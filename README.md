@@ -79,7 +79,7 @@ Ingame Menu Settings
 Shift + f2 for Reshade 3.0 menu
 
 * Depth Map View 	[Off ▼]		Depth Map View. To see The Depth map. Use This to Work on your Own Depth Map for your game.
-* Alternate Depth Map	[Depth Map 5 ▼]	[0|1|2|3|4|5|6|7|9|10|11|12|13|14|15] Alternate Depth Map for different Games. 
+* Alternate Depth Map	[Depth Map 5 ▼]	[0|1|2|3|4|5|6|7|9|10|11|12|13] Alternate Depth Map for different Games. 
 * Depth Flip	 	[Off ▼]		Depth Flip if Upside Down.
 * Pop		 	[Pop Off ▼]	[0|1|2|3|4|5|6] Adds more depth depending on the game.
 * Perspective	       -[◄▪▪▪▪0▪▪▪▪▪►]+	[-15:15] Perspective Default is 0 "Drag to Adjust Perspective"
