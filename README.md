@@ -188,7 +188,7 @@ If some how you can click on the menu......... Good Luck.
 Also if some how you get it working When the game Saves You have to recheck the 3D shader. 
 This is where a Defaults.ini will come in handy.
 
-Games Not working in Reshade 3.0 That Worked in 2.0
+Games Not working in Reshade 3.0
 ======================================================================================================================================
 crosire's ReShade version '3.0.0.81'
 
