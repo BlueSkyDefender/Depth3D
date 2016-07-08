@@ -76,13 +76,13 @@ Turn Off DOF in all games if possible. Unless you want to know how it feels to b
 
 Shift + f2 for Reshade 3.0 menu
 
-* Depth Map View 	    [Off ▼]		Depth Map View. To see The Depth map. Use This to Work on your Own Depth Map for your game.
+* Depth Map View 	[Off ▼]		Depth Map View. To see The Depth map. Use This to Work on your Own Depth Map for your game.
 * Alternate Depth Map	[Depth Map 5 ▼]	[0|1|2|3|4|5|6|7|9|10|11|12|13|14|15] Alternate Depth Map for different Games. 
-* Depth Flip	 	      [Off ▼]		Depth Flip if Upside Down.
-* Pop		 	            [Pop Off ▼]	[0|1|2|3|4|5|6] Adds more depth depending on the game.
+* Depth Flip	 	[Off ▼]		Depth Flip if Upside Down.
+* Pop		 	[Pop Off ▼]	[0|1|2|3|4|5|6] Adds more depth depending on the game.
 * Perspective	       -[◄▪▪▪▪0▪▪▪▪▪►]+	[-15:15] Perspective Default is 0 "Drag to Adjust Perspective"
-* Depth		           -[◄▪▪▪▪15▪▪▪▪►]+	[0:25] Depth Default is 15 "Drag to Adjust Perspective"
-* Eye Swap  	 	      [Off ▼]  	Swap Left/Right to Right/Left and ViceVersa.
+* Depth		       -[◄▪▪▪▪15▪▪▪▪►]+	[0:25] Depth Default is 15 "Drag to Adjust Perspective"
+* Eye Swap  	 	[Off ▼]  	Swap Left/Right to Right/Left and ViceVersa.
 
 Pop Now Works. For games that are open World/RPGs Try Pop Two, Pop Three, and Pop Four. For FPS Try Pop One, Pop Two and Pop Four. 
 For RTS games Try Pop One <----> Pop Five. You can Just try any of them out really.
