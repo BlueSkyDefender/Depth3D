@@ -57,7 +57,7 @@ Condemned: Criminal Origins {Read Below} | Zombi
 [Depth Map 13]
 Witcher 3
 
-.-=|DepthFix = 1|=-.
+.-=|DepthFix On|=-.
 ======================================================================================================================================
 
 [Depth Map 0]
