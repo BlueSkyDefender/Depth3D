@@ -1,9 +1,6 @@
 # Depth3D
 Depth Map Based 3D post-process shader v1.6 for Reshade 3.0
 
-Super Depth3D v1.6
-For Reshade 3.0
-
 There are the Basic Depth maps you can use for your games listed and not listed. Look at this link for other game Compatablity.
 
 This Mod alows for Depth Map Based 3D like What Nvidia does with Compatablity Mode 3D and Kind of what TriDef Does with Power 3D. 
@@ -16,6 +13,7 @@ Here is a quick and dirty game list of working Depth Maps.
 PLEASE SET YOUR RESOLUTION FIRST. Turn Off DOF in all games if possible. Unless you want to know how it feels to be neer sighted.
 
 .-=|DepthFix Off|=-.
+======================================================================================================================================
 
 [Depth Map 0]
 Naruto Shippuden UNS3 Full Blurst | Amnesia: The Dark Descent | The Evil With In {Read Below} | Sleeping Dogs: DE | RAGE64 {Read Below} | Quake 4 {Read Below}
@@ -60,6 +58,7 @@ Condemned: Criminal Origins {Read Below} | Zombi
 Witcher 3
 
 .-=|DepthFix = 1|=-.
+======================================================================================================================================
 
 [Depth Map 0]
  Among The Sleep
@@ -73,6 +72,9 @@ Firewatch
 You can also try different depth maps for other games your self by changing AltDepthMap number From 0-15. 
 You *may* want to disable AA in game. You can always enable SMAA in reshade for AA or play at 4k with no AA. 
 Turn Off DOF in all games if possible. Unless you want to know how it feels to be neer sighted. Turn On SSAO or HABO They help a lot.
+
+Ingame Menu Settings
+======================================================================================================================================
 
 Shift + f2 for Reshade 3.0 menu
 
@@ -88,8 +90,9 @@ Pop Now Works. For games that are open World/RPGs Try Pop Two, Pop Three, and Po
 For RTS games Try Pop One <----> Pop Five. You can Just try any of them out really.
 
 Ex. In Batman: Arkham City Depth Map 8 + Pop 6 looks best to me.
- 
---------------------------------------------------------------------------------------------------------------------------------------
+
+Read Below Section
+======================================================================================================================================
 
 {Deadly Premonition}
 Can Run with Higer Rez useing DPfix095.
@@ -97,6 +100,7 @@ To Use it with Reshade Just Start Up Reshade and Make a profile for it like any 
 
 Then head to the folder and rename d3d9.dll to dxgi.dll. 
 Now open the DPfix095.zip Directly from http://blog.metaclassofnil.com/wp-content/uploads/2013/12/DPfix095.zip or http://blog.metaclassofnil.com/?p=438.
+
 Install the contents of that folder in to Deadly Premonition Folder where you changed Reshade's d3d9.dll to dxgi.dll. Edit the DPfix.ini too what ever REZ you want. Then start the game.
 
 {Magicka 2} 
@@ -183,7 +187,10 @@ bDeferredShadows=0
 If some how you can click on the menu......... Good Luck.
 Also if some how you get it working When the game Saves You have to recheck the 3D shader. 
 This is where a Defaults.ini will come in handy.
+
+Games Not working in Reshade 3.0 That Worked in 2.0
 ======================================================================================================================================
+crosire's ReShade version '3.0.0.81'
 
 {Wolfenstine The New Order} - not working in Reshade 3.0
 [Set Launch Options](+r_multisamples "0" +vt_maxaniso "16")
