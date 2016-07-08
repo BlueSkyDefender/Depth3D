@@ -73,7 +73,7 @@ You can also try different depth maps for other games your self by changing AltD
 You *may* want to disable AA in game. You can always enable SMAA in reshade for AA or play at 4k with no AA. 
 Turn Off DOF in all games if possible. Unless you want to know how it feels to be neer sighted. Turn On SSAO or HABO They help a lot.
 
-Ingame Menu Settings
+In-game Menu Settings
 ======================================================================================================================================
 
 Shift + f2 for Reshade 3.0 menu
