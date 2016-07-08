@@ -3,7 +3,7 @@
  //----------------////
 
  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
- //* Depth Map Based 3D post-process shader v1.6																																	*//
+ //* Depth Map Based 3D post-process shader v1.6.1																																	*//
  //* For Reshade 3.0																																								*//
  //* --------------------------																																						*//
  //* This work is licensed under a Creative Commons Attribution 3.0 Unported License.																								*//
@@ -23,7 +23,6 @@
  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
  
  uniform bool DepthMap <
-	ui_type = "combo";
 	ui_items = "Off\0ON\0";
 	ui_label = "Depth Map View";
 	ui_tooltip = "Display the Depth Map. Use This to Work on your Own Depth Map for your game.";
@@ -36,12 +35,11 @@ uniform int AltDepthMap <
 	ui_tooltip = "Alternate Depth Map for different Games. Read the ReadMeDepth3d.txt, for setting. Each game May and can use a diffrent AltDepthMap.";
 > = 5;
 
-uniform int DepthFlip <
-	ui_type = "combo";
+uniform bool DepthFlip <
 	ui_items = "Off\0ON\0";
 	ui_label = "Depth Flip";
 	ui_tooltip = "Depth Flip if the depth map is Upside Down.";
-> = 0;
+> = false;
 
 uniform int Pop <
 	ui_type = "combo";
@@ -64,12 +62,11 @@ uniform int Depth <
 	ui_tooltip = "Determines the amount of Image Warping and Separation between both eyes. Deviation Default is 15. To go beyond 25 max you need to enter your own number.";
 > = 15;
 
-uniform int EyeSwap <
-	ui_type = "combo";
+uniform bool EyeSwap <
 	ui_items = "Off\0ON\0";
 	ui_label = "Eye Swap";
 	ui_tooltip = "Swap Left/Right to Right/Left and ViceVersa.";
-> = 0;
+> = false;
  
 /////////////////////////////////////////////D3D Starts Here/////////////////////////////////////////////////////////////////
 #include "ReShade.fxh"
@@ -102,10 +99,8 @@ sampler SamplerCR
 	{
 
 	 float4 color = tex2D(SamplerCC, texcoord);
-     		if (DepthFlip == 0)
-			texcoord.y = texcoord.y;
 
-			if (DepthFlip == 1)
+			if (DepthFlip)
 			texcoord.y =  1 - texcoord.y;
 
 
@@ -243,20 +238,16 @@ sampler SamplerCR
 		
 
     float4 DR = depthR;	
-    if (EyeSwap == 0)
-    {
-    if (texcoord.x < 0.5f) color.r = DL.r;
-    else if(texcoord.x > 0.5f) color.r = 1 - DR.r;
+    
+    if (EyeSwap)
+	{
+    color.r = texcoord.x < 0.5 ? 1.0 - DL.r : DR.r;
 	}
-	
-	  if (EyeSwap == 1)
-    {
-    if (texcoord.x < 0.5f) color.r = 1 - DL.r;
-    else if(texcoord.x > 0.5f) color.r = DR.r;
-	}
-	
-	return color.r;
-		
+	else
+	{
+    color.r = texcoord.x < 0.5 ? DL.r : 1.0 - DR.r;
+	}	
+	return color.r;	
 	}
 
 
@@ -272,7 +263,7 @@ void PS_renderR(in float4 position : SV_Position, in float2 texcoord: TEXCOORD0,
 		
 	color.rgb = tex2D(ReShade::BackBuffer, float2(texcoord.x*2-1, texcoord.y)).rgb;
 	
-	int x = 25 % 1024;
+	int x = 25 % 1023;
 	[loop]
 	for (int j = 0; j <= x; j++) 
 	{
@@ -291,7 +282,7 @@ void PS_renderR(in float4 position : SV_Position, in float2 texcoord: TEXCOORD0,
 			color.rgb = tex2D(ReShade::BackBuffer, float2((texcoord.x*2), texcoord.y)).rgb;
 
 	
-	int x = 25 % 1024;
+	int x = 25 % 1023;
 	[loop]		
 	for (int i = 0; i <= x; i++) 
 	{
@@ -310,16 +301,8 @@ void PS_renderR(in float4 position : SV_Position, in float2 texcoord: TEXCOORD0,
 
 void PS0(float4 pos : SV_Position, float2 texcoord : TEXCOORD0, out float3 color : SV_Target)
 {
-	float4 l = tex2D(SamplerCL, float2(texcoord.x-Perspective*pix.x, texcoord.y));
-	float4 r = tex2D(SamplerCR, float2(texcoord.x+Perspective*pix.x, texcoord.y));
-	
-	
-				if(texcoord.x < 0.5) color.rgb = l.rgb;
 				
-				else if(texcoord.x > 0.5 ) color.rgb = r.rgb;
-				
-				
-
+color = texcoord.x < 0.5 ? tex2D(SamplerCL, float2(texcoord.x - Perspective * pix.x, texcoord.y)).rgb : tex2D(SamplerCR, float2(texcoord.x + Perspective * pix.x, texcoord.y)).rgb;
 
 }
 
@@ -330,10 +313,8 @@ float4 PS(float4 pos : SV_Position, float2 texcoord : TEXCOORD0) : SV_Target
 		
 	float4 color = tex2D(SamplerCC, texcoord);
 		
-		if (DepthFlip == 0)
-		texcoord.y = texcoord.y; 
 		
-		if (DepthFlip == 1)
+		if (DepthFlip)
 		texcoord.y = 1 - texcoord.y;
 		
 	float4 depthM = ReShade::GetLinearizedDepth(texcoord.xy);
@@ -429,7 +410,7 @@ float4 PS(float4 pos : SV_Position, float2 texcoord : TEXCOORD0) : SV_Target
 		
 	float4 DM = depthM;
 	
-	if (DepthMap == true)
+	if (DepthMap)
 	{
 
 	color.rgb = DM.rrr;				
