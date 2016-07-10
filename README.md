@@ -29,7 +29,7 @@ Batman Arkham Origins | Batman Arkham Knight
 Skyrim V {Read Below}
 
 [Depth Map 4]
-Fallout 4 | Alien Isolation | Shadow warrior(2013) {Read Below}
+Alien Isolation | Shadow warrior(2013) {Read Below}
 
 [Depth Map 5]
 Lords of The Fallen  | Dragons Dogma: Dark Arisen Dragon | Ball Xenoverse | Hard Reset {Read Below} | Return To Castle Wolfenstine {Read Below} | Souls Games
@@ -38,7 +38,7 @@ Lords of The Fallen  | Dragons Dogma: Dark Arisen Dragon | Ball Xenoverse | Hard
 Dying Light
 
 [Depth Map 7]
-Assassin Creed Unity | Call of Duty: Ghost {Read Below} | Call of Duty: Black Ops 2 {Read Below}
+Assassin Creed Unity | Call of Duty: Ghost {Read Below} | Call of Duty: Black Ops 2 {Read Below} | Call of Duty: Advance Warfare
 
 [Depth Map 8]
 Metro Last Light Redux {Read Below} | Metro 2033 Redux {Read Below} | Batman: Arkham City
@@ -47,16 +47,16 @@ Metro Last Light Redux {Read Below} | Metro 2033 Redux {Read Below} | Batman: Ar
 Middle-earth: Shadow of Mordor {Read Below} | GTA V {Read Below}
 
 [Depth Map 10]
-Call of Duty: Advance Warfare
-
-[Depth Map 11]
 Magicka 2 {Read Below} | Casltevania: Lord of Shadows - UE
 
-[Depth Map 12]
+[Depth Map 11]
 Condemned: Criminal Origins {Read Below} | Zombi
 
-[Depth Map 13]
+[Depth Map 12]
 Witcher 3
+
+[Depth Map 13]
+Fallout 4 
 
 .-=|DepthFix On|=-.
 ======================================================================================================================================
