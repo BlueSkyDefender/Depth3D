@@ -30,7 +30,7 @@
 
 uniform int AltDepthMap <
 	ui_type = "combo";
-	ui_items = "Depth Map 0\0Depth Map 1\0Depth Map 2\0Depth Map 3\0Depth Map 4\0Depth Map 5\0Depth Map 6\0Depth Map 7\0Depth Map 8\0Depth Map 9\0Depth Map 10\0Depth Map 11\0Depth Map 12\0Depth Map 13\0";
+	ui_items = "Depth Map 0\0Depth Map 1\0Depth Map 2\0Depth Map 3\0Depth Map 4\0Depth Map 5\0Depth Map 6\0Depth Map 7\0Depth Map 8\0Depth Map 9\0Depth Map 10\0Depth Map 11\0Depth Map 12\0Depth Map 13\0Depth Map 14\0";
 	ui_label = "Alternate Depth Map";
 	ui_tooltip = "Alternate Depth Map for different Games. Read the ReadMeDepth3d.txt, for setting. Each game May and can use a diffrent AltDepthMap.";
 > = 5;
@@ -48,7 +48,7 @@ uniform int Pop <
 	ui_tooltip = "Image Warping in Both Eyes. Try Pop One through Pop Five, Too see what looks better too you.";
 > = 0;
 
- uniform int Perspective <
+ uniform float Perspective <
 	ui_type = "drag";
 	ui_min = -15; ui_max = 15;
 	ui_label = "Perspective Slider";
@@ -171,7 +171,7 @@ sampler SamplerCR
 		depthR = (pow(abs(depthR*3),0.25)-0.15);
 		}
 		
-		//Fallout 4 | Alien Isolation | Shadow warrior(2013)
+		//Alien Isolation | Shadow warrior(2013)
 		if (AltDepthMap == 4)
 		{
 		depthR = (pow(abs(depthR/2),0.2)-0.25);
@@ -233,6 +233,13 @@ sampler SamplerCR
 		{
 		float LinLog = 0.00000075;
 		depthR = ((LinLog) / (LinLog - depthR * (LinLog - 1)) + ((pow(abs(depthR),5)+0.75)/3.75));
+		}
+		
+		//Fallout 4
+		if (AltDepthMap == 14)
+		{
+		float LinLog = 0.004;
+		depthR = (1-(LinLog) / (LinLog - depthR * (LinLog-0.1)) + ((pow(abs(depthR*15),1)+0.50)/4));
 		}
 		
 		
@@ -344,7 +351,7 @@ float4 PS(float4 pos : SV_Position, float2 texcoord : TEXCOORD0) : SV_Target
 		depthM = (pow(abs(depthM*3),0.25)-0.15);
 		}
 		
-		//Fallout 4 | Alien Isolation | Shadow warrior(2013)
+		//Alien Isolation | Shadow warrior(2013)
 		if (AltDepthMap == 4)
 		{
 		depthM = (pow(abs(depthM/2),0.2)-0.25);
@@ -406,6 +413,13 @@ float4 PS(float4 pos : SV_Position, float2 texcoord : TEXCOORD0) : SV_Target
 		{
 		float LinLog = 0.00000075;
 		depthM = ((LinLog) / (LinLog - depthM * (LinLog - 1)) + ((pow(abs(depthM),5)+0.75)/3.75));
+		}
+		
+		//Fallout 4
+		if (AltDepthMap == 14)
+		{
+		float LinLog = 0.004;
+		depthM = (1-(LinLog) / (LinLog - depthM * (LinLog-0.1)) + ((pow(abs(depthM*15),1)+0.50)/4));
 		}
 		
 	float4 DM = depthM;
