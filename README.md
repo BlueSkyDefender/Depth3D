@@ -17,9 +17,9 @@ https://github.com/BlueSkyDefender/Depth3D/blob/master/ReadMeDepth3d.txt
 
 Game Compataliblity
 
-*Alien Isolation
-*Amnesia: The Dark Descent
-*Among The Sleep
+* Alien Isolation
+* Amnesia: The Dark Descent
+* Among The Sleep
 *Assassin Creed Unity
 *Batman Arkham Knight
 *Batman Arkham Origins
