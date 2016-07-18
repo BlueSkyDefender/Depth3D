@@ -1,6 +1,7 @@
 #SuperDepth3D
 Depth Map Based 3D post-process shader v1.6.5 for Reshade 3.0
 It also needs *ReShade.fxh* to work.
+https://github.com/BlueSkyDefender/reshade-shaders/blob/master/Shaders/ReShade.fxh
 
 There are the Basic Depth maps you can use for your games listed and not listed. Look at this link for other game Compatablity.
 
