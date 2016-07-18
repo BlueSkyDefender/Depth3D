@@ -1,6 +1,6 @@
 #SuperDepth3D
-Depth Map Based 3D post-process shader v1.6 for Reshade 3.0
-It also needs ReShade.fxh to work.
+Depth Map Based 3D post-process shader v1.6.5 for Reshade 3.0
+It also needs *ReShade.fxh* to work.
 
 There are the Basic Depth maps you can use for your games listed and not listed. Look at this link for other game Compatablity.
 
@@ -13,64 +13,47 @@ Here is a quick and dirty game list of working Depth Maps.
 
 PLEASE SET YOUR RESOLUTION FIRST. Turn Off DOF in all games if possible. Unless you want to know how it feels to be neer sighted.
 
-.-=|DepthFix Off|=-.
-======================================================================================================================================
+[Game List]							[Alternet Depth Map]	[Depth Flip On]		[Read Below]
+Alien Isolation								DM 10
+Amnesia: The Dark Descent					DM 0
+Among The Sleep								DM 16				DF On
+Assassin Creed Unity						DM 9
+Batman Arkham Knight						DM 1
+Batman Arkham Origins						DM 1
+Batman: Arkham City							DM 2
+BorderLands 2								DM 2									RB
+Call of Duty: Advance Warfare				DM 19
+Call of Duty: Black Ops 2					DM 19									RB
+Call of Duty: Ghost							DM 19									RB
+Casltevania: Lord of Shadows - UE			DM 7
+Condemned: Criminal Origins					DM 0									RB
+Deadly Premonition: The Directors's Cut		DM 10									RB
+Dragon Ball Xenoverse						DM 16
+Dragons Dogma: Dark Arisen					DM 15
+DreamFall Chapters							DM 18				DF On
+Dying Light									DM 11
+Fallout 4									DM 13
+Firewatch									DM 1				DF On
+GTA V										DM 11									RB
+Hard Reset									DM 8									RB
+Lords of The Fallen							DM 6
+Magicka 2									DM 14									RB
+Metro 2033 Redux							DM 20									RB
+Metro Last Light Redux						DM 20									RB
+Middle-earth: Shadow of Mordor				DM 12									RB
+Naruto Shippuden UNS3 Full Blurst			DM 0									RB
+Quake 4										DM 17
+Rage64										DM 8									RB
+Return To Castle Wolfenstine				DM 17									RB
+Shadow warrior(2013)						DM 7									RB
+Skyrim										DM 10
+Sleeping Dogs: DE							DM 4
+Souls Games									DM 6
+The Evil Within								DM 3									RB
+Witcher 3									DM 12
+Zombi										DM 3
 
-[Depth Map 0]
-Naruto Shippuden UNS3 Full Blurst | Amnesia: The Dark Descent | The Evil With In {Read Below} | Sleeping Dogs: DE | RAGE64 {Read Below} | Quake 4 {Read Below}
-
-[Depth Map 1]
-BoarderLands 2 {Read Below} | Deadly Premonition: The Directors's Cut {Read Below}
-
-[Depth Map 2]
-Batman Arkham Origins | Batman Arkham Knight
-
-[Depth Map 3]
-Skyrim V {Read Below}
-
-[Depth Map 4]
-Alien Isolation | Shadow warrior(2013) {Read Below}
-
-[Depth Map 5]
-Lords of The Fallen  | Dragons Dogma: Dark Arisen Dragon | Ball Xenoverse | Hard Reset {Read Below} | Return To Castle Wolfenstine {Read Below} | Souls Games
-
-[Depth Map 6]
-Dying Light
-
-[Depth Map 7]
-Assassin Creed Unity | Call of Duty: Ghost {Read Below} | Call of Duty: Black Ops 2 {Read Below} | Call of Duty: Advance Warfare
-
-[Depth Map 8]
-Metro Last Light Redux {Read Below} | Metro 2033 Redux {Read Below} | Batman: Arkham City
-
-[Depth Map 9]
-Middle-earth: Shadow of Mordor {Read Below} | GTA V {Read Below}
-
-[Depth Map 10]
-Magicka 2 {Read Below} | Casltevania: Lord of Shadows - UE
-
-[Depth Map 11]
-Condemned: Criminal Origins {Read Below} | Zombi
-
-[Depth Map 12]
-Witcher 3
-
-[Depth Map 13]
-Fallout 4 
-
-.-=|DepthFix On|=-.
-======================================================================================================================================
-
-[Depth Map 0]
- Among The Sleep
-
-[Depth Map 5]
-DreamFall Chapters
-
-[Depth Map 8]
-Firewatch
-
-You can also try different depth maps for other games your self by changing AltDepthMap number From 0-15. 
+You can also try different depth maps for other games your self by changing AltDepthMap number From 0-20. 
 You *may* want to disable AA in game. You can always enable SMAA in reshade for AA or play at 4k with no AA. 
 Turn Off DOF in all games if possible. Unless you want to know how it feels to be neer sighted. Turn On SSAO or HABO They help a lot.
 
@@ -79,21 +62,35 @@ In-game Menu Settings
 
 Shift + f2 for Reshade 3.0 menu
 
-* Depth Map View 	[Off ▼]		Depth Map View. To see The Depth map. Use This to Work on your Own Depth Map for your game.
-* Alternate Depth Map	[Depth Map 5 ▼]	[0|1|2|3|4|5|6|7|9|10|11|12|13] Alternate Depth Map for different Games. 
-* Depth Flip	 	[Off ▼]		Depth Flip if Upside Down.
-* Pop		 	[Pop Off ▼]	[0|1|2|3|4|5|6] Adds more depth depending on the game.
-* Perspective	       -[◄▪▪▪▪0▪▪▪▪▪►]+	[-15:15] Perspective Default is 0 "Drag to Adjust Perspective"
-* Depth		       -[◄▪▪▪▪15▪▪▪▪►]+	[0:25] Depth Default is 15 "Drag to Adjust Perspective"
-* Eye Swap  	 	[Off ▼]  	Swap Left/Right to Right/Left and ViceVersa.
+* Alternate Depth Map	[Depth Map 5 ▼]		[0|1|2|3|4|5|6|7|9|10|11|12|13|14|15|16|17|18|19|20|C1|C2] Alternate Depth Map for different Games. 
+						[Custom One  ▼]		Also Added, the Ablity to
+						[Custom Two  ▼]  	make your Own Depth Map.
+* Depth				   -[◄▪▪▪▪▪▪▪▪25►]+		[0:25] Depth Default is 25. "Drag to Adjust Perspective."
+* Perspective		   -[◄▪▪▪▪0▪▪▪▪▪►]+		[-25:25] Perspective Default is 0. "Drag to Adjust Perspective."
+* Warp Adjust		   -[◄▪▪▪▪0▪▪▪▪▪►]+		[-25:25] Warp Adjust Default is 0. "Adjust the warp in the right eye."
+* Depth Flip	 		[Off ▼]				Depth Flip if Upside Down.
+* Depth Map View 		[Off ▼]				Depth Map View. To see The Depth map. Use This to Work on your Own Depth Map for your game.
+* Far				   -[◄▪▪▪▪▪▪▪▪▪▪►]+		Default is "0.05" Far Depth Map Adjustment. This works on both [Custom Two ▼] and [Custom Two ▼]
+* Near				   -[◄▪▪▪▪▪▪▪▪▪▪►]+		Default is "1.25" Near Depth Map Adjustment. This works on both [Custom Two ▼] and [Custom Two ▼]
+* Eye Swap  	 		[Off ▼]  			Swap Left/Right to Right/Left and ViceVersa.
 
-Pop Now Works. For games that are open World/RPGs Try Pop Two, Pop Three, and Pop Four. For FPS Try Pop One, Pop Two and Pop Four. 
-For RTS games Try Pop One <----> Pop Five. You can Just try any of them out really.
-
-Ex. In Batman: Arkham City Depth Map 8 + Pop 6 looks best to me.
+Pop Removed WIP See SuperDepth3DL&R_WIP_.fx If you like to Test it.
 
 Read Below Section
 ======================================================================================================================================
+
+{BoarderLands 2}
+Use a Controller for menus navigation or keyboard. 
+Mouse and keyboard is good for gameplay. 
+
+{Call of Duty: Ghost}
+Set Image Quality to Extra.
+
+{Call of Duty: Black Ops 2}
+Turn off AA.
+
+{Condemned: Criminal Origins}
+Depth Buffer Drops time to time Also Dissable FSAA (FSAA OFF)
 
 {Deadly Premonition}
 Can Run with Higer Rez useing DPfix095.
@@ -104,18 +101,15 @@ Now open the DPfix095.zip Directly from http://blog.metaclassofnil.com/wp-conten
 
 Install the contents of that folder in to Deadly Premonition Folder where you changed Reshade's d3d9.dll to dxgi.dll. Edit the DPfix.ini too what ever REZ you want. Then start the game.
 
+{GTA 5}
+Rename the dxgi.dll too d3d11.dll for DX11 mode.
+
+{Hard Reset}
+Must Enable FSAA for depth buffer access.
+
 {Magicka 2} 
 Rename the opengl.dll to dxgi.dll
 Also Use a Controller for game play.
-
-{BoarderLands 2}
-Use a Controller for menus navigation or keyboard. 
-Mouse and keyboard is good for gameplay. 
-
-{Rage}
-Start the game with out Reshade Set your game resolution First Turn off AA. 
-Exit, Then use reshade and set your setting you want then launch your game. You can not change your resolution once in game This sill remove the depth map.
-Rage 64 was tested only.
 
 {Metro Last Light Redux}
 Rename the d3d9.dll or dxgi.dll to d3d11.dll
@@ -128,6 +122,19 @@ Rename the d3d9.dll or dxgi.dll to d3d11.dll
 Borderless Full Screen will not work Window mode will not Work. 
 So if you want to Play at a lower resolution, then set your windows resolution lower then run the game in full screen and set your scaling to 100%. 
 Anything Lower or Higher then 100% will not work.
+
+{Naruto Shippuden UNS3 Full Blurst}
+Ignore the warnings click play.
+
+{Quake 4}
+If some how you can click on the menu......... Good Luck.
+Also if some how you get it working When the game Saves You have to recheck the 3D shader. 
+This is where a Defaults.ini will come in handy.
+
+{Rage}
+Start the game with out Reshade Set your game resolution First Turn off AA. 
+Exit, Then use reshade and set your setting you want then launch your game. You can not change your resolution once in game This sill remove the depth map.
+Rage 64 was tested only.
 
 {Return To Castle Wolfenstine}
 Increase Depth to 25+ Do this by typing in your amount.
@@ -149,6 +156,15 @@ seta r_fullscreen "1"
 
 seta r_mode "-1"
 
+{Skyrim V}
+Change the SkyrimPrefs.ini setting too.
+
+bFloatPointRenderTarget=0
+bDeferredShadows=0
+
+{Shadow warrior(2013)}
+Depth Buffer only in DX9 so launch it in Shadow Warrior XP and turn on FSAAX2 in game.
+
 {The Evil With In}
 Game too big for scren DPI scaling. 
 To fix this go to where the program is installed and find the EXE
@@ -159,35 +175,6 @@ Go to Compatibility
 Check Disable Display Scaling On High DPI Settings
 
 This should fix it. For more look up this problem on google.
-
-{Call of Duty: Ghost}
-Set Image Quality to Extra.
-
-{Call of Duty: Black Ops 2}
-Turn off AA.
-
-{Hard Reset}
-Must Enable FSAA for depth buffer access.
-
-{Condemned: Criminal Origins}
-Depth Buffer Drops time to time Also Dissable FSAA (FSAA OFF)
-
-{Shadow warrior(2013)}
-Depth Buffer only in DX9 so launch it in Shadow Warrior XP and turn on FSAAX2 in game.
-
-{GTA 5}
-Rename the dxgi.dll too d3d11.dll for DX11 mode.
-
-{Skyrim V}
-Change the SkyrimPrefs.ini setting too.
-
-bFloatPointRenderTarget=0
-bDeferredShadows=0
-
-{Quake 4}
-If some how you can click on the menu......... Good Luck.
-Also if some how you get it working When the game Saves You have to recheck the 3D shader. 
-This is where a Defaults.ini will come in handy.
 
 Games Not working in Reshade 3.0
 ======================================================================================================================================

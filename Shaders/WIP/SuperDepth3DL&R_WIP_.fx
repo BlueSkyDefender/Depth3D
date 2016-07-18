@@ -3,7 +3,7 @@
  //----------------////
 
  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
- //* Depth Map Based 3D post-process shader v1.6.5																															*//
+ //* Depth Map Based 3D post-process shader v1.6.5	L & R Eye																																*//
  //* For Reshade 3.0																																								*//
  //* --------------------------																																						*//
  //* This work is licensed under a Creative Commons Attribution 3.0 Unported License.																								*//
@@ -37,14 +37,14 @@ uniform int Depth <
 
 uniform int Perspective <
 	ui_type = "drag";
-	ui_min = -25; ui_max = 25;
+	ui_min = -10; ui_max = 10;
 	ui_label = "Perspective Slider";
 	ui_tooltip = "Determines the perspective point.";
 > = 0;
 
 uniform int WA <
 	ui_type = "drag";
-	ui_min = -25; ui_max = 25;
+	ui_min = -35; ui_max = 35;
 	ui_label = "Warp Adjust";
 	ui_tooltip = "Adjust the warp in the right eye.";
 > = 0;
@@ -63,17 +63,24 @@ uniform bool DepthMap <
 
 uniform float Far <
 	ui_type = "drag";
-	ui_min = 0; ui_max = 5;
+	ui_min = 0; ui_max = 1.0;
 	ui_label = "Far";
 	ui_tooltip = "Far Depth Map Adjustment.";
-> = 0.050;
+> = 0.05;
  
  uniform float Near <
 	ui_type = "drag";
-	ui_min = 0; ui_max = 5;
+	ui_min = 1; ui_max = 5;
 	ui_label = "Near";
 	ui_tooltip = "Near Depth Map Adjustment.";
-> = 1.25;
+> = 1;
+
+uniform float Test <
+	ui_type = "drag";
+	ui_min = 0; ui_max = 10;
+	ui_label = "Test";
+	ui_tooltip = "Test Adjustment.";
+> = 1;
 
 uniform bool EyeSwap <
 	ui_items = "Off\0ON\0";
@@ -122,7 +129,8 @@ sampler SamplerCR
 
     if (AltDepthMap >= 0)
     {
-	depthL =  0;
+    float LinLog = 2.5;
+	depthL =  1 - (LinLog) / (LinLog - depthL * (LinLog - 25));
 	}
 
     float4 DL =  depthL;
@@ -165,10 +173,11 @@ sampler SamplerCR
 		depthR = 1 - (zF * zN / (zN + depthR * (zF - zN)) + pow(abs(depthR*depthR),1.0));
 		}
 		
-		//Place Holder
+		//Lords of the Fallen
 		if (AltDepthMap == 5)
 		{
-		depthR = depthR;
+		float LinLog = 2.5;
+		depthR =  1 - (LinLog) / (LinLog - depthR * (LinLog - 25));
 		}
 		
 		//Souls Game
@@ -303,8 +312,7 @@ sampler SamplerCR
 		{
 		float cF = Far;
 		float cN = Near;
-		float cC = 25;
-		depthR = (cN * cF / (cF + depthR * 1 * (cN - cF))) + pow(abs(depthR*depthR),cC);
+		depthR = (cN * cF / (cF + (pow(abs(depthR),cN)) * (cN - cF)));
 		}
 		
 		//Custom Two
@@ -312,8 +320,7 @@ sampler SamplerCR
 		{
 		float cF = Far;
 		float cN = Near;
-		float cC = 25;
-		depthR = 1 - (cN * cF / (cF + depthR * 1 * (cN - cF))) + pow(abs(depthR*depthR),cC);
+		depthR = 1 - (cN * cF / (cF + (pow(abs(depthR),cN)) * (cN - cF)));
 		}
 
     float4 DR = depthR;	
@@ -332,8 +339,10 @@ sampler SamplerCR
 
 	void  PS_calcLR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float3 color : SV_Target)
 	{
+	float HalfDepth = Depth/2;
 	float DivDepth = Depth/-3+WA;
-	color.rgb = texcoord.x+Depth*pix.x*SbSdepth(float2(texcoord.x-DivDepth*pix.x,texcoord.y));
+	color.r = texcoord.x+Depth*pix.x*SbSdepth(float2(texcoord.x-DivDepth*pix.x,texcoord.y));
+	color.gb = texcoord.x-Depth*pix.x*SbSdepth(float2(texcoord.x-HalfDepth*pix.x,texcoord.y));
 	}
 
 /////////////////////////////////////////L/R//////////////////////////////////////////////////////////////////////
@@ -341,12 +350,21 @@ sampler SamplerCR
 	void PS_renderL(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float3 color : SV_Target)
 	{
 		color.rgb = tex2D(ReShade::BackBuffer, float2(texcoord.x*2, texcoord.y)).rgb;
+		int x = 5 % 1024;
+		[loop]
+		for (int j = 0; j <= x+10; j++) 
+		{
+			if (tex2D(SamplerCC, float2((texcoord.x < 0.5)+j*pix.x,texcoord.y)).b >= texcoord.x-pix.x && tex2D(SamplerCC, float2(texcoord.x+j*pix.x,texcoord.y)).b <= texcoord.x+pix.x/2) 
+			{
+				color.rgb = tex2D(ReShade::BackBuffer, float2(texcoord.x*2+j*pix.x/0.85, texcoord.y)).rgb;
+			}
+		}
 	}
 
 	void PS_renderR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float3 color : SV_Target)
 	{
 		color.rgb = tex2D(ReShade::BackBuffer, float2(texcoord.x*2-1, texcoord.y)).rgb;
-		int x = 25 % 1024;
+		int x = 5 % 1024;
 		[loop]
 		for (int j = 0; j >= -x-10; --j) 
 		{
@@ -415,10 +433,11 @@ float4 PS(float4 pos : SV_Position, float2 texcoord : TEXCOORD0) : SV_Target
 		depthM = 1 - (zF * zN / (zN + depthM * (zF - zN)) + pow(abs(depthM*depthM),1.0));
 		}
 
-		//Place Holder
+		//Lords of the Fallen
 		if (AltDepthMap == 5)
 		{
-		depthM = depthM;
+		float LinLog = 2.5;
+		depthM = 1 - (LinLog) / (LinLog - depthM * (LinLog - 25));
 		}
 		
 		//Souls Game
@@ -553,8 +572,7 @@ float4 PS(float4 pos : SV_Position, float2 texcoord : TEXCOORD0) : SV_Target
 		{
 		float cF = Far;
 		float cN = Near;
-		float cC = 25;
-		depthM = (cN * cF / (cF + depthM * 1 * (cN - cF))) + pow(abs(depthM*depthM),cC);
+		depthM = (cN * cF / (cF + (pow(abs(depthM),cN)) * (cN - cF)));
 		}
 		
 		//Custom Two
@@ -562,10 +580,8 @@ float4 PS(float4 pos : SV_Position, float2 texcoord : TEXCOORD0) : SV_Target
 		{
 		float cF = Far;
 		float cN = Near;
-		float cC = 25;
-		depthM = 1 - (cN * cF / (cF + depthM * 1 * (cN - cF))) + pow(abs(depthM*depthM),cC);
+		depthM = 1 - (cN * cF / (cF + (pow(abs(depthM),cN)) * (cN - cF)));
 		}
-
 		
 	float4 DM = depthM;
 	
