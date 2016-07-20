@@ -232,10 +232,10 @@ sampler SamplerCR
 		//Fallout 4
 		if (AltDepthMap == 13)
 		{
-		float cF = 0.002;
-		float cM = 0;
-		float cN = 0.0005;
-		depthL = 1 - (1 * cF / (cF + depthL * (depthL+cM) * (1 - cF))) / (pow(abs(depthL),cN));
+		float cF = 0.015;
+		float cN = 1.150;
+		float cC = 25;
+		depthL = 1 - (cN * cF / (cF + depthL * 1 * (cN - cF))) + pow(abs(depthL*depthL),cC);
 		}
 		
 		//Magicka 2
@@ -428,10 +428,10 @@ sampler SamplerCR
 		//Fallout 4
 		if (AltDepthMap == 13)
 		{
-		float cF = 0.002;
-		float cM = 0;
-		float cN = 0.0005;
-		depthR = 1 - (1 * cF / (cF + depthR * (depthR+cM) * (1 - cF))) / (pow(abs(depthR),cN));
+		float cF = 0.015;
+		float cN = 1.150;
+		float cC = 25;
+		depthR = 1 - (cN * cF / (cF + depthR * 1 * (cN - cF))) + pow(abs(depthR*depthR),cC);
 		}
 		
 		//Magicka 2
@@ -717,10 +717,10 @@ float4 PS(float4 pos : SV_Position, float2 texcoord : TEXCOORD0) : SV_Target
 		//Fallout 4
 		if (AltDepthMap == 13)
 		{
-		float cF = 0.002;
-		float cM = 0;
-		float cN = 0.0005;
-		depthM = 1 - (1 * cF / (cF + depthM * (depthM+cM) * (1 - cF))) / (pow(abs(depthM),cN));
+		float cF = 0.015;
+		float cN = 1.150;
+		float cC = 25;
+		depthM = 1 - (cN * cF / (cF + depthM * 1 * (cN - cF))) + pow(abs(depthM*depthM),cC);
 		}
 		
 		//Magicka 2
