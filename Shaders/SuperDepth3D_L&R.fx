@@ -53,7 +53,7 @@ uniform int Pop <
 	ui_type = "combo";
 	ui_items = "Pop Off\0Pop +\0Pop ++\0Pop +++\0";
 	ui_label = "Pop";
-	ui_tooltip = "Test Adjustment.";
+	ui_tooltip = "Adjust Distortion and Depth for Left and Right eye.";
 > = 0;
 
 uniform bool DepthFlip <
