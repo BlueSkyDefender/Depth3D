@@ -53,7 +53,7 @@ The Evil Within				DM 3					RB
 Witcher 3				DM 12
 Zombi					DM 3
 
-You can also try different depth maps for other games your self by changing AltDepthMap number From 0-20. 
+You can also try different depth maps for other games your self by changing AltDepthMap number From 0-22. 
 You *may* want to disable AA in game. You can always enable SMAA in reshade for AA or play at 4k with no AA. 
 Turn Off DOF in all games if possible. Unless you want to know how it feels to be neer sighted. Turn On SSAO or HABO They help a lot.
 
