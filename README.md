@@ -3,12 +3,12 @@ Depth Map Based 3D post-process shader v1.7 for Reshade 3.0
 It also needs *ReShade.fxh* to work.
 https://github.com/BlueSkyDefender/reshade-shaders/blob/master/Shaders/ReShade.fxh
 
-There are the Basic Depth maps you can use for your games listed and not listed. Look at this link for other game Compatablity.
+There are the Basic Depth maps you can use for your games listed and not listed. Look at this link for other game Compatibility.
 
-This Mod alows for Depth Map Based 3D like What Nvidia does with Compatablity Mode 3D and Kind of what TriDef Does with Power 3D. 
+This Mod allows for Depth Map Based 3D like What Nvidia does with Compatibility Mode 3D and Kind of what TriDef Does with Power 3D. 
 
 http://reshade.me/compatibility
-At this link look for Depth Map compatablity.
+At this link look for Depth Map compatibility.
 
 SET YOUR RESOLUTION FIRST. Turn Off DOF in all games if possible. Unless you want to know how it feels to be neer sighted.
 
@@ -16,7 +16,7 @@ Please read me ReadMeDepth3d.txt For Setting and More Information.
 
 https://github.com/BlueSkyDefender/Depth3D/blob/master/ReadMeDepth3d.txt
 
-Game Compataliblity
+Game Compatibility
 
 * Alien Isolation
 * Amnesia: The Dark Descent
