@@ -13,7 +13,7 @@ Here is a quick and dirty game list of working Depth Maps.
 
 PLEASE SET YOUR RESOLUTION FIRST. Turn Off DOF in all games if possible. Unless you want to know how it feels to be neer sighted.
 
-[Game List]			[Alternet Depth Map]	[Depth Flip On]	[Read Below]
+[Game List]			[Alternet Depth Map]	[Depth Flip On]	[Read Below] [Alternate Render]
 *Alien Isolation			DM 7
 *Amnesia: The Dark Descent		DM 22
 Among The Sleep				DM 16		     DF On
@@ -21,10 +21,10 @@ Assassin Creed Unity			DM 9
 Batman Arkham Knight			DM 1
 Batman Arkham Origins			DM 1
 Batman: Arkham City			DM 2
-*BorderLands 2				DM 20					RB
+*BorderLands 2*				DM 20					RB
 *Call of Duty: Advance Warfare		DM 5					RB
 Call of Duty: Black Ops 2		DM 19					RB
-Call of Duty: Ghost			DM 19					RB
+*Call of Duty: Ghost*			DM 19					RB		AR
 *Casltevania: Lord of Shadows - UE	DM 7
 *Condemned: Criminal Origins		DM 22					RB
 Deadly Premonition: The Directors's Cut	DM 10					RB
@@ -38,8 +38,8 @@ GTA V					DM 11					RB
 Hard Reset				DM 8					RB
 *Lords of The Fallen			DM 6
 Magicka 2				DM 14					RB
-Metro 2033 Redux			DM 20					RB
-Metro Last Light Redux			DM 20					RB
+*Metro 2033 Redux*			DM 20					RB
+*Metro Last Light Redux*		DM 20					RB
 Middle-earth: Shadow of Mordor		DM 12					RB
 *Naruto Shippuden UNS3 Full Blurst	DM 0					RB
 Quake 4					DM 17
@@ -62,7 +62,7 @@ In-game Menu Settings
 
 Shift + f2 for Reshade 3.0 menu
 
-* Alternate Depth Map	[Depth Map 0 ▼]		[0|1|2|3|4|5|6|7|9|10|11|12|13|14|15|16|17|18|19|20|C1|C2] Alternate Depth Map for different Games. 
+* Alternate Depth Map	[Depth Map 0 ▼]		[0|1|2|3|4|5|6|7|9|10|11|12|13|14|15|16|17|18|19|20|21|22] Alternate Depth Map for different Games. 
 * Depth		       -[◄0▪▪▪▪▪▪▪25►]+		[0:25] Depth Default is 25. "Drag to Adjust Perspective."
 * Perspective	       -[◄▪▪▪▪0▪▪▪▪▪►]+		[-25:25] Perspective Default is 0. "Drag to Adjust Perspective."
 * Warp Adjust	       -[◄▪▪▪▪0▪▪▪▪▪►]+		[-25:25] Warp Adjust Default is 0. "Adjust the warp in the Left and Right eye."
@@ -71,7 +71,8 @@ Shift + f2 for Reshade 3.0 menu
 * Depth Map View 	[Off ▼]			Depth Map View. To see The Depth map. Use This to Work on your Own Depth Map for your game.
 * Far		       -[◄▪▪▪▪▪▪▪▪▪▪►]+		Default is "0.05" Far Depth Map Adjustment. This works on both [Custom Two ▼] and [Custom Two ▼]
 * Near		       -[◄▪▪▪▪▪▪▪▪▪▪►]+		Default is "1.25" Near Depth Map Adjustment. This works on both [Custom Two ▼] and [Custom Two ▼]
-* Custom Depth Map	[Custom Off  ▼]		Added, the Ablity to make your Own Depth Map.
+* Custom Depth Map	[Custom Off  ▼]		Added, the ablity to make your own Depth Map.
+* Alternate Render	[Off ▼]			Alternate Render Mode is a different way of warping the screen. Some Games may need this to be on to look better.
 * Eye Swap  	 	[Off ▼]  		Swap Left/Right to Right/Left and ViceVersa.
 
 Read Below Section
