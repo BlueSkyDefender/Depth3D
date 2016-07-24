@@ -29,7 +29,7 @@ Call of Duty: Ghost			DM 19					RB
 *Condemned: Criminal Origins		DM 22					RB
 Deadly Premonition: The Directors's Cut	DM 10					RB
 Dragon Ball Xenoverse			DM 16
-Dragons Dogma: Dark Arisen		DM 15
+*Dragons Dogma: Dark Arisen		DM 15
 DreamFall Chapters			DM 18		     DF On
 Dying Light				DM 11
 *Fallout 4				DM 13

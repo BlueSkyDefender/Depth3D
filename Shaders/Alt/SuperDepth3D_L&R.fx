@@ -254,13 +254,14 @@ sampler SamplerCR
 		float cN = 0.250;
 		depthL = (1 * cF / (cF + depthL * (depthL+cM) * (1 - cF))) / (pow(abs(depthL),cN));
 		}
-				
+		
 		//Dragon Dogma
 		if (AltDepthMap == 15)
 		{
-		float cN = -0.02;
-		float cF  = 1.025;
-		depthL = 1 - (1 - cF) / (cN - cF * depthL); 
+		float cF = 0.002;
+		float cM = 0;
+		float cN = -0.010;
+		depthL = 1 - (1 * cF / (cF + depthL * (depthL+cM) * (1 - cF))) / (pow(abs(depthL),cN));
 		}
 		
 		//Dragon Ball Xeno
@@ -533,11 +534,12 @@ sampler SamplerCR
 		//Dragon Dogma
 		if (AltDepthMap == 15)
 		{
-		float cN = -0.02;
-		float cF  = 1.025;
-		depthR = 1 - (1 - cF) / (cN - cF * depthR); 
+		float cF = 0.002;
+		float cM = 0;
+		float cN = -0.010;
+		depthR = 1 - (1 * cF / (cF + depthR * (depthR+cM) * (1 - cF))) / (pow(abs(depthR),cN));
 		}
-
+		
 		//Dragon Ball Xeno
 		if (AltDepthMap == 16)
 		{
@@ -937,7 +939,7 @@ float4 PS(float4 pos : SV_Position, float2 texcoord : TEXCOORD0) : SV_Target
 		depthM = 1 - (zF * zN / (zN + depthM * (zF - zN)) + pow(abs(depthM*depthM),1.0));
 		}
 
-		//Call of Duty: Advance Warfare
+		//Lords of the Fallen
 		if (AltDepthMap == 5)
 		{
 		float cF = 0.0000075;
@@ -1023,9 +1025,10 @@ float4 PS(float4 pos : SV_Position, float2 texcoord : TEXCOORD0) : SV_Target
 		//Dragon Dogma
 		if (AltDepthMap == 15)
 		{
-		float cN = -0.02;
-		float cF  = 1.025;
-		depthM = 1 - (1 - cF) / (cN - cF * depthM); 
+		float cF = 0.002;
+		float cM = 0;
+		float cN = -0.010;
+		depthM = 1 - (1 * cF / (cF + depthM * (depthM+cM) * (1 - cF))) / (pow(abs(depthM),cN));
 		}
 		
 		//Dragon Ball Xeno
