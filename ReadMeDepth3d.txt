@@ -49,9 +49,9 @@ Return To Castle Wolfenstine		DM 17					RB
 Skyrim					DM 10
 Sleeping Dogs: DE			DM 4
 *Souls Games				DM 21
-The Evil Within				DM 3					RB
+*The Evil Within*			DM 3					RB
 Witcher 3				DM 12
-Zombi					DM 3
+*Zombi*					DM 3
 
 You can also try different depth maps for other games your self by changing AltDepthMap number From 0-22. 
 You *may* want to disable AA in game. You can always enable SMAA in reshade for AA or play at 4k with no AA. 

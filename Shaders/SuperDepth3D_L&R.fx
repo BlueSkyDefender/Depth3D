@@ -160,8 +160,9 @@ sampler SamplerCR
 		//The Evil Within
 		if (AltDepthMap == 3)
 		{
-		float LinLog = 1.00;
-		depthL = 1 - (LinLog) / (LinLog - depthL * depthL * (LinLog -  25));
+		float cF = 0.0225;
+		float cN = 0.750;		
+		depthL = log(depthL/cF)/log(cN/cF);
 		}
 		
 		//Sleeping Dogs:  DE
@@ -392,7 +393,7 @@ sampler SamplerCR
 		{
 		float cF = Far;
 		float cN = Near;
-		depthL = (cN) / (cF - depthL * depthL * (cN - cF));
+		depthL = (cN) / (cF - depthL * log(depthL/cF)/log(cN/cF) * (cN - 1));
 		}
 		
 		//Custom Five -
@@ -400,7 +401,7 @@ sampler SamplerCR
 		{
 		float cF = Far;
 		float cN = Near;
-		depthL = 1 - (cN) / (cF - depthL * depthL * (cN - cF));
+		depthL = 1 - (cN) / (cF - depthL * log(depthL/cF)/log(cN/cF) * (cN - 1));
 		}
 	}
 
@@ -435,8 +436,9 @@ sampler SamplerCR
 		//The Evil Within
 		if (AltDepthMap == 3)
 		{
-		float LinLog = 1.00;
-		depthR = 1 - (LinLog) / (LinLog - depthR * depthR * (LinLog -  25));
+		float cF = 0.065;
+		float cN = 0.750;		
+		depthR = log(depthR/cF)/log(cN/cF);
 		}
 		
 		//Sleeping Dogs:  DE
@@ -667,7 +669,7 @@ sampler SamplerCR
 		{
 		float cF = Far;
 		float cN = Near;
-		depthR = (cN) / (cF - depthR * depthR * (cN - cF));
+		depthR = (cN) / (cF - depthR * log(depthR/cF)/log(cN/cF) * (cN - 1));
 		}
 		
 		//Custom Five -
@@ -675,7 +677,7 @@ sampler SamplerCR
 		{
 		float cF = Far;
 		float cN = Near;
-		depthR = 1 - (cN) / (cF - depthR * depthR * (cN - cF));
+		depthR = 1 - (cN) / (cF - depthR * log(depthR/cF)/log(cN/cF) * (cN - 1));
 		}
 	}
 
@@ -925,8 +927,9 @@ float4 PS(float4 pos : SV_Position, float2 texcoord : TEXCOORD0) : SV_Target
 		//The Evil Within
 		if (AltDepthMap == 3)
 		{
-		float LinLog = 1.00;
-		depthM = 1 - (LinLog) / (LinLog - depthM * depthM * (LinLog -  25));
+		float cF = 0.065;
+		float cN = 0.750;		
+		depthM = log(depthM/cF)/log(cN/cF);
 		}
 		
 		//Sleeping Dogs:  DE
@@ -1159,7 +1162,7 @@ float4 PS(float4 pos : SV_Position, float2 texcoord : TEXCOORD0) : SV_Target
 		{
 		float cF = Far;
 		float cN = Near;
-		depthM = (cN) / (cF - depthM * depthM * (cN - cF));
+		depthM = (cN) / (cF - depthM * log(depthM/cF)/log(cN/cF) * (cN - 1));
 		}
 		
 		//Custom Five -
@@ -1167,7 +1170,7 @@ float4 PS(float4 pos : SV_Position, float2 texcoord : TEXCOORD0) : SV_Target
 		{
 		float cF = Far;
 		float cN = Near;
-		depthM = 1 - (cN) / (cF - depthM * depthM * (cN - cF));
+		depthM = 1 - (cN) / (cF - depthM * log(depthM/cF)/log(cN/cF) * (cN - 1));
 		}
 	}
 	
