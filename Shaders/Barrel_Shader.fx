@@ -83,7 +83,6 @@ void  BarrelDistortion(in float4 position : SV_Position, in float2 texcoord : TE
 	color.rgb = BD(texcoord.xy);
 }
 
-
 //*Rendering passes*//
 
 technique Barrel_Shader
