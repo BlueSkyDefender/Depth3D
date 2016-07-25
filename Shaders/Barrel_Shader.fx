@@ -50,8 +50,6 @@ uniform float KCube <
 /////////////////////////////////////////////Barrel Shader Starts Here/////////////////////////////////////////////////////////////////
 #include "ReShade.fxh"
 
-#define pix float2(BUFFER_RCP_WIDTH, BUFFER_RCP_HEIGHT)
-
 sampler BorderSampler
 {
 	Texture = ReShade::BackBufferTex;
