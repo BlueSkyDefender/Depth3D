@@ -38,7 +38,7 @@ uniform int Depth <
 
 uniform float Perspective <
 	ui_type = "drag";
-	ui_min = -25; ui_max = 25;
+	ui_min = -50; ui_max = 50;
 	ui_label = "Perspective Slider";
 	ui_tooltip = "Determines the perspective point.";
 > = 0;
