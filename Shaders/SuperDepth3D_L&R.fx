@@ -316,8 +316,8 @@ float SbSdepth (float2 texcoord)
 		//Souls Game
 		if (AltDepthMap == 21)
 		{
-		float cF = 5;
-		float cN = 0;
+		float cF = 7.5;
+		float cN = -0.200;
 		depthL = (cN - depthL * cN) + (depthL*cF);
 		}
 		
@@ -608,9 +608,9 @@ float SbSdepth (float2 texcoord)
 		//Souls Game
 		if (AltDepthMap == 21)
 		{
-		float cF = 1;
-		float cN = 0;
-		depthR = (cN - depthR * cN) + (depthR*cF);
+		float cF = 4.55;
+		float cN = 2.0;
+		depthR = 1 - (cN - depthR * cN) + (depthR*cF);
 		}
 		
 		//Amnesia: The Dark Descent
@@ -752,6 +752,7 @@ float SbSdepth (float2 texcoord)
 	float NegDepth = -Depth;
 	float LeftDepth = Depth/2+WA;
 	float RightDepth = Depth/2+WA;
+
 	color.r = texcoord.x-NegDepth*pix.x*SbSdepth(float2(texcoord.x+RightDepth*pix.x,texcoord.y));
 	color.gb = texcoord.x-Depth*pix.x*SbSdepth(float2(texcoord.x-LeftDepth*pix.x,texcoord.y));
 	}
@@ -823,7 +824,7 @@ float SbSdepth (float2 texcoord)
 		[unroll]
 		for (int j = 0; j <= x; j++) 
 		{
-			if (tex2D(SamplerCC, float2(texcoord.x*2+j*pix.x,texcoord.y)).b >= texcoord.x-pix.x && tex2D(SamplerCC, float2(texcoord.x+j*pix.x,texcoord.y)).b <= texcoord.x+pix.x) 
+			if (tex2D(SamplerCC, float2(texcoord.x*2+j*pix.x,texcoord.y)).b >= texcoord.x-pix.x && tex2D(SamplerCC, float2(texcoord.x+j*pix.x,texcoord.y)).b < texcoord.x+pix.x) 
 			{
 			
 			float DP = 1;
@@ -908,7 +909,7 @@ float SbSdepth (float2 texcoord)
 		[unroll]
 		for (int j = 0; j <= x; j++) 
 		{
-			if (tex2D(SamplerCC, float2(texcoord.x*2+j*pix.x,texcoord.y)).b >= texcoord.x-pix.x && tex2D(SamplerCC, float2(texcoord.x+j*pix.x,texcoord.y)).b <= texcoord.x+pix.x) 
+			if (tex2D(SamplerCC, float2(texcoord.x*2+j*pix.x,texcoord.y)).b >= texcoord.x-pix.x && tex2D(SamplerCC, float2(texcoord.x+j*pix.x,texcoord.y)).b < texcoord.x+pix.x) 
 			{
 			
 			float DP = 1;
@@ -997,7 +998,7 @@ void PS_renderR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0
 		[unroll]
 	for (int j = 0; j >= -x; --j) 
 	{
-			if (tex2D(SamplerCC, float2(texcoord.x*2-j*pix.x,texcoord.y)).r >= texcoord.x-pix.x && tex2D(SamplerCC, float2(texcoord.x+j*pix.x,texcoord.y)).r >= texcoord.x+pix.x) 
+			if (tex2D(SamplerCC, float2(texcoord.x*2-j*pix.x,texcoord.y)).r >= texcoord.x-pix.x && tex2D(SamplerCC, float2(texcoord.x+j*pix.x,texcoord.y)).r > texcoord.x+pix.x) 
 			{
 			
 			float DP = 1;
@@ -1082,7 +1083,7 @@ void PS_renderR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0
 		[unroll]
 	for (int j = 0; j >= -x; --j) 
 	{
-			if (tex2D(SamplerCC, float2(texcoord.x*2-j*pix.x,texcoord.y)).r >= texcoord.x-pix.x && tex2D(SamplerCC, float2(texcoord.x+j*pix.x,texcoord.y)).r >= texcoord.x+pix.x) 
+			if (tex2D(SamplerCC, float2(texcoord.x*2-j*pix.x,texcoord.y)).r >= texcoord.x-pix.x && tex2D(SamplerCC, float2(texcoord.x+j*pix.x,texcoord.y)).r > texcoord.x+pix.x) 
 			{
 			
 			float DP = 1;
@@ -1308,9 +1309,9 @@ float4 PS(float4 pos : SV_Position, float2 texcoord : TEXCOORD0) : SV_Target
 		//Souls Game
 		if (AltDepthMap == 21)
 		{
-		float cF = 1;
-		float cN = 0.750;
-		depthM = (-0+(pow(abs(depthM),cN))*cF); 
+		float cF = 4.55;
+		float cN = 2.0;
+		depthM = 1 - (cN - depthM * cN) + (depthM*cF);
 		}
 	
 		//Amnesia: The Dark Descent
