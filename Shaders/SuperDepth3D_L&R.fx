@@ -85,7 +85,7 @@ uniform float Far <
 
 uniform int CustomDM <
 	ui_type = "combo";
-	ui_items = "Custom Off\0Custom One +\0Custom One -\0Custom Two +\0Custom Two -\0Custom Three +\0Custom Three -\0Custom Four +\0Custom Four -\0Custom Five +\0Custom Five -\0";
+	ui_items = "Custom Off\0Custom One +\0Custom One -\0Custom Two +\0Custom Two -\0Custom Three +\0Custom Three -\0Custom Four +\0Custom Four -\0Custom Five +\0Custom Five -\0Custom Six +\0Custom Six -\0";
 	ui_label = "Custom Depth Map";
 	ui_tooltip = "Adjust your own Custom Depth Map.";
 > = 0;
@@ -128,7 +128,7 @@ sampler SamplerCR
 	
 	
 //depth information
-	float SbSdepth (float2 texcoord) 
+float SbSdepth (float2 texcoord) 
 	
 	{
 
@@ -316,10 +316,11 @@ sampler SamplerCR
 		//Souls Game
 		if (AltDepthMap == 21)
 		{
-		float cF = 0.025;
-		float cN = 1.40;		
-		depthL = log(depthL/cF)/log(cN/cF);
+		float cF = 5;
+		float cN = 0;
+		depthL = (cN - depthL * cN) + (depthL*cF);
 		}
+		
 		//Amnesia: The Dark Descent
 		if (AltDepthMap == 22)
 		{
@@ -349,40 +350,40 @@ sampler SamplerCR
 		//Custom Two +
 		if (CustomDM == 3)
 		{
-		float cN = Near;
 		float cF  = Far;
+		float cN = Near;
 		depthL = (1 - cF) / (cN - cF * depthL); 
 		}
 		
 		//Custom Two -
 		if (CustomDM == 4)
 		{
-		float cN = Near;
 		float cF  = Far;
+		float cN = Near;
 		depthL = 1 - (1 - cF) / (cN - cF * depthL); 
 		}
 		
 		//Custom Three +
 		if (CustomDM == 5)
 		{
-		float cN = Near;
 		float cF  = Far;
-		depthL = (cF* 1/depthL + cN);
+		float cN = Near;
+		depthL = (cF * 1/depthL + cN);
 		}
 		
 		//Custom Three -
 		if (CustomDM == 6)
 		{
-		float cN = Near;
 		float cF  = Far;
-		depthL = 1 - (cF* 1/depthL + cN);
+		float cN = Near;
+		depthL = 1 - (cF * 1/depthL + cN);
 		}
 		
 		//Custom Four +
 		if (CustomDM == 7)
 		{
 		float cF = Far;
-		float cN = Near;		
+		float cN = Near;
 		depthL = log(depthL/cF)/log(cN/cF);
 		}
 		
@@ -393,7 +394,7 @@ sampler SamplerCR
 		float cN = Near;		
 		depthL = 1 - log(depthL/cF)/log(cN/cF);
 		}
-
+		
 		//Custom Five +
 		if (CustomDM == 9)
 		{
@@ -408,6 +409,22 @@ sampler SamplerCR
 		float cF = Far;
 		float cN = Near;
 		depthL = 1 - (cF) / (cF - depthL * ((1 - cN) / (cF - cN * depthL)) * (cF - 1));
+		}
+		
+		//Custom Six +
+		if (CustomDM == 11)
+		{
+		float cF = Far;
+		float cN = Near;
+		depthL = (cN - depthL * cN) + (depthL*cF);
+		}
+		
+		//Custom Six -
+		if (CustomDM == 12)
+		{
+		float cF = Far;
+		float cN = Near;
+		depthL = 1 - (cN - depthL * cN) + (depthL*cF);
 		}
 	}
 
@@ -591,10 +608,11 @@ sampler SamplerCR
 		//Souls Game
 		if (AltDepthMap == 21)
 		{
-		float cF = 0.025;
-		float cN = 1.40;		
-		depthR = log(depthR/cF)/log(cN/cF);
+		float cF = 1;
+		float cN = 0;
+		depthR = (cN - depthR * cN) + (depthR*cF);
 		}
+		
 		//Amnesia: The Dark Descent
 		if (AltDepthMap == 22)
 		{
@@ -624,40 +642,40 @@ sampler SamplerCR
 		//Custom Two +
 		if (CustomDM == 3)
 		{
-		float cN = Near;
 		float cF  = Far;
+		float cN = Near;
 		depthR = (1 - cF) / (cN - cF * depthR); 
 		}
 		
 		//Custom Two -
 		if (CustomDM == 4)
 		{
-		float cN = Near;
 		float cF  = Far;
+		float cN = Near;
 		depthR = 1 - (1 - cF) / (cN - cF * depthR); 
 		}
 		
 		//Custom Three +
 		if (CustomDM == 5)
 		{
-		float cN = Near;
 		float cF  = Far;
-		depthR = (cF* 1/depthR + cN);
+		float cN = Near;
+		depthR = (cF * 1/depthR + cN);
 		}
 		
 		//Custom Three -
 		if (CustomDM == 6)
 		{
-		float cN = Near;
 		float cF  = Far;
-		depthR = 1 - (cF* 1/depthR + cN);
+		float cN = Near;
+		depthR = 1 - (cF * 1/depthR + cN);
 		}
 		
 		//Custom Four +
 		if (CustomDM == 7)
 		{
 		float cF = Far;
-		float cN = Near;		
+		float cN = Near;	
 		depthR = log(depthR/cF)/log(cN/cF);
 		}
 		
@@ -665,10 +683,10 @@ sampler SamplerCR
 		if (CustomDM == 8)
 		{
 		float cF = Far;
-		float cN = Near;		
+		float cN = Near;
 		depthR = 1 - log(depthR/cF)/log(cN/cF);
 		}
-
+		
 		//Custom Five +
 		if (CustomDM == 9)
 		{
@@ -683,6 +701,22 @@ sampler SamplerCR
 		float cF = Far;
 		float cN = Near;
 		depthR = 1 - (cF) / (cF - depthR * ((1 - cN) / (cF - cN * depthR)) * (cF - 1));
+		}
+		
+		//Custom Six +
+		if (CustomDM == 11)
+		{
+		float cF = Far;
+		float cN = Near;
+		depthR = (cN - depthR * cN) + (depthR*cF);
+		}
+		
+		//Custom Six -
+		if (CustomDM == 12)
+		{
+		float cF = Far;
+		float cN = Near;
+		depthR = 1 - (cN - depthR * cN) + (depthR*cF);
 		}
 	}
 
@@ -1274,9 +1308,9 @@ float4 PS(float4 pos : SV_Position, float2 texcoord : TEXCOORD0) : SV_Target
 		//Souls Game
 		if (AltDepthMap == 21)
 		{
-		float cF = 0.025;
-		float cN = 1.40;		
-		depthM = log(depthM/cF)/log(cN/cF);
+		float cF = 1;
+		float cN = 0.750;
+		depthM = (-0+(pow(abs(depthM),cN))*cF); 
 		}
 	
 		//Amnesia: The Dark Descent
@@ -1309,40 +1343,40 @@ float4 PS(float4 pos : SV_Position, float2 texcoord : TEXCOORD0) : SV_Target
 		//Custom Two +
 		if (CustomDM == 3)
 		{
-		float cN = Near;
 		float cF  = Far;
+		float cN = Near;
 		depthM = (1 - cF) / (cN - cF * depthM); 
 		}
 		
 		//Custom Two -
 		if (CustomDM == 4)
 		{
-		float cN = Near;
 		float cF  = Far;
+		float cN = Near;
 		depthM = 1 - (1 - cF) / (cN - cF * depthM); 
 		}
 		
 		//Custom Three +
 		if (CustomDM == 5)
 		{
-		float cN = Near;
 		float cF  = Far;
-		depthM = (cF* 1/depthM + cN);
+		float cN = Near;
+		depthM = (cF * 1/depthM + cN);
 		}
 		
 		//Custom Three -
 		if (CustomDM == 6)
 		{
-		float cN = Near;
 		float cF  = Far;
-		depthM = 1 - (cF* 1/depthM + cN);
+		float cN = Near;
+		depthM = 1 - (cF * 1/depthM + cN);
 		}
 		
 		//Custom Four +
 		if (CustomDM == 7)
 		{
 		float cF = Far;
-		float cN = Near;		
+		float cN = Near;	
 		depthM = log(depthM/cF)/log(cN/cF);
 		}
 		
@@ -1350,7 +1384,7 @@ float4 PS(float4 pos : SV_Position, float2 texcoord : TEXCOORD0) : SV_Target
 		if (CustomDM == 8)
 		{
 		float cF = Far;
-		float cN = Near;		
+		float cN = Near;	
 		depthM = 1 - log(depthM/cF)/log(cN/cF);
 		}
 		
@@ -1368,6 +1402,22 @@ float4 PS(float4 pos : SV_Position, float2 texcoord : TEXCOORD0) : SV_Target
 		float cF = Far;
 		float cN = Near;
 		depthM = 1 - (cF) / (cF - depthM * ((1 - cN) / (cF - cN * depthM)) * (cF - 1));
+		}
+		
+		//Custom Six +
+		if (CustomDM == 11)
+		{
+		float cF = Far;
+		float cN = Near;
+		depthM = (cN - depthM * cN) + (depthM*cF);
+		}
+		
+		//Custom Six -
+		if (CustomDM == 12)
+		{
+		float cF = Far;
+		float cN = Near;
+		depthM = 1 - (cN - depthM * cN) + (depthM*cF);
 		}
 	}
 	

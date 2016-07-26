@@ -48,7 +48,7 @@ Return To Castle Wolfenstine		DM 17					RB
 *Shadow warrior(2013)			DM 7					RB
 Skyrim					DM 10
 Sleeping Dogs: DE			DM 4
-*Souls Games				DM 21
+*Souls Games*				DM 21
 *The Evil Within*			DM 3					RB
 Witcher 3				DM 12
 *Zombi*					DM 3
