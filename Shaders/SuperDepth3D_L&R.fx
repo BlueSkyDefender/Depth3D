@@ -751,7 +751,7 @@ float SbSdepth (float2 texcoord)
 	{
 	float NegDepth = -Depth;
 	float LeftDepth = Depth/2+WA;
-	float RightDepth = Depth/2-WA;
+	float RightDepth = Depth/2+WA;
 	color.r = texcoord.x-NegDepth*pix.x*SbSdepth(float2(texcoord.x+RightDepth*pix.x,texcoord.y));
 	color.gb = texcoord.x-Depth*pix.x*SbSdepth(float2(texcoord.x-LeftDepth*pix.x,texcoord.y));
 	}
