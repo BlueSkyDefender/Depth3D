@@ -36,7 +36,7 @@ Dying Light				DM 11
 Firewatch				DM 1		     DF On
 GTA V					DM 11					RB
 Hard Reset				DM 8					RB
-*Lords of The Fallen			DM 6
+*Lords of The Fallen*			DM 6
 Magicka 2				DM 14					RB
 *Metro 2033 Redux*			DM 20					RB
 *Metro Last Light Redux*		DM 20					RB

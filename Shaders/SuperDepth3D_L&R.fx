@@ -188,12 +188,12 @@ float SbSdepth (float2 texcoord)
 		depthL = (cN * cF / (cF + depthL * 1 * (cN - cF))) + pow(abs(depthL*depthL),cC);
 		}
 		
-		//Souls Game | Lords of the Fallen
+		//Lords of the Fallen
 		if (AltDepthMap == 6)
 		{
-		float cN = 0;
-		float cF  = 1.025;
-		depthL = 1 - (1 - cF) / (cN - cF * depthL); 
+		float cF = 8;
+		float cN = 1.5;
+		depthL = (-0+(pow(abs(depthL),cN))*cF);
 		}
 		
 		//Shadow Warrior
@@ -484,8 +484,8 @@ float SbSdepth (float2 texcoord)
 		//Souls Game | Lords of the Fallen
 		if (AltDepthMap == 6)
 		{
+		float cF  = 1.027;
 		float cN = 0;
-		float cF  = 1.025;
 		depthR = 1 - (1 - cF) / (cN - cF * depthR); 
 		}
 		
@@ -1184,8 +1184,8 @@ float4 PS(float4 pos : SV_Position, float2 texcoord : TEXCOORD0) : SV_Target
 		//Lords of the Fallen
 		if (AltDepthMap == 6)
 		{
+		float cF  = 1.027;
 		float cN = 0;
-		float cF  = 1.025;
 		depthM = 1 - (1 - cF) / (cN - cF * depthM); 
 		}
 		
