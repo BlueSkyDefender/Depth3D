@@ -166,9 +166,9 @@ float SbSdepth (float2 texcoord)
 		//The Evil Within
 		if (AltDepthMap == 3)
 		{
-		float cF = 0.0225;
-		float cN = 0.750;		
-		depthL = log(depthL/cF)/log(cN/cF);
+		float cF = 8;
+		float cN = 0;
+		depthL = (cN - depthL * cN) + (depthL*cF);
 		}
 		
 		//Sleeping Dogs:  DE
@@ -199,9 +199,9 @@ float SbSdepth (float2 texcoord)
 		//Shadow Warrior
 		if (AltDepthMap == 7)
 		{
-		float zF = 1.15;
-		float zN = 0.070;
-		depthL = 1 - (zF * zN / (zN + depthL * 1 * (zF - zN)))+(pow(abs(depthL*depthL),5));
+		float cF = 1.5;
+		float cN = 1;
+		depthL = (-0+(pow(abs(depthL),cN))*cF);
 		}
 		
 		//Rage
@@ -459,9 +459,9 @@ float SbSdepth (float2 texcoord)
 		//The Evil Within
 		if (AltDepthMap == 3)
 		{
-		float cF = 0.065;
-		float cN = 0.750;		
-		depthR = log(depthR/cF)/log(cN/cF);
+		float cF = 1.5;
+		float cN = 0;
+		depthR = (cN - depthR * cN) + (depthR*cF);
 		}
 		
 		//Sleeping Dogs:  DE
@@ -481,7 +481,7 @@ float SbSdepth (float2 texcoord)
 		depthR = (cN * cF / (cF + depthR * 1 * (cN - cF))) + pow(abs(depthR*depthR),cC);
 		}
 		
-		//Souls Game | Lords of the Fallen
+		//Lords of the Fallen
 		if (AltDepthMap == 6)
 		{
 		float cF  = 1.027;
@@ -492,9 +492,9 @@ float SbSdepth (float2 texcoord)
 		//Shadow Warrior
 		if (AltDepthMap == 7)
 		{
-		float zF = 1.15;
-		float zN = 0.070;
-		depthR = 1 - (zF * zN / (zN + depthR * 1 * (zF - zN)))+(pow(abs(depthR*depthR),5));
+		float cF = 10;
+		float cN = 0;
+		depthR = (cN - depthR * cN) + (depthR*cF);
 		}
 		
 		//Rage
@@ -1159,9 +1159,9 @@ float4 PS(float4 pos : SV_Position, float2 texcoord : TEXCOORD0) : SV_Target
 		//The Evil Within
 		if (AltDepthMap == 3)
 		{
-		float cF = 0.065;
-		float cN = 0.750;		
-		depthM = log(depthM/cF)/log(cN/cF);
+		float cF = 1.5;
+		float cN = 0;
+		depthM = (cN - depthM * cN) + (depthM*cF);
 		}
 		
 		//Sleeping Dogs:  DE
@@ -1192,9 +1192,9 @@ float4 PS(float4 pos : SV_Position, float2 texcoord : TEXCOORD0) : SV_Target
 		//Shadow Warrior
 		if (AltDepthMap == 7)
 		{
-		float zF = 1.15;
-		float zN = 0.070;
-		depthM = 1 - (zF * zN / (zN + depthM * 1 * (zF - zN)))+(pow(abs(depthM*depthM),5));
+		float cF = 10;
+		float cN = 0;
+		depthM = (cN - depthM * cN) + (depthM*cF);
 		}
 		
 		//Rage

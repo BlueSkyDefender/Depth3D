@@ -27,7 +27,7 @@ Call of Duty: Black Ops 2		DM 19					RB
 *Call of Duty: Ghost*			DM 19					RB		AR
 *Casltevania: Lord of Shadows - UE	DM 7
 *Condemned: Criminal Origins		DM 22					RB
-Deadly Premonition: The Directors's Cut	DM 10					RB
+Deadly Premonition: The Directors's Cut	DM 10					RB	
 Dragon Ball Xenoverse			DM 16
 *Dragons Dogma: Dark Arisen		DM 15
 DreamFall Chapters			DM 18		     DF On
@@ -45,7 +45,7 @@ Middle-earth: Shadow of Mordor		DM 12					RB
 Quake 4					DM 17
 Rage64					DM 8					RB
 Return To Castle Wolfenstine		DM 17					RB
-*Shadow warrior(2013)			DM 7					RB
+*Shadow warrior(2013)*			DM 7					RB
 Skyrim					DM 10
 Sleeping Dogs: DE			DM 4
 *Souls Games*				DM 21
