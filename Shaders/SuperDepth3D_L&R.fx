@@ -36,7 +36,7 @@ uniform int Depth <
 	ui_tooltip = "Determines the amount of Image Warping and Separation between both eyes. To go beyond 25 max you need to enter your own number.";
 > = 10;
 
-uniform float Perspective <
+uniform int Perspective <
 	ui_type = "drag";
 	ui_min = -50; ui_max = 50;
 	ui_label = "Perspective Slider";
@@ -1196,7 +1196,8 @@ void PS0(float4 pos : SV_Position, float2 texcoord : TEXCOORD0, out float3 color
 		}
 		else
 		{
-		color = texcoord.x > 0.5 ? tex2D(SamplerCL, float2(texcoord.x - Perspective * pix.x, texcoord.y)).rgb : tex2D(SamplerCR, float2(texcoord.x + Perspective * pix.x, texcoord.y)).rgb;
+		float AltPerspective = round(Depth/2)+Perspective;
+		color = texcoord.x > 0.5 ? tex2D(SamplerCL, float2(texcoord.x - AltPerspective * pix.x, texcoord.y)).rgb : tex2D(SamplerCR, float2(texcoord.x + AltPerspective * pix.x, texcoord.y)).rgb;
 		}
 }
 
