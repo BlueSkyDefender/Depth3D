@@ -903,7 +903,7 @@ void PS_renderL(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0
 		[unroll]
 		for (int j = 0; j <= x; j++) 
 		{
-			if (tex2D(SamplerCC, float2((texcoord.x*2)+j*pix.x,texcoord.y)).b >= (texcoord.x*2)-pix.x && tex2D(SamplerCC, float2(texcoord.x+j*pix.x,texcoord.y)).b <= texcoord.x+pix.x) 
+			if (tex2D(SamplerCC, float2((texcoord.x*2)+j*pix.x,texcoord.y)).b >= texcoord.x-pix.x && tex2D(SamplerCC, float2(texcoord.x+j*pix.x,texcoord.y)).b <= texcoord.x+pix.x) 
 			{
 			
 			float DP = 1;
@@ -1164,7 +1164,7 @@ void PS_renderR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0
 		[unroll]
 	for (int j = 0; j >= -x; --j) 
 	{
-			if (tex2D(SamplerCC, float2((texcoord.x*2)-j*pix.x,texcoord.y)).r >= (texcoord.x*2)-pix.x && tex2D(SamplerCC, float2(texcoord.x+j*pix.x,texcoord.y)).r >= texcoord.x+pix.x) 
+			if (tex2D(SamplerCC, float2((texcoord.x*2)-j*pix.x,texcoord.y)).r >= texcoord.x-pix.x && tex2D(SamplerCC, float2(texcoord.x+j*pix.x,texcoord.y)).r >= texcoord.x+pix.x) 
 			{
 			
 			float DP = 1;

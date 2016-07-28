@@ -26,7 +26,7 @@ Batman: Arkham City			DM 2
 *Call of Duty: Black Ops 2*		DM 19					RB		AR
 *Call of Duty: Ghost*			DM 19					RB		AR
 *Casltevania: Lord of Shadows - UE	DM 7
-*Condemned: Criminal Origins		DM 22					RB
+*Condemned: Criminal Origins*		DM 22					RB
 Deadly Premonition: The Directors's Cut	DM 10					RB	
 Dragon Ball Xenoverse			DM 16
 *Dragons Dogma: Dark Arisen		DM 15
