@@ -22,8 +22,8 @@ Batman Arkham Knight			DM 1
 Batman Arkham Origins			DM 1
 Batman: Arkham City			DM 2
 *BorderLands 2*				DM 20					RB
-*Call of Duty: Advance Warfare		DM 5					RB
-Call of Duty: Black Ops 2		DM 19					RB
+*Call of Duty: Advance Warfare*		DM 5					RB		AR
+*Call of Duty: Black Ops 2*		DM 19					RB		AR
 *Call of Duty: Ghost*			DM 19					RB		AR
 *Casltevania: Lord of Shadows - UE	DM 7
 *Condemned: Criminal Origins		DM 22					RB

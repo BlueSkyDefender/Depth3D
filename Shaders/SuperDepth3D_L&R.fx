@@ -182,10 +182,9 @@ float SbSdepthL (float2 texcoord)
 		//COD:AW
 		if (AltDepthMap == 5)
 		{
-		float cF = 0.0000075;
-		float cN = 1;
-		float cC = 25;
-		depthL = (cN * cF / (cF + depthL * 1 * (cN - cF))) + pow(abs(depthL*depthL),cC);
+		float cF = 0.0015;
+		float cN = 0;
+		depthL = (cF) / (cF - depthL * ((1 - cN) / (cF - cN * depthL)) * (cF - 1));
 		}
 		
 		//Lords of the Fallen
@@ -508,10 +507,9 @@ float SbSdepthR (float2 texcoord)
 		//COD:AW
 		if (AltDepthMap == 5)
 		{
-		float cF = 0.0000075;
-		float cN = 1;
-		float cC = 25;
-		depthR = (cN * cF / (cF + depthR * 1 * (cN - cF))) + pow(abs(depthR*depthR),cC);
+		float cF  = 0.00001;
+		float cN = 0;
+		depthR = (cF * 1/depthR + cN);
 		}
 		
 		//Lords of the Fallen
@@ -1219,10 +1217,9 @@ float4 PS(float4 pos : SV_Position, float2 texcoord : TEXCOORD0) : SV_Target
 		//Call of Duty: Advance Warfare
 		if (AltDepthMap == 5)
 		{
-		float cF = 0.0000075;
-		float cN = 1;
-		float cC = 25;
-		depthM = (cN * cF / (cF + depthM * 1 * (cN - cF))) + pow(abs(depthM*depthM),cC);
+		float cF  = 0.00001;
+		float cN = 0;
+		depthM = (cF * 1/depthM + cN);
 		}
 		
 		//Lords of the Fallen
