@@ -3,7 +3,7 @@
  //----------------////
 
  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
- //* Depth Map Based 3D post-process shader v1.7.1 L & R Eye																															*//
+ //* Depth Map Based 3D post-process shader v1.7 L & R Eye																															*//
  //* For Reshade 3.0																																								*//
  //* --------------------------																																						*//
  //* This work is licensed under a Creative Commons Attribution 3.0 Unported License.																								*//
@@ -988,7 +988,7 @@ void PS_renderL(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0
 		[unroll]
 		for (int j = 0; j <= x; j++) 
 		{
-			if (tex2D(SamplerCC, float2( (texcoord.x*2-1)-j*pix.x,texcoord.y)).b <= (texcoord.x*2-1)+pix.x && tex2D(SamplerCC, float2(texcoord.x+j*pix.x,texcoord.y)).b <= texcoord.x+pix.x) 
+			if (tex2D(SamplerCC, float2( (texcoord.x*2-1)+j*pix.x,texcoord.y)).b >= (texcoord.x*2-1)-pix.x && tex2D(SamplerCC, float2(texcoord.x+j*pix.x,texcoord.y)).b <= texcoord.x+pix.x) 
 			{
 			
 			float DP = 1;

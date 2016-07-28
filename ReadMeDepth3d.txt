@@ -15,7 +15,7 @@ PLEASE SET YOUR RESOLUTION FIRST. Turn Off DOF in all games if possible. Unless 
 
 [Game List]			[Alternet Depth Map]	[Depth Flip On]	[Read Below] [Alternate Render]
 *Alien Isolation*			DM 23
-*Amnesia: The Dark Descent		DM 22
+*Amnesia: The Dark Descent*		DM 22
 Among The Sleep				DM 16		     DF On
 Assassin Creed Unity			DM 9
 Batman Arkham Knight			DM 1
