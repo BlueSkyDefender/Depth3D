@@ -14,7 +14,7 @@ Here is a quick and dirty game list of working Depth Maps.
 PLEASE SET YOUR RESOLUTION FIRST. Turn Off DOF in all games if possible. Unless you want to know how it feels to be neer sighted.
 
 [Game List]			[Alternet Depth Map]	[Depth Flip On]	[Read Below] [Alternate Render]
-*Alien Isolation			DM 7
+*Alien Isolation*			DM 23
 *Amnesia: The Dark Descent		DM 22
 Among The Sleep				DM 16		     DF On
 Assassin Creed Unity			DM 9
@@ -87,6 +87,7 @@ Mouse and keyboard is good for gameplay.
 Render Resolution Native.
 Turn off AA.
 Don't use in game Supersampling
+FOV Sucks i know.
 
 {Call of Duty: Ghost}
 Set Image Quality to Extra.

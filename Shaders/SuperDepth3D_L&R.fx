@@ -24,7 +24,7 @@
  
 uniform int AltDepthMap <
 	ui_type = "combo";
-	ui_items = "Depth Map 0\0Depth Map 1\0Depth Map 2\0Depth Map 3\0Depth Map 4\0Depth Map 5\0Depth Map 6\0Depth Map 7\0Depth Map 8\0Depth Map 9\0Depth Map 10\0Depth Map 11\0Depth Map 12\0Depth Map 13\0Depth Map 14\0Depth Map 15\0Depth Map 16\0Depth Map 17\0Depth Map 18\0Depth Map 19\0Depth Map 20\0Depth Map 21\0Depth Map 22\0";
+	ui_items = "Depth Map 0\0Depth Map 1\0Depth Map 2\0Depth Map 3\0Depth Map 4\0Depth Map 5\0Depth Map 6\0Depth Map 7\0Depth Map 8\0Depth Map 9\0Depth Map 10\0Depth Map 11\0Depth Map 12\0Depth Map 13\0Depth Map 14\0Depth Map 15\0Depth Map 16\0Depth Map 17\0Depth Map 18\0Depth Map 19\0Depth Map 20\0Depth Map 21\0Depth Map 22\0Depth Map 23\0";
 	ui_label = "Alternate Depth Map";
 	ui_tooltip = "Alternate Depth Map for different Games. Read the ReadMeDepth3d.txt, for setting. Each game May and can use a diffrent AltDepthMap.";
 > = 0;
@@ -43,10 +43,17 @@ uniform float Perspective <
 	ui_tooltip = "Determines the perspective point.";
 > = 0;
 
-uniform int WA <
+uniform int WAL <
 	ui_type = "drag";
-	ui_min = -50; ui_max = 50;
-	ui_label = "Warp Adjust";
+	ui_min = -25; ui_max = 25;
+	ui_label = "Left Warp Adjust";
+	ui_tooltip = "Adjust the warp in the left eye.";
+> = 0;
+
+uniform int WAR <
+	ui_type = "drag";
+	ui_min = -25; ui_max = 25;
+	ui_label = "Right Warp Adjust";
 	ui_tooltip = "Adjust the warp in the right eye.";
 > = 0;
 
@@ -326,6 +333,14 @@ float SbSdepthL (float2 texcoord)
 		float cF = 1.5;
 		float cN = 1.5;
 		depthL = (-0+(pow(abs(depthL),cN))*cF);
+		}
+		
+		//Alien Isolation
+		if (AltDepthMap == 23)
+		{
+		float cF = 4;
+		float cN = 0;
+		depthL = (cN - depthL * cN) + (depthL*cF);
 		}
 	}
 	else
@@ -651,6 +666,14 @@ float SbSdepthR (float2 texcoord)
 		float cN = 1.5;
 		depthR = (-0+(pow(abs(depthR),cN))*cF);
 		}
+		
+		//Alien Isolation
+		if (AltDepthMap == 23)
+		{
+		float cF = 20;
+		float cN = 0;
+		depthR = (cN - depthR * cN) + (depthR*cF);
+		}
 	}
 	else
 	{
@@ -784,16 +807,16 @@ float SbSdepthR (float2 texcoord)
 		if(!AltRender)
 	{
 	float NegDepth = -Depth;
-	float LeftDepth = Depth/2+WA;
-	float RightDepth = Depth/2+WA;
+	float LeftDepth = Depth/2+WAL;
+	float RightDepth = Depth/2+WAR;
 	color.r =  texcoord.x-NegDepth*pix.x*SbSdepthR(float2(texcoord.x+RightDepth*pix.x,texcoord.y));
 	color.gb =  texcoord.x-Depth*pix.x*SbSdepthL(float2(texcoord.x-LeftDepth*pix.x,texcoord.y));
 	}
 	else
 	{
 	float NegDepth = -Depth;
-	float LeftDepth = Depth/2+WA;
-	float RightDepth = Depth/2+WA;
+	float LeftDepth = Depth/2+WAR;
+	float RightDepth = Depth/2+WAL;
 	color.r =  texcoord.x-NegDepth*pix.x*SbSdepthL(float2(texcoord.x+RightDepth*pix.x,texcoord.y));
 	color.gb =  texcoord.x-Depth*pix.x*SbSdepthR(float2(texcoord.x-LeftDepth*pix.x,texcoord.y));
 	}
@@ -1360,6 +1383,14 @@ float4 PS(float4 pos : SV_Position, float2 texcoord : TEXCOORD0) : SV_Target
 		float cF = 1.5;
 		float cN = 1.5;
 		depthM = (-0+(pow(abs(depthM),cN))*cF);
+		}
+		
+		//Alien Isolation
+		if (AltDepthMap == 23)
+		{
+		float cF = 20;
+		float cN = 0;
+		depthM = (cN - depthM * cN) + (depthM * cF);
 		}
 	
 	}
