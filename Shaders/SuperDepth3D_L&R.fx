@@ -127,8 +127,8 @@ sampler SamplerCR
 	};
 	
 	
-//depth information
-float SbSdepth (float2 texcoord) 
+//Left Eye Depth Map Information
+float SbSdepthL (float2 texcoord) 
 	
 	{
 
@@ -138,7 +138,7 @@ float SbSdepth (float2 texcoord)
 			texcoord.y =  1 - texcoord.y;
 
 
-	float4 depthL = ReShade::GetLinearizedDepth(float2((texcoord.x*2), texcoord.y));
+	float4 depthL = ReShade::GetLinearizedDepth(float2(texcoord.x*2, texcoord.y));
 
 	if (CustomDM == 0)
 	{		
@@ -300,8 +300,8 @@ float SbSdepth (float2 texcoord)
 		//CoD: Ghost
 		if (AltDepthMap == 19)
 		{
-		float cF = 0.00125;
-		float cN = 0.500;
+		float cF = 0.002;
+		float cN = 0;
 		depthL = (cF) / (cF - depthL * ((1 - cN) / (cF - cN * depthL)) * (cF - 1));
 		}
 		
@@ -430,8 +430,41 @@ float SbSdepth (float2 texcoord)
 
     float4 DL =  depthL;
 
+	if(!AltRender)
+	{
+		if (EyeSwap)
+		{
+		color.r = texcoord.x < 0.5 ? 1 - DL.r : 0;
+		}
+		else
+		{
+		color.r = texcoord.x < 0.5 ?  DL.r : 0;
+		}
+	}
+	else
+	{
+		if (EyeSwap)
+		{
+		color.r = texcoord.x < 0.5 ? DL.r : 0;
+		}
+		else
+		{
+		color.r = texcoord.x < 0.5 ? 1 - DL.r : 0;
+		}
+	}
+	return color.r;	
+	}
 
-	float4 depthR = ReShade::GetLinearizedDepth(float2((texcoord.x*2-1), texcoord.y));
+//Right Eye Depth Map Information	
+float SbSdepthR (float2 texcoord) 	
+{
+
+	 float4 color = tex2D(SamplerCC, texcoord);
+
+			if (DepthFlip)
+			texcoord.y =  1 - texcoord.y;
+	
+	float4 depthR = ReShade::GetLinearizedDepth(float2(texcoord.x*2-1, texcoord.y));
 		
 	if (CustomDM == 0)
 	{		
@@ -541,9 +574,9 @@ float SbSdepth (float2 texcoord)
 		//Fallout 4
 		if (AltDepthMap == 13)
 		{
-		float cN = -0.025;
-		float cF  = 1.025;
-		depthR = 1 - (1 - cF) / (cN - cF * depthR); 
+		float cF = 25;
+		float cN = 1;
+		depthR = (-0+(pow(abs(depthR),cN))*cF);
 		}
 		
 		//Magicka 2
@@ -593,9 +626,9 @@ float SbSdepth (float2 texcoord)
 		//CoD: Ghost
 		if (AltDepthMap == 19)
 		{
-		float cF = 0.005;
-		float cN = 0.500;
-		depthR = (cF) / (cF - depthR * ((1 - cN) / (cF - cN * depthR)) * (cF - 1));
+		float cF  = 0.00001;
+		float cN = 0;
+		depthR = (cF * 1/depthR + cN);
 		}
 		
 		//Metro Redux Games | Borderlands 2
@@ -726,41 +759,51 @@ float SbSdepth (float2 texcoord)
 	{
 		if (EyeSwap)
 		{
-		color.r = texcoord.x < 0.5 ? 1 - DL.r : 1 - DR.r;
+		color.r = texcoord.x < 0.5 ? 1 - 0 : 1 - DR.r;
 		}
 		else
 		{
-		color.r = texcoord.x < 0.5 ?  DL.r : DR.r;
+		color.r = texcoord.x < 0.5 ?  0 : DR.r;
 		}
 	}
 	else
 	{
 		if (EyeSwap)
 		{
-		color.r = texcoord.x < 0.5 ? DL.r : DR.r;
+		color.r = texcoord.x < 0.5 ? 0 : DR.r;
 		}
 		else
 		{
-		color.r = texcoord.x < 0.5 ? 1 - DL.r : 1 - DR.r;
+		color.r = texcoord.x < 0.5 ? 0 : 1 - DR.r;
 		}
 	}
 	return color.r;	
 	}
 
+/////////////////////////////////////////L/R/DepthMap Pos//////////////////////////////////////////////////////////
 	void  PS_calcLR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float3 color : SV_Target)
+	{
+		if(!AltRender)
 	{
 	float NegDepth = -Depth;
 	float LeftDepth = Depth/2+WA;
 	float RightDepth = Depth/2+WA;
-
-	color.r = texcoord.x-NegDepth*pix.x*SbSdepth(float2(texcoord.x+RightDepth*pix.x,texcoord.y));
-	color.gb = texcoord.x-Depth*pix.x*SbSdepth(float2(texcoord.x-LeftDepth*pix.x,texcoord.y));
+	color.r =  texcoord.x-NegDepth*pix.x*SbSdepthR(float2(texcoord.x+RightDepth*pix.x,texcoord.y));
+	color.gb =  texcoord.x-Depth*pix.x*SbSdepthL(float2(texcoord.x-LeftDepth*pix.x,texcoord.y));
+	}
+	else
+	{
+	float NegDepth = -Depth;
+	float LeftDepth = Depth/2+WA;
+	float RightDepth = Depth/2+WA;
+	color.r =  texcoord.x-NegDepth*pix.x*SbSdepthL(float2(texcoord.x+RightDepth*pix.x,texcoord.y));
+	color.gb =  texcoord.x-Depth*pix.x*SbSdepthR(float2(texcoord.x-LeftDepth*pix.x,texcoord.y));
+	}
 	}
 
-/////////////////////////////////////////L/R//////////////////////////////////////////////////////////////////////
-
-	void PS_renderL(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float3 color : SV_Target)
-	{
+////////////////////////////////////////////////Left Eye////////////////////////////////////////////////////////
+void PS_renderL(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float3 color : SV_Target)
+{
 		if(!AltRender)
 		{
 		color.rgb = tex2D(ReShade::BackBuffer, float2(texcoord.x*2, texcoord.y)).rgb;
@@ -820,11 +863,11 @@ float SbSdepth (float2 texcoord)
 			else if (Depth == 25)
 				x = 25;
 			//Workaround for DX9 Games
-
+		//Left
 		[unroll]
 		for (int j = 0; j <= x; j++) 
 		{
-			if (tex2D(SamplerCC, float2(texcoord.x*2+j*pix.x,texcoord.y)).b >= texcoord.x-pix.x && tex2D(SamplerCC, float2(texcoord.x+j*pix.x,texcoord.y)).b < texcoord.x+pix.x) 
+			if (tex2D(SamplerCC, float2(texcoord.x*2+j*pix.x,texcoord.y)).b >= texcoord.x-pix.x && tex2D(SamplerCC, float2(texcoord.x+j*pix.x,texcoord.y)).b <= texcoord.x+pix.x) 
 			{
 			
 			float DP = 1;
@@ -905,11 +948,11 @@ float SbSdepth (float2 texcoord)
 			else if (Depth == 25)
 				x = 25;
 			//Workaround for DX9 Games
-
+		//AltRight
 		[unroll]
 		for (int j = 0; j <= x; j++) 
 		{
-			if (tex2D(SamplerCC, float2(texcoord.x*2+j*pix.x,texcoord.y)).b >= texcoord.x-pix.x && tex2D(SamplerCC, float2(texcoord.x+j*pix.x,texcoord.y)).b < texcoord.x+pix.x) 
+			if (tex2D(SamplerCC, float2((texcoord.x > 0.5)+j*pix.x,texcoord.y)).b >= texcoord.x-pix.x && tex2D(SamplerCC, float2(texcoord.x+j*pix.x,texcoord.y)).b <= texcoord.x+pix.x) 
 			{
 			
 			float DP = 1;
@@ -927,12 +970,14 @@ float SbSdepth (float2 texcoord)
 			else if (DepthP == 5)
 				DP = 0.50;
 				
-				color.rgb = tex2D(ReShade::BackBuffer, float2(texcoord.x*2-1+j*pix.x/DP,texcoord.y)).rgb;
+				color.rgb =  tex2D(ReShade::BackBuffer, float2(texcoord.x*2-1+j*pix.x/DP,texcoord.y)).rgb;
 			}
 		}
 	}
 }
 
+
+//////////////////////////////////////////Right Eye/////////////////////////////////////////////////////////////
 void PS_renderR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float3 color : SV_Target)
 {
 		if(!AltRender)
@@ -994,11 +1039,11 @@ void PS_renderR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0
 			else if (Depth == 25)
 				x = 25;
 			//Workaround for DX9 Games
-
+		//Right
 		[unroll]
 	for (int j = 0; j >= -x; --j) 
 	{
-			if (tex2D(SamplerCC, float2(texcoord.x*2-j*pix.x,texcoord.y)).r >= texcoord.x-pix.x && tex2D(SamplerCC, float2(texcoord.x+j*pix.x,texcoord.y)).r > texcoord.x+pix.x) 
+			if (tex2D(SamplerCC, float2((texcoord.x > 0.5)-j*pix.x,texcoord.y)).r >= texcoord.x-pix.x && tex2D(SamplerCC, float2(texcoord.x+j*pix.x,texcoord.y)).r >= texcoord.x+pix.x) 
 			{
 			
 			float DP = 1;
@@ -1079,11 +1124,11 @@ void PS_renderR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0
 			else if (Depth == 25)
 				x = 25;
 			//Workaround for DX9 Games
-
+		//AltLeft
 		[unroll]
 	for (int j = 0; j >= -x; --j) 
 	{
-			if (tex2D(SamplerCC, float2(texcoord.x*2-j*pix.x,texcoord.y)).r >= texcoord.x-pix.x && tex2D(SamplerCC, float2(texcoord.x+j*pix.x,texcoord.y)).r > texcoord.x+pix.x) 
+			if (tex2D(SamplerCC, float2(texcoord.x*2-j*pix.x,texcoord.y)).r >= texcoord.x-pix.x && tex2D(SamplerCC, float2(texcoord.x+j*pix.x,texcoord.y)).r >= texcoord.x+pix.x) 
 			{
 			
 			float DP = 1;
@@ -1115,8 +1160,7 @@ void PS0(float4 pos : SV_Position, float2 texcoord : TEXCOORD0, out float3 color
 		}
 		else
 		{
-		float DivDepth = Depth/-2+Perspective;	
-		color = texcoord.x < 0.5 ? tex2D(SamplerCR, float2(texcoord.x - DivDepth * pix.x, texcoord.y)).rgb : tex2D(SamplerCL, float2(texcoord.x + DivDepth * pix.x, texcoord.y)).rgb;
+		color = texcoord.x > 0.5 ? tex2D(SamplerCL, float2(texcoord.x - Perspective * pix.x, texcoord.y)).rgb : tex2D(SamplerCR, float2(texcoord.x + Perspective * pix.x, texcoord.y)).rgb;
 		}
 }
 
@@ -1241,9 +1285,9 @@ float4 PS(float4 pos : SV_Position, float2 texcoord : TEXCOORD0) : SV_Target
 		//Fallout 4
 		if (AltDepthMap == 13)
 		{
-		float cN = -0.025;
-		float cF  = 1.025;
-		depthM = 1 - (1 - cF) / (cN - cF * depthM); 
+		float cF = 25;
+		float cN = 1;
+		depthM = (-0+(pow(abs(depthM),cN))*cF);
 		}
 		
 		//Magicka 2
@@ -1293,10 +1337,9 @@ float4 PS(float4 pos : SV_Position, float2 texcoord : TEXCOORD0) : SV_Target
 		//CoD: Ghost
 		if (AltDepthMap == 19)
 		{
-		float cF = 0.000015;
-		float cM = 0;
-		float cN = 1.0;
-		depthM = (1 * cF / (cF + (pow(abs(depthM+cM),cN)) * (1 - cF)));
+		float cF  = 0.00001;
+		float cN = 0;
+		depthM = (cF * 1/depthM + cN);
 		}
 		
 		//Metro Redux Games | Borderlands 2
@@ -1410,7 +1453,7 @@ float4 PS(float4 pos : SV_Position, float2 texcoord : TEXCOORD0) : SV_Target
 		{
 		float cF = Far;
 		float cN = Near;
-		depthM = (cN - depthM * cN) + (depthM*cF);
+		depthM = (cN - depthM * cN) + (depthM * cF);
 		}
 		
 		//Custom Six -
@@ -1418,7 +1461,7 @@ float4 PS(float4 pos : SV_Position, float2 texcoord : TEXCOORD0) : SV_Target
 		{
 		float cF = Far;
 		float cN = Near;
-		depthM = 1 - (cN - depthM * cN) + (depthM*cF);
+		depthM = 1 - (cN - depthM * cN) + (depthM * cF);
 		}
 	}
 	

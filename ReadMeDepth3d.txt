@@ -32,7 +32,7 @@ Dragon Ball Xenoverse			DM 16
 *Dragons Dogma: Dark Arisen		DM 15
 DreamFall Chapters			DM 18		     DF On
 Dying Light				DM 11
-*Fallout 4				DM 13
+*Fallout 4*				DM 13
 Firewatch				DM 1		     DF On
 GTA V					DM 11					RB
 Hard Reset				DM 8					RB
