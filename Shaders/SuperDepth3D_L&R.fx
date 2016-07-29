@@ -24,7 +24,7 @@
  
 uniform int AltDepthMap <
 	ui_type = "combo";
-	ui_items = "Depth Map 0\0Depth Map 1\0Depth Map 2\0Depth Map 3\0Depth Map 4\0Depth Map 5\0Depth Map 6\0Depth Map 7\0Depth Map 8\0Depth Map 9\0Depth Map 10\0Depth Map 11\0Depth Map 12\0Depth Map 13\0Depth Map 14\0Depth Map 15\0Depth Map 16\0Depth Map 17\0Depth Map 18\0Depth Map 19\0Depth Map 20\0Depth Map 21\0Depth Map 22\0Depth Map 23\0";
+	ui_items = "Depth Map 0\0Depth Map 1\0Depth Map 2\0Depth Map 3\0Depth Map 4\0Depth Map 5\0Depth Map 6\0Depth Map 7\0Depth Map 8\0Depth Map 9\0Depth Map 10\0Depth Map 11\0Depth Map 12\0Depth Map 13\0Depth Map 14\0Depth Map 15\0Depth Map 16\0Depth Map 17\0Depth Map 18\0Depth Map 19\0Depth Map 20\0Depth Map 21\0Depth Map 22\0Depth Map 23\0Depth Map 24\0";
 	ui_label = "Alternate Depth Map";
 	ui_tooltip = "Alternate Depth Map for different Games. Read the ReadMeDepth3d.txt, for setting. Each game May and can use a diffrent AltDepthMap.";
 > = 0;
@@ -291,13 +291,12 @@ float SbSdepthL (float2 texcoord)
 		depthL = 1 - (1 - cF) / (cN - cF * depthL); 
 		}
 		
-		//Dragon Ball Xeno
+		//Among The Sleep
 		if (AltDepthMap == 16)
 		{
-		float cF = 0.010;
-		float cM = 0;
+		float cF = 10;
 		float cN = 0;
-		depthL = 1 - (1 * cF / (cF + depthL * (depthL+cM) * (1 - cF))) / (pow(abs(depthL),cN));
+		depthL = (cN - depthL * cN) + (depthL*cF);
 		}
 		
 		//Return to Castle Wolfensitne
@@ -354,6 +353,14 @@ float SbSdepthL (float2 texcoord)
 		if (AltDepthMap == 23)
 		{
 		float cF = 4;
+		float cN = 0;
+		depthL = (cN - depthL * cN) + (depthL*cF);
+		}
+		
+		//Dragon Ball Xeno
+		if (AltDepthMap == 24)
+		{
+		float cF = 1.125;
 		float cN = 0;
 		depthL = (cN - depthL * cN) + (depthL*cF);
 		}
@@ -624,13 +631,12 @@ float SbSdepthR (float2 texcoord)
 		depthR = 1 - (1 - cF) / (cN - cF * depthR); 
 		}
 
-		//Dragon Ball Xeno
+		//Among The Sleep
 		if (AltDepthMap == 16)
 		{
-		float cF = 0.010;
-		float cM = 0;
-		float cN = 0;
-		depthR = 1 - (1 * cF / (cF + depthR * (depthR+cM) * (1 - cF))) / (pow(abs(depthR),cN));
+		float cF = 1.0;
+		float cN = 0.010;
+		depthR = 1 - log(depthR/cF)/log(cN/cF);
 		}
 		
 		//Return to Castle Wolfensitne
@@ -688,6 +694,14 @@ float SbSdepthR (float2 texcoord)
 		float cF = 20;
 		float cN = 0;
 		depthR = (cN - depthR * cN) + (depthR*cF);
+		}
+		
+		//Dragon Ball Xeno
+		if (AltDepthMap == 24)
+		{
+		float cF = 0.350;
+		float cN = 0;
+		depthR = 1 - (cF) / (cF - depthR * ((1 - cN) / (cF - cN * depthR)) * (cF - 1));
 		}
 	}
 	else
@@ -1343,13 +1357,12 @@ float4 PS(float4 pos : SV_Position, float2 texcoord : TEXCOORD0) : SV_Target
 		depthM = 1 - (1 - cF) / (cN - cF * depthM); 
 		}
 		
-		//Dragon Ball Xeno
+		//Among The Sleep
 		if (AltDepthMap == 16)
 		{
-		float cF = 0.010;
-		float cM = 0;
-		float cN = 0;
-		depthM = 1 - (1 * cF / (cF + depthM * (depthM+cM) * (1 - cF))) / (pow(abs(depthM),cN));
+		float cF = 1.0;
+		float cN = 0.010;	
+		depthM = 1 - log(depthM/cF)/log(cN/cF);
 		}
 		
 		//Return to Castle Wolfensitne
@@ -1407,6 +1420,14 @@ float4 PS(float4 pos : SV_Position, float2 texcoord : TEXCOORD0) : SV_Target
 		float cF = 20;
 		float cN = 0;
 		depthM = (cN - depthM * cN) + (depthM * cF);
+		}
+		
+		//Dragon Ball Xeno
+		if (AltDepthMap == 24)
+		{
+		float cF = 0.350;
+		float cN = 0;
+		depthM = 1 - (cF) / (cF - depthM * ((1 - cN) / (cF - cN * depthM)) * (cF - 1));
 		}
 	
 	}

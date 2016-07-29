@@ -1,5 +1,5 @@
 ﻿#SuperDepth3D
-Depth Map Based 3D post-process shader v1.7 for Reshade 3.0
+Depth Map Based 3D post-process shader v1.7.1 for Reshade 3.0
 It also needs *ReShade.fxh* to work.
 
 There are the Basic Depth maps you can use for your games listed and not listed. Look at this link for other game Compatibility.
@@ -16,7 +16,7 @@ PLEASE SET YOUR RESOLUTION FIRST. Turn Off DOF in all games if possible. Unless 
 [Game List]			[Alternet Depth Map]	[Depth Flip On]	[Read Below] [Alternate Render]
 *Alien Isolation*			DM 23
 *Amnesia: The Dark Descent*		DM 22
-Among The Sleep				DM 16		     DF On
+*Among The Sleep*			DM 16		     DF On				AR
 Assassin Creed Unity			DM 9
 Batman Arkham Knight			DM 1
 Batman Arkham Origins			DM 1
@@ -26,9 +26,9 @@ Batman: Arkham City			DM 2
 *Call of Duty: Black Ops 2*		DM 19					RB		AR
 *Call of Duty: Ghost*			DM 19					RB		AR
 *Casltevania: Lord of Shadows - UE	DM 7
-*Condemned: Criminal Origins*		DM 22					RB
+*Condemned: Criminal Origins*		DM 22					RB		AR
 Deadly Premonition: The Directors's Cut	DM 10					RB	
-Dragon Ball Xenoverse			DM 16
+*Dragon Ball Xenoverse*			DM 24							AR							
 *Dragons Dogma: Dark Arisen		DM 15
 DreamFall Chapters			DM 18		     DF On
 Dying Light				DM 11
