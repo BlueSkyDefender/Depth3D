@@ -173,8 +173,9 @@ float SbSdepthL (float2 texcoord)
 		//Batman Games
 		if (AltDepthMap == 1)
 		{
-		float LinLog = 0.05;
-		depthL = 1 - (LinLog) / (LinLog - depthL / 62.5 *  (LinLog -  1)) + (pow(abs(depthL*3),0.25)-0.25);
+		float cF = 2;
+		float cN = 1;
+		depthL = (-0+(pow(abs(depthL),cN))*cF);
 		}
 		
 		//Batman: Arkham City
@@ -513,8 +514,9 @@ float SbSdepthR (float2 texcoord)
 		//Batman Games
 		if (AltDepthMap == 1)
 		{
-		float LinLog = 0.05;
-		depthR = 1 - (LinLog) / (LinLog - depthR / 62.5 *  (LinLog -  1)) + (pow(abs(depthR*3),0.25)-0.25);
+		float cF = 5;
+		float cN = 0;
+		depthR = (cN - depthR * cN) + (depthR*cF);
 		}
 		
 		//Batman: Arkham City
@@ -1002,7 +1004,7 @@ void PS_renderL(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0
 		[unroll]
 		for (int j = 0; j <= x; j++) 
 		{
-			if (tex2D(SamplerCC, float2( (texcoord.x*2-1)-j*pix.x,texcoord.y)).b <= (texcoord.x*2-1)+pix.x && tex2D(SamplerCC, float2(texcoord.x+j*pix.x,texcoord.y)).b <= texcoord.x+pix.x) 
+			if (tex2D(SamplerCC, float2( (texcoord.x*2-1)-j*pix.x,texcoord.y)).b <= texcoord.x+pix.x && tex2D(SamplerCC, float2(texcoord.x+j*pix.x,texcoord.y)).b <= texcoord.x+pix.x) 
 			{
 			
 			float DP = 1;
@@ -1239,8 +1241,9 @@ float4 PS(float4 pos : SV_Position, float2 texcoord : TEXCOORD0) : SV_Target
 		//Batman Games
 		if (AltDepthMap == 1)
 		{
-		float LinLog = 0.05;
-		depthM = 1 - (LinLog) / (LinLog - depthM / 62.5 *  (LinLog -  1)) + (pow(abs(depthM*3),0.25)-0.25);
+		float cF = 5;
+		float cN = 0;
+		depthM = (cN - depthM * cN) + (depthM * cF);
 		}
 		
 		//Batman: Arkham City

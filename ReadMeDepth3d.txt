@@ -18,9 +18,9 @@ PLEASE SET YOUR RESOLUTION FIRST. Turn Off DOF in all games if possible. Unless 
 *Amnesia: The Dark Descent*		DM 22
 *Among The Sleep*			DM 16		     DF On				AR
 Assassin Creed Unity			DM 9
-Batman Arkham Knight			DM 1
-Batman Arkham Origins			DM 1
-Batman: Arkham City			DM 2
+*Batman Arkham Knight*			DM 1							AR
+*Batman Arkham Origins*			DM 1							AR
+*Batman: Arkham City*			DM 1							AR
 *BorderLands 2*				DM 20					RB
 *Call of Duty: Advance Warfare*		DM 5					RB		AR
 *Call of Duty: Black Ops 2*		DM 19					RB		AR
