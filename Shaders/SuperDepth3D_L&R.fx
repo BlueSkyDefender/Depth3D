@@ -236,10 +236,9 @@ float SbSdepthL (float2 texcoord)
 		//Assassin's Creed Unity
 		if (AltDepthMap == 9)
 		{
-		float cF = 0.00000000015;
-		float cM = 0.00001;
-		float cN = 0.0001;
-		depthL = (1 * cF / (cF + depthL * (depthL+cM) * (1 - cF))) / (pow(abs(depthL),cN));
+		float cF = 150;
+		float cN = 0.4;
+		depthL = 1-(-0+(pow(abs(depthL),cN))*cF);
 		}
 
 		// Skyrim | Deadly Premonition: The Directors's Cut | Alien Isolation
@@ -577,10 +576,9 @@ float SbSdepthR (float2 texcoord)
 		//Assassin's Creed Unity
 		if (AltDepthMap == 9)
 		{
-		float cF = 0.00000000015;
-		float cM = 0.00001;
-		float cN = 0.0001;
-		depthR = (1 * cF / (cF + depthR * (depthR+cM) * (1 - cF))) / (pow(abs(depthR),cN));
+		float cF = 25000;
+		float cN = 1;
+		depthR = 1-(-0+(pow(abs(depthR),cN))*cF);
 		}
 
 		// Skyrim | Deadly Premonition: The Directors's Cut | Alien Isolation
@@ -1212,7 +1210,7 @@ void PS0(float4 pos : SV_Position, float2 texcoord : TEXCOORD0, out float3 color
 		}
 		else
 		{
-		float AltPerspective = round(Depth/2)+Perspective;
+		float AltPerspective = round(Depth/1.5)+Perspective;
 		color = texcoord.x > 0.5 ? tex2D(SamplerCL, float2(texcoord.x - AltPerspective * pix.x, texcoord.y)).rgb : tex2D(SamplerCR, float2(texcoord.x + AltPerspective * pix.x, texcoord.y)).rgb;
 		}
 }
@@ -1304,10 +1302,9 @@ float4 PS(float4 pos : SV_Position, float2 texcoord : TEXCOORD0) : SV_Target
 		//Assassin Creed Unity
 		if (AltDepthMap == 9)
 		{
-		float cF = 0.00000000015;
-		float cM = 0.00001;
-		float cN = 0.0001;
-		depthM = (1 * cF / (cF + depthM * (depthM+cM) * (1 - cF))) / (pow(abs(depthM),cN));	
+		float cF = 25000;
+		float cN = 1;
+		depthM = 1-(-0+(pow(abs(depthM),cN))*cF);
 		}
 		
 		//Magicka 2 | Skyrim | Deadly Premonition: The Directors's Cut| Alien Isolation

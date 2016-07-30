@@ -17,7 +17,7 @@ PLEASE SET YOUR RESOLUTION FIRST. Turn Off DOF in all games if possible. Unless 
 *Alien Isolation*			DM 23
 *Amnesia: The Dark Descent*		DM 22
 *Among The Sleep*			DM 16		     DF On				AR
-Assassin Creed Unity			DM 9
+*Assassin Creed Unity*			DM 9							AR
 *Batman Arkham Knight*			DM 1							AR
 *Batman Arkham Origins*			DM 1							AR
 *Batman: Arkham City*			DM 1							AR
