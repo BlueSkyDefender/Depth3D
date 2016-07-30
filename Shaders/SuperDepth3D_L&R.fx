@@ -178,12 +178,12 @@ float SbSdepthL (float2 texcoord)
 		depthL = (-0+(pow(abs(depthL),cN))*cF);
 		}
 		
-		//Batman: Arkham City
+		//Quake 2 XP
 		if (AltDepthMap == 2)
 		{
-		float zF = 1;
-		float zN = 0.001;
-		depthL = 1 - (zF * zN / (zN + depthL * depthL * (zF - zN)));
+		float cF = 2.5;
+		float cN = 0;
+		depthL = (cN - depthL * cN) + (depthL*cF);
 		}
 		
 		//The Evil Within
@@ -519,12 +519,12 @@ float SbSdepthR (float2 texcoord)
 		depthR = (cN - depthR * cN) + (depthR*cF);
 		}
 		
-		//Batman: Arkham City
+		//Quake 2 XP
 		if (AltDepthMap == 2)
 		{
-		float zF = 1;
-		float zN = 0.001;
-		depthR = 1 - (zF * zN / (zN + depthR * depthR * (zF - zN)));
+		float cF  = 0.01;
+		float cN = 0;
+		depthR = 1 - (cF * 1/depthR + cN);
 		}
 		
 		//The Evil Within
@@ -1095,7 +1095,7 @@ void PS_renderR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0
 		[unroll]
 	for (int j = 0; j >= -x; --j) 
 	{
-			if (tex2D(SamplerCC, float2((texcoord.x*2-1)-j*pix.x,texcoord.y)).r >= (texcoord.x*2-1)-pix.x && tex2D(SamplerCC, float2(texcoord.x+j*pix.x,texcoord.y)).r >= texcoord.x+pix.x) 
+			if (tex2D(SamplerCC, float2((texcoord.x*2-1)-j*pix.x,texcoord.y)).r >= texcoord.x-pix.x && tex2D(SamplerCC, float2(texcoord.x+j*pix.x,texcoord.y)).r >= texcoord.x+pix.x) 
 			{
 			
 			float DP = 1;
@@ -1246,12 +1246,12 @@ float4 PS(float4 pos : SV_Position, float2 texcoord : TEXCOORD0) : SV_Target
 		depthM = (cN - depthM * cN) + (depthM * cF);
 		}
 		
-		//Batman: Arkham City
+		////Quake 2 XP
 		if (AltDepthMap == 2)
 		{
-		float zF = 1;
-		float zN = 0.001;
-		depthM = 1 - (zF * zN / (zN + depthM * depthM * (zF - zN)));
+		float cF  = 0.01;
+		float cN = 0;
+		depthM = 1 - (cF * 1/depthM + cN);
 		}
 		
 		//The Evil Within
