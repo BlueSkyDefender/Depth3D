@@ -3,7 +3,7 @@
  //---------------////
 
  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
- //* Barrel Shader v0.1																																								*//
+ //* Barrel Shader v0.2																																								*//
  //* For ReShade 3.0																																								*//
  //* --------------------------																																						*//
  //* This work is licensed under a Creative Commons Attribution 3.0 Unported License.																								*//
@@ -47,8 +47,17 @@ uniform float KCube <
 	ui_tooltip = "Cubic distortion value.";
 > = 0.5;
 
+uniform float Hsquish <
+	ui_type = "drag";
+	ui_min = 1; ui_max = 1.5;
+	ui_label = "Horizontal Squish";
+	ui_tooltip = "Horizontal squish cubic distortion value.";
+> = 1;
+
 /////////////////////////////////////////////Barrel Shader Starts Here/////////////////////////////////////////////////////////////////
 #include "ReShade.fxh"
+
+#define pix float2(BUFFER_RCP_WIDTH, BUFFER_RCP_HEIGHT)
 
 sampler BorderSampler
 {
@@ -80,7 +89,9 @@ float3 BD(float2 texcoord)
 
 void  BarrelDistortion(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float3 color : SV_Target)
 {
-	color.rgb = BD(texcoord.xy);
+	float pos = Hsquish-1;
+	float mid = pos*1000*pix.y;
+	color.rgb = BD(float2(texcoord.x,(texcoord.y*Hsquish)-mid));
 }
 
 //*Rendering passes*//

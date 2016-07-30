@@ -42,6 +42,7 @@ Magicka 2				DM 14					RB
 *Metro Last Light Redux*		DM 20					RB
 Middle-earth: Shadow of Mordor		DM 12					RB
 *Naruto Shippuden UNS3 Full Blurst	DM 0					RB
+*Quake 2 XP*				DM 2							AR
 Quake 4					DM 17
 Rage64					DM 8					RB
 Return To Castle Wolfenstine		DM 17					RB
