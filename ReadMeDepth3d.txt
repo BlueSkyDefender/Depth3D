@@ -47,7 +47,7 @@ Quake 4					DM 17
 Rage64					DM 8					RB
 Return To Castle Wolfenstine		DM 17					RB
 *Shadow warrior(2013)*			DM 7					RB
-Skyrim					DM 10
+*Skyrim*				DM 10							AR
 Sleeping Dogs: DE			DM 4
 *Souls Games*				DM 21
 *The Evil Within*			DM 3					RB
@@ -65,7 +65,7 @@ Shift + f2 for Reshade 3.0 menu
 
 * Alternate Depth Map	[Depth Map 0 ▼]		[0|1|2|3|4|5|6|7|9|10|11|12|13|14|15|16|17|18|19|20|21|22] Alternate Depth Map for different Games. 
 * Depth		       -[◄0▪▪▪▪▪▪▪25►]+		[0:25] Depth Default is 25. "Drag to Adjust Perspective."
-* Perspective	       -[◄▪▪▪▪0▪▪▪▪▪►]+		[-25:25] Perspective Default is 0. "Drag to Adjust Perspective."
+* Perspective	       -[◄▪▪▪▪0▪▪▪▪▪►]+		[-50:50] Perspective Default is 0. "Drag to Adjust Perspective."
 * Warp Adjust	       -[◄▪▪▪▪0▪▪▪▪▪►]+		[-25:25] Warp Adjust Default is 0. "Adjust the warp in the Left and Right eye."
 * Depth Plus		[Depth Plus Off ▼]	[Depth +|Depth ++|Depth +++|Depth ++++|Depth +++++] "Adjust Distortion and Depth for Left and Right eye."	
 * Depth Flip	 	[Off ▼]			Depth Flip if Upside Down.
@@ -164,6 +164,7 @@ seta r_fullscreen "1"
 seta r_mode "-1"
 
 {Skyrim V}
+Antialiasing Must be set too 2 Samples or more in the Options.
 Open your SkyrimPrefs.ini. Usually it should be found under %USERPROFILE%\Documents\My Games\Skyrim
 Edit the indicated sections of the INI like so:
 
@@ -175,7 +176,6 @@ fSplitDistanceMult=4.0
 
 [MAIN]
 fSkyCellRefFadeDistance=600000.0000
-Save and exit
 
 [Display]
 bFloatPointRenderTarget=0
