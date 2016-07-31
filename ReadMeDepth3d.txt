@@ -164,8 +164,20 @@ seta r_fullscreen "1"
 seta r_mode "-1"
 
 {Skyrim V}
-Change the SkyrimPrefs.ini setting too.
+Open your SkyrimPrefs.ini. Usually it should be found under %USERPROFILE%\Documents\My Games\Skyrim
+Edit the indicated sections of the INI like so:
 
+[Terrainmanager]
+fBlockMaximumDistance=500000
+fBlockLevel1Distance=140000
+fBlockLevel0Distance=75000
+fSplitDistanceMult=4.0
+
+[MAIN]
+fSkyCellRefFadeDistance=600000.0000
+Save and exit
+
+[Display]
 bFloatPointRenderTarget=0
 bDeferredShadows=0
 

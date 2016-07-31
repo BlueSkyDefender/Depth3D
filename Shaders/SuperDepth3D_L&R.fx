@@ -121,21 +121,21 @@ texture texCC  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA32F;
 sampler SamplerCL
 	{
 		Texture = texCL;
-		MinFilter = LINEAR;
-		MagFilter = LINEAR;
-		MipFilter = LINEAR;
-		AddressU = Clamp;
-		AddressV = Clamp;
+		AddressU = Border; 
+		AddressV = Border;
+		MipFilter = Linear; 
+		MinFilter = Linear; 
+		MagFilter = Linear;
 	};
 	
 sampler SamplerCR
 	{
 		Texture = texCR;
-		MinFilter = LINEAR;
-		MagFilter = LINEAR;
-		MipFilter = LINEAR;
-		AddressU = Clamp;
-		AddressV = Clamp;
+		AddressU = Border; 
+		AddressV = Border;
+		MipFilter = Linear; 
+		MinFilter = Linear; 
+		MagFilter = Linear;
 	};
 	
 sampler2D SamplerCC
@@ -148,6 +148,16 @@ sampler2D SamplerCC
 		AddressV = Clamp;
 	};
 	
+sampler BorderSampler
+{
+	Texture = ReShade::BackBufferTex;
+	AddressU = Border; 
+	AddressV = Border;
+	MipFilter = Linear; 
+	MinFilter = Linear; 
+	MagFilter = Linear;
+	SRGBTexture = false;
+};
 	
 //Left Eye Depth Map Information
 float SbSdepthL (float2 texcoord) 
@@ -241,11 +251,12 @@ float SbSdepthL (float2 texcoord)
 		depthL = 1-(-0+(pow(abs(depthL),cN))*cF);
 		}
 
-		// Skyrim | Deadly Premonition: The Directors's Cut | Alien Isolation
+		// Skyrim | Deadly Premonition: The Directors's Cut
 		if (AltDepthMap == 10)
 		{
-		float LinLog = 0.1;
-		depthL = 1 - (LinLog) / (LinLog - depthL * depthL * (LinLog -  37.5));
+		float cF = 0.005;
+		float cN = 0.5;
+		depthL = log(depthL/cF)/log(cN/cF);
 		}
 		
 		//Dying Light
@@ -581,11 +592,12 @@ float SbSdepthR (float2 texcoord)
 		depthR = 1-(-0+(pow(abs(depthR),cN))*cF);
 		}
 
-		// Skyrim | Deadly Premonition: The Directors's Cut | Alien Isolation
+		// Skyrim | Deadly Premonition: The Directors's Cut
 		if (AltDepthMap == 10)
 		{
-		float LinLog = 0.1;
-		depthR = 1 - (LinLog) / (LinLog - depthR * depthR * (LinLog -  37.5));
+		float cF = 0.2;
+		float cN = 0;
+		depthR = 1 - (cF) / (cF - depthR * ((1 - cN) / (cF - cN * depthR)) * (cF - 1));
 		}
 		
 		//Dying Light
@@ -1093,7 +1105,7 @@ void PS_renderR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0
 		[unroll]
 	for (int j = 0; j >= -x; --j) 
 	{
-			if (tex2D(SamplerCC, float2((texcoord.x*2-1)-j*pix.x,texcoord.y)).r >= texcoord.x-pix.x && tex2D(SamplerCC, float2(texcoord.x+j*pix.x,texcoord.y)).r >= texcoord.x+pix.x) 
+			if (tex2D(SamplerCC, float2((texcoord.x*2-1)-j*pix.x,texcoord.y)).r <= texcoord.x+pix.x && tex2D(SamplerCC, float2(texcoord.x+j*pix.x,texcoord.y)).r >= texcoord.x+pix.x) 
 			{
 			
 			float DP = 1;
@@ -1202,6 +1214,27 @@ void PS_renderR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0
 	}
 }
 
+//////////////////////////////////////////////////////////Border/////////////////////////////////////////////////////////////////////
+
+float3 B(float2 texcoord)
+
+{
+	float3 Border = tex2D(BorderSampler,texcoord.xy).rgb;
+	return Border.rgb;
+}
+
+
+void  Border(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float3 color : SV_Target)
+{
+	float Ssquish = 1.001;
+	float pos = Ssquish-1;
+	float side = pos*2160*pix.x;
+	
+	
+	color.rgb = B(float2((texcoord.x*Ssquish)-side,texcoord.y));
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void PS0(float4 pos : SV_Position, float2 texcoord : TEXCOORD0, out float3 color : SV_Target)
 {
 	if(!AltRender)
@@ -1307,11 +1340,12 @@ float4 PS(float4 pos : SV_Position, float2 texcoord : TEXCOORD0) : SV_Target
 		depthM = 1-(-0+(pow(abs(depthM),cN))*cF);
 		}
 		
-		//Magicka 2 | Skyrim | Deadly Premonition: The Directors's Cut| Alien Isolation
+		//Skyrim | Deadly Premonition: The Directors's Cut
 		if (AltDepthMap == 10)
 		{
-		float LinLog = 0.1;
-		depthM = 1 - (LinLog) / (LinLog - depthM * depthM * (LinLog -  37.5));
+		float cF = 0.2;
+		float cN = 0;
+		depthM = 1 - (cF) / (cF - depthM * ((1 - cN) / (cF - cN * depthM)) * (cF - 1));
 		}
 		
 		//Dying Light
@@ -1543,8 +1577,12 @@ float4 PS(float4 pos : SV_Position, float2 texcoord : TEXCOORD0) : SV_Target
 
 technique Super_Depth3D
 	{
+		pass
+		{
+		VertexShader = PostProcessVS;
+		PixelShader = Border;
+		}
 			pass
-
 		{
 			VertexShader = PostProcessVS;
 			PixelShader = PS_calcLR;
