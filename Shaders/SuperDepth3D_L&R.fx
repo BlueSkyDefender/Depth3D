@@ -23,10 +23,9 @@
  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 uniform bool AltRender <
-	ui_items = "Off\0ON\0";
 	ui_label = "Alternate Render";
 	ui_tooltip = "Alternate Render Mode is a different way of warping the screen.";
-> = false; 
+> = true; 
  
 uniform int AltDepthMap <
 	ui_type = "combo";
@@ -37,7 +36,7 @@ uniform int AltDepthMap <
 
 uniform int Depth <
 	ui_type = "drag";
-	ui_min = 0; ui_max = 20;
+	ui_min = 0; ui_max = 25;
 	ui_label = "Depth Slider";
 	ui_tooltip = "Determines the amount of Image Warping and Separation between both eyes.";
 > = 10;
@@ -57,7 +56,6 @@ uniform int WA <
 > = 0;
 
 uniform bool DepthFlip <
-	ui_items = "Off\0ON\0";
 	ui_label = "Depth Flip";
 	ui_tooltip = "Depth Flip if the depth map is Upside Down.";
 > = false;
@@ -70,7 +68,6 @@ uniform int CustomDM <
 > = 0;
 
 uniform bool DepthMap <
-	ui_items = "Off\0ON\0";
 	ui_label = "Depth Map View";
 	ui_tooltip = "Display the Depth Map. Use This to Work on your Own Depth Map for your game.";
 > = false;
@@ -90,7 +87,6 @@ uniform float Far <
 > = 1.5;
 
 uniform bool BD <
-	ui_items = "Off\0ON\0";
 	ui_label = "Barrel Distortion";
 	ui_tooltip = "Barrel Distortion for HMD type Displays.";
 > = false;
@@ -117,7 +113,6 @@ uniform float KCube <
 > = 0.5;
 
 uniform bool EyeSwap <
-	ui_items = "Off\0ON\0";
 	ui_label = "Eye Swap";
 	ui_tooltip = "Swap Left/Right to Right/Left and ViceVersa.";
 > = false;
@@ -846,7 +841,7 @@ float SbSdepthR (float2 texcoord)
 	}
 	return color.r;	
 	}
-
+	
 /////////////////////////////////////////L/R/DepthMap Pos//////////////////////////////////////////////////////////
 	void  PS_calcLR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float3 color : SV_Target)
 	{
@@ -874,57 +869,13 @@ void PS_renderL(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0
 		if(!AltRender)
 		{
 		color.rgb = tex2D(ReShade::BackBuffer, float2(texcoord.x, texcoord.y)).rgb;
-			
-			//Workaround for DX9 Games
-			int x = 10;	
-			if (Depth == 0)		
-				x = 0;
-			else if (Depth == 1)	
-				x = 1;
-			else if (Depth == 2)
-				x = 2;
-			else if (Depth == 3)
-				x = 3;
-			else if (Depth == 4)
-				x = 4;
-			else if (Depth == 5)
-				x = 5;
-			else if (Depth == 6)
-				x = 6;
-			else if (Depth == 7)
-				x = 7;
-			else if (Depth == 8)
-				x = 8;
-			else if (Depth == 9)
-				x = 9;
-			else if (Depth == 10)
-				x = 10;
-			else if (Depth == 11)
-				x = 11;
-			else if (Depth == 12)
-				x = 12;
-			else if (Depth == 13)
-				x = 13;
-			else if (Depth == 14)
-				x = 14;
-			else if (Depth == 15)
-				x = 15;
-			else if (Depth == 16)
-				x = 16;
-			else if (Depth == 17)
-				x = 17;
-			else if (Depth == 18)
-				x = 18;
-			else if (Depth == 19)
-				x = 19;			
-			else if (Depth == 20)
-				x = 20;		
-			//Workaround for DX9 Games
+
 		//Left
-		[unroll]
+		int x = 20 % 1023;
+		[loop]
 		for (int j = 0; j <= x; j++) 
 		{
-			if (tex2D(SamplerCC, float2(texcoord.x-j*pix.x,texcoord.y)).b <= texcoord.x-pix.x && tex2D(SamplerCC, float2(texcoord.x+j*pix.x,texcoord.y)).b <= texcoord.x+pix.x) 
+			if (tex2D(SamplerCC, float2(texcoord.x-j*pix.x,texcoord.y)).b <= texcoord.x-pix.x && tex2D(SamplerCC, float2(texcoord.x+j*pix.x,texcoord.y)).b <= texcoord.x+pix.x ) 
 			{	
 				color.rgb = tex2D(ReShade::BackBuffer, float2(texcoord.x+j*pix.x,texcoord.y)).rgb;
 			}
@@ -934,53 +885,9 @@ void PS_renderL(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0
 	{
 			color.rgb = tex2D(ReShade::BackBuffer, float2(texcoord.x, texcoord.y)).rgb;
 			
-			//Workaround for DX9 Games
-			int x = 10;	
-			if (Depth == 0)		
-				x = 0;
-			else if (Depth == 1)	
-				x = 1;
-			else if (Depth == 2)
-				x = 2;
-			else if (Depth == 3)
-				x = 3;
-			else if (Depth == 4)
-				x = 4;
-			else if (Depth == 5)
-				x = 5;
-			else if (Depth == 6)
-				x = 6;
-			else if (Depth == 7)
-				x = 7;
-			else if (Depth == 8)
-				x = 8;
-			else if (Depth == 9)
-				x = 9;
-			else if (Depth == 10)
-				x = 10;
-			else if (Depth == 11)
-				x = 11;
-			else if (Depth == 12)
-				x = 12;
-			else if (Depth == 13)
-				x = 13;
-			else if (Depth == 14)
-				x = 14;
-			else if (Depth == 15)
-				x = 15;
-			else if (Depth == 16)
-				x = 16;
-			else if (Depth == 17)
-				x = 17;
-			else if (Depth == 18)
-				x = 18;
-			else if (Depth == 19)
-				x = 19;			
-			else if (Depth == 20)
-				x = 20;			
-			//Workaround for DX9 Games
 		//AltRight
-		[unroll]
+		int x = 20 % 1023;
+		[loop]
 		for (int j = 0; j <= x; j++) 
 		{
 			if (tex2D(SamplerCC, float2(texcoord.x-j*pix.x,texcoord.y)).b <= texcoord.x+pix.x && tex2D(SamplerCC, float2(texcoord.x+j*pix.x,texcoord.y)).b <= texcoord.x+pix.x) 
@@ -998,54 +905,10 @@ void PS_renderR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0
 		if(!AltRender)
 		{
 		color.rgb = tex2D(ReShade::BackBuffer, float2(texcoord.x, texcoord.y)).rgb;
-
-			//Workaround for DX9 Games
-			int x = 10;	
-			if (Depth == 0)		
-				x = 0;
-			else if (Depth == 1)	
-				x = 1;
-			else if (Depth == 2)
-				x = 2;
-			else if (Depth == 3)
-				x = 3;
-			else if (Depth == 4)
-				x = 4;
-			else if (Depth == 5)
-				x = 5;
-			else if (Depth == 6)
-				x = 6;
-			else if (Depth == 7)
-				x = 7;
-			else if (Depth == 8)
-				x = 8;
-			else if (Depth == 9)
-				x = 9;
-			else if (Depth == 10)
-				x = 10;
-			else if (Depth == 11)
-				x = 11;
-			else if (Depth == 12)
-				x = 12;
-			else if (Depth == 13)
-				x = 13;
-			else if (Depth == 14)
-				x = 14;
-			else if (Depth == 15)
-				x = 15;
-			else if (Depth == 16)
-				x = 16;
-			else if (Depth == 17)
-				x = 17;
-			else if (Depth == 18)
-				x = 18;
-			else if (Depth == 19)
-				x = 19;			
-			else if (Depth == 20)
-				x = 20;			
-			//Workaround for DX9 Games
+		
 		//Right
-		[unroll]
+		int x = 20 % 1023;
+		[loop]
 	for (int j = 0; j >= -x; --j) 
 	{
 			if (tex2D(SamplerCC, float2(texcoord.x-j*pix.x,texcoord.y)).r >= texcoord.x+pix.x && tex2D(SamplerCC, float2(texcoord.x+j*pix.x,texcoord.y)).r >= texcoord.x+pix.x) 
@@ -1057,54 +920,10 @@ void PS_renderR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0
 	else
 	{
 			color.rgb = tex2D(ReShade::BackBuffer, float2(texcoord.x, texcoord.y)).rgb;
-
-			//Workaround for DX9 Games
-			int x = 10;	
-			if (Depth == 0)		
-				x = 0;
-			else if (Depth == 1)	
-				x = 1;
-			else if (Depth == 2)
-				x = 2;
-			else if (Depth == 3)
-				x = 3;
-			else if (Depth == 4)
-				x = 4;
-			else if (Depth == 5)
-				x = 5;
-			else if (Depth == 6)
-				x = 6;
-			else if (Depth == 7)
-				x = 7;
-			else if (Depth == 8)
-				x = 8;
-			else if (Depth == 9)
-				x = 9;
-			else if (Depth == 10)
-				x = 10;
-			else if (Depth == 11)
-				x = 11;
-			else if (Depth == 12)
-				x = 12;
-			else if (Depth == 13)
-				x = 13;
-			else if (Depth == 14)
-				x = 14;
-			else if (Depth == 15)
-				x = 15;
-			else if (Depth == 16)
-				x = 16;
-			else if (Depth == 17)
-				x = 17;
-			else if (Depth == 18)
-				x = 18;
-			else if (Depth == 19)
-				x = 19;			
-			else if (Depth == 20)
-				x = 20;			
-			//Workaround for DX9 Games
+					
 		//AltLeft
-		[unroll]
+		int x = 20 % 1023;
+		[loop]
 	for (int j = 0; j >= -x; --j) 
 	{
 			if (tex2D(SamplerCC, float2(texcoord.x-j*pix.x,texcoord.y)).r >= texcoord.x-pix.x && tex2D(SamplerCC, float2(texcoord.x+j*pix.x,texcoord.y)).r >= texcoord.x+pix.x) 
