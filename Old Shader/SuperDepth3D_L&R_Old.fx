@@ -21,12 +21,6 @@
  //*																																												*//
  //* 																																												*//
  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-uniform bool AltRender <
-	ui_items = "Off\0ON\0";
-	ui_label = "Alternate Render";
-	ui_tooltip = "Alternate Render Mode is a different way of warping the screen.";
-> = false; 
  
 uniform int AltDepthMap <
 	ui_type = "combo";
@@ -37,23 +31,37 @@ uniform int AltDepthMap <
 
 uniform int Depth <
 	ui_type = "drag";
-	ui_min = 0; ui_max = 20;
+	ui_min = 0; ui_max = 25;
 	ui_label = "Depth Slider";
-	ui_tooltip = "Determines the amount of Image Warping and Separation between both eyes.";
+	ui_tooltip = "Determines the amount of Image Warping and Separation between both eyes. To go beyond 25 max you need to enter your own number.";
 > = 10;
 
 uniform int Perspective <
 	ui_type = "drag";
-	ui_min = -100; ui_max = 100;
+	ui_min = -50; ui_max = 50;
 	ui_label = "Perspective Slider";
 	ui_tooltip = "Determines the perspective point.";
 > = 0;
 
-uniform int WA <
+uniform int WAL <
 	ui_type = "drag";
 	ui_min = -25; ui_max = 25;
-	ui_label = "Warp Adjust";
-	ui_tooltip = "Adjust the warp in both eyes.";
+	ui_label = "Left Warp Adjust";
+	ui_tooltip = "Adjust the warp in the left eye.";
+> = 0;
+
+uniform int WAR <
+	ui_type = "drag";
+	ui_min = -25; ui_max = 25;
+	ui_label = "Right Warp Adjust";
+	ui_tooltip = "Adjust the warp in the right eye.";
+> = 0;
+
+uniform int DepthP <
+	ui_type = "combo";
+	ui_items = "Depth Plus Off\0Depth +\0Depth ++\0Depth +++\0Depth ++++\0Depth +++++\0";
+	ui_label = "Depth Plus";
+	ui_tooltip = "Adjust Distortion and Depth for Left and Right eye.";
 > = 0;
 
 uniform bool DepthFlip <
@@ -61,13 +69,6 @@ uniform bool DepthFlip <
 	ui_label = "Depth Flip";
 	ui_tooltip = "Depth Flip if the depth map is Upside Down.";
 > = false;
-
-uniform int CustomDM <
-	ui_type = "combo";
-	ui_items = "Custom Off\0Custom One +\0Custom One -\0Custom Two +\0Custom Two -\0Custom Three +\0Custom Three -\0Custom Four +\0Custom Four -\0Custom Five +\0Custom Five -\0Custom Six +\0Custom Six -\0";
-	ui_label = "Custom Depth Map";
-	ui_tooltip = "Adjust your own Custom Depth Map.";
-> = 0;
 
 uniform bool DepthMap <
 	ui_items = "Off\0ON\0";
@@ -89,37 +90,23 @@ uniform float Far <
 	ui_tooltip = "Near Depth Map Adjustment.";
 > = 1.5;
 
-uniform bool BD <
-	ui_items = "Off\0ON\0";
-	ui_label = "Barrel Distortion";
-	ui_tooltip = "Barrel Distortion for HMD type Displays.";
-> = false;
-
-uniform float Hsquish <
-	ui_type = "drag";
-	ui_min = 1; ui_max = 1.5;
-	ui_label = "Horizontal Squish";
-	ui_tooltip = "Horizontal squish cubic distortion value. Default is 1.";
-> = 1;
-
-uniform float K <
-	ui_type = "drag";
-	ui_min = -25; ui_max = 25;
-	ui_label = "Lens Distortion";
-	ui_tooltip = "Lens distortion coefficient. Default is -0.15.";
-> = -0.15;
-
-uniform float KCube <
-	ui_type = "drag";
-	ui_min = -25; ui_max = 25;
-	ui_label = "Cubic Distortion";
-	ui_tooltip = "Cubic distortion value. Default is 0.5.";
-> = 0.5;
+uniform int CustomDM <
+	ui_type = "combo";
+	ui_items = "Custom Off\0Custom One +\0Custom One -\0Custom Two +\0Custom Two -\0Custom Three +\0Custom Three -\0Custom Four +\0Custom Four -\0Custom Five +\0Custom Five -\0Custom Six +\0Custom Six -\0";
+	ui_label = "Custom Depth Map";
+	ui_tooltip = "Adjust your own Custom Depth Map.";
+> = 0;
 
 uniform bool EyeSwap <
 	ui_items = "Off\0ON\0";
 	ui_label = "Eye Swap";
 	ui_tooltip = "Swap Left/Right to Right/Left and ViceVersa.";
+> = false;
+
+uniform bool AltRender <
+	ui_items = "Off\0ON\0";
+	ui_label = "Alternate Render";
+	ui_tooltip = "Alternate Render Mode is a different way of warping the screen.";
 > = false;
 
 /////////////////////////////////////////////D3D Starts Here/////////////////////////////////////////////////////////////////
@@ -134,9 +121,8 @@ texture texCC  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA32F;
 sampler SamplerCL
 	{
 		Texture = texCL;
-		AddressU = BORDER;
-		AddressV = BORDER;
-		AddressW = BORDER;
+		AddressU = Border; 
+		AddressV = Border;
 		MipFilter = Linear; 
 		MinFilter = Linear; 
 		MagFilter = Linear;
@@ -145,9 +131,8 @@ sampler SamplerCL
 sampler SamplerCR
 	{
 		Texture = texCR;
-		AddressU = BORDER;
-		AddressV = BORDER;
-		AddressW = BORDER;
+		AddressU = Border; 
+		AddressV = Border;
 		MipFilter = Linear; 
 		MinFilter = Linear; 
 		MagFilter = Linear;
@@ -159,10 +144,20 @@ sampler2D SamplerCC
 		MinFilter = LINEAR;
 		MagFilter = LINEAR;
 		MipFilter = LINEAR;
-		AddressU = CLAMP;
-		AddressV = CLAMP;
-		AddressW = CLAMP;
+		AddressU = Clamp;
+		AddressV = Clamp;
 	};
+	
+sampler BorderSampler
+{
+	Texture = ReShade::BackBufferTex;
+	AddressU = Border; 
+	AddressV = Border;
+	MipFilter = Linear; 
+	MinFilter = Linear; 
+	MagFilter = Linear;
+	SRGBTexture = false;
+};
 	
 //Left Eye Depth Map Information
 float SbSdepthL (float2 texcoord) 
@@ -175,7 +170,7 @@ float SbSdepthL (float2 texcoord)
 			texcoord.y =  1 - texcoord.y;
 
 
-	float4 depthL = ReShade::GetLinearizedDepth(float2(texcoord.x, texcoord.y));
+	float4 depthL = ReShade::GetLinearizedDepth(float2(texcoord.x*2, texcoord.y));
 
 	if (CustomDM == 0)
 	{		
@@ -486,22 +481,22 @@ float SbSdepthL (float2 texcoord)
 	{
 		if (EyeSwap)
 		{
-		color.r = 1 - DL.r;
+		color.r = texcoord.x < 0.5 ? 1 - DL.r : 0;
 		}
 		else
 		{
-		color.r = DL.r;
+		color.r = texcoord.x < 0.5 ?  DL.r : 0;
 		}
 	}
 	else
 	{
 		if (EyeSwap)
 		{
-		color.r = DL.r;
+		color.r = texcoord.x < 0.5 ? DL.r : 0;
 		}
 		else
 		{
-		color.r = 1 - DL.r;
+		color.r = texcoord.x < 0.5 ? 1 - DL.r : 0;
 		}
 	}
 	return color.r;	
@@ -516,7 +511,7 @@ float SbSdepthR (float2 texcoord)
 			if (DepthFlip)
 			texcoord.y =  1 - texcoord.y;
 	
-	float4 depthR = ReShade::GetLinearizedDepth(float2(texcoord.x, texcoord.y));
+	float4 depthR = ReShade::GetLinearizedDepth(float2(texcoord.x*2-1, texcoord.y));
 		
 	if (CustomDM == 0)
 	{		
@@ -826,22 +821,22 @@ float SbSdepthR (float2 texcoord)
 	{
 		if (EyeSwap)
 		{
-		color.r = 1 - DR.r;
+		color.r = texcoord.x < 0.5 ? 1 - 0 : 1 - DR.r;
 		}
 		else
 		{
-		color.r = DR.r;
+		color.r = texcoord.x < 0.5 ?  0 : DR.r;
 		}
 	}
 	else
 	{
 		if (EyeSwap)
 		{
-		color.r = DR.r;
+		color.r = texcoord.x < 0.5 ? 0 : DR.r;
 		}
 		else
 		{
-		color.r = 1 - DR.r;
+		color.r = texcoord.x < 0.5 ? 0 : 1 - DR.r;
 		}
 	}
 	return color.r;	
@@ -853,16 +848,16 @@ float SbSdepthR (float2 texcoord)
 		if(!AltRender)
 	{
 	float NegDepth = -Depth;
-	float LeftDepth = Depth/2+WA;
-	float RightDepth = Depth/2+WA;
+	float LeftDepth = Depth/2+WAL;
+	float RightDepth = Depth/2+WAR;
 	color.r =  texcoord.x-NegDepth*pix.x*SbSdepthR(float2(texcoord.x+RightDepth*pix.x,texcoord.y));
 	color.gb =  texcoord.x-Depth*pix.x*SbSdepthL(float2(texcoord.x-LeftDepth*pix.x,texcoord.y));
 	}
 	else
 	{
 	float NegDepth = -Depth;
-	float LeftDepth = Depth/2+WA;
-	float RightDepth = Depth/2+WA;
+	float LeftDepth = Depth/2+WAR;
+	float RightDepth = Depth/2+WAL;
 	color.r =  texcoord.x-NegDepth*pix.x*SbSdepthL(float2(texcoord.x+RightDepth*pix.x,texcoord.y));
 	color.gb =  texcoord.x-Depth*pix.x*SbSdepthR(float2(texcoord.x-LeftDepth*pix.x,texcoord.y));
 	}
@@ -873,69 +868,10 @@ void PS_renderL(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0
 {
 		if(!AltRender)
 		{
-		color.rgb = tex2D(ReShade::BackBuffer, float2(texcoord.x, texcoord.y)).rgb;
+		color.rgb = tex2D(ReShade::BackBuffer, float2(texcoord.x*2, texcoord.y)).rgb;
 			
 			//Workaround for DX9 Games
-			int x = 10;	
-			if (Depth == 0)		
-				x = 0;
-			else if (Depth == 1)	
-				x = 1;
-			else if (Depth == 2)
-				x = 2;
-			else if (Depth == 3)
-				x = 3;
-			else if (Depth == 4)
-				x = 4;
-			else if (Depth == 5)
-				x = 5;
-			else if (Depth == 6)
-				x = 6;
-			else if (Depth == 7)
-				x = 7;
-			else if (Depth == 8)
-				x = 8;
-			else if (Depth == 9)
-				x = 9;
-			else if (Depth == 10)
-				x = 10;
-			else if (Depth == 11)
-				x = 11;
-			else if (Depth == 12)
-				x = 12;
-			else if (Depth == 13)
-				x = 13;
-			else if (Depth == 14)
-				x = 14;
-			else if (Depth == 15)
-				x = 15;
-			else if (Depth == 16)
-				x = 16;
-			else if (Depth == 17)
-				x = 17;
-			else if (Depth == 18)
-				x = 18;
-			else if (Depth == 19)
-				x = 19;			
-			else if (Depth == 20)
-				x = 20;		
-			//Workaround for DX9 Games
-		//Left
-		[unroll]
-		for (int j = 0; j <= x; j++) 
-		{
-			if (tex2D(SamplerCC, float2(texcoord.x-j*pix.x,texcoord.y)).b <= texcoord.x-pix.x && tex2D(SamplerCC, float2(texcoord.x+j*pix.x,texcoord.y)).b <= texcoord.x+pix.x) 
-			{	
-				color.rgb = tex2D(ReShade::BackBuffer, float2(texcoord.x+j*pix.x,texcoord.y)).rgb;
-			}
-		}
-	}
-	else
-	{
-			color.rgb = tex2D(ReShade::BackBuffer, float2(texcoord.x, texcoord.y)).rgb;
-			
-			//Workaround for DX9 Games
-			int x = 10;	
+			int x = 5;	
 			if (Depth == 0)		
 				x = 0;
 			else if (Depth == 1)	
@@ -978,14 +914,125 @@ void PS_renderL(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0
 				x = 19;			
 			else if (Depth == 20)
 				x = 20;			
+			else if (Depth == 21)
+				x = 21;			
+			else if (Depth == 22)
+				x = 22;			
+			else if (Depth == 23)
+				x = 23;		
+			else if (Depth == 24)
+				x = 24;			
+			else if (Depth == 25)
+				x = 25;
+			//Workaround for DX9 Games
+		//Left
+		[unroll]
+		for (int j = 0; j <= x; j++) 
+		{
+			if (tex2D(SamplerCC, float2((texcoord.x*2)+j*pix.x,texcoord.y)).b >= texcoord.x-pix.x && tex2D(SamplerCC, float2(texcoord.x+j*pix.x,texcoord.y)).b <= texcoord.x+pix.x) 
+			{
+			
+			float DP = 1;
+			
+			if (DepthP == 0)		
+				DP = 1;
+			else if (DepthP == 1)	
+				DP = 0.9375;
+			else if (DepthP == 2)
+				DP = 0.875;
+			else if (DepthP == 3)
+				DP = 0.75;
+			else if (DepthP == 4)
+				DP = 0.625;
+			else if (DepthP == 5)
+				DP = 0.50;
+				
+				color.rgb = tex2D(ReShade::BackBuffer, float2(texcoord.x*2+j*pix.x/DP,texcoord.y)).rgb;
+			}
+		}
+	}
+	else
+	{
+			color.rgb = tex2D(ReShade::BackBuffer, float2(texcoord.x*2-1, texcoord.y)).rgb;
+			
+			//Workaround for DX9 Games
+			int x = 5;	
+			if (Depth == 0)		
+				x = 0;
+			else if (Depth == 1)	
+				x = 1;
+			else if (Depth == 2)
+				x = 2;
+			else if (Depth == 3)
+				x = 3;
+			else if (Depth == 4)
+				x = 4;
+			else if (Depth == 5)
+				x = 5;
+			else if (Depth == 6)
+				x = 6;
+			else if (Depth == 7)
+				x = 7;
+			else if (Depth == 8)
+				x = 8;
+			else if (Depth == 9)
+				x = 9;
+			else if (Depth == 10)
+				x = 10;
+			else if (Depth == 11)
+				x = 11;
+			else if (Depth == 12)
+				x = 12;
+			else if (Depth == 13)
+				x = 13;
+			else if (Depth == 14)
+				x = 14;
+			else if (Depth == 15)
+				x = 15;
+			else if (Depth == 16)
+				x = 16;
+			else if (Depth == 17)
+				x = 17;
+			else if (Depth == 18)
+				x = 18;
+			else if (Depth == 19)
+				x = 19;			
+			else if (Depth == 20)
+				x = 20;			
+			else if (Depth == 21)
+				x = 21;			
+			else if (Depth == 22)
+				x = 22;			
+			else if (Depth == 23)
+				x = 23;		
+			else if (Depth == 24)
+				x = 24;			
+			else if (Depth == 25)
+				x = 25;
 			//Workaround for DX9 Games
 		//AltRight
 		[unroll]
 		for (int j = 0; j <= x; j++) 
 		{
-			if (tex2D(SamplerCC, float2(texcoord.x-j*pix.x,texcoord.y)).b <= texcoord.x+pix.x && tex2D(SamplerCC, float2(texcoord.x+j*pix.x,texcoord.y)).b <= texcoord.x+pix.x) 
+			if (tex2D(SamplerCC, float2( (texcoord.x*2-1)-j*pix.x,texcoord.y)).b <= texcoord.x+pix.x && tex2D(SamplerCC, float2(texcoord.x+j*pix.x,texcoord.y)).b <= texcoord.x+pix.x) 
 			{
-				color.rgb =  tex2D(ReShade::BackBuffer, float2(texcoord.x+j*pix.x,texcoord.y)).rgb;
+			
+			float DP = 1;
+			
+			if (DepthP == 0)		
+				DP = 1;
+			else if (DepthP == 1)	
+				DP = 0.9375;
+			else if (DepthP == 2)
+				DP = 0.875;
+			else if (DepthP == 3)
+				DP = 0.75;
+			else if (DepthP == 4)
+				DP = 0.625;
+			else if (DepthP == 5)
+				DP = 0.50;
+				
+				color.rgb =  tex2D(ReShade::BackBuffer, float2(texcoord.x*2-1+j*pix.x/DP,texcoord.y)).rgb;
 			}
 		}
 	}
@@ -997,10 +1044,10 @@ void PS_renderR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0
 {
 		if(!AltRender)
 		{
-		color.rgb = tex2D(ReShade::BackBuffer, float2(texcoord.x, texcoord.y)).rgb;
+		color.rgb = tex2D(ReShade::BackBuffer, float2(texcoord.x*2-1, texcoord.y)).rgb;
 
 			//Workaround for DX9 Games
-			int x = 10;	
+			int x = 5;	
 			if (Depth == 0)		
 				x = 0;
 			else if (Depth == 1)	
@@ -1043,23 +1090,49 @@ void PS_renderR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0
 				x = 19;			
 			else if (Depth == 20)
 				x = 20;			
+			else if (Depth == 21)
+				x = 21;			
+			else if (Depth == 22)
+				x = 22;			
+			else if (Depth == 23)
+				x = 23;		
+			else if (Depth == 24)
+				x = 24;			
+			else if (Depth == 25)
+				x = 25;
 			//Workaround for DX9 Games
 		//Right
 		[unroll]
 	for (int j = 0; j >= -x; --j) 
 	{
-			if (tex2D(SamplerCC, float2(texcoord.x-j*pix.x,texcoord.y)).r >= texcoord.x+pix.x && tex2D(SamplerCC, float2(texcoord.x+j*pix.x,texcoord.y)).r >= texcoord.x+pix.x) 
+			if (tex2D(SamplerCC, float2((texcoord.x*2-1)-j*pix.x,texcoord.y)).r <= texcoord.x+pix.x && tex2D(SamplerCC, float2(texcoord.x+j*pix.x,texcoord.y)).r >= texcoord.x+pix.x) 
 			{
-				color.rgb = tex2D(ReShade::BackBuffer, float2(texcoord.x+j*pix.x, texcoord.y)).rgb;
+			
+			float DP = 1;
+			
+			if (DepthP == 0)		
+				DP = 1;
+			else if (DepthP == 1)	
+				DP = 0.9375;
+			else if (DepthP == 2)
+				DP = 0.875;
+			else if (DepthP == 3)
+				DP = 0.75;
+			else if (DepthP == 4)
+				DP = 0.625;
+			else if (DepthP == 5)
+				DP = 0.50;
+					
+				color.rgb = tex2D(ReShade::BackBuffer, float2(texcoord.x*2-1+j*pix.x/DP, texcoord.y)).rgb;
 			}
 		}
 	}
 	else
 	{
-			color.rgb = tex2D(ReShade::BackBuffer, float2(texcoord.x, texcoord.y)).rgb;
+			color.rgb = tex2D(ReShade::BackBuffer, float2(texcoord.x*2, texcoord.y)).rgb;
 
 			//Workaround for DX9 Games
-			int x = 10;	
+			int x = 5;	
 			if (Depth == 0)		
 				x = 0;
 			else if (Depth == 1)	
@@ -1102,85 +1175,77 @@ void PS_renderR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0
 				x = 19;			
 			else if (Depth == 20)
 				x = 20;			
+			else if (Depth == 21)
+				x = 21;			
+			else if (Depth == 22)
+				x = 22;			
+			else if (Depth == 23)
+				x = 23;		
+			else if (Depth == 24)
+				x = 24;			
+			else if (Depth == 25)
+				x = 25;
 			//Workaround for DX9 Games
 		//AltLeft
 		[unroll]
 	for (int j = 0; j >= -x; --j) 
 	{
-			if (tex2D(SamplerCC, float2(texcoord.x-j*pix.x,texcoord.y)).r >= texcoord.x-pix.x && tex2D(SamplerCC, float2(texcoord.x+j*pix.x,texcoord.y)).r >= texcoord.x+pix.x) 
-			{		
-				color.rgb = tex2D(ReShade::BackBuffer, float2(texcoord.x+j*pix.x, texcoord.y)).rgb;
+			if (tex2D(SamplerCC, float2((texcoord.x*2)-j*pix.x,texcoord.y)).r >= texcoord.x-pix.x && tex2D(SamplerCC, float2(texcoord.x+j*pix.x,texcoord.y)).r >= texcoord.x+pix.x) 
+			{
+			
+			float DP = 1;
+			
+			if (DepthP == 0)		
+				DP = 1;
+			else if (DepthP == 1)	
+				DP = 0.9375;
+			else if (DepthP == 2)
+				DP = 0.875;
+			else if (DepthP == 3)
+				DP = 0.75;
+			else if (DepthP == 4)
+				DP = 0.625;
+			else if (DepthP == 5)
+				DP = 0.50;
+					
+				color.rgb = tex2D(ReShade::BackBuffer, float2(texcoord.x*2+j*pix.x/DP, texcoord.y)).rgb;
 			}
 		}
 	}
 }
 
-//////////////////////////////////////////////////////Barrle_Distortion/////////////////////////////////////////////////////
-float3 BDL(float2 texcoord)
+//////////////////////////////////////////////////////////Border/////////////////////////////////////////////////////////////////////
+
+float3 B(float2 texcoord)
 
 {
-	float k = K;
-	float kcube = KCube;
-
-	float r2 = (texcoord.x-0.5) * (texcoord.x-0.5) + (texcoord.y-0.5) * (texcoord.y-0.5);       
-	float f = 0.0;
-
-	f = 1 + r2 * (k + kcube * sqrt(r2));
-
-	float x = f*(texcoord.x-0.5)+0.5;
-	float y = f*(texcoord.y-0.5)+0.5;
-	float pos = Hsquish-1;
-	float mid = pos*1024*pix.y;
-	float3 BDListortion = tex2D(SamplerCL,float2(x,(y*Hsquish)-mid)).rgb;
-
-	return BDListortion.rgb;
+	float3 Border = tex2D(BorderSampler,texcoord.xy).rgb;
+	return Border.rgb;
 }
 
-float3 BDR(float2 texcoord)
 
+void  Border(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float3 color : SV_Target)
 {
-	float k = K;
-	float kcube = KCube;
-
-	float r2 = (texcoord.x-0.5) * (texcoord.x-0.5) + (texcoord.y-0.5) * (texcoord.y-0.5);       
-	float f = 0.0;
-
-	f = 1 + r2 * (k + kcube * sqrt(r2));
-
-	float x = f*(texcoord.x-0.5)+0.5;
-	float y = f*(texcoord.y-0.5)+0.5;
-	float pos = Hsquish-1;
-	float mid = pos*1024*pix.y;
-	float3 BDRistortion = tex2D(SamplerCR,float2(x,(y*Hsquish)-mid)).rgb;
-
-	return BDRistortion.rgb;
+	float Ssquish = 1.001;
+	float pos = Ssquish-1;
+	float side = pos*2160*pix.x;
+	
+	
+	color.rgb = B(float2((texcoord.x*Ssquish)-side,texcoord.y));
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void PS0(float4 pos : SV_Position, float2 texcoord : TEXCOORD0, out float3 color : SV_Target)
 {
-	if(BD)
-	{
-		if(!AltRender)
+	if(!AltRender)
 		{
-		color = texcoord.x < 0.5 ? BDL(float2(texcoord.x*2 + Perspective * pix.x,texcoord.y)).rgb : BDR(float2(texcoord.x*2-1 - Perspective * pix.x,texcoord.y)).rgb;
+		color = texcoord.x < 0.5 ? tex2D(SamplerCL, float2(texcoord.x - Perspective * pix.x, texcoord.y)).rgb : tex2D(SamplerCR, float2(texcoord.x + Perspective * pix.x, texcoord.y)).rgb;
 		}
 		else
 		{
-		color = texcoord.x > 0.5 ? BDL(float2(texcoord.x*2-1 + Perspective * pix.x,texcoord.y)).rgb : BDR(float2(texcoord.x*2 - Perspective * pix.x,texcoord.y)).rgb;
+		float AltPerspective = round(Depth/1.5)+Perspective;
+		color = texcoord.x > 0.5 ? tex2D(SamplerCL, float2(texcoord.x - AltPerspective * pix.x, texcoord.y)).rgb : tex2D(SamplerCR, float2(texcoord.x + AltPerspective * pix.x, texcoord.y)).rgb;
 		}
-	}
-	else
-	{
-		if(!AltRender)
-		{
-		color = texcoord.x < 0.5 ? tex2D(SamplerCL, float2(texcoord.x*2 + Perspective * pix.x, texcoord.y)).rgb : tex2D(SamplerCR, float2(texcoord.x*2-1 - Perspective * pix.x, texcoord.y)).rgb;
-		}
-		else
-		{
-		color = texcoord.x > 0.5 ? tex2D(SamplerCL, float2(texcoord.x*2-1 + Perspective * pix.x, texcoord.y)).rgb : tex2D(SamplerCR, float2(texcoord.x*2 - Perspective * pix.x, texcoord.y)).rgb;
-		}
-	}
 }
 
 ///////////////////////////////////////////////Depth Map View//////////////////////////////////////////////////////////////////////
@@ -1512,6 +1577,11 @@ float4 PS(float4 pos : SV_Position, float2 texcoord : TEXCOORD0) : SV_Target
 
 technique Super_Depth3D
 	{
+		pass
+		{
+		VertexShader = PostProcessVS;
+		PixelShader = Border;
+		}
 			pass
 		{
 			VertexShader = PostProcessVS;
