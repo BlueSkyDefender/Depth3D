@@ -869,11 +869,10 @@ void PS_renderL(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0
 		if(!AltRender)
 		{
 		color.rgb = tex2D(ReShade::BackBuffer, float2(texcoord.x, texcoord.y)).rgb;
-
+		
 		//Left
-		int x = 20 % 1023;
-		[loop]
-		for (int j = 0; j <= x; j++) 
+		[unroll]
+		for (int j = 0; j <= 25; j++) 
 		{
 			if (tex2D(SamplerCC, float2(texcoord.x-j*pix.x,texcoord.y)).b <= texcoord.x-pix.x && tex2D(SamplerCC, float2(texcoord.x+j*pix.x,texcoord.y)).b <= texcoord.x+pix.x ) 
 			{	
@@ -886,9 +885,8 @@ void PS_renderL(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0
 			color.rgb = tex2D(ReShade::BackBuffer, float2(texcoord.x, texcoord.y)).rgb;
 			
 		//AltRight
-		int x = 20 % 1023;
-		[loop]
-		for (int j = 0; j <= x; j++) 
+		[unroll]
+		for (int j = 0; j <= 25; j++) 
 		{
 			if (tex2D(SamplerCC, float2(texcoord.x-j*pix.x,texcoord.y)).b <= texcoord.x+pix.x && tex2D(SamplerCC, float2(texcoord.x+j*pix.x,texcoord.y)).b <= texcoord.x+pix.x) 
 			{
@@ -907,9 +905,8 @@ void PS_renderR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0
 		color.rgb = tex2D(ReShade::BackBuffer, float2(texcoord.x, texcoord.y)).rgb;
 		
 		//Right
-		int x = 20 % 1023;
-		[loop]
-	for (int j = 0; j >= -x; --j) 
+		[unroll]
+	for (int j = 0; j >= -25; --j) 
 	{
 			if (tex2D(SamplerCC, float2(texcoord.x-j*pix.x,texcoord.y)).r >= texcoord.x+pix.x && tex2D(SamplerCC, float2(texcoord.x+j*pix.x,texcoord.y)).r >= texcoord.x+pix.x) 
 			{
@@ -922,9 +919,8 @@ void PS_renderR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0
 			color.rgb = tex2D(ReShade::BackBuffer, float2(texcoord.x, texcoord.y)).rgb;
 					
 		//AltLeft
-		int x = 20 % 1023;
-		[loop]
-	for (int j = 0; j >= -x; --j) 
+		[unroll]
+	for (int j = 0; j >= -25; --j) 
 	{
 			if (tex2D(SamplerCC, float2(texcoord.x-j*pix.x,texcoord.y)).r >= texcoord.x-pix.x && tex2D(SamplerCC, float2(texcoord.x+j*pix.x,texcoord.y)).r >= texcoord.x+pix.x) 
 			{		
