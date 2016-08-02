@@ -93,10 +93,10 @@ uniform bool BD <
 
 uniform float Hsquish <
 	ui_type = "drag";
-	ui_min = 1; ui_max = 1.5;
+	ui_min = 1; ui_max = 2;
 	ui_label = "Horizontal Squish";
-	ui_tooltip = "Horizontal squish cubic distortion value. Default is 1.";
-> = 1;
+	ui_tooltip = "Horizontal squish cubic distortion value. Default is 1.050.";
+> = 1.050;
 
 uniform float K <
 	ui_type = "drag";
@@ -944,9 +944,7 @@ float3 BDL(float2 texcoord)
 
 	float x = f*(texcoord.x-0.5)+0.5;
 	float y = f*(texcoord.y-0.5)+0.5;
-	float pos = Hsquish-1;
-	float mid = pos*1024*pix.y;
-	float3 BDListortion = tex2D(SamplerCL,float2(x,(y*Hsquish)-mid)).rgb;
+	float3 BDListortion = tex2D(SamplerCL,float2(x,y)).rgb;
 
 	return BDListortion.rgb;
 }
@@ -964,25 +962,25 @@ float3 BDR(float2 texcoord)
 
 	float x = f*(texcoord.x-0.5)+0.5;
 	float y = f*(texcoord.y-0.5)+0.5;
-	float pos = Hsquish-1;
-	float mid = pos*1024*pix.y;
-	float3 BDRistortion = tex2D(SamplerCR,float2(x,(y*Hsquish)-mid)).rgb;
+	float3 BDRistortion = tex2D(SamplerCR,float2(x,y)).rgb;
 
 	return BDRistortion.rgb;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-void PS0(float4 pos : SV_Position, float2 texcoord : TEXCOORD0, out float3 color : SV_Target)
+void PS0(float4 position : SV_Position, float2 texcoord : TEXCOORD0, out float3 color : SV_Target)
 {
 	if(BD)
 	{
+	float pos = Hsquish-1;
+	float mid = pos*BUFFER_HEIGHT/2*pix.y;
 		if(!AltRender)
 		{
-		color = texcoord.x < 0.5 ? BDL(float2(texcoord.x*2 + Perspective * pix.x,texcoord.y)).rgb : BDR(float2(texcoord.x*2-1 - Perspective * pix.x,texcoord.y)).rgb;
+		color = texcoord.x < 0.5 ? BDL(float2(texcoord.x*2 + Perspective * pix.x,(texcoord.y*Hsquish)-mid)).rgb : BDR(float2(texcoord.x*2-1 - Perspective * pix.x,(texcoord.y*Hsquish)-mid)).rgb;
 		}
 		else
 		{
-		color = texcoord.x > 0.5 ? BDL(float2(texcoord.x*2-1 + Perspective * pix.x,texcoord.y)).rgb : BDR(float2(texcoord.x*2 - Perspective * pix.x,texcoord.y)).rgb;
+		color = texcoord.x > 0.5 ? BDL(float2(texcoord.x*2-1 + Perspective * pix.x,(texcoord.y*Hsquish)-mid)).rgb : BDR(float2(texcoord.x*2 - Perspective * pix.x,(texcoord.y*Hsquish)-mid)).rgb;
 		}
 	}
 	else
