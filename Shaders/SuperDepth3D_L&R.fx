@@ -29,7 +29,7 @@ uniform bool AltRender <
  
 uniform int AltDepthMap <
 	ui_type = "combo";
-	ui_items = "Depth Map 0\0Depth Map 1\0Depth Map 2\0Depth Map 3\0Depth Map 4\0Depth Map 5\0Depth Map 6\0Depth Map 7\0Depth Map 8\0Depth Map 9\0Depth Map 10\0Depth Map 11\0Depth Map 12\0Depth Map 13\0Depth Map 14\0Depth Map 15\0Depth Map 16\0Depth Map 17\0Depth Map 18\0Depth Map 19\0Depth Map 20\0Depth Map 21\0Depth Map 22\0Depth Map 23\0Depth Map 24\0";
+	ui_items = "Depth Map 0\0Depth Map 1\0Depth Map 2\0Depth Map 3\0Depth Map 4\0Depth Map 5\0Depth Map 6\0Depth Map 7\0Depth Map 8\0Depth Map 9\0Depth Map 10\0Depth Map 11\0Depth Map 12\0Depth Map 13\0Depth Map 14\0Depth Map 15\0Depth Map 16\0Depth Map 17\0Depth Map 18\0Depth Map 19\0Depth Map 20\0Depth Map 21\0Depth Map 22\0Depth Map 23\0Depth Map 24\0Depth Map 25\0";
 	ui_label = "Alternate Depth Map";
 	ui_tooltip = "Alternate Depth Map for different Games. Read the ReadMeDepth3d.txt, for setting. Each game May and can use a diffrent AltDepthMap.";
 > = 0;
@@ -60,17 +60,17 @@ uniform bool DepthFlip <
 	ui_tooltip = "Depth Flip if the depth map is Upside Down.";
 > = false;
 
+uniform bool DepthMap <
+	ui_label = "Depth Map View";
+	ui_tooltip = "Display the Depth Map. Use This to Work on your Own Depth Map for your game.";
+> = false;
+
 uniform int CustomDM <
 	ui_type = "combo";
 	ui_items = "Custom Off\0Custom One +\0Custom One -\0Custom Two +\0Custom Two -\0Custom Three +\0Custom Three -\0Custom Four +\0Custom Four -\0Custom Five +\0Custom Five -\0Custom Six +\0Custom Six -\0";
 	ui_label = "Custom Depth Map";
 	ui_tooltip = "Adjust your own Custom Depth Map.";
 > = 0;
-
-uniform bool DepthMap <
-	ui_label = "Depth Map View";
-	ui_tooltip = "Display the Depth Map. Use This to Work on your Own Depth Map for your game.";
-> = false;
 
 uniform float Far <
 	ui_type = "drag";
@@ -251,7 +251,7 @@ float SbSdepthL (float2 texcoord)
 		depthL = 1-(-0+(pow(abs(depthL),cN))*cF);
 		}
 
-		// Skyrim | Deadly Premonition: The Directors's Cut
+		// Skyrim
 		if (AltDepthMap == 10)
 		{
 		float cF = 0.005;
@@ -374,6 +374,14 @@ float SbSdepthL (float2 texcoord)
 		float cF = 1.125;
 		float cN = 0;
 		depthL = (cN - depthL * cN) + (depthL*cF);
+		}
+		
+		//Deadly Premonition: The Directors's Cut
+		if (AltDepthMap == 25)
+		{
+		float cF = 0.5;
+		float cN = 0.020;		
+		depthL = 1 - log(depthL/cF)/log(cN/cF);
 		}
 	}
 	else
@@ -592,7 +600,7 @@ float SbSdepthR (float2 texcoord)
 		depthR = 1-(-0+(pow(abs(depthR),cN))*cF);
 		}
 
-		// Skyrim | Deadly Premonition: The Directors's Cut
+		// Skyrim
 		if (AltDepthMap == 10)
 		{
 		float cF = 0.2;
@@ -714,6 +722,14 @@ float SbSdepthR (float2 texcoord)
 		float cF = 0.350;
 		float cN = 0;
 		depthR = 1 - (cF) / (cF - depthR * ((1 - cN) / (cF - cN * depthR)) * (cF - 1));
+		}
+		
+		//Deadly Premonition: The Directors's Cut
+		if (AltDepthMap == 25)
+		{
+		float cF = 0.15;
+		float cN = 0.020;		
+		depthR = 1 - log(depthR/cF)/log(cN/cF);
 		}
 	}
 	else
@@ -1088,7 +1104,7 @@ float4 PS(float4 pos : SV_Position, float2 texcoord : TEXCOORD0) : SV_Target
 		depthM = 1-(-0+(pow(abs(depthM),cN))*cF);
 		}
 		
-		//Skyrim | Deadly Premonition: The Directors's Cut
+		//Skyrim
 		if (AltDepthMap == 10)
 		{
 		float cF = 0.2;
@@ -1210,6 +1226,14 @@ float4 PS(float4 pos : SV_Position, float2 texcoord : TEXCOORD0) : SV_Target
 		float cF = 0.350;
 		float cN = 0;
 		depthM = 1 - (cF) / (cF - depthM * ((1 - cN) / (cF - cN * depthM)) * (cF - 1));
+		}
+		
+		//Deadly Premonition: The Directors's Cut
+		if (AltDepthMap == 25)
+		{
+		float cF = 0.15;
+		float cN = 0.020;		
+		depthM = 1 - log(depthM/cF)/log(cN/cF);
 		}
 	
 	}

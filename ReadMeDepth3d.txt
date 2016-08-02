@@ -16,19 +16,19 @@ PLEASE SET YOUR RESOLUTION FIRST. Turn Off DOF in all games if possible. Unless 
 [Game List]			[Alternet Depth Map]	[Depth Flip On]	[Read Below] [Alternate Render]
 *Alien Isolation*			DM 23
 *Amnesia: The Dark Descent*		DM 22
-*Among The Sleep*			DM 16		     DF On				AR
-*Assassin Creed Unity*			DM 9							AR
-*Batman Arkham Knight*			DM 1							AR
-*Batman Arkham Origins*			DM 1							AR
-*Batman: Arkham City*			DM 1							AR
+*Among The Sleep*			DM 16		     DF On				ON
+*Assassin Creed Unity*			DM 9							ON
+*Batman Arkham Knight*			DM 1							ON
+*Batman Arkham Origins*			DM 1							ON
+*Batman: Arkham City*			DM 1							ON
 *BorderLands 2*				DM 20					RB
-*Call of Duty: Advance Warfare*		DM 5					RB		AR
-*Call of Duty: Black Ops 2*		DM 19					RB		AR
-*Call of Duty: Ghost*			DM 19					RB		AR
+*Call of Duty: Advance Warfare*		DM 5					RB		ON
+*Call of Duty: Black Ops 2*		DM 19					RB		ON
+*Call of Duty: Ghost*			DM 19					RB		ON
 *Casltevania: Lord of Shadows - UE	DM 7
-*Condemned: Criminal Origins*		DM 22					RB		AR
-Deadly Premonition: The Directors's Cut	DM 10					RB	
-*Dragon Ball Xenoverse*			DM 24							AR							
+*Condemned: Criminal Origins*		DM 22					RB		ON
+*Deadly Premonition:The Directors's Cut*DM 25					RB
+*Dragon Ball Xenoverse*			DM 24							ON							
 *Dragons Dogma: Dark Arisen		DM 15
 DreamFall Chapters			DM 18		     DF On
 Dying Light				DM 11
@@ -42,12 +42,12 @@ Magicka 2				DM 14					RB
 *Metro Last Light Redux*		DM 20					RB
 Middle-earth: Shadow of Mordor		DM 12					RB
 *Naruto Shippuden UNS3 Full Blurst	DM 0					RB
-*Quake 2 XP*				DM 2							AR
+*Quake 2 XP*				DM 2							ON
 Quake 4					DM 17
 Rage64					DM 8					RB
 Return To Castle Wolfenstine		DM 17					RB
 *Shadow warrior(2013)*			DM 7					RB
-*Skyrim*				DM 10							AR
+*Skyrim*				DM 10							ON
 Sleeping Dogs: DE			DM 4
 *Souls Games*				DM 21
 *The Evil Within*			DM 3					RB
