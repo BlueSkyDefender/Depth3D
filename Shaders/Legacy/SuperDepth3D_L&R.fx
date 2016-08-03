@@ -319,13 +319,12 @@ float SbSdepthL (float2 texcoord)
 		depthL = 1 - (1 * cF / (cF + depthL * (depthL+cM) * (1 - cF))) / (pow(abs(depthL),cN));
 		}
 		
-		//Dreamfall Chapters
+		//Dreamfall Chapters | Firewatch
 		if (AltDepthMap == 18)
 		{
-		float cF = 0.25;
-		float cM = 15.0;
-		float cN = 0.01;
-		depthL = 1 - (1 * cF / (cF + depthL * (depthL+cM) * (1 - cF))) / (pow(abs(depthL),cN));
+		float cF = 1;
+		float cN = 0.0025;		
+		depthL = 1 - log(depthL/cF)/log(cN/cF);
 		}		
 		
 		//CoD: Ghost
@@ -668,13 +667,12 @@ float SbSdepthR (float2 texcoord)
 		depthR = 1 - (1 * cF / (cF + depthR * (depthR+cM) * (1 - cF))) / (pow(abs(depthR),cN));
 		}
 		
-		//Dreamfall Chapters
+		//Dreamfall Chapters | Firewatch
 		if (AltDepthMap == 18)
 		{
-		float cF = 0.25;
-		float cM = 15.0;
-		float cN = 0.01;
-		depthR = 1 - (1 * cF / (cF + depthR * (depthR+cM) * (1 - cF))) / (pow(abs(depthR),cN));
+		float cF = 0.1;
+		float cN = 0.0025;		
+		depthR = 1 - log(depthR/cF)/log(cN/cF);
 		}		
 		
 		//CoD: Ghost
@@ -864,18 +862,16 @@ float SbSdepthR (float2 texcoord)
 		if(!AltRender)
 	{
 	float NegDepth = -Depth;
-	float LeftDepth = Depth/2+WA;
-	float RightDepth = Depth/2+WA;
-	color.r =  texcoord.x-NegDepth*pix.x*SbSdepthR(float2(texcoord.x+RightDepth*pix.x,texcoord.y));
-	color.gb =  texcoord.x-Depth*pix.x*SbSdepthL(float2(texcoord.x-LeftDepth*pix.x,texcoord.y));
+	float DWA = -1+WA;
+	color.r =  texcoord.x-NegDepth*pix.x*SbSdepthR(float2(texcoord.x+DWA*pix.x,texcoord.y));
+	color.gb =  texcoord.x-Depth*pix.x*SbSdepthL(float2(texcoord.x-DWA*pix.x,texcoord.y));
 	}
 	else
 	{
 	float NegDepth = -Depth;
-	float LeftDepth = Depth/2+WA;
-	float RightDepth = Depth/2+WA;
-	color.r =  texcoord.x-NegDepth*pix.x*SbSdepthL(float2(texcoord.x+RightDepth*pix.x,texcoord.y));
-	color.gb =  texcoord.x-Depth*pix.x*SbSdepthR(float2(texcoord.x-LeftDepth*pix.x,texcoord.y));
+	float DWA = 1+WA;
+	color.r =  texcoord.x-NegDepth*pix.x*SbSdepthL(float2(texcoord.x+DWA*pix.x,texcoord.y));
+	color.gb =  texcoord.x-Depth*pix.x*SbSdepthR(float2(texcoord.x-DWA*pix.x,texcoord.y));
 	}
 	}
 
@@ -1172,13 +1168,12 @@ float4 PS(float4 pos : SV_Position, float2 texcoord : TEXCOORD0) : SV_Target
 		depthM = 1 - (1 * cF / (cF + depthM * (depthM+cM) * (1 - cF))) / (pow(abs(depthM),cN));
 		}	
 		
-		//Dreamfall Chapters
+		//Dreamfall Chapters | Firewatch
 		if (AltDepthMap == 18)
 		{
-		float cF = 0.25;
-		float cM = 15.0;
-		float cN = 0.01;
-		depthM = 1 - (1 * cF / (cF + depthM * (depthM+cM) * (1 - cF))) / (pow(abs(depthM),cN));
+		float cF = 0.1;
+		float cN = 0.0025;		
+		depthM = 1 - log(depthM/cF)/log(cN/cF);
 		}
 				
 		//CoD: Ghost
@@ -1235,7 +1230,6 @@ float4 PS(float4 pos : SV_Position, float2 texcoord : TEXCOORD0) : SV_Target
 		float cN = 0.020;		
 		depthM = 1 - log(depthM/cF)/log(cN/cF);
 		}
-	
 	}
 	else
 	{

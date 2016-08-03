@@ -27,13 +27,13 @@ PLEASE SET YOUR RESOLUTION FIRST. Turn Off DOF in all games if possible. Unless 
 *Call of Duty: Ghost*			DM 19					RB		ON
 *Casltevania: Lord of Shadows - UE	DM 7
 *Condemned: Criminal Origins*		DM 22					RB		ON
-*Deadly Premonition:The Directors's Cut*DM 25					RB
+*Deadly Premonition:The Directors's Cut*DM 18					RB
 *Dragon Ball Xenoverse*			DM 24							ON							
 *Dragons Dogma: Dark Arisen		DM 15
 DreamFall Chapters			DM 18		     DF On
 Dying Light				DM 11
-*Fallout 4*				DM 13
-Firewatch				DM 1		     DF On
+*Fallout 4*				DM 13							
+*Firewatch*				DM 26		     DF On				ON
 GTA V					DM 11					RB
 Hard Reset				DM 8					RB
 *Lords of The Fallen*			DM 6
