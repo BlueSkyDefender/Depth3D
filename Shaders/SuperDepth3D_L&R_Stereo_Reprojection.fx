@@ -31,10 +31,10 @@ uniform int AltDepthMap <
 
 uniform int Depth <
 	ui_type = "drag";
-	ui_min = 0; ui_max = 25;
+	ui_min = 0; ui_max = 100;
 	ui_label = "Depth Slider";
 	ui_tooltip = "Determines the amount of Image Warping and Separation between both eyes.";
-> = 10;
+> = 25;
 
 uniform int Perspective <
 	ui_type = "drag";
@@ -407,20 +407,18 @@ void PS_renderL(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0
 	const float samples[3] = {0.5, 0.66, 1};
 	float minDepthL = 1.0;
 	float2 uv = 0;
+	float Parallax = 1;
 	
 	//color.rgb = tex2D(ReShade::BackBuffer, float2(texcoord.x, texcoord.y)).rgb;
-	//Workaround for DX9 Games
 
-
-	//Workaround for DX9 Games	
 	//Left Eye
 	[unroll]
-	for (int j = 0; j < 1; ++j)
+	for (int j = 0; j < 3; ++j)
 	{
 		uv.x = samples[j] * Depth;
 		minDepthL= min(minDepthL,SbSdepthL(texcoord.xy+uv*pix.xy));
 
-			float parallaxL = Depth * (1 - Far / minDepthL);
+			float parallaxL = Depth * (1 - Parallax / minDepthL);
 			
 			color.rgb = tex2D(ReShade::BackBuffer, texcoord.xy + float2(parallaxL,0)*pix.xy).rgb;
 		}
@@ -433,20 +431,18 @@ void PS_renderR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0
 	const float samples[3] = {0.5, 0.66, 1};
 	float minDepthR = 1.0;
 	float2 uv = 0;
+	float Parallax = 1;
 	
 	//color.rgb = tex2D(ReShade::BackBuffer, float2(texcoord.x, texcoord.y)).rgb;
-	//Workaround for DX9 Games
 
-
-	//Workaround for DX9 Games	
 	//Left Eye
 	[unroll]
-	for (int j = 0; j < 1; ++j)
+	for (int j = 0; j < 3; ++j)
 	{
 		uv.x = samples[j] * Depth;
 		minDepthR= min(minDepthR,SbSdepthR(texcoord.xy+uv*pix.xy));
 
-			float parallaxR = Depth * (1 - Far / minDepthR);
+			float parallaxR = Depth * (1 - Parallax / minDepthR);
 			
 			color.rgb = tex2D(ReShade::BackBuffer, texcoord.xy - float2(parallaxR,0)*pix.xy).rgb;
 		}
