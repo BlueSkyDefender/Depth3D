@@ -108,17 +108,17 @@ uniform float KCube <
 > = 0.5;
 
 /////////////////////////////////////////////D3D Starts Here/////////////////////////////////////////////////////////////////
-#include "ReShade.fxh"
 
 #define pix float2(BUFFER_RCP_WIDTH, BUFFER_RCP_HEIGHT)
 	
-texture texCL  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA32F;}; 
-texture texCR  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA32F;}; 
 texture texCC  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA32F;}; 
 
-sampler SamplerCL
-	{
-		Texture = texCL;
+texture DepthBufferTex : DEPTH;
+texture BackBufferTex : COLOR;
+
+sampler BackBuffer 
+	{ 
+		Texture = BackBufferTex; 
 		AddressU = BORDER;
 		AddressV = BORDER;
 		AddressW = BORDER;
@@ -126,18 +126,12 @@ sampler SamplerCL
 		MinFilter = Linear; 
 		MagFilter = Linear;
 	};
-	
-sampler SamplerCR
-	{
-		Texture = texCR;
-		AddressU = BORDER;
-		AddressV = BORDER;
-		AddressW = BORDER;
-		MipFilter = Linear; 
-		MinFilter = Linear; 
-		MagFilter = Linear;
+
+sampler DepthBuffer 
+	{ 
+		Texture = DepthBufferTex; 
 	};
-	
+
 sampler2D SamplerCC
 	{
 		Texture = texCC;
@@ -158,14 +152,16 @@ float SbSdepthL (float2 texcoord)
 			if (DepthFlip)
 			texcoord.y =  1 - texcoord.y;
 	
-	float4 depth = ReShade::GetLinearizedDepth(float2(texcoord.x+Depth*pix.x, texcoord.y));
+	float4 depth = tex2D(DepthBuffer, float2(texcoord.x*2+Depth*pix.x, texcoord.y));
 		
 	if (CustomDM == 0)
 	{		
-		//Naruto
+		//AI
 		if (AltDepthMap == 0)
 		{
-		depth = (pow(abs(depth),0.75));
+		float cF = 0.9125;
+		float cN = 0.9125;
+		depth = 1 - (cF) / (cF - depth * ((1 - cN) / (cF - cN * depth)) * (cF - 1));
 		}
 	}
 	else
@@ -282,15 +278,18 @@ float SbSdepthR (float2 texcoord)
 
 			if (DepthFlip)
 			texcoord.y =  1 - texcoord.y;
+			
 	
-	float4 depth = ReShade::GetLinearizedDepth(float2(texcoord.x-Depth*pix.x, texcoord.y));
+	float4 depth = tex2D(DepthBuffer, float2(texcoord.x*2-1-Depth*pix.x, texcoord.y)) ;
 		
 	if (CustomDM == 0)
 	{		
-		//Naruto
+		//AI
 		if (AltDepthMap == 0)
 		{
-		depth = (pow(abs(depth),0.75));
+		float cF = 0.9125;
+		float cN = 0.9125;
+		depth = 1 - (cF) / (cF - depth * ((1 - cN) / (cF - cN * depth)) * (cF - 1));
 		}
 	}
 	else
@@ -398,61 +397,14 @@ float SbSdepthR (float2 texcoord)
 
 	return color.r;	
 	}
-
-//////////////////////////////////////////Render Left Screen//////////////////////////////////////////////////
-void PS_renderL(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float3 color : SV_Target)
-{
-	const float samples[3] = {0.5, 0.66, 1};
-	float minDepthR = 1.0;
-	float2 uv = 0;
-	float Parallax = 1;
-	
-	//color.rgb = tex2D(ReShade::BackBuffer, float2(texcoord.x, texcoord.y)).rgb;
-
-	//Right Eye
-	[unroll]
-	for (int j = 0; j < 3; ++j)
-	{
-		uv.x = samples[j] * Depth;
-		minDepthR= min(minDepthR,SbSdepthR(texcoord.xy+uv*pix.xy));
-
-			float parallaxR = Depth * (1 - Parallax / minDepthR);
-			
-			color.rgb = tex2D(ReShade::BackBuffer, texcoord.xy + float2(parallaxR,0)*pix.xy).rgb;
-		}
-	}
-
-
-//////////////////////////////////////////Render Right Screen//////////////////////////////////////////////////
-void PS_renderR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float3 color : SV_Target)
-{
-	const float samples[3] = {0.5, 0.66, 1};
-	float minDepthL = 1.0;
-	float2 uv = 1;
-	float Parallax = 1;
-	
-	//color.rgb = tex2D(ReShade::BackBuffer, float2(texcoord.x, texcoord.y)).rgb;
-
-	//Left Eye
-	[unroll]
-	for (int j = 0; j < 3; ++j)
-	{
-		uv.x = samples[j] * Depth;
-		minDepthL= min(minDepthL,SbSdepthL(texcoord.xy-uv.xy*pix.xy));
-
-			float parallaxL = Depth * (1 - Parallax / minDepthL);
-			
-			color.rgb = tex2D(ReShade::BackBuffer, texcoord.xy - float2(parallaxL,0)*pix.xy).rgb;
-		}
-	}
-
-
 //////////////////////////////////////////////////////Barrle_Distortion/////////////////////////////////////////////////////
 float3 BDL(float2 texcoord)
 
 {
 	float k = K;
 	float kcube = KCube;
+	float pos = Hsquish-1;
+	float mid = pos*BUFFER_HEIGHT/2*pix.y;
 
 	float r2 = (texcoord.x-0.5) * (texcoord.x-0.5) + (texcoord.y-0.5) * (texcoord.y-0.5);       
 	float f = 0.0;
@@ -461,7 +413,7 @@ float3 BDL(float2 texcoord)
 
 	float x = f*(texcoord.x-0.5)+0.5;
 	float y = f*(texcoord.y-0.5)+0.5;
-	float3 BDListortion = tex2D(SamplerCL,float2(x,y)).rgb;
+	float3 BDListortion = tex2D(BackBuffer,float2(x*2 - Perspective* pix.x , ((y * Hsquish ) -mid))).rgb;
 
 	return BDListortion.rgb;
 }
@@ -471,7 +423,9 @@ float3 BDR(float2 texcoord)
 {
 	float k = K;
 	float kcube = KCube;
-
+	float pos = Hsquish-1;
+	float mid = pos*BUFFER_HEIGHT/2*pix.y;
+	
 	float r2 = (texcoord.x-0.5) * (texcoord.x-0.5) + (texcoord.y-0.5) * (texcoord.y-0.5);       
 	float f = 0.0;
 
@@ -479,181 +433,79 @@ float3 BDR(float2 texcoord)
 
 	float x = f*(texcoord.x-0.5)+0.5;
 	float y = f*(texcoord.y-0.5)+0.5;
-	float3 BDRistortion = tex2D(SamplerCR,float2(x,y)).rgb;
+	float3 BDRistortion = tex2D(BackBuffer,float2(x*2-1 + Perspective* pix.x , ((y * Hsquish ) -mid))).rgb;
 
 	return BDRistortion.rgb;
 }
 
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-void PS0(float4 position : SV_Position, float2 texcoord : TEXCOORD0, out float3 color : SV_Target)
+float3 LCal(float2 texcoord)
+
 {
-	if(BD)
-	{
-	float pos = Hsquish-1;
-	float mid = pos*BUFFER_HEIGHT/2*pix.y;
-	color = texcoord.x > 0.5 ? BDL(float2(texcoord.x*2-1 + Perspective * pix.x,(texcoord.y*Hsquish)-mid)).rgb : BDR(float2(texcoord.x*2 - Perspective * pix.x,(texcoord.y*Hsquish)-mid)).rgb;
-	}
-	else
-	{
-	color = texcoord.x > 0.5 ? tex2D(SamplerCL, float2(texcoord.x*2-1 + Perspective * pix.x, texcoord.y)).rgb : tex2D(SamplerCR, float2(texcoord.x*2 - Perspective * pix.x, texcoord.y)).rgb;
-	}
+	float3 LCalculation= tex2D(BackBuffer,float2(texcoord.x*2 - Perspective* pix.x , texcoord.y )).rgb;
+
+	return LCalculation.rgb;
+}
+
+float3 RCal(float2 texcoord)
+
+{
+	float3 RCalculation= tex2D(BackBuffer,float2(texcoord.x*2-1 + Perspective* pix.x , texcoord.y )).rgb;
+
+	return RCalculation.rgb;
 }
 
 
+//////////////////////////////////////////Render Single Pass Left/Right//////////////////////////////////////////////////
+void PS_renderLR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float3 color : SV_Target)
+{
+	const float samples[3] = {0.5, 0.66, 1};
+	float minDepthL = 1.0;
+	float minDepthR = 1.0;
+	float2 uv = 1;
+	float Parallax = 1;
+	
+	//Left Right Eyes
+	[unroll]
+	for (int j = 0; j < 3; ++j)
+	{
+		uv.x = samples[j] * Depth;
+		minDepthL= min(minDepthL,SbSdepthL(texcoord.xy-uv.xy*pix.xy));
+		minDepthR= min(minDepthR,SbSdepthR(texcoord.xy+uv.xy*pix.xy));
+
+		float parallaxL = Depth * (1 - Parallax / minDepthL);
+		float parallaxR = Depth * (1 - Parallax / minDepthR);
+			
+		if(BD)
+		{
+		color.rgb = texcoord.x < 0.5 ? BDL(float2(texcoord.xy - float2(parallaxL,0)*pix.xy)).rgb : BDR(float2(texcoord.xy + float2(parallaxR,0)*pix.xy)).rgb;
+		}
+		else
+		{
+		color.rgb = texcoord.x < 0.5 ? LCal(float2(texcoord.xy - float2(parallaxL,0)*pix.xy)).rgb : RCal(float2(texcoord.xy + float2(parallaxR,0)*pix.xy)).rgb;
+		}
+	}
+}
+
+///////////////////////////////////////////////////////////ReShade.fxh/////////////////////////////////////////////////////////////
+
+// Vertex shader generating a triangle covering the entire screen
+void PostProcessVS(in uint id : SV_VertexID, out float4 position : SV_Position, out float2 texcoord : TEXCOORD)
+{
+	texcoord.x = (id == 2) ? 2.0 : 0.0;
+	texcoord.y = (id == 1) ? 2.0 : 0.0;
+	position = float4(texcoord * float2(2.0, -2.0) + float2(-1.0, 1.0), 0.0, 1.0);
+}
+
 ///////////////////////////////////////////////Depth Map View//////////////////////////////////////////////////////////////////////
 
-float4 PS(float4 pos : SV_Position, float2 texcoord : TEXCOORD0) : SV_Target
-{
-		
-	float4 color = tex2D(SamplerCC, texcoord);
-		
-		
-		if (DepthFlip)
-		texcoord.y = 1 - texcoord.y;
-		
-		float4 depthM = ReShade::GetLinearizedDepth(texcoord.xy);
-		
-		if (CustomDM == 0)
-	{	
-		//Naruto
-		if (AltDepthMap == 0)
-		{
-		depthM = (pow(abs(depthM),0.75));
-		}
-	}
-	else
-	{
-		//Custom One +
-		if (CustomDM == 1)
-		{
-		float cF = Far;
-		float cN = Near;
-		depthM = (-0+(pow(abs(depthM),cN))*cF);
-		}
-		
-		//Custom One -
-		if (CustomDM == 2)
-		{
-		float cF = Far;
-		float cN = Near;
-		depthM = 1-(-0+(pow(abs(depthM),cN))*cF);
-		}
-		
-		//Custom Two +
-		if (CustomDM == 3)
-		{
-		float cF  = Far;
-		float cN = Near;
-		depthM = (1 - cF) / (cN - cF * depthM); 
-		}
-		
-		//Custom Two -
-		if (CustomDM == 4)
-		{
-		float cF  = Far;
-		float cN = Near;
-		depthM = 1 - (1 - cF) / (cN - cF * depthM); 
-		}
-		
-		//Custom Three +
-		if (CustomDM == 5)
-		{
-		float cF  = Far;
-		float cN = Near;
-		depthM = (cF * 1/depthM + cN);
-		}
-		
-		//Custom Three -
-		if (CustomDM == 6)
-		{
-		float cF  = Far;
-		float cN = Near;
-		depthM = 1 - (cF * 1/depthM + cN);
-		}
-		
-		//Custom Four +
-		if (CustomDM == 7)
-		{
-		float cF = Far;
-		float cN = Near;	
-		depthM = log(depthM/cF)/log(cN/cF);
-		}
-		
-		//Custom Four -
-		if (CustomDM == 8)
-		{
-		float cF = Far;
-		float cN = Near;	
-		depthM = 1 - log(depthM/cF)/log(cN/cF);
-		}
-		
-		//Custom Five +
-		if (CustomDM == 9)
-		{
-		float cF = Far;
-		float cN = Near;
-		depthM = (cF) / (cF - depthM * ((1 - cN) / (cF - cN * depthM)) * (cF - 1));
-		}
-		
-		//Custom Five -
-		if (CustomDM == 10)
-		{
-		float cF = Far;
-		float cN = Near;
-		depthM = 1 - (cF) / (cF - depthM * ((1 - cN) / (cF - cN * depthM)) * (cF - 1));
-		}
-		
-		//Custom Six +
-		if (CustomDM == 11)
-		{
-		float cF = Far;
-		float cN = Near;
-		depthM = (cN - depthM * cN) + (depthM * cF);
-		}
-		
-		//Custom Six -
-		if (CustomDM == 12)
-		{
-		float cF = Far;
-		float cN = Near;
-		depthM = 1 - (cN - depthM * cN) + (depthM * cF);
-		}
-	}
-	
-	float4 DM = depthM;
-	
-	if (DepthMap)
-	{
-	color.rgb = DM.rrr;				
-	}
-	return color;
-	}
-
-//*Rendering passes*//
+//*Rendering pass*//
 
 technique Super_Depth3D
 	{
 			pass
 		{
 			VertexShader = PostProcessVS;
-			PixelShader = PS_renderL;
-			RenderTarget = texCL;
+			PixelShader = PS_renderLR;
 		}
-			pass
-		{
-			VertexShader = PostProcessVS;
-			PixelShader = PS_renderR;
-			RenderTarget = texCR;
-		}
-			pass
-		{
-			VertexShader = PostProcessVS;
-			PixelShader = PS0;
-			RenderTarget = texCC;
-		}
-			pass
-		{
-			VertexShader = PostProcessVS;
-			PixelShader = PS;
-		}
+		
 	}
