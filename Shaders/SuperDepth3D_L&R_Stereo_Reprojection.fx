@@ -3,7 +3,7 @@
  //----------------////
 
  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
- //* Depth Map Based 3D post-process shader v2.0 L & R Eye Rework of Code																											*//
+ //* Depth Map Based 3D post-process shader v1.0 L & R                      																										*//
  //* For Reshade 3.0																																								*//
  //* --------------------------																																						*//
  //* This work is licensed under a Creative Commons Attribution 3.0 Unported License.																								*//
@@ -17,7 +17,7 @@
  //* http://reshade.me/forum/shader-presentation/2128-sidebyside-3d-depth-map-based-stereoscopic-shader																				*//	
  //* ---------------------------------																																				*//
  //*																																												*//
- //* Original work was based on Shader Based on forum user 04348 and be located here http://reshade.me/forum/shader-presentation/1594-3d-anaglyph-red-cyan-shader-wip#15236			*//
+ //* 																																												*//
  //*																																												*//
  //* 																																												*//
  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -31,7 +31,7 @@ uniform int AltDepthMap <
 
 uniform int Depth <
 	ui_type = "drag";
-	ui_min = 0; ui_max = 100;
+	ui_min = 0; ui_max = 25;
 	ui_label = "Depth Slider";
 	ui_tooltip = "Determines the amount of Image Warping and Separation between both eyes.";
 > = 25;
@@ -148,26 +148,24 @@ sampler2D SamplerCC
 		AddressV = CLAMP;
 		AddressW = CLAMP;
 	};
-	
-//Left Eye Depth Map Information
-float SbSdepthL (float2 texcoord) 
-	
-	{
+
+//Depth Map Information	
+float SbSdepthL (float2 texcoord) 	
+{
 
 	 float4 color = tex2D(SamplerCC, texcoord);
 
 			if (DepthFlip)
 			texcoord.y =  1 - texcoord.y;
-
-
-	float4 depthL = ReShade::GetLinearizedDepth(float2(texcoord.x, texcoord.y));
-
+	
+	float4 depth = ReShade::GetLinearizedDepth(float2(texcoord.x+Depth*pix.x, texcoord.y));
+		
 	if (CustomDM == 0)
 	{		
 		//Naruto
 		if (AltDepthMap == 0)
 		{
-		depthL = (pow(abs(depthL),0.75));
+		depth = (pow(abs(depth),0.75));
 		}
 	}
 	else
@@ -177,7 +175,7 @@ float SbSdepthL (float2 texcoord)
 		{
 		float cF = Far;
 		float cN = Near;
-		depthL = (-0+(pow(abs(depthL),cN))*cF);
+		depth = (-0+(pow(abs(depth),cN))*cF);
 		}
 		
 		//Custom One -
@@ -185,7 +183,7 @@ float SbSdepthL (float2 texcoord)
 		{
 		float cF = Far;
 		float cN = Near;
-		depthL = 1-(-0+(pow(abs(depthL),cN))*cF);
+		depth = 1-(-0+(pow(abs(depth),cN))*cF);
 		}
 		
 		//Custom Two +
@@ -193,7 +191,7 @@ float SbSdepthL (float2 texcoord)
 		{
 		float cF  = Far;
 		float cN = Near;
-		depthL = (1 - cF) / (cN - cF * depthL); 
+		depth = (1 - cF) / (cN - cF * depth); 
 		}
 		
 		//Custom Two -
@@ -201,7 +199,7 @@ float SbSdepthL (float2 texcoord)
 		{
 		float cF  = Far;
 		float cN = Near;
-		depthL = 1 - (1 - cF) / (cN - cF * depthL); 
+		depth = 1 - (1 - cF) / (cN - cF * depth); 
 		}
 		
 		//Custom Three +
@@ -209,7 +207,7 @@ float SbSdepthL (float2 texcoord)
 		{
 		float cF  = Far;
 		float cN = Near;
-		depthL = (cF * 1/depthL + cN);
+		depth = (cF * 1/depth + cN);
 		}
 		
 		//Custom Three -
@@ -217,23 +215,23 @@ float SbSdepthL (float2 texcoord)
 		{
 		float cF  = Far;
 		float cN = Near;
-		depthL = 1 - (cF * 1/depthL + cN);
+		depth = 1 - (cF * 1/depth + cN);
 		}
 		
 		//Custom Four +
 		if (CustomDM == 7)
 		{
 		float cF = Far;
-		float cN = Near;
-		depthL = log(depthL/cF)/log(cN/cF);
+		float cN = Near;	
+		depth = log(depth/cF)/log(cN/cF);
 		}
 		
 		//Custom Four -
 		if (CustomDM == 8)
 		{
 		float cF = Far;
-		float cN = Near;		
-		depthL = 1 - log(depthL/cF)/log(cN/cF);
+		float cN = Near;
+		depth = 1 - log(depth/cF)/log(cN/cF);
 		}
 		
 		//Custom Five +
@@ -241,7 +239,7 @@ float SbSdepthL (float2 texcoord)
 		{
 		float cF = Far;
 		float cN = Near;
-		depthL = (cF) / (cF - depthL * ((1 - cN) / (cF - cN * depthL)) * (cF - 1));
+		depth = (cF) / (cF - depth * ((1 - cN) / (cF - cN * depth)) * (cF - 1));
 		}
 		
 		//Custom Five -
@@ -249,7 +247,7 @@ float SbSdepthL (float2 texcoord)
 		{
 		float cF = Far;
 		float cN = Near;
-		depthL = 1 - (cF) / (cF - depthL * ((1 - cN) / (cF - cN * depthL)) * (cF - 1));
+		depth = 1 - (cF) / (cF - depth * ((1 - cN) / (cF - cN * depth)) * (cF - 1));
 		}
 		
 		//Custom Six +
@@ -257,7 +255,7 @@ float SbSdepthL (float2 texcoord)
 		{
 		float cF = Far;
 		float cN = Near;
-		depthL = (cN - depthL * cN) + (depthL*cF);
+		depth = (cN - depth * cN) + (depth*cF);
 		}
 		
 		//Custom Six -
@@ -265,18 +263,18 @@ float SbSdepthL (float2 texcoord)
 		{
 		float cF = Far;
 		float cN = Near;
-		depthL = 1 - (cN - depthL * cN) + (depthL*cF);
+		depth = 1 - (cN - depth * cN) + (depth*cF);
 		}
 	}
 
-    float4 DL =  depthL;
+    float4 D = depth;	
 
-	color.r = 1 - DL.r;
-	
+	color.r = 1 - D.r;
+
 	return color.r;	
 	}
 
-//Right Eye Depth Map Information	
+//Depth Map Information	
 float SbSdepthR (float2 texcoord) 	
 {
 
@@ -285,14 +283,14 @@ float SbSdepthR (float2 texcoord)
 			if (DepthFlip)
 			texcoord.y =  1 - texcoord.y;
 	
-	float4 depthR = ReShade::GetLinearizedDepth(float2(texcoord.x, texcoord.y));
+	float4 depth = ReShade::GetLinearizedDepth(float2(texcoord.x-Depth*pix.x, texcoord.y));
 		
 	if (CustomDM == 0)
 	{		
 		//Naruto
 		if (AltDepthMap == 0)
 		{
-		depthR = (pow(abs(depthR),0.75));
+		depth = (pow(abs(depth),0.75));
 		}
 	}
 	else
@@ -302,7 +300,7 @@ float SbSdepthR (float2 texcoord)
 		{
 		float cF = Far;
 		float cN = Near;
-		depthR = (-0+(pow(abs(depthR),cN))*cF);
+		depth = (-0+(pow(abs(depth),cN))*cF);
 		}
 		
 		//Custom One -
@@ -310,7 +308,7 @@ float SbSdepthR (float2 texcoord)
 		{
 		float cF = Far;
 		float cN = Near;
-		depthR = 1-(-0+(pow(abs(depthR),cN))*cF);
+		depth = 1-(-0+(pow(abs(depth),cN))*cF);
 		}
 		
 		//Custom Two +
@@ -318,7 +316,7 @@ float SbSdepthR (float2 texcoord)
 		{
 		float cF  = Far;
 		float cN = Near;
-		depthR = (1 - cF) / (cN - cF * depthR); 
+		depth = (1 - cF) / (cN - cF * depth); 
 		}
 		
 		//Custom Two -
@@ -326,7 +324,7 @@ float SbSdepthR (float2 texcoord)
 		{
 		float cF  = Far;
 		float cN = Near;
-		depthR = 1 - (1 - cF) / (cN - cF * depthR); 
+		depth = 1 - (1 - cF) / (cN - cF * depth); 
 		}
 		
 		//Custom Three +
@@ -334,7 +332,7 @@ float SbSdepthR (float2 texcoord)
 		{
 		float cF  = Far;
 		float cN = Near;
-		depthR = (cF * 1/depthR + cN);
+		depth = (cF * 1/depth + cN);
 		}
 		
 		//Custom Three -
@@ -342,7 +340,7 @@ float SbSdepthR (float2 texcoord)
 		{
 		float cF  = Far;
 		float cN = Near;
-		depthR = 1 - (cF * 1/depthR + cN);
+		depth = 1 - (cF * 1/depth + cN);
 		}
 		
 		//Custom Four +
@@ -350,7 +348,7 @@ float SbSdepthR (float2 texcoord)
 		{
 		float cF = Far;
 		float cN = Near;	
-		depthR = log(depthR/cF)/log(cN/cF);
+		depth = log(depth/cF)/log(cN/cF);
 		}
 		
 		//Custom Four -
@@ -358,7 +356,7 @@ float SbSdepthR (float2 texcoord)
 		{
 		float cF = Far;
 		float cN = Near;
-		depthR = 1 - log(depthR/cF)/log(cN/cF);
+		depth = 1 - log(depth/cF)/log(cN/cF);
 		}
 		
 		//Custom Five +
@@ -366,7 +364,7 @@ float SbSdepthR (float2 texcoord)
 		{
 		float cF = Far;
 		float cN = Near;
-		depthR = (cF) / (cF - depthR * ((1 - cN) / (cF - cN * depthR)) * (cF - 1));
+		depth = (cF) / (cF - depth * ((1 - cN) / (cF - cN * depth)) * (cF - 1));
 		}
 		
 		//Custom Five -
@@ -374,7 +372,7 @@ float SbSdepthR (float2 texcoord)
 		{
 		float cF = Far;
 		float cN = Near;
-		depthR = 1 - (cF) / (cF - depthR * ((1 - cN) / (cF - cN * depthR)) * (cF - 1));
+		depth = 1 - (cF) / (cF - depth * ((1 - cN) / (cF - cN * depth)) * (cF - 1));
 		}
 		
 		//Custom Six +
@@ -382,7 +380,7 @@ float SbSdepthR (float2 texcoord)
 		{
 		float cF = Far;
 		float cN = Near;
-		depthR = (cN - depthR * cN) + (depthR*cF);
+		depth = (cN - depth * cN) + (depth*cF);
 		}
 		
 		//Custom Six -
@@ -390,13 +388,13 @@ float SbSdepthR (float2 texcoord)
 		{
 		float cF = Far;
 		float cN = Near;
-		depthR = 1 - (cN - depthR * cN) + (depthR*cF);
+		depth = 1 - (cN - depth * cN) + (depth*cF);
 		}
 	}
 
-    float4 DR = depthR;	
+    float4 D = depth;	
 
-	color.r = 1 - DR.r;
+	color.r = 1 - D.r;
 
 	return color.r;	
 	}
@@ -405,37 +403,13 @@ float SbSdepthR (float2 texcoord)
 void PS_renderL(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float3 color : SV_Target)
 {
 	const float samples[3] = {0.5, 0.66, 1};
-	float minDepthL = 1.0;
-	float2 uv = 0;
-	float Parallax = 1;
-	
-	//color.rgb = tex2D(ReShade::BackBuffer, float2(texcoord.x, texcoord.y)).rgb;
-
-	//Left Eye
-	[unroll]
-	for (int j = 0; j < 3; ++j)
-	{
-		uv.x = samples[j] * Depth;
-		minDepthL= min(minDepthL,SbSdepthL(texcoord.xy+uv*pix.xy));
-
-			float parallaxL = Depth * (1 - Parallax / minDepthL);
-			
-			color.rgb = tex2D(ReShade::BackBuffer, texcoord.xy + float2(parallaxL,0)*pix.xy).rgb;
-		}
-	}
-
-
-//////////////////////////////////////////Render Right Screen//////////////////////////////////////////////////
-void PS_renderR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float3 color : SV_Target)
-{
-	const float samples[3] = {0.5, 0.66, 1};
 	float minDepthR = 1.0;
 	float2 uv = 0;
 	float Parallax = 1;
 	
 	//color.rgb = tex2D(ReShade::BackBuffer, float2(texcoord.x, texcoord.y)).rgb;
 
-	//Left Eye
+	//Right Eye
 	[unroll]
 	for (int j = 0; j < 3; ++j)
 	{
@@ -444,7 +418,31 @@ void PS_renderR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0
 
 			float parallaxR = Depth * (1 - Parallax / minDepthR);
 			
-			color.rgb = tex2D(ReShade::BackBuffer, texcoord.xy - float2(parallaxR,0)*pix.xy).rgb;
+			color.rgb = tex2D(ReShade::BackBuffer, texcoord.xy + float2(parallaxR,0)*pix.xy).rgb;
+		}
+	}
+
+
+//////////////////////////////////////////Render Right Screen//////////////////////////////////////////////////
+void PS_renderR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float3 color : SV_Target)
+{
+	const float samples[3] = {0.5, 0.66, 1};
+	float minDepthL = 1.0;
+	float2 uv = 1;
+	float Parallax = 1;
+	
+	//color.rgb = tex2D(ReShade::BackBuffer, float2(texcoord.x, texcoord.y)).rgb;
+
+	//Left Eye
+	[unroll]
+	for (int j = 0; j < 3; ++j)
+	{
+		uv.x = samples[j] * Depth;
+		minDepthL= min(minDepthL,SbSdepthL(texcoord.xy-uv.xy*pix.xy));
+
+			float parallaxL = Depth * (1 - Parallax / minDepthL);
+			
+			color.rgb = tex2D(ReShade::BackBuffer, texcoord.xy - float2(parallaxL,0)*pix.xy).rgb;
 		}
 	}
 
