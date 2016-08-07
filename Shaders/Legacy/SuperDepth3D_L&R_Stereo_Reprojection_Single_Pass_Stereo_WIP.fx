@@ -17,7 +17,7 @@
  //* http://reshade.me/forum/shader-presentation/2128-sidebyside-3d-depth-map-based-stereoscopic-shader																				*//	
  //* ---------------------------------																																				*//
  //*																																												*//
- //* 																																												*//
+ //* Code lifted from CryTech 3 Slide Show																																			*//
  //*																																												*//
  //* 																																												*//
  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -152,120 +152,100 @@ float SbSdepthL (float2 texcoord)
 			if (DepthFlip)
 			texcoord.y =  1 - texcoord.y;
 	
-	float4 depth = tex2D(DepthBuffer, float2(texcoord.x*2+Depth*pix.x, texcoord.y));
+	float DWA = WA;
+	
+	float4 depthM = tex2D(DepthBuffer, float2(texcoord.x*2-DWA*pix.x, texcoord.y));
 		
-	if (CustomDM == 0)
-	{		
-		//AI
+		if (CustomDM == 0)
+	{	
+		//Alien Isolation
 		if (AltDepthMap == 0)
 		{
-		float cF = 0.9125;
-		float cN = 0.9125;
-		depth = 1 - (cF) / (cF - depth * ((1 - cN) / (cF - cN * depth)) * (cF - 1));
+		float cF = 1000000000;
+		float cN = 1;	
+		depthM = (exp(depthM * log(cF + cN)) - cN) / cF;
 		}
+		
+		//Amnesia: The Dark Descent
+		if (AltDepthMap == 1)
+		{
+		float cF = 1000;
+		float cN = 1;
+		depthM = cN/(cN-cF) / ( depthM - cF/(cF-cN));
+		}
+		
+		//Among The Sleep	
+		if (AltDepthMap == 2)
+		{
+		float cF = 10;
+		float cN = 0.05;
+		depthM = cN/(cN-cF) / ( depthM - cF/(cF-cN));
+		}
+		
+		//Assassin Creed Unity
+		if (AltDepthMap == 3)
+		{
+		float cF  = 0.0075;
+		float cN = 1;
+		depthM =  (cN * cF / (cF + depthM * (cN - cF))); 
+		}
+		
+		//Batman Arkham Knight | Batman Arkham Origins | Batman: Arkham City | BorderLands 2
+		if (AltDepthMap == 4)
+		{
+		float cF = 50;
+		float cN = 0;
+		depthM = (pow(abs(cN-depthM),cF));
+		}
+		
 	}
 	else
 	{
-		//Custom One +
+		//Custom One
 		if (CustomDM == 1)
 		{
 		float cF = Far;
 		float cN = Near;
-		depth = (-0+(pow(abs(depth),cN))*cF);
+		depthM = (pow(abs(cN-depthM),cF));
 		}
 		
-		//Custom One -
+		//Custom Two
 		if (CustomDM == 2)
 		{
-		float cF = Far;
+		float cF  = Far;
 		float cN = Near;
-		depth = 1-(-0+(pow(abs(depth),cN))*cF);
+		depthM = (2.0 * cN) / (cF + cN - depthM * (cF - cN));
 		}
 		
-		//Custom Two +
+		//Custom Three
 		if (CustomDM == 3)
 		{
 		float cF  = Far;
 		float cN = Near;
-		depth = (1 - cF) / (cN - cF * depth); 
+		depthM =  (cN * cF / (cF + depthM * (cN - cF))); 
 		}
 		
-		//Custom Two -
+		//Custom Four
 		if (CustomDM == 4)
-		{
-		float cF  = Far;
-		float cN = Near;
-		depth = 1 - (1 - cF) / (cN - cF * depth); 
-		}
-		
-		//Custom Three +
-		if (CustomDM == 5)
-		{
-		float cF  = Far;
-		float cN = Near;
-		depth = (cF * 1/depth + cN);
-		}
-		
-		//Custom Three -
-		if (CustomDM == 6)
-		{
-		float cF  = Far;
-		float cN = Near;
-		depth = 1 - (cF * 1/depth + cN);
-		}
-		
-		//Custom Four +
-		if (CustomDM == 7)
 		{
 		float cF = Far;
 		float cN = Near;	
-		depth = log(depth/cF)/log(cN/cF);
+		depthM = (exp(depthM * log(cF + cN)) - cN) / cF;
 		}
 		
-		//Custom Four -
-		if (CustomDM == 8)
+		//Custom Five
+		if (CustomDM == 5)
 		{
 		float cF = Far;
 		float cN = Near;
-		depth = 1 - log(depth/cF)/log(cN/cF);
+		depthM = cN/(cN-cF) / ( depthM - cF/(cF-cN));
 		}
 		
-		//Custom Five +
-		if (CustomDM == 9)
-		{
-		float cF = Far;
-		float cN = Near;
-		depth = (cF) / (cF - depth * ((1 - cN) / (cF - cN * depth)) * (cF - 1));
-		}
-		
-		//Custom Five -
-		if (CustomDM == 10)
-		{
-		float cF = Far;
-		float cN = Near;
-		depth = 1 - (cF) / (cF - depth * ((1 - cN) / (cF - cN * depth)) * (cF - 1));
-		}
-		
-		//Custom Six +
-		if (CustomDM == 11)
-		{
-		float cF = Far;
-		float cN = Near;
-		depth = (cN - depth * cN) + (depth*cF);
-		}
-		
-		//Custom Six -
-		if (CustomDM == 12)
-		{
-		float cF = Far;
-		float cN = Near;
-		depth = 1 - (cN - depth * cN) + (depth*cF);
-		}
 	}
 
-    float4 D = depth;	
+    float4 D = depthM;	
 
-	color.r = 1 - D.r;
+	color.r = texcoord.x < 0.5 ? D.r : 0;
 
 	return color.r;	
 	}
@@ -278,122 +258,101 @@ float SbSdepthR (float2 texcoord)
 
 			if (DepthFlip)
 			texcoord.y =  1 - texcoord.y;
-			
 	
-	float4 depth = tex2D(DepthBuffer, float2(texcoord.x*2-1-Depth*pix.x, texcoord.y)) ;
+	float DWA = WA;
+	
+	float4 depthM = tex2D(DepthBuffer, float2(texcoord.x*2-1+DWA*pix.x, texcoord.y)) ;
 		
-	if (CustomDM == 0)
-	{		
-		//AI
+		if (CustomDM == 0)
+	{	
+		//Alien Isolation
 		if (AltDepthMap == 0)
 		{
-		float cF = 0.9125;
-		float cN = 0.9125;
-		depth = 1 - (cF) / (cF - depth * ((1 - cN) / (cF - cN * depth)) * (cF - 1));
+		float cF = 1000000000;
+		float cN = 1;	
+		depthM = (exp(depthM * log(cF + cN)) - cN) / cF;
 		}
+		
+		//Amnesia: The Dark Descent
+		if (AltDepthMap == 1)
+		{
+		float cF = 1000;
+		float cN = 1;
+		depthM = cN/(cN-cF) / ( depthM - cF/(cF-cN));
+		}
+		
+		//Among The Sleep	
+		if (AltDepthMap == 2)
+		{
+		float cF = 10;
+		float cN = 0.05;
+		depthM = cN/(cN-cF) / ( depthM - cF/(cF-cN));
+		}
+		
+		//Assassin Creed Unity
+		if (AltDepthMap == 3)
+		{
+		float cF  = 0.0075;
+		float cN = 1;
+		depthM =  (cN * cF / (cF + depthM * (cN - cF))); 
+		}
+		
+		//Batman Arkham Knight | Batman Arkham Origins | Batman: Arkham City | BorderLands 2
+		if (AltDepthMap == 4)
+		{
+		float cF = 50;
+		float cN = 0;
+		depthM = (pow(abs(cN-depthM),cF));
+		}
+		
 	}
 	else
 	{
-		//Custom One +
+		//Custom One
 		if (CustomDM == 1)
 		{
 		float cF = Far;
 		float cN = Near;
-		depth = (-0+(pow(abs(depth),cN))*cF);
+		depthM = (pow(abs(cN-depthM),cF));
 		}
 		
-		//Custom One -
+		//Custom Two
 		if (CustomDM == 2)
 		{
-		float cF = Far;
+		float cF  = Far;
 		float cN = Near;
-		depth = 1-(-0+(pow(abs(depth),cN))*cF);
+		depthM = (2.0 * cN) / (cF + cN - depthM * (cF - cN));
 		}
 		
-		//Custom Two +
+		//Custom Three
 		if (CustomDM == 3)
 		{
 		float cF  = Far;
 		float cN = Near;
-		depth = (1 - cF) / (cN - cF * depth); 
+		depthM =  (cN * cF / (cF + depthM * (cN - cF))); 
 		}
 		
-		//Custom Two -
+		//Custom Four
 		if (CustomDM == 4)
-		{
-		float cF  = Far;
-		float cN = Near;
-		depth = 1 - (1 - cF) / (cN - cF * depth); 
-		}
-		
-		//Custom Three +
-		if (CustomDM == 5)
-		{
-		float cF  = Far;
-		float cN = Near;
-		depth = (cF * 1/depth + cN);
-		}
-		
-		//Custom Three -
-		if (CustomDM == 6)
-		{
-		float cF  = Far;
-		float cN = Near;
-		depth = 1 - (cF * 1/depth + cN);
-		}
-		
-		//Custom Four +
-		if (CustomDM == 7)
 		{
 		float cF = Far;
 		float cN = Near;	
-		depth = log(depth/cF)/log(cN/cF);
+		depthM = (exp(depthM * log(cF + cN)) - cN) / cF;
 		}
 		
-		//Custom Four -
-		if (CustomDM == 8)
+		//Custom Five
+		if (CustomDM == 5)
 		{
 		float cF = Far;
 		float cN = Near;
-		depth = 1 - log(depth/cF)/log(cN/cF);
+		depthM = cN/(cN-cF) / ( depthM - cF/(cF-cN));
 		}
 		
-		//Custom Five +
-		if (CustomDM == 9)
-		{
-		float cF = Far;
-		float cN = Near;
-		depth = (cF) / (cF - depth * ((1 - cN) / (cF - cN * depth)) * (cF - 1));
-		}
-		
-		//Custom Five -
-		if (CustomDM == 10)
-		{
-		float cF = Far;
-		float cN = Near;
-		depth = 1 - (cF) / (cF - depth * ((1 - cN) / (cF - cN * depth)) * (cF - 1));
-		}
-		
-		//Custom Six +
-		if (CustomDM == 11)
-		{
-		float cF = Far;
-		float cN = Near;
-		depth = (cN - depth * cN) + (depth*cF);
-		}
-		
-		//Custom Six -
-		if (CustomDM == 12)
-		{
-		float cF = Far;
-		float cN = Near;
-		depth = 1 - (cN - depth * cN) + (depth*cF);
-		}
 	}
 
-    float4 D = depth;	
+    float4 D = depthM;	
 
-	color.r = 1 - D.r;
+	color.r = texcoord.x > 0.5 ? D.r : 0;
 
 	return color.r;	
 	}
@@ -458,30 +417,29 @@ float3 RCal(float2 texcoord)
 //////////////////////////////////////////Render Single Pass Left/Right//////////////////////////////////////////////////
 void PS_renderLR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float3 color : SV_Target)
 {
-	const float samples[3] = {0.5, 0.66, 1};
-	float minDepthL = 1.0;
-	float minDepthR = 1.0;
-	float2 uv = 1;
+	const float samples[5] = {0.5, 0.66, 1, 0.25 , 0.75};
+	float minDepthL = 1.0, minDepthR = 1.0;
+	float2 uv = 0;
 	float Parallax = 1;
 	
 	//Left Right Eyes
 	[unroll]
-	for (int j = 0; j < 3; ++j)
+	for (int j = 0; j < 5; ++j)
 	{
 		uv.x = samples[j] * Depth;
-		minDepthL= min(minDepthL,SbSdepthL(texcoord.xy-uv.xy*pix.xy));
-		minDepthR= min(minDepthR,SbSdepthR(texcoord.xy+uv.xy*pix.xy));
+		minDepthL= min(minDepthL,SbSdepthL(float2(texcoord.x-uv.x*pix.x,texcoord.y-uv.y*pix.y)));
+		minDepthR= min(minDepthR,SbSdepthR(float2(texcoord.x+uv.x*pix.x,texcoord.y+uv.y*pix.y)));
 
 		float parallaxL = Depth * (1 - Parallax / minDepthL);
 		float parallaxR = Depth * (1 - Parallax / minDepthR);
 			
 		if(BD)
 		{
-		color.rgb = texcoord.x < 0.5 ? BDL(float2(texcoord.xy - float2(parallaxL,0)*pix.xy)).rgb : BDR(float2(texcoord.xy + float2(parallaxR,0)*pix.xy)).rgb;
+		color.rgb = texcoord.x < 0.5 ? BDL(float2(texcoord.xy + float2(parallaxL,0)*pix.xy)).rgb : BDR(float2(texcoord.xy - float2(parallaxR,0)*pix.xy)).rgb;
 		}
 		else
 		{
-		color.rgb = texcoord.x < 0.5 ? LCal(float2(texcoord.xy - float2(parallaxL,0)*pix.xy)).rgb : RCal(float2(texcoord.xy + float2(parallaxR,0)*pix.xy)).rgb;
+		color.rgb = texcoord.x < 0.5 ? LCal(float2(texcoord.xy + float2(parallaxL,0)*pix.xy)).rgb : RCal(float2(texcoord.xy - float2(parallaxR,0)*pix.xy)).rgb;
 		}
 	}
 }

@@ -61,7 +61,7 @@ uniform float Hsquish <
 
 sampler BorderSampler
 {
-	Texture = ReShade::BackBufferTex;
+	Texture = BackBufferTex;
 	AddressU = Border; AddressV = Border;
 	MipFilter = Linear; MinFilter = Linear; MagFilter = Linear;
 	SRGBTexture = false;
