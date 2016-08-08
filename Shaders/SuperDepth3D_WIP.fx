@@ -304,13 +304,29 @@ float SbSdepth (float2 texcoord)
 	else
 	{
 	float DWA = WA;
-	color.r =  texcoord.x+Depth*pix.x*SbSdepth(float2(texcoord.x+DWA*pix.x,texcoord.y));
+	color.r =   texcoord.x+Depth*pix.x*SbSdepth(float2(texcoord.x+DWA*pix.x,texcoord.y));
 	color.gb =  texcoord.x-Depth*pix.x*SbSdepth(float2(texcoord.x-DWA*pix.x,texcoord.y));
 	}
 	}
+
+float3 LCal(float2 texcoord)
+
+{
+	float3 LCalculation= tex2D(BackBuffer,float2(texcoord.x, texcoord.y )).rgb;
+
+	return LCalculation.rgb;
+}
+
+float3 RCal(float2 texcoord)
+
+{
+	float3 RCalculation= tex2D(BackBuffer,float2(texcoord.x, texcoord.y )).rgb;
+
+	return RCalculation.rgb;
+}
 	
 ////////////////////////////////////////////////Left Eye////////////////////////////////////////////////////////
-void PS_renderL(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float3 color : SV_Target)
+void PS_renderLR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float3 color : SV_Target0 , out float3 colorT: SV_Target1)
 {		
 	[loop]
 	for (int j = 0; j <= 25; ++j) 
@@ -318,9 +334,9 @@ void PS_renderL(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0
 		if (AltRender)
 		{
 			//Left	
-			if (tex2D(SamplerCC,float2(texcoord.x-j*pix.x,texcoord.y)).b >= texcoord.x+pix.x || tex2D(SamplerCC,float2(texcoord.x+j*pix.x,texcoord.y)).b <= tex2D(SamplerCC,float2(texcoord.x-j*pix.x,texcoord.y)).b)
+			if (tex2D(SamplerCC,float2(texcoord.x-j*pix.x,texcoord.y)).b >= texcoord.x+pix.x || tex2D(SamplerCC,float2(texcoord.x+j*pix.x,texcoord.y)).b <= tex2D(SamplerCC,float2(texcoord.x-j*pix.x,texcoord.y)).b) 
 			{
-			color.rgb = tex2D(BackBuffer, float2(texcoord.x+j*pix.x, texcoord.y)).rgb;
+			color.rgb = LCal(float2(texcoord.x+j*pix.x, texcoord.y)).rgb;
 			}
 		}
 		else
@@ -328,31 +344,21 @@ void PS_renderL(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0
 			//Right
 			if (tex2D(SamplerCC,float2(texcoord.x+j*pix.x,texcoord.y)).b <= texcoord.x-pix.x || tex2D(SamplerCC,float2(texcoord.x-j*pix.x,texcoord.y)).b >= tex2D(SamplerCC,float2(texcoord.x+j*pix.x,texcoord.y)).b)
 			{
-				color.rgb = tex2D(BackBuffer, float2(texcoord.x+j*pix.x, texcoord.y)).rgb;
+			color.rgb = RCal(float2(texcoord.x+j*pix.x, texcoord.y)).rgb;
 			}
 		}
-	}
-}
-
-
-//////////////////////////////////////////Right Eye/////////////////////////////////////////////////////////////
-void PS_renderR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float3 color : SV_Target)
-{
-	[loop]
-	for (int j = 0; j >= -25; --j) 
-	{
 		if (AltRender)
 		{
-			if (tex2D(SamplerCC,float2(texcoord.x-j*pix.x,texcoord.y)).r <= texcoord.x+pix.x || tex2D(SamplerCC,float2(texcoord.x+j*pix.x,texcoord.y)).r >= tex2D(SamplerCC,float2(texcoord.x-j*pix.x,texcoord.y)).r)
+			if (tex2D(SamplerCC,float2(texcoord.x+j*pix.x,texcoord.y)).r <= texcoord.x-pix.x || tex2D(SamplerCC,float2(texcoord.x-j*pix.x,texcoord.y)).r >= tex2D(SamplerCC,float2(texcoord.x+j*pix.x,texcoord.y)).r)
 			{
-			color.rgb = tex2D(BackBuffer, float2(texcoord.x+j*pix.x, texcoord.y)).rgb;
+			colorT.rgb = RCal(float2(texcoord.x-j*pix.x, texcoord.y)).rgb;
 			}
 		}
 		else
 		{
-			if (tex2D(SamplerCC,float2(texcoord.x+j*pix.x,texcoord.y)).r >= texcoord.x-pix.x || tex2D(SamplerCC,float2(texcoord.x+j*pix.x,texcoord.y)).r >= tex2D(SamplerCC,float2(texcoord.x-j*pix.x,texcoord.y)).r)
+			if (tex2D(SamplerCC,float2(texcoord.x-j*pix.x,texcoord.y)).r >= texcoord.x+pix.x || tex2D(SamplerCC,float2(texcoord.x-j*pix.x,texcoord.y)).r >= tex2D(SamplerCC,float2(texcoord.x+j*pix.x,texcoord.y)).r)
 			{
-				color.rgb = tex2D(BackBuffer, float2(texcoord.x+j*pix.x, texcoord.y)).rgb;
+			colorT.rgb = LCal(float2(texcoord.x-j*pix.x, texcoord.y)).rgb;
 			}
 		}
 	}
@@ -401,16 +407,15 @@ void PS0(float4 position : SV_Position, float2 texcoord : TEXCOORD0, out float3 
 {
 	float pos = Hsquish-1;
 	float mid = pos*BUFFER_HEIGHT/2*pix.y;
+	
 	if(BD)
 	{
-		color = texcoord.x < 0.5 ? BDL(float2(texcoord.x*2 + Perspective * pix.x,(texcoord.y*Hsquish)-mid)).rgb : BDR(float2(texcoord.x*2-1 - Perspective * pix.x,(texcoord.y*Hsquish)-mid)).rgb;
+	color = texcoord.x < 0.5 ? BDL(float2(texcoord.x*2 + Perspective * pix.x,(texcoord.y*Hsquish)-mid)).rgb : BDR(float2(texcoord.x*2-1 - Perspective * pix.x,(texcoord.y*Hsquish)-mid)).rgb;
 	}
-		else
+	else
 	{
-		color = texcoord.x < 0.5 ? tex2D(SamplerCL, float2(texcoord.x*2 + Perspective * pix.x, texcoord.y)).rgb : tex2D(SamplerCR, float2(texcoord.x*2-1 - Perspective * pix.x, texcoord.y)).rgb;
+	color = texcoord.x < 0.5 ? tex2D(SamplerCL,float2(texcoord.x*2 + Perspective * pix.x,texcoord.y)).rgb : tex2D(SamplerCR,float2(texcoord.x*2-1 - Perspective * pix.x,texcoord.y)).rgb;
 	}
-
-
 }
 
 ///////////////////////////////////////////////////////////ReShade.fxh/////////////////////////////////////////////////////////////
@@ -551,19 +556,15 @@ technique Super_Depth3D
 			pass
 		{
 			VertexShader = PostProcessVS;
-			PixelShader = PS_renderL;
-			RenderTarget = texCL;
-		}
-			pass
-		{
-			VertexShader = PostProcessVS;
-			PixelShader = PS_renderR;
-			RenderTarget = texCR;
+			PixelShader = PS_renderLR;
+			RenderTarget0 = texCL;
+			RenderTarget1 = texCR;
 		}
 			pass
 		{
 			VertexShader = PostProcessVS;
 			PixelShader = PS0;
+			
 		}
 			pass
 		{
