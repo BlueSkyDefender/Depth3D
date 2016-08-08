@@ -327,14 +327,16 @@ float3 RCal(float2 texcoord)
 	
 ////////////////////////////////////////////////Left Eye////////////////////////////////////////////////////////
 void PS_renderLR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float3 color : SV_Target0 , out float3 colorT: SV_Target1)
-{		
+{	
+color.rgb = tex2D(BackBuffer,float2(texcoord.x, texcoord.y )).rgb;
+colorT.rgb = tex2D(BackBuffer,float2(texcoord.x, texcoord.y )).rgb;
 	[loop]
 	for (int j = 0; j <= 25; ++j) 
 	{
 		if (AltRender)
 		{
 			//Left	
-			if (tex2D(SamplerCC,float2(texcoord.x-j*pix.x,texcoord.y)).b >= texcoord.x+pix.x || tex2D(SamplerCC,float2(texcoord.x+j*pix.x,texcoord.y)).b <= tex2D(SamplerCC,float2(texcoord.x-j*pix.x,texcoord.y)).b) 
+			if (tex2D(SamplerCC,float2(texcoord.x-j*pix.x,texcoord.y)).b >= texcoord.x+pix.x ) 
 			{
 			color.rgb = LCal(float2(texcoord.x+j*pix.x, texcoord.y)).rgb;
 			}
@@ -342,21 +344,21 @@ void PS_renderLR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD
 		else
 		{
 			//Right
-			if (tex2D(SamplerCC,float2(texcoord.x+j*pix.x,texcoord.y)).b <= texcoord.x-pix.x || tex2D(SamplerCC,float2(texcoord.x-j*pix.x,texcoord.y)).b >= tex2D(SamplerCC,float2(texcoord.x+j*pix.x,texcoord.y)).b)
+			if (tex2D(SamplerCC,float2(texcoord.x+j*pix.x,texcoord.y)).b <= texcoord.x-pix.x)
 			{
 			color.rgb = RCal(float2(texcoord.x+j*pix.x, texcoord.y)).rgb;
 			}
 		}
 		if (AltRender)
 		{
-			if (tex2D(SamplerCC,float2(texcoord.x+j*pix.x,texcoord.y)).r <= texcoord.x-pix.x || tex2D(SamplerCC,float2(texcoord.x-j*pix.x,texcoord.y)).r >= tex2D(SamplerCC,float2(texcoord.x+j*pix.x,texcoord.y)).r)
+			if (tex2D(SamplerCC,float2(texcoord.x+j*pix.x,texcoord.y)).r <= texcoord.x-pix.x)
 			{
 			colorT.rgb = RCal(float2(texcoord.x-j*pix.x, texcoord.y)).rgb;
 			}
 		}
 		else
 		{
-			if (tex2D(SamplerCC,float2(texcoord.x-j*pix.x,texcoord.y)).r >= texcoord.x+pix.x || tex2D(SamplerCC,float2(texcoord.x-j*pix.x,texcoord.y)).r >= tex2D(SamplerCC,float2(texcoord.x+j*pix.x,texcoord.y)).r)
+			if (tex2D(SamplerCC,float2(texcoord.x-j*pix.x,texcoord.y)).r >= texcoord.x+pix.x)
 			{
 			colorT.rgb = LCal(float2(texcoord.x-j*pix.x, texcoord.y)).rgb;
 			}
