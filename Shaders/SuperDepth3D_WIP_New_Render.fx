@@ -3,7 +3,7 @@
  //----------------////
 
  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
- //* Depth Map Based 3D post-process shader v1.7.2 L & R Eye																															*//
+ //* Depth Map Based 3D post-process shader v1.7.2 L & R Eye																														*//
  //* For Reshade 3.0																																								*//
  //* --------------------------																																						*//
  //* This work is licensed under a Creative Commons Attribution 3.0 Unported License.																								*//
@@ -31,7 +31,7 @@ uniform int AltDepthMap <
 
 uniform int Depth <
 	ui_type = "drag";
-	ui_min = 0; ui_max = 30;
+	ui_min = 0; ui_max = 25;
 	ui_label = "Depth Slider";
 	ui_tooltip = "Determines the amount of Image Warping and Separation between both eyes.";
 > = 10;
@@ -178,7 +178,7 @@ sampler2D SamplerCDM
 		AddressV = CLAMP;
 		AddressW = CLAMP;
 	};
-	
+
 //Depth Map Information	
 float SbSdepth (float2 texcoord) 	
 {
@@ -292,21 +292,38 @@ float SbSdepth (float2 texcoord)
 	return color.r;	
 	}
 	
+float Blur(float2 texcoord)
+{
+	float4 color = 0;
+	const float weight[11] = {
+		0.082607,
+		0.080977,
+		0.076276,
+		0.069041,
+		0.060049,
+		0.050187,
+		0.040306,
+		0.031105,
+		0.023066,
+		0.016436,
+		0.011254
+	};
+
+	for (int i = -5; i < 5; i++)
+	{
+		float currweight = weight[abs(i)];
+		color += SbSdepth( texcoord.xy + float2(1,0) * (float)i * pix.x * 3.75) * currweight / 1.75;
+		color += SbSdepth( texcoord.xy + float2(1,0) * (float)i * pix.x * -3.75) * currweight / 1.75;
+	}
+  
+return color;
+}
 	/////////////////////////////////////////L/R/DepthMap Pos//////////////////////////////////////////////////////////
 	void  PS_calcLR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float3 color : SV_Target)
 	{
-	if(AltRender)
-	{
 	float DWA = -Depth+WA;
-	color.r =  texcoord.x-Depth*pix.x*SbSdepth(float2(texcoord.x+DWA*pix.x,texcoord.y));
-	color.gb =  texcoord.x+Depth*pix.x*SbSdepth(float2(texcoord.x-DWA*pix.x,texcoord.y));
-	}
-	else
-	{
-	float DWA = WA;
-	color.r =   texcoord.x+Depth*pix.x*SbSdepth(float2(texcoord.x+DWA*pix.x,texcoord.y));
-	color.gb =  texcoord.x-Depth*pix.x*SbSdepth(float2(texcoord.x-DWA*pix.x,texcoord.y));
-	}
+	color.r =  texcoord.x-Depth*pix.x*Blur(float2(texcoord.x+DWA*pix.x,texcoord.y));
+	color.gb =  texcoord.x+Depth*pix.x*Blur(float2(texcoord.x-DWA*pix.x,texcoord.y));
 	}
 
 float3 LCal(float2 texcoord)
@@ -324,7 +341,7 @@ float3 RCal(float2 texcoord)
 
 	return RCalculation.rgb;
 }
-	
+
 ////////////////////////////////////////////////Left Eye////////////////////////////////////////////////////////
 void PS_renderLR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float3 color : SV_Target0 , out float3 colorT: SV_Target1)
 {	
@@ -333,35 +350,15 @@ colorT.rgb = tex2D(BackBuffer,float2(texcoord.x, texcoord.y )).rgb;
 	[loop]
 	for (int j = 0; j <= 25; ++j) 
 	{
-		if (AltRender)
+		//Left	
+		if (tex2D(SamplerCC,float2(texcoord.x-j*pix.x,texcoord.y)).b >= texcoord.x+pix.x ) 
 		{
-			//Left	
-			if (tex2D(SamplerCC,float2(texcoord.x-j*pix.x,texcoord.y)).b >= texcoord.x+pix.x ) 
-			{
-			color.rgb = LCal(float2(texcoord.x+j*pix.x, texcoord.y)).rgb;
-			}
+		color.rgb = LCal(float2(texcoord.x+j*pix.x, texcoord.y)).rgb;
 		}
-		else
+		//Right
+		if (tex2D(SamplerCC,float2(texcoord.x+j*pix.x,texcoord.y)).r <= texcoord.x-pix.x)
 		{
-			//Right
-			if (tex2D(SamplerCC,float2(texcoord.x+j*pix.x,texcoord.y)).b <= texcoord.x-pix.x)
-			{
-			color.rgb = RCal(float2(texcoord.x+j*pix.x, texcoord.y)).rgb;
-			}
-		}
-		if (AltRender)
-		{
-			if (tex2D(SamplerCC,float2(texcoord.x+j*pix.x,texcoord.y)).r <= texcoord.x-pix.x)
-			{
-			colorT.rgb = RCal(float2(texcoord.x-j*pix.x, texcoord.y)).rgb;
-			}
-		}
-		else
-		{
-			if (tex2D(SamplerCC,float2(texcoord.x-j*pix.x,texcoord.y)).r >= texcoord.x+pix.x)
-			{
-			colorT.rgb = LCal(float2(texcoord.x-j*pix.x, texcoord.y)).rgb;
-			}
+		colorT.rgb = RCal(float2(texcoord.x-j*pix.x, texcoord.y)).rgb;
 		}
 	}
 }
