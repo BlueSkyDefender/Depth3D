@@ -280,23 +280,31 @@ float SbSdepth (float2 texcoord)
 		depthM = (pow(abs(cN-depthM),cF));
 		}
 		
+		//Dying Light
+		if (AltDepthMap == 11)
+		{
+		float cF = 100;
+		float cN = 0.005;
+		depthM = cF / (1 + cF - (depthM/cN) * (1 - cF));
+		}
+		
 	}
 	else
 	{
 		//Custom One
 		if (CustomDM == 1)
 		{
-		float cF = Far;
-		float cN = Near;
+		float cF = Far; //10+
+		float cN = Near;//1
 		depthM = (pow(abs(cN-depthM),cF));
 		}
 		
 		//Custom Two
 		if (CustomDM == 2)
 		{
-		float cF  = Far;
-		float cN = Near;
-		depthM = (2.0 * cN) / (cF + cN - depthM * (cF - cN));
+		float cF  = Far; //100+
+		float cN = Near; //0.01-
+		depthM = cF / (1 + cF - (depthM/cN) * (1 - cF));
 		}
 		
 		//Custom Three
@@ -553,6 +561,14 @@ float4 PS(float4 pos : SV_Position, float2 texcoord : TEXCOORD0) : SV_Target
 		depthM = (pow(abs(cN-depthM),cF));
 		}
 		
+		//Dying Light
+		if (AltDepthMap == 11)
+		{
+		float cF = 100;
+		float cN = 0.005;
+		depthM = cF / (1 + cF - (depthM/cN) * (1 - cF));
+		}
+		
 	}
 	else
 	{
@@ -569,7 +585,7 @@ float4 PS(float4 pos : SV_Position, float2 texcoord : TEXCOORD0) : SV_Target
 		{
 		float cF  = Far;
 		float cN = Near;
-		depthM = (2.0 * cN) / (cF + cN - depthM * (cF - cN));
+		depthM = cF / (1 + cF - (depthM/cN) * (1 - cF));
 		}
 		
 		//Custom Three
