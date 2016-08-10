@@ -1,0 +1,21 @@
+[Game List]			[Alternet Depth Map]	[Depth Flip On]	[Read Below]
+Alien Isolation				DM 0
+Amnesia: The Dark Descent		DM 1
+Among The Sleep				DM 2		     DF On				
+Assassin Creed Unity			DM 3							
+Batman Arkham Knight			DM 4							
+Batman Arkham Origins			DM 4							
+Batman: Arkham City			DM 4							
+BorderLands 2				DM 4					RB
+Call of Duty: Advance Warfare		DM 5					RB		
+Call of Duty: Black Ops 2		DM 5					RB		
+Call of Duty: Ghost			DM 5					RB		
+Casltevania: Lord of Shadows - UE	DM 6
+Condemned: Criminal Origins		DM 7					RB		
+Deadly Premonition:The Directors's Cut  DM 8					RB
+Dragon Ball Xenoverse			DM 9														
+Dragons Dogma: Dark Arisen		DM 8
+DreamFall Chapters			DM 10		     DF On
+
+To Go
+
