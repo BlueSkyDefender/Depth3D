@@ -240,6 +240,46 @@ float SbSdepth (float2 texcoord)
 		depthM =  (cN * cF / (cF + depthM * (cN - cF))); 
 		}
 		
+		//Casltevania: Lord of Shadows - UE
+		if (AltDepthMap == 6)
+		{
+		float cF = 25;
+		float cN = 0;
+		depthM = (pow(abs(cN-depthM),cF));
+		}
+		
+		//Condemned: Criminal Origins
+		if (AltDepthMap == 7)
+		{
+		float cF  = 1;
+		float cN = 0.002;
+		depthM =  (cN * cF / (cF + depthM * (cN - cF))); 
+		}
+		
+		//Deadly Premonition:The Directors's Cut
+		if (AltDepthMap == 8)
+		{
+		float cF = 30;
+		float cN = 0;
+		depthM = (pow(abs(cN-depthM),cF));
+		}
+		
+		//Dragon Ball Xenoverse
+		if (AltDepthMap == 9)
+		{
+		float cF = 1;
+		float cN = 0.005;
+		depthM = cN/(cN-cF) / ( depthM - cF/(cF-cN));
+		}
+		
+		//DreamFall Chapters
+		if (AltDepthMap == 10)
+		{
+		float cF = 15;
+		float cN = 0;
+		depthM = (pow(abs(cN-depthM),cF));
+		}
+		
 	}
 	else
 	{
@@ -290,7 +330,7 @@ float SbSdepth (float2 texcoord)
 		color.r = D.r;
 		
 	return color.r;	
-	}
+}
 	
 float Blur(float2 texcoord)
 {
@@ -308,7 +348,8 @@ float Blur(float2 texcoord)
 		0.016436,
 		0.011254
 	};
-
+	
+	[loop]
 	for (int i = -5; i < 5; i++)
 	{
 		float currweight = weight[abs(i)];
@@ -325,23 +366,7 @@ return color;
 	color.r =  texcoord.x-Depth*pix.x*Blur(float2(texcoord.x+DWA*pix.x,texcoord.y));
 	color.gb =  texcoord.x+Depth*pix.x*Blur(float2(texcoord.x-DWA*pix.x,texcoord.y));
 	}
-
-float3 LCal(float2 texcoord)
-
-{
-	float3 LCalculation= tex2D(BackBuffer,float2(texcoord.x, texcoord.y )).rgb;
-
-	return LCalculation.rgb;
-}
-
-float3 RCal(float2 texcoord)
-
-{
-	float3 RCalculation= tex2D(BackBuffer,float2(texcoord.x, texcoord.y )).rgb;
-
-	return RCalculation.rgb;
-}
-
+	
 ////////////////////////////////////////////////Left Eye////////////////////////////////////////////////////////
 void PS_renderLR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float3 color : SV_Target0 , out float3 colorT: SV_Target1)
 {	
@@ -351,14 +376,14 @@ colorT.rgb = tex2D(BackBuffer,float2(texcoord.x, texcoord.y )).rgb;
 	for (int j = 0; j <= 25; ++j) 
 	{
 		//Left	
-		if (tex2D(SamplerCC,float2(texcoord.x-j*pix.x,texcoord.y)).b >= texcoord.x+pix.x ) 
+		if (tex2D(SamplerCC,float2(texcoord.x-j*pix.x,texcoord.y)).b >= texcoord.x+pix.x / 2 ) 
 		{
-		color.rgb = LCal(float2(texcoord.x+j*pix.x, texcoord.y)).rgb;
+		color.rgb = tex2D(BackBuffer , float2(texcoord.x+j*pix.x, texcoord.y)).rgb;
 		}
 		//Right
-		if (tex2D(SamplerCC,float2(texcoord.x+j*pix.x,texcoord.y)).r <= texcoord.x-pix.x)
+		if (tex2D(SamplerCC,float2(texcoord.x+j*pix.x,texcoord.y)).r <= texcoord.x-pix.x / 2)
 		{
-		colorT.rgb = RCal(float2(texcoord.x-j*pix.x, texcoord.y)).rgb;
+		colorT.rgb = tex2D(BackBuffer , float2(texcoord.x-j*pix.x , texcoord.y)).rgb;
 		}
 	}
 }
@@ -488,6 +513,46 @@ float4 PS(float4 pos : SV_Position, float2 texcoord : TEXCOORD0) : SV_Target
 		depthM =  (cN * cF / (cF + depthM * (cN - cF))); 
 		}
 		
+		//Casltevania: Lord of Shadows - UE
+		if (AltDepthMap == 6)
+		{
+		float cF = 25;
+		float cN = 0;
+		depthM = (pow(abs(cN-depthM),cF));
+		}
+		
+		//Condemned: Criminal Origins
+		if (AltDepthMap == 7)
+		{
+		float cF  = 1;
+		float cN = 0.002;
+		depthM =  (cN * cF / (cF + depthM * (cN - cF))); 
+		}
+		
+		//Deadly Premonition:The Directors's Cut
+		if (AltDepthMap == 8)
+		{
+		float cF = 30;
+		float cN = 0;
+		depthM = (pow(abs(cN-depthM),cF));
+		}
+		
+		//Dragon Ball Xenoverse
+		if (AltDepthMap == 9)
+		{
+		float cF = 1;
+		float cN = 0.005;
+		depthM = cN/(cN-cF) / ( depthM - cF/(cF-cN));
+		}
+		
+		//DreamFall Chapters
+		if (AltDepthMap == 10)
+		{
+		float cF = 15;
+		float cN = 0;
+		depthM = (pow(abs(cN-depthM),cF));
+		}
+		
 	}
 	else
 	{
@@ -540,12 +605,12 @@ float4 PS(float4 pos : SV_Position, float2 texcoord : TEXCOORD0) : SV_Target
 	color.rgb = DM.rrr;				
 	}
 	return color;
-	}
+}
 
 //*Rendering passes*//
 
 technique Super_Depth3D
-	{
+{
 			pass
 		{
 			VertexShader = PostProcessVS;
@@ -570,4 +635,4 @@ technique Super_Depth3D
 			VertexShader = PostProcessVS;
 			PixelShader = PS;
 		}
-	}
+}
