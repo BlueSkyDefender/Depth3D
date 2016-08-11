@@ -62,7 +62,7 @@ uniform bool DepthMap <
 
 uniform int CustomDM <
 	ui_type = "combo";
-	ui_items = "Custom Off\0Custom One\0Custom Two\0Custom Three\0Custom Four\0Custom Five\0";
+	ui_items = "Custom Off\0Custom One\0Custom Two\0Custom Three\0Custom Four\0Custom Five\0Custom Six\0";
 	ui_label = "Custom Depth Map";
 	ui_tooltip = "Adjust your own Custom Depth Map.";
 > = 0;
@@ -106,11 +106,6 @@ uniform float KCube <
 	ui_label = "Cubic Distortion";
 	ui_tooltip = "Cubic distortion value. Default is 0.5.";
 > = 0.5;
-
-uniform bool AltRender <
-	ui_label = "Alternate Render";
-	ui_tooltip = "Alternate Render Mode is a different way of warping the screen.";
-> = true; 
 
 /////////////////////////////////////////////D3D Starts Here/////////////////////////////////////////////////////////////////
 
@@ -192,7 +187,7 @@ float SbSdepth (float2 texcoord)
 		
 		if (CustomDM == 0)
 	{	
-		//Alien Isolation
+		//Alien Isolation | Fallout 4
 		if (AltDepthMap == 0)
 		{
 		float cF = 1000000000;
@@ -331,6 +326,14 @@ float SbSdepth (float2 texcoord)
 		depthM = cN/(cN-cF) / ( depthM - cF/(cF-cN));
 		}
 		
+		//Custom Six
+		if (CustomDM == 6)
+		{
+		float cF = Far;//1
+		float cN = Near;//0.025
+		depthM = ((cN / (cN-cF)) / (depthM-cF/(cF-cN)));
+		}
+		
 	}
 
     float4 D = depthM;	
@@ -356,18 +359,17 @@ float Blur(float2 texcoord)
 		0.016436,
 		0.011254
 	};
-	
 	[loop]
 	for (int i = -5; i < 5; i++)
 	{
 		float currweight = weight[abs(i)];
-		color += SbSdepth( texcoord.xy + float2(1,0) * (float)i * pix.x * 3.75) * currweight / 1.75;
-		color += SbSdepth( texcoord.xy + float2(1,0) * (float)i * pix.x * -3.75) * currweight / 1.75;
-	}
-  
+		color += SbSdepth( texcoord.xy + float2(1,0) * (float)i * pix.x * 6) * currweight / 1.75;
+		color += SbSdepth( texcoord.xy + float2(1,0) * (float)i * pix.x * -6) * currweight / 1.75;
+	}  
 return color;
 }
-	/////////////////////////////////////////L/R/DepthMap Pos//////////////////////////////////////////////////////////
+  
+/////////////////////////////////////////L/R/DepthMap Pos//////////////////////////////////////////////////////////
 	void  PS_calcLR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float3 color : SV_Target)
 	{
 	float DWA = -Depth+WA;
@@ -384,12 +386,12 @@ colorT.rgb = tex2D(BackBuffer,float2(texcoord.x, texcoord.y )).rgb;
 	for (int j = 0; j <= 25; ++j) 
 	{
 		//Left	
-		if (tex2D(SamplerCC,float2(texcoord.x-j*pix.x,texcoord.y)).b >= texcoord.x+pix.x / 2 ) 
+		if (tex2D(SamplerCC,float2(texcoord.x-j*pix.x,texcoord.y)).b > texcoord.x+pix.x)
 		{
-		color.rgb = tex2D(BackBuffer , float2(texcoord.x+j*pix.x, texcoord.y)).rgb;
+		color.rgb = tex2D(BackBuffer , float2(texcoord.x+j*pix.x , texcoord.y)).rgb;
 		}
 		//Right
-		if (tex2D(SamplerCC,float2(texcoord.x+j*pix.x,texcoord.y)).r <= texcoord.x-pix.x / 2)
+		if (tex2D(SamplerCC,float2(texcoord.x+j*pix.x,texcoord.y)).r < texcoord.x-pix.x)
 		{
 		colorT.rgb = tex2D(BackBuffer , float2(texcoord.x-j*pix.x , texcoord.y)).rgb;
 		}
@@ -474,7 +476,7 @@ float4 PS(float4 pos : SV_Position, float2 texcoord : TEXCOORD0) : SV_Target
 		
 		if (CustomDM == 0)
 	{	
-		//Alien Isolation
+		//Alien Isolation | Fallout 4
 		if (AltDepthMap == 0)
 		{
 		float cF = 1000000000;
@@ -610,6 +612,14 @@ float4 PS(float4 pos : SV_Position, float2 texcoord : TEXCOORD0) : SV_Target
 		float cF = Far;
 		float cN = Near;
 		depthM = cN/(cN-cF) / ( depthM - cF/(cF-cN));
+		}
+		
+		//Custom Six
+		if (CustomDM == 6)
+		{
+		float cF = Far;//1
+		float cN = Near;//0.025
+		depthM = ((cN / (cN-cF)) / (depthM-cF/(cF-cN)));
 		}
 		
 	}
