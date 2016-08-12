@@ -18,5 +18,7 @@ Dragons Dogma: Dark Arisen		DM 8
 DreamFall Chapters			DM 10		     DF On
 Dying Light				DM 11
 Fallout 4				DM 0
-
-
+Firewatch				DM 0
+GTA V					DM 12
+Hard Reset				DM 4
+Lords of The Fallen			DM 4
