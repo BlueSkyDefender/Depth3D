@@ -187,7 +187,7 @@ float SbSdepth (float2 texcoord)
 		
 		if (CustomDM == 0)
 	{	
-		//Alien Isolation | Fallout 4
+		//Alien Isolation | Fallout 4 | Firewatch
 		if (AltDepthMap == 0)
 		{
 		float cF = 1000000000;
@@ -219,7 +219,7 @@ float SbSdepth (float2 texcoord)
 		depthM =  (cN * cF / (cF + depthM * (cN - cF))); 
 		}
 		
-		//Batman Arkham Knight | Batman Arkham Origins | Batman: Arkham City | BorderLands 2
+		//Batman Arkham Knight | Batman Arkham Origins | Batman: Arkham City | BorderLands 2 | Hard Reset | Lords Of The Fallen
 		if (AltDepthMap == 4)
 		{
 		float cF = 50;
@@ -283,6 +283,13 @@ float SbSdepth (float2 texcoord)
 		depthM = cF / (1 + cF - (depthM/cN) * (1 - cF));
 		}
 		
+		//GTA V
+		if (AltDepthMap == 12)
+		{
+		float cF  = 10000; 
+		float cN = 0.0075; 
+		depthM = cF / (1 + cF - (depthM/cN) * (1 - cF));
+		}
 	}
 	else
 	{
@@ -346,26 +353,33 @@ float SbSdepth (float2 texcoord)
 float Blur(float2 texcoord)
 {
 	float4 color = 0;
-	const float weight[11] = {
-		0.082607,
-		0.080977,
-		0.076276,
-		0.069041,
-		0.060049,
-		0.050187,
-		0.040306,
-		0.031105,
-		0.023066,
-		0.016436,
-		0.011254
+	const float weight[2] = {
+0.44908,
+0.05092
 	};
+	
+	const float offset[2] = {
+0.53805,
+2.0678
+	};
+	
 	[loop]
-	for (int i = -5; i < 5; i++)
+	for (int i = 0; i < 2; i++)
 	{
-		float currweight = weight[abs(i)];
-		color += SbSdepth( texcoord.xy + float2(1,0) * (float)i * pix.x * 6) * currweight / 1.75;
-		color += SbSdepth( texcoord.xy + float2(1,0) * (float)i * pix.x * -6) * currweight / 1.75;
-	}  
+		float2 texOffset = offset[i] * float2(0.001,0);
+		float2 texOffsetOne = offset[i] * float2(0.003,0);
+		float2 texOffsetTwo = offset[i] * float2(0.006,0);
+		float2 texOffsetThree = offset[i] * float2(0.009,0);
+		float3 col = SbSdepth(texcoord.xy + texOffset ) +
+					 SbSdepth(texcoord.xy - texOffset ) +
+					 SbSdepth(texcoord.xy + texOffsetOne ) +
+					 SbSdepth(texcoord.xy - texOffsetOne ) +
+					 SbSdepth(texcoord.xy + texOffsetTwo ) +
+					 SbSdepth(texcoord.xy - texOffsetTwo ) +
+					 SbSdepth(texcoord.xy + texOffsetThree ) +
+					 SbSdepth(texcoord.xy - texOffsetThree );
+		color += weight[i] * col / 4;
+	}
 return color;
 }
   
@@ -476,7 +490,7 @@ float4 PS(float4 pos : SV_Position, float2 texcoord : TEXCOORD0) : SV_Target
 		
 		if (CustomDM == 0)
 	{	
-		//Alien Isolation | Fallout 4
+		//Alien Isolation | Fallout 4 | Firewatch
 		if (AltDepthMap == 0)
 		{
 		float cF = 1000000000;
@@ -507,7 +521,7 @@ float4 PS(float4 pos : SV_Position, float2 texcoord : TEXCOORD0) : SV_Target
 		depthM =  (cN * cF / (cF + depthM * (cN - cF))); 
 		}
 		
-		//Batman Arkham Knight | Batman Arkham Origins | Batman: Arkham City | BorderLands 2
+		//Batman Arkham Knight | Batman Arkham Origins | Batman: Arkham City | BorderLands 2 | Hard Reset | Lords Of The Fallen
 		if (AltDepthMap == 4)
 		{
 		float cF = 50;
@@ -568,6 +582,14 @@ float4 PS(float4 pos : SV_Position, float2 texcoord : TEXCOORD0) : SV_Target
 		{
 		float cF = 100;
 		float cN = 0.005;
+		depthM = cF / (1 + cF - (depthM/cN) * (1 - cF));
+		}
+		
+		//GTA V
+		if (AltDepthMap == 12)
+		{
+		float cF  = 10000; 
+		float cN = 0.0075; 
 		depthM = cF / (1 + cF - (depthM/cN) * (1 - cF));
 		}
 		
