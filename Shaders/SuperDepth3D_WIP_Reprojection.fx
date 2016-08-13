@@ -43,13 +43,6 @@ uniform int Perspective <
 	ui_tooltip = "Determines the perspective point.";
 > = 0;
 
-uniform int WA <
-	ui_type = "drag";
-	ui_min = -25; ui_max = 25;
-	ui_label = "Warp Adjust";
-	ui_tooltip = "Adjust the warp in both eyes.";
-> = 0;
-
 uniform bool DepthFlip <
 	ui_label = "Depth Flip";
 	ui_tooltip = "Depth Flip if the depth map is Upside Down.";
@@ -114,7 +107,7 @@ uniform float KCube <
 	
 texture texCL  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA32F;}; 
 texture texCR  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA32F;}; 
-texture texCC  { Width = BUFFER_WIDTH/50; Height = BUFFER_HEIGHT/50; Format = RGBA32F;}; 
+texture texCC  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA32F;}; 
 texture texCDM  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA32F;};
 
 texture DepthBufferTex : DEPTH;
@@ -155,9 +148,9 @@ sampler SamplerCR
 sampler2D SamplerCC
 	{
 		Texture = texCC;
-		MinFilter = LINEAR;
-		MagFilter = LINEAR;
-		MipFilter = LINEAR;
+		AddressU = BORDER;
+		AddressV = BORDER;
+		AddressW = BORDER;
 		AddressU = CLAMP;
 		AddressV = CLAMP;
 		AddressW = CLAMP;
@@ -350,9 +343,9 @@ float SbSdepth (float2 texcoord)
 	return color.r;	
 }
 	
-float Blur(float2 texcoord)
+void Blur(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float3 color : SV_Target)
 {
- float3 colOut = float3( 0, 0, 0 );    
+  
 	const float weight[2] = {
 0.44908,
 0.05092
@@ -367,11 +360,17 @@ float Blur(float2 texcoord)
 	for (int i = 0; i < 2; i++)
 	{
 		float2 texOffset = offset[i] * float2(0.002,0);
+		float2 texOffsetOne = offset[i] * float2(0.004,0);
+		float2 texOffsetTwo = offset[i] * float2(0.006,0);
 		float3 col = SbSdepth(texcoord.xy + texOffset ) +
-					 SbSdepth(texcoord.xy - texOffset );
-		colOut += weight[i] * col;
+					 SbSdepth(texcoord.xy - texOffset ) +
+					 SbSdepth(texcoord.xy + texOffsetOne ) +
+					 SbSdepth(texcoord.xy - texOffsetOne ) +
+					 SbSdepth(texcoord.xy + texOffsetTwo ) +
+					 SbSdepth(texcoord.xy - texOffsetTwo );
+		color.rgb += weight[i] * col / 3;
+
 	}
-return colOut.r;
 }
   
 ////////////////////////////////////////////////Left/Right Eye////////////////////////////////////////////////////////
@@ -384,8 +383,8 @@ void PS_renderLR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD
 	for (int j = 0; j <= 3; ++j) 
 	{
 		uv.x = samples[j] * Depth;
-		DepthL= Blur(texcoord.xy+uv.xy*pix.xy);
-		DepthR= Blur(texcoord.xy-uv.xy*pix.xy);
+		DepthL=  tex2D(SamplerCC,texcoord.xy+uv.xy*pix.xy);
+		DepthR=  tex2D(SamplerCC,texcoord.xy-uv.xy*pix.xy);
 		
 		color.rgb = tex2D(BackBuffer , float2(texcoord.xy+float2(DepthL*Depth,0)*pix.xy)).rgb;
 		
@@ -641,6 +640,12 @@ float4 PS(float4 pos : SV_Position, float2 texcoord : TEXCOORD0) : SV_Target
 
 technique Super_Depth3D
 {
+			pass
+		{
+			VertexShader = PostProcessVS;
+			PixelShader = Blur;
+			RenderTarget = texCC;
+		}
 			pass
 		{
 			VertexShader = PostProcessVS;
