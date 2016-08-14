@@ -22,3 +22,7 @@ Firewatch				DM 0
 GTA V					DM 12
 Hard Reset				DM 4
 Lords of The Fallen			DM 4
+Magicka 2				DM 13					RB
+Metro 2033 Redux			DM 6					RB
+Metro Last Light Redux			DM 6					RB
+Middle-earth: Shadow of Mordor		DM 14					RB

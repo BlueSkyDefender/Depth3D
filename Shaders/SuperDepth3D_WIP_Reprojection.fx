@@ -291,6 +291,14 @@ float SbSdepth (float2 texcoord)
 		float cN = 13;	
 		depthM = (exp(depthM * log(cF + cN)) - cN) / cF;
 		}
+		
+		//Middle-earth: Shadow of Mordor
+		if (AltDepthMap == 14)
+		{
+		float cF = 30;
+		float cN = 1;	
+		depthM = (pow(abs(cN-depthM),cF));
+		}
 	}
 	else
 	{
@@ -370,12 +378,15 @@ void Blur(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out 
 		float2 texOffset = offset[i] * float2(0.001,0);
 		float2 texOffsetOne = offset[i] * float2(0.003,0);
 		float2 texOffsetTwo = offset[i] * float2(0.006,0);
+		float2 texOffsetThree = offset[i] * float2(0.009,0);
 		float3 col = SbSdepth(texcoord.xy + texOffset ) +
 					 SbSdepth(texcoord.xy - texOffset ) +
 					 SbSdepth(texcoord.xy + texOffsetOne ) +
 					 SbSdepth(texcoord.xy - texOffsetOne ) +
 					 SbSdepth(texcoord.xy + texOffsetTwo ) +
-					 SbSdepth(texcoord.xy - texOffsetTwo );
+					 SbSdepth(texcoord.xy - texOffsetTwo ) +
+					 SbSdepth(texcoord.xy + texOffsetThree ) +
+					 SbSdepth(texcoord.xy - texOffsetThree );
 		color.rgb += weight[i] * col / 3;
 
 	}
@@ -391,8 +402,8 @@ void PS_renderLR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD
 	for (int j = 0; j <= 3; ++j) 
 	{
 		uv.x = samples[j] * Depth;
-		DepthL=  tex2D(SamplerCC,texcoord.xy+uv.xy*pix.xy);
-		DepthR=  tex2D(SamplerCC,texcoord.xy-uv.xy*pix.xy);
+		DepthL=  min(DepthL,tex2D(SamplerCC,float2(texcoord.x+uv.x*pix.x, texcoord.y)));
+		DepthR=  min(DepthR,tex2D(SamplerCC,float2(texcoord.x-uv.x*pix.x, texcoord.y)));
 		
 		color.rgb = tex2D(BackBuffer , float2(texcoord.xy+float2(DepthL*Depth,0)*pix.xy)).rgb;
 		
@@ -588,6 +599,14 @@ float4 PS(float4 pos : SV_Position, float2 texcoord : TEXCOORD0) : SV_Target
 		float cF = 1;
 		float cN = 13;	
 		depthM = (exp(depthM * log(cF + cN)) - cN) / cF;
+		}
+		
+		//Middle-earth: Shadow of Mordor
+		if (AltDepthMap == 14)
+		{
+		float cF = 30;
+		float cN = 1;	
+		depthM = (pow(abs(cN-depthM),cF));
 		}
 	}
 	else
