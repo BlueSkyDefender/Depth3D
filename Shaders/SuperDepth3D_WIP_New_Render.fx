@@ -290,6 +290,14 @@ float SbSdepth (float2 texcoord)
 		float cN = 0.0075; 
 		depthM = cF / (1 + cF - (depthM/cN) * (1 - cF));
 		}
+		
+		//Magicka 2
+		if (AltDepthMap == 13)
+		{
+		float cF = 1;
+		float cN = 13;	
+		depthM = (exp(depthM * log(cF + cN)) - cN) / cF;
+		}
 	}
 	else
 	{
@@ -320,8 +328,8 @@ float SbSdepth (float2 texcoord)
 		//Custom Four
 		if (CustomDM == 4)
 		{
-		float cF = Far;
-		float cN = Near;	
+		float cF = Far;//1000000000 or 1	
+		float cN = Near;//0 or 13	
 		depthM = (exp(depthM * log(cF + cN)) - cN) / cF;
 		}
 		
@@ -352,7 +360,7 @@ float SbSdepth (float2 texcoord)
 	
 float Blur(float2 texcoord)
 {
-	float4 color = 0;
+	float3 color = 0;
 	const float weight[2] = {
 0.44908,
 0.05092
@@ -378,9 +386,9 @@ float Blur(float2 texcoord)
 					 SbSdepth(texcoord.xy - texOffsetTwo ) +
 					 SbSdepth(texcoord.xy + texOffsetThree ) +
 					 SbSdepth(texcoord.xy - texOffsetThree );
-		color += weight[i] * col / 4;
+		color.rgb += weight[i] * col / 4;
 	}
-return color;
+return color.r;
 }
   
 /////////////////////////////////////////L/R/DepthMap Pos//////////////////////////////////////////////////////////
@@ -591,6 +599,14 @@ float4 PS(float4 pos : SV_Position, float2 texcoord : TEXCOORD0) : SV_Target
 		float cF  = 10000; 
 		float cN = 0.0075; 
 		depthM = cF / (1 + cF - (depthM/cN) * (1 - cF));
+		}
+		
+		//Magicka 2
+		if (AltDepthMap == 13)
+		{
+		float cF = 1;
+		float cN = 13;	
+		depthM = (exp(depthM * log(cF + cN)) - cN) / cF;
 		}
 		
 	}

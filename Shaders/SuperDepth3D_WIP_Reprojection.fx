@@ -283,6 +283,14 @@ float SbSdepth (float2 texcoord)
 		float cN = 0.0075; 
 		depthM = cF / (1 + cF - (depthM/cN) * (1 - cF));
 		}
+		
+		//Magicka 2
+		if (AltDepthMap == 13)
+		{
+		float cF = 1;
+		float cN = 13;	
+		depthM = (exp(depthM * log(cF + cN)) - cN) / cF;
+		}
 	}
 	else
 	{
@@ -313,8 +321,8 @@ float SbSdepth (float2 texcoord)
 		//Custom Four
 		if (CustomDM == 4)
 		{
-		float cF = Far;
-		float cN = Near;	
+		float cF = Far;//1000000000 or 1	
+		float cN = Near;//0 or 13	
 		depthM = (exp(depthM * log(cF + cN)) - cN) / cF;
 		}
 		
@@ -359,8 +367,8 @@ void Blur(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out 
 	[loop]
 	for (int i = 0; i < 2; i++)
 	{
-		float2 texOffset = offset[i] * float2(0.002,0);
-		float2 texOffsetOne = offset[i] * float2(0.004,0);
+		float2 texOffset = offset[i] * float2(0.001,0);
+		float2 texOffsetOne = offset[i] * float2(0.003,0);
 		float2 texOffsetTwo = offset[i] * float2(0.006,0);
 		float3 col = SbSdepth(texcoord.xy + texOffset ) +
 					 SbSdepth(texcoord.xy - texOffset ) +
@@ -574,22 +582,29 @@ float4 PS(float4 pos : SV_Position, float2 texcoord : TEXCOORD0) : SV_Target
 		depthM = cF / (1 + cF - (depthM/cN) * (1 - cF));
 		}
 		
+		//Magicka 2
+		if (AltDepthMap == 13)
+		{
+		float cF = 1;
+		float cN = 13;	
+		depthM = (exp(depthM * log(cF + cN)) - cN) / cF;
+		}
 	}
 	else
 	{
 		//Custom One
 		if (CustomDM == 1)
 		{
-		float cF = Far;
-		float cN = Near;
+		float cF = Far; //10+
+		float cN = Near;//1
 		depthM = (pow(abs(cN-depthM),cF));
 		}
 		
 		//Custom Two
 		if (CustomDM == 2)
 		{
-		float cF  = Far;
-		float cN = Near;
+		float cF  = Far; //100+
+		float cN = Near; //0.01-
 		depthM = cF / (1 + cF - (depthM/cN) * (1 - cF));
 		}
 		
@@ -604,8 +619,8 @@ float4 PS(float4 pos : SV_Position, float2 texcoord : TEXCOORD0) : SV_Target
 		//Custom Four
 		if (CustomDM == 4)
 		{
-		float cF = Far;
-		float cN = Near;	
+		float cF = Far;//1000000000 or 1	
+		float cN = Near;//0 or 13	
 		depthM = (exp(depthM * log(cF + cN)) - cN) / cF;
 		}
 		
