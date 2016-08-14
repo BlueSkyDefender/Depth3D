@@ -3,7 +3,7 @@
  //----------------////
 
  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
- //* Depth Map Based 3D post-process shader v1.7.2 L & R Eye																														*//
+ //* Depth Map Based 3D post-process shader v1.8 L & R Eye																														*//
  //* For Reshade 3.0																																								*//
  //* --------------------------																																						*//
  //* This work is licensed under a Creative Commons Attribution 3.0 Unported License.																								*//
@@ -55,7 +55,7 @@ uniform bool DepthMap <
 
 uniform int CustomDM <
 	ui_type = "combo";
-	ui_items = "Custom Off\0Custom One\0Custom Two\0Custom Three\0Custom Four\0Custom Five\0Custom Six\0";
+	ui_items = "Custom Off\0Custom One\0Custom Two\0Custom Three\0Custom Four\0Custom Five\0";
 	ui_label = "Custom Depth Map";
 	ui_tooltip = "Adjust your own Custom Depth Map.";
 > = 0;
@@ -299,6 +299,15 @@ float SbSdepth (float2 texcoord)
 		float cN = 1;	
 		depthM = (pow(abs(cN-depthM),cF));
 		}
+		
+		//Naruto Shippuden UNS3 Full Blurst
+		if (AltDepthMap == 15)
+		{
+		float cF = 150;
+		float cN = 0.001;
+		depthM = (pow(abs(cN-depthM),cF));
+		}
+		
 	}
 	else
 	{
@@ -337,19 +346,11 @@ float SbSdepth (float2 texcoord)
 		//Custom Five
 		if (CustomDM == 5)
 		{
-		float cF = Far;
-		float cN = Near;
-		depthM = cN/(cN-cF) / ( depthM - cF/(cF-cN));
-		}
-		
-		//Custom Six
-		if (CustomDM == 6)
-		{
 		float cF = Far;//1
 		float cN = Near;//0.025
-		depthM = ((cN / (cN-cF)) / (depthM-cF/(cF-cN)));
+		depthM = cN/(cN-cF) / ( depthM - cF/(cF-cN));
 		}
-		
+				
 	}
 
     float4 D = depthM;	
@@ -608,6 +609,15 @@ float4 PS(float4 pos : SV_Position, float2 texcoord : TEXCOORD0) : SV_Target
 		float cN = 1;	
 		depthM = (pow(abs(cN-depthM),cF));
 		}
+		
+		//Naruto Shippuden UNS3 Full Blurst
+		if (AltDepthMap == 15)
+		{
+		float cF = 150;
+		float cN = 0.001;
+		depthM = (pow(abs(cN-depthM),cF));
+		}
+		
 	}
 	else
 	{
@@ -646,19 +656,10 @@ float4 PS(float4 pos : SV_Position, float2 texcoord : TEXCOORD0) : SV_Target
 		//Custom Five
 		if (CustomDM == 5)
 		{
-		float cF = Far;
-		float cN = Near;
-		depthM = cN/(cN-cF) / ( depthM - cF/(cF-cN));
-		}
-		
-		//Custom Six
-		if (CustomDM == 6)
-		{
 		float cF = Far;//1
 		float cN = Near;//0.025
-		depthM = ((cN / (cN-cF)) / (depthM-cF/(cF-cN)));
-		}
-		
+		depthM = cN/(cN-cF) / ( depthM - cF/(cF-cN));
+		}		
 	}
 	
 	float4 DM = depthM;
