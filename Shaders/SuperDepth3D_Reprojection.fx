@@ -308,7 +308,21 @@ float SbSdepth (float2 texcoord)
 		depthM = (pow(abs(cN-depthM),cF));
 		}
 		
+		//Shadow warrior(2013)XP
+		if (AltDepthMap == 16)
+		{
+		float cF = 5;
+		float cN = 0.05;
+		depthM = cN/(cN-cF) / ( depthM - cF/(cF-cN));
+		}
 		
+		//Ryse: Son of Rome
+		if (AltDepthMap == 17)
+		{
+		float cF = 1000;
+		float cN = 10;
+		depthM = cN/(cN-cF) / ( depthM - cF/(cF-cN));
+		}
 		
 	}
 	else
@@ -618,6 +632,22 @@ float4 PS(float4 pos : SV_Position, float2 texcoord : TEXCOORD0) : SV_Target
 		float cF = 150;
 		float cN = 0.001;
 		depthM = (pow(abs(cN-depthM),cF));
+		}
+		
+		//Shadow warrior(2013)XP
+		if (AltDepthMap == 16)
+		{
+		float cF = 5;
+		float cN = 0.05;
+		depthM = cN/(cN-cF) / ( depthM - cF/(cF-cN));
+		}
+		
+		//Ryse: Son of Rome
+		if (AltDepthMap == 17)
+		{
+		float cF = 1000;
+		float cN = 10;
+		depthM = cN/(cN-cF) / ( depthM - cF/(cF-cN));
 		}
 		
 	}
