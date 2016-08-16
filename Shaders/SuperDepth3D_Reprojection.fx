@@ -212,7 +212,7 @@ float SbSdepth (float2 texcoord)
 		depthM =  (cN * cF / (cF + depthM * (cN - cF))); 
 		}
 		
-		//Batman Arkham Knight | Batman Arkham Origins | Batman: Arkham City | BorderLands 2 | Hard Reset | Lords Of The Fallen
+		//Batman Arkham Knight | Batman Arkham Origins | Batman: Arkham City | BorderLands 2 | Hard Reset | Lords Of The Fallen | The Elder Scrolls V: Skyrim
 		if (AltDepthMap == 4)
 		{
 		float cF = 50;
@@ -236,7 +236,7 @@ float SbSdepth (float2 texcoord)
 		depthM = (pow(abs(cN-depthM),cF));
 		}
 		
-		//Condemned: Criminal Origins | Rage | Return To Castle Wolfenstine
+		//Condemned: Criminal Origins | Rage | Return To Castle Wolfenstine | The Evil Within | Quake 4
 		if (AltDepthMap == 7)
 		{
 		float cF  = 1;
@@ -260,7 +260,7 @@ float SbSdepth (float2 texcoord)
 		depthM = cN/(cN-cF) / ( depthM - cF/(cF-cN));
 		}
 		
-		//DreamFall Chapters
+		//???
 		if (AltDepthMap == 10)
 		{
 		float cF = 15;
@@ -322,6 +322,30 @@ float SbSdepth (float2 texcoord)
 		float cF = 1000;
 		float cN = 10;
 		depthM = cN/(cN-cF) / ( depthM - cF/(cF-cN));
+		}
+		
+		//Sleeping Dogs: DE | DreamFall Chapters
+		if (AltDepthMap == 18)
+		{
+		float cF  = 1;
+		float cN = 0.025;
+		depthM =  (cN * cF / (cF + depthM * (cN - cF))); 
+		}
+		
+		//Souls Games
+		if (AltDepthMap == 19)
+		{
+		float cF = 200;
+		float cN = 1;
+		depthM = cN/(cN-cF) / ( depthM - cF/(cF-cN));
+		}
+		
+		//Witcher 3
+		if (AltDepthMap == 20)
+		{
+		float cF = 100;
+		float cN = 0.01;
+		depthM = cF / (1 + cF - (depthM/cN) * (1 - cF));
 		}
 		
 	}
@@ -404,7 +428,7 @@ void Blur(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out 
 					 SbSdepth(texcoord.xy - texOffsetTwo ) +
 					 SbSdepth(texcoord.xy + texOffsetThree ) +
 					 SbSdepth(texcoord.xy - texOffsetThree );
-		color.rgb += weight[i] * col / 3;
+		color += weight[i] * col / 3;
 
 	}
 }
@@ -419,8 +443,8 @@ void PS_renderLR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD
 	for (int j = 0; j <= 3; ++j) 
 	{
 		uv.x = samples[j] * Depth;
-		DepthL=  min(DepthL,tex2D(SamplerCC,float2(texcoord.x+uv.x*pix.x, texcoord.y)));
-		DepthR=  min(DepthR,tex2D(SamplerCC,float2(texcoord.x-uv.x*pix.x, texcoord.y)));
+		DepthL=  min(DepthL,tex2D(SamplerCC,float2(texcoord.x+uv.x*pix.x, texcoord.y))).r;
+		DepthR=  min(DepthR,tex2D(SamplerCC,float2(texcoord.x-uv.x*pix.x, texcoord.y))).r;
 		
 		color.rgb = tex2D(BackBuffer , float2(texcoord.xy+float2(DepthL*Depth,0)*pix.xy)).rgb;
 		
@@ -538,7 +562,7 @@ float4 PS(float4 pos : SV_Position, float2 texcoord : TEXCOORD0) : SV_Target
 		depthM =  (cN * cF / (cF + depthM * (cN - cF))); 
 		}
 		
-		//Batman Arkham Knight | Batman Arkham Origins | Batman: Arkham City | BorderLands 2 | Hard Reset | Lords Of The Fallen
+		//Batman Arkham Knight | Batman Arkham Origins | Batman: Arkham City | BorderLands 2 | Hard Reset | Lords Of The Fallen | The Elder Scrolls V: Skyrim
 		if (AltDepthMap == 4)
 		{
 		float cF = 50;
@@ -562,7 +586,7 @@ float4 PS(float4 pos : SV_Position, float2 texcoord : TEXCOORD0) : SV_Target
 		depthM = (pow(abs(cN-depthM),cF));
 		}
 		
-		//Condemned: Criminal Origins | Rage | Return To Castle Wolfenstine
+		//Condemned: Criminal Origins | Rage | Return To Castle Wolfenstine | The Evil Within | Quake 4
 		if (AltDepthMap == 7)
 		{
 		float cF  = 1;
@@ -586,7 +610,7 @@ float4 PS(float4 pos : SV_Position, float2 texcoord : TEXCOORD0) : SV_Target
 		depthM = cN/(cN-cF) / ( depthM - cF/(cF-cN));
 		}
 		
-		//DreamFall Chapters
+		//???
 		if (AltDepthMap == 10)
 		{
 		float cF = 15;
@@ -648,6 +672,30 @@ float4 PS(float4 pos : SV_Position, float2 texcoord : TEXCOORD0) : SV_Target
 		float cF = 1000;
 		float cN = 10;
 		depthM = cN/(cN-cF) / ( depthM - cF/(cF-cN));
+		}
+		
+		//Sleeping Dogs: DE | DreamFall Chapters
+		if (AltDepthMap == 18)
+		{
+		float cF  = 1;
+		float cN = 0.025;
+		depthM =  (cN * cF / (cF + depthM * (cN - cF))); 
+		}
+		
+		//Souls Games
+		if (AltDepthMap == 19)
+		{
+		float cF = 200;
+		float cN = 1;
+		depthM = cN/(cN-cF) / ( depthM - cF/(cF-cN));
+		}
+		
+		//Witcher 3
+		if (AltDepthMap == 20)
+		{
+		float cF = 100;
+		float cN = 0.01;
+		depthM = cF / (1 + cF - (depthM/cN) * (1 - cF));
 		}
 		
 	}
