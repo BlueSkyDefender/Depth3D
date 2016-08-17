@@ -12,7 +12,7 @@ SET YOUR RESOLUTION FIRST. Turn Off DOF in all games if possible. Unless you wan
 
 Please read me ReadMeDepth3d.txt For Setting and More Information.
 
-https://github.com/BlueSkyDefender/Depth3D/blob/master/ReadMeDepth3d.txt
+https://github.com/BlueSkyDefender/Depth3D/blob/master/ReadMe_Depth3D.txt
 
 Game Compatibility
 

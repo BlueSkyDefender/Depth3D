@@ -113,6 +113,7 @@ Issues in game with the shader Detoggling.
 
 {GTA 5}
 Rename the dxgi.dll too d3d11.dll for DX11 mode.
+If the game is crashing in fullscreen. Switch over to Window or Borderless window mode.
 
 {Hard Reset}
 Must Enable FSAA for depth buffer access.
