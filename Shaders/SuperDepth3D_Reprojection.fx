@@ -100,6 +100,11 @@ uniform float KCube <
 	ui_tooltip = "Cubic distortion value. Default is 0.5.";
 > = 0.5;
 
+uniform bool TnB <
+	ui_label = "Top and Bottom";
+	ui_tooltip = "Top and Bottom displays output.";
+> = false;
+
 /////////////////////////////////////////////D3D Starts Here/////////////////////////////////////////////////////////////////
 
 #define pix float2(BUFFER_RCP_WIDTH, BUFFER_RCP_HEIGHT)
@@ -494,6 +499,8 @@ float3 BDR(float2 texcoord)
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void PS0(float4 position : SV_Position, float2 texcoord : TEXCOORD0, out float3 color : SV_Target)
 {
+	if(!TnB)
+	{
 	float pos = Hsquish-1;
 	float mid = pos*BUFFER_HEIGHT/2*pix.y;
 	
@@ -504,6 +511,11 @@ void PS0(float4 position : SV_Position, float2 texcoord : TEXCOORD0, out float3 
 	else
 	{
 	color = texcoord.x < 0.5 ? tex2D(SamplerCL,float2(texcoord.x*2 + Perspective * pix.x,texcoord.y)).rgb : tex2D(SamplerCR,float2(texcoord.x*2-1 - Perspective * pix.x,texcoord.y)).rgb;
+	}
+	}
+	else
+	{
+	color = texcoord.y < 0.5 ? tex2D(SamplerCL,float2(texcoord.x + Perspective * pix.x,texcoord.y*2)).rgb : tex2D(SamplerCR,float2(texcoord.x - Perspective * pix.x,texcoord.y*2-1)).rgb;
 	}
 }
 
