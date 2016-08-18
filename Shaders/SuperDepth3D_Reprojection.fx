@@ -102,7 +102,7 @@ uniform float KCube <
 
 uniform int sstbli <
 	ui_type = "combo";
-	ui_items = "Side by Side\0Top and Bottom\0Line Interlaced\0";
+	ui_items = "Side by Side\0Top and Bottom\0Line Interlaced\0Checkerboard 3D\0";
 	ui_label = "3D Display Mode";
 	ui_tooltip = "Side by Side/Top and Bottom/Line Interlaced displays output.";
 > = 0;
@@ -525,7 +525,12 @@ void PS0(float4 position : SV_Position, float2 texcoord : TEXCOORD0, out float3 
 	float grid = frac(texcoord.y*(BUFFER_HEIGHT/2));
 	color = grid > 0.5? tex2D(SamplerCL,float2(texcoord.x + Perspective * pix.x,texcoord.y)).rgb : tex2D(SamplerCR,float2(texcoord.x - Perspective * pix.x,texcoord.y)).rgb;
 	}
-	
+	if(sstbli == 3)
+	{
+	float gridy = frac(texcoord.y*(BUFFER_HEIGHT/2));
+	float gridx = frac(texcoord.x*(BUFFER_WIDTH/2));
+	color = gridy+gridx > 0.5 ? tex2D(SamplerCL,float2(texcoord.x + Perspective * pix.x,texcoord.y)).rgb : tex2D(SamplerCR,float2(texcoord.x - Perspective * pix.x,texcoord.y)).rgb;
+	}
 }
 
 ///////////////////////////////////////////////////////////ReShade.fxh/////////////////////////////////////////////////////////////
