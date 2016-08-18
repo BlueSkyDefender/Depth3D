@@ -409,34 +409,24 @@ float SbSdepth (float2 texcoord)
 	
 void Blur(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float3 color : SV_Target)
 {
-  
-	const float weight[2] = {
-0.44908,
-0.05092
+	const float weight[11] = {
+		0.082607,
+		0.080977,
+		0.076276,
+		0.069041,
+		0.060049,
+		0.050187,
+		0.040306,
+		0.031105,
+		0.023066,
+		0.016436,
+		0.011254
 	};
-	
-	const float offset[2] = {
-0.53805,
-2.0678
-	};
-	
 	[loop]
-	for (int i = 0; i < 2; i++)
+	for (int i = -0; i < 5; i++)
 	{
-		float2 texOffset = offset[i] * float2(0.001,0);
-		float2 texOffsetOne = offset[i] * float2(0.003,0);
-		float2 texOffsetTwo = offset[i] * float2(0.006,0);
-		float2 texOffsetThree = offset[i] * float2(0.009,0);
-		float3 col = SbSdepth(texcoord.xy + texOffset ) +
-					 SbSdepth(texcoord.xy - texOffset ) +
-					 SbSdepth(texcoord.xy + texOffsetOne ) +
-					 SbSdepth(texcoord.xy - texOffsetOne ) +
-					 SbSdepth(texcoord.xy + texOffsetTwo ) +
-					 SbSdepth(texcoord.xy - texOffsetTwo ) +
-					 SbSdepth(texcoord.xy + texOffsetThree ) +
-					 SbSdepth(texcoord.xy - texOffsetThree );
-		color += weight[i] * col / 3;
-
+		float currweight = weight[abs(i)];
+		color += SbSdepth( texcoord.xy + float2(1,0) * (float)i * pix.x * 7.5) * currweight + SbSdepth( texcoord.xy + float2(1,0) * (float)i * pix.x * -7.5) * currweight / 0.75;
 	}
 }
   
