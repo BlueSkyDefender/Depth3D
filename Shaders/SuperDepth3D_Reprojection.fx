@@ -102,6 +102,8 @@ uniform float KCube <
 
 uniform int sstbli <
 	ui_type = "combo";
+	ui_items = "Side by Side\0Top and Bottom\0Line Interlaced\0";
+	ui_label = "3D Display Mode";
 	ui_tooltip = "Side by Side/Top and Bottom/Line Interlaced displays output.";
 > = 0;
 
