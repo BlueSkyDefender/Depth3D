@@ -100,10 +100,10 @@ uniform float KCube <
 	ui_tooltip = "Cubic distortion value. Default is 0.5.";
 > = 0.5;
 
-uniform bool TnB <
-	ui_label = "Top and Bottom";
-	ui_tooltip = "Top and Bottom displays output.";
-> = false;
+uniform int sstbli <
+	ui_type = "combo";
+	ui_tooltip = "Side by Side/Top and Bottom/Line Interlaced displays output.";
+> = 0;
 
 /////////////////////////////////////////////D3D Starts Here/////////////////////////////////////////////////////////////////
 
@@ -499,7 +499,8 @@ float3 BDR(float2 texcoord)
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void PS0(float4 position : SV_Position, float2 texcoord : TEXCOORD0, out float3 color : SV_Target)
 {
-	if(!TnB)
+
+	if(sstbli == 0)
 	{
 	float pos = Hsquish-1;
 	float mid = pos*BUFFER_HEIGHT/2*pix.y;
@@ -513,10 +514,16 @@ void PS0(float4 position : SV_Position, float2 texcoord : TEXCOORD0, out float3 
 	color = texcoord.x < 0.5 ? tex2D(SamplerCL,float2(texcoord.x*2 + Perspective * pix.x,texcoord.y)).rgb : tex2D(SamplerCR,float2(texcoord.x*2-1 - Perspective * pix.x,texcoord.y)).rgb;
 	}
 	}
-	else
+	if(sstbli == 1)
 	{
 	color = texcoord.y < 0.5 ? tex2D(SamplerCL,float2(texcoord.x + Perspective * pix.x,texcoord.y*2)).rgb : tex2D(SamplerCR,float2(texcoord.x - Perspective * pix.x,texcoord.y*2-1)).rgb;
 	}
+	if(sstbli == 2)
+	{
+	float grid = frac(texcoord.y*(BUFFER_HEIGHT/2));
+	color = grid > 0.5? tex2D(SamplerCL,float2(texcoord.x + Perspective * pix.x,texcoord.y)).rgb : tex2D(SamplerCR,float2(texcoord.x - Perspective * pix.x,texcoord.y)).rgb;
+	}
+	
 }
 
 ///////////////////////////////////////////////////////////ReShade.fxh/////////////////////////////////////////////////////////////
