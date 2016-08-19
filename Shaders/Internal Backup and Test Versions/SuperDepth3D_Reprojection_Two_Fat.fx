@@ -400,7 +400,7 @@ float SbSdepth (float2 texcoord)
 				
 	}
 
-    float4 D = 1 - depthM;	
+    float4 D = depthM;	
 
 		color.r = D.r;
 		
@@ -451,9 +451,9 @@ void PS_renderLR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD
 	for (int j = 0; j <= 1; ++j) 
 	{
 
-		color.rgb = tex2D(BackBuffer , float2(texcoord.xy-float2(FAT(texcoord.xy)*Depth,0)*pix.xy)).rgb;
+		colorT.rgb = tex2D(BackBuffer , float2(texcoord.xy-float2(FAT(texcoord.xy)*Depth,0)*pix.xy)).rgb;
 
-		colorT.rgb = tex2D(BackBuffer , float2(texcoord.xy+float2(FAT(texcoord.xy)*Depth,0)*pix.xy)).rgb;
+		color.rgb = tex2D(BackBuffer , float2(texcoord.xy+float2(FAT(texcoord.xy)*Depth,0)*pix.xy)).rgb;
 		
 	}
 }
