@@ -436,7 +436,7 @@ float4 color;
 	for (int i = -0; i < 5; i++)
 	{
 		float currweight = weight[abs(i)];
-		color += SbSdepth( texcoord.xy + float2(1,0) * (float)i * pix.x * blur) * currweight / 0.5;
+		color += SbSdepth( texcoord.xy + float2(1,0) * (float)i * pix.x * blur) * currweight / 1.25 + SbSdepth( texcoord.xy + float2(1,0) * (float)i * pix.x * -blur) * currweight  / 1.25;
 	}
 	}
 	else

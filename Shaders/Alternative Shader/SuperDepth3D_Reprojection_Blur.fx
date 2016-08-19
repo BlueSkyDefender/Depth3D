@@ -435,7 +435,7 @@ void Blur(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out 
 	for (int i = -0; i < 5; i++)
 	{
 		float currweight = weight[abs(i)];
-		color += SbSdepth( texcoord.xy + float2(1,0) * (float)i * pix.x * blur) * currweight / 0.5;
+		color += SbSdepth( texcoord.xy + float2(1,0) * (float)i * pix.x * blur) * currweight / 1.25 + SbSdepth( texcoord.xy + float2(1,0) * (float)i * pix.x * -blur) * currweight  / 1.25;
 	}
 	}
 	else
