@@ -31,7 +31,7 @@ uniform int AltDepthMap <
 
 uniform int Depth <
 	ui_type = "drag";
-	ui_min = 0; ui_max = 30;
+	ui_min = 0; ui_max = 25;
 	ui_label = "Depth Slider";
 	ui_tooltip = "Determines the amount of Image Warping and Separation between both eyes.";
 > = 10;
@@ -42,13 +42,6 @@ uniform int Perspective <
 	ui_label = "Perspective Slider";
 	ui_tooltip = "Determines the perspective point.";
 > = 0;
-
-uniform int blur <
-	ui_type = "drag";
-	ui_min = 0; ui_max = 25;
-	ui_label = "Blur Slider";
-	ui_tooltip = "Determines the amount of Depth Map Blur.";
-> = 7;
 
 uniform bool DepthFlip <
 	ui_label = "Depth Flip";
@@ -121,7 +114,7 @@ uniform int sstbli <
 	
 texture texCL  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA32F;}; 
 texture texCR  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA32F;}; 
-texture texCC  { Width = BUFFER_WIDTH/2.5; Height = BUFFER_HEIGHT; Format = RGBA32F;}; 
+texture texCC  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA32F;}; 
 texture texCDM  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA32F;};
 
 texture DepthBufferTex : DEPTH;
@@ -407,60 +400,58 @@ float SbSdepth (float2 texcoord)
 				
 	}
 
-    float4 D = depthM;	
+    float4 D = 1 - depthM;	
 
 		color.r = D.r;
 		
 	return color.r;	
 }
 	
-void Blur(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float3 color : SV_Target)
+float Blur(float2 texcoord : TEXCOORD0)
 {
-	if(blur > 0)
-	{
-	const float weight[11] = {
-		0.082607,
-		0.080977,
-		0.076276,
-		0.069041,
-		0.060049,
-		0.050187,
-		0.040306,
-		0.031105,
-		0.023066,
-		0.016436,
-		0.011254
+float4 color;
+	const float weight[2] = {
+0.44908,
+0.05092
 	};
+	
+	const float offset[2] = {
+0.53805,
+2.0678
+	};
+	
 	[loop]
-	for (int i = -0; i < 5; i++)
+	for (int i = 0; i < 2; i++)
 	{
-		float currweight = weight[abs(i)];
-		color += SbSdepth( texcoord.xy + float2(1,0) * (float)i * pix.x * blur) * currweight / K;
+		float2 texOffset = offset[i] * float2(0.001,0);
+		float2 texOffsetOne = offset[i] * float2(0.003,0);
+		float2 texOffsetTwo = offset[i] * float2(0.006,0);
+		float2 texOffsetThree = offset[i] * float2(0.009,0);
+		float3 col = SbSdepth(texcoord.xy + texOffset ) +
+					 SbSdepth(texcoord.xy - texOffset ) +
+					 SbSdepth(texcoord.xy + texOffsetOne ) +
+					 SbSdepth(texcoord.xy - texOffsetOne ) +
+					 SbSdepth(texcoord.xy + texOffsetTwo ) +
+					 SbSdepth(texcoord.xy - texOffsetTwo ) +
+					 SbSdepth(texcoord.xy + texOffsetThree ) +
+					 SbSdepth(texcoord.xy - texOffsetThree );
+		color += weight[i] * col / 3;
+
 	}
-	}
-	else
-	{
-		color = SbSdepth(texcoord.xy);
-	}
+	return color;
 }
   
 ////////////////////////////////////////////////Left/Right Eye////////////////////////////////////////////////////////
 void PS_renderLR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float3 color : SV_Target0 , out float3 colorT: SV_Target1)
 {	
-	const float samples[4] = {0.5, 0.66, 1, 0.25};
-	float DepthL = 1.0, DepthR = 1.0;
-	float2 uv = 0;
 	[loop]
-	for (int j = 0; j <= 3; ++j) 
+	for (int j = 0; j <= 1; ++j) 
 	{
-		uv.x = samples[j] * Depth;
-		DepthL=  min(DepthL,tex2D(SamplerCC,float2(texcoord.x+uv.x*pix.x, texcoord.y))).r;
-		DepthR=  min(DepthR,tex2D(SamplerCC,float2(texcoord.x-uv.x*pix.x, texcoord.y))).r;
+
+		color.rgb = tex2D(BackBuffer , float2(texcoord.xy-float2(Blur(texcoord.xy)*Depth,0)*pix.xy)).rgb;
+
+		colorT.rgb = tex2D(BackBuffer , float2(texcoord.xy+float2(Blur(texcoord.xy)*Depth,0)*pix.xy)).rgb;
 		
-		color.rgb = tex2D(BackBuffer , float2(texcoord.xy+float2(DepthL*Depth,0)*pix.xy)).rgb;
-		
-		colorT.rgb = tex2D(BackBuffer , float2(texcoord.xy-float2(DepthR*Depth,0)*pix.xy)).rgb;
-	
 	}
 }
 
@@ -785,12 +776,6 @@ float4 PS(float4 pos : SV_Position, float2 texcoord : TEXCOORD0) : SV_Target
 
 technique Super_Depth3D
 {
-			pass
-		{
-			VertexShader = PostProcessVS;
-			PixelShader = Blur;
-			RenderTarget = texCC;
-		}
 			pass
 		{
 			VertexShader = PostProcessVS;
