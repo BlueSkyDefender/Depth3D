@@ -31,7 +31,7 @@ uniform int AltDepthMap <
 
 uniform int Depth <
 	ui_type = "drag";
-	ui_min = 0; ui_max = 25;
+	ui_min = 0; ui_max = 30;
 	ui_label = "Depth Slider";
 	ui_tooltip = "Determines the amount of Image Warping and Separation between both eyes.";
 > = 10;
@@ -114,7 +114,7 @@ uniform int sstbli <
 	
 texture texCL  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA32F;}; 
 texture texCR  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA32F;}; 
-texture texCC  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA32F;}; 
+texture texCC  { Width = BUFFER_WIDTH/2; Height = BUFFER_HEIGHT; Format = RGBA32F;}; 
 texture texCDM  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA32F;};
 
 texture DepthBufferTex : DEPTH;
@@ -409,34 +409,7 @@ float SbSdepth (float2 texcoord)
 	
 void Blur(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float3 color : SV_Target)
 {
-	const float weight[2] = {
-0.44908,
-0.05092
-	};
-	
-	const float offset[2] = {
-0.53805,
-2.0678
-	};
-	
-	[loop]
-	for (int i = 0; i < 2; i++)
-	{
-		float2 texOffset = offset[i] * float2(0.001,0);
-		float2 texOffsetOne = offset[i] * float2(0.003,0);
-		float2 texOffsetTwo = offset[i] * float2(0.006,0);
-		float2 texOffsetThree = offset[i] * float2(0.009,0);
-		float3 col = SbSdepth(texcoord.xy + texOffset ) +
-					 SbSdepth(texcoord.xy - texOffset ) +
-					 SbSdepth(texcoord.xy + texOffsetOne ) +
-					 SbSdepth(texcoord.xy - texOffsetOne ) +
-					 SbSdepth(texcoord.xy + texOffsetTwo ) +
-					 SbSdepth(texcoord.xy - texOffsetTwo ) +
-					 SbSdepth(texcoord.xy + texOffsetThree ) +
-					 SbSdepth(texcoord.xy - texOffsetThree );
-		color += weight[i] * col / 3;
-
-	}
+color = SbSdepth(texcoord.xy);
 }
   
 ////////////////////////////////////////////////Left/Right Eye////////////////////////////////////////////////////////
