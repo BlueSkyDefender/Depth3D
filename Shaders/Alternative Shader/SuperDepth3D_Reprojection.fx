@@ -151,7 +151,7 @@ uniform float KCube <
 	
 texture texCL  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA32F;}; 
 texture texCR  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA32F;}; 
-texture texCC  { Width = BUFFER_WIDTH/2; Height = BUFFER_HEIGHT; Format = RGBA32F;}; 
+texture texCC  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA32F;}; 
 texture texCDM  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA32F;};
 
 texture DepthBufferTex : DEPTH;
@@ -437,13 +437,13 @@ float SbSdepth (float2 texcoord)
 				
 	}
 
-    float4 D = 1 - depthM;	
+    float4 D = depthM;	
 
 		color.r = D.r;
 		
 	return color.r;	
 }
-  
+	
 void Blur(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float3 color : SV_Target)
 {
 	if(blur > 0)
@@ -473,24 +473,24 @@ void Blur(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out 
 	color = SbSdepth(texcoord.xy);
 	}
 } 
-
-float inter(float2 texcoord)
-{
-float4 color = tex2D(SamplerCC,texcoord.xy);
-return color.r;
-}
   
 ////////////////////////////////////////////////Left/Right Eye////////////////////////////////////////////////////////
 void PS_renderLR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float3 color : SV_Target0 , out float3 colorT: SV_Target1)
 {	
+	const float samples[4] = {0.5, 0.66, 1, 0.25};
+	float DepthL = 1.0, DepthR = 1.0;
+	float2 uv = 0;
 	[loop]
-	for (int j = 0; j <= 1; ++j) 
+	for (int j = 0; j <= 3; ++j) 
 	{
-
-		color.rgb = tex2D(BackBuffer , float2(texcoord.xy-float2(inter(texcoord.xy)*Depth,0)*pix.xy)).rgb;
-
-		colorT.rgb = tex2D(BackBuffer , float2(texcoord.xy+float2(inter(texcoord.xy)*Depth,0)*pix.xy)).rgb;
+		uv.x = samples[j] * Depth;
+		DepthL=  min(DepthL,tex2D(SamplerCC,float2(texcoord.x+uv.x*pix.x, texcoord.y))).r;
+		DepthR=  min(DepthR,tex2D(SamplerCC,float2(texcoord.x-uv.x*pix.x, texcoord.y))).r;
 		
+		color.rgb = tex2D(BackBuffer , float2(texcoord.xy+float2(DepthL*Depth,0)*pix.xy)).rgb;
+		
+		colorT.rgb = tex2D(BackBuffer , float2(texcoord.xy-float2(DepthR*Depth,0)*pix.xy)).rgb;
+	
 	}
 }
 
@@ -531,6 +531,7 @@ float3 BDR(float2 texcoord)
 
 	return BDRistortion.rgb;
 }
+
 ////////////////////////////////////////////////////OSVR's Polynomial_Distortion/////////////////////////////////////////////////////
 
 float2 PD(float2 p, float k1)
@@ -904,7 +905,7 @@ float4 PS(float4 pos : SV_Position, float2 texcoord : TEXCOORD0) : SV_Target
 
 technique Super_Depth3D
 {
-		pass
+			pass
 		{
 			VertexShader = PostProcessVS;
 			PixelShader = Blur;
