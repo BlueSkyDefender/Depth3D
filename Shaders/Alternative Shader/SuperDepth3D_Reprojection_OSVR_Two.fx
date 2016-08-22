@@ -473,23 +473,19 @@ void Blur(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out 
 	color = SbSdepth(texcoord.xy);
 	}
 } 
-
-float inter(float2 texcoord)
-{
-float4 color = tex2D(SamplerCC,texcoord.xy);
-return color.r;
-}
   
 ////////////////////////////////////////////////Left/Right Eye////////////////////////////////////////////////////////
 void PS_renderLR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float3 color : SV_Target0 , out float3 colorT: SV_Target1)
 {	
+	float inter = tex2D(SamplerCC,texcoord.xy).r;
+	
 	[loop]
 	for (int j = 0; j <= 1; ++j) 
 	{
 
-		color.rgb = tex2D(BackBuffer , float2(texcoord.xy-float2(inter(texcoord.xy)*Depth,0)*pix.xy)).rgb;
+		color.rgb = tex2D(BackBuffer , float2(texcoord.xy-float2(inter*Depth,0)*pix.xy)).rgb;
 
-		colorT.rgb = tex2D(BackBuffer , float2(texcoord.xy+float2(inter(texcoord.xy)*Depth,0)*pix.xy)).rgb;
+		colorT.rgb = tex2D(BackBuffer , float2(texcoord.xy+float2(inter*Depth,0)*pix.xy)).rgb;
 		
 	}
 }
@@ -558,7 +554,7 @@ float4 PDL(float2 texcoord)
 		float2 sectorOrigin;
 
     // Radial distort around center
-		sectorOrigin = (0.5,0.5,0,0);
+		sectorOrigin = (texcoord.xy-0.5,0,0);
 
 		uv_red = PD(texcoord.xy-sectorOrigin,Red) + sectorOrigin;
 		uv_green = PD(texcoord.xy-sectorOrigin,Green) + sectorOrigin;
@@ -590,7 +586,8 @@ float4 PDL(float2 texcoord)
 		float2 sectorOrigin;
 
     // Radial distort around center
-		sectorOrigin = (0.5,0.5,0,0);
+		sectorOrigin = (texcoord.xy-0.5,0,0);
+		
 
 		uv_red = PD(texcoord.xy-sectorOrigin,Red) + sectorOrigin;
 		uv_green = PD(texcoord.xy-sectorOrigin,Green) + sectorOrigin;

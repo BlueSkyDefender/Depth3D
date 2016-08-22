@@ -559,7 +559,7 @@ float4 PDL(float2 texcoord)
 		float2 sectorOrigin;
 
     // Radial distort around center
-		sectorOrigin = (0.5,0.5,0,0);
+		sectorOrigin = (texcoord.xy-0.5,0,0);
 
 		uv_red = PD(texcoord.xy-sectorOrigin,Red) + sectorOrigin;
 		uv_green = PD(texcoord.xy-sectorOrigin,Green) + sectorOrigin;
@@ -591,7 +591,7 @@ float4 PDL(float2 texcoord)
 		float2 sectorOrigin;
 
     // Radial distort around center
-		sectorOrigin = (0.5,0.5,0,0);
+		sectorOrigin = (texcoord.xy-0.5,0,0);
 
 		uv_red = PD(texcoord.xy-sectorOrigin,Red) + sectorOrigin;
 		uv_green = PD(texcoord.xy-sectorOrigin,Green) + sectorOrigin;
