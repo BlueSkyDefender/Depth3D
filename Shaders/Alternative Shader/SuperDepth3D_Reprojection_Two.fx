@@ -3,7 +3,7 @@
  //----------------////
 
  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
- //* Depth Map Based 3D post-process shader v1.8 L & R Eye																															*//
+ //* Depth Map Based 3D post-process shader v1.8.1 L & R Eye																															*//
  //* For Reshade 3.0																																								*//
  //* --------------------------																																						*//
  //* This work is licensed under a Creative Commons Attribution 3.0 Unported License.																								*//
@@ -43,12 +43,12 @@ uniform int Perspective <
 	ui_tooltip = "Determines the perspective point.";
 > = 0;
 
-uniform int blur <
+uniform float blur <
 	ui_type = "drag";
 	ui_min = 0; ui_max = 25;
 	ui_label = "Blur Slider";
-	ui_tooltip = "Determines the amount of Depth Map Blur.";
-> = 7;
+	ui_tooltip = "Determines the blur seperation of Depth Map Blur.";
+> = 7.5;
 
 uniform bool DepthFlip <
 	ui_label = "Depth Flip";
@@ -83,7 +83,7 @@ uniform float Far <
 
 uniform int BD <
 	ui_type = "combo";
-	ui_items = "Off\0Barrel Distortion\0OSVR Polynomial Distortion\0";
+	ui_items = "Off\0Polynomial Distortion\0";
 	ui_label = "Barrel Distortion";
 	ui_tooltip = "Barrel Distortion for HMD type Displays.";
 > = 0;
@@ -112,37 +112,23 @@ uniform int sstbli <
 uniform float Red <
 	ui_type = "drag";
 	ui_min = 0; ui_max = 1;
-	ui_label = "OSVR Red";
+	ui_label = "Red Distortion";
 	ui_tooltip = "Adjust the Polynomial Distortion Red. Default is 1.0";
 > = 1.0;
 
 uniform float Green <
 	ui_type = "drag";
 	ui_min = 0; ui_max = 1;
-	ui_label = "OSVR Green";
+	ui_label = "Green Distortion";
 	ui_tooltip = "Adjust the Polynomial Distortion Green. Default is 1.0";
 > = 1.0;
 
 uniform float Blue <
 	ui_type = "drag";
 	ui_min = 0; ui_max = 1;
-	ui_label = "OSVR Blue";
+	ui_label = "Blue Distortion";
 	ui_tooltip = "Adjust the Polynomial Distortion Blue. Default is 1.0";
 > = 1.0;
-
-uniform float K <
-	ui_type = "drag";
-	ui_min = -25; ui_max = 25;
-	ui_label = "Lens Distortion";
-	ui_tooltip = "Lens distortion coefficient. Default is -0.15.";
-> = -0.15;
-
-uniform float KCube <
-	ui_type = "drag";
-	ui_min = -25; ui_max = 25;
-	ui_label = "Cubic Distortion";
-	ui_tooltip = "Cubic distortion value. Default is 0.5.";
-> = 0.5;
 
 /////////////////////////////////////////////D3D Starts Here/////////////////////////////////////////////////////////////////
 
@@ -446,6 +432,9 @@ float SbSdepth (float2 texcoord)
   
 void Blur(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float3 color : SV_Target)
 {
+
+	float Con = 0.75;
+	
 	if(blur > 0)
 	{
 	const float weight[11] = {
@@ -465,7 +454,7 @@ void Blur(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out 
 	for (int i = -0; i < 5; i++)
 	{
 		float currweight = weight[abs(i)];
-		color += SbSdepth( texcoord.xy + float2(1,0) * (float)i * pix.x * blur) * currweight / 1.25 + SbSdepth( texcoord.xy + float2(1,0) * (float)i * pix.x * -blur) * currweight  / 1.25;
+		color += (SbSdepth( texcoord.xy + float2(1,0) * (float)i * pix.x * blur) * currweight + SbSdepth( texcoord.xy + float2(1,0) * (float)i * pix.x * -blur) * currweight)  / Con;
 	}
 	}
 	else
@@ -490,44 +479,7 @@ void PS_renderLR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD
 	}
 }
 
-//////////////////////////////////////////////////////Barrle_Distortion/////////////////////////////////////////////////////
-float3 BDL(float2 texcoord)
-
-{
-	float k = K;
-	float kcube = KCube;
-
-	float r2 = (texcoord.x-0.5) * (texcoord.x-0.5) + (texcoord.y-0.5) * (texcoord.y-0.5);       
-	float f = 0.0;
-
-	f = 1 + r2 * (k + kcube * sqrt(r2));
-
-	float x = f*(texcoord.x-0.5)+0.5;
-	float y = f*(texcoord.y-0.5)+0.5;
-	float3 BDListortion = tex2D(SamplerCL,float2(x,y)).rgb;
-
-	return BDListortion.rgb;
-}
-
-float3 BDR(float2 texcoord)
-
-{
-
-	float k = K;
-	float kcube = KCube;
-
-	float r2 = (texcoord.x-0.5) * (texcoord.x-0.5) + (texcoord.y-0.5) * (texcoord.y-0.5);       
-	float f = 0.0;
-
-	f = 1 + r2 * (k + kcube * sqrt(r2));
-
-	float x = f*(texcoord.x-0.5)+0.5;
-	float y = f*(texcoord.y-0.5)+0.5;
-	float3 BDRistortion = tex2D(SamplerCR,float2(x,y)).rgb;
-
-	return BDRistortion.rgb;
-}
-////////////////////////////////////////////////////OSVR's Polynomial_Distortion/////////////////////////////////////////////////////
+////////////////////////////////////////////////////Polynomial_Distortion/////////////////////////////////////////////////////
 
 float2 PD(float2 p, float k1)
 
@@ -627,10 +579,6 @@ void PS0(float4 position : SV_Position, float2 texcoord : TEXCOORD0, out float3 
 		color = texcoord.x < 0.5 ? tex2D(SamplerCL,float2(texcoord.x*2 + Perspective * pix.x,texcoord.y)).rgb : tex2D(SamplerCR,float2(texcoord.x*2-1 - Perspective * pix.x,texcoord.y)).rgb;
 		}
 		if(BD == 1)
-		{
-		color = texcoord.x < 0.5 ? BDL(float2(((texcoord.x*2)*Vsquish)-midV + Perspective * pix.x,(texcoord.y*Hsquish)-midH)).rgb : BDR(float2(((texcoord.x*2-1)*Vsquish)-midV - Perspective * pix.x,(texcoord.y*Hsquish)-midH)).rgb;
-		}
-		if(BD == 2)
 		{
 		color = texcoord.x < 0.5 ? PDL(float2(((texcoord.x*2)*Vsquish)-midV + Perspective * pix.x,(texcoord.y*Hsquish)-midH)).rgb : PDR(float2(((texcoord.x*2-1)*Vsquish)-midV - Perspective * pix.x,(texcoord.y*Hsquish)-midH)).rgb;
 		}
