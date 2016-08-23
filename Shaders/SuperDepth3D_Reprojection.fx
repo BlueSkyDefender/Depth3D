@@ -3,7 +3,7 @@
  //----------------////
 
  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
- //* Depth Map Based 3D post-process shader v1.8 L & R Eye																															*//
+ //* Depth Map Based 3D post-process shader v1.8.1 L & R Eye																															*//
  //* For Reshade 3.0																																								*//
  //* --------------------------																																						*//
  //* This work is licensed under a Creative Commons Attribution 3.0 Unported License.																								*//
@@ -31,7 +31,7 @@ uniform int AltDepthMap <
 
 uniform int Depth <
 	ui_type = "drag";
-	ui_min = 0; ui_max = 25;
+	ui_min = 0; ui_max = 30;
 	ui_label = "Depth Slider";
 	ui_tooltip = "Determines the amount of Image Warping and Separation between both eyes.";
 > = 10;
@@ -42,6 +42,13 @@ uniform int Perspective <
 	ui_label = "Perspective Slider";
 	ui_tooltip = "Determines the perspective point.";
 > = 0;
+
+uniform float blur <
+	ui_type = "drag";
+	ui_min = 0; ui_max = 25;
+	ui_label = "Blur Slider";
+	ui_tooltip = "Determines the blur seperation of Depth Map Blur.";
+> = 7.5;
 
 uniform bool DepthFlip <
 	ui_label = "Depth Flip";
@@ -74,31 +81,26 @@ uniform float Far <
 	ui_tooltip = "Near Depth Map Adjustment.";
 > = 1;
 
-uniform bool BD <
+uniform int BD <
+	ui_type = "combo";
+	ui_items = "Off\0Polynomial Distortion\0";
 	ui_label = "Barrel Distortion";
 	ui_tooltip = "Barrel Distortion for HMD type Displays.";
-> = false;
+> = 0;
 
 uniform float Hsquish <
 	ui_type = "drag";
-	ui_min = 1; ui_max = 2;
+	ui_min = 0.5; ui_max = 2;
 	ui_label = "Horizontal Squish";
-	ui_tooltip = "Horizontal squish cubic distortion value. Default is 1.050.";
-> = 1.050;
+	ui_tooltip = "Horizontal squish cubic distortion value. Default is 1.0.";
+> = 1.00;
 
-uniform float K <
+uniform float Vsquish <
 	ui_type = "drag";
-	ui_min = -25; ui_max = 25;
-	ui_label = "Lens Distortion";
-	ui_tooltip = "Lens distortion coefficient. Default is -0.15.";
-> = -0.15;
-
-uniform float KCube <
-	ui_type = "drag";
-	ui_min = -25; ui_max = 25;
-	ui_label = "Cubic Distortion";
-	ui_tooltip = "Cubic distortion value. Default is 0.5.";
-> = 0.5;
+	ui_min = 0.5; ui_max = 2;
+	ui_label = "Vertical Squish";
+	ui_tooltip = "Vertical squish cubic distortion value. Default is 1.0.";
+> = 1.0;
 
 uniform int sstbli <
 	ui_type = "combo";
@@ -106,6 +108,32 @@ uniform int sstbli <
 	ui_label = "3D Display Mode";
 	ui_tooltip = "Side by Side/Top and Bottom/Line Interlaced displays output.";
 > = 0;
+
+uniform float Red <
+	ui_type = "drag";
+	ui_min = 0; ui_max = 1;
+	ui_label = "Red Distortion";
+	ui_tooltip = "Adjust the Polynomial Distortion Red. Default is 1.0";
+> = 1.0;
+
+uniform float Green <
+	ui_type = "drag";
+	ui_min = 0; ui_max = 1;
+	ui_label = "Green Distortion";
+	ui_tooltip = "Adjust the Polynomial Distortion Green. Default is 1.0";
+> = 1.0;
+
+uniform float Blue <
+	ui_type = "drag";
+	ui_min = 0; ui_max = 1;
+	ui_label = "Blue Distortion";
+	ui_tooltip = "Adjust the Polynomial Distortion Blue. Default is 1.0";
+> = 1.0;
+
+uniform bool LRRL <
+	ui_label = "Eye Swap";
+	ui_tooltip = "Left right image change.";
+> = false;
 
 /////////////////////////////////////////////D3D Starts Here/////////////////////////////////////////////////////////////////
 
@@ -409,35 +437,36 @@ float SbSdepth (float2 texcoord)
 	
 void Blur(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float3 color : SV_Target)
 {
-	const float weight[2] = {
-0.44908,
-0.05092
-	};
-	
-	const float offset[2] = {
-0.53805,
-2.0678
-	};
-	
-	[loop]
-	for (int i = 0; i < 2; i++)
-	{
-		float2 texOffset = offset[i] * float2(0.001,0);
-		float2 texOffsetOne = offset[i] * float2(0.003,0);
-		float2 texOffsetTwo = offset[i] * float2(0.006,0);
-		float2 texOffsetThree = offset[i] * float2(0.009,0);
-		float3 col = SbSdepth(texcoord.xy + texOffset ) +
-					 SbSdepth(texcoord.xy - texOffset ) +
-					 SbSdepth(texcoord.xy + texOffsetOne ) +
-					 SbSdepth(texcoord.xy - texOffsetOne ) +
-					 SbSdepth(texcoord.xy + texOffsetTwo ) +
-					 SbSdepth(texcoord.xy - texOffsetTwo ) +
-					 SbSdepth(texcoord.xy + texOffsetThree ) +
-					 SbSdepth(texcoord.xy - texOffsetThree );
-		color += weight[i] * col / 3;
 
+	float Con = 0.75;
+		
+	if(blur > 0)
+	{
+	const float weight[11] = {
+		0.082607,
+		0.080977,
+		0.076276,
+		0.069041,
+		0.060049,
+		0.050187,
+		0.040306,
+		0.031105,
+		0.023066,
+		0.016436,
+		0.011254
+	};
+	[loop]
+	for (int i = -0; i < 5; i++)
+	{
+		float currweight = weight[abs(i)];
+		color += (SbSdepth( texcoord.xy + float2(1,0) * (float)i * pix.x * blur) * currweight + SbSdepth( texcoord.xy + float2(1,0) * (float)i * pix.x * -blur) * currweight)  / Con;
 	}
-}
+	}
+	else
+	{
+	color = SbSdepth(texcoord.xy);
+	}
+} 
   
 ////////////////////////////////////////////////Left/Right Eye////////////////////////////////////////////////////////
 void PS_renderLR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float3 color : SV_Target0 , out float3 colorT: SV_Target1)
@@ -447,55 +476,107 @@ void PS_renderLR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD
 	float2 uv = 0;
 	[loop]
 	for (int j = 0; j <= 3; ++j) 
-	{
-		uv.x = samples[j] * Depth;
-		DepthL=  min(DepthL,tex2D(SamplerCC,float2(texcoord.x+uv.x*pix.x, texcoord.y))).r;
-		DepthR=  min(DepthR,tex2D(SamplerCC,float2(texcoord.x-uv.x*pix.x, texcoord.y))).r;
+	{	
+			uv.x = samples[j] * Depth;
+			DepthL=  min(DepthL,tex2D(SamplerCC,float2(texcoord.x+uv.x*pix.x, texcoord.y))).r;
+			DepthR=  min(DepthR,tex2D(SamplerCC,float2(texcoord.x-uv.x*pix.x, texcoord.y))).r;
+		if(!LRRL)
+		{
+			color.rgb = tex2D(BackBuffer , float2(texcoord.xy+float2(DepthL*Depth,0)*pix.xy)).rgb;
 		
-		color.rgb = tex2D(BackBuffer , float2(texcoord.xy+float2(DepthL*Depth,0)*pix.xy)).rgb;
+			colorT.rgb = tex2D(BackBuffer , float2(texcoord.xy-float2(DepthR*Depth,0)*pix.xy)).rgb;
+		}
+		else
+		{		
+			colorT.rgb = tex2D(BackBuffer , float2(texcoord.xy+float2(DepthL*Depth,0)*pix.xy)).rgb;
 		
-		colorT.rgb = tex2D(BackBuffer , float2(texcoord.xy-float2(DepthR*Depth,0)*pix.xy)).rgb;
-	
+			color.rgb = tex2D(BackBuffer , float2(texcoord.xy-float2(DepthR*Depth,0)*pix.xy)).rgb;
+		}
 	}
 }
 
-//////////////////////////////////////////////////////Barrle_Distortion/////////////////////////////////////////////////////
-float3 BDL(float2 texcoord)
+////////////////////////////////////////////////////Polynomial_Distortion/////////////////////////////////////////////////////
 
-{
-	float k = K;
-	float kcube = KCube;
-
-	float r2 = (texcoord.x-0.5) * (texcoord.x-0.5) + (texcoord.y-0.5) * (texcoord.y-0.5);       
-	float f = 0.0;
-
-	f = 1 + r2 * (k + kcube * sqrt(r2));
-
-	float x = f*(texcoord.x-0.5)+0.5;
-	float y = f*(texcoord.y-0.5)+0.5;
-	float3 BDListortion = tex2D(SamplerCL,float2(x,y)).rgb;
-
-	return BDListortion.rgb;
-}
-
-float3 BDR(float2 texcoord)
+float2 PD(float2 p, float k1)
 
 {
 
-	float k = K;
-	float kcube = KCube;
+	
+	float r2 = (p.x-0.5) * (p.x-0.5) + (p.y-0.5) * (p.y-0.5);       
+	float newRadius = 0.0;
 
-	float r2 = (texcoord.x-0.5) * (texcoord.x-0.5) + (texcoord.y-0.5) * (texcoord.y-0.5);       
-	float f = 0.0;
+	newRadius = (1 + k1*r2);
 
-	f = 1 + r2 * (k + kcube * sqrt(r2));
-
-	float x = f*(texcoord.x-0.5)+0.5;
-	float y = f*(texcoord.y-0.5)+0.5;
-	float3 BDRistortion = tex2D(SamplerCR,float2(x,y)).rgb;
-
-	return BDRistortion.rgb;
+	 p.x = newRadius * (p.x-0.5)+0.5;
+	 p.y = newRadius * (p.y-0.5)+0.5;
+	
+	return p;
 }
+
+float4 PDL(float2 texcoord)
+
+{		
+		float4 color;
+		float2 uv_red, uv_green, uv_blue;
+		float4 color_red, color_green, color_blue;
+		float2 sectorOrigin;
+
+    // Radial distort around center
+		sectorOrigin = (texcoord.xy-0.5,0,0);
+
+		uv_red = PD(texcoord.xy-sectorOrigin,Red) + sectorOrigin;
+		uv_green = PD(texcoord.xy-sectorOrigin,Green) + sectorOrigin;
+		uv_blue = PD(texcoord.xy-sectorOrigin,Blue) + sectorOrigin;
+
+		color_red = tex2D(SamplerCL, uv_red).r;
+		color_green = tex2D(SamplerCL, uv_green).g;
+		color_blue = tex2D(SamplerCL, uv_blue).b;
+
+
+		if( ((uv_red.x > 0) && (uv_red.x < 1) && (uv_red.y > 0) && (uv_red.y < 1)))
+		{
+			color = float4(color_red.x, color_green.y, color_blue.z, 1.0);
+		}
+		else
+		{
+			color = float4(0,0,0,1);
+		}
+		return color;
+		
+	}
+	
+	float4 PDR(float2 texcoord)
+
+{		
+		float4 color;
+		float2 uv_red, uv_green, uv_blue;
+		float4 color_red, color_green, color_blue;
+		float2 sectorOrigin;
+
+    // Radial distort around center
+		sectorOrigin = (texcoord.xy-0.5,0,0);
+		
+
+		uv_red = PD(texcoord.xy-sectorOrigin,Red) + sectorOrigin;
+		uv_green = PD(texcoord.xy-sectorOrigin,Green) + sectorOrigin;
+		uv_blue = PD(texcoord.xy-sectorOrigin,Blue) + sectorOrigin;
+
+		color_red = tex2D(SamplerCR, uv_red).r;
+		color_green = tex2D(SamplerCR, uv_green).g;
+		color_blue = tex2D(SamplerCR, uv_blue).b;
+
+
+		if( ((uv_red.x > 0) && (uv_red.x < 1) && (uv_red.y > 0) && (uv_red.y < 1)))
+		{
+			color = float4(color_red.x, color_green.y, color_blue.z, 1.0);
+		}
+		else
+		{
+			color = float4(0,0,0,1);
+		}
+		return color;
+		
+	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void PS0(float4 position : SV_Position, float2 texcoord : TEXCOORD0, out float3 color : SV_Target)
@@ -503,17 +584,21 @@ void PS0(float4 position : SV_Position, float2 texcoord : TEXCOORD0, out float3 
 
 	if(sstbli == 0)
 	{
-	float pos = Hsquish-1;
-	float mid = pos*BUFFER_HEIGHT/2*pix.y;
+	float posH = Hsquish-1;
+	float midH = posH*BUFFER_HEIGHT/2*pix.y;
 	
-	if(BD)
-	{
-	color = texcoord.x < 0.5 ? BDL(float2(texcoord.x*2 + Perspective * pix.x,(texcoord.y*Hsquish)-mid)).rgb : BDR(float2(texcoord.x*2-1 - Perspective * pix.x,(texcoord.y*Hsquish)-mid)).rgb;
-	}
-	else
-	{
-	color = texcoord.x < 0.5 ? tex2D(SamplerCL,float2(texcoord.x*2 + Perspective * pix.x,texcoord.y)).rgb : tex2D(SamplerCR,float2(texcoord.x*2-1 - Perspective * pix.x,texcoord.y)).rgb;
-	}
+	float posV = Vsquish-1;
+	float midV = posV*BUFFER_WIDTH/2*pix.x;
+	
+		if(BD == 0)
+		{
+		color = texcoord.x < 0.5 ? tex2D(SamplerCL,float2(texcoord.x*2 + Perspective * pix.x,texcoord.y)).rgb : tex2D(SamplerCR,float2(texcoord.x*2-1 - Perspective * pix.x,texcoord.y)).rgb;
+		}
+		if(BD == 1)
+		{
+		color = texcoord.x < 0.5 ? PDL(float2(((texcoord.x*2)*Vsquish)-midV + Perspective * pix.x,(texcoord.y*Hsquish)-midH)).rgb : PDR(float2(((texcoord.x*2-1)*Vsquish)-midV - Perspective * pix.x,(texcoord.y*Hsquish)-midH)).rgb;
+		}
+	
 	}
 	if(sstbli == 1)
 	{
@@ -521,16 +606,31 @@ void PS0(float4 position : SV_Position, float2 texcoord : TEXCOORD0, out float3 
 	}
 	if(sstbli == 2)
 	{
-	float grid = frac(texcoord.y*(BUFFER_HEIGHT/2));
-	color = grid > 0.5? tex2D(SamplerCL,float2(texcoord.x + Perspective * pix.x,texcoord.y)).rgb : tex2D(SamplerCR,float2(texcoord.x - Perspective * pix.x,texcoord.y)).rgb;
+		float gridL = frac(texcoord.y*(BUFFER_HEIGHT/2));
+		if (gridL > 0.5)
+		{ 
+		color = tex2D(SamplerCL,float2(texcoord.x + Perspective * pix.x,texcoord.y)).rgb;
+		}
+		else
+		{
+		color = tex2D(SamplerCR,float2(texcoord.x - Perspective * pix.x,texcoord.y)).rgb;
+		}
 	}
 	if(sstbli == 3)
 	{
-	float gridy = frac(texcoord.y*(BUFFER_HEIGHT/2));
-	float gridx = frac(texcoord.x*(BUFFER_WIDTH/2));
-	color = gridy+gridx > 0.5 ? tex2D(SamplerCL,float2(texcoord.x + Perspective * pix.x,texcoord.y)).rgb : tex2D(SamplerCR,float2(texcoord.x - Perspective * pix.x,texcoord.y)).rgb;
+		float gridy = frac(texcoord.y*(BUFFER_HEIGHT/2));
+		float gridx = frac(texcoord.x*(BUFFER_WIDTH/2));
+		if (gridy+gridx > 0.5)
+		{
+		color = tex2D(SamplerCL,float2(texcoord.x + Perspective * pix.x,texcoord.y)).rgb;
+		}
+		else
+		{
+		color = tex2D(SamplerCR,float2(texcoord.x - Perspective * pix.x,texcoord.y)).rgb;
+		}
 	}
 }
+
 
 ///////////////////////////////////////////////////////////ReShade.fxh/////////////////////////////////////////////////////////////
 

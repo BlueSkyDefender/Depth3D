@@ -130,6 +130,11 @@ uniform float Blue <
 	ui_tooltip = "Adjust the Polynomial Distortion Blue. Default is 1.0";
 > = 1.0;
 
+uniform bool LRRL <
+	ui_label = "Eye Swap";
+	ui_tooltip = "Left right image change.";
+> = false;
+
 /////////////////////////////////////////////D3D Starts Here/////////////////////////////////////////////////////////////////
 
 #define pix float2(BUFFER_RCP_WIDTH, BUFFER_RCP_HEIGHT)
@@ -471,11 +476,16 @@ void PS_renderLR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD
 	[loop]
 	for (int j = 0; j <= 1; ++j) 
 	{
-
+		if(!LRRL)
+		{
 		color.rgb = tex2D(BackBuffer , float2(texcoord.xy-float2(inter*Depth,0)*pix.xy)).rgb;
-
 		colorT.rgb = tex2D(BackBuffer , float2(texcoord.xy+float2(inter*Depth,0)*pix.xy)).rgb;
-		
+		}
+		else
+		{
+		colorT.rgb = tex2D(BackBuffer , float2(texcoord.xy-float2(inter*Depth,0)*pix.xy)).rgb;
+		color.rgb = tex2D(BackBuffer , float2(texcoord.xy+float2(inter*Depth,0)*pix.xy)).rgb;
+		}
 	}
 }
 
@@ -565,54 +575,53 @@ float4 PDL(float2 texcoord)
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void PS0(float4 position : SV_Position, float2 texcoord : TEXCOORD0, out float3 color : SV_Target)
 {
-
-	if(sstbli == 0)
-	{
-	float posH = Hsquish-1;
-	float midH = posH*BUFFER_HEIGHT/2*pix.y;
-	
-	float posV = Vsquish-1;
-	float midV = posV*BUFFER_WIDTH/2*pix.x;
-	
-		if(BD == 0)
+		if(sstbli == 0)
 		{
-		color = texcoord.x < 0.5 ? tex2D(SamplerCL,float2(texcoord.x*2 + Perspective * pix.x,texcoord.y)).rgb : tex2D(SamplerCR,float2(texcoord.x*2-1 - Perspective * pix.x,texcoord.y)).rgb;
+		float posH = Hsquish-1;
+		float midH = posH*BUFFER_HEIGHT/2*pix.y;
+		
+		float posV = Vsquish-1;
+		float midV = posV*BUFFER_WIDTH/2*pix.x;
+		
+			if(BD == 0)
+			{
+			color = texcoord.x < 0.5 ? tex2D(SamplerCL,float2(texcoord.x*2 + Perspective * pix.x,texcoord.y)).rgb : tex2D(SamplerCR,float2(texcoord.x*2-1 - Perspective * pix.x,texcoord.y)).rgb;
+			}
+			if(BD == 1)
+			{
+			color = texcoord.x < 0.5 ? PDL(float2(((texcoord.x*2)*Vsquish)-midV + Perspective * pix.x,(texcoord.y*Hsquish)-midH)).rgb : PDR(float2(((texcoord.x*2-1)*Vsquish)-midV - Perspective * pix.x,(texcoord.y*Hsquish)-midH)).rgb;
+			}
+		
 		}
-		if(BD == 1)
+		if(sstbli == 1)
 		{
-		color = texcoord.x < 0.5 ? PDL(float2(((texcoord.x*2)*Vsquish)-midV + Perspective * pix.x,(texcoord.y*Hsquish)-midH)).rgb : PDR(float2(((texcoord.x*2-1)*Vsquish)-midV - Perspective * pix.x,(texcoord.y*Hsquish)-midH)).rgb;
+		color = texcoord.y < 0.5 ? tex2D(SamplerCL,float2(texcoord.x + Perspective * pix.x,texcoord.y*2)).rgb : tex2D(SamplerCR,float2(texcoord.x - Perspective * pix.x,texcoord.y*2-1)).rgb;
 		}
-	
-	}
-	if(sstbli == 1)
-	{
-	color = texcoord.y < 0.5 ? tex2D(SamplerCL,float2(texcoord.x + Perspective * pix.x,texcoord.y*2)).rgb : tex2D(SamplerCR,float2(texcoord.x - Perspective * pix.x,texcoord.y*2-1)).rgb;
-	}
-	if(sstbli == 2)
-	{
-		float gridL = frac(texcoord.y*(BUFFER_HEIGHT/2));
-		if (gridL > 0.5)
-		{ 
-		color = tex2D(SamplerCL,float2(texcoord.x + Perspective * pix.x,texcoord.y)).rgb;
-		}
-		else
+		if(sstbli == 2)
 		{
-		color = tex2D(SamplerCR,float2(texcoord.x - Perspective * pix.x,texcoord.y)).rgb;
+			float gridL = frac(texcoord.y*(BUFFER_HEIGHT/2));
+			if (gridL > 0.5)
+			{ 
+			color = tex2D(SamplerCL,float2(texcoord.x + Perspective * pix.x,texcoord.y)).rgb;
+			}
+			else
+			{
+			color = tex2D(SamplerCR,float2(texcoord.x - Perspective * pix.x,texcoord.y)).rgb;
+			}
 		}
-	}
-	if(sstbli == 3)
-	{
-		float gridy = frac(texcoord.y*(BUFFER_HEIGHT/2));
-		float gridx = frac(texcoord.x*(BUFFER_WIDTH/2));
-		if (gridy+gridx > 0.5)
+		if(sstbli == 3)
 		{
-		color = tex2D(SamplerCL,float2(texcoord.x + Perspective * pix.x,texcoord.y)).rgb;
+			float gridy = frac(texcoord.y*(BUFFER_HEIGHT/2));
+			float gridx = frac(texcoord.x*(BUFFER_WIDTH/2));
+			if (gridy+gridx > 0.5)
+			{
+			color = tex2D(SamplerCL,float2(texcoord.x + Perspective * pix.x,texcoord.y)).rgb;
+			}
+			else
+			{
+			color = tex2D(SamplerCR,float2(texcoord.x - Perspective * pix.x,texcoord.y)).rgb;
+			}
 		}
-		else
-		{
-		color = tex2D(SamplerCR,float2(texcoord.x - Perspective * pix.x,texcoord.y)).rgb;
-		}
-	}
 }
 
 ///////////////////////////////////////////////////////////ReShade.fxh/////////////////////////////////////////////////////////////
