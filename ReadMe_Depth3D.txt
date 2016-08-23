@@ -1,5 +1,5 @@
 ﻿#SuperDepth3D
-Depth Map Based 3D post-process shader v1.8 for Reshade 3.0
+Depth Map Based 3D post-process shader v1.8.1 for Reshade 3.0
 
 There are the Basic Depth maps you can use for your games listed and not listed. Look at this link for other game Compatibility.
 
@@ -27,7 +27,7 @@ Call of Duty: Ghost			DM 5					RB
 Casltevania: Lord of Shadows - UE	DM 6
 Condemned: Criminal Origins		DM 7					RB		
 Deadly Premonition:The Directors's Cut  DM 8					RB
-Dragon Ball Xenoverse			DM 9														
+Dragon Ball Xenoverse			DM 9											
 Dragons Dogma: Dark Arisen		DM 8
 DreamFall Chapters			DM 18		     DF On
 Dying Light				DM 11
@@ -66,15 +66,20 @@ Shift + f2 for Reshade 3.0 menu
 * Alternate Depth Map	[Depth Map 0 ▼]		[0|1|2|3|4|5|6|7|9|10|11|12|13|14|15|16|17|18|19|20] Alternate Depth Map for different Games. 
 * Depth		       -[◄0▪▪▪▪▪▪▪25►]+		[0:25] Depth Default is 25. "Drag to Adjust Perspective."
 * Perspective	       -[◄▪▪▪▪0▪▪▪▪▪►]+		[-100:100] Perspective Default is 0. "Drag to Adjust Perspective."
+* Blur		       -[◄▪▪7.5▪▪▪▪▪►]+		[0:25] Depth Map Blur Adjustment. Default is 7.5. 0 is Off.
 * Depth Flip	 	[Off ▼]			Depth Flip if Upside Down.
 * Depth Map View 	[Off ▼]			Depth Map View. To see The Depth map. Use This to Work on your Own Depth Map for your game.
-* Far		       -[◄▪▪▪▪▪▪▪▪▪▪►]+		Default is "0.05" Far Depth Map Adjustment. This works on both [Custom Two ▼] and [Custom Two ▼]
-* Near		       -[◄▪▪▪▪▪▪▪▪▪▪►]+		Default is "1.25" Near Depth Map Adjustment. This works on both [Custom Two ▼] and [Custom Two ▼]
+* Far		       -[◄▪▪▪▪▪▪▪▪▪▪►]+		Default is "0.05" Far Depth Map Adjustment. This works on  [Custom DM ▼] 
+* Near		       -[◄▪▪▪▪▪▪▪▪▪▪►]+		Default is "1.25" Near Depth Map Adjustment. This works on [Custom DM ▼] 
 * Custom Depth Map	[Custom Off  ▼]		Added, the ablity to make your own Depth Map.
 * Barrel Distortion	[Off ▼]			Enables Barrel Distortion for HMD or if you want a sence of a little more depth.
-* Horizontal Squish    -[◄1▪▪▪▪▪▪▪▪2►]+		Squishes the screen horizontaly.
-* Lens Distortion      -[◄25▪▪▪▪▪▪25►]+		Lens distortion slider.
-* Cubic Distortion     -[◄25▪▪▪▪▪▪25►]+		Cubic distortion slider.
+* Horizontal Squish    -[◄0.5▪▪▪1▪▪▪▪2►]+	Squishes the screen horizontaly.
+* Vertical Squish      -[◄0.5▪▪▪1▪▪▪▪2►]+	Vertical the screen horizontaly.
+* 3D Display Mode	[Side by Side ▼]	Side by Side/Top and Bottom/Line Interlaced/Checkerboard 3D displays output.
+* Red Distortion       -[◄0▪▪▪▪▪▪1►]+		Red distortion slider.
+* Green Distortion     -[◄0▪▪▪▪▪▪1►]+		Green distortion slider.
+* Blue Distortion      -[◄0▪▪▪▪▪▪1►]+		Blue distortion slider.
+* EyeSwap		[Off ▼]			Left Right Eye Swap.
 
 Read Below Section
 ======================================================================================================================================
@@ -199,7 +204,7 @@ Check Disable Display Scaling On High DPI Settings
 
 This should fix it. For more look up this problem on google.
 
-Games Not working in Reshade 3.0
+Games Not working in Reshade 3.0 Use Reshade 2.0
 ======================================================================================================================================
 crosire's ReShade version '3.0.0.81'
 
