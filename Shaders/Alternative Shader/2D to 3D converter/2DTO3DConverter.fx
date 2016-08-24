@@ -25,10 +25,10 @@
 
 uniform int Depth <
 	ui_type = "drag";
-	ui_min = -25; ui_max = 25;
+	ui_min = 0; ui_max = 25;
 	ui_label = "Depth Slider";
 	ui_tooltip = "Determines the amount of Image Warping and Separation between both eyes.";
-> = 0;
+> = 25;
 
 uniform int Perspective <
 	ui_type = "drag";
@@ -42,64 +42,7 @@ uniform int blur <
 	ui_min = 0; ui_max = 25;
 	ui_label = "Blur Slider";
 	ui_tooltip = "Determines the amount of Depth Map Blur.";
-> = 4;
-
-uniform bool DepthFlip <
-	ui_label = "Depth Flip";
-	ui_tooltip = "Depth Flip if the depth map is Upside Down.";
-> = false;
-
-uniform bool DepthMap <
-	ui_label = "Depth Map View";
-	ui_tooltip = "Display the Depth Map. Use This to Work on your Own Depth Map for your game.";
-> = false;
-
-uniform int CustomDM <
-	ui_type = "combo";
-	ui_items = "Custom Off\0Custom One\0Custom Two\0Custom Three\0Custom Four\0Custom Five\0";
-	ui_label = "Custom Depth Map";
-	ui_tooltip = "Adjust your own Custom Depth Map.";
-> = 0;
-
-uniform float Far <
-	ui_type = "drag";
-	ui_min = 0; ui_max = 5;
-	ui_label = "Far";
-	ui_tooltip = "Far Depth Map Adjustment.";
-> = 1.5;
- 
- uniform float Near <
-	ui_type = "drag";
-	ui_min = 0; ui_max = 5;
-	ui_label = "Near";
-	ui_tooltip = "Near Depth Map Adjustment.";
-> = 1;
-
-uniform bool BD <
-	ui_label = "Barrel Distortion";
-	ui_tooltip = "Barrel Distortion for HMD type Displays.";
-> = false;
-
-uniform float Hsquish <
-	ui_type = "drag";
-	ui_min = 1; ui_max = 2;
-	ui_label = "Horizontal Squish";
-	ui_tooltip = "Horizontal squish cubic distortion value. Default is 1.050.";
-> = 1.050;
-
-uniform float K <
-	ui_type = "drag";
-	ui_min = -25; ui_max = 25;
-	ui_label = "Lens Distortion";
-	ui_tooltip = "Lens distortion coefficient. Default is -0.15.";
-> = -0.15;
-
-uniform float KCube <
-	ui_type = "drag";
-	ui_min = -25; ui_max = 25;
-	ui_label = "Cubic Distortion";
-	ui_tooltip = "Cubic distortion value. Default is 0.5.";
-> = 0.5;
+> = 3;
 
 uniform bool LRRL <
 	ui_label = "Eye Swap";
@@ -293,7 +236,7 @@ float4 color;
 	for (int i = -0; i < 5; i++)
 	{
 		float currweight = weight[abs(i)];
-		color += HQ4X( texcoord.xy + float2(1,0) * (float)i * pix.x * blur) * currweight / 1.25 + HQ4X( texcoord.xy + float2(1,0) * (float)i * pix.x * -blur) * currweight  / 1.25;
+		color += (HQ4X( texcoord.xy + float2(1,0) * (float)i * pix.x * blur) * currweight + HQ4X( texcoord.xy + float2(1,0) * (float)i * pix.x * -blur) * currweight)  / 0.75;
 	}
 	}
 	else
@@ -308,7 +251,7 @@ float4 color;
 void Grade(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float3 color : SV_Target)
 {
 
- float3 px = Blur(float2(texcoord.x,texcoord.y)) ;
+ float3 px = Blur(float2(texcoord.x,texcoord.y)) - HQ4X(texcoord.xy);
  
 color = px;
  
@@ -334,73 +277,22 @@ void PS_renderLR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD
 			DepthL =  min(DepthL,1 - (tex2D(PseudoDofSamplerC,float2(texcoord.x+uv.x*pix.x, texcoord.y)).r)-tex2D(SamplerCC,float2(texcoord.x, texcoord.y)).b);
 			DepthR =  min(DepthR,1 - (tex2D(PseudoDofSamplerC,float2(texcoord.x-uv.x*pix.x, texcoord.y)).r)-tex2D(SamplerCC,float2(texcoord.x, texcoord.y)).b);
 		}	
-		if(!LRRL)
-		{
+
 			//color.rgb = DepthL;
 			color.rgb = tex2D(BackBuffer , float2(texcoord.xy+float2(DepthL*Depth,0)*pix.xy)).rgb;
 		
 			colorT.rgb = tex2D(BackBuffer , float2(texcoord.xy-float2(DepthR*Depth,0)*pix.xy)).rgb;
-		}
-		else
-		{		
-			colorT.rgb = tex2D(BackBuffer , float2(texcoord.xy+float2(DepthL*Depth,0)*pix.xy)).rgb;
-		
-			color.rgb = tex2D(BackBuffer , float2(texcoord.xy-float2(DepthR*Depth,0)*pix.xy)).rgb;
-		}
+	
 	}
 }
-//////////////////////////////////////////////////////Barrle_Distortion/////////////////////////////////////////////////////
-float3 BDL(float2 texcoord)
 
-{
-	float k = K;
-	float kcube = KCube;
-
-	float r2 = (texcoord.x-0.5) * (texcoord.x-0.5) + (texcoord.y-0.5) * (texcoord.y-0.5);       
-	float f = 0.0;
-
-	f = 1 + r2 * (k + kcube * sqrt(r2));
-
-	float x = f*(texcoord.x-0.5)+0.5;
-	float y = f*(texcoord.y-0.5)+0.5;
-	float3 BDListortion = tex2D(SamplerCL,float2(x,y)).rgb;
-
-	return BDListortion.rgb;
-}
-
-float3 BDR(float2 texcoord)
-
-{
-
-	float k = K;
-	float kcube = KCube;
-
-	float r2 = (texcoord.x-0.5) * (texcoord.x-0.5) + (texcoord.y-0.5) * (texcoord.y-0.5);       
-	float f = 0.0;
-
-	f = 1 + r2 * (k + kcube * sqrt(r2));
-
-	float x = f*(texcoord.x-0.5)+0.5;
-	float y = f*(texcoord.y-0.5)+0.5;
-	float3 BDRistortion = tex2D(SamplerCR,float2(x,y)).rgb;
-
-	return BDRistortion.rgb;
-}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void PS0(float4 position : SV_Position, float2 texcoord : TEXCOORD0, out float3 color : SV_Target)
 {
-	float pos = Hsquish-1;
-	float mid = pos*BUFFER_HEIGHT/2*pix.y;
-	
-	if(BD)
-	{
-	color = texcoord.x < 0.5 ? BDL(float2(texcoord.x*2 + Perspective * pix.x,(texcoord.y*Hsquish)-mid)).rgb : BDR(float2(texcoord.x*2-1 - Perspective * pix.x,(texcoord.y*Hsquish)-mid)).rgb;
-	}
-	else
-	{
+
 	color = texcoord.x < 0.5 ? tex2D(SamplerCL,float2(texcoord.x*2 + Perspective * pix.x,texcoord.y)).rgb : tex2D(SamplerCR,float2(texcoord.x*2-1 - Perspective * pix.x,texcoord.y)).rgb;
-	}
+	
 }
 
 ///////////////////////////////////////////////////////////ReShade.fxh/////////////////////////////////////////////////////////////
