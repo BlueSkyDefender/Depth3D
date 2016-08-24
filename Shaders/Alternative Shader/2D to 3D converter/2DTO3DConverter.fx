@@ -62,7 +62,6 @@ uniform bool CS <
 texture texCL  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA32F;}; 
 texture texCR  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA32F;}; 
 texture texCC  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA32F;}; 
-texture texCCL  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA32F;}; 
 texture texCDM  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA32F;};
 
 texture PseudoDofTexC < source = "Cgrad.png"; > { Width = 1024; Height = 1024; MipLevels = 1; Format = RGBA8; };
@@ -116,17 +115,6 @@ sampler2D SamplerCC
 		AddressU = CLAMP;
 		AddressV = CLAMP;
 		AddressW = CLAMP;
-	};
-	
-	sampler SamplerCCL
-	{
-		Texture = texCCL;
-		AddressU = BORDER;
-		AddressV = BORDER;
-		AddressW = BORDER;
-		MipFilter = Linear; 
-		MinFilter = Linear; 
-		MagFilter = Linear;
 	};
 	
 sampler2D SamplerCDM
@@ -236,12 +224,12 @@ float4 color;
 	for (int i = -0; i < 5; i++)
 	{
 		float currweight = weight[abs(i)];
-		color += (HQ4X( texcoord.xy + float2(1,0) * (float)i * pix.x * blur) * currweight + HQ4X( texcoord.xy + float2(1,0) * (float)i * pix.x * -blur) * currweight)  / 0.75;
+		color += (HQ4X(texcoord.xy + float2(1,0) * (float)i * pix.x * blur) * currweight + HQ4X(texcoord.xy + float2(1,0) * (float)i * pix.x * -blur) * currweight)  / 0.75;
 	}
 	}
 	else
 	{
-	color = HQ4X(texcoord.xy);
+	color = HQ4X(float2(texcoord.x, texcoord.y));
 	}
 	return color;
 }
@@ -269,16 +257,15 @@ void PS_renderLR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD
 			if(!CS)
 		{
 			uv.x = samples[j] * Depth*5;
-			DepthL =  min(DepthL,(tex2D(PseudoDofSamplerS,float2(texcoord.x+uv.x*pix.x, texcoord.y)).r)-tex2D(SamplerCC,float2(texcoord.x, texcoord.y)).b );
-			DepthR =  min(DepthR,(tex2D(PseudoDofSamplerS,float2(texcoord.x-uv.x*pix.x, texcoord.y)).r)-tex2D(SamplerCC,float2(texcoord.x, texcoord.y)).b );
+			DepthL =  min(DepthL,(tex2D(PseudoDofSamplerS,float2(texcoord.x+uv.x*pix.x, texcoord.y)).r)-tex2D(SamplerCC,float2(texcoord.x, texcoord.y)).rgb );
+			DepthR =  min(DepthR,(tex2D(PseudoDofSamplerS,float2(texcoord.x-uv.x*pix.x, texcoord.y)).r)-tex2D(SamplerCC,float2(texcoord.x, texcoord.y)).rgb );
 		}
 		else
 		{
-			DepthL =  min(DepthL,1 - (tex2D(PseudoDofSamplerC,float2(texcoord.x+uv.x*pix.x, texcoord.y)).r)-tex2D(SamplerCC,float2(texcoord.x, texcoord.y)).b);
-			DepthR =  min(DepthR,1 - (tex2D(PseudoDofSamplerC,float2(texcoord.x-uv.x*pix.x, texcoord.y)).r)-tex2D(SamplerCC,float2(texcoord.x, texcoord.y)).b);
+			DepthL =  min(DepthL,1 - (tex2D(PseudoDofSamplerC,float2(texcoord.x+uv.x*pix.x, texcoord.y)).r)-tex2D(SamplerCC,float2(texcoord.x, texcoord.y)).rgb);
+			DepthR =  min(DepthR,1 - (tex2D(PseudoDofSamplerC,float2(texcoord.x-uv.x*pix.x, texcoord.y)).r)-tex2D(SamplerCC,float2(texcoord.x, texcoord.y)).rgb);
 		}	
 
-			//color.rgb = DepthL;
 			color.rgb = tex2D(BackBuffer , float2(texcoord.x+DepthL*Depth*pix.x,texcoord.y)).rgb;
 		
 			colorT.rgb = tex2D(BackBuffer , float2(texcoord.x-DepthR*Depth*pix.x,texcoord.y)).rgb;
@@ -312,7 +299,7 @@ void PostProcessVS(in uint id : SV_VertexID, out float4 position : SV_Position, 
 
 technique Super_Depth3D
 {
-		pass
+			pass
 		{
 			VertexShader = PostProcessVS;
 			PixelShader = Grade;
