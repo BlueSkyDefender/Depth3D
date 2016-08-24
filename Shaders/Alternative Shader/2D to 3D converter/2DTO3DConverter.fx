@@ -251,7 +251,7 @@ float4 color;
 void Grade(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float3 color : SV_Target)
 {
 
- float3 px = Blur(float2(texcoord.x,texcoord.y)) - HQ4X(texcoord.xy);
+ float3 px = Blur(float2(texcoord.x,texcoord.y));
  
 color = px;
  
@@ -269,8 +269,8 @@ void PS_renderLR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD
 			if(!CS)
 		{
 			uv.x = samples[j] * Depth*5;
-			DepthL =  min(DepthL,(tex2D(PseudoDofSamplerS,float2(texcoord.x+uv.x*pix.x, texcoord.y)).r)-tex2D(SamplerCC,float2(texcoord.x, texcoord.y)).b);
-			DepthR =  min(DepthR,(tex2D(PseudoDofSamplerS,float2(texcoord.x-uv.x*pix.x, texcoord.y)).r)-tex2D(SamplerCC,float2(texcoord.x, texcoord.y)).b);
+			DepthL =  min(DepthL,(tex2D(PseudoDofSamplerS,float2(texcoord.x+uv.x*pix.x, texcoord.y)).r)-tex2D(SamplerCC,float2(texcoord.x, texcoord.y)).b );
+			DepthR =  min(DepthR,(tex2D(PseudoDofSamplerS,float2(texcoord.x-uv.x*pix.x, texcoord.y)).r)-tex2D(SamplerCC,float2(texcoord.x, texcoord.y)).b );
 		}
 		else
 		{
@@ -279,9 +279,9 @@ void PS_renderLR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD
 		}	
 
 			//color.rgb = DepthL;
-			color.rgb = tex2D(BackBuffer , float2(texcoord.xy+float2(DepthL*Depth,0)*pix.xy)).rgb;
+			color.rgb = tex2D(BackBuffer , float2(texcoord.x+DepthL*Depth*pix.x,texcoord.y)).rgb;
 		
-			colorT.rgb = tex2D(BackBuffer , float2(texcoord.xy-float2(DepthR*Depth,0)*pix.xy)).rgb;
+			colorT.rgb = tex2D(BackBuffer , float2(texcoord.x-DepthR*Depth*pix.x,texcoord.y)).rgb;
 	
 	}
 }
