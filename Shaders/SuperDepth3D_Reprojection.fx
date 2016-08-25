@@ -3,7 +3,7 @@
  //----------------////
 
  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
- //* Depth Map Based 3D post-process shader v1.8.1 L & R Eye																															*//
+ //* Depth Map Based 3D post-process shader v1.8.2 L & R Eye																															*//
  //* For Reshade 3.0																																								*//
  //* --------------------------																																						*//
  //* This work is licensed under a Creative Commons Attribution 3.0 Unported License.																								*//
@@ -180,7 +180,7 @@ sampler SamplerCR
 		MagFilter = Linear;
 	};
 	
-sampler2D SamplerCC
+sampler SamplerCC
 	{
 		Texture = texCC;
 		AddressU = BORDER;
@@ -191,7 +191,7 @@ sampler2D SamplerCC
 		AddressW = CLAMP;
 	};
 	
-sampler2D SamplerCDM
+sampler SamplerCDM
 	{
 		Texture = texCDM;
 		MinFilter = LINEAR;
@@ -203,10 +203,10 @@ sampler2D SamplerCDM
 	};
 
 //Depth Map Information	
-float SbSdepth (float2 texcoord) 	
+float4 SbSdepth(float4 pos : SV_Position, float2 texcoord : TEXCOORD0) : SV_Target
 {
 
-	 float4 color = tex2D(SamplerCDM, texcoord);
+	 float4 color = 0;
 
 			if (DepthFlip)
 			texcoord.y =  1 - texcoord.y;
@@ -430,9 +430,9 @@ float SbSdepth (float2 texcoord)
 
     float4 D = depthM;	
 
-		color.r = D.r;
+		color.rgb = D.rrr;
 		
-	return color.r;	
+	return color;	
 }
 	
 void Blur(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float3 color : SV_Target)
@@ -459,12 +459,12 @@ void Blur(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out 
 	for (int i = -0; i < 5; i++)
 	{
 		float currweight = weight[abs(i)];
-		color += (SbSdepth( texcoord.xy + float2(1,0) * (float)i * pix.x * blur) * currweight + SbSdepth( texcoord.xy + float2(1,0) * (float)i * pix.x * -blur) * currweight)  / Con;
+		color += (tex2D(SamplerCDM,texcoord.xy + float2(1,0) * (float)i * pix.x * blur).rrr * currweight + tex2D(SamplerCDM,texcoord.xy + float2(1,0) * (float)i * pix.x * -blur).rrr * currweight)  / Con;
 	}
 	}
 	else
 	{
-	color = SbSdepth(texcoord.xy);
+	color = tex2D(SamplerCDM,texcoord.xy).rrr;
 	}
 } 
   
@@ -482,6 +482,8 @@ void PS_renderLR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD
 			DepthR=  min(DepthR,tex2D(SamplerCC,float2(texcoord.x-uv.x*pix.x, texcoord.y))).r;
 		if(!LRRL)
 		{
+			//color.rgb = tex2D(SamplerCC, texcoord.xy).rrr;
+			
 			color.rgb = tex2D(BackBuffer , float2(texcoord.xy+float2(DepthL*Depth,0)*pix.xy)).rgb;
 		
 			colorT.rgb = tex2D(BackBuffer , float2(texcoord.xy-float2(DepthR*Depth,0)*pix.xy)).rgb;
@@ -880,6 +882,12 @@ float4 PS(float4 pos : SV_Position, float2 texcoord : TEXCOORD0) : SV_Target
 
 technique Super_Depth3D
 {
+					pass
+		{
+			VertexShader = PostProcessVS;
+			PixelShader = SbSdepth;
+			RenderTarget = texCDM;
+		}
 			pass
 		{
 			VertexShader = PostProcessVS;
