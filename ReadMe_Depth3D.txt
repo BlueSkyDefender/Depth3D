@@ -53,6 +53,7 @@ Souls Games				DM 19
 The Evil Within				DM 7					RB
 Witcher 3				DM 20
 Zombi					DM 7
+Warhammer: End Times - Vermintide	DM 10
 
 You can also try different depth maps for other games your self by changing AltDepthMap number From 0-20. 
 You *may* want to disable AA in game. You can always enable SMAA in reshade for AA or play at 4k with no AA. 

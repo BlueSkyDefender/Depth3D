@@ -295,12 +295,12 @@ float SbSdepth (float2 texcoord)
 		depthM = cN/(cN-cF) / ( depthM - cF/(cF-cN));
 		}
 		
-		//???
+		//Warhammer: End Times - Vermintide
 		if (AltDepthMap == 10)
 		{
-		float cF = 15;
-		float cN = 0;
-		depthM = (pow(abs(cN-depthM),cF));
+		float cF = 1;	
+		float cN = 5.5;	
+		depthM = (exp(depthM * log(cF + cN)) - cN) / cF;
 		}
 		
 		//Dying Light
@@ -735,12 +735,12 @@ float4 PS(float4 pos : SV_Position, float2 texcoord : TEXCOORD0) : SV_Target
 		depthM = cN/(cN-cF) / ( depthM - cF/(cF-cN));
 		}
 		
-		//???
+		//Warhammer: End Times - Vermintide
 		if (AltDepthMap == 10)
 		{
-		float cF = 15;
-		float cN = 0;
-		depthM = (pow(abs(cN-depthM),cF));
+		float cF = 1;	
+		float cN = 5.5;	
+		depthM = (exp(depthM * log(cF + cN)) - cN) / cF;
 		}
 		
 		//Dying Light
