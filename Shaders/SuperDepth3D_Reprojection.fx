@@ -610,27 +610,15 @@ void PS0(float4 position : SV_Position, float2 texcoord : TEXCOORD0, out float3 
 	if(sstbli == 2)
 	{
 		float gridL = frac(texcoord.y*(BUFFER_HEIGHT/2));
-		if (gridL > 0.5)
-		{ 
-		color = tex2D(SamplerCL,float2(texcoord.x + Perspective * pix.x,texcoord.y)).rgb;
-		}
-		else
-		{
-		color = tex2D(SamplerCR,float2(texcoord.x - Perspective * pix.x,texcoord.y)).rgb;
-		}
+		
+		color = gridL > 0.5 ? tex2D(SamplerCL,float2(texcoord.x + Perspective * pix.x,texcoord.y)).rgb : tex2D(SamplerCR,float2(texcoord.x - Perspective * pix.x,texcoord.y)).rgb;
 	}
 	if(sstbli == 3)
 	{
 		float gridy = floor(texcoord.y*(BUFFER_HEIGHT));
 		float gridx = floor(texcoord.x*(BUFFER_WIDTH));
-		if ((int(gridy+gridx) & 1) == 0)
-		{
-		color = tex2D(SamplerCL,float2(texcoord.x + Perspective * pix.x,texcoord.y)).rgb;
-		}
-		else
-		{
-		color = tex2D(SamplerCR,float2(texcoord.x - Perspective * pix.x,texcoord.y)).rgb;
-		}
+
+		color = (int((gridy+gridx)+(gridy+gridx)) & 2) < 0.5 ? tex2D(SamplerCL,float2(texcoord.x + Perspective * pix.x,texcoord.y)).rgb : tex2D(SamplerCR,float2(texcoord.x - Perspective * pix.x,texcoord.y)).rgb;
 	}
 	}
 	else
