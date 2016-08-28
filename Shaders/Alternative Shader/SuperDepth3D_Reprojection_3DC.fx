@@ -109,9 +109,9 @@ uniform int sstbli <
 	ui_tooltip = "Side by Side/Top and Bottom/Line Interlaced displays output.";
 > = 0;
 
-uniform float P <
+uniform int P <
 	ui_type = "drag";
-	ui_min = 0; ui_max = 50;
+	ui_min = 1; ui_max = 50;
 	ui_label = "Checkerboard 3D Pixel Size";
 	ui_tooltip = "Adjust the Pixel Size for the right size. This Assumes pixle order is L/R R/L.";
 > = 1;
@@ -121,7 +121,7 @@ uniform float Red <
 	ui_min = 0; ui_max = 1;
 	ui_label = "Red Distortion";
 	ui_tooltip = "Adjust the Polynomial Distortion Red. Default is 1.0";
-> = 2.0;
+> = 1.0;
 
 uniform float Green <
 	ui_type = "drag";
