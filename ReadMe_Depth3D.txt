@@ -51,7 +51,7 @@ The Elder Scrolls V: Skyrim		DM 4
 Sleeping Dogs: DE			DM 18
 Souls Games				DM 19
 The Evil Within				DM 7						RB
-Witcher 3				DM 20 or DM 14							0 or 0.1		RB
+Witcher 3				DM 20 or DM 14							0-0.1		RB
 Zombi					DM 7
 Warhammer: End Times - Vermintide	DM 10
 
@@ -209,8 +209,8 @@ This should fix it. For more look up this problem on google.
 ______________________________________________________________________________________________________________________________________
 *Witcher 3*
 I noticed when playing this game that a blur setting of 0 is fine as long you can handle Depth setting from 0-30. If you want more
-depth but you don't mind sacrificing detail then, override the depth limit and set it from 30-40 and set your blur to 0.075-0.100.
-That ever looks better too you. DM20 is not as strong as DM14.
+depth but you don't mind sacrificing detail then, override the depth limit and set it from for DM 20 30-40 and set your blur to 0.075-0.100.
+That ever looks better too you. DM20 is not as strong as DM14. So the max I think for DM 14 is Depth 30.
 
 *GTA V*
 One of the few game where you can override the Depth Limit and run with a higher depth setting. I personaly run mine at 40 and a blur
