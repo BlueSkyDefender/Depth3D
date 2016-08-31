@@ -12,46 +12,46 @@ Here is a quick and dirty game list of working Depth Maps.
 
 PLEASE SET YOUR RESOLUTION FIRST. Turn Off DOF in all games if possible. Unless you want to know how it feels to be neer sighted.
 
-[Game List]			[Alternet Depth Map]	[Depth Flip On]	[Read Below]	[Blur Recommendations]	[BSD Notes]
+[Game List]				[Alternet Depth Map]	   [Depth Flip On][Read Below]	[Blur Recommendations]	[BSD Notes]
 Alien Isolation				DM 0
 Amnesia: The Dark Descent		DM 1
-Among The Sleep				DM 2		     DF On				
+Among The Sleep				DM 2				DF On				
 Assassin Creed Unity			DM 3							
 Batman Arkham Knight			DM 4							
 Batman Arkham Origins			DM 4							
 Batman: Arkham City			DM 4							
-BorderLands 2				DM 4					RB
-Call of Duty: Advance Warfare		DM 5					RB		
-Call of Duty: Black Ops 2		DM 5					RB		
-Call of Duty: Ghost			DM 5					RB		
+BorderLands 2				DM 4						RB
+Call of Duty: Advance Warfare		DM 5						RB		
+Call of Duty: Black Ops 2		DM 5						RB		
+Call of Duty: Ghost			DM 5						RB		
 Casltevania: Lord of Shadows - UE	DM 6
-Condemned: Criminal Origins		DM 7					RB		
-Deadly Premonition:The Directors's Cut  DM 8					RB
+Condemned: Criminal Origins		DM 7						RB		
+Deadly Premonition:The Directors's Cut  DM 8						RB
 Dragon Ball Xenoverse			DM 9											
 Dragons Dogma: Dark Arisen		DM 8
-DreamFall Chapters			DM 18		     DF On
+DreamFall Chapters			DM 18		     		DF On
 Dying Light				DM 11
 Fallout 4				DM 0							
-Firewatch				DM 0		     DF On		RB				
-GTA V					DM 12					RB		0.01-0.25		RB
-Hard Reset				DM 4					RB
+Firewatch				DM 0				DF On		RB				
+GTA V					DM 12						RB		0.01-0.25		RB
+Hard Reset				DM 4						RB
 Lords of The Fallen			DM 4
-Magicka 2				DM 13					RB
-Metro 2033 Redux			DM 6					RB
-Metro Last Light Redux			DM 6					RB
-Middle-earth: Shadow of Mordor		DM 14					RB
-Naruto Shippuden UNS3 Full Blurst	DM 15					RB
+Magicka 2				DM 13						RB
+Metro 2033 Redux			DM 6						RB
+Metro Last Light Redux			DM 6						RB
+Middle-earth: Shadow of Mordor		DM 14						RB
+Naruto Shippuden UNS3 Full Blurst	DM 15						RB
 Quake 2 XP				DM 9							
 Quake 4					DM 7
-Rage64					DM 7					RB
-Return To Castle Wolfenstine		DM 7					RB
+Rage64					DM 7						RB
+Return To Castle Wolfenstine		DM 7						RB
 Ryse: Son of Rome			DM 17
-Shadow warrior(2013)			DM 16					RB
+Shadow warrior(2013)			DM 16						RB
 The Elder Scrolls V: Skyrim		DM 4							
 Sleeping Dogs: DE			DM 18
 Souls Games				DM 19
-The Evil Within				DM 7					RB
-Witcher 3				DM 20							0 or 0.1		RB
+The Evil Within				DM 7						RB
+Witcher 3				DM 20 or DM 14							0 or 0.1		RB
 Zombi					DM 7
 Warhammer: End Times - Vermintide	DM 10
 
@@ -209,8 +209,8 @@ This should fix it. For more look up this problem on google.
 ______________________________________________________________________________________________________________________________________
 *Witcher 3*
 I noticed when playing this game that a blur setting of 0 is fine as long you can handle Depth setting from 0-30. If you want more
-depth but you don't mind sacrificing detail then, override the depth limit and set it from 30-50 and set your blur too 0.075-0.100.
-That ever looks better too you.
+depth but you don't mind sacrificing detail then, override the depth limit and set it from 30-40 and set your blur to 0.075-0.100.
+That ever looks better too you. DM20 is not as strong as DM14.
 
 *GTA V*
 One of the few game where you can override the Depth Limit and run with a higher depth setting. I personaly run mine at 40 and a blur
