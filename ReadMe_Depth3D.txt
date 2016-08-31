@@ -12,7 +12,7 @@ Here is a quick and dirty game list of working Depth Maps.
 
 PLEASE SET YOUR RESOLUTION FIRST. Turn Off DOF in all games if possible. Unless you want to know how it feels to be neer sighted.
 
-[Game List]			[Alternet Depth Map]	[Depth Flip On]	[Read Below]
+[Game List]			[Alternet Depth Map]	[Depth Flip On]	[Read Below]	[Blur Recommendations]	[BSD Notes]
 Alien Isolation				DM 0
 Amnesia: The Dark Descent		DM 1
 Among The Sleep				DM 2		     DF On				
@@ -33,7 +33,7 @@ DreamFall Chapters			DM 18		     DF On
 Dying Light				DM 11
 Fallout 4				DM 0							
 Firewatch				DM 0		     DF On		RB				
-GTA V					DM 12					RB
+GTA V					DM 12					RB		0.01-0.25		RB
 Hard Reset				DM 4					RB
 Lords of The Fallen			DM 4
 Magicka 2				DM 13					RB
@@ -51,7 +51,7 @@ The Elder Scrolls V: Skyrim		DM 4
 Sleeping Dogs: DE			DM 18
 Souls Games				DM 19
 The Evil Within				DM 7					RB
-Witcher 3				DM 20
+Witcher 3				DM 20							0 or 0.1		RB
 Zombi					DM 7
 Warhammer: End Times - Vermintide	DM 10
 
@@ -204,10 +204,24 @@ Go to Compatibility
 Check Disable Display Scaling On High DPI Settings
 
 This should fix it. For more look up this problem on google.
+--------------------------------------------------------------------------------------------------------------------------------------
+-=BSD Notes=- Personal recommended settings and tips for some games.
+______________________________________________________________________________________________________________________________________
+*Witcher 3*
+I noticed when playing this game that a blur setting of 0 is fine as long you can handle Depth setting from 0-30. If you want more
+depth but you don't mind sacrificing detail then, override the depth limit and set it from 30-50 and set your blur too 0.075-0.100.
+That ever looks better too you.
+
+*GTA V*
+One of the few game where you can override the Depth Limit and run with a higher depth setting. I personaly run mine at 40 and a blur
+setting of 0.025
+
+Also remember if you don't like the depth map I made. You can alawys make your own.
+______________________________________________________________________________________________________________________________________
 
 Games Not working in Reshade 3.0 Use Reshade 2.0
 ======================================================================================================================================
-crosire's ReShade version '3.0.0.81'
+crosire's ReShade version '3.0.0.81' corsire is working on this game for the next update for 3.0
 
 {Wolfenstine The New Order} - not working in Reshade 3.0
 [Set Launch Options](+r_multisamples "0" +vt_maxaniso "16")

@@ -14,10 +14,10 @@ uniform int Perspective <
 
 uniform float blur <
 	ui_type = "drag";
-	ui_min = 1; ui_max = 25;
+	ui_min = 0; ui_max = 1;
 	ui_label = "Blur Slider";
 	ui_tooltip = "Determines the blur seperation of Depth Map Blur.";
-> = 7.5;
+> =0;
 
 uniform bool DepthMap <
 	ui_label = "Depth Map View";
@@ -100,19 +100,11 @@ uniform bool LRRL <
 texture texCL  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA32F;}; 
 texture texCR  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA32F;}; 
 texture texCC  { Width = BUFFER_WIDTH/2; Height = BUFFER_HEIGHT; Format = RGBA32F;}; 
-texture texCCC  { Width = BUFFER_WIDTH/2; Height = BUFFER_HEIGHT; Format = RGBA32F;}; 
 texture texCCL  { Width = BUFFER_WIDTH/2; Height = BUFFER_HEIGHT; Format = RGBA32F;}; 
-texture texCCM  { Width = BUFFER_WIDTH/2; Height = BUFFER_HEIGHT; Format = RGBA32F;}; 
-texture texCCMM  { Width = BUFFER_WIDTH/2; Height = BUFFER_HEIGHT; Format = RGBA32F;}; 
-texture texCCMMM  { Width = BUFFER_WIDTH/2; Height = BUFFER_HEIGHT; Format = RGBA32F;}; 
-texture texCCS  { Width = BUFFER_WIDTH/2; Height = BUFFER_HEIGHT; Format = RGBA32F;}; 
 texture texCDM  { Width = BUFFER_WIDTH/2; Height = BUFFER_HEIGHT; Format = RGBA32F;};
 
 texture PseudoDofTexS < source = "Sgrad.png"; > { Width = 1024; Height = 1024; MipLevels = 1; Format = RGBA8; };
 sampler PseudoDofSamplerS { Texture = PseudoDofTexS; };
-
-texture PseudoDofTexC < source = "Cgrad.png"; > { Width = 1024; Height = 1024; MipLevels = 1; Format = RGBA8; };
-sampler PseudoDofSamplerC { Texture = PseudoDofTexC; };
 
 
 texture BackBufferTex : COLOR;
@@ -154,17 +146,7 @@ sampler SamplerCC
 		AddressV = CLAMP;
 		AddressW = CLAMP;
 	};
-	
-sampler SamplerCCC
-	{
-		Texture = texCCC;
-		AddressU = BORDER;
-		AddressV = BORDER;
-		AddressW = BORDER;
-		AddressU = CLAMP;
-		AddressV = CLAMP;
-		AddressW = CLAMP;
-	};
+
 	
 sampler SamplerCCL
 	{
@@ -176,52 +158,6 @@ sampler SamplerCCL
 		AddressV = CLAMP;
 		AddressW = CLAMP;
 	};
-	
-sampler SamplerCCM
-	{
-		Texture = texCCM;
-		AddressU = BORDER;
-		AddressV = BORDER;
-		AddressW = BORDER;
-		AddressU = CLAMP;
-		AddressV = CLAMP;
-		AddressW = CLAMP;
-	};
-	
-	sampler SamplerCCMM
-	{
-		Texture = texCCMM;
-		AddressU = BORDER;
-		AddressV = BORDER;
-		AddressW = BORDER;
-		AddressU = CLAMP;
-		AddressV = CLAMP;
-		AddressW = CLAMP;
-	};
-
-	
-	sampler SamplerCCMMM
-	{
-		Texture = texCCMMM;
-		AddressU = BORDER;
-		AddressV = BORDER;
-		AddressW = BORDER;
-		AddressU = CLAMP;
-		AddressV = CLAMP;
-		AddressW = CLAMP;
-	};
-	
-sampler SamplerCCS
-	{
-		Texture = texCCS;
-		AddressU = BORDER;
-		AddressV = BORDER;
-		AddressW = BORDER;
-		AddressU = CLAMP;
-		AddressV = CLAMP;
-		AddressW = CLAMP;
-	};
-	
 	
 sampler SamplerCDM
 	{
@@ -237,7 +173,7 @@ sampler SamplerCDM
 float3 RGBtoHSV(float2 RGB)
 {
     float3 HCV = tex2D(BackBuffer,RGB).rgb;
-    float S = HCV.y / (HCV.z + 0);
+    float S = HCV.y / (HCV.z + 0.50);
     float3 gray_scale = float3(HCV.x, S, HCV.z);	
 	return dot(gray_scale, float3(0.3, 0.59, 0.11));//Gray-scale conversion.
 }
@@ -245,13 +181,33 @@ float3 RGBtoHSV(float2 RGB)
 float3 RGBtoHSVTWO(float2 RGB)
 {
     float3 HCV = tex2D(BackBuffer,RGB).rgb;
-    float S = HCV.y / (HCV.z + 0.025);
+    float S = HCV.y / (HCV.z + 100);
     float3 gray_scale = float3(HCV.x, S, HCV.z);	
 	return dot(gray_scale, float3(0.3, 0.59, 0.11));//Gray-scale conversion.
 }
 
+float4 Laplace(float2 texcoord : TEXCOORD0) : SV_Target
+{  
+  
+const float samples[4] = {  
+0, -1,  
+-1, 0  
+};
 
+const float samplesS[4] = {  
+1, 0,  
+0, 1  
+};
 
+float4 laplace = -4 * RGBtoHSV(texcoord).r;  
+  
+// Sample the neighbor pixels  
+for (int i = 0; i < 4; i++){  
+laplace += RGBtoHSV( texcoord + 0.0031 * float2(samples[i],samplesS[i]));  
+}  
+  
+return (0.5 + 1.0 * laplace);  
+}  
 
 #define s2(a, b)				temp = a; a = min(a, b); b = max(temp, b);
 #define mn3(a, b, c)			s2(a, b); s2(a, c);
@@ -269,25 +225,25 @@ float4 color;
 
   float v[6];
 
-  v[0] = RGBtoHSV(texcoord.xy + float2(-1.0, -1.0) * 2.5 * pix);
-  v[1] = RGBtoHSV(texcoord.xy + float2( 0.0, -1.0) * 2.5 * pix);
-  v[2] = RGBtoHSV(texcoord.xy + float2(+1.0, -1.0) * 2.5 * pix);
-  v[3] = RGBtoHSV(texcoord.xy + float2(-1.0,  0.0) * 2.5 * pix);
-  v[4] = RGBtoHSV(texcoord.xy + float2( 0.0,  0.0) * 2.5 * pix);
-  v[5] = RGBtoHSV(texcoord.xy + float2(+1.0,  0.0) * 2.5 * pix);
+  v[0] = RGBtoHSVTWO(texcoord.xy + float2(-1.0, -1.0) * 5 * pix).r;
+  v[1] = RGBtoHSVTWO(texcoord.xy + float2( 0.0, -1.0) * 5 * pix).r;
+  v[2] = RGBtoHSVTWO(texcoord.xy + float2(+1.0, -1.0) * 5 * pix).r;
+  v[3] = RGBtoHSVTWO(texcoord.xy + float2(-1.0,  0.0) * 5 * pix).r;
+  v[4] = RGBtoHSVTWO(texcoord.xy + float2( 0.0,  0.0) * 5 * pix).r;
+  v[5] = RGBtoHSVTWO(texcoord.xy + float2(+1.0,  0.0) * 5 * pix).r;
 
   float temp;
   mnmx6(v[0], v[1], v[2], v[3], v[4], v[5]);
 
-  v[5] = RGBtoHSV(texcoord.xy + float2(-1.0, +1.0) * 2.5 * pix);
+  v[5] = RGBtoHSVTWO(texcoord.xy + float2(-1.0, +1.0) * 5 * pix).r;
 
   mnmx5(v[1], v[2], v[3], v[4], v[5]);
 
-  v[5] = RGBtoHSV(texcoord.xy + float2( 0.0, +1.0) * 2.5 * pix);
+  v[5] = RGBtoHSVTWO(texcoord.xy + float2( 0.0, +1.0) * 5 * pix).r;
 
   mnmx4(v[2], v[3], v[4], v[5]);
 
-  v[5] = RGBtoHSV(texcoord.xy + float2(+1.0, +1.0) * 2.5 * pix);
+  v[5] = RGBtoHSVTWO(texcoord.xy + float2(+1.0, +1.0) * 5 * pix).r;
 
   mnmx3(v[3], v[4], v[5]);
   color = v[4];
@@ -296,219 +252,60 @@ float4 color;
 
 }
 
-float4 Laplace(float2 texcoord : TEXCOORD0) : SV_Target
+float3 comb(float2 texcoord : TEXCOORD0) : SV_Target
 {  
-  
-const float samples[4] = {  
-0, -1,  
--1, 0  
-};
-
-const float samplesS[4] = {  
-1, 0,  
-0, 1  
-};
-
-float4 laplace = -4 * tex2D(SamplerCDM, texcoord);  
-  
-// Sample the neighbor pixels  
-for (int i = 0; i < 4; i++){  
-laplace += tex2D(SamplerCDM, texcoord + 0.0031 * float2(samples[i],samplesS[i]));  
-}  
-  
-return (0.5 + 1.0 * laplace);  
-}  
-
-
-float4 MedianTwo(float2 texcoord : TEXCOORD0) : SV_Target
-{
-
-float4 color;
-
-  float v[6];
-
-  v[0] = tex2D(SamplerCCL,texcoord.xy + float2(-1.0, -1.0) * 2.5 * pix);
-  v[1] = tex2D(SamplerCCL,texcoord.xy + float2( 0.0, -1.0) * 2.5 * pix);
-  v[2] = tex2D(SamplerCCL,texcoord.xy + float2(+1.0, -1.0) * 2.5 * pix);
-  v[3] = tex2D(SamplerCCL,texcoord.xy + float2(-1.0,  0.0) * 2.5 * pix);
-  v[4] = tex2D(SamplerCCL,texcoord.xy + float2( 0.0,  0.0) * 2.5 * pix);
-  v[5] = tex2D(SamplerCCL,texcoord.xy + float2(+1.0,  0.0) * 2.5 * pix);
-
-  float temp;
-  mnmx6(v[0], v[1], v[2], v[3], v[4], v[5]);
-
-  v[5] = tex2D(SamplerCCL,texcoord.xy + float2(-1.0, +1.0) * 2.5 * pix);
-
-  mnmx5(v[1], v[2], v[3], v[4], v[5]);
-
-  v[5] = tex2D(SamplerCCL,texcoord.xy + float2( 0.0, +1.0) * 2.5 * pix);
-
-  mnmx4(v[2], v[3], v[4], v[5]);
-
-  v[5] = tex2D(SamplerCCL,texcoord.xy + float2(+1.0, +1.0) * 2.5 * pix);
-
-  mnmx3(v[3], v[4], v[5]);
-  color = v[4];
-  
-  return color;
-
-}
-
-float4 MedianThree(float2 texcoord : TEXCOORD0) : SV_Target
-{
-
-float4 color;
-
-  float v[6];
-
-  v[0] = RGBtoHSVTWO(texcoord.xy + float2(-1.0, -1.0) * 5 * pix);
-  v[1] = RGBtoHSVTWO(texcoord.xy + float2( 0.0, -1.0) * 5 * pix);
-  v[2] = RGBtoHSVTWO(texcoord.xy + float2(+1.0, -1.0) * 5 * pix);
-  v[3] = RGBtoHSVTWO(texcoord.xy + float2(-1.0,  0.0) * 5 * pix);
-  v[4] = RGBtoHSVTWO(texcoord.xy + float2( 0.0,  0.0) * 5 * pix);
-  v[5] = RGBtoHSVTWO(texcoord.xy + float2(+1.0,  0.0) * 5 * pix);
-
-  float temp;
-  mnmx6(v[0], v[1], v[2], v[3], v[4], v[5]);
-
-  v[5] = RGBtoHSVTWO(texcoord.xy + float2(-1.0, +1.0) * 5 * pix);
-
-  mnmx5(v[1], v[2], v[3], v[4], v[5]);
-
-  v[5] = RGBtoHSVTWO(texcoord.xy + float2( 0.0, +1.0) * 5 * pix);
-
-  mnmx4(v[2], v[3], v[4], v[5]);
-
-  v[5] = RGBtoHSVTWO(texcoord.xy + float2(+1.0, +1.0) * 5 * pix);
-
-  mnmx3(v[3], v[4], v[5]);
-  color = v[4];
-  
-  return color;
-
-}
-
-float4 MedianFour(float2 texcoord : TEXCOORD0) : SV_Target
-{
-
-float4 color;
-
-  float v[6];
-
-  v[0] = tex2D(SamplerCCM,texcoord.xy + float2(-1.0, -1.0) * 5 * pix);
-  v[1] = tex2D(SamplerCCM,texcoord.xy + float2( 0.0, -1.0) * 5 * pix);
-  v[2] = tex2D(SamplerCCM,texcoord.xy + float2(+1.0, -1.0) * 5 * pix);
-  v[3] = tex2D(SamplerCCM,texcoord.xy + float2(-1.0,  0.0) * 5 * pix);
-  v[4] = tex2D(SamplerCCM,texcoord.xy + float2( 0.0,  0.0) * 5 * pix);
-  v[5] = tex2D(SamplerCCM,texcoord.xy + float2(+1.0,  0.0) * 5 * pix);
-
-  float temp;
-  mnmx6(v[0], v[1], v[2], v[3], v[4], v[5]);
-
-  v[5] = tex2D(SamplerCCM,texcoord.xy + float2(-1.0, +1.0) * 5 * pix);
-
-  mnmx5(v[1], v[2], v[3], v[4], v[5]);
-
-  v[5] = tex2D(SamplerCCM,texcoord.xy + float2( 0.0, +1.0) * 5 * pix);
-
-  mnmx4(v[2], v[3], v[4], v[5]);
-
-  v[5] = tex2D(SamplerCCM,texcoord.xy + float2(+1.0, +1.0) * 5 * pix);
-
-  mnmx3(v[3], v[4], v[5]);
-  color = v[4];
-  
-  return color;
-
-}
-
-float4 MedianFive(float2 texcoord : TEXCOORD0) : SV_Target
-{
-
-float4 color;
-
-  float v[6];
-
-  v[0] = tex2D(SamplerCCMM,texcoord.xy + float2(-1.0, -1.0) * 5 * pix);
-  v[1] = tex2D(SamplerCCMM,texcoord.xy + float2( 0.0, -1.0) * 5 * pix);
-  v[2] = tex2D(SamplerCCMM,texcoord.xy + float2(+1.0, -1.0) * 5 * pix);
-  v[3] = tex2D(SamplerCCMM,texcoord.xy + float2(-1.0,  0.0) * 5 * pix);
-  v[4] = tex2D(SamplerCCMM,texcoord.xy + float2( 0.0,  0.0) * 5 * pix);
-  v[5] = tex2D(SamplerCCMM,texcoord.xy + float2(+1.0,  0.0) * 5 * pix);
-
-  float temp;
-  mnmx6(v[0], v[1], v[2], v[3], v[4], v[5]);
-
-  v[5] = tex2D(SamplerCCMM,texcoord.xy + float2(-1.0, +1.0) * 5 * pix);
-
-  mnmx5(v[1], v[2], v[3], v[4], v[5]);
-
-  v[5] = tex2D(SamplerCCMM,texcoord.xy + float2( 0.0, +1.0) * 5 * pix);
-
-  mnmx4(v[2], v[3], v[4], v[5]);
-
-  v[5] = tex2D(SamplerCCMM,texcoord.xy + float2(+1.0, +1.0) * 5 * pix);
-
-  mnmx3(v[3], v[4], v[5]);
-  color = v[4];
-  
-  return color;
-
-}
-
-float4 MedianSix(float2 texcoord : TEXCOORD0) : SV_Target
-{
-
-float4 color;
-
-  float v[6];
-
-  v[0] = tex2D(SamplerCCMMM,texcoord.xy + float2(-1.0, -1.0) * 5 * pix);
-  v[1] = tex2D(SamplerCCMMM,texcoord.xy + float2( 0.0, -1.0) * 5 * pix);
-  v[2] = tex2D(SamplerCCMMM,texcoord.xy + float2(+1.0, -1.0) * 5 * pix);
-  v[3] = tex2D(SamplerCCMMM,texcoord.xy + float2(-1.0,  0.0) * 5 * pix);
-  v[4] = tex2D(SamplerCCMMM,texcoord.xy + float2( 0.0,  0.0) * 5 * pix);
-  v[5] = tex2D(SamplerCCMMM,texcoord.xy + float2(+1.0,  0.0) * 5 * pix);
-
-  float temp;
-  mnmx6(v[0], v[1], v[2], v[3], v[4], v[5]);
-
-  v[5] = tex2D(SamplerCCMMM,texcoord.xy + float2(-1.0, +1.0) * 5 * pix);
-
-  mnmx5(v[1], v[2], v[3], v[4], v[5]);
-
-  v[5] = tex2D(SamplerCCMMM,texcoord.xy + float2( 0.0, +1.0) * 5 * pix);
-
-  mnmx4(v[2], v[3], v[4], v[5]);
-
-  v[5] = tex2D(SamplerCCMMM,texcoord.xy + float2(+1.0, +1.0) * 5 * pix);
-
-  mnmx3(v[3], v[4], v[5]);
-  color = v[4];
-  
-  return color;
-
-}
-
-float4 comb(float2 texcoord : TEXCOORD0) : SV_Target
-{  
-return (lerp(1 - (tex2D(SamplerCCL,texcoord).r) , tex2D(PseudoDofSamplerC,texcoord).r,0.975) / ((MedianSix(texcoord).r*1.25)));
+return lerp(tex2D(SamplerCCL,texcoord).r , 1-tex2D(SamplerCC,texcoord).r*(1-tex2D(PseudoDofSamplerS,float2(texcoord.x, texcoord.y)).r+blur),1)-0.5;
 
 //tex2D(PseudoDofSamplerS,float2(texcoord.x-uv.x*pix.x, texcoord.y)).r
 }
 
+float4 MedianT(float2 texcoord : TEXCOORD0)
+{
+
+float4 color;
+
+  float v[6];
+
+  v[0] =  comb(texcoord.xy + float2(-1.0, -1.0) * 2.5 * pix).r;
+  v[1] =  comb(texcoord.xy + float2( 0.0, -1.0) * 2.5 * pix).r;
+  v[2] =  comb(texcoord.xy + float2(+1.0, -1.0) * 2.5 * pix).r;
+  v[3] =  comb(texcoord.xy + float2(-1.0,  0.0) * 2.5 * pix).r;
+  v[4] =  comb(texcoord.xy + float2( 0.0,  0.0) * 2.5 * pix).r;
+  v[5] =  comb(texcoord.xy + float2(+1.0,  0.0) * 2.5 * pix).r;
+
+  float temp;
+  mnmx6(v[0], v[1], v[2], v[3], v[4], v[5]);
+
+  v[5] =  comb(texcoord.xy + float2(-1.0, +1.0) * 2.5 * pix).r;
+
+  mnmx5(v[1], v[2], v[3], v[4], v[5]);
+
+  v[5] =  comb(texcoord.xy + float2( 0.0, +1.0) * 2.5 * pix).r;
+
+  mnmx4(v[2], v[3], v[4], v[5]);
+
+  v[5] =  comb(texcoord.xy + float2(+1.0, +1.0) * 2.5 * pix).r;
+
+  mnmx3(v[3], v[4], v[5]);
+  color = v[4];
+  
+  return color;
+
+}
+
+
 ////////////////////////////////////////////////Left/Right Eye////////////////////////////////////////////////////////
 void PS_renderLR(in float2 texcoord : TEXCOORD0, out float3 color : SV_Target0 , out float3 colorT: SV_Target1)
 {	
-	const float samples[10] = {0.5, 0.66, 1, 0.25, 0.60, 0.75, 0.1, 0.42, 2, 1.25};
+	const float samples[4] = {0.5, 0.66, 1, 0.25};
 	float DepthL = 1.0, DepthR = 1.0;
 	float2 uv = 0;
 	[loop]
-	for (int j = 0; j <= 9; ++j) 
+	for (int j = 0; j <= 3; ++j) 
 	{	
 			uv.x = samples[j] * Depth;
-			DepthL=  min(DepthL,comb(float2(texcoord.x+uv.x*pix.x, texcoord.y)) );
-			DepthR=  min(DepthR,comb(float2(texcoord.x-uv.x*pix.x, texcoord.y)) );
+			DepthL=  min(DepthL,MedianT(float2(texcoord.x+uv.x*pix.x, texcoord.y)).r );
+			DepthR=  min(DepthR,MedianT(float2(texcoord.x-uv.x*pix.x, texcoord.y)).r );
 		if(!LRRL)
 		{
 			//color.rgb = DepthL;
@@ -664,7 +461,7 @@ void PS0(float4 position : SV_Position, float2 texcoord : TEXCOORD0, out float3 
 	}
 	else
 	{
-	color = comb(texcoord.xy).rgb;
+	color =  MedianT(texcoord.xy).rgb;
 	}
 }
 
@@ -695,30 +492,6 @@ technique Super_2DTO3D
 			PixelShader = Laplace;
 			RenderTarget = texCCL;
 		}
-			pass
-		{
-			VertexShader = PostProcessVS;
-			PixelShader = MedianTwo;
-			RenderTarget = texCCC;
-		}
-			pass
-		{
-			VertexShader = PostProcessVS;
-			PixelShader = MedianThree;
-			RenderTarget = texCCM;
-		}
-			pass
-		{
-			VertexShader = PostProcessVS;
-			PixelShader = MedianFour;
-			RenderTarget = texCCMM;
-		}
-			pass
-		{
-			VertexShader = PostProcessVS;
-			PixelShader = MedianFive;
-			RenderTarget = texCCMMM;
-		}		
 			pass
 		{
 			VertexShader = PostProcessVS;

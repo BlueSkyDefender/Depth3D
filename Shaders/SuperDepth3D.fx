@@ -378,9 +378,9 @@ float4 SbSdepth(float4 pos : SV_Position, float2 texcoord : TEXCOORD0) : SV_Targ
 		//Witcher 3
 		if (AltDepthMap == 20)
 		{
-		float cF = 100;
-		float cN = 0.01;
-		depthM = cF / (1 + cF - (depthM/cN) * (1 - cF));
+		float cF  = 0.20;
+		float cN = 1.0;
+		depthM =  (cN * cF / (cF + depthM * (cN - cF))); 
 		}
 		
 	}
@@ -405,8 +405,8 @@ float4 SbSdepth(float4 pos : SV_Position, float2 texcoord : TEXCOORD0) : SV_Targ
 		//Custom Three
 		if (CustomDM == 3)
 		{
-		float cF  = Far;
-		float cN = Near;
+		float cF  = Far;//0.025
+		float cN = Near;//1.0
 		depthM =  (cN * cF / (cF + depthM * (cN - cF))); 
 		}
 		
