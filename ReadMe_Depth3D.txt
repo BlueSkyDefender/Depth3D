@@ -204,19 +204,6 @@ Go to Compatibility
 Check Disable Display Scaling On High DPI Settings
 
 This should fix it. For more look up this problem on google.
---------------------------------------------------------------------------------------------------------------------------------------
--=BSD Notes=- Personal recommended settings and tips for some games.
-______________________________________________________________________________________________________________________________________
-*Witcher 3*
-I noticed when playing this game that a blur setting of 0 is fine as long you can handle Depth setting from 0-30. If you want more
-depth but you don't mind sacrificing detail then, override the depth limit and set it from for DM 20 30-40 and set your blur to 0.075-0.100.
-That ever looks better too you. DM20 is not as strong as DM14. So the max I think for DM 14 is Depth 30.
-
-*GTA V*
-One of the few game where you can override the Depth Limit and run with a higher depth setting. I personaly run mine at 40 and a blur
-setting of 0.025
-
-Also remember if you don't like the depth map I made. You can alawys make your own.
 ______________________________________________________________________________________________________________________________________
 
 Games Not working in Reshade 3.0 Use Reshade 2.0
@@ -245,7 +232,7 @@ Ex.
 		"ultra" : 0
 	},
 
-User submitted Depth Map Settings
+User Submitted Depth Map Settings
 
 [Game List]				[Alternet Depth Map]	   [Depth Flip On]	[Blur Recommendations]
 ______________________________________________________________________________________________________________________________________
@@ -255,3 +242,16 @@ Need for Speed				DM 4
 
 [zig11727] "https://forums.geforce.com/default/topic/959175/3d-vision/superdepth-3d/post/4963888/#4963888"
 --------------------------------------------------------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------------------------------------------------------
+-=BSD Notes=- Personal recommended settings and tips for some games.
+______________________________________________________________________________________________________________________________________
+*Witcher 3*
+I noticed when playing this game that a blur setting of 0 is fine as long you can handle Depth setting from 0-30. If you want more
+depth but you don't mind sacrificing detail then, override the depth limit and set it from for DM 20 30-40 and set your blur to 0.075-0.100.
+That ever looks better too you. DM20 is not as strong as DM14. So the max I think for DM 14 is Depth 30.
+
+*GTA V*
+One of the few game where you can override the Depth Limit and run with a higher depth setting. I personaly run mine at 40 and a blur
+setting of 0.025
+______________________________________________________________________________________________________________________________________
+Also remember if you don't like the depth map I made. You can alawys make your own.
