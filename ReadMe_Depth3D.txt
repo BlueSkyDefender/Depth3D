@@ -244,3 +244,14 @@ Ex.
 		"high" : 0,
 		"ultra" : 0
 	},
+
+User submitted Depth Map Settings
+
+[Game List]				[Alternet Depth Map]	   [Depth Flip On]	[Blur Recommendations]
+______________________________________________________________________________________________________________________________________
+Homefront The Revolution 		DM 17
+Mirror's Edge				DM 4
+Need for Speed				DM 4
+
+[zig11727] "https://forums.geforce.com/default/topic/959175/3d-vision/superdepth-3d/post/4963888/#4963888"
+--------------------------------------------------------------------------------------------------------------------------------------
