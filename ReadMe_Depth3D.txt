@@ -54,6 +54,7 @@ The Evil Within				DM 7						RB
 Witcher 3				DM 20 or DM 14							0-0.1		RB
 Zombi					DM 7
 Warhammer: End Times - Vermintide	DM 10
+Deus Ex: Mankind Divided		DM 21								0.050-0.1	RB
 
 You can also try different depth maps for other games your self by changing AltDepthMap number From 0-20. 
 You *may* want to disable AA in game. You can always enable SMAA in reshade for AA or play at 4k with no AA. 
@@ -247,6 +248,7 @@ Need for Speed				DM 4
 
 [zig11727] "https://forums.geforce.com/default/topic/959175/3d-vision/superdepth-3d/post/4963888/#4963888"
 --------------------------------------------------------------------------------------------------------------------------------------
+
 --------------------------------------------------------------------------------------------------------------------------------------
 -=BSD Notes=- Personal recommended settings and tips for some games.
 ______________________________________________________________________________________________________________________________________
@@ -258,5 +260,18 @@ That ever looks better too you. DM20 is not as strong as DM14. So the max I thin
 *GTA V*
 One of the few game where you can override the Depth Limit and run with a higher depth setting. I personaly run mine at 40 and a blur
 setting of 0.025
+
+*Deus Ex: Mankind Divided*
+I know this game has a built in side by side. But, my head hurs when I use it.
+The setting Use for this game for 4k are. Fullscreen not exclisive no Vsync. My preset is custom. Texture Quality Ultra you can set this
+lower if you don't have that much GPU memory. Texture Filtering 16x and Shadow Qualty Medium. For AO I set it to ON If you have a good gpu 
+set this to Very High. Contact Hard Shadows is set to off. Paralax also set to on. Dof off. Now Level of Detail I have this set too High...
+any lower makes the game look bad you may want to set this Very High. Volumetic Lighting set too on. Screenspace Reflections set too on. 
+Temporal AA check this ON even with out 3D this should be on. Motion Blur off. Sharpen I have it on I like it. Bloom This one good and bad.
+Good as it gives the lighitng in game life but bad because it causes ghosting. I have it set to on I don't mind a little ghosting. 
+Cloth Physics I have this set too off because my processor is weak. Subsurface Scattering I like the look it has on people. Tessellation on.
+I use a blur of 0.075 and depth 30 or depth 25 and blur 0.050.
+
+
 ______________________________________________________________________________________________________________________________________
 Also remember if you don't like the depth map I made. You can alawys make your own.
