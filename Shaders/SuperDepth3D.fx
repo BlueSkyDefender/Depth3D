@@ -3,7 +3,7 @@
  //----------------////
 
  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
- //* Depth Map Based 3D post-process shader v1.8.4 L & R Eye																															*//
+ //* Depth Map Based 3D post-process shader v1.8.5 L & R Eye																															*//
  //* For Reshade 3.0																																								*//
  //* --------------------------																																						*//
  //* This work is licensed under a Creative Commons Attribution 3.0 Unported License.																								*//
@@ -88,6 +88,12 @@ uniform int BD <
 	ui_tooltip = "Barrel Distortion for HMD type Displays.";
 > = 0;
 
+uniform float3 PColor <
+	ui_type = "color";
+	ui_tooltip = "Adjust the Polynomial Distortion Red, Green, Blue. Default is (R 255, G 255, B 255)";
+	ui_label = "Polynomial Color";
+> = float3(1.0, 1.0, 1.0);
+
 uniform float Hsquish <
 	ui_type = "drag";
 	ui_min = 0.5; ui_max = 2;
@@ -109,31 +115,26 @@ uniform int sstbli <
 	ui_tooltip = "Side by Side/Top and Bottom/Line Interlaced displays output.";
 > = 0;
 
-uniform float Red <
-	ui_type = "drag";
-	ui_min = 0; ui_max = 1;
-	ui_label = "Red Distortion";
-	ui_tooltip = "Adjust the Polynomial Distortion Red. Default is 1.0";
-> = 1.0;
-
-uniform float Green <
-	ui_type = "drag";
-	ui_min = 0; ui_max = 1;
-	ui_label = "Green Distortion";
-	ui_tooltip = "Adjust the Polynomial Distortion Green. Default is 1.0";
-> = 1.0;
-
-uniform float Blue <
-	ui_type = "drag";
-	ui_min = 0; ui_max = 1;
-	ui_label = "Blue Distortion";
-	ui_tooltip = "Adjust the Polynomial Distortion Blue. Default is 1.0";
-> = 1.0;
-
 uniform bool LRRL <
 	ui_label = "Eye Swap";
 	ui_tooltip = "Left right image change.";
 > = false;
+
+uniform int CCS <
+	ui_type = "drag";
+	ui_min = 1; ui_max = 100;
+	ui_tooltip = "Pick your size of the cross cusor";
+> = 20;
+uniform float3 CCC <
+	ui_type = "color";
+	ui_tooltip = "Pick your own cross cusor color.";
+	ui_label = "Cross Cusor Color";
+> = float3(1.0, 1.0, 1.0);
+
+uniform bool mouse < source = "key"; keycode = 192; toggle = true; >;
+
+uniform float2 Mousecoords < source = "mousepoint"; > ;
+
 
 /////////////////////////////////////////////D3D Starts Here/////////////////////////////////////////////////////////////////
 
@@ -201,6 +202,20 @@ sampler SamplerCDM
 		AddressV = CLAMP;
 		AddressW = CLAMP;
 	};
+	
+float4 MouseCuror(float4 pos : SV_Position, float2 texcoord : TEXCOORD) : SV_Target
+{
+	float4 Mpointer; 
+	if(mouse)
+	{
+	Mpointer = all(abs(Mousecoords - pos.xy) < CCS) * (1 - all(abs(Mousecoords - pos.xy) > CCS/(CCS/2))) ? float4(CCC, 1.0) : tex2D(BackBuffer, texcoord);//cross
+	}
+	else
+	{
+	Mpointer =  tex2D(BackBuffer, texcoord);
+	}
+	return Mpointer;
+}
 
 //Depth Map Information	
 float4 SbSdepth(float4 pos : SV_Position, float2 texcoord : TEXCOORD0) : SV_Target
@@ -523,11 +538,16 @@ float4 PDL(float2 texcoord)
 		float4 color;
 		float2 uv_red, uv_green, uv_blue;
 		float4 color_red, color_green, color_blue;
+		float Red, Green, Blue;
 		float2 sectorOrigin;
 
     // Radial distort around center
 		sectorOrigin = (texcoord.xy-0.5,0,0);
-
+		
+		Red = PColor.x;
+		Green = PColor.y;
+		Blue = PColor.z;
+		
 		uv_red = PD(texcoord.xy-sectorOrigin,Red) + sectorOrigin;
 		uv_green = PD(texcoord.xy-sectorOrigin,Green) + sectorOrigin;
 		uv_blue = PD(texcoord.xy-sectorOrigin,Blue) + sectorOrigin;
@@ -555,12 +575,16 @@ float4 PDL(float2 texcoord)
 		float4 color;
 		float2 uv_red, uv_green, uv_blue;
 		float4 color_red, color_green, color_blue;
+		float Red, Green, Blue;
 		float2 sectorOrigin;
 
     // Radial distort around center
 		sectorOrigin = (texcoord.xy-0.5,0,0);
 		
-
+		Red = PColor.x;
+		Green = PColor.y;
+		Blue = PColor.z;
+		
 		uv_red = PD(texcoord.xy-sectorOrigin,Red) + sectorOrigin;
 		uv_green = PD(texcoord.xy-sectorOrigin,Green) + sectorOrigin;
 		uv_blue = PD(texcoord.xy-sectorOrigin,Blue) + sectorOrigin;
@@ -645,8 +669,13 @@ void PostProcessVS(in uint id : SV_VertexID, out float4 position : SV_Position, 
 //*Rendering passes*//
 
 technique Super_Depth3D
-{
-					pass
+{			
+			pass
+		{
+			VertexShader = PostProcessVS;
+			PixelShader = MouseCuror;
+		}
+			pass
 		{
 			VertexShader = PostProcessVS;
 			PixelShader = SbSdepth;
