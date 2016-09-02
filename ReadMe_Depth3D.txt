@@ -33,7 +33,7 @@ DreamFall Chapters			DM 18		     		DF On
 Dying Light				DM 11
 Fallout 4				DM 0							
 Firewatch				DM 0				DF On		RB				
-GTA V					DM 12						RB		0.01-0.25		RB
+GTA V					DM 12						RB		0.01-0.25	RB
 Hard Reset				DM 4						RB
 Lords of The Fallen			DM 4
 Magicka 2				DM 13						RB
@@ -64,23 +64,25 @@ In-game Menu Settings
 
 Shift + f2 for Reshade 3.0 menu
 
-* Alternate Depth Map	[Depth Map 0 ▼]		[0|1|2|3|4|5|6|7|9|10|11|12|13|14|15|16|17|18|19|20] Alternate Depth Map for different Games. 
-* Depth		       -[◄0▪▪▪▪▪▪▪25►]+		[0:25] Depth Default is 25. "Drag to Adjust Perspective."
-* Perspective	       -[◄▪▪▪▪0▪▪▪▪▪►]+		[-100:100] Perspective Default is 0. "Drag to Adjust Perspective."
-* Blur		       -[◄▪▪7.5▪▪▪▪▪►]+		[0:25] Depth Map Blur Adjustment. Default is 7.5. 0 is Off.
-* Depth Flip	 	[Off ▼]			Depth Flip if Upside Down.
-* Depth Map View 	[Off ▼]			Depth Map View. To see The Depth map. Use This to Work on your Own Depth Map for your game.
-* Far		       -[◄▪▪▪▪▪▪▪▪▪▪►]+		Default is "0.05" Far Depth Map Adjustment. This works on  [Custom DM ▼] 
-* Near		       -[◄▪▪▪▪▪▪▪▪▪▪►]+		Default is "1.25" Near Depth Map Adjustment. This works on [Custom DM ▼] 
-* Custom Depth Map	[Custom Off  ▼]		Added, the ablity to make your own Depth Map.
-* Barrel Distortion	[Off ▼]			Enables Barrel Distortion for HMD or if you want a sence of a little more depth.
-* Horizontal Squish    -[◄0.5▪▪▪1▪▪▪▪2►]+	Squishes the screen horizontaly.
-* Vertical Squish      -[◄0.5▪▪▪1▪▪▪▪2►]+	Vertical the screen horizontaly.
-* 3D Display Mode	[Side by Side ▼]	Side by Side/Top and Bottom/Line Interlaced/Checkerboard 3D displays output.
-* Red Distortion        [R 255][G 255][B 255]	Red | Green | Blue distortion sliders.
-* EyeSwap		[Off ▼]			Left Right Eye Swap.
-* Cross Cusor Size     -[◄0▪▪▪▪▪▪100►]+		Pick your size of the cross cusor.
-* Cross Cusor Color	[R 255][G 255][B 255]	Cross Cusor Color.
+* Alternate Depth Map		[Depth Map 0 ▼]		[0|1|2|3|4|5|6|7|9|10|11|12|13|14|15|16|17|18|19|20] Alternate Depth Map for different Games. 
+* Depth		               -[◄0▪▪▪▪▪▪▪30►]+		[0:30] Depth Default is 10. "Drag to Adjust Perspective."
+* Perspective	               -[◄▪▪▪▪0▪▪▪▪▪►]+		[-100:100] Perspective Default is 0. "Drag to Adjust Perspective."
+* Blur		               -[◄▪0.05▪▪▪▪▪►]+		[0:25] Depth Map Blur Adjustment. Default is 0.050 zero is Off.
+* Depth Flip	 		[Off ▼]			Depth Flip if Upside Down.
+* Depth Map View 		[Off ▼]			Depth Map View. To see The Depth map. Use This to Work on your Own Depth Map for your game.
+* Far		               -[◄▪▪▪▪▪▪▪▪▪▪►]+		Default is "0.05" Far Depth Map Adjustment. This works on  [Custom DM ▼] 
+* Near		               -[◄▪▪▪▪▪▪▪▪▪▪►]+		Default is "1.25" Near Depth Map Adjustment. This works on [Custom DM ▼] 
+* Custom Depth Map		[Custom Off  ▼]		Added, the ablity to make your own Depth Map.
+* Barrel Distortion		[Off ▼]			Enables Barrel Distortion for HMD or if you want a sence of a little more depth.
+* Horizontal Squish            -[◄0.5▪▪▪1▪▪▪▪2►]+	Squishes the screen horizontaly.
+* Vertical Squish      	       -[◄0.5▪▪▪1▪▪▪▪2►]+	Vertical the screen horizontaly.
+* 3D Display Mode		[Side by Side ▼]	Side by Side/Top and Bottom/Line Interlaced/Checkerboard 3D displays output.
+* Polynomial Color Distortion	[R 255][G 255][B 255]	Red | Green | Blue distortion sliders.
+* EyeSwap			[Off ▼]			Left Right Eye Swap.
+* Cross Cusor Size             -[◄0▪▪▪▪▪▪100►]+		Pick your size of the cross cusor.
+* Cross Cusor Color		[R 255][G 255][B 255]	Cross Cusor Color.
+
+Toggle Key ` for Cross Cusor On/Off
 
 uniform bool mouse < source = "key"; keycode = 192; toggle = true; >; // Key Code 192 `  that little thing below ~ you can change this 
 to what you want.

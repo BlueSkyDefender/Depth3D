@@ -91,7 +91,7 @@ uniform int BD <
 uniform float3 PColor <
 	ui_type = "color";
 	ui_tooltip = "Adjust the Polynomial Distortion Red, Green, Blue. Default is (R 255, G 255, B 255)";
-	ui_label = "Polynomial Color";
+	ui_label = "Polynomial Color Distortion";
 > = float3(1.0, 1.0, 1.0);
 
 uniform float Hsquish <
@@ -126,6 +126,7 @@ uniform int CCS <
 	ui_tooltip = "Pick your size of the cross cusor.";
 	ui_label = "Cross Cusor Size";
 > = 20;
+
 uniform float3 CCC <
 	ui_type = "color";
 	ui_tooltip = "Pick your own cross cusor color.";
