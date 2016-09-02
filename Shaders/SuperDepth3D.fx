@@ -123,7 +123,7 @@ uniform bool LRRL <
 uniform int CCS <
 	ui_type = "drag";
 	ui_min = 1; ui_max = 100;
-	ui_tooltip = "Pick your size of the cross cusor";
+	ui_tooltip = "Pick your size of the cross cusor.";
 	ui_label = "Cross Cusor Size";
 > = 20;
 uniform float3 CCC <

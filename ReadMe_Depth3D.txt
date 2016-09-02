@@ -1,5 +1,5 @@
 ﻿#SuperDepth3D
-Depth Map Based 3D post-process shader v1.8.1 for Reshade 3.0
+Depth Map Based 3D post-process shader v1.8.5 for Reshade 3.0
 
 There are the Basic Depth maps you can use for your games listed and not listed. Look at this link for other game Compatibility.
 
@@ -77,10 +77,13 @@ Shift + f2 for Reshade 3.0 menu
 * Horizontal Squish    -[◄0.5▪▪▪1▪▪▪▪2►]+	Squishes the screen horizontaly.
 * Vertical Squish      -[◄0.5▪▪▪1▪▪▪▪2►]+	Vertical the screen horizontaly.
 * 3D Display Mode	[Side by Side ▼]	Side by Side/Top and Bottom/Line Interlaced/Checkerboard 3D displays output.
-* Red Distortion       -[◄0▪▪▪▪▪▪1►]+		Red distortion slider.
-* Green Distortion     -[◄0▪▪▪▪▪▪1►]+		Green distortion slider.
-* Blue Distortion      -[◄0▪▪▪▪▪▪1►]+		Blue distortion slider.
+* Red Distortion        [R 255][G 255][B 255]	Red | Green | Blue distortion sliders.
 * EyeSwap		[Off ▼]			Left Right Eye Swap.
+* Cross Cusor Size     -[◄0▪▪▪▪▪▪100►]+		Pick your size of the cross cusor.
+* Cross Cusor Color	[R 255][G 255][B 255]	Cross Cusor Color.
+
+uniform bool mouse < source = "key"; keycode = 192; toggle = true; >; // Key Code 192 `  that little thing below ~ you can change this 
+to what you want.
 
 Read Below Section
 ======================================================================================================================================
