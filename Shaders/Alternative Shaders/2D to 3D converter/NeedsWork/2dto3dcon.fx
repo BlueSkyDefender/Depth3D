@@ -99,9 +99,10 @@ uniform bool LRRL <
 	
 texture texCL  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA32F;}; 
 texture texCR  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA32F;}; 
-texture texCC  { Width = BUFFER_WIDTH/2; Height = BUFFER_HEIGHT; Format = RGBA32F;}; 
-texture texCCL  { Width = BUFFER_WIDTH/2; Height = BUFFER_HEIGHT; Format = RGBA32F;}; 
-texture texCDM  { Width = BUFFER_WIDTH/2; Height = BUFFER_HEIGHT; Format = RGBA32F;};
+texture texHSV  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA32F;}; 
+texture texCC  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA32F;}; 
+texture texCCL  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA32F;}; 
+texture texCDM  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA32F;};
 
 texture PseudoDofTexS < source = "Sgrad.png"; > { Width = 1024; Height = 1024; MipLevels = 1; Format = RGBA8; };
 sampler PseudoDofSamplerS { Texture = PseudoDofTexS; };
@@ -134,6 +135,17 @@ sampler SamplerCR
 		MipFilter = Linear; 
 		MinFilter = Linear; 
 		MagFilter = Linear;
+	};
+	
+	sampler SamplerHSV
+	{
+		Texture = texHSV;
+		AddressU = BORDER;
+		AddressV = BORDER;
+		AddressW = BORDER;
+		AddressU = CLAMP;
+		AddressV = CLAMP;
+		AddressW = CLAMP;
 	};
 	
 sampler SamplerCC
@@ -173,41 +185,32 @@ sampler SamplerCDM
 float3 RGBtoHSV(float2 RGB)
 {
     float3 HCV = tex2D(BackBuffer,RGB).rgb;
-    float S = HCV.y / (HCV.z + 0.50);
+    float S = HCV.y / (HCV.z + 0.001);
     float3 gray_scale = float3(HCV.x, S, HCV.z);	
 	return dot(gray_scale, float3(0.3, 0.59, 0.11));//Gray-scale conversion.
 }
 
-float3 RGBtoHSVTWO(float2 RGB)
+float3 RGBtoHSVTWO(float2 texcoord : TEXCOORD0) : SV_Target
 {
-    float3 HCV = tex2D(BackBuffer,RGB).rgb;
-    float S = HCV.y / (HCV.z + 100);
+    float3 HCV = tex2D(BackBuffer,texcoord).rgb;
+    float S = HCV.y / (HCV.z + 1);
     float3 gray_scale = float3(HCV.x, S, HCV.z);	
 	return dot(gray_scale, float3(0.3, 0.59, 0.11));//Gray-scale conversion.
 }
 
-float4 Laplace(float2 texcoord : TEXCOORD0) : SV_Target
-{  
-  
-const float samples[4] = {  
-0, -1,  
--1, 0  
-};
-
-const float samplesS[4] = {  
-1, 0,  
-0, 1  
-};
-
-float4 laplace = -4 * RGBtoHSV(texcoord).r;  
-  
-// Sample the neighbor pixels  
-for (int i = 0; i < 4; i++){  
-laplace += RGBtoHSV( texcoord + 0.0031 * float2(samples[i],samplesS[i]));  
-}  
-  
-return (0.5 + 1.0 * laplace);  
-}  
+float4 Lum(float2 uv)  
+{   
+     float4 color = tex2D(BackBuffer,uv) + float4(RGBtoHSV(uv),1);   
+     float luminosity = (color.r + color.g + color.b) / 6; 
+     float mappedluminosity = tex2D(SamplerHSV,uv).x;   
+ 
+     float4 a = float4(mappedluminosity, mappedluminosity, mappedluminosity, color.a);  
+     float4 b = float4(color.rgb * (mappedluminosity / luminosity), color.a);  
+     // Absolutely black color  
+     if(luminosity == 0) b = a;  
+ 
+     return b;  
+} 
 
 #define s2(a, b)				temp = a; a = min(a, b); b = max(temp, b);
 #define mn3(a, b, c)			s2(a, b); s2(a, c);
@@ -225,25 +228,25 @@ float4 color;
 
   float v[6];
 
-  v[0] = RGBtoHSVTWO(texcoord.xy + float2(-1.0, -1.0) * 5 * pix).r;
-  v[1] = RGBtoHSVTWO(texcoord.xy + float2( 0.0, -1.0) * 5 * pix).r;
-  v[2] = RGBtoHSVTWO(texcoord.xy + float2(+1.0, -1.0) * 5 * pix).r;
-  v[3] = RGBtoHSVTWO(texcoord.xy + float2(-1.0,  0.0) * 5 * pix).r;
-  v[4] = RGBtoHSVTWO(texcoord.xy + float2( 0.0,  0.0) * 5 * pix).r;
-  v[5] = RGBtoHSVTWO(texcoord.xy + float2(+1.0,  0.0) * 5 * pix).r;
+  v[0] = Lum(texcoord.xy + float2(-1.0, -1.0) * 5 * pix).r;
+  v[1] = Lum(texcoord.xy + float2( 0.0, -1.0) * 5 * pix).r;
+  v[2] = Lum(texcoord.xy + float2(+1.0, -1.0) * 5 * pix).r;
+  v[3] = Lum(texcoord.xy + float2(-1.0,  0.0) * 5 * pix).r;
+  v[4] = Lum(texcoord.xy + float2( 0.0,  0.0) * 5 * pix).r;
+  v[5] = Lum(texcoord.xy + float2(+1.0,  0.0) * 5 * pix).r;
 
   float temp;
   mnmx6(v[0], v[1], v[2], v[3], v[4], v[5]);
 
-  v[5] = RGBtoHSVTWO(texcoord.xy + float2(-1.0, +1.0) * 5 * pix).r;
+  v[5] = Lum(texcoord.xy + float2(-1.0, +1.0) * 5 * pix).r;
 
   mnmx5(v[1], v[2], v[3], v[4], v[5]);
 
-  v[5] = RGBtoHSVTWO(texcoord.xy + float2( 0.0, +1.0) * 5 * pix).r;
+  v[5] = Lum(texcoord.xy + float2( 0.0, +1.0) * 5 * pix).r;
 
   mnmx4(v[2], v[3], v[4], v[5]);
 
-  v[5] = RGBtoHSVTWO(texcoord.xy + float2(+1.0, +1.0) * 5 * pix).r;
+  v[5] = Lum(texcoord.xy + float2(+1.0, +1.0) * 5 * pix).r;
 
   mnmx3(v[3], v[4], v[5]);
   color = v[4];
@@ -254,8 +257,8 @@ float4 color;
 
 float3 comb(float2 texcoord : TEXCOORD0) : SV_Target
 {  
-return lerp(tex2D(SamplerCCL,texcoord).r , 1-tex2D(SamplerCC,texcoord).r*(1-tex2D(PseudoDofSamplerS,float2(texcoord.x, texcoord.y)).r+blur),1)-0.5;
-
+return (lerp(tex2D(PseudoDofSamplerS,texcoord).r , 1-tex2D(SamplerCC,texcoord).r,0.5));
+//* (tex2D(PseudoDofSamplerS,texcoord).r + blur)
 //tex2D(PseudoDofSamplerS,float2(texcoord.x-uv.x*pix.x, texcoord.y)).r
 }
 
@@ -479,18 +482,18 @@ void PostProcessVS(in uint id : SV_VertexID, out float4 position : SV_Position, 
 
 //*Rendering passes*//
 technique Super_2DTO3D
-{
-					pass
+{				
+		pass
+		{
+			VertexShader = PostProcessVS;
+			PixelShader = RGBtoHSVTWO;
+			RenderTarget = texHSV;
+		}
+			pass
 		{
 			VertexShader = PostProcessVS;
 			PixelShader = Median;
 			RenderTarget = texCC;
-		}
-							pass
-		{
-			VertexShader = PostProcessVS;
-			PixelShader = Laplace;
-			RenderTarget = texCCL;
 		}
 			pass
 		{
