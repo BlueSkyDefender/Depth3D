@@ -87,6 +87,13 @@ uniform float Blue <
 	ui_tooltip = "Adjust the Polynomial Distortion Blue. Default is 1.0";
 > = 1.0;
 
+uniform float PHA <
+	ui_type = "drag";
+	ui_min = 0; ui_max = 1;
+	ui_label = "Photo";
+	ui_tooltip = "Adjust the PHA";
+> = 1.0;
+
 uniform bool LRRL <
 	ui_label = "Eye Swap";
 	ui_tooltip = "Left right image change.";
@@ -99,10 +106,12 @@ uniform bool LRRL <
 	
 texture texCL  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA32F;}; 
 texture texCR  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA32F;}; 
-texture texHSV  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA32F;}; 
-texture texCC  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA32F;}; 
-texture texCCL  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA32F;}; 
-texture texCDM  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA32F;};
+texture texHSV  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA8;}; 
+texture texCC  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA8;}; 
+texture texDM  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA8;}; 
+texture texPH { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA8;}; 
+texture texR { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA8;}; 
+texture texPHB { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA8;};
 
 texture PseudoDofTexS < source = "Sgrad.png"; > { Width = 1024; Height = 1024; MipLevels = 1; Format = RGBA8; };
 sampler PseudoDofSamplerS { Texture = PseudoDofTexS; };
@@ -137,15 +146,15 @@ sampler SamplerCR
 		MagFilter = Linear;
 	};
 	
-	sampler SamplerHSV
+sampler SamplerHSV
 	{
 		Texture = texHSV;
 		AddressU = BORDER;
 		AddressV = BORDER;
 		AddressW = BORDER;
-		AddressU = CLAMP;
-		AddressV = CLAMP;
-		AddressW = CLAMP;
+		MipFilter = Linear; 
+		MinFilter = Linear; 
+		MagFilter = Linear;
 	};
 	
 sampler SamplerCC
@@ -154,41 +163,63 @@ sampler SamplerCC
 		AddressU = BORDER;
 		AddressV = BORDER;
 		AddressW = BORDER;
-		AddressU = CLAMP;
-		AddressV = CLAMP;
-		AddressW = CLAMP;
+		MipFilter = Linear; 
+		MinFilter = Linear; 
+		MagFilter = Linear;
 	};
-
 	
-sampler SamplerCCL
+sampler SamplerDM
 	{
-		Texture = texCCL;
+		Texture = texDM;
 		AddressU = BORDER;
 		AddressV = BORDER;
 		AddressW = BORDER;
-		AddressU = CLAMP;
-		AddressV = CLAMP;
-		AddressW = CLAMP;
+		MipFilter = Linear; 
+		MinFilter = Linear; 
+		MagFilter = Linear;
 	};
 	
-sampler SamplerCDM
+sampler SamplerPH
 	{
-		Texture = texCDM;
-		MinFilter = LINEAR;
-		MagFilter = LINEAR;
-		MipFilter = LINEAR;
-		AddressU = CLAMP;
-		AddressV = CLAMP;
-		AddressW = CLAMP;
+		Texture = texPH;
+		AddressU = BORDER;
+		AddressV = BORDER;
+		AddressW = BORDER;
+		MipFilter = Linear; 
+		MinFilter = Linear; 
+		MagFilter = Linear;
+	};
+	
+sampler SamplerR
+	{
+		Texture = texR;
+		AddressU = BORDER;
+		AddressV = BORDER;
+		AddressW = BORDER;
+		MipFilter = Linear; 
+		MinFilter = Linear; 
+		MagFilter = Linear;
 	};
 
-float3 RGBtoHSV(float2 RGB)
+sampler SamplerPHB
+	{
+		Texture = texPHB;
+		AddressU = BORDER;
+		AddressV = BORDER;
+		AddressW = BORDER;
+		MipFilter = Linear; 
+		MinFilter = Linear; 
+		MagFilter = Linear;
+	};
+	
+	
+float3 RGBtoHSV(float2 texcoord : TEXCOORD0) : SV_Target
 {
-    float3 HCV = tex2D(BackBuffer,RGB).rgb;
-    float S = HCV.y / (HCV.z + 0.001);
-    float3 gray_scale = float3(HCV.x, S, HCV.z);	
-	return dot(gray_scale, float3(0.3, 0.59, 0.11));//Gray-scale conversion.
+    float3 HCV = tex2D(BackBuffer,texcoord).rgb;
+    float S = HCV.y / (HCV.z + 0.50);
+    return float3(HCV.x, S, HCV.z);	
 }
+
 
 float3 RGBtoHSVTWO(float2 texcoord : TEXCOORD0) : SV_Target
 {
@@ -198,19 +229,95 @@ float3 RGBtoHSVTWO(float2 texcoord : TEXCOORD0) : SV_Target
 	return dot(gray_scale, float3(0.3, 0.59, 0.11));//Gray-scale conversion.
 }
 
-float4 Lum(float2 uv)  
-{   
-     float4 color = tex2D(BackBuffer,uv) + float4(RGBtoHSV(uv),1);   
-     float luminosity = (color.r + color.g + color.b) / 6; 
-     float mappedluminosity = tex2D(SamplerHSV,uv).x;   
- 
-     float4 a = float4(mappedluminosity, mappedluminosity, mappedluminosity, color.a);  
-     float4 b = float4(color.rgb * (mappedluminosity / luminosity), color.a);  
-     // Absolutely black color  
-     if(luminosity == 0) b = a;  
- 
-     return b;  
-} 
+float3 Pinhole(float2 texcoord : TEXCOORD0) : SV_Target
+{
+float slope = 0.250;
+float micro_size = slope/4;
+float shift_x = -0.100;
+float shift_y = -0.100;
+float2 q = texcoord .xy / micro_size;
+float2 p = floor(q);
+float2 offset = q - p;
+float2 shift = float2(shift_x, shift_y);
+return tex2D(SamplerHSV,p*micro_size+shift+(slope*offset) );
+}
+
+
+float4 DepthM(float2 texcoord : TEXCOORD0) : SV_Target
+{
+int micro_size = 7;
+float2 p = texcoord.xy / micro_size;
+float shift_x = 0;
+float shift_y = 0;
+float2 shift = float2(shift_x, shift_y);
+float2 offset = texcoord.xy / micro_size - p;
+int num_patches = 3;
+int num_images = 1;
+float best_slope = 0;
+float best_match = 6;
+[loop]
+for(float patch_size = micro_size / 2.0; patch_size >= 0.0; patch_size -= 0.5) 
+{
+float2 left_base = p * micro_size + shift - offset * patch_size;
+float score = 0;
+for (int i = 0; i < num_patches; i++) 
+{
+for(int j = 0; j < num_patches; j++) 
+{
+float2 pixel_shift = float2(i, j);
+float4 left = tex2Doffset(SamplerPH,texcoord,
+left_base
++ pixel_shift);
+for(int m = -num_images; m <= num_images; m++) 
+{
+for(int n = -num_images; n <= num_images; n++) 
+{
+if(m == 0 && n == 0) continue;
+float2 right_base =
+left_base + float2(m, n) * (micro_size + patch_size);
+float4 right = tex2Doffset(SamplerPH,texcoord,
+right_base
++ pixel_shift);
+score += distance(left, right);
+}
+}
+}
+}
+if(score < best_match) {
+best_slope = patch_size;
+best_match = score;
+}
+}
+float color = best_slope / (micro_size / 2.0);
+return float4(color, color, color, 1.0);
+}
+
+
+float3 Render(float2 texcoord : TEXCOORD0) : SV_Target
+{
+float M = 0.016;
+float mu = 0.063;
+float2 offest = float2(-0.002,-0.002);
+
+float2 x_mu = texcoord.xy/mu;
+float2 p = floor(x_mu);
+float2 q = (x_mu-p) * M;
+float2 qp = q + 0.5*(mu-M);
+
+float4 colXY = float4(0,0,0,0);
+for(int i= -1; i <=1; ++i)
+{
+for(int j= -1; j <=1; ++j)
+{
+float2 ij = float2(float(i), float(j));
+float2 dq = qp - ij*M;
+float2 fx = (p + ij)*mu+dq + offest;
+
+colXY +=tex2D(SamplerDM,fx);
+}
+}
+return colXY/5;
+}
 
 #define s2(a, b)				temp = a; a = min(a, b); b = max(temp, b);
 #define mn3(a, b, c)			s2(a, b); s2(a, c);
@@ -228,25 +335,25 @@ float4 color;
 
   float v[6];
 
-  v[0] = Lum(texcoord.xy + float2(-1.0, -1.0) * 5 * pix).r;
-  v[1] = Lum(texcoord.xy + float2( 0.0, -1.0) * 5 * pix).r;
-  v[2] = Lum(texcoord.xy + float2(+1.0, -1.0) * 5 * pix).r;
-  v[3] = Lum(texcoord.xy + float2(-1.0,  0.0) * 5 * pix).r;
-  v[4] = Lum(texcoord.xy + float2( 0.0,  0.0) * 5 * pix).r;
-  v[5] = Lum(texcoord.xy + float2(+1.0,  0.0) * 5 * pix).r;
+  v[0] = tex2D(SamplerR ,texcoord.xy + float2(-1.0, -1.0) * 5 * pix).r;
+  v[1] = tex2D(SamplerR ,texcoord.xy + float2( 0.0, -1.0) * 5 * pix).r;
+  v[2] = tex2D(SamplerR ,texcoord.xy + float2(+1.0, -1.0) * 5 * pix).r;
+  v[3] = tex2D(SamplerR ,texcoord.xy + float2(-1.0,  0.0) * 5 * pix).r;
+  v[4] = tex2D(SamplerR ,texcoord.xy + float2( 0.0,  0.0) * 5 * pix).r;
+  v[5] = tex2D(SamplerR ,texcoord.xy + float2(+1.0,  0.0) * 5 * pix).r;
 
   float temp;
   mnmx6(v[0], v[1], v[2], v[3], v[4], v[5]);
 
-  v[5] = Lum(texcoord.xy + float2(-1.0, +1.0) * 5 * pix).r;
+  v[5] = tex2D(SamplerR ,texcoord.xy + float2(-1.0, +1.0) * 5 * pix).r;
 
   mnmx5(v[1], v[2], v[3], v[4], v[5]);
 
-  v[5] = Lum(texcoord.xy + float2( 0.0, +1.0) * 5 * pix).r;
+  v[5] = tex2D(SamplerR ,texcoord.xy + float2( 0.0, +1.0) * 5 * pix).r;
 
   mnmx4(v[2], v[3], v[4], v[5]);
 
-  v[5] = Lum(texcoord.xy + float2(+1.0, +1.0) * 5 * pix).r;
+  v[5] = tex2D(SamplerR ,texcoord.xy + float2(+1.0, +1.0) * 5 * pix).r;
 
   mnmx3(v[3], v[4], v[5]);
   color = v[4];
@@ -257,43 +364,9 @@ float4 color;
 
 float3 comb(float2 texcoord : TEXCOORD0) : SV_Target
 {  
-return (lerp(tex2D(PseudoDofSamplerS,texcoord).r , 1-tex2D(SamplerCC,texcoord).r,0.5));
+return lerp(lerp(tex2D(SamplerCC,texcoord).r-0.5,tex2D(PseudoDofSamplerS,float2(texcoord.x, texcoord.y)).r,0.250),1-RGBtoHSVTWO(texcoord),0);
 //* (tex2D(PseudoDofSamplerS,texcoord).r + blur)
 //tex2D(PseudoDofSamplerS,float2(texcoord.x-uv.x*pix.x, texcoord.y)).r
-}
-
-float4 MedianT(float2 texcoord : TEXCOORD0)
-{
-
-float4 color;
-
-  float v[6];
-
-  v[0] =  comb(texcoord.xy + float2(-1.0, -1.0) * 2.5 * pix).r;
-  v[1] =  comb(texcoord.xy + float2( 0.0, -1.0) * 2.5 * pix).r;
-  v[2] =  comb(texcoord.xy + float2(+1.0, -1.0) * 2.5 * pix).r;
-  v[3] =  comb(texcoord.xy + float2(-1.0,  0.0) * 2.5 * pix).r;
-  v[4] =  comb(texcoord.xy + float2( 0.0,  0.0) * 2.5 * pix).r;
-  v[5] =  comb(texcoord.xy + float2(+1.0,  0.0) * 2.5 * pix).r;
-
-  float temp;
-  mnmx6(v[0], v[1], v[2], v[3], v[4], v[5]);
-
-  v[5] =  comb(texcoord.xy + float2(-1.0, +1.0) * 2.5 * pix).r;
-
-  mnmx5(v[1], v[2], v[3], v[4], v[5]);
-
-  v[5] =  comb(texcoord.xy + float2( 0.0, +1.0) * 2.5 * pix).r;
-
-  mnmx4(v[2], v[3], v[4], v[5]);
-
-  v[5] =  comb(texcoord.xy + float2(+1.0, +1.0) * 2.5 * pix).r;
-
-  mnmx3(v[3], v[4], v[5]);
-  color = v[4];
-  
-  return color;
-
 }
 
 
@@ -307,8 +380,8 @@ void PS_renderLR(in float2 texcoord : TEXCOORD0, out float3 color : SV_Target0 ,
 	for (int j = 0; j <= 3; ++j) 
 	{	
 			uv.x = samples[j] * Depth;
-			DepthL=  min(DepthL,MedianT(float2(texcoord.x+uv.x*pix.x, texcoord.y)).r );
-			DepthR=  min(DepthR,MedianT(float2(texcoord.x-uv.x*pix.x, texcoord.y)).r );
+			DepthL=  min(DepthL,comb(float2(texcoord.x+uv.x*pix.x, texcoord.y)).r );
+			DepthR=  min(DepthR,comb(float2(texcoord.x-uv.x*pix.x, texcoord.y)).r );
 		if(!LRRL)
 		{
 			//color.rgb = DepthL;
@@ -464,7 +537,7 @@ void PS0(float4 position : SV_Position, float2 texcoord : TEXCOORD0, out float3 
 	}
 	else
 	{
-	color =  MedianT(texcoord.xy).rgb;
+	color = comb(texcoord.xy).rgb;
 	}
 }
 
@@ -483,12 +556,30 @@ void PostProcessVS(in uint id : SV_VertexID, out float4 position : SV_Position, 
 //*Rendering passes*//
 technique Super_2DTO3D
 {				
-		pass
+			pass
 		{
 			VertexShader = PostProcessVS;
-			PixelShader = RGBtoHSVTWO;
+			PixelShader = RGBtoHSV;
 			RenderTarget = texHSV;
 		}
+			pass
+		{
+			VertexShader = PostProcessVS;
+			PixelShader = Pinhole;
+			RenderTarget = texPH;
+		}
+			pass
+		{
+			VertexShader = PostProcessVS;
+			PixelShader = DepthM;
+			RenderTarget = texDM;
+		}
+			pass
+		{
+			VertexShader = PostProcessVS;
+			PixelShader = Render;
+			RenderTarget = texR;
+		}		
 			pass
 		{
 			VertexShader = PostProcessVS;
