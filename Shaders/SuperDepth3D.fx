@@ -141,7 +141,7 @@ uniform int Edge <
 	ui_type = "combo";
 	ui_items = "Mirrored Edges\0Black Edges\0Stretched Edges\0";
 	ui_label = "Edge Selection";
-	ui_tooltip = "Select the how you like the Edge of the screen to look like.";
+	ui_tooltip = "Select how you like the Edge of the screen to look like.";
 > = 1;
 
 /////////////////////////////////////////////D3D Starts Here/////////////////////////////////////////////////////////////////
