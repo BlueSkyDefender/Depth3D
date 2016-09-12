@@ -115,10 +115,12 @@ uniform int sstbli <
 	ui_tooltip = "Side by Side/Top and Bottom/Line Interlaced displays output.";
 > = 0;
 
-uniform bool LRRL <
-	ui_label = "Eye Swap";
-	ui_tooltip = "Left right image change.";
-> = false;
+uniform int Edge <
+	ui_type = "combo";
+	ui_items = "Mirrored Edges\0Black Edges\0Stretched Edges\0";
+	ui_label = "Edge Selection";
+	ui_tooltip = "Select how you like the Edge of the screen to look like.";
+> = 1;
 
 uniform float CCS <
 	ui_type = "drag";
@@ -133,16 +135,14 @@ uniform float3 CCC <
 	ui_label = "Cross Cusor Color";
 > = float3(1.0, 1.0, 1.0);
 
+uniform bool LRRL <
+	ui_label = "Eye Swap";
+	ui_tooltip = "Left right image change.";
+> = false;
+
 uniform bool mouse < source = "key"; keycode = 192; toggle = true; >;
 
 uniform float2 Mousecoords < source = "mousepoint"; > ;
-
-uniform int Edge <
-	ui_type = "combo";
-	ui_items = "Mirrored Edges\0Black Edges\0Stretched Edges\0";
-	ui_label = "Edge Selection";
-	ui_tooltip = "Select how you like the Edge of the screen to look like.";
-> = 1;
 
 /////////////////////////////////////////////D3D Starts Here/////////////////////////////////////////////////////////////////
 
@@ -168,9 +168,6 @@ sampler BackBufferMIRROR
 		AddressU = MIRROR;
 		AddressV = MIRROR;
 		AddressW = MIRROR;
-		MipFilter = Linear; 
-		MinFilter = Linear; 
-		MagFilter = Linear;
 	};
 
 sampler BackBufferBORDER
@@ -179,9 +176,6 @@ sampler BackBufferBORDER
 		AddressU = BORDER;
 		AddressV = BORDER;
 		AddressW = BORDER;
-		MipFilter = Linear; 
-		MinFilter = Linear; 
-		MagFilter = Linear;
 	};
 
 sampler BackBufferCLAMP
@@ -190,9 +184,6 @@ sampler BackBufferCLAMP
 		AddressU = CLAMP;
 		AddressV = CLAMP;
 		AddressW = CLAMP;
-		MipFilter = Linear; 
-		MinFilter = Linear; 
-		MagFilter = Linear;
 	};
 	
 texture texCL  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA32F;}; 
@@ -206,9 +197,6 @@ sampler SamplerCL
 		AddressU = BORDER;
 		AddressV = BORDER;
 		AddressW = BORDER;
-		MipFilter = Linear; 
-		MinFilter = Linear; 
-		MagFilter = Linear;
 	};
 	
 sampler SamplerCR
@@ -217,9 +205,6 @@ sampler SamplerCR
 		AddressU = BORDER;
 		AddressV = BORDER;
 		AddressW = BORDER;
-		MipFilter = Linear; 
-		MinFilter = Linear; 
-		MagFilter = Linear;
 	};
 	
 sampler SamplerCC
@@ -228,9 +213,6 @@ sampler SamplerCC
 		AddressU = CLAMP;
 		AddressV = CLAMP;
 		AddressW = CLAMP;
-		MipFilter = Linear; 
-		MinFilter = Linear; 
-		MagFilter = Linear;
 	};
 	
 sampler SamplerCDM
@@ -239,9 +221,6 @@ sampler SamplerCDM
 		AddressU = CLAMP;
 		AddressV = CLAMP;
 		AddressW = CLAMP;
-		MipFilter = Linear; 
-		MinFilter = Linear; 
-		MagFilter = Linear;
 	};
 	
 float4 MouseCuror(float4 pos : SV_Position, float2 texcoord : TEXCOORD) : SV_Target
