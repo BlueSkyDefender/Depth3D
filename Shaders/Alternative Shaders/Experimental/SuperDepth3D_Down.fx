@@ -120,7 +120,7 @@ uniform int Edge <
 	ui_items = "Mirrored Edges\0Black Edges\0Stretched Edges\0";
 	ui_label = "Edge Selection";
 	ui_tooltip = "Select how you like the Edge of the screen to look like.";
-> = 1;
+> = 0;
 
 uniform float CCS <
 	ui_type = "drag";
@@ -524,44 +524,44 @@ void PS_renderLR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD
 	for (int j = 0; j <= 3; ++j) 
 	{	
 			uv.x = samples[j] * Depth;
-			DepthL =  min(DepthL,tex2D(SamplerCC,float2(texcoord.x+uv.x*pix.x, texcoord.y)).r);
-			DepthR =  min(DepthR,tex2D(SamplerCC,float2(texcoord.x-uv.x*pix.x, texcoord.y)).r);
+			DepthL =  min(DepthL,tex2D(SamplerCC,float2(texcoord.x+uv.x*pix.x, texcoord.y+uv.y*pix.y)).r);
+			DepthR =  min(DepthR,tex2D(SamplerCC,float2(texcoord.x-uv.x*pix.x, texcoord.y+uv.y*pix.y)).r);
 	}
 			
 		if(!LRRL)
 		{	
 			if(Edge == 0)
 			{
-			color = tex2D(BackBufferMIRROR, float2(texcoord.xy+float2(DepthL*Depth,0)*pix.xy));
-			colorT = tex2D(BackBufferMIRROR, float2(texcoord.xy-float2(DepthR*Depth,0)*pix.xy));
+			color = tex2D(BackBufferMIRROR, float2(texcoord.xy+float2(DepthL*Depth,DepthL*-Depth)*pix.xy));
+			colorT = tex2D(BackBufferMIRROR, float2(texcoord.xy-float2(DepthR*Depth,DepthR*Depth)*pix.xy));
 			}
 			else if(Edge == 1)
 			{
-			color = tex2D(BackBufferBORDER, float2(texcoord.xy+float2(DepthL*Depth,0)*pix.xy));
-			colorT = tex2D(BackBufferBORDER, float2(texcoord.xy-float2(DepthR*Depth,0)*pix.xy));
+			color = tex2D(BackBufferBORDER, float2(texcoord.xy+float2(DepthL*Depth,DepthL*-Depth)*pix.xy));
+			colorT = tex2D(BackBufferBORDER, float2(texcoord.xy-float2(DepthR*Depth,DepthR*Depth)*pix.xy));
 			}
 			else
 			{
-			color = tex2D(BackBufferCLAMP, float2(texcoord.xy+float2(DepthL*Depth,0)*pix.xy));
-			colorT = tex2D(BackBufferCLAMP, float2(texcoord.xy-float2(DepthR*Depth,0)*pix.xy));
+			color = tex2D(BackBufferCLAMP, float2(texcoord.xy+float2(DepthL*Depth,DepthL*-Depth)*pix.xy));
+			colorT = tex2D(BackBufferCLAMP, float2(texcoord.xy-float2(DepthR*Depth,DepthR*Depth)*pix.xy));
 			}
 		}
 		else
 		{		
 			if(Edge == 0)
 			{
-			colorT = tex2D(BackBufferMIRROR, float2(texcoord.xy+float2(DepthL*Depth,0)*pix.xy));
-			color = tex2D(BackBufferMIRROR, float2(texcoord.xy-float2(DepthR*Depth,0)*pix.xy));
+			colorT = tex2D(BackBufferMIRROR, float2(texcoord.xy+float2(DepthL*Depth,DepthL*-Depth)*pix.xy));
+			color = tex2D(BackBufferMIRROR, float2(texcoord.xy-float2(DepthR*Depth,DepthR*Depth)*pix.xy));
 			}
 			else if(Edge == 1)
 			{
-			colorT = tex2D(BackBufferBORDER, float2(texcoord.xy+float2(DepthL*Depth,0)*pix.xy));
-			color = tex2D(BackBufferBORDER, float2(texcoord.xy-float2(DepthR*Depth,0)*pix.xy));
+			colorT = tex2D(BackBufferBORDER, float2(texcoord.xy+float2(DepthL*Depth,DepthL*-Depth)*pix.xy));
+			color = tex2D(BackBufferBORDER, float2(texcoord.xy-float2(DepthR*Depth,DepthR*Depth)*pix.xy));
 			}
 			else
 			{
-			colorT = tex2D(BackBufferCLAMP, float2(texcoord.xy+float2(DepthL*Depth,0)*pix.xy));
-			color = tex2D(BackBufferCLAMP, float2(texcoord.xy-float2(DepthR*Depth,0)*pix.xy));
+			colorT = tex2D(BackBufferCLAMP, float2(texcoord.xy+float2(DepthL*Depth,DepthL*-Depth)*pix.xy));
+			color = tex2D(BackBufferCLAMP, float2(texcoord.xy-float2(DepthR*Depth,DepthR*Depth)*pix.xy));
 			}
 		}
 }

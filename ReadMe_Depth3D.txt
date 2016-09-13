@@ -55,6 +55,7 @@ Witcher 3				DM 20 or DM 14							0-0.1		RB
 Zombi					DM 7
 Warhammer: End Times - Vermintide	DM 10
 Deus Ex: Mankind Divided		DM 21								0.050-0.1	RB
+Dead Rising 3				DM 6								0.050-0.1
 
 You can also try different depth maps for other games your self by changing AltDepthMap number From 0-20. 
 You *may* want to disable AA in game. You can always enable SMAA in reshade for AA or play at 4k with no AA. 
