@@ -12,6 +12,7 @@ Here is a quick and dirty game list of working Depth Maps.
 
 PLEASE SET YOUR RESOLUTION FIRST. Turn Off DOF in all games if possible. Unless you want to know how it feels to be neer sighted.
 
+Game List updates for Reshade 3.0 Beta7
 [Game List]				[Alternet Depth Map]	   [Depth Flip On][Read Below]	[Blur Recommendations]	[BSD Notes]
 Alien Isolation				DM 0
 Amnesia: The Dark Descent		DM 1
@@ -56,6 +57,12 @@ Zombi					DM 7
 Warhammer: End Times - Vermintide	DM 10
 Deus Ex: Mankind Divided		DM 21								0.050-0.1	RB
 Dead Rising 3				DM 6								0.050-0.1
+Soma					DM 2
+Penumbra: Black Plague			DM 4						RB
+NecroVision: Lost Company		DM 4
+The Vanishing of Ethan Carter Redux	DM 3						RB
+Cryostasis				DM 8
+
 
 You can also try different depth maps for other games your self by changing AltDepthMap number From 0-20. 
 You *may* want to disable AA in game. You can always enable SMAA in reshade for AA or play at 4k with no AA. 
@@ -150,6 +157,12 @@ Anything Lower or Higher then 100% will not work.
 {Naruto Shippuden UNS3 Full Blurst}
 Ignore the warnings click play.
 
+{Penumbra: Black Plague}
+Go here
+C:\Users\...\Documents\Penumbra\settings.cfg
+Open the settings and set your res. 
+<Screen Width="3840" Height="2160" FullScreen="true" Vsync="true" />
+
 {Quake 4}
 If some how you can click on the menu......... Good Luck.
 Also if some how you get it working When the game Saves You have to recheck the 3D shader. 
@@ -211,6 +224,11 @@ Go to Compatibility
 Check Disable Display Scaling On High DPI Settings
 
 This should fix it. For more look up this problem on google.
+
+{The Vanishing of Ethan Carter Redux}
+
+Instal Dll too D:\SteamLibrary\steamapps\common\The Vanishing of Ethan Carter Redux\EthanCarter\Binaries\Win64
+
 ______________________________________________________________________________________________________________________________________
 
 Games Not working in Reshade 3.0 Use Reshade 2.0
@@ -243,12 +261,24 @@ User Submitted Depth Map Settings
 
 [Game List]				[Alternet Depth Map]	   [Depth Flip On]	[Blur Recommendations]
 ______________________________________________________________________________________________________________________________________
+
 Homefront The Revolution 		DM 17
 Mirror's Edge				DM 4
 Need for Speed				DM 4
 
 [zig11727] "https://forums.geforce.com/default/topic/959175/3d-vision/superdepth-3d/post/4963888/#4963888"
---------------------------------------------------------------------------------------------------------------------------------------
+______________________________________________________________________________________________________________________________________
+
+User Guides: 
+
+Guide by [SkySolstice] "https://forums.geforce.com/default/topic/961597/oculus/play-3d-games-in-sbs-on-the-virtual-screen-using-bigscreen/"
+
+Play 3D games in SBS on the virtual screen using BigScreen
+
+1. Install Superdepth.fx to the program exe folder and the corresponding reshade 3 exe to link the dll.
+2. Press Shift F2 to run the tutorial and setup for either SBS or Top Bottom.
+3. Alt tab to Bigscreen and select the corresponding output you chose.
+4. Alt tab back into game.
 
 --------------------------------------------------------------------------------------------------------------------------------------
 -=BSD Notes=- Personal recommended settings and tips for some games.
