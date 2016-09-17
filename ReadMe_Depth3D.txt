@@ -62,7 +62,8 @@ Penumbra: Black Plague			DM 4						RB
 NecroVision: Lost Company		DM 4
 The Vanishing of Ethan Carter Redux	DM 3						RB
 Cryostasis				DM 8
-
+Silent Hill: Homecoming			DM 22
+Monstrum DX11				DM 23				DF On		RB
 
 You can also try different depth maps for other games your self by changing AltDepthMap number From 0-20. 
 You *may* want to disable AA in game. You can always enable SMAA in reshade for AA or play at 4k with no AA. 
@@ -153,6 +154,9 @@ Rename the d3d9.dll or dxgi.dll to d3d11.dll
 Borderless Full Screen will not work Window mode will not Work. 
 So if you want to Play at a lower resolution, then set your windows resolution lower then run the game in full screen and set your scaling to 100%. 
 Anything Lower or Higher then 100% will not work.
+
+{Monstrum}
+Start the game in DX11 mode.
 
 {Naruto Shippuden UNS3 Full Blurst}
 Ignore the warnings click play.

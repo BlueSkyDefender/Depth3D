@@ -24,7 +24,7 @@
 
 uniform int AltDepthMap <
 	ui_type = "combo";
-	ui_items = "Depth Map 0\0Depth Map 1\0Depth Map 2\0Depth Map 3\0Depth Map 4\0Depth Map 5\0Depth Map 6\0Depth Map 7\0Depth Map 8\0Depth Map 9\0Depth Map 10\0Depth Map 11\0Depth Map 12\0Depth Map 13\0Depth Map 14\0Depth Map 15\0Depth Map 16\0Depth Map 17\0Depth Map 18\0Depth Map 19\0Depth Map 20\0Depth Map 21\0Depth Map 22\0";
+	ui_items = "Depth Map 0\0Depth Map 1\0Depth Map 2\0Depth Map 3\0Depth Map 4\0Depth Map 5\0Depth Map 6\0Depth Map 7\0Depth Map 8\0Depth Map 9\0Depth Map 10\0Depth Map 11\0Depth Map 12\0Depth Map 13\0Depth Map 14\0Depth Map 15\0Depth Map 16\0Depth Map 17\0Depth Map 18\0Depth Map 19\0Depth Map 20\0Depth Map 21\0Depth Map 22\0Depth Map 23\0";
 	ui_label = "Alternate Depth Map";
 	ui_tooltip = "Alternate Depth Map for different Games. Read the ReadMeDepth3d.txt, for setting. Each game May and can use a diffrent AltDepthMap.";
 > = 0;
@@ -62,7 +62,7 @@ uniform bool DepthMap <
 
 uniform int CustomDM <
 	ui_type = "combo";
-	ui_items = "Custom Off\0Custom One\0Custom Two\0Custom Three\0Custom Four\0Custom Five\0Custom Six\0Custom Seven\0";
+	ui_items = "Custom Off\0Custom One\0Custom Two\0Custom Three\0Custom Four\0Custom Five\0Custom Six\0Custom Seven\0Custom Eight\0";
 	ui_label = "Custom Depth Map";
 	ui_tooltip = "Adjust your own Custom Depth Map.";
 > = 0;
@@ -434,6 +434,14 @@ float4 SbSdepth(float4 pos : SV_Position, float2 texcoord : TEXCOORD0) : SV_Targ
 		depthM = clamp(1 - (depthM * cF / (cF - cN) + cN) / depthM,0,255);
 		}
 		
+		//Monstrum DX11
+		if (AltDepthMap == 23)
+		{
+		float cF = 1.075;	
+		float cN = 0;
+		depthM = pow(abs((exp(depthM * log(cF + cN)) - cN) / cF),1000);
+		}
+		
 	}
 	else
 	{
@@ -491,6 +499,14 @@ float4 SbSdepth(float4 pos : SV_Position, float2 texcoord : TEXCOORD0) : SV_Targ
 		float cF = Far;//1
 		float cN = Near;//1.875
 		depthM = clamp(1 - ((depthM * (cF + cN) / (cF - cN) + (2*cN)) / depthM),0,255); //GL-style Infinite reversed-Z. Clamped, not so Infinate anymore.
+		}
+		
+		//Custom Eight
+		if (CustomDM == 8)
+		{
+		float cF = Far;//1.010+	
+		float cN = Near;//0	
+		depthM = pow(abs((exp(depthM * log(cF + cN)) - cN) / cF),1000);
 		}
 		
 	}
