@@ -22,11 +22,18 @@
  //* 																																												*//
  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-uniform int AltDepthMap <
+// Change the Cross Cusor Key
+// Determines the Cusor Toggle Key useing keycode info
+// You can use http://keycode.info/ to figure out what key is what.
+// key B is Key Code 66, This is Default. Ex. Key 187 is the code for Equal Sign =.
+
+#define Cross_Cusor_Key 66
+
+uniform int Alternet_Depth_Map <
 	ui_type = "combo";
 	ui_items = "Depth Map 0\0Depth Map 1\0Depth Map 2\0Depth Map 3\0Depth Map 4\0Depth Map 5\0Depth Map 6\0Depth Map 7\0Depth Map 8\0Depth Map 9\0Depth Map 10\0Depth Map 11\0Depth Map 12\0Depth Map 13\0Depth Map 14\0Depth Map 15\0Depth Map 16\0Depth Map 17\0Depth Map 18\0Depth Map 19\0Depth Map 20\0Depth Map 21\0Depth Map 22\0Depth Map 23\0";
 	ui_label = "Alternate Depth Map";
-	ui_tooltip = "Alternate Depth Map for different Games. Read the ReadMeDepth3d.txt, for setting. Each game May and can use a diffrent AltDepthMap.";
+	ui_tooltip = "Alternate Depth Map for different Games. Read the ReadMeDepth3d.txt, for setting. Each game May and can use a diffrent Alternet Depth Map.";
 > = 0;
 
 uniform int Depth <
@@ -43,24 +50,24 @@ uniform int Perspective <
 	ui_tooltip = "Determines the perspective point.";
 > = 0;
 
-uniform float blur <
+uniform float Blur <
 	ui_type = "drag";
 	ui_min = 0; ui_max = 0.5;
 	ui_label = "Blur Slider";
 	ui_tooltip = "Determines the blur seperation of Depth Map Blur.";
 > = 0.050;
 
-uniform bool DepthFlip <
-	ui_label = "Depth Flip";
+uniform bool Depth_Map_Flip <
+	ui_label = "Depth Map Flip";
 	ui_tooltip = "Depth Flip if the depth map is Upside Down.";
 > = false;
 
-uniform bool DepthMap <
+uniform bool Depth_Map_View <
 	ui_label = "Depth Map View";
 	ui_tooltip = "Display the Depth Map. Use This to Work on your Own Depth Map for your game.";
 > = false;
 
-uniform int CustomDM <
+uniform int Custom_Depth_Map <
 	ui_type = "combo";
 	ui_items = "Custom Off\0Custom One\0Custom Two\0Custom Three\0Custom Four\0Custom Five\0Custom Six\0Custom Seven\0Custom Eight\0";
 	ui_label = "Custom Depth Map";
@@ -81,66 +88,66 @@ uniform float Far <
 	ui_tooltip = "Near Depth Map Adjustment.";
 > = 1;
 
-uniform int BD <
+uniform int Polynomial_Barrel_Distortio <
 	ui_type = "combo";
 	ui_items = "Off\0Polynomial Distortion\0";
-	ui_label = "Barrel Distortion";
+	ui_label = "Polynomial Barrel Distortion";
 	ui_tooltip = "Barrel Distortion for HMD type Displays.";
 > = 0;
 
-uniform float3 PColor <
+uniform float3 Polynomial_Colors <
 	ui_type = "color";
 	ui_tooltip = "Adjust the Polynomial Distortion Red, Green, Blue. Default is (R 255, G 255, B 255)";
 	ui_label = "Polynomial Color Distortion";
 > = float3(1.0, 1.0, 1.0);
 
-uniform float Hsquish <
+uniform float Horizontal_Squish <
 	ui_type = "drag";
 	ui_min = 0.5; ui_max = 2;
 	ui_label = "Horizontal Squish";
 	ui_tooltip = "Horizontal squish cubic distortion value. Default is 1.0.";
 > = 1.00;
 
-uniform float Vsquish <
+uniform float Vertical_Squish <
 	ui_type = "drag";
 	ui_min = 0.5; ui_max = 2;
 	ui_label = "Vertical Squish";
 	ui_tooltip = "Vertical squish cubic distortion value. Default is 1.0.";
 > = 1.0;
 
-uniform int sstbli <
+uniform int Stereoscopic_Mode <
 	ui_type = "combo";
 	ui_items = "Side by Side\0Top and Bottom\0Line Interlaced\0Checkerboard 3D\0";
 	ui_label = "3D Display Mode";
 	ui_tooltip = "Side by Side/Top and Bottom/Line Interlaced displays output.";
 > = 0;
 
-uniform int Edge <
+uniform int Custom_Sidebars <
 	ui_type = "combo";
 	ui_items = "Mirrored Edges\0Black Edges\0Stretched Edges\0";
 	ui_label = "Edge Selection";
 	ui_tooltip = "Select how you like the Edge of the screen to look like.";
 > = 1;
 
-uniform float CCS <
+uniform float Cross_Cusor_Size <
 	ui_type = "drag";
 	ui_min = 1; ui_max = 100;
 	ui_tooltip = "Pick your size of the cross cusor.";
 	ui_label = "Cross Cusor Size";
 > = 20;
 
-uniform float3 CCC <
+uniform float3 Cross_Cusor_Color <
 	ui_type = "color";
 	ui_tooltip = "Pick your own cross cusor color.";
 	ui_label = "Cross Cusor Color";
 > = float3(1.0, 1.0, 1.0);
 
-uniform bool LRRL <
+uniform bool Eye_Swap <
 	ui_label = "Eye Swap";
 	ui_tooltip = "Left right image change.";
 > = false;
 
-uniform bool mouse < source = "key"; keycode = 192; toggle = true; >;
+uniform bool mouse < source = "key"; keycode = Cross_Cusor_Key; toggle = true; >;
 
 uniform float2 Mousecoords < source = "mousepoint"; > ;
 

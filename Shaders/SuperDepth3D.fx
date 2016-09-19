@@ -58,11 +58,11 @@ uniform float Blur <
 > = 0.050;
 
 uniform bool Depth_Map_Flip <
-	ui_label = "Depth Flip";
+	ui_label = "Depth Map Flip";
 	ui_tooltip = "Depth Flip if the depth map is Upside Down.";
 > = false;
 
-uniform bool DepthMap <
+uniform bool Depth_Map_View <
 	ui_label = "Depth Map View";
 	ui_tooltip = "Display the Depth Map. Use This to Work on your Own Depth Map for your game.";
 > = false;
@@ -91,7 +91,7 @@ uniform float Far <
 uniform int Polynomial_Barrel_Distortion <
 	ui_type = "combo";
 	ui_items = "Off\0Polynomial Distortion\0";
-	ui_label = "Barrel Distortion";
+	ui_label = "Polynomial Barrel Distortion";
 	ui_tooltip = "Barrel Distortion for HMD type Displays.";
 > = 0;
 
@@ -134,7 +134,7 @@ uniform float Cross_Cusor_Size <
 	ui_min = 1; ui_max = 100;
 	ui_tooltip = "Pick your size of the cross cusor.";
 	ui_label = "Cross Cusor Size";
-> = 25.0;
+> = 20.0;
 
 uniform float3 Cross_Cusor_Color <
 	ui_type = "color";
@@ -142,14 +142,14 @@ uniform float3 Cross_Cusor_Color <
 	ui_label = "Cross Cusor Color";
 > = float3(1.0, 1.0, 1.0);
 
-uniform bool mouse < source = "key"; keycode = Cross_Cusor_Key; toggle = true; >;
-
-uniform float2 Mousecoords < source = "mousepoint"; > ;
-
 uniform bool Eye_Swap <
 	ui_label = "Eye Swap";
 	ui_tooltip = "Left right image change.";
 > = false;
+
+uniform bool mouse < source = "key"; keycode = Cross_Cusor_Key; toggle = true; >;
+
+uniform float2 Mousecoords < source = "mousepoint"; > ;
 
 /////////////////////////////////////////////D3D Starts Here/////////////////////////////////////////////////////////////////
 
@@ -232,7 +232,6 @@ sampler SamplerCDM
 	
 float4 MouseCuror(float4 pos : SV_Position, float2 texcoord : TEXCOORD) : SV_Target
 {
-			
 	float4 Mpointer; 
 	if(mouse)
 	{
@@ -251,7 +250,7 @@ float4 SbSdepth(float4 pos : SV_Position, float2 texcoord : TEXCOORD0) : SV_Targ
 
 	 float4 color = 0;
 
-			if (Alternet_Depth_Map)
+			if (Depth_Map_Flip)
 			texcoord.y =  1 - texcoord.y;
 	
 	float4 depthM = tex2D(DepthBuffer, float2(texcoord.x, texcoord.y));
@@ -526,7 +525,7 @@ float4 SbSdepth(float4 pos : SV_Position, float2 texcoord : TEXCOORD0) : SV_Targ
 	return color;	
 }
 	
-float4 DMBlur(float4 pos : SV_Position, float2 texcoord : TEXCOORD0) : SV_Target
+float4 BlurDM(float4 pos : SV_Position, float2 texcoord : TEXCOORD0) : SV_Target
 {
 	float4 color;
 	float Con = 11;
@@ -710,7 +709,7 @@ float4 PDL(float2 texcoord)
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void PS0(float4 position : SV_Position, float2 texcoord : TEXCOORD0, out float4 color : SV_Target)
 {
-	if(!DepthMap)
+	if(!Depth_Map_View)
 	{
 	if(Stereoscopic_Mode == 0)
 	{
@@ -765,6 +764,8 @@ void PostProcessVS(in uint id : SV_VertexID, out float4 position : SV_Position, 
 	position = float4(texcoord * float2(2.0, -2.0) + float2(-1.0, 1.0), 0.0, 1.0);
 }
 
+///////////////////////////////////////////////Depth Map View//////////////////////////////////////////////////////////////////////
+
 //*Rendering passes*//
 
 technique Super_Depth3D
@@ -783,7 +784,7 @@ technique Super_Depth3D
 			pass BlurPass
 		{
 			VertexShader = PostProcessVS;
-			PixelShader = DMBlur;
+			PixelShader = BlurDM;
 			RenderTarget = texCC;
 		}
 			pass SinglePassStereo
