@@ -18,7 +18,7 @@ Alien Isolation				DM 0
 Amnesia: The Dark Descent		DM 1
 Among The Sleep				DM 2				DF On				
 Assassin Creed Unity			DM 3							
-Batman Arkham Knight			DM 4							
+Batman Arkham Knight			DM 6							
 Batman Arkham Origins			DM 4							
 Batman: Arkham City			DM 4							
 BorderLands 2				DM 4						RB
