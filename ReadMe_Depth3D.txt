@@ -18,7 +18,7 @@ Alien Isolation				DM 0
 Amnesia: The Dark Descent		DM 1
 Among The Sleep				DM 2				DF On				
 Assassin Creed Unity			DM 3							
-Batman Arkham Knight			DM 6							
+Batman Arkham Knight			DM 4 or 6							0.01-0.050		
 Batman Arkham Origins			DM 4							
 Batman: Arkham City			DM 4							
 BorderLands 2				DM 4						RB
@@ -52,7 +52,7 @@ The Elder Scrolls V: Skyrim		DM 4
 Sleeping Dogs: DE			DM 18
 Souls Games				DM 19
 The Evil Within				DM 7						RB
-Witcher 3				DM 20 or DM 14							0-0.1		RB
+Witcher 3				DM 20 or 14							0-0.1		RB
 Zombi					DM 7
 Warhammer: End Times - Vermintide	DM 10
 Deus Ex: Mankind Divided		DM 21								0.050-0.1	RB
