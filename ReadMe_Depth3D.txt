@@ -1,5 +1,5 @@
 ﻿#SuperDepth3D
-Depth Map Based 3D post-process shader v1.8.5 for Reshade 3.0
+Depth Map Based 3D post-process shader v1.8.7 for Reshade 3.0
 
 There are the Basic Depth maps you can use for your games listed and not listed. Look at this link for other game Compatibility.
 
@@ -74,7 +74,7 @@ In-game Menu Settings
 
 Shift + f2 for Reshade 3.0 menu
 
-* Alternate Depth Map		[Depth Map 0 ▼]		[0|1|2|3|4|5|6|7|9|10|11|12|13|14|15|16|17|18|19|20] Alternate Depth Map for different Games. 
+* Alternate Depth Map		[Depth Map 0 ▼]		[0|1|2|3|4|5|6|7|9|10|11|12|13|14|15|16|17|18|19|20|21|22|23] Alternate Depth Map for different Games. 
 * Depth		               -[◄0▪▪▪▪▪▪▪30►]+		[0:30] Depth Default is 10. "Drag to Adjust Perspective."
 * Perspective	               -[◄▪▪▪▪0▪▪▪▪▪►]+		[-100:100] Perspective Default is 0. "Drag to Adjust Perspective."
 * Blur		               -[◄▪0.05▪▪▪▪▪►]+		[0:25] Depth Map Blur Adjustment. Default is 0.050 zero is Off.
@@ -92,10 +92,20 @@ Shift + f2 for Reshade 3.0 menu
 * Cross Cusor Size             -[◄0▪▪▪▪▪▪100►]+		Pick your size of the cross cusor.
 * Cross Cusor Color		[R 255][G 255][B 255]	Cross Cusor Color.
 
-Toggle Key ` for Cross Cusor On/Off
+Toggle Key n for Cross Cusor On/Off
 
-uniform bool mouse < source = "key"; keycode = 192; toggle = true; >; // Key Code 192 `  that little thing below ~ you can change this 
-to what you want.
+// Change the Cross Cusor Key
+
+// Determines the Cusor Toggle Key useing keycode info
+
+// You can use http://keycode.info/ to figure out what key is what.
+
+// key B is Key Code 66, This is Default. Ex. Key 187 is the code for Equal Sign =.
+//On line 30
+
+#define Cross_Cusor_Key 66
+
+______________________________________________________________________________________________________________________________________
 
 Read Below Section
 ======================================================================================================================================

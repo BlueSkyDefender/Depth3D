@@ -1,5 +1,5 @@
 #SuperDepth3D
-Depth Map Based 3D post-process shader v1.8 for Reshade 3.0
+Depth Map Based 3D post-process shader v1.8.7 for Reshade 3.0
 
 There are the Basic Depth maps you can use for your games listed and not listed. Look at this link for other game Compatibility.
 
@@ -55,5 +55,25 @@ Game Compatibility
 * The Evil Within
 * Witcher 3
 * Zombi
+* Warhammer: End Times - Vermintide
+* Deus Ex: Mankind Divided
+* Dead Rising 3
+* Soma
+* Penumbra: Black Plague
+* NecroVision: Lost Company
+* The Vanishing of Ethan Carter Redux
+* Cryostasis
+* Silent Hill: Homecoming
+* Monstrum DX11
+* Homefront The Revolution
+* Mirror's Edge
+* Need for Speed		
 
 Added a way to make your own Depth Maps in game. Read ReadMeDepth3d.txt For more Info.
+
+======================================================================================================================================
+The Reshade 2.0 Repack For 1.8.7
+
+http://www.mediafire.com/download/lxpxe642b44p3u9/ReShade_2.0.3f1_Super_DepthMap_3D_v1.8.7_Repack.7z
+
+======================================================================================================================================
