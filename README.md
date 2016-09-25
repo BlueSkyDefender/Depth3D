@@ -67,13 +67,16 @@ Game Compatibility
 * Monstrum DX11
 * Homefront The Revolution
 * Mirror's Edge
-* Need for Speed		
+* Need for Speed
+* Double Dragon Neon
+* Zombie Army Trilogy
+	
 
 Added a way to make your own Depth Maps in game. Read ReadMeDepth3d.txt For more Info.
 
 ======================================================================================================================================
-The Reshade 2.0 Repack For 1.8.7
+The Reshade 2.0 Repack For 1.8.8
 
-http://www.mediafire.com/download/lxpxe642b44p3u9/ReShade_2.0.3f1_Super_DepthMap_3D_v1.8.7_Repack.7z
+http://www.mediafire.com/download/9c25utcc2fcd8b8/ReShade_2.0.3f1_Super_DepthMap_3D_v1.8.8_Repack.7z
 
 ======================================================================================================================================

@@ -1,5 +1,5 @@
 ﻿#SuperDepth3D
-Depth Map Based 3D post-process shader v1.8.7 for Reshade 3.0
+Depth Map Based 3D post-process shader v1.8.8 for Reshade 3.0
 
 There are the Basic Depth maps you can use for your games listed and not listed. Look at this link for other game Compatibility.
 
@@ -52,7 +52,7 @@ The Elder Scrolls V: Skyrim		DM 4
 Sleeping Dogs: DE			DM 18
 Souls Games				DM 19
 The Evil Within				DM 7						RB
-Witcher 3				DM 20 or 14							0-0.1		RB
+Witcher 3				DM 20 or 14							0.00-0.10	RB
 Zombi					DM 7
 Warhammer: End Times - Vermintide	DM 10
 Deus Ex: Mankind Divided		DM 21								0.050-0.1	RB
@@ -64,6 +64,25 @@ The Vanishing of Ethan Carter Redux	DM 3						RB
 Cryostasis				DM 8
 Silent Hill: Homecoming			DM 22
 Monstrum DX11				DM 23				DF On		RB
+Double Dragon Neon			DM 25
+Zombie Army Trilogy			DM 8 or 4							0.0-0.050
+
+Game List updates for Reshade 2.0
+[Game List]				[Alternet Depth Map]	   [Depth Flip On][Read Below]	[Blur Recommendations]	[BSD Notes]
+Serious Sam Revolution			DM 24
+
+
+User Submitted Depth Map Settings
+
+[Game List]				[Alternet Depth Map]	   [Depth Flip On]	[Blur Recommendations]
+______________________________________________________________________________________________________________________________________
+
+Homefront The Revolution 		DM 17
+Mirror's Edge				DM 4
+Need for Speed				DM 4
+
+[zig11727] "https://forums.geforce.com/default/topic/959175/3d-vision/superdepth-3d/post/4963888/#4963888"
+______________________________________________________________________________________________________________________________________
 
 You can also try different depth maps for other games your self by changing AltDepthMap number From 0-20. 
 You *may* want to disable AA in game. You can always enable SMAA in reshade for AA or play at 4k with no AA. 
@@ -92,7 +111,7 @@ Shift + f2 for Reshade 3.0 menu
 * Cross Cusor Size             -[◄0▪▪▪▪▪▪100►]+		Pick your size of the cross cusor.
 * Cross Cusor Color		[R 255][G 255][B 255]	Cross Cusor Color.
 
-Toggle Key n for Cross Cusor On/Off
+Toggle Key B for Cross Cusor On/Off
 
 // Change the Cross Cusor Key
 
@@ -245,44 +264,6 @@ Instal Dll too D:\SteamLibrary\steamapps\common\The Vanishing of Ethan Carter Re
 
 ______________________________________________________________________________________________________________________________________
 
-Games Not working in Reshade 3.0 Use Reshade 2.0
-======================================================================================================================================
-crosire's ReShade version '3.0.0.81' corsire is working on this game for the next update for 3.0
-
-{Wolfenstine The New Order} - not working in Reshade 3.0
-[Set Launch Options](+r_multisamples "0" +vt_maxaniso "16")
-This game must be started at the lower Resoution 1600x1200 Then Switch to 1920x1080. Befor you exit switch it back to 1600x1200. 
-Note if you want to 4k It the same process Start the game at 1600x1200 then switch it to 3840x2160.
-Also note you can't switch back. So say you Start the game at 1600x1200 then switch to 4k then back too 1600x1200 it will not work. 
-If you change it one last time to 4k It will not work. You must restart your game for eatch change of resolution.
-You can always enable SMAA in reshade for AA or play at 4k with no AA.
-
-In order to completely disable DOF:
-
-“open up graphicsprofiles.json and find the postprocessdof line and change high and ultra to 0.” \SteamLibrary\steamapps\common\Wolfenstein.The.New.Order\base\graphicsprofiles.json
-
-Should look like this;
-Ex.
-"r_postProcessDofMode" : 
-	{ 
-		"low" : 0,
-		"mid" : 0,
-		"high" : 0,
-		"ultra" : 0
-	},
-
-User Submitted Depth Map Settings
-
-[Game List]				[Alternet Depth Map]	   [Depth Flip On]	[Blur Recommendations]
-______________________________________________________________________________________________________________________________________
-
-Homefront The Revolution 		DM 17
-Mirror's Edge				DM 4
-Need for Speed				DM 4
-
-[zig11727] "https://forums.geforce.com/default/topic/959175/3d-vision/superdepth-3d/post/4963888/#4963888"
-______________________________________________________________________________________________________________________________________
-
 User Guides: 
 
 Guide by [SkySolstice] "https://forums.geforce.com/default/topic/961597/oculus/play-3d-games-in-sbs-on-the-virtual-screen-using-bigscreen/"
@@ -319,4 +300,31 @@ I use a blur of 0.075 and depth 30 or depth 25 and blur 0.050.
 
 
 ______________________________________________________________________________________________________________________________________
-Also remember if you don't like the depth map I made. You can alawys make your own.
+
+Games Not working in Reshade 3.0 Use Reshade 2.0
+======================================================================================================================================
+crosire's ReShade version '3.0.0.81' corsire is working on this game for the next update for 3.0
+
+{Wolfenstine The New Order} - not working in Reshade 3.0
+[Set Launch Options](+r_multisamples "0" +vt_maxaniso "16")
+This game must be started at the lower Resoution 1600x1200 Then Switch to 1920x1080. Befor you exit switch it back to 1600x1200. 
+Note if you want to 4k It the same process Start the game at 1600x1200 then switch it to 3840x2160.
+Also note you can't switch back. So say you Start the game at 1600x1200 then switch to 4k then back too 1600x1200 it will not work. 
+If you change it one last time to 4k It will not work. You must restart your game for eatch change of resolution.
+You can always enable SMAA in reshade for AA or play at 4k with no AA.
+
+In order to completely disable DOF:
+
+“open up graphicsprofiles.json and find the postprocessdof line and change high and ultra to 0.” \SteamLibrary\steamapps\common\Wolfenstein.The.New.Order\base\graphicsprofiles.json
+
+Should look like this;
+Ex.
+"r_postProcessDofMode" : 
+	{ 
+		"low" : 0,
+		"mid" : 0,
+		"high" : 0,
+		"ultra" : 0
+	},
+______________________________________________________________________________________________________________________________________
+Also Keep in mind if you don't like the depth map I made. You can alawys make your own.

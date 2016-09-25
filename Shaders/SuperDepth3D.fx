@@ -3,7 +3,7 @@
  //----------------////
 
  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
- //* Depth Map Based 3D post-process shader v1.8.7 L & R Eye																														*//
+ //* Depth Map Based 3D post-process shader v1.8.8 L & R Eye																														*//
  //* For Reshade 3.0																																								*//
  //* --------------------------																																						*//
  //* This work is licensed under a Creative Commons Attribution 3.0 Unported License.																								*//
@@ -29,9 +29,9 @@
 
 #define Cross_Cusor_Key 66
 
-uniform int Alternet_Depth_Map <
+uniform int Alternate_Depth_Map <
 	ui_type = "combo";
-	ui_items = "Depth Map 0\0Depth Map 1\0Depth Map 2\0Depth Map 3\0Depth Map 4\0Depth Map 5\0Depth Map 6\0Depth Map 7\0Depth Map 8\0Depth Map 9\0Depth Map 10\0Depth Map 11\0Depth Map 12\0Depth Map 13\0Depth Map 14\0Depth Map 15\0Depth Map 16\0Depth Map 17\0Depth Map 18\0Depth Map 19\0Depth Map 20\0Depth Map 21\0Depth Map 22\0Depth Map 23\0";
+	ui_items = "Depth Map 0\0Depth Map 1\0Depth Map 2\0Depth Map 3\0Depth Map 4\0Depth Map 5\0Depth Map 6\0Depth Map 7\0Depth Map 8\0Depth Map 9\0Depth Map 10\0Depth Map 11\0Depth Map 12\0Depth Map 13\0Depth Map 14\0Depth Map 15\0Depth Map 16\0Depth Map 17\0Depth Map 18\0Depth Map 19\0Depth Map 20\0Depth Map 21\0Depth Map 22\0Depth Map 23\0Depth Map 24\0Depth Map 25\0";
 	ui_label = "Alternate Depth Map";
 	ui_tooltip = "Alternate Depth Map for different Games. Read the ReadMeDepth3d.txt, for setting. Each game May and can use a diffrent Alternet Depth Map.";
 > = 0;
@@ -258,7 +258,7 @@ float4 SbSdepth(float4 pos : SV_Position, float2 texcoord : TEXCOORD0) : SV_Targ
 		if (Custom_Depth_Map == 0)
 	{	
 		//Alien Isolation | Fallout 4 | Firewatch
-		if (Alternet_Depth_Map == 0)
+		if (Alternate_Depth_Map == 0)
 		{
 		float cF = 1000000000;
 		float cN = 1;	
@@ -266,7 +266,7 @@ float4 SbSdepth(float4 pos : SV_Position, float2 texcoord : TEXCOORD0) : SV_Targ
 		}
 		
 		//Amnesia: The Dark Descent
-		if (Alternet_Depth_Map == 1)
+		if (Alternate_Depth_Map == 1)
 		{
 		float cF = 1000;
 		float cN = 1;
@@ -274,7 +274,7 @@ float4 SbSdepth(float4 pos : SV_Position, float2 texcoord : TEXCOORD0) : SV_Targ
 		}
 		
 		//Among The Sleep | Soma
-		if (Alternet_Depth_Map == 2)
+		if (Alternate_Depth_Map == 2)
 		{
 		float cF = 10;
 		float cN = 0.05;
@@ -282,7 +282,7 @@ float4 SbSdepth(float4 pos : SV_Position, float2 texcoord : TEXCOORD0) : SV_Targ
 		}
 		
 		//Assassin Creed Unity
-		if (Alternet_Depth_Map == 3)
+		if (Alternate_Depth_Map == 3)
 		{
 		float cF  = 0.0075;
 		float cN = 1;
@@ -290,7 +290,7 @@ float4 SbSdepth(float4 pos : SV_Position, float2 texcoord : TEXCOORD0) : SV_Targ
 		}
 		
 		//Batman Arkham Knight | Batman Arkham Origins | Batman: Arkham City | BorderLands 2 | Hard Reset | Lords Of The Fallen | The Elder Scrolls V: Skyrim
-		if (Alternet_Depth_Map == 4)
+		if (Alternate_Depth_Map == 4)
 		{
 		float cF = 50;
 		float cN = 0;
@@ -298,7 +298,7 @@ float4 SbSdepth(float4 pos : SV_Position, float2 texcoord : TEXCOORD0) : SV_Targ
 		}
 		
 		//Call of Duty: Advance Warfare | Call of Duty: Black Ops 2 | Call of Duty: Ghost
-		if (Alternet_Depth_Map == 5)
+		if (Alternate_Depth_Map == 5)
 		{
 		float cF  = 0.01;
 		float cN = 1;
@@ -306,7 +306,7 @@ float4 SbSdepth(float4 pos : SV_Position, float2 texcoord : TEXCOORD0) : SV_Targ
 		}
 		
 		//Casltevania: Lord of Shadows - UE | Dead Rising 3
-		if (Alternet_Depth_Map == 6)
+		if (Alternate_Depth_Map == 6)
 		{
 		float cF = 25;
 		float cN = 0;
@@ -314,7 +314,7 @@ float4 SbSdepth(float4 pos : SV_Position, float2 texcoord : TEXCOORD0) : SV_Targ
 		}
 		
 		//Condemned: Criminal Origins | Rage | Return To Castle Wolfenstine | The Evil Within | Quake 4
-		if (Alternet_Depth_Map == 7)
+		if (Alternate_Depth_Map == 7)
 		{
 		float cF  = 1;
 		float cN = 0.0025;
@@ -322,7 +322,7 @@ float4 SbSdepth(float4 pos : SV_Position, float2 texcoord : TEXCOORD0) : SV_Targ
 		}
 		
 		//Deadly Premonition:The Directors's Cut
-		if (Alternet_Depth_Map == 8)
+		if (Alternate_Depth_Map == 8)
 		{
 		float cF = 30;
 		float cN = 0;
@@ -330,7 +330,7 @@ float4 SbSdepth(float4 pos : SV_Position, float2 texcoord : TEXCOORD0) : SV_Targ
 		}
 		
 		//Dragon Ball Xenoverse | Quake 2 XP
-		if (Alternet_Depth_Map == 9)
+		if (Alternate_Depth_Map == 9)
 		{
 		float cF = 1;
 		float cN = 0.005;
@@ -338,7 +338,7 @@ float4 SbSdepth(float4 pos : SV_Position, float2 texcoord : TEXCOORD0) : SV_Targ
 		}
 		
 		//Warhammer: End Times - Vermintide
-		if (Alternet_Depth_Map == 10)
+		if (Alternate_Depth_Map == 10)
 		{
 		float cF = 1;	
 		float cN = 5.5;	
@@ -346,7 +346,7 @@ float4 SbSdepth(float4 pos : SV_Position, float2 texcoord : TEXCOORD0) : SV_Targ
 		}
 		
 		//Dying Light
-		if (Alternet_Depth_Map == 11)
+		if (Alternate_Depth_Map == 11)
 		{
 		float cF = 100;
 		float cN = 0.005;
@@ -354,7 +354,7 @@ float4 SbSdepth(float4 pos : SV_Position, float2 texcoord : TEXCOORD0) : SV_Targ
 		}
 		
 		//GTA V
-		if (Alternet_Depth_Map == 12)
+		if (Alternate_Depth_Map == 12)
 		{
 		float cF  = 10000; 
 		float cN = 0.0075; 
@@ -362,7 +362,7 @@ float4 SbSdepth(float4 pos : SV_Position, float2 texcoord : TEXCOORD0) : SV_Targ
 		}
 		
 		//Magicka 2
-		if (Alternet_Depth_Map == 13)
+		if (Alternate_Depth_Map == 13)
 		{
 		float cF = 1;
 		float cN = 13;	
@@ -370,7 +370,7 @@ float4 SbSdepth(float4 pos : SV_Position, float2 texcoord : TEXCOORD0) : SV_Targ
 		}
 		
 		//Middle-earth: Shadow of Mordor
-		if (Alternet_Depth_Map == 14)
+		if (Alternate_Depth_Map == 14)
 		{
 		float cF = 30;
 		float cN = 1;	
@@ -378,7 +378,7 @@ float4 SbSdepth(float4 pos : SV_Position, float2 texcoord : TEXCOORD0) : SV_Targ
 		}
 		
 		//Naruto Shippuden UNS3 Full Blurst
-		if (Alternet_Depth_Map == 15)
+		if (Alternate_Depth_Map == 15)
 		{
 		float cF = 150;
 		float cN = 0.001;
@@ -386,7 +386,7 @@ float4 SbSdepth(float4 pos : SV_Position, float2 texcoord : TEXCOORD0) : SV_Targ
 		}
 		
 		//Shadow warrior(2013)XP
-		if (Alternet_Depth_Map == 16)
+		if (Alternate_Depth_Map == 16)
 		{
 		float cF = 5;
 		float cN = 0.05;
@@ -394,7 +394,7 @@ float4 SbSdepth(float4 pos : SV_Position, float2 texcoord : TEXCOORD0) : SV_Targ
 		}
 		
 		//Ryse: Son of Rome
-		if (Alternet_Depth_Map == 17)
+		if (Alternate_Depth_Map == 17)
 		{
 		float cF = 1000;
 		float cN = 10;
@@ -402,7 +402,7 @@ float4 SbSdepth(float4 pos : SV_Position, float2 texcoord : TEXCOORD0) : SV_Targ
 		}
 		
 		//Sleeping Dogs: DE | DreamFall Chapters
-		if (Alternet_Depth_Map == 18)
+		if (Alternate_Depth_Map == 18)
 		{
 		float cF  = 1;
 		float cN = 0.025;
@@ -410,7 +410,7 @@ float4 SbSdepth(float4 pos : SV_Position, float2 texcoord : TEXCOORD0) : SV_Targ
 		}
 		
 		//Souls Games
-		if (Alternet_Depth_Map == 19)
+		if (Alternate_Depth_Map == 19)
 		{
 		float cF = 200;
 		float cN = 1;
@@ -418,7 +418,7 @@ float4 SbSdepth(float4 pos : SV_Position, float2 texcoord : TEXCOORD0) : SV_Targ
 		}
 		
 		//Witcher 3
-		if (Alternet_Depth_Map == 20)
+		if (Alternate_Depth_Map == 20)
 		{
 		float cF  = 0.20;
 		float cN = 1.0;
@@ -426,7 +426,7 @@ float4 SbSdepth(float4 pos : SV_Position, float2 texcoord : TEXCOORD0) : SV_Targ
 		}
 		
 		//Deus Ex: Mankind Divided.
-		if (Alternet_Depth_Map == 21)
+		if (Alternate_Depth_Map == 21)
 		{
 		float cF  = 100;
 		float cN = 0.01;
@@ -434,7 +434,7 @@ float4 SbSdepth(float4 pos : SV_Position, float2 texcoord : TEXCOORD0) : SV_Targ
 		}
 		
 		//Silent Hill: Homecoming
-		if (Alternet_Depth_Map == 22)
+		if (Alternate_Depth_Map == 22)
 		{
 		float cF = 25;
 		float cN = 25.869;
@@ -442,16 +442,33 @@ float4 SbSdepth(float4 pos : SV_Position, float2 texcoord : TEXCOORD0) : SV_Targ
 		}
 		
 		//Monstrum DX11
-		if (Alternet_Depth_Map == 23)
+		if (Alternate_Depth_Map == 23)
 		{
 		float cF = 1.075;	
 		float cN = 0;
 		depthM = pow(abs((exp(depthM * log(cF + cN)) - cN) / cF),1000);
 		}
 		
+		//Serious Sam Revolution
+		if (Alternate_Depth_Map == 24)
+		{
+		float cF = 1.01;	
+		float cN = 0;	
+		depthM = clamp(pow(abs((exp(depthM * log(cF + cN)) - cN) / cF),1000)/0.5,0,1.25);
+		}
+		
+		//Double Dragon Neon
+		if (Alternate_Depth_Map == 25)
+		{
+		float cF = 0.025;//1
+		float cN = 0.16;//1.875
+		depthM = clamp(1 - (depthM * cF / (cF - cN) + cN) / depthM,0,255);
+		}
+		
 	}
 	else
 	{
+	
 		//Custom One
 		if (Custom_Depth_Map == 1)
 		{
@@ -503,9 +520,9 @@ float4 SbSdepth(float4 pos : SV_Position, float2 texcoord : TEXCOORD0) : SV_Targ
 		//Custom Seven
 		if (Custom_Depth_Map == 7)
 		{
-		float cF = Far;//1
-		float cN = Near;//1.875
-		depthM = clamp(1 - ((depthM * (cF + cN) / (cF - cN) + (2*cN)) / depthM),0,255); //GL-style Infinite reversed-Z. Clamped, not so Infinate anymore.
+		float cF = Far;//1.01	
+		float cN = Near;//0	
+		depthM = clamp(pow(abs((exp(depthM * log(cF + cN)) - cN) / cF),1000)/0.5,0,1.25);
 		}
 		
 		//Custom Eight
@@ -763,8 +780,6 @@ void PostProcessVS(in uint id : SV_VertexID, out float4 position : SV_Position, 
 	texcoord.y = (id == 1) ? 2.0 : 0.0;
 	position = float4(texcoord * float2(2.0, -2.0) + float2(-1.0, 1.0), 0.0, 1.0);
 }
-
-///////////////////////////////////////////////Depth Map View//////////////////////////////////////////////////////////////////////
 
 //*Rendering passes*//
 
