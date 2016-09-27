@@ -3,7 +3,7 @@
  //----------------////
 
  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
- //* Depth Map Based 3D post-process shader vE.E.E L & R Eye																														*//
+ //* Depth Map Based 3D post-process shader v1.8.9 L & R Eye																														*//
  //* For Reshade 3.0																																								*//
  //* --------------------------																																						*//
  //* This work is licensed under a Creative Commons Attribution 3.0 Unported License.																								*//
@@ -31,7 +31,7 @@
 
 uniform int Alternate_Depth_Map <
 	ui_type = "combo";
-	ui_items = "Depth Map 0\0";
+	ui_items = "Depth Map 0\0Depth Map 1\0Depth Map 2\0Depth Map 3\0Depth Map 4\0Depth Map 5\0Depth Map 6\0Depth Map 7\0Depth Map 8\0Depth Map 9\0Depth Map 10\0Depth Map 11\0Depth Map 12\0Depth Map 13\0Depth Map 14\0Depth Map 15\0Depth Map 16\0Depth Map 17\0Depth Map 18\0Depth Map 19\0Depth Map 20\0Depth Map 21\0Depth Map 22\0Depth Map 23\0Depth Map 24\0Depth Map 25\0";
 	ui_label = "Alternate Depth Map";
 	ui_tooltip = "Alternate Depth Map for different Games. Read the ReadMeDepth3d.txt, for setting. Each game May and can use a diffrent Alternet Depth Map.";
 > = 0;
@@ -42,13 +42,6 @@ uniform int Depth <
 	ui_label = "Depth Slider";
 	ui_tooltip = "Determines the amount of Image Warping and Separation between both eyes.";
 > = 10;
-
-uniform float Adjust <
-	ui_type = "drag";
-	ui_min = 0; ui_max = 10;
-	ui_label = "Adjust";
-	ui_tooltip = "Adjust Near Far";
-> = 1.0;
 
 uniform int Perspective <
 	ui_type = "drag";
@@ -70,6 +63,20 @@ uniform float Blur <
 	ui_label = "Blur Slider";
 	ui_tooltip = "Determines the blur seperation of Depth Map Blur.";
 > = 0.050;
+
+uniform int Depth_Map_Enhancement <
+	ui_type = "combo";
+	ui_items = "Enhancement Off\0Enhancement Alpha\0";
+	ui_label = "Depth Map Enhancement";
+	ui_tooltip = "Choose Or Dissable Depth Map Enhancement.";
+> = 0;
+
+uniform float Adjust <
+	ui_type = "drag";
+	ui_min = 0.5; ui_max = 1.5;
+	ui_label = "Adjust";
+	ui_tooltip = "Adjust DepthMap Enhancement, Dehancement occurs past one.";
+> = 1.0;
 
 uniform bool Depth_Map_Flip <
 	ui_label = "Depth Map Flip";
@@ -101,20 +108,6 @@ uniform float Far <
 	ui_label = "Near";
 	ui_tooltip = "Near Depth Map Adjustment.";
 > = 1;
-
-uniform float CFar <
-	ui_type = "drag";
-	ui_min = 0; ui_max = 5;
-	ui_label = "Clamp Far";
-	ui_tooltip = "Far Depth Map Adjustment.";
-> = 0.9;
- 
- uniform float CNear <
-	ui_type = "drag";
-	ui_min = 0; ui_max = 5;
-	ui_label = "Clamp Near";
-	ui_tooltip = "Near Depth Map Adjustment.";
-> = 0.150;
 
 uniform int Polynomial_Barrel_Distortion <
 	ui_type = "combo";
@@ -224,7 +217,7 @@ sampler BackBufferCLAMP
 texture texCL  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA32F;}; 
 texture texCR  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA32F;}; 
 texture texCC  { Width = BUFFER_WIDTH/2; Height = BUFFER_HEIGHT; Format = RGBA32F;}; 
-texture texCDM  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA32F;};
+texture texCDM  { Width = BUFFER_WIDTH/2; Height = BUFFER_HEIGHT; Format = RGBA32F;};
 
 sampler SamplerCL
 	{
@@ -280,23 +273,225 @@ float4 SbSdepth(float4 pos : SV_Position, float2 texcoord : TEXCOORD0) : SV_Targ
 
 			if (Depth_Map_Flip)
 			texcoord.y =  1 - texcoord.y;
-
+	
 	float4 depthM = tex2D(DepthBuffer, float2(texcoord.x, texcoord.y));
+	
 	float4 depthMFar = tex2D(DepthBuffer, float2(texcoord.x, texcoord.y));
-	
-	if (Custom_Depth_Map == 0)
-	{
-	
-		//Batman Arkham Knight
+		
+		if (Custom_Depth_Map == 0)
+	{	
+		//Alien Isolation | Fallout 4 | Firewatch
 		if (Alternate_Depth_Map == 0)
+		{
+		float cF = 1000000000;
+		float cN = 1;	
+		depthM = (exp(depthM * log(cF + cN)) - cN) / cF;
+		}
+		
+		//Amnesia: The Dark Descent
+		if (Alternate_Depth_Map == 1)
+		{
+		float cF = 1000;
+		float cN = 1;
+		depthM = cN/(cN-cF) / ( depthM - cF/(cF-cN));
+		}
+		
+		//Among The Sleep | Soma
+		if (Alternate_Depth_Map == 2)
+		{
+		float cF = 10;
+		float cN = 0.05;
+		depthM = cN/(cN-cF) / ( depthM - cF/(cF-cN));
+		}
+		
+		//Assassin Creed Unity
+		if (Alternate_Depth_Map == 3)
+		{
+		float cF  = 0.0075;
+		float cN = 1;
+		depthM =  (cN * cF / (cF + depthM * (cN - cF))); 
+		}
+		
+		//Batman Arkham Knight | Batman Arkham Origins | Batman: Arkham City | BorderLands 2 | Hard Reset | Lords Of The Fallen | The Elder Scrolls V: Skyrim
+		if (Alternate_Depth_Map == 4)
 		{
 		float cF = 50;
 		float cN = 0;
 		depthM = (pow(abs(cN-depthM),cF));
-		}	
+		}
+		
+		//Call of Duty: Advance Warfare | Call of Duty: Black Ops 2 | Call of Duty: Ghost
+		if (Alternate_Depth_Map == 5)
+		{
+		float cF  = 0.01;
+		float cN = 1;
+		depthM =  (cN * cF / (cF + depthM * (cN - cF))); 
+		}
+		
+		//Casltevania: Lord of Shadows - UE | Dead Rising 3
+		if (Alternate_Depth_Map == 6)
+		{
+		float cF = 25;
+		float cN = 0;
+		depthM = (pow(abs(cN-depthM),cF));
+		}
+		
+		//Condemned: Criminal Origins | Rage | Return To Castle Wolfenstine | The Evil Within | Quake 4
+		if (Alternate_Depth_Map == 7)
+		{
+		float cF  = 1;
+		float cN = 0.0025;
+		depthM =  (cN * cF / (cF + depthM * (cN - cF))); 
+		}
+		
+		//Deadly Premonition:The Directors's Cut
+		if (Alternate_Depth_Map == 8)
+		{
+		float cF = 30;
+		float cN = 0;
+		depthM = (pow(abs(cN-depthM),cF));
+		}
+		
+		//Dragon Ball Xenoverse | Quake 2 XP
+		if (Alternate_Depth_Map == 9)
+		{
+		float cF = 1;
+		float cN = 0.005;
+		depthM = cN/(cN-cF) / ( depthM - cF/(cF-cN));
+		}
+		
+		//Warhammer: End Times - Vermintide
+		if (Alternate_Depth_Map == 10)
+		{
+		float cF = 1;	
+		float cN = 5.5;	
+		depthM = (exp(depthM * log(cF + cN)) - cN) / cF;
+		}
+		
+		//Dying Light
+		if (Alternate_Depth_Map == 11)
+		{
+		float cF = 100;
+		float cN = 0.005;
+		depthM = cF / (1 + cF - (depthM/cN) * (1 - cF));
+		}
+		
+		//GTA V
+		if (Alternate_Depth_Map == 12)
+		{
+		float cF  = 10000; 
+		float cN = 0.0075; 
+		depthM = cF / (1 + cF - (depthM/cN) * (1 - cF));
+		}
+		
+		//Magicka 2
+		if (Alternate_Depth_Map == 13)
+		{
+		float cF = 1;
+		float cN = 13;	
+		depthM = (exp(depthM * log(cF + cN)) - cN) / cF;
+		}
+		
+		//Middle-earth: Shadow of Mordor
+		if (Alternate_Depth_Map == 14)
+		{
+		float cF = 30;
+		float cN = 1;	
+		depthM = (pow(abs(cN-depthM),cF));
+		}
+		
+		//Naruto Shippuden UNS3 Full Blurst
+		if (Alternate_Depth_Map == 15)
+		{
+		float cF = 150;
+		float cN = 0.001;
+		depthM = (pow(abs(cN-depthM),cF));
+		}
+		
+		//Shadow warrior(2013)XP
+		if (Alternate_Depth_Map == 16)
+		{
+		float cF = 5;
+		float cN = 0.05;
+		depthM = cN/(cN-cF) / ( depthM - cF/(cF-cN));
+		}
+		
+		//Ryse: Son of Rome
+		if (Alternate_Depth_Map == 17)
+		{
+		float cF = 1000;
+		float cN = 10;
+		depthM = cN/(cN-cF) / ( depthM - cF/(cF-cN));
+		}
+		
+		//Sleeping Dogs: DE | DreamFall Chapters
+		if (Alternate_Depth_Map == 18)
+		{
+		float cF  = 1;
+		float cN = 0.025;
+		depthM =  (cN * cF / (cF + depthM * (cN - cF))); 
+		}
+		
+		//Souls Games
+		if (Alternate_Depth_Map == 19)
+		{
+		float cF = 200;
+		float cN = 1;
+		depthM = cN/(cN-cF) / ( depthM - cF/(cF-cN));
+		}
+		
+		//Witcher 3
+		if (Alternate_Depth_Map == 20)
+		{
+		float cF  = 0.20;
+		float cN = 1.0;
+		depthM =  (cN * cF / (cF + depthM * (cN - cF))); 
+		}
+		
+		//Deus Ex: Mankind Divided.
+		if (Alternate_Depth_Map == 21)
+		{
+		float cF  = 100;
+		float cN = 0.01;
+		depthM = cF / (1 + cF - (depthM/cN) * (1 - cF));
+		}
+		
+		//Silent Hill: Homecoming
+		if (Alternate_Depth_Map == 22)
+		{
+		float cF = 25;
+		float cN = 25.869;
+		depthM = clamp(1 - (depthM * cF / (cF - cN) + cN) / depthM,0,255);
+		}
+		
+		//Monstrum DX11
+		if (Alternate_Depth_Map == 23)
+		{
+		float cF = 1.075;	
+		float cN = 0;
+		depthM = pow(abs((exp(depthM * log(cF + cN)) - cN) / cF),1000);
+		}
+		
+		//Serious Sam Revolution
+		if (Alternate_Depth_Map == 24)
+		{
+		float cF = 1.01;	
+		float cN = 0;	
+		depthM = clamp(pow(abs((exp(depthM * log(cF + cN)) - cN) / cF),1000)/0.5,0,1.25);
+		}
+		
+		//Double Dragon Neon
+		if (Alternate_Depth_Map == 25)
+		{
+		float cF = 0.025;//1
+		float cN = 0.16;//1.875
+		depthM = clamp(1 - (depthM * cF / (cF - cN) + cN) / depthM,0,255);
+		}
+		
 	}
 	else
 	{
+	
 		//Custom One
 		if (Custom_Depth_Map == 1)
 		{
@@ -348,9 +543,9 @@ float4 SbSdepth(float4 pos : SV_Position, float2 texcoord : TEXCOORD0) : SV_Targ
 		//Custom Seven
 		if (Custom_Depth_Map == 7)
 		{
-		float cF = Far;//1
-		float cN = Near;//1.875
-		depthM = clamp(1 - ((depthM * (cF + cN) / (cF - cN) + (2*cN)) / depthM),0,255); //GL-style Infinite reversed-Z. Clamped, not so Infinate anymore.
+		float cF = Far;//1.01	
+		float cN = Near;//0	
+		depthM = clamp(pow(abs((exp(depthM * log(cF + cN)) - cN) / cF),1000)/0.5,0,1.25);
 		}
 		
 		//Custom Eight
@@ -362,20 +557,23 @@ float4 SbSdepth(float4 pos : SV_Position, float2 texcoord : TEXCOORD0) : SV_Targ
 		}
 		
 	}
-
-    float Adj;
-    float4 D;
-	
 		
-		if (Alternate_Depth_Map == 0)
+		float A;
+		
+		if (Depth_Map_Enhancement == 1)
 		{
+		A = Adjust;
 		float cDF = 1.025;
 		float cDN = 0;
 		depthMFar = pow(abs((exp(depthM * log(cDF + cDN)) - cDN) / cDF),1000);
 		}
+		else
+		{
+		A = 1;
+		depthMFar = 0;
+		}
 
-	
-    D = clamp(lerp(depthMFar,depthM,0.75),CNear,CFar);
+    float4 D = lerp(depthMFar,depthM,A);	
 
 		color.rgb = D.rrr;
 		
@@ -437,7 +635,7 @@ float4 BlurDM(float4 pos : SV_Position, float2 texcoord : TEXCOORD0) : SV_Target
 ////////////////////////////////////////////////Left/Right Eye////////////////////////////////////////////////////////
 void PS_renderLR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 color : SV_Target0 , out float4 colorT: SV_Target1)
 {	
-	const float samples[4] = { 0.25, 0.50, 0.75, 1};
+	const float samples[4] = {0.25, 0.50, 0.75, 1};
 	float DepthL = 1.0, DepthR = 1.0;
 	float2 uv = 0;
 	[loop]
@@ -622,7 +820,7 @@ void PS0(float4 position : SV_Position, float2 texcoord : TEXCOORD0, out float4 
 	}
 	else
 	{
-		color = tex2D(SamplerCC,texcoord.xy);
+		color = tex2D(SamplerCDM,texcoord.xy);
 	}
 }
 
