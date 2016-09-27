@@ -3,7 +3,7 @@
  //----------------////
 
  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
- //* Depth Map Based 3D post-process shader v1.8.8 L & R Eye																														*//
+ //* Depth Map Based 3D post-process shader vE.E.E L & R Eye																														*//
  //* For Reshade 3.0																																								*//
  //* --------------------------																																						*//
  //* This work is licensed under a Creative Commons Attribution 3.0 Unported License.																								*//
@@ -29,9 +29,9 @@
 
 #define Cross_Cusor_Key 66
 
-uniform int Alternet_Depth_Map <
+uniform int Alternate_Depth_Map <
 	ui_type = "combo";
-	ui_items = "Depth Map 0\0Depth Map 1\0";
+	ui_items = "Depth Map 0\0";
 	ui_label = "Alternate Depth Map";
 	ui_tooltip = "Alternate Depth Map for different Games. Read the ReadMeDepth3d.txt, for setting. Each game May and can use a diffrent Alternet Depth Map.";
 > = 0;
@@ -48,13 +48,20 @@ uniform float Adjust <
 	ui_min = 0; ui_max = 10;
 	ui_label = "Adjust";
 	ui_tooltip = "Adjust Near Far";
-> = 0.0;
+> = 1.0;
 
 uniform int Perspective <
 	ui_type = "drag";
 	ui_min = -100; ui_max = 100;
 	ui_label = "Perspective Slider";
 	ui_tooltip = "Determines the perspective point.";
+> = 0;
+
+uniform int Blur_Type <
+	ui_type = "combo";
+	ui_items = "Normal Blur\0Radial Blur\0";
+	ui_label = "Blur Type";
+	ui_tooltip = "Pick the type of blur you want";
 > = 0;
 
 uniform float Blur <
@@ -95,19 +102,19 @@ uniform float Far <
 	ui_tooltip = "Near Depth Map Adjustment.";
 > = 1;
 
-uniform float DFar <
+uniform float CFar <
 	ui_type = "drag";
 	ui_min = 0; ui_max = 5;
-	ui_label = "DFar";
+	ui_label = "Clamp Far";
 	ui_tooltip = "Far Depth Map Adjustment.";
-> = 1.5;
+> = 0.9;
  
- uniform float DNear <
+ uniform float CNear <
 	ui_type = "drag";
 	ui_min = 0; ui_max = 5;
-	ui_label = "DNear";
+	ui_label = "Clamp Near";
 	ui_tooltip = "Near Depth Map Adjustment.";
-> = 1;
+> = 0.150;
 
 uniform int Polynomial_Barrel_Distortion <
 	ui_type = "combo";
@@ -217,7 +224,7 @@ sampler BackBufferCLAMP
 texture texCL  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA32F;}; 
 texture texCR  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA32F;}; 
 texture texCC  { Width = BUFFER_WIDTH/2; Height = BUFFER_HEIGHT; Format = RGBA32F;}; 
-texture texCDM  { Width = BUFFER_WIDTH/2; Height = BUFFER_HEIGHT; Format = RGBA32F;};
+texture texCDM  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA32F;};
 
 sampler SamplerCL
 	{
@@ -273,22 +280,15 @@ float4 SbSdepth(float4 pos : SV_Position, float2 texcoord : TEXCOORD0) : SV_Targ
 
 			if (Depth_Map_Flip)
 			texcoord.y =  1 - texcoord.y;
-	
+
 	float4 depthM = tex2D(DepthBuffer, float2(texcoord.x, texcoord.y));
 	float4 depthMFar = tex2D(DepthBuffer, float2(texcoord.x, texcoord.y));
-		
-		if (Custom_Depth_Map == 0)
-	{	
-		//Alien Isolation | Fallout 4 | Firewatch
-		if (Alternet_Depth_Map == 0)
-		{
-		float cF = 1000000000;
-		float cN = 1;	
-		depthM = (exp(depthM * log(cF + cN)) - cN) / cF;
-		}
-
-		//Batman Arkham Knight | Batman Arkham Origins | Batman: Arkham City | BorderLands 2 | Hard Reset | Lords Of The Fallen | The Elder Scrolls V: Skyrim
-		if (Alternet_Depth_Map == 1)
+	
+	if (Custom_Depth_Map == 0)
+	{
+	
+		//Batman Arkham Knight
+		if (Alternate_Depth_Map == 0)
 		{
 		float cF = 50;
 		float cN = 0;
@@ -367,7 +367,7 @@ float4 SbSdepth(float4 pos : SV_Position, float2 texcoord : TEXCOORD0) : SV_Targ
     float4 D;
 	
 		
-		if (Alternet_Depth_Map == 1)
+		if (Alternate_Depth_Map == 0)
 		{
 		float cDF = 1.025;
 		float cDN = 0;
@@ -375,7 +375,7 @@ float4 SbSdepth(float4 pos : SV_Position, float2 texcoord : TEXCOORD0) : SV_Targ
 		}
 
 	
-    D = lerp(depthMFar,depthM,0.75);
+    D = clamp(lerp(depthMFar,depthM,0.75),CNear,CFar);
 
 		color.rgb = D.rrr;
 		
@@ -385,10 +385,13 @@ float4 SbSdepth(float4 pos : SV_Position, float2 texcoord : TEXCOORD0) : SV_Targ
 float4 BlurDM(float4 pos : SV_Position, float2 texcoord : TEXCOORD0) : SV_Target
 {
 	float4 color;
+	float2 dir;
+	float B;
 	float Con = 11;
-		
+	
 	if(Blur > 0)
 	{
+	
 	const float weight[10] = 
 	{  
 	-0.08,  
@@ -401,14 +404,27 @@ float4 BlurDM(float4 pos : SV_Position, float2 texcoord : TEXCOORD0) : SV_Target
 	0.03,  
 	0.05,  
 	0.08  
-	};  
+	};
 	
-	float2 dir = float2(0.5,0);
+	if(Blur_Type == 1)
+	{
+	dir = 0.5 - texcoord;
+	B = Blur*2;
+	}
+	else
+	{
+	dir = float2(0.5,0);
+	B = Blur;
+	}
+	
 	dir = normalize( dir );  
 	[loop]
 	for (int i = -0; i < 10; i++)
 	{
-	color += tex2D(SamplerCDM,texcoord + dir * weight[i] * Blur)/Con;  
+	if(Blur_Type == 0 || Blur_Type == 1)
+	{
+	color += tex2D(SamplerCDM,texcoord + dir * weight[i] * B)/Con;  
+	}
 	}
 	}
 	else
@@ -421,7 +437,7 @@ float4 BlurDM(float4 pos : SV_Position, float2 texcoord : TEXCOORD0) : SV_Target
 ////////////////////////////////////////////////Left/Right Eye////////////////////////////////////////////////////////
 void PS_renderLR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 color : SV_Target0 , out float4 colorT: SV_Target1)
 {	
-	const float samples[4] = {0.45, 0.666, 1, 0.25};
+	const float samples[4] = { 0.25, 0.50, 0.75, 1};
 	float DepthL = 1.0, DepthR = 1.0;
 	float2 uv = 0;
 	[loop]
@@ -578,7 +594,7 @@ void PS0(float4 position : SV_Position, float2 texcoord : TEXCOORD0, out float4 
 	
 		if(Polynomial_Barrel_Distortion == 0)
 		{
-		color = texcoord.x < 0.5 ? tex2D(SamplerCL,float2(texcoord.x*2 + Perspective * pix.x,texcoord.y)) : tex2D(SamplerCR,float2(texcoord.x*2-1 - Perspective * pix.x,texcoord.y)) ;
+		color = texcoord.x < 0.5 ? tex2D(SamplerCL,float2(texcoord.x*2 + Perspective * pix.x,texcoord.y)) : tex2D(SamplerCR,float2(texcoord.x*2-1 - Perspective * pix.x,texcoord.y));
 		}
 		else
 		{
@@ -606,7 +622,7 @@ void PS0(float4 position : SV_Position, float2 texcoord : TEXCOORD0, out float4 
 	}
 	else
 	{
-		color = tex2D(SamplerCDM,texcoord.xy);
+		color = tex2D(SamplerCC,texcoord.xy);
 	}
 }
 
@@ -620,8 +636,6 @@ void PostProcessVS(in uint id : SV_VertexID, out float4 position : SV_Position, 
 	texcoord.y = (id == 1) ? 2.0 : 0.0;
 	position = float4(texcoord * float2(2.0, -2.0) + float2(-1.0, 1.0), 0.0, 1.0);
 }
-
-///////////////////////////////////////////////Depth Map View//////////////////////////////////////////////////////////////////////
 
 //*Rendering passes*//
 

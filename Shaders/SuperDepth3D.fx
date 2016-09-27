@@ -581,7 +581,7 @@ float4 BlurDM(float4 pos : SV_Position, float2 texcoord : TEXCOORD0) : SV_Target
 ////////////////////////////////////////////////Left/Right Eye////////////////////////////////////////////////////////
 void PS_renderLR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 color : SV_Target0 , out float4 colorT: SV_Target1)
 {	
-	const float samples[4] = {0.45, 0.666, 1, 0.25};
+	const float samples[4] = {0.25, 0.50, 0.75, 1};
 	float DepthL = 1.0, DepthR = 1.0;
 	float2 uv = 0;
 	[loop]
