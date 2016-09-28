@@ -41,13 +41,13 @@ uniform int Depth <
 	ui_min = 0; ui_max = 30;
 	ui_label = "Depth Slider";
 	ui_tooltip = "Determines the amount of Image Warping and Separation between both eyes.";
-> = 10;
+> = 15;
 
 uniform int Perspective <
 	ui_type = "drag";
 	ui_min = -100; ui_max = 100;
 	ui_label = "Perspective Slider";
-	ui_tooltip = "Determines the perspective point.";
+	ui_tooltip = "Determines the perspective point. Default is 0";
 > = 0;
 
 uniform int Blur_Type <
@@ -61,21 +61,21 @@ uniform float Blur <
 	ui_type = "drag";
 	ui_min = 0; ui_max = 0.5;
 	ui_label = "Blur Slider";
-	ui_tooltip = "Determines the blur seperation of Depth Map Blur.";
+	ui_tooltip = "Determines the blur seperation of Depth Map Blur. Default is 0.050";
 > = 0.050;
 
 uniform int Depth_Map_Enhancement <
 	ui_type = "combo";
 	ui_items = "Enhancement Off\0Enhancement Alpha\0";
 	ui_label = "Depth Map Enhancement";
-	ui_tooltip = "Choose Or Dissable Depth Map Enhancement.";
+	ui_tooltip = "Choose Or Dissable Depth Map Enhancement. Default is Off";
 > = 0;
 
 uniform float Adjust <
 	ui_type = "drag";
 	ui_min = 0.5; ui_max = 1.5;
 	ui_label = "Adjust";
-	ui_tooltip = "Adjust DepthMap Enhancement, Dehancement occurs past one.";
+	ui_tooltip = "Adjust DepthMap Enhancement, Dehancement occurs past one. Default is 1.0";
 > = 1.0;
 
 uniform bool Depth_Map_Flip <
@@ -153,13 +153,13 @@ uniform int Custom_Sidebars <
 uniform float Cross_Cusor_Size <
 	ui_type = "drag";
 	ui_min = 1; ui_max = 100;
-	ui_tooltip = "Pick your size of the cross cusor.";
+	ui_tooltip = "Pick your size of the cross cusor. Default is 25";
 	ui_label = "Cross Cusor Size";
-> = 20.0;
+> = 25.0;
 
 uniform float3 Cross_Cusor_Color <
 	ui_type = "color";
-	ui_tooltip = "Pick your own cross cusor color.";
+	ui_tooltip = "Pick your own cross cusor color. Default is (R 255, G 255, B 255)";
 	ui_label = "Cross Cusor Color";
 > = float3(1.0, 1.0, 1.0);
 
@@ -559,6 +559,7 @@ float4 SbSdepth(float4 pos : SV_Position, float2 texcoord : TEXCOORD0) : SV_Targ
 	}
 		
 		float A;
+		float4 D;
 		
 		if (Depth_Map_Enhancement == 1)
 		{
@@ -572,9 +573,15 @@ float4 SbSdepth(float4 pos : SV_Position, float2 texcoord : TEXCOORD0) : SV_Targ
 		A = 1;
 		depthMFar = 0;
 		}
-
-    float4 D = lerp(depthMFar,depthM,A);	
-
+	
+	if(Depth_Map_Enhancement == 0)
+    {
+    D = depthM;	
+    }
+    else
+    {
+    D = lerp(depthMFar,depthM,A);	
+    }
 		color.rgb = D.rrr;
 		
 	return color;	
