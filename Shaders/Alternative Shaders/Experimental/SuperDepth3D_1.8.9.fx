@@ -66,7 +66,7 @@ uniform float Blur <
 
 uniform int Depth_Map_Enhancement <
 	ui_type = "combo";
-	ui_items = "Enhancement Off\0Enhancement Alpha\0";
+	ui_items = "Enhancement Off\0Enhancement Alpha\0Enhancement Beta\0";
 	ui_label = "Depth Map Enhancement";
 	ui_tooltip = "Choose Or Dissable Depth Map Enhancement. Default is Off";
 > = 0;
@@ -443,9 +443,9 @@ float4 SbSdepth(float4 pos : SV_Position, float2 texcoord : TEXCOORD0) : SV_Targ
 		//Witcher 3
 		if (Alternate_Depth_Map == 20)
 		{
-		float cF  = 0.20;
-		float cN = 1.0;
-		depthM =  (cN * cF / (cF + depthM * (cN - cF))); 
+		float cF = 7.5;
+		float cN = 1;	
+		depthM = (pow(abs(cN-depthM),cF));
 		}
 		
 		//Deus Ex: Mankind Divided.
@@ -561,6 +561,12 @@ float4 SbSdepth(float4 pos : SV_Position, float2 texcoord : TEXCOORD0) : SV_Targ
 		float A;
 		float4 D;
 		
+		if (Depth_Map_Enhancement == 0)
+		{
+		A = 1;
+		depthMFar = 0;
+		}
+		
 		if (Depth_Map_Enhancement == 1)
 		{
 		A = Adjust;
@@ -568,10 +574,13 @@ float4 SbSdepth(float4 pos : SV_Position, float2 texcoord : TEXCOORD0) : SV_Targ
 		float cDN = 0;
 		depthMFar = pow(abs((exp(depthM * log(cDF + cDN)) - cDN) / cDF),1000);
 		}
-		else
+		
+		if (Depth_Map_Enhancement == 2)
 		{
-		A = 1;
-		depthMFar = 0;
+		A = Adjust;
+		float cDF = 1.005;
+		float cDN = 0;
+		depthMFar = pow(abs((exp(depthM * log(cDF + cDN)) - cDN) / cDF),1000);
 		}
 	
 	if(Depth_Map_Enhancement == 0)
@@ -626,10 +635,7 @@ float4 BlurDM(float4 pos : SV_Position, float2 texcoord : TEXCOORD0) : SV_Target
 	[loop]
 	for (int i = -0; i < 10; i++)
 	{
-	if(Blur_Type == 0 || Blur_Type == 1)
-	{
 	color += tex2D(SamplerCDM,texcoord + dir * weight[i] * B)/Con;  
-	}
 	}
 	}
 	else
