@@ -1,14 +1,13 @@
 ﻿#SuperDepth3D
 Depth Map Based 3D post-process shader v1.8.8 for Reshade 3.0
 
-There are the Basic Depth maps you can use for your games listed and not listed. Look at this link for other game Compatibility.
-
-This Mod alows for Depth Map Based 3D like What Nvidia does with Compatibility Mode 3D and Kind of what TriDef Does with Power 3D. 
+This Shader allows for Depth Map Based 3D like What Nvidia does with Compatibility Mode 3D and Kind of what TriDef Does with Power 3D. 
 
 http://reshade.me/compatibility
 At this link look for Depth Map Compatibility.
 
-Here is a quick and dirty game list of working Depth Maps. 
+Game Depth Map list and settings.
+https://github.com/BlueSkyDefender/Depth3D/blob/master/Game_Settings.txt
 
 PLEASE SET YOUR RESOLUTION FIRST. Turn Off DOF in all games if possible. Unless you want to know how it feels to be neer sighted.
 
