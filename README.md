@@ -8,6 +8,7 @@ This Shader allows for Depth Map Based 3D like What Nvidia does with Compatibili
 http://reshade.me/compatibility
 At this link look for Depth Map Compatibility.
 
+This should work for Both AMD/Nividia GPUs.
 
 Game Compatibility
 
