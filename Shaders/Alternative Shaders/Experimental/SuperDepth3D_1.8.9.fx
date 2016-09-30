@@ -31,7 +31,7 @@
 
 uniform int Alternate_Depth_Map <
 	ui_type = "combo";
-	ui_items = "Depth Map 0\0Depth Map 1\0Depth Map 2\0Depth Map 3\0Depth Map 4\0Depth Map 5\0Depth Map 6\0Depth Map 7\0Depth Map 8\0Depth Map 9\0Depth Map 10\0Depth Map 11\0Depth Map 12\0Depth Map 13\0Depth Map 14\0Depth Map 15\0Depth Map 16\0Depth Map 17\0Depth Map 18\0Depth Map 19\0Depth Map 20\0Depth Map 21\0Depth Map 22\0Depth Map 23\0Depth Map 24\0Depth Map 25\0";
+	ui_items = "Depth Map 0\0Depth Map 1\0Depth Map 2\0Depth Map 3\0Depth Map 4\0Depth Map 5\0Depth Map 6\0Depth Map 7\0Depth Map 8\0Depth Map 9\0Depth Map 10\0Depth Map 11\0Depth Map 12\0Depth Map 13\0Depth Map 14\0Depth Map 15\0Depth Map 16\0Depth Map 17\0Depth Map 18\0Depth Map 19\0Depth Map 20\0Depth Map 21\0Depth Map 22\0Depth Map 23\0Depth Map 24\0Depth Map 25\0Depth Map 26\0";
 	ui_label = "Alternate Depth Map";
 	ui_tooltip = "Alternate Depth Map for different Games. Read the ReadMeDepth3d.txt, for setting. Each game May and can use a diffrent Alternet Depth Map.";
 > = 0;
@@ -52,10 +52,10 @@ uniform int Perspective <
 
 uniform int Blur_Type <
 	ui_type = "combo";
-	ui_items = "Normal Blur\0Radial Blur\0";
+	ui_items = "Blur Off\0Normal Blur\0Radial Blur\0";
 	ui_label = "Blur Type";
 	ui_tooltip = "Pick the type of blur you want";
-> = 0;
+> = 1;
 
 uniform float Blur <
 	ui_type = "drag";
@@ -64,11 +64,9 @@ uniform float Blur <
 	ui_tooltip = "Determines the blur seperation of Depth Map Blur. Default is 0.050";
 > = 0.050;
 
-uniform int Depth_Map_Enhancement <
-	ui_type = "combo";
-	ui_items = "Enhancement Off\0Enhancement Alpha\0Enhancement Beta\0";
+uniform bool Depth_Map_Enhancement <
 	ui_label = "Depth Map Enhancement";
-	ui_tooltip = "Choose Or Dissable Depth Map Enhancement. Default is Off";
+	ui_tooltip = "Enable Or Dissable Depth Map Enhancement. Default is Off";
 > = 0;
 
 uniform float Adjust <
@@ -78,14 +76,14 @@ uniform float Adjust <
 	ui_tooltip = "Adjust DepthMap Enhancement, Dehancement occurs past one. Default is 1.0";
 > = 1.0;
 
-uniform bool Depth_Map_Flip <
-	ui_label = "Depth Map Flip";
-	ui_tooltip = "Depth Flip if the depth map is Upside Down.";
-> = false;
-
 uniform bool Depth_Map_View <
 	ui_label = "Depth Map View";
 	ui_tooltip = "Display the Depth Map. Use This to Work on your Own Depth Map for your game.";
+> = false;
+
+uniform bool Depth_Map_Flip <
+	ui_label = "Depth Map Flip";
+	ui_tooltip = "Depth Flip if the depth map is Upside Down.";
 > = false;
 
 uniform int Custom_Depth_Map <
@@ -95,19 +93,19 @@ uniform int Custom_Depth_Map <
 	ui_tooltip = "Adjust your own Custom Depth Map.";
 > = 0;
 
-uniform float Far <
+uniform float2 Near_Far <
 	ui_type = "drag";
-	ui_min = 0; ui_max = 5;
-	ui_label = "Far";
-	ui_tooltip = "Far Depth Map Adjustment.";
-> = 1.5;
- 
- uniform float Near <
-	ui_type = "drag";
-	ui_min = 0; ui_max = 5;
-	ui_label = "Near";
-	ui_tooltip = "Near Depth Map Adjustment.";
-> = 1;
+	ui_min = 0; ui_max = 100;
+	ui_label = "Near & Far";
+	ui_tooltip = "Adjustment for Near and Far Depth Map Precision.";
+> = float2(1,1.5);
+
+uniform int Stereoscopic_Mode <
+	ui_type = "combo";
+	ui_items = "Side by Side\0Top and Bottom\0Line Interlaced\0Checkerboard 3D\0";
+	ui_label = "3D Display Mode";
+	ui_tooltip = "Side by Side/Top and Bottom/Line Interlaced displays output.";
+> = 0;
 
 uniform int Polynomial_Barrel_Distortion <
 	ui_type = "combo";
@@ -122,26 +120,12 @@ uniform float3 Polynomial_Colors <
 	ui_label = "Polynomial Color Distortion";
 > = float3(1.0, 1.0, 1.0);
 
-uniform float Horizontal_Squish <
+uniform float2 Horizontal_Vertical_Squish <
 	ui_type = "drag";
 	ui_min = 0.5; ui_max = 2;
-	ui_label = "Horizontal Squish";
-	ui_tooltip = "Horizontal squish cubic distortion value. Default is 1.0.";
-> = 1.00;
-
-uniform float Vertical_Squish <
-	ui_type = "drag";
-	ui_min = 0.5; ui_max = 2;
-	ui_label = "Vertical Squish";
-	ui_tooltip = "Vertical squish cubic distortion value. Default is 1.0.";
-> = 1.0;
-
-uniform int Stereoscopic_Mode <
-	ui_type = "combo";
-	ui_items = "Side by Side\0Top and Bottom\0Line Interlaced\0Checkerboard 3D\0";
-	ui_label = "3D Display Mode";
-	ui_tooltip = "Side by Side/Top and Bottom/Line Interlaced displays output.";
-> = 0;
+	ui_label = "Horizontal & Vertical";
+	ui_tooltip = "Adjust Horizontal and Vertical squish cubic distortion value. Default is 1.0.";
+> = float2(1,1);
 
 uniform int Custom_Sidebars <
 	ui_type = "combo";
@@ -276,7 +260,7 @@ float4 SbSdepth(float4 pos : SV_Position, float2 texcoord : TEXCOORD0) : SV_Targ
 	
 	float4 depthM = tex2D(DepthBuffer, float2(texcoord.x, texcoord.y));
 	
-	float4 depthMFar = tex2D(DepthBuffer, float2(texcoord.x, texcoord.y));
+	float4 depthMFar;
 		
 		if (Custom_Depth_Map == 0)
 	{	
@@ -304,7 +288,7 @@ float4 SbSdepth(float4 pos : SV_Position, float2 texcoord : TEXCOORD0) : SV_Targ
 		depthM = cN/(cN-cF) / ( depthM - cF/(cF-cN));
 		}
 		
-		//Assassin Creed Unity
+		//The Vanishing of Ethan Carter Redux
 		if (Alternate_Depth_Map == 3)
 		{
 		float cF  = 0.0075;
@@ -395,9 +379,9 @@ float4 SbSdepth(float4 pos : SV_Position, float2 texcoord : TEXCOORD0) : SV_Targ
 		//Middle-earth: Shadow of Mordor
 		if (Alternate_Depth_Map == 14)
 		{
-		float cF = 30;
-		float cN = 1;	
-		depthM = (pow(abs(cN-depthM),cF));
+		float cF = 650;
+		float cN = 651;
+		depthM = pow(abs((exp(depthM * log(cF + cN)) - cN) / cF),1000);
 		}
 		
 		//Naruto Shippuden UNS3 Full Blurst
@@ -419,9 +403,9 @@ float4 SbSdepth(float4 pos : SV_Position, float2 texcoord : TEXCOORD0) : SV_Targ
 		//Ryse: Son of Rome
 		if (Alternate_Depth_Map == 17)
 		{
-		float cF = 1000;
-		float cN = 10;
-		depthM = cN/(cN-cF) / ( depthM - cF/(cF-cN));
+		float cF = 1.010;
+		float cN = 0;
+		depthM = pow(abs((exp(depthM * log(cF + cN)) - cN) / cF),1000);
 		}
 		
 		//Sleeping Dogs: DE | DreamFall Chapters
@@ -435,9 +419,9 @@ float4 SbSdepth(float4 pos : SV_Position, float2 texcoord : TEXCOORD0) : SV_Targ
 		//Souls Games
 		if (Alternate_Depth_Map == 19)
 		{
-		float cF = 200;
-		float cN = 1;
-		depthM = cN/(cN-cF) / ( depthM - cF/(cF-cN));
+		float cF = 1.050;
+		float cN = 0.025;
+		depthM = pow(abs((exp(depthM * log(cF + cN)) - cN) / cF),1000);
 		}
 		
 		//Witcher 3
@@ -447,14 +431,14 @@ float4 SbSdepth(float4 pos : SV_Position, float2 texcoord : TEXCOORD0) : SV_Targ
 		float cN = 1;	
 		depthM = (pow(abs(cN-depthM),cF));
 		}
-		
-		//Deus Ex: Mankind Divided.
+
+		//Assassin Creed Unity | Just Cause 3
 		if (Alternate_Depth_Map == 21)
 		{
-		float cF  = 100;
-		float cN = 0.01;
-		depthM = cF / (1 + cF - (depthM/cN) * (1 - cF));
-		}
+		float cF = 150;
+		float cN = 151;
+		depthM = pow(abs((exp(depthM * log(cF + cN)) - cN) / cF),1000);
+		}	
 		
 		//Silent Hill: Homecoming
 		if (Alternate_Depth_Map == 22)
@@ -488,6 +472,14 @@ float4 SbSdepth(float4 pos : SV_Position, float2 texcoord : TEXCOORD0) : SV_Targ
 		depthM = clamp(1 - (depthM * cF / (cF - cN) + cN) / depthM,0,255);
 		}
 		
+		//Deus Ex: Mankind Divided
+		if (Alternate_Depth_Map == 26)
+		{
+		float cF = 250;
+		float cN = 251;
+		depthM = pow(abs((exp(depthM * log(cF + cN)) - cN) / cF),1000);
+		}	
+		
 	}
 	else
 	{
@@ -495,93 +487,70 @@ float4 SbSdepth(float4 pos : SV_Position, float2 texcoord : TEXCOORD0) : SV_Targ
 		//Custom One
 		if (Custom_Depth_Map == 1)
 		{
-		float cF = Far; //10+
-		float cN = Near;//1
+		float cF = Near_Far.y; //10+
+		float cN = Near_Far.x;//1
 		depthM = (pow(abs(cN-depthM),cF));
 		}
 		
 		//Custom Two
 		if (Custom_Depth_Map == 2)
 		{
-		float cF  = Far; //100+
-		float cN = Near; //0.01-
+		float cF  = Near_Far.y; //100+
+		float cN = Near_Far.x; //0.01-
 		depthM = cF / (1 + cF - (depthM/cN) * (1 - cF));
 		}
 		
 		//Custom Three
 		if (Custom_Depth_Map == 3)
 		{
-		float cF  = Far;//0.025
-		float cN = Near;//1.0
+		float cF  = Near_Far.y;//0.025
+		float cN = Near_Far.x;//1.0
 		depthM =  (cN * cF / (cF + depthM * (cN - cF))); 
 		}
 		
 		//Custom Four
 		if (Custom_Depth_Map == 4)
 		{
-		float cF = Far;//1000000000 or 1	
-		float cN = Near;//0 or 13	
+		float cF = Near_Far.y;//1000000000 or 1	
+		float cN = Near_Far.x;//0 or 13	
 		depthM = (exp(depthM * log(cF + cN)) - cN) / cF;
 		}
 		
 		//Custom Five
 		if (Custom_Depth_Map == 5)
 		{
-		float cF = Far;//1
-		float cN = Near;//0.025
+		float cF = Near_Far.y;//1
+		float cN = Near_Far.x;//0.025
 		depthM = cN/(cN-cF) / ( depthM - cF/(cF-cN));
 		}
 		
 		//Custom Six
 		if (Custom_Depth_Map == 6)
 		{
-		float cF = Far;//1
-		float cN = Near;//1.875
+		float cF = Near_Far.y;//1
+		float cN = Near_Far.x;//1.875
 		depthM = clamp(1 - (depthM * cF / (cF - cN) + cN) / depthM,0,255); //Infinite reversed-Z. Clamped, not so Infinate anymore.
 		}
 		
 		//Custom Seven
 		if (Custom_Depth_Map == 7)
 		{
-		float cF = Far;//1.01	
-		float cN = Near;//0	
+		float cF = Near_Far.y;//1.01	
+		float cN = Near_Far.x;//0	
 		depthM = clamp(pow(abs((exp(depthM * log(cF + cN)) - cN) / cF),1000)/0.5,0,1.25);
 		}
 		
 		//Custom Eight
 		if (Custom_Depth_Map == 8)
 		{
-		float cF = Far;//1.010+	
-		float cN = Near;//0	
+		float cF = Near_Far.y;//1.010+	or 150
+		float cN = Near_Far.x;//0 or	151
 		depthM = pow(abs((exp(depthM * log(cF + cN)) - cN) / cF),1000);
 		}
 		
 	}
 		
-		float A;
-		float4 D;
-		
-		if (Depth_Map_Enhancement == 0)
-		{
-		A = 1;
-		depthMFar = 0;
-		}
-		
-		if (Depth_Map_Enhancement == 1)
-		{
-		A = Adjust;
-		float cDF = 1.025;
-		float cDN = 0;
-		depthMFar = pow(abs((exp(depthM * log(cDF + cDN)) - cDN) / cDF),1000);
-		}
-		
-		if (Depth_Map_Enhancement == 2)
-		{
-		A = Adjust;
-		float cDF = 1.005;
-		float cDN = 0;
-		depthMFar = pow(abs((exp(depthM * log(cDF + cDN)) - cDN) / cDF),1000);
-		}
+	float4 D;
 	
 	if(Depth_Map_Enhancement == 0)
     {
@@ -589,10 +558,15 @@ float4 SbSdepth(float4 pos : SV_Position, float2 texcoord : TEXCOORD0) : SV_Targ
     }
     else
     {
+    float A = Adjust;
+	float cDF = 1.025;
+	float cDN = 0;
+	depthMFar = pow(abs((exp(depthM * log(cDF + cDN)) - cDN) / cDF),1000);	
     D = lerp(depthMFar,depthM,A);	
     }
-		color.rgb = D.rrr;
-		
+  
+  		color.rgb = D.rrr;
+			
 	return color;	
 }
 	
@@ -602,8 +576,7 @@ float4 BlurDM(float4 pos : SV_Position, float2 texcoord : TEXCOORD0) : SV_Target
 	float2 dir;
 	float B;
 	float Con = 11;
-	
-	if(Blur > 0)
+	if(Blur_Type > 0)
 	{
 	
 	const float weight[10] = 
@@ -622,26 +595,30 @@ float4 BlurDM(float4 pos : SV_Position, float2 texcoord : TEXCOORD0) : SV_Target
 	
 	if(Blur_Type == 1)
 	{
-	dir = 0.5 - texcoord;
-	B = Blur*2;
-	}
-	else
-	{
 	dir = float2(0.5,0);
 	B = Blur;
 	}
 	
-	dir = normalize( dir );  
+	if(Blur_Type == 2)
+	{
+	dir = 0.5 - texcoord;
+	B = Blur*2;
+	}
+	
+	dir = normalize( dir ); 
+	 
 	[loop]
 	for (int i = -0; i < 10; i++)
 	{
-	color += tex2D(SamplerCDM,texcoord + dir * weight[i] * B)/Con;  
+	color += tex2D(SamplerCDM,texcoord + dir * weight[i] * B)/Con;
 	}
+	
 	}
 	else
 	{
 	color = tex2D(SamplerCDM,texcoord.xy);
 	}
+	
 	return color;
 } 
   
@@ -797,10 +774,10 @@ void PS0(float4 position : SV_Position, float2 texcoord : TEXCOORD0, out float4 
 	{
 	if(Stereoscopic_Mode == 0)
 	{
-	float posH = Horizontal_Squish-1;
+	float posH = Horizontal_Vertical_Squish.y-1;
 	float midH = posH*BUFFER_HEIGHT/2*pix.y;
 	
-	float posV = Vertical_Squish-1;
+	float posV = Horizontal_Vertical_Squish.x-1;
 	float midV = posV*BUFFER_WIDTH/2*pix.x;
 	
 		if(Polynomial_Barrel_Distortion == 0)
@@ -809,7 +786,7 @@ void PS0(float4 position : SV_Position, float2 texcoord : TEXCOORD0, out float4 
 		}
 		else
 		{
-		color = texcoord.x < 0.5 ? PDL(float2(((texcoord.x*2)*Vertical_Squish)-midV + Perspective * pix.x,(texcoord.y*Horizontal_Squish)-midH)) : PDR(float2(((texcoord.x*2-1)*Vertical_Squish)-midV - Perspective * pix.x,(texcoord.y*Horizontal_Squish)-midH));
+		color = texcoord.x < 0.5 ? PDL(float2(((texcoord.x*2)*Horizontal_Vertical_Squish.x)-midV + Perspective * pix.x,(texcoord.y*Horizontal_Vertical_Squish.y)-midH)) : PDR(float2(((texcoord.x*2-1)*Horizontal_Vertical_Squish.x)-midV - Perspective * pix.x,(texcoord.y*Horizontal_Vertical_Squish.y)-midH));
 		}
 	
 	}
