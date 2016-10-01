@@ -40,7 +40,7 @@ uniform int Depth <
 	ui_type = "drag";
 	ui_min = 0; ui_max = 30;
 	ui_label = "Depth Slider";
-	ui_tooltip = "Determines the amount of Image Warping and Separation between both eyes.";
+	ui_tooltip = "Determines the amount of Image Warping and Separation between both eyes. You can Override this setting.";
 > = 15;
 
 uniform int Perspective <
@@ -75,6 +75,11 @@ uniform float Adjust <
 	ui_label = "Adjust";
 	ui_tooltip = "Adjust DepthMap Enhancement, Dehancement occurs past one. Default is 1.0";
 > = 1.0;
+
+uniform bool Depth_Map_Clamp <
+	ui_label = "Depth Map Clamp";
+	ui_tooltip = "Clamps Min and Max setting of Your Depth Map, you may want to turn this on if going pass 25 Depth. Default is Off";
+> = 0;
 
 uniform bool Depth_Map_View <
 	ui_label = "Depth Map View";
@@ -564,10 +569,18 @@ float4 SbSdepth(float4 pos : SV_Position, float2 texcoord : TEXCOORD0) : SV_Targ
 	depthMFar = pow(abs((exp(depthM * log(cDF + cDN)) - cDN) / cDF),1000);	
     D = lerp(depthMFar,depthM,A);	
     }
-  
-  		color.rgb = D.rrr;
-			
+    
+    if(Depth_Map_Clamp == 1)
+	{
+  	color.rgb = clamp(D.rrr,0,1);
+	}
+	else
+	{
+	color.rgb = D.rrr;
+	}
+	
 	return color;	
+
 }
 	
 float4 BlurDM(float4 pos : SV_Position, float2 texcoord : TEXCOORD0) : SV_Target
@@ -576,7 +589,7 @@ float4 BlurDM(float4 pos : SV_Position, float2 texcoord : TEXCOORD0) : SV_Target
 	float2 dir;
 	float B;
 	float Con = 11;
-	if(Blur_Type > 0)
+	if(Blur_Type > 0 && Blur > 0)
 	{
 	
 	const float weight[10] = 
