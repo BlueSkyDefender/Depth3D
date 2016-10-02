@@ -1,5 +1,5 @@
 #SuperDepth3D
-Depth Map Based 3D post-process shader v1.8.9 for Reshade 3.0
+Depth Map Based 3D post-process shader v1.8.8 for Reshade 3.0
 
 There are the Basic Depth maps you can use for your games listed and not listed. Look at this link for other game Compatibility.
 
@@ -66,7 +66,6 @@ Game Compatibility
 * Need for Speed
 * Double Dragon Neon
 * Zombie Army Trilogy
-* Just Cause 3
 
 Please read me ReadMeDepth3d.txt For Setting and More Information.
 
@@ -75,8 +74,8 @@ https://github.com/BlueSkyDefender/Depth3D/blob/master/ReadMe_Depth3D.txt
 Also read https://github.com/BlueSkyDefender/Depth3D/blob/master/Game_Settings.txt For Game Settings.
  
 ======================================================================================================================================
-The Reshade 2.0 Repack For 1.8.9
+The Reshade 2.0 Repack For 1.8.8
 
-http://www.mediafire.com/file/57cja74fpc5dru5/ReShade_2.0.3f1_Super_DepthMap_3D_v1.8.9_Repack.7z
+http://www.mediafire.com/download/9c25utcc2fcd8b8/ReShade_2.0.3f1_Super_DepthMap_3D_v1.8.8_Repack.7z
 
 ======================================================================================================================================

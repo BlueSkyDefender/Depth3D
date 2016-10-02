@@ -1,4 +1,3 @@
-#SuperDepth3D 1.8.9
 --------------------------------------------------------------------------------------------------------------------------------------
 -=BSD Notes=- Personal recommended settings and tips for some games.
 ______________________________________________________________________________________________________________________________________
@@ -17,7 +16,7 @@ The setting Use for this game for 4k are. Fullscreen not exclisive no Vsync. My 
 lower if you don't have that much GPU memory. Texture Filtering 16x and Shadow Qualty Medium. For AO I set it to ON If you have a good gpu 
 set this to Very High. Contact Hard Shadows is set to off. Paralax also set to on. Dof off. Now Level of Detail I have this set too High...
 any lower makes the game look bad you may want to set this Very High. Volumetic Lighting set too on. Screenspace Reflections set too on. 
-Temporal AA check this off. Motion Blur off. Sharpen I have it on I like it. Bloom This one good and bad.
+Temporal AA check this ON even with out 3D this should be on. Motion Blur off. Sharpen I have it on I like it. Bloom This one good and bad.
 Good as it gives the lighitng in game life but bad because it causes ghosting. I have it set to on I don't mind a little ghosting. 
 Cloth Physics I have this set too off because my processor is weak. Subsurface Scattering I like the look it has on people. Tessellation on.
 I use a blur of 0.075 and depth 30 or depth 25 and blur 0.050.
@@ -28,14 +27,14 @@ ________________________________________________________________________________
 Here is a quick and dirty game list of working Depth Maps. 
 
 --------------------------------------------------------------------------------------------------------------------------------------
-Game List updates for Reshade 3.0
+Game List updates for Reshade 3.0 Beta 9
 ______________________________________________________________________________________________________________________________________
 
-[Game List]				[Alternate Depth Map]	[Depth Flip On]	[Read Below]	[Blur Recommendations]	[BSD Notes]
+[Game List]				[Alternet Depth Map]	[Depth Flip On]	[Read Below]	[Blur Recommendations]	[BSD Notes]
 Alien Isolation				DM 0
 Amnesia: The Dark Descent		DM 1
 Among The Sleep				DM 2				DF On				
-Assassin Creed Unity			DM 21 or 3							
+Assassin Creed Unity			DM 3							
 Batman Arkham Knight			DM 4 or 6							0.01-0.050		
 Batman Arkham Origins			DM 4							
 Batman: Arkham City			DM 4							
@@ -70,10 +69,10 @@ The Elder Scrolls V: Skyrim		DM 4
 Sleeping Dogs: DE			DM 18
 Souls Games				DM 19
 The Evil Within				DM 7						RB
-Witcher 3				DM 20								0.00-0.10	Read Above
+Witcher 3				DM 20 or 14							0.00-0.10	Read Above
 Zombi					DM 7
 Warhammer: End Times - Vermintide	DM 10
-Deus Ex: Mankind Divided		DM 26								0.050-0.1	Read Above
+Deus Ex: Mankind Divided		DM 21								0.050-0.1	Read Above
 Dead Rising 3				DM 6								0.050-0.1
 Soma					DM 2
 Penumbra: Black Plague			DM 4						RB
@@ -84,16 +83,15 @@ Silent Hill: Homecoming			DM 22
 Monstrum DX11				DM 23				DF On		RB
 Double Dragon Neon			DM 25
 Zombie Army Trilogy			DM 8 or 4							0.0-0.050
-Just Cause 3				DM 21
 
 Game List updates for Reshade 2.0
-[Game List]				[Alternate Depth Map]	   [Depth Flip On][Read Below]	[Blur Recommendations]	[BSD Notes]
+[Game List]				[Alternet Depth Map]	   [Depth Flip On][Read Below]	[Blur Recommendations]	[BSD Notes]
 Serious Sam Revolution			DM 24
 
 
 User Submitted Depth Map Settings
 
-[Game List]				[Alternate Depth Map]	   [Depth Flip On]	[Blur Recommendations]
+[Game List]				[Alternet Depth Map]	   [Depth Flip On]	[Blur Recommendations]
 ______________________________________________________________________________________________________________________________________
 
 Homefront The Revolution 		DM 17
@@ -245,7 +243,7 @@ This should fix it. For more look up this problem on google.
 
 Instal Dll too D:\SteamLibrary\steamapps\common\The Vanishing of Ethan Carter Redux\EthanCarter\Binaries\Win64
 
-{Wolfenstine The New Order} - working in Reshade 3.0 and Rehade 2.0
+{Wolfenstine The New Order} - working in Reshade 3.0 Beta 9 and Rehade 2.0
 [Set Launch Options](+r_multisamples "0" +vt_maxaniso "16")
 This game must be started at the lower Resoution 1600x1200 Then Switch to 1920x1080. Befor you exit switch it back to 1600x1200. 
 Note if you want to 4k It's the same process Start the game at 1600x1200 then switch it to 3840x2160.
