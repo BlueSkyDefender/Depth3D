@@ -67,6 +67,7 @@ Game Compatibility
 * Double Dragon Neon
 * Zombie Army Trilogy
 * Just Cause 3
+* DOOM (2016)
 
 Please read me ReadMeDepth3d.txt For Setting and More Information.
 

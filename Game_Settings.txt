@@ -17,74 +17,73 @@ The setting Use for this game for 4k are. Fullscreen not exclisive no Vsync. My 
 lower if you don't have that much GPU memory. Texture Filtering 16x and Shadow Qualty Medium. For AO I set it to ON If you have a good gpu 
 set this to Very High. Contact Hard Shadows is set to off. Paralax also set to on. Dof off. Now Level of Detail I have this set too High...
 any lower makes the game look bad you may want to set this Very High. Volumetic Lighting set too on. Screenspace Reflections set too on. 
-Temporal AA check this off. Motion Blur off. Sharpen I have it on I like it. Bloom This one good and bad.
-Good as it gives the lighitng in game life but bad because it causes ghosting. I have it set to on I don't mind a little ghosting. 
-Cloth Physics I have this set too off because my processor is weak. Subsurface Scattering I like the look it has on people. Tessellation on.
-I use a blur of 0.075 and depth 30 or depth 25 and blur 0.050.
+Temporal AA check this off. Motion Blur off. Sharpen I have it on I like it.Cloth Physics I have this set too off because my processor is weak. 
+Subsurface Scattering I like the look it has on people. Tessellation on.
 
 
 ______________________________________________________________________________________________________________________________________
 
-Here is a quick and dirty game list of working Depth Maps. 
+Here is a quick and dirty game list of working Depth Maps. They are only suggestions. You can use any setting combination you like.
 
 --------------------------------------------------------------------------------------------------------------------------------------
 Game List updates for Reshade 3.0
 ______________________________________________________________________________________________________________________________________
 
-[Game List]				[Alternate Depth Map]	[Depth Flip On]	[Read Below]	[Blur Recommendations]	[BSD Notes]
+[Game List]				[Alternate DM]	[Depth Flip] [Read Below] [Blur Type] [Depth Map Enhancement] [Depth Map Clamp] [BSD Notes]
 Alien Isolation				DM 0
 Amnesia: The Dark Descent		DM 1
-Among The Sleep				DM 2				DF On				
+Among The Sleep				DM 2		On				
 Assassin Creed Unity			DM 21 or 3							
-Batman Arkham Knight			DM 4 or 6							0.01-0.050		
+Batman Arkham Knight			DM 4 or 6				    Radial	On Adjust 0.750	
 Batman Arkham Origins			DM 4							
 Batman: Arkham City			DM 4							
-BorderLands 2				DM 4						RB
-Call of Duty: Advance Warfare		DM 5						RB		
-Call of Duty: Black Ops 2		DM 5						RB		
-Call of Duty: Ghost			DM 5						RB		
+BorderLands 2				DM 4				RB
+Call of Duty: Advance Warfare		DM 5				RB		
+Call of Duty: Black Ops 2		DM 5				RB		
+Call of Duty: Ghost			DM 5				RB		
 Casltevania: Lord of Shadows - UE	DM 6
-Condemned: Criminal Origins		DM 7						RB		
-Deadly Premonition:The Directors's Cut  DM 8						RB
+Condemned: Criminal Origins		DM 7				RB		
+Deadly Premonition:The Directors's Cut  DM 8				RB
 Dragon Ball Xenoverse			DM 9											
 Dragons Dogma: Dark Arisen		DM 8
-DreamFall Chapters			DM 18		     		DF On
+DreamFall Chapters			DM 18		On
 Dying Light				DM 11
 Fallout 4				DM 0							
-Firewatch				DM 0				DF On		RB				
-GTA V					DM 12						RB		0.01-0.25	Read Above
-Hard Reset				DM 4						RB
+Firewatch				DM 0		On		RB				
+GTA V					DM 12				RB	    Radial					  	Read Above
+Hard Reset				DM 4				RB
 Lords of The Fallen			DM 4
-Magicka 2				DM 13						RB
-Metro 2033 Redux			DM 6						RB
-Metro Last Light Redux			DM 6						RB
-Middle-earth: Shadow of Mordor		DM 14						RB
-Naruto Shippuden UNS3 Full Blurst	DM 15						RB
+Magicka 2				DM 13				RB
+Metro 2033 Redux			DM 6				RB
+Metro Last Light Redux			DM 6				RB
+Middle-earth: Shadow of Mordor		DM 14				RB
+Naruto Shippuden UNS3 Full Blurst	DM 15				RB
 Quake 2 XP				DM 9							
 Quake 4					DM 7
-Rage64					DM 7						RB
-Return To Castle Wolfenstine		DM 7						RB
+Rage64					DM 7				RB
+Return To Castle Wolfenstine		DM 7				RB
 Ryse: Son of Rome			DM 17
-Shadow warrior(2013)			DM 16						RB
+Shadow warrior(2013)			DM 16				RB
 The Elder Scrolls V: Skyrim		DM 4							
 Sleeping Dogs: DE			DM 18
 Souls Games				DM 19
-The Evil Within				DM 7						RB
-Witcher 3				DM 20								0.00-0.10	Read Above
+The Evil Within				DM 7				RB
+Witcher 3				DM 20 or 14				    Radial	On Adjust 0.875		  		Read Above
 Zombi					DM 7
-Warhammer: End Times - Vermintide	DM 10
-Deus Ex: Mankind Divided		DM 26								0.050-0.1	Read Above
-Dead Rising 3				DM 6								0.050-0.1
+Warhammer: End Times - Vermintide	DM 10										DM Clamp On
+Deus Ex: Mankind Divided		DM 26					    Radial				  		Read Above
+Dead Rising 3				DM 6					
 Soma					DM 2
-Penumbra: Black Plague			DM 4						RB
+Penumbra: Black Plague			DM 4				RB
 NecroVision: Lost Company		DM 4
-The Vanishing of Ethan Carter Redux	DM 3						RB
+The Vanishing of Ethan Carter Redux	DM 3				RB
 Cryostasis				DM 8
 Silent Hill: Homecoming			DM 22
-Monstrum DX11				DM 23				DF On		RB
+Monstrum DX11				DM 23		On		RB
 Double Dragon Neon			DM 25
-Zombie Army Trilogy			DM 8 or 4							0.0-0.050
-Just Cause 3				DM 21
+Zombie Army Trilogy			DM 8 or 4				
+Just Cause 3				DM 21					    Radial
+DOOM 2016				DM 2							On Adjust 1.250
 
 Game List updates for Reshade 2.0
 [Game List]				[Alternate Depth Map]	   [Depth Flip On][Read Below]	[Blur Recommendations]	[BSD Notes]
@@ -103,10 +102,12 @@ Need for Speed				DM 4
 [zig11727] "https://forums.geforce.com/default/topic/959175/3d-vision/superdepth-3d/post/4963888/#4963888"
 ______________________________________________________________________________________________________________________________________
 
-You can also try different depth maps for other games your self by changing AltDepthMap number From 0-25. 
+You can also try different depth maps for other games your self by changing AltDepthMap number From 0-26. 
 You *may* want to disable AA in game. You can always enable SMAA in reshade for AA or play at 4k with no AA. 
 Turn Off DOF in all games if possible. Unless you want to know how it feels to be neer sighted. Turn On SSAO or HABO They help a lot.
+Motion Blur Off
 
+Also Keep in mind if you don't like the depth map I made. You can alawys make your own.
 ______________________________________________________________________________________________________________________________________
 
 Read Below Section
