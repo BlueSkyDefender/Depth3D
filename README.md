@@ -78,6 +78,6 @@ Also read https://github.com/BlueSkyDefender/Depth3D/blob/master/Game_Settings.t
 ======================================================================================================================================
 The Reshade 2.0 Repack For 1.8.9
 
-http://www.mediafire.com/file/57cja74fpc5dru5/ReShade_2.0.3f1_Super_DepthMap_3D_v1.8.9_Repack.7z
+http://www.mediafire.com/file/9m9k3888f69i093/ReShade_2.0.3f1_Super_DepthMap_3D_v1.8.9_Repack.7z
 
 ======================================================================================================================================
