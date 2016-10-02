@@ -376,9 +376,9 @@ float4 SbSdepth(float4 pos : SV_Position, float2 texcoord : TEXCOORD0) : SV_Targ
 		//Magicka 2
 		if (Alternate_Depth_Map == 13)
 		{
-		float cF = 1;
-		float cN = 13;	
-		depthM = (exp(depthM * log(cF + cN)) - cN) / cF;
+		float cF = 1.025;
+		float cN = 0.025;	
+		depthM = clamp(pow(abs((exp(depthM * log(cF + cN)) - cN) / cF),1000)/0.5,0,1.25);
 		}
 		
 		//Middle-earth: Shadow of Mordor

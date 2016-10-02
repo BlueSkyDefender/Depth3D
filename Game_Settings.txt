@@ -53,7 +53,7 @@ Firewatch				DM 0		On		RB
 GTA V					DM 12				RB	    Radial					  	Read Above
 Hard Reset				DM 4				RB
 Lords of The Fallen			DM 4
-Magicka 2				DM 13				RB
+Magicka 2				DM 13				RB	    Off
 Metro 2033 Redux			DM 6				RB
 Metro Last Light Redux			DM 6				RB
 Middle-earth: Shadow of Mordor		DM 14				RB
