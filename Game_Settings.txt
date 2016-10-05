@@ -37,6 +37,7 @@ Assassin Creed Unity			DM 21 or 3
 Batman Arkham Knight			DM 4 or 6				    Radial	On Adjust 0.750	
 Batman Arkham Origins			DM 4							
 Batman: Arkham City			DM 4							
+BorderLands 2				DM 4				RB	    Any
 Call of Duty: Advance Warfare		DM 5				RB		
 Call of Duty: Black Ops 2		DM 5				RB		
 Call of Duty: Ghost			DM 5				RB		
