@@ -114,10 +114,24 @@ uniform float2 Near_Far <
 
 uniform int Stereoscopic_Mode <
 	ui_type = "combo";
-	ui_items = "Side by Side\0Top and Bottom\0Line Interlaced\0Checkerboard 3D\0";
+	ui_items = "Side by Side\0Top and Bottom\0Line Interlaced\0Checkerboard 3D\0Anaglyph\0";
 	ui_label = "3D Display Mode";
 	ui_tooltip = "Side by Side/Top and Bottom/Line Interlaced displays output.";
 > = 0;
+
+uniform int Anaglyph_Colors <
+	ui_type = "combo";
+	ui_items = "Red/Cyan\0Dubois Red/Cyan\0Green/Magenta\0Dubois Green/Magenta\0Magenta/Green\0";
+	ui_label = "Anaglyph Color Mode";
+	ui_tooltip = "Select anaglyph colors for your anaglyph glasses Magenta/Green is for TriOviz Inficolor 3D support.";
+> = 0;
+
+uniform float Anaglyph_Desaturation <
+	ui_type = "drag";
+	ui_min = 0.0; ui_max = 1.0;
+	ui_label = "Anaglyph Desaturation";
+	ui_tooltip = "Adjust Anaglyph Saturation, Zero is Black & White, One is full color.";
+> = 1.0;
 
 uniform int Polynomial_Barrel_Distortion <
 	ui_type = "combo";
@@ -808,16 +822,10 @@ void PS0(float4 position : SV_Position, float2 texcoord : TEXCOORD0, out float4 
 {
 	if(!Depth_Map_View)
 	{
-	if(Stereoscopic_Mode == 0)
+	if(Polynomial_Barrel_Distortion == 0)
 	{
-	float posH = Horizontal_Vertical_Squish.y-1;
-	float midH = posH*BUFFER_HEIGHT/2*pix.y;
-	
-	float posV = Horizontal_Vertical_Squish.x-1;
-	float midV = posV*BUFFER_WIDTH/2*pix.x;
-	
-		if(Polynomial_Barrel_Distortion == 0)
-		{
+		if(Stereoscopic_Mode == 0)
+		{	
 			if(Perspective_Edge_Selection == 0)
 			{
 			color = texcoord.x < 0.5 ? tex2D(SamplerCLBORDER,float2(texcoord.x*2 + Perspective * pix.x,texcoord.y)) : tex2D(SamplerCRBORDER,float2(texcoord.x*2-1 - Perspective * pix.x,texcoord.y));
@@ -825,49 +833,148 @@ void PS0(float4 position : SV_Position, float2 texcoord : TEXCOORD0, out float4 
 			else
 			{
 			color = texcoord.x < 0.5 ? tex2D(SamplerCLMIRROR,float2(texcoord.x*2 + Perspective * pix.x,texcoord.y)) : tex2D(SamplerCRMIRROR,float2(texcoord.x*2-1 - Perspective * pix.x,texcoord.y));
+			}	
+		}
+		else if(Stereoscopic_Mode == 1)
+		{
+			if(Perspective_Edge_Selection == 0)
+			{
+			color = texcoord.y < 0.5 ? tex2D(SamplerCLBORDER,float2(texcoord.x + Perspective * pix.x,texcoord.y*2)) : tex2D(SamplerCRBORDER,float2(texcoord.x - Perspective * pix.x,texcoord.y*2-1));
+			}
+			else
+			{
+			color = texcoord.y < 0.5 ? tex2D(SamplerCLMIRROR,float2(texcoord.x + Perspective * pix.x,texcoord.y*2)) : tex2D(SamplerCRMIRROR,float2(texcoord.x - Perspective * pix.x,texcoord.y*2-1));	
+			}
+		}
+		else if(Stereoscopic_Mode == 2)
+		{
+			float gridL = frac(texcoord.y*(BUFFER_HEIGHT/2));
+			if(Perspective_Edge_Selection == 0)
+			{
+			color = gridL > 0.5 ? tex2D(SamplerCLBORDER,float2(texcoord.x + Perspective * pix.x,texcoord.y)) : tex2D(SamplerCRBORDER,float2(texcoord.x - Perspective * pix.x,texcoord.y));
+			}
+			else
+			{
+			color = gridL > 0.5 ? tex2D(SamplerCLMIRROR,float2(texcoord.x + Perspective * pix.x,texcoord.y)) : tex2D(SamplerCRMIRROR,float2(texcoord.x - Perspective * pix.x,texcoord.y));
+			}
+		}
+		else if(Stereoscopic_Mode == 3)
+		{
+			float gridy = floor(texcoord.y*(BUFFER_HEIGHT));
+			float gridx = floor(texcoord.x*(BUFFER_WIDTH));
+			if(Perspective_Edge_Selection == 0)
+			{
+			color = (int(gridy+gridx) & 1) < 0.5 ? tex2D(SamplerCLBORDER,float2(texcoord.x + Perspective * pix.x,texcoord.y)) : tex2D(SamplerCRBORDER,float2(texcoord.x - Perspective * pix.x,texcoord.y));
+			}
+			else
+			{
+			color = (int(gridy+gridx) & 1) < 0.5 ? tex2D(SamplerCLMIRROR,float2(texcoord.x + Perspective * pix.x,texcoord.y)) : tex2D(SamplerCRMIRROR,float2(texcoord.x - Perspective * pix.x,texcoord.y));
 			}
 		}
 		else
-		{
-		color = texcoord.x < 0.5 ? PDL(float2(((texcoord.x*2)*Horizontal_Vertical_Squish.x)-midV + Perspective * pix.x,(texcoord.y*Horizontal_Vertical_Squish.y)-midH)) : PDR(float2(((texcoord.x*2-1)*Horizontal_Vertical_Squish.x)-midV - Perspective * pix.x,(texcoord.y*Horizontal_Vertical_Squish.y)-midH));
-		}
-	
-	}
-	else if(Stereoscopic_Mode == 1)
-	{
-		if(Perspective_Edge_Selection == 0)
-		{
-		color = texcoord.y < 0.5 ? tex2D(SamplerCLBORDER,float2(texcoord.x + Perspective * pix.x,texcoord.y*2)) : tex2D(SamplerCRBORDER,float2(texcoord.x - Perspective * pix.x,texcoord.y*2-1));
-		}
-		else
-		{
-		color = texcoord.y < 0.5 ? tex2D(SamplerCLMIRROR,float2(texcoord.x + Perspective * pix.x,texcoord.y*2)) : tex2D(SamplerCRMIRROR,float2(texcoord.x - Perspective * pix.x,texcoord.y*2-1));	
-		}
-	}
-	else if(Stereoscopic_Mode == 2)
-	{
-		float gridL = frac(texcoord.y*(BUFFER_HEIGHT/2));
-		if(Perspective_Edge_Selection == 0)
-		{
-		color = gridL > 0.5 ? tex2D(SamplerCLBORDER,float2(texcoord.x + Perspective * pix.x,texcoord.y)) : tex2D(SamplerCRBORDER,float2(texcoord.x - Perspective * pix.x,texcoord.y));
-		}
-		else
-		{
-		color = gridL > 0.5 ? tex2D(SamplerCLMIRROR,float2(texcoord.x + Perspective * pix.x,texcoord.y)) : tex2D(SamplerCRMIRROR,float2(texcoord.x - Perspective * pix.x,texcoord.y));
+		{	
+								
+				float3 HalfLM = dot(tex2D(SamplerCLMIRROR,float2(texcoord.x + Perspective * pix.x,texcoord.y)).rgb,float3(0.299, 0.587, 0.114));
+				float3 HalfRM = dot(tex2D(SamplerCRMIRROR,float2(texcoord.x - Perspective * pix.x,texcoord.y)).rgb,float3(0.299, 0.587, 0.114));
+				float3 LM = lerp(HalfLM,tex2D(SamplerCLMIRROR,float2(texcoord.x + Perspective * pix.x,texcoord.y)).rgb,Anaglyph_Desaturation);  
+				float3 RM = lerp(HalfRM,tex2D(SamplerCRMIRROR,float2(texcoord.x - Perspective * pix.x,texcoord.y)).rgb,Anaglyph_Desaturation); 
+				
+				float3 HalfLB = dot(tex2D(SamplerCLBORDER,float2(texcoord.x + Perspective * pix.x,texcoord.y)).rgb,float3(0.299, 0.587, 0.114));
+				float3 HalfRB = dot(tex2D(SamplerCRBORDER,float2(texcoord.x - Perspective * pix.x,texcoord.y)).rgb,float3(0.299, 0.587, 0.114));
+				float3 LB = lerp(HalfLB,tex2D(SamplerCLBORDER,float2(texcoord.x + Perspective * pix.x,texcoord.y)).rgb,Anaglyph_Desaturation);  
+				float3 RB = lerp(HalfRB,tex2D(SamplerCRBORDER,float2(texcoord.x - Perspective * pix.x,texcoord.y)).rgb,Anaglyph_Desaturation); 
+				
+				float4 C;
+				float4 CT;
+				
+				if(Perspective_Edge_Selection == 0)
+				{
+				C = float4(LB,0);
+				CT = float4(RB,0);
+				}
+				else
+				{
+				C = float4(LM,0);
+				CT = float4(RM,0);
+				}
+				
+			if (Anaglyph_Colors == 0)
+			{
+				float4 LeftEyecolor = float4(1.0,0.0,0.0,0.0);
+				float4 RightEyecolor = float4(0.0,1.0,1.0,0.0);
+				
+
+				color =  (C*LeftEyecolor) + (CT*RightEyecolor);
+
+			}
+			else if (Anaglyph_Colors == 1)
+			{
+			float red = 0.437 * C.r + 0.449 * C.g + 0.164 * C.b
+					- 0.011 * CT.r - 0.032 * CT.g - 0.007 * CT.b;
+			
+			if (red > 1) { red = 1; }   if (red < 0) { red = 0; }
+
+			float green = -0.062 * C.r -0.062 * C.g -0.024 * C.b 
+						+ 0.377 * CT.r + 0.761 * CT.g + 0.009 * CT.b;
+			
+			if (green > 1) { green = 1; }   if (green < 0) { green = 0; }
+
+			float blue = -0.048 * C.r - 0.050 * C.g - 0.017 * C.b 
+						-0.026 * CT.r -0.093 * CT.g + 1.234  * CT.b;
+			
+			if (blue > 1) { blue = 1; }   if (blue < 0) { blue = 0; }
+
+
+			color = float4(red, green, blue, 0);
+			}
+			else if (Anaglyph_Colors == 2)
+			{
+				float4 LeftEyecolor = float4(0.0,1.0,0.0,0.0);
+				float4 RightEyecolor = float4(1.0,0.0,1.0,0.0);
+				
+				color =  (C*LeftEyecolor) + (CT*RightEyecolor);
+				
+			}
+			else if (Anaglyph_Colors == 3)
+			{
+				
+				
+			float red = -0.062 * C.r -0.158 * C.g -0.039 * C.b
+					+ 0.529 * CT.r + 0.705 * CT.g + 0.024 * CT.b;
+			
+			if (red > 1) { red = 1; }   if (red < 0) { red = 0; }
+
+			float green = 0.284 * C.r + 0.668 * C.g + 0.143 * C.b 
+						- 0.016 * CT.r - 0.015 * CT.g + 0.065 * CT.b;
+			
+			if (green > 1) { green = 1; }   if (green < 0) { green = 0; }
+
+			float blue = -0.015 * C.r -0.027 * C.g + 0.021 * C.b 
+						+ 0.009 * CT.r + 0.075 * CT.g + 0.937  * CT.b;
+			
+			if (blue > 1) { blue = 1; }   if (blue < 0) { blue = 0; }
+					
+			color = float4(red, green, blue, 0);
+			}
+			else
+			{
+				float4 LeftEyecolor = float4(1.0,0.0,1.0,0.0);
+				float4 RightEyecolor = float4(0.0,1.0,0.0,0.0);
+				
+				color =  (C*LeftEyecolor) + (CT*RightEyecolor);
+				
+			}
 		}
 	}
 	else
 	{
-		float gridy = floor(texcoord.y*(BUFFER_HEIGHT));
-		float gridx = floor(texcoord.x*(BUFFER_WIDTH));
-		if(Perspective_Edge_Selection == 0)
-		{
-		color = (int(gridy+gridx) & 1) < 0.5 ? tex2D(SamplerCLBORDER,float2(texcoord.x + Perspective * pix.x,texcoord.y)) : tex2D(SamplerCRBORDER,float2(texcoord.x - Perspective * pix.x,texcoord.y));
-		}
-		else
-		{
-		color = (int(gridy+gridx) & 1) < 0.5 ? tex2D(SamplerCLMIRROR,float2(texcoord.x + Perspective * pix.x,texcoord.y)) : tex2D(SamplerCRMIRROR,float2(texcoord.x - Perspective * pix.x,texcoord.y));
-		}
+	float posH = Horizontal_Vertical_Squish.y-1;
+	float midH = posH*BUFFER_HEIGHT/2*pix.y;
+		
+	float posV = Horizontal_Vertical_Squish.x-1;
+	float midV = posV*BUFFER_WIDTH/2*pix.x;
+	
+	color = texcoord.x < 0.5 ? PDL(float2(((texcoord.x*2)*Horizontal_Vertical_Squish.x)-midV + Perspective * pix.x,(texcoord.y*Horizontal_Vertical_Squish.y)-midH)) : PDR(float2(((texcoord.x*2-1)*Horizontal_Vertical_Squish.x)-midV - Perspective * pix.x,(texcoord.y*Horizontal_Vertical_Squish.y)-midH));
 	}
 	}
 	else
