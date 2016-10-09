@@ -81,3 +81,7 @@ The Reshade 2.0 Repack For 1.8.9
 http://www.mediafire.com/file/9m9k3888f69i093/ReShade_2.0.3f1_Super_DepthMap_3D_v1.8.9_Repack.7z
 
 ======================================================================================================================================
+
+User Game & Settings
+
+https://docs.google.com/spreadsheets/d/18ujpY-97V_YuXpQUh-7bOomE4D5nUGwp3XppfU_0N2k/edit?usp=sharing

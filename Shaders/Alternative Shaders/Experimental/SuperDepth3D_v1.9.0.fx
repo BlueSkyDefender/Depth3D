@@ -43,6 +43,13 @@ uniform int Depth <
 	ui_tooltip = "Determines the amount of Image Warping and Separation between both eyes. You can Override this setting.";
 > = 15;
 
+uniform float Convergence <
+	ui_type = "drag";
+	ui_min = -0.150; ui_max = 0.150;
+	ui_label = "Convergence Slider";
+	ui_tooltip = "Determines the Convergence point. Default is 0";
+> = 0;
+
 uniform int Perspective_Edge_Selection <
 	ui_type = "combo";
 	ui_items = "Black Sides\0Mirrored Sides\0";
@@ -121,9 +128,9 @@ uniform int Stereoscopic_Mode <
 
 uniform int Anaglyph_Colors <
 	ui_type = "combo";
-	ui_items = "Red/Cyan\0Dubois Red/Cyan\0Green/Magenta\0Dubois Green/Magenta\0Magenta/Green\0";
+	ui_items = "Red/Cyan\0Dubois Red/Cyan\0Green/Magenta\0Dubois Green/Magenta\0InfiniteColor\0";
 	ui_label = "Anaglyph Color Mode";
-	ui_tooltip = "Select anaglyph colors for your anaglyph glasses Magenta/Green is for TriOviz Inficolor 3D support.";
+	ui_tooltip = "Select anaglyph colors for your anaglyph glasses, InfiniteColor is for TriOvis Inficolors 3D support.";
 > = 0;
 
 uniform float Anaglyph_Desaturation <
@@ -626,7 +633,8 @@ float4 BlurDM(float4 pos : SV_Position, float2 texcoord : TEXCOORD0) : SV_Target
 	float2 dir;
 	float B;
 	float Con = 11;
-	if(Blur_Type > 0 && Blur > 0)
+	
+	if((Blur_Type > 0 && Blur > 0) && (Stereoscopic_Mode < 4 || Anaglyph_Colors != 4)) 
 	{
 	
 	const float weight[10] = 
@@ -675,51 +683,66 @@ float4 BlurDM(float4 pos : SV_Position, float2 texcoord : TEXCOORD0) : SV_Target
 ////////////////////////////////////////////////Left/Right Eye////////////////////////////////////////////////////////
 void PS_renderLR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 color : SV_Target0 , out float4 colorT: SV_Target1)
 {	
+	float D;
+	float C;
+	
+	if (Stereoscopic_Mode == 4 && Anaglyph_Colors == 4)
+			{
+			D = 17.5;
+			C = 0.100;
+			}
+			else
+			{
+			D = Depth;
+			C = Convergence;
+			}
+			
+	
 	const float samples[4] = {0.25, 0.50, 0.75, 1};
 	float DepthL = 1.0, DepthR = 1.0;
 	float2 uv = 0;
 	[loop]
 	for (int j = 0; j <= 3; ++j) 
 	{	
-			uv.x = samples[j] * Depth;
-			DepthL =  min(DepthL,tex2D(SamplerCC,float2(texcoord.x+uv.x*pix.x, texcoord.y)).r);
-			DepthR =  min(DepthR,tex2D(SamplerCC,float2(texcoord.x-uv.x*pix.x, texcoord.y)).r);
+			uv.x = samples[j] * D;
+			DepthL =  min(DepthL,tex2D(SamplerCC,float2(texcoord.x+uv.x*pix.x, texcoord.y)).r)/1-C;
+			DepthR =  min(DepthR,tex2D(SamplerCC,float2(texcoord.x-uv.x*pix.x, texcoord.y)).r)/1-C;
 	}
 			
 		if(!Eye_Swap)
 		{	
 			if(Custom_Sidebars == 0)
 			{
-			color = tex2D(BackBufferMIRROR, float2(texcoord.xy+float2((DepthL*Depth)/0.950,0)*pix.xy));
-			colorT = tex2D(BackBufferMIRROR, float2(texcoord.xy-float2((DepthR*Depth)/0.950,0)*pix.xy));
+			color = tex2D(BackBufferMIRROR, float2(texcoord.xy+float2((DepthL*D),0)*pix.xy));
+			colorT = tex2D(BackBufferMIRROR, float2(texcoord.xy-float2((DepthR*D),0)*pix.xy));
 			}
 			else if(Custom_Sidebars == 1)
 			{
-			color = tex2D(BackBufferBORDER, float2(texcoord.xy+float2((DepthL*Depth)/0.950,0)*pix.xy));
-			colorT = tex2D(BackBufferBORDER, float2(texcoord.xy-float2((DepthR*Depth)/0.950,0)*pix.xy));
+			color = tex2D(BackBufferBORDER, float2(texcoord.xy+float2((DepthL*D),0)*pix.xy));
+			colorT = tex2D(BackBufferBORDER, float2(texcoord.xy-float2((DepthR*D),0)*pix.xy));
 			}
 			else
 			{
-			color = tex2D(BackBufferCLAMP, float2(texcoord.xy+float2((DepthL*Depth)/0.950,0)*pix.xy));
-			colorT = tex2D(BackBufferCLAMP, float2(texcoord.xy-float2((DepthR*Depth)/0.950,0)*pix.xy));
+			color = tex2D(BackBufferCLAMP, float2(texcoord.xy+float2((DepthL*D),0)*pix.xy));
+			colorT = tex2D(BackBufferCLAMP, float2(texcoord.xy-float2((DepthR*D),0)*pix.xy));
 			}
 		}
 		else
 		{		
 			if(Custom_Sidebars == 0)
 			{
-			colorT = tex2D(BackBufferMIRROR, float2(texcoord.xy+float2((DepthL*Depth)/0.950,0)*pix.xy));
-			color = tex2D(BackBufferMIRROR, float2(texcoord.xy-float2((DepthR*Depth)/0.950,0)*pix.xy));
+			colorT = tex2D(BackBufferMIRROR, float2(texcoord.xy+float2((DepthL*D),0)*pix.xy));
+			color = tex2D(BackBufferMIRROR, float2(texcoord.xy-float2((DepthR*D),0)*pix.xy));
 			}
 			else if(Custom_Sidebars == 1)
 			{
-			colorT = tex2D(BackBufferBORDER, float2(texcoord.xy+float2((DepthL*Depth)/0.950,0)*pix.xy));
-			color = tex2D(BackBufferBORDER, float2(texcoord.xy-float2((DepthR*Depth)/0.950,0)*pix.xy));
+			colorT = tex2D(BackBufferBORDER, float2(texcoord.xy+float2((DepthL*D),0)*pix.xy));
+			color = tex2D(BackBufferBORDER, float2(texcoord.xy-float2((DepthR*D),0)*pix.xy));
 			}
 			else
 			{
-			colorT = tex2D(BackBufferCLAMP, float2(texcoord.xy+float2((DepthL*Depth)/0.950,0)*pix.xy));
-			color = tex2D(BackBufferCLAMP, float2(texcoord.xy-float2((DepthR*Depth)/0.950,0)*pix.xy));
+			colorT = tex2D(BackBufferCLAMP, float2(texcoord.xy+float2((DepthL*D),0)*pix.xy));
+			color = tex2D(BackBufferCLAMP, float2(texcoord.xy-float2((DepthR*D),0)*pix.xy));
 			}
 		}
 }
@@ -873,35 +896,46 @@ void PS0(float4 position : SV_Position, float2 texcoord : TEXCOORD0, out float4 
 		}
 		else
 		{	
+	
+	float P;
+	
+	if (Stereoscopic_Mode == 4)
+			{
+			P = 0;
+			}
+			else
+			{
+			P = Perspective;
+			}
 								
-				float3 HalfLM = dot(tex2D(SamplerCLMIRROR,float2(texcoord.x + Perspective * pix.x,texcoord.y)).rgb,float3(0.299, 0.587, 0.114));
-				float3 HalfRM = dot(tex2D(SamplerCRMIRROR,float2(texcoord.x - Perspective * pix.x,texcoord.y)).rgb,float3(0.299, 0.587, 0.114));
-				float3 LM = lerp(HalfLM,tex2D(SamplerCLMIRROR,float2(texcoord.x + Perspective * pix.x,texcoord.y)).rgb,Anaglyph_Desaturation);  
-				float3 RM = lerp(HalfRM,tex2D(SamplerCRMIRROR,float2(texcoord.x - Perspective * pix.x,texcoord.y)).rgb,Anaglyph_Desaturation); 
+				float3 HalfLM = dot(tex2D(SamplerCLMIRROR,float2(texcoord.x + P * pix.x,texcoord.y)).rgb,float3(0.299, 0.587, 0.114));
+				float3 HalfRM = dot(tex2D(SamplerCRMIRROR,float2(texcoord.x - P * pix.x,texcoord.y)).rgb,float3(0.299, 0.587, 0.114));
+				float3 LM = lerp(HalfLM,tex2D(SamplerCLMIRROR,float2(texcoord.x + P * pix.x,texcoord.y)).rgb,Anaglyph_Desaturation);  
+				float3 RM = lerp(HalfRM,tex2D(SamplerCRMIRROR,float2(texcoord.x - P * pix.x,texcoord.y)).rgb,Anaglyph_Desaturation); 
 				
-				float3 HalfLB = dot(tex2D(SamplerCLBORDER,float2(texcoord.x + Perspective * pix.x,texcoord.y)).rgb,float3(0.299, 0.587, 0.114));
-				float3 HalfRB = dot(tex2D(SamplerCRBORDER,float2(texcoord.x - Perspective * pix.x,texcoord.y)).rgb,float3(0.299, 0.587, 0.114));
-				float3 LB = lerp(HalfLB,tex2D(SamplerCLBORDER,float2(texcoord.x + Perspective * pix.x,texcoord.y)).rgb,Anaglyph_Desaturation);  
-				float3 RB = lerp(HalfRB,tex2D(SamplerCRBORDER,float2(texcoord.x - Perspective * pix.x,texcoord.y)).rgb,Anaglyph_Desaturation); 
+				float3 HalfLB = dot(tex2D(SamplerCLBORDER,float2(texcoord.x + P * pix.x,texcoord.y)).rgb,float3(0.299, 0.587, 0.114));
+				float3 HalfRB = dot(tex2D(SamplerCRBORDER,float2(texcoord.x - P * pix.x,texcoord.y)).rgb,float3(0.299, 0.587, 0.114));
+				float3 LB = lerp(HalfLB,tex2D(SamplerCLBORDER,float2(texcoord.x + P * pix.x,texcoord.y)).rgb,Anaglyph_Desaturation);  
+				float3 RB = lerp(HalfRB,tex2D(SamplerCRBORDER,float2(texcoord.x - P * pix.x,texcoord.y)).rgb,Anaglyph_Desaturation); 
 				
 				float4 C;
 				float4 CT;
 				
 				if(Perspective_Edge_Selection == 0)
 				{
-				C = float4(LB,0);
-				CT = float4(RB,0);
+				C = float4(LB,1);
+				CT = float4(RB,1);
 				}
 				else
 				{
-				C = float4(LM,0);
-				CT = float4(RM,0);
+				C = float4(LM,1);
+				CT = float4(RM,1);
 				}
 				
 			if (Anaglyph_Colors == 0)
 			{
-				float4 LeftEyecolor = float4(1.0,0.0,0.0,0.0);
-				float4 RightEyecolor = float4(0.0,1.0,1.0,0.0);
+				float4 LeftEyecolor = float4(1.0,0.0,0.0,1.0);
+				float4 RightEyecolor = float4(0.0,1.0,1.0,1.0);
 				
 
 				color =  (C*LeftEyecolor) + (CT*RightEyecolor);
@@ -929,8 +963,8 @@ void PS0(float4 position : SV_Position, float2 texcoord : TEXCOORD0, out float4 
 			}
 			else if (Anaglyph_Colors == 2)
 			{
-				float4 LeftEyecolor = float4(0.0,1.0,0.0,0.0);
-				float4 RightEyecolor = float4(1.0,0.0,1.0,0.0);
+				float4 LeftEyecolor = float4(0.0,1.0,0.0,1.0);
+				float4 RightEyecolor = float4(1.0,0.0,1.0,1.0);
 				
 				color =  (C*LeftEyecolor) + (CT*RightEyecolor);
 				
@@ -958,10 +992,34 @@ void PS0(float4 position : SV_Position, float2 texcoord : TEXCOORD0, out float4 
 			}
 			else
 			{
-				float4 LeftEyecolor = float4(1.0,0.0,1.0,0.0);
-				float4 RightEyecolor = float4(0.0,1.0,0.0,0.0);
-				
-				color =  (C*LeftEyecolor) + (CT*RightEyecolor);
+			
+	float Contrast = 1.5;
+	float Deghost = 0.5;
+	float4 accum;
+	float4 image = (1.0,1.0,1.0,1.0);
+	Contrast = (Contrast*0.5)+0.5;
+	float l1 = Contrast;
+	float l2 = (1.0-l1)*0.5;
+	float r1 = Contrast;
+	float r2 = 1.0-r1;
+	float deghost = Deghost*0.275;
+
+	accum = clamp(C*float4(r1,r2,0.0,1.0),0.0,1.0);
+	image.r = pow(accum.r+accum.g+accum.b, 1.00);
+	image.a = accum.a;
+
+	accum = clamp(CT*float4(l2,l1,l2,1.0),0.0,1.0);
+	image.g = pow(accum.r+accum.g+accum.b, 1.00);
+	image.a = image.a+accum.a;
+
+	accum = clamp(C*float4(0.0,r2,r1,1.0),0.0,1.0);
+	image.b = pow(accum.r+accum.g+accum.b, 1.00);
+	image.a = (image.a+accum.a)/3.0;
+
+	accum = image;
+	image.rb = (accum.rb+(accum.r*(deghost*-0.75))+(accum.g*(deghost*1.5))+(accum.b*(deghost*-0.75)));
+	image.g = (accum.g+(accum.r*(deghost*-0.75))+(accum.g*(deghost*1.5))+(accum.b*(deghost*-0.75)));
+	color = image;
 				
 			}
 		}
