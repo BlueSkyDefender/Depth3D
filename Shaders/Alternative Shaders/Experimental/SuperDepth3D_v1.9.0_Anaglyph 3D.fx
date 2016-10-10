@@ -3,7 +3,7 @@
  //----------------////
 
  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
- //* Depth Map Based 3D post-process shader v1.9.0																																	*//
+ //* Depth Map Based 3D post-process shader v1.9.0 Anaglyph 3D																														*//
  //* For Reshade 3.0																																								*//
  //* --------------------------																																						*//
  //* This work is licensed under a Creative Commons Attribution 3.0 Unported License.																								*//
@@ -21,13 +21,6 @@
  //*																																												*//
  //* 																																												*//
  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-// Change the Cross Cusor Key
-// Determines the Cusor Toggle Key useing keycode info
-// You can use http://keycode.info/ to figure out what key is what.
-// key B is Key Code 66, This is Default. Ex. Key 187 is the code for Equal Sign =.
-
-#define Cross_Cusor_Key 66
 
 uniform int Alternate_Depth_Map <
 	ui_type = "combo";
@@ -119,12 +112,19 @@ uniform float2 Near_Far <
 	ui_tooltip = "Adjustment for Near and Far Depth Map Precision.";
 > = float2(1,1.5);
 
-uniform int Stereoscopic_Mode <
+uniform int Anaglyph_Colors <
 	ui_type = "combo";
-	ui_items = "Side by Side\0Top and Bottom\0Line Interlaced\0Checkerboard 3D\0";
-	ui_label = "3D Display Mode";
-	ui_tooltip = "Side by Side/Top and Bottom/Line Interlaced displays output.";
+	ui_items = "Red/Cyan\0Dubois Red/Cyan\0Green/Magenta\0Dubois Green/Magenta\0InfiniteColor\0";
+	ui_label = "Anaglyph Color Mode";
+	ui_tooltip = "Select anaglyph colors for your anaglyph glasses, InfiniteColor is for TriOvis Inficolors 3D support.";
 > = 0;
+
+uniform float Anaglyph_Desaturation <
+	ui_type = "drag";
+	ui_min = 0.0; ui_max = 1.0;
+	ui_label = "Anaglyph Desaturation";
+	ui_tooltip = "Adjust Anaglyph Saturation, Zero is Black & White, One is full color.";
+> = 1.0;
 
 uniform int Custom_Sidebars <
 	ui_type = "combo";
@@ -133,27 +133,10 @@ uniform int Custom_Sidebars <
 	ui_tooltip = "Select how you like the Edge of the screen to look like.";
 > = 1;
 
-uniform float Cross_Cusor_Size <
-	ui_type = "drag";
-	ui_min = 1; ui_max = 100;
-	ui_tooltip = "Pick your size of the cross cusor. Default is 25";
-	ui_label = "Cross Cusor Size";
-> = 25.0;
-
-uniform float3 Cross_Cusor_Color <
-	ui_type = "color";
-	ui_tooltip = "Pick your own cross cusor color. Default is (R 255, G 255, B 255)";
-	ui_label = "Cross Cusor Color";
-> = float3(1.0, 1.0, 1.0);
-
 uniform bool Eye_Swap <
 	ui_label = "Eye Swap";
 	ui_tooltip = "Left right image change.";
 > = false;
-
-uniform bool mouse < source = "key"; keycode = Cross_Cusor_Key; toggle = true; >;
-
-uniform float2 Mousecoords < source = "mousepoint"; > ;
 
 /////////////////////////////////////////////D3D Starts Here/////////////////////////////////////////////////////////////////
 
@@ -199,7 +182,7 @@ sampler BackBufferCLAMP
 	
 texture texCL  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA32F;}; 
 texture texCR  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA32F;}; 
-texture texCC  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA32F;}; 
+texture texCC  { Width = BUFFER_WIDTH/2; Height = BUFFER_HEIGHT; Format = RGBA32F;}; 
 texture texCDM  { Width = BUFFER_WIDTH/2; Height = BUFFER_HEIGHT; Format = RGBA32F;};
 	
 sampler SamplerCLMIRROR
@@ -249,20 +232,6 @@ sampler SamplerCDM
 		AddressV = CLAMP;
 		AddressW = CLAMP;
 	};
-	
-float4 MouseCuror(float4 pos : SV_Position, float2 texcoord : TEXCOORD) : SV_Target
-{
-	float4 Mpointer; 
-	if(mouse)
-	{
-	Mpointer = all(abs(Mousecoords - pos.xy) < Cross_Cusor_Size) * (1 - all(abs(Mousecoords - pos.xy) > Cross_Cusor_Size/(Cross_Cusor_Size/2))) ? float4(Cross_Cusor_Color, 1.0) : tex2D(BackBuffer, texcoord);//cross
-	}
-	else
-	{
-	Mpointer =  tex2D(BackBuffer, texcoord);
-	}
-	return Mpointer;
-}
 
 //Depth Map Information	
 float4 SbSdepth(float4 pos : SV_Position, float2 texcoord : TEXCOORD0) : SV_Target
@@ -600,7 +569,7 @@ float4 BlurDM(float4 pos : SV_Position, float2 texcoord : TEXCOORD0) : SV_Target
 	float B;
 	float Con = 11;
 	
-	if(Blur_Type > 0 && Blur > 0) 
+	if((Blur_Type > 0 && Blur > 0) && (Anaglyph_Colors != 4)) 
 	{
 	
 	const float weight[10] = 
@@ -649,10 +618,23 @@ float4 BlurDM(float4 pos : SV_Position, float2 texcoord : TEXCOORD0) : SV_Target
 ////////////////////////////////////////////////Left/Right Eye////////////////////////////////////////////////////////
 void PS_renderLR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 color : SV_Target0 , out float4 colorT: SV_Target1)
 {	
+	float D;
+	float C;
+	
+	if (Anaglyph_Colors == 4)
+			{
+			D = 17.5;
+			C = 0.100;
+			}
+			else
+			{
+			D = Depth;
+			C = Convergence;
+			}
+			
+	
 	const float samples[4] = {0.25, 0.50, 0.75, 1};
 	float DepthL = 1.0, DepthR = 1.0;
-	float C = Convergence;
-	float D = Depth;
 	float2 uv = 0;
 	[loop]
 	for (int j = 0; j <= 3; ++j) 
@@ -705,54 +687,133 @@ void PS0(float4 position : SV_Position, float2 texcoord : TEXCOORD0, out float4 
 {
 	if(!Depth_Map_View)
 	{
-		if(Stereoscopic_Mode == 0)
-		{	
-			if(Perspective_Edge_Selection == 0)
+	
+	float P;
+	
+	if (Anaglyph_Colors == 4)
 			{
-			color = texcoord.x < 0.5 ? tex2D(SamplerCLBORDER,float2(texcoord.x*2 + Perspective * pix.x,texcoord.y)) : tex2D(SamplerCRBORDER,float2(texcoord.x*2-1 - Perspective * pix.x,texcoord.y));
+			P = 0;
 			}
 			else
 			{
-			color = texcoord.x < 0.5 ? tex2D(SamplerCLMIRROR,float2(texcoord.x*2 + Perspective * pix.x,texcoord.y)) : tex2D(SamplerCRMIRROR,float2(texcoord.x*2-1 - Perspective * pix.x,texcoord.y));
-			}	
-		}
-		else if(Stereoscopic_Mode == 1)
-		{
-			if(Perspective_Edge_Selection == 0)
+			P = Perspective;
+			}
+								
+				float3 HalfLM = dot(tex2D(SamplerCLMIRROR,float2(texcoord.x + P * pix.x,texcoord.y)).rgb,float3(0.299, 0.587, 0.114));
+				float3 HalfRM = dot(tex2D(SamplerCRMIRROR,float2(texcoord.x - P * pix.x,texcoord.y)).rgb,float3(0.299, 0.587, 0.114));
+				float3 LM = lerp(HalfLM,tex2D(SamplerCLMIRROR,float2(texcoord.x + P * pix.x,texcoord.y)).rgb,Anaglyph_Desaturation);  
+				float3 RM = lerp(HalfRM,tex2D(SamplerCRMIRROR,float2(texcoord.x - P * pix.x,texcoord.y)).rgb,Anaglyph_Desaturation); 
+				
+				float3 HalfLB = dot(tex2D(SamplerCLBORDER,float2(texcoord.x + P * pix.x,texcoord.y)).rgb,float3(0.299, 0.587, 0.114));
+				float3 HalfRB = dot(tex2D(SamplerCRBORDER,float2(texcoord.x - P * pix.x,texcoord.y)).rgb,float3(0.299, 0.587, 0.114));
+				float3 LB = lerp(HalfLB,tex2D(SamplerCLBORDER,float2(texcoord.x + P * pix.x,texcoord.y)).rgb,Anaglyph_Desaturation);  
+				float3 RB = lerp(HalfRB,tex2D(SamplerCRBORDER,float2(texcoord.x - P * pix.x,texcoord.y)).rgb,Anaglyph_Desaturation); 
+				
+				float4 C;
+				float4 CT;
+				
+				if(Perspective_Edge_Selection == 0)
+				{
+				C = float4(LB,1);
+				CT = float4(RB,1);
+				}
+				else
+				{
+				C = float4(LM,1);
+				CT = float4(RM,1);
+				}
+				
+			if (Anaglyph_Colors == 0)
 			{
-			color = texcoord.y < 0.5 ? tex2D(SamplerCLBORDER,float2(texcoord.x + Perspective * pix.x,texcoord.y*2)) : tex2D(SamplerCRBORDER,float2(texcoord.x - Perspective * pix.x,texcoord.y*2-1));
+				float4 LeftEyecolor = float4(1.0,0.0,0.0,1.0);
+				float4 RightEyecolor = float4(0.0,1.0,1.0,1.0);
+				
+
+				color =  (C*LeftEyecolor) + (CT*RightEyecolor);
+
+			}
+			else if (Anaglyph_Colors == 1)
+			{
+			float red = 0.437 * C.r + 0.449 * C.g + 0.164 * C.b
+					- 0.011 * CT.r - 0.032 * CT.g - 0.007 * CT.b;
+			
+			if (red > 1) { red = 1; }   if (red < 0) { red = 0; }
+
+			float green = -0.062 * C.r -0.062 * C.g -0.024 * C.b 
+						+ 0.377 * CT.r + 0.761 * CT.g + 0.009 * CT.b;
+			
+			if (green > 1) { green = 1; }   if (green < 0) { green = 0; }
+
+			float blue = -0.048 * C.r - 0.050 * C.g - 0.017 * C.b 
+						-0.026 * CT.r -0.093 * CT.g + 1.234  * CT.b;
+			
+			if (blue > 1) { blue = 1; }   if (blue < 0) { blue = 0; }
+
+
+			color = float4(red, green, blue, 0);
+			}
+			else if (Anaglyph_Colors == 2)
+			{
+				float4 LeftEyecolor = float4(0.0,1.0,0.0,1.0);
+				float4 RightEyecolor = float4(1.0,0.0,1.0,1.0);
+				
+				color =  (C*LeftEyecolor) + (CT*RightEyecolor);
+				
+			}
+			else if (Anaglyph_Colors == 3)
+			{
+				
+				
+			float red = -0.062 * C.r -0.158 * C.g -0.039 * C.b
+					+ 0.529 * CT.r + 0.705 * CT.g + 0.024 * CT.b;
+			
+			if (red > 1) { red = 1; }   if (red < 0) { red = 0; }
+
+			float green = 0.284 * C.r + 0.668 * C.g + 0.143 * C.b 
+						- 0.016 * CT.r - 0.015 * CT.g + 0.065 * CT.b;
+			
+			if (green > 1) { green = 1; }   if (green < 0) { green = 0; }
+
+			float blue = -0.015 * C.r -0.027 * C.g + 0.021 * C.b 
+						+ 0.009 * CT.r + 0.075 * CT.g + 0.937  * CT.b;
+			
+			if (blue > 1) { blue = 1; }   if (blue < 0) { blue = 0; }
+					
+			color = float4(red, green, blue, 0);
 			}
 			else
 			{
-			color = texcoord.y < 0.5 ? tex2D(SamplerCLMIRROR,float2(texcoord.x + Perspective * pix.x,texcoord.y*2)) : tex2D(SamplerCRMIRROR,float2(texcoord.x - Perspective * pix.x,texcoord.y*2-1));	
+			
+	float Contrast = 1.5;
+	float Deghost = 0.5;
+	float4 accum;
+	float4 image = (1.0,1.0,1.0,1.0);
+	Contrast = (Contrast*0.5)+0.5;
+	float l1 = Contrast;
+	float l2 = (1.0-l1)*0.5;
+	float r1 = Contrast;
+	float r2 = 1.0-r1;
+	float deghost = Deghost*0.275;
+
+	accum = clamp(C*float4(r1,r2,0.0,1.0),0.0,1.0);
+	image.r = pow(accum.r+accum.g+accum.b, 1.00);
+	image.a = accum.a;
+
+	accum = clamp(CT*float4(l2,l1,l2,1.0),0.0,1.0);
+	image.g = pow(accum.r+accum.g+accum.b, 1.00);
+	image.a = image.a+accum.a;
+
+	accum = clamp(C*float4(0.0,r2,r1,1.0),0.0,1.0);
+	image.b = pow(accum.r+accum.g+accum.b, 1.00);
+	image.a = (image.a+accum.a)/3.0;
+
+	accum = image;
+	image.rb = (accum.rb+(accum.r*(deghost*-0.75))+(accum.g*(deghost*1.5))+(accum.b*(deghost*-0.75)));
+	image.g = (accum.g+(accum.r*(deghost*-0.75))+(accum.g*(deghost*1.5))+(accum.b*(deghost*-0.75)));
+	color = image;
+				
 			}
 		}
-		else if(Stereoscopic_Mode == 2)
-		{
-			float gridL = frac(texcoord.y*(BUFFER_HEIGHT/2));
-			if(Perspective_Edge_Selection == 0)
-			{
-			color = gridL > 0.5 ? tex2D(SamplerCLBORDER,float2(texcoord.x + Perspective * pix.x,texcoord.y)) : tex2D(SamplerCRBORDER,float2(texcoord.x - Perspective * pix.x,texcoord.y));
-			}
-			else
-			{
-			color = gridL > 0.5 ? tex2D(SamplerCLMIRROR,float2(texcoord.x + Perspective * pix.x,texcoord.y)) : tex2D(SamplerCRMIRROR,float2(texcoord.x - Perspective * pix.x,texcoord.y));
-			}
-		}
-		else if(Stereoscopic_Mode == 3)
-		{
-			float gridy = floor(texcoord.y*(BUFFER_HEIGHT));
-			float gridx = floor(texcoord.x*(BUFFER_WIDTH));
-			if(Perspective_Edge_Selection == 0)
-			{
-			color = (int(gridy+gridx) & 1) < 0.5 ? tex2D(SamplerCLBORDER,float2(texcoord.x + Perspective * pix.x,texcoord.y)) : tex2D(SamplerCRBORDER,float2(texcoord.x - Perspective * pix.x,texcoord.y));
-			}
-			else
-			{
-			color = (int(gridy+gridx) & 1) < 0.5 ? tex2D(SamplerCLMIRROR,float2(texcoord.x + Perspective * pix.x,texcoord.y)) : tex2D(SamplerCRMIRROR,float2(texcoord.x - Perspective * pix.x,texcoord.y));
-			}
-		}
-	}
 	else
 	{
 		color = tex2D(SamplerCDM,texcoord.xy);
@@ -772,13 +833,8 @@ void PostProcessVS(in uint id : SV_VertexID, out float4 position : SV_Position, 
 
 //*Rendering passes*//
 
-technique Super_Depth3D
+technique Super_DepthAnaglyph3D
 {			
-			pass MousePass
-		{
-			VertexShader = PostProcessVS;
-			PixelShader = MouseCuror;
-		}
 			pass DepthMapPass
 		{
 			VertexShader = PostProcessVS;

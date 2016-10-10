@@ -64,20 +64,6 @@ uniform int Perspective <
 	ui_tooltip = "Determines the perspective point. Default is 0";
 > = 0;
 
-uniform int Blur_Type <
-	ui_type = "combo";
-	ui_items = "Blur Off\0Normal Blur\0Radial Blur\0";
-	ui_label = "Blur Type";
-	ui_tooltip = "Pick the type of blur you want.";
-> = 1;
-
-uniform float Blur <
-	ui_type = "drag";
-	ui_min = 0; ui_max = 0.5;
-	ui_label = "Blur Slider";
-	ui_tooltip = "Determines the blur seperation of Depth Map Blur. Default is 0.050";
-> = 0.050;
-
 uniform bool Depth_Map_Enhancement <
 	ui_label = "Depth Map Enhancement";
 	ui_tooltip = "Enable Or Dissable Depth Map Enhancement. Default is Off";
@@ -119,12 +105,25 @@ uniform float2 Near_Far <
 	ui_tooltip = "Adjustment for Near and Far Depth Map Precision.";
 > = float2(1,1.5);
 
-uniform int Stereoscopic_Mode <
+uniform int Polynomial_Barrel_Distortion <
 	ui_type = "combo";
-	ui_items = "Side by Side\0Top and Bottom\0Line Interlaced\0Checkerboard 3D\0";
-	ui_label = "3D Display Mode";
-	ui_tooltip = "Side by Side/Top and Bottom/Line Interlaced displays output.";
+	ui_items = "Off\0Polynomial Distortion\0";
+	ui_label = "Polynomial Barrel Distortion";
+	ui_tooltip = "Barrel Distortion for HMD type Displays.";
 > = 0;
+
+uniform float3 Polynomial_Colors <
+	ui_type = "color";
+	ui_tooltip = "Adjust the Polynomial Distortion Red, Green, Blue. Default is (R 255, G 255, B 255)";
+	ui_label = "Polynomial Color Distortion";
+> = float3(1.0, 1.0, 1.0);
+
+uniform float2 Horizontal_Vertical_Squish <
+	ui_type = "drag";
+	ui_min = 0.5; ui_max = 2;
+	ui_label = "Horizontal & Vertical";
+	ui_tooltip = "Adjust Horizontal and Vertical squish cubic distortion value. Default is 1.0.";
+> = float2(1,1);
 
 uniform int Custom_Sidebars <
 	ui_type = "combo";
@@ -199,8 +198,8 @@ sampler BackBufferCLAMP
 	
 texture texCL  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA32F;}; 
 texture texCR  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA32F;}; 
-texture texCC  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA32F;}; 
-texture texCDM  { Width = BUFFER_WIDTH/2; Height = BUFFER_HEIGHT; Format = RGBA32F;};
+texture texCC  { Width = BUFFER_WIDTH/2; Height = BUFFER_HEIGHT/2; Format = RGBA32F;}; 
+texture texCDM  { Width = BUFFER_WIDTH/2; Height = BUFFER_HEIGHT/2; Format = RGBA32F;};
 	
 sampler SamplerCLMIRROR
 	{
@@ -592,59 +591,6 @@ float4 SbSdepth(float4 pos : SV_Position, float2 texcoord : TEXCOORD0) : SV_Targ
 	return color;	
 
 }
-	
-float4 BlurDM(float4 pos : SV_Position, float2 texcoord : TEXCOORD0) : SV_Target
-{
-	float4 color;
-	float2 dir;
-	float B;
-	float Con = 11;
-	
-	if(Blur_Type > 0 && Blur > 0) 
-	{
-	
-	const float weight[10] = 
-	{  
-	-0.08,  
-	-0.05,  
-	-0.03,  
-	-0.02,  
-	-0.01,  
-	0.01,  
-	0.02,  
-	0.03,  
-	0.05,  
-	0.08  
-	};
-	
-	if(Blur_Type == 1)
-	{
-	dir = float2(0.5,0);
-	B = Blur;
-	}
-	
-	if(Blur_Type == 2)
-	{
-	dir = 0.5 - texcoord;
-	B = Blur*2;
-	}
-	
-	dir = normalize( dir ); 
-	 
-	[loop]
-	for (int i = -0; i < 10; i++)
-	{
-	color += tex2D(SamplerCDM,texcoord + dir * weight[i] * B)/Con;
-	}
-	
-	}
-	else
-	{
-	color = tex2D(SamplerCDM,texcoord.xy);
-	}
-	
-	return color;
-} 
   
 ////////////////////////////////////////////////Left/Right Eye////////////////////////////////////////////////////////
 void PS_renderLR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 color : SV_Target0 , out float4 colorT: SV_Target1)
@@ -658,8 +604,8 @@ void PS_renderLR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD
 	for (int j = 0; j <= 3; ++j) 
 	{	
 			uv.x = samples[j] * D;
-			DepthL =  min(DepthL,tex2D(SamplerCC,float2(texcoord.x+uv.x*pix.x, texcoord.y)).r)/1-C;
-			DepthR =  min(DepthR,tex2D(SamplerCC,float2(texcoord.x-uv.x*pix.x, texcoord.y)).r)/1-C;
+			DepthL =  min(DepthL,tex2D(SamplerCDM,float2(texcoord.x+uv.x*pix.x, texcoord.y)).r)/1-C;
+			DepthR =  min(DepthR,tex2D(SamplerCDM,float2(texcoord.x-uv.x*pix.x, texcoord.y)).r)/1-C;
 	}
 			
 		if(!Eye_Swap)
@@ -700,62 +646,146 @@ void PS_renderLR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD
 		}
 }
 
+
+////////////////////////////////////////////////////Polynomial_Distortion/////////////////////////////////////////////////////
+
+float2 PD(float2 p, float k1)
+
+{
+
+	
+	float r2 = (p.x-0.5) * (p.x-0.5) + (p.y-0.5) * (p.y-0.5);       
+	float newRadius = 0.0;
+
+	newRadius = (1 + k1*r2);
+
+	 p.x = newRadius * (p.x-0.5)+0.5;
+	 p.y = newRadius * (p.y-0.5)+0.5;
+	
+	return p;
+}
+
+float4 PDL(float2 texcoord)
+
+{		
+		float4 color;
+		float2 uv_red, uv_green, uv_blue;
+		float4 color_red, color_green, color_blue;
+		float Red, Green, Blue;
+		float2 sectorOrigin;
+
+    // Radial distort around center
+		sectorOrigin = (texcoord.xy-0.5,0,0);
+		
+		Red = Polynomial_Colors.x;
+		Green = Polynomial_Colors.y;
+		Blue = Polynomial_Colors.z;
+		
+		uv_red = PD(texcoord.xy-sectorOrigin,Red) + sectorOrigin;
+		uv_green = PD(texcoord.xy-sectorOrigin,Green) + sectorOrigin;
+		uv_blue = PD(texcoord.xy-sectorOrigin,Blue) + sectorOrigin;
+		
+		if(Perspective_Edge_Selection == 0)
+		{
+		color_red = tex2D(SamplerCLBORDER, uv_red).r;
+		color_green = tex2D(SamplerCLBORDER, uv_green).g;
+		color_blue = tex2D(SamplerCLBORDER, uv_blue).b;
+		}
+		else
+		{
+		color_red = tex2D(SamplerCLMIRROR, uv_red).r;
+		color_green = tex2D(SamplerCLMIRROR, uv_green).g;
+		color_blue = tex2D(SamplerCLMIRROR, uv_blue).b;
+		}
+
+		if( ((uv_red.x > 0) && (uv_red.x < 1) && (uv_red.y > 0) && (uv_red.y < 1)))
+		{
+			color = float4(color_red.x, color_green.y, color_blue.z, 1.0);
+		}
+		else
+		{
+			color = float4(0,0,0,1);
+		}
+		return color;
+		
+	}
+	
+	float4 PDR(float2 texcoord)
+
+{		
+		float4 color;
+		float2 uv_red, uv_green, uv_blue;
+		float4 color_red, color_green, color_blue;
+		float Red, Green, Blue;
+		float2 sectorOrigin;
+
+    // Radial distort around center
+		sectorOrigin = (texcoord.xy-0.5,0,0);
+		
+		Red = Polynomial_Colors.x;
+		Green = Polynomial_Colors.y;
+		Blue = Polynomial_Colors.z;
+		
+		uv_red = PD(texcoord.xy-sectorOrigin,Red) + sectorOrigin;
+		uv_green = PD(texcoord.xy-sectorOrigin,Green) + sectorOrigin;
+		uv_blue = PD(texcoord.xy-sectorOrigin,Blue) + sectorOrigin;
+		
+		if(Perspective_Edge_Selection == 0)
+		{
+		color_red = tex2D(SamplerCRBORDER, uv_red).r;
+		color_green = tex2D(SamplerCRBORDER, uv_green).g;
+		color_blue = tex2D(SamplerCRBORDER, uv_blue).b;
+		}
+		else
+		{
+		color_red = tex2D(SamplerCRMIRROR, uv_red).r;
+		color_green = tex2D(SamplerCRMIRROR, uv_green).g;
+		color_blue = tex2D(SamplerCRMIRROR, uv_blue).b;
+		}
+
+		if( ((uv_red.x > 0) && (uv_red.x < 1) && (uv_red.y > 0) && (uv_red.y < 1)))
+		{
+			color = float4(color_red.x, color_green.y, color_blue.z, 1.0);
+		}
+		else
+		{
+			color = float4(0,0,0,1);
+		}
+		return color;
+		
+	}
+
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void PS0(float4 position : SV_Position, float2 texcoord : TEXCOORD0, out float4 color : SV_Target)
 {
 	if(!Depth_Map_View)
 	{
-		if(Stereoscopic_Mode == 0)
-		{	
-			if(Perspective_Edge_Selection == 0)
-			{
-			color = texcoord.x < 0.5 ? tex2D(SamplerCLBORDER,float2(texcoord.x*2 + Perspective * pix.x,texcoord.y)) : tex2D(SamplerCRBORDER,float2(texcoord.x*2-1 - Perspective * pix.x,texcoord.y));
-			}
-			else
-			{
-			color = texcoord.x < 0.5 ? tex2D(SamplerCLMIRROR,float2(texcoord.x*2 + Perspective * pix.x,texcoord.y)) : tex2D(SamplerCRMIRROR,float2(texcoord.x*2-1 - Perspective * pix.x,texcoord.y));
-			}	
-		}
-		else if(Stereoscopic_Mode == 1)
+	
+	float posH = Horizontal_Vertical_Squish.y-1;
+	float midH = posH*BUFFER_HEIGHT/2*pix.y;
+		
+	float posV = Horizontal_Vertical_Squish.x-1;
+	float midV = posV*BUFFER_WIDTH/2*pix.x;
+	
+	if(Polynomial_Barrel_Distortion == 0)
+	{	
+		if(Perspective_Edge_Selection == 0)
 		{
-			if(Perspective_Edge_Selection == 0)
-			{
-			color = texcoord.y < 0.5 ? tex2D(SamplerCLBORDER,float2(texcoord.x + Perspective * pix.x,texcoord.y*2)) : tex2D(SamplerCRBORDER,float2(texcoord.x - Perspective * pix.x,texcoord.y*2-1));
-			}
-			else
-			{
-			color = texcoord.y < 0.5 ? tex2D(SamplerCLMIRROR,float2(texcoord.x + Perspective * pix.x,texcoord.y*2)) : tex2D(SamplerCRMIRROR,float2(texcoord.x - Perspective * pix.x,texcoord.y*2-1));	
-			}
+		color = texcoord.x < 0.5 ? tex2D(SamplerCLBORDER,float2(((texcoord.x*2)*Horizontal_Vertical_Squish.x)-midV + Perspective * pix.x,(texcoord.y*Horizontal_Vertical_Squish.y)-midH)) : tex2D(SamplerCRBORDER,float2(((texcoord.x*2-1)*Horizontal_Vertical_Squish.x)-midV - Perspective * pix.x,(texcoord.y*Horizontal_Vertical_Squish.y)-midH));
 		}
-		else if(Stereoscopic_Mode == 2)
+		else
 		{
-			float gridL = frac(texcoord.y*(BUFFER_HEIGHT/2));
-			if(Perspective_Edge_Selection == 0)
-			{
-			color = gridL > 0.5 ? tex2D(SamplerCLBORDER,float2(texcoord.x + Perspective * pix.x,texcoord.y)) : tex2D(SamplerCRBORDER,float2(texcoord.x - Perspective * pix.x,texcoord.y));
-			}
-			else
-			{
-			color = gridL > 0.5 ? tex2D(SamplerCLMIRROR,float2(texcoord.x + Perspective * pix.x,texcoord.y)) : tex2D(SamplerCRMIRROR,float2(texcoord.x - Perspective * pix.x,texcoord.y));
-			}
-		}
-		else if(Stereoscopic_Mode == 3)
-		{
-			float gridy = floor(texcoord.y*(BUFFER_HEIGHT));
-			float gridx = floor(texcoord.x*(BUFFER_WIDTH));
-			if(Perspective_Edge_Selection == 0)
-			{
-			color = (int(gridy+gridx) & 1) < 0.5 ? tex2D(SamplerCLBORDER,float2(texcoord.x + Perspective * pix.x,texcoord.y)) : tex2D(SamplerCRBORDER,float2(texcoord.x - Perspective * pix.x,texcoord.y));
-			}
-			else
-			{
-			color = (int(gridy+gridx) & 1) < 0.5 ? tex2D(SamplerCLMIRROR,float2(texcoord.x + Perspective * pix.x,texcoord.y)) : tex2D(SamplerCRMIRROR,float2(texcoord.x - Perspective * pix.x,texcoord.y));
-			}
-		}
+		color = texcoord.x < 0.5 ? tex2D(SamplerCLMIRROR,float2(((texcoord.x*2)*Horizontal_Vertical_Squish.x)-midV + Perspective * pix.x,(texcoord.y*Horizontal_Vertical_Squish.y)-midH)) : tex2D(SamplerCRMIRROR,float2(((texcoord.x*2-1)*Horizontal_Vertical_Squish.x)-midV - Perspective * pix.x,(texcoord.y*Horizontal_Vertical_Squish.y)-midH));
+		}	
+	}
+	else
+	{	
+	color = texcoord.x < 0.5 ? PDL(float2(((texcoord.x*2)*Horizontal_Vertical_Squish.x)-midV + Perspective * pix.x,(texcoord.y*Horizontal_Vertical_Squish.y)-midH)) : PDR(float2(((texcoord.x*2-1)*Horizontal_Vertical_Squish.x)-midV - Perspective * pix.x,(texcoord.y*Horizontal_Vertical_Squish.y)-midH));
+	}
 	}
 	else
 	{
-		color = tex2D(SamplerCDM,texcoord.xy);
+	color = tex2D(SamplerCDM,texcoord.xy);
 	}
 }
 
@@ -784,12 +814,6 @@ technique Super_Depth3D
 			VertexShader = PostProcessVS;
 			PixelShader = SbSdepth;
 			RenderTarget = texCDM;
-		}
-			pass BlurPass
-		{
-			VertexShader = PostProcessVS;
-			PixelShader = BlurDM;
-			RenderTarget = texCC;
 		}
 			pass SinglePassStereo
 		{
