@@ -64,18 +64,18 @@ uniform int Perspective <
 	ui_tooltip = "Determines the perspective point. Default is 0";
 > = 0;
 
-uniform int Blur_Type <
+uniform int Disocclusion_Type <
 	ui_type = "combo";
-	ui_items = "Blur Off\0Normal Blur\0Radial Blur\0";
-	ui_label = "Blur Type";
+	ui_items = "Disocclusion Mask Off\0Normal Disocclusion Mask\0Radial Disocclusion Mask\0";
+	ui_label = "Disocclusion Type";
 	ui_tooltip = "Pick the type of blur you want.";
 > = 1;
 
-uniform float Blur <
+uniform float Disocclusion_Power <
 	ui_type = "drag";
 	ui_min = 0; ui_max = 0.5;
-	ui_label = "Blur Slider";
-	ui_tooltip = "Determines the blur seperation of Depth Map Blur. Default is 0.050";
+	ui_label = "Disocclusion Power";
+	ui_tooltip = "Determines the Disocclusion masking of Depth Map. Default is 0.050";
 > = 0.050;
 
 uniform bool Depth_Map_Enhancement <
@@ -593,14 +593,14 @@ float4 SbSdepth(float4 pos : SV_Position, float2 texcoord : TEXCOORD0) : SV_Targ
 
 }
 	
-float4 BlurDM(float4 pos : SV_Position, float2 texcoord : TEXCOORD0) : SV_Target
+float4 DisocclusionMask(float4 pos : SV_Position, float2 texcoord : TEXCOORD0) : SV_Target
 {
 	float4 color;
 	float2 dir;
 	float B;
 	float Con = 9;
 	
-	if(Blur_Type > 0 && Blur > 0) 
+	if(Disocclusion_Type > 0 && Disocclusion_Power > 0) 
 	{
 	
 	const float weight[8] = 
@@ -615,16 +615,16 @@ float4 BlurDM(float4 pos : SV_Position, float2 texcoord : TEXCOORD0) : SV_Target
 	0.07 
 	};
 	
-	if(Blur_Type == 1)
+	if(Disocclusion_Type == 1)
 	{
 	dir = float2(0.5,0);
-	B = Blur;
+	B = Disocclusion_Power;
 	}
 	
-	if(Blur_Type == 2)
+	if(Disocclusion_Type == 2)
 	{
 	dir = 0.5 - texcoord;
-	B = Blur*2;
+	B = Disocclusion_Power*2;
 	}
 	
 	dir = normalize( dir ); 
@@ -783,10 +783,10 @@ technique Super_Depth3D
 			PixelShader = SbSdepth;
 			RenderTarget = texCDM;
 		}
-			pass BlurPass
+			pass DisocclusionPass
 		{
 			VertexShader = PostProcessVS;
-			PixelShader = BlurDM;
+			PixelShader = DisocclusionMask;
 			RenderTarget = texCC;
 		}
 			pass SinglePassStereo
