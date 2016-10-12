@@ -199,7 +199,7 @@ sampler BackBufferCLAMP
 	
 texture texCL  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA32F;}; 
 texture texCR  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA32F;}; 
-texture texCC  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA32F;}; 
+texture texCC  { Width = BUFFER_WIDTH/2; Height = BUFFER_HEIGHT; Format = RGBA32F;}; 
 texture texCDM  { Width = BUFFER_WIDTH/2; Height = BUFFER_HEIGHT; Format = RGBA32F;};
 	
 sampler SamplerCLMIRROR
@@ -598,23 +598,21 @@ float4 BlurDM(float4 pos : SV_Position, float2 texcoord : TEXCOORD0) : SV_Target
 	float4 color;
 	float2 dir;
 	float B;
-	float Con = 11;
+	float Con = 9;
 	
 	if(Blur_Type > 0 && Blur > 0) 
 	{
 	
-	const float weight[10] = 
+	const float weight[8] = 
 	{  
 	-0.08,  
-	-0.05,  
-	-0.03,  
+	-0.06,  
+	-0.04,  
 	-0.02,  
-	-0.01,  
 	0.01,  
-	0.02,  
 	0.03,  
 	0.05,  
-	0.08  
+	0.07 
 	};
 	
 	if(Blur_Type == 1)
@@ -632,7 +630,7 @@ float4 BlurDM(float4 pos : SV_Position, float2 texcoord : TEXCOORD0) : SV_Target
 	dir = normalize( dir ); 
 	 
 	[loop]
-	for (int i = -0; i < 10; i++)
+	for (int i = -0; i < 8; i++)
 	{
 	color += tex2D(SamplerCDM,texcoord + dir * weight[i] * B)/Con;
 	}
