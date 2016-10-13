@@ -68,8 +68,8 @@ uniform float Disocclusion_Power <
 	ui_type = "drag";
 	ui_min = 0; ui_max = 0.5;
 	ui_label = "Disocclusion Power";
-	ui_tooltip = "Determines the Disocclusion masking of Depth Map. Default is 0.050";
-> = 0.050;
+	ui_tooltip = "Determines the Disocclusion masking of Depth Map. Default is 0.025";
+> = 0.025;
 
 uniform bool Depth_Map_Enhancement <
 	ui_label = "Depth Map Enhancement";
