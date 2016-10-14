@@ -112,6 +112,27 @@ uniform int Polynomial_Barrel_Distortion <
 	ui_tooltip = "Barrel Distortion for HMD type Displays.";
 > = 0;
 
+uniform float Lens_Center <
+	ui_type = "drag";
+	ui_min = 0.475; ui_max = 0.525;
+	ui_label = "Lens Center";
+	ui_tooltip = "Adjust Lens Center. Default is 0.5";
+> = 0.5;
+
+uniform float Lens_Distortion <
+	ui_type = "drag";
+	ui_min = -1.5; ui_max = 50;
+	ui_label = "Lens Distortion";
+	ui_tooltip = "Lens distortion value.";
+> = 1.0;
+
+uniform float Cubic_Distortion <
+	ui_type = "drag";
+	ui_min = -3.5; ui_max = 50;
+	ui_label = "Cubic Distortion";
+	ui_tooltip = "Cubic distortion value.";
+> = 1.0;
+
 uniform float3 Polynomial_Colors <
 	ui_type = "color";
 	ui_tooltip = "Adjust the Polynomial Distortion Red, Green, Blue. Default is (R 255, G 255, B 255)";
@@ -649,15 +670,25 @@ void PS_renderLR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD
 
 ////////////////////////////////////////////////////Polynomial_Distortion/////////////////////////////////////////////////////
 
-float2 PD(float2 p, float k1)
-
+float2 DL(float2 p, float k1) //Cubic Lens Distortion 
 {
-
+	float LC = 1-Lens_Center;
+	float r2 = (p.x-LC) * (p.x-LC) + (p.y-0.5) * (p.y-0.5);       
 	
-	float r2 = (p.x-0.5) * (p.x-0.5) + (p.y-0.5) * (p.y-0.5);       
-	float newRadius = 0.0;
+	float newRadius = 1 + r2 * k1 * Lens_Distortion + (Cubic_Distortion * sqrt(r2));
 
-	newRadius = (1 + k1*r2);
+	 p.x = newRadius * (p.x-0.5)+0.5;
+	 p.y = newRadius * (p.y-0.5)+0.5;
+	
+	return p;
+}
+
+float2 DR(float2 p, float k1) //Cubic Lens Distortion 
+{
+	float LC = Lens_Center;
+	float r2 = (p.x-LC) * (p.x-LC) + (p.y-0.5) * (p.y-0.5);       
+	
+	float newRadius = 1 + r2 * k1 * Lens_Distortion + (Cubic_Distortion * sqrt(r2));
 
 	 p.x = newRadius * (p.x-0.5)+0.5;
 	 p.y = newRadius * (p.y-0.5)+0.5;
@@ -681,9 +712,9 @@ float4 PDL(float2 texcoord)
 		Green = Polynomial_Colors.y;
 		Blue = Polynomial_Colors.z;
 		
-		uv_red = PD(texcoord.xy-sectorOrigin,Red) + sectorOrigin;
-		uv_green = PD(texcoord.xy-sectorOrigin,Green) + sectorOrigin;
-		uv_blue = PD(texcoord.xy-sectorOrigin,Blue) + sectorOrigin;
+		uv_red = DL(texcoord.xy-sectorOrigin,Red) + sectorOrigin;
+		uv_green = DL(texcoord.xy-sectorOrigin,Green) + sectorOrigin;
+		uv_blue = DL(texcoord.xy-sectorOrigin,Blue) + sectorOrigin;
 		
 		if(Perspective_Edge_Selection == 0)
 		{
@@ -726,9 +757,9 @@ float4 PDL(float2 texcoord)
 		Green = Polynomial_Colors.y;
 		Blue = Polynomial_Colors.z;
 		
-		uv_red = PD(texcoord.xy-sectorOrigin,Red) + sectorOrigin;
-		uv_green = PD(texcoord.xy-sectorOrigin,Green) + sectorOrigin;
-		uv_blue = PD(texcoord.xy-sectorOrigin,Blue) + sectorOrigin;
+		uv_red = DR(texcoord.xy-sectorOrigin,Red) + sectorOrigin;
+		uv_green = DR(texcoord.xy-sectorOrigin,Green) + sectorOrigin;
+		uv_blue = DR(texcoord.xy-sectorOrigin,Blue) + sectorOrigin;
 		
 		if(Perspective_Edge_Selection == 0)
 		{
