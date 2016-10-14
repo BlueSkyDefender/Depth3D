@@ -45,7 +45,7 @@ uniform int Depth <
 
 uniform float Convergence <
 	ui_type = "drag";
-	ui_min = -0.150; ui_max = 0.150;
+	ui_min = -0.250; ui_max = 0.250;
 	ui_label = "Convergence Slider";
 	ui_tooltip = "Determines the Convergence point. Default is 0";
 > = 0;
@@ -199,8 +199,8 @@ sampler BackBufferCLAMP
 	
 texture texCL  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA32F;}; 
 texture texCR  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA32F;}; 
-texture texCC  { Width = BUFFER_WIDTH/2; Height = BUFFER_HEIGHT; Format = RGBA32F;}; 
-texture texCDM  { Width = BUFFER_WIDTH/2; Height = BUFFER_HEIGHT; Format = RGBA32F;};
+texture texCC  { Width = BUFFER_WIDTH/2; Height = BUFFER_HEIGHT/2; Format = RGBA32F;}; 
+texture texCDM  { Width = BUFFER_WIDTH/2; Height = BUFFER_HEIGHT/2; Format = RGBA32F;};
 	
 sampler SamplerCLMIRROR
 	{
@@ -598,21 +598,23 @@ float4 DisocclusionMask(float4 pos : SV_Position, float2 texcoord : TEXCOORD0) :
 	float4 color;
 	float2 dir;
 	float B;
-	float Con = 9;
+	float Con = 10;
 	
 	if(Disocclusion_Type > 0 && Disocclusion_Power > 0) 
 	{
 	
-	const float weight[8] = 
+	const float weight[10] = 
 	{  
 	-0.08,  
-	-0.06,  
-	-0.04,  
+	-0.05,  
+	-0.03,  
 	-0.02,  
+	-0.01,  
 	0.01,  
+	0.02,  
 	0.03,  
 	0.05,  
-	0.07 
+	0.08  
 	};
 	
 	if(Disocclusion_Type == 1)
@@ -630,7 +632,7 @@ float4 DisocclusionMask(float4 pos : SV_Position, float2 texcoord : TEXCOORD0) :
 	dir = normalize( dir ); 
 	 
 	[loop]
-	for (int i = -0; i < 8; i++)
+	for (int i = -0; i < 10; i++)
 	{
 	color += tex2D(SamplerCDM,texcoord + dir * weight[i] * B)/Con;
 	}
@@ -737,7 +739,7 @@ void PS0(float4 position : SV_Position, float2 texcoord : TEXCOORD0, out float4 
 			color = gridL > 0.5 ? tex2D(SamplerCLMIRROR,float2(texcoord.x + Perspective * pix.x,texcoord.y)) : tex2D(SamplerCRMIRROR,float2(texcoord.x - Perspective * pix.x,texcoord.y));
 			}
 		}
-		else if(Stereoscopic_Mode == 3)
+		else
 		{
 			float gridy = floor(texcoord.y*(BUFFER_HEIGHT));
 			float gridx = floor(texcoord.x*(BUFFER_WIDTH));
