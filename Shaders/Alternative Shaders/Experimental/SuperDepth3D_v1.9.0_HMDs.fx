@@ -45,7 +45,7 @@ uniform int Depth <
 
 uniform float Convergence <
 	ui_type = "drag";
-	ui_min = -0.200; ui_max = 0.200;
+	ui_min = -1; ui_max = 1;
 	ui_label = "Convergence Slider";
 	ui_tooltip = "Determines the Convergence point. Default is 0";
 > = 0;
@@ -627,44 +627,43 @@ void PS_renderLR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD
 	for (int j = 0; j <= 3; ++j) 
 	{	
 			uv.x = samples[j] * D;
-			DepthL =  min(DepthL,tex2D(SamplerCDM,float2(texcoord.x+uv.x*pix.x, texcoord.y)).r)/1-C;
-			DepthR =  min(DepthR,tex2D(SamplerCDM,float2(texcoord.x-uv.x*pix.x, texcoord.y)).r)/1-C;
+			DepthL =  min(DepthL,tex2D(SamplerCDM,float2(texcoord.x+uv.x*pix.x, texcoord.y)).r);
+			DepthR =  min(DepthR,tex2D(SamplerCDM,float2(texcoord.x-uv.x*pix.x, texcoord.y)).r);
 	}
-			
 		if(!Eye_Swap)
 		{	
 			if(Custom_Sidebars == 0)
 			{
-			color = tex2D(BackBufferMIRROR, float2(texcoord.xy+float2((DepthL*D),0)*pix.xy));
-			colorT = tex2D(BackBufferMIRROR, float2(texcoord.xy-float2((DepthR*D),0)*pix.xy));
+			color = tex2D(BackBufferMIRROR, float2(texcoord.xy+float2(((DepthL/1-C)*D),0)*pix.xy));
+			colorT = tex2D(BackBufferMIRROR, float2(texcoord.xy-float2(((DepthR/1-C)*D),0)*pix.xy));
 			}
 			else if(Custom_Sidebars == 1)
 			{
-			color = tex2D(BackBufferBORDER, float2(texcoord.xy+float2((DepthL*D),0)*pix.xy));
-			colorT = tex2D(BackBufferBORDER, float2(texcoord.xy-float2((DepthR*D),0)*pix.xy));
+			color = tex2D(BackBufferBORDER, float2(texcoord.xy+float2(((DepthL/1-C)*D),0)*pix.xy));
+			colorT = tex2D(BackBufferBORDER, float2(texcoord.xy-float2(((DepthR/1-C)*D),0)*pix.xy));
 			}
 			else
 			{
-			color = tex2D(BackBufferCLAMP, float2(texcoord.xy+float2((DepthL*D),0)*pix.xy));
-			colorT = tex2D(BackBufferCLAMP, float2(texcoord.xy-float2((DepthR*D),0)*pix.xy));
+			color = tex2D(BackBufferCLAMP, float2(texcoord.xy+float2(((DepthL/1-C)*D),0)*pix.xy));
+			colorT = tex2D(BackBufferCLAMP, float2(texcoord.xy-float2(((DepthR/1-C)*D),0)*pix.xy));
 			}
 		}
 		else
 		{		
 			if(Custom_Sidebars == 0)
 			{
-			colorT = tex2D(BackBufferMIRROR, float2(texcoord.xy+float2((DepthL*D),0)*pix.xy));
-			color = tex2D(BackBufferMIRROR, float2(texcoord.xy-float2((DepthR*D),0)*pix.xy));
+			colorT = tex2D(BackBufferMIRROR, float2(texcoord.xy+float2(((DepthL/1-C)*D),0)*pix.xy));
+			color = tex2D(BackBufferMIRROR, float2(texcoord.xy-float2(((DepthR/1-C)*D),0)*pix.xy));
 			}
 			else if(Custom_Sidebars == 1)
 			{
-			colorT = tex2D(BackBufferBORDER, float2(texcoord.xy+float2((DepthL*D),0)*pix.xy));
-			color = tex2D(BackBufferBORDER, float2(texcoord.xy-float2((DepthR*D),0)*pix.xy));
+			colorT = tex2D(BackBufferBORDER, float2(texcoord.xy+float2(((DepthL/1-C)*D),0)*pix.xy));
+			color = tex2D(BackBufferBORDER, float2(texcoord.xy-float2(((DepthR/1-C)*D),0)*pix.xy));
 			}
 			else
 			{
-			colorT = tex2D(BackBufferCLAMP, float2(texcoord.xy+float2((DepthL*D),0)*pix.xy));
-			color = tex2D(BackBufferCLAMP, float2(texcoord.xy-float2((DepthR*D),0)*pix.xy));
+			colorT = tex2D(BackBufferCLAMP, float2(texcoord.xy+float2(((DepthL/1-C)*D),0)*pix.xy));
+			color = tex2D(BackBufferCLAMP, float2(texcoord.xy-float2(((DepthR/1-C)*D),0)*pix.xy));
 			}
 		}
 }
