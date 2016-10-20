@@ -89,6 +89,10 @@ Just Cause 3				DM 21					    Radial
 DOOM 2016				DM 2							On Adjust 1.250
 Quantum Break				DM 18					    Radial
 Stay Close				DM 26				RB	    Normal
+Emily Wants To Play			DM 26				RB	    Any
+KHOLAT					DM 21				RB	    Any
+LuciusII				DM 4 or 23			RB	    Normal
+Dead Effect				DM 10		On			    Any					
 
 Game List updates for Reshade 2.0
 [Game List]				[Alternate Depth Map]	   [Depth Flip On][Read Below]	[Blur Recommendations]	[BSD Notes]
@@ -147,6 +151,9 @@ Now open the DPfix095.zip Directly from http://blog.metaclassofnil.com/wp-conten
 
 Install the contents of that folder in to Deadly Premonition Folder where you changed Reshade's d3d9.dll to dxgi.dll. Edit the DPfix.ini too what ever REZ you want. Then start the game.
 
+{Emily Wants To Play}
+Install reshade in to SteamLibrary\steamapps\common\Emily Wants To Play\Engine\Binaries\Win64
+
 {Firewatch}
 Issues in game with the shader Detoggling.
 
@@ -156,6 +163,13 @@ If the game is crashing in fullscreen. Switch over to Window or Borderless windo
 
 {Hard Reset}
 Must Enable FSAA for depth buffer access.
+
+{KHOLAT}
+Install reshade in to SteamLibrary\steamapps\common\KHOLAT\Kholat\Binaries\Win64
+In setting scaling 100%
+
+{LuciusII}
+Set Globla Settings to Medium. Turn off FXAA Every thing else can be maxed out.
 
 {Magicka 2} 
 Rename the opengl.dll to dxgi.dll
