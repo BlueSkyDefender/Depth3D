@@ -38,14 +38,14 @@ uniform int Alternate_Depth_Map <
 
 uniform int Depth <
 	ui_type = "drag";
-	ui_min = 0; ui_max = 30;
+	ui_min = 0; ui_max = 50;
 	ui_label = "Depth Slider";
 	ui_tooltip = "Determines the amount of Image Warping and Separation between both eyes. You can Override this setting.";
-> = 15;
+> = 25;
 
 uniform float Convergence <
 	ui_type = "drag";
-	ui_min = -1; ui_max = 1;
+	ui_min = -0.250; ui_max = 0.250;
 	ui_label = "Convergence Slider";
 	ui_tooltip = "Determines the Convergence point. Default is 0";
 > = 0;
@@ -53,8 +53,8 @@ uniform float Convergence <
 uniform int IPD <
 	ui_type = "drag";
 	ui_min = -100; ui_max = 100;
-	ui_label = "Optical Pupillary Distance";
-	ui_tooltip = "Determines the perspective point. Default is 0";
+	ui_label = "Optical Pupillary Distance Adjust";
+	ui_tooltip = "Determines the distance between your eyes. Default is 0";
 > = 0;
 
 uniform bool Depth_Map_Enhancement <
@@ -107,7 +107,7 @@ uniform int Polynomial_Barrel_Distortion <
 
 uniform float Lens_Center <
 	ui_type = "drag";
-	ui_min = 0.450; ui_max = 0.550;
+	ui_min = 0.475; ui_max = 0.575;
 	ui_label = "Lens Center";
 	ui_tooltip = "Adjust Lens Center. Default is 0.5";
 > = 0.5;
@@ -802,6 +802,7 @@ float4 PDL(float2 texcoord)
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void PS0(float4 position : SV_Position, float2 texcoord : TEXCOORD0, out float4 color : SV_Target)
 {
+	float IPDD = IPD-Depth;
 	if(!Depth_Map_View)
 	{
 	
@@ -815,20 +816,20 @@ void PS0(float4 position : SV_Position, float2 texcoord : TEXCOORD0, out float4 
 	{	
 		if(Custom_Sidebars == 0)
 		{
-		color = texcoord.x < 0.5 ? tex2D(SamplerCLMIRROR,float2(((texcoord.x*2)*Horizontal_Vertical_Squish.x)-midV + IPD * pix.x,(texcoord.y*Horizontal_Vertical_Squish.y)-midH)) : tex2D(SamplerCRMIRROR,float2(((texcoord.x*2-1)*Horizontal_Vertical_Squish.x)-midV - IPD * pix.x,(texcoord.y*Horizontal_Vertical_Squish.y)-midH));
+		color = texcoord.x < 0.5 ? tex2D(SamplerCLMIRROR,float2(((texcoord.x*2)*Horizontal_Vertical_Squish.x)-midV + IPDD * pix.x,(texcoord.y*Horizontal_Vertical_Squish.y)-midH)) : tex2D(SamplerCRMIRROR,float2(((texcoord.x*2-1)*Horizontal_Vertical_Squish.x)-midV - IPDD * pix.x,(texcoord.y*Horizontal_Vertical_Squish.y)-midH));
 		}
 		if(Custom_Sidebars == 1)
 		{
-		color = texcoord.x < 0.5 ? tex2D(SamplerCLBORDER,float2(((texcoord.x*2)*Horizontal_Vertical_Squish.x)-midV + IPD * pix.x,(texcoord.y*Horizontal_Vertical_Squish.y)-midH)) : tex2D(SamplerCRBORDER,float2(((texcoord.x*2-1)*Horizontal_Vertical_Squish.x)-midV - IPD * pix.x,(texcoord.y*Horizontal_Vertical_Squish.y)-midH));
+		color = texcoord.x < 0.5 ? tex2D(SamplerCLBORDER,float2(((texcoord.x*2)*Horizontal_Vertical_Squish.x)-midV + IPDD * pix.x,(texcoord.y*Horizontal_Vertical_Squish.y)-midH)) : tex2D(SamplerCRBORDER,float2(((texcoord.x*2-1)*Horizontal_Vertical_Squish.x)-midV - IPDD * pix.x,(texcoord.y*Horizontal_Vertical_Squish.y)-midH));
 		}	
 		else
 		{
-		color = texcoord.x < 0.5 ? tex2D(SamplerCLCLAMP,float2(((texcoord.x*2)*Horizontal_Vertical_Squish.x)-midV + IPD * pix.x,(texcoord.y*Horizontal_Vertical_Squish.y)-midH)) : tex2D(SamplerCRCLAMP,float2(((texcoord.x*2-1)*Horizontal_Vertical_Squish.x)-midV - IPD * pix.x,(texcoord.y*Horizontal_Vertical_Squish.y)-midH));
+		color = texcoord.x < 0.5 ? tex2D(SamplerCLCLAMP,float2(((texcoord.x*2)*Horizontal_Vertical_Squish.x)-midV + IPDD * pix.x,(texcoord.y*Horizontal_Vertical_Squish.y)-midH)) : tex2D(SamplerCRCLAMP,float2(((texcoord.x*2-1)*Horizontal_Vertical_Squish.x)-midV - IPDD * pix.x,(texcoord.y*Horizontal_Vertical_Squish.y)-midH));
 		}
 	}
 	else
 	{	
-	color = texcoord.x < 0.5 ? PDL(float2(((texcoord.x*2)*Horizontal_Vertical_Squish.x)-midV + IPD * pix.x,(texcoord.y*Horizontal_Vertical_Squish.y)-midH)) : PDR(float2(((texcoord.x*2-1)*Horizontal_Vertical_Squish.x)-midV - IPD * pix.x,(texcoord.y*Horizontal_Vertical_Squish.y)-midH));
+	color = texcoord.x < 0.5 ? PDL(float2(((texcoord.x*2)*Horizontal_Vertical_Squish.x)-midV + IPDD * pix.x,(texcoord.y*Horizontal_Vertical_Squish.y)-midH)) : PDR(float2(((texcoord.x*2-1)*Horizontal_Vertical_Squish.x)-midV - IPDD * pix.x,(texcoord.y*Horizontal_Vertical_Squish.y)-midH));
 	}
 	}
 	else
