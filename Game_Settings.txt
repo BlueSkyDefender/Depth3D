@@ -92,7 +92,8 @@ Stay Close				DM 26				RB	    Normal
 Emily Wants To Play			DM 26				RB	    Any
 KHOLAT					DM 21				RB	    Any
 LuciusII				DM 4 or 23			RB	    Normal
-Dead Effect				DM 10		On			    Any					
+Dead Effect				DM 10		On			    Any	
+Nosferatu: The Wrath of Malachi		DM 1				RB	    Any				
 
 Game List updates for Reshade 2.0
 [Game List]				[Alternate Depth Map]	   [Depth Flip On][Read Below]	[Blur Recommendations]	[BSD Notes]
@@ -192,6 +193,13 @@ Start the game in DX11 mode.
 
 {Naruto Shippuden UNS3 Full Blurst}
 Ignore the warnings click play.
+
+{Nosferatu: The Wrath of Malachi}
+You need DGVooDoo2
+YouTube Guide.
+https://www.youtube.com/watch?v=opVni9cRN7Q
+No film Grain Guide.
+https://steamcommunity.com/sharedfiles/filedetails/?id=334444605
 
 {Penumbra: Black Plague}
 Go here
