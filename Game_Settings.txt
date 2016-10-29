@@ -20,7 +20,8 @@ any lower makes the game look bad you may want to set this Very High. Volumetic 
 Temporal AA check this off. Motion Blur off. Sharpen I have it on I like it.Cloth Physics I have this set too off because my processor is weak. 
 Subsurface Scattering I like the look it has on people. Tessellation on.
 
-
+*Skyrim: Enhanced Edition*
+Seems to work better the the old Skyrim. Less Bugs and runs well on my system. No INI mods needed.
 ______________________________________________________________________________________________________________________________________
 
 Here is a quick and dirty game list of working Depth Maps. They are only suggestions. You can use any setting combination you like.
@@ -93,7 +94,8 @@ Emily Wants To Play			DM 26				RB	    Any
 KHOLAT					DM 21				RB	    Any
 LuciusII				DM 4 or 23			RB	    Normal
 Dead Effect				DM 10		On			    Any	
-Nosferatu: The Wrath of Malachi		DM 1				RB	    Any				
+Nosferatu: The Wrath of Malachi		DM 1				RB	    Any	
+Skyrim EE				DM 27					    Radial	On Adjust 0.750-0.875			Read Above		
 
 Game List updates for Reshade 2.0
 [Game List]				[Alternate Depth Map]	   [Depth Flip On][Read Below]	[Blur Recommendations]	[BSD Notes]
