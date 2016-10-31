@@ -31,7 +31,7 @@
 
 uniform int Alternate_Depth_Map <
 	ui_type = "combo";
-	ui_items = "Depth Map 0\0Depth Map 1\0Depth Map 2\0Depth Map 3\0Depth Map 4\0Depth Map 5\0Depth Map 6\0Depth Map 7\0Depth Map 8\0Depth Map 9\0Depth Map 10\0Depth Map 11\0Depth Map 12\0Depth Map 13\0Depth Map 14\0Depth Map 15\0Depth Map 16\0Depth Map 17\0Depth Map 18\0Depth Map 19\0Depth Map 20\0Depth Map 21\0Depth Map 22\0Depth Map 23\0Depth Map 24\0Depth Map 25\0Depth Map 26\0Depth Map 27\0";
+	ui_items = "Depth Map 0\0Depth Map 1\0Depth Map 2\0Depth Map 3\0Depth Map 4\0Depth Map 5\0Depth Map 6\0Depth Map 7\0Depth Map 8\0Depth Map 9\0Depth Map 10\0Depth Map 11\0Depth Map 12\0Depth Map 13\0Depth Map 14\0Depth Map 15\0Depth Map 16\0Depth Map 17\0Depth Map 18\0Depth Map 19\0Depth Map 20\0Depth Map 21\0Depth Map 22\0Depth Map 23\0Depth Map 24\0Depth Map 25\0Depth Map 26\0Depth Map 27\0Depth Map 28\0";
 	ui_label = "Alternate Depth Map";
 	ui_tooltip = "Alternate Depth Map for different Games. Read the ReadMeDepth3d.txt, for setting. Each game May and can use a diffrent Alternet Depth Map.";
 > = 0;
@@ -157,9 +157,53 @@ uniform bool Eye_Swap <
 	ui_tooltip = "Left right image change.";
 > = false;
 
+uniform int HMD_Profiles <
+	ui_type = "combo";
+	ui_items = "Off\0Profile One\0";
+	ui_label = "Head Mounted Display Profiles";
+	ui_tooltip = "Preset Head Mounted Display Profiles";
+> = 0;
+
 uniform bool mouse < source = "key"; keycode = Cross_Cusor_Key; toggle = true; >;
 
 uniform float2 Mousecoords < source = "mousepoint"; > ;
+
+
+
+////////////////////////////////////////////////HMD Profiles/////////////////////////////////////////////////////////////////
+//Lens Distortion Area//
+float LD()
+{
+float L_D = Lens_Distortion;
+if (HMD_Profiles == 0)
+{
+ L_D;
+}
+
+if (HMD_Profiles == 1)
+{
+ L_D = -0.5;
+}
+return L_D;
+}
+
+//Horizontal Vertical Squish Area//
+float2 H_V_S()
+{
+float2 H_V_S = Horizontal_Vertical_Squish;
+if (HMD_Profiles == 0)
+{
+ H_V_S;
+}
+
+if (HMD_Profiles == 1)
+{
+ H_V_S = float2(1,1.25);
+}
+return H_V_S;
+}
+
+//float2 Horizontal_Vertical_Squish = float2(1,1.25);
 
 /////////////////////////////////////////////D3D Starts Here/////////////////////////////////////////////////////////////////
 
@@ -517,13 +561,21 @@ float4 SbSdepth(float4 pos : SV_Position, float2 texcoord : TEXCOORD0) : SV_Targ
 		depthM = pow(abs((exp(depthM * log(cF + cN)) - cN) / cF),1000);
 		}	
 		
-		//Skyrim ED
+		//Skyrim SE
 		if (Alternate_Depth_Map == 27)
 		{
 		float cF = 5;
 		float cN = 5;
 		depthM =  (exp(pow(depthM, depthM + cF / pow(depthM, cN) - 1 * (pow((depthM), cN)))) - 1) / (exp(depthM) - 1);
-		}	
+		}
+		
+		//Doom
+		if (Alternate_Depth_Map == 28)
+		{
+		float cF = 50;
+		float cN = -0.5;
+		depthM =  (exp(pow(depthM, depthM + cF / pow(depthM, cN) - 1 * (pow((depthM), cN)))) - 1) / (exp(depthM) - 1);
+		}
 		
 	}
 	else
@@ -700,7 +752,7 @@ float2 DL(float2 p, float k1) //Cubic Lens Distortion
 	float LC = 1-Lens_Center;
 	float r2 = (p.x-LC) * (p.x-LC) + (p.y-0.5) * (p.y-0.5);       
 	
-	float newRadius = 1 + r2 * k1 + (Lens_Distortion * sqrt(r2));
+	float newRadius = 1 + r2 * k1 + (LD() * sqrt(r2));
 
 	 p.x = newRadius * (p.x-0.5)+0.5;
 	 p.y = newRadius * (p.y-0.5)+0.5;
@@ -713,7 +765,7 @@ float2 DR(float2 p, float k1) //Cubic Lens Distortion
 	float LC = Lens_Center;
 	float r2 = (p.x-LC) * (p.x-LC) + (p.y-0.5) * (p.y-0.5);       
 	
-	float newRadius = 1 + r2 * k1 + (Lens_Distortion * sqrt(r2));
+	float newRadius = 1 + r2 * k1 + (LD() * sqrt(r2));
 
 	 p.x = newRadius * (p.x-0.5)+0.5;
 	 p.y = newRadius * (p.y-0.5)+0.5;
@@ -825,35 +877,36 @@ float4 PDL(float2 texcoord)
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void PS0(float4 position : SV_Position, float2 texcoord : TEXCOORD0, out float4 color : SV_Target)
-{
-	float IPDD = IPD-Depth;
+{	
+	float D = Depth;
+	float IPDD = IPD-(D/2);
 	if(!Depth_Map_View)
 	{
 	
-	float posH = Horizontal_Vertical_Squish.y-1;
+	float posH = H_V_S().y-1;
 	float midH = posH*BUFFER_HEIGHT/2*pix.y;
 		
-	float posV = Horizontal_Vertical_Squish.x-1;
+	float posV = H_V_S().x-1;
 	float midV = posV*BUFFER_WIDTH/2*pix.x;
 	
-	if(Polynomial_Barrel_Distortion == 0)
+	if(Polynomial_Barrel_Distortion == 0 && HMD_Profiles == 0 )
 	{	
 		if(Custom_Sidebars == 0)
 		{
-		color = texcoord.x < 0.5 ? tex2D(SamplerCLMIRROR,float2(((texcoord.x*2)*Horizontal_Vertical_Squish.x)-midV + IPDD * pix.x,(texcoord.y*Horizontal_Vertical_Squish.y)-midH)) : tex2D(SamplerCRMIRROR,float2(((texcoord.x*2-1)*Horizontal_Vertical_Squish.x)-midV - IPDD * pix.x,(texcoord.y*Horizontal_Vertical_Squish.y)-midH));
+		color = texcoord.x < 0.5 ? tex2D(SamplerCLMIRROR,float2(((texcoord.x*2)*H_V_S().x)-midV + IPDD * pix.x,(texcoord.y*H_V_S().y)-midH)) : tex2D(SamplerCRMIRROR,float2(((texcoord.x*2-1)*H_V_S().x)-midV - IPDD * pix.x,(texcoord.y*H_V_S().y)-midH));
 		}
 		if(Custom_Sidebars == 1)
 		{
-		color = texcoord.x < 0.5 ? tex2D(SamplerCLBORDER,float2(((texcoord.x*2)*Horizontal_Vertical_Squish.x)-midV + IPDD * pix.x,(texcoord.y*Horizontal_Vertical_Squish.y)-midH)) : tex2D(SamplerCRBORDER,float2(((texcoord.x*2-1)*Horizontal_Vertical_Squish.x)-midV - IPDD * pix.x,(texcoord.y*Horizontal_Vertical_Squish.y)-midH));
+		color = texcoord.x < 0.5 ? tex2D(SamplerCLBORDER,float2(((texcoord.x*2)*H_V_S().x)-midV + IPDD * pix.x,(texcoord.y*H_V_S().y)-midH)) : tex2D(SamplerCRBORDER,float2(((texcoord.x*2-1)*H_V_S().x)-midV - IPDD * pix.x,(texcoord.y*H_V_S().y)-midH));
 		}	
 		else
 		{
-		color = texcoord.x < 0.5 ? tex2D(SamplerCLCLAMP,float2(((texcoord.x*2)*Horizontal_Vertical_Squish.x)-midV + IPDD * pix.x,(texcoord.y*Horizontal_Vertical_Squish.y)-midH)) : tex2D(SamplerCRCLAMP,float2(((texcoord.x*2-1)*Horizontal_Vertical_Squish.x)-midV - IPDD * pix.x,(texcoord.y*Horizontal_Vertical_Squish.y)-midH));
+		color = texcoord.x < 0.5 ? tex2D(SamplerCLCLAMP,float2(((texcoord.x*2)*H_V_S().x)-midV + IPDD * pix.x,(texcoord.y*H_V_S().y)-midH)) : tex2D(SamplerCRCLAMP,float2(((texcoord.x*2-1)*H_V_S().x)-midV - IPDD * pix.x,(texcoord.y*H_V_S().y)-midH));
 		}
 	}
 	else
 	{	
-	color = texcoord.x < 0.5 ? PDL(float2(((texcoord.x*2)*Horizontal_Vertical_Squish.x)-midV + IPDD * pix.x,(texcoord.y*Horizontal_Vertical_Squish.y)-midH)) : PDR(float2(((texcoord.x*2-1)*Horizontal_Vertical_Squish.x)-midV - IPDD * pix.x,(texcoord.y*Horizontal_Vertical_Squish.y)-midH));
+	color = texcoord.x < 0.5 ? PDL(float2(((texcoord.x*2)*H_V_S().x)-midV + IPDD * pix.x,(texcoord.y*H_V_S().y)-midH)) : PDR(float2(((texcoord.x*2-1)*H_V_S().x)-midV - IPDD * pix.x,(texcoord.y*H_V_S().y)-midH));
 	}
 	}
 	else

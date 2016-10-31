@@ -87,7 +87,7 @@ Monstrum DX11				DM 23		On		RB
 Double Dragon Neon			DM 25
 Zombie Army Trilogy			DM 8 or 4				
 Just Cause 3				DM 21					    Radial
-DOOM 2016				DM 2							On Adjust 1.250
+DOOM 2016				DM 27 or 2							On Adjust 1.250
 Quantum Break				DM 18					    Radial
 Stay Close				DM 26				RB	    Normal
 Emily Wants To Play			DM 26				RB	    Any
@@ -95,7 +95,7 @@ KHOLAT					DM 21				RB	    Any
 LuciusII				DM 4 or 23			RB	    Normal
 Dead Effect				DM 10		On			    Any	
 Nosferatu: The Wrath of Malachi		DM 1				RB	    Any	
-Skyrim EE				DM 27 or 0					    Radial	On Adjust 0.750-0.875			Read Above		
+Skyrim SE				DM 27 or 0				    Radial	On Adjust 0.750-0.875			Read Above		
 
 Game List updates for Reshade 2.0
 [Game List]				[Alternate Depth Map]	   [Depth Flip On][Read Below]	[Blur Recommendations]	[BSD Notes]
