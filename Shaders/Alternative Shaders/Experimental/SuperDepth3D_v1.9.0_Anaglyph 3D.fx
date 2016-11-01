@@ -38,16 +38,9 @@ uniform int Depth <
 
 uniform float Convergence <
 	ui_type = "drag";
-	ui_min = -1; ui_max = 1;
+	ui_min = -0.250; ui_max = 0.250;
 	ui_label = "Convergence Slider";
 	ui_tooltip = "Determines the Convergence point. Default is 0";
-> = 0;
-
-uniform int Perspective_Edge_Selection <
-	ui_type = "combo";
-	ui_items = "Black Sides\0Mirrored Sides\0";
-	ui_label = "Perspective Edge Selection";
-	ui_tooltip = "Select how you like the Edge of the screen to look like for perspective.";
 > = 0;
 
 uniform int Perspective <
@@ -71,6 +64,11 @@ uniform float Disocclusion_Power <
 	ui_tooltip = "Determines the Disocclusion masking of Depth Map. Default is 0.025";
 > = 0.025;
 
+uniform bool Depth_Map_View <
+	ui_label = "Depth Map View";
+	ui_tooltip = "Display the Depth Map. Use This to Work on your Own Depth Map for your game.";
+> = false;
+
 uniform bool Depth_Map_Enhancement <
 	ui_label = "Depth Map Enhancement";
 	ui_tooltip = "Enable Or Dissable Depth Map Enhancement. Default is Off";
@@ -78,20 +76,31 @@ uniform bool Depth_Map_Enhancement <
 
 uniform float Adjust <
 	ui_type = "drag";
-	ui_min = 0.5; ui_max = 1.5;
+	ui_min = 0; ui_max = 1.5;
 	ui_label = "Adjust";
 	ui_tooltip = "Adjust DepthMap Enhancement, Dehancement occurs past one. Default is 1.0";
 > = 1.0;
 
-uniform bool Depth_Map_Clamp <
-	ui_label = "Depth Map Clamp";
-	ui_tooltip = "Clamps Min and Max setting of Your Depth Map, you may want to turn this on if going pass 25 Depth. Default is Off";
+uniform int Weapon_Depth_Map <
+	ui_type = "combo";
+	ui_items = "Weapon Depth Map Off\0Weapon Depth Map On\0";
+	ui_label = "Alternate Weapon Depth Map";
+	ui_tooltip = "Alternate Depth Map for different Games. Read the ReadMeDepth3d.txt, for setting. Each game May and can use a diffrent Alternet Depth Map.";
 > = 0;
 
-uniform bool Depth_Map_View <
-	ui_label = "Depth Map View";
-	ui_tooltip = "Display the Depth Map. Use This to Work on your Own Depth Map for your game.";
-> = false;
+uniform float3 Weapon_Adjust <
+	ui_type = "drag";
+	ui_min = -1.0; ui_max = 1.500;
+	ui_label = "Weapon Adjust DepthMap";
+	ui_tooltip = "Adjust weapon depth map. Default is (Y 0, X 0.250, Z 1.001)";
+> = float3(0.0,0.250,1.001);
+
+uniform float Weapon_Percentage <
+	ui_type = "drag";
+	ui_min = -1.0; ui_max = 5.0;
+	ui_label = "Weapon Percentage";
+	ui_tooltip = "Adjust weapon percentage. Default is 5.0";
+> = 5.0;
 
 uniform bool Depth_Map_Flip <
 	ui_label = "Depth Map Flip";
@@ -200,6 +209,14 @@ sampler SamplerCLBORDER
 		AddressV = BORDER;
 		AddressW = BORDER;
 	};
+	
+sampler SamplerCLCLAMP
+	{
+		Texture = texCL;
+		AddressU = CLAMP;
+		AddressV = CLAMP;
+		AddressW = CLAMP;
+	};
 
 sampler SamplerCRMIRROR
 	{
@@ -215,6 +232,14 @@ sampler SamplerCRBORDER
 		AddressU = BORDER;
 		AddressV = BORDER;
 		AddressW = BORDER;
+	};
+	
+sampler SamplerCRCLAMP
+	{
+		Texture = texCR;
+		AddressU = CLAMP;
+		AddressV = CLAMP;
+		AddressW = CLAMP;
 	};
 	
 sampler SamplerCC
@@ -243,8 +268,7 @@ float4 SbSdepth(float4 pos : SV_Position, float2 texcoord : TEXCOORD0) : SV_Targ
 			texcoord.y =  1 - texcoord.y;
 	
 	float4 depthM = tex2D(DepthBuffer, float2(texcoord.x, texcoord.y));
-	
-	float4 depthMFar;
+	float4 WDM = tex2D(DepthBuffer, float2(texcoord.x, texcoord.y));
 		
 		if (Custom_Depth_Map == 0)
 	{	
@@ -333,7 +357,7 @@ float4 SbSdepth(float4 pos : SV_Position, float2 texcoord : TEXCOORD0) : SV_Targ
 		{
 		float cF = 1;	
 		float cN = 5.5;	
-		depthM = (exp(depthM * log(cF + cN)) - cN) / cF;
+		depthM = clamp((exp(depthM * log(cF + cN)) - cN) / cF,0,1.25);
 		}
 		
 		//Dying Light
@@ -451,9 +475,9 @@ float4 SbSdepth(float4 pos : SV_Position, float2 texcoord : TEXCOORD0) : SV_Targ
 		//Double Dragon Neon
 		if (Alternate_Depth_Map == 25)
 		{
-		float cF = 0.025;//1
-		float cN = 0.16;//1.875
-		depthM = clamp(1 - (depthM * cF / (cF - cN) + cN) / depthM,0,255);
+		float cF = 0.5;
+		float cN = 0.150;
+		depthM = log(depthM / cN) / log(cF / cN);
 		}
 		
 		//Deus Ex: Mankind Divided
@@ -478,7 +502,7 @@ float4 SbSdepth(float4 pos : SV_Position, float2 texcoord : TEXCOORD0) : SV_Targ
 		float cF = 50;
 		float cN = -0.5;
 		depthM =  (exp(pow(depthM, depthM + cF / pow(depthM, cN) - 1 * (pow((depthM), cN)))) - 1) / (exp(depthM) - 1);
-		}	
+		}
 		
 	}
 	else
@@ -567,28 +591,56 @@ float4 SbSdepth(float4 pos : SV_Position, float2 texcoord : TEXCOORD0) : SV_Targ
 	}
 		
 	float4 D;
+	float4 depthMFar;
+	float4 depthMFarT;
+	
+	float Adj;
+	float Per;
+		
+		//Weapon Depth Profile One	
+		if (Weapon_Depth_Map == 1)
+		{
+		Adj = Weapon_Adjust.x;
+		Per = Weapon_Percentage;
+		float cWF = Weapon_Adjust.y;
+		float cWN = Weapon_Adjust.z;
+		WDM = 1 - (log(cWF * cWN/WDM - cWF));
+		}
+		
+	float NearDepth = step(depthM.r,Adj);
 	
 	if(Depth_Map_Enhancement == 0)
     {
-    D = depthM;	
+		if (Weapon_Depth_Map <= 0)
+		{
+		D = depthM;
+		}
+		else
+		{
+		D = lerp(depthM,WDM%Per,NearDepth);
+		}
     }
     else
     {
-    float A = Adjust;
-	float cDF = 1.025;
-	float cDN = 0;
-	depthMFar = pow(abs((exp(depthM * log(cDF + cDN)) - cDN) / cDF),1000);	
-    D = lerp(depthMFar,depthM,A);	
+		if (Weapon_Depth_Map <= 0)
+		{
+		float A = Adjust;
+		float cDF = 1.025;
+		float cDN = 0;
+		depthMFar = pow(abs((exp(depthM * log(cDF + cDN)) - cDN) / cDF),1000);	
+		D = lerp(depthMFar,depthM,A);
+		}
+		else
+		{
+		float A = Adjust;
+		float cDF = 1.025;
+		float cDN = 0;
+		depthMFar = pow(abs((exp(depthM * log(cDF + cDN)) - cDN) / cDF),1000);	
+		D = lerp(lerp(depthMFar,depthM,A),WDM%Per,NearDepth);
+		}
     }
     
-    if(Depth_Map_Clamp == 1)
-	{
-  	color.rgb = clamp(D.rrr,0,1);
-	}
-	else
-	{
 	color.rgb = D.rrr;
-	}
 	
 	return color;	
 
@@ -672,47 +724,46 @@ void PS_renderLR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD
 	for (int j = 0; j <= 3; ++j) 
 	{	
 			uv.x = samples[j] * D;
-			DepthL =  min(DepthL,tex2D(SamplerCC,float2(texcoord.x+uv.x*pix.x, texcoord.y)).r);
-			DepthR =  min(DepthR,tex2D(SamplerCC,float2(texcoord.x-uv.x*pix.x, texcoord.y)).r);
+			DepthL =  min(DepthL,tex2D(SamplerCC,float2(texcoord.x+uv.x*pix.x, texcoord.y)).r)/1-C;
+			DepthR =  min(DepthR,tex2D(SamplerCC,float2(texcoord.x-uv.x*pix.x, texcoord.y)).r)/1-C;
 	}
 		if(!Eye_Swap)
 		{	
 			if(Custom_Sidebars == 0)
 			{
-			color = tex2D(BackBufferMIRROR, float2(texcoord.xy+float2(((DepthL/1-C)*D),0)*pix.xy));
-			colorT = tex2D(BackBufferMIRROR, float2(texcoord.xy-float2(((DepthR/1-C)*D),0)*pix.xy));
+			color = tex2D(BackBufferMIRROR, float2(texcoord.xy+float2((DepthL*D),0)*pix.xy));
+			colorT = tex2D(BackBufferMIRROR, float2(texcoord.xy-float2((DepthR*D),0)*pix.xy));
 			}
 			else if(Custom_Sidebars == 1)
 			{
-			color = tex2D(BackBufferBORDER, float2(texcoord.xy+float2(((DepthL/1-C)*D),0)*pix.xy));
-			colorT = tex2D(BackBufferBORDER, float2(texcoord.xy-float2(((DepthR/1-C)*D),0)*pix.xy));
+			color = tex2D(BackBufferBORDER, float2(texcoord.xy+float2((DepthL*D),0)*pix.xy));
+			colorT = tex2D(BackBufferBORDER, float2(texcoord.xy-float2((DepthR*D),0)*pix.xy));
 			}
 			else
 			{
-			color = tex2D(BackBufferCLAMP, float2(texcoord.xy+float2(((DepthL/1-C)*D),0)*pix.xy));
-			colorT = tex2D(BackBufferCLAMP, float2(texcoord.xy-float2(((DepthR/1-C)*D),0)*pix.xy));
+			color = tex2D(BackBufferCLAMP, float2(texcoord.xy+float2((DepthL*D),0)*pix.xy));
+			colorT = tex2D(BackBufferCLAMP, float2(texcoord.xy-float2((DepthR*D),0)*pix.xy));
 			}
 		}
 		else
 		{		
 			if(Custom_Sidebars == 0)
 			{
-			colorT = tex2D(BackBufferMIRROR, float2(texcoord.xy+float2(((DepthL/1-C)*D),0)*pix.xy));
-			color = tex2D(BackBufferMIRROR, float2(texcoord.xy-float2(((DepthR/1-C)*D),0)*pix.xy));
+			colorT = tex2D(BackBufferMIRROR, float2(texcoord.xy+float2((DepthL*D),0)*pix.xy));
+			color = tex2D(BackBufferMIRROR, float2(texcoord.xy-float2((DepthR*D),0)*pix.xy));
 			}
 			else if(Custom_Sidebars == 1)
 			{
-			colorT = tex2D(BackBufferBORDER, float2(texcoord.xy+float2(((DepthL/1-C)*D),0)*pix.xy));
-			color = tex2D(BackBufferBORDER, float2(texcoord.xy-float2(((DepthR/1-C)*D),0)*pix.xy));
+			colorT = tex2D(BackBufferBORDER, float2(texcoord.xy+float2((DepthL*D),0)*pix.xy));
+			color = tex2D(BackBufferBORDER, float2(texcoord.xy-float2((DepthR*D),0)*pix.xy));
 			}
 			else
 			{
-			colorT = tex2D(BackBufferCLAMP, float2(texcoord.xy+float2(((DepthL/1-C)*D),0)*pix.xy));
-			color = tex2D(BackBufferCLAMP, float2(texcoord.xy-float2(((DepthR/1-C)*D),0)*pix.xy));
+			colorT = tex2D(BackBufferCLAMP, float2(texcoord.xy+float2((DepthL*D),0)*pix.xy));
+			color = tex2D(BackBufferCLAMP, float2(texcoord.xy-float2((DepthR*D),0)*pix.xy));
 			}
 		}
 }
-
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void PS0(float4 position : SV_Position, float2 texcoord : TEXCOORD0, out float4 color : SV_Target)
 {
@@ -740,18 +791,28 @@ void PS0(float4 position : SV_Position, float2 texcoord : TEXCOORD0, out float4 
 				float3 LB = lerp(HalfLB,tex2D(SamplerCLBORDER,float2(texcoord.x + P * pix.x,texcoord.y)).rgb,Anaglyph_Desaturation);  
 				float3 RB = lerp(HalfRB,tex2D(SamplerCRBORDER,float2(texcoord.x - P * pix.x,texcoord.y)).rgb,Anaglyph_Desaturation); 
 				
+				float3 HalfLC = dot(tex2D(SamplerCLClamp,float2(texcoord.x + P * pix.x,texcoord.y)).rgb,float3(0.299, 0.587, 0.114));
+				float3 HalfRC = dot(tex2D(SamplerCRClamp,float2(texcoord.x - P * pix.x,texcoord.y)).rgb,float3(0.299, 0.587, 0.114));
+				float3 LC = lerp(HalfLB,tex2D(SamplerCLClamp,float2(texcoord.x + P * pix.x,texcoord.y)).rgb,Anaglyph_Desaturation);  
+				float3 RC = lerp(HalfRB,tex2D(SamplerCRClamp,float2(texcoord.x - P * pix.x,texcoord.y)).rgb,Anaglyph_Desaturation); 
+				
 				float4 C;
 				float4 CT;
 				
-				if(Perspective_Edge_Selection == 0)
+				if(Custom_Sidebars == 0)
+				{
+				C = float4(LM,1);
+				CT = float4(RM,1);
+				}
+				else if(Custom_Sidebars == 1)
 				{
 				C = float4(LB,1);
 				CT = float4(RB,1);
 				}
 				else
 				{
-				C = float4(LM,1);
-				CT = float4(RM,1);
+				C = float4(LC,1);
+				CT = float4(RC,1);
 				}
 				
 			if (Anaglyph_Colors == 0)
