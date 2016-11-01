@@ -74,34 +74,6 @@ uniform float Adjust <
 	ui_tooltip = "Adjust DepthMap Enhancement, Dehancement occurs past one. Default is 1.0";
 > = 1.0;
 
-uniform int Weapon_Depth_Map <
-	ui_type = "combo";
-	ui_items = "Weapon Depth Map Off\0Weapon Depth Map On\0";
-	ui_label = "Alternate Weapon Depth Map";
-	ui_tooltip = "Alternate Depth Map for different Games. Read the ReadMeDepth3d.txt, for setting. Each game May and can use a diffrent Alternet Depth Map.";
-> = 0;
-
-uniform float3 Weapon_Adjust <
-	ui_type = "drag";
-	ui_min = -1.0; ui_max = 1.500;
-	ui_label = "Weapon Adjust DepthMap";
-	ui_tooltip = "Adjust weapon depth map. Default is (Y 0, X 0.250, Z 1.001)";
-> = float3(0.0,0.250,1.001);
-
-uniform float Weapon_Percentage <
-	ui_type = "drag";
-	ui_min = -1.0; ui_max = 5.0;
-	ui_label = "Weapon Percentage";
-	ui_tooltip = "Adjust weapon percentage. Default is 5.0";
-> = 5.0;
-
-uniform int Stereoscopic_Mode <
-	ui_type = "combo";
-	ui_items = "Side by Side\0Top and Bottom\0Line Interlaced\0Checkerboard 3D\0";
-	ui_label = "3D Display Mode";
-	ui_tooltip = "Side by Side/Top and Bottom/Line Interlaced displays output.";
-> = 0;
-
 uniform int Custom_Sidebars <
 	ui_type = "combo";
 	ui_items = "Mirrored Edges\0Black Edges\0Stretched Edges\0";
@@ -121,6 +93,13 @@ uniform float3 Cross_Cusor_Color <
 	ui_tooltip = "Pick your own cross cusor color. Default is (R 255, G 255, B 255)";
 	ui_label = "Cross Cusor Color";
 > = float3(1.0, 1.0, 1.0);
+
+uniform int Stereoscopic_Mode <
+	ui_type = "combo";
+	ui_items = "Side by Side\0Top and Bottom\0Line Interlaced\0Checkerboard 3D\0";
+	ui_label = "3D Display Mode";
+	ui_tooltip = "Side by Side/Top and Bottom/Line Interlaced displays output.";
+> = 0;
 
 uniform bool Eye_Swap <
 	ui_label = "Eye Swap";
@@ -347,38 +326,13 @@ float4 SbSdepth(float4 pos : SV_Position, float2 texcoord : TEXCOORD0) : SV_Targ
 		
 	float4 D;
 	float4 depthMFar;
-	float4 depthMFarT;
-	
-	float Adj;
-	float Per;
-			
-		if (Weapon_Depth_Map == 1)
-		{
-		Adj = Weapon_Adjust.x;
-		Per = Weapon_Percentage;
-		float cWF = Weapon_Adjust.y;
-		float cWN = Weapon_Adjust.z;
-		WDM = 1 - (log(cWF * cWN/WDM - cWF));
-		}
-	
-	if (Weapon_Depth_Map <= 0)
-	{
-	float A = Adjust;
-	float cDF = 1.025;
-	float cDN = 0;
-	depthMFar = pow(abs((exp(depthM * log(cDF + cDN)) - cDN) / cDF),1000);	
-    D = lerp(depthMFar,depthM,A);
-	}
-	else
-	{
-	float NearDepth = step(depthM.r,Adj);
+
     float A = Adjust;
 	float cDF = 1.025;
 	float cDN = 0;
 	depthMFar = pow(abs((exp(depthM * log(cDF + cDN)) - cDN) / cDF),1000);	
-    D = lerp(lerp(depthMFar,depthM,A),WDM%Per,NearDepth);
-    }
-    	
+    D = lerp(depthMFar,depthM,A);
+        	
     color.rgb = clamp(D.rrr,0,1);
   		
 	return color;	

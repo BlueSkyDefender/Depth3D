@@ -76,6 +76,18 @@ uniform bool Depth_Map_View <
 	ui_tooltip = "Display the Depth Map. Use This to Work on your Own Depth Map for your game.";
 > = false;
 
+uniform bool Depth_Map_Enhancement <
+	ui_label = "Depth Map Enhancement";
+	ui_tooltip = "Enable Or Dissable Depth Map Enhancement. Default is Off";
+> = 0;
+
+uniform float Adjust <
+	ui_type = "drag";
+	ui_min = 0; ui_max = 1.5;
+	ui_label = "Adjust";
+	ui_tooltip = "Adjust DepthMap Enhancement, Dehancement occurs past one. Default is 1.0";
+> = 1.0;
+
 uniform int Weapon_Depth_Map <
 	ui_type = "combo";
 	ui_items = "Weapon Depth Map Off\0Weapon Depth Map On\0";
@@ -101,18 +113,6 @@ uniform bool Depth_Map_Flip <
 	ui_label = "Depth Map Flip";
 	ui_tooltip = "Depth Flip if the depth map is Upside Down.";
 > = false;
-
-uniform bool Depth_Map_Enhancement <
-	ui_label = "Depth Map Enhancement";
-	ui_tooltip = "Enable Or Dissable Depth Map Enhancement. Default is Off";
-> = 0;
-
-uniform float Adjust <
-	ui_type = "drag";
-	ui_min = 0; ui_max = 1.5;
-	ui_label = "Adjust";
-	ui_tooltip = "Adjust DepthMap Enhancement, Dehancement occurs past one. Default is 1.0";
-> = 1.0;
 
 uniform int Custom_Depth_Map <
 	ui_type = "combo";
