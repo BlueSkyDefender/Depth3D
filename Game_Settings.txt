@@ -33,7 +33,7 @@ https://docs.google.com/spreadsheets/d/18ujpY-97V_YuXpQUh-7bOomE4D5nUGwp3XppfU_0
 Game List updates for Reshade 3.0
 ______________________________________________________________________________________________________________________________________
 
-[Game List]				[Alternate DM]	[Depth Flip] [Read Below] [Blur Type] [Depth Map Enhancement] [Depth Map Clamp] [BSD Notes]
+[Game List]				[Alternate DM]	[Depth Flip] [Read Below] [Blur Type] [Depth Map Enhancement]  [BSD Notes]
 Alien Isolation				DM 0
 Amnesia: The Dark Descent		DM 1
 Among The Sleep				DM 2		On				
@@ -52,9 +52,9 @@ Dragon Ball Xenoverse			DM 9
 Dragons Dogma: Dark Arisen		DM 8
 DreamFall Chapters			DM 18		On
 Dying Light				DM 11
-Fallout 4				DM 0 or 27				    Radial	On/Off								
+Fallout 4				DM 0 or 27				    Radial								
 Firewatch				DM 0		On		RB				
-GTA V					DM 12				RB	    Radial					  	Read Above
+GTA V					DM 12				RB	    Radial				Read Above
 Hard Reset				DM 4				RB
 Lords of The Fallen			DM 4
 Magicka 2				DM 13				RB	    Off
@@ -72,10 +72,10 @@ The Elder Scrolls V: Skyrim		DM 4
 Sleeping Dogs: DE			DM 18
 Souls Games				DM 19
 The Evil Within				DM 19				RB	    Any
-Witcher 3				DM 20 or 14				    Radial	On Adjust 0.875		  		Read Above
+Witcher 3				DM 20 or 14				    Radial	On Adjust 0.875		  Read Above
 Zombi					DM 7
-Warhammer: End Times - Vermintide	DM 10										DM Clamp On
-Deus Ex: Mankind Divided		DM 26					    Radial				  		Read Above
+Warhammer: End Times - Vermintide	DM 10										
+Deus Ex: Mankind Divided		DM 26					    Radial				  Read Above
 Dead Rising 3				DM 6					
 Soma					DM 2
 Penumbra: Black Plague			DM 4				RB
@@ -87,7 +87,7 @@ Monstrum DX11				DM 23		On		RB
 Double Dragon Neon			DM 25
 Zombie Army Trilogy			DM 8 or 4				
 Just Cause 3				DM 21					    Radial
-DOOM 2016				DM 27 or 2							On Adjust 1.250
+DOOM 2016				DM 28 or 2						On Adjust 1.250
 Quantum Break				DM 18					    Radial
 Stay Close				DM 26				RB	    Normal
 Emily Wants To Play			DM 26				RB	    Any
@@ -95,10 +95,10 @@ KHOLAT					DM 21				RB	    Any
 LuciusII				DM 4 or 23			RB	    Normal
 Dead Effect				DM 10		On			    Any	
 Nosferatu: The Wrath of Malachi		DM 1				RB	    Any	
-Skyrim SE				DM 27 or 0				    Radial	On Adjust 0.750-0.875			Read Above
-Phantasmal				DM 4		ON		RB	    Any								
-Layers of Fear				DM 10		ON			    Normal
-Through The Woods			DM 29		ON		RB	    Radial
+The Elder Scrolls V: SE			DM 27 or 0				    Radial				Read Above
+Phantasmal				DM 4		On		RB	    Any								
+Layers of Fear				DM 10		On			    Normal
+Through The Woods			DM 29		On		RB	    Radial
 
 Game List updates for Reshade 2.0
 [Game List]				[Alternate Depth Map]	   [Depth Flip On][Read Below]	[Blur Recommendations]	[BSD Notes]
