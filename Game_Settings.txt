@@ -99,6 +99,7 @@ The Elder Scrolls V: SE			DM 27 or 0				    Radial				Read Above
 Phantasmal				DM 4		On		RB	    Any								
 Layers of Fear				DM 10		On			    Normal
 Through The Woods			DM 29		On		RB	    Radial
+Dungeon Nightmares II			DM 23		On		RB	    Any
 
 Game List updates for Reshade 2.0
 [Game List]				[Alternate Depth Map]	   [Depth Flip On][Read Below]	[Blur Recommendations]	[BSD Notes]
@@ -156,6 +157,9 @@ Then head to the folder and rename d3d9.dll to dxgi.dll.
 Now open the DPfix095.zip Directly from http://blog.metaclassofnil.com/wp-content/uploads/2013/12/DPfix095.zip or http://blog.metaclassofnil.com/?p=438.
 
 Install the contents of that folder in to Deadly Premonition Folder where you changed Reshade's d3d9.dll to dxgi.dll. Edit the DPfix.ini too what ever REZ you want. Then start the game.
+
+{Dungeon Nightmares II}
+Highest Setting is "Good" Any thing Lower will work and thing above will not work. Make sure to set your res to native.
 
 {Emily Wants To Play}
 Install reshade in to SteamLibrary\steamapps\common\Emily Wants To Play\Engine\Binaries\Win64
