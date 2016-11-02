@@ -1,6 +1,6 @@
- ////----------------//
- ///**VRSBStoElse**///
- //----------------////
+ ////--------------------//
+ ///**SidebySideToElse**///
+ //--------------------////
 
 // Change the Cross Cusor Key
 // Determines the Cusor Toggle Key useing keycode info
@@ -71,10 +71,10 @@ uniform float3 Cross_Cusor_Color <
 	ui_label = "Cross Cusor Color";
 > = float3(1.0, 1.0, 1.0);
 
-uniform int VR <
+uniform int SidebySideToElse <
 	ui_type = "combo";
 	ui_items = "Off\0ON\0";
-	ui_label = "VR to Else";
+	ui_label = "Side by Side to Else";
 	ui_tooltip = "NUll";
 > = 0;
 
@@ -245,7 +245,7 @@ float4 MouseCuror(float4 pos : SV_Position, float2 texcoord : TEXCOORD) : SV_Tar
 void PS_renderLR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 color : SV_Target0 , out float4 colorT: SV_Target1)
 {	
 
-		if(VR == 0)
+		if(SidebySideToElse == 0)
 		{	
 			if(!Eye_Swap)
 			{	
@@ -551,7 +551,7 @@ void PostProcessVS(in uint id : SV_VertexID, out float4 position : SV_Position, 
 
 //*Rendering passes*//
 
-technique VRSBS_Else
+technique SidebySide_To_Else
 {			
 			pass MousePass
 		{
@@ -565,7 +565,7 @@ technique VRSBS_Else
 			RenderTarget0 = texCL;
 			RenderTarget1 = texCR;
 		}
-			pass SidebySideTopandBottomLineCheckerboardPass
+			pass SidebySideToElse
 		{
 			VertexShader = PostProcessVS;
 			PixelShader = PS0;	
