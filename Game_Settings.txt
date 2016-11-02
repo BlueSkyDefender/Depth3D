@@ -95,7 +95,10 @@ KHOLAT					DM 21				RB	    Any
 LuciusII				DM 4 or 23			RB	    Normal
 Dead Effect				DM 10		On			    Any	
 Nosferatu: The Wrath of Malachi		DM 1				RB	    Any	
-Skyrim SE				DM 27 or 0				    Radial	On Adjust 0.750-0.875			Read Above		
+Skyrim SE				DM 27 or 0				    Radial	On Adjust 0.750-0.875			Read Above
+Phantasmal				DM 4		ON		RB	    Any								
+Layers of Fear				DM 10		ON			    Normal
+Through The Woods			DM 29		ON		RB	    Radial
 
 Game List updates for Reshade 2.0
 [Game List]				[Alternate Depth Map]	   [Depth Flip On][Read Below]	[Blur Recommendations]	[BSD Notes]
@@ -203,6 +206,9 @@ https://www.youtube.com/watch?v=opVni9cRN7Q
 No film Grain Guide.
 https://steamcommunity.com/sharedfiles/filedetails/?id=334444605
 
+{Phantasmal}
+A buggy Opengl game. But, hold down ctrl when starting the game and set your resolution. That or use "-show-screen-selector" in launch options. Once in game Start it. Then you will get a overblown screen. From here press Alt+Enter. Then hit escape and set your resoution and settings to ultra dissable motion blur. Set your settings and now press shift+f2 for reshade and set your settings for Depth3D.
+
 {Penumbra: Black Plague}
 Go here
 C:\Users\...\Documents\Penumbra\settings.cfg
@@ -278,6 +284,9 @@ This should fix it. For more look up this problem on google.
 {The Vanishing of Ethan Carter Redux}
 
 Instal Dll too D:\SteamLibrary\steamapps\common\The Vanishing of Ethan Carter Redux\EthanCarter\Binaries\Win64
+
+{Through The Woods}
+In game Set your Res to Native screen Res.
 
 {Wolfenstine The New Order} - working in Reshade 3.0 and Rehade 2.0
 [Set Launch Options](+r_multisamples "0" +vt_maxaniso "16")

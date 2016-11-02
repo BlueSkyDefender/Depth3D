@@ -1,6 +1,6 @@
- ////----------------//
- ///**SuperDepth3D**///
- //----------------////
+ ////-------------------//
+ ///**SuperDepth3DHMD**///
+ //-------------------////
 
  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
  //* Depth Map Based 3D post-process shader v1.9.0																																	*//
@@ -31,7 +31,7 @@
 
 uniform int Alternate_Depth_Map <
 	ui_type = "combo";
-	ui_items = "Depth Map 0\0Depth Map 1\0Depth Map 2\0Depth Map 3\0Depth Map 4\0Depth Map 5\0Depth Map 6\0Depth Map 7\0Depth Map 8\0Depth Map 9\0Depth Map 10\0Depth Map 11\0Depth Map 12\0Depth Map 13\0Depth Map 14\0Depth Map 15\0Depth Map 16\0Depth Map 17\0Depth Map 18\0Depth Map 19\0Depth Map 20\0Depth Map 21\0Depth Map 22\0Depth Map 23\0Depth Map 24\0Depth Map 25\0Depth Map 26\0Depth Map 27\0Depth Map 28\0";
+	ui_items = "Depth Map 0\0Depth Map 1\0Depth Map 2\0Depth Map 3\0Depth Map 4\0Depth Map 5\0Depth Map 6\0Depth Map 7\0Depth Map 8\0Depth Map 9\0Depth Map 10\0Depth Map 11\0Depth Map 12\0Depth Map 13\0Depth Map 14\0Depth Map 15\0Depth Map 16\0Depth Map 17\0Depth Map 18\0Depth Map 19\0Depth Map 20\0Depth Map 21\0Depth Map 22\0Depth Map 23\0Depth Map 24\0Depth Map 25\0Depth Map 26\0Depth Map 27\0Depth Map 28\0Depth Map 29\0";
 	ui_label = "Alternate Depth Map";
 	ui_tooltip = "Alternate Depth Map for different Games. Read the ReadMeDepth3d.txt, for setting. Each game May and can use a diffrent Alternet Depth Map.";
 > = 0;
@@ -137,6 +137,7 @@ uniform float Lens_Distortion <
 
 uniform float3 Polynomial_Colors <
 	ui_type = "color";
+	ui_min = 0.0; ui_max = 2.0;
 	ui_tooltip = "Adjust the Polynomial Distortion Red, Green, Blue. Default is (R 255, G 255, B 255)";
 	ui_label = "Polynomial Color Distortion";
 > = float3(1.0, 1.0, 1.0);
@@ -590,6 +591,14 @@ float4 SbSdepth(float4 pos : SV_Position, float2 texcoord : TEXCOORD0) : SV_Targ
 		depthM =  (exp(pow(depthM, depthM + cF / pow(depthM, cN) - 1 * (pow((depthM), cN)))) - 1) / (exp(depthM) - 1);
 		}
 		
+		//Through The Woods
+		if (Alternate_Depth_Map == 29)
+		{
+		float cF = 25;
+		float cN = 0;
+		depthM =  (exp(pow(depthM, depthM + cF / pow(depthM, cN) - 1 * (pow((depthM), cN)))) - 1) / (exp(depthM) - 1);
+		}
+		
 	}
 	else
 	{
@@ -968,7 +977,7 @@ void PostProcessVS(in uint id : SV_VertexID, out float4 position : SV_Position, 
 
 //*Rendering passes*//
 
-technique Super_Depth3D
+technique Super_Depth3D_HMDs
 {			
 			pass MousePass
 		{
@@ -988,7 +997,7 @@ technique Super_Depth3D
 			RenderTarget0 = texCL;
 			RenderTarget1 = texCR;
 		}
-			pass SidebySideTopandBottomLineCheckerboardPass
+			pass SidebySidePolynomialBarrelDistortion
 		{
 			VertexShader = PostProcessVS;
 			PixelShader = PS0;	
