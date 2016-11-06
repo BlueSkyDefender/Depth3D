@@ -633,6 +633,7 @@ float4 SbSdepth(float4 pos : SV_Position, float2 texcoord : TEXCOORD0) : SV_Targ
 		WDM = (log(cWF / cWN*WDM - cWF));
 		}
 		
+		//Weapon Depth Map One
 		if (Weapon_Depth_Map == 3)
 		{
 		Adj = 0;
