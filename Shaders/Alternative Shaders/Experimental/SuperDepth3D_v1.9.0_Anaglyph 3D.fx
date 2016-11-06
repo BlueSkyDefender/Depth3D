@@ -312,12 +312,12 @@ float4 SbSdepth(float4 pos : SV_Position, float2 texcoord : TEXCOORD0) : SV_Targ
 		depthM = (pow(abs(cN-depthM),cF));
 		}
 		
-		//Call of Duty: Advance Warfare | Call of Duty: Black Ops 2 | Call of Duty: Ghost
+		//Call of Duty: Advance Warfare | Call of Duty: Black Ops 2 | Call of Duty: Ghost | Call of Duty: Infinite Warfare 
 		if (Alternate_Depth_Map == 5)
 		{
-		float cF  = 0.01;
+		float cF = 25;
 		float cN = 1;
-		depthM =  (cN * cF / (cF + depthM * (cN - cF))); 
+		depthM = (pow(abs(cN-depthM),cF));
 		}
 		
 		//Casltevania: Lord of Shadows - UE | Dead Rising 3
@@ -512,11 +512,11 @@ float4 SbSdepth(float4 pos : SV_Position, float2 texcoord : TEXCOORD0) : SV_Targ
 		depthM =  (exp(pow(depthM, depthM + cF / pow(depthM, cN) - 1 * (pow((depthM), cN)))) - 1) / (exp(depthM) - 1);
 		}
 		
-		//Null
+		//Amnesia: Machine for Pigs
 		if (Alternate_Depth_Map == 30)
 		{
-		float cF = 5;
-		float cN = 5;
+		float cF = 100;
+		float cN = 0;
 		depthM =  (exp(pow(depthM, depthM + cF / pow(depthM, cN) - 1 * (pow((depthM), cN)))) - 1) / (exp(depthM) - 1);
 		}
 		
