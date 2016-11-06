@@ -83,7 +83,7 @@ uniform float Adjust <
 
 uniform int Weapon_Depth_Map <
 	ui_type = "combo";
-	ui_items = "Weapon Depth Map Off\0Weapon Depth Map On\0";
+	ui_items = "Weapon Depth Map Off\0Custom Weapon Depth Map One\0Custom Weapon Depth Map Two\0Weapon Depth Map One\0";
 	ui_label = "Alternate Weapon Depth Map";
 	ui_tooltip = "Alternate Depth Map for different Games. Read the ReadMeDepth3d.txt, for setting. Each game May and can use a diffrent Alternet Depth Map.";
 > = 0;
@@ -613,14 +613,33 @@ float4 SbSdepth(float4 pos : SV_Position, float2 texcoord : TEXCOORD0) : SV_Targ
 	float Adj;
 	float Per;
 		
-		//Weapon Depth Profile One	
+		//Custom Weapon Depth Profile One	
 		if (Weapon_Depth_Map == 1)
 		{
-		Adj = Weapon_Adjust.x;
-		Per = Weapon_Percentage;
-		float cWF = Weapon_Adjust.y;
-		float cWN = Weapon_Adjust.z;
+		Adj = Weapon_Adjust.x;//0
+		Per = Weapon_Percentage;//5
+		float cWF = Weapon_Adjust.y;//0.250
+		float cWN = Weapon_Adjust.z;//1.001
 		WDM = 1 - (log(cWF * cWN/WDM - cWF));
+		}
+		
+		//Custom Weapon Depth Profile Two
+		if (Weapon_Depth_Map == 2)
+		{
+		Adj = Weapon_Adjust.x;//0
+		Per = Weapon_Percentage;//5
+		float cWF = Weapon_Adjust.y;//-1000
+		float cWN = Weapon_Adjust.z;//0.985
+		WDM = (log(cWF / cWN*WDM - cWF));
+		}
+		
+		if (Weapon_Depth_Map == 3)
+		{
+		Adj = 0;
+		Per = 5;
+		float cWF = -1000;
+		float cWN = 0.9856;
+		WDM = (log(cWF / cWN*WDM - cWF));
 		}
 		
 	float NearDepth = step(depthM.r,Adj);
