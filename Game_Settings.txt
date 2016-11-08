@@ -112,6 +112,7 @@ S.T.A.L.K.E.R:SoC Complete Mod		DM 0						RB	    Any
 Wolfenstine: The New Order		DM 4						RB	    Any					Read Above
 Wolfenstine: The Old Blood		DM 4						RB	    Any					Read Above
 Amnesia: Machine for Pigs		DM 30							    Any
+Portal 2				Placeholder					RB	    Radial
 
 Game List updates for Reshade 2.0
 [Game List]				[Alternate Depth Map]	   [Depth Flip On][Read Below]	[Blur Recommendations]	[BSD Notes]
@@ -235,6 +236,17 @@ Go here
 C:\Users\...\Documents\Penumbra\settings.cfg
 Open the settings and set your res. 
 <Screen Width="3840" Height="2160" FullScreen="true" Vsync="true" />
+
+{Portal 2}
+Max out everything. Turn off AA
+Open the console.
+Type in console;
+ 
+sv_cheats 1
+bind 3 "r_drawvgui 1"
+bind 2 "r_drawvgui 0"
+
+Once in game press 2 and you should have acess to a Depth Map.
 
 {Quake 4}
 If some how you can click on the menu......... Good Luck.

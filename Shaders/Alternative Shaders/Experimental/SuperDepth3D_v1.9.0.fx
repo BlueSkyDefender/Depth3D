@@ -152,7 +152,14 @@ uniform int Stereoscopic_Mode <
 	ui_type = "combo";
 	ui_items = "Side by Side\0Top and Bottom\0Line Interlaced\0Checkerboard 3D\0";
 	ui_label = "3D Display Mode";
-	ui_tooltip = "Side by Side/Top and Bottom/Line Interlaced displays output.";
+	ui_tooltip = "Side by Side/Top and Bottom/Line Interlaced/Checkerboard 3D display output.";
+> = 0;
+
+uniform int Downscaling_Support <
+	ui_type = "combo";
+	ui_items = "Native\0Option One\0Option Two\0";
+	ui_label = "Downscaling Support";
+	ui_tooltip = "Dynamic Super Resolution & Virtual Super Resolution downscaling support for Line Interlaced & Checkerboard 3D displays.";
 > = 0;
 
 uniform bool Eye_Swap <
@@ -855,7 +862,21 @@ void PS0(float4 position : SV_Position, float2 texcoord : TEXCOORD0, out float4 
 		}
 		else if(Stereoscopic_Mode == 2)
 		{
-			float gridL = frac(texcoord.y*(BUFFER_HEIGHT/2));
+			float gridL;
+			
+			if(Downscaling_Support == 0)
+			{
+			gridL = frac(texcoord.y*(BUFFER_HEIGHT/2));
+			}
+			else if(Downscaling_Support == 1)
+			{
+			gridL = frac(texcoord.y*(1080.0/2));
+			}
+			else
+			{
+			gridL = frac(texcoord.y*(1081.0/2));
+			}
+			
 			if(Custom_Sidebars == 0)
 			{
 			color = gridL > 0.5 ? tex2D(SamplerCLMIRROR,float2(texcoord.x + Perspective * pix.x,texcoord.y)) : tex2D(SamplerCRMIRROR,float2(texcoord.x - Perspective * pix.x,texcoord.y));
@@ -871,8 +892,25 @@ void PS0(float4 position : SV_Position, float2 texcoord : TEXCOORD0, out float4 
 		}
 		else
 		{
-			float gridy = floor(texcoord.y*(BUFFER_HEIGHT));
-			float gridx = floor(texcoord.x*(BUFFER_WIDTH));
+			float gridy;
+			float gridx;
+			
+			if(Downscaling_Support == 0)
+			{
+			gridy = floor(texcoord.y*(BUFFER_HEIGHT));
+			gridx = floor(texcoord.x*(BUFFER_WIDTH));
+			}
+			else if(Downscaling_Support == 1)
+			{
+			gridy = floor(texcoord.y*(1080.0));
+			gridx = floor(texcoord.x*(1080.0));
+			}
+			else
+			{
+			gridy = floor(texcoord.y*(1081.0));
+			gridx = floor(texcoord.x*(1081.0));
+			}
+			
 			if(Custom_Sidebars == 0)
 			{
 			color = (int(gridy+gridx) & 1) < 0.5 ? tex2D(SamplerCLMIRROR,float2(texcoord.x + Perspective * pix.x,texcoord.y)) : tex2D(SamplerCRMIRROR,float2(texcoord.x - Perspective * pix.x,texcoord.y));
