@@ -90,9 +90,9 @@ uniform float Adjust <
 
 uniform int Weapon_Depth_Map <
 	ui_type = "combo";
-	ui_items = "Weapon Depth Map Off\0Custom Weapon Depth Map One\0Custom Weapon Depth Map Two\0Weapon Depth Map One\0";
+	ui_items = "Weapon Depth Map Off\0Custom Weapon Depth Map One\0Custom Weapon Depth Map Two\0Weapon Depth Map One\0Weapon Depth Map Two\0Weapon Depth Map Three\0Weapon Depth Map Four\0Weapon Depth Map Five\0";
 	ui_label = "Alternate Weapon Depth Map";
-	ui_tooltip = "Alternate Depth Map for different Games. Read the ReadMeDepth3d.txt, for setting. Each game May and can use a diffrent Alternet Depth Map.";
+	ui_tooltip = "Alternate Weapon Depth Map for different Games. Read the ReadMeDepth3d.txt, for setting. Each game May and can use a diffrent Weapon Depth Map.";
 > = 0;
 
 uniform float3 Weapon_Adjust <
@@ -393,9 +393,9 @@ float4 SbSdepth(float4 pos : SV_Position, float2 texcoord : TEXCOORD0) : SV_Targ
 		//Warhammer: End Times - Vermintide
 		if (Alternate_Depth_Map == 10)
 		{
-		float cF = 1;	
-		float cN = 5.5;	
-		depthM = clamp((exp(depthM * log(cF + cN)) - cN) / cF,0,1.25);
+		float cF = 7.0;
+		float cN = 1.5;
+		depthM = (exp(pow(depthM, depthM + cF / pow(depthM, cN) - 1 * (pow((depthM), cN)))) - 1) / (exp(depthM) - 1);
 		}
 		
 		//Dying Light
@@ -679,6 +679,46 @@ float4 SbSdepth(float4 pos : SV_Position, float2 texcoord : TEXCOORD0) : SV_Targ
 		float cWF = -1000;
 		float cWN = 0.9856;
 		WDM = (log(cWF / cWN*WDM - cWF));
+		}
+		
+		//Weapon Depth Map Two
+		if (Weapon_Depth_Map == 4)
+		{
+		Adj = 0.001;
+		Per = 0.440;
+		float cWF = 0.255;
+		float cWN = 1.001;
+		WDM = 1 - (log(cWF * cWN/WDM - cWF));
+		}
+		
+		//Weapon Depth Map Three
+		if (Weapon_Depth_Map == 5)
+		{
+		Adj = 0.000;
+		Per = 0.180;
+		float cWF = 0.235;
+		float cWN = 1.001;
+		WDM = 1 - (log(cWF * cWN/WDM - cWF));
+		}
+		
+		//Weapon Depth Map Four
+		if (Weapon_Depth_Map == 6)
+		{
+		Adj = 0.00000001;
+		Per = 0.675;
+		float cWF = 10;
+		float cWN = 0.0085;
+		WDM = (log(cWF / cWN*WDM - cWF));
+		}
+		
+		//Weapon Depth Map Five
+		if (Weapon_Depth_Map == 7)
+		{
+		Adj = 0.001;
+		Per = 0.525;
+		float cWF = 0.080;
+		float cWN = 1.001;
+		WDM = 1 - (log(cWF * cWN/WDM - cWF));
 		}
 		
 	float NearDepth = step(depthM.r,Adj);
