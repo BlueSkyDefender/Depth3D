@@ -39,8 +39,8 @@ ________________________________________________________________________________
 
 [Game List]				[Alternate DM] [Weapon DM][Depth Flip] [Read Below] [Blur Type] [Depth Map Enhancement]	[BSD Notes]
 Alien Isolation				DM 0	
-Amnesia: The Dark Descent		DM 1
-Among The Sleep				DM 2				On				
+*Amnesia: The Dark Descent		DM 1
+*Among The Sleep			DM 2				On				
 Assassin Creed Unity			DM 21 or 3									
 Batman Arkham Knight			DM 4 or 6						Radial	On Adjust 0.750-0.900
 Batman Arkham Origins			DM 4									
@@ -51,48 +51,48 @@ Call of Duty: Black Ops 2		DM 5					    RB		Any	On Adjust 0.750-0.900
 Call of Duty: Ghost			DM 5					    RB		Any	On Adjust 0.750-0.900
 Call of Duty: Infinite Warfare		DM 5		WDM One			    RB		Any	On Adjust 0.750-0.900
 Casltevania: Lord of Shadows - UE	DM 6
-Condemned: Criminal Origins		DM 7					    RB		
+Condemned: Criminal Origins		DM 30		WDM Six			    RB		
 Deadly Premonition:The Directors's Cut  DM 8					    RB
 Dragon Ball Xenoverse			DM 9													
 Dragons Dogma: Dark Arisen		DM 8		
 DreamFall Chapters			DM 18				On
-Dying Light				DM 11		
-Fallout 4				DM 0 or 27	WDM Four				Radial							
+Dying Light				DM 11		WDM Seven
+Fallout 4				DM 0		WDM Four				Radial							
 Firewatch				DM 0				On	    RB				
 GTA V					DM 12					    RB		Radial				Read Above
-Hard Reset				DM 4					    RB
+Hard Reset				DM 27		WDM Eight		    RB
 Lords of The Fallen			DM 4
 Magicka 2				DM 13					    RB		Off
 Metro 2033 Redux			DM 6		WDM Five		    RB
 Metro Last Light Redux			DM 6		WDM Five		    RB
 Middle-earth: Shadow of Mordor		DM 14					    RB
 Naruto Shippuden UNS3 Full Blurst	DM 15					    RB
-Quake 2 XP				DM 9							
-Quake 4					DM 7		
-Rage64					DM 7					    RB
-Return To Castle Wolfenstine		DM 7					    RB
+Quake 2 XP				DM 0 or 27	WDM Nine							
+*Quake 4				DM 7		
+*Rage64					DM 7					    RB
+*Return To Castle Wolfenstine		DM 7					    RB
 Ryse: Son of Rome			DM 17
-Shadow warrior(2013)			DM 16					    RB
+*Shadow warrior(2013)			DM 16					    RB
 The Elder Scrolls V: Skyrim		DM 4									
 Sleeping Dogs: DE			DM 18		
 Souls Games				DM 19		
 The Evil Within				DM 19					    RB		Any
 Witcher 3				DM 20 or 14						Radial	On Adjust 0.750-0.900	Read Above
-Zombi					DM 7		
+*Zombi					DM 7		
 Warhammer: End Times - Vermintide	DM 10												
-Deus Ex: Mankind Divided		DM 26							Radial				Read Above
+*Deus Ex: Mankind Divided		DM 26							Radial				Read Above
 Dead Rising 3				DM 6					
 Soma					DM 2		
 Penumbra: Black Plague			DM 4					    RB
-NecroVision: Lost Company		DM 4
+*NecroVision: Lost Company		DM 4
 The Vanishing of Ethan Carter Redux	DM 3					    RB
-Cryostasis				DM 8		
+*Cryostasis				DM 8		
 Silent Hill: Homecoming			DM 22		
 Monstrum DX11				DM 23				On	    RB
 Double Dragon Neon			DM 25
 Zombie Army Trilogy			DM 8 or 4						
 Just Cause 3				DM 21							Radial
-DOOM 2016				DM 28 or 2							On Adjust 1.250
+*DOOM 2016				DM 28 or 2							On Adjust 1.250
 Quantum Break				DM 18							Radial
 Stay Close				DM 26					    RB		Normal
 Emily Wants To Play			DM 26					    RB		Any
@@ -100,19 +100,19 @@ KHOLAT					DM 21					    RB		Any
 LuciusII				DM 4 or 23				    RB		Normal
 Dead Effect				DM 10				On			Any	
 Nosferatu: The Wrath of Malachi		DM 1					    RB		Any	
-The Elder Scrolls V: SE			DM 27 or 0	WDM Three				Radial				Read Above
+The Elder Scrolls V: SE			DM 27 		WDM Three				Radial				Read Above
 Phantasmal				DM 4				On	    RB		Any								
 Layers of Fear				DM 10				On			Normal
 Through The Woods			DM 29				On	    RB		Radial
 Dungeon Nightmares II			DM 23				On	    RB		Any
 The Legend of Korra			DM 4							Any
-S.T.A.L.K.E.R:CoP Complete Mod		DM 29					    RB		Any
-S.T.A.L.K.E.R:CS Complete Mod		DM 0					    RB		Any
-S.T.A.L.K.E.R:SoC Complete Mod		DM 0					    RB		Any
-Wolfenstine: The New Order		DM 4					    RB		Any				Read Above
-Wolfenstine: The Old Blood		DM 4					    RB		Any				Read Above
-Amnesia: Machine for Pigs		DM 30							Any
-Portal 2				Placeholder				    RB		Radial
+*S.T.A.L.K.E.R:CoP Complete Mod		DM 29					    RB		Any
+*S.T.A.L.K.E.R:CS Complete Mod		DM 0					    RB		Any
+*S.T.A.L.K.E.R:SoC Complete Mod		DM 0					    RB		Any
+*Wolfenstine: The New Order		DM 4					    RB		Any				Read Above
+*Wolfenstine: The Old Blood		DM 4					    RB		Any				Read Above
+*Amnesia: Machine for Pigs		DM 30							Any
+*Portal 2				Placeholder				    RB		Radial
 
 Game List updates for Reshade 2.0
 [Game List]				[Alternate Depth Map]	   [Depth Flip On][Read Below]	[Blur Recommendations]	[BSD Notes]
@@ -123,12 +123,14 @@ User Submitted Depth Map Settings
 
 [Game List]				[Alternate Depth Map]	   [Depth Flip On]	[Blur Recommendations]
 ______________________________________________________________________________________________________________________________________
-
+[zig11727] "https://forums.geforce.com/default/topic/959175/3d-vision/superdepth-3d/post/4963888/#4963888"
 Homefront The Revolution 		DM 17
 Mirror's Edge				DM 4
 Need for Speed				DM 4
 
-[zig11727] "https://forums.geforce.com/default/topic/959175/3d-vision/superdepth-3d/post/4963888/#4963888"
+[x8009] "https://reshade.me/forum/shader-presentation/2128-3d-depth-map-based-stereoscopic-shader?start=620#18728"
+BladeStorm Nightmare			DM 8							Radial	
+Need For Speed Rivals			DM 6							Radial
 ______________________________________________________________________________________________________________________________________
 
 You can also try different depth maps for other games your self by changing AltDepthMap number From 0-26. 
