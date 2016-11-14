@@ -45,34 +45,34 @@ Assassin Creed Unity			DM 21 or 3
 Batman Arkham Knight			DM 4 or 6						Radial	On Adjust 0.750-0.900
 Batman Arkham Origins			DM 4									
 Batman: Arkham City			DM 4							
-BorderLands 2				DM 6 or 10	WDM Two			    RB		Any	On Adjust 0.750-0.900
+BorderLands 2				DM 6 or 10	WDM 2			    RB		Any	On Adjust 0.750-0.900
 Call of Duty: Advance Warfare		DM 5					    RB		Any	On Adjust 0.750-0.900
 Call of Duty: Black Ops 2		DM 5					    RB		Any	On Adjust 0.750-0.900
 Call of Duty: Ghost			DM 5					    RB		Any	On Adjust 0.750-0.900
-Call of Duty: Infinite Warfare		DM 5		WDM One			    RB		Any	On Adjust 0.750-0.900
+Call of Duty: Infinite Warfare		DM 5		WDM 1			    RB		Any	On Adjust 0.750-0.900
 Casltevania: Lord of Shadows - UE	DM 6
-Condemned: Criminal Origins		DM 30		WDM Six			    RB		
+Condemned: Criminal Origins		DM 30		WDM 6			    RB		
 Deadly Premonition:The Directors's Cut  DM 8					    RB
 Dragon Ball Xenoverse			DM 9													
 Dragons Dogma: Dark Arisen		DM 8		
 DreamFall Chapters			DM 18				On
-Dying Light				DM 11		WDM Seven
-Fallout 4				DM 0		WDM Four				Radial							
+Dying Light				DM 11		WDM 7
+Fallout 4				DM 0		WDM 4					Radial							
 Firewatch				DM 0				On	    RB				
 GTA V					DM 12					    RB		Radial				Read Above
-Hard Reset				DM 27		WDM Eight		    RB
+Hard Reset				DM 27		WDM 8			    RB
 Lords of The Fallen			DM 4
 Magicka 2				DM 13					    RB		Off
-Metro 2033 Redux			DM 6		WDM Five		    RB
-Metro Last Light Redux			DM 6		WDM Five		    RB
+Metro 2033 Redux			DM 6		WDM 5			    RB
+Metro Last Light Redux			DM 6		WDM 5			    RB
 Middle-earth: Shadow of Mordor		DM 14					    RB
 Naruto Shippuden UNS3 Full Blurst	DM 15					    RB
-Quake 2 XP				DM 0 or 27	WDM Nine							
-*Quake 4				DM 7		
-*Rage64					DM 7					    RB
-*Return To Castle Wolfenstine		DM 7					    RB
+Quake 2 XP				DM 0 or 27	WDM 9							
+Quake 4					DM 29		WDM 5
+Rage64					DM 28		WDM 10			    RB
+Return To Castle Wolfenstine		DM 27		WDM 11			    RB
 Ryse: Son of Rome			DM 17
-*Shadow warrior(2013)			DM 16					    RB
+*Shadow warrior(2013)			DM 27		WDM 12			    RB
 The Elder Scrolls V: Skyrim		DM 4									
 Sleeping Dogs: DE			DM 18		
 Souls Games				DM 19		
@@ -100,7 +100,7 @@ KHOLAT					DM 21					    RB		Any
 LuciusII				DM 4 or 23				    RB		Normal
 Dead Effect				DM 10				On			Any	
 Nosferatu: The Wrath of Malachi		DM 1					    RB		Any	
-The Elder Scrolls V: SE			DM 27 		WDM Three				Radial				Read Above
+The Elder Scrolls V: SE			DM 27 		WDM 3					Radial				Read Above
 Phantasmal				DM 4				On	    RB		Any								
 Layers of Fear				DM 10				On			Normal
 Through The Woods			DM 29				On	    RB		Radial
@@ -113,6 +113,7 @@ The Legend of Korra			DM 4							Any
 *Wolfenstine: The Old Blood		DM 4					    RB		Any				Read Above
 *Amnesia: Machine for Pigs		DM 30							Any
 *Portal 2				Placeholder				    RB		Radial
+Gone Home				DM 0				On			Any
 
 Game List updates for Reshade 2.0
 [Game List]				[Alternate Depth Map]	   [Depth Flip On][Read Below]	[Blur Recommendations]	[BSD Notes]
@@ -300,6 +301,7 @@ bDeferredShadows=0
 
 {Shadow warrior(2013)}
 Depth Buffer only in DX9 so launch it in Shadow Warrior XP and turn on FSAAX2 in game.
+Overlap in Weapon Depth Map. May be worth it.
 
 
 {Stay Close}
