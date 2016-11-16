@@ -72,13 +72,12 @@ Quake 4					DM 29		WDM 5
 Rage64					DM 28		WDM 10			    RB
 Return To Castle Wolfenstine		DM 27		WDM 11			    RB
 Ryse: Son of Rome			DM 17
-*Shadow warrior(2013)			DM 27		WDM 12			    RB
+Shadow warrior(2013)			DM 27		WDM 12			    RB
 The Elder Scrolls V: Skyrim		DM 4									
 Sleeping Dogs: DE			DM 18		
 Souls Games				DM 19		
 The Evil Within				DM 19					    RB		Any
 Witcher 3				DM 20 or 14						Radial	On Adjust 0.750-0.900	Read Above
-*Zombi					DM 7		
 Warhammer: End Times - Vermintide	DM 10												
 *Deus Ex: Mankind Divided		DM 26							Radial				Read Above
 Dead Rising 3				DM 6					
@@ -92,7 +91,7 @@ Monstrum DX11				DM 23				On	    RB
 Double Dragon Neon			DM 25
 Zombie Army Trilogy			DM 8 or 4						
 Just Cause 3				DM 21							Radial
-*DOOM 2016				DM 28 or 2							On Adjust 1.250
+DOOM 2016				DM 7		WDM 13						On Adjust 0.950-1.050
 Quantum Break				DM 18							Radial
 Stay Close				DM 26					    RB		Normal
 Emily Wants To Play			DM 26					    RB		Any
@@ -112,13 +111,7 @@ The Legend of Korra			DM 4							Any
 *Wolfenstine: The New Order		DM 4					    RB		Any				Read Above
 *Wolfenstine: The Old Blood		DM 4					    RB		Any				Read Above
 *Amnesia: Machine for Pigs		DM 30							Any
-*Portal 2				Placeholder				    RB		Radial
 Gone Home				DM 0				On			Any
-
-Game List updates for Reshade 2.0
-[Game List]				[Alternate Depth Map]	   [Depth Flip On][Read Below]	[Blur Recommendations]	[BSD Notes]
-Serious Sam Revolution			DM 24
-
 
 User Submitted Depth Map Settings
 
@@ -240,7 +233,9 @@ C:\Users\...\Documents\Penumbra\settings.cfg
 Open the settings and set your res. 
 <Screen Width="3840" Height="2160" FullScreen="true" Vsync="true" />
 
-{Portal 2}
+{Portal 2} -Game crashes when loading-
+ DM 10 WDM 14
+Install to the Bin Folder DX9.
 Max out everything. Turn off AA
 Open the console.
 Type in console;
@@ -250,6 +245,7 @@ bind 3 "r_drawvgui 1"
 bind 2 "r_drawvgui 0"
 
 Once in game press 2 and you should have acess to a Depth Map.
+Game Crashes if you leave r_drawvgui 0 when you die. Don't know how to fix this.
 
 {Quake 4}
 If some how you can click on the menu......... Good Luck.
@@ -352,5 +348,8 @@ Ex.
 		"ultra" : 0
 	},
 
+(Zombi} -Depth map Pops in and out-
+DM 28
+This Problem seems to happen when looking at one direction. Don't know why it happens. But, I suggest useing a othere 3D application like Tridef or Nvidia 3D Vision.
 ______________________________________________________________________________________________________________________________________
 Also Keep in mind if you don't like the depth map I made. You can alawys make your own.

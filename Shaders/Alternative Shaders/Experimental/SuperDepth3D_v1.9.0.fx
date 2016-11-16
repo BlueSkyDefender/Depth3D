@@ -90,7 +90,7 @@ uniform float Adjust <
 
 uniform int Weapon_Depth_Map <
 	ui_type = "combo";
-	ui_items = "Weapon Depth Map Off\0Custom Weapon Depth Map One\0Custom Weapon Depth Map Two\0Custom Weapon Depth Map Three\0WDM 1\0WDM 2\0WDM 3\0WDM 4\0WDM 5\0WDM 6\0WDM 7\0WDM 8\0WDM 9\0WDM 10\0WDM 11\0WDM 12\0";
+	ui_items = "Weapon Depth Map Off\0Custom Weapon Depth Map One\0Custom Weapon Depth Map Two\0Custom Weapon Depth Map Three\0Custom Weapon Depth Map Four\0WDM 1\0WDM 2\0WDM 3\0WDM 4\0WDM 5\0WDM 6\0WDM 7\0WDM 8\0WDM 9\0WDM 10\0WDM 11\0WDM 12\0WDM 13\0WDM 14\0";
 	ui_label = "Alternate Weapon Depth Map";
 	ui_tooltip = "Alternate Weapon Depth Map for different Games. Read the ReadMeDepth3d.txt, for setting.";
 > = 0;
@@ -366,12 +366,12 @@ float4 SbSdepth(float4 pos : SV_Position, float2 texcoord : TEXCOORD0) : SV_Targ
 		depthM = (pow(abs(cN-depthM),cF));
 		}
 		
-		//Condemned: Criminal Origins | Rage | Return To Castle Wolfenstine | The Evil Within | Quake 4
+		//Doom 2016
 		if (Alternate_Depth_Map == 7)
 		{
-		float cF  = 1;
-		float cN = 0.0025;
-		depthM =  (cN * cF / (cF + depthM * (cN - cF))); 
+		float cF = 25;
+		float cN = 5;
+		depthM =  (exp(pow(depthM, depthM + cF / pow(depthM, cN) - 1 * (pow((depthM), cN)))) - 1) / (exp(depthM) - 1);
 		}
 		
 		//Deadly Premonition:The Directors's Cut
@@ -502,7 +502,7 @@ float4 SbSdepth(float4 pos : SV_Position, float2 texcoord : TEXCOORD0) : SV_Targ
 		depthM = pow(abs((exp(depthM * log(cF + cN)) - cN) / cF),1000);
 		}
 		
-		//Serious Sam Revolution
+		//Portal 2
 		if (Alternate_Depth_Map == 24)
 		{
 		float cF = 1.01;	
@@ -534,7 +534,7 @@ float4 SbSdepth(float4 pos : SV_Position, float2 texcoord : TEXCOORD0) : SV_Targ
 		depthM =  (exp(pow(depthM, depthM + cF / pow(depthM, cN) - 1 * (pow((depthM), cN)))) - 1) / (exp(depthM) - 1);
 		}
 		
-		//Doom
+		//Rage64|
 		if (Alternate_Depth_Map == 28)
 		{
 		float cF = 50;
@@ -681,8 +681,18 @@ float4 SbSdepth(float4 pos : SV_Position, float2 texcoord : TEXCOORD0) : SV_Targ
 		WDM = (log(cWF * cWN/WDM - cWF));
 		}
 		
-		//Weapon Depth Map One
+		//Custom Weapon Depth Profile Four	
 		if (Weapon_Depth_Map == 4)
+		{
+		Adj = Weapon_Adjust.x;//0
+		Per = Weapon_Percentage;//5
+		float cWF = Weapon_Adjust.y;//-0.05
+		float cWN = Weapon_Adjust.z;//0.500
+		WDM = 1 - (log(cWN * WDM)/ 1 - log(cWF+WDM));
+		}
+		
+		//Weapon Depth Map One
+		if (Weapon_Depth_Map == 5)
 		{
 		Adj = 0;
 		Per = 5;
@@ -692,7 +702,7 @@ float4 SbSdepth(float4 pos : SV_Position, float2 texcoord : TEXCOORD0) : SV_Targ
 		}
 		
 		//Weapon Depth Map Two
-		if (Weapon_Depth_Map == 5)
+		if (Weapon_Depth_Map == 6)
 		{
 		Adj = 0.001;
 		Per = 0.440;
@@ -702,7 +712,7 @@ float4 SbSdepth(float4 pos : SV_Position, float2 texcoord : TEXCOORD0) : SV_Targ
 		}
 		
 		//Weapon Depth Map Three
-		if (Weapon_Depth_Map == 6)
+		if (Weapon_Depth_Map == 7)
 		{
 		Adj = 0.000;
 		Per = 0.180;
@@ -712,7 +722,7 @@ float4 SbSdepth(float4 pos : SV_Position, float2 texcoord : TEXCOORD0) : SV_Targ
 		}
 		
 		//Weapon Depth Map Four
-		if (Weapon_Depth_Map == 7)
+		if (Weapon_Depth_Map == 8)
 		{
 		Adj = 0.00000001;
 		Per = 0.675;
@@ -722,7 +732,7 @@ float4 SbSdepth(float4 pos : SV_Position, float2 texcoord : TEXCOORD0) : SV_Targ
 		}
 		
 		//Weapon Depth Map Five
-		if (Weapon_Depth_Map == 8)
+		if (Weapon_Depth_Map == 9)
 		{
 		Adj = 0.001;
 		Per = 0.525;
@@ -732,7 +742,7 @@ float4 SbSdepth(float4 pos : SV_Position, float2 texcoord : TEXCOORD0) : SV_Targ
 		}
 		
 		//Weapon Depth Map Six
-		if (Weapon_Depth_Map == 9)
+		if (Weapon_Depth_Map == 10)
 		{
 		Adj = 0;
 		Per = 0.500;
@@ -742,7 +752,7 @@ float4 SbSdepth(float4 pos : SV_Position, float2 texcoord : TEXCOORD0) : SV_Targ
 		}
 		
 		//Weapon Depth Map Seven
-		if (Weapon_Depth_Map == 10)
+		if (Weapon_Depth_Map == 11)
 		{
 		Adj = 0.125;
 		Per = 1;
@@ -752,7 +762,7 @@ float4 SbSdepth(float4 pos : SV_Position, float2 texcoord : TEXCOORD0) : SV_Targ
 		}
 		
 		//Weapon Depth Map Eight
-		if (Weapon_Depth_Map == 11)
+		if (Weapon_Depth_Map == 12)
 		{
 		Adj = 0.037;
 		Per = 5.0;
@@ -762,7 +772,7 @@ float4 SbSdepth(float4 pos : SV_Position, float2 texcoord : TEXCOORD0) : SV_Targ
 		}
 		
 		//Weapon Depth Map Nine
-		if (Weapon_Depth_Map == 12)
+		if (Weapon_Depth_Map == 13)
 		{
 		Adj = 0.000001;
 		Per = 5.0;
@@ -772,7 +782,7 @@ float4 SbSdepth(float4 pos : SV_Position, float2 texcoord : TEXCOORD0) : SV_Targ
 		}
 		
 		//Weapon Depth Map Ten
-		if (Weapon_Depth_Map == 13)
+		if (Weapon_Depth_Map == 14)
 		{
 		Adj = 0.0;
 		Per = 2;
@@ -782,7 +792,7 @@ float4 SbSdepth(float4 pos : SV_Position, float2 texcoord : TEXCOORD0) : SV_Targ
 		}
 		
 		//Weapon Depth Map Eleven
-		if (Weapon_Depth_Map == 14)
+		if (Weapon_Depth_Map == 15)
 		{
 		Adj = 0.0003;
 		Per = 0.625;
@@ -792,13 +802,33 @@ float4 SbSdepth(float4 pos : SV_Position, float2 texcoord : TEXCOORD0) : SV_Targ
 		}
 		
 		//Weapon Depth Map Twelve
-		if (Weapon_Depth_Map == 15)
+		if (Weapon_Depth_Map == 16)
 		{
 		Adj = 0.050;
 		Per = 1.0;
 		float cWF = 1.5;
 		float cWN = 1.7;
 		WDM = 1 - (log(cWF * cWN/WDM - cWF));
+		}
+		
+		//Weapon Depth Map Thirteen
+		if (Weapon_Depth_Map == 17)
+		{
+		Adj = 0;
+		Per = 0.666;
+		float cWF = -0.06;
+		float cWN = 0.666;
+		WDM = 1 - (log(cWN * WDM)/ 1 - log(cWF+WDM));
+		}
+		
+		//Weapon Depth Map Fourteen
+		if (Weapon_Depth_Map == 18)
+		{
+		Adj = 0;
+		Per = 0.500;
+		float cWF = -0.0865;
+		float cWN = -0.2;
+		WDM = 1 - (log(cWN * WDM)/ 1 - log(cWF+WDM));
 		}
 		
 	float NearDepth = step(depthM.r,Adj);

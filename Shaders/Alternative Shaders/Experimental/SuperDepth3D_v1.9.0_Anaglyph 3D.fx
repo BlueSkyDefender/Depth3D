@@ -83,9 +83,9 @@ uniform float Adjust <
 
 uniform int Weapon_Depth_Map <
 	ui_type = "combo";
-	ui_items = "Weapon Depth Map Off\0Custom Weapon Depth Map One\0Custom Weapon Depth Map Two\0Weapon Depth Map One\0";
+	ui_items = "Weapon Depth Map Off\0Custom Weapon Depth Map One\0Custom Weapon Depth Map Two\0Custom Weapon Depth Map Three\0Custom Weapon Depth Map Four\0WDM 1\0WDM 2\0WDM 3\0WDM 4\0WDM 5\0WDM 6\0WDM 7\0WDM 8\0WDM 9\0WDM 10\0WDM 11\0WDM 12\0WDM 13\0";
 	ui_label = "Alternate Weapon Depth Map";
-	ui_tooltip = "Alternate Depth Map for different Games. Read the ReadMeDepth3d.txt, for setting. Each game May and can use a diffrent Alternet Depth Map.";
+	ui_tooltip = "Alternate Weapon Depth Map for different Games. Read the ReadMeDepth3d.txt, for setting.";
 > = 0;
 
 uniform float3 Weapon_Adjust <
@@ -137,7 +137,7 @@ uniform float Anaglyph_Desaturation <
 
 uniform int Custom_Sidebars <
 	ui_type = "combo";
-	ui_items = "Mirrored Edges\0Black Edges\0Stretched Edges\0";
+	ui_items = "Mirrored Edges\0Black Edges\0";
 	ui_label = "Edge Selection";
 	ui_tooltip = "Select how you like the Edge of the screen to look like.";
 > = 1;
@@ -328,12 +328,12 @@ float4 SbSdepth(float4 pos : SV_Position, float2 texcoord : TEXCOORD0) : SV_Targ
 		depthM = (pow(abs(cN-depthM),cF));
 		}
 		
-		//Condemned: Criminal Origins | Rage | Return To Castle Wolfenstine | The Evil Within | Quake 4
+		//Doom 2016
 		if (Alternate_Depth_Map == 7)
 		{
-		float cF  = 1;
-		float cN = 0.0025;
-		depthM =  (cN * cF / (cF + depthM * (cN - cF))); 
+		float cF = 25;
+		float cN = 5;
+		depthM =  (exp(pow(depthM, depthM + cF / pow(depthM, cN) - 1 * (pow((depthM), cN)))) - 1) / (exp(depthM) - 1);
 		}
 		
 		//Deadly Premonition:The Directors's Cut
@@ -355,16 +355,16 @@ float4 SbSdepth(float4 pos : SV_Position, float2 texcoord : TEXCOORD0) : SV_Targ
 		//Warhammer: End Times - Vermintide
 		if (Alternate_Depth_Map == 10)
 		{
-		float cF = 1;	
-		float cN = 5.5;	
-		depthM = clamp((exp(depthM * log(cF + cN)) - cN) / cF,0,1.25);
+		float cF = 7.0;
+		float cN = 1.5;
+		depthM = (exp(pow(depthM, depthM + cF / pow(depthM, cN) - 1 * (pow((depthM), cN)))) - 1) / (exp(depthM) - 1);
 		}
 		
 		//Dying Light
 		if (Alternate_Depth_Map == 11)
 		{
 		float cF = 100;
-		float cN = 0.005;
+		float cN = 0.0075;
 		depthM = cF / (1 + cF - (depthM/cN) * (1 - cF));
 		}
 		
@@ -464,7 +464,7 @@ float4 SbSdepth(float4 pos : SV_Position, float2 texcoord : TEXCOORD0) : SV_Targ
 		depthM = pow(abs((exp(depthM * log(cF + cN)) - cN) / cF),1000);
 		}
 		
-		//Serious Sam Revolution
+		//Portal 2
 		if (Alternate_Depth_Map == 24)
 		{
 		float cF = 1.01;	
@@ -496,7 +496,7 @@ float4 SbSdepth(float4 pos : SV_Position, float2 texcoord : TEXCOORD0) : SV_Targ
 		depthM =  (exp(pow(depthM, depthM + cF / pow(depthM, cN) - 1 * (pow((depthM), cN)))) - 1) / (exp(depthM) - 1);
 		}
 		
-		//Doom
+		//Rage64|
 		if (Alternate_Depth_Map == 28)
 		{
 		float cF = 50;
@@ -633,14 +633,154 @@ float4 SbSdepth(float4 pos : SV_Position, float2 texcoord : TEXCOORD0) : SV_Targ
 		WDM = (log(cWF / cWN*WDM - cWF));
 		}
 		
-		//Weapon Depth Map One
+		//Custom Weapon Depth Profile Three	
 		if (Weapon_Depth_Map == 3)
+		{
+		Adj = Weapon_Adjust.x;//0
+		Per = Weapon_Percentage;//5
+		float cWF = Weapon_Adjust.y;//0.250
+		float cWN = Weapon_Adjust.z;//1.001
+		WDM = (log(cWF * cWN/WDM - cWF));
+		}
+		
+		//Custom Weapon Depth Profile Four	
+		if (Weapon_Depth_Map == 4)
+		{
+		Adj = Weapon_Adjust.x;//0
+		Per = Weapon_Percentage;//5
+		float cWF = Weapon_Adjust.y;//-0.05
+		float cWN = Weapon_Adjust.z;//0.500
+		WDM = 1 - (log(cWN * WDM)/ 1 - log(cWF+WDM));
+		}
+		
+		//Weapon Depth Map One
+		if (Weapon_Depth_Map == 5)
 		{
 		Adj = 0;
 		Per = 5;
 		float cWF = -1000;
 		float cWN = 0.9856;
 		WDM = (log(cWF / cWN*WDM - cWF));
+		}
+		
+		//Weapon Depth Map Two
+		if (Weapon_Depth_Map == 6)
+		{
+		Adj = 0.001;
+		Per = 0.440;
+		float cWF = 0.255;
+		float cWN = 1.001;
+		WDM = 1 - (log(cWF * cWN/WDM - cWF));
+		}
+		
+		//Weapon Depth Map Three
+		if (Weapon_Depth_Map == 7)
+		{
+		Adj = 0.000;
+		Per = 0.180;
+		float cWF = 0.235;
+		float cWN = 1.001;
+		WDM = 1 - (log(cWF * cWN/WDM - cWF));
+		}
+		
+		//Weapon Depth Map Four
+		if (Weapon_Depth_Map == 8)
+		{
+		Adj = 0.00000001;
+		Per = 0.675;
+		float cWF = 10;
+		float cWN = 0.0085;
+		WDM = (log(cWF / cWN*WDM - cWF));
+		}
+		
+		//Weapon Depth Map Five
+		if (Weapon_Depth_Map == 9)
+		{
+		Adj = 0.001;
+		Per = 0.525;
+		float cWF = 0.080;
+		float cWN = 1.001;
+		WDM = 1 - (log(cWF * cWN/WDM - cWF));
+		}
+		
+		//Weapon Depth Map Six
+		if (Weapon_Depth_Map == 10)
+		{
+		Adj = 0;
+		Per = 0.500;
+		float cWF = -1.9;
+		float cWN = 1.001;
+		WDM = 1 - (log(cWF * cWN/WDM - cWF));
+		}
+		
+		//Weapon Depth Map Seven
+		if (Weapon_Depth_Map == 11)
+		{
+		Adj = 0.125;
+		Per = 1;
+		float cWF = -1.0;
+		float cWN = -0.1;
+		WDM = (log(cWF * cWN/WDM - cWF));
+		}
+		
+		//Weapon Depth Map Eight
+		if (Weapon_Depth_Map == 12)
+		{
+		Adj = 0.037;
+		Per = 5.0;
+		float cWF = 0.75;
+		float cWN = -1.0;
+		WDM = 1 - (log(cWF * cWN/WDM - cWF));
+		}
+		
+		//Weapon Depth Map Nine
+		if (Weapon_Depth_Map == 13)
+		{
+		Adj = 0.000001;
+		Per = 5.0;
+		float cWF = 0.0045;
+		float cWN = 100;
+		WDM = 1 - (log(cWF * cWN/WDM - cWF));
+		}
+		
+		//Weapon Depth Map Ten
+		if (Weapon_Depth_Map == 14)
+		{
+		Adj = 0.0;
+		Per = 2;
+		float cWF = 37.5;
+		float cWN = 0.523;
+		WDM = (log(cWF / cWN*WDM - cWF));
+		}
+		
+		//Weapon Depth Map Eleven
+		if (Weapon_Depth_Map == 15)
+		{
+		Adj = 0.0003;
+		Per = 0.625;
+		float cWF = 0.625;
+		float cWN = 1.001;
+		WDM = 1 - (log(cWF * cWN/WDM - cWF));
+		}
+		
+		//Weapon Depth Map Twelve
+		if (Weapon_Depth_Map == 16)
+		{
+		Adj = 0.050;
+		Per = 1.0;
+		float cWF = 1.5;
+		float cWN = 1.7;
+		WDM = 1 - (log(cWF * cWN/WDM - cWF));
+		}
+		
+		//Weapon Depth Map Thirteen
+		if (Weapon_Depth_Map == 17)
+		{
+		Adj = 0;
+		Per = 0.666;
+		float cWF = -0.06;
+		float cWN = 0.666;
+		WDM = 1 - (log(cWN * WDM)/ 1 - log(cWF+WDM));
 		}
 		
 	float NearDepth = step(depthM.r,Adj);
@@ -689,7 +829,7 @@ float4 DisocclusionMask(float4 pos : SV_Position, float2 texcoord : TEXCOORD0) :
 	float B;
 	float Con = 10;
 	
-	if(Disocclusion_Type > 0 && Disocclusion_Power > 0) 
+	if(Disocclusion_Type > 0 && Disocclusion_Power > 0 && Anaglyph_Colors != 4) 
 	{
 	
 	const float weight[10] = 
@@ -743,8 +883,8 @@ void PS_renderLR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD
 	
 	if (Anaglyph_Colors == 4)
 			{
-			D = 15;
-			C = 0.150;
+			D = 10;
+			C = 0.175;
 			}
 			else
 			{
@@ -770,15 +910,10 @@ void PS_renderLR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD
 			color = tex2D(BackBufferMIRROR, float2(texcoord.xy+float2((DepthL*D),0)*pix.xy));
 			colorT = tex2D(BackBufferMIRROR, float2(texcoord.xy-float2((DepthR*D),0)*pix.xy));
 			}
-			else if(Custom_Sidebars == 1)
+			else
 			{
 			color = tex2D(BackBufferBORDER, float2(texcoord.xy+float2((DepthL*D),0)*pix.xy));
 			colorT = tex2D(BackBufferBORDER, float2(texcoord.xy-float2((DepthR*D),0)*pix.xy));
-			}
-			else
-			{
-			color = tex2D(BackBufferCLAMP, float2(texcoord.xy+float2((DepthL*D),0)*pix.xy));
-			colorT = tex2D(BackBufferCLAMP, float2(texcoord.xy-float2((DepthR*D),0)*pix.xy));
 			}
 		}
 		else
@@ -788,15 +923,10 @@ void PS_renderLR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD
 			colorT = tex2D(BackBufferMIRROR, float2(texcoord.xy+float2((DepthL*D),0)*pix.xy));
 			color = tex2D(BackBufferMIRROR, float2(texcoord.xy-float2((DepthR*D),0)*pix.xy));
 			}
-			else if(Custom_Sidebars == 1)
+			else
 			{
 			colorT = tex2D(BackBufferBORDER, float2(texcoord.xy+float2((DepthL*D),0)*pix.xy));
 			color = tex2D(BackBufferBORDER, float2(texcoord.xy-float2((DepthR*D),0)*pix.xy));
-			}
-			else
-			{
-			colorT = tex2D(BackBufferCLAMP, float2(texcoord.xy+float2((DepthL*D),0)*pix.xy));
-			color = tex2D(BackBufferCLAMP, float2(texcoord.xy-float2((DepthR*D),0)*pix.xy));
 			}
 		}
 }
@@ -806,17 +936,8 @@ void PS0(float4 position : SV_Position, float2 texcoord : TEXCOORD0, out float4 
 	if(!Depth_Map_View)
 	{
 	
-	float P;
-	
-	if (Anaglyph_Colors == 4)
-			{
-			P = -7.5;
-			}
-			else
-			{
-			P = Perspective;
-			}
-								
+	float P = Perspective;
+											
 				float3 HalfLM = dot(tex2D(SamplerCLMIRROR,float2(texcoord.x + P * pix.x,texcoord.y)).rgb,float3(0.299, 0.587, 0.114));
 				float3 HalfRM = dot(tex2D(SamplerCRMIRROR,float2(texcoord.x - P * pix.x,texcoord.y)).rgb,float3(0.299, 0.587, 0.114));
 				float3 LM = lerp(HalfLM,tex2D(SamplerCLMIRROR,float2(texcoord.x + P * pix.x,texcoord.y)).rgb,Anaglyph_Desaturation);  
@@ -827,11 +948,6 @@ void PS0(float4 position : SV_Position, float2 texcoord : TEXCOORD0, out float4 
 				float3 LB = lerp(HalfLB,tex2D(SamplerCLBORDER,float2(texcoord.x + P * pix.x,texcoord.y)).rgb,Anaglyph_Desaturation);  
 				float3 RB = lerp(HalfRB,tex2D(SamplerCRBORDER,float2(texcoord.x - P * pix.x,texcoord.y)).rgb,Anaglyph_Desaturation); 
 				
-				float3 HalfLC = dot(tex2D(SamplerCLClamp,float2(texcoord.x + P * pix.x,texcoord.y)).rgb,float3(0.299, 0.587, 0.114));
-				float3 HalfRC = dot(tex2D(SamplerCRClamp,float2(texcoord.x - P * pix.x,texcoord.y)).rgb,float3(0.299, 0.587, 0.114));
-				float3 LC = lerp(HalfLB,tex2D(SamplerCLClamp,float2(texcoord.x + P * pix.x,texcoord.y)).rgb,Anaglyph_Desaturation);  
-				float3 RC = lerp(HalfRB,tex2D(SamplerCRClamp,float2(texcoord.x - P * pix.x,texcoord.y)).rgb,Anaglyph_Desaturation); 
-				
 				float4 C;
 				float4 CT;
 				
@@ -840,16 +956,12 @@ void PS0(float4 position : SV_Position, float2 texcoord : TEXCOORD0, out float4 
 				C = float4(LM,1);
 				CT = float4(RM,1);
 				}
-				else if(Custom_Sidebars == 1)
+				else
 				{
 				C = float4(LB,1);
 				CT = float4(RB,1);
 				}
-				else
-				{
-				C = float4(LC,1);
-				CT = float4(RC,1);
-				}
+
 				
 			if (Anaglyph_Colors == 0)
 			{
@@ -911,34 +1023,16 @@ void PS0(float4 position : SV_Position, float2 texcoord : TEXCOORD0, out float4 
 			}
 			else
 			{
-			
-	float Contrast = 1.5;
-	float Deghost = 0.5;
-	float4 accum;
-	float4 image = (1.0,1.0,1.0,1.0);
-	Contrast = (Contrast*0.5)+0.5;
-	float l1 = Contrast;
-	float l2 = (1.0-l1)*0.5;
-	float r1 = Contrast;
-	float r2 = 1.0-r1;
-	float deghost = Deghost*0.275;
+				float3 LeftEyecolor = float3(1.0,0.0,1.0);
+				float3 RightEyecolor = float3(0.0,1.0,0.0);
+				
+				float3 HalfLeftEyecolor = dot(LeftEyecolor,float3(0.299, 0.587, 0.114));
+				float3 HalfRightEyecolor = dot(RightEyecolor,float3(0.299, 0.587, 0.114));
+				float3 LEC = lerp(HalfLeftEyecolor,LeftEyecolor,1.4);  
+				float3 REC = lerp(HalfRightEyecolor,RightEyecolor,1.4); 
+				
 
-	accum = clamp(C*float4(r1,r2,0.0,1.0),0.0,1.0);
-	image.r = pow(accum.r+accum.g+accum.b, 1.00);
-	image.a = accum.a;
-
-	accum = clamp(CT*float4(l2,l1,l2,1.0),0.0,1.0);
-	image.g = pow(accum.r+accum.g+accum.b, 1.00);
-	image.a = image.a+accum.a;
-
-	accum = clamp(C*float4(0.0,r2,r1,1.0),0.0,1.0);
-	image.b = pow(accum.r+accum.g+accum.b, 1.00);
-	image.a = (image.a+accum.a)/3.0;
-
-	accum = image;
-	image.rb = (accum.rb+(accum.r*(deghost*-0.75))+(accum.g*(deghost*1.5))+(accum.b*(deghost*-0.75)));
-	image.g = (accum.g+(accum.r*(deghost*-0.75))+(accum.g*(deghost*1.5))+(accum.b*(deghost*-0.75)));
-	color = image;
+				color =  (C*float4(LEC,1)) + (CT*float4(REC,1));
 				
 			}
 		}
