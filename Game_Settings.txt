@@ -85,7 +85,7 @@ Soma					DM 2
 Penumbra: Black Plague			DM 4					    RB
 *NecroVision: Lost Company		DM 4
 The Vanishing of Ethan Carter Redux	DM 3					    RB
-*Cryostasis				DM 8		
+Cryostasis				DM 27		WDM 15		
 Silent Hill: Homecoming			DM 22		
 Monstrum DX11				DM 23				On	    RB
 Double Dragon Neon			DM 25
