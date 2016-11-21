@@ -108,8 +108,8 @@ The Legend of Korra			DM 4							Any
 *S.T.A.L.K.E.R:CoP Complete Mod		DM 29					    RB		Any
 *S.T.A.L.K.E.R:CS Complete Mod		DM 0					    RB		Any
 *S.T.A.L.K.E.R:SoC Complete Mod		DM 0					    RB		Any
-*Wolfenstine: The New Order		DM 4					    RB		Any				Read Above
-*Wolfenstine: The Old Blood		DM 4					    RB		Any				Read Above
+Wolfenstine: The New Order		DM 4		WDM 16			    RB		Any				Read Above
+Wolfenstine: The Old Blood		DM 4		WDM 16			    RB		Any				Read Above
 *Amnesia: Machine for Pigs		DM 30							Any
 Gone Home				DM 0				On			Any
 

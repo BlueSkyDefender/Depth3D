@@ -90,7 +90,7 @@ uniform float Adjust <
 
 uniform int Weapon_Depth_Map <
 	ui_type = "combo";
-	ui_items = "Weapon Depth Map Off\0Custom Weapon Depth Map One\0Custom Weapon Depth Map Two\0Custom Weapon Depth Map Three\0Custom Weapon Depth Map Four\0WDM 1\0WDM 2\0WDM 3\0WDM 4\0WDM 5\0WDM 6\0WDM 7\0WDM 8\0WDM 9\0WDM 10\0WDM 11\0WDM 12\0WDM 13\0WDM 14\0WDM 15\0";
+	ui_items = "Weapon Depth Map Off\0Custom Weapon Depth Map One\0Custom Weapon Depth Map Two\0Custom Weapon Depth Map Three\0Custom Weapon Depth Map Four\0WDM 1\0WDM 2\0WDM 3\0WDM 4\0WDM 5\0WDM 6\0WDM 7\0WDM 8\0WDM 9\0WDM 10\0WDM 11\0WDM 12\0WDM 13\0WDM 14\0WDM 15\0WDM 16\0";
 	ui_label = "Alternate Weapon Depth Map";
 	ui_tooltip = "Alternate Weapon Depth Map for different Games. Read the ReadMeDepth3d.txt, for setting.";
 > = 0;
@@ -841,7 +841,26 @@ float4 SbSdepth(float4 pos : SV_Position, float2 texcoord : TEXCOORD0) : SV_Targ
 		WDM = 1 - (log(cWF * cWN/WDM - cWF));
 		}
 		
-	float NearDepth = step(depthM.r,Adj);
+		//Weapon Depth Profile Sixteen
+		if (Weapon_Depth_Map == 20)
+		{
+		Adj = 0.00000001;
+		Per = 5;
+		float cWF = -0.4925;
+		float cWN = 0.200;
+		WDM = 1 - (log(cWN * WDM)/ 1 - log(cWF+WDM));
+		}
+		
+	float NearDepth;
+	
+	if (Weapon_Depth_Map == 20 || Weapon_Depth_Map == 19 || Weapon_Depth_Map == 13 || Weapon_Depth_Map == 8)
+	{
+	NearDepth = step(depthM.r,Adj/100000);
+	}
+	else
+	{
+	NearDepth = step(depthM.r,Adj);
+	}
 	
 	if(Depth_Map_Enhancement == 0)
     {

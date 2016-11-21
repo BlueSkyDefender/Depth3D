@@ -5,8 +5,8 @@
 uniform float Power <
 	ui_type = "drag";
 	ui_min = 0.1; ui_max = 2.5;
-	ui_label = "Perspective Slider";
-	ui_tooltip = "Determines the perspective point.";
+	ui_label = "Median Power Slider";
+	ui_tooltip = "Determines the Median Power.";
 > = 1.0;
 
 uniform int MedianFilter <
