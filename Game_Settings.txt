@@ -40,7 +40,7 @@ ________________________________________________________________________________
 [Game List]				[Alternate DM] [Weapon DM][Depth Flip] [Read Below] [Blur Type] [Depth Map Enhancement]	[BSD Notes]
 Alien Isolation				DM 0	
 Amnesia: The Dark Descent		DM 2 or 30	WDM 17
-*Among The Sleep			DM 2				On				
+Among The Sleep				DM 29				On				
 Assassin Creed Unity			DM 21 or 3									
 Batman Arkham Knight			DM 4 or 6						Radial	On Adjust 0.750-0.900
 Batman Arkham Origins			DM 4									
