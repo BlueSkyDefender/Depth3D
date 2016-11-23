@@ -39,7 +39,7 @@ ________________________________________________________________________________
 
 [Game List]				[Alternate DM] [Weapon DM][Depth Flip] [Read Below] [Blur Type] [Depth Map Enhancement]	[BSD Notes]
 Alien Isolation				DM 0	
-*Amnesia: The Dark Descent		DM 1
+Amnesia: The Dark Descent		DM 2 or 30	WDM 17
 *Among The Sleep			DM 2				On				
 Assassin Creed Unity			DM 21 or 3									
 Batman Arkham Knight			DM 4 or 6						Radial	On Adjust 0.750-0.900
@@ -110,7 +110,7 @@ The Legend of Korra			DM 4							Any
 *S.T.A.L.K.E.R:SoC Complete Mod		DM 0					    RB		Any
 Wolfenstine: The New Order		DM 4		WDM 16			    RB		Any				Read Above
 Wolfenstine: The Old Blood		DM 4		WDM 16			    RB		Any				Read Above
-*Amnesia: Machine for Pigs		DM 30							Any
+Amnesia: Machine for Pigs		DM 2 or 30	WDM 17					Any
 Gone Home				DM 0				On			Any
 
 User Submitted Depth Map Settings
