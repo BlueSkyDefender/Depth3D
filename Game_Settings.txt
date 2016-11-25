@@ -11,15 +11,6 @@ That ever looks better too you. DM20 is not as strong as DM14. So the max I thin
 One of the few game where you can override the Depth Limit and run with a higher depth setting. I personaly run mine at 40 and a blur
 setting of 0.025
 
-*Deus Ex: Mankind Divided*
-I know this game has a built in side by side. But, my head hurs when I use it.
-The setting Use for this game for 4k are. Fullscreen not exclisive no Vsync. My preset is custom. Texture Quality Ultra you can set this
-lower if you don't have that much GPU memory. Texture Filtering 16x and Shadow Qualty Medium. For AO I set it to ON If you have a good gpu 
-set this to Very High. Contact Hard Shadows is set to off. Paralax also set to on. Dof off. Now Level of Detail I have this set too High...
-any lower makes the game look bad you may want to set this Very High. Volumetic Lighting set too on. Screenspace Reflections set too on. 
-Temporal AA check this off. Motion Blur off. Sharpen I have it on I like it.Cloth Physics I have this set too off because my processor is weak. 
-Subsurface Scattering I like the look it has on people. Tessellation on.
-
 *Skyrim: Enhanced Edition*
 Seems to work better then the old Skyrim. Less Bugs and runs well on my system. No INI mods needed.
 
@@ -45,7 +36,7 @@ Assassin Creed Unity			DM 21 or 3
 Batman Arkham Knight			DM 4 or 6						Radial	On Adjust 0.750-0.900
 Batman Arkham Origins			DM 4									
 Batman: Arkham City			DM 4							
-BorderLands 2				DM 6 or 10	WDM 2			    RB		Any	On Adjust 0.750-0.900
+BorderLands 2				DM 27		WDM 2			    RB		Any	On Adjust 0.750-0.900
 Call of Duty: Advance Warfare		DM 5					    RB		Any	On Adjust 0.750-0.900
 Call of Duty: Black Ops 2		DM 5					    RB		Any	On Adjust 0.750-0.900
 Call of Duty: Ghost			DM 5					    RB		Any	On Adjust 0.750-0.900
@@ -79,7 +70,6 @@ Souls Games				DM 19
 The Evil Within				DM 19					    RB		Any
 Witcher 3				DM 20 or 14						Radial	On Adjust 0.750-0.900	Read Above
 Warhammer: End Times - Vermintide	DM 10												
-*Deus Ex: Mankind Divided		DM 26							Radial				Read Above
 Dead Rising 3				DM 6					
 Soma					DM 2		
 Penumbra: Black Plague			DM 4					    RB
@@ -99,13 +89,13 @@ KHOLAT					DM 21					    RB		Any
 LuciusII				DM 4 or 23				    RB		Normal
 Dead Effect				DM 10				On			Any	
 Nosferatu: The Wrath of Malachi		DM 1					    RB		Any	
-The Elder Scrolls V: SE			DM 27 		WDM 3					Radial				Read Above
+The Elder Scrolls V: SE			DM 27 		WDM 3					Radial				
 Phantasmal				DM 4				On	    RB		Any								
 Layers of Fear				DM 10				On			Normal
 Through The Woods			DM 29				On	    RB		Radial
 Dungeon Nightmares II			DM 23				On	    RB		Any
 The Legend of Korra			DM 4							Any
-*S.T.A.L.K.E.R:CoP Complete Mod		DM 29					    RB		Any
+S.T.A.L.K.E.R:CoP Complete Mod		DM 29		WDM 18			    RB		Any
 *S.T.A.L.K.E.R:CS Complete Mod		DM 0					    RB		Any
 *S.T.A.L.K.E.R:SoC Complete Mod		DM 0					    RB		Any
 Wolfenstine: The New Order		DM 4		WDM 16			    RB		Any				Read Above
@@ -303,9 +293,10 @@ Overlap in Weapon Depth Map. May be worth it.
 {Stay Close}
 Install reshade in too Steam\steamapps\common\Stay Close\Migrate\Binaries\Win64
 
-{S.T.A.L.K.E.R.: Games}
+{S.T.A.L.K.E.R.: Games} -  I suggest windows 7.
 Please install the Complete Mods since I did all my testing with this mod.
-I most of the games have problems running in Windows 10 and Long Load times.
+Most of the games have problems running in Windows 10 and Long Load times.
+As well as Compatilbility Mode Windows XP (Service Pack 3) and DPI scaling.
 Shadow of Chernobyl Had a depth map that fluctuates for some reason.
 
 {The Evil With In}
@@ -347,9 +338,10 @@ Ex.
 		"high" : 0,
 		"ultra" : 0
 	},
-
+Problem Games
+_________________________________________________________________________________________________________________________________________
 (Zombi} -Depth map Pops in and out-
 DM 28
 This Problem seems to happen when looking at one direction. Don't know why it happens. But, I suggest useing a othere 3D application like Tridef or Nvidia 3D Vision.
-______________________________________________________________________________________________________________________________________
+_________________________________________________________________________________________________________________________________________
 Also Keep in mind if you don't like the depth map I made. You can alawys make your own.
