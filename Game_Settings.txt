@@ -96,8 +96,8 @@ Through The Woods			DM 29				On	    RB		Radial
 Dungeon Nightmares II			DM 23				On	    RB		Any
 The Legend of Korra			DM 4							Any
 S.T.A.L.K.E.R:CoP Complete Mod		DM 29		WDM 18			    RB		Any
-*S.T.A.L.K.E.R:CS Complete Mod		DM 0					    RB		Any
-*S.T.A.L.K.E.R:SoC Complete Mod		DM 0					    RB		Any
+S.T.A.L.K.E.R:CS Complete Mod		DM 0		WDM 19			    RB		Any
+S.T.A.L.K.E.R:SoC Complete Mod		DM 24		WDM 20			    RB		Any
 Wolfenstine: The New Order		DM 4		WDM 16			    RB		Any				Read Above
 Wolfenstine: The Old Blood		DM 4		WDM 16			    RB		Any				Read Above
 Amnesia: Machine for Pigs		DM 2 or 30	WDM 17					Any
@@ -224,7 +224,9 @@ Open the settings and set your res.
 <Screen Width="3840" Height="2160" FullScreen="true" Vsync="true" />
 
 {Portal 2} -Game crashes when loading-
- DM 10 WDM 14
+Custom_Depth_Map 7
+Near = 0 Far = 1.01
+WDM 14
 Install to the Bin Folder DX9.
 Max out everything. Turn off AA
 Open the console.
@@ -293,11 +295,25 @@ Overlap in Weapon Depth Map. May be worth it.
 {Stay Close}
 Install reshade in too Steam\steamapps\common\Stay Close\Migrate\Binaries\Win64
 
-{S.T.A.L.K.E.R.: Games} -  I suggest windows 7.
+{S.T.A.L.K.E.R.: Games} -  I suggest windows 7 or Windows 10 Anniversary.
+
+Call of Pripyat; 
+..\S.T.A.L.K.E.R. Call of Pripyat\bin\xrEngine.exe 
+First Start the Game with out modding and set the settings.
 Please install the Complete Mods since I did all my testing with this mod.
-Most of the games have problems running in Windows 10 and Long Load times.
-As well as Compatilbility Mode Windows XP (Service Pack 3) and DPI scaling.
-Shadow of Chernobyl Had a depth map that fluctuates for some reason.
+Most of the games have problems running in Windows 10 and Long Load times. Run in Compatilbility Mode Windows XP (Service Pack 3) and DPI scaling.
+
+In Windows 10 Anniversary Delete the files in the "prefecth," folder. SteamLibrary\steamapps\common\Stalker Call of Pripyat\gamedata\configs\prefetch This folder should stay empty. It normaly contains prefetch.ltx and or prefetch_single.ltx in the folder. You should not need Compatilbility Mode.
+
+Clear Sky;
+..\S.T.A.L.K.E.R. Clear Sky\bin\xrEngine.exe 
+Run in Compatilbility Mode Windows 7 and DPI scaling. First Start the Game with out modding and set the settings. First load should take a long time.
+After that it should not take too long any more.
+
+Shadow of Chernobyl; - use reshade 3.0.2
+..\S.T.A.L.K.E.R. Shadow of Chernobyl\bin\XR_3DA.exe 
+Run in Compatilbility Mode Windows 7 and DPI scaling. First Start the Game with out modding and set the settings.
+Has a depth map that fluctuates for some reason.
 
 {The Evil With In}
 Game too big for screen DPI scaling. 
