@@ -1,5 +1,5 @@
 #SuperDepth3D
-Depth Map Based 3D post-process shader v1.8.9 for Reshade 3.0
+Depth Map Based 3D post-process shader v1.9.0 for Reshade 3.0
 
 There are the Basic Depth maps you can use for your games listed and not listed. Look at this link for other game Compatibility.
 
@@ -50,7 +50,6 @@ Game Compatibility
 * Souls Games
 * The Evil Within
 * Witcher 3
-* Zombi
 * Warhammer: End Times - Vermintide
 * Deus Ex: Mankind Divided
 * Dead Rising 3
@@ -69,6 +68,8 @@ Game Compatibility
 * Just Cause 3
 * DOOM (2016)
 
+Also, many more games.
+
 Please read me ReadMeDepth3d.txt For Setting and More Information.
 
 https://github.com/BlueSkyDefender/Depth3D/blob/master/ReadMe_Depth3D.txt
@@ -76,9 +77,9 @@ https://github.com/BlueSkyDefender/Depth3D/blob/master/ReadMe_Depth3D.txt
 Also read https://github.com/BlueSkyDefender/Depth3D/blob/master/Game_Settings.txt For Game Settings.
  
 ======================================================================================================================================
-The Reshade 2.0 Repack For 1.8.9
+The Reshade 2.0 Repack For 1.9.0
 
-http://www.mediafire.com/file/9m9k3888f69i093/ReShade_2.0.3f1_Super_DepthMap_3D_v1.8.9_Repack.7z
+http://www.mediafire.com/file/swji5143ga20b1t/ReShade_2.0.3f1_Super_DepthMap_3D_v1.9.0_Repack.7z
 
 ======================================================================================================================================
 
