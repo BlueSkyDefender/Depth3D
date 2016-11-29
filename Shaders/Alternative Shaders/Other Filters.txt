@@ -1,3 +1,0 @@
-BilateralFilter Needs some work Do not use.
-
-MedianFilter Works in some games will be fixing this up.

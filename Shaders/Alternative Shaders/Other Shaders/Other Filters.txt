@@ -1,0 +1,10 @@
+BilateralFilter Needs some work Do not use.
+
+
+MedianFilter Works in some games will be fixing this up.
+
+Temporal anti aliasing Use this with DSR or VSR for TSSAA.
+This or Use with FXAA for TXAA.
+You get the picture for TSMAA....... :P
+
+May not be the best implementation for TAA. But, It's a start.

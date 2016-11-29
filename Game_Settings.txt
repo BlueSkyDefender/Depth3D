@@ -73,7 +73,7 @@ Warhammer: End Times - Vermintide	DM 10
 Dead Rising 3				DM 6					
 Soma					DM 2		
 Penumbra: Black Plague			DM 4					    RB
-*NecroVision: Lost Company		DM 4
+NecroVision: Lost Company		DM 27		WDM 21		
 The Vanishing of Ethan Carter Redux	DM 3					    RB
 Cryostasis				DM 27		WDM 15		
 Silent Hill: Homecoming			DM 22		
