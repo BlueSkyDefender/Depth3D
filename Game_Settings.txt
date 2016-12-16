@@ -1,4 +1,4 @@
-#SuperDepth3D 1.8.9
+#SuperDepth3D 1.9.1
 --------------------------------------------------------------------------------------------------------------------------------------
 -=BSD Notes=- Personal recommended settings and tips for some games.
 ______________________________________________________________________________________________________________________________________
@@ -102,6 +102,8 @@ Wolfenstine: The New Order		DM 4		WDM 16			    RB		Any				Read Above
 Wolfenstine: The Old Blood		DM 4		WDM 16			    RB		Any				Read Above
 Amnesia: Machine for Pigs		DM 2 or 30	WDM 17					Any
 Gone Home				DM 0				On			Any
+DarkSiders Warmastred Edition		DM 0							Any
+Requiem: Avenging Angel			DM 31					    RB		Any 
 
 User Submitted Depth Map Settings
 
@@ -268,6 +270,10 @@ seta r_customwidth "3840"
 seta r_fullscreen "1"
 
 seta r_mode "-1"
+
+{Requiem: Avenging Angel}
+Use nglide 1.05 to run this game.
+http://www.zeus-software.com/downloads/nglide
 
 {Skyrim V}
 Antialiasing Must be set too 2 Samples or more in the Options.
