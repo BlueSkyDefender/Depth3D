@@ -104,6 +104,8 @@ Amnesia: Machine for Pigs		DM 2 or 30	WDM 17					Any
 Gone Home				DM 0				On			Any
 DarkSiders Warmastred Edition		DM 0							Any
 Requiem: Avenging Angel			DM 31					    RB		Any 
+Resident Evil 7				DM 21							Radial
+
 
 User Submitted Depth Map Settings
 

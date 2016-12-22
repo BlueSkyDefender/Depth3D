@@ -95,7 +95,8 @@ void Bilateral_Filter(float4 position : SV_Position, float2 texcoord : TEXCOORD0
 		float3 cc;
 		float factor;
 		float bZ = 1.0/normpdf(0.0, BSIGMA);
-
+		
+		[loop]
 		for (int i=-kSize; i <= kSize; ++i)
 		{
 			for (int j=-kSize; j <= kSize; ++j)
