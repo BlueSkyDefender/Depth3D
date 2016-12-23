@@ -86,6 +86,13 @@ uniform float Bar_Distance_Three <
 	ui_tooltip = "Adjust Distance of Line From Player.";
 > = 0.080;
 
+uniform int COLOR <
+	ui_type = "combo";
+	ui_items = "Black\0White\0";
+	ui_label = "Line Color";
+	ui_tooltip = "Swap Line Color.";
+> = 0;
+
 /////////////////////////////////////////////D3D Starts Here/////////////////////////////////////////////////////////////////
 
 #define pix float2(BUFFER_RCP_WIDTH, BUFFER_RCP_HEIGHT)
@@ -539,8 +546,28 @@ void PS0(float4 position : SV_Position, float2 texcoord : TEXCOORD0, out float4 
 		float4 LINES = tex2D(SamplerB,texcoord.xy).a;
 		float4 LINESS = tex2D(SamplerBT,texcoord.xy).a;
 		float4 LINESMID = tex2D(SamplerBMID,texcoord.xy).a;
-		float4 Desaturation = dot(LINES,float4(0.299, 0.587, 0.114,0).a);
-		color = (tex2D(BackBuffer,texcoord.xy) * (tex2D(SamplerCDM,texcoord.xy) <= (lerp(Desaturation,LINES,Bar_Distance_Three))) + tex2D(BackBuffer,texcoord.xy) * ((tex2D(SamplerCDM,texcoord.xy)>0)>lerp(Desaturation,LINES,1.4))) * (tex2D(BackBuffer,texcoord.xy) && (tex2D(SamplerCDM,texcoord.xy) <= lerp(Desaturation,LINESS,Bar_Distance_One)) + tex2D(BackBuffer,texcoord.xy) * ((tex2D(SamplerCDM,texcoord.xy)>0)>lerp(Desaturation,LINESS,1))) * (tex2D(BackBuffer,texcoord.xy) && (tex2D(SamplerCDM,texcoord.xy) <= lerp(Desaturation,LINESMID,Bar_Distance_Two)) + tex2D(BackBuffer,texcoord.xy) * ((tex2D(SamplerCDM,texcoord.xy)>0)>lerp(Desaturation,LINESMID,1)));
+		float4 Desaturation = dot(tex2D(BackBuffer,texcoord.xy),float4(0.299, 0.587, 0.114,0).a);
+		
+		if(COLOR == 0)
+		{
+		color = tex2D(BackBuffer,texcoord.xy) * 
+		
+				(tex2D(BackBuffer,texcoord.xy) && (tex2D(SamplerCDM,texcoord.xy) <= lerp(Desaturation,LINES,Bar_Distance_Three)) + tex2D(BackBuffer,texcoord.xy) * ((tex2D(SamplerCDM,texcoord.xy)>0)>lerp(Desaturation,LINES,1))) * 
+		
+				(tex2D(BackBuffer,texcoord.xy) && (tex2D(SamplerCDM,texcoord.xy) <= lerp(Desaturation,LINESS,Bar_Distance_One)) + tex2D(BackBuffer,texcoord.xy) * ((tex2D(SamplerCDM,texcoord.xy)>0)>lerp(Desaturation,LINESS,1))) * 
+		
+				(tex2D(BackBuffer,texcoord.xy) && (tex2D(SamplerCDM,texcoord.xy) <= lerp(Desaturation,LINESMID,Bar_Distance_Two)) + tex2D(BackBuffer,texcoord.xy) * ((tex2D(SamplerCDM,texcoord.xy)>0)>lerp(Desaturation,LINESMID,1)));
+		}
+		else
+		{
+				color = tex2D(BackBuffer,texcoord.xy) / 
+		
+				(tex2D(BackBuffer,texcoord.xy) && (tex2D(SamplerCDM,texcoord.xy) <= lerp(Desaturation,LINES,Bar_Distance_Three)) + tex2D(BackBuffer,texcoord.xy) * ((tex2D(SamplerCDM,texcoord.xy)>0)>lerp(Desaturation,LINES,1))) / 
+		
+				(tex2D(BackBuffer,texcoord.xy) && (tex2D(SamplerCDM,texcoord.xy) <= lerp(Desaturation,LINESS,Bar_Distance_One)) + tex2D(BackBuffer,texcoord.xy) * ((tex2D(SamplerCDM,texcoord.xy)>0)>lerp(Desaturation,LINESS,1))) / 
+		
+				(tex2D(BackBuffer,texcoord.xy) && (tex2D(SamplerCDM,texcoord.xy) <= lerp(Desaturation,LINESMID,Bar_Distance_Two)) + tex2D(BackBuffer,texcoord.xy) * ((tex2D(SamplerCDM,texcoord.xy)>0)>lerp(Desaturation,LINESMID,1)));
+		}		
 
 	}
 	else
