@@ -105,6 +105,10 @@ Gone Home				DM 0				On			Any
 DarkSiders Warmastred Edition		DM 0							Any
 Requiem: Avenging Angel			DM 31					    RB		Any 
 Resident Evil 7				DM 21							Radial
+The Void				DM 4					    RB		Any
+Turok: Dinosaur Hunter			DM 32		WDM 22			    RB		Any	On Adjust 0.750-0.900
+Everybody's Gone to the Rapture		DM 0							Any	
+
 
 
 User Submitted Depth Map Settings
@@ -338,8 +342,14 @@ This should fix it. For more look up this problem on google.
 
 Instal Dll too D:\SteamLibrary\steamapps\common\The Vanishing of Ethan Carter Redux\EthanCarter\Binaries\Win64
 
+{The Void} - Use Reshade 3.0.3
+You may need to install the other things in the game folder for the game to run such as DX9 runtime and AdbeRdr810_en_US. Also the PhysX run time if you are on AMD. I know, I know...... But, this was the only way I got it to run in windows 10 on AMD Hardware.
+
 {Through The Woods}
 In game Set your Res to Native screen Res.
+
+{Turok: Dinosaur Hunter} - Use Reshade 3.0.4
+Turn Off "Light Scatter," in Graphics Menu.
 
 {Wolfenstine: Games} - working in Reshade 3.0 and Rehade 2.0
 [Set Launch Options](+r_multisamples "0" +vt_maxaniso "16")
