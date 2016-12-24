@@ -1,6 +1,6 @@
- ////---------------//
+ ////----------------//
  ///**SplitDepth3D**///
- //---------------////
+ //----------------////
 
  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
  //* Depth Map Based 3D post-process shader v1.9.1																																	*//
@@ -68,29 +68,27 @@ uniform float2 Near_Far <
 uniform float Bar_Distance_One <
 	ui_type = "drag";
 	ui_min = 0.0; ui_max = 1.0;
-	ui_label = "Side Bar Distance";
+	ui_label = "Near Bar Distance";
 	ui_tooltip = "Adjust Distance of Line From Player.";
 > = 0.040;
 
 uniform float Bar_Distance_Two <
 	ui_type = "drag";
 	ui_min = 0.0; ui_max = 1.0;
-	ui_label = "MIddle Bar Distance";
+	ui_label = "Mid Bar Distance";
 	ui_tooltip = "Adjust Distance of Line From Player.";
 > = 0.300;
 
 uniform float Bar_Distance_Three <
 	ui_type = "drag";
 	ui_min = 0.0; ui_max = 1.0;
-	ui_label = "Inside Bar Distance";
+	ui_label = "Far Bar Distance";
 	ui_tooltip = "Adjust Distance of Line From Player.";
 > = 0.080;
 
-uniform int COLOR <
-	ui_type = "combo";
-	ui_items = "Black\0White\0";
-	ui_label = "Line Color";
-	ui_tooltip = "Swap Line Color.";
+uniform bool INVERT <
+	ui_label = "Invert";
+	ui_tooltip = "Invert the color of the lines.";
 > = 0;
 
 /////////////////////////////////////////////D3D Starts Here/////////////////////////////////////////////////////////////////
@@ -124,29 +122,35 @@ sampler SamplerCDM
 		MagFilter = Linear;
 	};
 	
-texture TexSB < source = "SgradBlack.png"; > { Width = 1024; Height = 1024; MipLevels = 1; Format = RGBA8; };
-sampler SamplerB { Texture = TexSB; 		AddressU = CLAMP;
-		AddressV = CLAMP;
-		AddressW = CLAMP;
-		MipFilter = Linear; 
-		MinFilter = Linear; 
-		MagFilter = Linear;};
+texture TexOne  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA32F;};
 
-texture TexSBMID < source = "SgradBlackMid.png"; > { Width = 1024; Height = 1024; MipLevels = 1; Format = RGBA8; };
-sampler SamplerBMID { Texture = TexSBMID; 		AddressU = CLAMP;
-		AddressV = CLAMP;
-		AddressW = CLAMP;
-		MipFilter = Linear; 
-		MinFilter = Linear; 
-		MagFilter = Linear;};
+sampler SamplerOne
+	{ 
+		Texture = TexOne;
+	};
+	
+texture TexTwo  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA32F;};
 
-texture TexSBT < source = "SgradBlackT.png"; > { Width = 1024; Height = 1024; MipLevels = 1; Format = RGBA8; };
-sampler SamplerBT { Texture = TexSBT; 		AddressU = CLAMP;
-		AddressV = CLAMP;
-		AddressW = CLAMP;
-		MipFilter = Linear; 
-		MinFilter = Linear; 
-		MagFilter = Linear;};
+sampler SamplerTwo
+	{ 
+		Texture = TexTwo;
+	};
+	
+texture TexThree  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA32F;};
+
+sampler SamplerThree
+	{ 
+		Texture = TexThree;
+	};
+	
+texture TexSBOne < source = "SgradBlackOne.png"; > { Width = 1024; Height = 1024; MipLevels = 1; Format = RGBA8; };
+sampler SamplerBLOne { Texture = TexSBOne;};
+
+texture TexSBTwo < source = "SgradBlackTwo.png"; > { Width = 1024; Height = 1024; MipLevels = 1; Format = RGBA8; };
+sampler SamplerBLTwo { Texture = TexSBTwo;};
+
+texture TexSBThree < source = "SgradBlackThree.png"; > { Width = 1024; Height = 1024; MipLevels = 1; Format = RGBA8; };
+sampler SamplerBLThree { Texture = TexSBThree;};
 	
 
 //Depth Map Information	
@@ -531,7 +535,7 @@ float4 SbSdepth(float4 pos : SV_Position, float2 texcoord : TEXCOORD0) : SV_Targ
 
     }
     
-	color.rgb = D.rrr;
+	color.rgb = 1-D.rrr;
 	
 	return color;	
 
@@ -539,41 +543,33 @@ float4 SbSdepth(float4 pos : SV_Position, float2 texcoord : TEXCOORD0) : SV_Targ
 	
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-void PS0(float4 position : SV_Position, float2 texcoord : TEXCOORD0, out float4 color : SV_Target)
+void Levels(float4 position : SV_Position, float2 texcoord : TEXCOORD0, out float4 color : SV_Target)
 {
-	if(!Depth_Map_View)
-	{
-		float4 LINES = tex2D(SamplerB,texcoord.xy).a;
-		float4 LINESS = tex2D(SamplerBT,texcoord.xy).a;
-		float4 LINESMID = tex2D(SamplerBMID,texcoord.xy).a;
+		float4 White = float4(0.25,0.25,0.25,0.0);
+		float4 Gray = float4(0.125,0.125,0.125,0.0);
+		float4 Black = float4(0.0,0.0,0.0,0.0);
+		float4 LINESOne = tex2D(SamplerBLOne,texcoord.xy).a;
+		float4 LINESTwo = tex2D(SamplerBLTwo,texcoord.xy).a;
+		float4 LINESThree = tex2D(SamplerBLThree,texcoord.xy).a;
 		float4 Desaturation = dot(tex2D(BackBuffer,texcoord.xy),float4(0.299, 0.587, 0.114,0).a);
 		
-		if(COLOR == 0)
+		if(INVERT == 0)
 		{
-		color = tex2D(BackBuffer,texcoord.xy) * 
-		
-				(tex2D(BackBuffer,texcoord.xy) && (tex2D(SamplerCDM,texcoord.xy) <= lerp(Desaturation,LINES,Bar_Distance_Three)) + tex2D(BackBuffer,texcoord.xy) * ((tex2D(SamplerCDM,texcoord.xy)>0)>lerp(Desaturation,LINES,1))) * 
-		
-				(tex2D(BackBuffer,texcoord.xy) && (tex2D(SamplerCDM,texcoord.xy) <= lerp(Desaturation,LINESS,Bar_Distance_One)) + tex2D(BackBuffer,texcoord.xy) * ((tex2D(SamplerCDM,texcoord.xy)>0)>lerp(Desaturation,LINESS,1))) * 
-		
-				(tex2D(BackBuffer,texcoord.xy) && (tex2D(SamplerCDM,texcoord.xy) <= lerp(Desaturation,LINESMID,Bar_Distance_Two)) + tex2D(BackBuffer,texcoord.xy) * ((tex2D(SamplerCDM,texcoord.xy)>0)>lerp(Desaturation,LINESMID,1)));
+			color = 
+			(tex2D(SamplerCDM,texcoord) < lerp(Desaturation,LINESOne,Bar_Distance_One)) ?  White : tex2D(BackBuffer, texcoord) && 
+			(tex2D(SamplerCDM,texcoord) < lerp(Desaturation,LINESTwo,Bar_Distance_Two)) ?  Gray : tex2D(BackBuffer, texcoord) && 
+			(tex2D(SamplerCDM,texcoord) < lerp(Desaturation,LINESThree,Bar_Distance_Three)) ?  Black : tex2D(BackBuffer, texcoord);
+
 		}
 		else
-		{
-				color = tex2D(BackBuffer,texcoord.xy) / 
+		{			
+			color = 
+			(tex2D(SamplerCDM,texcoord) < lerp(Desaturation,LINESOne,Bar_Distance_One)) ?  Black : tex2D(BackBuffer, texcoord) && 
+			(tex2D(SamplerCDM,texcoord) < lerp(Desaturation,LINESTwo,Bar_Distance_Two)) ?  Gray : tex2D(BackBuffer, texcoord) && 
+			(tex2D(SamplerCDM,texcoord) < lerp(Desaturation,LINESThree,Bar_Distance_Three)) ?  White : tex2D(BackBuffer, texcoord);
 		
-				(tex2D(BackBuffer,texcoord.xy) && (tex2D(SamplerCDM,texcoord.xy) <= lerp(Desaturation,LINES,Bar_Distance_Three)) + tex2D(BackBuffer,texcoord.xy) * ((tex2D(SamplerCDM,texcoord.xy)>0)>lerp(Desaturation,LINES,1))) / 
-		
-				(tex2D(BackBuffer,texcoord.xy) && (tex2D(SamplerCDM,texcoord.xy) <= lerp(Desaturation,LINESS,Bar_Distance_One)) + tex2D(BackBuffer,texcoord.xy) * ((tex2D(SamplerCDM,texcoord.xy)>0)>lerp(Desaturation,LINESS,1))) / 
-		
-				(tex2D(BackBuffer,texcoord.xy) && (tex2D(SamplerCDM,texcoord.xy) <= lerp(Desaturation,LINESMID,Bar_Distance_Two)) + tex2D(BackBuffer,texcoord.xy) * ((tex2D(SamplerCDM,texcoord.xy)>0)>lerp(Desaturation,LINESMID,1)));
 		}		
-
-	}
-	else
-	{
-		color = tex2D(SamplerCDM,texcoord.xy);
-	}
+		
 }
 
 
@@ -596,10 +592,11 @@ technique SplitDepth3D
 			VertexShader = PostProcessVS;
 			PixelShader = SbSdepth;
 			RenderTarget = texCDM;
-		}
-			pass Output
+		}			
+			pass SplitDepth
 		{
 			VertexShader = PostProcessVS;
-			PixelShader = PS0;	
+			PixelShader = Levels;
 		}
+
 }
