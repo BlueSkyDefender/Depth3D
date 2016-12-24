@@ -107,7 +107,8 @@ Requiem: Avenging Angel			DM 31					    RB		Any
 Resident Evil 7				DM 21							Radial
 The Void				DM 4					    RB		Any
 Turok: Dinosaur Hunter			DM 32		WDM 22			    RB		Any	On Adjust 0.750-0.900
-Everybody's Gone to the Rapture		DM 0							Any	
+Everybody's Gone to the Rapture		DM 0							Any
+ABZU					DM 21							Any
 
 
 
