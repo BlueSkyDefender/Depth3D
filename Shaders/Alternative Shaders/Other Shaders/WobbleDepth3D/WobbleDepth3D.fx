@@ -114,13 +114,6 @@ uniform float2 Near_Far <
 	ui_tooltip = "Adjustment for Near and Far Depth Map Precision.";
 > = float2(1,1.5);
 
-uniform float Bar_Distance_One <
-	ui_type = "drag";
-	ui_min = 0.0; ui_max = 1.0;
-	ui_label = "Near Bar Distance";
-	ui_tooltip = "Adjust Distance of Line From Player.";
-> = 0.5;
-
 uniform int Wobble_Speed <
 	ui_type = "combo";
 	ui_items = "Speed---\0Speed--\0Speed-\0Normal Speed\0Speed+\0Speed++\0Speed+++\0Off\0";
