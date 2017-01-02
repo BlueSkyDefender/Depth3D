@@ -3,7 +3,7 @@
  //----------------////
 
  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
- //* Depth Map Based 3D post-process shader v1.9.3																																	*//
+ //* Depth Map Based 3D post-process shader v1.9.2																																	*//
  //* For Reshade 3.0																																								*//
  //* --------------------------																																						*//
  //* This work is licensed under a Creative Commons Attribution 3.0 Unported License.																								*//
@@ -991,17 +991,19 @@ float4 SbSdepth(float4 pos : SV_Position, float2 texcoord : TEXCOORD0) : SV_Targ
 
 }
 	
-float3 DisocclusionMask(float2 texcoord : TEXCOORD0)
+float4 DisocclusionMask(float4 pos : SV_Position, float2 texcoord : TEXCOORD0) : SV_Target
 {
 	float4 color;
 	float2 dir;
 	float B;
-	float Con = 8;
+	float Con = 10;
 	
 	if(Disocclusion_Type > 0 && Disocclusion_Power > 0) 
-	{	
-	const float weight[8] = 
-	{   
+	{
+	
+	const float weight[10] = 
+	{  
+	-0.08,  
 	-0.05,  
 	-0.03,  
 	-0.02,  
@@ -1009,7 +1011,8 @@ float3 DisocclusionMask(float2 texcoord : TEXCOORD0)
 	0.01,  
 	0.02,  
 	0.03,  
-	0.05
+	0.05,  
+	0.08  
 	};
 	
 	if(Disocclusion_Type == 1)
@@ -1027,7 +1030,7 @@ float3 DisocclusionMask(float2 texcoord : TEXCOORD0)
 	dir = normalize( dir ); 
 	 
 	[loop]
-	for (int i = -0; i < 7; i++)
+	for (int i = -0; i < 10; i++)
 	{
 	color += tex2D(SamplerCDM,texcoord + dir * weight[i] * B)/Con;
 	}
@@ -1037,14 +1040,14 @@ float3 DisocclusionMask(float2 texcoord : TEXCOORD0)
 	{
 	color = tex2D(SamplerCDM,texcoord.xy);
 	}
-
-	return color.r;
+	
+	return color;
 } 
   
 ////////////////////////////////////////////////Left/Right Eye////////////////////////////////////////////////////////
-void PS_renderLR(in float2 texcoord : TEXCOORD0, out float4 color : SV_Target0 , out float4 colorT: SV_Target1)
+void PS_renderLR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 color : SV_Target0 , out float4 colorT: SV_Target1)
 {	
-	const float samples[4] = {0.25, 0.50, 0.75, 1.0};
+	const float samples[4] = {0.25, 0.50, 0.75, 1};
 	float DepthL = 1.0, DepthR = 1.0;
 	float C = Convergence;
 	float D = Depth;
@@ -1053,8 +1056,8 @@ void PS_renderLR(in float2 texcoord : TEXCOORD0, out float4 color : SV_Target0 ,
 	for (int j = 0; j <= 3; ++j) 
 	{	
 			uv.x = samples[j] * D;
-			DepthL =  min(DepthL,DisocclusionMask(float2(texcoord.x+uv.x*pix.x, texcoord.y)).r)/1-C;
-			DepthR =  min(DepthR,DisocclusionMask(float2(texcoord.x-uv.x*pix.x, texcoord.y)).r)/1-C;
+			DepthL =  min(DepthL,tex2D(SamplerCC,float2(texcoord.x+uv.x*pix.x, texcoord.y)).r)/1-C;
+			DepthR =  min(DepthR,tex2D(SamplerCC,float2(texcoord.x-uv.x*pix.x, texcoord.y)).r)/1-C;
 	}
 		if(!Eye_Swap)
 		{	
@@ -1094,7 +1097,7 @@ void PS_renderLR(in float2 texcoord : TEXCOORD0, out float4 color : SV_Target0 ,
 		}
 }
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-void PS0(float2 texcoord : TEXCOORD0, out float4 color : SV_Target)
+void PS0(float4 position : SV_Position, float2 texcoord : TEXCOORD0, out float4 color : SV_Target)
 {
 	if(!Depth_Map_View)
 	{
@@ -1224,6 +1227,12 @@ technique SuperDepth3D
 			VertexShader = PostProcessVS;
 			PixelShader = SbSdepth;
 			RenderTarget = texCDM;
+		}
+			pass DisocclusionPass
+		{
+			VertexShader = PostProcessVS;
+			PixelShader = DisocclusionMask;
+			RenderTarget = texCC;
 		}
 			pass SinglePassStereo
 		{

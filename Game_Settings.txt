@@ -1,4 +1,4 @@
-#SuperDepth3D 1.9.1
+#SuperDepth3D 1.9.3
 --------------------------------------------------------------------------------------------------------------------------------------
 -=BSD Notes=- Personal recommended settings and tips for some games.
 ______________________________________________________________________________________________________________________________________
@@ -109,8 +109,11 @@ The Void				DM 4					    RB		Any
 Turok: Dinosaur Hunter			DM 32		WDM 22			    RB		Any	On Adjust 0.750-0.900
 Everybody's Gone to the Rapture		DM 0							Any
 ABZU					DM 21							Any
-
-
+Never Alone (Kisima Ingitchuna)		DM 33							Normal
+Lifeless Planet				DM 17							Radial
+Dead Island				DM 27							Any
+Tales of Zestiria			DM 7							Any
+Mordheim: City of the Damned		DM 0							Any
 
 User Submitted Depth Map Settings
 
