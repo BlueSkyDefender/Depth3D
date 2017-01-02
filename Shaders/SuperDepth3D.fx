@@ -1042,7 +1042,7 @@ float3 DisocclusionMask(float2 texcoord : TEXCOORD0)
 } 
   
 ////////////////////////////////////////////////Left/Right Eye////////////////////////////////////////////////////////
-void PS_renderLR(in float2 texcoord : TEXCOORD0, out float4 color : SV_Target0 , out float4 colorT: SV_Target1)
+void PS_renderLR(in float4 pos : SV_Position, in float2 texcoord : TEXCOORD0, out float4 color : SV_Target0 , out float4 colorT: SV_Target1)
 {	
 	const float samples[4] = {0.25, 0.50, 0.75, 1.0};
 	float DepthL = 1.0, DepthR = 1.0;
@@ -1094,7 +1094,7 @@ void PS_renderLR(in float2 texcoord : TEXCOORD0, out float4 color : SV_Target0 ,
 		}
 }
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-void PS0(float2 texcoord : TEXCOORD0, out float4 color : SV_Target)
+void PS0(float4 pos : SV_Position, float2 texcoord : TEXCOORD0, out float4 color : SV_Target)
 {
 	if(!Depth_Map_View)
 	{
