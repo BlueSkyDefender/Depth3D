@@ -3,7 +3,7 @@
  //------------------------////
 
  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
- //* Depth Map Based 3D post-process shader v1.9.0 Anaglyph 3D																														*//
+ //* Depth Map Based 3D post-process shader v1.9.3 Anaglyph 3D																														*//
  //* For Reshade 3.0																																								*//
  //* --------------------------																																						*//
  //* This work is licensed under a Creative Commons Attribution 3.0 Unported License.																								*//
@@ -24,7 +24,7 @@
 
 uniform int Alternate_Depth_Map <
 	ui_type = "combo";
-	ui_items = "Depth Map 0\0Depth Map 1\0Depth Map 2\0Depth Map 3\0Depth Map 4\0Depth Map 5\0Depth Map 6\0Depth Map 7\0Depth Map 8\0Depth Map 9\0Depth Map 10\0Depth Map 11\0Depth Map 12\0Depth Map 13\0Depth Map 14\0Depth Map 15\0Depth Map 16\0Depth Map 17\0Depth Map 18\0Depth Map 19\0Depth Map 20\0Depth Map 21\0Depth Map 22\0Depth Map 23\0Depth Map 24\0Depth Map 25\0Depth Map 26\0Depth Map 27\0Depth Map 28\0Depth Map 29\0Depth Map 30\0Depth Map 31\0";
+	ui_items = "Depth Map 0\0Depth Map 1\0Depth Map 2\0Depth Map 3\0Depth Map 4\0Depth Map 5\0Depth Map 6\0Depth Map 7\0Depth Map 8\0Depth Map 9\0Depth Map 10\0Depth Map 11\0Depth Map 12\0Depth Map 13\0Depth Map 14\0Depth Map 15\0Depth Map 16\0Depth Map 17\0Depth Map 18\0Depth Map 19\0Depth Map 20\0Depth Map 21\0Depth Map 22\0Depth Map 23\0Depth Map 24\0Depth Map 25\0Depth Map 26\0Depth Map 27\0Depth Map 28\0Depth Map 29\0Depth Map 30\0Depth Map 31\0Depth Map 32\0Depth Map 33\0";
 	ui_label = "Alternate Depth Map";
 	ui_tooltip = "Alternate Depth Map for different Games. Read the ReadMeDepth3d.txt, for setting. Each game May and can use a diffrent Alternet Depth Map.";
 > = 0;
@@ -36,14 +36,7 @@ uniform int Depth <
 	ui_tooltip = "Determines the amount of Image Warping and Separation between both eyes. You can Override this setting.";
 > = 15;
 
-uniform float Convergence <
-	ui_type = "drag";
-	ui_min = -0.250; ui_max = 0.250;
-	ui_label = "Convergence Slider";
-	ui_tooltip = "Determines the Convergence point. Default is 0";
-> = 0;
-
-uniform int Perspective <
+uniform float Perspective <
 	ui_type = "drag";
 	ui_min = -100; ui_max = 100;
 	ui_label = "Perspective Slider";
@@ -259,7 +252,7 @@ sampler SamplerCDM
 	};
 
 //Depth Map Information	
-float4 SbSdepth(float4 pos : SV_Position, float2 texcoord : TEXCOORD0) : SV_Target
+float4 SbSdepth(float4 position : SV_Position, float2 texcoord : TEXCOORD0) : SV_Target
 {
 
 	 float4 color = 0;
@@ -525,6 +518,22 @@ float4 SbSdepth(float4 pos : SV_Position, float2 texcoord : TEXCOORD0) : SV_Targ
 		{
 		float cF = 100;
 		float cN = 1.555;
+		depthM = 1 - log(pow(abs(cN-depthM),cF));
+		}
+		
+		//Turok: Dinosaur Hunter
+		if (Alternate_Depth_Map == 32)
+		{
+		float cF = 1000; //10+
+		float cN = 0;//1
+		depthM = (pow(abs(cN-depthM),cF));
+		}
+		
+		//Never Alone (Kisima Ingitchuna)
+		if (Alternate_Depth_Map == 33)
+		{
+		float cF = 112.5;
+		float cN = 1.995;
 		depthM = 1 - log(pow(abs(cN-depthM),cF));
 		}
 		
@@ -873,10 +882,20 @@ float4 SbSdepth(float4 pos : SV_Position, float2 texcoord : TEXCOORD0) : SV_Targ
 		if (Weapon_Depth_Map == 25)
 		{
 		Adj = 0.000010;
-		Per = 5;//5
+		Per = 5;
 		float cWF = -0.4;
 		float cWN = 0.375;
 		WDM = 1 - (log(cWN * WDM)/ 1 - log(cWF+WDM));
+		}
+		
+		//Weapon Depth Profile Twenty Two
+		if (Weapon_Depth_Map == 26)
+		{
+		Adj = 0.102000;
+		Per = 3.650000;
+		float cWF = 0.001300;
+		float cWN = 50.000000;
+		WDM = 1 - (log(cWF * cWN/WDM - cWF));
 		}
 		
 	float NearDepth;
@@ -932,7 +951,7 @@ float4 DisocclusionMask(float4 pos : SV_Position, float2 texcoord : TEXCOORD0) :
 	float4 color;
 	float2 dir;
 	float B;
-	float Con = 10;
+	float Con = 9;
 	
 	if(Disocclusion_Type > 0 && Disocclusion_Power > 0 && Anaglyph_Colors != 4) 
 	{
@@ -966,7 +985,7 @@ float4 DisocclusionMask(float4 pos : SV_Position, float2 texcoord : TEXCOORD0) :
 	dir = normalize( dir ); 
 	 
 	[loop]
-	for (int i = -0; i < 10; i++)
+	for (int i = 0; i < 10; i++)
 	{
 	color += tex2D(SamplerCDM,texcoord + dir * weight[i] * B)/Con;
 	}
@@ -984,29 +1003,30 @@ float4 DisocclusionMask(float4 pos : SV_Position, float2 texcoord : TEXCOORD0) :
 void PS_renderLR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 color : SV_Target0 , out float4 colorT: SV_Target1)
 {	
 	float D;
-	float C;
+	float DepthL, DepthR;
 	
 	if (Anaglyph_Colors == 4)
 			{
-			D = 10;
-			C = 0.175;
+			DepthL = 0.875;
+			DepthR = 0.875;
+			D = 15;
 			}
 			else
 			{
+			DepthL = 1.0;
+			DepthR = 1.0;
 			D = Depth;
-			C = Convergence;
 			}
 			
 	
-	const float samples[4] = {0.25, 0.50, 0.75, 1};
-	float DepthL = 1.0, DepthR = 1.0;
+	const float samples[3] = {0.50, 0.66, 1};
 	float2 uv = 0;
 	[loop]
-	for (int j = 0; j <= 3; ++j) 
+	for (int j = 0; j < 3; ++j) 
 	{	
 			uv.x = samples[j] * D;
-			DepthL =  min(DepthL,tex2D(SamplerCC,float2(texcoord.x+uv.x*pix.x, texcoord.y)).r)/1-C;
-			DepthR =  min(DepthR,tex2D(SamplerCC,float2(texcoord.x-uv.x*pix.x, texcoord.y)).r)/1-C;
+			DepthL =  min(DepthL,tex2D(SamplerCC,float2(texcoord.x+uv.x*pix.x, texcoord.y)).r);
+			DepthR =  min(DepthR,tex2D(SamplerCC,float2(texcoord.x-uv.x*pix.x, texcoord.y)).r);
 	}
 		if(!Eye_Swap)
 		{	
@@ -1040,8 +1060,15 @@ void PS0(float4 position : SV_Position, float2 texcoord : TEXCOORD0, out float4 
 {
 	if(!Depth_Map_View)
 	{
-	
-	float P = Perspective;
+	float P; 
+		if (Anaglyph_Colors == 4)
+			{
+			P = -15/2;
+			}
+			else
+			{
+			P = Perspective;
+			}
 											
 				float3 HalfLM = dot(tex2D(SamplerCLMIRROR,float2(texcoord.x + P * pix.x,texcoord.y)).rgb,float3(0.299, 0.587, 0.114));
 				float3 HalfRM = dot(tex2D(SamplerCRMIRROR,float2(texcoord.x - P * pix.x,texcoord.y)).rgb,float3(0.299, 0.587, 0.114));
@@ -1133,8 +1160,8 @@ void PS0(float4 position : SV_Position, float2 texcoord : TEXCOORD0, out float4 
 				
 				float3 HalfLeftEyecolor = dot(LeftEyecolor,float3(0.299, 0.587, 0.114));
 				float3 HalfRightEyecolor = dot(RightEyecolor,float3(0.299, 0.587, 0.114));
-				float3 LEC = lerp(HalfLeftEyecolor,LeftEyecolor,1.4);  
-				float3 REC = lerp(HalfRightEyecolor,RightEyecolor,1.4); 
+				float3 LEC = lerp(HalfLeftEyecolor,LeftEyecolor,0.95);  
+				float3 REC = lerp(HalfRightEyecolor,RightEyecolor,1); 
 				
 
 				color =  (C*float4(LEC,1)) + (CT*float4(REC,1));
