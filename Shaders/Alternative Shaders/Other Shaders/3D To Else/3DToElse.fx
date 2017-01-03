@@ -1,5 +1,5 @@
  ////--------------------//
- ///**SidebySideToElse**///
+ ///**3DToElse**///
  //--------------------////
 
 // Change the Cross Cusor Key
@@ -14,7 +14,7 @@ uniform int Perspective <
 	ui_min = -350; ui_max = 350;
 	ui_label = "Perspective Slider";
 	ui_tooltip = "Determines the perspective point.";
-> = 295;
+> = 0;
 
 uniform int Polynomial_Barrel_Distortion <
 	ui_type = "combo";
@@ -76,6 +76,13 @@ uniform int SidebySideToElse <
 	ui_items = "Off\0ON\0";
 	ui_label = "Side by Side to Else";
 	ui_tooltip = "NUll";
+> = 0;
+
+uniform int DeAnaglyph <
+	ui_type = "combo";
+	ui_items = "Off\0ON\0";
+	ui_label = "DeAnglyph";
+	ui_tooltip = "Anaglyph to Gray scale";
 > = 0;
 
 uniform int Stereoscopic_Mode <
@@ -258,7 +265,8 @@ float4 MouseCuror(float4 pos : SV_Position, float2 texcoord : TEXCOORD) : SV_Tar
 ////////////////////////////////////////////////Left/Right Eye////////////////////////////////////////////////////////
 void PS_renderLR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 color : SV_Target0 , out float4 colorT: SV_Target1)
 {	
-
+	if(DeAnaglyph == 0)
+	{
 		if(SidebySideToElse == 0)
 		{	
 			if(!Eye_Swap)
@@ -337,6 +345,24 @@ void PS_renderLR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD
 				}
 			}
 		}
+	}
+	else
+	{	
+
+		float4 L = tex2D(BackBuffer,texcoord).r;
+		float4 R = tex2D(BackBuffer,texcoord).g;
+		
+		if(!Eye_Swap)
+			{	
+				color =  L;
+				colorT =  R;
+			}
+			else
+			{	
+				colorT =  L;
+				color =  R;
+			}
+	}
 }
 
 
@@ -660,7 +686,7 @@ void PostProcessVS(in uint id : SV_VertexID, out float4 position : SV_Position, 
 
 //*Rendering passes*//
 
-technique SidebySide_To_Else
+technique To_Else
 {			
 			pass MousePass
 		{

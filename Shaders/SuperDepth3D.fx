@@ -43,13 +43,6 @@ uniform int Depth <
 	ui_tooltip = "Determines the amount of Image Warping and Separation between both eyes. You can Override this setting.";
 > = 15;
 
-uniform float Convergence <
-	ui_type = "drag";
-	ui_min = -0.250; ui_max = 0.250;
-	ui_label = "Convergence Slider";
-	ui_tooltip = "Determines the Convergence point. Default is 0";
-> = 0;
-
 uniform int Perspective <
 	ui_type = "drag";
 	ui_min = -100; ui_max = 100;
@@ -215,7 +208,7 @@ sampler BackBufferCLAMP
 	
 texture texCL  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA32F;}; 
 texture texCR  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA32F;}; 
-texture texCC  { Width = BUFFER_WIDTH/2; Height = BUFFER_HEIGHT/2; Format = RGBA8;}; 
+texture texDis  { Width = BUFFER_WIDTH/2; Height = BUFFER_HEIGHT/2; Format = RGBA8;}; 
 texture texCDM  { Width = BUFFER_WIDTH/2; Height = BUFFER_HEIGHT/2; Format = RGBA8;};
 	
 sampler SamplerCLMIRROR
@@ -266,9 +259,9 @@ sampler SamplerCRCLAMP
 		AddressW = CLAMP;
 	};
 	
-sampler SamplerCC
+sampler SamplerDis
 	{
-		Texture = texCC;
+		Texture = texDis;
 		AddressU = CLAMP;
 		AddressV = CLAMP;
 		AddressW = CLAMP;
@@ -282,12 +275,12 @@ sampler SamplerCDM
 		AddressW = CLAMP;
 	};
 	
-float4 MouseCuror(float4 pos : SV_Position, float2 texcoord : TEXCOORD) : SV_Target
+float4 MouseCuror(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Target
 {
 	float4 Mpointer; 
 	if(mouse)
 	{
-	Mpointer = all(abs(Mousecoords - pos.xy) < Cross_Cusor_Size) * (1 - all(abs(Mousecoords - pos.xy) > Cross_Cusor_Size/(Cross_Cusor_Size/2))) ? float4(Cross_Cusor_Color, 1.0) : tex2D(BackBuffer, texcoord);//cross
+	Mpointer = all(abs(Mousecoords - position.xy) < Cross_Cusor_Size) * (1 - all(abs(Mousecoords - position.xy) > Cross_Cusor_Size/(Cross_Cusor_Size/2))) ? float4(Cross_Cusor_Color, 1.0) : tex2D(BackBuffer, texcoord);//cross
 	}
 	else
 	{
@@ -297,7 +290,7 @@ float4 MouseCuror(float4 pos : SV_Position, float2 texcoord : TEXCOORD) : SV_Tar
 }
 
 //Depth Map Information	
-float4 SbSdepth(float4 pos : SV_Position, float2 texcoord : TEXCOORD0) : SV_Target
+float4 SbSdepth(float4 position : SV_Position, float2 texcoord : TEXCOORD0) : SV_Target
 {
 
 	 float4 color = 0;
@@ -991,17 +984,18 @@ float4 SbSdepth(float4 pos : SV_Position, float2 texcoord : TEXCOORD0) : SV_Targ
 
 }
 	
-float3 DisocclusionMask(float2 texcoord : TEXCOORD0)
+float4 DisocclusionMask(float4 position : SV_Position, float2 texcoord : TEXCOORD0) : SV_Target
 {
 	float4 color;
 	float2 dir;
 	float B;
-	float Con = 8;
+	float Con = 10;
 	
 	if(Disocclusion_Type > 0 && Disocclusion_Power > 0) 
 	{	
-	const float weight[8] = 
-	{   
+	const float weight[10] = 
+	{ 
+	-0.08,
 	-0.05,  
 	-0.03,  
 	-0.02,  
@@ -1009,7 +1003,8 @@ float3 DisocclusionMask(float2 texcoord : TEXCOORD0)
 	0.01,  
 	0.02,  
 	0.03,  
-	0.05
+	0.05,
+	0.08
 	};
 	
 	if(Disocclusion_Type == 1)
@@ -1027,7 +1022,7 @@ float3 DisocclusionMask(float2 texcoord : TEXCOORD0)
 	dir = normalize( dir ); 
 	 
 	[loop]
-	for (int i = -0; i < 7; i++)
+	for (int i = 0; i < 10; i++)
 	{
 	color += tex2D(SamplerCDM,texcoord + dir * weight[i] * B)/Con;
 	}
@@ -1038,23 +1033,22 @@ float3 DisocclusionMask(float2 texcoord : TEXCOORD0)
 	color = tex2D(SamplerCDM,texcoord.xy);
 	}
 
-	return color.r;
+	return color;
 } 
   
 ////////////////////////////////////////////////Left/Right Eye////////////////////////////////////////////////////////
-void PS_renderLR(in float4 pos : SV_Position, in float2 texcoord : TEXCOORD0, out float4 color : SV_Target0 , out float4 colorT: SV_Target1)
+void PS_renderLR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 color : SV_Target0 , out float4 colorT: SV_Target1)
 {	
-	const float samples[4] = {0.25, 0.50, 0.75, 1.0};
+	const float samples[4] = {0.50, 0.66, 1.0};
 	float DepthL = 1.0, DepthR = 1.0;
-	float C = Convergence;
 	float D = Depth;
 	float2 uv = 0;
 	[loop]
-	for (int j = 0; j <= 3; ++j) 
+	for (int j = 0; j < 3; ++j) 
 	{	
 			uv.x = samples[j] * D;
-			DepthL =  min(DepthL,DisocclusionMask(float2(texcoord.x+uv.x*pix.x, texcoord.y)).r)/1-C;
-			DepthR =  min(DepthR,DisocclusionMask(float2(texcoord.x-uv.x*pix.x, texcoord.y)).r)/1-C;
+			DepthL =  min(DepthL,tex2D(SamplerDis,float2(texcoord.x+uv.x*pix.x, texcoord.y)).r);
+			DepthR =  min(DepthR,tex2D(SamplerDis,float2(texcoord.x-uv.x*pix.x, texcoord.y)).r);
 	}
 		if(!Eye_Swap)
 		{	
@@ -1094,7 +1088,7 @@ void PS_renderLR(in float4 pos : SV_Position, in float2 texcoord : TEXCOORD0, ou
 		}
 }
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-void PS0(float4 pos : SV_Position, float2 texcoord : TEXCOORD0, out float4 color : SV_Target)
+void PS0(float4 position : SV_Position, float2 texcoord : TEXCOORD0, out float4 color : SV_Target)
 {
 	if(!Depth_Map_View)
 	{
@@ -1224,6 +1218,12 @@ technique SuperDepth3D
 			VertexShader = PostProcessVS;
 			PixelShader = SbSdepth;
 			RenderTarget = texCDM;
+		}
+			pass DisocclusionPass
+		{
+			VertexShader = PostProcessVS;
+			PixelShader = DisocclusionMask;
+			RenderTarget = texDis;
 		}
 			pass SinglePassStereo
 		{

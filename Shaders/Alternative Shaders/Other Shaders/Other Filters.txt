@@ -1,11 +1,12 @@
-BilateralFilter Needs some work Do not use.
+BilateralFilter In Normal Shaders Folder.
 
-MedianFilter Works in some games will be fixing this up.
+MedianFilter In Normal Shaders Folder.
 
-Temporal anti aliasing Use this with DSR or VSR for TSSAA.
-This or Use with FXAA for TXAA.
-You get the picture for TSMAA....... :P
+3D to Else To convert a Normal 3D out Put to something else.
 
-May not be the best implementation for TAA. But, It's a start.
+2D to 3D converter WIP; Do not use.
 
-2dto3d converter Needs automatic lumance adjustment. Also has a strange bug that will distortion on movment.
+Split Depth Shader.
+
+Wobble 3D Shader.
+
