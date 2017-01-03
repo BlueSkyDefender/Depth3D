@@ -43,7 +43,7 @@ uniform int Depth <
 	ui_tooltip = "Determines the amount of Image Warping and Separation between both eyes. You can Override this setting.";
 > = 15;
 
-uniform int Perspective <
+uniform float Perspective <
 	ui_type = "drag";
 	ui_min = -100; ui_max = 100;
 	ui_label = "Perspective Slider";
@@ -989,7 +989,7 @@ float4 DisocclusionMask(float4 position : SV_Position, float2 texcoord : TEXCOOR
 	float4 color;
 	float2 dir;
 	float B;
-	float Con = 10;
+	float Con = 9;
 	
 	if(Disocclusion_Type > 0 && Disocclusion_Power > 0) 
 	{	

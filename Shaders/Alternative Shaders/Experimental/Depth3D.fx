@@ -3,7 +3,7 @@
  //-----------////
 
  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
- //* Depth Map Based 3D post-process shader v1.9.0																																	*//
+ //* Depth Map Based 3D post-process shader v1.0																																	*//
  //* For Reshade 3.0																																								*//
  //* --------------------------																																						*//
  //* This work is licensed under a Creative Commons Attribution 3.0 Unported License.																								*//
@@ -43,11 +43,11 @@ uniform int Depth <
 	ui_tooltip = "Determines the amount of Image Warping and Separation between both eyes. You can Override this setting.";
 > = 25;
 
-uniform float Convergence <
+uniform float Perspective <
 	ui_type = "drag";
-	ui_min = -0.250; ui_max = 0.250;
-	ui_label = "Convergence Slider";
-	ui_tooltip = "Determines the Convergence point. Default is 0";
+	ui_min = -100; ui_max = 100;
+	ui_label = "Perspective Slider";
+	ui_tooltip = "Determines the perspective point. Default is 0";
 > = 0;
 
 uniform int Disocclusion_Type <
@@ -406,17 +406,17 @@ float4 DisocclusionMask(float4 pos : SV_Position, float2 texcoord : TEXCOORD0) :
 ////////////////////////////////////////////////Left/Right Eye////////////////////////////////////////////////////////
 void PS_renderLR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 color : SV_Target0 , out float4 colorT: SV_Target1)
 {	
-	const float samples[4] = {0.25, 0.50, 0.75, 1};
+	const float samples[4] = {0.50, 0.66, 1};
 	float DepthL = 1.0, DepthR = 1.0;
 	float C = Convergence;
 	float D = Depth;
 	float2 uv = 0;
 	[loop]
-	for (int j = 0; j <= 3; ++j) 
+	for (int j = 0; j < 3; ++j) 
 	{	
 			uv.x = samples[j] * D;
-			DepthL =  min(DepthL,tex2D(SamplerCC,float2(texcoord.x+uv.x*pix.x, texcoord.y)).r)/1-C;
-			DepthR =  min(DepthR,tex2D(SamplerCC,float2(texcoord.x-uv.x*pix.x, texcoord.y)).r)/1-C;
+			DepthL =  min(DepthL,tex2D(SamplerCC,float2(texcoord.x+uv.x*pix.x, texcoord.y)).r);
+			DepthR =  min(DepthR,tex2D(SamplerCC,float2(texcoord.x-uv.x*pix.x, texcoord.y)).r);
 	}
 		if(!Eye_Swap)
 		{	
@@ -458,7 +458,6 @@ void PS_renderLR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void PS0(float4 position : SV_Position, float2 texcoord : TEXCOORD0, out float4 color : SV_Target)
 {
-	float Perspective = 0;
 	if(!Depth_Map_View)
 	{
 		if(Stereoscopic_Mode == 0)
