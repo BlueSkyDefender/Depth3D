@@ -29,13 +29,6 @@
 
 #define Cross_Cusor_Key 66
 
-uniform float Percent_In_Front <
-	ui_type = "drag";
-	ui_min = 0.0; ui_max = 0.500;
-	ui_label = "Percent In Front";
-	ui_tooltip = "Percent In Front";
-> = 0.0;
-
 uniform int Alternate_Depth_Map <
 	ui_type = "combo";
 	ui_items = "Depth Map 0\0Depth Map 1\0Depth Map 2\0Depth Map 3\0Depth Map 4\0Depth Map 5\0Depth Map 6\0Depth Map 7\0Depth Map 8\0Depth Map 9\0Depth Map 10\0Depth Map 11\0Depth Map 12\0Depth Map 13\0Depth Map 14\0Depth Map 15\0Depth Map 16\0Depth Map 17\0Depth Map 18\0Depth Map 19\0Depth Map 20\0Depth Map 21\0Depth Map 22\0Depth Map 23\0Depth Map 24\0Depth Map 25\0Depth Map 26\0Depth Map 27\0Depth Map 28\0Depth Map 29\0Depth Map 30\0Depth Map 31\0Depth Map 32\0Depth Map 33\0";
@@ -1018,21 +1011,19 @@ void PS_renderLR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD
 			
 		if(Stereoscopic_Mode == 0)
 		{	
-			DepthL =  min(DepthL,tex2D(SamplerDM,float2((texcoord.x*2 + P)+uv.x, texcoord.y)).r);
-			DepthR =  min(DepthR,tex2D(SamplerDM,float2((texcoord.x*2-1 - P)-uv.x, texcoord.y)).r);
+			DepthL =  min(DepthL,tex2D(SamplerDiss,float2((texcoord.x*2 + P)+uv.x, texcoord.y)).r);
+			DepthR =  min(DepthR,tex2D(SamplerDiss,float2((texcoord.x*2-1 - P)-uv.x, texcoord.y)).r);
 		}
 		else if(Stereoscopic_Mode == 1)
 		{
-			DepthL =  min(DepthL,tex2D(SamplerDM,float2((texcoord.x + P)+uv.x, texcoord.y*2)).r);
-			DepthR =  min(DepthR,tex2D(SamplerDM,float2((texcoord.x - P)-uv.x, texcoord.y*2-1)).r);
+			DepthL =  min(DepthL,tex2D(SamplerDiss,float2((texcoord.x + P)+uv.x, texcoord.y*2)).r);
+			DepthR =  min(DepthR,tex2D(SamplerDiss,float2((texcoord.x - P)-uv.x, texcoord.y*2-1)).r);
 		}
 		else
 		{
-			DepthL =  min(DepthL,tex2D(SamplerDM,float2((texcoord.x + P)+uv.x, texcoord.y)).r);
-			DepthR =  min(DepthR,tex2D(SamplerDM,float2((texcoord.x - P)-uv.x, texcoord.y)).r);
+			DepthL =  min(DepthL,tex2D(SamplerDiss,float2((texcoord.x + P)+uv.x, texcoord.y)).r);
+			DepthR =  min(DepthR,tex2D(SamplerDiss,float2((texcoord.x - P)-uv.x, texcoord.y)).r);
 		}
-			DepthL =  max(Percent_In_Front,DepthL);
-			DepthR =  max(Percent_In_Front,DepthR);
 	}
 	
 	if(!Depth_Map_View)
