@@ -81,6 +81,13 @@ uniform float Adjust <
 	ui_tooltip = "Adjust DepthMap Enhancement, Dehancement occurs past one. Default is 1.0";
 > = 1.0;
 
+uniform float Forward_Scaling <
+	ui_type = "drag";
+	ui_min = 0; ui_max = 1;
+	ui_label = "Forward Scaling";
+	ui_tooltip = "Forward Scaling Adjust the Depth Map Brightness Near The Virtual Cam. Zero is Off.";
+> = 0;
+
 uniform int Weapon_Depth_Map <
 	ui_type = "combo";
 	ui_items = "Weapon Depth Map Off\0Custom Weapon Depth Map One\0Custom Weapon Depth Map Two\0Custom Weapon Depth Map Three\0Custom Weapon Depth Map Four\0WDM 1\0WDM 2\0WDM 3\0WDM 4\0WDM 5\0WDM 6\0WDM 7\0WDM 8\0WDM 9\0WDM 10\0WDM 11\0WDM 12\0WDM 13\0WDM 14\0WDM 15\0WDM 16\0WDM 17\0WDM 18\0WDM 19\0WDM 20\0WDM 21\0WDM 22\0";
@@ -925,6 +932,8 @@ float4 DepthMap(float4 position : SV_Position, float2 texcoord : TEXCOORD0) : SV
 		D = lerp(lerp(depthMFar,depthM,A),WDM%Per,NearDepth);
 		}
     }
+    
+    D = lerp(D,pow(abs(D),0.5),Forward_Scaling);
     
 	color.rgb = D.rrr;
 	
