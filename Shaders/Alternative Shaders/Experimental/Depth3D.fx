@@ -43,6 +43,13 @@ uniform int Depth <
 	ui_tooltip = "Determines the amount of Image Warping and Separation between both eyes. You can Override this setting.";
 > = 25;
 
+uniform float Forward_Scaling <
+	ui_type = "drag";
+	ui_min = 0; ui_max = 1;
+	ui_label = "Forward Scaling";
+	ui_tooltip = "Forward Scaling Adjust the Depth Map Brightness Near The Virtual Cam. Zero is Off.";
+> = 0;
+
 uniform float Perspective <
 	ui_type = "drag";
 	ui_min = -100; ui_max = 100;
@@ -152,74 +159,23 @@ sampler BackBufferCLAMP
 		AddressW = CLAMP;
 	};
 	
-texture texCL  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA32F;}; 
-texture texCR  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA32F;}; 
-texture texCC  { Width = BUFFER_WIDTH/2; Height = BUFFER_HEIGHT/2; Format = RGBA8;}; 
-texture texCDM  { Width = BUFFER_WIDTH/2; Height = BUFFER_HEIGHT/2; Format = RGBA8;};
+texture texDM  { Width = BUFFER_WIDTH/2; Height = BUFFER_HEIGHT/2; Format = RGBA32F;};
 	
-sampler SamplerCLMIRROR
+sampler SamplerDM
 	{
-		Texture = texCL;
-		AddressU = MIRROR;
-		AddressV = MIRROR;
-		AddressW = MIRROR;
-	};
-	
-sampler SamplerCLBORDER
-	{
-		Texture = texCL;
-		AddressU = BORDER;
-		AddressV = BORDER;
-		AddressW = BORDER;
-	};
-	
-sampler SamplerCLCLAMP
-	{
-		Texture = texCL;
+		Texture = texDM;
 		AddressU = CLAMP;
 		AddressV = CLAMP;
 		AddressW = CLAMP;
 	};
 
-sampler SamplerCRMIRROR
+texture texDiss  { Width = BUFFER_WIDTH/2; Height = BUFFER_HEIGHT/2; Format = RGBA32F;};
+	
+sampler SamplerDiss
 	{
-		Texture = texCR;
-		AddressU = MIRROR;
-		AddressV = MIRROR;
-		AddressW = MIRROR;
+		Texture = texDiss;
 	};
 	
-sampler SamplerCRBORDER
-	{
-		Texture = texCR;
-		AddressU = BORDER;
-		AddressV = BORDER;
-		AddressW = BORDER;
-	};
-	
-sampler SamplerCRCLAMP
-	{
-		Texture = texCR;
-		AddressU = CLAMP;
-		AddressV = CLAMP;
-		AddressW = CLAMP;
-	};
-	
-sampler SamplerCC
-	{
-		Texture = texCC;
-		AddressU = CLAMP;
-		AddressV = CLAMP;
-		AddressW = CLAMP;
-	};
-	
-sampler SamplerCDM
-	{
-		Texture = texCDM;
-		AddressU = CLAMP;
-		AddressV = CLAMP;
-		AddressW = CLAMP;
-	};
 	
 float4 MouseCuror(float4 pos : SV_Position, float2 texcoord : TEXCOORD) : SV_Target
 {
@@ -332,6 +288,8 @@ float4 SbSdepth(float4 pos : SV_Position, float2 texcoord : TEXCOORD0) : SV_Targ
 	float cDN = 0;
 	depthMFar = pow(abs((exp(depthM * log(cDF + cDN)) - cDN) / cDF),1000);	
     D = lerp(depthMFar,depthM,A);
+    
+    D = lerp(D,pow(abs(D),0.5),Forward_Scaling);
         	
     color.rgb = clamp(D.rrr,0,1);
   		
@@ -344,7 +302,7 @@ float4 DisocclusionMask(float4 pos : SV_Position, float2 texcoord : TEXCOORD0) :
 	float4 color;
 	float2 dir;
 	float B;
-	float Con = 10;
+	float Con = 9;
 	float DP = Depth;
 	float Disocclusion_Power = DP/1000;
 	float Disocclusion_Power_Plus = DP/500;
@@ -390,7 +348,7 @@ float4 DisocclusionMask(float4 pos : SV_Position, float2 texcoord : TEXCOORD0) :
 	dir = normalize( dir ); 
 	 
 	[loop]
-	for (int i = -0; i < 10; i++)
+	for (int i = 0; i < 10; i++)
 	{
 	color += tex2D(SamplerCDM,texcoord + dir * weight[i] * B)/Con;
 	}
@@ -403,133 +361,151 @@ float4 DisocclusionMask(float4 pos : SV_Position, float2 texcoord : TEXCOORD0) :
 	return color;
 } 
   
+  
 ////////////////////////////////////////////////Left/Right Eye////////////////////////////////////////////////////////
-void PS_renderLR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 color : SV_Target0 , out float4 colorT: SV_Target1)
+void PS_renderLR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 color : SV_Target0)
 {	
-	const float samples[4] = {0.50, 0.66, 1};
+	const float samples[4] = {0.50, 0.66, 1.0};
 	float DepthL = 1.0, DepthR = 1.0;
-	float C = Convergence;
-	float D = Depth;
 	float2 uv = 0;
+	float D;
+	float P;
+	
+	if(!Eye_Swap)
+		{	
+			P = Perspective * pix.x;
+			D = Depth * pix.x;
+		}
+		else
+		{
+			P = -Perspective * pix.x;
+			D = -Depth * pix.x;
+		}
+	
 	[loop]
 	for (int j = 0; j < 3; ++j) 
 	{	
 			uv.x = samples[j] * D;
-			DepthL =  min(DepthL,tex2D(SamplerCC,float2(texcoord.x+uv.x*pix.x, texcoord.y)).r);
-			DepthR =  min(DepthR,tex2D(SamplerCC,float2(texcoord.x-uv.x*pix.x, texcoord.y)).r);
-	}
-		if(!Eye_Swap)
-		{	
-			if(Custom_Sidebars == 0)
-			{
-			color = tex2D(BackBufferMIRROR, float2(texcoord.xy+float2((DepthL*D),0)*pix.xy));
-			colorT = tex2D(BackBufferMIRROR, float2(texcoord.xy-float2((DepthR*D),0)*pix.xy));
-			}
-			else if(Custom_Sidebars == 1)
-			{
-			color = tex2D(BackBufferBORDER, float2(texcoord.xy+float2((DepthL*D),0)*pix.xy));
-			colorT = tex2D(BackBufferBORDER, float2(texcoord.xy-float2((DepthR*D),0)*pix.xy));
-			}
-			else
-			{
-			color = tex2D(BackBufferCLAMP, float2(texcoord.xy+float2((DepthL*D),0)*pix.xy));
-			colorT = tex2D(BackBufferCLAMP, float2(texcoord.xy-float2((DepthR*D),0)*pix.xy));
-			}
-		}
-		else
-		{		
-			if(Custom_Sidebars == 0)
-			{
-			colorT = tex2D(BackBufferMIRROR, float2(texcoord.xy+float2((DepthL*D),0)*pix.xy));
-			color = tex2D(BackBufferMIRROR, float2(texcoord.xy-float2((DepthR*D),0)*pix.xy));
-			}
-			else if(Custom_Sidebars == 1)
-			{
-			colorT = tex2D(BackBufferBORDER, float2(texcoord.xy+float2((DepthL*D),0)*pix.xy));
-			color = tex2D(BackBufferBORDER, float2(texcoord.xy-float2((DepthR*D),0)*pix.xy));
-			}
-			else
-			{
-			colorT = tex2D(BackBufferCLAMP, float2(texcoord.xy+float2((DepthL*D),0)*pix.xy));
-			color = tex2D(BackBufferCLAMP, float2(texcoord.xy-float2((DepthR*D),0)*pix.xy));
-			}
-		}
-}
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-void PS0(float4 position : SV_Position, float2 texcoord : TEXCOORD0, out float4 color : SV_Target)
-{
-	if(!Depth_Map_View)
-	{
+			
 		if(Stereoscopic_Mode == 0)
 		{	
-			if(Custom_Sidebars == 0)
-			{
-			color = texcoord.x < 0.5 ? tex2D(SamplerCLMIRROR,float2(texcoord.x*2 + Perspective * pix.x,texcoord.y)) : tex2D(SamplerCRMIRROR,float2(texcoord.x*2-1 - Perspective * pix.x,texcoord.y));
-			}
-			else if(Custom_Sidebars == 1)
-			{
-			color = texcoord.x < 0.5 ? tex2D(SamplerCLBORDER,float2(texcoord.x*2 + Perspective * pix.x,texcoord.y)) : tex2D(SamplerCRBORDER,float2(texcoord.x*2-1 - Perspective * pix.x,texcoord.y));
-			}
-			else
-			{
-			color = texcoord.x < 0.5 ? tex2D(SamplerCLCLAMP,float2(texcoord.x*2 + Perspective * pix.x,texcoord.y)) : tex2D(SamplerCRCLAMP,float2(texcoord.x*2-1 - Perspective * pix.x,texcoord.y));
-			}
+			DepthL =  min(DepthL,tex2D(SamplerDiss,float2((texcoord.x*2 + P)+uv.x, texcoord.y)).r);
+			DepthR =  min(DepthR,tex2D(SamplerDiss,float2((texcoord.x*2-1 - P)-uv.x, texcoord.y)).r);
 		}
 		else if(Stereoscopic_Mode == 1)
 		{
+			DepthL =  min(DepthL,tex2D(SamplerDiss,float2((texcoord.x + P)+uv.x, texcoord.y*2)).r);
+			DepthR =  min(DepthR,tex2D(SamplerDiss,float2((texcoord.x - P)-uv.x, texcoord.y*2-1)).r);
+		}
+		else
+		{
+			DepthL =  min(DepthL,tex2D(SamplerDiss,float2((texcoord.x + P)+uv.x, texcoord.y)).r);
+			DepthR =  min(DepthR,tex2D(SamplerDiss,float2((texcoord.x - P)-uv.x, texcoord.y)).r);
+		}
+	}
+	
+	if(!Depth_Map_View)
+	{
+		if(Stereoscopic_Mode == 0)
+		{
 			if(Custom_Sidebars == 0)
 			{
-			color = texcoord.y < 0.5 ? tex2D(SamplerCLMIRROR,float2(texcoord.x + Perspective * pix.x,texcoord.y*2)) : tex2D(SamplerCRMIRROR,float2(texcoord.x - Perspective * pix.x,texcoord.y*2-1));	
+			color = texcoord.x < 0.5 ? tex2D(BackBufferMIRROR, float2((texcoord.x*2 + P) + DepthL * D , texcoord.y)) : tex2D(BackBufferMIRROR, float2((texcoord.x*2-1 - P) - DepthR * D , texcoord.y));
 			}
 			else if(Custom_Sidebars == 1)
 			{
-			color = texcoord.y < 0.5 ? tex2D(SamplerCLBORDER,float2(texcoord.x + Perspective * pix.x,texcoord.y*2)) : tex2D(SamplerCRBORDER,float2(texcoord.x - Perspective * pix.x,texcoord.y*2-1));
+			color = texcoord.x < 0.5 ? tex2D(BackBufferBORDER, float2((texcoord.x*2 + P) + DepthL * D , texcoord.y)) : tex2D(BackBufferBORDER, float2((texcoord.x*2-1 - P) - DepthR * D , texcoord.y));
 			}
 			else
 			{
-			color = texcoord.y < 0.5 ? tex2D(SamplerCLCLAMP,float2(texcoord.x + Perspective * pix.x,texcoord.y*2)) : tex2D(SamplerCRCLAMP,float2(texcoord.x - Perspective * pix.x,texcoord.y*2-1));
+			color = texcoord.x < 0.5 ? tex2D(BackBufferCLAMP, float2((texcoord.x*2 + P) + DepthL * D , texcoord.y)) : tex2D(BackBufferCLAMP, float2((texcoord.x*2-1 - P) - DepthR * D , texcoord.y));
+			}
+		}
+		else if(Stereoscopic_Mode == 1)
+		{	
+			if(Custom_Sidebars == 0)
+			{
+			color = texcoord.y < 0.5 ? tex2D(BackBufferMIRROR, float2((texcoord.x+ P) + DepthL * D , texcoord.y*2)) : tex2D(BackBufferMIRROR, float2((texcoord.x - P) - DepthR * D , texcoord.y*2-1));
+			}
+			else if(Custom_Sidebars == 1)
+			{
+			color = texcoord.y < 0.5 ? tex2D(BackBufferBORDER, float2((texcoord.x + P) + DepthL * D , texcoord.y*2)) : tex2D(BackBufferBORDER, float2((texcoord.x - P) - DepthR * D , texcoord.y*2-1));
+			}
+			else
+			{
+			color = texcoord.y < 0.5 ? tex2D(BackBufferCLAMP, float2((texcoord.x + P) + DepthL * D , texcoord.y*2)) : tex2D(BackBufferCLAMP, float2((texcoord.x - P) - DepthR * D , texcoord.y*2-1));
 			}
 		}
 		else if(Stereoscopic_Mode == 2)
 		{
-			float gridL = frac(texcoord.y*(BUFFER_HEIGHT/2));
-			if(Custom_Sidebars == 0)
+			float gridL;
+			
+			if(Downscaling_Support == 0)
 			{
-			color = gridL > 0.5 ? tex2D(SamplerCLMIRROR,float2(texcoord.x + Perspective * pix.x,texcoord.y)) : tex2D(SamplerCRMIRROR,float2(texcoord.x - Perspective * pix.x,texcoord.y));
+			gridL = frac(texcoord.y*(BUFFER_HEIGHT/2));
 			}
-			else if(Custom_Sidebars == 1)
+			else if(Downscaling_Support == 1)
 			{
-			color = gridL > 0.5 ? tex2D(SamplerCLBORDER,float2(texcoord.x + Perspective * pix.x,texcoord.y)) : tex2D(SamplerCRBORDER,float2(texcoord.x - Perspective * pix.x,texcoord.y));			
+			gridL = frac(texcoord.y*(1080.0/2));
 			}
 			else
 			{
-			color = gridL > 0.5 ? tex2D(SamplerCLCLAMP,float2(texcoord.x + Perspective * pix.x,texcoord.y)) : tex2D(SamplerCRCLAMP,float2(texcoord.x - Perspective * pix.x,texcoord.y));			
+			gridL = frac(texcoord.y*(1081.0/2));
+			}
+			
+			if(Custom_Sidebars == 0)
+			{
+			color = gridL > 0.5 ? tex2D(BackBufferMIRROR, float2((texcoord.x + P) + DepthL * D , texcoord.y)) :  tex2D(BackBufferMIRROR, float2((texcoord.x - P) - DepthR * D , texcoord.y));
+			}
+			else if(Custom_Sidebars == 1)
+			{
+			color = gridL > 0.5 ? tex2D(BackBufferBORDER, float2((texcoord.x + P) + DepthL * D , texcoord.y)) : tex2D(BackBufferBORDER, float2((texcoord.x - P) - DepthR * D , texcoord.y));
+			}
+			else
+			{
+			color = gridL > 0.5 ? tex2D(BackBufferCLAMP, float2((texcoord.x + P) + DepthL * D , texcoord.y)) : tex2D(BackBufferCLAMP, float2((texcoord.x - P) - DepthR * D , texcoord.y));
 			}
 		}
 		else
 		{
-			float gridy = floor(texcoord.y*(BUFFER_HEIGHT));
-			float gridx = floor(texcoord.x*(BUFFER_WIDTH));
-			if(Custom_Sidebars == 0)
+			float gridy;
+			float gridx;
+			
+			if(Downscaling_Support == 0)
 			{
-			color = (int(gridy+gridx) & 1) < 0.5 ? tex2D(SamplerCLMIRROR,float2(texcoord.x + Perspective * pix.x,texcoord.y)) : tex2D(SamplerCRMIRROR,float2(texcoord.x - Perspective * pix.x,texcoord.y));
+			gridy = floor(texcoord.y*(BUFFER_HEIGHT));
+			gridx = floor(texcoord.x*(BUFFER_WIDTH));
 			}
-			else if(Custom_Sidebars == 1)
+			else if(Downscaling_Support == 1)
 			{
-			color = (int(gridy+gridx) & 1) < 0.5 ? tex2D(SamplerCLBORDER,float2(texcoord.x + Perspective * pix.x,texcoord.y)) : tex2D(SamplerCRBORDER,float2(texcoord.x - Perspective * pix.x,texcoord.y));
+			gridy = floor(texcoord.y*(1080.0));
+			gridx = floor(texcoord.x*(1080.0));
 			}
 			else
 			{
-			color = (int(gridy+gridx) & 1) < 0.5 ? tex2D(SamplerCLCLAMP,float2(texcoord.x + Perspective * pix.x,texcoord.y)) : tex2D(SamplerCRCLAMP,float2(texcoord.x - Perspective * pix.x,texcoord.y));
+			gridy = floor(texcoord.y*(1081.0));
+			gridx = floor(texcoord.x*(1081.0));
+			}
+			
+			if(Custom_Sidebars == 0)
+			{
+			color = (int(gridy+gridx) & 1) < 0.5 ? tex2D(BackBufferMIRROR, float2((texcoord.x + P) + DepthL * D , texcoord.y)) :  tex2D(BackBufferMIRROR, float2((texcoord.x  - P) - DepthR * D , texcoord.y));
+			}
+			else if(Custom_Sidebars == 1)
+			{
+			color = (int(gridy+gridx) & 1) < 0.5 ? tex2D(BackBufferBORDER, float2((texcoord.x + P) + DepthL * D , texcoord.y)) : tex2D(BackBufferBORDER, float2((texcoord.x  - P) - DepthR * D , texcoord.y));
+			}
+			else
+			{
+			color = (int(gridy+gridx) & 1) < 0.5 ? tex2D(BackBufferCLAMP, float2((texcoord.x + P) + DepthL * D , texcoord.y)) : tex2D(BackBufferCLAMP, float2((texcoord.x  - P) - DepthR * D , texcoord.y));
 			}
 		}
 	}
-	else
+		else
 	{
-		color = tex2D(SamplerCDM,texcoord.xy);
-	}
+		color = tex2D(SamplerDM,texcoord);
+	}	
 }
-
 
 ///////////////////////////////////////////////////////////ReShade.fxh/////////////////////////////////////////////////////////////
 
@@ -553,25 +529,18 @@ technique Depth3D
 			pass DepthMapPass
 		{
 			VertexShader = PostProcessVS;
-			PixelShader = SbSdepth;
-			RenderTarget = texCDM;
+			PixelShader = DepthMap;
+			RenderTarget = texDM;
 		}
-			pass DisocclusionPass
+			pass Disocclusion
 		{
 			VertexShader = PostProcessVS;
 			PixelShader = DisocclusionMask;
-			RenderTarget = texCC;
+			RenderTarget = texDiss;
 		}
 			pass SinglePassStereo
 		{
 			VertexShader = PostProcessVS;
 			PixelShader = PS_renderLR;
-			RenderTarget0 = texCL;
-			RenderTarget1 = texCR;
-		}
-			pass SidebySideTopandBottomLineCheckerboardPass
-		{
-			VertexShader = PostProcessVS;
-			PixelShader = PS0;	
 		}
 }

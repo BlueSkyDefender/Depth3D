@@ -50,6 +50,13 @@ uniform float Perspective <
 	ui_tooltip = "Determines the perspective point. Default is 0";
 > = 0;
 
+uniform float Depth_Limit <
+	ui_type = "drag";
+	ui_min = 0.750; ui_max = 1.0;
+	ui_label = "Depth Limit";
+	ui_tooltip = "Limit how far Depth Image Warping is done. Default is One.";
+> = 1;
+
 uniform int Disocclusion_Type <
 	ui_type = "combo";
 	ui_items = "Disocclusion Mask Off\0Normal Disocclusion Mask\0Radial Disocclusion Mask\0";
@@ -80,13 +87,6 @@ uniform float Adjust <
 	ui_label = "Adjust";
 	ui_tooltip = "Adjust DepthMap Enhancement, Dehancement occurs past one. Default is 1.0";
 > = 1.0;
-
-uniform float Forward_Scaling <
-	ui_type = "drag";
-	ui_min = 0; ui_max = 1;
-	ui_label = "Forward Scaling";
-	ui_tooltip = "Forward Scaling Adjust the Depth Map Brightness Near The Virtual Cam. Zero is Off.";
-> = 0;
 
 uniform int Weapon_Depth_Map <
 	ui_type = "combo";
@@ -933,8 +933,6 @@ float4 DepthMap(float4 position : SV_Position, float2 texcoord : TEXCOORD0) : SV
 		}
     }
     
-    D = lerp(D,pow(abs(D),0.5),Forward_Scaling);
-    
 	color.rgb = D.rrr;
 	
 	return color;	
@@ -997,7 +995,7 @@ float4 DisocclusionMask(float4 position : SV_Position, float2 texcoord : TEXCOOR
 void PS_renderLR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 color : SV_Target0)
 {	
 	const float samples[4] = {0.50, 0.66, 1.0};
-	float DepthL = 1.0, DepthR = 1.0;
+	float DepthL = Depth_Limit, DepthR = Depth_Limit;
 	float2 uv = 0;
 	float D;
 	float P;

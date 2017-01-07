@@ -111,7 +111,7 @@ Everybody's Gone to the Rapture		DM 0							Any
 ABZU					DM 21							Any
 Never Alone (Kisima Ingitchuna)		DM 33							Normal
 Lifeless Planet				DM 17							Radial
-Dead Island				DM 27							Any
+Dead Island				DM 10							Any
 Tales of Zestiria			DM 7							Any
 Mordheim: City of the Damned		DM 0							Any
 
