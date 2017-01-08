@@ -114,7 +114,8 @@ Lifeless Planet				DM 17							Radial
 Dead Island				DM 10							Any
 Tales of Zestiria			DM 7							Any
 Mordheim: City of the Damned		DM 0							Any
-Metal Gear Rising					DM 28			RB			Any
+Metal Gear Rising			DM 28						RB	Any
+
 User Submitted Depth Map Settings
 
 [Game List]				[Alternate Depth Map]	   [Depth Flip On]	[Blur Recommendations]
@@ -372,7 +373,7 @@ You can always enable SMAA in reshade for AA or play at 4k with no AA.
 
 In order to completely disable DOF:
 
-“open up graphicsprofiles.json and find the postprocessdof line and change high and ultra to 0.” \SteamLibrary\steamapps\common\Wolfenstein.The.New.Order\base\graphicsprofiles.json
+Â“open up graphicsprofiles.json and find the postprocessdof line and change high and ultra to 0.Â” \SteamLibrary\steamapps\common\Wolfenstein.The.New.Order\base\graphicsprofiles.json
 
 Should look like this;
 Ex.
