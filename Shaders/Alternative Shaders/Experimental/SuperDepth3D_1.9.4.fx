@@ -944,7 +944,7 @@ float4 DisocclusionMask(float4 position : SV_Position, float2 texcoord : TEXCOOR
 	float4 color;
 	float2 dir;
 	float B;
-	float Con = 9;
+	float Con = 10;
 	
 	if(Disocclusion_Type > 0 && Disocclusion_Power > 0) 
 	{	
@@ -965,7 +965,7 @@ float4 DisocclusionMask(float4 position : SV_Position, float2 texcoord : TEXCOOR
 	if(Disocclusion_Type == 1)
 	{
 	dir = float2(0.5,0);
-	B = Disocclusion_Power;
+	B = Disocclusion_Power*1.5;
 	}
 	
 	if(Disocclusion_Type == 2)
