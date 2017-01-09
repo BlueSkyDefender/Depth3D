@@ -989,7 +989,7 @@ float4 DisocclusionMask(float4 position : SV_Position, float2 texcoord : TEXCOOR
 	float4 color;
 	float2 dir;
 	float B;
-	float Con = 9;
+	float Con = 10;
 	
 	if(Disocclusion_Type > 0 && Disocclusion_Power > 0) 
 	{	

@@ -973,7 +973,7 @@ float4 DisocclusionMask(float4 pos : SV_Position, float2 texcoord : TEXCOORD0) :
 	dir = normalize( dir ); 
 	 
 	[loop]
-	for (int i = -0; i < 10; i++)
+	for (int i = 0; i < 10; i++)
 	{
 	color += tex2D(SamplerCDM,texcoord + dir * weight[i] * B)/Con;
 	}
@@ -990,12 +990,12 @@ float4 DisocclusionMask(float4 pos : SV_Position, float2 texcoord : TEXCOORD0) :
 ////////////////////////////////////////////////Left/Right Eye////////////////////////////////////////////////////////
 void PS_renderLR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 color : SV_Target0 , out float4 colorT: SV_Target1)
 {	
-	const float samples[4] = {0.25, 0.50, 0.75, 1};
+	const float samples[4] = {0.50, 0.66, 1};
 	float DepthL = 1.0, DepthR = 1.0;
 	float D = Depth;
 	float2 uv = 0;
 	[loop]
-	for (int j = 0; j <= 3; ++j) 
+	for (int j = 0; j < 3; ++j) 
 	{	
 			uv.x = samples[j] * D;
 			DepthL =  min(DepthL,tex2D(SamplerCC,float2(texcoord.x+uv.x*pix.x, texcoord.y)).r);
