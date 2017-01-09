@@ -302,7 +302,7 @@ float4 DisocclusionMask(float4 pos : SV_Position, float2 texcoord : TEXCOORD0) :
 	float4 color;
 	float2 dir;
 	float B;
-	float Con = 9;
+	float Con = 10;
 	float DP = Depth;
 	float Disocclusion_Power = DP/1000;
 	float Disocclusion_Power_Plus = DP/500;
