@@ -1,4 +1,4 @@
-#SuperDepth3D 1.9.3
+﻿#SuperDepth3D 1.9.4
 --------------------------------------------------------------------------------------------------------------------------------------
 -=BSD Notes=- Personal recommended settings and tips for some games.
 ______________________________________________________________________________________________________________________________________
@@ -16,6 +16,9 @@ Seems to work better then the old Skyrim. Less Bugs and runs well on my system. 
 
 *Wolfenstine: Games*
 This game you must read the instructions below so that you are able to get the depth map in game. Also I consider 30 to be max depth in this game.
+
+*Fez*
+In this game Fez, it seems to flip it's Depth Map when in the Menu some times. This can be anoying. Other then that it seem fine. With Depth set to around 25 seem to be ok with proper perspective adjustment. Also set the new depth limit option to around 0.800-0.900.
 
 ______________________________________________________________________________________________________________________________________
 
@@ -114,7 +117,11 @@ Lifeless Planet				DM 17							Radial
 Dead Island				DM 10							Any
 Tales of Zestiria			DM 7							Any
 Mordheim: City of the Damned		DM 0							Any
-Metal Gear Rising			DM 28						RB	Any
+Metal Gear Rising			DM 28					    RB		Any
+DeadPool Game				DM 6							Any
+FarCry 3				DM 18					    RB		Radial
+Stacking				DM 34							Any
+Fez					DM 35				On			Off				Read Above
 
 User Submitted Depth Map Settings
 
@@ -180,6 +187,9 @@ Highest Setting is "Good" Any thing Lower will work and thing above will not wor
 
 {Emily Wants To Play}
 Install reshade in to SteamLibrary\steamapps\common\Emily Wants To Play\Engine\Binaries\Win64
+
+{FarCry 3}
+Ingame setting MSAA 2X should be on to enable Depth Map in DX11.
 
 {Firewatch}
 Issues in game with the shader Detoggling.
