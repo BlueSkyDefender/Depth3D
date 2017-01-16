@@ -18,7 +18,7 @@ Seems to work better then the old Skyrim. Less Bugs and runs well on my system. 
 This game you must read the instructions below so that you are able to get the depth map in game. Also I consider 30 to be max depth in this game.
 
 *Fez*
-In this game Fez, it seems to flip it's Depth Map when in the Menu some times. This can be anoying. Other then that it seem fine. With Depth set to around 25 seem to be ok with proper perspective adjustment. Also set the new depth limit option to around 0.800-0.900.
+In this game Fez, it seems to flip it's Depth Map when in the Menu some times. This can be anoying. Other then that it seem fine. With Depth set to around 20 seem to be ok with proper perspective adjustment. Also set the new depth limit option to around 0.800-0.900.
 
 ______________________________________________________________________________________________________________________________________
 
@@ -114,7 +114,7 @@ Everybody's Gone to the Rapture		DM 0							Any
 ABZU					DM 21							Any
 Never Alone (Kisima Ingitchuna)		DM 33							Normal
 Lifeless Planet				DM 17							Radial
-Dead Island				DM 10							Any
+Dead Island				DM 6 or 34						Any
 Tales of Zestiria			DM 7							Any
 Mordheim: City of the Damned		DM 0							Any
 Metal Gear Rising			DM 28					    RB		Any

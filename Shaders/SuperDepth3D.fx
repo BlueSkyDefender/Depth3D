@@ -3,7 +3,7 @@
  //----------------////
 
  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
- //* Depth Map Based 3D post-process shader v1.9.3																																	*//
+ //* Depth Map Based 3D post-process shader v1.9.4																																	*//
  //* For Reshade 3.0																																								*//
  //* --------------------------																																						*//
  //* This work is licensed under a Creative Commons Attribution 3.0 Unported License.																								*//
@@ -31,7 +31,7 @@
 
 uniform int Alternate_Depth_Map <
 	ui_type = "combo";
-	ui_items = "Depth Map 0\0Depth Map 1\0Depth Map 2\0Depth Map 3\0Depth Map 4\0Depth Map 5\0Depth Map 6\0Depth Map 7\0Depth Map 8\0Depth Map 9\0Depth Map 10\0Depth Map 11\0Depth Map 12\0Depth Map 13\0Depth Map 14\0Depth Map 15\0Depth Map 16\0Depth Map 17\0Depth Map 18\0Depth Map 19\0Depth Map 20\0Depth Map 21\0Depth Map 22\0Depth Map 23\0Depth Map 24\0Depth Map 25\0Depth Map 26\0Depth Map 27\0Depth Map 28\0Depth Map 29\0Depth Map 30\0Depth Map 31\0Depth Map 32\0Depth Map 33\0";
+	ui_items = "Depth Map 0\0Depth Map 1\0Depth Map 2\0Depth Map 3\0Depth Map 4\0Depth Map 5\0Depth Map 6\0Depth Map 7\0Depth Map 8\0Depth Map 9\0Depth Map 10\0Depth Map 11\0Depth Map 12\0Depth Map 13\0Depth Map 14\0Depth Map 15\0Depth Map 16\0Depth Map 17\0Depth Map 18\0Depth Map 19\0Depth Map 20\0Depth Map 21\0Depth Map 22\0Depth Map 23\0Depth Map 24\0Depth Map 25\0Depth Map 26\0Depth Map 27\0Depth Map 28\0Depth Map 29\0Depth Map 30\0Depth Map 31\0Depth Map 32\0Depth Map 33\00Depth Map 34\0Depth Map 35\0";
 	ui_label = "Alternate Depth Map";
 	ui_tooltip = "Alternate Depth Map for different Games. Read the ReadMeDepth3d.txt, for setting. Each game May and can use a diffrent Alternet Depth Map.";
 > = 0;
@@ -49,6 +49,13 @@ uniform float Perspective <
 	ui_label = "Perspective Slider";
 	ui_tooltip = "Determines the perspective point. Default is 0";
 > = 0;
+
+uniform float Depth_Limit <
+	ui_type = "drag";
+	ui_min = 0.750; ui_max = 1.0;
+	ui_label = "Depth Limit";
+	ui_tooltip = "Limit how far Depth Image Warping is done. Default is One.";
+> = 1.0;
 
 uniform int Disocclusion_Type <
 	ui_type = "combo";
@@ -206,73 +213,21 @@ sampler BackBufferCLAMP
 		AddressW = CLAMP;
 	};
 	
-texture texCL  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA32F;}; 
-texture texCR  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA32F;}; 
-texture texDis  { Width = BUFFER_WIDTH/2; Height = BUFFER_HEIGHT/2; Format = RGBA8;}; 
-texture texCDM  { Width = BUFFER_WIDTH/2; Height = BUFFER_HEIGHT/2; Format = RGBA8;};
+texture texDM  { Width = BUFFER_WIDTH/2; Height = BUFFER_HEIGHT/2; Format = RGBA32F;};
 	
-sampler SamplerCLMIRROR
+sampler SamplerDM
 	{
-		Texture = texCL;
-		AddressU = MIRROR;
-		AddressV = MIRROR;
-		AddressW = MIRROR;
-	};
-	
-sampler SamplerCLBORDER
-	{
-		Texture = texCL;
-		AddressU = BORDER;
-		AddressV = BORDER;
-		AddressW = BORDER;
-	};
-	
-sampler SamplerCLCLAMP
-	{
-		Texture = texCL;
+		Texture = texDM;
 		AddressU = CLAMP;
 		AddressV = CLAMP;
 		AddressW = CLAMP;
 	};
 
-sampler SamplerCRMIRROR
-	{
-		Texture = texCR;
-		AddressU = MIRROR;
-		AddressV = MIRROR;
-		AddressW = MIRROR;
-	};
+texture texDiss  { Width = BUFFER_WIDTH/2; Height = BUFFER_HEIGHT/2; Format = RGBA32F;};
 	
-sampler SamplerCRBORDER
+sampler SamplerDiss
 	{
-		Texture = texCR;
-		AddressU = BORDER;
-		AddressV = BORDER;
-		AddressW = BORDER;
-	};
-	
-sampler SamplerCRCLAMP
-	{
-		Texture = texCR;
-		AddressU = CLAMP;
-		AddressV = CLAMP;
-		AddressW = CLAMP;
-	};
-	
-sampler SamplerDis
-	{
-		Texture = texDis;
-		AddressU = CLAMP;
-		AddressV = CLAMP;
-		AddressW = CLAMP;
-	};
-	
-sampler SamplerCDM
-	{
-		Texture = texCDM;
-		AddressU = CLAMP;
-		AddressV = CLAMP;
-		AddressW = CLAMP;
+		Texture = texDiss;
 	};
 	
 float4 MouseCuror(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Target
@@ -290,7 +245,7 @@ float4 MouseCuror(float4 position : SV_Position, float2 texcoord : TEXCOORD) : S
 }
 
 //Depth Map Information	
-float4 SbSdepth(float4 position : SV_Position, float2 texcoord : TEXCOORD0) : SV_Target
+float4 DepthMap(float4 position : SV_Position, float2 texcoord : TEXCOORD0) : SV_Target
 {
 
 	 float4 color = 0;
@@ -573,6 +528,22 @@ float4 SbSdepth(float4 position : SV_Position, float2 texcoord : TEXCOORD0) : SV
 		float cF = 112.5;
 		float cN = 1.995;
 		depthM = 1 - log(pow(abs(cN-depthM),cF));
+		}
+		
+		//Stacking
+		if (Alternate_Depth_Map == 34)
+		{
+		float cF = 15;
+		float cN = 0;
+		depthM =  (exp(pow(depthM, depthM + cF / pow(depthM, cN) - 1 * (pow((depthM), cN)))) - 1) / (exp(depthM) - 1);
+		}
+		
+		//Fez
+		if (Alternate_Depth_Map == 35)
+		{
+		float cF = 25.0;
+		float cN = 1.5125;
+		depthM = clamp(1 - log(pow(abs(cN-depthM),cF)),0,1);
 		}
 		
 	}
@@ -1010,7 +981,7 @@ float4 DisocclusionMask(float4 position : SV_Position, float2 texcoord : TEXCOOR
 	if(Disocclusion_Type == 1)
 	{
 	dir = float2(0.5,0);
-	B = Disocclusion_Power;
+	B = Disocclusion_Power*1.5;
 	}
 	
 	if(Disocclusion_Type == 2)
@@ -1024,102 +995,90 @@ float4 DisocclusionMask(float4 position : SV_Position, float2 texcoord : TEXCOOR
 	[loop]
 	for (int i = 0; i < 10; i++)
 	{
-	color += tex2D(SamplerCDM,texcoord + dir * weight[i] * B)/Con;
+	color += tex2D(SamplerDM, texcoord + dir * weight[i] * B)/Con;
 	}
 	
 	}
 	else
 	{
-	color = tex2D(SamplerCDM,texcoord.xy);
+	color = tex2D(SamplerDM, texcoord);
 	}
-
+	
 	return color;
 } 
   
 ////////////////////////////////////////////////Left/Right Eye////////////////////////////////////////////////////////
-void PS_renderLR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 color : SV_Target0 , out float4 colorT: SV_Target1)
+void PS_renderLR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 color : SV_Target0)
 {	
-	const float samples[4] = {0.50, 0.66, 1.0};
-	float DepthL = 1.0, DepthR = 1.0;
-	float D = Depth;
+	const float samples[3] = {0.50, 0.66, 1.0};
+	float DepthL = Depth_Limit, DepthR = Depth_Limit;
 	float2 uv = 0;
+	float D;
+	float P;
+	
+	if(!Eye_Swap)
+		{	
+			P = Perspective * pix.x;
+			D = Depth * pix.x;
+		}
+		else
+		{
+			P = -Perspective * pix.x;
+			D = -Depth * pix.x;
+		}
+	
 	[loop]
 	for (int j = 0; j < 3; ++j) 
 	{	
 			uv.x = samples[j] * D;
-			DepthL =  min(DepthL,tex2D(SamplerDis,float2(texcoord.x+uv.x*pix.x, texcoord.y)).r);
-			DepthR =  min(DepthR,tex2D(SamplerDis,float2(texcoord.x-uv.x*pix.x, texcoord.y)).r);
-	}
-		if(!Eye_Swap)
-		{	
-			if(Custom_Sidebars == 0)
-			{
-			color = tex2D(BackBufferMIRROR, float2(texcoord.xy+float2((DepthL*D),0)*pix.xy));
-			colorT = tex2D(BackBufferMIRROR, float2(texcoord.xy-float2((DepthR*D),0)*pix.xy));
-			}
-			else if(Custom_Sidebars == 1)
-			{
-			color = tex2D(BackBufferBORDER, float2(texcoord.xy+float2((DepthL*D),0)*pix.xy));
-			colorT = tex2D(BackBufferBORDER, float2(texcoord.xy-float2((DepthR*D),0)*pix.xy));
-			}
-			else
-			{
-			color = tex2D(BackBufferCLAMP, float2(texcoord.xy+float2((DepthL*D),0)*pix.xy));
-			colorT = tex2D(BackBufferCLAMP, float2(texcoord.xy-float2((DepthR*D),0)*pix.xy));
-			}
-		}
-		else
-		{		
-			if(Custom_Sidebars == 0)
-			{
-			colorT = tex2D(BackBufferMIRROR, float2(texcoord.xy+float2((DepthL*D),0)*pix.xy));
-			color = tex2D(BackBufferMIRROR, float2(texcoord.xy-float2((DepthR*D),0)*pix.xy));
-			}
-			else if(Custom_Sidebars == 1)
-			{
-			colorT = tex2D(BackBufferBORDER, float2(texcoord.xy+float2((DepthL*D),0)*pix.xy));
-			color = tex2D(BackBufferBORDER, float2(texcoord.xy-float2((DepthR*D),0)*pix.xy));
-			}
-			else
-			{
-			colorT = tex2D(BackBufferCLAMP, float2(texcoord.xy+float2((DepthL*D),0)*pix.xy));
-			color = tex2D(BackBufferCLAMP, float2(texcoord.xy-float2((DepthR*D),0)*pix.xy));
-			}
-		}
-}
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-void PS0(float4 position : SV_Position, float2 texcoord : TEXCOORD0, out float4 color : SV_Target)
-{
-	if(!Depth_Map_View)
-	{
+			
 		if(Stereoscopic_Mode == 0)
 		{	
-			if(Custom_Sidebars == 0)
-			{
-			color = texcoord.x < 0.5 ? tex2D(SamplerCLMIRROR,float2(texcoord.x*2 + Perspective * pix.x,texcoord.y)) : tex2D(SamplerCRMIRROR,float2(texcoord.x*2-1 - Perspective * pix.x,texcoord.y));
-			}
-			else if(Custom_Sidebars == 1)
-			{
-			color = texcoord.x < 0.5 ? tex2D(SamplerCLBORDER,float2(texcoord.x*2 + Perspective * pix.x,texcoord.y)) : tex2D(SamplerCRBORDER,float2(texcoord.x*2-1 - Perspective * pix.x,texcoord.y));
-			}
-			else
-			{
-			color = texcoord.x < 0.5 ? tex2D(SamplerCLCLAMP,float2(texcoord.x*2 + Perspective * pix.x,texcoord.y)) : tex2D(SamplerCRCLAMP,float2(texcoord.x*2-1 - Perspective * pix.x,texcoord.y));
-			}	
+			DepthL =  min(DepthL,tex2D(SamplerDiss,float2((texcoord.x*2 + P)+uv.x, texcoord.y)).r);
+			DepthR =  min(DepthR,tex2D(SamplerDiss,float2((texcoord.x*2-1 - P)-uv.x, texcoord.y)).r);
 		}
 		else if(Stereoscopic_Mode == 1)
 		{
+			DepthL =  min(DepthL,tex2D(SamplerDiss,float2((texcoord.x + P)+uv.x, texcoord.y*2)).r);
+			DepthR =  min(DepthR,tex2D(SamplerDiss,float2((texcoord.x - P)-uv.x, texcoord.y*2-1)).r);
+		}
+		else
+		{
+			DepthL =  min(DepthL,tex2D(SamplerDiss,float2((texcoord.x + P)+uv.x, texcoord.y)).r);
+			DepthR =  min(DepthR,tex2D(SamplerDiss,float2((texcoord.x - P)-uv.x, texcoord.y)).r);
+		}
+	}
+	
+	if(!Depth_Map_View)
+	{
+		if(Stereoscopic_Mode == 0)
+		{
 			if(Custom_Sidebars == 0)
 			{
-			color = texcoord.y < 0.5 ? tex2D(SamplerCLMIRROR,float2(texcoord.x + Perspective * pix.x,texcoord.y*2)) : tex2D(SamplerCRMIRROR,float2(texcoord.x - Perspective * pix.x,texcoord.y*2-1));
+			color = texcoord.x < 0.5 ? tex2D(BackBufferMIRROR, float2((texcoord.x*2 + P) + DepthL * D , texcoord.y)) : tex2D(BackBufferMIRROR, float2((texcoord.x*2-1 - P) - DepthR * D , texcoord.y));
 			}
 			else if(Custom_Sidebars == 1)
 			{
-			color = texcoord.y < 0.5 ? tex2D(SamplerCLBORDER,float2(texcoord.x + Perspective * pix.x,texcoord.y*2)) : tex2D(SamplerCRBORDER,float2(texcoord.x - Perspective * pix.x,texcoord.y*2-1));	
+			color = texcoord.x < 0.5 ? tex2D(BackBufferBORDER, float2((texcoord.x*2 + P) + DepthL * D , texcoord.y)) : tex2D(BackBufferBORDER, float2((texcoord.x*2-1 - P) - DepthR * D , texcoord.y));
 			}
 			else
 			{
-			color = texcoord.y < 0.5 ? tex2D(SamplerCLCLAMP,float2(texcoord.x + Perspective * pix.x,texcoord.y*2)) : tex2D(SamplerCRCLAMP,float2(texcoord.x - Perspective * pix.x,texcoord.y*2-1));	
+			color = texcoord.x < 0.5 ? tex2D(BackBufferCLAMP, float2((texcoord.x*2 + P) + DepthL * D , texcoord.y)) : tex2D(BackBufferCLAMP, float2((texcoord.x*2-1 - P) - DepthR * D , texcoord.y));
+			}
+		}
+		else if(Stereoscopic_Mode == 1)
+		{	
+			if(Custom_Sidebars == 0)
+			{
+			color = texcoord.y < 0.5 ? tex2D(BackBufferMIRROR, float2((texcoord.x+ P) + DepthL * D , texcoord.y*2)) : tex2D(BackBufferMIRROR, float2((texcoord.x - P) - DepthR * D , texcoord.y*2-1));
+			}
+			else if(Custom_Sidebars == 1)
+			{
+			color = texcoord.y < 0.5 ? tex2D(BackBufferBORDER, float2((texcoord.x + P) + DepthL * D , texcoord.y*2)) : tex2D(BackBufferBORDER, float2((texcoord.x - P) - DepthR * D , texcoord.y*2-1));
+			}
+			else
+			{
+			color = texcoord.y < 0.5 ? tex2D(BackBufferCLAMP, float2((texcoord.x + P) + DepthL * D , texcoord.y*2)) : tex2D(BackBufferCLAMP, float2((texcoord.x - P) - DepthR * D , texcoord.y*2-1));
 			}
 		}
 		else if(Stereoscopic_Mode == 2)
@@ -1141,15 +1100,15 @@ void PS0(float4 position : SV_Position, float2 texcoord : TEXCOORD0, out float4 
 			
 			if(Custom_Sidebars == 0)
 			{
-			color = gridL > 0.5 ? tex2D(SamplerCLMIRROR,float2(texcoord.x + Perspective * pix.x,texcoord.y)) : tex2D(SamplerCRMIRROR,float2(texcoord.x - Perspective * pix.x,texcoord.y));
+			color = gridL > 0.5 ? tex2D(BackBufferMIRROR, float2((texcoord.x + P) + DepthL * D , texcoord.y)) :  tex2D(BackBufferMIRROR, float2((texcoord.x - P) - DepthR * D , texcoord.y));
 			}
 			else if(Custom_Sidebars == 1)
 			{
-			color = gridL > 0.5 ? tex2D(SamplerCLBORDER,float2(texcoord.x + Perspective * pix.x,texcoord.y)) : tex2D(SamplerCRBORDER,float2(texcoord.x - Perspective * pix.x,texcoord.y));
+			color = gridL > 0.5 ? tex2D(BackBufferBORDER, float2((texcoord.x + P) + DepthL * D , texcoord.y)) : tex2D(BackBufferBORDER, float2((texcoord.x - P) - DepthR * D , texcoord.y));
 			}
 			else
 			{
-			color = gridL > 0.5 ? tex2D(SamplerCLCLAMP,float2(texcoord.x + Perspective * pix.x,texcoord.y)) : tex2D(SamplerCRCLAMP,float2(texcoord.x - Perspective * pix.x,texcoord.y));
+			color = gridL > 0.5 ? tex2D(BackBufferCLAMP, float2((texcoord.x + P) + DepthL * D , texcoord.y)) : tex2D(BackBufferCLAMP, float2((texcoord.x - P) - DepthR * D , texcoord.y));
 			}
 		}
 		else
@@ -1175,24 +1134,23 @@ void PS0(float4 position : SV_Position, float2 texcoord : TEXCOORD0, out float4 
 			
 			if(Custom_Sidebars == 0)
 			{
-			color = (int(gridy+gridx) & 1) < 0.5 ? tex2D(SamplerCLMIRROR,float2(texcoord.x + Perspective * pix.x,texcoord.y)) : tex2D(SamplerCRMIRROR,float2(texcoord.x - Perspective * pix.x,texcoord.y));
+			color = (int(gridy+gridx) & 1) < 0.5 ? tex2D(BackBufferMIRROR, float2((texcoord.x + P) + DepthL * D , texcoord.y)) :  tex2D(BackBufferMIRROR, float2((texcoord.x  - P) - DepthR * D , texcoord.y));
 			}
 			else if(Custom_Sidebars == 1)
 			{
-			color = (int(gridy+gridx) & 1) < 0.5 ? tex2D(SamplerCLBORDER,float2(texcoord.x + Perspective * pix.x,texcoord.y)) : tex2D(SamplerCRBORDER,float2(texcoord.x - Perspective * pix.x,texcoord.y));
+			color = (int(gridy+gridx) & 1) < 0.5 ? tex2D(BackBufferBORDER, float2((texcoord.x + P) + DepthL * D , texcoord.y)) : tex2D(BackBufferBORDER, float2((texcoord.x  - P) - DepthR * D , texcoord.y));
 			}
 			else
 			{
-			color = (int(gridy+gridx) & 1) < 0.5 ? tex2D(SamplerCLCLAMP,float2(texcoord.x + Perspective * pix.x,texcoord.y)) : tex2D(SamplerCRCLAMP,float2(texcoord.x - Perspective * pix.x,texcoord.y));
+			color = (int(gridy+gridx) & 1) < 0.5 ? tex2D(BackBufferCLAMP, float2((texcoord.x + P) + DepthL * D , texcoord.y)) : tex2D(BackBufferCLAMP, float2((texcoord.x  - P) - DepthR * D , texcoord.y));
 			}
 		}
 	}
-	else
+		else
 	{
-		color = tex2D(SamplerCDM,texcoord.xy);
-	}
+		color = tex2D(SamplerDM,texcoord);
+	}	
 }
-
 
 ///////////////////////////////////////////////////////////ReShade.fxh/////////////////////////////////////////////////////////////
 
@@ -1216,25 +1174,18 @@ technique SuperDepth3D
 			pass DepthMapPass
 		{
 			VertexShader = PostProcessVS;
-			PixelShader = SbSdepth;
-			RenderTarget = texCDM;
+			PixelShader = DepthMap;
+			RenderTarget = texDM;
 		}
-			pass DisocclusionPass
+			pass Disocclusion
 		{
 			VertexShader = PostProcessVS;
 			PixelShader = DisocclusionMask;
-			RenderTarget = texDis;
+			RenderTarget = texDiss;
 		}
 			pass SinglePassStereo
 		{
 			VertexShader = PostProcessVS;
 			PixelShader = PS_renderLR;
-			RenderTarget0 = texCL;
-			RenderTarget1 = texCR;
-		}
-			pass SidebySideTopandBottomLineCheckerboardPass
-		{
-			VertexShader = PostProcessVS;
-			PixelShader = PS0;	
 		}
 }

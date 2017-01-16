@@ -102,14 +102,14 @@ uniform float2 Near_Far <
 
 uniform int Wobble_Speed <
 	ui_type = "combo";
-	ui_items = "Speed---\0Speed--\0Speed-\0Normal Speed\0Speed+\0Speed++\0Speed+++\0Off\0";
+	ui_items = "Speed-----\0Speed----\0Speed---\0Speed--\0Speed-\0Normal Speed\0Speed+\0Speed++\0Speed+++\0Speed++++\0Speed+++++\0Off\0";
 	ui_label = "Wobble Speed";
 	ui_tooltip = "Set the speed of the Wobble 3D Effect.";
-> = 3;
+> = 5;
 
 uniform int Wobble_Mode <
 	ui_type = "combo";
-	ui_items = "Wobble Mode X Rotation\0Wobble Mode X Heartbeat\0Wobble Mode X L/R\0";
+	ui_items = "Wobble Mode X Rotation\0Wobble Mode X Heartbeat\0Wobble Mode X L/R\0Wobble Mode X Lerp\0";
 	ui_label = "Wobble Transition Effect";
 	ui_tooltip = "Change the Transition of the Wobble 3D Effect.";
 > = 0;
@@ -870,6 +870,10 @@ uniform float2 WobbleSpeedThree < source = "pingpong"; min = 0; max = 1; step = 
 uniform float2 WobbleSpeedFour < source = "pingpong"; min = 0; max = 1; step = 6.25; >;
 uniform float2 WobbleSpeedFive < source = "pingpong"; min = 0; max = 1; step = 7.5; >;
 uniform float2 WobbleSpeedSix < source = "pingpong"; min = 0; max = 1; step = 10; >;
+uniform float2 WobbleSpeedSeven < source = "pingpong"; min = 0; max = 1; step = 15; >;
+uniform float2 WobbleSpeedEight < source = "pingpong"; min = 0; max = 1; step = 20; >;
+uniform float2 WobbleSpeedNine< source = "pingpong"; min = 0; max = 1; step = 25; >;
+uniform float2 WobbleSpeedTen < source = "pingpong"; min = 0; max = 1; step = 30; >;
 ////////////////////////////////////////////////Left/Right Eye////////////////////////////////////////////////////////
 void PS_renderLR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 color : SV_Target)
 {	
@@ -907,6 +911,22 @@ void PS_renderLR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD
 		else if (Wobble_Speed == 6)
 		{
 		w = WobbleSpeedSix.x;
+		}
+		else if (Wobble_Speed == 7)
+		{
+		w = WobbleSpeedSeven.x;
+		}
+		else if (Wobble_Speed == 8)
+		{
+		w = WobbleSpeedEight.x;
+		}
+		else if (Wobble_Speed == 9)
+		{
+		w = WobbleSpeedNine.x;
+		}
+		else if (Wobble_Speed == 10)
+		{
+		w = WobbleSpeedTen.x;
 		}
 		else
 		{
@@ -997,7 +1017,7 @@ if(!Depth_Map_View)
 				color = tex2D(BackBuffer, texcoord);
 				}
 			}
-			else
+			else if(Wobble_Mode == 2)
 			{
 				if (w < 0.50)
 				{
@@ -1033,6 +1053,21 @@ if(!Depth_Map_View)
 				{
 				color = tex2D(BackBuffer, texcoord);
 				}
+			}
+			else
+			{
+			if(Custom_Sidebars == 0)
+					{
+					color = lerp(tex2D(BackBufferMIRROR,float2((texcoord.x - P) - DepthR * D,texcoord.y)),tex2D(BackBufferMIRROR,float2((texcoord.x + P) + DepthL * D,texcoord.y)), w);
+					}
+					else if(Custom_Sidebars == 1)
+					{
+					color = lerp(tex2D(BackBufferBORDER,float2((texcoord.x - P) - DepthR * D,texcoord.y)),tex2D(BackBufferBORDER,float2((texcoord.x + P) + DepthL * D,texcoord.y)),w);
+					}
+					else
+					{
+					color = lerp(tex2D(BackBufferCLAMP,float2((texcoord.x - P) - DepthR * D,texcoord.y)),tex2D(BackBufferCLAMP,float2((texcoord.x + P) + DepthL * D,texcoord.y)),w);
+					}
 			}
 			
 	}

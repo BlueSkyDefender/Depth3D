@@ -3,7 +3,7 @@
  //-------------------////
 
  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
- //* Depth Map Based 3D post-process shader v1.9.3																																	*//
+ //* Depth Map Based 3D post-process shader v1.9.4																																	*//
  //* For Reshade 3.0																																								*//
  //* --------------------------																																						*//
  //* This work is licensed under a Creative Commons Attribution 3.0 Unported License.																								*//
@@ -31,7 +31,7 @@
 
 uniform int Alternate_Depth_Map <
 	ui_type = "combo";
-	ui_items = "Depth Map 0\0Depth Map 1\0Depth Map 2\0Depth Map 3\0Depth Map 4\0Depth Map 5\0Depth Map 6\0Depth Map 7\0Depth Map 8\0Depth Map 9\0Depth Map 10\0Depth Map 11\0Depth Map 12\0Depth Map 13\0Depth Map 14\0Depth Map 15\0Depth Map 16\0Depth Map 17\0Depth Map 18\0Depth Map 19\0Depth Map 20\0Depth Map 21\0Depth Map 22\0Depth Map 23\0Depth Map 24\0Depth Map 25\0Depth Map 26\0Depth Map 27\0Depth Map 28\0Depth Map 29\0Depth Map 30\0Depth Map 31\0Depth Map 32\0Depth Map 33\0";
+	ui_items = "Depth Map 0\0Depth Map 1\0Depth Map 2\0Depth Map 3\0Depth Map 4\0Depth Map 5\0Depth Map 6\0Depth Map 7\0Depth Map 8\0Depth Map 9\0Depth Map 10\0Depth Map 11\0Depth Map 12\0Depth Map 13\0Depth Map 14\0Depth Map 15\0Depth Map 16\0Depth Map 17\0Depth Map 18\0Depth Map 19\0Depth Map 20\0Depth Map 21\0Depth Map 22\0Depth Map 23\0Depth Map 24\0Depth Map 25\0Depth Map 26\0Depth Map 27\0Depth Map 28\0Depth Map 29\0Depth Map 30\0Depth Map 31\0Depth Map 32\0Depth Map 33\00Depth Map 34\0Depth Map 35\0";
 	ui_label = "Alternate Depth Map";
 	ui_tooltip = "Alternate Depth Map for different Games. Read the ReadMeDepth3d.txt, for setting. Each game May and can use a diffrent Alternet Depth Map.";
 > = 0;
@@ -43,19 +43,19 @@ uniform int Depth <
 	ui_tooltip = "Determines the amount of Image Warping and Separation between both eyes. You can Override this setting.";
 > = 25;
 
-uniform float Convergence <
-	ui_type = "drag";
-	ui_min = -0.250; ui_max = 0.250;
-	ui_label = "Convergence Slider";
-	ui_tooltip = "Determines the Convergence point. Default is 0";
-> = 0;
-
 uniform int IPD <
 	ui_type = "drag";
 	ui_min = -100; ui_max = 100;
 	ui_label = "Optical Pupillary Distance Adjust";
 	ui_tooltip = "Determines the distance between your eyes. Default is 0";
 > = 0;
+
+uniform float Depth_Limit <
+	ui_type = "drag";
+	ui_min = 0.750; ui_max = 1.0;
+	ui_label = "Depth Limit";
+	ui_tooltip = "Limit how far Depth Image Warping is done. Default is One.";
+> = 1.0;
 
 uniform bool Depth_Map_View <
 	ui_label = "Depth Map View";
@@ -346,7 +346,7 @@ float4 MouseCuror(float4 pos : SV_Position, float2 texcoord : TEXCOORD) : SV_Tar
 }
 
 //Depth Map Information	
-float4 SbSdepth(float4 position : SV_Position, float2 texcoord : TEXCOORD0) : SV_Target
+float4 DepthMap(float4 position : SV_Position, float2 texcoord : TEXCOORD0) : SV_Target
 {
 
 	 float4 color = 0;
@@ -629,6 +629,22 @@ float4 SbSdepth(float4 position : SV_Position, float2 texcoord : TEXCOORD0) : SV
 		float cF = 112.5;
 		float cN = 1.995;
 		depthM = 1 - log(pow(abs(cN-depthM),cF));
+		}
+		
+		//Stacking
+		if (Alternate_Depth_Map == 34)
+		{
+		float cF = 15;
+		float cN = 0;
+		depthM =  (exp(pow(depthM, depthM + cF / pow(depthM, cN) - 1 * (pow((depthM), cN)))) - 1) / (exp(depthM) - 1);
+		}
+		
+		//Fez
+		if (Alternate_Depth_Map == 35)
+		{
+		float cF = 25.0;
+		float cN = 1.5125;
+		depthM = clamp(1 - log(pow(abs(cN-depthM),cF)),0,1);
 		}
 		
 	}
@@ -1044,7 +1060,7 @@ float4 SbSdepth(float4 position : SV_Position, float2 texcoord : TEXCOORD0) : SV
 void PS_renderLR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 color : SV_Target0 , out float4 colorT: SV_Target1)
 {	
 	const float samples[4] = {0.25, 0.50, 0.75, 1};
-	float DepthL = 1.0, DepthR = 1.0;
+	float DepthL = Depth_Limit, DepthR = Depth_Limit;
 	float D = Depth;
 	float2 uv = 0;
 	[loop]
@@ -1285,7 +1301,7 @@ technique SuperDepth3D_HMDs
 			pass DepthMapPass
 		{
 			VertexShader = PostProcessVS;
-			PixelShader = SbSdepth;
+			PixelShader = DepthMap;
 			RenderTarget = texCDM;
 		}
 			pass SinglePassStereo

@@ -1,5 +1,5 @@
 #SuperDepth3D
-Depth Map Based 3D post-process shader v1.9.0 for Reshade 3.0
+Depth Map Based 3D post-process shader v1.9.4 for Reshade 3.0
 
 There are the Basic Depth maps you can use for your games listed and not listed. Look at this link for other game Compatibility.
 
@@ -12,7 +12,9 @@ This should work for Both AMD/Nividia GPUs.
 
 Game Compatibility
 
+* ABZU
 * Alien Isolation
+* Amnesia: Machine for Pigs
 * Amnesia: The Dark Descent
 * Among The Sleep
 * Assassin Creed Unity
@@ -23,50 +25,83 @@ Game Compatibility
 * Call of Duty: Advance Warfare
 * Call of Duty: Black Ops 2
 * Call of Duty: Ghost
+* Call of Duty: Infinite Warfare
 * Casltevania: Lord of Shadows - UE
 * Condemned: Criminal Origins
-* Deadly Premonition: The Directors's Cut
+* Cryostasis
+* DOOM 2016
+* DarkSiders Warmastred Edition
+* Dead Effect
+* Dead Island
+* Dead Rising 3
+* DeadPool Game
+* Deadly Premonition:The Directors's Cut
+* Double Dragon Neon
 * Dragon Ball Xenoverse
 * Dragons Dogma: Dark Arisen
 * DreamFall Chapters
+* Dungeon Nightmares II
 * Dying Light
+* Emily Wants To Play
+* Everybody's Gone to the Rapture
 * Fallout 4
+* FarCry 3
+* Fez
 * Firewatch
 * GTA V
+* Gone Home
 * Hard Reset
+* Just Cause 3
+* KHOLAT
+* Layers of Fear
+* Lifeless Planet
 * Lords of The Fallen
+* LuciusII
 * Magicka 2
+* Metal Gear Rising
 * Metro 2033 Redux
 * Metro Last Light Redux
 * Middle-earth: Shadow of Mordor
+* Monstrum DX11
+* Mordheim: City of the Damned
 * Naruto Shippuden UNS3 Full Blurst
+* NecroVision: Lost Company
+* Never Alone (Kisima Ingitchuna)
+* Nosferatu: The Wrath of Malachi
+* Penumbra: Black Plague
+* Phantasmal
+* Quake 2 XP
 * Quake 4
+* Quantum Break
 * Rage64
+* Requiem: Avenging Angel
+* Resident Evil 7
 * Return To Castle Wolfenstine
 * Ryse: Son of Rome
+* S.T.A.L.K.E.R:CS Complete Mod
+* S.T.A.L.K.E.R:CoP Complete Mod
+* S.T.A.L.K.E.R:SoC Complete Mod
 * Shadow warrior(2013)
-* Skyrim
-* Sleeping Dogs: DE
-* Souls Games
-* The Evil Within
-* Witcher 3
-* Warhammer: End Times - Vermintide
-* Deus Ex: Mankind Divided
-* Dead Rising 3
-* Soma
-* Penumbra: Black Plague
-* NecroVision: Lost Company
-* The Vanishing of Ethan Carter Redux
-* Cryostasis
 * Silent Hill: Homecoming
-* Monstrum DX11
-* Homefront The Revolution
-* Mirror's Edge
-* Need for Speed
-* Double Dragon Neon
+* Sleeping Dogs: DE
+* Soma
+* Souls Games
+* Stacking
+* Stay Close
+* Tales of Zestiria
+* The Elder Scrolls V: SE
+* The Elder Scrolls V: Skyrim
+* The Evil Within
+* The Legend of Korra
+* The Vanishing of Ethan Carter Redux
+* The Void
+* Through The Woods
+* Turok: Dinosaur Hunter
+* Warhammer: End Times - Vermintide
+* Witcher 3
+* Wolfenstine: The New Order
+* Wolfenstine: The Old Blood
 * Zombie Army Trilogy
-* Just Cause 3
-* DOOM (2016)
 
 Also, many more games.
 

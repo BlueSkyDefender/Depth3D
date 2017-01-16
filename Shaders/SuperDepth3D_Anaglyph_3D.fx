@@ -3,7 +3,7 @@
  //------------------------////
 
  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
- //* Depth Map Based 3D post-process shader v1.9.3 Anaglyph 3D																														*//
+ //* Depth Map Based 3D post-process shader v1.9.4 Anaglyph 3D																														*//
  //* For Reshade 3.0																																								*//
  //* --------------------------																																						*//
  //* This work is licensed under a Creative Commons Attribution 3.0 Unported License.																								*//
@@ -24,7 +24,7 @@
 
 uniform int Alternate_Depth_Map <
 	ui_type = "combo";
-	ui_items = "Depth Map 0\0Depth Map 1\0Depth Map 2\0Depth Map 3\0Depth Map 4\0Depth Map 5\0Depth Map 6\0Depth Map 7\0Depth Map 8\0Depth Map 9\0Depth Map 10\0Depth Map 11\0Depth Map 12\0Depth Map 13\0Depth Map 14\0Depth Map 15\0Depth Map 16\0Depth Map 17\0Depth Map 18\0Depth Map 19\0Depth Map 20\0Depth Map 21\0Depth Map 22\0Depth Map 23\0Depth Map 24\0Depth Map 25\0Depth Map 26\0Depth Map 27\0Depth Map 28\0Depth Map 29\0Depth Map 30\0Depth Map 31\0Depth Map 32\0Depth Map 33\0";
+	ui_items = "Depth Map 0\0Depth Map 1\0Depth Map 2\0Depth Map 3\0Depth Map 4\0Depth Map 5\0Depth Map 6\0Depth Map 7\0Depth Map 8\0Depth Map 9\0Depth Map 10\0Depth Map 11\0Depth Map 12\0Depth Map 13\0Depth Map 14\0Depth Map 15\0Depth Map 16\0Depth Map 17\0Depth Map 18\0Depth Map 19\0Depth Map 20\0Depth Map 21\0Depth Map 22\0Depth Map 23\0Depth Map 24\0Depth Map 25\0Depth Map 26\0Depth Map 27\0Depth Map 28\0Depth Map 29\0Depth Map 30\0Depth Map 31\0Depth Map 32\0Depth Map 33\00Depth Map 34\0Depth Map 35\0";
 	ui_label = "Alternate Depth Map";
 	ui_tooltip = "Alternate Depth Map for different Games. Read the ReadMeDepth3d.txt, for setting. Each game May and can use a diffrent Alternet Depth Map.";
 > = 0;
@@ -42,6 +42,13 @@ uniform float Perspective <
 	ui_label = "Perspective Slider";
 	ui_tooltip = "Determines the perspective point. Default is 0";
 > = 0;
+
+uniform float Depth_Limit <
+	ui_type = "drag";
+	ui_min = 0.750; ui_max = 1.0;
+	ui_label = "Depth Limit";
+	ui_tooltip = "Limit how far Depth Image Warping is done. Default is One.";
+> = 1.0;
 
 uniform int Disocclusion_Type <
 	ui_type = "combo";
@@ -181,59 +188,9 @@ sampler BackBufferCLAMP
 		AddressV = CLAMP;
 		AddressW = CLAMP;
 	};
-	
-texture texCL  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA32F;}; 
-texture texCR  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA32F;}; 
+
 texture texCC  { Width = BUFFER_WIDTH/2; Height = BUFFER_HEIGHT/2; Format = RGBA8;}; 
 texture texCDM  { Width = BUFFER_WIDTH/2; Height = BUFFER_HEIGHT/2; Format = RGBA8;};
-	
-sampler SamplerCLMIRROR
-	{
-		Texture = texCL;
-		AddressU = MIRROR;
-		AddressV = MIRROR;
-		AddressW = MIRROR;
-	};
-	
-sampler SamplerCLBORDER
-	{
-		Texture = texCL;
-		AddressU = BORDER;
-		AddressV = BORDER;
-		AddressW = BORDER;
-	};
-	
-sampler SamplerCLCLAMP
-	{
-		Texture = texCL;
-		AddressU = CLAMP;
-		AddressV = CLAMP;
-		AddressW = CLAMP;
-	};
-
-sampler SamplerCRMIRROR
-	{
-		Texture = texCR;
-		AddressU = MIRROR;
-		AddressV = MIRROR;
-		AddressW = MIRROR;
-	};
-	
-sampler SamplerCRBORDER
-	{
-		Texture = texCR;
-		AddressU = BORDER;
-		AddressV = BORDER;
-		AddressW = BORDER;
-	};
-	
-sampler SamplerCRCLAMP
-	{
-		Texture = texCR;
-		AddressU = CLAMP;
-		AddressV = CLAMP;
-		AddressW = CLAMP;
-	};
 	
 sampler SamplerCC
 	{
@@ -252,7 +209,7 @@ sampler SamplerCDM
 	};
 
 //Depth Map Information	
-float4 SbSdepth(float4 position : SV_Position, float2 texcoord : TEXCOORD0) : SV_Target
+float4 DepthMap(float4 position : SV_Position, float2 texcoord : TEXCOORD0) : SV_Target
 {
 
 	 float4 color = 0;
@@ -535,6 +492,22 @@ float4 SbSdepth(float4 position : SV_Position, float2 texcoord : TEXCOORD0) : SV
 		float cF = 112.5;
 		float cN = 1.995;
 		depthM = 1 - log(pow(abs(cN-depthM),cF));
+		}
+		
+		//Stacking
+		if (Alternate_Depth_Map == 34)
+		{
+		float cF = 15;
+		float cN = 0;
+		depthM =  (exp(pow(depthM, depthM + cF / pow(depthM, cN) - 1 * (pow((depthM), cN)))) - 1) / (exp(depthM) - 1);
+		}
+		
+		//Fez
+		if (Alternate_Depth_Map == 35)
+		{
+		float cF = 25.0;
+		float cN = 1.5125;
+		depthM = clamp(1 - log(pow(abs(cN-depthM),cF)),0,1);
 		}
 		
 	}
@@ -951,7 +924,7 @@ float4 DisocclusionMask(float4 pos : SV_Position, float2 texcoord : TEXCOORD0) :
 	float4 color;
 	float2 dir;
 	float B;
-	float Con = 9;
+	float Con = 10;
 	
 	if(Disocclusion_Type > 0 && Disocclusion_Power > 0 && Anaglyph_Colors != 4) 
 	{
@@ -1000,85 +973,56 @@ float4 DisocclusionMask(float4 pos : SV_Position, float2 texcoord : TEXCOORD0) :
 }  
   
 ////////////////////////////////////////////////Left/Right Eye////////////////////////////////////////////////////////
-void PS_renderLR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 color : SV_Target0 , out float4 colorT: SV_Target1)
+void PS_renderLR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 color : SV_Target)
 {	
-	float D;
-	float DepthL, DepthR;
+float D;
+float P;
+float DepthL = Depth_Limit, DepthR = Depth_Limit;
 	
-	if (Anaglyph_Colors == 4)
-			{
-			DepthL = 0.875;
-			DepthR = 0.875;
-			D = 15;
-			}
-			else
-			{
-			DepthL = 1.0;
-			DepthR = 1.0;
-			D = Depth;
-			}
+if (Anaglyph_Colors == 4)
+	{
+		DepthL = 0.875;
+		DepthR = 0.875;
+		D = Depth * pix.x;
+		P = (D * pix.x)/2;
+	}
+	else
+	{
+	if(!Eye_Swap)
+		{	
+			P = Perspective * pix.x;
+			D = Depth * pix.x;
+		}
+		else
+		{
+			P = -Perspective * pix.x;
+			D = -Depth * pix.x;
+		}
+	}
+
 			
-	
-	const float samples[3] = {0.50, 0.66, 1};
+const float samples[3] = {0.50, 0.66, 1.0};
 	float2 uv = 0;
 	[loop]
 	for (int j = 0; j < 3; ++j) 
 	{	
 			uv.x = samples[j] * D;
-			DepthL =  min(DepthL,tex2D(SamplerCC,float2(texcoord.x+uv.x*pix.x, texcoord.y)).r);
-			DepthR =  min(DepthR,tex2D(SamplerCC,float2(texcoord.x-uv.x*pix.x, texcoord.y)).r);
+			DepthL =  min(DepthL,tex2D(SamplerCC,float2((texcoord.x + P)+uv.x, texcoord.y)).r);
+			DepthR =  min(DepthR,tex2D(SamplerCC,float2((texcoord.x - P)-uv.x, texcoord.y)).r);
 	}
-		if(!Eye_Swap)
-		{	
-			if(Custom_Sidebars == 0)
-			{
-			color = tex2D(BackBufferMIRROR, float2(texcoord.xy+float2((DepthL*D),0)*pix.xy));
-			colorT = tex2D(BackBufferMIRROR, float2(texcoord.xy-float2((DepthR*D),0)*pix.xy));
-			}
-			else
-			{
-			color = tex2D(BackBufferBORDER, float2(texcoord.xy+float2((DepthL*D),0)*pix.xy));
-			colorT = tex2D(BackBufferBORDER, float2(texcoord.xy-float2((DepthR*D),0)*pix.xy));
-			}
-		}
-		else
-		{		
-			if(Custom_Sidebars == 0)
-			{
-			colorT = tex2D(BackBufferMIRROR, float2(texcoord.xy+float2((DepthL*D),0)*pix.xy));
-			color = tex2D(BackBufferMIRROR, float2(texcoord.xy-float2((DepthR*D),0)*pix.xy));
-			}
-			else
-			{
-			colorT = tex2D(BackBufferBORDER, float2(texcoord.xy+float2((DepthL*D),0)*pix.xy));
-			color = tex2D(BackBufferBORDER, float2(texcoord.xy-float2((DepthR*D),0)*pix.xy));
-			}
-		}
-}
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-void PS0(float4 position : SV_Position, float2 texcoord : TEXCOORD0, out float4 color : SV_Target)
-{
+	
 	if(!Depth_Map_View)
 	{
-	float P; 
-		if (Anaglyph_Colors == 4)
-			{
-			P = -15/2;
-			}
-			else
-			{
-			P = Perspective;
-			}
 											
-				float3 HalfLM = dot(tex2D(SamplerCLMIRROR,float2(texcoord.x + P * pix.x,texcoord.y)).rgb,float3(0.299, 0.587, 0.114));
-				float3 HalfRM = dot(tex2D(SamplerCRMIRROR,float2(texcoord.x - P * pix.x,texcoord.y)).rgb,float3(0.299, 0.587, 0.114));
-				float3 LM = lerp(HalfLM,tex2D(SamplerCLMIRROR,float2(texcoord.x + P * pix.x,texcoord.y)).rgb,Anaglyph_Desaturation);  
-				float3 RM = lerp(HalfRM,tex2D(SamplerCRMIRROR,float2(texcoord.x - P * pix.x,texcoord.y)).rgb,Anaglyph_Desaturation); 
+				float3 HalfLM = dot(tex2D(BackBufferMIRROR,float2((texcoord.x + P) + DepthL * D ,texcoord.y)).rgb,float3(0.299, 0.587, 0.114));
+				float3 HalfRM = dot(tex2D(BackBufferMIRROR,float2((texcoord.x - P) - DepthL * D ,texcoord.y)).rgb,float3(0.299, 0.587, 0.114));
+				float3 LM = lerp(HalfLM,tex2D(BackBufferMIRROR,float2((texcoord.x + P) + DepthL * D ,texcoord.y)).rgb,Anaglyph_Desaturation);  
+				float3 RM = lerp(HalfRM,tex2D(BackBufferMIRROR,float2((texcoord.x - P) - DepthL * D ,texcoord.y)).rgb,Anaglyph_Desaturation); 
 				
-				float3 HalfLB = dot(tex2D(SamplerCLBORDER,float2(texcoord.x + P * pix.x,texcoord.y)).rgb,float3(0.299, 0.587, 0.114));
-				float3 HalfRB = dot(tex2D(SamplerCRBORDER,float2(texcoord.x - P * pix.x,texcoord.y)).rgb,float3(0.299, 0.587, 0.114));
-				float3 LB = lerp(HalfLB,tex2D(SamplerCLBORDER,float2(texcoord.x + P * pix.x,texcoord.y)).rgb,Anaglyph_Desaturation);  
-				float3 RB = lerp(HalfRB,tex2D(SamplerCRBORDER,float2(texcoord.x - P * pix.x,texcoord.y)).rgb,Anaglyph_Desaturation); 
+				float3 HalfLB = dot(tex2D(BackBufferBORDER,float2((texcoord.x + P) + DepthL * D ,texcoord.y)).rgb,float3(0.299, 0.587, 0.114));
+				float3 HalfRB = dot(tex2D(BackBufferBORDER,float2((texcoord.x - P ) - DepthL * D ,texcoord.y)).rgb,float3(0.299, 0.587, 0.114));
+				float3 LB = lerp(HalfLB,tex2D(BackBufferBORDER,float2((texcoord.x + P) + DepthL * D ,texcoord.y)).rgb,Anaglyph_Desaturation);  
+				float3 RB = lerp(HalfRB,tex2D(BackBufferBORDER,float2((texcoord.x - P) - DepthL * D ,texcoord.y)).rgb,Anaglyph_Desaturation); 
 				
 				float4 C;
 				float4 CT;
@@ -1174,7 +1118,6 @@ void PS0(float4 position : SV_Position, float2 texcoord : TEXCOORD0, out float4 
 	}
 }
 
-
 ///////////////////////////////////////////////////////////ReShade.fxh/////////////////////////////////////////////////////////////
 
 // Vertex shader generating a triangle covering the entire screen
@@ -1192,7 +1135,7 @@ technique SuperDepth_Anaglyph3D
 			pass DepthMapPass
 		{
 			VertexShader = PostProcessVS;
-			PixelShader = SbSdepth;
+			PixelShader = DepthMap;
 			RenderTarget = texCDM;
 		}
 			pass DisocclusionPass
@@ -1205,12 +1148,6 @@ technique SuperDepth_Anaglyph3D
 		{
 			VertexShader = PostProcessVS;
 			PixelShader = PS_renderLR;
-			RenderTarget0 = texCL;
-			RenderTarget1 = texCR;
 		}
-			pass Anaglyph
-		{
-			VertexShader = PostProcessVS;
-			PixelShader = PS0;	
-		}
+
 }
