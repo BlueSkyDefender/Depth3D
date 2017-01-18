@@ -103,15 +103,17 @@ uniform float2 Near_Far <
 	ui_tooltip = "Adjustment for Near and Far Depth Map Precision.";
 > = float2(1,1.5);
 
-uniform bool Swap <
-	ui_label = "Swap Depth Map";
-	ui_tooltip = "Left to right Depth map change.";
-> = false;
+uniform int Content <
+	ui_type = "combo";
+	ui_items = "NoDepth\0Reserved\0Still\0CGI\0Game\0Movie\0Signage\0";
+	ui_label = "Content Type";
+	ui_tooltip = "Content Type for WOWvx.";
+> = 0;
 
 uniform bool Invert <
 	ui_label = "Invert";
 	ui_tooltip = "Invert Depth Map.";
-> = false;
+> = true;
 
 /////////////////////////////////////////////D3D Starts Here/////////////////////////////////////////////////////////////////
 
@@ -149,6 +151,13 @@ sampler SamplerCDM
 		AddressU = CLAMP;
 		AddressV = CLAMP;
 		AddressW = CLAMP;
+	};
+	
+texture WOWtex { Width=256; Height=1; Format=RGBA8; };
+
+sampler2D  SamplerWOW
+	{ 
+	Texture = WOWtex; 
 	};
 
 //Depth Map Information	
@@ -919,19 +928,194 @@ float4 DisocclusionMask(float4 position : SV_Position, float2 texcoord : TEXCOOR
 	}
 
 	return color;
-} 
-  
+}
+
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-void PS0(float4 position : SV_Position, float2 texcoord : TEXCOORD0, out float4 color : SV_Target)
+float4 PS0(float4 position : SV_Position, float2 texcoord : TEXCOORD0) : SV_Target
 {	
-	if(!Swap)
-	{
-	color = texcoord.x < 0.5 ? tex2D(BackBuffer,float2(texcoord.x*2 + Perspective * pix.x,texcoord.y)) : tex2D(SamplerDis,float2(texcoord.x*2-1 - Perspective * pix.x,texcoord.y));
-	}
+ float4 Color;	
+	//BLOCK ONE
+ 	float4 A = all(abs(float2(0.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
+	float4 B = all(abs(float2(2.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
+	float4 C = all(abs(float2(4.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
+	float4 D = all(abs(float2(6.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
+	float4 E = all(abs(float2(14.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
+	float4 F = all(abs(float2(32.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
+	float4 G = all(abs(float2(34.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
+	float4 H = all(abs(float2(36.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
+	float4 I = all(abs(float2(38.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
+	float4 J = all(abs(float2(40.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
+	float4 K = all(abs(float2(42.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
+	float4 L = all(abs(float2(44.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
+	float4 M = all(abs(float2(46.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
+	float4 N = all(abs(float2(48.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
+	float4 BlockOne = A+B+C+D+E+F+G+H+I+J+K+L+M+N;
+	
+	//NO DEPTH
+	float4 NDA = all(abs(float2(96.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
+	float4 NDB = all(abs(float2(98.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
+	float4 NDC = all(abs(float2(102.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
+	float4 NDD = all(abs(float2(108.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
+	float4 NDE = all(abs(float2(110.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
+	float4 NDF = all(abs(float2(114.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
+	float4 NDG = all(abs(float2(118.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
+	float4 NDH = all(abs(float2(124.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
+	float4 NDI = all(abs(float2(126.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
+	float4 NDJ = all(abs(float2(128.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
+	float4 NDK = all(abs(float2(138.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
+	float4 NDL = all(abs(float2(152.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
+	float4 NDM = all(abs(float2(154.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
+	float4 NoDepth = NDA+NDB+NDC+NDD+NDE+NDF+NDG+NDH+NDI+NDJ+NDK+NDL+NDM;
+
+	//RESERVED
+	float4 RA = all(abs(float2(26.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
+	float4 RB = all(abs(float2(28.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
+	float4 RC = all(abs(float2(98.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
+	float4 RD = all(abs(float2(100.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
+	float4 RE = all(abs(float2(110.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
+	float4 RF = all(abs(float2(112.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
+	float4 RG = all(abs(float2(116.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
+	float4 RH = all(abs(float2(118.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
+	float4 RI = all(abs(float2(120.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
+	float4 RJ = all(abs(float2(122.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
+	float4 RK = all(abs(float2(126.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
+	float4 RL = all(abs(float2(128.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
+	float4 RM = all(abs(float2(130.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
+	float4 RN = all(abs(float2(136.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
+	float4 RO = all(abs(float2(144.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
+	float4 RP = all(abs(float2(150.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
+	float4 RQ = all(abs(float2(154.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
+	float4 RR = all(abs(float2(158.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
+	float4 Reserved = RA+RB+RC+RD+RE+RF+RG+RH+RI+RJ+RK+RL+RM+RN+RO+RP+RQ+RR;
+	
+	//STILL
+	float4 SA = all(abs(float2(26.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
+	float4 SB = all(abs(float2(30.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
+	float4 SC = all(abs(float2(96.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
+	float4 SD = all(abs(float2(100.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
+	float4 SE = all(abs(float2(102.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
+	float4 SF = all(abs(float2(104.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
+	float4 SG = all(abs(float2(108.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
+	float4 SH = all(abs(float2(112.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
+	float4 SI = all(abs(float2(116.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
+	float4 SJ = all(abs(float2(120.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
+	float4 SK = all(abs(float2(124.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
+	float4 SL = all(abs(float2(130.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
+	float4 SM = all(abs(float2(132.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
+	float4 SN = all(abs(float2(156.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
+	float4 Still = SA+SB+SC+SD+SE+SF+SG+SH+SI+SJ+SK+SL+SM+SN;
+	
+	//CGI
+	float4 CA = all(abs(float2(26.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
+	float4 CB = all(abs(float2(96.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
+	float4 CC = all(abs(float2(98.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
+	float4 CD = all(abs(float2(100.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
+	float4 CE = all(abs(float2(102.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
+	float4 CF = all(abs(float2(108.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
+	float4 CG = all(abs(float2(110.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
+	float4 CH = all(abs(float2(112.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
+	float4 CI = all(abs(float2(116.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
+	float4 CJ = all(abs(float2(122.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
+	float4 CK = all(abs(float2(124.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
+	float4 CL = all(abs(float2(126.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
+	float4 CM = all(abs(float2(138.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
+	float4 CN = all(abs(float2(140.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
+	float4 CO = all(abs(float2(142.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
+	float4 CP = all(abs(float2(144.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
+	float4 CQ = all(abs(float2(152.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
+	float4 CR = all(abs(float2(154.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
+	float4 CS = all(abs(float2(156.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
+	float4 CT = all(abs(float2(158.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
+	float4 CGI = CA+CB+CC+CD+CE+CF+CG+CH+CI+CJ+CK+CL+CM+CN+CO+CP+CQ+CR+CS+CT;
+	
+	//GAME
+	float4 GA = all(abs(float2(28.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
+	float4 GB = all(abs(float2(30.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
+	float4 GC = all(abs(float2(104.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
+	float4 GD = all(abs(float2(114.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
+	float4 GE = all(abs(float2(122.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
+	float4 GF = all(abs(float2(132.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
+	float4 GG = all(abs(float2(136.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
+	float4 GH = all(abs(float2(138.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
+	float4 GI = all(abs(float2(144.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
+	float4 GJ = all(abs(float2(150.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
+	float4 GK = all(abs(float2(152.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
+	float4 GL = all(abs(float2(156.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
+	float4 GM = all(abs(float2(158.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
+	float4 Game = GA+GB+GB+GC+GD+GE+GF+GG+GH+GI+GJ+GK+GL+GM;
+	
+	//MOVIE
+	float4 MA = all(abs(float2(28.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
+	float4 MB = all(abs(float2(98.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
+	float4 MC = all(abs(float2(110.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
+	float4 MD = all(abs(float2(114.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
+	float4 ME = all(abs(float2(120.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
+	float4 MF = all(abs(float2(126.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
+	float4 MG = all(abs(float2(130.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
+	float4 MH = all(abs(float2(136.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
+	float4 MI = all(abs(float2(140.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
+	float4 MJ = all(abs(float2(142.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
+	float4 MK = all(abs(float2(150.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
+	float4 ML = all(abs(float2(154.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
+	float4 MM = all(abs(float2(156.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
+	float4 Movie = MA+MB+MC+MD+ME+MF+MG+MH+MI+MJ+MK+ML+MM;
+	
+	//SIGNAGE
+	float4 SSA = all(abs(float2(30.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
+	float4 SSB = all(abs(float2(96.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
+	float4 SSC = all(abs(float2(102.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
+	float4 SSD = all(abs(float2(104.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
+	float4 SSE = all(abs(float2(108.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
+	float4 SSF = all(abs(float2(114.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
+	float4 SSG = all(abs(float2(118.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
+	float4 SSH = all(abs(float2(120.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
+	float4 SSI = all(abs(float2(122.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
+	float4 SSJ = all(abs(float2(124.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
+	float4 SSK = all(abs(float2(128.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
+	float4 SSL = all(abs(float2(130.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
+	float4 SSM = all(abs(float2(132.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
+	float4 SSN = all(abs(float2(140.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
+	float4 SSO = all(abs(float2(142.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
+	float4 SSP = all(abs(float2(144.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
+	float4 SSQ = all(abs(float2(158.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
+	float4 Signage = SSA+SSB+SSC+SSD+SSE+SSF+SSG+SSH+SSI+SSJ+SSK+SSL+SSM+SSN+SSO+SSP+SSQ;
+	
+	float4 Content_Type;
+	
+	if (Content == 0)
+		{
+		Content_Type = NoDepth;
+		}
+	else if (Content == 1)
+		{
+		Content_Type = Reserved;
+		}
+	else if (Content == 2)
+		{
+		Content_Type = Still;
+		}
+	else if (Content == 3)
+		{
+		Content_Type = CGI;
+		}
+	else if (Content == 4)
+		{
+		Content_Type = Game;
+		}
+	else if (Content == 5)
+		{
+		Content_Type = Movie;
+		}
 	else
-	{
-	color = texcoord.x < 0.5 ? tex2D(SamplerDis,float2(texcoord.x*2 + Perspective * pix.x,texcoord.y)) : tex2D(BackBuffer,float2(texcoord.x*2-1 - Perspective * pix.x,texcoord.y));
-	}
+		{
+		Content_Type = Signage;
+		}
+		
+	Color = texcoord.x < 0.5 ? tex2D(BackBuffer,float2(texcoord.x*2 + Perspective * pix.x,texcoord.y)) : tex2D(SamplerDis,float2(texcoord.x*2-1 - Perspective * pix.x,texcoord.y));
+	
+	float4 BACK = all(abs(float2(80,BUFFER_HEIGHT)-position.xy) < float2(80,1)) ? 0 : Color;
+
+	return BlockOne + Content_Type ? float4(0,0,1,0) : BACK;
 }
 
 
