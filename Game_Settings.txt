@@ -122,6 +122,7 @@ DeadPool Game				DM 6							Any
 FarCry 3				DM 18					    RB		Radial
 Stacking				DM 34							Any
 Fez					DM 35				On			Off				Read Above
+Unreal Gold with v227 			DM 8					    RB		Any
 
 User Submitted Depth Map Settings
 
@@ -253,22 +254,6 @@ C:\Users\...\Documents\Penumbra\settings.cfg
 Open the settings and set your res. 
 <Screen Width="3840" Height="2160" FullScreen="true" Vsync="true" />
 
-{Portal 2} -Game crashes when loading-
-Custom_Depth_Map 7
-Near = 0 Far = 1.01
-WDM 14
-Install to the Bin Folder DX9.
-Max out everything. Turn off AA
-Open the console.
-Type in console;
- 
-sv_cheats 1
-bind 3 "r_drawvgui 1"
-bind 2 "r_drawvgui 0"
-
-Once in game press 2 and you should have acess to a Depth Map.
-Game Crashes if you leave r_drawvgui 0 when you die. Don't know how to fix this.
-
 {Quake 4}
 If some how you can click on the menu......... Good Luck.
 Also if some how you get it working When the game Saves You have to recheck the 3D shader. 
@@ -373,6 +358,11 @@ In game Set your Res to Native screen Res.
 {Turok: Dinosaur Hunter} - Use Reshade 3.0.4
 Turn Off "Light Scatter," in Graphics Menu.
 
+{Unreal Gold}
+Use v227 patch. Use the DX9 render. Install Rehsade 3.0 to System folder select DX9.
+In Unreal Set your res and the go to advance settings.
+Turn Off AA and go back in to the game. Start a game.
+
 {Wolfenstine: Games} - working in Reshade 3.0 and Rehade 2.0
 [Set Launch Options](+r_multisamples "0" +vt_maxaniso "16")
 This game must be started at the lower Resoution 1600x1200 Then Switch to 1920x1080. Befor you exit switch it back to 1600x1200. 
@@ -394,8 +384,25 @@ Ex.
 		"high" : 0,
 		"ultra" : 0
 	},
+
 Problem Games
 _________________________________________________________________________________________________________________________________________
+{Portal 2} -Game crashes when loading-
+Custom_Depth_Map 7
+Near = 0 Far = 1.01
+WDM 14
+Install to the Bin Folder DX9.
+Max out everything. Turn off AA
+Open the console.
+Type in console;
+ 
+sv_cheats 1
+bind 3 "r_drawvgui 1"
+bind 2 "r_drawvgui 0"
+
+Once in game press 2 and you should have acess to a Depth Map.
+Game Crashes if you leave r_drawvgui 0 when you die. Don't know how to fix this.
+
 (Zombi} -Depth map Pops in and out-
 DM 28
 This Problem seems to happen when looking at one direction. Don't know why it happens. But, I suggest useing a othere 3D application like Tridef or Nvidia 3D Vision.

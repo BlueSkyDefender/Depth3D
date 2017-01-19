@@ -264,7 +264,6 @@ sampler BackBufferCLAMP
 	
 texture texCL  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA32F;}; 
 texture texCR  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA32F;}; 
-texture texCC  { Width = BUFFER_WIDTH/2; Height = BUFFER_HEIGHT/2; Format = RGBA8;}; 
 texture texCDM  { Width = BUFFER_WIDTH/2; Height = BUFFER_HEIGHT/2; Format = RGBA8;};
 	
 sampler SamplerCLMIRROR
@@ -310,14 +309,6 @@ sampler SamplerCRBORDER
 sampler SamplerCRCLAMP
 	{
 		Texture = texCR;
-		AddressU = CLAMP;
-		AddressV = CLAMP;
-		AddressW = CLAMP;
-	};
-	
-sampler SamplerCC
-	{
-		Texture = texCC;
 		AddressU = CLAMP;
 		AddressV = CLAMP;
 		AddressW = CLAMP;
@@ -1067,8 +1058,8 @@ void PS_renderLR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD
 	for (int j = 0; j < 4; ++j) 
 	{	
 			uv.x = samples[j] * D;
-			DepthL =  min(DepthL,tex2D(SamplerCC,float2(texcoord.x+uv.x*pix.x, texcoord.y)).r);
-			DepthR =  min(DepthR,tex2D(SamplerCC,float2(texcoord.x-uv.x*pix.x, texcoord.y)).r);
+			DepthL =  min(DepthL,tex2D(SamplerCDM,float2(texcoord.x+uv.x*pix.x, texcoord.y)).r);
+			DepthR =  min(DepthR,tex2D(SamplerCDM,float2(texcoord.x-uv.x*pix.x, texcoord.y)).r);
 	}
 		if(!Eye_Swap)
 		{	
