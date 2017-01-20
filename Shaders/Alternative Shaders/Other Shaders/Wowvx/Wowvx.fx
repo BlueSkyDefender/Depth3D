@@ -14,12 +14,13 @@
  //* Have fun,																																										*//
  //* Jose Negrete AKA BlueSkyDefender																																				*//
  //*																																												*//
- //* http://reshade.me/forum/shader-presentation/2128-sidebyside-3d-depth-map-based-stereoscopic-shader																				*//	
+ //* http://reshade.me/forum/shader-presentation/2128-sidebyside-3d-depth-map-based-stereoscopic-shader 																			*//	
  //* ---------------------------------																																				*//
- //*																																												*//
- //*																																												*//
- //*																																												*//
- //* 																																												*//
+ //* Major Contributor and Insperation for this shader.																																*//
+ //* User: WOWvX																																									*//
+ //* Name: Shawn Barclay																																							*//
+ //* Email: ironhell@hotmail.com																																					*//
+ //* Websites: A: https://bugs.winehq.org/show_bug.cgi?id=40602 B: https://reshade.me/forum/shader-suggestions/2812-wowvx-support#19996												*//
  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
@@ -944,6 +945,8 @@ float4 PS0(float4 position : SV_Position, float2 texcoord : TEXCOORD0) : SV_Targ
 	float size = 1;
 	float4 Color;	
 	
+	//HeaderCode Blocks for WOWvx 3D activation//
+	
 	//BLOCK ONE
  	float4 A = all(abs(float2(0.5,HEIGHT)-position.xy) < float2(0.5,size));
 	float4 B = all(abs(float2(2.5,HEIGHT)-position.xy) < float2(0.5,size));
@@ -1126,6 +1129,8 @@ float4 PS0(float4 position : SV_Position, float2 texcoord : TEXCOORD0) : SV_Targ
 	float4 BACK = all(abs(float2(80,HEIGHT)-position.xy) < float2(80,size)) ? 0 : Color;
 
 	return BlockOne + Content_Type ? float4(0,0,1,0) : BACK;
+	
+	//HeaderCode Blocks for WOWvx 3D activation//
 }
 
 
