@@ -150,10 +150,22 @@ uniform float3 Cross_Cusor_Color <
 
 uniform int Stereoscopic_Mode <
 	ui_type = "combo";
-	ui_items = "Side by Side\0Top and Bottom\0Line Interlaced\0Checkerboard 3D\0";
+	ui_items = "Side by Side\0Top and Bottom\0Line Interlaced\0Checkerboard 3D\0Marked Frame Seq.\0";
 	ui_label = "3D Display Mode";
 	ui_tooltip = "Side by Side/Top and Bottom/Line Interlaced/Checkerboard 3D display output.";
 > = 0;
+
+uniform bool FS_Marker_Fix <
+	ui_label = "Frame Seq. Marker Fix";
+	ui_tooltip = "If Marker is on Bottom Right Use this to place it Back on the Top Right.";
+> = true;
+
+uniform float SPEED <
+	ui_type = "drag";
+	ui_min = 1; ui_max = 2;
+	ui_label = "Frame Seq. Speed Adjust";
+	ui_tooltip = "Adjust the sutter speed.";
+> = 1.0;
 
 uniform int Downscaling_Support <
 	ui_type = "combo";
@@ -1006,7 +1018,8 @@ float4 DisocclusionMask(float4 position : SV_Position, float2 texcoord : TEXCOOR
 	
 	return color;
 } 
-  
+
+uniform int framecount < source = "framecount"; >;
 ////////////////////////////////////////////////Left/Right Eye////////////////////////////////////////////////////////
 void PS_renderLR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 color : SV_Target0)
 {	
@@ -1051,6 +1064,19 @@ void PS_renderLR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD
 	
 	if(!Depth_Map_View)
 	{
+	float HEIGHT;
+	float WIDTH;
+	if (FS_Marker_Fix)
+	{
+	HEIGHT = BUFFER_RCP_HEIGHT;
+	WIDTH = BUFFER_WIDTH;
+	}
+	else
+	{
+	HEIGHT = BUFFER_HEIGHT;
+	WIDTH = BUFFER_WIDTH;
+	}
+	
 		if(Stereoscopic_Mode == 0)
 		{
 			if(Custom_Sidebars == 0)
@@ -1111,7 +1137,7 @@ void PS_renderLR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD
 			color = gridL > 0.5 ? tex2D(BackBufferCLAMP, float2((texcoord.x + P) + DepthL * D , texcoord.y)) : tex2D(BackBufferCLAMP, float2((texcoord.x - P) - DepthR * D , texcoord.y));
 			}
 		}
-		else
+		else if(Stereoscopic_Mode == 3)
 		{
 			float gridy;
 			float gridx;
@@ -1145,11 +1171,53 @@ void PS_renderLR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD
 			color = (int(gridy+gridx) & 1) < 0.5 ? tex2D(BackBufferCLAMP, float2((texcoord.x + P) + DepthL * D , texcoord.y)) : tex2D(BackBufferCLAMP, float2((texcoord.x  - P) - DepthR * D , texcoord.y));
 			}
 		}
+		else
+		{
+		
+		float4 FSMarker = all(abs(float2(WIDTH,HEIGHT)-position.xy) < float2(25,25));
+		
+		float FT = framecount/SPEED;
+		
+		if(Custom_Sidebars == 0)
+			{
+			if (int(FT) & 1)
+				{
+				color = FSMarker ? 0 : tex2D(BackBufferMIRROR, float2((texcoord.x + P) + DepthL * D , texcoord.y));
+				}
+				else
+				{
+				color = FSMarker ? 1 : tex2D(BackBufferMIRROR, float2((texcoord.x - P) - DepthR * D , texcoord.y));
+				}
+			}
+			else if(Custom_Sidebars == 1)
+			{
+			if (int(FT) & 1)
+				{
+				color = FSMarker ? 0 : tex2D(BackBufferBORDER, float2((texcoord.x + P) + DepthL * D , texcoord.y));
+				}
+				else
+				{
+				color = FSMarker ? 1 : tex2D(BackBufferBORDER, float2((texcoord.x - P) - DepthR * D , texcoord.y));
+				}
+			}
+			else
+			{
+			if (int(FT) & 1)
+				{
+				color = FSMarker ? 0 : tex2D(BackBufferCLAMP, float2((texcoord.x + P) + DepthL * D , texcoord.y));
+				}
+				else
+				{
+				color = FSMarker ? 1 : tex2D(BackBufferCLAMP, float2((texcoord.x - P) - DepthR * D , texcoord.y));
+				}
+			}
+		}
 	}
 		else
 	{
 		color = tex2D(SamplerDM,texcoord);
-	}	
+	}
+		
 }
 
 ///////////////////////////////////////////////////////////ReShade.fxh/////////////////////////////////////////////////////////////
