@@ -52,16 +52,16 @@ uniform float Depth_Limit <
 
 uniform int Disocclusion_Type <
 	ui_type = "combo";
-	ui_items = "Disocclusion Mask Off\0Normal Disocclusion Mask\0Radial Disocclusion Mask\0";
+	ui_items = "Off\0Normal\0Radial\0";
 	ui_label = "Disocclusion Type";
-	ui_tooltip = "Pick the type of blur you want.";
+	ui_tooltip = "Pick the type of disocclusion you want.";
 > = 1;
 
 uniform float Disocclusion_Power <
 	ui_type = "drag";
 	ui_min = 0; ui_max = 0.5;
 	ui_label = "Disocclusion Power";
-	ui_tooltip = "Determines the Disocclusion masking of Depth Map. Default is 0.025";
+	ui_tooltip = "Determines the disocclusion effect on the Depth Map. Default is 0.025";
 > = 0.025;
 
 uniform bool Depth_Map_View <
