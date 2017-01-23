@@ -19,7 +19,6 @@
  //* Major Contributor and Insperation for this shader.																																*//
  //* User: WOWvX																																									*//
  //* Name: Shawn Barclay																																							*//
- //* Email: ironhell@hotmail.com																																					*//
  //* Websites: A: https://bugs.winehq.org/show_bug.cgi?id=40602 B: https://reshade.me/forum/shader-suggestions/2812-wowvx-support#19996												*//
  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -66,7 +65,7 @@ uniform float Adjust <
 
 uniform int Weapon_Depth_Map <
 	ui_type = "combo";
-	ui_items = "Weapon Depth Map Off\0Custom Weapon Depth Map One\0Custom Weapon Depth Map Two\0Custom Weapon Depth Map Three\0Custom Weapon Depth Map Four\0WDM 1\0WDM 2\0WDM 3\0WDM 4\0WDM 5\0WDM 6\0WDM 7\0WDM 8\0WDM 9\0WDM 10\0WDM 11\0WDM 12\0WDM 13\0WDM 14\0WDM 15\0WDM 16\0WDM 17\0WDM 18\0WDM 19\0WDM 20\0WDM 21\0WDM 22\0";
+	ui_items = "Weapon Depth Map Off\0Custom Weapon Depth Map One\0Custom Weapon Depth Map Two\0Custom Weapon Depth Map Three\0Custom Weapon Depth Map Four\0WDM 1\0WDM 2\0WDM 3\0WDM 4\0WDM 5\0WDM 6\0WDM 7\0WDM 8\0WDM 9\0WDM 10\0WDM 11\0WDM 12\0WDM 13\0WDM 14\0WDM 15\0WDM 16\0WDM 17\0WDM 18\0WDM 19\0WDM 20\0WDM 21\0WDM 22\0WDM 23\0";
 	ui_label = "Alternate Weapon Depth Map";
 	ui_tooltip = "Alternate Weapon Depth Map for different Games. Read the ReadMeDepth3d.txt, for setting.";
 > = 0;
@@ -173,7 +172,7 @@ float4 DepthMap(float4 position : SV_Position, float2 texcoord : TEXCOORD0) : SV
 		
 		if (Custom_Depth_Map == 0)
 	{	
-		//Alien Isolation | Fallout 4 | Firewatch
+		//Alien Isolation | Firewatch
 		if (Alternate_Depth_Map == 0)
 		{
 		float cF = 1000000000;
@@ -253,7 +252,7 @@ float4 DepthMap(float4 position : SV_Position, float2 texcoord : TEXCOORD0) : SV
 		depthM = cN/(cN-cF) / ( depthM - cF/(cF-cN));
 		}
 		
-		//Warhammer: End Times - Vermintide
+		//Warhammer: End Times - Vermintide | Fallout 4 
 		if (Alternate_Depth_Map == 10)
 		{
 		float cF = 7.0;
@@ -822,9 +821,19 @@ float4 DepthMap(float4 position : SV_Position, float2 texcoord : TEXCOORD0) : SV
 		WDM = 1 - (log(cWF * cWN/WDM - cWF));
 		}
 		
+		//Weapon Depth Map Twenty Three
+		if (Weapon_Depth_Map == 27)
+		{
+		Adj = 0.00000001;
+		Per = 0.6;//0.675
+		float cWF = 4.925;//10
+		float cWN = 0.0075;//0.0085
+		WDM = (log(cWF / cWN*WDM - cWF));
+		}
+		
 	float NearDepth;
 	
-	if (Weapon_Depth_Map == 23 || Weapon_Depth_Map == 20 || Weapon_Depth_Map == 19 || Weapon_Depth_Map == 13 || Weapon_Depth_Map == 8)
+	if (Weapon_Depth_Map == 27 || Weapon_Depth_Map == 23 || Weapon_Depth_Map == 20 || Weapon_Depth_Map == 19 || Weapon_Depth_Map == 13 || Weapon_Depth_Map == 8)
 	{
 	NearDepth = step(depthM.r,Adj/100000);
 	}
@@ -863,15 +872,8 @@ float4 DepthMap(float4 position : SV_Position, float2 texcoord : TEXCOORD0) : SV
 		D = lerp(lerp(depthMFar,depthM,A),WDM%Per,NearDepth);
 		}
     }
-	
-	if(!Invert)
-	{
+    
 	color.rgb = D.rrr;
-	}
-	else
-	{
-	color.rgb = 1-D.rrr;
-	}
 	
 	return color;	
 
