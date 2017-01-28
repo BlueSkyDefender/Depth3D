@@ -107,7 +107,7 @@ Amnesia: Machine for Pigs		DM 2 or 30	WDM 17					Any
 Gone Home				DM 0				On			Any
 DarkSiders Warmastred Edition		DM 0							Any
 Requiem: Avenging Angel			DM 31					    RB		Any 
-Resident Evil 7				DM 21							Radial
+Resident Evil 7				DM 37							Any
 The Void				DM 4					    RB		Any
 Turok: Dinosaur Hunter			DM 32		WDM 22			    RB		Any		On Adjust 0.750-0.900
 Everybody's Gone to the Rapture		DM 0							Any
@@ -123,6 +123,8 @@ FarCry 3				DM 18					    RB		Radial
 Stacking				DM 34							Any
 Fez					DM 35				On			Off					Read Above
 Unreal Gold with v227 			DM 8					    RB		Any
+Watch Dogs 2				DM 21					    RB		Any
+Lara Croft & Temple of Osiris		DM 36							Any
 
 User Submitted Depth Map Settings
 
@@ -365,6 +367,13 @@ Turn Off "Light Scatter," in Graphics Menu.
 Use v227 patch. Use the DX9 render. Install Rehsade 3.0 to System folder select DX9.
 In Unreal Set your res and the go to advance settings.
 Turn Off AA and go back in to the game. Start a game.
+
+{Watch Dogs 2}
+Go to the WatchDog2.exe and use compatibility mode.
+Set it too Windows 8.
+Install reshade and use dxgi.dll
+Ok befor you launch use this command.
+-eac_launcher <---- as the start up command.
 
 {Wolfenstine: Games} - working in Reshade 3.0 and Rehade 2.0
 [Set Launch Options](+r_multisamples "0" +vt_maxaniso "16")

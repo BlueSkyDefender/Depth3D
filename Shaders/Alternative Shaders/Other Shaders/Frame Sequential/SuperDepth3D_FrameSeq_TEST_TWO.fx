@@ -3,7 +3,7 @@
  //----------------////
 
  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
- //* Depth Map Based 3D post-process shader v1.9.4																																	*//
+ //* Depth Map Based 3D post-process shader v1.9.5																																	*//
  //* For Reshade 3.0																																								*//
  //* --------------------------																																						*//
  //* This work is licensed under a Creative Commons Attribution 3.0 Unported License.																								*//
@@ -59,16 +59,16 @@ uniform float Depth_Limit <
 
 uniform int Disocclusion_Type <
 	ui_type = "combo";
-	ui_items = "Off\0Normal\0Radial\0";
+	ui_items = "Disocclusion Mask Off\0Normal Disocclusion Mask\0Radial Disocclusion Mask\0";
 	ui_label = "Disocclusion Type";
-	ui_tooltip = "Pick the type of disocclusion you want.";
+	ui_tooltip = "Pick the type of blur you want.";
 > = 1;
 
 uniform float Disocclusion_Power <
 	ui_type = "drag";
 	ui_min = 0; ui_max = 0.5;
 	ui_label = "Disocclusion Power";
-	ui_tooltip = "Determines the disocclusion effect on the Depth Map. Default is 0.025";
+	ui_tooltip = "Determines the Disocclusion masking of Depth Map. Default is 0.025";
 > = 0.025;
 
 uniform bool Depth_Map_View <
@@ -90,7 +90,7 @@ uniform float Adjust <
 
 uniform int Weapon_Depth_Map <
 	ui_type = "combo";
-	ui_items = "Weapon Depth Map Off\0Custom Weapon Depth Map One\0Custom Weapon Depth Map Two\0Custom Weapon Depth Map Three\0Custom Weapon Depth Map Four\0WDM 1\0WDM 2\0WDM 3\0WDM 4\0WDM 5\0WDM 6\0WDM 7\0WDM 8\0WDM 9\0WDM 10\0WDM 11\0WDM 12\0WDM 13\0WDM 14\0WDM 15\0WDM 16\0WDM 17\0WDM 18\0WDM 19\0WDM 20\0WDM 21\0WDM 22\0WDM 23\0";
+	ui_items = "Weapon Depth Map Off\0Custom Weapon Depth Map One\0Custom Weapon Depth Map Two\0Custom Weapon Depth Map Three\0Custom Weapon Depth Map Four\0WDM 1\0WDM 2\0WDM 3\0WDM 4\0WDM 5\0WDM 6\0WDM 7\0WDM 8\0WDM 9\0WDM 10\0WDM 11\0WDM 12\0WDM 13\0WDM 14\0WDM 15\0WDM 16\0WDM 17\0WDM 18\0WDM 19\0WDM 20\0WDM 21\0WDM 22\0";
 	ui_label = "Alternate Weapon Depth Map";
 	ui_tooltip = "Alternate Weapon Depth Map for different Games. Read the ReadMeDepth3d.txt, for setting.";
 > = 0;
@@ -116,7 +116,7 @@ uniform bool Depth_Map_Flip <
 
 uniform int Custom_Depth_Map <
 	ui_type = "combo";
-	ui_items = "Custom Off\0Custom One\0Custom Two\0Custom Three\0Custom Four\0Custom Five\0Custom Six\0Custom Seven\0Custom Eight\0Custom Nine\0Custom Ten\0Custom Eleven\0Custom Twelve\0";
+	ui_items = "Custom Off\0Custom One\0Custom Two\0Custom Three\0Custom Four\0Custom Five\0Custom Six\0Custom Seven\0Custom Eight\0Custom Nine\0Custom Ten\0Custom Eleven\0";
 	ui_label = "Custom Depth Map";
 	ui_tooltip = "Adjust your own Custom Depth Map.";
 > = 0;
@@ -150,9 +150,21 @@ uniform float3 Cross_Cusor_Color <
 
 uniform int Stereoscopic_Mode <
 	ui_type = "combo";
-	ui_items = "Side by Side\0Top and Bottom\0Line Interlaced\0Checkerboard 3D\0";
+	ui_items = "Side by Side\0Top and Bottom\0Line Interlaced\0Checkerboard 3D\0Marked Frame Seq.\0";
 	ui_label = "3D Display Mode";
 	ui_tooltip = "Side by Side/Top and Bottom/Line Interlaced/Checkerboard 3D display output.";
+> = 0;
+
+uniform bool FS_Marker_Fix <
+	ui_label = "Frame Seq. Marker Fix";
+	ui_tooltip = "If Marker is on Bottom Right Use this to place it Back on the Top Right.";
+> = true;
+
+uniform int Sutter_Speed <
+	ui_type = "combo";
+	ui_items = "Off\0 60Hz\0 120Hz\0 144Hz\0";
+	ui_label = "Sutter Speed";
+	ui_tooltip = "Sutter speed options from 30Hz to 144Hz.";
 > = 0;
 
 uniform int Downscaling_Support <
@@ -258,7 +270,7 @@ float4 DepthMap(float4 position : SV_Position, float2 texcoord : TEXCOORD0) : SV
 		
 		if (Custom_Depth_Map == 0)
 	{	
-		//Alien Isolation | Firewatch
+		//Alien Isolation | Fallout 4 | Firewatch
 		if (Alternate_Depth_Map == 0)
 		{
 		float cF = 1000000000;
@@ -338,7 +350,7 @@ float4 DepthMap(float4 position : SV_Position, float2 texcoord : TEXCOORD0) : SV
 		depthM = cN/(cN-cF) / ( depthM - cF/(cF-cN));
 		}
 		
-		//Warhammer: End Times - Vermintide | Fallout 4 
+		//Warhammer: End Times - Vermintide
 		if (Alternate_Depth_Map == 10)
 		{
 		float cF = 7.0;
@@ -546,22 +558,6 @@ float4 DepthMap(float4 position : SV_Position, float2 texcoord : TEXCOORD0) : SV
 		depthM = clamp(1 - log(pow(abs(cN-depthM),cF)),0,1);
 		}
 		
-		//Lara Croft & Temple of Osiris
-		if (Alternate_Depth_Map == 36)
-		{
-		float cF = 0.340;//1.010+	or 150
-		float cN = 12.250;//0 or	151
-		depthM = 1 - clamp(pow(abs((exp(depthM * log(cF + cN)) - cN) / cF),10),0,1);
-		}
-		
-		//RE7
-		if (Alternate_Depth_Map == 37)
-		{
-		float cF = 32.5;
-		float cN = 1;
-		depthM = (pow(abs(cN-depthM),cF));
-		}
-		
 	}
 	else
 	{
@@ -652,14 +648,6 @@ float4 DepthMap(float4 position : SV_Position, float2 texcoord : TEXCOORD0) : SV
 		float cF = Near_Far.y;//1.010+	or 150
 		float cN = Near_Far.x;//0 or	151
 		depthM = 1 - log(pow(abs(cN-depthM),cF));
-		}
-		
-		//Custom Twelve
-		if (Custom_Depth_Map == 12)
-		{
-		float cF = Near_Far.y;//
-		float cN = Near_Far.x;//
-		depthM = 1 - clamp(pow(abs((exp(depthM * log(cF + cN)) - cN) / cF),10),0,1);
 		}
 		
 	}
@@ -931,19 +919,9 @@ float4 DepthMap(float4 position : SV_Position, float2 texcoord : TEXCOORD0) : SV
 		WDM = 1 - (log(cWF * cWN/WDM - cWF));
 		}
 		
-		//Weapon Depth Map Twenty Three
-		if (Weapon_Depth_Map == 27)
-		{
-		Adj = 0.00000001;
-		Per = 0.6;//0.675
-		float cWF = 4.925;//10
-		float cWN = 0.0075;//0.0085
-		WDM = (log(cWF / cWN*WDM - cWF));
-		}
-		
 	float NearDepth;
 	
-	if (Weapon_Depth_Map == 27 || Weapon_Depth_Map == 23 || Weapon_Depth_Map == 20 || Weapon_Depth_Map == 19 || Weapon_Depth_Map == 13 || Weapon_Depth_Map == 8)
+	if (Weapon_Depth_Map == 23 || Weapon_Depth_Map == 20 || Weapon_Depth_Map == 19 || Weapon_Depth_Map == 13 || Weapon_Depth_Map == 8)
 	{
 	NearDepth = step(depthM.r,Adj/100000);
 	}
@@ -1039,8 +1017,9 @@ float4 DisocclusionMask(float4 position : SV_Position, float2 texcoord : TEXCOOR
 	}
 	
 	return color;
-} 
-  
+}
+
+uniform float timer < source = "timer"; >;
 ////////////////////////////////////////////////Left/Right Eye////////////////////////////////////////////////////////
 void PS_renderLR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 color : SV_Target0)
 {	
@@ -1085,6 +1064,19 @@ void PS_renderLR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD
 	
 	if(!Depth_Map_View)
 	{
+	float HEIGHT;
+	float WIDTH;
+	if (FS_Marker_Fix)
+	{
+	HEIGHT = BUFFER_RCP_HEIGHT;
+	WIDTH = BUFFER_WIDTH;
+	}
+	else
+	{
+	HEIGHT = BUFFER_HEIGHT;
+	WIDTH = BUFFER_WIDTH;
+	}
+	
 		if(Stereoscopic_Mode == 0)
 		{
 			if(Custom_Sidebars == 0)
@@ -1145,7 +1137,7 @@ void PS_renderLR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD
 			color = gridL > 0.5 ? tex2D(BackBufferCLAMP, float2((texcoord.x + P) + DepthL * D , texcoord.y)) : tex2D(BackBufferCLAMP, float2((texcoord.x - P) - DepthR * D , texcoord.y));
 			}
 		}
-		else
+		else if(Stereoscopic_Mode == 3)
 		{
 			float gridy;
 			float gridx;
@@ -1179,11 +1171,71 @@ void PS_renderLR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD
 			color = (int(gridy+gridx) & 1) < 0.5 ? tex2D(BackBufferCLAMP, float2((texcoord.x + P) + DepthL * D , texcoord.y)) : tex2D(BackBufferCLAMP, float2((texcoord.x  - P) - DepthR * D , texcoord.y));
 			}
 		}
+		else
+		{
+		float speed;
+		
+		if(Sutter_Speed == 0)
+		{
+			speed = 0;
+		}
+		else if(Sutter_Speed == 1)
+		{
+			speed = 30;
+		}
+		else if(Sutter_Speed == 2)
+		{
+			speed = 60;
+		}
+		else
+		{
+			speed = 72;
+		}
+		
+		float4 FSMarker = all(abs(float2(WIDTH,HEIGHT)-position.xy) < float2(25,25));
+		float S = 1000/speed;
+		float T = floor(timer)/S;
+		
+		if(Custom_Sidebars == 0)
+			{
+			if (int(T) & 1)
+				{
+				color = FSMarker ? 0 : tex2D(BackBufferMIRROR, float2((texcoord.x + P) + DepthL * D , texcoord.y));
+				}
+				else
+				{
+				color = FSMarker ? 1 : tex2D(BackBufferMIRROR, float2((texcoord.x - P) - DepthR * D , texcoord.y));
+				}
+			}
+			else if(Custom_Sidebars == 1)
+			{
+			if (int(T) & 1)
+				{
+				color = FSMarker ? 0 : tex2D(BackBufferBORDER, float2((texcoord.x + P) + DepthL * D , texcoord.y));
+				}
+				else
+				{
+				color = FSMarker ? 1 : tex2D(BackBufferBORDER, float2((texcoord.x - P) - DepthR * D , texcoord.y));
+				}
+			}
+			else
+			{
+			if (int(T) & 1)
+				{
+				color = FSMarker ? 0 : tex2D(BackBufferCLAMP, float2((texcoord.x + P) + DepthL * D , texcoord.y));
+				}
+				else
+				{
+				color = FSMarker ? 1 : tex2D(BackBufferCLAMP, float2((texcoord.x - P) - DepthR * D , texcoord.y));
+				}
+			}
+		}
 	}
 		else
 	{
 		color = tex2D(SamplerDM,texcoord);
-	}	
+	}
+		
 }
 
 ///////////////////////////////////////////////////////////ReShade.fxh/////////////////////////////////////////////////////////////
