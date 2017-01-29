@@ -162,7 +162,7 @@ uniform bool FS_Marker_Fix <
 
 uniform int Sutter_Speed <
 	ui_type = "combo";
-	ui_items = "Off\0 60Hz\0 120Hz\0 144Hz\0";
+	ui_items = "Off\0ON\0";
 	ui_label = "Sutter Speed";
 	ui_tooltip = "Sutter speed options from 30Hz to 144Hz.";
 > = 0;
@@ -1019,7 +1019,7 @@ float4 DisocclusionMask(float4 position : SV_Position, float2 texcoord : TEXCOOR
 	return color;
 }
 
-uniform float timer < source = "timer"; >;
+uniform int framecount < source = "framecount"; >;
 ////////////////////////////////////////////////Left/Right Eye////////////////////////////////////////////////////////
 void PS_renderLR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 color : SV_Target0)
 {	
@@ -1179,26 +1179,19 @@ void PS_renderLR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD
 		{
 			speed = 0;
 		}
-		else if(Sutter_Speed == 1)
-		{
-			speed = 30;
-		}
-		else if(Sutter_Speed == 2)
-		{
-			speed = 60;
-		}
 		else
 		{
-			speed = 72;
+			speed = 1;
 		}
+
 		
 		float4 FSMarker = all(abs(float2(WIDTH,HEIGHT)-position.xy) < float2(25,25));
-		float S = 1000/speed;
-		float T = floor(timer)/S;
+		
+		float FC =  framecount/speed;
 		
 		if(Custom_Sidebars == 0)
 			{
-			if (int(T) & 1)
+				if ((FC % 2) == 1)
 				{
 				color = FSMarker ? 0 : tex2D(BackBufferMIRROR, float2((texcoord.x + P) + DepthL * D , texcoord.y));
 				}
@@ -1209,7 +1202,7 @@ void PS_renderLR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD
 			}
 			else if(Custom_Sidebars == 1)
 			{
-			if (int(T) & 1)
+				if ((FC % 2) == 1)
 				{
 				color = FSMarker ? 0 : tex2D(BackBufferBORDER, float2((texcoord.x + P) + DepthL * D , texcoord.y));
 				}
@@ -1220,7 +1213,7 @@ void PS_renderLR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD
 			}
 			else
 			{
-			if (int(T) & 1)
+				if ((FC % 2) == 1)
 				{
 				color = FSMarker ? 0 : tex2D(BackBufferCLAMP, float2((texcoord.x + P) + DepthL * D , texcoord.y));
 				}
