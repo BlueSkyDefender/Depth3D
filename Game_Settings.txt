@@ -107,7 +107,7 @@ Amnesia: Machine for Pigs		DM 2 or 30	WDM 17					Any
 Gone Home				DM 0				On			Any
 DarkSiders Warmastred Edition		DM 0							Any
 Requiem: Avenging Angel			DM 31					    RB		Any 
-Resident Evil 7				DM 37							Any
+Resident Evil 7				DM 37					    RB		Any
 The Void				DM 4					    RB		Any
 Turok: Dinosaur Hunter			DM 32		WDM 22			    RB		Any		On Adjust 0.750-0.900
 Everybody's Gone to the Rapture		DM 0							Any
@@ -268,6 +268,10 @@ This is where a Defaults.ini will come in handy.
 Start the game with out Reshade Set your game resolution First Turn off AA. 
 Exit, Then use reshade and set your setting you want then launch your game. You can not change your resolution once in game This sill remove the depth map.
 Rage 64 was tested only.
+
+{Resident Evil 7}
+Make sure Render Mode is Normal.
+Also Scale should be 1 for 1:1.
 
 {Return To Castle Wolfenstine}
 Increase Depth to 25+ Do this by typing in your amount.

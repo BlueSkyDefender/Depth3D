@@ -31,7 +31,7 @@
 
 uniform int Alternate_Depth_Map <
 	ui_type = "combo";
-	ui_items = "Depth Map 0\0Depth Map 1\0Depth Map 2\0Depth Map 3\0Depth Map 4\0Depth Map 5\0Depth Map 6\0Depth Map 7\0Depth Map 8\0Depth Map 9\0Depth Map 10\0Depth Map 11\0Depth Map 12\0Depth Map 13\0Depth Map 14\0Depth Map 15\0Depth Map 16\0Depth Map 17\0Depth Map 18\0Depth Map 19\0Depth Map 20\0Depth Map 21\0Depth Map 22\0Depth Map 23\0Depth Map 24\0Depth Map 25\0Depth Map 26\0Depth Map 27\0Depth Map 28\0Depth Map 29\0Depth Map 30\0Depth Map 31\0Depth Map 32\0Depth Map 33\00Depth Map 34\0Depth Map 35\0";
+	ui_items = "DM 0\0DM 1\0DM 2\0DM 3\0DM 4\0DM 5\0DM 6\0DM 7\0DM 8\0DM 9\0DM 10\0DM 11\0DM 12\0DM 13\0DM 14\0DM 15\0DM 16\0DM 17\0DM 18\0DM 19\0DM 20\0DM 21\0DM 22\0DM 23\0DM 24\0DM 25\0DM 26\0DM 27\0DM 28\0DM 29\0DM 30\0DM 31\0DM 32\0DM 33\0DM 34\0DM 35\0DM 36\0DM 37\0";
 	ui_label = "Alternate Depth Map";
 	ui_tooltip = "Alternate Depth Map for different Games. Read the ReadMeDepth3d.txt, for setting. Each game May and can use a diffrent Alternet Depth Map.";
 > = 0;
@@ -102,7 +102,7 @@ uniform float Weapon_Percentage <
 
 uniform int Custom_Depth_Map <
 	ui_type = "combo";
-	ui_items = "Custom Off\0Custom One\0Custom Two\0Custom Three\0Custom Four\0Custom Five\0Custom Six\0Custom Seven\0Custom Eight\0Custom Nine\0Custom Ten\0";
+	ui_items = "Custom Off\0Custom One\0Custom Two\0Custom Three\0Custom Four\0Custom Five\0Custom Six\0Custom Seven\0Custom Eight\0Custom Nine\0Custom Ten\0Custom Eleven\0Custom Twelve\0";
 	ui_label = "Custom Depth Map";
 	ui_tooltip = "Adjust your own Custom Depth Map.";
 > = 0;
@@ -638,6 +638,22 @@ float4 DepthMap(float4 position : SV_Position, float2 texcoord : TEXCOORD0) : SV
 		depthM = clamp(1 - log(pow(abs(cN-depthM),cF)),0,1);
 		}
 		
+		//Lara Croft & Temple of Osiris
+		if (Alternate_Depth_Map == 36)
+		{
+		float cF = 0.340;//1.010+	or 150
+		float cN = 12.250;//0 or	151
+		depthM = 1 - clamp(pow(abs((exp(depthM * log(cF + cN)) - cN) / cF),10),0,1);
+		}
+		
+		//RE7
+		if (Alternate_Depth_Map == 37)
+		{
+		float cF = 32.5;
+		float cN = 1;
+		depthM = (pow(abs(cN-depthM),cF));
+		}
+		
 	}
 	else
 	{
@@ -728,6 +744,14 @@ float4 DepthMap(float4 position : SV_Position, float2 texcoord : TEXCOORD0) : SV
 		float cF = Near_Far.y;//1.010+	or 150
 		float cN = Near_Far.x;//0 or	151
 		depthM = 1 - log(pow(abs(cN-depthM),cF));
+		}
+		
+		//Custom Twelve
+		if (Custom_Depth_Map == 12)
+		{
+		float cF = Near_Far.y;//
+		float cN = Near_Far.x;//
+		depthM = 1 - clamp(pow(abs((exp(depthM * log(cF + cN)) - cN) / cF),10),0,1);
 		}
 		
 	}
