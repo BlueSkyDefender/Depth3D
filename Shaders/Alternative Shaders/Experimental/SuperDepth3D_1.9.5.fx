@@ -45,7 +45,7 @@ uniform int Alternate_Depth_Map_Two <
 
 uniform int Depth <
 	ui_type = "drag";
-	ui_min = 0; ui_max = 30;
+	ui_min = 0; ui_max = 35;
 	ui_label = "Depth Slider";
 	ui_tooltip = "Determines the amount of Image Warping and Separation between both eyes. You can Override this setting.";
 > = 15;
@@ -206,24 +206,16 @@ sampler BackBufferCLAMP
 		AddressW = CLAMP;
 	};
 	
-texture texDMOne  { Width = BUFFER_WIDTH/2; Height = BUFFER_HEIGHT/2; Format = RGBA32F;};
-	
-sampler SamplerDMOne
+texture texL  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA32F;}; 
+sampler SamplerL
 	{
-		Texture = texDMOne;
-		AddressU = CLAMP;
-		AddressV = CLAMP;
-		AddressW = CLAMP;
+		Texture = texL;
 	};
 	
-texture texDMTwo  { Width = BUFFER_WIDTH/2; Height = BUFFER_HEIGHT/2; Format = RGBA32F;};
-	
-sampler SamplerDMTwo
+texture texR  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA32F;}; 
+sampler SamplerR
 	{
-		Texture = texDMTwo;
-		AddressU = CLAMP;
-		AddressV = CLAMP;
-		AddressW = CLAMP;
+		Texture = texR;
 	};
 	
 float4 MouseCuror(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Target
@@ -241,7 +233,7 @@ float4 MouseCuror(float4 position : SV_Position, float2 texcoord : TEXCOORD) : S
 }
 
 //Depth Map Information	
-float4 DepthMapOne(float4 position : SV_Position, float2 texcoord : TEXCOORD0) : SV_Target
+float4 DepthMapOne(float2 texcoord : TEXCOORD0) : SV_Target
 {
 
 	 float4 color = 0;
@@ -993,7 +985,7 @@ float4 DepthMapOne(float4 position : SV_Position, float2 texcoord : TEXCOORD0) :
 
 }
 
-float4 DepthMapTwo(float4 position : SV_Position, float2 texcoord : TEXCOORD0) : SV_Target
+float4 DepthMapTwo(float2 texcoord : TEXCOORD0) : SV_Target
 {
 
 	 float4 color = 0;
@@ -1744,8 +1736,15 @@ float4 DepthMapTwo(float4 position : SV_Position, float2 texcoord : TEXCOORD0) :
 	return color;	
 
 }
- 
+
 ////////////////////////////////////////////////Left/Right Eye////////////////////////////////////////////////////////
+
+void  PS_calcLR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 colorR : SV_Target0, out float4 colorL : SV_Target1)
+{
+	colorL = DepthMapOne(texcoord);
+	colorR = DepthMapTwo(texcoord);
+}
+
 void PS_renderLR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 color : SV_Target0)
 {	
 	const float samples[3] = {0.50, 0.66, 1.0};
@@ -1772,18 +1771,18 @@ void PS_renderLR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD
 			
 		if(Stereoscopic_Mode == 0)
 		{	
-			DepthL =  min(DepthL,tex2D(SamplerDMOne,float2((texcoord.x*2 + P)+uv.x, texcoord.y)).r);
-			DepthR =  min(DepthR,tex2D(SamplerDMTwo,float2((texcoord.x*2-1 - P)-uv.x, texcoord.y)).r);
+			DepthL =  min(DepthL,tex2D(SamplerL,float2((texcoord.x*2 + P)+uv.x, texcoord.y)).r);
+			DepthR =  min(DepthR,tex2D(SamplerR,float2((texcoord.x*2-1 - P)-uv.x, texcoord.y)).r);
 		}
 		else if(Stereoscopic_Mode == 1)
 		{
-			DepthL =  min(DepthL,tex2D(SamplerDMOne,float2((texcoord.x + P)+uv.x, texcoord.y*2)).r);
-			DepthR =  min(DepthR,tex2D(SamplerDMTwo,float2((texcoord.x - P)-uv.x, texcoord.y*2-1)).r);
+			DepthL =  min(DepthL,tex2D(SamplerL,float2((texcoord.x + P)+uv.x, texcoord.y*2)).r);
+			DepthR =  min(DepthR,tex2D(SamplerR,float2((texcoord.x - P)-uv.x, texcoord.y*2-1)).r);
 		}
 		else
 		{
-			DepthL =  min(DepthL,tex2D(SamplerDMOne,float2((texcoord.x + P)+uv.x, texcoord.y)).r);
-			DepthR =  min(DepthR,tex2D(SamplerDMTwo,float2((texcoord.x - P)-uv.x, texcoord.y)).r);
+			DepthL =  min(DepthL,tex2D(SamplerL,float2((texcoord.x + P)+uv.x, texcoord.y)).r);
+			DepthR =  min(DepthR,tex2D(SamplerR,float2((texcoord.x - P)-uv.x, texcoord.y)).r);
 		}
 	}
 	
@@ -1888,11 +1887,11 @@ void PS_renderLR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD
 	{
 		if (Custom_Depth_Map == 0)
 		{
-			color = texcoord.x < 0.5 ? tex2D(SamplerDMOne,float2(texcoord.x*2 , texcoord.y)) : tex2D(SamplerDMTwo,float2(texcoord.x*2-1 , texcoord.y));
+			color = texcoord.x < 0.5 ? tex2D(SamplerL,float2(texcoord.x*2 , texcoord.y)) : tex2D(SamplerR,float2(texcoord.x*2-1 , texcoord.y));
 		}
 		else
 		{
-			color = tex2D(SamplerDMOne,texcoord);
+			color = tex2D(SamplerL,texcoord);
 		}
 	}	
 }
@@ -1916,17 +1915,12 @@ technique SuperDepth3D
 			VertexShader = PostProcessVS;
 			PixelShader = MouseCuror;
 		}
-			pass DepthMapPassOne
+			pass
 		{
 			VertexShader = PostProcessVS;
-			PixelShader = DepthMapOne;
-			RenderTarget0 = texDMOne;
-		}
-			pass DepthMapPassTwo
-		{
-			VertexShader = PostProcessVS;
-			PixelShader = DepthMapTwo;
-			RenderTarget0 = texDMTwo;
+			PixelShader = PS_calcLR;
+			RenderTarget0 = texL;
+			RenderTarget1 = texR;
 		}
 			pass SinglePassStereo
 		{
