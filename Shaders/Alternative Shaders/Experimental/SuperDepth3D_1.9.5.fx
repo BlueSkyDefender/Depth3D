@@ -31,6 +31,7 @@
 
 // Determines The size of the Depth Map. For 4k Use 2 or 2.5. For 1440p Use 1.5 or 2. For 1080p use 1.
 
+#define Depth_Map_Division 2
 
 uniform int Alternate_Depth_Map_One <
 	ui_type = "combo";
