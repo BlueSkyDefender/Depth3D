@@ -29,6 +29,9 @@
 
 #define Cross_Cusor_Key 66
 
+// Determines The size of the Depth Map. For 4k Use 2 or 2.5. For 1440p Use 1.5 or 2. For 1080p use 1.
+
+
 uniform int Alternate_Depth_Map_One <
 	ui_type = "combo";
 	ui_items = "DM 0\0DM 1\0DM 2\0DM 3\0DM 4\0DM 5\0DM 6\0DM 7\0DM 8\0DM 9\0DM 10\0DM 11\0DM 12\0DM 13\0DM 14\0DM 15\0DM 16\0DM 17\0DM 18\0DM 19\0DM 20\0DM 21\0DM 22\0DM 23\0DM 24\0DM 25\0DM 26\0DM 27\0DM 28\0DM 29\0DM 30\0DM 31\0DM 32\0DM 33\0DM 34\0DM 35\0DM 36\0DM 37\0DM 38\0DM 39\0";
@@ -155,6 +158,13 @@ uniform int Downscaling_Support <
 	ui_tooltip = "Dynamic Super Resolution & Virtual Super Resolution downscaling support for Line Interlaced & Checkerboard 3D displays.";
 > = 0;
 
+uniform int Alt_Render <
+	ui_type = "combo";
+	ui_items = "Normal Render\0Alternative Render\0";
+	ui_label = "Alternative Rendering Selection";
+	ui_tooltip = "Alternative render increases the number of samples used.";
+> = 0;
+
 uniform bool Eye_Swap <
 	ui_label = "Eye Swap";
 	ui_tooltip = "Left right image change.";
@@ -206,14 +216,14 @@ sampler BackBufferCLAMP
 		AddressW = CLAMP;
 	};
 	
-texture texL  { Width = BUFFER_WIDTH/2.5; Height = BUFFER_HEIGHT/2.5; Format = RGBA32F;}; 
+texture texL  { Width = BUFFER_WIDTH/Depth_Map_Division; Height = BUFFER_HEIGHT/Depth_Map_Division; Format = RGBA32F;}; 
 
 sampler SamplerL
 	{
 		Texture = texL;
 	};
 	
-texture texR  { Width = BUFFER_WIDTH/2.5; Height = BUFFER_HEIGHT/2.5; Format = RGBA32F;}; 
+texture texR  { Width = BUFFER_WIDTH/Depth_Map_Division; Height = BUFFER_HEIGHT/Depth_Map_Division; Format = RGBA32F;}; 
 
 sampler SamplerR
 	{
@@ -1730,7 +1740,18 @@ float4 DepthMapTwo(float2 texcoord : TEXCOORD0) : SV_Target
 
 void  PS_calcLR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 colorR : SV_Target0, out float4 colorL : SV_Target1)
 {
- float DP = Depth;
+
+ float DP;
+ 
+ 	if(!Eye_Swap)
+		{	
+			DP = Depth;
+		}
+		else
+		{
+			DP = -Depth;
+		}
+ 
  float Disocclusion_Power_Low = DP/1500;
  float Disocclusion_Power_Medium = DP/1000;
  float Disocclusion_Power_High = DP/500;
@@ -1746,18 +1767,10 @@ void  PS_calcLR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0
 		Con = 8;
 	
 	if(Dis_Occlusion > 0) 
-	{	
-	const float weight[8] = 
-	{ 
-	0.21,
-	 0.13,
-	0.08,
-	 0.05,  
-	0.03,
-	 0.02,  
-	0.01,
-	 0.01   
-	};
+	{
+	
+	const float weight[8] = { 0.21,0.13,0.08,0.05,0.03,0.02,0.01, 0.01 };
+//const float weight[8] = { -0.05,0.05,-0.03,0.03,-0.02,0.02,-0.01,0.01 };
 	
 	if(Dis_Occlusion == 1)
 	{
@@ -1780,19 +1793,19 @@ void  PS_calcLR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0
 	if(Dis_Occlusion == 4)
 	{
 	dir = 0.5 - texcoord;
-	B = Disocclusion_Power_Low*2;
+	B = Disocclusion_Power_Low;
 	}
 	
 	if(Dis_Occlusion == 5)
 	{
 	dir = 0.5 - texcoord;
-	B = Disocclusion_Power_Medium*2;
+	B = Disocclusion_Power_Medium;
 	}
 	
 	if(Dis_Occlusion == 6)
 	{
 	dir = 0.5 - texcoord;
-	B = Disocclusion_Power_High*2;
+	B = Disocclusion_Power_High;
 	}
 	
 	dir = normalize( dir ); 
@@ -1818,10 +1831,15 @@ void  PS_calcLR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0
 void PS_renderLR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 color : SV_Target0)
 {
 	float samples[3] = {0.50, 0.66, 1.0};
-	float DepthL = 1, DepthR = 1;
+	float samplesAlt[8] = {0.15, 0.25, 0.375, 0.50, 0.66, 0.75, 0.825, 1.0};
+	float DepthL = 1, DepthR = 1 , D , P , S;
 	float2 uv = 0;
-	float D;
-	float P;
+	int Con;
+	
+	if (Alt_Render == 0)		
+		Con = 3;
+	else
+		Con = 8;
 	
 	if(!Eye_Swap)
 		{	
@@ -1835,24 +1853,34 @@ void PS_renderLR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD
 		}
 	
 	[loop]
-	for (int j = 0; j < 3; ++j) 
+	for (int j = 0; j < Con; ++j) 
 	{	
-			uv.x = samples[j] * D;
-
-		if(Stereoscopic_Mode == 0)
+		uv.x = samples[j] * D;
+		uv.y = samplesAlt[j] * D;
+			
+		if (Alt_Render == 0)
 		{	
-			DepthL =  min(DepthL,tex2D(SamplerL,float2((texcoord.x*2 + P)+uv.x, texcoord.y)).r);
-			DepthR =  min(DepthR,tex2D(SamplerR,float2((texcoord.x*2-1 - P)-uv.x, texcoord.y)).r);
-		}
-		else if(Stereoscopic_Mode == 1)
-		{
-			DepthL =  min(DepthL,tex2D(SamplerL,float2((texcoord.x + P)+uv.x, texcoord.y*2)).r);
-			DepthR =  min(DepthR,tex2D(SamplerR,float2((texcoord.x - P)-uv.x, texcoord.y*2-1)).r);
+			S = uv.x;
 		}
 		else
 		{
-			DepthL =  min(DepthL,tex2D(SamplerL,float2((texcoord.x + P)+uv.x, texcoord.y)).r);
-			DepthR =  min(DepthR,tex2D(SamplerR,float2((texcoord.x - P)-uv.x, texcoord.y)).r);
+			S = uv.y;
+		}
+
+		if(Stereoscopic_Mode == 0)
+		{	
+			DepthL =  min(DepthL,tex2D(SamplerL,float2((texcoord.x*2 + P)+S, texcoord.y)).r);
+			DepthR =  min(DepthR,tex2D(SamplerR,float2((texcoord.x*2-1 - P)-S, texcoord.y)).r);
+		}
+		else if(Stereoscopic_Mode == 1)
+		{
+			DepthL =  min(DepthL,tex2D(SamplerL,float2((texcoord.x + P)+S, texcoord.y*2)).r);
+			DepthR =  min(DepthR,tex2D(SamplerR,float2((texcoord.x - P)-S, texcoord.y*2-1)).r);
+		}
+		else
+		{
+			DepthL =  min(DepthL,tex2D(SamplerL,float2((texcoord.x + P)+S, texcoord.y)).r);
+			DepthR =  min(DepthR,tex2D(SamplerR,float2((texcoord.x - P)-S, texcoord.y)).r);
 		}
 	}
 	
