@@ -38,7 +38,7 @@ uniform int Alternate_Depth_Map_Two <
 
 uniform int Depth <
 	ui_type = "drag";
-	ui_min = 0; ui_max = 30;
+	ui_min = 0; ui_max = 25;
 	ui_label = "Depth Slider";
 	ui_tooltip = "Determines the amount of Image Warping and Separation between both eyes. To go beyond 25 max you need to enter your own number.";
 > = 10;
@@ -1672,8 +1672,8 @@ float4 DepthMapTwo(float2 texcoord : TEXCOORD0) : SV_Target
 
 	void  PS_calcLR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 colorR : SV_Target0, out float4 colorL : SV_Target1)
 	{
-	colorL = texcoord.x+Depth*pix.x*DepthMapOne(float2(texcoord.x,texcoord.y));
-	colorR = texcoord.x-Depth*pix.x*DepthMapTwo(float2(texcoord.x,texcoord.y));
+	colorL = texcoord.x+Depth*pix.x*DepthMapOne(float2(texcoord.x-(Depth/25)*pix.x,texcoord.y));
+	colorR = texcoord.x-Depth*pix.x*DepthMapTwo(float2(texcoord.x+(Depth/25)*pix.x,texcoord.y));
 	}
 	
 
@@ -1737,16 +1737,6 @@ float4 DepthMapTwo(float2 texcoord : TEXCOORD0) : SV_Target
 				x = 24;			
 			else if (Depth == 25)
 				x = 25;
-			else if (Depth == 26)
-				x = 26;
-			else if (Depth == 27)
-				x = 27;
-			else if (Depth == 28)
-				x = 28;
-			else if (Depth == 29)
-				x = 29;
-			else if (Depth == 30)
-				x = 30;
 							
 			//Workaround for DX9 Games
 
@@ -1822,16 +1812,6 @@ float4 DepthMapTwo(float2 texcoord : TEXCOORD0) : SV_Target
 				x = 24;			
 			else if (Depth == 25)
 				x = 25;
-			else if (Depth == 26)
-				x = 26;
-			else if (Depth == 27)
-				x = 27;
-			else if (Depth == 28)
-				x = 28;
-			else if (Depth == 29)
-				x = 29;
-			else if (Depth == 30)
-				x = 30;
 			
 			//Workaround for DX9 Games
 
