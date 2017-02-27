@@ -33,6 +33,18 @@
 
 #define Depth_Map_Division 2.0
 
+uniform bool MIX <
+	ui_label = "Mix Selection";
+	ui_tooltip = "Select how you like mix the Depth Maps.";
+> = 0;
+
+uniform float Adjust <
+	ui_type = "drag";
+	ui_min = 0; ui_max = 1;
+	ui_label = "Mix Adjust";
+	ui_tooltip = "Adjust How you mix both Depth Maps. Default is 0.50 = 50% mix.";
+> = 0.50;
+
 uniform int Alternate_Depth_Map_One <
 	ui_type = "combo";
 	ui_items = "DM 0\0DM 1\0DM 2\0DM 3\0DM 4\0DM 5\0DM 6\0DM 7\0DM 8\0DM 9\0DM 10\0DM 11\0DM 12\0DM 13\0DM 14\0DM 15\0DM 16\0DM 17\0DM 18\0DM 19\0DM 20\0DM 21\0DM 22\0DM 23\0DM 24\0DM 25\0DM 26\0DM 27\0DM 28\0DM 29\0DM 30\0DM 31\0DM 32\0DM 33\0DM 34\0DM 35\0DM 36\0DM 37\0DM 38\0DM 39\0DM 40\0";
@@ -47,13 +59,6 @@ uniform int Alternate_Depth_Map_Two <
 	ui_tooltip = "Alternate Depth Map for different Games. Read the ReadMeDepth3d.txt, for setting. Each game May and can use a diffrent Alternet Depth Map.";
 > = 0;
 
-uniform int MIX <
-	ui_type = "combo";
-	ui_items = "Off\0Mix 50/50\0Mix 75/25\0Mix 25/75\0";
-	ui_label = "Mix Selection";
-	ui_tooltip = "Select how you like mix the Depth Maps.";
-> = 1;
-
 uniform int Depth <
 	ui_type = "drag";
 	ui_min = 0; ui_max = 50;
@@ -67,6 +72,13 @@ uniform float Perspective <
 	ui_label = "Perspective Slider";
 	ui_tooltip = "Determines the perspective point. Default is 0";
 > = 0;
+
+uniform int Dis_Occlusion <
+	ui_type = "combo";
+	ui_items = "Off\0Normal Mask Low\0Normal Mask Medium\0Normal Mask High\0Radial Mask Low\0Radial Mask Medium\0Radial Mask High\0";
+	ui_label = "Dis-Occlusion Mask";
+	ui_tooltip = "Auto occlusion masking options.";
+> = 1;
 
 uniform bool Depth_Map_View <
 	ui_label = "Depth Map View";
@@ -159,13 +171,6 @@ uniform int Downscaling_Support <
 	ui_tooltip = "Dynamic Super Resolution & Virtual Super Resolution downscaling support for Line Interlaced & Checkerboard 3D displays.";
 > = 0;
 
-uniform int Alt_Render <
-	ui_type = "combo";
-	ui_items = "Normal Render\0Alternative Render\0";
-	ui_label = "Alternative Rendering Selection";
-	ui_tooltip = "Alternative render increases the number of samples used.";
-> = 0;
-
 uniform bool Eye_Swap <
 	ui_label = "Eye Swap";
 	ui_tooltip = "Left right image change.";
@@ -229,6 +234,20 @@ texture texTwo  { Width = BUFFER_WIDTH/Depth_Map_Division; Height = BUFFER_HEIGH
 sampler SamplerTwo
 	{
 		Texture = texTwo;
+	};
+
+texture texL  { Width = BUFFER_WIDTH/Depth_Map_Division; Height = BUFFER_HEIGHT/Depth_Map_Division; Format = RGBA8;}; 
+	
+sampler SamplerL
+	{
+		Texture = texL;
+	};
+	
+texture texR  { Width = BUFFER_WIDTH/Depth_Map_Division; Height = BUFFER_HEIGHT/Depth_Map_Division; Format = RGBA8;}; 
+
+sampler SamplerR
+	{
+		Texture = texR;
 	};
 	
 float4 MouseCuror(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Target
@@ -1765,38 +1784,109 @@ void  PS_calcLR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0
 	One = DepthMapOne(texcoord);
 	Two = DepthMapTwo(texcoord);
 	}
-	else if (MIX == 1)
+	else
 	{
-	One = lerp(DepthMapOne(texcoord),DepthMapTwo(texcoord),0.50);
-	Two = lerp(DepthMapOne(texcoord),DepthMapTwo(texcoord),0.50);
+	One = lerp(DepthMapOne(texcoord),DepthMapTwo(texcoord),Adjust);
+	Two = lerp(DepthMapOne(texcoord),DepthMapTwo(texcoord),Adjust);
 	}
-	else if (MIX == 2)
-	{
-	One = lerp(DepthMapOne(texcoord),DepthMapTwo(texcoord),0.75);
-	Two = lerp(DepthMapOne(texcoord),DepthMapTwo(texcoord),0.75);
-	}
-	else 
-	{
-	One = lerp(DepthMapOne(texcoord),DepthMapTwo(texcoord),0.25);
-	Two = lerp(DepthMapOne(texcoord),DepthMapTwo(texcoord),0.25);
-	}
-	
+		
 	colorOne = One;
 	colorTwo = Two;	
 }
 
+void  DisOcclusion(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 colorOne : SV_Target0, out float4 colorTwo : SV_Target1)
+{
+ float DP;
+ 
+ 	if(!Eye_Swap)
+		{	
+			DP = Depth;
+		}
+		else
+		{
+			DP = -Depth;
+		}
+ 
+ float Disocclusion_Power_Low = DP/2000;
+ float Disocclusion_Power_Medium = DP/1500;
+ float Disocclusion_Power_High = DP/1000;
+ float4 colOutOne;
+ float4 colOutTwo;                                                                                                                                                                                                                                                                                                	
+ float2 dir;
+ float B;
+ int Con;
+ 
+	if (Dis_Occlusion == 0)		
+		Con = 1;//has to be one for DX9 Games
+	else
+		Con = 10;
+	
+	if(Dis_Occlusion > 0) 
+	{
+	
+	const float weight[10] = { -0.08,0.01,-0.05,0.02,-0.03,0.05,-0.02,0.05,-0.01,0.08 };
+	
+	if(Dis_Occlusion == 1)
+	{
+	dir = float2(0.5,0);
+	B = Disocclusion_Power_Low;
+	}
+	
+	if(Dis_Occlusion == 2)
+	{
+	dir = float2(0.5,0);
+	B = Disocclusion_Power_Medium;
+	}
+
+	if(Dis_Occlusion == 3)
+	{
+	dir = float2(0.5,0);
+	B = Disocclusion_Power_High;
+	}
+	
+	if(Dis_Occlusion == 4)
+	{
+	dir = 0.5 - texcoord;
+	B = Disocclusion_Power_Low;
+	}
+	
+	if(Dis_Occlusion == 5)
+	{
+	dir = 0.5 - texcoord;
+	B = Disocclusion_Power_Medium;
+	}
+	
+	if(Dis_Occlusion == 6)
+	{
+	dir = 0.5 - texcoord;
+	B = Disocclusion_Power_High;
+	}
+	
+	dir = normalize( dir ); 
+	 
+	[unroll]
+	for (int i = 0; i < Con; i++)
+	{
+	colOutOne += tex2D(SamplerOne,texcoord + dir * weight[i] * B)/Con;
+	colOutTwo += tex2D(SamplerTwo,texcoord + dir * weight[i] * B)/Con;
+	}
+	
+	}
+	else
+	{
+	colOutOne = tex2D(SamplerOne,texcoord);
+	colOutTwo = tex2D(SamplerTwo,texcoord);
+	}		                                                                                                                                                   
+	colorOne = colOutOne;
+	colorTwo = colOutTwo;
+}
+
 void PS_renderLR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 color : SV_Target0 )
 {
-	float samples[8] = {0.50, 0.66, 1.0, 0.15, 0.25, 0.375, 0.75, 0.825};
+	float samples[4] = {0.50, 0.66, 0.825, 1.0,};
 	float DepthL = 1, DepthR = 1 , D , P;
 	float2 uv = 0;
-	int Con;
 		
-	if (Alt_Render == 0)		
-		Con = 3;
-	else
-		Con = 8;
-	
 	if(!Eye_Swap)
 		{	
 			P = Perspective * pix.x;
@@ -1808,25 +1898,25 @@ void PS_renderLR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD
 			D = -Depth * pix.x;
 		}
 	
-	[unroll]
-	for (int j = 0; j < Con; ++j) 
+	[loop]
+	for (int j = 0; j < 4; ++j) 
 	{	
 		uv.x = samples[j] * D;
 		
 		if(Stereoscopic_Mode == 0)
 		{	
-			DepthL =  min(DepthL,tex2D(SamplerOne,float2((texcoord.x*2 + P)+uv.x, texcoord.y)).r);
-			DepthR =  min(DepthR,tex2D(SamplerTwo,float2((texcoord.x*2-1 - P)-uv.x, texcoord.y)).r);
+			DepthL =  min(DepthL,tex2D(SamplerL,float2((texcoord.x*2 + P)+uv.x, texcoord.y)).r);
+			DepthR =  min(DepthR,tex2D(SamplerR,float2((texcoord.x*2-1 - P)-uv.x, texcoord.y)).r);
 		}
 		else if(Stereoscopic_Mode == 1)
 		{
-			DepthL =  min(DepthL,tex2D(SamplerOne,float2((texcoord.x + P)+uv.x, texcoord.y*2)).r);
-			DepthR =  min(DepthR,tex2D(SamplerTwo,float2((texcoord.x - P)-uv.x, texcoord.y*2-1)).r);
+			DepthL =  min(DepthL,tex2D(SamplerL,float2((texcoord.x + P)+uv.x, texcoord.y*2)).r);
+			DepthR =  min(DepthR,tex2D(SamplerR,float2((texcoord.x - P)-uv.x, texcoord.y*2-1)).r);
 		}
 		else
 		{
-			DepthL =  min(DepthL,tex2D(SamplerOne,float2((texcoord.x + P)+uv.x, texcoord.y)).r);
-			DepthR =  min(DepthR,tex2D(SamplerTwo,float2((texcoord.x - P)-uv.x, texcoord.y)).r);
+			DepthL =  min(DepthL,tex2D(SamplerL,float2((texcoord.x + P)+uv.x, texcoord.y)).r);
+			DepthR =  min(DepthR,tex2D(SamplerR,float2((texcoord.x - P)-uv.x, texcoord.y)).r);
 		}
 	}
 		
@@ -1931,7 +2021,8 @@ void PS_renderLR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD
 	{
 		if (Custom_Depth_Map == 0)
 		{
-			color = texcoord.x < 0.5 ? tex2D(SamplerOne,float2(texcoord.x*2 , texcoord.y)) : tex2D(SamplerTwo,float2(texcoord.x*2-1 , texcoord.y));
+			float4 DMV = texcoord.x < 0.5 ? DepthMapOne(float2(texcoord.x*2 , texcoord.y*2)) : DepthMapTwo(float2(texcoord.x*2-1 , texcoord.y*2));
+			color = texcoord.y < 0.5 ? DMV : tex2D(SamplerOne,float2(texcoord.x , texcoord.y*2-1));
 		}
 		else
 		{
@@ -1965,6 +2056,13 @@ technique SuperDepth3D
 			PixelShader = PS_calcLR;
 			RenderTarget0 = texOne;
 			RenderTarget1 = texTwo;
+		}
+			pass DisOcclusion
+		{
+			VertexShader = PostProcessVS;
+			PixelShader = DisOcclusion;
+			RenderTarget0 = texL;
+			RenderTarget1 = texR;
 		}
 			pass SinglePassStereo
 		{
