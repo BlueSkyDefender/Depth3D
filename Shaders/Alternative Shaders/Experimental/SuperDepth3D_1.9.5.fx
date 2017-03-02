@@ -1883,7 +1883,7 @@ void  DisOcclusion(in float4 position : SV_Position, in float2 texcoord : TEXCOO
 
 void PS_renderLR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 color : SV_Target0 )
 {
-	float samples[4] = {0.50, 0.66, 0.825, 1.0,};
+	float samples[4] = {0.50, 0.66, 0.00, 1.0,};
 	float DepthL = 1, DepthR = 1 , D , P;
 	float2 uv = 0;
 		
