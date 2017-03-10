@@ -29,6 +29,22 @@
 
 #define Cross_Cusor_Key 66
 
+// Determines The size of the Depth Map. For 4k Use 2 or 2.5. For 1440p Use 1.5 or 2. For 1080p use 1.
+
+#define Depth_Map_Division 2.0
+
+uniform bool MIX <
+	ui_label = "Mix Selection";
+	ui_tooltip = "Select how you like mix the Depth Maps.";
+> = 0;
+
+uniform float Adjust <
+	ui_type = "drag";
+	ui_min = 0; ui_max = 1;
+	ui_label = "Mix Adjust";
+	ui_tooltip = "Adjust How you mix both Depth Maps. Default is 0.50 = 50% mix.";
+> = 0.50;
+
 uniform int Alternate_Depth_Map_One <
 	ui_type = "combo";
 	ui_items = "DM 0\0DM 1\0DM 2\0DM 3\0DM 4\0DM 5\0DM 6\0DM 7\0DM 8\0DM 9\0DM 10\0DM 11\0DM 12\0DM 13\0DM 14\0DM 15\0DM 16\0DM 17\0DM 18\0DM 19\0DM 20\0DM 21\0DM 22\0DM 23\0DM 24\0DM 25\0DM 26\0DM 27\0DM 28\0DM 29\0DM 30\0DM 31\0DM 32\0DM 33\0DM 34\0DM 35\0DM 36\0DM 37\0DM 38\0";
@@ -272,13 +288,13 @@ sampler BackBufferCLAMP
 texture texCL  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA32F;}; 
 texture texCR  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA32F;}; 
 
-texture texL  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA32F;}; 
+texture texL  { Width = BUFFER_WIDTH/Depth_Map_Division; Height = BUFFER_HEIGHT/Depth_Map_Division; Format = RGBA32F;}; 
 sampler SamplerL
 	{
 		Texture = texL;
 	};
 	
-texture texR  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA32F;}; 
+texture texR  { Width = BUFFER_WIDTH/Depth_Map_Division; Height = BUFFER_HEIGHT/Depth_Map_Division; Format = RGBA32F;}; 
 sampler SamplerR
 	{
 		Texture = texR;
@@ -332,18 +348,18 @@ sampler SamplerCRCLAMP
 		AddressW = CLAMP;
 	};
 	
-//Depth Map Information	
+/////////////////////////////////////////////////////////////////////////////////Depth Map Information One/////////////////////////////////////////////////////////////////////////////////
+
 float4 DepthMapOne(float2 texcoord : TEXCOORD0) : SV_Target
 {
-
-	 float4 color = 0;
+	 float4 color;
 
 			if (Depth_Map_Flip)
 			texcoord.y =  1 - texcoord.y;
-	
+
 	float4 depthM = tex2D(DepthBuffer, float2(texcoord.x, texcoord.y));
 	float4 WDM = tex2D(DepthBuffer, float2(texcoord.x, texcoord.y));
-		
+			
 		if (Custom_Depth_Map == 0)
 	{	
 		//Alien Isolation | Firewatch
@@ -656,6 +672,22 @@ float4 DepthMapOne(float2 texcoord : TEXCOORD0) : SV_Target
 		float cF = 100;	
 		float cN = 100;	
 		depthM = (exp(depthM * log(cF + cN)) - cN) / cF;
+		}
+		
+		//LOZ TP HD
+		if (Alternate_Depth_Map_One == 39)
+		{
+		float cF = 100;
+		float cN = 2.250;
+		depthM = (exp(depthM * log(cF + cN)) - cN) / cF;
+		}
+		
+		//God of War Ghost of Sparta
+		if (Alternate_Depth_Map_One == 40)
+		{
+		float cF = 10.5;
+		float cN = 0.02;
+		depthM = (pow(abs(cN-depthM),cF));
 		}
 		
 	}
@@ -1042,14 +1074,14 @@ float4 DepthMapOne(float2 texcoord : TEXCOORD0) : SV_Target
 	if (Weapon_Depth_Map == 27 || Weapon_Depth_Map == 23 || Weapon_Depth_Map == 20 || Weapon_Depth_Map == 19 || Weapon_Depth_Map == 13 || Weapon_Depth_Map == 8)
 	{
 	NearDepth = step(depthM.r,Adj/100000);
+	NearDepth = NearDepth-NearDepth*Weapon_Near_Far.x;
 	}
 	else
 	{
 	NearDepth = step(depthM.r,Adj);
+	NearDepth = NearDepth-NearDepth*Weapon_Near_Far.x;
 	}
-	
-	if(Depth_Map_Enhancement == 0)
-    {
+
 		if (Weapon_Depth_Map <= 0)
 		{
 		D = depthM;
@@ -1058,26 +1090,6 @@ float4 DepthMapOne(float2 texcoord : TEXCOORD0) : SV_Target
 		{
 		D = lerp(depthM,WDM%Per,NearDepth);
 		}
-    }
-    else
-    {
-		if (Weapon_Depth_Map <= 0)
-		{
-		float A = Adjust;
-		float cDF = 1.025;
-		float cDN = 0;
-		depthMFar = pow(abs((exp(depthM * log(cDF + cDN)) - cDN) / cDF),1000);	
-		D = lerp(depthMFar,depthM,A);
-		}
-		else
-		{
-		float A = Adjust;
-		float cDF = 1.025;
-		float cDN = 0;
-		depthMFar = pow(abs((exp(depthM * log(cDF + cDN)) - cDN) / cDF),1000);	
-		D = lerp(lerp(depthMFar,depthM,A),WDM%Per,NearDepth);
-		}
-    }
     
 	color.rgb = D.rrr;
 	
@@ -1085,14 +1097,15 @@ float4 DepthMapOne(float2 texcoord : TEXCOORD0) : SV_Target
 
 }
 
+/////////////////////////////////////////////////////////////////////////////////Depth Map Information Two/////////////////////////////////////////////////////////////////////////////////
+
 float4 DepthMapTwo(float2 texcoord : TEXCOORD0) : SV_Target
 {
-
-	 float4 color = 0;
+	 float4 color;
 
 			if (Depth_Map_Flip)
 			texcoord.y =  1 - texcoord.y;
-	
+
 	float4 depthM = tex2D(DepthBuffer, float2(texcoord.x, texcoord.y));
 	float4 WDM = tex2D(DepthBuffer, float2(texcoord.x, texcoord.y));
 		
@@ -1410,6 +1423,22 @@ float4 DepthMapTwo(float2 texcoord : TEXCOORD0) : SV_Target
 		depthM = (exp(depthM * log(cF + cN)) - cN) / cF;
 		}
 		
+		//LOZ TP HD
+		if (Alternate_Depth_Map_Two == 39)
+		{
+		float cF = 100;
+		float cN = 2.250;
+		depthM = (exp(depthM * log(cF + cN)) - cN) / cF;
+		}
+		
+		//God of War Ghost of Sparta
+		if (Alternate_Depth_Map_Two == 40)
+		{
+		float cF = 10.5;
+		float cN = 0.02;
+		depthM = (pow(abs(cN-depthM),cF));
+		}
+		
 	}
 	else
 	{
@@ -1794,14 +1823,14 @@ float4 DepthMapTwo(float2 texcoord : TEXCOORD0) : SV_Target
 	if (Weapon_Depth_Map == 27 || Weapon_Depth_Map == 23 || Weapon_Depth_Map == 20 || Weapon_Depth_Map == 19 || Weapon_Depth_Map == 13 || Weapon_Depth_Map == 8)
 	{
 	NearDepth = step(depthM.r,Adj/100000);
+	NearDepth = NearDepth-NearDepth*Weapon_Near_Far.y;
 	}
 	else
 	{
 	NearDepth = step(depthM.r,Adj);
+	NearDepth = NearDepth-NearDepth*Weapon_Near_Far.y;
 	}
 	
-	if(Depth_Map_Enhancement == 0)
-    {
 		if (Weapon_Depth_Map <= 0)
 		{
 		D = depthM;
@@ -1810,26 +1839,6 @@ float4 DepthMapTwo(float2 texcoord : TEXCOORD0) : SV_Target
 		{
 		D = lerp(depthM,WDM%Per,NearDepth);
 		}
-    }
-    else
-    {
-		if (Weapon_Depth_Map <= 0)
-		{
-		float A = Adjust;
-		float cDF = 1.025;
-		float cDN = 0;
-		depthMFar = pow(abs((exp(depthM * log(cDF + cDN)) - cDN) / cDF),1000);	
-		D = lerp(depthMFar,depthM,A);
-		}
-		else
-		{
-		float A = Adjust;
-		float cDF = 1.025;
-		float cDN = 0;
-		depthMFar = pow(abs((exp(depthM * log(cDF + cDN)) - cDN) / cDF),1000);	
-		D = lerp(lerp(depthMFar,depthM,A),WDM%Per,NearDepth);
-		}
-    }
     
 	color.rgb = D.rrr;
 	
@@ -1841,8 +1850,22 @@ float4 DepthMapTwo(float2 texcoord : TEXCOORD0) : SV_Target
 
 void  PS_calcLR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 colorR : SV_Target0, out float4 colorL : SV_Target1)
 {
-	colorL = DepthMapOne(texcoord);
-	colorR = DepthMapTwo(texcoord);
+	float4 One;
+	float4 Two;
+	
+	if (MIX == 0)
+	{
+	One = DepthMapOne(texcoord);
+	Two = DepthMapTwo(texcoord);
+	}
+	else
+	{
+	One = lerp(DepthMapOne(texcoord),DepthMapTwo(texcoord),Adjust);
+	Two = lerp(DepthMapOne(texcoord),DepthMapTwo(texcoord),Adjust);
+	}
+		
+	colorL = One;
+	colorR = Two;	
 }
 
 void PS_renderLR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 color : SV_Target0 , out float4 colorT: SV_Target1)

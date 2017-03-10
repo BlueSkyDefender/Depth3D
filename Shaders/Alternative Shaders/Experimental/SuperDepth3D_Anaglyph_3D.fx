@@ -1760,9 +1760,9 @@ void  DisOcclusion(in float4 position : SV_Position, in float2 texcoord : TEXCOO
 			DP = -Depth;
 		}
  
- float Disocclusion_Power_Low = DP/2000;
- float Disocclusion_Power_Medium = DP/1500;
- float Disocclusion_Power_High = DP/1000;
+ float Disocclusion_Power_Low = DP/1500;
+ float Disocclusion_Power_Medium = DP/1000;
+ float Disocclusion_Power_High = DP/500;
  float4 colOutOne;
  float4 colOutTwo;                                                                                                                                                                                                                                                                                                	
  float2 dir;
