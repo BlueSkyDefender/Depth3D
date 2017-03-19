@@ -161,6 +161,13 @@ uniform bool Eye_Swap <
 	ui_tooltip = "Left right image change.";
 > = false;
 
+uniform int AO <
+	ui_type = "combo";
+	ui_items = "Off\0AO x8\0AO x16\0";
+	ui_label = "Ambient Occlusion Settings";
+	ui_tooltip = "Ambient Occlusion settings x8 is normal x16 is twice the power.";
+> = 1;
+
 uniform float Power <
 	ui_type = "drag";
 	ui_min = 0.375; ui_max = 0.625;
@@ -170,10 +177,10 @@ uniform float Power <
 
 uniform float Spread <
 	ui_type = "drag";
-	ui_min = 1.0; ui_max = 5.0;
+	ui_min = 0; ui_max = 3;
 	ui_label = "Spread";
 	ui_tooltip = "Spread";
-> = 2.5;
+> = 1.5;
 
 uniform bool mouse < source = "key"; keycode = Cross_Cusor_Key; toggle = true; >;
 
@@ -1069,6 +1076,7 @@ float4 GetAO( float2 texcoord )
     float incy = Spread*pix.y;
     float width = incx;
     float height = incy;
+    float num;
     
     //Depth Map
     float depthM = tex2D(SamplerDM, texcoord).r;
@@ -1077,7 +1085,7 @@ float4 GetAO( float2 texcoord )
 		float cN = 1000;
 		
 	//Depth Map linearization
-    depthM = clamp(pow(abs((exp(depthM * log(cF + cN)) - cN) / cF),10),0,1);
+    depthM = saturate(pow(abs((exp(depthM * log(cF + cN)) - cN) / cF),-0.200));
     
 	//2 iterations 
     [loop]
@@ -1085,23 +1093,46 @@ float4 GetAO( float2 texcoord )
     {
        float npw = (width+iter*random.x)/depthM;
        float nph = (height+iter*random.y)/depthM;
-	
-		   float3 ddiff = GetPosition(texcoord.xy+float2(npw,nph))-position;
-		   float3 ddiff2 = GetPosition(texcoord.xy+float2(npw,-nph))-position;
-		   float3 ddiff3 = GetPosition(texcoord.xy+float2(-npw,nph))-position;
-		   float3 ddiff4 = GetPosition(texcoord.xy+float2(-npw,-nph))-position;
+		if(AO == 1)
+		{
+			float3 ddiff = GetPosition(texcoord.xy+float2(npw,nph))-position;
+			float3 ddiff2 = GetPosition(texcoord.xy+float2(npw,-nph))-position;
+			float3 ddiff3 = GetPosition(texcoord.xy+float2(-npw,nph))-position;
+			float3 ddiff4 = GetPosition(texcoord.xy+float2(-npw,-nph))-position;
 
-		   ao+=  aoFF(ddiff,normal,npw,nph);
-		   ao+=  aoFF(ddiff2,normal,npw,-nph);
-		   ao+=  aoFF(ddiff3,normal,-npw,nph);
-		   ao+=  aoFF(ddiff4,normal,-npw,-nph);
+			ao+=  aoFF(ddiff,normal,npw,nph);
+			ao+=  aoFF(ddiff2,normal,npw,-nph);
+			ao+=  aoFF(ddiff3,normal,-npw,nph);
+			ao+=  aoFF(ddiff4,normal,-npw,-nph);
+			num = 8;
+		}
+		else if(AO == 2)
+		{
+			float3 ddiff = GetPosition(texcoord.xy+float2(npw,nph))-position;
+			float3 ddiff2 = GetPosition(texcoord.xy+float2(npw,-nph))-position;
+			float3 ddiff3 = GetPosition(texcoord.xy+float2(-npw,nph))-position;
+			float3 ddiff4 = GetPosition(texcoord.xy+float2(-npw,-nph))-position;
+			float3 ddiff5 = GetPosition(texcoord.xy+float2(0,nph))-position;
+			float3 ddiff6 = GetPosition(texcoord.xy+float2(0,-nph))-position;
+			float3 ddiff7 = GetPosition(texcoord.xy+float2(npw,0))-position;
+			float3 ddiff8 = GetPosition(texcoord.xy+float2(-npw,0))-position;
 
+			ao+=  aoFF(ddiff,normal,npw,nph);
+			ao+=  aoFF(ddiff2,normal,npw,-nph);
+			ao+=  aoFF(ddiff3,normal,-npw,nph);
+			ao+=  aoFF(ddiff4,normal,-npw,-nph);
+			ao+=  aoFF(ddiff5,normal,0,nph);
+			ao+=  aoFF(ddiff6,normal,0,-nph);
+			ao+=  aoFF(ddiff7,normal,npw,0);
+			ao+=  aoFF(ddiff8,normal,-npw,0);
+			num = 16;
+		}
 		
 		//increase sampling area
 		   width += incx;  
 		   height += incy;		    
     } 
-    ao/=8;
+    ao/=num;
 
 	//Luminance adjust used for overbright correction.
 	float4 Done = clamp(ao,0,0.975);
@@ -1129,11 +1160,12 @@ void AO_in(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out
 void  DisOcclusion(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 color : SV_Target)
 {
   
-float2 ScreenCal = float2(2.5*pix.x,2.5*pix.y);
+float2 ScreenCal = float2(2*pix.x,2*pix.y);
 
 	float2 FinCal = ScreenCal*0.6;
 
 	float4 v[9];
+	float4 x[9];
 
 	[unroll]
 	for(int i = -1; i <= 1; ++i) 
@@ -1143,6 +1175,7 @@ float2 ScreenCal = float2(2.5*pix.x,2.5*pix.y);
 		  float2 offset = float2(float(i), float(j));
 
 		  v[(i + 1) * 3 + (j + 1)] = tex2D(SamplerSSAO, texcoord + offset * FinCal);
+		  x[(i + 1) * 3 + (j + 1)] = tex2D(SamplerSSAO, texcoord + (offset * FinCal)*2);
 		  
 		  }
 	}
@@ -1154,7 +1187,12 @@ float2 ScreenCal = float2(2.5*pix.x,2.5*pix.y);
 	mnmx4(v[2], v[3], v[4], v[7]);
 	mnmx3(v[3], v[4], v[8]);
 	
-	float4 Done = v[4]; 
+	mnmx6(x[0], x[1], x[2], x[3], x[4], x[5]);
+	mnmx5(x[1], x[2], x[3], x[4], x[6]);
+	mnmx4(x[2], x[3], x[4], x[7]);
+	mnmx3(x[3], x[4], x[8]);
+	
+	float4 Done = (v[4]*x[4])/2; 
 
 float DP =  Depth;
 	
