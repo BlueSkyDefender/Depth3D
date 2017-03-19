@@ -17,9 +17,13 @@
  //* http://reshade.me/forum/shader-presentation/2128-sidebyside-3d-depth-map-based-stereoscopic-shader																				*//	
  //* ---------------------------------																																				*//
  //*																																												*//
- //* Original work was based on Shader Based on CryTech 3 Dev work http://www.slideshare.net/TiagoAlexSousa/secrets-of-cryengine-3-graphics-technology								*//
- //*																																												*//
+ //* Original work was based on the shader code of a CryTech 3 Dev http://www.slideshare.net/TiagoAlexSousa/secrets-of-cryengine-3-graphics-technology								*//
  //* 																																												*//
+ //* AO Work was based on the shader code of a Devmaster Dev																														*//
+ //* code was take from http://forum.devmaster.net/t/disk-to-disk-ssao/17414																										*//
+ //* arkano22 Disk to Disk AO GLSL code adapted to be used to add more detail to the Depth Map.																						*//
+ //* http://forum.devmaster.net/users/arkano22/																																		*//
+ //*																																												*//
  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // Change the Cross Cusor Key
@@ -1043,6 +1047,7 @@ float3 normal_from_depth(float2 texcoords)
 	return normalize(normal);
 }
 
+//Ambient Occlusion form factor
 float aoFF(in float3 ddiff,in float3 cnorm, in float c1, in float c2)
 {
 	float3 vv = normalize(ddiff);
@@ -1052,57 +1057,57 @@ float aoFF(in float3 ddiff,in float3 cnorm, in float c1, in float c2)
 
 float4 GetAO( float2 texcoord )
 { 
-    //read current normal,position and color.
-    float3 n = normal_from_depth(texcoord);
-    float3 p = GetPosition(texcoord);
-
-    //randomization texture
-
-    float2 random = GetRandom(texcoord).xy;
-
-float iter = 2.5*pix.x;
+    //current normal , position and random static texture.
+    float3 normal = normal_from_depth(texcoord);
+    float3 position = GetPosition(texcoord);
+	float2 random = GetRandom(texcoord).xy;
 
     //initialize variables:
-    float ao = 0.0;
+	float iter = 2.5*pix.x;
+    float ao;
     float incx = Spread*pix.x;
     float incy = Spread*pix.y;
-    float pw = incx;
-    float ph = incy;
-    float cdepth = tex2D(SamplerDM, texcoord).r;
+    float width = incx;
+    float height = incy;
+    
+    //Depth Map
+    float depthM = tex2D(SamplerDM, texcoord).r;
     
     	float cF = -1.0;
 		float cN = 1000;
-
-    cdepth = clamp(pow(abs((exp(cdepth * log(cF + cN)) - cN) / cF),10),0,1);
-
+		
+	//Depth Map linearization
+    depthM = clamp(pow(abs((exp(depthM * log(cF + cN)) - cN) / cF),10),0,1);
+    
+	//2 iterations 
     [loop]
     for(float i=0.0; i<2; ++i) 
     {
-       float npw = (pw+iter*random.x)/cdepth;
-       float nph = (ph+iter*random.y)/cdepth;
+       float npw = (width+iter*random.x)/depthM;
+       float nph = (height+iter*random.y)/depthM;
 	
-		   float3 ddiff = GetPosition(texcoord.st+float2(npw,nph))-p;
-		   float3 ddiff2 = GetPosition(texcoord.st+float2(npw,-nph))-p;
-		   float3 ddiff3 = GetPosition(texcoord.st+float2(-npw,nph))-p;
-		   float3 ddiff4 = GetPosition(texcoord.st+float2(-npw,-nph))-p;
+		   float3 ddiff = GetPosition(texcoord.xy+float2(npw,nph))-position;
+		   float3 ddiff2 = GetPosition(texcoord.xy+float2(npw,-nph))-position;
+		   float3 ddiff3 = GetPosition(texcoord.xy+float2(-npw,nph))-position;
+		   float3 ddiff4 = GetPosition(texcoord.xy+float2(-npw,-nph))-position;
 
-		   ao+=  aoFF(ddiff,n,npw,nph);
-		   ao+=  aoFF(ddiff2,n,npw,-nph);
-		   ao+=  aoFF(ddiff3,n,-npw,nph);
-		   ao+=  aoFF(ddiff4,n,-npw,-nph);
+		   ao+=  aoFF(ddiff,normal,npw,nph);
+		   ao+=  aoFF(ddiff2,normal,npw,-nph);
+		   ao+=  aoFF(ddiff3,normal,-npw,nph);
+		   ao+=  aoFF(ddiff4,normal,-npw,-nph);
 
 		
-		//increase sampling area:
-		   pw += incx;  
-		   ph += incy;		    
+		//increase sampling area
+		   width += incx;  
+		   height += incy;		    
     } 
     ao/=8;
 
-float4 Done = clamp(ao,0,0.975);
-
-  float3 lumcoeff = float3(0.299,0.587,0.114);
-  float lum = dot(Done.rgb, lumcoeff);
-  float3 luminance = float3(lum, lum, lum);
+	//Luminance adjust used for overbright correction.
+	float4 Done = clamp(ao,0,0.975);
+	float3 lumcoeff = float3(0.299,0.587,0.114);
+	float lum = dot(Done.rgb, lumcoeff);
+	float3 luminance = float3(lum, lum, lum);
   
     return float4(luminance,1);
 }
