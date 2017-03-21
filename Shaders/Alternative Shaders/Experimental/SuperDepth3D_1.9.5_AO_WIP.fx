@@ -46,7 +46,7 @@ uniform int Alternate_Depth_Map_One <
 
 uniform int Depth <
 	ui_type = "drag";
-	ui_min = 0; ui_max = 50;
+	ui_min = 0; ui_max = 30;
 	ui_label = "Depth Slider";
 	ui_tooltip = "Determines the amount of Image Warping and Separation between both eyes. You can Override this setting.";
 > = 15;
@@ -60,7 +60,7 @@ uniform float Perspective <
 
 uniform int Dis_Occlusion <
 	ui_type = "combo";
-	ui_items = "Off\0Normal Mask Low\0Normal Mask Medium\0Normal Mask High\0Radial Mask Low\0Radial Mask Medium\0Radial Mask High\0";
+	ui_items = "Off\0Normal Mask\0Radial Mask\0";
 	ui_label = "Dis-Occlusion Mask";
 	ui_tooltip = "Auto occlusion masking options.";
 > = 1;
@@ -163,7 +163,7 @@ uniform bool Eye_Swap <
 
 uniform int AO <
 	ui_type = "combo";
-	ui_items = "Off\0AO x8\0AO x16\0";
+	ui_items = "Off\0AO x8\0";
 	ui_label = "Ambient Occlusion Settings";
 	ui_tooltip = "Ambient Occlusion settings x8 is normal x16 is twice the power.";
 > = 1;
@@ -177,7 +177,7 @@ uniform float Power <
 
 uniform float Spread <
 	ui_type = "drag";
-	ui_min = 0; ui_max = 3;
+	ui_min = 0.5; ui_max = 2.5;
 	ui_label = "Spread";
 	ui_tooltip = "Spread";
 > = 1.5;
@@ -242,7 +242,7 @@ sampler SamplerDone
 		Texture = texDone;
 	};
 	
-texture texSSAO  { Width = BUFFER_WIDTH/Depth_Map_Division; Height = BUFFER_HEIGHT/Depth_Map_Division; Format = RGBA32F;}; 
+texture texSSAO  { Width = BUFFER_WIDTH/2; Height = BUFFER_HEIGHT/2; Format = RGBA32F;}; 
 
 sampler SamplerSSAO
 	{
@@ -1039,8 +1039,8 @@ float3 GetRandom(float2 co)
 float3 normal_from_depth(float2 texcoords) 
 {
 	float depth;
-	const float2 offset1 = float2(-1,1.1);
-	const float2 offset2 = float2(1.1,1.1);
+	const float2 offset1 = float2(-10,10);
+	const float2 offset2 = float2(10,10);
 	  
 	float depth1 = tex2D(SamplerDM, texcoords + offset1).r;
 	float depth2 = tex2D(SamplerDM, texcoords + offset2).r;
@@ -1059,7 +1059,7 @@ float aoFF(in float3 ddiff,in float3 cnorm, in float c1, in float c2)
 {
 	float3 vv = normalize(ddiff);
 	float rd = length(ddiff);
-	return (1.0-clamp(dot(normal_from_depth(float2(c1,c2)),-vv),-1,1.0)) * clamp(dot( cnorm,vv ),1.0,1.0)* (1.0 - 1.0/sqrt(1.0/(rd*rd) + 5));
+	return (1.0-clamp(dot(normal_from_depth(float2(c1,c2)),-vv),-1,1.0)) * clamp(dot( cnorm,vv ),1.0,1.0)* (1.0 - 1.0/sqrt(1.0/(rd*rd) + 1000));
 }
 
 float4 GetAO( float2 texcoord )
@@ -1068,12 +1068,13 @@ float4 GetAO( float2 texcoord )
     float3 normal = normal_from_depth(texcoord);
     float3 position = GetPosition(texcoord);
 	float2 random = GetRandom(texcoord).xy;
-
+    
     //initialize variables:
+    float S = Spread;
 	float iter = 2.5*pix.x;
     float ao;
-    float incx = Spread*pix.x;
-    float incy = Spread*pix.y;
+    float incx = S*pix.x;
+    float incy = S*pix.y;
     float width = incx;
     float height = incy;
     float num;
@@ -1093,6 +1094,7 @@ float4 GetAO( float2 texcoord )
     {
        float npw = (width+iter*random.x)/depthM;
        float nph = (height+iter*random.y)/depthM;
+       
 		if(AO == 1)
 		{
 			float3 ddiff = GetPosition(texcoord.xy+float2(npw,nph))-position;
@@ -1106,27 +1108,6 @@ float4 GetAO( float2 texcoord )
 			ao+=  aoFF(ddiff4,normal,-npw,-nph);
 			num = 8;
 		}
-		else if(AO == 2)
-		{
-			float3 ddiff = GetPosition(texcoord.xy+float2(npw,nph))-position;
-			float3 ddiff2 = GetPosition(texcoord.xy+float2(npw,-nph))-position;
-			float3 ddiff3 = GetPosition(texcoord.xy+float2(-npw,nph))-position;
-			float3 ddiff4 = GetPosition(texcoord.xy+float2(-npw,-nph))-position;
-			float3 ddiff5 = GetPosition(texcoord.xy+float2(0,nph))-position;
-			float3 ddiff6 = GetPosition(texcoord.xy+float2(0,-nph))-position;
-			float3 ddiff7 = GetPosition(texcoord.xy+float2(npw,0))-position;
-			float3 ddiff8 = GetPosition(texcoord.xy+float2(-npw,0))-position;
-
-			ao+=  aoFF(ddiff,normal,npw,nph);
-			ao+=  aoFF(ddiff2,normal,npw,-nph);
-			ao+=  aoFF(ddiff3,normal,-npw,nph);
-			ao+=  aoFF(ddiff4,normal,-npw,-nph);
-			ao+=  aoFF(ddiff5,normal,0,nph);
-			ao+=  aoFF(ddiff6,normal,0,-nph);
-			ao+=  aoFF(ddiff7,normal,npw,0);
-			ao+=  aoFF(ddiff8,normal,-npw,0);
-			num = 16;
-		}
 		
 		//increase sampling area
 		   width += incx;  
@@ -1135,7 +1116,7 @@ float4 GetAO( float2 texcoord )
     ao/=num;
 
 	//Luminance adjust used for overbright correction.
-	float4 Done = clamp(ao,0,0.975);
+	float4 Done = min(1.0,ao);
 	float3 lumcoeff = float3(0.299,0.587,0.114);
 	float lum = dot(Done.rgb, lumcoeff);
 	float3 luminance = float3(lum, lum, lum);
@@ -1148,60 +1129,35 @@ void AO_in(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out
 	color = GetAO(texcoord);
 }
 
-#define s2(a, b)					temp = a; a = min(a, b); b = max(temp, b);
-#define mn3(a, b, c)				s2(a, b); s2(a, c);
-#define mx3(a, b, c)				s2(b, c); s2(a, c);
-
-#define mnmx3(a, b, c)				mx3(a, b, c); s2(a, b);                                   // 3 exchanges
-#define mnmx4(a, b, c, d)			s2(a, b); s2(c, d); s2(a, c); s2(b, d);                   // 4 exchanges
-#define mnmx5(a, b, c, d, e)		s2(a, b); s2(c, d); mn3(a, c, e); mx3(b, d, e);           // 6 exchanges
-#define mnmx6(a, b, c, d, e, f) 	s2(a, d); s2(b, e); s2(c, f); mn3(a, b, c); mx3(d, e, f); // 7 exchanges
-
 void  DisOcclusion(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 color : SV_Target)
 {
-  
-float2 ScreenCal = float2(2*pix.x,2*pix.y);
 
-	float2 FinCal = ScreenCal*0.6;
+//float4 Done = tex2D(SamplerSSAO, texcoord); 
 
-	float4 v[9];
-	float4 x[9];
+//bilateral blur\/
+float4 Done;
+float4 sum;
 
-	[unroll]
-	for(int i = -1; i <= 1; ++i) 
-	{
-		for(int j = -1; j <= 1; ++j)
-		{		
-		  float2 offset = float2(float(i), float(j));
+float blursize = 2.0*pix.x;
 
-		  v[(i + 1) * 3 + (j + 1)] = tex2D(SamplerSSAO, texcoord + offset * FinCal);
-		  x[(i + 1) * 3 + (j + 1)] = tex2D(SamplerSSAO, texcoord + (offset * FinCal)*2);
-		  
-		  }
-	}
-	
-	float4 temp;
-	
-	mnmx6(v[0], v[1], v[2], v[3], v[4], v[5]);
-	mnmx5(v[1], v[2], v[3], v[4], v[6]);
-	mnmx4(v[2], v[3], v[4], v[7]);
-	mnmx3(v[3], v[4], v[8]);
-	
-	mnmx6(x[0], x[1], x[2], x[3], x[4], x[5]);
-	mnmx5(x[1], x[2], x[3], x[4], x[6]);
-	mnmx4(x[2], x[3], x[4], x[7]);
-	mnmx3(x[3], x[4], x[8]);
-	
-	float4 Done = (v[4]*x[4])/2; 
+sum += tex2D(SamplerSSAO, float2(texcoord.x - 4.0*blursize, texcoord.y)) * 0.05;
+sum += tex2D(SamplerSSAO, float2(texcoord.x, texcoord.y - 3.0*blursize)) * 0.09;
+sum += tex2D(SamplerSSAO, float2(texcoord.x - 2.0*blursize, texcoord.y)) * 0.12;
+sum += tex2D(SamplerSSAO, float2(texcoord.x, texcoord.y - blursize)) * 0.15;
+sum += tex2D(SamplerSSAO, float2(texcoord.x + blursize, texcoord.y)) * 0.15;
+sum += tex2D(SamplerSSAO, float2(texcoord.x, texcoord.y + 2.0*blursize)) * 0.12;
+sum += tex2D(SamplerSSAO, float2(texcoord.x + 3.0*blursize, texcoord.y)) * 0.09;
+sum += tex2D(SamplerSSAO, float2(texcoord.x, texcoord.y + 4.0*blursize)) * 0.05;
+
+Done = sum;
+//bilateral blur/\
 
 float DP =  Depth;
 	
- float Disocclusion_Power_Low = DP/1000;
- float Disocclusion_Power_Medium = DP/750;
- float Disocclusion_Power_High = DP/500;
+ float Disocclusion_Power = DP/375;
  float4 DM;                                                                                                                                                                                                                                                                                               	
  float2 dir;
- float B;
+ float B , W;
  int Con;
  
 	if (Dis_Occlusion == 0)		
@@ -1212,42 +1168,18 @@ float DP =  Depth;
 	if(Dis_Occlusion > 0) 
 	{
 	
-	const float weight[10] = { -0.08,0.01,-0.05,0.02,-0.03,0.05,-0.02,0.05,-0.01,0.08 };
-	
+	const float weight[10] = { 0.01,-0.01,0.02,-0.02,0.03,-0.03,0.04,-0.04,0.05,-0.05};
+
 	if(Dis_Occlusion == 1)
 	{
 	dir = float2(0.5,0);
-	B = Disocclusion_Power_Low;
+	B = Disocclusion_Power;
 	}
 	
 	if(Dis_Occlusion == 2)
 	{
-	dir = float2(0.5,0);
-	B = Disocclusion_Power_Medium;
-	}
-
-	if(Dis_Occlusion == 3)
-	{
-	dir = float2(0.5,0);
-	B = Disocclusion_Power_High;
-	}
-	
-	if(Dis_Occlusion == 4)
-	{
 	dir = 0.5 - texcoord;
-	B = Disocclusion_Power_Low;
-	}
-	
-	if(Dis_Occlusion == 5)
-	{
-	dir = 0.5 - texcoord;
-	B = Disocclusion_Power_Medium;
-	}
-	
-	if(Dis_Occlusion == 6)
-	{
-	dir = 0.5 - texcoord;
-	B = Disocclusion_Power_High;
+	B = Disocclusion_Power*2;
 	}
 	
 	dir = normalize( dir ); 
@@ -1255,7 +1187,9 @@ float DP =  Depth;
 	[unroll]
 	for (int i = 0; i < Con; i++)
 	{
+
 	DM += tex2D(SamplerDM,texcoord + dir * weight[i] * B)/Con;
+	
 	}
 	
 	}
@@ -1264,18 +1198,18 @@ float DP =  Depth;
 	DM = tex2D(SamplerDM,texcoord);
 	}		                          
 	
-	DM = saturate(DM);
+	DM = DM;
 	
-	float4 Mix = min(0.950,1-(Done*(1-DM)));
+	float4 Mix = pow(1-(Done*(1-DM)),0.25);
 	
-	color = pow(lerp(pow(Mix,0.250),DM,Power),2.5);
+	color = saturate(pow(lerp(Mix,DM,Power),3));
 }
 
 ////////////////////////////////////////////////Left/Right Eye////////////////////////////////////////////////////////
 
 void PS_renderLR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 color : SV_Target0 )
 {
-	float samples[4] = {0.50, 0.66, 0.00, 1.0,};
+	float samples[4] = {0.50, 0.66, 0.85, 1.0,};
 	float DepthL = 1, DepthR = 1 , D , P;
 	float2 uv = 0;
 		
