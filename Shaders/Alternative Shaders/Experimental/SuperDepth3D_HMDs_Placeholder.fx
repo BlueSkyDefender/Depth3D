@@ -1,9 +1,9 @@
- ////----------------//
- ///**SuperDepth3D**///
- //----------------////
+ ////-------------------//
+ ///**SuperDepth3DHMD**///
+ //-------------------////
 
  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
- //* Depth Map Based 3D post-process shader v1.9.5 AO																																*//
+ //* Depth Map Based 3D post-process shader v1.9.4																																	*//
  //* For Reshade 3.0																																								*//
  //* --------------------------																																						*//
  //* This work is licensed under a Creative Commons Attribution 3.0 Unported License.																								*//
@@ -17,13 +17,9 @@
  //* http://reshade.me/forum/shader-presentation/2128-sidebyside-3d-depth-map-based-stereoscopic-shader																				*//	
  //* ---------------------------------																																				*//
  //*																																												*//
- //* Original work was based on the shader code of a CryTech 3 Dev http://www.slideshare.net/TiagoAlexSousa/secrets-of-cryengine-3-graphics-technology								*//
- //* 																																												*//
- //* AO Work was based on the shader code of a Devmaster Dev																														*//
- //* code was take from http://forum.devmaster.net/t/disk-to-disk-ssao/17414																										*//
- //* arkano22 Disk to Disk AO GLSL code adapted to be used to add more detail to the Depth Map.																						*//
- //* http://forum.devmaster.net/users/arkano22/																																		*//
+ //* Original work was based on Shader Based on CryTech 3 Dev work http://www.slideshare.net/TiagoAlexSousa/secrets-of-cryengine-3-graphics-technology								*//
  //*																																												*//
+ //* 																																												*//
  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // Change the Cross Cusor Key
@@ -33,42 +29,50 @@
 
 #define Cross_Cusor_Key 66
 
-// Determines The size of the Depth Map. For 4k Use 2 or 2.5. For 1440p Use 1.5 or 2. For 1080p use 1.
-
-#define Depth_Map_Division 2.0
-
-uniform int Alternate_Depth_Map_One <
+uniform int Alternate_Depth_Map <
 	ui_type = "combo";
-	ui_items = "DM 0\0DM 1\0DM 2\0DM 3\0DM 4\0DM 5\0DM 6\0DM 7\0DM 8\0DM 9\0DM 10\0DM 11\0DM 12\0DM 13\0DM 14\0DM 15\0DM 16\0DM 17\0DM 18\0DM 19\0DM 20\0DM 21\0DM 22\0DM 23\0DM 24\0DM 25\0DM 26\0DM 27\0DM 28\0DM 29\0DM 30\0DM 31\0DM 32\0DM 33\0DM 34\0DM 35\0DM 36\0DM 37\0DM 38\0DM 39\0DM 40\0";
-	ui_label = "Depth Map Two";
+	ui_items = "DM 0\0DM 1\0DM 2\0DM 3\0DM 4\0DM 5\0DM 6\0DM 7\0DM 8\0DM 9\0DM 10\0DM 11\0DM 12\0DM 13\0DM 14\0DM 15\0DM 16\0DM 17\0DM 18\0DM 19\0DM 20\0DM 21\0DM 22\0DM 23\0DM 24\0DM 25\0DM 26\0DM 27\0DM 28\0DM 29\0DM 30\0DM 31\0DM 32\0DM 33\0DM 34\0DM 35\0DM 36\0DM 37\0";
+	ui_label = "Alternate Depth Map";
 	ui_tooltip = "Alternate Depth Map for different Games. Read the ReadMeDepth3d.txt, for setting. Each game May and can use a diffrent Alternet Depth Map.";
 > = 0;
 
 uniform int Depth <
 	ui_type = "drag";
-	ui_min = 0; ui_max = 30;
+	ui_min = 0; ui_max = 50;
 	ui_label = "Depth Slider";
 	ui_tooltip = "Determines the amount of Image Warping and Separation between both eyes. You can Override this setting.";
-> = 15;
+> = 25;
 
-uniform float Perspective <
+uniform int IPD <
 	ui_type = "drag";
 	ui_min = -100; ui_max = 100;
-	ui_label = "Perspective Slider";
-	ui_tooltip = "Determines the perspective point. Default is 0";
+	ui_label = "Optical Pupillary Distance Adjust";
+	ui_tooltip = "Determines the distance between your eyes. Default is 0";
 > = 0;
 
-uniform int Dis_Occlusion <
-	ui_type = "combo";
-	ui_items = "Off\0Normal Mask\0Radial Mask\0";
-	ui_label = "Dis-Occlusion Mask";
-	ui_tooltip = "Auto occlusion masking options.";
-> = 1;
+uniform float Depth_Limit <
+	ui_type = "drag";
+	ui_min = 0.750; ui_max = 1.0;
+	ui_label = "Depth Limit";
+	ui_tooltip = "Limit how far Depth Image Warping is done. Default is One.";
+> = 1.0;
 
 uniform bool Depth_Map_View <
 	ui_label = "Depth Map View";
 	ui_tooltip = "Display the Depth Map. Use This to Work on your Own Depth Map for your game.";
 > = false;
+
+uniform bool Depth_Map_Enhancement <
+	ui_label = "Depth Map Enhancement";
+	ui_tooltip = "Enable Or Dissable Depth Map Enhancement. Default is Off";
+> = 0;
+
+uniform float Adjust <
+	ui_type = "drag";
+	ui_min = 0; ui_max = 1.5;
+	ui_label = "Adjust";
+	ui_tooltip = "Adjust DepthMap Enhancement, Dehancement occurs past one. Default is 1.0";
+> = 1.0;
 
 uniform bool Depth_Map_Flip <
 	ui_label = "Depth Map Flip";
@@ -85,7 +89,7 @@ uniform int Weapon_Depth_Map <
 uniform float3 Weapon_Adjust <
 	ui_type = "drag";
 	ui_min = -1.0; ui_max = 1.500;
-	ui_label = "Weapon Adjust Depth Map";
+	ui_label = "Weapon Adjust DepthMap";
 	ui_tooltip = "Adjust weapon depth map. Default is (Y 0, X 0.250, Z 1.001)";
 > = float3(0.0,0.250,1.001);
 
@@ -95,13 +99,6 @@ uniform float Weapon_Percentage <
 	ui_label = "Weapon Percentage";
 	ui_tooltip = "Adjust weapon percentage. Default is 5.0";
 > = 5.0;
-
-uniform float2 Weapon_Near_Far <
-	ui_type = "drag";
-	ui_min = -0.5; ui_max = 0.5;
-	ui_label = "Weapon Near & Far adjustment";
-	ui_tooltip = "Adjust weapon Near & Far adjustment. Default is 0";
-> = float2(0,0);
 
 uniform int Custom_Depth_Map <
 	ui_type = "combo";
@@ -116,6 +113,41 @@ uniform float2 Near_Far <
 	ui_label = "Near & Far";
 	ui_tooltip = "Adjustment for Near and Far Depth Map Precision.";
 > = float2(1,1.5);
+
+uniform int Polynomial_Barrel_Distortion <
+	ui_type = "combo";
+	ui_items = "Off\0Polynomial Distortion\0";
+	ui_label = "Polynomial Barrel Distortion";
+	ui_tooltip = "Barrel Distortion for HMD type Displays.";
+> = 0;
+
+uniform float Lens_Center <
+	ui_type = "drag";
+	ui_min = 0.475; ui_max = 0.575;
+	ui_label = "Lens Center";
+	ui_tooltip = "Adjust Lens Center. Default is 0.5";
+> = 0.5;
+
+uniform float Lens_Distortion <
+	ui_type = "drag";
+	ui_min = -1; ui_max = 5;
+	ui_label = "Lens Distortion";
+	ui_tooltip = "Lens distortion value.";
+> = 0.0;
+
+uniform float3 Polynomial_Colors <
+	ui_type = "color";
+	ui_min = 0.0; ui_max = 2.0;
+	ui_tooltip = "Adjust the Polynomial Distortion Red, Green, Blue. Default is (R 255, G 255, B 255)";
+	ui_label = "Polynomial Color Distortion";
+> = float3(1.0, 1.0, 1.0);
+
+uniform float2 Horizontal_Vertical_Squish <
+	ui_type = "drag";
+	ui_min = 0.5; ui_max = 2;
+	ui_label = "Horizontal & Vertical";
+	ui_tooltip = "Adjust Horizontal and Vertical squish cubic distortion value. Default is 1.0.";
+> = float2(1,1);
 
 uniform int Custom_Sidebars <
 	ui_type = "combo";
@@ -137,54 +169,56 @@ uniform float3 Cross_Cusor_Color <
 	ui_label = "Cross Cusor Color";
 > = float3(1.0, 1.0, 1.0);
 
-uniform bool InvertY <
-	ui_label = "Invert Y-Axis";
-	ui_tooltip = "Invert Y-Axis for the Cross Cusor.";
-> = false;
-
-uniform int Stereoscopic_Mode <
-	ui_type = "combo";
-	ui_items = "Side by Side\0Top and Bottom\0Line Interlaced\0Checkerboard 3D\0";
-	ui_label = "3D Display Mode";
-	ui_tooltip = "Side by Side/Top and Bottom/Line Interlaced/Checkerboard 3D display output.";
-> = 0;
-
-uniform int Downscaling_Support <
-	ui_type = "combo";
-	ui_items = "Native\0Option One\0Option Two\0";
-	ui_label = "Downscaling Support";
-	ui_tooltip = "Dynamic Super Resolution & Virtual Super Resolution downscaling support for Line Interlaced & Checkerboard 3D displays.";
-> = 0;
-
 uniform bool Eye_Swap <
 	ui_label = "Eye Swap";
 	ui_tooltip = "Left right image change.";
 > = false;
 
-uniform int AO <
+uniform int HMD_Profiles <
 	ui_type = "combo";
-	ui_items = "Off\0AO x8\0";
-	ui_label = "Ambient Occlusion Settings";
-	ui_tooltip = "Ambient Occlusion settings AO x8 is On. Default is On.";
-> = 1;
-
-uniform float Power <
-	ui_type = "drag";
-	ui_min = 0.375; ui_max = 0.625;
-	ui_tooltip = "SSAO Power";
-	ui_label = "Power AO on Depth Map from 0.375 to 0.625 lower is stronger. Default is 0.500";
-> = 0.500;
-
-uniform float Spread <
-	ui_type = "drag";
-	ui_min = 0.5; ui_max = 2.5;
-	ui_label = "Spread";
-	ui_tooltip = "Spread is AO Falloff. Default is 1.5";
-> = 1.5;
+	ui_items = "Off\0Profile One\0";
+	ui_label = "Head Mounted Display Profiles";
+	ui_tooltip = "Preset Head Mounted Display Profiles";
+> = 0;
 
 uniform bool mouse < source = "key"; keycode = Cross_Cusor_Key; toggle = true; >;
 
 uniform float2 Mousecoords < source = "mousepoint"; > ;
+
+
+
+////////////////////////////////////////////////HMD Profiles/////////////////////////////////////////////////////////////////
+//Lens Distortion Area//
+float LD()
+{
+float L_D = Lens_Distortion;
+if (HMD_Profiles == 0)
+{
+ L_D;
+}
+
+if (HMD_Profiles == 1)
+{
+ L_D = -0.5;
+}
+return L_D;
+}
+
+//Horizontal Vertical Squish Area//
+float2 H_V_S()
+{
+float2 H_V_S = Horizontal_Vertical_Squish;
+if (HMD_Profiles == 0)
+{
+ H_V_S;
+}
+
+if (HMD_Profiles == 1)
+{
+ H_V_S = float2(1,1.25);
+}
+return H_V_S;
+}
 
 /////////////////////////////////////////////D3D Starts Here/////////////////////////////////////////////////////////////////
 
@@ -228,68 +262,96 @@ sampler BackBufferCLAMP
 		AddressW = CLAMP;
 	};
 	
-texture texDM  { Width = BUFFER_WIDTH/Depth_Map_Division; Height = BUFFER_HEIGHT/Depth_Map_Division; Format = RGBA32F;}; 
-
-sampler SamplerDM
+texture texCL  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA32F;}; 
+texture texCR  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA32F;}; 
+texture texCDM  { Width = BUFFER_WIDTH/2; Height = BUFFER_HEIGHT/2; Format = RGBA8;};
+	
+sampler SamplerCLMIRROR
 	{
-		Texture = texDM;
+		Texture = texCL;
+		AddressU = MIRROR;
+		AddressV = MIRROR;
+		AddressW = MIRROR;
 	};
 	
-texture texDone  { Width = BUFFER_WIDTH/Depth_Map_Division; Height = BUFFER_HEIGHT/Depth_Map_Division; Format = RGBA32F;}; 
-
-sampler SamplerDone
+sampler SamplerCLBORDER
 	{
-		Texture = texDone;
+		Texture = texCL;
+		AddressU = BORDER;
+		AddressV = BORDER;
+		AddressW = BORDER;
+	};
+
+sampler SamplerCLCLAMP
+	{
+		Texture = texCL;
+		AddressU = CLAMP;
+		AddressV = CLAMP;
+		AddressW = CLAMP;
+	};
+
+sampler SamplerCRMIRROR
+	{
+		Texture = texCR;
+		AddressU = MIRROR;
+		AddressV = MIRROR;
+		AddressW = MIRROR;
 	};
 	
-texture texSSAO  { Width = BUFFER_WIDTH/2; Height = BUFFER_HEIGHT/2; Format = RGBA32F;}; 
-
-sampler SamplerSSAO
+sampler SamplerCRBORDER
 	{
-		Texture = texSSAO;
+		Texture = texCR;
+		AddressU = BORDER;
+		AddressV = BORDER;
+		AddressW = BORDER;
 	};
 	
-float4 MouseCuror(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Target
+sampler SamplerCRCLAMP
+	{
+		Texture = texCR;
+		AddressU = CLAMP;
+		AddressV = CLAMP;
+		AddressW = CLAMP;
+	};
+	
+sampler SamplerCDM
+	{
+		Texture = texCDM;
+		AddressU = CLAMP;
+		AddressV = CLAMP;
+		AddressW = CLAMP;
+	};
+	
+float4 MouseCuror(float4 pos : SV_Position, float2 texcoord : TEXCOORD) : SV_Target
 {
 	float4 Mpointer; 
-	float4 MInvert;
-	 
-	if (!InvertY)
-	{
-		MInvert = all(abs(Mousecoords - position.xy) < Cross_Cusor_Size) * (1 - all(abs(Mousecoords - position.xy) > Cross_Cusor_Size/(Cross_Cusor_Size/2))) ? float4(Cross_Cusor_Color, 1.0) : tex2D(BackBuffer, texcoord);//cross
-	}
-	else
-	{
-		MInvert = all(abs(float2(Mousecoords.x,BUFFER_HEIGHT-Mousecoords.y) - position.xy) < Cross_Cusor_Size) * (1 - all(abs(float2(Mousecoords.x,BUFFER_HEIGHT-Mousecoords.y) - position.xy) > Cross_Cusor_Size/(Cross_Cusor_Size/2))) ? float4(Cross_Cusor_Color, 1.0) : tex2D(BackBuffer, texcoord);//cross
-	}
-	
 	if(mouse)
 	{
-		Mpointer = MInvert;
+	Mpointer = all(abs(Mousecoords - pos.xy) < Cross_Cusor_Size) * (1 - all(abs(Mousecoords - pos.xy) > Cross_Cusor_Size/(Cross_Cusor_Size/2))) ? float4(Cross_Cusor_Color, 1.0) : tex2D(BackBuffer, texcoord);//cross
 	}
 	else
 	{
-		Mpointer =  tex2D(BackBuffer, texcoord);
+	Mpointer =  tex2D(BackBuffer, texcoord);
 	}
 	return Mpointer;
 }
 
-/////////////////////////////////////////////////////////////////////////////////Depth Map Information/////////////////////////////////////////////////////////////////////////////////
-
-void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 Color : SV_Target0 )
+//Depth Map Information	
+float4 DepthMap(float4 position : SV_Position, float2 texcoord : TEXCOORD0) : SV_Target
 {
-	 float4 color;
+
+	 float4 color = 0;
 
 			if (Depth_Map_Flip)
 			texcoord.y =  1 - texcoord.y;
-
+	
 	float4 depthM = tex2D(DepthBuffer, float2(texcoord.x, texcoord.y));
 	float4 WDM = tex2D(DepthBuffer, float2(texcoord.x, texcoord.y));
-			
+		
 		if (Custom_Depth_Map == 0)
 	{	
 		//Alien Isolation | Firewatch
-		if (Alternate_Depth_Map_One == 0)
+		if (Alternate_Depth_Map == 0)
 		{
 		float cF = 1000000000;
 		float cN = 1;	
@@ -297,7 +359,7 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 		}
 		
 		//Amnesia: The Dark Descent
-		if (Alternate_Depth_Map_One == 1)
+		if (Alternate_Depth_Map == 1)
 		{
 		float cF = 1000;
 		float cN = 1;
@@ -305,7 +367,7 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 		}
 		
 		//Among The Sleep | Soma
-		if (Alternate_Depth_Map_One == 2)
+		if (Alternate_Depth_Map == 2)
 		{
 		float cF = 10;
 		float cN = 0.05;
@@ -313,7 +375,7 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 		}
 		
 		//The Vanishing of Ethan Carter Redux
-		if (Alternate_Depth_Map_One == 3)
+		if (Alternate_Depth_Map == 3)
 		{
 		float cF  = 0.0075;
 		float cN = 1;
@@ -321,7 +383,7 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 		}
 		
 		//Batman Arkham Knight | Batman Arkham Origins | Batman: Arkham City | BorderLands 2 | Hard Reset | Lords Of The Fallen | The Elder Scrolls V: Skyrim
-		if (Alternate_Depth_Map_One == 4)
+		if (Alternate_Depth_Map == 4)
 		{
 		float cF = 50;
 		float cN = 0;
@@ -329,7 +391,7 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 		}
 		
 		//Call of Duty: Advance Warfare | Call of Duty: Black Ops 2 | Call of Duty: Ghost | Call of Duty: Infinite Warfare 
-		if (Alternate_Depth_Map_One == 5)
+		if (Alternate_Depth_Map == 5)
 		{
 		float cF = 25;
 		float cN = 1;
@@ -337,7 +399,7 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 		}
 		
 		//Casltevania: Lord of Shadows - UE | Dead Rising 3
-		if (Alternate_Depth_Map_One == 6)
+		if (Alternate_Depth_Map == 6)
 		{
 		float cF = 25;
 		float cN = 0;
@@ -345,7 +407,7 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 		}
 		
 		//Doom 2016
-		if (Alternate_Depth_Map_One == 7)
+		if (Alternate_Depth_Map == 7)
 		{
 		float cF = 25;
 		float cN = 5;
@@ -353,7 +415,7 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 		}
 		
 		//Deadly Premonition:The Directors's Cut
-		if (Alternate_Depth_Map_One == 8)
+		if (Alternate_Depth_Map == 8)
 		{
 		float cF = 30;
 		float cN = 0;
@@ -361,7 +423,7 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 		}
 		
 		//Dragon Ball Xenoverse | Quake 2 XP
-		if (Alternate_Depth_Map_One == 9)
+		if (Alternate_Depth_Map == 9)
 		{
 		float cF = 1;
 		float cN = 0.005;
@@ -369,7 +431,7 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 		}
 		
 		//Warhammer: End Times - Vermintide | Fallout 4 
-		if (Alternate_Depth_Map_One == 10)
+		if (Alternate_Depth_Map == 10)
 		{
 		float cF = 7.0;
 		float cN = 1.5;
@@ -377,7 +439,7 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 		}
 		
 		//Dying Light
-		if (Alternate_Depth_Map_One == 11)
+		if (Alternate_Depth_Map == 11)
 		{
 		float cF = 100;
 		float cN = 0.0075;
@@ -385,7 +447,7 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 		}
 		
 		//GTA V
-		if (Alternate_Depth_Map_One == 12)
+		if (Alternate_Depth_Map == 12)
 		{
 		float cF  = 10000; 
 		float cN = 0.0075; 
@@ -393,7 +455,7 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 		}
 		
 		//Magicka 2
-		if (Alternate_Depth_Map_One == 13)
+		if (Alternate_Depth_Map == 13)
 		{
 		float cF = 1.025;
 		float cN = 0.025;	
@@ -401,7 +463,7 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 		}
 		
 		//Middle-earth: Shadow of Mordor
-		if (Alternate_Depth_Map_One == 14)
+		if (Alternate_Depth_Map == 14)
 		{
 		float cF = 650;
 		float cN = 651;
@@ -409,7 +471,7 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 		}
 		
 		//Naruto Shippuden UNS3 Full Blurst
-		if (Alternate_Depth_Map_One == 15)
+		if (Alternate_Depth_Map == 15)
 		{
 		float cF = 150;
 		float cN = 0.001;
@@ -417,7 +479,7 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 		}
 		
 		//Shadow warrior(2013)XP
-		if (Alternate_Depth_Map_One == 16)
+		if (Alternate_Depth_Map == 16)
 		{
 		float cF = 5;
 		float cN = 0.05;
@@ -425,15 +487,15 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 		}
 		
 		//Ryse: Son of Rome
-		if (Alternate_Depth_Map_One == 17)
+		if (Alternate_Depth_Map == 17)
 		{
 		float cF = 1.010;
 		float cN = 0;
 		depthM = pow(abs((exp(depthM * log(cF + cN)) - cN) / cF),1000);
 		}
 		
-		//Sleeping Dogs: DE
-		if (Alternate_Depth_Map_One == 18)
+		//Sleeping Dogs: DE | DreamFall Chapters
+		if (Alternate_Depth_Map == 18)
 		{
 		float cF  = 1;
 		float cN = 0.025;
@@ -441,7 +503,7 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 		}
 		
 		//Souls Games
-		if (Alternate_Depth_Map_One == 19)
+		if (Alternate_Depth_Map == 19)
 		{
 		float cF = 1.050;
 		float cN = 0.025;
@@ -449,7 +511,7 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 		}
 		
 		//Witcher 3
-		if (Alternate_Depth_Map_One == 20)
+		if (Alternate_Depth_Map == 20)
 		{
 		float cF = 7.5;
 		float cN = 1;	
@@ -457,7 +519,7 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 		}
 
 		//Assassin Creed Unity | Just Cause 3
-		if (Alternate_Depth_Map_One == 21)
+		if (Alternate_Depth_Map == 21)
 		{
 		float cF = 150;
 		float cN = 151;
@@ -465,7 +527,7 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 		}	
 		
 		//Silent Hill: Homecoming
-		if (Alternate_Depth_Map_One == 22)
+		if (Alternate_Depth_Map == 22)
 		{
 		float cF = 25;
 		float cN = 25.869;
@@ -473,7 +535,7 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 		}
 		
 		//Monstrum DX11
-		if (Alternate_Depth_Map_One == 23)
+		if (Alternate_Depth_Map == 23)
 		{
 		float cF = 1.075;	
 		float cN = 0;
@@ -481,7 +543,7 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 		}
 		
 		//S.T.A.L.K.E.R:SoC
-		if (Alternate_Depth_Map_One == 24)
+		if (Alternate_Depth_Map == 24)
 		{
 		float cF = 1.001;
 		float cN = 0;
@@ -489,7 +551,7 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 		}
 		
 		//Double Dragon Neon
-		if (Alternate_Depth_Map_One == 25)
+		if (Alternate_Depth_Map == 25)
 		{
 		float cF = 0.5;
 		float cN = 0.150;
@@ -497,7 +559,7 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 		}
 		
 		//Deus Ex: Mankind Divided
-		if (Alternate_Depth_Map_One == 26)
+		if (Alternate_Depth_Map == 26)
 		{
 		float cF = 250;
 		float cN = 251;
@@ -505,7 +567,7 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 		}	
 		
 		//The Elder Scrolls V: Skyrim Special Edition
-		if (Alternate_Depth_Map_One == 27)
+		if (Alternate_Depth_Map == 27)
 		{
 		float cF = 20;
 		float cN = 0;
@@ -513,7 +575,7 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 		}
 		
 		//Rage64|
-		if (Alternate_Depth_Map_One == 28)
+		if (Alternate_Depth_Map == 28)
 		{
 		float cF = 50;
 		float cN = -0.5;
@@ -521,7 +583,7 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 		}
 		
 		//Through The Woods
-		if (Alternate_Depth_Map_One == 29)
+		if (Alternate_Depth_Map == 29)
 		{
 		float cF = 25;
 		float cN = 0;
@@ -529,7 +591,7 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 		}
 		
 		//Amnesia: Machine for Pigs
-		if (Alternate_Depth_Map_One == 30)
+		if (Alternate_Depth_Map == 30)
 		{
 		float cF = 100;
 		float cN = 0;
@@ -537,7 +599,7 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 		}
 		
 		//Requiem: Avenging Angel
-		if (Alternate_Depth_Map_One == 31)
+		if (Alternate_Depth_Map == 31)
 		{
 		float cF = 100;
 		float cN = 1.555;
@@ -545,7 +607,7 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 		}
 		
 		//Turok: Dinosaur Hunter
-		if (Alternate_Depth_Map_One == 32)
+		if (Alternate_Depth_Map == 32)
 		{
 		float cF = 1000; //10+
 		float cN = 0;//1
@@ -553,7 +615,7 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 		}
 		
 		//Never Alone (Kisima Ingitchuna)
-		if (Alternate_Depth_Map_One == 33)
+		if (Alternate_Depth_Map == 33)
 		{
 		float cF = 112.5;
 		float cN = 1.995;
@@ -561,7 +623,7 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 		}
 		
 		//Stacking
-		if (Alternate_Depth_Map_One == 34)
+		if (Alternate_Depth_Map == 34)
 		{
 		float cF = 15;
 		float cN = 0;
@@ -569,7 +631,7 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 		}
 		
 		//Fez
-		if (Alternate_Depth_Map_One == 35)
+		if (Alternate_Depth_Map == 35)
 		{
 		float cF = 25.0;
 		float cN = 1.5125;
@@ -577,42 +639,18 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 		}
 		
 		//Lara Croft & Temple of Osiris
-		if (Alternate_Depth_Map_One == 36)
+		if (Alternate_Depth_Map == 36)
 		{
 		float cF = 0.340;//1.010+	or 150
 		float cN = 12.250;//0 or	151
 		depthM = 1 - clamp(pow(abs((exp(depthM * log(cF + cN)) - cN) / cF),10),0,1);
 		}
 		
-		//DreamFall Chapters
-		if (Alternate_Depth_Map_One == 37)
+		//RE7
+		if (Alternate_Depth_Map == 37)
 		{
-		float cF = 100;	
-		float cN = 5;	
-		depthM = (exp(depthM * log(cF + cN)) - cN) / cF;
-		}
-		
-		//DreamFall Chapters
-		if (Alternate_Depth_Map_One == 38)
-		{
-		float cF = 100;	
-		float cN = 100;	
-		depthM = (exp(depthM * log(cF + cN)) - cN) / cF;
-		}
-		
-		//LOZ TP HD
-		if (Alternate_Depth_Map_One == 39)
-		{
-		float cF = 100;
-		float cN = 2.250;
-		depthM = (exp(depthM * log(cF + cN)) - cN) / cF;
-		}
-		
-		//God of War Ghost of Sparta
-		if (Alternate_Depth_Map_One == 40)
-		{
-		float cF = 10.5;
-		float cN = 0.02;
+		float cF = 32.5;
+		float cN = 1;
 		depthM = (pow(abs(cN-depthM),cF));
 		}
 		
@@ -1000,14 +1038,14 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 	if (Weapon_Depth_Map == 27 || Weapon_Depth_Map == 23 || Weapon_Depth_Map == 20 || Weapon_Depth_Map == 19 || Weapon_Depth_Map == 13 || Weapon_Depth_Map == 8)
 	{
 	NearDepth = step(depthM.r,Adj/100000);
-	NearDepth = NearDepth-NearDepth*Weapon_Near_Far.x;
 	}
 	else
 	{
 	NearDepth = step(depthM.r,Adj);
-	NearDepth = NearDepth-NearDepth*Weapon_Near_Far.x;
 	}
-
+	
+	if(Depth_Map_Enhancement == 0)
+    {
 		if (Weapon_Depth_Map <= 0)
 		{
 		D = depthM;
@@ -1016,343 +1054,255 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 		{
 		D = lerp(depthM,WDM%Per,NearDepth);
 		}
+    }
+    else
+    {
+		if (Weapon_Depth_Map <= 0)
+		{
+		float A = Adjust;
+		float cDF = 1.025;
+		float cDN = 0;
+		depthMFar = pow(abs((exp(depthM * log(cDF + cDN)) - cDN) / cDF),1000);	
+		D = lerp(depthMFar,depthM,A);
+		}
+		else
+		{
+		float A = Adjust;
+		float cDF = 1.025;
+		float cDN = 0;
+		depthMFar = pow(abs((exp(depthM * log(cDF + cDN)) - cDN) / cDF),1000);	
+		D = lerp(lerp(depthMFar,depthM,A),WDM%Per,NearDepth);
+		}
+    }
     
 	color.rgb = D.rrr;
 	
-	Color = color;	
+	return color;	
 
 }
-
-/////////////////////////////////////////////////////AO/////////////////////////////////////////////////////////////
-
-float3 GetPosition(float2 coords)
-{
-	return float3(coords.xy*2.0-1.0,10.0)*tex2D(SamplerDM,coords.xy).rgb;
-}
-
-float3 GetRandom(float2 co)
-{
-	float random = frac(sin(dot(co, float2(12.9898, 78.233))) * 43758.5453 * 1);
-	return float3(random,random,random);
-}
-
-float3 normal_from_depth(float2 texcoords) 
-{
-	float depth;
-	const float2 offset1 = float2(-10,10);
-	const float2 offset2 = float2(10,10);
-	  
-	float depth1 = tex2D(SamplerDM, texcoords + offset1).r;
-	float depth2 = tex2D(SamplerDM, texcoords + offset2).r;
-	  
-	float3 p1 = float3(offset1, depth1 - depth);
-	float3 p2 = float3(offset2, depth2 - depth);
-	  
-	float3 normal = cross(p1, p2);
-	normal.z = -normal.z;
-	  
-	return normalize(normal);
-}
-
-//Ambient Occlusion form factor
-float aoFF(in float3 ddiff,in float3 cnorm, in float c1, in float c2)
-{
-	float3 vv = normalize(ddiff);
-	float rd = length(ddiff);
-	return (1.0-clamp(dot(normal_from_depth(float2(c1,c2)),-vv),-1,1.0)) * clamp(dot( cnorm,vv ),1.0,1.0)* (1.0 - 1.0/sqrt(1.0/(rd*rd) + 1000));
-}
-
-float4 GetAO( float2 texcoord )
-{ 
-    //current normal , position and random static texture.
-    float3 normal = normal_from_depth(texcoord);
-    float3 position = GetPosition(texcoord);
-	float2 random = GetRandom(texcoord).xy;
-    
-    //initialize variables:
-    float S = Spread;
-	float iter = 2.5*pix.x;
-    float ao;
-    float incx = S*pix.x;
-    float incy = S*pix.y;
-    float width = incx;
-    float height = incy;
-    float num;
-    
-    //Depth Map
-    float depthM = tex2D(SamplerDM, texcoord).r;
-    
-    	float cF = -1.0;
-		float cN = 1000;
-		
-	//Depth Map linearization
-    depthM = saturate(pow(abs((exp(depthM * log(cF + cN)) - cN) / cF),-0.200));
-    
-	//2 iterations 
-    [loop]
-    for(float i=0.0; i<2; ++i) 
-    {
-       float npw = (width+iter*random.x)/depthM;
-       float nph = (height+iter*random.y)/depthM;
-       
-		if(AO == 1)
-		{
-			float3 ddiff = GetPosition(texcoord.xy+float2(npw,nph))-position;
-			float3 ddiff2 = GetPosition(texcoord.xy+float2(npw,-nph))-position;
-			float3 ddiff3 = GetPosition(texcoord.xy+float2(-npw,nph))-position;
-			float3 ddiff4 = GetPosition(texcoord.xy+float2(-npw,-nph))-position;
-
-			ao+=  aoFF(ddiff,normal,npw,nph);
-			ao+=  aoFF(ddiff2,normal,npw,-nph);
-			ao+=  aoFF(ddiff3,normal,-npw,nph);
-			ao+=  aoFF(ddiff4,normal,-npw,-nph);
-			num = 8;
-		}
-		
-		//increase sampling area
-		   width += incx;  
-		   height += incy;		    
-    } 
-    ao/=num;
-
-	//Luminance adjust used for overbright correction.
-	float4 Done = min(1.0,ao);
-	float3 lumcoeff = float3(0.299,0.587,0.114);
-	float lum = dot(Done.rgb, lumcoeff);
-	float3 luminance = float3(lum, lum, lum);
   
-    return float4(luminance,1);
-}
-
-void AO_in(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 color : SV_Target0 )
-{
-	color = GetAO(texcoord);
-}
-
-void  DisOcclusion(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 color : SV_Target)
-{
-//bilateral blur\/
-float4 Done;
-float4 sum;
-
-float blursize = 2.0*pix.x;
-
-sum += tex2D(SamplerSSAO, float2(texcoord.x - 4.0*blursize, texcoord.y)) * 0.05;
-sum += tex2D(SamplerSSAO, float2(texcoord.x, texcoord.y - 3.0*blursize)) * 0.09;
-sum += tex2D(SamplerSSAO, float2(texcoord.x - 2.0*blursize, texcoord.y)) * 0.12;
-sum += tex2D(SamplerSSAO, float2(texcoord.x, texcoord.y - blursize)) * 0.15;
-sum += tex2D(SamplerSSAO, float2(texcoord.x + blursize, texcoord.y)) * 0.15;
-sum += tex2D(SamplerSSAO, float2(texcoord.x, texcoord.y + 2.0*blursize)) * 0.12;
-sum += tex2D(SamplerSSAO, float2(texcoord.x + 3.0*blursize, texcoord.y)) * 0.09;
-sum += tex2D(SamplerSSAO, float2(texcoord.x, texcoord.y + 4.0*blursize)) * 0.05;
-
-Done = sum;
-//bilateral blur/\
-
-float DP =  Depth;
-	
- float Disocclusion_Power = DP/375;
- float4 DM;                                                                                                                                                                                                                                                                                               	
- float2 dir;
- float B , W;
- int Con;
- 
-	if (Dis_Occlusion == 0)		
-		Con = 1;//has to be one for DX9 Games
-	else
-		Con = 10;
-	
-	if(Dis_Occlusion > 0) 
-	{
-	
-	const float weight[10] = { 0.01,-0.01,0.02,-0.02,0.03,-0.03,0.04,-0.04,0.05,-0.05};
-
-	if(Dis_Occlusion == 1)
-	{
-	dir = float2(0.5,0);
-	B = Disocclusion_Power;
-	}
-	
-	if(Dis_Occlusion == 2)
-	{
-	dir = 0.5 - texcoord;
-	B = Disocclusion_Power*2;
-	}
-	
-	dir = normalize( dir ); 
-	 
-	[unroll]
-	for (int i = 0; i < Con; i++)
-	{
-
-	DM += tex2D(SamplerDM,texcoord + dir * weight[i] * B)/Con;
-	
-	}
-	
-	}
-	else
-	{
-	DM = tex2D(SamplerDM,texcoord);
-	}		                          
-	
-	DM = DM;
-	
-	float4 Mix = pow(1-(Done*(1-DM)),0.25);
-	
-	color = saturate(pow(lerp(Mix,DM,Power),3));
-}
-
 ////////////////////////////////////////////////Left/Right Eye////////////////////////////////////////////////////////
-
-void PS_renderLR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 color : SV_Target0 )
-{
-	float samples[4] = {0.50, 0.66, 0.85, 1.0,};
-	float DepthL = 1, DepthR = 1 , D , P;
+void PS_renderLR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 color : SV_Target0 , out float4 colorT: SV_Target1)
+{	
+	const float samples[4] = {0.25, 0.50, 0.75, 1};
+	float DepthL = Depth_Limit, DepthR = Depth_Limit;
+	float D = Depth;
 	float2 uv = 0;
-		
-	if(!Eye_Swap)
-		{	
-			P = Perspective * pix.x;
-			D = Depth * pix.x;
-		}
-		else
-		{
-			P = -Perspective * pix.x;
-			D = -Depth * pix.x;
-		}
-	
 	[loop]
 	for (int j = 0; j < 4; ++j) 
 	{	
-		uv.x = samples[j] * D;
-		
-		if(Stereoscopic_Mode == 0)
+			uv.x = samples[j] * D;
+			DepthL =  min(DepthL,tex2D(SamplerCDM,float2(texcoord.x+uv.x*pix.x, texcoord.y)).r);
+			DepthR =  min(DepthR,tex2D(SamplerCDM,float2(texcoord.x-uv.x*pix.x, texcoord.y)).r);
+	}
+		if(!Eye_Swap)
 		{	
-			DepthL =  min(DepthL,tex2D(SamplerDone,float2((texcoord.x*2 + P)+uv.x, texcoord.y)).r);
-			DepthR =  min(DepthR,tex2D(SamplerDone,float2((texcoord.x*2-1 - P)-uv.x, texcoord.y)).r);
+			if(Custom_Sidebars == 0)
+			{
+			color = tex2D(BackBufferMIRROR, float2(texcoord.xy+float2((DepthL*D),0)*pix.xy));
+			colorT = tex2D(BackBufferMIRROR, float2(texcoord.xy-float2((DepthR*D),0)*pix.xy));
+			}
+			else if(Custom_Sidebars == 1)
+			{
+			color = tex2D(BackBufferBORDER, float2(texcoord.xy+float2((DepthL*D),0)*pix.xy));
+			colorT = tex2D(BackBufferBORDER, float2(texcoord.xy-float2((DepthR*D),0)*pix.xy));
+			}
+			else
+			{
+			color = tex2D(BackBufferCLAMP, float2(texcoord.xy+float2((DepthL*D),0)*pix.xy));
+			colorT = tex2D(BackBufferCLAMP, float2(texcoord.xy-float2((DepthR*D),0)*pix.xy));
+			}
 		}
-		else if(Stereoscopic_Mode == 1)
+		else
+		{		
+			if(Custom_Sidebars == 0)
+			{
+			colorT = tex2D(BackBufferMIRROR, float2(texcoord.xy+float2((DepthL*D),0)*pix.xy));
+			color = tex2D(BackBufferMIRROR, float2(texcoord.xy-float2((DepthR*D),0)*pix.xy));
+			}
+			else if(Custom_Sidebars == 1)
+			{
+			colorT = tex2D(BackBufferBORDER, float2(texcoord.xy+float2((DepthL*D),0)*pix.xy));
+			color = tex2D(BackBufferBORDER, float2(texcoord.xy-float2((DepthR*D),0)*pix.xy));
+			}
+			else
+			{
+			colorT = tex2D(BackBufferCLAMP, float2(texcoord.xy+float2((DepthL*D),0)*pix.xy));
+			color = tex2D(BackBufferCLAMP, float2(texcoord.xy-float2((DepthR*D),0)*pix.xy));
+			}
+		}
+}
+
+////////////////////////////////////////////////////Polynomial_Distortion/////////////////////////////////////////////////////
+
+float2 DL(float2 p, float k1) //Cubic Lens Distortion 
+{
+	float LC = 1-Lens_Center;
+	float r2 = (p.x-LC) * (p.x-LC) + (p.y-0.5) * (p.y-0.5);       
+	
+	float newRadius = 1 + r2 * k1 + (LD() * sqrt(r2));
+
+	 p.x = newRadius * (p.x-0.5)+0.5;
+	 p.y = newRadius * (p.y-0.5)+0.5;
+	
+	return p;
+}
+
+float2 DR(float2 p, float k1) //Cubic Lens Distortion 
+{
+	float LC = Lens_Center;
+	float r2 = (p.x-LC) * (p.x-LC) + (p.y-0.5) * (p.y-0.5);       
+	
+	float newRadius = 1 + r2 * k1 + (LD() * sqrt(r2));
+
+	 p.x = newRadius * (p.x-0.5)+0.5;
+	 p.y = newRadius * (p.y-0.5)+0.5;
+	
+	return p;
+}
+
+float4 PDL(float2 texcoord)
+
+{		
+		float4 color;
+		float2 uv_red, uv_green, uv_blue;
+		float4 color_red, color_green, color_blue;
+		float Red, Green, Blue;
+		float2 sectorOrigin;
+
+    // Radial distort around center
+		sectorOrigin = (texcoord.xy-0.5,0,0);
+		
+		Red = Polynomial_Colors.x;
+		Green = Polynomial_Colors.y;
+		Blue = Polynomial_Colors.z;
+		
+		uv_red = DL(texcoord.xy-sectorOrigin,Red) + sectorOrigin;
+		uv_green = DL(texcoord.xy-sectorOrigin,Green) + sectorOrigin;
+		uv_blue = DL(texcoord.xy-sectorOrigin,Blue) + sectorOrigin;
+		
+		if(Custom_Sidebars == 0)
 		{
-			DepthL =  min(DepthL,tex2D(SamplerDone,float2((texcoord.x + P)+uv.x, texcoord.y*2)).r);
-			DepthR =  min(DepthR,tex2D(SamplerDone,float2((texcoord.x - P)-uv.x, texcoord.y*2-1)).r);
+		color_red = tex2D(SamplerCLMIRROR, uv_red).r;
+		color_green = tex2D(SamplerCLMIRROR, uv_green).g;
+		color_blue = tex2D(SamplerCLMIRROR, uv_blue).b;
+		}
+		else if(Custom_Sidebars == 1)
+		{
+		color_red = tex2D(SamplerCLBORDER, uv_red).r;
+		color_green = tex2D(SamplerCLBORDER, uv_green).g;
+		color_blue = tex2D(SamplerCLBORDER, uv_blue).b;
 		}
 		else
 		{
-			DepthL =  min(DepthL,tex2D(SamplerDone,float2((texcoord.x + P)+uv.x, texcoord.y)).r);
-			DepthR =  min(DepthR,tex2D(SamplerDone,float2((texcoord.x - P)-uv.x, texcoord.y)).r);
+		color_red = tex2D(SamplerCLCLAMP, uv_red).r;
+		color_green = tex2D(SamplerCLCLAMP, uv_green).g;
+		color_blue = tex2D(SamplerCLCLAMP, uv_blue).b;
 		}
+
+		if( ((uv_red.x > 0) && (uv_red.x < 1) && (uv_red.y > 0) && (uv_red.y < 1)))
+		{
+			color = float4(color_red.x, color_green.y, color_blue.z, 1.0);
+		}
+		else
+		{
+			color = float4(0,0,0,1);
+		}
+		return color;
+		
 	}
 	
+	float4 PDR(float2 texcoord)
+
+{		
+		float4 color;
+		float2 uv_red, uv_green, uv_blue;
+		float4 color_red, color_green, color_blue;
+		float Red, Green, Blue;
+		float2 sectorOrigin;
+
+    // Radial distort around center
+		sectorOrigin = (texcoord.xy-0.5,0,0);
+		
+		Red = Polynomial_Colors.x;
+		Green = Polynomial_Colors.y;
+		Blue = Polynomial_Colors.z;
+		
+		uv_red = DR(texcoord.xy-sectorOrigin,Red) + sectorOrigin;
+		uv_green = DR(texcoord.xy-sectorOrigin,Green) + sectorOrigin;
+		uv_blue = DR(texcoord.xy-sectorOrigin,Blue) + sectorOrigin;
+		
+		if(Custom_Sidebars == 0)
+		{
+		color_red = tex2D(SamplerCRMIRROR, uv_red).r;
+		color_green = tex2D(SamplerCRMIRROR, uv_green).g;
+		color_blue = tex2D(SamplerCRMIRROR, uv_blue).b;
+		}
+		else if(Custom_Sidebars == 1)
+		{
+		color_red = tex2D(SamplerCRBORDER, uv_red).r;
+		color_green = tex2D(SamplerCRBORDER, uv_green).g;
+		color_blue = tex2D(SamplerCRBORDER, uv_blue).b;
+		}
+		else
+		{
+		color_red = tex2D(SamplerCRCLAMP, uv_red).r;
+		color_green = tex2D(SamplerCRCLAMP, uv_green).g;
+		color_blue = tex2D(SamplerCRCLAMP, uv_blue).b;
+		}
+
+		if( ((uv_red.x > 0) && (uv_red.x < 1) && (uv_red.y > 0) && (uv_red.y < 1)))
+		{
+			color = float4(color_red.x, color_green.y, color_blue.z, 1.0);
+		}
+		else
+		{
+			color = float4(0,0,0,1);
+		}
+		return color;
+		
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+void PS0(float4 position : SV_Position, float2 texcoord : TEXCOORD0, out float4 color : SV_Target)
+{	
+	float D = Depth;
+	float IPDD = IPD-(D/2);
 	if(!Depth_Map_View)
 	{
-		if(Stereoscopic_Mode == 0)
+	
+	float posH = H_V_S().y-1;
+	float midH = posH*BUFFER_HEIGHT/2*pix.y;
+		
+	float posV = H_V_S().x-1;
+	float midV = posV*BUFFER_WIDTH/2*pix.x;
+	
+	if(Polynomial_Barrel_Distortion == 0 && HMD_Profiles == 0 )
+	{	
+		if(Custom_Sidebars == 0)
 		{
-			if(Custom_Sidebars == 0)
-			{
-			color = texcoord.x < 0.5 ? tex2D(BackBufferMIRROR, float2((texcoord.x*2 + P) + DepthL * D, texcoord.y)) : tex2D(BackBufferMIRROR, float2((texcoord.x*2-1 - P) - DepthR * D , texcoord.y));
-			}
-			else if(Custom_Sidebars == 1)
-			{
-			color = texcoord.x < 0.5 ? tex2D(BackBufferBORDER, float2((texcoord.x*2 + P) + DepthL * D , texcoord.y)) : tex2D(BackBufferBORDER, float2((texcoord.x*2-1 - P) - DepthR * D , texcoord.y));
-			}
-			else
-			{
-			color = texcoord.x < 0.5 ? tex2D(BackBufferCLAMP, float2((texcoord.x*2 + P) + DepthL * D , texcoord.y)) : tex2D(BackBufferCLAMP, float2((texcoord.x*2-1 - P) - DepthR * D , texcoord.y));
-			}
+		color = texcoord.x < 0.5 ? tex2D(SamplerCLMIRROR,float2(((texcoord.x*2)*H_V_S().x)-midV + IPDD * pix.x,(texcoord.y*H_V_S().y)-midH)) : tex2D(SamplerCRMIRROR,float2(((texcoord.x*2-1)*H_V_S().x)-midV - IPDD * pix.x,(texcoord.y*H_V_S().y)-midH));
 		}
-		else if(Stereoscopic_Mode == 1)
-		{	
-			if(Custom_Sidebars == 0)
-			{
-			color = texcoord.y < 0.5 ? tex2D(BackBufferMIRROR, float2((texcoord.x + P) + DepthL * D , texcoord.y*2)) : tex2D(BackBufferMIRROR, float2((texcoord.x - P) - DepthR * D , texcoord.y*2-1));
-			}
-			else if(Custom_Sidebars == 1)
-			{
-			color = texcoord.y < 0.5 ? tex2D(BackBufferBORDER, float2((texcoord.x + P) + DepthL * D , texcoord.y*2)) : tex2D(BackBufferBORDER, float2((texcoord.x - P) - DepthR * D , texcoord.y*2-1));
-			}
-			else
-			{
-			color = texcoord.y < 0.5 ? tex2D(BackBufferCLAMP, float2((texcoord.x + P) + DepthL * D , texcoord.y*2)) : tex2D(BackBufferCLAMP, float2((texcoord.x - P) - DepthR * D , texcoord.y*2-1));
-			}
-		}
-		else if(Stereoscopic_Mode == 2)
+		else if(Custom_Sidebars == 1)
 		{
-			float gridL;
-			
-			if(Downscaling_Support == 0)
-			{
-			gridL = frac(texcoord.y*(BUFFER_HEIGHT/2));
-			}
-			else if(Downscaling_Support == 1)
-			{
-			gridL = frac(texcoord.y*(1080.0/2));
-			}
-			else
-			{
-			gridL = frac(texcoord.y*(1081.0/2));
-			}
-			
-			if(Custom_Sidebars == 0)
-			{
-			color = gridL > 0.5 ? tex2D(BackBufferMIRROR, float2((texcoord.x + P) + DepthL * D , texcoord.y)) :  tex2D(BackBufferMIRROR, float2((texcoord.x - P) - DepthR * D , texcoord.y));
-			}
-			else if(Custom_Sidebars == 1)
-			{
-			color = gridL > 0.5 ? tex2D(BackBufferBORDER, float2((texcoord.x + P) + DepthL * D , texcoord.y)) : tex2D(BackBufferBORDER, float2((texcoord.x - P) - DepthR * D , texcoord.y));
-			}
-			else
-			{
-			color = gridL > 0.5 ? tex2D(BackBufferCLAMP, float2((texcoord.x + P) + DepthL * D , texcoord.y)) : tex2D(BackBufferCLAMP, float2((texcoord.x - P) - DepthR * D , texcoord.y));
-			}
-		}
+		color = texcoord.x < 0.5 ? tex2D(SamplerCLBORDER,float2(((texcoord.x*2)*H_V_S().x)-midV + IPDD * pix.x,(texcoord.y*H_V_S().y)-midH)) : tex2D(SamplerCRBORDER,float2(((texcoord.x*2-1)*H_V_S().x)-midV - IPDD * pix.x,(texcoord.y*H_V_S().y)-midH));
+		}	
 		else
 		{
-			float gridy;
-			float gridx;
-			
-			if(Downscaling_Support == 0)
-			{
-			gridy = floor(texcoord.y*(BUFFER_HEIGHT));
-			gridx = floor(texcoord.x*(BUFFER_WIDTH));
-			}
-			else if(Downscaling_Support == 1)
-			{
-			gridy = floor(texcoord.y*(1080.0));
-			gridx = floor(texcoord.x*(1080.0));
-			}
-			else
-			{
-			gridy = floor(texcoord.y*(1081.0));
-			gridx = floor(texcoord.x*(1081.0));
-			}
-			
-			if(Custom_Sidebars == 0)
-			{
-			color = (int(gridy+gridx) & 1) < 0.5 ? tex2D(BackBufferMIRROR, float2((texcoord.x + P) + DepthL * D , texcoord.y)) :  tex2D(BackBufferMIRROR, float2((texcoord.x - P) - DepthR * D , texcoord.y));
-			}
-			else if(Custom_Sidebars == 1)
-			{
-			color = (int(gridy+gridx) & 1) < 0.5 ? tex2D(BackBufferBORDER, float2((texcoord.x + P) + DepthL * D , texcoord.y)) : tex2D(BackBufferBORDER, float2((texcoord.x - P) - DepthR * D , texcoord.y));
-			}
-			else
-			{
-			color = (int(gridy+gridx) & 1) < 0.5 ? tex2D(BackBufferCLAMP, float2((texcoord.x + P) + DepthL * D , texcoord.y)) : tex2D(BackBufferCLAMP, float2((texcoord.x - P) - DepthR * D , texcoord.y));
-			}
+		color = texcoord.x < 0.5 ? tex2D(SamplerCLCLAMP,float2(((texcoord.x*2)*H_V_S().x)-midV + IPDD * pix.x,(texcoord.y*H_V_S().y)-midH)) : tex2D(SamplerCRCLAMP,float2(((texcoord.x*2-1)*H_V_S().x)-midV - IPDD * pix.x,(texcoord.y*H_V_S().y)-midH));
 		}
 	}
-		else
+	else
+	{	
+	color = texcoord.x < 0.5 ? PDL(float2(((texcoord.x*2)*H_V_S().x)-midV + IPDD * pix.x,(texcoord.y*H_V_S().y)-midH)) : PDR(float2(((texcoord.x*2-1)*H_V_S().x)-midV - IPDD * pix.x,(texcoord.y*H_V_S().y)-midH));
+	}
+	}
+	else
 	{
-		if (Custom_Depth_Map == 0)
-		{
-			float4 DMV = texcoord.x < 0.5 ? GetAO(float2(texcoord.x*2 , texcoord.y*2)) : tex2D(SamplerDM,float2(texcoord.x*2-1 , texcoord.y*2));
-			color = texcoord.y < 0.5 ? DMV : tex2D(SamplerDone,float2(texcoord.x , texcoord.y*2-1));
-		}
-		else
-		{
-			color = tex2D(SamplerDM,texcoord);
-		}
-	}	
+	color = tex2D(SamplerCDM,texcoord.xy);
+	}
 }
+
 
 ///////////////////////////////////////////////////////////ReShade.fxh/////////////////////////////////////////////////////////////
 
@@ -1366,34 +1316,29 @@ void PostProcessVS(in uint id : SV_VertexID, out float4 position : SV_Position, 
 
 //*Rendering passes*//
 
-technique SuperDepth3D
+technique SuperDepth3D_HMDs
 {			
-			pass MouseCuror
+			pass MousePass
 		{
 			VertexShader = PostProcessVS;
 			PixelShader = MouseCuror;
-		}			
-			pass DepthMap
+		}
+			pass DepthMapPass
 		{
 			VertexShader = PostProcessVS;
 			PixelShader = DepthMap;
-			RenderTarget = texDM;
+			RenderTarget = texCDM;
 		}
-			pass SSAOcal
-		{
-			VertexShader = PostProcessVS;
-			PixelShader = AO_in;
-			RenderTarget = texSSAO;
-		}	
-			pass DisOcclusion
-		{
-			VertexShader = PostProcessVS;
-			PixelShader = DisOcclusion;
-			RenderTarget = texDone;
-		}
-			pass Stereo
+			pass SinglePassStereo
 		{
 			VertexShader = PostProcessVS;
 			PixelShader = PS_renderLR;
+			RenderTarget0 = texCL;
+			RenderTarget1 = texCR;
+		}
+			pass SidebySidePolynomialBarrelDistortion
+		{
+			VertexShader = PostProcessVS;
+			PixelShader = PS0;	
 		}
 }
