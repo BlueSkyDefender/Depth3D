@@ -70,18 +70,6 @@ uniform bool Depth_Map_View <
 	ui_tooltip = "Display the Depth Map. Use This to Work on your Own Depth Map for your game.";
 > = false;	
 
-uniform bool Depth_Map_Enhancement <
-	ui_label = "Depth Map Enhancement";
-	ui_tooltip = "Enable Or Dissable Depth Map Enhancement. Default is Off";
-> = 0;
-
-uniform float Adjust <
-	ui_type = "drag";
-	ui_min = 0; ui_max = 1.5;
-	ui_label = "Adjust";
-	ui_tooltip = "Adjust DepthMap Enhancement, Dehancement occurs past one. Default is 1.0";
-> = 1.0;
-
 uniform int Weapon_Depth_Map <
 	ui_type = "combo";
 	ui_items = "Weapon Depth Map Off\0Custom Weapon Depth Map One\0Custom Weapon Depth Map Two\0Custom Weapon Depth Map Three\0Custom Weapon Depth Map Four\0WDM 1\0WDM 2\0WDM 3\0WDM 4\0WDM 5\0WDM 6\0WDM 7\0WDM 8\0WDM 9\0WDM 10\0WDM 11\0WDM 12\0WDM 13\0WDM 14\0WDM 15\0WDM 16\0WDM 17\0WDM 18\0WDM 19\0WDM 20\0WDM 21\0WDM 22\0WDM 23\0";
@@ -211,30 +199,6 @@ sampler BackBuffer
 		Texture = BackBufferTex;
 	};
 
-sampler BackBufferMIRROR 
-	{ 
-		Texture = BackBufferTex;
-		AddressU = MIRROR;
-		AddressV = MIRROR;
-		AddressW = MIRROR;
-	};
-
-sampler BackBufferBORDER
-	{ 
-		Texture = BackBufferTex;
-		AddressU = BORDER;
-		AddressV = BORDER;
-		AddressW = BORDER;
-	};
-
-sampler BackBufferCLAMP
-	{ 
-		Texture = BackBufferTex;
-		AddressU = CLAMP;
-		AddressV = CLAMP;
-		AddressW = CLAMP;
-	};
-	
 texture texDM  { Width = BUFFER_WIDTH/Depth_Map_Division; Height = BUFFER_HEIGHT/Depth_Map_Division; Format = RGBA32F;}; 
 
 sampler SamplerDM
@@ -256,13 +220,13 @@ sampler SamplerSSAO
 		Texture = texSSAO;
 	};
 
-texture texL  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA32F;}; 
+texture texL  { Width = BUFFER_WIDTH/Depth_Map_Division; Height = BUFFER_HEIGHT/Depth_Map_Division; Format = RGBA32F;}; 
 sampler SamplerL
 	{
 		Texture = texL;
 	};
 	
-texture texR  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA32F;}; 
+texture texR  { Width = BUFFER_WIDTH/Depth_Map_Division; Height = BUFFER_HEIGHT/Depth_Map_Division; Format = RGBA32F;}; 
 sampler SamplerR
 	{
 		Texture = texR;
