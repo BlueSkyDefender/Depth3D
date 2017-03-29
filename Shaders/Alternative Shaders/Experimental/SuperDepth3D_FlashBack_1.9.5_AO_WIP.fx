@@ -26,13 +26,6 @@
  //*																																												*//
  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-// Change the Cross Cusor Key
-// Determines the Cusor Toggle Key useing keycode info
-// You can use http://keycode.info/ to figure out what key is what.
-// key B is Key Code 66, This is Default. Ex. Key 187 is the code for Equal Sign =.
-
-#define Cross_Cusor_Key 66
-
 // Determines The size of the Depth Map. For 4k Use 2 or 2.5. For 1440p Use 1.5 or 2. For 1080p use 1.
 
 #define Depth_Map_Division 2.0
@@ -138,24 +131,6 @@ uniform float Anaglyph_Desaturation <
 	ui_tooltip = "Adjust Anaglyph Saturation, Zero is Black & White, One is full color.";
 > = 1.0;
 
-uniform float Cross_Cusor_Size <
-	ui_type = "drag";
-	ui_min = 1; ui_max = 100;
-	ui_tooltip = "Pick your size of the cross cusor. Default is 25";
-	ui_label = "Cross Cusor Size";
-> = 25.0;
-
-uniform float3 Cross_Cusor_Color <
-	ui_type = "color";
-	ui_tooltip = "Pick your own cross cusor color. Default is (R 255, G 255, B 255)";
-	ui_label = "Cross Cusor Color";
-> = float3(1.0, 1.0, 1.0);
-
-uniform bool InvertY <
-	ui_label = "Invert Y-Axis";
-	ui_tooltip = "Invert Y-Axis for the Cross Cusor.";
-> = false;
-
 uniform bool Eye_Swap <
 	ui_label = "Eye Swap";
 	ui_tooltip = "Left right image change.";
@@ -182,11 +157,6 @@ uniform float Spread <
 	ui_label = "Spread";
 	ui_tooltip = "Spread is AO Falloff. Default is 1.5";
 > = 1.5;
-
-uniform bool mouse < source = "key"; keycode = Cross_Cusor_Key; toggle = true; >;
-
-uniform float2 Mousecoords < source = "mousepoint"; > ;
-
 
 /////////////////////////////////////////////D3D Starts Here/////////////////////////////////////////////////////////////////
 
@@ -238,31 +208,6 @@ sampler SamplerR
 	{
 		Texture = texR;
 	};
-
-float4 MouseCuror(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Target
-{
-	float4 Mpointer; 
-	float4 MInvert;
-	 
-	if (!InvertY)
-	{
-		MInvert = all(abs(Mousecoords - position.xy) < Cross_Cusor_Size) * (1 - all(abs(Mousecoords - position.xy) > Cross_Cusor_Size/(Cross_Cusor_Size/2))) ? float4(Cross_Cusor_Color, 1.0) : tex2D(BackBuffer, texcoord);//cross
-	}
-	else
-	{
-		MInvert = all(abs(float2(Mousecoords.x,BUFFER_HEIGHT-Mousecoords.y) - position.xy) < Cross_Cusor_Size) * (1 - all(abs(float2(Mousecoords.x,BUFFER_HEIGHT-Mousecoords.y) - position.xy) > Cross_Cusor_Size/(Cross_Cusor_Size/2))) ? float4(Cross_Cusor_Color, 1.0) : tex2D(BackBuffer, texcoord);//cross
-	}
-	
-	if(mouse)
-	{
-		Mpointer = MInvert;
-	}
-	else
-	{
-		Mpointer =  tex2D(BackBuffer, texcoord);
-	}
-	return Mpointer;
-}
 	
 /////////////////////////////////////////////////////////////////////////////////Depth Map Information/////////////////////////////////////////////////////////////////////////////////
 
@@ -1415,8 +1360,8 @@ float4 DM = tex2D(SamplerDM,texcoord);
 					float3 HalfR = dot(R(float2((texcoord.x - Perspective * pix.x),texcoord.y)).rgb,float3(0.299, 0.587, 0.114));
 					float3 LC = lerp(HalfL,L(float2((texcoord.x + Perspective * pix.x),texcoord.y)).rgb,Anaglyph_Desaturation);  
 					float3 RC = lerp(HalfR,R(float2((texcoord.x - Perspective * pix.x),texcoord.y)).rgb,Anaglyph_Desaturation); 
-
-					float4 C = float4(LC,1);;
+					
+					float4 C = float4(LC,1);
 					float4 CT = float4(RC,1);
 					
 				if (Anaglyph_Colors == 0)
@@ -1507,11 +1452,6 @@ void PostProcessVS(in uint id : SV_VertexID, out float4 position : SV_Position, 
 
 technique SuperDepth3D_FlashBack
 	{
-			pass MouseCuror
-		{
-			VertexShader = PostProcessVS;
-			PixelShader = MouseCuror;
-		}			
 			pass DepthMap
 		{
 			VertexShader = PostProcessVS;

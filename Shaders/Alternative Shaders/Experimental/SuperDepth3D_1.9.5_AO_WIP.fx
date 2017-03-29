@@ -26,13 +26,6 @@
  //*																																												*//
  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-// Change the Cross Cusor Key
-// Determines the Cusor Toggle Key useing keycode info
-// You can use http://keycode.info/ to figure out what key is what.
-// key B is Key Code 66, This is Default. Ex. Key 187 is the code for Equal Sign =.
-
-#define Cross_Cusor_Key 66
-
 // Determines The size of the Depth Map. For 4k Use 2 or 2.5. For 1440p Use 1.5 or 2. For 1080p use 1.
 
 #define Depth_Map_Division 2.0
@@ -124,24 +117,6 @@ uniform int Custom_Sidebars <
 	ui_tooltip = "Select how you like the Edge of the screen to look like.";
 > = 1;
 
-uniform float Cross_Cusor_Size <
-	ui_type = "drag";
-	ui_min = 1; ui_max = 100;
-	ui_tooltip = "Pick your size of the cross cusor. Default is 25";
-	ui_label = "Cross Cusor Size";
-> = 25.0;
-
-uniform float3 Cross_Cusor_Color <
-	ui_type = "color";
-	ui_tooltip = "Pick your own cross cusor color. Default is (R 255, G 255, B 255)";
-	ui_label = "Cross Cusor Color";
-> = float3(1.0, 1.0, 1.0);
-
-uniform bool InvertY <
-	ui_label = "Invert Y-Axis";
-	ui_tooltip = "Invert Y-Axis for the Cross Cusor.";
-> = false;
-
 uniform int Stereoscopic_Mode <
 	ui_type = "combo";
 	ui_items = "Side by Side\0Top and Bottom\0Line Interlaced\0Checkerboard 3D\0Anaglyph\0";
@@ -195,10 +170,6 @@ uniform float Spread <
 	ui_label = "Spread";
 	ui_tooltip = "Spread is AO Falloff. Default is 1.5";
 > = 1.5;
-
-uniform bool mouse < source = "key"; keycode = Cross_Cusor_Key; toggle = true; >;
-
-uniform float2 Mousecoords < source = "mousepoint"; > ;
 
 /////////////////////////////////////////////D3D Starts Here/////////////////////////////////////////////////////////////////
 
@@ -262,31 +233,6 @@ sampler SamplerSSAO
 	{
 		Texture = texSSAO;
 	};
-	
-float4 MouseCuror(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Target
-{
-	float4 Mpointer; 
-	float4 MInvert;
-	 
-	if (!InvertY)
-	{
-		MInvert = all(abs(Mousecoords - position.xy) < Cross_Cusor_Size) * (1 - all(abs(Mousecoords - position.xy) > Cross_Cusor_Size/(Cross_Cusor_Size/2))) ? float4(Cross_Cusor_Color, 1.0) : tex2D(BackBuffer, texcoord);//cross
-	}
-	else
-	{
-		MInvert = all(abs(float2(Mousecoords.x,BUFFER_HEIGHT-Mousecoords.y) - position.xy) < Cross_Cusor_Size) * (1 - all(abs(float2(Mousecoords.x,BUFFER_HEIGHT-Mousecoords.y) - position.xy) > Cross_Cusor_Size/(Cross_Cusor_Size/2))) ? float4(Cross_Cusor_Color, 1.0) : tex2D(BackBuffer, texcoord);//cross
-	}
-	
-	if(mouse)
-	{
-		Mpointer = MInvert;
-	}
-	else
-	{
-		Mpointer =  tex2D(BackBuffer, texcoord);
-	}
-	return Mpointer;
-}
 
 /////////////////////////////////////////////////////////////////////////////////Depth Map Information/////////////////////////////////////////////////////////////////////////////////
 
@@ -1468,12 +1414,7 @@ void PostProcessVS(in uint id : SV_VertexID, out float4 position : SV_Position, 
 //*Rendering passes*//
 
 technique SuperDepth3D
-{			
-			pass MouseCuror
-		{
-			VertexShader = PostProcessVS;
-			PixelShader = MouseCuror;
-		}			
+{					
 			pass DepthMap
 		{
 			VertexShader = PostProcessVS;
