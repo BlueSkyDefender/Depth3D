@@ -1,9 +1,9 @@
-////-------------------//
- ///**SuperDepth3DHMD**///
- //-------------------////
+ ////------------------------------------------//
+ ///**Polynomial Barrel Distortion for HMDs**///
+ //-----------------------------------------////
 
  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
- //* Depth Map Based 3D post-process shader v1.9.4																																	*//
+ //* Barrel Distortion for HMD type Displays For SuperDepth3D v1.0																													*//
  //* For Reshade 3.0																																								*//
  //* --------------------------																																						*//
  //* This work is licensed under a Creative Commons Attribution 3.0 Unported License.																								*//
@@ -16,9 +16,9 @@
  //*																																												*//
  //* http://reshade.me/forum/shader-presentation/2128-sidebyside-3d-depth-map-based-stereoscopic-shader																				*//	
  //* ---------------------------------																																				*//
- //*																																												*//
+ //* Also thank you Zapal for your help with fixing a few things in this shader. 																									*//
+ //* https://reshade.me/forum/shader-presentation/2128-3d-depth-map-based-stereoscopic-shader?start=900#21236																		*//
  //* 																																												*//
- //*																																												*//
  //* 																																												*//
  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -29,16 +29,9 @@ uniform int IPD <
 	ui_tooltip = "Determines the distance between your eyes. Default is 0";
 > = 0;
 
-uniform int Polynomial_Barrel_Distortion <
-	ui_type = "combo";
-	ui_items = "Off\0Polynomial Distortion\0";
-	ui_label = "Polynomial Barrel Distortion";
-	ui_tooltip = "Barrel Distortion for HMD type Displays.";
-> = 0;
-
 uniform int Stereoscopic_Mode_Convert <
 	ui_type = "combo";
-	ui_items = "Side by Side\0Top and Bottom\0";
+	ui_items = "Side by Side\0Top and Bottom\0Alt Top and Bottom\0";
 	ui_label = "3D Display Mode Conversion";
 	ui_tooltip = "3D display output conversion for SbS and TnB.";
 > = 0;
@@ -340,15 +333,24 @@ float4 PDL(float2 texcoord)		//Texture = texCL Left
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void PS0(float4 position : SV_Position, float2 texcoord : TEXCOORD0, out float4 color : SV_Target)
 {	
-
+	
+	float4 Out;
+	
 	float posH = H_V_S().y - 1;
 	float midH = posH*BUFFER_HEIGHT/2*pix.y;
 		
 	float posV = H_V_S().x-1;
 	float midV = posV*BUFFER_WIDTH/2*pix.x;
 	
-	color = texcoord.x < 0.5 ? PDL(float2(((texcoord.x*2)*H_V_S().x)-midV + IPD * pix.x,(texcoord.y*H_V_S().y)-midH)) : PDR(float2(((texcoord.x*2-1)*H_V_S().x)-midV - IPD * pix.x,(texcoord.y*H_V_S().y)-midH));
-
+	if( Stereoscopic_Mode_Convert == 0 || Stereoscopic_Mode_Convert == 1)
+	{
+	Out = texcoord.x < 0.5 ? PDL(float2(((texcoord.x*2)*H_V_S().x)-midV + IPD * pix.x,(texcoord.y*H_V_S().y)-midH)) : PDR(float2(((texcoord.x*2-1)*H_V_S().x)-midV - IPD * pix.x,(texcoord.y*H_V_S().y)-midH));
+	}
+	else
+	{
+	Out = texcoord.y < 0.5 ? PDL(float2((texcoord.x*H_V_S().x)-midV + IPD * pix.x,((texcoord.y*2)*H_V_S().y)-midH)) : PDR(float2((texcoord.x*H_V_S().x)-midV - IPD * pix.x,((texcoord.y*2-1)*H_V_S().y)-midH));
+	}
+	color = Out;
 }
 
 
