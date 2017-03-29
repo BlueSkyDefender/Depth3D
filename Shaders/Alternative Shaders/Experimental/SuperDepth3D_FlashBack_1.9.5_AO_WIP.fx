@@ -51,13 +51,6 @@ uniform int Depth <
 	ui_tooltip = "Determines the amount of Image Warping and Separation between both eyes. To go beyond 25 max you need to enter your own number.";
 > = 15;
 
-uniform float Depth_Limit <
-	ui_type = "drag";
-	ui_min = 0.500; ui_max = 1.0;
-	ui_label = "Depth Limit";
-	ui_tooltip = "Limit how far Depth Image Warping is done. Default is One.";
-> = 1.0;
-
 uniform float Perspective <
 	ui_type = "drag";
 	ui_min = -50; ui_max = 50;
@@ -119,9 +112,9 @@ uniform float2 Near_Far <
 
 uniform int Stereoscopic_Mode <
 	ui_type = "combo";
-	ui_items = "Side by Side\0Top and Bottom\0Line Interlaced\0Checkerboard 3D\0";
+	ui_items = "Side by Side\0Top and Bottom\0Line Interlaced\0Checkerboard 3D\0Anaglyph\0";
 	ui_label = "3D Display Mode";
-	ui_tooltip = "Side by Side/Top and Bottom/Line Interlaced/Checkerboard 3D display output.";
+	ui_tooltip = "Side by Side/Top and Bottom/Line Interlaced/Checkerboard 3D/Anaglyph 3D display output.";
 > = 0;
 
 uniform int Downscaling_Support <
@@ -130,6 +123,20 @@ uniform int Downscaling_Support <
 	ui_label = "Downscaling Support";
 	ui_tooltip = "Dynamic Super Resolution & Virtual Super Resolution downscaling support for Line Interlaced & Checkerboard 3D displays.";
 > = 0;
+
+uniform int Anaglyph_Colors <
+	ui_type = "combo";
+	ui_items = "Red/Cyan\0Dubois Red/Cyan\0Green/Magenta\0Dubois Green/Magenta\0";
+	ui_label = "Anaglyph Color Mode";
+	ui_tooltip = "Select colors for your anaglyph glasses.";
+> = 0;
+
+uniform float Anaglyph_Desaturation <
+	ui_type = "drag";
+	ui_min = 0.0; ui_max = 1.0;
+	ui_label = "Anaglyph Desaturation";
+	ui_tooltip = "Adjust Anaglyph Saturation, Zero is Black & White, One is full color.";
+> = 1.0;
 
 uniform float Cross_Cusor_Size <
 	ui_type = "drag";
@@ -1345,7 +1352,7 @@ float4 DM = tex2D(SamplerDM,texcoord);
 					color = texcoord.y < 0.5 ? R(float2(texcoord.x + Perspective * pix.x,texcoord.y*2)) : L(float2(texcoord.x - Perspective * pix.x,texcoord.y*2-1));
 				}
 			}
-			else if(Stereoscopic_Mode == 1)
+			else if(Stereoscopic_Mode == 2)
 			{
 				float gridL;
 				
@@ -1371,7 +1378,7 @@ float4 DM = tex2D(SamplerDM,texcoord);
 					color = gridL > 0.5 ? R(float2(texcoord.x + Perspective * pix.x,texcoord.y)) : L(float2(texcoord.x - Perspective * pix.x,texcoord.y));
 				}
 			}
-			else if(Stereoscopic_Mode == 2)
+			else if(Stereoscopic_Mode == 3)
 			{
 			float gridy;
 				float gridx;
@@ -1399,6 +1406,76 @@ float4 DM = tex2D(SamplerDM,texcoord);
 				else
 				{
 					color = (int(gridy+gridx) & 1) < 0.5 ? R(float2(texcoord.x + Perspective * pix.x,texcoord.y)) : L(float2(texcoord.x - Perspective * pix.x,texcoord.y));
+				}
+			}
+			else
+			{
+														
+					float3 HalfL = dot(L(float2((texcoord.x + Perspective * pix.x),texcoord.y)).rgb,float3(0.299, 0.587, 0.114));
+					float3 HalfR = dot(R(float2((texcoord.x - Perspective * pix.x),texcoord.y)).rgb,float3(0.299, 0.587, 0.114));
+					float3 LC = lerp(HalfL,L(float2((texcoord.x + Perspective * pix.x),texcoord.y)).rgb,Anaglyph_Desaturation);  
+					float3 RC = lerp(HalfR,R(float2((texcoord.x - Perspective * pix.x),texcoord.y)).rgb,Anaglyph_Desaturation); 
+
+					float4 C = float4(LC,1);;
+					float4 CT = float4(RC,1);
+					
+				if (Anaglyph_Colors == 0)
+				{
+					float4 LeftEyecolor = float4(1.0,0.0,0.0,1.0);
+					float4 RightEyecolor = float4(0.0,1.0,1.0,1.0);
+					
+
+					color =  (C*LeftEyecolor) + (CT*RightEyecolor);
+
+				}
+				else if (Anaglyph_Colors == 1)
+				{
+				float red = 0.437 * C.r + 0.449 * C.g + 0.164 * C.b
+						- 0.011 * CT.r - 0.032 * CT.g - 0.007 * CT.b;
+				
+				if (red > 1) { red = 1; }   if (red < 0) { red = 0; }
+
+				float green = -0.062 * C.r -0.062 * C.g -0.024 * C.b 
+							+ 0.377 * CT.r + 0.761 * CT.g + 0.009 * CT.b;
+				
+				if (green > 1) { green = 1; }   if (green < 0) { green = 0; }
+
+				float blue = -0.048 * C.r - 0.050 * C.g - 0.017 * C.b 
+							-0.026 * CT.r -0.093 * CT.g + 1.234  * CT.b;
+				
+				if (blue > 1) { blue = 1; }   if (blue < 0) { blue = 0; }
+
+
+				color = float4(red, green, blue, 0);
+				}
+				else if (Anaglyph_Colors == 2)
+				{
+					float4 LeftEyecolor = float4(0.0,1.0,0.0,1.0);
+					float4 RightEyecolor = float4(1.0,0.0,1.0,1.0);
+					
+					color =  (C*LeftEyecolor) + (CT*RightEyecolor);
+					
+				}
+				else
+				{
+					
+					
+				float red = -0.062 * C.r -0.158 * C.g -0.039 * C.b
+						+ 0.529 * CT.r + 0.705 * CT.g + 0.024 * CT.b;
+				
+				if (red > 1) { red = 1; }   if (red < 0) { red = 0; }
+
+				float green = 0.284 * C.r + 0.668 * C.g + 0.143 * C.b 
+							- 0.016 * CT.r - 0.015 * CT.g + 0.065 * CT.b;
+				
+				if (green > 1) { green = 1; }   if (green < 0) { green = 0; }
+
+				float blue = -0.015 * C.r -0.027 * C.g + 0.021 * C.b 
+							+ 0.009 * CT.r + 0.075 * CT.g + 0.937  * CT.b;
+				
+				if (blue > 1) { blue = 1; }   if (blue < 0) { blue = 0; }
+						
+				color = float4(red, green, blue, 0);
 				}
 			}
 		}
