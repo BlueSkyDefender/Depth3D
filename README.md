@@ -121,3 +121,11 @@ http://www.mediafire.com/file/swji5143ga20b1t/ReShade_2.0.3f1_Super_DepthMap_3D_
 User Game & Settings
 
 https://docs.google.com/spreadsheets/d/18ujpY-97V_YuXpQUh-7bOomE4D5nUGwp3XppfU_0N2k/edit?usp=sharing
+
+======================================================================================================================================
+Want to talk to me leave me a message at the forums: I am user BlueSkyKnight
+https://reshade.me/forum/shader-presentation/2128-sidebyside-3d-depth-map-based-stereoscopic-shader
+
+If you enjoyed this shader and like to donate paypal.me/BlueSkyDefender
+
+Also my steam page steamcommunity.com/id/BlueSkyDefender
