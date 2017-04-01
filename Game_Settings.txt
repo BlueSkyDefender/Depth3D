@@ -8,8 +8,7 @@ depth but you don't mind sacrificing detail then, override the depth limit and s
 That ever looks better too you. DM20 is not as strong as DM14. So the max I think for DM 14 is Depth 30.
 
 *GTA V*
-One of the few game where you can override the Depth Limit and run with a higher depth setting. I personaly run mine at 40 and a blur
-setting of 0.025
+One of the few game where you can override the Depth Limit and run with a higher depth setting. I personaly run mine at 40
 
 *Skyrim: Enhanced Edition*
 Seems to work better then the old Skyrim. Less Bugs and runs well on my system. No INI mods needed.
@@ -18,7 +17,7 @@ Seems to work better then the old Skyrim. Less Bugs and runs well on my system. 
 This game you must read the instructions below so that you are able to get the depth map in game. Also I consider 30 to be max depth in this game.
 
 *Fez*
-In this game Fez, it seems to flip it's Depth Map when in the Menu some times. This can be anoying. Other then that it seem fine. With Depth set to around 20 seem to be ok with proper perspective adjustment. Also set the new depth limit option to around 0.800-0.900.
+In this game Fez, it seems to flip it's Depth Map when in the Menu some times. This can be anoying. Other then that it seem fine. With Depth set to around 20 seem to be ok with proper perspective adjustment.
 
 ______________________________________________________________________________________________________________________________________
 
@@ -74,7 +73,7 @@ The Evil Within				DM 19					    RB		Any
 Witcher 3				DM 20 or 14						Radial		On Adjust 0.750-0.900	Read Above
 Warhammer: End Times - Vermintide	DM 10												
 Dead Rising 3				DM 6					
-Soma					DM 2		
+Soma					DM 2					    RB
 Penumbra: Black Plague			DM 4					    RB
 NecroVision: Lost Company		DM 27		WDM 21		
 The Vanishing of Ethan Carter Redux	DM 3					    RB
@@ -319,6 +318,8 @@ bDeferredShadows=0
 Depth Buffer only in DX9 so launch it in Shadow Warrior XP and turn on FSAAX2 in game.
 Overlap in Weapon Depth Map. May be worth it.
 
+{Soma}
+Use reshade 3.0.4 and launch with internal exe. It's called Soma_NoSteam.exe
 
 {Stay Close}
 Install reshade in too Steam\steamapps\common\Stay Close\Migrate\Binaries\Win64
