@@ -54,7 +54,7 @@ uniform float Perspective <
 uniform int Dis_Occlusion <
 	ui_type = "combo";
 	ui_items = "Off\0Normal Mask\0Radial Mask\0";
-	ui_label = "Dis-Occlusion Mask";
+	ui_label = "Disocclusion Mask";
 	ui_tooltip = "Auto occlusion masking options.";
 > = 1;
 
