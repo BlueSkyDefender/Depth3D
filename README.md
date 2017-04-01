@@ -111,11 +111,11 @@ https://github.com/BlueSkyDefender/Depth3D/blob/master/ReadMe_Depth3D.txt
 
 Also read https://github.com/BlueSkyDefender/Depth3D/blob/master/Game_Settings.txt For Game Settings.
  
-##The Reshade 2.0 Repack For 1.9.0
+## The Reshade 2.0 Repack For 1.9.0
 
 http://www.mediafire.com/file/swji5143ga20b1t/ReShade_2.0.3f1_Super_DepthMap_3D_v1.9.0_Repack.7z
 
-##User Game & Settings
+## User Game & Settings
 
 https://docs.google.com/spreadsheets/d/18ujpY-97V_YuXpQUh-7bOomE4D5nUGwp3XppfU_0N2k/edit?usp=sharing
 
