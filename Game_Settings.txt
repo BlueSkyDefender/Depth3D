@@ -1,4 +1,4 @@
-﻿#SuperDepth3D 1.9.5
+#SuperDepth3D 1.9.5
 --------------------------------------------------------------------------------------------------------------------------------------
 -=BSD Notes=- Personal recommended settings and tips for some games.
 ______________________________________________________________________________________________________________________________________
@@ -32,100 +32,100 @@ https://docs.google.com/spreadsheets/d/18ujpY-97V_YuXpQUh-7bOomE4D5nUGwp3XppfU_0
 Game List updates for Reshade 3.0
 ______________________________________________________________________________________________________________________________________
 
-[Game List]				[Alternate DM] [Weapon DM][Depth Flip] [Read Below] [Disocclusion Type] [BSD Notes]
-Alien Isolation				DM 0											
-Amnesia: The Dark Descent		DM 2 or 30	WDM 17									
-Among The Sleep				DM 29				On				
-Assassin Creed Unity			DM 21 or 3										
-Batman Arkham Knight			DM 4 or 6						Radial				
-Batman Arkham Origins			DM 4											
-Batman: Arkham City			DM 4											
-BorderLands 2				DM 27		WDM 2			    RB		Any		
-Call of Duty: Advance Warfare		DM 5					    RB		Any		
-Call of Duty: Black Ops 2		DM 5					    RB		Any		
-Call of Duty: Ghost			DM 5					    RB		Any		
-Call of Duty: Infinite Warfare		DM 5		WDM 1			    RB		Any		
-Casltevania: Lord of Shadows - UE	DM 6
-Condemned: Criminal Origins		DM 30		WDM 6			    RB		
-Deadly Premonition:The Directors's Cut	DM 8					    RB
-Dragon Ball Xenoverse			DM 9												
-Dragons Dogma: Dark Arisen		DM 8		
-DreamFall Chapters			DM 17 or 37			On
-Dying Light				DM 11		WDM 7
-Fallout 4				DM 10		WDM 23 : 4				Radial					
-Firewatch				DM 0				On	    RB				
-GTA V					DM 12					    RB		Radial		Read Above
-Hard Reset				DM 27		WDM 8			    RB
-Lords of The Fallen			DM 4
-Magicka 2				DM 13					    RB		Off
-Metro 2033 Redux			DM 6		WDM 5			    RB
-Metro Last Light Redux			DM 6		WDM 5			    RB
-Middle-earth: Shadow of Mordor		DM 14					    RB
-Naruto Shippuden UNS3 Full Blurst	DM 15					    RB
-Quake 2 XP				DM 0 or 27	WDM 9							
-Quake 4					DM 29		WDM 5
-Rage64					DM 28		WDM 10			    RB
-Return To Castle Wolfenstine		DM 27		WDM 11			    RB
-Ryse: Son of Rome			DM 17
-Shadow warrior(2013)			DM 27		WDM 12			    RB
-The Elder Scrolls V: Skyrim		DM 4				
-Sleeping Dogs: DE			DM 18		
-Souls Games				DM 19		
-The Evil Within				DM 19					    RB		Any
-Witcher 3				DM 20 or 14						Radial		Read Above
-Warhammer: End Times - Vermintide	DM 10												
-Dead Rising 3				DM 6					
-Soma					DM 2					    RB
-Penumbra: Black Plague			DM 4					    RB
-NecroVision: Lost Company		DM 27		WDM 21		
-The Vanishing of Ethan Carter Redux	DM 3					    RB
-Cryostasis				DM 27		WDM 15		
-Silent Hill: Homecoming			DM 22		
-Monstrum DX11				DM 23				On	    RB
-Double Dragon Neon			DM 25
-Zombie Army Trilogy			DM 8 or 4						
-Just Cause 3				DM 21							Radial
-DOOM 2016				DM 7		WDM 13							
-Quantum Break				DM 18							Radial
-Stay Close				DM 26					    RB		Normal
-Emily Wants To Play			DM 26					    RB		Any
-KHOLAT					DM 21					    RB		Any
-LuciusII				DM 4 or 23				    RB		Normal
-Dead Effect				DM 10				On			Any	
-Nosferatu: The Wrath of Malachi		DM 1					    RB		Any	
-The Elder Scrolls V: SE			DM 27 		WDM 3					Radial		Read Above	
-Phantasmal				DM 4				On	    RB		Any			
-Layers of Fear				DM 10				On			Normal
-Through The Woods			DM 29				On	    RB		Radial
-Dungeon Nightmares II			DM 23				On	    RB		Any
-The Legend of Korra			DM 4							Any
-S.T.A.L.K.E.R:CoP Complete Mod		DM 29		WDM 18			    RB		Any
-S.T.A.L.K.E.R:CS Complete Mod		DM 0		WDM 19			    RB		Any
-S.T.A.L.K.E.R:SoC Complete Mod		DM 24		WDM 20			    RB		Any
-Wolfenstine: The New Order		DM 4		WDM 16			    RB		Any		Read Above
-Wolfenstine: The Old Blood		DM 4		WDM 16			    RB		Any		Read Above
-Amnesia: Machine for Pigs		DM 2 or 30	WDM 17					Any
-Gone Home				DM 0				On			Any
-DarkSiders Warmastred Edition		DM 0							Any
-Requiem: Avenging Angel			DM 31					    RB		Any 
-Resident Evil 7				DM 12					    RB		Any
-The Void				DM 4					    RB		Any
-Turok: Dinosaur Hunter			DM 32		WDM 22			    RB		Any		
-Everybody's Gone to the Rapture		DM 0							Any
-ABZU					DM 21							Any
-Never Alone (Kisima Ingitchuna)		DM 33							Normal
-Lifeless Planet				DM 17							Radial
-Dead Island				DM 6 or 34						Any
-Tales of Zestiria			DM 7							Any
-Mordheim: City of the Damned		DM 0							Any
-Metal Gear Rising			DM 28					    RB		Any
-DeadPool Game				DM 6							Any
-FarCry 3				DM 18					    RB		Radial
-Stacking				DM 34							Any
-Fez					DM 35				On			Off		Read Above
-Unreal Gold with v227			DM 8					    RB		Any
-Watch Dogs 2				DM 21					    RB		Any
-Lara Croft & Temple of Osiris		DM 36							Any
+[Game List]								[Depth Map]		[Weapon DM][Depth Flip] [Read Below] [Disocclusion Type] [BSD Notes]
+Alien Isolation							DM 0											
+Amnesia: The Dark Descent				DM 2 or 30		WDM 17									
+Among The Sleep							DM 29							On				
+Assassin Creed Unity					DM 21 or 3										
+Batman Arkham Knight					DM 4 or 6													Radial				
+Batman Arkham Origins					DM 4											
+Batman: Arkham City						DM 4											
+BorderLands 2							DM 27			WDM 2							RB			Any		
+Call of Duty: Advance Warfare			DM 5											RB			Any		
+Call of Duty: Black Ops 2				DM 5											RB			Any		
+Call of Duty: Ghost						DM 5											RB			Any		
+Call of Duty: Infinite Warfare			DM 5			WDM 1							RB			Any		
+Casltevania: Lord of Shadows - UE		DM 6
+Condemned: Criminal Origins				DM 30			WDM 6							RB		
+Deadly Premonition:The Directors's Cut	DM 8											RB
+Dragon Ball Xenoverse					DM 9												
+Dragons Dogma: Dark Arisen				DM 8		
+DreamFall Chapters						DM 17 or 37						On
+Dying Light								DM 11			WDM 7
+Fallout 4								DM 10			WDM 23 : 4									Radial					
+Firewatch								DM 0							On				RB				
+GTA V									DM 12											RB			Radial		Read Above
+Hard Reset								DM 27			WDM 8							RB
+Lords of The Fallen						DM 4
+Magicka 2								DM 13											RB			Off
+Metro 2033 Redux						DM 6			WDM 5							RB
+Metro Last Light Redux					DM 6			WDM 5							RB
+Middle-earth: Shadow of Mordor			DM 14											RB
+Naruto Shippuden UNS3 Full Blurst		DM 15											RB
+Quake 2 XP								DM 0 or 27		WDM 9							
+Quake 4									M 29			WDM 5
+Rage64									DM 28			WDM 10							RB
+Return To Castle Wolfenstine			DM 27			WDM 11							RB
+Ryse: Son of Rome						DM 17
+Shadow warrior(2013)					DM 27			WDM 12							RB
+The Elder Scrolls V: Skyrim				DM 4				
+Sleeping Dogs: DE						DM 18		
+Souls Games								DM 19		
+The Evil Within							DM 19											RB			Any
+Witcher 3								DM 20 or 14													Radial		Read Above
+Warhammer: End Times - Vermintide		DM 10												
+Dead Rising 3							DM 6					
+Soma									DM 2											RB
+Penumbra: Black Plague					DM 4											RB
+NecroVision: Lost Company				DM 27			WDM 21		
+The Vanishing of Ethan Carter Redux		DM 3											RB
+Cryostasis								DM 27			WDM 15		
+Silent Hill: Homecoming					DM 22		
+Monstrum DX11							DM 23							On				RB
+Double Dragon Neon						DM 25
+Zombie Army Trilogy						DM 8 or 4						
+Just Cause 3							DM 21														Radial
+DOOM 2016								DM 7			WDM 13							
+Quantum Break							DM 18														Radial
+Stay Close								DM 26											RB			Normal
+Emily Wants To Play						DM 26											RB			Any
+KHOLAT									DM 21											RB			Any
+LuciusII								DM 4 or 23										RB			Normal
+Dead Effect								DM 10							On							Any	
+Nosferatu: The Wrath of Malachi			DM 1											RB			Any	
+The Elder Scrolls V: SE					DM 27			WDM 3										Radial		Read Above	
+Phantasmal								DM 4							On				RB			Any			
+Layers of Fear							DM 10							On							Normal
+Through The Woods						DM 29							On				RB			Radial
+Dungeon Nightmares II					DM 23							On				RB			Any
+The Legend of Korra						DM 4														Any
+S.T.A.L.K.E.R:CoP Complete Mod			DM 29			WDM 18							RB			Any
+S.T.A.L.K.E.R:CS Complete Mod			DM 0			WDM 19							RB			Any
+S.T.A.L.K.E.R:SoC Complete Mod			DM 24			WDM 20							RB			Any
+Wolfenstine: The New Order				DM 4			WDM 16							RB			Any			Read Above
+Wolfenstine: The Old Blood				DM 4			WDM 16							RB			Any			Read Above
+Amnesia: Machine for Pigs				DM 2 or 30		WDM 17										Any
+Gone Home								DM 0							On							Any
+DarkSiders Warmastred Edition			DM 0														Any
+Requiem: Avenging Angel					DM 31											RB			Any 
+Resident Evil 7							DM 12											RB			Any
+The Void								DM 4											RB			Any
+Turok: Dinosaur Hunter					DM 32			WDM 22							RB			Any		
+Everybody's Gone to the Rapture			DM 0														Any
+ABZU									DM 21														Any
+Never Alone (Kisima Ingitchuna)			DM 33														Normal
+Lifeless Planet							DM 17														Radial
+Dead Island								DM 6 or 34													Any
+Tales of Zestiria						DM 7														Any
+Mordheim: City of the Damned			DM 0														Any
+Metal Gear Rising						DM 28											RB			Any
+DeadPool Game							DM 6														Any
+FarCry 3								DM 18											RB			Radial
+Stacking								DM 34														Any
+Fez										DM 35							On							Off			Read Above
+Unreal Gold with v227					DM 8											RB			Any
+Watch Dogs 2							DM 21											RB			Any
+Lara Croft & Temple of Osiris			DM 36														Any
 
 User Submitted Depth Map Settings
 
