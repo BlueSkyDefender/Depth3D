@@ -106,7 +106,7 @@ float3 PC = Polynomial_Colors;
 	//Make your own Profile here.
 	if (HMD_Profiles == 2)
 	{
-		IPD = -25.0;					//Interpupillary Distance.
+		IPD = -25.0;				//Interpupillary Distance.
 		LC = 0.5; 					//Lens Center. Default is 0.5
 		LD = 0.250;					//Lens Distortion. Default is 0.01
 		Z = 1.0;					//Zoom. Default is 1.0
