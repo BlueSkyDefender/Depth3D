@@ -30,18 +30,18 @@
 
 #define Depth_Map_Division 2.0
 
-uniform int Alternate_Depth_Map_One <
+uniform int Depth_Map <
 	ui_type = "combo";
 	ui_items = "DM 0\0DM 1\0DM 2\0DM 3\0DM 4\0DM 5\0DM 6\0DM 7\0DM 8\0DM 9\0DM 10\0DM 11\0DM 12\0DM 13\0DM 14\0DM 15\0DM 16\0DM 17\0DM 18\0DM 19\0DM 20\0DM 21\0DM 22\0DM 23\0DM 24\0DM 25\0DM 26\0DM 27\0DM 28\0DM 29\0DM 30\0DM 31\0DM 32\0DM 33\0DM 34\0DM 35\0DM 36\0DM 37\0DM 38\0DM 39\0DM 40\0";
-	ui_label = "Depth Map Two";
-	ui_tooltip = "Alternate Depth Map for different Games. Read the ReadMeDepth3d.txt, for setting. Each game May and can use a diffrent Alternet Depth Map.";
+	ui_label = "Depth Map";
+	ui_tooltip = "Depth map for different Games. Read the ReadMeDepth3d.txt, for setting.";
 > = 0;
 
 uniform int Depth <
 	ui_type = "drag";
 	ui_min = 0; ui_max = 30;
 	ui_label = "Depth Slider";
-	ui_tooltip = "Determines the amount of Image Warping and Separation between both eyes. You can Override this setting.";
+	ui_tooltip = "Determines the amount of Image Warping and Separation.";
 > = 15;
 
 uniform float Perspective <
@@ -55,24 +55,38 @@ uniform int Dis_Occlusion <
 	ui_type = "combo";
 	ui_items = "Off\0Normal Mask\0Radial Mask\0";
 	ui_label = "Disocclusion Mask";
-	ui_tooltip = "Auto occlusion masking options.";
+	ui_tooltip = "Automatic occlusion masking options.";
 > = 1;
 
 uniform bool Depth_Map_View <
 	ui_label = "Depth Map View";
-	ui_tooltip = "Display the Depth Map. Use This to Work on your Own Depth Map for your game.";
+	ui_tooltip = "Display the Depth Map.";
 > = false;
 
 uniform bool Depth_Map_Flip <
 	ui_label = "Depth Map Flip";
-	ui_tooltip = "Depth Flip if the depth map is Upside Down.";
+	ui_tooltip = "Flip the depth map if it is upside down.";
 > = false;
+
+uniform int Custom_Depth_Map <
+	ui_type = "combo";
+	ui_items = "Custom Off\0Custom One\0Custom Two\0Custom Three\0Custom Four\0Custom Five\0Custom Six\0Custom Seven\0Custom Eight\0Custom Nine\0Custom Ten\0Custom Eleven\0Custom Twelve\0";
+	ui_label = "Custom Depth Map";
+	ui_tooltip = "Adjust your own Custom Depth Map.";
+> = 0;
+
+uniform float2 Near_Far <
+	ui_type = "drag";
+	ui_min = 0; ui_max = 100;
+	ui_label = "Near & Far";
+	ui_tooltip = "Adjustment for Near and Far Depth Map Precision.";
+> = float2(1,1.5);
 
 uniform int Weapon_Depth_Map <
 	ui_type = "combo";
 	ui_items = "Weapon Depth Map Off\0Custom Weapon Depth Map One\0Custom Weapon Depth Map Two\0Custom Weapon Depth Map Three\0Custom Weapon Depth Map Four\0WDM 1\0WDM 2\0WDM 3\0WDM 4\0WDM 5\0WDM 6\0WDM 7\0WDM 8\0WDM 9\0WDM 10\0WDM 11\0WDM 12\0WDM 13\0WDM 14\0WDM 15\0WDM 16\0WDM 17\0WDM 18\0WDM 19\0WDM 20\0WDM 21\0WDM 22\0WDM 23\0";
-	ui_label = "Alternate Weapon Depth Map";
-	ui_tooltip = "Alternate Weapon Depth Map for different Games. Read the ReadMeDepth3d.txt, for setting.";
+	ui_label = "Weapon Depth Map";
+	ui_tooltip = "Weapon depth map for games. Read the ReadMeDepth3d.txt, for setting.";
 > = 0;
 
 uniform float3 Weapon_Adjust <
@@ -96,32 +110,18 @@ uniform float2 Weapon_Near_Far <
 	ui_tooltip = "Adjust weapon Near & Far adjustment. Default is 0";
 > = float2(0,0);
 
-uniform int Custom_Depth_Map <
-	ui_type = "combo";
-	ui_items = "Custom Off\0Custom One\0Custom Two\0Custom Three\0Custom Four\0Custom Five\0Custom Six\0Custom Seven\0Custom Eight\0Custom Nine\0Custom Ten\0Custom Eleven\0Custom Twelve\0";
-	ui_label = "Custom Depth Map";
-	ui_tooltip = "Adjust your own Custom Depth Map.";
-> = 0;
-
-uniform float2 Near_Far <
-	ui_type = "drag";
-	ui_min = 0; ui_max = 100;
-	ui_label = "Near & Far";
-	ui_tooltip = "Adjustment for Near and Far Depth Map Precision.";
-> = float2(1,1.5);
-
 uniform int Custom_Sidebars <
 	ui_type = "combo";
 	ui_items = "Mirrored Edges\0Black Edges\0Stretched Edges\0";
 	ui_label = "Edge Selection";
-	ui_tooltip = "Select how you like the Edge of the screen to look like.";
+	ui_tooltip = "Edges selection for your screen output.";
 > = 1;
 
 uniform int Stereoscopic_Mode <
 	ui_type = "combo";
 	ui_items = "Side by Side\0Top and Bottom\0Line Interlaced\0Checkerboard 3D\0Anaglyph\0";
 	ui_label = "3D Display Mode";
-	ui_tooltip = "Side by Side/Top and Bottom/Line Interlaced/Checkerboard 3D/Anaglyph 3D display output.";
+	ui_tooltip = "Stereoscopic 3D display output selection.";
 > = 0;
 
 uniform int Downscaling_Support <
@@ -135,40 +135,40 @@ uniform int Anaglyph_Colors <
 	ui_type = "combo";
 	ui_items = "Red/Cyan\0Dubois Red/Cyan\0Green/Magenta\0Dubois Green/Magenta\0";
 	ui_label = "Anaglyph Color Mode";
-	ui_tooltip = "Select colors for your anaglyph glasses.";
+	ui_tooltip = "Select colors for your 3D anaglyph glasses.";
 > = 0;
 
 uniform float Anaglyph_Desaturation <
 	ui_type = "drag";
 	ui_min = 0.0; ui_max = 1.0;
 	ui_label = "Anaglyph Desaturation";
-	ui_tooltip = "Adjust Anaglyph Saturation, Zero is Black & White, One is full color.";
+	ui_tooltip = "Adjust anaglyph desaturation, Zero is Black & White, One is full color.";
 > = 1.0;
 
 uniform bool Eye_Swap <
-	ui_label = "Eye Swap";
-	ui_tooltip = "Left right image change.";
+	ui_label = "Swap Eyes";
+	ui_tooltip = "L/R to R/L.";
 > = false;
 
 uniform int AO <
 	ui_type = "combo";
-	ui_items = "Off\0AO x8\0";
-	ui_label = "Ambient Occlusion Settings";
-	ui_tooltip = "Ambient Occlusion settings AO x8 is On. Default is On.";
+	ui_items = "Off\0ON\0";
+	ui_label = "3D AO Mode";
+	ui_tooltip = "3D ambient occlusion mode switch. Default is On.";
 > = 1;
 
 uniform float Power <
 	ui_type = "drag";
 	ui_min = 0.375; ui_max = 0.625;
-	ui_tooltip = "SSAO Power";
-	ui_label = "Power AO on Depth Map from 0.375 to 0.625 lower is stronger. Default is 0.500";
+	ui_label = "AO Power";
+	ui_tooltip = "Ambient occlusion power on the depth map. Default is 0.500";
 > = 0.500;
 
 uniform float Spread <
 	ui_type = "drag";
 	ui_min = 0.5; ui_max = 2.5;
-	ui_label = "Spread";
-	ui_tooltip = "Spread is AO Falloff. Default is 1.5";
+	ui_label = "AO Falloff";
+	ui_tooltip = "Ambient occlusion falloff. Default is 1.5";
 > = 1.5;
 
 /////////////////////////////////////////////D3D Starts Here/////////////////////////////////////////////////////////////////
@@ -249,7 +249,7 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 		if (Custom_Depth_Map == 0)
 	{	
 		//Alien Isolation | Firewatch
-		if (Alternate_Depth_Map_One == 0)
+		if (Depth_Map == 0)
 		{
 		float cF = 1000000000;
 		float cN = 1;	
@@ -257,7 +257,7 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 		}
 		
 		//Amnesia: The Dark Descent
-		if (Alternate_Depth_Map_One == 1)
+		if (Depth_Map == 1)
 		{
 		float cF = 1000;
 		float cN = 1;
@@ -265,7 +265,7 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 		}
 		
 		//Among The Sleep | Soma
-		if (Alternate_Depth_Map_One == 2)
+		if (Depth_Map == 2)
 		{
 		float cF = 10;
 		float cN = 0.05;
@@ -273,7 +273,7 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 		}
 		
 		//The Vanishing of Ethan Carter Redux
-		if (Alternate_Depth_Map_One == 3)
+		if (Depth_Map == 3)
 		{
 		float cF  = 0.0075;
 		float cN = 1;
@@ -281,7 +281,7 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 		}
 		
 		//Batman Arkham Knight | Batman Arkham Origins | Batman: Arkham City | BorderLands 2 | Hard Reset | Lords Of The Fallen | The Elder Scrolls V: Skyrim
-		if (Alternate_Depth_Map_One == 4)
+		if (Depth_Map == 4)
 		{
 		float cF = 50;
 		float cN = 0;
@@ -289,7 +289,7 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 		}
 		
 		//Call of Duty: Advance Warfare | Call of Duty: Black Ops 2 | Call of Duty: Ghost | Call of Duty: Infinite Warfare 
-		if (Alternate_Depth_Map_One == 5)
+		if (Depth_Map == 5)
 		{
 		float cF = 25;
 		float cN = 1;
@@ -297,7 +297,7 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 		}
 		
 		//Casltevania: Lord of Shadows - UE | Dead Rising 3
-		if (Alternate_Depth_Map_One == 6)
+		if (Depth_Map == 6)
 		{
 		float cF = 25;
 		float cN = 0;
@@ -305,7 +305,7 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 		}
 		
 		//Doom 2016
-		if (Alternate_Depth_Map_One == 7)
+		if (Depth_Map == 7)
 		{
 		float cF = 25;
 		float cN = 5;
@@ -313,7 +313,7 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 		}
 		
 		//Deadly Premonition:The Directors's Cut
-		if (Alternate_Depth_Map_One == 8)
+		if (Depth_Map == 8)
 		{
 		float cF = 30;
 		float cN = 0;
@@ -321,7 +321,7 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 		}
 		
 		//Dragon Ball Xenoverse | Quake 2 XP
-		if (Alternate_Depth_Map_One == 9)
+		if (Depth_Map == 9)
 		{
 		float cF = 1;
 		float cN = 0.005;
@@ -329,7 +329,7 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 		}
 		
 		//Warhammer: End Times - Vermintide | Fallout 4 
-		if (Alternate_Depth_Map_One == 10)
+		if (Depth_Map == 10)
 		{
 		float cF = 7.0;
 		float cN = 1.5;
@@ -337,7 +337,7 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 		}
 		
 		//Dying Light
-		if (Alternate_Depth_Map_One == 11)
+		if (Depth_Map == 11)
 		{
 		float cF = 100;
 		float cN = 0.0075;
@@ -345,7 +345,7 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 		}
 		
 		//GTA V
-		if (Alternate_Depth_Map_One == 12)
+		if (Depth_Map == 12)
 		{
 		float cF  = 10000; 
 		float cN = 0.0075; 
@@ -353,7 +353,7 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 		}
 		
 		//Magicka 2
-		if (Alternate_Depth_Map_One == 13)
+		if (Depth_Map == 13)
 		{
 		float cF = 1.025;
 		float cN = 0.025;	
@@ -361,7 +361,7 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 		}
 		
 		//Middle-earth: Shadow of Mordor
-		if (Alternate_Depth_Map_One == 14)
+		if (Depth_Map == 14)
 		{
 		float cF = 650;
 		float cN = 651;
@@ -369,7 +369,7 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 		}
 		
 		//Naruto Shippuden UNS3 Full Blurst
-		if (Alternate_Depth_Map_One == 15)
+		if (Depth_Map == 15)
 		{
 		float cF = 150;
 		float cN = 0.001;
@@ -377,7 +377,7 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 		}
 		
 		//Shadow warrior(2013)XP
-		if (Alternate_Depth_Map_One == 16)
+		if (Depth_Map == 16)
 		{
 		float cF = 5;
 		float cN = 0.05;
@@ -385,7 +385,7 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 		}
 		
 		//Ryse: Son of Rome
-		if (Alternate_Depth_Map_One == 17)
+		if (Depth_Map == 17)
 		{
 		float cF = 1.010;
 		float cN = 0;
@@ -393,7 +393,7 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 		}
 		
 		//Sleeping Dogs: DE
-		if (Alternate_Depth_Map_One == 18)
+		if (Depth_Map == 18)
 		{
 		float cF  = 1;
 		float cN = 0.025;
@@ -401,7 +401,7 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 		}
 		
 		//Souls Games
-		if (Alternate_Depth_Map_One == 19)
+		if (Depth_Map == 19)
 		{
 		float cF = 1.050;
 		float cN = 0.025;
@@ -409,7 +409,7 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 		}
 		
 		//Witcher 3
-		if (Alternate_Depth_Map_One == 20)
+		if (Depth_Map == 20)
 		{
 		float cF = 7.5;
 		float cN = 1;	
@@ -417,7 +417,7 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 		}
 
 		//Assassin Creed Unity | Just Cause 3
-		if (Alternate_Depth_Map_One == 21)
+		if (Depth_Map == 21)
 		{
 		float cF = 150;
 		float cN = 151;
@@ -425,7 +425,7 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 		}	
 		
 		//Silent Hill: Homecoming
-		if (Alternate_Depth_Map_One == 22)
+		if (Depth_Map == 22)
 		{
 		float cF = 25;
 		float cN = 25.869;
@@ -433,7 +433,7 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 		}
 		
 		//Monstrum DX11
-		if (Alternate_Depth_Map_One == 23)
+		if (Depth_Map == 23)
 		{
 		float cF = 1.075;	
 		float cN = 0;
@@ -441,7 +441,7 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 		}
 		
 		//S.T.A.L.K.E.R:SoC
-		if (Alternate_Depth_Map_One == 24)
+		if (Depth_Map == 24)
 		{
 		float cF = 1.001;
 		float cN = 0;
@@ -449,7 +449,7 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 		}
 		
 		//Double Dragon Neon
-		if (Alternate_Depth_Map_One == 25)
+		if (Depth_Map == 25)
 		{
 		float cF = 0.5;
 		float cN = 0.150;
@@ -457,7 +457,7 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 		}
 		
 		//Deus Ex: Mankind Divided
-		if (Alternate_Depth_Map_One == 26)
+		if (Depth_Map == 26)
 		{
 		float cF = 250;
 		float cN = 251;
@@ -465,7 +465,7 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 		}	
 		
 		//The Elder Scrolls V: Skyrim Special Edition
-		if (Alternate_Depth_Map_One == 27)
+		if (Depth_Map == 27)
 		{
 		float cF = 20;
 		float cN = 0;
@@ -473,7 +473,7 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 		}
 		
 		//Rage64|
-		if (Alternate_Depth_Map_One == 28)
+		if (Depth_Map == 28)
 		{
 		float cF = 50;
 		float cN = -0.5;
@@ -481,7 +481,7 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 		}
 		
 		//Through The Woods
-		if (Alternate_Depth_Map_One == 29)
+		if (Depth_Map == 29)
 		{
 		float cF = 25;
 		float cN = 0;
@@ -489,7 +489,7 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 		}
 		
 		//Amnesia: Machine for Pigs
-		if (Alternate_Depth_Map_One == 30)
+		if (Depth_Map == 30)
 		{
 		float cF = 100;
 		float cN = 0;
@@ -497,7 +497,7 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 		}
 		
 		//Requiem: Avenging Angel
-		if (Alternate_Depth_Map_One == 31)
+		if (Depth_Map == 31)
 		{
 		float cF = 100;
 		float cN = 1.555;
@@ -505,7 +505,7 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 		}
 		
 		//Turok: Dinosaur Hunter
-		if (Alternate_Depth_Map_One == 32)
+		if (Depth_Map == 32)
 		{
 		float cF = 1000; //10+
 		float cN = 0;//1
@@ -513,7 +513,7 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 		}
 		
 		//Never Alone (Kisima Ingitchuna)
-		if (Alternate_Depth_Map_One == 33)
+		if (Depth_Map == 33)
 		{
 		float cF = 112.5;
 		float cN = 1.995;
@@ -521,7 +521,7 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 		}
 		
 		//Stacking
-		if (Alternate_Depth_Map_One == 34)
+		if (Depth_Map == 34)
 		{
 		float cF = 15;
 		float cN = 0;
@@ -529,7 +529,7 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 		}
 		
 		//Fez
-		if (Alternate_Depth_Map_One == 35)
+		if (Depth_Map == 35)
 		{
 		float cF = 25.0;
 		float cN = 1.5125;
@@ -537,7 +537,7 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 		}
 		
 		//Lara Croft & Temple of Osiris
-		if (Alternate_Depth_Map_One == 36)
+		if (Depth_Map == 36)
 		{
 		float cF = 0.340;//1.010+	or 150
 		float cN = 12.250;//0 or	151
@@ -545,7 +545,7 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 		}
 		
 		//DreamFall Chapters
-		if (Alternate_Depth_Map_One == 37)
+		if (Depth_Map == 37)
 		{
 		float cF = 100;	
 		float cN = 5;	
@@ -553,7 +553,7 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 		}
 		
 		//DreamFall Chapters
-		if (Alternate_Depth_Map_One == 38)
+		if (Depth_Map == 38)
 		{
 		float cF = 100;	
 		float cN = 100;	
@@ -561,7 +561,7 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 		}
 		
 		//LOZ TP HD
-		if (Alternate_Depth_Map_One == 39)
+		if (Depth_Map == 39)
 		{
 		float cF = 100;
 		float cN = 2.250;
@@ -569,7 +569,7 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 		}
 		
 		//God of War Ghost of Sparta
-		if (Alternate_Depth_Map_One == 40)
+		if (Depth_Map == 40)
 		{
 		float cF = 10.5;
 		float cN = 0.02;
@@ -1155,7 +1155,7 @@ float DP =  Depth;
 	
 	float4 Mix = pow(1-(Done*(1-DM)),0.25);
 	
-	color = saturate(pow(lerp(Mix,DM,Power),3));
+	color = saturate(pow(lerp(DM,Mix,Power),3));
 }
 
 ////////////////////////////////////////////////Left/Right Eye////////////////////////////////////////////////////////

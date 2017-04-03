@@ -22,10 +22,10 @@
  //* 																																												*//
  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-uniform int IPD <
+uniform int Interpupillary_Distance <
 	ui_type = "drag";
 	ui_min = -100; ui_max = 100;
-	ui_label = "Optical Pupillary Distance Adjust";
+	ui_label = "Interpupillary Distance";
 	ui_tooltip = "Determines the distance between your eyes. Default is 0";
 > = 0;
 
@@ -43,33 +43,26 @@ uniform float Lens_Center <
 	ui_tooltip = "Adjust Lens Center. Default is 0.5";
 > = 0.5;
 
-uniform float LD_k1<
-	ui_type = "drag";
-	ui_min = -1; ui_max = 5;
-	ui_label = "Lens Distortion k1";
-	ui_tooltip = "Lens distortion value. Not is 0.0";
-> = 0.01;
-
 uniform float Lens_Distortion <
 	ui_type = "drag";
-	ui_min = -1; ui_max = 5;
-	ui_label = "Lens Distortion k2";
-	ui_tooltip = "Lens distortion value. Not is 0.0";
+	ui_min = -0.325; ui_max = 5;
+	ui_label = "Lens Distortion";
+	ui_tooltip = "Lens distortion value, positive values of k2 gives barrel distortion, negative give pincushion. Default is 0.01";
 > = 0.01;
 
 uniform float3 Polynomial_Colors <
 	ui_type = "drag";
-	ui_min = 0.0; ui_max = 2.0;
+	ui_min = 0.250; ui_max = 2.0;
 	ui_tooltip = "Adjust the Polynomial Distortion Red, Green, Blue. Default is (R 1.0, G 1.0, B 1.0)";
 	ui_label = "Polynomial Color Distortion";
 > = float3(1.0, 1.0, 1.0);
 
-uniform float2 Horizontal_Vertical_Squish <
+uniform float2 Zoom_Aspect_Ratio <
 	ui_type = "drag";
 	ui_min = 0.5; ui_max = 2;
 	ui_label = "Lens Zoom & Aspect Ratio";
-	ui_tooltip = "Adjust Horizontal and Vertical squish cubic distortion value. Default is 1.0.";
-> = float2(1,1);
+	ui_tooltip = "Lens Zoom amd Aspect Ratio. Default is 1.0.";
+> = float2(1.0,1.0);
 
 uniform int Custom_Sidebars <
 	ui_type = "combo";
@@ -78,47 +71,87 @@ uniform int Custom_Sidebars <
 	ui_tooltip = "Select how you like the Edge of the screen to look like.";
 > = 1;
 
-//Add Profiles here
+//////////////////////////////////////////////////HMD Profiles//////////////////////////////////////////////////////////////////
 
 uniform int HMD_Profiles <
 	ui_type = "combo";
-	ui_items = "Off\0Profile One\0";
-	ui_label = "Head Mounted Display Profiles";
-	ui_tooltip = "Preset Head Mounted Display Profiles";
+	ui_items = "Off\0Profile One\0Profile Two\0"; //Add your own Profile here.
+	ui_label = "HMD Profiles";
+	ui_tooltip = "Head Mounted Display Profiles.";
 > = 0;
 
-////////////////////////////////////////////////HMD Profiles/////////////////////////////////////////////////////////////////
-//Lens Distortion Area//
+float4x4 HMDProfiles()
+{
+float Zoom = Zoom_Aspect_Ratio.x;
+float Aspect_Ratio = Zoom_Aspect_Ratio.y;
+
+float IPD = Interpupillary_Distance;
+float LC = Lens_Center;
+float LD = Lens_Distortion;
+float Z = Zoom;
+float AR = Aspect_Ratio;
+float3 PC = Polynomial_Colors;
+
+	//Make your own Profile here.
+	if (HMD_Profiles == 1)
+	{
+		IPD = 0.0;					//Interpupillary Distance. Default is 0
+		LC = 0.5; 					//Lens Center. Default is 0.5
+		LD = 0.01;					//Lens Distortion. Default is 0.01
+		Z = 1.0;					//Zoom. Default is 1.0
+		AR = 1.0;					//Aspect Ratio. Default is 1.0
+		PC = float3(1,1,1);			//Polynomial Colors. Default is (Red 1.0, Green 1.0, Blue 1.0)
+	}
+	
+	//Make your own Profile here.
+	if (HMD_Profiles == 2)
+	{
+		IPD = -25.0;					//Interpupillary Distance.
+		LC = 0.5; 					//Lens Center. Default is 0.5
+		LD = 0.250;					//Lens Distortion. Default is 0.01
+		Z = 1.0;					//Zoom. Default is 1.0
+		AR = 0.925;					//Aspect Ratio. Default is 1.0
+		PC = float3(0.5,0.75,1);	//Polynomial Colors. Default is (Red 1.0, Green 1.0, Blue 1.0)
+	}
+
+return float4x4(float4(IPD,LC,LD,0),float4(PC.x,PC.y,PC.z,0),float4(Z,AR,0,0),float4(0,0,0,0));
+}
+
+////////////////////////////////////////////////HMD Profiles End/////////////////////////////////////////////////////////////////
+
+//Interpupillary Distance Section//
+float IPDS()
+{
+	float IPDS = HMDProfiles()[0][0];
+	return IPDS;
+}
+
+//Lens Center Section//
+float LCS()
+{
+	float LCS = HMDProfiles()[0][1];
+	return LCS;
+}
+
+//Lens Distortion Section//
 float LD_k2()
 {
-float L_D = Lens_Distortion;
-if (HMD_Profiles == 0)
-{
- L_D;
+	float LD = HMDProfiles()[0][2];
+	return LD;
 }
 
-if (HMD_Profiles == 1)
+//Lens Zoom & Aspect Ratio Section//
+float2 Z_A()
 {
- L_D = -0.5;
-}
-return L_D;
-}
-
-//Horizontal Vertical Squish Area//
-float2 H_V_S()
-{
-float2 H_V_S = Horizontal_Vertical_Squish;
-if (HMD_Profiles == 0)
-{
- H_V_S.x = 1 / H_V_S.x;
- H_V_S.y = H_V_S.y * H_V_S.x * 2;
+	float2 ZA = float2(HMDProfiles()[2][0],HMDProfiles()[2][1]);
+	return ZA;
 }
 
-if (HMD_Profiles == 1)
+//Polynomial Colors Section//
+float3 P_C()
 {
- H_V_S = float2(1,1.25);
-}
-return H_V_S;
+	float3 PC = float3(HMDProfiles()[1][0],HMDProfiles()[1][1],HMDProfiles()[1][2]);
+	return PC;
 }
 
 /////////////////////////////////////////////D3D Starts Here/////////////////////////////////////////////////////////////////
@@ -204,7 +237,8 @@ colorT = SBSR;
 
 float2 DL(float2 p, float k_RGB) //Cubic Lens Distortion Left
 {
-	float LC = 1-Lens_Center;
+	float LC = 1-LCS();
+	float LD_k1 = 0.01; //Lens distortion value, positive values of k1 give barrel distortion, negative give pincushion.
 	float r2 = (p.x-LC) * (p.x-LC) + (p.y-0.5) * (p.y-0.5);       
 	
 	float newRadius = 1 + r2 * LD_k1 * k_RGB + (LD_k2() * k_RGB * r2 * r2);
@@ -217,7 +251,8 @@ float2 DL(float2 p, float k_RGB) //Cubic Lens Distortion Left
 
 float2 DR(float2 p, float k_RGB) //Cubic Lens Distortion Right
 {
-	float LC = Lens_Center;
+	float LC = LCS();
+	float LD_k1 = 0.01; //Lens distortion value, positive values of k1 give barrel distortion, negative give pincushion.
 	float r2 = (p.x-LC) * (p.x-LC) + (p.y-0.5) * (p.y-0.5);       
 	
 	float newRadius = 1 + r2 * LD_k1 * k_RGB + (LD_k2() * k_RGB * r2 * r2);
@@ -240,9 +275,9 @@ float4 PDL(float2 texcoord)		//Texture = texCL Left
     // Radial distort around center
 		sectorOrigin = (texcoord.xy-0.5,0,0);
 		
-		Red = 1 / Polynomial_Colors.x;
-		Green = 1/ Polynomial_Colors.y;
-		Blue = 1/ Polynomial_Colors.z;
+		Red = 1 / P_C().x;
+		Green = 1/ P_C().y;
+		Blue = 1/ P_C().z;
 		
 		uv_red = DL(texcoord.xy-sectorOrigin,Red) + sectorOrigin;
 		uv_green = DL(texcoord.xy-sectorOrigin,Green) + sectorOrigin;
@@ -291,9 +326,9 @@ float4 PDL(float2 texcoord)		//Texture = texCL Left
     // Radial distort around center
 		sectorOrigin = (texcoord.xy-0.5,0,0); //sectorOrigin = (texcoord.xy-0.5,0,0);
 		
-		Red = 1 / Polynomial_Colors.x;
-		Green = 1 / Polynomial_Colors.y;
-		Blue = 1 / Polynomial_Colors.z;
+		Red = 1 / P_C().x;
+		Green = 1 / P_C().y;
+		Blue = 1 / P_C().z;
 		
 		uv_red = DR(texcoord.xy-sectorOrigin,Red) + sectorOrigin;
 		uv_green = DR(texcoord.xy-sectorOrigin,Green) + sectorOrigin;
@@ -333,22 +368,24 @@ float4 PDL(float2 texcoord)		//Texture = texCL Left
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void PS0(float4 position : SV_Position, float2 texcoord : TEXCOORD0, out float4 color : SV_Target)
 {	
-	
 	float4 Out;
 	
-	float posH = H_V_S().y - 1;
+	float X = Z_A().x;
+	float Y = Z_A().y * Z_A().x * 2;
+	
+	float posH = Y - 1;
 	float midH = posH*BUFFER_HEIGHT/2*pix.y;
 		
-	float posV = H_V_S().x-1;
+	float posV = X - 1;
 	float midV = posV*BUFFER_WIDTH/2*pix.x;
 	
 	if( Stereoscopic_Mode_Convert == 0 || Stereoscopic_Mode_Convert == 1)
 	{
-	Out = texcoord.x < 0.5 ? PDL(float2(((texcoord.x*2)*H_V_S().x)-midV + IPD * pix.x,(texcoord.y*H_V_S().y)-midH)) : PDR(float2(((texcoord.x*2-1)*H_V_S().x)-midV - IPD * pix.x,(texcoord.y*H_V_S().y)-midH));
+	Out = texcoord.x < 0.5 ? PDL(float2(((texcoord.x*2)*X)-midV + IPDS() * pix.x,(texcoord.y*Y)-midH)) : PDR(float2(((texcoord.x*2-1)*X)-midV - IPDS() * pix.x,(texcoord.y*Y)-midH));
 	}
 	else
 	{
-	Out = texcoord.y < 0.5 ? PDL(float2((texcoord.x*H_V_S().x)-midV + IPD * pix.x,((texcoord.y*2)*H_V_S().y)-midH)) : PDR(float2((texcoord.x*H_V_S().x)-midV - IPD * pix.x,((texcoord.y*2-1)*H_V_S().y)-midH));
+	Out = texcoord.y < 0.5 ? PDL(float2((texcoord.x*X)-midV + IPDS() * pix.x,((texcoord.y*2)*Y)-midH)) : PDR(float2((texcoord.x*X)-midV - IPDS() * pix.x,((texcoord.y*2-1)*Y)-midH));
 	}
 	color = Out;
 }
@@ -366,7 +403,7 @@ void PostProcessVS(in uint id : SV_VertexID, out float4 position : SV_Position, 
 
 //*Rendering passes*//
 
-technique Polynomial_Barrel_Distortion_HMDs
+technique Polynomial_Barrel_Distortion
 {			
 			pass SinglePassStereo
 		{
