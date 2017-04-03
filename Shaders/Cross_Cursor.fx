@@ -1,9 +1,9 @@
  ////---------------//
- ///**Cross_Cusor**///
+ ///**Cross_Cursor**///
  //---------------////
 
  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
- //* Cusor for Depth Map Based 3D post-process shader v1.0																															*//
+ //* Cursor for Depth Map Based 3D post-process shader v1.0																															*//
  //* For Reshade 3.0																																								*//
  //* --------------------------																																						*//
  //* This work is licensed under a Creative Commons Attribution 3.0 Unported License.																								*//
@@ -22,22 +22,22 @@
  //* 																																												*//
  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-uniform float Cross_Cusor_Size <
+uniform float Cross_Cursor_Size <
 	ui_type = "drag";
 	ui_min = 1; ui_max = 100;
-	ui_tooltip = "Pick your size of the cross cusor. Default is 25";
-	ui_label = "Cross Cusor Size";
+	ui_tooltip = "Pick your size of the cross cursor. Default is 25";
+	ui_label = "Cross Cursor Size";
 > = 25.0;
 
-uniform float3 Cross_Cusor_Color <
+uniform float3 Cross_Cursor_Color <
 	ui_type = "color";
-	ui_tooltip = "Pick your own cross cusor color. Default is (R 255, G 255, B 255)";
-	ui_label = "Cross Cusor Color";
+	ui_tooltip = "Pick your own cross cursor color. Default is (R 255, G 255, B 255)";
+	ui_label = "Cross Cursor Color";
 > = float3(1.0, 1.0, 1.0);
 
 uniform bool InvertY <
 	ui_label = "Invert Y-Axis";
-	ui_tooltip = "Invert Y-Axis for the Cross Cusor.";
+	ui_tooltip = "Invert Y-Axis for the cross cursor.";
 > = false;
 
 uniform float2 Mousecoords < source = "mousepoint"; > ;
@@ -59,11 +59,11 @@ float4 MouseCuror(float4 position : SV_Position, float2 texcoord : TEXCOORD) : S
 	 
 	if (!InvertY)
 	{
-		Mpointer = all(abs(Mousecoords - position.xy) < Cross_Cusor_Size) * (1 - all(abs(Mousecoords - position.xy) > Cross_Cusor_Size/(Cross_Cusor_Size/2))) ? float4(Cross_Cusor_Color, 1.0) : tex2D(BackBuffer, texcoord);//cross
+		Mpointer = all(abs(Mousecoords - position.xy) < Cross_Cursor_Size) * (1 - all(abs(Mousecoords - position.xy) > Cross_Cursor_Size/(Cross_Cursor_Size/2))) ? float4(Cross_Cursor_Color, 1.0) : tex2D(BackBuffer, texcoord);//cross
 	}
 	else
 	{
-		Mpointer = all(abs(float2(Mousecoords.x,BUFFER_HEIGHT-Mousecoords.y) - position.xy) < Cross_Cusor_Size) * (1 - all(abs(float2(Mousecoords.x,BUFFER_HEIGHT-Mousecoords.y) - position.xy) > Cross_Cusor_Size/(Cross_Cusor_Size/2))) ? float4(Cross_Cusor_Color, 1.0) : tex2D(BackBuffer, texcoord);//cross
+		Mpointer = all(abs(float2(Mousecoords.x,BUFFER_HEIGHT-Mousecoords.y) - position.xy) < Cross_Cursor_Size) * (1 - all(abs(float2(Mousecoords.x,BUFFER_HEIGHT-Mousecoords.y) - position.xy) > Cross_Cursor_Size/(Cross_Cursor_Size/2))) ? float4(Cross_Cursor_Color, 1.0) : tex2D(BackBuffer, texcoord);//cross
 	}
 	
 	return Mpointer;
@@ -80,7 +80,7 @@ void PostProcessVS(in uint id : SV_VertexID, out float4 position : SV_Position, 
 
 //*Rendering passes*//
 
-technique Cross_Cusor
+technique Cross_Cursor
 {			
 			pass MouseCuror
 		{

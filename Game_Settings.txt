@@ -132,13 +132,13 @@ User Submitted Depth Map Settings
 [Game List]				[Alternate Depth Map]	   [Depth Flip On]	[Disocclusion Recommendations]
 ______________________________________________________________________________________________________________________________________
 [zig11727] "https://forums.geforce.com/default/topic/959175/3d-vision/superdepth-3d/post/4963888/#4963888"
-Homefront The Revolution 		DM 17
+Homefront The Revolution 	DM 17
 Mirror's Edge				DM 4
 Need for Speed				DM 4
 
 [x8009] "https://reshade.me/forum/shader-presentation/2128-3d-depth-map-based-stereoscopic-shader?start=620#18728"
-BladeStorm Nightmare			DM 8							Radial	
-Need For Speed Rivals			DM 6							Radial
+BladeStorm Nightmare		DM 8											Radial	
+Need For Speed Rivals		DM 6											Radial
 
 [wowvx] "https://reshade.me/forum/shader-suggestions/2812-wowvx-support#19996"
 You Are Empty				DM 0
