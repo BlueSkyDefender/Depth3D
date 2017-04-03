@@ -103,12 +103,12 @@ uniform float Weapon_Percentage <
 	ui_tooltip = "Adjust weapon percentage. Default is 5.0";
 > = 5.0;
 
-uniform float2 Weapon_Near_Far <
+uniform float Weapon_Distance_Correction <
 	ui_type = "drag";
-	ui_min = -0.5; ui_max = 0.5;
-	ui_label = "Weapon Near & Far adjustment";
-	ui_tooltip = "Adjust weapon Near & Far adjustment. Default is 0";
-> = float2(0,0);
+	ui_min = -0.250; ui_max = 0.750;
+	ui_label = "Weapon Distance Correction";
+	ui_tooltip = "For adjusting the distance of the weapon in the depth map. Default is 0";
+> = 0.0;
 
 uniform int Custom_Sidebars <
 	ui_type = "combo";
@@ -960,12 +960,12 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 	if (Weapon_Depth_Map == 27 || Weapon_Depth_Map == 23 || Weapon_Depth_Map == 20 || Weapon_Depth_Map == 19 || Weapon_Depth_Map == 13 || Weapon_Depth_Map == 8)
 	{
 	NearDepth = step(depthM.r,Adj/100000);
-	NearDepth = NearDepth-NearDepth*Weapon_Near_Far.x;
+	NearDepth = NearDepth-NearDepth*Weapon_Distance_Correction;
 	}
 	else
 	{
 	NearDepth = step(depthM.r,Adj);
-	NearDepth = NearDepth-NearDepth*Weapon_Near_Far.x;
+	NearDepth = NearDepth-NearDepth*Weapon_Distance_Correction;
 	}
 
 		if (Weapon_Depth_Map <= 0)
