@@ -30,6 +30,10 @@
 
 #define Depth_Map_Division 2.0
 
+// Determines The Max Depth amount. The larger the amount harder it will hit on FPS will be.
+
+#define Depth_Max 30
+
 uniform int Depth_Map <
 	ui_type = "combo";
 	ui_items = "DM 0\0DM 1\0DM 2\0DM 3\0DM 4\0DM 5\0DM 6\0DM 7\0DM 8\0DM 9\0DM 10\0DM 11\0DM 12\0DM 13\0DM 14\0DM 15\0DM 16\0DM 17\0DM 18\0DM 19\0DM 20\0DM 21\0DM 22\0DM 23\0DM 24\0DM 25\0DM 26\0DM 27\0DM 28\0DM 29\0DM 30\0DM 31\0DM 32\0DM 33\0DM 34\0DM 35\0DM 36\0DM 37\0DM 38\0DM 39\0DM 40\0";
@@ -39,7 +43,7 @@ uniform int Depth_Map <
 
 uniform int Depth <
 	ui_type = "drag";
-	ui_min = 0; ui_max = 30;
+	ui_min = 0; ui_max = Depth_Max;
 	ui_label = "Depth Slider";
 	ui_tooltip = "Determines the amount of Image Warping and Separation.";
 > = 15;
@@ -196,16 +200,28 @@ sampler SamplerSSAO
 		Texture = texSSAO;
 	};
 
-texture texL  { Width = BUFFER_WIDTH/Depth_Map_Division; Height = BUFFER_HEIGHT/Depth_Map_Division; Format = RGBA32F;}; 
-sampler SamplerL
+texture texOne  { Width = BUFFER_WIDTH/Depth_Map_Division; Height = BUFFER_HEIGHT/Depth_Map_Division; Format = RGBA32F;}; 
+sampler SamplerOne
 	{
-		Texture = texL;
+		Texture = texOne;
 	};
 	
-texture texR  { Width = BUFFER_WIDTH/Depth_Map_Division; Height = BUFFER_HEIGHT/Depth_Map_Division; Format = RGBA32F;}; 
-sampler SamplerR
+texture texTwo  { Width = BUFFER_WIDTH/Depth_Map_Division; Height = BUFFER_HEIGHT/Depth_Map_Division; Format = RGBA32F;}; 
+sampler SamplerTwo
 	{
-		Texture = texR;
+		Texture = texTwo;
+	};
+	
+texture texLeft { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA32F;}; 
+sampler SamplerLeft
+	{
+		Texture = texLeft;
+	};
+	
+texture texRight  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA32F;}; 
+sampler SamplerRight
+	{
+		Texture = texRight;
 	};
 	
 /////////////////////////////////////////////////////////////////////////////////Depth Map Information/////////////////////////////////////////////////////////////////////////////////
@@ -1090,183 +1106,41 @@ float4 DM = tex2D(SamplerDM,texcoord);
 	color = saturate(pow(lerp(Mix,DM,Power),3));
 }
 
-	void  PS_calcLR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 colorR : SV_Target0, out float4 colorL : SV_Target1)
+	void  PS_calcLR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 colorTwo : SV_Target0, out float4 colorOne : SV_Target1)
 	{
-	colorL = texcoord.x+Depth*pix.x*tex2D(SamplerDone,float2(texcoord.x,texcoord.y));
-	colorR = texcoord.x-Depth*pix.x*tex2D(SamplerDone,float2(texcoord.x,texcoord.y));
+	colorOne = texcoord.x+Depth*pix.x*tex2D(SamplerDone,float2(texcoord.x,texcoord.y));
+	colorTwo = texcoord.x-Depth*pix.x*tex2D(SamplerDone,float2(texcoord.x,texcoord.y));
 	}
 	
 
 /////////////////////////////////////////L/R//////////////////////////////////////////////////////////////////////
 
-	float4 L(float2 texcoord)
+	void LR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 colorR : SV_Target0, out float4 colorL : SV_Target1)
 	{
-	 float4 color;
-	 
-			//Workaround for DX9 Games
-			int x = 5;	
-			if (Depth == 0)		
-				x = 0;
-			else if (Depth == 1)	
-				x = 1;
-			else if (Depth == 2)
-				x = 2;
-			else if (Depth == 3)
-				x = 3;
-			else if (Depth == 4)
-				x = 4;
-			else if (Depth == 5)
-				x = 5;
-			else if (Depth == 6)
-				x = 6;
-			else if (Depth == 7)
-				x = 7;
-			else if (Depth == 8)
-				x = 8;
-			else if (Depth == 9)
-				x = 9;
-			else if (Depth == 10)
-				x = 10;
-			else if (Depth == 11)
-				x = 11;
-			else if (Depth == 12)
-				x = 12;
-			else if (Depth == 13)
-				x = 13;
-			else if (Depth == 14)
-				x = 14;
-			else if (Depth == 15)
-				x = 15;
-			else if (Depth == 16)
-				x = 16;
-			else if (Depth == 17)
-				x = 17;
-			else if (Depth == 18)
-				x = 18;
-			else if (Depth == 19)
-				x = 19;			
-			else if (Depth == 20)
-				x = 20;			
-			else if (Depth == 21)
-				x = 21;			
-			else if (Depth == 22)
-				x = 22;			
-			else if (Depth == 23)
-				x = 23;		
-			else if (Depth == 24)
-				x = 24;			
-			else if (Depth == 25)
-				x = 25;
-			else if (Depth == 26)
-				x = 26;
-			else if (Depth == 27)
-				x = 27;
-			else if (Depth == 28)
-				x = 28;
-			else if (Depth == 29)
-				x = 29;
-			else if (Depth == 30)
-				x = 30;
-			
-			//Workaround for DX9 Games
-
-		//Left
-		color.rgb = tex2D(BackBuffer, float2(texcoord.x, texcoord.y)).rgb;
-			
-		[unroll]
+		float4 cL = tex2D(BackBuffer,texcoord);			
+		float4 cR = tex2D(BackBuffer,texcoord);
+		
+		int x = Depth_Max;
+		
+		[loop]
 		for (int i = 0; i <= x; i++) 
 		{
-			if (tex2D(SamplerL, float2(texcoord.x+i*pix.x,texcoord.y)).r <= texcoord.x) 
-			{			
-				color = tex2D(BackBuffer, float2(texcoord.x+i*pix.x,texcoord.y));
-			}
-		}
-		return color;
-	}
-	
-	float4 R(float2 texcoord)
-	{
-	 float4 color;
-	 
-			//Workaround for DX9 Games
-			int x = 5;	
-			if (Depth == 0)		
-				x = 0;
-			else if (Depth == 1)	
-				x = 1;
-			else if (Depth == 2)
-				x = 2;
-			else if (Depth == 3)
-				x = 3;
-			else if (Depth == 4)
-				x = 4;
-			else if (Depth == 5)
-				x = 5;
-			else if (Depth == 6)
-				x = 6;
-			else if (Depth == 7)
-				x = 7;
-			else if (Depth == 8)
-				x = 8;
-			else if (Depth == 9)
-				x = 9;
-			else if (Depth == 10)
-				x = 10;
-			else if (Depth == 11)
-				x = 11;
-			else if (Depth == 12)
-				x = 12;
-			else if (Depth == 13)
-				x = 13;
-			else if (Depth == 14)
-				x = 14;
-			else if (Depth == 15)
-				x = 15;
-			else if (Depth == 16)
-				x = 16;
-			else if (Depth == 17)
-				x = 17;
-			else if (Depth == 18)
-				x = 18;
-			else if (Depth == 19)
-				x = 19;			
-			else if (Depth == 20)
-				x = 20;			
-			else if (Depth == 21)
-				x = 21;			
-			else if (Depth == 22)
-				x = 22;			
-			else if (Depth == 23)
-				x = 23;		
-			else if (Depth == 24)
-				x = 24;			
-			else if (Depth == 25)
-				x = 25;
-			else if (Depth == 26)
-				x = 26;
-			else if (Depth == 27)
-				x = 27;
-			else if (Depth == 28)
-				x = 28;
-			else if (Depth == 29)
-				x = 29;
-			else if (Depth == 30)
-				x = 30;
-			
-			//Workaround for DX9 Games
-
-		//Right
-		color.rgb = tex2D(BackBuffer, float2(texcoord.x, texcoord.y)).rgb;
-
-		[unroll]
-		for (int j = 0; j >= -x; --j) 
-		{
-			if (tex2D(SamplerR, float2(texcoord.x+j*pix.x,texcoord.y)).r >= texcoord.x) 
+			int j = -i;
+			//R
+			if (tex2D(SamplerOne, float2(texcoord.x+i*pix.x/0.9,texcoord.y)).r <= texcoord.x)
 			{
-				color = tex2D(BackBuffer, float2(texcoord.x+j*pix.x, texcoord.y));
+				cR = tex2D(BackBuffer, float2(texcoord.x+i*pix.x,texcoord.y));
+			}
+			
+			//L
+			if (tex2D(SamplerTwo, float2(texcoord.x+j*pix.x/0.9,texcoord.y)).r >= texcoord.x) 
+			{
+				cL = tex2D(BackBuffer, float2(texcoord.x+j*pix.x, texcoord.y));
 			}
 		}
-		return color;
+		
+	colorL = cL;
+	colorR = cR;
 	}
 
 	float4 Out(float4 pos : SV_Position, float2 texcoord : TEXCOORD0) : SV_Target
@@ -1278,22 +1152,22 @@ float4 DM = tex2D(SamplerDM,texcoord);
 			{
 				if(!Eye_Swap)
 				{	
-					color = texcoord.x < 0.5 ? L(float2((texcoord.x*2) + Perspective * pix.x,texcoord.y)) : R(float2((texcoord.x*2-1) - Perspective * pix.x,texcoord.y));
+					color = texcoord.x < 0.5 ? tex2D(SamplerLeft,float2((texcoord.x*2) + Perspective * pix.x,texcoord.y)) : tex2D(SamplerRight,float2((texcoord.x*2-1) - Perspective * pix.x,texcoord.y));
 				}
 				else
 				{
-					color = texcoord.x < 0.5 ? R(float2((texcoord.x*2) + Perspective * pix.x,texcoord.y)) : L(float2((texcoord.x*2-1) - Perspective * pix.x,texcoord.y));
+					color = texcoord.x < 0.5 ? tex2D(SamplerRight,float2((texcoord.x*2) + Perspective * pix.x,texcoord.y)) : tex2D(SamplerLeft,float2((texcoord.x*2-1) - Perspective * pix.x,texcoord.y));
 				}
 			}
 			else if(Stereoscopic_Mode == 1)
 			{
 				if(!Eye_Swap)
 				{
-					color = texcoord.y < 0.5 ? L(float2(texcoord.x + Perspective * pix.x,texcoord.y*2)) : R(float2(texcoord.x - Perspective * pix.x,texcoord.y*2-1));
+					color = texcoord.y < 0.5 ? tex2D(SamplerLeft,float2(texcoord.x + Perspective * pix.x,texcoord.y*2)) : tex2D(SamplerRight,float2(texcoord.x - Perspective * pix.x,texcoord.y*2-1));
 				}
 				else
 				{
-					color = texcoord.y < 0.5 ? R(float2(texcoord.x + Perspective * pix.x,texcoord.y*2)) : L(float2(texcoord.x - Perspective * pix.x,texcoord.y*2-1));
+					color = texcoord.y < 0.5 ? tex2D(SamplerRight,float2(texcoord.x + Perspective * pix.x,texcoord.y*2)) : tex2D(SamplerLeft,float2(texcoord.x - Perspective * pix.x,texcoord.y*2-1));
 				}
 			}
 			else if(Stereoscopic_Mode == 2)
@@ -1315,11 +1189,11 @@ float4 DM = tex2D(SamplerDM,texcoord);
 				
 				if(!Eye_Swap)
 				{
-					color = gridL > 0.5 ? L(float2(texcoord.x + Perspective * pix.x,texcoord.y)) : R(float2(texcoord.x - Perspective * pix.x,texcoord.y));
+					color = gridL > 0.5 ? tex2D(SamplerLeft,float2(texcoord.x + Perspective * pix.x,texcoord.y)) : tex2D(SamplerRight,float2(texcoord.x - Perspective * pix.x,texcoord.y));
 				}
 				else
 				{
-					color = gridL > 0.5 ? R(float2(texcoord.x + Perspective * pix.x,texcoord.y)) : L(float2(texcoord.x - Perspective * pix.x,texcoord.y));
+					color = gridL > 0.5 ? tex2D(SamplerRight,float2(texcoord.x + Perspective * pix.x,texcoord.y)) : tex2D(SamplerLeft,float2(texcoord.x - Perspective * pix.x,texcoord.y));
 				}
 			}
 			else if(Stereoscopic_Mode == 3)
@@ -1345,20 +1219,20 @@ float4 DM = tex2D(SamplerDM,texcoord);
 				
 				if(!Eye_Swap)
 				{
-					color = (int(gridy+gridx) & 1) < 0.5 ? L(float2(texcoord.x + Perspective * pix.x,texcoord.y)) : R(float2(texcoord.x - Perspective * pix.x,texcoord.y));
+					color = (int(gridy+gridx) & 1) < 0.5 ? tex2D(SamplerLeft,float2(texcoord.x + Perspective * pix.x,texcoord.y)) : tex2D(SamplerRight,float2(texcoord.x - Perspective * pix.x,texcoord.y));
 				}
 				else
 				{
-					color = (int(gridy+gridx) & 1) < 0.5 ? R(float2(texcoord.x + Perspective * pix.x,texcoord.y)) : L(float2(texcoord.x - Perspective * pix.x,texcoord.y));
+					color = (int(gridy+gridx) & 1) < 0.5 ? tex2D(SamplerRight,float2(texcoord.x + Perspective * pix.x,texcoord.y)) : tex2D(SamplerLeft,float2(texcoord.x - Perspective * pix.x,texcoord.y));
 				}
 			}
 			else
 			{
 														
-					float3 HalfL = dot(L(float2((texcoord.x + Perspective * pix.x),texcoord.y)).rgb,float3(0.299, 0.587, 0.114));
-					float3 HalfR = dot(R(float2((texcoord.x - Perspective * pix.x),texcoord.y)).rgb,float3(0.299, 0.587, 0.114));
-					float3 LC = lerp(HalfL,L(float2((texcoord.x + Perspective * pix.x),texcoord.y)).rgb,Anaglyph_Desaturation);  
-					float3 RC = lerp(HalfR,R(float2((texcoord.x - Perspective * pix.x),texcoord.y)).rgb,Anaglyph_Desaturation); 
+					float3 HalfL = dot(tex2D(SamplerLeft,float2((texcoord.x + Perspective * pix.x),texcoord.y)).rgb,float3(0.299, 0.587, 0.114));
+					float3 HalfR = dot(tex2D(SamplerRight,float2((texcoord.x - Perspective * pix.x),texcoord.y)).rgb,float3(0.299, 0.587, 0.114));
+					float3 LC = lerp(HalfL,tex2D(SamplerLeft,float2((texcoord.x + Perspective * pix.x),texcoord.y)).rgb,Anaglyph_Desaturation);  
+					float3 RC = lerp(HalfR,tex2D(SamplerRight,float2((texcoord.x - Perspective * pix.x),texcoord.y)).rgb,Anaglyph_Desaturation); 
 					
 					float4 C = float4(LC,1);
 					float4 CT = float4(RC,1);
@@ -1473,8 +1347,15 @@ technique SuperDepth3D_FlashBack
 		{
 			VertexShader = PostProcessVS;
 			PixelShader = PS_calcLR;
-			RenderTarget0 = texL;
-			RenderTarget1 = texR;
+			RenderTarget0 = texOne;
+			RenderTarget1 = texTwo;
+		}
+			pass
+		{
+			VertexShader = PostProcessVS;
+			PixelShader = LR;
+			RenderTarget0 = texLeft;
+			RenderTarget1 = texRight;
 		}
 			pass
 		{
