@@ -31,6 +31,13 @@
 #define Depth_Map_Division 2.0
 
 
+uniform int Depth_Map <
+	ui_type = "combo";
+	ui_items = "Depth Map 0\0Depth Map 1\0Depth Map 2\0Depth Map 3\0Depth Map 4\0Depth Map 5\0";
+	ui_label = "Custom Depth Map";
+	ui_tooltip = "Pick your Depth Map.";
+> = 0;
+
 uniform int Depth <
 	ui_type = "drag";
 	ui_min = 0; ui_max = 25;
@@ -52,20 +59,6 @@ uniform int Dis_Occlusion <
 	ui_tooltip = "Automatic occlusion masking options.";
 > = 1;
 
-uniform int Depth_Map <
-	ui_type = "combo";
-	ui_items = "DirectX\0DirectX Alternative\0OpenGL\0OpenGL Alternative\0";
-	ui_label = "Custom Depth Map";
-	ui_tooltip = "Pick your Depth Map.";
-> = 0;
-
-uniform float2 Near_Far <
-	ui_type = "drag";
-	ui_min = 0; ui_max = 100;
-	ui_label = "Near & Far Adjustment";
-	ui_tooltip = "Defaults for Near is 0.01-1.0 & for Far is 1.0. Alternative defaults for Near is 0.01-1.0 & for Far is 25.";
-> = float2(0.01,1.0);
-
 uniform bool Depth_Map_Invert <
 	ui_label = "Invert Depth Map";
 	ui_tooltip = "To invert the Depth Map if it is reverse.";
@@ -75,6 +68,20 @@ uniform bool Depth_Map_View <
 	ui_label = "Depth Map View";
 	ui_tooltip = "Display the Depth Map.";
 > = false;
+
+uniform float Depth_Map_Adjust <
+	ui_type = "drag";
+	ui_min = 0.001; ui_max = 50;
+	ui_label = "Depth Map Adjust";
+	ui_tooltip = "Adjust the depth map for your games.";
+> = 15.0;
+
+uniform float Offset <
+	ui_type = "drag";
+	ui_min = 0; ui_max = 1;
+	ui_label = "Offset";
+	ui_tooltip = "Offset";
+> = 1.0;
 
 uniform bool Depth_Map_Flip <
 	ui_label = "Depth Map Flip";
@@ -88,19 +95,12 @@ uniform int Weapon_Depth_Map <
 	ui_tooltip = "Weapon depth map for games. Read the ReadMeDepth3d.txt, for setting.";
 > = 0;
 
-uniform float3 Weapon_Adjust <
+uniform float4 Weapon_Adjust <
 	ui_type = "drag";
 	ui_min = -1.0; ui_max = 1.500;
 	ui_label = "Weapon Adjust Depth Map";
-	ui_tooltip = "Adjust weapon depth map. Default is (Y 0, X 0.250, Z 1.001)";
-> = float3(0.0,0.250,1.001);
-
-uniform float Weapon_Distance_Correction <
-	ui_type = "drag";
-	ui_min = -1.0; ui_max = 1.0;
-	ui_label = "Weapon Distance Correction";
-	ui_tooltip = "For adjusting the distance of the weapon in the depth map. Default is 0";
-> = 0.0;
+	ui_tooltip = "Adjust weapon depth map. Default is (Y 0, X 0.250, Z 1.001, W 1.0)";
+> = float4(0.0,0.250,1.001,1.0);
 
 uniform bool Weapon_Depth_Map_Invert <
 	ui_label = "Invert Weapon Depth Map";
@@ -245,47 +245,74 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 	float4 WDone;
 	
 		//Conversions to linear space.....
-		float cF = Near_Far.y;//Far
-		float cN = Near_Far.x;//Near
-		float constantF = 1.0;	
-		float constantN = 0.01;
+		//float cF = Near_Far.y;//Far
+		//float cN = Near_Far.x;//Near
+		float DMA;
+		float offset = Offset;
+		float constantFar = 1.0;
+		float constantNear = 1.0;	
+
 		
 		//Flow control switch statement incompatible with dx9...
-
-		//DirectX Custom
+		if (Depth_Map == 4 || Depth_Map == 2 || Depth_Map == 0)
+		{
+		DMA = 0.150/Depth_Map_Adjust;
+		}
+		else
+		{
+		DMA = Depth_Map_Adjust;
+		}
+		
+		//DirectX Custom Constant Far
 		if (Depth_Map == 0)
 		{
-		depthM = 2.0 * cN * cF / (cF + cN - depthM.r * (cF - cN));
+		depthM = 2.0 * DMA * constantFar / (constantFar + DMA - depthM.r * (constantFar - DMA));
 		}
-		//DirectX Alternative Custom
+		
+		//DirectX Alternative Custom Constant Near
 		if (Depth_Map == 1)
 		{
-		depthM = pow(abs(cN-depthM.r),cF);
+		depthM = pow(abs(constantNear-depthM.r),DMA);
 		}
 
-		//OpenGL Custom
+		//OpenGL Custom Constant Far
 		if (Depth_Map == 2)
 		{
-		depthM = 2.0 * cN * cF / (cF + cN - (2.0 * depthM.r - 1.0) * (cF - cN));
+		depthM = 2.0 * DMA * constantFar / (constantFar + DMA - (2.0 * depthM.r - offset) * (constantFar - DMA));
 		}
 		
-		//OpenGL Alternative Custom
+		//OpenGL Alternative Custom Constant Near
 		if (Depth_Map == 3)
 		{
-		depthM = pow(abs(2.0 * depthM.r - cN),cF);
+		depthM = pow(abs(2.0 * depthM.r - offset),DMA);
 		}
 		
+		//OpenGL Reverse Constant Far
+		if (Depth_Map == 4)
+		{
+		depthM = 2.0 * constantFar * DMA / (DMA + constantFar - (2.0 * depthM.r - 1.0) * (DMA - constantFar));
+		}
+		
+		//OpenGL Reverse Constant Far
+		if (Depth_Map == 5)
+		{
+		depthM = pow(abs(2.0 * depthM.r - constantFar),DMA);
+		}
+		
+		//Weapon Depth Map start//
+		float constantF = 1.0;	
+		float constantN = 0.01;
 		float Adj;
 		float4 D;
 		
 		//DirectX Weapon Depth Map
-		if (Depth_Map == 0 || 1)
+		if (Depth_Map == 0 || Depth_Map == 1)
 		{
 		WDM = 2.0 * constantN * constantF / (constantF + constantN - depthM.r * (constantF - constantN));
 		}
 		
 		//OpenGL Weapon Depth Map
-		else if (Depth_Map == 2 || 3)
+		else if (Depth_Map == 2 || Depth_Map == 3 || Depth_Map == 4 || Depth_Map == 5)
 		{
 		WDM = 2.0 * constantN * constantF / (constantF + constantN - (2.0 * depthM.r - 1.0) * (constantF - constantN));
 		}
@@ -300,7 +327,8 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 		Adj = Weapon_Adjust.x;//0
 		float cWF = Weapon_Adjust.y;//0.250
 		float cWN = Weapon_Adjust.z;//1.001
-		WDone = 1 - (log(cWF * cWN/WDM - cWF));
+		float cWP = Weapon_Adjust.w;//7.5
+		WDone = (log(cWF * cWN/WDM - cWF))*cWP;
 		}
 		
 		//Custom Weapon Depth Profile Two	
@@ -309,7 +337,8 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 		Adj = Weapon_Adjust.x;//0
 		float cWF = Weapon_Adjust.y;//-0.05
 		float cWN = Weapon_Adjust.z;//0.500
-		WDone = 1 - (log(cWN * WDM)/ 1 - log(cWF+WDM));
+		float cWP = Weapon_Adjust.w;//7.5
+		WDone = (log(cWN * WDM)/ 1 - log(cWF+WDM))*cWP;
 		}
 			
 		if (Weapon_Depth_Map_Invert)
@@ -320,12 +349,12 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 	if (Weapon_Depth_Map == 27 || Weapon_Depth_Map == 23 || Weapon_Depth_Map == 20 || Weapon_Depth_Map == 19 || Weapon_Depth_Map == 13 || Weapon_Depth_Map == 8)
 	{
 	NearDepth = step(WDM.r,Adj/100000);
-	NearDepth = NearDepth-NearDepth*Weapon_Distance_Correction;
+
 	}
 	else
 	{
 	NearDepth = step(WDM.r,Adj);
-	NearDepth = NearDepth-NearDepth*Weapon_Distance_Correction;
+
 	}
 	
 		if (Weapon_Depth_Map <= 0)
@@ -336,6 +365,7 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 		{
 		D = lerp(depthM,WDone,NearDepth);
 		}
+    //Weapon Depth Map end//
     
 	color.rgb = clamp(D.rrr,0,1.0);
 	
