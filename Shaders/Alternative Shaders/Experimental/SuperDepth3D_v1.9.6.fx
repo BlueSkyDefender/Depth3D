@@ -38,10 +38,17 @@ uniform int Depth_Map <
 	ui_tooltip = "Pick your Depth Map.";
 > = 0;
 
-uniform int Depth <
+uniform float Depth_Map_Adjust <
 	ui_type = "drag";
-	ui_min = 0; ui_max = 25;
-	ui_label = "Depth Slider";
+	ui_min = 0.0001; ui_max = 50;
+	ui_label = "Depth Map Adjustment";
+	ui_tooltip = "Adjust the depth map for your games.";
+> = 15.0;
+
+uniform int Divergence <
+	ui_type = "drag";
+	ui_min = 0; ui_max = 35;
+	ui_label = "Divergence Slider";
 	ui_tooltip = "Determines the amount of Image Warping and Separation.";
 > = 15;
 
@@ -57,7 +64,7 @@ uniform int Dis_Occlusion <
 	ui_items = "Off\0Normal Mask\0Radial Mask\0";
 	ui_label = "Disocclusion Mask";
 	ui_tooltip = "Automatic occlusion masking options.";
-> = 1;
+> = 0;
 
 uniform bool Depth_Map_Invert <
 	ui_label = "Invert Depth Map";
@@ -68,13 +75,6 @@ uniform bool Depth_Map_View <
 	ui_label = "Depth Map View";
 	ui_tooltip = "Display the Depth Map.";
 > = false;
-
-uniform float Depth_Map_Adjust <
-	ui_type = "drag";
-	ui_min = 0.001; ui_max = 50;
-	ui_label = "Depth Map Adjust";
-	ui_tooltip = "Adjust the depth map for your games.";
-> = 15.0;
 
 uniform float Offset <
 	ui_type = "drag";
@@ -499,7 +499,7 @@ sum += tex2D(SamplerSSAO, float2(texcoord.x, texcoord.y + 4.0*blursize)) * 0.05;
 Done = sum;
 //bilateral blur/\
 
-float DP =  Depth;
+float DP =  Divergence;
 	
  float Disocclusion_Power = DP/375;
  float4 DM;                                                                                                                                                                                                                                                                                               	
@@ -559,12 +559,12 @@ void PS_renderLR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD
 	if(!Eye_Swap)
 		{	
 			P = Perspective * pix.x;
-			D = Depth * pix.x;
+			D = Divergence * pix.x;
 		}
 		else
 		{
 			P = -Perspective * pix.x;
-			D = -Depth * pix.x;
+			D = -Divergence * pix.x;
 		}
 	
 	[loop]
