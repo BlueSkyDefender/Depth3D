@@ -30,7 +30,6 @@
 
 #define Depth_Map_Division 2.0
 
-
 uniform int Depth_Map <
 	ui_type = "combo";
 	ui_items = "Depth Map 0\0Depth Map 1\0Depth Map 2\0Depth Map 3\0Depth Map 4\0Depth Map 5\0";
@@ -52,6 +51,13 @@ uniform int Divergence <
 	ui_tooltip = "Determines the amount of Image Warping and Separation.";
 > = 15;
 
+uniform float Convergence <
+	ui_type = "drag";
+	ui_min = 0; ui_max = 250;
+	ui_label = "Convergence Slider";
+	ui_tooltip = "Determines the Convergence point. Default is 0";
+> = 0;
+
 uniform float Perspective <
 	ui_type = "drag";
 	ui_min = -100; ui_max = 100;
@@ -66,14 +72,14 @@ uniform int Dis_Occlusion <
 	ui_tooltip = "Automatic occlusion masking options.";
 > = 0;
 
-uniform bool Depth_Map_Invert <
-	ui_label = "Invert Depth Map";
-	ui_tooltip = "To invert the Depth Map if it is reverse.";
-> = false;
-
 uniform bool Depth_Map_View <
 	ui_label = "Depth Map View";
 	ui_tooltip = "Display the Depth Map.";
+> = false;
+
+uniform bool Depth_Map_Flip <
+	ui_label = "Depth Map Flip";
+	ui_tooltip = "Flip the depth map if it is upside down.";
 > = false;
 
 uniform float Offset <
@@ -83,24 +89,33 @@ uniform float Offset <
 	ui_tooltip = "Offset";
 > = 1.0;
 
-uniform bool Depth_Map_Flip <
-	ui_label = "Depth Map Flip";
-	ui_tooltip = "Flip the depth map if it is upside down.";
-> = false;
+uniform int Custom_Depth_Map <
+	ui_type = "combo";
+	ui_items = "Weapon Depth Map Off\0Weapon Depth Map On\0";
+	ui_label = "Custom Weapon Depth Map";
+	ui_tooltip = "Custom weapon depth map for games. Read the ReadMeDepth3d.txt, for setting.";
+> = 0;
 
 uniform int Weapon_Depth_Map <
 	ui_type = "combo";
-	ui_items = "Weapon Depth Map Off\0Custom Weapon Depth Map One\0Custom Weapon Depth Map Two\0";
-	ui_label = "Weapon Depth Map";
-	ui_tooltip = "Weapon depth map for games. Read the ReadMeDepth3d.txt, for setting.";
+	ui_items = "Depth Map 0\0Depth Map 1\0Depth Map 2\0Depth Map 3\0Depth Map 4\0Depth Map 5\0";
+	ui_label = "Custom Depth Map";
+	ui_tooltip = "Pick your Depth Map.";
 > = 0;
 
-uniform float4 Weapon_Adjust <
+uniform float3 Weapon_Adjust <
 	ui_type = "drag";
 	ui_min = -1.0; ui_max = 1.500;
 	ui_label = "Weapon Adjust Depth Map";
-	ui_tooltip = "Adjust weapon depth map. Default is (Y 0, X 0.250, Z 1.001, W 1.0)";
-> = float4(0.0,0.250,1.001,1.0);
+	ui_tooltip = "Adjust weapon depth map. Default is (Y 0, X 0.250, Z 1.001)";
+> = float3(0.0,0.250,1.001);
+
+uniform float Weapon_Correction <
+	ui_type = "drag";
+	ui_min = -1; ui_max = 1;
+	ui_label = "Weapon Correction";
+	ui_tooltip = "For adjusting the cutoff of the weapon Depth Map.";
+> = 0.0;
 
 uniform bool Weapon_Depth_Map_Invert <
 	ui_label = "Invert Weapon Depth Map";
@@ -240,19 +255,18 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 			if (Depth_Map_Flip)
 			texcoord.y =  1 - texcoord.y;
 			
-	float4 depthM = tex2D(DepthBuffer, float2(texcoord.x, texcoord.y));
+	float4 depthM = tex2D(DepthBuffer, texcoord);
+	float4 WdepthM = tex2D(DepthBuffer, texcoord);
+	float4 MDepth;
 	float4 WDM;
 	float4 WDone;
 	
 		//Conversions to linear space.....
-		//float cF = Near_Far.y;//Far
-		//float cN = Near_Far.x;//Near
 		float DMA;
 		float offset = Offset;
 		float constantFar = 1.0;
 		float constantNear = 1.0;	
 
-		
 		//Flow control switch statement incompatible with dx9...
 		if (Depth_Map == 4 || Depth_Map == 2 || Depth_Map == 0)
 		{
@@ -287,87 +301,105 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 		depthM = pow(abs(2.0 * depthM.r - offset),DMA);
 		}
 		
-		//OpenGL Reverse Constant Far
+		//Reverse Constant Far
 		if (Depth_Map == 4)
 		{
 		depthM = 2.0 * constantFar * DMA / (DMA + constantFar - (2.0 * depthM.r - 1.0) * (DMA - constantFar));
 		}
 		
-		//OpenGL Reverse Constant Far
+		//Reverse Constant Far
 		if (Depth_Map == 5)
 		{
 		depthM = pow(abs(2.0 * depthM.r - constantFar),DMA);
 		}
 		
+		MDepth = depthM;
+		
 		//Weapon Depth Map start//
-		float constantF = 1.0;	
-		float constantN = 0.01;
-		float Adj;
-		float4 D;
-		
-		//DirectX Weapon Depth Map
-		if (Depth_Map == 0 || Depth_Map == 1)
+		if (Weapon_Depth_Map == 4 || Weapon_Depth_Map == 2 || Weapon_Depth_Map == 0)
 		{
-		WDM = 2.0 * constantN * constantF / (constantF + constantN - depthM.r * (constantF - constantN));
+		DMA = 0.150/25;
+		}
+		else
+		{
+		DMA = 25;
 		}
 		
-		//OpenGL Weapon Depth Map
-		else if (Depth_Map == 2 || Depth_Map == 3 || Depth_Map == 4 || Depth_Map == 5)
+		//DirectX Custom Constant Far
+		if (Weapon_Depth_Map == 0)
 		{
-		WDM = 2.0 * constantN * constantF / (constantF + constantN - (2.0 * depthM.r - 1.0) * (constantF - constantN));
+		WdepthM = 2.0 * DMA * constantFar / (constantFar + DMA - WdepthM.r * (constantFar - DMA));
 		}
 		
-		if (Depth_Map_Invert)
-			depthM = 1.0 - depthM;
-				
-		//Scaled Section z-Buffer Needs more Work!
-		//Custom Weapon Depth Profile One	
+		//DirectX Alternative Custom Constant Near
 		if (Weapon_Depth_Map == 1)
 		{
-		Adj = Weapon_Adjust.x;//0
-		float cWF = Weapon_Adjust.y;//0.250
-		float cWN = Weapon_Adjust.z;//1.001
-		float cWP = Weapon_Adjust.w;//7.5
-		WDone = (log(cWF * cWN/WDM - cWF))*cWP;
+		WdepthM = pow(abs(constantNear-WdepthM.r),DMA);
 		}
-		
-		//Custom Weapon Depth Profile Two	
+
+		//OpenGL Custom Constant Far
 		if (Weapon_Depth_Map == 2)
 		{
-		Adj = Weapon_Adjust.x;//0
+		WdepthM = 2.0 * DMA * constantFar / (constantFar + DMA - (2.0 * WdepthM.r - offset) * (constantFar - DMA));
+		}
+		
+		//OpenGL Alternative Custom Constant Near
+		if (Weapon_Depth_Map == 3)
+		{
+		WdepthM = pow(abs(2.0 * WdepthM.r - constantFar),DMA);
+		}
+		
+		//Reverse Constant Far
+		if (Weapon_Depth_Map == 4)
+		{
+		WdepthM = 2.0 * constantFar * DMA / (DMA + constantFar - (2.0 * WdepthM.r - 1.0) * (DMA - constantFar));
+		}
+		
+		//Reverse Constant Far
+		if (Weapon_Depth_Map == 5)
+		{
+		WdepthM = pow(abs(2.0 * WdepthM.r - constantFar),DMA);
+		}
+		
+		//Weapon Depth Map
+		float constantF = 1.0;	
+		float constantN = 0.01;
+		WDM = 2.0 * constantN * constantF / (constantF + constantN - (2.0 * WdepthM.r - 1.0) * (constantF - constantN));
+ 		
+		//Scaled Section z-Buffer
+		float Adj;
+		if (Custom_Depth_Map == 1)
+		{
 		float cWF = Weapon_Adjust.y;//-0.05
 		float cWN = Weapon_Adjust.z;//0.500
-		float cWP = Weapon_Adjust.w;//7.5
-		WDone = (log(cWN * WDM)/ 1 - log(cWF+WDM))*cWP;
+		WDone = (cWN * WDM) / (WDM-(cWF));
 		}
-			
+		
+		Adj = Weapon_Adjust.x;//0
+		
 		if (Weapon_Depth_Map_Invert)
 			WDone = 1 - WDone;
 			
-	float NearDepth;
-	
-	if (Weapon_Depth_Map == 27 || Weapon_Depth_Map == 23 || Weapon_Depth_Map == 20 || Weapon_Depth_Map == 19 || Weapon_Depth_Map == 13 || Weapon_Depth_Map == 8)
-	{
-	NearDepth = step(WDM.r,Adj/100000);
-
-	}
-	else
-	{
-	NearDepth = step(WDM.r,Adj);
-
-	}
-	
-		if (Weapon_Depth_Map <= 0)
+		float NearDepth = step(WDM.r,Adj);
+		float4 D;
+		
+		float Correction = step(MDepth.r,Weapon_Correction);
+		float4 DM;
+			
+		if (Custom_Depth_Map <= 0)
 		{
-		D = depthM;
+		DM = MDepth;
 		}
 		else
 		{
 		D = lerp(depthM,WDone,NearDepth);
+		DM = lerp(MDepth,D,Correction);
 		}
+		
+		
     //Weapon Depth Map end//
     
-	color.rgb = clamp(D.rrr,0,1.0);
+	color.rgb = clamp(DM.rrr,0,1.0);
 	
 	Color = color;	
 
@@ -507,6 +539,7 @@ float DP =  Divergence;
  float B , W;
  int Con = 10;
 	
+	//Note to self may do away with this and add more smaples..... Not sure if I should.
 	if(Dis_Occlusion > 0) 
 	{
 	
@@ -553,16 +586,18 @@ float DP =  Divergence;
 void PS_renderLR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 color : SV_Target0 )
 {
 	float samples[4] = {0.50, 0.66, 0.85, 1.0,};
-	float DepthL = 1, DepthR = 1 , D , P;
+	float DepthL = 1, DepthR = 1 , D , P , C;
 	float2 uv = 0;
 		
 	if(!Eye_Swap)
 		{	
+			C = Convergence * pix.x;
 			P = Perspective * pix.x;
 			D = Divergence * pix.x;
 		}
 		else
 		{
+			C = -Convergence * pix.x;
 			P = -Perspective * pix.x;
 			D = -Divergence * pix.x;
 		}
@@ -589,36 +624,39 @@ void PS_renderLR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD
 		}
 	}
 	
+	float PL = D * (1-C/DepthL);
+	float PR = D * (1-C/DepthR);
+	
 	if(!Depth_Map_View)
 	{
 		if(Stereoscopic_Mode == 0)
 		{
 			if(Custom_Sidebars == 0)
 			{
-			color = texcoord.x < 0.5 ? tex2D(BackBufferMIRROR, float2((texcoord.x*2 + P) + DepthL * D, texcoord.y)) : tex2D(BackBufferMIRROR, float2((texcoord.x*2-1 - P) - DepthR * D , texcoord.y));
+			color = texcoord.x < 0.5 ? tex2D(BackBufferMIRROR, float2((texcoord.x*2 + P) + lerp((DepthL * D) , PL , 0.5), texcoord.y)) : tex2D(BackBufferMIRROR, float2((texcoord.x*2-1 - P) - lerp((DepthR * D) , PR , 0.5), texcoord.y));
 			}
 			else if(Custom_Sidebars == 1)
 			{
-			color = texcoord.x < 0.5 ? tex2D(BackBufferBORDER, float2((texcoord.x*2 + P) + DepthL * D , texcoord.y)) : tex2D(BackBufferBORDER, float2((texcoord.x*2-1 - P) - DepthR * D , texcoord.y));
+			color = texcoord.x < 0.5 ? tex2D(BackBufferBORDER, float2((texcoord.x*2 + P) + lerp((DepthL * D) , PL , 0.5), texcoord.y)) : tex2D(BackBufferBORDER, float2((texcoord.x*2-1 - P) - lerp((DepthR * D) , PR , 0.5), texcoord.y));
 			}
 			else
 			{
-			color = texcoord.x < 0.5 ? tex2D(BackBufferCLAMP, float2((texcoord.x*2 + P) + DepthL * D , texcoord.y)) : tex2D(BackBufferCLAMP, float2((texcoord.x*2-1 - P) - DepthR * D , texcoord.y));
+			color = texcoord.x < 0.5 ? tex2D(BackBufferCLAMP, float2((texcoord.x*2 + P) + lerp((DepthL * D) , PL , 0.5), texcoord.y)) : tex2D(BackBufferCLAMP, float2((texcoord.x*2-1 - P) - lerp((DepthR * D) , PR , 0.5), texcoord.y));
 			}
 		}
 		else if(Stereoscopic_Mode == 1)
 		{	
 			if(Custom_Sidebars == 0)
 			{
-			color = texcoord.y < 0.5 ? tex2D(BackBufferMIRROR, float2((texcoord.x + P) + DepthL * D , texcoord.y*2)) : tex2D(BackBufferMIRROR, float2((texcoord.x - P) - DepthR * D , texcoord.y*2-1));
+			color = texcoord.y < 0.5 ? tex2D(BackBufferMIRROR, float2((texcoord.x + P) + lerp((DepthL * D) , PL , 0.5) , texcoord.y*2)) : tex2D(BackBufferMIRROR, float2((texcoord.x - P) - lerp((DepthR * D) , PR , 0.5) , texcoord.y*2-1));
 			}
 			else if(Custom_Sidebars == 1)
 			{
-			color = texcoord.y < 0.5 ? tex2D(BackBufferBORDER, float2((texcoord.x + P) + DepthL * D , texcoord.y*2)) : tex2D(BackBufferBORDER, float2((texcoord.x - P) - DepthR * D , texcoord.y*2-1));
+			color = texcoord.y < 0.5 ? tex2D(BackBufferBORDER, float2((texcoord.x + P) + lerp((DepthL * D) , PL , 0.5) , texcoord.y*2)) : tex2D(BackBufferBORDER, float2((texcoord.x - P) - lerp((DepthR * D) , PR , 0.5) , texcoord.y*2-1));
 			}
 			else
 			{
-			color = texcoord.y < 0.5 ? tex2D(BackBufferCLAMP, float2((texcoord.x + P) + DepthL * D , texcoord.y*2)) : tex2D(BackBufferCLAMP, float2((texcoord.x - P) - DepthR * D , texcoord.y*2-1));
+			color = texcoord.y < 0.5 ? tex2D(BackBufferCLAMP, float2((texcoord.x + P) + lerp((DepthL * D) , PL , 0.5) , texcoord.y*2)) : tex2D(BackBufferCLAMP, float2((texcoord.x - P) - lerp((DepthR * D) , PR , 0.5) , texcoord.y*2-1));
 			}
 		}
 		else if(Stereoscopic_Mode == 2)
@@ -640,15 +678,15 @@ void PS_renderLR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD
 			
 			if(Custom_Sidebars == 0)
 			{
-			color = gridL > 0.5 ? tex2D(BackBufferMIRROR, float2((texcoord.x + P) + DepthL * D , texcoord.y)) :  tex2D(BackBufferMIRROR, float2((texcoord.x - P) - DepthR * D , texcoord.y));
+			color = gridL > 0.5 ? tex2D(BackBufferMIRROR, float2((texcoord.x + P) + lerp((DepthL * D) , PL , 0.5) , texcoord.y)) :  tex2D(BackBufferMIRROR, float2((texcoord.x - P) - lerp((DepthR * D) , PR , 0.5) , texcoord.y));
 			}
 			else if(Custom_Sidebars == 1)
 			{
-			color = gridL > 0.5 ? tex2D(BackBufferBORDER, float2((texcoord.x + P) + DepthL * D , texcoord.y)) : tex2D(BackBufferBORDER, float2((texcoord.x - P) - DepthR * D , texcoord.y));
+			color = gridL > 0.5 ? tex2D(BackBufferBORDER, float2((texcoord.x + P) + lerp((DepthL * D) , PL , 0.5) , texcoord.y)) : tex2D(BackBufferBORDER, float2((texcoord.x - P) - lerp((DepthR * D) , PR , 0.5) , texcoord.y));
 			}
 			else
 			{
-			color = gridL > 0.5 ? tex2D(BackBufferCLAMP, float2((texcoord.x + P) + DepthL * D , texcoord.y)) : tex2D(BackBufferCLAMP, float2((texcoord.x - P) - DepthR * D , texcoord.y));
+			color = gridL > 0.5 ? tex2D(BackBufferCLAMP, float2((texcoord.x + P) + lerp((DepthL * D) , PL , 0.5) , texcoord.y)) : tex2D(BackBufferCLAMP, float2((texcoord.x - P) - lerp((DepthR * D) , PR , 0.5) , texcoord.y));
 			}
 		}
 		else if(Stereoscopic_Mode == 3)
@@ -674,29 +712,29 @@ void PS_renderLR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD
 			
 			if(Custom_Sidebars == 0)
 			{
-			color = (int(gridy+gridx) & 1) < 0.5 ? tex2D(BackBufferMIRROR, float2((texcoord.x + P) + DepthL * D , texcoord.y)) :  tex2D(BackBufferMIRROR, float2((texcoord.x - P) - DepthR * D , texcoord.y));
+			color = (int(gridy+gridx) & 1) < 0.5 ? tex2D(BackBufferMIRROR, float2((texcoord.x + P) + lerp((DepthL * D) , PL , 0.5) , texcoord.y)) :  tex2D(BackBufferMIRROR, float2((texcoord.x - P) - lerp((DepthR * D) , PR , 0.5) , texcoord.y));
 			}
 			else if(Custom_Sidebars == 1)
 			{
-			color = (int(gridy+gridx) & 1) < 0.5 ? tex2D(BackBufferBORDER, float2((texcoord.x + P) + DepthL * D , texcoord.y)) : tex2D(BackBufferBORDER, float2((texcoord.x - P) - DepthR * D , texcoord.y));
+			color = (int(gridy+gridx) & 1) < 0.5 ? tex2D(BackBufferBORDER, float2((texcoord.x + P) + lerp((DepthL * D) , PL , 0.5) , texcoord.y)) : tex2D(BackBufferBORDER, float2((texcoord.x - P) - lerp((DepthR * D) , PR , 0.5) , texcoord.y));
 			}
 			else
 			{
-			color = (int(gridy+gridx) & 1) < 0.5 ? tex2D(BackBufferCLAMP, float2((texcoord.x + P) + DepthL * D , texcoord.y)) : tex2D(BackBufferCLAMP, float2((texcoord.x - P) - DepthR * D , texcoord.y));
+			color = (int(gridy+gridx) & 1) < 0.5 ? tex2D(BackBufferCLAMP, float2((texcoord.x + P) + lerp((DepthL * D) , PL , 0.5) , texcoord.y)) : tex2D(BackBufferCLAMP, float2((texcoord.x - P) - lerp((DepthR * D) , PR , 0.5) , texcoord.y));
 			}
 		}
 		else
 		{
 													
-				float3 HalfLM = dot(tex2D(BackBufferMIRROR,float2((texcoord.x + P) + DepthL * D ,texcoord.y)).rgb,float3(0.299, 0.587, 0.114));
-				float3 HalfRM = dot(tex2D(BackBufferMIRROR,float2((texcoord.x - P) - DepthR * D ,texcoord.y)).rgb,float3(0.299, 0.587, 0.114));
-				float3 LM = lerp(HalfLM,tex2D(BackBufferMIRROR,float2((texcoord.x + P) + DepthL * D ,texcoord.y)).rgb,Anaglyph_Desaturation);  
-				float3 RM = lerp(HalfRM,tex2D(BackBufferMIRROR,float2((texcoord.x - P) - DepthR * D ,texcoord.y)).rgb,Anaglyph_Desaturation); 
+				float3 HalfLM = dot(tex2D(BackBufferMIRROR,float2((texcoord.x + P) + lerp((DepthL * D) , PL , 0.5) ,texcoord.y)).rgb,float3(0.299, 0.587, 0.114));
+				float3 HalfRM = dot(tex2D(BackBufferMIRROR,float2((texcoord.x - P) - lerp((DepthR * D) , PR , 0.5) ,texcoord.y)).rgb,float3(0.299, 0.587, 0.114));
+				float3 LM = lerp(HalfLM,tex2D(BackBufferMIRROR,float2((texcoord.x + P) + lerp((DepthL * D) , PL , 0.5) ,texcoord.y)).rgb,Anaglyph_Desaturation);  
+				float3 RM = lerp(HalfRM,tex2D(BackBufferMIRROR,float2((texcoord.x - P) - lerp((DepthR * D) , PR , 0.5) ,texcoord.y)).rgb,Anaglyph_Desaturation); 
 				
-				float3 HalfLB = dot(tex2D(BackBufferBORDER,float2((texcoord.x + P) + DepthL * D ,texcoord.y)).rgb,float3(0.299, 0.587, 0.114));
-				float3 HalfRB = dot(tex2D(BackBufferBORDER,float2((texcoord.x - P ) - DepthR * D ,texcoord.y)).rgb,float3(0.299, 0.587, 0.114));
-				float3 LB = lerp(HalfLB,tex2D(BackBufferBORDER,float2((texcoord.x + P) + DepthL * D ,texcoord.y)).rgb,Anaglyph_Desaturation);  
-				float3 RB = lerp(HalfRB,tex2D(BackBufferBORDER,float2((texcoord.x - P) - DepthR * D ,texcoord.y)).rgb,Anaglyph_Desaturation); 
+				float3 HalfLB = dot(tex2D(BackBufferBORDER,float2((texcoord.x + P) + lerp((DepthL * D) , PL , 0.5) ,texcoord.y)).rgb,float3(0.299, 0.587, 0.114));
+				float3 HalfRB = dot(tex2D(BackBufferBORDER,float2((texcoord.x - P ) - lerp((DepthR * D) , PR , 0.5) ,texcoord.y)).rgb,float3(0.299, 0.587, 0.114));
+				float3 LB = lerp(HalfLB,tex2D(BackBufferBORDER,float2((texcoord.x + P) + lerp((DepthL * D) , PL , 0.5) ,texcoord.y)).rgb,Anaglyph_Desaturation);  
+				float3 RB = lerp(HalfRB,tex2D(BackBufferBORDER,float2((texcoord.x - P) - lerp((DepthR * D) , PR , 0.5) ,texcoord.y)).rgb,Anaglyph_Desaturation); 
 				
 				float4 C;
 				float4 CT;

@@ -10,24 +10,25 @@ https://docs.google.com/spreadsheets/d/18ujpY-97V_YuXpQUh-7bOomE4D5nUGwp3XppfU_0
 Game List updates for Reshade 3.0
 ______________________________________________________________________________________________________________________________________
 [Disocclusion Mask] - Use what looks good to you. If you don't like the look of it, turn it off. Option are Off/Normal/Radial
+[Depth Map Adjustment] - Use what you think looks good. You don't have to use my adjustment. It's just a good place to start.
 --------------------------------------------------------------------------------------------------------------------------------------
 
 [Game List]                                 [Depth Map] [Depth Map Adjustment] [Depth Flip] [Read Below]
-ABZU											DM 1            15-25                      
+ABZU                                            DM 1            15-25                      
 Alien Isolation                                 DM 3            10-15
-Amnesia: Machine for Pigs						DM 2			15-25
-Amnesia: The Dark Descent						DM 2            15-25
-Among The Sleep                                 DM 0			15-20               yes
-Assassin Creed Unity							DM 4            15-25
+Amnesia: Machine for Pigs                       DM 2            15-25
+Amnesia: The Dark Descent                       DM 2            15-25
+Among The Sleep                                 DM 0            15-20               yes
+Assassin Creed Unity                            DM 4            15-25
 Batman Arkham Knight                            DM 0            15-25
 Batman Arkham Origins                           DM 0            15-25
 Batman: Arkham City                             DM 0            15-25
 BladeStorm Nightmare                            ????            ?????
-BorderLands 2                                                                                 RB
-CEMU - Mariokart 8
-CEMU - Super Mario 3D World
+BorderLands 2                                   DM 0            10-20                            RB
+CEMU - Mariokart 8                              DM 2            10-20
+CEMU - Super Mario 3D World                     ????            ?????
 CEMU - The Legend of Zelda: Breath of the Wild  ????            ?????
-Call of Duty: Advance Warfare RB
+Call of Duty: Advance Warfare                   DM 1            10-20                            RB
 Call of Duty: Black Ops 2 RB
 Call of Duty: Ghost RB
 Call of Duty: Infinite Warfare RB
