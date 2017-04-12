@@ -39,17 +39,17 @@
 
 uniform int Depth_Map <
 	ui_type = "combo";
-	ui_items = "Depth Map 0\0Depth Map 1\0Depth Map 2\0Depth Map 3\0Depth Map 4\0Depth Map 5\0Depth Map 6\0";
+	ui_items = "Depth Map 0\0Depth Map 1\0Depth Map 2\0Depth Map 3\0Depth Map 4\0Depth Map 5\0Depth Map 6\0Depth Map 7\0";
 	ui_label = "Custom Depth Map";
 	ui_tooltip = "Pick your Depth Map.";
 > = 0;
 
 uniform float Depth_Map_Adjust <
 	ui_type = "drag";
-	ui_min = 5.0; ui_max = 25.0;
+	ui_min = 7.5; ui_max = 25.0;
 	ui_label = "Depth Map Adjustment";
 	ui_tooltip = "Adjust the depth map for your games.";
-> = 15.0;
+> = 7.5;
 
 uniform int Divergence <
 	ui_type = "drag";
@@ -58,12 +58,12 @@ uniform int Divergence <
 	ui_tooltip = "Determines the amount of Image Warping and Separation.";
 > = 15;
 
-uniform int Convergence <
+uniform float Convergence <
 	ui_type = "drag";
 	ui_min = 1; ui_max = 5;
 	ui_label = "Convergence Power";
 	ui_tooltip = "Determines the Convergence Power. Default is 1";
-> = 1;
+> = 1.5;
 
 uniform float Perspective <
 	ui_type = "drag";
@@ -318,9 +318,14 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 		{
 		depthM = lerp(Raw,DirectX,0.5);
 		}
-				
-		//6. Offset
+
 		else if (Depth_Map == 6)
+		{
+		depthM = Raw;
+		}
+				
+		//7. Offset
+		else if (Depth_Map == 7)
 		{
 		depthM = pow(abs(depthM.r - offset),DA);
 		}
@@ -542,20 +547,17 @@ float DP =  Divergence;
  float Disocclusion_Power = DP/350;
  float4 DM;                                                                                                                                                                                                                                                                                               	
  float2 dir;
- float B , W;
+ float B;
  int Con = 10;
 	
-	//Note to self may do away with this and add more smaples..... Not sure if I should.
 	if(Dis_Occlusion > 0) 
 	{
 	
 	const float weight[10] = { 0.01,-0.01,0.02,-0.02,0.03,-0.03,0.04,-0.04,0.05,-0.05};
 
-	if(Dis_Occlusion == 1)
-	{
 	dir = float2(0.5,0);
 	B = Disocclusion_Power;
-	}
+
 	
 	dir = normalize( dir ); 
 	 
@@ -588,7 +590,7 @@ void PS_renderLR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD
 	float samples[4] = {0.50, 0.66, 0.85, 1.0};
 	float DepthL = 1, DepthR = 1 , D , P , C;
 	float2 uv = 0;
-			
+	
 	if(!Eye_Swap)
 		{	
 			C = (Divergence * pix.x)*Convergence;
