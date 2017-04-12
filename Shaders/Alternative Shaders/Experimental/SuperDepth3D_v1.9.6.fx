@@ -30,16 +30,23 @@
 
 #define Depth_Map_Division 2.0
 
+//uniform float TEST <
+	//ui_type = "drag";
+	//ui_min = 0; ui_max = 1;
+	//ui_label = "TEST Slider";
+	//ui_tooltip = "Determines the TEST. Default is 0";
+//> = 0;
+
 uniform int Depth_Map <
 	ui_type = "combo";
-	ui_items = "Depth Map 0\0Depth Map 1\0Depth Map 2\0Depth Map 3\0Depth Map 4\0Depth Map 5\0";
+	ui_items = "Depth Map 0\0Depth Map 1\0Depth Map 2\0Depth Map 3\0Depth Map 4\0Depth Map 5\0Depth Map 6\0";
 	ui_label = "Custom Depth Map";
 	ui_tooltip = "Pick your Depth Map.";
 > = 0;
 
 uniform float Depth_Map_Adjust <
 	ui_type = "drag";
-	ui_min = 0.0001; ui_max = 50;
+	ui_min = 5.0; ui_max = 25.0;
 	ui_label = "Depth Map Adjustment";
 	ui_tooltip = "Adjust the depth map for your games.";
 > = 15.0;
@@ -51,12 +58,12 @@ uniform int Divergence <
 	ui_tooltip = "Determines the amount of Image Warping and Separation.";
 > = 15;
 
-uniform float Convergence <
+uniform int Convergence <
 	ui_type = "drag";
-	ui_min = 0; ui_max = 250;
-	ui_label = "Convergence Slider";
-	ui_tooltip = "Determines the Convergence point. Default is 0";
-> = 0;
+	ui_min = 1; ui_max = 5;
+	ui_label = "Convergence Power";
+	ui_tooltip = "Determines the Convergence Power. Default is 1";
+> = 1;
 
 uniform float Perspective <
 	ui_type = "drag";
@@ -65,11 +72,9 @@ uniform float Perspective <
 	ui_tooltip = "Determines the perspective point. Default is 0";
 > = 0;
 
-uniform int Dis_Occlusion <
-	ui_type = "combo";
-	ui_items = "Off\0Normal Mask\0Radial Mask\0";
+uniform bool Dis_Occlusion <
 	ui_label = "Disocclusion Mask";
-	ui_tooltip = "Automatic occlusion masking options.";
+	ui_tooltip = "Automatic occlusion masking switch.";
 > = 0;
 
 uniform bool Depth_Map_View <
@@ -84,10 +89,10 @@ uniform bool Depth_Map_Flip <
 
 uniform float Offset <
 	ui_type = "drag";
-	ui_min = 0; ui_max = 1;
+	ui_min = 0; ui_max = 0.5;
 	ui_label = "Offset";
 	ui_tooltip = "Offset";
-> = 1.0;
+> = 0.5;
 
 uniform int Custom_Depth_Map <
 	ui_type = "combo";
@@ -103,12 +108,12 @@ uniform int Weapon_Depth_Map <
 	ui_tooltip = "Pick your Depth Map.";
 > = 0;
 
-uniform float3 Weapon_Adjust <
+uniform float4 Weapon_Adjust <
 	ui_type = "drag";
 	ui_min = -1.0; ui_max = 1.500;
 	ui_label = "Weapon Adjust Depth Map";
 	ui_tooltip = "Adjust weapon depth map. Default is (Y 0, X 0.250, Z 1.001)";
-> = float3(0.0,0.250,1.001);
+> = float4(0.0,0.250,1.001,1.0);
 
 uniform float Weapon_Correction <
 	ui_type = "drag";
@@ -162,9 +167,7 @@ uniform bool Eye_Swap <
 	ui_tooltip = "L/R to R/L.";
 > = false;
 
-uniform int AO <
-	ui_type = "combo";
-	ui_items = "Off\0ON\0";
+uniform bool AO <
 	ui_label = "3D AO Mode";
 	ui_tooltip = "3D ambient occlusion mode switch. Default is On.";
 > = 1;
@@ -262,103 +265,107 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 	float4 WDone;
 	
 		//Conversions to linear space.....
-		float DMA;
-		float offset = Offset;
-		float constantFar = 1.0;
-		float constantNear = 1.0;	
-
-		//Flow control switch statement incompatible with dx9...
-		if (Depth_Map == 4 || Depth_Map == 2 || Depth_Map == 0)
-		{
-		DMA = 0.150/Depth_Map_Adjust;
-		}
-		else
-		{
-		DMA = Depth_Map_Adjust;
-		}
+		//Near & Far Adjustment
+		float DDA = 0.125/Depth_Map_Adjust; //Division Depth Map Adjust - Near
+		float DA = Depth_Map_Adjust*2; //Depth Map Adjust - Near
+		float offset = -Offset;
+		//All 1.0f are Far Adjustment
 		
-		//DirectX Custom Constant Far
+		//0. DirectX Custom Constant Far
+		float DirectX = 2.0 * DDA * 1.0f / (1.0f + DDA - depthM.r * (1.0f - DDA));
+		
+		//1. DirectX Alternative
+		float DirectXAlt = pow(abs(1.0-depthM.r),DA);
+		
+		//2. OpenGL
+		float OpenGL = 2.0 * DDA * 1.0f / (1.0f + DDA - (2.0 * depthM.r - 1.0) * (1.0f - DDA));
+		
+		//3. OpenGL Alternative
+		float OpenGLAlt = pow(abs(depthM.r - 1.0),DA);
+		
+		//4. OpenGL Reverse
+		float OpenGLRev = 2.0 * 1.0f * DDA / (DDA + 1.0f - (2.0 * depthM.r - 1.0) * (DDA - 1.0f));
+		
+		//5. Raw Buffer
+		float Raw = pow(abs(depthM.r),DA);
+
 		if (Depth_Map == 0)
 		{
-		depthM = 2.0 * DMA * constantFar / (constantFar + DMA - depthM.r * (constantFar - DMA));
+		depthM = DirectX;
 		}
 		
-		//DirectX Alternative Custom Constant Near
-		if (Depth_Map == 1)
+		else if (Depth_Map == 1)
 		{
-		depthM = pow(abs(constantNear-depthM.r),DMA);
+		depthM = DirectXAlt;
 		}
 
-		//OpenGL Custom Constant Far
-		if (Depth_Map == 2)
+		else if (Depth_Map == 2)
 		{
-		depthM = 2.0 * DMA * constantFar / (constantFar + DMA - (2.0 * depthM.r - offset) * (constantFar - DMA));
+		depthM = OpenGL;
 		}
 		
-		//OpenGL Alternative Custom Constant Near
-		if (Depth_Map == 3)
+		else if (Depth_Map == 3)
 		{
-		depthM = pow(abs(2.0 * depthM.r - offset),DMA);
+		depthM = lerp(OpenGLAlt,OpenGLRev,0.5);
 		}
 		
-		//Reverse Constant Far
-		if (Depth_Map == 4)
+		else if (Depth_Map == 4)
 		{
-		depthM = 2.0 * constantFar * DMA / (DMA + constantFar - (2.0 * depthM.r - 1.0) * (DMA - constantFar));
+		depthM = OpenGLRev;
 		}
 		
-		//Reverse Constant Far
-		if (Depth_Map == 5)
+		else if (Depth_Map == 5)
 		{
-		depthM = pow(abs(2.0 * depthM.r - constantFar),DMA);
+		depthM = lerp(Raw,DirectX,0.5);
+		}
+				
+		//6. Offset
+		else if (Depth_Map == 6)
+		{
+		depthM = pow(abs(depthM.r - offset),DA);
 		}
 		
 		MDepth = depthM;
 		
 		//Weapon Depth Map start//
-		if (Weapon_Depth_Map == 4 || Weapon_Depth_Map == 2 || Weapon_Depth_Map == 0)
-		{
-		DMA = 0.150/25;
-		}
-		else
-		{
-		DMA = 25;
-		}
+		//Near & Far Adjustment
+		float DWA = 0.125/15; //Division Fixed Weapon Adjust - Near
+		float WA = 15*2; //Fixed Weapon Adjust - Near
 		
-		//DirectX Custom Constant Far
+		//DirectX
 		if (Weapon_Depth_Map == 0)
 		{
-		WdepthM = 2.0 * DMA * constantFar / (constantFar + DMA - WdepthM.r * (constantFar - DMA));
+		WdepthM = 2.0 * DWA * 1.0 / (1.0 + DWA - WdepthM.r * (1.0 - DWA));
 		}
 		
-		//DirectX Alternative Custom Constant Near
-		if (Weapon_Depth_Map == 1)
+		//DirectX Alternative
+		else if (Weapon_Depth_Map == 1)
 		{
-		WdepthM = pow(abs(constantNear-WdepthM.r),DMA);
+		WdepthM = pow(abs(1.0-WdepthM.r),WA);
 		}
 
-		//OpenGL Custom Constant Far
-		if (Weapon_Depth_Map == 2)
+		//OpenGL
+		else if (Weapon_Depth_Map == 2)
 		{
-		WdepthM = 2.0 * DMA * constantFar / (constantFar + DMA - (2.0 * WdepthM.r - offset) * (constantFar - DMA));
+		WdepthM = 2.0 * DWA * 1.0 / (1.0 + DWA - (2.0 * WdepthM.r - 1.0) * (1.0 - DWA));
 		}
 		
-		//OpenGL Alternative Custom Constant Near
-		if (Weapon_Depth_Map == 3)
+		//OpenGL Alternative
+		else if (Weapon_Depth_Map == 3)
 		{
-		WdepthM = pow(abs(2.0 * WdepthM.r - constantFar),DMA);
+		WdepthM = pow(abs(WdepthM.r - 1.0),WA);
 		}
 		
-		//Reverse Constant Far
-		if (Weapon_Depth_Map == 4)
+		//Reverse OpenGL
+		else if (Weapon_Depth_Map == 4)
 		{
-		WdepthM = 2.0 * constantFar * DMA / (DMA + constantFar - (2.0 * WdepthM.r - 1.0) * (DMA - constantFar));
+		WdepthM = 2.0 * 1.0 * DWA / (DWA + 1.0 - (2.0 * WdepthM.r - 1.0) * (DWA - 1.0));
 		}
 		
-		//Reverse Constant Far
-		if (Weapon_Depth_Map == 5)
+		//Offset
+		else if (Weapon_Depth_Map == 5)
 		{
-		WdepthM = pow(abs(2.0 * WdepthM.r - constantFar),DMA);
+		WdepthM = pow(abs(WdepthM.r - offset),WA);
 		}
 		
 		//Weapon Depth Map
@@ -372,7 +379,8 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 		{
 		float cWF = Weapon_Adjust.y;//-0.05
 		float cWN = Weapon_Adjust.z;//0.500
-		WDone = (cWN * WDM) / (WDM-(cWF));
+		float cWP = Weapon_Adjust.w;//0.500
+		WDone = (cWN * WDM) / ((cWP*WDM)-(cWF));
 		}
 		
 		Adj = Weapon_Adjust.x;//0
@@ -394,12 +402,10 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 		{
 		D = lerp(depthM,WDone,NearDepth);
 		DM = lerp(MDepth,D,Correction);
-		}
-		
-		
-    //Weapon Depth Map end//
+		}		
+		//Weapon Depth Map end//
     
-	color.rgb = clamp(DM.rrr,0,1.0);
+	color.rgb = saturate(DM.rrr); //clamped
 	
 	Color = color;	
 
@@ -533,7 +539,7 @@ Done = sum;
 
 float DP =  Divergence;
 	
- float Disocclusion_Power = DP/375;
+ float Disocclusion_Power = DP/350;
  float4 DM;                                                                                                                                                                                                                                                                                               	
  float2 dir;
  float B , W;
@@ -549,12 +555,6 @@ float DP =  Divergence;
 	{
 	dir = float2(0.5,0);
 	B = Disocclusion_Power;
-	}
-	
-	if(Dis_Occlusion == 2)
-	{
-	dir = 0.5 - texcoord;
-	B = Disocclusion_Power*2;
 	}
 	
 	dir = normalize( dir ); 
@@ -585,19 +585,19 @@ float DP =  Divergence;
 
 void PS_renderLR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 color : SV_Target0 )
 {
-	float samples[4] = {0.50, 0.66, 0.85, 1.0,};
+	float samples[4] = {0.50, 0.66, 0.85, 1.0};
 	float DepthL = 1, DepthR = 1 , D , P , C;
 	float2 uv = 0;
-		
+			
 	if(!Eye_Swap)
 		{	
-			C = Convergence * pix.x;
+			C = (Divergence * pix.x)*Convergence;
 			P = Perspective * pix.x;
 			D = Divergence * pix.x;
 		}
 		else
 		{
-			C = -Convergence * pix.x;
+			C = (-Divergence * pix.x)*Convergence;
 			P = -Perspective * pix.x;
 			D = -Divergence * pix.x;
 		}

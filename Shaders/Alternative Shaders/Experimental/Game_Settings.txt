@@ -14,22 +14,23 @@ ________________________________________________________________________________
 --------------------------------------------------------------------------------------------------------------------------------------
 
 [Game List]                                 [Depth Map] [Depth Map Adjustment] [Depth Flip] [Read Below]
-ABZU                                            DM 1            15-25                      
-Alien Isolation                                 DM 3            10-15
-Amnesia: Machine for Pigs                       DM 2            15-25
-Amnesia: The Dark Descent                       DM 2            15-25
-Among The Sleep                                 DM 0            15-20               yes
-Assassin Creed Unity                            DM 4            15-25
-Batman Arkham Knight                            DM 0            15-25
-Batman Arkham Origins                           DM 0            15-25
-Batman: Arkham City                             DM 0            15-25
+ABZU                                            DM 1            7.5-25                      
+Alien Isolation                                 DM 3            7.5-15
+Amnesia: Machine for Pigs                       DM 2            7.5-25
+Amnesia: The Dark Descent                       DM 2            7.5-25
+Among The Sleep                                 DM 0            7.5-20               yes
+Assassin Creed Unity                            DM 4            7.5-25
+Batman Arkham Knight                            DM 0            7.5-25
+Batman Arkham Origins                           DM 0            7.5-25
+Batman: Arkham City                             DM 0            7.5-25
 BladeStorm Nightmare                            ????            ?????
-BorderLands 2                                   DM 0            10-20                            RB
-CEMU - Mariokart 8                              DM 2            10-20
+BorderLands 2                                   DM 2            7.5-15                            RB
+CEMU - Mariokart 8                              DM 2            7.5-20
 CEMU - Super Mario 3D World                     ????            ?????
 CEMU - The Legend of Zelda: Breath of the Wild  ????            ?????
-Call of Duty: Advance Warfare                   DM 1            10-20                            RB
-Call of Duty: Black Ops 2 RB
+Call of Duty: Advance Warfare                   DM 1            7.5-20                            RB
+Call of Duty: Black Ops                         DM 0            7.5-15                            RB
+Call of Duty: Black Ops 2                       DM 3                                              RB
 Call of Duty: Ghost RB
 Call of Duty: Infinite Warfare RB
 Casltevania: Lord of Shadows - UE
