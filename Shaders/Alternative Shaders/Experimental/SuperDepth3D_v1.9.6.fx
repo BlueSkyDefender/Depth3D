@@ -39,14 +39,14 @@
 
 uniform int Depth_Map <
 	ui_type = "combo";
-	ui_items = "Depth Map 0\0Depth Map 1\0Depth Map 2\0Depth Map 3\0Depth Map 4\0Depth Map 5\0Depth Map 6\0Depth Map 7\0";
+	ui_items = "Depth Map 0\0Depth Map 1\0Depth Map 2\0Depth Map 3\0Depth Map 4\0Depth Map 5\0Depth Map 6\0Depth Map 7\0Depth Map 8\0";
 	ui_label = "Custom Depth Map";
 	ui_tooltip = "Pick your Depth Map.";
 > = 0;
 
 uniform float Depth_Map_Adjust <
 	ui_type = "drag";
-	ui_min = 7.5; ui_max = 25.0;
+	ui_min = 2.5; ui_max = 25.0;
 	ui_label = "Depth Map Adjustment";
 	ui_tooltip = "Adjust the depth map for your games.";
 > = 7.5;
@@ -62,7 +62,7 @@ uniform float Convergence <
 	ui_type = "drag";
 	ui_min = 1; ui_max = 5;
 	ui_label = "Convergence Power";
-	ui_tooltip = "Determines the Convergence Power. Default is 1";
+	ui_tooltip = "Determines the Convergence Power. Default is 1.5";
 > = 1.5;
 
 uniform float Perspective <
@@ -323,9 +323,14 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 		{
 		depthM = Raw;
 		}
+		
+		else if (Depth_Map == 7)
+		{
+		depthM = lerp(DirectX,OpenGL,0.5);
+		}
 				
 		//7. Offset
-		else if (Depth_Map == 7)
+		else if (Depth_Map == 8)
 		{
 		depthM = pow(abs(depthM.r - offset),DA);
 		}
@@ -629,36 +634,39 @@ void PS_renderLR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD
 	float PL = D * (1-C/DepthL);
 	float PR = D * (1-C/DepthR);
 	
+	float ReprojectionLeft = lerp((DepthL * D) , PL , 0.5);
+	float ReprojectionRight = lerp((DepthR * D) , PR , 0.5);
+	
 	if(!Depth_Map_View)
 	{
 		if(Stereoscopic_Mode == 0)
 		{
 			if(Custom_Sidebars == 0)
 			{
-			color = texcoord.x < 0.5 ? tex2D(BackBufferMIRROR, float2((texcoord.x*2 + P) + lerp((DepthL * D) , PL , 0.5), texcoord.y)) : tex2D(BackBufferMIRROR, float2((texcoord.x*2-1 - P) - lerp((DepthR * D) , PR , 0.5), texcoord.y));
+			color = texcoord.x < 0.5 ? tex2D(BackBufferMIRROR, float2((texcoord.x*2 + P) + ReprojectionLeft, texcoord.y)) : tex2D(BackBufferMIRROR, float2((texcoord.x*2-1 - P) - ReprojectionRight, texcoord.y));
 			}
 			else if(Custom_Sidebars == 1)
 			{
-			color = texcoord.x < 0.5 ? tex2D(BackBufferBORDER, float2((texcoord.x*2 + P) + lerp((DepthL * D) , PL , 0.5), texcoord.y)) : tex2D(BackBufferBORDER, float2((texcoord.x*2-1 - P) - lerp((DepthR * D) , PR , 0.5), texcoord.y));
+			color = texcoord.x < 0.5 ? tex2D(BackBufferBORDER, float2((texcoord.x*2 + P) + ReprojectionLeft, texcoord.y)) : tex2D(BackBufferBORDER, float2((texcoord.x*2-1 - P) - ReprojectionRight, texcoord.y));
 			}
 			else
 			{
-			color = texcoord.x < 0.5 ? tex2D(BackBufferCLAMP, float2((texcoord.x*2 + P) + lerp((DepthL * D) , PL , 0.5), texcoord.y)) : tex2D(BackBufferCLAMP, float2((texcoord.x*2-1 - P) - lerp((DepthR * D) , PR , 0.5), texcoord.y));
+			color = texcoord.x < 0.5 ? tex2D(BackBufferCLAMP, float2((texcoord.x*2 + P) + ReprojectionLeft, texcoord.y)) : tex2D(BackBufferCLAMP, float2((texcoord.x*2-1 - P) - ReprojectionRight, texcoord.y));
 			}
 		}
 		else if(Stereoscopic_Mode == 1)
 		{	
 			if(Custom_Sidebars == 0)
 			{
-			color = texcoord.y < 0.5 ? tex2D(BackBufferMIRROR, float2((texcoord.x + P) + lerp((DepthL * D) , PL , 0.5) , texcoord.y*2)) : tex2D(BackBufferMIRROR, float2((texcoord.x - P) - lerp((DepthR * D) , PR , 0.5) , texcoord.y*2-1));
+			color = texcoord.y < 0.5 ? tex2D(BackBufferMIRROR, float2((texcoord.x + P) + ReprojectionLeft, texcoord.y*2)) : tex2D(BackBufferMIRROR, float2((texcoord.x - P) - ReprojectionRight, texcoord.y*2-1));
 			}
 			else if(Custom_Sidebars == 1)
 			{
-			color = texcoord.y < 0.5 ? tex2D(BackBufferBORDER, float2((texcoord.x + P) + lerp((DepthL * D) , PL , 0.5) , texcoord.y*2)) : tex2D(BackBufferBORDER, float2((texcoord.x - P) - lerp((DepthR * D) , PR , 0.5) , texcoord.y*2-1));
+			color = texcoord.y < 0.5 ? tex2D(BackBufferBORDER, float2((texcoord.x + P) + ReprojectionLeft, texcoord.y*2)) : tex2D(BackBufferBORDER, float2((texcoord.x - P) - ReprojectionRight, texcoord.y*2-1));
 			}
 			else
 			{
-			color = texcoord.y < 0.5 ? tex2D(BackBufferCLAMP, float2((texcoord.x + P) + lerp((DepthL * D) , PL , 0.5) , texcoord.y*2)) : tex2D(BackBufferCLAMP, float2((texcoord.x - P) - lerp((DepthR * D) , PR , 0.5) , texcoord.y*2-1));
+			color = texcoord.y < 0.5 ? tex2D(BackBufferCLAMP, float2((texcoord.x + P) + ReprojectionLeft, texcoord.y*2)) : tex2D(BackBufferCLAMP, float2((texcoord.x - P) - ReprojectionRight, texcoord.y*2-1));
 			}
 		}
 		else if(Stereoscopic_Mode == 2)
@@ -680,15 +688,15 @@ void PS_renderLR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD
 			
 			if(Custom_Sidebars == 0)
 			{
-			color = gridL > 0.5 ? tex2D(BackBufferMIRROR, float2((texcoord.x + P) + lerp((DepthL * D) , PL , 0.5) , texcoord.y)) :  tex2D(BackBufferMIRROR, float2((texcoord.x - P) - lerp((DepthR * D) , PR , 0.5) , texcoord.y));
+			color = gridL > 0.5 ? tex2D(BackBufferMIRROR, float2((texcoord.x + P) + ReprojectionLeft, texcoord.y)) :  tex2D(BackBufferMIRROR, float2((texcoord.x - P) - ReprojectionRight, texcoord.y));
 			}
 			else if(Custom_Sidebars == 1)
 			{
-			color = gridL > 0.5 ? tex2D(BackBufferBORDER, float2((texcoord.x + P) + lerp((DepthL * D) , PL , 0.5) , texcoord.y)) : tex2D(BackBufferBORDER, float2((texcoord.x - P) - lerp((DepthR * D) , PR , 0.5) , texcoord.y));
+			color = gridL > 0.5 ? tex2D(BackBufferBORDER, float2((texcoord.x + P) + ReprojectionLeft, texcoord.y)) : tex2D(BackBufferBORDER, float2((texcoord.x - P) - ReprojectionRight, texcoord.y));
 			}
 			else
 			{
-			color = gridL > 0.5 ? tex2D(BackBufferCLAMP, float2((texcoord.x + P) + lerp((DepthL * D) , PL , 0.5) , texcoord.y)) : tex2D(BackBufferCLAMP, float2((texcoord.x - P) - lerp((DepthR * D) , PR , 0.5) , texcoord.y));
+			color = gridL > 0.5 ? tex2D(BackBufferCLAMP, float2((texcoord.x + P) + ReprojectionLeft, texcoord.y)) : tex2D(BackBufferCLAMP, float2((texcoord.x - P) - ReprojectionRight, texcoord.y));
 			}
 		}
 		else if(Stereoscopic_Mode == 3)
@@ -714,29 +722,29 @@ void PS_renderLR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD
 			
 			if(Custom_Sidebars == 0)
 			{
-			color = (int(gridy+gridx) & 1) < 0.5 ? tex2D(BackBufferMIRROR, float2((texcoord.x + P) + lerp((DepthL * D) , PL , 0.5) , texcoord.y)) :  tex2D(BackBufferMIRROR, float2((texcoord.x - P) - lerp((DepthR * D) , PR , 0.5) , texcoord.y));
+			color = (int(gridy+gridx) & 1) < 0.5 ? tex2D(BackBufferMIRROR, float2((texcoord.x + P) + ReprojectionLeft, texcoord.y)) :  tex2D(BackBufferMIRROR, float2((texcoord.x - P) - ReprojectionRight, texcoord.y));
 			}
 			else if(Custom_Sidebars == 1)
 			{
-			color = (int(gridy+gridx) & 1) < 0.5 ? tex2D(BackBufferBORDER, float2((texcoord.x + P) + lerp((DepthL * D) , PL , 0.5) , texcoord.y)) : tex2D(BackBufferBORDER, float2((texcoord.x - P) - lerp((DepthR * D) , PR , 0.5) , texcoord.y));
+			color = (int(gridy+gridx) & 1) < 0.5 ? tex2D(BackBufferBORDER, float2((texcoord.x + P) + ReprojectionLeft, texcoord.y)) : tex2D(BackBufferBORDER, float2((texcoord.x - P) - ReprojectionRight, texcoord.y));
 			}
 			else
 			{
-			color = (int(gridy+gridx) & 1) < 0.5 ? tex2D(BackBufferCLAMP, float2((texcoord.x + P) + lerp((DepthL * D) , PL , 0.5) , texcoord.y)) : tex2D(BackBufferCLAMP, float2((texcoord.x - P) - lerp((DepthR * D) , PR , 0.5) , texcoord.y));
+			color = (int(gridy+gridx) & 1) < 0.5 ? tex2D(BackBufferCLAMP, float2((texcoord.x + P) + ReprojectionLeft, texcoord.y)) : tex2D(BackBufferCLAMP, float2((texcoord.x - P) - ReprojectionRight, texcoord.y));
 			}
 		}
 		else
 		{
 													
-				float3 HalfLM = dot(tex2D(BackBufferMIRROR,float2((texcoord.x + P) + lerp((DepthL * D) , PL , 0.5) ,texcoord.y)).rgb,float3(0.299, 0.587, 0.114));
-				float3 HalfRM = dot(tex2D(BackBufferMIRROR,float2((texcoord.x - P) - lerp((DepthR * D) , PR , 0.5) ,texcoord.y)).rgb,float3(0.299, 0.587, 0.114));
-				float3 LM = lerp(HalfLM,tex2D(BackBufferMIRROR,float2((texcoord.x + P) + lerp((DepthL * D) , PL , 0.5) ,texcoord.y)).rgb,Anaglyph_Desaturation);  
-				float3 RM = lerp(HalfRM,tex2D(BackBufferMIRROR,float2((texcoord.x - P) - lerp((DepthR * D) , PR , 0.5) ,texcoord.y)).rgb,Anaglyph_Desaturation); 
+				float3 HalfLM = dot(tex2D(BackBufferMIRROR,float2((texcoord.x + P) + ReprojectionLeft,texcoord.y)).rgb,float3(0.299, 0.587, 0.114));
+				float3 HalfRM = dot(tex2D(BackBufferMIRROR,float2((texcoord.x - P) - ReprojectionRight,texcoord.y)).rgb,float3(0.299, 0.587, 0.114));
+				float3 LM = lerp(HalfLM,tex2D(BackBufferMIRROR,float2((texcoord.x + P) + ReprojectionLeft,texcoord.y)).rgb,Anaglyph_Desaturation);  
+				float3 RM = lerp(HalfRM,tex2D(BackBufferMIRROR,float2((texcoord.x - P) - ReprojectionRight,texcoord.y)).rgb,Anaglyph_Desaturation); 
 				
-				float3 HalfLB = dot(tex2D(BackBufferBORDER,float2((texcoord.x + P) + lerp((DepthL * D) , PL , 0.5) ,texcoord.y)).rgb,float3(0.299, 0.587, 0.114));
-				float3 HalfRB = dot(tex2D(BackBufferBORDER,float2((texcoord.x - P ) - lerp((DepthR * D) , PR , 0.5) ,texcoord.y)).rgb,float3(0.299, 0.587, 0.114));
-				float3 LB = lerp(HalfLB,tex2D(BackBufferBORDER,float2((texcoord.x + P) + lerp((DepthL * D) , PL , 0.5) ,texcoord.y)).rgb,Anaglyph_Desaturation);  
-				float3 RB = lerp(HalfRB,tex2D(BackBufferBORDER,float2((texcoord.x - P) - lerp((DepthR * D) , PR , 0.5) ,texcoord.y)).rgb,Anaglyph_Desaturation); 
+				float3 HalfLB = dot(tex2D(BackBufferBORDER,float2((texcoord.x + P) + ReprojectionLeft,texcoord.y)).rgb,float3(0.299, 0.587, 0.114));
+				float3 HalfRB = dot(tex2D(BackBufferBORDER,float2((texcoord.x - P ) - ReprojectionRight,texcoord.y)).rgb,float3(0.299, 0.587, 0.114));
+				float3 LB = lerp(HalfLB,tex2D(BackBufferBORDER,float2((texcoord.x + P) + ReprojectionLeft,texcoord.y)).rgb,Anaglyph_Desaturation);  
+				float3 RB = lerp(HalfRB,tex2D(BackBufferBORDER,float2((texcoord.x - P) - ReprojectionRight,texcoord.y)).rgb,Anaglyph_Desaturation); 
 				
 				float4 C;
 				float4 CT;

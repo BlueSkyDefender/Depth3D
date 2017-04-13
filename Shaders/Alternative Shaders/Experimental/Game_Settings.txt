@@ -9,51 +9,51 @@ https://docs.google.com/spreadsheets/d/18ujpY-97V_YuXpQUh-7bOomE4D5nUGwp3XppfU_0
 --------------------------------------------------------------------------------------------------------------------------------------
 Game List updates for Reshade 3.0
 ______________________________________________________________________________________________________________________________________
-[Disocclusion Mask] - Use what looks good to you. If you don't like the look of it, turn it off. Option are Off/Normal/Radial
+[Disocclusion Mask] - Use what looks good to you. If you don't like the look of it, turn it off.
 [Depth Map Adjustment] - Use what you think looks good. You don't have to use my adjustment. It's just a good place to start.
 --------------------------------------------------------------------------------------------------------------------------------------
-
-[Game List]                                 [Depth Map] [Depth Map Adjustment] [Depth Flip] [Read Below]
-ABZU                                            DM 1            7.5-25                      
-Alien Isolation                                 DM 6            7.5-15
-Amnesia: Machine for Pigs                       DM 2            7.5-25
-Amnesia: The Dark Descent                       DM 2            7.5-25
-Among The Sleep                                 DM 0            7.5-20               yes
-Assassin Creed Unity                            DM 4            7.5-25
-Batman Arkham Knight                            DM 0            7.5-25
-Batman Arkham Origins                           DM 0            7.5-25
-Batman: Arkham City                             DM 0            7.5-25
-BladeStorm Nightmare                            ????            ?????
-BorderLands 2                                   DM 5            7.5-15                            RB
-CEMU - Mariokart 8                              DM 2            7.5-20
-CEMU - Super Mario 3D World                     ????            ?????
-CEMU - The Legend of Zelda: Breath of the Wild  ????            ?????
-Call of Duty: Advance Warfare                   DM 1            7.5-20                            RB
-Call of Duty: Black Ops                         DM 0            7.5-15                            RB
-Call of Duty: Black Ops 2                       DM 3            7.5-10                            RB
-Call of Duty: Ghost RB
-Call of Duty: Infinite Warfare RB
-Casltevania: Lord of Shadows - UE
-Cryostasis
-DOOM 2016
-DarkSiders Warmastred Edition
-Dead Effect
-Dead Island
-Dead Rising 3
-DeadPool Game
-Deadly Premonition:The Directors's Cut RB
-Double Dragon Neon
-Dragon Ball Xenoverse
-Dragons Dogma: Dark Arisen
-DreamFall Chapters
-Dungeon Nightmares II RB
-Dying Light
-Emily Wants To Play RB
-Everybody's Gone to the Rapture
+                                                WIP        Range WIP        WIP 
+[Game List]                                 [Depth Map] [DM Adjustment] [Weapon DM] [Depth Flip] [Read Below]
+ABZU                                            DM 1        7.5-25                      
+Alien Isolation                                 DM 6        7.5-15
+Amnesia: Machine for Pigs                       DM 2        7.5-25
+Amnesia: The Dark Descent                       DM 2        7.5-25
+Among The Sleep                                 DM 0        7.5-20                       yes
+Assassin Creed Unity                            DM 4        7.5-25
+Batman Arkham Knight                            DM 0        7.5-25
+Batman Arkham Origins                           DM 0        7.5-25
+Batman: Arkham City                             DM 0        7.5-25
+BladeStorm Nightmare                            ????        ??????
+BorderLands 2                                   DM 5        7.5-15          ????                       RB
+CEMU - Mariokart 8                              DM 2        7.5-20
+CEMU - Super Mario 3D World                     ????        ??????
+CEMU - The Legend of Zelda: Breath of the Wild  ????        ??????
+Call of Duty: Advance Warfare                   DM 3        7.5-10          ????                       RB
+Call of Duty: Black Ops                         DM 0        7.5-15          ????                       RB
+Call of Duty: Black Ops 2                       DM 3        7.5-10          ????                       RB
+Call of Duty: Ghost                             DM 3        7.5-10          ????                       RB
+Call of Duty: Infinite Warfare                  DM 3        7.5-10          ????                       RB
+Casltevania: Lord of Shadows - UE               DM 0        7.5-10                                       
+Cryostasis                                      DM 7        7.5-10          ????                         
+DOOM 2016                                       DM 7        10-15           ????                          
+DarkSiders Warmastred Edition                   DM 5        10-15                                      
+Dead Effect                                     DM 0        7.5-10                                     
+Dead Island                                     ????        ??????
+Dead Rising 3                                   DM 6        10-20
+DeadPool Game                                   DM 6        15-20
+Deadly Premonition:The Directors's Cut          DM 5        7.5-10                                     RB
+Double Dragon Neon                              ????        ??????
+Dragon Ball Xenoverse                           DM 5        10-20
+Dragons Dogma: Dark Arisen                      DM 6        7.5-15
+DreamFall Chapters                              DM 0        5.0-10
+Dungeon Nightmares II                           DM 6        25-35                                      RB
+Dying Light                                     DM 1        15-25            ????
+Emily Wants To Play                             DM 1        10-20                                      RB
+Everybody's Gone to the Rapture                 DM 5        2.5-7.5
 Fallout 4
 FarCry 3 RB
 Firewatch RB
-GTA V RB Read Above
+GTA V RB
 Gone Home
 Hard Reset RB
 Homefront The Revolution
@@ -117,7 +117,7 @@ You Are Empty
 Zombie Army Trilogy
 
 [Outlier Game List] [Depth Map]	[Offset] [Depth Flip]
-Fez                    DM 3      0.020f       On
+Fez                    DM 8      0.020f       On
 ______________________________________________________________________________________________________________________________________
 
 You can also try different depth maps for other games your self by changing Depth Map number From 0-5. 
