@@ -11,6 +11,7 @@ Game List updates for Reshade 3.0
 ______________________________________________________________________________________________________________________________________
 [Disocclusion Mask] - Use what looks good to you. If you don't like the look of it, turn it off.
 [Depth Map Adjustment] - Use what you think looks good. You don't have to use my adjustment. It's just a good place to start.
+[Depth Map Division] Inside Shader Setting -=Line 30=-. For 4k Use 2 or 2.5. For 1440p Use 1.5 or 2. For 1080p use 1.
 --------------------------------------------------------------------------------------------------------------------------------------
                                                 WIP        Range WIP        WIP 
 [Game List]                                 [Depth Map] [DM Adjustment] [Weapon DM] [Depth Flip] [Read Below]
@@ -18,7 +19,7 @@ ABZU                                            DM 1        7.5-25
 Alien Isolation                                 DM 6        7.5-15
 Amnesia: Machine for Pigs                       DM 2        7.5-25
 Amnesia: The Dark Descent                       DM 2        7.5-25
-Among The Sleep                                 DM 0        7.5-20                       yes
+Among The Sleep                                 DM 0        7.5-20                       Yes
 Assassin Creed Unity                            DM 4        7.5-25
 Batman Arkham Knight                            DM 0        7.5-25
 Batman Arkham Origins                           DM 0        7.5-25
@@ -50,15 +51,15 @@ Dungeon Nightmares II                           DM 6        25-35               
 Dying Light                                     DM 1        15-25            ????
 Emily Wants To Play                             DM 1        10-20                                      RB
 Everybody's Gone to the Rapture                 DM 5        2.5-7.5
-Fallout 4
-FarCry 3 RB
-Firewatch RB
-GTA V RB
-Gone Home
-Hard Reset RB
-Homefront The Revolution
-Just Cause 3
-KHOLAT RB
+Fallout 4                                       DM 0        5.0-10           ????
+FarCry 3                                        DM 0        7.5-15                                     RB
+Firewatch                                       DM 6        5.0-10                        Yes
+GTA V                                           DM 1        10-20                                      RB
+Gone Home                                       DM 0        5.0-10                        Yes
+Hard Reset                                      DM 0        5.0-10                                     RB
+Homefront The Revolution                        ????        ??????
+Just Cause 3                                    DM 4        7.5-15
+KHOLAT                                          DM 1        15-25                                      RB
 Lara Croft & Temple of Osiris
 Layers of Fear
 Lifeless Planet
@@ -170,9 +171,6 @@ Install reshade in to SteamLibrary\steamapps\common\Emily Wants To Play\Engine\B
 
 {FarCry 3}
 Ingame setting MSAA 2X should be on to enable Depth Map in DX11.
-
-{Firewatch}
-Issues in game with the shader Detoggling.
 
 {GTA 5}
 Rename the dxgi.dll too d3d11.dll for DX11 mode.

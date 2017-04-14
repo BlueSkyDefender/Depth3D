@@ -27,7 +27,6 @@
  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // Determines The size of the Depth Map. For 4k Use 2 or 2.5. For 1440p Use 1.5 or 2. For 1080p use 1.
-
 #define Depth_Map_Division 2.0
 
 //uniform float TEST <
@@ -60,7 +59,7 @@ uniform int Divergence <
 
 uniform float Convergence <
 	ui_type = "drag";
-	ui_min = 1; ui_max = 5;
+	ui_min = 1; ui_max = 4;
 	ui_label = "Convergence Power";
 	ui_tooltip = "Determines the Convergence Power. Default is 1.5";
 > = 1.5;
