@@ -20,7 +20,7 @@ Alien Isolation                                 DM 6        7.5-15
 Amnesia: Machine for Pigs                       DM 2        7.5-25
 Amnesia: The Dark Descent                       DM 2        7.5-25
 Among The Sleep                                 DM 0        7.5-20                       Yes
-Assassin Creed Unity                            DM 4        7.5-25
+Assassin Creed Unity                            DM 3        7.5-25
 Batman Arkham Knight                            DM 0        7.5-25
 Batman Arkham Origins                           DM 0        7.5-25
 Batman: Arkham City                             DM 0        7.5-25
@@ -29,11 +29,11 @@ BorderLands 2                                   DM 5        7.5-15          ????
 CEMU - Mariokart 8                              DM 2        7.5-20
 CEMU - Super Mario 3D World                     ????        ??????
 CEMU - The Legend of Zelda: Breath of the Wild  ????        ??????
-Call of Duty: Advance Warfare                   DM 3        7.5-10          ????                       RB
+Call of Duty: Advance Warfare                   DM 4        7.5-10          ????                       RB
 Call of Duty: Black Ops                         DM 0        7.5-15          ????                       RB
-Call of Duty: Black Ops 2                       DM 3        7.5-10          ????                       RB
-Call of Duty: Ghost                             DM 3        7.5-10          ????                       RB
-Call of Duty: Infinite Warfare                  DM 3        7.5-10          ????                       RB
+Call of Duty: Black Ops 2                       DM 4        7.5-10          ????                       RB
+Call of Duty: Ghost                             DM 4        7.5-10          ????                       RB
+Call of Duty: Infinite Warfare                  DM 4        7.5-10          ????                       RB
 Casltevania: Lord of Shadows - UE               DM 0        7.5-10                                       
 Cryostasis                                      DM 7        7.5-10          ????                         
 DOOM 2016                                       DM 7        10-15           ????                          
@@ -58,18 +58,16 @@ GTA V                                           DM 1        10-20               
 Gone Home                                       DM 0        5.0-10                        Yes
 Hard Reset                                      DM 0        5.0-10                                     RB
 Homefront The Revolution                        ????        ??????
-Just Cause 3                                    DM 4        7.5-15
+Just Cause 3                                    DM 3        7.5-15
 KHOLAT                                          DM 1        15-25                                      RB
-Lara Croft & Temple of Osiris
-Layers of Fear
-Lifeless Planet
-Lords of The Fallen
-LuciusII RB
-Magicka 2 RB
-Metal Gear Rising RB
-Metro 2033 Redux RB
-Metro Last Light Redux RB
-Middle-earth: Shadow of Mordor RB
+Layers of Fear                                  DM 6        5.0-10                        Yes
+Lifeless Planet                                 DM 6        2.5-7.5                       Yes
+Lords of The Fallen                             DM 6        15-25
+LuciusII                                        DM 6        30-40                         Yes          RB
+Metal Gear Rising                               DM 5        10-20                                      RB
+Metro 2033 Redux                                DM 5        10-20            ????                      RB
+Metro Last Light Redux                          DM 5        10-20            ????                      RB
+Middle-earth: Shadow of Mordor                  DM 4        7.5-15                                     RB
 Mirror's Edge
 Monstrum DX11 RB
 Mordheim: City of the Damned
@@ -117,8 +115,10 @@ Wolfenstine: The Old Blood RB
 You Are Empty
 Zombie Army Trilogy
 
-[Outlier Game List] [Depth Map]	[Offset] [Depth Flip]
-Fez                    DM 8      0.020f       On
+[Special Depth Game List]     [Depth Map] [DM Adjustment] [Offset] [Depth Flip] [Read Below]
+Lara Croft & Temple of Osiris    DM 10        15.0-25      0.3754
+Fez                              DM 10        1.5-2.5      0.6010       On
+Magicka 2                        DM 10        1.5-5.0      0.3730                   RB
 ______________________________________________________________________________________________________________________________________
 
 You can also try different depth maps for other games your self by changing Depth Map number From 0-5. 
@@ -135,7 +135,7 @@ Read Below Section
 {BoarderLands 2}
 Use a Controller for menus navigation or keyboard. 
 Mouse and keyboard is good for gameplay. 
-
+You can also you my Cross_Cursor.fx shader.
 
 {Call of Duty: Advance Warfare}
 Render Resolution Native.

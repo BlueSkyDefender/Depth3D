@@ -3,7 +3,7 @@
  //----------------////
 
  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
- //* Depth Map Based 3D post-process shader v1.9.6 AO																																*//
+ //* Depth Map Based 3D post-process shader v1.9.6  																																*//
  //* For Reshade 3.0																																								*//
  //* --------------------------																																						*//
  //* This work is licensed under a Creative Commons Attribution 3.0 Unported License.																								*//
@@ -31,21 +31,21 @@
 
 //uniform float TEST <
 	//ui_type = "drag";
-	//ui_min = 0; ui_max = 1;
+	//ui_min = 0; ui_max = 50;
 	//ui_label = "TEST Slider";
 	//ui_tooltip = "Determines the TEST. Default is 0";
 //> = 0;
 
 uniform int Depth_Map <
 	ui_type = "combo";
-	ui_items = "Depth Map 0\0Depth Map 1\0Depth Map 2\0Depth Map 3\0Depth Map 4\0Depth Map 5\0Depth Map 6\0Depth Map 7\0Depth Map 8\0";
+	ui_items = "Depth Map 0\0Depth Map 1\0Depth Map 2\0Depth Map 3\0Depth Map 4\0Depth Map 5\0Depth Map 6\0Depth Map 7\0Depth Map 8\0Depth Map 9\0Depth Map 10\0";
 	ui_label = "Custom Depth Map";
 	ui_tooltip = "Pick your Depth Map.";
 > = 0;
 
 uniform float Depth_Map_Adjust <
 	ui_type = "drag";
-	ui_min = 2.5; ui_max = 25.0;
+	ui_min = 1.0; ui_max = 50.0;
 	ui_label = "Depth Map Adjustment";
 	ui_tooltip = "Adjust the depth map for your games.";
 > = 7.5;
@@ -81,17 +81,17 @@ uniform bool Depth_Map_View <
 	ui_tooltip = "Display the Depth Map.";
 > = false;
 
+uniform float Offset <
+	ui_type = "drag";
+	ui_min = 0; ui_max = 1.0;
+	ui_label = "Offset";
+	ui_tooltip = "Offset";
+> = 0.5;
+
 uniform bool Depth_Map_Flip <
 	ui_label = "Depth Map Flip";
 	ui_tooltip = "Flip the depth map if it is upside down.";
 > = false;
-
-uniform float Offset <
-	ui_type = "drag";
-	ui_min = 0; ui_max = 0.5;
-	ui_label = "Offset";
-	ui_tooltip = "Offset";
-> = 0.5;
 
 uniform int Custom_Depth_Map <
 	ui_type = "combo";
@@ -102,7 +102,7 @@ uniform int Custom_Depth_Map <
 
 uniform int Weapon_Depth_Map <
 	ui_type = "combo";
-	ui_items = "Depth Map 0\0Depth Map 1\0Depth Map 2\0Depth Map 3\0Depth Map 4\0Depth Map 5\0";
+	ui_items = "Depth Map One\0Depth Map Two\0Depth Map Three\0Depth Map Four\0Depth Map Five\0";
 	ui_label = "Custom Depth Map";
 	ui_tooltip = "Pick your Depth Map.";
 > = 0;
@@ -173,10 +173,10 @@ uniform bool AO <
 
 uniform float Power <
 	ui_type = "drag";
-	ui_min = 0.375; ui_max = 0.625;
+	ui_min = 0.25; ui_max = 1.25;
 	ui_label = "AO Power";
-	ui_tooltip = "Ambient occlusion power on the depth map. Default is 0.500";
-> = 0.500;
+	ui_tooltip = "Ambient occlusion power on the depth map. Default is 0.75";
+> = 0.75;
 
 uniform float Spread <
 	ui_type = "drag";
@@ -267,27 +267,26 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 		//Near & Far Adjustment
 		float DDA = 0.125/Depth_Map_Adjust; //Division Depth Map Adjust - Near
 		float DA = Depth_Map_Adjust*2; //Depth Map Adjust - Near
-		float offset = -Offset;
 		//All 1.0f are Far Adjustment
 		
 		//0. DirectX Custom Constant Far
 		float DirectX = 2.0 * DDA * 1.0f / (1.0f + DDA - depthM.r * (1.0f - DDA));
 		
 		//1. DirectX Alternative
-		float DirectXAlt = pow(abs(1.0-depthM.r),DA);
+		float DirectXAlt = pow(abs(depthM.r - 1.0),DA);
 		
 		//2. OpenGL
 		float OpenGL = 2.0 * DDA * 1.0f / (1.0f + DDA - (2.0 * depthM.r - 1.0) * (1.0f - DDA));
 		
-		//3. OpenGL Alternative
-		float OpenGLAlt = pow(abs(depthM.r - 1.0),DA);
-		
-		//4. OpenGL Reverse
+		//3. OpenGL Reverse
 		float OpenGLRev = 2.0 * 1.0f * DDA / (DDA + 1.0f - (2.0 * depthM.r - 1.0) * (DDA - 1.0f));
 		
-		//5. Raw Buffer
+		//4. Raw Buffer
 		float Raw = pow(abs(depthM.r),DA);
-
+		
+		//5. Special Depth Map
+		float Special = pow(abs(exp(depthM.r)*Offset),(DA*25));
+		
 		if (Depth_Map == 0)
 		{
 		depthM = DirectX;
@@ -305,12 +304,12 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 		
 		else if (Depth_Map == 3)
 		{
-		depthM = lerp(OpenGLAlt,OpenGLRev,0.5);
+		depthM = OpenGLRev;
 		}
 		
 		else if (Depth_Map == 4)
 		{
-		depthM = OpenGLRev;
+		depthM = lerp(DirectXAlt,OpenGLRev,0.5);
 		}
 		
 		else if (Depth_Map == 5)
@@ -327,11 +326,20 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 		{
 		depthM = lerp(DirectX,OpenGL,0.5);
 		}
-				
-		//7. Offset
+		
 		else if (Depth_Map == 8)
 		{
-		depthM = pow(abs(depthM.r - offset),DA);
+		depthM = lerp(Raw,OpenGL,0.5);
+		}		
+		
+		else if (Depth_Map == 9)
+		{
+		//depthM = SpecialTwo;
+		}
+		
+		else if (Depth_Map == 10)
+		{
+		depthM = Special;
 		}
 		
 		MDepth = depthM;
@@ -369,12 +377,6 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 		else if (Weapon_Depth_Map == 4)
 		{
 		WdepthM = 2.0 * 1.0 * DWA / (DWA + 1.0 - (2.0 * WdepthM.r - 1.0) * (DWA - 1.0));
-		}
-		
-		//Offset
-		else if (Weapon_Depth_Map == 5)
-		{
-		WdepthM = pow(abs(WdepthM.r - offset),WA);
 		}
 		
 		//Weapon Depth Map
@@ -531,6 +533,7 @@ void  DisOcclusion(in float4 position : SV_Position, in float2 texcoord : TEXCOO
 //bilateral blur\/
 float4 Done;
 float4 sum;
+float P = Power/10;
 
 float blursize = 2.0*pix.x;
 
@@ -543,7 +546,7 @@ sum += tex2D(SamplerSSAO, float2(texcoord.x, texcoord.y + 2.0*blursize)) * 0.12;
 sum += tex2D(SamplerSSAO, float2(texcoord.x + 3.0*blursize, texcoord.y)) * 0.09;
 sum += tex2D(SamplerSSAO, float2(texcoord.x, texcoord.y + 4.0*blursize)) * 0.05;
 
-Done = sum;
+Done = 1-sum;
 //bilateral blur/\
 
 float DP =  Divergence;
@@ -579,12 +582,8 @@ float DP =  Divergence;
 	{
 	DM = tex2D(SamplerDM,texcoord);
 	}		                          
-	
-	DM = DM;
-	
-	float4 Mix = pow(1-(Done*(1-DM)),0.25);
-	
-	color = saturate(pow(lerp(DM,Mix,Power),3));
+
+	color = lerp(DM,Done,P);
 }
 
 ////////////////////////////////////////////////Left/Right Eye////////////////////////////////////////////////////////
