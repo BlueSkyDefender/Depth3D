@@ -68,21 +68,18 @@ Metal Gear Rising                               DM 5        10-20               
 Metro 2033 Redux                                DM 5        10-20            ????                      RB
 Metro Last Light Redux                          DM 5        10-20            ????                      RB
 Middle-earth: Shadow of Mordor                  DM 4        7.5-15                                     RB
-Mirror's Edge
-Monstrum DX11 RB
-Mordheim: City of the Damned
-Naruto Shippuden UNS3 Full Blurst RB
-NecroVision: Lost Company
-Need For Speed Rivals
-Need for Speed
-Never Alone (Kisima Ingitchuna)
-Nosferatu: The Wrath of Malachi RB
-Penumbra: Black Plague RB
-Phantasmal RB
-Quake 2 XP
-Quake 4
-Quantum Break
-Rage64 RB
+Mirror's Edge Catalyst                          DM 4        5.0-10                                     
+Mordheim: City of the Damned                    DM 6        2.5-7.5                                    
+Naruto Shippuden UNS3 Full Blurst               DM 7        15-25                                      RB
+NecroVision: Lost Company                       DM 0        10-20            ????                      
+Need For Speed Rivals                           ????        ??????
+Need for Speed                                  ????        ??????
+Penumbra: Black Plague                          DM 5        10-20                                      RB
+Phantasmal                                      DM 0        10-20                                      RB
+Quake 2 XP                                      DM 2        5.0-10           ????
+Quake 4                                         ????        ??????           ????                      RB
+Quantum Break                                   DM 5        7.5-15
+Rage64                                          DM 2        7.5-15           ????                      RB
 Requiem: Avenging Angel RB
 Resident Evil 7 RB
 Return To Castle Wolfenstine RB
@@ -115,10 +112,12 @@ Wolfenstine: The Old Blood RB
 You Are Empty
 Zombie Army Trilogy
 
-[Special Depth Game List]     [Depth Map] [DM Adjustment] [Offset] [Depth Flip] [Read Below]
-Lara Croft & Temple of Osiris    DM 10        15.0-25      0.3754
-Fez                              DM 10        1.5-2.5      0.6010       On
-Magicka 2                        DM 10        1.5-5.0      0.3730                   RB
+[Special Depth Game List]      [Depth Map] [DM Adjustment] [Weapon DM] [Offset] [Depth Flip] [Read Below]
+Lara Croft & Temple of Osiris     DM 10        15.0-25                  0.3754
+Fez                               DM 10        1.5-2.5                  0.6010       On
+Magicka 2                         DM 10        1.5-5.0                  0.3730                   RB
+Never Alone (Kisima Ingitchuna)   DM 10        1.0-2.0                  0.3688
+Nosferatu: The Wrath of Malachi   DM 10        2.0-3.0        ????      0.3667                   RB
 ______________________________________________________________________________________________________________________________________
 
 You can also try different depth maps for other games your self by changing Depth Map number From 0-5. 
@@ -209,9 +208,6 @@ Borderless Full Screen will not work Window mode will not Work.
 So if you want to Play at a lower resolution, then set your windows resolution lower then run the game in full screen and set your scaling to 100%. 
 Anything Lower or Higher then 100% will not work.
 
-{Monstrum}
-Start the game in DX11 mode.
-
 {Naruto Shippuden UNS3 Full Blurst}
 Ignore the warnings click play.
 
@@ -233,8 +229,6 @@ Open the settings and set your res.
 
 {Quake 4}
 If some how you can click on the menu......... Good Luck.
-Also if some how you get it working When the game Saves You have to recheck the 3D shader. 
-This is where a Defaults.ini will come in handy.
 
 {Rage}
 Start the game with out Reshade Set your game resolution First Turn off AA. 
@@ -377,6 +371,9 @@ Problem Games
 _________________________________________________________________________________________________________________________________________
 {Condemned: Criminal Origins}
 Depth Buffer Drops time to time Also Dissable FSAA (FSAA OFF)
+
+{Monstrum}
+Start the game in OpenGL or DX3D mode. Game seems to change Depth Buffer now after update. I suggest useing TriDef.
 
 {Portal 2} -Game crashes when loading-
 Custom_Depth_Map 7

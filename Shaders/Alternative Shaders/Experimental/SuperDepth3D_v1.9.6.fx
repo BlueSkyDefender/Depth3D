@@ -31,7 +31,7 @@
 
 //uniform float TEST <
 	//ui_type = "drag";
-	//ui_min = 0; ui_max = 50;
+	//ui_min = 0; ui_max = 5;
 	//ui_label = "TEST Slider";
 	//ui_tooltip = "Determines the TEST. Default is 0";
 //> = 0;
@@ -57,12 +57,12 @@ uniform int Divergence <
 	ui_tooltip = "Determines the amount of Image Warping and Separation.";
 > = 15;
 
-uniform float Convergence <
+uniform float Near_Depth <
 	ui_type = "drag";
-	ui_min = 1; ui_max = 4;
-	ui_label = "Convergence Power";
-	ui_tooltip = "Determines the Convergence Power. Default is 1.5";
-> = 1.5;
+	ui_min = 0; ui_max = 0.500;
+	ui_label = "Near Depth";
+	ui_tooltip = "Depth Near the Cam. Default is 0";
+> = 0;
 
 uniform float Perspective <
 	ui_type = "drag";
@@ -109,7 +109,7 @@ uniform int Weapon_Depth_Map <
 
 uniform float4 Weapon_Adjust <
 	ui_type = "drag";
-	ui_min = -1.0; ui_max = 1.500;
+	ui_min = -1.0; ui_max = 5;
 	ui_label = "Weapon Adjust Depth Map";
 	ui_tooltip = "Adjust weapon depth map. Default is (Y 0, X 0.250, Z 1.001)";
 > = float4(0.0,0.250,1.001,1.0);
@@ -388,16 +388,16 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 		float Adj;
 		if (Custom_Depth_Map == 1)
 		{
-		float cWF = Weapon_Adjust.y;//-0.05
-		float cWN = Weapon_Adjust.z;//0.500
-		float cWP = Weapon_Adjust.w;//0.500
+		float cWF = Weapon_Adjust.y;
+		float cWN = Weapon_Adjust.z/1000;
+		float cWP = Weapon_Adjust.w;
 		WDone = (cWN * WDM) / ((cWP*WDM)-(cWF));
 		}
 		
-		Adj = Weapon_Adjust.x;//0
-		
 		if (Weapon_Depth_Map_Invert)
-			WDone = 1 - WDone;
+			WDone = 1 - WDone;	
+			
+		Adj = Weapon_Adjust.x;//0
 			
 		float NearDepth = step(WDM.r,Adj);
 		float4 D;
@@ -458,7 +458,7 @@ float aoFF(in float3 ddiff,in float3 cnorm, in float c1, in float c2)
 {
 	float3 vv = normalize(ddiff);
 	float rd = length(ddiff);
-	return (1.0-clamp(dot(normal_from_depth(float2(c1,c2)),-vv),-1,1.0)) * clamp(dot( cnorm,vv ),1.0,1.0)* (1.0 - 1.0/sqrt(1.0/(rd*rd) + 1000));
+	return (1-clamp(dot(normal_from_depth(float2(c1,c2)),-vv),-1,1.0)) * clamp(dot( cnorm,vv ),1.075,1.0)* (1.0 - 1.0/sqrt(-0.001/(rd*rd) + 1000));
 }
 
 float4 GetAO( float2 texcoord )
@@ -481,11 +481,11 @@ float4 GetAO( float2 texcoord )
     //Depth Map
     float depthM = tex2D(SamplerDM, texcoord).r;
     
-    	float cF = -1.0;
-		float cN = 1000;
 		
 	//Depth Map linearization
-    depthM = saturate(pow(abs((exp(depthM * log(cF + cN)) - cN) / cF),-0.200));
+	float constantF = 1.0;	
+	float constantN = 0.250;
+	depthM = saturate(2.0 * constantN * constantF / (constantF + constantN - (2.0 * depthM.r - 1.0) * (constantF - constantN)));
     
 	//2 iterations 
     [loop]
@@ -596,13 +596,13 @@ void PS_renderLR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD
 	
 	if(!Eye_Swap)
 		{	
-			C = (Divergence * pix.x)*Convergence;
+			C = Divergence * pix.x;
 			P = Perspective * pix.x;
 			D = Divergence * pix.x;
 		}
 		else
 		{
-			C = (-Divergence * pix.x)*Convergence;
+			C = -Divergence * pix.x;
 			P = -Perspective * pix.x;
 			D = -Divergence * pix.x;
 		}
@@ -632,8 +632,8 @@ void PS_renderLR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD
 	float PL = D * (1-C/DepthL);
 	float PR = D * (1-C/DepthR);
 	
-	float ReprojectionLeft = lerp((DepthL * D) , PL , 0.5);
-	float ReprojectionRight = lerp((DepthR * D) , PR , 0.5);
+	float ReprojectionLeft = lerp((DepthL * D) , PL , -Near_Depth);
+	float ReprojectionRight = lerp((DepthR * D) , PR , -Near_Depth);
 	
 	if(!Depth_Map_View)
 	{
