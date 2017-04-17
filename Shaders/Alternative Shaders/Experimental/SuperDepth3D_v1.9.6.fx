@@ -57,13 +57,6 @@ uniform int Divergence <
 	ui_tooltip = "Determines the amount of Image Warping and Separation.";
 > = 15;
 
-uniform float Near_Depth <
-	ui_type = "drag";
-	ui_min = 0; ui_max = 0.500;
-	ui_label = "Near Depth";
-	ui_tooltip = "Depth Near the Cam. Default is 0";
-> = 0;
-
 uniform float Perspective <
 	ui_type = "drag";
 	ui_min = -100; ui_max = 100;
@@ -178,12 +171,19 @@ uniform float Power <
 	ui_tooltip = "Ambient occlusion power on the depth map. Default is 0.75";
 > = 0.75;
 
-uniform float Spread <
+uniform float Falloff <
 	ui_type = "drag";
 	ui_min = 0.5; ui_max = 2.5;
 	ui_label = "AO Falloff";
 	ui_tooltip = "Ambient occlusion falloff. Default is 1.5";
 > = 1.5;
+
+uniform float AO_Shift <
+	ui_type = "drag";
+	ui_min = 0.250; ui_max = 0.750;
+	ui_label = "AO Shift";
+	ui_tooltip = "Determines the Shift from White to Black. Default is 1";
+> = 0.5;
 
 /////////////////////////////////////////////D3D Starts Here/////////////////////////////////////////////////////////////////
 
@@ -456,9 +456,10 @@ float3 normal_from_depth(float2 texcoords)
 //Ambient Occlusion form factor
 float aoFF(in float3 ddiff,in float3 cnorm, in float c1, in float c2)
 {
+	float S = 1-AO_Shift;
 	float3 vv = normalize(ddiff);
 	float rd = length(ddiff);
-	return (1-clamp(dot(normal_from_depth(float2(c1,c2)),-vv),-1,1.0)) * clamp(dot( cnorm,vv ),1.075,1.0)* (1.0 - 1.0/sqrt(-0.001/(rd*rd) + 1000));
+	return (S-clamp(dot(normal_from_depth(float2(c1,c2)),-vv),-1,1.0)) * clamp(dot( cnorm,vv ),1.075,1.0)* (1.0 - 1.0/sqrt(-0.001/(rd*rd) + 1000));
 }
 
 float4 GetAO( float2 texcoord )
@@ -469,11 +470,11 @@ float4 GetAO( float2 texcoord )
 	float2 random = GetRandom(texcoord).xy;
     
     //initialize variables:
-    float S = Spread;
+    float F = Falloff;
 	float iter = 2.5*pix.x;
     float ao;
-    float incx = S*pix.x;
-    float incy = S*pix.y;
+    float incx = F*pix.x;
+    float incy = F*pix.y;
     float width = incx;
     float height = incy;
     float num;
@@ -488,7 +489,6 @@ float4 GetAO( float2 texcoord )
 	depthM = saturate(2.0 * constantN * constantF / (constantF + constantN - (2.0 * depthM.r - 1.0) * (constantF - constantN)));
     
 	//2 iterations 
-    [loop]
     for(float i=0.0; i<2; ++i) 
     {
        float npw = (width+iter*random.x)/depthM;
@@ -591,26 +591,24 @@ float DP =  Divergence;
 void PS_renderLR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 color : SV_Target0 )
 {
 	float samples[4] = {0.50, 0.66, 0.85, 1.0};
-	float DepthL = 1, DepthR = 1 , D , P , C;
+	float DepthL = 1, DepthR = 1 , MS , P;
 	float2 uv = 0;
 	
 	if(!Eye_Swap)
 		{	
-			C = Divergence * pix.x;
 			P = Perspective * pix.x;
-			D = Divergence * pix.x;
+			MS = Divergence * pix.x;
 		}
 		else
 		{
-			C = -Divergence * pix.x;
 			P = -Perspective * pix.x;
-			D = -Divergence * pix.x;
+			MS = -Divergence * pix.x;
 		}
 	
 	[loop]
 	for (int j = 0; j < 4; ++j) 
 	{	
-		uv.x = samples[j] * D;
+		uv.x = samples[j] * MS;
 		
 		if(Stereoscopic_Mode == 0)
 		{	
@@ -629,11 +627,8 @@ void PS_renderLR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD
 		}
 	}
 	
-	float PL = D * (1-C/DepthL);
-	float PR = D * (1-C/DepthR);
-	
-	float ReprojectionLeft = lerp((DepthL * D) , PL , -Near_Depth);
-	float ReprojectionRight = lerp((DepthR * D) , PR , -Near_Depth);
+	float ReprojectionLeft = DepthL * MS;
+	float ReprojectionRight = DepthR * MS;
 	
 	if(!Depth_Map_View)
 	{
