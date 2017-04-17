@@ -29,12 +29,12 @@
 // Determines The size of the Depth Map. For 4k Use 2 or 2.5. For 1440p Use 1.5 or 2. For 1080p use 1.
 #define Depth_Map_Division 2.0
 
-//uniform float TEST <
+//uniform float2 TEST <
 	//ui_type = "drag";
-	//ui_min = 0; ui_max = 5;
-	//ui_label = "TEST Slider";
-	//ui_tooltip = "Determines the TEST. Default is 0";
-//> = 0;
+	//ui_min = -2; ui_max = 2;
+	//ui_label = "TEST";
+	//ui_tooltip = "Determines the TEST. Default is X 0 and Y 1.250";
+//> = float2(0,1);
 
 uniform int Depth_Map <
 	ui_type = "combo";
@@ -114,6 +114,13 @@ uniform float Weapon_Correction <
 	ui_tooltip = "For adjusting the cutoff of the weapon Depth Map.";
 > = 0.0;
 
+uniform float2 SSW <
+	ui_type = "drag";
+	ui_min = -2; ui_max = 2;
+	ui_label = "Smooth Step Slider";
+	ui_tooltip = "Determines the smoothstep Min and Max. Default is X 0 and Y 1.250";
+> = float2(0,1.250);
+
 uniform bool Weapon_Depth_Map_Invert <
 	ui_label = "Invert Weapon Depth Map";
 	ui_tooltip = "To invert the Weapon Depth Map if it is reverse.";
@@ -180,10 +187,10 @@ uniform float Falloff <
 
 uniform float AO_Shift <
 	ui_type = "drag";
-	ui_min = 0.250; ui_max = 0.750;
+	ui_min = 0; ui_max = 0.750;
 	ui_label = "AO Shift";
-	ui_tooltip = "Determines the Shift from White to Black. Default is 1";
-> = 0.5;
+	ui_tooltip = "Determines the Shift from White to Black. Default is 0";
+> = 0;
 
 /////////////////////////////////////////////D3D Starts Here/////////////////////////////////////////////////////////////////
 
@@ -258,7 +265,6 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 			texcoord.y =  1 - texcoord.y;
 			
 	float4 depthM = tex2D(DepthBuffer, texcoord);
-	float4 WdepthM = tex2D(DepthBuffer, texcoord);
 	float4 MDepth;
 	float4 WDM;
 	float4 WDone;
@@ -342,47 +348,12 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 		depthM = Special;
 		}
 		
-		MDepth = depthM;
-		
-		//Weapon Depth Map start//
-		//Near & Far Adjustment
-		float DWA = 0.125/15; //Division Fixed Weapon Adjust - Near
-		float WA = 15*2; //Fixed Weapon Adjust - Near
-		
-		//DirectX
-		if (Weapon_Depth_Map == 0)
-		{
-		WdepthM = 2.0 * DWA * 1.0 / (1.0 + DWA - WdepthM.r * (1.0 - DWA));
-		}
-		
-		//DirectX Alternative
-		else if (Weapon_Depth_Map == 1)
-		{
-		WdepthM = pow(abs(1.0-WdepthM.r),WA);
-		}
-
-		//OpenGL
-		else if (Weapon_Depth_Map == 2)
-		{
-		WdepthM = 2.0 * DWA * 1.0 / (1.0 + DWA - (2.0 * WdepthM.r - 1.0) * (1.0 - DWA));
-		}
-		
-		//OpenGL Alternative
-		else if (Weapon_Depth_Map == 3)
-		{
-		WdepthM = pow(abs(WdepthM.r - 1.0),WA);
-		}
-		
-		//Reverse OpenGL
-		else if (Weapon_Depth_Map == 4)
-		{
-		WdepthM = 2.0 * 1.0 * DWA / (DWA + 1.0 - (2.0 * WdepthM.r - 1.0) * (DWA - 1.0));
-		}
+		MDepth = depthM;		
 		
 		//Weapon Depth Map
 		float constantF = 1.0;	
 		float constantN = 0.01;
-		WDM = 2.0 * constantN * constantF / (constantF + constantN - (2.0 * WdepthM.r - 1.0) * (constantF - constantN));
+		WDM = 2.0 * constantN * constantF / (constantF + constantN - (2.0 * depthM.r - 1.0) * (constantF - constantN));
  		
 		//Scaled Section z-Buffer
 		float Adj;
@@ -393,6 +364,8 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 		float cWP = Weapon_Adjust.w;
 		WDone = (cWN * WDM) / ((cWP*WDM)-(cWF));
 		}
+		
+		WDone = smoothstep(SSW.x,SSW.y,WDone);
 		
 		if (Weapon_Depth_Map_Invert)
 			WDone = 1 - WDone;	
@@ -426,7 +399,7 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 
 float3 GetPosition(float2 coords)
 {
-	return float3(coords.xy*2.0-1.0,10.0)*tex2D(SamplerDM,coords.xy).rgb;
+	return float3(coords.xy*2.5-1.0,10.0)*tex2D(SamplerDM,coords.xy).rgb;
 }
 
 float3 GetRandom(float2 co)
