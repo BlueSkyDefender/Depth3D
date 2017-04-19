@@ -102,17 +102,17 @@ uniform int Weapon_Depth_Map <
 
 uniform float4 Weapon_Adjust <
 	ui_type = "drag";
-	ui_min = -1.0; ui_max = 5;
+	ui_min = -2.5; ui_max = 2.5;
 	ui_label = "Weapon Adjust Depth Map";
-	ui_tooltip = "Adjust weapon depth map. Default is (Y 0, X 0.250, Z 1.001)";
-> = float4(0.0,0.250,1.001,1.0);
+	ui_tooltip = "Adjust weapon depth map. Default is (Y 0, X 0.010, Z 1.001)";
+> = float4(1.0,0.010,1.001,1.0);
 
 uniform float Weapon_Correction <
 	ui_type = "drag";
 	ui_min = -1; ui_max = 1;
 	ui_label = "Weapon Correction";
 	ui_tooltip = "For adjusting the cutoff of the weapon Depth Map.";
-> = 0.0;
+> = 0.10;
 
 uniform float2 SSW <
 	ui_type = "drag";
@@ -189,8 +189,8 @@ uniform float AO_Shift <
 	ui_type = "drag";
 	ui_min = 0; ui_max = 0.750;
 	ui_label = "AO Shift";
-	ui_tooltip = "Determines the Shift from White to Black. Default is 0";
-> = 0;
+	ui_tooltip = "Determines the Shift from White to Black. Default is 0.250";
+> = 0.250;
 
 /////////////////////////////////////////////D3D Starts Here/////////////////////////////////////////////////////////////////
 
@@ -530,7 +530,7 @@ float DP =  Divergence;
  float B;
  int Con = 10;
 	
-	if(Dis_Occlusion > 0) 
+	if(Dis_Occlusion == 1) 
 	{
 	
 	const float weight[10] = { 0.01,-0.01,0.02,-0.02,0.03,-0.03,0.04,-0.04,0.05,-0.05};
@@ -544,7 +544,7 @@ float DP =  Divergence;
 	[loop]
 	for (int i = 0; i < Con; i++)
 	{
-		if(Dis_Occlusion > 0) 
+		if(Dis_Occlusion == 1) 
 		{
 		DM += tex2D(SamplerDM,texcoord + dir * weight[i] * B)/Con;
 		}

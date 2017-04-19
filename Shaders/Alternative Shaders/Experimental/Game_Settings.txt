@@ -80,15 +80,13 @@ Quake 2 XP                                      DM 2        5.0-10           ???
 Quake 4                                         ????        ??????           ????                      RB
 Quantum Break                                   DM 5        7.5-15
 Rage64                                          DM 2        7.5-15           ????                      RB
-Requiem: Avenging Angel RB
-Resident Evil 7 RB
-Return To Castle Wolfenstine RB
-Ryse: Son of Rome
-S.T.A.L.K.E.R:CS Complete Mod RB
-S.T.A.L.K.E.R:CoP Complete Mod RB
-S.T.A.L.K.E.R:SoC Complete Mod RB
-Shadow warrior(2013) RB
-Silent Hill: Homecoming
+Resident Evil 7                                 DM 4        5.0-10                                     RB
+Return To Castle Wolfenstine                    DM 2        2.5-7.5          ????                      RB
+Ryse: Son of Rome                               DM 0        5.0-10                                     
+S.T.A.L.K.E.R:CS Complete Mod RB                ????        ??????
+S.T.A.L.K.E.R:CoP Complete Mod RB               ????        ??????
+S.T.A.L.K.E.R:SoC Complete Mod RB               ????        ??????
+Shadow warrior(2013)                            DM 5        2.5-5.0                                    RB
 Sleeping Dogs: DE
 Soma
 Souls Games
@@ -112,12 +110,14 @@ Wolfenstine: The Old Blood RB
 You Are Empty
 Zombie Army Trilogy
 
-[Special Depth Game List]      [Depth Map] [DM Adjustment] [Weapon DM] [Offset] [Depth Flip] [Read Below]
+[Special Depth Map Game List]  [Depth Map] [DM Adjustment] [Weapon DM] [Offset] [Depth Flip] [Read Below]
 Lara Croft & Temple of Osiris     DM 10        15.0-25                  0.3754
 Fez                               DM 10        1.5-2.5                  0.6010       On
 Magicka 2                         DM 10        1.5-5.0                  0.3730                   RB
 Never Alone (Kisima Ingitchuna)   DM 10        1.0-2.0                  0.3688
 Nosferatu: The Wrath of Malachi   DM 10        2.0-3.0        ????      0.3667                   RB
+Requiem: Avenging Angel           DM 10        5.0-7.5                  0.5740                   RB
+ Silent Hill: Homecoming          DM 10        1.0-2.0                  0.4080
 ______________________________________________________________________________________________________________________________________
 
 You can also try different depth maps for other games your self by changing Depth Map number From 0-5. 
@@ -258,6 +258,10 @@ seta r_customwidth "3840"
 seta r_fullscreen "1"
 
 seta r_mode "-1"
+
+If you have nGlide installed.
+seta r_glIgnoreWicked3D "1"
+or just set your res to 800x600 and set your res in nGlide to your native res. I say use nGlide it looks better and you get to see the in game movies.
 
 {Requiem: Avenging Angel}
 Use nglide 1.05 to run this game.
