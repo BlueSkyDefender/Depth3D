@@ -21,6 +21,7 @@ Amnesia: Machine for Pigs                       DM 2        7.5-25
 Amnesia: The Dark Descent                       DM 2        7.5-25
 Among The Sleep                                 DM 0        7.5-20                       Yes
 Assassin Creed Unity                            DM 3        7.5-25
+Bayonetta                                       DM 5        10-15
 Batman Arkham Knight                            DM 0        7.5-25
 Batman Arkham Origins                           DM 0        7.5-25
 Batman: Arkham City                             DM 0        7.5-25
@@ -87,15 +88,14 @@ S.T.A.L.K.E.R:CS Complete Mod RB                ????        ??????
 S.T.A.L.K.E.R:CoP Complete Mod RB               ????        ??????
 S.T.A.L.K.E.R:SoC Complete Mod RB               ????        ??????
 Shadow warrior(2013)                            DM 5        2.5-5.0                                    RB
-Sleeping Dogs: DE
-Soma
-Souls Games
-Stacking
-Stay Close RB
-Tales of Zestiria
-The Elder Scrolls V: SE
-The Elder Scrolls V: Skyrim
-The Evil Within RB
+Sleeping Dogs: DE                               DM 6        2.5-5.0
+Soma                                            DM 2        10-20            ????                      
+Souls Games                                     DM 6        15-25                                      
+Stacking                                        DM 6        5.0-10                                  
+Stay Close                                      DM 3        2.5-7.5                                    RB
+Tales of Zestiria                               DM 6        15-20
+The Elder Scrolls V: SE                         DM 8        2.5-5.0          ????
+The Evil Within                                 DM 0        20-30                                      RB
 The Legend of Korra
 The Vanishing of Ethan Carter Redux RB
 The Void RB

@@ -27,7 +27,7 @@
  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // Determines The size of the Depth Map. For 4k Use 2 or 2.5. For 1440p Use 1.5 or 2. For 1080p use 1.
-#define Depth_Map_Division 2.0
+#define Depth_Map_Division 1.0
 
 //uniform float2 TEST <
 	//ui_type = "drag";
@@ -52,10 +52,16 @@ uniform float Depth_Map_Adjust <
 
 uniform int Divergence <
 	ui_type = "drag";
-	ui_min = 0; ui_max = 35;
+	ui_min = 1; ui_max = 35;
 	ui_label = "Divergence Slider";
 	ui_tooltip = "Determines the amount of Image Warping and Separation.";
 > = 15;
+uniform int Near_Depth <
+	ui_type = "drag";
+	ui_min = 0; ui_max = 3;
+	ui_label = "Divergence Slider";
+	ui_tooltip = "Determines the amount of depth near the cam, zero is off. Default is 1.";
+> = 1;
 
 uniform float Perspective <
 	ui_type = "drag";
@@ -266,6 +272,7 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 			
 	float4 depthM = tex2D(DepthBuffer, texcoord);
 	float4 MDepth;
+	float4 WDepth = tex2D(DepthBuffer, texcoord);
 	float4 WDM;
 	float4 WDone;
 	
@@ -351,9 +358,17 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 		MDepth = depthM;		
 		
 		//Weapon Depth Map
+		
+		if(Weapon_Depth_Map == 0)
+		{
 		float constantF = 1.0;	
 		float constantN = 0.01;
-		WDM = 2.0 * constantN * constantF / (constantF + constantN - (2.0 * depthM.r - 1.0) * (constantF - constantN));
+		WDM = 2.0 * constantN * constantF / (constantF + constantN - (2.0 * WDepth.r - 1.0) * (constantF - constantN));
+		}
+		else
+		{
+		WDM = pow(abs(WDepth.r - 1.0),10);
+ 		}
  		
 		//Scaled Section z-Buffer
 		float Adj;
@@ -564,7 +579,7 @@ float DP =  Divergence;
 void PS_renderLR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 color : SV_Target0 )
 {
 	float samples[4] = {0.50, 0.66, 0.85, 1.0};
-	float DepthL = 1, DepthR = 1 , MS , P;
+	float DepthL = 1, DepthR = 1, MS , P, S, MaxTP, CalNear;
 	float2 uv = 0;
 	
 	if(!Eye_Swap)
@@ -600,8 +615,28 @@ void PS_renderLR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD
 		}
 	}
 	
-	float ReprojectionLeft = DepthL * MS;
-	float ReprojectionRight = DepthR * MS;
+	if(Near_Depth == 1)
+	{
+	CalNear = 3.5/Divergence;//Near Depth auto Cal.
+	}
+	else if(Near_Depth == 2)
+	{
+	CalNear = 5.25/Divergence;//Near Depth auto x1.5 Cal.
+	}
+	else if(Near_Depth == 3)
+	{
+	CalNear = 7.0/Divergence;//Near Depth auto x2 Cal.
+	}
+	else
+	{
+	CalNear = 0;//Near Depth Off.
+	}
+	
+	MaxTP = Divergence * 0.03;//Max 3% of Divergence.
+	float PL = saturate(1-(MaxTP *(1-0.350/DepthL)));//ZPD is hard set 0.350 for now.
+	float PR = saturate(1-(MaxTP *(1-0.350/DepthR)));//ZPD is hard set 0.350 for now.
+	float ReprojectionLeft = lerp(DepthL * MS, PL * MS,-CalNear);
+	float ReprojectionRight = lerp(DepthR * MS,PR * MS,-CalNear);
 	
 	if(!Depth_Map_View)
 	{
