@@ -59,7 +59,7 @@ uniform int Divergence <
 uniform int Near_Depth <
 	ui_type = "drag";
 	ui_min = 0; ui_max = 3;
-	ui_label = "Divergence Slider";
+	ui_label = "Near Depth Adjustment";
 	ui_tooltip = "Determines the amount of depth near the cam, zero is off. Default is 1.";
 > = 1;
 
