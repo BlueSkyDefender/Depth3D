@@ -27,7 +27,7 @@ Batman Arkham Origins                           DM 0        7.5-25
 Batman: Arkham City                             DM 0        7.5-25
 BladeStorm Nightmare                            Help        ??????
 BorderLands 2                                   DM 5        7.5-15          ????                       RB
-CEMU - Mariokart 8                              DM 2        7.5-20
+CEMU - Mariokart 8                              ????        ??????
 CEMU - Super Mario 3D World                     ????        ??????
 CEMU - The Legend of Zelda: Breath of the Wild  ????        ??????
 Call of Duty: Advance Warfare                   DM 4        7.5-10          ????                       RB
@@ -40,11 +40,10 @@ Cryostasis                                      DM 7        7.5-10          ????
 DOOM 2016                                       DM 7        10-15           ????                          
 DarkSiders Warmastred Edition                   DM 5        10-15                                      
 Dead Effect                                     DM 0        7.5-10                                     
-Dead Island                                     ????        ??????
+Dead Island                                     DM 0        5.0-10
 Dead Rising 3                                   DM 6        10-20
 DeadPool Game                                   DM 6        15-20
 Deadly Premonition:The Directors's Cut          DM 5        7.5-10                                     RB
-Double Dragon Neon                              ????        ??????
 Dragon Ball Xenoverse                           DM 5        10-20
 Dragons Dogma: Dark Arisen                      DM 6        7.5-15
 DreamFall Chapters                              DM 0        5.0-10
@@ -52,19 +51,21 @@ Dungeon Nightmares II                           DM 6        25-35               
 Dying Light                                     DM 1        15-25            ????
 Emily Wants To Play                             DM 1        10-20                                      RB
 Everybody's Gone to the Rapture                 DM 5        2.5-7.5
-Fallout 4                                       ????        ??????           ????
+Fallout 4                                       DM 5        2.5-5.0          ????
 FarCry 3                                        DM 0        7.5-15                                     RB
 Firewatch                                       DM 6        5.0-10                        Yes
 GTA V                                           DM 1        10-20                                      RB
 Gone Home                                       DM 0        5.0-10                        Yes
 Hard Reset                                      DM 0        5.0-10                                     RB
-Homefront The Revolution                        Help        ??????
+Homefront The Revolution                        DM 0        7.5-15                                     RB
 Just Cause 3                                    DM 3        7.5-15
 KHOLAT                                          DM 1        15-25                                      RB
 Layers of Fear                                  DM 6        5.0-10                        Yes
 Lifeless Planet                                 DM 6        2.5-7.5                       Yes
 Lords of The Fallen                             DM 6        15-25
 LuciusII                                        DM 6        30-40                         Yes          RB
+Mafia III                                       DM 4        10-15                                      RB
+Mass Effect Andromeda                           DM 4        10-15                                      RB
 Metal Gear Rising                               DM 5        10-20                                      RB
 Metro 2033 Redux                                DM 5        10-20            ????                      RB
 Metro Last Light Redux                          DM 5        10-20            ????                      RB
@@ -81,6 +82,7 @@ Quake 2 XP                                      DM 2        5.0-10           ???
 Quake 4                                         ????        ??????           ????                      RB
 Quantum Break                                   DM 5        7.5-15
 Rage64                                          DM 2        7.5-15           ????                      RB
+Redout                                          DM 3        15-25                                      RB
 Resident Evil 7                                 DM 4        5.0-10                                     RB
 Return To Castle Wolfenstine                    DM 2        2.5-7.5          ????                      RB
 Ryse: Son of Rome                               DM 0        5.0-10                                     
@@ -105,12 +107,13 @@ Unreal Gold with v227                           DM 0        5.0-10            ??
 Warhammer: End Times - Vermintide               DM 5        2.5-4.5                                    
 Watch Dogs 2                                    DM 4        2.5-5.0                                    RB
 Witcher 3                                       DM 1        3.0-7.0                                            
-Wolfenstine: The New Order RB
-Wolfenstine: The Old Blood RB
-You Are Empty
-Zombie Army Trilogy
+Wolfenstine: The New Order                      DM 2        3.75-7.5          ????                     RB
+Wolfenstine: The Old Blood                      DM 2        3.75-7.5          ????                     RB
+You Are Empty                                   Help        ??????
+Zombie Army Trilogy                             DM 8        2.5-7.5                                    
 
 [Special Depth Map Game List]  [Depth Map] [DM Adjustment] [Weapon DM] [Offset] [Depth Flip] [Read Below]
+Double Dragon Neon                DM 10        0.75-0.1                 0.6300
 Lara Croft & Temple of Osiris     DM 10        15.0-25                  0.3754
 Fez                               DM 10        1.5-2.5                  0.6010       Yes
 Magicka 2                         DM 10        1.5-5.0                  0.3730                   RB
@@ -175,6 +178,9 @@ Ingame setting MSAA 2X should be on to enable Depth Map in DX11.
 Rename the dxgi.dll too d3d11.dll for DX11 mode.
 If the game is crashing in fullscreen. Switch over to Window or Borderless window mode.
 
+{HomeFront the Revolution} - Thank you zig11727
+Path to Install E:\Steam\SteamApps\common\Homefront_The_Revolution\Bin64
+
 {Hard Reset}
 Must Enable FSAA for depth buffer access.
 
@@ -185,9 +191,15 @@ In setting scaling 100%
 {LuciusII}
 Set Globla Settings to Medium. Turn off FXAA Every thing else can be maxed out.
 
+{Mafia III} - Thank you zig11727
+Path to install \Steam\SteamApps\common\Mafia III
+
 {Magicka 2} 
 Rename the opengl.dll to dxgi.dll
 Also Use a Controller for game play.
+
+{Mass Effect Andromeda} - Thank you zig11727
+Install path \Program Files\Origin\Mass Effect Andromeda
 
 {Metal Gear Rising}
 Use a Controller for game play.
@@ -234,6 +246,9 @@ If some how you can click on the menu......... Good Luck.
 Start the game with out Reshade Set your game resolution First Turn off AA. 
 Exit, Then use reshade and set your setting you want then launch your game. You can not change your resolution once in game This sill remove the depth map.
 Rage 64 was tested only.
+
+{Redout} - Thank you zig11727
+Path to install \Steam\SteamApps\common\Redout\redout\Binaries
 
 {Resident Evil 7}
 Make sure Render Mode is Normal.
