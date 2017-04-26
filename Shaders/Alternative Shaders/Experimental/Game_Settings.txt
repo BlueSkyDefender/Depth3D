@@ -44,6 +44,7 @@ Dead Island                                     DM 0        5.0-10
 Dead Rising 3                                   DM 6        10-20
 DeadPool Game                                   DM 6        15-20
 Deadly Premonition:The Directors's Cut          DM 5        7.5-10                                     RB
+Dragon Age Inquisition                          DM 0        2.5-5.0
 Dragon Ball Xenoverse                           DM 5        10-20
 Dragons Dogma: Dark Arisen                      DM 6        7.5-15
 DreamFall Chapters                              DM 0        5.0-10
@@ -60,6 +61,7 @@ Hard Reset                                      DM 0        5.0-10              
 Homefront The Revolution                        DM 0        7.5-15                                     RB
 Just Cause 3                                    DM 3        7.5-15
 KHOLAT                                          DM 1        15-25                                      RB
+Kingpin: Life of Crime                          DM 2        5.0-10           ????                      RB 
 Layers of Fear                                  DM 6        5.0-10                        Yes
 Lifeless Planet                                 DM 6        2.5-7.5                       Yes
 Lords of The Fallen                             DM 6        15-25
@@ -187,6 +189,14 @@ Must Enable FSAA for depth buffer access.
 {KHOLAT}
 Install reshade in to SteamLibrary\steamapps\common\KHOLAT\Kholat\Binaries\Win64
 In setting scaling 100%
+
+{Kingpin: Life of Crime}
+Use GLDirect download it from here.
+https://sourceforge.net/projects/gldirect/?source=typ_redirect
+OpenGL to DX9 Wrapper. 
+
+Then install Reshade DX9. You will also need the res mod. 
+http://steamcommunity.com/sharedfiles/filedetails/?id=170642945
 
 {LuciusII}
 Set Globla Settings to Medium. Turn off FXAA Every thing else can be maxed out.
