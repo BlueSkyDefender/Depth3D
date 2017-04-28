@@ -27,8 +27,8 @@ Batman Arkham Origins                           DM 0        7.5-25
 Batman: Arkham City                             DM 0        7.5-25
 BladeStorm Nightmare                            Help        ??????
 BorderLands 2                                   DM 5        7.5-15          ????                       RB
-CEMU - Mariokart 8                              ????        ??????
-CEMU - Super Mario 3D World                     ????        ??????
+CEMU - Mariokart 8                              DM 2        5.0-10                       Yes
+CEMU - Super Mario 3D World                     DM 6        5.0-10                       Yes
 CEMU - The Legend of Zelda: Breath of the Wild  ????        ??????
 Call of Duty: Advance Warfare                   DM 4        7.5-10          ????                       RB
 Call of Duty: Black Ops                         DM 0        7.5-15          ????                       RB
