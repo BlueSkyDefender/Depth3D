@@ -47,7 +47,7 @@ Deadly Premonition:The Directors's Cut          DM 5        7.5-10              
 Dragon Age Inquisition                          DM 0        2.5-5.0
 Dragon Ball Xenoverse                           DM 5        10-20
 Dragons Dogma: Dark Arisen                      DM 6        7.5-15
-DreamFall Chapters                              DM 0        5.0-10
+DreamFall Chapters                              DM 5        2.5-7.5
 Dungeon Nightmares II                           DM 6        25-35                                      RB
 Dying Light                                     DM 1        15-25            ????
 Emily Wants To Play                             DM 1        10-20                                      RB
@@ -58,6 +58,7 @@ Firewatch                                       DM 6        5.0-10              
 GTA V                                           DM 1        10-20                                      RB
 Gone Home                                       DM 0        5.0-10                        Yes
 Hard Reset                                      DM 0        5.0-10                                     RB
+Hitman 2016                                     DM 2        7.5-15                                     RB
 Homefront The Revolution                        DM 0        7.5-15                                     RB
 Just Cause 3                                    DM 3        7.5-15
 KHOLAT                                          DM 1        15-25                                      RB
@@ -81,7 +82,7 @@ Need for Speed Most Wanted                      Help        ??????
 Penumbra: Black Plague                          DM 5        10-20                                      RB
 Phantasmal                                      DM 0        10-20                                      RB
 Quake 2 XP                                      DM 2        5.0-10           ????
-Quake 4                                         ????        ??????           ????                      RB
+Quake 4                                         DM 2        5.0-10           ????                      RB
 Quantum Break                                   DM 5        7.5-15
 Rage64                                          DM 2        7.5-15           ????                      RB
 Redout                                          DM 3        15-25                                      RB
@@ -180,11 +181,14 @@ Ingame setting MSAA 2X should be on to enable Depth Map in DX11.
 Rename the dxgi.dll too d3d11.dll for DX11 mode.
 If the game is crashing in fullscreen. Switch over to Window or Borderless window mode.
 
+{Hard Reset}
+Must Enable FSAA for depth buffer access.
+
 {HomeFront the Revolution} - Thank you zig11727
 Path to Install E:\Steam\SteamApps\common\Homefront_The_Revolution\Bin64
 
-{Hard Reset}
-Must Enable FSAA for depth buffer access.
+{Hitman 2016} - Thank you zig11727
+Install to \Steam\SteamApps\common\Hitman\Retail
 
 {KHOLAT}
 Install reshade in to SteamLibrary\steamapps\common\KHOLAT\Kholat\Binaries\Win64
