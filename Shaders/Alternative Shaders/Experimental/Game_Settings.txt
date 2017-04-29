@@ -89,9 +89,9 @@ Redout                                          DM 3        15-25               
 Resident Evil 7                                 DM 4        5.0-10                                     RB
 Return To Castle Wolfenstine                    DM 2        2.5-7.5          ????                      RB
 Ryse: Son of Rome                               DM 0        5.0-10                                     
-S.T.A.L.K.E.R:CS Complete Mod RB                ????        ??????
-S.T.A.L.K.E.R:CoP Complete Mod RB               ????        ??????
-S.T.A.L.K.E.R:SoC Complete Mod RB               ????        ??????
+S.T.A.L.K.E.R:CS Complete Mod RB                DM 0        2.5-5.0          ????                      RB
+S.T.A.L.K.E.R:CoP Complete Mod RB               DM 0        2.5-5.0          ????                      RB
+S.T.A.L.K.E.R:SoC Complete Mod RB               DM 0        3.75-7.5         ????                      RB
 Shadow warrior(2013)                            DM 5        2.5-5.0                                    RB
 Sleeping Dogs: DE                               DM 6        2.5-5.0
 Soma                                            DM 2        10-20            ????                      
@@ -112,7 +112,6 @@ Watch Dogs 2                                    DM 4        2.5-5.0             
 Witcher 3                                       DM 1        3.0-7.0                                            
 Wolfenstine: The New Order                      DM 2        3.75-7.5          ????                     RB
 Wolfenstine: The Old Blood                      DM 2        3.75-7.5          ????                     RB
-You Are Empty                                   Help        ??????
 Zombie Army Trilogy                             DM 8        2.5-7.5                                    
 
 [Special Depth Map Game List]  [Depth Map] [DM Adjustment] [Weapon DM] [Offset] [Depth Flip] [Read Below]
@@ -296,24 +295,6 @@ or just set your res to 800x600 and set your res in nGlide to your native res. I
 Use nglide 1.05 to run this game.
 http://www.zeus-software.com/downloads/nglide
 
-{Skyrim V}
-Antialiasing Must be set too 2 Samples or more in the Options.
-Open your SkyrimPrefs.ini. Usually it should be found under %USERPROFILE%\Documents\My Games\Skyrim
-Edit the indicated sections of the INI like so:
-
-[Terrainmanager]
-fBlockMaximumDistance=500000
-fBlockLevel1Distance=140000
-fBlockLevel0Distance=75000
-fSplitDistanceMult=4.0
-
-[MAIN]
-fSkyCellRefFadeDistance=600000.0000
-
-[Display]
-bFloatPointRenderTarget=0
-bDeferredShadows=0
-
 {Shadow warrior(2013)}
 Depth Buffer only in DX9 so launch it in Shadow Warrior XP and turn on FSAAX2 in game.
 Overlap in Weapon Depth Map. May be worth it.
@@ -330,17 +311,25 @@ First Start the Game with out modding and set the settings.
 Please install the Complete Mods since I did all my testing with this mod.
 Most of the games have problems running in Windows 10 and Long Load times. Run in Compatilbility Mode Windows XP (Service Pack 3) and DPI scaling.
 
-In Windows 10 Anniversary Delete the files in the "prefecth," folder. SteamLibrary\steamapps\common\Stalker Call of Pripyat\gamedata\configs\prefetch This folder should stay empty. It normaly contains prefetch.ltx and or prefetch_single.ltx in the folder. You should not need Compatilbility Mode.
+In Windows 10 Anniversary Delete the files in the "prefecth," folder. SteamLibrary\steamapps\common\Stalker Call of Pripyat\gamedata\configs\prefetch This folder should stay empty. 
+It normaly contains prefetch.ltx and or prefetch_single.ltx in the folder. 
+You should not need Compatilbility Mode.
+
+Now in Windows 10 Creators update you want to disable Compatilbility Mode.
 
 Clear Sky;
 ..\S.T.A.L.K.E.R. Clear Sky\bin\xrEngine.exe 
 Run in Compatilbility Mode Windows 7 and DPI scaling. First Start the Game with out modding and set the settings. First load should take a long time.
 After that it should not take too long any more.
 
+Now in Windows 10 Creators update you want to disable Compatilbility Mode.
+
 Shadow of Chernobyl; - use reshade 3.0.2
 ..\S.T.A.L.K.E.R. Shadow of Chernobyl\bin\XR_3DA.exe 
 Run in Compatilbility Mode Windows 7 and DPI scaling. First Start the Game with out modding and set the settings.
 Has a depth map that fluctuates for some reason.
+
+Now in Windows 10 Creators update you want to disable Compatilbility Mode and you still need to use Reshade 3.0.2.
 
 {The Evil With In}
 Game too big for screen DPI scaling. 
@@ -399,6 +388,10 @@ Ex.
 		"high" : 0,
 		"ultra" : 0
 	},
+	
+{You Are Empty}
+Read Here you will need patch 1.2 and 1snd.
+http://pcgamingwiki.com/wiki/You_Are_Empty
 
 Problem Games
 _________________________________________________________________________________________________________________________________________
