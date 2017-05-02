@@ -106,26 +106,24 @@ uniform int Weapon_Depth_Map <
 	ui_tooltip = "Pick your Depth Map.";
 > = 0;
 
-uniform float4 Weapon_Adjust <
+uniform float3 Weapon_Adjust <
 	ui_type = "drag";
-	ui_min = -2.5; ui_max = 2.5;
+	ui_min = -10.0; ui_max = 10.0;
 	ui_label = "Weapon Adjust Depth Map";
 	ui_tooltip = "Adjust weapon depth map. Default is (Y 0, X 0.010, Z 1.001)";
-> = float4(1.0,0.010,1.001,1.0);
+> = float3(0.010,1.00,1.00);
 
-uniform float Weapon_Correction <
+uniform float Weapon_Cutoff <
 	ui_type = "drag";
 	ui_min = -1; ui_max = 1;
-	ui_label = "Weapon Correction";
+	ui_label = "Weapon Cutoff Point";
 	ui_tooltip = "For adjusting the cutoff of the weapon Depth Map.";
 > = 0.10;
 
-uniform float2 SSW <
-	ui_type = "drag";
-	ui_min = -2; ui_max = 2;
-	ui_label = "Smooth Step Slider";
-	ui_tooltip = "Determines the smoothstep Min and Max. Default is X 0 and Y 1.250";
-> = float2(0,1.250);
+uniform bool Weapon_Auto_Adjust <
+	ui_label = "Weapon Auto Adjust";
+	ui_tooltip = "Turn on to combat weapon Z-Fighting. May not work 100% of the time.";
+> = false;
 
 uniform bool Weapon_Depth_Map_Invert <
 	ui_label = "Invert Weapon Depth Map";
@@ -261,9 +259,53 @@ sampler SamplerSSAO
 		Texture = texSSAO;
 	};
 
+texture texAve  {Width = 256/2; Height = 256/2; Format = RGBA8; MipLevels = 2;};//Sample at 256x256/2 and a mip bias of 8 should be 1x1 
+																				//if there is a better way of doing this please tell
+sampler SamplerAve																//256 / 2^8 = 1
+	{
+		Texture = texAve;
+		MipLODBias = 8.0f;
+		MinFilter = LINEAR;
+		MagFilter = LINEAR;
+		MipFilter = LINEAR;
+	};
+		
+uniform float frametime < source = "frametime"; >;
+/////////////////////////////////////////////////////////////////////////////////Adapted Luminance/////////////////////////////////////////////////////////////////////////////////
+float AL()
+{
+float adaptScaleFactor = 1;
+const float TauCone = 0.01;
+const float TauRod = 0.04;
+
+    // get Luminance adapted luminance value from 1x1 Texture Mip Bias of 8
+	float4 Luminance = tex2Dlod(SamplerAve,float4(0.5,0.5,0,0));//Average
+    //float4 Center = tex2D(SamplerAve,float2(0.5,0.5));//Center
+    //float4 Sum = (Luminance + Center)/2;
+	float AveOld = clamp(0.375, 0.750, max(max(Luminance.r, Luminance.g), Luminance.b));
+	
+    //determin if rods or cones are active
+    //Perceptual Effects in Real-time Tone Mapping: Equ(7)    
+    float sigma = clamp(0.0,1.0,0.4/(0.04));
+
+    //interpolate tau from taurod and taucone depending on lum
+    //Perceptual Effects in Real-time Tone Mapping: Equ(12)
+    float Tau = lerp(TauCone,TauRod,sigma) / adaptScaleFactor;
+
+    //calculate adaption
+    //Perceptual Effects in Real-time Tone Mapping: Equ(5)
+    float lum  = AveOld + (AveOld) * (1.0 - exp(-(frametime)/Tau));
+    
+    return saturate(lum);
+}
+
+void Average_Luminance(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 color : SV_Target0 )
+{
+	color = tex2D(SamplerDM,texcoord);
+}
 /////////////////////////////////////////////////////////////////////////////////Depth Map Information/////////////////////////////////////////////////////////////////////////////////
 
-void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 Color : SV_Target0 )
+void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 Color : SV_Target0)
 {
 	 float4 color;
 
@@ -374,23 +416,26 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 		float Adj;
 		if (Custom_Depth_Map == 1)
 		{
-		float cWF = Weapon_Adjust.y;
-		float cWN = Weapon_Adjust.z/1000;
-		float cWP = Weapon_Adjust.w;
+		float cWF = Weapon_Adjust.x;
+		float cWN = Weapon_Adjust.y/1000;
+		float cWP = Weapon_Adjust.z;
 		WDone = (cWN * WDM) / ((cWP*WDM)-(cWF));
 		}
 		
-		WDone = smoothstep(SSW.x,SSW.y,WDone);
+		if(Weapon_Auto_Adjust == 1)
+		WDone = WDone*AL();
+		
+		WDone = smoothstep(0.0,1.250,WDone);
 		
 		if (Weapon_Depth_Map_Invert)
 			WDone = 1 - WDone;	
 			
-		Adj = Weapon_Adjust.x;//0
+		Adj = 1.0;//Replaced with Weapon_Cutoff Still used as a base.
 			
 		float NearDepth = step(WDM.r,Adj);
 		float4 D;
 		
-		float Correction = step(MDepth.r,Weapon_Correction);
+		float Cutoff = step(MDepth.r,Weapon_Cutoff);
 		float4 DM;
 			
 		if (Custom_Depth_Map <= 0)
@@ -400,14 +445,14 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 		else
 		{
 		D = lerp(depthM,WDone,NearDepth);
-		DM = lerp(MDepth,D,Correction);
-		}		
+		DM = lerp(MDepth,D,Cutoff);
+		}
+			
 		//Weapon Depth Map end//
     
 	color.rgb = saturate(DM.rrr); //clamped
 	
 	Color = color;	
-
 }
 
 /////////////////////////////////////////////////////AO/////////////////////////////////////////////////////////////
@@ -516,7 +561,7 @@ void AO_in(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out
 	color = GetAO(texcoord);
 }
 
-void  DisOcclusion(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 color : SV_Target)
+void  DisOcclusion(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 color : SV_Target0, out float4 Ave : SV_Target1)
 {
 //bilateral blur\/
 float4 Done;
@@ -572,6 +617,7 @@ float DP =  Divergence;
 	}		                          
 
 	color = lerp(DM,Done,P);
+	Ave = DM;
 }
 
 ////////////////////////////////////////////////Left/Right Eye////////////////////////////////////////////////////////
@@ -825,7 +871,7 @@ void PS_renderLR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD
 		else
 	{
 			float4 DMV = texcoord.x < 0.5 ? GetAO(float2(texcoord.x*2 , texcoord.y*2)) : tex2D(SamplerDM,float2(texcoord.x*2-1 , texcoord.y*2));
-			color = texcoord.y < 0.5 ? DMV : tex2D(SamplerDone,float2(texcoord.x , texcoord.y*2-1));
+			color = texcoord.y < 0.5 ? DMV : tex2D(SamplerDone,float2(texcoord.x,texcoord.y*2-1));
 	}	
 }
 
@@ -865,5 +911,11 @@ technique SuperDepth3D
 		{
 			VertexShader = PostProcessVS;
 			PixelShader = PS_renderLR;
+		}
+			pass Luminance
+		{
+			VertexShader = PostProcessVS;
+			PixelShader = Average_Luminance;
+			RenderTarget = texAve;
 		}
 }
