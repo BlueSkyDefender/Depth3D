@@ -238,27 +238,27 @@ sampler SamplerDM
 		Texture = texDM;
 	};
 	
-texture texDone  { Width = BUFFER_WIDTH/Depth_Map_Division; Height = BUFFER_HEIGHT/Depth_Map_Division; Format = RGBA32F;}; 
+texture texDis  { Width = BUFFER_WIDTH/Depth_Map_Division; Height = BUFFER_HEIGHT/Depth_Map_Division; Format = RGBA32F;}; 
 
-sampler SamplerDone
+sampler SamplerDis
 	{
-		Texture = texDone;
+		Texture = texDis;
 	};
 	
-texture texSSAO  { Width = BUFFER_WIDTH/2; Height = BUFFER_HEIGHT/2; Format = RGBA32F;}; 
+texture texAO  { Width = BUFFER_WIDTH/2; Height = BUFFER_HEIGHT/2; Format = RGBA32F;}; 
 
-sampler SamplerSSAO
+sampler SamplerAO
 	{
-		Texture = texSSAO;
+		Texture = texAO;
 	};
 
 uniform float frametime < source = "frametime"; >;
 /////////////////////////////////////////////////////////////////////////////////Adapted Luminance/////////////////////////////////////////////////////////////////////////////////
-texture texAve  {Width = 256/2; Height = 256/2; Format = RGBA8; MipLevels = 2;};//Sample at 256x256/2 and a mip bias of 8 should be 1x1 
+texture texLum  {Width = 256/2; Height = 256/2; Format = RGBA8; MipLevels = 2;};//Sample at 256x256/2 and a mip bias of 8 should be 1x1 
 																				//if there is a better way of doing this please tell
-sampler SamplerAve																//256 / 2^8 = 1
+sampler SamplerLum																//256 / 2^8 = 1
 	{
-		Texture = texAve;
+		Texture = texLum;
 		MipLODBias = 8.0f;
 		MinFilter = LINEAR;
 		MagFilter = LINEAR;
@@ -270,7 +270,7 @@ float AL()
 float AdaptScale = 1;
     
     //Luminance adapted luminance value from 1x1 Texture Mip Bias of 8
-	float4 Luminance = tex2Dlod(SamplerAve,float4(0.5,0.5,0,0));//Average
+	float4 Luminance = tex2Dlod(SamplerLum,float4(0.5,0.5,0,0));//Average
 	float Ave = clamp(0.375, 0.750, max(max(Luminance.r, Luminance.g), Luminance.b));
     
     //Frametime Perceptual Effects
@@ -281,10 +281,6 @@ float AdaptScale = 1;
     return saturate(lum);
 }
 
-void Average_Luminance(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 color : SV_Target0 )
-{
-	color = tex2D(SamplerDM,texcoord);
-}
 /////////////////////////////////////////////////////////////////////////////////Depth Map Information/////////////////////////////////////////////////////////////////////////////////
 
 void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 Color : SV_Target0)
@@ -422,11 +418,13 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 		cWP = 0.875;
 		}
 		
+		//Game: Call of Duty: Black Ops 
+		//Weapon Depth Map Two
 		if (Weapon_Depth_Map == 4)
 		{
-		cWF = Weapon_Adjust.x;
-		cWN = Weapon_Adjust.y;
-		cWP = Weapon_Adjust.z;
+		cWF = 0.853;
+		cWN = 1.500;
+		cWP = 1.0003;
 		}
 		
 		//Game: Call of Duty: Games 
@@ -435,7 +433,7 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 		{
 		cWF = 0.390;
 		cWN = 5;
-		cWP = 1.001;
+		cWP = 1.002;
 		}
 		
 		if (Weapon_Depth_Map == 6)
@@ -593,7 +591,7 @@ void AO_in(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out
 	color = GetAO(texcoord);
 }
 
-void  DisOcclusion(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 color : SV_Target0, out float4 Ave : SV_Target1)
+void  Disocclusion(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 color : SV_Target0, out float4 Ave : SV_Target1)
 {
 //bilateral blur\/
 float4 Done;
@@ -602,14 +600,14 @@ float P = Power/10;
 
 float blursize = 2.0*pix.x;
 
-sum += tex2D(SamplerSSAO, float2(texcoord.x - 4.0*blursize, texcoord.y)) * 0.05;
-sum += tex2D(SamplerSSAO, float2(texcoord.x, texcoord.y - 3.0*blursize)) * 0.09;
-sum += tex2D(SamplerSSAO, float2(texcoord.x - 2.0*blursize, texcoord.y)) * 0.12;
-sum += tex2D(SamplerSSAO, float2(texcoord.x, texcoord.y - blursize)) * 0.15;
-sum += tex2D(SamplerSSAO, float2(texcoord.x + blursize, texcoord.y)) * 0.15;
-sum += tex2D(SamplerSSAO, float2(texcoord.x, texcoord.y + 2.0*blursize)) * 0.12;
-sum += tex2D(SamplerSSAO, float2(texcoord.x + 3.0*blursize, texcoord.y)) * 0.09;
-sum += tex2D(SamplerSSAO, float2(texcoord.x, texcoord.y + 4.0*blursize)) * 0.05;
+sum += tex2D(SamplerAO, float2(texcoord.x - 4.0*blursize, texcoord.y)) * 0.05;
+sum += tex2D(SamplerAO, float2(texcoord.x, texcoord.y - 3.0*blursize)) * 0.09;
+sum += tex2D(SamplerAO, float2(texcoord.x - 2.0*blursize, texcoord.y)) * 0.12;
+sum += tex2D(SamplerAO, float2(texcoord.x, texcoord.y - blursize)) * 0.15;
+sum += tex2D(SamplerAO, float2(texcoord.x + blursize, texcoord.y)) * 0.15;
+sum += tex2D(SamplerAO, float2(texcoord.x, texcoord.y + 2.0*blursize)) * 0.12;
+sum += tex2D(SamplerAO, float2(texcoord.x + 3.0*blursize, texcoord.y)) * 0.09;
+sum += tex2D(SamplerAO, float2(texcoord.x, texcoord.y + 4.0*blursize)) * 0.05;
 
 Done = 1-sum;
 //bilateral blur/\
@@ -652,6 +650,10 @@ float DP =  Divergence;
 	Ave = DM;
 }
 
+void Average_Luminance(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 color : SV_Target0 )
+{
+	color = tex2D(SamplerDM,texcoord);
+}
 ////////////////////////////////////////////////Left/Right Eye////////////////////////////////////////////////////////
 
 void PS_renderLR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 color : SV_Target0 )
@@ -678,18 +680,18 @@ void PS_renderLR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD
 		
 		if(Stereoscopic_Mode == 0)
 		{	
-			DepthL =  min(DepthL,tex2D(SamplerDone,float2((texcoord.x*2 + P)+uv.x, texcoord.y)).r);
-			DepthR =  min(DepthR,tex2D(SamplerDone,float2((texcoord.x*2-1 - P)-uv.x, texcoord.y)).r);
+			DepthL =  min(DepthL,tex2D(SamplerDis,float2((texcoord.x*2 + P)+uv.x, texcoord.y)).r);
+			DepthR =  min(DepthR,tex2D(SamplerDis,float2((texcoord.x*2-1 - P)-uv.x, texcoord.y)).r);
 		}
 		else if(Stereoscopic_Mode == 1)
 		{
-			DepthL =  min(DepthL,tex2D(SamplerDone,float2((texcoord.x + P)+uv.x, texcoord.y*2)).r);
-			DepthR =  min(DepthR,tex2D(SamplerDone,float2((texcoord.x - P)-uv.x, texcoord.y*2-1)).r);
+			DepthL =  min(DepthL,tex2D(SamplerDis,float2((texcoord.x + P)+uv.x, texcoord.y*2)).r);
+			DepthR =  min(DepthR,tex2D(SamplerDis,float2((texcoord.x - P)-uv.x, texcoord.y*2-1)).r);
 		}
 		else
 		{
-			DepthL =  min(DepthL,tex2D(SamplerDone,float2((texcoord.x + P)+uv.x, texcoord.y)).r);
-			DepthR =  min(DepthR,tex2D(SamplerDone,float2((texcoord.x - P)-uv.x, texcoord.y)).r);
+			DepthL =  min(DepthL,tex2D(SamplerDis,float2((texcoord.x + P)+uv.x, texcoord.y)).r);
+			DepthR =  min(DepthR,tex2D(SamplerDis,float2((texcoord.x - P)-uv.x, texcoord.y)).r);
 		}
 	}
 	
@@ -903,7 +905,7 @@ void PS_renderLR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD
 		else
 	{
 			float4 DMV = texcoord.x < 0.5 ? GetAO(float2(texcoord.x*2 , texcoord.y*2)) : tex2D(SamplerDM,float2(texcoord.x*2-1 , texcoord.y*2));
-			color = texcoord.y < 0.5 ? DMV : tex2D(SamplerDone,float2(texcoord.x,texcoord.y*2-1));
+			color = texcoord.y < 0.5 ? DMV : tex2D(SamplerDis,float2(texcoord.x,texcoord.y*2-1));
 	}	
 }
 
@@ -927,23 +929,23 @@ technique SuperDepth3D
 			PixelShader = DepthMap;
 			RenderTarget = texDM;
 		}
+			pass AO
+		{
+			VertexShader = PostProcessVS;
+			PixelShader = AO_in;
+			RenderTarget = texAO;
+		}	
+			pass Disocclusion
+		{
+			VertexShader = PostProcessVS;
+			PixelShader = Disocclusion;
+			RenderTarget = texDis;
+		}
 			pass Luminance
 		{
 			VertexShader = PostProcessVS;
 			PixelShader = Average_Luminance;
-			RenderTarget = texAve;
-		}
-			pass SSAOcal
-		{
-			VertexShader = PostProcessVS;
-			PixelShader = AO_in;
-			RenderTarget = texSSAO;
-		}	
-			pass DisOcclusion
-		{
-			VertexShader = PostProcessVS;
-			PixelShader = DisOcclusion;
-			RenderTarget = texDone;
+			RenderTarget = texLum;
 		}
 			pass Stereo
 		{
