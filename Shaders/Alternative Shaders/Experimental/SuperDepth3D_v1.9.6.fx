@@ -92,18 +92,11 @@ uniform bool Depth_Map_Flip <
 	ui_tooltip = "Flip the depth map if it is upside down.";
 > = false;
 
-uniform int Custom_Depth_Map <
-	ui_type = "combo";
-	ui_items = "Weapon Depth Map Off\0Weapon Depth Map On\0";
-	ui_label = "Custom Weapon Depth Map";
-	ui_tooltip = "Custom weapon depth map for games. Read the ReadMeDepth3d.txt, for setting.";
-> = 0;
-
 uniform int Weapon_Depth_Map <
 	ui_type = "combo";
-	ui_items = "Depth Map One\0Depth Map Two\0Depth Map Three\0Depth Map Four\0Depth Map Five\0";
-	ui_label = "Custom Depth Map";
-	ui_tooltip = "Pick your Depth Map.";
+	ui_items = "Weapon DM Off\0Custom WDM One\0Custom WDM Two\0Weapon DM 1\0Weapon DM 2\0Weapon DM 3\0";
+	ui_label = "Weapon Depth Map";
+	ui_tooltip = "Pick your weapon depth map for games.";
 > = 0;
 
 uniform float3 Weapon_Adjust <
@@ -259,6 +252,8 @@ sampler SamplerSSAO
 		Texture = texSSAO;
 	};
 
+uniform float frametime < source = "frametime"; >;
+/////////////////////////////////////////////////////////////////////////////////Adapted Luminance/////////////////////////////////////////////////////////////////////////////////
 texture texAve  {Width = 256/2; Height = 256/2; Format = RGBA8; MipLevels = 2;};//Sample at 256x256/2 and a mip bias of 8 should be 1x1 
 																				//if there is a better way of doing this please tell
 sampler SamplerAve																//256 / 2^8 = 1
@@ -269,32 +264,19 @@ sampler SamplerAve																//256 / 2^8 = 1
 		MagFilter = LINEAR;
 		MipFilter = LINEAR;
 	};
-		
-uniform float frametime < source = "frametime"; >;
-/////////////////////////////////////////////////////////////////////////////////Adapted Luminance/////////////////////////////////////////////////////////////////////////////////
+
 float AL()
 {
-float adaptScaleFactor = 1;
-const float TauCone = 0.01;
-const float TauRod = 0.04;
-
-    // get Luminance adapted luminance value from 1x1 Texture Mip Bias of 8
+float AdaptScale = 1;
+    
+    //Luminance adapted luminance value from 1x1 Texture Mip Bias of 8
 	float4 Luminance = tex2Dlod(SamplerAve,float4(0.5,0.5,0,0));//Average
-    //float4 Center = tex2D(SamplerAve,float2(0.5,0.5));//Center
-    //float4 Sum = (Luminance + Center)/2;
-	float AveOld = clamp(0.375, 0.750, max(max(Luminance.r, Luminance.g), Luminance.b));
-	
-    //determin if rods or cones are active
-    //Perceptual Effects in Real-time Tone Mapping: Equ(7)    
+	float Ave = clamp(0.375, 0.750, max(max(Luminance.r, Luminance.g), Luminance.b));
+    
+    //Frametime Perceptual Effects
     float sigma = clamp(0.0,1.0,0.4/(0.04));
-
-    //interpolate tau from taurod and taucone depending on lum
-    //Perceptual Effects in Real-time Tone Mapping: Equ(12)
-    float Tau = lerp(TauCone,TauRod,sigma) / adaptScaleFactor;
-
-    //calculate adaption
-    //Perceptual Effects in Real-time Tone Mapping: Equ(5)
-    float lum  = AveOld + (AveOld) * (1.0 - exp(-(frametime)/Tau));
+    float Scale = lerp(0.01,0.05,sigma) / AdaptScale;   
+    float lum  = Ave + (Ave) * (1.0 - exp(-(frametime)/Scale));
     
     return saturate(lum);
 }
@@ -401,24 +383,74 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 		
 		//Weapon Depth Map
 		
-		if(Weapon_Depth_Map == 0)
+		if(Weapon_Depth_Map == 1 || Weapon_Depth_Map == 3 || Weapon_Depth_Map == 5)
 		{
 		float constantF = 1.0;	
 		float constantN = 0.01;
 		WDM = 2.0 * constantN * constantF / (constantF + constantN - (2.0 * WDepth.r - 1.0) * (constantF - constantN));
 		}
-		else
+		if(Weapon_Depth_Map == 2 || Weapon_Depth_Map == 4 || Weapon_Depth_Map == 6)
 		{
 		WDM = pow(abs(WDepth.r - 1.0),10);
  		}
  		
+		//Set Weapon Depth Map settings for the section below.//
+		float cWF;
+		float cWN;
+		float cWP;
+		
+		if (Weapon_Depth_Map == 1)
+		{
+		cWF = Weapon_Adjust.x;
+		cWN = Weapon_Adjust.y;
+		cWP = Weapon_Adjust.z;
+		}
+		
+		if (Weapon_Depth_Map == 2)
+		{
+		cWF = Weapon_Adjust.x;
+		cWN = Weapon_Adjust.y;
+		cWP = Weapon_Adjust.z;
+		}
+		
+		//Game: Borderlands 2 
+		//Weapon Depth Map One
+		if (Weapon_Depth_Map == 3)
+		{
+		cWF = 0.010;
+		cWN = -7.500;
+		cWP = 0.875;
+		}
+		
+		if (Weapon_Depth_Map == 4)
+		{
+		cWF = Weapon_Adjust.x;
+		cWN = Weapon_Adjust.y;
+		cWP = Weapon_Adjust.z;
+		}
+		
+		//Game: Call of Duty Advanced Warfare 
+		//Weapon Depth Map Three
+		if (Weapon_Depth_Map == 5)
+		{
+		cWF = 0.390;
+		cWN = 5;
+		cWP = 1.0;
+		}
+		
+		if (Weapon_Depth_Map == 6)
+		{
+		cWF = Weapon_Adjust.x;
+		cWN = Weapon_Adjust.y;
+		cWP = Weapon_Adjust.z;
+		}
+		//SWDMS Done//
+ 		
 		//Scaled Section z-Buffer
 		float Adj;
-		if (Custom_Depth_Map == 1)
+		if (Weapon_Depth_Map >= 1)
 		{
-		float cWF = Weapon_Adjust.x;
-		float cWN = Weapon_Adjust.y/1000;
-		float cWP = Weapon_Adjust.z;
+		cWN /= 1000;
 		WDone = (cWN * WDM) / ((cWP*WDM)-(cWF));
 		}
 		
@@ -438,7 +470,7 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 		float Cutoff = step(MDepth.r,Weapon_Cutoff);
 		float4 DM;
 			
-		if (Custom_Depth_Map <= 0)
+		if (Weapon_Depth_Map <= 0)
 		{
 		DM = MDepth;
 		}
