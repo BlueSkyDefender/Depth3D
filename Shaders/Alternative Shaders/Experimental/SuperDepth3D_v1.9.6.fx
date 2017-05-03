@@ -429,13 +429,13 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 		cWP = Weapon_Adjust.z;
 		}
 		
-		//Game: Call of Duty Advanced Warfare 
+		//Game: Call of Duty: Games 
 		//Weapon Depth Map Three
 		if (Weapon_Depth_Map == 5)
 		{
 		cWF = 0.390;
 		cWN = 5;
-		cWP = 1.0;
+		cWP = 1.001;
 		}
 		
 		if (Weapon_Depth_Map == 6)
@@ -927,6 +927,12 @@ technique SuperDepth3D
 			PixelShader = DepthMap;
 			RenderTarget = texDM;
 		}
+			pass Luminance
+		{
+			VertexShader = PostProcessVS;
+			PixelShader = Average_Luminance;
+			RenderTarget = texAve;
+		}
 			pass SSAOcal
 		{
 			VertexShader = PostProcessVS;
@@ -943,11 +949,5 @@ technique SuperDepth3D
 		{
 			VertexShader = PostProcessVS;
 			PixelShader = PS_renderLR;
-		}
-			pass Luminance
-		{
-			VertexShader = PostProcessVS;
-			PixelShader = Average_Luminance;
-			RenderTarget = texAve;
 		}
 }
