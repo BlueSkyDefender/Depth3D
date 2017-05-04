@@ -94,7 +94,7 @@ uniform bool Depth_Map_Flip <
 
 uniform int Weapon_Depth_Map <
 	ui_type = "combo";
-	ui_items = "Weapon DM Off\0Custom WDM One\0Custom WDM Two\0Weapon DM 1\0Weapon DM 2\0Weapon DM 3\0";
+	ui_items = "Weapon DM Off\0Custom WDM One\0Custom WDM Two\0Weapon DM 1\0Weapon DM 2\0Weapon DM 3\0Weapon DM 4\0Weapon DM 5\0Weapon DM 6\0";
 	ui_label = "Weapon Depth Map";
 	ui_tooltip = "Pick your weapon depth map for games.";
 > = 0;
@@ -254,7 +254,7 @@ sampler SamplerAO
 
 uniform float frametime < source = "frametime"; >;
 /////////////////////////////////////////////////////////////////////////////////Adapted Luminance/////////////////////////////////////////////////////////////////////////////////
-texture texLum  {Width = 256/2; Height = 256/2; Format = RGBA8; MipLevels = 2;};//Sample at 256x256/2 and a mip bias of 8 should be 1x1 
+texture texLum  {Width = 256/2; Height = 256/2; Format = RGBA8; MipLevels = 8;};//Sample at 256x256/2 and a mip bias of 8 should be 1x1 
 																				//if there is a better way of doing this please tell
 sampler SamplerLum																//256 / 2^8 = 1
 	{
@@ -267,18 +267,15 @@ sampler SamplerLum																//256 / 2^8 = 1
 
 float AL()
 {
-float AdaptScale = 1;
+float AdjustScale = 2;
     
-    //Luminance adapted luminance value from 1x1 Texture Mip Bias of 8
+    //Luminance adapted luminance value from 1x1 Texture Mip lvl of 8
 	float4 Luminance = tex2Dlod(SamplerLum,float4(0.5,0.5,0,0));//Average
-	float Ave = clamp(0.375, 0.750, max(max(Luminance.r, Luminance.g), Luminance.b));
     
-    //Frametime Perceptual Effects
-    float sigma = clamp(0.0,1.0,0.4/(0.04));
-    float Scale = lerp(0.01,0.05,sigma) / AdaptScale;   
-    float lum  = Ave + (Ave) * (1.0 - exp(-(frametime)/Scale));
+    //Frametime Perceptual Effects 
+    float FPE  = (Luminance) * (AdjustScale - exp(-frametime));
     
-    return saturate(lum);
+    return saturate(FPE);
 }
 
 /////////////////////////////////////////////////////////////////////////////////Depth Map Information/////////////////////////////////////////////////////////////////////////////////
@@ -379,13 +376,13 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 		
 		//Weapon Depth Map
 		
-		if(Weapon_Depth_Map == 1 || Weapon_Depth_Map == 3 || Weapon_Depth_Map == 5)
+		if(Weapon_Depth_Map == 1 || Weapon_Depth_Map == 3 || Weapon_Depth_Map == 5 || Weapon_Depth_Map == 7 || Weapon_Depth_Map == 8)
 		{
 		float constantF = 1.0;	
 		float constantN = 0.01;
 		WDM = 2.0 * constantN * constantF / (constantF + constantN - (2.0 * WDepth.r - 1.0) * (constantF - constantN));
 		}
-		if(Weapon_Depth_Map == 2 || Weapon_Depth_Map == 4 || Weapon_Depth_Map == 6)
+		if(Weapon_Depth_Map == 2 || Weapon_Depth_Map == 4 || Weapon_Depth_Map == 6 )
 		{
 		WDM = pow(abs(WDepth.r - 1.0),10);
  		}
@@ -441,6 +438,20 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 		cWF = Weapon_Adjust.x;
 		cWN = Weapon_Adjust.y;
 		cWP = Weapon_Adjust.z;
+		}
+		
+		if (Weapon_Depth_Map == 7)
+		{
+		cWF = 0.015;
+		cWN = -87.500;
+		cWP = 0.750;
+		}
+		
+		if (Weapon_Depth_Map == 8)
+		{
+		cWF = 0.010;
+		cWN = -5.0;
+		cWP = 0.900;
 		}
 		//SWDMS Done//
  		
@@ -906,6 +917,7 @@ void PS_renderLR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD
 	{
 			float4 DMV = texcoord.x < 0.5 ? GetAO(float2(texcoord.x*2 , texcoord.y*2)) : tex2D(SamplerDM,float2(texcoord.x*2-1 , texcoord.y*2));
 			color = texcoord.y < 0.5 ? DMV : tex2D(SamplerDis,float2(texcoord.x,texcoord.y*2-1));
+			//tex2Dlod(SamplerLum,float4(texcoord.x,texcoord.y*2-1,0,0))
 	}	
 }
 
