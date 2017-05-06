@@ -49,7 +49,7 @@ Dragon Ball Xenoverse                           DM 5        10-20
 Dragons Dogma: Dark Arisen                      DM 6        7.5-15
 DreamFall Chapters                              DM 5        2.5-7.5
 Dungeon Nightmares II                           DM 6        25-35                                      RB
-Dying Light                                     DM 1        10-20           WDM 10
+Dying Light                                     DM 1        10-20           WDM A
 Emily Wants To Play                             DM 1        10-20                                      RB
 Everybody's Gone to the Rapture                 DM 5        2.5-7.5
 Fallout 4                                       DM 5        2.5-5.0         WDM 4
@@ -63,7 +63,7 @@ Hitman 2016                                     DM 2        7.5-15              
 Homefront The Revolution                        DM 0        7.5-15                                     RB
 Just Cause 3                                    DM 3        7.5-15
 KHOLAT                                          DM 1        15-25                                      RB
-Kingpin: Life of Crime                          DM 2        5.0-10          WDM 10                     RB 
+Kingpin: Life of Crime                          DM 2        5.0-10          WDM A                      RB 
 Layers of Fear                                  DM 6        5.0-10                        Yes
 Lifeless Planet                                 DM 6        2.5-7.5                       Yes
 Lords of The Fallen                             DM 6        15-25
@@ -77,13 +77,13 @@ Middle-earth: Shadow of Mordor                  DM 4        7.5-15              
 Mirror's Edge Catalyst                          DM 4        5.0-10                                     
 Mordheim: City of the Damned                    DM 6        2.5-7.5                                    
 Naruto Shippuden UNS3 Full Blurst               DM 7        15-25                                      RB
-NecroVision: Lost Company                       DM 0        10-20           ????                      
+NecroVision: Lost Company                       DM 0        10-20           WDM 8                      
 Need For Speed Rivals                           Help        ??????
 Need for Speed Most Wanted                      Help        ??????
 Penumbra: Black Plague                          DM 5        10-20                                      RB
 Phantasmal                                      DM 0        10-20                                      RB
-Quake 2 XP                                      DM 2        5.0-10          ????
-Quake 4                                         DM 2        5.0-10          ????                       RB
+Quake 2 XP                                      DM 2        5.0-10          WDM 9
+Quake 4                                         DM 2        5.0-10          WDM 10                     RB
 Quantum Break                                   DM 5        7.5-15
 Rage64                                          DM 2        7.5-15          ????                       RB
 Redout                                          DM 3        15-25                                      RB
@@ -110,7 +110,7 @@ Turok: Dinosaur Hunter                          DM 2        75-150           Nee
 Unreal Gold with v227                           DM 0        5.0-10           ????                      RB
 Warhammer: End Times - Vermintide               DM 5        2.5-4.5                                    
 Watch Dogs 2                                    DM 4        2.5-5.0                                    RB
-Witcher 3                                       DM 1        3.0-7.0                                            
+Witcher 3                                       DM 1        3.0-7.0                                         
 Wolfenstine: The New Order                      DM 2        3.75-7.5         ????                      RB
 Wolfenstine: The Old Blood                      DM 2        3.75-7.5         ????                      RB
 Zombie Army Trilogy                             DM 8        2.5-7.5                                    
@@ -254,7 +254,10 @@ Open the settings and set your res.
 <Screen Width="3840" Height="2160" FullScreen="true" Vsync="true" />
 
 {Quake 4}
-If some how you can click on the menu......... Good Luck.
+If some how you can click on the menu......... Good Luck. Try Alt-Tab borderless window mode.
+You may also want to put in your setting by hand in your own ini.
+
+Use Reshade 3.0.4 and good luck. BTW it really does work just hard to enter any settings.....
 
 {Rage}
 Start the game with out Reshade Set your game resolution First Turn off AA. 

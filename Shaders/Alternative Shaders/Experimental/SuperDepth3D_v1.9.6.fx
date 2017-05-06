@@ -94,7 +94,7 @@ uniform bool Depth_Map_Flip <
 
 uniform int Weapon_Depth_Map <
 	ui_type = "combo";
-	ui_items = "Weapon DM Off\0Custom WDM One\0Custom WDM Two\0Weapon DM 1\0Weapon DM 2\0Weapon DM 3\0Weapon DM 4\0Weapon DM 5\0Weapon DM 6\0Weapon DM 7\0Weapon DM 8\0Weapon DM 9\0Weapon DM 10\0";
+	ui_items = "Weapon DM Off\0Custom WDM One\0Custom WDM Two\0Weapon DM 1\0Weapon DM 2\0Weapon DM 3\0Weapon DM 4\0Weapon DM 5\0Weapon DM 6\0Weapon DM 7\0Weapon DM 8\0Weapon DM 9\0Weapon DM 10\0Weapon DM 11\0Weapon DM 12\0Weapon DM 13\0Weapon DM 14\0Weapon DM 15\0Weapon DM Alpha\0";
 	ui_label = "Weapon Depth Map";
 	ui_tooltip = "Pick your weapon depth map for games.";
 > = 0;
@@ -385,7 +385,7 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 		
 		//Weapon Depth Map
 		
-		if(Weapon_Depth_Map == 1 || Weapon_Depth_Map == 3 || Weapon_Depth_Map == 5 || Weapon_Depth_Map == 6 || Weapon_Depth_Map == 7 || Weapon_Depth_Map == 8 || Weapon_Depth_Map == 9 )
+		if(Weapon_Depth_Map == 1 || Weapon_Depth_Map == 3 || Weapon_Depth_Map == 5 || Weapon_Depth_Map == 6 || Weapon_Depth_Map == 7 || Weapon_Depth_Map == 8 || Weapon_Depth_Map == 9 || Weapon_Depth_Map == 10 || Weapon_Depth_Map == 11 || Weapon_Depth_Map == 12 )
 		{
 		float constantF = 1.0;	
 		float constantN = 0.01;
@@ -478,18 +478,36 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 		cWP = 0.956;
 		}
 		
-		//Game: 
+		//Game: NecroVision
 		//Weapon Depth Map Eight
 		if (Weapon_Depth_Map == 10)
 		{
-		cWF = Weapon_Adjust.x;
-		cWN = Weapon_Adjust.y;
-		cWP = Weapon_Adjust.z;
+		cWF = 0.010;
+		cWN = -20.0;
+		cWP = 0.4825;
+		}
+		
+		//Game: Quake XP
+		//Weapon Depth Map Nine
+		if (Weapon_Depth_Map == 11)
+		{
+		cWF = 0.010;
+		cWN = -25.0;
+		cWP = 0.695;
+		}
+		
+		//Game: Quake 4
+		//Weapon Depth Map Ten
+		if (Weapon_Depth_Map == 12)
+		{
+		cWF = 0.010;
+		cWN = -20.0;
+		cWP = 0.500;
 		}
 		
 		//Game: 
-		//Weapon Depth Map Nine
-		if (Weapon_Depth_Map == 11)
+		//Weapon Depth Map Eleven
+		if (Weapon_Depth_Map == 13)
 		{
 		cWF = Weapon_Adjust.x;
 		cWN = Weapon_Adjust.y;
@@ -497,8 +515,44 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 		}
 		
 		//Game: 
-		//Weapon Depth Map Ten
-		if (Weapon_Depth_Map == 12)
+		//Weapon Depth Map Twelve
+		if (Weapon_Depth_Map == 14)
+		{
+		cWF = Weapon_Adjust.x;
+		cWN = Weapon_Adjust.y;
+		cWP = Weapon_Adjust.z;
+		}
+
+		//Game: 
+		//Weapon Depth Map Thirteen
+		if (Weapon_Depth_Map == 15)
+		{
+		cWF = Weapon_Adjust.x;
+		cWN = Weapon_Adjust.y;
+		cWP = Weapon_Adjust.z;
+		}
+
+		//Game: 
+		//Weapon Depth Map Fourteen
+		if (Weapon_Depth_Map == 16)
+		{
+		cWF = Weapon_Adjust.x;
+		cWN = Weapon_Adjust.y;
+		cWP = Weapon_Adjust.z;
+		}
+		
+		//Game: 
+		//Weapon Depth Map Fifteen
+		if (Weapon_Depth_Map == 17)
+		{
+		cWF = Weapon_Adjust.x;
+		cWN = Weapon_Adjust.y;
+		cWP = Weapon_Adjust.z;
+		}
+		
+		//Game: Specail DM
+		//Weapon Depth Map Lock
+		if (Weapon_Depth_Map == 18)
 		{
 		cWF = 0;
 		cWN = 0;
@@ -539,7 +593,7 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 		{
 		DM = zBuffer;
 		}
-		else if (Weapon_Depth_Map == 12)
+		else if (Weapon_Depth_Map == 18)
 		{
 		DM = lerp(zBuffer,zBufferPass,Cutoff);
 		}
