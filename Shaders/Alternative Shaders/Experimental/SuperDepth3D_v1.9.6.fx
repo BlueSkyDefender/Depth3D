@@ -385,7 +385,7 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 		
 		//Weapon Depth Map
 		
-		if(Weapon_Depth_Map == 1 || Weapon_Depth_Map == 3 || Weapon_Depth_Map == 5 || Weapon_Depth_Map == 6 || Weapon_Depth_Map == 7 || Weapon_Depth_Map == 8 || Weapon_Depth_Map == 9 || Weapon_Depth_Map == 10 || Weapon_Depth_Map == 11 || Weapon_Depth_Map == 12 )
+		if(Weapon_Depth_Map == 1 || Weapon_Depth_Map == 3 || Weapon_Depth_Map == 5 || Weapon_Depth_Map == 6 || Weapon_Depth_Map == 7 || Weapon_Depth_Map == 8 || Weapon_Depth_Map == 9 || Weapon_Depth_Map == 10 || Weapon_Depth_Map == 11 || Weapon_Depth_Map == 12 || Weapon_Depth_Map == 13 )
 		{
 		float constantF = 1.0;	
 		float constantN = 0.01;
@@ -505,13 +505,13 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 		cWP = 0.500;
 		}
 		
-		//Game: 
+		//Game: Rage
 		//Weapon Depth Map Eleven
 		if (Weapon_Depth_Map == 13)
 		{
-		cWF = Weapon_Adjust.x;
-		cWN = Weapon_Adjust.y;
-		cWP = Weapon_Adjust.z;
+		cWF = 0.010;
+		cWN = -3.75;
+		cWP = 0.456;
 		}
 		
 		//Game: 

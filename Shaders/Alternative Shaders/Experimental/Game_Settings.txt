@@ -85,7 +85,7 @@ Phantasmal                                      DM 0        10-20               
 Quake 2 XP                                      DM 2        5.0-10          WDM 9
 Quake 4                                         DM 2        5.0-10          WDM 10                     RB
 Quantum Break                                   DM 5        7.5-15
-Rage64                                          DM 2        7.5-15          ????                       RB
+Rage64                                          DM 2        7.5-15          WDM 11                     RB
 Redout                                          DM 3        15-25                                      RB
 Resident Evil 7                                 DM 4        5.0-10                                     RB
 Return To Castle Wolfenstine                    DM 2        2.5-7.5         ????                       RB
