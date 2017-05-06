@@ -385,7 +385,7 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 		
 		//Weapon Depth Map
 		
-		if(Weapon_Depth_Map == 1 || Weapon_Depth_Map == 3 || Weapon_Depth_Map == 5 || Weapon_Depth_Map == 6 || Weapon_Depth_Map == 7 || Weapon_Depth_Map == 8)
+		if(Weapon_Depth_Map == 1 || Weapon_Depth_Map == 3 || Weapon_Depth_Map == 5 || Weapon_Depth_Map == 6 || Weapon_Depth_Map == 7 || Weapon_Depth_Map == 8 || Weapon_Depth_Map == 9 )
 		{
 		float constantF = 1.0;	
 		float constantN = 0.01;
@@ -469,13 +469,13 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 		cWP = 0.900;
 		}
 		
-		//Game: 
+		//Game: Metro Games
 		//Weapon Depth Map Seven
 		if (Weapon_Depth_Map == 9)
 		{
-		cWF = Weapon_Adjust.x;
-		cWN = Weapon_Adjust.y;
-		cWP = Weapon_Adjust.z;
+		cWF = 0.010;
+		cWN = -5.0;
+		cWP = 0.956;
 		}
 		
 		//Game: 
