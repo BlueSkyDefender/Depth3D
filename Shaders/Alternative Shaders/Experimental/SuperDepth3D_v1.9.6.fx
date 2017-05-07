@@ -92,9 +92,9 @@ uniform bool Depth_Map_Flip <
 	ui_tooltip = "Flip the depth map if it is upside down.";
 > = false;
 
-uniform int Weapon_Depth_Map <
+uniform int WDM <
 	ui_type = "combo";
-	ui_items = "Weapon DM Off\0Custom WDM One\0Custom WDM Two\0Weapon DM 1\0Weapon DM 2\0Weapon DM 3\0Weapon DM 4\0Weapon DM 5\0Weapon DM 6\0Weapon DM 7\0Weapon DM 8\0Weapon DM 9\0Weapon DM 10\0Weapon DM 11\0Weapon DM 12\0Weapon DM 13\0Weapon DM 14\0Weapon DM 15\0Weapon DM Alpha\0";
+	ui_items = "Weapon DM Off\0Custom WDM One\0Custom WDM Two\0Weapon DM 0\0Weapon DM 1\0Weapon DM 2\0Weapon DM 3\0Weapon DM 4\0Weapon DM 5\0Weapon DM 6\0Weapon DM 7\0Weapon DM 8\0Weapon DM 9\0Weapon DM 10\0Weapon DM 11\0Weapon DM 12\0Weapon DM 13\0Weapon DM 14\0Weapon DM 15\0Weapon DM Alpha\0";
 	ui_label = "Weapon Depth Map";
 	ui_tooltip = "Pick your weapon depth map for games.";
 > = 0;
@@ -385,13 +385,13 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 		
 		//Weapon Depth Map
 		
-		if(Weapon_Depth_Map == 1 || Weapon_Depth_Map == 3 || Weapon_Depth_Map == 5 || Weapon_Depth_Map == 6 || Weapon_Depth_Map == 7 || Weapon_Depth_Map == 8 || Weapon_Depth_Map == 9 || Weapon_Depth_Map == 10 || Weapon_Depth_Map == 11 || Weapon_Depth_Map == 12 || Weapon_Depth_Map == 13 )
+		if(WDM == 1 || WDM == 3 || WDM == 4 || WDM == 6 || WDM == 7 || WDM == 8 || WDM == 9 || WDM == 10 || WDM == 11 || WDM == 12 || WDM == 13 || WDM == 14 || WDM == 16 || WDM == 17 || WDM == 18 )
 		{
 		float constantF = 1.0;	
 		float constantN = 0.01;
 		zBufferWH = 2.0 * constantN * constantF / (constantF + constantN - (2.0 * zBufferWH.r - 1.0) * (constantF - constantN));
 		}
-		if(Weapon_Depth_Map == 2 || Weapon_Depth_Map == 4 )
+		if(WDM == 2 || WDM == 5 || WDM == 15 )
 		{
 		zBufferWH = pow(abs(zBufferWH.r - 1.0),10);
  		}
@@ -401,14 +401,23 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 		float cWN;
 		float cWP;
 		
-		if (Weapon_Depth_Map == 1)
+		if (WDM == 1)
 		{
 		cWF = Weapon_Adjust.x;
 		cWN = Weapon_Adjust.y;
 		cWP = Weapon_Adjust.z;
 		}
 		
-		if (Weapon_Depth_Map == 2)
+		if (WDM == 2)
+		{
+		cWF = Weapon_Adjust.x;
+		cWN = Weapon_Adjust.y;
+		cWP = Weapon_Adjust.z;
+		}
+		
+		//Game:
+		//Weapon Depth Map Zero
+		if (WDM == 3)
 		{
 		cWF = Weapon_Adjust.x;
 		cWN = Weapon_Adjust.y;
@@ -417,7 +426,7 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 		
 		//Game: Borderlands 2 
 		//Weapon Depth Map One
-		if (Weapon_Depth_Map == 3)
+		if (WDM == 4)
 		{
 		cWF = 0.010;
 		cWN = -7.500;
@@ -426,7 +435,7 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 		
 		//Game: Call of Duty: Black Ops 
 		//Weapon Depth Map Two
-		if (Weapon_Depth_Map == 4)
+		if (WDM == 5)
 		{
 		cWF = 0.853;
 		cWN = 1.500;
@@ -435,7 +444,7 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 		
 		//Game: Call of Duty: Games 
 		//Weapon Depth Map Three
-		if (Weapon_Depth_Map == 5)
+		if (WDM == 6)
 		{
 		cWF = 0.390;
 		cWN = 5;
@@ -444,7 +453,7 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 		
 		//Game: Fallout 4
 		//Weapon Depth Map Four
-		if (Weapon_Depth_Map == 6)
+		if (WDM == 7)
 		{
 		cWF = 0.010;
 		cWN = -0.500;
@@ -453,7 +462,7 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 		
 		//Game: Cryostasis
 		//Weapon Depth Map Five		
-		if (Weapon_Depth_Map == 7)
+		if (WDM == 8)
 		{
 		cWF = 0.015;
 		cWN = -87.500;
@@ -462,7 +471,7 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 		
 		//Game: Doom 2016
 		//Weapon Depth Map Six
-		if (Weapon_Depth_Map == 8)
+		if (WDM == 9)
 		{
 		cWF = 0.010;
 		cWN = -5.0;
@@ -471,7 +480,7 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 		
 		//Game: Metro Games
 		//Weapon Depth Map Seven
-		if (Weapon_Depth_Map == 9)
+		if (WDM == 10)
 		{
 		cWF = 0.010;
 		cWN = -5.0;
@@ -480,7 +489,7 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 		
 		//Game: NecroVision
 		//Weapon Depth Map Eight
-		if (Weapon_Depth_Map == 10)
+		if (WDM == 11)
 		{
 		cWF = 0.010;
 		cWN = -20.0;
@@ -489,7 +498,7 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 		
 		//Game: Quake XP
 		//Weapon Depth Map Nine
-		if (Weapon_Depth_Map == 11)
+		if (WDM == 12)
 		{
 		cWF = 0.010;
 		cWN = -25.0;
@@ -498,7 +507,7 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 		
 		//Game: Quake 4
 		//Weapon Depth Map Ten
-		if (Weapon_Depth_Map == 12)
+		if (WDM == 13)
 		{
 		cWF = 0.010;
 		cWN = -20.0;
@@ -507,66 +516,64 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 		
 		//Game: Rage
 		//Weapon Depth Map Eleven
-		if (Weapon_Depth_Map == 13)
+		if (WDM == 14)
 		{
 		cWF = 0.010;
 		cWN = -3.75;
 		cWP = 0.456;
 		}
 		
-		//Game: 
+		//Game: Return to Castle Wolfensitne
 		//Weapon Depth Map Twelve
-		if (Weapon_Depth_Map == 14)
+		if (WDM == 15)
 		{
-		cWF = Weapon_Adjust.x;
-		cWN = Weapon_Adjust.y;
-		cWP = Weapon_Adjust.z;
+		cWF = 0.010;
+		cWN = 100.0;
+		cWP = 0.4375;
 		}
 
-		//Game: 
+		//Game: S.T.A.L.K.E.R: Games
 		//Weapon Depth Map Thirteen
-		if (Weapon_Depth_Map == 15)
+		if (WDM == 16)
 		{
-		cWF = Weapon_Adjust.x;
-		cWN = Weapon_Adjust.y;
-		cWP = Weapon_Adjust.z;
+		cWF = 0.010;
+		cWN = -5.0;
+		cWP = 0.976;
 		}
 
-		//Game: 
+		//Game: Skyrim Special Edition
 		//Weapon Depth Map Fourteen
-		if (Weapon_Depth_Map == 16)
+		if (WDM == 17)
 		{
-		cWF = Weapon_Adjust.x;
-		cWN = Weapon_Adjust.y;
-		cWP = Weapon_Adjust.z;
+		cWF = 0.010;
+		cWN = -5.0;
+		cWP = 0.905;
 		}
 		
-		//Game: 
+		//Game: Turok Dinosaur Hunter
 		//Weapon Depth Map Fifteen
-		if (Weapon_Depth_Map == 17)
+		if (WDM == 18)
 		{
-		cWF = Weapon_Adjust.x;
-		cWN = Weapon_Adjust.y;
-		cWP = Weapon_Adjust.z;
+		cWF = 0.010;
+		cWN = 2.0;
+		cWP = 0.9785;
 		}
 		
-		//Game: Specail DM
-		//Weapon Depth Map Lock
-		if (Weapon_Depth_Map == 18)
-		{
-		cWF = 0;
-		cWN = 0;
-		cWP = 0;
-		}
+		//Game: Specail DM Lock
+		//Weapon Depth Map Sixteen
+		
 		//SWDMS Done//
  		
 		//Scaled Section z-Buffer
 		float Adj;
-		if (Weapon_Depth_Map >= 1)
+		if (WDM >= 1)
 		{
 		cWN /= 1000;
 		zBufferWH = (cWN * zBufferWH) / ((cWP*zBufferWH)-(cWF));
 		}
+		
+		if (WDM == 18)
+		zBufferWH = 1-zBufferWH;
 		
 		if(Weapon_Auto_Adjust == 1)
 		{
@@ -589,11 +596,11 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 		float Cutoff = step(zBuffer.r,Weapon_Cutoff);
 		float4 DM;
 			
-		if (Weapon_Depth_Map == 0)
+		if (WDM == 0)
 		{
 		DM = zBuffer;
 		}
-		else if (Weapon_Depth_Map == 18)
+		else if (WDM == 19)
 		{
 		DM = lerp(zBuffer,zBufferPass,Cutoff);
 		}

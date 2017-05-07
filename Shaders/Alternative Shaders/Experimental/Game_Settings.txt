@@ -88,25 +88,25 @@ Quantum Break                                   DM 5        7.5-15
 Rage64                                          DM 2        7.5-15          WDM 11                     RB
 Redout                                          DM 3        15-25                                      RB
 Resident Evil 7                                 DM 4        5.0-10                                     RB
-Return To Castle Wolfenstine                    DM 2        2.5-7.5         ????                       RB
+Return To Castle Wolfenstine                    DM 2        2.5-7.5         WDM 12                     RB
 Ryse: Son of Rome                               DM 0        5.0-10                                     
-S.T.A.L.K.E.R:CS Complete Mod RB                DM 0        2.5-5.0         ????                       RB
-S.T.A.L.K.E.R:CoP Complete Mod RB               DM 0        2.5-5.0         ????                       RB
-S.T.A.L.K.E.R:SoC Complete Mod RB               DM 0        3.75-7.5        ????                       RB
+S.T.A.L.K.E.R:CS Complete Mod                   DM 0        2.5-5.0         WDM 13                     RB
+S.T.A.L.K.E.R:CoP Complete Mod                  DM 0        2.5-5.0         WDM 13                     RB
+S.T.A.L.K.E.R:SoC Complete Mod                  DM 0        3.75-7.5        WDM 13                     RB
 Shadow warrior(2013)                            DM 5        2.5-5.0                                    RB
 Sleeping Dogs: DE                               DM 6        2.5-5.0
-Soma                                            DM 2        10-20           ????                      
+Soma                                            DM 2        10-20           WDM A                      
 Souls Games                                     DM 6        15-25                                      
 Stacking                                        DM 6        5.0-10                                  
 Stay Close                                      DM 3        2.5-7.5                                    RB
 Tales of Zestiria                               DM 6        15-20
-The Elder Scrolls V: SE                         DM 8        2.5-5.0         ????
+The Elder Scrolls V: SE                         DM 8        2.5-5.0         WDM 14
 The Evil Within                                 DM 0        20-30                                      RB
 The Legend of Korra                             DM 0        5.0-10
 The Vanishing of Ethan Carter Redux             DM 1        5.0-10                                     RB
 The Void                                        DM 0        5.0-10                                     RB
 Through The Woods                               DM 0        5.0-10                         Yes         RB
-Turok: Dinosaur Hunter                          DM 2        75-150           Needed                    RB
+Turok: Dinosaur Hunter                          DM 2        75-150           WDM 15                    RB
 Unreal Gold with v227                           DM 0        5.0-10           ????                      RB
 Warhammer: End Times - Vermintide               DM 5        2.5-4.5                                    
 Watch Dogs 2                                    DM 4        2.5-5.0                                    RB
@@ -406,9 +406,6 @@ Depth Buffer Drops time to time Also Dissable FSAA (FSAA OFF)
 Start the game in OpenGL or DX3D mode. Game seems to change Depth Buffer now after update. I suggest useing TriDef.
 
 {Portal 2} -Game crashes when loading-
-Custom_Depth_Map 7
-Near = 0 Far = 1.01
-WDM 14
 Install to the Bin Folder DX9.
 Max out everything. Turn off AA
 Open the console.
@@ -422,7 +419,7 @@ Once in game press 2 and you should have acess to a Depth Map.
 Game Crashes if you leave r_drawvgui 0 when you die. Don't know how to fix this.
 
 (Zombi} -Depth map Pops in and out-
-DM 28
-This Problem seems to happen when looking at one direction. Don't know why it happens. But, I suggest useing a othere 3D application like Tridef or Nvidia 3D Vision.
+This Problem seems to happen when looking at one direction. Don't know why it happens. 
+But, I suggest useing a othere 3D application like Tridef or Nvidia 3D Vision.
 _________________________________________________________________________________________________________________________________________
 Also Keep in mind if you don't like the depth map I made. You can alawys make your own.
