@@ -415,13 +415,13 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 		cWP = Weapon_Adjust.z;
 		}
 		
-		//Game:
+		//Game: Unreal Gold with v227
 		//Weapon Depth Map Zero
 		if (WDM == 3)
 		{
-		cWF = Weapon_Adjust.x;
-		cWN = Weapon_Adjust.y;
-		cWP = Weapon_Adjust.z;
+		cWF = 0.010;
+		cWN = -2.5;
+		cWP = 0.873;
 		}
 		
 		//Game: Borderlands 2 
