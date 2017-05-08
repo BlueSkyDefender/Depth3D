@@ -63,9 +63,11 @@ uniform float Perspective <
 	ui_tooltip = "Determines the perspective point. Default is 0";
 > = 0;
 
-uniform bool Dis_Occlusion <
+uniform int Dis_Occlusion <
+	ui_type = "combo";
+	ui_items = "Off\0Normal Mask\0Radial Mask\0";
 	ui_label = "Disocclusion Mask";
-	ui_tooltip = "Automatic occlusion masking switch.";
+	ui_tooltip = "Automatic occlusion masking options.";
 > = 0;
 
 uniform bool Depth_Map_View <
@@ -372,7 +374,7 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 		}
 		
 		//Weapon Depth Map
-		
+		//FPS Hand Depth Maps require more precision at smaller scales to work
 		if(WDM == 1 || WDM == 3 || WDM == 4 || WDM == 6 || WDM == 7 || WDM == 8 || WDM == 9 || WDM == 10 || WDM == 11 || WDM == 12 || WDM == 13 || WDM == 14 || WDM == 16 || WDM == 17 || WDM == 18 || WDM == 19 )
 		{
 		float constantF = 1.0;	
@@ -785,21 +787,27 @@ float DP =  Divergence;
  float B;
  int Con = 10;
 	
-	if(Dis_Occlusion == 1) 
+	if(Dis_Occlusion >= 1) 
 	{
 	
 	const float weight[10] = { 0.01,-0.01,0.02,-0.02,0.03,-0.03,0.04,-0.04,0.05,-0.05};
 
+	if(Dis_Occlusion == 1)
+	{
 	dir = float2(0.5,0);
 	B = Disocclusion_Power;
-
+	}
 	
-	dir = normalize( dir ); 
+	if(Dis_Occlusion == 2)
+	{
+	dir = 0.5 - texcoord;
+	B = Disocclusion_Power*2;
+	}
 	 
 	[loop]
 	for (int i = 0; i < Con; i++)
 	{
-		if(Dis_Occlusion == 1) 
+		if(Dis_Occlusion >= 1) 
 		{
 		DM += tex2D(SamplerDM,texcoord + dir * weight[i] * B)/Con;
 		}
