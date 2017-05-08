@@ -29,13 +29,6 @@
 // Determines The size of the Depth Map. For 4k Use 2 or 2.5. For 1440p Use 1.5 or 2. For 1080p use 1.
 #define Depth_Map_Division 1.0
 
-//uniform float2 TEST <
-	//ui_type = "drag";
-	//ui_min = -2; ui_max = 2;
-	//ui_label = "TEST";
-	//ui_tooltip = "Determines the TEST. Default is X 0 and Y 1.250";
-//> = float2(0,1);
-
 uniform int Depth_Map <
 	ui_type = "combo";
 	ui_items = "Depth Map 0\0Depth Map 1\0Depth Map 2\0Depth Map 3\0Depth Map 4\0Depth Map 5\0Depth Map 6\0Depth Map 7\0Depth Map 8\0Depth Map 9\0Depth Map 10\0";
@@ -94,7 +87,7 @@ uniform bool Depth_Map_Flip <
 
 uniform int WDM <
 	ui_type = "combo";
-	ui_items = "Weapon DM Off\0Custom WDM One\0Custom WDM Two\0Weapon DM 0\0Weapon DM 1\0Weapon DM 2\0Weapon DM 3\0Weapon DM 4\0Weapon DM 5\0Weapon DM 6\0Weapon DM 7\0Weapon DM 8\0Weapon DM 9\0Weapon DM 10\0Weapon DM 11\0Weapon DM 12\0Weapon DM 13\0Weapon DM 14\0Weapon DM 15\0Weapon DM Alpha\0";
+	ui_items = "Weapon DM Off\0Custom WDM One\0Custom WDM Two\0Weapon DM 0\0Weapon DM 1\0Weapon DM 2\0Weapon DM 3\0Weapon DM 4\0Weapon DM 5\0Weapon DM 6\0Weapon DM 7\0Weapon DM 8\0Weapon DM 9\0Weapon DM 10\0Weapon DM 11\0Weapon DM 12\0Weapon DM 13\0Weapon DM 14\0Weapon DM 15\0Weapon DM 16\0Weapon DM 17\0Weapon DM 18\0Weapon DM 19\0Weapon DM 20\0Weapon DM Alpha\0";
 	ui_label = "Weapon Depth Map";
 	ui_tooltip = "Pick your weapon depth map for games.";
 > = 0;
@@ -112,11 +105,6 @@ uniform float Weapon_Cutoff <
 	ui_label = "Weapon Cutoff Point";
 	ui_tooltip = "For adjusting the cutoff of the weapon Depth Map.";
 > = 0.10;
-
-uniform bool Weapon_Auto_Adjust <
-	ui_label = "Weapon Auto Adjust";
-	ui_tooltip = "Turn on to combat weapon Z-Fighting. May not work 100% of the time.";
-> = false;
 
 uniform int Custom_Sidebars <
 	ui_type = "combo";
@@ -385,7 +373,7 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 		
 		//Weapon Depth Map
 		
-		if(WDM == 1 || WDM == 3 || WDM == 4 || WDM == 6 || WDM == 7 || WDM == 8 || WDM == 9 || WDM == 10 || WDM == 11 || WDM == 12 || WDM == 13 || WDM == 14 || WDM == 16 || WDM == 17 || WDM == 18 )
+		if(WDM == 1 || WDM == 3 || WDM == 4 || WDM == 6 || WDM == 7 || WDM == 8 || WDM == 9 || WDM == 10 || WDM == 11 || WDM == 12 || WDM == 13 || WDM == 14 || WDM == 16 || WDM == 17 || WDM == 18 || WDM == 19 )
 		{
 		float constantF = 1.0;	
 		float constantN = 0.01;
@@ -559,8 +547,53 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 		cWP = 0.9785;
 		}
 		
-		//Game: Specail DM Lock
+		//Game: Wolfenstine: New Order ; Old Blood
 		//Weapon Depth Map Sixteen
+		if (WDM == 19)
+		{
+		cWF = 0.010;
+		cWN = -10.0;
+		cWP = 0.4455;
+		}
+		
+		//Game:
+		//Weapon Depth Map Seventeen
+		if (WDM == 20)
+		{
+		cWF = Weapon_Adjust.x;
+		cWN = Weapon_Adjust.y;
+		cWP = Weapon_Adjust.z;
+		}
+		
+		//Game:
+		//Weapon Depth Map Eighteen
+		if (WDM == 21)
+		{
+		cWF = Weapon_Adjust.x;
+		cWN = Weapon_Adjust.y;
+		cWP = Weapon_Adjust.z;
+		}
+		
+		//Game:
+		//Weapon Depth Map Nineteen
+		if (WDM == 22)
+		{
+		cWF = Weapon_Adjust.x;
+		cWN = Weapon_Adjust.y;
+		cWP = Weapon_Adjust.z;
+		}
+
+		//Game:
+		//Weapon Depth Map Twenty
+		if (WDM == 23)
+		{
+		cWF = Weapon_Adjust.x;
+		cWN = Weapon_Adjust.y;
+		cWP = Weapon_Adjust.z;
+		}
+		
+		//Game: Specail DM Lock
+		//Weapon Depth Map 24
 		
 		//SWDMS Done//
  		
@@ -572,18 +605,18 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 		zBufferWH = (cWN * zBufferWH) / ((cWP*zBufferWH)-(cWF));
 		}
 		
-		if (WDM == 18)
+		if (WDM == 18) //Turok Dinosaur Hunter
 		zBufferWH = 1-zBufferWH;
 		
-		if(Weapon_Auto_Adjust == 1)
-		{
-		zBufferWH = zBufferWH*AL();
-		zBufferPass = zBufferPass*AL();
-		}
-		else
+		if(WDM == 0) // I do not see a reason why not to use Auto Anti Weapon Depth Map Z-Fighting so it turns on when you turn on Weapon Depth map.
 		{
 		zBufferWH = zBufferWH;
 		zBufferPass = zBufferPass;
+		}
+		else
+		{
+		zBufferWH = zBufferWH*AL();
+		zBufferPass = zBufferPass*AL();
 		}
 		
 		zBufferWH = smoothstep(0.0,1.250,zBufferWH);
@@ -600,7 +633,7 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 		{
 		DM = zBuffer;
 		}
-		else if (WDM == 19)
+		else if (WDM == 24)
 		{
 		DM = lerp(zBuffer,zBufferPass,Cutoff);
 		}

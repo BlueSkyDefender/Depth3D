@@ -111,8 +111,8 @@ Unreal Gold with v227                           DM 0        5.0-10           WDM
 Warhammer: End Times - Vermintide               DM 5        2.5-4.5                                    
 Watch Dogs 2                                    DM 4        2.5-5.0                                    RB
 Witcher 3                                       DM 1        3.0-7.0                                         
-Wolfenstine: The New Order                      DM 2        3.75-7.5         ????                      RB
-Wolfenstine: The Old Blood                      DM 2        3.75-7.5         ????                      RB
+Wolfenstine: The New Order                      DM 2        3.75-7.5         WDM 16                    RB
+Wolfenstine: The Old Blood                      DM 2        3.75-7.5         WDM 16                    RB
 Zombie Army Trilogy                             DM 8        2.5-7.5                                    
 
 [Special Depth Map Game List]  [Depth Map] [DM Adjustment] [Weapon DM] [Offset] [Depth Flip] [Read Below]
@@ -121,7 +121,7 @@ Lara Croft & Temple of Osiris     DM 10        15.0-25                  0.3754
 Fez                               DM 10        1.5-2.5                  0.6010       Yes
 Magicka 2                         DM 10        1.5-5.0                  0.3730                   RB
 Never Alone (Kisima Ingitchuna)   DM 10        1.0-2.0                  0.3688
-Nosferatu: The Wrath of Malachi   DM 10        2.0-3.0        ????      0.3667                   RB
+Nosferatu: The Wrath of Malachi   DM 10        2.0-3.0        WDM A     0.3667                   RB
 Requiem: Avenging Angel           DM 10        5.0-7.5                  0.5740                   RB
 Silent Hill: Homecoming           DM 10        1.0-2.0                  0.4080
 ______________________________________________________________________________________________________________________________________
@@ -243,6 +243,8 @@ YouTube Guide.
 https://www.youtube.com/watch?v=opVni9cRN7Q
 No film Grain Guide.
 https://steamcommunity.com/sharedfiles/filedetails/?id=334444605
+
+Real 3D may be done with TriDef Try It.
 
 {Phantasmal}
 A buggy Opengl game. But, hold down ctrl when starting the game and set your resolution. That or use "-show-screen-selector" in launch options. Once in game Start it. Then you will get a overblown screen. From here press Alt+Enter. Then hit escape and set your resoution and settings to ultra dissable motion blur. Set your settings and now press shift+f2 for reshade and set your settings for Depth3D.
