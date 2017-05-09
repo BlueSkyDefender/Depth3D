@@ -82,6 +82,7 @@ Need For Speed Rivals                           Help        ??????
 Need for Speed Most Wanted                      Help        ??????
 Penumbra: Black Plague                          DM 5        10-20                                      RB
 Phantasmal                                      DM 0        10-20                                      RB
+Prey 2017					DM 4        2.5-7.5	    WDM 17
 Quake 2 XP                                      DM 2        5.0-10          WDM 9
 Quake 4                                         DM 2        5.0-10          WDM 10                     RB
 Quantum Break                                   DM 5        7.5-15
