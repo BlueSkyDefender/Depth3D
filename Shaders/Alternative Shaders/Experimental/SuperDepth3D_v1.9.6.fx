@@ -103,10 +103,10 @@ uniform float3 Weapon_Adjust <
 
 uniform float Weapon_Cutoff <
 	ui_type = "drag";
-	ui_min = -1; ui_max = 1;
+	ui_min = 0; ui_max = 1;
 	ui_label = "Weapon Cutoff Point";
-	ui_tooltip = "For adjusting the cutoff of the weapon Depth Map.";
-> = 0.10;
+	ui_tooltip = "For adjusting the cutoff point of the weapon Depth Map. 0 is Auto";
+> = 0;
 
 uniform int Custom_Sidebars <
 	ui_type = "combo";
@@ -304,7 +304,11 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 		float Raw = pow(abs(zBuffer.r),DA);
 		float RawPass = pow(abs(zBufferPass.r),DAP);
 		
-		//5. Special Depth Map
+		//5. Old Depth Map from 1.9.5
+		float Old = 100 / (1 + 100 - (zBuffer.r/DDA) * (1 - 100));
+		float OldPass = 100 / (1 + 100 - (zBufferPass.r/DDA) * (1 - 100));
+		
+		//6. Special Depth Map
 		float Special = pow(abs(exp(zBuffer.r)*Offset),(DA*25));
 		float SpecialPass = pow(abs(exp(zBufferPass.r)*Offset),(DAP*25));
 		
@@ -364,7 +368,8 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 		
 		else if (Depth_Map == 9)
 		{
-		//zBuffer = SpecialTwo;
+		zBuffer = Old;
+		zBufferPass = OldPass;
 		}
 		
 		else if (Depth_Map == 10)
@@ -375,7 +380,7 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 		
 		//Weapon Depth Map
 		//FPS Hand Depth Maps require more precision at smaller scales to work
-		if(WDM == 1 || WDM == 3 || WDM == 4 || WDM == 6 || WDM == 7 || WDM == 8 || WDM == 9 || WDM == 10 || WDM == 11 || WDM == 12 || WDM == 13 || WDM == 14 || WDM == 16 || WDM == 17 || WDM == 18 || WDM == 19 || WDM == 20 )
+		if(WDM == 1 || WDM == 3 || WDM == 4 || WDM == 6 || WDM == 7 || WDM == 8 || WDM == 9 || WDM == 10 || WDM == 11 || WDM == 12 || WDM == 13 || WDM == 14 || WDM == 16 || WDM == 17 || WDM == 18 || WDM == 19 || WDM == 20 || WDM == 21 )
 		{
 		float constantF = 1.0;	
 		float constantN = 0.01;
@@ -390,6 +395,7 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 		float cWF;
 		float cWN;
 		float cWP;
+		float CutOFFCal; //Weapon Cut Off Calculation
 		
 		if (WDM == 1)
 		{
@@ -421,6 +427,7 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 		cWF = 0.010;
 		cWN = -7.500;
 		cWP = 0.875;
+		CutOFFCal = (0.600/Depth_Map_Adjust)/2;
 		}
 		
 		//Game: Call of Duty: Black Ops 
@@ -558,22 +565,24 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 		cWP = 0.4455;
 		}
 		
-		//Game: Prey 2017
+		//Game: Prey 2017 Object Detail Veary High
 		//Weapon Depth Map Seventeen
 		if (WDM == 20)
 		{
 		cWF = 0.010;
 		cWN = 10.0;
-		cWP = 0.0980;
+		cWP = 0.1025;
+		CutOFFCal = (0.600/Depth_Map_Adjust)/2;
 		}
 		
-		//Game:
+		//Game: Prey 2017
 		//Weapon Depth Map Eighteen
 		if (WDM == 21)
 		{
-		cWF = Weapon_Adjust.x;
-		cWN = Weapon_Adjust.y;
-		cWP = Weapon_Adjust.z;
+		cWF = 0.010;
+		cWN = 5.0;
+		cWP = 0.131;
+		CutOFFCal = (0.600/Depth_Map_Adjust)/2;
 		}
 		
 		//Game:
@@ -626,9 +635,18 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 		Adj = 1.0;//Replaced with Weapon_Cutoff Still used as a base.
 			
 		float NearDepth = step(zBufferWH.r,Adj);
+		float Cutoff;
 		float4 D;
+				
+		if (Weapon_Cutoff == 0)//Zero Is auto
+		{
+		Cutoff = step(zBuffer.r,CutOFFCal);
+		}
+		else
+		{
+		Cutoff = step(zBuffer.r,Weapon_Cutoff);
+		}
 		
-		float Cutoff = step(zBuffer.r,Weapon_Cutoff);
 		float4 DM;
 			
 		if (WDM == 0)
@@ -689,7 +707,7 @@ float aoFF(in float3 ddiff,in float3 cnorm, in float c1, in float c2)
 	float S = 1-AO_Shift;
 	float3 vv = normalize(ddiff);
 	float rd = length(ddiff);
-	return (S-clamp(dot(normal_from_depth(float2(c1,c2)),-vv),-1,1.0)) * clamp(dot( cnorm,vv ),1.075,1.0)* (1.0 - 1.0/sqrt(-0.001/(rd*rd) + 1000));
+	return (S-clamp(dot(normal_from_depth(float2(c1,c2)),-vv),-1,1.0)) * (1.0 - 1.0/sqrt(-0.001/(rd*rd) + 1000));
 }
 
 float4 GetAO( float2 texcoord )

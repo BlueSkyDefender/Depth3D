@@ -82,7 +82,7 @@ Need For Speed Rivals                           Help        ??????
 Need for Speed Most Wanted                      Help        ??????
 Penumbra: Black Plague                          DM 5        10-20                                      RB
 Phantasmal                                      DM 0        10-20                                      RB
-Prey 2017					DM 4        2.5-7.5	    WDM 17
+Prey 2017                                       DM 9        2.5-5.0         WDM 17 or 18               RB
 Quake 2 XP                                      DM 2        5.0-10          WDM 9
 Quake 4                                         DM 2        5.0-10          WDM 10                     RB
 Quantum Break                                   DM 5        7.5-15
@@ -255,6 +255,14 @@ Go here
 C:\Users\...\Documents\Penumbra\settings.cfg
 Open the settings and set your res. 
 <Screen Width="3840" Height="2160" FullScreen="true" Vsync="true" />
+
+{Prey 2017}
+Path to install \Steam\steamapps\common\Prey\Binaries\Danielle\x64\Release
+
+Object Detail Setting seems to change the Near Depth by a small amount. When you have Object Detail set to Very High use WDM 17. If set to something else
+use WDM 18.
+
+I also notice a problem with starting the game with reshade 3.0.7. I used reshade 3.0.4.
 
 {Quake 4}
 If some how you can click on the menu......... Good Luck. Try Alt-Tab borderless window mode.
