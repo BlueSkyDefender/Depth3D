@@ -29,6 +29,13 @@
 // Determines The size of the Depth Map. For 4k Use 2 or 2.5. For 1440p Use 1.5 or 2. For 1080p use 1.
 #define Depth_Map_Division 1.0
 
+//uniform float X <
+	//ui_type = "drag";
+	//ui_min = 0.0; ui_max = 1.0;
+	//ui_label = "X";
+	//ui_tooltip = "Determines the X point. Default is 0";
+//> = 0;
+
 uniform int Depth_Map <
 	ui_type = "combo";
 	ui_items = "Depth Map 0\0Depth Map 1\0Depth Map 2\0Depth Map 3\0Depth Map 4\0Depth Map 5\0Depth Map 6\0Depth Map 7\0Depth Map 8\0Depth Map 9\0Depth Map 10\0";
@@ -437,6 +444,7 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 		cWF = 0.853;
 		cWN = 1.500;
 		cWP = 1.0003;
+		CutOFFCal = (0.507/Depth_Map_Adjust)/2;
 		}
 		
 		//Game: Call of Duty: Games 
@@ -445,7 +453,8 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 		{
 		cWF = 0.390;
 		cWN = 5;
-		cWP = 1.002;
+		cWP = 0.999;
+		CutOFFCal = (0.254/Depth_Map_Adjust)/2;
 		}
 		
 		//Game: Fallout 4
@@ -570,9 +579,9 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 		if (WDM == 20)
 		{
 		cWF = 0.010;
-		cWN = 10.0;
-		cWP = 0.1025;
-		CutOFFCal = (0.600/Depth_Map_Adjust)/2;
+		cWN = 3.75;
+		cWP = 0.0914;
+		CutOFFCal = (0.275/Depth_Map_Adjust)/2;
 		}
 		
 		//Game: Prey 2017
@@ -582,7 +591,7 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 		cWF = 0.010;
 		cWN = 5.0;
 		cWP = 0.131;
-		CutOFFCal = (0.600/Depth_Map_Adjust)/2;
+		CutOFFCal = (0.285/Depth_Map_Adjust)/2;
 		}
 		
 		//Game:
