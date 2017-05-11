@@ -56,6 +56,7 @@ uniform int Divergence <
 	ui_label = "Divergence Slider";
 	ui_tooltip = "Determines the amount of Image Warping and Separation.";
 > = 15;
+
 uniform int Near_Depth <
 	ui_type = "drag";
 	ui_min = 0; ui_max = 3;
@@ -387,7 +388,7 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 		
 		//Weapon Depth Map
 		//FPS Hand Depth Maps require more precision at smaller scales to work
-		if(WDM == 1 || WDM == 3 || WDM == 4 || WDM == 6 || WDM == 7 || WDM == 8 || WDM == 9 || WDM == 10 || WDM == 11 || WDM == 12 || WDM == 13 || WDM == 14 || WDM == 16 || WDM == 17 || WDM == 18 || WDM == 19 || WDM == 20 || WDM == 21 )
+		if(WDM == 1 || WDM == 3 || WDM == 4 || WDM == 6 || WDM == 7 || WDM == 8 || WDM == 9 || WDM == 10 || WDM == 11 || WDM == 12 || WDM == 13 || WDM == 14 || WDM == 16 || WDM == 17 || WDM == 18 || WDM == 19 || WDM == 20 || WDM == 21 || WDM == 22 )
 		{
 		float constantF = 1.0;	
 		float constantN = 0.01;
@@ -594,13 +595,13 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 		CutOFFCal = (0.285/Depth_Map_Adjust)/2;
 		}
 		
-		//Game:
+		//Game: Deus Ex Mankind Divided may not be needed.
 		//Weapon Depth Map Nineteen
 		if (WDM == 22)
 		{
-		cWF = Weapon_Adjust.x;
-		cWN = Weapon_Adjust.y;
-		cWP = Weapon_Adjust.z;
+		cWF = 0.010;
+		cWN = 150.0;
+		cWP = 1.100;
 		}
 
 		//Game:
