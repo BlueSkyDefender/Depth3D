@@ -474,6 +474,7 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 		cWF = 0.015;
 		cWN = -87.500;
 		cWP = 0.750;
+		CutOFFCal = (0.666/Depth_Map_Adjust)/2;
 		}
 		
 		//Game: Doom 2016
@@ -483,6 +484,7 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 		cWF = 0.010;
 		cWN = -5.0;
 		cWP = 0.900;
+		CutOFFCal = (0.4127/Depth_Map_Adjust)/2;
 		}
 		
 		//Game: Metro Games

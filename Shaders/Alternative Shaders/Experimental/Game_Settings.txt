@@ -131,7 +131,7 @@ Deus Ex Mankind Divided                DM 9          3.75          WDM 19       
 [Notes for Deus Ex MD]
 If you use a DM adjustment of 3.75 you can use a cut off point of 0.193.If you change DM adjustment you will have to readjust
 The Cutoff point. Ex. if DM adjustment is 2.5 your cut off point is 0.242. Auto Cutoff would not work for this game. You may get away
-with useing no Weapon Depth map if you can handle the gun sticking out the screen.
+with useing no Weapon Depth map if you can handle the gun sticking out the screen. Consider playing with games native 3D.
 ______________________________________________________________________________________________________________________________________
 
 You can also try different depth maps for other games your self by changing Depth Map number From 0-5. 
