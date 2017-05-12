@@ -97,7 +97,7 @@ uniform bool Depth_Map_Flip <
 
 uniform int WDM <
 	ui_type = "combo";
-	ui_items = "Weapon DM Off\0Custom WDM One\0Custom WDM Two\0Weapon DM 0\0Weapon DM 1\0Weapon DM 2\0Weapon DM 3\0Weapon DM 4\0Weapon DM 5\0Weapon DM 6\0Weapon DM 7\0Weapon DM 8\0Weapon DM 9\0Weapon DM 10\0Weapon DM 11\0Weapon DM 12\0Weapon DM 13\0Weapon DM 14\0Weapon DM 15\0Weapon DM 16\0Weapon DM 17\0Weapon DM 18\0Weapon DM 19\0Weapon DM 20\0Weapon DM Alpha\0";
+	ui_items = "Weapon DM Off\0Custom WDM One\0Custom WDM Two\0Weapon DM 0\0Weapon DM 1\0Weapon DM 2\0Weapon DM 3\0Weapon DM 4\0Weapon DM 5\0Weapon DM 6\0Weapon DM 7\0Weapon DM 8\0Weapon DM 9\0Weapon DM 10\0Weapon DM 11\0Weapon DM 12\0Weapon DM 13\0Weapon DM 14\0Weapon DM 15\0Weapon DM 16\0Weapon DM 17\0Weapon DM 18\0Weapon DM 19\0Weapon DM 20\0Weapon DM 21\0Weapon DM 22\0Weapon DM 23\0Weapon DM 24\0Weapon DM 25\0";
 	ui_label = "Weapon Depth Map";
 	ui_tooltip = "Pick your weapon depth map for games.";
 > = 0;
@@ -163,10 +163,10 @@ uniform bool AO <
 
 uniform float Power <
 	ui_type = "drag";
-	ui_min = 0.25; ui_max = 1.25;
+	ui_min = 0.25; ui_max = 0.75;
 	ui_label = "AO Power";
-	ui_tooltip = "Ambient occlusion power on the depth map. Default is 0.75";
-> = 0.75;
+	ui_tooltip = "Ambient occlusion power on the depth map. Default is 0.500";
+> = 0.500;
 
 uniform float Falloff <
 	ui_type = "drag";
@@ -288,107 +288,87 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 		//Near & Far Adjustment
 		float DDA = 0.125/Depth_Map_Adjust; //Division Depth Map Adjust - Near
 		float DA = Depth_Map_Adjust*2; //Depth Map Adjust - Near
-		float DDAP = DDA*10; //Part of the Pass Buffer Cal
-		float DAP = DA/10; //Part of the Pass Buffer Cal
 		//All 1.0f are Far Adjustment
 		
 		//0. DirectX Custom Constant Far
 		float DirectX = 2.0 * DDA * 1.0f / (1.0f + DDA - zBuffer.r * (1.0f - DDA));
-		float DirectXPass = 2.0 * DDAP * 1.0f / (1.0f + DDAP - zBufferPass.r * (1.0f - DDAP));
 		
 		//1. DirectX Alternative
 		float DirectXAlt = pow(abs(zBuffer.r - 1.0),DA);
-		float DirectXAltPass = pow(abs(zBufferPass.r - 1.0),DAP);
 		
 		//2. OpenGL
 		float OpenGL = 2.0 * DDA * 1.0f / (1.0f + DDA - (2.0 * zBuffer.r - 1.0) * (1.0f - DDA));
-		float OpenGLPass = 2.0 * DDAP * 1.0f / (1.0f + DDAP - (2.0 * zBufferPass.r - 1.0) * (1.0f - DDAP));
 		
 		//3. OpenGL Reverse
 		float OpenGLRev = 2.0 * 1.0f * DDA / (DDA + 1.0f - (2.0 * zBuffer.r - 1.0) * (DDA - 1.0f));
-		float OpenGLRevPass = 2.0 * 1.0f * DDAP / (DDAP + 1.0f - (2.0 * zBufferPass.r - 1.0) * (DDAP - 1.0f));
 		
 		//4. Raw Buffer
 		float Raw = pow(abs(zBuffer.r),DA);
-		float RawPass = pow(abs(zBufferPass.r),DAP);
 		
 		//5. Old Depth Map from 1.9.5
 		float Old = 100 / (1 + 100 - (zBuffer.r/DDA) * (1 - 100));
-		float OldPass = 100 / (1 + 100 - (zBufferPass.r/DDA) * (1 - 100));
 		
 		//6. Special Depth Map
 		float Special = pow(abs(exp(zBuffer.r)*Offset),(DA*25));
-		float SpecialPass = pow(abs(exp(zBufferPass.r)*Offset),(DAP*25));
 		
 		if (Depth_Map == 0)
 		{
 		zBuffer = DirectX;
-		zBufferPass = DirectXPass;
 		}
 		
 		else if (Depth_Map == 1)
 		{
 		zBuffer = DirectXAlt;
-		zBufferPass = DirectXAltPass;
 		}
 
 		else if (Depth_Map == 2)
 		{
 		zBuffer = OpenGL;
-		zBufferPass = OpenGLPass;
 		}
 		
 		else if (Depth_Map == 3)
 		{
 		zBuffer = OpenGLRev;
-		zBufferPass = OpenGLRevPass;
 		}
 		
 		else if (Depth_Map == 4)
 		{
 		zBuffer = lerp(DirectXAlt,OpenGLRev,0.5);
-		zBufferPass = lerp(DirectXAltPass,OpenGLRevPass,0.5);
 		}
 		
 		else if (Depth_Map == 5)
 		{
 		zBuffer = lerp(Raw,DirectX,0.5);
-		zBufferPass = lerp(RawPass,DirectXPass,0.5);
 		}
 
 		else if (Depth_Map == 6)
 		{
 		zBuffer = Raw;
-		zBufferPass = RawPass;
 		}
 		
 		else if (Depth_Map == 7)
 		{
 		zBuffer = lerp(DirectX,OpenGL,0.5);
-		zBufferPass = lerp(DirectXPass,OpenGLPass,0.5);
 		}
 		
 		else if (Depth_Map == 8)
 		{
 		zBuffer = lerp(Raw,OpenGL,0.5);
-		zBufferPass = lerp(RawPass,OpenGLPass,0.5);
 		}		
 		
 		else if (Depth_Map == 9)
 		{
 		zBuffer = Old;
-		zBufferPass = OldPass;
 		}
 		
 		else if (Depth_Map == 10)
 		{
 		zBuffer = Special;
-		zBufferPass = SpecialPass;
 		}
 		
 		//Weapon Depth Map
 		//FPS Hand Depth Maps require more precision at smaller scales to work
-		if(WDM == 1 || WDM == 3 || WDM == 4 || WDM == 6 || WDM == 7 || WDM == 8 || WDM == 9 || WDM == 10 || WDM == 11 || WDM == 12 || WDM == 13 || WDM == 14 || WDM == 16 || WDM == 17 || WDM == 18 || WDM == 19 || WDM == 20 || WDM == 21 || WDM == 22 )
+		if(WDM == 1 || WDM == 3 || WDM == 4 || WDM == 6 || WDM == 7 || WDM == 8 || WDM == 9 || WDM == 10 || WDM == 11 || WDM == 12 || WDM == 13 || WDM == 14 || WDM == 16 || WDM == 17 || WDM == 18 || WDM == 19 || WDM == 20 || WDM == 21 || WDM == 22 || WDM == 23 || WDM == 24 || WDM == 25 )
 		{
 		float constantF = 1.0;	
 		float constantN = 0.01;
@@ -403,7 +383,8 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 		float cWF;
 		float cWN;
 		float cWP;
-		float CutOFFCal; //Weapon Cut Off Calculation
+		float CoP; //Weapon Cutoff Point
+		float CutOFFCal; //Weapon Cutoff Calculation
 		
 		if (WDM == 1)
 		{
@@ -435,7 +416,7 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 		cWF = 0.010;
 		cWN = -7.500;
 		cWP = 0.875;
-		CutOFFCal = (0.600/Depth_Map_Adjust)/2;
+		CoP = 0.600;
 		}
 		
 		//Game: Call of Duty: Black Ops 
@@ -445,7 +426,7 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 		cWF = 0.853;
 		cWN = 1.500;
 		cWP = 1.0003;
-		CutOFFCal = (0.507/Depth_Map_Adjust)/2;
+		CoP = 0.507;
 		}
 		
 		//Game: Call of Duty: Games 
@@ -455,7 +436,7 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 		cWF = 0.390;
 		cWN = 5;
 		cWP = 0.999;
-		CutOFFCal = (0.254/Depth_Map_Adjust)/2;
+		CoP = 0.254;
 		}
 		
 		//Game: Fallout 4
@@ -465,6 +446,7 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 		cWF = 0.010;
 		cWN = -0.500;
 		cWP = 0.9895;
+		CoP = 0.252;
 		}
 		
 		//Game: Cryostasis
@@ -474,7 +456,7 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 		cWF = 0.015;
 		cWN = -87.500;
 		cWP = 0.750;
-		CutOFFCal = (0.666/Depth_Map_Adjust)/2;
+		CoP = 0.666;
 		}
 		
 		//Game: Doom 2016
@@ -484,7 +466,7 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 		cWF = 0.010;
 		cWN = -5.0;
 		cWP = 0.900;
-		CutOFFCal = (0.4127/Depth_Map_Adjust)/2;
+		CoP = 0.4127;
 		}
 		
 		//Game: Metro Games
@@ -584,7 +566,7 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 		cWF = 0.010;
 		cWN = 3.75;
 		cWP = 0.0914;
-		CutOFFCal = (0.275/Depth_Map_Adjust)/2;
+		CoP = 0.275;
 		}
 		
 		//Game: Prey 2017
@@ -594,7 +576,7 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 		cWF = 0.010;
 		cWN = 5.0;
 		cWP = 0.131;
-		CutOFFCal = (0.285/Depth_Map_Adjust)/2;
+		CoP = 0.285;
 		}
 		
 		//Game: Deus Ex Mankind Divided may not be needed.
@@ -606,18 +588,63 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 		cWP = 1.100;
 		}
 
-		//Game:
+		//Game: Dying Light
 		//Weapon Depth Map Twenty
 		if (WDM == 23)
+		{
+		cWF = 0.010;
+		cWN = 150.0;
+		cWP = 1.045;
+		}
+
+		//Game: Kingpin
+		//Weapon Depth Map Twenty One
+		if (WDM == 24)
+		{
+		cWF = 0.010;
+		cWN = 150.0;
+		cWP = 1.100;
+		CoP = 0.338;
+		}
+		
+		//Game: SOMA
+		//Weapon Depth Map Twenty Two
+		if (WDM == 25)
+		{
+		cWF = 0.010;
+		cWN = -150.0;
+		cWP = 0.125;
+		CoP = 0.900;
+		}
+		
+		//Game:
+		//Weapon Depth Map Twenty Three
+		if (WDM == 26)
 		{
 		cWF = Weapon_Adjust.x;
 		cWN = Weapon_Adjust.y;
 		cWP = Weapon_Adjust.z;
 		}
 		
-		//Game: Specail DM Lock
-		//Weapon Depth Map 24
+		//Game:
+		//Weapon Depth Map Twenty Four
+		if (WDM == 27)
+		{
+		cWF = Weapon_Adjust.x;
+		cWN = Weapon_Adjust.y;
+		cWP = Weapon_Adjust.z;
+		}
 		
+		//Game:
+		//Weapon Depth Map Twenty Five
+		if (WDM == 28)
+		{
+		cWF = Weapon_Adjust.x;
+		cWN = Weapon_Adjust.y;
+		cWP = Weapon_Adjust.z;
+		}
+		
+		CutOFFCal = (CoP/Depth_Map_Adjust)/2;
 		//SWDMS Done//
  		
 		//Scaled Section z-Buffer
@@ -628,19 +655,11 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 		zBufferWH = (cWN * zBufferWH) / ((cWP*zBufferWH)-(cWF));
 		}
 		
-		if (WDM == 18) //Turok Dinosaur Hunter
+		if (WDM == 18 || WDM == 24) //Turok Dinosaur Hunter ; KingPin
 		zBufferWH = 1-zBufferWH;
 		
-		if(WDM == 0) // I do not see a reason why not to use Auto Anti Weapon Depth Map Z-Fighting so it turns on when you turn on Weapon Depth map.
-		{
-		zBufferWH = zBufferWH;
-		zBufferPass = zBufferPass;
-		}
-		else
-		{
-		zBufferWH = zBufferWH*AL();
-		zBufferPass = zBufferPass*AL();
-		}
+		//Auto Anti Weapon Depth Map Z-Fighting is always on.
+		zBufferWH = zBufferWH*AL(); 
 		
 		zBufferWH = smoothstep(0.0,1.250,zBufferWH);
 
@@ -664,10 +683,6 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 		if (WDM == 0)
 		{
 		DM = zBuffer;
-		}
-		else if (WDM == 24)
-		{
-		DM = lerp(zBuffer,zBufferPass,Cutoff);
 		}
 		else
 		{
