@@ -106,8 +106,8 @@ uniform float3 Weapon_Adjust <
 	ui_type = "drag";
 	ui_min = -10.0; ui_max = 10.0;
 	ui_label = "Weapon Adjust Depth Map";
-	ui_tooltip = "Adjust weapon depth map. Default is (Y 0, X 0.010, Z 1.001)";
-> = float3(0.010,1.00,1.00);
+	ui_tooltip = "Adjust weapon depth map. Default is (X 0.010, Y 5.0, Z 1.0)";
+> = float3(0.010,5.00,1.00);
 
 uniform float Weapon_Cutoff <
 	ui_type = "drag";
@@ -151,11 +151,6 @@ uniform float Anaglyph_Desaturation <
 	ui_tooltip = "Adjust anaglyph desaturation, Zero is Black & White, One is full color.";
 > = 1.0;
 
-uniform bool Eye_Swap <
-	ui_label = "Swap Eyes";
-	ui_tooltip = "L/R to R/L.";
-> = false;
-
 uniform bool AO <
 	ui_label = "3D AO Mode";
 	ui_tooltip = "3D ambient occlusion mode switch. Default is On.";
@@ -181,6 +176,29 @@ uniform float AO_Shift <
 	ui_label = "AO Shift";
 	ui_tooltip = "Determines the Shift from White to Black. Default is 0.250";
 > = 0.250;
+
+uniform bool Eye_Swap <
+	ui_label = "Swap Eyes";
+	ui_tooltip = "L/R to R/L.";
+> = false;
+
+uniform float Cross_Cursor_Size <
+	ui_type = "drag";
+	ui_min = 1; ui_max = 100;
+	ui_tooltip = "Pick your size of the cross cursor. Default is 25";
+	ui_label = "Cross Cursor Size";
+> = 25.0;
+
+uniform float3 Cross_Cursor_Color <
+	ui_type = "color";
+	ui_tooltip = "Pick your own cross cursor color. Default is (R 255, G 255, B 255)";
+	ui_label = "Cross Cursor Color";
+> = float3(1.0, 1.0, 1.0);
+
+uniform bool InvertY <
+	ui_label = "Invert Y-Axis";
+	ui_tooltip = "Invert Y-Axis for the cross cursor.";
+> = false;
 
 /////////////////////////////////////////////D3D Starts Here/////////////////////////////////////////////////////////////////
 
@@ -244,6 +262,24 @@ sampler SamplerAO
 	{
 		Texture = texAO;
 	};
+
+uniform float2 Mousecoords < source = "mousepoint"; > ;	
+////////////////////////////////////////////////////////////////////////////////////Cross Cursor////////////////////////////////////////////////////////////////////////////////////	
+float4 MouseCursor(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Target
+{
+	float4 Mpointer; 
+	 
+	if (!InvertY)
+	{
+		Mpointer = all(abs(Mousecoords - position.xy) < Cross_Cursor_Size) * (1 - all(abs(Mousecoords - position.xy) > Cross_Cursor_Size/(Cross_Cursor_Size/2))) ? float4(Cross_Cursor_Color, 1.0) : tex2D(BackBuffer, texcoord);//cross
+	}
+	else
+	{
+		Mpointer = all(abs(float2(Mousecoords.x,BUFFER_HEIGHT-Mousecoords.y) - position.xy) < Cross_Cursor_Size) * (1 - all(abs(float2(Mousecoords.x,BUFFER_HEIGHT-Mousecoords.y) - position.xy) > Cross_Cursor_Size/(Cross_Cursor_Size/2))) ? float4(Cross_Cursor_Color, 1.0) : tex2D(BackBuffer, texcoord);//cross
+	}
+	
+	return Mpointer;
+}
 
 uniform float frametime < source = "frametime"; >;
 /////////////////////////////////////////////////////////////////////////////////Adapted Luminance/////////////////////////////////////////////////////////////////////////////////
@@ -476,6 +512,7 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 		cWF = 0.010;
 		cWN = -5.0;
 		cWP = 0.956;
+		CoP = 0.260;
 		}
 		
 		//Game: NecroVision
@@ -485,6 +522,7 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 		cWF = 0.010;
 		cWN = -20.0;
 		cWP = 0.4825;
+		CoP = 0.733;
 		}
 		
 		//Game: Quake XP
@@ -494,6 +532,7 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 		cWF = 0.010;
 		cWN = -25.0;
 		cWP = 0.695;
+		CoP = 0.341;
 		}
 		
 		//Game: Quake 4
@@ -503,6 +542,7 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 		cWF = 0.010;
 		cWN = -20.0;
 		cWP = 0.500;
+		CoP = 0.476;
 		}
 		
 		//Game: Rage
@@ -510,8 +550,9 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 		if (WDM == 14)
 		{
 		cWF = 0.010;
-		cWN = -3.75;
-		cWP = 0.456;
+		cWN = -7.5;
+		cWP = 0.4505;
+		CoP = 0.816;
 		}
 		
 		//Game: Return to Castle Wolfensitne
@@ -1139,8 +1180,16 @@ void PostProcessVS(in uint id : SV_VertexID, out float4 position : SV_Position, 
 }
 
 //*Rendering passes*//
+technique Cross_Cursor
+{			
+			pass Cursor
+		{
+			VertexShader = PostProcessVS;
+			PixelShader = MouseCursor;
+		}	
+}
 
-technique SuperDepth3D
+technique Depth3D
 {					
 			pass DepthMap
 		{
