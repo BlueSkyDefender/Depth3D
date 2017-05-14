@@ -436,13 +436,14 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 		cWP = Weapon_Adjust.z;
 		}
 		
-		//Game: Unreal Gold with v227
+		//Game: Unreal Gold with v227 DX9
 		//Weapon Depth Map Zero
 		if (WDM == 3)
 		{
 		cWF = 0.010;
 		cWN = -2.5;
 		cWP = 0.873;
+		CoP = 0.569;
 		}
 		
 		//Game: Borderlands 2 
@@ -602,6 +603,7 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 		cWF = 0.010;
 		cWN = -10.0;
 		cWP = 0.4455;
+		CoP = 0.548;
 		}
 		
 		//Game: Prey 2017 Object Detail Veary High
