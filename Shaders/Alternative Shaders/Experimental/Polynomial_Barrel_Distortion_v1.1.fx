@@ -393,7 +393,7 @@ void PS0(float4 position : SV_Position, float2 texcoord : TEXCOORD0, out float4 
 	}
 	else
 	{
-	Out = PDL(float2((texcoord.x*X)-midV * pix.x,(texcoord.y*Y)-midH));
+	Out = PDL(float2((texcoord.x*X)-midV + IPDS() * pix.x,(texcoord.y*Y)-midH));  // IPDS works now like screen x offset
 	}
 	color = Out;
 }
