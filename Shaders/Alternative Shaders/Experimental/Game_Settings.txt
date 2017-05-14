@@ -62,7 +62,7 @@ Hitman 2016                                     DM 2        7.5-15              
 Homefront The Revolution                        DM 0        7.5-15                                     RB
 Just Cause 3                                    DM 3        7.5-15
 KHOLAT                                          DM 1        15-25                                      RB
-Kingpin: Life of Crime                          DM 2        5.0-10          WDM 21                      RB 
+Kingpin: Life of Crime                          DM 2        5.0-10          WDM 21                     RB 
 Layers of Fear                                  DM 6        5.0-10                        Yes
 Lifeless Planet                                 DM 6        2.5-7.5                       Yes
 Lords of The Fallen                             DM 6        15-25
@@ -70,8 +70,8 @@ LuciusII                                        DM 6        30-40               
 Mafia III                                       DM 4        10-15                                      RB
 Mass Effect Andromeda                           DM 4        10-15                                      RB
 Metal Gear Rising                               DM 5        10-20                                      RB
-Metro 2033 Redux                                DM 5        7.5-15           WDM 7                      RB
-Metro Last Light Redux                          DM 5        7.5-15           WDM 7                      RB
+Metro 2033 Redux                                DM 5        7.5-15           WDM 7                     RB
+Metro Last Light Redux                          DM 5        7.5-15           WDM 7                     RB
 Middle-earth: Shadow of Mordor                  DM 4        7.5-15                                     RB
 Mirror's Edge Catalyst                          DM 4        5.0-10                                     
 Mordheim: City of the Damned                    DM 6        2.5-7.5                                    
@@ -106,7 +106,8 @@ The Legend of Korra                             DM 0        5.0-10
 The Vanishing of Ethan Carter Redux             DM 1        5.0-10                                     RB
 The Void                                        DM 0        5.0-10                                     RB
 Through The Woods                               DM 0        5.0-10                         Yes         RB
-Turok: Dinosaur Hunter                          DM 2        75-150           WDM 15                    RB
+Turok: Dinosaur Hunter                          DM 8        50-100           WDM 15                    RB
+Turok 2: Seeds of Evil                          DM 8        75-125           WDM 23
 Unreal Gold with v227                           DM 0        5.0-10           WDM 0                     RB
 Warhammer: End Times - Vermintide               DM 5        2.5-4.5                                    
 Watch Dogs 2                                    DM 4        2.5-5.0                                    RB

@@ -404,13 +404,13 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 		
 		//Weapon Depth Map
 		//FPS Hand Depth Maps require more precision at smaller scales to work
-		if(WDM == 1 || WDM == 3 || WDM == 4 || WDM == 6 || WDM == 7 || WDM == 8 || WDM == 9 || WDM == 10 || WDM == 11 || WDM == 12 || WDM == 13 || WDM == 14 || WDM == 16 || WDM == 17 || WDM == 18 || WDM == 19 || WDM == 20 || WDM == 21 || WDM == 22 || WDM == 23 || WDM == 24 || WDM == 25 )
+		if(WDM == 1 || WDM == 3 || WDM == 4 || WDM == 6 || WDM == 7 || WDM == 8 || WDM == 9 || WDM == 10 || WDM == 11 || WDM == 12 || WDM == 13 || WDM == 14 || WDM == 16 || WDM == 17 || WDM == 19 || WDM == 20 || WDM == 21 || WDM == 22 || WDM == 23 || WDM == 24 || WDM == 25 || WDM == 26 )
 		{
 		float constantF = 1.0;	
 		float constantN = 0.01;
 		zBufferWH = 2.0 * constantN * constantF / (constantF + constantN - (2.0 * zBufferWH.r - 1.0) * (constantF - constantN));
 		}
-		if(WDM == 2 || WDM == 5 || WDM == 15 )
+		if(WDM == 2 || WDM == 5 || WDM == 15 || WDM == 18)
 		{
 		zBufferWH = pow(abs(zBufferWH.r - 1.0),10);
  		}
@@ -562,6 +562,7 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 		cWF = 0.010;
 		cWN = 100.0;
 		cWP = 0.4375;
+		CoP = 0.522;
 		}
 
 		//Game: S.T.A.L.K.E.R: Games
@@ -571,6 +572,7 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 		cWF = 0.010;
 		cWN = -5.0;
 		cWP = 0.976;
+		CoP = 0.508;
 		}
 
 		//Game: Skyrim Special Edition
@@ -580,6 +582,7 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 		cWF = 0.010;
 		cWN = -5.0;
 		cWP = 0.905;
+		CoP = 0.146;
 		}
 		
 		//Game: Turok Dinosaur Hunter
@@ -587,8 +590,9 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 		if (WDM == 18)
 		{
 		cWF = 0.010;
-		cWN = 2.0;
-		cWP = 0.9785;
+		cWN = -0.450;
+		cWP = 0.01225;
+		CoP = 0.473;
 		}
 		
 		//Game: Wolfenstine: New Order ; Old Blood
@@ -658,13 +662,14 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 		CoP = 0.900;
 		}
 		
-		//Game:
+		//Game: Turok 2: Seeds of Evil
 		//Weapon Depth Map Twenty Three
 		if (WDM == 26)
 		{
-		cWF = Weapon_Adjust.x;
-		cWN = Weapon_Adjust.y;
-		cWP = Weapon_Adjust.z;
+		cWF = 0.010;
+		cWN = -100.0;
+		cWP = -0.050;
+		CoP = 3.750;
 		}
 		
 		//Game:
@@ -702,8 +707,15 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 		//Auto Anti Weapon Depth Map Z-Fighting is always on.
 		zBufferWH = zBufferWH*AL(); 
 		
-		zBufferWH = smoothstep(0.0,1.250,zBufferWH);
-
+		if (WDM == 18)
+		{
+		zBufferWH = smoothstep(0,1,zBufferWH);
+		}
+		else
+		{
+		zBufferWH = smoothstep(0,1.250,zBufferWH);
+		}
+		
 		Adj = 1.0;//Replaced with Weapon_Cutoff Still used as a base.
 			
 		float NearDepth = step(zBufferWH.r,Adj);
