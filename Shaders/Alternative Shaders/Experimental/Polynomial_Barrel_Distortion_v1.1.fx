@@ -27,8 +27,8 @@ uniform int Interpupillary_Distance <
 	ui_min = -100; ui_max = 100;
 	ui_label = "Interpupillary Distance";
 	ui_tooltip = "Determines the distance between your eyes.\n" 
-				"In Monoscopic mode it's x offset calibration.\n"
-				"Default is 0.";
+				 "In Monoscopic mode it's x offset calibration.\n"
+				 "Default is 0.";
 > = 0;
 
 uniform int Stereoscopic_Mode_Convert <
