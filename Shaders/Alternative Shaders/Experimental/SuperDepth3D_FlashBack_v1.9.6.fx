@@ -59,7 +59,8 @@ uniform float Near_Depth <
 	ui_type = "drag";
 	ui_min = 0; ui_max = 0.3;
 	ui_label = "Near Depth Adjustment";
-	ui_tooltip = "Determines the amount of depth near the cam, zero is off. Default is 0.150.";
+	ui_tooltip = "Determines the amount of depth near the cam, zero is off.\n" 
+				 "Default is 0.150.";
 > = 0.150;
 
 uniform float Perspective <
@@ -97,14 +98,16 @@ uniform float3 Weapon_Adjust <
 	ui_type = "drag";
 	ui_min = -10.0; ui_max = 10.0;
 	ui_label = "Weapon Adjust Depth Map";
-	ui_tooltip = "Adjust weapon depth map. Default is (X 0.010, Y 5.0, Z 1.0)";
+	ui_tooltip = "Adjust weapon depth map.\n" 
+				 "Default is (X 0.010, Y 5.0, Z 1.0)";
 > = float3(0.010,5.00,1.00);
 
 uniform float Weapon_Cutoff <
 	ui_type = "drag";
 	ui_min = 0; ui_max = 1;
 	ui_label = "Weapon Cutoff Point";
-	ui_tooltip = "For adjusting the cutoff point of the weapon Depth Map. 0 is Auto";
+	ui_tooltip = "For adjusting the cutoff point of the weapon Depth Map.\n" 
+				 "Zero is Auto";
 > = 0;
 
 uniform int Custom_Sidebars <
@@ -144,28 +147,32 @@ uniform float Anaglyph_Desaturation <
 
 uniform bool AO <
 	ui_label = "3D AO Mode";
-	ui_tooltip = "3D ambient occlusion mode switch. Default is On.";
+	ui_tooltip = "3D ambient occlusion mode switch.\n" 
+				 "Default is On.";
 > = 1;
 
 uniform float Power <
 	ui_type = "drag";
 	ui_min = 0.25; ui_max = 0.75;
 	ui_label = "AO Power";
-	ui_tooltip = "Ambient occlusion power on the depth map. Default is 0.500";
+	ui_tooltip = "Ambient occlusion power on the depth map.\n" 
+				 "Default is 0.500";
 > = 0.500;
 
 uniform float Falloff <
 	ui_type = "drag";
 	ui_min = 0.5; ui_max = 2.5;
 	ui_label = "AO Falloff";
-	ui_tooltip = "Ambient occlusion falloff. Default is 1.5";
+	ui_tooltip = "Ambient occlusion falloff.\n" 
+				 "Default is 1.5";
 > = 1.5;
 
 uniform float AO_Shift <
 	ui_type = "drag";
 	ui_min = 0; ui_max = 0.750;
 	ui_label = "AO Shift";
-	ui_tooltip = "Determines the Shift from White to Black. Default is 0.250";
+	ui_tooltip = "Determines the Shift from White to Black.\n" 
+				 "Default is 0.250";
 > = 0.250;
 
 uniform bool Eye_Swap <
@@ -176,14 +183,16 @@ uniform bool Eye_Swap <
 uniform float Cross_Cursor_Size <
 	ui_type = "drag";
 	ui_min = 1; ui_max = 100;
-	ui_tooltip = "Pick your size of the cross cursor. Default is 25";
 	ui_label = "Cross Cursor Size";
+	ui_tooltip = "Pick your size of the cross cursor.\n" 
+				 "Default is 25";
 > = 25.0;
 
 uniform float3 Cross_Cursor_Color <
 	ui_type = "color";
-	ui_tooltip = "Pick your own cross cursor color. Default is (R 255, G 255, B 255)";
 	ui_label = "Cross Cursor Color";
+	ui_tooltip = "Pick your own cross cursor color.\n" 
+				 " Default is (R 255, G 255, B 255)";
 > = float3(1.0, 1.0, 1.0);
 
 uniform bool InvertY <

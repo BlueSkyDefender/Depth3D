@@ -59,16 +59,18 @@ uniform int Divergence <
 
 uniform int Near_Depth <
 	ui_type = "drag";
-	ui_min = 0; ui_max = 3;
+	ui_min = 0; ui_max = 4;
 	ui_label = "Near Depth Adjustment";
-	ui_tooltip = "Determines the amount of depth near the cam, zero is off. Default is 1.";
+	ui_tooltip = "Determines the amount of depth near the cam, zero is off.\n" 
+				 "Default is 1.";
 > = 1;
 
 uniform float Perspective <
 	ui_type = "drag";
 	ui_min = -100; ui_max = 100;
 	ui_label = "Perspective Slider";
-	ui_tooltip = "Determines the perspective point. Default is 0";
+	ui_tooltip = "Determines the perspective point.\n" 
+				 "Default is 0";
 > = 0;
 
 uniform int Dis_Occlusion <
@@ -106,14 +108,16 @@ uniform float3 Weapon_Adjust <
 	ui_type = "drag";
 	ui_min = -10.0; ui_max = 10.0;
 	ui_label = "Weapon Adjust Depth Map";
-	ui_tooltip = "Adjust weapon depth map. Default is (X 0.010, Y 5.0, Z 1.0)";
+	ui_tooltip = "Adjust weapon depth map.\n" 
+				 "Default is (X 0.010, Y 5.0, Z 1.0)";
 > = float3(0.010,5.00,1.00);
 
 uniform float Weapon_Cutoff <
 	ui_type = "drag";
 	ui_min = 0; ui_max = 1;
 	ui_label = "Weapon Cutoff Point";
-	ui_tooltip = "For adjusting the cutoff point of the weapon Depth Map. 0 is Auto";
+	ui_tooltip = "For adjusting the cutoff point of the weapon Depth Map.\n" 
+				 "Zero is Auto.";
 > = 0;
 
 uniform int Custom_Sidebars <
@@ -153,28 +157,32 @@ uniform float Anaglyph_Desaturation <
 
 uniform bool AO <
 	ui_label = "3D AO Mode";
-	ui_tooltip = "3D ambient occlusion mode switch. Default is On.";
+	ui_tooltip = "3D ambient occlusion mode switch.\n" 
+				 "Default is On.";
 > = 1;
 
 uniform float Power <
 	ui_type = "drag";
 	ui_min = 0.25; ui_max = 0.75;
 	ui_label = "AO Power";
-	ui_tooltip = "Ambient occlusion power on the depth map. Default is 0.500";
+	ui_tooltip = "Ambient occlusion power on the depth map.\n" 
+				 "Default is 0.500";
 > = 0.500;
 
 uniform float Falloff <
 	ui_type = "drag";
 	ui_min = 0.5; ui_max = 2.5;
 	ui_label = "AO Falloff";
-	ui_tooltip = "Ambient occlusion falloff. Default is 1.5";
+	ui_tooltip = "Ambient occlusion falloff.\n" 
+				 "Default is 1.5";
 > = 1.5;
 
 uniform float AO_Shift <
 	ui_type = "drag";
 	ui_min = 0; ui_max = 0.750;
 	ui_label = "AO Shift";
-	ui_tooltip = "Determines the Shift from White to Black. Default is 0.250";
+	ui_tooltip = "Determines the Shift from White to Black.\n" 
+				 "Default is 0.250";
 > = 0.250;
 
 uniform bool Eye_Swap <
@@ -185,14 +193,16 @@ uniform bool Eye_Swap <
 uniform float Cross_Cursor_Size <
 	ui_type = "drag";
 	ui_min = 1; ui_max = 100;
-	ui_tooltip = "Pick your size of the cross cursor. Default is 25";
 	ui_label = "Cross Cursor Size";
+	ui_tooltip = "Pick your size of the cross cursor.\n" 
+				 "Default is 25";
 > = 25.0;
 
 uniform float3 Cross_Cursor_Color <
 	ui_type = "color";
-	ui_tooltip = "Pick your own cross cursor color. Default is (R 255, G 255, B 255)";
 	ui_label = "Cross Cursor Color";
+	ui_tooltip = "Pick your own cross cursor color.\n" 
+				 "Default is (R 255, G 255, B 255)";
 > = float3(1.0, 1.0, 1.0);
 
 uniform bool InvertY <
@@ -932,7 +942,7 @@ void Average_Luminance(in float4 position : SV_Position, in float2 texcoord : TE
 void PS_renderLR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 color : SV_Target0 )
 {
 	float samples[4] = {0.50, 0.66, 0.85, 1.0};
-	float DepthL = 1, DepthR = 1, MS , P, S, MaxTP, CalNear;
+	float DepthL = 1, DepthR = 1, MS , P, S, CalNear;
 	float2 uv = 0;
 	
 	if(!Eye_Swap)
@@ -970,24 +980,28 @@ void PS_renderLR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD
 	
 	if(Near_Depth == 1)
 	{
-	CalNear = 3.5/Divergence;//Near Depth auto Cal.
+	CalNear = Divergence * 0.004;//Near Depth auto Cal.
 	}
 	else if(Near_Depth == 2)
 	{
-	CalNear = 5.25/Divergence;//Near Depth auto x1.5 Cal.
+	CalNear = Divergence * 0.008;
 	}
 	else if(Near_Depth == 3)
 	{
-	CalNear = 7.0/Divergence;//Near Depth auto x2 Cal.
+	CalNear = Divergence * 0.012;
+	}
+	else if(Near_Depth == 4)
+	{
+	CalNear = Divergence * 0.016;
 	}
 	else
 	{
 	CalNear = 0;//Near Depth Off.
 	}
 	
-	MaxTP = Divergence * 0.03;//Max 3% of Divergence.
-	float PL = saturate(1-(MaxTP *(1-0.350/DepthL)));//ZPD is hard set 0.350 for now.
-	float PR = saturate(1-(MaxTP *(1-0.350/DepthR)));//ZPD is hard set 0.350 for now.
+	float MaxTP = Divergence * 0.03;//Max 3% of Divergence.
+	float PL = saturate(1-(MaxTP *(1-0.250/DepthL)));
+	float PR = saturate(1-(MaxTP *(1-0.250/DepthR)));
 	float ReprojectionLeft = lerp(DepthL * MS, PL * MS,-CalNear);
 	float ReprojectionRight = lerp(DepthR * MS,PR * MS,-CalNear);
 	

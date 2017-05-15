@@ -26,7 +26,9 @@ uniform int Interpupillary_Distance <
 	ui_type = "drag";
 	ui_min = -100; ui_max = 100;
 	ui_label = "Interpupillary Distance";
-	ui_tooltip = "Determines the distance between your eyes. Default is 0";
+	ui_tooltip = "Determines the distance between your eyes.\n" 
+				"In Monoscopic mode it's x offset calibration.\n"
+				"Default is 0.";
 > = 0;
 
 uniform int Stereoscopic_Mode_Convert <
@@ -47,13 +49,15 @@ uniform float Lens_Distortion <
 	ui_type = "drag";
 	ui_min = -0.325; ui_max = 5;
 	ui_label = "Lens Distortion";
-	ui_tooltip = "Lens distortion value, positive values of k2 gives barrel distortion, negative give pincushion. Default is 0.01";
+	ui_tooltip = "Lens distortion value, positive values of k2 gives barrel distortion, negative give pincushion.\n"
+				 "Default is 0.01";
 > = 0.01;
 
 uniform float3 Polynomial_Colors <
 	ui_type = "drag";
 	ui_min = 0.250; ui_max = 2.0;
-	ui_tooltip = "Adjust the Polynomial Distortion Red, Green, Blue. Default is (R 1.0, G 1.0, B 1.0)";
+	ui_tooltip = "Adjust the Polynomial Distortion Red, Green, Blue.\n"
+				 "Default is (R 1.0, G 1.0, B 1.0)";
 	ui_label = "Polynomial Color Distortion";
 > = float3(1.0, 1.0, 1.0);
 
@@ -61,7 +65,8 @@ uniform float2 Zoom_Aspect_Ratio <
 	ui_type = "drag";
 	ui_min = 0.5; ui_max = 2;
 	ui_label = "Lens Zoom & Aspect Ratio";
-	ui_tooltip = "Lens Zoom amd Aspect Ratio. Default is 1.0.";
+	ui_tooltip = "Lens Zoom amd Aspect Ratio..\n" 
+				 "Default is 1.0.";
 > = float2(1.0,1.0);
 
 uniform int Custom_Sidebars <
@@ -70,6 +75,11 @@ uniform int Custom_Sidebars <
 	ui_label = "Edge Selection";
 	ui_tooltip = "Select how you like the Edge of the screen to look like.";
 > = 1;
+
+uniform bool Diaspora <
+	ui_label = "Diaspora Fix";
+	ui_tooltip = "A small fix for the game Diaspora.";
+> = false;
 
 //////////////////////////////////////////////////HMD Profiles//////////////////////////////////////////////////////////////////
 
@@ -91,6 +101,7 @@ float LD = Lens_Distortion;
 float Z = Zoom;
 float AR = Aspect_Ratio;
 float3 PC = Polynomial_Colors;
+float4x4 Done;
 
 	//Make your own Profile here.
 	if (HMD_Profiles == 1)
@@ -114,7 +125,15 @@ float3 PC = Polynomial_Colors;
 		PC = float3(0.5,0.75,1);	//Polynomial Colors. Default is (Red 1.0, Green 1.0, Blue 1.0)
 	}
 
-return float4x4(float4(IPD,LC,LD,0),float4(PC.x,PC.y,PC.z,0),float4(Z,AR,0,0),float4(0,0,0,0));
+if(Diaspora)
+{
+Done = float4x4(float4(IPD,PC.x,Z,0),float4(LC,PC.y,AR,0),float4(LD,PC.z,0,0),float4(0,0,0,0)); //Diaspora frak up 4x4 fix
+}
+else
+{
+Done = float4x4(float4(IPD,LC,LD,0),float4(PC.x,PC.y,PC.z,0),float4(Z,AR,0,0),float4(0,0,0,0));
+}
+return Done;
 }
 
 ////////////////////////////////////////////////HMD Profiles End/////////////////////////////////////////////////////////////////
@@ -393,7 +412,7 @@ void PS0(float4 position : SV_Position, float2 texcoord : TEXCOORD0, out float4 
 	}
 	else
 	{
-	Out = PDL(float2((texcoord.x*X)-midV * pix.x,(texcoord.y*Y)-midH));
+	Out = PDL(float2((texcoord.x*X)-midV + IPDS() * pix.x,(texcoord.y*Y)-midH));
 	}
 	color = Out;
 }
