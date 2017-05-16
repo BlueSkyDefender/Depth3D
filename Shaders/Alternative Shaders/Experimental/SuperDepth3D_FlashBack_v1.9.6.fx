@@ -55,13 +55,13 @@ uniform int Divergence <
 	ui_tooltip = "Determines the amount of Image Warping and Separation.";
 > = 15;
 
-uniform int Near_Depth <
+uniform float Near_Depth <
 	ui_type = "drag";
-	ui_min = 0; ui_max = 4;
+	ui_min = 0.0; ui_max = 100.0;
 	ui_label = "Near Depth Adjustment";
 	ui_tooltip = "Determines the amount of depth near the cam, zero is off.\n" 
-				 "Default is 1.";
-> = 1;
+				 "Default is 50.";
+> = 50.0;
 
 uniform float Perspective <
 	ui_type = "drag";
@@ -920,37 +920,11 @@ void Average_Luminance(in float4 position : SV_Position, in float2 texcoord : TE
 
 	void  PS_calcLR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 colorTwo : SV_Target0, out float4 colorOne : SV_Target1)
 	{
-	float CalNear;
+	float ND = Near_Depth/500;
+	float D = Divergence*2;
 	float GetDepth = tex2D(SamplerDis,float2(texcoord.x,texcoord.y)).r;
-	
-	if (Near_Depth == 1)
-	{
-	CalNear = Divergence * 0.004; //Near Depth auto Cal.
-	}
-	else if(Near_Depth == 2)
-	{
-	CalNear = Divergence * 0.008;
-	}
-	else if(Near_Depth == 3)
-	{
-	CalNear = Divergence * 0.012;
-	}
-	else if(Near_Depth == 4)
-	{
-	CalNear = Divergence * 0.016;
-	}
-	else
-	{
-	CalNear = 0;//Near Depth Off.
-	}
-	
-	float MaxTP = Divergence * 0.03;//Max 3% of Divergence.
-	float P = saturate(1-(MaxTP *(1-0.250/GetDepth)));
-	float Reprojection = lerp(GetDepth,P , -CalNear);
-	
-	colorOne = texcoord.x+Divergence*pix.x*Reprojection;
-	colorTwo = texcoord.x-Divergence*pix.x*Reprojection;
-	
+	colorOne = lerp(texcoord.x+Divergence*pix.x*GetDepth,texcoord.x+D*pix.x*(1-GetDepth),-ND);
+	colorTwo = lerp(texcoord.x-Divergence*pix.x*GetDepth,texcoord.x-D*pix.x*(1-GetDepth),-ND);
 	}
 	
 

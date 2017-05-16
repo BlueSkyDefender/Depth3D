@@ -65,7 +65,7 @@ uniform float2 Zoom_Aspect_Ratio <
 	ui_type = "drag";
 	ui_min = 0.5; ui_max = 2;
 	ui_label = "Lens Zoom & Aspect Ratio";
-	ui_tooltip = "Lens Zoom amd Aspect Ratio..\n" 
+	ui_tooltip = "Lens Zoom amd Aspect Ratio.\n" 
 				 "Default is 1.0.";
 > = float2(1.0,1.0);
 

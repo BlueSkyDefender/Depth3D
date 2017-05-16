@@ -25,13 +25,15 @@
 uniform float Cross_Cursor_Size <
 	ui_type = "drag";
 	ui_min = 1; ui_max = 100;
-	ui_tooltip = "Pick your size of the cross cursor. Default is 25";
+	ui_tooltip = "Pick your size of the cross cursor.\n" 
+				 "Default is 25";
 	ui_label = "Cross Cursor Size";
 > = 25.0;
 
 uniform float3 Cross_Cursor_Color <
 	ui_type = "color";
-	ui_tooltip = "Pick your own cross cursor color. Default is (R 255, G 255, B 255)";
+	ui_tooltip = "Pick your own cross cursor color.\n" 
+				 "Default is (R 255, G 255, B 255)";
 	ui_label = "Cross Cursor Color";
 > = float3(1.0, 1.0, 1.0);
 
@@ -53,7 +55,7 @@ sampler BackBuffer
 		Texture = BackBufferTex;
 	};
 	
-float4 MouseCuror(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Target
+float4 MouseCursor(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Target
 {
 	float4 Mpointer; 
 	 
@@ -85,6 +87,6 @@ technique Cross_Cursor
 			pass MouseCuror
 		{
 			VertexShader = PostProcessVS;
-			PixelShader = MouseCuror;
+			PixelShader = MouseCursor;
 		}	
 }

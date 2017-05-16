@@ -57,13 +57,13 @@ uniform int Divergence <
 	ui_tooltip = "Determines the amount of Image Warping and Separation.";
 > = 15;
 
-uniform int Near_Depth <
+uniform float Near_Depth <
 	ui_type = "drag";
-	ui_min = 0; ui_max = 4;
+	ui_min = 0; ui_max = 100;
 	ui_label = "Near Depth Adjustment";
 	ui_tooltip = "Determines the amount of depth near the cam, zero is off.\n" 
-				 "Default is 1.";
-> = 1;
+				 "Default is 0.";
+> = 0;
 
 uniform float Perspective <
 	ui_type = "drag";
@@ -744,15 +744,17 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 		}
 		
 		float4 DM;
+		float ND = Near_Depth/200;
+		float Z = lerp(zBuffer.r,pow(zBuffer.r,0.5),ND);
 			
 		if (WDM == 0)
 		{
-		DM = zBuffer;
+		DM = Z;
 		}
 		else
 		{
-		D = lerp(zBuffer,zBufferWH,NearDepth);
-		DM = lerp(zBuffer,D,Cutoff);
+		D = lerp(Z,zBufferWH,NearDepth);
+		DM = lerp(Z,D,Cutoff);
 		}
 			
 		//Weapon Depth Map end//
@@ -942,7 +944,7 @@ void Average_Luminance(in float4 position : SV_Position, in float2 texcoord : TE
 void PS_renderLR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 color : SV_Target0 )
 {
 	float samples[4] = {0.50, 0.66, 0.85, 1.0};
-	float DepthL = 1, DepthR = 1, MS , P, S, CalNear;
+	float DepthL = 1, DepthR = 1, MS , P, S, ND;
 	float2 uv = 0;
 	
 	if(!Eye_Swap)
@@ -977,33 +979,9 @@ void PS_renderLR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD
 			DepthR =  min(DepthR,tex2D(SamplerDis,float2((texcoord.x - P)-uv.x, texcoord.y)).r);
 		}
 	}
-	
-	if(Near_Depth == 1)
-	{
-	CalNear = Divergence * 0.004;//Near Depth auto Cal.
-	}
-	else if(Near_Depth == 2)
-	{
-	CalNear = Divergence * 0.008;
-	}
-	else if(Near_Depth == 3)
-	{
-	CalNear = Divergence * 0.012;
-	}
-	else if(Near_Depth == 4)
-	{
-	CalNear = Divergence * 0.016;
-	}
-	else
-	{
-	CalNear = 0;//Near Depth Off.
-	}
-	
-	float MaxTP = Divergence * 0.03;//Max 3% of Divergence.
-	float PL = saturate(1-(MaxTP *(1-0.250/DepthL)));
-	float PR = saturate(1-(MaxTP *(1-0.250/DepthR)));
-	float ReprojectionLeft = lerp(DepthL * MS, PL * MS,-CalNear);
-	float ReprojectionRight = lerp(DepthR * MS,PR * MS,-CalNear);
+
+	float ReprojectionLeft = DepthL * MS;
+	float ReprojectionRight = DepthR * MS;
 	
 	if(!Depth_Map_View)
 	{
