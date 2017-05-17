@@ -32,7 +32,14 @@
 
 // Determines The Max Depth amount. The larger the amount harder it will hit on FPS will be.
 
-#define Depth_Max 25
+#define Depth_Max 30
+
+//uniform float2 X <
+	//ui_type = "drag";
+	//ui_min = 0.0; ui_max = 5000.0;
+	//ui_label = "X";
+	//ui_tooltip = "Determines the X point. Default is 0";
+//> = float2(0.0,1.0);
 
 uniform int Depth_Map <
 	ui_type = "combo";
@@ -60,8 +67,15 @@ uniform float Near_Depth <
 	ui_min = 0.0; ui_max = 100.0;
 	ui_label = "Near Depth Adjustment";
 	ui_tooltip = "Determines the amount of depth near the cam, zero is off.\n" 
-				 "Default is 50.";
+				 "Default is 50";
 > = 50.0;
+
+uniform bool Weapon_Fix <
+	ui_label = "Weapon Fix";
+	ui_tooltip = "If FPS Hand is to deep in the screen Turn this on.\n"
+				 "This is to fix Weapon Scale.\n" 
+				 "Default is On.";
+> = 1;
 
 uniform float Perspective <
 	ui_type = "drag";
@@ -169,11 +183,11 @@ uniform float Falloff <
 
 uniform float AO_Shift <
 	ui_type = "drag";
-	ui_min = 0; ui_max = 0.750;
+	ui_min = 0; ui_max = 0.500;
 	ui_label = "AO Shift";
 	ui_tooltip = "Determines the Shift from White to Black.\n" 
-				 "Default is 0.250";
-> = 0.250;
+				 "Default is 0";
+> = 0.0;
 
 uniform bool Eye_Swap <
 	ui_label = "Swap Eyes";
@@ -772,20 +786,27 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 					
 		float NearDepth = step(WD.r,1.0); //Base Cutoff
 		
-		float4 D;
+		float D, Done;
 		
 		float Cutoff = step(DM.r,CutOFFCal);
 		
-		float4 Done;
+		float ND = Near_Depth/200;
+		float Z = lerp(DM,pow(DM,0.5),ND);
+		float NDFix = 500;
+		
+		if(Weapon_Fix)
+		NDFix = 1000;
+		
+		float Adj = Near_Depth/NDFix;
 					
 		if (WDM == 0)
 		{
-		Done = DM.r;
+		Done = Z;
 		}
 		else
 		{
-		D = lerp(DM.r,WD.r,NearDepth);
-		Done = lerp(DM.r,D,Cutoff);
+		D = lerp(Z,WD,NearDepth);
+		Done = lerp(Z,D+Adj,Cutoff);
 		}
 		
 		Color = saturate(float4(Done.rrr,1));

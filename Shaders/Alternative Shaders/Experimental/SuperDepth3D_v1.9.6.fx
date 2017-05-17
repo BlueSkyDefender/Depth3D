@@ -52,17 +52,28 @@ uniform float Depth_Map_Adjust <
 
 uniform int Divergence <
 	ui_type = "drag";
-	ui_min = 1; ui_max = 35;
+	ui_min = 1; ui_max = 30;
 	ui_label = "Divergence Slider";
-	ui_tooltip = "Determines the amount of Image Warping and Separation.";
+	ui_tooltip = "Determines the amount of Image Warping and Separation.\n" 
+				 "You can override this value.";
 > = 15;
 
 uniform float Near_Depth <
 	ui_type = "drag";
-	ui_min = 0; ui_max = 100;
+	ui_min = 0; ui_max = 50;
 	ui_label = "Near Depth Adjustment";
-	ui_tooltip = "Determines the amount of depth near the cam, zero is off.\n" 
-				 "Default is 0.";
+	ui_tooltip = "Pushes in the scene near the cam.\n" 
+				 "Default is 0";
+> = 0;
+
+uniform int Pop <
+	ui_type = "drag";
+	ui_min = 0; ui_max = 3;
+	ui_label = "Pop Adjustment";
+	ui_tooltip = "Determines the amount of Pop near the cam, zero is off.\n" 
+				 "For FPS Games it is recommended to stay around 0-2.\n"
+				 "You may want to enable Disocclusion for artifacts\n" 
+				 "Default is 0";
 > = 0;
 
 uniform float Perspective <
@@ -179,11 +190,11 @@ uniform float Falloff <
 
 uniform float AO_Shift <
 	ui_type = "drag";
-	ui_min = 0; ui_max = 0.750;
+	ui_min = 0; ui_max = 0.500;
 	ui_label = "AO Shift";
 	ui_tooltip = "Determines the Shift from White to Black.\n" 
-				 "Default is 0.250";
-> = 0.250;
+				 "Default is 0";
+> = 0.0;
 
 uniform bool Eye_Swap <
 	ui_label = "Swap Eyes";
@@ -744,27 +755,25 @@ float4 WeaponDepth(in float2 texcoord : TEXCOORD0)
 
 void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 Color : SV_Target0)
 {
-		float DM = Depth(texcoord).r;		
+		float DM = Depth(texcoord).r; //DepthMap In		
 		
-		float WD = WeaponDepth(texcoord).r;
+		float WD = WeaponDepth(texcoord).r; //Weapon DepthMap In
 		
 		float CoP = WeaponDepth(texcoord).w; //Weapon Cutoff Point
 				
 		float CutOFFCal = (CoP/Depth_Map_Adjust)/2; //Weapon Cutoff Calculation
-		
-		float Adj = 1.0; //Replaced with Weapon_Cutoff Still used as a base.
 			
-		float NearDepth = step(WD,Adj);
+		float NearDepth = step(WD,1.0); //1.0 Cutoff Still used as a base.
 		
-		float D;
-		
+		float D, Done;
+
 		float Cutoff = step(DM,CutOFFCal);
-		
-		float Done;
 		
 		float ND = Near_Depth/200;
 		float Z = lerp(DM,pow(DM,0.5),ND);
-					
+		
+		float Adj = Pop/30; //Push In weapon when useing Pop.
+		
 		if (WDM == 0)
 		{
 		Done = Z;
@@ -772,7 +781,7 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 		else
 		{
 		D = lerp(Z,WD,NearDepth);
-		Done = lerp(Z,D,Cutoff);
+		Done = lerp(Z,D+Adj,Cutoff);
 		}
 		
 		Color = saturate(float4(Done.rrr,1));
@@ -993,9 +1002,31 @@ void PS_renderLR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD
 			DepthR =  min(DepthR,tex2D(SamplerDis,float2((texcoord.x - P)-uv.x, texcoord.y)).r);
 		}
 	}
+	
+	float CalNear;
 
-	float ReprojectionLeft = DepthL * MS;
-	float ReprojectionRight = DepthR * MS;
+	if (Pop == 1)
+	{
+	CalNear = Divergence * 0.003;//Near Depth auto Cal.
+	}
+	else if(Pop == 2)
+	{
+	CalNear = Divergence * 0.004;
+	}
+	else if(Pop == 3)
+	{
+	CalNear = Divergence * 0.005;
+	}
+	else
+	{
+	CalNear = 0;//Near Depth Off.
+	}
+	
+	float MaxTP = Divergence * 0.03;//Max 3% of Divergence.
+	float PL = saturate(1-(MaxTP *(1-0.200/DepthL)));
+	float PR = saturate(1-(MaxTP *(1-0.200/DepthR)));
+	float ReprojectionLeft = lerp(DepthL * MS, PL * MS,-CalNear);
+	float ReprojectionRight = lerp(DepthR * MS,PR * MS,-CalNear);
 	
 	if(!Depth_Map_View)
 	{
