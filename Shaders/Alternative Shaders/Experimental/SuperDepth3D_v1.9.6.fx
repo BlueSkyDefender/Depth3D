@@ -29,12 +29,12 @@
 // Determines The size of the Depth Map. For 4k Use 2 or 2.5. For 1440p Use 1.5 or 2. For 1080p use 1.
 #define Depth_Map_Division 1.0
 
-//uniform float X <
+//uniform float2 X <
 	//ui_type = "drag";
 	//ui_min = 0.0; ui_max = 1.0;
 	//ui_label = "X";
 	//ui_tooltip = "Determines the X point. Default is 0";
-//> = 0;
+//> = float2(0.0,1.0);
 
 uniform int Depth_Map <
 	ui_type = "combo";
@@ -319,17 +319,13 @@ float AdjustScale = 2;
 
 /////////////////////////////////////////////////////////////////////////////////Depth Map Information/////////////////////////////////////////////////////////////////////////////////
 
-void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 Color : SV_Target0)
+float4 Depth(in float2 texcoord : TEXCOORD0)
 {
-	 float4 color;
-
-			if (Depth_Map_Flip)
+		if (Depth_Map_Flip)
 			texcoord.y =  1 - texcoord.y;
 			
-	float4 zBuffer = tex2D(DepthBuffer, texcoord); //Depth Buffer
-	float4 zBufferWH = tex2D(DepthBuffer, texcoord); //Weapon Hand Depth Buffer
-	float4 zBufferPass = tex2D(DepthBuffer, texcoord); //zBuffer Pass for alt Weapon Hands
-	
+		float zBuffer = tex2D(DepthBuffer, texcoord).r; //Depth Buffer
+
 		//Conversions to linear space.....
 		//Near & Far Adjustment
 		float DDA = 0.125/Depth_Map_Adjust; //Division Depth Map Adjust - Near
@@ -337,25 +333,25 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 		//All 1.0f are Far Adjustment
 		
 		//0. DirectX Custom Constant Far
-		float DirectX = 2.0 * DDA * 1.0f / (1.0f + DDA - zBuffer.r * (1.0f - DDA));
+		float DirectX = 2.0 * DDA * 1.0f / (1.0f + DDA - zBuffer * (1.0f - DDA));
 		
 		//1. DirectX Alternative
-		float DirectXAlt = pow(abs(zBuffer.r - 1.0),DA);
+		float DirectXAlt = pow(abs(zBuffer - 1.0),DA);
 		
 		//2. OpenGL
-		float OpenGL = 2.0 * DDA * 1.0f / (1.0f + DDA - (2.0 * zBuffer.r - 1.0) * (1.0f - DDA));
+		float OpenGL = 2.0 * DDA * 1.0f / (1.0f + DDA - (2.0 * zBuffer - 1.0) * (1.0f - DDA));
 		
 		//3. OpenGL Reverse
-		float OpenGLRev = 2.0 * 1.0f * DDA / (DDA + 1.0f - (2.0 * zBuffer.r - 1.0) * (DDA - 1.0f));
+		float OpenGLRev = 2.0 * 1.0f * DDA / (DDA + 1.0f - (2.0 * zBuffer - 1.0) * (DDA - 1.0f));
 		
 		//4. Raw Buffer
-		float Raw = pow(abs(zBuffer.r),DA);
+		float Raw = pow(abs(zBuffer),DA);
 		
 		//5. Old Depth Map from 1.9.5
-		float Old = 100 / (1 + 100 - (zBuffer.r/DDA) * (1 - 100));
+		float Old = 100 / (1 + 100 - (zBuffer/DDA) * (1 - 100));
 		
 		//6. Special Depth Map
-		float Special = pow(abs(exp(zBuffer.r)*Offset),(DA*25));
+		float Special = pow(abs(exp(zBuffer)*Offset),(DA*25));
 		
 		if (Depth_Map == 0)
 		{
@@ -412,25 +408,37 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 		zBuffer = Special;
 		}
 		
+		float4 DM;
+		float ND = Near_Depth/200;
+		zBuffer = lerp(zBuffer,pow(zBuffer,0.5),ND);
+	
+	return saturate(float4(zBuffer.rrr,1));	
+}
+
+float4 WeaponDepth(in float2 texcoord : TEXCOORD0)
+{
+		if (Depth_Map_Flip)
+			texcoord.y =  1 - texcoord.y;
+			
+		float zBufferWH = tex2D(DepthBuffer, texcoord).r; //Weapon Hand Depth Buffer
 		//Weapon Depth Map
 		//FPS Hand Depth Maps require more precision at smaller scales to work
 		if(WDM == 1 || WDM == 3 || WDM == 4 || WDM == 6 || WDM == 7 || WDM == 8 || WDM == 9 || WDM == 10 || WDM == 11 || WDM == 12 || WDM == 13 || WDM == 14 || WDM == 16 || WDM == 17 || WDM == 19 || WDM == 20 || WDM == 21 || WDM == 22 || WDM == 23 || WDM == 24 || WDM == 25 || WDM == 26 )
 		{
 		float constantF = 1.0;	
 		float constantN = 0.01;
-		zBufferWH = 2.0 * constantN * constantF / (constantF + constantN - (2.0 * zBufferWH.r - 1.0) * (constantF - constantN));
+		zBufferWH = 2.0 * constantN * constantF / (constantF + constantN - (2.0 * zBufferWH - 1.0) * (constantF - constantN));
 		}
-		if(WDM == 2 || WDM == 5 || WDM == 15 || WDM == 18)
+		else if(WDM == 2 || WDM == 5 || WDM == 15 || WDM == 18)
 		{
-		zBufferWH = pow(abs(zBufferWH.r - 1.0),10);
+		zBufferWH = pow(abs(zBufferWH - 1.0),10);
  		}
  		
 		//Set Weapon Depth Map settings for the section below.//
 		float cWF;
 		float cWN;
 		float cWP;
-		float CoP; //Weapon Cutoff Point
-		float CutOFFCal; //Weapon Cutoff Calculation
+		float CoP;
 		
 		if (WDM == 1)
 		{
@@ -702,11 +710,10 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 		cWP = Weapon_Adjust.z;
 		}
 		
-		CutOFFCal = (CoP/Depth_Map_Adjust)/2;
 		//SWDMS Done//
  		
 		//Scaled Section z-Buffer
-		float Adj;
+		
 		if (WDM >= 1)
 		{
 		cWN /= 1000;
@@ -727,41 +734,49 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 		{
 		zBufferWH = smoothstep(0,1.250,zBufferWH);
 		}
+		if (Weapon_Cutoff == 0) //Zero Is auto
+		{
+		CoP = CoP;
+		}
+		else	
+		{
+		CoP = Weapon_Cutoff;
+		}
 		
-		Adj = 1.0;//Replaced with Weapon_Cutoff Still used as a base.
-			
-		float NearDepth = step(zBufferWH.r,Adj);
-		float Cutoff;
-		float4 D;
+		return saturate(float4(zBufferWH.rrr,CoP));
+}
+
+void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 Color : SV_Target0)
+{
+		float DM = Depth(texcoord).r;		
+		
+		float WD = WeaponDepth(texcoord).r;
+		
+		float CoP = WeaponDepth(texcoord).w; //Weapon Cutoff Point
 				
-		if (Weapon_Cutoff == 0)//Zero Is auto
-		{
-		Cutoff = step(zBuffer.r,CutOFFCal);
-		}
-		else
-		{
-		Cutoff = step(zBuffer.r,Weapon_Cutoff);
-		}
+		float CutOFFCal = (CoP/Depth_Map_Adjust)/2; //Weapon Cutoff Calculation
 		
-		float4 DM;
-		float ND = Near_Depth/200;
-		float Z = lerp(zBuffer.r,pow(zBuffer.r,0.5),ND);
+		float Adj = 1.0; //Replaced with Weapon_Cutoff Still used as a base.
 			
+		float NearDepth = step(WD.r,Adj);
+		
+		float4 D;
+		
+		float Cutoff = step(DM.r,CutOFFCal);
+		
+		float4 Done;
+					
 		if (WDM == 0)
 		{
-		DM = Z;
+		Done = DM.r;
 		}
 		else
 		{
-		D = lerp(Z,zBufferWH,NearDepth);
-		DM = lerp(Z,D,Cutoff);
+		D = lerp(DM.r,WD.r,NearDepth);
+		Done = lerp(DM.r,D,Cutoff);
 		}
-			
-		//Weapon Depth Map end//
-    
-	color.rgb = saturate(DM.rrr); //clamped
-	
-	Color = color;	
+		
+		Color = saturate(float4(Done.rrr,1));
 }
 
 /////////////////////////////////////////////////////AO/////////////////////////////////////////////////////////////
