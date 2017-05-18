@@ -60,7 +60,7 @@ uniform int Divergence <
 
 uniform float Convergence <
 	ui_type = "drag";
-	ui_min = 0.0; ui_max = 1.0;
+	ui_min = 0.0; ui_max = 5.0;
 	ui_label = "Convergence Slider";
 	ui_tooltip = "Determines the amount of Screen Depth.\n"
 				 "Give the image Pop if used correctly.\n"
@@ -780,7 +780,7 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 		Done = lerp(DM,D+Adj,Cutoff);
 		}
 		
-		Color = float4(Done.rrr,1);
+		Color = saturate(float4(Done.rrr,1));
 }
 
 /////////////////////////////////////////////////////AO/////////////////////////////////////////////////////////////
@@ -1002,8 +1002,8 @@ void PS_renderLR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD
 		DepthL += MS * (1-Convergence/DepthL);
 		DepthR += MS * (1-Convergence/DepthR);
 	
-	float ReprojectionLeft =  saturate(DepthL*MS);
-	float ReprojectionRight = saturate(DepthR*MS);
+	float ReprojectionLeft =  max(-0.005,DepthL*MS);
+	float ReprojectionRight = max(-0.005,DepthR*MS);
 	
 	if(!Depth_Map_View)
 	{
