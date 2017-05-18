@@ -31,7 +31,7 @@
 
 //uniform float2 X <
 	//ui_type = "drag";
-	//ui_min = 0.0; ui_max = 1.0;
+	//ui_min = 0.0; ui_max = 2.0;
 	//ui_label = "X";
 	//ui_tooltip = "Determines the X point. Default is 0";
 //> = float2(0.0,1.0);
@@ -58,21 +58,20 @@ uniform int Divergence <
 				 "You can override this value.";
 > = 15;
 
-uniform float Near_Depth <
+uniform float Convergence <
 	ui_type = "drag";
-	ui_min = 0; ui_max = 50;
-	ui_label = "Near Depth Adjustment";
-	ui_tooltip = "Pushes in the scene near the cam.\n" 
-				 "Default is 0";
-> = 0;
+	ui_min = 0.0; ui_max = 1.0;
+	ui_label = "Convergence Slider";
+	ui_tooltip = "Determines the amount of Screen Depth.\n"
+				 "Give the image Pop if used correctly.\n"
+				 "You can override this value.";
+> = 0.5;
 
-uniform int Pop <
+uniform float Weapon_Depth <
 	ui_type = "drag";
-	ui_min = 0; ui_max = 3;
-	ui_label = "Pop Adjustment";
-	ui_tooltip = "Determines the amount of Pop near the cam, zero is off.\n" 
-				 "For FPS Games it is recommended to stay around 0-2.\n"
-				 "You may want to enable Disocclusion for artifacts\n" 
+	ui_min = -100; ui_max = 100;
+	ui_label = "Weapon Depth Adjustment";
+	ui_tooltip = "Pushes or Pulls the FPS Hand in or out of the screen.\n" 
 				 "Default is 0";
 > = 0;
 
@@ -419,7 +418,7 @@ float4 Depth(in float2 texcoord : TEXCOORD0)
 		zBuffer = Special;
 		}
 	
-	return saturate(float4(zBuffer.rrr,1));	
+	return float4(zBuffer.rrr,1);	
 }
 
 float4 WeaponDepth(in float2 texcoord : TEXCOORD0)
@@ -750,7 +749,7 @@ float4 WeaponDepth(in float2 texcoord : TEXCOORD0)
 		CoP = Weapon_Cutoff;
 		}
 		
-		return saturate(float4(zBufferWH.rrr,CoP));
+		return float4(zBufferWH.rrr,CoP);
 }
 
 void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 Color : SV_Target0)
@@ -768,23 +767,20 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 		float D, Done;
 
 		float Cutoff = step(DM,CutOFFCal);
-		
-		float ND = Near_Depth/200;
-		float Z = lerp(DM,pow(DM,0.5),ND);
-		
-		float Adj = Pop/30; //Push In weapon when useing Pop.
+				
+		float Adj = Weapon_Depth/1000; //Push In weapon when useing Pop.
 		
 		if (WDM == 0)
 		{
-		Done = Z;
+		Done = DM;
 		}
 		else
 		{
-		D = lerp(Z,WD,NearDepth);
-		Done = lerp(Z,D+Adj,Cutoff);
+		D = lerp(DM,WD,NearDepth);
+		Done = lerp(DM,D+Adj,Cutoff);
 		}
 		
-		Color = saturate(float4(Done.rrr,1));
+		Color = float4(Done.rrr,1);
 }
 
 /////////////////////////////////////////////////////AO/////////////////////////////////////////////////////////////
@@ -966,7 +962,7 @@ void Average_Luminance(in float4 position : SV_Position, in float2 texcoord : TE
 
 void PS_renderLR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 color : SV_Target0 )
 {
-	float samples[4] = {0.50, 0.66, 0.85, 1.0};
+	float samples[4] = {0.50, 0.66, 0.83, 1.00};
 	float DepthL = 1, DepthR = 1, MS , P, S, ND;
 	float2 uv = 0;
 	
@@ -987,7 +983,7 @@ void PS_renderLR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD
 		uv.x = samples[j] * MS;
 		
 		if(Stereoscopic_Mode == 0)
-		{	
+		{
 			DepthL =  min(DepthL,tex2D(SamplerDis,float2((texcoord.x*2 + P)+uv.x, texcoord.y)).r);
 			DepthR =  min(DepthR,tex2D(SamplerDis,float2((texcoord.x*2-1 - P)-uv.x, texcoord.y)).r);
 		}
@@ -1003,30 +999,11 @@ void PS_renderLR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD
 		}
 	}
 	
-	float CalNear;
-
-	if (Pop == 1)
-	{
-	CalNear = Divergence * 0.003;//Near Depth auto Cal.
-	}
-	else if(Pop == 2)
-	{
-	CalNear = Divergence * 0.004;
-	}
-	else if(Pop == 3)
-	{
-	CalNear = Divergence * 0.005;
-	}
-	else
-	{
-	CalNear = 0;//Near Depth Off.
-	}
+		DepthL += MS * (1-Convergence/DepthL);
+		DepthR += MS * (1-Convergence/DepthR);
 	
-	float MaxTP = Divergence * 0.03;//Max 3% of Divergence.
-	float PL = saturate(1-(MaxTP *(1-0.200/DepthL)));
-	float PR = saturate(1-(MaxTP *(1-0.200/DepthR)));
-	float ReprojectionLeft = lerp(DepthL * MS, PL * MS,-CalNear);
-	float ReprojectionRight = lerp(DepthR * MS,PR * MS,-CalNear);
+	float ReprojectionLeft =  saturate(DepthL*MS);
+	float ReprojectionRight = saturate(DepthR*MS);
 	
 	if(!Depth_Map_View)
 	{

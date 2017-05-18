@@ -440,7 +440,7 @@ float4 Depth(in float2 texcoord : TEXCOORD0)
 		zBuffer = Special;
 		}
 		
-	return saturate(float4(zBuffer.rrr,1));	
+	return float4(zBuffer.rrr,1);	
 }
 
 float4 WeaponDepth(in float2 texcoord : TEXCOORD0)
@@ -771,7 +771,7 @@ float4 WeaponDepth(in float2 texcoord : TEXCOORD0)
 		CoP = Weapon_Cutoff;
 		}
 		
-		return saturate(float4(zBufferWH.rrr,CoP));
+		return float4(zBufferWH.rrr,CoP);
 }
 
 void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 Color : SV_Target0)
@@ -790,8 +790,6 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 		
 		float Cutoff = step(DM.r,CutOFFCal);
 		
-		float ND = Near_Depth/200;
-		float Z = lerp(DM,pow(DM,0.5),ND);
 		float NDFix = 500;
 		
 		if(Weapon_Fix)
@@ -801,12 +799,12 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 					
 		if (WDM == 0)
 		{
-		Done = Z;
+		Done = DM;
 		}
 		else
 		{
-		D = lerp(Z,WD,NearDepth);
-		Done = lerp(Z,D+Adj,Cutoff);
+		D = lerp(DM,WD,NearDepth);
+		Done = lerp(DM,D+Adj,Cutoff);
 		}
 		
 		Color = saturate(float4(Done.rrr,1));
