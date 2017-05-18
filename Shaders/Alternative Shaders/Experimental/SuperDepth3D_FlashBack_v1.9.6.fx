@@ -939,7 +939,7 @@ Done = sum;
 
 float4 DM = tex2D(SamplerDM,texcoord);
 
-	color = lerp(DM,Done,P);
+	color = lerp(DM,1-Done,P);
 	Ave = DM;
 }
 
