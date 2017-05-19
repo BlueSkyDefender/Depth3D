@@ -773,7 +773,7 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 
 		float Cutoff = step(DM,CutOFFCal);
 				
-		float Adj = Weapon_Depth/1000; //Push In weapon when useing Pop.
+		float Adj = Weapon_Depth/1000; //Push & pull weapon in or out of screen.
 		
 		if (WDM == 0)
 		{

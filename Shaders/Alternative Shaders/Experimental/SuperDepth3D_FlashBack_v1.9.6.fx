@@ -36,7 +36,7 @@
 
 //uniform float2 X <
 	//ui_type = "drag";
-	//ui_min = 0.0; ui_max = 5000.0;
+	//ui_min = 0.0; ui_max = 2.0;
 	//ui_label = "X";
 	//ui_tooltip = "Determines the X point. Default is 0";
 //> = float2(0.0,1.0);
@@ -64,18 +64,19 @@ uniform int Divergence <
 
 uniform float Near_Depth <
 	ui_type = "drag";
-	ui_min = 0.0; ui_max = 25.0;
+	ui_min = 0.0; ui_max = 100.0;
 	ui_label = "Near Depth Adjustment";
 	ui_tooltip = "Determines the amount of depth near the cam, zero is off.\n" 
 				 "Default is 0.0";
 > = 0.0;
 
-uniform bool Weapon_Fix <
-	ui_label = "Weapon Fix";
-	ui_tooltip = "If FPS Hand is to deep in the screen Turn this on.\n"
-				 "This is to fix Weapon Scale.\n" 
-				 "Default is On.";
-> = 1;
+uniform float Weapon_Depth <
+	ui_type = "drag";
+	ui_min = -100; ui_max = 100;
+	ui_label = "Weapon Depth Adjustment";
+	ui_tooltip = "Pushes or Pulls the FPS Hand in or out of the screen.\n" 
+				 "Default is 0";
+> = 0;
 
 uniform float Perspective <
 	ui_type = "drag";
@@ -782,13 +783,8 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 		float D, Done;
 		
 		float Cutoff = step(DM.r,CutOFFCal);
-		
-		float NDFix = 500;
-		
-		if(Weapon_Fix)
-		NDFix = 1000;
-		
-		float Adj = Near_Depth/NDFix;
+				
+		float Adj = Weapon_Depth/1000; //Push & pull weapon in or out of screen.
 					
 		if (WDM == 0)
 		{
@@ -943,11 +939,30 @@ void Average_Luminance(in float4 position : SV_Position, in float2 texcoord : TE
 
 	void  PS_calcLR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 color : SV_Target0)
 	{
+	//CodeStore//
+	//float G = (1-texcoord.x)-Divergence*pix.x*GetDepth;
+	//float A = texcoord.x-Divergence*pix.x*GetDepth;
+	//float R = (1-texcoord.x)+Divergence*pix.x*GetDepth;
+	//float B = texcoord.x+Divergence*pix.x*GetDepth;
+	//if (tex2Dlod(SamplerRB, float4(texcoord.x+i*pix.x/0.9,texcoord.y,0,0)).w <= texcoord.x/1.002)  //Decode A
+	//{
+		//cR = tex2Dlod(BackBuffer, float4(texcoord.x+i*pix.x,texcoord.y,0,0));
+	//}
+	//if (tex2Dlod(SamplerRB, float4(texcoord.x-i*pix.x/0.9,texcoord.y,0,0)).g <= (1-texcoord.x)/1.002) //Decode G
+	//{
+		//cL = tex2Dlod(BackBuffer, float4(texcoord.x-i*pix.x, texcoord.y,0,0));
+	//}
+	//End//
+	
 	float ND = Near_Depth/500;
-	float D = Divergence*2;
 	float GetDepth = tex2D(SamplerDis,float2(texcoord.x,texcoord.y)).r;
-	float R = lerp(texcoord.x-Divergence*pix.x*GetDepth,texcoord.x-D*pix.x*(1-GetDepth),-ND); //Red Color Channel
-	float B = lerp(texcoord.x+Divergence*pix.x*GetDepth,texcoord.x+D*pix.x*(1-GetDepth),-ND); //Blue Color Channel
+	float Red = (1-texcoord.x)+Divergence*pix.x*GetDepth;
+	float Blue = texcoord.x+Divergence*pix.x*GetDepth;
+	float RedINV = (1-texcoord.x)+Divergence*pix.x*(1-GetDepth);
+	float BlueINV = texcoord.x+Divergence*pix.x*(1-GetDepth);
+	float R = lerp(Red,RedINV,-ND); //Red Color Channel
+	float B = lerp(Blue,BlueINV,-ND); //Blue Color Channel
+	
 	color = float4(R,0,B,0);
 	}
 	
@@ -956,23 +971,22 @@ void Average_Luminance(in float4 position : SV_Position, in float2 texcoord : TE
 
 	void LR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 colorR : SV_Target0, out float4 colorL : SV_Target1)
 	{
-		float4 cL = tex2D(BackBuffer,texcoord);			
-		float4 cR = tex2D(BackBuffer,texcoord);
+		float4 cL = tex2D(BackBuffer,texcoord);	//objects that hit screen boundary is replaced with the BackBuffer 		
+		float4 cR = tex2D(BackBuffer,texcoord); //objects that hit screen boundary is replaced with the BackBuffer
 				
 		[loop]
 		for (int i = 0; i <= Divergence; i++) 
-		{
-			int j = -i;
+		{			
 			//R
-			if (tex2Dlod(SamplerRB, float4(texcoord.x+i*pix.x/0.9,texcoord.y,0,0)).r <= texcoord.x/1.002) //Decode Red
+			if (tex2Dlod(SamplerRB, float4(texcoord.x+i*pix.x/0.9,texcoord.y,0,0)).r >= (1-texcoord.x)/1.002)  //Decode R
 			{
 				cR = tex2Dlod(BackBuffer, float4(texcoord.x+i*pix.x,texcoord.y,0,0));
 			}
 			
 			//L
-			if (tex2Dlod(SamplerRB, float4(texcoord.x+j*pix.x/0.9,texcoord.y,0,0)).b >= texcoord.x/1.002) //Decode Blue
+			if (tex2Dlod(SamplerRB, float4(texcoord.x-i*pix.x/0.9,texcoord.y,0,0)).b >= texcoord.x/1.002) //Decode B
 			{
-				cL = tex2Dlod(BackBuffer, float4(texcoord.x+j*pix.x, texcoord.y,0,0));
+				cL = tex2Dlod(BackBuffer, float4(texcoord.x-i*pix.x, texcoord.y,0,0));
 			}
 		}
 		
