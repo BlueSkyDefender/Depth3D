@@ -29,12 +29,12 @@
 // Determines The size of the Depth Map. For 4k Use 2 or 2.5. For 1440p Use 1.5 or 2. For 1080p use 1.
 #define Depth_Map_Division 1.0
 
-uniform float2 X <
-	ui_type = "drag";
-	ui_min = 0.0; ui_max = 2.0;
-	ui_label = "X";
-	ui_tooltip = "Determines the X point. Default is 0";
-> = float2(0.0,1.0);
+//uniform float2 X <
+	//ui_type = "drag";
+	//ui_min = 0.0; ui_max = 2.0;
+	//ui_label = "X";
+	//ui_tooltip = "Determines the X point. Default is 0";
+//> = float2(0.0,1.0);
 
 uniform int Depth_Map <
 	ui_type = "combo";
