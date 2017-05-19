@@ -29,12 +29,12 @@
 // Determines The size of the Depth Map. For 4k Use 2 or 2.5. For 1440p Use 1.5 or 2. For 1080p use 1.
 #define Depth_Map_Division 1.0
 
-//uniform float2 X <
-	//ui_type = "drag";
-	//ui_min = 0.0; ui_max = 2.0;
-	//ui_label = "X";
-	//ui_tooltip = "Determines the X point. Default is 0";
-//> = float2(0.0,1.0);
+uniform float2 X <
+	ui_type = "drag";
+	ui_min = 0.0; ui_max = 2.0;
+	ui_label = "X";
+	ui_tooltip = "Determines the X point. Default is 0";
+> = float2(0.0,1.0);
 
 uniform int Depth_Map <
 	ui_type = "combo";
@@ -58,11 +58,16 @@ uniform int Divergence <
 				 "You can override this value.";
 > = 15;
 
+uniform bool Convergence_Clamp <
+	ui_label = "Convergence Clamp";
+	ui_tooltip = "A clamp for convergence so to limit Pop out.";
+> = true;
+
 uniform float Convergence <
 	ui_type = "drag";
-	ui_min = 0.0; ui_max = 5.0;
+	ui_min = 0.0; ui_max = 2.5;
 	ui_label = "Convergence Slider";
-	ui_tooltip = "Determines the amount of Screen Depth.\n"
+	ui_tooltip = "Determines the amount of pop out.\n"
 				 "Give the image Pop if used correctly.\n"
 				 "You can override this value.";
 > = 0.5;
@@ -787,13 +792,13 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 
 float3 GetPosition(float2 coords)
 {
-	return float3(coords.xy*2.5-1.0,10.0)*tex2D(SamplerDM,coords.xy).rgb;
+	return float3(coords.xy*2.5-1.0,10.0)*tex2Dlod(SamplerDM,float4(coords.xy,0,0)).rgb;
 }
 
-float3 GetRandom(float2 co)
+float2 GetRandom(float2 co)
 {
 	float random = frac(sin(dot(co, float2(12.9898, 78.233))) * 43758.5453 * 1);
-	return float3(random,random,random);
+	return float2(random,random);
 }
 
 float3 normal_from_depth(float2 texcoords) 
@@ -802,8 +807,8 @@ float3 normal_from_depth(float2 texcoords)
 	const float2 offset1 = float2(-10,10);
 	const float2 offset2 = float2(10,10);
 	  
-	float depth1 = tex2D(SamplerDM, texcoords + offset1).r;
-	float depth2 = tex2D(SamplerDM, texcoords + offset2).r;
+	float depth1 = tex2Dlod(SamplerDM, float4(texcoords + offset1,0,0)).r;
+	float depth2 = tex2Dlod(SamplerDM, float4(texcoords + offset2,0,0)).r;
 	  
 	float3 p1 = float3(offset1, depth1 - depth);
 	float3 p2 = float3(offset2, depth2 - depth);
@@ -833,24 +838,24 @@ float4 GetAO( float2 texcoord )
     //initialize variables:
     float F = Falloff;
 	float iter = 2.5*pix.x;
-    float ao;
+    float aout, num = 8;
     float incx = F*pix.x;
     float incy = F*pix.y;
     float width = incx;
     float height = incy;
-    float num;
     
     //Depth Map
-    float depthM = tex2D(SamplerDM, texcoord).r;
+    float depthM = tex2Dlod(SamplerDM,float4(texcoord ,0,0)).r;
     
 		
 	//Depth Map linearization
 	float constantF = 1.0;	
 	float constantN = 0.250;
-	depthM = saturate(2.0 * constantN * constantF / (constantF + constantN - (2.0 * depthM.r - 1.0) * (constantF - constantN)));
+	depthM = saturate(2.0 * constantN * constantF / (constantF + constantN - (2.0 * depthM - 1.0) * (constantF - constantN)));
     
-	//2 iterations 
-    for(float i=0.0; i<2; ++i) 
+	//2 iterations
+	[loop]
+    for(int i = 0; i<2; ++i) 
     {
        float npw = (width+iter*random.x)/depthM;
        float nph = (height+iter*random.y)/depthM;
@@ -862,21 +867,20 @@ float4 GetAO( float2 texcoord )
 			float3 ddiff3 = GetPosition(texcoord.xy+float2(-npw,nph))-position;
 			float3 ddiff4 = GetPosition(texcoord.xy+float2(-npw,-nph))-position;
 
-			ao+=  aoFF(ddiff,normal,npw,nph);
-			ao+=  aoFF(ddiff2,normal,npw,-nph);
-			ao+=  aoFF(ddiff3,normal,-npw,nph);
-			ao+=  aoFF(ddiff4,normal,-npw,-nph);
-			num = 8;
+			aout += aoFF(ddiff,normal,npw,nph);
+			aout += aoFF(ddiff2,normal,npw,-nph);
+			aout += aoFF(ddiff3,normal,-npw,nph);
+			aout += aoFF(ddiff4,normal,-npw,-nph);
 		}
 		
 		//increase sampling area
 		   width += incx;  
-		   height += incy;		    
+		   height += incy;	    
     } 
-    ao/=num;
+    aout/=num;
 
 	//Luminance adjust used for overbright correction.
-	float4 Done = min(1.0,ao);
+	float4 Done = min(1.0,aout);
 	float3 lumcoeff = float3(0.299,0.587,0.114);
 	float lum = dot(Done.rgb, lumcoeff);
 	float3 luminance = float3(lum, lum, lum);
@@ -940,7 +944,7 @@ float DP =  Divergence;
 	{
 		if(Dis_Occlusion >= 1) 
 		{
-		DM += tex2D(SamplerDM,texcoord + dir * weight[i] * B)/Con;
+		DM += tex2Dlod(SamplerDM,float4(texcoord + dir * weight[i] * B,0,0))/Con;
 		}
 	}
 	
@@ -962,9 +966,9 @@ void Average_Luminance(in float4 position : SV_Position, in float2 texcoord : TE
 
 void PS_renderLR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 color : SV_Target0 )
 {
-	float samples[4] = {0.50, 0.66, 0.83, 1.00};
-	float DepthL = 1, DepthR = 1, MS , P, S, ND;
-	float2 uv = 0;
+	float samples[7] = {0.25, 0.50, 0.58, 0.66, 0.74, 0.83, 1.00};
+	float DepthL = 1, DepthR = 1, MS , P, S, ND, Clamp = 100;
+	float uv = 0;
 	
 	if(!Eye_Swap)
 		{	
@@ -978,32 +982,35 @@ void PS_renderLR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD
 		}
 	
 	[loop]
-	for (int j = 0; j < 4; ++j) 
+	for (int j = 0; j < 7; ++j) 
 	{	
-		uv.x = samples[j] * MS;
+		uv = samples[j] * MS;
 		
 		if(Stereoscopic_Mode == 0)
 		{
-			DepthL =  min(DepthL,tex2D(SamplerDis,float2((texcoord.x*2 + P)+uv.x, texcoord.y)).r);
-			DepthR =  min(DepthR,tex2D(SamplerDis,float2((texcoord.x*2-1 - P)-uv.x, texcoord.y)).r);
+			DepthL =  min(DepthL,tex2D(SamplerDis,float2((texcoord.x*2 + P)+uv, texcoord.y)).r);
+			DepthR =  min(DepthR,tex2D(SamplerDis,float2((texcoord.x*2-1 - P)-uv, texcoord.y)).r);
 		}
 		else if(Stereoscopic_Mode == 1)
 		{
-			DepthL =  min(DepthL,tex2D(SamplerDis,float2((texcoord.x + P)+uv.x, texcoord.y*2)).r);
-			DepthR =  min(DepthR,tex2D(SamplerDis,float2((texcoord.x - P)-uv.x, texcoord.y*2-1)).r);
+			DepthL =  min(DepthL,tex2D(SamplerDis,float2((texcoord.x + P)+uv, texcoord.y*2)).r);
+			DepthR =  min(DepthR,tex2D(SamplerDis,float2((texcoord.x - P)-uv, texcoord.y*2-1)).r);
 		}
 		else
 		{
-			DepthL =  min(DepthL,tex2D(SamplerDis,float2((texcoord.x + P)+uv.x, texcoord.y)).r);
-			DepthR =  min(DepthR,tex2D(SamplerDis,float2((texcoord.x - P)-uv.x, texcoord.y)).r);
+			DepthL =  min(DepthL,tex2D(SamplerDis,float2((texcoord.x + P)+uv, texcoord.y)).r);
+			DepthR =  min(DepthR,tex2D(SamplerDis,float2((texcoord.x - P)-uv, texcoord.y)).r);
 		}
 	}
 	
 		DepthL += MS * (1-Convergence/DepthL);
 		DepthR += MS * (1-Convergence/DepthR);
 	
-	float ReprojectionLeft =  max(-0.005,DepthL*MS);
-	float ReprojectionRight = max(-0.005,DepthR*MS);
+	if(Convergence_Clamp)
+	Clamp = 0.005;
+	
+	float ReprojectionLeft =  max(-Clamp,DepthL*MS);
+	float ReprojectionRight = max(-Clamp,DepthR*MS);
 	
 	if(!Depth_Map_View)
 	{

@@ -64,11 +64,11 @@ uniform int Divergence <
 
 uniform float Near_Depth <
 	ui_type = "drag";
-	ui_min = 0.0; ui_max = 100.0;
+	ui_min = 0.0; ui_max = 25.0;
 	ui_label = "Near Depth Adjustment";
 	ui_tooltip = "Determines the amount of depth near the cam, zero is off.\n" 
-				 "Default is 25";
-> = 25.0;
+				 "Default is 0.0";
+> = 0.0;
 
 uniform bool Weapon_Fix <
 	ui_label = "Weapon Fix";
@@ -807,13 +807,13 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 
 float3 GetPosition(float2 coords)
 {
-	return float3(coords.xy*2.5-1.0,10.0)*tex2D(SamplerDM,coords.xy).rgb;
+	return float3(coords.xy*2.5-1.0,10.0)*tex2Dlod(SamplerDM,float4(coords.xy,0,0)).rgb;
 }
 
-float3 GetRandom(float2 co)
+float2 GetRandom(float2 co)
 {
 	float random = frac(sin(dot(co, float2(12.9898, 78.233))) * 43758.5453 * 1);
-	return float3(random,random,random);
+	return float2(random,random);
 }
 
 float3 normal_from_depth(float2 texcoords) 
@@ -822,8 +822,8 @@ float3 normal_from_depth(float2 texcoords)
 	const float2 offset1 = float2(-10,10);
 	const float2 offset2 = float2(10,10);
 	  
-	float depth1 = tex2D(SamplerDM, texcoords + offset1).r;
-	float depth2 = tex2D(SamplerDM, texcoords + offset2).r;
+	float depth1 = tex2Dlod(SamplerDM, float4(texcoords + offset1,0,0)).r;
+	float depth2 = tex2Dlod(SamplerDM, float4(texcoords + offset2,0,0)).r;
 	  
 	float3 p1 = float3(offset1, depth1 - depth);
 	float3 p2 = float3(offset2, depth2 - depth);
@@ -853,23 +853,23 @@ float4 GetAO( float2 texcoord )
     //initialize variables:
     float F = Falloff;
 	float iter = 2.5*pix.x;
-    float ao;
+    float ao, num;
     float incx = F*pix.x;
     float incy = F*pix.y;
     float width = incx;
     float height = incy;
-    float num;
     
     //Depth Map
-    float depthM = tex2D(SamplerDM, texcoord).r;
+    float depthM = tex2Dlod(SamplerDM, float4(texcoord,0,0)).r;
     
 		
 	//Depth Map linearization
 	float constantF = 1.0;	
 	float constantN = 0.250;
-	depthM = saturate(2.0 * constantN * constantF / (constantF + constantN - (2.0 * depthM.r - 1.0) * (constantF - constantN)));
+	depthM = saturate(2.0 * constantN * constantF / (constantF + constantN - (2.0 * depthM - 1.0) * (constantF - constantN)));
     
 	//2 iterations 
+	[loop]
     for(float i=0.0; i<2; ++i) 
     {
        float npw = (width+iter*random.x)/depthM;
@@ -927,12 +927,12 @@ sum += tex2D(SamplerAO, float2(texcoord.x, texcoord.y + 2.0*blursize)) * 0.12;
 sum += tex2D(SamplerAO, float2(texcoord.x + 3.0*blursize, texcoord.y)) * 0.09;
 sum += tex2D(SamplerAO, float2(texcoord.x, texcoord.y + 4.0*blursize)) * 0.05;
 
-Done = sum;
+Done = 1-sum;
 //bilateral blur/\
 
 float4 DM = tex2D(SamplerDM,texcoord);
 
-	color = lerp(DM,1-Done,P);
+	color = lerp(DM,Done,P);
 	Ave = DM;
 }
 
@@ -958,23 +958,21 @@ void Average_Luminance(in float4 position : SV_Position, in float2 texcoord : TE
 	{
 		float4 cL = tex2D(BackBuffer,texcoord);			
 		float4 cR = tex2D(BackBuffer,texcoord);
-		
-		int x = Depth_Max;
-		
+				
 		[loop]
-		for (int i = 0; i <= x; i++) 
+		for (int i = 0; i <= Divergence; i++) 
 		{
 			int j = -i;
 			//R
-			if (tex2D(SamplerRB, float2(texcoord.x+i*pix.x/0.9,texcoord.y)).r <= texcoord.x/1.002) //Decode Red
+			if (tex2Dlod(SamplerRB, float4(texcoord.x+i*pix.x/0.9,texcoord.y,0,0)).r <= texcoord.x/1.002) //Decode Red
 			{
-				cR = tex2D(BackBuffer, float2(texcoord.x+i*pix.x,texcoord.y));
+				cR = tex2Dlod(BackBuffer, float4(texcoord.x+i*pix.x,texcoord.y,0,0));
 			}
 			
 			//L
-			if (tex2D(SamplerRB, float2(texcoord.x+j*pix.x/0.9,texcoord.y)).b >= texcoord.x/1.002) //Decode Blue
+			if (tex2Dlod(SamplerRB, float4(texcoord.x+j*pix.x/0.9,texcoord.y,0,0)).b >= texcoord.x/1.002) //Decode Blue
 			{
-				cL = tex2D(BackBuffer, float2(texcoord.x+j*pix.x, texcoord.y));
+				cL = tex2Dlod(BackBuffer, float4(texcoord.x+j*pix.x, texcoord.y,0,0));
 			}
 		}
 		
