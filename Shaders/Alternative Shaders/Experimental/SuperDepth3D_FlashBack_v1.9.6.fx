@@ -67,8 +67,8 @@ uniform float Near_Depth <
 	ui_min = 0.0; ui_max = 100.0;
 	ui_label = "Near Depth Adjustment";
 	ui_tooltip = "Determines the amount of depth near the cam, zero is off.\n" 
-				 "Default is 50";
-> = 50.0;
+				 "Default is 25";
+> = 25.0;
 
 uniform bool Weapon_Fix <
 	ui_label = "Weapon Fix";
@@ -277,18 +277,11 @@ sampler SamplerAO
 		Texture = texAO;
 	};
 	
-texture texOne  { Width = BUFFER_WIDTH/Depth_Map_Division; Height = BUFFER_HEIGHT/Depth_Map_Division; Format = RGBA32F;}; 
+texture texRB  { Width = BUFFER_WIDTH/Depth_Map_Division; Height = BUFFER_HEIGHT/Depth_Map_Division; Format = RGBA32F;}; 
 
-sampler SamplerOne
+sampler SamplerRB
 	{
-		Texture = texOne;
-	};
-	
-texture texTwo  { Width = BUFFER_WIDTH/Depth_Map_Division; Height = BUFFER_HEIGHT/Depth_Map_Division; Format = RGBA32F;}; 
-
-sampler SamplerTwo
-	{
-		Texture = texTwo;
+		Texture = texRB;
 	};
 	
 texture texLeft { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA32F;}; 
@@ -948,13 +941,14 @@ void Average_Luminance(in float4 position : SV_Position, in float2 texcoord : TE
 	color = tex2D(SamplerDM,texcoord);
 }
 
-	void  PS_calcLR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 colorTwo : SV_Target0, out float4 colorOne : SV_Target1)
+	void  PS_calcLR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 color : SV_Target0)
 	{
 	float ND = Near_Depth/500;
 	float D = Divergence*2;
 	float GetDepth = tex2D(SamplerDis,float2(texcoord.x,texcoord.y)).r;
-	colorOne = lerp(texcoord.x+Divergence*pix.x*GetDepth,texcoord.x+D*pix.x*(1-GetDepth),-ND);
-	colorTwo = lerp(texcoord.x-Divergence*pix.x*GetDepth,texcoord.x-D*pix.x*(1-GetDepth),-ND);
+	float R = lerp(texcoord.x-Divergence*pix.x*GetDepth,texcoord.x-D*pix.x*(1-GetDepth),-ND); //Red Color Channel
+	float B = lerp(texcoord.x+Divergence*pix.x*GetDepth,texcoord.x+D*pix.x*(1-GetDepth),-ND); //Blue Color Channel
+	color = float4(R,0,B,0);
 	}
 	
 
@@ -972,13 +966,13 @@ void Average_Luminance(in float4 position : SV_Position, in float2 texcoord : TE
 		{
 			int j = -i;
 			//R
-			if (tex2D(SamplerOne, float2(texcoord.x+i*pix.x/0.9,texcoord.y)).r <= texcoord.x)
+			if (tex2D(SamplerRB, float2(texcoord.x+i*pix.x/0.9,texcoord.y)).r <= texcoord.x/1.002) //Decode Red
 			{
 				cR = tex2D(BackBuffer, float2(texcoord.x+i*pix.x,texcoord.y));
 			}
 			
 			//L
-			if (tex2D(SamplerTwo, float2(texcoord.x+j*pix.x/0.9,texcoord.y)).r >= texcoord.x) 
+			if (tex2D(SamplerRB, float2(texcoord.x+j*pix.x/0.9,texcoord.y)).b >= texcoord.x/1.002) //Decode Blue
 			{
 				cL = tex2D(BackBuffer, float2(texcoord.x+j*pix.x, texcoord.y));
 			}
@@ -1199,8 +1193,7 @@ technique Depth3D_FlashBack
 		{
 			VertexShader = PostProcessVS;
 			PixelShader = PS_calcLR;
-			RenderTarget0 = texOne;
-			RenderTarget1 = texTwo;
+			RenderTarget = texRB;
 		}
 			pass
 		{
