@@ -954,14 +954,22 @@ void Average_Luminance(in float4 position : SV_Position, in float2 texcoord : TE
 	//}
 	//End//
 	
-	float ND = Near_Depth/500;
 	float GetDepth = tex2D(SamplerDis,float2(texcoord.x,texcoord.y)).r;
+	float ZDP, Depth, MS = Divergence*pix.x;
+	float ND = Near_Depth/100;
+		
+	Depth += MS * (1-ZDP/GetDepth);//Convergence also known as ZPD, code is not in used since Near Depth is in favor. 
+	
+	GetDepth = lerp(GetDepth,1-GetDepth,-ND);
+	
 	float Red = (1-texcoord.x)+Divergence*pix.x*GetDepth;
 	float Blue = texcoord.x+Divergence*pix.x*GetDepth;
-	float RedINV = (1-texcoord.x)+Divergence*pix.x*(1-GetDepth);
-	float BlueINV = texcoord.x+Divergence*pix.x*(1-GetDepth);
-	float R = lerp(Red,RedINV,-ND); //Red Color Channel
-	float B = lerp(Blue,BlueINV,-ND); //Blue Color Channel
+	
+	float RedINV = (1-texcoord.x)+Divergence*pix.x*Depth;
+	float BlueINV = texcoord.x+Divergence*pix.x*Depth;
+	
+	float R = max(-0.008,lerp(Red,RedINV,0.5)); //Red Color Channel
+	float B = max(-0.008,lerp(Blue,BlueINV,0.5)); //Blue Color Channel
 	
 	color = float4(R,0,B,0);
 	}

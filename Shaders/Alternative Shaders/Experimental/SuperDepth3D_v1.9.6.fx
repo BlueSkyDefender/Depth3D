@@ -961,9 +961,9 @@ void Average_Luminance(in float4 position : SV_Position, in float2 texcoord : TE
 
 void PS_renderLR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 color : SV_Target0 )
 {
-	float samples[5] = {0.25, 0.50, 0.66, 0.83, 1};
+	float samples[5] = {0.50, 0.58, 0.66, 0.83, 1};
 	float DepthL = 1, DepthR = 1, MS , P, PL, PR, ZDP;
-	float uv = 0;
+	float S = 0;
 	
 	if(!Eye_Swap)
 		{	
@@ -979,28 +979,28 @@ void PS_renderLR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD
 	[loop]
 	for (int j = 0; j < 5; ++j) 
 	{	
-		uv = samples[j] * MS;
+		S = samples[j] * MS;
 		
 		if(Stereoscopic_Mode == 0)
 		{
-			DepthL =  min(DepthL,tex2D(SamplerDis,float2((texcoord.x*2 + P)+uv, texcoord.y)).r);
-			DepthR =  min(DepthR,tex2D(SamplerDis,float2((texcoord.x*2-1 - P)-uv, texcoord.y)).r);
+			DepthL =  min(DepthL,tex2D(SamplerDis,float2((texcoord.x*2 + P)+S, texcoord.y)).r);
+			DepthR =  min(DepthR,tex2D(SamplerDis,float2((texcoord.x*2-1 - P)-S, texcoord.y)).r);
 		}
 		else if(Stereoscopic_Mode == 1)
 		{
-			DepthL =  min(DepthL,tex2D(SamplerDis,float2((texcoord.x + P)+uv, texcoord.y*2)).r);
-			DepthR =  min(DepthR,tex2D(SamplerDis,float2((texcoord.x - P)-uv, texcoord.y*2-1)).r);
+			DepthL =  min(DepthL,tex2D(SamplerDis,float2((texcoord.x + P)+S, texcoord.y*2)).r);
+			DepthR =  min(DepthR,tex2D(SamplerDis,float2((texcoord.x - P)-S, texcoord.y*2-1)).r);
 		}
 		else
 		{
-			DepthL =  min(DepthL,tex2D(SamplerDis,float2((texcoord.x + P)+uv, texcoord.y)).r);
-			DepthR =  min(DepthR,tex2D(SamplerDis,float2((texcoord.x - P)-uv, texcoord.y)).r);
+			DepthL =  min(DepthL,tex2D(SamplerDis,float2((texcoord.x + P)+S, texcoord.y)).r);
+			DepthR =  min(DepthR,tex2D(SamplerDis,float2((texcoord.x - P)-S, texcoord.y)).r);
 		}
 	}
 		float ND = Near_Depth/100;
 		
 		PL += MS * (1-ZDP/DepthL); //Convergence also known as ZPD 
-		PR += MS * (1-ZDP/DepthR); //Code is not used since Near Depth is in favor in this shader.
+		PR += MS * (1-ZDP/DepthR); //Code is not in used since Near Depth is in favor.
 		
 		DepthL = lerp(DepthL,1-DepthL,-ND); //Near Depth
 		DepthR = lerp(DepthR,1-DepthR,-ND);
