@@ -60,17 +60,28 @@ uniform int Divergence <
 
 uniform bool Convergence_Clamp <
 	ui_label = "Convergence Clamp";
-	ui_tooltip = "A clamp for convergence so to limit Pop out.";
+	ui_tooltip = "A clamp for convergence so to limit Pop out.\n"
+				 "In most cases you want to leave this On.\n"
+				 "Default is On.";			 
 > = true;
 
 uniform float Convergence <
 	ui_type = "drag";
-	ui_min = 0.0; ui_max = 2.5;
+	ui_min = 0.0; ui_max = 1.0;
 	ui_label = "Convergence Slider";
 	ui_tooltip = "Determines the amount of pop out.\n"
-				 "Give the image Pop if used correctly.\n"
-				 "You can override this value.";
+				 "Gives the image Pop out if used correctly.\n"
+				 "Default is 0.500";
 > = 0.5;
+
+uniform float Near_Depth <
+	ui_type = "drag";
+	ui_min = 0.0; ui_max = 100.0;
+	ui_label = "Near Depth Adjustment";
+	ui_tooltip = "Determines the amount of depth near the cam, zero is off.\n" 
+				 "Gives the image +Pop & +Depth.\n"
+				 "Default is 0.0";
+> = 0.0;
 
 uniform float Weapon_Depth <
 	ui_type = "drag";
@@ -966,8 +977,9 @@ void Average_Luminance(in float4 position : SV_Position, in float2 texcoord : TE
 
 void PS_renderLR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 color : SV_Target0 )
 {
-	float samples[7] = {0.25, 0.50, 0.58, 0.66, 0.74, 0.83, 1.00};
-	float DepthL = 1, DepthR = 1, MS , P, S, ND, Clamp = 100;
+	float NDEx = ((Near_Depth/0.5125)/1000)+1;
+	float samples[7] = {0.25, 0.50, 0.58, 0.66, 0.74, 0.83, NDEx};
+	float DepthL = 1, DepthR = 1, MS , P, S, Clamp = 1;
 	float uv = 0;
 	
 	if(!Eye_Swap)
@@ -1002,12 +1014,16 @@ void PS_renderLR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD
 			DepthR =  min(DepthR,tex2D(SamplerDis,float2((texcoord.x - P)-uv, texcoord.y)).r);
 		}
 	}
-	
-		DepthL += MS * (1-Convergence/DepthL);
+		float ND = Near_Depth/400;
+		
+		DepthL += MS * (1-Convergence/DepthL); //Convergence
 		DepthR += MS * (1-Convergence/DepthR);
+		
+		DepthL = lerp(DepthL,1-DepthL,-ND); //Near_Depth
+		DepthR = lerp(DepthR,1-DepthR,-ND);
 	
 	if(Convergence_Clamp)
-	Clamp = 0.005;
+	Clamp = 0.008;
 	
 	float ReprojectionLeft =  max(-Clamp,DepthL*MS);
 	float ReprojectionRight = max(-Clamp,DepthR*MS);
