@@ -163,16 +163,16 @@ Install to \BloodCM\distr
 Install Reshade 3.0.4 This is needed to use some lighting & shadows. But, if you don't care for lighting use the newest one.
 Install as Direct 3D 10+ so you don't delete opengl32.dll.
 
-Once that is done now you can install. HRP for BloodCM game.
+Once that is done now you can install. High Resolution Textures Pack for BloodCM game.
 https://sourceforge.net/projects/bloodcmhrp/
 
-Put xhrp_05fix.zip and zip archives in \BloodCM\autoload folder and check "Enable autoload folder" chekbox in eduke32 setup window. If you don't want to use the textures just disable them in game that way you can still have the 3D models.
+Put xhrp_05fix.zip and zip archives in \BloodCM\autoload folder and check "Enable autoload folder" checkbox in eduke32 setup window. If you don't want to use the textures just disable them in-game that way you can still have the 3D models.
 
-Now last thing is to start the game and set your settings.
+Now the last thing is to start the game and set your settings.
 
 To help fix the depth buffer with lighting & shadows use Console command r_pr_maxlightpasses "1".
-This will limit the ammount lights processed per surface. Seems to be a hard bug to fix in eduke32.
-So I don't think this will get fixed any time soon.
+This will limit the amount lights processed per surface. Seems to be a hard bug to fix in eduke32.
+So I don't think this will get fixed anytime soon.
 
 {Call of Duty: Advance Warfare}
 Render Resolution Native.
