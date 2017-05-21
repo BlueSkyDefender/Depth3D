@@ -244,13 +244,6 @@ sampler SamplerAO
 	{
 		Texture = texAO;
 	};
-	
-texture texRGBA  { Width = BUFFER_WIDTH/Depth_Map_Division; Height = BUFFER_HEIGHT/Depth_Map_Division; Format = RGBA32F;}; 
-
-sampler SamplerRGBA
-	{
-		Texture = texRGBA;
-	};
 
 uniform float2 Mousecoords < source = "mousepoint"; > ;	
 ////////////////////////////////////////////////////////////////////////////////////Cross Cursor////////////////////////////////////////////////////////////////////////////////////	
@@ -890,9 +883,9 @@ void Average_Luminance(in float4 position : SV_Position, in float2 texcoord : TE
 	color = tex2D(SamplerDM,texcoord);
 }
 
-void  RGBAEncode(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 color : SV_Target0)
+float4  RGBAEncode(in float2 texcoord : TEXCOORD0) //RGBA zBuffer Color Channel Encode
 {
-	float GetDepth = tex2D(SamplerBlur,float2(texcoord.x,texcoord.y)).r;
+	float GetDepth = tex2Dlod(SamplerBlur,float4(texcoord.x,texcoord.y,0,0)).r;
 	float ZPD, Depth, MS = Divergence*pix.x;
 	float ND = Near_Depth/100;
 		
@@ -909,7 +902,7 @@ void  RGBAEncode(in float4 position : SV_Position, in float2 texcoord : TEXCOORD
 	float R = max(-0.008,lerp(Red,RedINV,0.5)); //Red Color Channel
 	float B = max(-0.008,lerp(Blue,BlueINV,0.5)); //Blue Color Channel
 	
-	color = float4(R,0,B,1);
+	return float4(R,0,B,0);
 }
 
 /////////////////////////////////////////L/R//////////////////////////////////////////////////////////////////////
@@ -962,20 +955,20 @@ void PS_calcLR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0,
 		}
 		
 	
-		float4 cL = tex2D(BackBuffer,float2(TCL.x,TCL.y));	//objects that hit screen boundary is replaced with the BackBuffer 		
+		float4 cL = tex2D(BackBuffer,float2(TCL.x,TCL.y)); //objects that hit screen boundary is replaced with the BackBuffer 		
 		float4 cR = tex2D(BackBuffer,float2(TCR.x,TCR.y)); //objects that hit screen boundary is replaced with the BackBuffer
 				
 		[loop]
 		for (int i = 0; i <= Divergence; i++) 
 		{
 				//R
-				if (tex2Dlod(SamplerRGBA, float4(TCR.x+i*pix.x/0.9,TCR.y,0,0)).r >= (1-TCR.x)/1.002)  //Decode R
+				if (RGBAEncode(float2(TCR.x+i*pix.x/0.9,TCR.y)).x >= (1-TCR.x)/1.002) //Decode R
 				{
 					cR = tex2Dlod(BackBuffer, float4(TCR.x+i*pix.x,TCR.y,0,0));
 				}
 				
 				//L
-				if (tex2Dlod(SamplerRGBA, float4(TCL.x-i*pix.x/0.9,TCL.y,0,0)).b >= TCL.x/1.002) //Decode B
+				if (RGBAEncode(float2(TCL.x-i*pix.x/0.9,TCL.y)).z >= TCL.x/1.002) //Decode B
 				{
 					cL = tex2Dlod(BackBuffer, float4(TCL.x-i*pix.x,TCL.y,0,0));
 				}	
@@ -1196,12 +1189,6 @@ technique Depth3D_FlashBack
 			VertexShader = PostProcessVS;
 			PixelShader = Average_Luminance;
 			RenderTarget = texLum;
-		}
-			pass zBufferColorChannelEncode
-		{
-			VertexShader = PostProcessVS;
-			PixelShader = RGBAEncode;
-			RenderTarget = texRGBA;
 		}
 			pass StereographicDecodeOutput
 		{
