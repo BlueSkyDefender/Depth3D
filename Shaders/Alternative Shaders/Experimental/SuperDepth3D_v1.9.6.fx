@@ -961,11 +961,10 @@ void Average_Luminance(in float4 position : SV_Position, in float2 texcoord : TE
 
 void PS_renderLR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 color : SV_Target0 )
 {
+	float DepthL = 1, DepthR = 1, ZPD, MS, PL, PR, P, S;
 	float samples[5] = {0.50, 0.58, 0.66, 0.83, 1};
-	float DepthL = 1, DepthR = 1, MS , P, PL, PR, ZDP;
-	float S = 0;
-	
-	if(!Eye_Swap)
+		
+	if(!Eye_Swap) //MS is Max Separation P is Perspective Adjustment
 		{	
 			P = Perspective * pix.x;
 			MS = Divergence * pix.x;
@@ -999,11 +998,11 @@ void PS_renderLR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD
 	}
 		float ND = Near_Depth/100;
 		
-		PL += MS * (1-ZDP/DepthL); //Convergence also known as ZPD 
-		PR += MS * (1-ZDP/DepthR); //Code is not in used since Near Depth is in favor.
+		PL += MS * (1-ZPD/DepthL); //Convergence also known as ZPD 
+		PR += MS * (1-ZPD/DepthR); //Code is not in full use since Near Depth is in favor.
 		
-		DepthL = lerp(DepthL,1-DepthL,-ND); //Near Depth
-		DepthR = lerp(DepthR,1-DepthR,-ND);
+		DepthL = lerp(DepthL,1-DepthL,-ND); //Near depth code.
+		DepthR = lerp(DepthR,1-DepthR,-ND); //Simple Code to add enhanced depth to the image output.
 	
 		float ReprojectionLeft =  max(-0.008,lerp(DepthL*MS,PL*MS,0.5));
 		float ReprojectionRight = max(-0.008,lerp(DepthR*MS,PR*MS,0.5));
@@ -1196,7 +1195,6 @@ void PS_renderLR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD
 	{
 			float4 DMV = texcoord.x < 0.5 ? GetAO(float2(texcoord.x*2 , texcoord.y*2)) : tex2D(SamplerDM,float2(texcoord.x*2-1 , texcoord.y*2));
 			color = texcoord.y < 0.5 ? DMV : tex2D(SamplerDis,float2(texcoord.x,texcoord.y*2-1));
-			//tex2Dlod(SamplerLum,float4(texcoord.x,texcoord.y*2-1,0,0))
 	}	
 }
 
@@ -1220,15 +1218,15 @@ technique Cross_Cursor
 		}	
 }
 
-technique Depth3D
+technique Depth3D_Reprojection
 {					
-			pass DepthMap
+			pass zbuffer
 		{
 			VertexShader = PostProcessVS;
 			PixelShader = DepthMap;
 			RenderTarget = texDM;
 		}
-			pass AO
+			pass AmbientOcclusion
 		{
 			VertexShader = PostProcessVS;
 			PixelShader = AO_in;
@@ -1240,13 +1238,13 @@ technique Depth3D
 			PixelShader = Disocclusion;
 			RenderTarget = texDis;
 		}
-			pass Luminance
+			pass AverageLuminance
 		{
 			VertexShader = PostProcessVS;
 			PixelShader = Average_Luminance;
 			RenderTarget = texLum;
 		}
-			pass Stereo
+			pass StereoOut
 		{
 			VertexShader = PostProcessVS;
 			PixelShader = PS_renderLR;
