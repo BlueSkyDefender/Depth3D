@@ -909,7 +909,7 @@ void  RGBAEncode(in float4 position : SV_Position, in float2 texcoord : TEXCOORD
 	float R = max(-0.008,lerp(Red,RedINV,0.5)); //Red Color Channel
 	float B = max(-0.008,lerp(Blue,BlueINV,0.5)); //Blue Color Channel
 	
-	color = float4(R,0,B,0);
+	color = float4(R,0,B,1);
 }
 
 /////////////////////////////////////////L/R//////////////////////////////////////////////////////////////////////
