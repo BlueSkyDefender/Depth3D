@@ -29,6 +29,9 @@
 // Determines The size of the Depth Map. For 4k Use 2 or 2.5. For 1440p Use 1.5 or 2. For 1080p use 1.
 #define Depth_Map_Division 1.0
 
+// Determines The Max Depth amount.
+#define Depth_Max 30
+
 //uniform float2 X <
 	//ui_type = "drag";
 	//ui_min = 0.0; ui_max = 2.0;
@@ -52,7 +55,7 @@ uniform float Depth_Map_Adjust <
 
 uniform int Divergence <
 	ui_type = "drag";
-	ui_min = 1; ui_max = 30;
+	ui_min = 1; ui_max = Depth_Max;
 	ui_label = "Divergence Slider";
 	ui_tooltip = "Determines the amount of Image Warping and Separation.\n" 
 				 "You can override this value.";
@@ -957,6 +960,7 @@ void Average_Luminance(in float4 position : SV_Position, in float2 texcoord : TE
 {
 	color = tex2D(SamplerDM,texcoord);
 }
+
 ////////////////////////////////////////////////Left/Right Eye////////////////////////////////////////////////////////
 
 void PS_renderLR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 color : SV_Target0 )

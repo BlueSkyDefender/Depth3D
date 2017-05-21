@@ -27,11 +27,9 @@
  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // Determines The size of the Depth Map. For 4k Use 2 or 2.5. For 1440p Use 1.5 or 2. For 1080p use 1.
-
 #define Depth_Map_Division 1.0
 
 // Determines The Max Depth amount. The larger the amount harder it will hit on FPS will be.
-
 #define Depth_Max 30
 
 //uniform float2 X <
@@ -226,30 +224,6 @@ sampler BackBuffer
 		Texture = BackBufferTex;
 	};
 
-sampler BackBufferMIRROR 
-	{ 
-		Texture = BackBufferTex;
-		AddressU = MIRROR;
-		AddressV = MIRROR;
-		AddressW = MIRROR;
-	};
-
-sampler BackBufferBORDER
-	{ 
-		Texture = BackBufferTex;
-		AddressU = BORDER;
-		AddressV = BORDER;
-		AddressW = BORDER;
-	};
-
-sampler BackBufferCLAMP
-	{ 
-		Texture = BackBufferTex;
-		AddressU = CLAMP;
-		AddressV = CLAMP;
-		AddressW = CLAMP;
-	};
-	
 texture texDM  { Width = BUFFER_WIDTH/Depth_Map_Division; Height = BUFFER_HEIGHT/Depth_Map_Division; Format = RGBA32F;}; 
 
 sampler SamplerDM
@@ -916,23 +890,8 @@ void Average_Luminance(in float4 position : SV_Position, in float2 texcoord : TE
 	color = tex2D(SamplerDM,texcoord);
 }
 
-	void  RGBAEncode(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 color : SV_Target0)
-	{
-	//CodeStore//
-	//float G = (1-texcoord.x)-Divergence*pix.x*GetDepth;
-	//float A = texcoord.x-Divergence*pix.x*GetDepth;
-	//float R = (1-texcoord.x)+Divergence*pix.x*GetDepth;
-	//float B = texcoord.x+Divergence*pix.x*GetDepth;
-	//if (tex2Dlod(SamplerRGBA, float4(texcoord.x+i*pix.x/0.9,texcoord.y,0,0)).w <= texcoord.x/1.002)  //Decode A
-	//{
-		//cR = tex2Dlod(BackBuffer, float4(texcoord.x+i*pix.x,texcoord.y,0,0));
-	//}
-	//if (tex2Dlod(SamplerRGBA, float4(texcoord.x-i*pix.x/0.9,texcoord.y,0,0)).g <= (1-texcoord.x)/1.002) //Decode G
-	//{
-		//cL = tex2Dlod(BackBuffer, float4(texcoord.x-i*pix.x, texcoord.y,0,0));
-	//}
-	//End//
-	
+void  RGBAEncode(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 color : SV_Target0)
+{
 	float GetDepth = tex2D(SamplerBlur,float2(texcoord.x,texcoord.y)).r;
 	float ZPD, Depth, MS = Divergence*pix.x;
 	float ND = Near_Depth/100;
@@ -951,14 +910,13 @@ void Average_Luminance(in float4 position : SV_Position, in float2 texcoord : TE
 	float B = max(-0.008,lerp(Blue,BlueINV,0.5)); //Blue Color Channel
 	
 	color = float4(R,0,B,0);
-	}
-	
+}
 
 /////////////////////////////////////////L/R//////////////////////////////////////////////////////////////////////
 
-	void PS_calcLR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 color : SV_Target)
-	{
-float4 Out;
+void PS_calcLR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 color : SV_Target)
+{
+	float4 Out;
 	float2 TCL,TCR;
 	
 	if (Stereoscopic_Mode == 0)
@@ -1192,7 +1150,7 @@ float4 Out;
 		}
 		
 		color = Out;
-	}
+}
 
 ///////////////////////////////////////////////////////////ReShade.fxh/////////////////////////////////////////////////////////////
 // Vertex shader generating a triangle covering the entire screen
