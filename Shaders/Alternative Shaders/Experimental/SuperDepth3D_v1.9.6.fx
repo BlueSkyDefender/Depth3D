@@ -26,7 +26,7 @@
  //*																																												*//
  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-// Determines The size of the Depth Map. For 4k Use 2 or 2.5. For 1440p Use 1.5 or 2. For 1080p use 1.
+// Determines The size of the Depth Map. For 4k Use 2 or 2.5. For 1440p Use 1.5 or 2. For 1080p use 1. This may cause errors in Weapon Depth Maps.
 #define Depth_Map_Division 1.0
 
 // Determines The Max Depth amount.
@@ -198,6 +198,15 @@ uniform float AO_Shift <
 				 "Default is 0";
 > = 0.0;
 
+uniform int Depth_Map_Resolution <
+	ui_type = "drag";
+	ui_min = 0; ui_max = 1;
+	ui_label = "Depth Map Resolution";
+	ui_tooltip = "Lower the resolution of the Depth Map.\n"
+				 "Use if you need a little fps boost.\n"
+				 "Default is 0";
+> = 0;
+
 uniform bool Eye_Swap <
 	ui_label = "Swap Eyes";
 	ui_tooltip = "L/R to R/L.";
@@ -265,14 +274,14 @@ sampler BackBufferCLAMP
 		AddressW = CLAMP;
 	};
 	
-texture texDM  { Width = BUFFER_WIDTH/Depth_Map_Division; Height = BUFFER_HEIGHT/Depth_Map_Division; Format = RGBA32F;}; 
+texture texDM  { Width = BUFFER_WIDTH/Depth_Map_Division; Height = BUFFER_HEIGHT/Depth_Map_Division; Format = RGBA32F; MipLevels = 3;}; 
 
 sampler SamplerDM
 	{
 		Texture = texDM;
 	};
 	
-texture texDis  { Width = BUFFER_WIDTH/Depth_Map_Division; Height = BUFFER_HEIGHT/Depth_Map_Division; Format = RGBA32F;}; 
+texture texDis  { Width = BUFFER_WIDTH/Depth_Map_Division; Height = BUFFER_HEIGHT/Depth_Map_Division; Format = RGBA32F; MipLevels = 3;}; 
 
 sampler SamplerDis
 	{
@@ -432,7 +441,7 @@ float4 WeaponDepth(in float2 texcoord : TEXCOORD0)
 		float zBufferWH = tex2D(DepthBuffer, texcoord).r; //Weapon Hand Depth Buffer
 		//Weapon Depth Map
 		//FPS Hand Depth Maps require more precision at smaller scales to work
-		if(WDM == 1 || WDM == 3 || WDM == 4 || WDM == 6 || WDM == 7 || WDM == 8 || WDM == 9 || WDM == 10 || WDM == 11 || WDM == 12 || WDM == 13 || WDM == 14 || WDM == 16 || WDM == 17 || WDM == 19 || WDM == 20 || WDM == 21 || WDM == 22 || WDM == 23 || WDM == 24 || WDM == 25 || WDM == 26 )
+		if(WDM == 1 || WDM == 3 || WDM == 4 || WDM == 6 || WDM == 7 || WDM == 8 || WDM == 9 || WDM == 10 || WDM == 11 || WDM == 12 || WDM == 13 || WDM == 14 || WDM == 16 || WDM == 17 || WDM == 19 || WDM == 20 || WDM == 21 || WDM == 22 || WDM == 23 || WDM == 24 || WDM == 25 || WDM == 26 || WDM == 27 )
 		{
 		float constantF = 1.0;	
 		float constantN = 0.01;
@@ -701,13 +710,14 @@ float4 WeaponDepth(in float2 texcoord : TEXCOORD0)
 		CoP = 3.750;
 		}
 		
-		//Game:
+		//Game: Amnesia: Machine for Pigs
 		//Weapon Depth Map Twenty Four
 		if (WDM == 27)
 		{
-		cWF = Weapon_Adjust.x;
-		cWN = Weapon_Adjust.y;
-		cWP = Weapon_Adjust.z;
+		cWF = 0.010;
+		cWN = -37.5;
+		cWP = -0.0075;
+		CoP = 7.0;
 		}
 		
 		//Game:
@@ -790,7 +800,7 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 
 float3 GetPosition(float2 coords)
 {
-	return float3(coords.xy*2.5-1.0,10.0)*tex2Dlod(SamplerDM,float4(coords.xy,0,0)).rgb;
+	return float3(coords.xy*2.5-1.0,10.0)*tex2Dlod(SamplerDM,float4(coords.xy,0,Depth_Map_Resolution)).rgb;
 }
 
 float2 GetRandom(float2 co)
@@ -805,8 +815,8 @@ float3 normal_from_depth(float2 texcoords)
 	const float2 offset1 = float2(-10,10);
 	const float2 offset2 = float2(10,10);
 	  
-	float depth1 = tex2Dlod(SamplerDM, float4(texcoords + offset1,0,0)).r;
-	float depth2 = tex2Dlod(SamplerDM, float4(texcoords + offset2,0,0)).r;
+	float depth1 = tex2Dlod(SamplerDM, float4(texcoords + offset1,0,Depth_Map_Resolution)).r;
+	float depth2 = tex2Dlod(SamplerDM, float4(texcoords + offset2,0,Depth_Map_Resolution)).r;
 	  
 	float3 p1 = float3(offset1, depth1 - depth);
 	float3 p2 = float3(offset2, depth2 - depth);
@@ -843,7 +853,7 @@ float4 GetAO( float2 texcoord )
     float height = incy;
     
     //Depth Map
-    float depthM = tex2Dlod(SamplerDM,float4(texcoord ,0,0)).r;
+    float depthM = tex2Dlod(SamplerDM,float4(texcoord ,0,Depth_Map_Resolution)).r;
     
 		
 	//Depth Map linearization
@@ -942,14 +952,14 @@ float DP =  Divergence;
 	{
 		if(Dis_Occlusion >= 1) 
 		{
-		DM += tex2Dlod(SamplerDM,float4(texcoord + dir * weight[i] * B,0,0))/Con;
+		DM += tex2Dlod(SamplerDM,float4(texcoord + dir * weight[i] * B,0,Depth_Map_Resolution))/Con;
 		}
 	}
 	
 	}
 	else
 	{
-	DM = tex2D(SamplerDM,texcoord);
+	DM = tex2Dlod(SamplerDM,float4(texcoord,0,Depth_Map_Resolution));
 	}		                          
 
 	color = lerp(DM,Done,P);
@@ -958,7 +968,7 @@ float DP =  Divergence;
 
 void Average_Luminance(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 color : SV_Target0 )
 {
-	color = tex2D(SamplerDM,texcoord);
+	color = tex2Dlod(SamplerDM,float4(texcoord,0,Depth_Map_Resolution));
 }
 
 ////////////////////////////////////////////////Left/Right Eye////////////////////////////////////////////////////////
@@ -967,6 +977,7 @@ void PS_renderLR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD
 {
 	float DepthL = 1, DepthR = 1, ZPD, MS, PL, PR, P, S;
 	float samples[5] = {0.50, 0.58, 0.66, 0.83, 1};
+	float2 TCL, TCR;
 		
 	if(!Eye_Swap) //MS is Max Separation P is Perspective Adjustment
 		{	
@@ -979,26 +990,34 @@ void PS_renderLR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD
 			MS = -Divergence * pix.x;
 		}
 	
+	if (Stereoscopic_Mode == 0)
+		{
+			TCL.x = (texcoord.x*2-1) - P;
+			TCR.x = (texcoord.x*2) + P;
+			TCL.y = texcoord.y;
+			TCR.y = texcoord.y;
+		}
+	else if(Stereoscopic_Mode == 1)
+		{
+			TCL.x = texcoord.x - P;
+			TCR.x = texcoord.x + P;
+			TCL.y = texcoord.y*2-1;
+			TCR.y = texcoord.y*2;
+		}
+	else
+		{
+			TCL.x = texcoord.x - P;
+			TCR.x = texcoord.x + P;
+			TCL.y = texcoord.y;
+			TCR.y = texcoord.y;
+		}
+	
 	[loop]
 	for (int j = 0; j < 5; ++j) 
 	{	
 		S = samples[j] * MS;
-		
-		if(Stereoscopic_Mode == 0)
-		{
-			DepthL =  min(DepthL,tex2D(SamplerDis,float2((texcoord.x*2 + P)+S, texcoord.y)).r);
-			DepthR =  min(DepthR,tex2D(SamplerDis,float2((texcoord.x*2-1 - P)-S, texcoord.y)).r);
-		}
-		else if(Stereoscopic_Mode == 1)
-		{
-			DepthL =  min(DepthL,tex2D(SamplerDis,float2((texcoord.x + P)+S, texcoord.y*2)).r);
-			DepthR =  min(DepthR,tex2D(SamplerDis,float2((texcoord.x - P)-S, texcoord.y*2-1)).r);
-		}
-		else
-		{
-			DepthL =  min(DepthL,tex2D(SamplerDis,float2((texcoord.x + P)+S, texcoord.y)).r);
-			DepthR =  min(DepthR,tex2D(SamplerDis,float2((texcoord.x - P)-S, texcoord.y)).r);
-		}
+		DepthL =  min(DepthL,tex2Dlod(SamplerDis,float4(TCR.x+S, TCR.y,0,Depth_Map_Resolution)).r);
+		DepthR =  min(DepthR,tex2Dlod(SamplerDis,float4(TCL.x-S, TCL.y,0,Depth_Map_Resolution)).r);
 	}
 		float ND = Near_Depth/100;
 		
@@ -1008,8 +1027,8 @@ void PS_renderLR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD
 		DepthL = lerp(DepthL,1-DepthL,-ND); //Near depth code.
 		DepthR = lerp(DepthR,1-DepthR,-ND); //Simple Code to add enhanced depth to the image output.
 	
-		float ReprojectionLeft =  max(-0.008,lerp(DepthL*MS,PL*MS,0.5));
-		float ReprojectionRight = max(-0.008,lerp(DepthR*MS,PR*MS,0.5));
+		float ReprojectionLeft =  lerp(DepthL*MS,PL*MS,0.5);
+		float ReprojectionRight = lerp(DepthR*MS,PR*MS,0.5);
 	
 	if(!Depth_Map_View)
 	{
@@ -1197,8 +1216,8 @@ void PS_renderLR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD
 	}
 		else
 	{
-			float4 DMV = texcoord.x < 0.5 ? GetAO(float2(texcoord.x*2 , texcoord.y*2)) : tex2D(SamplerDM,float2(texcoord.x*2-1 , texcoord.y*2));
-			color = texcoord.y < 0.5 ? DMV : tex2D(SamplerDis,float2(texcoord.x,texcoord.y*2-1));
+			float4 DMV = texcoord.x < 0.5 ? GetAO(float2(texcoord.x*2 , texcoord.y*2)) : tex2Dlod(SamplerDM,float4(texcoord.x*2-1 , texcoord.y*2,0,Depth_Map_Resolution));
+			color = texcoord.y < 0.5 ? DMV : tex2Dlod(SamplerDis,float4(texcoord.x,texcoord.y*2-1,0,Depth_Map_Resolution));
 	}	
 }
 

@@ -26,7 +26,7 @@
  //*																																												*//
  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-// Determines The size of the Depth Map. For 4k Use 2 or 2.5. For 1440p Use 1.5 or 2. For 1080p use 1. This may cause errors in Weapon Depth Maps.
+// Determines The size of the Depth Map. For 4k Use 2 or 2.5. For 1440p Use 1.5 or 2. For 1080p use 1.
 #define Depth_Map_Division 1.0
 
 // Determines The Max Depth amount. The larger the amount harder it will hit on FPS will be.
@@ -181,15 +181,6 @@ uniform float AO_Shift <
 				 "Default is 0";
 > = 0.0;
 
-uniform int Depth_Map_Resolution <
-	ui_type = "drag";
-	ui_min = 0; ui_max = 1;
-	ui_label = "Depth Map Resolution";
-	ui_tooltip = "Lower the resolution of the Depth Map.\n"
-				 "Use if you need a little fps boost.\n"
-				 "Default is 0";
-> = 0;
-
 uniform bool Eye_Swap <
 	ui_label = "Swap Eyes";
 	ui_tooltip = "L/R to R/L.";
@@ -233,14 +224,14 @@ sampler BackBuffer
 		Texture = BackBufferTex;
 	};
 
-texture texDM  { Width = BUFFER_WIDTH/Depth_Map_Division; Height = BUFFER_HEIGHT/Depth_Map_Division; Format = RGBA32F; MipLevels = 3;}; 
+texture texDM  { Width = BUFFER_WIDTH/Depth_Map_Division; Height = BUFFER_HEIGHT/Depth_Map_Division; Format = RGBA32F;}; 
 
 sampler SamplerDM
 	{
 		Texture = texDM;
 	};
 	
-texture texBlur  { Width = BUFFER_WIDTH/Depth_Map_Division; Height = BUFFER_HEIGHT/Depth_Map_Division; Format = RGBA32F; MipLevels = 3;}; 
+texture texBlur  { Width = BUFFER_WIDTH/Depth_Map_Division; Height = BUFFER_HEIGHT/Depth_Map_Division; Format = RGBA32F;}; 
 
 sampler SamplerBlur
 	{
@@ -305,7 +296,7 @@ float4 Depth(in float2 texcoord : TEXCOORD0)
 		if (Depth_Map_Flip)
 			texcoord.y =  1 - texcoord.y;
 			
-		float zBuffer = tex2D(DepthBuffer, texcoord ).r; //Depth Buffer
+		float zBuffer = tex2D(DepthBuffer, texcoord).r; //Depth Buffer
 
 		//Conversions to linear space.....
 		//Near & Far Adjustment
@@ -397,10 +388,10 @@ float4 WeaponDepth(in float2 texcoord : TEXCOORD0)
 		if (Depth_Map_Flip)
 			texcoord.y =  1 - texcoord.y;
 			
-		float zBufferWH = tex2D(DepthBuffer, texcoord ).r; //Weapon Hand Depth Buffer
+		float zBufferWH = tex2D(DepthBuffer, texcoord).r; //Weapon Hand Depth Buffer
 		//Weapon Depth Map
 		//FPS Hand Depth Maps require more precision at smaller scales to work
-		if(WDM == 1 || WDM == 3 || WDM == 4 || WDM == 6 || WDM == 7 || WDM == 8 || WDM == 9 || WDM == 10 || WDM == 11 || WDM == 12 || WDM == 13 || WDM == 14 || WDM == 16 || WDM == 17 || WDM == 19 || WDM == 20 || WDM == 21 || WDM == 22 || WDM == 23 || WDM == 24 || WDM == 25 || WDM == 26 || WDM == 27 )
+		if(WDM == 1 || WDM == 3 || WDM == 4 || WDM == 6 || WDM == 7 || WDM == 8 || WDM == 9 || WDM == 10 || WDM == 11 || WDM == 12 || WDM == 13 || WDM == 14 || WDM == 16 || WDM == 17 || WDM == 19 || WDM == 20 || WDM == 21 || WDM == 22 || WDM == 23 || WDM == 24 || WDM == 25 || WDM == 26 )
 		{
 		float constantF = 1.0;	
 		float constantN = 0.01;
@@ -669,14 +660,13 @@ float4 WeaponDepth(in float2 texcoord : TEXCOORD0)
 		CoP = 3.750;
 		}
 		
-		//Game: Amnesia: Machine for Pigs
+		//Game:
 		//Weapon Depth Map Twenty Four
 		if (WDM == 27)
 		{
-		cWF = 0.010;
-		cWN = -37.5;
-		cWP = -0.0075;
-		CoP = 7.0;
+		cWF = Weapon_Adjust.x;
+		cWN = Weapon_Adjust.y;
+		cWP = Weapon_Adjust.z;
 		}
 		
 		//Game:
@@ -759,7 +749,7 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 
 float3 GetPosition(float2 coords)
 {
-	return float3(coords.xy*2.5-1.0,10.0)*tex2Dlod(SamplerDM,float4(coords.xy,0,Depth_Map_Resolution)).rgb;
+	return float3(coords.xy*2.5-1.0,10.0)*tex2Dlod(SamplerDM,float4(coords.xy,0,0)).rgb;
 }
 
 float2 GetRandom(float2 co)
@@ -774,8 +764,8 @@ float3 normal_from_depth(float2 texcoords)
 	const float2 offset1 = float2(-10,10);
 	const float2 offset2 = float2(10,10);
 	  
-	float depth1 = tex2Dlod(SamplerDM, float4(texcoords + offset1,0,Depth_Map_Resolution)).r;
-	float depth2 = tex2Dlod(SamplerDM, float4(texcoords + offset2,0,Depth_Map_Resolution)).r;
+	float depth1 = tex2Dlod(SamplerDM, float4(texcoords + offset1,0,0)).r;
+	float depth2 = tex2Dlod(SamplerDM, float4(texcoords + offset2,0,0)).r;
 	  
 	float3 p1 = float3(offset1, depth1 - depth);
 	float3 p2 = float3(offset2, depth2 - depth);
@@ -812,7 +802,7 @@ float4 GetAO( float2 texcoord )
     float height = incy;
     
     //Depth Map
-    float depthM = tex2Dlod(SamplerDM, float4(texcoord,0,Depth_Map_Resolution)).r;
+    float depthM = tex2Dlod(SamplerDM, float4(texcoord,0,0)).r;
     
 		
 	//Depth Map linearization
@@ -882,7 +872,7 @@ sum += tex2D(SamplerAO, float2(texcoord.x, texcoord.y + 4.0*blursize)) * 0.05;
 Done = 1-sum;
 //bilateral blur/\
 
-float4 DM = tex2Dlod(SamplerDM,float4(texcoord,0,Depth_Map_Resolution));
+float4 DM = tex2D(SamplerDM,texcoord);
 
 	color = lerp(DM,Done,P);
 	Ave = DM;
@@ -890,12 +880,12 @@ float4 DM = tex2Dlod(SamplerDM,float4(texcoord,0,Depth_Map_Resolution));
 
 void Average_Luminance(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 color : SV_Target0 )
 {
-	color = tex2Dlod(SamplerDM,float4(texcoord,0,Depth_Map_Resolution));
+	color = tex2D(SamplerDM,texcoord);
 }
 
 float4  RGBAEncode(in float2 texcoord : TEXCOORD0) //RGBA zBuffer Color Channel Encode
 {
-	float GetDepth = tex2Dlod(SamplerBlur,float4(texcoord.x,texcoord.y,0,Depth_Map_Resolution)).r;
+	float GetDepth = tex2Dlod(SamplerBlur,float4(texcoord.x,texcoord.y,0,0)).r;
 	float ZPD, Depth, MS = Divergence*pix.x;
 	float ND = Near_Depth/100;
 		
@@ -909,8 +899,8 @@ float4  RGBAEncode(in float2 texcoord : TEXCOORD0) //RGBA zBuffer Color Channel 
 	float RedINV = (1-texcoord.x)+Divergence*pix.x*Depth;
 	float BlueINV = texcoord.x+Divergence*pix.x*Depth;
 	
-	float R = lerp(Red,RedINV,0.5); //Red Color Channel
-	float B = lerp(Blue,BlueINV,0.5); //Blue Color Channel
+	float R = max(-0.008,lerp(Red,RedINV,0.5)); //Red Color Channel
+	float B = max(-0.008,lerp(Blue,BlueINV,0.5)); //Blue Color Channel
 	
 	return float4(R,0,B,0);
 }
@@ -926,15 +916,15 @@ void PS_calcLR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0,
 		{
 		if (Eye_Swap)
 			{
-				TCL.x = (texcoord.x*2) - Perspective * pix.x;
-				TCR.x = (texcoord.x*2-1) + Perspective * pix.x;
+				TCL.x = (texcoord.x*2) + Perspective * pix.x;
+				TCR.x = (texcoord.x*2-1) - Perspective * pix.x;
 				TCL.y = texcoord.y;
 				TCR.y = texcoord.y;
 			}
 		else
 			{
-				TCL.x = (texcoord.x*2-1) - Perspective * pix.x;
-				TCR.x = (texcoord.x*2) + Perspective * pix.x;
+				TCL.x = (texcoord.x*2-1) + Perspective * pix.x;
+				TCR.x = (texcoord.x*2) - Perspective * pix.x;
 				TCL.y = texcoord.y;
 				TCR.y = texcoord.y;
 			}
@@ -943,23 +933,23 @@ void PS_calcLR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0,
 		{
 		if (Eye_Swap)
 			{
-			TCL.x = texcoord.x - Perspective * pix.x;
-			TCR.x = texcoord.x + Perspective * pix.x;
+			TCL.x = texcoord.x + Perspective * pix.x;
+			TCR.x = texcoord.x - Perspective * pix.x;
 			TCL.y = texcoord.y*2;
 			TCR.y = texcoord.y*2-1;
 			}
 		else
 			{
-			TCL.x = texcoord.x - Perspective * pix.x;
-			TCR.x = texcoord.x + Perspective * pix.x;
+			TCL.x = texcoord.x + Perspective * pix.x;
+			TCR.x = texcoord.x - Perspective * pix.x;
 			TCL.y = texcoord.y*2-1;
 			TCR.y = texcoord.y*2;
 			}
 		}
 	else
 		{
-			TCL.x = texcoord.x - Perspective * pix.x;
-			TCR.x = texcoord.x + Perspective * pix.x;
+			TCL.x = texcoord.x + Perspective * pix.x;
+			TCR.x = texcoord.x - Perspective * pix.x;
 			TCL.y = texcoord.y;
 			TCR.y = texcoord.y;
 		}
@@ -1148,8 +1138,8 @@ void PS_calcLR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0,
 		}
 	else
 		{
-				float4 DMV = texcoord.x < 0.5 ? GetAO(float2(texcoord.x*2 , texcoord.y*2)) : tex2Dlod(SamplerDM,float4(texcoord.x*2-1 , texcoord.y*2,0,Depth_Map_Resolution));
-				Out = texcoord.y < 0.5 ? DMV : tex2Dlod(SamplerBlur,float4(texcoord.x , texcoord.y*2-1 , 0 , Depth_Map_Resolution));
+				float4 DMV = texcoord.x < 0.5 ? GetAO(float2(texcoord.x*2 , texcoord.y*2)) : tex2D(SamplerDM,float2(texcoord.x*2-1 , texcoord.y*2));
+				Out = texcoord.y < 0.5 ? DMV : tex2D(SamplerBlur,float2(texcoord.x , texcoord.y*2-1));
 		}
 		
 		color = Out;
