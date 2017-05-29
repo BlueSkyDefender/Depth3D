@@ -202,9 +202,10 @@ uniform int Depth_Map_Resolution <
 	ui_type = "drag";
 	ui_min = 0; ui_max = 1;
 	ui_label = "Depth Map Resolution";
-	ui_tooltip = "Lower the resolution of the Depth Map.\n"
-				 "Use if you need a little fps boost.\n"
-				 "Default is 0";
+	ui_tooltip = "This will lower the resolution of the Depth Map.\n"
+				 "You lose image quality if this is turned on.\n"
+				 "Use if you need a fps boost.\n"
+				 "Default is 0 Off";
 > = 0;
 
 uniform bool Eye_Swap <

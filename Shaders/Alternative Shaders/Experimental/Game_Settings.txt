@@ -89,7 +89,7 @@ Prey 2017                                        DM 4        5.0         WDM 17 
 *Quake 4                                         DM 2        5.0-10          WDM 10                     RB
 *Quantum Break                                   DM 5        7.5-15 
 *Rage64                                          DM 7        7.5-12.5        WDM 11                     RB
-*Redout                                          DM 3        15-25                                      RB
+Redout                                          DM 3           15                                       RB
 *Resident Evil 7                                 DM 4        5.0-10                                     RB
 *Return To Castle Wolfenstine                    DM 2        2.5-7.5         WDM 12                     RB
 *Ryse: Son of Rome                               DM 0        5.0-10                                      
@@ -105,6 +105,7 @@ Prey 2017                                        DM 4        5.0         WDM 17 
 *The Elder Scrolls V: SE                         DM 8        2.5-5.0         WDM 14
 *The Evil Within                                 DM 0        20-30                                      RB
 *The Legend of Korra                             DM 0        5.0-10
+The Surge                                        DM 6          12                                       RB
 *The Vanishing of Ethan Carter Redux             DM 1        5.0-10                                     RB
 *The Void                                        DM 0        5.0-10                                     RB
 *Through The Woods                               DM 0        5.0-10                         Yes         RB
@@ -383,6 +384,9 @@ Go to Compatibility
 Check Disable Display Scaling On High DPI Settings
 
 This should fix it. For more look up this problem on google.
+
+{The Surge} - Thank you zig11727
+Install Directory \SteamLibrary\steamapps\common\The Surge\bin
 
 {The Vanishing of Ethan Carter Redux}
 
