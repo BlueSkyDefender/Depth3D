@@ -103,7 +103,7 @@ Redout                                          DM 3           15               
 *Stacking                                        DM 6        5.0-10                                   
 *Stay Close                                      DM 3        2.5-7.5                                    RB
 *Tales of Zestiria                               DM 6        15-20 
-The Elder Scrolls V: SE                         DM 6        6.25         WDM 14
+The Elder Scrolls V: SE                         DM 5         5.0         WDM 14
 *The Evil Within                                 DM 0        20-30                                      RB
 *The Legend of Korra                             DM 0        5.0-10
 The Surge                                        DM 6          12                                       RB

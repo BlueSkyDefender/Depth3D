@@ -316,20 +316,27 @@ float4 MouseCursor(float4 position : SV_Position, float2 texcoord : TEXCOORD) : 
 
 uniform float frametime < source = "frametime"; >;
 /////////////////////////////////////////////////////////////////////////////////Adapted Luminance/////////////////////////////////////////////////////////////////////////////////
-
+texture texLum  {Width = 256/2; Height = 256/2; Format = RGBA8; MipLevels = 8;}; //Sample at 256x256/2 and a mip bias of 8 should be 1x1 
+																				
+sampler SamplerLum																
+	{
+		Texture = texLum;
+		MipLODBias = 8.0f; //Luminance adapted luminance value from 1x1 Texture Mip lvl of 8
+		MinFilter = LINEAR;
+		MagFilter = LINEAR;
+		MipFilter = LINEAR;
+	};
+	
 float AL()
 {
-float AdjustScale = 2;
-    
-    //Luminance adapted luminance value from 1x1 Texture Mip lvl of 16
-	float4 Luminance = tex2Dlod(SamplerDis,float4(0.5,0.5,0,16));//Average
-    
-    //Frametime Perceptual Effects 
+	float AdjustScale = 2;
+
+	//Frametime Perceptual Effects 
+	float4 Luminance = tex2Dlod(SamplerLum,float4(0.5,0.5,0,0)); //Average Luminance Texture Sample
     float FPE  = (Luminance.r) * (AdjustScale - exp(-frametime));
     
     return saturate(FPE);
-}
-
+}	
 /////////////////////////////////////////////////////////////////////////////////Depth Map Information/////////////////////////////////////////////////////////////////////////////////
 
 float4 Depth(in float2 texcoord : TEXCOORD0)
@@ -609,8 +616,8 @@ float4 WeaponDepth(in float2 texcoord : TEXCOORD0)
 		{
 		cWF = 0.010;
 		cWN = -5.0;
-		cWP = 0.905;
-		CoP = 0.146;
+		cWP = 0.90375;
+		CoP = 0.275;
 		}
 		
 		//Game: Turok Dinosaur Hunter
@@ -907,6 +914,11 @@ float4 GetAO( float2 texcoord )
 void AO_in(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 color : SV_Target0 )
 {
 	color = GetAO(texcoord);
+}
+
+void Average_Luminance(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 color : SV_Target0 )
+{
+	color = tex2D(SamplerDM,texcoord);
 }
 
 void  Disocclusion(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 color : SV_Target0)
@@ -1261,6 +1273,12 @@ technique Depth3D_Reprojection
 			VertexShader = PostProcessVS;
 			PixelShader = Disocclusion;
 			RenderTarget = texDis;
+		}
+			pass AverageLuminance
+		{
+			VertexShader = PostProcessVS;
+			PixelShader = Average_Luminance;
+			RenderTarget = texLum;
 		}
 			pass StereoOut
 		{
