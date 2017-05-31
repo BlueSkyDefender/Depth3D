@@ -282,7 +282,7 @@ sampler SamplerDM
 		Texture = texDM;
 	};
 	
-texture texDis  { Width = BUFFER_WIDTH/Depth_Map_Division; Height = BUFFER_HEIGHT/Depth_Map_Division; Format = RGBA32F; MipLevels = 3;}; 
+texture texDis  { Width = BUFFER_WIDTH/Depth_Map_Division; Height = BUFFER_HEIGHT/Depth_Map_Division; Format = RGBA32F; MipLevels = 11;}; 
 
 sampler SamplerDis
 	{
@@ -316,23 +316,13 @@ float4 MouseCursor(float4 position : SV_Position, float2 texcoord : TEXCOORD) : 
 
 uniform float frametime < source = "frametime"; >;
 /////////////////////////////////////////////////////////////////////////////////Adapted Luminance/////////////////////////////////////////////////////////////////////////////////
-texture texLum  {Width = 256/2; Height = 256/2; Format = RGBA8; MipLevels = 8;};//Sample at 256x256/2 and a mip bias of 8 should be 1x1 
-																				//If there is a better way of doing this please tell
-sampler SamplerLum																//256 / 2^8 = 1
-	{
-		Texture = texLum;
-		MipLODBias = 8.0f;
-		MinFilter = LINEAR;
-		MagFilter = LINEAR;
-		MipFilter = LINEAR;
-	};
 
 float AL()
 {
 float AdjustScale = 2;
     
-    //Luminance adapted luminance value from 1x1 Texture Mip lvl of 8
-	float4 Luminance = tex2Dlod(SamplerLum,float4(0.5,0.5,0,0));//Average
+    //Luminance adapted luminance value from 1x1 Texture Mip lvl of 16
+	float4 Luminance = tex2Dlod(SamplerDis,float4(0.5,0.5,0,16));//Average
     
     //Frametime Perceptual Effects 
     float FPE  = (Luminance.r) * (AdjustScale - exp(-frametime));
@@ -768,22 +758,25 @@ float4 WeaponDepth(in float2 texcoord : TEXCOORD0)
 
 void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 Color : SV_Target0)
 {
-		float DM = Depth(texcoord).r; //DepthMap In		
+		float X,Y,W = 1;
+		float3 Z;
 		
-		float WD = WeaponDepth(texcoord).r; //Weapon DepthMap In
+		float DM = Depth(texcoord).r;		
+		
+		float WD = WeaponDepth(texcoord).r;
 		
 		float CoP = WeaponDepth(texcoord).w; //Weapon Cutoff Point
 				
 		float CutOFFCal = (CoP/Depth_Map_Adjust)/2; //Weapon Cutoff Calculation
-			
-		float NearDepth = step(WD,1.0); //1.0 Cutoff Still used as a base.
+					
+		float NearDepth = step(WD.r,1.0); //Base Cutoff
 		
 		float D, Done;
-
-		float Cutoff = step(DM,CutOFFCal);
+		
+		float Cutoff = step(DM.r,CutOFFCal);
 				
 		float Adj = Weapon_Depth/1000; //Push & pull weapon in or out of screen.
-		
+					
 		if (WDM == 0)
 		{
 		Done = DM;
@@ -794,14 +787,28 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 		Done = lerp(DM,D+Adj,Cutoff);
 		}
 		
-		Color = saturate(float4(Done.rrr,1));
+		X = Done;
+		Z = Done.rrr;
+			
+	// Dither for DepthBuffer adapted from gedosato ramdom dither https://github.com/PeterTh/gedosato/blob/master/pack/assets/dx9/deband.fx
+	
+	float dither_bit  = 8.0;
+	float noise = frac(sin(dot(texcoord, float2(12.9898, 78.233))) * 43758.5453 * 1);
+	float dither_shift = (1.0 / (pow(2,dither_bit) - 1.0));
+	float dither_shift_half = (dither_shift * 0.5);
+	dither_shift = dither_shift * noise - dither_shift_half;
+	Z += float3(-dither_shift, dither_shift, -dither_shift);
+	
+	// Dither End
+		
+		Color = saturate(float4(X,Y,Z.r,W));
 }
 
 /////////////////////////////////////////////////////AO/////////////////////////////////////////////////////////////
 
 float3 GetPosition(float2 coords)
 {
-	return float3(coords.xy*2.5-1.0,10.0)*tex2Dlod(SamplerDM,float4(coords.xy,0,Depth_Map_Resolution)).rgb;
+	return float3(coords.xy*2.5-1.0,10.0)*tex2Dlod(SamplerDM,float4(coords.xy,0,Depth_Map_Resolution)).rrr;
 }
 
 float2 GetRandom(float2 co)
@@ -854,7 +861,7 @@ float4 GetAO( float2 texcoord )
     float height = incy;
     
     //Depth Map
-    float depthM = tex2Dlod(SamplerDM,float4(texcoord ,0,Depth_Map_Resolution)).r;
+    float depthM = tex2Dlod(SamplerDM,float4(texcoord ,0,Depth_Map_Resolution)).b;
     
 		
 	//Depth Map linearization
@@ -902,11 +909,10 @@ void AO_in(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out
 	color = GetAO(texcoord);
 }
 
-void  Disocclusion(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 color : SV_Target0, out float4 Ave : SV_Target1)
+void  Disocclusion(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 color : SV_Target0)
 {
 //bilateral blur\/
-float4 Done;
-float4 sum;
+float4 Done, sum;
 float P = Power/10;
 
 float blursize = 2.0*pix.x;
@@ -953,23 +959,17 @@ float DP =  Divergence;
 	{
 		if(Dis_Occlusion >= 1) 
 		{
-		DM += tex2Dlod(SamplerDM,float4(texcoord + dir * weight[i] * B,0,Depth_Map_Resolution))/Con;
+		DM += tex2Dlod(SamplerDM,float4(texcoord + dir * weight[i] * B,0,Depth_Map_Resolution)).bbbb/Con;
 		}
 	}
 	
 	}
 	else
 	{
-	DM = tex2Dlod(SamplerDM,float4(texcoord,0,Depth_Map_Resolution));
+	DM = tex2Dlod(SamplerDM,float4(texcoord,0,Depth_Map_Resolution)).bbbb;
 	}		                          
-
+	
 	color = lerp(DM,Done,P);
-	Ave = DM;
-}
-
-void Average_Luminance(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 color : SV_Target0 )
-{
-	color = tex2Dlod(SamplerDM,float4(texcoord,0,Depth_Map_Resolution));
 }
 
 ////////////////////////////////////////////////Left/Right Eye////////////////////////////////////////////////////////
@@ -1217,7 +1217,7 @@ void PS_renderLR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD
 	}
 		else
 	{
-			float4 DMV = texcoord.x < 0.5 ? GetAO(float2(texcoord.x*2 , texcoord.y*2)) : tex2Dlod(SamplerDM,float4(texcoord.x*2-1 , texcoord.y*2,0,Depth_Map_Resolution));
+			float4 DMV = texcoord.x < 0.5 ? GetAO(float2(texcoord.x*2 , texcoord.y*2)) : tex2Dlod(SamplerDM,float4(texcoord.x*2-1 , texcoord.y*2,0,Depth_Map_Resolution)).rrrr;
 			color = texcoord.y < 0.5 ? DMV : tex2Dlod(SamplerDis,float4(texcoord.x,texcoord.y*2-1,0,Depth_Map_Resolution));
 	}	
 }
@@ -1261,12 +1261,6 @@ technique Depth3D_Reprojection
 			VertexShader = PostProcessVS;
 			PixelShader = Disocclusion;
 			RenderTarget = texDis;
-		}
-			pass AverageLuminance
-		{
-			VertexShader = PostProcessVS;
-			PixelShader = Average_Luminance;
-			RenderTarget = texLum;
 		}
 			pass StereoOut
 		{

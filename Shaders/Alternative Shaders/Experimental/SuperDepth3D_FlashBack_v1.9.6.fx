@@ -241,7 +241,7 @@ sampler SamplerDM
 		Texture = texDM;
 	};
 	
-texture texBlur  { Width = BUFFER_WIDTH/Depth_Map_Division; Height = BUFFER_HEIGHT/Depth_Map_Division; Format = RGBA32F; MipLevels = 3;}; 
+texture texBlur  { Width = BUFFER_WIDTH/Depth_Map_Division; Height = BUFFER_HEIGHT/Depth_Map_Division; Format = RGBA32F; MipLevels = 11;}; 
 
 sampler SamplerBlur
 	{
@@ -275,23 +275,13 @@ float4 MouseCursor(float4 position : SV_Position, float2 texcoord : TEXCOORD) : 
 
 uniform float frametime < source = "frametime"; >;
 /////////////////////////////////////////////////////////////////////////////////Adapted Luminance/////////////////////////////////////////////////////////////////////////////////
-texture texLum  {Width = 256/2; Height = 256/2; Format = RGBA8; MipLevels = 8;};//Sample at 256x256/2 and a mip bias of 8 should be 1x1 
-																				//if there is a better way of doing this please tell
-sampler SamplerLum																//256 / 2^8 = 1
-	{
-		Texture = texLum;
-		MipLODBias = 8.0f;
-		MinFilter = LINEAR;
-		MagFilter = LINEAR;
-		MipFilter = LINEAR;
-	};
 
 float AL()
 {
 float AdjustScale = 2;
     
-    //Luminance adapted luminance value from 1x1 Texture Mip lvl of 8
-	float4 Luminance = tex2Dlod(SamplerLum,float4(0.5,0.5,0,0));//Average
+    //Luminance adapted luminance value from 1x1 Texture Mip lvl of 16
+	float4 Luminance = tex2Dlod(SamplerBlur,float4(0.5,0.5,0,16));//Average
     
     //Frametime Perceptual Effects 
     float FPE  = (Luminance.r) * (AdjustScale - exp(-frametime));
@@ -727,6 +717,9 @@ float4 WeaponDepth(in float2 texcoord : TEXCOORD0)
 
 void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 Color : SV_Target0)
 {
+		float X,Y,W = 1;
+		float3 Z;
+		
 		float DM = Depth(texcoord).r;		
 		
 		float WD = WeaponDepth(texcoord).r;
@@ -753,14 +746,29 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 		Done = lerp(DM,D+Adj,Cutoff);
 		}
 		
-		Color = saturate(float4(Done.rrr,1));
+		X = Done;
+		Z = Done.rrr;
+			
+	// Dither for DepthBuffer adapted from gedosato ramdom dither https://github.com/PeterTh/gedosato/blob/master/pack/assets/dx9/deband.fx
+	
+	float dither_bit  = 8.0;
+	float noise = frac(sin(dot(texcoord, float2(12.9898, 78.233))) * 43758.5453 * 1);
+	float dither_shift = (1.0 / (pow(2,dither_bit) - 1.0));
+	float dither_shift_half = (dither_shift * 0.5);
+	dither_shift = dither_shift * noise - dither_shift_half;
+	Z += float3(-dither_shift, dither_shift, -dither_shift);
+	
+	// Dither End
+		
+		Color = saturate(float4(X,Y,Z.r,W));
 }
 
 /////////////////////////////////////////////////////AO/////////////////////////////////////////////////////////////
 
 float3 GetPosition(float2 coords)
 {
-	return float3(coords.xy*2.5-1.0,10.0)*tex2Dlod(SamplerDM,float4(coords.xy,0,Depth_Map_Resolution)).rgb;
+	float3 DM = tex2Dlod(SamplerDM,float4(coords.xy,0,Depth_Map_Resolution)).rrr;
+	return float3(coords.xy*2.5-1.0,10.0)*DM;
 }
 
 float2 GetRandom(float2 co)
@@ -813,7 +821,7 @@ float4 GetAO( float2 texcoord )
     float height = incy;
     
     //Depth Map
-    float depthM = tex2Dlod(SamplerDM, float4(texcoord,0,Depth_Map_Resolution)).r;
+    float depthM = tex2Dlod(SamplerDM, float4(texcoord,0,Depth_Map_Resolution)).b;
     
 		
 	//Depth Map linearization
@@ -862,7 +870,7 @@ void AO_in(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out
 	color = GetAO(texcoord);
 }
 
-void  BilateralBlur(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 color : SV_Target0 , out float4 Ave : SV_Target1)
+void  BilateralBlur(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 color : SV_Target0)
 {
 //bilateral blur\/
 float4 Done;
@@ -883,20 +891,15 @@ sum += tex2D(SamplerAO, float2(texcoord.x, texcoord.y + 4.0*blursize)) * 0.05;
 Done = 1-sum;
 //bilateral blur/\
 
-float4 DM = tex2Dlod(SamplerDM,float4(texcoord,0,Depth_Map_Resolution));
+float4 DM = tex2Dlod(SamplerDM,float4(texcoord,0,Depth_Map_Resolution)).bbbb;
 
 	color = lerp(DM,Done,P);
-	Ave = DM;
-}
-
-void Average_Luminance(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 color : SV_Target0 )
-{
-	color = tex2Dlod(SamplerDM,float4(texcoord,0,Depth_Map_Resolution));
 }
 
 float4  RGBAEncode(in float2 texcoord : TEXCOORD0) //RGBA zBuffer Color Channel Encode
 {
 	float GetDepth = tex2Dlod(SamplerBlur,float4(texcoord.x,texcoord.y,0,Depth_Map_Resolution)).r;
+	
 	float ZPD, Depth, MS = Divergence*pix.x;
 	float ND = Near_Depth/100;
 		
@@ -973,15 +976,15 @@ void PS_calcLR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0,
 		for (int i = 0; i <= Divergence; i++) 
 		{
 				//R
-				if (RGBAEncode(float2(TCR.x+i*pix.x/0.9,TCR.y)).x >= (1-TCR.x)/1.002) //Decode R
+				if (RGBAEncode(float2(TCR.x+i*pix.x/0.900,TCR.y)).x >= (1-TCR.x)/1.0025) //Decode R
 				{
-					cR = tex2Dlod(BackBuffer, float4(TCR.x+i*pix.x,TCR.y,0,0));
+					cR = tex2Dlod(BackBuffer, float4(TCR.x+i*pix.x/0.9875,TCR.y,0,0));
 				}
 				
 				//L
-				if (RGBAEncode(float2(TCL.x-i*pix.x/0.9,TCL.y)).z >= TCL.x/1.002) //Decode B
+				if (RGBAEncode(float2(TCL.x-i*pix.x/0.900,TCL.y)).z >= TCL.x/1.0025) //Decode B
 				{
-					cL = tex2Dlod(BackBuffer, float4(TCL.x-i*pix.x,TCL.y,0,0));
+					cL = tex2Dlod(BackBuffer, float4(TCL.x-i*pix.x/0.9875,TCL.y,0,0));
 				}	
 		}
 	if(!Depth_Map_View)
@@ -1149,7 +1152,7 @@ void PS_calcLR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0,
 		}
 	else
 		{
-				float4 DMV = texcoord.x < 0.5 ? GetAO(float2(texcoord.x*2 , texcoord.y*2)) : tex2Dlod(SamplerDM,float4(texcoord.x*2-1 , texcoord.y*2,0,Depth_Map_Resolution));
+				float4 DMV = texcoord.x < 0.5 ? GetAO(float2(texcoord.x*2 , texcoord.y*2)) : tex2Dlod(SamplerDM,float4(texcoord.x*2-1 , texcoord.y*2,0,Depth_Map_Resolution)).bbbb;
 				Out = texcoord.y < 0.5 ? DMV : tex2Dlod(SamplerBlur,float4(texcoord.x , texcoord.y*2-1 , 0 , Depth_Map_Resolution));
 		}
 		
@@ -1194,12 +1197,6 @@ technique Depth3D_FlashBack
 			VertexShader = PostProcessVS;
 			PixelShader = BilateralBlur;
 			RenderTarget = texBlur;
-		}
-			pass AverageLuminance
-		{
-			VertexShader = PostProcessVS;
-			PixelShader = Average_Luminance;
-			RenderTarget = texLum;
 		}
 			pass StereographicDecodeOutput
 		{

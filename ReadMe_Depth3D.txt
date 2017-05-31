@@ -1,5 +1,5 @@
 ﻿#SuperDepth3D
-Depth Map Based 3D post-process shader v1.9.5 for Reshade 3.0 WIP
+Depth Map Based 3D post-process shader v1.9.6 for Reshade 3.0 WIP
 
 This Shader allows for Depth Map Based 3D like What Nvidia does with Compatibility Mode 3D and Kind of what TriDef Does with Power 3D. 
 
