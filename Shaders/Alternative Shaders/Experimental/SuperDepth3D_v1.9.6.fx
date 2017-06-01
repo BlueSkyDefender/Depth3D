@@ -61,14 +61,14 @@ uniform int Divergence <
 				 "You can override this value.";
 > = 15;
 
-uniform float Near_Depth <
+uniform float Depth_Plus <
 	ui_type = "drag";
 	ui_min = 0.0; ui_max = 100.0;
-	ui_label = "Near Depth Adjustment";
+	ui_label = "Depth Plus Adjustment";
 	ui_tooltip = "Determines the amount of depth near the cam, zero is off.\n" 
 				 "Gives the image +Pop & +Depth.\n"
-				 "Default is 0.0";
-> = 0.0;
+				 "Default is 50.0";
+> = 50.0;
 
 uniform float Weapon_Depth <
 	ui_type = "drag";
@@ -1032,13 +1032,13 @@ void PS_renderLR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD
 		DepthL =  min(DepthL,tex2Dlod(SamplerDis,float4(TCR.x+S, TCR.y,0,Depth_Map_Resolution)).r);
 		DepthR =  min(DepthR,tex2Dlod(SamplerDis,float4(TCL.x-S, TCL.y,0,Depth_Map_Resolution)).r);
 	}
-		float ND = Near_Depth/100;
+		float DP = Depth_Plus/100;
 		
 		PL += MS * (1-ZPD/DepthL); //Convergence also known as ZPD 
 		PR += MS * (1-ZPD/DepthR); //Code is not in full use since Near Depth is in favor.
 		
-		DepthL = lerp(DepthL,1-DepthL,-ND); //Near depth code.
-		DepthR = lerp(DepthR,1-DepthR,-ND); //Simple Code to add enhanced depth to the image output.
+		DepthL = lerp(DepthL,1-DepthL,-DP); //Near depth code.
+		DepthR = lerp(DepthR,1-DepthR,-DP); //Simple Code to add enhanced depth to the image output.
 	
 		float ReprojectionLeft =  lerp(DepthL*MS,PL*MS,0.5);
 		float ReprojectionRight = lerp(DepthR*MS,PR*MS,0.5);

@@ -19,7 +19,7 @@ IF IT HAS AN *asterisk* I AM STILL WORKING ON IT.
                                               NS & FB
 [Game List]                                 [Depth Map] [Adjustment] [Weapons DM] [Depth Flip] [Read Below] 
 ABZU                                            DM 4         20
-Alien Isolation                                 DM 6         5
+Alien Isolation                                 DM 6        5.00
 Amnesia: Machine for Pigs                       DM 2         15         WDM 24          
 Amnesia: The Dark Descent                       DM 2         15         WDM 24  
 Among The Sleep                                 DM 0        8.75                       Yes
@@ -34,11 +34,11 @@ BorderLands 2                                   DM 5        7.50        WDM 1   
 *CEMU - Mariokart 8                              DM 2        5.0-10                        Yes
 *CEMU - Super Mario 3D World                     DM 6        5.0-10                        Yes
 *CEMU - The Legend of Zelda: Breath of the Wild  ????        ??????
-*Call of Duty: Advance Warfare                   DM 4        2.5-7.5         WDM 3                      RB
-*Call of Duty: Black Ops                         DM 0        5.0-10          WDM 2                      RB
-*Call of Duty: Black Ops 2                       DM 4        2.5-7.5         WDM 3                      RB
-*Call of Duty: Ghost                             DM 4        2.5-7.5         WDM 3                      RB
-*Call of Duty: Infinite Warfare                  DM 4        5.0-10          WDM 3                      RB
+Call of Duty: Advance Warfare                   DM 4         6.25       WDM 3                        RB
+Call of Duty: Black Ops                         DM 0         6.25       WDM 2                        RB
+Call of Duty: Black Ops 2                       DM 4         6.25       WDM 3                        RB
+Call of Duty: Ghost                             DM 4         6.25       WDM 3                        RB
+Call of Duty: Infinite Warfare                  DM 4         6.25       WDM 3                        RB
 *Casltevania: Lord of Shadows - UE               DM 0        7.5-10                                       
 *Cryostasis                                      DM 7        7.5-10          WDM 5                         
 *DOOM 2016                                       DM 7        10-15           WDM 6                          

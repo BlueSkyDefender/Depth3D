@@ -60,13 +60,13 @@ uniform int Divergence <
 	ui_tooltip = "Determines the amount of Image Warping and Separation.";
 > = 15;
 
-uniform float Near_Depth <
+uniform float Depth_Plus <
 	ui_type = "drag";
 	ui_min = 0.0; ui_max = 100.0;
-	ui_label = "Near Depth Adjustment";
+	ui_label = "Depth Plus Adjustment";
 	ui_tooltip = "Determines the amount of depth near the cam, zero is off.\n" 
-				 "Default is 0.0";
-> = 0.0;
+				 "Default is 50.0";
+> = 50.0;
 
 uniform float Weapon_Depth <
 	ui_type = "drag";
@@ -913,11 +913,11 @@ float4  RGBAEncode(in float2 texcoord : TEXCOORD0) //RGBA zBuffer Color Channel 
 	float GetDepth = tex2Dlod(SamplerBlur,float4(texcoord.x,texcoord.y,0,Depth_Map_Resolution)).r;
 	
 	float ZPD, Depth, MS = Divergence*pix.x;
-	float ND = Near_Depth/100;
+	float DP = Depth_Plus/100;
 		
 	Depth += MS * (1-ZPD/GetDepth);//Convergence also known as ZPD, code is not in full use since Near Depth is in favor.
 	
-	GetDepth = lerp(GetDepth,1-GetDepth,-ND); //Near Depth code, simple Code to add enhanced depth to the image output.
+	GetDepth = lerp(GetDepth,1-GetDepth,-DP); //Near Depth code, simple Code to add enhanced depth to the image output.
 	
 	float Red = (1-texcoord.x)+Divergence*pix.x*GetDepth;
 	float Blue = texcoord.x+Divergence*pix.x*GetDepth;
