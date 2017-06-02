@@ -535,8 +535,8 @@ float4 WeaponDepth(in float2 texcoord : TEXCOORD0)
 		if (WDM == 9)
 		{
 		cWF = 0.010;
-		cWN = -5.0;
-		cWP = 0.900;
+		cWN = -15.0;
+		cWP = 0.890;
 		CoP = 0.4127;
 		}
 		

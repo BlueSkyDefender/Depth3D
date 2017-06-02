@@ -494,8 +494,8 @@ float4 WeaponDepth(in float2 texcoord : TEXCOORD0)
 		if (WDM == 9)
 		{
 		cWF = 0.010;
-		cWN = -5.0;
-		cWP = 0.900;
+		cWN = -15.0;
+		cWP = 0.890;
 		CoP = 0.4127;
 		}
 		
@@ -908,7 +908,7 @@ float4 DM = tex2Dlod(SamplerDM,float4(texcoord,0,Depth_Map_Resolution)).bbbb;
 	color = lerp(DM,Done,P);
 }
 
-float4  RGBAEncode(in float2 texcoord : TEXCOORD0) //RGBA zBuffer Color Channel Encode
+float4  Encode(in float2 texcoord : TEXCOORD0) //zBuffer Color Channel Encode
 {
 	float GetDepth = tex2Dlod(SamplerBlur,float4(texcoord.x,texcoord.y,0,Depth_Map_Resolution)).r;
 	
@@ -925,8 +925,8 @@ float4  RGBAEncode(in float2 texcoord : TEXCOORD0) //RGBA zBuffer Color Channel 
 	float RedINV = (1-texcoord.x)+Divergence*pix.x*Depth;
 	float BlueINV = texcoord.x+Divergence*pix.x*Depth;
 	
-	float R = lerp(Red,RedINV,0.5); //Red Color Channel
-	float B = lerp(Blue,BlueINV,0.5); //Blue Color Channel
+	float R = lerp(Red,RedINV,0.5); //R Encode
+	float B = lerp(Blue,BlueINV,0.5); //B Encode
 	
 	return float4(R,0,B,0);
 }
@@ -988,13 +988,13 @@ void PS_calcLR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0,
 		for (int i = 0; i <= Divergence; i++) 
 		{
 				//R
-				if (RGBAEncode(float2(TCR.x+i*pix.x/0.900,TCR.y)).x >= (1-TCR.x)/1.0025) //Decode R
+				if (Encode(float2(TCR.x+i*pix.x/0.900,TCR.y)).x >= (1-TCR.x)/1.0025) //Decode R
 				{
 					cR = tex2Dlod(BackBuffer, float4(TCR.x+i*pix.x/0.9875,TCR.y,0,0));
 				}
 				
 				//L
-				if (RGBAEncode(float2(TCL.x-i*pix.x/0.900,TCL.y)).z >= TCL.x/1.0025) //Decode B
+				if (Encode(float2(TCL.x-i*pix.x/0.900,TCL.y)).z >= TCL.x/1.0025) //Decode B
 				{
 					cL = tex2Dlod(BackBuffer, float4(TCL.x-i*pix.x/0.9875,TCL.y,0,0));
 				}	
