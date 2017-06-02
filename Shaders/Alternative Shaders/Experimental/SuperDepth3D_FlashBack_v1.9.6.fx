@@ -724,9 +724,8 @@ float4 WeaponDepth(in float2 texcoord : TEXCOORD0)
 
 void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 Color : SV_Target0)
 {
-		float X,Y,W = 1;
-		float3 Z;
-		
+		float X,Y,Z,W = 1;
+
 		float DM = Depth(texcoord).r;		
 		
 		float WD = WeaponDepth(texcoord).r;
@@ -754,7 +753,7 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 		}
 		
 		X = Done;
-		Z = Done.rrr;
+		Z = Done;
 			
 	// Dither for DepthBuffer adapted from gedosato ramdom dither https://github.com/PeterTh/gedosato/blob/master/pack/assets/dx9/deband.fx
 	
@@ -763,11 +762,13 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 	float dither_shift = (1.0 / (pow(2,dither_bit) - 1.0));
 	float dither_shift_half = (dither_shift * 0.5);
 	dither_shift = dither_shift * noise - dither_shift_half;
-	Z += float3(-dither_shift, dither_shift, -dither_shift);
+	Z += -dither_shift;
+	Z += dither_shift;
+	Z += -dither_shift;
 	
 	// Dither End
 		
-		Color = saturate(float4(X,Y,Z.r,W));
+		Color = saturate(float4(X,Y,Z,W));
 }
 
 /////////////////////////////////////////////////////AO/////////////////////////////////////////////////////////////
