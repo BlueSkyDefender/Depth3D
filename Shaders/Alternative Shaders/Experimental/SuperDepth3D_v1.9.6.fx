@@ -26,18 +26,11 @@
  //*																																												*//
  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-// Determines The size of the Depth Map. For 4k Use 2 or 2.5. For 1440p Use 1.5 or 2. For 1080p use 1. This may cause errors in Weapon Depth Maps.
+// Determines The size of the Depth Map. For 4k Use 2 or 2.5. For 1440p Use 1.5 or 2. For 1080p use 1.
 #define Depth_Map_Division 1.0
 
 // Determines The Max Depth amount.
-#define Depth_Max 30
-
-//uniform float2 X <
-	//ui_type = "drag";
-	//ui_min = 0.0; ui_max = 2.0;
-	//ui_label = "X";
-	//ui_tooltip = "Determines the X point. Default is 0";
-//> = float2(0.0,1.0);
+#define Depth_Max 35
 
 uniform int Depth_Map <
 	ui_type = "combo";
@@ -63,7 +56,7 @@ uniform int Divergence <
 
 uniform float Depth_Plus <
 	ui_type = "drag";
-	ui_min = 0.0; ui_max = 100.0;
+	ui_min = 0.0; ui_max = 125.0;
 	ui_label = "Depth Plus Adjustment";
 	ui_tooltip = "Determines the amount of depth near the cam, zero is off.\n" 
 				 "Gives the image +Pop & +Depth.\n"
@@ -198,16 +191,6 @@ uniform float AO_Shift <
 				 "Default is 0";
 > = 0.0;
 
-uniform int Depth_Map_Resolution <
-	ui_type = "drag";
-	ui_min = 0; ui_max = 1;
-	ui_label = "Depth Map Resolution";
-	ui_tooltip = "This will lower the resolution of the Depth Map.\n"
-				 "You lose image quality if this is turned on.\n"
-				 "Use if you need a fps boost.\n"
-				 "Default is 0 Off";
-> = 0;
-
 uniform bool Eye_Swap <
 	ui_label = "Swap Eyes";
 	ui_tooltip = "L/R to R/L.";
@@ -275,21 +258,21 @@ sampler BackBufferCLAMP
 		AddressW = CLAMP;
 	};
 	
-texture texDM  { Width = BUFFER_WIDTH/Depth_Map_Division; Height = BUFFER_HEIGHT/Depth_Map_Division; Format = RGBA32F; MipLevels = 3;}; 
+texture texDM  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT/Depth_Map_Division; Format = RGBA32F; MipLevels = 3;}; 
 
 sampler SamplerDM
 	{
 		Texture = texDM;
 	};
 	
-texture texDis  { Width = BUFFER_WIDTH/Depth_Map_Division; Height = BUFFER_HEIGHT/Depth_Map_Division; Format = RGBA32F; MipLevels = 11;}; 
+texture texDis  { Width = BUFFER_WIDTH/Depth_Map_Division; Height = BUFFER_HEIGHT/Depth_Map_Division; Format = RGBA32F; MipLevels = 3;}; 
 
 sampler SamplerDis
 	{
 		Texture = texDis;
 	};
 	
-texture texAO  { Width = BUFFER_WIDTH/2; Height = BUFFER_HEIGHT/2; Format = RGBA32F;}; 
+texture texAO  { Width = BUFFER_WIDTH/2; Height = BUFFER_HEIGHT/2; Format = RGBA32F; MipLevels = 3;}; 
 
 sampler SamplerAO
 	{
@@ -765,7 +748,7 @@ float4 WeaponDepth(in float2 texcoord : TEXCOORD0)
 
 void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 Color : SV_Target0)
 {
-		float X,Y,Z,W = 1;
+		float R,G,B,A = 1;
 
 		float DM = Depth(texcoord).r;		
 		
@@ -793,30 +776,18 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 		Done = lerp(DM,D+Adj,Cutoff);
 		}
 		
-		X = Done;
-		Z = Done;
-			
-	// Dither for DepthBuffer adapted from gedosato ramdom dither https://github.com/PeterTh/gedosato/blob/master/pack/assets/dx9/deband.fx
+		R = Done;
+		G = Done;
+		B = Done;
 	
-	float dither_bit  = 8.0;
-	float noise = frac(sin(dot(texcoord, float2(12.9898, 78.233))) * 43758.5453 * 1);
-	float dither_shift = (1.0 / (pow(2,dither_bit) - 1.0));
-	float dither_shift_half = (dither_shift * 0.5);
-	dither_shift = dither_shift * noise - dither_shift_half;
-	Z += -dither_shift;
-	Z += dither_shift;
-	Z += -dither_shift;
-	
-	// Dither End
-		
-		Color = saturate(float4(X,Y,Z,W));
+	Color = saturate(float4(R,G,B,A));
 }
 
 /////////////////////////////////////////////////////AO/////////////////////////////////////////////////////////////
 
 float3 GetPosition(float2 coords)
 {
-	return float3(coords.xy*2.5-1.0,10.0)*tex2Dlod(SamplerDM,float4(coords.xy,0,Depth_Map_Resolution)).rrr;
+	return float3(coords.xy*2.5-1.0,10.0)*tex2Dlod(SamplerDM,float4(coords.xy,0,0)).rrr;
 }
 
 float2 GetRandom(float2 co)
@@ -831,8 +802,8 @@ float3 normal_from_depth(float2 texcoords)
 	const float2 offset1 = float2(-10,10);
 	const float2 offset2 = float2(10,10);
 	  
-	float depth1 = tex2Dlod(SamplerDM, float4(texcoords + offset1,0,Depth_Map_Resolution)).r;
-	float depth2 = tex2Dlod(SamplerDM, float4(texcoords + offset2,0,Depth_Map_Resolution)).r;
+	float depth1 = tex2Dlod(SamplerDM, float4(texcoords + offset1,0,0)).r;
+	float depth2 = tex2Dlod(SamplerDM, float4(texcoords + offset2,0,0)).r;
 	  
 	float3 p1 = float3(offset1, depth1 - depth);
 	float3 p2 = float3(offset2, depth2 - depth);
@@ -869,7 +840,7 @@ float4 GetAO( float2 texcoord )
     float height = incy;
     
     //Depth Map
-    float depthM = tex2Dlod(SamplerDM,float4(texcoord ,0,Depth_Map_Resolution)).b;
+    float depthM = tex2Dlod(SamplerDM,float4(texcoord ,0,0)).b;
     
 		
 	//Depth Map linearization
@@ -972,14 +943,14 @@ float DP =  Divergence;
 	{
 		if(Dis_Occlusion >= 1) 
 		{
-		DM += tex2Dlod(SamplerDM,float4(texcoord + dir * weight[i] * B,0,Depth_Map_Resolution)).bbbb/Con;
+		DM += tex2Dlod(SamplerDM,float4(texcoord + dir * weight[i] * B,0,0)).rrrr/Con;
 		}
 	}
 	
 	}
 	else
 	{
-	DM = tex2Dlod(SamplerDM,float4(texcoord,0,Depth_Map_Resolution)).bbbb;
+	DM = tex2Dlod(SamplerDM,float4(texcoord,0,0)).rrrr;
 	}		                          
 	
 	color = lerp(DM,Done,P);
@@ -1030,15 +1001,15 @@ void PS_renderLR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD
 	for (int j = 0; j < 5; ++j) 
 	{	
 		S = samples[j] * MS;
-		DepthL =  min(DepthL,tex2Dlod(SamplerDis,float4(TCR.x+S, TCR.y,0,Depth_Map_Resolution)).r);
-		DepthR =  min(DepthR,tex2Dlod(SamplerDis,float4(TCL.x-S, TCL.y,0,Depth_Map_Resolution)).r);
+		DepthL =  min(DepthL,tex2Dlod(SamplerDis,float4(TCR.x+S, TCR.y,0,0)).r);
+		DepthR =  min(DepthR,tex2Dlod(SamplerDis,float4(TCL.x-S, TCL.y,0,0)).r);
 	}
 		float DP = Depth_Plus/100;
 		
 		PL += MS * (1-ZPD/DepthL); //Convergence also known as ZPD 
 		PR += MS * (1-ZPD/DepthR); //Code is not in full use since Near Depth is in favor.
 		
-		DepthL = lerp(DepthL,1-DepthL,-DP); //Near depth code.
+		DepthL = lerp(DepthL,1-DepthL,-DP); //Depth Plus code.
 		DepthR = lerp(DepthR,1-DepthR,-DP); //Simple Code to add enhanced depth to the image output.
 	
 		float ReprojectionLeft =  lerp(DepthL*MS,PL*MS,0.5);
@@ -1230,8 +1201,8 @@ void PS_renderLR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD
 	}
 		else
 	{
-			float4 DMV = texcoord.x < 0.5 ? GetAO(float2(texcoord.x*2 , texcoord.y*2)) : tex2Dlod(SamplerDM,float4(texcoord.x*2-1 , texcoord.y*2,0,Depth_Map_Resolution)).rrrr;
-			color = texcoord.y < 0.5 ? DMV : tex2Dlod(SamplerDis,float4(texcoord.x,texcoord.y*2-1,0,Depth_Map_Resolution));
+			float4 DMV = texcoord.x < 0.5 ? GetAO(float2(texcoord.x*2 , texcoord.y*2)) : tex2Dlod(SamplerDM,float4(texcoord.x*2-1 , texcoord.y*2,0,0)).rrrr;
+			color = texcoord.y < 0.5 ? DMV : tex2Dlod(SamplerDis,float4(texcoord.x,texcoord.y*2-1,0,0));
 	}	
 }
 
