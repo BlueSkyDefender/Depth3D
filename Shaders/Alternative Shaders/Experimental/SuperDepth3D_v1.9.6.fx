@@ -779,6 +779,20 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 		R = Done;
 		G = Done;
 		B = Done;
+		
+	// Dither for DepthBuffer adapted from gedosato ramdom dither https://github.com/PeterTh/gedosato/blob/master/pack/assets/dx9/deband.fx
+	// I noticed in some games the depth buffer started to have banding so this is used to remove that.
+			
+	float dither_bit  = 6.0;
+	float noise = frac(sin(dot(texcoord, float2(12.9898, 78.233))) * 43758.5453 * 1);
+	float dither_shift = (1.0 / (pow(2,dither_bit) - 1.0));
+	float dither_shift_half = (dither_shift * 0.5);
+	dither_shift = dither_shift * noise - dither_shift_half;
+	B += -dither_shift;
+	B += dither_shift;
+	B += -dither_shift;
+	
+	// Dither End	
 	
 	Color = saturate(float4(R,G,B,A));
 }
@@ -840,7 +854,7 @@ float4 GetAO( float2 texcoord )
     float height = incy;
     
     //Depth Map
-    float depthM = tex2Dlod(SamplerDM,float4(texcoord ,0,0)).r;
+    float depthM = tex2Dlod(SamplerDM,float4(texcoord ,0,0)).b;
     
 		
 	//Depth Map linearization
@@ -943,29 +957,15 @@ float DP =  Divergence;
 	{
 		if(Dis_Occlusion >= 1) 
 		{
-		DM += tex2Dlod(SamplerDM,float4(texcoord + dir * weight[i] * B,0,0)).rrrr/Con;
+		DM += tex2Dlod(SamplerDM,float4(texcoord + dir * weight[i] * B,0,0)).bbbb/Con;
 		}
 	}
 	
 	}
 	else
 	{
-	DM = tex2Dlod(SamplerDM,float4(texcoord,0,0)).rrrr;
-	}
-	
-	// Dither for DepthBuffer adapted from gedosato ramdom dither https://github.com/PeterTh/gedosato/blob/master/pack/assets/dx9/deband.fx
-	// I noticed in some games the depth buffer started to have banding so this is used to remove that.
-			
-	float dither_bit  = 6.0;
-	float noise = frac(sin(dot(texcoord, float2(12.9898, 78.233))) * 43758.5453 * 1);
-	float dither_shift = (1.0 / (pow(2,dither_bit) - 1.0));
-	float dither_shift_half = (dither_shift * 0.5);
-	dither_shift = dither_shift * noise - dither_shift_half;
-	DM += -dither_shift;
-	DM += dither_shift;
-	DM += -dither_shift;
-	
-	// Dither End		                          
+	DM = tex2Dlod(SamplerDM,float4(texcoord,0,0)).bbbb;
+	}	                          
 	
 	color = lerp(DM,Done,P);
 }
@@ -1215,7 +1215,7 @@ void PS_renderLR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD
 	}
 		else
 	{
-			float4 DMV = texcoord.x < 0.5 ? GetAO(float2(texcoord.x*2 , texcoord.y*2)) : tex2Dlod(SamplerDM,float4(texcoord.x*2-1 , texcoord.y*2,0,0)).rrrr;
+			float4 DMV = texcoord.x < 0.5 ? GetAO(float2(texcoord.x*2 , texcoord.y*2)) : tex2Dlod(SamplerDM,float4(texcoord.x*2-1 , texcoord.y*2,0,0)).bbbb;
 			color = texcoord.y < 0.5 ? DMV : tex2Dlod(SamplerDis,float4(texcoord.x,texcoord.y*2-1,0,0));
 	}	
 }
