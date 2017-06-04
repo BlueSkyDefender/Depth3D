@@ -42,7 +42,7 @@ Call of Duty: Infinite Warfare                  DM 4        6.25       WDM 3    
 Casltevania: Lord of Shadows - UE               DM 0        3.75                                       
 Cryostasis                                      DM 7        6.25       WDM 5                         
 DOOM 2016                                       DM 7        6.25       WDM 6                          
-*DarkSiders Warmastred Edition                   DM 5        10-15                                      
+DarkSiders Warmastred Edition                   DM 0        5.00                                      
 *Dead Effect                                     DM 0        7.5-10                                     
 *Dead Island                                     DM 0        5.0-10
 *Dead Rising 3                                   DM 6        10-20
@@ -51,7 +51,7 @@ DOOM 2016                                       DM 7        6.25       WDM 6
 *Dragon Age Inquisition                          DM 0        2.5-5.0
 *Dragon Ball Xenoverse                           DM 5        10-20
 *Dragons Dogma: Dark Arisen                      DM 6        7.5-15
-*DreamFall Chapters                              DM 5        2.5-7.5
+DreamFall Chapters                              DM 0        5.0
 *Dungeon Nightmares II                           DM 6        25-35                                      RB
 *Emily Wants To Play                             DM 1        10-20                                      RB
 *Everybody's Gone to the Rapture                 DM 5        2.5-7.5
