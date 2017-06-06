@@ -83,6 +83,7 @@ DreamFall Chapters                              DM 0        5.0
 *NecroVision: Lost Company                       DM 7        7.5-15          WDM 8                      
 *Need For Speed Rivals                           Help        ?????? 
 *Need for Speed Most Wanted                      Help        ?????? 
+NieRAutomata                                     DM 6        15
 *Penumbra: Black Plague                          DM 5        10-20                                      RB
 *Phantasmal                                      DM 0        10-20                                      RB
 Prey 2017                                        DM 4        5.0         WDM 17 or 18                   RB
