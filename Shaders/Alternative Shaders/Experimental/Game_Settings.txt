@@ -43,9 +43,9 @@ Casltevania: Lord of Shadows - UE               DM 0        3.75
 Cryostasis                                      DM 7        6.25       WDM 5                         
 DOOM 2016                                       DM 7        6.25       WDM 6                          
 DarkSiders Warmastred Edition                   DM 0        5.00                                      
-*Dead Effect                                     DM 0        7.5-10                                     
-*Dead Island                                     DM 0        5.0-10
-*Dead Rising 3                                   DM 6        10-20
+Dead Effect                                     DM 7        5.00                                     
+Dead Island                                     DM 7        3.125
+Dead Rising 3                                   DM 6        10.0
 *DeadPool Game                                   DM 6        15-20
 *Deadly Premonition:The Directors's Cut          DM 5        7.5-10                                     RB
 *Dragon Age Inquisition                          DM 0        2.5-5.0

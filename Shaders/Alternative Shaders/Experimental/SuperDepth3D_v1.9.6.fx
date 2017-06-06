@@ -1018,7 +1018,7 @@ void PS_renderLR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD
 		DepthL =  min(DepthL,tex2Dlod(SamplerDis,float4(TCR.x+S, TCR.y,0,0)).r);
 		DepthR =  min(DepthR,tex2Dlod(SamplerDis,float4(TCL.x-S, TCL.y,0,0)).r);
 	}
-		float DP = Depth_Plus/105.25;
+		float DP = Depth_Plus/100;
 		
 		PL += MS * (1-ZPD/DepthL); //Convergence also known as ZPD 
 		PR += MS * (1-ZPD/DepthR); //Code is not in full use since Near Depth is in favor.
