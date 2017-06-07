@@ -991,43 +991,47 @@ void PS_renderLR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD
 	
 	if (Stereoscopic_Mode == 0)
 		{
-			TCL.x = (texcoord.x*2-1) - P;
-			TCR.x = (texcoord.x*2) + P;
-			TCL.y = texcoord.y;
+			TCR.x = (texcoord.x*2-1) - P;
+			TCL.x = (texcoord.x*2) + P;
 			TCR.y = texcoord.y;
+			TCL.y = texcoord.y;
 		}
 	else if(Stereoscopic_Mode == 1)
 		{
-			TCL.x = texcoord.x - P;
-			TCR.x = texcoord.x + P;
-			TCL.y = texcoord.y*2-1;
-			TCR.y = texcoord.y*2;
+			TCR.x = texcoord.x - P;
+			TCL.x = texcoord.x + P;
+			TCR.y = texcoord.y*2-1;
+			TCL.y = texcoord.y*2;
 		}
 	else
 		{
-			TCL.x = texcoord.x - P;
-			TCR.x = texcoord.x + P;
-			TCL.y = texcoord.y;
+			TCR.x = texcoord.x - P;
+			TCL.x = texcoord.x + P;
 			TCR.y = texcoord.y;
+			TCL.y = texcoord.y;
 		}
 	
 	[loop]
 	for (int j = 0; j < 5; ++j) 
 	{	
 		S = samples[j] * MS;
-		DepthL =  min(DepthL,tex2Dlod(SamplerDis,float4(TCR.x+S, TCR.y,0,0)).r);
-		DepthR =  min(DepthR,tex2Dlod(SamplerDis,float4(TCL.x-S, TCL.y,0,0)).r);
+		float DP = Depth_Plus/105.25;
+		
+		float L = tex2Dlod(SamplerDis,float4(TCL.x+S, TCL.y,0,0)).r;
+		float R = tex2Dlod(SamplerDis,float4(TCR.x-S, TCR.y,0,0)).r;
+		
+		PL += MS * (1-ZPD/L); //Convergence also known as ZPD 
+		PR += MS * (1-ZPD/L); //Code is not in full use since Near Depth is in favor.
+		
+		L = lerp(L,1-L,-DP); //Depth Plus code.
+		R = lerp(R,1-R,-DP); //Simple Code to add enhanced depth to the image output.
+		
+		DepthL =  min(DepthL,lerp(L,PL,0.5));
+		DepthR =  min(DepthR,lerp(R,PR,0.5));
 	}
-		float DP = Depth_Plus/100;
-		
-		PL += MS * (1-ZPD/DepthL); //Convergence also known as ZPD 
-		PR += MS * (1-ZPD/DepthR); //Code is not in full use since Near Depth is in favor.
-		
-		DepthL = lerp(DepthL,1-DepthL,-DP); //Depth Plus code.
-		DepthR = lerp(DepthR,1-DepthR,-DP); //Simple Code to add enhanced depth to the image output.
 	
-		float ReprojectionLeft =  lerp(DepthL*MS,PL*MS,0.5);
-		float ReprojectionRight = lerp(DepthR*MS,PR*MS,0.5);
+		float ReprojectionLeft =  DepthL*MS;
+		float ReprojectionRight = DepthR*MS;
 	
 	if(!Depth_Map_View)
 	{
