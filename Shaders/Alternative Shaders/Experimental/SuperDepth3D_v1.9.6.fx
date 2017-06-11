@@ -1021,7 +1021,7 @@ void PS_renderLR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD
 		float R = tex2Dlod(SamplerDis,float4(TCR.x-S, TCR.y,0,0)).r;
 		
 		PL += MS * (1-ZPD/L); //Convergence also known as ZPD 
-		PR += MS * (1-ZPD/L); //Code is not in full use since Near Depth is in favor.
+		PR += MS * (1-ZPD/R); //Code is not in full use since Depth Plus is in favor.
 		
 		L = lerp(L,1-L,-DP); //Depth Plus code.
 		R = lerp(R,1-R,-DP); //Simple Code to add enhanced depth to the image output.
