@@ -910,8 +910,8 @@ void Average_Luminance(in float4 position : SV_Position, in float2 texcoord : TE
 void  Disocclusion(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 color : SV_Target0)
 {
 //bilateral blur\/
-float4 Done, sum;
-float P = Power/10;
+float4 Done, sum, DM;
+float P = Power/10, B;
 
 float blursize = 2.0*pix.x;
 
@@ -927,44 +927,43 @@ sum += tex2D(SamplerAO, float2(texcoord.x, texcoord.y + 4.0*blursize)) * 0.05;
 Done = 1-sum;
 //bilateral blur/\
 
-float DP =  Divergence;
+float DP =  Divergence+(Depth_Plus);
 	
- float Disocclusion_Power = DP/350;
- float4 DM;                                                                                                                                                                                                                                                                                               	
+ float Disocclusion_Power = DP/250;                                                                                                                                                                                                                                                                                           	
  float2 dir;
- float B;
- int Con = 10;
+ const int Con = 11;
 	
 	if(Dis_Occlusion >= 1) 
 	{
-	
-	const float weight[10] = { 0.01,-0.01,0.02,-0.02,0.03,-0.03,0.04,-0.04,0.05,-0.05};
-
-	if(Dis_Occlusion == 1)
-	{
-	dir = float2(0.5,0);
-	B = Disocclusion_Power;
-	}
-	
-	if(Dis_Occlusion == 2)
-	{
-	dir = 0.5 - texcoord;
-	B = Disocclusion_Power*2;
-	}
-	 
-	[loop]
-	for (int i = 0; i < Con; i++)
-	{
-		if(Dis_Occlusion >= 1) 
+		const float weight[Con] = {0.0,0.01,-0.01,0.02,-0.02,0.03,-0.03,0.04,-0.04,0.05,-0.05};
+		
+		float sampleOffset = 1-tex2Dlod(SamplerDM,float4(texcoord,0,0)).b;
+		
+		if(Dis_Occlusion == 1)
 		{
-		DM += tex2Dlod(SamplerDM,float4(texcoord + dir * weight[i] * B,0,0)).bbbb/Con;
+			dir = float2(sampleOffset,sampleOffset);
+			B = Disocclusion_Power;
 		}
-	}
+		
+		if(Dis_Occlusion == 2)
+		{
+			dir = sampleOffset - texcoord;
+			B = Disocclusion_Power*2;
+		}
+	 
+		[loop]
+		for (int i = 0; i < Con; i++)
+		{	
+			if(Dis_Occlusion >= 1) 
+			{	
+				DM += tex2Dlod(SamplerDM,float4(texcoord + dir * weight[i] * B,0,0)).bbbb/Con;
+			}
+		}
 	
 	}
 	else
 	{
-	DM = tex2Dlod(SamplerDM,float4(texcoord,0,0)).bbbb;
+		DM = tex2Dlod(SamplerDM,float4(texcoord,0,0)).bbbb;
 	}	                          
 	
 	color = lerp(DM,Done,P);
