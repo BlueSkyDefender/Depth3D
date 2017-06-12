@@ -927,21 +927,18 @@ sum += tex2D(SamplerAO, float2(texcoord.x, texcoord.y + 4.0*blursize)) * 0.05;
 Done = 1-sum;
 //bilateral blur/\
 
-float DP =  Divergence+(Depth_Plus);
-	
- float Disocclusion_Power = DP/250;                                                                                                                                                                                                                                                                                           	
+ float Disocclusion_Power =  Divergence/350;                                                                                                                                                                                                                                                                                        	
  float2 dir;
- const int Con = 11;
+ const int Con = 10;
 	
 	if(Dis_Occlusion >= 1) 
 	{
-		const float weight[Con] = {0.0,0.01,-0.01,0.02,-0.02,0.03,-0.03,0.04,-0.04,0.05,-0.05};
-		
-		float sampleOffset = 1-tex2Dlod(SamplerDM,float4(texcoord,0,0)).b;
+		const float weight[Con] = {0.01,-0.01,0.02,-0.02,0.03,-0.03,0.04,-0.04,0.05,-0.05};
+		float sampleOffset = smoothstep(0,1,1-tex2Dlod(SamplerDM,float4(texcoord,0,0)).b);
 		
 		if(Dis_Occlusion == 1)
 		{
-			dir = float2(sampleOffset,sampleOffset);
+			dir = float2(sampleOffset,0.0);
 			B = Disocclusion_Power;
 		}
 		
@@ -950,13 +947,13 @@ float DP =  Divergence+(Depth_Plus);
 			dir = sampleOffset - texcoord;
 			B = Disocclusion_Power*2;
 		}
-	 
+		
 		[loop]
 		for (int i = 0; i < Con; i++)
 		{	
 			if(Dis_Occlusion >= 1) 
 			{	
-				DM += tex2Dlod(SamplerDM,float4(texcoord + dir * weight[i] * B,0,0)).bbbb/Con;
+				DM += tex2Dlod(SamplerDM,float4(texcoord + dir * weight[i] * B ,0,0)).bbbb/Con;
 			}
 		}
 	
