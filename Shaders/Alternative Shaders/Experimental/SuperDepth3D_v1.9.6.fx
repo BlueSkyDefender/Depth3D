@@ -910,7 +910,7 @@ void Average_Luminance(in float4 position : SV_Position, in float2 texcoord : TE
 void  Disocclusion(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 color : SV_Target0)
 {
 //bilateral blur\/
-float4 Done, sum, DM;
+float4 Done, sum, DM, DP =  Divergence;
 float P = Power/10, B;
 
 float blursize = 2.0*pix.x;
@@ -927,7 +927,8 @@ sum += tex2D(SamplerAO, float2(texcoord.x, texcoord.y + 4.0*blursize)) * 0.05;
 Done = 1-sum;
 //bilateral blur/\
 
- float Disocclusion_Power =  Divergence/350;                                                                                                                                                                                                                                                                                        	
+float Disocclusion_Power = DP/350;     
+                                                                                                                                                                                                                                                                                                                                                                                                                   	
  float2 dir;
  const int Con = 10;
 	
