@@ -734,7 +734,7 @@ float4 WeaponDepth(in float2 texcoord : TEXCOORD0)
 		CoP = Weapon_Cutoff;
 		}
 		
-		return float4(zBufferWH.rrr,CoP);
+		return float4(saturate(zBufferWH.rrr),CoP);
 }
 
 void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 Color : SV_Target0)
@@ -742,7 +742,9 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 		float R,G,B,A = 1;
 
 		float DM = Depth(texcoord).r;		
-		
+		//DM = 1-(25*pix.x) * (20/DM);
+		//DM = max(-1,lerp(DM,Depth(texcoord).r,0.5));
+
 		float WD = WeaponDepth(texcoord).r;
 		
 		float CoP = WeaponDepth(texcoord).w; //Weapon Cutoff Point
@@ -785,7 +787,7 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 	
 	// Dither End	
 	
-	Color = saturate(float4(R,G,B,A));
+	Color = float4(R,G,B,A);
 }
 
 /////////////////////////////////////////////////////AO/////////////////////////////////////////////////////////////
@@ -961,7 +963,7 @@ float Disocclusion_Power = DP/350;
 
 void PS_renderLR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 color : SV_Target0 )
 {
-	float DepthL = 1, DepthR = 1, ZPD, MS, P, S;
+	float DepthL = 1, DepthR = 1, MS, P, S;
 	float samples[5] = {0.50, 0.58, 0.66, 0.83, 1};
 	float2 TCL, TCR;
 		
