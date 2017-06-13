@@ -54,15 +54,6 @@ uniform int Divergence <
 				 "You can override this value.";
 > = 15;
 
-uniform float Depth_Plus <
-	ui_type = "drag";
-	ui_min = 0.0; ui_max = 100.0;
-	ui_label = "Depth Plus Adjustment";
-	ui_tooltip = "Determines the amount of depth near the cam, zero is off.\n" 
-				 "Gives the image +Pop & +Depth.\n"
-				 "Default is 50.0";
-> = 50.0;
-
 uniform float Weapon_Depth <
 	ui_type = "drag";
 	ui_min = -100; ui_max = 100;
@@ -910,8 +901,8 @@ void Average_Luminance(in float4 position : SV_Position, in float2 texcoord : TE
 void  Disocclusion(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 color : SV_Target0)
 {
 //bilateral blur\/
-float4 Done, sum, DM, DP =  Divergence;
-float P = Power/10, B;
+float4 Done, sum, DM;
+float P = Power/10, B, DP =  Divergence;
 
 float blursize = 2.0*pix.x;
 
@@ -935,17 +926,16 @@ float Disocclusion_Power = DP/350;
 	if(Dis_Occlusion >= 1) 
 	{
 		const float weight[Con] = {0.01,-0.01,0.02,-0.02,0.03,-0.03,0.04,-0.04,0.05,-0.05};
-		float sampleOffset = smoothstep(0,1,1-tex2Dlod(SamplerDM,float4(texcoord,0,0)).b);
 		
 		if(Dis_Occlusion == 1)
 		{
-			dir = float2(sampleOffset,0.0);
+			dir = float2(0.5,0.0);
 			B = Disocclusion_Power;
 		}
 		
 		if(Dis_Occlusion == 2)
 		{
-			dir = sampleOffset - texcoord;
+			dir = 0.5 - texcoord;
 			B = Disocclusion_Power*2;
 		}
 		
@@ -963,7 +953,7 @@ float Disocclusion_Power = DP/350;
 	{
 		DM = tex2Dlod(SamplerDM,float4(texcoord,0,0)).bbbb;
 	}	                          
-	
+		
 	color = lerp(DM,Done,P);
 }
 
@@ -971,7 +961,7 @@ float Disocclusion_Power = DP/350;
 
 void PS_renderLR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 color : SV_Target0 )
 {
-	float DepthL = 1, DepthR = 1, ZPD, MS, PL, PR, P, S;
+	float DepthL = 1, DepthR = 1, ZPD, MS, P, S;
 	float samples[5] = {0.50, 0.58, 0.66, 0.83, 1};
 	float2 TCL, TCR;
 		
@@ -1012,21 +1002,14 @@ void PS_renderLR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD
 	for (int j = 0; j < 5; ++j) 
 	{	
 		S = samples[j] * MS;
-		float DP = Depth_Plus/105.25;
 		
 		float L = tex2Dlod(SamplerDis,float4(TCL.x+S, TCL.y,0,0)).r;
 		float R = tex2Dlod(SamplerDis,float4(TCR.x-S, TCR.y,0,0)).r;
-		
-		PL += MS * (1-ZPD/L); //Convergence also known as ZPD 
-		PR += MS * (1-ZPD/R); //Code is not in full use since Depth Plus is in favor.
-		
-		L = lerp(L,1-L,-DP); //Depth Plus code.
-		R = lerp(R,1-R,-DP); //Simple Code to add enhanced depth to the image output.
-		
-		DepthL =  min(DepthL,lerp(L,PL,0.5));
-		DepthR =  min(DepthR,lerp(R,PR,0.5));
+
+		DepthL =  min(DepthL,L);
+		DepthR =  min(DepthR,R);
 	}
-	
+		
 		float ReprojectionLeft =  DepthL*MS;
 		float ReprojectionRight = DepthR*MS;
 	
