@@ -53,14 +53,6 @@ uniform int Divergence <
 	ui_tooltip = "Determines the amount of Image Warping and Separation.";
 > = 15;
 
-uniform float Depth_Plus <
-	ui_type = "drag";
-	ui_min = 0.0; ui_max = 100.0;
-	ui_label = "Depth Plus Adjustment";
-	ui_tooltip = "Determines the amount of depth near the cam, zero is off.\n" 
-				 "Default is 50.0";
-> = 50.0;
-
 uniform float Weapon_Depth <
 	ui_type = "drag";
 	ui_min = -100; ui_max = 100;
@@ -702,7 +694,7 @@ float4 WeaponDepth(in float2 texcoord : TEXCOORD0)
 		CoP = Weapon_Cutoff;
 		}
 		
-		return float4(zBufferWH.rrr,CoP);
+		return float4(saturate(zBufferWH.rrr),CoP);
 }
 
 void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 Color : SV_Target0)
@@ -710,6 +702,8 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 		float R,G,B,A = 1;
 
 		float DM = Depth(texcoord).r;		
+		//DM = 1-(25*pix.x) * (20/DM);
+		//DM = max(-1,lerp(DM,Depth(texcoord).r,0.5));	
 		
 		float WD = WeaponDepth(texcoord).r;
 		
@@ -753,7 +747,7 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 	
 	// Dither End
 	
-	Color = saturate(float4(R,G,B,A));
+	Color = float4(R,G,B,A);
 }
 
 /////////////////////////////////////////////////////AO/////////////////////////////////////////////////////////////
@@ -897,22 +891,12 @@ float4 DM = tex2Dlod(SamplerDM,float4(texcoord,0,0)).bbbb;
 float4  Encode(in float2 texcoord : TEXCOORD0) //zBuffer Color Channel Encode
 {
 	float GetDepth = tex2Dlod(SamplerBlur,float4(texcoord.x,texcoord.y,0,0)).r;
-	
-	float ZPD, Depth, MS = Divergence*pix.x;
-	float DP = Depth_Plus/105.25;
 		
-	Depth += MS * (1-ZPD/GetDepth);//Convergence also known as ZPD, code is not in full use since Near Depth is in favor.
-	
-	GetDepth = lerp(GetDepth,1-GetDepth,-DP); //Near Depth code, simple Code to add enhanced depth to the image output.
-	
 	float Red = (1-texcoord.x)+Divergence*pix.x*GetDepth;
 	float Blue = texcoord.x+Divergence*pix.x*GetDepth;
 	
-	float RedINV = (1-texcoord.x)+Divergence*pix.x*Depth;
-	float BlueINV = texcoord.x+Divergence*pix.x*Depth;
-	
-	float R = lerp(Red,RedINV,0.5); //R Encode
-	float B = lerp(Blue,BlueINV,0.5); //B Encode
+	float R = Red; //R Encode
+	float B = Blue; //B Encode
 	
 	return float4(R,0,B,0);
 }

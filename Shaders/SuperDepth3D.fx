@@ -1011,8 +1011,6 @@ void PS_renderLR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD
 		DepthL =  min(DepthL,L);
 		DepthR =  min(DepthR,R);
 	}
-		DepthL = lerp(DepthL,1-DepthL,-0.1); //Depth Plus code.
-		DepthR = lerp(DepthR,1-DepthR,-0.1); //Simple Code to add enhanced depth to the image output.
 		
 		float ReprojectionLeft =  DepthL*MS;
 		float ReprojectionRight = DepthR*MS;
