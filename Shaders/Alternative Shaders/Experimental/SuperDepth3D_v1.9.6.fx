@@ -54,6 +54,12 @@ uniform int Divergence <
 				 "You can override this value.";
 > = 15;
 
+uniform bool Depth_Plus <
+	ui_label = "Depth Plus Toggle";
+	ui_tooltip = "Enhances depth the 3D image.\n" 
+				 "Default is off.";
+> = false;
+
 uniform float Weapon_Depth <
 	ui_type = "drag";
 	ui_min = -100; ui_max = 100;
@@ -740,11 +746,24 @@ float4 WeaponDepth(in float2 texcoord : TEXCOORD0)
 void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 Color : SV_Target0)
 {
 		float R,G,B,A = 1;
-
+		
+		float Depth_Plus_Adjust = 50;
+		float DP = Depth_Plus_Adjust/100,DDP = (Depth_Plus_Adjust/100)+1;
+		
 		float DM = Depth(texcoord).r;		
+		
 		//DM = 1-(25*pix.x) * (20/DM);
-		//DM = max(-1,lerp(DM,Depth(texcoord).r,0.5));
-
+		//DM = max(-1,lerp(DM,Depth(texcoord).r,0.5));	
+		
+		if(Depth_Plus)
+		{
+			DM = lerp(DM,1-DM,-DP)/DDP; //Depth Plus code.
+		}
+		else
+		{
+			DM = DM;
+		}
+		
 		float WD = WeaponDepth(texcoord).r;
 		
 		float CoP = WeaponDepth(texcoord).w; //Weapon Cutoff Point
@@ -1011,8 +1030,6 @@ void PS_renderLR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD
 		DepthL =  min(DepthL,L);
 		DepthR =  min(DepthR,R);
 	}
-		DepthL = lerp(DepthL,1-DepthL,-0.1); //Depth Plus code.
-		DepthR = lerp(DepthR,1-DepthR,-0.1); //Simple Code to add enhanced depth to the image output.
 		
 		float ReprojectionLeft =  DepthL*MS;
 		float ReprojectionRight = DepthR*MS;
