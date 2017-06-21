@@ -53,10 +53,10 @@ Dragon Ball Xenoverse                           DM 8        10.0
 Dragons Dogma: Dark Arisen                      DM 8        7.50
 DreamFall Chapters                              DM 0        5.00
 Dungeon Nightmares II                           DM 8        20.0                                     RB
-*Emily Wants To Play                             DM 1        10-20                                      RB
-*Everybody's Gone to the Rapture                 DM 5        2.5-7.5
-*Fallout 4                                       DM 5        2.5-5.0         WDM 4
-*FarCry 3                                        DM 0        7.5-15                                     RB
+Emily Wants To Play                             DM 1        10.0                                     RB
+Everybody's Gone to the Rapture                 DM 5        4.25
+Fallout 4                                       DM 5        5.00        WDM 4
+FarCry 3                                        DM 2        5.00                                     RB
 *Firewatch                                       DM 6        5.0-10                         Yes
 *GTA V                                           DM 1        10-20                                      RB
 *Gone Home                                       DM 0        5.0-10                         Yes
