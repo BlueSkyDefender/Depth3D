@@ -34,14 +34,14 @@ BorderLands 2                                   DM 5        7.50        WDM 1   
 *CEMU - Mariokart 8                              DM 2       5.0-10                     Yes
 *CEMU - Super Mario 3D World                     DM 6       5.0-10                     Yes
 *CEMU - The Legend of Zelda: Breath of the Wild ????       ??????
-Call of Duty: Advance Warfare                   DM 4        6.25       WDM 3                         RB
-Call of Duty: Black Ops                         DM 0        6.25       WDM 2                         RB
-Call of Duty: Black Ops 2                       DM 4        6.25       WDM 3                         RB
-Call of Duty: Ghost                             DM 4        6.25       WDM 3                         RB
-Call of Duty: Infinite Warfare                  DM 4        6.25       WDM 3                         RB
+Call of Duty: Advance Warfare                   DM 4        6.25        WDM 3                        RB
+Call of Duty: Black Ops                         DM 0        6.25        WDM 2                        RB
+Call of Duty: Black Ops 2                       DM 4        6.25        WDM 3                        RB
+Call of Duty: Ghost                             DM 4        6.25        WDM 3                        RB
+Call of Duty: Infinite Warfare                  DM 4        6.25        WDM 3                        RB
 Casltevania: Lord of Shadows - UE               DM 0        3.75                                       
-Cryostasis                                      DM 7        6.25       WDM 5                         
-DOOM 2016                                       DM 7        6.25       WDM 6                          
+Cryostasis                                      DM 7        6.25        WDM 5                         
+DOOM 2016                                       DM 7        6.25        WDM 6                          
 DarkSiders Warmastred Edition                   DM 0        5.00                                      
 Dead Effect                                     DM 7        6.25                                     
 Dead Island                                     DM 8        3.75
