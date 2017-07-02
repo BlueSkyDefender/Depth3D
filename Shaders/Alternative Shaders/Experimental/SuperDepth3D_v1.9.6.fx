@@ -132,16 +132,16 @@ uniform int Custom_Sidebars <
 
 uniform int Stereoscopic_Mode <
 	ui_type = "combo";
-	ui_items = "Side by Side\0Top and Bottom\0Line Interlaced\0Checkerboard 3D\0Anaglyph\0";
+	ui_items = "Side by Side\0Top and Bottom\0Line Interlaced\0Column Interlaced\0Checkerboard 3D\0Anaglyph\0";
 	ui_label = "3D Display Mode";
 	ui_tooltip = "Stereoscopic 3D display output selection.";
 > = 0;
 
 uniform int Downscaling_Support <
 	ui_type = "combo";
-	ui_items = "Native\0Option One\0Option Two\0";
+	ui_items = "Native\0Option One\0Option Two\0Option Three\0Option Four\0";
 	ui_label = "Downscaling Support";
-	ui_tooltip = "Dynamic Super Resolution & Virtual Super Resolution downscaling support for Line Interlaced & Checkerboard 3D displays.";
+	ui_tooltip = "Dynamic Super Resolution & Virtual Super Resolution downscaling support for Line Interlaced, Column Interlaced, & Checkerboard 3D displays.";
 > = 0;
 
 uniform int Anaglyph_Colors <
@@ -294,7 +294,6 @@ float4 MouseCursor(float4 position : SV_Position, float2 texcoord : TEXCOORD) : 
 	return Mpointer;
 }
 
-uniform float frametime < source = "frametime"; >;
 /////////////////////////////////////////////////////////////////////////////////Adapted Luminance/////////////////////////////////////////////////////////////////////////////////
 texture texLum  {Width = 256/2; Height = 256/2; Format = RGBA8; MipLevels = 8;}; //Sample at 256x256/2 and a mip bias of 8 should be 1x1 
 																				
@@ -307,16 +306,11 @@ sampler SamplerLum
 		MipFilter = LINEAR;
 	};
 	
-float AL()
+float AL(in float2 texcoord : TEXCOORD0)
 {
-	float AdjustScale = 2;
-
-	//Frametime Perceptual Effects 
-	float4 Luminance = tex2Dlod(SamplerLum,float4(0.5,0.5,0,0)); //Average Luminance Texture Sample
-    float FPE  = (Luminance.r) * (AdjustScale - exp(-frametime));
-    
-    return saturate(FPE);
-}	
+	float4 Luminance = tex2Dlod(SamplerLum,float4(texcoord,0,0)); //Average Luminance Texture Sample 
+    return smoothstep(0,1,Luminance);
+}
 /////////////////////////////////////////////////////////////////////////////////Depth Map Information/////////////////////////////////////////////////////////////////////////////////
 
 float4 Depth(in float2 texcoord : TEXCOORD0)
@@ -721,7 +715,7 @@ float4 WeaponDepth(in float2 texcoord : TEXCOORD0)
 		zBufferWH = 1-zBufferWH;
 		
 		//Auto Anti Weapon Depth Map Z-Fighting is always on.
-		zBufferWH = zBufferWH*AL(); 
+		zBufferWH = zBufferWH*AL(texcoord).r; 
 		
 		if (WDM == 18)
 		{
@@ -750,7 +744,8 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 		float Depth_Plus_Adjust = 50;
 		float DP = Depth_Plus_Adjust/100,DDP = (Depth_Plus_Adjust/100)+1;
 		
-		float DM = Depth(texcoord).r;		
+		float DM = Depth(texcoord).r;
+		float AverageLuminance = Depth(texcoord).r;		
 		
 		//DM = 1-(25*pix.x) * (20/DM);
 		//DM = max(-1,lerp(DM,Depth(texcoord).r,0.5));	
@@ -789,7 +784,7 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 		}
 		
 		R = Done;
-		G = Done;
+		G = AverageLuminance;
 		B = Done;
 		
 	// Dither for DepthBuffer adapted from gedosato ramdom dither https://github.com/PeterTh/gedosato/blob/master/pack/assets/dx9/deband.fx
@@ -916,7 +911,7 @@ void AO_in(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out
 
 void Average_Luminance(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 color : SV_Target0 )
 {
-	color = tex2D(SamplerDM,texcoord);
+	color = tex2D(SamplerDM,texcoord).gggg;
 }
 
 void  Disocclusion(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 color : SV_Target0)
@@ -1098,6 +1093,45 @@ void PS_renderLR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD
 		}
 		else if(Stereoscopic_Mode == 3)
 		{
+			float gridC;
+			
+			if(Downscaling_Support == 0)
+			{
+			gridC = frac(texcoord.x*(BUFFER_WIDTH/2));
+			}
+			else if(Downscaling_Support == 1)
+			{
+			gridC = frac(texcoord.x*(1920.0/2));
+			}
+			else if(Downscaling_Support == 2)
+			{
+			gridC = frac(texcoord.x*(1921.0/2));
+			}
+			else if(Downscaling_Support == 3)
+			{
+			gridC = frac(texcoord.x*(1280.0/2));
+			}
+			else
+			{
+			gridC = frac(texcoord.x*(1281.0/2));
+			}
+			
+			
+			if(Custom_Sidebars == 0)
+			{
+			color = gridC > 0.5 ? tex2D(BackBufferMIRROR, float2((texcoord.x + P) + ReprojectionLeft, texcoord.y)) :  tex2D(BackBufferMIRROR, float2((texcoord.x - P) - ReprojectionRight, texcoord.y));
+			}
+			else if(Custom_Sidebars == 1)
+			{
+			color = gridC > 0.5 ? tex2D(BackBufferBORDER, float2((texcoord.x + P) + ReprojectionLeft, texcoord.y)) : tex2D(BackBufferBORDER, float2((texcoord.x - P) - ReprojectionRight, texcoord.y));
+			}
+			else
+			{
+			color = gridC > 0.5 ? tex2D(BackBufferCLAMP, float2((texcoord.x + P) + ReprojectionLeft, texcoord.y)) : tex2D(BackBufferCLAMP, float2((texcoord.x - P) - ReprojectionRight, texcoord.y));
+			}
+		}
+		else if(Stereoscopic_Mode == 4)
+		{
 			float gridy;
 			float gridx;
 			
@@ -1109,12 +1143,22 @@ void PS_renderLR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD
 			else if(Downscaling_Support == 1)
 			{
 			gridy = floor(texcoord.y*(1080.0));
-			gridx = floor(texcoord.x*(1080.0));
+			gridx = floor(texcoord.x*(1920.0));
+			}
+			else if(Downscaling_Support == 2)
+			{
+			gridy = floor(texcoord.y*(1081.0));
+			gridx = floor(texcoord.x*(1921.0));
+			}
+			else if(Downscaling_Support == 3)
+			{
+			gridy = floor(texcoord.y*(720.0));
+			gridx = floor(texcoord.x*(1280.0));
 			}
 			else
 			{
-			gridy = floor(texcoord.y*(1081.0));
-			gridx = floor(texcoord.x*(1081.0));
+			gridy = floor(texcoord.y*(721.0));
+			gridx = floor(texcoord.x*(1281.0));
 			}
 			
 			if(Custom_Sidebars == 0)

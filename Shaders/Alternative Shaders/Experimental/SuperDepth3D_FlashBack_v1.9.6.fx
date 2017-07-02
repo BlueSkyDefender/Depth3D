@@ -116,16 +116,16 @@ uniform float Weapon_Cutoff <
 
 uniform int Stereoscopic_Mode <
 	ui_type = "combo";
-	ui_items = "Side by Side\0Top and Bottom\0Line Interlaced\0Checkerboard 3D\0Anaglyph\0";
+	ui_items = "Side by Side\0Top and Bottom\0Line Interlaced\0Column Interlaced\0Checkerboard 3D\0Anaglyph\0";
 	ui_label = "3D Display Mode";
 	ui_tooltip = "Stereoscopic 3D display output selection.";
 > = 0;
 
 uniform int Downscaling_Support <
 	ui_type = "combo";
-	ui_items = "Native\0Option One\0Option Two\0";
+	ui_items = "Native\0Option One\0Option Two\0Option Three\0Option Four\0";
 	ui_label = "Downscaling Support";
-	ui_tooltip = "Dynamic Super Resolution & Virtual Super Resolution downscaling support for Line Interlaced & Checkerboard 3D displays.";
+	ui_tooltip = "Dynamic Super Resolution & Virtual Super Resolution downscaling support for Line Interlaced, Column Interlaced, & Checkerboard 3D displays.";
 > = 0;
 
 uniform int Anaglyph_Colors <
@@ -254,7 +254,6 @@ float4 MouseCursor(float4 position : SV_Position, float2 texcoord : TEXCOORD) : 
 	return Mpointer;
 }
 
-uniform float frametime < source = "frametime"; >;
 /////////////////////////////////////////////////////////////////////////////////Adapted Luminance/////////////////////////////////////////////////////////////////////////////////
 texture texLum  {Width = 256/2; Height = 256/2; Format = RGBA8; MipLevels = 8;}; //Sample at 256x256/2 and a mip bias of 8 should be 1x1 
 																				
@@ -267,16 +266,11 @@ sampler SamplerLum
 		MipFilter = LINEAR;
 	};
 	
-float AL()
+float AL(in float2 texcoord : TEXCOORD0)
 {
-	float AdjustScale = 2;
-
-	//Frametime Perceptual Effects 
-	float4 Luminance = tex2Dlod(SamplerLum,float4(0.5,0.5,0,0)); //Average Luminance Texture Sample
-    float FPE  = (Luminance.r) * (AdjustScale - exp(-frametime));
-    
-    return saturate(FPE);
-}		
+	float4 Luminance = tex2Dlod(SamplerLum,float4(texcoord,0,0)); //Average Luminance Texture Sample 
+    return smoothstep(0,1,Luminance);
+}
 /////////////////////////////////////////////////////////////////////////////////Depth Map Information/////////////////////////////////////////////////////////////////////////////////
 
 float4 Depth(in float2 texcoord : TEXCOORD0)
@@ -284,7 +278,7 @@ float4 Depth(in float2 texcoord : TEXCOORD0)
 		if (Depth_Map_Flip)
 			texcoord.y =  1 - texcoord.y;
 			
-		float zBuffer = tex2D(DepthBuffer, texcoord ).r; //Depth Buffer
+		float zBuffer = tex2D(DepthBuffer, texcoord).r; //Depth Buffer
 
 		//Conversions to linear space.....
 		//Near & Far Adjustment
@@ -367,7 +361,7 @@ float4 Depth(in float2 texcoord : TEXCOORD0)
 		{
 		zBuffer = Special;
 		}
-		
+	
 	return float4(zBuffer.rrr,1);	
 }
 
@@ -376,7 +370,7 @@ float4 WeaponDepth(in float2 texcoord : TEXCOORD0)
 		if (Depth_Map_Flip)
 			texcoord.y =  1 - texcoord.y;
 			
-		float zBufferWH = tex2D(DepthBuffer, texcoord ).r; //Weapon Hand Depth Buffer
+		float zBufferWH = tex2D(DepthBuffer, texcoord).r; //Weapon Hand Depth Buffer
 		//Weapon Depth Map
 		//FPS Hand Depth Maps require more precision at smaller scales to work
 		if(WDM == 1 || WDM == 3 || WDM == 4 || WDM == 6 || WDM == 7 || WDM == 8 || WDM == 9 || WDM == 10 || WDM == 11 || WDM == 12 || WDM == 13 || WDM == 14 || WDM == 16 || WDM == 17 || WDM == 19 || WDM == 20 || WDM == 21 || WDM == 22 || WDM == 23 || WDM == 24 || WDM == 25 || WDM == 26 || WDM == 27 )
@@ -681,7 +675,7 @@ float4 WeaponDepth(in float2 texcoord : TEXCOORD0)
 		zBufferWH = 1-zBufferWH;
 		
 		//Auto Anti Weapon Depth Map Z-Fighting is always on.
-		zBufferWH = zBufferWH*AL(); 
+		zBufferWH = zBufferWH*AL(texcoord).r; 
 		
 		if (WDM == 18)
 		{
@@ -710,7 +704,8 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 		float Depth_Plus_Adjust = 50;
 		float DP = Depth_Plus_Adjust/100,DDP = (Depth_Plus_Adjust/100)+1;
 		
-		float DM = Depth(texcoord).r;		
+		float DM = Depth(texcoord).r;
+		float AverageLuminance = Depth(texcoord).r;		
 		
 		//DM = 1-(25*pix.x) * (20/DM);
 		//DM = max(-1,lerp(DM,Depth(texcoord).r,0.5));	
@@ -749,9 +744,9 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 		}
 		
 		R = Done;
-		G = Done;
+		G = AverageLuminance;
 		B = Done;
-	
+		
 	// Dither for DepthBuffer adapted from gedosato ramdom dither https://github.com/PeterTh/gedosato/blob/master/pack/assets/dx9/deband.fx
 	// I noticed in some games the depth buffer started to have banding so this is used to remove that.
 			
@@ -764,7 +759,7 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 	B += dither_shift;
 	B += -dither_shift;
 	
-	// Dither End
+	// Dither End	
 	
 	Color = float4(R,G,B,A);
 }
@@ -878,7 +873,7 @@ void AO_in(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out
 
 void Average_Luminance(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 color : SV_Target0 )
 {
-	color = tex2D(SamplerDM,texcoord);
+	color = tex2D(SamplerDM,texcoord).gggg;
 }
 
 void  BilateralBlur(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 color : SV_Target0)
@@ -1002,18 +997,18 @@ void PS_calcLR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0,
 				Out = texcoord.x < 0.5 ? cR : cL;
 			}
 		}
-	else if (Stereoscopic_Mode == 1)
+		else if (Stereoscopic_Mode == 1)
 		{	
 		if (Eye_Swap)
 			{
 				Out = texcoord.y < 0.5 ? cL : cR;
 			}
-		else
+			else
 			{
 				Out = texcoord.y < 0.5 ? cR : cL;
 			} 
 		}
-	else if (Stereoscopic_Mode == 2)
+		else if (Stereoscopic_Mode == 2)
 		{	
 			float gridL;
 				
@@ -1025,7 +1020,7 @@ void PS_calcLR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0,
 			{
 				gridL = frac(texcoord.y*(1080.0/2));
 			}
-		else
+			else
 			{
 				gridL = frac(texcoord.y*(1081.0/2));
 			}
@@ -1034,38 +1029,83 @@ void PS_calcLR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0,
 			{
 				Out = gridL > 0.5 ? cL : cR;
 			}
-		else
+			else
 			{
 				Out = gridL > 0.5 ? cR : cL;
 			} 
 			
 		}
-	else if (Stereoscopic_Mode == 3)
+		else if (Stereoscopic_Mode == 3)
+		{	
+			float gridC;
+				
+			if(Downscaling_Support == 0)
+			{
+			gridC = frac(texcoord.x*(BUFFER_WIDTH/2));
+			}
+			else if(Downscaling_Support == 1)
+			{
+			gridC = frac(texcoord.x*(1920.0/2));
+			}
+			else if(Downscaling_Support == 2)
+			{
+			gridC = frac(texcoord.x*(1921.0/2));
+			}
+			else if(Downscaling_Support == 3)
+			{
+			gridC = frac(texcoord.x*(1280.0/2));
+			}
+			else
+			{
+			gridC = frac(texcoord.x*(1281.0/2));
+			}
+				
+		if (Eye_Swap)
+			{
+				Out = gridC > 0.5 ? cL : cR;
+			}
+			else
+			{
+				Out = gridC > 0.5 ? cR : cL;
+			} 
+			
+		}
+		else if (Stereoscopic_Mode == 4)
 		{	
 			float gridy;
 			float gridx;
 				
-		if (Downscaling_Support == 0)
+			if(Downscaling_Support == 0)
 			{
-					gridy = floor(texcoord.y*(BUFFER_HEIGHT));
-				gridx = floor(texcoord.x*(BUFFER_WIDTH));
+			gridy = floor(texcoord.y*(BUFFER_HEIGHT));
+			gridx = floor(texcoord.x*(BUFFER_WIDTH));
 			}
-		else if (Downscaling_Support == 1)
+			else if(Downscaling_Support == 1)
 			{
-				gridy = floor(texcoord.y*(1080.0));
-				gridx = floor(texcoord.x*(1080.0));
+			gridy = floor(texcoord.y*(1080.0));
+			gridx = floor(texcoord.x*(1920.0));
 			}
-		else
+			else if(Downscaling_Support == 2)
 			{
-				gridy = floor(texcoord.y*(1081.0));
-				gridx = floor(texcoord.x*(1081.0));
+			gridy = floor(texcoord.y*(1081.0));
+			gridx = floor(texcoord.x*(1921.0));
+			}
+			else if(Downscaling_Support == 3)
+			{
+			gridy = floor(texcoord.y*(720.0));
+			gridx = floor(texcoord.x*(1280.0));
+			}
+			else
+			{
+			gridy = floor(texcoord.y*(721.0));
+			gridx = floor(texcoord.x*(1281.0));
 			}
 
 		if (Eye_Swap)
 			{
 				Out = (int(gridy+gridx) & 1) < 0.5 ? cL : cR;
 			}
-		else
+			else
 			{
 				Out = (int(gridy+gridx) & 1) < 0.5 ? cR : cL;
 			} 
@@ -1079,7 +1119,7 @@ void PS_calcLR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0,
 				L = cL.rgb;
 				R = cR.rgb;
 			}
-		else
+			else
 			{
 				L = cR.rgb;
 				R = cL.rgb;
@@ -1101,7 +1141,7 @@ void PS_calcLR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0,
 				Out =  (C*LeftEyecolor) + (CT*RightEyecolor);
 
 				}
-			else if (Anaglyph_Colors == 1)
+				else if (Anaglyph_Colors == 1)
 				{
 						float red = 0.437 * C.r + 0.449 * C.g + 0.164 * C.b
 							- 0.011 * CT.r - 0.032 * CT.g - 0.007 * CT.b;
@@ -1121,7 +1161,7 @@ void PS_calcLR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0,
 
 					Out = float4(red, green, blue, 0);
 				}
-			else if (Anaglyph_Colors == 2)
+				else if (Anaglyph_Colors == 2)
 				{
 					float4 LeftEyecolor = float4(0.0,1.0,0.0,1.0);
 					float4 RightEyecolor = float4(1.0,0.0,1.0,1.0);
@@ -1129,7 +1169,7 @@ void PS_calcLR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0,
 					Out =  (C*LeftEyecolor) + (CT*RightEyecolor);
 					
 				}
-			else
+				else
 				{
 					
 					
@@ -1152,7 +1192,7 @@ void PS_calcLR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0,
 				}
 			}
 		}
-	else
+		else
 		{
 				float4 DMV = texcoord.x < 0.5 ? GetAO(float2(texcoord.x*2 , texcoord.y*2)) : tex2Dlod(SamplerDM,float4(texcoord.x*2-1 , texcoord.y*2,0,0)).bbbb;
 				Out = texcoord.y < 0.5 ? DMV : tex2Dlod(SamplerBlur,float4(texcoord.x , texcoord.y*2-1 , 0 , 0));
