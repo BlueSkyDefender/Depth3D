@@ -24,7 +24,7 @@ Amnesia: Machine for Pigs                       DM 2         15         WDM 24
 Amnesia: The Dark Descent                       DM 2         15         WDM 24  
 Among The Sleep                                 DM 0        8.75                       Yes
 Assassin Creed Unity                            DM 1        17.5
-Bayonetta                                       DM 6         15
+Bayonetta                                       DM 6        17.5
 Batman Arkham Knight                            DM 0        7.50
 Batman Arkham Origins                           DM 0        7.50
 Batman: Arkham City                             DM 0        7.50

@@ -54,11 +54,13 @@ uniform int Divergence <
 				 "You can override this value.";
 > = 15;
 
-uniform bool Depth_Plus <
+uniform int Depth_Plus <	
+	ui_type = "combo";
+	ui_items = "Off\0Mode One\0Mode Two\0Mode Three\0";
 	ui_label = "Depth Plus Toggle";
 	ui_tooltip = "Enhances depth the 3D image.\n" 
 				 "Default is off.";
-> = false;
+> = 0;
 
 uniform float Weapon_Depth <
 	ui_type = "drag";
@@ -741,16 +743,29 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 {
 		float R,G,B,A = 1;
 		
-		float Depth_Plus_Adjust = 50;
-		float DP = Depth_Plus_Adjust/100,DDP = (Depth_Plus_Adjust/100)+1;
-		
 		float DM = Depth(texcoord).r;
-		float AverageLuminance = Depth(texcoord).r;		
+		float AverageLuminance = Depth(texcoord).r;	
 		
-		if(Depth_Plus)
+		if(Depth_Plus == 1)
 		{
 			float ZDM = max((25*pix.x) * (1 - 5/DM),-5);
 			DM = lerp(ZDM,DM,0.875);
+		}
+		if(Depth_Plus == 2)
+		{
+			float Depth_Plus_Adjust = 50;
+			float DP = Depth_Plus_Adjust/100,DDP = (Depth_Plus_Adjust/100)+1;
+			DM = lerp(DM,1-DM,-DP)/DDP; //Depth Plus code.
+		}
+		if(Depth_Plus == 3)
+		{
+			float ZDM = max((25*pix.x) * (1 - 5/DM),-5);
+			float ZDP = lerp(ZDM,DM,0.875);
+			
+			float Depth_Plus_Adjust = 50;
+			float DP = Depth_Plus_Adjust/100,DDP = (Depth_Plus_Adjust/100)+1;
+			float DPM = lerp(ZDP,1-ZDP,-DP)/DDP; //Depth Plus code.
+			DM = DPM;
 		}
 		else
 		{
