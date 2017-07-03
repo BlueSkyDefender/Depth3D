@@ -268,7 +268,7 @@ sampler SamplerLum
 	
 float AL(in float2 texcoord : TEXCOORD0)
 {
-	float4 Luminance = tex2Dlod(SamplerLum,float4(texcoord,0,0)); //Average Luminance Texture Sample 
+	float Luminance = tex2Dlod(SamplerLum,float4(texcoord,0,0)).r; //Average Luminance Texture Sample 
     return smoothstep(0,1,Luminance);
 }
 /////////////////////////////////////////////////////////////////////////////////Depth Map Information/////////////////////////////////////////////////////////////////////////////////
@@ -707,12 +707,10 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 		float DM = Depth(texcoord).r;
 		float AverageLuminance = Depth(texcoord).r;		
 		
-		//DM = 1-(25*pix.x) * (20/DM);
-		//DM = max(-1,lerp(DM,Depth(texcoord).r,0.5));	
-		
 		if(Depth_Plus)
 		{
-			DM = lerp(DM,1-DM,-DP)/DDP; //Depth Plus code.
+			float ZDM = max((25*pix.x) * (1 - 5/DM),-5);
+			DM = lerp(ZDM,DM,0.875);
 		}
 		else
 		{
