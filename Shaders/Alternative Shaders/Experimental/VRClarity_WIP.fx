@@ -88,11 +88,11 @@ sampler BackBuffer
 		Texture = BackBufferTex;
 	};
 	
-texture texDM  { Width = BUFFER_WIDTH/2; Height = BUFFER_HEIGHT/2; Format = RGBA32F;}; 
+texture texDDM  { Width = BUFFER_WIDTH/2; Height = BUFFER_HEIGHT/2; Format = RGBA32F;}; 
 
-sampler SamplerDM
+sampler SamplerDDM
 	{
-		Texture = texDM;
+		Texture = texDDM;
 	};
 	
 texture BOut  { Width = BUFFER_WIDTH/2; Height = BUFFER_HEIGHT/2; Format = RGBA32F;}; 
@@ -212,7 +212,7 @@ void GaussianBlurImage(in float4 position : SV_Position, in float2 texcoord : TE
 		//Associated Depth Blur AKA Simple Dof
 		float3 col;
 		
-		float sampleOffset =  tex2D(SamplerDM,texcoord).r/0.5; 
+		float sampleOffset = tex2D(SamplerDDM,texcoord).r/0.5; 
 		
 		col  = tex2D(BackBuffer, texcoord + float2(pix.x, -pix.y) * D_Adjust * sampleOffset).rgb;
 		col += tex2D(BackBuffer, texcoord - pix * D_Adjust * sampleOffset).rgb;
@@ -240,7 +240,7 @@ void Out(float4 position : SV_Position, float2 texcoord : TEXCOORD0, out float4 
 	}
 	else
 	{
-	Out = texcoord.y > 0.5 ? tex2D(SamplerBOut,float2(texcoord.x,texcoord.y * 2 - 1)) : tex2D(SamplerDM,float2(texcoord.x,texcoord.y * 2));
+	Out = texcoord.y > 0.5 ? tex2D(SamplerBOut,float2(texcoord.x,texcoord.y * 2 - 1)) : tex2D(SamplerDDM,float2(texcoord.x,texcoord.y * 2));
 	}
 	
 	color = Out;
@@ -261,11 +261,11 @@ void PostProcessVS(in uint id : SV_VertexID, out float4 position : SV_Position, 
 
 technique VR_Clarity
 {			
-			pass zbuffer
+			pass DitherZBuffer
 		{
 			VertexShader = PostProcessVS;
 			PixelShader = DitherDepthMap;
-			RenderTarget = texDM;
+			RenderTarget = texDDM;
 		}
 			pass BlurImage
 		{
