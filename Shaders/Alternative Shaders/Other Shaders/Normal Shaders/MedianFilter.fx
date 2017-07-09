@@ -74,7 +74,8 @@ float4 Median(float4 position : SV_Position, float2 texcoord : TEXCOORD0) : SV_T
 	float2 FinCal = ScreenCal*0.6;
 
 	float4 v[9];
-	[unroll]
+	
+	[loop]
 	for(int i = -1; i <= 1; ++i) 
 	{
 		for(int j = -1; j <= 1; ++j)

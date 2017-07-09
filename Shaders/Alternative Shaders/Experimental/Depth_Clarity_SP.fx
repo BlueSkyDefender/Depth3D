@@ -1,5 +1,5 @@
- ////----------------------//
  ///**Depth Unsharp Mask**///
+ ////----------------------//
  //----------------------////
 
  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -18,18 +18,22 @@
  //* ---------------------------------																																				*//
  //*                                                                            																									*//
  //*                                                                                                            																	*//
- //* 																																												*//
+ //*                                                                                                            																	*//
+ //* 											Bilateral Filter Made by mrharicot ported over to Reshade by BSD																	*//
+ //*											GitHub Link for sorce info github.com/SableRaf/Filters4Processin																	*//
+ //* 											Shadertoy Link https://www.shadertoy.com/view/4dfGDH  Thank You.																	*//	 
+ //*																																												*//
  //* 																																												*//
  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-// Determines The Max Depth amount.
-#define Depth_Max 15
+// Determines The resolution of the Depth Map. For 4k Use 1.75 or 1.5. For 1440p Use 1.5 or 1.25. For 1080p use 1. Too low of a resolution will remove too much.
+#define Depth_Map_Division 1.0
 
 uniform float contrast <
 	ui_type = "drag";
 	ui_min = 0; ui_max = 1;
-	ui_label = "contrast";
-	ui_tooltip = "contrast";
+	ui_label = "Contrast";
+	ui_tooltip = "Use if your Game is Too Dark";
 > = 0;
 
 uniform int Depth_Map <
@@ -41,29 +45,22 @@ uniform int Depth_Map <
 
 uniform float Depth_Map_Adjust <
 	ui_type = "drag";
-	ui_min = 1.0; ui_max = 50.0;
+	ui_min = 0.25; ui_max = 75.0;
 	ui_label = "Depth Map Adjustment";
-	ui_tooltip = "Adjust the depth map for your games.";
-> = 7.5;
+	ui_tooltip = "Adjust the depth map and sharpness.";
+> = 5.0;
 
 uniform float Offset <
 	ui_type = "drag";
 	ui_min = 0; ui_max = 1.0;
 	ui_label = "Offset";
-	ui_tooltip = "Offset";
+	ui_tooltip = "Offset is for the Special Depth Map Only";
 > = 0.5;
 
 uniform bool Depth_Map_Flip <
 	ui_label = "Depth Map Flip";
 	ui_tooltip = "Flip the depth map if it is upside down.";
 > = false;
-
-uniform float D_Adjust <
-	ui_type = "drag";
-	ui_min = 1; ui_max = 5;
-	ui_label = "Depth Adjust";
-	ui_tooltip = "Depth Adjust";
-> = 2.5;
 
 uniform bool View_Adjustment <
 	ui_label = "View Adjustment";
@@ -87,25 +84,15 @@ sampler BackBuffer
 	{ 
 		Texture = BackBufferTex;
 	};
-	
-texture texDDM  { Width = BUFFER_WIDTH/2; Height = BUFFER_HEIGHT/2; Format = RGBA32F;}; 
+		
+texture texF { Width = BUFFER_WIDTH/Depth_Map_Division; Height = BUFFER_HEIGHT/Depth_Map_Division; Format = RGBA8;};
 
-sampler SamplerDDM
+sampler SamplerF
 	{
-		Texture = texDDM;
-	};
-	
-texture BOut  { Width = BUFFER_WIDTH/2; Height = BUFFER_HEIGHT/2; Format = RGBA32F;}; 
-
-sampler SamplerBOut
-	{
-		Texture = BOut;
-		AddressU = MIRROR;
-		AddressV = MIRROR;
-		AddressW = MIRROR;
+		Texture = texF;
 	};
 
-	
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 float4 Depth(in float2 texcoord : TEXCOORD0)
 {
 		if (Depth_Map_Flip)
@@ -168,79 +155,100 @@ float4 Depth(in float2 texcoord : TEXCOORD0)
 		zBuffer = Special;
 		}
 	
-	return float4(zBuffer.rrr,1);	
+	return 1-saturate(float4(zBuffer.rrr,1));	
 }
+#define SIGMA 10
+#define BSIGMA 0.1
+#define MSIZE 15
 
-void DitherDepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 Color : SV_Target0)
+float normpdf(in float x, in float sigma)
 {
-		float R,G,B,A = 1;
-		
-		float DM = Depth(texcoord).r;
-		
-		R = DM;
-		G = DM;
-		B = DM;
-		
-	// Dither for DepthBuffer adapted from gedosato ramdom dither https://github.com/PeterTh/gedosato/blob/master/pack/assets/dx9/deband.fx
-	// I noticed in some games the depth buffer started to have banding so this is used to remove that.
-			
-	float dither_bit  = 6.0;
-	float noise = frac(sin(dot(texcoord, float2(12.9898, 78.233))) * 43758.5453 * 1);
-	float dither_shift = (1.0 / (pow(2,dither_bit) - 1.0));
-	float dither_shift_half = (dither_shift * 0.5);
-	dither_shift = dither_shift * noise - dither_shift_half;
-	R += -dither_shift;
-	R += dither_shift;
-	R += -dither_shift;
-	G += -dither_shift;
-	G += dither_shift;
-	G += -dither_shift;
-	B += -dither_shift;
-	B += dither_shift;
-	B += -dither_shift;
-	
-	// Dither End	
-	
-	Color = 1-float4(R,G,B,A);
+	return 0.39894*exp(-0.5*x*x/(sigma*sigma))/sigma;
 }
 
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+float normpdf3(in float3 v, in float sigma)
+{
+	return 0.39894*exp(-0.5*dot(v,v)/(sigma*sigma))/sigma;
+}
 
-void GaussianBlurImage(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 Color : SV_Target0)                                                                          
-{                                                                                                                                                                   
+void Filters(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 color : SV_Target0)                                                                          
+{
+//Bilateral Filter//                                                                                                                                                                   
+float3 c = tex2D(BackBuffer,texcoord.xy).rgb;
+float sampleOffset = Depth(texcoord).r; //Depth Buffer Offset	
+	const int kSize = (MSIZE-1)/2;	
+	
+	float weight[MSIZE] = 
+	{  
+	0.031225216, 
+	0.033322271, 
+	0.035206333, 
+	0.036826804, 
+	0.038138565, 
+	0.039104044, 
+	0.039695028, 
+	0.039894000, 
+	0.039695028, 
+	0.039104044, 
+	0.038138565, 
+	0.036826804, 
+	0.035206333, 
+	0.033322271, 
+	0.031225216
+	};  
+		float3 final_colour;
+		float Z;
+		[unroll]
+		for (int j = 0; j <= kSize; ++j)
+		{
+			weight[kSize+j] = normpdf(float(j), SIGMA);
+			weight[kSize-j] = normpdf(float(j), SIGMA);
+		}
 		
-		//Associated Depth Blur AKA Simple Dof
-		float3 col;
+		float3 cc;
+		float factor;
+		float bZ = 1.0/normpdf(0.0, BSIGMA);
 		
-		float sampleOffset = tex2D(SamplerDDM,texcoord).r/0.5; 
-		
-		col  = tex2D(BackBuffer, texcoord + float2(pix.x, -pix.y) * D_Adjust * sampleOffset).rgb;
-		col += tex2D(BackBuffer, texcoord - pix * D_Adjust * sampleOffset).rgb;
-		col += tex2D(BackBuffer, texcoord + pix * D_Adjust * sampleOffset).rgb;
-		col += tex2D(BackBuffer, texcoord - float2(pix.x, -pix.y) * D_Adjust * sampleOffset).rgb;
+		[loop]
+		for (int i=-kSize; i <= kSize; ++i)
+		{
+			for (int j=-kSize; j <= kSize; ++j)
+			{
+				float2 XY = float2(float(i),float(j))*pix;
+				cc = tex2D(BackBuffer,texcoord.xy+XY*sampleOffset*2).rgb;
+				factor = normpdf3(cc-c, BSIGMA)*bZ*weight[kSize+j]*weight[kSize+i];
+				Z += factor;
+				final_colour += factor*cc;
 
-		col = col/4;
+			}
+		}
 		
-    Color = float4(col,1);
+		float4 Bilateral_Filter = float4(final_colour/Z, 1.0);
+		
+	color = Bilateral_Filter;
 }
 
 void Out(float4 position : SV_Position, float2 texcoord : TEXCOORD0, out float4 color: SV_Target)
 {	
 	float4 Out;
-	float3 NR,NG,NB,R,G,B;
+	float R,G,B,A = 1;
+
+	R = tex2D(BackBuffer,float2(texcoord.x,texcoord.y)).r - tex2D(SamplerF,float2(texcoord.x,texcoord.y)).r;
+	G = tex2D(BackBuffer,float2(texcoord.x,texcoord.y)).g - tex2D(SamplerF,float2(texcoord.x,texcoord.y)).g;
+	B = tex2D(BackBuffer,float2(texcoord.x,texcoord.y)).b - tex2D(SamplerF,float2(texcoord.x,texcoord.y)).b;
+	R = saturate(R);
+	G = saturate(G);
+	B = saturate(B);
+	
+	float4 Combine = (float4(R,G,B,A))+tex2D(BackBuffer,float2(texcoord.x,texcoord.y)) * (1.0+contrast)/1.0;
+
 	if (View_Adjustment == 0)
 	{
-	NR = tex2D(BackBuffer,float2(texcoord.x,texcoord.y)).rgb - tex2D(SamplerBOut,float2(texcoord.x,texcoord.y)).rgb;
-
-	R = (NR.rrr+NR.ggg+NR.bbb)/3;
-
-	Out = float4(R,1)+tex2D(BackBuffer,float2(texcoord.x,texcoord.y));
-		
-	Out = lerp(Out,tex2D(BackBuffer,float2(texcoord.x,texcoord.y)),0.5) * (1.0+contrast)/1.0;
+	Out = Combine;
 	}
 	else
 	{
-	Out = texcoord.y > 0.5 ? tex2D(SamplerBOut,float2(texcoord.x,texcoord.y * 2 - 1)) : tex2D(SamplerDDM,float2(texcoord.x,texcoord.y * 2));
+	Out = texcoord.y > 0.5 ? tex2D(SamplerF,float2(texcoord.x,texcoord.y * 2 - 1)) : 1 - Depth(float2(texcoord.x,texcoord.y * 2));
 	}
 	
 	color = Out;
@@ -259,19 +267,13 @@ void PostProcessVS(in uint id : SV_VertexID, out float4 position : SV_Position, 
 
 //*Rendering passes*//
 
-technique VR_Clarity
+technique Smart_Sharp
 {			
-			pass DitherZBuffer
+			pass FilterOut
 		{
 			VertexShader = PostProcessVS;
-			PixelShader = DitherDepthMap;
-			RenderTarget = texDDM;
-		}
-			pass BlurImage
-		{
-			VertexShader = PostProcessVS;
-			PixelShader = GaussianBlurImage;
-			RenderTarget = BOut;
+			PixelShader = Filters;
+			RenderTarget = texF;
 		}
 			pass UnsharpMask
 		{
