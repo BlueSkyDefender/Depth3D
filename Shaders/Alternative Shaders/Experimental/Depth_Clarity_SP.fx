@@ -26,8 +26,8 @@
  //* 																																												*//
  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-// Determines The resolution of the Bilateral Filtered Image. For 4k Use 1.75 or 1.5. For 1440p Use 1.5 or 1.25. For 1080p use 1.
-#define Image_Division 1.0
+// Determines The resolution of the Bilateral Filtered Image. For 4k Use 2, 1.75 or 1.5. For 1440p Use 1.5, 1.375, or 1.25. For 1080p use 1.25, or 1.
+#define Image_Division 1
 
 uniform float contrast <
 	ui_type = "drag";
@@ -164,7 +164,7 @@ float4 Depth(in float2 texcoord : TEXCOORD0)
 }
 #define SIGMA 20
 #define BSIGMA 0.1
-#define MSIZE 15
+#define MSIZE 10
 
 float normpdf(in float x, in float sigma)
 {
@@ -194,12 +194,7 @@ float sampleOffset = Depth(texcoord).r/0.5; //Depth Buffer Offset
 	0.039695028, 
 	0.039894000, 
 	0.039695028, 
-	0.039104044, 
-	0.038138565, 
-	0.036826804, 
-	0.035206333, 
-	0.033322271, 
-	0.031225216
+	0.039104044
 	};  
 		float3 final_colour;
 		float Z;
@@ -252,6 +247,7 @@ void Out(float4 position : SV_Position, float2 texcoord : TEXCOORD0, out float4 
 	R = tex2D(BackBuffer,float2(texcoord.x,texcoord.y)).r - tex2D(SamplerF,float2(texcoord.x,texcoord.y)).r;
 	G = tex2D(BackBuffer,float2(texcoord.x,texcoord.y)).g - tex2D(SamplerF,float2(texcoord.x,texcoord.y)).g;
 	B = tex2D(BackBuffer,float2(texcoord.x,texcoord.y)).b - tex2D(SamplerF,float2(texcoord.x,texcoord.y)).b;
+	
 	R = saturate(R);
 	G = saturate(G);
 	B = saturate(B);
