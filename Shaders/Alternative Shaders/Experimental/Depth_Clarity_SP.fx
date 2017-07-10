@@ -26,8 +26,8 @@
  //* 																																												*//
  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-// Determines The resolution of the Depth Map. For 4k Use 1.75 or 1.5. For 1440p Use 1.5 or 1.25. For 1080p use 1. Too low of a resolution will remove too much.
-#define Depth_Map_Division 1.0
+// Determines The resolution of the Bilateral Filtered Image. For 4k Use 1.75 or 1.5. For 1440p Use 1.5 or 1.25. For 1080p use 1.
+#define Image_Division 1.0
 
 uniform float contrast <
 	ui_type = "drag";
@@ -85,7 +85,7 @@ sampler BackBuffer
 		Texture = BackBufferTex;
 	};
 		
-texture texF { Width = BUFFER_WIDTH/Depth_Map_Division; Height = BUFFER_HEIGHT/Depth_Map_Division; Format = RGBA8;};
+texture texF { Width = BUFFER_WIDTH/Image_Division; Height = BUFFER_HEIGHT/Image_Division; Format = RGBA8;};
 
 sampler SamplerF
 	{
@@ -157,7 +157,7 @@ float4 Depth(in float2 texcoord : TEXCOORD0)
 	
 	return 1-saturate(float4(zBuffer.rrr,1));	
 }
-#define SIGMA 10
+#define SIGMA 20
 #define BSIGMA 0.1
 #define MSIZE 15
 
@@ -175,7 +175,7 @@ void Filters(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, o
 {
 //Bilateral Filter//                                                                                                                                                                   
 float3 c = tex2D(BackBuffer,texcoord.xy).rgb;
-float sampleOffset = Depth(texcoord).r; //Depth Buffer Offset	
+float sampleOffset = Depth(texcoord).r/0.5; //Depth Buffer Offset	
 	const int kSize = (MSIZE-1)/2;	
 	
 	float weight[MSIZE] = 
@@ -215,7 +215,7 @@ float sampleOffset = Depth(texcoord).r; //Depth Buffer Offset
 			for (int j=-kSize; j <= kSize; ++j)
 			{
 				float2 XY = float2(float(i),float(j))*pix;
-				cc = tex2D(BackBuffer,texcoord.xy+XY*sampleOffset*2).rgb;
+				cc = tex2D(BackBuffer,texcoord.xy+XY*sampleOffset).rgb;
 				factor = normpdf3(cc-c, BSIGMA)*bZ*weight[kSize+j]*weight[kSize+i];
 				Z += factor;
 				final_colour += factor*cc;
