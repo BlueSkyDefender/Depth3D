@@ -104,11 +104,11 @@ sampler BackBuffer
 		Texture = BackBufferTex;
 	};
 		
-texture texBF { Width = BUFFER_WIDTH/Image_Division; Height = BUFFER_HEIGHT/Image_Division; Format = RGBA8;};
+texture texMF { Width = BUFFER_WIDTH/Image_Division; Height = BUFFER_HEIGHT/Image_Division; Format = RGBA8;};
 
-sampler SamplerBF
+sampler SamplerMF
 	{
-		Texture = texBF;
+		Texture = texMF;
 	};
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -176,82 +176,63 @@ float4 Depth(in float2 texcoord : TEXCOORD0)
 	
 	return 1-saturate(float4(zBuffer.rrr,1));	
 }
-#define SIGMA 10
-#define BSIGMA 0.1125
-#define MSIZE 7
 
-float normpdf(in float x, in float sigma)
-{
-	return 0.39894*exp(-0.5*x*x/(sigma*sigma))/sigma;
-}
+#define s2(a, b)				temp = a; a = min(a, b); b = max(temp, b);
+#define mn3(a, b, c)			s2(a, b); s2(a, c);
+#define mx3(a, b, c)			s2(b, c); s2(a, c);
 
-float normpdf3(in float3 v, in float sigma)
-{
-	return 0.39894*exp(-0.5*dot(v,v)/(sigma*sigma))/sigma;
-}
+#define mnmx3(a, b, c)			mx3(a, b, c); s2(a, b);                                   // 3 exchanges
+#define mnmx4(a, b, c, d)		s2(a, b); s2(c, d); s2(a, c); s2(b, d);                   // 4 exchanges
+#define mnmx5(a, b, c, d, e)	s2(a, b); s2(c, d); mn3(a, c, e); mx3(b, d, e);           // 6 exchanges
+#define mnmx6(a, b, c, d, e, f) s2(a, d); s2(b, e); s2(c, f); mn3(a, b, c); mx3(d, e, f); // 7 exchanges
 
 void Filters(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 color : SV_Target0)                                                                          
 {
-	//Bilateral Filter//                                                                                                                                                                   
-	float3 c = tex2D(BackBuffer,texcoord.xy).rgb;
-	float sampleOffset = Depth(texcoord).r/0.425; //Depth Buffer Offset adjust
-	float2 ScreenCal = float2(2.5*pix.x,2.5*pix.y);
+//Median Filter//                                                                                                                                                                   
 
-	float2 FinCal = ScreenCal;
-	
-	const int kSize = (MSIZE-1)/2;	
-	
-	float weight[MSIZE] = 
-	{  
-	0.031225216, 
-	0.033322271, 
-	0.035206333, 
-	0.036826804, 
-	0.038138565, 
-	0.039104044, 
-	0.039695028
-	};  
-		float3 final_colour;
-		float Z;
-		[unroll]
-		for (int j = 0; j <= kSize; ++j)
-		{
-			weight[kSize+j] = normpdf(float(j), SIGMA);
-			weight[kSize-j] = normpdf(float(j), SIGMA);
-		}
-		
-		float3 cc;
-		float factor;
-		float bZ = 1.0/normpdf(0.0, BSIGMA);
-		
-		[loop]
-		for (int i=-kSize; i <= kSize; ++i)
-		{
-			for (int j=-kSize; j <= kSize; ++j)
+float DepthOffset = Depth(texcoord).r/0.425; //Depth Buffer Offset adjust
+
+	float2 ScreenCal;
+			if(No_Depth_Map)
+			{	
+				ScreenCal = float2(2.5*pix.x,2.5*pix.y);
+			}
+			else
 			{
+				ScreenCal = float2(2.0*pix.x,2.0*pix.y);
+			}
 			
-				float2 XY;
-				
-				if(No_Depth_Map)
+	float2 FinCal = ScreenCal*0.6;
+
+	float4 v[9];
+	
+	[loop]
+	for(int i = -1; i <= 1; ++i) 
+	{
+		for(int j = -1; j <= 1; ++j)
+		{		
+		  float2 XY = float2(float(i), float(j)) * FinCal;
+			if(No_Depth_Map)
 				{
-					XY = float2(float(i),float(j))*FinCal;
-					cc = tex2D(BackBuffer,texcoord.xy+XY).rgb;
+					v[(i + 1) * 3 + (j + 1)] = tex2D(BackBuffer, texcoord + XY);
 				}
 				else
 				{
-					XY = float2(float(i),float(j))*FinCal;
-					cc = tex2D(BackBuffer,texcoord.xy+XY*sampleOffset).rgb;
+					v[(i + 1) * 3 + (j + 1)] = tex2D(BackBuffer, texcoord + XY * DepthOffset);
 				}
-				factor = normpdf3(cc-c, BSIGMA)*bZ*weight[kSize+j]*weight[kSize+i];
-				Z += factor;
-				final_colour += factor*cc;
-
-			}
 		}
+	}
+
+	float4 temp;
+
+	mnmx6(v[0], v[1], v[2], v[3], v[4], v[5]);
+	mnmx5(v[1], v[2], v[3], v[4], v[6]);
+	mnmx4(v[2], v[3], v[4], v[7]);
+	mnmx3(v[3], v[4], v[8]);
 		
-		float4 Bilateral_Filter = float4(final_colour/Z, 1.0);
+	float4 Median_Filter = v[4];
 		
-	color = Bilateral_Filter;
+	color = Median_Filter;
 }
 
 void Out(float4 position : SV_Position, float2 texcoord : TEXCOORD0, out float4 color: SV_Target)
@@ -263,9 +244,9 @@ void Out(float4 position : SV_Position, float2 texcoord : TEXCOORD0, out float4 
 	float3 Luma_Coefficient = float3(0.2627, 0.6780, 0.0593); //Used in Grayscale calculation I see no diffrence....
 	float R,G,B,A = 1;
 	
-	R = tex2D(BackBuffer,float2(texcoord.x,texcoord.y)).r - tex2D(SamplerBF,float2(texcoord.x,texcoord.y)).r;
-	G = tex2D(BackBuffer,float2(texcoord.x,texcoord.y)).g - tex2D(SamplerBF,float2(texcoord.x,texcoord.y)).g;
-	B = tex2D(BackBuffer,float2(texcoord.x,texcoord.y)).b - tex2D(SamplerBF,float2(texcoord.x,texcoord.y)).b;
+	R = tex2D(BackBuffer,float2(texcoord.x,texcoord.y)).r - tex2D(SamplerMF,float2(texcoord.x,texcoord.y)).r;
+	G = tex2D(BackBuffer,float2(texcoord.x,texcoord.y)).g - tex2D(SamplerMF,float2(texcoord.x,texcoord.y)).g;
+	B = tex2D(BackBuffer,float2(texcoord.x,texcoord.y)).b - tex2D(SamplerMF,float2(texcoord.x,texcoord.y)).b;
 	
 	float3 Color_Sharp_Control = float3(R,G,B) * Sharpen_Power; 
 	float Grayscale_Sharp_Control = dot(float3(R,G,B), saturate(Luma_Coefficient * Sharpen_Power));
@@ -291,7 +272,7 @@ void Out(float4 position : SV_Position, float2 texcoord : TEXCOORD0, out float4 
 	}
 	else
 	{
-	Out = texcoord.y > 0.5 ? tex2D(SamplerBF,float2(texcoord.x,texcoord.y * 2 - 1)) : 1 - Depth(float2(texcoord.x,texcoord.y * 2));
+	Out = texcoord.y > 0.5 ? tex2D(SamplerMF,float2(texcoord.x,texcoord.y * 2 - 1)) : 1 - Depth(float2(texcoord.x,texcoord.y * 2));
 	}
 	
 	color = Out;
@@ -316,7 +297,7 @@ technique Smart_Sharp
 		{
 			VertexShader = PostProcessVS;
 			PixelShader = Filters;
-			RenderTarget = texBF;
+			RenderTarget = texMF;
 		}
 			pass UnsharpMask
 		{
