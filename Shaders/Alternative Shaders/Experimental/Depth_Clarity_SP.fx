@@ -67,6 +67,20 @@ uniform bool No_Depth_Map <
 	ui_tooltip = "If you have No Depth Buffer turn this On.";
 > = false;
 
+uniform int Output_Selection <
+	ui_type = "combo";
+	ui_items = "Normal\0Color Only\0Greyscale Only\0";
+	ui_label = "Output Selection";
+	ui_tooltip = "Select Sharpen output type.";
+> = 0;
+
+uniform float Sharpen_Power <
+	ui_type = "drag";
+	ui_min = 1; ui_max = 5;
+	ui_label = "Sharpen Power";
+	ui_tooltip = "Increases or Decreases the Sharpen power.";
+> = 1.0;
+
 uniform bool View_Adjustment <
 	ui_label = "View Adjustment";
 	ui_tooltip = "Adjust the depth map and Depth Blur.";
@@ -164,7 +178,7 @@ float4 Depth(in float2 texcoord : TEXCOORD0)
 }
 #define SIGMA 20
 #define BSIGMA 0.1
-#define MSIZE 10
+#define MSIZE 9
 
 float normpdf(in float x, in float sigma)
 {
@@ -193,8 +207,7 @@ float sampleOffset = Depth(texcoord).r/0.5; //Depth Buffer Offset
 	0.039104044, 
 	0.039695028, 
 	0.039894000, 
-	0.039695028, 
-	0.039104044
+	0.039695028
 	};  
 		float3 final_colour;
 		float Z;
@@ -241,18 +254,34 @@ float sampleOffset = Depth(texcoord).r/0.5; //Depth Buffer Offset
 
 void Out(float4 position : SV_Position, float2 texcoord : TEXCOORD0, out float4 color: SV_Target)
 {	
-	float4 Out;
+	//Luma (SD video)	float3(0.299, 0.587, 0.114)
+	//Luma (HD video)	float3(0.2126, 0.7152, 0.0722) https://en.wikipedia.org/wiki/Luma_(video)
+	//Luma (HDR video)	float3(0.2627, 0.6780, 0.0593) https://en.wikipedia.org/wiki/Rec._2100
+	float4 Out,RGBA;
+	float3 Luma_Coefficient = float3(0.2627, 0.6780, 0.0593); //Used in Grayscale calculation I see no diffrence....
 	float R,G,B,A = 1;
-
+	
 	R = tex2D(BackBuffer,float2(texcoord.x,texcoord.y)).r - tex2D(SamplerF,float2(texcoord.x,texcoord.y)).r;
 	G = tex2D(BackBuffer,float2(texcoord.x,texcoord.y)).g - tex2D(SamplerF,float2(texcoord.x,texcoord.y)).g;
 	B = tex2D(BackBuffer,float2(texcoord.x,texcoord.y)).b - tex2D(SamplerF,float2(texcoord.x,texcoord.y)).b;
 	
-	R = saturate(R);
-	G = saturate(G);
-	B = saturate(B);
+	float3 Color_Sharp_Control = float3(R,G,B) * Sharpen_Power; 
+	float Grayscale_Sharp_Control = dot(float3(R,G,B), saturate(Luma_Coefficient * Sharpen_Power));
+
+	if (Output_Selection == 0)
+	{
+		RGBA = saturate(lerp(Grayscale_Sharp_Control,float4(Color_Sharp_Control,A),0.5)) + tex2D(BackBuffer,float2(texcoord.x,texcoord.y));
+	}
+	else if (Output_Selection == 1)
+	{
+		RGBA = saturate(float4(Color_Sharp_Control,A)) + tex2D(BackBuffer,float2(texcoord.x,texcoord.y));
+	}
+	else
+	{
+		RGBA = saturate(Grayscale_Sharp_Control) + tex2D(BackBuffer,float2(texcoord.x,texcoord.y));
+	}
 	
-	float4 Combine = (float4(R,G,B,A))+tex2D(BackBuffer,float2(texcoord.x,texcoord.y)) * (1.0+contrast)/1.0;
+	float4 Combine = RGBA * (1.0+contrast)/1.0;
 
 	if (View_Adjustment == 0)
 	{
