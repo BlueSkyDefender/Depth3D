@@ -45,7 +45,7 @@ uniform int Depth_Map <
 
 uniform float Depth_Map_Adjust <
 	ui_type = "drag";
-	ui_min = 0.25; ui_max = 75.0;
+	ui_min = 0.25; ui_max = 50.0;
 	ui_label = "Depth Map Adjustment";
 	ui_tooltip = "Adjust the depth map and sharpness.";
 > = 5.0;
@@ -60,6 +60,11 @@ uniform float Offset <
 uniform bool Depth_Map_Flip <
 	ui_label = "Depth Map Flip";
 	ui_tooltip = "Flip the depth map if it is upside down.";
+> = false;
+
+uniform bool No_Depth_Map <
+	ui_label = "No Depth Map";
+	ui_tooltip = "If you have No Depth Buffer turn this On.";
 > = false;
 
 uniform bool View_Adjustment <
@@ -214,8 +219,19 @@ float sampleOffset = Depth(texcoord).r/0.5; //Depth Buffer Offset
 		{
 			for (int j=-kSize; j <= kSize; ++j)
 			{
-				float2 XY = float2(float(i),float(j))*pix;
-				cc = tex2D(BackBuffer,texcoord.xy+XY*sampleOffset).rgb;
+			
+				float2 XY;
+				
+				if(No_Depth_Map)
+				{
+					XY = float2(float(i),float(j))*(pix/0.5);
+					cc = tex2D(BackBuffer,texcoord.xy+XY).rgb;
+				}
+				else
+				{
+					XY = float2(float(i),float(j))*pix;
+					cc = tex2D(BackBuffer,texcoord.xy+XY*sampleOffset).rgb;
+				}
 				factor = normpdf3(cc-c, BSIGMA)*bZ*weight[kSize+j]*weight[kSize+i];
 				Z += factor;
 				final_colour += factor*cc;
