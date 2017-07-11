@@ -676,7 +676,7 @@ float4 WeaponDepth(in float2 texcoord : TEXCOORD0)
 		zBufferWH = 1-zBufferWH;
 		
 		//Auto Anti Weapon Depth Map Z-Fighting is always on.
-		zBufferWH = zBufferWH*AL(texcoord).r; 
+		zBufferWH = zBufferWH*clamp(AL(texcoord).r*1.825,0.375,1); 
 		
 		if (WDM == 18)
 		{

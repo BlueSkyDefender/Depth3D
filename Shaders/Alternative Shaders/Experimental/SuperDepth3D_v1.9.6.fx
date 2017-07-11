@@ -76,12 +76,6 @@ uniform float ZPD <
 	ui_tooltip = "ZPD controls the focus distance for the screen Pop-out effect.";
 > = 0.025;
 
-//uniform bool Depth_Plus <	
-	//ui_label = "Depth Plus Toggle";
-	//ui_tooltip = "Enhances depth automatically the 3D image.\n" 
-	//			 "Default is off.";
-//> = 0;
-
 uniform bool Depth_Map_View <
 	ui_label = "Depth Map View";
 	ui_tooltip = "Display the Depth Map.";
@@ -722,7 +716,7 @@ float4 WeaponDepth(in float2 texcoord : TEXCOORD0)
 		zBufferWH = 1-zBufferWH;
 		
 		//Auto Anti Weapon Depth Map Z-Fighting is always on.
-		zBufferWH = zBufferWH*AL(texcoord).r; 
+		zBufferWH = zBufferWH*clamp(AL(texcoord).r*1.825,0.375,1); 
 		
 		if (WDM == 18)
 		{
@@ -1017,7 +1011,7 @@ void PS_renderLR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD
 		DepthL =  min(DepthL,L);
 		DepthR =  min(DepthR,R);
 	}
-	
+
 	float ParallaxL = max(-0.1,MS * (1-ZPD/DepthL));
 	float ParallaxR = max(-0.1,MS * (1-ZPD/DepthR));
 	
