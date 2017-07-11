@@ -53,21 +53,12 @@ uniform int Divergence <
 	ui_tooltip = "Determines the amount of Image Warping and Separation.";
 > = 15;
 
-uniform int Depth_Plus <	
-	ui_type = "combo";
-	ui_items = "Off\0Mode One\0Mode Two\0Mode Three\0";
-	ui_label = "Depth Plus Toggle";
-	ui_tooltip = "Enhances depth the 3D image.\n" 
-				 "Default is off.";
-> = 0;
-
-uniform float Weapon_Depth <
+uniform float ZPD <
 	ui_type = "drag";
-	ui_min = -100; ui_max = 100;
-	ui_label = "Weapon Depth Adjustment";
-	ui_tooltip = "Pushes or Pulls the FPS Hand in or out of the screen.\n" 
-				 "Default is 0";
-> = 0;
+	ui_min = 1.0; ui_max = 55;
+	ui_label = "Zero Parallax Distance";
+	ui_tooltip = "ZPD controls the focus distance for the screen Pop-out effect.";
+> = 27.5;
 
 uniform float Perspective <
 	ui_type = "drag";
@@ -92,6 +83,14 @@ uniform bool Depth_Map_Flip <
 	ui_label = "Depth Map Flip";
 	ui_tooltip = "Flip the depth map if it is upside down.";
 > = false;
+
+uniform float Weapon_Depth <
+	ui_type = "drag";
+	ui_min = -100; ui_max = 100;
+	ui_label = "Weapon Depth Adjustment";
+	ui_tooltip = "Pushes or Pulls the FPS Hand in or out of the screen.\n" 
+				 "Default is 0";
+> = 0;
 
 uniform int WDM <
 	ui_type = "combo";
@@ -705,33 +704,7 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 		
 		float DM = Depth(texcoord).r;
 		float AverageLuminance = Depth(texcoord).r;		
-		
-		if(Depth_Plus == 1)
-		{
-			float ZDM = max((25*pix.x) * (1 - 5/DM),-5);
-			DM = lerp(ZDM,DM,0.875);
-		}
-		if(Depth_Plus == 2)
-		{
-			float Depth_Plus_Adjust = 50;
-			float DP = Depth_Plus_Adjust/100,DDP = (Depth_Plus_Adjust/100)+1;
-			DM = lerp(DM,1-DM,-DP)/DDP; //Depth Plus code.
-		}
-		if(Depth_Plus == 3)
-		{
-			float ZDM = max((25*pix.x) * (1 - 5/DM),-5);
-			float ZDP = lerp(ZDM,DM,0.875);
-			
-			float Depth_Plus_Adjust = 50;
-			float DP = Depth_Plus_Adjust/100,DDP = (Depth_Plus_Adjust/100)+1;
-			float DPM = lerp(ZDP,1-ZDP,-DP)/DDP; //Depth Plus code.
-			DM = DPM;
-		}
-		else
-		{
-			DM = DM;
-		}
-		
+
 		float WD = WeaponDepth(texcoord).r;
 		
 		float CoP = WeaponDepth(texcoord).w; //Weapon Cutoff Point
@@ -918,9 +891,21 @@ float4 DM = tex2Dlod(SamplerDM,float4(texcoord,0,0)).bbbb;
 float4  Encode(in float2 texcoord : TEXCOORD0) //zBuffer Color Channel Encode
 {
 	float GetDepth = tex2Dlod(SamplerBlur,float4(texcoord.x,texcoord.y,0,0)).r;
+	
+	float ParallaxR = max(-0.1,1-0.0075/GetDepth);
+		ParallaxR = lerp(ParallaxR,GetDepth,0.5);
+	float ParallaxL = max(-0.1,1-0.025/GetDepth);
+		ParallaxL = lerp(ParallaxL,GetDepth,0.5);
 		
-	float Red = (1-texcoord.x)+Divergence*pix.x*GetDepth;
-	float Blue = texcoord.x+Divergence*pix.x*GetDepth;
+	float D = ZPD;		
+	float RD = (1-texcoord.x)+D*pix.x*ParallaxL;
+	float LD = texcoord.x+D*pix.x*ParallaxR;
+	
+	float RX = (1-texcoord.x)+Divergence*pix.x*ParallaxL;
+	float LX = texcoord.x+Divergence*pix.x*ParallaxR;
+	
+	float Red = lerp(RX,RD,0.5);
+	float Blue = lerp(LX,LD,0.5);
 	
 	float R = Red; //R Encode
 	float B = Blue; //B Encode
@@ -987,13 +972,13 @@ void PS_calcLR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0,
 				//R
 				if (Encode(float2(TCR.x+i*pix.x/0.900,TCR.y)).x >= (1-TCR.x)/1.0025) //Decode R
 				{
-					cR = tex2Dlod(BackBuffer, float4(TCR.x+i*pix.x/0.9875,TCR.y,0,0));
+					cR = tex2Dlod(BackBuffer, float4(TCR.x+i*pix.x,TCR.y,0,0));
 				}
 				
 				//L
 				if (Encode(float2(TCL.x-i*pix.x/0.900,TCL.y)).z >= TCL.x/1.0025) //Decode B
 				{
-					cL = tex2Dlod(BackBuffer, float4(TCL.x-i*pix.x/0.9875,TCL.y,0,0));
+					cL = tex2Dlod(BackBuffer, float4(TCR.x-i*pix.x,TCL.y,0,0));
 				}	
 		}
 		
