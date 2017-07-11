@@ -54,22 +54,6 @@ uniform int Divergence <
 				 "You can override this value.";
 > = 15;
 
-uniform int Depth_Plus <	
-	ui_type = "combo";
-	ui_items = "Off\0Mode One\0Mode Two\0Mode Three\0";
-	ui_label = "Depth Plus Toggle";
-	ui_tooltip = "Enhances depth the 3D image.\n" 
-				 "Default is off.";
-> = 0;
-
-uniform float Weapon_Depth <
-	ui_type = "drag";
-	ui_min = -100; ui_max = 100;
-	ui_label = "Weapon Depth Adjustment";
-	ui_tooltip = "Pushes or Pulls the FPS Hand in or out of the screen.\n" 
-				 "Default is 0";
-> = 0;
-
 uniform float Perspective <
 	ui_type = "drag";
 	ui_min = -100; ui_max = 100;
@@ -84,6 +68,19 @@ uniform int Dis_Occlusion <
 	ui_label = "Disocclusion Mask";
 	ui_tooltip = "Automatic occlusion masking options.";
 > = 0;
+
+uniform float ZPD <
+	ui_type = "drag";
+	ui_min = 0.0; ui_max = 0.1;
+	ui_label = "Zero Parallax Distance";
+	ui_tooltip = "ZPD controls the focus distance for the screen Pop-out effect.";
+> = 0.025;
+
+//uniform bool Depth_Plus <	
+	//ui_label = "Depth Plus Toggle";
+	//ui_tooltip = "Enhances depth automatically the 3D image.\n" 
+	//			 "Default is off.";
+//> = 0;
 
 uniform bool Depth_Map_View <
 	ui_label = "Depth Map View";
@@ -101,6 +98,14 @@ uniform bool Depth_Map_Flip <
 	ui_label = "Depth Map Flip";
 	ui_tooltip = "Flip the depth map if it is upside down.";
 > = false;
+
+uniform float Weapon_Depth <
+	ui_type = "drag";
+	ui_min = -100; ui_max = 100;
+	ui_label = "Weapon Depth Adjustment";
+	ui_tooltip = "Pushes or Pulls the FPS Hand in or out of the screen.\n" 
+				 "Default is 0";
+> = 0;
 
 uniform int WDM <
 	ui_type = "combo";
@@ -741,37 +746,11 @@ float4 WeaponDepth(in float2 texcoord : TEXCOORD0)
 
 void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 Color : SV_Target0)
 {
-		float R,G,B,A = 1;
+		float N,R,G,B,A = 1;
 		
 		float DM = Depth(texcoord).r;
 		float AverageLuminance = Depth(texcoord).r;	
-		
-		if(Depth_Plus == 1)
-		{
-			float ZDM = max((25*pix.x) * (1 - 5/DM),-5);
-			DM = lerp(ZDM,DM,0.875);
-		}
-		if(Depth_Plus == 2)
-		{
-			float Depth_Plus_Adjust = 50;
-			float DP = Depth_Plus_Adjust/100,DDP = (Depth_Plus_Adjust/100)+1;
-			DM = lerp(DM,1-DM,-DP)/DDP; //Depth Plus code.
-		}
-		if(Depth_Plus == 3)
-		{
-			float ZDM = max((25*pix.x) * (1 - 5/DM),-5);
-			float ZDP = lerp(ZDM,DM,0.875);
-			
-			float Depth_Plus_Adjust = 50;
-			float DP = Depth_Plus_Adjust/100,DDP = (Depth_Plus_Adjust/100)+1;
-			float DPM = lerp(ZDP,1-ZDP,-DP)/DDP; //Depth Plus code.
-			DM = DPM;
-		}
-		else
-		{
-			DM = DM;
-		}
-		
+
 		float WD = WeaponDepth(texcoord).r;
 		
 		float CoP = WeaponDepth(texcoord).w; //Weapon Cutoff Point
@@ -1034,13 +1013,19 @@ void PS_renderLR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD
 		
 		float L = tex2Dlod(SamplerDis,float4(TCL.x+S, TCL.y,0,0)).r;
 		float R = tex2Dlod(SamplerDis,float4(TCR.x-S, TCR.y,0,0)).r;
-
+		
 		DepthL =  min(DepthL,L);
 		DepthR =  min(DepthR,R);
 	}
+	
+	float ParallaxL = max(-0.1,MS * (1-ZPD/DepthL));
+	float ParallaxR = max(-0.1,MS * (1-ZPD/DepthR));
+	
+		ParallaxL = lerp(ParallaxL,DepthL * MS,0.5);
+		ParallaxR = lerp(ParallaxR,DepthR * MS,0.5);
 		
-		float ReprojectionLeft =  DepthL*MS;
-		float ReprojectionRight = DepthR*MS;
+		float ReprojectionLeft =  ParallaxL;
+		float ReprojectionRight = ParallaxR;
 	
 	if(!Depth_Map_View)
 	{
