@@ -46,6 +46,13 @@ uniform float Depth_Map_Adjust <
 	ui_tooltip = "Adjust the depth map for your games.";
 > = 7.5;
 
+uniform float Offset <
+	ui_type = "drag";
+	ui_min = 0; ui_max = 1.0;
+	ui_label = "Offset";
+	ui_tooltip = "Offset is for the Special Depth Map Only";
+> = 0.5;
+
 uniform int Divergence <
 	ui_type = "drag";
 	ui_min = 1; ui_max = Depth_Max;
@@ -60,6 +67,14 @@ uniform float ZPD <
 	ui_tooltip = "ZPD controls the focus distance for the screen Pop-out effect.";
 > = 27.5;
 
+uniform float Weapon_Depth <
+	ui_type = "drag";
+	ui_min = -100; ui_max = 100;
+	ui_label = "Weapon Depth Adjustment";
+	ui_tooltip = "Pushes or Pulls the FPS Hand in or out of the screen.\n" 
+				 "Default is 0";
+> = 0;
+
 uniform float Perspective <
 	ui_type = "drag";
 	ui_min = -100; ui_max = 100;
@@ -72,25 +87,10 @@ uniform bool Depth_Map_View <
 	ui_tooltip = "Display the Depth Map.";
 > = false;
 
-uniform float Offset <
-	ui_type = "drag";
-	ui_min = 0; ui_max = 1.0;
-	ui_label = "Offset";
-	ui_tooltip = "Offset";
-> = 0.5;
-
 uniform bool Depth_Map_Flip <
 	ui_label = "Depth Map Flip";
 	ui_tooltip = "Flip the depth map if it is upside down.";
 > = false;
-
-uniform float Weapon_Depth <
-	ui_type = "drag";
-	ui_min = -100; ui_max = 100;
-	ui_label = "Weapon Depth Adjustment";
-	ui_tooltip = "Pushes or Pulls the FPS Hand in or out of the screen.\n" 
-				 "Default is 0";
-> = 0;
 
 uniform int WDM <
 	ui_type = "combo";
@@ -216,25 +216,25 @@ sampler BackBuffer
 		Texture = BackBufferTex;
 	};
 
-texture texDM  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT/Depth_Map_Division; Format = RGBA32F; MipLevels = 3;}; 
+texture texDMFB  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT/Depth_Map_Division; Format = RGBA32F; MipLevels = 3;}; 
 
 sampler SamplerDM
 	{
-		Texture = texDM;
+		Texture = texDMFB;
 	};
 	
-texture texBlur  { Width = BUFFER_WIDTH/Depth_Map_Division; Height = BUFFER_HEIGHT/Depth_Map_Division; Format = RGBA32F; MipLevels = 3;}; 
+texture texBlurFB  { Width = BUFFER_WIDTH/Depth_Map_Division; Height = BUFFER_HEIGHT/Depth_Map_Division; Format = RGBA32F; MipLevels = 3;}; 
 
 sampler SamplerBlur
 	{
-		Texture = texBlur;
+		Texture = texBlurFB;
 	};
 	
-texture texAO  { Width = BUFFER_WIDTH/2; Height = BUFFER_HEIGHT/2; Format = RGBA32F; MipLevels = 3;}; 
+texture texAOFB  { Width = BUFFER_WIDTH/2; Height = BUFFER_HEIGHT/2; Format = RGBA32F; MipLevels = 3;}; 
 
 sampler SamplerAO
 	{
-		Texture = texAO;
+		Texture = texAOFB;
 	};
 
 uniform float2 Mousecoords < source = "mousepoint"; > ;	
@@ -256,11 +256,11 @@ float4 MouseCursor(float4 position : SV_Position, float2 texcoord : TEXCOORD) : 
 }
 
 /////////////////////////////////////////////////////////////////////////////////Adapted Luminance/////////////////////////////////////////////////////////////////////////////////
-texture texLum  {Width = 256/2; Height = 256/2; Format = RGBA8; MipLevels = 8;}; //Sample at 256x256/2 and a mip bias of 8 should be 1x1 
+texture texLumFB  {Width = 256/2; Height = 256/2; Format = RGBA8; MipLevels = 8;}; //Sample at 256x256/2 and a mip bias of 8 should be 1x1 
 																				
 sampler SamplerLum																
 	{
-		Texture = texLum;
+		Texture = texLumFB;
 		MipLODBias = 8.0f; //Luminance adapted luminance value from 1x1 Texture Mip lvl of 8
 		MinFilter = LINEAR;
 		MagFilter = LINEAR;
@@ -675,6 +675,9 @@ float4 WeaponDepth(in float2 texcoord : TEXCOORD0)
 		if (WDM == 18 || WDM == 24) //Turok Dinosaur Hunter ; KingPin
 		zBufferWH = 1-zBufferWH;
 		
+		float Adj = Weapon_Depth/375; //Push & pull weapon in or out of screen.
+		zBufferWH = smoothstep(Adj,1,zBufferWH) ;//Weapon Adjust smoothsteprange from Adj-1
+		
 		//Auto Anti Weapon Depth Map Z-Fighting is always on.
 		zBufferWH = zBufferWH*clamp(AL(texcoord).r*1.825,0.375,1); 
 		
@@ -716,8 +719,6 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 		float D, Done;
 		
 		float Cutoff = step(DM.r,CutOFFCal);
-				
-		float Adj = Weapon_Depth/1000; //Push & pull weapon in or out of screen.
 					
 		if (WDM == 0)
 		{
@@ -726,7 +727,7 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 		else
 		{
 		D = lerp(DM,WD,NearDepth);
-		Done = lerp(DM,D+Adj,Cutoff);
+		Done = lerp(DM,D,Cutoff);
 		}
 		
 		R = Done;
@@ -1224,25 +1225,25 @@ technique Depth3D_FlashBack
 		{
 			VertexShader = PostProcessVS;
 			PixelShader = DepthMap;
-			RenderTarget = texDM;
+			RenderTarget = texDMFB;
 		}
 			pass AmbientOcclusion
 		{
 			VertexShader = PostProcessVS;
 			PixelShader = AO_in;
-			RenderTarget = texAO;
+			RenderTarget = texAOFB;
 		}	
 			pass BilateralBlur
 		{
 			VertexShader = PostProcessVS;
 			PixelShader = BilateralBlur;
-			RenderTarget = texBlur;
+			RenderTarget = texBlurFB;
 		}
 			pass AverageLuminance
 		{
 			VertexShader = PostProcessVS;
 			PixelShader = Average_Luminance;
-			RenderTarget = texLum;
+			RenderTarget = texLumFB;
 		}
 			pass StereographicDecodeOutput
 		{

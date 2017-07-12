@@ -260,19 +260,27 @@ void Out(float4 position : SV_Position, float2 texcoord : TEXCOORD0, out float4 
 	//Luma (HD video)	float3(0.2126, 0.7152, 0.0722) https://en.wikipedia.org/wiki/Luma_(video)
 	//Luma (HDR video)	float3(0.2627, 0.6780, 0.0593) https://en.wikipedia.org/wiki/Rec._2100
 	float4 Out,RGBA;
-	float3 Luma_Coefficient = float3(0.2627, 0.6780, 0.0593),RGB; //Used in Grayscale calculation I see no diffrence....
+	float3 Luma_Coefficient = float3(0.2627, 0.6780, 0.0593),RGB,RGBT,RGBB; //Used in Grayscale calculation I see no diffrence....
+	
 	if (View_Adjustment == 0)
 	{
-	RGB = tex2D(BackBuffer,float2(texcoord.x,texcoord.y)).rgb - tex2D(SamplerBF,float2(texcoord.x,texcoord.y)).rgb;
+		RGB = tex2D(BackBuffer,float2(texcoord.x,texcoord.y)).rgb - tex2D(SamplerBF,float2(texcoord.x,texcoord.y)).rgb;
 	}
 	else
 	{
-	RGB = tex2D(BackBuffer,float2(texcoord.x*2,texcoord.y*2)).rgb - tex2D(SamplerBF,float2(texcoord.x*2,texcoord.y*2)).rgb;
+		RGBT = tex2D(BackBuffer,float2(texcoord.x*2,texcoord.y*2)).rgb - tex2D(SamplerBF,float2(texcoord.x*2,texcoord.y*2)).rgb;
+		RGBB = tex2D(BackBuffer,float2(texcoord.x*2,texcoord.y*2-1)).rgb - tex2D(SamplerBF,float2(texcoord.x*2,texcoord.y*2-1)).rgb;
 	}
 	
 	float3 Color_Sharp_Control = RGB * Sharpen_Power; 
 	float Grayscale_Sharp_Control = dot(RGB, saturate(Luma_Coefficient * Sharpen_Power));
-
+	
+	float3 CSCT = (RGBT * 5) * Sharpen_Power; 
+	float GSCT = dot(RGBT, saturate((Luma_Coefficient * 5 ) * Sharpen_Power));
+	
+	float3 CSCB = (RGBB * 2.5) * Sharpen_Power; 
+	float GSCB = dot(RGBB, saturate((Luma_Coefficient * 2.5) * Sharpen_Power));
+	
 	if (Output_Selection == 0)
 	{
 		RGBA = saturate(lerp(Grayscale_Sharp_Control,float4(Color_Sharp_Control,1),0.5)) + tex2D(BackBuffer,float2(texcoord.x,texcoord.y));
@@ -290,24 +298,29 @@ void Out(float4 position : SV_Position, float2 texcoord : TEXCOORD0, out float4 
 
 	if (View_Adjustment == 0)
 	{
-	Out = Combine;
+		Out = Combine;
 	}
 	else
 	{
 		if (Output_Selection == 0)
 			{
-				RGB = saturate(lerp(Grayscale_Sharp_Control,Color_Sharp_Control,0.5));
+				RGB = saturate(lerp(GSCT,CSCT,0.5));
+				RGBA = saturate(lerp(GSCB,float4(CSCB,1),0.5)) + tex2D(BackBuffer,float2(texcoord.x*2,texcoord.y*2-1));
 			}
 		else if (Output_Selection == 1)
 			{
-				RGB = saturate(Color_Sharp_Control);
+				RGB = saturate(CSCT);
+				RGBA = saturate(float4(CSCB,1)) + tex2D(BackBuffer,float2(texcoord.x*2,texcoord.y*2-1));
 			}
 		else
 			{
-				RGB = saturate(Grayscale_Sharp_Control);
+				RGB = saturate(GSCT);
+				RGBA = saturate(GSCB) + tex2D(BackBuffer,float2(texcoord.x*2,texcoord.y*2-1));
 			}
-	float4 VA = texcoord.x < 0.5 ? float4(RGB,1) : 1 - Depth(float2(texcoord.x*2-1,texcoord.y*2));
-	Out = texcoord.y < 0.5 ? VA : tex2D(SamplerBF,float2(texcoord.x,texcoord.y*2-1));
+			
+	float4 VA_Top = texcoord.x < 0.5 ? float4(RGB,1) : 1 - Depth(float2(texcoord.x*2-1,texcoord.y*2));
+	float4 VA_Bottom = texcoord.x < 0.5 ? RGBA : tex2D(SamplerBF,float2(texcoord.x*2-1,texcoord.y*2-1));
+	Out = texcoord.y < 0.5 ? VA_Top : VA_Bottom;
 	}
 	
 	color = Out;

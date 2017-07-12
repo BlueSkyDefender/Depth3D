@@ -46,6 +46,13 @@ uniform float Depth_Map_Adjust <
 	ui_tooltip = "Adjust the depth map for your games.";
 > = 7.5;
 
+uniform float Offset <
+	ui_type = "drag";
+	ui_min = 0; ui_max = 1.0;
+	ui_label = "Offset";
+	ui_tooltip = "Offset is for the Special Depth Map Only";
+> = 0.5;
+
 uniform int Divergence <
 	ui_type = "drag";
 	ui_min = 1; ui_max = Depth_Max;
@@ -54,11 +61,18 @@ uniform int Divergence <
 				 "You can override this value.";
 > = 15;
 
-uniform float Perspective <
+uniform float ZPD <
+	ui_type = "drag";
+	ui_min = 0.0; ui_max = 0.1;
+	ui_label = "Zero Parallax Distance";
+	ui_tooltip = "ZPD controls the focus distance for the screen Pop-out effect.";
+> = 0.025;
+
+uniform float Weapon_Depth <
 	ui_type = "drag";
 	ui_min = -100; ui_max = 100;
-	ui_label = "Perspective Slider";
-	ui_tooltip = "Determines the perspective point.\n" 
+	ui_label = "Weapon Depth Adjustment";
+	ui_tooltip = "Pushes or Pulls the FPS Hand in or out of the screen.\n" 
 				 "Default is 0";
 > = 0;
 
@@ -69,37 +83,23 @@ uniform int Dis_Occlusion <
 	ui_tooltip = "Automatic occlusion masking options.";
 > = 0;
 
-uniform float ZPD <
+uniform float Perspective <
 	ui_type = "drag";
-	ui_min = 0.0; ui_max = 0.1;
-	ui_label = "Zero Parallax Distance";
-	ui_tooltip = "ZPD controls the focus distance for the screen Pop-out effect.";
-> = 0.025;
+	ui_min = -100; ui_max = 100;
+	ui_label = "Perspective Slider";
+	ui_tooltip = "Determines the perspective point.\n" 
+				 "Default is 0";
+> = 0;
 
 uniform bool Depth_Map_View <
 	ui_label = "Depth Map View";
 	ui_tooltip = "Display the Depth Map.";
 > = false;
 
-uniform float Offset <
-	ui_type = "drag";
-	ui_min = 0; ui_max = 1.0;
-	ui_label = "Offset";
-	ui_tooltip = "Offset";
-> = 0.5;
-
 uniform bool Depth_Map_Flip <
 	ui_label = "Depth Map Flip";
 	ui_tooltip = "Flip the depth map if it is upside down.";
 > = false;
-
-uniform float Weapon_Depth <
-	ui_type = "drag";
-	ui_min = -100; ui_max = 100;
-	ui_label = "Weapon Depth Adjustment";
-	ui_tooltip = "Pushes or Pulls the FPS Hand in or out of the screen.\n" 
-				 "Default is 0";
-> = 0;
 
 uniform int WDM <
 	ui_type = "combo";
@@ -715,6 +715,9 @@ float4 WeaponDepth(in float2 texcoord : TEXCOORD0)
 		if (WDM == 18 || WDM == 24) //Turok Dinosaur Hunter ; KingPin
 		zBufferWH = 1-zBufferWH;
 		
+		float Adj = Weapon_Depth/375; //Push & pull weapon in or out of screen.
+		zBufferWH = smoothstep(Adj,1,zBufferWH) ;//Weapon Adjust smoothstep range from Adj-1
+		
 		//Auto Anti Weapon Depth Map Z-Fighting is always on.
 		zBufferWH = zBufferWH*clamp(AL(texcoord).r*1.825,0.375,1); 
 		
@@ -757,8 +760,6 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 		
 		float Cutoff = step(DM.r,CutOFFCal);
 				
-		float Adj = Weapon_Depth/1000; //Push & pull weapon in or out of screen.
-					
 		if (WDM == 0)
 		{
 		Done = DM;
@@ -766,7 +767,7 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 		else
 		{
 		D = lerp(DM,WD,NearDepth);
-		Done = lerp(DM,D+Adj,Cutoff);
+		Done = lerp(DM,D,Cutoff);
 		}
 		
 		R = Done;
@@ -1011,7 +1012,7 @@ void PS_renderLR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD
 		DepthL =  min(DepthL,L);
 		DepthR =  min(DepthR,R);
 	}
-
+	
 	float ParallaxL = max(-0.1,MS * (1-ZPD/DepthL));
 	float ParallaxR = max(-0.1,MS * (1-ZPD/DepthR));
 	
