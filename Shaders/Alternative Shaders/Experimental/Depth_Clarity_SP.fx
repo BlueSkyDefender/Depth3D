@@ -262,24 +262,10 @@ void Out(float4 position : SV_Position, float2 texcoord : TEXCOORD0, out float4 
 	float4 Out,RGBA;
 	float3 Luma_Coefficient = float3(0.2627, 0.6780, 0.0593),RGB,RGBT,RGBB; //Used in Grayscale calculation I see no diffrence....
 	
-	if (View_Adjustment == 0)
-	{
-		RGB = tex2D(BackBuffer,float2(texcoord.x,texcoord.y)).rgb - tex2D(SamplerBF,float2(texcoord.x,texcoord.y)).rgb;
-	}
-	else
-	{
-		RGBT = tex2D(BackBuffer,float2(texcoord.x*2,texcoord.y*2)).rgb - tex2D(SamplerBF,float2(texcoord.x*2,texcoord.y*2)).rgb;
-		RGBB = tex2D(BackBuffer,float2(texcoord.x*2,texcoord.y*2-1)).rgb - tex2D(SamplerBF,float2(texcoord.x*2,texcoord.y*2-1)).rgb;
-	}
+	RGB = tex2D(BackBuffer,float2(texcoord.x,texcoord.y)).rgb - tex2D(SamplerBF,float2(texcoord.x,texcoord.y)).rgb;
 	
 	float3 Color_Sharp_Control = RGB * Sharpen_Power; 
 	float Grayscale_Sharp_Control = dot(RGB, saturate(Luma_Coefficient * Sharpen_Power));
-	
-	float3 CSCT = (RGBT * 5) * Sharpen_Power; 
-	float GSCT = dot(RGBT, saturate((Luma_Coefficient * 5 ) * Sharpen_Power));
-	
-	float3 CSCB = (RGBB * 2.5) * Sharpen_Power; 
-	float GSCB = dot(RGBB, saturate((Luma_Coefficient * 2.5) * Sharpen_Power));
 	
 	if (Output_Selection == 0)
 	{
@@ -302,6 +288,15 @@ void Out(float4 position : SV_Position, float2 texcoord : TEXCOORD0, out float4 
 	}
 	else
 	{
+		RGBT = tex2D(BackBuffer,float2(texcoord.x*2,texcoord.y*2)).rgb - tex2D(SamplerBF,float2(texcoord.x*2,texcoord.y*2)).rgb;
+		RGBB = tex2D(BackBuffer,float2(texcoord.x*2,texcoord.y*2-1)).rgb - tex2D(SamplerBF,float2(texcoord.x*2,texcoord.y*2-1)).rgb;
+		
+		float3 CSCT = (RGBT * 5) * Sharpen_Power; 
+		float GSCT = dot(RGBT, saturate((Luma_Coefficient * 5 ) * Sharpen_Power));
+		
+		float3 CSCB = (RGBB * 2.5) * Sharpen_Power; 
+		float GSCB = dot(RGBB, saturate((Luma_Coefficient * 2.5) * Sharpen_Power));
+	
 		if (Output_Selection == 0)
 			{
 				RGB = saturate(lerp(GSCT,CSCT,0.5));
@@ -318,9 +313,11 @@ void Out(float4 position : SV_Position, float2 texcoord : TEXCOORD0, out float4 
 				RGBA = saturate(GSCB) + tex2D(BackBuffer,float2(texcoord.x*2,texcoord.y*2-1));
 			}
 			
-	float4 VA_Top = texcoord.x < 0.5 ? float4(RGB,1) : 1 - Depth(float2(texcoord.x*2-1,texcoord.y*2));
-	float4 VA_Bottom = texcoord.x < 0.5 ? RGBA : tex2D(SamplerBF,float2(texcoord.x*2-1,texcoord.y*2-1));
+		float4 VA_Top = texcoord.x < 0.5 ? float4(RGB,1) : 1 - Depth(float2(texcoord.x*2-1,texcoord.y*2));
+		float4 VA_Bottom = texcoord.x < 0.5 ? RGBA : tex2D(SamplerBF,float2(texcoord.x*2-1,texcoord.y*2-1));
+		
 	Out = texcoord.y < 0.5 ? VA_Top : VA_Bottom;
+	
 	}
 	
 	color = Out;

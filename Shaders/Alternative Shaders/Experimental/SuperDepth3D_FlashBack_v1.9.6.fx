@@ -62,10 +62,10 @@ uniform int Divergence <
 
 uniform float ZPD <
 	ui_type = "drag";
-	ui_min = 1.0; ui_max = 55;
+	ui_min = 0.0; ui_max = 0.250;
 	ui_label = "Zero Parallax Distance";
 	ui_tooltip = "ZPD controls the focus distance for the screen Pop-out effect.";
-> = 27.5;
+> = 0.125;
 
 uniform float Weapon_Depth <
 	ui_type = "drag";
@@ -802,14 +802,14 @@ float4 GetAO( float2 texcoord )
     //initialize variables:
     float F = Falloff;
 	float iter = 2.5*pix.x;
-    float ao, num;
+    float aout, num = 8;
     float incx = F*pix.x;
     float incy = F*pix.y;
     float width = incx;
     float height = incy;
     
     //Depth Map
-    float depthM = tex2Dlod(SamplerDM, float4(texcoord,0,0)).b;
+    float depthM = tex2Dlod(SamplerDM,float4(texcoord ,0,0)).b;
     
 		
 	//Depth Map linearization
@@ -817,9 +817,9 @@ float4 GetAO( float2 texcoord )
 	float constantN = 0.250;
 	depthM = saturate(2.0 * constantN * constantF / (constantF + constantN - (2.0 * depthM - 1.0) * (constantF - constantN)));
     
-	//2 iterations 
+	//2 iterations
 	[loop]
-    for(float i=0.0; i<2; ++i) 
+    for(int i = 0; i<2; ++i) 
     {
        float npw = (width+iter*random.x)/depthM;
        float nph = (height+iter*random.y)/depthM;
@@ -831,26 +831,22 @@ float4 GetAO( float2 texcoord )
 			float3 ddiff3 = GetPosition(texcoord.xy+float2(-npw,nph))-position;
 			float3 ddiff4 = GetPosition(texcoord.xy+float2(-npw,-nph))-position;
 
-			ao+=  aoFF(ddiff,normal,npw,nph);
-			ao+=  aoFF(ddiff2,normal,npw,-nph);
-			ao+=  aoFF(ddiff3,normal,-npw,nph);
-			ao+=  aoFF(ddiff4,normal,-npw,-nph);
-			num = 8;
+			aout += aoFF(ddiff,normal,npw,nph);
+			aout += aoFF(ddiff2,normal,npw,-nph);
+			aout += aoFF(ddiff3,normal,-npw,nph);
+			aout += aoFF(ddiff4,normal,-npw,-nph);
 		}
 		
 		//increase sampling area
 		   width += incx;  
-		   height += incy;		    
+		   height += incy;	    
     } 
-    ao/=num;
+    aout/=num;
 
 	//Luminance adjust used for overbright correction.
-	float4 Done = min(1.0,ao);
-	float3 lumcoeff = float3(0.299,0.587,0.114);
-	float lum = dot(Done.rgb, lumcoeff);
-	float3 luminance = float3(lum, lum, lum);
-  
-    return float4(luminance,1);
+	float4 Done = min(1.0,aout);
+	float OBC =  dot(Done.rgb,float3(0.2627, 0.6780, 0.0593));
+	return smoothstep(0,1,float4(OBC,OBC,OBC,1));
 }
 
 void AO_in(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 color : SV_Target0 )
@@ -885,33 +881,40 @@ Done = 1-sum;
 //bilateral blur/\
 
 float4 DM = tex2Dlod(SamplerDM,float4(texcoord,0,0)).bbbb;
-
-	color = lerp(DM,Done,P);
+        
+        if(AO == 1)
+		{
+			DM =lerp(DM,Done,P);
+		}
+		
+	color = DM;
 }
 
 float4  Encode(in float2 texcoord : TEXCOORD0) //zBuffer Color Channel Encode
 {
 	float GetDepth = tex2Dlod(SamplerBlur,float4(texcoord.x,texcoord.y,0,0)).r;
 	
-	float ParallaxR = max(-0.1,1-0.0075/GetDepth);
+	float ParallaxR = 1-ZPD/GetDepth;
 		ParallaxR = lerp(ParallaxR,GetDepth,0.5);
-	float ParallaxL = max(-0.1,1-0.025/GetDepth);
+	float ParallaxL = 1-ZPD/GetDepth;
 		ParallaxL = lerp(ParallaxL,GetDepth,0.5);
 		
-	float D = ZPD;		
-	float RD = (1-texcoord.x)+D*pix.x*ParallaxL;
-	float LD = texcoord.x+D*pix.x*ParallaxR;
+		ParallaxR = lerp(ParallaxR,1,0.05);
+		ParallaxL = lerp(ParallaxL,1,0.05);
+		
+	float D = 45;		
+	float RD = (1-texcoord.x)+D*pix.x*ParallaxR;
+	float LD = texcoord.x+D*pix.x*ParallaxL;
 	
-	float RX = (1-texcoord.x)+Divergence*pix.x*ParallaxL;
-	float LX = texcoord.x+Divergence*pix.x*ParallaxR;
+	float RX = (1-texcoord.x)+Divergence*pix.x*GetDepth;
+	float LX = texcoord.x+Divergence*pix.x*GetDepth;
 	
-	float Red = lerp(RX,RD,0.5);
-	float Blue = lerp(LX,LD,0.5);
+	float R = lerp(RX,RD,0.5); //R Encode
+	float G = RD; //B Encode
+	float B = lerp(LX,LD,0.5); //B Encode
+	float A = LD; //B Encode
 	
-	float R = Red; //R Encode
-	float B = Blue; //B Encode
-	
-	return float4(R,0,B,0);
+	return float4(R,G,B,A);
 }
 
 /////////////////////////////////////////L/R//////////////////////////////////////////////////////////////////////
@@ -971,13 +974,13 @@ void PS_calcLR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0,
 		for (int i = 0; i <= Divergence; i++) 
 		{
 				//R
-				if (Encode(float2(TCR.x+i*pix.x/0.900,TCR.y)).x >= (1-TCR.x)/1.0025) //Decode R
+				if (Encode(float2(TCR.x+i*pix.x,TCR.y)).x >= (1-TCR.x)/1.0001) //Decode R
 				{
 					cR = tex2Dlod(BackBuffer, float4(TCR.x+i*pix.x,TCR.y,0,0));
 				}
 				
 				//L
-				if (Encode(float2(TCL.x-i*pix.x/0.900,TCL.y)).z >= TCL.x/1.0025) //Decode B
+				if (Encode(float2(TCL.x-i*pix.x,TCL.y)).z >= TCL.x/1.0001) //Decode B
 				{
 					cL = tex2Dlod(BackBuffer, float4(TCR.x-i*pix.x,TCL.y,0,0));
 				}	

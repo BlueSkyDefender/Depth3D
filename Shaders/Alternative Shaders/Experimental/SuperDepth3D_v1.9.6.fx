@@ -63,7 +63,7 @@ uniform int Divergence <
 
 uniform float ZPD <
 	ui_type = "drag";
-	ui_min = 0.0; ui_max = 0.1;
+	ui_min = 0.0; ui_max = 0.15;
 	ui_label = "Zero Parallax Distance";
 	ui_tooltip = "ZPD controls the focus distance for the screen Pop-out effect.";
 > = 0.025;
@@ -884,11 +884,8 @@ float4 GetAO( float2 texcoord )
 
 	//Luminance adjust used for overbright correction.
 	float4 Done = min(1.0,aout);
-	float3 lumcoeff = float3(0.299,0.587,0.114);
-	float lum = dot(Done.rgb, lumcoeff);
-	float3 luminance = float3(lum, lum, lum);
-  
-    return float4(luminance,1);
+	float OBC =  dot(Done.rgb,float3(0.2627, 0.6780, 0.0593));
+	return smoothstep(0,1,float4(OBC,OBC,OBC,1));
 }
 
 void AO_in(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 color : SV_Target0 )
@@ -957,7 +954,14 @@ float Disocclusion_Power = DP/350;
 		DM = tex2Dlod(SamplerDM,float4(texcoord,0,0)).bbbb;
 	}	                          
 		
-	color = lerp(DM,Done,P);
+		DM = lerp(DM,float4(1,1,1,1),0.05);                         	
+		
+		if(AO == 1)
+		{
+			DM =lerp(DM,Done,P);
+		}
+		
+	color = DM;
 }
 
 ////////////////////////////////////////////////Left/Right Eye////////////////////////////////////////////////////////
