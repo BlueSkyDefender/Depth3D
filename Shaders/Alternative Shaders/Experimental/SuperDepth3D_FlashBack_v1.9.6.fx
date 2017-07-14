@@ -894,13 +894,12 @@ float4  Encode(in float2 texcoord : TEXCOORD0) //zBuffer Color Channel Encode
 {
 	float GetDepth = tex2Dlod(SamplerBlur,float4(texcoord.x,texcoord.y,0,0)).r;
 	
+	GetDepth = lerp(GetDepth,1,0.05);
+	
 	float ParallaxR = 1-ZPD/GetDepth;
 		ParallaxR = lerp(ParallaxR,GetDepth,0.5);
 	float ParallaxL = 1-ZPD/GetDepth;
 		ParallaxL = lerp(ParallaxL,GetDepth,0.5);
-		
-		ParallaxR = lerp(ParallaxR,1,0.05);
-		ParallaxL = lerp(ParallaxL,1,0.05);
 		
 	float D = 45;		
 	float RD = (1-texcoord.x)+D*pix.x*ParallaxR;
