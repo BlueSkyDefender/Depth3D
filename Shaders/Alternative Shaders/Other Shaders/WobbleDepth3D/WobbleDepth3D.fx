@@ -3,7 +3,7 @@
  //-----------------////
 
  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
- //* Depth Map Based 3D post-process shader v1.9.2																																	*//
+ //* Depth Map Based 3D post-process shader v1.9.6																																	*//
  //* For Reshade 3.0																																								*//
  //* --------------------------																																						*//
  //* This work is licensed under a Creative Commons Attribution 3.0 Unported License.																								*//
@@ -22,83 +22,65 @@
  //* 																																												*//
  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-uniform int Alternate_Depth_Map <
+// Determines The resolution of the Depth Map. For 4k Use 1.75 or 1.5. For 1440p Use 1.5 or 1.25. For 1080p use 1. Too low of a resolution will remove too much.
+#define Depth_Map_Division 1.0
+
+// Determines The Max Depth amount.
+#define Depth_Max 35
+
+uniform int Depth_Map <
 	ui_type = "combo";
-	ui_items = "DM 0\0DM 1\0DM 2\0DM 3\0DM 4\0DM 5\0DM 6\0DM 7\0DM 8\0DM 9\0DM 10\0DM 11\0DM 12\0DM 13\0DM 14\0DM 15\0DM 16\0DM 17\0DM 18\0DM 19\0DM 20\0DM 21\0DM 22\0DM 23\0DM 24\0DM 25\0DM 26\0DM 27\0DM 28\0DM 29\0DM 30\0DM 31\0DM 32\0DM 33\0DM 34\0DM 35\0DM 36\0DM 37\0";
-	ui_label = "Alternate Depth Map";
-	ui_tooltip = "Alternate Depth Map for different Games. Read the ReadMeDepth3d.txt, for setting. Each game May and can use a diffrent Alternet Depth Map.";
+	ui_items = "Depth Map 0\0Depth Map 1\0Depth Map 2\0Depth Map 3\0Depth Map 4\0Depth Map 5\0Depth Map 6\0Depth Map 7\0Depth Map 8\0Depth Map 9\0Depth Map 10\0";
+	ui_label = "Custom Depth Map";
+	ui_tooltip = "Pick your Depth Map.";
 > = 0;
 
-uniform int Depth <
+uniform float Depth_Map_Adjust <
 	ui_type = "drag";
-	ui_min = 0; ui_max = 50;
-	ui_label = "Depth Slider";
-	ui_tooltip = "Determines the amount of Image Warping and Separation between both eyes. You can Override this setting.";
+	ui_min = 1.0; ui_max = 50.0;
+	ui_label = "Depth Map Adjustment";
+	ui_tooltip = "Adjust the depth map for your games.";
+> = 7.5;
+
+uniform float Offset <
+	ui_type = "drag";
+	ui_min = 0; ui_max = 1.0;
+	ui_label = "Offset";
+	ui_tooltip = "Offset is for the Special Depth Map Only";
+> = 0.5;
+
+uniform int Divergence <
+	ui_type = "drag";
+	ui_min = 1; ui_max = Depth_Max;
+	ui_label = "Divergence Slider";
+	ui_tooltip = "Determines the amount of Image Warping and Separation.\n" 
+				 "You can override this value.";
 > = 15;
 
-uniform int Perspective <
+uniform float ZPD <
+	ui_type = "drag";
+	ui_min = 0.0; ui_max = 0.15;
+	ui_label = "Zero Parallax Distance";
+	ui_tooltip = "ZPD controls the focus distance for the screen Pop-out effect.";
+> = 0.025;
+
+uniform float Perspective <
 	ui_type = "drag";
 	ui_min = -100; ui_max = 100;
 	ui_label = "Perspective Slider";
-	ui_tooltip = "Determines the perspective point. Default is 0";
+	ui_tooltip = "Determines the perspective point.\n" 
+				 "Default is 0";
 > = 0;
 
 uniform bool Depth_Map_View <
 	ui_label = "Depth Map View";
-	ui_tooltip = "Display the Depth Map. Use This to Work on your Own Depth Map for your game.";
+	ui_tooltip = "Display the Depth Map.";
 > = false;
-
-uniform bool Depth_Map_Enhancement <
-	ui_label = "Depth Map Enhancement";
-	ui_tooltip = "Enable Or Dissable Depth Map Enhancement. Default is Off";
-> = 0;
-
-uniform float Adjust <
-	ui_type = "drag";
-	ui_min = 0; ui_max = 1.5;
-	ui_label = "Adjust";
-	ui_tooltip = "Adjust DepthMap Enhancement, Dehancement occurs past one. Default is 1.0";
-> = 1.0;
-
-uniform int Weapon_Depth_Map <
-	ui_type = "combo";
-	ui_items = "Weapon Depth Map Off\0Custom Weapon Depth Map One\0Custom Weapon Depth Map Two\0Custom Weapon Depth Map Three\0Custom Weapon Depth Map Four\0WDM 1\0WDM 2\0WDM 3\0WDM 4\0WDM 5\0WDM 6\0WDM 7\0WDM 8\0WDM 9\0WDM 10\0WDM 11\0WDM 12\0WDM 13\0WDM 14\0WDM 15\0WDM 16\0WDM 17\0WDM 18\0WDM 19\0WDM 20\0WDM 21\0WDM 22\0";
-	ui_label = "Alternate Weapon Depth Map";
-	ui_tooltip = "Alternate Weapon Depth Map for different Games. Read the ReadMeDepth3d.txt, for setting.";
-> = 0;
-
-uniform float3 Weapon_Adjust <
-	ui_type = "drag";
-	ui_min = -1.0; ui_max = 1.500;
-	ui_label = "Weapon Adjust Depth Map";
-	ui_tooltip = "Adjust weapon depth map. Default is (Y 0, X 0.250, Z 1.001)";
-> = float3(0.0,0.250,1.001);
-
-uniform float Weapon_Percentage <
-	ui_type = "drag";
-	ui_min = -1.0; ui_max = 5.0;
-	ui_label = "Weapon Percentage";
-	ui_tooltip = "Adjust weapon percentage. Default is 5.0";
-> = 5.0;
 
 uniform bool Depth_Map_Flip <
 	ui_label = "Depth Map Flip";
-	ui_tooltip = "Depth Flip if the depth map is Upside Down.";
+	ui_tooltip = "Flip the depth map if it is upside down.";
 > = false;
-
-uniform int Custom_Depth_Map <
-	ui_type = "combo";
-	ui_items = "Custom Off\0Custom One\0Custom Two\0Custom Three\0Custom Four\0Custom Five\0Custom Six\0Custom Seven\0Custom Eight\0Custom Nine\0Custom Ten\0Custom Eleven\0Custom Twelve\0";
-	ui_label = "Custom Depth Map";
-	ui_tooltip = "Adjust your own Custom Depth Map.";
-> = 0;
-
-uniform float2 Near_Far <
-	ui_type = "drag";
-	ui_min = 0; ui_max = 100;
-	ui_label = "Near & Far";
-	ui_tooltip = "Adjustment for Near and Far Depth Map Precision.";
-> = float2(1,1.5);
 
 uniform int Wobble_Speed <
 	ui_type = "combo";
@@ -118,7 +100,7 @@ uniform int Custom_Sidebars <
 	ui_type = "combo";
 	ui_items = "Mirrored Edges\0Black Edges\0Stretched Edges\0";
 	ui_label = "Edge Selection";
-	ui_tooltip = "Select how you like the Edge of the screen to look like.";
+	ui_tooltip = "Edges selection for your screen output.";
 > = 1;
 
 /////////////////////////////////////////////D3D Starts Here/////////////////////////////////////////////////////////////////
@@ -164,762 +146,136 @@ sampler BackBufferCLAMP
 	};
 	
 
-texture texCC  { Width = BUFFER_WIDTH/2; Height = BUFFER_HEIGHT/2; Format = RGBA8;}; 
-texture texCDM  { Width = BUFFER_WIDTH/2; Height = BUFFER_HEIGHT/2; Format = RGBA8;};
+texture texCDM  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT/Depth_Map_Division; Format = RGBA32F;};
 	
 sampler SamplerCDM
 	{
 		Texture = texCDM;
-		AddressU = CLAMP;
-		AddressV = CLAMP;
-		AddressW = CLAMP;
 	};
 	
 
 //Depth Map Information	
-float4 DepthMap(float4 position : SV_Position, float2 texcoord : TEXCOORD0) : SV_Target
+/////////////////////////////////////////////////////////////////////////////////Depth Map Information/////////////////////////////////////////////////////////////////////////////////
+
+float4 Depth(in float2 texcoord : TEXCOORD0)
 {
-
-	 float4 color = 0;
-
-			if (Depth_Map_Flip)
+		if (Depth_Map_Flip)
 			texcoord.y =  1 - texcoord.y;
-	
-	float4 depthM = tex2D(DepthBuffer, float2(texcoord.x, texcoord.y));
-	float4 WDM = tex2D(DepthBuffer, float2(texcoord.x, texcoord.y));
+			
+		float zBuffer = tex2D(DepthBuffer, texcoord).r; //Depth Buffer
+
+		//Conversions to linear space.....
+		//Near & Far Adjustment
+		float DDA = 0.125/Depth_Map_Adjust; //Division Depth Map Adjust - Near
+		float DA = Depth_Map_Adjust*2; //Depth Map Adjust - Near
+		//All 1.0f are Far Adjustment
 		
-		if (Custom_Depth_Map == 0)
-	{	
-		//Alien Isolation | Firewatch
-		if (Alternate_Depth_Map == 0)
+		//0. DirectX Custom Constant Far
+		float DirectX = 2.0 * DDA * 1.0f / (1.0f + DDA - zBuffer * (1.0f - DDA));
+		
+		//1. DirectX Alternative
+		float DirectXAlt = pow(abs(zBuffer - 1.0),DA);
+		
+		//2. OpenGL
+		float OpenGL = 2.0 * DDA * 1.0f / (1.0f + DDA - (2.0 * zBuffer - 1.0) * (1.0f - DDA));
+		
+		//3. OpenGL Reverse
+		float OpenGLRev = 2.0 * 1.0f * DDA / (DDA + 1.0f - (2.0 * zBuffer - 1.0) * (DDA - 1.0f));
+		
+		//4. Raw Buffer
+		float Raw = pow(abs(zBuffer),DA);
+		
+		//5. Old Depth Map from 1.9.5
+		float Old = 100 / (1 + 100 - (zBuffer/DDA) * (1 - 100));
+		
+		//6. Special Depth Map
+		float Special = pow(abs(exp(zBuffer)*Offset),(DA*25));
+		
+		if (Depth_Map == 0)
 		{
-		float cF = 1000000000;
-		float cN = 1;	
-		depthM = (exp(depthM * log(cF + cN)) - cN) / cF;
+		zBuffer = DirectX;
 		}
 		
-		//Amnesia: The Dark Descent
-		if (Alternate_Depth_Map == 1)
+		else if (Depth_Map == 1)
 		{
-		float cF = 1000;
-		float cN = 1;
-		depthM = cN/(cN-cF) / ( depthM - cF/(cF-cN));
-		}
-		
-		//Among The Sleep | Soma
-		if (Alternate_Depth_Map == 2)
-		{
-		float cF = 10;
-		float cN = 0.05;
-		depthM = cN/(cN-cF) / ( depthM - cF/(cF-cN));
-		}
-		
-		//The Vanishing of Ethan Carter Redux
-		if (Alternate_Depth_Map == 3)
-		{
-		float cF  = 0.0075;
-		float cN = 1;
-		depthM =  (cN * cF / (cF + depthM * (cN - cF))); 
-		}
-		
-		//Batman Arkham Knight | Batman Arkham Origins | Batman: Arkham City | BorderLands 2 | Hard Reset | Lords Of The Fallen | The Elder Scrolls V: Skyrim
-		if (Alternate_Depth_Map == 4)
-		{
-		float cF = 50;
-		float cN = 0;
-		depthM = (pow(abs(cN-depthM),cF));
-		}
-		
-		//Call of Duty: Advance Warfare | Call of Duty: Black Ops 2 | Call of Duty: Ghost | Call of Duty: Infinite Warfare 
-		if (Alternate_Depth_Map == 5)
-		{
-		float cF = 25;
-		float cN = 1;
-		depthM = (pow(abs(cN-depthM),cF));
-		}
-		
-		//Casltevania: Lord of Shadows - UE | Dead Rising 3
-		if (Alternate_Depth_Map == 6)
-		{
-		float cF = 25;
-		float cN = 0;
-		depthM = (pow(abs(cN-depthM),cF));
-		}
-		
-		//Doom 2016
-		if (Alternate_Depth_Map == 7)
-		{
-		float cF = 25;
-		float cN = 5;
-		depthM =  (exp(pow(depthM, depthM + cF / pow(depthM, cN) - 1 * (pow((depthM), cN)))) - 1) / (exp(depthM) - 1);
-		}
-		
-		//Deadly Premonition:The Directors's Cut
-		if (Alternate_Depth_Map == 8)
-		{
-		float cF = 30;
-		float cN = 0;
-		depthM = (pow(abs(cN-depthM),cF));
-		}
-		
-		//Dragon Ball Xenoverse | Quake 2 XP
-		if (Alternate_Depth_Map == 9)
-		{
-		float cF = 1;
-		float cN = 0.005;
-		depthM = cN/(cN-cF) / ( depthM - cF/(cF-cN));
-		}
-		
-		//Warhammer: End Times - Vermintide | Fallout 4 
-		if (Alternate_Depth_Map == 10)
-		{
-		float cF = 7.0;
-		float cN = 1.5;
-		depthM = (exp(pow(depthM, depthM + cF / pow(depthM, cN) - 1 * (pow((depthM), cN)))) - 1) / (exp(depthM) - 1);
-		}
-		
-		//Dying Light
-		if (Alternate_Depth_Map == 11)
-		{
-		float cF = 100;
-		float cN = 0.0075;
-		depthM = cF / (1 + cF - (depthM/cN) * (1 - cF));
-		}
-		
-		//GTA V
-		if (Alternate_Depth_Map == 12)
-		{
-		float cF  = 10000; 
-		float cN = 0.0075; 
-		depthM = cF / (1 + cF - (depthM/cN) * (1 - cF));
-		}
-		
-		//Magicka 2
-		if (Alternate_Depth_Map == 13)
-		{
-		float cF = 1.025;
-		float cN = 0.025;	
-		depthM = clamp(pow(abs((exp(depthM * log(cF + cN)) - cN) / cF),1000)/0.5,0,1.25);
-		}
-		
-		//Middle-earth: Shadow of Mordor
-		if (Alternate_Depth_Map == 14)
-		{
-		float cF = 650;
-		float cN = 651;
-		depthM = pow(abs((exp(depthM * log(cF + cN)) - cN) / cF),1000);
-		}
-		
-		//Naruto Shippuden UNS3 Full Blurst
-		if (Alternate_Depth_Map == 15)
-		{
-		float cF = 150;
-		float cN = 0.001;
-		depthM = (pow(abs(cN-depthM),cF));
-		}
-		
-		//Shadow warrior(2013)XP
-		if (Alternate_Depth_Map == 16)
-		{
-		float cF = 5;
-		float cN = 0.05;
-		depthM = cN/(cN-cF) / ( depthM - cF/(cF-cN));
-		}
-		
-		//Ryse: Son of Rome
-		if (Alternate_Depth_Map == 17)
-		{
-		float cF = 1.010;
-		float cN = 0;
-		depthM = pow(abs((exp(depthM * log(cF + cN)) - cN) / cF),1000);
-		}
-		
-		//Sleeping Dogs: DE | DreamFall Chapters
-		if (Alternate_Depth_Map == 18)
-		{
-		float cF  = 1;
-		float cN = 0.025;
-		depthM =  (cN * cF / (cF + depthM * (cN - cF))); 
-		}
-		
-		//Souls Games
-		if (Alternate_Depth_Map == 19)
-		{
-		float cF = 1.050;
-		float cN = 0.025;
-		depthM = pow(abs((exp(depthM * log(cF + cN)) - cN) / cF),1000);
-		}
-		
-		//Witcher 3
-		if (Alternate_Depth_Map == 20)
-		{
-		float cF = 7.5;
-		float cN = 1;	
-		depthM = (pow(abs(cN-depthM),cF));
+		zBuffer = DirectXAlt;
 		}
 
-		//Assassin Creed Unity | Just Cause 3
-		if (Alternate_Depth_Map == 21)
+		else if (Depth_Map == 2)
 		{
-		float cF = 150;
-		float cN = 151;
-		depthM = pow(abs((exp(depthM * log(cF + cN)) - cN) / cF),1000);
-		}	
-		
-		//Silent Hill: Homecoming
-		if (Alternate_Depth_Map == 22)
-		{
-		float cF = 25;
-		float cN = 25.869;
-		depthM = clamp(1 - (depthM * cF / (cF - cN) + cN) / depthM,0,255);
+		zBuffer = OpenGL;
 		}
 		
-		//Monstrum DX11
-		if (Alternate_Depth_Map == 23)
+		else if (Depth_Map == 3)
 		{
-		float cF = 1.075;	
-		float cN = 0;
-		depthM = pow(abs((exp(depthM * log(cF + cN)) - cN) / cF),1000);
+		zBuffer = OpenGLRev;
 		}
 		
-		//S.T.A.L.K.E.R:SoC
-		if (Alternate_Depth_Map == 24)
+		else if (Depth_Map == 4)
 		{
-		float cF = 1.001;
-		float cN = 0;
-		depthM = pow(abs((exp(depthM * log(cF + cN)) - cN) / cF),1000);
+		zBuffer = lerp(DirectXAlt,OpenGLRev,0.5);
 		}
 		
-		//Double Dragon Neon
-		if (Alternate_Depth_Map == 25)
+		else if (Depth_Map == 5)
 		{
-		float cF = 0.5;
-		float cN = 0.150;
-		depthM = log(depthM / cN) / log(cF / cN);
+		zBuffer = lerp(Raw,DirectX,0.5);
 		}
-		
-		//Deus Ex: Mankind Divided
-		if (Alternate_Depth_Map == 26)
-		{
-		float cF = 250;
-		float cN = 251;
-		depthM = pow(abs((exp(depthM * log(cF + cN)) - cN) / cF),1000);
-		}	
-		
-		//The Elder Scrolls V: Skyrim Special Edition
-		if (Alternate_Depth_Map == 27)
-		{
-		float cF = 20;
-		float cN = 0;
-		depthM =  (exp(pow(depthM, depthM + cF / pow(depthM, cN) - 1 * (pow((depthM), cN)))) - 1) / (exp(depthM) - 1);
-		}
-		
-		//Rage64|
-		if (Alternate_Depth_Map == 28)
-		{
-		float cF = 50;
-		float cN = -0.5;
-		depthM =  (exp(pow(depthM, depthM + cF / pow(depthM, cN) - 1 * (pow((depthM), cN)))) - 1) / (exp(depthM) - 1);
-		}
-		
-		//Through The Woods
-		if (Alternate_Depth_Map == 29)
-		{
-		float cF = 25;
-		float cN = 0;
-		depthM =  (exp(pow(depthM, depthM + cF / pow(depthM, cN) - 1 * (pow((depthM), cN)))) - 1) / (exp(depthM) - 1);
-		}
-		
-		//Amnesia: Machine for Pigs
-		if (Alternate_Depth_Map == 30)
-		{
-		float cF = 100;
-		float cN = 0;
-		depthM =  (exp(pow(depthM, depthM + cF / pow(depthM, cN) - 1 * (pow((depthM), cN)))) - 1) / (exp(depthM) - 1);
-		}
-		
-		//Requiem: Avenging Angel
-		if (Alternate_Depth_Map == 31)
-		{
-		float cF = 100;
-		float cN = 1.555;
-		depthM = 1 - log(pow(abs(cN-depthM),cF));
-		}
-		
-		//Turok: Dinosaur Hunter
-		if (Alternate_Depth_Map == 32)
-		{
-		float cF = 1000; //10+
-		float cN = 0;//1
-		depthM = (pow(abs(cN-depthM),cF));
-		}
-		
-		//Never Alone (Kisima Ingitchuna)
-		if (Alternate_Depth_Map == 33)
-		{
-		float cF = 112.5;
-		float cN = 1.995;
-		depthM = 1 - log(pow(abs(cN-depthM),cF));
-		}
-		
-		//Stacking
-		if (Alternate_Depth_Map == 34)
-		{
-		float cF = 15;
-		float cN = 0;
-		depthM =  (exp(pow(depthM, depthM + cF / pow(depthM, cN) - 1 * (pow((depthM), cN)))) - 1) / (exp(depthM) - 1);
-		}
-		
-		//Fez
-		if (Alternate_Depth_Map == 35)
-		{
-		float cF = 25.0;
-		float cN = 1.5125;
-		depthM = clamp(1 - log(pow(abs(cN-depthM),cF)),0,1);
-		}
-		
-		//Lara Croft & Temple of Osiris
-		if (Alternate_Depth_Map == 36)
-		{
-		float cF = 0.340;//1.010+	or 150
-		float cN = 12.250;//0 or	151
-		depthM = 1 - clamp(pow(abs((exp(depthM * log(cF + cN)) - cN) / cF),10),0,1);
-		}
-		
-		//RE7
-		if (Alternate_Depth_Map == 37)
-		{
-		float cF = 32.5;
-		float cN = 1;
-		depthM = (pow(abs(cN-depthM),cF));
-		}
-		
-	}
-	else
-	{
-	
-		//Custom One
-		if (Custom_Depth_Map == 1)
-		{
-		float cF = Near_Far.y; //10+
-		float cN = Near_Far.x;//1
-		depthM = (pow(abs(cN-depthM),cF));
-		}
-		
-		//Custom Two
-		if (Custom_Depth_Map == 2)
-		{
-		float cF  = Near_Far.y; //100+
-		float cN = Near_Far.x; //0.01-
-		depthM = cF / (1 + cF - (depthM/cN) * (1 - cF));
-		}
-		
-		//Custom Three
-		if (Custom_Depth_Map == 3)
-		{
-		float cF  = Near_Far.y;//0.025
-		float cN = Near_Far.x;//1.0
-		depthM =  (cN * cF / (cF + depthM * (cN - cF))); 
-		}
-		
-		//Custom Four
-		if (Custom_Depth_Map == 4)
-		{
-		float cF = Near_Far.y;//1000000000 or 1	
-		float cN = Near_Far.x;//0 or 13	
-		depthM = (exp(depthM * log(cF + cN)) - cN) / cF;
-		}
-		
-		//Custom Five
-		if (Custom_Depth_Map == 5)
-		{
-		float cF = Near_Far.y;//1
-		float cN = Near_Far.x;//0.025
-		depthM = cN/(cN-cF) / ( depthM - cF/(cF-cN));
-		}
-		
-		//Custom Six
-		if (Custom_Depth_Map == 6)
-		{
-		float cF = Near_Far.y;//1
-		float cN = Near_Far.x;//1.875
-		depthM = clamp(1 - (depthM * cF / (cF - cN) + cN) / depthM,0,255); //Infinite reversed-Z. Clamped, not so Infinate anymore.
-		}
-		
-		//Custom Seven
-		if (Custom_Depth_Map == 7)
-		{
-		float cF = Near_Far.y;//1.01	
-		float cN = Near_Far.x;//0	
-		depthM = clamp(pow(abs((exp(depthM * log(cF + cN)) - cN) / cF),1000)/0.5,0,1.25);
-		}
-		
-		//Custom Eight
-		if (Custom_Depth_Map == 8)
-		{
-		float cF = Near_Far.y;//1.010+	or 150
-		float cN = Near_Far.x;//0 or	151
-		depthM = pow(abs((exp(depthM * log(cF + cN)) - cN) / cF),1000);
-		}
-		
-		//Custom Nine
-		if (Custom_Depth_Map == 9)
-		{
-		float cF = Near_Far.y;
-		float cN = Near_Far.x;
-		depthM = log(depthM / cN) / log(cF / cN);
-		}
-		
-		//Custom Ten
-		if (Custom_Depth_Map == 10)
-		{
-		float cF = Near_Far.y;//5
-		float cN = Near_Far.x;//5
-		depthM =  (exp(pow(depthM, depthM + cF / pow(depthM, cN) - 1 * (pow((depthM), cN)))) - 1) / (exp(depthM) - 1);
-		}
-		
-		//Custom Eleven
-		if (Custom_Depth_Map == 11)
-		{
-		float cF = Near_Far.y;//1.010+	or 150
-		float cN = Near_Far.x;//0 or	151
-		depthM = 1 - log(pow(abs(cN-depthM),cF));
-		}
-		
-		//Custom Twelve
-		if (Custom_Depth_Map == 12)
-		{
-		float cF = Near_Far.y;//
-		float cN = Near_Far.x;//
-		depthM = 1 - clamp(pow(abs((exp(depthM * log(cF + cN)) - cN) / cF),10),0,1);
-		}
-		
-	}
-		
-	float4 D;
-	float4 depthMFar;
-	float4 depthMFarT;
-	
-	float Adj;
-	float Per;
-		
-		//Custom Weapon Depth Profile One	
-		if (Weapon_Depth_Map == 1)
-		{
-		Adj = Weapon_Adjust.x;//0
-		Per = Weapon_Percentage;//5
-		float cWF = Weapon_Adjust.y;//0.250
-		float cWN = Weapon_Adjust.z;//1.001
-		WDM = 1 - (log(cWF * cWN/WDM - cWF));
-		}
-		
-		//Custom Weapon Depth Profile Two
-		if (Weapon_Depth_Map == 2)
-		{
-		Adj = Weapon_Adjust.x;//0
-		Per = Weapon_Percentage;//5
-		float cWF = Weapon_Adjust.y;//-1000
-		float cWN = Weapon_Adjust.z;//0.985
-		WDM = (log(cWF / cWN*WDM - cWF));
-		}
-		
-		//Custom Weapon Depth Profile Three	
-		if (Weapon_Depth_Map == 3)
-		{
-		Adj = Weapon_Adjust.x;//0
-		Per = Weapon_Percentage;//5
-		float cWF = Weapon_Adjust.y;//0.250
-		float cWN = Weapon_Adjust.z;//1.001
-		WDM = (log(cWF * cWN/WDM - cWF));
-		}
-		
-		//Custom Weapon Depth Profile Four	
-		if (Weapon_Depth_Map == 4)
-		{
-		Adj = Weapon_Adjust.x;//0
-		Per = Weapon_Percentage;//5
-		float cWF = Weapon_Adjust.y;//-0.05
-		float cWN = Weapon_Adjust.z;//0.500
-		WDM = 1 - (log(cWN * WDM)/ 1 - log(cWF+WDM));
-		}
-		
-		//Weapon Depth Map One
-		if (Weapon_Depth_Map == 5)
-		{
-		Adj = 0;
-		Per = 5;
-		float cWF = -1000;
-		float cWN = 0.9856;
-		WDM = (log(cWF / cWN*WDM - cWF));
-		}
-		
-		//Weapon Depth Map Two
-		if (Weapon_Depth_Map == 6)
-		{
-		Adj = 0.001;
-		Per = 0.440;
-		float cWF = 0.255;
-		float cWN = 1.001;
-		WDM = 1 - (log(cWF * cWN/WDM - cWF));
-		}
-		
-		//Weapon Depth Map Three
-		if (Weapon_Depth_Map == 7)
-		{
-		Adj = 0.000;
-		Per = 0.180;
-		float cWF = 0.235;
-		float cWN = 1.001;
-		WDM = 1 - (log(cWF * cWN/WDM - cWF));
-		}
-		
-		//Weapon Depth Map Four
-		if (Weapon_Depth_Map == 8)
-		{
-		Adj = 0.00000001;
-		Per = 0.675;
-		float cWF = 10;
-		float cWN = 0.0085;
-		WDM = (log(cWF / cWN*WDM - cWF));
-		}
-		
-		//Weapon Depth Map Five
-		if (Weapon_Depth_Map == 9)
-		{
-		Adj = 0.001;
-		Per = 0.525;
-		float cWF = 0.080;
-		float cWN = 1.001;
-		WDM = 1 - (log(cWF * cWN/WDM - cWF));
-		}
-		
-		//Weapon Depth Map Six
-		if (Weapon_Depth_Map == 10)
-		{
-		Adj = 0;
-		Per = 0.500;
-		float cWF = -1.9;
-		float cWN = 1.001;
-		WDM = 1 - (log(cWF * cWN/WDM - cWF));
-		}
-		
-		//Weapon Depth Map Seven
-		if (Weapon_Depth_Map == 11)
-		{
-		Adj = 0.125;
-		Per = 1;
-		float cWF = -1.0;
-		float cWN = -0.1;
-		WDM = (log(cWF * cWN/WDM - cWF));
-		}
-		
-		//Weapon Depth Map Eight
-		if (Weapon_Depth_Map == 12)
-		{
-		Adj = 0.037;
-		Per = 5.0;
-		float cWF = 0.75;
-		float cWN = -1.0;
-		WDM = 1 - (log(cWF * cWN/WDM - cWF));
-		}
-		
-		//Weapon Depth Map Nine
-		if (Weapon_Depth_Map == 13)
-		{
-		Adj = 0.000001;
-		Per = 5.0;
-		float cWF = 0.0045;
-		float cWN = 100;
-		WDM = 1 - (log(cWF * cWN/WDM - cWF));
-		}
-		
-		//Weapon Depth Map Ten
-		if (Weapon_Depth_Map == 14)
-		{
-		Adj = 0.0;
-		Per = 2;
-		float cWF = 37.5;
-		float cWN = 0.523;
-		WDM = (log(cWF / cWN*WDM - cWF));
-		}
-		
-		//Weapon Depth Map Eleven
-		if (Weapon_Depth_Map == 15)
-		{
-		Adj = 0.0003;
-		Per = 0.625;
-		float cWF = 0.625;
-		float cWN = 1.001;
-		WDM = 1 - (log(cWF * cWN/WDM - cWF));
-		}
-		
-		//Weapon Depth Map Twelve
-		if (Weapon_Depth_Map == 16)
-		{
-		Adj = 0.050;
-		Per = 1.0;
-		float cWF = 1.5;
-		float cWN = 1.7;
-		WDM = 1 - (log(cWF * cWN/WDM - cWF));
-		}
-		
-		//Weapon Depth Map Thirteen
-		if (Weapon_Depth_Map == 17)
-		{
-		Adj = 0;
-		Per = 0.666;
-		float cWF = -0.06;
-		float cWN = 0.666;
-		WDM = 1 - (log(cWN * WDM)/ 1 - log(cWF+WDM));
-		}
-		
-		//Weapon Depth Map Fourteen
-		if (Weapon_Depth_Map == 18)
-		{
-		Adj = 0;
-		Per = 0.500;
-		float cWF = -0.0865;
-		float cWN = -0.2;
-		WDM = 1 - (log(cWN * WDM)/ 1 - log(cWF+WDM));
-		}
-		
-		//Weapon Depth Map Fifteen
-		if (Weapon_Depth_Map == 19)
-		{
-		Adj = 0.000001;
-		Per = 5;
-		float cWF = 1.6;
-		float cWN = 1.001;
-		WDM = 1 - (log(cWF * cWN/WDM - cWF));
-		}
-		
-		//Weapon Depth Profile Sixteen
-		if (Weapon_Depth_Map == 20)
-		{
-		Adj = 0.00000001;
-		Per = 5;
-		float cWF = -0.4925;
-		float cWN = 0.200;
-		WDM = 1 - (log(cWN * WDM)/ 1 - log(cWF+WDM));
-		}
-		
-		//Weapon Depth Profile Seventeen
-		if (Weapon_Depth_Map == 21)
-		{
-		Adj = 0.040;
-		Per = 5;
-		float cWF = 0.051;
-		float cWN = 1.250;
-		WDM = 1 - (log(cWF * cWN/WDM - cWF));
-		}
-		
-		//Weapon Depth Profile Eighteen
-		if (Weapon_Depth_Map == 22)
-		{
-		Adj = 0;
-		Per = 0.580;
-		float cWF = -0.005;
-		float cWN = 1.5;
-		WDM = 1 - (log(cWN * WDM)/ 1 - log(cWF+WDM));
-		}
-		
-		//Weapon Depth Profile Nineteen
-		if (Weapon_Depth_Map == 23)
-		{
-		Adj = 0.0001;
-		Per = 5;
-		float cWF = 0.025;
-		float cWN = 1.001;
-		WDM = 1 - (log(cWF * cWN/WDM - cWF));
-		}
-		
-		//Weapon Depth Profile Twenty
-		if (Weapon_Depth_Map == 24)
-		{
-		Adj = 0.0001;
-		Per = 5;
-		float cWF = 0.035;
-		float cWN = 1.001;
-		WDM = 1 - (log(cWF * cWN/WDM - cWF));
-		}
-		
-		//Weapon Depth Profile Twenty One
-		if (Weapon_Depth_Map == 25)
-		{
-		Adj = 0.000010;
-		Per = 5;
-		float cWF = -0.4;
-		float cWN = 0.375;
-		WDM = 1 - (log(cWN * WDM)/ 1 - log(cWF+WDM));
-		}
-		
-		//Weapon Depth Profile Twenty Two
-		if (Weapon_Depth_Map == 26)
-		{
-		Adj = 0.102000;
-		Per = 3.650000;
-		float cWF = 0.001300;
-		float cWN = 50.000000;
-		WDM = 1 - (log(cWF * cWN/WDM - cWF));
-		}
-		
-		//Weapon Depth Map Twenty Three
-		if (Weapon_Depth_Map == 27)
-		{
-		Adj = 0.00000001;
-		Per = 0.6;//0.675
-		float cWF = 4.925;//10
-		float cWN = 0.0075;//0.0085
-		WDM = (log(cWF / cWN*WDM - cWF));
-		}
-		
-	float NearDepth;
-	
-	if (Weapon_Depth_Map == 27 || Weapon_Depth_Map == 23 || Weapon_Depth_Map == 20 || Weapon_Depth_Map == 19 || Weapon_Depth_Map == 13 || Weapon_Depth_Map == 8)
-	{
-	NearDepth = step(depthM.r,Adj/100000);
-	}
-	else
-	{
-	NearDepth = step(depthM.r,Adj);
-	}
-	
-	if(Depth_Map_Enhancement == 0)
-    {
-		if (Weapon_Depth_Map <= 0)
-		{
-		D = depthM;
-		}
-		else
-		{
-		D = lerp(depthM,WDM%Per,NearDepth);
-		}
-    }
-    else
-    {
-		if (Weapon_Depth_Map <= 0)
-		{
-		float A = Adjust;
-		float cDF = 1.025;
-		float cDN = 0;
-		depthMFar = pow(abs((exp(depthM * log(cDF + cDN)) - cDN) / cDF),1000);	
-		D = lerp(depthMFar,depthM,A);
-		}
-		else
-		{
-		float A = Adjust;
-		float cDF = 1.025;
-		float cDN = 0;
-		depthMFar = pow(abs((exp(depthM * log(cDF + cDN)) - cDN) / cDF),1000);	
-		D = lerp(lerp(depthMFar,depthM,A),WDM%Per,NearDepth);
-		}
-    }
-    
-	color.rgb = D.rrr;
-	
-	return color;	
 
+		else if (Depth_Map == 6)
+		{
+		zBuffer = Raw;
+		}
+		
+		else if (Depth_Map == 7)
+		{
+		zBuffer = lerp(DirectX,OpenGL,0.5);
+		}
+		
+		else if (Depth_Map == 8)
+		{
+		zBuffer = lerp(Raw,OpenGL,0.5);
+		}		
+		
+		else if (Depth_Map == 9)
+		{
+		zBuffer = Old;
+		}
+		
+		else if (Depth_Map == 10)
+		{
+		zBuffer = Special;
+		}
+	
+	return float4(zBuffer.rrr,1);	
 }
+
+void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 Color : SV_Target0)
+{
+		float N,R,G,B,A = 1;
+		
+		float DM = Depth(texcoord).r;
+		
+		R = DM;
+		G = DM;
+		B = DM;
+		
+	// Dither for DepthBuffer adapted from gedosato ramdom dither https://github.com/PeterTh/gedosato/blob/master/pack/assets/dx9/deband.fx
+	// I noticed in some games the depth buffer started to have banding so this is used to remove that.
+			
+	float dither_bit  = 7.0;
+	float noise = frac(sin(dot(texcoord, float2(12.9898, 78.233))) * 43758.5453 * 1);
+	float dither_shift = (1.0 / (pow(2,dither_bit) - 1.0));
+	float dither_shift_half = (dither_shift * 0.5);
+	dither_shift = dither_shift * noise - dither_shift_half;
+	R += -dither_shift;
+	R += dither_shift;
+	R += -dither_shift;
+	
+	// Dither End	
+	
+	Color = float4(lerp(R,1,0.05),lerp(R,1,0.05),lerp(R,1,0.05),A);
+}
+
 
 uniform float2 WobbleSpeedZero < source = "pingpong"; min = 0; max = 1; step = 1; >;
 uniform float2 WobbleSpeedOne < source = "pingpong"; min = 0; max = 1; step = 2.5; >;
@@ -933,14 +289,12 @@ uniform float2 WobbleSpeedEight < source = "pingpong"; min = 0; max = 1; step = 
 uniform float2 WobbleSpeedNine< source = "pingpong"; min = 0; max = 1; step = 25; >;
 uniform float2 WobbleSpeedTen < source = "pingpong"; min = 0; max = 1; step = 30; >;
 ////////////////////////////////////////////////Left/Right Eye////////////////////////////////////////////////////////
-void PS_renderLR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 color : SV_Target)
+float4 WobbleLRC(in float2 texcoord : TEXCOORD0)
 {	
-	const float samples[4] = {0.50, 0.66, 1};
+	float samples[5] = {0.50, 0.58, 0.66, 0.83, 1};
 	float DepthL = 1.0, DepthR = 1.0;
-	float P = Perspective * pix.x;
-	float D = Depth * pix.x;
-	float2 uv = 0;
-	float w;
+	float P = Perspective * pix.x, MS = Divergence * pix.x, S, w;
+	float4 color;
 	
 	if(Wobble_Speed == 0)
 		{
@@ -992,12 +346,25 @@ void PS_renderLR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD
 		}
 		
 	[loop]
-	for (int j = 0; j < 3; ++j) 
+	for (int j = 0; j < 5; ++j) 
 	{	
-			uv.x = samples[j] * D;
-			DepthL =  min(DepthL,tex2D(SamplerCDM,float2((texcoord.x + P)+uv.x, texcoord.y)).r);
-			DepthR =  min(DepthR,tex2D(SamplerCDM,float2((texcoord.x - P)-uv.x, texcoord.y)).r);
+		S = samples[j] * MS;
+		
+		float L = tex2Dlod(SamplerCDM,float4((texcoord.x+P)+S, texcoord.y,0,0)).r;
+		float R = tex2Dlod(SamplerCDM,float4((texcoord.x-P)-S, texcoord.y,0,0)).r;
+		
+		DepthL =  min(DepthL,L);
+		DepthR =  min(DepthR,R);
 	}
+	
+	float ParallaxL = max(-0.1,MS * (1-ZPD/DepthL));
+	float ParallaxR = max(-0.1,MS * (1-ZPD/DepthR));
+	
+		ParallaxL = lerp(ParallaxL,DepthL * MS,0.5);
+		ParallaxR = lerp(ParallaxR,DepthR * MS,0.5);
+		
+		float ReprojectionLeft =  ParallaxL;
+		float ReprojectionRight = ParallaxR;
 
 if(!Depth_Map_View)
 	{
@@ -1007,30 +374,30 @@ if(!Depth_Map_View)
 				{
 				if(Custom_Sidebars == 0)
 					{
-					color = tex2D(BackBufferMIRROR,float2((texcoord.x + P) + DepthL * D,texcoord.y));
+					color = tex2D(BackBufferMIRROR,float2((texcoord.x + P) + ReprojectionLeft,texcoord.y));
 					}
 					else if(Custom_Sidebars == 1)
 					{
-					color = tex2D(BackBufferBORDER,float2((texcoord.x + P) + DepthL * D ,texcoord.y));
+					color = tex2D(BackBufferBORDER,float2((texcoord.x + P) + ReprojectionLeft,texcoord.y));
 					}
 					else
 					{
-					color = tex2D(BackBufferCLAMP,float2((texcoord.x + P) + DepthL * D,texcoord.y));
+					color = tex2D(BackBufferCLAMP,float2((texcoord.x + P) + ReprojectionLeft,texcoord.y));
 					}	
 				}
 				else if(w > 0.75)
 				{
 				if(Custom_Sidebars == 0)
 					{
-					color = tex2D(BackBufferMIRROR,float2((texcoord.x - P) - DepthR * D,texcoord.y));
+					color = tex2D(BackBufferMIRROR,float2((texcoord.x - P) - ReprojectionRight,texcoord.y));
 					}
 					else if(Custom_Sidebars == 1)
 					{
-					color = tex2D(BackBufferBORDER,float2((texcoord.x - P) - DepthR * D,texcoord.y));
+					color = tex2D(BackBufferBORDER,float2((texcoord.x - P) - ReprojectionRight,texcoord.y));
 					}
 					else
 					{
-					color = tex2D(BackBufferCLAMP,float2((texcoord.x - P) - DepthR * D,texcoord.y));
+					color = tex2D(BackBufferCLAMP,float2((texcoord.x - P) - ReprojectionRight,texcoord.y));
 					}	
 				}
 				else
@@ -1044,30 +411,30 @@ if(!Depth_Map_View)
 				{
 				if(Custom_Sidebars == 0)
 					{
-					color = tex2D(BackBufferMIRROR,float2((texcoord.x + P) + DepthL * D,texcoord.y));
+					color = tex2D(BackBufferMIRROR,float2((texcoord.x + P) + ReprojectionLeft,texcoord.y));
 					}
 					else if(Custom_Sidebars == 1)
 					{
-					color = tex2D(BackBufferBORDER,float2((texcoord.x + P) + DepthL * D,texcoord.y));
+					color = tex2D(BackBufferBORDER,float2((texcoord.x + P) + ReprojectionLeft,texcoord.y));
 					}
 					else
 					{
-					color = tex2D(BackBufferCLAMP,float2((texcoord.x + P) + DepthL * D,texcoord.y));
+					color = tex2D(BackBufferCLAMP,float2((texcoord.x + P) + ReprojectionLeft,texcoord.y));
 					}	
 				}
 				else if (texcoord.x > w)
 				{
 				if(Custom_Sidebars == 0)
 					{
-					color = tex2D(BackBufferMIRROR,float2((texcoord.x - P) - DepthR * D,texcoord.y));
+					color = tex2D(BackBufferMIRROR,float2((texcoord.x - P) - ReprojectionRight,texcoord.y));
 					}
 					else if(Custom_Sidebars == 1)
 					{
-					color = tex2D(BackBufferBORDER,float2((texcoord.x - P) - DepthR * D,texcoord.y));
+					color = tex2D(BackBufferBORDER,float2((texcoord.x - P) - ReprojectionRight,texcoord.y));
 					}
 					else
 					{
-					color = tex2D(BackBufferCLAMP,float2((texcoord.x - P) - DepthR * D,texcoord.y));
+					color = tex2D(BackBufferCLAMP,float2((texcoord.x - P) - ReprojectionRight,texcoord.y));
 					}	
 				}
 				else
@@ -1081,30 +448,30 @@ if(!Depth_Map_View)
 				{
 				if(Custom_Sidebars == 0)
 					{
-					color = tex2D(BackBufferMIRROR,float2((texcoord.x + P) + DepthL * D,texcoord.y));
+					color = tex2D(BackBufferMIRROR,float2((texcoord.x + P) + ReprojectionLeft,texcoord.y));
 					}
 					else if(Custom_Sidebars == 1)
 					{
-					color = tex2D(BackBufferBORDER,float2((texcoord.x + P) + DepthL * D,texcoord.y));
+					color = tex2D(BackBufferBORDER,float2((texcoord.x + P) + ReprojectionLeft,texcoord.y));
 					}
 					else
 					{
-					color = tex2D(BackBufferCLAMP,float2((texcoord.x + P) + DepthL * D,texcoord.y));
+					color = tex2D(BackBufferCLAMP,float2((texcoord.x + P) + ReprojectionLeft,texcoord.y));
 					}	
 				}
 				else if (w > 0.50)
 				{
 				if(Custom_Sidebars == 0)
 					{
-					color = tex2D(BackBufferMIRROR,float2((texcoord.x - P) - DepthR * D,texcoord.y));
+					color = tex2D(BackBufferMIRROR,float2((texcoord.x - P) - ReprojectionRight,texcoord.y));
 					}
 					else if(Custom_Sidebars == 1)
 					{
-					color = tex2D(BackBufferBORDER,float2((texcoord.x - P) - DepthR * D,texcoord.y));
+					color = tex2D(BackBufferBORDER,float2((texcoord.x - P) - ReprojectionRight,texcoord.y));
 					}
 					else
 					{
-					color = tex2D(BackBufferCLAMP,float2((texcoord.x - P) - DepthR * D,texcoord.y));
+					color = tex2D(BackBufferCLAMP,float2((texcoord.x - P) - ReprojectionRight,texcoord.y));
 					}	
 				}
 				else
@@ -1116,15 +483,15 @@ if(!Depth_Map_View)
 			{
 			if(Custom_Sidebars == 0)
 					{
-					color = lerp(tex2D(BackBufferMIRROR,float2((texcoord.x - P) - DepthR * D,texcoord.y)),tex2D(BackBufferMIRROR,float2((texcoord.x + P) + DepthL * D,texcoord.y)), w);
+					color = lerp(tex2D(BackBufferMIRROR,float2((texcoord.x - P) - ReprojectionRight,texcoord.y)),tex2D(BackBufferMIRROR,float2((texcoord.x + P) + ReprojectionLeft,texcoord.y)), w);
 					}
 					else if(Custom_Sidebars == 1)
 					{
-					color = lerp(tex2D(BackBufferBORDER,float2((texcoord.x - P) - DepthR * D,texcoord.y)),tex2D(BackBufferBORDER,float2((texcoord.x + P) + DepthL * D,texcoord.y)),w);
+					color = lerp(tex2D(BackBufferBORDER,float2((texcoord.x - P) - ReprojectionRight,texcoord.y)),tex2D(BackBufferBORDER,float2((texcoord.x + P) + ReprojectionLeft,texcoord.y)),w);
 					}
 					else
 					{
-					color = lerp(tex2D(BackBufferCLAMP,float2((texcoord.x - P) - DepthR * D,texcoord.y)),tex2D(BackBufferCLAMP,float2((texcoord.x + P) + DepthL * D,texcoord.y)),w);
+					color = lerp(tex2D(BackBufferCLAMP,float2((texcoord.x - P) - ReprojectionRight,texcoord.y)),tex2D(BackBufferCLAMP,float2((texcoord.x + P) + ReprojectionLeft,texcoord.y)),w);
 					}
 			}
 			
@@ -1133,9 +500,146 @@ if(!Depth_Map_View)
 	{
 		color = tex2D(SamplerCDM,texcoord.xy);
 	}
-
+	return color;
 }
 
+////////////////////////////////////////////////////////Logo/////////////////////////////////////////////////////////////////////////
+uniform float timer < source = "timer"; >;
+float4 Out(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Target
+{
+	//#define pix float2(BUFFER_RCP_WIDTH, BUFFER_RCP_HEIGHT)
+	float HEIGHT = BUFFER_HEIGHT/2,WIDTH = BUFFER_WIDTH/2;	
+	float2 LCD,LCE,LCP,LCT,LCH,LCThree,LCDD,LCDot,LCI,LCN,LCF,LCO;
+	float size = 9.5,set = BUFFER_HEIGHT/2,offset = (set/size),Shift = 50;
+	float4 Color = WobbleLRC(texcoord),Done,Website,D,E,P,T,H,Three,DD,Dot,I,N,F,O;
+
+	if(timer <= 10000)
+	{
+	//DEPTH
+	//D
+	float offsetD = (size*offset)/(set-((size/size)+(size/size)));
+	LCD = float2(-90-Shift,0); 
+	float4 OneD = all(abs(LCD+float2(WIDTH,HEIGHT)-position.xy) < float2(size,size*2));
+	float4 TwoD = all(abs(LCD+float2(WIDTH*offsetD,HEIGHT)-position.xy) < float2(size,size*1.5));
+	D = OneD-TwoD;
+	//
+	
+	//E
+	float offs = (size*offset)/(set-(size/size)/2);
+	LCE = float2(-62-Shift,0); 
+	float4 OneE = all(abs(LCE+float2(WIDTH,HEIGHT)-position.xy) < float2(size,size*2));
+	float4 TwoE = all(abs(LCE+float2(WIDTH*offs,HEIGHT)-position.xy) < float2(size*0.875,size*1.5));
+	float4 ThreeE = all(abs(LCE+float2(WIDTH,HEIGHT)-position.xy) < float2(size,size/3));
+	E = (OneE-TwoE)+ThreeE;
+	//
+	
+	//P
+	float offsetP = (size*offset)/(set-((size/size)*5));
+	float offsP = (size*offset)/(set-(size/size)*-11);
+	float offseP = (size*offset)/(set-((size/size)*4.25));
+	LCP = float2(-37-Shift,0);
+	float4 OneP = all(abs(LCP+float2(WIDTH,HEIGHT/offsetP)-position.xy) < float2(size,size*1.5));
+	float4 TwoP = all(abs(LCP+float2((WIDTH)*offsetD,HEIGHT/offsetP)-position.xy) < float2(size,size));
+	float4 ThreeP = all(abs(LCP+float2(WIDTH/offseP,HEIGHT/offsP)-position.xy) < float2(size*0.200,size));
+	P = (OneP-TwoP)+ThreeP;
+	//
+
+	//T
+	float offsetT = (size*offset)/(set-((size/size)*16.75));
+	float offsetTT = (size*offset)/(set-((size/size)*1.250));
+	LCT = float2(-10-Shift,0);
+	float4 OneT = all(abs(LCT+float2(WIDTH,HEIGHT*offsetTT)-position.xy) < float2(size/4,size*1.875));
+	float4 TwoT = all(abs(LCT+float2(WIDTH,HEIGHT/offsetT)-position.xy) < float2(size,size/4));
+	T = OneT+TwoT;
+	//
+	
+	//H
+	LCH = float2(13-Shift,0);
+	float4 OneH = all(abs(LCH+float2(WIDTH,HEIGHT)-position.xy) < float2(size,size*2));
+	float4 TwoH = all(abs(LCH+float2(WIDTH,HEIGHT)-position.xy) < float2(size/2,size*2));
+	float4 ThreeH = all(abs(LCH+float2(WIDTH,HEIGHT)-position.xy) < float2(size,size/3));
+	H = (OneH-TwoH)+ThreeH;
+	//
+	
+	//Three
+	float offsThree = (size*offset)/(set-(size/size)*1.250);
+	LCThree = float2(38-Shift,0);
+	float4 OneThree = all(abs(LCThree+float2(WIDTH,HEIGHT)-position.xy) < float2(size,size*2));
+	float4 TwoThree = all(abs(LCThree+float2(WIDTH*offsThree,HEIGHT)-position.xy) < float2(size*1.2,size*1.5));
+	float4 ThreeThree = all(abs(LCThree+float2(WIDTH,HEIGHT)-position.xy) < float2(size,size/3));
+	Three = (OneThree-TwoThree)+ThreeThree;
+	//
+	
+	//DD
+	float offsetDD = (size*offset)/(set-((size/size)+(size/size)));
+	LCDD = float2(65-Shift,0);
+	float4 OneDD = all(abs(LCDD+float2(WIDTH,HEIGHT)-position.xy) < float2(size,size*2));
+	float4 TwoDD = all(abs(LCDD+float2(WIDTH*offsetDD,HEIGHT)-position.xy) < float2(size,size*1.5));
+	DD = OneDD-TwoDD;
+	//
+	
+	//Dot
+	float offsetDot = (size*offset)/(set-((size/size)*16));
+	LCDot = float2(85-Shift,0);	
+	float4 OneDot = all(abs(LCDot+float2(WIDTH,HEIGHT*offsetDot)-position.xy) < float2(size/3,size/3.3));
+	Dot = OneDot;
+	//
+	
+	//INFO
+	//I
+	float offsetI = (size*offset)/(set-((size/size)*18));
+	float offsetII = (size*offset)/(set-((size/size)*8));
+	float offsetIII = (size*offset)/(set-((size/size)*5));
+	LCI = float2(101-Shift,0);	
+	float4 OneI = all(abs(LCI+float2(WIDTH,HEIGHT*offsetI)-position.xy) < float2(size,size/4));
+	float4 TwoI = all(abs(LCI+float2(WIDTH,HEIGHT/offsetII)-position.xy) < float2(size,size/4));
+	float4 ThreeI = all(abs(LCI+float2(WIDTH,HEIGHT*offsetIII)-position.xy) < float2(size/4,size*1.5));
+	I = OneI+TwoI+ThreeI;
+	//
+	
+	//N
+	float offsetN = (size*offset)/(set-((size/size)*7));
+	float offsetNN = (size*offset)/(set-((size/size)*5));
+	LCN = float2(126-Shift,0);	
+	float4 OneN = all(abs(LCN+float2(WIDTH,HEIGHT/offsetN)-position.xy) < float2(size,size/4));
+	float4 TwoN = all(abs(LCN+float2(WIDTH*offsetNN,HEIGHT*offsetNN)-position.xy) < float2(size/5,size*1.5));
+	float4 ThreeN = all(abs(LCN+float2(WIDTH/offsetNN,HEIGHT*offsetNN)-position.xy) < float2(size/5,size*1.5));
+	N = OneN+TwoN+ThreeN;
+	//
+	
+	//F
+	float offsetF = (size*offset)/(set-((size/size*7)));
+	float offsetFF = (size*offset)/(set-((size/size)*5));
+	float offsetFFF = (size*offset)/(set-((size/size)*-7.5));
+	LCF = float2(153-Shift,0);	
+	float4 OneF = all(abs(LCF+float2(WIDTH,HEIGHT/offsetF)-position.xy) < float2(size,size/4));
+	float4 TwoF = all(abs(LCF+float2(WIDTH/offsetFF,HEIGHT*offsetFF)-position.xy) < float2(size/5,size*1.5));
+	float4 ThreeF = all(abs(LCF+float2(WIDTH,HEIGHT/offsetFFF)-position.xy) < float2(size,size/4));
+	F = OneF+TwoF+ThreeF;
+	//
+	
+	//O
+	float offsetO = (size*offset)/(set-((size/size*-5)));
+	LCO = float2(176-Shift,0);	
+	float4 OneO = all(abs(LCO+float2(WIDTH,HEIGHT/offsetO)-position.xy) < float2(size,size*1.5));
+	float4 TwoO = all(abs(LCO+float2(WIDTH,HEIGHT/offsetO)-position.xy) < float2(size/1.5,size));
+	O = OneO-TwoO;
+	//
+	}
+	
+	Website = D+E+P+T+H+Three+DD+Dot+I+N+F+O ? float4(1.0,1.0,1.0,1) : Color;
+	
+	if(timer >= 10000)
+	{
+	Done = Color;
+	}
+	else
+	{
+	Done = Website;
+	}
+
+	return Done;
+}
 
 
 ///////////////////////////////////////////////////////////ReShade.fxh/////////////////////////////////////////////////////////////
@@ -1161,7 +665,7 @@ technique WobbleDepth3D
 			pass SinglePassStereo
 		{
 			VertexShader = PostProcessVS;
-			PixelShader = PS_renderLR;
+			PixelShader = Out;
 		}	
 
 }

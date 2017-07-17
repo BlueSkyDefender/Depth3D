@@ -30,7 +30,7 @@
 #define Depth_Map_Division 1.0
 
 // Determines The Max Depth amount.
-#define Depth_Max 35
+#define Depth_Max 50
 
 uniform int Depth_Map <
 	ui_type = "combo";
@@ -77,11 +77,13 @@ uniform float Weapon_Depth <
 > = 0;
 
 uniform int Dis_Occlusion <
-	ui_type = "combo";
-	ui_items = "Off\0Normal Mask\0Radial Mask\0";
-	ui_label = "Disocclusion Mask";
-	ui_tooltip = "Automatic occlusion masking options.";
-> = 0;
+	ui_type = "drag";
+	ui_min = 0; ui_max = 5;
+	ui_label = "Disocclusion Power";
+	ui_tooltip = "Occlusion masking power adjustment.\n"
+				"Disocclusion starts at One.\n."
+				"Default is 1";
+> = 1;
 
 uniform float Perspective <
 	ui_type = "drag";
@@ -164,14 +166,6 @@ uniform bool AO <
 	ui_tooltip = "3D ambient occlusion mode switch.\n" 
 				 "Default is On.";
 > = 1;
-
-uniform float Power <
-	ui_type = "drag";
-	ui_min = 0.25; ui_max = 0.75;
-	ui_label = "AO Power";
-	ui_tooltip = "Ambient occlusion power on the depth map.\n" 
-				 "Default is 0.500";
-> = 0.500;
 
 uniform float Falloff <
 	ui_type = "drag";
@@ -777,7 +771,7 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 	// Dither for DepthBuffer adapted from gedosato ramdom dither https://github.com/PeterTh/gedosato/blob/master/pack/assets/dx9/deband.fx
 	// I noticed in some games the depth buffer started to have banding so this is used to remove that.
 			
-	float dither_bit  = 6.0;
+	float dither_bit  = 7.0;
 	float noise = frac(sin(dot(texcoord, float2(12.9898, 78.233))) * 43758.5453 * 1);
 	float dither_shift = (1.0 / (pow(2,dither_bit) - 1.0));
 	float dither_shift_half = (dither_shift * 0.5);
@@ -902,24 +896,46 @@ void  Disocclusion(in float4 position : SV_Position, in float2 texcoord : TEXCOO
 {
 //bilateral blur\/
 float4 Done, sum, DM;
-float P = Power/10, B, DP =  Divergence;
+float B, DP =  Divergence,Disocclusion_Power;
 
 float blursize = 2.0*pix.x;
 
-sum += tex2D(SamplerAO, float2(texcoord.x - 4.0*blursize, texcoord.y)) * 0.05;
-sum += tex2D(SamplerAO, float2(texcoord.x, texcoord.y - 3.0*blursize)) * 0.09;
-sum += tex2D(SamplerAO, float2(texcoord.x - 2.0*blursize, texcoord.y)) * 0.12;
-sum += tex2D(SamplerAO, float2(texcoord.x, texcoord.y - blursize)) * 0.15;
-sum += tex2D(SamplerAO, float2(texcoord.x + blursize, texcoord.y)) * 0.15;
-sum += tex2D(SamplerAO, float2(texcoord.x, texcoord.y + 2.0*blursize)) * 0.12;
-sum += tex2D(SamplerAO, float2(texcoord.x + 3.0*blursize, texcoord.y)) * 0.09;
-sum += tex2D(SamplerAO, float2(texcoord.x, texcoord.y + 4.0*blursize)) * 0.05;
-
+if(AO == 1)
+	{
+		sum += tex2D(SamplerAO, float2(texcoord.x - 4.0*blursize, texcoord.y)) * 0.05;
+		sum += tex2D(SamplerAO, float2(texcoord.x, texcoord.y - 3.0*blursize)) * 0.09;
+		sum += tex2D(SamplerAO, float2(texcoord.x - 2.0*blursize, texcoord.y)) * 0.12;
+		sum += tex2D(SamplerAO, float2(texcoord.x, texcoord.y - blursize)) * 0.15;
+		sum += tex2D(SamplerAO, float2(texcoord.x + blursize, texcoord.y)) * 0.15;
+		sum += tex2D(SamplerAO, float2(texcoord.x, texcoord.y + 2.0*blursize)) * 0.12;
+		sum += tex2D(SamplerAO, float2(texcoord.x + 3.0*blursize, texcoord.y)) * 0.09;
+		sum += tex2D(SamplerAO, float2(texcoord.x, texcoord.y + 4.0*blursize)) * 0.05;
+	}
+	
 Done = 1-sum;
 //bilateral blur/\
 
-float Disocclusion_Power = DP/350;     
-                                                                                                                                                                                                                                                                                                                                                                                                                   	
+	if(Dis_Occlusion == 1)     
+		{
+		Disocclusion_Power = DP/350;
+		}
+else if(Dis_Occlusion == 2)     
+		{
+		Disocclusion_Power = DP/306.25;
+		}
+else if(Dis_Occlusion == 3)     
+		{
+		Disocclusion_Power = DP/262.5;
+		}
+else if(Dis_Occlusion == 4)   
+		{
+		Disocclusion_Power = DP/175;
+		}
+else if(Dis_Occlusion == 5)   
+		{
+		Disocclusion_Power = DP/116.6666667;
+		}
+		
  float2 dir;
  const int Con = 10;
 	
@@ -927,16 +943,10 @@ float Disocclusion_Power = DP/350;
 	{
 		const float weight[Con] = {0.01,-0.01,0.02,-0.02,0.03,-0.03,0.04,-0.04,0.05,-0.05};
 		
-		if(Dis_Occlusion == 1)
+		if(Dis_Occlusion >= 1)
 		{
 			dir = float2(0.5,0.0);
 			B = Disocclusion_Power;
-		}
-		
-		if(Dis_Occlusion == 2)
-		{
-			dir = 0.5 - texcoord;
-			B = Disocclusion_Power*2;
 		}
 		
 		[loop]
@@ -958,7 +968,7 @@ float Disocclusion_Power = DP/350;
 		
 		if(AO == 1)
 		{
-			DM =lerp(DM,Done,P);
+			DM =lerp(DM,Done,0.05);
 		}
 		
 	color = DM;
@@ -966,8 +976,9 @@ float Disocclusion_Power = DP/350;
 
 ////////////////////////////////////////////////Left/Right Eye////////////////////////////////////////////////////////
 
-void PS_renderLR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 color : SV_Target0 )
+float4 PS_renderLR(in float2 texcoord : TEXCOORD0)
 {
+	float4 color;
 	float DepthL = 1, DepthR = 1, MS, P, S;
 	float samples[5] = {0.50, 0.58, 0.66, 0.83, 1};
 	float2 TCL, TCR;
@@ -1263,7 +1274,146 @@ void PS_renderLR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD
 	{
 			float4 DMV = texcoord.x < 0.5 ? GetAO(float2(texcoord.x*2 , texcoord.y*2)) : tex2Dlod(SamplerDM,float4(texcoord.x*2-1 , texcoord.y*2,0,0)).bbbb;
 			color = texcoord.y < 0.5 ? DMV : tex2Dlod(SamplerDis,float4(texcoord.x,texcoord.y*2-1,0,0));
-	}	
+	}
+return color;
+}
+
+////////////////////////////////////////////////////////Logo/////////////////////////////////////////////////////////////////////////
+uniform float timer < source = "timer"; >;
+float4 Out(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Target
+{
+	//#define pix float2(BUFFER_RCP_WIDTH, BUFFER_RCP_HEIGHT)
+	float HEIGHT = BUFFER_HEIGHT/2,WIDTH = BUFFER_WIDTH/2;	
+	float2 LCD,LCE,LCP,LCT,LCH,LCThree,LCDD,LCDot,LCI,LCN,LCF,LCO;
+	float size = 9.5,set = BUFFER_HEIGHT/2,offset = (set/size),Shift = 50;
+	float4 Color = PS_renderLR(texcoord),Done,Website,D,E,P,T,H,Three,DD,Dot,I,N,F,O;
+
+	if(timer <= 10000)
+	{
+	//DEPTH
+	//D
+	float offsetD = (size*offset)/(set-((size/size)+(size/size)));
+	LCD = float2(-90-Shift,0); 
+	float4 OneD = all(abs(LCD+float2(WIDTH,HEIGHT)-position.xy) < float2(size,size*2));
+	float4 TwoD = all(abs(LCD+float2(WIDTH*offsetD,HEIGHT)-position.xy) < float2(size,size*1.5));
+	D = OneD-TwoD;
+	//
+	
+	//E
+	float offs = (size*offset)/(set-(size/size)/2);
+	LCE = float2(-62-Shift,0); 
+	float4 OneE = all(abs(LCE+float2(WIDTH,HEIGHT)-position.xy) < float2(size,size*2));
+	float4 TwoE = all(abs(LCE+float2(WIDTH*offs,HEIGHT)-position.xy) < float2(size*0.875,size*1.5));
+	float4 ThreeE = all(abs(LCE+float2(WIDTH,HEIGHT)-position.xy) < float2(size,size/3));
+	E = (OneE-TwoE)+ThreeE;
+	//
+	
+	//P
+	float offsetP = (size*offset)/(set-((size/size)*5));
+	float offsP = (size*offset)/(set-(size/size)*-11);
+	float offseP = (size*offset)/(set-((size/size)*4.25));
+	LCP = float2(-37-Shift,0);
+	float4 OneP = all(abs(LCP+float2(WIDTH,HEIGHT/offsetP)-position.xy) < float2(size,size*1.5));
+	float4 TwoP = all(abs(LCP+float2((WIDTH)*offsetD,HEIGHT/offsetP)-position.xy) < float2(size,size));
+	float4 ThreeP = all(abs(LCP+float2(WIDTH/offseP,HEIGHT/offsP)-position.xy) < float2(size*0.200,size));
+	P = (OneP-TwoP)+ThreeP;
+	//
+
+	//T
+	float offsetT = (size*offset)/(set-((size/size)*16.75));
+	float offsetTT = (size*offset)/(set-((size/size)*1.250));
+	LCT = float2(-10-Shift,0);
+	float4 OneT = all(abs(LCT+float2(WIDTH,HEIGHT*offsetTT)-position.xy) < float2(size/4,size*1.875));
+	float4 TwoT = all(abs(LCT+float2(WIDTH,HEIGHT/offsetT)-position.xy) < float2(size,size/4));
+	T = OneT+TwoT;
+	//
+	
+	//H
+	LCH = float2(13-Shift,0);
+	float4 OneH = all(abs(LCH+float2(WIDTH,HEIGHT)-position.xy) < float2(size,size*2));
+	float4 TwoH = all(abs(LCH+float2(WIDTH,HEIGHT)-position.xy) < float2(size/2,size*2));
+	float4 ThreeH = all(abs(LCH+float2(WIDTH,HEIGHT)-position.xy) < float2(size,size/3));
+	H = (OneH-TwoH)+ThreeH;
+	//
+	
+	//Three
+	float offsThree = (size*offset)/(set-(size/size)*1.250);
+	LCThree = float2(38-Shift,0);
+	float4 OneThree = all(abs(LCThree+float2(WIDTH,HEIGHT)-position.xy) < float2(size,size*2));
+	float4 TwoThree = all(abs(LCThree+float2(WIDTH*offsThree,HEIGHT)-position.xy) < float2(size*1.2,size*1.5));
+	float4 ThreeThree = all(abs(LCThree+float2(WIDTH,HEIGHT)-position.xy) < float2(size,size/3));
+	Three = (OneThree-TwoThree)+ThreeThree;
+	//
+	
+	//DD
+	float offsetDD = (size*offset)/(set-((size/size)+(size/size)));
+	LCDD = float2(65-Shift,0);
+	float4 OneDD = all(abs(LCDD+float2(WIDTH,HEIGHT)-position.xy) < float2(size,size*2));
+	float4 TwoDD = all(abs(LCDD+float2(WIDTH*offsetDD,HEIGHT)-position.xy) < float2(size,size*1.5));
+	DD = OneDD-TwoDD;
+	//
+	
+	//Dot
+	float offsetDot = (size*offset)/(set-((size/size)*16));
+	LCDot = float2(85-Shift,0);	
+	float4 OneDot = all(abs(LCDot+float2(WIDTH,HEIGHT*offsetDot)-position.xy) < float2(size/3,size/3.3));
+	Dot = OneDot;
+	//
+	
+	//INFO
+	//I
+	float offsetI = (size*offset)/(set-((size/size)*18));
+	float offsetII = (size*offset)/(set-((size/size)*8));
+	float offsetIII = (size*offset)/(set-((size/size)*5));
+	LCI = float2(101-Shift,0);	
+	float4 OneI = all(abs(LCI+float2(WIDTH,HEIGHT*offsetI)-position.xy) < float2(size,size/4));
+	float4 TwoI = all(abs(LCI+float2(WIDTH,HEIGHT/offsetII)-position.xy) < float2(size,size/4));
+	float4 ThreeI = all(abs(LCI+float2(WIDTH,HEIGHT*offsetIII)-position.xy) < float2(size/4,size*1.5));
+	I = OneI+TwoI+ThreeI;
+	//
+	
+	//N
+	float offsetN = (size*offset)/(set-((size/size)*7));
+	float offsetNN = (size*offset)/(set-((size/size)*5));
+	LCN = float2(126-Shift,0);	
+	float4 OneN = all(abs(LCN+float2(WIDTH,HEIGHT/offsetN)-position.xy) < float2(size,size/4));
+	float4 TwoN = all(abs(LCN+float2(WIDTH*offsetNN,HEIGHT*offsetNN)-position.xy) < float2(size/5,size*1.5));
+	float4 ThreeN = all(abs(LCN+float2(WIDTH/offsetNN,HEIGHT*offsetNN)-position.xy) < float2(size/5,size*1.5));
+	N = OneN+TwoN+ThreeN;
+	//
+	
+	//F
+	float offsetF = (size*offset)/(set-((size/size*7)));
+	float offsetFF = (size*offset)/(set-((size/size)*5));
+	float offsetFFF = (size*offset)/(set-((size/size)*-7.5));
+	LCF = float2(153-Shift,0);	
+	float4 OneF = all(abs(LCF+float2(WIDTH,HEIGHT/offsetF)-position.xy) < float2(size,size/4));
+	float4 TwoF = all(abs(LCF+float2(WIDTH/offsetFF,HEIGHT*offsetFF)-position.xy) < float2(size/5,size*1.5));
+	float4 ThreeF = all(abs(LCF+float2(WIDTH,HEIGHT/offsetFFF)-position.xy) < float2(size,size/4));
+	F = OneF+TwoF+ThreeF;
+	//
+	
+	//O
+	float offsetO = (size*offset)/(set-((size/size*-5)));
+	LCO = float2(176-Shift,0);	
+	float4 OneO = all(abs(LCO+float2(WIDTH,HEIGHT/offsetO)-position.xy) < float2(size,size*1.5));
+	float4 TwoO = all(abs(LCO+float2(WIDTH,HEIGHT/offsetO)-position.xy) < float2(size/1.5,size));
+	O = OneO-TwoO;
+	//
+	}
+	
+	Website = D+E+P+T+H+Three+DD+Dot+I+N+F+O ? float4(1.0,1.0,1.0,1) : Color;
+	
+	if(timer >= 10000)
+	{
+	Done = Color;
+	}
+	else
+	{
+	Done = Website;
+	}
+
+	return Done;
 }
 
 ///////////////////////////////////////////////////////////ReShade.fxh/////////////////////////////////////////////////////////////
@@ -1277,6 +1427,7 @@ void PostProcessVS(in uint id : SV_VertexID, out float4 position : SV_Position, 
 }
 
 //*Rendering passes*//
+
 technique Cross_Cursor
 {			
 			pass Cursor
@@ -1287,7 +1438,7 @@ technique Cross_Cursor
 }
 
 technique Depth3D_Reprojection
-{					
+{			
 			pass zbuffer
 		{
 			VertexShader = PostProcessVS;
@@ -1315,6 +1466,6 @@ technique Depth3D_Reprojection
 			pass StereoOut
 		{
 			VertexShader = PostProcessVS;
-			PixelShader = PS_renderLR;
+			PixelShader = Out;
 		}
 }
