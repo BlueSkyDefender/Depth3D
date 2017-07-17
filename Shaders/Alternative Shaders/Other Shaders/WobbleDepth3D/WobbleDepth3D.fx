@@ -72,6 +72,15 @@ uniform float Perspective <
 				 "Default is 0";
 > = 0;
 
+uniform int Dis_Occlusion <
+	ui_type = "drag";
+	ui_min = 0; ui_max = 5;
+	ui_label = "Disocclusion Power";
+	ui_tooltip = "Occlusion masking power adjustment.\n"
+				"Disocclusion starts at One.\n."
+				"Default is 1";
+> = 1;
+
 uniform bool Depth_Map_View <
 	ui_label = "Depth Map View";
 	ui_tooltip = "Display the Depth Map.";
@@ -152,7 +161,13 @@ sampler SamplerCDM
 	{
 		Texture = texCDM;
 	};
+
+texture texDiss  { Width = BUFFER_WIDTH/Depth_Map_Division; Height = BUFFER_HEIGHT/Depth_Map_Division; Format = RGBA32F;};
 	
+sampler SamplerDiss
+	{
+		Texture = texDiss;
+	};
 
 //Depth Map Information	
 /////////////////////////////////////////////////////////////////////////////////Depth Map Information/////////////////////////////////////////////////////////////////////////////////
@@ -276,6 +291,63 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 	Color = float4(lerp(R,1,0.05),lerp(R,1,0.05),lerp(R,1,0.05),A);
 }
 
+void Dis(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 Color : SV_Target0)
+{
+float B, DP =  Divergence,Disocclusion_Power;
+	float4 DM;
+	if(Dis_Occlusion == 1)     
+		{
+		Disocclusion_Power = DP/350;
+		}
+else if(Dis_Occlusion == 2)     
+		{
+		Disocclusion_Power = DP/306.25;
+		}
+else if(Dis_Occlusion == 3)     
+		{
+		Disocclusion_Power = DP/262.5;
+		}
+else if(Dis_Occlusion == 4)   
+		{
+		Disocclusion_Power = DP/175;
+		}
+else if(Dis_Occlusion == 5)   
+		{
+		Disocclusion_Power = DP/116.6666667;
+		}
+	
+ float2 dir;
+ const int Con = 10;
+	
+	if(Dis_Occlusion >= 1) 
+	{
+		const float weight[Con] = {0.01,-0.01,0.02,-0.02,0.03,-0.03,0.04,-0.04,0.05,-0.05};
+		
+		if(Dis_Occlusion >= 1)
+		{
+			dir = float2(0.5,0.0);
+			B = Disocclusion_Power;
+		}
+		
+		[loop]
+		for (int i = 0; i < Con; i++)
+		{	
+			if(Dis_Occlusion >= 1) 
+			{	
+				DM += tex2Dlod(SamplerCDM,float4(texcoord + dir * weight[i] * B ,0,0)).rrrr/Con;
+			}
+		}
+	
+	}
+	else
+	{
+		DM = tex2Dlod(SamplerCDM,float4(texcoord,0,0)).rrrr;
+	}	                          
+		
+		DM = lerp(DM,float4(1,1,1,1),0.05);
+		
+		Color = DM;	
+}
 
 uniform float2 WobbleSpeedZero < source = "pingpong"; min = 0; max = 1; step = 1; >;
 uniform float2 WobbleSpeedOne < source = "pingpong"; min = 0; max = 1; step = 2.5; >;
@@ -350,8 +422,8 @@ float4 WobbleLRC(in float2 texcoord : TEXCOORD0)
 	{	
 		S = samples[j] * MS;
 		
-		float L = tex2Dlod(SamplerCDM,float4((texcoord.x+P)+S, texcoord.y,0,0)).r;
-		float R = tex2Dlod(SamplerCDM,float4((texcoord.x-P)-S, texcoord.y,0,0)).r;
+		float L = tex2Dlod(SamplerDiss,float4((texcoord.x+P)+S, texcoord.y,0,0)).r;
+		float R = tex2Dlod(SamplerDiss,float4((texcoord.x-P)-S, texcoord.y,0,0)).r;
 		
 		DepthL =  min(DepthL,L);
 		DepthR =  min(DepthR,R);
@@ -661,6 +733,12 @@ technique WobbleDepth3D
 			VertexShader = PostProcessVS;
 			PixelShader = DepthMap;
 			RenderTarget = texCDM;
+		}
+			pass DissPass
+		{
+			VertexShader = PostProcessVS;
+			PixelShader = Dis;
+			RenderTarget = texDiss;
 		}
 			pass SinglePassStereo
 		{
