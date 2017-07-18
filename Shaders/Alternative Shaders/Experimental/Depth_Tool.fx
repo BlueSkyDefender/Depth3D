@@ -85,11 +85,8 @@ float4 zBuffer(in float2 texcoord : TEXCOORD0)
 		
 		//4. Raw Buffer
 		float Raw = pow(abs(zBuffer),DA);
-		
-		//5. Old Depth Map from 1.9.5
-		float Old = 100 / (1 + 100 - (zBuffer/DDA) * (1 - 100));
-		
-		//6. Special Depth Map
+			
+		//5. Special Depth Map
 		float Special = pow(abs(exp(zBuffer)*Offset),(DA*25));
 		
 		if (Depth_Map == 0)
