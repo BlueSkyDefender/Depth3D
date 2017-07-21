@@ -113,7 +113,7 @@ The Surge                                        DM 0          12               
 *Through The Woods                               DM 0        5.0-10                         Yes         RB
 *Turok: Dinosaur Hunter                          DM 0        50-100          WDM 15                     RB
 *Turok 2: Seeds of Evil                          DM 0        75-125          WDM 23
-*Unreal Gold with v227                           DM 0        5.0-10          WDM 0                      RB
+Unreal Gold with v227                            DM 8         17.5       WDM 0                        RB
 *Warhammer: End Times - Vermintide               DM 0        2.5-4.5                                    
 *Watch Dogs 2                                    DM 0        2.5-5.0                                    RB
 *Witcher 3                                       DM 0        3.0-7.0                                         

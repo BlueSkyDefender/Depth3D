@@ -420,7 +420,7 @@ float4 WeaponDepth(in float2 texcoord : TEXCOORD0)
 		cWF = 0.010;
 		cWN = -2.5;
 		cWP = 0.873;
-		CoP = 0.569;
+		CoP = 0.390;
 		}
 		
 		//Game: Borderlands 2 
