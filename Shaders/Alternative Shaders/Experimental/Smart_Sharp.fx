@@ -1,5 +1,5 @@
- ///**Depth Unsharp Mask**///
  ////----------------------//
+ ///**Depth Unsharp Mask**///
  //----------------------////
 
  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -38,7 +38,7 @@ uniform float contrast <
 
 uniform int Depth_Map <
 	ui_type = "combo";
-	ui_items = "DirectX\0DirectX Alt\0OpenGL\0OpenGL Alt\0Raw Buffer\0Special\0";
+	ui_items = "Normal\0Normal Reversed\0Raw\0Raw Reverse\0Special\0";
 	ui_label = "Custom Depth Map";
 	ui_tooltip = "Pick your Depth Map.";
 > = 0;
@@ -124,51 +124,42 @@ float4 Depth(in float2 texcoord : TEXCOORD0)
 		float DA = Depth_Map_Adjust*2; //Depth Map Adjust - Near
 		//All 1.0f are Far Adjustment
 		
-		//0. DirectX Custom Constant Far
-		float DirectX = 2.0 * DDA * 1.0f / (1.0f + DDA - zBuffer * (1.0f - DDA));
+		//0. Normal
+		float Normal = 1.0f * DDA / (1.0f + zBuffer * (DDA - 1.0f));
 		
-		//1. DirectX Alternative
-		float DirectXAlt = pow(abs(zBuffer - 1.0),DA);
+		//1. Reverse
+		float NormalReverse = 1.0f * DDA / (DDA + zBuffer * (1.0f - DDA));
 		
-		//2. OpenGL
-		float OpenGL = 2.0 * DDA * 1.0f / (1.0f + DDA - (2.0 * zBuffer - 1.0) * (1.0f - DDA));
-		
-		//3. OpenGL Reverse
-		float OpenGLRev = 2.0 * 1.0f * DDA / (DDA + 1.0f - (2.0 * zBuffer - 1.0) * (DDA - 1.0f));
-		
-		//4. Raw Buffer
+		//2. Raw Buffer
 		float Raw = pow(abs(zBuffer),DA);
 		
-		//5. Old Depth Map from 1.9.5
-		float Old = 100 / (1 + 100 - (zBuffer/DDA) * (1 - 100));
+		//3. Raw Buffer Reverse
+		float RawReverse = pow(abs(zBuffer - 1.0),DA);
 		
-		//6. Special Depth Map
+		//4. Special Depth Map
 		float Special = pow(abs(exp(zBuffer)*Offset),(DA*25));
 		
 		if (Depth_Map == 0)
 		{
-		zBuffer = DirectX;
+		zBuffer = Normal;
 		}
 		
 		else if (Depth_Map == 1)
 		{
-		zBuffer = DirectXAlt;
+		zBuffer = NormalReverse;
 		}
 
 		else if (Depth_Map == 2)
 		{
-		zBuffer = OpenGL;
+		zBuffer = Raw;
 		}
 		
 		else if (Depth_Map == 3)
 		{
-		zBuffer = OpenGLRev;
+		zBuffer = RawReverse;
 		}
+		
 		else if (Depth_Map == 4)
-		{
-		zBuffer = Raw;
-		}		
-		else if (Depth_Map == 5)
 		{
 		zBuffer = Special;
 		}
