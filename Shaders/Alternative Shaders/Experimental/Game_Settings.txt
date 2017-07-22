@@ -51,7 +51,7 @@ Alien Isolation                                 DM 0        12.5
 *Dragon Age Inquisition                          DM 0        3.00
 *Dragon Ball Xenoverse                           DM 0        10.0
 *Dragons Dogma: Dark Arisen                      DM 0        7.50
-*DreamFall Chapters                              DM 0        5.00
+DreamFall Chapters                              DM 4        10.0                     Yes
 *Dungeon Nightmares II                           DM 0        20.0                                     RB
 *Emily Wants To Play                             DM 0        10.0                                     RB
 *Everybody's Gone to the Rapture                 DM 0        4.25
