@@ -19,7 +19,7 @@ IF IT HAS AN *asterisk* I AM STILL WORKING ON IT.
 
 [Game List]                                 [Depth Map] [Adjustment] [Weapons DM] [Depth Flip] [Read Below] 
 *ABZU                                            DM 0         20
-*Alien Isolation                                 DM 0        5.00
+Alien Isolation                                 DM 0        12.5
 *Amnesia: Machine for Pigs                       DM 0         15         WDM 24          
 *Amnesia: The Dark Descent                       DM 0         15         WDM 24  
 *Among The Sleep                                 DM 0        8.75                       Yes
@@ -104,7 +104,7 @@ Prey 2017                                        DM 0        5.0         WDM 17 
 *Stacking                                        DM 0        5.0-10                                   
 *Stay Close                                      DM 0        2.5-7.5                                    RB
 *Tales of Zestiria                               DM 0        15-20 
-The Elder Scrolls V: SE                          DM 0         5.0         WDM 14
+*The Elder Scrolls V: SE                         DM 0         5.0         WDM 14
 *The Evil Within                                 DM 0        20-30                                      RB
 *The Legend of Korra                             DM 0        5.0-10
 The Surge                                        DM 0          12                                       RB
@@ -113,7 +113,7 @@ The Surge                                        DM 0          12               
 *Through The Woods                               DM 0        5.0-10                         Yes         RB
 *Turok: Dinosaur Hunter                          DM 0        50-100          WDM 15                     RB
 *Turok 2: Seeds of Evil                          DM 0        75-125          WDM 23
-Unreal Gold with v227                            DM 8         17.5       WDM 0                        RB
+Unreal Gold with v227                           DM 8        17.5         WDM 0                        RB
 *Warhammer: End Times - Vermintide               DM 0        2.5-4.5                                    
 *Watch Dogs 2                                    DM 0        2.5-5.0                                    RB
 *Witcher 3                                       DM 0        3.0-7.0                                         
