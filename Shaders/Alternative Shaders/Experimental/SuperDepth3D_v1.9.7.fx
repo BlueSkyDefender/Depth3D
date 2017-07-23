@@ -34,7 +34,7 @@
 
 uniform int Depth_Map <
 	ui_type = "combo";
-	ui_items = " 0 Normal\0 1 Normal Reversed\0 2 Raw\0 3 Raw Reverse\0 4 Interpolated Normal & Raw\0 5 Interpolated Normal Reverse & Raw Reverse\0 6 Special\0";
+	ui_items = " 0 Normal\0 1 Normal Reverse\0 2 Raw\0 3 Raw Reverse\0 4 Mix\0 5 Mix Reverse\0 6 Special\0";
 	ui_label = "Custom Depth Map";
 	ui_tooltip = "Pick your Depth Map.";
 > = 0;
@@ -46,11 +46,20 @@ uniform float Depth_Map_Adjust <
 	ui_tooltip = "Adjust the depth map for your games.";
 > = 7.5;
 
+uniform float Mix <
+	ui_type = "drag";
+	ui_min = 0.125; ui_max = 0.875;
+	ui_label = "Mix Adjustment";
+	ui_tooltip = "Mix is used to adjust between Normal & Raw.\n"
+				"This is for Depth Map 4 & 5\n"
+				"Default is 0.5";
+> = 0.5;
+
 uniform float Offset <
 	ui_type = "drag";
 	ui_min = 0; ui_max = 1.0;
 	ui_label = "Offset";
-	ui_tooltip = "Offset is for the Special Depth Map Only";
+	ui_tooltip = "Offset is for the Special Depth Map Only.";
 > = 0.5;
 
 uniform int Divergence <
@@ -81,7 +90,7 @@ uniform int Dis_Occlusion <
 	ui_min = 0; ui_max = 5;
 	ui_label = "Disocclusion Power";
 	ui_tooltip = "Occlusion masking power adjustment.\n"
-				"Disocclusion starts at One.\n."
+				"Disocclusion starts at One.\n"
 				"Default is 1";
 > = 1;
 
@@ -140,10 +149,10 @@ uniform int Stereoscopic_Mode <
 	ui_tooltip = "Stereoscopic 3D display output selection.";
 > = 0;
 
-uniform int Downscaling_Support <
+uniform int Scaling_Support <
 	ui_type = "combo";
-	ui_items = "Native\0Option One\0Option Two\0Option Three\0Option Four\0";
-	ui_label = "Downscaling Support";
+	ui_items = " 2160p\0 Native\0 1080p A\0 1080p B\0 1050p A\0 1050p B\0 720p A\0 720p B\0";
+	ui_label = "Scaling Support";
 	ui_tooltip = "Dynamic Super Resolution & Virtual Super Resolution downscaling support for Line Interlaced, Column Interlaced, & Checkerboard 3D displays.";
 > = 0;
 
@@ -357,12 +366,12 @@ float4 Depth(in float2 texcoord : TEXCOORD0)
 		
 		else if (Depth_Map == 4)
 		{
-		zBuffer = lerp(Normal,Raw,0.5);
+		zBuffer = lerp(Normal,Raw,Mix);
 		}
 		
 		else if (Depth_Map == 5)
 		{
-		zBuffer = lerp(NormalReverse,RawReverse,0.5);
+		zBuffer = lerp(NormalReverse,RawReverse,Mix);
 		}
 
 		else if (Depth_Map == 6)
@@ -1060,17 +1069,29 @@ float4 PS_renderLR(in float2 texcoord : TEXCOORD0)
 		{
 			float gridL;
 			
-			if(Downscaling_Support == 0)
+			if(Scaling_Support == 0)
 			{
-			gridL = frac(texcoord.y*(BUFFER_HEIGHT/2));
+			gridL = frac(texcoord.y*(2160.0/2));
+			}			
+			else if(Scaling_Support == 1)
+			{
+			gridL = frac(texcoord.y*(BUFFER_HEIGHT/2)); //Native
 			}
-			else if(Downscaling_Support == 1)
+			else if(Scaling_Support == 2)
 			{
 			gridL = frac(texcoord.y*(1080.0/2));
 			}
-			else
+			else if(Scaling_Support == 3)
 			{
 			gridL = frac(texcoord.y*(1081.0/2));
+			}
+			else if(Scaling_Support == 4)
+			{
+			gridL = frac(texcoord.y*(1050.0/2));
+			}
+			else if(Scaling_Support == 5)
+			{
+			gridL = frac(texcoord.y*(1051.0/2));
 			}
 			
 			if(Custom_Sidebars == 0)
@@ -1090,23 +1111,27 @@ float4 PS_renderLR(in float2 texcoord : TEXCOORD0)
 		{
 			float gridC;
 			
-			if(Downscaling_Support == 0)
+			if(Scaling_Support == 0)
 			{
-			gridC = frac(texcoord.x*(BUFFER_WIDTH/2));
+			gridC = frac(texcoord.x*(3840.0/2));
+			}			
+			else if(Scaling_Support == 1)
+			{
+			gridC = frac(texcoord.x*(BUFFER_WIDTH/2)); //Native
 			}
-			else if(Downscaling_Support == 1)
+			else if(Scaling_Support == 2)
 			{
 			gridC = frac(texcoord.x*(1920.0/2));
 			}
-			else if(Downscaling_Support == 2)
+			else if(Scaling_Support == 3)
 			{
 			gridC = frac(texcoord.x*(1921.0/2));
 			}
-			else if(Downscaling_Support == 3)
+			else if(Scaling_Support == 6)
 			{
 			gridC = frac(texcoord.x*(1280.0/2));
 			}
-			else
+			else if(Scaling_Support == 7)
 			{
 			gridC = frac(texcoord.x*(1281.0/2));
 			}
@@ -1129,28 +1154,28 @@ float4 PS_renderLR(in float2 texcoord : TEXCOORD0)
 		{
 			float gridy;
 			float gridx;
-			
-			if(Downscaling_Support == 0)
+
+			if(Scaling_Support == 1)
 			{
-			gridy = floor(texcoord.y*(BUFFER_HEIGHT));
-			gridx = floor(texcoord.x*(BUFFER_WIDTH));
+			gridy = floor(texcoord.y*(BUFFER_HEIGHT)); //Native
+			gridx = floor(texcoord.x*(BUFFER_WIDTH)); //Native
 			}
-			else if(Downscaling_Support == 1)
+			else if(Scaling_Support == 2)
 			{
 			gridy = floor(texcoord.y*(1080.0));
 			gridx = floor(texcoord.x*(1920.0));
 			}
-			else if(Downscaling_Support == 2)
+			else if(Scaling_Support == 3)
 			{
 			gridy = floor(texcoord.y*(1081.0));
 			gridx = floor(texcoord.x*(1921.0));
 			}
-			else if(Downscaling_Support == 3)
+			else if(Scaling_Support == 6)
 			{
 			gridy = floor(texcoord.y*(720.0));
 			gridx = floor(texcoord.x*(1280.0));
 			}
-			else
+			else if(Scaling_Support == 7)
 			{
 			gridy = floor(texcoord.y*(721.0));
 			gridx = floor(texcoord.x*(1281.0));
