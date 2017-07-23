@@ -63,10 +63,10 @@ uniform int Divergence <
 
 uniform float ZPD <
 	ui_type = "drag";
-	ui_min = 0.0; ui_max = 0.20;
+	ui_min = 0.0; ui_max = 0.25;
 	ui_label = "Zero Parallax Distance";
 	ui_tooltip = "ZPD controls the focus distance for the screen Pop-out effect.";
-> = 0.025;
+> = 0.050;
 
 uniform float Weapon_Depth <
 	ui_type = "drag";
@@ -167,14 +167,6 @@ uniform bool AO <
 				 "Default is On.";
 > = 1;
 
-uniform float Falloff <
-	ui_type = "drag";
-	ui_min = 0.5; ui_max = 2.5;
-	ui_label = "AO Falloff";
-	ui_tooltip = "Ambient occlusion falloff.\n" 
-				 "Default is 1.5";
-> = 1.5;
-
 uniform float AO_Shift <
 	ui_type = "drag";
 	ui_min = 0; ui_max = 0.500;
@@ -182,6 +174,13 @@ uniform float AO_Shift <
 	ui_tooltip = "Determines the Shift from White to Black.\n" 
 				 "Default is 0";
 > = 0.0;
+
+uniform int Mode <
+	ui_type = "combo";
+	ui_items = "Normal\0Over Sample\0Tight\0";
+	ui_label = "Sample Mode Selection";
+	ui_tooltip = "Use this to hide artifacts.";
+> = 0;
 
 uniform bool Eye_Swap <
 	ui_label = "Swap Eyes";
@@ -807,7 +806,7 @@ float4 GetAO( float2 texcoord )
 	float2 random = GetRandom(texcoord).xy;
     
     //initialize variables:
-    float F = Falloff;
+    float F = 1.5;//Falloff
 	float iter = 2.5*pix.x;
     float aout, num = 8;
     float incx = F*pix.x;
@@ -952,11 +951,25 @@ else if(Dis_Occlusion == 5)
 
 float4 PS_renderLR(in float2 texcoord : TEXCOORD0)
 {
-	float4 color;
+	float4 color,Samp;
 	float DepthL = 1, DepthR = 1, MS, P, S;
-	float samples[5] = {0.50, 0.58, 0.66, 0.83, 1};
+	
+	if(Mode == 1)
+	{
+	Samp = float4(0.60, 0.58, 0.75, 1.5);
+	}
+	else if(Mode == 2)
+	{
+	Samp = float4(0.60, 0.58, 0.66, 1);
+	}
+	else
+	{
+	Samp = float4(0.50, 0.58, 0.66, 1);
+	}
+	
+	float samples[5] = {Samp.x, Samp.y, Samp.z, 0.83, Samp.w};
 	float2 TCL, TCR;
-		
+	
 	if(!Eye_Swap) //MS is Max Separation P is Perspective Adjustment
 		{	
 			P = Perspective * pix.x;
