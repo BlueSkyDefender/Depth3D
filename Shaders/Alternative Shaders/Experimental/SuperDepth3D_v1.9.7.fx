@@ -48,7 +48,7 @@ uniform float Depth_Map_Adjust <
 
 uniform float Mix <
 	ui_type = "drag";
-	ui_min = 0.125; ui_max = 0.875;
+	ui_min = 0.125; ui_max = 0.500;
 	ui_label = "Mix Adjustment";
 	ui_tooltip = "Mix is used to adjust between Normal & Raw.\n"
 				"This is for Depth Map 4 & 5\n"
@@ -74,7 +74,8 @@ uniform float ZPD <
 	ui_type = "drag";
 	ui_min = 0.0; ui_max = 0.25;
 	ui_label = "Zero Parallax Distance";
-	ui_tooltip = "ZPD controls the focus distance for the screen Pop-out effect.";
+	ui_tooltip = "ZPD controls the focus distance for the screen Pop-out effect.\n"
+				"FPS Games should be around 0.025-0.100 Max.";
 > = 0.050;
 
 uniform float Weapon_Depth <
@@ -153,7 +154,7 @@ uniform int Scaling_Support <
 	ui_type = "combo";
 	ui_items = " 2160p\0 Native\0 1080p A\0 1080p B\0 1050p A\0 1050p B\0 720p A\0 720p B\0";
 	ui_label = "Scaling Support";
-	ui_tooltip = "Dynamic Super Resolution & Virtual Super Resolution downscaling support for Line Interlaced, Column Interlaced, & Checkerboard 3D displays.";
+	ui_tooltip = "Dynamic Super Resolution , Virtual Super Resolution, downscaling, or Upscaling support for Line Interlaced, Column Interlaced, & Checkerboard 3D displays.";
 > = 0;
 
 uniform int Anaglyph_Colors <
@@ -695,7 +696,7 @@ float4 WeaponDepth(in float2 texcoord : TEXCOORD0)
 		zBufferWH = smoothstep(Adj,1,zBufferWH) ;//Weapon Adjust smoothstep range from Adj-1
 		
 		//Auto Anti Weapon Depth Map Z-Fighting is always on.
-		zBufferWH = zBufferWH*clamp(AL(texcoord).r*1.825,0.375,1); 
+		zBufferWH = zBufferWH*clamp(AL(texcoord).r*2,0.125,1); 
 		
 		if (WDM == 18)
 		{
@@ -946,11 +947,11 @@ else if(Dis_Occlusion == 5)
 		DM = tex2Dlod(SamplerDM,float4(texcoord,0,0)).bbbb;
 	}	                          
 		
-		DM = lerp(DM,float4(1,1,1,1),0.05);                         	
+		DM = lerp(DM,float4(1,1,1,1),0.04375);                         	
 		
 		if(AO == 1)
 		{
-			DM =lerp(DM,Done,0.05);
+			DM =lerp(DM,Done,0.04375);
 		}
 		
 	color = DM;
