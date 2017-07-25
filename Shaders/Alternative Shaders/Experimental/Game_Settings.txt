@@ -83,7 +83,7 @@ Mass Effect Andromeda                           DM 1        25.0                
 *NecroVision: Lost Company                       DM 0        7.5-15          WDM 8                      
 *Need For Speed Rivals                           Help        ?????? 
 *Need for Speed Most Wanted                      Help        ?????? 
-*NieRAutomata                                     DM 0        15
+*NieRAutomata                                    DM 0        15
 *Penumbra: Black Plague                          DM 0        10-20                                      RB
 *Phantasmal                                      DM 0        10-20                                      RB
 Prey 2017                                        DM 5        17.5         WDM 17 or 18                 RB

@@ -76,7 +76,7 @@ uniform int Output_Selection <
 
 uniform float Sharpen_Power <
 	ui_type = "drag";
-	ui_min = 1; ui_max = 5;
+	ui_min = 0.5; ui_max = 5;
 	ui_label = "Sharpen Power";
 	ui_tooltip = "Increases or Decreases the Sharpen power.";
 > = 1.0;
