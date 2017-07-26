@@ -168,7 +168,7 @@ float4 Depth(in float2 texcoord : TEXCOORD0)
 }
 #define SIGMA 10
 #define BSIGMA 0.1125
-#define MSIZE 7
+#define MSIZE 6
 
 float normpdf(in float x, in float sigma)
 {
@@ -198,8 +198,7 @@ void Filters(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, o
 	0.035206333, 
 	0.036826804, 
 	0.038138565, 
-	0.039104044, 
-	0.039695028
+	0.039104044
 	};  
 		float3 final_colour;
 		float Z;

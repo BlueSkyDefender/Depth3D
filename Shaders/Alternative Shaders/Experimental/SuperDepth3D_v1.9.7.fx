@@ -30,7 +30,7 @@
 #define Depth_Map_Division 1.0
 
 // Determines The Max Depth amount.
-#define Depth_Max 50
+#define Depth_Max 55
 
 uniform int Depth_Map <
 	ui_type = "combo";
@@ -155,7 +155,7 @@ uniform int Scaling_Support <
 	ui_items = " 2160p\0 Native\0 1080p A\0 1080p B\0 1050p A\0 1050p B\0 720p A\0 720p B\0";
 	ui_label = "Scaling Support";
 	ui_tooltip = "Dynamic Super Resolution , Virtual Super Resolution, downscaling, or Upscaling support for Line Interlaced, Column Interlaced, & Checkerboard 3D displays.";
-> = 0;
+> = 1;
 
 uniform int Anaglyph_Colors <
 	ui_type = "combo";
@@ -949,12 +949,18 @@ else if(Dis_Occlusion == 5)
 		
 		DM = lerp(DM,float4(1,1,1,1),0.04375);                         	
 		
+		float4 AODM;
+		
 		if(AO == 1)
 		{
-			DM =lerp(DM,Done,0.04375);
+			AODM =lerp(DM,Done,0.04375);
+		}
+		else
+		{
+			AODM = DM;
 		}
 		
-	color = DM;
+	color = float4(DM.r,0,AODM.r,1); //AO Depth Map is on the Blue Channel Normal DM on the Red Channel.
 }
 
 ////////////////////////////////////////////////Left/Right Eye////////////////////////////////////////////////////////
@@ -962,7 +968,7 @@ else if(Dis_Occlusion == 5)
 float4 PS_renderLR(in float2 texcoord : TEXCOORD0)
 {
 	float4 color,Samp;
-	float DepthL = 1, DepthR = 1, MS, P, S;
+	float DepthL = 1, DepthR = 1, DepthZL = 1, DepthZR = 1, MS, P, S, Z;
 	
 	if(Mode == 1)
 	{
@@ -977,7 +983,7 @@ float4 PS_renderLR(in float2 texcoord : TEXCOORD0)
 	Samp = float4(0.50, 0.58, 0.66, 1);
 	}
 	
-	float samples[5] = {Samp.x, Samp.y, Samp.z, 0.83, Samp.w};
+	float samples[4] = {Samp.x, Samp.y, Samp.z,Samp.w};
 	float2 TCL, TCR;
 	
 	if(!Eye_Swap) //MS is Max Separation P is Perspective Adjustment
@@ -1014,19 +1020,33 @@ float4 PS_renderLR(in float2 texcoord : TEXCOORD0)
 		}
 	
 	[loop]
-	for (int j = 0; j < 5; ++j) 
+	for (int j = 0; j < 4; ++j) 
 	{	
 		S = samples[j] * MS;
 		
 		float L = tex2Dlod(SamplerDis,float4(TCL.x+S, TCL.y,0,0)).r;
 		float R = tex2Dlod(SamplerDis,float4(TCR.x-S, TCR.y,0,0)).r;
 		
+		float ZL = tex2Dlod(SamplerDis,float4(TCL.x+S, TCL.y,0,0)).b;
+		float ZR = tex2Dlod(SamplerDis,float4(TCR.x-S, TCR.y,0,0)).b;
+		
 		DepthL =  min(DepthL,L);
 		DepthR =  min(DepthR,R);
+		DepthZL =  min(DepthZL,ZL);
+		DepthZR =  min(DepthZR,ZR);
 	}
 	
-	float ParallaxL = max(-0.1,MS * (1-ZPD/DepthL));
-	float ParallaxR = max(-0.1,MS * (1-ZPD/DepthR));
+	float ParallaxL = max(-0.1,MS * (1-ZPD/DepthZL));
+	float ParallaxR = max(-0.1,MS * (1-ZPD/DepthZR));
+	
+	if(ZPD == 0)
+	{
+	Z = 1.0;
+	}
+	else
+	{
+	Z = 0.5;
+	}
 	
 		ParallaxL = lerp(ParallaxL,DepthL * MS,0.5);
 		ParallaxR = lerp(ParallaxR,DepthR * MS,0.5);
@@ -1285,8 +1305,9 @@ float4 PS_renderLR(in float2 texcoord : TEXCOORD0)
 	}
 		else
 	{
+			float3 FinDM = lerp(tex2Dlod(SamplerDis,float4(texcoord.x,texcoord.y*2-1,0,0)).rrr,tex2Dlod(SamplerDis,float4(texcoord.x,texcoord.y*2-1,0,0)).bbb,0.5);
 			float4 DMV = texcoord.x < 0.5 ? GetAO(float2(texcoord.x*2 , texcoord.y*2)) : tex2Dlod(SamplerDM,float4(texcoord.x*2-1 , texcoord.y*2,0,0)).bbbb;
-			color = texcoord.y < 0.5 ? DMV : tex2Dlod(SamplerDis,float4(texcoord.x,texcoord.y*2-1,0,0));
+			color = texcoord.y < 0.5 ? DMV : float4(FinDM,1) ;
 	}
 return color;
 }
