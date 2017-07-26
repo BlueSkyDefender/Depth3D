@@ -72,10 +72,11 @@ uniform int Divergence <
 
 uniform float ZPD <
 	ui_type = "drag";
-	ui_min = 0.0; ui_max = 0.25;
+	ui_min = 0.0; ui_max = 0.150;
 	ui_label = "Zero Parallax Distance";
 	ui_tooltip = "ZPD controls the focus distance for the screen Pop-out effect.\n"
-				"FPS Games should be around 0.025-0.100 Max.";
+				"FPS Games should be around 0.025-0.075 Max.\n"
+				"Default is 0.050";
 > = 0.050;
 
 uniform float Weapon_Depth <
@@ -171,20 +172,6 @@ uniform float Anaglyph_Desaturation <
 	ui_tooltip = "Adjust anaglyph desaturation, Zero is Black & White, One is full color.";
 > = 1.0;
 
-uniform bool AO <
-	ui_label = "3D AO Mode";
-	ui_tooltip = "3D ambient occlusion mode switch.\n" 
-				 "Default is On.";
-> = 1;
-
-uniform float AO_Shift <
-	ui_type = "drag";
-	ui_min = 0; ui_max = 0.500;
-	ui_label = "AO Shift";
-	ui_tooltip = "Determines the Shift from White to Black.\n" 
-				 "Default is 0";
-> = 0.0;
-
 uniform int Mode <
 	ui_type = "combo";
 	ui_items = "Normal\0Over Sample\0Tight\0";
@@ -271,13 +258,6 @@ texture texDis  { Width = BUFFER_WIDTH/Depth_Map_Division; Height = BUFFER_HEIGH
 sampler SamplerDis
 	{
 		Texture = texDis;
-	};
-	
-texture texAO  { Width = BUFFER_WIDTH/2; Height = BUFFER_HEIGHT/2; Format = RGBA32F; MipLevels = 3;}; 
-
-sampler SamplerAO
-	{
-		Texture = texAO;
 	};
 
 uniform float2 Mousecoords < source = "mousepoint"; > ;	
@@ -696,7 +676,19 @@ float4 WeaponDepth(in float2 texcoord : TEXCOORD0)
 		zBufferWH = smoothstep(Adj,1,zBufferWH) ;//Weapon Adjust smoothstep range from Adj-1
 		
 		//Auto Anti Weapon Depth Map Z-Fighting is always on.
-		zBufferWH = zBufferWH*clamp(AL(texcoord).r*2,0.125,1); 
+		float AA;
+		float al = abs(AL(texcoord).r);
+		if(al <= 0.044)
+		{
+			AA = 0.0925;
+		}
+		else
+		{
+			AA = 0.250;
+		}
+
+		float AAWDMA = clamp(AL(texcoord).r*2,AA,1.0);
+		zBufferWH = lerp(zBufferWH*AAWDMA,zBufferWH,0.050);
 		
 		if (WDM == 18)
 		{
@@ -744,6 +736,7 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 		else
 		{
 		D = lerp(DM,WD,NearDepth);
+		D = lerp(D,1,0.050);
 		Done = lerp(DM,D,Cutoff);
 		}
 		
@@ -754,7 +747,7 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 	// Dither for DepthBuffer adapted from gedosato ramdom dither https://github.com/PeterTh/gedosato/blob/master/pack/assets/dx9/deband.fx
 	// I noticed in some games the depth buffer started to have banding so this is used to remove that.
 			
-	float dither_bit  = 7.0;
+	float dither_bit  = 8;
 	float noise = frac(sin(dot(texcoord, float2(12.9898, 78.233))) * 43758.5453 * 1);
 	float dither_shift = (1.0 / (pow(2,dither_bit) - 1.0));
 	float dither_shift_half = (dither_shift * 0.5);
@@ -768,135 +761,11 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 	Color = float4(R,G,B,A);
 }
 
-/////////////////////////////////////////////////////AO/////////////////////////////////////////////////////////////
-
-float3 GetPosition(float2 coords)
-{
-	return float3(coords.xy*2.5-1.0,10.0)*tex2Dlod(SamplerDM,float4(coords.xy,0,0)).rrr;
-}
-
-float2 GetRandom(float2 co)
-{
-	float random = frac(sin(dot(co, float2(12.9898, 78.233))) * 43758.5453 * 1);
-	return float2(random,random);
-}
-
-float3 normal_from_depth(float2 texcoords) 
-{
-	float depth;
-	const float2 offset1 = float2(-10,10);
-	const float2 offset2 = float2(10,10);
-	  
-	float depth1 = tex2Dlod(SamplerDM, float4(texcoords + offset1,0,0)).r;
-	float depth2 = tex2Dlod(SamplerDM, float4(texcoords + offset2,0,0)).r;
-	  
-	float3 p1 = float3(offset1, depth1 - depth);
-	float3 p2 = float3(offset2, depth2 - depth);
-	  
-	float3 normal = cross(p1, p2);
-	normal.z = -normal.z;
-	  
-	return normalize(normal);
-}
-
-//Ambient Occlusion form factor
-float aoFF(in float3 ddiff,in float3 cnorm, in float c1, in float c2)
-{
-	float S = 1-AO_Shift;
-	float3 vv = normalize(ddiff);
-	float rd = length(ddiff);
-	return (S-clamp(dot(normal_from_depth(float2(c1,c2)),-vv),-1,1.0)) * (1.0 - 1.0/sqrt(-0.001/(rd*rd) + 1000));
-}
-
-float4 GetAO( float2 texcoord )
-{ 
-    //current normal , position and random static texture.
-    float3 normal = normal_from_depth(texcoord);
-    float3 position = GetPosition(texcoord);
-	float2 random = GetRandom(texcoord).xy;
-    
-    //initialize variables:
-    float F = 1.5;//Falloff
-	float iter = 2.5*pix.x;
-    float aout, num = 8;
-    float incx = F*pix.x;
-    float incy = F*pix.y;
-    float width = incx;
-    float height = incy;
-    
-    //Depth Map
-    float depthM = tex2Dlod(SamplerDM,float4(texcoord ,0,0)).b;
-    
-		
-	//Depth Map linearization
-	float constantF = 1.0;	
-	float constantN = 0.250;
-	depthM = saturate(2.0 * constantN * constantF / (constantF + constantN - (2.0 * depthM - 1.0) * (constantF - constantN)));
-    
-	//2 iterations
-	[loop]
-    for(int i = 0; i<2; ++i) 
-    {
-       float npw = (width+iter*random.x)/depthM;
-       float nph = (height+iter*random.y)/depthM;
-       
-		if(AO == 1)
-		{
-			float3 ddiff = GetPosition(texcoord.xy+float2(npw,nph))-position;
-			float3 ddiff2 = GetPosition(texcoord.xy+float2(npw,-nph))-position;
-			float3 ddiff3 = GetPosition(texcoord.xy+float2(-npw,nph))-position;
-			float3 ddiff4 = GetPosition(texcoord.xy+float2(-npw,-nph))-position;
-
-			aout += aoFF(ddiff,normal,npw,nph);
-			aout += aoFF(ddiff2,normal,npw,-nph);
-			aout += aoFF(ddiff3,normal,-npw,nph);
-			aout += aoFF(ddiff4,normal,-npw,-nph);
-		}
-		
-		//increase sampling area
-		   width += incx;  
-		   height += incy;	    
-    } 
-    aout/=num;
-
-	//Luminance adjust used for overbright correction.
-	float4 Done = min(1.0,aout);
-	float OBC =  dot(Done.rgb,float3(0.2627, 0.6780, 0.0593));
-	return smoothstep(0,1,float4(OBC,OBC,OBC,1));
-}
-
-void AO_in(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 color : SV_Target0 )
-{
-	color = GetAO(texcoord);
-}
-
-void Average_Luminance(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 color : SV_Target0 )
-{
-	color = tex2D(SamplerDM,texcoord).gggg;
-}
-
 void  Disocclusion(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 color : SV_Target0)
 {
 //bilateral blur\/
-float4 Done, sum, DM;
+float4 DM;
 float B, DP =  Divergence,Disocclusion_Power;
-
-float blursize = 2.0*pix.x;
-
-if(AO == 1)
-	{
-		sum += tex2D(SamplerAO, float2(texcoord.x - 4.0*blursize, texcoord.y)) * 0.05;
-		sum += tex2D(SamplerAO, float2(texcoord.x, texcoord.y - 3.0*blursize)) * 0.09;
-		sum += tex2D(SamplerAO, float2(texcoord.x - 2.0*blursize, texcoord.y)) * 0.12;
-		sum += tex2D(SamplerAO, float2(texcoord.x, texcoord.y - blursize)) * 0.15;
-		sum += tex2D(SamplerAO, float2(texcoord.x + blursize, texcoord.y)) * 0.15;
-		sum += tex2D(SamplerAO, float2(texcoord.x, texcoord.y + 2.0*blursize)) * 0.12;
-		sum += tex2D(SamplerAO, float2(texcoord.x + 3.0*blursize, texcoord.y)) * 0.09;
-		sum += tex2D(SamplerAO, float2(texcoord.x, texcoord.y + 4.0*blursize)) * 0.05;
-	}
-	
-Done = 1-sum;
-//bilateral blur/\
 
 	if(Dis_Occlusion == 1)     
 		{
@@ -946,21 +815,9 @@ else if(Dis_Occlusion == 5)
 	{
 		DM = tex2Dlod(SamplerDM,float4(texcoord,0,0)).bbbb;
 	}	                          
+		DM = lerp(DM,float4(1,1,1,1),0.0075);                         	
 		
-		DM = lerp(DM,float4(1,1,1,1),0.04375);                         	
-		
-		float4 AODM;
-		
-		if(AO == 1)
-		{
-			AODM =lerp(DM,Done,0.04375);
-		}
-		else
-		{
-			AODM = DM;
-		}
-		
-	color = float4(DM.r,0,AODM.r,1); //AO Depth Map is on the Blue Channel Normal DM on the Red Channel.
+	color = DM;
 }
 
 ////////////////////////////////////////////////Left/Right Eye////////////////////////////////////////////////////////
@@ -968,7 +825,7 @@ else if(Dis_Occlusion == 5)
 float4 PS_renderLR(in float2 texcoord : TEXCOORD0)
 {
 	float4 color,Samp;
-	float DepthL = 1, DepthR = 1, DepthZL = 1, DepthZR = 1, MS, P, S, Z;
+	float DepthL = 1, DepthR = 1, MS, P, S, Z;
 	
 	if(Mode == 1)
 	{
@@ -1027,29 +884,24 @@ float4 PS_renderLR(in float2 texcoord : TEXCOORD0)
 		float L = tex2Dlod(SamplerDis,float4(TCL.x+S, TCL.y,0,0)).r;
 		float R = tex2Dlod(SamplerDis,float4(TCR.x-S, TCR.y,0,0)).r;
 		
-		float ZL = tex2Dlod(SamplerDis,float4(TCL.x+S, TCL.y,0,0)).b;
-		float ZR = tex2Dlod(SamplerDis,float4(TCR.x-S, TCR.y,0,0)).b;
-		
 		DepthL =  min(DepthL,L);
 		DepthR =  min(DepthR,R);
-		DepthZL =  min(DepthZL,ZL);
-		DepthZR =  min(DepthZR,ZR);
 	}
 	
-	float ParallaxL = max(-0.1,MS * (1-ZPD/DepthZL));
-	float ParallaxR = max(-0.1,MS * (1-ZPD/DepthZR));
+	float ParallaxL = max(-0.1,MS * (1-ZPD/DepthL));
+	float ParallaxR = max(-0.1,MS * (1-ZPD/DepthR));
 	
 	if(ZPD == 0)
-	{
-	Z = 1.0;
-	}
-	else
-	{
-	Z = 0.5;
-	}
-	
-		ParallaxL = lerp(ParallaxL,DepthL * MS,0.5);
-		ParallaxR = lerp(ParallaxR,DepthR * MS,0.5);
+		{
+			Z = 1.0;
+		}
+		else
+		{
+			Z = 0.5;
+		}
+		
+		ParallaxL = lerp(ParallaxL,DepthL * MS,Z);
+		ParallaxR = lerp(ParallaxR,DepthR * MS,Z);
 		
 		float ReprojectionLeft =  ParallaxL;
 		float ReprojectionRight = ParallaxR;
@@ -1305,11 +1157,14 @@ float4 PS_renderLR(in float2 texcoord : TEXCOORD0)
 	}
 		else
 	{
-			float3 FinDM = lerp(tex2Dlod(SamplerDis,float4(texcoord.x,texcoord.y*2-1,0,0)).rrr,tex2Dlod(SamplerDis,float4(texcoord.x,texcoord.y*2-1,0,0)).bbb,0.5);
-			float4 DMV = texcoord.x < 0.5 ? GetAO(float2(texcoord.x*2 , texcoord.y*2)) : tex2Dlod(SamplerDM,float4(texcoord.x*2-1 , texcoord.y*2,0,0)).bbbb;
-			color = texcoord.y < 0.5 ? DMV : float4(FinDM,1) ;
+			color = texcoord.y < 0.5 ? tex2Dlod(SamplerDM,float4(texcoord.x , texcoord.y*2,0,0)).bbbb : tex2Dlod(SamplerDis,float4(texcoord.x,texcoord.y*2-1,0,0));
 	}
-return color;
+return float4(color.rgb,tex2Dlod(SamplerDis,float4(texcoord.x,texcoord.y*2-1,0,0)).r);
+}
+
+void Average_Luminance(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 color : SV_Target0 )
+{
+	color = PS_renderLR(texcoord).wwww;
 }
 
 ////////////////////////////////////////////////////////Logo/////////////////////////////////////////////////////////////////////////
@@ -1320,7 +1175,7 @@ float4 Out(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Targe
 	float HEIGHT = BUFFER_HEIGHT/2,WIDTH = BUFFER_WIDTH/2;	
 	float2 LCD,LCE,LCP,LCT,LCH,LCThree,LCDD,LCDot,LCI,LCN,LCF,LCO;
 	float size = 9.5,set = BUFFER_HEIGHT/2,offset = (set/size),Shift = 50;
-	float4 Color = PS_renderLR(texcoord),Done,Website,D,E,P,T,H,Three,DD,Dot,I,N,F,O;
+	float4 Color = float4(PS_renderLR(texcoord).rgb,1),Done,Website,D,E,P,T,H,Three,DD,Dot,I,N,F,O;
 
 	if(timer <= 10000)
 	{
@@ -1479,12 +1334,6 @@ technique Depth3D_Reprojection
 			PixelShader = DepthMap;
 			RenderTarget = texDM;
 		}
-			pass AmbientOcclusion
-		{
-			VertexShader = PostProcessVS;
-			PixelShader = AO_in;
-			RenderTarget = texAO;
-		}	
 			pass Disocclusion
 		{
 			VertexShader = PostProcessVS;
