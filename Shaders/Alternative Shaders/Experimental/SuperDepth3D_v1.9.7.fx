@@ -30,7 +30,7 @@
 #define Depth_Map_Division 1.0
 
 // Determines The Max Depth amount.
-#define Depth_Max 55
+#define Depth_Max 50
 
 uniform int Depth_Map <
 	ui_type = "combo";
@@ -75,9 +75,19 @@ uniform float ZPD <
 	ui_min = 0.0; ui_max = 0.150;
 	ui_label = "Zero Parallax Distance";
 	ui_tooltip = "ZPD controls the focus distance for the screen Pop-out effect.\n"
-				"FPS Games should be around 0.025-0.075 Max.\n"
-				"Default is 0.050";
-> = 0.050;
+				"For FPS Games this should be around 0.005-0.075.\n"
+				"Default is 0.010, Zero is off.";
+> = 0.010;
+
+uniform int Auto_ZPD <
+	ui_type = "drag";
+	ui_min = 0; ui_max = 5;
+	ui_label = "Auto Zero Parallax Distance Power";
+	ui_tooltip = "Auto Zero Parallax Distance Power controls the focus distance for the screen Pop-out effect automatically.\n"
+				"One is low, Two is Medium, Three is Normal, Four is High, Five is Extra, and Six is Max.\n"
+				"Auto ZPD is not made for FPS Games.\n"
+				"Default is 0, Zero is off.";
+> = 0;
 
 uniform float Weapon_Depth <
 	ui_type = "drag";
@@ -246,14 +256,14 @@ sampler BackBufferCLAMP
 		AddressW = CLAMP;
 	};
 	
-texture texDM  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT/Depth_Map_Division; Format = RGBA32F; MipLevels = 3;}; 
+texture texDM  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT/Depth_Map_Division; Format = RGBA32F;}; 
 
 sampler SamplerDM
 	{
 		Texture = texDM;
 	};
 	
-texture texDis  { Width = BUFFER_WIDTH/Depth_Map_Division; Height = BUFFER_HEIGHT/Depth_Map_Division; Format = RGBA32F; MipLevels = 3;}; 
+texture texDis  { Width = BUFFER_WIDTH/Depth_Map_Division; Height = BUFFER_HEIGHT/Depth_Map_Division; Format = RGBA32F;}; 
 
 sampler SamplerDis
 	{
@@ -290,11 +300,16 @@ sampler SamplerLum
 		MipFilter = LINEAR;
 	};
 	
-float AL(in float2 texcoord : TEXCOORD0)
-{
-	float Luminance = tex2Dlod(SamplerLum,float4(texcoord,0,0)).r; //Average Luminance Texture Sample 
-    return smoothstep(0,1,Luminance);
-}
+texture texLumT  {Width = BUFFER_WIDTH/2; Height = BUFFER_HEIGHT/2; Format = RGBA8;};
+																				
+sampler SamplerLumT																
+	{
+		Texture = texLumT;
+		MinFilter = LINEAR;
+		MagFilter = LINEAR;
+		MipFilter = LINEAR;
+	};
+	
 /////////////////////////////////////////////////////////////////////////////////Depth Map Information/////////////////////////////////////////////////////////////////////////////////
 
 float4 Depth(in float2 texcoord : TEXCOORD0)
@@ -676,9 +691,12 @@ float4 WeaponDepth(in float2 texcoord : TEXCOORD0)
 		zBufferWH = smoothstep(Adj,1,zBufferWH) ;//Weapon Adjust smoothstep range from Adj-1
 		
 		//Auto Anti Weapon Depth Map Z-Fighting is always on.
-		float AA;
-		float al = abs(AL(texcoord).r);
-		if(al <= 0.044)
+		
+		float Luminance = tex2Dlod(SamplerLum,float4(texcoord,0,0)).r; //Average Luminance Texture Sample 
+		Luminance = smoothstep(0,1,Luminance);		
+		float AA,AL = abs(Luminance);
+
+		if(AL <= 0.044)
 		{
 			AA = 0.0925;
 		}
@@ -687,7 +705,7 @@ float4 WeaponDepth(in float2 texcoord : TEXCOORD0)
 			AA = 0.250;
 		}
 
-		float AAWDMA = clamp(AL(texcoord).r*2,AA,1.0);
+		float AAWDMA = clamp(Luminance*2,AA,1.0);
 		zBufferWH = lerp(zBufferWH*AAWDMA,zBufferWH,0.050);
 		
 		if (WDM == 18)
@@ -816,8 +834,8 @@ else if(Dis_Occlusion == 5)
 		DM = tex2Dlod(SamplerDM,float4(texcoord,0,0)).bbbb;
 	}	                          
 		DM = lerp(DM,float4(1,1,1,1),0.0075);                         	
-		
-	color = DM;
+		float ALDM = tex2D(SamplerDM,float2(texcoord.x,texcoord.y)).g;
+	color = float4(DM.r,ALDM,DM.b,1);
 }
 
 ////////////////////////////////////////////////Left/Right Eye////////////////////////////////////////////////////////
@@ -825,7 +843,7 @@ else if(Dis_Occlusion == 5)
 float4 PS_renderLR(in float2 texcoord : TEXCOORD0)
 {
 	float4 color,Samp;
-	float DepthL = 1, DepthR = 1, MS, P, S, Z;
+	float DepthL = 1, DepthR = 1, AZPD, ZP, MS, P, S, Z;
 	
 	if(Mode == 1)
 	{
@@ -887,21 +905,58 @@ float4 PS_renderLR(in float2 texcoord : TEXCOORD0)
 		DepthL =  min(DepthL,L);
 		DepthR =  min(DepthR,R);
 	}
-	
-	float ParallaxL = max(-0.1,MS * (1-ZPD/DepthL));
-	float ParallaxR = max(-0.1,MS * (1-ZPD/DepthR));
-	
-	if(ZPD == 0)
+		float Luminance = tex2Dlod(SamplerLumT,float4(texcoord,0,0)).r; //Average Luminance Texture Sample 
+		Luminance = smoothstep(0,1,Luminance);		
+		float AL = abs(Luminance);
+		
+		if(Auto_ZPD == 1)
 		{
-			Z = 1.0;
+			AZPD = 0.100;
+		}
+		else if(Auto_ZPD == 2)
+		{
+			AZPD = 0.150;
+		}
+		else if(Auto_ZPD == 3)
+		{
+			AZPD = 0.200;
+		}
+		else if(Auto_ZPD == 4)
+		{
+			AZPD = 0.250;
+		}
+		else if(Auto_ZPD == 5)
+		{
+			AZPD = 0.375;
+		}
+		else if(Auto_ZPD == 6)
+		{
+			AZPD = 0.500;
+		}
+
+		if(Auto_ZPD >= 1)
+		{
+			Z = AL*AZPD; //Auto ZDP based on the Auto Anti Weapon Depth Map Z-Fighting code.
 		}
 		else
 		{
-			Z = 0.5;
+			Z = ZPD;
 		}
 		
-		ParallaxL = lerp(ParallaxL,DepthL * MS,Z);
-		ParallaxR = lerp(ParallaxR,DepthR * MS,Z);
+		if(ZPD == 0 && Auto_ZPD == 0)
+		{
+			ZP = 1.0;
+		}
+		else
+		{
+			ZP = 0.625;
+		}
+	
+	float ParallaxL = max(-0.1,MS * (1-Z/DepthL));
+	float ParallaxR = max(-0.1,MS * (1-Z/DepthR));
+	
+		ParallaxL = lerp(ParallaxL,DepthL * MS,ZP);
+		ParallaxR = lerp(ParallaxR,DepthR * MS,ZP);
 		
 		float ReprojectionLeft =  ParallaxL;
 		float ReprojectionRight = ParallaxR;
@@ -1157,14 +1212,19 @@ float4 PS_renderLR(in float2 texcoord : TEXCOORD0)
 	}
 		else
 	{
-			color = texcoord.y < 0.5 ? tex2Dlod(SamplerDM,float4(texcoord.x , texcoord.y*2,0,0)).bbbb : tex2Dlod(SamplerDis,float4(texcoord.x,texcoord.y*2-1,0,0));
+			color = texcoord.y < 0.5 ? tex2Dlod(SamplerDM,float4(texcoord.x , texcoord.y*2,0,0)).bbbb : tex2Dlod(SamplerDis,float4(texcoord.x,texcoord.y*2-1,0,0)).rrrr;
 	}
-return float4(color.rgb,tex2Dlod(SamplerDis,float4(texcoord.x,texcoord.y*2-1,0,0)).r);
+return float4(color.rgb,tex2D(SamplerDis,float2(texcoord.x,texcoord.y)).g);
 }
 
-void Average_Luminance(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 color : SV_Target0 )
+void Average_Luminance(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 color : SV_Target)
 {
 	color = PS_renderLR(texcoord).wwww;
+}
+
+void ALT(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 color : SV_Target)
+{
+	color = tex2Dlod(SamplerLum,float4(texcoord,0,0));
 }
 
 ////////////////////////////////////////////////////////Logo/////////////////////////////////////////////////////////////////////////
@@ -1345,6 +1405,12 @@ technique Depth3D_Reprojection
 			VertexShader = PostProcessVS;
 			PixelShader = Average_Luminance;
 			RenderTarget = texLum;
+		}
+			pass ALT
+		{
+			VertexShader = PostProcessVS;
+			PixelShader = ALT;
+			RenderTarget = texLumT;
 		}
 			pass StereoOut
 		{
