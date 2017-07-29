@@ -66,7 +66,7 @@ uniform float ZPD <
 	ui_min = 0.0; ui_max = 0.15;
 	ui_label = "Zero Parallax Distance";
 	ui_tooltip = "ZPD controls the focus distance for the screen Pop-out effect.";
-> = 0.025;
+> = 0.010;
 
 uniform float Weapon_Depth <
 	ui_type = "drag";
@@ -116,13 +116,6 @@ uniform int Anaglyph_Colors <
 	ui_label = "Anaglyph Color Mode";
 	ui_tooltip = "Select colors for your 3D anaglyph glasses.";
 > = 0;
-
-uniform float Anaglyph_Desaturation <
-	ui_type = "drag";
-	ui_min = 0.0; ui_max = 1.0;
-	ui_label = "Anaglyph Desaturation";
-	ui_tooltip = "Adjust anaglyph desaturation, Zero is Black & White, One is full color.";
-> = 1.0;
 
 uniform int Custom_Sidebars <
 	ui_type = "combo";
@@ -252,22 +245,8 @@ float4 Depth(in float2 texcoord : TEXCOORD0)
 
 void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 Color : SV_Target0)
 {
-		float Out = Depth(texcoord).r,A = 1;
+	float Out = Depth(texcoord).r,A = 1;
 
-	// Dither for DepthBuffer adapted from gedosato ramdom dither https://github.com/PeterTh/gedosato/blob/master/pack/assets/dx9/deband.fx
-	// I noticed in some games the depth buffer started to have banding so this is used to remove that.
-			
-	float dither_bit  = 7.0;
-	float noise = frac(sin(dot(texcoord, float2(12.9898, 78.233))) * 43758.5453 * 1);
-	float dither_shift = (1.0 / (pow(2,dither_bit) - 1.0));
-	float dither_shift_half = (dither_shift * 0.5);
-	dither_shift = dither_shift * noise - dither_shift_half;
-	Out += -dither_shift;
-	Out += dither_shift;
-	Out += -dither_shift;
-	
-	// Dither End	
-	
 	Color = float4(Out,Out,Out,A);
 }
 
@@ -327,7 +306,7 @@ else if(Dis_Occlusion == 5)
 		DM = tex2Dlod(SamplerDM,float4(texcoord,0,0)).bbbb;
 	}	                          
 		
-		DM = lerp(DM,float4(1,1,1,1),0.05);                         	
+		DM = lerp(DM,float4(1,1,1,1),0.0075);                         	
 
 	color = DM;
 }
@@ -389,8 +368,8 @@ float4 PS_renderLR(in float2 texcoord : TEXCOORD0)
 	float ParallaxL = max(-0.1,MS * (1-ZPD/DepthL));
 	float ParallaxR = max(-0.1,MS * (1-ZPD/DepthR));
 	
-		ParallaxL = lerp(ParallaxL,DepthL * MS,0.5);
-		ParallaxR = lerp(ParallaxR,DepthR * MS,0.5);
+		ParallaxL = lerp(ParallaxL,DepthL * MS,0.625);
+		ParallaxR = lerp(ParallaxR,DepthR * MS,0.625);
 		
 		float ReprojectionLeft =  ParallaxL;
 		float ReprojectionRight = ParallaxR;
@@ -482,15 +461,11 @@ float4 PS_renderLR(in float2 texcoord : TEXCOORD0)
 		else
 		{
 													
-				float3 HalfLM = dot(tex2D(BackBufferMIRROR,float2((texcoord.x + P) + ReprojectionLeft,texcoord.y)).rgb,float3(0.299, 0.587, 0.114));
-				float3 HalfRM = dot(tex2D(BackBufferMIRROR,float2((texcoord.x - P) - ReprojectionRight,texcoord.y)).rgb,float3(0.299, 0.587, 0.114));
-				float3 LM = lerp(HalfLM,tex2D(BackBufferMIRROR,float2((texcoord.x + P) + ReprojectionLeft,texcoord.y)).rgb,Anaglyph_Desaturation);  
-				float3 RM = lerp(HalfRM,tex2D(BackBufferMIRROR,float2((texcoord.x - P) - ReprojectionRight,texcoord.y)).rgb,Anaglyph_Desaturation); 
+				float3 LM = tex2D(BackBufferMIRROR,float2((texcoord.x + P) + ReprojectionLeft,texcoord.y)).rgb;  
+				float3 RM = tex2D(BackBufferMIRROR,float2((texcoord.x - P) - ReprojectionRight,texcoord.y)).rgb; 
 				
-				float3 HalfLB = dot(tex2D(BackBufferBORDER,float2((texcoord.x + P) + ReprojectionLeft,texcoord.y)).rgb,float3(0.299, 0.587, 0.114));
-				float3 HalfRB = dot(tex2D(BackBufferBORDER,float2((texcoord.x - P ) - ReprojectionRight,texcoord.y)).rgb,float3(0.299, 0.587, 0.114));
-				float3 LB = lerp(HalfLB,tex2D(BackBufferBORDER,float2((texcoord.x + P) + ReprojectionLeft,texcoord.y)).rgb,Anaglyph_Desaturation);  
-				float3 RB = lerp(HalfRB,tex2D(BackBufferBORDER,float2((texcoord.x - P) - ReprojectionRight,texcoord.y)).rgb,Anaglyph_Desaturation); 
+				float3 LB = tex2D(BackBufferBORDER,float2((texcoord.x + P) + ReprojectionLeft,texcoord.y)).rgb;  
+				float3 RB = tex2D(BackBufferBORDER,float2((texcoord.x - P) - ReprojectionRight,texcoord.y)).rgb; 
 				
 				float4 C;
 				float4 CT;

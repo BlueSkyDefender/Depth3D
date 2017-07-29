@@ -386,7 +386,7 @@ float4 WeaponDepth(in float2 texcoord : TEXCOORD0)
 		float zBufferWH = tex2D(DepthBuffer, texcoord).r; //Weapon Hand Depth Buffer
 		//Weapon Depth Map
 		//FPS Hand Depth Maps require more precision at smaller scales to work
-		if(WDM == 1 || WDM == 3 || WDM == 4 || WDM == 6 || WDM == 7 || WDM == 8 || WDM == 9 || WDM == 10 || WDM == 11 || WDM == 12 || WDM == 13 || WDM == 14 || WDM == 16 || WDM == 17 || WDM == 19 || WDM == 20 || WDM == 21 || WDM == 22 || WDM == 23 || WDM == 24 || WDM == 25 || WDM == 26 || WDM == 27 )
+		if(WDM == 1 || WDM == 3 || WDM == 4 || WDM == 6 || WDM == 7 || WDM == 8 || WDM == 9 || WDM == 10 || WDM == 11 || WDM == 12 || WDM == 13 || WDM == 14 || WDM == 16 || WDM == 17 || WDM == 19 || WDM == 20 || WDM == 21 || WDM == 22 || WDM == 23 || WDM == 24 || WDM == 25 || WDM == 26 || WDM == 27|| WDM == 28 )
 		{
 		float constantF = 1.0;	
 		float constantN = 0.01;
@@ -660,14 +660,25 @@ float4 WeaponDepth(in float2 texcoord : TEXCOORD0)
 		if (WDM == 27)
 		{
 		cWF = 0.010;
-		cWN = -37.5;
-		cWP = -0.0075;
-		CoP = 7.0;
+		cWN = -33.75;
+		cWP = 0.0;
+		CoP = 4.375;
+		}
+		
+				
+		//Game: Amnesia: The Dark Decent
+		//Weapon Depth Map Twenty Five
+		if (WDM == 28)
+		{
+		cWF = 0.010;
+		cWN = -33.75;
+		cWP = 0.0;
+		CoP = 3.875;
 		}
 		
 		//Game:
-		//Weapon Depth Map Twenty Five
-		if (WDM == 28)
+		//Weapon Depth Map Twenty Six
+		if (WDM == 29)
 		{
 		cWF = Weapon_Adjust.x;
 		cWN = Weapon_Adjust.y;
@@ -762,20 +773,6 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 		G = AverageLuminance;
 		B = Done;
 		
-	// Dither for DepthBuffer adapted from gedosato ramdom dither https://github.com/PeterTh/gedosato/blob/master/pack/assets/dx9/deband.fx
-	// I noticed in some games the depth buffer started to have banding so this is used to remove that.
-			
-	float dither_bit  = 8;
-	float noise = frac(sin(dot(texcoord, float2(12.9898, 78.233))) * 43758.5453 * 1);
-	float dither_shift = (1.0 / (pow(2,dither_bit) - 1.0));
-	float dither_shift_half = (dither_shift * 0.5);
-	dither_shift = dither_shift * noise - dither_shift_half;
-	B += -dither_shift;
-	B += dither_shift;
-	B += -dither_shift;
-	
-	// Dither End	
-	
 	Color = float4(R,G,B,A);
 }
 
@@ -833,8 +830,8 @@ else if(Dis_Occlusion == 5)
 	{
 		DM = tex2Dlod(SamplerDM,float4(texcoord,0,0)).bbbb;
 	}	                          
-		DM = lerp(DM,float4(1,1,1,1),0.0075);                         	
-		float ALDM = tex2D(SamplerDM,float2(texcoord.x,texcoord.y)).g;
+	
+	float ALDM = tex2D(SamplerDM,float2(texcoord.x,texcoord.y)).g;
 	color = float4(DM.r,ALDM,DM.b,1);
 }
 
@@ -952,8 +949,8 @@ float4 PS_renderLR(in float2 texcoord : TEXCOORD0)
 			ZP = 0.625;
 		}
 	
-	float ParallaxL = max(-0.1,MS * (1-Z/DepthL));
-	float ParallaxR = max(-0.1,MS * (1-Z/DepthR));
+	float ParallaxL = max(-0.05,MS * (1-Z/DepthL));
+	float ParallaxR = max(-0.05,MS * (1-Z/DepthR));
 	
 		ParallaxL = lerp(ParallaxL,DepthL * MS,ZP);
 		ParallaxR = lerp(ParallaxR,DepthR * MS,ZP);
