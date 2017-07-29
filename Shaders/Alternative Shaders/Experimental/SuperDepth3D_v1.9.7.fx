@@ -423,7 +423,7 @@ float4 WeaponDepth(in float2 texcoord : TEXCOORD0)
 		{
 		cWF = 0.010;
 		cWN = -2.5;
-		cWP = 0.873;
+		cWP = 0.872;
 		CoP = 0.390;
 		}
 		

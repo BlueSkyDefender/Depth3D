@@ -699,7 +699,7 @@ void PostProcessVS(in uint id : SV_VertexID, out float4 position : SV_Position, 
 
 //*Rendering passes*//
 
-technique Depth3D_Reprojection
+technique Depth3D
 {			
 			pass zbuffer
 		{
