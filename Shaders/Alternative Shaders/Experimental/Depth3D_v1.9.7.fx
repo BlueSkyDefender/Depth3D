@@ -34,7 +34,7 @@
 
 uniform int Depth_Map <
 	ui_type = "combo";
-	ui_items = "Normal\0Normal Reversed\0Raw\0Raw Reverse\0Special\0";
+	ui_items = "Normal\0Normal Reversed\0Special\0";
 	ui_label = "Custom Depth Map";
 	ui_tooltip = "Pick your Depth Map.";
 > = 0;
@@ -187,7 +187,7 @@ sampler SamplerDis
 
 /////////////////////////////////////////////////////////////////////////////////Depth Map Information/////////////////////////////////////////////////////////////////////////////////
 
-float4 Depth(in float2 texcoord : TEXCOORD0)
+void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 Color : SV_Target0)
 {
 		if (Depth_Map_Flip)
 			texcoord.y =  1 - texcoord.y;
@@ -217,37 +217,18 @@ float4 Depth(in float2 texcoord : TEXCOORD0)
 		
 		if (Depth_Map == 0)
 		{
-		zBuffer = Normal;
-		}
-		
+		zBuffer = lerp(Normal,Raw,0.0625);
+		}	
 		else if (Depth_Map == 1)
 		{
-		zBuffer = NormalReverse;
-		}
-
-		else if (Depth_Map == 2)
-		{
-		zBuffer = Raw;
-		}
-		
-		else if (Depth_Map == 3)
-		{
-		zBuffer = RawReverse;
-		}
- 
-		else if (Depth_Map == 4)
+		zBuffer = lerp(NormalReverse,RawReverse,0.0625);
+		}		 
+		else
 		{
 		zBuffer = Special;
 		}
 	
 	return float4(zBuffer.rrr,1);	
-}
-
-void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 Color : SV_Target0)
-{
-	float Out = Depth(texcoord).r,A = 1;
-
-	Color = float4(Out,Out,Out,A);
 }
 
 void  Disocclusion(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 color : SV_Target0)
@@ -305,8 +286,6 @@ else if(Dis_Occlusion == 5)
 	{
 		DM = tex2Dlod(SamplerDM,float4(texcoord,0,0)).bbbb;
 	}	                          
-		
-		DM = lerp(DM,float4(1,1,1,1),0.0075);                         	
 
 	color = DM;
 }
@@ -316,7 +295,7 @@ else if(Dis_Occlusion == 5)
 float4 PS_renderLR(in float2 texcoord : TEXCOORD0)
 {
 	float4 color;
-	float DepthL = 1, DepthR = 1, MS, P, S;
+	float DepthL = 1, DepthR = 1, MS, P, S, Z;
 	float samples[5] = {0.50, 0.58, 0.66, 0.83, 1};
 	float2 TCL, TCR;
 		
@@ -365,11 +344,20 @@ float4 PS_renderLR(in float2 texcoord : TEXCOORD0)
 		DepthR =  min(DepthR,R);
 	}
 	
-	float ParallaxL = max(-0.1,MS * (1-ZPD/DepthL));
-	float ParallaxR = max(-0.1,MS * (1-ZPD/DepthR));
+	if(ZPD == 0)
+	{
+		Z = 1.0;
+	}
+	else
+	{
+		Z = 0.625;
+	}
 	
-		ParallaxL = lerp(ParallaxL,DepthL * MS,0.625);
-		ParallaxR = lerp(ParallaxR,DepthR * MS,0.625);
+	float ParallaxL = max(-0.05,MS * (1-ZPD/DepthL));
+	float ParallaxR = max(-0.05,MS * (1-ZPD/DepthR));
+	
+		ParallaxL = lerp(ParallaxL,DepthL * MS,Z);
+		ParallaxR = lerp(ParallaxR,DepthR * MS,Z);
 		
 		float ReprojectionLeft =  ParallaxL;
 		float ReprojectionRight = ParallaxR;

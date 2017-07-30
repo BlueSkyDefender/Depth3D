@@ -72,20 +72,22 @@ uniform int Divergence <
 
 uniform float ZPD <
 	ui_type = "drag";
-	ui_min = 0.0; ui_max = 0.150;
+	ui_min = 0.0; ui_max = 0.375;
 	ui_label = "Zero Parallax Distance";
 	ui_tooltip = "ZPD controls the focus distance for the screen Pop-out effect.\n"
 				"For FPS Games this should be around 0.005-0.075.\n"
+				"Also Controlls Auto ZPD Power.\n"
 				"Default is 0.010, Zero is off.";
 > = 0.010;
 
 uniform int Auto_ZPD <
-	ui_type = "drag";
-	ui_min = 0; ui_max = 5;
+	ui_type = "combo";
+	ui_items = "Off\0Inverted\0Normal\0";
 	ui_label = "Auto Zero Parallax Distance Power";
 	ui_tooltip = "Auto Zero Parallax Distance Power controls the focus distance for the screen Pop-out effect automatically.\n"
-				"One is low, Two is Medium, Three is Normal, Four is High, Five is Extra, and Six is Max.\n"
-				"Auto ZPD is not made for FPS Games.\n"
+				"Inverted, is if your cam is close to a object you will have less Pop-out.\n"
+				"Normal, is if your cam is close to a object you will have more Pop-out.\n"
+				"Power of this effect is based off ZPD setting above.\n;
 				"Default is 0, Zero is off.";
 > = 0;
 
@@ -213,6 +215,13 @@ uniform bool InvertY <
 	ui_label = "Invert Y-Axis";
 	ui_tooltip = "Invert Y-Axis for the cross cursor.";
 > = false;
+
+//uniform float4 X <
+//	ui_type = "drag";
+//	ui_min = -1; ui_max = 1;
+//	ui_label = "X";
+//	ui_tooltip = "XYZW";
+//> = float4(0,0,0,0);
 
 /////////////////////////////////////////////D3D Starts Here/////////////////////////////////////////////////////////////////
 
@@ -840,7 +849,7 @@ else if(Dis_Occlusion == 5)
 float4 PS_renderLR(in float2 texcoord : TEXCOORD0)
 {
 	float4 color,Samp;
-	float DepthL = 1, DepthR = 1, AZPD, ZP, MS, P, S, Z;
+	float DepthL = 1, DepthR = 1, ZP, MS, P, S, Z;
 	
 	if(Mode == 1)
 	{
@@ -903,37 +912,25 @@ float4 PS_renderLR(in float2 texcoord : TEXCOORD0)
 		DepthR =  min(DepthR,R);
 	}
 		float Luminance = tex2Dlod(SamplerLumT,float4(texcoord,0,0)).r; //Average Luminance Texture Sample 
-		Luminance = smoothstep(0,1,Luminance);		
+		
+		if (Auto_ZPD == 1)
+		{
+			Luminance = smoothstep(0,1,Luminance);		
+		}
+		else if (Auto_ZPD == 2)
+		{
+			Luminance = smoothstep(1,0,Luminance);
+		}
+		else
+		{
+		Luminance = 0;
+		}
+		
 		float AL = abs(Luminance);
 		
-		if(Auto_ZPD == 1)
+		if(Auto_ZPD == 1 && Auto_ZPD == 2)
 		{
-			AZPD = 0.100;
-		}
-		else if(Auto_ZPD == 2)
-		{
-			AZPD = 0.150;
-		}
-		else if(Auto_ZPD == 3)
-		{
-			AZPD = 0.200;
-		}
-		else if(Auto_ZPD == 4)
-		{
-			AZPD = 0.250;
-		}
-		else if(Auto_ZPD == 5)
-		{
-			AZPD = 0.375;
-		}
-		else if(Auto_ZPD == 6)
-		{
-			AZPD = 0.500;
-		}
-
-		if(Auto_ZPD >= 1)
-		{
-			Z = AL*AZPD; //Auto ZDP based on the Auto Anti Weapon Depth Map Z-Fighting code.
+			Z = AL*ZPD; //Auto ZDP based on the Auto Anti Weapon Depth Map Z-Fighting code.
 		}
 		else
 		{

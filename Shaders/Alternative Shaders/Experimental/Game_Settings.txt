@@ -24,7 +24,7 @@ IF IT HAS AN *asterisk* I AM STILL WORKING ON IT.
              Amnesia: The Dark Descent                       DM 4        85.0        WDM 25                   0.500    No    / 0.0375
              Among The Sleep                                 DM 4         50                       Yes        0.125
             *Assassin Creed Unity                            DM *        17.5
-            *Bayonetta                                       DM 0        17.5                                          Yes
+             Bayonetta                                       DM 4        18.75                                0.3125   Yes 4 / 0.020
             *Batman Arkham Knight                            DM *        7.50
             *Batman Arkham Origins                           DM *        7.50
             *Batman: Arkham City                             DM *        7.50
