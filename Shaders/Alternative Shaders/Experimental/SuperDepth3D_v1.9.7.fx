@@ -27,7 +27,7 @@
  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // Determines The resolution of the Depth Map. For 4k Use 1.75 or 1.5. For 1440p Use 1.5 or 1.25. For 1080p use 1. Too low of a resolution will remove too much.
-#define Depth_Map_Division 1.0
+#define Depth_Map_Division 1.75
 
 // Determines The Max Depth amount.
 #define Depth_Max 50
@@ -581,8 +581,8 @@ float4 WeaponDepth(in float2 texcoord : TEXCOORD0)
 		if (WDM == 20)
 		{
 		cWF = 0.010;
-		cWN = 3.75;
-		cWP = 0.0914;
+		cWN = 4.375;
+		cWP = 0.0932;
 		CoP = 0.275;
 		}
 		
@@ -591,9 +591,9 @@ float4 WeaponDepth(in float2 texcoord : TEXCOORD0)
 		if (WDM == 21)
 		{
 		cWF = 0.010;
-		cWN = 5.0;
+		cWN = 4.375;
 		cWP = 0.131;
-		CoP = 0.285;
+		CoP = 0.275;
 		}
 		
 		//Game: Deus Ex Mankind Divided may not be needed.
@@ -928,7 +928,7 @@ float4 PS_renderLR(in float2 texcoord : TEXCOORD0)
 		}
 		else
 		{
-			ZP = 0.625;
+			ZP = 0.6875;
 		}
 	
 	float ParallaxL = max(-0.05,MS * (1-Z/DepthL));
