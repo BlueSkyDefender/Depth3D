@@ -34,7 +34,7 @@
 
 uniform int Depth_Map <
 	ui_type = "combo";
-	ui_items = " 0 Normal\0 1 Normal Reverse\0 2 Raw\0 3 Raw Reverse\0 4 Mix\0 5 Mix Reverse\0 6 Special\0";
+	ui_items = " 0 Normal\0 1 Normal Reverse\0 2 Special\0";
 	ui_label = "Custom Depth Map";
 	ui_tooltip = "Pick your Depth Map.";
 > = 0;
@@ -48,11 +48,11 @@ uniform float Depth_Map_Adjust <
 
 uniform float Mix <
 	ui_type = "drag";
-	ui_min = 0.125; ui_max = 0.500;
+	ui_min = 0.0; ui_max = 1.0;
 	ui_label = "Mix Adjustment";
-	ui_tooltip = "Mix is used to adjust between Normal & Raw.\n"
-				"This is for Depth Map 4 & 5\n"
-				"Default is 0.5";
+	ui_tooltip = "Mix is used to adjust between two linearization algorithms Normal & Raw.\n"
+				"This is for Depth Map 0 & 1\n"
+				"Default is Zero";
 > = 0.5;
 
 uniform float Offset <
@@ -88,7 +88,7 @@ uniform int Auto_ZPD <
 				"Inverted, is if your cam is close to a object you will have less Pop-out.\n"
 				"Normal, is if your cam is close to a object you will have more Pop-out.\n"
 				"Power of this effect is based off ZPD setting above.\n;
-				"Default is 0, Zero is off.";
+				"Default is Off.";
 > = 0;
 
 uniform float Weapon_Depth <
@@ -351,35 +351,15 @@ float4 Depth(in float2 texcoord : TEXCOORD0)
 		
 		if (Depth_Map == 0)
 		{
-		zBuffer = Normal;
+		zBuffer = lerp(Normal,Raw,Mix);
 		}
 		
 		else if (Depth_Map == 1)
 		{
-		zBuffer = NormalReverse;
-		}
-
-		else if (Depth_Map == 2)
-		{
-		zBuffer = Raw;
-		}
-		
-		else if (Depth_Map == 3)
-		{
-		zBuffer = RawReverse;
-		}
-		
-		else if (Depth_Map == 4)
-		{
-		zBuffer = lerp(Normal,Raw,Mix);
-		}
-		
-		else if (Depth_Map == 5)
-		{
 		zBuffer = lerp(NormalReverse,RawReverse,Mix);
 		}
 
-		else if (Depth_Map == 6)
+		else if (Depth_Map == 2)
 		{
 		zBuffer = Special;
 		}
@@ -664,25 +644,25 @@ float4 WeaponDepth(in float2 texcoord : TEXCOORD0)
 		CoP = 3.750;
 		}
 		
-		//Game: Amnesia: Machine for Pigs
+		//Game: Amnesia: Machine for Pigs or Amnesia: The Dark Decent
 		//Weapon Depth Map Twenty Four
 		if (WDM == 27)
 		{
 		cWF = 0.010;
-		cWN = -33.75;
+		cWN = -25.0;
 		cWP = 0.0;
-		CoP = 4.375;
+		CoP = 4.0;
 		}
 		
 				
-		//Game: Amnesia: The Dark Decent
+		//Game: Amnesia: Machine for Pigs or Amnesia: The Dark Decent
 		//Weapon Depth Map Twenty Five
 		if (WDM == 28)
 		{
 		cWF = 0.010;
-		cWN = -33.75;
+		cWN = -25.0;
 		cWP = 0.0;
-		CoP = 3.875;
+		CoP = 2.250;
 		}
 		
 		//Game:
@@ -750,7 +730,7 @@ float4 WeaponDepth(in float2 texcoord : TEXCOORD0)
 
 void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 Color : SV_Target0)
 {
-		float N,R,G,B,A = 1;
+		float N, R, G, B, D, Done, Cutoff, A = 1;
 		
 		float DM = Depth(texcoord).r;
 		float AverageLuminance = Depth(texcoord).r;	
@@ -763,9 +743,14 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 					
 		float NearDepth = step(WD.r,1.0); //Base Cutoff
 		
-		float D, Done;
-		
-		float Cutoff = step(DM.r,CutOFFCal);
+		if (WDM == 28)
+		{
+		Cutoff = smoothstep(0.008,DM.r,CutOFFCal);
+		}
+		else
+		{
+		Cutoff = step(DM.r,CutOFFCal);
+		}
 				
 		if (WDM == 0)
 		{
@@ -928,7 +913,7 @@ float4 PS_renderLR(in float2 texcoord : TEXCOORD0)
 		
 		float AL = abs(Luminance);
 		
-		if(Auto_ZPD == 1 && Auto_ZPD == 2)
+		if(Auto_ZPD >= 1)
 		{
 			Z = AL*ZPD; //Auto ZDP based on the Auto Anti Weapon Depth Map Z-Fighting code.
 		}
@@ -1205,8 +1190,9 @@ float4 PS_renderLR(in float2 texcoord : TEXCOORD0)
 		}	
 	}
 		else
-	{
-			color = texcoord.y < 0.5 ? tex2Dlod(SamplerDM,float4(texcoord.x , texcoord.y*2,0,0)).bbbb : tex2Dlod(SamplerDis,float4(texcoord.x,texcoord.y*2-1,0,0)).rrrr;
+	{		
+			float4 Top = texcoord.x < 0.5 ? tex2Dlod(SamplerLumT,float4(texcoord.x*2,texcoord.y*2,0,0)).r : tex2Dlod(SamplerDM,float4(texcoord.x*2-1 , texcoord.y*2,0,0)).bbbb;
+			color = texcoord.y < 0.5 ? Top : tex2Dlod(SamplerDis,float4(texcoord.x,texcoord.y*2-1,0,0)).rrrr;
 	}
 return float4(color.rgb,tex2D(SamplerDis,float2(texcoord.x,texcoord.y)).g);
 }
