@@ -119,7 +119,7 @@ IF IT HAS AN *asterisk* I AM STILL WORKING ON IT.
             *Witcher 3                                       DM *                 3.0-7.0                                         
     RB      *Wolfenstine: The New Order                      DM *                 3.75-7.5        WDM 16                     
     RB      *Wolfenstine: The Old Blood                      DM *                 3.75-7.5        WDM 16                     
-            *Zombie Army Trilogy                             DM *                 2.5-7.5                                    
+             Zombie Army Trilogy                             DM 0      0.1875       10.0                               Yes N / 0.050-0.075
 
 [Special Depth Map Game List]  [Depth Map] [DM Adjustment] [Weapon DM] [Offset] [Depth Flip] [Read Below]
 *Double Dragon Neon                DM 10        0.75-0.1                 0.6300

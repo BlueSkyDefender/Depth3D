@@ -27,35 +27,33 @@
  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // Determines The resolution of the Depth Map. For 4k Use 1.75 or 1.5. For 1440p Use 1.5 or 1.25. For 1080p use 1. Too low of a resolution will remove too much.
-#define Depth_Map_Division 1.0
+#define Depth_Map_Division 1.75
 
 // Determines The Max Depth amount.
 #define Depth_Max 50
 
 uniform int Depth_Map <
 	ui_type = "combo";
-	ui_items = " 0 Normal\0 1 Normal Reverse\0 3 Special\0";
-	ui_label = "Depth Map Selection";
-	ui_tooltip = "linearization for the zBuffer also Depth Map One to Five.\n"
-			    "Normally you want to use 1,2, or 5."
-			    "DM 3 and 4 are for indoor games.";
+	ui_items = " 0 Normal\0 1 Normal Reverse\0 2 Special\0";
+	ui_label = "Custom Depth Map";
+	ui_tooltip = "Pick your Depth Map.";
 > = 0;
 
 uniform float Depth_Map_Adjust <
 	ui_type = "drag";
-	ui_min = 1.0; ui_max = 100.0;
+	ui_min = 1.0; ui_max = 50.0;
 	ui_label = "Depth Map Adjustment";
 	ui_tooltip = "Adjust the depth map for your games.";
 > = 7.5;
 
-uniform int Balance <
+uniform float Mix <
 	ui_type = "drag";
-	ui_min = -3; ui_max = 3;
-	ui_label = "Power Balance";
-	ui_tooltip = "Power Blance Between two Depth Maps.\n"
-				"This also adjust for your Dominate Eye.\n"
-				"Default is Zero.";
-> = 0;
+	ui_min = 0.0; ui_max = 1.0;
+	ui_label = "Mix Adjustment";
+	ui_tooltip = "Mix is used to adjust between two linearization algorithms Normal & Raw.\n"
+				"This is for Depth Map 0 & 1\n"
+				"Default is Zero";
+> = 0.5;
 
 uniform float Offset <
 	ui_type = "drag";
@@ -84,13 +82,21 @@ uniform float ZPD <
 
 uniform int Auto_ZPD <
 	ui_type = "combo";
-	ui_items = "Off\0Inverted\0Normal\0Inverted Alt\0Normal Alt\0";
+	ui_items = "Off\0Inverted\0Normal\0";
 	ui_label = "Auto Zero Parallax Distance Power";
 	ui_tooltip = "Auto Zero Parallax Distance Power controls the focus distance for the screen Pop-out effect automatically.\n"
 				"Inverted, is if your cam is close to a object you will have less Pop-out.\n"
 				"Normal, is if your cam is close to a object you will have more Pop-out.\n"
 				"Power of this effect is based off ZPD setting above.\n;
 				"Default is Off.";
+> = 0;
+
+uniform float Weapon_Depth <
+	ui_type = "drag";
+	ui_min = -100; ui_max = 100;
+	ui_label = "Weapon Depth Adjustment";
+	ui_tooltip = "Pushes or Pulls the FPS Hand in or out of the screen.\n" 
+				 "Default is 0";
 > = 0;
 
 uniform int Dis_Occlusion <
@@ -122,28 +128,25 @@ uniform bool Depth_Map_Flip <
 
 uniform int WDM <
 	ui_type = "combo";
-	ui_items = "Weapon DM Off\0Custom WDM\0 WDM 0\0";
+	ui_items = "Weapon DM Off\0Custom WDM One\0Custom WDM Two\0Weapon DM 0\0Weapon DM 1\0Weapon DM 2\0Weapon DM 3\0Weapon DM 4\0Weapon DM 5\0Weapon DM 6\0Weapon DM 7\0Weapon DM 8\0Weapon DM 9\0Weapon DM 10\0Weapon DM 11\0Weapon DM 12\0Weapon DM 13\0Weapon DM 14\0Weapon DM 15\0Weapon DM 16\0Weapon DM 17\0Weapon DM 18\0Weapon DM 19\0Weapon DM 20\0Weapon DM 21\0Weapon DM 22\0Weapon DM 23\0Weapon DM 24\0Weapon DM 25\0";
 	ui_label = "Weapon Depth Map";
 	ui_tooltip = "Pick your weapon depth map for games.";
 > = 0;
 
 uniform float3 Weapon_Adjust <
 	ui_type = "drag";
-	ui_min = 0; ui_max = 25.0;
+	ui_min = -10.0; ui_max = 10.0;
 	ui_label = "Weapon Adjust Depth Map";
-	ui_tooltip = "Adjust weapon depth map for FPS Hand.\n"
-				 "X, is FPS Hand Scale Adjustment.\n"
-				 "Y, is Cutoff Point Adjustment.\n"
-				 "Y, Zero is Auto.\n"
-				 "Default is (X 0.250, Y 0, Z 0).";
-> = float3(0.0,0.250,0.0);
+	ui_tooltip = "Adjust weapon depth map.\n" 
+				 "Default is (X 0.010, Y 5.0, Z 1.0)";
+> = float3(0.010,5.00,1.00);
 
-uniform float Weapon_Depth <
+uniform float Weapon_Cutoff <
 	ui_type = "drag";
-	ui_min = -100; ui_max = 100;
-	ui_label = "Weapon Depth Adjustment";
-	ui_tooltip = "Pushes or Pulls the FPS Hand in or out of the screen.\n" 
-				 "Default is 0";
+	ui_min = 0; ui_max = 1;
+	ui_label = "Weapon Cutoff Point";
+	ui_tooltip = "For adjusting the cutoff point of the weapon Depth Map.\n" 
+				 "Zero is Auto.";
 > = 0;
 
 uniform int Custom_Sidebars <
@@ -294,9 +297,8 @@ float4 MouseCursor(float4 position : SV_Position, float2 texcoord : TEXCOORD) : 
 	return Mpointer;
 }
 
-
 /////////////////////////////////////////////////////////////////////////////////Adapted Luminance/////////////////////////////////////////////////////////////////////////////////
-texture texLum {Width = 256/2; Height = 256/2; Format = RGBA8; MipLevels = 8;}; //Sample at 256x256/2 and a mip bias of 8 should be 1x1 
+texture texLum  {Width = 256/2; Height = 256/2; Format = RGBA8; MipLevels = 8;}; //Sample at 256x256/2 and a mip bias of 8 should be 1x1 
 																				
 sampler SamplerLum																
 	{
@@ -307,33 +309,19 @@ sampler SamplerLum
 		MipFilter = LINEAR;
 	};
 	
-texture texLumWeapon {Width = 256/2; Height = 256/2; Format = RGBA8; MipLevels = 8;}; //Sample at 256x256/2 and a mip bias of 8 should be 1x1 
+texture texLumT  {Width = BUFFER_WIDTH/2; Height = BUFFER_HEIGHT/2; Format = RGBA8;};
 																				
-sampler SamplerLumWeapon																
+sampler SamplerLumT																
 	{
-		Texture = texLumWeapon;
-		MipLODBias = 8.0f; //Luminance adapted luminance value from 1x1 Texture Mip lvl of 8
+		Texture = texLumT;
 		MinFilter = LINEAR;
 		MagFilter = LINEAR;
 		MipFilter = LINEAR;
-	};	
+	};
 	
-	float Lum(in float2 texcoord : TEXCOORD0)
-	{
-		float Luminance = tex2Dlod(SamplerLum,float4(texcoord,0,0)).r; //Average Luminance Texture Sample 
-
-		return Luminance;
-	}
-	
-		float LumWeapon(in float2 texcoord : TEXCOORD0)
-	{
-		float Luminance = tex2Dlod(SamplerLumWeapon,float4(texcoord,0,0)).g; //Average Luminance Texture Sample 
-
-		return Luminance;
-	}
 /////////////////////////////////////////////////////////////////////////////////Depth Map Information/////////////////////////////////////////////////////////////////////////////////
 
-float2 Depth(in float2 texcoord : TEXCOORD0)
+float4 Depth(in float2 texcoord : TEXCOORD0)
 {
 		if (Depth_Map_Flip)
 			texcoord.y =  1 - texcoord.y;
@@ -344,7 +332,6 @@ float2 Depth(in float2 texcoord : TEXCOORD0)
 		//Near & Far Adjustment
 		float DDA = 0.125/Depth_Map_Adjust; //Division Depth Map Adjust - Near
 		float DA = Depth_Map_Adjust*2; //Depth Map Adjust - Near
-		float Mix = 0.062 , pOne, pTwo;
 		//All 1.0f are Far Adjustment
 		
 		//0. Normal
@@ -360,74 +347,27 @@ float2 Depth(in float2 texcoord : TEXCOORD0)
 		float RawReverse = pow(abs(zBuffer - 1.0),DA);
 		
 		//4. Special Depth Map
-		float Special = pow(abs(exp(zBuffer)*Offset),DA*25);
-		
-		float2 DM;
-		
-		if(Balance == 1)
-		{
-		pOne = 1.25;
-		}
-		else if(Balance == 2)
-		{
-		pOne = 1.375;
-		}
-		else if(Balance == 3)
-		{
-		pOne = 1.5;
-		}
-		else
-		{
-		pOne = 1;
-		}
-		
-		if(Balance == -1)
-		{
-		pTwo = 1;
-		}
-		else if(Balance == -2)
-		{
-		pTwo = 1.375;
-		}
-		else if(Balance == -3)
-		{
-		pTwo = 1.5;
-		}
-		else
-		{
-		pTwo = 1;
-		}
+		float Special = pow(abs(exp(zBuffer)*Offset),(DA*25));
 		
 		if (Depth_Map == 0)
 		{
-		DM.x = lerp(Normal,Raw,Mix)*pOne;
-		}		
-		else if (Depth_Map == 1)
-		{
-		DM.x = lerp(NormalReverse,RawReverse,Mix)*pOne;
-		}		
-		else
-		{
-		DM.x = Special*pOne;
+		zBuffer = lerp(Normal,Raw,Mix);
 		}
 		
-		if (Depth_Map == 0)
-		{
-		DM.y = lerp(Normal,Raw,Mix)*pTwo;
-		}		
 		else if (Depth_Map == 1)
 		{
-		DM.y = lerp(NormalReverse,RawReverse,Mix)*pTwo;
-		}	
-		else
+		zBuffer = lerp(NormalReverse,RawReverse,Mix);
+		}
+
+		else if (Depth_Map == 2)
 		{
-		DM.y = Special*pTwo;
+		zBuffer = Special;
 		}
 	
-	return float2(DM.x,DM.y);	
+	return float4(zBuffer.rrr,1);	
 }
 
-float2 WeaponDepth(in float2 texcoord : TEXCOORD0)
+float4 WeaponDepth(in float2 texcoord : TEXCOORD0)
 {
 		if (Depth_Map_Flip)
 			texcoord.y =  1 - texcoord.y;
@@ -435,132 +375,405 @@ float2 WeaponDepth(in float2 texcoord : TEXCOORD0)
 		float zBufferWH = tex2D(DepthBuffer, texcoord).r; //Weapon Hand Depth Buffer
 		//Weapon Depth Map
 		//FPS Hand Depth Maps require more precision at smaller scales to work
+		if(WDM == 1 || WDM == 3 || WDM == 4 || WDM == 6 || WDM == 7 || WDM == 8 || WDM == 9 || WDM == 10 || WDM == 11 || WDM == 12 || WDM == 13 || WDM == 14 || WDM == 16 || WDM == 17 || WDM == 19 || WDM == 20 || WDM == 21 || WDM == 22 || WDM == 23 || WDM == 24 || WDM == 25 || WDM == 26 || WDM == 27|| WDM == 28 )
+		{
 		float constantF = 1.0;	
 		float constantN = 0.01;
-		
-		zBufferWH = constantF * constantN / (constantF + zBufferWH * (constantN - constantF));
+		zBufferWH = 2.0 * constantN * constantF / (constantF + constantN - (2.0 * zBufferWH - 1.0) * (constantF - constantN));
+		}
+		else if(WDM == 2 || WDM == 5 || WDM == 15 || WDM == 18)
+		{
+		zBufferWH = pow(abs(zBufferWH - 1.0),10);
+ 		}
  		
 		//Set Weapon Depth Map settings for the section below.//
-		float WA_X; //Weapon_Adjust.x
-		float WA_Y; //Weapon_Adjust.y
-		float CoP; //Weapon_Adjust.z
+		float cWF;
+		float cWN;
+		float cWP;
+		float CoP;
 		
 		if (WDM == 1)
 		{
-		WA_X = Weapon_Adjust.x;
-		WA_Y = Weapon_Adjust.y;
+		cWF = Weapon_Adjust.x;
+		cWN = Weapon_Adjust.y;
+		cWP = Weapon_Adjust.z;
 		}
 		
-		else if (WDM == 2)
+		if (WDM == 2)
 		{
-		WA_X = 2.855;
-		WA_Y = 0.1375;
-		CoP = 0.335;
+		cWF = Weapon_Adjust.x;
+		cWN = Weapon_Adjust.y;
+		cWP = Weapon_Adjust.z;
 		}
+		
+		//Game: Unreal Gold with v227 DX9
+		//Weapon Depth Map Zero
+		if (WDM == 3)
+		{
+		cWF = 0.010;
+		cWN = -2.5;
+		cWP = 0.872;
+		CoP = 0.390;
+		}
+		
+		//Game: Borderlands 2 
+		//Weapon Depth Map One
+		if (WDM == 4)
+		{
+		cWF = 0.010;
+		cWN = -7.500;
+		cWP = 0.875;
+		CoP = 0.600;
+		}
+		
+		//Game: Call of Duty: Black Ops 
+		//Weapon Depth Map Two
+		if (WDM == 5)
+		{
+		cWF = 0.853;
+		cWN = 1.500;
+		cWP = 1.0003;
+		CoP = 0.507;
+		}
+		
+		//Game: Call of Duty: Games 
+		//Weapon Depth Map Three
+		if (WDM == 6)
+		{
+		cWF = 0.390;
+		cWN = 5;
+		cWP = 0.999;
+		CoP = 0.254;
+		}
+		
+		//Game: Fallout 4
+		//Weapon Depth Map Four
+		if (WDM == 7)
+		{
+		cWF = 0.010;
+		cWN = -0.500;
+		cWP = 0.9895;
+		CoP = 0.252;
+		}
+		
+		//Game: Cryostasis
+		//Weapon Depth Map Five		
+		if (WDM == 8)
+		{
+		cWF = 0.015;
+		cWN = -87.500;
+		cWP = 0.750;
+		CoP = 0.666;
+		}
+		
+		//Game: Doom 2016
+		//Weapon Depth Map Six
+		if (WDM == 9)
+		{
+		cWF = 0.010;
+		cWN = -15.0;
+		cWP = 0.890;
+		CoP = 0.4127;
+		}
+		
+		//Game: Metro Games
+		//Weapon Depth Map Seven
+		if (WDM == 10)
+		{
+		cWF = 0.010;
+		cWN = -5.0;
+		cWP = 0.956;
+		CoP = 0.260;
+		}
+		
+		//Game: NecroVision
+		//Weapon Depth Map Eight
+		if (WDM == 11)
+		{
+		cWF = 0.010;
+		cWN = -20.0;
+		cWP = 0.4825;
+		CoP = 0.733;
+		}
+		
+		//Game: Quake XP
+		//Weapon Depth Map Nine
+		if (WDM == 12)
+		{
+		cWF = 0.010;
+		cWN = -25.0;
+		cWP = 0.695;
+		CoP = 0.341;
+		}
+		
+		//Game: Quake 4
+		//Weapon Depth Map Ten
+		if (WDM == 13)
+		{
+		cWF = 0.010;
+		cWN = -20.0;
+		cWP = 0.500;
+		CoP = 0.476;
+		}
+		
+		//Game: Rage
+		//Weapon Depth Map Eleven
+		if (WDM == 14)
+		{
+		cWF = 0.010;
+		cWN = -7.5;
+		cWP = 0.4505;
+		CoP = 0.816;
+		}
+		
+		//Game: Return to Castle Wolfensitne
+		//Weapon Depth Map Twelve
+		if (WDM == 15)
+		{
+		cWF = 0.010;
+		cWN = 100.0;
+		cWP = 0.4375;
+		CoP = 0.522;
+		}
+
+		//Game: S.T.A.L.K.E.R: Games
+		//Weapon Depth Map Thirteen
+		if (WDM == 16)
+		{
+		cWF = 0.010;
+		cWN = -5.0;
+		cWP = 0.976;
+		CoP = 0.508;
+		}
+
+		//Game: Skyrim Special Edition
+		//Weapon Depth Map Fourteen
+		if (WDM == 17)
+		{
+		cWF = 0.010;
+		cWN = -5.0;
+		cWP = 0.90375;
+		CoP = 0.275;
+		}
+		
+		//Game: Turok Dinosaur Hunter
+		//Weapon Depth Map Fifteen
+		if (WDM == 18)
+		{
+		cWF = 0.010;
+		cWN = -0.450;
+		cWP = 0.01225;
+		CoP = 0.473;
+		}
+		
+		//Game: Wolfenstine: New Order ; Old Blood
+		//Weapon Depth Map Sixteen
+		if (WDM == 19)
+		{
+		cWF = 0.010;
+		cWN = -10.0;
+		cWP = 0.4455;
+		CoP = 0.548;
+		}
+		
+		//Game: Prey 2017 Object Detail Veary High
+		//Weapon Depth Map Seventeen
+		if (WDM == 20)
+		{
+		cWF = 0.010;
+		cWN = 4.375;
+		cWP = 0.0932;
+		CoP = 0.275;
+		}
+		
+		//Game: Prey 2017
+		//Weapon Depth Map Eighteen
+		if (WDM == 21)
+		{
+		cWF = 0.010;
+		cWN = 4.375;
+		cWP = 0.131;
+		CoP = 0.275;
+		}
+		
+		//Game: Deus Ex Mankind Divided may not be needed.
+		//Weapon Depth Map Nineteen
+		if (WDM == 22)
+		{
+		cWF = 0.010;
+		cWN = 150.0;
+		cWP = 1.100;
+		}
+
+		//Game: Dying Light
+		//Weapon Depth Map Twenty
+		if (WDM == 23)
+		{
+		cWF = 0.010;
+		cWN = 150.0;
+		cWP = 1.045;
+		}
+
+		//Game: Kingpin
+		//Weapon Depth Map Twenty One
+		if (WDM == 24)
+		{
+		cWF = 0.010;
+		cWN = 150.0;
+		cWP = 1.100;
+		CoP = 0.338;
+		}
+		
+		//Game: SOMA
+		//Weapon Depth Map Twenty Two
+		if (WDM == 25)
+		{
+		cWF = 0.010;
+		cWN = -150.0;
+		cWP = 0.125;
+		CoP = 0.900;
+		}
+		
+		//Game: Turok 2: Seeds of Evil
+		//Weapon Depth Map Twenty Three
+		if (WDM == 26)
+		{
+		cWF = 0.010;
+		cWN = -100.0;
+		cWP = -0.050;
+		CoP = 3.750;
+		}
+		
+		//Game: Amnesia: Machine for Pigs or Amnesia: The Dark Decent
+		//Weapon Depth Map Twenty Four
+		if (WDM == 27)
+		{
+		cWF = 0.010;
+		cWN = -25.0;
+		cWP = 0.0;
+		CoP = 4.0;
+		}
+		
+				
+		//Game: Amnesia: Machine for Pigs or Amnesia: The Dark Decent
+		//Weapon Depth Map Twenty Five
+		if (WDM == 28)
+		{
+		cWF = 0.010;
+		cWN = -25.0;
+		cWP = 0.0;
+		CoP = 2.250;
+		}
+		
+		//Game:
+		//Weapon Depth Map Twenty Six
+		if (WDM == 29)
+		{
+		cWF = Weapon_Adjust.x;
+		cWN = Weapon_Adjust.y;
+		cWP = Weapon_Adjust.z;
+		}
+		
 		//SWDMS Done//
  		
 		//Scaled Section z-Buffer
 		
 		if (WDM >= 1)
 		{
-		WA_X /= 250;
-		WA_Y /= 250;
-		zBufferWH = WA_Y*zBufferWH/(WA_X-zBufferWH);
+		cWN /= 1000;
+		zBufferWH = (cWN * zBufferWH) / ((cWP*zBufferWH)-(cWF));
 		}
+		
+		if (WDM == 18 || WDM == 24) //Turok Dinosaur Hunter ; KingPin
+		zBufferWH = 1-zBufferWH;
 		
 		float Adj = Weapon_Depth/375; //Push & pull weapon in or out of screen.
 		zBufferWH = smoothstep(Adj,1,zBufferWH) ;//Weapon Adjust smoothstep range from Adj-1
 		
 		//Auto Anti Weapon Depth Map Z-Fighting is always on.
 		
-		float AA,AL = abs(smoothstep(0,1,LumWeapon(texcoord)*2));
-		
-		if(AL <= 0.003)
+		float Luminance = tex2Dlod(SamplerLum,float4(texcoord,0,0)).r; //Average Luminance Texture Sample 
+		Luminance = smoothstep(0,1,Luminance);		
+		float AA,AL = abs(Luminance);
+
+		if(AL <= 0.044)
 		{
-		AA = -0.003;
-		}
-		else if(AL <= 0.04)
-		{
-		AA = 0.025;
+			AA = 0.0925;
 		}
 		else
 		{
-		AA = 0.250;
+			AA = 0.250;
 		}
+
+		float AAWDMA = clamp(Luminance*2,AA,1.0);
+		zBufferWH = lerp(zBufferWH*AAWDMA,zBufferWH,0.050);
 		
-		
-		if (WDM!= 1)
-		zBufferWH = lerp(zBufferWH*AL,zBufferWH,AA);
-		
-		if (Weapon_Adjust.z == 0) //Zero Is auto
+		if (WDM == 18)
+		{
+		zBufferWH = smoothstep(0,1,zBufferWH);
+		}
+		else
+		{
+		zBufferWH = smoothstep(0,1.250,zBufferWH);
+		}
+		if (Weapon_Cutoff == 0) //Zero Is auto
 		{
 		CoP = CoP;
 		}
 		else	
 		{
-		CoP = Weapon_Adjust.z;
+		CoP = Weapon_Cutoff;
 		}
 		
-		return float2(saturate(zBufferWH.r),CoP);
+		return float4(saturate(zBufferWH.rrr),CoP);
 }
 
 void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 Color : SV_Target0)
 {
-		float N, R, G, B, D, LDM, RDM, Cutoff, A = 1;
+		float N, R, G, B, D, Done, Cutoff, A = 1;
 		
-		float2 DM = Depth(texcoord);
+		float DM = Depth(texcoord).r;
+		float AverageLuminance = Depth(texcoord).r;	
+
+		float WD = WeaponDepth(texcoord).r;
 		
-		float AverageLuminance;	
+		float CoP = WeaponDepth(texcoord).w; //Weapon Cutoff Point
+				
+		float CutOFFCal = (CoP/Depth_Map_Adjust)/2; //Weapon Cutoff Calculation
+					
+		float NearDepth = step(WD.r,1.0); //Base Cutoff
 		
-		if(Balance >= 1)
+		if (WDM == 28)
 		{
-		AverageLuminance = Depth(texcoord).y;
-		}
-		else if(Balance <= -1)
-		{		
-		AverageLuminance = Depth(texcoord).x;
+		Cutoff = smoothstep(0.008,DM.r,CutOFFCal);
 		}
 		else
 		{
-		AverageLuminance = Depth(texcoord).x;
+		Cutoff = step(DM.r,CutOFFCal);
 		}
-		
-		float WD = lerp(WeaponDepth(texcoord).x,1,0.0175);
-		
-		float CoP = WeaponDepth(texcoord).y; //Weapon Cutoff Point
-				
-		float CutOFFCal = (CoP/Depth_Map_Adjust)/2; //Weapon Cutoff Calculation
-		
-		Cutoff = step(lerp(DM.x,DM.y,0.5),CutOFFCal);
 				
 		if (WDM == 0)
 		{
-		LDM = DM.x;
-		RDM = DM.y;
+		Done = DM;
 		}
 		else
 		{
-		LDM = lerp(DM.x,WD,Cutoff);
-		RDM = lerp(DM.y,WD,Cutoff);
+		D = lerp(DM,WD,NearDepth);
+		D = lerp(D,1,0.050);
+		Done = lerp(DM,D,Cutoff);
 		}
 		
-		R = LDM;
+		R = Done;
 		G = AverageLuminance;
-		B = RDM;
+		B = Done;
 		
 	Color = float4(R,G,B,A);
-}
-
-void Average_Luminance(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 color : SV_Target0)
-{
-	float3 Average_Luminance = tex2D(SamplerDM,float2(texcoord.x,texcoord.y)).ggg;
-	color = float4(Average_Luminance,1);
 }
 
 void  Disocclusion(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 color : SV_Target0)
 {
 //bilateral blur\/
-float2 DM;
+float4 DM;
 float B, DP =  Divergence,Disocclusion_Power;
 
 	if(Dis_Occlusion == 1)     
@@ -602,17 +815,18 @@ else if(Dis_Occlusion == 5)
 		{	
 			if(Dis_Occlusion >= 1) 
 			{	
-				DM += tex2Dlod(SamplerDM,float4(texcoord + dir * weight[i] * B ,0,0)).rb/Con;
+				DM += tex2Dlod(SamplerDM,float4(texcoord + dir * weight[i] * B ,0,0)).bbbb/Con;
 			}
 		}
 	
 	}
 	else
 	{
-		DM = tex2Dlod(SamplerDM,float4(texcoord,0,0)).rb;
+		DM = tex2Dlod(SamplerDM,float4(texcoord,0,0)).bbbb;
 	}	                          
-
-	color = float4(DM.x,0,DM.y,1);
+	
+	float ALDM = tex2D(SamplerDM,float2(texcoord.x,texcoord.y)).g;
+	color = float4(DM.r,ALDM,DM.b,1);
 }
 
 ////////////////////////////////////////////////Left/Right Eye////////////////////////////////////////////////////////
@@ -677,28 +891,20 @@ float4 PS_renderLR(in float2 texcoord : TEXCOORD0)
 		S = samples[j] * MS;
 		
 		float L = tex2Dlod(SamplerDis,float4(TCL.x+S, TCL.y,0,0)).r;
-		float R = tex2Dlod(SamplerDis,float4(TCR.x-S, TCR.y,0,0)).b;
+		float R = tex2Dlod(SamplerDis,float4(TCR.x-S, TCR.y,0,0)).r;
 		
 		DepthL =  min(DepthL,L);
 		DepthR =  min(DepthR,R);
 	}
-		float Luminance; //Average Luminance Texture Sample 
+		float Luminance = tex2Dlod(SamplerLumT,float4(texcoord,0,0)).r; //Average Luminance Texture Sample 
 		
 		if (Auto_ZPD == 1)
 		{
-			Luminance = smoothstep(0,1,Lum(texcoord));		
+			Luminance = smoothstep(0,1,Luminance);		
 		}
 		else if (Auto_ZPD == 2)
 		{
-			Luminance = smoothstep(1,0,Lum(texcoord));
-		}
-		else if (Auto_ZPD == 3)
-		{
-			Luminance = smoothstep(0,1,Lum(texcoord)*3);		
-		}
-		else if (Auto_ZPD == 4)
-		{
-			Luminance = smoothstep(1,0,Lum(texcoord)*3);
+			Luminance = smoothstep(1,0,Luminance);
 		}
 		else
 		{
@@ -724,9 +930,7 @@ float4 PS_renderLR(in float2 texcoord : TEXCOORD0)
 		{
 			ZP = 0.6875;
 		}
-		
-		Z = max(0,Z);
-		
+	
 	float ParallaxL = max(-0.05,MS * (1-Z/DepthL));
 	float ParallaxR = max(-0.05,MS * (1-Z/DepthR));
 	
@@ -987,17 +1191,20 @@ float4 PS_renderLR(in float2 texcoord : TEXCOORD0)
 	}
 		else
 	{		
-			float4 Top = texcoord.x < 0.5 ? Lum(float2(texcoord.x*2,texcoord.y*2)).xxxx : tex2Dlod(SamplerDM,float4(texcoord.x*2-1 , texcoord.y*2,0,0)).rrbb;
+			float4 Top = texcoord.x < 0.5 ? tex2Dlod(SamplerLumT,float4(texcoord.x*2,texcoord.y*2,0,0)).r : tex2Dlod(SamplerDM,float4(texcoord.x*2-1 , texcoord.y*2,0,0)).bbbb;
 			color = texcoord.y < 0.5 ? Top : tex2Dlod(SamplerDis,float4(texcoord.x,texcoord.y*2-1,0,0)).rrrr;
 	}
-	float Average_Luminance = texcoord.y < 0.5 ? 0.5 : tex2D(SamplerDM,float2(texcoord.x,texcoord.y)).g;
-	return float4(color.rgb,Average_Luminance);
+return float4(color.rgb,tex2D(SamplerDis,float2(texcoord.x,texcoord.y)).g);
 }
 
-void Average_Luminance_Weapon(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 color : SV_Target0)
+void Average_Luminance(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 color : SV_Target)
 {
-	float3 Average_Luminance = PS_renderLR(float2(texcoord.x,(texcoord.y + 0.500) * 0.500 + 0.250)).www;
-	color = float4(Average_Luminance,1);
+	color = PS_renderLR(texcoord).wwww;
+}
+
+void ALT(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 color : SV_Target)
+{
+	color = tex2Dlod(SamplerLum,float4(texcoord,0,0));
 }
 
 ////////////////////////////////////////////////////////Logo/////////////////////////////////////////////////////////////////////////
@@ -1167,23 +1374,23 @@ technique Depth3D_Reprojection
 			PixelShader = DepthMap;
 			RenderTarget = texDM;
 		}
-			pass AverageLuminance
-		{
-			VertexShader = PostProcessVS;
-			PixelShader = Average_Luminance;
-			RenderTarget = texLum;
-		}
 			pass Disocclusion
 		{
 			VertexShader = PostProcessVS;
 			PixelShader = Disocclusion;
 			RenderTarget = texDis;
 		}
-			pass AverageLuminanceWeapon
+			pass AverageLuminance
 		{
 			VertexShader = PostProcessVS;
-			PixelShader = Average_Luminance_Weapon;
-			RenderTarget = texLumWeapon;
+			PixelShader = Average_Luminance;
+			RenderTarget = texLum;
+		}
+			pass ALT
+		{
+			VertexShader = PostProcessVS;
+			PixelShader = ALT;
+			RenderTarget = texLumT;
 		}
 			pass StereoOut
 		{
