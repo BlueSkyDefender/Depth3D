@@ -34,7 +34,7 @@
 
 uniform int Depth_Map <
 	ui_type = "combo";
-	ui_items = " 0 Normal\0 1 Normal Reverse\0 3 Special\0";
+	ui_items = " 0 Normal\0 1 Normal Reversed-Z\0 2 Alternate Alpha\0 3 Alternate Beta\0 4 Alternate Gamma\0 5 Special\0";
 	ui_label = "Depth Map Selection";
 	ui_tooltip = "linearization for the zBuffer also Depth Map One to Five.\n"
 			    "Normally you want to use 1,2, or 5."
@@ -47,15 +47,6 @@ uniform float Depth_Map_Adjust <
 	ui_label = "Depth Map Adjustment";
 	ui_tooltip = "Adjust the depth map for your games.";
 > = 7.5;
-
-uniform int Balance <
-	ui_type = "drag";
-	ui_min = -3; ui_max = 3;
-	ui_label = "Power Balance";
-	ui_tooltip = "Power Blance Between two Depth Maps.\n"
-				"This also adjust for your Dominate Eye.\n"
-				"Default is Zero.";
-> = 0;
 
 uniform float Offset <
 	ui_type = "drag";
@@ -215,7 +206,7 @@ uniform bool InvertY <
 
 //uniform float4 X <
 //	ui_type = "drag";
-//	ui_min = -1; ui_max = 1;
+//	ui_min = 0; ui_max = 1;
 //	ui_label = "X";
 //	ui_tooltip = "XYZW";
 //> = float4(0,0,0,0);
@@ -343,8 +334,10 @@ float2 Depth(in float2 texcoord : TEXCOORD0)
 		//Conversions to linear space.....
 		//Near & Far Adjustment
 		float DDA = 0.125/Depth_Map_Adjust; //Division Depth Map Adjust - Near
+		float DDDA = 0.00125/Depth_Map_Adjust; //Division Depth Map Adjust - Near
+		float Cal = (Depth_Map_Adjust/325)+1;
 		float DA = Depth_Map_Adjust*2; //Depth Map Adjust - Near
-		float Mix = 0.062 , pOne, pTwo;
+		float Mix = 0.062;
 		//All 1.0f are Far Adjustment
 		
 		//0. Normal
@@ -354,74 +347,74 @@ float2 Depth(in float2 texcoord : TEXCOORD0)
 		float NormalReverse = 1.0f * DDA / (DDA + zBuffer * (1.0f - DDA));
 		
 		//2. Raw Buffer
-		float Raw = pow(abs(zBuffer),DA);
+		float Raw = pow(abs(zBuffer),DA); //Looking to replace with exp(zBuffer*DA)
 		
 		//3. Raw Buffer Reverse
-		float RawReverse = pow(abs(zBuffer - 1.0),DA);
+		float RawReverse = pow(abs(zBuffer - 1.0),DA); //Looking to replace with exp(-zBuffer*DA)
 		
-		//4. Special Depth Map
+		//4 Alternate Normal
+		float AlternateOne = (1.0f * DDA / (1.0f + zBuffer * (DDA - 1.0f)))*Cal;
+		
+		//5. Alternate Normal Reverse
+		float AlternateTwo = (1.0f * DDA / (DDA + zBuffer * (1.0f - DDA)))*Cal;
+		
+		//6. Alternate Special
+		float AlternateThree = log(zBuffer / DDDA) / log(0.2 / DDDA);
+		AlternateThree = smoothstep(1,0,AlternateThree);
+		
+		//7. Special Depth Map
 		float Special = pow(abs(exp(zBuffer)*Offset),DA*25);
 		
 		float2 DM;
 		
-		if(Balance == 1)
+		if (Depth_Map == 0)
 		{
-		pOne = 1.25;
-		}
-		else if(Balance == 2)
+		DM.x = lerp(Normal,Raw,Mix);
+		}		
+		else if (Depth_Map == 1)
 		{
-		pOne = 1.375;
+		DM.x = lerp(NormalReverse,RawReverse,Mix);
 		}
-		else if(Balance == 3)
+		else if (Depth_Map == 2)
 		{
-		pOne = 1.5;
+		DM.x = AlternateOne;
 		}
+		else if (Depth_Map == 3)
+		{
+		DM.x = AlternateTwo;
+		}
+		else if (Depth_Map == 4)
+		{
+		DM.x = AlternateThree;
+		}			
 		else
 		{
-		pOne = 1;
-		}
-		
-		if(Balance == -1)
-		{
-		pTwo = 1;
-		}
-		else if(Balance == -2)
-		{
-		pTwo = 1.375;
-		}
-		else if(Balance == -3)
-		{
-		pTwo = 1.5;
-		}
-		else
-		{
-		pTwo = 1;
+		DM.x = Special;
 		}
 		
 		if (Depth_Map == 0)
 		{
-		DM.x = lerp(Normal,Raw,Mix)*pOne;
+		DM.y = lerp(Normal,Raw,Mix);
 		}		
 		else if (Depth_Map == 1)
 		{
-		DM.x = lerp(NormalReverse,RawReverse,Mix)*pOne;
-		}		
-		else
-		{
-		DM.x = Special*pOne;
+		DM.y = lerp(NormalReverse,RawReverse,Mix);
 		}
-		
-		if (Depth_Map == 0)
+		else if (Depth_Map == 2)
 		{
-		DM.y = lerp(Normal,Raw,Mix)*pTwo;
-		}		
-		else if (Depth_Map == 1)
+		DM.y = AlternateOne;
+		}
+		else if (Depth_Map == 3)
 		{
-		DM.y = lerp(NormalReverse,RawReverse,Mix)*pTwo;
+		DM.y = AlternateTwo;
+		}
+		else if (Depth_Map == 4)
+		{
+		DM.y = AlternateThree;
 		}	
 		else
 		{
-		DM.y = Special*pTwo;
+		DM.y = Special;
 		}
 	
 	return float2(DM.x,DM.y);	
@@ -510,20 +503,7 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 		
 		float2 DM = Depth(texcoord);
 		
-		float AverageLuminance;	
-		
-		if(Balance >= 1)
-		{
-		AverageLuminance = Depth(texcoord).y;
-		}
-		else if(Balance <= -1)
-		{		
-		AverageLuminance = Depth(texcoord).x;
-		}
-		else
-		{
-		AverageLuminance = Depth(texcoord).x;
-		}
+		float AverageLuminance = Depth(texcoord).x;	
 		
 		float WD = lerp(WeaponDepth(texcoord).x,1,0.0175);
 		
