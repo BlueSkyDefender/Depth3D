@@ -34,7 +34,7 @@
 
 uniform int Depth_Map <
 	ui_type = "combo";
-	ui_items = " 0 Normal\0 1 Normal Reversed-Z\0 2 Alternate Alpha\0 3 Alternate Beta\0 4 Alternate Gamma\0 5 Special\0";
+	ui_items = " 0 Normal\0 1 Normal Reversed-Z\0 3 Special\0";
 	ui_label = "Depth Map Selection";
 	ui_tooltip = "linearization for the zBuffer also Depth Map One to Five.\n"
 			    "Normally you want to use 1,2, or 5."
@@ -65,7 +65,7 @@ uniform int Divergence <
 
 uniform float ZPD <
 	ui_type = "drag";
-	ui_min = 0.0; ui_max = 0.375;
+	ui_min = 0.0; ui_max = 0.250;
 	ui_label = "Zero Parallax Distance";
 	ui_tooltip = "ZPD controls the focus distance for the screen Pop-out effect.\n"
 				"For FPS Games this should be around 0.005-0.075.\n"
@@ -171,13 +171,6 @@ uniform float Anaglyph_Desaturation <
 	ui_label = "Anaglyph Desaturation";
 	ui_tooltip = "Adjust anaglyph desaturation, Zero is Black & White, One is full color.";
 > = 1.0;
-
-uniform int Mode <
-	ui_type = "combo";
-	ui_items = "Normal\0Over Sample\0Tight\0";
-	ui_label = "Sample Mode Selection";
-	ui_tooltip = "Use this to hide artifacts.";
-> = 0;
 
 uniform bool Eye_Swap <
 	ui_label = "Swap Eyes";
@@ -333,60 +326,32 @@ float2 Depth(in float2 texcoord : TEXCOORD0)
 
 		//Conversions to linear space.....
 		//Near & Far Adjustment
-		float DDA = 0.125/Depth_Map_Adjust; //Division Depth Map Adjust - Near
-		float DDDA = 0.00125/Depth_Map_Adjust; //Division Depth Map Adjust - Near
-		float Cal = (Depth_Map_Adjust/325)+1;
+		float Near = 0.125/Depth_Map_Adjust; //Division Depth Map Adjust - Near
+		float Far = 1; //Far Adjustment
+		
 		float DA = Depth_Map_Adjust*2; //Depth Map Adjust - Near
-		float Mix = 0.062;
+		float Mix = 0.1;// Mix ammount For Raw Depth and Normal Depth.
 		//All 1.0f are Far Adjustment
 		
 		//0. Normal
-		float Normal = 1.0f * DDA / (1.0f + zBuffer * (DDA - 1.0f));
+		float Normal = Far * Near / (Far + zBuffer * (Near - Far));
 		
 		//1. Reverse
-		float NormalReverse = 1.0f * DDA / (DDA + zBuffer * (1.0f - DDA));
+		float NormalReverse = Far * Near / (Near + zBuffer * (Far - Near));
 		
-		//2. Raw Buffer
-		float Raw = pow(abs(zBuffer),DA); //Looking to replace with exp(zBuffer*DA)
-		
-		//3. Raw Buffer Reverse
-		float RawReverse = pow(abs(zBuffer - 1.0),DA); //Looking to replace with exp(-zBuffer*DA)
-		
-		//4 Alternate Normal
-		float AlternateOne = (1.0f * DDA / (1.0f + zBuffer * (DDA - 1.0f)))*Cal;
-		
-		//5. Alternate Normal Reverse
-		float AlternateTwo = (1.0f * DDA / (DDA + zBuffer * (1.0f - DDA)))*Cal;
-		
-		//6. Alternate Special
-		float AlternateThree = log(zBuffer / DDDA) / log(0.2 / DDDA);
-		AlternateThree = smoothstep(1,0,AlternateThree);
-		
-		//7. Special Depth Map
+		//4. Special Depth Map
 		float Special = pow(abs(exp(zBuffer)*Offset),DA*25);
 		
 		float2 DM;
 		
 		if (Depth_Map == 0)
 		{
-		DM.x = lerp(Normal,Raw,Mix);
+		DM.x = Normal;
 		}		
 		else if (Depth_Map == 1)
 		{
-		DM.x = lerp(NormalReverse,RawReverse,Mix);
+		DM.x = NormalReverse*1.250;
 		}
-		else if (Depth_Map == 2)
-		{
-		DM.x = AlternateOne;
-		}
-		else if (Depth_Map == 3)
-		{
-		DM.x = AlternateTwo;
-		}
-		else if (Depth_Map == 4)
-		{
-		DM.x = AlternateThree;
-		}			
 		else
 		{
 		DM.x = Special;
@@ -394,24 +359,12 @@ float2 Depth(in float2 texcoord : TEXCOORD0)
 		
 		if (Depth_Map == 0)
 		{
-		DM.y = lerp(Normal,Raw,Mix);
+		DM.y = Normal;
 		}		
 		else if (Depth_Map == 1)
 		{
-		DM.y = lerp(NormalReverse,RawReverse,Mix);
+		DM.y = NormalReverse*1.250;
 		}
-		else if (Depth_Map == 2)
-		{
-		DM.y = AlternateOne;
-		}
-		else if (Depth_Map == 3)
-		{
-		DM.y = AlternateTwo;
-		}
-		else if (Depth_Map == 4)
-		{
-		DM.y = AlternateThree;
-		}	
 		else
 		{
 		DM.y = Special;
@@ -565,11 +518,11 @@ else if(Dis_Occlusion == 5)
 		}
 		
  float2 dir;
- const int Con = 10;
+ const int Con = 11;
 	
 	if(Dis_Occlusion >= 1) 
 	{
-		const float weight[Con] = {0.01,-0.01,0.02,-0.02,0.03,-0.03,0.04,-0.04,0.05,-0.05};
+		const float weight[Con] = {0.01,-0.01,0.02,-0.02,0.03,-0.03,0.04,-0.04,0.05,-0.05,0.0};
 		
 		if(Dis_Occlusion >= 1)
 		{
@@ -590,8 +543,8 @@ else if(Dis_Occlusion == 5)
 	else
 	{
 		DM = tex2Dlod(SamplerDM,float4(texcoord,0,0)).rb;
-	}	                          
-
+	}
+     
 	color = float4(DM.x,0,DM.y,1);
 }
 
@@ -599,23 +552,10 @@ else if(Dis_Occlusion == 5)
 
 float4 PS_renderLR(in float2 texcoord : TEXCOORD0)
 {
-	float4 color,Samp;
+	float4 color,Samp = float4(0.5, 0.625, 0.750, 0.825);
 	float DepthL = 1, DepthR = 1, ZP, MS, P, S, Z;
-	
-	if(Mode == 1)
-	{
-	Samp = float4(0.60, 0.58, 0.75, 1.5);
-	}
-	else if(Mode == 2)
-	{
-	Samp = float4(0.60, 0.58, 0.66, 1);
-	}
-	else
-	{
-	Samp = float4(0.50, 0.58, 0.66, 1);
-	}
-	
-	float samples[4] = {Samp.x, Samp.y, Samp.z,Samp.w};
+		
+	float samples[5] = {Samp.x, Samp.y, Samp.z,Samp.w,1.0};
 	float2 TCL, TCR;
 	
 	if(!Eye_Swap) //MS is Max Separation P is Perspective Adjustment
@@ -652,7 +592,7 @@ float4 PS_renderLR(in float2 texcoord : TEXCOORD0)
 		}
 	
 	[loop]
-	for (int j = 0; j < 4; ++j) 
+	for (int j = 0; j < 5; ++j) 
 	{	
 		S = samples[j] * MS;
 		
@@ -707,9 +647,12 @@ float4 PS_renderLR(in float2 texcoord : TEXCOORD0)
 		
 		Z = max(0,Z);
 		
-	float ParallaxL = max(-0.05,MS * (1-Z/DepthL));
-	float ParallaxR = max(-0.05,MS * (1-Z/DepthR));
-	
+	float ParallaxL = max(-0.250,MS * (1-Z/DepthL));
+	float ParallaxR = max(-0.250,MS * (1-Z/DepthR));
+		
+		DepthL = lerp(DepthL,1-DepthL,-0.025);         
+		DepthR = lerp(DepthR,1-DepthR,-0.025);     
+		
 		ParallaxL = lerp(ParallaxL,DepthL * MS,ZP);
 		ParallaxR = lerp(ParallaxR,DepthR * MS,ZP);
 		
