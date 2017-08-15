@@ -98,7 +98,8 @@ IF IT HAS AN *asterisk* I AM STILL WORKING ON IT.
     RB      *S.T.A.L.K.E.R:CoP Complete Mod                  DM *         2.5-5.0       WDM *                     
     RB      *S.T.A.L.K.E.R:SoC Complete Mod                  DM *         3.75-7.5      WDM *                     
             *Sleeping Dogs: DE                               DM *         2.5-5.0 
-            *Soma                                            DM *         10-20         WDM *                      
+            *Soma                                            DM *         10-20         WDM * 	
+             Sonic Adventure 2                               DM 0         10.0                               Yes N  / 0.150-0.250
             *Souls Games                                     DM *         15-25                                       
             *Stacking                                        DM *         5.0-10                                   
     RB      *Stay Close                                      DM *         2.5-7.5                                    
