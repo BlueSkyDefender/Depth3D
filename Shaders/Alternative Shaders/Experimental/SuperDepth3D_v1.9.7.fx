@@ -113,14 +113,14 @@ uniform bool Depth_Map_Flip <
 
 uniform int WDM <
 	ui_type = "combo";
-	ui_items = "Weapon DM Off\0Custom WDM\0 WDM 0\0";
+	ui_items = "Weapon DM Off\0Custom WDM\0 WDM 0\0 WDM 1\0 WDM 2\0 WDM 3\0 WDM 4\0 WDM 5\0";
 	ui_label = "Weapon Depth Map";
 	ui_tooltip = "Pick your weapon depth map for games.";
 > = 0;
 
 uniform float3 Weapon_Adjust <
 	ui_type = "drag";
-	ui_min = 0; ui_max = 25.0;
+	ui_min = 0; ui_max = 100.0;
 	ui_label = "Weapon Adjust Depth Map";
 	ui_tooltip = "Adjust weapon depth map for FPS Hand.\n"
 				 "X, is FPS Hand Scale Adjustment.\n"
@@ -328,10 +328,7 @@ float2 Depth(in float2 texcoord : TEXCOORD0)
 		//Near & Far Adjustment
 		float Near = 0.125/Depth_Map_Adjust; //Division Depth Map Adjust - Near
 		float Far = 1; //Far Adjustment
-		
 		float DA = Depth_Map_Adjust*2; //Depth Map Adjust - Near
-		float Mix = 0.1;// Mix ammount For Raw Depth and Normal Depth.
-		//All 1.0f are Far Adjustment
 		
 		//0. Normal
 		float Normal = Far * Near / (Far + zBuffer * (Near - Far));
@@ -350,7 +347,7 @@ float2 Depth(in float2 texcoord : TEXCOORD0)
 		}		
 		else if (Depth_Map == 1)
 		{
-		DM.x = NormalReverse*1.250;
+		DM.x = NormalReverse;
 		}
 		else
 		{
@@ -363,7 +360,7 @@ float2 Depth(in float2 texcoord : TEXCOORD0)
 		}		
 		else if (Depth_Map == 1)
 		{
-		DM.y = NormalReverse*1.250;
+		DM.y = NormalReverse;
 		}
 		else
 		{
@@ -397,11 +394,28 @@ float2 WeaponDepth(in float2 texcoord : TEXCOORD0)
 		WA_Y = Weapon_Adjust.y;
 		}
 		
+		//WDM 0 ; Unreal Gold with v227
 		else if (WDM == 2)
 		{
 		WA_X = 2.855;
 		WA_Y = 0.1375;
 		CoP = 0.335;
+		}
+		
+		//WDM 1 ; DOOM 2016
+		else if (WDM == 3)
+		{
+		WA_X = 2.775;
+		WA_Y = 0.666;
+		CoP = 0.276;
+		}
+		
+		//WDM 2 ; Amnesia Games
+		else if (WDM == 4)
+		{
+		WA_X = 100.0;
+		WA_Y = 75.0;
+		CoP = 8.0;
 		}
 		//SWDMS Done//
  		
