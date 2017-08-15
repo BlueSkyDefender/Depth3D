@@ -16,7 +16,7 @@ ________________________________________________________________________________
 ---------------------------------------------------------------------------------------------------------------------------------
 
 IF IT HAS AN *asterisk* I AM STILL WORKING ON IT.
-                                                                      [- - - - - - - - - -=: Recommended Settings :=- - - - - - - - - -]
+                                                                      [- - - - - - - -=: Recommended Settings :=- - - - - - - -]
 [Read Below] [Game List]                                  [Depth Map] [Adjustment] [Weapon DM] [Depth Flip] [Auto S / ZDP Range]
              ABZU                                            DM 1         50                                 No Off / 0.050
              Alien Isolation                                 DM 0         20                                 No Off / 0.0375
@@ -41,7 +41,7 @@ IF IT HAS AN *asterisk* I AM STILL WORKING ON IT.
     RB      *Call of Duty: Infinite Warfare                  DM *         6.25        WDM *                          
             *Casltevania: Lord of Shadows - UE               DM *         3.75                                       
             *Cryostasis                                      DM *         6.25        WDM *                         
-             DOOM 2016                                       DM 0         15.0        WDM 1                          
+             DOOM 2016                                       DM 0         15.0        WDM 1                  No Off / 0.050-0.100                       
             *DarkSiders Warmastred Edition                   DM *         5.00                                      
             *Dead Effect                                     DM *         6.25                                     
             *Dead Island                                     DM *         3.75                             
@@ -51,7 +51,7 @@ IF IT HAS AN *asterisk* I AM STILL WORKING ON IT.
             *Dragon Age Inquisition                          DM *         3.00                            
             *Dragon Ball Xenoverse                           DM *         10.0                          
             *Dragons Dogma: Dark Arisen                      DM *         7.50                          
-             DreamFall Chapters                              DM 0         10.0                      Yes       Yes N / 0.025-0.075
+             DreamFall Chapters                              DM 0         12.5                      Yes      Yes N  / 0.075-0.125
     RB      *Dungeon Nightmares II                           DM *         20.0                                       
     RB      *Emily Wants To Play                             DM *         10.0                                       
             *Everybody's Gone to the Rapture                 DM *         4.25                       

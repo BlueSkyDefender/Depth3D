@@ -656,7 +656,7 @@ float4 PS_renderLR(in float2 texcoord : TEXCOORD0)
 		}
 		else
 		{
-			ZP = 0.6875;
+			ZP = 0.750;
 		}
 		
 		Z = max(0,Z);
