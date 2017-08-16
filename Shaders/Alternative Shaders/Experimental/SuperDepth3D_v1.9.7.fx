@@ -75,7 +75,7 @@ uniform float ZPD <
 
 uniform int Auto_ZPD <
 	ui_type = "combo";
-	ui_items = "Off\0Inverted\0Normal\0Inverted Alt\0Normal Alt\0";
+	ui_items = "Off\0Inverted\0Normal\0";
 	ui_label = "Auto Zero Parallax Distance Power";
 	ui_tooltip = "Auto Zero Parallax Distance Power controls the focus distance for the screen Pop-out effect automatically.\n"
 				"Inverted, is if your cam is close to a object you will have less Pop-out.\n"
@@ -653,37 +653,29 @@ float4 PS_renderLR(in float2 texcoord : TEXCOORD0)
 		
 		if (Auto_ZPD == 1)
 		{
-			Luminance = smoothstep(0,1,Lum(texcoord));		
+			Luminance = smoothstep(0.01,1,Lum(texcoord)*ZPD);		
 		}
 		else if (Auto_ZPD == 2)
 		{
-			Luminance = smoothstep(1,0,Lum(texcoord));
-		}
-		else if (Auto_ZPD == 3)
-		{
-			Luminance = smoothstep(0,1,Lum(texcoord)*3);		
-		}
-		else if (Auto_ZPD == 4)
-		{
-			Luminance = smoothstep(1,0,Lum(texcoord)*3);
+			Luminance = smoothstep(0.01,1,ZPD-(Lum(texcoord)*ZPD));
 		}
 		else
 		{
-		Luminance = 0;
+			Luminance = 0;
 		}
 		
 		float AL = abs(Luminance);
 		
 		if(Auto_ZPD >= 1)
 		{
-			Z = AL*ZPD; //Auto ZDP based on the Auto Anti Weapon Depth Map Z-Fighting code.
+			Z = AL; //Auto ZDP based on the Auto Anti Weapon Depth Map Z-Fighting code.
 		}
 		else
 		{
 			Z = ZPD;
 		}
 		
-		if(ZPD == 0 && Auto_ZPD == 0)
+		if(ZPD == 0)
 		{
 			ZP = 1.0;
 		}

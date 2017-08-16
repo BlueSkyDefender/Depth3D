@@ -28,7 +28,7 @@ IF IT HAS AN *asterisk* I AM STILL WORKING ON IT.
              Batman Arkham Knight                            DM 0         20.0                               Yes N  / 0.050-0.100                           
              Batman Arkham Origins                           DM 0         20.0                               Yes N  / 0.050-0.100
              Batman: Arkham City                             DM 0         20.0                               Yes N  / 0.050-0.100
-            *BladeStorm Nightmare                            Help         ??????
+             BladeStorm Nightmare                            DM 0         5.5
     RB       BloodCM                                         DM 0         15.0                               No Off / 0.100-0.300                                     
     RB       BorderLands 2                                   DM 0         15.0        WDM 3                  No Off / 0.025-0.075                          
             *CEMU - Mariokart 8                              DM *         5.0-10                    Yes
@@ -39,7 +39,7 @@ IF IT HAS AN *asterisk* I AM STILL WORKING ON IT.
     RB       Call of Duty: Black Ops 2                       DM 1         15.0        WDM 4                  No Off / 0.050-0.075    
     RB       Call of Duty: Ghost                             DM 1         15.0        WDM 4                  No Off / 0.050-0.075    
     RB       Call of Duty: Infinite Warfare                  DM 1         15.0        WDM 4                  No Off / 0.050-0.075    
-            *Casltevania: Lord of Shadows - UE               DM *         3.75                                       
+             Casltevania: Lord of Shadows - UE               DM 0         7.5                                       
             *Cryostasis                                      DM *         6.25        WDM *                         
              DOOM 2016                                       DM 0         15.0        WDM 1                  No Off / 0.050-0.100                       
             *DarkSiders Warmastred Edition                   DM *         5.00                                      
