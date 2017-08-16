@@ -26,11 +26,11 @@ IF IT HAS AN *asterisk* I AM STILL WORKING ON IT.
              Assassin Creed Unity                            DM 1         20.0                               Yes N  / 0.100-0.150
              Bayonetta                                       DM 0         20.0                               Yes N  / 0.050-0.075
              Batman Arkham Knight                            DM 0         20.0                               Yes N  / 0.050-0.100                           
-            *Batman Arkham Origins                           DM *         7.50                         
-            *Batman: Arkham City                             DM *         7.50                       
-            *BladeStorm Nightmare                            Help         ??????                      
-    RB      *BloodCM                                         DM *         8.75                                       
-    RB      *BorderLands 2                                   DM *         7.50        WDM *                          
+             Batman Arkham Origins                           DM 0         20.0                               Yes N  / 0.050-0.100
+             Batman: Arkham City                             DM 0         20.0                               Yes N  / 0.050-0.100
+            *BladeStorm Nightmare                            Help         ??????
+    RB       BloodCM                                         DM 0         15.0                               No Off / 0.100-0.300                                     
+    RB       BorderLands 2                                   DM 0         15.0        WDM 3                  No Off / 0.025-0.075                          
             *CEMU - Mariokart 8                              DM *         5.0-10                    Yes
             *CEMU - Super Mario 3D World                     DM *         5.0-10                    Yes
             *CEMU - The Legend of Zelda: Breath of the Wild  DM *         7.50                      Yes
@@ -83,7 +83,7 @@ IF IT HAS AN *asterisk* I AM STILL WORKING ON IT.
             *NecroVision: Lost Company                       DM *         7.5-15       WDM *                      
             *Need For Speed Rivals                           Help         ?????? 
             *Need for Speed Most Wanted                      Help         ?????? 
-             NieRAutomata                                    DM 0         17.50                               Yes N / 0.050-0.075
+             NieRAutomata                                    DM 0         20.0                               Yes N  / 0.050-0.075
     RB      *Penumbra: Black Plague                          DM *         10-20                                      
     RB      *Phantasmal                                      DM *         10-20                                      
     RB       Prey 2017                                       DM 1         18.75        WDM *                  Yes N / 0.050-0.075                  
