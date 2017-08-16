@@ -119,7 +119,7 @@ uniform int WDM <
 
 uniform float3 Weapon_Adjust <
 	ui_type = "drag";
-	ui_min = 0; ui_max = 100.0;
+	ui_min = -1.0; ui_max = 100.0;
 	ui_label = "Weapon Adjust Depth Map";
 	ui_tooltip = "Adjust weapon depth map for FPS Hand.\n"
 				 "X, is FPS Hand Scale Adjustment.\n"
@@ -424,6 +424,22 @@ float2 WeaponDepth(in float2 texcoord : TEXCOORD0)
 		WA_Y = 1.0;
 		CoP = 0.300;
 		}
+		
+		//WDM 4 ; CoD:AW
+		else if (WDM == 6)
+		{
+		WA_X = 98.0;
+		WA_Y = -0.3625;
+		CoP = 0.300;
+		}
+		
+		//WDM 5 ; CoD: Black Ops
+		else if (WDM == 7)
+		{
+		WA_X = 2.53945;
+		WA_Y = 0.0125;
+		CoP = 0.300;
+		}
 		//SWDMS Done//
  		
 		//Scaled Section z-Buffer
@@ -459,7 +475,7 @@ float2 WeaponDepth(in float2 texcoord : TEXCOORD0)
 		if (WDM!= 1)
 		zBufferWH = lerp(zBufferWH*AL,zBufferWH,AA);
 		
-		if (Weapon_Adjust.z == 0) //Zero Is auto
+		if (Weapon_Adjust.z <= 0) //Zero Is auto
 		{
 		CoP = CoP;
 		}

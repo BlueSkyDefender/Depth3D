@@ -34,11 +34,11 @@ IF IT HAS AN *asterisk* I AM STILL WORKING ON IT.
             *CEMU - Mariokart 8                              DM *         5.0-10                    Yes
             *CEMU - Super Mario 3D World                     DM *         5.0-10                    Yes
             *CEMU - The Legend of Zelda: Breath of the Wild  DM *         7.50                      Yes
-    RB      *Call of Duty: Advance Warfare                   DM *         6.25        WDM *                          
-    RB      *Call of Duty: Black Ops                         DM *         6.25        WDM *                          
-    RB      *Call of Duty: Black Ops 2                       DM *         6.25        WDM *                          
-    RB      *Call of Duty: Ghost                             DM *         6.25        WDM *                          
-    RB      *Call of Duty: Infinite Warfare                  DM *         6.25        WDM *                          
+    RB       Call of Duty: Advance Warfare                   DM 1         15.0        WDM 4                  No Off / 0.050-0.075                          
+    RB       Call of Duty: Black Ops                         DM 0         10.0        WDM 5                  No Off / 0.050-0.075                           
+    RB       Call of Duty: Black Ops 2                       DM 1         15.0        WDM 4                  No Off / 0.050-0.075    
+    RB       Call of Duty: Ghost                             DM 1         15.0        WDM 4                  No Off / 0.050-0.075    
+    RB       Call of Duty: Infinite Warfare                  DM 1         15.0        WDM 4                  No Off / 0.050-0.075    
             *Casltevania: Lord of Shadows - UE               DM *         3.75                                       
             *Cryostasis                                      DM *         6.25        WDM *                         
              DOOM 2016                                       DM 0         15.0        WDM 1                  No Off / 0.050-0.100                       
