@@ -80,17 +80,16 @@ uniform int Auto_ZPD <
 	ui_tooltip = "Auto Zero Parallax Distance Power controls the focus distance for the screen Pop-out effect automatically.\n"
 				"Inverted, is if your cam is close to a object you will have less Pop-out.\n"
 				"Normal, is if your cam is close to a object you will have more Pop-out.\n"
-				"Power of this effect is based off ZPD setting above.\n;
+				"Power of this effect is based off ZPD setting above.\n"
 				"Default is Off.";
 > = 0;
 
 uniform int Dis_Occlusion <
-	ui_type = "drag";
-	ui_min = 0; ui_max = 5;
-	ui_label = "Disocclusion Power";
-	ui_tooltip = "Occlusion masking power adjustment.\n"
-				"Disocclusion starts at One.\n"
-				"Default is 1";
+	ui_type = "combo";
+	ui_items = "Off\0Normal Mask\0Normal Mask Plus\0Normal Mask Depth Based\0Radial Mask\0Radial Mask Plus\0Radial Mask Depth Based\0";
+	ui_label = "Disocclusion Mask";
+	ui_tooltip = "Automatic occlusion masking options.\n"
+				"Default is Normal Mask.";
 > = 1;
 
 uniform float Perspective <
@@ -516,17 +515,21 @@ float B, DP =  Divergence,Disocclusion_Power;
 		}
 else if(Dis_Occlusion == 2)     
 		{
-		Disocclusion_Power = DP/306.25;
+		Disocclusion_Power = DP/300;
 		}
 else if(Dis_Occlusion == 3)     
 		{
-		Disocclusion_Power = DP/262.5;
+		Disocclusion_Power = DP/min(-250,1-tex2Dlod(SamplerDM,float4(texcoord,0,0)).b/0.002);
 		}
 else if(Dis_Occlusion == 4)   
 		{
-		Disocclusion_Power = DP/175;
+		Disocclusion_Power = DP/125;
 		}
 else if(Dis_Occlusion == 5)   
+		{
+		Disocclusion_Power = DP/250;
+		}
+else if(Dis_Occlusion == 6)   
 		{
 		Disocclusion_Power = DP/min(-250,1-tex2Dlod(SamplerDM,float4(texcoord,0,0)).b/0.002);
 		}
@@ -538,9 +541,15 @@ else if(Dis_Occlusion == 5)
 	{
 		const float weight[Con] = {0.01,-0.01,0.02,-0.02,0.03,-0.03,0.04,-0.04,0.05,-0.05,0.0};
 		
-		if(Dis_Occlusion >= 1)
+		if(Dis_Occlusion == 1 || Dis_Occlusion == 2 || Dis_Occlusion == 3)
 		{
 			dir = float2(0.5,0.0);
+			B = Disocclusion_Power;
+		}
+		
+		if(Dis_Occlusion == 4 || Dis_Occlusion == 5 || Dis_Occlusion == 6)
+		{
+			dir = 0.5 - texcoord;
 			B = Disocclusion_Power;
 		}
 		
