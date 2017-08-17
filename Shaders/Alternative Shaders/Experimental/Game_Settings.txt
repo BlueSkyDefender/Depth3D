@@ -39,10 +39,10 @@ IF IT HAS AN *asterisk* I AM STILL WORKING ON IT.
     RB       Call of Duty: Black Ops 2                       DM 1         15.0        WDM 4                  No Off / 0.050-0.075    
     RB       Call of Duty: Ghost                             DM 1         15.0        WDM 4                  No Off / 0.050-0.075    
     RB       Call of Duty: Infinite Warfare                  DM 1         15.0        WDM 4                  No Off / 0.050-0.075    
-             Casltevania: Lord of Shadows - UE               DM 0         7.5                                       
-            *Cryostasis                                      DM *         6.25        WDM *                         
+             Casltevania: Lord of Shadows - UE               DM 0         7.5                                Yes N  / 0.100-0.200                                       
+             Cryostasis                                      DM 0         10.0        WDM 6                  No Off / 0.025-0.075                         
              DOOM 2016                                       DM 0         15.0        WDM 1                  No Off / 0.050-0.100                       
-            *DarkSiders Warmastred Edition                   DM *         5.00                                      
+             DarkSiders Warmastred Edition                   DM 0         37.5                               Yes N  / 0.150-0.250  
             *Dead Effect                                     DM *         6.25                                     
             *Dead Island                                     DM *         3.75                             
             *Dead Rising 3                                   DM *         8.75                            
@@ -86,13 +86,14 @@ IF IT HAS AN *asterisk* I AM STILL WORKING ON IT.
              NieRAutomata                                    DM 0         20.0                               Yes N  / 0.050-0.075
     RB      *Penumbra: Black Plague                          DM *         10-20                                      
     RB      *Phantasmal                                      DM *         10-20                                      
-    RB       Prey 2017                                       DM 1         18.75        WDM *                  Yes N / 0.050-0.075                  
+    RB       Prey 2017                                       DM 1         18.75        WDM *                 Yes N / 0.050-0.075                  
             *Quake 2 XP                                      DM *         5.0-10       WDM *
     RB      *Quake 4                                         DM *         5.0-10       WDM *                     
             *Quantum Break                                   DM *         7.5-15 
     RB      *Rage64                                          DM *         7.5-12.5     WDM *                     
     RB      *Redout                                          DM *         15                                      
     RB      *Return To Castle Wolfenstine                    DM *         2.5-7.5       WDM *                     
+             Rez Infinite                                    DM 1         15.0                               No Off / Zero Off
             *Ryse: Son of Rome                               DM *         5.0-10                                      
     RB      *S.T.A.L.K.E.R:CS Complete Mod                   DM *         2.5-5.0       WDM *                     
     RB      *S.T.A.L.K.E.R:CoP Complete Mod                  DM *         2.5-5.0       WDM *                     
