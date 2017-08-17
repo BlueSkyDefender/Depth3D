@@ -39,12 +39,12 @@ IF IT HAS AN *asterisk* I AM STILL WORKING ON IT.
     RB       Call of Duty: Black Ops 2                       DM 1         15.0        WDM 4                  No Off / 0.050-0.075    
     RB       Call of Duty: Ghost                             DM 1         15.0        WDM 4                  No Off / 0.050-0.075    
     RB       Call of Duty: Infinite Warfare                  DM 1         15.0        WDM 4                  No Off / 0.050-0.075    
-             Casltevania: Lord of Shadows - UE               DM 0         7.5                                Yes N  / 0.100-0.200                                       
+            *Casltevania: Lord of Shadows - UE               DM 0         7.5                                Yes N  / 0.100-0.200                                       
              Cryostasis                                      DM 0         10.0        WDM 6                  No Off / 0.025-0.075                         
              DOOM 2016                                       DM 0         15.0        WDM 1                  No Off / 0.050-0.100                       
-             DarkSiders Warmastred Edition                   DM 0         37.5                               Yes N  / 0.150-0.250  
+             DarkSiders Warmastred Edition                   DM 0         37.5                               Yes N  / 0.075-0.125  
             *Dead Effect                                     DM *         6.25                                     
-            *Dead Island                                     DM *         3.75                             
+             Dead Island                                     DM 0         5.0                                No Off / 0.025                             
             *Dead Rising 3                                   DM *         8.75                            
     RB      *Deadly Premonition:The Directors's Cut          DM *         8.75                                       
             *DeadPool Game                                   DM *         9.375                       
@@ -123,20 +123,20 @@ IF IT HAS AN *asterisk* I AM STILL WORKING ON IT.
              Zombie Army Trilogy                             DM 0         10.0                               Yes N / 0.050-0.075
 
 [Special Depth Map Game List]  [Depth Map] [DM Adjustment] [Weapon DM] [Offset] [Depth Flip] [Read Below]
-*Double Dragon Neon                DM 10        0.75-0.1                 0.6300
-*Dungeons 2                        DM 10        0.250-0.350              0.3750       Yes
-*Lara Croft & Temple of Osiris     DM 10        15.0-25                  0.3754
-*Fez                               DM 10        1.5-2.5                  0.6010       Yes
-*Magicka 2                         DM 10        1.5-5.0                  0.3730                   RB
-*Never Alone (Kisima Ingitchuna)   DM 10        1.0-2.0                  0.3688
-*Nosferatu: The Wrath of Malachi   DM 10        2.0-3.0        ?????     0.3667                   RB
-*Requiem: Avenging Angel           DM 10        5.0-7.5                  0.5740                   RB
-*Silent Hill: Homecoming           DM 10        1.0-2.0                  0.4080
+*Double Dragon Neon                DM *        0.75-0.1                 0.6300
+*Dungeons 2                        DM *        0.250-0.350              0.3750       Yes
+*Lara Croft & Temple of Osiris     DM *        15.0-25                  0.3754
+*Fez                               DM *        1.5-2.5                  0.6010       Yes
+*Magicka 2                         DM *        1.5-5.0                  0.3730                   RB
+*Never Alone (Kisima Ingitchuna)   DM *        1.0-2.0                  0.3688
+*Nosferatu: The Wrath of Malachi   DM *        2.0-3.0        ?????     0.3667                   RB
+*Requiem: Avenging Angel           DM *        5.0-7.5                  0.5740                   RB
+*Silent Hill: Homecoming           DM *        1.0-2.0                  0.4080
 
 [Games with special considerations][Depth Map] [DM Adjustments] [Weapon DM] [Weapon Cutoff] [Depth Flip] [Notes]
-*Resident Evil 7                        DM 3               18.75-25.0                             No Off/ 0.050-0.100          
-*Deus Ex Mankind Divided                DM 9          3.75          WDM 19          0.193                   Yes
-*Dying Light                            DM 9          3.75          WDM 20          0.193                   Yes
+*Resident Evil 7                        DM *       18.75-25.0                             No Off/ 0.050-0.100          
+*Deus Ex Mankind Divided                DM *          3.75          WDM 19          0.193                   Yes
+*Dying Light                            DM *          3.75          WDM 20          0.193                   Yes
 
 [Notes for Deus Ex MD]
 If you use a DM adjustment of 3.75 you can use a cut off point of 0.193.If you change DM adjustment you will have to readjust

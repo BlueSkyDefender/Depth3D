@@ -73,6 +73,16 @@ uniform float ZPD <
 				"Default is 0.010, Zero is off.";
 > = 0.010;
 
+uniform int Balance <
+	ui_type = "drag";
+	ui_min = 0; ui_max = 2;
+	ui_label = "Balance";
+	ui_tooltip = "Balance between ZPD Depth and Scene Depth.\n"
+				"Zero is 50/50 equal between both states.\n"
+				"One is 75/25, Two is 87.5/12.5\n"
+				"Defaultis One. Based on ZPD.";
+> = 1;
+
 uniform int Auto_ZPD <
 	ui_type = "combo";
 	ui_items = "Off\0Inverted\0Normal\0";
@@ -195,13 +205,6 @@ uniform bool InvertY <
 	ui_label = "Invert Y-Axis";
 	ui_tooltip = "Invert Y-Axis for the cross cursor.";
 > = false;
-
-//uniform float4 X <
-//	ui_type = "drag";
-//	ui_min = 0; ui_max = 1;
-//	ui_label = "X";
-//	ui_tooltip = "XYZW";
-//> = float4(0,0,0,0);
 
 /////////////////////////////////////////////D3D Starts Here/////////////////////////////////////////////////////////////////
 
@@ -609,7 +612,7 @@ else if(Dis_Occlusion == 6)
 float4 PS_renderLR(in float2 texcoord : TEXCOORD0)
 {
 	float4 color,Samp = float4(0.5, 0.625, 0.750, 0.825);
-	float DepthL = 1, DepthR = 1, ZP, MS, P, S, Z;
+	float NF_Power, DepthL = 1, DepthR = 1, ZP, MS, P, S, Z;
 		
 	float samples[5] = {Samp.x, Samp.y, Samp.z,Samp.w,1.0};
 	float2 TCL, TCR;
@@ -684,13 +687,27 @@ float4 PS_renderLR(in float2 texcoord : TEXCOORD0)
 			Z = ZPD;
 		}
 		
+
+		if (Balance == 0)
+		{
+			NF_Power = 0.5;
+		}
+		else if (Balance == 1)
+		{
+			NF_Power = 0.75;
+		}
+		else if (Balance == 2)
+		{
+			NF_Power = 0.875;
+		}
+		
 		if(ZPD == 0)
 		{
 			ZP = 1.0;
 		}
 		else
 		{
-			ZP = 0.750;
+			ZP = NF_Power;
 		}
 		
 		Z = max(0,Z);
