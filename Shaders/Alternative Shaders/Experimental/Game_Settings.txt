@@ -61,6 +61,7 @@ IF IT HAS AN *asterisk* I AM STILL WORKING ON IT.
     RB      *GTA V                                           DM *         10-20                                      
             *Gone Home                                       DM *         10.0                      Yes
     RB      *Hard Reset                                      DM *         5.0-10                                     
+             Hellblade: Senua's Sacrifice                    DM 1         10.0                               Yes N  / 0.150-0.250    [2] 
             *Hellpoint                                       DM *         10.0                      Yes
     RB      *Hitman 2016                                     DM *         7.5-15                                     
     RB      *Homefront The Revolution                        DM *         7.5-15                                     

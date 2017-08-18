@@ -94,13 +94,13 @@ uniform int Auto_ZPD <
 				"Default is Off.";
 > = 0;
 
-uniform int Dis_Occlusion <
+uniform int Disocclusion_Adjust <
 	ui_type = "combo";
-	ui_items = "Off\0Normal Mask\0Normal Mask Plus\0Normal Mask Depth Based\0Radial Mask\0Radial Mask Plus\0Radial Mask Depth Based\0";
+	ui_items = "Off\0Radial Mask\0Normal Mask\0Normal Mask Alternet\0Normal Mask Depth Based\0";
 	ui_label = "Disocclusion Mask";
 	ui_tooltip = "Automatic occlusion masking options.\n"
 				"Default is Normal Mask.";
-> = 1;
+> = 2;
 
 uniform float Perspective <
 	ui_type = "drag";
@@ -543,56 +543,48 @@ void  Disocclusion(in float4 position : SV_Position, in float2 texcoord : TEXCOO
 {
 //bilateral blur\/
 float2 DM;
-float B, DP =  Divergence,Disocclusion_Power;
-
-	if(Dis_Occlusion == 1)     
-		{
-		Disocclusion_Power = DP/350;
-		}
-else if(Dis_Occlusion == 2)     
-		{
-		Disocclusion_Power = DP/300;
-		}
-else if(Dis_Occlusion == 3)     
-		{
-		Disocclusion_Power = DP/min(-250,1-tex2Dlod(SamplerDM,float4(texcoord,0,0)).b/0.002);
-		}
-else if(Dis_Occlusion == 4)   
+float B, DP =  Divergence, Disocclusion_Power, DepthBased = clamp(tex2Dlod(SamplerDM,float4(texcoord,0,0)).r/0.0005,100,1000);
+	
+	 if(Disocclusion_Adjust == 1)     
 		{
 		Disocclusion_Power = DP/125;
 		}
-else if(Dis_Occlusion == 5)   
+else if(Disocclusion_Adjust == 2)   
 		{
-		Disocclusion_Power = DP/250;
+		Disocclusion_Power = DP/350;
 		}
-else if(Dis_Occlusion == 6)   
+else if(Disocclusion_Adjust == 3)   
 		{
-		Disocclusion_Power = DP/min(-250,1-tex2Dlod(SamplerDM,float4(texcoord,0,0)).b/0.002);
+		Disocclusion_Power = DP/350;
 		}
-		
+else if(Disocclusion_Adjust == 4)     
+		{
+		Disocclusion_Power = DP/DepthBased;
+		}
+								
  float2 dir;
  const int Con = 11;
 	
-	if(Dis_Occlusion >= 1) 
+	if(Disocclusion_Adjust >= 1) 
 	{
 		const float weight[Con] = {0.01,-0.01,0.02,-0.02,0.03,-0.03,0.04,-0.04,0.05,-0.05,0.0};
 		
-		if(Dis_Occlusion == 1 || Dis_Occlusion == 2 || Dis_Occlusion == 3)
-		{
-			dir = float2(0.5,0.0);
-			B = Disocclusion_Power;
-		}
-		
-		if(Dis_Occlusion == 4 || Dis_Occlusion == 5 || Dis_Occlusion == 6)
+		if(Disocclusion_Adjust == 1)
 		{
 			dir = 0.5 - texcoord;
 			B = Disocclusion_Power;
 		}
 		
+		if(Disocclusion_Adjust == 2 || Disocclusion_Adjust == 3 || Disocclusion_Adjust == 4)
+		{
+			dir = float2(0.5,0.0);
+			B = Disocclusion_Power;
+		}
+				
 		[loop]
 		for (int i = 0; i < Con; i++)
 		{	
-			if(Dis_Occlusion >= 1) 
+			if(Disocclusion_Adjust >= 1) 
 			{	
 				DM += tex2Dlod(SamplerDM,float4(texcoord + dir * weight[i] * B ,0,0)).rb/Con;
 			}
@@ -654,6 +646,9 @@ float4 PS_renderLR(in float2 texcoord : TEXCOORD0)
 	for (int j = 0; j < 5; ++j) 
 	{	
 		S = samples[j] * MS;
+		
+		if (Disocclusion_Adjust == 3)
+		S /= 1.5;
 		
 		float L = tex2Dlod(SamplerDis,float4(TCL.x+S, TCL.y,0,0)).r;
 		float R = tex2Dlod(SamplerDis,float4(TCR.x-S, TCR.y,0,0)).b;
