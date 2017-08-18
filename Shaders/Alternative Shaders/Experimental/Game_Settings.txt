@@ -42,7 +42,7 @@ IF IT HAS AN *asterisk* I AM STILL WORKING ON IT.
             *Casltevania: Lord of Shadows - UE               DM 0         7.5                                Yes N  / 0.100-0.200                                       
              Cryostasis                                      DM 0         10.0        WDM 6                  No Off / 0.025-0.075                         
              DOOM 2016                                       DM 0         15.0        WDM 1                  No Off / 0.050-0.100                       
-             DarkSiders Warmastred Edition                   DM 0         37.5                               Yes N  / 0.075-0.125    [0]  
+             DarkSiders Warmastred Edition                   DM 0         25.0                               No Off / 0.100-0.150    [0]  
             *Dead Effect                                     DM *         6.25                                     
              Dead Island                                     DM 0         5.0                                No Off / 0.025          [3]                       
             *Dead Rising 3                                   DM *         8.75                            
@@ -121,9 +121,9 @@ IF IT HAS AN *asterisk* I AM STILL WORKING ON IT.
             *Warhammer: End Times - Vermintide               DM *         2.5-4.5                                    
     RB      *Watch Dogs 2                                    DM *         2.5-5.0                                    
             *Witcher 3                                       DM *         3.0-7.0                                         
-    RB      *Wolfenstine: The New Order                      DM *         3.75-7.5      WDM *                     
-    RB      *Wolfenstine: The Old Blood                      DM *         3.75-7.5      WDM *                     
-             Zombie Army Trilogy                             DM 0         10.0                               Yes N / 0.050-0.075
+    RB       Wolfenstine: The New Order                      DM 0         25.0        WDM 7                  No Off / 0.050-0.075  [1]:[2] 
+    RB       Wolfenstine: The Old Blood                      DM 0         25.0        WDM 7                  No Off / 0.050-0.075  [1]:[2]
+             Zombie Army Trilogy                             DM 0         10.0                               Yes N  / 0.050-0.075
 
 [Special Depth Map Game List]  [Depth Map] [DM Adjustment] [Weapon DM] [Offset] [Depth Flip] [Read Below]
 *Double Dragon Neon                DM *        0.75-0.1                 0.6300

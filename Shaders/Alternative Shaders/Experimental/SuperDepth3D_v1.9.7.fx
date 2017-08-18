@@ -26,19 +26,18 @@
  //*																																												*//
  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-// Determines The resolution of the Depth Map. For 4k Use 1.75 or 1.5. For 1440p Use 1.5 or 1.25. For 1080p use 1. Too low of a resolution will remove too much.
+// Determines The resolution of the Depth Map. For 4k Use 2.0 or 1.75. For 1440p Use 1.75 or 1.50. For 1080p use 1. Too low of a resolution division will remove too much.
 #define Depth_Map_Division 1.0
 
 // Determines The Max Depth amount.
-#define Depth_Max 50
+#define Depth_Max 55
 
 uniform int Depth_Map <
 	ui_type = "combo";
 	ui_items = " 0 Normal\0 1 Normal Reversed-Z\0 3 Special\0";
 	ui_label = "Depth Map Selection";
-	ui_tooltip = "linearization for the zBuffer also Depth Map One to Five.\n"
-			    "Normally you want to use 1,2, or 5."
-			    "DM 3 and 4 are for indoor games.";
+	ui_tooltip = "linearization for the zBuffer also Depth Map One to Three.\n"
+			    "Normally you want to use 1,2, or 3.";
 > = 0;
 
 uniform float Depth_Map_Adjust <
@@ -452,6 +451,14 @@ float2 WeaponDepth(in float2 texcoord : TEXCOORD0)
 		CoP = 0.455;
 		}
 		
+		//WDM 7 ; Wolfenstine: The New Order
+		else if (WDM == 9)
+		{
+		WA_X = 5.500;
+		WA_Y = 1.550;
+		CoP = 0.550;
+		}
+		
 		//SWDMS Done//
  		
 		//Scaled Section z-Buffer
@@ -470,22 +477,8 @@ float2 WeaponDepth(in float2 texcoord : TEXCOORD0)
 		
 		float AA,AL = abs(smoothstep(0,1,LumWeapon(texcoord)*2));
 		
-		if(AL <= 0.003)
-		{
-		AA = -0.003;
-		}
-		else if(AL <= 0.04)
-		{
-		AA = 0.025;
-		}
-		else
-		{
-		AA = 0.250;
-		}
-		
-		
 		if (WDM!= 1)
-		zBufferWH = lerp(zBufferWH*AL,zBufferWH,AA);
+		zBufferWH = lerp(zBufferWH*AL,zBufferWH,0.025);
 		
 		if (Weapon_Adjust.z <= 0) //Zero Is auto
 		{
