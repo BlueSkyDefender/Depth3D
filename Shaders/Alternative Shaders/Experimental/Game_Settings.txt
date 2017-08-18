@@ -44,7 +44,7 @@ IF IT HAS AN *asterisk* I AM STILL WORKING ON IT.
              DOOM 2016                                       DM 0         15.0        WDM 1                  No Off / 0.050-0.100                       
              DarkSiders Warmastred Edition                   DM 0         37.5                               Yes N  / 0.075-0.125    [0]  
             *Dead Effect                                     DM *         6.25                                     
-             Dead Island                                     DM 0         5.0                                No Off / 0.025          [2]                       
+             Dead Island                                     DM 0         5.0                                No Off / 0.025          [3]                       
             *Dead Rising 3                                   DM *         8.75                            
     RB      *Deadly Premonition:The Directors's Cut          DM *         8.75                                       
             *DeadPool Game                                   DM *         9.375                       
@@ -67,7 +67,7 @@ IF IT HAS AN *asterisk* I AM STILL WORKING ON IT.
             *Just Cause 3                                    DM *         7.5-15                         
     RB      *KHOLAT                                          DM *         15-25                                      
     RB      *Kingpin: Life of Crime                          DM *         5.0-10      WDM *                      
-             Layers of Fear                                  DM 0         7.5                       Yes       No Off/ 0.125-0.175
+             Layers of Fear                                  DM 0         7.5                       Yes       No Off / 0.125-0.175
             *Lifeless Planet                                 DM *         10.0                      Yes
             *Lords of The Fallen                             DM *         15-25                      
     RB      *LuciusII                                        DM *         50                       Yes       
@@ -84,6 +84,7 @@ IF IT HAS AN *asterisk* I AM STILL WORKING ON IT.
             *Need For Speed Rivals                           Help         ?????? 
             *Need for Speed Most Wanted                      Help         ?????? 
              NieRAutomata                                    DM 0         20.0                               Yes N  / 0.050-0.075
+             Observer                                        DM 1         10.0                               No Off / 0.150-0.250    [2] 
     RB      *Penumbra: Black Plague                          DM *         10-20                                      
     RB      *Phantasmal                                      DM *         10-20                                      
     RB       Prey 2017                                       DM 1         18.75        WDM *                 Yes N / 0.050-0.075                  
@@ -92,7 +93,7 @@ IF IT HAS AN *asterisk* I AM STILL WORKING ON IT.
             *Quantum Break                                   DM *         7.5-15 
     RB      *Rage64                                          DM *         7.5-12.5     WDM *                     
     RB      *Redout                                          DM *         15.0
-    RB       Resident Evil 7                                 DM 1         20.0                               Yes N  / 0.150-0.300    [1]                                         
+    RB       Resident Evil 7                                 DM 1         20.0                               Yes N  / 0.150-0.300    [2]                                         
     RB      *Return To Castle Wolfenstine                    DM *         2.5-7.5       WDM *                     
              Rez Infinite                                    DM 1         20.0                               No Off / 0.075-0.150    [0]
             *Ryse: Son of Rome                               DM *         5.0-10                                      
