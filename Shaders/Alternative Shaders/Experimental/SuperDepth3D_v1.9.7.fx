@@ -30,7 +30,7 @@
 #define Depth_Map_Division 1.0
 
 // Determines The Max Depth amount.
-#define Depth_Max 55
+#define Depth_Max 50
 
 uniform int Depth_Map <
 	ui_type = "combo";
@@ -95,7 +95,7 @@ uniform int Auto_ZPD <
 
 uniform int Disocclusion_Adjust <
 	ui_type = "combo";
-	ui_items = "Off\0Radial Mask\0Normal Mask\0Normal Mask Alt One\0Normal Mask Alt Two\0Normal Mask Depth Based\0";
+	ui_items = "Off\0Radial Mask\0Normal Mask\0Normal Mask Alt\0Normal Depth Mask\0Normal Depth Mask Alt\0";
 	ui_label = "Disocclusion Mask";
 	ui_tooltip = "Automatic occlusion masking options.\n"
 				"Default is Normal Mask.";
@@ -204,6 +204,13 @@ uniform bool InvertY <
 	ui_label = "Invert Y-Axis";
 	ui_tooltip = "Invert Y-Axis for the cross cursor.";
 > = false;
+
+//uniform float2 X <
+//	ui_type = "drag";
+//	ui_min = 0; ui_max = 1;
+//	ui_label = "X";
+//	ui_tooltip = "X";
+//> = float2(0,0);
 
 /////////////////////////////////////////////D3D Starts Here/////////////////////////////////////////////////////////////////
 
@@ -536,19 +543,23 @@ void  Disocclusion(in float4 position : SV_Position, in float2 texcoord : TEXCOO
 {
 //bilateral blur\/
 float2 DM;
-float B, DP =  Divergence, Disocclusion_Power, DepthBased = clamp(tex2Dlod(SamplerDM,float4(texcoord,0,0)).r/0.0005,100,1000);
+float B, DP =  Divergence, Disocclusion_Power;
 	
 	 if(Disocclusion_Adjust == 1)     
 		{
 		Disocclusion_Power = DP/125;
 		}
-else if(Disocclusion_Adjust == 2 || Disocclusion_Adjust == 3 || Disocclusion_Adjust == 4)   
+else if(Disocclusion_Adjust == 2 || Disocclusion_Adjust == 3)   
 		{
 		Disocclusion_Power = DP/350;
 		}
-else if(Disocclusion_Adjust == 5)     
+else if(Disocclusion_Adjust == 4) //Depth Based    
 		{
-		Disocclusion_Power = DP/DepthBased;
+		Disocclusion_Power = DP/clamp(tex2Dlod(SamplerDM,float4(texcoord,0,0)).r/0.0005,100,1000);
+		}
+else if(Disocclusion_Adjust == 5) //Depth Based    
+		{
+		Disocclusion_Power = DP/clamp(tex2Dlod(SamplerDM,float4(texcoord,0,0)).r/0.0009625,100,1000);
 		}
 								
  float2 dir;
@@ -638,11 +649,11 @@ float4 PS_renderLR(in float2 texcoord : TEXCOORD0)
 		
 		if (Disocclusion_Adjust == 3)
 		{
-		S /= 1.5;
+		S /= 1.3125;
 		}
-		else if (Disocclusion_Adjust == 4)
+		else if (Disocclusion_Adjust == 5)
 		{
-		S /= 1.375;
+		S /= 1.075;
 		}
 		
 		float L = tex2Dlod(SamplerDis,float4(TCL.x+S, TCL.y,0,0)).r;
