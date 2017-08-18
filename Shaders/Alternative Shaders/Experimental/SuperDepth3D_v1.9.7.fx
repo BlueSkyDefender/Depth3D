@@ -95,7 +95,7 @@ uniform int Auto_ZPD <
 
 uniform int Disocclusion_Adjust <
 	ui_type = "combo";
-	ui_items = "Off\0Radial Mask\0Normal Mask\0Normal Mask Alternet\0Normal Mask Depth Based\0";
+	ui_items = "Off\0Radial Mask\0Normal Mask\0Normal Mask Alt One\0Normal Mask Alt Two\0Normal Mask Depth Based\0";
 	ui_label = "Disocclusion Mask";
 	ui_tooltip = "Automatic occlusion masking options.\n"
 				"Default is Normal Mask.";
@@ -542,15 +542,11 @@ float B, DP =  Divergence, Disocclusion_Power, DepthBased = clamp(tex2Dlod(Sampl
 		{
 		Disocclusion_Power = DP/125;
 		}
-else if(Disocclusion_Adjust == 2)   
+else if(Disocclusion_Adjust == 2 || Disocclusion_Adjust == 3 || Disocclusion_Adjust == 4)   
 		{
 		Disocclusion_Power = DP/350;
 		}
-else if(Disocclusion_Adjust == 3)   
-		{
-		Disocclusion_Power = DP/350;
-		}
-else if(Disocclusion_Adjust == 4)     
+else if(Disocclusion_Adjust == 5)     
 		{
 		Disocclusion_Power = DP/DepthBased;
 		}
@@ -568,7 +564,7 @@ else if(Disocclusion_Adjust == 4)
 			B = Disocclusion_Power;
 		}
 		
-		if(Disocclusion_Adjust == 2 || Disocclusion_Adjust == 3 || Disocclusion_Adjust == 4)
+		if(Disocclusion_Adjust == 2 || Disocclusion_Adjust == 3 || Disocclusion_Adjust == 4 || Disocclusion_Adjust == 5)
 		{
 			dir = float2(0.5,0.0);
 			B = Disocclusion_Power;
@@ -641,7 +637,13 @@ float4 PS_renderLR(in float2 texcoord : TEXCOORD0)
 		S = samples[j] * MS;
 		
 		if (Disocclusion_Adjust == 3)
+		{
 		S /= 1.5;
+		}
+		else if (Disocclusion_Adjust == 4)
+		{
+		S /= 1.375;
+		}
 		
 		float L = tex2Dlod(SamplerDis,float4(TCL.x+S, TCL.y,0,0)).r;
 		float R = tex2Dlod(SamplerDis,float4(TCR.x-S, TCR.y,0,0)).b;

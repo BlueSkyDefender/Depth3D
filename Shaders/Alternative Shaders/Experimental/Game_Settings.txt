@@ -117,13 +117,13 @@ IF IT HAS AN *asterisk* I AM STILL WORKING ON IT.
     RB      *Through The Woods                               DM *         10.0                        Yes         
     RB      *Turok: Dinosaur Hunter                          DM *         50-100       WDM *                     
             *Turok 2: Seeds of Evil                          DM *         75-125       WDM *
-    RB       Unreal Gold with v227                           DM 0         17.5         WDM 0                 No Off/ 0.010-0.050      
+    RB       Unreal Gold with v227                           DM 0         17.5        WDM 0                  No Off/ 0.010-0.050      
             *Warhammer: End Times - Vermintide               DM *         2.5-4.5                                    
     RB      *Watch Dogs 2                                    DM *         2.5-5.0                                    
             *Witcher 3                                       DM *         3.0-7.0                                         
     RB       Wolfenstine: The New Order                      DM 0         25.0        WDM 7                  No Off / 0.050-0.075  [1]:[2] 
     RB       Wolfenstine: The Old Blood                      DM 0         25.0        WDM 7                  No Off / 0.050-0.075  [1]:[2]
-             Zombie Army Trilogy                             DM 0         10.0                               Yes N  / 0.050-0.075
+             Zombie Army Trilogy                             DM 0         10.0                               Yes N  / 0.050-0.075    [2]
 
 [Special Depth Map Game List]  [Depth Map] [DM Adjustment] [Weapon DM] [Offset] [Depth Flip] [Read Below]
 *Double Dragon Neon                DM *        0.75-0.1                 0.6300
