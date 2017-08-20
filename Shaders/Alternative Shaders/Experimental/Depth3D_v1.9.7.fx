@@ -68,22 +68,14 @@ uniform float ZPD <
 	ui_tooltip = "ZPD controls the focus distance for the screen Pop-out effect.";
 > = 0.010;
 
-uniform float Weapon_Depth <
+uniform int Disocclusion <
 	ui_type = "drag";
-	ui_min = -100; ui_max = 100;
-	ui_label = "Weapon Depth Adjustment";
-	ui_tooltip = "Pushes or Pulls the FPS Hand in or out of the screen.\n" 
-				 "Default is 0";
-> = 0;
-
-uniform int Dis_Occlusion <
-	ui_type = "drag";
-	ui_min = 0; ui_max = 5;
-	ui_label = "Disocclusion Power";
-	ui_tooltip = "Occlusion masking power adjustment.\n"
-				"Disocclusion starts at One.\n."
-				"Default is 1";
-> = 1;
+	ui_min = 0; ui_max = 3;
+	ui_label = "Disocclusion Type";
+	ui_tooltip = "Occlusion masking adjustment.\n"
+				"Disocclusion starts at One ends at Three.\n."
+				"Default is 2";
+> = 2;
 
 uniform float Perspective <
 	ui_type = "drag";
@@ -228,45 +220,43 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 		zBuffer = Special;
 		}
 	
-	return float4(zBuffer.rrr,1);	
+	Color = float4(zBuffer.rrr,1);	
 }
 
-void  Disocclusion(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 color : SV_Target0)
+void  Disocclusion_Out(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 color : SV_Target0)
 {
 
 float4 DM;
 
 float B, DP =  Divergence,Disocclusion_Power;
 
-	if(Dis_Occlusion == 1)     
+	if(Disocclusion == 1)     
+		{
+		Disocclusion_Power = DP/125;
+		}
+else if(Disocclusion == 2)     
 		{
 		Disocclusion_Power = DP/350;
 		}
-else if(Dis_Occlusion == 2)     
+else if(Disocclusion == 2)//Depth Based      
 		{
-		Disocclusion_Power = DP/306.25;
+		Disocclusion_Power = DP/clamp(tex2Dlod(SamplerDM,float4(texcoord,0,0)).r/0.0005,100,1000);
 		}
-else if(Dis_Occlusion == 3)     
-		{
-		Disocclusion_Power = DP/262.5;
-		}
-else if(Dis_Occlusion == 4)   
-		{
-		Disocclusion_Power = DP/175;
-		}
-else if(Dis_Occlusion == 5)   
-		{
-		Disocclusion_Power = DP/116.6666667;
-		}
-		
+				
  float2 dir;
- const int Con = 10;
+ const int Con = 11;
 	
-	if(Dis_Occlusion >= 1) 
+	if(Disocclusion >= 1) 
 	{
-		const float weight[Con] = {0.01,-0.01,0.02,-0.02,0.03,-0.03,0.04,-0.04,0.05,-0.05};
+		const float weight[Con] = {0.0,0.01,-0.01,0.02,-0.02,0.03,-0.03,0.04,-0.04,0.05,-0.05};
 		
-		if(Dis_Occlusion >= 1)
+		if(Disocclusion == 1)
+		{
+			dir = 0.5 - texcoord;
+			B = Disocclusion_Power;
+		}
+		
+		if(Disocclusion == 2 || Disocclusion == 3)
 		{
 			dir = float2(0.5,0.0);
 			B = Disocclusion_Power;
@@ -275,7 +265,7 @@ else if(Dis_Occlusion == 5)
 		[loop]
 		for (int i = 0; i < Con; i++)
 		{	
-			if(Dis_Occlusion >= 1) 
+			if(Disocclusion >= 1) 
 			{	
 				DM += tex2Dlod(SamplerDM,float4(texcoord + dir * weight[i] * B ,0,0)).bbbb/Con;
 			}
@@ -296,7 +286,7 @@ float4 PS_renderLR(in float2 texcoord : TEXCOORD0)
 {
 	float4 color;
 	float DepthL = 1, DepthR = 1, MS, P, S, Z;
-	float samples[5] = {0.50, 0.58, 0.66, 0.83, 1};
+	float samples[5] = {0.5, 0.625, 0.750, 0.825, 1};
 	float2 TCL, TCR;
 		
 	if(!Eye_Swap) //MS is Max Separation P is Perspective Adjustment
@@ -350,11 +340,11 @@ float4 PS_renderLR(in float2 texcoord : TEXCOORD0)
 	}
 	else
 	{
-		Z = 0.625;
+		Z = 0.6875;
 	}
 	
-	float ParallaxL = max(-0.05,MS * (1-ZPD/DepthL));
-	float ParallaxR = max(-0.05,MS * (1-ZPD/DepthR));
+	float ParallaxL = max(-0.250,MS * (1-ZPD/DepthL));
+	float ParallaxR = max(-0.250,MS * (1-ZPD/DepthR));
 	
 		ParallaxL = lerp(ParallaxL,DepthL * MS,Z);
 		ParallaxR = lerp(ParallaxR,DepthR * MS,Z);
@@ -698,7 +688,7 @@ technique Depth3D
 			pass Disocclusion
 		{
 			VertexShader = PostProcessVS;
-			PixelShader = Disocclusion;
+			PixelShader = Disocclusion_Out;
 			RenderTarget = texDis;
 		}
 			pass StereoOut

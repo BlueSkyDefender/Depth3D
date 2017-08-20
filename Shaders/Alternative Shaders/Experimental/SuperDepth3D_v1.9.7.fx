@@ -466,6 +466,14 @@ float2 WeaponDepth(in float2 texcoord : TEXCOORD0)
 		CoP = 0.550;
 		}
 		
+		//WDM 8 ; Fallout 4
+		else if (WDM == 10)
+		{
+		WA_X = 2.5275;
+		WA_Y = 0.125;
+		CoP = 0.255;
+		}
+		
 		//SWDMS Done//
  		
 		//Scaled Section z-Buffer
@@ -604,7 +612,7 @@ else if(Disocclusion_Adjust == 5) //Depth Based
 float4 PS_renderLR(in float2 texcoord : TEXCOORD0)
 {
 	float4 color,Samp = float4(0.5, 0.625, 0.750, 0.825);
-	float NF_Power, DepthL = 1, DepthR = 1, ZP, MS, P, S, Z;
+	float NF_Power, Boost = 1.025, DepthL = 1, DepthR = 1, ZP, MS, P, S, Z;
 		
 	float samples[5] = {Samp.x, Samp.y, Samp.z,Samp.w,1.0};
 	float2 TCL, TCR;
@@ -720,11 +728,11 @@ float4 PS_renderLR(in float2 texcoord : TEXCOORD0)
 	float ParallaxL = max(-0.250,MS * (1-Z/DepthL));
 	float ParallaxR = max(-0.250,MS * (1-Z/DepthR));
 		
-		DepthL = lerp(DepthL,1-DepthL,-0.025);         
-		DepthR = lerp(DepthR,1-DepthR,-0.025);     
+		DepthL *= MS;
+		DepthR *= MS;
 		
-		ParallaxL = lerp(ParallaxL,DepthL * MS,ZP);
-		ParallaxR = lerp(ParallaxR,DepthR * MS,ZP);
+		ParallaxL = lerp(ParallaxL * Boost,DepthL * Boost,ZP);
+		ParallaxR = lerp(ParallaxR * Boost,DepthR * Boost,ZP);
 		
 		float ReprojectionLeft =  ParallaxL;
 		float ReprojectionRight = ParallaxR;
