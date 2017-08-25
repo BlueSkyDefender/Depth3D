@@ -64,7 +64,7 @@ uniform int Divergence <
 
 uniform float ZPD <
 	ui_type = "drag";
-	ui_min = 0.0; ui_max = 0.300;
+	ui_min = 0.0; ui_max = 0.350;
 	ui_label = "Zero Parallax Distance";
 	ui_tooltip = "ZPD controls the focus distance for the screen Pop-out effect.\n"
 				"For FPS Games this should be around 0.005-0.075.\n"
@@ -472,6 +472,22 @@ float2 WeaponDepth(in float2 texcoord : TEXCOORD0)
 		WA_X = 2.5275;
 		WA_Y = 0.125;
 		CoP = 0.255;
+		}
+		
+		//WDM 9 ; Prey 2017 High and <
+		else if (WDM == 11)
+		{
+		WA_X = 19.700;
+		WA_Y = -2.600;
+		CoP = 0.285;
+		}
+
+		//WDM 10 ; Prey 2017 Very High
+		else if (WDM == 12)
+		{
+		WA_X = 28.450;
+		WA_Y = -2.600;
+		CoP = 0.285;
 		}
 		
 		//SWDMS Done//

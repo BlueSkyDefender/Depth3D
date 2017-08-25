@@ -45,7 +45,7 @@ IF IT HAS AN *asterisk* I AM STILL WORKING ON IT.
              DarkSiders Warmastred Edition                   DM 0         25.0                               No Off / 0.100-0.150    [0]  
             *Dead Effect                                     DM *         6.25                                     
              Dead Island                                     DM 0         5.0                                No Off / 0.025          [3]                       
-    RB       Dead Rising 3                                   DM 0         15.0                               No Off / 0.075-0.175    [2]                           
+    RB       Dead Rising 3                                   DM 0         12.5                               No Off / 0.075-0.175    [2]                           
     RB      *Deadly Premonition:The Directors's Cut          DM *         8.75                                       
             *DeadPool Game                                   DM *         9.375                       
             *Dragon Age Inquisition                          DM *         3.00                            
@@ -88,7 +88,7 @@ IF IT HAS AN *asterisk* I AM STILL WORKING ON IT.
              Observer                                        DM 1         10.0                               No Off / 0.150-0.250    [2] 
     RB      *Penumbra: Black Plague                          DM *         10-20                                      
     RB      *Phantasmal                                      DM *         10-20                                      
-    RB       Prey 2017                                       DM 1         18.75        WDM *                 Yes N / 0.050-0.075                  
+    RB       Prey 2017                                       DM 1         18.75     WDM 9 & 10               No Off / 0.025-0.075    [2]                
             *Quake 2 XP                                      DM *         5.0-10       WDM *
     RB      *Quake 4                                         DM *         5.0-10       WDM *                     
             *Quantum Break                                   DM *         7.5-15 
