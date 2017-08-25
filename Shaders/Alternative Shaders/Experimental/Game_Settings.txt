@@ -45,7 +45,7 @@ IF IT HAS AN *asterisk* I AM STILL WORKING ON IT.
              DarkSiders Warmastred Edition                   DM 0         25.0                               No Off / 0.100-0.150    [0]  
             *Dead Effect                                     DM *         6.25                                     
              Dead Island                                     DM 0         5.0                                No Off / 0.025          [3]                       
-            *Dead Rising 3                                   DM *         8.75                            
+    RB       Dead Rising 3                                   DM 0         15.0                               No Off / 0.075-0.175    [2]                           
     RB      *Deadly Premonition:The Directors's Cut          DM *         8.75                                       
             *DeadPool Game                                   DM *         9.375                       
             *Dragon Age Inquisition                          DM *         3.00                            
@@ -55,7 +55,7 @@ IF IT HAS AN *asterisk* I AM STILL WORKING ON IT.
     RB      *Dungeon Nightmares II                           DM *         20.0                                       
     RB      *Emily Wants To Play                             DM *         10.0                                       
             *Everybody's Gone to the Rapture                 DM *         4.25                       
-             Fallout 4                                       DM 0         4.50        WDM 8                  No Off / 0.075-0.200    [2]          
+             Fallout 4                                       DM 0         5.00        WDM 8                  No Off / 0.075-0.200    [2]          
     RB      *FarCry 3                                        DM *         5.00                                       
             *Firewatch                                       DM *         10.0                      Yes
     RB      *GTA V                                           DM *         10-20                                      
@@ -199,6 +199,12 @@ Turn off AA.
 Render Resolution Native.
 Turn off AA.
 Don't use in game Supersampling
+
+{DeadRising 3}
+Use Native scailing I think it's called in game as Full.
+I also suggest useing the 60FPS and 80FOV Fix for this game.
+
+https://pcgamingwiki.com/wiki/Dead_Rising_3
 
 {Deadly Premonition}
 Can Run with Higer Rez useing DPfix095.
