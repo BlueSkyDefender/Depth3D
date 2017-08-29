@@ -34,10 +34,10 @@
 
 uniform int Depth_Map <
 	ui_type = "combo";
-	ui_items = " 0 Normal\0 1 Normal Reversed-Z\0 3 Special\0";
+	ui_items = " 0 Normal\0 1 Normal Reversed-Z\0 3 Offset Normal\0 4 Offset Reversed-Z\0";
 	ui_label = "Depth Map Selection";
-	ui_tooltip = "linearization for the zBuffer also Depth Map One to Three.\n"
-			    "Normally you want to use 1,2, or 3.";
+	ui_tooltip = "linearization for the zBuffer also Depth Map One to Four.\n"
+			    "Normally you want to use 1 or 2.";
 > = 0;
 
 uniform float Depth_Map_Adjust <
@@ -344,8 +344,14 @@ float2 Depth(in float2 texcoord : TEXCOORD0)
 		//1. Reverse
 		float NormalReverse = Far * Near / (Near + zBuffer * (Far - Near));
 		
+		//2. Offset Normal
+		float OffsetNormal =  Far * Near / (Far +  pow(abs(exp(zBuffer)*Offset),DA*25) * (Near - Far));
+
+		//3. Offset Reverse
+		float OffsetReverse = Far * Near / (Near +  pow(abs(exp(zBuffer)*Offset),DA*25) * (Far - Near));
+
 		//4. Special Depth Map
-		float Special = pow(abs(exp(zBuffer)*Offset),DA*25);
+		//float Special = pow(abs(exp(zBuffer)*Offset),DA*25); Not in use......		
 		
 		float2 DM;
 		
@@ -357,9 +363,13 @@ float2 Depth(in float2 texcoord : TEXCOORD0)
 		{
 		DM.x = NormalReverse;
 		}
+		else if (Depth_Map == 2)
+		{
+		DM.x = OffsetNormal;
+		}
 		else
 		{
-		DM.x = Special;
+		DM.x = OffsetReverse;
 		}
 		
 		if (Depth_Map == 0)
@@ -370,9 +380,13 @@ float2 Depth(in float2 texcoord : TEXCOORD0)
 		{
 		DM.y = NormalReverse;
 		}
+		else if (Depth_Map == 2)
+		{
+		DM.y = OffsetNormal;
+		}
 		else
 		{
-		DM.y = Special;
+		DM.y = OffsetReverse;
 		}
 	
 	return float2(DM.x,DM.y);	
