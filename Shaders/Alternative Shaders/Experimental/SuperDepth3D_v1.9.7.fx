@@ -121,7 +121,7 @@ uniform bool Depth_Map_Flip <
 
 uniform int WDM <
 	ui_type = "combo";
-	ui_items = "Weapon DM Off\0Custom WDM\0 WDM 0\0 WDM 1\0 WDM 2\0 WDM 3\0 WDM 4\0 WDM 5\0 WDM 6\0 WDM 7\0 WDM 8\0 WDM 9\0 WDM 10\0";
+	ui_items = "Weapon DM Off\0Custom WDM\0 WDM 0\0 WDM 1\0 WDM 2\0 WDM 3\0 WDM 4\0 WDM 5\0 WDM 6\0 WDM 7\0 WDM 8\0 WDM 9\0 WDM 10\0 WDM 11\0";
 	ui_label = "Weapon Depth Map";
 	ui_tooltip = "Pick your weapon depth map for games.";
 > = 0;
@@ -502,6 +502,14 @@ float2 WeaponDepth(in float2 texcoord : TEXCOORD0)
 		WA_X = 28.450;
 		WA_Y = -2.600;
 		CoP = 0.285;
+		}
+		
+		//WDM 11 ; Metro Redux Games
+		else if (WDM == 13)
+		{
+		WA_X = 2.61375;
+		WA_Y = 1.0;
+		CoP = 0.260;
 		}
 		
 		//SWDMS Done//

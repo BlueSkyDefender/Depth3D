@@ -75,8 +75,8 @@ IF IT HAS AN *asterisk* I AM STILL WORKING ON IT.
     RB      *Mafia III                                       DM *         10-15                                      
     RB       Mass Effect Andromeda                           DM 1         15.0                                Yes N / 0.075-0.175                                        
     RB      *Metal Gear Rising                               DM *         10-20                                      
-    RB      *Metro 2033 Redux                                DM *         7.5-15       WDM *                      
-    RB      *Metro Last Light Redux                          DM *         7.5-15       WDM *                      
+    RB       Metro 2033 Redux                                DM 0         7.50        WDM  11                 No Off / 0.025-0.125    [2]                
+    RB       Metro Last Light Redux                          DM 0         7.50        WDM  11                 No Off / 0.025-0.125    [2]                      
     RB      *Middle-earth: Shadow of Mordor                  DM *         7.5-15                                     
             *Mirror's Edge Catalyst                          DM *         5.0-10                                      
             *Mordheim: City of the Damned                    DM *         2.5-7.5                                     
