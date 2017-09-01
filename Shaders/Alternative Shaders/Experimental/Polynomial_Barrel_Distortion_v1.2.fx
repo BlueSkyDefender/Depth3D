@@ -22,6 +22,11 @@
  //* 																																												*//
  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+// Determines Slave and Master Shader Toggle. This is used if you want pair this shader up with a other one of the same kind.
+// One = Master;
+// Zero = Slave;
+#define TOGGLE 1
+
 uniform int Interpupillary_Distance <
 	ui_type = "drag";
 	ui_min = -100; ui_max = 100;
@@ -109,6 +114,7 @@ float LD = Lens_Distortion;
 float Z = Zoom;
 float AR = Aspect_Ratio;
 float3 PC = Polynomial_Colors;
+float2 D =  Degrees;
 float4x4 Done;
 
 	//Make your own Profile here.
@@ -120,6 +126,7 @@ float4x4 Done;
 		Z = 1.0;					//Zoom. Default is 1.0
 		AR = 1.0;					//Aspect Ratio. Default is 1.0
 		PC = float3(1,1,1);			//Polynomial Colors. Default is (Red 1.0, Green 1.0, Blue 1.0)
+		D = float2(0,0);			//Left & Right Rotation Angle known as Degrees.
 	}
 	
 	//Make your own Profile here.
@@ -131,15 +138,16 @@ float4x4 Done;
 		Z = 1.0;					//Zoom. Default is 1.0
 		AR = 0.925;					//Aspect Ratio. Default is 1.0
 		PC = float3(0.5,0.75,1);	//Polynomial Colors. Default is (Red 1.0, Green 1.0, Blue 1.0)
+		D = float2(0,0);			//Left & Right Rotation Angle known as Degrees.
 	}
 
 if(Diaspora)
 {
-Done = float4x4(float4(IPD,PC.x,Z,0),float4(LC,PC.y,AR,0),float4(LD,PC.z,0,0),float4(0,0,0,0)); //Diaspora frak up 4x4 fix
+Done = float4x4(float4(IPD,PC.x,Z,0),float4(LC,PC.y,AR,0),float4(LD,PC.z,D.x,0),float4(0,0,0,D.y)); //Diaspora frak up 4x4 fix
 }
 else
 {
-Done = float4x4(float4(IPD,LC,LD,0),float4(PC.x,PC.y,PC.z,0),float4(Z,AR,0,0),float4(0,0,0,0));
+Done = float4x4(float4(IPD,LC,LD,0),float4(PC.x,PC.y,PC.z,0),float4(Z,AR,D.x,0),float4(0,0,0,D.y));
 }
 return Done;
 }
@@ -179,6 +187,13 @@ float3 P_C()
 {
 	float3 PC = float3(HMDProfiles()[1][0],HMDProfiles()[1][1],HMDProfiles()[1][2]);
 	return PC;
+}
+
+//Degrees Section//
+float2 DEGREES()
+{
+	float2 Degrees = float2(HMDProfiles()[2][2],HMDProfiles()[3][3]);
+	return Degrees;
 }
 
 /////////////////////////////////////////////D3D Starts Here/////////////////////////////////////////////////////////////////
@@ -402,9 +417,9 @@ float4 PBDOut(float2 texcoord : TEXCOORD0)
 	//Texture Rotation//
 	
 	//Converts the specified value from radians to degrees.
-	float LD = radians(Degrees.x);
-	float RD = radians(-Degrees.y);
-	float MD = radians(Degrees.x);
+	float LD = radians(DEGREES().x);
+	float RD = radians(-DEGREES().y);
+	float MD = radians(DEGREES().x);
 	
 	//Left
 	float2 L_PivotPoint = float2(0.25,0.5);
@@ -608,7 +623,8 @@ void PostProcessVS(in uint id : SV_VertexID, out float4 position : SV_Position, 
 //*Rendering passes*//
 
 technique Polynomial_Barrel_Distortion
-{			
+{		
+		#if !TOGGLE
 			pass StereoMonoPass
 		{
 			VertexShader = PostProcessVS;
@@ -621,4 +637,19 @@ technique Polynomial_Barrel_Distortion
 			VertexShader = PostProcessVS;
 			PixelShader = Out;	
 		}
+		
+		#else
+			pass SMP
+		{
+			VertexShader = PostProcessVS;
+			PixelShader = LR;
+			RenderTarget0 = texCL;
+			RenderTarget1 = texCR;
+		}
+			pass PBD
+		{
+			VertexShader = PostProcessVS;
+			PixelShader = Out;	
+		}
+		#endif
 }
