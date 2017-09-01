@@ -121,7 +121,7 @@ uniform bool Depth_Map_Flip <
 
 uniform int WDM <
 	ui_type = "combo";
-	ui_items = "Weapon DM Off\0Custom WDM\0 WDM 0\0 WDM 1\0 WDM 2\0 WDM 3\0 WDM 4\0 WDM 5\0 WDM 6\0 WDM 7\0 WDM 8\0 WDM 9\0 WDM 10\0 WDM 11\0";
+	ui_items = "Weapon DM Off\0Custom WDM\0 WDM 0\0 WDM 1\0 WDM 2\0 WDM 3\0 WDM 4\0 WDM 5\0 WDM 6\0 WDM 7\0 WDM 8\0 WDM 9\0 WDM 10\0 WDM 11\0 WDM 12\0 WDM 13\0 WDM 14\0";
 	ui_label = "Weapon Depth Map";
 	ui_tooltip = "Pick your weapon depth map for games.";
 > = 0;
@@ -511,6 +511,30 @@ float2 WeaponDepth(in float2 texcoord : TEXCOORD0)
 		WA_Y = 1.0;
 		CoP = 0.260;
 		}
+		
+		//WDM 12 ; NecroVisioN: Lost Company
+		else if (WDM == 14)
+		{
+		WA_X = 5.1375;
+		WA_Y = 7.5;
+		CoP = 0.485;
+		}
+		
+		//WDM 13 ; Kingpin Life of Crime
+		else if (WDM == 15)
+		{
+		WA_X = 3.925;
+		WA_Y = 17.5;
+		CoP = 0.400;
+		}
+	
+		//WDM 14 ; Rage64
+		else if (WDM == 16)
+		{
+		WA_X = 5.45;
+		WA_Y = 1.0;
+		CoP = 0.550;
+		}	
 		
 		//SWDMS Done//
  		
