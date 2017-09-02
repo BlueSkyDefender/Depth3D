@@ -207,12 +207,21 @@ sampler BackBuffer
 		Texture = BackBufferTex;
 	};
 	
-texture texCL  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA32F;}; 
-texture texCR  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA32F;}; 
+#if TOGGLE
+texture texCLM  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA32F;}; 
+texture texCRM  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA32F;}; 
+#else
+texture texCLS  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA32F;}; 
+texture texCRS  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA32F;}; 
+#endif
 	
 sampler SamplerCLMIRROR
 	{
-		Texture = texCL;
+		#if TOGGLE
+		Texture = texCLM;
+		#else
+		Texture = texCLS;
+		#endif
 		AddressU = MIRROR;
 		AddressV = MIRROR;
 		AddressW = MIRROR;
@@ -220,7 +229,11 @@ sampler SamplerCLMIRROR
 	
 sampler SamplerCLBORDER
 	{
-		Texture = texCL;
+		#if TOGGLE
+		Texture = texCLM;
+		#else
+		Texture = texCLS;
+		#endif
 		AddressU = BORDER;
 		AddressV = BORDER;
 		AddressW = BORDER;
@@ -228,7 +241,11 @@ sampler SamplerCLBORDER
 
 sampler SamplerCLCLAMP
 	{
-		Texture = texCL;
+		#if TOGGLE
+		Texture = texCLM;
+		#else
+		Texture = texCLS;
+		#endif
 		AddressU = CLAMP;
 		AddressV = CLAMP;
 		AddressW = CLAMP;
@@ -236,7 +253,11 @@ sampler SamplerCLCLAMP
 
 sampler SamplerCRMIRROR
 	{
-		Texture = texCR;
+		#if TOGGLE
+		Texture = texCRM;
+		#else
+		Texture = texCRS;
+		#endif
 		AddressU = MIRROR;
 		AddressV = MIRROR;
 		AddressW = MIRROR;
@@ -244,7 +265,11 @@ sampler SamplerCRMIRROR
 	
 sampler SamplerCRBORDER
 	{
-		Texture = texCR;
+		#if TOGGLE
+		Texture = texCRM;
+		#else
+		Texture = texCRS;
+		#endif
 		AddressU = BORDER;
 		AddressV = BORDER;
 		AddressW = BORDER;
@@ -252,7 +277,11 @@ sampler SamplerCRBORDER
 	
 sampler SamplerCRCLAMP
 	{
-		Texture = texCR;
+		#if TOGGLE
+		Texture = texCRM;
+		#else
+		Texture = texCRS;
+		#endif
 		AddressU = CLAMP;
 		AddressV = CLAMP;
 		AddressW = CLAMP;
@@ -474,6 +503,8 @@ float4 PBDOut(float2 texcoord : TEXCOORD0)
 
 ////////////////////////////////////////////////////////Logo/////////////////////////////////////////////////////////////////////////
 uniform float timer < source = "timer"; >;
+
+
 float4 Out(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Target
 {
 	//#define pix float2(BUFFER_RCP_WIDTH, BUFFER_RCP_HEIGHT)
@@ -621,35 +652,27 @@ void PostProcessVS(in uint id : SV_VertexID, out float4 position : SV_Position, 
 }
 
 //*Rendering passes*//
-
-technique Polynomial_Barrel_Distortion
+#if TOGGLE
+technique Polynomial_Barrel_Distortion_M
+#else
+technique Polynomial_Barrel_Distortion_S
+#endif
 {		
-		#if !TOGGLE
 			pass StereoMonoPass
 		{
 			VertexShader = PostProcessVS;
 			PixelShader = LR;
-			RenderTarget0 = texCL;
-			RenderTarget1 = texCR;
-		}
-			pass SidebySidePolynomialBarrelDistortion
-		{
-			VertexShader = PostProcessVS;
-			PixelShader = Out;	
-		}
-		
-		#else
-			pass SMP
-		{
-			VertexShader = PostProcessVS;
-			PixelShader = LR;
-			RenderTarget0 = texCL;
-			RenderTarget1 = texCR;
+			#if TOGGLE
+			RenderTarget0 = texCLM;
+			RenderTarget1 = texCRM;
+			#else
+			RenderTarget0 = texCLS;
+			RenderTarget1 = texCRS;
+			#endif
 		}
 			pass PBD
 		{
 			VertexShader = PostProcessVS;
 			PixelShader = Out;	
 		}
-		#endif
 }
