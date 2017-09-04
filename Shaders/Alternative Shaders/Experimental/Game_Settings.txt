@@ -88,8 +88,9 @@ IF IT HAS AN *asterisk* I AM STILL WORKING ON IT.
              Observer                                        DM 1         10.0                                No Off / 0.150-0.250    [2] 
     RB      *Penumbra: Black Plague                          DM *         10-20                                      
     RB      *Phantasmal                                      DM *         10-20                                      
-    RB       Prey 2017                                       DM 1         18.75     WDM 9 & 10                No Off / 0.025-0.075    [2]                
-            *Quake 2 XP                                      DM *         5.0-10       WDM *
+    RB       Prey 2017                                       DM 1         18.75      WDM 9 & 10               No Off / 0.025-0.075    [2]                
+             Quake Epsilon                                   DM 0         15.00        WDM 15                 No Off / 0.075-0.125    [3] 
+             Quake 2 XP                                      DM 0         7.5          WDM 16                 No Off / 0.125-0.325    [3]
     RB      *Quake 4                                         DM *         5.0-10       WDM *                     
             *Quantum Break                                   DM *         7.5-15 
     RB       Rage64                                          DM 0         20.00        WDM 14                 No Off / 0.025-0.100  [2]:[3]   
