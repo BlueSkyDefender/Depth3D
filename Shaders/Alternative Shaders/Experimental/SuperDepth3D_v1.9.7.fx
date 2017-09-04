@@ -121,7 +121,7 @@ uniform bool Depth_Map_Flip <
 
 uniform int WDM <
 	ui_type = "combo";
-	ui_items = "Weapon DM Off\0Custom WDM\0 WDM 0\0 WDM 1\0 WDM 2\0 WDM 3\0 WDM 4\0 WDM 5\0 WDM 6\0 WDM 7\0 WDM 8\0 WDM 9\0 WDM 10\0 WDM 11\0 WDM 12\0 WDM 13\0 WDM 14\0 WDM 15\0 WDM 16\0";
+	ui_items = "Weapon DM Off\0Custom WDM\0 WDM 0\0 WDM 1\0 WDM 2\0 WDM 3\0 WDM 4\0 WDM 5\0 WDM 6\0 WDM 7\0 WDM 8\0 WDM 9\0 WDM 10\0 WDM 11\0 WDM 12\0 WDM 13\0 WDM 14\0 WDM 15\0 WDM 16\0 WDM 17\0 WDM 18\0";
 	ui_label = "Weapon Depth Map";
 	ui_tooltip = "Pick your weapon depth map for games.";
 > = 0;
@@ -552,6 +552,22 @@ float2 WeaponDepth(in float2 texcoord : TEXCOORD0)
 		CoP = 0.400;
 		}
 		
+		//WDM 17 ; Quake 4
+		else if (WDM == 19)
+		{
+		WA_X = 5.000000;
+		WA_Y = 7.0;
+		CoP = 0.500;
+		}
+
+		//WDM 18 ; RTCW
+		else if (WDM == 20)
+		{
+		WA_X = 3.6875;
+		WA_Y = 7.250;
+		CoP = 0.400;
+		}
+				
 		//SWDMS Done//
  		
 		//Scaled Section z-Buffer

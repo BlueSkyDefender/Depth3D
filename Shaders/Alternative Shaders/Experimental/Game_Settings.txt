@@ -91,12 +91,12 @@ IF IT HAS AN *asterisk* I AM STILL WORKING ON IT.
     RB       Prey 2017                                       DM 1         18.75      WDM 9 & 10               No Off / 0.025-0.075    [2]                
              Quake Epsilon                                   DM 0         15.00        WDM 15                 No Off / 0.075-0.125    [3] 
              Quake 2 XP                                      DM 0         7.5          WDM 16                 No Off / 0.125-0.325    [3]
-    RB      *Quake 4                                         DM *         5.0-10       WDM *                     
+    RB       Quake 4                                         DM 0         7.5          WDM 17                 No Off / 0.025-0.125    [3]
             *Quantum Break                                   DM *         7.5-15 
     RB       Rage64                                          DM 0         20.00        WDM 14                 No Off / 0.025-0.100  [2]:[3]   
     RB      *Redout                                          DM *         15.0
     RB       Resident Evil 7                                 DM 1         20.0                                Yes N  / 0.150-0.300    [2]                                         
-    RB      *Return To Castle Wolfenstine                    DM *         2.5-7.5       WDM *                     
+    RB       Return To Castle Wolfenstine                    DM 0         10.0         WDM 18                 No Off / 0.075-0.250    [3]                     
              Rez Infinite                                    DM 1         20.0                                No Off / 0.075-0.150    [0]
             *Ryse: Son of Rome                               DM *         5.0-10                                      
     RB      *S.T.A.L.K.E.R:CS Complete Mod                   DM *         2.5-5.0       WDM *                     
