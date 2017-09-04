@@ -121,7 +121,7 @@ uniform bool Depth_Map_Flip <
 
 uniform int WDM <
 	ui_type = "combo";
-	ui_items = "Weapon DM Off\0Custom WDM\0 WDM 0\0 WDM 1\0 WDM 2\0 WDM 3\0 WDM 4\0 WDM 5\0 WDM 6\0 WDM 7\0 WDM 8\0 WDM 9\0 WDM 10\0 WDM 11\0 WDM 12\0 WDM 13\0 WDM 14\0 WDM 15\0 WDM 16\0 WDM 17\0 WDM 18\0";
+	ui_items = "Weapon DM Off\0Custom WDM\0 WDM 0\0 WDM 1\0 WDM 2\0 WDM 3\0 WDM 4\0 WDM 5\0 WDM 6\0 WDM 7\0 WDM 8\0 WDM 9\0 WDM 10\0 WDM 11\0 WDM 12\0 WDM 13\0 WDM 14\0 WDM 15\0 WDM 16\0 WDM 17\0 WDM 18\0 WDM 19\0 WDM 20\0";
 	ui_label = "Weapon Depth Map";
 	ui_tooltip = "Pick your weapon depth map for games.";
 > = 0;
@@ -567,7 +567,23 @@ float2 WeaponDepth(in float2 texcoord : TEXCOORD0)
 		WA_Y = 7.250;
 		CoP = 0.400;
 		}
-				
+	
+		//WDM 19 ; S.T.A.L.K.E.R: Games
+		else if (WDM == 21)
+		{
+		WA_X = 2.55925;
+		WA_Y = 0.75;
+		CoP = 0.255;
+		}
+		
+		//WDM 20 ; Soma
+		else if (WDM == 22)
+		{
+		WA_X = 16.250;
+		WA_Y = 87.50;
+		CoP = 0.825;
+		}
+							
 		//SWDMS Done//
  		
 		//Scaled Section z-Buffer
@@ -586,8 +602,14 @@ float2 WeaponDepth(in float2 texcoord : TEXCOORD0)
 		
 		float AA,AL = abs(smoothstep(0,1,LumWeapon(texcoord)*2));
 		
-		if (WDM!= 1)
+		if (WDM == 1 || WDM == 22)//WDM Adjust and SOMA
+		{
+		zBufferWH = zBufferWH;
+		}
+		else
+		{
 		zBufferWH = lerp(zBufferWH*AL,zBufferWH,0.025);
+		}
 		
 		if (Weapon_Adjust.z <= 0) //Zero Is auto
 		{
