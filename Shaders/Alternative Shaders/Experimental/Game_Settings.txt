@@ -109,7 +109,7 @@ IF IT HAS AN *asterisk* I AM STILL WORKING ON IT.
             *Stacking                                        DM *         5.0-10                                   
     RB      *Stay Close                                      DM *         2.5-7.5                                    
             *Tales of Zestiria                               DM *         15-20 
-            *The Elder Scrolls V: SE                         DM *         5.0          WDM *
+             The Elder Scrolls V: SE                         DM 0         6.875        WDM 21                 No Off / 0.075-0.150    [3]
     RB      *The Evil Within                                 DM *         20-30                                      
             *The Legend of Korra                             DM *         5.0-10
     RB      *The Surge                                       DM *         12                                       
