@@ -121,7 +121,7 @@ uniform bool Depth_Map_Flip <
 
 uniform int WDM <
 	ui_type = "combo";
-	ui_items = "Weapon DM Off\0Custom WDM\0 WDM 0\0 WDM 1\0 WDM 2\0 WDM 3\0 WDM 4\0 WDM 5\0 WDM 6\0 WDM 7\0 WDM 8\0 WDM 9\0 WDM 10\0 WDM 11\0 WDM 12\0 WDM 13\0 WDM 14\0 WDM 15\0 WDM 16\0 WDM 17\0 WDM 18\0 WDM 19\0 WDM 20\0 WDM 21\0";
+	ui_items = "Weapon DM Off\0Custom WDM\0 WDM 0\0 WDM 1\0 WDM 2\0 WDM 3\0 WDM 4\0 WDM 5\0 WDM 6\0 WDM 7\0 WDM 8\0 WDM 9\0 WDM 10\0 WDM 11\0 WDM 12\0 WDM 13\0 WDM 14\0 WDM 15\0 WDM 16\0 WDM 17\0 WDM 18\0 WDM 19\0 WDM 20\0 WDM 21\0 WDM 22\0 WDM 23\0";
 	ui_label = "Weapon Depth Map";
 	ui_tooltip = "Pick your weapon depth map for games.";
 > = 0;
@@ -204,13 +204,6 @@ uniform bool InvertY <
 	ui_label = "Invert Y-Axis";
 	ui_tooltip = "Invert Y-Axis for the cross cursor.";
 > = false;
-
-//uniform float2 X <
-//	ui_type = "drag";
-//	ui_min = 0; ui_max = 1;
-//	ui_label = "X";
-//	ui_tooltip = "X";
-//> = float2(0,0);
 
 /////////////////////////////////////////////D3D Starts Here/////////////////////////////////////////////////////////////////
 
@@ -591,7 +584,23 @@ float2 WeaponDepth(in float2 texcoord : TEXCOORD0)
 		WA_Y = 1.125;
 		CoP = 0.278;
 		}
-							
+		
+		//WDM 22 ; Turok: DH 2017
+		else if (WDM == 24)
+		{
+		WA_X = 2.553125;
+		WA_Y = 1.0;
+		CoP = 0.500;
+		}
+
+		//WDM 23 ; Turok2: SoE 2017
+		else if (WDM == 25)
+		{
+		WA_X = 140.0;
+		WA_Y = 500.0;
+		CoP = 5.0;
+		}
+									
 		//SWDMS Done//
  		
 		//Scaled Section z-Buffer
@@ -601,6 +610,9 @@ float2 WeaponDepth(in float2 texcoord : TEXCOORD0)
 		WA_X /= 250;
 		WA_Y /= 250;
 		zBufferWH = WA_Y*zBufferWH/(WA_X-zBufferWH);
+		
+		if(WDM == 24)
+		zBufferWH += 1;
 		}
 		
 		float Adj = Weapon_Depth/375; //Push & pull weapon in or out of screen.
@@ -610,7 +622,7 @@ float2 WeaponDepth(in float2 texcoord : TEXCOORD0)
 		
 		float AA,AL = abs(smoothstep(0,1,LumWeapon(texcoord)*2));
 		
-		if (WDM == 1 || WDM == 22)//WDM Adjust and SOMA
+		if (WDM == 1 || WDM == 22 || WDM == 24)//WDM Adjust and SOMA
 		{
 		zBufferWH = zBufferWH;
 		}

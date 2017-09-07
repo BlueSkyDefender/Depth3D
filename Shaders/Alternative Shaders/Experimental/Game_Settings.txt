@@ -55,7 +55,7 @@ IF IT HAS AN *asterisk* I AM STILL WORKING ON IT.
     RB      *Dungeon Nightmares II                           DM *         20.0                                       
     RB      *Emily Wants To Play                             DM *         10.0                                       
             *Everybody's Gone to the Rapture                 DM *         4.25                       
-             Fallout 4                                       DM 0         5.00        WDM 8                  No Off / 0.075-0.200    [2]          
+             Fallout 4                                       DM 0         6.875       WDM 8                  No Off / 0.075-0.200    [3]          
     RB      *FarCry 3                                        DM *         5.00                                       
             *Firewatch                                       DM *         10.0                      Yes
     RB      *GTA V                                           DM *         10-20                                      
@@ -116,15 +116,15 @@ IF IT HAS AN *asterisk* I AM STILL WORKING ON IT.
     RB      *The Vanishing of Ethan Carter Redux             DM *         5.0-10                                     
     RB      *The Void                                        DM *         5.0-10                                     
     RB      *Through The Woods                               DM *         10.0                        Yes         
-    RB      *Turok: Dinosaur Hunter                          DM *         50-100       WDM *                     
-            *Turok 2: Seeds of Evil                          DM *         75-125       WDM *
-    RB       Unreal Gold with v227                           DM 0         17.50        WDM 0                 No Off / 0.010-0.050    [2]      
+    RB       Turok: Dinosaur Hunter                          DM 0         200.0        WDM 22                 No Off / 0.010-0.075    [3]
+             Turok 2: Seeds of Evil                          DM 0         200.0        WDM 23                 No Off / 0.050-0.150    [3]
+    RB       Unreal Gold with v227                           DM 0         17.50        WDM 0                  No Off / 0.010-0.050    [2]      
             *Warhammer: End Times - Vermintide               DM *         2.5-4.5                                    
     RB      *Watch Dogs 2                                    DM *         2.5-5.0                                    
             *Witcher 3                                       DM *         3.0-7.0                                         
-    RB       Wolfenstine: The New Order                      DM 0         25.00        WDM 7                 No Off / 0.050-0.075  [1]:[2] 
-    RB       Wolfenstine: The Old Blood                      DM 0         25.00        WDM 7                 No Off / 0.050-0.075  [1]:[2]
-             Zombie Army Trilogy                             DM 0         10.0                               Yes N  / 0.050-0.075    [2]
+    RB       Wolfenstine: The New Order                      DM 0         25.00        WDM 7                  No Off / 0.050-0.075  [1]:[2] 
+    RB       Wolfenstine: The Old Blood                      DM 0         25.00        WDM 7                  No Off / 0.050-0.075  [1]:[2]
+             Zombie Army Trilogy                             DM 0         10.0                                Yes N  / 0.050-0.075    [2]
 
 [Special Depth Map Game List]  [Depth Map] [DM Adjustment] [Weapon DM] [Offset] [Depth Flip] [Read Below]
 *Double Dragon Neon                DM *        0.75-0.1                 0.6300
