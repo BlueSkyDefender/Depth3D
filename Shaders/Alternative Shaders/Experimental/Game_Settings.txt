@@ -34,12 +34,12 @@ IF IT HAS AN *asterisk* I AM STILL WORKING ON IT.
             *CEMU - Mariokart 8                              DM *         5.0-10                    Yes
             *CEMU - Super Mario 3D World                     DM *         5.0-10                    Yes
             *CEMU - The Legend of Zelda: Breath of the Wild  DM *         7.50                      Yes
-    RB       Call of Duty: Advance Warfare                   DM 1         15.0        WDM 4                  No Off / 0.050-0.075                          
-    RB       Call of Duty: Black Ops                         DM 0         10.0        WDM 5                  No Off / 0.050-0.075                           
-    RB       Call of Duty: Black Ops 2                       DM 1         15.0        WDM 4                  No Off / 0.050-0.075    
-    RB       Call of Duty: Ghost                             DM 1         15.0        WDM 4                  No Off / 0.050-0.075    
-    RB       Call of Duty: Infinite Warfare                  DM 1         15.0        WDM 4                  No Off / 0.050-0.075    
-            *Casltevania: Lord of Shadows - UE               DM 0         7.5                                Yes N  / 0.100-0.200                                       
+    RB       Call of Duty: Advance Warfare                   DM 1         15.0        WDM 4                  No Off / 0.050-0.075    [3]                          
+    RB       Call of Duty: Black Ops                         DM 0         10.0        WDM 5                  No Off / 0.050-0.075    [3]                           
+    RB       Call of Duty: Black Ops 2                       DM 1         15.0        WDM 4                  No Off / 0.050-0.075    [3]    
+    RB       Call of Duty: Ghost                             DM 1         15.0        WDM 4                  No Off / 0.050-0.075    [3]    
+    RB       Call of Duty: Infinite Warfare                  DM 1         15.0        WDM 4                  No Off / 0.050-0.075    [3]   
+            *Casltevania: Lord of Shadows - UE               DM 0         7.5                                Yes N  / 0.100-0.200                                        
              Cryostasis                                      DM 0         10.0        WDM 6                  No Off / 0.025-0.075                         
              DOOM 2016                                       DM 0         15.0        WDM 1                  No Off / 0.050-0.100                       
              DarkSiders Warmastred Edition                   DM 0         25.0                               No Off / 0.100-0.150    [0]  
@@ -69,6 +69,7 @@ IF IT HAS AN *asterisk* I AM STILL WORKING ON IT.
     RB      *KHOLAT                                          DM *         15-25                                      
     RB       Kingpin: Life of Crime                          DM 0         7.50        WDM 13                  No Off / 0.025-0.125  [2]:[3]
              Layers of Fear                                  DM 0         7.5                       Yes       No Off / 0.125-0.175
+             Life is Strange: Before the Storm               DM 1         150.0                     Yes       Both N / 0.075-0.375  [2]:[3] 
             *Lifeless Planet                                 DM *         10.0                      Yes
             *Lords of The Fallen                             DM *         15-25                      
     RB      *LuciusII                                        DM *         50                        Yes       
