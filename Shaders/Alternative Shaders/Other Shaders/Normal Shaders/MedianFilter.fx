@@ -11,7 +11,7 @@ uniform float Power <
 
 uniform int MedianFilter <
 	ui_type = "combo";
-	ui_items = "Off\0Median On\0Median 2X\0Median Control\0Median 2X Control\0";
+	ui_items = "Off\0Median 1X\0Median 2X\0Median Control\0Median 2X Control\0";
 	ui_label = "Median Selection";
 > = 0;
 
@@ -63,19 +63,19 @@ sampler SamplerMedOne
 float4 Median(float4 position : SV_Position, float2 texcoord : TEXCOORD0) : SV_Target
 {
 	float2 ScreenCal;
-    if(MedianFilter == 3)
+    if(MedianFilter == 3 || MedianFilter == 4)
     {
     ScreenCal = float2(Power*pix.x,Power*pix.y);
     }
     else
     {
-    ScreenCal = float2(2.5*pix.x,2.5*pix.y);
+    ScreenCal = float2(2.0*pix.x,2.0*pix.y);
 	}
 	float2 FinCal = ScreenCal*0.6;
 
 	float4 v[9];
 	
-	[loop]
+	[unroll]
 	for(int i = -1; i <= 1; ++i) 
 	{
 		for(int j = -1; j <= 1; ++j)
@@ -99,13 +99,13 @@ float4 Median(float4 position : SV_Position, float2 texcoord : TEXCOORD0) : SV_T
 float4 MedianOne(float4 position : SV_Position, float2 texcoord : TEXCOORD0) : SV_Target
 {
 	float2 ScreenCal;
-    if(MedianFilter == 4)
+	if(MedianFilter == 3 || MedianFilter == 4)
     {
     ScreenCal = float2(Power*pix.x,Power*pix.y);
     }
     else
     {
-    ScreenCal = float2(2.5*pix.x,2.5*pix.y);
+    ScreenCal = float2(2.0*pix.x,2.0*pix.y);
 	}
 	float2 FinCal = ScreenCal*0.6;
 
