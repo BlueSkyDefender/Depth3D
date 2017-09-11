@@ -74,13 +74,13 @@ uniform float ZPD <
 
 uniform int Balance <
 	ui_type = "drag";
-	ui_min = 0; ui_max = 3;
+	ui_min = 0; ui_max = 5;
 	ui_label = "Balance";
 	ui_tooltip = "Balance between ZPD Depth and Scene Depth and works with ZPD option above.\n"
 				"Example Zero is 50/50 equal between ZPD Depth and Scene Depth.\n"
-				"One is 62.5/37.5, Two is 75/25, and Three is 87.5/12.5\n"
-				"Default is Two.";
-> = 2;
+				"One is 62.5/37.5, Three is 75/25, and Five is 87.5/12.5\n"
+				"Default is Three.";
+> = 3;
 
 uniform int Auto_ZPD <
 	ui_type = "combo";
@@ -843,9 +843,17 @@ float4 PS_renderLR(in float2 texcoord : TEXCOORD0)
 		}
 		else if (Balance == 2)
 		{
-			NF_Power = 0.75;
+			NF_Power = 0.6875;
 		}
 		else if (Balance == 3)
+		{
+			NF_Power = 0.75;
+		}
+		else if (Balance == 4)
+		{
+			NF_Power = 0.8125;
+		}
+		else if (Balance == 5)
 		{
 			NF_Power = 0.875;
 		}
