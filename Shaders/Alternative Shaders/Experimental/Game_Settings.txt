@@ -16,7 +16,7 @@ ________________________________________________________________________________
 ---------------------------------------------------------------------------------------------------------------------------------
 
 IF IT HAS AN *asterisk* I AM STILL WORKING ON IT.
-                                                                      [- - - - - - - -=: Recommended Settings :=- - - - - - - -]
+                                                                      [- - - - - - - - - -=: Recommended Settings :=- - - - - - - - - -]
 [Read Below] [Game List]                                  [Depth Map] [Adjustment] [Weapon DM] [Depth Flip] [Auto S / ZDP Range] [Balance]
              ABZU                                            DM 1         50                                 No Off / 0.050
              Alien Isolation                                 DM 0         20                                 No Off / 0.0375
@@ -53,10 +53,10 @@ IF IT HAS AN *asterisk* I AM STILL WORKING ON IT.
              Dragons Dogma: Dark Arisen                      DM 0         8.75                               No Off / 0.200-0.300    [3]
              DreamFall Chapters                              DM 0         12.5                      Yes      Yes N  / 0.075-0.125
     RB       Dungeon Nightmares II                           DM 0         17.5                      Yes      No Off  / 0.375-0.50    [4]                                
-    RB      *Emily Wants To Play                             DM *         10.0                                       
-            *Everybody's Gone to the Rapture                 DM *         4.25                       
+    RB       Emily Wants To Play                             DM 1         25.0                               Yes N  / 0.150-0.200    [3]                                      
+             Everybody's Gone to the Rapture                 DM 0         1.50                               No Off / 0.375-0.625    [5]                       
              Fallout 4                                       DM 0         6.875       WDM 8                  No Off / 0.075-0.200    [5]          
-    RB      *FarCry 3                                        DM *         5.00                                       
+    RB       FarCry 3                                        DM 0         7.50                               No Off / 0.100-0.200    [5]
             *Firewatch                                       DM *         10.0                      Yes
     RB      *GTA V                                           DM *         10-20                                      
             *Gone Home                                       DM *         10.0                      Yes
