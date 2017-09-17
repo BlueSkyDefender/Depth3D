@@ -117,6 +117,7 @@ IF IT HAS AN *asterisk* I AM STILL WORKING ON IT.
     RB      *The Vanishing of Ethan Carter Redux             DM *         5.0-10                                     
     RB      *The Void                                        DM *         5.0-10                                     
     RB      *Through The Woods                               DM *         10.0                        Yes         
+             Total War: Warhammer                            DM 0         2.625                               No Off / 0.375-0.500    [4]
     RB       Turok: Dinosaur Hunter                          DM 0         200.0        WDM 22                 No Off / 0.010-0.075    [5]
              Turok 2: Seeds of Evil                          DM 0         200.0        WDM 23                 No Off / 0.050-0.150    [5]
     RB       Unreal Gold with v227                           DM 0         17.50        WDM 0                  No Off / 0.010-0.050    [3]      
