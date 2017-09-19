@@ -57,8 +57,8 @@ IF IT HAS AN *asterisk* I AM STILL WORKING ON IT.
              Everybody's Gone to the Rapture                 DM 0         1.50                               No Off / 0.375-0.625    [5]                       
              Fallout 4                                       DM 0         6.875       WDM 8                  No Off / 0.075-0.200    [5]          
     RB       FarCry 3                                        DM 0         7.50                               No Off / 0.100-0.200    [5]
-            *Firewatch                                       DM *         10.0                      Yes
-    RB      *GTA V                                           DM *         10-20                                      
+             Firewatch                                       DM 0         5.0                       Yes      No Off / 0.150-0.250    [3]
+    RB       GTA V                                           DM 1         7.5                                No Off / 0.150-0.200    [5]                                      
             *Gone Home                                       DM *         10.0                      Yes
     RB      *Hard Reset                                      DM *         5.0-10                                     
              Hellblade: Senua's Sacrifice                    DM 1         10.0                               Yes N  / 0.150-0.250    [3] 
@@ -90,7 +90,7 @@ IF IT HAS AN *asterisk* I AM STILL WORKING ON IT.
     RB      *Penumbra: Black Plague                          DM *         10-20                                      
     RB      *Phantasmal                                      DM *         10-20                                      
     RB       Prey 2017                                       DM 1         18.75      WDM 9 & 10               No Off / 0.025-0.075    [3]                
-             Quake Epsilon                                   DM 0         15.00        WDM 15                 No Off / 0.075-0.125    [5] 
+    RB       Quake Epsilon                                   DM 0         15.00        WDM 15                 No Off / 0.075-0.125    [5] 
              Quake 2 XP                                      DM 0         7.5          WDM 16                 No Off / 0.125-0.325    [5]
     RB       Quake 4                                         DM 0         7.5          WDM 17                 No Off / 0.025-0.125    [5]
             *Quantum Break                                   DM *         7.5-15 
@@ -222,6 +222,8 @@ Ingame setting MSAA 2X should be on to enable Depth Map in DX11.
 {GTA 5}
 Rename the dxgi.dll too d3d11.dll for DX11 mode.
 If the game is crashing in fullscreen. Switch over to Window or Borderless window mode.
+ZDP Range can also be set to Zero.
+Divergence can be set higer then normal up to 75. I play with at 42.5. But, thats just me.
 
 {Hard Reset}
 Must Enable FSAA for depth buffer access.
@@ -286,7 +288,7 @@ https://www.youtube.com/watch?v=opVni9cRN7Q
 No film Grain Guide.
 https://steamcommunity.com/sharedfiles/filedetails/?id=334444605
 
-Real 3D may be done with TriDef Try It.
+geometry 3D may be done with TriDef Try It.
 
 {Phantasmal}
 A buggy Opengl game. But, hold down ctrl when starting the game and set your resolution. That or use "-show-screen-selector" in launch options. Once in game Start it. Then you will get a overblown screen. From here press Alt+Enter. Then hit escape and set your resoution and settings to ultra dissable motion blur. Set your settings and now press shift+f2 for reshade and set your settings for Depth3D.
@@ -304,6 +306,22 @@ Object Detail Setting seems to change the Near Depth by a small amount. When you
 use WDM 18.
 
 I also notice a problem with starting the game with reshade 3.0.7. I used reshade 3.0.4.
+
+{Quake} - DarkPlaces Quake 1 mod
+For geometry stereo open the console and use the commands listed here.
+r_stereo_horizontal "1" SbS
+r_stereo_vertical "1" TnB
+Now after that to adjust the viewmodle use
+cl_viewmodel_scale "2" 1-3
+For separation of eyes in the world (try negative values too)
+r_stereo_separation	"4"
+
+Also please use DarkPlaces "build 20140513" from here. https://icculus.org/twilight/darkplaces/download.html
+
+{Quake Epsilon} - DarkPlaces Quake 1 mod
+Install Reshade as OpenGl or use above setting for geometry 3D.
+
+Also please use DarkPlaces "build 20140513" from here. https://icculus.org/twilight/darkplaces/download.html
 
 {Quake 4}
 If some how you can click on the menu......... Good Luck. Try Alt-Tab borderless window mode.
