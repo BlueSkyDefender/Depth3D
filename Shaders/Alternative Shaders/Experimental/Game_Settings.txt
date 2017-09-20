@@ -59,10 +59,10 @@ IF IT HAS AN *asterisk* I AM STILL WORKING ON IT.
     RB       FarCry 3                                        DM 0         7.50                               No Off / 0.100-0.200    [5]
              Firewatch                                       DM 0         5.0                       Yes      No Off / 0.150-0.250    [3]
     RB       GTA V                                           DM 1         7.5                                No Off / 0.150-0.200    [5]                                      
-            *Gone Home                                       DM *         10.0                      Yes
-    RB      *Hard Reset                                      DM *         5.0-10                                     
+             Gone Home                                       DM 0         5.0                       Yes      No Off / 0.125-0.325    [3]
+    RB       Hard Reset                                      DM 0         8.125                              No Off / 0.050-0.125    [4]          
              Hellblade: Senua's Sacrifice                    DM 1         10.0                               Yes N  / 0.150-0.250    [3] 
-            *Hellpoint                                       DM *         10.0                      Yes
+             Hellpoint                                       DM 1         5.0                       Yes      No Off / 0.200-0.300    [4]
     RB      *Hitman 2016                                     DM *         7.5-15                                     
     RB      *Homefront The Revolution                        DM *         7.5-15                                     
             *Just Cause 3                                    DM *         7.5-15                         
