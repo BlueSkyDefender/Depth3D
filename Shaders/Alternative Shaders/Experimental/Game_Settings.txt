@@ -72,9 +72,9 @@ IF IT HAS AN *asterisk* I AM STILL WORKING ON IT.
     RB       Kingpin: Life of Crime                          DM 0         7.50        WDM 13                 No Off / 0.025-0.125    [4]
              Layers of Fear                                  DM 0         7.5                       Yes      No Off / 0.125-0.175
              Life is Strange: Before the Storm               DM 1         150.0                     Yes      Both N / 0.075-0.375    [4] 
-            *Lifeless Planet                                 DM *         10.0                      Yes      *
-            *Lords of The Fallen                             DM *         15-25                              *
-    RB      *LuciusII                                        DM *         50                        Yes      * 
+             Lifeless Planet                                 DM 0         17.50                     Yes      No Off / 0.025-0.075    [4]
+             Lords of The Fallen                             DM 0         14.750                             Yes N  / 0.500-0.625    [4]
+    RB       LuciusII                                        DM 0         20.000                    Yes      No Off / 0.125-0.275    [5] 
     RB      ?Mafia III                                       DM ?         ?                                  ?         
     RB       Mass Effect Andromeda                           DM 1         15.0                               Yes N / 0.075-0.175                                        
     RB      *Metal Gear Rising                               DM *         10-20                              *        
