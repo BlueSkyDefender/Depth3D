@@ -18,19 +18,19 @@ ________________________________________________________________________________
 IF IT HAS AN *asterisk* I AM STILL WORKING ON IT.
                                                                       [- - - - - - - - - -=: Recommended Settings :=- - - - - - - - - -]
 [Read Below] [Game List]                                  [Depth Map] [Adjustment] [Weapon DM] [Depth Flip] [Auto S / ZDP Range] [Balance]
-             ABZU                                            DM 1         50                                 No Off / 0.050
-             Alien Isolation                                 DM 0         20                                 No Off / 0.0375
-             Amnesia: Machine for Pigs                       DM 0         37.5        WDM 2                  No Off / 0.050-0.075   
-             Amnesia: The Dark Descent                       DM 0         37.5        WDM 2                  No Off / 0.050-0.075
-             Among The Sleep                                 DM 0         37.5                      Yes      No Off / 0.025
-             Assassin Creed Unity                            DM 1         20.0                               Yes N  / 0.100-0.150
-             Bayonetta                                       DM 0         20.0                               Yes N  / 0.050-0.075
-             Batman Arkham Knight                            DM 0         20.0                               Yes N  / 0.050-0.100                           
-             Batman Arkham Origins                           DM 0         20.0                               Yes N  / 0.050-0.100
-             Batman: Arkham City                             DM 0         20.0                               Yes N  / 0.050-0.100
-             BladeStorm Nightmare                            DM ?         ?                         ?        ?
-    RB       BloodCM                                         DM 0         15.0                               No Off / 0.100-0.300                                     
-    RB       BorderLands 2                                   DM 0         15.0        WDM 3                  No Off / 0.025-0.075                          
+            *ABZU                                            DM 1         50                                 No Off / 0.050
+            *Alien Isolation                                 DM 0         20                                 No Off / 0.0375
+            *Amnesia: Machine for Pigs                       DM 0         37.5        WDM 2                  No Off / 0.050-0.075   
+            *Amnesia: The Dark Descent                       DM 0         37.5        WDM 2                  No Off / 0.050-0.075
+            *Among The Sleep                                 DM 0         37.5                      Yes      No Off / 0.025
+            *Assassin Creed Unity                            DM 1         20.0                               Yes N  / 0.100-0.150
+            *Bayonetta                                       DM 0         20.0                               Yes N  / 0.050-0.075
+            *Batman Arkham Knight                            DM 0         20.0                               Yes N  / 0.050-0.100                           
+            *Batman Arkham Origins                           DM 0         20.0                               Yes N  / 0.050-0.100
+            *Batman: Arkham City                             DM 0         20.0                               Yes N  / 0.050-0.100
+            ?BladeStorm Nightmare                            DM ?         ?                         ?        ?
+    RB      *BloodCM                                         DM 0         15.0                               No Off / 0.100-0.300                                     
+    RB      *BorderLands 2                                   DM 0         15.0        WDM 3                  No Off / 0.025-0.075                          
             *CEMU - Mariokart 8                              DM *         *                         Yes      *
             *CEMU - Super Mario 3D World                     DM *         *                         Yes      *
             *CEMU - The Legend of Zelda: Breath of the Wild  DM *         *                         Yes      *
@@ -40,8 +40,8 @@ IF IT HAS AN *asterisk* I AM STILL WORKING ON IT.
     RB       Call of Duty: Ghost                             DM 1         15.0        WDM 4                  No Off / 0.050-0.075    [5]    
     RB       Call of Duty: Infinite Warfare                  DM 1         15.0        WDM 4                  No Off / 0.050-0.075    [5]   
              Casltevania: Lord of Shadows - UE               DM 0         7.5                                No Off / 0.150-0.250    [3]                                         
-             Cryostasis                                      DM 0         10.0        WDM 6                  No Off / 0.025-0.075                         
-             DOOM 2016                                       DM 0         15.0        WDM 1                  No Off / 0.050-0.100                       
+            *Cryostasis                                      DM 0         10.0        WDM 6                  No Off / 0.025-0.075                         
+            *DOOM 2016                                       DM 0         15.0        WDM 1                  No Off / 0.050-0.100                       
              DarkSiders Warmastred Edition                   DM 0         25.0                               No Off / 0.100-0.150    [0]  
             *Dead Effect                                     DM *         6.25                               *      
              Dead Island                                     DM 0         5.0                                No Off / 0.025          [5]                       
@@ -51,7 +51,7 @@ IF IT HAS AN *asterisk* I AM STILL WORKING ON IT.
              Dragon Age Inquisition                          DM 0         3.25                               Both N / 0.075-0.375    [3]               
              Dragon Ball Xenoverse                           DM 0         8.75                               No Off / 0.150-0.200    [3]                          
              Dragons Dogma: Dark Arisen                      DM 0         8.75                               No Off / 0.200-0.300    [3]
-             DreamFall Chapters                              DM 0         12.5                      Yes      Yes N  / 0.075-0.125
+            *DreamFall Chapters                              DM 0         12.5                      Yes      Yes N  / 0.075-0.125
     RB       Dungeon Nightmares II                           DM 0         17.5                      Yes      No Off  / 0.375-0.50    [4]                                
              Dying Light                                     DM *         *                         *        *
     RB       Emily Wants To Play                             DM 1         25.0                               Yes N  / 0.150-0.200    [3]                                      
@@ -70,13 +70,13 @@ IF IT HAS AN *asterisk* I AM STILL WORKING ON IT.
              Just Cause 3                                    DM 1         10.0                               Both N / 0.375-0.625    [4]   
     RB       KHOLAT                                          DM 1         10.0                               No Off / 0.500-1.000    [4]        
     RB       Kingpin: Life of Crime                          DM 0         7.50        WDM 13                 No Off / 0.025-0.125    [4]
-             Layers of Fear                                  DM 0         7.5                       Yes      No Off / 0.125-0.175
+            *Layers of Fear                                  DM 0         7.5                       Yes      No Off / 0.125-0.175
              Life is Strange: Before the Storm               DM 1         150.0                     Yes      Both N / 0.075-0.375    [4] 
              Lifeless Planet                                 DM 0         17.50                     Yes      No Off / 0.025-0.075    [4]
              Lords of The Fallen                             DM 0         14.750                             Yes N  / 0.500-0.625    [4]
     RB       LuciusII                                        DM 0         20.000                    Yes      No Off / 0.125-0.275    [5] 
     RB      ?Mafia III                                       DM ?         ?                                  ?         
-    RB       Mass Effect Andromeda                           DM 1         15.0                               Yes N / 0.075-0.175                                        
+    RB      *Mass Effect Andromeda                           DM 1         15.0                               Yes N / 0.075-0.175                                        
     RB      *Metal Gear Rising                               DM *         10-20                              *        
     RB       Metro 2033 Redux                                DM 0         7.50        WDM 11                 No Off / 0.025-0.125    [3]                
     RB       Metro Last Light Redux                          DM 0         7.50        WDM 11                 No Off / 0.025-0.125    [3]                      
@@ -87,7 +87,7 @@ IF IT HAS AN *asterisk* I AM STILL WORKING ON IT.
              NecroVision: Lost Company                       DM 0         7.50        WDM 12                 No Off / 0.025-0.125    [4]
             ?Need For Speed Rivals                           ?         ?                                     ?
             ?Need for Speed Most Wanted                      ?         ?                                     ?
-             NieRAutomata                                    DM 0         20.0                               Yes N  / 0.050-0.075
+            *NieRAutomata                                    DM 0         20.0                               Yes N  / 0.050-0.075
              Observer                                        DM 1         10.0                               No Off / 0.150-0.250    [3] 
     RB      *Penumbra: Black Plague                          DM *         10-20                              *       
     RB      *Phantasmal                                      DM *         10-20                              *       
@@ -107,7 +107,7 @@ IF IT HAS AN *asterisk* I AM STILL WORKING ON IT.
     RB       S.T.A.L.K.E.R:SoC Complete Mod                  DM 0         7.5          WDM 19                No Off / 0.200-0.350    [5]
             *Sleeping Dogs: DE                               DM *         2.5-5.0                            *    
              Soma                                            DM 0         11.25        WDM 20                No Off / 0.025-0.100    [5]
-             Sonic Adventure 2                               DM 0         10.0                               Yes N  / 0.150-0.250
+            *Sonic Adventure 2                               DM 0         10.0                               Yes N  / 0.150-0.250
             *Souls Games                                     DM *         15-25                              *        
             *Stacking                                        DM *         5.0-10                             *      
     RB      *Stay Close                                      DM *         2.5-7.5                            *        
