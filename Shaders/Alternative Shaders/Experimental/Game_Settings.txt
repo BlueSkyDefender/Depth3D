@@ -77,7 +77,7 @@ IF IT HAS AN *asterisk* I AM STILL WORKING ON IT.
     RB       LuciusII                                        DM 0         20.000                    Yes      No Off / 0.125-0.275    [5] 
     RB      ?Mafia III                                       DM ?         ?                                  ?         
     RB      *Mass Effect Andromeda                           DM 1         15.0                               Yes N / 0.075-0.175                                        
-    RB      *Metal Gear Rising                               DM *         10-20                              *        
+    RB       Metal Gear Rising                               DM 0         13.75                              No Off / 0.200-0.300    [3]        
     RB       Metro 2033 Redux                                DM 0         7.50        WDM 11                 No Off / 0.025-0.125    [3]                
     RB       Metro Last Light Redux                          DM 0         7.50        WDM 11                 No Off / 0.025-0.125    [3]                      
     RB      *Middle-earth: Shadow of Mordor                  DM *         7.5-15                             *        

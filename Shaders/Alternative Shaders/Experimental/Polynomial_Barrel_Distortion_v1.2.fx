@@ -141,6 +141,18 @@ float4x4 Done;
 		D = float2(0,0);			//Left & Right Rotation Angle known as Degrees.
 	}
 
+	//Rift Profile WIP
+	if (HMD_Profiles == 3)
+	{
+		IPD = -300.0;				//Interpupillary Distance.
+		LC = 0.5; 					//Lens Center. Default is 0.5
+		LD = 0.250;					//Lens Distortion. Default is 0.01
+		Z = 1.0;					//Zoom. Default is 1.0
+		AR = 1.0;					//Aspect Ratio. Default is 1.0
+		PC = float3(1,1,1);	//Polynomial Colors. Default is (Red 1.0, Green 1.0, Blue 1.0)
+		D = float2(0,0);			//Left & Right Rotation Angle known as Degrees.
+	}
+
 if(Diaspora)
 {
 Done = float4x4(float4(IPD,PC.x,Z,0),float4(LC,PC.y,AR,0),float4(LD,PC.z,D.x,0),float4(0,0,0,D.y)); //Diaspora frak up 4x4 fix
