@@ -871,10 +871,10 @@ float4 PS_renderLR(in float2 texcoord : TEXCOORD0)
 		
 	float ParallaxL = max(-0.250,MS * (1-Z/DepthL));
 	float ParallaxR = max(-0.250,MS * (1-Z/DepthR));
-		
+
 		DepthL *= MS;
 		DepthR *= MS;
-		
+				
 		ParallaxL = lerp(ParallaxL * Boost,DepthL * Boost,ZP);
 		ParallaxR = lerp(ParallaxR * Boost,DepthR * Boost,ZP);
 		

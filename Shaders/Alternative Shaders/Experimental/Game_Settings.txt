@@ -81,7 +81,7 @@ IF IT HAS AN *asterisk* I AM STILL WORKING ON IT.
     RB       Metro 2033 Redux                                DM 0         7.50        WDM 11                 No Off / 0.025-0.125    [3]                
     RB       Metro Last Light Redux                          DM 0         7.50        WDM 11                 No Off / 0.025-0.125    [3]                      
     RB       Middle-earth: Shadow of Mordor                  DM 1         25.0                               Yes N  / 0.200-0.300    [3]        
-            *Mirror's Edge Catalyst                          DM *         5.0-10                             *        
+             Mirror's Edge Catalyst                          DM 1         13.750                             Yes N  / 0.1375-0.2375  [4]       
             *Mordheim: City of the Damned                    DM *         2.5-7.5                            *         
     RB      *Naruto Shippuden UNS3 Full Blurst               DM *         15-25                              *        
              NecroVision: Lost Company                       DM 0         7.50        WDM 12                 No Off / 0.025-0.125    [4]
