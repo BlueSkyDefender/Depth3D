@@ -102,6 +102,7 @@ IF IT HAS AN *asterisk* I AM STILL WORKING ON IT.
     RB       Return To Castle Wolfenstine                    DM 0         10.0         WDM 18                No Off / 0.075-0.250    [5]                     
              Rez Infinite                                    DM 1         20.0                               No Off / 0.075-0.150    [0]
             *Ryse: Son of Rome                               DM *         5.0-10                             *        
+             Scorn                                           DM 1         40.0                               No Off / 0.0175-0.0375  [4]
     RB       S.T.A.L.K.E.R:CS Complete Mod                   DM 0         7.5          WDM 19                No Off / 0.200-0.350    [5]
     RB       S.T.A.L.K.E.R:CoP Complete Mod                  DM 0         7.5          WDM 19                No Off / 0.200-0.350    [5]
     RB       S.T.A.L.K.E.R:SoC Complete Mod                  DM 0         7.5          WDM 19                No Off / 0.200-0.350    [5]
