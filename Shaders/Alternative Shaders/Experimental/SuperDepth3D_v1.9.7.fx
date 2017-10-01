@@ -806,7 +806,8 @@ float4 PS_renderLR(in float2 texcoord : TEXCOORD0)
 		DepthL =  min(DepthL,L);
 		DepthR =  min(DepthR,R);
 	}
-		float Luminance; //Average Luminance Texture Sample 
+		//Average Luminance Auto ZDP Start
+		float Luminance, LClamp = Luminance = smoothstep(0.01,1,Lum(texcoord)); //Average Luminance Texture Sample 
 		
 		if (Auto_ZPD == 1)
 		{
@@ -821,7 +822,16 @@ float4 PS_renderLR(in float2 texcoord : TEXCOORD0)
 			Luminance = 0;
 		}
 		
-		float AL = abs(Luminance);
+		float AL = abs(Luminance),ALC = abs(LClamp);
+			
+		if (ALC <= 0.001)
+		{
+			AL = 0;
+		}
+		else
+		{
+			AL = AL; //Auto ZDP based on the Auto Anti Weapon Depth Map Z-Fighting code.
+		}	
 		
 		if(Auto_ZPD >= 1)
 		{
@@ -831,8 +841,8 @@ float4 PS_renderLR(in float2 texcoord : TEXCOORD0)
 		{
 			Z = ZPD;
 		}
+		//Average Luminance Auto ZDP End
 		
-
 		if (Balance == 0)
 		{
 			NF_Power = 0.5;
