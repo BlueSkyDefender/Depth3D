@@ -32,6 +32,9 @@
 // Determines The Max Depth amount.
 #define Depth_Max 50
 
+// Enable this to fix the problem when there is a full screen Game Map Poping out of the screen. AKA Full Black Depth Map Fix. Zero is off, One is On.
+#define FBDMF 1
+
 uniform int Depth_Map <
 	ui_type = "combo";
 	ui_items = " 0 Normal\0 1 Normal Reversed-Z\0 3 Offset Normal\0 4 Offset Reversed-Z\0";
@@ -121,7 +124,7 @@ uniform bool Depth_Map_Flip <
 
 uniform int WDM <
 	ui_type = "combo";
-	ui_items = "Weapon DM Off\0Custom WDM\0 WDM 0\0 WDM 1\0 WDM 2\0 WDM 3\0 WDM 4\0 WDM 5\0 WDM 6\0 WDM 7\0 WDM 8\0 WDM 9\0 WDM 10\0 WDM 11\0 WDM 12\0 WDM 13\0 WDM 14\0 WDM 15\0 WDM 16\0 WDM 17\0 WDM 18\0 WDM 19\0 WDM 20\0 WDM 21\0 WDM 22\0 WDM 23\0";
+	ui_items = "Weapon DM Off\0Custom WDM\0 WDM 0\0 WDM 1\0 WDM 2\0 WDM 3\0 WDM 4\0 WDM 5\0 WDM 6\0 WDM 7\0 WDM 8\0 WDM 9\0 WDM 10\0 WDM 11\0 WDM 12\0 WDM 13\0 WDM 14\0 WDM 15\0 WDM 16\0 WDM 17\0 WDM 18\0 WDM 19\0 WDM 20\0 WDM 21\0 WDM 22\0 WDM 23\0 WDM 24\0 WDM 25\0 HUD Mode One\0";
 	ui_label = "Weapon Depth Map";
 	ui_tooltip = "Pick your weapon depth map for games.";
 > = 0;
@@ -130,8 +133,8 @@ uniform float3 Weapon_Adjust <
 	ui_type = "drag";
 	ui_min = -1.0; ui_max = 100.0;
 	ui_label = "Weapon Adjust Depth Map";
-	ui_tooltip = "Adjust weapon depth map for FPS Hand.\n"
-				 "X, is FPS Hand Scale Adjustment.\n"
+	ui_tooltip = "Adjust weapon depth map for FPS Hand & also HUD Mode.\n"
+				 "X, is FPS Hand Scale Adjustment & Adjusts HUD Mode.\n"
 				 "Y, is Cutoff Point Adjustment.\n"
 				 "Y, Zero is Auto.\n"
 				 "Default is (X 0.250, Y 0, Z 0).";
@@ -141,7 +144,8 @@ uniform float Weapon_Depth <
 	ui_type = "drag";
 	ui_min = -100; ui_max = 100;
 	ui_label = "Weapon Depth Adjustment";
-	ui_tooltip = "Pushes or Pulls the FPS Hand in or out of the screen.\n" 
+	ui_tooltip = "Pushes or Pulls the FPS Hand in or out of the screen.\n"
+				 "This also used to fine tune the Weapon Hand.\n" 
 				 "Default is 0";
 > = 0;
 
@@ -600,7 +604,15 @@ float2 WeaponDepth(in float2 texcoord : TEXCOORD0)
 		WA_Y = 500.0;
 		CoP = 5.0;
 		}
-									
+
+		//TEXT MODE 26 Adjust
+		else if (WDM == 28) //Text mode one.
+		{
+		WA_X = Weapon_Adjust.x;
+		WA_Y = 100;
+		CoP = 0.252;
+		}
+						
 		//SWDMS Done//
  		
 		//Scaled Section z-Buffer
@@ -622,7 +634,7 @@ float2 WeaponDepth(in float2 texcoord : TEXCOORD0)
 		
 		float AA,AL = abs(smoothstep(0,1,LumWeapon(texcoord)*2));
 		
-		if (WDM == 1 || WDM == 22 || WDM == 24)//WDM Adjust and SOMA
+		if (WDM == 1 || WDM == 22 || WDM == 24 || WDM == 28)//WDM Adjust,SOMA, and HUD mode.
 		{
 		zBufferWH = zBufferWH;
 		}
@@ -822,15 +834,17 @@ float4 PS_renderLR(in float2 texcoord : TEXCOORD0)
 			Luminance = 0;
 		}
 		
-		float AL = abs(Luminance),ALC = abs(LClamp);
+		float AL = abs(Luminance),ALC = abs(LClamp),ZPDC;
 			
-		if (ALC <= 0.001)
+		if (ALC <= 0.00001 && FBDMF == 1)
 		{
 			AL = 0;
+			ZPDC = 0; 
 		}
 		else
 		{
 			AL = AL; //Auto ZDP based on the Auto Anti Weapon Depth Map Z-Fighting code.
+			ZPDC = ZPD; 
 		}	
 		
 		if(Auto_ZPD >= 1)
@@ -839,7 +853,7 @@ float4 PS_renderLR(in float2 texcoord : TEXCOORD0)
 		}
 		else
 		{
-			Z = ZPD;
+			Z = ZPDC;
 		}
 		//Average Luminance Auto ZDP End
 		

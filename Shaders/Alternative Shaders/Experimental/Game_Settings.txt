@@ -82,8 +82,8 @@ IF IT HAS AN *asterisk* I AM STILL WORKING ON IT.
     RB       Metro Last Light Redux                          DM 0         7.50        WDM 11                 No Off / 0.025-0.125    [3]                      
     RB       Middle-earth: Shadow of Mordor                  DM 1         25.0                               Yes N  / 0.200-0.300    [3]        
              Mirror's Edge Catalyst                          DM 1         13.750                             Yes N  / 0.1375-0.2375  [4]       
-             Mordheim: City of the Damned                    DM 0         12.500                    Yes      Yes N  / 0.275-0.425    [4]         
-    RB      *Naruto Shippuden UNS3 Full Blurst               DM *         15-25                              *        
+             Mordheim: City of the Damned                    DM 0         12.500                    Yes      Yes N  / 0.250-0.400    [4]         
+    RB       Naruto Shippuden UNS3 Full Blurst HD            DM 0         36.25                              Yes N  / 0.200-0.300    [5]        
              NecroVision: Lost Company                       DM 0         7.50        WDM 12                 No Off / 0.025-0.125    [4]
             ?Need For Speed Rivals                           ?         ?                                     ?
             ?Need for Speed Most Wanted                      ?         ?                                     ?
@@ -124,7 +124,7 @@ IF IT HAS AN *asterisk* I AM STILL WORKING ON IT.
     RB       Turok: Dinosaur Hunter                          DM 0         200.0        WDM 22                No Off / 0.010-0.075    [5]
              Turok 2: Seeds of Evil                          DM 0         200.0        WDM 23                No Off / 0.050-0.150    [5]
     RB       Unreal Gold with v227                           DM 0         17.50        WDM 0                 No Off / 0.010-0.050    [3]      
-            *Warhammer: End Times - Vermintide               DM *         2.5-4.5                            *        
+             Warhammer: End Times - Vermintide               DM 0         10.0                               Yes N  / 0.225-0.375    [4]        
     RB      *Watch Dogs 2                                    DM *         2.5-5.0                            *       
             *Witcher 3                                       DM *         3.0-7.0                            *            
     RB       Wolfenstine: The New Order                      DM 0         25.00        WDM 7                 No Off / 0.050-0.075    [2] 
