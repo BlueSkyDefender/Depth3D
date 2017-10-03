@@ -32,7 +32,7 @@
 // Determines The Max Depth amount.
 #define Depth_Max 50
 
-// Enable this to fix the problem when there is a full screen Game Map Poping out of the screen. AKA Full Black Depth Map Fix. Zero is off, One is On.
+// Enable this to fix the problem when there is a full screen Game Map Poping out of the screen. AKA Full Black Depth Map Fix. I have this on by default. Zero is off, One is On.
 #define FBDMF 1
 
 uniform int Depth_Map <
@@ -87,7 +87,7 @@ uniform int Balance <
 
 uniform int Auto_ZPD <
 	ui_type = "combo";
-	ui_items = "Off\0Inverted\0Normal\0";
+	ui_items = "Off\0Inverted\0Normal\0Inverted Half\0Normal Half\0";
 	ui_label = "Auto Zero Parallax Distance Power";
 	ui_tooltip = "Auto Zero Parallax Distance Power controls the focus distance for the screen Pop-out effect automatically.\n"
 				"Inverted, is if your cam is close to a object you will have less Pop-out.\n"
@@ -760,7 +760,7 @@ else if(Disocclusion_Adjust == 5) //Depth Based
 float4 PS_renderLR(in float2 texcoord : TEXCOORD0)
 {
 	float4 color,Samp = float4(0.5, 0.625, 0.750, 0.825);
-	float NF_Power, Boost = 1.025, DepthL = 1, DepthR = 1, ZP, MS, P, S, Z;
+	float NF_Power, Boost = 1.02375, DepthL = 1, DepthR = 1, ZP, MS, P, S, Z;
 		
 	float samples[5] = {Samp.x, Samp.y, Samp.z,Samp.w,1.0};
 	float2 TCL, TCR;
@@ -829,6 +829,14 @@ float4 PS_renderLR(in float2 texcoord : TEXCOORD0)
 		{
 			Luminance = smoothstep(0.01,1,ZPD-(Lum(texcoord)*ZPD));
 		}
+		else if (Auto_ZPD == 3)
+		{
+			Luminance = smoothstep(0.01,0.5,Lum(texcoord)*ZPD);	//Half	
+		}
+		else if (Auto_ZPD == 4)
+		{
+			Luminance = smoothstep(0.01,0.5,ZPD-(Lum(texcoord)*ZPD)); //Half
+		}
 		else
 		{
 			Luminance = 0;
@@ -836,7 +844,7 @@ float4 PS_renderLR(in float2 texcoord : TEXCOORD0)
 		
 		float AL = abs(Luminance),ALC = abs(LClamp),ZPDC;
 			
-		if (ALC <= 0.00001 && FBDMF == 1)
+		if (ALC <= 0.00001 && FBDMF == 1) //Full Black Depth Map Fix.
 		{
 			AL = 0;
 			ZPDC = 0; 
@@ -902,8 +910,8 @@ float4 PS_renderLR(in float2 texcoord : TEXCOORD0)
 		ParallaxL = lerp(ParallaxL * Boost,DepthL * Boost,ZP);
 		ParallaxR = lerp(ParallaxR * Boost,DepthR * Boost,ZP);
 		
-		float ReprojectionLeft =  ParallaxL;
-		float ReprojectionRight = ParallaxR;
+		float ReprojectionLeft =  ParallaxL * Boost;
+		float ReprojectionRight = ParallaxR * Boost;
 	
 	if(!Depth_Map_View)
 	{
