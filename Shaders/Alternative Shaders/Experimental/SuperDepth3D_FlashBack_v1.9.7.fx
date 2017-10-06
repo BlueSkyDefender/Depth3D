@@ -27,7 +27,7 @@
  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // Determines The resolution of the Depth Map. For 4k Use 1.75 or 1.5. For 1440p Use 1.5 or 1.25. For 1080p use 1. Too low of a resolution will remove too much.
-#define Depth_Map_Division 1.0
+#define Depth_Map_Division 2.0
 
 // Determines The Max Depth amount. The larger the amount harder it will hit on FPS will be.
 #define Depth_Max 50
@@ -824,13 +824,13 @@ float4 PS_calcLR(in float2 texcoord : TEXCOORD0)
 		for (int i = 0; i <= Divergence; i++) 
 		{
 				//R Good
-				if ( Encode(float2(TCR.x+i*pix.x/0.900,TCR.y)).x > (1-TCR.x)/1.0025 ) //Decode X
+				if ( Encode(float2(TCR.x+i*pix.x,TCR.y)).x > (1-TCR.x) ) //Decode X
 				{
 				RF = i * pix.x; //Good
 				}
 
 				//L Good
-				if ( Encode(float2(TCL.x-i*pix.x/0.900,TCL.y)).z > TCL.x/1.0025 ) //Decode Z
+				if ( Encode(float2(TCL.x-i*pix.x,TCL.y)).z > TCL.x ) //Decode Z
 				{
 				LF = i * pix.x; //Good
 				}
