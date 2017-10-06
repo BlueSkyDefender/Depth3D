@@ -95,7 +95,7 @@ IF IT HAS AN *asterisk* I AM STILL WORKING ON IT. But, you can still use the set
     RB       Quake Epsilon                                   DM 0         15.00        WDM 15                No Off / 0.075-0.125    [5] 
              Quake 2 XP                                      DM 0         7.5          WDM 16                No Off / 0.125-0.325    [5]
     RB       Quake 4                                         DM 0         7.5          WDM 17                No Off / 0.025-0.125    [5]
-            *Quantum Break                                   DM *         9.0                                *
+             Quantum Break                                   DM 0         9.0                                Yes NH / 0.0250-0.275   [2]
     RB       Rage64                                          DM 0         20.00        WDM 14                No Off / 0.025-0.100    [4]   
     RB      ?Redout                                          DM ?         ?                         ?        ?
     RB       Resident Evil 7                                 DM 1         22.5                               Yes N  / 0.125-0.275    [2]                                         
