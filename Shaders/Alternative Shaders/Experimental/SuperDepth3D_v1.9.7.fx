@@ -104,6 +104,14 @@ uniform int Disocclusion_Adjust <
 				"Default is Normal Mask.";
 > = 2;
 
+uniform float Disocclusion_Power_Adjust <
+	ui_type = "drag";
+	ui_min = 0.250; ui_max = 2.0;
+	ui_label = "Disocclusion Power Adjust";
+	ui_tooltip = "Automatic occlusion masking power adjust.\n"
+				"Default is 1.";
+> = 1.0;
+
 uniform float Perspective <
 	ui_type = "drag";
 	ui_min = -100; ui_max = 100;
@@ -697,10 +705,11 @@ void Average_Luminance(in float4 position : SV_Position, in float2 texcoord : TE
 
 void  Disocclusion(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 color : SV_Target0)
 {
-
 float2 DM;
 float B, DP =  Divergence, Disocclusion_Power;
-	
+
+	DP *= Disocclusion_Power_Adjust;
+		
 	 if(Disocclusion_Adjust == 1)     
 		{
 		Disocclusion_Power = DP/125;
@@ -850,7 +859,7 @@ else if(Disocclusion_Adjust == 5) //Depth Based
 float4 PS_renderLR(in float2 texcoord : TEXCOORD0)
 {
 	float4 color,Samp = float4(0.5, 0.625, 0.750, 0.825);
-	float NF_Power, Boost = 1.025, DepthL = 1, DepthR = 1, MS, P, S;
+	float Boost = 1.025, DepthL = 1, DepthR = 1, MS, P, S;
 		
 	float samples[5] = {Samp.x, Samp.y, Samp.z,Samp.w,1.0};
 	float2 TCL, TCR;

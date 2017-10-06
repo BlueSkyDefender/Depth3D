@@ -32,9 +32,6 @@
 // Determines The Max Depth amount. The larger the amount harder it will hit on FPS will be.
 #define Depth_Max 50
 
-// Enable this to fix the problem when there is a full screen Game Map Poping out of the screen. AKA Full Black Depth Map Fix. I have this on by default. Zero is off, One is On.
-#define FBDMF 1
-
 uniform int Depth_Map <
 	ui_type = "combo";
 	ui_items = " 0 Normal\0 1 Normal Reversed-Z\0 3 Offset Normal\0 4 Offset Reversed-Z\0";
@@ -45,10 +42,10 @@ uniform int Depth_Map <
 
 uniform float Depth_Map_Adjust <
 	ui_type = "drag";
-	ui_min = 1.0; ui_max = 50.0;
+	ui_min = 1.0; ui_max = 100.0;
 	ui_label = "Depth Map Adjustment";
 	ui_tooltip = "Adjust the depth map for your games.";
-> = 7.5;
+> = 35;
 
 uniform float Offset <
 	ui_type = "drag";
@@ -57,19 +54,13 @@ uniform float Offset <
 	ui_tooltip = "Offset is for the Special Depth Map Only";
 > = 0.5;
 
-uniform float Divergence <
+uniform int Divergence <
 	ui_type = "drag";
 	ui_min = 1; ui_max = Depth_Max;
 	ui_label = "Divergence Slider";
-	ui_tooltip = "Determines the amount of Image Warping and Separation.";
-> = 25;
-
-uniform float ZPD <
-	ui_type = "drag";
-	ui_min = 0.0; ui_max = 0.175;
-	ui_label = "Zero Parallax Distance";
-	ui_tooltip = "ZPD controls the focus distance for the screen Pop-out effect.";
-> = 0.05;
+	ui_tooltip = "Determines the amount of Image Warping and Separation.\n" 
+				 "You can override this value.";
+> = 35;
 
 uniform int Balance <
 	ui_type = "drag";
@@ -81,24 +72,21 @@ uniform int Balance <
 				"Default is One.";
 > = 1;
 
-uniform int Auto_ZPD <
-	ui_type = "combo";
-	ui_items = "Off\0Inverted\0Normal\0Inverted Half\0Normal Half\0";
-	ui_label = "Auto Zero Parallax Distance Power";
-	ui_tooltip = "Auto Zero Parallax Distance Power controls the focus distance for the screen Pop-out effect automatically.\n"
-				"Inverted, is if your cam is close to a object you will have less Pop-out.\n"
-				"Normal, is if your cam is close to a object you will have more Pop-out.\n"
-				"Power of this effect is based off ZPD setting above.\n"
-				"Default is Off.";
-> = 0;
-
 uniform int Disocclusion_Adjust <
 	ui_type = "combo";
 	ui_items = "Off\0Radial Mask\0Normal Mask\0Normal Mask Alt\0Normal Depth Mask\0Normal Depth Mask Alt\0";
 	ui_label = "Disocclusion Mask";
 	ui_tooltip = "Automatic occlusion masking options.\n"
 				"Default is Normal Mask.";
-> = 2;
+> = 0;
+
+uniform float Disocclusion_Power_Adjust <
+	ui_type = "drag";
+	ui_min = 0.250; ui_max = 2.0;
+	ui_label = "Disocclusion Power Adjust";
+	ui_tooltip = "Automatic occlusion masking power adjust.\n"
+				"Default is 1.";
+> = 1.0;
 
 uniform float Perspective <
 	ui_type = "drag";
@@ -665,6 +653,8 @@ void  Disocclusion(in float4 position : SV_Position, in float2 texcoord : TEXCOO
 float2 DM;
 float B, DP =  Divergence, Disocclusion_Power;
 	
+	DP *= Disocclusion_Power_Adjust;
+	
 	 if(Disocclusion_Adjust == 1)     
 		{
 		Disocclusion_Power = DP/125;
@@ -723,53 +713,6 @@ float4  Encode(in float2 texcoord : TEXCOORD0) //zBuffer Color Channel Encode
 {
 	float Z, ZP, NF_Power;
 		
-		//Average Luminance Auto ZDP Start
-		float Luminance, LClamp = smoothstep(0.01,1,Lum(texcoord)); //Average Luminance Texture Sample 
-		
-		if (Auto_ZPD == 1)
-		{
-			Luminance = smoothstep(0.01,1,Lum(texcoord)*ZPD);		
-		}
-		else if (Auto_ZPD == 2)
-		{
-			Luminance = smoothstep(0.01,1,ZPD-(Lum(texcoord)*ZPD));
-		}
-		else if (Auto_ZPD == 3)
-		{
-			Luminance = smoothstep(0.01,0.5,Lum(texcoord)*ZPD);	//Half	
-		}
-		else if (Auto_ZPD == 4)
-		{
-			Luminance = smoothstep(0.01,0.5,ZPD-(Lum(texcoord)*ZPD)); //Half
-		}
-		else
-		{
-			Luminance = 0;
-		}
-		
-		float AL = abs(Luminance),ALC = abs(LClamp),ZPDC;
-			
-		if (ALC <= 0.00001 && FBDMF == 1) //Full Black Depth Map Fix.
-		{
-			AL = 0;
-			ZPDC = 0; 
-		}
-		else
-		{
-			AL = AL; //Auto ZDP based on the Auto Anti Weapon Depth Map Z-Fighting code.
-			ZPDC = ZPD; 
-		}	
-		
-		if(Auto_ZPD >= 1)
-		{
-			Z = AL; //Auto ZDP based on the Auto Anti Weapon Depth Map Z-Fighting code.
-		}
-		else
-		{
-			Z = ZPDC;
-		}
-		//Average Luminance Auto ZDP End
-		
 		if (Balance == 0)
 		{
 			NF_Power = 0.5;
@@ -795,33 +738,31 @@ float4  Encode(in float2 texcoord : TEXCOORD0) //zBuffer Color Channel Encode
 			NF_Power = 0.875;
 		}
 		
-		if(ZPD == 0)
-		{
-			ZP = 1.0;
-		}
-		else
-		{
-			ZP = NF_Power;
-		}
-		
-		Z = max(0,Z);
+		ZP = NF_Power;
 
 	float GetDepthR = tex2Dlod(SamplerDis,float4(texcoord.x,texcoord.y,0,0)).r;
 	float GetDepthB = tex2Dlod(SamplerDis,float4(texcoord.x,texcoord.y,0,0)).b;
 	
-	float GetDepthZPDR = 1-Z/GetDepthR;
-	float GetDepthZPDB = 1-Z/GetDepthB;
-		
-	float ROx = (1-texcoord.x)+Divergence*pix.x*GetDepthZPDR;
-	float RTx = (1-texcoord.x)+Divergence*pix.x*GetDepthR;
+	float GetDepthZPDR = 1-0.05/GetDepthR;
+	float GetDepthZPDB = 1-0.05/GetDepthB;
 	
-	float BOz = texcoord.x+Divergence*pix.x*GetDepthZPDB;
-	float BTz = texcoord.x+Divergence*pix.x*GetDepthB;
+	// X	
+	float Rx = (1-texcoord.x)+Divergence*pix.x*GetDepthR;
+	float RZx = (1-texcoord.x)+Divergence*pix.x*GetDepthZPDR;
+	// Y
+	float Ry = (1-texcoord.x)+Divergence*pix.x*GetDepthR;
+	float RZy = (1-texcoord.x)+Divergence*pix.x*GetDepthZPDR;
+	// Z
+	float Bz = texcoord.x+Divergence*pix.x*GetDepthB;
+	float BZz = texcoord.x+Divergence*pix.x*GetDepthZPDB;
+	// W
+	float Bw = texcoord.x+Divergence*pix.x*GetDepthB;
+	float BZw = texcoord.x+Divergence*pix.x*GetDepthZPDB;
 	
-	float R = lerp(ROx,RTx,ZP); //R Encode
-	float G = 0; //Y Encode
-	float B = lerp(BOz,BTz,ZP); //B Encode
-	float A = 0; //W Encode
+	float R = lerp(RZx,Rx,ZP); //X Encode
+	float G = Ry; //Y Encode
+	float B = lerp(BZz,Bz,ZP); //Z Encode
+	float A = Bw; //W Encode
 	
 	return float4(R,G,B,A);
 }
@@ -876,25 +817,28 @@ float4 PS_calcLR(in float2 texcoord : TEXCOORD0)
 		}
 		
 	
-		float4 cL = tex2D(BackBuffer,float2(TCL.x,TCL.y)); //objects that hit screen boundary is replaced with the BackBuffer 		
-		float4 cR = tex2D(BackBuffer,float2(TCR.x,TCR.y)); //objects that hit screen boundary is replaced with the BackBuffer
-				
+		float4 cL, LL; //tex2D(BackBuffer,float2(TCL.x,TCL.y)); //objects that hit screen boundary is replaced with the BackBuffer 		
+		float4 cR, RR; //tex2D(BackBuffer,float2(TCR.x,TCR.y)); //objects that hit screen boundary is replaced with the BackBuffer
+		float RF, RN, LF, LN;		
 		[loop]
 		for (int i = 0; i <= Divergence; i++) 
 		{
-				//R
-				if (Encode(float2(TCR.x+i*pix.x,TCR.y)).x > (1-TCR.x)) //Decode R
+				//R Good
+				if ( Encode(float2(TCR.x+i*pix.x/0.900,TCR.y)).x > (1-TCR.x)/1.0025 ) //Decode X
 				{
-					cR = tex2Dlod(BackBuffer, float4(TCR.x+i*pix.x/1.125,TCR.y,0,0));
+				RF = i * pix.x; //Good
 				}
-				
-				//L
-				if (Encode(float2(TCL.x-i*pix.x,TCL.y)).z > TCL.x) //Decode B
+
+				//L Good
+				if ( Encode(float2(TCL.x-i*pix.x/0.900,TCL.y)).z > TCL.x/1.0025 ) //Decode Z
 				{
-					cL = tex2Dlod(BackBuffer, float4(TCL.x-i*pix.x/1.125,TCL.y,0,0));
-				}	
+				LF = i * pix.x; //Good
+				}
 		}
-		
+			
+		cR = tex2Dlod(BackBuffer, float4(TCR.x+RF,TCR.y,0,0)); //Good
+		cL = tex2Dlod(BackBuffer, float4(TCL.x-LF,TCL.y,0,0)); //Good
+
 	if(!Depth_Map_View)
 		{	
 	if (Stereoscopic_Mode == 0)
