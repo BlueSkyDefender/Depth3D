@@ -13,12 +13,12 @@ ________________________________________________________________________________
 [Depth Map Adjustment] - Use what you think looks good. You don't have to use my adjustment. It's just a good place to start.
 [Depth Map Division] Inside Shader Setting -=Line 30=-. For 4k Use 2 or 2.5. For 1440p Use 1.5 or 2. For 1080p use 1.
 [Depth Maps List] - For the Normal 3D Shader and Flash Back. If one Depth Map is used it for both shader.
-[Adjustment] - The FlashBack Shader is about 2.5 Times this amount most of the time. Adjust this to what looks good to you.
+[Adjustment] - The FlashBack Shader is about/around 2.5 Times this amount most of the time. Adjust this to what looks good to you.
 ---------------------------------------------------------------------------------------------------------------------------------
 
 IF IT HAS AN *asterisk* I AM STILL WORKING ON IT. But, you can still use the settings.
-                                                                      [- - - - - - - - - -=: Recommended Settings :=- - - - - - - - - -]
-[Read Below] [Game List]                                  [Depth Map] [Adjustment] [Weapon DM] [Depth Flip] [Auto S / ZDP Range] [Balance]
+                                                                      [- - - - - - - - - - - - - -=: Recommended Settings :=- - - - - - - - - - - - - -]
+[Read Below] [Game List]                                  [Depth Map] [Adjustment] [Weapon DM] [Depth Flip] [Auto S / ZDP Range] [Balance] [Consider FB]
             *ABZU                                            DM 1         50                                 No Off / 0.050
             *Alien Isolation                                 DM 0         20                                 No Off / 0.0375
             *Amnesia: Machine for Pigs                       DM 0         37.5        WDM 2                  No Off / 0.050-0.075   
@@ -35,7 +35,7 @@ IF IT HAS AN *asterisk* I AM STILL WORKING ON IT. But, you can still use the set
             *CEMU - Mariokart 8                              DM *         *                         Yes      *
             *CEMU - Super Mario 3D World                     DM *         *                         Yes      *
             *CEMU - The Legend of Zelda: Breath of the Wild  DM *         *                         Yes      *
-    RB       Call of Duty: Advance Warfare                   DM 1         15.0        WDM 4                  No Off / 0.050-0.075    [5]                          
+    RB       Call of Duty: Advance Warfare                   DM 1         15.0        WDM 4                  No Off / 0.050-0.075    [5]                                  
     RB       Call of Duty: Black Ops                         DM 0         10.0        WDM 5                  No Off / 0.050-0.075    [5]                           
     RB       Call of Duty: Black Ops 2                       DM 1         15.0        WDM 4                  No Off / 0.050-0.075    [5]    
     RB       Call of Duty: Ghost                             DM 1         15.0        WDM 4                  No Off / 0.050-0.075    [5]    
@@ -102,12 +102,12 @@ IF IT HAS AN *asterisk* I AM STILL WORKING ON IT. But, you can still use the set
     RB       Resident Evil 7                                 DM 1         22.5                               Yes N  / 0.125-0.275    [2]                                         
     RB       Return To Castle Wolfenstine                    DM 0         10.0         WDM 18                No Off / 0.075-0.250    [5]                     
              Rez Infinite                                    DM 1         20.0                               No Off / 0.075-0.150    [0]
-            *Ryse: Son of Rome                               DM *         5.0-10                             *        
+             Ryse: Son of Rome                               DM 0         7.500                              No Off / 0.025-0.050    [3]        
              Scorn                                           DM 1         40.0                               No Off / 0.0175-0.0375  [4]
     RB       S.T.A.L.K.E.R:CS Complete Mod                   DM 0         7.5          WDM 19                No Off / 0.200-0.350    [5]
     RB       S.T.A.L.K.E.R:CoP Complete Mod                  DM 0         7.5          WDM 19                No Off / 0.200-0.350    [5]
     RB       S.T.A.L.K.E.R:SoC Complete Mod                  DM 0         7.5          WDM 19                No Off / 0.200-0.350    [5]
-            *Sleeping Dogs: DE                               DM *         2.5-5.0                            *    
+             Sleeping Dogs: DE                               DM 0         7.0                                Yes NH / 0.075-0.100    [3]        Yes
              Soma                                            DM 0         11.25        WDM 20                No Off / 0.025-0.100    [5]
             *Sonic Adventure 2                               DM 0         10.0                               Yes N  / 0.150-0.250
             *Souls Games                                     DM *         15-25                              *        
