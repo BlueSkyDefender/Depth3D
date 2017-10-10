@@ -90,8 +90,8 @@ IF IT HAS AN *asterisk* I AM STILL WORKING ON IT. But, you can still use the set
             ?Need for Speed Most Wanted                      ?         ?                                     ?
             *NieRAutomata                                    DM 0         20.0                               Yes N  / 0.050-0.075
              Observer                                        DM 1         10.0                               No Off / 0.150-0.250    [3] 
-    RB      *Penumbra: Black Plague                          DM *         10-20                              *       
-    RB      *Phantasmal                                      DM *         10-20                              *       
+    RB       Penumbra: Black Plague                          DM 0         7.5                                No Off / 0.150-0.200    [1]       
+    RB       Phantasmal                                      DM 0         7.5                       Yes      No Off / 0.010-0.020    [3]       
     RB       Prey 2017                                       DM 1         18.75      WDM 9 & 10              No Off / 0.025-0.075    [3]                
     RB       Quake Epsilon                                   DM 0         15.00        WDM 15                No Off / 0.075-0.125    [5] 
              Quake 2 XP                                      DM 0         7.5          WDM 16                No Off / 0.125-0.325    [5]
@@ -297,9 +297,14 @@ https://steamcommunity.com/sharedfiles/filedetails/?id=334444605
 geometry 3D may be done with TriDef Try It.
 
 {Phantasmal}
-A buggy Opengl game. But, hold down ctrl when starting the game and set your resolution. That or use "-show-screen-selector" in launch options. Once in game Start it. Then you will get a overblown screen. From here press Alt+Enter. Then hit escape and set your resoution and settings to ultra dissable motion blur. Set your settings and now press shift+f2 for reshade and set your settings for Depth3D.
+A buggy Opengl game. But, hold down ctrl when starting the game and set your resolution. That or use "-show-screen-selector" in launch options. 
+Once in game Start it. 
+Then you will get a overblown screen. 
+From here press Alt+Enter. 
+Then hit escape and set your resoution and settings to ultra dissable motion blur. 
+Set your settings and now press shift+f2 for reshade and set your settings for Depth3D.
 
-{Penumbra: Black Plague}
+{Penumbra: Black Plague} - Use reshade 3.0.4.
 Go here
 C:\Users\...\Documents\Penumbra\settings.cfg
 Open the settings and set your res. 
@@ -308,8 +313,7 @@ Open the settings and set your res.
 {Prey 2017}
 Path to install \Steam\steamapps\common\Prey\Binaries\Danielle\x64\Release
 
-Object Detail Setting seems to change the Near Depth by a small amount. When you have Object Detail set to Very High use WDM 17. If set to something else
-use WDM 18.
+Object Detail Setting seems to change the Near Depth by a small amount. When you have Object Detail set to Very High.
 
 I also notice a problem with starting the game with reshade 3.0.7. I used reshade 3.0.4.
 
