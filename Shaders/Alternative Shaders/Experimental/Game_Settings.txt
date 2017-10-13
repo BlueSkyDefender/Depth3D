@@ -115,7 +115,8 @@ IF IT HAS AN *asterisk* I AM STILL WORKING ON IT. But, you can still use the set
     RB        Stay Close                                      DM 1         10                                 No Off / 0.200-0.300    [4]
               Tales of Zestiria                               DM 0         7.5                                No Off / 0.350-0.400    [4]
               The Elder Scrolls V: SE                         DM 0         6.875        WDM 21                No Off / 0.075-0.150    [5]
-    RB        The Evil Within                                 DM 0         28.75                              Yes NH / 0.175-0.250    [3]        
+    RB        The Evil Within                                 DM 0         28.75                              Yes NH / 0.175-0.250    [3]   
+              The Evil Within 2                               DM 0         20.00                              Yes NH / 0.150-0.200    [3]      
     RB        The Legend of Korra                             DM 0         10                                 No Off / 0.200-0.300    [4]
     RB       *The Surge                                       DM *         ?                                  ?     
     RB        The Vanishing of Ethan Carter Redux             DM 1         7.5                                Yes NH / 0.150-0.250    [3]

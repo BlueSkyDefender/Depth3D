@@ -98,7 +98,7 @@ uniform int Auto_ZPD <
 
 uniform int Disocclusion_Adjust <
 	ui_type = "combo";
-	ui_items = "Off\0Radial Mask\0Normal Mask\0Normal Mask Alt\0Normal Depth Mask\0Normal Depth Mask Alt\0";
+	ui_items = "Off\0Radial Mask\0Normal Mask\0Normal Depth Mask\0Normal Depth Mask Plus\0Normal Depth Mask Alt Plus\0";
 	ui_label = "Disocclusion Mask";
 	ui_tooltip = "Automatic occlusion masking options.\n"
 				"Default is Normal Mask.";
@@ -714,11 +714,11 @@ float B, DP =  Divergence, Disocclusion_Power;
 		{
 		Disocclusion_Power = DP/125;
 		}
-else if(Disocclusion_Adjust == 2 || Disocclusion_Adjust == 3)   
+else if(Disocclusion_Adjust == 2)   
 		{
 		Disocclusion_Power = DP/350;
 		}
-else if(Disocclusion_Adjust == 4) //Depth Based    
+else if(Disocclusion_Adjust == 3 || Disocclusion_Adjust == 4) //Depth Based    
 		{
 		Disocclusion_Power = DP/clamp(tex2Dlod(SamplerDM,float4(texcoord,0,0)).r/0.0005,100,1000);
 		}
@@ -728,6 +728,7 @@ else if(Disocclusion_Adjust == 5) //Depth Based
 		}
 								
  float2 dir;
+ float dirX,dirY;
  const int Con = 11;
 	
 	if(Disocclusion_Adjust >= 1) 
@@ -740,9 +741,16 @@ else if(Disocclusion_Adjust == 5) //Depth Based
 			B = Disocclusion_Power;
 		}
 		
-		if(Disocclusion_Adjust == 2 || Disocclusion_Adjust == 3 || Disocclusion_Adjust == 4 || Disocclusion_Adjust == 5)
+		if(Disocclusion_Adjust == 2 || Disocclusion_Adjust == 3 )
 		{
 			dir = float2(0.5,0.0);
+			B = Disocclusion_Power;
+		}
+		
+		if(Disocclusion_Adjust == 4 || Disocclusion_Adjust == 5 || Disocclusion_Adjust == 6 )
+		{
+			dirX = 0.5;
+			dirY = 0.5;
 			B = Disocclusion_Power;
 		}
 				
@@ -751,7 +759,14 @@ else if(Disocclusion_Adjust == 5) //Depth Based
 		{	
 			if(Disocclusion_Adjust >= 1) 
 			{	
-				DM += tex2Dlod(SamplerDM,float4(texcoord + dir * weight[i] * B ,0,0)).rb/Con;
+				if(Disocclusion_Adjust == 4 || Disocclusion_Adjust == 5 || Disocclusion_Adjust == 6)
+				{
+					DM += tex2Dlod(SamplerDM,float4(texcoord.x + dirX * weight[i] * B , texcoord.y + dirY * weight[i] * B,0,0)).rb/Con;
+				}
+				else
+				{
+					DM += tex2Dlod(SamplerDM,float4(texcoord + dir * weight[i] * B ,0,0)).rb/Con;
+				}
 			}
 		}
 	
@@ -902,11 +917,7 @@ float4 PS_renderLR(in float2 texcoord : TEXCOORD0)
 	{	
 		S = samples[j] * MS * Boost;
 		
-		if (Disocclusion_Adjust == 3)
-		{
-		S /= 1.3125;
-		}
-		else if (Disocclusion_Adjust == 5)
+		if (Disocclusion_Adjust == 6)
 		{
 		S /= 1.075;
 		}
