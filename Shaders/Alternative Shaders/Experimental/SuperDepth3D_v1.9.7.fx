@@ -32,8 +32,8 @@
 // Determines The Max Depth amount.
 #define Depth_Max 50
 
-// Enable this to fix the problem when there is a full screen Game Map Poping out of the screen. AKA Full Black Depth Map Fix. I have this on by default. Zero is off, One is On.
-#define FBDMF 1
+// Enable this to fix the problem when there is a full screen Game Map Poping out of the screen. AKA Full Black Depth Map Fix. I have this off by default. Zero is off, One is On.
+#define FBDMF 0
 
 uniform int Depth_Map <
 	ui_type = "combo";

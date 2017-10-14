@@ -35,11 +35,11 @@ IF IT HAS AN *asterisk* I AM STILL WORKING ON IT. But, you can still use the set
              *CEMU - Mariokart 8                              DM *         *                         Yes      *
              *CEMU - Super Mario 3D World                     DM *         *                         Yes      *
              *CEMU - The Legend of Zelda: Breath of the Wild  DM *         *                         Yes      *
-    RB        Call of Duty: Advance Warfare                   DM 1         15.0        WDM 4                  No Off / 0.050-0.075    [5]                                  
-    RB        Call of Duty: Black Ops                         DM 0         10.0        WDM 5                  No Off / 0.050-0.075    [5]                           
-    RB        Call of Duty: Black Ops 2                       DM 1         15.0        WDM 4                  No Off / 0.050-0.075    [5]    
-    RB        Call of Duty: Ghost                             DM 1         15.0        WDM 4                  No Off / 0.050-0.075    [5]    
-    RB        Call of Duty: Infinite Warfare                  DM 1         15.0        WDM 4                  No Off / 0.050-0.075    [4]   
+    RB       *Call of Duty: Advance Warfare                   DM 1         15.0        WDM 4                  No Off / 0.050-0.075    [5]                                  
+    RB       *Call of Duty: Black Ops                         DM 0         10.0        WDM 5                  No Off / 0.050-0.075    [5]                           
+    RB       *Call of Duty: Black Ops 2                       DM 1         15.0        WDM 4                  No Off / 0.050-0.075    [5]    
+    RB       *Call of Duty: Ghost                             DM 1         15.0        WDM 4                  No Off / 0.050-0.075    [5]    
+    RB        Call of Duty: Infinite Warfare                  DM 1         7.5         WDM 4                  No Off / 0.075-0.100    [3]   
               Casltevania: Lord of Shadows - UE               DM 0         7.5                                No Off / 0.150-0.250    [3]                                         
              *Cryostasis                                      DM 0         10.0        WDM 6                  No Off / 0.025-0.075                         
              *DOOM 2016                                       DM 0         15.0        WDM 1                  No Off / 0.050-0.100                       
