@@ -84,10 +84,15 @@ uniform float2 Zoom_Aspect_Ratio <
 
 uniform int Custom_Sidebars <
 	ui_type = "combo";
-	ui_items = "Mirrored Edges\0Black Edges\0Stretched Edges\0";
+	ui_items = "Black Edges\0Stretched Edges\0";
 	ui_label = "Edge Selection";
 	ui_tooltip = "Select how you like the Edge of the screen to look like.";
 > = 1;
+
+uniform bool Vignette <
+	ui_label = "Vignette";
+	ui_tooltip = "Soft edge effect around the image.";
+> = false;
 
 uniform bool Diaspora <
 	ui_label = "Diaspora Fix";
@@ -227,18 +232,6 @@ texture texCLS  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA32F
 texture texCRS  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA32F;}; 
 #endif
 	
-sampler SamplerCLMIRROR
-	{
-		#if TOGGLE
-		Texture = texCLM;
-		#else
-		Texture = texCLS;
-		#endif
-		AddressU = MIRROR;
-		AddressV = MIRROR;
-		AddressW = MIRROR;
-	};
-	
 sampler SamplerCLBORDER
 	{
 		#if TOGGLE
@@ -261,18 +254,6 @@ sampler SamplerCLCLAMP
 		AddressU = CLAMP;
 		AddressV = CLAMP;
 		AddressW = CLAMP;
-	};
-
-sampler SamplerCRMIRROR
-	{
-		#if TOGGLE
-		Texture = texCRM;
-		#else
-		Texture = texCRS;
-		#endif
-		AddressU = MIRROR;
-		AddressV = MIRROR;
-		AddressW = MIRROR;
 	};
 	
 sampler SamplerCRBORDER
@@ -350,6 +331,27 @@ float2 DR(float2 p, float k_RGB) //Cubic Lens Distortion Right
 	return p;
 }
 
+float4 vignetteL(in float2 texcoord : TEXCOORD0)
+{  
+float4 base;
+	
+	if(Custom_Sidebars == 0)
+	{
+		base = tex2D(SamplerCLBORDER, texcoord);
+	}
+	else
+	{
+		base = tex2D(SamplerCLCLAMP, texcoord);
+	}
+		   
+		texcoord = -texcoord * texcoord + texcoord;
+		
+		if( Vignette )
+		base.rgb *= saturate(texcoord.x * texcoord.y * 250);
+
+	return base;    
+}
+
 float4 PDL(float2 texcoord)		//Texture = texCL Left
 {		
 		texcoord.x += IPDS() * pix.x;
@@ -370,24 +372,9 @@ float4 PDL(float2 texcoord)		//Texture = texCL Left
 		uv_green = DL(texcoord.xy-sectorOrigin,Green) + sectorOrigin;
 		uv_blue = DL(texcoord.xy-sectorOrigin,Blue) + sectorOrigin;
 		
-		if(Custom_Sidebars == 0)
-		{
-		color_red = tex2D(SamplerCLMIRROR, uv_red).r;
-		color_green = tex2D(SamplerCLMIRROR, uv_green).g;
-		color_blue = tex2D(SamplerCLMIRROR, uv_blue).b;
-		}
-		else if(Custom_Sidebars == 1)
-		{
-		color_red = tex2D(SamplerCLBORDER, uv_red).r;
-		color_green = tex2D(SamplerCLBORDER, uv_green).g;
-		color_blue = tex2D(SamplerCLBORDER, uv_blue).b;
-		}
-		else
-		{
-		color_red = tex2D(SamplerCLCLAMP, uv_red).r;
-		color_green = tex2D(SamplerCLCLAMP, uv_green).g;
-		color_blue = tex2D(SamplerCLCLAMP, uv_blue).b;
-		}
+		color_red = vignetteL(uv_red).r;
+		color_green = vignetteL(uv_green).g;
+		color_blue = vignetteL(uv_blue).b;
 
 		if( ((uv_red.x > 0) && (uv_red.x < 1) && (uv_red.y > 0) && (uv_red.y < 1)))
 		{
@@ -400,6 +387,28 @@ float4 PDL(float2 texcoord)		//Texture = texCL Left
 		return color;
 		
 	}
+
+
+float4 vignetteR(in float2 texcoord : TEXCOORD0)
+{  
+float4 base;
+
+		if(Custom_Sidebars == 0)
+		{
+		base = tex2D(SamplerCRBORDER, texcoord);
+		}
+		else
+		{
+		base = tex2D(SamplerCRCLAMP, texcoord);
+		}
+		   
+		texcoord = -texcoord * texcoord + texcoord;
+		
+		if( Vignette )
+		base.rgb *= saturate(texcoord.x * texcoord.y * 250);
+
+	return base;    
+}
 	
 	float4 PDR(float2 texcoord)		//Texture = texCR Right
 {		
@@ -420,25 +429,10 @@ float4 PDL(float2 texcoord)		//Texture = texCL Left
 		uv_red = DR(texcoord.xy-sectorOrigin,Red) + sectorOrigin;
 		uv_green = DR(texcoord.xy-sectorOrigin,Green) + sectorOrigin;
 		uv_blue = DR(texcoord.xy-sectorOrigin,Blue) + sectorOrigin;
-		
-		if(Custom_Sidebars == 0)
-		{
-		color_red = tex2D(SamplerCRMIRROR, uv_red).r;
-		color_green = tex2D(SamplerCRMIRROR, uv_green).g;
-		color_blue = tex2D(SamplerCRMIRROR, uv_blue).b;
-		}
-		else if(Custom_Sidebars == 1)
-		{
-		color_red = tex2D(SamplerCRBORDER, uv_red).r;
-		color_green = tex2D(SamplerCRBORDER, uv_green).g;
-		color_blue = tex2D(SamplerCRBORDER, uv_blue).b;
-		}
-		else
-		{
-		color_red = tex2D(SamplerCRCLAMP, uv_red).r;
-		color_green = tex2D(SamplerCRCLAMP, uv_green).g;
-		color_blue = tex2D(SamplerCRCLAMP, uv_blue).b;
-		}
+
+		color_red = vignetteR(uv_red).r;
+		color_green = vignetteR(uv_green).g;
+		color_blue = vignetteR(uv_blue).b;
 
 		if( ((uv_red.x > 0) && (uv_red.x < 1) && (uv_red.y > 0) && (uv_red.y < 1)))
 		{
@@ -510,6 +504,7 @@ float4 PBDOut(float2 texcoord : TEXCOORD0)
 	{
 	Out = PDL(float2((Rotationtexcoord.x*X)-midV ,(Rotationtexcoord.y*Y)-midH));
 	}
+	
 	return Out;
 }
 
