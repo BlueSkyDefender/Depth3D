@@ -17,12 +17,7 @@
  //* http://reshade.me/forum/shader-presentation/2128-sidebyside-3d-depth-map-based-stereoscopic-shader																				*//	
  //* ---------------------------------																																				*//
  //*																																												*//
- //* Original work was based on the shader code of a CryTech 3 Dev http://www.slideshare.net/TiagoAlexSousa/secrets-of-cryengine-3-graphics-technology								*//
- //* 																																												*//
- //* AO Work was based on the shader code of a Devmaster Dev																														*//
- //* code was take from http://forum.devmaster.net/t/disk-to-disk-ssao/17414																										*//
- //* arkano22 Disk to Disk AO GLSL code adapted to be used to add more detail to the Depth Map.																						*//
- //* http://forum.devmaster.net/users/arkano22/																																		*//
+ //* Original work was based on the shader code of a CryTech 3 Dev http://www.slideshare.net/TiagoAlexSousa/secrets-of-cryengine-3-graphics-technology								*//																														*//
  //*																																												*//
  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -703,79 +698,8 @@ void Average_Luminance(in float4 position : SV_Position, in float2 texcoord : TE
 	color = float4(Average_Luminance,1);
 }
 
-void  Disocclusion(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 color : SV_Target0)
+float C(float D,float2 texcoord)
 {
-float2 DM;
-float B, DP =  Divergence, Disocclusion_Power;
-
-	DP *= Disocclusion_Power_Adjust;
-		
-	 if(Disocclusion_Adjust == 1)     
-		{
-		Disocclusion_Power = DP/125;
-		}
-else if(Disocclusion_Adjust == 2)   
-		{
-		Disocclusion_Power = DP/350;
-		}
-else if(Disocclusion_Adjust == 3 || Disocclusion_Adjust == 4) //Depth Based    
-		{
-		Disocclusion_Power = DP/clamp(tex2Dlod(SamplerDM,float4(texcoord,0,0)).r/0.0005,100,1000);
-		}
-else if(Disocclusion_Adjust == 5) //Depth Based    
-		{
-		Disocclusion_Power = DP/clamp(tex2Dlod(SamplerDM,float4(texcoord,0,0)).r/0.0009625,100,1000);
-		}
-								
- float2 dir;
- float dirX,dirY;
- const int Con = 11;
-	
-	if(Disocclusion_Adjust >= 1) 
-	{
-		const float weight[Con] = {0.01,-0.01,0.02,-0.02,0.03,-0.03,0.04,-0.04,0.05,-0.05,0.0};
-		
-		if(Disocclusion_Adjust == 1)
-		{
-			dir = 0.5 - texcoord;
-			B = Disocclusion_Power;
-		}
-		
-		if(Disocclusion_Adjust == 2 || Disocclusion_Adjust == 3 )
-		{
-			dir = float2(0.5,0.0);
-			B = Disocclusion_Power;
-		}
-		
-		if(Disocclusion_Adjust == 4 || Disocclusion_Adjust == 5 || Disocclusion_Adjust == 6 )
-		{
-			dirX = 0.5;
-			dirY = 0.5;
-			B = Disocclusion_Power;
-		}
-				
-		[loop]
-		for (int i = 0; i < Con; i++)
-		{	
-			if(Disocclusion_Adjust >= 1) 
-			{	
-				if(Disocclusion_Adjust == 4 || Disocclusion_Adjust == 5 || Disocclusion_Adjust == 6)
-				{
-					DM += tex2Dlod(SamplerDM,float4(texcoord.x + dirX * weight[i] * B , texcoord.y + dirY * weight[i] * B,0,0)).rb/Con;
-				}
-				else
-				{
-					DM += tex2Dlod(SamplerDM,float4(texcoord + dir * weight[i] * B ,0,0)).rb/Con;
-				}
-			}
-		}
-	
-	}
-	else
-	{
-		DM = tex2Dlod(SamplerDM,float4(texcoord,0,0)).rb;
-	}
-	
 	float Z, ZP, NF_Power;
 		
 		//Average Luminance Auto ZDP Start
@@ -859,12 +783,85 @@ else if(Disocclusion_Adjust == 5) //Depth Based
 			ZP = NF_Power;
 		}
 		
-		Z = max(0,Z);
+    Z = lerp(1-Z/D,D,ZP);
+    
+    return Z;
+}
+
+void  Disocclusion(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 color : SV_Target0)
+{
+float2 DM;
+float B, DP =  Divergence, Disocclusion_Power;
+
+	DP *= Disocclusion_Power_Adjust;
 		
-	float GetDepthZPDR = max(-5,1-Z/DM.x), GetDepthZPDB = max(-5,1-Z/DM.y);
+	 if(Disocclusion_Adjust == 1)     
+		{
+		Disocclusion_Power = DP/125;
+		}
+else if(Disocclusion_Adjust == 2)   
+		{
+		Disocclusion_Power = DP/350;
+		}
+else if(Disocclusion_Adjust == 3 || Disocclusion_Adjust == 4) //Depth Based    
+		{
+		Disocclusion_Power = DP/clamp(tex2Dlod(SamplerDM,float4(texcoord,0,0)).r/0.0005,100,1000);
+		}
+else if(Disocclusion_Adjust == 5) //Depth Based    
+		{
+		Disocclusion_Power = DP/clamp(tex2Dlod(SamplerDM,float4(texcoord,0,0)).r/0.0009625,100,1000);
+		}
+								
+ float2 dir;
+ float dirX,dirY;
+ const int Con = 11;
+	
+	if(Disocclusion_Adjust >= 1) 
+	{
+		const float weight[Con] = {0.01,-0.01,0.02,-0.02,0.03,-0.03,0.04,-0.04,0.05,-0.05,0.0};
 		
-	float X = lerp(GetDepthZPDR,DM.x,ZP); //R Encode
-	float Y = lerp(GetDepthZPDB,DM.y,ZP); //B Encode
+		if(Disocclusion_Adjust == 1)
+		{
+			dir = 0.5 - texcoord;
+			B = Disocclusion_Power;
+		}
+		
+		if(Disocclusion_Adjust == 2 || Disocclusion_Adjust == 3 )
+		{
+			dir = float2(0.5,0.0);
+			B = Disocclusion_Power;
+		}
+		
+		if(Disocclusion_Adjust == 4 || Disocclusion_Adjust == 5 || Disocclusion_Adjust == 6 )
+		{
+			dirX = 0.5;
+			dirY = 0.5;
+			B = Disocclusion_Power;
+		}
+				
+		[loop]
+		for (int i = 0; i < Con; i++)
+		{	
+			if(Disocclusion_Adjust >= 1) 
+			{	
+				if(Disocclusion_Adjust == 4 || Disocclusion_Adjust == 5 || Disocclusion_Adjust == 6)
+				{
+					DM += tex2Dlod(SamplerDM,float4(texcoord.x + dirX * weight[i] * B , texcoord.y + dirY * weight[i] * B,0,0)).rb/Con;
+				}
+				else
+				{
+					DM += tex2Dlod(SamplerDM,float4(texcoord + dir * weight[i] * B ,0,0)).rb/Con;
+				}
+			}
+		}
+	
+	}
+	else
+	{
+		DM = tex2Dlod(SamplerDM,float4(texcoord,0,0)).rb;
+	}
+	
+	float X = DM.x, Y = DM.y;
 	
 	color = float4(X,0,Y,1);
 }
@@ -928,15 +925,12 @@ float4 PS_renderLR(in float2 texcoord : TEXCOORD0)
 		DepthL =  min(DepthL,L);
 		DepthR =  min(DepthR,R);
 	}
-
-		DepthL *= MS;
-		DepthR *= MS;
 		
-		DepthL *= Boost;
-		DepthR *= Boost;
-		
-		float ReprojectionLeft =  DepthL * Boost;
-		float ReprojectionRight = DepthR * Boost;
+		float ParallaxL = max(-0.250,MS * C(DepthL,texcoord))* Boost;
+		float ParallaxR = max(-0.250,MS * C(DepthR,texcoord))* Boost;
+			
+		float ReprojectionLeft =  ParallaxL * Boost;
+		float ReprojectionRight = ParallaxR * Boost;
 	
 	if(!Depth_Map_View)
 	{
