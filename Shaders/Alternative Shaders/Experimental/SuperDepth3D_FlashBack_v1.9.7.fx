@@ -19,18 +19,16 @@
  //*																																												*//
  //* Original work was based on Shader Based on forum user 04348 and be located here http://reshade.me/forum/shader-presentation/1594-3d-anaglyph-red-cyan-shader-wip#15236			*//
  //*																																												*//
-//* AO Work was based on the shader code of a Devmaster Dev																															*//
- //* code was take from http://forum.devmaster.net/t/disk-to-disk-ssao/17414																										*//
- //* arkano22 Disk to Disk AO GLSL code adapted to be used to add more detail to the Depth Map.																						*//
- //* http://forum.devmaster.net/users/arkano22/																																		*//
- //*																																												*//
  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // Determines The resolution of the Depth Map. For 4k Use 1.75 or 1.5. For 1440p Use 1.5 or 1.25. For 1080p use 1. Too low of a resolution will remove too much.
-#define Depth_Map_Division 2.0
+#define Depth_Map_Division 1.0
 
 // Determines The Max Depth amount. The larger the amount harder it will hit on FPS will be.
 #define Depth_Max 50
+
+// Enable this to fix the problem when there is a full screen Game Map Poping out of the screen. AKA Full Black Depth Map Fix. I have this off by default. Zero is off, One is On.
+#define FBDMF 0
 
 uniform int Depth_Map <
 	ui_type = "combo";
@@ -45,7 +43,7 @@ uniform float Depth_Map_Adjust <
 	ui_min = 1.0; ui_max = 100.0;
 	ui_label = "Depth Map Adjustment";
 	ui_tooltip = "Adjust the depth map for your games.";
-> = 35;
+> = 7.5;
 
 uniform float Offset <
 	ui_type = "drag";
@@ -62,6 +60,16 @@ uniform int Divergence <
 				 "You can override this value.";
 > = 35;
 
+uniform float ZPD <
+	ui_type = "drag";
+	ui_min = 0.0; ui_max = 0.375;
+	ui_label = "Zero Parallax Distance";
+	ui_tooltip = "ZPD controls the focus distance for the screen Pop-out effect.\n"
+				"For FPS Games this should be around 0.005-0.075.\n"
+				"Also Controlls Auto ZPD Power.\n"
+				"Default is 0.010, Zero is off.";
+> = 0.010;
+
 uniform int Balance <
 	ui_type = "drag";
 	ui_min = 0; ui_max = 5;
@@ -69,16 +77,16 @@ uniform int Balance <
 	ui_tooltip = "Balance between ZPD Depth and Scene Depth and works with ZPD option above.\n"
 				"Example Zero is 50/50 equal between ZPD Depth and Scene Depth.\n"
 				"One is 62.5/37.5, Three is 75/25, and Five is 87.5/12.5\n"
-				"Default is One.";
-> = 1;
+				"Default is Three.";
+> = 3;
 
 uniform int Disocclusion_Adjust <
 	ui_type = "combo";
-	ui_items = "Off\0Radial Mask\0Normal Mask\0Normal Mask Alt\0Normal Depth Mask\0Normal Depth Mask Alt\0";
+	ui_items = "Off\0Radial Mask\0Normal Mask\0Normal Depth Mask\0Normal Depth Mask Plus\0Normal Depth Mask Alt Plus\0";
 	ui_label = "Disocclusion Mask";
 	ui_tooltip = "Automatic occlusion masking options.\n"
 				"Default is Normal Mask.";
-> = 0;
+> = 2;
 
 uniform float Disocclusion_Power_Adjust <
 	ui_type = "drag";
@@ -647,72 +655,10 @@ void Average_Luminance(in float4 position : SV_Position, in float2 texcoord : TE
 	color = float4(Average_Luminance,1);
 }
 
-void  Disocclusion(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 color : SV_Target0)
+float C(float DM,float2 texcoord)
 {
-//bilateral blur\/
-float2 DM;
-float B, DP =  Divergence, Disocclusion_Power;
+	float NF_Power, ZP;
 	
-	DP *= Disocclusion_Power_Adjust;
-	
-	 if(Disocclusion_Adjust == 1)     
-		{
-		Disocclusion_Power = DP/125;
-		}
-else if(Disocclusion_Adjust == 2 || Disocclusion_Adjust == 3)   
-		{
-		Disocclusion_Power = DP/350;
-		}
-else if(Disocclusion_Adjust == 4) //Depth Based    
-		{
-		Disocclusion_Power = DP/clamp(tex2Dlod(SamplerDM,float4(texcoord,0,0)).r/0.0005,100,1000);
-		}
-else if(Disocclusion_Adjust == 5) //Depth Based    
-		{
-		Disocclusion_Power = DP/clamp(tex2Dlod(SamplerDM,float4(texcoord,0,0)).r/0.0009625,100,1000);
-		}
-								
- float2 dir;
- const int Con = 11;
-	
-	if(Disocclusion_Adjust >= 1) 
-	{
-		const float weight[Con] = {0.01,-0.01,0.02,-0.02,0.03,-0.03,0.04,-0.04,0.05,-0.05,0.0};
-		
-		if(Disocclusion_Adjust == 1)
-		{
-			dir = 0.5 - texcoord;
-			B = Disocclusion_Power;
-		}
-		
-		if(Disocclusion_Adjust == 2 || Disocclusion_Adjust == 3 || Disocclusion_Adjust == 4 || Disocclusion_Adjust == 5)
-		{
-			dir = float2(0.5,0.0);
-			B = Disocclusion_Power;
-		}
-				
-		[loop]
-		for (int i = 0; i < Con; i++)
-		{	
-			if(Disocclusion_Adjust >= 1) 
-			{	
-				DM += tex2Dlod(SamplerDM,float4(texcoord + dir * weight[i] * B ,0,0)).rb/Con;
-			}
-		}
-	
-	}
-	else
-	{
-		DM = tex2Dlod(SamplerDM,float4(texcoord,0,0)).rb;
-	}
-     
-	color = float4(DM.x,0,DM.y,1);
-}
-
-float4  Encode(in float2 texcoord : TEXCOORD0) //zBuffer Color Channel Encode
-{
-	float Z, ZP, NF_Power;
-		
 		if (Balance == 0)
 		{
 			NF_Power = 0.5;
@@ -738,30 +684,115 @@ float4  Encode(in float2 texcoord : TEXCOORD0) //zBuffer Color Channel Encode
 			NF_Power = 0.875;
 		}
 		
-		ZP = NF_Power;
+		if(ZPD == 0)
+		{
+			ZP = 1.0;
+		}
+		else
+		{
+			ZP = NF_Power;
+		}
+		
+    DM = lerp(1-ZPD/DM,DM,ZP);  
+    return DM;
+}
+
+void  Disocclusion(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 color : SV_Target0)
+{
+float2 DM;
+float B, DP =  Divergence, Disocclusion_Power;
+
+	DP *= Disocclusion_Power_Adjust;
+		
+	 if(Disocclusion_Adjust == 1)     
+		{
+		Disocclusion_Power = DP/125;
+		}
+else if(Disocclusion_Adjust == 2)   
+		{
+		Disocclusion_Power = DP/350;
+		}
+else if(Disocclusion_Adjust == 3 || Disocclusion_Adjust == 4) //Depth Based    
+		{
+		Disocclusion_Power = DP/clamp(tex2Dlod(SamplerDM,float4(texcoord,0,0)).r/0.0005,100,1000);
+		}
+else if(Disocclusion_Adjust == 5) //Depth Based    
+		{
+		Disocclusion_Power = DP/clamp(tex2Dlod(SamplerDM,float4(texcoord,0,0)).r/0.0009625,100,1000);
+		}
+								
+ float2 dir;
+ float dirX,dirY;
+ const int Con = 11;
+	
+	if(Disocclusion_Adjust >= 1) 
+	{
+		const float weight[Con] = {0.01,-0.01,0.02,-0.02,0.03,-0.03,0.04,-0.04,0.05,-0.05,0.0};
+		
+		if(Disocclusion_Adjust == 1)
+		{
+			dir = 0.5 - texcoord;
+			B = Disocclusion_Power;
+		}
+		
+		if(Disocclusion_Adjust == 2 || Disocclusion_Adjust == 3 )
+		{
+			dir = float2(0.5,0.0);
+			B = Disocclusion_Power;
+		}
+		
+		if(Disocclusion_Adjust == 4 || Disocclusion_Adjust == 5 || Disocclusion_Adjust == 6 )
+		{
+			dirX = 0.5;
+			dirY = 0.5;
+			B = Disocclusion_Power;
+		}
+				
+		[loop]
+		for (int i = 0; i < Con; i++)
+		{	
+			if(Disocclusion_Adjust >= 1) 
+			{	
+				if(Disocclusion_Adjust == 4 || Disocclusion_Adjust == 5 || Disocclusion_Adjust == 6)
+				{
+					DM += tex2Dlod(SamplerDM,float4(texcoord.x + dirX * weight[i] * B , texcoord.y + dirY * weight[i] * B,0,0)).rb/Con;
+				}
+				else
+				{
+					DM += tex2Dlod(SamplerDM,float4(texcoord + dir * weight[i] * B ,0,0)).rb/Con;
+				}
+			}
+		}
+	
+	}
+	else
+	{
+		DM = tex2Dlod(SamplerDM,float4(texcoord,0,0)).rb;
+	}
+	
+	float X = C(DM.x,texcoord), Y = C(DM.y,texcoord);
+	
+	color = float4(X,0,Y,1);
+}
+
+float4  Encode(in float2 texcoord : TEXCOORD0) //zBuffer Color Channel Encode
+{
 
 	float GetDepthR = tex2Dlod(SamplerDis,float4(texcoord.x,texcoord.y,0,0)).r;
 	float GetDepthB = tex2Dlod(SamplerDis,float4(texcoord.x,texcoord.y,0,0)).b;
-	
-	float GetDepthZPDR = 1-0.05/GetDepthR;
-	float GetDepthZPDB = 1-0.05/GetDepthB;
-	
+
 	// X	
 	float Rx = (1-texcoord.x)+Divergence*pix.x*GetDepthR;
-	float RZx = (1-texcoord.x)+Divergence*pix.x*GetDepthZPDR;
 	// Y
 	float Ry = (1-texcoord.x)+Divergence*pix.x*GetDepthR;
-	float RZy = (1-texcoord.x)+Divergence*pix.x*GetDepthZPDR;
 	// Z
 	float Bz = texcoord.x+Divergence*pix.x*GetDepthB;
-	float BZz = texcoord.x+Divergence*pix.x*GetDepthZPDB;
 	// W
 	float Bw = texcoord.x+Divergence*pix.x*GetDepthB;
-	float BZw = texcoord.x+Divergence*pix.x*GetDepthZPDB;
 	
-	float R = lerp(RZx,Rx,ZP); //X Encode
+	float R = Rx; //X Encode
 	float G = Ry; //Y Encode
-	float B = lerp(BZz,Bz,ZP); //Z Encode
+	float B = Bz; //Z Encode
 	float A = Bw; //W Encode
 	
 	return float4(R,G,B,A);
@@ -824,15 +855,17 @@ float4 PS_calcLR(in float2 texcoord : TEXCOORD0)
 		for (int i = 0; i <= Divergence; i++) 
 		{
 				//R Good
-				if ( Encode(float2(TCR.x+i*pix.x,TCR.y)).x > (1-TCR.x) ) //Decode X
+				//if ( Encode(float2(TCR.x+i*pix.x,TCR.y)).x >= (1-TCR.x-pix.x/2) && Encode(float2(TCR.x+i*pix.x,TCR.y)).x <= (1-TCR.x+pix.x/2) ) //Decode X
+				if ( Encode(float2(TCR.x+i*pix.x,TCR.y)).x >= (1-TCR.x) )
 				{
-				RF = i * pix.x; //Good
+				RF = i * pix.x/1.1; //Good
 				}
 
 				//L Good
-				if ( Encode(float2(TCL.x-i*pix.x,TCL.y)).z > TCL.x ) //Decode Z
+				//if ( Encode(float2(TCL.x-i*pix.x,TCL.y)).z >= TCL.x-pix.x/2 && Encode(float2(TCL.x-i*pix.x,TCL.y)).z <= (TCR.x+pix.x/2)) //Decode Z
+				if ( Encode(float2(TCL.x-i*pix.x,TCL.y)).z >= TCL.x )
 				{
-				LF = i * pix.x; //Good
+				LF = i * pix.x/1.1; //Good
 				}
 		}
 			
