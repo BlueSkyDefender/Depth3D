@@ -144,7 +144,7 @@ IF IT HAS AN *asterisk* I AM STILL WORKING ON IT. But, you can still use the set
     RB         Magicka 2                         DM 3       3.250                  0.3730               No Off / 0.025-0.075    [0]
                Never Alone (Kisima Ingitchuna)   DM 3       3.125                  0.3688               No Off / 0.090-0.140    [3]        Yes          
     RB        *Requiem: Avenging Angel           DM *         0                    0.5740            
-              *Silent Hill: Homecoming           DM *         0                    0.4080
+               Silent Hill: Homecoming           DM 3       1.625                  0.4080               No Off / 0.100-0.125    [3]       
               
 [Emulator]  [Special Depth Map Game List]                [Depth Map] [Adjustment] [Weapon DM] [Offset] [Depth Flip] [Auto T / ZDP Range] [Balance] [Consider FB]
 CEMU         Mariokart 8                                     DM *         *                                 Yes     *
