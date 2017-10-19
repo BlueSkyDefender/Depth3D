@@ -40,7 +40,7 @@ uniform int Depth_Map <
 
 uniform float Depth_Map_Adjust <
 	ui_type = "drag";
-	ui_min = 1.0; ui_max = 100.0;
+	ui_min = 0.250; ui_max = 100.0;
 	ui_label = "Depth Map Adjustment";
 	ui_tooltip = "Adjust the depth map for your games.";
 > = 7.5;
@@ -259,6 +259,9 @@ texture texDM  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT/Depth_Map_Division
 sampler SamplerDM
 	{
 		Texture = texDM;
+		MagFilter = LINEAR;
+		MinFilter = LINEAR;
+		MipFilter = LINEAR;
 	};
 	
 texture texDis  { Width = BUFFER_WIDTH/Depth_Map_Division; Height = BUFFER_HEIGHT/Depth_Map_Division; Format = RGBA32F;}; 
@@ -266,6 +269,9 @@ texture texDis  { Width = BUFFER_WIDTH/Depth_Map_Division; Height = BUFFER_HEIGH
 sampler SamplerDis
 	{
 		Texture = texDis;
+		MagFilter = LINEAR;
+		MinFilter = LINEAR;
+		MipFilter = LINEAR;
 	};
 
 uniform float2 Mousecoords < source = "mousepoint"; > ;	
@@ -325,6 +331,14 @@ sampler SamplerLumWeapon
 	}
 /////////////////////////////////////////////////////////////////////////////////Depth Map Information/////////////////////////////////////////////////////////////////////////////////
 
+// transform range in world-z to #-1 for near-far
+float DepthRange( float d )
+{
+	float N = -0.01875;
+	d = ( d - N ) / ( 1 - N );	
+    return min(0.875,d);
+}
+
 float2 Depth(in float2 texcoord : TEXCOORD0)
 {
 		if (Depth_Map_Flip)
@@ -345,13 +359,11 @@ float2 Depth(in float2 texcoord : TEXCOORD0)
 		float NormalReverse = Far * Near / (Near + zBuffer * (Far - Near));
 		
 		//2. Offset Normal
-		float OffsetNormal =  Far * Near / (Far +  pow(abs(exp(zBuffer)*Offset),DA*25) * (Near - Far));
-
+		//float OffsetNormal =  Far * Near / (Far +  pow(abs(exp(zBuffer)*Offset),DA*25) * (Near - Far)); //Not in use......		
+		float OffsetNormal = DepthRange(pow(abs(exp(zBuffer)*Offset),DA*25));
+		
 		//3. Offset Reverse
 		float OffsetReverse = Far * Near / (Near +  pow(abs(exp(zBuffer)*Offset),DA*25) * (Far - Near));
-
-		//4. Special Depth Map
-		//float Special = pow(abs(exp(zBuffer)*Offset),DA*25); Not in use......		
 		
 		float2 DM;
 		
@@ -371,6 +383,7 @@ float2 Depth(in float2 texcoord : TEXCOORD0)
 		{
 		DM.x = OffsetReverse;
 		}
+
 		
 		if (Depth_Map == 0)
 		{
@@ -388,7 +401,7 @@ float2 Depth(in float2 texcoord : TEXCOORD0)
 		{
 		DM.y = OffsetReverse;
 		}
-	
+		
 	return float2(DM.x,DM.y);	
 }
 
@@ -926,8 +939,8 @@ float4 PS_renderLR(in float2 texcoord : TEXCOORD0)
 		DepthR =  min(DepthR,R);
 	}
 		
-		float ParallaxL = max(-0.250,MS * C(DepthL,texcoord))* Boost;
-		float ParallaxR = max(-0.250,MS * C(DepthR,texcoord))* Boost;
+		float ParallaxL = max(-0.250,MS * C(DepthL,texcoord));
+		float ParallaxR = max(-0.250,MS * C(DepthR,texcoord));
 			
 		float ReprojectionLeft =  ParallaxL * Boost;
 		float ReprojectionRight = ParallaxR * Boost;

@@ -281,6 +281,13 @@ sampler SamplerLumWeapon
 	}
 	
 /////////////////////////////////////////////////////////////////////////////////Depth Map Information/////////////////////////////////////////////////////////////////////////////////
+// transform range in world-z to #-1 for near-far
+float DepthRange( float d )
+{
+	float N = -0.01875;
+	d = ( d - N ) / ( 1 - N );	
+    return min(0.875,d);
+}
 
 float2 Depth(in float2 texcoord : TEXCOORD0)
 {
@@ -302,13 +309,11 @@ float2 Depth(in float2 texcoord : TEXCOORD0)
 		float NormalReverse = Far * Near / (Near + zBuffer * (Far - Near));
 		
 		//2. Offset Normal
-		float OffsetNormal =  Far * Near / (Far +  pow(abs(exp(zBuffer)*Offset),DA*25) * (Near - Far));
-
+		//float OffsetNormal =  Far * Near / (Far +  pow(abs(exp(zBuffer)*Offset),DA*25) * (Near - Far)); //Not in use......		
+		float OffsetNormal = DepthRange(pow(abs(exp(zBuffer)*Offset),DA*25));
+		
 		//3. Offset Reverse
 		float OffsetReverse = Far * Near / (Near +  pow(abs(exp(zBuffer)*Offset),DA*25) * (Far - Near));
-
-		//4. Special Depth Map
-		//float Special = pow(abs(exp(zBuffer)*Offset),DA*25); Not in use......		
 		
 		float2 DM;
 		

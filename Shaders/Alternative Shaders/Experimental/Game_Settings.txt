@@ -13,13 +13,18 @@ ________________________________________________________________________________
 [Depth Map Adjustment] - Use what you think looks good. You don't have to use my adjustment. It's just a good place to start.
 [Depth Map Division] - Inner Shader Setting -=Line 25=-. For 4k Use 1.75 or 1.5. For 1440p Use 1.5 or 1.25. For 1080p use 1.
 [Depth Maps List] - For the Normal 3D Shader and Flash Back. If one Depth Map is used it for both shader.
-[Adjustment] - The FlashBack Shader is about/around 2 Times this amount most of the time. Adjust this to what looks good to you.
-[Consider FB] - Consider the FlashBack Shader as an Option you may like the look of it. ZPD for the flash back shader is lower.
 ---------------------------------------------------------------------------------------------------------------------------------
+
+[Adjustment] - The FlashBack Shader is about/around 2 Times this amount most of the time. Adjust this to what looks good to you. Don't Go to High or To Low.
+
+[Auto T / ZDP Range] -  Auto give you a Yes or No Use case. T is Type. N is Normal, I is Inverted, NH is Normal Half, and IH is Inverted Half.
+                        ZDP Range is the range where you should set Zero Parallax Distance.
+                        
+[Consider FB] - Consider the FlashBack Shader as an Option you may like the look of it. ZPD for the flash back shader is lower.
 
 IF IT HAS AN *asterisk* I AM STILL WORKING ON IT. But, you can still use the settings.
                                                                       [- - - - - - - - - - - - - -=: Recommended Settings :=- - - - - - - - - - - - - -]
-[Read Below] [Game List]                                  [Depth Map] [Adjustment] [Weapon DM] [Depth Flip] [Auto S / ZDP Range] [Balance] [Consider FB]
+[Read Below] [Game List]                                  [Depth Map] [Adjustment] [Weapon DM] [Depth Flip] [Auto T / ZDP Range] [Balance] [Consider FB]
              *ABZU                                            DM 1         50                                No Off / 0.050
              *Alien Isolation                                 DM 0         20                                No Off / 0.0375
              *Amnesia: Machine for Pigs                       DM 0         37.5        WDM 2                 No Off / 0.050-0.075   
@@ -33,9 +38,6 @@ IF IT HAS AN *asterisk* I AM STILL WORKING ON IT. But, you can still use the set
              ?BladeStorm Nightmare                            DM ?         ?                         ?       ?
     RB       *BloodCM                                         DM 0         15.0                              No Off / 0.100-0.300                                     
     RB       *BorderLands 2                                   DM 0         15.0        WDM 3                 No Off / 0.025-0.075                          
-             *CEMU - Mariokart 8                              DM *         *                         Yes     *
-             *CEMU - Super Mario 3D World                     DM *         *                         Yes     *
-             *CEMU - The Legend of Zelda: Breath of the Wild  DM *         *                         Yes     *
     RB       *Call of Duty: Advance Warfare                   DM 1         15.0        WDM 4                 No Off / 0.050-0.075    [5]                                  
     RB       *Call of Duty: Black Ops                         DM 0         10.0        WDM 5                 No Off / 0.050-0.075    [5]                           
     RB       *Call of Duty: Black Ops 2                       DM 1         15.0        WDM 4                 No Off / 0.050-0.075    [5]    
@@ -90,6 +92,7 @@ IF IT HAS AN *asterisk* I AM STILL WORKING ON IT. But, you can still use the set
              ?Need For Speed Rivals                           ?         ?                                    ?
              ?Need for Speed Most Wanted                      ?         ?                                    ?
              *NieRAutomata                                    DM 0         20.0                              Yes N  / 0.050-0.075
+    RB        Nosferatu: The Wrath of Malachi                 DM 0         62.5                              Yes NH / 0.150-0.175    [3]        Yes
               Observer                                        DM 1         10.0                              No Off / 0.150-0.250    [3] 
     RB        Penumbra: Black Plague                          DM 0         7.5                               No Off / 0.150-0.200    [1]       
     RB        Phantasmal                                      DM 0         7.5                       Yes     No Off / 0.010-0.020    [3]       
@@ -132,18 +135,23 @@ IF IT HAS AN *asterisk* I AM STILL WORKING ON IT. But, you can still use the set
     RB        Wolfenstine: The New Order                      DM 0         25.00        WDM 7                No Off / 0.050-0.075    [2] 
     RB        Wolfenstine: The Old Blood                      DM 0         25.00        WDM 7                No Off / 0.050-0.075    [2]
               Zombie Army Trilogy                             DM 0         10.0                              Yes N  / 0.050-0.075    [3]
-                                                                                                                                        
-[Read Below]  [Special Depth Map Game List]  [Depth Map] [Adjustment] [Weapon DM] [Offset] [Depth Flip] [Auto S / ZDP Range] [Balance] [Consider FB]
-              *Double Dragon Neon                DM *         0                    0.6300
-              *Dungeons 2                        DM *         0                    0.3750       Yes
-              *Lara Croft & Temple of Osiris     DM *         0                    0.3754
-              *Fez                               DM *         0                    0.6010       Yes
-    RB        *Magicka 2                         DM *         0                    0.3730           
-              *Never Alone (Kisima Ingitchuna)   DM *         0                    0.3688
-    RB        *Nosferatu: The Wrath of Malachi   DM *         0                    0.3667           
+
+                                                                                                                     0.14625                   
+[Read Below]  [Special Depth Map Game List]  [Depth Map] [Adjustment] [Weapon DM] [Offset] [Depth Flip] [Auto T / ZDP Range] [Balance] [Consider FB]
+               Double Dragon Neon                DM 3        0.1                   0.6300               No Off / 0.250-0.350    [3]
+               Dungeons 2                        DM 3       0.350                  0.3750       Yes     No Off / 0.150-0.250    [3]
+               Lara Croft & Temple of Osiris     DM 3       17.50                  0.3754               Yes I  / 1.125-1.375    [1]
+    RB         Magicka 2                         DM 3       3.250                  0.3730               No Off / 0.025-0.075    [0]
+               Never Alone (Kisima Ingitchuna)   DM 3       3.125                  0.3688               No Off / 0.090-0.140    [3]        Yes          
     RB        *Requiem: Avenging Angel           DM *         0                    0.5740            
               *Silent Hill: Homecoming           DM *         0                    0.4080
-
+              
+[Emulator]  [Special Depth Map Game List]                [Depth Map] [Adjustment] [Weapon DM] [Offset] [Depth Flip] [Auto T / ZDP Range] [Balance] [Consider FB]
+CEMU         Mariokart 8                                     DM *         *                                 Yes     *
+CEMU         Super Mario 3D World                            DM *         *                                 Yes     *
+CEMU         The Legend of Zelda: Breath of the Wild         DM *         *                                 Yes     *
+nullDC       Shenmue                                         DM 4        1.0                    0.4080               No Off /      ?         [3]
+nullDC       Cyber Troopers Virtual On - Oratorio Tangram    DM 4        1.0                    0.5125               No Off /      ?         [3]  
 _________________________________________________________________________________________________________________________________
 More Info
 
@@ -301,10 +309,22 @@ Ignore the warnings click play.
 You need DGVooDoo2
 YouTube Guide.
 https://www.youtube.com/watch?v=opVni9cRN7Q
-No film Grain Guide.
-https://steamcommunity.com/sharedfiles/filedetails/?id=334444605
 
-geometry 3D may be done with TriDef Try It.
+No film Grain Guide.
+Editing the pack.csa file
+Open the pack.csa file in Notepad++ (or whatever you are useing to edit with) and find "Version\Data\filmgrain_0000.jpg"
+
+Now change one of the 0's to 1. It dosen't matter which one. So it looks like Version\Data\filmgrain_1000.jpg
+
+Save and close Notepad++ (or whatever you are useing to edit with).
+
+Now download this filmgrain_0000.jpg pic http://www.mediafire.com/view/mgl3ukaizwkjrdo/filmgrain_0000.jpg
+
+Now put the pic C:\Program Files (x86)\Steam\steamapps\common\Nosferatu The Wrath of Malachi\Version\Data
+
+Start the game with no more film grain!
+
+Geometry 3D may be done with TriDef Try It.
 
 {Phantasmal}
 A buggy Opengl game. But, hold down ctrl when starting the game and set your resolution. That or use "-show-screen-selector" in launch options. 
@@ -493,6 +513,9 @@ http://pcgamingwiki.com/wiki/You_Are_Empty
 _________________________________________________________________________________________________________________________________
 {Condemned: Criminal Origins}
 Depth Buffer Drops time to time Also Dissable FSAA (FSAA OFF)
+
+{Fez}
+At one time this game was working. But, not any more Reshade will no longer start.
 
 {Monstrum}
 Start the game in OpenGL or DX3D mode. Game seems to change Depth Buffer now after update. I suggest useing TriDef.
