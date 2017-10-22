@@ -59,8 +59,8 @@ IF IT HAS AN *asterisk* I AM STILL WORKING ON IT. But, you can still use the set
               Dragon Ball Xenoverse                           DM 0         8.75                              No Off / 0.150-0.200    [3]                          
               Dragons Dogma: Dark Arisen                      DM 0         8.75                              No Off / 0.200-0.300    [3]
              *DreamFall Chapters                              DM 0         12.5                      Yes     Yes N  / 0.075-0.125
-    RB        Dungeon Nightmares II                           DM 0         17.5                      Yes     No Off  / 0.375-0.50    [4]                                
-              Dying Light                                     DM *         *                         *       *
+    RB        Dungeon Nightmares II                           DM 0         17.5                      Yes     No Off / 0.375-0.500    [4]                                
+              Dying Light                                     DM 1         22.5                              No Off / 0.001-0.010    [4]
     RB        Emily Wants To Play                             DM 1         25.0                              Yes N  / 0.150-0.200    [3]                                      
               Everybody's Gone to the Rapture                 DM 0         1.50                              No Off / 0.375-0.625    [5]                       
               Fallout 4                                       DM 0         6.875       WDM 8                 No Off / 0.075-0.200    [5]          
@@ -146,7 +146,7 @@ IF IT HAS AN *asterisk* I AM STILL WORKING ON IT. But, you can still use the set
                Lara Croft & Temple of Osiris     DM 3       17.50                  0.3754               Yes I  / 1.125-1.375    [1]
     RB         Magicka 2                         DM 3       3.250                  0.3730               No Off / 0.025-0.075    [0]
                Never Alone (Kisima Ingitchuna)   DM 3       3.125                  0.3688               No Off / 0.090-0.140    [3]        Yes          
-    RB        *Requiem: Avenging Angel           DM *         0                    0.5740            
+    RB         Requiem: Avenging Angel           DM 3       3.1875                 0.5740               No Off / 0.010-0.025    [3]
                Silent Hill: Homecoming           DM 3       1.625                  0.4080               No Off / 0.100-0.125    [3]       
               
 [Emulator]  [Special Depth Map Game List]                [Depth Map] [Adjustment] [Weapon DM] [Offset] [Depth Flip] [Auto T / ZDP Range] [Balance] [Consider FB]
@@ -409,8 +409,10 @@ seta r_glIgnoreWicked3D "1"
 or just set your res to 800x600 and set your res in nGlide to your native res. I say use nGlide it looks better and you get to see the in game movies.
 
 {Requiem: Avenging Angel}
-Use nglide 1.05 to run this game.
+Use nglide 1.05 or 1.04 to run this game.
 http://www.zeus-software.com/downloads/nglide
+
+Click on 3DFX.exe Untill it starts..... Some thing wrong with this game. It starts after around 6-10 time I try.
 
 {Stay Close}
 Install reshade in too Steam\steamapps\common\Stay Close\Migrate\Binaries\Win64
