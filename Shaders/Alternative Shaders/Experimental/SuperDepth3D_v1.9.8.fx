@@ -22,10 +22,10 @@
  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // Determines The resolution of the Depth Map. For 4k Use 1.75 or 1.5. For 1440p Use 1.5 or 1.25. For 1080p use 1. Too low of a resolution will remove too much.
-#define Depth_Map_Division 1.5
+#define Depth_Map_Division 1.0
 
 // Determines The Max Depth amount. The larger the amount harder it will hit on FPS will be.
-#define Depth_Max 55
+#define Depth_Max 50
 
 // Enable this to fix the problem when there is a full screen Game Map Poping out of the screen. AKA Full Black Depth Map Fix. I have this off by default. Zero is off, One is On.
 #define FBDMF 0
@@ -593,7 +593,7 @@ float2 WeaponDepth(in float2 texcoord : TEXCOORD0)
 		else if (WDM == 26)
 		{
 		WA_X = 2.000;
-		WA_Y = -42.5;
+		WA_Y = -40.0;
 		CoP = 2.0;
 		}
 						
@@ -901,28 +901,26 @@ float4 PS_calcLR(in float2 texcoord : TEXCOORD0)
 		}
 		
 	
-		float4 cL, LL; //tex2D(BackBuffer,float2(TCL.x,TCL.y)); //objects that hit screen boundary is replaced with the BackBuffer 		
-		float4 cR, RR; //tex2D(BackBuffer,float2(TCR.x,TCR.y)); //objects that hit screen boundary is replaced with the BackBuffer
-		float RF = 1, RN, LF = 1, LN ,ER,EL,S,MS;	
-		MS = Divergence * pix.x;	
+		float4 cL, cR;	
+		float DepthR = 1, DepthL = 1, MS = Divergence * pix.x;	
 		
 		[loop]
-		for (int i = 0 ; i < Divergence; i++) 
+		for (int i = 0 ; i < 2; i++) 
 		{
-				ER = tex2Dlod(SamplerDis,float4(TCR.x+i*pix.x,TCR.y,0,0)).r;
-				
-				RF =  min(RF,ER);
+			float x = i * Divergence;
+			
+				float R = tex2Dlod(SamplerDis,float4(TCR.x+x*pix.x,TCR.y,0,0)).r;
+				DepthR =  min(DepthR,R);
 
-				EL = tex2Dlod(SamplerDis,float4(TCL.x-i*pix.x,TCL.y,0,0)).b;
-				
-				LF =  min(LF,EL); //Good
-				
+				float L = tex2Dlod(SamplerDis,float4(TCL.x-x*pix.x,TCL.y,0,0)).b;
+				DepthL =  min(DepthL,L);
 		}
-		RF = MS * C(RF,texcoord);
-		LF = MS * C(LF,texcoord);	
+		
+		DepthR = max(-0.250,MS * C(DepthR,texcoord));
+		DepthL = max(-0.250,MS * C(DepthL,texcoord));	
 
-		cR = tex2Dlod(BackBuffer, float4(TCR.x+RF,TCR.y,0,0)); //Good
-		cL = tex2Dlod(BackBuffer, float4(TCL.x-LF,TCL.y,0,0)); //Good
+		cR = tex2Dlod(BackBuffer, float4(TCR.x+DepthR,TCR.y,0,0));
+		cL = tex2Dlod(BackBuffer, float4(TCL.x-DepthL,TCL.y,0,0));
 
 	if(!Depth_Map_View)
 		{	
