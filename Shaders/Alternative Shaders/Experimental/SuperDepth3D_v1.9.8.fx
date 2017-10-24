@@ -1,9 +1,9 @@
- ////--------------------------//
- ///**SuperDepth3D_FlashBack**///
- //--------------------------////
+ ////------------- --//
+ ///**SuperDepth3D**///
+ //----------------////
 
  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
- //* Depth Map Based 3D post-process shader v1.9.7 FlashBack																														*//
+ //* Depth Map Based 3D post-process shader v1.9.8 FlashBack																														*//
  //* For Reshade 3.0																																								*//
  //* --------------------------																																						*//
  //* This work is licensed under a Creative Commons Attribution 3.0 Unported License.																								*//
@@ -17,15 +17,15 @@
  //* http://reshade.me/forum/shader-presentation/2128-sidebyside-3d-depth-map-based-stereoscopic-shader																				*//	
  //* ---------------------------------																																				*//
  //*																																												*//
- //* Original work was based on Shader Based on forum user 04348 and be located here http://reshade.me/forum/shader-presentation/1594-3d-anaglyph-red-cyan-shader-wip#15236			*//
+ //*                                                                                                                                                                       			*//
  //*																																												*//
  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // Determines The resolution of the Depth Map. For 4k Use 1.75 or 1.5. For 1440p Use 1.5 or 1.25. For 1080p use 1. Too low of a resolution will remove too much.
-#define Depth_Map_Division 1.0
+#define Depth_Map_Division 1.5
 
 // Determines The Max Depth amount. The larger the amount harder it will hit on FPS will be.
-#define Depth_Max 50
+#define Depth_Max 55
 
 // Enable this to fix the problem when there is a full screen Game Map Poping out of the screen. AKA Full Black Depth Map Fix. I have this off by default. Zero is off, One is On.
 #define FBDMF 0
@@ -70,9 +70,20 @@ uniform float ZPD <
 				"Default is 0.010, Zero is off.";
 > = 0.010;
 
+uniform int Auto_ZPD <
+	ui_type = "combo";
+	ui_items = "Off\0Inverted\0Normal\0Inverted Half\0Normal Half\0";
+	ui_label = "Auto Zero Parallax Distance Power";
+	ui_tooltip = "Auto Zero Parallax Distance Power controls the focus distance for the screen Pop-out effect automatically.\n"
+				"Inverted, is if your cam is close to a object you will have less Pop-out.\n"
+				"Normal, is if your cam is close to a object you will have more Pop-out.\n"
+				"Power of this effect is based off ZPD setting above.\n"
+				"Default is Off.";
+> = 0;
+
 uniform int Balance <
 	ui_type = "drag";
-	ui_min = 0; ui_max = 5;
+	ui_min = 0; ui_max = 6;
 	ui_label = "Balance";
 	ui_tooltip = "Balance between ZPD Depth and Scene Depth and works with ZPD option above.\n"
 				"Example Zero is 50/50 equal between ZPD Depth and Scene Depth.\n"
@@ -90,10 +101,10 @@ uniform int Disocclusion_Adjust <
 
 uniform float Disocclusion_Power_Adjust <
 	ui_type = "drag";
-	ui_min = 0.250; ui_max = 2.0;
+	ui_min = 0.250; ui_max = 2.5;
 	ui_label = "Disocclusion Power Adjust";
 	ui_tooltip = "Automatic occlusion masking power adjust.\n"
-				"Default is 1.";
+				"Default is 1.0";
 > = 1.0;
 
 uniform float Perspective <
@@ -147,12 +158,12 @@ uniform int Stereoscopic_Mode <
 	ui_tooltip = "Stereoscopic 3D display output selection.";
 > = 0;
 
-uniform int Downscaling_Support <
+uniform int Scaling_Support <
 	ui_type = "combo";
-	ui_items = "Native\0Option One\0Option Two\0Option Three\0Option Four\0";
-	ui_label = "Downscaling Support";
-	ui_tooltip = "Dynamic Super Resolution & Virtual Super Resolution downscaling support for Line Interlaced, Column Interlaced, & Checkerboard 3D displays.";
-> = 0;
+	ui_items = " 2160p\0 Native\0 1080p A\0 1080p B\0 1050p A\0 1050p B\0 720p A\0 720p B\0";
+	ui_label = "Scaling Support";
+	ui_tooltip = "Dynamic Super Resolution , Virtual Super Resolution, downscaling, or Upscaling support for Line Interlaced, Column Interlaced, & Checkerboard 3D displays.";
+> = 1;
 
 uniform int Anaglyph_Colors <
 	ui_type = "combo";
@@ -577,6 +588,14 @@ float2 WeaponDepth(in float2 texcoord : TEXCOORD0)
 		WA_Y = 100;
 		CoP = 0.252;
 		}
+		
+		//WDM 24 ; Dying Light
+		else if (WDM == 26)
+		{
+		WA_X = 2.000;
+		WA_Y = -42.5;
+		CoP = 2.0;
+		}
 						
 		//SWDMS Done//
  		
@@ -660,10 +679,57 @@ void Average_Luminance(in float4 position : SV_Position, in float2 texcoord : TE
 	color = float4(Average_Luminance,1);
 }
 
-float C(float DM,float2 texcoord)
+float C(float D,float2 texcoord)
 {
-	float NF_Power, ZP;
-	
+	float Z, ZP, NF_Power;
+		
+		//Average Luminance Auto ZDP Start
+		float Luminance, LClamp = smoothstep(0.01,1,Lum(texcoord)); //Average Luminance Texture Sample 
+		
+		if (Auto_ZPD == 1)
+		{
+			Luminance = smoothstep(0.01,1,Lum(texcoord)*ZPD);		
+		}
+		else if (Auto_ZPD == 2)
+		{
+			Luminance = smoothstep(0.01,1,ZPD-(Lum(texcoord)*ZPD));
+		}
+		else if (Auto_ZPD == 3)
+		{
+			Luminance = smoothstep(0.01,0.5,Lum(texcoord)*ZPD);	//Half	
+		}
+		else if (Auto_ZPD == 4)
+		{
+			Luminance = smoothstep(0.01,0.5,ZPD-(Lum(texcoord)*ZPD)); //Half
+		}
+		else
+		{
+			Luminance = 0;
+		}
+		
+		float AL = abs(Luminance),ALC = abs(LClamp),ZPDC;
+			
+		if (ALC <= 0.00001 && FBDMF == 1) //Full Black Depth Map Fix.
+		{
+			AL = 0;
+			ZPDC = 0; 
+		}
+		else
+		{
+			AL = AL; //Auto ZDP based on the Auto Anti Weapon Depth Map Z-Fighting code.
+			ZPDC = ZPD; 
+		}	
+		
+		if(Auto_ZPD >= 1)
+		{
+			Z = AL; //Auto ZDP based on the Auto Anti Weapon Depth Map Z-Fighting code.
+		}
+		else
+		{
+			Z = ZPDC;
+		}
+		//Average Luminance Auto ZDP End
+		
 		if (Balance == 0)
 		{
 			NF_Power = 0.5;
@@ -682,9 +748,13 @@ float C(float DM,float2 texcoord)
 		}
 		else if (Balance == 4)
 		{
-			NF_Power = 0.8125;
+			NF_Power = 0.78125;
 		}
 		else if (Balance == 5)
+		{
+			NF_Power = 0.8125;
+		}
+		else if (Balance == 6)
 		{
 			NF_Power = 0.875;
 		}
@@ -698,8 +768,9 @@ float C(float DM,float2 texcoord)
 			ZP = NF_Power;
 		}
 		
-    DM = lerp(1-ZPD/DM,DM,ZP);  
-    return DM;
+    Z = lerp(1-Z/D,D,ZP);
+    
+    return Z;
 }
 
 void  Disocclusion(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 color : SV_Target0)
@@ -775,32 +846,9 @@ else if(Disocclusion_Adjust == 5) //Depth Based
 		DM = tex2Dlod(SamplerDM,float4(texcoord,0,0)).rb;
 	}
 	
-	float X = C(DM.x,texcoord), Y = C(DM.y,texcoord);
+	float X = DM.x, Y = DM.y;
 	
 	color = float4(X,0,Y,1);
-}
-
-float4  Encode(in float2 texcoord : TEXCOORD0) //zBuffer Color Channel Encode
-{
-
-	float GetDepthR = tex2Dlod(SamplerDis,float4(texcoord.x,texcoord.y,0,0)).r;
-	float GetDepthB = tex2Dlod(SamplerDis,float4(texcoord.x,texcoord.y,0,0)).b;
-
-	// X	
-	float Rx = (1-texcoord.x)+Divergence*pix.x*GetDepthR;
-	// Y
-	float Ry = (1-texcoord.x)+Divergence*pix.x*GetDepthR;
-	// Z
-	float Bz = texcoord.x+Divergence*pix.x*GetDepthB;
-	// W
-	float Bw = texcoord.x+Divergence*pix.x*GetDepthB;
-	
-	float R = Rx; //X Encode
-	float G = Ry; //Y Encode
-	float B = Bz; //Z Encode
-	float A = Bw; //W Encode
-	
-	return float4(R,G,B,A);
 }
 
 /////////////////////////////////////////L/R//////////////////////////////////////////////////////////////////////
@@ -855,25 +903,24 @@ float4 PS_calcLR(in float2 texcoord : TEXCOORD0)
 	
 		float4 cL, LL; //tex2D(BackBuffer,float2(TCL.x,TCL.y)); //objects that hit screen boundary is replaced with the BackBuffer 		
 		float4 cR, RR; //tex2D(BackBuffer,float2(TCR.x,TCR.y)); //objects that hit screen boundary is replaced with the BackBuffer
-		float RF, RN, LF, LN;		
+		float RF = 1, RN, LF = 1, LN ,ER,EL,S,MS;	
+		MS = Divergence * pix.x;	
+		
 		[loop]
-		for (int i = 0; i <= Divergence; i++) 
+		for (int i = 0 ; i < Divergence; i++) 
 		{
-				//R Good
-				//if ( Encode(float2(TCR.x+i*pix.x,TCR.y)).x >= (1-TCR.x-pix.x/2) && Encode(float2(TCR.x+i*pix.x,TCR.y)).x <= (1-TCR.x+pix.x/2) ) //Decode X
-				if ( Encode(float2(TCR.x+i*pix.x,TCR.y)).x >= (1-TCR.x) )
-				{
-				RF = i * pix.x/1.1; //Good
-				}
+				ER = tex2Dlod(SamplerDis,float4(TCR.x+i*pix.x,TCR.y,0,0)).r;
+				
+				RF =  min(RF,ER);
 
-				//L Good
-				//if ( Encode(float2(TCL.x-i*pix.x,TCL.y)).z >= TCL.x-pix.x/2 && Encode(float2(TCL.x-i*pix.x,TCL.y)).z <= (TCR.x+pix.x/2)) //Decode Z
-				if ( Encode(float2(TCL.x-i*pix.x,TCL.y)).z >= TCL.x )
-				{
-				LF = i * pix.x/1.1; //Good
-				}
+				EL = tex2Dlod(SamplerDis,float4(TCL.x-i*pix.x,TCL.y,0,0)).b;
+				
+				LF =  min(LF,EL); //Good
+				
 		}
-			
+		RF = MS * C(RF,texcoord);
+		LF = MS * C(LF,texcoord);	
+
 		cR = tex2Dlod(BackBuffer, float4(TCR.x+RF,TCR.y,0,0)); //Good
 		cL = tex2Dlod(BackBuffer, float4(TCL.x-LF,TCL.y,0,0)); //Good
 
@@ -905,17 +952,29 @@ float4 PS_calcLR(in float2 texcoord : TEXCOORD0)
 		{	
 			float gridL;
 				
-		if(Downscaling_Support == 0)
+			if(Scaling_Support == 0)
 			{
-				gridL = frac(texcoord.y*(BUFFER_HEIGHT/2));
+			gridL = frac(texcoord.y*(2160.0/2));
+			}			
+			else if(Scaling_Support == 1)
+			{
+			gridL = frac(texcoord.y*(BUFFER_HEIGHT/2)); //Native
 			}
-			else if(Downscaling_Support == 1)
+			else if(Scaling_Support == 2)
 			{
-				gridL = frac(texcoord.y*(1080.0/2));
+			gridL = frac(texcoord.y*(1080.0/2));
 			}
-			else
+			else if(Scaling_Support == 3)
 			{
-				gridL = frac(texcoord.y*(1081.0/2));
+			gridL = frac(texcoord.y*(1081.0/2));
+			}
+			else if(Scaling_Support == 4)
+			{
+			gridL = frac(texcoord.y*(1050.0/2));
+			}
+			else if(Scaling_Support == 5)
+			{
+			gridL = frac(texcoord.y*(1051.0/2));
 			}
 				
 		if (Eye_Swap)
@@ -932,23 +991,27 @@ float4 PS_calcLR(in float2 texcoord : TEXCOORD0)
 		{	
 			float gridC;
 				
-			if(Downscaling_Support == 0)
+			if(Scaling_Support == 0)
 			{
-			gridC = frac(texcoord.x*(BUFFER_WIDTH/2));
+			gridC = frac(texcoord.x*(3840.0/2));
+			}			
+			else if(Scaling_Support == 1)
+			{
+			gridC = frac(texcoord.x*(BUFFER_WIDTH/2)); //Native
 			}
-			else if(Downscaling_Support == 1)
+			else if(Scaling_Support == 2)
 			{
 			gridC = frac(texcoord.x*(1920.0/2));
 			}
-			else if(Downscaling_Support == 2)
+			else if(Scaling_Support == 3)
 			{
 			gridC = frac(texcoord.x*(1921.0/2));
 			}
-			else if(Downscaling_Support == 3)
+			else if(Scaling_Support == 6)
 			{
 			gridC = frac(texcoord.x*(1280.0/2));
 			}
-			else
+			else if(Scaling_Support == 7)
 			{
 			gridC = frac(texcoord.x*(1281.0/2));
 			}
@@ -968,27 +1031,27 @@ float4 PS_calcLR(in float2 texcoord : TEXCOORD0)
 			float gridy;
 			float gridx;
 				
-			if(Downscaling_Support == 0)
+			if(Scaling_Support == 1)
 			{
-			gridy = floor(texcoord.y*(BUFFER_HEIGHT));
-			gridx = floor(texcoord.x*(BUFFER_WIDTH));
+			gridy = floor(texcoord.y*(BUFFER_HEIGHT)); //Native
+			gridx = floor(texcoord.x*(BUFFER_WIDTH)); //Native
 			}
-			else if(Downscaling_Support == 1)
+			else if(Scaling_Support == 2)
 			{
 			gridy = floor(texcoord.y*(1080.0));
 			gridx = floor(texcoord.x*(1920.0));
 			}
-			else if(Downscaling_Support == 2)
+			else if(Scaling_Support == 3)
 			{
 			gridy = floor(texcoord.y*(1081.0));
 			gridx = floor(texcoord.x*(1921.0));
 			}
-			else if(Downscaling_Support == 3)
+			else if(Scaling_Support == 6)
 			{
 			gridy = floor(texcoord.y*(720.0));
 			gridx = floor(texcoord.x*(1280.0));
 			}
-			else
+			else if(Scaling_Support == 7)
 			{
 			gridy = floor(texcoord.y*(721.0));
 			gridx = floor(texcoord.x*(1281.0));
