@@ -1,4 +1,4 @@
-﻿#SuperDepth3D 1.9.8
+﻿#SuperDepth3D 1.9.7
 _________________________________________________________________________________________________________________________________
 
 Here is a quick and dirty game list of working Depth Maps. They are only suggestions. You can use any setting that works for you.
@@ -19,17 +19,22 @@ ________________________________________________________________________________
 
 [Auto T / ZDP Range] -  Auto give you a Yes or No Use case. T is Type. N is Normal, I is Inverted, NH is Normal Half, and IH is Inverted Half.
                         ZDP Range is the range where you should set Zero Parallax Distance.
+                        
+[Consider FB] - Consider the FlashBack Shader as an Option you may like the look of it. ZPD for the flash back shader is lower.
+
+[Aj/HD/2k/4K] Resoutions I tested at. HD is 1080p, 2K is 1440p, and 4k is 2160p. If you see Aj = Y then you need to adjust. If It's N then you don't need to.
+              Adjustment done to the [Adjustment] section.
 
 IF IT HAS AN *asterisk* I AM STILL WORKING ON IT. But, you can still use the settings.
-                                                                      [- - - - - - - - - -=: Recommended Settings :=- - - - - - - - - -]
-[Read Below] [Game List]                                  [Depth Map] [Adjustment] [Weapon DM] [Depth Flip] [Auto T / ZDP Range] [Balance]
+                                                                      [- - - - - - - - - - - - - - -=: Recommended Settings :=- - - - - - - - - - - - - - -]
+[Read Below] [Game List]                                  [Depth Map] [Adjustment] [Weapon DM] [Depth Flip] [Auto T / ZDP Range] [Balance] [FB] [A/HD/2k/4K]
              *ABZU                                            DM 1         50                                No Off / 0.050                    
              *Alien Isolation                                 DM 0         20                                No Off / 0.0375
              *Amnesia: Machine for Pigs                       DM 0         37.5        WDM 2                 No Off / 0.050-0.075       
              *Amnesia: The Dark Descent                       DM 0         37.5        WDM 2                 No Off / 0.050-0.075
              *Among The Sleep                                 DM 0         37.5                      Yes     No Off / 0.025
              *Assassin Creed Unity                            DM 1         20.0                              Yes N  / 0.100-0.150
-              Bayonetta                                       DM 0         20.0                              Yes NH / 0.125-0.150    [3] 
+              Bayonetta                                       DM 0         20.0                              Yes NH / 0.125-0.150    [3]     Y   
              *Batman Arkham Knight                            DM 0         20.0                              Yes N  / 0.050-0.100                           
              *Batman Arkham Origins                           DM 0         20.0                              Yes N  / 0.050-0.100
              *Batman: Arkham City                             DM 0         20.0                              Yes N  / 0.050-0.100
@@ -43,7 +48,7 @@ IF IT HAS AN *asterisk* I AM STILL WORKING ON IT. But, you can still use the set
     RB       *Call of Duty: Infinite Warfare                  DM 1         15.0        WDM 4                 No Off / 0.050-0.075    [3]   
               Casltevania: Lord of Shadows - UE               DM 0         7.5                               No Off / 0.150-0.250    [3]                                         
              *Cryostasis                                      DM 0         10.0        WDM 6                 No Off / 0.025-0.075                         
-              DOOM 2016                                       DM 0         22.5        WDM 1                 No Off / 0.050-0.100    [4]       
+              DOOM 2016                                       DM 0         22.5        WDM 1                 No Off / 0.050-0.100    [4]         N HD * 4K                
               DarkSiders Warmastred Edition                   DM 0         25.0                              No Off / 0.100-0.150    [0]  
              *Dead Effect                                     DM *         6.25                              *      
               Dead Island                                     DM 0         5.0                               No Off / 0.025          [5]                       
@@ -90,7 +95,7 @@ IF IT HAS AN *asterisk* I AM STILL WORKING ON IT. But, you can still use the set
              ?Need For Speed Rivals                           ?         ?                                    ?
              ?Need for Speed Most Wanted                      ?         ?                                    ?
              *NieRAutomata                                    DM 0         20.0                              Yes N  / 0.050-0.075
-    RB        Nosferatu: The Wrath of Malachi                 DM 0         62.5                              Yes NH / 0.150-0.175    [3] 
+    RB        Nosferatu: The Wrath of Malachi                 DM 0         62.5                              Yes NH / 0.150-0.175    [3]     Y
               Observer                                        DM 1         10.0                              No Off / 0.150-0.250    [3] 
     RB        Penumbra: Black Plague                          DM 0         7.5                               No Off / 0.150-0.200    [1]       
     RB        Phantasmal                                      DM 0         7.5                       Yes     No Off / 0.010-0.020    [3]       
@@ -109,7 +114,7 @@ IF IT HAS AN *asterisk* I AM STILL WORKING ON IT. But, you can still use the set
     RB        S.T.A.L.K.E.R:CS Complete Mod                   DM 0         7.5          WDM 19               No Off / 0.200-0.350    [5]
     RB        S.T.A.L.K.E.R:CoP Complete Mod                  DM 0         7.5          WDM 19               No Off / 0.200-0.350    [5]
     RB        S.T.A.L.K.E.R:SoC Complete Mod                  DM 0         7.5          WDM 19               No Off / 0.200-0.350    [5]
-              Sleeping Dogs: DE                               DM 0         7.0                               Yes NH / 0.075-0.100    [3] 
+              Sleeping Dogs: DE                               DM 0         7.0                               Yes NH / 0.075-0.100    [3]     Y
               Soma                                            DM 0         11.25        WDM 20               No Off / 0.025-0.100    [5]
              *Sonic Adventure 2                               DM 0         10.0                              Yes N  / 0.150-0.250
               Souls Games                                     DM 0         7.5                               Yes NH / 0.050-0.100    [5]              
@@ -118,10 +123,10 @@ IF IT HAS AN *asterisk* I AM STILL WORKING ON IT. But, you can still use the set
               Tales of Zestiria                               DM 0         7.5                               No Off / 0.350-0.400    [4]
               The Elder Scrolls V: SE                         DM 0         6.875        WDM 21               No Off / 0.075-0.150    [5]
     RB        The Evil Within                                 DM 0         28.75                             Yes NH / 0.175-0.250    [3]   
-              The Evil Within 2                               DM 0      4.675-17.5                           Yes NH / 0.150-0.200    [3]     
+              The Evil Within 2                               DM 0      4.675-17.5                           Yes NH / 0.150-0.200    [3]         Y HD * 4K      
     RB        The Legend of Korra                             DM 0         10                                No Off / 0.200-0.300    [4]
     RB       *The Surge                                       DM *         ?                                 ?     
-    RB        The Vanishing of Ethan Carter Redux             DM 1         7.5                               Yes NH / 0.150-0.175    [3]
+    RB        The Vanishing of Ethan Carter Redux             DM 1         7.5                               Yes NH / 0.150-0.175    [3]         N HD * 4K
     RB        The Void                                        DM 0         7.500                             No Off / 0.050-0.150    [4]           
               Total War: Warhammer                            DM 0         2.625                             No Off / 0.375-0.500    [4]
     RB        Turok: Dinosaur Hunter                          DM 0         200.0        WDM 22               No Off / 0.010-0.075    [5]
@@ -135,17 +140,16 @@ IF IT HAS AN *asterisk* I AM STILL WORKING ON IT. But, you can still use the set
               Zombie Army Trilogy                             DM 0         10.0                              Yes N  / 0.050-0.075    [3]
 
                                                                                                                      0.14625                   
-[Read Below]  [Special Depth Map Game List]  [Depth Map] [Adjustment] [Weapon DM] [Offset] [Depth Flip] [Auto T / ZDP Range] [Balance]
-               Double Dragon Neon                DM 3       0.1                    0.6300               No Off / 0.250-0.350    [3]
+[Read Below]  [Special Depth Map Game List]  [Depth Map] [Adjustment] [Weapon DM] [Offset] [Depth Flip] [Auto T / ZDP Range] [Balance] [Consider FB]
+               Double Dragon Neon                DM 3        0.1                   0.6300               No Off / 0.250-0.350    [3]
                Dungeons 2                        DM 3       0.350                  0.3750       Yes     No Off / 0.150-0.250    [3]
-               Lara Croft & Temple of Osiris     DM 3       15.0                   0.3754               Yes I  / 1.125-1.375    [1]
+               Lara Croft & Temple of Osiris     DM 3       17.50                  0.3754               Yes I  / 1.125-1.375    [1]
     RB         Magicka 2                         DM 3       3.250                  0.3730               No Off / 0.025-0.075    [0]
-               Never Alone (Kisima Ingitchuna)   DM 3       3.125                  0.3688               No Off / 0.090-0.140    [3]             
+               Never Alone (Kisima Ingitchuna)   DM 3       3.125                  0.3688               No Off / 0.090-0.140    [3]        Yes          
     RB         Requiem: Avenging Angel           DM 3       3.1875                 0.5740               No Off / 0.010-0.025    [3]
                Silent Hill: Homecoming           DM 3       1.625                  0.4080               No Off / 0.100-0.125    [3]       
-               Rise Of the Tomb Raider           DM 5       1.0                    0.375425             No Off / 0.200-0.300    [3]
-               
-[Emulator]  [Special Depth Map Game List]                [Depth Map] [Adjustment] [Weapon DM] [Offset] [Depth Flip] [Auto T / ZDP Range] [Balance]
+              
+[Emulator]  [Special Depth Map Game List]                [Depth Map] [Adjustment] [Weapon DM] [Offset] [Depth Flip] [Auto T / ZDP Range] [Balance] [Consider FB]
 CEMU         Mariokart 8                                     DM *         *                                 Yes     *
 CEMU         Super Mario 3D World                            DM *         *                                 Yes     *
 CEMU         The Legend of Zelda: Breath of the Wild         DM *         *                                 Yes     *

@@ -3,7 +3,7 @@
  //----------------////
 
  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
- //* Depth Map Based 3D post-process shader v1.9.8 FlashBack																														*//
+ //* Depth Map Based 3D post-process shader v1.9.8          																														*//
  //* For Reshade 3.0																																								*//
  //* --------------------------																																						*//
  //* This work is licensed under a Creative Commons Attribution 3.0 Unported License.																								*//
@@ -32,7 +32,7 @@
 
 uniform int Depth_Map <
 	ui_type = "combo";
-	ui_items = " 0 Normal\0 1 Normal Reversed-Z\0 3 Offset Normal\0 4 Offset Reversed-Z\0";
+	ui_items = " 0 Normal\0 1 Normal Reversed-Z\0 3 Offset \0 4 Offset Reversed-Z\0 5 Offset Normal\0";
 	ui_label = "Depth Map Selection";
 	ui_tooltip = "linearization for the zBuffer also Depth Map One to Four.\n"
 			    "Normally you want to use 1 or 2.";
@@ -45,7 +45,7 @@ uniform float Depth_Map_Adjust <
 	ui_tooltip = "Adjust the depth map for your games.";
 > = 7.5;
 
-uniform float Offset <
+uniform float Offsets <
 	ui_type = "drag";
 	ui_min = 0; ui_max = 1.0;
 	ui_label = "Offset";
@@ -66,7 +66,8 @@ uniform float ZPD <
 	ui_label = "Zero Parallax Distance";
 	ui_tooltip = "ZPD controls the focus distance for the screen Pop-out effect.\n"
 				"For FPS Games this should be around 0.005-0.075.\n"
-				"Also Controlls Auto ZPD Power.\n"
+				"Also Controlls Auto ZPD power level.\n"
+				"If Pop is ON use a lower value.\n"
 				"Default is 0.010, Zero is off.";
 > = 0.010;
 
@@ -151,6 +152,13 @@ uniform float Weapon_Depth <
 				 "Default is 0";
 > = 0;
 
+uniform int Custom_Sidebars <
+	ui_type = "combo";
+	ui_items = "Mirrored Edges\0Black Edges\0Stretched Edges\0";
+	ui_label = "Edge Selection";
+	ui_tooltip = "Edges selection for your screen output.";
+> = 1;
+
 uniform int Stereoscopic_Mode <
 	ui_type = "combo";
 	ui_items = "Side by Side\0Top and Bottom\0Line Interlaced\0Column Interlaced\0Checkerboard 3D\0Anaglyph\0";
@@ -204,6 +212,11 @@ uniform bool InvertY <
 	ui_tooltip = "Invert Y-Axis for the cross cursor.";
 > = false;
 
+uniform bool TEST <
+	ui_label = "TEST Pop Setting";
+	ui_tooltip = "TEST Pop old setting I may it bringback.";
+> = false;
+
 /////////////////////////////////////////////D3D Starts Here/////////////////////////////////////////////////////////////////
 
 #define pix float2(BUFFER_RCP_WIDTH, BUFFER_RCP_HEIGHT)
@@ -220,6 +233,30 @@ texture BackBufferTex : COLOR;
 sampler BackBuffer 
 	{ 
 		Texture = BackBufferTex;
+	};
+	
+sampler BackBufferMIRROR 
+	{ 
+		Texture = BackBufferTex;
+		AddressU = MIRROR;
+		AddressV = MIRROR;
+		AddressW = MIRROR;
+	};
+
+sampler BackBufferBORDER
+	{ 
+		Texture = BackBufferTex;
+		AddressU = BORDER;
+		AddressV = BORDER;
+		AddressW = BORDER;
+	};
+
+sampler BackBufferCLAMP
+	{ 
+		Texture = BackBufferTex;
+		AddressU = CLAMP;
+		AddressV = CLAMP;
+		AddressW = CLAMP;
 	};
 
 texture texDM  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT/Depth_Map_Division; Format = RGBA32F;}; 
@@ -292,13 +329,6 @@ sampler SamplerLumWeapon
 	}
 	
 /////////////////////////////////////////////////////////////////////////////////Depth Map Information/////////////////////////////////////////////////////////////////////////////////
-// transform range in world-z to #-1 for near-far
-float DepthRange( float d )
-{
-	float N = -0.01875;
-	d = ( d - N ) / ( 1 - N );	
-    return min(0.875,d);
-}
 
 float2 Depth(in float2 texcoord : TEXCOORD0)
 {
@@ -311,20 +341,22 @@ float2 Depth(in float2 texcoord : TEXCOORD0)
 		//Near & Far Adjustment
 		float Near = 0.125/Depth_Map_Adjust; //Division Depth Map Adjust - Near
 		float Far = 1; //Far Adjustment
-		float DA = Depth_Map_Adjust*2; //Depth Map Adjust - Near
+		float DA = Depth_Map_Adjust*10; //Depth Map Adjust - Near
 		
 		//0. Normal
 		float Normal = Far * Near / (Far + zBuffer * (Near - Far));
 		
 		//1. Reverse
 		float NormalReverse = Far * Near / (Near + zBuffer * (Far - Near));
-		
-		//2. Offset Normal
-		//float OffsetNormal =  Far * Near / (Far +  pow(abs(exp(zBuffer)*Offset),DA*25) * (Near - Far)); //Not in use......		
-		float OffsetNormal = DepthRange(pow(abs(exp(zBuffer)*Offset),DA*25));
+
+		//2. Offset
+		float Offset = min(1,pow(abs(exp(zBuffer)*Offsets),DA));
 		
 		//3. Offset Reverse
-		float OffsetReverse = Far * Near / (Near +  pow(abs(exp(zBuffer)*Offset),DA*25) * (Far - Near));
+		float OffsetReverse = Far * Near / (Near + min(1,pow(abs(exp(zBuffer)*Offsets),1.75)) * (Far - Near));
+		
+		//4. Offset Normal
+		float OffsetNormal = Far * Near / (Far + min(1,pow(abs(exp(zBuffer)*Offsets),1.75)) * (Near - Far));		
 		
 		float2 DM;
 		
@@ -338,11 +370,15 @@ float2 Depth(in float2 texcoord : TEXCOORD0)
 		}
 		else if (Depth_Map == 2)
 		{
-		DM.x = OffsetNormal;
+		DM.x = Offset;
+		}
+		else if (Depth_Map == 3)
+		{
+		DM.x = OffsetReverse;
 		}
 		else
 		{
-		DM.x = OffsetReverse;
+		DM.x = OffsetNormal;
 		}
 		
 		if (Depth_Map == 0)
@@ -355,11 +391,15 @@ float2 Depth(in float2 texcoord : TEXCOORD0)
 		}
 		else if (Depth_Map == 2)
 		{
-		DM.y = OffsetNormal;
+		DM.y = Offset;
+		}
+		else if (Depth_Map == 3)
+		{
+		DM.y = OffsetReverse;
 		}
 		else
 		{
-		DM.y = OffsetReverse;
+		DM.y = OffsetNormal;
 		}
 	
 	return float2(DM.x,DM.y);	
@@ -679,6 +719,86 @@ void Average_Luminance(in float4 position : SV_Position, in float2 texcoord : TE
 	color = float4(Average_Luminance,1);
 }
 
+void  Disocclusion(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 color : SV_Target0)
+{
+float2 DM;
+float B, DP =  Divergence, Disocclusion_Power;
+
+	DP *= Disocclusion_Power_Adjust;
+		
+	 if(Disocclusion_Adjust == 1)     
+		{
+		Disocclusion_Power = DP/125;
+		}
+else if(Disocclusion_Adjust == 2)   
+		{
+		Disocclusion_Power = DP/350;
+		}
+else if(Disocclusion_Adjust == 3 || Disocclusion_Adjust == 4) //Depth Based    
+		{
+		Disocclusion_Power = DP/clamp(tex2Dlod(SamplerDM,float4(texcoord,0,0)).r/0.0005,100,1000);
+		}
+else if(Disocclusion_Adjust == 5) //Depth Based    
+		{
+		Disocclusion_Power = DP/clamp(tex2Dlod(SamplerDM,float4(texcoord,0,0)).r/0.0009625,100,1000);
+		}
+								
+ float2 dir;
+ float dirX,dirY;
+ const int Con = 11;
+	
+	if(Disocclusion_Adjust >= 1) 
+	{
+		const float weight[Con] = {0.01,-0.01,0.02,-0.02,0.03,-0.03,0.04,-0.04,0.05,-0.05,0.0};
+		
+		if(Disocclusion_Adjust == 1)
+		{
+			dir = 0.5 - texcoord;
+			B = Disocclusion_Power;
+		}
+		
+		if(Disocclusion_Adjust == 2 || Disocclusion_Adjust == 3 )
+		{
+			dir = float2(0.5,0.0);
+			B = Disocclusion_Power;
+		}
+		
+		if(Disocclusion_Adjust == 4 || Disocclusion_Adjust == 5 || Disocclusion_Adjust == 6 )
+		{
+			dirX = 0.5;
+			dirY = 0.5;
+			B = Disocclusion_Power;
+		}
+				
+		[loop]
+		for (int i = 0; i < Con; i++)
+		{	
+			if(Disocclusion_Adjust >= 1) 
+			{	
+				if(Disocclusion_Adjust == 4 || Disocclusion_Adjust == 5 || Disocclusion_Adjust == 6)
+				{
+					DM += tex2Dlod(SamplerDM,float4(texcoord.x + dirX * weight[i] * B , texcoord.y + dirY * weight[i] * B,0,0)).rb/Con;
+				}
+				else
+				{
+					DM += tex2Dlod(SamplerDM,float4(texcoord + dir * weight[i] * B ,0,0)).rb/Con;
+				}
+			}
+		}
+	
+	}
+	else
+	{
+		DM = tex2Dlod(SamplerDM,float4(texcoord,0,0)).rb;
+	}
+	
+	float X = DM.x, Y = DM.y;
+	
+	color = float4(X,0,Y,1);
+}
+
+/////////////////////////////////////////L/R//////////////////////////////////////////////////////////////////////
+
 float C(float D,float2 texcoord)
 {
 	float Z, ZP, NF_Power;
@@ -773,85 +893,13 @@ float C(float D,float2 texcoord)
     return Z;
 }
 
-void  Disocclusion(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 color : SV_Target0)
+float SS(float edge0, float edge1, float x)
 {
-float2 DM;
-float B, DP =  Divergence, Disocclusion_Power;
-
-	DP *= Disocclusion_Power_Adjust;
-		
-	 if(Disocclusion_Adjust == 1)     
-		{
-		Disocclusion_Power = DP/125;
-		}
-else if(Disocclusion_Adjust == 2)   
-		{
-		Disocclusion_Power = DP/350;
-		}
-else if(Disocclusion_Adjust == 3 || Disocclusion_Adjust == 4) //Depth Based    
-		{
-		Disocclusion_Power = DP/clamp(tex2Dlod(SamplerDM,float4(texcoord,0,0)).r/0.0005,100,1000);
-		}
-else if(Disocclusion_Adjust == 5) //Depth Based    
-		{
-		Disocclusion_Power = DP/clamp(tex2Dlod(SamplerDM,float4(texcoord,0,0)).r/0.0009625,100,1000);
-		}
-								
- float2 dir;
- float dirX,dirY;
- const int Con = 11;
-	
-	if(Disocclusion_Adjust >= 1) 
-	{
-		const float weight[Con] = {0.01,-0.01,0.02,-0.02,0.03,-0.03,0.04,-0.04,0.05,-0.05,0.0};
-		
-		if(Disocclusion_Adjust == 1)
-		{
-			dir = 0.5 - texcoord;
-			B = Disocclusion_Power;
-		}
-		
-		if(Disocclusion_Adjust == 2 || Disocclusion_Adjust == 3 )
-		{
-			dir = float2(0.5,0.0);
-			B = Disocclusion_Power;
-		}
-		
-		if(Disocclusion_Adjust == 4 || Disocclusion_Adjust == 5 || Disocclusion_Adjust == 6 )
-		{
-			dirX = 0.5;
-			dirY = 0.5;
-			B = Disocclusion_Power;
-		}
-				
-		[loop]
-		for (int i = 0; i < Con; i++)
-		{	
-			if(Disocclusion_Adjust >= 1) 
-			{	
-				if(Disocclusion_Adjust == 4 || Disocclusion_Adjust == 5 || Disocclusion_Adjust == 6)
-				{
-					DM += tex2Dlod(SamplerDM,float4(texcoord.x + dirX * weight[i] * B , texcoord.y + dirY * weight[i] * B,0,0)).rb/Con;
-				}
-				else
-				{
-					DM += tex2Dlod(SamplerDM,float4(texcoord + dir * weight[i] * B ,0,0)).rb/Con;
-				}
-			}
-		}
-	
-	}
-	else
-	{
-		DM = tex2Dlod(SamplerDM,float4(texcoord,0,0)).rb;
-	}
-	
-	float X = DM.x, Y = DM.y;
-	
-	color = float4(X,0,Y,1);
+    // Scale, bias
+    x = (x - edge0)/(edge1 - edge0); 
+    // Evaluate polynomial
+    return x*x*(3 - 2*x);
 }
-
-/////////////////////////////////////////L/R//////////////////////////////////////////////////////////////////////
 
 float4 PS_calcLR(in float2 texcoord : TEXCOORD0)
 {
@@ -916,11 +964,30 @@ float4 PS_calcLR(in float2 texcoord : TEXCOORD0)
 				DepthL =  min(DepthL,L);
 		}
 		
+		if (TEST)
+		{
+		DepthR = SS(-(ZPD/2),1,DepthR);
+		DepthL = SS(-(ZPD/2),1,DepthL);
+		}
+						
 		DepthR = max(-0.250,MS * C(DepthR,texcoord));
 		DepthL = max(-0.250,MS * C(DepthL,texcoord));	
-
-		cR = tex2Dlod(BackBuffer, float4(TCR.x+DepthR,TCR.y,0,0));
-		cL = tex2Dlod(BackBuffer, float4(TCL.x-DepthL,TCL.y,0,0));
+		
+		if(Custom_Sidebars == 0)
+			{
+				cR = tex2Dlod(BackBufferMIRROR, float4(TCR.x+DepthR,TCR.y,0,0));
+				cL = tex2Dlod(BackBufferMIRROR, float4(TCL.x-DepthL,TCL.y,0,0));
+			}
+		else if(Custom_Sidebars == 1)
+			{
+				cR = tex2Dlod(BackBufferBORDER, float4(TCR.x+DepthR,TCR.y,0,0));
+				cL = tex2Dlod(BackBufferBORDER, float4(TCL.x-DepthL,TCL.y,0,0));
+			}
+			else
+			{
+				cR = tex2Dlod(BackBufferCLAMP, float4(TCR.x+DepthR,TCR.y,0,0));
+				cL = tex2Dlod(BackBufferCLAMP, float4(TCL.x-DepthL,TCL.y,0,0));
+			}
 
 	if(!Depth_Map_View)
 		{	
@@ -1149,7 +1216,7 @@ float4 PS_calcLR(in float2 texcoord : TEXCOORD0)
 		else
 		{
 				float4 DMV = texcoord.x < 0.5 ? Lum(float2(texcoord.x*2,texcoord.y*2)).xxxx : tex2Dlod(SamplerDM,float4(texcoord.x*2-1 , texcoord.y*2,0,0)).bbbb;
-				Out = texcoord.y < 0.5 ? DMV : tex2Dlod(SamplerDis,float4(texcoord.x , texcoord.y*2-1 , 0 , 0));
+				Out = texcoord.y < 0.5 ? DMV : tex2Dlod(SamplerDis,float4(texcoord.x , texcoord.y*2-1 , 0 , 0)).rrbb;
 		}
 		
 	float Average_Luminance = texcoord.y < 0.5 ? 0.5 : tex2D(SamplerDM,float2(texcoord.x,texcoord.y)).g;
@@ -1320,7 +1387,7 @@ technique Cross_Cursor
 		}	
 }
 
-technique Depth3D_FlashBack
+technique Depth3D
 	{
 			pass zbuffer
 		{
