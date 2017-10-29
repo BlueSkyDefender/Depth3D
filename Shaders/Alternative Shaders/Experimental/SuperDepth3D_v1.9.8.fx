@@ -94,7 +94,7 @@ uniform int Balance <
 
 uniform int Disocclusion_Adjust <
 	ui_type = "combo";
-	ui_items = "Off\0Radial Mask\0Normal Mask\0Normal Depth Mask\0Normal Depth Mask Plus\0Normal Depth Mask Alt Plus\0";
+	ui_items = "Off\0Radial Mask\0Normal Mask\0Normal Depth Mask\0";
 	ui_label = "Disocclusion Mask";
 	ui_tooltip = "Automatic occlusion masking options.\n"
 				"Default is Normal Mask.";
@@ -105,8 +105,8 @@ uniform float Disocclusion_Power_Adjust <
 	ui_min = 0.250; ui_max = 2.5;
 	ui_label = "Disocclusion Power Adjust";
 	ui_tooltip = "Automatic occlusion masking power adjust.\n"
-				"Default is 1.0";
-> = 1.0;
+				"Default is 1.250";
+> = 1.250;
 
 uniform float Perspective <
 	ui_type = "drag";
@@ -187,6 +187,11 @@ uniform float Anaglyph_Desaturation <
 	ui_tooltip = "Adjust anaglyph desaturation, Zero is Black & White, One is full color.";
 > = 1.0;
 
+uniform bool DepthPlus <
+	ui_label = "Depth Plus";
+	ui_tooltip = "This is to turn on Depth Plus a depth enhancment toggle.";
+> = false;
+
 uniform bool Eye_Swap <
 	ui_label = "Swap Eyes";
 	ui_tooltip = "L/R to R/L.";
@@ -210,11 +215,6 @@ uniform float3 Cross_Cursor_Color <
 uniform bool InvertY <
 	ui_label = "Invert Y-Axis";
 	ui_tooltip = "Invert Y-Axis for the cross cursor.";
-> = false;
-
-uniform bool TEST <
-	ui_label = "TEST Pop Setting";
-	ui_tooltip = "TEST Pop old setting I may it bringback.";
 > = false;
 
 /////////////////////////////////////////////D3D Starts Here/////////////////////////////////////////////////////////////////
@@ -734,17 +734,13 @@ else if(Disocclusion_Adjust == 2)
 		{
 		Disocclusion_Power = DP/350;
 		}
-else if(Disocclusion_Adjust == 3 || Disocclusion_Adjust == 4) //Depth Based    
+else if(Disocclusion_Adjust == 3) //Depth Based    
 		{
 		Disocclusion_Power = DP/clamp(tex2Dlod(SamplerDM,float4(texcoord,0,0)).r/0.0005,100,1000);
 		}
-else if(Disocclusion_Adjust == 5) //Depth Based    
-		{
-		Disocclusion_Power = DP/clamp(tex2Dlod(SamplerDM,float4(texcoord,0,0)).r/0.0009625,100,1000);
-		}
+
 								
  float2 dir;
- float dirX,dirY;
  const int Con = 11;
 	
 	if(Disocclusion_Adjust >= 1) 
@@ -762,27 +758,13 @@ else if(Disocclusion_Adjust == 5) //Depth Based
 			dir = float2(0.5,0.0);
 			B = Disocclusion_Power;
 		}
-		
-		if(Disocclusion_Adjust == 4 || Disocclusion_Adjust == 5 || Disocclusion_Adjust == 6 )
-		{
-			dirX = 0.5;
-			dirY = 0.5;
-			B = Disocclusion_Power;
-		}
 				
 		[loop]
 		for (int i = 0; i < Con; i++)
 		{	
 			if(Disocclusion_Adjust >= 1) 
 			{	
-				if(Disocclusion_Adjust == 4 || Disocclusion_Adjust == 5 || Disocclusion_Adjust == 6)
-				{
-					DM += tex2Dlod(SamplerDM,float4(texcoord.x + dirX * weight[i] * B , texcoord.y + dirY * weight[i] * B,0,0)).rb/Con;
-				}
-				else
-				{
-					DM += tex2Dlod(SamplerDM,float4(texcoord + dir * weight[i] * B ,0,0)).rb/Con;
-				}
+				DM += tex2Dlod(SamplerDM,float4(texcoord + dir * weight[i] * B ,0,0)).rb/Con;
 			}
 		}
 	
@@ -964,13 +946,13 @@ float4 PS_calcLR(in float2 texcoord : TEXCOORD0)
 				DepthL =  min(DepthL,L);
 		}
 		
-		if (TEST)
+		if (DepthPlus)
 		{
-		DepthR = SS(-(ZPD/2),1,DepthR);
-		DepthL = SS(-(ZPD/2),1,DepthL);
+		DepthR = SS(-(ZPD/2),1,DepthR); // Depth Plus is basicly smooth step with out the clamps. Seemed to give more Depth to a Image. 
+		DepthL = SS(-(ZPD/2),1,DepthL); // This will cause some FPS Hand Pop out. This is tolerable. Also kind of controlled by ZPD.
 		}
 						
-		DepthR = max(-0.250,MS * C(DepthR,texcoord));
+		DepthR = max(-0.250,MS * C(DepthR,texcoord)); //Zero Parallax Distance controll
 		DepthL = max(-0.250,MS * C(DepthL,texcoord));	
 		
 		if(Custom_Sidebars == 0)
