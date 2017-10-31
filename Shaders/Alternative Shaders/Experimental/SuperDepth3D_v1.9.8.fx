@@ -30,6 +30,9 @@
 // Enable this to fix the problem when there is a full screen Game Map Poping out of the screen. AKA Full Black Depth Map Fix. I have this off by default. Zero is off, One is On.
 #define FBDMF 0
 
+// BOTW Fix WIP
+#define AADM 0
+
 uniform int Depth_Map <
 	ui_type = "combo";
 	ui_items = " 0 Normal\0 1 Normal Reversed-Z\0 3 Offset \0 4 Offset Reversed-Z\0 5 Offset Normal\0";
@@ -94,7 +97,7 @@ uniform int Balance <
 
 uniform int Disocclusion_Adjust <
 	ui_type = "combo";
-	ui_items = "Off\0Radial Mask\0Normal Mask\0Normal Depth Mask\0";
+	ui_items = "Off\0Radial Mask\0Normal Mask\0Normal Depth Mask\0Radial Mask +\0Normal Mask +\0Normal Depth Mask +\0Radial Mask ++\0Normal Mask ++\0Normal Depth Mask ++\0";
 	ui_label = "Disocclusion Mask";
 	ui_tooltip = "Automatic occlusion masking options.\n"
 				"Default is Normal Mask.";
@@ -114,6 +117,14 @@ uniform float Perspective <
 	ui_label = "Perspective Slider";
 	ui_tooltip = "Determines the perspective point. Default is 0";
 > = 0;
+
+uniform int DepthPlus <
+	ui_type = "drag";
+	ui_min = 0.0; ui_max = 10;
+	ui_label = "Depth Plus";
+	ui_tooltip = "This is to turn on Depth Plus a depth and pop enhancment toggle.\n" 
+				 "Default is 0, Zero is off.";
+> = 0.0;
 
 uniform bool Depth_Map_View <
 	ui_label = "Depth Map View";
@@ -186,11 +197,6 @@ uniform float Anaglyph_Desaturation <
 	ui_label = "Anaglyph Desaturation";
 	ui_tooltip = "Adjust anaglyph desaturation, Zero is Black & White, One is full color.";
 > = 1.0;
-
-uniform bool DepthPlus <
-	ui_label = "Depth Plus";
-	ui_tooltip = "This is to turn on Depth Plus a depth enhancment toggle.";
-> = false;
 
 uniform bool Eye_Swap <
 	ui_label = "Swap Eyes";
@@ -726,46 +732,67 @@ float B, DP =  Divergence, Disocclusion_Power;
 
 	DP *= Disocclusion_Power_Adjust;
 		
-	 if(Disocclusion_Adjust == 1)     
+	 if(Disocclusion_Adjust == 1 || Disocclusion_Adjust == 4 || Disocclusion_Adjust == 7)     
 		{
 		Disocclusion_Power = DP/125;
 		}
-else if(Disocclusion_Adjust == 2)   
+else if(Disocclusion_Adjust == 2 || Disocclusion_Adjust == 5 || Disocclusion_Adjust == 8)   
 		{
 		Disocclusion_Power = DP/350;
 		}
-else if(Disocclusion_Adjust == 3) //Depth Based    
+else if(Disocclusion_Adjust == 3 || Disocclusion_Adjust == 6 || Disocclusion_Adjust == 9) //Depth Based    
 		{
 		Disocclusion_Power = DP/clamp(tex2Dlod(SamplerDM,float4(texcoord,0,0)).r/0.0005,100,1000);
 		}
 
 								
- float2 dir;
- const int Con = 11;
+ float2 dir, dirT;
 	
 	if(Disocclusion_Adjust >= 1) 
 	{
-		const float weight[Con] = {0.01,-0.01,0.02,-0.02,0.03,-0.03,0.04,-0.04,0.05,-0.05,0.0};
+		const float weightA[11] = {0.0,0.010,-0.010,0.020,-0.020,0.030,-0.030,0.040,-0.040,0.050,-0.050}; //By 10
+		const float weightB[17] = {0.0,0.005,-0.005,0.010,-0.010,0.015,-0.015,0.020,-0.020,0.025,-0.025,0.030,-0.030,0.035,-0.035,0.040,-0.040}; //By 5
+		const float weightC[23] = {0.0,0.0025,-0.0025,0.005,-0.005,0.0075,-0.0075,0.010,-0.010,0.0125,-0.0125,0.015,-0.015,0.0175,-0.0175,0.020,-0.020,0.0225,-0.0225,0.025,-0.025,0.0275,-0.0275}; //By 2.5
 		
-		if(Disocclusion_Adjust == 1)
+		if(Disocclusion_Adjust == 1 || Disocclusion_Adjust == 4 || Disocclusion_Adjust == 7 )
 		{
 			dir = 0.5 - texcoord;
 			B = Disocclusion_Power;
 		}
 		
-		if(Disocclusion_Adjust == 2 || Disocclusion_Adjust == 3 )
+		if(Disocclusion_Adjust == 2 || Disocclusion_Adjust == 3 || Disocclusion_Adjust == 5 || Disocclusion_Adjust == 6 || Disocclusion_Adjust == 8 || Disocclusion_Adjust == 9 )
 		{
 			dir = float2(0.5,0.0);
 			B = Disocclusion_Power;
 		}
-				
-		[loop]
-		for (int i = 0; i < Con; i++)
+		
+		if(Disocclusion_Adjust == 1 || Disocclusion_Adjust == 2 || Disocclusion_Adjust == 3)
+		{			
+				[loop]
+				for (int i = 0; i < 11; i++)
+				{	
+					DM += tex2Dlod(SamplerDM,float4(texcoord + dir * weightA[i] * B ,0,0)).rb/11;
+				}
+		}
+		
+		if(Disocclusion_Adjust == 4 || Disocclusion_Adjust == 5 || Disocclusion_Adjust == 6)
 		{	
-			if(Disocclusion_Adjust >= 1) 
-			{	
-				DM += tex2Dlod(SamplerDM,float4(texcoord + dir * weight[i] * B ,0,0)).rb/Con;
-			}
+				B *= 1.25;
+				[loop]
+				for (int i = 0; i < 17; i++)
+				{	
+					DM += tex2Dlod(SamplerDM,float4(texcoord + dir * weightB[i] * B ,0,0)).rb/17;
+				}
+		}
+		
+		if(Disocclusion_Adjust == 7 || Disocclusion_Adjust == 8 || Disocclusion_Adjust == 9)
+		{	
+				B *= 1.875;
+				[loop]
+				for (int i = 0; i < 23; i++)
+				{	
+					DM += tex2Dlod(SamplerDM,float4(texcoord + dir * weightC[i] * B ,0,0)).rb/23;
+				}
 		}
 	
 	}
@@ -786,7 +813,7 @@ float C(float D,float2 texcoord)
 	float Z, ZP, NF_Power;
 		
 		//Average Luminance Auto ZDP Start
-		float Luminance, LClamp = smoothstep(0.01,1,Lum(texcoord)); //Average Luminance Texture Sample 
+		float Luminance, LClamp = smoothstep(0,1,Lum(texcoord)); //Average Luminance Texture Sample 
 		
 		if (Auto_ZPD == 1)
 		{
@@ -798,12 +825,12 @@ float C(float D,float2 texcoord)
 		}
 		else if (Auto_ZPD == 3)
 		{
-			Luminance = smoothstep(0.01,0.5,Lum(texcoord)*ZPD);	//Half	
+			Luminance =  smoothstep(0.01,0.5,Lum(texcoord)*ZPD);	
 		}
 		else if (Auto_ZPD == 4)
 		{
-			Luminance = smoothstep(0.01,0.5,ZPD-(Lum(texcoord)*ZPD)); //Half
-		}
+			Luminance =  smoothstep(0.01,0.5,ZPD-(Lum(texcoord)*ZPD));
+		}	
 		else
 		{
 			Luminance = 0;
@@ -811,7 +838,7 @@ float C(float D,float2 texcoord)
 		
 		float AL = abs(Luminance),ALC = abs(LClamp),ZPDC;
 			
-		if (ALC <= 0.00001 && FBDMF == 1) //Full Black Depth Map Fix.
+		if (ALC <= 0.00005 && FBDMF) //Full Black Depth Map Fix.
 		{
 			AL = 0;
 			ZPDC = 0; 
@@ -820,7 +847,44 @@ float C(float D,float2 texcoord)
 		{
 			AL = AL; //Auto ZDP based on the Auto Anti Weapon Depth Map Z-Fighting code.
 			ZPDC = ZPD; 
-		}	
+		}
+		
+		if (AADM)
+		{
+			if (ALC >= 0.01)
+			{
+				AL = AL/1.250;
+			}
+			if (ALC >= 0.125)
+			{
+				AL = AL/1.0;
+			}
+			if (ALC >= 0.250)
+			{
+				AL = AL/0.750;
+			}
+			if (ALC >= 0.3125)
+			{
+				AL = AL/0.5;
+			}
+			if (ALC >= 0.375)
+			{
+				AL = AL/0.75;
+			}
+			if (ALC >= 0.450)
+			{
+				AL = AL/1.0;
+			}
+			if (ALC >= 0.500)
+			{
+				AL = AL/1.250;
+			}
+			else if (ALC < 0.01)
+			{
+				AL = AL/1.75;
+			}	
+		}
+		
 		
 		if(Auto_ZPD >= 1)
 		{
@@ -877,6 +941,47 @@ float C(float D,float2 texcoord)
 
 float SS(float edge0, float edge1, float x)
 {
+		if (DepthPlus == 1)//ZPD linked
+		{
+			edge0 /= 2.0;
+		}
+		else if (DepthPlus == 2)//ZDP linked +
+		{
+			edge0 /= 2.5;
+		}
+		else if (DepthPlus == 3)//ZDP linked ++
+		{
+			edge0 /= 3.75;
+		}
+		else if (DepthPlus == 4)//ZDP linked +++
+		{
+			edge0 /= 4.25;
+		}
+		else if (DepthPlus == 5)//ZDP linked ++++
+		{
+			edge0 /= 5.0;
+		}
+		else if (DepthPlus == 6)//ZDP linked +++++
+		{
+			edge0 /= 6.25;
+		}
+		else if (DepthPlus == 7)//ZDP linked ++++++
+		{
+			edge0 /= 7.5;
+		}
+		else if (DepthPlus == 8)//ZDP linked +++++++
+		{
+			edge0 /= 8.75;
+		}
+		else if (DepthPlus == 9)//ZDP linked ++++++++
+		{
+			edge0 /= 9.25;
+		}
+		else if (DepthPlus == 10)//ZDP linked +++++++++
+		{
+			edge0 /= 10.0;
+		}
+
     // Scale, bias
     x = (x - edge0)/(edge1 - edge0); 
     // Evaluate polynomial
@@ -946,12 +1051,12 @@ float4 PS_calcLR(in float2 texcoord : TEXCOORD0)
 				DepthL =  min(DepthL,L);
 		}
 		
-		if (DepthPlus)
+		if (DepthPlus >= 1)//ZPD linked
 		{
-		DepthR = SS(-(ZPD/2),1,DepthR); // Depth Plus is basicly smooth step with out the clamps. Seemed to give more Depth to a Image. 
-		DepthL = SS(-(ZPD/2),1,DepthL); // This will cause some FPS Hand Pop out. This is tolerable. Also kind of controlled by ZPD.
+		DepthR = SS(-ZPD,1,DepthR); // Depth Plus is basicly smooth step with out the clamps. Seemed to give more Depth to a Image. 
+		DepthL = SS(-ZPD,1,DepthL); // This will cause some FPS Hand Pop out. This is tolerable. Also kind of controlled by ZPD.
 		}
-						
+
 		DepthR = max(-0.250,MS * C(DepthR,texcoord)); //Zero Parallax Distance controll
 		DepthL = max(-0.250,MS * C(DepthL,texcoord));	
 		

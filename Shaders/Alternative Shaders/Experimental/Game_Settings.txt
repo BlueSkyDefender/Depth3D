@@ -145,12 +145,12 @@ IF IT HAS AN *asterisk* I AM STILL WORKING ON IT. But, you can still use the set
                Silent Hill: Homecoming           DM 3       1.625                  0.4080               No Off / 0.100-0.125    [3]       
                Rise Of the Tomb Raider           DM 5       1.0                    0.375425             No Off / 0.200-0.300    [3]
                
-[Emulator]  [Special Depth Map Game List]                [Depth Map] [Adjustment] [Weapon DM] [Offset] [Depth Flip] [Auto T / ZDP Range] [Balance]
-CEMU         Mariokart 8                                     DM *         *                                 Yes     *
-CEMU         Super Mario 3D World                            DM *         *                                 Yes     *
-CEMU         The Legend of Zelda: Breath of the Wild         DM *         *                                 Yes     *
-nullDC       Shenmue                                         DM 4        1.0                    0.4080               No Off /      ?         [3]
-nullDC       Cyber Troopers Virtual On - Oratorio Tangram    DM 4        1.0                    0.5125               No Off /      ?         [3]  
+[Emulator] [RB] [Special Depth Map Game List]                [Depth Map] [Adjustment] [Weapon DM] [Offset] [Depth Flip] [Auto T / ZDP Range] [Balance]
+CEMU             Mariokart 8                                     DM *         *                                 Yes      *
+CEMU             Super Mario 3D World                            DM *         *                                 Yes      *
+CEMU        RB   The Legend of Zelda: Breath of the Wild         DM 0       45.0                                Yes      Yes N  / 0.250-0.350    [4]
+nullDC           Shenmue                                         DM 4        1.0                    0.4080               No Off /      ?         [3]
+nullDC           Cyber Troopers Virtual On - Oratorio Tangram    DM 4        1.0                    0.5125               No Off /      ?         [3]  
 _________________________________________________________________________________________________________________________________
 More Info
 
@@ -458,6 +458,30 @@ I would say also use an FOV fix. Like the one found at http://www.flawlesswidesc
 If you want 4K in this res locked game you SpecialK build of Reshade.
 Guide Here.
 https://steamcommunity.com/sharedfiles/filedetails/?id=933337066
+
+{The Legend of Zelda: Breath of the Wild} - Note:  I will not show you how to set up the emulator or the Rom. This part on you. But, If you love the game buy it on console.
+First set up the shader as the above settings then.
+
+Enable AADM in the shader it self. line 34.... around there
+From:
+// BOTW Fix WIP
+#define AADM 0
+To:
+// BOTW Fix WIP
+#define AADM 1
+
+You may want to enable Full Black Depth Map Fix. In this game as well.
+
+ReShade it self has issues when you enter a menu to change your weapon/clothes/Stuff. 
+To fix this follow this procedure.
+
+Start up CEMU and the enter the game world. Then go back to the CEMU program.
+In CEMU to Options. In this Pull-Down Menu click on Separate Gamepad View.
+Once this is done go back in to the game and go back to your items Menu.
+If going back to your items menu does not give you depth try pressing down on your right stick on your Wii U game Pad or what ever your using to play the game.
+The press it again.
+
+This should fix your problem.
 
 {The Surge} - Thank you zig11727
 Install Directory \SteamLibrary\steamapps\common\The Surge\bin
