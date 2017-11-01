@@ -97,7 +97,7 @@ uniform int Balance <
 
 uniform int Disocclusion_Adjust <
 	ui_type = "combo";
-	ui_items = "Off\0Radial Mask\0Normal Mask\0Normal Depth Mask\0Radial Mask +\0Normal Mask +\0Normal Depth Mask +\0Radial Mask ++\0Normal Mask ++\0Normal Depth Mask ++\0";
+	ui_items = "Off\0Radial Mask\0Normal Mask\0Depth Based\0Radial Depth Mask\0Normal Depth Mask\0Radial Mask X2\0Normal Mask X2\0Depth Based X2\0Radial Depth Mask X2\0Normal Depth Mask X2\0";
 	ui_label = "Disocclusion Mask";
 	ui_tooltip = "Automatic occlusion masking options.\n"
 				"Default is Normal Mask.";
@@ -727,72 +727,87 @@ void Average_Luminance(in float4 position : SV_Position, in float2 texcoord : TE
 
 void  Disocclusion(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 color : SV_Target0)
 {
-float2 DM;
-float B, DP =  Divergence, Disocclusion_Power;
+float2 DM, DMA, DMB, DMC;
+float A, B, DP =  Divergence, Disocclusion_PowerA, Disocclusion_PowerB , DBD = 1-tex2Dlod(SamplerDM,float4(texcoord,0,0)).r/0.0002;
 
 	DP *= Disocclusion_Power_Adjust;
 		
-	 if(Disocclusion_Adjust == 1 || Disocclusion_Adjust == 4 || Disocclusion_Adjust == 7)     
+	 if ( Disocclusion_Adjust == 1 || Disocclusion_Adjust == 6 || Disocclusion_Adjust == 4 || Disocclusion_Adjust == 9 ) // Radial    
 		{
-		Disocclusion_Power = DP/125;
-		}
-else if(Disocclusion_Adjust == 2 || Disocclusion_Adjust == 5 || Disocclusion_Adjust == 8)   
+			Disocclusion_PowerA = DP/125;
+		}		
+	if ( Disocclusion_Adjust == 2 || Disocclusion_Adjust == 7 || Disocclusion_Adjust == 5 || Disocclusion_Adjust == 10 ) // Normal  
 		{
-		Disocclusion_Power = DP/350;
+			Disocclusion_PowerA = DP/350;
 		}
-else if(Disocclusion_Adjust == 3 || Disocclusion_Adjust == 6 || Disocclusion_Adjust == 9) //Depth Based    
+	if ( Disocclusion_Adjust == 3 || Disocclusion_Adjust == 8 ) // Depth    
 		{
-		Disocclusion_Power = DP/clamp(tex2Dlod(SamplerDM,float4(texcoord,0,0)).r/0.0005,100,1000);
+			Disocclusion_PowerA = DP/DBD;
 		}
-
+		
+	// Mix Depth Start	
+	if ( Disocclusion_Adjust == 4 || Disocclusion_Adjust == 5 || Disocclusion_Adjust == 9 || Disocclusion_Adjust == 10 ) //Depth    
+		{
+			Disocclusion_PowerB = DP/DBD;
+		}
+	// Mix Depth End
 								
  float2 dir, dirT;
 	
-	if(Disocclusion_Adjust >= 1) 
+	if (Disocclusion_Adjust >= 1) 
 	{
 		const float weightA[11] = {0.0,0.010,-0.010,0.020,-0.020,0.030,-0.030,0.040,-0.040,0.050,-0.050}; //By 10
 		const float weightB[17] = {0.0,0.005,-0.005,0.010,-0.010,0.015,-0.015,0.020,-0.020,0.025,-0.025,0.030,-0.030,0.035,-0.035,0.040,-0.040}; //By 5
-		const float weightC[23] = {0.0,0.0025,-0.0025,0.005,-0.005,0.0075,-0.0075,0.010,-0.010,0.0125,-0.0125,0.015,-0.015,0.0175,-0.0175,0.020,-0.020,0.0225,-0.0225,0.025,-0.025,0.0275,-0.0275}; //By 2.5
 		
-		if(Disocclusion_Adjust == 1 || Disocclusion_Adjust == 4 || Disocclusion_Adjust == 7 )
+		if( Disocclusion_Adjust == 1 || Disocclusion_Adjust == 6 || Disocclusion_Adjust == 11 )
 		{
 			dir = 0.5 - texcoord;
-			B = Disocclusion_Power;
+			A = Disocclusion_PowerA;
+			B = Disocclusion_PowerB;
 		}
 		
-		if(Disocclusion_Adjust == 2 || Disocclusion_Adjust == 3 || Disocclusion_Adjust == 5 || Disocclusion_Adjust == 6 || Disocclusion_Adjust == 8 || Disocclusion_Adjust == 9 )
+		if ( Disocclusion_Adjust == 2 || Disocclusion_Adjust == 3 || Disocclusion_Adjust == 4 || Disocclusion_Adjust == 5 || Disocclusion_Adjust == 7 || Disocclusion_Adjust == 8 || Disocclusion_Adjust == 9 || Disocclusion_Adjust == 10 )
 		{
 			dir = float2(0.5,0.0);
-			B = Disocclusion_Power;
+			A = Disocclusion_PowerA;
+			B = Disocclusion_PowerB;
 		}
 		
-		if(Disocclusion_Adjust == 1 || Disocclusion_Adjust == 2 || Disocclusion_Adjust == 3)
+		if ( Disocclusion_Adjust == 1 || Disocclusion_Adjust == 2 || Disocclusion_Adjust == 3 || Disocclusion_Adjust == 4 || Disocclusion_Adjust == 5 )
 		{			
 				[loop]
 				for (int i = 0; i < 11; i++)
 				{	
-					DM += tex2Dlod(SamplerDM,float4(texcoord + dir * weightA[i] * B ,0,0)).rb/11;
+					DM += tex2Dlod(SamplerDM,float4(texcoord + dir * weightA[i] * A ,0,0)).rb/11;
+					if(Disocclusion_Adjust == 4 || Disocclusion_Adjust == 5)
+					{
+						DMA += tex2Dlod(SamplerDM,float4(texcoord + dir * weightA[i] * B ,0,0)).rb/11;
+					}
 				}
 		}
 		
-		if(Disocclusion_Adjust == 4 || Disocclusion_Adjust == 5 || Disocclusion_Adjust == 6)
+		if ( Disocclusion_Adjust == 6 || Disocclusion_Adjust == 7 || Disocclusion_Adjust == 8 || Disocclusion_Adjust == 9 || Disocclusion_Adjust == 10 )
 		{	
 				B *= 1.25;
 				[loop]
 				for (int i = 0; i < 17; i++)
 				{	
-					DM += tex2Dlod(SamplerDM,float4(texcoord + dir * weightB[i] * B ,0,0)).rb/17;
+					DM += tex2Dlod(SamplerDM,float4(texcoord + dir * weightB[i] * A ,0,0)).rb/17;
+					if( Disocclusion_Adjust == 9 || Disocclusion_Adjust == 10 )
+					{
+						DMB += tex2Dlod(SamplerDM,float4(texcoord + dir * weightB[i] * B ,0,0)).rb/17;
+					}
 				}
 		}
 		
-		if(Disocclusion_Adjust == 7 || Disocclusion_Adjust == 8 || Disocclusion_Adjust == 9)
+		if ( Disocclusion_Adjust == 4 || Disocclusion_Adjust == 5 )
 		{	
-				B *= 1.875;
-				[loop]
-				for (int i = 0; i < 23; i++)
-				{	
-					DM += tex2Dlod(SamplerDM,float4(texcoord + dir * weightC[i] * B ,0,0)).rb/23;
-				}
+			DM = lerp(DM,DMA,0.125);
+		}
+		
+		if ( Disocclusion_Adjust == 9 || Disocclusion_Adjust == 10 )
+		{	
+			DM = lerp(DM,DMB,0.125);
 		}
 	
 	}
