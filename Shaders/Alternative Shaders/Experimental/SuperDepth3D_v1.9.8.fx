@@ -17,7 +17,7 @@
  //* http://reshade.me/forum/shader-presentation/2128-sidebyside-3d-depth-map-based-stereoscopic-shader																				*//	
  //* ---------------------------------																																				*//
  //*																																												*//
- //*                                                                                                                                                                       			*//
+ //* Original work was based on the shader code of a CryTech 3 Dev http://www.slideshare.net/TiagoAlexSousa/secrets-of-cryengine-3-graphics-technology								*//
  //*																																												*//
  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -727,87 +727,102 @@ void Average_Luminance(in float4 position : SV_Position, in float2 texcoord : TE
 
 void  Disocclusion(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 color : SV_Target0)
 {
-float2 DM, DMA, DMB, DMC;
-float A, B, DP =  Divergence, Disocclusion_PowerA, Disocclusion_PowerB , DBD = 1-tex2Dlod(SamplerDM,float4(texcoord,0,0)).r/0.0002;
+
+float A, B, DP =  Divergence, Disocclusion_PowerA, Disocclusion_PowerB , DBD = tex2Dlod(SamplerDM,float4(texcoord,0,0)).r;
+float2 DM, DMA, DMB, dirA, dirB;
+
+//DBD Adjustment Start
+DBD = (DBD - 0.025)/(1 - 0.025); 
+DBD = DBD*DBD*(3 - 2*DBD);
+DBD = ( DBD - 1.0f ) / ( -250.0f - 1.0f );
+//DBD Adjustment End
 
 	DP *= Disocclusion_Power_Adjust;
 		
-	 if ( Disocclusion_Adjust == 1 || Disocclusion_Adjust == 6 || Disocclusion_Adjust == 4 || Disocclusion_Adjust == 9 ) // Radial    
+		if ( Disocclusion_Adjust == 1 || Disocclusion_Adjust == 4 || Disocclusion_Adjust == 6 || Disocclusion_Adjust == 9 ) // Radial    
 		{
 			Disocclusion_PowerA = DP/125;
-		}		
-	if ( Disocclusion_Adjust == 2 || Disocclusion_Adjust == 7 || Disocclusion_Adjust == 5 || Disocclusion_Adjust == 10 ) // Normal  
+		}
+		else if ( Disocclusion_Adjust == 2 || Disocclusion_Adjust == 5 || Disocclusion_Adjust == 7 || Disocclusion_Adjust == 10 ) // Normal  
 		{
 			Disocclusion_PowerA = DP/350;
 		}
-	if ( Disocclusion_Adjust == 3 || Disocclusion_Adjust == 8 ) // Depth    
+		else if ( Disocclusion_Adjust == 3 || Disocclusion_Adjust == 8 ) // Depth    
 		{
-			Disocclusion_PowerA = DP/DBD;
+			Disocclusion_PowerA = DBD*DP;
 		}
 		
 	// Mix Depth Start	
 	if ( Disocclusion_Adjust == 4 || Disocclusion_Adjust == 5 || Disocclusion_Adjust == 9 || Disocclusion_Adjust == 10 ) //Depth    
 		{
-			Disocclusion_PowerB = DP/DBD;
+			Disocclusion_PowerB = DBD*DP;
 		}
 	// Mix Depth End
-								
- float2 dir, dirT;
 	
 	if (Disocclusion_Adjust >= 1) 
 	{
 		const float weightA[11] = {0.0,0.010,-0.010,0.020,-0.020,0.030,-0.030,0.040,-0.040,0.050,-0.050}; //By 10
 		const float weightB[17] = {0.0,0.005,-0.005,0.010,-0.010,0.015,-0.015,0.020,-0.020,0.025,-0.025,0.030,-0.030,0.035,-0.035,0.040,-0.040}; //By 5
 		
-		if( Disocclusion_Adjust == 1 || Disocclusion_Adjust == 6 || Disocclusion_Adjust == 11 )
+		if( Disocclusion_Adjust == 1 || Disocclusion_Adjust == 6)
 		{
-			dir = 0.5 - texcoord;
+			dirA = 0.5 - texcoord;
+			dirB = 0.5 - texcoord;
+			A = Disocclusion_PowerA;
+			B = Disocclusion_PowerB;
+		}
+		else if ( Disocclusion_Adjust == 2 || Disocclusion_Adjust == 3 || Disocclusion_Adjust == 7 || Disocclusion_Adjust == 8 || Disocclusion_Adjust == 5 || Disocclusion_Adjust == 10 )
+		{
+			dirA = float2(0.5,0.0);
+			dirB = float2(0.5,0.0);
+			A = Disocclusion_PowerA;
+			B = Disocclusion_PowerB;
+		}
+		else if(Disocclusion_Adjust == 4 || Disocclusion_Adjust == 9)
+		{
+			dirA = 0.5 - texcoord;
+			dirB = float2(0.5,0.0);
 			A = Disocclusion_PowerA;
 			B = Disocclusion_PowerB;
 		}
 		
-		if ( Disocclusion_Adjust == 2 || Disocclusion_Adjust == 3 || Disocclusion_Adjust == 4 || Disocclusion_Adjust == 5 || Disocclusion_Adjust == 7 || Disocclusion_Adjust == 8 || Disocclusion_Adjust == 9 || Disocclusion_Adjust == 10 )
-		{
-			dir = float2(0.5,0.0);
-			A = Disocclusion_PowerA;
-			B = Disocclusion_PowerB;
-		}
 		
 		if ( Disocclusion_Adjust == 1 || Disocclusion_Adjust == 2 || Disocclusion_Adjust == 3 || Disocclusion_Adjust == 4 || Disocclusion_Adjust == 5 )
 		{			
 				[loop]
 				for (int i = 0; i < 11; i++)
 				{	
-					DM += tex2Dlod(SamplerDM,float4(texcoord + dir * weightA[i] * A ,0,0)).rb/11;
+					DM += tex2Dlod(SamplerDM,float4(texcoord + dirA * weightA[i] * A ,0,0)).rb/11;
 					if(Disocclusion_Adjust == 4 || Disocclusion_Adjust == 5)
 					{
-						DMA += tex2Dlod(SamplerDM,float4(texcoord + dir * weightA[i] * B ,0,0)).rb/11;
+						DMA += tex2Dlod(SamplerDM,float4(texcoord + dirB * weightA[i] * B ,0,0)).rb/11;
 					}
 				}
 		}
 		
 		if ( Disocclusion_Adjust == 6 || Disocclusion_Adjust == 7 || Disocclusion_Adjust == 8 || Disocclusion_Adjust == 9 || Disocclusion_Adjust == 10 )
 		{	
-				B *= 1.25;
+				A *= 1.250;
+				B *= 1.250;
 				[loop]
 				for (int i = 0; i < 17; i++)
 				{	
-					DM += tex2Dlod(SamplerDM,float4(texcoord + dir * weightB[i] * A ,0,0)).rb/17;
+					DM += tex2Dlod(SamplerDM,float4(texcoord + dirA * weightB[i] * A ,0,0)).rb/17;
 					if( Disocclusion_Adjust == 9 || Disocclusion_Adjust == 10 )
 					{
-						DMB += tex2Dlod(SamplerDM,float4(texcoord + dir * weightB[i] * B ,0,0)).rb/17;
+						DMB += tex2Dlod(SamplerDM,float4(texcoord + dirB * weightB[i] * B ,0,0)).rb/17;
 					}
 				}
 		}
 		
 		if ( Disocclusion_Adjust == 4 || Disocclusion_Adjust == 5 )
 		{	
-			DM = lerp(DM,DMA,0.125);
+			DM = lerp(DM,DMA,0.425);
 		}
 		
 		if ( Disocclusion_Adjust == 9 || Disocclusion_Adjust == 10 )
 		{	
-			DM = lerp(DM,DMB,0.125);
+			DM = lerp(DM,DMB,0.425);
 		}
 	
 	}
@@ -823,7 +838,7 @@ float A, B, DP =  Divergence, Disocclusion_PowerA, Disocclusion_PowerB , DBD = 1
 
 /////////////////////////////////////////L/R//////////////////////////////////////////////////////////////////////
 
-float C(float D,float2 texcoord)
+float Conv(float D,float2 texcoord)
 {
 	float Z, ZP, NF_Power;
 		
@@ -1005,65 +1020,56 @@ float SS(float edge0, float edge1, float x)
 
 float4 PS_calcLR(in float2 texcoord : TEXCOORD0)
 {
-	float4 Out;
+	float4 color;
 	float2 TCL,TCR;
+	float DepthR = 1, DepthL = 1, MS, P, S;
+	
+	if(!Eye_Swap) //MS is Max Separation P is Perspective Adjustment
+		{	
+			P = Perspective * pix.x;
+			MS = Divergence * pix.x;
+		}
+		else
+		{
+			P = -Perspective * pix.x;
+			MS = -Divergence * pix.x;
+		}
 	
 	if (Stereoscopic_Mode == 0)
 		{
-		if (Eye_Swap)
-			{
-				TCL.x = (texcoord.x*2) - Perspective * pix.x;
-				TCR.x = (texcoord.x*2-1) + Perspective * pix.x;
-				TCL.y = texcoord.y;
-				TCR.y = texcoord.y;
-			}
-		else
-			{
-				TCL.x = (texcoord.x*2-1) - Perspective * pix.x;
-				TCR.x = (texcoord.x*2) + Perspective * pix.x;
-				TCL.y = texcoord.y;
-				TCR.y = texcoord.y;
-			}
+			TCR.x = (texcoord.x*2-1) - P;
+			TCL.x = (texcoord.x*2) + P;
+			TCR.y = texcoord.y;
+			TCL.y = texcoord.y;
 		}
 	else if(Stereoscopic_Mode == 1)
 		{
-		if (Eye_Swap)
-			{
-			TCL.x = texcoord.x - Perspective * pix.x;
-			TCR.x = texcoord.x + Perspective * pix.x;
-			TCL.y = texcoord.y*2;
+			TCR.x = texcoord.x - P;
+			TCL.x = texcoord.x + P;
 			TCR.y = texcoord.y*2-1;
-			}
-		else
-			{
-			TCL.x = texcoord.x - Perspective * pix.x;
-			TCR.x = texcoord.x + Perspective * pix.x;
-			TCL.y = texcoord.y*2-1;
-			TCR.y = texcoord.y*2;
-			}
+			TCL.y = texcoord.y*2;
 		}
 	else
 		{
-			TCL.x = texcoord.x - Perspective * pix.x;
-			TCR.x = texcoord.x + Perspective * pix.x;
-			TCL.y = texcoord.y;
+			TCR.x = texcoord.x - P;
+			TCL.x = texcoord.x + P;
 			TCR.y = texcoord.y;
+			TCL.y = texcoord.y;
 		}
 		
-	
-		float4 cL, cR;	
-		float DepthR = 1, DepthL = 1, MS = Divergence * pix.x;	
+		float samples[3] = {0.5,0.625,1.0};
 		
 		[loop]
-		for (int i = 0 ; i < 2; i++) 
+		for (int i = 0 ; i < 3; i++) 
 		{
-			float x = i * Divergence;
+			//X = i * MS;
+			S = samples[i] * MS;
 			
-				float R = tex2Dlod(SamplerDis,float4(TCR.x+x*pix.x,TCR.y,0,0)).r;
-				DepthR =  min(DepthR,R);
-
-				float L = tex2Dlod(SamplerDis,float4(TCL.x-x*pix.x,TCL.y,0,0)).b;
-				DepthL =  min(DepthL,L);
+			float L = tex2Dlod(SamplerDis,float4(TCL.x+S, TCL.y,0,0)).r;
+			float R = tex2Dlod(SamplerDis,float4(TCR.x-S, TCR.y,0,0)).b;
+		
+			DepthL =  min(DepthL,L);
+			DepthR =  min(DepthR,R);
 		}
 		
 		if (DepthPlus >= 1)//ZPD linked
@@ -1072,53 +1078,45 @@ float4 PS_calcLR(in float2 texcoord : TEXCOORD0)
 		DepthL = SS(-ZPD,1,DepthL); // This will cause some FPS Hand Pop out. This is tolerable. Also kind of controlled by ZPD.
 		}
 
-		DepthR = max(-0.250,MS * C(DepthR,texcoord)); //Zero Parallax Distance controll
-		DepthL = max(-0.250,MS * C(DepthL,texcoord));	
+	float ReprojectionRight = max(-0.250,MS * Conv(DepthR,texcoord)); //Zero Parallax Distance controll
+	float ReprojectionLeft =  max(-0.250,MS * Conv(DepthL,texcoord));	
 		
-		if(Custom_Sidebars == 0)
-			{
-				cR = tex2Dlod(BackBufferMIRROR, float4(TCR.x+DepthR,TCR.y,0,0));
-				cL = tex2Dlod(BackBufferMIRROR, float4(TCL.x-DepthL,TCL.y,0,0));
-			}
-		else if(Custom_Sidebars == 1)
-			{
-				cR = tex2Dlod(BackBufferBORDER, float4(TCR.x+DepthR,TCR.y,0,0));
-				cL = tex2Dlod(BackBufferBORDER, float4(TCL.x-DepthL,TCL.y,0,0));
-			}
-			else
-			{
-				cR = tex2Dlod(BackBufferCLAMP, float4(TCR.x+DepthR,TCR.y,0,0));
-				cL = tex2Dlod(BackBufferCLAMP, float4(TCL.x-DepthL,TCL.y,0,0));
-			}
-
 	if(!Depth_Map_View)
-		{	
-	if (Stereoscopic_Mode == 0)
-		{	
-			if (Eye_Swap)
+	{
+		if(Stereoscopic_Mode == 0)
+		{
+			if(Custom_Sidebars == 0)
 			{
-				Out = texcoord.x < 0.5 ? cL : cR;
+			color = texcoord.x < 0.5 ? tex2D(BackBufferMIRROR, float2((texcoord.x*2 + P) + ReprojectionLeft, texcoord.y)) : tex2D(BackBufferMIRROR, float2((texcoord.x*2-1 - P) - ReprojectionRight, texcoord.y));
 			}
-		else
+			else if(Custom_Sidebars == 1)
 			{
-				Out = texcoord.x < 0.5 ? cR : cL;
-			}
-		}
-		else if (Stereoscopic_Mode == 1)
-		{	
-		if (Eye_Swap)
-			{
-				Out = texcoord.y < 0.5 ? cL : cR;
+			color = texcoord.x < 0.5 ? tex2D(BackBufferBORDER, float2((texcoord.x*2 + P) + ReprojectionLeft, texcoord.y)) : tex2D(BackBufferBORDER, float2((texcoord.x*2-1 - P) - ReprojectionRight, texcoord.y));
 			}
 			else
 			{
-				Out = texcoord.y < 0.5 ? cR : cL;
-			} 
+			color = texcoord.x < 0.5 ? tex2D(BackBufferCLAMP, float2((texcoord.x*2 + P) + ReprojectionLeft, texcoord.y)) : tex2D(BackBufferCLAMP, float2((texcoord.x*2-1 - P) - ReprojectionRight, texcoord.y));
+			}
 		}
-		else if (Stereoscopic_Mode == 2)
+		else if(Stereoscopic_Mode == 1)
 		{	
+			if(Custom_Sidebars == 0)
+			{
+			color = texcoord.y < 0.5 ? tex2D(BackBufferMIRROR, float2((texcoord.x + P) + ReprojectionLeft, texcoord.y*2)) : tex2D(BackBufferMIRROR, float2((texcoord.x - P) - ReprojectionRight, texcoord.y*2-1));
+			}
+			else if(Custom_Sidebars == 1)
+			{
+			color = texcoord.y < 0.5 ? tex2D(BackBufferBORDER, float2((texcoord.x + P) + ReprojectionLeft, texcoord.y*2)) : tex2D(BackBufferBORDER, float2((texcoord.x - P) - ReprojectionRight, texcoord.y*2-1));
+			}
+			else
+			{
+			color = texcoord.y < 0.5 ? tex2D(BackBufferCLAMP, float2((texcoord.x + P) + ReprojectionLeft, texcoord.y*2)) : tex2D(BackBufferCLAMP, float2((texcoord.x - P) - ReprojectionRight, texcoord.y*2-1));
+			}
+		}
+		else if(Stereoscopic_Mode == 2)
+		{
 			float gridL;
-				
+			
 			if(Scaling_Support == 0)
 			{
 			gridL = frac(texcoord.y*(2160.0/2));
@@ -1143,21 +1141,24 @@ float4 PS_calcLR(in float2 texcoord : TEXCOORD0)
 			{
 			gridL = frac(texcoord.y*(1051.0/2));
 			}
-				
-		if (Eye_Swap)
+			
+			if(Custom_Sidebars == 0)
 			{
-				Out = gridL > 0.5 ? cL : cR;
+			color = gridL > 0.5 ? tex2D(BackBufferMIRROR, float2((texcoord.x + P) + ReprojectionLeft, texcoord.y)) :  tex2D(BackBufferMIRROR, float2((texcoord.x - P) - ReprojectionRight, texcoord.y));
+			}
+			else if(Custom_Sidebars == 1)
+			{
+			color = gridL > 0.5 ? tex2D(BackBufferBORDER, float2((texcoord.x + P) + ReprojectionLeft, texcoord.y)) : tex2D(BackBufferBORDER, float2((texcoord.x - P) - ReprojectionRight, texcoord.y));
 			}
 			else
 			{
-				Out = gridL > 0.5 ? cR : cL;
-			} 
-			
+			color = gridL > 0.5 ? tex2D(BackBufferCLAMP, float2((texcoord.x + P) + ReprojectionLeft, texcoord.y)) : tex2D(BackBufferCLAMP, float2((texcoord.x - P) - ReprojectionRight, texcoord.y));
+			}
 		}
-		else if (Stereoscopic_Mode == 3)
-		{	
+		else if(Stereoscopic_Mode == 3)
+		{
 			float gridC;
-				
+			
 			if(Scaling_Support == 0)
 			{
 			gridC = frac(texcoord.x*(3840.0/2));
@@ -1182,22 +1183,26 @@ float4 PS_calcLR(in float2 texcoord : TEXCOORD0)
 			{
 			gridC = frac(texcoord.x*(1281.0/2));
 			}
-				
-		if (Eye_Swap)
+			
+			
+			if(Custom_Sidebars == 0)
 			{
-				Out = gridC > 0.5 ? cL : cR;
+			color = gridC > 0.5 ? tex2D(BackBufferMIRROR, float2((texcoord.x + P) + ReprojectionLeft, texcoord.y)) :  tex2D(BackBufferMIRROR, float2((texcoord.x - P) - ReprojectionRight, texcoord.y));
+			}
+			else if(Custom_Sidebars == 1)
+			{
+			color = gridC > 0.5 ? tex2D(BackBufferBORDER, float2((texcoord.x + P) + ReprojectionLeft, texcoord.y)) : tex2D(BackBufferBORDER, float2((texcoord.x - P) - ReprojectionRight, texcoord.y));
 			}
 			else
 			{
-				Out = gridC > 0.5 ? cR : cL;
-			} 
-			
+			color = gridC > 0.5 ? tex2D(BackBufferCLAMP, float2((texcoord.x + P) + ReprojectionLeft, texcoord.y)) : tex2D(BackBufferCLAMP, float2((texcoord.x - P) - ReprojectionRight, texcoord.y));
+			}
 		}
-		else if (Stereoscopic_Mode == 4)
-		{	
+		else if(Stereoscopic_Mode == 4)
+		{
 			float gridy;
 			float gridx;
-				
+
 			if(Scaling_Support == 1)
 			{
 			gridy = floor(texcoord.y*(BUFFER_HEIGHT)); //Native
@@ -1223,106 +1228,115 @@ float4 PS_calcLR(in float2 texcoord : TEXCOORD0)
 			gridy = floor(texcoord.y*(721.0));
 			gridx = floor(texcoord.x*(1281.0));
 			}
-
-		if (Eye_Swap)
+			
+			if(Custom_Sidebars == 0)
 			{
-				Out = (int(gridy+gridx) & 1) < 0.5 ? cL : cR;
+			color = (int(gridy+gridx) & 1) < 0.5 ? tex2D(BackBufferMIRROR, float2((texcoord.x + P) + ReprojectionLeft, texcoord.y)) :  tex2D(BackBufferMIRROR, float2((texcoord.x - P) - ReprojectionRight, texcoord.y));
+			}
+			else if(Custom_Sidebars == 1)
+			{
+			color = (int(gridy+gridx) & 1) < 0.5 ? tex2D(BackBufferBORDER, float2((texcoord.x + P) + ReprojectionLeft, texcoord.y)) : tex2D(BackBufferBORDER, float2((texcoord.x - P) - ReprojectionRight, texcoord.y));
 			}
 			else
 			{
-				Out = (int(gridy+gridx) & 1) < 0.5 ? cR : cL;
-			} 
-			
-		}
-	else
-		{
-		float3 L,R;
-		if(Eye_Swap)
-			{
-				L = cL.rgb;
-				R = cR.rgb;
-			}
-			else
-			{
-				L = cR.rgb;
-				R = cL.rgb;
-			}
-			
-			float3 HalfL = dot(L,float3(0.299, 0.587, 0.114));
-			float3 HalfR = dot(R,float3(0.299, 0.587, 0.114));
-			float3 LC = lerp(HalfL,L,Anaglyph_Desaturation);  
-			float3 RC = lerp(HalfR,R,Anaglyph_Desaturation); 
-					
-			float4 C = float4(LC,1);
-			float4 CT = float4(RC,1);
-					
-		if (Anaglyph_Colors == 0)
-			{
-				float4 LeftEyecolor = float4(1.0,0.0,0.0,1.0);
-				float4 RightEyecolor = float4(0.0,1.0,1.0,1.0);
-		
-				Out =  (C*LeftEyecolor) + (CT*RightEyecolor);
-
-				}
-				else if (Anaglyph_Colors == 1)
-				{
-						float red = 0.437 * C.r + 0.449 * C.g + 0.164 * C.b
-							- 0.011 * CT.r - 0.032 * CT.g - 0.007 * CT.b;
-				
-					if (red > 1) { red = 1; }   if (red < 0) { red = 0; }
-
-						float green = -0.062 * C.r -0.062 * C.g -0.024 * C.b 
-							+ 0.377 * CT.r + 0.761 * CT.g + 0.009 * CT.b;
-				
-					if (green > 1) { green = 1; }   if (green < 0) { green = 0; }
-
-						float blue = -0.048 * C.r - 0.050 * C.g - 0.017 * C.b 
-							-0.026 * CT.r -0.093 * CT.g + 1.234  * CT.b;
-				
-					if (blue > 1) { blue = 1; }   if (blue < 0) { blue = 0; }
-
-
-					Out = float4(red, green, blue, 0);
-				}
-				else if (Anaglyph_Colors == 2)
-				{
-					float4 LeftEyecolor = float4(0.0,1.0,0.0,1.0);
-					float4 RightEyecolor = float4(1.0,0.0,1.0,1.0);
-					
-					Out =  (C*LeftEyecolor) + (CT*RightEyecolor);
-					
-				}
-				else
-				{
-					
-					
-					float red = -0.062 * C.r -0.158 * C.g -0.039 * C.b
-						+ 0.529 * CT.r + 0.705 * CT.g + 0.024 * CT.b;
-				
-					if (red > 1) { red = 1; }   if (red < 0) { red = 0; }
-
-					float green = 0.284 * C.r + 0.668 * C.g + 0.143 * C.b 
-						- 0.016 * CT.r - 0.015 * CT.g + 0.065 * CT.b;
-				
-					if (green > 1) { green = 1; }   if (green < 0) { green = 0; }
-
-					float blue = -0.015 * C.r -0.027 * C.g + 0.021 * C.b 
-						+ 0.009 * CT.r + 0.075 * CT.g + 0.937  * CT.b;
-				
-					if (blue > 1) { blue = 1; }   if (blue < 0) { blue = 0; }
-						
-					Out = float4(red, green, blue, 0);
-				}
+			color = (int(gridy+gridx) & 1) < 0.5 ? tex2D(BackBufferCLAMP, float2((texcoord.x + P) + ReprojectionLeft, texcoord.y)) : tex2D(BackBufferCLAMP, float2((texcoord.x - P) - ReprojectionRight, texcoord.y));
 			}
 		}
 		else
 		{
-				float4 DMV = texcoord.x < 0.5 ? Lum(float2(texcoord.x*2,texcoord.y*2)).xxxx : tex2Dlod(SamplerDM,float4(texcoord.x*2-1 , texcoord.y*2,0,0)).bbbb;
-				Out = texcoord.y < 0.5 ? DMV : tex2Dlod(SamplerDis,float4(texcoord.x , texcoord.y*2-1 , 0 , 0)).rrbb;
-		}
-		
+													
+				float3 HalfLM = dot(tex2D(BackBufferMIRROR,float2((texcoord.x + P) + ReprojectionLeft,texcoord.y)).rgb,float3(0.299, 0.587, 0.114));
+				float3 HalfRM = dot(tex2D(BackBufferMIRROR,float2((texcoord.x - P) - ReprojectionRight,texcoord.y)).rgb,float3(0.299, 0.587, 0.114));
+				float3 LM = lerp(HalfLM,tex2D(BackBufferMIRROR,float2((texcoord.x + P) + ReprojectionLeft,texcoord.y)).rgb,Anaglyph_Desaturation);  
+				float3 RM = lerp(HalfRM,tex2D(BackBufferMIRROR,float2((texcoord.x - P) - ReprojectionRight,texcoord.y)).rgb,Anaglyph_Desaturation); 
+				
+				float3 HalfLB = dot(tex2D(BackBufferBORDER,float2((texcoord.x + P) + ReprojectionLeft,texcoord.y)).rgb,float3(0.299, 0.587, 0.114));
+				float3 HalfRB = dot(tex2D(BackBufferBORDER,float2((texcoord.x - P ) - ReprojectionRight,texcoord.y)).rgb,float3(0.299, 0.587, 0.114));
+				float3 LB = lerp(HalfLB,tex2D(BackBufferBORDER,float2((texcoord.x + P) + ReprojectionLeft,texcoord.y)).rgb,Anaglyph_Desaturation);  
+				float3 RB = lerp(HalfRB,tex2D(BackBufferBORDER,float2((texcoord.x - P) - ReprojectionRight,texcoord.y)).rgb,Anaglyph_Desaturation); 
+				
+				float4 C;
+				float4 CT;
+				
+				if(Custom_Sidebars == 0)
+				{
+				C = float4(LM,1);
+				CT = float4(RM,1);
+				}
+				else
+				{
+				C = float4(LB,1);
+				CT = float4(RB,1);
+				}
+
+				
+			if (Anaglyph_Colors == 0)
+			{
+				float4 LeftEyecolor = float4(1.0,0.0,0.0,1.0);
+				float4 RightEyecolor = float4(0.0,1.0,1.0,1.0);
+				
+
+				color =  (C*LeftEyecolor) + (CT*RightEyecolor);
+
+			}
+			else if (Anaglyph_Colors == 1)
+			{
+			float red = 0.437 * C.r + 0.449 * C.g + 0.164 * C.b
+					- 0.011 * CT.r - 0.032 * CT.g - 0.007 * CT.b;
+			
+			if (red > 1) { red = 1; }   if (red < 0) { red = 0; }
+
+			float green = -0.062 * C.r -0.062 * C.g -0.024 * C.b 
+						+ 0.377 * CT.r + 0.761 * CT.g + 0.009 * CT.b;
+			
+			if (green > 1) { green = 1; }   if (green < 0) { green = 0; }
+
+			float blue = -0.048 * C.r - 0.050 * C.g - 0.017 * C.b 
+						-0.026 * CT.r -0.093 * CT.g + 1.234  * CT.b;
+			
+			if (blue > 1) { blue = 1; }   if (blue < 0) { blue = 0; }
+
+
+			color = float4(red, green, blue, 0);
+			}
+			else if (Anaglyph_Colors == 2)
+			{
+				float4 LeftEyecolor = float4(0.0,1.0,0.0,1.0);
+				float4 RightEyecolor = float4(1.0,0.0,1.0,1.0);
+				
+				color =  (C*LeftEyecolor) + (CT*RightEyecolor);
+				
+			}
+			else
+			{
+				
+				
+			float red = -0.062 * C.r -0.158 * C.g -0.039 * C.b
+					+ 0.529 * CT.r + 0.705 * CT.g + 0.024 * CT.b;
+			
+			if (red > 1) { red = 1; }   if (red < 0) { red = 0; }
+
+			float green = 0.284 * C.r + 0.668 * C.g + 0.143 * C.b 
+						- 0.016 * CT.r - 0.015 * CT.g + 0.065 * CT.b;
+			
+			if (green > 1) { green = 1; }   if (green < 0) { green = 0; }
+
+			float blue = -0.015 * C.r -0.027 * C.g + 0.021 * C.b 
+						+ 0.009 * CT.r + 0.075 * CT.g + 0.937  * CT.b;
+			
+			if (blue > 1) { blue = 1; }   if (blue < 0) { blue = 0; }
+					
+			color = float4(red, green, blue, 0);
+			}
+		}	
+	}
+		else
+	{		
+			float4 Top = texcoord.x < 0.5 ? Lum(float2(texcoord.x*2,texcoord.y*2)).xxxx : tex2Dlod(SamplerDM,float4(texcoord.x*2-1 , texcoord.y*2,0,0)).rrbb;
+			color = texcoord.y < 0.5 ? Top : tex2Dlod(SamplerDis,float4(texcoord.x,texcoord.y*2-1,0,0)).rrrr;
+	}
 	float Average_Luminance = texcoord.y < 0.5 ? 0.5 : tex2D(SamplerDM,float2(texcoord.x,texcoord.y)).g;
-	return float4(Out.rgb,Average_Luminance);
+	return float4(color.rgb,Average_Luminance);
 }
 
 void Average_Luminance_Weapon(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 color : SV_Target0)
