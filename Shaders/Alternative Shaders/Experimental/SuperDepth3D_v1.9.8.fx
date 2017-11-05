@@ -200,7 +200,7 @@ uniform float Anaglyph_Desaturation <
 
 uniform int View_Mode <
 	ui_type = "combo";
-	ui_items = "View Mode Normal\0View Mode New\0";
+	ui_items = "View Mode Normal\0View Mode Alpha\0View Mode Beta\0";
 	ui_label = "View Mode";
 	ui_tooltip = "Change the way the shader warps the output to the screen.\n" 
 				 "Default is Normal";
@@ -1031,7 +1031,7 @@ float4 PS_calcLR(in float2 texcoord : TEXCOORD0)
 	int N = 3;
 	float2 TCL,TCR;
 	float4 color, Right, Left, cR, cL;
-	float Boost = 1.025, DepthR = 1, DepthL = 1, MS, P, S, J, L, R, LA, RA, LB, RB, LC, RC;
+	float Boost = 1.01875, DepthR = 1, DepthL = 1, MS, P, S, J, L, R, LA, RA, LB, RB, LC, RC;
 	float samples[3] = {0.5,0.625,1.0};
 	
 	//MS is Max Separation P is Perspective Adjustment
@@ -1086,7 +1086,10 @@ float4 PS_calcLR(in float2 texcoord : TEXCOORD0)
 				TCR.y = texcoord.y;
 			}
 		}	
-				
+		
+		if (View_Mode == 2)
+			N = 2;		
+		
 		[loop]
 		for (int i = 0 ; i < N; i++) 
 		{
@@ -1106,6 +1109,14 @@ float4 PS_calcLR(in float2 texcoord : TEXCOORD0)
 				RB = tex2Dlod(SamplerDis,float4(TCR.x-J, TCR.y,0,0)).b;
 				L = lerp(LA,LB,0.5);
 				R = lerp(RA,RB,0.5);
+			}
+			else if (View_Mode == 2)
+			{
+				J =  i * MS;
+				LA = tex2Dlod(SamplerDis,float4(TCL.x+J, TCL.y,0,0)).r;
+				RA = tex2Dlod(SamplerDis,float4(TCR.x-J, TCR.y,0,0)).b;
+				L = LA;
+				R = RA;
 			}
 			
 			DepthL =  min(DepthL,L);
