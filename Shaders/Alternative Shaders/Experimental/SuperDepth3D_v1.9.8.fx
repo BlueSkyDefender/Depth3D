@@ -55,7 +55,7 @@ uniform float Offsets <
 	ui_tooltip = "Offset is for the Special Depth Map Only";
 > = 0.5;
 
-uniform int Divergence <
+uniform float Divergence <
 	ui_type = "drag";
 	ui_min = 1; ui_max = Depth_Max;
 	ui_label = "Divergence Slider";
@@ -200,7 +200,7 @@ uniform float Anaglyph_Desaturation <
 
 uniform int View_Mode <
 	ui_type = "combo";
-	ui_items = "View Mode Normal\0View Mode Alpha\0View Mode Beta\0";
+	ui_items = "View Mode Normal\0View Mode Alpha\0View Mode Beta\0View Mode Gamma\0";
 	ui_label = "View Mode";
 	ui_tooltip = "Change the way the shader warps the output to the screen.\n" 
 				 "Default is Normal";
@@ -735,14 +735,13 @@ void Average_Luminance(in float4 position : SV_Position, in float2 texcoord : TE
 
 void  Disocclusion(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 color : SV_Target0)
 {
-
 float A, B, DP =  Divergence, Disocclusion_PowerA, Disocclusion_PowerB , DBD = tex2Dlod(SamplerDM,float4(texcoord,0,0)).r;
 float2 DM, DMA, DMB, dirA, dirB;
 
 //DBD Adjustment Start
 DBD = (DBD - 0.025)/(1 - 0.025); 
 DBD = DBD*DBD*(3 - 2*DBD);
-DBD = ( DBD - 1.0f ) / ( -250.0f - 1.0f );
+DBD = ( DBD - 1.0f ) / ( -187.5f - 1.0f );
 //DBD Adjustment End
 
 	DP *= Disocclusion_Power_Adjust;
@@ -825,12 +824,12 @@ DBD = ( DBD - 1.0f ) / ( -250.0f - 1.0f );
 		
 		if ( Disocclusion_Adjust == 4 || Disocclusion_Adjust == 5 )
 		{	
-			DM = lerp(DM,DMA,0.25);
+			DM = lerp(DM,DMA,0.5);
 		}
 		
 		if ( Disocclusion_Adjust == 9 || Disocclusion_Adjust == 10 )
 		{	
-			DM = lerp(DM,DMB,0.25);
+			DM = lerp(DM,DMB,0.5);
 		}
 	
 	}
@@ -1028,11 +1027,13 @@ float SS(float edge0, float edge1, float x)
 
 float4 PS_calcLR(in float2 texcoord : TEXCOORD0)
 {
-	int N = 3;
-	float2 TCL,TCR;
+	int N;
+	float2 TCL, TCR, MINMAX = float2(1,0);
 	float4 color, Right, Left, cR, cL;
-	float Boost = 1.01875, DepthR = 1, DepthL = 1, MS, P, S, J, L, R, LA, RA, LB, RB, LC, RC;
-	float samples[3] = {0.5,0.625,1.0};
+	float DepthR, DepthL, MS, P, S, J, L, R, LA, RA, LB, RB, LC, RC;
+	float samplesA[3] = {0.5,0.75,1.0};
+	float samplesB[5] = {0.0,0.25,0.5,0.75,1.0};
+	float samplesC[5] = {0.5,0.625,0.75,0.875,1.0};
 	
 	//MS is Max Separation P is Perspective Adjustment
 	P = Perspective * pix.x;
@@ -1085,52 +1086,59 @@ float4 PS_calcLR(in float2 texcoord : TEXCOORD0)
 				TCL.y = texcoord.y;
 				TCR.y = texcoord.y;
 			}
-		}	
+		}
+			
+		if (View_Mode == 0)
+			N = 3;
+		else if (View_Mode == 1)
+			N = 5;
+		else if (View_Mode == 2)
+			N = 5;
+		else if (View_Mode == 3)
+			N = 2;
 		
-		if (View_Mode == 2)
-			N = 2;		
-		
+				
 		[loop]
 		for (int i = 0 ; i < N; i++) 
 		{
+			MS *= 1.025;
 			if (View_Mode == 0)
 			{
-				S = samples[i] * MS;
+				S = samplesA[i] * MS;
 				L = tex2Dlod(SamplerDis,float4(TCL.x+S, TCL.y,0,0)).r;
 				R = tex2Dlod(SamplerDis,float4(TCR.x-S, TCR.y,0,0)).b;
 			}
 			else if (View_Mode == 1)
 			{
-				J *= MS;
-				S = samples[i] * MS;
-				LA = tex2Dlod(SamplerDis,float4(TCL.x+S, TCL.y,0,0)).r;
-				RA = tex2Dlod(SamplerDis,float4(TCR.x-S, TCR.y,0,0)).b;
-				LB = tex2Dlod(SamplerDis,float4(TCL.x+J, TCL.y,0,0)).r;
-				RB = tex2Dlod(SamplerDis,float4(TCR.x-J, TCR.y,0,0)).b;
-				L = lerp(LA,LB,0.5);
-				R = lerp(RA,RB,0.5);
+				S = samplesB[i] * MS;
+				L = tex2Dlod(SamplerDis,float4(TCL.x+S, TCL.y,0,0)).r;
+				R = tex2Dlod(SamplerDis,float4(TCR.x-S, TCR.y,0,0)).b;
 			}
 			else if (View_Mode == 2)
 			{
-				J =  i * MS;
-				LA = tex2Dlod(SamplerDis,float4(TCL.x+J, TCL.y,0,0)).r;
-				RA = tex2Dlod(SamplerDis,float4(TCR.x-J, TCR.y,0,0)).b;
-				L = LA;
-				R = RA;
+				S = samplesC[i] * MS;
+				L = tex2Dlod(SamplerDis,float4(TCL.x+S, TCL.y,0,0)).r;
+				R = tex2Dlod(SamplerDis,float4(TCR.x-S, TCR.y,0,0)).b;
+			}
+			else if (View_Mode == 3)
+			{
+				S = i * MS;
+				L = tex2Dlod(SamplerDis,float4(TCL.x+S, TCL.y,0,0)).r;
+				R = tex2Dlod(SamplerDis,float4(TCR.x-S, TCR.y,0,0)).b;
 			}
 			
-			DepthL =  min(DepthL,L);
-			DepthR =  min(DepthR,R);
+			DepthL = min(MINMAX.x,L);
+			DepthR = min(MINMAX.x,R);
 		}
-		
+				
 		if (DepthPlus >= 1)//ZPD linked
 		{
 			DepthR = SS(-ZPD,1,DepthR); // Depth Plus is basicly smooth step with out the clamps. Seemed to give more Depth to a Image. 
 			DepthL = SS(-ZPD,1,DepthL); // This will cause some FPS Hand Pop out. This is tolerable. Also kind of controlled by ZPD.
 		}
 
-		float ReprojectionRight = max(-0.250,MS * Conv(DepthR,texcoord)) * Boost; //Zero Parallax Distance controll
-		float ReprojectionLeft =  max(-0.250,MS * Conv(DepthL,texcoord)) * Boost;
+		float ReprojectionRight = max(-0.250,MS * Conv(DepthR,texcoord)) * 1.0125; //Zero Parallax Distance controll
+		float ReprojectionLeft =  max(-0.250,MS * Conv(DepthL,texcoord)) * 1.0125;
 	
 		if(Custom_Sidebars == 0)
 			{
