@@ -1032,8 +1032,8 @@ float4 PS_calcLR(in float2 texcoord : TEXCOORD0)
 	float4 color, Right, Left, cR, cL;
 	float DepthR, DepthL, MS, P, S, J, L, R, LA, RA, LB, RB, LC, RC;
 	float samplesA[3] = {0.5,0.75,1.0};
-	float samplesB[5] = {0.0,0.25,0.5,0.75,1.0};
-	float samplesC[5] = {0.5,0.625,0.75,0.875,1.0};
+	float samplesB[5] = {0.5,0.625,0.75,0.875,1.0};
+	float samplesC[6] = {0.375,0.5,0.625,0.75,0.875,1.0};
 	
 	//MS is Max Separation P is Perspective Adjustment
 	P = Perspective * pix.x;
@@ -1093,7 +1093,7 @@ float4 PS_calcLR(in float2 texcoord : TEXCOORD0)
 		else if (View_Mode == 1)
 			N = 5;
 		else if (View_Mode == 2)
-			N = 5;
+			N = 6;
 		else if (View_Mode == 3)
 			N = 2;
 		
@@ -1117,15 +1117,16 @@ float4 PS_calcLR(in float2 texcoord : TEXCOORD0)
 			else if (View_Mode == 2)
 			{
 				S = samplesC[i] * MS;
-				L = tex2Dlod(SamplerDis,float4(TCL.x+S, TCL.y,0,0)).r;
-				R = tex2Dlod(SamplerDis,float4(TCR.x-S, TCR.y,0,0)).b;
+				L += tex2Dlod(SamplerDis,float4(TCL.x+S, TCL.y,0,0)).r/N;
+				R += tex2Dlod(SamplerDis,float4(TCR.x-S, TCR.y,0,0)).b/N;
 			}
 			else if (View_Mode == 3)
 			{
-				S = i * MS;
-				L = tex2Dlod(SamplerDis,float4(TCL.x+S, TCL.y,0,0)).r;
-				R = tex2Dlod(SamplerDis,float4(TCR.x-S, TCR.y,0,0)).b;
+				S = i * Divergence;
+				L = tex2Dlod(SamplerDis,float4(TCL.x+S*pix.x, TCL.y,0,0)).r;
+				R = tex2Dlod(SamplerDis,float4(TCR.x-S*pix.x, TCR.y,0,0)).b;
 			}
+
 			
 			DepthL = min(MINMAX.x,L);
 			DepthR = min(MINMAX.x,R);
