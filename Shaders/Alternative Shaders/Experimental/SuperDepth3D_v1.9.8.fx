@@ -200,11 +200,16 @@ uniform float Anaglyph_Desaturation <
 
 uniform int View_Mode <
 	ui_type = "combo";
-	ui_items = "View Mode Normal\0View Mode Alpha\0View Mode Beta\0View Mode Gamma\0";
+	ui_items = "View Mode Normal\0View Mode Alpha\0View Mode Beta\0";
 	ui_label = "View Mode";
 	ui_tooltip = "Change the way the shader warps the output to the screen.\n" 
 				 "Default is Normal";
 > = 0;
+
+uniform bool Auto_Depth_Range <
+	ui_label = "Auto Depth Range";
+	ui_tooltip = "The Map Automaticly scales to outdoor and indoor areas.";
+> = false;
 
 uniform bool Eye_Swap <
 	ui_label = "Swap Eyes";
@@ -415,7 +420,7 @@ float2 Depth(in float2 texcoord : TEXCOORD0)
 		{
 		DM.y = OffsetNormal;
 		}
-	
+		
 	return float2(DM.x,DM.y);	
 }
 
@@ -733,9 +738,195 @@ void Average_Luminance(in float4 position : SV_Position, in float2 texcoord : TE
 	color = float4(Average_Luminance,1);
 }
 
+float Conv(float D,float2 texcoord)
+{
+	float Z, ZP, Con = ZPD, NF_Power;
+						
+		//Average Luminance Auto ZDP Start
+		float Luminance, LClamp = smoothstep(0,1,Lum(texcoord)); //Average Luminance Texture Sample 
+		
+		if (Auto_ZPD == 1)
+		{
+			Luminance = smoothstep(0.01,1,Lum(texcoord)*Con);		
+		}
+		else if (Auto_ZPD == 2)
+		{
+			Luminance = smoothstep(0.01,1,Con-(Lum(texcoord)*Con));
+		}
+		else if (Auto_ZPD == 3)
+		{
+			Luminance =  smoothstep(0.01,0.5,Lum(texcoord)*Con);	
+		}
+		else if (Auto_ZPD == 4)
+		{
+			Luminance =  smoothstep(0.01,0.5,Con-(Lum(texcoord)*Con));
+		}	
+		else
+		{
+			Luminance = 0;
+		}
+		
+		float AL = abs(Luminance),ALC = abs(LClamp),ZPDC;
+			
+		if (ALC <= 0.00005 && FBDMF) //Full Black Depth Map Fix.
+		{
+			AL = 0;
+			ZPDC = 0; 
+		}
+		else
+		{
+			AL = AL; //Auto ZDP based on the Auto Anti Weapon Depth Map Z-Fighting code.
+			ZPDC = Con; 
+		}
+		
+		if (AADM)
+		{
+			if (ALC >= 0.01)
+			{
+				AL = AL/1.250;
+			}
+			if (ALC >= 0.125)
+			{
+				AL = AL/1.0;
+			}
+			if (ALC >= 0.250)
+			{
+				AL = AL/0.750;
+			}
+			if (ALC >= 0.3125)
+			{
+				AL = AL/0.5;
+			}
+			if (ALC >= 0.375)
+			{
+				AL = AL/0.75;
+			}
+			if (ALC >= 0.450)
+			{
+				AL = AL/1.0;
+			}
+			if (ALC >= 0.500)
+			{
+				AL = AL/1.250;
+			}
+			else if (ALC < 0.01)
+			{
+				AL = AL/1.75;
+			}	
+		}
+		
+		
+		if(Auto_ZPD >= 1)
+		{
+			Z = AL; //Auto ZDP based on the Auto Anti Weapon Depth Map Z-Fighting code.
+		}
+		else
+		{
+			Z = ZPDC;
+		}
+		//Average Luminance Auto ZDP End
+		
+		if (Balance == 0)
+		{
+			NF_Power = 0.5;
+		}
+		else if (Balance == 1)
+		{
+			NF_Power = 0.625;
+		}
+		else if (Balance == 2)
+		{
+			NF_Power = 0.6875;
+		}
+		else if (Balance == 3)
+		{
+			NF_Power = 0.75;
+		}
+		else if (Balance == 4)
+		{
+			NF_Power = 0.78125;
+		}
+		else if (Balance == 5)
+		{
+			NF_Power = 0.8125;
+		}
+		else if (Balance == 6)
+		{
+			NF_Power = 0.875;
+		}
+		
+		if(ZPD == 0)
+		{
+			ZP = 1.0;
+		}
+		else
+		{
+			ZP = NF_Power;
+		}
+	
+		Z = lerp(1-Z/D,D,ZP);
+		
+    return Z;
+}
+
+float SS(float edge0, float edge1, float x)
+{
+		if (DepthPlus == 1)//ZPD linked
+		{
+			edge0 /= 2.0;
+		}
+		else if (DepthPlus == 2)//ZDP linked +
+		{
+			edge0 /= 2.5;
+		}
+		else if (DepthPlus == 3)//ZDP linked ++
+		{
+			edge0 /= 3.75;
+		}
+		else if (DepthPlus == 4)//ZDP linked +++
+		{
+			edge0 /= 4.25;
+		}
+		else if (DepthPlus == 5)//ZDP linked ++++
+		{
+			edge0 /= 5.0;
+		}
+		else if (DepthPlus == 6)//ZDP linked +++++
+		{
+			edge0 /= 6.25;
+		}
+		else if (DepthPlus == 7)//ZDP linked ++++++
+		{
+			edge0 /= 7.5;
+		}
+		else if (DepthPlus == 8)//ZDP linked +++++++
+		{
+			edge0 /= 8.75;
+		}
+		else if (DepthPlus == 9)//ZDP linked ++++++++
+		{
+			edge0 /= 9.25;
+		}
+		else if (DepthPlus == 10)//ZDP linked +++++++++
+		{
+			edge0 /= 10.0;
+		}
+
+    // Scale, bias
+    x = (x - edge0)/(edge1 - edge0); 
+    // Evaluate polynomial
+    return x*x*(3 - 2*x);
+}
+
+float AutoDepthRange( float d, float2 texcoord )
+{
+	float LumAdjust = smoothstep(-0.0175,0.300,Lum(texcoord));
+    return min(1,( d - 0 ) / ( LumAdjust - 0));
+}
+
 void  Disocclusion(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 color : SV_Target0)
 {
-float A, B, DP =  Divergence, Disocclusion_PowerA, Disocclusion_PowerB , DBD = tex2Dlod(SamplerDM,float4(texcoord,0,0)).r;
+float X, Y, A, B, DP =  Divergence, Disocclusion_PowerA, Disocclusion_PowerB , DBD = tex2Dlod(SamplerDM,float4(texcoord,0,0)).r;
 float2 DM, DMA, DMB, dirA, dirB;
 
 //DBD Adjustment Start
@@ -837,242 +1028,42 @@ DBD = ( DBD - 1.0f ) / ( -187.5f - 1.0f );
 	{
 		DM = tex2Dlod(SamplerDM,float4(texcoord,0,0)).rb;
 	}
+
+	X = DM.x;
+	Y = DM.y;
 	
-	float X = DM.x, Y = DM.y;
-	
-	color = float4(X,0,Y,1);
+	if (Auto_Depth_Range)
+		{
+			X = AutoDepthRange(X,texcoord);
+			Y = AutoDepthRange(Y,texcoord);
+		}
+	color = float4(X,DM.x,Y,1);
 }
 
 /////////////////////////////////////////L/R//////////////////////////////////////////////////////////////////////
 
-float Conv(float D,float2 texcoord)
-{
-	float Z, ZP, NF_Power;
-		
-		//Average Luminance Auto ZDP Start
-		float Luminance, LClamp = smoothstep(0,1,Lum(texcoord)); //Average Luminance Texture Sample 
-		
-		if (Auto_ZPD == 1)
-		{
-			Luminance = smoothstep(0.01,1,Lum(texcoord)*ZPD);		
-		}
-		else if (Auto_ZPD == 2)
-		{
-			Luminance = smoothstep(0.01,1,ZPD-(Lum(texcoord)*ZPD));
-		}
-		else if (Auto_ZPD == 3)
-		{
-			Luminance =  smoothstep(0.01,0.5,Lum(texcoord)*ZPD);	
-		}
-		else if (Auto_ZPD == 4)
-		{
-			Luminance =  smoothstep(0.01,0.5,ZPD-(Lum(texcoord)*ZPD));
-		}	
-		else
-		{
-			Luminance = 0;
-		}
-		
-		float AL = abs(Luminance),ALC = abs(LClamp),ZPDC;
-			
-		if (ALC <= 0.00005 && FBDMF) //Full Black Depth Map Fix.
-		{
-			AL = 0;
-			ZPDC = 0; 
-		}
-		else
-		{
-			AL = AL; //Auto ZDP based on the Auto Anti Weapon Depth Map Z-Fighting code.
-			ZPDC = ZPD; 
-		}
-		
-		if (AADM)
-		{
-			if (ALC >= 0.01)
-			{
-				AL = AL/1.250;
-			}
-			if (ALC >= 0.125)
-			{
-				AL = AL/1.0;
-			}
-			if (ALC >= 0.250)
-			{
-				AL = AL/0.750;
-			}
-			if (ALC >= 0.3125)
-			{
-				AL = AL/0.5;
-			}
-			if (ALC >= 0.375)
-			{
-				AL = AL/0.75;
-			}
-			if (ALC >= 0.450)
-			{
-				AL = AL/1.0;
-			}
-			if (ALC >= 0.500)
-			{
-				AL = AL/1.250;
-			}
-			else if (ALC < 0.01)
-			{
-				AL = AL/1.75;
-			}	
-		}
-		
-		
-		if(Auto_ZPD >= 1)
-		{
-			Z = AL; //Auto ZDP based on the Auto Anti Weapon Depth Map Z-Fighting code.
-		}
-		else
-		{
-			Z = ZPDC;
-		}
-		//Average Luminance Auto ZDP End
-		
-		if (Balance == 0)
-		{
-			NF_Power = 0.5;
-		}
-		else if (Balance == 1)
-		{
-			NF_Power = 0.625;
-		}
-		else if (Balance == 2)
-		{
-			NF_Power = 0.6875;
-		}
-		else if (Balance == 3)
-		{
-			NF_Power = 0.75;
-		}
-		else if (Balance == 4)
-		{
-			NF_Power = 0.78125;
-		}
-		else if (Balance == 5)
-		{
-			NF_Power = 0.8125;
-		}
-		else if (Balance == 6)
-		{
-			NF_Power = 0.875;
-		}
-		
-		if(ZPD == 0)
-		{
-			ZP = 1.0;
-		}
-		else
-		{
-			ZP = NF_Power;
-		}
-		
-    Z = lerp(1-Z/D,D,ZP);
-    
-    return Z;
-}
-
-float SS(float edge0, float edge1, float x)
-{
-		if (DepthPlus == 1)//ZPD linked
-		{
-			edge0 /= 2.0;
-		}
-		else if (DepthPlus == 2)//ZDP linked +
-		{
-			edge0 /= 2.5;
-		}
-		else if (DepthPlus == 3)//ZDP linked ++
-		{
-			edge0 /= 3.75;
-		}
-		else if (DepthPlus == 4)//ZDP linked +++
-		{
-			edge0 /= 4.25;
-		}
-		else if (DepthPlus == 5)//ZDP linked ++++
-		{
-			edge0 /= 5.0;
-		}
-		else if (DepthPlus == 6)//ZDP linked +++++
-		{
-			edge0 /= 6.25;
-		}
-		else if (DepthPlus == 7)//ZDP linked ++++++
-		{
-			edge0 /= 7.5;
-		}
-		else if (DepthPlus == 8)//ZDP linked +++++++
-		{
-			edge0 /= 8.75;
-		}
-		else if (DepthPlus == 9)//ZDP linked ++++++++
-		{
-			edge0 /= 9.25;
-		}
-		else if (DepthPlus == 10)//ZDP linked +++++++++
-		{
-			edge0 /= 10.0;
-		}
-
-    // Scale, bias
-    x = (x - edge0)/(edge1 - edge0); 
-    // Evaluate polynomial
-    return x*x*(3 - 2*x);
-}
-
 float4 PS_calcLR(in float2 texcoord : TEXCOORD0)
 {
-	int N;
-	float2 TCL, TCR, MINMAX = float2(1,0);
+	float2 TCL, TCR;
 	float4 color, Right, Left, cR, cL;
-	float DepthR, DepthL, MS, P, S, J, L, R, LA, RA, LB, RB, LC, RC;
+	float DepthR = 1, DepthL = 1, ConAlt, MS, P, N, S, L, R;
 	float samplesA[3] = {0.5,0.75,1.0};
 	float samplesB[5] = {0.5,0.625,0.75,0.875,1.0};
-	float samplesC[6] = {0.375,0.5,0.625,0.75,0.875,1.0};
 	
 	//MS is Max Separation P is Perspective Adjustment
 	P = Perspective * pix.x;
 	MS = Divergence * pix.x;
 	
-	if (!Eye_Swap)
+	if ( Eye_Swap )
 		{
-		if (Stereoscopic_Mode == 0)
-			{
-				TCR.x = (texcoord.x*2-1) - P;
-				TCL.x = (texcoord.x*2) + P;
-				TCR.y = texcoord.y;
-				TCL.y = texcoord.y;
-			}
-		else if(Stereoscopic_Mode == 1)
-			{
-				TCR.x = texcoord.x - P;
-				TCL.x = texcoord.x + P;
-				TCR.y = texcoord.y*2-1;
-				TCL.y = texcoord.y*2;
-			}
-		else
-			{
-				TCR.x = texcoord.x - P;
-				TCL.x = texcoord.x + P;
-				TCR.y = texcoord.y;
-				TCL.y = texcoord.y;
-			}
-		}	
-		else
-		{
-		if (Stereoscopic_Mode == 0)
+		if ( Stereoscopic_Mode == 0)
 			{
 				TCL.x = (texcoord.x*2-1) - P;
 				TCR.x = (texcoord.x*2) + P;
 				TCL.y = texcoord.y;
 				TCR.y = texcoord.y;
 			}
-		else if(Stereoscopic_Mode == 1)
+		else if( Stereoscopic_Mode == 1 )
 			{
 				TCL.x = texcoord.x - P;
 				TCR.x = texcoord.x + P;
@@ -1086,67 +1077,80 @@ float4 PS_calcLR(in float2 texcoord : TEXCOORD0)
 				TCL.y = texcoord.y;
 				TCR.y = texcoord.y;
 			}
+		}	
+		else
+		{
+		if ( Stereoscopic_Mode == 0 )
+			{
+				TCR.x = (texcoord.x*2-1) - P;
+				TCL.x = (texcoord.x*2) + P;
+				TCR.y = texcoord.y;
+				TCL.y = texcoord.y;
+			}
+		else if( Stereoscopic_Mode == 1 )
+			{
+				TCR.x = texcoord.x - P;
+				TCL.x = texcoord.x + P;
+				TCR.y = texcoord.y*2-1;
+				TCL.y = texcoord.y*2;
+			}
+		else
+			{
+				TCR.x = texcoord.x - P;
+				TCL.x = texcoord.x + P;
+				TCR.y = texcoord.y;
+				TCL.y = texcoord.y;
+			}
 		}
-			
-		if (View_Mode == 0)
+				
+		if ( View_Mode == 0 )
 			N = 3;
-		else if (View_Mode == 1)
+		else if ( View_Mode == 1 )
 			N = 5;
-		else if (View_Mode == 2)
-			N = 6;
-		else if (View_Mode == 3)
-			N = 2;
-		
+		else if ( View_Mode == 2 )
+			N = 1.5;
 				
 		[loop]
-		for (int i = 0 ; i < N; i++) 
+		for ( int i = 0 ; i < N; i++ ) 
 		{
-			MS *= 1.025;
 			if (View_Mode == 0)
 			{
 				S = samplesA[i] * MS;
-				L = tex2Dlod(SamplerDis,float4(TCL.x+S, TCL.y,0,0)).r;
-				R = tex2Dlod(SamplerDis,float4(TCR.x-S, TCR.y,0,0)).b;
+				DepthL = min(DepthL,tex2Dlod(SamplerDis,float4(TCL.x+S, TCL.y,0,0)).r);
+				DepthR = min(DepthR,tex2Dlod(SamplerDis,float4(TCR.x-S, TCR.y,0,0)).b);
 			}
 			else if (View_Mode == 1)
 			{
 				S = samplesB[i] * MS;
-				L = tex2Dlod(SamplerDis,float4(TCL.x+S, TCL.y,0,0)).r;
-				R = tex2Dlod(SamplerDis,float4(TCR.x-S, TCR.y,0,0)).b;
+				DepthL = min(DepthL,tex2Dlod(SamplerDis,float4(TCL.x+S, TCL.y,0,0)).r);
+				DepthR = min(DepthR,tex2Dlod(SamplerDis,float4(TCR.x-S, TCR.y,0,0)).b);
 			}
 			else if (View_Mode == 2)
 			{
-				S = samplesC[i] * MS;
-				L += tex2Dlod(SamplerDis,float4(TCL.x+S, TCL.y,0,0)).r/N;
-				R += tex2Dlod(SamplerDis,float4(TCR.x-S, TCR.y,0,0)).b/N;
-			}
-			else if (View_Mode == 3)
-			{
 				S = i * Divergence;
-				L = tex2Dlod(SamplerDis,float4(TCL.x+S*pix.x, TCL.y,0,0)).r;
-				R = tex2Dlod(SamplerDis,float4(TCR.x-S*pix.x, TCR.y,0,0)).b;
+				DepthL = min(DepthL,tex2Dlod(SamplerDis,float4(TCL.x+S*pix.x,TCL.y,0,0)).b);
+				DepthR = min(DepthR,tex2Dlod(SamplerDis,float4(TCR.x-S*pix.x,TCR.y,0,0)).r);
 			}
-
-			
-			DepthL = min(MINMAX.x,L);
-			DepthR = min(MINMAX.x,R);
 		}
-				
+		
 		if (DepthPlus >= 1)//ZPD linked
-		{
-			DepthR = SS(-ZPD,1,DepthR); // Depth Plus is basicly smooth step with out the clamps. Seemed to give more Depth to a Image. 
-			DepthL = SS(-ZPD,1,DepthL); // This will cause some FPS Hand Pop out. This is tolerable. Also kind of controlled by ZPD.
-		}
-
-		float ReprojectionRight = max(-0.250,MS * Conv(DepthR,texcoord)) * 1.0125; //Zero Parallax Distance controll
-		float ReprojectionLeft =  max(-0.250,MS * Conv(DepthL,texcoord)) * 1.0125;
+			{
+				DepthR = SS(-ZPD,1.25,DepthR); // Depth Plus is basicly smooth step with out the clamps. Seemed to give more Depth to a Image. 
+				DepthL = SS(-ZPD,1.25,DepthL); // This will cause some FPS Hand Pop out. This is tolerable. 		
+			}	
+			
+			DepthR = MS * Conv(DepthR,texcoord);
+			DepthL = MS * Conv(DepthL,texcoord);
+		
+		float ReprojectionRight = DepthR; //Zero Parallax Distance controll
+		float ReprojectionLeft =  DepthL;
 	
-		if(Custom_Sidebars == 0)
+		if( Custom_Sidebars == 0 )
 			{
 			Left = tex2D(BackBufferMIRROR, float2(TCL.x + ReprojectionLeft, TCL.y));
 			Right = tex2D(BackBufferMIRROR, float2(TCR.x - ReprojectionRight, TCR.y));
 			}
-			else if(Custom_Sidebars == 1)
+			else if( Custom_Sidebars == 1 )
 			{
 			Left = tex2D(BackBufferBORDER, float2(TCL.x + ReprojectionLeft, TCL.y));
 			Right = tex2D(BackBufferBORDER, float2(TCR.x - ReprojectionRight, TCR.y));
@@ -1156,8 +1160,8 @@ float4 PS_calcLR(in float2 texcoord : TEXCOORD0)
 			Left = tex2D(BackBufferCLAMP, float2(TCL.x + ReprojectionLeft, TCL.y));
 			Right = tex2D(BackBufferCLAMP, float2(TCR.x - ReprojectionRight, TCR.y));
 			}
-			
-			if (Eye_Swap)
+	
+			if ( Eye_Swap )
 			{
 				cL = Right;
 				cR = Left;	
@@ -1341,7 +1345,7 @@ float4 PS_calcLR(in float2 texcoord : TEXCOORD0)
 		else
 	{		
 			float4 Top = texcoord.x < 0.5 ? Lum(float2(texcoord.x*2,texcoord.y*2)).xxxx : tex2Dlod(SamplerDM,float4(texcoord.x*2-1 , texcoord.y*2,0,0)).rrbb;
-			color = texcoord.y < 0.5 ? Top : tex2Dlod(SamplerDis,float4(texcoord.x,texcoord.y*2-1,0,0)).rrrr;
+			color = texcoord.y < 0.5 ? Top : L;
 	}
 	float Average_Luminance = texcoord.y < 0.5 ? 0.5 : tex2D(SamplerDM,float2(texcoord.x,texcoord.y)).g;
 	return float4(color.rgb,Average_Luminance);

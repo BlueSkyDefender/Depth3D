@@ -138,12 +138,13 @@ IF IT HAS AN *asterisk* I AM STILL WORKING ON IT. But, you can still use the set
 [Read Below]  [Special Depth Map Game List]  [Depth Map] [Adjustment] [Weapon DM] [Offset] [Depth Flip] [Auto T / ZDP Range] [Balance]
                Double Dragon Neon                DM 3       0.1                    0.6300               No Off / 0.250-0.350    [3]
                Dungeons 2                        DM 3       0.350                  0.3750       Yes     No Off / 0.150-0.250    [3]
+               Fez                               DM 4       10.0                   0.6010       Yes     No Off / 0.0            [3] 
                Lara Croft & Temple of Osiris     DM 3       15.0                   0.3754               Yes I  / 1.125-1.375    [1]
     RB         Magicka 2                         DM 3       3.250                  0.3730               No Off / 0.025-0.075    [0]
                Never Alone (Kisima Ingitchuna)   DM 3       3.125                  0.3688               No Off / 0.090-0.140    [3]             
     RB         Requiem: Avenging Angel           DM 3       3.1875                 0.5740               No Off / 0.010-0.025    [3]
                Silent Hill: Homecoming           DM 3       1.625                  0.4080               No Off / 0.100-0.125    [3]       
-               Rise Of the Tomb Raider           DM 5       1.0                    0.375425             No Off / 0.200-0.300    [3]
+               Rise Of the Tomb Raider           DM 5       15.0                   0.375425             No Off / 0.200-0.300    [3]
                
 [Emulator] [RB] [Special Depth Map Game List]                [Depth Map] [Adjustment] [Weapon DM] [Offset] [Depth Flip] [Auto T / ZDP Range] [Balance]
 CEMU             Mariokart 8                                     DM *         *                                 Yes      *
@@ -538,9 +539,6 @@ http://pcgamingwiki.com/wiki/You_Are_Empty
 _________________________________________________________________________________________________________________________________
 {Condemned: Criminal Origins}
 Depth Buffer Drops time to time Also Dissable FSAA (FSAA OFF)
-
-{Fez}
-At one time this game was working. But, not any more Reshade will no longer start.
 
 {Monstrum}
 Start the game in OpenGL or DX3D mode. Game seems to change Depth Buffer now after update. I suggest useing TriDef.
