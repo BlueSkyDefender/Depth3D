@@ -1353,7 +1353,7 @@ float4 PS_calcLR(in float2 texcoord : TEXCOORD0)
 		else
 	{		
 			float4 Top = texcoord.x < 0.5 ? Lum(float2(texcoord.x*2,texcoord.y*2)).xxxx : tex2Dlod(SamplerDM,float4(texcoord.x*2-1 , texcoord.y*2,0,0)).rrbb;
-			color = texcoord.y < 0.5 ? Top : L;
+			color = texcoord.y < 0.5 ? Top : tex2Dlod(SamplerDis,float4(texcoord.x,texcoord.y*2-1,0,0)).rrrr;
 	}
 	float Average_Luminance = texcoord.y < 0.5 ? 0.5 : tex2D(SamplerDM,float2(texcoord.x,texcoord.y)).g;
 	return float4(color.rgb,Average_Luminance);
