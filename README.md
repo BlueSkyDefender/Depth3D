@@ -1,5 +1,5 @@
 #SuperDepth3D
-Depth Map Based 3D post-process shader v1.9.5 for Reshade 3.0
+Depth Map Based 3D post-process shader v1.9.8 for Reshade 3.0
 
 There are the Basic Depth maps you can use for your games listed and not listed. Look at this link for other game Compatibility.
 
@@ -89,9 +89,9 @@ Game Compatibility
 * Stacking
 * Stay Close
 * Tales of Zestiria
-* The Elder Scrolls V: SE
-* The Elder Scrolls V: Skyrim
+* The Elder Scrolls V: Skyrim SE
 * The Evil Within
+* The Evil Within 2
 * The Legend of Korra
 * The Vanishing of Ethan Carter Redux
 * The Void
@@ -112,7 +112,7 @@ https://github.com/BlueSkyDefender/Depth3D/blob/master/ReadMe_Depth3D.txt
 Also read https://github.com/BlueSkyDefender/Depth3D/blob/master/Game_Settings.txt For Game Settings.
  
 ## The Reshade 2.0 Repack For 1.9.0
-
+this needs to be updated................... Do Not Use
 http://www.mediafire.com/file/swji5143ga20b1t/ReShade_2.0.3f1_Super_DepthMap_3D_v1.9.0_Repack.7z
 
 ## User Game & Settings
@@ -126,3 +126,5 @@ https://reshade.me/forum/shader-presentation/2128-sidebyside-3d-depth-map-based-
 If you enjoyed this shader and like to donate paypal.me/BlueSkyDefender
 
 Also my steam page steamcommunity.com/id/BlueSkyDefender
+
+Discord Server discord.gg/W2f7YhX
