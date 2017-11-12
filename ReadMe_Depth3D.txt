@@ -1,5 +1,5 @@
 ﻿#SuperDepth3D
-Depth Map Based 3D post-process shader v1.9.6 for Reshade 3.0 WIP
+Depth Map Based 3D post-process shader v1.9.8 for Reshade 3.0 WIP
 
 This Shader allows for Depth Map Based 3D like What Nvidia does with Compatibility Mode 3D and Kind of what TriDef Does with Power 3D. 
 
@@ -9,14 +9,29 @@ At this link look for Depth Map Compatibility.
 Game Depth Map list and settings.
 https://github.com/BlueSkyDefender/Depth3D/blob/master/Game_Settings.txt
 
-PLEASE SET YOUR RESOLUTION FIRST. Turn Off DOF in all games if possible. Unless you want to know how it feels to be neer sighted.
+PLEASE SET YOUR RESOLUTION FIRST. Turn Off DOF in all games if possible. Unless you want to know how it feels to be neer sighted
+
+#Polynomial Barrel Distortion 
+Polynomial Barrel Distortion v1.2 Is an barrel distortion for HMD type Displays For SuperDepth3D.
+Shader order is important when using PBD shader with SuperDepth3D. Make sure this is last.
+Ex.
+Cross_Cursor
+Depth3D
+Polynomial_Barrel_Distortion_M
 
 ### In-shader Settings
 ======================================================================================================================================
-Depth_Map_Division Determines The size of the Depth Map. For 4k Use 2 or 2.5. For 1440p Use 1.5 or 2. For 1080p use 1.
-To edit this open up the shader and change this number
+// Determines The resolution of the Depth Map. For 4k Use 1.75 or 1.5. For 1440p Use 1.5 or 1.25. For 1080p use 1. Too low of a resolution will remove too much.
+#define Depth_Map_Division 1.0
 
-#define Depth_Map_Division 2.0
+// Determines The Max Depth amount. The larger the amount harder it will hit on FPS will be.
+#define Depth_Max 50
+
+// Enable this to fix the problem when there is a full screen Game Map Poping out of the screen. AKA Full Black Depth Map Fix. I have this off by default. Zero is off, One is On.
+#define FBDMF 0
+
+// BOTW Fix WIP
+#define AADM 0
 
 ### In-game Menu Settings
 ======================================================================================================================================
@@ -26,7 +41,7 @@ Shift + f2 for Reshade 3.0 menu
 ## Basic 3D Settings Section
 
 * Alternate Depth Map 	      [Depth Map 0 ▼]         [0-40] Alternate Depth Map for Games. 
-* Depth                      -[◄0▪▪▪▪▪▪▪30►]+         Depth Default is 15. "Drag to Adjust Depth." You can enter what ever you want.
+* Depth                      -[◄0▪▪▪▪▪▪▪50►]+         Depth Default is 15. "Drag to Adjust Depth." You can enter what ever you want.
 * Perspective                -[◄-100▪▪▪100►]+         [-100:100] Perspective Default is 0. "Drag to Adjust Perspective."
 * Disocclusion Type           [Disocclusion Mask ▼]   Pick the type of disocclusion you want. Options are [Off ▼] [Normal ▼] [Radial ▼]
 
@@ -51,11 +66,6 @@ Shift + f2 for Reshade 3.0 menu
 * Anaglyph Desaturation      -[◄▪▪▪▪▪▪1.0►]+          Adjust anaglyph desaturation, Zero is Black & White, One is full color.
 * Custom Sidebars             [Black Edges ▼]         Select [Mirrored Edges ▼] [Black Edges ▼] or [Stretched Edges ▼]. 
 * Eye Swap                    [Off ▼]                 Left Right Eye Swap.
-
-## Ambient Occlusion Section
-* 3D AO Mode                  [On  ▼]                 Ambient occlusion settings. Default is On. Options are [Off ▼] and [AO x8 ▼]
-* AO Power                   -[◄▪▪▪▪0.5▪▪▪▪►]+        Ambient occlusion power on Depth Map.
-* AO Falloff                 -[◄▪▪▪▪1.5▪▪▪▪►]+        Ambient occlusion falloff.
 
 User Guides: 
 
