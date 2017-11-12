@@ -202,13 +202,14 @@ uniform int View_Mode <
 	ui_type = "combo";
 	ui_items = "View Mode Normal\0View Mode Alpha\0View Mode Beta\0View Mode Gamma\0";
 	ui_label = "View Mode";
-	ui_tooltip = "Change the way the shader warps the output to the screen.\n" 
+	ui_tooltip = "Change the way the shader warps the output to the screen.\n"
 				 "Default is Normal";
 > = 0;
 
 uniform bool Auto_Depth_Range <
 	ui_label = "Auto Depth Range";
-	ui_tooltip = "The Map Automaticly scales to outdoor and indoor areas.";
+	ui_tooltip = "The Map Automaticly scales to outdoor and indoor areas.\n" 
+				 "This is still WIP";
 > = false;
 
 uniform bool Eye_Swap <

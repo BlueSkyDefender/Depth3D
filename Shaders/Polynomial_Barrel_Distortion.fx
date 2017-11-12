@@ -3,7 +3,7 @@
  //-----------------------------------------////
 
  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
- //* Barrel Distortion for HMD type Displays For SuperDepth3D v1.1																													*//
+ //* Barrel Distortion for HMD type Displays For SuperDepth3D v1.2																													*//
  //* For Reshade 3.0																																								*//
  //* --------------------------																																						*//
  //* This work is licensed under a Creative Commons Attribution 3.0 Unported License.																								*//
@@ -22,9 +22,14 @@
  //* 																																												*//
  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+// Determines Slave and Master Shader Toggle. This is used if you want pair this shader up with a other one of the same kind.
+// One = Master;
+// Zero = Slave;
+#define TOGGLE 1
+
 uniform int Interpupillary_Distance <
 	ui_type = "drag";
-	ui_min = -100; ui_max = 100;
+	ui_min = -400; ui_max = 400;
 	ui_label = "Interpupillary Distance";
 	ui_tooltip = "Determines the distance between your eyes.\n" 
 				 "In Monoscopic mode it's x offset calibration.\n"
@@ -53,6 +58,14 @@ uniform float Lens_Distortion <
 				 "Default is 0.01";
 > = 0.01;
 
+uniform float2 Degrees <
+	ui_type = "drag";
+	ui_min = 0; ui_max =  360;
+	ui_label = "Rotation";
+	ui_tooltip = "Left & Right Rotation Angle known as Degrees.\n"
+				 "Default is Zero";
+> = float2(0.0,0.0);
+
 uniform float3 Polynomial_Colors <
 	ui_type = "drag";
 	ui_min = 0.250; ui_max = 2.0;
@@ -71,10 +84,15 @@ uniform float2 Zoom_Aspect_Ratio <
 
 uniform int Custom_Sidebars <
 	ui_type = "combo";
-	ui_items = "Mirrored Edges\0Black Edges\0Stretched Edges\0";
+	ui_items = "Black Edges\0Stretched Edges\0";
 	ui_label = "Edge Selection";
 	ui_tooltip = "Select how you like the Edge of the screen to look like.";
 > = 1;
+
+uniform bool Vignette <
+	ui_label = "Vignette";
+	ui_tooltip = "Soft edge effect around the image.";
+> = false;
 
 uniform bool Diaspora <
 	ui_label = "Diaspora Fix";
@@ -101,6 +119,7 @@ float LD = Lens_Distortion;
 float Z = Zoom;
 float AR = Aspect_Ratio;
 float3 PC = Polynomial_Colors;
+float2 D =  Degrees;
 float4x4 Done;
 
 	//Make your own Profile here.
@@ -112,6 +131,7 @@ float4x4 Done;
 		Z = 1.0;					//Zoom. Default is 1.0
 		AR = 1.0;					//Aspect Ratio. Default is 1.0
 		PC = float3(1,1,1);			//Polynomial Colors. Default is (Red 1.0, Green 1.0, Blue 1.0)
+		D = float2(0,0);			//Left & Right Rotation Angle known as Degrees.
 	}
 	
 	//Make your own Profile here.
@@ -123,15 +143,28 @@ float4x4 Done;
 		Z = 1.0;					//Zoom. Default is 1.0
 		AR = 0.925;					//Aspect Ratio. Default is 1.0
 		PC = float3(0.5,0.75,1);	//Polynomial Colors. Default is (Red 1.0, Green 1.0, Blue 1.0)
+		D = float2(0,0);			//Left & Right Rotation Angle known as Degrees.
+	}
+
+	//Rift Profile WIP
+	if (HMD_Profiles == 3)
+	{
+		IPD = -320.0;				//Interpupillary Distance.
+		LC = 0.5; 					//Lens Center. Default is 0.5
+		LD = 0.250;					//Lens Distortion. Default is 0.01
+		Z = 1.0;					//Zoom. Default is 1.0
+		AR = 1.0;					//Aspect Ratio. Default is 1.0
+		PC = float3(1,1,1);	//Polynomial Colors. Default is (Red 1.0, Green 1.0, Blue 1.0)
+		D = float2(0,0);			//Left & Right Rotation Angle known as Degrees.
 	}
 
 if(Diaspora)
 {
-Done = float4x4(float4(IPD,PC.x,Z,0),float4(LC,PC.y,AR,0),float4(LD,PC.z,0,0),float4(0,0,0,0)); //Diaspora frak up 4x4 fix
+Done = float4x4(float4(IPD,PC.x,Z,0),float4(LC,PC.y,AR,0),float4(LD,PC.z,D.x,0),float4(0,0,0,D.y)); //Diaspora frak up 4x4 fix
 }
 else
 {
-Done = float4x4(float4(IPD,LC,LD,0),float4(PC.x,PC.y,PC.z,0),float4(Z,AR,0,0),float4(0,0,0,0));
+Done = float4x4(float4(IPD,LC,LD,0),float4(PC.x,PC.y,PC.z,0),float4(Z,AR,D.x,0),float4(0,0,0,D.y));
 }
 return Done;
 }
@@ -173,6 +206,13 @@ float3 P_C()
 	return PC;
 }
 
+//Degrees Section//
+float2 DEGREES()
+{
+	float2 Degrees = float2(HMDProfiles()[2][2],HMDProfiles()[3][3]);
+	return Degrees;
+}
+
 /////////////////////////////////////////////D3D Starts Here/////////////////////////////////////////////////////////////////
 
 #define pix float2(BUFFER_RCP_WIDTH, BUFFER_RCP_HEIGHT)
@@ -184,20 +224,21 @@ sampler BackBuffer
 		Texture = BackBufferTex;
 	};
 	
-texture texCL  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA32F;}; 
-texture texCR  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA32F;}; 
-	
-sampler SamplerCLMIRROR
-	{
-		Texture = texCL;
-		AddressU = MIRROR;
-		AddressV = MIRROR;
-		AddressW = MIRROR;
-	};
+#if TOGGLE
+texture texCLM  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA32F;}; 
+texture texCRM  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA32F;}; 
+#else
+texture texCLS  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA32F;}; 
+texture texCRS  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA32F;}; 
+#endif
 	
 sampler SamplerCLBORDER
 	{
-		Texture = texCL;
+		#if TOGGLE
+		Texture = texCLM;
+		#else
+		Texture = texCLS;
+		#endif
 		AddressU = BORDER;
 		AddressV = BORDER;
 		AddressW = BORDER;
@@ -205,23 +246,23 @@ sampler SamplerCLBORDER
 
 sampler SamplerCLCLAMP
 	{
-		Texture = texCL;
+		#if TOGGLE
+		Texture = texCLM;
+		#else
+		Texture = texCLS;
+		#endif
 		AddressU = CLAMP;
 		AddressV = CLAMP;
 		AddressW = CLAMP;
 	};
-
-sampler SamplerCRMIRROR
-	{
-		Texture = texCR;
-		AddressU = MIRROR;
-		AddressV = MIRROR;
-		AddressW = MIRROR;
-	};
 	
 sampler SamplerCRBORDER
 	{
-		Texture = texCR;
+		#if TOGGLE
+		Texture = texCRM;
+		#else
+		Texture = texCRS;
+		#endif
 		AddressU = BORDER;
 		AddressV = BORDER;
 		AddressW = BORDER;
@@ -229,7 +270,11 @@ sampler SamplerCRBORDER
 	
 sampler SamplerCRCLAMP
 	{
-		Texture = texCR;
+		#if TOGGLE
+		Texture = texCRM;
+		#else
+		Texture = texCRS;
+		#endif
 		AddressU = CLAMP;
 		AddressV = CLAMP;
 		AddressW = CLAMP;
@@ -286,9 +331,30 @@ float2 DR(float2 p, float k_RGB) //Cubic Lens Distortion Right
 	return p;
 }
 
-float4 PDL(float2 texcoord)		//Texture = texCL Left
+float4 vignetteL(in float2 texcoord : TEXCOORD0)
+{  
+float4 base;
+	
+	if(Custom_Sidebars == 0)
+	{
+		base = tex2D(SamplerCLBORDER, texcoord);
+	}
+	else
+	{
+		base = tex2D(SamplerCLCLAMP, texcoord);
+	}
+		   
+		texcoord = -texcoord * texcoord + texcoord;
+		
+		if( Vignette )
+		base.rgb *= saturate(texcoord.x * texcoord.y * 250);
 
+	return base;    
+}
+
+float4 PDL(float2 texcoord)		//Texture = texCL Left
 {		
+		texcoord.x += IPDS() * pix.x;
 		float4 color;
 		float2 uv_red, uv_green, uv_blue;
 		float4 color_red, color_green, color_blue;
@@ -306,24 +372,9 @@ float4 PDL(float2 texcoord)		//Texture = texCL Left
 		uv_green = DL(texcoord.xy-sectorOrigin,Green) + sectorOrigin;
 		uv_blue = DL(texcoord.xy-sectorOrigin,Blue) + sectorOrigin;
 		
-		if(Custom_Sidebars == 0)
-		{
-		color_red = tex2D(SamplerCLMIRROR, uv_red).r;
-		color_green = tex2D(SamplerCLMIRROR, uv_green).g;
-		color_blue = tex2D(SamplerCLMIRROR, uv_blue).b;
-		}
-		else if(Custom_Sidebars == 1)
-		{
-		color_red = tex2D(SamplerCLBORDER, uv_red).r;
-		color_green = tex2D(SamplerCLBORDER, uv_green).g;
-		color_blue = tex2D(SamplerCLBORDER, uv_blue).b;
-		}
-		else
-		{
-		color_red = tex2D(SamplerCLCLAMP, uv_red).r;
-		color_green = tex2D(SamplerCLCLAMP, uv_green).g;
-		color_blue = tex2D(SamplerCLCLAMP, uv_blue).b;
-		}
+		color_red = vignetteL(uv_red).r;
+		color_green = vignetteL(uv_green).g;
+		color_blue = vignetteL(uv_blue).b;
 
 		if( ((uv_red.x > 0) && (uv_red.x < 1) && (uv_red.y > 0) && (uv_red.y < 1)))
 		{
@@ -336,10 +387,32 @@ float4 PDL(float2 texcoord)		//Texture = texCL Left
 		return color;
 		
 	}
+
+
+float4 vignetteR(in float2 texcoord : TEXCOORD0)
+{  
+float4 base;
+
+		if(Custom_Sidebars == 0)
+		{
+		base = tex2D(SamplerCRBORDER, texcoord);
+		}
+		else
+		{
+		base = tex2D(SamplerCRCLAMP, texcoord);
+		}
+		   
+		texcoord = -texcoord * texcoord + texcoord;
+		
+		if( Vignette )
+		base.rgb *= saturate(texcoord.x * texcoord.y * 250);
+
+	return base;    
+}
 	
 	float4 PDR(float2 texcoord)		//Texture = texCR Right
-
 {		
+		texcoord.x -= IPDS() * pix.x;
 		float4 color;
 		float2 uv_red, uv_green, uv_blue;
 		float4 color_red, color_green, color_blue;
@@ -356,25 +429,10 @@ float4 PDL(float2 texcoord)		//Texture = texCL Left
 		uv_red = DR(texcoord.xy-sectorOrigin,Red) + sectorOrigin;
 		uv_green = DR(texcoord.xy-sectorOrigin,Green) + sectorOrigin;
 		uv_blue = DR(texcoord.xy-sectorOrigin,Blue) + sectorOrigin;
-		
-		if(Custom_Sidebars == 0)
-		{
-		color_red = tex2D(SamplerCRMIRROR, uv_red).r;
-		color_green = tex2D(SamplerCRMIRROR, uv_green).g;
-		color_blue = tex2D(SamplerCRMIRROR, uv_blue).b;
-		}
-		else if(Custom_Sidebars == 1)
-		{
-		color_red = tex2D(SamplerCRBORDER, uv_red).r;
-		color_green = tex2D(SamplerCRBORDER, uv_green).g;
-		color_blue = tex2D(SamplerCRBORDER, uv_blue).b;
-		}
-		else
-		{
-		color_red = tex2D(SamplerCRCLAMP, uv_red).r;
-		color_green = tex2D(SamplerCRCLAMP, uv_green).g;
-		color_blue = tex2D(SamplerCRCLAMP, uv_blue).b;
-		}
+
+		color_red = vignetteR(uv_red).r;
+		color_green = vignetteR(uv_green).g;
+		color_blue = vignetteR(uv_blue).b;
 
 		if( ((uv_red.x > 0) && (uv_red.x < 1) && (uv_red.y > 0) && (uv_red.y < 1)))
 		{
@@ -391,6 +449,38 @@ float4 PDL(float2 texcoord)		//Texture = texCL Left
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 float4 PBDOut(float2 texcoord : TEXCOORD0)
 {	
+	//Texture Rotation//
+	
+	//Converts the specified value from radians to degrees.
+	float LD = radians(DEGREES().x);
+	float RD = radians(-DEGREES().y);
+	float MD = radians(DEGREES().x);
+	
+	//Left
+	float2 L_PivotPoint = float2(0.25,0.5);
+    float2 L_Rotationtexcoord = texcoord;
+    float L_sin_factor = sin(LD);
+    float L_cos_factor = cos(LD);
+    L_Rotationtexcoord = mul(L_Rotationtexcoord - L_PivotPoint, float2x2(float2(L_cos_factor, L_sin_factor), float2(-L_sin_factor, L_cos_factor)));
+	L_Rotationtexcoord += L_PivotPoint;
+	
+	//Right
+	float2 R_PivotPoint = float2(0.75,0.5);
+    float2 R_Rotationtexcoord = texcoord;
+    float R_sin_factor = sin(RD);
+    float R_cos_factor = cos(RD);
+    R_Rotationtexcoord = mul(R_Rotationtexcoord - R_PivotPoint, float2x2(float2(R_cos_factor, R_sin_factor), float2(-R_sin_factor, R_cos_factor)));
+	R_Rotationtexcoord += R_PivotPoint;
+	
+	//Mono
+	float2 PivotPoint = float2(0.5,0.5);
+    float2 Rotationtexcoord = texcoord;
+    float sin_factor = sin(MD);
+    float cos_factor = cos(MD);
+    Rotationtexcoord = mul(Rotationtexcoord - PivotPoint, float2x2(float2(cos_factor, sin_factor), float2(-sin_factor, cos_factor)));
+	Rotationtexcoord += PivotPoint;	
+	//Texture Rotation End//
+
 	float4 Out;
 	
 	float X = Z_A().x;
@@ -404,21 +494,24 @@ float4 PBDOut(float2 texcoord : TEXCOORD0)
 	
 	if( Stereoscopic_Mode_Convert == 0 || Stereoscopic_Mode_Convert == 1)
 	{
-	Out = texcoord.x < 0.5 ? PDL(float2(((texcoord.x*2)*X)-midV + IPDS() * pix.x,(texcoord.y*Y)-midH)) : PDR(float2(((texcoord.x*2-1)*X)-midV - IPDS() * pix.x,(texcoord.y*Y)-midH));
+	Out = texcoord.x < 0.5 ? PDL(float2(((L_Rotationtexcoord.x*2)*X)-midV ,(L_Rotationtexcoord.y*Y)-midH)) : PDR(float2(((R_Rotationtexcoord.x*2-1)*X)-midV ,(R_Rotationtexcoord.y*Y)-midH));
 	}
 	else if (Stereoscopic_Mode_Convert == 2 || Stereoscopic_Mode_Convert == 3)
 	{
-	Out = texcoord.y < 0.5 ? PDL(float2((texcoord.x*X)-midV + IPDS() * pix.x,((texcoord.y*2)*Y)-midH)) : PDR(float2((texcoord.x*X)-midV - IPDS() * pix.x,((texcoord.y*2-1)*Y)-midH));
+	Out = texcoord.y < 0.5 ? PDL(float2((L_Rotationtexcoord.x*X)-midV ,((L_Rotationtexcoord.y*2)*Y)-midH)) : PDR(float2((R_Rotationtexcoord.x*X)-midV ,((R_Rotationtexcoord.y*2-1)*Y)-midH));
 	}
 	else
 	{
-	Out = PDL(float2((texcoord.x*X)-midV + IPDS() * pix.x,(texcoord.y*Y)-midH));
+	Out = PDL(float2((Rotationtexcoord.x*X)-midV ,(Rotationtexcoord.y*Y)-midH));
 	}
+	
 	return Out;
 }
 
 ////////////////////////////////////////////////////////Logo/////////////////////////////////////////////////////////////////////////
 uniform float timer < source = "timer"; >;
+
+
 float4 Out(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Target
 {
 	//#define pix float2(BUFFER_RCP_WIDTH, BUFFER_RCP_HEIGHT)
@@ -566,17 +659,25 @@ void PostProcessVS(in uint id : SV_VertexID, out float4 position : SV_Position, 
 }
 
 //*Rendering passes*//
-
-technique Polynomial_Barrel_Distortion
-{			
+#if TOGGLE
+technique Polynomial_Barrel_Distortion_M
+#else
+technique Polynomial_Barrel_Distortion_S
+#endif
+{		
 			pass StereoMonoPass
 		{
 			VertexShader = PostProcessVS;
 			PixelShader = LR;
-			RenderTarget0 = texCL;
-			RenderTarget1 = texCR;
+			#if TOGGLE
+			RenderTarget0 = texCLM;
+			RenderTarget1 = texCRM;
+			#else
+			RenderTarget0 = texCLS;
+			RenderTarget1 = texCRS;
+			#endif
 		}
-			pass SidebySidePolynomialBarrelDistortion
+			pass PBD
 		{
 			VertexShader = PostProcessVS;
 			PixelShader = Out;	
