@@ -1108,9 +1108,9 @@ float4 PS_calcLR(in float2 texcoord : TEXCOORD0)
 		else if (View_Mode == 1)
 			N = 5;
 		else if (View_Mode == 2)
-			N = 1.125;
+			N = 1.025;
 		else if (View_Mode == 3)
-			N = Divergence/1.1875;
+			N = Divergence/1.01;
 				
 		[loop]
 		for ( int i = 0 ; i < N; i++ ) 
@@ -1129,7 +1129,7 @@ float4 PS_calcLR(in float2 texcoord : TEXCOORD0)
 			}
 			else if (View_Mode == 2)
 			{
-				S = lerp(i*(Divergence/1.125), (Divergence/1.125),0.5);
+				S = lerp(i*(Divergence/1.025), (Divergence/1.025),0.5);
 				DepthL = min(DepthL,tex2Dlod(SamplerDis,float4(TCL.x+S*pix.x,TCL.y,0,0)).b);
 				DepthR = min(DepthR,tex2Dlod(SamplerDis,float4(TCR.x-S*pix.x,TCR.y,0,0)).r);
 			}
