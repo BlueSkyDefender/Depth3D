@@ -61,7 +61,7 @@ uniform float Divergence <
 	ui_label = "Divergence Slider";
 	ui_tooltip = "Determines the amount of Image Warping and Separation.\n" 
 				 "You can override this value.";
-> = 35;
+> = 35.0;
 
 uniform float ZPD <
 	ui_type = "drag";
@@ -206,11 +206,13 @@ uniform int View_Mode <
 				 "Default is Normal";
 > = 0;
 
-uniform bool Auto_Depth_Range <
+uniform float Auto_Depth_Range <
+	ui_type = "drag";
+	ui_min = 0.0; ui_max = 0.625;
 	ui_label = "Auto Depth Range";
 	ui_tooltip = "The Map Automaticly scales to outdoor and indoor areas.\n" 
 				 "This is still WIP";
-> = false;
+> = 0.0;
 
 uniform bool Eye_Swap <
 	ui_label = "Swap Eyes";
@@ -872,47 +874,7 @@ float Conv(float D,float2 texcoord)
 
 float SS(float edge0, float edge1, float x)
 {
-		if(DepthPlus == 1)//ZPD linked
-		{
-			edge0 /= 2.0;
-		}
-		else if(DepthPlus == 2)//ZDP linked +
-		{
-			edge0 /= 2.5;
-		}
-		else if(DepthPlus == 3)//ZDP linked ++
-		{
-			edge0 /= 3.75;
-		}
-		else if(DepthPlus == 4)//ZDP linked +++
-		{
-			edge0 /= 4.25;
-		}
-		else if(DepthPlus == 5)//ZDP linked ++++
-		{
-			edge0 /= 5.0;
-		}
-		else if(DepthPlus == 6)//ZDP linked +++++
-		{
-			edge0 /= 6.25;
-		}
-		else if(DepthPlus == 7)//ZDP linked ++++++
-		{
-			edge0 /= 7.5;
-		}
-		else if(DepthPlus == 8)//ZDP linked +++++++
-		{
-			edge0 /= 8.75;
-		}
-		else if(DepthPlus == 9)//ZDP linked ++++++++
-		{
-			edge0 /= 9.25;
-		}
-		else if(DepthPlus == 10)//ZDP linked +++++++++
-		{
-			edge0 /= 10.0;
-		}
-
+	edge0 /= DepthPlus;
     // Scale, bias
     x = (x - edge0)/(edge1 - edge0); 
     // Evaluate polynomial
@@ -921,7 +883,8 @@ float SS(float edge0, float edge1, float x)
 
 float AutoDepthRange( float d, float2 texcoord )
 {
-	float LumAdjust = smoothstep(-0.0175,0.300,Lum(texcoord));
+	float ADR_Scale = Auto_Depth_Range;
+	float LumAdjust = smoothstep(-0.0175,ADR_Scale,Lum(texcoord));
     return min(1,( d - 0 ) / ( LumAdjust - 0));
 }
 
@@ -1033,7 +996,7 @@ DBD = ( DBD - 1.0f ) / ( -187.5f - 1.0f );
 	X = DM.x;
 	Y = DM.y;
 	
-	if (Auto_Depth_Range)
+	if (Auto_Depth_Range > 0)
 	{
 		X = AutoDepthRange(X,texcoord);
 		Y = AutoDepthRange(Y,texcoord);
