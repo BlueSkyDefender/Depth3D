@@ -230,11 +230,6 @@ uniform bool InvertY <
 	ui_tooltip = "Invert Y-Axis for the cross cursor.";
 > = false;
 
-uniform bool TEST <
-	ui_label = "TEST";
-	ui_tooltip = "TEST";
-> = false;
-
 /////////////////////////////////////////////D3D Starts Here/////////////////////////////////////////////////////////////////
 
 #define pix float2(BUFFER_RCP_WIDTH, BUFFER_RCP_HEIGHT)
@@ -737,6 +732,13 @@ void Average_Luminance(in float4 position : SV_Position, in float2 texcoord : TE
 	color = float4(Average_Luminance,1);
 }
 
+float AutoDepthRange( float d, float2 texcoord )
+{
+	float ADR_Scale = Auto_Depth_Range;
+	float LumAdjust = smoothstep(-0.0175,ADR_Scale,Lum(texcoord));
+    return min(1,( d - 0 ) / ( LumAdjust - 0));
+}
+
 float Conv(float D,float2 texcoord)
 {
 	float Z, ZP, Con = ZPD, NF_Power, MS = Divergence * pix.x, DH = ZPD * 100;
@@ -872,18 +874,16 @@ float Conv(float D,float2 texcoord)
 		}
 				
 		float Convergence = MS * ( 1 - (Z*DH) / D );
-		
 			Z = MS *  (D + Convergence);
+		
+		if (Auto_Depth_Range > 0)
+		{
+			D = AutoDepthRange(D,texcoord);
+		}	
+			
 			Z = lerp(Z,MS * D,ZP);
 		
     return Z;
-}
-
-float AutoDepthRange( float d, float2 texcoord )
-{
-	float ADR_Scale = Auto_Depth_Range;
-	float LumAdjust = smoothstep(-0.0175,ADR_Scale,Lum(texcoord));
-    return min(1,( d - 0 ) / ( LumAdjust - 0));
 }
 
 void  Disocclusion(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 color : SV_Target0)
@@ -994,11 +994,6 @@ DBD = ( DBD - 1.0f ) / ( -187.5f - 1.0f );
 	X = DM.x;
 	Y = DM.y;
 	
-	if (Auto_Depth_Range > 0)
-	{
-		X = AutoDepthRange(X,texcoord);
-		Y = AutoDepthRange(Y,texcoord);
-	}
 	color = float4(X,DM.x,Y,1);
 }
 
@@ -1309,7 +1304,8 @@ float4 PS_calcLR(in float2 texcoord : TEXCOORD0)
 		else
 	{		
 			float4 Top = texcoord.x < 0.5 ? Lum(float2(texcoord.x*2,texcoord.y*2)).xxxx : tex2Dlod(SamplerDM,float4(texcoord.x*2-1 , texcoord.y*2,0,0)).rrbb;
-			color = texcoord.y < 0.5 ? Top : tex2Dlod(SamplerDis,float4(texcoord.x,texcoord.y*2-1,0,0)).rrrr;
+			float4 Bottom = texcoord.x < 0.5 ?  AutoDepthRange(tex2Dlod(SamplerDM,float4(texcoord.x*2 , texcoord.y*2-1,0,0)).rrbb,texcoord) : tex2Dlod(SamplerDis,float4(texcoord.x*2-1,texcoord.y*2-1,0,0)).rrrr;
+			color = texcoord.y < 0.5 ? Top : Bottom;
 	}
 	float Average_Luminance = texcoord.y < 0.5 ? 0.5 : tex2D(SamplerDM,float2(texcoord.x,texcoord.y)).g;
 	return float4(color.rgb,Average_Luminance);
