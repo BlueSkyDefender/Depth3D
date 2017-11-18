@@ -1119,18 +1119,18 @@ float4 PS_calcLR(in float2 texcoord : TEXCOORD0)
 	
 		if(Custom_Sidebars == 0)
 			{
-				Left = tex2D(BackBufferMIRROR, float2(TCL.x + ReprojectionLeft, TCL.y));
-				Right = tex2D(BackBufferMIRROR, float2(TCR.x - ReprojectionRight, TCR.y));
+				Left = tex2Dlod(BackBufferMIRROR, float4(TCL.x + ReprojectionLeft, TCL.y,0,0));
+				Right = tex2Dlod(BackBufferMIRROR, float4(TCR.x - ReprojectionRight, TCR.y,0,0));
 			}
 			else if(Custom_Sidebars == 1)
 			{
-				Left = tex2D(BackBufferBORDER, float2(TCL.x + ReprojectionLeft, TCL.y));
-				Right = tex2D(BackBufferBORDER, float2(TCR.x - ReprojectionRight, TCR.y));
+				Left = tex2Dlod(BackBufferBORDER, float4(TCL.x + ReprojectionLeft, TCL.y,0,0));
+				Right = tex2Dlod(BackBufferBORDER, float4(TCR.x - ReprojectionRight, TCR.y,0,0));
 			}
 			else
 			{
-				Left = tex2D(BackBufferCLAMP, float2(TCL.x + ReprojectionLeft, TCL.y));
-				Right = tex2D(BackBufferCLAMP, float2(TCR.x - ReprojectionRight, TCR.y));
+				Left = tex2Dlod(BackBufferCLAMP, float4(TCL.x + ReprojectionLeft, TCL.y,0,0));
+				Right = tex2Dlod(BackBufferCLAMP, float4(TCR.x - ReprojectionRight, TCR.y,0,0));
 			}
 	
 			if ( Eye_Swap )
