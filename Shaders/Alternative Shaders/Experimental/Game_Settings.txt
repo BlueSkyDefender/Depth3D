@@ -57,7 +57,7 @@ IF IT HAS AN *asterisk* I AM STILL WORKING ON IT. But, you can still use the set
     RB        Dungeon Nightmares II                           DM 0         17.5                      Yes     No Off / 0.375-0.500    [4]                                
               Dying Light                                     DM 1         22.5                              No Off / 0.001-0.010    [4]
     RB        Emily Wants To Play                             DM 1         25.0                              Yes N  / 0.150-0.200    [3]                                      
-              Euro Trucks Sim 2                               DM 0         8.750       WDM 25        Yes     No Off / 0.450-0.550    [0] 
+              Euro Trucks Sim 2                               DM 0         8.750       WDM 25         ?      No Off / 0.450-0.550    [0] 
               Everybody's Gone to the Rapture                 DM 0         1.50                              No Off / 0.375-0.625    [5]                       
               Fallout 4                                       DM 0         6.875       WDM 8                 No Off / 0.075-0.200    [5]          
     RB        FarCry 3                                        DM 0         7.50                              No Off / 0.100-0.200    [5]
