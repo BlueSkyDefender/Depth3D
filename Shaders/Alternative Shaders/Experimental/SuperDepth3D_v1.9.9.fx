@@ -24,7 +24,7 @@
 // Determines The resolution of the Depth Map. For 4k Use 1.75 or 1.5. For 1440p Use 1.5 or 1.25. For 1080p use 1. Too low of a resolution will remove too much.
 #define Depth_Map_Division 1.0
 
-// Determines The Max Depth amount. The larger the amount harder it will hit on FPS will be.
+// Determines The Max Depth amount.
 #define Depth_Max 50
 
 // Enable this to fix the problem when there is a full screen Game Map Poping out of the screen. AKA Full Black Depth Map Fix. I have this off by default. Zero is off, One is On.
@@ -32,6 +32,13 @@
 
 // BOTW Fix WIP
 #define AADM 0
+
+// Change the Cancel Depth Key
+// Determines the Cancel Depth Toggle Key useing keycode info
+// You can use http://keycode.info/ to figure out what key is what.
+// key "." is Key Code 110. Ex. Key 110 is the code for Decimal Point.
+
+#define Cancel_Depth_Key 0
 
 uniform int Depth_Map <
 	ui_type = "combo";
@@ -87,7 +94,7 @@ uniform int Auto_ZPD <
 
 uniform int Balance <
 	ui_type = "drag";
-	ui_min = -4.0; ui_max = 4.0;
+	ui_min = -3.0; ui_max = 3.0;
 	ui_label = "Balance";
 	ui_tooltip = "Balance between ZPD Depth and Scene Depth and works with ZPD option above.\n"
 				"Example Zero is 50/50 equal between ZPD Depth and Scene Depth.\n"
@@ -229,6 +236,8 @@ uniform bool InvertY <
 	ui_label = "Invert Y-Axis";
 	ui_tooltip = "Invert Y-Axis for the cross cursor.";
 > = false;
+
+uniform bool Cancel_Depth < source = "key"; keycode = Cancel_Depth_Key; toggle = true; >;
 
 /////////////////////////////////////////////D3D Starts Here/////////////////////////////////////////////////////////////////
 
@@ -827,11 +836,7 @@ float Conv(float D,float2 texcoord)
 		}
 		//Average Luminance Auto ZDP End
 		
-		if(Balance == -4)
-		{
-			NF_Power = 0.0;
-		}
-		else if(Balance == -3)
+		if(Balance == -3)
 		{
 			NF_Power = 0.125;
 		}
@@ -858,10 +863,6 @@ float Conv(float D,float2 texcoord)
 		else if(Balance == 3)
 		{
 			NF_Power = 0.875;
-		}
-		else if(Balance == 4)
-		{
-			NF_Power = 1.0;
 		}
 		
 		if(ZPD == 0)
@@ -991,8 +992,16 @@ DBD = ( DBD - 1.0f ) / ( -187.5f - 1.0f );
 		DM = tex2Dlod(SamplerDM,float4(texcoord,0,0)).rb;
 	}
 
-	X = DM.x;
-	Y = DM.y;
+	if (!Cancel_Depth)
+	{
+		X = DM.x;
+		Y = DM.y;
+	}
+	else
+	{
+		X = 0.5;
+		Y = 0.5;
+	}
 	
 	color = float4(X,DM.x,Y,1);
 }
@@ -1304,7 +1313,7 @@ float4 PS_calcLR(in float2 texcoord : TEXCOORD0)
 		else
 	{		
 			float4 Top = texcoord.x < 0.5 ? Lum(float2(texcoord.x*2,texcoord.y*2)).xxxx : tex2Dlod(SamplerDM,float4(texcoord.x*2-1 , texcoord.y*2,0,0)).rrbb;
-			float4 Bottom = texcoord.x < 0.5 ?  AutoDepthRange(tex2Dlod(SamplerDM,float4(texcoord.x*2 , texcoord.y*2-1,0,0)).rrbb,texcoord) : tex2Dlod(SamplerDis,float4(texcoord.x*2-1,texcoord.y*2-1,0,0)).rrrr;
+			float4 Bottom = texcoord.x < 0.5 ?  AutoDepthRange(tex2Dlod(SamplerDM,float4(texcoord.x*2 , texcoord.y*2-1,0,0)).r,texcoord) : tex2Dlod(SamplerDis,float4(texcoord.x*2-1,texcoord.y*2-1,0,0)).rrrr;
 			color = texcoord.y < 0.5 ? Top : Bottom;
 	}
 	float Average_Luminance = texcoord.y < 0.5 ? 0.5 : tex2D(SamplerDM,float2(texcoord.x,texcoord.y)).g;
