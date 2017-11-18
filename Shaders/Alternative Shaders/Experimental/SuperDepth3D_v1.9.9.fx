@@ -642,14 +642,6 @@ float2 WeaponDepth(in float2 texcoord : TEXCOORD0)
 			WA_Y = 500.0;
 			CoP = 5.0;
 		}
-
-		//TEXT MODE 26 Adjust
-		else if(WDM == 28) //Text mode one.
-		{
-			WA_X = Weapon_Adjust.x;
-			WA_Y = 100;
-			CoP = 0.252;
-		}
 		
 		//WDM 24 ; Dying Light
 		else if(WDM == 26)
@@ -658,8 +650,23 @@ float2 WeaponDepth(in float2 texcoord : TEXCOORD0)
 			WA_Y = -40.0;
 			CoP = 2.0;
 		}
-						
+		
+		//WDM 25 ; Dying Light
+		else if(WDM == 27)
+		{
+			WA_X = 2.800;
+			WA_Y = 1.0;
+			CoP = 0.280;
+		}				
 		//SWDMS Done//
+ 		
+ 		//TEXT MODE 26 Adjust
+		else if(WDM == 28) //Text mode one.
+		{
+			WA_X = Weapon_Adjust.x;
+			WA_Y = 100;
+			CoP = 0.252;
+		}
  		
 		//Scaled Section z-Buffer
 		
@@ -680,7 +687,7 @@ float2 WeaponDepth(in float2 texcoord : TEXCOORD0)
 		
 		float AA,AL = abs(smoothstep(0,1,LumWeapon(texcoord)*2));
 		
-		if( WDM == 1 || WDM == 22 || WDM == 24 || WDM == 28 )//WDM Adjust,SOMA, and HUD mode.
+		if( WDM == 1 || WDM == 22 || WDM == 24 || WDM == 27 || WDM == 28 )//WDM Adjust,SOMA, EuroTruckSim2, and HUD mode.
 		{
 			zBufferWH = zBufferWH;
 		}
