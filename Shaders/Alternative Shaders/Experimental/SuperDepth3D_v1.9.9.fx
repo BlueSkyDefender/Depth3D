@@ -94,7 +94,7 @@ uniform int Auto_ZPD <
 
 uniform int Balance <
 	ui_type = "drag";
-	ui_min = -3.0; ui_max = 3.0;
+	ui_min = -1.0; ui_max = 6.0;
 	ui_label = "Balance";
 	ui_tooltip = "Balance between ZPD Depth and Scene Depth and works with ZPD option above.\n"
 				"Example Zero is 50/50 equal between ZPD Depth and Scene Depth.\n"
@@ -842,16 +842,7 @@ float Conv(float D,float2 texcoord)
 			Z = ZPDC;
 		}
 		//Average Luminance Auto ZDP End
-		
-		if(Balance == -3)
-		{
-			NF_Power = 0.125;
-		}
-		else if(Balance == -2)
-		{
-			NF_Power = 0.250;
-		}
-		else if(Balance == -1)
+		if(Balance == -1)
 		{
 			NF_Power = 0.375;
 		}
@@ -861,13 +852,25 @@ float Conv(float D,float2 texcoord)
 		}
 		else if(Balance == 1)
 		{
-			NF_Power = 0.625;
+			NF_Power = 0.5625;
 		}
 		else if(Balance == 2)
 		{
-			NF_Power = 0.75;
+			NF_Power = 0.625;
 		}
 		else if(Balance == 3)
+		{
+			NF_Power = 0.6875;
+		}
+		else if(Balance == 4)
+		{
+			NF_Power = 0.75;
+		}
+		else if(Balance == 5)
+		{
+			NF_Power = 0.8125;
+		}
+		else if(Balance == 6)
 		{
 			NF_Power = 0.875;
 		}
@@ -881,15 +884,17 @@ float Conv(float D,float2 texcoord)
 			ZP = NF_Power;
 		}
 				
-		float Convergence = MS * ( 1 - (Z*DH) / D );
-			Z = MS *  (D + Convergence);
+		float Convergence = 1 - Z / D;
 		
+		Convergence = Convergence + D; 
+		Convergence /= 1.750;
+		 
 		if (Auto_Depth_Range > 0)
 		{
 			D = AutoDepthRange(D,texcoord);
 		}	
 			
-			Z = lerp(Z,MS * D,ZP);
+			Z = lerp(MS * Convergence,MS * D,ZP);
 		
     return Z;
 }
