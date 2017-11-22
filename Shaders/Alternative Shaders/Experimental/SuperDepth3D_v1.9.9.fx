@@ -72,7 +72,7 @@ uniform float Divergence <
 
 uniform float ZPD <
 	ui_type = "drag";
-	ui_min = 0.0; ui_max = 0.375;
+	ui_min = 0.0; ui_max = 0.500;
 	ui_label = "Zero Parallax Distance";
 	ui_tooltip = "ZPD controls the focus distance for the screen Pop-out effect.\n"
 				"For FPS Games this should be around 0.005-0.075.\n"
@@ -94,7 +94,7 @@ uniform int Auto_ZPD <
 
 uniform int Balance <
 	ui_type = "drag";
-	ui_min = -1.0; ui_max = 6.0;
+	ui_min = -4.0; ui_max = 6.0;
 	ui_label = "Balance";
 	ui_tooltip = "Balance between ZPD Depth and Scene Depth and works with ZPD option above.\n"
 				"Example Zero is 50/50 equal between ZPD Depth and Scene Depth.\n"
@@ -519,7 +519,7 @@ float2 WeaponDepth(in float2 texcoord : TEXCOORD0)
 		else if(WDM == 10)
 		{
 			WA_X = 2.5275;
-			WA_Y = 0.125;
+			WA_Y = 0.0875;
 			CoP = 0.255;
 		}
 		
@@ -685,15 +685,15 @@ float2 WeaponDepth(in float2 texcoord : TEXCOORD0)
 		
 		//Auto Anti Weapon Depth Map Z-Fighting is always on.
 		
-		float AA,AL = abs(smoothstep(0,1,LumWeapon(texcoord)*2));
-		
+		float WeaponLumAdjust = abs(smoothstep(0,0.5,LumWeapon(texcoord)*2.5)) * zBufferWH;	
+			
 		if( WDM == 1 || WDM == 22 || WDM == 24 || WDM == 27 || WDM == 28 )//WDM Adjust,SOMA, EuroTruckSim2, and HUD mode.
 		{
 			zBufferWH = zBufferWH;
 		}
 		else
 		{
-			zBufferWH = lerp(zBufferWH*AL,zBufferWH,0.025);
+			zBufferWH = lerp(saturate(WeaponLumAdjust),zBufferWH,0.025);
 		}
 		
 		if(Weapon_Adjust.z <= 0) //Zero Is auto
@@ -757,7 +757,7 @@ float AutoDepthRange( float d, float2 texcoord )
 
 float Conv(float D,float2 texcoord)
 {
-	float Z, ZP, Con = ZPD, NF_Power, MS = Divergence * pix.x, DH = ZPD * 100;
+	float Z, ZP, Con = ZPD, NF_Power, MS = Divergence * pix.x, NMS = Divergence/1.11111111 * pix.x;
 						
 		//Average Luminance Auto ZDP Start
 		float Luminance, LClamp = smoothstep(0,1,Lum(texcoord)); //Average Luminance Texture Sample 
@@ -842,9 +842,21 @@ float Conv(float D,float2 texcoord)
 			Z = ZPDC;
 		}
 		//Average Luminance Auto ZDP End
-		if(Balance == -1)
+		if(Balance == -4)
+		{
+			NF_Power = 0.125;
+		}		
+		if(Balance == -3)
+		{
+			NF_Power = 0.250;
+		}
+		if(Balance == -2)
 		{
 			NF_Power = 0.375;
+		}
+		else if(Balance == -1)
+		{
+			NF_Power = 0.425;
 		}
 		else if(Balance == 0)
 		{
@@ -883,18 +895,15 @@ float Conv(float D,float2 texcoord)
 		{
 			ZP = NF_Power;
 		}
-				
-		float Convergence = 1 - Z / D;
 		
-		Convergence = Convergence + D; 
-		Convergence /= 1.750;
-		 
+		float Convergence = 1 - Z / D;
+			 
 		if (Auto_Depth_Range > 0)
 		{
 			D = AutoDepthRange(D,texcoord);
 		}	
 			
-			Z = lerp(MS * Convergence,MS * D,ZP);
+			Z = lerp(NMS * Convergence ,MS * D,ZP);
 		
     return Z;
 }
