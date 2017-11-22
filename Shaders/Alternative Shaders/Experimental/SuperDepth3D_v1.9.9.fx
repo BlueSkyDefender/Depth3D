@@ -198,7 +198,7 @@ uniform float Anaglyph_Desaturation <
 
 uniform int View_Mode <
 	ui_type = "combo";
-	ui_items = "View Mode Normal\0View Mode Alpha\0View Mode Beta\0View Mode Gamma\0";
+	ui_items = "View Mode Normal\0View Mode Alpha\0View Mode Beta\0View Mode Gamma\0View Mode Delta\0";
 	ui_label = "View Mode";
 	ui_tooltip = "Change the way the shader warps the output to the screen.\n"
 				 "Default is Normal";
@@ -1036,6 +1036,7 @@ float4 PS_calcLR(in float2 texcoord : TEXCOORD0)
 	float DepthR = 1, DepthL = 1, ConAlt, MS, P, N, S, L, R;
 	float samplesA[3] = {0.5,0.75,1.0};
 	float samplesB[5] = {0.5,0.625,0.75,0.875,1.0};
+	float samplesC[17] = {0.5,0.53125,0.5625,0.59375,0.625,0.63125,0.6875,0.71875,0.75,0.78125,0.8125,0.84375,0.875,0.90625,0.9375,0.96875,1.0};
 	
 	//MS is Max Separation P is Perspective Adjustment
 	P = Perspective * pix.x;
@@ -1098,6 +1099,8 @@ float4 PS_calcLR(in float2 texcoord : TEXCOORD0)
 			N = 1.025;
 		else if (View_Mode == 3)
 			N = Divergence/1.01;
+		else if (View_Mode == 4)
+			N = 17;
 				
 		[loop]
 		for ( int i = 0 ; i < N; i++ ) 
@@ -1125,6 +1128,14 @@ float4 PS_calcLR(in float2 texcoord : TEXCOORD0)
 				S = i;
 				DepthL = min(DepthL,tex2Dlod(SamplerDis,float4(TCL.x+S*pix.x,TCL.y,0,0)).b);
 				DepthR = min(DepthR,tex2Dlod(SamplerDis,float4(TCR.x-S*pix.x,TCR.y,0,0)).r);
+			}
+			else if (View_Mode == 4)
+			{
+				S = samplesC[i] * MS;
+				L += tex2Dlod(SamplerDis,float4(TCL.x+S, TCL.y,0,0)).r/17;
+				R += tex2Dlod(SamplerDis,float4(TCR.x-S, TCR.y,0,0)).b/17;
+				DepthL = saturate(L);
+				DepthR = saturate(R);
 			}
 		}
 			
