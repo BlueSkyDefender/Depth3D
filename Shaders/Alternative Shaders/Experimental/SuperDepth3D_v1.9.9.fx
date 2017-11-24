@@ -198,7 +198,7 @@ uniform float Anaglyph_Desaturation <
 
 uniform int View_Mode <
 	ui_type = "combo";
-	ui_items = "View Mode Normal\0View Mode Alpha\0View Mode Beta\0View Mode Gamma\0View Mode Delta\0";
+	ui_items = "View Mode Normal\0View Mode Alpha\0View Mode Beta\0View Mode Gamma\0";
 	ui_label = "View Mode";
 	ui_tooltip = "Change the way the shader warps the output to the screen.\n"
 				 "Default is Normal";
@@ -236,6 +236,25 @@ uniform bool InvertY <
 	ui_label = "Invert Y-Axis";
 	ui_tooltip = "Invert Y-Axis for the cross cursor.";
 > = false;
+
+//uniform bool TEST <
+	//ui_label = "TEST";
+	//ui_tooltip = "TEST.";
+//> = false;
+
+//uniform float2 H <
+	//ui_type = "drag";
+	//ui_min = 0; ui_max = 1.0;
+	//ui_label = "H";
+	//ui_tooltip = "H";
+//> = float2(0,1);
+
+uniform float Depth_Plus <
+	ui_type = "drag";
+	ui_min = 0; ui_max = 1.0;
+	ui_label = "Depth Plus";
+	ui_tooltip = "This is to turn on Depth Plus a depth and pop enhancment.";
+> = 0.0;
 
 uniform bool Cancel_Depth < source = "key"; keycode = Cancel_Depth_Key; toggle = true; >;
 
@@ -901,10 +920,18 @@ float Conv(float D,float2 texcoord)
 		if (Auto_Depth_Range > 0)
 		{
 			D = AutoDepthRange(D,texcoord);
-		}	
+		}
 			
-			Z = lerp(NMS * Convergence ,MS * D,ZP);
+		// You need to readjust the Z-Buffer if your going to use use the Convergence equation. You can do it this way or Use Convergence/1-(-ZPD)
+		Convergence = ( Convergence - 0 ) / ( (1-Z) - 0);
 		
+		// Depth Plus
+		float DP = Depth_Plus*0.250;
+		//D = D/1-(DP/1.5);
+		D = lerp(D,1-D,-DP); 
+		
+		Z = lerp(MS * Convergence,MS * D,ZP);
+			
     return Z;
 }
 
@@ -1015,6 +1042,9 @@ DBD = ( DBD - 1.0f ) / ( -187.5f - 1.0f );
 
 	if (!Cancel_Depth)
 	{
+		//Conv(DepthR,texcoord)
+		//X = Conv(DM.x,texcoord);
+		//Y = Conv(DM.y,texcoord);
 		X = DM.x;
 		Y = DM.y;
 	}
@@ -1023,7 +1053,7 @@ DBD = ( DBD - 1.0f ) / ( -187.5f - 1.0f );
 		X = 0.5;
 		Y = 0.5;
 	}
-	
+		
 	color = float4(X,DM.x,Y,1);
 }
 
@@ -1098,8 +1128,6 @@ float4 PS_calcLR(in float2 texcoord : TEXCOORD0)
 		else if (View_Mode == 2)
 			N = 1.025;
 		else if (View_Mode == 3)
-			N = Divergence/1.01;
-		else if (View_Mode == 4)
 			N = 17;
 				
 		[loop]
@@ -1125,12 +1153,6 @@ float4 PS_calcLR(in float2 texcoord : TEXCOORD0)
 			}
 			else if (View_Mode == 3)
 			{
-				S = i;
-				DepthL = min(DepthL,tex2Dlod(SamplerDis,float4(TCL.x+S*pix.x,TCL.y,0,0)).b);
-				DepthR = min(DepthR,tex2Dlod(SamplerDis,float4(TCR.x-S*pix.x,TCR.y,0,0)).r);
-			}
-			else if (View_Mode == 4)
-			{
 				S = samplesC[i] * MS;
 				L += tex2Dlod(SamplerDis,float4(TCL.x+S, TCL.y,0,0)).r/17;
 				R += tex2Dlod(SamplerDis,float4(TCR.x-S, TCR.y,0,0)).b/17;
@@ -1138,10 +1160,9 @@ float4 PS_calcLR(in float2 texcoord : TEXCOORD0)
 				DepthR = saturate(R);
 			}
 		}
-			
 			DepthR = Conv(DepthR,texcoord);
 			DepthL = Conv(DepthL,texcoord);
-		
+			
 		float ReprojectionRight = DepthR; //Zero Parallax Distance controll
 		float ReprojectionLeft =  DepthL;
 	
