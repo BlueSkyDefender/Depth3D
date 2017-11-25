@@ -237,25 +237,6 @@ uniform bool InvertY <
 	ui_tooltip = "Invert Y-Axis for the cross cursor.";
 > = false;
 
-//uniform bool TEST <
-	//ui_label = "TEST";
-	//ui_tooltip = "TEST.";
-//> = false;
-
-//uniform float2 H <
-	//ui_type = "drag";
-	//ui_min = 0; ui_max = 1.0;
-	//ui_label = "H";
-	//ui_tooltip = "H";
-//> = float2(0,1);
-
-uniform float Depth_Plus <
-	ui_type = "drag";
-	ui_min = 0; ui_max = 1.0;
-	ui_label = "Depth Plus";
-	ui_tooltip = "This is to turn on Depth Plus a depth and pop enhancment.";
-> = 0.0;
-
 uniform bool Cancel_Depth < source = "key"; keycode = Cancel_Depth_Key; toggle = true; >;
 
 /////////////////////////////////////////////D3D Starts Here/////////////////////////////////////////////////////////////////
@@ -925,11 +906,6 @@ float Conv(float D,float2 texcoord)
 		// You need to readjust the Z-Buffer if your going to use use the Convergence equation. You can do it this way or Use Convergence/1-(-ZPD)
 		Convergence = ( Convergence - 0 ) / ( (1-Z) - 0);
 		
-		// Depth Plus
-		float DP = Depth_Plus*0.250;
-		//D = D/1-(DP/1.5);
-		D = lerp(D,1-D,-DP); 
-		
 		Z = lerp(MS * Convergence,MS * D,ZP);
 			
     return Z;
@@ -1042,9 +1018,6 @@ DBD = ( DBD - 1.0f ) / ( -187.5f - 1.0f );
 
 	if (!Cancel_Depth)
 	{
-		//Conv(DepthR,texcoord)
-		//X = Conv(DM.x,texcoord);
-		//Y = Conv(DM.y,texcoord);
 		X = DM.x;
 		Y = DM.y;
 	}
@@ -1153,7 +1126,7 @@ float4 PS_calcLR(in float2 texcoord : TEXCOORD0)
 			}
 			else if (View_Mode == 3)
 			{
-				S = samplesC[i] * MS;
+				S = samplesC[i] * MS * 1.125;
 				L += tex2Dlod(SamplerDis,float4(TCL.x+S, TCL.y,0,0)).r/17;
 				R += tex2Dlod(SamplerDis,float4(TCR.x-S, TCR.y,0,0)).b/17;
 				DepthL = saturate(L);
