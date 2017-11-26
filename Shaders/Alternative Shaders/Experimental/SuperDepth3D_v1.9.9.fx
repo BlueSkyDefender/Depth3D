@@ -896,15 +896,14 @@ float Conv(float D,float2 texcoord)
 			ZP = NF_Power;
 		}
 		
-		float Convergence = 1 - Z / D;
-			 
+		// You need to readjust the Z-Buffer if your going to use use the Convergence equation. You can do it this way or Use Convergence/1-(-ZPD)
+		float DM = ( D - 0 ) / ( (1-Z) - 0);
+		float Convergence = 1 - Z / DM;
+	 
 		if (Auto_Depth_Range > 0)
 		{
 			D = AutoDepthRange(D,texcoord);
 		}
-			
-		// You need to readjust the Z-Buffer if your going to use use the Convergence equation. You can do it this way or Use Convergence/1-(-ZPD)
-		Convergence = ( Convergence - 0 ) / ( (1-Z) - 0);
 		
 		Z = lerp(MS * Convergence,MS * D,ZP);
 			
