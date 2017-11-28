@@ -345,7 +345,7 @@ sampler SamplerLumWeapon
 	
 		float LumWeapon(in float2 texcoord : TEXCOORD0)
 	{
-		float Luminance = tex2Dlod(SamplerLumWeapon,float4(texcoord,0,0)).g; //Average Luminance Texture Sample 
+		float Luminance = tex2Dlod(SamplerLumWeapon,float4(texcoord,0,0)).r; //Average Luminance Texture Sample 
 
 		return Luminance;
 	}
@@ -740,12 +740,6 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 		B = RDM;
 		
 	Color = float4(R,G,B,A);
-}
-
-void Average_Luminance(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 color : SV_Target0)
-{
-	float3 Average_Luminance = tex2D(SamplerDM,float2(texcoord.x,texcoord.y)).ggg;
-	color = float4(Average_Luminance,1);
 }
 
 float AutoDepthRange( float d, float2 texcoord )
@@ -1341,14 +1335,20 @@ float4 PS_calcLR(in float2 texcoord : TEXCOORD0)
 			float4 Bottom = texcoord.x < 0.5 ?  AutoDepthRange(tex2Dlod(SamplerDM,float4(texcoord.x*2 , texcoord.y*2-1,0,0)).r,texcoord) : tex2Dlod(SamplerDis,float4(texcoord.x*2-1,texcoord.y*2-1,0,0)).rrrr;
 			color = texcoord.y < 0.5 ? Top : Bottom;
 	}
-	float Average_Luminance = texcoord.y < 0.5 ? 0.5 : tex2D(SamplerDM,float2(texcoord.x,texcoord.y)).g;
-	return float4(color.rgb,Average_Luminance);
+	float Average_Lum = texcoord.y < 0.5 ? 0.5 : tex2D(SamplerDM,float2(texcoord.x,texcoord.y)).g;
+	return float4(color.rgb,Average_Lum);
 }
 
-void Average_Luminance_Weapon(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 color : SV_Target0)
+float4 Average_Luminance(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Target
 {
-	float3 Average_Luminance = PS_calcLR(float2(texcoord.x,(texcoord.y + 0.500) * 0.500 + 0.250)).www;
-	color = float4(Average_Luminance,1);
+	float3 Average_Lum = tex2D(SamplerDM,float2(texcoord.x,texcoord.y)).ggg;
+	return float4(Average_Lum,1);
+}
+
+float4 Average_Luminance_Weapon(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Target
+{
+	float3 Average_Lum_Weapon = PS_calcLR(float2(texcoord.x,(texcoord.y + 0.500) * 0.500 + 0.250)).www;
+	return float4(Average_Lum_Weapon,1);
 }
 
 ////////////////////////////////////////////////////////Logo/////////////////////////////////////////////////////////////////////////
@@ -1517,17 +1517,17 @@ technique Depth3D
 			PixelShader = DepthMap;
 			RenderTarget = texDM;
 		}
-			pass AverageLuminance
-		{
-			VertexShader = PostProcessVS;
-			PixelShader = Average_Luminance;
-			RenderTarget = texLum;
-		}
 			pass Disocclusion
 		{
 			VertexShader = PostProcessVS;
 			PixelShader = Disocclusion;
 			RenderTarget = texDis;
+		}
+			pass AverageLuminance
+		{
+			VertexShader = PostProcessVS;
+			PixelShader = Average_Luminance;
+			RenderTarget = texLum;
 		}
 			pass AverageLuminanceWeapon
 		{
@@ -1540,5 +1540,4 @@ technique Depth3D
 			VertexShader = PostProcessVS;
 			PixelShader = Out;
 		}
-
 	}
