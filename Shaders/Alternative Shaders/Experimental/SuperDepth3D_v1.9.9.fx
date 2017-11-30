@@ -263,6 +263,9 @@ sampler BackBufferMIRROR
 		AddressU = MIRROR;
 		AddressV = MIRROR;
 		AddressW = MIRROR;
+		MagFilter = LINEAR;
+		MinFilter = LINEAR;
+		MipFilter = LINEAR;
 	};
 
 sampler BackBufferBORDER
@@ -271,6 +274,9 @@ sampler BackBufferBORDER
 		AddressU = BORDER;
 		AddressV = BORDER;
 		AddressW = BORDER;
+		MagFilter = LINEAR;
+		MinFilter = LINEAR;
+		MipFilter = LINEAR;
 	};
 
 sampler BackBufferCLAMP
@@ -279,6 +285,9 @@ sampler BackBufferCLAMP
 		AddressU = CLAMP;
 		AddressV = CLAMP;
 		AddressW = CLAMP;
+		MagFilter = LINEAR;
+		MinFilter = LINEAR;
+		MipFilter = LINEAR;
 	};
 
 texture texDM  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT/Depth_Map_Division; Format = RGBA32F;}; 
@@ -1161,6 +1170,51 @@ float4 PS_calcLR(in float2 texcoord : TEXCOORD0)
 			
 	if(!Depth_Map_View)
 	{
+	
+	float gridy;
+	float gridx;
+
+	if(Scaling_Support == 0)
+	{
+	gridy = floor(texcoord.y*(2160.0));
+	gridx = floor(texcoord.x*(3840.0));
+	}	
+	else if(Scaling_Support == 1)
+	{
+	gridy = floor(texcoord.y*(BUFFER_HEIGHT)); //Native
+	gridx = floor(texcoord.x*(BUFFER_WIDTH)); //Native
+	}
+	else if(Scaling_Support == 2)
+	{
+	gridy = floor(texcoord.y*(1080.0));
+	gridx = floor(texcoord.x*(1920.0));
+	}
+	else if(Scaling_Support == 3)
+	{
+	gridy = floor(texcoord.y*(1081.0));
+	gridx = floor(texcoord.x*(1921.0));
+	}
+	else if(Scaling_Support == 4)
+	{
+	gridy = floor(texcoord.y*(1050.0));
+	gridx = floor(texcoord.x*(1680.0));
+	}
+	else if(Scaling_Support == 5)
+	{
+	gridy = floor(texcoord.y*(1051.0));
+	gridx = floor(texcoord.x*(1681.0));
+	}
+	else if(Scaling_Support == 6)
+	{
+	gridy = floor(texcoord.y*(720.0));
+	gridx = floor(texcoord.x*(1280.0));
+	}
+	else if(Scaling_Support == 7)
+	{
+	gridy = floor(texcoord.y*(721.0));
+	gridx = floor(texcoord.x*(1281.0));
+	}
+			
 		if(Stereoscopic_Mode == 0)
 		{	
 			color = texcoord.x < 0.5 ? cL : cR;
@@ -1171,97 +1225,14 @@ float4 PS_calcLR(in float2 texcoord : TEXCOORD0)
 		}
 		else if(Stereoscopic_Mode == 2)
 		{
-			float gridL;
-			
-			if(Scaling_Support == 0)
-			{
-				gridL = frac(texcoord.y*(2160.0/2));
-			}			
-			else if(Scaling_Support == 1)
-			{
-				gridL = frac(texcoord.y*(BUFFER_HEIGHT/2)); //Native
-			}
-			else if(Scaling_Support == 2)
-			{
-				gridL = frac(texcoord.y*(1080.0/2));
-			}
-			else if(Scaling_Support == 3)
-			{
-				gridL = frac(texcoord.y*(1081.0/2));
-			}
-			else if(Scaling_Support == 4)
-			{
-				gridL = frac(texcoord.y*(1050.0/2));
-			}
-			else if(Scaling_Support == 5)
-			{
-				gridL = frac(texcoord.y*(1051.0/2));
-			}
-
-			color = gridL > 0.5 ? cL : cR;	
+			color = (int(gridy) & 1) < 0.5 ? cL : cR;	
 		}
 		else if(Stereoscopic_Mode == 3)
 		{
-			float gridC;
-			
-			if(Scaling_Support == 0)
-			{
-				gridC = frac(texcoord.x*(3840.0/2));
-			}			
-			else if(Scaling_Support == 1)
-			{
-				gridC = frac(texcoord.x*(BUFFER_WIDTH/2)); //Native
-			}
-			else if(Scaling_Support == 2)
-			{
-				gridC = frac(texcoord.x*(1920.0/2));
-			}
-			else if(Scaling_Support == 3)
-			{
-				gridC = frac(texcoord.x*(1921.0/2));
-			}
-			else if(Scaling_Support == 6)
-			{
-				gridC = frac(texcoord.x*(1280.0/2));
-			}
-			else if(Scaling_Support == 7)
-			{
-				gridC = frac(texcoord.x*(1281.0/2));
-			}
-
-			color = gridC > 0.5 ? cL : cR;		
+			color = (int(gridx) & 1) < 0.5 ? cL : cR;		
 		}
 		else if(Stereoscopic_Mode == 4)
 		{
-			float gridy;
-			float gridx;
-
-			if(Scaling_Support == 1)
-			{
-			gridy = floor(texcoord.y*(BUFFER_HEIGHT)); //Native
-			gridx = floor(texcoord.x*(BUFFER_WIDTH)); //Native
-			}
-			else if(Scaling_Support == 2)
-			{
-			gridy = floor(texcoord.y*(1080.0));
-			gridx = floor(texcoord.x*(1920.0));
-			}
-			else if(Scaling_Support == 3)
-			{
-			gridy = floor(texcoord.y*(1081.0));
-			gridx = floor(texcoord.x*(1921.0));
-			}
-			else if(Scaling_Support == 6)
-			{
-			gridy = floor(texcoord.y*(720.0));
-			gridx = floor(texcoord.x*(1280.0));
-			}
-			else if(Scaling_Support == 7)
-			{
-			gridy = floor(texcoord.y*(721.0));
-			gridx = floor(texcoord.x*(1281.0));
-			}
-			
 			color = (int(gridy+gridx) & 1) < 0.5 ? cL : cR;
 		}
 		else
