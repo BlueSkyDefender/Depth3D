@@ -94,7 +94,8 @@ IF IT HAS AN *asterisk* I AM STILL WORKING ON IT. But, you can still use the set
     RB        Nosferatu: The Wrath of Malachi                 DM 0         62.5                              Yes NH / 0.150-0.175    [3] 
               Observer                                        DM 1         10.0                              No Off / 0.150-0.250    [3] 
     RB        Penumbra: Black Plague                          DM 0         7.5                               No Off / 0.150-0.200    [1]       
-    RB        Phantasmal                                      DM 0         7.5                       Yes     No Off / 0.010-0.020    [3]       
+    RB        Phantasmal                                      DM 0         7.5                       Yes     No Off / 0.010-0.020    [3]
+    RB        Prey 2016                                       DM 0         12.5        WDM 26                No Off / 0.050-0.075    [1]        
     RB        Prey 2017                                       DM 1         18.75      WDM 9 & 10             No Off / 0.025-0.075    [3]                
     RB        Quake Epsilon                                   DM 0         15.00        WDM 15               No Off / 0.075-0.125    [5] 
               Quake 2 XP                                      DM 0         7.5          WDM 16               No Off / 0.125-0.325    [5]
@@ -340,6 +341,13 @@ Go here
 C:\Users\...\Documents\Penumbra\settings.cfg
 Open the settings and set your res. 
 <Screen Width="3840" Height="2160" FullScreen="true" Vsync="true" />
+
+{Prey 2006} - Using Reshade 3.1.0 
+
+Credit goes to Devil Master User on ReShades Forums
+
+Disable the glow in the game options so the DepthMap Shows. Link to the Forum Post.
+https://reshade.me/forum/general-discussion/3219-doom-3-vs-prey-2006-depth-buffer#24982
 
 {Prey 2017}
 Path to install \Steam\steamapps\common\Prey\Binaries\Danielle\x64\Release

@@ -136,7 +136,7 @@ uniform bool Depth_Map_Flip <
 
 uniform int WDM <
 	ui_type = "combo";
-	ui_items = "Weapon DM Off\0Custom WDM\0 WDM 0\0 WDM 1\0 WDM 2\0 WDM 3\0 WDM 4\0 WDM 5\0 WDM 6\0 WDM 7\0 WDM 8\0 WDM 9\0 WDM 10\0 WDM 11\0 WDM 12\0 WDM 13\0 WDM 14\0 WDM 15\0 WDM 16\0 WDM 17\0 WDM 18\0 WDM 19\0 WDM 20\0 WDM 21\0 WDM 22\0 WDM 23\0 WDM 24\0 WDM 25\0 HUD Mode One\0";
+	ui_items = "Weapon DM Off\0Custom WDM\0 WDM 0\0 WDM 1\0 WDM 2\0 WDM 3\0 WDM 4\0 WDM 5\0 WDM 6\0 WDM 7\0 WDM 8\0 WDM 9\0 WDM 10\0 WDM 11\0 WDM 12\0 WDM 13\0 WDM 14\0 WDM 15\0 WDM 16\0 WDM 17\0 WDM 18\0 WDM 19\0 WDM 20\0 WDM 21\0 WDM 22\0 WDM 23\0 WDM 24\0 WDM 25\0 WDM 26\0 WDM 27\0 WDM 28\0 WDM 29\0 WDM 30\0 HUD Mode One\0";
 	ui_label = "Weapon Depth Map";
 	ui_tooltip = "Pick your weapon depth map for games.";
 > = 0;
@@ -263,9 +263,6 @@ sampler BackBufferMIRROR
 		AddressU = MIRROR;
 		AddressV = MIRROR;
 		AddressW = MIRROR;
-		MagFilter = LINEAR;
-		MinFilter = LINEAR;
-		MipFilter = LINEAR;
 	};
 
 sampler BackBufferBORDER
@@ -274,9 +271,6 @@ sampler BackBufferBORDER
 		AddressU = BORDER;
 		AddressV = BORDER;
 		AddressW = BORDER;
-		MagFilter = LINEAR;
-		MinFilter = LINEAR;
-		MipFilter = LINEAR;
 	};
 
 sampler BackBufferCLAMP
@@ -285,9 +279,6 @@ sampler BackBufferCLAMP
 		AddressU = CLAMP;
 		AddressV = CLAMP;
 		AddressW = CLAMP;
-		MagFilter = LINEAR;
-		MinFilter = LINEAR;
-		MipFilter = LINEAR;
 	};
 
 texture texDM  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT/Depth_Map_Division; Format = RGBA32F;}; 
@@ -660,17 +651,25 @@ float2 WeaponDepth(in float2 texcoord : TEXCOORD0)
 			CoP = 2.0;
 		}
 		
-		//WDM 25 ; Dying Light
+		//WDM 25 ; EuroTruckSim2
 		else if(WDM == 27)
 		{
 			WA_X = 2.800;
 			WA_Y = 1.0;
 			CoP = 0.280;
-		}				
+		}
+		
+		//WDM 26 ; Prey - 2006
+		else if(WDM == 28)
+		{
+			WA_X = 5.000;
+			WA_Y = 2.875;
+			CoP = 0.500;
+		}						
 		//SWDMS Done//
  		
- 		//TEXT MODE 26 Adjust
-		else if(WDM == 28) //Text mode one.
+ 		//TEXT MODE 31 Adjust
+		else if(WDM == 33) //Text mode one.
 		{
 			WA_X = Weapon_Adjust.x;
 			WA_Y = 100;
@@ -696,7 +695,7 @@ float2 WeaponDepth(in float2 texcoord : TEXCOORD0)
 		
 		float WeaponLumAdjust = abs(smoothstep(0,0.5,LumWeapon(texcoord)*2.5)) * zBufferWH;	
 			
-		if( WDM == 1 || WDM == 22 || WDM == 24 || WDM == 27 || WDM == 28 )//WDM Adjust,SOMA, EuroTruckSim2, and HUD mode.
+		if( WDM == 1 || WDM == 22 || WDM == 24 || WDM == 27 || WDM == 32 )//WDM Adjust,SOMA, EuroTruckSim2, and HUD mode.
 		{
 			zBufferWH = zBufferWH;
 		}
