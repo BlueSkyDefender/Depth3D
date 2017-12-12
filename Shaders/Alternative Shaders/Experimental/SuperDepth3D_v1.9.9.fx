@@ -464,7 +464,7 @@ float2 WeaponDepth(in float2 texcoord : TEXCOORD0)
 		{
 			WA_X = 2.775;
 			WA_Y = 0.666;
-			CoP = 0.276;
+			CoP = 0.2775;
 		}
 		
 		//WDM 2 ; Amnesia Games

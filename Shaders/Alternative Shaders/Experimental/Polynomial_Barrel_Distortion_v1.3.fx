@@ -300,7 +300,8 @@ float4 Bi_L(in float2 texcoord : TEXCOORD0)
    float2 f = frac( texcoord * TextureSize );
    float4 tA = lerp( tl, tr, f.x );
    float4 tB = lerp( bl, br, f.x );
-   return lerp( tA, tB, f.y )*2;
+   float4 done = lerp( tA, tB, f.y ) * 2.0;//2.0 Gamma correction.
+   return done;
 }
 
 float4 R(in float2 texcoord : TEXCOORD0)
@@ -319,7 +320,8 @@ float4 Bi_R(in float2 texcoord : TEXCOORD0)
    float2 f = frac( texcoord * TextureSize );
    float4 tA = lerp( tl, tr, f.x );
    float4 tB = lerp( bl, br, f.x );
-   return lerp( tA, tB, f.y )*2;
+   float4 done = lerp( tA, tB, f.y ) * 2.0;//2.0 Gamma correction.
+   return done;
 }
 
 void LR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 color : SV_Target0 , out float4 colorT: SV_Target1)
@@ -347,8 +349,8 @@ float4 SBSL, SBSR;
 	//SBSL = (int(gridy+gridx) & 1) < 0.5 ? L(texcoord) : Bi_L(texcoord) ;
 	//SBSR = (int(gridy+gridx) & 1) < 0.5 ? Bi_R(texcoord) : R(texcoord) ;
 	
-		SBSL = Bi_L(texcoord);
-		SBSR = Bi_R(texcoord);
+	SBSL = Bi_L(texcoord);
+	SBSR = Bi_R(texcoord);   
 	}
 	
 color = SBSL;
