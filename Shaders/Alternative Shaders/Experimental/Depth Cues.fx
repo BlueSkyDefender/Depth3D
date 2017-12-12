@@ -22,7 +22,7 @@
 
 uniform float Power <
 	ui_type = "drag";
-	ui_min = 1.5; ui_max = 2.5;
+	ui_min = 1.25; ui_max = 2.5;
 	ui_label = "Shade Power";
 	ui_tooltip = "Adjust the Shade Power Lower is Higher & Higher is Lower.\n"
 				 "This improves AO, Shadows, & Darker Areas in game.\n"
