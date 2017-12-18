@@ -22,7 +22,7 @@
 
 uniform float Power <
 	ui_type = "drag";
-	ui_min = 1.25; ui_max = 2.5;
+	ui_min = 1.5; ui_max = 2.5;
 	ui_label = "Shade Power";
 	ui_tooltip = "Adjust the Shade Power Lower is Higher & Higher is Lower.\n"
 				 "This improves AO, Shadows, & Darker Areas in game.\n"
@@ -55,7 +55,9 @@ uniform bool Debug_View <
 
 /////////////////////////////////////////////////////D3D Starts Here/////////////////////////////////////////////////////////////////
 #define pix float2(BUFFER_RCP_WIDTH, BUFFER_RCP_HEIGHT)
+#define TextureSize float2(BUFFER_WIDTH, BUFFER_HEIGHT)
 #define Sharpen_Power 0.5 //correction for BGpop errors
+
 texture DepthBufferTex : DEPTH;
 
 sampler DepthBuffer 
@@ -76,6 +78,16 @@ sampler SamplerBlur
 	{
 		Texture = texB;
 		MipLODBias = 1.0f;
+		MinFilter = LINEAR;
+		MagFilter = LINEAR;
+		MipFilter = LINEAR;
+	};	
+
+texture texDC { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA8; };
+
+sampler SamplerDC
+	{
+		Texture = texDC;
 		MinFilter = LINEAR;
 		MagFilter = LINEAR;
 		MipFilter = LINEAR;
@@ -140,20 +152,27 @@ float3 GS(float3 color)
     color.b = grayscale;
 	return clamp(color,0.003,1.0);//clamping to protect from over Dark.
 }
-float4 PopOut(float2 texcoord : TEXCOORD0)
-{		
+
+float4 Sharpen_Out(float2 texcoord : TEXCOORD0)
+{
+	float4 RGBA;	
+	//Formula for unsharp masking is Sharpened = Original + (Original - Blurred) * Amount.	
+	RGBA = tex2D(BackBuffer,texcoord) - tex2D(SamplerBlur,texcoord);
+	RGBA = saturate(RGBA * Sharpen_Power);
+	RGBA = tex2D(BackBuffer,texcoord) + RGBA;
+	
+	return RGBA;
+}
+
+float4 DepthCues(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Target
+{
 	//Luma (SD video)	float3(0.299, 0.587, 0.114)
 	//Luma (HD video)	float3(0.2126, 0.7152, 0.0722) https://en.wikipedia.org/wiki/Luma_(video)
 	//Luma (HDR video)	float3(0.2627, 0.6780, 0.0593) https://en.wikipedia.org/wiki/Rec._2100
 	float4 Out,RGBA,RGBB,RGBC,A=tex2D(BackBuffer,texcoord);
 	float3 Luma_Coefficient = float3(0.2627, 0.6780, 0.0593),RGB,RGBT; //Used in Grayscale calculation I see no diffrence....
 	float Con = (1.0 - 0.1875)/1.0;
-	
-	//Formula for unsharp masking is Sharpened = Original + (Original - Blurred) * Amount.	
-	RGBB = tex2D(BackBuffer,texcoord) - tex2D(SamplerBlur,texcoord);
-	RGBB = saturate(RGBB * Sharpen_Power);
-	RGBB = tex2D(BackBuffer,texcoord) + RGBB;
-	
+		
 	//Formula for Image Pop = Original + (Original / Blurred) * Amount * Original.
 	RGB = GS(tex2D(BackBuffer,texcoord).rgb * Con) / GS(Adjust(texcoord).rgb);
 	float Grayscale = dot(RGB, smoothstep(0,1,Luma_Coefficient * Power));
@@ -164,33 +183,62 @@ float4 PopOut(float2 texcoord : TEXCOORD0)
 	float3 BGPop = GS(1-BGGrayscale);
 	
 	RGBA = saturate(Grayscale) + tex2D(BackBuffer,texcoord);
-	float3 Combine = lerp(GS(RGBA.rgb),BGPop.rgb,0.250) * RGBB.rgb;
-	float4 Done = float4(Combine,A.a);
+	float4 Combine = float4(lerp(GS(RGBA.rgb),BGPop.rgb,0.250),A.a);
 	
+	// Dither for Not AO adapted from gedosato ramdom dither https://github.com/PeterTh/gedosato/blob/master/pack/assets/dx9/deband.fx
+	// I noticed in some games have banding so this is used to remove that.
+			
+	float DB  = 4.0f;
+	float noise = frac(sin(dot(texcoord, float2(12.9898, 78.233))) * 43758.5453 * 2);
+	float dither_shift = (1.0 / (pow(2,DB) - 1.0));
+	float dither_shift_half = (dither_shift * 0.5);
+	dither_shift = dither_shift * noise - dither_shift_half;
+	Combine.r += -dither_shift;
+	Combine.r += dither_shift;
+	Combine.r += -dither_shift;
+	Combine.g += -dither_shift;
+	Combine.g += dither_shift;
+	Combine.g += -dither_shift;
+	Combine.b += -dither_shift;
+	Combine.b += dither_shift;
+	Combine.b += -dither_shift;
+	
+	// Dither End	
+	
+	return Combine;
+}
+
+float4 CuesOut(float2 texcoord : TEXCOORD0)
+{		
+	float4 Out;
+	
+	float2 Offset = float2(1.0f,1.0f) * pix;
+	 
+	float4 colA = tex2D(SamplerDC, texcoord + float2(-Offset.x, -Offset.y));
+	float4 colB = tex2D(SamplerDC, texcoord + float2(      0.0, -Offset.y));
+	float4 colC = tex2D(SamplerDC, texcoord + float2(+Offset.x, -Offset.y));
+	float4 colD = tex2D(SamplerDC, texcoord + float2(-Offset.x,       0.0));
+	float4 colE = tex2D(SamplerDC, texcoord);
+	float4 colF = tex2D(SamplerDC, texcoord + float2(+Offset.x,       0.0));
+	float4 colG = tex2D(SamplerDC, texcoord + float2(-Offset.x, +Offset.y));
+	float4 colH = tex2D(SamplerDC, texcoord + float2(      0.0, +Offset.y));
+	float4 colI = tex2D(SamplerDC, texcoord + float2(+Offset.x, +Offset.y));
+	 
+	float4 Sum = (1.0 * colA + 2.0 * colB + 1.0 * colC + 
+				2.0 * colD + 4.0 * colE + 2.0 * colF +
+				1.0 * colG + 2.0 * colH + 1.0 * colI) / 16.0; 
+
+	float4 Combine = Sum * Sharpen_Out(texcoord);
+	
+	float4 Debug_Done = Sum;
+		
 	if (!Debug_View)
 	{
-		Out = Done;
+		Out = Combine;
 	}
 	else
-	{
-		RGBT = GS(tex2D(BackBuffer,float2(texcoord.x,texcoord.y*2)).rgb * Con) / GS(Adjust(float2(texcoord.x,(texcoord.y*2))).rgb);
-		
-		float GSCT = dot(RGBT, smoothstep(0,1,Luma_Coefficient * Power));
-		
-		//Formula for BackGround Pop = Original + (Original - Blurred) * Amount .
-		RGBT = GS(tex2D(BackBuffer,float2(texcoord.x,texcoord.y*2)).rgb) - GS(BGAdjust(float2(texcoord.x,texcoord.y*2)).rgb);
-		float BGGrayscale = dot(RGBT, smoothstep(0,1,Luma_Coefficient * 2.0));
-		float3 BGPop = GS(1-BGGrayscale);
-				
-		RGB = GSCT + tex2D(BackBuffer,float2(texcoord.x,(texcoord.y*2))).rgb;
-
-		RGB = GS(RGB);
-			
-		float4 VA_Top = float4(lerp(RGB,BGPop,0.250),A.a);
-		float4 VA_Bottom = Adjust(float2(texcoord.x,texcoord.y*2-1));
-		
-	Out = texcoord.y < 0.5 ? VA_Top : VA_Bottom;
-	
+	{		
+		Out = Debug_Done;
 	}
 	
 	return Out;
@@ -204,7 +252,7 @@ float4 Out(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Targe
 	float HEIGHT = BUFFER_HEIGHT/2,WIDTH = BUFFER_WIDTH/2;	
 	float2 LCD,LCE,LCP,LCT,LCH,LCThree,LCDD,LCDot,LCI,LCN,LCF,LCO;
 	float size = 9.5,set = BUFFER_HEIGHT/2,offset = (set/size),Shift = 50;
-	float4 Color = PopOut(texcoord),Done,Website,D,E,P,T,H,Three,DD,Dot,I,N,F,O;
+	float4 Color = CuesOut(texcoord),Done,Website,D,E,P,T,H,Three,DD,Dot,I,N,F,O;
 
 	if(timer <= 10000)
 	{
@@ -354,6 +402,12 @@ technique Monocular_Cues
 			PixelShader = Blur;
 			RenderTarget = texB;
 		}	
+			pass BlurFilter
+		{
+			VertexShader = PostProcessVS;
+			PixelShader = DepthCues;
+			RenderTarget = texDC;
+		}
 			pass CuesUnsharpMask
 		{
 			VertexShader = PostProcessVS;

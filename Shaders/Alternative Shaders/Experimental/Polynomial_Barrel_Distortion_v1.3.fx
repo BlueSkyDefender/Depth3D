@@ -50,13 +50,14 @@ uniform float Lens_Center <
 	ui_tooltip = "Adjust Lens Center. Default is 0.5";
 > = 0.5;
 
-uniform float Lens_Distortion <
+uniform float2 Lens_Distortion <
 	ui_type = "drag";
 	ui_min = -0.325; ui_max = 5;
 	ui_label = "Lens Distortion";
-	ui_tooltip = "Lens distortion value, positive values of k2 gives barrel distortion, negative give pincushion.\n"
-				 "Default is 0.01";
-> = 0.01;
+	ui_tooltip = "On the 1st lens distortion value, positive values of k1 gives barrel distortion, negative give pincushion.\n"
+				 "On the 2nd lens distortion value, positive values of k2 gives barrel distortion, negative give pincushion.\n"
+				 "Mainly start with k2. Default is 0.01";
+> = float2(0.01,0.01);
 
 uniform float2 Degrees <
 	ui_type = "drag";
@@ -115,7 +116,8 @@ float Aspect_Ratio = Zoom_Aspect_Ratio.y;
 
 float IPD = Interpupillary_Distance;
 float LC = Lens_Center;
-float LD = Lens_Distortion;
+float LDkO = Lens_Distortion.x;
+float LDkT = Lens_Distortion.y;
 float Z = Zoom;
 float AR = Aspect_Ratio;
 float3 PC = Polynomial_Colors;
@@ -127,7 +129,8 @@ float4x4 Done;
 	{
 		IPD = 0.0;					//Interpupillary Distance. Default is 0
 		LC = 0.5; 					//Lens Center. Default is 0.5
-		LD = 0.01;					//Lens Distortion. Default is 0.01
+		LDkO = 0.01;				//Lens Distortion k1. Default is 0.01
+		LDkT = 0.01;				//Lens Distortion k2. Default is 0.01
 		Z = 1.0;					//Zoom. Default is 1.0
 		AR = 1.0;					//Aspect Ratio. Default is 1.0
 		PC = float3(1,1,1);			//Polynomial Colors. Default is (Red 1.0, Green 1.0, Blue 1.0)
@@ -139,7 +142,8 @@ float4x4 Done;
 	{
 		IPD = -25.0;				//Interpupillary Distance.
 		LC = 0.5; 					//Lens Center. Default is 0.5
-		LD = 0.250;					//Lens Distortion. Default is 0.01
+		LDkO = 0.01;				//Lens Distortion k1. Default is 0.01
+		LDkT = 0.250;				//Lens Distortion k2. Default is 0.01
 		Z = 1.0;					//Zoom. Default is 1.0
 		AR = 0.925;					//Aspect Ratio. Default is 1.0
 		PC = float3(0.5,0.75,1);	//Polynomial Colors. Default is (Red 1.0, Green 1.0, Blue 1.0)
@@ -151,7 +155,8 @@ float4x4 Done;
 	{
 		IPD = -320.0;				//Interpupillary Distance.
 		LC = 0.5; 					//Lens Center. Default is 0.5
-		LD = 0.250;					//Lens Distortion. Default is 0.01
+		LDkO = 0.01;				//Lens Distortion k1. Default is 0.01
+		LDkT = 0.250;				//Lens Distortion k2. Default is 0.01
 		Z = 1.0;					//Zoom. Default is 1.0
 		AR = 1.0;					//Aspect Ratio. Default is 1.0
 		PC = float3(1,1,1);	//Polynomial Colors. Default is (Red 1.0, Green 1.0, Blue 1.0)
@@ -160,11 +165,11 @@ float4x4 Done;
 
 if(Diaspora)
 {
-Done = float4x4(float4(IPD,PC.x,Z,0),float4(LC,PC.y,AR,0),float4(LD,PC.z,D.x,0),float4(0,0,0,D.y)); //Diaspora frak up 4x4 fix
+Done = float4x4(float4(IPD,PC.x,Z,0),float4(LC,PC.y,AR,0),float4(LDkT,PC.z,D.x,0),float4(LDkO,0,0,D.y)); //Diaspora frak up 4x4 fix
 }
 else
 {
-Done = float4x4(float4(IPD,LC,LD,0),float4(PC.x,PC.y,PC.z,0),float4(Z,AR,D.x,0),float4(0,0,0,D.y));
+Done = float4x4(float4(IPD,LC,LDkT,LDkO),float4(PC.x,PC.y,PC.z,0),float4(Z,AR,D.x,0),float4(0,0,0,D.y));
 }
 return Done;
 }
@@ -186,9 +191,9 @@ float LCS()
 }
 
 //Lens Distortion Section//
-float LD_k2()
+float2 LD_kN()
 {
-	float LD = HMDProfiles()[0][2];
+	float2 LD = float2(HMDProfiles()[0][2],HMDProfiles()[0][3]);
 	return LD;
 }
 
@@ -360,10 +365,10 @@ colorT = SBSR;
 float2 DL(float2 p, float k_RGB) //Cubic Lens Distortion Left
 {
 	float LC = 1-LCS();
-	float LD_k1 = 0.01; //Lens distortion value, positive values of k1 give barrel distortion, negative give pincushion.
+	float LD_k1 = LD_kN().y; //Lens distortion value, positive values of k1 give barrel distortion, negative give pincushion.
 	float r2 = (p.x-LC) * (p.x-LC) + (p.y-0.5) * (p.y-0.5);       
 	
-	float newRadius = 1 + r2 * LD_k1 * k_RGB + (LD_k2() * k_RGB * r2 * r2);
+	float newRadius = 1 + r2 * LD_k1 * k_RGB + (LD_kN().x * k_RGB * r2 * r2);
 
 	 p.x = newRadius * (p.x-0.5)+0.5;
 	 p.y = newRadius * (p.y-0.5)+0.5;
@@ -374,10 +379,10 @@ float2 DL(float2 p, float k_RGB) //Cubic Lens Distortion Left
 float2 DR(float2 p, float k_RGB) //Cubic Lens Distortion Right
 {
 	float LC = LCS();
-	float LD_k1 = 0.01; //Lens distortion value, positive values of k1 give barrel distortion, negative give pincushion.
+	float LD_k1 = LD_kN().y; //Lens distortion value, positive values of k1 give barrel distortion, negative give pincushion.
 	float r2 = (p.x-LC) * (p.x-LC) + (p.y-0.5) * (p.y-0.5);       
 	
-	float newRadius = 1 + r2 * LD_k1 * k_RGB + (LD_k2() * k_RGB * r2 * r2);
+	float newRadius = 1 + r2 * LD_k1 * k_RGB + (LD_kN().x * k_RGB * r2 * r2);
 
 	 p.x = newRadius  * (p.x-0.5)+0.5;
 	 p.y = newRadius  * (p.y-0.5)+0.5;
