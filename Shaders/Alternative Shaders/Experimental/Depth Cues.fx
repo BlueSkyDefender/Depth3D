@@ -82,16 +82,6 @@ sampler SamplerBlur
 		MagFilter = LINEAR;
 		MipFilter = LINEAR;
 	};	
-
-texture texDC { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA8; };
-
-sampler SamplerDC
-	{
-		Texture = texDC;
-		MinFilter = LINEAR;
-		MagFilter = LINEAR;
-		MipFilter = LINEAR;
-	};	
 	
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -164,13 +154,13 @@ float4 Sharpen_Out(float2 texcoord : TEXCOORD0)
 	return RGBA;
 }
 
-float4 DepthCues(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Target
+float4 DepthCues(float2 texcoord : TEXCOORD0)
 {
 	//Luma (SD video)	float3(0.299, 0.587, 0.114)
 	//Luma (HD video)	float3(0.2126, 0.7152, 0.0722) https://en.wikipedia.org/wiki/Luma_(video)
 	//Luma (HDR video)	float3(0.2627, 0.6780, 0.0593) https://en.wikipedia.org/wiki/Rec._2100
-	float4 Out,RGBA,RGBB,RGBC,A=tex2D(BackBuffer,texcoord);
-	float3 Luma_Coefficient = float3(0.2627, 0.6780, 0.0593),RGB,RGBT; //Used in Grayscale calculation I see no diffrence....
+	float4 RGBA, A=tex2D(BackBuffer,texcoord);
+	float3 RGB, Luma_Coefficient = float3(0.2627, 0.6780, 0.0593);
 	float Con = (1.0 - 0.1875)/1.0;
 		
 	//Formula for Image Pop = Original + (Original / Blurred) * Amount * Original.
@@ -185,52 +175,16 @@ float4 DepthCues(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV
 	RGBA = saturate(Grayscale) + tex2D(BackBuffer,texcoord);
 	float4 Combine = float4(lerp(GS(RGBA.rgb),BGPop.rgb,0.250),A.a);
 	
-	// Dither for Not AO adapted from gedosato ramdom dither https://github.com/PeterTh/gedosato/blob/master/pack/assets/dx9/deband.fx
-	// I noticed in some games have banding so this is used to remove that.
-			
-	float DB  = 4.0f;
-	float noise = frac(sin(dot(texcoord, float2(12.9898, 78.233))) * 43758.5453 * 2);
-	float dither_shift = (1.0 / (pow(2,DB) - 1.0));
-	float dither_shift_half = (dither_shift * 0.5);
-	dither_shift = dither_shift * noise - dither_shift_half;
-	Combine.r += -dither_shift;
-	Combine.r += dither_shift;
-	Combine.r += -dither_shift;
-	Combine.g += -dither_shift;
-	Combine.g += dither_shift;
-	Combine.g += -dither_shift;
-	Combine.b += -dither_shift;
-	Combine.b += dither_shift;
-	Combine.b += -dither_shift;
-	
-	// Dither End	
-	
 	return Combine;
 }
 
 float4 CuesOut(float2 texcoord : TEXCOORD0)
 {		
 	float4 Out;
-	
-	float2 Offset = float2(1.0f,1.0f) * pix;
-	 
-	float4 colA = tex2D(SamplerDC, texcoord + float2(-Offset.x, -Offset.y));
-	float4 colB = tex2D(SamplerDC, texcoord + float2(      0.0, -Offset.y));
-	float4 colC = tex2D(SamplerDC, texcoord + float2(+Offset.x, -Offset.y));
-	float4 colD = tex2D(SamplerDC, texcoord + float2(-Offset.x,       0.0));
-	float4 colE = tex2D(SamplerDC, texcoord);
-	float4 colF = tex2D(SamplerDC, texcoord + float2(+Offset.x,       0.0));
-	float4 colG = tex2D(SamplerDC, texcoord + float2(-Offset.x, +Offset.y));
-	float4 colH = tex2D(SamplerDC, texcoord + float2(      0.0, +Offset.y));
-	float4 colI = tex2D(SamplerDC, texcoord + float2(+Offset.x, +Offset.y));
-	 
-	float4 Sum = (1.0 * colA + 2.0 * colB + 1.0 * colC + 
-				2.0 * colD + 4.0 * colE + 2.0 * colF +
-				1.0 * colG + 2.0 * colH + 1.0 * colI) / 16.0; 
 
-	float4 Combine = Sum * Sharpen_Out(texcoord);
+	float4 Combine = DepthCues(texcoord) * Sharpen_Out(texcoord);
 	
-	float4 Debug_Done = Sum;
+	float4 Debug_Done = DepthCues(texcoord);
 		
 	if (!Debug_View)
 	{
@@ -402,12 +356,6 @@ technique Monocular_Cues
 			PixelShader = Blur;
 			RenderTarget = texB;
 		}	
-			pass BlurFilter
-		{
-			VertexShader = PostProcessVS;
-			PixelShader = DepthCues;
-			RenderTarget = texDC;
-		}
 			pass CuesUnsharpMask
 		{
 			VertexShader = PostProcessVS;
