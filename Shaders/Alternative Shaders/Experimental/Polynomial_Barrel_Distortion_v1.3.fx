@@ -43,6 +43,15 @@ uniform int Stereoscopic_Mode_Convert <
 	ui_tooltip = "3D display output conversion for SbS and TnB.";
 > = 0;
 
+uniform int Vertical_Repositioning <
+	ui_type = "drag";
+	ui_min = -500; ui_max = 500;
+	ui_label = "Vertical Repositioning";
+	ui_tooltip = "Determines the vertical position of the Image.\n" 
+				 "In Monoscopic mode it's y offset calibration.\n"
+				 "Default is 0.";
+> = 0;
+
 uniform float Lens_Center <
 	ui_type = "drag";
 	ui_min = 0.475; ui_max = 0.575;
@@ -53,7 +62,7 @@ uniform float Lens_Center <
 uniform float2 Lens_Distortion <
 	ui_type = "drag";
 	ui_min = -0.325; ui_max = 5;
-	ui_label = "Lens Distortion";
+	ui_label = "K1 & K2 Lens Distortion";
 	ui_tooltip = "On the 1st lens distortion value, positive values of k1 gives barrel distortion, negative give pincushion.\n"
 				 "On the 2nd lens distortion value, positive values of k2 gives barrel distortion, negative give pincushion.\n"
 				 "Mainly start with k2. Default is 0.01";
@@ -90,6 +99,11 @@ uniform int Custom_Sidebars <
 	ui_tooltip = "Select how you like the Edge of the screen to look like.";
 > = 1;
 
+uniform bool Aliment_Marker <
+	ui_label = "Aliment Marker";
+	ui_tooltip = "Use to this green Cross Marker for lens aliment.";
+> = false;
+
 uniform bool Vignette <
 	ui_label = "Vignette";
 	ui_tooltip = "Soft edge effect around the image.";
@@ -115,6 +129,7 @@ float Zoom = Zoom_Aspect_Ratio.x;
 float Aspect_Ratio = Zoom_Aspect_Ratio.y;
 
 float IPD = Interpupillary_Distance;
+float VRP = Vertical_Repositioning;
 float LC = Lens_Center;
 float LDkO = Lens_Distortion.x;
 float LDkT = Lens_Distortion.y;
@@ -128,6 +143,7 @@ float4x4 Done;
 	if (HMD_Profiles == 1)
 	{
 		IPD = 0.0;					//Interpupillary Distance. Default is 0
+		VRP = 0;                    //Vertical Repositioning.
 		LC = 0.5; 					//Lens Center. Default is 0.5
 		LDkO = 0.01;				//Lens Distortion k1. Default is 0.01
 		LDkT = 0.01;				//Lens Distortion k2. Default is 0.01
@@ -141,6 +157,7 @@ float4x4 Done;
 	if (HMD_Profiles == 2)
 	{
 		IPD = -25.0;				//Interpupillary Distance.
+		VRP = 0;                    //Vertical Repositioning.
 		LC = 0.5; 					//Lens Center. Default is 0.5
 		LDkO = 0.01;				//Lens Distortion k1. Default is 0.01
 		LDkT = 0.250;				//Lens Distortion k2. Default is 0.01
@@ -154,22 +171,23 @@ float4x4 Done;
 	if (HMD_Profiles == 3)
 	{
 		IPD = -320.0;				//Interpupillary Distance.
+		VRP = 0;                    //Vertical Repositioning.
 		LC = 0.5; 					//Lens Center. Default is 0.5
 		LDkO = 0.01;				//Lens Distortion k1. Default is 0.01
 		LDkT = 0.250;				//Lens Distortion k2. Default is 0.01
 		Z = 1.0;					//Zoom. Default is 1.0
 		AR = 1.0;					//Aspect Ratio. Default is 1.0
-		PC = float3(1,1,1);	//Polynomial Colors. Default is (Red 1.0, Green 1.0, Blue 1.0)
+		PC = float3(1,1,1);	        //Polynomial Colors. Default is (Red 1.0, Green 1.0, Blue 1.0)
 		D = float2(0,0);			//Left & Right Rotation Angle known as Degrees.
 	}
 
 if(Diaspora)
 {
-Done = float4x4(float4(IPD,PC.x,Z,0),float4(LC,PC.y,AR,0),float4(LDkT,PC.z,D.x,0),float4(LDkO,0,0,D.y)); //Diaspora frak up 4x4 fix
+	Done = float4x4(float4(IPD,PC.x,Z,0),float4(LC,PC.y,AR,0),float4(LDkT,PC.z,D.x,0),float4(LDkO,VRP,D.y,0)); //Diaspora frak up 4x4 fix
 }
 else
 {
-Done = float4x4(float4(IPD,LC,LDkT,LDkO),float4(PC.x,PC.y,PC.z,0),float4(Z,AR,D.x,0),float4(0,0,0,D.y));
+	Done = float4x4(float4(IPD,LC,LDkT,LDkO),float4(PC.x,PC.y,PC.z,VRP),float4(Z,AR,D.x,D.y),float4(0,0,0,0));
 }
 return Done;
 }
@@ -181,6 +199,13 @@ float IPDS()
 {
 	float IPDS = HMDProfiles()[0][0];
 	return IPDS;
+}
+
+//Vertical Repositioning Section//
+float VRePos()
+{
+	float VRePos = HMDProfiles()[1][3];
+	return VRePos;
 }
 
 //Lens Center Section//
@@ -214,12 +239,11 @@ float3 P_C()
 //Degrees Section//
 float2 DEGREES()
 {
-	float2 Degrees = float2(HMDProfiles()[2][2],HMDProfiles()[3][3]);
+	float2 Degrees = float2(HMDProfiles()[2][2],HMDProfiles()[2][3]);
 	return Degrees;
 }
 
 /////////////////////////////////////////////D3D Starts Here/////////////////////////////////////////////////////////////////
-
 #define pix float2(BUFFER_RCP_WIDTH, BUFFER_RCP_HEIGHT)
 #define TextureSize float2(BUFFER_WIDTH, BUFFER_HEIGHT)
 
@@ -393,6 +417,13 @@ float2 DR(float2 p, float k_RGB) //Cubic Lens Distortion Right
 float4 vignetteL(in float2 texcoord : TEXCOORD0)
 {  
 float4 base;
+
+	//Cross Marker inside left Vignette
+	float2 Horz = float2(1-0.49925,0.49925);
+	float2 Vert = float2(1-0.501,0.501);
+	float4 A = all( texcoord < float2(Horz.x,Vert.x)) || all( texcoord > float2(Horz.x,Vert.x));
+	float4 B = all( texcoord < float2(Horz.y,Vert.y)) || all( texcoord > float2(Horz.y,Vert.y));
+	float4 H = A-B;
 	
 	if(Custom_Sidebars == 0)
 	{
@@ -407,6 +438,9 @@ float4 base;
 		
 		if( Vignette )
 		base.rgb *= saturate(texcoord.x * texcoord.y * 250);
+		
+		if( Aliment_Marker )
+		base = H ? float4(0.0,1.0,0.0,1) : base;
 
 	return base;    
 }
@@ -414,6 +448,7 @@ float4 base;
 float4 PDL(float2 texcoord)		//Texture = texCL Left
 {		
 		texcoord.x += IPDS() * pix.x;
+		texcoord.y += VRePos() * pix.y;
 		float4 color;
 		float2 uv_red, uv_green, uv_blue;
 		float4 color_red, color_green, color_blue;
@@ -424,8 +459,8 @@ float4 PDL(float2 texcoord)		//Texture = texCL Left
 		sectorOrigin = (texcoord.xy-0.5,0,0);
 		
 		Red = 1 / P_C().x;
-		Green = 1/ P_C().y;
-		Blue = 1/ P_C().z;
+		Green = 1 / P_C().y;
+		Blue = 1 / P_C().z;
 		
 		uv_red = DL(texcoord.xy-sectorOrigin,Red) + sectorOrigin;
 		uv_green = DL(texcoord.xy-sectorOrigin,Green) + sectorOrigin;
@@ -451,7 +486,13 @@ float4 PDL(float2 texcoord)		//Texture = texCL Left
 float4 vignetteR(in float2 texcoord : TEXCOORD0)
 {  
 float4 base;
-
+	//Cross Marker inside Right Vignette
+	float2 Horz = float2(1-0.49925,0.49925);
+	float2 Vert = float2(1-0.501,0.501);
+	float4 A = all( texcoord < float2(Horz.x,Vert.x)) || all( texcoord > float2(Horz.x,Vert.x));
+	float4 B = all( texcoord < float2(Horz.y,Vert.y)) || all( texcoord > float2(Horz.y,Vert.y));
+	float4 H = A-B;
+	
 		if(Custom_Sidebars == 0)
 		{
 		base = tex2D(SamplerCRBORDER, texcoord);
@@ -465,13 +506,16 @@ float4 base;
 		
 		if( Vignette )
 		base.rgb *= saturate(texcoord.x * texcoord.y * 250);
-
+		
+		if( Aliment_Marker )
+		base = H ? float4(0.0,1.0,0.0,1) : base;
 	return base;    
 }
 	
 	float4 PDR(float2 texcoord)		//Texture = texCR Right
 {		
 		texcoord.x -= IPDS() * pix.x;
+		texcoord.y += VRePos() * pix.y;
 		float4 color;
 		float2 uv_red, uv_green, uv_blue;
 		float4 color_red, color_green, color_blue;
@@ -506,6 +550,7 @@ float4 base;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 float4 PBDOut(float2 texcoord : TEXCOORD0)
 {	
 	//Texture Rotation//
@@ -553,15 +598,15 @@ float4 PBDOut(float2 texcoord : TEXCOORD0)
 	
 	if( Stereoscopic_Mode_Convert == 0 || Stereoscopic_Mode_Convert == 1|| Stereoscopic_Mode_Convert == 5 )
 	{
-	Out = texcoord.x < 0.5 ? PDL(float2(((L_Rotationtexcoord.x*2)*X)-midV ,(L_Rotationtexcoord.y*Y)-midH)) : PDR(float2(((R_Rotationtexcoord.x*2-1)*X)-midV ,(R_Rotationtexcoord.y*Y)-midH));
+		Out = texcoord.x < 0.5 ? PDL(float2(((L_Rotationtexcoord.x*2)*X)-midV ,(L_Rotationtexcoord.y*Y)-midH)) : PDR(float2(((R_Rotationtexcoord.x*2-1)*X)-midV ,(R_Rotationtexcoord.y*Y)-midH));
 	}
 	else if (Stereoscopic_Mode_Convert == 2 || Stereoscopic_Mode_Convert == 3)
 	{
-	Out = texcoord.y < 0.5 ? PDL(float2((L_Rotationtexcoord.x*X)-midV ,((L_Rotationtexcoord.y*2)*Y)-midH)) : PDR(float2((R_Rotationtexcoord.x*X)-midV ,((R_Rotationtexcoord.y*2-1)*Y)-midH));
+		Out = texcoord.y < 0.5 ? PDL(float2((L_Rotationtexcoord.x*X)-midV ,((L_Rotationtexcoord.y*2)*Y)-midH)) : PDR(float2((R_Rotationtexcoord.x*X)-midV ,((R_Rotationtexcoord.y*2-1)*Y)-midH));
 	}
 	else if (Stereoscopic_Mode_Convert == 4 )
 	{
-	Out = PDL(float2((Rotationtexcoord.x*X)-midV ,(Rotationtexcoord.y*Y)-midH));
+		Out = PDL(float2((Rotationtexcoord.x*X)-midV ,(Rotationtexcoord.y*Y)-midH));
 	}
 	
 	return Out;
