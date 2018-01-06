@@ -347,7 +347,6 @@ void PostProcessVS(in uint id : SV_VertexID, out float4 position : SV_Position, 
 }
 
 //*Rendering passes*//
-
 technique Monocular_Cues
 {
 			pass BlurFilter
