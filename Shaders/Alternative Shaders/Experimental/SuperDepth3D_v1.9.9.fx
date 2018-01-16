@@ -37,8 +37,12 @@
 // Determines the Cancel Depth Toggle Key useing keycode info
 // You can use http://keycode.info/ to figure out what key is what.
 // key "." is Key Code 110. Ex. Key 110 is the code for Decimal Point.
-
 #define Cancel_Depth_Key 0
+
+//Horizontal & Vertical Depth Buffer Resize for non conforming BackBuffer.
+//Min value is 0.5 & Max value is 2.0 Default is One.
+//Ex. Resident Evil 7 Has this problem. So you want to adjust it too around 0.9575.
+#define Horizontal_and_Vertical float2(1.0, 1.0)
 
 uniform int Depth_Map <
 	ui_type = "combo";
@@ -141,25 +145,19 @@ uniform int WDM <
 	ui_tooltip = "Pick your weapon depth map for games.";
 > = 0;
 
-uniform float3 Weapon_Adjust <
+uniform float4 Weapon_Adjust <
 	ui_type = "drag";
-	ui_min = -1.0; ui_max = 100.0;
+	ui_min = -100.0; ui_max = 100.0;
 	ui_label = "Weapon Adjust Depth Map";
 	ui_tooltip = "Adjust weapon depth map for FPS Hand & also HUD Mode.\n"
 				 "X, is FPS Hand Scale Adjustment & Adjusts HUD Mode.\n"
 				 "Y, is Cutoff Point Adjustment.\n"
-				 "Y, Zero is Auto.\n"
-				 "Default is (X 0.250, Y 0, Z 0).";
-> = float3(0.0,0.250,0.0);
-
-uniform float Weapon_Depth <
-	ui_type = "drag";
-	ui_min = -100; ui_max = 100;
-	ui_label = "Weapon Depth Adjustment";
-	ui_tooltip = "Pushes or Pulls the FPS Hand in or out of the screen.\n"
+				 "Z, Zero is Auto.\n"
+				 "W, is Weapon Depth Adjustment.\n"
+				 "Pushes or Pulls the FPS Hand in or out of the screen.\n"
 				 "This also used to fine tune the Weapon Hand.\n" 
-				 "Default is 0";
-> = 0;
+				 "Default is (X 0.250, Y 0.0, Z 0.0, W 0.0).";
+> = float4(0.0,0.250,0.0,0.0);
 
 uniform int Custom_Sidebars <
 	ui_type = "combo";
@@ -170,7 +168,7 @@ uniform int Custom_Sidebars <
 
 uniform int Stereoscopic_Mode <
 	ui_type = "combo";
-	ui_items = "Side by Side\0Top and Bottom\0Line Interlaced\0Column Interlaced\0Checkerboard 3D\0Anaglyph\0FrameSeq+BLSync\0WoWvx\0";
+	ui_items = "Side by Side\0Top and Bottom\0Line Interlaced\0Column Interlaced\0Checkerboard 3D\0Anaglyph\0FrameSeq with BLSync\0WoWvx\0";
 	ui_label = "3D Display Mode";
 	ui_tooltip = "Stereoscopic 3D display output selection.";
 > = 0;
@@ -182,11 +180,11 @@ uniform int Scaling_Support <
 	ui_tooltip = "Dynamic Super Resolution , Virtual Super Resolution, downscaling, or Upscaling support for Line Interlaced, Column Interlaced, & Checkerboard 3D displays.";
 > = 1;
 
-uniform int Anaglyph_Colors <
+uniform int Anaglyph_Colors_and_Content <
 	ui_type = "combo";
-	ui_items = "Red/Cyan\0Dubois Red/Cyan\0Green/Magenta\0Dubois Green/Magenta\0";
-	ui_label = "Anaglyph Color Mode";
-	ui_tooltip = "Select colors for your 3D anaglyph glasses.";
+	ui_items = "Red/Cyan               NoDepth\0Dubois Red/Cyan        Reserved\0Green/Magenta          Still\0Dubois Green/Magenta   CGI\0                       Game\0                       Movie\0                       Signage\0";
+	ui_label = "Anaglyph Color Mode & Wowvx Content Type";
+	ui_tooltip = "Select colors for your 3D anaglyph glasses or Signage.";
 > = 0;
 
 uniform float Anaglyph_Desaturation <
@@ -195,13 +193,6 @@ uniform float Anaglyph_Desaturation <
 	ui_label = "Anaglyph Desaturation";
 	ui_tooltip = "Adjust anaglyph desaturation, Zero is Black & White, One is full color.";
 > = 1.0;
-
-uniform int Content <
-	ui_type = "combo";
-	ui_items = "NoDepth\0Reserved\0Still\0CGI\0Game\0Movie\0Signage\0";
-	ui_label = "Content Type";
-	ui_tooltip = "Content Type for WOWvx.";
-> = 0;
 
 uniform int View_Mode <
 	ui_type = "combo";
@@ -224,20 +215,13 @@ uniform bool Eye_Swap <
 	ui_tooltip = "L/R to R/L.";
 > = false;
 
-uniform float Cross_Cursor_Size <
+uniform float4 Cross_Cursor_Adjust <
 	ui_type = "drag";
-	ui_min = 1; ui_max = 100;
-	ui_label = "Cross Cursor Size";
-	ui_tooltip = "Pick your size of the cross cursor.\n" 
-				 "Default is 25";
-> = 25.0;
-
-uniform float3 Cross_Cursor_Color <
-	ui_type = "color";
-	ui_label = "Cross Cursor Color";
-	ui_tooltip = "Pick your own cross cursor color.\n" 
-				 " Default is (R 255, G 255, B 255)";
-> = float3(1.0, 1.0, 1.0);
+	ui_min = 0.0; ui_max = 255.0;
+	ui_label = "Cross Cursor Adjust";
+	ui_tooltip = "Pick your own cross cursor color & Size.\n" 
+				 " Default is (R 255, G 255, B 255 , Size 25)";
+> = float4(255.0, 255.0, 255.0, 25.0);
 
 uniform bool InvertY <
 	ui_label = "Invert Y-Axis";
@@ -310,11 +294,11 @@ float4 MouseCursor(float4 position : SV_Position, float2 texcoord : TEXCOORD) : 
 	 
 	if (!InvertY)
 	{
-		Mpointer = all(abs(Mousecoords - position.xy) < Cross_Cursor_Size) * (1 - all(abs(Mousecoords - position.xy) > Cross_Cursor_Size/(Cross_Cursor_Size/2))) ? float4(Cross_Cursor_Color, 1.0) : tex2D(BackBuffer, texcoord);//cross
+		Mpointer = all(abs(Mousecoords - position.xy) < Cross_Cursor_Adjust.a) * (1 - all(abs(Mousecoords - position.xy) > Cross_Cursor_Adjust.a/(Cross_Cursor_Adjust.a/2))) ? float4(Cross_Cursor_Adjust.rgb/255, 1.0) : tex2D(BackBuffer, texcoord);//cross
 	}
 	else
 	{
-		Mpointer = all(abs(float2(Mousecoords.x,BUFFER_HEIGHT-Mousecoords.y) - position.xy) < Cross_Cursor_Size) * (1 - all(abs(float2(Mousecoords.x,BUFFER_HEIGHT-Mousecoords.y) - position.xy) > Cross_Cursor_Size/(Cross_Cursor_Size/2))) ? float4(Cross_Cursor_Color, 1.0) : tex2D(BackBuffer, texcoord);//cross
+		Mpointer = all(abs(float2(Mousecoords.x,BUFFER_HEIGHT-Mousecoords.y) - position.xy) < Cross_Cursor_Adjust.a) * (1 - all(abs(float2(Mousecoords.x,BUFFER_HEIGHT-Mousecoords.y) - position.xy) > Cross_Cursor_Adjust.a/(Cross_Cursor_Adjust.a/2))) ? float4(Cross_Cursor_Adjust.rgb/255, 1.0) : tex2D(BackBuffer, texcoord);//cross
 	}
 	
 	return Mpointer;
@@ -359,8 +343,17 @@ sampler SamplerLumWeapon
 	
 /////////////////////////////////////////////////////////////////////////////////Depth Map Information/////////////////////////////////////////////////////////////////////////////////
 
-float2 Depth(in float2 texcoord : TEXCOORD0)
+float Depth(in float2 texcoord : TEXCOORD0)
 {
+
+		float posH = Horizontal_and_Vertical.y-1;
+		float midH = posH*BUFFER_HEIGHT/2*pix.y;
+		
+		float posV = Horizontal_and_Vertical.x-1;
+		float midV = posV*BUFFER_WIDTH/2*pix.x;
+		
+		texcoord = float2((texcoord.x*Horizontal_and_Vertical.x)-midV,(texcoord.y*Horizontal_and_Vertical.y)-midH);
+		
 		if (Depth_Map_Flip)
 			texcoord.y =  1 - texcoord.y;
 			
@@ -387,55 +380,42 @@ float2 Depth(in float2 texcoord : TEXCOORD0)
 		//4. Offset Normal
 		float OffsetNormal = Far * Near / (Far + min(1,pow(abs(exp(zBuffer)*Offsets),1.75)) * (Near - Far));		
 		
-		float2 DM;
+		float DM;
 		
 		if (Depth_Map == 0)
 		{
-		DM.x = Normal;
+		DM = Normal;
 		}		
 		else if (Depth_Map == 1)
 		{
-		DM.x = NormalReverse;
+		DM = NormalReverse;
 		}
 		else if (Depth_Map == 2)
 		{
-		DM.x = Offset;
+		DM = Offset;
 		}
 		else if (Depth_Map == 3)
 		{
-		DM.x = OffsetReverse;
+		DM = OffsetReverse;
 		}
 		else
 		{
-		DM.x = OffsetNormal;
+		DM = OffsetNormal;
 		}
 		
-		if (Depth_Map == 0)
-		{
-		DM.y = Normal;
-		}		
-		else if (Depth_Map == 1)
-		{
-		DM.y = NormalReverse;
-		}
-		else if (Depth_Map == 2)
-		{
-		DM.y = Offset;
-		}
-		else if (Depth_Map == 3)
-		{
-		DM.y = OffsetReverse;
-		}
-		else
-		{
-		DM.y = OffsetNormal;
-		}
-		
-	return float2(DM.x,DM.y);	
+	return DM;	
 }
 
 float2 WeaponDepth(in float2 texcoord : TEXCOORD0)
 {
+		float posH = Horizontal_and_Vertical.y-1;
+		float midH = posH*BUFFER_HEIGHT/2*pix.y;
+		
+		float posV = Horizontal_and_Vertical.x-1;
+		float midV = posV*BUFFER_WIDTH/2*pix.x;
+		
+		texcoord = float2((texcoord.x*Horizontal_and_Vertical.x)-midV,(texcoord.y*Horizontal_and_Vertical.y)-midH);
+		
 		if (Depth_Map_Flip)
 			texcoord.y =  1 - texcoord.y;
 			
@@ -695,7 +675,7 @@ float2 WeaponDepth(in float2 texcoord : TEXCOORD0)
 			zBufferWH += 1;
 		}
 		
-		float Adj = Weapon_Depth/375; //Push & pull weapon in or out of screen.
+		float Adj = Weapon_Adjust.w/375; //Push & pull weapon in or out of screen. Weapon_Depth Adjustment
 		zBufferWH = smoothstep(Adj,1,zBufferWH) ;//Weapon Adjust smoothstep range from Adj-1
 		
 		//Auto Anti Weapon Depth Map Z-Fighting is always on.
@@ -729,8 +709,6 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 		
 		float2 DM = Depth(texcoord);
 		
-		float AverageLuminance = Depth(texcoord).x;	
-		
 		float WD = lerp(WeaponDepth(texcoord).x,1,0.0175);
 		
 		float CoP = WeaponDepth(texcoord).y; //Weapon Cutoff Point
@@ -751,7 +729,7 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 		}
 		
 		R = LDM;
-		G = AverageLuminance;
+		G = Depth(texcoord); //AverageLuminance
 		B = RDM;
 		
 	Color = float4(R,G,B,A);
@@ -1103,44 +1081,52 @@ float4 PS_calcLR(float4 position,in float2 texcoord : TEXCOORD0)
 				TCL.y = texcoord.y;
 			}
 		}
-				
-		if (View_Mode == 0)
-			N = 3;
-		else if (View_Mode == 1)
-			N = 5;
-		else if (View_Mode == 2)
-			N = 1.025;
-		else if (View_Mode == 3)
-			N = 17;
-				
-		[loop]
-		for ( int i = 0 ; i < N; i++ ) 
+		
+		if(Stereoscopic_Mode == 7)
 		{
+			DepthL = 0;
+			DepthR = 0;
+		}
+		else
+		{	
 			if (View_Mode == 0)
-			{
-				S = samplesA[i] * MS;
-				DepthL = min(DepthL,tex2Dlod(SamplerDis,float4(TCL.x+S, TCL.y,0,0)).r);
-				DepthR = min(DepthR,tex2Dlod(SamplerDis,float4(TCR.x-S, TCR.y,0,0)).b);
-			}
+				N = 3;
 			else if (View_Mode == 1)
-			{
-				S = samplesB[i] * MS;
-				DepthL = min(DepthL,tex2Dlod(SamplerDis,float4(TCL.x+S, TCL.y,0,0)).r);
-				DepthR = min(DepthR,tex2Dlod(SamplerDis,float4(TCR.x-S, TCR.y,0,0)).b);
-			}
+				N = 5;
 			else if (View_Mode == 2)
-			{
-				S = lerp(i*(Divergence/1.025), (Divergence/1.025),0.5);
-				DepthL = min(DepthL,tex2Dlod(SamplerDis,float4(TCL.x+S*pix.x,TCL.y,0,0)).b);
-				DepthR = min(DepthR,tex2Dlod(SamplerDis,float4(TCR.x-S*pix.x,TCR.y,0,0)).r);
-			}
+				N = 1.025;
 			else if (View_Mode == 3)
+				N = 17;
+					
+			[loop]
+			for ( int i = 0 ; i < N; i++ ) 
 			{
-				S = samplesC[i] * MS * 1.125;
-				L += tex2Dlod(SamplerDis,float4(TCL.x+S, TCL.y,0,0)).r/17;
-				R += tex2Dlod(SamplerDis,float4(TCR.x-S, TCR.y,0,0)).b/17;
-				DepthL = saturate(L);
-				DepthR = saturate(R);
+				if (View_Mode == 0)
+				{
+					S = samplesA[i] * MS;
+					DepthL = min(DepthL,tex2Dlod(SamplerDis,float4(TCL.x+S, TCL.y,0,0)).r);
+					DepthR = min(DepthR,tex2Dlod(SamplerDis,float4(TCR.x-S, TCR.y,0,0)).b);
+				}
+				else if (View_Mode == 1)
+				{
+					S = samplesB[i] * MS;
+					DepthL = min(DepthL,tex2Dlod(SamplerDis,float4(TCL.x+S, TCL.y,0,0)).r);
+					DepthR = min(DepthR,tex2Dlod(SamplerDis,float4(TCR.x-S, TCR.y,0,0)).b);
+				}
+				else if (View_Mode == 2)
+				{
+					S = lerp(i*(Divergence/1.025), (Divergence/1.025),0.5);
+					DepthL = min(DepthL,tex2Dlod(SamplerDis,float4(TCL.x+S*pix.x,TCL.y,0,0)).b);
+					DepthR = min(DepthR,tex2Dlod(SamplerDis,float4(TCR.x-S*pix.x,TCR.y,0,0)).r);
+				}
+				else if (View_Mode == 3)
+				{
+					S = samplesC[i] * MS * 1.125;
+					L += tex2Dlod(SamplerDis,float4(TCL.x+S, TCL.y,0,0)).r/17;
+					R += tex2Dlod(SamplerDis,float4(TCR.x-S, TCR.y,0,0)).b/17;
+					DepthL = saturate(L);
+					DepthR = saturate(R);
+				}
 			}
 		}
 			DepthR = Conv(DepthR,texcoord);
@@ -1253,14 +1239,14 @@ float4 PS_calcLR(float4 position,in float2 texcoord : TEXCOORD0)
 				float4 cA = float4(LMA,1);
 				float4 cB = float4(RMA,1);
 	
-			if (Anaglyph_Colors == 0)
+			if (Anaglyph_Colors_and_Content == 0)
 			{
 				float4 LeftEyecolor = float4(1.0,0.0,0.0,1.0);
 				float4 RightEyecolor = float4(0.0,1.0,1.0,1.0);
 				
 				color =  (cA*LeftEyecolor) + (cB*RightEyecolor);
 			}
-			else if (Anaglyph_Colors == 1)
+			else if (Anaglyph_Colors_and_Content == 1)
 			{
 			float red = 0.437 * cA.r + 0.449 * cA.g + 0.164 * cA.b
 					- 0.011 * cB.r - 0.032 * cB.g - 0.007 * cB.b;
@@ -1279,7 +1265,7 @@ float4 PS_calcLR(float4 position,in float2 texcoord : TEXCOORD0)
 
 			color = float4(red, green, blue, 0);
 			}
-			else if (Anaglyph_Colors == 2)
+			else if (Anaglyph_Colors_and_Content == 2)
 			{
 				float4 LeftEyecolor = float4(0.0,1.0,0.0,1.0);
 				float4 RightEyecolor = float4(1.0,0.0,1.0,1.0);
@@ -1362,6 +1348,8 @@ float4 PS_calcLR(float4 position,in float2 texcoord : TEXCOORD0)
 		float4 BlockOne = A+B+C+D+E+F+G+H+I+J+K+L+M+N;
 				
 		float4 Content_Type;
+		
+		float Content = Anaglyph_Colors_and_Content;
 		
 		if (Content == 0)
 			{
