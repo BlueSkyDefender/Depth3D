@@ -1,9 +1,9 @@
- ////---------------------//
- ///**Barrel Distortion**///
- //---------------------////
+ ////------------------------------------//
+ ///**Barrel Distortion & Image Adjust**///
+ //------------------------------------////
 
  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
- //* Barrel Distortion Correction For SuperDepth3D v1.0		            																											*//
+ //* Barrel Distortion Correction and Image Adjust  		            																											*//
  //* For Reshade 3.0																																								*//
  //* --------------------------																																						*//
  //* This work is licensed under a Creative Commons Attribution 3.0 Unported License.																								*//
@@ -46,11 +46,11 @@ uniform float3 Polynomial_Colors <
 	ui_label = "Polynomial Color Distortion";
 > = float3(1.0, 1.0, 1.0);
 
-uniform float2 DMPAdjust<
+uniform float2 IPAdjust<
 	ui_type = "drag";
 	ui_min = -25.0; ui_max = 25.0;
-	ui_label = "Depth Map Position Adjust";
-	ui_tooltip = "Adjust the Depth Map Postion if it's off.";
+	ui_label = "Image Position Adjust";
+	ui_tooltip = "Adjust the BackBuffer Postion if it's off by a bit.";
 > = float2(0.0,0.0);
 	
 uniform float2 Horizontal_Vertical_Squish <
@@ -134,8 +134,8 @@ float4 PBD(float2 texcoord)
 
 float4 PBDOut(float2 texcoord)
 {	
-	texcoord.x += DMPAdjust.x * pix.x;
-	texcoord.y += DMPAdjust.y * pix.y;
+	texcoord.x += IPAdjust.x * pix.x;
+	texcoord.y += IPAdjust.y * pix.y;
 	
 	float posH = Horizontal_Vertical_Squish.y-1;
 	float midH = posH*BUFFER_HEIGHT/2*pix.y;

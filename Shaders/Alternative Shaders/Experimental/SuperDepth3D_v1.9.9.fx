@@ -652,7 +652,16 @@ float2 WeaponDepth(in float2 texcoord : TEXCOORD0)
 			WA_X = 5.000;
 			WA_Y = 2.875;
 			CoP = 0.500;
-		}						
+		}
+		
+		//WDM 27 ; TitanFall 2
+		else if(WDM == 29)
+		{
+			WA_X = 2.77575;
+			WA_Y = 0.3625;
+			CoP = 0.3625;
+		}
+								
 		//SWDMS Done//
  		
  		//TEXT MODE 31 Adjust
@@ -682,7 +691,7 @@ float2 WeaponDepth(in float2 texcoord : TEXCOORD0)
 		
 		float WeaponLumAdjust = abs(smoothstep(0,0.5,LumWeapon(texcoord)*2.5)) * zBufferWH;	
 			
-		if( WDM == 1 || WDM == 22 || WDM == 24 || WDM == 27 || WDM == 32 )//WDM Adjust,SOMA, EuroTruckSim2, and HUD mode.
+		if( WDM == 1 || WDM == 22 || WDM == 24 || WDM == 27 || WDM == 33 )//WDM Adjust,SOMA, EuroTruckSim2, and HUD mode.
 		{
 			zBufferWH = zBufferWH;
 		}
