@@ -46,7 +46,7 @@
 
 uniform int Depth_Map <
 	ui_type = "combo";
-	ui_items = " 0 Normal\0 1 Normal Reversed\0 2 Offset Normal\0 3 Offset Reversed\0";
+	ui_items = " 0 Normal\0 1 Normal Reversed-Z\0 3 Offset \0 4 Offset Reversed-Z\0 5 Offset Normal\0";
 	ui_label = "Depth Map Selection";
 	ui_tooltip = "linearization for the zBuffer also Depth Map One to Four.\n"
 			    "Normally you want to use 1 or 2.";
@@ -54,7 +54,7 @@ uniform int Depth_Map <
 
 uniform float Depth_Map_Adjust <
 	ui_type = "drag";
-	ui_min = 0.250; ui_max = 100.0;
+	ui_min = 1.0; ui_max = 100.0;
 	ui_label = "Depth Map Adjustment";
 	ui_tooltip = "Adjust the depth map for your games.";
 > = 7.5;
@@ -363,22 +363,22 @@ float Depth(in float2 texcoord : TEXCOORD0)
 		//Near & Far Adjustment
 		float Near = 0.125/Depth_Map_Adjust; //Division Depth Map Adjust - Near
 		float Far = 1; //Far Adjustment
-
-		//Raw Z Offset
-		float Z = min(1,pow(abs(exp(zBuffer)*Offsets),2));
-		float ZR = min(1,pow(abs(exp(zBuffer)*Offsets),50));
+		float DA = Depth_Map_Adjust*10; //Depth Map Adjust - Near
 		
 		//0. Normal
 		float Normal = Far * Near / (Far + zBuffer * (Near - Far));
 		
 		//1. Reverse
 		float NormalReverse = Far * Near / (Near + zBuffer * (Far - Near));
-		
-		//2. Offset Normal
-		float OffsetNormal = Far * Near / (Far + Z * (Near - Far));
+
+		//2. Offset
+		float Offset = min(1,pow(abs(exp(zBuffer)*Offsets),DA));
 		
 		//3. Offset Reverse
-		float OffsetReverse = Far * Near / (Near + ZR * (Far - Near));
+		float OffsetReverse = Far * Near / (Near + min(1,pow(abs(exp(zBuffer)*Offsets),1.75)) * (Far - Near));
+		
+		//4. Offset Normal
+		float OffsetNormal = Far * Near / (Far + min(1,pow(abs(exp(zBuffer)*Offsets),1.75)) * (Near - Far));		
 		
 		float DM;
 		
@@ -392,11 +392,15 @@ float Depth(in float2 texcoord : TEXCOORD0)
 		}
 		else if (Depth_Map == 2)
 		{
-		DM = OffsetNormal;
+		DM = Offset;
+		}
+		else if (Depth_Map == 3)
+		{
+		DM = OffsetReverse;
 		}
 		else
 		{
-		DM = OffsetReverse;
+		DM = OffsetNormal;
 		}
 		
 	return DM;	
