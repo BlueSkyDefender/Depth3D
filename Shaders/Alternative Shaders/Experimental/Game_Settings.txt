@@ -95,7 +95,7 @@ IF IT HAS AN *asterisk* I AM STILL WORKING ON IT. But, you can still use the set
               Observer                                        DM 1         10.0                              No Off / 0.150-0.250 
     RB        Penumbra: Black Plague                          DM 0         7.5                               No Off / 0.150-0.200       
     RB        Phantasmal                                      DM 0         7.5                       Yes     No Off / 0.010-0.020
-    RB        Prey 2016                                       DM 0         12.5        WDM 26                No Off / 0.050-0.075       
+    RB        Prey 2006                                       DM 0         12.5        WDM 26                No Off / 0.050-0.075       
     RB        Prey 2017                                       DM 1         18.75     WDM 9 & 10              No Off / 0.025-0.075                
     RB        Quake Epsilon                                   DM 0         15.00       WDM 15                No Off / 0.075-0.125 
               Quake 2 XP                                      DM 0         7.5         WDM 16                No Off / 0.125-0.325
