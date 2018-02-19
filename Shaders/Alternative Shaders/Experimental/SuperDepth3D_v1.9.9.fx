@@ -41,8 +41,9 @@
 //Ex. Resident Evil 7 Has this problem. So you want to adjust it too around 0.9575.
 #define Horizontal_and_Vertical float2(1.0, 1.0)
 
-//Image resizing and BackBuffer fill for Lightberry like Systems.
+//Image resizing and BackBuffer fill for Lightberry like systems.
 //Do Not Enable This Toggle if you are useing Polynomial Barrel Distortion for HMDs.
+//This is mainly for TnB and SideBySide output for the Lightberry like systems.
 //Default is Zero.
 #define TOGGLE_Resize 0
 
