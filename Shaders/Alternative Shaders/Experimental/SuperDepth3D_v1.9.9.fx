@@ -243,7 +243,7 @@ uniform float Resize <
 
 uniform int Blur_Spread <
 	ui_type = "drag";
-	ui_min = 0; ui_max = 16;
+	ui_min = 0.0; ui_max = 16.0;
 	ui_label = "Blur Spread Ammount";
 	ui_tooltip = "Used to adjust Blur Spread Ammount.\n"
 				 "Default is 4.0";
@@ -251,7 +251,7 @@ uniform int Blur_Spread <
 
 uniform int BackBuffer_Resolution <
 	ui_type = "drag";
-	ui_min = 0; ui_max = 8;
+	ui_min = 0.0; ui_max = 8.0;
 	ui_label = "BackBuffer Image Resolution";
 	ui_tooltip = "Use this to adjust BackBuffer Resolution.\n"
 				 "Default is 2.0";
