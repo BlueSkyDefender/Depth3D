@@ -38,14 +38,14 @@
 
 //Horizontal & Vertical Depth Buffer Resize for non conforming BackBuffer.
 //Min value is 0.5 & Max value is 2.0 Default is One.
-//Ex. Resident Evil 7 Has this problem. So you want to adjust it too around 0.9575.
-#define Horizontal_and_Vertical float2(1.0, 1.0)
+//Ex. Resident Evil 7 Has this problem. So you want to adjust it too around -0.0425.
+#define Horizontal_and_Vertical 0.0
 
 //Image resizing and BackBuffer fill for Lightberry like systems.
 //Do Not Enable This Toggle if you are useing Polynomial Barrel Distortion for HMDs.
 //This is mainly for TnB and SideBySide output for the Lightberry like systems.
-//Default is Zero.
-#define TOGGLE_Resize 0
+//Default 0 Off. 1 is Resize mode. 2 is Lightberry Resize Mode.
+#define Image_Resize_Modes 0
 
 uniform int Depth_Map <
 	ui_type = "combo";
@@ -224,23 +224,46 @@ uniform bool InvertY <
 	ui_tooltip = "Invert Y-Axis for the cross cursor.";
 > = false;
 
-#if TOGGLE_Resize
+#if Image_Resize_Modes == 1
 
 uniform int Custom_Sidebars <
 	ui_type = "combo";
-	ui_items = "Mirrored Edges\0Black Edges\0Stretched Edges\0Mirrored Edges BF\0Black Edges BF\0Stretched Edges BF\0";
+	ui_items = "Mirrored Edges\0Black Edges\0Stretched Edges\0";
 	ui_label = "Edge Selection";
-	ui_tooltip = "Edges selection for your screen output with and with out Backfill.";
+	ui_tooltip = "Edges selection for your screen output.";
 > = 1;
 
 uniform float Resize <
 	ui_type = "drag";
-	ui_min = 0.875; ui_max = 1.125;
+	ui_min = -0.250; ui_max = 0.250;
 	ui_label = "Image Resizer";
 	ui_tooltip = "Use this to resize your image for your screen.\n" 
-				 "Do not use with Polynomial Barrel Distortion.\n"
-				 "Default is One";
-> = 1.0;
+				 "Default is Zero";
+> = 0.0;
+
+#elif Image_Resize_Modes == 2
+
+uniform int Custom_Sidebars <
+	ui_type = "combo";
+	ui_items = "Mirrored Edges BF\0Black Edges BF\0Stretched Edges BF\0";
+	ui_label = "Edge Selection";
+	ui_tooltip = "Edges selection for your screen output with and with out Backfill.";
+> = 1;
+
+uniform int Resize_Mode <
+	ui_type = "combo";
+	ui_items = "Mode One\0Mode Two\0";
+	ui_label = "Resize Mode";
+	ui_tooltip = "Image resizing modes for TnB or SbS.";
+> = 0;
+
+uniform float Resize <
+	ui_type = "drag";
+	ui_min = 0.0; ui_max = 0.140;
+	ui_label = "Image Resizer";
+	ui_tooltip = "Use this to resize your image for your screen.\n" 
+				 "Default is Zero";
+> = 0.0;
 
 uniform int Blur_Spread <
 	ui_type = "drag";
@@ -264,7 +287,7 @@ uniform int Custom_Sidebars <
 	ui_type = "combo";
 	ui_items = "Mirrored Edges\0Black Edges\0Stretched Edges\0";
 	ui_label = "Edge Selection";
-	ui_tooltip = "Edges selection for your screen output with and with out Backfill.";
+	ui_tooltip = "Edges selection for your screen output.";
 > = 1;
 
 #endif
@@ -326,7 +349,7 @@ sampler SamplerDis
 		Texture = texDis;
 	};
 	
-#if TOGGLE_Resize
+#if Image_Resize_Modes == 2
 	
 texture texBBHalf {Width = BUFFER_WIDTH; Height = BUFFER_WIDTH; Format = RGBA8; MipLevels = 8;}; 
 																				
@@ -396,11 +419,10 @@ sampler SamplerLumWeapon
 
 float Depth(in float2 texcoord : TEXCOORD0)
 {
-		float2 HV = Horizontal_and_Vertical;	
-		float midH = (HV.y-1)*(BUFFER_HEIGHT*0.5)*pix.y;
-		float midV = (HV.x-1)*(BUFFER_WIDTH*0.5)*pix.x;
-		
-		texcoord = float2((texcoord.x*HV.x)-midV,(texcoord.y*HV.y)-midH);
+		float2 HV = float2(Horizontal_and_Vertical+1.0,Horizontal_and_Vertical+1.0);	
+		float midV = (HV.y-1)*(BUFFER_HEIGHT*0.5)*pix.y;		
+		float midH = (HV.x-1)*(BUFFER_WIDTH*0.5)*pix.x;			
+		texcoord = float2((texcoord.x*HV.x)-midH,(texcoord.y*HV.y)-midV);	
 		
 		if (Depth_Map_Flip)
 			texcoord.y =  1 - texcoord.y;
@@ -452,11 +474,10 @@ float Depth(in float2 texcoord : TEXCOORD0)
 
 float2 WeaponDepth(in float2 texcoord : TEXCOORD0)
 {
-		float2 HV = Horizontal_and_Vertical;	
-		float midH = (HV.y-1)*(BUFFER_HEIGHT*0.5)*pix.y;
-		float midV = (HV.x-1)*(BUFFER_WIDTH*0.5)*pix.x;
-		
-		texcoord = float2((texcoord.x*HV.x)-midV,(texcoord.y*HV.y)-midH);
+		float2 HV = float2(Horizontal_and_Vertical+1.0,Horizontal_and_Vertical+1.0);
+		float midV = (HV.y-1)*(BUFFER_HEIGHT*0.5)*pix.y;		
+		float midH = (HV.x-1)*(BUFFER_WIDTH*0.5)*pix.x;			
+		texcoord = float2((texcoord.x*HV.x)-midH,(texcoord.y*HV.y)-midV);
 		
 		if (Depth_Map_Flip)
 			texcoord.y =  1 - texcoord.y;
@@ -1030,8 +1051,7 @@ DBD = ( DBD - 1.0f ) / ( -187.5f - 1.0f );
 	color = float4(X,DM.x,Y,1);
 }
 
-#if TOGGLE_Resize
-
+#if Image_Resize_Modes == 2
 float4 BBHalf(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Target
 {
 	return tex2D(BackBuffer,texcoord);
@@ -1065,7 +1085,6 @@ float4 BackBufferBlur(in float2 texcoord : TEXCOORD0)
 
 return sum;
 }
-
 #endif
 /////////////////////////////////////////L/R//////////////////////////////////////////////////////////////////////
 float4 PS_calcLR(float4 position,in float2 texcoord : TEXCOORD0)
@@ -1080,15 +1099,39 @@ float4 PS_calcLR(float4 position,in float2 texcoord : TEXCOORD0)
 	//MS is Max Separation P is Perspective Adjustment
 	P = Perspective * pix.x;
 	MS = Divergence * pix.x;
-
-	#if TOGGLE_Resize
+	
+	//Horizontal and Vertical stretch or squish
+	#if Image_Resize_Modes == 1
+		float4 BB = 0;	
+		float2 HV = float2(Resize+1,Resize+1);
+		float midV = (HV.y-1)*(BUFFER_HEIGHT*0.5)*pix.y;		
+		float midH = (HV.x-1)*(BUFFER_WIDTH*0.5)*pix.x;			
+		texcoord = float2((texcoord.x*HV.x)-midH,(texcoord.y*HV.y)-midV);		
+	#elif Image_Resize_Modes == 2
 		float4 BB = BackBufferBlur(texcoord);
-		//Horizontal and Vertical stretch or squish
-		float2 HV = float2(Resize,Resize);
-		float midH = (HV.y-1)*(BUFFER_HEIGHT*0.5)*pix.y;		
-		float midV = (HV.x-1)*(BUFFER_WIDTH*0.5)*pix.x;	
-				
-		texcoord = float2((texcoord.x*HV.x)-midV,(texcoord.y*HV.y)-midH);
+		float2 HV;
+		float midH, midV;
+		if ( Stereoscopic_Mode == 0 && Resize_Mode == 0 )
+		{
+			HV = float2(0,(Resize*2)+1);
+			midV = (HV.y-1)*(BUFFER_HEIGHT*0.5)*pix.y;
+			midH = 0;
+			texcoord = float2(texcoord.x,(texcoord.y*HV.y)-midV);
+		}
+		else if( Stereoscopic_Mode == 1 && Resize_Mode == 0 )
+		{
+			HV = float2(Resize+1,0);
+			midV = 0;
+			midH = (HV.x-1)*(BUFFER_WIDTH*0.5)*pix.x;
+			texcoord = float2((texcoord.x*HV.x)-midH,texcoord.y);
+		}
+		else
+		{
+			HV = float2(Resize+1,(Resize*2)+1);
+			midV = (HV.y-1)*(BUFFER_HEIGHT*0.5)*pix.y;
+			midH = (HV.x-1)*(BUFFER_WIDTH*0.5)*pix.x;
+			texcoord = float2((texcoord.x*HV.x)-midH,(texcoord.y*HV.y)-midV);
+		}
 	#else
 		float4 BB = 0;
 		float midH = 0;		
@@ -1097,7 +1140,7 @@ float4 PS_calcLR(float4 position,in float2 texcoord : TEXCOORD0)
 				
 		if(Eye_Swap)
 		{
-			if ( Stereoscopic_Mode == 0)
+			if ( Stereoscopic_Mode == 0 )
 			{
 				TCL.x = (texcoord.x*2-1) - P - midH;
 				TCR.x = (texcoord.x*2) + P + midH;
@@ -1198,61 +1241,63 @@ float4 PS_calcLR(float4 position,in float2 texcoord : TEXCOORD0)
 			
 		float ReprojectionRight = DepthR; //Zero Parallax Distance controll
 		float ReprojectionLeft =  DepthL;
-		
-		if(Custom_Sidebars == 0)
-			{
-				Left = tex2Dlod(BackBufferMIRROR, float4(TCL.x + ReprojectionLeft, TCL.y,0,0));
-				Right = tex2Dlod(BackBufferMIRROR, float4(TCR.x - ReprojectionRight, TCR.y,0,0));
-			}
-			else if(Custom_Sidebars == 1)
-			{
-				Left = tex2Dlod(BackBufferBORDER, float4(TCL.x + ReprojectionLeft, TCL.y,0,0));
-				Right = tex2Dlod(BackBufferBORDER, float4(TCR.x - ReprojectionRight, TCR.y,0,0));
-			}
-			else if(Custom_Sidebars == 2)
-			{
-				Left = tex2Dlod(BackBufferCLAMP, float4(TCL.x + ReprojectionLeft, TCL.y,0,0));
-				Right = tex2Dlod(BackBufferCLAMP, float4(TCR.x - ReprojectionRight, TCR.y,0,0));
-			}
-			else if(Custom_Sidebars == 3)
-			{
-				if ((TCL.x < 1.0 && TCL.x > 0.0 && TCL.y < 1.0 && TCL.y > 0.0) || (TCR.x < 1.0 && TCR.x > 0.0 && TCR.y < 1.0 && TCR.y > 0.0))
+			#if Image_Resize_Modes == 2
+				if(Custom_Sidebars == 0)
+				{
+					if ((TCL.x < 1.0 && TCL.x > 0.0 && TCL.y < 1.0 && TCL.y > 0.0) || (TCR.x < 1.0 && TCR.x > 0.0 && TCR.y < 1.0 && TCR.y > 0.0))
+					{
+						Left = tex2Dlod(BackBufferMIRROR, float4(TCL.x + ReprojectionLeft, TCL.y,0,0));
+						Right = tex2Dlod(BackBufferMIRROR, float4(TCR.x - ReprojectionRight, TCR.y,0,0));
+					}
+					else
+					{
+						Left = BB;
+						Right = BB;
+					}
+				}
+				else if(Custom_Sidebars == 1)
+				{
+					if ((TCL.x < 1.0 && TCL.x > 0.0 && TCL.y < 1.0 && TCL.y > 0.0) || (TCR.x < 1.0 && TCR.x > 0.0 && TCR.y < 1.0 && TCR.y > 0.0))
+					{
+						Left = tex2Dlod(BackBufferBORDER, float4(TCL.x + ReprojectionLeft, TCL.y,0,0));
+						Right = tex2Dlod(BackBufferBORDER, float4(TCR.x - ReprojectionRight, TCR.y,0,0));
+					}
+					else
+					{
+						Left = BB;
+						Right = BB;
+					}
+				}
+				else
+				{
+					if ((TCL.x < 1.0 && TCL.x > 0.0 && TCL.y < 1.0 && TCL.y > 0.0) || (TCR.x < 1.0 && TCR.x > 0.0 && TCR.y < 1.0 && TCR.y > 0.0))
+					{
+						Left = tex2Dlod(BackBufferCLAMP, float4(TCL.x + ReprojectionLeft, TCL.y,0,0));
+						Right = tex2Dlod(BackBufferCLAMP, float4(TCR.x - ReprojectionRight, TCR.y,0,0));
+					}
+					else
+					{
+						Left = BB;
+						Right = BB;
+					}
+				}
+			#else
+				if(Custom_Sidebars == 0)
 				{
 					Left = tex2Dlod(BackBufferMIRROR, float4(TCL.x + ReprojectionLeft, TCL.y,0,0));
 					Right = tex2Dlod(BackBufferMIRROR, float4(TCR.x - ReprojectionRight, TCR.y,0,0));
 				}
-				else
-				{
-					Left = BB;
-					Right = BB;
-				}
-			}
-			else if(Custom_Sidebars == 4)
-			{
-				if ((TCL.x < 1.0 && TCL.x > 0.0 && TCL.y < 1.0 && TCL.y > 0.0) || (TCR.x < 1.0 && TCR.x > 0.0 && TCR.y < 1.0 && TCR.y > 0.0))
+				else if(Custom_Sidebars == 1)
 				{
 					Left = tex2Dlod(BackBufferBORDER, float4(TCL.x + ReprojectionLeft, TCL.y,0,0));
 					Right = tex2Dlod(BackBufferBORDER, float4(TCR.x - ReprojectionRight, TCR.y,0,0));
 				}
 				else
 				{
-					Left = BB;
-					Right = BB;
-				}
-			}
-			else if(Custom_Sidebars == 5)
-			{
-				if ((TCL.x < 1.0 && TCL.x > 0.0 && TCL.y < 1.0 && TCL.y > 0.0) || (TCR.x < 1.0 && TCR.x > 0.0 && TCR.y < 1.0 && TCR.y > 0.0))
-				{
 					Left = tex2Dlod(BackBufferCLAMP, float4(TCL.x + ReprojectionLeft, TCL.y,0,0));
 					Right = tex2Dlod(BackBufferCLAMP, float4(TCR.x - ReprojectionRight, TCR.y,0,0));
 				}
-				else
-				{
-					Left = BB;
-					Right = BB;
-				}
-			}
+			#endif
 	
 			if ( Eye_Swap )
 			{
@@ -1603,7 +1648,7 @@ technique Depth3D
 			PixelShader = Average_Luminance_Weapon;
 			RenderTarget = texLumWeapon;
 		}
-		#if TOGGLE_Resize
+		#if Image_Resize_Modes == 2
 			pass BB_Blur
 		{
 			VertexShader = PostProcessVS;
