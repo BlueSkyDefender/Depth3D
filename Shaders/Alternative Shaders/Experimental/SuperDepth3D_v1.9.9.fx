@@ -37,13 +37,12 @@
 #define Cancel_Depth_Key 0
 
 //Horizontal & Vertical Depth Buffer Resize for non conforming BackBuffer.
-//Min value is 0.5 & Max value is 2.0 Default is One.
+//Min value is -0.5 & Max value is 0.5 Default is Zero.
 //Ex. Resident Evil 7 Has this problem. So you want to adjust it too around -0.0425.
 #define Horizontal_and_Vertical 0.0
 
 //Image resizing and BackBuffer fill for Lightberry like systems.
-//Do Not Enable This Toggle if you are useing Polynomial Barrel Distortion for HMDs.
-//This is mainly for TnB and SideBySide output for the Lightberry like systems.
+//Do Not Enable This Toggle if you are using Polynomial Barrel Distortion for HMDs.
 //Default 0 Off. 1 is Resize mode. 2 is Lightberry Resize Mode.
 #define Image_Resize_Modes 0
 
