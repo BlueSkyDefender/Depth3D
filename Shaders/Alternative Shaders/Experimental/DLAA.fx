@@ -165,7 +165,6 @@ float4 LongEdge(float2 texcoord)
     //Thank you
     if ( abs( longEdgeH - longEdgeV ) > 0.2 )
 	{
-    float4 CenterH = Center, CenterV = Center; 
     float4 longEdgeBlurH= ( HNegA + HNegB + HNegC + HNegD + HPosA + HPosB + HPosC + HPosD ) * 0.125;
     float4 longEdgeBlurV= ( VNegA + VNegB + VNegC + VNegD + VPosA + VPosB + VPosC + VPosD ) * 0.125;
     
@@ -189,16 +188,16 @@ float4 LongEdge(float2 texcoord)
 	float blurRight		= saturate( 1.0 + ( LongBlurLumV - CenterLI ) / CenterDiff.z );
 	float blurDown 		= saturate( 1.0 + ( LongBlurLumH - CenterLI ) / CenterDiff.w );     
 
-	float4 Cross   		= float4( blurLeft, blurRight, blurUp, blurDown );
-		   Cross  		= ( Cross == float4(0.0, 0.0, 0.0, 0.0) ) ? float4(1.0, 1.0, 1.0, 1.0) : Cross;
+	float4 CrossBlur   		= float4( blurLeft, blurRight, blurUp, blurDown );
+		   CrossBlur  		= ( CrossBlur == float4(0.0, 0.0, 0.0, 0.0) ) ? float4(1.0, 1.0, 1.0, 1.0) : CrossBlur;
 
-	CenterH				= lerp( Left, CenterH,  Cross.x );
-	CenterH				= lerp( Right,CenterH, Cross.y );
-	CenterV 			= lerp( Up,   CenterV,  Cross.z );
-	CenterV 			= lerp( Down, CenterV, Cross.w );
+	float4 CenterH		= lerp( Left, Center,  CrossBlur.x );
+		   CenterH		= lerp( Right,CenterH, CrossBlur.y );
+	float4 CenterV 		= lerp( Up,   Center,  CrossBlur.z );
+		   CenterV		= lerp( Down, CenterV, CrossBlur.w );
     	
-    SEdge = lerp( SEdge, CenterH, LongBlurLumH);
-	SEdge = lerp( SEdge, CenterV, LongBlurLumV);  
+    SEdge = lerp( SEdge, CenterH, longEdgeV);
+	SEdge = lerp( SEdge, CenterV, longEdgeH);  
     }
     
     DLAA_Out = SEdge;
