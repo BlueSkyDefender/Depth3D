@@ -32,7 +32,7 @@ uniform int Luminace_Selection <
 	ui_tooltip = "Luminace color selection Green to RGB.";
 > = 0;
 
-uniform float Luminosity_Intensity <
+uniform int Luminosity_Intensity <
 	ui_type = "drag";
 	ui_min = 1.0; ui_max = 10.0;
 	ui_label = "Luminosity Intensity";
@@ -55,7 +55,7 @@ sampler BackBuffer
 	
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //Luminosity Intensity
-float3 LI(in float3 value)
+float LI(in float3 value)
 {	
 	//Luminosity Controll from 0.1 to 1.0 
 	//If GGG value of 0.333, 0.333, 0.333 is about right for Green channel. 
@@ -67,7 +67,7 @@ float3 LI(in float3 value)
 	}
 	else
 	{
-		Lum = dot(value.xyz, float3(0.333*Luminosity_Intensity, 0.333*Luminosity_Intensity, 0.333*Luminosity_Intensity));
+		Lum = dot(value.yyy, float3(0.333*Luminosity_Intensity, 0.333*Luminosity_Intensity, 0.333*Luminosity_Intensity));
 	}
 	
 	return Lum;
