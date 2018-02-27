@@ -41,7 +41,7 @@ uniform int Stereoscopic_Mode <
 
 uniform int Scaling_Support <
 	ui_type = "combo";
-	ui_items = " 2160p\0 Native\0 1080p A\0 1080p B\0 1050p A\0 1050p B\0 720p A\0 720p B\0";
+	ui_items = " 2160p\0 Native\0 1080p A\0 1080p B\0 1050p A\0 1050p B\0 720p A\0 720p B\0TEST\0";
 	ui_label = "Scaling Support";
 	ui_tooltip = "Dynamic Super Resolution , Virtual Super Resolution, downscaling, or Upscaling support for Line Interlaced, Column Interlaced, & Checkerboard 3D displays.";
 > = 1;
@@ -67,7 +67,7 @@ uniform bool Eye_Swap <
 
 uniform float TEST <
 	ui_type = "drag";
-	ui_min = 0.0; ui_max = 1.0;
+	ui_min = 0.0; ui_max = 720.0;
 	ui_label = "TEST";
 	ui_tooltip = "TEST";
 > = 0.5;
@@ -96,11 +96,17 @@ texture texCR  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA32F;
 sampler SamplerCL
 	{
 		Texture = texCL;
+		AddressU = BORDER;
+		AddressV = BORDER;
+		AddressW = BORDER;
 	};
 
 sampler SamplerCR
 	{
 		Texture = texCR;
+		AddressU = BORDER;
+		AddressV = BORDER;
+		AddressW = BORDER;
 	};
   
 ////////////////////////////////////////////////Left/Right Eye////////////////////////////////////////////////////////
@@ -108,7 +114,7 @@ sampler SamplerCR
 float4 UL(in float2 texcoord : TEXCOORD0)
 {
 	float gridy = floor(texcoord.y*(BUFFER_HEIGHT)); //Native
-	return (int(gridy) & 1) < 0.5 ? tex2D(BackBuffer, float2(texcoord.x,texcoord.y)) : 0 ;
+	return int(gridy) % 2 ? 0 : tex2D(BackBuffer, float2(texcoord.x,texcoord.y)) ;
 }
 
 float4 Uni_L(in float2 texcoord : TEXCOORD0)
@@ -127,7 +133,7 @@ float4 Uni_L(in float2 texcoord : TEXCOORD0)
 float4 UR(in float2 texcoord : TEXCOORD0)
 {
 	float gridy = floor(texcoord.y*(BUFFER_HEIGHT)); //Native
-	return (int(gridy) & 1) < 0.5 ? 0 : tex2D(BackBuffer, float2(texcoord.x,texcoord.y)) ;
+	return int(gridy) % 2 ? tex2D(BackBuffer, float2(texcoord.x,texcoord.y)) : 0 ;
 }
 
 float4 Uni_R(in float2 texcoord : TEXCOORD0)
@@ -145,9 +151,8 @@ float4 Uni_R(in float2 texcoord : TEXCOORD0)
 //Bilateral Left
 float4 BL(in float2 texcoord : TEXCOORD0)
 {
-	float gridy = floor(texcoord.y*(BUFFER_HEIGHT)); //Native
-	float gridx = floor(texcoord.x*(BUFFER_WIDTH)); //Native
-	return (int(gridy+gridx) & 1) < 0.5 ? tex2D(BackBuffer, float2(texcoord.x,texcoord.y)) : 0 ;
+	float2 gridxy = floor(float2(texcoord.x*BUFFER_WIDTH,texcoord.y*BUFFER_HEIGHT));
+	return int(gridxy.x+gridxy.y) % 2 ? 0 : tex2D(BackBuffer, float2(texcoord.x,texcoord.y)) ;
 }
 
 float4 Bi_L(in float2 texcoord : TEXCOORD0)
@@ -166,9 +171,8 @@ float4 Bi_L(in float2 texcoord : TEXCOORD0)
 //Bilateral Right
 float4 BR(in float2 texcoord : TEXCOORD0)
 {
-	float gridy = floor(texcoord.y*(BUFFER_HEIGHT)); //Native
-	float gridx = floor(texcoord.x*(BUFFER_WIDTH)); //Native
-	return (int(gridy+gridx) & 1) < 0.5 ? 0 : tex2D(BackBuffer, float2(texcoord.x,texcoord.y)) ;
+	float2 gridxy = floor(float2(texcoord.x*BUFFER_WIDTH,texcoord.y*BUFFER_HEIGHT));
+	return int(gridxy.x+gridxy.y) % 2 ? tex2D(BackBuffer, float2(texcoord.x,texcoord.y)) : 0 ;
 }
 
 float4 Bi_R(in float2 texcoord : TEXCOORD0)
@@ -223,7 +227,7 @@ void PS_InputLR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0
 		color =  A;
 		colorT = B;
 	}
-	else if(Stereoscopic_Mode_Input == 5) // FS Needs previous frame Filled.
+	else if(Stereoscopic_Mode_Input == 5) //  DeAnaglyph Need. Need to Do ReSearch.
 	{
 	
 	}
@@ -232,7 +236,6 @@ void PS_InputLR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0
 	
 	}
 }
-
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void PS0(float4 position : SV_Position, float2 texcoord : TEXCOORD0, out float4 color : SV_Target)
@@ -245,7 +248,7 @@ void PS0(float4 position : SV_Position, float2 texcoord : TEXCOORD0, out float4 
 	}
 	else
 	{
-		P = 1-Perspective;
+		P = -Perspective;
 	}
 	
 	if(Stereoscopic_Mode == 0)
@@ -266,48 +269,39 @@ void PS0(float4 position : SV_Position, float2 texcoord : TEXCOORD0, out float4 
 	
 	
 
-	float gridy;
-	float gridx;
+	float2 gridxy;
 
 	if(Scaling_Support == 0)
 	{
-	gridy = floor(texcoord.y*(2160.0));
-	gridx = floor(texcoord.x*(3840.0));
+		gridxy = floor(float2(texcoord.x*3840.0,texcoord.y*2160.0));
 	}	
 	else if(Scaling_Support == 1)
 	{
-	gridy = floor(texcoord.y*(BUFFER_HEIGHT)); //Native
-	gridx = floor(texcoord.x*(BUFFER_WIDTH)); //Native
+		gridxy = floor(float2(texcoord.x*BUFFER_WIDTH,texcoord.y*BUFFER_HEIGHT));
 	}
 	else if(Scaling_Support == 2)
 	{
-	gridy = floor(texcoord.y*(1080.0));
-	gridx = floor(texcoord.x*(1920.0));
+		gridxy = floor(float2((texcoord.x*1920.0)*0.5,(texcoord.y*1080.0)*0.5));
 	}
 	else if(Scaling_Support == 3)
 	{
-	gridy = floor(texcoord.y*(1081.0));
-	gridx = floor(texcoord.x*(1921.0));
+		gridxy = floor(float2((texcoord.x*1921.0)*0.5,(texcoord.y*1081.0)*0.5));
 	}
 	else if(Scaling_Support == 4)
 	{
-	gridy = floor(texcoord.y*(1050.0));
-	gridx = floor(texcoord.x*(1680.0));
+		gridxy = floor(float2((texcoord.x*1680.0)*0.5,(texcoord.y*1050.0)*0.5));
 	}
 	else if(Scaling_Support == 5)
 	{
-	gridy = floor(texcoord.y*(1051.0));
-	gridx = floor(texcoord.x*(1681.0));
+		gridxy = floor(float2((texcoord.x*1681.0)*0.5,(texcoord.y*1051.0)*0.5));
 	}
 	else if(Scaling_Support == 6)
 	{
-	gridy = floor(texcoord.y*(720.0));
-	gridx = floor(texcoord.x*(1280.0));
+		gridxy = floor(float2((texcoord.x*1280.0)*0.5,(texcoord.y*720.0)*0.5));
 	}
 	else if(Scaling_Support == 7)
 	{
-	gridy = floor(texcoord.y*(721.0));
-	gridx = floor(texcoord.x*(1281.0));
+		gridxy = floor(float2((texcoord.x*1281.0)*0.5,(texcoord.y*721.0)*0.5));
 	}
 			
 	if(Stereoscopic_Mode == 0)
@@ -320,15 +314,15 @@ void PS0(float4 position : SV_Position, float2 texcoord : TEXCOORD0, out float4 
 	}
 	else if(Stereoscopic_Mode == 2)
 	{
-		color = (int(gridy) & 1) < 0.5 ? cL : cR;	
+		color = int(gridxy.y) % 2 ? cR : cL;	
 	}
 	else if(Stereoscopic_Mode == 3)
 	{
-		color = (int(gridx) & 1) < 0.5 ? cL : cR;		
+		color = int(gridxy.x) % 2 ? cR : cL;		
 	}
 	else if(Stereoscopic_Mode == 4)
-	{
-		color = (int(gridy+gridx) & 1) < 0.5 ? cL : cR;
+	{	
+		color = int(gridxy.x+gridxy.y) % 2 ? cR : cL;
 	}
 	else if(Stereoscopic_Mode == 5)
 	{													

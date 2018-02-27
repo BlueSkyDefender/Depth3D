@@ -102,7 +102,7 @@ uniform int Balance <
 	ui_tooltip = "Balance between ZPD Depth and Scene Depth and works with ZPD option above.\n"
 				"Example Zero is 50/50 equal between ZPD Depth and Scene Depth.\n"
 				"Default is Zero.";
-> = 3;
+> = 0;
 
 uniform int Disocclusion_Adjust <
 	ui_type = "combo";
@@ -1366,124 +1366,89 @@ float4 Average_Luminance_Weapon(float4 position : SV_Position, float2 texcoord :
 uniform float timer < source = "timer"; >;
 float4 Out(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Target
 {
-	//#define pix float2(BUFFER_RCP_WIDTH, BUFFER_RCP_HEIGHT)
-	float HEIGHT = BUFFER_HEIGHT/2,WIDTH = BUFFER_WIDTH/2;	
-	float2 LCD,LCE,LCP,LCT,LCH,LCThree,LCDD,LCDot,LCI,LCN,LCF,LCO;
-	float size = 9.5,set = BUFFER_HEIGHT/2,offset = (set/size),Shift = 50;
+	float PosX = 0.5*BUFFER_WIDTH*pix.x,PosY = 0.5*BUFFER_HEIGHT*pix.y;	
 	float4 Color = float4(PS_calcLR(position,texcoord).rgb,1),Done,Website,D,E,P,T,H,Three,DD,Dot,I,N,F,O;
-
+	
 	if(timer <= 10000)
 	{
 	//DEPTH
 	//D
-	float offsetD = (size*offset)/(set-((size/size)+(size/size)));
-	LCD = float2(-90-Shift,0); 
-	float4 OneD = all(abs(LCD+float2(WIDTH,HEIGHT)-position.xy) < float2(size,size*2));
-	float4 TwoD = all(abs(LCD+float2(WIDTH*offsetD,HEIGHT)-position.xy) < float2(size,size*1.5));
+	float PosXD = -0.035+PosX, offsetD = 0.001;
+	float4 OneD = all( abs(float2( texcoord.x -PosXD, texcoord.y-PosY)) < float2(0.0025,0.009));
+	float4 TwoD = all( abs(float2( texcoord.x -PosXD-offsetD, texcoord.y-PosY)) < float2(0.0025,0.007));
 	D = OneD-TwoD;
-	//
 	
 	//E
-	float offs = (size*offset)/(set-(size/size)/2);
-	LCE = float2(-62-Shift,0); 
-	float4 OneE = all(abs(LCE+float2(WIDTH,HEIGHT)-position.xy) < float2(size,size*2));
-	float4 TwoE = all(abs(LCE+float2(WIDTH*offs,HEIGHT)-position.xy) < float2(size*0.875,size*1.5));
-	float4 ThreeE = all(abs(LCE+float2(WIDTH,HEIGHT)-position.xy) < float2(size,size/3));
+	float PosXE = -0.028+PosX, offsetE = 0.0005;
+	float4 OneE = all( abs(float2( texcoord.x -PosXE, texcoord.y-PosY)) < float2(0.003,0.009));
+	float4 TwoE = all( abs(float2( texcoord.x -PosXE-offsetE, texcoord.y-PosY)) < float2(0.0025,0.007));
+	float4 ThreeE = all( abs(float2( texcoord.x -PosXE, texcoord.y-PosY)) < float2(0.003,0.001));
 	E = (OneE-TwoE)+ThreeE;
-	//
 	
 	//P
-	float offsetP = (size*offset)/(set-((size/size)*5));
-	float offsP = (size*offset)/(set-(size/size)*-11);
-	float offseP = (size*offset)/(set-((size/size)*4.25));
-	LCP = float2(-37-Shift,0);
-	float4 OneP = all(abs(LCP+float2(WIDTH,HEIGHT/offsetP)-position.xy) < float2(size,size*1.5));
-	float4 TwoP = all(abs(LCP+float2((WIDTH)*offsetD,HEIGHT/offsetP)-position.xy) < float2(size,size));
-	float4 ThreeP = all(abs(LCP+float2(WIDTH/offseP,HEIGHT/offsP)-position.xy) < float2(size*0.200,size));
-	P = (OneP-TwoP)+ThreeP;
-	//
+	float PosXP = -0.0215+PosX, PosYP = -0.0025+PosY, offsetP = 0.001, offsetP1 = 0.002;
+	float4 OneP = all( abs(float2( texcoord.x -PosXP, texcoord.y-PosYP)) < float2(0.0025,0.009*0.682));
+	float4 TwoP = all( abs(float2( texcoord.x -PosXP-offsetP, texcoord.y-PosYP)) < float2(0.0025,0.007*0.682));
+	float4 ThreeP = all( abs(float2( texcoord.x -PosXP+offsetP1, texcoord.y-PosY)) < float2(0.0005,0.009));
+	P = (OneP-TwoP) + ThreeP;
 
 	//T
-	float offsetT = (size*offset)/(set-((size/size)*16.75));
-	float offsetTT = (size*offset)/(set-((size/size)*1.250));
-	LCT = float2(-10-Shift,0);
-	float4 OneT = all(abs(LCT+float2(WIDTH,HEIGHT*offsetTT)-position.xy) < float2(size/4,size*1.875));
-	float4 TwoT = all(abs(LCT+float2(WIDTH,HEIGHT/offsetT)-position.xy) < float2(size,size/4));
+	float PosXT = -0.014+PosX, PosYT = -0.008+PosY;
+	float4 OneT = all( abs(float2( texcoord.x -PosXT, texcoord.y-PosYT)) < float2(0.003,0.001));
+	float4 TwoT = all( abs(float2( texcoord.x -PosXT, texcoord.y-PosY)) < float2(0.000625,0.009));
 	T = OneT+TwoT;
-	//
 	
 	//H
-	LCH = float2(13-Shift,0);
-	float4 OneH = all(abs(LCH+float2(WIDTH,HEIGHT)-position.xy) < float2(size,size*2));
-	float4 TwoH = all(abs(LCH+float2(WIDTH,HEIGHT)-position.xy) < float2(size/2,size*2));
-	float4 ThreeH = all(abs(LCH+float2(WIDTH,HEIGHT)-position.xy) < float2(size,size/3));
+	float PosXH = -0.0071+PosX;
+	float4 OneH = all( abs(float2( texcoord.x -PosXH, texcoord.y-PosY)) < float2(0.002,0.001));
+	float4 TwoH = all( abs(float2( texcoord.x -PosXH, texcoord.y-PosY)) < float2(0.002,0.009));
+	float4 ThreeH = all( abs(float2( texcoord.x -PosXH, texcoord.y-PosY)) < float2(0.003,0.009));
 	H = (OneH-TwoH)+ThreeH;
-	//
 	
 	//Three
-	float offsThree = (size*offset)/(set-(size/size)*1.250);
-	LCThree = float2(38-Shift,0);
-	float4 OneThree = all(abs(LCThree+float2(WIDTH,HEIGHT)-position.xy) < float2(size,size*2));
-	float4 TwoThree = all(abs(LCThree+float2(WIDTH*offsThree,HEIGHT)-position.xy) < float2(size*1.2,size*1.5));
-	float4 ThreeThree = all(abs(LCThree+float2(WIDTH,HEIGHT)-position.xy) < float2(size,size/3));
+	float offsetFive = 0.001, PosX3 = -0.001+PosX;
+	float4 OneThree = all( abs(float2( texcoord.x -PosX3, texcoord.y-PosY)) < float2(0.002,0.009));
+	float4 TwoThree = all( abs(float2( texcoord.x -PosX3 - offsetFive, texcoord.y-PosY)) < float2(0.003,0.007));
+	float4 ThreeThree = all( abs(float2( texcoord.x -PosX3, texcoord.y-PosY)) < float2(0.002,0.001));
 	Three = (OneThree-TwoThree)+ThreeThree;
-	//
 	
 	//DD
-	float offsetDD = (size*offset)/(set-((size/size)+(size/size)));
-	LCDD = float2(65-Shift,0);
-	float4 OneDD = all(abs(LCDD+float2(WIDTH,HEIGHT)-position.xy) < float2(size,size*2));
-	float4 TwoDD = all(abs(LCDD+float2(WIDTH*offsetDD,HEIGHT)-position.xy) < float2(size,size*1.5));
+	float PosXDD = 0.006+PosX, offsetDD = 0.001;	
+	float4 OneDD = all( abs(float2( texcoord.x -PosXDD, texcoord.y-PosY)) < float2(0.0025,0.009));
+	float4 TwoDD = all( abs(float2( texcoord.x -PosXDD-offsetDD, texcoord.y-PosY)) < float2(0.0025,0.007));
 	DD = OneDD-TwoDD;
-	//
 	
 	//Dot
-	float offsetDot = (size*offset)/(set-((size/size)*16));
-	LCDot = float2(85-Shift,0);	
-	float4 OneDot = all(abs(LCDot+float2(WIDTH,HEIGHT*offsetDot)-position.xy) < float2(size/3,size/3.3));
+	float PosXDot = 0.011+PosX, PosYDot = 0.008+PosY;		
+	float4 OneDot = all( abs(float2( texcoord.x -PosXDot, texcoord.y-PosYDot)) < float2(0.00075,0.0015));
 	Dot = OneDot;
-	//
 	
 	//INFO
 	//I
-	float offsetI = (size*offset)/(set-((size/size)*18));
-	float offsetII = (size*offset)/(set-((size/size)*8));
-	float offsetIII = (size*offset)/(set-((size/size)*5));
-	LCI = float2(101-Shift,0);	
-	float4 OneI = all(abs(LCI+float2(WIDTH,HEIGHT*offsetI)-position.xy) < float2(size,size/4));
-	float4 TwoI = all(abs(LCI+float2(WIDTH,HEIGHT/offsetII)-position.xy) < float2(size,size/4));
-	float4 ThreeI = all(abs(LCI+float2(WIDTH,HEIGHT*offsetIII)-position.xy) < float2(size/4,size*1.5));
+	float PosXI = 0.0155+PosX, PosYI = 0.004+PosY, PosYII = 0.008+PosY;
+	float4 OneI = all( abs(float2( texcoord.x - PosXI, texcoord.y - PosY)) < float2(0.003,0.001));
+	float4 TwoI = all( abs(float2( texcoord.x - PosXI, texcoord.y - PosYI)) < float2(0.000625,0.005));
+	float4 ThreeI = all( abs(float2( texcoord.x - PosXI, texcoord.y - PosYII)) < float2(0.003,0.001));
 	I = OneI+TwoI+ThreeI;
-	//
 	
 	//N
-	float offsetN = (size*offset)/(set-((size/size)*7));
-	float offsetNN = (size*offset)/(set-((size/size)*5));
-	LCN = float2(126-Shift,0);	
-	float4 OneN = all(abs(LCN+float2(WIDTH,HEIGHT/offsetN)-position.xy) < float2(size,size/4));
-	float4 TwoN = all(abs(LCN+float2(WIDTH*offsetNN,HEIGHT*offsetNN)-position.xy) < float2(size/5,size*1.5));
-	float4 ThreeN = all(abs(LCN+float2(WIDTH/offsetNN,HEIGHT*offsetNN)-position.xy) < float2(size/5,size*1.5));
-	N = OneN+TwoN+ThreeN;
-	//
+	float PosXN = 0.0225+PosX, PosYN = 0.005+PosY,offsetN = -0.001;
+	float4 OneN = all( abs(float2( texcoord.x - PosXN, texcoord.y - PosYN)) < float2(0.002,0.004));
+	float4 TwoN = all( abs(float2( texcoord.x - PosXN, texcoord.y - PosYN - offsetN)) < float2(0.003,0.005));
+	N = OneN-TwoN;
 	
 	//F
-	float offsetF = (size*offset)/(set-((size/size*7)));
-	float offsetFF = (size*offset)/(set-((size/size)*5));
-	float offsetFFF = (size*offset)/(set-((size/size)*-7.5));
-	LCF = float2(153-Shift,0);	
-	float4 OneF = all(abs(LCF+float2(WIDTH,HEIGHT/offsetF)-position.xy) < float2(size,size/4));
-	float4 TwoF = all(abs(LCF+float2(WIDTH/offsetFF,HEIGHT*offsetFF)-position.xy) < float2(size/5,size*1.5));
-	float4 ThreeF = all(abs(LCF+float2(WIDTH,HEIGHT/offsetFFF)-position.xy) < float2(size,size/4));
-	F = OneF+TwoF+ThreeF;
-	//
+	float PosXF = 0.029+PosX, PosYF = 0.004+PosY, offsetF = 0.0005, offsetF1 = 0.001;
+	float4 OneF = all( abs(float2( texcoord.x -PosXF-offsetF, texcoord.y-PosYF-offsetF1)) < float2(0.002,0.004));
+	float4 TwoF = all( abs(float2( texcoord.x -PosXF, texcoord.y-PosYF)) < float2(0.0025,0.005));
+	float4 ThreeF = all( abs(float2( texcoord.x -PosXF, texcoord.y-PosYF)) < float2(0.0015,0.00075));
+	F = (OneF-TwoF)+ThreeF;
 	
 	//O
-	float offsetO = (size*offset)/(set-((size/size*-5)));
-	LCO = float2(176-Shift,0);	
-	float4 OneO = all(abs(LCO+float2(WIDTH,HEIGHT/offsetO)-position.xy) < float2(size,size*1.5));
-	float4 TwoO = all(abs(LCO+float2(WIDTH,HEIGHT/offsetO)-position.xy) < float2(size/1.5,size));
+	float PosXO = 0.035+PosX, PosYO = 0.004+PosY;
+	float4 OneO = all( abs(float2( texcoord.x -PosXO, texcoord.y-PosYO)) < float2(0.003,0.005));
+	float4 TwoO = all( abs(float2( texcoord.x -PosXO, texcoord.y-PosYO)) < float2(0.002,0.003));
 	O = OneO-TwoO;
-	//
 	}
 	
 	Website = D+E+P+T+H+Three+DD+Dot+I+N+F+O ? float4(1.0,1.0,1.0,1) : Color;
