@@ -159,11 +159,8 @@ float4 LongEdge(float2 texcoord)
     
     //float longEdge = max( longEdgeH , longEdgeV);   
     //if ( longEdge > 1.0 )
-    //if ( longEdgeH > 0 || longEdgeV > 0 )
-    //Ended useing This instead of the other 2 above
-    //This was taken from https://github.uconn.edu/eec09006/breakout/blob/master/breakout/Assets/Standard%20Assets/Effects/ImageEffects/Shaders/_Antialiasing/DLAA.shader#L135
-    //Thank you
-    if ( abs( longEdgeH - longEdgeV ) > 0.2 )
+    float longEdge = abs( longEdgeH - longEdgeV); 
+    if ( longEdge > 0.2 )
 	{
     float4 longEdgeBlurH= ( HNegA + HNegB + HNegC + HNegD + HPosA + HPosB + HPosC + HPosD ) * 0.125;
     float4 longEdgeBlurV= ( VNegA + VNegB + VNegC + VNegD + VPosA + VPosB + VPosC + VPosD ) * 0.125;
