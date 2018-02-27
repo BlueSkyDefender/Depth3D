@@ -27,14 +27,14 @@ uniform bool Debug_View <
 
 uniform int Luminace_Selection <
 	ui_type = "combo";
-	ui_items = "Green Channel Luminace\0RGB Luminace\0";
+	ui_items = "RGB Luminace\0Green Channel Luminace\0";
 	ui_label = "Luminace Selection";
 	ui_tooltip = "Luminace color selection Green to RGB.";
 > = 0;
 
 uniform int Luminosity_Intensity <
 	ui_type = "drag";
-	ui_min = 1.0; ui_max = 10.0;
+	ui_min = 1; ui_max = 10;
 	ui_label = "Luminosity Intensity";
 	ui_tooltip = "This adjust the Edge Detection Luminace seeking value.\n"
 				 "When in doubt leave it at default.\n"
@@ -61,7 +61,7 @@ float LI(in float3 value)
 	//If GGG value of 0.333, 0.333, 0.333 is about right for Green channel. 
 	//If RGB channels are used as luminosity 0.299, 0.587, 0.114
 	float Lum;
-	if (Luminace_Selection == 1)
+	if (Luminace_Selection == 0)
 	{
 		Lum = dot(value.xyz, float3(0.299*Luminosity_Intensity, 0.587*Luminosity_Intensity, 0.114*Luminosity_Intensity));
 	}
