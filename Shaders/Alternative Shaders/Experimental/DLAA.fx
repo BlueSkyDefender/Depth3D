@@ -32,15 +32,6 @@ uniform int Luminace_Selection <
 	ui_tooltip = "Luminace color selection Green to RGB.";
 > = 0;
 
-uniform int Luminosity_Intensity <
-	ui_type = "drag";
-	ui_min = 1; ui_max = 10;
-	ui_label = "Luminosity Intensity";
-	ui_tooltip = "This adjust the Edge Detection Luminace seeking value.\n"
-				 "When in doubt leave it at default.\n"
-				 "Number 1.0 is default.";
-> = 1.0;
-
 /////////////////////////////////////////////////////D3D Starts Here/////////////////////////////////////////////////////////////////
 #define pix float2(BUFFER_RCP_WIDTH, BUFFER_RCP_HEIGHT)
 #define lambda 3.0f
@@ -64,11 +55,11 @@ float LI(in float3 value)
 	float Lum;
 	if (Luminace_Selection == 0)
 	{
-		Lum = dot(value.xyz, float3(0.299*Luminosity_Intensity, 0.587*Luminosity_Intensity, 0.114*Luminosity_Intensity));
+		Lum = dot(value.xyz, float3(0.299, 0.587, 0.114));
 	}
 	else
 	{
-		Lum = dot(value.yyy, float3(0.333*Luminosity_Intensity, 0.333*Luminosity_Intensity, 0.333*Luminosity_Intensity));
+		Lum = dot(value.yyy, float3(0.333, 0.333, 0.333));
 	}
 	
 	return Lum;
@@ -78,7 +69,7 @@ float LI(in float3 value)
 float4 DLAA(float2 texcoord)
 {
 	//Short Edge Filter http://and.intercon.ru/releases/talks/dlaagdc2011/slides/#slide43
-	float4 DLAA; //DLAA is Compleated AA Result.
+	float4 DLAA; //DLAA is the completed AA Result.
 	
 	//5 bi-linear samples cross
 	float4 Center 		= tex2D(BackBuffer, texcoord);    
@@ -94,11 +85,11 @@ float4 DLAA(float2 texcoord)
 	//Bi-directional anti-aliasing using *only* HORIZONTAL blur and horizontal edge detection
 	//Slide information triped me up here. Read slide 43.
 	float4 CenterDiffH	= abs( combH - 2.0 * Center ) * 0.5;  
-	float4 CenterDiffV	= abs( combH - 2.0 * Center ) * 0.5;
+	//float4 CenterDiffV	= abs( combH - 2.0 * Center ) * 0.5;
 	
 	//Edge detection
 	float EdgeLumH		= LI( CenterDiffH.rgb );
-	float EdgeLumV		= LI( CenterDiffV.rgb );
+	//float EdgeLumV		= LI( CenterDiffV.rgb );
 		
 	//Blur
 	float4 blurredH		= ( combH + Center) * 0.33333333;
@@ -106,9 +97,9 @@ float4 DLAA(float2 texcoord)
 	
 	float LumH			= LI( blurredH.rgb );
 	float LumV			= LI( blurredV.rgb );
-
+	
 	float satAmountH 	= saturate( ( lambda * EdgeLumH - epsilon ) / LumH );
-    float satAmountV 	= saturate( ( lambda * EdgeLumV - epsilon ) / LumV );
+    float satAmountV 	= saturate( ( lambda * EdgeLumH - epsilon ) / LumV );
 	
 	//Re-blend Short Edge Done
 	DLAA = lerp( Center,  blurredH, satAmountH );
@@ -143,11 +134,11 @@ float4 DLAA(float2 texcoord)
     longEdgeH = saturate( longEdgeH * 2.0 - 1.0 );
     longEdgeV = saturate( longEdgeV * 2.0 - 1.0 );
     
-    //float longEdge = max( longEdgeH , longEdgeV);   
-    //if ( longEdge > 1.0 )
+    //float longEdge = abs( longEdgeH - longEdgeV);
+    //if ( longEdge > 0.2 )
     
-    float longEdge = abs( longEdgeH - longEdgeV); //This showed less color bleeding.
-    if ( longEdge > 0.2 )
+    float longEdge = max( longEdgeH , longEdgeV);   
+    if ( longEdge > 1.0 )
 	{
 	//Merge for BlurSamples.
     float4 longEdgeBlurH= ( HNegA + HNegB + HNegC + HNegD + HPosA + HPosB + HPosC + HPosD ) * 0.125;
