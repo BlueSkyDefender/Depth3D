@@ -161,7 +161,7 @@ float4 DepthCues(float2 texcoord : TEXCOORD0)
 	//Luma (HDR video)	float3(0.2627, 0.6780, 0.0593) https://en.wikipedia.org/wiki/Rec._2100
 	float4 RGBA, A=tex2D(BackBuffer,texcoord);
 	float3 RGB, Luma_Coefficient = float3(0.2627, 0.6780, 0.0593);
-	float Con = (1.0 - 0.1875)/1.0;
+	float Con = 1.0 - 0.1875;
 		
 	//Formula for Image Pop = Original + (Original / Blurred) * Amount * Original.
 	RGB = GS(tex2D(BackBuffer,texcoord).rgb * Con) / GS(Adjust(texcoord).rgb);
