@@ -122,24 +122,24 @@ float4 DLAA(float2 texcoord)
 	float4 HNegA, HNegB, HNegC, HNegD, HPosA, HPosB, HPosC, HPosD, VNegA, VNegB, VNegC, VNegD, VPosA, VPosB, VPosC, VPosD, CenterH, CenterV;
 			
 	// Long Edges 
-    //16 bi-linear samples cross, 4 extra bi-linear samples in each direction. -8to8 Slide 44
-	HNegA	= tex2D(BackBuffer, texcoord + float2(-pix.x,  0.0) );
-	HNegB   = tex2D(BackBuffer, texcoord + float2(-2.0 * pix.x,  0.0) );
-	HNegC   = tex2D(BackBuffer, texcoord + float2(-4.0 * pix.x,  0.0) );
-	HNegD   = tex2D(BackBuffer, texcoord + float2(-8.0 * pix.x,  0.0) );
-	HPosA   = tex2D(BackBuffer, texcoord + float2( pix.x,  0.0) );
-	HPosB   = tex2D(BackBuffer, texcoord + float2( 2.0 * pix.x,  0.0) );
-	HPosC   = tex2D(BackBuffer, texcoord + float2( 4.0 * pix.x,  0.0) );
-	HPosD   = tex2D(BackBuffer, texcoord + float2( 8.0 * pix.x,  0.0) );
+    //16 bi-linear samples cross, 4 extra bi-linear samples in each direction. -7.5 to 7.5 Not the same as Slide 44
+	HNegA	= tex2D(BackBuffer, texcoord + float2(-1.5 * pix.x,  0.0) );
+	HNegB   = tex2D(BackBuffer, texcoord + float2(-3.5 * pix.x,  0.0) );
+	HNegC   = tex2D(BackBuffer, texcoord + float2(-5.5 * pix.x,  0.0) );
+	HNegD   = tex2D(BackBuffer, texcoord + float2(-7.5 * pix.x,  0.0) );
+	HPosA   = tex2D(BackBuffer, texcoord + float2( 1.5 * pix.x,  0.0) );
+	HPosB   = tex2D(BackBuffer, texcoord + float2( 3.5 * pix.x,  0.0) );
+	HPosC   = tex2D(BackBuffer, texcoord + float2( 5.5 * pix.x,  0.0) );
+	HPosD   = tex2D(BackBuffer, texcoord + float2( 7.5 * pix.x,  0.0) );
 	 
-	VNegA   = tex2D(BackBuffer, texcoord + float2( 0.0,-pix.y) );
-	VNegB   = tex2D(BackBuffer, texcoord + float2( 0.0,-2.0 * pix.y) );
-	VNegC   = tex2D(BackBuffer, texcoord + float2( 0.0,-4.0 * pix.y) );
-	VNegD   = tex2D(BackBuffer, texcoord + float2( 0.0,-8.0 * pix.y) );
-	VPosA   = tex2D(BackBuffer, texcoord + float2( 0.0, pix.y) );
-	VPosB   = tex2D(BackBuffer, texcoord + float2( 0.0, 2.0 * pix.y) );
-	VPosC   = tex2D(BackBuffer, texcoord + float2( 0.0, 4.0 * pix.y) );
-	VPosD   = tex2D(BackBuffer, texcoord + float2( 0.0, 8.0 * pix.y) );
+	VNegA   = tex2D(BackBuffer, texcoord + float2( 0.0,-1.5 * pix.y) );
+	VNegB   = tex2D(BackBuffer, texcoord + float2( 0.0,-3.5 * pix.y) );
+	VNegC   = tex2D(BackBuffer, texcoord + float2( 0.0,-5.5 * pix.y) );
+	VNegD   = tex2D(BackBuffer, texcoord + float2( 0.0,-7.5 * pix.y) );
+	VPosA   = tex2D(BackBuffer, texcoord + float2( 0.0, 1.5 * pix.y) );
+	VPosB   = tex2D(BackBuffer, texcoord + float2( 0.0, 3.5 * pix.y) );
+	VPosC   = tex2D(BackBuffer, texcoord + float2( 0.0, 5.5 * pix.y) );
+	VPosD   = tex2D(BackBuffer, texcoord + float2( 0.0, 7.5 * pix.y) );
 	
     //Long Edge detection H
     float4 EdgeBlurH = ( HNegA + HNegB + HNegC + HNegD + HPosA + HPosB + HPosC + HPosD );
