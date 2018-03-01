@@ -40,8 +40,8 @@ uniform float Long_Edge_Seek <
 	ui_label = "Long Edge Seek";
 	ui_tooltip = "Use this to seek out long edged jaggys.\n"
 				 "The Sronger the blurryer the image.\n"
-				 "Default is 0.800";
-> = 0.800;
+				 "Default is 0.750";
+> = 0.750;
 
 /////////////////////////////////////////////////////D3D Starts Here/////////////////////////////////////////////////////////////////
 #define pix float2(BUFFER_RCP_WIDTH, BUFFER_RCP_HEIGHT)
