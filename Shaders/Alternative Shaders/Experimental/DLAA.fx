@@ -151,12 +151,10 @@ float4 DLAA(float2 texcoord)
     float4 longEdgeDV = abs( EdgeBlurV - 8.0 * DLAA ) * 0.5; 
 	float LongEdgeLumV	= LI( longEdgeDV.rgb );
 
-	float LongEdgeLumHV = (LongEdgeLumV + LongEdgeLumV) * 0.5;
-
     //Long Edge detection H & V
-    //float longEdge = abs( longEdgeH - longEdgeV);
+    float LongEdgeLumHV = abs(LongEdgeLumH - LongEdgeLumV);
     float LES = 1-Long_Edge_Seek; 
-    if ( LongEdgeLumHV > LES )
+    if ( LongEdgeLumH > LES )
 	{    	
 	//Merge for BlurSamples.
 	//Long Blur H
