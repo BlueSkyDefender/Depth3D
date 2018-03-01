@@ -20,7 +20,9 @@
  //* 																																												*//
  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-uniform bool Debug_View <
+uniform int Debug_View <
+	ui_type = "combo";
+	ui_items = "Off\0Short Edge\0Long Edge\0";
 	ui_label = "Debug View";
 	ui_tooltip = "To view Edge Detect working on, movie piture & ect.";
 > = false;
@@ -31,6 +33,15 @@ uniform int Luminace_Selection <
 	ui_label = "Luminace Selection";
 	ui_tooltip = "Luminace color selection Green to RGB.";
 > = 0;
+
+uniform float Long_Edge_Seek <
+	ui_type = "drag";
+	ui_min = 0; ui_max = 1.0;
+	ui_label = "Long Edge Seek";
+	ui_tooltip = "Use this to seek out long edged jaggys.\n"
+				 "The Sronger the blurryer the image.\n"
+				 "Default is 0.625";
+> = 0.625;
 
 /////////////////////////////////////////////////////D3D Starts Here/////////////////////////////////////////////////////////////////
 #define pix float2(BUFFER_RCP_WIDTH, BUFFER_RCP_HEIGHT)
@@ -85,7 +96,7 @@ float4 DLAA(float2 texcoord)
 	//Bi-directional anti-aliasing using *only* HORIZONTAL blur and horizontal edge detection
 	//Slide information triped me up here. Read slide 43.
 	float4 CenterDiffH	= abs( combH - 2.0 * Center ) * 0.5;  
-	//float4 CenterDiffV	= abs( combH - 2.0 * Center ) * 0.5;
+	//float4 CenterDiffV	= abs( combV - 2.0 * Center ) * 0.5;
 	
 	//Edge detection
 	float EdgeLumH		= LI( CenterDiffH.rgb );
@@ -95,17 +106,20 @@ float4 DLAA(float2 texcoord)
 	float4 blurredH		= ( combH + Center) * 0.33333333;
 	float4 blurredV		= ( combV + Center) * 0.33333333;
 	
+	//L(x)
 	float LumH			= LI( blurredH.rgb );
 	float LumV			= LI( blurredV.rgb );
 	
+	//t
 	float satAmountH 	= saturate( ( lambda * EdgeLumH - epsilon ) / LumH );
     float satAmountV 	= saturate( ( lambda * EdgeLumH - epsilon ) / LumV );
 	
+	//color = lerp(color,blur,sat(Edge/blur)
 	//Re-blend Short Edge Done
 	DLAA = lerp( Center,  blurredH, satAmountH );
 	DLAA = lerp( Center,  blurredV, satAmountV );
 	
-	float4 HNegA, HNegB, HNegC, HNegD, HPosA, HPosB, HPosC, HPosD, VNegA, VNegB, VNegC, VNegD, VPosA, VPosB, VPosC, VPosD, DLAA_Out;
+	float4 HNegA, HNegB, HNegC, HNegD, HPosA, HPosB, HPosC, HPosD, VNegA, VNegB, VNegC, VNegD, VPosA, VPosB, VPosC, VPosD, CenterH, CenterV;
 			
 	// Long Edges 
     //16 bi-linear samples cross, 4 extra bi-linear samples in each direction. -8to8 Slide 44
@@ -127,62 +141,75 @@ float4 DLAA(float2 texcoord)
 	VPosC   = tex2D(BackBuffer, texcoord + float2( 0.0, 4.0 * pix.y) );
 	VPosD   = tex2D(BackBuffer, texcoord + float2( 0.0, 8.0 * pix.y) );
 	
-	//Slide 40 Talk about using rgb"L" for Long Edge Estimation.
-	float longEdgeH = ( HNegA.a + HNegB.a + HNegC.a + HNegD.a + HPosA.a + HPosB.a + HPosC.a + HPosD.a ) * 0.125;
-    float longEdgeV = ( VNegA.a + VNegB.a + VNegC.a + VNegD.a + VPosA.a + VPosB.a + VPosC.a + VPosD.a ) * 0.125;
-	
-    longEdgeH = saturate( longEdgeH * 2.0 - 1.0 );
-    longEdgeV = saturate( longEdgeV * 2.0 - 1.0 );
+    //Long Edge detection H
+    float4 EdgeBlurH = ( HNegA + HNegB + HNegC + HNegD + HPosA + HPosB + HPosC + HPosD );
+    float4 longEdgeDH = abs( EdgeBlurH - 8.0 * DLAA ) * 0.5;
+    float LongEdgeLumH	= LI( longEdgeDH.rgb );
     
+    //Long Edge detection V
+    float4 EdgeBlurV = ( VNegA + VNegB + VNegC + VNegD + VPosA + VPosB + VPosC + VPosD );
+    float4 longEdgeDV = abs( EdgeBlurV - 8.0 * DLAA ) * 0.5; 
+	float LongEdgeLumV	= LI( longEdgeDV.rgb );
+
+	float LongEdgeLumHV = (LongEdgeLumV + LongEdgeLumV) * 0.5;
+
+    //Long Edge detection H & V
     //float longEdge = abs( longEdgeH - longEdgeV);
-    //if ( longEdge > 0.2 )
-    
-    float longEdge = max( longEdgeH , longEdgeV);   
-    if ( longEdge > 1.0 )
-	{
+    float LES = 1-Long_Edge_Seek; 
+    if ( LongEdgeLumHV > LES )
+	{    	
 	//Merge for BlurSamples.
-    float4 longEdgeBlurH= ( HNegA + HNegB + HNegC + HNegD + HPosA + HPosB + HPosC + HPosD ) * 0.125;
-    float4 longEdgeBlurV= ( VNegA + VNegB + VNegC + VNegD + VPosA + VPosB + VPosC + VPosD ) * 0.125;
+	//Long Blur H
+    float4 longBlurH = ( HNegA + HNegB + HNegC + HNegD + HPosA + HPosB + HPosC + HPosD ) * 0.125;
+    float LongBlurLumH	= LI( longBlurH.rgb );
     
-    //blurred_lum = X_lum + t * ( Y_lum – X_lum ) Note Doing this apart seem off.
-    float LongBlurLumH	= LI( longEdgeBlurH.rgb );
-	float LongBlurLumV	= LI( longEdgeBlurV.rgb );
-	
+    //Long Blur V
+    float4 longBlurV = ( VNegA + VNegB + VNegC + VNegD + VPosA + VPosB + VPosC + VPosD ) * 0.125;
+	float LongBlurLumV	= LI( longBlurV.rgb );
+    
+    //t
+    float satAmountLH 	= saturate( ( lambda * LongEdgeLumH - epsilon ) / LongBlurLumH );
+    float satAmountLV 	= saturate( ( lambda * LongEdgeLumV - epsilon ) / LongBlurLumV );
+    
 	float CenterLI		= LI( Center.rgb );
 	float LeftLI		= LI( Left.rgb );
 	float RightLI		= LI( Right.rgb );
 	float UpLI			= LI( Up.rgb );
 	float DownLI		= LI( Down.rgb );
-	
-	//t = ( blurred_lum – X_lum ) / ( Y_lum – X_lum ) slide 45
-	float4 CenterDiff	= CenterLI - float4(LeftLI, UpLI, RightLI, DownLI);      
-	float blurLeft 		= saturate( 0.0 + ( LongBlurLumV - LeftLI   ) / CenterDiff.x );
-	float blurUp   		= saturate( 0.0 + ( LongBlurLumH - UpLI     ) / CenterDiff.y );
-	float blurRight		= saturate( 1.0 + ( LongBlurLumV - CenterLI ) / CenterDiff.z );
-	float blurDown 		= saturate( 1.0 + ( LongBlurLumH - CenterLI ) / CenterDiff.w );     
+    
+    float4 V = Center;
+    float4 H = Center;
+    
+    float blurUp = CenterLI == UpLI ? 0.0 : saturate( 0 + ( LongBlurLumH - UpLI    ) / ( CenterLI - UpLI    ) );
+    float blurDown = CenterLI == DownLI ? 0.0 : saturate( 1 + ( LongBlurLumH - CenterLI ) / ( CenterLI - DownLI ) );
+    float blurLeft = CenterLI == LeftLI ? 0.0 : saturate( 0 + ( LongBlurLumV - LeftLI   ) / ( CenterLI - LeftLI   ) );
+    float blurRight = CenterLI == RightLI ? 0.0 : saturate( 1 + ( LongBlurLumV - CenterLI ) / ( CenterLI - RightLI  ) );
 
-	float4 CrossBlur 	= float4( blurLeft, blurRight, blurUp, blurDown );
-		   CrossBlur	= ( CrossBlur == float4(0.0, 0.0, 0.0, 0.0) ) ? float4(1.0, 1.0, 1.0, 1.0) : CrossBlur;
-		   
-	//Notes Slide 42 talks about dilation of the estimate. In case of missed aliasing.
-	float4 CenterH		= lerp( Left, Center,  CrossBlur.x );
-		   CenterH		= lerp( Right,CenterH, CrossBlur.y );
-	float4 CenterV 		= lerp( Up,   Center,  CrossBlur.z );
-		   CenterV		= lerp( Down, CenterV, CrossBlur.w );
-		   
+    float4 UDLR = float4( blurLeft, blurRight, blurUp, blurDown );
+
+    V = lerp( Left  , V, UDLR.x );
+    V  = lerp( Right , V, UDLR.y );
+    H = lerp( Up   , H, UDLR.z );
+    H = lerp( Down, H, UDLR.w );
+	
 	//Reuse short samples and DLAA Long Edge Out.
-    DLAA = lerp( DLAA, CenterH, longEdgeV);
-	DLAA = lerp( DLAA, CenterV, longEdgeH);  
+    DLAA = lerp( DLAA, V , satAmountLV);
+	DLAA = lerp( DLAA, H , satAmountLH);  
     }
    
-   	if(Debug_View)
+   	if(Debug_View == 1)
 	{
 		DLAA = EdgeLumH.xxxx;
+	}
+	else if(Debug_View == 2)
+	{
+		DLAA = LongEdgeLumHV.xxxx;
 	}
 	else
 	{
 		DLAA = DLAA;
 	}
+
 	    
 	return DLAA;
 }
