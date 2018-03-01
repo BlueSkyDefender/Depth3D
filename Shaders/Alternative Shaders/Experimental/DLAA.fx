@@ -25,7 +25,7 @@ uniform int Debug_View <
 	ui_items = "Off\0Short Edge\0Long Edge\0";
 	ui_label = "Debug View";
 	ui_tooltip = "To view Edge Detect working on, movie piture & ect.";
-> = false;
+> = 0;
 
 uniform int Luminace_Selection <
 	ui_type = "combo";
@@ -36,12 +36,12 @@ uniform int Luminace_Selection <
 
 uniform float Long_Edge_Seek <
 	ui_type = "drag";
-	ui_min = 0; ui_max = 1.0;
+	ui_min = 0.5; ui_max = 1.0;
 	ui_label = "Long Edge Seek";
 	ui_tooltip = "Use this to seek out long edged jaggys.\n"
 				 "The Sronger the blurryer the image.\n"
-				 "Default is 0.625";
-> = 0.625;
+				 "Default is 0.800";
+> = 0.800;
 
 /////////////////////////////////////////////////////D3D Starts Here/////////////////////////////////////////////////////////////////
 #define pix float2(BUFFER_RCP_WIDTH, BUFFER_RCP_HEIGHT)
@@ -123,36 +123,31 @@ float4 DLAA(float2 texcoord)
 			
 	// Long Edges 
     //16 bi-linear samples cross, 4 extra bi-linear samples in each direction. -7.5 to 7.5 Not the same as Slide 44
-	HNegA	= tex2D(BackBuffer, texcoord + float2(-1.5 * pix.x,  0.0) );
-	HNegB   = tex2D(BackBuffer, texcoord + float2(-3.5 * pix.x,  0.0) );
-	HNegC   = tex2D(BackBuffer, texcoord + float2(-5.5 * pix.x,  0.0) );
-	HNegD   = tex2D(BackBuffer, texcoord + float2(-7.5 * pix.x,  0.0) );
-	HPosA   = tex2D(BackBuffer, texcoord + float2( 1.5 * pix.x,  0.0) );
-	HPosB   = tex2D(BackBuffer, texcoord + float2( 3.5 * pix.x,  0.0) );
-	HPosC   = tex2D(BackBuffer, texcoord + float2( 5.5 * pix.x,  0.0) );
-	HPosD   = tex2D(BackBuffer, texcoord + float2( 7.5 * pix.x,  0.0) );
+	HNegA	= tex2D(BackBuffer, texcoord + float2(-pix.x,  0.0) );
+	HNegB   = tex2D(BackBuffer, texcoord + float2(-2.0 * pix.x,  0.0) );
+	HNegC   = tex2D(BackBuffer, texcoord + float2(-4.0 * pix.x,  0.0) );
+	HNegD   = tex2D(BackBuffer, texcoord + float2(-8.0 * pix.x,  0.0) );
+	HPosA   = tex2D(BackBuffer, texcoord + float2( pix.x,  0.0) );
+	HPosB   = tex2D(BackBuffer, texcoord + float2( 2.0 * pix.x,  0.0) );
+	HPosC   = tex2D(BackBuffer, texcoord + float2( 4.0 * pix.x,  0.0) );
+	HPosD   = tex2D(BackBuffer, texcoord + float2( 8.0 * pix.x,  0.0) );
 	 
-	VNegA   = tex2D(BackBuffer, texcoord + float2( 0.0,-1.5 * pix.y) );
-	VNegB   = tex2D(BackBuffer, texcoord + float2( 0.0,-3.5 * pix.y) );
-	VNegC   = tex2D(BackBuffer, texcoord + float2( 0.0,-5.5 * pix.y) );
-	VNegD   = tex2D(BackBuffer, texcoord + float2( 0.0,-7.5 * pix.y) );
-	VPosA   = tex2D(BackBuffer, texcoord + float2( 0.0, 1.5 * pix.y) );
-	VPosB   = tex2D(BackBuffer, texcoord + float2( 0.0, 3.5 * pix.y) );
-	VPosC   = tex2D(BackBuffer, texcoord + float2( 0.0, 5.5 * pix.y) );
-	VPosD   = tex2D(BackBuffer, texcoord + float2( 0.0, 7.5 * pix.y) );
+	VNegA   = tex2D(BackBuffer, texcoord + float2( 0.0,-pix.y) );
+	VNegB   = tex2D(BackBuffer, texcoord + float2( 0.0,-2.0 * pix.y) );
+	VNegC   = tex2D(BackBuffer, texcoord + float2( 0.0,-4.0 * pix.y) );
+	VNegD   = tex2D(BackBuffer, texcoord + float2( 0.0,-8.0 * pix.y) );
+	VPosA   = tex2D(BackBuffer, texcoord + float2( 0.0, pix.y) );
+	VPosB   = tex2D(BackBuffer, texcoord + float2( 0.0, 2.0 * pix.y) );
+	VPosC   = tex2D(BackBuffer, texcoord + float2( 0.0, 4.0 * pix.y) );
+	VPosD   = tex2D(BackBuffer, texcoord + float2( 0.0, 8.0 * pix.y) );
 	
     //Long Edge detection H
     float4 EdgeBlurH = ( HNegA + HNegB + HNegC + HNegD + HPosA + HPosB + HPosC + HPosD );
     float4 longEdgeDH = abs( EdgeBlurH - 8.0 * DLAA ) * 0.5;
     float LongEdgeLumH	= LI( longEdgeDH.rgb );
-    
-    //Long Edge detection V
-    float4 EdgeBlurV = ( VNegA + VNegB + VNegC + VNegD + VPosA + VPosB + VPosC + VPosD );
-    float4 longEdgeDV = abs( EdgeBlurV - 8.0 * DLAA ) * 0.5; 
-	float LongEdgeLumV	= LI( longEdgeDV.rgb );
 
     //Long Edge detection H & V
-    float LongEdgeLumHV = abs(LongEdgeLumH - LongEdgeLumV);
+    float LongEdgeLumHV = abs(LongEdgeLumH);
     float LES = 1-Long_Edge_Seek; 
     if ( LongEdgeLumH > LES )
 	{    	
@@ -166,8 +161,7 @@ float4 DLAA(float2 texcoord)
 	float LongBlurLumV	= LI( longBlurV.rgb );
     
     //t
-    float satAmountLH 	= saturate( ( lambda * LongEdgeLumH - epsilon ) / LongBlurLumH );
-    float satAmountLV 	= saturate( ( lambda * LongEdgeLumV - epsilon ) / LongBlurLumV );
+    float saturateALH 	= saturate( ( lambda * LongEdgeLumH - epsilon ) / LongBlurLumH );
     
 	float CenterLI		= LI( Center.rgb );
 	float LeftLI		= LI( Left.rgb );
@@ -191,8 +185,8 @@ float4 DLAA(float2 texcoord)
     H = lerp( Down, H, UDLR.w );
 	
 	//Reuse short samples and DLAA Long Edge Out.
-    DLAA = lerp( DLAA, V , satAmountLV);
-	DLAA = lerp( DLAA, H , satAmountLH);  
+    DLAA = lerp( DLAA, V , saturateALH);
+	DLAA = lerp( DLAA, H , saturateALH);  
     }
    
    	if(Debug_View == 1)
@@ -201,7 +195,7 @@ float4 DLAA(float2 texcoord)
 	}
 	else if(Debug_View == 2)
 	{
-		DLAA = LongEdgeLumHV.xxxx;
+		DLAA = LongEdgeLumH.xxxx;
 	}
 	else
 	{
