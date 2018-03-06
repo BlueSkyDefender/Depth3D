@@ -637,6 +637,14 @@ float2 WeaponDepth(in float2 texcoord : TEXCOORD0)
 			WA_Y = 0.3625;
 			CoP = 0.3625;
 		}
+		
+		//WDM 28 ; Bioshock Remastred
+		else if(WDM == 30)
+		{
+			WA_X = 2.52475;
+			WA_Y = 0.05625;
+			CoP = 0.260;
+		}
 								
 		//SWDMS Done//
  		

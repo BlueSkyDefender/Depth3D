@@ -34,7 +34,7 @@ IF IT HAS AN *asterisk* I AM STILL WORKING ON IT. But, you can still use the set
              *Batman Arkham Origins                           DM 0         15.0                              Yes NH  / 0.050-0.100
              *Batman: Arkham City                             DM 0         15.0                              Yes NH  / 0.050-0.100
              ?BladeStorm Nightmare                            DM ?         ?                                 ?       ?
-    RB        Bioshock Remastred                              DM 0         7.5         WDM8                  No Off / 0.050-0.175          
+    RB        Bioshock Remastred                              DM 0         7.5         WDM 28                No Off / 0.050-0.175          
     RB       *BloodCM                                         DM 0         15.0                              No Off / 0.100-0.300                                     
     RB       *BorderLands 2                                   DM 0         15.0        WDM 3                 No Off / 0.025-0.075                          
     RB       *Call of Duty: Advance Warfare                   DM 1         15.0        WDM 4                 No Off / 0.050-0.075                                 
