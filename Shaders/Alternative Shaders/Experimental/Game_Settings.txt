@@ -33,7 +33,8 @@ IF IT HAS AN *asterisk* I AM STILL WORKING ON IT. But, you can still use the set
              *Batman Arkham Knight                            DM 0         15.0                              No Off  / 0.050-0.100                           
              *Batman Arkham Origins                           DM 0         15.0                              Yes NH  / 0.050-0.100
              *Batman: Arkham City                             DM 0         15.0                              Yes NH  / 0.050-0.100
-             ?BladeStorm Nightmare                            DM ?         ?                         ?       ?
+             ?BladeStorm Nightmare                            DM ?         ?                                 ?       ?
+    RB        Bioshock Remastred                              DM 0         7.5         WDM8                  No Off / 0.050-0.175          
     RB       *BloodCM                                         DM 0         15.0                              No Off / 0.100-0.300                                     
     RB       *BorderLands 2                                   DM 0         15.0        WDM 3                 No Off / 0.025-0.075                          
     RB       *Call of Duty: Advance Warfare                   DM 1         15.0        WDM 4                 No Off / 0.050-0.075                                 
@@ -180,6 +181,11 @@ Read Below Section
 Use a Controller for menus navigation or keyboard. 
 Mouse and keyboard is good for gameplay. 
 Use Cross_Cursor for navigation with mouse.
+
+{Bioshock Remastred}
+In the game settings you would need to dissable Real Time Reflections and use the DLL listed here.
+
+https://reshade.me/forum/releases/3744-3-1?start=200#26443
 
 {Blood Crossmatching}
 Get it here http://m210.duke4.net/index.php/files/viewdownload/3-eduke32/38-blood-crossmatching
