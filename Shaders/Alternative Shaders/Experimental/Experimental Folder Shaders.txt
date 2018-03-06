@@ -23,3 +23,7 @@ Sharpness enhancing tool based on the z-Buffer
 
 SuperDepth3D
 An Depth Based 3D Shader.
+
+Trails
+Pseudo Velocity Map based Motion Blur shader. With exposure adjustments.
+Can be Used for Light Painting.
