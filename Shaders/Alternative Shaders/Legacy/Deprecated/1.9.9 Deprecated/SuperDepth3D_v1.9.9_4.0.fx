@@ -44,6 +44,11 @@
 //Ex. Resident Evil 7 Has this problem. So you want to adjust it too around -0.0425.
 #define Horizontal_and_Vertical 0.0
 
+//Image resizing and BackBuffer fill for Lightberry like systems.
+//Do Not Enable This Toggle if you are using Polynomial Barrel Distortion for HMDs.
+//Default 0 Off. 1 is Resize mode. 2 is Lightberry Resize Mode.
+#define Image_Resize_Modes 0
+
 uniform int Depth_Map <
 	ui_type = "combo";
 	ui_items = " 0 Normal\0 1 Normal Reversed\0 2 Offset Normal\0 3 Offset Reversed\0";
@@ -215,6 +220,8 @@ uniform float4 Cross_Cursor_Adjust <
 				 " Default is (R 255, G 255, B 255 , Size 25)";
 > = float4(255.0, 255.0, 255.0, 25.0);
 
+#if Image_Resize_Modes == 1
+
 uniform int Custom_Sidebars <
 	ui_type = "combo";
 	ui_items = "Mirrored Edges\0Black Edges\0Stretched Edges\0";
@@ -222,8 +229,68 @@ uniform int Custom_Sidebars <
 	ui_tooltip = "Edges selection for your screen output.";
 > = 1;
 
+uniform float Resize <
+	ui_type = "drag";
+	ui_min = -0.250; ui_max = 0.250;
+	ui_label = "Image Resizer";
+	ui_tooltip = "Use this to resize your image for your screen.\n" 
+				 "Default is Zero";
+> = 0.0;
+
+#elif Image_Resize_Modes == 2
+
+uniform int Custom_Sidebars <
+	ui_type = "combo";
+	ui_items = "Mirrored Edges BF\0Black Edges BF\0Stretched Edges BF\0";
+	ui_label = "Edge Selection";
+	ui_tooltip = "Edges selection for your screen output with and with out Backfill.";
+> = 1;
+
+uniform int Resize_Mode <
+	ui_type = "combo";
+	ui_items = "Mode One\0Mode Two\0";
+	ui_label = "Resize Mode";
+	ui_tooltip = "Image resizing modes for TnB or SbS.";
+> = 0;
+
+uniform float Resize <
+	ui_type = "drag";
+	ui_min = 0.0; ui_max = 0.140;
+	ui_label = "Image Resizer";
+	ui_tooltip = "Use this to resize your image for your screen.\n" 
+				 "Default is Zero";
+> = 0.0;
+
+uniform int Blur_Spread <
+	ui_type = "drag";
+	ui_min = 0.0; ui_max = 16.0;
+	ui_label = "Blur Spread Ammount";
+	ui_tooltip = "Used to adjust Blur Spread Ammount.\n"
+				 "Default is 4.0";
+> = 4.0;
+
+uniform int BackBuffer_Resolution <
+	ui_type = "drag";
+	ui_min = 0.0; ui_max = 8.0;
+	ui_label = "BackBuffer Image Resolution";
+	ui_tooltip = "Use this to adjust BackBuffer Resolution.\n"
+				 "Default is 2.0";
+> = 2.0;
+
+#else
+
+uniform int Custom_Sidebars <
+	ui_type = "combo";
+	ui_items = "Mirrored Edges\0Black Edges\0Stretched Edges\0";
+	ui_label = "Edge Selection";
+	ui_tooltip = "Edges selection for your screen output.";
+> = 1;
+
+#endif
+
 uniform bool Cancel_Depth < source = "key"; keycode = Cancel_Depth_Key; toggle = true; >;
 /////////////////////////////////////////////D3D Starts Here/////////////////////////////////////////////////////////////////
+
 #define pix float2(BUFFER_RCP_WIDTH, BUFFER_RCP_HEIGHT)
 
 texture DepthBufferTex : DEPTH;
@@ -278,6 +345,17 @@ sampler SamplerDis
 		Texture = texDis;
 	};
 	
+#if Image_Resize_Modes == 2
+	
+texture texBBHalf {Width = BUFFER_WIDTH; Height = BUFFER_WIDTH; Format = RGBA8; MipLevels = 8;}; 
+																				
+sampler SamplerBBH																
+	{
+		Texture = texBBHalf;
+
+	};
+	
+#endif
 uniform float2 Mousecoords < source = "mousepoint"; > ;	
 ////////////////////////////////////////////////////////////////////////////////////Cross Cursor////////////////////////////////////////////////////////////////////////////////////	
 float4 MouseCursor(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Target
@@ -1007,6 +1085,39 @@ DBD = ( DBD - 1.0f ) / ( -187.5f - 1.0f );
 	color = float4(X,DM.x,Y,1);
 }
 
+#if Image_Resize_Modes == 2
+float4 BBHalf(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Target
+{
+	return tex2D(BackBuffer,texcoord);
+}
+
+float4 BackBufferBlur(in float2 texcoord : TEXCOORD0)
+{
+	float2 samples[10] = {
+	float2(-0.326212, -0.405805),  
+	float2(-0.840144, -0.073580),  
+	float2(-0.695914, 0.457137),  
+	float2(-0.203345, 0.620716),  
+	float2(0.962340, -0.194983),  
+	float2(0.473434, -0.480026),  
+	float2(0.519456, 0.767022),  
+	float2(0.185461, -0.893124),  
+	float2(0.507431, 0.064425),  
+	float2(0.896420, 0.412458),   
+	};  
+ 
+	float4 sum = tex2Dlod(SamplerBBH,float4(texcoord,0,BackBuffer_Resolution));  
+	float Adjust = (Blur_Spread*6)*pix.x;
+	for (int i = 0; i < 10; i++)
+	{  
+		sum += tex2Dlod(SamplerBBH, float4(texcoord + Adjust * samples[i],0,BackBuffer_Resolution));  
+	} 
+	
+	sum *= 0.09090909f;
+
+return sum;
+}
+#endif
 /////////////////////////////////////////L/R//////////////////////////////////////////////////////////////////////
 float4 PS_calcLR(in float2 texcoord : TEXCOORD0)
 {
@@ -1020,13 +1131,51 @@ float4 PS_calcLR(in float2 texcoord : TEXCOORD0)
 	//MS is Max Separation P is Perspective Adjustment
 	P = Perspective * pix.x;
 	MS = Divergence * pix.x;
-					
+	
+	//Horizontal and Vertical stretch or squish
+	#if Image_Resize_Modes == 1
+		float4 BB = 0;	
+		float2 HV = float2(Resize+1,Resize+1);
+		float midV = (HV.y-1)*(BUFFER_HEIGHT*0.5)*pix.y;		
+		float midH = (HV.x-1)*(BUFFER_WIDTH*0.5)*pix.x;			
+		texcoord = float2((texcoord.x*HV.x)-midH,(texcoord.y*HV.y)-midV);		
+	#elif Image_Resize_Modes == 2
+		float4 BB = BackBufferBlur(texcoord);
+		float2 HV;
+		float midH, midV;
+		if ( Stereoscopic_Mode == 0 && Resize_Mode == 0 )
+		{
+			HV = float2(0,(Resize*2)+1);
+			midV = (HV.y-1)*(BUFFER_HEIGHT*0.5)*pix.y;
+			midH = 0;
+			texcoord = float2(texcoord.x,(texcoord.y*HV.y)-midV);
+		}
+		else if( Stereoscopic_Mode == 1 && Resize_Mode == 0 )
+		{
+			HV = float2(Resize+1,0);
+			midV = 0;
+			midH = (HV.x-1)*(BUFFER_WIDTH*0.5)*pix.x;
+			texcoord = float2((texcoord.x*HV.x)-midH,texcoord.y);
+		}
+		else
+		{
+			HV = float2(Resize+1,(Resize*2)+1);
+			midV = (HV.y-1)*(BUFFER_HEIGHT*0.5)*pix.y;
+			midH = (HV.x-1)*(BUFFER_WIDTH*0.5)*pix.x;
+			texcoord = float2((texcoord.x*HV.x)-midH,(texcoord.y*HV.y)-midV);
+		}
+	#else
+		float4 BB = 0;
+		float midH = 0;		
+		float midV = 0;	
+	#endif
+				
 		if(Eye_Swap)
 		{
 			if ( Stereoscopic_Mode == 0 )
 			{
-				TCL.x = (texcoord.x*2-1) - P;
-				TCR.x = (texcoord.x*2) + P;
+				TCL.x = (texcoord.x*2-1) - P - midH;
+				TCR.x = (texcoord.x*2) + P + midH;
 				TCL.y = texcoord.y;
 				TCR.y = texcoord.y;
 			}
@@ -1034,8 +1183,8 @@ float4 PS_calcLR(in float2 texcoord : TEXCOORD0)
 			{
 				TCL.x = texcoord.x - P;
 				TCR.x = texcoord.x + P;
-				TCL.y = (texcoord.y*2-1);
-				TCR.y = (texcoord.y*2);
+				TCL.y = (texcoord.y*2-1) - midV;
+				TCR.y = (texcoord.y*2) + midV;
 			}
 			else
 			{
@@ -1049,8 +1198,8 @@ float4 PS_calcLR(in float2 texcoord : TEXCOORD0)
 		{
 			if (Stereoscopic_Mode == 0)
 			{
-				TCR.x = (texcoord.x*2-1) - P;
-				TCL.x = (texcoord.x*2) + P;
+				TCR.x = (texcoord.x*2-1) - P - midH;
+				TCL.x = (texcoord.x*2) + P + midH;
 				TCR.y = texcoord.y;
 				TCL.y = texcoord.y;
 			}
@@ -1058,8 +1207,8 @@ float4 PS_calcLR(in float2 texcoord : TEXCOORD0)
 			{
 				TCR.x = texcoord.x - P;
 				TCL.x = texcoord.x + P;
-				TCR.y = (texcoord.y*2-1);
-				TCL.y = (texcoord.y*2);
+				TCR.y = (texcoord.y*2-1) - midV;
+				TCL.y = (texcoord.y*2) + midV;
 			}
 			else
 			{
@@ -1124,23 +1273,63 @@ float4 PS_calcLR(in float2 texcoord : TEXCOORD0)
 			
 		float ReprojectionRight = DepthR; //Zero Parallax Distance controll
 		float ReprojectionLeft =  DepthL;
-
-			if(Custom_Sidebars == 0)
-			{
-				Left = tex2Dlod(BackBufferMIRROR, float4(TCL.x + ReprojectionLeft, TCL.y,0,0));
-				Right = tex2Dlod(BackBufferMIRROR, float4(TCR.x - ReprojectionRight, TCR.y,0,0));
-			}
-			else if(Custom_Sidebars == 1)
-			{
-				Left = tex2Dlod(BackBufferBORDER, float4(TCL.x + ReprojectionLeft, TCL.y,0,0));
-				Right = tex2Dlod(BackBufferBORDER, float4(TCR.x - ReprojectionRight, TCR.y,0,0));
-			}
-			else
-			{
-				Left = tex2Dlod(BackBufferCLAMP, float4(TCL.x + ReprojectionLeft, TCL.y,0,0));
-				Right = tex2Dlod(BackBufferCLAMP, float4(TCR.x - ReprojectionRight, TCR.y,0,0));
-			}
-
+			#if Image_Resize_Modes == 2
+				if(Custom_Sidebars == 0)
+				{
+					if ((TCL.x < 1.0 && TCL.x > 0.0 && TCL.y < 1.0 && TCL.y > 0.0) || (TCR.x < 1.0 && TCR.x > 0.0 && TCR.y < 1.0 && TCR.y > 0.0))
+					{
+						Left = tex2Dlod(BackBufferMIRROR, float4(TCL.x + ReprojectionLeft, TCL.y,0,0));
+						Right = tex2Dlod(BackBufferMIRROR, float4(TCR.x - ReprojectionRight, TCR.y,0,0));
+					}
+					else
+					{
+						Left = BB;
+						Right = BB;
+					}
+				}
+				else if(Custom_Sidebars == 1)
+				{
+					if ((TCL.x < 1.0 && TCL.x > 0.0 && TCL.y < 1.0 && TCL.y > 0.0) || (TCR.x < 1.0 && TCR.x > 0.0 && TCR.y < 1.0 && TCR.y > 0.0))
+					{
+						Left = tex2Dlod(BackBufferBORDER, float4(TCL.x + ReprojectionLeft, TCL.y,0,0));
+						Right = tex2Dlod(BackBufferBORDER, float4(TCR.x - ReprojectionRight, TCR.y,0,0));
+					}
+					else
+					{
+						Left = BB;
+						Right = BB;
+					}
+				}
+				else
+				{
+					if ((TCL.x < 1.0 && TCL.x > 0.0 && TCL.y < 1.0 && TCL.y > 0.0) || (TCR.x < 1.0 && TCR.x > 0.0 && TCR.y < 1.0 && TCR.y > 0.0))
+					{
+						Left = tex2Dlod(BackBufferCLAMP, float4(TCL.x + ReprojectionLeft, TCL.y,0,0));
+						Right = tex2Dlod(BackBufferCLAMP, float4(TCR.x - ReprojectionRight, TCR.y,0,0));
+					}
+					else
+					{
+						Left = BB;
+						Right = BB;
+					}
+				}
+			#else
+				if(Custom_Sidebars == 0)
+				{
+					Left = tex2Dlod(BackBufferMIRROR, float4(TCL.x + ReprojectionLeft, TCL.y,0,0));
+					Right = tex2Dlod(BackBufferMIRROR, float4(TCR.x - ReprojectionRight, TCR.y,0,0));
+				}
+				else if(Custom_Sidebars == 1)
+				{
+					Left = tex2Dlod(BackBufferBORDER, float4(TCL.x + ReprojectionLeft, TCL.y,0,0));
+					Right = tex2Dlod(BackBufferBORDER, float4(TCR.x - ReprojectionRight, TCR.y,0,0));
+				}
+				else
+				{
+					Left = tex2Dlod(BackBufferCLAMP, float4(TCL.x + ReprojectionLeft, TCL.y,0,0));
+					Right = tex2Dlod(BackBufferCLAMP, float4(TCR.x - ReprojectionRight, TCR.y,0,0));
+				}
+			#endif
 	
 			if ( Eye_Swap )
 			{
@@ -1446,6 +1635,14 @@ technique Depth3D
 			PixelShader = Average_Luminance_Weapon;
 			RenderTarget = texLumWeapon;
 		}
+		#if Image_Resize_Modes == 2
+			pass BB_Blur
+		{
+			VertexShader = PostProcessVS;
+			PixelShader = BBHalf;
+			RenderTarget = texBBHalf;
+		}
+		#endif
 			pass StereoOut
 		{
 			VertexShader = PostProcessVS;
