@@ -97,11 +97,10 @@ void Blur(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out 
 
 float4 Adjust(in float2 texcoord : TEXCOORD0)
 {
-float2 S = float2(Spread * pix.x,Spread * pix.y);
-
+float2 S = float2(Spread * pix.x,Spread * 0.5 * pix.y);// Hoizontal Sepration needs to be stronger
 float4 H = lerp(tex2D(SamplerBlur, float2(texcoord.x + S.x, texcoord.y)),tex2D(SamplerBlur, float2(texcoord.x - S.x, texcoord.y)),0.5);
 float4 V = lerp(tex2D(SamplerBlur, float2(texcoord.x, texcoord.y + S.y)),tex2D(SamplerBlur, float2(texcoord.x, texcoord.y - S.y)),0.5);
-float4 HVC = lerp(H,V,0.50);// Hoizontal Sepration needs to be stronger
+float4 HVC = lerp(H,V,0.50);
 
 return HVC; 
 }
@@ -119,7 +118,7 @@ float4 Sharpen_Out(float2 texcoord : TEXCOORD0)
 {
 	float4 RGBA;	
 	//Formula for unsharp masking is Sharpened = Original + (Original - Blurred) * Amount.	
-	RGBA = tex2D(BackBuffer,texcoord) - tex2D(SamplerBlur,texcoord);
+	RGBA = tex2D(BackBuffer,texcoord) - Adjust(texcoord);// Had to use Adjusted Blur to Ringing.
 	RGBA = saturate(RGBA * Sharpen_Power);
 	RGBA = tex2D(BackBuffer,texcoord) + RGBA;
 	
