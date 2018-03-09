@@ -2,28 +2,9 @@
 3D conversion shader
 Ex. Line Interlace to Side By Side.
 
-Depth Cues
-Enhace Details in an image that helps with stereo vision.
-Ex. Use in any game where you want visual pop. 
-http://www.intropsych.com/ch04-senses/depth-perception.html
-
-Depth Tool
-Used to see the Z-Buffer In game.
-
-DLAA
-Used for Anti-Aliasing in game.
-http://and.intercon.ru/releases/talks/dlaagdc2011/slides/
-
 Polynomial Barrel Distortion
 Used for CellPhone HMD or Normal HMDs.
 Used to adjust a image for VR.
 
-Smart_Sharp
-Sharpness enhancing tool based on the z-Buffer
-
 SuperDepth3D
 An Depth Based 3D Shader.
-
-Trails
-Pseudo Velocity Map based Motion Blur shader. With exposure adjustments.
-Can be Used for Light Painting.

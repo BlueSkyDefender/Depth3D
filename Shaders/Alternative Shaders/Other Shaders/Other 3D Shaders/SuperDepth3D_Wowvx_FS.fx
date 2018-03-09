@@ -101,8 +101,8 @@ uniform int Balance <
 	ui_label = "Balance";
 	ui_tooltip = "Balance between ZPD Depth and Scene Depth and works with ZPD option above.\n"
 				"Example Zero is 50/50 equal between ZPD Depth and Scene Depth.\n"
-				"Default is Zero.";
-> = 0;
+				"Default is Three.";
+> = 3.0;
 
 uniform int Disocclusion_Adjust <
 	ui_type = "combo";

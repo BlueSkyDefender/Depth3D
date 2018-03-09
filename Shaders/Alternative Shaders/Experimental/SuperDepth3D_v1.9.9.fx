@@ -30,6 +30,9 @@
 // Enable this to fix the problem when there is a full screen Game Map Poping out of the screen. AKA Full Black Depth Map Fix. I have this off by default. Zero is off, One is On.
 #define FBDMF 0
 
+// BOTW Fix WIP....
+#define AADM 0
+
 // Change the Cancel Depth Key
 // Determines the Cancel Depth Toggle Key useing keycode info
 // You can use http://keycode.info/ to figure out what key is what.
@@ -217,12 +220,6 @@ uniform float4 Cross_Cursor_Adjust <
 				 " Default is (R 255, G 255, B 255 , Size 25)";
 > = float4(255.0, 255.0, 255.0, 25.0);
 
-
-uniform bool InvertY <
-	ui_label = "Invert Y-Axis";
-	ui_tooltip = "Invert Y-Axis for the cross cursor.";
-> = false;
-
 #if Image_Resize_Modes == 1
 
 uniform int Custom_Sidebars <
@@ -363,16 +360,9 @@ uniform float2 Mousecoords < source = "mousepoint"; > ;
 ////////////////////////////////////////////////////////////////////////////////////Cross Cursor////////////////////////////////////////////////////////////////////////////////////	
 float4 MouseCursor(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Target
 {
-	float4 Mpointer; 
-	 
-	if (!InvertY)
-	{
-		Mpointer = all(abs(Mousecoords - position.xy) < Cross_Cursor_Adjust.a) * (1 - all(abs(Mousecoords - position.xy) > Cross_Cursor_Adjust.a/(Cross_Cursor_Adjust.a/2))) ? float4(Cross_Cursor_Adjust.rgb/255, 1.0) : tex2D(BackBuffer, texcoord);//cross
-	}
-	else
-	{
-		Mpointer = all(abs(float2(Mousecoords.x,BUFFER_HEIGHT-Mousecoords.y) - position.xy) < Cross_Cursor_Adjust.a) * (1 - all(abs(float2(Mousecoords.x,BUFFER_HEIGHT-Mousecoords.y) - position.xy) > Cross_Cursor_Adjust.a/(Cross_Cursor_Adjust.a/2))) ? float4(Cross_Cursor_Adjust.rgb/255, 1.0) : tex2D(BackBuffer, texcoord);//cross
-	}
+	float2 MousecoordsXY = Mousecoords*pix;
+	float CC_Size = Cross_Cursor_Adjust.a * pix.x;
+	float4 Mpointer = all(abs(texcoord - MousecoordsXY) < CC_Size) * (1 - all(abs(texcoord - MousecoordsXY) > CC_Size/(Cross_Cursor_Adjust.a*0.5))) ? float4(Cross_Cursor_Adjust.rgb/255, 1.0) : tex2D(BackBuffer, texcoord);//cross
 	
 	return Mpointer;
 }
@@ -860,7 +850,44 @@ float Conv(float D,float2 texcoord)
 		{
 			AL = AL; //Auto ZDP based on the Auto Anti Weapon Depth Map Z-Fighting code.
 			ZPDC = Con; 
-		}		
+		}	
+		
+		//Using the Luminace to control what happens when really close to link.... May be phased out soon.	
+		if (AADM)
+		{
+			if (ALC >= 0.01)
+			{
+				AL = AL*0.8;
+			}
+			if (ALC >= 0.125)
+			{
+				AL = AL;
+			}
+			if (ALC >= 0.250)
+			{
+				AL = AL*1.33333333;
+			}
+			if (ALC >= 0.3125)
+			{
+				AL = AL*2.0;
+			}
+			if (ALC >= 0.375)
+			{
+				AL = AL*1.33333333;
+			}
+			if (ALC >= 0.450)
+			{
+				AL = AL;
+			}
+			if (ALC >= 0.500)
+			{
+				AL = AL*0.8;
+			}
+			else if (ALC < 0.01)
+			{
+				AL = AL*0.57142857;
+			}	
+		}
 		
 		if(Auto_ZPD >= 1)
 		{
@@ -1066,7 +1093,7 @@ float4 BBHalf(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Ta
 
 float4 BackBufferBlur(in float2 texcoord : TEXCOORD0)
 {
-	float2 samples[12] = {
+	float2 samples[10] = {
 	float2(-0.326212, -0.405805),  
 	float2(-0.840144, -0.073580),  
 	float2(-0.695914, 0.457137),  
@@ -1076,19 +1103,17 @@ float4 BackBufferBlur(in float2 texcoord : TEXCOORD0)
 	float2(0.519456, 0.767022),  
 	float2(0.185461, -0.893124),  
 	float2(0.507431, 0.064425),  
-	float2(0.896420, 0.412458),  
-	float2(-0.321940, -0.932615),  
-	float2(-0.791559, -0.597705)  
+	float2(0.896420, 0.412458),   
 	};  
  
 	float4 sum = tex2Dlod(SamplerBBH,float4(texcoord,0,BackBuffer_Resolution));  
 	float Adjust = (Blur_Spread*6)*pix.x;
-	for (int i = 0; i < 12; i++)
+	for (int i = 0; i < 10; i++)
 	{  
 		sum += tex2Dlod(SamplerBBH, float4(texcoord + Adjust * samples[i],0,BackBuffer_Resolution));  
 	} 
 	
-	sum *= 0.07692307;
+	sum *= 0.09090909f;
 
 return sum;
 }
@@ -1318,8 +1343,7 @@ float4 PS_calcLR(in float2 texcoord : TEXCOORD0)
 			}
 			
 	if(!Depth_Map_View)
-	{
-	
+	{	
 	float2 gridxy;
 
 	if(Scaling_Support == 0)
@@ -1365,15 +1389,15 @@ float4 PS_calcLR(in float2 texcoord : TEXCOORD0)
 		}
 		else if(Stereoscopic_Mode == 2)
 		{
-			color = int(gridxy.y) % 2 ? cR : cL;	
+			color = int(gridxy.y) & 1 ? cR : cL;	
 		}
 		else if(Stereoscopic_Mode == 3)
 		{
-			color = int(gridxy.x) % 2 ? cR : cL;		
+			color = int(gridxy.x) & 1 ? cR : cL;		
 		}
 		else if(Stereoscopic_Mode == 4)
 		{
-			color = int(gridxy.x+gridxy.y) % 2 ? cR : cL;
+			color = int(gridxy.x+gridxy.y) & 1 ? cR : cL;
 		}
 		else if(Stereoscopic_Mode == 5)
 		{													

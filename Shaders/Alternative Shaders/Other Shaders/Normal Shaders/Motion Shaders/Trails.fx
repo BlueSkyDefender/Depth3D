@@ -1,5 +1,9 @@
- //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
- //* Depth Map Shader                                           																													*//
+ ////----------//
+ ///**Trails**///
+ //----------////
+ 
+ /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+ //* Trails an pseudo motion blur                            																														*//
  //* For Reshade 3.0																																								*//
  //* --------------------------																																						*//
  //* This work is licensed under a Creative Commons Attribution 3.0 Unported License.																								*//
@@ -11,44 +15,47 @@
  //* Jose Negrete AKA BlueSkyDefender																																				*//
  //*																																												*//
  //* http://reshade.me/forum/shader-presentation/2128-sidebyside-3d-depth-map-based-stereoscopic-shader																				*//	
- //* ---------------------------------																																				*//																																											*//
- //* 																																												*//
+ //* ---------------------------------																																				*//
+ //*																																												*//
  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-uniform float Dither_Bit <
+uniform float Persistence <
 	ui_type = "drag";
-	ui_min = 1; ui_max = 15;
-	ui_label = "Dither Bit";
-	ui_tooltip = "Dither is an intentionally applied form of noise used to randomize quantization error, preventing banding in images.";
-> = 7.5;
+	ui_min = 0.0; ui_max = 1.00;
+	ui_label = "Persistence";
+	ui_tooltip = "Increase persistence longer the trail or afterimage.\n"
+				"If pushed out the effect is alot like long exposure.\n"
+				"This can be used for light painting in games.\n"
+				"1000/1 is 1.0, so 1/2 is 0.5 and so forth.\n"
+				"Default is 1/250 so 0.750, 0 is infinity.";
+> = 0.75;
 
-uniform int Depth_Map <
-	ui_type = "combo";
-	ui_items = "Normal\0Normal Reversed\0Normal Offset\0Normal Reversed Offset\0Raw\0Raw Reverse\0Debug\0";
-	ui_label = "Custom Depth Map";
-	ui_tooltip = "Pick your Depth Map.";
-> = 0;
-
-uniform float Depth_Map_Adjust <
+uniform int T_P_Q <
 	ui_type = "drag";
-	ui_min = 0.25; ui_max = 100.0;
-	ui_label = "Depth Map Adjustment";
-	ui_tooltip = "Adjust the depth map and sharpness.";
-> = 5.0;
+	ui_min = 1; ui_max = 5;
+	ui_label = "Trail Quality & Persistence Quality";
+	ui_tooltip = "Adjust trail and persistence blur effect.";
+> = 1;
 
-uniform float Offset <
+uniform bool PMB <
+	ui_label = "Pseudo Motion Blur";
+	ui_tooltip = "This toggles on low motion pseudo motion blur.";
+> = false;
+
+uniform int BA <
 	ui_type = "drag";
-	ui_min = 0; ui_max = 1.0;
-	ui_label = "Offset";
-	ui_tooltip = "Offset is for the Special Depth Map Only";
-> = 0.375;
+	ui_min = 1; ui_max = 10;
+	ui_label = "Blur Amount";
+	ui_tooltip = "Adjust Blur Amount";
+> = 1;
 
-uniform bool Depth_Map_Flip <
-	ui_label = "Depth Map Flip";
-	ui_tooltip = "Flip the depth map if it is upside down.";
+uniform bool Debug_View <
+	ui_label = "Debug View";
+	ui_tooltip = "To view the blur mask.";
 > = false;
 
 /////////////////////////////////////////////D3D Starts Here/////////////////////////////////////////////////////////////////
+#define pix float2(BUFFER_RCP_WIDTH, BUFFER_RCP_HEIGHT)
 
 texture DepthBufferTex : DEPTH;
 
@@ -56,125 +63,171 @@ sampler DepthBuffer
 	{ 
 		Texture = DepthBufferTex; 
 	};
-		
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-#define pix float2(BUFFER_RCP_WIDTH, BUFFER_RCP_HEIGHT)
+	
+texture BackBufferTex : COLOR;
 
-float4 zBuffer(in float2 texcoord : TEXCOORD0)    
+sampler BackBuffer 
+	{ 
+		Texture = BackBufferTex;
+	};
+	
+texture CurrentBackBuffer  { Width = BUFFER_WIDTH*0.5; Height = BUFFER_HEIGHT*0.5; Format = RGBA32F;}; 
+
+sampler CBackBuffer
+	{
+		Texture = CurrentBackBuffer;
+	};
+
+texture PastBackBuffer  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA32F;}; 
+
+sampler PBackBuffer
+	{
+		Texture = PastBackBuffer;
+	};
+
+texture PastSingleBackBuffer  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA32F;}; 
+
+sampler PSBackBuffer
+	{
+		Texture = PastSingleBackBuffer;
+	};
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+texture texAveLum {Width = 256*0.5; Height = 256*0.5; Format = RGBA8; MipLevels = 8;}; //Sample at 256x256/2 and a mip bias of 8 should be 1x1 
+																				
+sampler SamplerAveLum																
+	{
+		Texture = texAveLum;
+		MipLODBias = 8.0f; //Luminance adapted luminance value from 1x1 Texture Mip lvl of 8
+		MinFilter = LINEAR;
+		MagFilter = LINEAR;
+		MipFilter = LINEAR;
+	};
+	
+texture texLumWeapon {Width = 256*0.5; Height = 256*0.5; Format = RGBA8; MipLevels = 8;}; //Sample at 256x256*0.5 and a mip bias of 8 should be 1x1 
+
+float AveLum(in float2 texcoord : TEXCOORD0)
 {
-		float4 Out;
-		if (Depth_Map_Flip)
-			texcoord.y =  1 - texcoord.y;
-			
-		float zBuffer = tex2D(DepthBuffer, texcoord).r; //Depth Buffer
-		
-		//Conversions to linear space.....
-		//Near & Far Adjustment
-		float Near = 0.125/Depth_Map_Adjust; //Division Depth Map Adjust - Near
-		float Far = 1; //Far Adjustment
-		float DA = Depth_Map_Adjust*2; //Depth Map Adjust - Near
-				
-		//Raw Z Offset
-		float Z = min(1,pow(abs(exp(zBuffer)*Offset),2));
-		float ZR = min(1,pow(abs(exp(zBuffer)*Offset),50));
-		
-		//0. Normal
-		float Normal = Far * Near / (Far + zBuffer * (Near - Far));
-		
-		//1. Reverse
-		float NormalReverse = Far * Near / (Near + zBuffer * (Far - Near));
-		
-		//2. Offset Normal
-		float OffsetNormal = Far * Near / (Far + Z * (Near - Far));
-		
-		//3. Offset Reverse
-		float OffsetReverse = Far * Near / (Near + ZR * (Far - Near));
-		
-		//4. Raw Buffer
-		float Raw = min(1,pow(abs(zBuffer),DA));
-		
-		//5. Raw Buffer Reverse
-		float RawReverse = max(1,pow(abs(zBuffer - 1.0),DA));
-		
-		float DM,DM0,DM1,DM2,DM3;
-		
-		if (Depth_Map == 0)
-		{
-		DM = Normal;
-		}		
-		else if (Depth_Map == 1)
-		{
-		DM = NormalReverse;
-		}
-		else if (Depth_Map == 2)
-		{
-		DM = OffsetNormal;
-		}
-		else if (Depth_Map == 3)
-		{
-		DM = OffsetReverse;
-		}
-		else if (Depth_Map == 4)
-		{
-		DM = Raw;
-		}
-		else if (Depth_Map == 5)
-		{
-		DM = RawReverse;
-		}
-		else
-		{
-		DM0 = Normal;
-		DM1 = NormalReverse;
-		DM2 = OffsetNormal;
-		DM3 = OffsetReverse;
-		}
+	float Luminance = tex2Dlod(SamplerAveLum,float4(texcoord,0,0)).r; //Average Luminance Texture Sample 
+	Luminance = smoothstep(0,1,Luminance);
+	return Luminance;
+}
 	
-	// Dither for DepthBuffer adapted from gedosato ramdom dither https://github.com/PeterTh/gedosato/blob/master/pack/assets/dx9/deband.fx
-	// I noticed in some games the depth buffer started to have banding so this is used to remove that.
-			
-	float DB  = Dither_Bit;
-	float noise = frac(sin(dot(texcoord, float2(12.9898, 78.233))) * 43758.5453 * 1);
-	float dither_shift = (1.0 / (pow(2,DB) - 1.0));
-	float dither_shift_half = (dither_shift * 0.5);
-	dither_shift = dither_shift * noise - dither_shift_half;
-	DM += -dither_shift;
-	DM += dither_shift;
-	DM += -dither_shift;
+uniform float frametime < source = "frametime"; >;
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////	
+
+float Mask(float2 texcoord)
+{   
+	float4 current_buffer = tex2D(BackBuffer,texcoord);
+	float4 past_single_buffer = tex2D(PSBackBuffer, texcoord);//Past Single Buffer
+	 
+	//Used for a mask calculation
+	//Velosity Mask
+	float V = length(current_buffer-past_single_buffer);
 	
-	// Dither End
+	V = smoothstep(0,1,V);
 	
-	if (Depth_Map == 6)
-	{
-	Out = float4(DM0,DM1,DM2,DM3);
-	}
-	else
-	{
-	Out = DM.xxxx;
-	}	
-		
-	return saturate(Out);	
+	return V;
 }
 
-////////////////////////////////////////////////////////Logo/////////////////////////////////////////////////////////////////////////
-uniform float timer < source = "timer"; >;
-float4 Out(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Target
+float4 MotionBlur(float2 texcoord : TEXCOORD0)
 {
-	float4 Color;
-	float Top = texcoord.x < 0.5 ? zBuffer(float2(texcoord.x*2,texcoord.y*2)).x : zBuffer(float2(texcoord.x*2-1 , texcoord.y*2)).y;
-	float Bottom = texcoord.x < 0.5 ?   zBuffer(float2(texcoord.x*2 , texcoord.y*2-1)).z :  zBuffer(float2(texcoord.x*2-1,texcoord.y*2-1)).w;
+	float M = Mask(texcoord), AL = AveLum(texcoord), Speed_Clamp = 0.02f, Q = BA;
+	float4 color;
+	float4 current_buffer = tex2D(BackBuffer,texcoord);
+	float4 past_buffer = tex2D(PBackBuffer, texcoord);//Past Buffer
 	
-	if (Depth_Map == 6)
+	
+	if(PMB)
 	{
-		Color = texcoord.y < 0.5 ? Top.xxxx : Bottom.xxxx;
+		float2 samples[10] = 
+		{
+		float2(-0.695914, 0.457137),  
+		float2(-0.203345, 0.620716),  
+		float2(0.962340, -0.194983),  
+		float2(0.473434, -0.480026),  
+		float2(0.519456, 0.767022),  
+		float2(0.185461, -0.893124),  
+		float2(0.507431, 0.064425),  
+		float2(0.896420, 0.412458),  
+		float2(-0.321940, -0.932615),  
+		float2(-0.791559, -0.597705)  
+		};  
+				
+		float2 Adjust = float2(Q,Q)*pix;
+		
+		if(abs(AL) <= Speed_Clamp) // This is done because at higher motion the mask fails............. Keep it slow......
+		{
+			[unroll]
+			for (int i = 0; i < 10; i++)
+			{  
+				current_buffer += tex2D(BackBuffer, texcoord + Adjust * samples[i] * M);
+			} 
+			
+			current_buffer *= 0.09090909f;
+		}
+	}
+	
+	float P = 1-Persistence;
+	past_buffer.rgb = past_buffer.rgb * P;
+		
+	current_buffer.rgb = max( current_buffer.rgb, past_buffer.rgb);
+
+
+	color = current_buffer;
+	
+	if(!Debug_View)
+	{
+		color = current_buffer;
 	}
 	else
 	{
-		Color = zBuffer(texcoord).xxxx;
+		color =  M.xxxx;
 	}
 	
+return color;
+}
+
+void Current_BackBuffer(float4 position : SV_Position, float2 texcoord : TEXCOORD, out float4 color : SV_Target)
+{	 	
+	color = tex2D(BackBuffer,texcoord);
+}
+
+void Past_BackBuffer(float4 position : SV_Position, float2 texcoord : TEXCOORD, out float4 PastSingle : SV_Target0, out float4 Past : SV_Target1)
+{	
+	float2 samples[6] = {
+	float2(-0.326212, -0.405805),  
+	float2(-0.840144, -0.073580),  
+	float2(-0.695914, 0.457137),  
+	float2(-0.203345, 0.620716),  
+	float2(0.962340, -0.194983),  
+	float2(0.473434, -0.480026),  
+	}; 
+	
+	Past = tex2D(BackBuffer,texcoord);
+	float2 Adjust = float2(T_P_Q,T_P_Q)*pix;
+	[loop]
+	for (int i = 0; i < 6; i++)
+	{  
+		Past += tex2D(BackBuffer, texcoord + Adjust * samples[i]);
+	} 
+	
+	Past *= 0.16666666;
+	PastSingle = tex2D(CBackBuffer,texcoord);
+}
+
+float4 Average_Luminance(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Target
+{
+	float3 Average_Lum = Mask(texcoord).xxx;
+	return float4(Average_Lum,1);
+}
+
+uniform float timer < source = "timer"; >;
+////////////////////////////////////////////////////////Logo/////////////////////////////////////////////////////////////////////////
+float4 Out(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Target
+{
 	float PosX = 0.5*BUFFER_WIDTH*pix.x,PosY = 0.5*BUFFER_HEIGHT*pix.y;	
-	float4 Done,Website,D,E,P,T,H,Three,DD,Dot,I,N,F,O;
+	float4 Color = MotionBlur(texcoord),Done,Website,D,E,P,T,H,Three,DD,Dot,I,N,F,O;
 	
 	if(timer <= 10000)
 	{
@@ -272,7 +325,7 @@ float4 Out(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Targe
 	return Done;
 }
 
-///////////////////////////////////////////////////////////ReShade.fxh/////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////ReShade.fxh///////////////////////////////////////////////////////////////
 
 // Vertex shader generating a triangle covering the entire screen
 void PostProcessVS(in uint id : SV_VertexID, out float4 position : SV_Position, out float2 texcoord : TEXCOORD)
@@ -282,11 +335,33 @@ void PostProcessVS(in uint id : SV_VertexID, out float4 position : SV_Position, 
 	position = float4(texcoord * float2(2.0, -2.0) + float2(-1.0, 1.0), 0.0, 1.0);
 }
 
-technique Display_Depth
-{		
-			pass DepthMap
+//*Rendering passes*//
+
+technique Pseudo_Motion_Blur
+{
+			pass CBB
 		{
 			VertexShader = PostProcessVS;
-			PixelShader = Out;	
+			PixelShader = Current_BackBuffer;
+			RenderTarget = CurrentBackBuffer;
 		}
+			pass AverageLuminance
+		{
+			VertexShader = PostProcessVS;
+			PixelShader = Average_Luminance;
+			RenderTarget = texAveLum;
+		}
+			pass ExposureOut
+		{
+			VertexShader = PostProcessVS;
+			PixelShader = Out;
+		}
+			pass PBB
+		{
+			VertexShader = PostProcessVS;
+			PixelShader = Past_BackBuffer;
+			RenderTarget0 = PastSingleBackBuffer;
+			RenderTarget1 = PastBackBuffer;		
+		}
+		
 }

@@ -24,7 +24,7 @@ IF IT HAS AN *asterisk* I AM STILL WORKING ON IT. But, you can still use the set
                                                                       [- - - - - - - -=: Recommended Settings :=- - - - - - - -]
 [Read Below] [Game List]                                  [Depth Map] [Adjustment] [Weapon DM] [Depth Flip] [Auto T / ZDP Range]
              *ABZU                                            DM 1         50                                No Off / 0.050                    
-             *Alien Isolation                                 DM 0         20                                No Off / 0.0375
+              Alien Isolation                                 DM 0         25                                No Off / 0.0375-0.075
              *Amnesia: Machine for Pigs                       DM 0         37.5        WDM 2                 No Off / 0.050-0.075       
              *Amnesia: The Dark Descent                       DM 0         37.5        WDM 2                 No Off / 0.050-0.075
              *Among The Sleep                                 DM 0         37.5                      Yes     No Off / 0.025

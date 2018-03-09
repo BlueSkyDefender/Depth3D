@@ -314,15 +314,15 @@ void PS0(float4 position : SV_Position, float2 texcoord : TEXCOORD0, out float4 
 	}
 	else if(Stereoscopic_Mode == 2)
 	{
-		color = int(gridxy.y) % 2 ? cR : cL;	
+		color = int(gridxy.y) & 1 ? cR : cL;	
 	}
 	else if(Stereoscopic_Mode == 3)
 	{
-		color = int(gridxy.x) % 2 ? cR : cL;		
+		color = int(gridxy.x) & 1 ? cR : cL;		
 	}
 	else if(Stereoscopic_Mode == 4)
 	{	
-		color = int(gridxy.x+gridxy.y) % 2 ? cR : cL;
+		color = int(gridxy.x+gridxy.y) & 1 ? cR : cL;
 	}
 	else if(Stereoscopic_Mode == 5)
 	{													
