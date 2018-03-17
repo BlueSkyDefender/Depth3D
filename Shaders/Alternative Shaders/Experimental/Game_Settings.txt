@@ -23,6 +23,7 @@ ________________________________________________________________________________
 IF IT HAS AN *asterisk* I AM STILL WORKING ON IT. But, you can still use the settings.
                                                                       [- - - - - - - -=: Recommended Settings :=- - - - - - - -]
 [Read Below] [Game List]                                  [Depth Map] [Adjustment] [Weapon DM] [Depth Flip] [Auto T / ZDP Range]
+    RB        .Hack//G.U.                                     DM 1         25                                No Off / 0.050-0.125 
              *ABZU                                            DM 1         50                                No Off / 0.050                    
               Alien Isolation                                 DM 0         25                                No Off / 0.0375-0.075
              *Amnesia: Machine for Pigs                       DM 0         37.5        WDM 2                 No Off / 0.050-0.075       
@@ -176,6 +177,9 @@ https://steamcommunity.com/sharedfiles/filedetails/?id=933337066
 Read Below Section
 
 =================================================================================================================================
+{.Hack//G.U.} - used reshade 3.0.8
+Once you install Reshade. Install this fix that allows for depth buffer access. This fix uses 3DMigoto to dissable a shader that was blocking acess to the depth buffer.
+http://www.mediafire.com/file/d5ep3qlsnbbbmvl/dotHack%20GU%20fix%20for%20Depth3D.zip
 
 {BoarderLands 2}
 Use a Controller for menus navigation or keyboard. 
