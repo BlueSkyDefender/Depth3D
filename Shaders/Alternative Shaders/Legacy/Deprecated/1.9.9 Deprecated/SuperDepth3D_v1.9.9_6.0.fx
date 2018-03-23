@@ -30,6 +30,9 @@
 // Enable this to fix the problem when there is a full screen Game Map Poping out of the screen. AKA Full Black Depth Map Fix. I have this off by default. Zero is off, One is On.
 #define FBDMF 0
 
+// BOTW Fix WIP....
+#define AADM 0
+
 // Change the Cancel Depth Key
 // Determines the Cancel Depth Toggle Key useing keycode info
 // You can use http://keycode.info/ to figure out what key is what.
@@ -73,9 +76,9 @@ uniform float Divergence <
 
 uniform int Convergence_Mode <
 	ui_type = "combo";
-	ui_items = "Mode A\0Mode B\0";
-	ui_label = "Convergence Mode -=WIP=-";
-	ui_tooltip = "Select your Convergence for ZPD calculation.";
+	ui_items = "Mode A\0Mode B\0Mode C\0";
+	ui_label = "Convergence Mode";
+	ui_tooltip = "Select your Convergence Mode.";
 > = 0;
 
 uniform float ZPD <
@@ -88,13 +91,16 @@ uniform float ZPD <
 				"Default is 0.010, Zero is off.";
 > = 0.010;
 
-uniform float Auto_Depth_Range <
-	ui_type = "drag";
-	ui_min = 0.0; ui_max = 0.625;
-	ui_label = "Auto Depth Range";
-	ui_tooltip = "The Map Automaticly scales to outdoor and indoor areas.\n" 
-				 "This is still WIP";
-> = 0.0;
+uniform int Auto_ZPD <
+	ui_type = "combo";
+	ui_items = "Off\0Inverted\0Normal\0Inverted Half\0Normal Half\0";
+	ui_label = "Auto Zero Parallax Distance Power";
+	ui_tooltip = "Auto Zero Parallax Distance Power controls the focus distance for the screen Pop-out effect automatically.\n"
+				"Inverted, is if your cam is close to a object you will have less Pop-out.\n"
+				"Normal, is if your cam is close to a object you will have more Pop-out.\n"
+				"Power of this effect is based off ZPD setting above.\n"
+				"Default is Off.";
+> = 0;
 
 uniform int Balance <
 	ui_type = "drag";
@@ -189,11 +195,19 @@ uniform float Anaglyph_Desaturation <
 
 uniform int View_Mode <
 	ui_type = "combo";
-	ui_items = "View Mode Normal\0View Mode Alpha\0View Mode Beta -=WIP=-\0View Mode Gamma\0";
+	ui_items = "View Mode Normal\0View Mode Alpha\0View Mode Beta\0View Mode Gamma\0";
 	ui_label = "View Mode";
 	ui_tooltip = "Change the way the shader warps the output to the screen.\n"
 				 "Default is Normal";
 > = 0;
+
+uniform float Auto_Depth_Range <
+	ui_type = "drag";
+	ui_min = 0.0; ui_max = 0.625;
+	ui_label = "Auto Depth Range";
+	ui_tooltip = "The Map Automaticly scales to outdoor and indoor areas.\n" 
+				 "This is still WIP";
+> = 0.0;
 
 uniform bool Eye_Swap <
 	ui_label = "Swap Eyes";
@@ -382,8 +396,8 @@ float2 WeaponDepth(in float2 texcoord : TEXCOORD0)
 		float midV = (HV.y-1)*(BUFFER_HEIGHT*0.5)*pix.y;		
 		float midH = (HV.x-1)*(BUFFER_WIDTH*0.5)*pix.x;			
 		texcoord = float2((texcoord.x*HV.x)-midH,(texcoord.y*HV.y)-midV);
-			
-			if (Depth_Map_Flip)
+		
+		if (Depth_Map_Flip)
 			texcoord.y =  1 - texcoord.y;
 			
 		float zBufferWH = tex2D(DepthBuffer, texcoord).r; //Weapon Hand Depth Buffer
@@ -684,7 +698,7 @@ float2 WeaponDepth(in float2 texcoord : TEXCOORD0)
 			CoP = Weapon_Adjust.z;
 		}
 		
-	return float2(saturate(zBufferWH.r),CoP);	
+	return float2(saturate(zBufferWH.r),CoP);
 }
 
 void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 Color : SV_Target0)
@@ -721,25 +735,98 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 
 float AutoDepthRange( float d, float2 texcoord )
 {
-	float LumAdjust = smoothstep(-0.0175,Auto_Depth_Range,Lum(texcoord));
+	float ADR_Scale = Auto_Depth_Range;
+	float LumAdjust = smoothstep(-0.0175,ADR_Scale,Lum(texcoord));
     return min(1,( d - 0 ) / ( LumAdjust - 0));
 }
 
 float Conv(float D,float2 texcoord)
 {
 	float Z, ZP, Con = ZPD, NF_Power, MS = Divergence * pix.x;
-
-		float ALC = abs(smoothstep(0,1,Lum(texcoord)));
+						
+		//Average Luminance Auto ZDP Start
+		float Luminance, LClamp = smoothstep(0,1,Lum(texcoord)); //Average Luminance Texture Sample 
+		
+		if (Auto_ZPD == 1)
+		{
+			Luminance = smoothstep(0.01,1,Lum(texcoord)*Con);		
+		}
+		else if (Auto_ZPD == 2)
+		{
+			Luminance = smoothstep(0.01,1,Con-(Lum(texcoord)*Con));
+		}
+		else if (Auto_ZPD == 3)
+		{
+			Luminance =  smoothstep(0.01,0.5,Lum(texcoord)*Con);	
+		}
+		else if (Auto_ZPD == 4)
+		{
+			Luminance =  smoothstep(0.01,0.5,Con-(Lum(texcoord)*Con));
+		}	
+		else
+		{
+			Luminance = 0;
+		}
+		
+		float AL = abs(Luminance),ALC = abs(LClamp),ZPDC;
 			
 		if (ALC <= 0.00005 && FBDMF) //Full Black Depth Map Fix.
 		{
-			Z = 0; 
+			AL = 0;
+			ZPDC = 0; 
 		}
 		else
 		{
-			Z = Con; 
+			AL = AL; //Auto ZDP based on the Auto Anti Weapon Depth Map Z-Fighting code.
+			ZPDC = Con; 
 		}	
-
+		
+		//Using the Luminace to control what happens when really close to link.... May be phased out soon.	
+		if (AADM)
+		{
+			if (ALC >= 0.01)
+			{
+				AL = AL*0.8;
+			}
+			if (ALC >= 0.125)
+			{
+				AL = AL;
+			}
+			if (ALC >= 0.250)
+			{
+				AL = AL*1.33333333;
+			}
+			if (ALC >= 0.3125)
+			{
+				AL = AL*2.0;
+			}
+			if (ALC >= 0.375)
+			{
+				AL = AL*1.33333333;
+			}
+			if (ALC >= 0.450)
+			{
+				AL = AL;
+			}
+			if (ALC >= 0.500)
+			{
+				AL = AL*0.8;
+			}
+			else if (ALC < 0.01)
+			{
+				AL = AL*0.57142857;
+			}	
+		}
+		
+		if(Auto_ZPD >= 1)
+		{
+			Z = AL; //Auto ZDP based on the Auto Anti Weapon Depth Map Z-Fighting code.
+		}
+		else
+		{
+			Z = ZPDC;
+		}
+		//Average Luminance Auto ZDP End
 		if(Balance == -4)
 		{
 			NF_Power = 0.125;
@@ -802,9 +889,14 @@ float Conv(float D,float2 texcoord)
 		{
 			Convergence = 1 - Z / D;
 		}
-		else
+		else if(Convergence_Mode == 1)
 		{
 			Convergence = 1 - Z / DM;
+		}
+		else
+		{
+			Convergence = 1 - Z / D;
+			Convergence /= 1-(-Z);
 		}
 		
 		if (Auto_Depth_Range > 0)
