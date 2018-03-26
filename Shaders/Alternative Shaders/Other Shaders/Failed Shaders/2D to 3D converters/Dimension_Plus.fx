@@ -100,6 +100,7 @@ uniform int Mode <
 
 /////////////////////////////////////////////////////D3D Starts Here/////////////////////////////////////////////////////////////////
 #define pix float2(BUFFER_RCP_WIDTH, BUFFER_RCP_HEIGHT)
+#define TextureSize float2(BUFFER_WIDTH, BUFFER_HEIGHT)
 	
 texture BackBufferTex : COLOR;
 
@@ -121,7 +122,17 @@ sampler SamplerBlur
 		MipFilter = LINEAR;
 	};	
 
+texture texFakeDB { Width = BUFFER_WIDTH*0.5; Height = BUFFER_HEIGHT*0.5; Format = RGBA8; MipLevels = 8;};
 
+sampler SamplerFakeDB
+	{
+		Texture = texFakeDB;
+		MipLODBias = 2.0f;
+		MinFilter = LINEAR;
+		MagFilter = LINEAR;
+		MipFilter = LINEAR;
+	};
+	
 	
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 float3 rgb2hsv(float3 c)
@@ -148,27 +159,20 @@ float3 rgb2yuv(float3 rgb)
 
 void Blur(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 color : SV_Target0)                                                                          
 {
-	float4 CC = tex2D(BackBuffer, texcoord);
-
-	float2 samples[10] = { float2(-0.695914, 0.457137), float2(-0.203345, 0.620716), float2(0.962340, -0.194983), float2(0.473434, -0.480026), float2(0.519456, 0.767022), 
-						   float2(0.185461, -0.893124), float2(0.507431, 0.064425), float2(0.896420, 0.412458), float2(-0.321940, -0.932615), float2(-0.791559, -0.597705) };  
-			
-	float2 Adjust = float2(Spread,Spread)*pix;
-
-		[unroll]
-		for (int i = 0; i < 10; i++)
-		{  
-			CC += tex2D(BackBuffer, texcoord + Adjust * samples[i]);
-		} 
-		
-		CC *= 0.09090909f;
-		
-		color = CC;
+   float4 tl = tex2D(BackBuffer,texcoord);
+   float4 tr = tex2D(BackBuffer,texcoord +float2(pix.x, 0.0));
+   float4 bl = tex2D(BackBuffer,texcoord +float2(0.0, pix.y));
+   float4 br = tex2D(BackBuffer,texcoord +float2(pix.x, pix.y));
+   float2 f = frac( texcoord * TextureSize );
+   float4 tA = lerp( tl, tr, f.x );
+   float4 tB = lerp( bl, br, f.x );
+   float4 done = lerp( tA, tB, f.y );//2.0 Gamma correction.
+ color = done;
 }
 
 float4 Adjust(in float2 texcoord : TEXCOORD0)
 {
-float2 S = float2(Spread * pix.x,Spread * 0.5 * pix.y);// Hoizontal Sepration needs to be stronger
+float2 S = float2(Spread * pix.x,Spread * pix.y);// Hoizontal Sepration needs to be stronger
 float4 H = lerp(tex2D(SamplerBlur, float2(texcoord.x + S.x, texcoord.y)),tex2D(SamplerBlur, float2(texcoord.x - S.x, texcoord.y)),0.5);
 float4 V = lerp(tex2D(SamplerBlur, float2(texcoord.x, texcoord.y + S.y)),tex2D(SamplerBlur, float2(texcoord.x, texcoord.y - S.y)),0.5);
 float4 HVC = lerp(H,V,0.50);
@@ -185,7 +189,7 @@ float3 GS(float3 color)
 	return clamp(color,0.003,1.0);//clamping to protect from over Dark.
 }
 
-float DepthCues(float2 texcoord : TEXCOORD0)
+float4 FakeDB(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0): SV_Target
 {
 	//Luma (SD video)	float3(0.299, 0.587, 0.114)
 	//Luma (HD video)	float3(0.2126, 0.7152, 0.0722) https://en.wikipedia.org/wiki/Luma_(video)
@@ -224,15 +228,16 @@ float DepthCues(float2 texcoord : TEXCOORD0)
 	Done = rgb2hsv(Done);
 	Num = 0.500;
 	}
+	float RGB = smoothstep(0,Power,1-distance(smoothstep(0,Num,FG*BG),Done));
 	
-	return smoothstep(0,Power,1-distance(smoothstep(0,Num,FG*BG),Done));
+	return float4(RGB,RGB,RGB,1);
 }
 
 float4  Encode(in float2 texcoord : TEXCOORD0) //zBuffer Color Channel Encode
 {
 
-	float GetDepthR = DepthCues(float2(texcoord.x,texcoord.y));
-	float GetDepthB = DepthCues(float2(texcoord.x,texcoord.y));
+	float GetDepthR = tex2D(SamplerFakeDB,float2(texcoord.x,texcoord.y)).x;
+	float GetDepthB = tex2D(SamplerFakeDB,float2(texcoord.x,texcoord.y)).x;
 
 	// X	
 	float Rx = (1-texcoord.x)+Divergence*pix.x*GetDepthR;
@@ -546,7 +551,7 @@ float4 Converter(float2 texcoord : TEXCOORD0)
 				}
 			}
 			if(Debug_View)
-			Out.rgb = DepthCues(texcoord).xxx;
+			Out.rgb = tex2D(SamplerFakeDB,texcoord).xxx;
 
 	return float4(Out.rgb,1);
 	}
@@ -672,6 +677,12 @@ technique Dimension_Plus
 			VertexShader = PostProcessVS;
 			PixelShader = Blur;
 			RenderTarget = texBlur;
+		}	
+			pass FakeDBFilter
+		{
+			VertexShader = PostProcessVS;
+			PixelShader = FakeDB;
+			RenderTarget = texFakeDB;
 		}	
 			pass CuesUnsharpMask
 		{
