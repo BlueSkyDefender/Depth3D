@@ -22,13 +22,13 @@
 
 uniform int Divergence <
 	ui_type = "drag";
-	ui_min = 1; ui_max = 35;
+	ui_min = 1; ui_max = 25;
 	ui_label = "Divergence Slider";
 	ui_tooltip = "Determines the amount of Image Warping and Separation.\n" 
 				 "You can override this value.";
 > = 15;
 
-uniform float P <
+uniform float Perspective <
 	ui_type = "drag";
 	ui_min = -50.0; ui_max = 50.0;
 	ui_label = "Perspective Slider";
@@ -68,6 +68,36 @@ uniform bool Eye_Swap <
 	ui_tooltip = "L/R to R/L.";
 > = false;
 
+uniform bool Debug_View <
+	ui_label = "Debug View";
+	ui_tooltip = "Debug View.";
+> = false;
+
+uniform float Power <
+	ui_type = "drag";
+	ui_min = 0.5; ui_max = 1.0;
+	ui_label = "Shade Power";
+	ui_tooltip = "Adjust the Shade Power Lower is Higher & Higher is Lower.\n"
+				 "This improves AO, Shadows, & Darker Areas in game.\n"
+				 "Number 1.0 is default.";
+> = 1.0;
+
+uniform float Spread <
+	ui_type = "drag";
+	ui_min = 1.0; ui_max = 20.0;
+	ui_label = "Shade Fill";
+	ui_tooltip = "Adjust This to have the shade effect to fill in areas.\n"
+				 "This is used for gap filling. AKA, Fake AO.\n"
+				 "Number 7.5 is default.";
+> = 7.5;
+
+uniform int Mode <
+	ui_type = "combo";
+	ui_items = "Mode A\0Mode B\0Mode C\0";
+	ui_label = "Anaglyph Color Mode";
+	ui_tooltip = "Select colors for your 3D anaglyph glasses.";
+> = 0;
+
 /////////////////////////////////////////////////////D3D Starts Here/////////////////////////////////////////////////////////////////
 #define pix float2(BUFFER_RCP_WIDTH, BUFFER_RCP_HEIGHT)
 	
@@ -78,6 +108,8 @@ sampler BackBuffer
 		Texture = BackBufferTex;
 	};
 	
+	
+
 texture texBlur { Width = BUFFER_WIDTH*0.5; Height = BUFFER_HEIGHT*0.5; Format = RGBA8; MipLevels = 8;};
 
 sampler SamplerBlur
@@ -88,63 +120,119 @@ sampler SamplerBlur
 		MagFilter = LINEAR;
 		MipFilter = LINEAR;
 	};	
+
+
 	
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 float3 rgb2hsv(float3 c)
 {
-    float4 K = float4(0.5, -1.0 / 3.0, 2.0 / 3.0, -1.0);
+    float4 K = float4(0.0, -1.0 / 3.0, 2.0 / 3.0, -1.0);
     float4 p = lerp(float4(c.bg, K.wz), float4(c.gb, K.xy), step(c.b, c.g));
     float4 q = lerp(float4(p.xyw, c.r), float4(c.r, p.yzx), step(p.x, c.r));
 
     float d = q.x - min(q.w, q.y);
     float e = 1.0e-10;
-   // return float3(abs(q.z + (q.w - q.y) / (6.0 * d + e)), d / (q.x + e), q.x);
-    return dot(float3(abs(q.z + (q.w - q.y) / (6.0 * d + e)), d / (q.x + e), q.x), float3(0.3, 0.59, 0.11));//Gray-scale conversion.
+    return float3(abs(q.z + (q.w - q.y) / (6.0 * d + e)), d / (q.x + e), q.x);
+    //return dot(float3(abs(q.z + (q.w - q.y) / (6.0 * d + e)), d / (q.x + e), q.x), float3(0.3, 0.59, 0.11));//Gray-scale conversion.
+}
+
+float3 rgb2yuv(float3 rgb)
+{
+	float4 yuv;
+	yuv.x = rgb.r * 0.299 + rgb.g * 0.587 + rgb.b * 0.114;
+	yuv.y = rgb.r * -0.169 + rgb.g * -0.331 + rgb.b * 0.5 + 0.5;
+	yuv.z = rgb.r * 0.5 + rgb.g * -0.419 + rgb.b * -0.081 + 0.5;
+	
+	return yuv;
 }
 
 void Blur(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 color : SV_Target0)                                                                          
 {
-float2 samples[12] = {  
-float2(-0.326212, -0.405805),  
-float2(-0.840144, -0.073580),  
-float2(-0.695914, 0.457137),  
-float2(-0.203345, 0.620716),  
-float2(0.962340, -0.194983),  
-float2(0.473434, -0.480026),  
-float2(0.519456, 0.767022),  
-float2(0.185461, -0.893124),  
-float2(0.507431, 0.064425),  
-float2(0.896420, 0.412458),  
-float2(-0.321940, -0.932615),  
-float2(-0.791559, -0.597705)  
-};  
-  
-float3 sum = tex2D(BackBuffer, texcoord).rgb;  
-for (int i = 0; i < 12; i++){  
-sum += tex2D(BackBuffer, texcoord + samples[i] * pix * 7.5).rgb;  
-}  
-sum *= 0.07692307;
+	float4 CC = tex2D(BackBuffer, texcoord);
 
-color = float4(rgb2hsv(sum),1); 
+	float2 samples[10] = { float2(-0.695914, 0.457137), float2(-0.203345, 0.620716), float2(0.962340, -0.194983), float2(0.473434, -0.480026), float2(0.519456, 0.767022), 
+						   float2(0.185461, -0.893124), float2(0.507431, 0.064425), float2(0.896420, 0.412458), float2(-0.321940, -0.932615), float2(-0.791559, -0.597705) };  
+			
+	float2 Adjust = float2(Spread,Spread)*pix;
+
+		[unroll]
+		for (int i = 0; i < 10; i++)
+		{  
+			CC += tex2D(BackBuffer, texcoord + Adjust * samples[i]);
+		} 
+		
+		CC *= 0.09090909f;
+		
+		color = CC;
 }
 
-float FakeDepthBuffer(float2 texcoord : TEXCOORD0)
+float4 Adjust(in float2 texcoord : TEXCOORD0)
 {
-	float3 RGB_A,Luma_Coefficient = float3(0.2627, 0.6780, 0.0593);
-	
-	RGB_A = (1-rgb2hsv(tex2D(BackBuffer,texcoord).xxx)) * clamp(tex2D(SamplerBlur,texcoord).rgb,0.25,1) ;
+float2 S = float2(Spread * pix.x,Spread * 0.5 * pix.y);// Hoizontal Sepration needs to be stronger
+float4 H = lerp(tex2D(SamplerBlur, float2(texcoord.x + S.x, texcoord.y)),tex2D(SamplerBlur, float2(texcoord.x - S.x, texcoord.y)),0.5);
+float4 V = lerp(tex2D(SamplerBlur, float2(texcoord.x, texcoord.y + S.y)),tex2D(SamplerBlur, float2(texcoord.x, texcoord.y - S.y)),0.5);
+float4 HVC = lerp(H,V,0.50);
 
-	float Combine = dot(RGB_A,Luma_Coefficient * 2);
+return HVC; 
+}
+
+float3 GS(float3 color)
+{
+    float grayscale = dot(color.rgb, float3(0.3, 0.59, 0.11));
+    color.r = grayscale;
+    color.g = grayscale;
+    color.b = grayscale;
+	return clamp(color,0.003,1.0);//clamping to protect from over Dark.
+}
+
+float DepthCues(float2 texcoord : TEXCOORD0)
+{
+	//Luma (SD video)	float3(0.299, 0.587, 0.114)
+	//Luma (HD video)	float3(0.2126, 0.7152, 0.0722) https://en.wikipedia.org/wiki/Luma_(video)
+	//Luma (HDR video)	float3(0.2627, 0.6780, 0.0593) https://en.wikipedia.org/wiki/Rec._2100
+	float3 RGB_A, RGB_B, Luma_Coefficient = float3(0.2627, 0.6780, 0.0593);
+		
+	//Formula for Image Pop = Original + (Original / Blurred) * Amount.
+	RGB_A = GS( tex2D(BackBuffer,texcoord).rgb ) / GS( Adjust(texcoord).rgb );
+	float3 FGPop = GS(RGB_A.rgb);
 	
-	return saturate(lerp((1-texcoord.y)+100*pix.x,Combine,0.5));
+	//Formula for BackGround Pop = Original + (Original - Blurred) * Amount .
+	RGB_B = GS(tex2D(BackBuffer,texcoord).rgb) - GS(Adjust(texcoord).rgb);
+	float3 BGPop = GS(1-RGB_B.rgb);
+	
+	//RGB = saturate(RGB_A);
+	float BG = dot(BGPop,Luma_Coefficient);
+	float FG = dot(FGPop,Luma_Coefficient);
+	
+	BG = 1-(saturate(BG)*(1-(rgb2yuv(tex2D(BackBuffer,texcoord).rgb).ggg*rgb2yuv(tex2D(BackBuffer,texcoord).rgb).bbb)));
+	FG = 1-(saturate(FG)*(1-(rgb2yuv(tex2D(BackBuffer,texcoord).rgb).ggg*rgb2yuv(tex2D(BackBuffer,texcoord).rgb).bbb)));
+	
+	float3 Done = 1-tex2D(BackBuffer,texcoord).rgb;
+	float Num;
+	if(Mode == 0)
+	{
+	Done = GS(Done);
+	Num = 0.250;
+	}
+	else if(Mode == 1)
+	{
+	Done = rgb2yuv(Done);
+	Num = 0.250;
+	}
+	else
+	{
+	Done = rgb2hsv(Done);
+	Num = 0.500;
+	}
+	
+	return smoothstep(0,Power,1-distance(smoothstep(0,Num,FG*BG),Done));
 }
 
 float4  Encode(in float2 texcoord : TEXCOORD0) //zBuffer Color Channel Encode
 {
 
-	float GetDepthR = FakeDepthBuffer(float2(texcoord.x,texcoord.y));
-	float GetDepthB = FakeDepthBuffer(float2(texcoord.x,texcoord.y));
+	float GetDepthR = DepthCues(float2(texcoord.x,texcoord.y));
+	float GetDepthB = DepthCues(float2(texcoord.x,texcoord.y));
 
 	// X	
 	float Rx = (1-texcoord.x)+Divergence*pix.x*GetDepthR;
@@ -167,7 +255,7 @@ float4 Converter(float2 texcoord : TEXCOORD0)
 {		
 	float4 Out;
 	float2 TCL,TCR;
-	float Perspective = (Divergence * 0.5) + P;
+	//float Perspective = (Divergence * 0.5) + P;
 	if (Stereoscopic_Mode == 0)
 		{
 		if (Eye_Swap)
@@ -457,7 +545,8 @@ float4 Converter(float2 texcoord : TEXCOORD0)
 					Out = float4(red, green, blue, 0);
 				}
 			}
-		
+			if(Debug_View)
+			Out.rgb = DepthCues(texcoord).xxx;
 
 	return float4(Out.rgb,1);
 	}
