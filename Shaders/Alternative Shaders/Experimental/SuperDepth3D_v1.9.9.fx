@@ -45,13 +45,13 @@ uniform int Depth_Map <
 	ui_type = "combo";
 	ui_items = " 0 Normal\0 1 Normal Reversed\0 2 Offset Normal\0 3 Offset Reversed\0";
 	ui_label = "Depth Map Selection";
-	ui_tooltip = "linearization for the zBuffer also Depth Map One to Four.\n"
-			    "Normally you want to use 1 or 2.";
+	ui_tooltip = "Linearization for the zBuffer also known as Depth Map.\n"
+			     "Normally you want to use 0 or 1.";
 > = 0;
 
 uniform float Depth_Map_Adjust <
 	ui_type = "drag";
-	ui_min = 0.250; ui_max = 100.0;
+	ui_min = 0.250; ui_max = 125.0;
 	ui_label = "Depth Map Adjustment";
 	ui_tooltip = "Adjust the depth map for your games.";
 > = 7.5;
@@ -73,18 +73,23 @@ uniform float Divergence <
 
 uniform int Convergence_Mode <
 	ui_type = "combo";
-	ui_items = "Mode A\0Mode B\0";
-	ui_label = "Convergence Mode -=WIP=-";
-	ui_tooltip = "Select your Convergence for ZPD calculation.";
+	ui_items = "ZPD Locked\0ZPD Unlocked\0ZPD Tied\0";
+	ui_label = "Convergence Mode";
+	ui_tooltip = "Select your Convergence for ZPD calculation.\n" 
+				 "ZPD Locked mode is locked to divergence & dissables ZPD control below.\n" 
+				 "ZPD Unlocked mode lets you control ZPD separately from Divergence.\n" 
+				 "ZPD Tied is controlled by ZPD. Works in tandam with Divergence.\n" 
+				 "For FPS with no custom weapon profile use Tied.\n" 
+				 "Default is ZPD Locked.";
 > = 0;
 
 uniform float ZPD <
 	ui_type = "drag";
 	ui_min = 0.0; ui_max = 0.500;
 	ui_label = "Zero Parallax Distance";
-	ui_tooltip = "ZPD controls the focus distance for the screen Pop-out effect.\n"
-				"For FPS Games this should be around 0.005-0.075.\n"
-				"Also Controlls Auto ZPD power level.\n"
+	ui_tooltip = "ZPD controls the focus distance for the screen Pop-out effect also known as Convergence.\n"
+				"For FPS Games keeps this low Since you don't want your gun to pop out of screen.\n"
+				"This is controled by Convergence Mode.\n"
 				"Default is 0.010, Zero is off.";
 > = 0.010;
 
@@ -93,7 +98,7 @@ uniform float Auto_Depth_Range <
 	ui_min = 0.0; ui_max = 0.625;
 	ui_label = "Auto Depth Range";
 	ui_tooltip = "The Map Automaticly scales to outdoor and indoor areas.\n" 
-				 "This is still WIP";
+				 "Default is Zero, Zero is off.";
 > = 0.0;
 
 uniform int Balance <
@@ -138,11 +143,11 @@ uniform bool Depth_Map_Flip <
 	ui_tooltip = "Flip the depth map if it is upside down.";
 > = false;
 
-uniform int WDM <
+uniform int WP <
 	ui_type = "combo";
-	ui_items = "Weapon DM Off\0Custom WDM\0 WDM 0\0 WDM 1\0 WDM 2\0 WDM 3\0 WDM 4\0 WDM 5\0 WDM 6\0 WDM 7\0 WDM 8\0 WDM 9\0 WDM 10\0 WDM 11\0 WDM 12\0 WDM 13\0 WDM 14\0 WDM 15\0 WDM 16\0 WDM 17\0 WDM 18\0 WDM 19\0 WDM 20\0 WDM 21\0 WDM 22\0 WDM 23\0 WDM 24\0 WDM 25\0 WDM 26\0 WDM 27\0 WDM 28\0 WDM 29\0 WDM 30\0 HUD Mode One\0";
-	ui_label = "Weapon Depth Map";
-	ui_tooltip = "Pick your weapon depth map for games.";
+	ui_items = "Weapon Profile Off\0Custom WP\0 WP 0\0 WP 1\0 WP 2\0 WP 3\0 WP 4\0 WP 5\0 WP 6\0 WP 7\0 WP 8\0 WP 9\0 WP 10\0 WP 11\0 WP 12\0 WP 13\0 WP 14\0 WP 15\0 WP 16\0 WP 17\0 WP 18\0 WP 19\0 WP 20\0 WP 21\0 WP 22\0 WP 23\0 WP 24\0 WP 25\0 WP 26\0 WP 27\0 WP 28\0 WP 29\0 WP 30\0 HUD Mode One\0";
+	ui_label = "HUD & Weapon Profile";
+	ui_tooltip = "Pick your weapon profile for game.";
 > = 0;
 
 uniform float4 Weapon_Adjust <
@@ -399,238 +404,238 @@ float2 WeaponDepth(in float2 texcoord : TEXCOORD0)
 		float WA_Y; //Weapon_Adjust.y
 		float CoP; //Weapon_Adjust.z
 		
-		if (WDM == 1)
+		if (WP == 1)
 		{
 			WA_X = Weapon_Adjust.x;
 			WA_Y = Weapon_Adjust.y;
 		}
 		
-		//WDM 0 ; Unreal Gold with v227
-		else if(WDM == 2)
+		//WP 0 ; Unreal Gold with v227
+		else if(WP == 2)
 		{
 			WA_X = 2.855;
 			WA_Y = 0.1375;
 			CoP = 0.335;
 		}
 		
-		//WDM 1 ; DOOM 2016
-		else if(WDM == 3)
+		//WP 1 ; DOOM 2016
+		else if(WP == 3)
 		{
 			WA_X = 2.775;
 			WA_Y = 0.666;
 			CoP = 0.2775;
 		}
 		
-		//WDM 2 ; Amnesia Games
-		else if(WDM == 4)
+		//WP 2 ; Amnesia Games
+		else if(WP == 4)
 		{
 			WA_X = 100.0;
 			WA_Y = 75.0;
 			CoP = 8.0;
 		}
 		
-		//WDM 3 ; BorderLands 2
-		else if(WDM == 5)
+		//WP 3 ; BorderLands 2
+		else if(WP == 5)
 		{
 			WA_X = 2.855;
 			WA_Y = 1.0;
 			CoP = 0.300;
 		}
 		
-		//WDM 4 ; CoD:AW
-		else if(WDM == 6)
+		//WP 4 ; CoD:AW
+		else if(WP == 6)
 		{
 			WA_X = 98.0;
 			WA_Y = -0.3625;
 			CoP = 0.300;
 		}
 		
-		//WDM 5 ; CoD: Black Ops
-		else if(WDM == 7)
+		//WP 5 ; CoD: Black Ops
+		else if(WP == 7)
 		{
 			WA_X = 2.53945;
 			WA_Y = 0.0125;
 			CoP = 0.300;
 		}
 		
-		//WDM 6 ; CoD: Black Ops
-		else if(WDM == 8)
+		//WP 6 ; CoD: Black Ops
+		else if(WP == 8)
 		{
 			WA_X = 5.0;
 			WA_Y = 15.625;
 			CoP = 0.455;
 		}
 		
-		//WDM 7 ; Wolfenstine: The New Order
-		else if(WDM == 9)
+		//WP 7 ; Wolfenstine: The New Order
+		else if(WP == 9)
 		{
 			WA_X = 5.500;
 			WA_Y = 1.550;
 			CoP = 0.550;
 		}
 		
-		//WDM 8 ; Fallout 4
-		else if(WDM == 10)
+		//WP 8 ; Fallout 4
+		else if(WP == 10)
 		{
 			WA_X = 2.5275;
 			WA_Y = 0.0875;
 			CoP = 0.255;
 		}
 		
-		//WDM 9 ; Prey 2017 High and <
-		else if(WDM == 11)
+		//WP 9 ; Prey 2017 High and <
+		else if(WP == 11)
 		{
 			WA_X = 19.700;
 			WA_Y = -2.600;
 			CoP = 0.285;
 		}
 
-		//WDM 10 ; Prey 2017 Very High
-		else if(WDM == 12)
+		//WP 10 ; Prey 2017 Very High
+		else if(WP == 12)
 		{
 			WA_X = 28.450;
 			WA_Y = -2.600;
 			CoP = 0.285;
 		}
 		
-		//WDM 11 ; Metro Redux Games
-		else if(WDM == 13)
+		//WP 11 ; Metro Redux Games
+		else if(WP == 13)
 		{
 			WA_X = 2.61375;
 			WA_Y = 1.0;
 			CoP = 0.260;
 		}
 		
-		//WDM 12 ; NecroVisioN: Lost Company
-		else if(WDM == 14)
+		//WP 12 ; NecroVisioN: Lost Company
+		else if(WP == 14)
 		{
 			WA_X = 5.1375;
 			WA_Y = 7.5;
 			CoP = 0.485;
 		}
 		
-		//WDM 13 ; Kingpin Life of Crime
-		else if(WDM == 15)
+		//WP 13 ; Kingpin Life of Crime
+		else if(WP == 15)
 		{
 			WA_X = 3.925;
 			WA_Y = 17.5;
 			CoP = 0.400;
 		}
 	
-		//WDM 14 ; Rage64
-		else if(WDM == 16)
+		//WP 14 ; Rage64
+		else if(WP == 16)
 		{
 			WA_X = 5.45;
 			WA_Y = 1.0;
 			CoP = 0.550;
 		}	
 		
-		//WDM 15 ; Quake DarkPlaces
-		else if(WDM == 17)
+		//WP 15 ; Quake DarkPlaces
+		else if(WP == 17)
 		{
 			WA_X = 2.685;
 			WA_Y = 1.0;
 			CoP = 0.375;
 		}	
 
-		//WDM 16 ; Quake 2 XP
-		else if(WDM == 18)
+		//WP 16 ; Quake 2 XP
+		else if(WP == 18)
 		{
 			WA_X = 3.925;
 			WA_Y = 16.25;
 			CoP = 0.400;
 		}
 		
-		//WDM 17 ; Quake 4
-		else if(WDM == 19)
+		//WP 17 ; Quake 4
+		else if(WP == 19)
 		{
 			WA_X = 5.000000;
 			WA_Y = 7.0;
 			CoP = 0.500;
 		}
 
-		//WDM 18 ; RTCW
-		else if(WDM == 20)
+		//WP 18 ; RTCW
+		else if(WP == 20)
 		{
 			WA_X = 3.6875;
 			WA_Y = 7.250;
 			CoP = 0.400;
 		}
 	
-		//WDM 19 ; S.T.A.L.K.E.R: Games
-		else if(WDM == 21)
+		//WP 19 ; S.T.A.L.K.E.R: Games
+		else if(WP == 21)
 		{
 			WA_X = 2.55925;
 			WA_Y = 0.75;
 			CoP = 0.255;
 		}
 		
-		//WDM 20 ; Soma
-		else if(WDM == 22)
+		//WP 20 ; Soma
+		else if(WP == 22)
 		{
 			WA_X = 16.250;
 			WA_Y = 87.50;
 			CoP = 0.825;
 		}
 		
-		//WDM 21 ; Skyrim: SE
-		else if(WDM == 23)
+		//WP 21 ; Skyrim: SE
+		else if(WP == 23)
 		{
 			WA_X = 2.775;
 			WA_Y = 1.125;
 			CoP = 0.278;
 		}
 		
-		//WDM 22 ; Turok: DH 2017
-		else if(WDM == 24)
+		//WP 22 ; Turok: DH 2017
+		else if(WP == 24)
 		{
 			WA_X = 2.553125;
 			WA_Y = 1.0;
 			CoP = 0.500;
 		}
 
-		//WDM 23 ; Turok2: SoE 2017
-		else if(WDM == 25)
+		//WP 23 ; Turok2: SoE 2017
+		else if(WP == 25)
 		{
 			WA_X = 140.0;
 			WA_Y = 500.0;
 			CoP = 5.0;
 		}
 		
-		//WDM 24 ; Dying Light
-		else if(WDM == 26)
+		//WP 24 ; Dying Light
+		else if(WP == 26)
 		{
 			WA_X = 2.000;
 			WA_Y = -40.0;
 			CoP = 2.0;
 		}
 		
-		//WDM 25 ; EuroTruckSim2
-		else if(WDM == 27)
+		//WP 25 ; EuroTruckSim2
+		else if(WP == 27)
 		{
 			WA_X = 2.800;
 			WA_Y = 1.0;
 			CoP = 0.280;
 		}
 		
-		//WDM 26 ; Prey - 2006
-		else if(WDM == 28)
+		//WP 26 ; Prey - 2006
+		else if(WP == 28)
 		{
 			WA_X = 5.000;
 			WA_Y = 2.875;
 			CoP = 0.500;
 		}
 		
-		//WDM 27 ; TitanFall 2
-		else if(WDM == 29)
+		//WP 27 ; TitanFall 2
+		else if(WP == 29)
 		{
 			WA_X = 2.77575;
 			WA_Y = 0.3625;
 			CoP = 0.3625;
 		}
 		
-		//WDM 28 ; Bioshock Remastred
-		else if(WDM == 30)
+		//WP 28 ; Bioshock Remastred
+		else if(WP == 30)
 		{
 			WA_X = 2.52475;
 			WA_Y = 0.05625;
@@ -640,7 +645,7 @@ float2 WeaponDepth(in float2 texcoord : TEXCOORD0)
 		//SWDMS Done//
  		
  		//TEXT MODE 31 Adjust
-		else if(WDM == 33) //Text mode one.
+		else if(WP == 33) //Text mode one.
 		{
 			WA_X = Weapon_Adjust.x;
 			WA_Y = 100;
@@ -649,13 +654,13 @@ float2 WeaponDepth(in float2 texcoord : TEXCOORD0)
  		
 		//Scaled Section z-Buffer
 		
-		if(WDM >= 1)
+		if(WP >= 1)
 		{
 			WA_X *= 0.004;
 			WA_Y *= 0.004;
 			zBufferWH = WA_Y*zBufferWH/(WA_X-zBufferWH);
 		
-			if(WDM == 24)
+			if(WP == 24)
 			zBufferWH += 1;
 		}
 		
@@ -666,7 +671,7 @@ float2 WeaponDepth(in float2 texcoord : TEXCOORD0)
 		
 		float WeaponLumAdjust = abs(smoothstep(0,0.5,LumWeapon(texcoord)*2.5)) * zBufferWH;	
 			
-		if( WDM == 1 || WDM == 22 || WDM == 24 || WDM == 27 || WDM == 33 )//WDM Adjust,SOMA, EuroTruckSim2, and HUD mode.
+		if( WP == 1 || WP == 22 || WP == 24 || WP == 27 || WP == 33 )//WP Adjust,SOMA, EuroTruckSim2, and HUD mode.
 		{
 			zBufferWH = zBufferWH;
 		}
@@ -701,7 +706,7 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 		
 		Cutoff = step(lerp(DM.x,DM.y,0.5),CutOFFCal);
 				
-		if (WDM == 0)
+		if (WP == 0)
 		{
 			LDM = DM.x;
 			RDM = DM.y;
@@ -727,17 +732,20 @@ float AutoDepthRange( float d, float2 texcoord )
 
 float Conv(float D,float2 texcoord)
 {
-	float Z, ZP, Con = ZPD, NF_Power, MS = Divergence * pix.x;
+	float Z, ZP, NF_Power, MSZ, MS_A = Divergence * pix.x, MS_B = (ZPD*1000) * pix.x;
 
+		float Divergence_Locked = Divergence*0.001;
 		float ALC = abs(smoothstep(0,1,Lum(texcoord)));
 			
 		if (ALC <= 0.00005 && FBDMF) //Full Black Depth Map Fix.
 		{
-			Z = 0; 
+			Z = 0;
+			Divergence_Locked = 0;
 		}
 		else
 		{
-			Z = Con; 
+			Z = ZPD;
+			Divergence_Locked = Divergence_Locked;
 		}	
 
 		if(Balance == -4)
@@ -794,17 +802,22 @@ float Conv(float D,float2 texcoord)
 			ZP = NF_Power;
 		}
 		
-		// You "may......" need to readjust the Z-Buffer if your going to use the Convergence equation.
-		float DM =  D  / (1-Z);
-		float Convergence;
+		float Convergence;		
 		
 		if(Convergence_Mode == 0)
 		{
+			MSZ = MS_A; //Locked ZPD easy for new people less settings.
+			Convergence = 1 - Divergence_Locked / D;
+		}
+		else if(Convergence_Mode == 1)
+		{
+			MSZ = MS_B; //Unhooked ZDP for Advance Users.
 			Convergence = 1 - Z / D;
 		}
 		else
-		{
-			Convergence = 1 - Z / DM;
+		{	
+			MSZ = MS_A; //Tied ZDP AKA Original Way, Mix of both 0 & 1.
+			Convergence = 1 - Z / D;
 		}
 		
 		if (Auto_Depth_Range > 0)
@@ -812,7 +825,7 @@ float Conv(float D,float2 texcoord)
 			D = AutoDepthRange(D,texcoord);
 		}
 		
-		Z = lerp(MS * Convergence,MS * D,ZP);
+		Z = lerp(MSZ * Convergence,MS_A * D,ZP);
 			
     return Z;
 }

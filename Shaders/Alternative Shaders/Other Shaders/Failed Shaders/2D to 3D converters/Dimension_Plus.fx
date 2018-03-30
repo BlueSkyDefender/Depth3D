@@ -19,10 +19,13 @@
  //*                                                                            																									*//
  //* 																																												*//
  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Determines The Max Depth amount. The larger the amount harder it will hit on FPS will be.
+
+#define Depth_Max 25
 
 uniform int Divergence <
 	ui_type = "drag";
-	ui_min = 1; ui_max = 25;
+	ui_min = 1; ui_max = Depth_Max;
 	ui_label = "Divergence Slider";
 	ui_tooltip = "Determines the amount of Image Warping and Separation.\n" 
 				 "You can override this value.";
@@ -147,7 +150,7 @@ float3 rgb2hsv(float3 c)
     //return dot(float3(abs(q.z + (q.w - q.y) / (6.0 * d + e)), d / (q.x + e), q.x), float3(0.3, 0.59, 0.11));//Gray-scale conversion.
 }
 
-float3 rgb2yuv(float3 rgb)
+float4 rgb2yuv(float3 rgb)
 {
 	float4 yuv;
 	yuv.x = rgb.r * 0.299 + rgb.g * 0.587 + rgb.b * 0.114;
@@ -208,10 +211,11 @@ float4 FakeDB(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0):
 	float BG = dot(BGPop,Luma_Coefficient);
 	float FG = dot(FGPop,Luma_Coefficient);
 	
-	BG = 1-(saturate(BG)*(1-(rgb2yuv(tex2D(BackBuffer,texcoord).rgb).ggg*rgb2yuv(tex2D(BackBuffer,texcoord).rgb).bbb)));
-	FG = 1-(saturate(FG)*(1-(rgb2yuv(tex2D(BackBuffer,texcoord).rgb).ggg*rgb2yuv(tex2D(BackBuffer,texcoord).rgb).bbb)));
+	float3 BGt = 1-(saturate(BG)*(1-(rgb2yuv(tex2D(BackBuffer,texcoord).rgb).ggg*rgb2yuv(tex2D(BackBuffer,texcoord).rgb).bbb)));
+	float3 FGt = 1-(saturate(FG)*(1-(rgb2yuv(tex2D(BackBuffer,texcoord).rgb).ggg*rgb2yuv(tex2D(BackBuffer,texcoord).rgb).bbb)));
 	
 	float3 Done = 1-tex2D(BackBuffer,texcoord).rgb;
+	
 	float Num;
 	if(Mode == 0)
 	{
@@ -220,7 +224,7 @@ float4 FakeDB(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0):
 	}
 	else if(Mode == 1)
 	{
-	Done = rgb2yuv(Done);
+	Done = rgb2yuv(Done).rgb;
 	Num = 0.250;
 	}
 	else
@@ -228,7 +232,8 @@ float4 FakeDB(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0):
 	Done = rgb2hsv(Done);
 	Num = 0.500;
 	}
-	float RGB = smoothstep(0,Power,1-distance(smoothstep(0,Num,FG*BG),Done));
+	
+	float RGB = smoothstep(0,Power,1-distance(smoothstep(0,Num,FGt*BGt),Done));
 	
 	return float4(RGB,RGB,RGB,1);
 }
@@ -306,9 +311,10 @@ float4 Converter(float2 texcoord : TEXCOORD0)
 	
 		float4 cL, LL; //tex2D(BackBuffer,float2(TCL.x,TCL.y)); //objects that hit screen boundary is replaced with the BackBuffer 		
 		float4 cR, RR; //tex2D(BackBuffer,float2(TCR.x,TCR.y)); //objects that hit screen boundary is replaced with the BackBuffer
-		float RF, RN, LF, LN;		
+		float RF, RN, LF, LN;
+		int x = Depth_Max;		
 		[loop]
-		for (int i = 0; i <= Divergence+1; i++) 
+		for (int i = 0; i <= x+1; i++) 
 		{
 				//R Good
 				//if ( Encode(float2(TCR.x+i*pix.x,TCR.y)).x >= (1-TCR.x-pix.x/2) && Encode(float2(TCR.x+i*pix.x,TCR.y)).x <= (1-TCR.x+pix.x/2) ) //Decode X
@@ -329,227 +335,138 @@ float4 Converter(float2 texcoord : TEXCOORD0)
 		cL = tex2Dlod(BackBuffer, float4(TCL.x-LF,TCL.y,0,0)); //Good
 
 	
-	if (Stereoscopic_Mode == 0)
-		{	
-			if (Eye_Swap)
+			if ( Eye_Swap )
 			{
-				Out = texcoord.x < 0.5 ? cL : cR;
-			}
-		else
-			{
-				Out = texcoord.x < 0.5 ? cR : cL;
-			}
-		}
-		else if (Stereoscopic_Mode == 1)
-		{	
-		if (Eye_Swap)
-			{
-				Out = texcoord.y < 0.5 ? cL : cR;
+				cR = tex2Dlod(BackBuffer, float4(TCR.x+RF,TCR.y,0,0)); //Good
+				cL = tex2Dlod(BackBuffer, float4(TCL.x-LF,TCL.y,0,0)); //Good
 			}
 			else
 			{
-				Out = texcoord.y < 0.5 ? cR : cL;
-			} 
-		}
-		else if (Stereoscopic_Mode == 2)
-		{	
-			float gridL;
-				
-			if(Scaling_Support == 0)
-			{
-			gridL = frac(texcoord.y*(2160.0/2));
-			}			
-			else if(Scaling_Support == 1)
-			{
-			gridL = frac(texcoord.y*(BUFFER_HEIGHT/2)); //Native
+				cL = tex2Dlod(BackBuffer, float4(TCR.x+RF,TCR.y,0,0)); //Good
+				cR = tex2Dlod(BackBuffer, float4(TCL.x-LF,TCL.y,0,0)); //Good
 			}
-			else if(Scaling_Support == 2)
-			{
-			gridL = frac(texcoord.y*(1080.0/2));
-			}
-			else if(Scaling_Support == 3)
-			{
-			gridL = frac(texcoord.y*(1081.0/2));
-			}
-			else if(Scaling_Support == 4)
-			{
-			gridL = frac(texcoord.y*(1050.0/2));
-			}
-			else if(Scaling_Support == 5)
-			{
-			gridL = frac(texcoord.y*(1051.0/2));
-			}
-				
-		if (Eye_Swap)
-			{
-				Out = gridL > 0.5 ? cL : cR;
-			}
-			else
-			{
-				Out = gridL > 0.5 ? cR : cL;
-			} 
 			
-		}
-		else if (Stereoscopic_Mode == 3)
-		{	
-			float gridC;
-				
-			if(Scaling_Support == 0)
-			{
-			gridC = frac(texcoord.x*(3840.0/2));
-			}			
-			else if(Scaling_Support == 1)
-			{
-			gridC = frac(texcoord.x*(BUFFER_WIDTH/2)); //Native
-			}
-			else if(Scaling_Support == 2)
-			{
-			gridC = frac(texcoord.x*(1920.0/2));
-			}
-			else if(Scaling_Support == 3)
-			{
-			gridC = frac(texcoord.x*(1921.0/2));
-			}
-			else if(Scaling_Support == 6)
-			{
-			gridC = frac(texcoord.x*(1280.0/2));
-			}
-			else if(Scaling_Support == 7)
-			{
-			gridC = frac(texcoord.x*(1281.0/2));
-			}
-				
-		if (Eye_Swap)
-			{
-				Out = gridC > 0.5 ? cL : cR;
-			}
-			else
-			{
-				Out = gridC > 0.5 ? cR : cL;
-			} 
-			
-		}
-		else if (Stereoscopic_Mode == 4)
-		{	
-			float gridy;
-			float gridx;
-				
-			if(Scaling_Support == 1)
-			{
-			gridy = floor(texcoord.y*(BUFFER_HEIGHT)); //Native
-			gridx = floor(texcoord.x*(BUFFER_WIDTH)); //Native
-			}
-			else if(Scaling_Support == 2)
-			{
-			gridy = floor(texcoord.y*(1080.0));
-			gridx = floor(texcoord.x*(1920.0));
-			}
-			else if(Scaling_Support == 3)
-			{
-			gridy = floor(texcoord.y*(1081.0));
-			gridx = floor(texcoord.x*(1921.0));
-			}
-			else if(Scaling_Support == 6)
-			{
-			gridy = floor(texcoord.y*(720.0));
-			gridx = floor(texcoord.x*(1280.0));
-			}
-			else if(Scaling_Support == 7)
-			{
-			gridy = floor(texcoord.y*(721.0));
-			gridx = floor(texcoord.x*(1281.0));
-			}
 
-		if (Eye_Swap)
-			{
-				Out = (int(gridy+gridx) & 1) < 0.5 ? cL : cR;
-			}
-			else
-			{
-				Out = (int(gridy+gridx) & 1) < 0.5 ? cR : cL;
-			} 
+	float2 gridxy;
+
+	if(Scaling_Support == 0)
+	{
+		gridxy = floor(float2(texcoord.x*3840.0,texcoord.y*2160.0));
+	}	
+	else if(Scaling_Support == 1)
+	{
+		gridxy = floor(float2(texcoord.x*BUFFER_WIDTH,texcoord.y*BUFFER_HEIGHT));
+	}
+	else if(Scaling_Support == 2)
+	{
+		gridxy = floor(float2(texcoord.x*1920.0,texcoord.y*1080.0));
+	}
+	else if(Scaling_Support == 3)
+	{
+		gridxy = floor(float2(texcoord.x*1921.0,texcoord.y*1081.0));
+	}
+	else if(Scaling_Support == 4)
+	{
+		gridxy = floor(float2(texcoord.x*1680.0,texcoord.y*1050.0));
+	}
+	else if(Scaling_Support == 5)
+	{
+		gridxy = floor(float2(texcoord.x*1681.0,texcoord.y*1051.0));
+	}
+	else if(Scaling_Support == 6)
+	{
+		gridxy = floor(float2(texcoord.x*1280.0,texcoord.y*720.0));
+	}
+	else if(Scaling_Support == 7)
+	{
+		gridxy = floor(float2(texcoord.x*1281.0,texcoord.y*721.0));
+	}
 			
+		if(Stereoscopic_Mode == 0)
+		{	
+			Out = texcoord.x < 0.5 ? cL : cR;
 		}
-	else
+		else if(Stereoscopic_Mode == 1)
+		{	
+			Out = texcoord.y < 0.5 ? cL : cR;
+		}
+		else if(Stereoscopic_Mode == 2)
 		{
-		float3 L,R;
-		if(Eye_Swap)
-			{
-				L = cL.rgb;
-				R = cR.rgb;
-			}
-			else
-			{
-				L = cR.rgb;
-				R = cL.rgb;
-			}
-			
-			float3 HalfL = dot(L,float3(0.299, 0.587, 0.114));
-			float3 HalfR = dot(R,float3(0.299, 0.587, 0.114));
-			float3 LC = lerp(HalfL,L,Anaglyph_Desaturation);  
-			float3 RC = lerp(HalfR,R,Anaglyph_Desaturation); 
-					
-			float4 C = float4(LC,1);
-			float4 CT = float4(RC,1);
-					
-		if (Anaglyph_Colors == 0)
+			Out = int(gridxy.y) & 1 ? cR : cL;	
+		}
+		else if(Stereoscopic_Mode == 3)
+		{
+			Out = int(gridxy.x) & 1 ? cR : cL;		
+		}
+		else if(Stereoscopic_Mode == 4)
+		{
+			Out = int(gridxy.x+gridxy.y) & 1 ? cR : cL;
+		}
+		else if(Stereoscopic_Mode == 5)
+		{													
+				float3 HalfLA = dot(cL.rgb,float3(0.299, 0.587, 0.114));
+				float3 HalfRA = dot(cR.rgb,float3(0.299, 0.587, 0.114));
+				float3 LMA = lerp(HalfLA,cL.rgb,Anaglyph_Desaturation);  
+				float3 RMA = lerp(HalfRA,cR.rgb,Anaglyph_Desaturation); 
+				
+				float4 cA = float4(LMA,1);
+				float4 cB = float4(RMA,1);
+	
+			if (Anaglyph_Colors == 0)
 			{
 				float4 LeftEyecolor = float4(1.0,0.0,0.0,1.0);
 				float4 RightEyecolor = float4(0.0,1.0,1.0,1.0);
-		
-				Out =  (C*LeftEyecolor) + (CT*RightEyecolor);
-
-				}
-				else if (Anaglyph_Colors == 1)
-				{
-						float red = 0.437 * C.r + 0.449 * C.g + 0.164 * C.b
-							- 0.011 * CT.r - 0.032 * CT.g - 0.007 * CT.b;
 				
-					if (red > 1) { red = 1; }   if (red < 0) { red = 0; }
-
-						float green = -0.062 * C.r -0.062 * C.g -0.024 * C.b 
-							+ 0.377 * CT.r + 0.761 * CT.g + 0.009 * CT.b;
-				
-					if (green > 1) { green = 1; }   if (green < 0) { green = 0; }
-
-						float blue = -0.048 * C.r - 0.050 * C.g - 0.017 * C.b 
-							-0.026 * CT.r -0.093 * CT.g + 1.234  * CT.b;
-				
-					if (blue > 1) { blue = 1; }   if (blue < 0) { blue = 0; }
-
-
-					Out = float4(red, green, blue, 0);
-				}
-				else if (Anaglyph_Colors == 2)
-				{
-					float4 LeftEyecolor = float4(0.0,1.0,0.0,1.0);
-					float4 RightEyecolor = float4(1.0,0.0,1.0,1.0);
-					
-					Out =  (C*LeftEyecolor) + (CT*RightEyecolor);
-					
-				}
-				else
-				{
-					
-					
-					float red = -0.062 * C.r -0.158 * C.g -0.039 * C.b
-						+ 0.529 * CT.r + 0.705 * CT.g + 0.024 * CT.b;
-				
-					if (red > 1) { red = 1; }   if (red < 0) { red = 0; }
-
-					float green = 0.284 * C.r + 0.668 * C.g + 0.143 * C.b 
-						- 0.016 * CT.r - 0.015 * CT.g + 0.065 * CT.b;
-				
-					if (green > 1) { green = 1; }   if (green < 0) { green = 0; }
-
-					float blue = -0.015 * C.r -0.027 * C.g + 0.021 * C.b 
-						+ 0.009 * CT.r + 0.075 * CT.g + 0.937  * CT.b;
-				
-					if (blue > 1) { blue = 1; }   if (blue < 0) { blue = 0; }
-						
-					Out = float4(red, green, blue, 0);
-				}
+				Out =  (cA*LeftEyecolor) + (cB*RightEyecolor);
 			}
+			else if (Anaglyph_Colors == 1)
+			{
+			float red = 0.437 * cA.r + 0.449 * cA.g + 0.164 * cA.b
+					- 0.011 * cB.r - 0.032 * cB.g - 0.007 * cB.b;
+			
+			if (red > 1) { red = 1; }   if (red < 0) { red = 0; }
+
+			float green = -0.062 * cA.r -0.062 * cA.g -0.024 * cA.b 
+						+ 0.377 * cB.r + 0.761 * cB.g + 0.009 * cB.b;
+			
+			if (green > 1) { green = 1; }   if (green < 0) { green = 0; }
+
+			float blue = -0.048 * cA.r - 0.050 * cA.g - 0.017 * cA.b 
+						-0.026 * cB.r -0.093 * cB.g + 1.234  * cB.b;
+			
+			if (blue > 1) { blue = 1; }   if (blue < 0) { blue = 0; }
+
+			Out = float4(red, green, blue, 0);
+			}
+			else if (Anaglyph_Colors == 2)
+			{
+				float4 LeftEyecolor = float4(0.0,1.0,0.0,1.0);
+				float4 RightEyecolor = float4(1.0,0.0,1.0,1.0);
+				
+				Out =  (cA*LeftEyecolor) + (cB*RightEyecolor);			
+			}
+			else
+			{
+								
+			float red = -0.062 * cA.r -0.158 * cA.g -0.039 * cA.b
+					+ 0.529 * cB.r + 0.705 * cB.g + 0.024 * cB.b;
+			
+			if (red > 1) { red = 1; }   if (red < 0) { red = 0; }
+
+			float green = 0.284 * cA.r + 0.668 * cA.g + 0.143 * cA.b 
+						- 0.016 * cB.r - 0.015 * cB.g + 0.065 * cB.b;
+			
+			if (green > 1) { green = 1; }   if (green < 0) { green = 0; }
+
+			float blue = -0.015 * cA.r -0.027 * cA.g + 0.021 * cA.b 
+						+ 0.009 * cB.r + 0.075 * cB.g + 0.937  * cB.b;
+			
+			if (blue > 1) { blue = 1; }   if (blue < 0) { blue = 0; }
+					
+			Out = float4(red, green, blue, 0);
+			}
+		}
+	
 			if(Debug_View)
 			Out.rgb = tex2D(SamplerFakeDB,texcoord).xxx;
 
