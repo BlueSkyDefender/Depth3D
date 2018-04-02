@@ -36,15 +36,10 @@
 // key "." is Key Code 110. Ex. Key 110 is the code for Decimal Point.
 #define Cancel_Depth_Key 0
 
-//Use Depth Tool to adjust the lower Preprossor definitions.
 //Horizontal & Vertical Depth Buffer Resize for non conforming BackBuffer.
 //Min value is -0.5 & Max value is 0.5 Default is Zero.
-//Ex. Resident Evil 7 Has this problem. So you want to adjust it too around float2(0.9575,0.9575).
-#define Horizontal_and_Vertical float2(1.0, 1.0)
-
-//Image Position Adjust is used to move the depth buffer around.
-#define Image_Position_Adjust float2(0.0,0.0)
-//End Depth Buffer Adjustemnt.
+//Ex. Resident Evil 7 Has this problem. So you want to adjust it too around -0.0425.
+#define Horizontal_and_Vertical 0.0
 
 uniform int Depth_Map <
 	ui_type = "combo";
@@ -332,12 +327,11 @@ float LumWeapon(in float2 texcoord : TEXCOORD0)
 /////////////////////////////////////////////////////////////////////////////////Depth Map Information/////////////////////////////////////////////////////////////////////////////////
 
 float Depth(in float2 texcoord : TEXCOORD0)
-{	
-		float texX = texcoord.x + Image_Position_Adjust.x * pix.x;
-		float texY = texcoord.y + Image_Position_Adjust.y * pix.y;	
-		float midV = (Horizontal_and_Vertical.y-1)*(BUFFER_HEIGHT*0.5)*pix.y;		
-		float midH = (Horizontal_and_Vertical.x-1)*(BUFFER_WIDTH*0.5)*pix.x;			
-		texcoord = float2((texX*Horizontal_and_Vertical.x)-midH,(texY*Horizontal_and_Vertical.y)-midV);	
+{
+		float2 HV = float2(Horizontal_and_Vertical+1.0,Horizontal_and_Vertical+1.0);	
+		float midV = (HV.y-1)*(BUFFER_HEIGHT*0.5)*pix.y;		
+		float midH = (HV.x-1)*(BUFFER_WIDTH*0.5)*pix.x;			
+		texcoord = float2((texcoord.x*HV.x)-midH,(texcoord.y*HV.y)-midV);	
 		
 		if (Depth_Map_Flip)
 			texcoord.y =  1 - texcoord.y;
@@ -389,11 +383,10 @@ float Depth(in float2 texcoord : TEXCOORD0)
 
 float2 WeaponDepth(in float2 texcoord : TEXCOORD0)
 {
-		float texX = texcoord.x + Image_Position_Adjust.x * pix.x;
-		float texY = texcoord.y + Image_Position_Adjust.y * pix.y;	
-		float midV = (Horizontal_and_Vertical.y-1)*(BUFFER_HEIGHT*0.5)*pix.y;		
-		float midH = (Horizontal_and_Vertical.x-1)*(BUFFER_WIDTH*0.5)*pix.x;			
-		texcoord = float2((texX*Horizontal_and_Vertical.x)-midH,(texY*Horizontal_and_Vertical.y)-midV);	
+		float2 HV = float2(Horizontal_and_Vertical+1.0,Horizontal_and_Vertical+1.0);
+		float midV = (HV.y-1)*(BUFFER_HEIGHT*0.5)*pix.y;		
+		float midH = (HV.x-1)*(BUFFER_WIDTH*0.5)*pix.x;			
+		texcoord = float2((texcoord.x*HV.x)-midH,(texcoord.y*HV.y)-midV);
 			
 			if (Depth_Map_Flip)
 			texcoord.y =  1 - texcoord.y;

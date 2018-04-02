@@ -48,6 +48,20 @@ uniform bool Depth_Map_Flip <
 	ui_tooltip = "Flip the depth map if it is upside down.";
 > = false;
 
+uniform float2 Image_Position_Adjust<
+	ui_type = "drag";
+	ui_min = -4096.0; ui_max = 4096.0;
+	ui_label = "Image Position Adjust";
+	ui_tooltip = "Adjust the Image Postion if it's off by a bit. Default is Zero.";
+> = float2(0.0,0.0);
+	
+uniform float2 Horizontal_Vertical_Resize <
+	ui_type = "drag";
+	ui_min = 0.125; ui_max = 2;
+	ui_label = "Horizontal & Vertical";
+	ui_tooltip = "Adjust Horizontal and Vertical Resize. Default is 1.0.";
+> = float2(1.0,1.0);
+
 /////////////////////////////////////////////D3D Starts Here/////////////////////////////////////////////////////////////////
 
 texture DepthBufferTex : DEPTH;
@@ -63,11 +77,17 @@ sampler DepthBuffer
 float4 zBuffer(in float2 texcoord : TEXCOORD0)    
 {
 		float4 Out;
+		float texX = texcoord.x + Image_Position_Adjust.x * pix.x;
+		float texY = texcoord.y + Image_Position_Adjust.y * pix.y;	
+		float midV = (Horizontal_Vertical_Resize.y-1)*(BUFFER_HEIGHT*0.5)*pix.y;		
+		float midH = (Horizontal_Vertical_Resize.x-1)*(BUFFER_WIDTH*0.5)*pix.x;			
+		texcoord = float2((texX*Horizontal_Vertical_Resize.x)-midH,(texY*Horizontal_Vertical_Resize.y)-midV);	
+		
 		if (Depth_Map_Flip)
 			texcoord.y =  1 - texcoord.y;
 			
 		float zBuffer = tex2D(DepthBuffer, texcoord).r; //Depth Buffer
-		
+
 		//Conversions to linear space.....
 		//Near & Far Adjustment
 		float Near = 0.125/Depth_Map_Adjust; //Division Depth Map Adjust - Near
