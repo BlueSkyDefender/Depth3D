@@ -171,7 +171,7 @@ uniform float4 Weapon_Adjust <
 
 uniform int Stereoscopic_Mode <
 	ui_type = "combo";
-	ui_items = "Side by Side\0Top and Bottom\0Line Interlaced\0Column Interlaced\0Checkerboard 3D\0Anaglyph\0";
+	ui_items = "Side by Side\0Top and Bottom\0Line Interlaced\0Line Interlaced Soft\0Column Interlaced\0Checkerboard 3D\0Anaglyph\0";
 	ui_label = "3D Display Mode";
 	ui_tooltip = "Stereoscopic 3D display output selection.";
 > = 0;
@@ -1019,55 +1019,54 @@ float4 PS_calcLR(float2 texcoord)
 			}
 		}
 		
-		if(Stereoscopic_Mode == 7)
+		if (Stereoscopic_Mode == 3)//Line Interlaced Soft Adjustment
 		{
-			DepthL = 0;
-			DepthR = 0;
+			TCL.y = TCL.y + (0.5 * pix.y);
+			TCR.y = TCR.y - (0.5 * pix.y);
 		}
-		else
-		{	
+			
+		if (View_Mode == 0)
+			N = 3;
+		else if (View_Mode == 1)
+			N = 5;
+		else if (View_Mode == 2)
+			N = 1.025;
+		else if (View_Mode == 3)
+			N = 17;
+				
+		[loop]
+		for ( int i = 0 ; i < N; i++ ) 
+		{
 			if (View_Mode == 0)
-				N = 3;
-			else if (View_Mode == 1)
-				N = 5;
-			else if (View_Mode == 2)
-				N = 1.025;
-			else if (View_Mode == 3)
-				N = 17;
-					
-			[loop]
-			for ( int i = 0 ; i < N; i++ ) 
 			{
-				if (View_Mode == 0)
-				{
-					S = samplesA[i] * MS;
-					DepthL = min(DepthL,tex2Dlod(SamplerDis,float4(TCL.x+S, TCL.y,0,0)).r);
-					DepthR = min(DepthR,tex2Dlod(SamplerDis,float4(TCR.x-S, TCR.y,0,0)).b);
-				}
-				else if (View_Mode == 1)
-				{
-					S = samplesB[i] * MS;
-					DepthL = min(DepthL,tex2Dlod(SamplerDis,float4(TCL.x+S, TCL.y,0,0)).r);
-					DepthR = min(DepthR,tex2Dlod(SamplerDis,float4(TCR.x-S, TCR.y,0,0)).b);
-				}
-				else if (View_Mode == 2)
-				{
-					float AMoffset = 0.97560975;
-					S = lerp(i*(Divergence*AMoffset), (Divergence*AMoffset),0.5);
-					DepthL = min(DepthL,tex2Dlod(SamplerDis,float4(TCL.x+S*pix.x,TCL.y,0,0)).b);
-					DepthR = min(DepthR,tex2Dlod(SamplerDis,float4(TCR.x-S*pix.x,TCR.y,0,0)).r);
-				}
-				else if (View_Mode == 3)
-				{
-					float BMoffset = 0.05882352;
-					S = samplesC[i] * MS * 1.125;
-					L += tex2Dlod(SamplerDis,float4(TCL.x+S, TCL.y,0,0)).r*BMoffset;
-					R += tex2Dlod(SamplerDis,float4(TCR.x-S, TCR.y,0,0)).b*BMoffset;
-					DepthL = saturate(L);
-					DepthR = saturate(R);
-				}
+				S = samplesA[i] * MS;
+				DepthL = min(DepthL,tex2Dlod(SamplerDis,float4(TCL.x+S, TCL.y,0,0)).r);
+				DepthR = min(DepthR,tex2Dlod(SamplerDis,float4(TCR.x-S, TCR.y,0,0)).b);
+			}
+			else if (View_Mode == 1)
+			{
+				S = samplesB[i] * MS;
+				DepthL = min(DepthL,tex2Dlod(SamplerDis,float4(TCL.x+S, TCL.y,0,0)).r);
+				DepthR = min(DepthR,tex2Dlod(SamplerDis,float4(TCR.x-S, TCR.y,0,0)).b);
+			}
+			else if (View_Mode == 2)
+			{
+				float AMoffset = 0.97560975;
+				S = lerp(i*(Divergence*AMoffset), (Divergence*AMoffset),0.5);
+				DepthL = min(DepthL,tex2Dlod(SamplerDis,float4(TCL.x+S*pix.x,TCL.y,0,0)).b);
+				DepthR = min(DepthR,tex2Dlod(SamplerDis,float4(TCR.x-S*pix.x,TCR.y,0,0)).r);
+			}
+			else if (View_Mode == 3)
+			{
+				float BMoffset = 0.05882352;
+				S = samplesC[i] * MS * 1.125;
+				L += tex2Dlod(SamplerDis,float4(TCL.x+S, TCL.y,0,0)).r*BMoffset;
+				R += tex2Dlod(SamplerDis,float4(TCR.x-S, TCR.y,0,0)).b*BMoffset;
+				DepthL = saturate(L);
+				DepthR = saturate(R);
 			}
 		}
+		
 			DepthR = Conv(DepthR,TexCoords);
 			DepthL = Conv(DepthL,TexCoords);
 			
@@ -1153,13 +1152,17 @@ float4 PS_calcLR(float2 texcoord)
 		}
 		else if(Stereoscopic_Mode == 3)
 		{
-			color = int(gridxy.x) & 1 ? cR : cL;		
+			color = int(gridxy.y) & 1 ? cR : cL;	
 		}
 		else if(Stereoscopic_Mode == 4)
 		{
-			color = int(gridxy.x+gridxy.y) & 1 ? cR : cL;
+			color = int(gridxy.x) & 1 ? cR : cL;		
 		}
 		else if(Stereoscopic_Mode == 5)
+		{
+			color = int(gridxy.x+gridxy.y) & 1 ? cR : cL;
+		}
+		else if(Stereoscopic_Mode == 6)
 		{													
 				float3 HalfLA = dot(cL.rgb,float3(0.299, 0.587, 0.114));
 				float3 HalfRA = dot(cR.rgb,float3(0.299, 0.587, 0.114));
