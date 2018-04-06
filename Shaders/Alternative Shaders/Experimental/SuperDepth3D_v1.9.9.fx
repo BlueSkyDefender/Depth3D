@@ -171,7 +171,7 @@ uniform float4 Weapon_Adjust <
 
 uniform int Stereoscopic_Mode <
 	ui_type = "combo";
-	ui_items = "Side by Side\0Top and Bottom\0Line Interlaced\0Line Interlaced Soft\0Column Interlaced\0Checkerboard 3D\0Anaglyph\0";
+	ui_items = "Side by Side\0Top and Bottom\0Line Interlaced\0Line Interlaced Optimized\0Column Interlaced\0Checkerboard 3D\0Anaglyph\0";
 	ui_label = "3D Display Mode";
 	ui_tooltip = "Stereoscopic 3D display output selection.";
 > = 0;
@@ -1021,8 +1021,8 @@ float4 PS_calcLR(float2 texcoord)
 		
 		if (Stereoscopic_Mode == 3)//Line Interlaced Soft Adjustment
 		{
-			TCL.y = TCL.y + (0.5 * pix.y);
-			TCR.y = TCR.y - (0.5 * pix.y);
+			TCL.y = TCL.y + (0.375 * pix.y);
+			TCR.y = TCR.y - (0.375 * pix.y);
 		}
 			
 		if (View_Mode == 0)
