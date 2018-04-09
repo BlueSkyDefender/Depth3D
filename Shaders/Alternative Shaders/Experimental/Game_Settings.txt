@@ -150,7 +150,8 @@ IF IT HAS AN *asterisk* I AM STILL WORKING ON IT. But, you can still use the set
     RB         Requiem: Avenging Angel           DM 2       3.1875                 0.5740               0.010-0.025
                Silent Hill: Homecoming           DM 2       1.50                   0.4080               0.100-0.125       
                Rise Of the Tomb Raider           DM 2       15.0                   0.3754               0.200-0.300
-               
+               Two Worlds EE                     DM 2       7.5                    0.395                0.025-0.075            
+                            
 [Emulator] [RB] [Special Depth Map Game List]                [Depth Map] [Adjustment] [Weapon DM] [Offset] [Depth Flip] [ZDP Range]
 CEMU             Mariokart 8                                     DM *         *                                 Yes      *
 CEMU             Super Mario 3D World                            DM *         *                                 Yes      *

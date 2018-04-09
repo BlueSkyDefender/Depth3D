@@ -30,13 +30,16 @@
 // Enable this to fix the problem when there is a full screen Game Map Poping out of the screen. AKA Full Black Depth Map Fix. I have this off by default. Zero is off, One is On.
 #define FBDMF 0
 
+//Third person auto zero parallax distance is a form of Automatic Near Field Adjustment based on BOTW fix. This now should work on all Third Person Games. 
+#define TPAuto_ZPD 0 //Default 0 is Off. One is On.
+
 // Change the Cancel Depth Key
 // Determines the Cancel Depth Toggle Key useing keycode info
 // You can use http://keycode.info/ to figure out what key is what.
 // key "." is Key Code 110. Ex. Key 110 is the code for Decimal Point.
 #define Cancel_Depth_Key 0
 
-//Use Depth Tool to adjust the lower Preprossor definitions.
+//Use Depth Tool to adjust the lower preprocessor definitions.
 //Horizontal & Vertical Depth Buffer Resize for non conforming BackBuffer.
 //Min value is -0.5 & Max value is 0.5 Default is Zero.
 //Ex. Resident Evil 7 Has this problem. So you want to adjust it too around float2(0.9575,0.9575).
@@ -78,14 +81,14 @@ uniform float Divergence <
 
 uniform int Convergence_Mode <
 	ui_type = "combo";
-	ui_items = "ZPD Locked\0ZPD Unlocked\0ZPD Tied\0";
+	ui_items = "ZPD Tied\0ZPD Locked\0ZPD Unlocked\0";
 	ui_label = "Convergence Mode";
 	ui_tooltip = "Select your Convergence for ZPD calculation.\n" 
 				 "ZPD Locked mode is locked to divergence & dissables ZPD control below.\n" 
 				 "ZPD Unlocked mode lets you control ZPD separately from Divergence.\n" 
 				 "ZPD Tied is controlled by ZPD. Works in tandam with Divergence.\n" 
 				 "For FPS with no custom weapon profile use Tied.\n" 
-				 "Default is ZPD Locked.";
+				 "Default is ZPD Tied.";
 > = 0;
 
 uniform float ZPD <
@@ -115,12 +118,12 @@ uniform int Balance <
 				"Default is Zero.";
 > = 0;
 
-uniform int Disocclusion_Adjust <
+uniform int Disocclusion_Selection <
 	ui_type = "combo";
-	ui_items = "Off\0Radial Mask\0Normal Mask\0Depth Based\0Radial Depth Mask\0Normal Depth Mask\0Radial Mask X2\0Normal Mask X2\0Depth Based X2\0Radial Depth Mask X2\0Normal Depth Mask X2\0";
-	ui_label = "Disocclusion Mask";
-	ui_tooltip = "Automatic occlusion masking options.\n"
-				"Default is Normal Mask.";
+	ui_items = "Off\0Radial Blur\0Normal Blur\0Depth Based\0Radial Depth Blur\0Normal Depth Blur\0";
+	ui_label = "Disocclusion Selection";
+	ui_tooltip = "This is to select the z-Buffer bluring option for low level occlusion masking.\n"
+				"Default is Normal Blur.";
 > = 2;
 
 uniform float Disocclusion_Power_Adjust <
@@ -361,10 +364,12 @@ float Depth(in float2 texcoord : TEXCOORD0)
 		
 		//2. Offset Normal
 		float OffsetNormal = Far * Near / (Far + Z * (Near - Far));
-		
+			  OffsetNormal = lerp(Normal,OffsetNormal,0.875);//mixing
+			  
 		//3. Offset Reverse
 		float OffsetReverse = Far * Near / (Near + ZR * (Far - Near));
-		
+			  OffsetReverse = lerp(Normal,OffsetReverse,0.875);//mixing
+
 		float DM;
 		
 		if (Depth_Map == 0)
@@ -739,10 +744,46 @@ float AutoDepthRange( float d, float2 texcoord )
 
 float Conv(float D,float2 texcoord)
 {
-	float Z, ZP, NF_Power, MSZ, MS_A = Divergence * pix.x, MS_B = (ZPD*1000) * pix.x;
+	float Z, ZP, Con = ZPD, NF_Power, MSZ, MS_A = Divergence * pix.x, MS_B = (ZPD*1000) * pix.x;
 
 		float Divergence_Locked = Divergence*0.001;
-		float ALC = abs(smoothstep(0,1,Lum(texcoord)));
+		float ALC = abs(smoothstep(0,1.0,Lum(texcoord)));
+		
+			if(TPAuto_ZPD == 1)
+			{
+				if (ALC < 0.0078125)
+				{
+					Con = ZPD*2.0;
+				}	
+				if (ALC > 0.0078125)
+				{
+					Con = ZPD*1.750;
+				}
+				if (ALC > 0.015625)
+				{
+					Con = ZPD*1.625;
+				}
+				if (ALC > 0.03125)
+				{
+					Con = ZPD*1.5;
+				}
+				if (ALC > 0.03125)
+				{
+					Con = ZPD*1.375;
+				}
+				if (ALC > 0.0625)
+				{
+					Con = ZPD*1.250;
+				}
+				if (ALC > 0.125)
+				{
+					Con = ZPD;
+				}
+			}
+			else
+			{
+				Con = ZPD;
+			}
 			
 		if (ALC <= 0.00005 && FBDMF) //Full Black Depth Map Fix.
 		{
@@ -751,7 +792,7 @@ float Conv(float D,float2 texcoord)
 		}
 		else
 		{
-			Z = ZPD;
+			Z = Con;
 			Divergence_Locked = Divergence_Locked;
 		}	
 
@@ -811,12 +852,12 @@ float Conv(float D,float2 texcoord)
 		
 		float Convergence;		
 		
-		if(Convergence_Mode == 0)
+		if(Convergence_Mode == 1)
 		{
 			MSZ = MS_A; //Locked ZPD easy for new people less settings.
 			Convergence = 1 - Divergence_Locked / D;
 		}
-		else if(Convergence_Mode == 1)
+		else if(Convergence_Mode == 2)
 		{
 			MSZ = MS_B; //Unhooked ZDP for Advance Users.
 			Convergence = 1 - Z / D;
@@ -850,46 +891,45 @@ DBD = ( DBD - 1.0f ) / ( -187.5f - 1.0f );
 
 	DP *= Disocclusion_Power_Adjust;
 		
-	if ( Disocclusion_Adjust == 1 || Disocclusion_Adjust == 4 || Disocclusion_Adjust == 6 || Disocclusion_Adjust == 9 ) // Radial    
+	if ( Disocclusion_Selection == 1 || Disocclusion_Selection == 4 ) // Radial    
 	{
 		Disocclusion_PowerA = DP*AMoffset;
 	}
-	else if ( Disocclusion_Adjust == 2 || Disocclusion_Adjust == 5 || Disocclusion_Adjust == 7 || Disocclusion_Adjust == 10 ) // Normal  
+	else if ( Disocclusion_Selection == 2 || Disocclusion_Selection == 5 ) // Normal  
 	{
 		Disocclusion_PowerA = DP*BMoffset;
 	}
-	else if ( Disocclusion_Adjust == 3 || Disocclusion_Adjust == 8 ) // Depth    
+	else if ( Disocclusion_Selection == 3 ) // Depth    
 	{
 		Disocclusion_PowerA = DBD*DP;
 	}
 		
 	// Mix Depth Start	
-	if ( Disocclusion_Adjust == 4 || Disocclusion_Adjust == 5 || Disocclusion_Adjust == 9 || Disocclusion_Adjust == 10 ) //Depth    
+	if ( Disocclusion_Selection == 4 || Disocclusion_Selection == 5 ) //Depth    
 	{
 		Disocclusion_PowerB = DBD*DP;
 	}
 	// Mix Depth End
 	
-	if (Disocclusion_Adjust >= 1) 
+	if (Disocclusion_Selection >= 1) 
 	{
-		const float weightA[11] = {0.0,0.010,-0.010,0.020,-0.020,0.030,-0.030,0.040,-0.040,0.050,-0.050}; //By 10
-		const float weightB[17] = {0.0,0.005,-0.005,0.010,-0.010,0.015,-0.015,0.020,-0.020,0.025,-0.025,0.030,-0.030,0.035,-0.035,0.040,-0.040}; //By 5
+		const float weight[11] = {0.0,0.010,-0.010,0.020,-0.020,0.030,-0.030,0.040,-0.040,0.050,-0.050}; //By 10
 		
-		if( Disocclusion_Adjust == 1 || Disocclusion_Adjust == 6)
+		if( Disocclusion_Selection == 1)
 		{
 			dirA = 0.5 - texcoord;
 			dirB = 0.5 - texcoord;
 			A = Disocclusion_PowerA;
 			B = Disocclusion_PowerB;
 		}
-		else if ( Disocclusion_Adjust == 2 || Disocclusion_Adjust == 3 || Disocclusion_Adjust == 7 || Disocclusion_Adjust == 8 || Disocclusion_Adjust == 5 || Disocclusion_Adjust == 10 )
+		else if ( Disocclusion_Selection == 2 || Disocclusion_Selection == 3 || Disocclusion_Selection == 5)
 		{
 			dirA = float2(0.5,0.0);
 			dirB = float2(0.5,0.0);
 			A = Disocclusion_PowerA;
 			B = Disocclusion_PowerB;
 		}
-		else if(Disocclusion_Adjust == 4 || Disocclusion_Adjust == 9)
+		else if(Disocclusion_Selection == 4)
 		{
 			dirA = 0.5 - texcoord;
 			dirB = float2(0.5,0.0);
@@ -897,45 +937,24 @@ DBD = ( DBD - 1.0f ) / ( -187.5f - 1.0f );
 			B = Disocclusion_PowerB;
 		}
 		
-		
-		if ( Disocclusion_Adjust == 1 || Disocclusion_Adjust == 2 || Disocclusion_Adjust == 3 || Disocclusion_Adjust == 4 || Disocclusion_Adjust == 5 )
+		if ( Disocclusion_Selection >= 1 )
 		{			
 				[loop]
 				for (int i = 0; i < 11; i++)
 				{	
-					DM += tex2Dlod(SamplerDM,float4(texcoord + dirA * weightA[i] * A ,0,0)).rb*CMoffset;
-					if(Disocclusion_Adjust == 4 || Disocclusion_Adjust == 5)
+					DM += tex2Dlod(SamplerDM,float4(texcoord + dirA * weight[i] * A ,0,0)).rb*CMoffset;
+					
+					if(Disocclusion_Selection == 4 || Disocclusion_Selection == 5)
 					{
-						DMA += tex2Dlod(SamplerDM,float4(texcoord + dirB * weightA[i] * B ,0,0)).rb*CMoffset;
+						DMA += tex2Dlod(SamplerDM,float4(texcoord + dirB * weight[i] * B ,0,0)).rb*CMoffset;
 					}
 				}
 		}
 		
-		if ( Disocclusion_Adjust == 6 || Disocclusion_Adjust == 7 || Disocclusion_Adjust == 8 || Disocclusion_Adjust == 9 || Disocclusion_Adjust == 10 )
-		{	
-				A *= 1.250;
-				B *= 1.250;
-				[loop]
-				for (int i = 0; i < 17; i++)
-				{	
-					DM += tex2Dlod(SamplerDM,float4(texcoord + dirA * weightB[i] * A ,0,0)).rb*DMoffset;
-					if( Disocclusion_Adjust == 9 || Disocclusion_Adjust == 10 )
-					{
-						DMB += tex2Dlod(SamplerDM,float4(texcoord + dirB * weightB[i] * B ,0,0)).rb*DMoffset;
-					}
-				}
-		}
-		
-		if ( Disocclusion_Adjust == 4 || Disocclusion_Adjust == 5 )
+		if ( Disocclusion_Selection == 4 || Disocclusion_Selection == 5)
 		{	
 			DM = lerp(DM,DMA,0.5);
 		}
-		
-		if ( Disocclusion_Adjust == 9 || Disocclusion_Adjust == 10 )
-		{	
-			DM = lerp(DM,DMB,0.5);
-		}
-	
 	}
 	else
 	{
@@ -1372,7 +1391,7 @@ technique Cross_Cursor
 		}	
 }
 
-technique Depth3D
+technique SuperDepth3D
 	{
 			pass zbuffer
 		{
