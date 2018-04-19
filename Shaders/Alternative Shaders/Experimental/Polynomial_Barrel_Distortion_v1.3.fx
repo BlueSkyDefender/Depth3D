@@ -92,13 +92,6 @@ uniform float2 Zoom_Aspect_Ratio <
 				 "Default is 1.0.";
 > = float2(1.0,1.0);
 
-uniform int Custom_Sidebars <
-	ui_type = "combo";
-	ui_items = "Black Edges\0Stretched Edges\0";
-	ui_label = "Edge Selection";
-	ui_tooltip = "Select how you like the Edge of the screen to look like.";
-> = 1;
-
 uniform bool Aliment_Marker <
 	ui_label = "Aliment Marker";
 	ui_tooltip = "Use to this green Cross Marker for lens aliment.";
@@ -128,7 +121,7 @@ float4x4 HMDProfiles()
 float Zoom = Zoom_Aspect_Ratio.x;
 float Aspect_Ratio = Zoom_Aspect_Ratio.y;
 
-float IPD = Interpupillary_Distance;
+float IPD = Interpupillary_Distance; //Time 4 if need to be as other systems.
 float VRP = Vertical_Repositioning;
 float LC = Lens_Center;
 float LDkO = Lens_Distortion.x;
@@ -170,7 +163,7 @@ float4x4 Done;
 	//Rift Profile WIP
 	if (HMD_Profiles == 3)
 	{
-		IPD = -320.0;				//Interpupillary Distance.
+		IPD = -272.5;				//Interpupillary Distance.
 		VRP = 0;                    //Vertical Repositioning.
 		LC = 0.5; 					//Lens Center. Default is 0.5
 		LDkO = 0.01;				//Lens Distortion k1. Default is 0.01
@@ -274,18 +267,6 @@ sampler SamplerCLBORDER
 		AddressV = BORDER;
 		AddressW = BORDER;
 	};
-
-sampler SamplerCLCLAMP
-	{
-		#if TOGGLE
-		Texture = texCLM;
-		#else
-		Texture = texCLS;
-		#endif
-		AddressU = CLAMP;
-		AddressV = CLAMP;
-		AddressW = CLAMP;
-	};
 	
 sampler SamplerCRBORDER
 	{
@@ -299,24 +280,12 @@ sampler SamplerCRBORDER
 		AddressW = BORDER;
 	};
 	
-sampler SamplerCRCLAMP
-	{
-		#if TOGGLE
-		Texture = texCRM;
-		#else
-		Texture = texCRS;
-		#endif
-		AddressU = CLAMP;
-		AddressV = CLAMP;
-		AddressW = CLAMP;
-	};
-	
 ////////////////////////////////////////////////////Polynomial_Distortion/////////////////////////////////////////////////////
 
 float4 L(in float2 texcoord : TEXCOORD0)
 {
 	float2 gridxy = floor(float2(texcoord.x*BUFFER_WIDTH,texcoord.y*BUFFER_HEIGHT)); //Native
-	return int(gridxy.x+gridxy.y) % 2 ? 0 : tex2D(BackBuffer, float2(texcoord.x,texcoord.y)) ;
+	return int(gridxy.x+gridxy.y) & 1 ? 0 : tex2D(BackBuffer, float2(texcoord.x,texcoord.y)) ;
 }
 
 float4 Bi_L(in float2 texcoord : TEXCOORD0)
@@ -335,7 +304,7 @@ float4 Bi_L(in float2 texcoord : TEXCOORD0)
 float4 R(in float2 texcoord : TEXCOORD0)
 {
 	float2 gridxy = floor(float2(texcoord.x*BUFFER_WIDTH,texcoord.y*BUFFER_HEIGHT)); //Native
-	return int(gridxy.x+gridxy.y) % 2 ? tex2D(BackBuffer, float2(texcoord.x,texcoord.y)) : 0 ;
+	return int(gridxy.x+gridxy.y) & 1 ? tex2D(BackBuffer, float2(texcoord.x,texcoord.y)) : 0 ;
 }
 
 float4 Bi_R(in float2 texcoord : TEXCOORD0)
@@ -411,11 +380,38 @@ float2 DR(float2 p, float k_RGB) //Cubic Lens Distortion Right
 	
 	return p;
 }
-
+	
 float4 vignetteL(in float2 texcoord : TEXCOORD0)
 {  
 float4 base;
+	
+	//Texture Rotation//
+	//Converts the specified value from radians to degrees.
+	float LD = radians(DEGREES().x);
+	float RD = radians(-DEGREES().y);
+	float MD = radians(DEGREES().x);
+	
+	//Left
+	float2 L_PivotPoint = float2(0.5,0.5);
+    float2 L_Rotationtexcoord = texcoord;
+    float L_sin_factor = sin(LD);
+    float L_cos_factor = cos(LD);
+    L_Rotationtexcoord = mul(L_Rotationtexcoord - L_PivotPoint, float2x2(float2(L_cos_factor, L_sin_factor), float2(-L_sin_factor, L_cos_factor)));
+	L_Rotationtexcoord += L_PivotPoint;
 
+	//Texture Position//
+	texcoord.x += IPDS() * pix.x;
+	texcoord.y += VRePos() * pix.y;
+	
+	//Texture Zoom & Aspect Ratio//
+	float X = Z_A().x;
+	float Y = Z_A().y * Z_A().x * 2;
+	float midW = (X - 1)*(BUFFER_WIDTH*0.5)*pix.x;	
+	float midH = (Y - 1)*(BUFFER_HEIGHT*0.5)*pix.y;	
+				
+	texcoord = float2((L_Rotationtexcoord.x*X)-midW,(L_Rotationtexcoord.y*Y)-midH);	
+	//Texture Adjustment End//		
+	
 	//Cross Marker inside left Vignette
 	float2 Horz = float2(1-0.49925,0.49925);
 	float2 Vert = float2(1-0.501,0.501);
@@ -423,14 +419,7 @@ float4 base;
 	float4 B = all( texcoord < float2(Horz.y,Vert.y)) || all( texcoord > float2(Horz.y,Vert.y));
 	float4 H = A-B;
 	
-	if(Custom_Sidebars == 0)
-	{
 		base = tex2D(SamplerCLBORDER, texcoord);
-	}
-	else
-	{
-		base = tex2D(SamplerCLCLAMP, texcoord);
-	}
 		   
 		texcoord = -texcoord * texcoord + texcoord;
 		
@@ -445,8 +434,6 @@ float4 base;
 
 float4 PDL(float2 texcoord)		//Texture = texCL Left
 {		
-		texcoord.x += IPDS() * pix.x;
-		texcoord.y += VRePos() * pix.y;
 		float4 color;
 		float2 uv_red, uv_green, uv_blue;
 		float4 color_red, color_green, color_blue;
@@ -480,10 +467,38 @@ float4 PDL(float2 texcoord)		//Texture = texCL Left
 		
 	}
 
-
 float4 vignetteR(in float2 texcoord : TEXCOORD0)
 {  
 float4 base;
+	
+	//Texture Rotation//
+	
+	//Converts the specified value from radians to degrees.
+	float LD = radians(DEGREES().x);
+	float RD = radians(-DEGREES().y);
+	float MD = radians(DEGREES().x);
+	
+	//Right
+	float2 R_PivotPoint = float2(0.5,0.5);
+    float2 R_Rotationtexcoord = texcoord;
+    float R_sin_factor = sin(RD);
+    float R_cos_factor = cos(RD);
+    R_Rotationtexcoord = mul(R_Rotationtexcoord - R_PivotPoint, float2x2(float2(R_cos_factor, R_sin_factor), float2(-R_sin_factor, R_cos_factor)));
+	R_Rotationtexcoord += R_PivotPoint;
+	
+	//Texture Position//
+	texcoord.x -= IPDS() * pix.x;
+	texcoord.y += VRePos() * pix.y;
+	
+	//Texture Zoom & Aspect Ratio//
+	float X = Z_A().x;
+	float Y = Z_A().y * Z_A().x * 2;
+	float midW = (X - 1)*(BUFFER_WIDTH*0.5)*pix.x;	
+	float midH = (Y - 1)*(BUFFER_HEIGHT*0.5)*pix.y;	
+				
+	texcoord = float2((R_Rotationtexcoord.x*X)-midW,(R_Rotationtexcoord.y*Y)-midH);	
+	//Texture Adjustment End//
+	
 	//Cross Marker inside Right Vignette
 	float2 Horz = float2(1-0.49925,0.49925);
 	float2 Vert = float2(1-0.501,0.501);
@@ -491,14 +506,7 @@ float4 base;
 	float4 B = all( texcoord < float2(Horz.y,Vert.y)) || all( texcoord > float2(Horz.y,Vert.y));
 	float4 H = A-B;
 	
-		if(Custom_Sidebars == 0)
-		{
 		base = tex2D(SamplerCRBORDER, texcoord);
-		}
-		else
-		{
-		base = tex2D(SamplerCRCLAMP, texcoord);
-		}
 		   
 		texcoord = -texcoord * texcoord + texcoord;
 		
@@ -512,8 +520,6 @@ float4 base;
 	
 	float4 PDR(float2 texcoord)		//Texture = texCR Right
 {		
-		texcoord.x -= IPDS() * pix.x;
-		texcoord.y += VRePos() * pix.y;
 		float4 color;
 		float2 uv_red, uv_green, uv_blue;
 		float4 color_red, color_green, color_blue;
@@ -551,57 +557,19 @@ float4 base;
 
 float4 PBDOut(float2 texcoord : TEXCOORD0)
 {	
-	//Texture Rotation//
-	
-	//Converts the specified value from radians to degrees.
-	float LD = radians(DEGREES().x);
-	float RD = radians(-DEGREES().y);
-	float MD = radians(DEGREES().x);
-	
-	//Left
-	float2 L_PivotPoint = float2(0.25,0.5);
-    float2 L_Rotationtexcoord = texcoord;
-    float L_sin_factor = sin(LD);
-    float L_cos_factor = cos(LD);
-    L_Rotationtexcoord = mul(L_Rotationtexcoord - L_PivotPoint, float2x2(float2(L_cos_factor, L_sin_factor), float2(-L_sin_factor, L_cos_factor)));
-	L_Rotationtexcoord += L_PivotPoint;
-	
-	//Right
-	float2 R_PivotPoint = float2(0.75,0.5);
-    float2 R_Rotationtexcoord = texcoord;
-    float R_sin_factor = sin(RD);
-    float R_cos_factor = cos(RD);
-    R_Rotationtexcoord = mul(R_Rotationtexcoord - R_PivotPoint, float2x2(float2(R_cos_factor, R_sin_factor), float2(-R_sin_factor, R_cos_factor)));
-	R_Rotationtexcoord += R_PivotPoint;
-	
-	//Mono
-	float2 PivotPoint = float2(0.5,0.5);
-    float2 Rotationtexcoord = texcoord;
-    float sin_factor = sin(MD);
-    float cos_factor = cos(MD);
-    Rotationtexcoord = mul(Rotationtexcoord - PivotPoint, float2x2(float2(cos_factor, sin_factor), float2(-sin_factor, cos_factor)));
-	Rotationtexcoord += PivotPoint;	
-	//Texture Rotation End//
-
 	float4 Out;
-	
-	float X = Z_A().x;
-	float Y = Z_A().y * Z_A().x * 2;
-	
-	float midW = (X - 1)*(BUFFER_WIDTH*0.5)*pix.x;	
-	float midH = (Y - 1)*(BUFFER_HEIGHT*0.5)*pix.y;	
 	
 	if( Stereoscopic_Mode_Convert == 0 || Stereoscopic_Mode_Convert == 1|| Stereoscopic_Mode_Convert == 5 )
 	{
-		Out = texcoord.x < 0.5 ? PDL(float2(((L_Rotationtexcoord.x*2)*X)-midW ,(L_Rotationtexcoord.y*Y)-midH)) : PDR(float2(((R_Rotationtexcoord.x*2-1)*X)-midW ,(R_Rotationtexcoord.y*Y)-midH));
+		Out = texcoord.x < 0.5 ? PDL(float2(texcoord.x*2,texcoord.y)) : PDR(float2(texcoord.x*2-1 ,texcoord.y));
 	}
 	else if (Stereoscopic_Mode_Convert == 2 || Stereoscopic_Mode_Convert == 3)
 	{
-		Out = texcoord.y < 0.5 ? PDL(float2((L_Rotationtexcoord.x*X)-midW ,((L_Rotationtexcoord.y*2)*Y)-midH)) : PDR(float2((R_Rotationtexcoord.x*X)-midW ,((R_Rotationtexcoord.y*2-1)*Y)-midH));
+		Out = texcoord.y < 0.5 ? PDL(float2(texcoord.x,texcoord.y*2)) : PDR(float2(texcoord.x,texcoord.y*2-1));
 	}
 	else if (Stereoscopic_Mode_Convert == 4 )
 	{
-		Out = PDL(float2((Rotationtexcoord.x*X)-midW ,(Rotationtexcoord.y*Y)-midH));
+		Out = PDL(float2(texcoord.x ,texcoord.y));
 	}
 	
 	return Out;
