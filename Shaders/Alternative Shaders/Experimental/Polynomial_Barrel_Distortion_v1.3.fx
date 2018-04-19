@@ -398,10 +398,6 @@ float4 base;
     float L_cos_factor = cos(LD);
     L_Rotationtexcoord = mul(L_Rotationtexcoord - L_PivotPoint, float2x2(float2(L_cos_factor, L_sin_factor), float2(-L_sin_factor, L_cos_factor)));
 	L_Rotationtexcoord += L_PivotPoint;
-
-	//Texture Position//
-	texcoord.x += IPDS() * pix.x;
-	texcoord.y += VRePos() * pix.y;
 	
 	//Texture Zoom & Aspect Ratio//
 	float X = Z_A().x;
@@ -410,6 +406,10 @@ float4 base;
 	float midH = (Y - 1)*(BUFFER_HEIGHT*0.5)*pix.y;	
 				
 	texcoord = float2((L_Rotationtexcoord.x*X)-midW,(L_Rotationtexcoord.y*Y)-midH);	
+	
+	//Texture Position//
+	texcoord.x += IPDS() * pix.x;
+	texcoord.y += VRePos() * pix.y;
 	//Texture Adjustment End//		
 	
 	//Cross Marker inside left Vignette
@@ -486,9 +486,6 @@ float4 base;
     R_Rotationtexcoord = mul(R_Rotationtexcoord - R_PivotPoint, float2x2(float2(R_cos_factor, R_sin_factor), float2(-R_sin_factor, R_cos_factor)));
 	R_Rotationtexcoord += R_PivotPoint;
 	
-	//Texture Position//
-	texcoord.x -= IPDS() * pix.x;
-	texcoord.y += VRePos() * pix.y;
 	
 	//Texture Zoom & Aspect Ratio//
 	float X = Z_A().x;
@@ -497,6 +494,10 @@ float4 base;
 	float midH = (Y - 1)*(BUFFER_HEIGHT*0.5)*pix.y;	
 				
 	texcoord = float2((R_Rotationtexcoord.x*X)-midW,(R_Rotationtexcoord.y*Y)-midH);	
+
+	//Texture Position//
+	texcoord.x -= IPDS() * pix.x;
+	texcoord.y += VRePos() * pix.y;
 	//Texture Adjustment End//
 	
 	//Cross Marker inside Right Vignette
