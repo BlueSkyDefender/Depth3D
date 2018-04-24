@@ -39,6 +39,10 @@
 // key "." is Key Code 110. Ex. Key 110 is the code for Decimal Point.
 #define Cancel_Depth_Key 0
 
+//Line Interlaced Optimized Adjustment
+//Default is 0.375 and 0.500 is Max softness.
+#define LIO 0.375
+
 //Use Depth Tool to adjust the lower preprocessor definitions.
 //Horizontal & Vertical Depth Buffer Resize for non conforming BackBuffer.
 //Min value is -0.5 & Max value is 0.5 Default is Zero.
@@ -1036,8 +1040,8 @@ float4 PS_calcLR(float2 texcoord)
 		
 		if (Stereoscopic_Mode == 3)//Line Interlaced Soft Adjustment
 		{
-			TCL.y = TCL.y + (0.375 * pix.y);
-			TCR.y = TCR.y - (0.375 * pix.y);
+			TCL.y = TCL.y + (LIO * pix.y);
+			TCR.y = TCR.y - (LIO * pix.y);
 		}
 			
 		if (View_Mode == 0)
