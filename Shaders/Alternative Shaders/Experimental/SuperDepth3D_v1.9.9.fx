@@ -39,10 +39,6 @@
 // key "." is Key Code 110. Ex. Key 110 is the code for Decimal Point.
 #define Cancel_Depth_Key 0
 
-//Line Interlaced Optimized Adjustment
-//Default is 0.375 and 0.500 is Max softness.
-#define LIO 0.375
-
 //Use Depth Tool to adjust the lower preprocessor definitions.
 //Horizontal & Vertical Depth Buffer Resize for non conforming BackBuffer.
 //Min value is -0.5 & Max value is 0.5 Default is Zero.
@@ -178,10 +174,19 @@ uniform float4 Weapon_Adjust <
 
 uniform int Stereoscopic_Mode <
 	ui_type = "combo";
-	ui_items = "Side by Side\0Top and Bottom\0Line Interlaced\0Line Interlaced Optimized\0Column Interlaced\0Checkerboard 3D\0Anaglyph\0";
+	ui_items = "Side by Side\0Top and Bottom\0Line Interlaced\0Column Interlaced\0Checkerboard 3D\0Anaglyph\0";
 	ui_label = "3D Display Mode";
 	ui_tooltip = "Stereoscopic 3D display output selection.";
 > = 0;
+
+uniform float Interlace_Optimization <
+	ui_type = "drag";
+	ui_min = 0.0; ui_max = 0.5;
+	ui_label = "Interlace Optimization";
+	ui_tooltip = "Interlace Optimization Is used to reduce alisesing in a Line or Column interlaced image.\n"
+	             "This has the side effect of softening the image.\n"
+	             "Default is 0.375";
+> = 0.375;
 
 uniform int Scaling_Support <
 	ui_type = "combo";
@@ -1037,11 +1042,16 @@ float4 PS_calcLR(float2 texcoord)
 				TCL.y = texcoord.y;
 			}
 		}
-		
-		if (Stereoscopic_Mode == 3)//Line Interlaced Soft Adjustment
+		//Optimization for line & column interlaced out.
+		if (Stereoscopic_Mode == 2)
 		{
-			TCL.y = TCL.y + (LIO * pix.y);
-			TCR.y = TCR.y - (LIO * pix.y);
+			TCL.y = TCL.y + (Interlace_Optimization * pix.y);
+			TCR.y = TCR.y - (Interlace_Optimization * pix.y);
+		}
+		else if (Stereoscopic_Mode == 3)
+		{
+			TCL.x = TCL.x + (Interlace_Optimization * pix.y);
+			TCR.x = TCR.x - (Interlace_Optimization * pix.y);
 		}
 			
 		if (View_Mode == 0)
@@ -1173,17 +1183,13 @@ float4 PS_calcLR(float2 texcoord)
 		}
 		else if(Stereoscopic_Mode == 3)
 		{
-			color = int(gridxy.y) & 1 ? cR : cL;	
+			color = int(gridxy.x) & 1 ? cR : cL;		
 		}
 		else if(Stereoscopic_Mode == 4)
 		{
-			color = int(gridxy.x) & 1 ? cR : cL;		
-		}
-		else if(Stereoscopic_Mode == 5)
-		{
 			color = int(gridxy.x+gridxy.y) & 1 ? cR : cL;
 		}
-		else if(Stereoscopic_Mode == 6)
+		else if(Stereoscopic_Mode == 5)
 		{													
 				float3 HalfLA = dot(cL.rgb,float3(0.299, 0.587, 0.114));
 				float3 HalfRA = dot(cR.rgb,float3(0.299, 0.587, 0.114));
