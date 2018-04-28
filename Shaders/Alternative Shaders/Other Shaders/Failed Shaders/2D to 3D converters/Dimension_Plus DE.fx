@@ -76,15 +76,6 @@ uniform bool Debug_View <
 	ui_tooltip = "Debug View.";
 > = false;
 
-uniform float Power <
-	ui_type = "drag";
-	ui_min = 0.5; ui_max = 1.0;
-	ui_label = "Shade Power";
-	ui_tooltip = "Adjust the Shade Power Lower is Higher & Higher is Lower.\n"
-				 "This improves AO, Shadows, & Darker Areas in game.\n"
-				 "Number 1.0 is default.";
-> = 1.0;
-
 uniform float Spread <
 	ui_type = "drag";
 	ui_min = 1.0; ui_max = 20.0;
@@ -94,54 +85,19 @@ uniform float Spread <
 				 "Number 7.5 is default.";
 > = 7.5;
 
-uniform int Mode <
-	ui_type = "combo";
-	ui_items = "Mode A\0Mode B\0Mode C\0";
-	ui_label = "Anaglyph Color Mode";
-	ui_tooltip = "Select colors for your 3D anaglyph glasses.";
-> = 0;
-
-uniform float micro_size <
+uniform float X <
 	ui_type = "drag";
-	ui_min = 0.5; ui_max = 1.0;
-	ui_label = "Micro Size";
-	ui_tooltip = "Number 1.0 is default.";
-> = 1.0;
-
-uniform float micro_size <
-	ui_type = "drag";
-	ui_min = 0.5; ui_max = 1.0;
-	ui_label = "Micro Size";
-	ui_tooltip = "Number 1.0 is default.";
-> = 1.0;
-
-uniform float2 Shift_XY <
-	ui_type = "drag";
-	ui_min = 0.5; ui_max = 1.0;
-	ui_label = "Shift XY";
-	ui_tooltip = "Number Zero is default.";
-> = float2(0.0,0.0);
-
-uniform float patch_size <
-	ui_type = "drag";
-	ui_min = 0.0; ui_max = 1920.0;
-	ui_label = "Patch Size";
-	ui_tooltip = "Number Zero is default.";
+	ui_min = -2.0; ui_max = 2.0;
+	ui_label = "X";
+	ui_tooltip = "X";
 > = 0.0;
 
-uniform int patch_width <
+uniform float Y <
 	ui_type = "drag";
-	ui_min = 0.0; ui_max = 100.0;
-	ui_label = "Patch Width";
-	ui_tooltip = "Number 1.0 is default.";
-> = 1.0;
-
-//uniform sampler2DRect texture;
-//uniform float micro_size;
-//uniform float shift_x;
-//uniform float shift_y;
-//uniform float patch_size;
-//uniform int patch_width;
+	ui_min = -2.0; ui_max = 2.0;
+	ui_label = "Y";
+	ui_tooltip = "Y";
+> = 0.0;
 
 /////////////////////////////////////////////////////D3D Starts Here/////////////////////////////////////////////////////////////////
 #define pix float2(BUFFER_RCP_WIDTH, BUFFER_RCP_HEIGHT)
@@ -154,134 +110,122 @@ sampler BackBuffer
 		Texture = BackBufferTex;
 	};
 	
-	
-
 texture texBlur { Width = BUFFER_WIDTH*0.5; Height = BUFFER_HEIGHT*0.5; Format = RGBA8; MipLevels = 8;};
 
 sampler SamplerBlur
 	{
 		Texture = texBlur;
-		MipLODBias = 2.0f;
+		MipLODBias = 1.0f;
 		MinFilter = LINEAR;
 		MagFilter = LINEAR;
 		MipFilter = LINEAR;
 	};	
-
+		
 texture texFakeDB { Width = BUFFER_WIDTH*0.5; Height = BUFFER_HEIGHT*0.5; Format = RGBA8; MipLevels = 8;};
 
 sampler SamplerFakeDB
 	{
 		Texture = texFakeDB;
-		MipLODBias = 2.0f;
+		MipLODBias = 1.0f;
 		MinFilter = LINEAR;
 		MagFilter = LINEAR;
 		MipFilter = LINEAR;
 	};
-	
-	
+
+texture texMed { Width = BUFFER_WIDTH*0.5; Height = BUFFER_HEIGHT*0.5; Format = RGBA8; MipLevels = 8;};
+
+sampler SamplerMed
+	{
+		Texture = texMed;
+		MipLODBias = 1.0f;
+		MinFilter = LINEAR;
+		MagFilter = LINEAR;
+		MipFilter = LINEAR;
+	};
+
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-float3 rgb2hsv(float3 c)
-{
-    float4 K = float4(0.0, -1.0 / 3.0, 2.0 / 3.0, -1.0);
-    float4 p = lerp(float4(c.bg, K.wz), float4(c.gb, K.xy), step(c.b, c.g));
-    float4 q = lerp(float4(p.xyw, c.r), float4(c.r, p.yzx), step(p.x, c.r));
-
-    float d = q.x - min(q.w, q.y);
-    float e = 1.0e-10;
-    return float3(abs(q.z + (q.w - q.y) / (6.0 * d + e)), d / (q.x + e), q.x);
-    //return dot(float3(abs(q.z + (q.w - q.y) / (6.0 * d + e)), d / (q.x + e), q.x), float3(0.3, 0.59, 0.11));//Gray-scale conversion.
-}
-
-float4 rgb2yuv(float3 rgb)
-{
-	float4 yuv;
-	yuv.x = rgb.r * 0.299 + rgb.g * 0.587 + rgb.b * 0.114;
-	yuv.y = rgb.r * -0.169 + rgb.g * -0.331 + rgb.b * 0.5 + 0.5;
-	yuv.z = rgb.r * 0.5 + rgb.g * -0.419 + rgb.b * -0.081 + 0.5;
-	
-	return yuv;
-}
-
 void Blur(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 color : SV_Target0)                                                                          
-{
-   float4 tl = tex2D(BackBuffer,texcoord);
-   float4 tr = tex2D(BackBuffer,texcoord +float2(pix.x, 0.0));
-   float4 bl = tex2D(BackBuffer,texcoord +float2(0.0, pix.y));
-   float4 br = tex2D(BackBuffer,texcoord +float2(pix.x, pix.y));
-   float2 f = frac( texcoord * TextureSize );
-   float4 tA = lerp( tl, tr, f.x );
-   float4 tB = lerp( bl, br, f.x );
-   float4 done = lerp( tA, tB, f.y );//2.0 Gamma correction.
- color = done;
-}
-
-float4 Adjust(in float2 texcoord : TEXCOORD0)
-{
-float2 S = float2(Spread * pix.x,Spread * pix.y);// Hoizontal Sepration needs to be stronger
-float4 H = lerp(tex2D(SamplerBlur, float2(texcoord.x + S.x, texcoord.y)),tex2D(SamplerBlur, float2(texcoord.x - S.x, texcoord.y)),0.5);
-float4 V = lerp(tex2D(SamplerBlur, float2(texcoord.x, texcoord.y + S.y)),tex2D(SamplerBlur, float2(texcoord.x, texcoord.y - S.y)),0.5);
-float4 HVC = lerp(H,V,0.50);
-
-return HVC; 
-}
-
-float3 GS(float3 color)
-{
-    float grayscale = dot(color.rgb, float3(0.3, 0.59, 0.11));
-    color.r = grayscale;
-    color.g = grayscale;
-    color.b = grayscale;
-	return clamp(color,0.003,1.0);//clamping to protect from over Dark.
+{                                                                                                                                                                 
+	float4 Out;
+    
+    float gWeights[2] = { 0.44908, 0.05092 };
+    float gOffsets[2] = { 0.53805, 2.06278 };
+    
+	[loop]
+    for( int i = 0; i < 2; i++ )                                                                                                                             
+    {
+		float2 texCoordOffset = gOffsets[i] * pix * 2;
+        float3 col = tex2D( BackBuffer, texcoord + texCoordOffset ).xyz + tex2D( BackBuffer, texcoord - texCoordOffset ).xyz;
+		Out.rgb += gWeights[i] * col;                                                                                                                               
+    }
+    color = Out;
 }
 
 float4 FakeDB(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0): SV_Target
 {
-//float2 num_micro_images = TextureSize / micro_size;
-float2 p = floor(texcoord.xy / micro_size);
-float2 shift = float2(Shift_XY.x, Shift_XY.y);
-float2 offset = texcoord.xy / micro_size - p;
-int num_patches = 3;
-int num_images = 1;
+float micro_size = 100;
 float best_slope = 0.0;
-float best_match = 10000000000.0;
-
-	for(float patch_size = micro_size / 2.0; patch_size >= 0.0; patch_size -= 0.5) 
+float best_match = 1.0;
+ 
+	for(float x = micro_size ; x >= 0.0; x -= 0.5) 
 	{
-		float2 left_base = p * micro_size + shift - offset * patch_size;
 		float score = 0.0;
-		for (int i = 0; i < num_patches; i++) 
-		{
-			for(int j = 0; j < num_patches; j++) 
-			{
-				float2 pixel_shift = float2(i, j);
-				float4 left = tex2D(texture, left_base + pixel_shift);
-				for(int m = -num_images; m <= num_images; m++) 
-				{
-					for(int n = -num_images; n <= num_images; n++) 
-					{
-						if(m == 0 && n == 0) continue;
-						float2 right_base = left_base + float2(m, n) * (micro_size + patch_size);
-						float4 right = tex2D(texture,right_base + pixel_shift);
-						score += distance(left, right);
-					}
-				}
-			}
-		}
+				float4 left = tex2Dgatheroffset(SamplerBlur,texcoord, float2(0,x),3);
+				float4 right = tex2Dgatheroffset(BackBuffer,texcoord, float2(0,x),3);
+				
+				score += distance(left, right);
+
 		if(score < best_match) 
 		{
-			best_slope = patch_size;
+			best_slope = x;
 			best_match = score;
 		}
 	}
-	float color = best_slope / (micro_size / 2.0);
+	float color = (best_slope / micro_size);
 	return float4(color, color, color, 1.0);
+}
+
+#define s2(a, b)				temp = a; a = min(a, b); b = max(temp, b);
+#define mn3(a, b, c)			s2(a, b); s2(a, c);
+#define mx3(a, b, c)			s2(b, c); s2(a, c);
+
+#define mnmx3(a, b, c)			mx3(a, b, c); s2(a, b);                                   // 3 exchanges
+#define mnmx4(a, b, c, d)		s2(a, b); s2(c, d); s2(a, c); s2(b, d);                   // 4 exchanges
+#define mnmx5(a, b, c, d, e)	s2(a, b); s2(c, d); mn3(a, c, e); mx3(b, d, e);           // 6 exchanges
+#define mnmx6(a, b, c, d, e, f) s2(a, d); s2(b, e); s2(c, f); mn3(a, b, c); mx3(d, e, f); // 7 exchanges
+
+float4 Median(float4 position : SV_Position, float2 texcoord : TEXCOORD0) : SV_Target
+{
+	float2 ScreenCal = float2(5*pix.x,5*pix.y);
+
+	float4 v[9];
+	
+	[unroll]
+	for(int i = -1; i <= 1; ++i) 
+	{
+		for(int j = -1; j <= 1; ++j)
+		{		
+		  float2 offset = float2(float(i), float(j));
+		  v[(i + 1) * 3 + (j + 1)] = tex2D(SamplerFakeDB, texcoord + offset * ScreenCal);
+		}
+	}
+
+	float4 temp;
+
+	mnmx6(v[0], v[1], v[2], v[3], v[4], v[5]);
+	mnmx5(v[1], v[2], v[3], v[4], v[6]);
+	mnmx4(v[2], v[3], v[4], v[7]);
+	mnmx3(v[3], v[4], v[8]);
+;
+	
+	return v[4];
 }
 
 float4  Encode(in float2 texcoord : TEXCOORD0) //zBuffer Color Channel Encode
 {
 
-	float GetDepthR = tex2D(SamplerFakeDB,float2(texcoord.x,texcoord.y)).x;
-	float GetDepthB = tex2D(SamplerFakeDB,float2(texcoord.x,texcoord.y)).x;
+	float GetDepthR = tex2D(SamplerMed,float2(texcoord.x,texcoord.y)).x;
+	float GetDepthB = tex2D(SamplerMed,float2(texcoord.x,texcoord.y)).x;
 
 	// X	
 	float Rx = (1-texcoord.x)+Divergence*pix.x*GetDepthR;
@@ -507,7 +451,7 @@ float4 Converter(float2 texcoord : TEXCOORD0)
 		}
 	
 			if(Debug_View)
-			Out.rgb = tex2D(SamplerFakeDB,texcoord).xxx;
+			Out.rgb = tex2D(SamplerMed,texcoord).xxx;
 
 	return float4(Out.rgb,1);
 	}
@@ -640,6 +584,13 @@ technique Dimension_Plus
 			PixelShader = FakeDB;
 			RenderTarget = texFakeDB;
 		}	
+			pass MedianPass
+		{
+			VertexShader = PostProcessVS;
+			PixelShader = Median;
+			RenderTarget = texMed;
+		}
+		
 			pass CuesUnsharpMask
 		{
 			VertexShader = PostProcessVS;

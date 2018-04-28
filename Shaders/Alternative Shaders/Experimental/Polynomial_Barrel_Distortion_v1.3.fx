@@ -47,8 +47,9 @@ uniform int Vertical_Repositioning <
 	ui_type = "drag";
 	ui_min = -500; ui_max = 500;
 	ui_label = "Vertical Repositioning";
-	ui_tooltip = "Determines the vertical position of the Image.\n" 
-				 "In Monoscopic mode it's y offset calibration.\n"
+	ui_tooltip = "Please note if you have to use this please aline and adjust your headset.\n"
+				 "You can use the aliment markers to do this below.\n"
+				 "Determines the vertical position of the Image.\n"
 				 "Default is 0.";
 > = 0;
 
@@ -280,7 +281,7 @@ sampler SamplerCRBORDER
 		AddressW = BORDER;
 	};
 	
-////////////////////////////////////////////////////Polynomial_Distortion/////////////////////////////////////////////////////
+////////////////////////////////////////////////////Texture_Intercepter/////////////////////////////////////////////////////
 
 float4 L(in float2 texcoord : TEXCOORD0)
 {
@@ -353,34 +354,8 @@ color = SBSL;
 colorT = SBSR;
 }
 
-float2 DL(float2 p, float k_RGB) //Cubic Lens Distortion Left
-{
-	float LC = 1-LCS();
-	float LD_k1 = LD_kN().y; //Lens distortion value, positive values of k1 give barrel distortion, negative give pincushion.
-	float r2 = (p.x-LC) * (p.x-LC) + (p.y-0.5) * (p.y-0.5);       
-	
-	float newRadius = 1 + r2 * LD_k1 * k_RGB + (LD_kN().x * k_RGB * r2 * r2);
+////////////////////////////////////////////////////Texture_Modifier/////////////////////////////////////////////////////
 
-	 p.x = newRadius * (p.x-0.5)+0.5;
-	 p.y = newRadius * (p.y-0.5)+0.5;
-	
-	return p;
-}
-
-float2 DR(float2 p, float k_RGB) //Cubic Lens Distortion Right
-{
-	float LC = LCS();
-	float LD_k1 = LD_kN().y; //Lens distortion value, positive values of k1 give barrel distortion, negative give pincushion.
-	float r2 = (p.x-LC) * (p.x-LC) + (p.y-0.5) * (p.y-0.5);       
-	
-	float newRadius = 1 + r2 * LD_k1 * k_RGB + (LD_kN().x * k_RGB * r2 * r2);
-
-	 p.x = newRadius  * (p.x-0.5)+0.5;
-	 p.y = newRadius  * (p.y-0.5)+0.5;
-	
-	return p;
-}
-	
 float4 vignetteL(in float2 texcoord : TEXCOORD0)
 {  
 float4 base;
@@ -411,61 +386,16 @@ float4 base;
 	texcoord.x += IPDS() * pix.x;
 	texcoord.y += VRePos() * pix.y;
 	//Texture Adjustment End//		
-	
-	//Cross Marker inside left Vignette
-	float2 Horz = float2(1-0.49925,0.49925);
-	float2 Vert = float2(1-0.501,0.501);
-	float4 A = all( texcoord < float2(Horz.x,Vert.x)) || all( texcoord > float2(Horz.x,Vert.x));
-	float4 B = all( texcoord < float2(Horz.y,Vert.y)) || all( texcoord > float2(Horz.y,Vert.y));
-	float4 H = A-B;
-	
-		base = tex2D(SamplerCLBORDER, texcoord);
-		   
-		texcoord = -texcoord * texcoord + texcoord;
 		
-		if( Vignette )
-		base.rgb *= saturate(texcoord.x * texcoord.y * 250);
+	base = tex2D(SamplerCLBORDER, texcoord);
+	   
+	texcoord = -texcoord * texcoord + texcoord;
+	
+	if( Vignette )
+	base.rgb *= saturate(texcoord.x * texcoord.y * 250);
 		
-		if( Aliment_Marker )
-		base = H ? float4(0.0,1.0,0.0,1) : base;
-
 	return base;    
 }
-
-float4 PDL(float2 texcoord)		//Texture = texCL Left
-{		
-		float4 color;
-		float2 uv_red, uv_green, uv_blue;
-		float4 color_red, color_green, color_blue;
-		float Red, Green, Blue;
-		float2 sectorOrigin;
-
-    // Radial distort around center
-		sectorOrigin = (texcoord.xy-0.5,0,0);
-		
-		Red = 1 / P_C().x;
-		Green = 1 / P_C().y;
-		Blue = 1 / P_C().z;
-		
-		uv_red = DL(texcoord.xy-sectorOrigin,Red) + sectorOrigin;
-		uv_green = DL(texcoord.xy-sectorOrigin,Green) + sectorOrigin;
-		uv_blue = DL(texcoord.xy-sectorOrigin,Blue) + sectorOrigin;
-		
-		color_red = vignetteL(uv_red).r;
-		color_green = vignetteL(uv_green).g;
-		color_blue = vignetteL(uv_blue).b;
-
-		if( ((uv_red.x > 0) && (uv_red.x < 1) && (uv_red.y > 0) && (uv_red.y < 1)))
-		{
-			color = float4(color_red.x, color_green.y, color_blue.z, 1.0);
-		}
-		else
-		{
-			color = float4(0,0,0,1);
-		}
-		return color;
-		
-	}
 
 float4 vignetteR(in float2 texcoord : TEXCOORD0)
 {  
@@ -499,67 +429,150 @@ float4 base;
 	texcoord.x -= IPDS() * pix.x;
 	texcoord.y += VRePos() * pix.y;
 	//Texture Adjustment End//
+
+	base = tex2D(SamplerCRBORDER, texcoord);
+	   
+	texcoord = -texcoord * texcoord + texcoord;
 	
-	//Cross Marker inside Right Vignette
+	if( Vignette )
+	base.rgb *= saturate(texcoord.x * texcoord.y * 250);
+
+	return base;    
+}
+
+////////////////////////////////////////////////////Polynomial_Distortion/////////////////////////////////////////////////////
+
+float2 DL(float2 p, float k_RGB) //Cubic Lens Distortion Left
+{
+	float LC = 1-LCS();
+	float LD_k1 = LD_kN().y, LD_k2 = LD_kN().x; //Lens distortion value, positive values of k1 & k 2 give barrel distortion, negative give pincushion.
+	float k3 = k_RGB; //Polynomial
+	
+	float r = sqrt((p.x-LC) * (p.x-LC) + (p.y-0.5) * (p.y-0.5));       
+	float r2 = pow(r, 2.0f);
+					
+	float newRadius = (1.0f + r2 * LD_k1) + (LD_k2 * pow(r, 4.0f)) + (k3 * pow(r, 6.0f));
+	
+	 p.x = newRadius * (p.x-0.5)+0.5;
+	 p.y = newRadius * (p.y-0.5)+0.5;
+	
+	return p;
+}
+
+float4 PDL(float2 texcoord)		//Texture = texCL Left
+{		
+	float4 color;
+	float2 uv_red, uv_green, uv_blue;
+	float4 color_red, color_green, color_blue;
+	float Red, Green, Blue;
+	float2 sectorOrigin;
+
+	// Radial distort around center
+	sectorOrigin = (texcoord.xy-0.5,0,0);
+	
+	Red = 1 / P_C().x;
+	Green = 1 / P_C().y;
+	Blue = 1 / P_C().z;
+	
+	uv_red = DL(texcoord.xy-sectorOrigin,Red) + sectorOrigin;
+	uv_green = DL(texcoord.xy-sectorOrigin,Green) + sectorOrigin;
+	uv_blue = DL(texcoord.xy-sectorOrigin,Blue) + sectorOrigin;
+	
+	color_red = vignetteL(uv_red).r;
+	color_green = vignetteL(uv_green).g;
+	color_blue = vignetteL(uv_blue).b;
+
+	if( ((uv_red.x > 0) && (uv_red.x < 1) && (uv_red.y > 0) && (uv_red.y < 1)))
+	{
+		color = float4(color_red.x, color_green.y, color_blue.z, 1.0);
+	}
+	else
+	{
+		color = float4(0,0,0,1);
+	}
+	
+	//Cross Marker inside left Polynomial
 	float2 Horz = float2(1-0.49925,0.49925);
 	float2 Vert = float2(1-0.501,0.501);
 	float4 A = all( texcoord < float2(Horz.x,Vert.x)) || all( texcoord > float2(Horz.x,Vert.x));
 	float4 B = all( texcoord < float2(Horz.y,Vert.y)) || all( texcoord > float2(Horz.y,Vert.y));
 	float4 H = A-B;
 	
-		base = tex2D(SamplerCRBORDER, texcoord);
-		   
-		texcoord = -texcoord * texcoord + texcoord;
-		
-		if( Vignette )
-		base.rgb *= saturate(texcoord.x * texcoord.y * 250);
-		
-		if( Aliment_Marker )
-		base = H ? float4(0.0,1.0,0.0,1) : base;
-	return base;    
+	if( Aliment_Marker )
+	color = H ? float4(0.0,1.0,0.0,1) : color;
+	
+	return color;	
+}
+
+float2 DR(float2 p, float k_RGB) //Cubic Lens Distortion Right
+{
+	float LC = LCS();
+	float LD_k1 = LD_kN().y, LD_k2 = LD_kN().x; //Lens distortion value, positive values of k1 & k 2 give barrel distortion, negative give pincushion.
+	float k3 = k_RGB; //Polynomial
+	
+	float r = sqrt((p.x-LC) * (p.x-LC) + (p.y-0.5) * (p.y-0.5));       
+	float r2 = pow(r, 2.0f);
+					
+	float newRadius = (1.0f + r2 * LD_k1) + (LD_k2 * pow(r, 4.0f)) + (k3 * pow(r, 6.0f));
+	
+	 p.x = newRadius * (p.x-0.5)+0.5;
+	 p.y = newRadius * (p.y-0.5)+0.5;
+	
+	return p;
 }
 	
 	float4 PDR(float2 texcoord)		//Texture = texCR Right
 {		
-		float4 color;
-		float2 uv_red, uv_green, uv_blue;
-		float4 color_red, color_green, color_blue;
-		float Red, Green, Blue;
-		float2 sectorOrigin;
+	float4 color;
+	float2 uv_red, uv_green, uv_blue;
+	float4 color_red, color_green, color_blue;
+	float Red, Green, Blue;
+	float2 sectorOrigin;
 
-    // Radial distort around center
-		sectorOrigin = (texcoord.xy-0.5,0,0); //sectorOrigin = (texcoord.xy-0.5,0,0);
-		
-		Red = 1 / P_C().x;
-		Green = 1 / P_C().y;
-		Blue = 1 / P_C().z;
-		
-		uv_red = DR(texcoord.xy-sectorOrigin,Red) + sectorOrigin;
-		uv_green = DR(texcoord.xy-sectorOrigin,Green) + sectorOrigin;
-		uv_blue = DR(texcoord.xy-sectorOrigin,Blue) + sectorOrigin;
+	// Radial distort around center
+	sectorOrigin = (texcoord.xy-0.5,0,0); //sectorOrigin = (texcoord.xy-0.5,0,0);
+	
+	Red = 1 / P_C().x;
+	Green = 1 / P_C().y;
+	Blue = 1 / P_C().z;
+	
+	uv_red = DR(texcoord.xy-sectorOrigin,Red) + sectorOrigin;
+	uv_green = DR(texcoord.xy-sectorOrigin,Green) + sectorOrigin;
+	uv_blue = DR(texcoord.xy-sectorOrigin,Blue) + sectorOrigin;
 
-		color_red = vignetteR(uv_red).r;
-		color_green = vignetteR(uv_green).g;
-		color_blue = vignetteR(uv_blue).b;
+	color_red = vignetteR(uv_red).r;
+	color_green = vignetteR(uv_green).g;
+	color_blue = vignetteR(uv_blue).b;
 
-		if( ((uv_red.x > 0) && (uv_red.x < 1) && (uv_red.y > 0) && (uv_red.y < 1)))
-		{
-			color = float4(color_red.x, color_green.y, color_blue.z, 1.0);
-		}
-		else
-		{
-			color = float4(0,0,0,1);
-		}
-		return color;
-		
+	if( ((uv_red.x > 0) && (uv_red.x < 1) && (uv_red.y > 0) && (uv_red.y < 1)))
+	{
+		color = float4(color_red.x, color_green.y, color_blue.z, 1.0);
 	}
+	else
+	{
+		color = float4(0,0,0,1);
+	}
+	
+	//Cross Marker inside Right Polynomial
+	float2 Horz = float2(1-0.49925,0.49925);
+	float2 Vert = float2(1-0.501,0.501);
+	float4 A = all( texcoord < float2(Horz.x,Vert.x)) || all( texcoord > float2(Horz.x,Vert.x));
+	float4 B = all( texcoord < float2(Horz.y,Vert.y)) || all( texcoord > float2(Horz.y,Vert.y));
+	float4 H = A-B;
+	
+	if( Aliment_Marker )
+	color = H ? float4(0.0,1.0,0.0,1) : color;
+	
+	return color;
+		
+}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 float4 PBDOut(float2 texcoord : TEXCOORD0)
 {	
 	float4 Out;
-	
+		
 	if( Stereoscopic_Mode_Convert == 0 || Stereoscopic_Mode_Convert == 1|| Stereoscopic_Mode_Convert == 5 )
 	{
 		Out = texcoord.x < 0.5 ? PDL(float2(texcoord.x*2,texcoord.y)) : PDR(float2(texcoord.x*2-1 ,texcoord.y));

@@ -19,18 +19,11 @@
  //*                                                                            																									*//
  //*                                                                                                            																	*//
  //*                                                                                                            																	*//
- //* 											Bilateral Filter Made by mrharicot ported over to Reshade by BSD																	*//
- //*											GitHub Link for sorce info github.com/SableRaf/Filters4Processin																	*//
- //* 											Shadertoy Link https://www.shadertoy.com/view/4dfGDH  Thank You.																	*//	 
+ //* 											Median Filter Made by AndriyRutkovskyy ported over to Reshade by BSD																*//
+ //* 											Shadertoy Link https://www.shadertoy.com/view/XstGW4  Thank You.																	*//	 
  //*																																												*//
  //* 																																												*//
  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Determines the power of the Bilateral Filter and sharpening quality. Lower the setting the more performance you would get along with lower quality.
-// 0 = Low
-// 1 = Medium 
-// 2 = High 
-// Default is Low.
-#define Quality 0
 
 uniform int Depth_Map <
 	ui_type = "combo";
@@ -65,7 +58,7 @@ uniform int Output_Selection <
 
 uniform float Sharpen_Power <
 	ui_type = "drag";
-	ui_min = 0.0; ui_max = 5;
+	ui_min = 0.0; ui_max = 1.250;
 	ui_label = "Sharpen Power";
 	ui_tooltip = "Increases or Decreases the Sharpen power.";
 > = 0.5;
@@ -85,6 +78,7 @@ uniform bool View_Adjustment <
 
 /////////////////////////////////////////////////////D3D Starts Here/////////////////////////////////////////////////////////////////
 #define pix float2(BUFFER_RCP_WIDTH, BUFFER_RCP_HEIGHT)
+#define TextureSize float2(BUFFER_WIDTH, BUFFER_HEIGHT)
 
 texture DepthBufferTex : DEPTH;
 
@@ -100,11 +94,11 @@ sampler BackBuffer
 		Texture = BackBufferTex;
 	};
 		
-texture texBF { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA8;};
+texture texMF { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA8;};
 
-sampler SamplerBF
+sampler SamplerMF
 	{
-		Texture = texBF;
+		Texture = texMF;
 	};
 	
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -140,94 +134,47 @@ float4 Depth(in float2 texcoord : TEXCOORD0)
 	return 1-saturate(float4(zBuffer.rrr,1));	
 }
 
+#define s2(a, b)				temp = a; a = min(a, b); b = max(temp, b);
+#define mn3(a, b, c)			s2(a, b); s2(a, c);
+#define mx3(a, b, c)			s2(b, c); s2(a, c);
 
-#define SIGMA 10
-#define BSIGMA 0.1125
+#define mnmx3(a, b, c)			mx3(a, b, c); s2(a, b);                                   // 3 exchanges
+#define mnmx4(a, b, c, d)		s2(a, b); s2(c, d); s2(a, c); s2(b, d);                   // 4 exchanges
+#define mnmx5(a, b, c, d, e)	s2(a, b); s2(c, d); mn3(a, c, e); mx3(b, d, e);           // 6 exchanges
+#define mnmx6(a, b, c, d, e, f) s2(a, d); s2(b, e); s2(c, f); mn3(a, b, c); mx3(d, e, f); // 7 exchanges	
 
-#if Quality == 0
-	#define MSIZE 3
-#endif
-#if Quality == 1
-	#define MSIZE 6
-#endif
-#if Quality == 2
-	#define MSIZE 8
-#endif
-
-
-float normpdf(in float x, in float sigma)
-{
-	return 0.39894*exp(-0.5*x*x/(sigma*sigma))/sigma;
-}
-
-float normpdf3(in float3 v, in float sigma)
-{
-	return 0.39894*exp(-0.5*dot(v,v)/(sigma*sigma))/sigma;
-}
-
-void Filters(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 color : SV_Target0)                                                                          
-{
-	//Bilateral Filter//                                                                                                                                                                   
-	float3 c = tex2D(BackBuffer,texcoord.xy).rgb;
+void Filter(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 color : SV_Target0)                                                                          
+{                                                                                                                                                               
 	float sampleOffset = Depth(texcoord).r/0.425; //Depth Buffer Offset adjust
-	float2 ScreenCal = float2(2.5*pix.x,2.5*pix.y);
+    float2 ScreenCal = float2(pix.x,pix.y);
 
-	float2 FinCal = ScreenCal;
+	float4 v[9];
 	
-	const int kSize = (MSIZE-1)/2;	
-
-//Full Kernal Size would be 15 as shown here (0.031225216, 0.033322271, 0.035206333, 0.036826804, 0.038138565, 0.039104044, 0.039695028, 0.039894000, 0.039695028, 0.039104044, 0.038138565, 0.036826804, 0.035206333, 0.033322271, 0.031225216)
-#if Quality == 0
-	float weight[MSIZE] = {0.031225216, 0.033322271, 0.035206333};
-#endif
-#if Quality == 1
-	float weight[MSIZE] = {0.031225216, 0.033322271, 0.035206333, 0.036826804, 0.038138565, 0.039104044};  
-#endif	
-#if Quality == 2
-	float weight[MSIZE] = {0.031225216, 0.033322271, 0.035206333, 0.036826804, 0.038138565, 0.039104044, 0.039695028, 0.039894000};  
-#endif
-
-		float3 final_colour;
-		float Z;
-		[unroll]
-		for (int j = 0; j <= kSize; ++j)
-		{
-			weight[kSize+j] = normpdf(float(j), SIGMA);
-			weight[kSize-j] = normpdf(float(j), SIGMA);
-		}
-		
-		float3 cc;
-		float factor;
-		float bZ = 1.0/normpdf(0.0, BSIGMA);
-		
-		[loop]
-		for (int i=-kSize; i <= kSize; ++i)
-		{
-			for (int j=-kSize; j <= kSize; ++j)
+	[unroll]
+	for(int i = -1; i <= 1; ++i) 
+	{
+		for(int j = -1; j <= 1; ++j)
+		{		
+			float2 offset = float2(float(i), float(j));
+			if(No_Depth_Map)
 			{
-			
-				float2 XY;
-				
-				if(No_Depth_Map)
-				{
-					XY = float2(float(i),float(j))*FinCal;
-					cc = tex2D(BackBuffer,texcoord.xy+XY).rgb;
-				}
-				else
-				{
-					XY = float2(float(i),float(j))*FinCal;
-					cc = tex2D(BackBuffer,texcoord.xy+XY*sampleOffset).rgb;
-				}
-				factor = normpdf3(cc-c, BSIGMA)*bZ*weight[kSize+j]*weight[kSize+i];
-				Z += factor;
-				final_colour += factor*cc;
-
+				v[(i + 1) * 3 + (j + 1)] = tex2D(BackBuffer, texcoord + offset * ScreenCal);
+			}
+			else
+			{
+				v[(i + 1) * 3 + (j + 1)] = tex2D(BackBuffer, texcoord + offset * ScreenCal * sampleOffset);
 			}
 		}
-		
-		float4 Bilateral_Filter = float4(final_colour/Z, 1.0);
-		
-	color = Bilateral_Filter;
+	}
+
+	float4 temp;
+
+	mnmx6(v[0], v[1], v[2], v[3], v[4], v[5]);
+	mnmx5(v[1], v[2], v[3], v[4], v[6]);
+	mnmx4(v[2], v[3], v[4], v[7]);
+	mnmx3(v[3], v[4], v[8]);
+	
+	color = v[4];
 }
 
 float4 SharderOut(float2 texcoord : TEXCOORD0)
@@ -248,7 +195,7 @@ float4 SharderOut(float2 texcoord : TEXCOORD0)
 		Luma = float3(0.2627, 0.6780, 0.0593); //(HDR video) https://en.wikipedia.org/wiki/Rec._2100
 	}
 	
-	RGB = tex2D(BackBuffer,float2(texcoord.x,texcoord.y)).rgb - tex2D(SamplerBF,float2(texcoord.x,texcoord.y)).rgb;
+	RGB = tex2D(BackBuffer,float2(texcoord.x,texcoord.y)).rgb - tex2D(SamplerMF,float2(texcoord.x,texcoord.y)).rgb;
 	
 	float3 Color_Sharp_Control = RGB * Sharpen_Power; 
 	float Grayscale_Sharp_Control = dot(RGB, saturate(Luma * Sharpen_Power));
@@ -265,15 +212,17 @@ float4 SharderOut(float2 texcoord : TEXCOORD0)
 	{
 		RGBA = saturate(Grayscale_Sharp_Control) + BB;
 	}
-
+	
+		float Mask = smoothstep(0,1,dot(RGB,Luma * Sharpen_Power));
+	
 	if (View_Adjustment == 0)
 	{
-		Out = RGBA;
+		Out = lerp(RGBA,tex2D(BackBuffer, texcoord),Mask);
 	}
 	else
 	{
-		RGBT = tex2D(BackBuffer,float2(texcoord.x*2,texcoord.y*2)).rgb - tex2D(SamplerBF,float2(texcoord.x*2,texcoord.y*2)).rgb;
-		RGBB = tex2D(BackBuffer,float2(texcoord.x*2,texcoord.y*2-1)).rgb - tex2D(SamplerBF,float2(texcoord.x*2,texcoord.y*2-1)).rgb;
+		RGBT = tex2D(BackBuffer,float2(texcoord.x*2,texcoord.y*2)).rgb - tex2D(SamplerMF,float2(texcoord.x*2,texcoord.y*2)).rgb;
+		RGBB = tex2D(BackBuffer,float2(texcoord.x*2,texcoord.y*2-1)).rgb - tex2D(SamplerMF,float2(texcoord.x*2,texcoord.y*2-1)).rgb;
 		
 		float3 CSCT = (RGBT * 5) * Sharpen_Power; 
 		float GSCT = dot(RGBT, saturate((Luma * 5 ) * Sharpen_Power));
@@ -298,7 +247,7 @@ float4 SharderOut(float2 texcoord : TEXCOORD0)
 			}
 			
 		float4 VA_Top = texcoord.x < 0.5 ? float4(RGB,1) : 1 - Depth(float2(texcoord.x*2-1,texcoord.y*2));
-		float4 VA_Bottom = texcoord.x < 0.5 ? RGBA : tex2D(SamplerBF,float2(texcoord.x*2-1,texcoord.y*2-1));
+		float4 VA_Bottom = texcoord.x < 0.5 ? RGBA : tex2D(SamplerMF,float2(texcoord.x*2-1,texcoord.y*2-1));
 		
 	Out = texcoord.y < 0.5 ? VA_Top : VA_Bottom;
 	
@@ -422,13 +371,13 @@ void PostProcessVS(in uint id : SV_VertexID, out float4 position : SV_Position, 
 
 //*Rendering passes*//
 
-technique Smart_Sharp
+technique MSharp
 {			
 			pass FilterOut
 		{
 			VertexShader = PostProcessVS;
-			PixelShader = Filters;
-			RenderTarget = texBF;
+			PixelShader = Filter;
+			RenderTarget = texMF;
 		}
 			pass UnsharpMask
 		{
