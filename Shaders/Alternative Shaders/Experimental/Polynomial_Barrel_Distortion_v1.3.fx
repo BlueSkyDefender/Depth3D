@@ -29,7 +29,7 @@
 
 uniform int Interpupillary_Distance <
 	ui_type = "drag";
-	ui_min = -400; ui_max = 400;
+	ui_min = 0; ui_max = 100;
 	ui_label = "Interpupillary Distance";
 	ui_tooltip = "Determines the distance between your eyes.\n" 
 				 "In Monoscopic mode it's x offset calibration.\n"
@@ -122,7 +122,7 @@ float4x4 HMDProfiles()
 float Zoom = Zoom_Aspect_Ratio.x;
 float Aspect_Ratio = Zoom_Aspect_Ratio.y;
 
-float IPD = Interpupillary_Distance; //Time 4 if need to be as other systems.
+float IPD = Interpupillary_Distance;
 float VRP = Vertical_Repositioning;
 float LC = Lens_Center;
 float LDkO = Lens_Distortion.x;
@@ -382,8 +382,8 @@ float4 base;
 				
 	texcoord = float2((L_Rotationtexcoord.x*X)-midW,(L_Rotationtexcoord.y*Y)-midH);	
 	
-	//Texture Position//
-	texcoord.x += IPDS() * pix.x;
+	//Texture Position// https://developers.google.com/vr/jump/rendering-ods-content.pdf Page 10
+	texcoord.x -= (IPDS() * 0.5) * pix.x;
 	texcoord.y += VRePos() * pix.y;
 	//Texture Adjustment End//		
 		
@@ -425,8 +425,8 @@ float4 base;
 				
 	texcoord = float2((R_Rotationtexcoord.x*X)-midW,(R_Rotationtexcoord.y*Y)-midH);	
 
-	//Texture Position//
-	texcoord.x -= IPDS() * pix.x;
+	//Texture Position// https://developers.google.com/vr/jump/rendering-ods-content.pdf Page 10
+	texcoord.x += (IPDS() * 0.5) * pix.x;
 	texcoord.y += VRePos() * pix.y;
 	//Texture Adjustment End//
 

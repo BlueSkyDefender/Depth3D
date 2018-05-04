@@ -21,7 +21,7 @@ ________________________________________________________________________________
 
 IF IT HAS AN *asterisk* I AM STILL WORKING ON IT. But, you can still use the settings.
                                                                       [- - - - - - - -=: Recommended Settings :=- - - - - - - -]
-[Read Below] [Game List]                                  [Depth Map] [Adjustment] [Weapon DM] [Depth Flip] [ZDP Range]
+[Read Below] [Game List]                                  [Depth Map] [Adjustment] [Weapon DM] [Depth Flip] [ZDP Tied Range]
     RB        .Hack//G.U.                                     DM 1         25                                0.050-0.125 
              *ABZU                                            DM 1         50                                0.050                    
               Alien Isolation                                 DM 0         25                                0.0375-0.075
@@ -105,6 +105,7 @@ IF IT HAS AN *asterisk* I AM STILL WORKING ON IT. But, you can still use the set
               Quantum Break                                   DM 0         9.0                               0.0250-0.275
     RB        Rage64                                          DM 0         20.00       WDM 14                0.025-0.100   
     RB       ?Redout                                          DM ?         ?                         ?       ?
+              Remembrance                                     DM 1         7.5                       Yes     0.050-0.100
     RB        Resident Evil 7                                 DM 1         22.5                              0.125-0.275                                        
     RB        Return To Castle Wolfenstine                    DM 0         10.0        WDM 18                0.075-0.250                     
               Rez Infinite                                    DM 1         20.0                              0.075-0.150
