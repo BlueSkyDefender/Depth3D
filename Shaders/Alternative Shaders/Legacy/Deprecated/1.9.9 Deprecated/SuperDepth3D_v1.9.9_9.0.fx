@@ -49,10 +49,6 @@
 #define Image_Position_Adjust float2(0.0,0.0)
 //End Depth Buffer Adjustemnt.
 
-//3D AO Toggle enable this if you want better 3D seperation between objects. 
-//Performance loss when enabled.
-#define AO_TOGGLE 0 //Default 0 is Off. One is On.
-
 uniform int Depth_Map <
 	ui_type = "combo";
 	ui_items = " 0 Normal\0 1 Normal Reversed\0 2 Offset Normal\0 3 Offset Reversed\0";
@@ -240,22 +236,6 @@ uniform int Custom_Sidebars <
 	ui_label = "Edge Selection";
 	ui_tooltip = "Edges selection for your screen output.";
 > = 1;
-#if AO_TOGGLE
-uniform bool AO <
-	ui_label = "3D AO Mode";
-	ui_tooltip = "3D ambient occlusion mode switch.\n"
-				 "Performance loss when enabled.\n"
-				 "Default is On.";
-> = 1;
-
-uniform float AO_Adjust <
-	ui_type = "drag";
-	ui_min = 0.0; ui_max = 1.0;
-	ui_label = "3D AO Adjust";
-	ui_tooltip = "Adjust the spread of the 3D AO.\n" 
-				 "Default is 1.0.";
-> = 1.0;
-#endif
 
 uniform bool Cancel_Depth < source = "key"; keycode = Cancel_Depth_Key; toggle = true; >;
 /////////////////////////////////////////////D3D Starts Here/////////////////////////////////////////////////////////////////
@@ -306,26 +286,13 @@ sampler SamplerDM
 		Texture = texDM;
 	};
 	
-texture texDis  { Width = BUFFER_WIDTH/Depth_Map_Division; Height = BUFFER_HEIGHT/Depth_Map_Division; Format = RGBA8;}; 
+texture texDis  { Width = BUFFER_WIDTH/Depth_Map_Division; Height = BUFFER_HEIGHT/Depth_Map_Division; Format = RGBA32F;}; 
 
 sampler SamplerDis
 	{
 		Texture = texDis;
 	};
 	
-#if AO_TOGGLE	
-texture texAO  { Width = BUFFER_WIDTH/2; Height = BUFFER_HEIGHT/2; Format = RGBA8; MipLevels = 1;}; 
-
-sampler SamplerAO
-	{
-		Texture = texAO;
-		MipLODBias = 1.0f;
-		MinFilter = LINEAR;
-		MagFilter = LINEAR;
-		MipFilter = LINEAR;
-	};
-#endif
-		
 uniform float2 Mousecoords < source = "mousepoint"; > ;	
 ////////////////////////////////////////////////////////////////////////////////////Cross Cursor////////////////////////////////////////////////////////////////////////////////////	
 float4 MouseCursor(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Target
@@ -785,111 +752,6 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 	Color = float4(R,G,B,A);
 }
 
-#if AO_TOGGLE
-//AO START//
-float AO_Depth(float2 coords)
-{
-	float DM = tex2Dlod(SamplerDM,float4(coords.xy,0,0)).r;
-	return ( DM - 0 ) / ( AO_Adjust - 0);
-}
-
-float3 GetPosition(float2 coords)
-{
-	float3 DM = -AO_Depth(coords).xxx;
-	return float3(coords.xy*2.0-1.0,1.0)*DM;
-}
-
-float2 GetRandom(float2 co)
-{
-	float random = frac(sin(dot(co, float2(12.9898, 78.233))) * 43758.5453 * 1);
-	return float2(random,random);
-}
-
-float3 normal_from_depth(float2 texcoords) 
-{
-	float depth;
-	const float2 offset1 = float2(10,pix.y);
-	const float2 offset2 = float2(pix.x,10);
-	  
-	float depth1 = AO_Depth(texcoords + offset1).x;
-	float depth2 = AO_Depth(texcoords + offset2).x;
-	  
-	float3 p1 = float3(offset1, depth1 - depth);
-	float3 p2 = float3(offset2, depth2 - depth);
-	  
-	float3 normal = cross(p1, p2);
-	normal.z = -normal.z;
-	  
-	return normalize(normal);
-}
-
-//Ambient Occlusion form factor
-float aoFF(in float3 ddiff,in float3 cnorm, in float c1, in float c2)
-{
-	float3 vv = normalize(ddiff);
-	float rd = length(ddiff);
-	return (clamp(dot(normal_from_depth(float2(c1,c2)),-vv),-1,1.0)) * (1.0 - 1.0/sqrt(-0.001/(rd*rd) + 1000));
-}
-
-float4 GetAO( float2 texcoord )
-{ 
-    //current normal , position and random static texture.
-    float3 normal = normal_from_depth(texcoord);
-    float3 position = GetPosition(texcoord);
-	float2 random = GetRandom(texcoord).xy;
-    
-    //initialize variables:
-    float F = 0.750;
-	float iter = 2.5*pix.x;
-    float aout, num = 8;
-    float incx = F*pix.x;
-    float incy = F*pix.y;
-    float width = incx;
-    float height = incy;
-    
-    //Depth Map
-    float depthM = AO_Depth(texcoord).x;
-    	
-	//2 iterations
-	[loop]
-    for(int i = 0; i<2; ++i) 
-    {
-       float npw = (width+iter*random.x)/depthM;
-       float nph = (height+iter*random.y)/depthM;
-       
-		if(AO == 1)
-		{
-			float3 ddiff = GetPosition(texcoord.xy+float2(npw,nph))-position;
-			float3 ddiff2 = GetPosition(texcoord.xy+float2(npw,-nph))-position;
-			float3 ddiff3 = GetPosition(texcoord.xy+float2(-npw,nph))-position;
-			float3 ddiff4 = GetPosition(texcoord.xy+float2(-npw,-nph))-position;
-
-			aout += aoFF(ddiff,normal,npw,nph);
-			aout += aoFF(ddiff2,normal,npw,-nph);
-			aout += aoFF(ddiff3,normal,-npw,nph);
-			aout += aoFF(ddiff4,normal,-npw,-nph);
-		}
-		
-		//increase sampling area
-		   width += incx;  
-		   height += incy;	    
-    } 
-    aout/=num;
-
-	//Luminance adjust used for overbright correction.
-	float4 Done = min(1.0,aout);
-	float OBC =  dot(Done.rgb,float3(0.2627, 0.6780, 0.0593)* 2);
-	return smoothstep(0,1,float4(OBC,OBC,OBC,1));
-}
-
-void AO_in(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 color : SV_Target0 )
-{
-	color = GetAO(texcoord);
-}
-
-//AO END//
-#endif
-
 float AutoDepthRange( float d, float2 texcoord )
 {
 	float LumAdjust = smoothstep(-0.0175,Auto_Depth_Range,Lum(texcoord));
@@ -1037,21 +899,6 @@ void  Disocclusion(in float4 position : SV_Position, in float2 texcoord : TEXCOO
 float X, Y, A, B, DP =  Divergence, Disocclusion_PowerA, Disocclusion_PowerB , DBD = tex2Dlod(SamplerDM,float4(texcoord,0,0)).r , AMoffset = 0.008, BMoffset = 0.00285714, CMoffset = 0.09090909;
 float2 DM, DMA, DMB, dirA, dirB;
 
-#if AO_TOGGLE
-float blursize = 2.0*pix.x,sum;
-if(AO == 1)
-	{
-		sum += tex2Dlod(SamplerAO, float4(texcoord.x - 4.0*blursize, texcoord.y,0,0)).x * 0.05;
-		sum += tex2Dlod(SamplerAO, float4(texcoord.x, texcoord.y - 3.0*blursize,0,0)).x * 0.09;
-		sum += tex2Dlod(SamplerAO, float4(texcoord.x - 2.0*blursize, texcoord.y,0,0)).x * 0.12;
-		sum += tex2Dlod(SamplerAO, float4(texcoord.x, texcoord.y - blursize,0,0)).x * 0.15;
-		sum += tex2Dlod(SamplerAO, float4(texcoord.x + blursize, texcoord.y,0,0)).x * 0.15;
-		sum += tex2Dlod(SamplerAO, float4(texcoord.x, texcoord.y + 2.0*blursize,0,0)).x * 0.12;
-		sum += tex2Dlod(SamplerAO, float4(texcoord.x + 3.0*blursize, texcoord.y,0,0)).x * 0.09;
-		sum += tex2Dlod(SamplerAO, float4(texcoord.x, texcoord.y + 4.0*blursize,0,0)).x * 0.05;
-	}
-#endif
-
 //DBD Adjustment Start
 DBD = (DBD - 0.025)/(1 - 0.025); 
 DBD = DBD*DBD*(3 - 2*DBD);
@@ -1131,22 +978,9 @@ DBD = ( DBD - 1.0f ) / ( -187.5f - 1.0f );
 	}
 
 	if (!Cancel_Depth)
-	{	
-		#if AO_TOGGLE
-		if(AO == 1)
-		{
-			X =lerp(DM.x,sum,0.05);
-			Y =lerp(DM.y,sum,0.05);
-		}
-		else
-		{
-			X = DM.x;
-			Y = DM.y;
-		}
-		#else
-			X = DM.x;
-			Y = DM.y;
-		#endif	
+	{
+		X = DM.x;
+		Y = DM.y;
 	}
 	else
 	{
@@ -1584,14 +1418,6 @@ technique SuperDepth3D
 			PixelShader = DepthMap;
 			RenderTarget = texDM;
 		}
-		#if AO_TOGGLE
-			pass AmbientOcclusion
-		{
-			VertexShader = PostProcessVS;
-			PixelShader = AO_in;
-			RenderTarget = texAO;
-		}
-		#endif
 			pass Disocclusion
 		{
 			VertexShader = PostProcessVS;
