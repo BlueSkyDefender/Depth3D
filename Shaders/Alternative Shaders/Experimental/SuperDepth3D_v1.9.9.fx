@@ -11,7 +11,6 @@
  //* I would also love to hear about a project you are using it with.																												*//
  //* https://creativecommons.org/licenses/by/3.0/us/																																*//
  //*																																												*//
- //* Have fun,																																										*//
  //* Jose Negrete AKA BlueSkyDefender																																				*//
  //*																																												*//
  //* http://reshade.me/forum/shader-presentation/2128-sidebyside-3d-depth-map-based-stereoscopic-shader																				*//	
@@ -21,14 +20,13 @@
  //*																																												*//
  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+//USER EDITABLE PREPROCESSOR FUNCTIONS START//
+
 // Determines The resolution of the Depth Map. For 4k Use 1.75 or 1.5. For 1440p Use 1.5 or 1.25. For 1080p use 1. Too low of a resolution will remove too much.
 #define Depth_Map_Division 1.0
 
-// Determines The Max Depth amount.
-#define Depth_Max 50
-
 // Enable this to fix the problem when there is a full screen Game Map Poping out of the screen. AKA Full Black Depth Map Fix. I have this off by default. Zero is off, One is On.
-#define FBDMF 0
+#define FBDMF 0 //Default 0 is Off. One is On.
 
 //Third person auto zero parallax distance is a form of Automatic Near Field Adjustment based on BOTW fix. This now should work on all Third Person Games. 
 #define TPAuto_ZPD 0 //Default 0 is Off. One is On.
@@ -41,9 +39,8 @@
 
 //Use Depth Tool to adjust the lower preprocessor definitions.
 //Horizontal & Vertical Depth Buffer Resize for non conforming BackBuffer.
-//Min value is -0.5 & Max value is 0.5 Default is Zero.
 //Ex. Resident Evil 7 Has this problem. So you want to adjust it too around float2(0.9575,0.9575).
-#define Horizontal_and_Vertical float2(1.0, 1.0)
+#define Horizontal_and_Vertical float2(1.0, 1.0) //Min value is -0.5 & Max value is 0.5 Default is Zero.
 
 //Image Position Adjust is used to move the depth buffer around.
 #define Image_Position_Adjust float2(0.0,0.0)
@@ -52,6 +49,11 @@
 //3D AO Toggle enable this if you want better 3D seperation between objects. 
 //Performance loss when enabled.
 #define AO_TOGGLE 0 //Default 0 is Off. One is On.
+
+// Determines the Max Depth amount, in ReShades GUI.
+#define Depth_Max 50
+
+//USER EDITABLE PREPROCESSOR FUNCTIONS END//
 
 uniform int Depth_Map <
 	ui_type = "combo";
@@ -248,15 +250,22 @@ uniform bool AO <
 				 "Default is On.";
 > = 1;
 
-uniform float AO_Adjust <
+uniform float AO_Control <
 	ui_type = "drag";
-	ui_min = 0.0; ui_max = 1.0;
-	ui_label = "3D AO Adjust";
-	ui_tooltip = "Adjust the spread of the 3D AO.\n" 
-				 "Default is 1.0.";
-> = 1.0;
-#endif
+	ui_min = 0.001; ui_max = 1.25;
+	ui_label = "3D AO Control";
+	ui_tooltip = "Control the spread of the 3D AO.\n" 
+				 "Default is 0.5.";
+> = 0.5;
 
+uniform float AO_Power <
+	ui_type = "drag";
+	ui_min = 0.001; ui_max = 0.100;
+	ui_label = "3D AO Power";
+	ui_tooltip = "Adjust the power 3D AO.\n" 
+				 "Default is 0.05.";
+> = 0.05;
+#endif
 uniform bool Cancel_Depth < source = "key"; keycode = Cancel_Depth_Key; toggle = true; >;
 /////////////////////////////////////////////D3D Starts Here/////////////////////////////////////////////////////////////////
 #define pix float2(BUFFER_RCP_WIDTH, BUFFER_RCP_HEIGHT)
@@ -786,11 +795,11 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 }
 
 #if AO_TOGGLE
-//AO START//
+//3D AO START//
 float AO_Depth(float2 coords)
 {
 	float DM = tex2Dlod(SamplerDM,float4(coords.xy,0,0)).r;
-	return ( DM - 0 ) / ( AO_Adjust - 0);
+	return ( DM - 0 ) / ( AO_Control - 0);
 }
 
 float3 GetPosition(float2 coords)
@@ -1135,8 +1144,8 @@ DBD = ( DBD - 1.0f ) / ( -187.5f - 1.0f );
 		#if AO_TOGGLE
 		if(AO == 1)
 		{
-			X =lerp(DM.x,sum,0.05);
-			Y =lerp(DM.y,sum,0.05);
+			X =lerp(DM.x,DM.x+sum,AO_Power);
+			Y =lerp(DM.y,DM.x+sum,AO_Power);
 		}
 		else
 		{
