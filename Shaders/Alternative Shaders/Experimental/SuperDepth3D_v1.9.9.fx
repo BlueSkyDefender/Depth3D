@@ -53,120 +53,143 @@
 #define Image_Position_Adjust float2(0.0,0.0)
 
 //USER EDITABLE PREPROCESSOR FUNCTIONS END//
-
-uniform int Depth_Map <
-	ui_type = "combo";
-	ui_items = " 0 Normal\0 1 Normal Reversed\0 2 Offset Normal\0 3 Offset Reversed\0";
-	ui_label = "Depth Map Selection";
-	ui_tooltip = "Linearization for the zBuffer also known as Depth Map.\n"
-			     "Normally you want to use 0 or 1.";
-> = 0;
-
-uniform float Depth_Map_Adjust <
-	ui_type = "drag";
-	ui_min = 0.250; ui_max = 125.0;
-	ui_label = "Depth Map Adjustment";
-	ui_tooltip = "Adjust the depth map for your games.";
-> = 7.5;
-
-uniform float Offsets <
-	ui_type = "drag";
-	ui_min = 0; ui_max = 1.0;
-	ui_label = "Offset";
-	ui_tooltip = "Offset is for the Special Depth Map Only";
-> = 0.5;
-
+//Divergence & Convergence//
 uniform float Divergence <
 	ui_type = "drag";
 	ui_min = 1; ui_max = Depth_Max;
-	ui_label = "Divergence Slider";
+	ui_label = "·Divergence Slider·";
 	ui_tooltip = "Determines the amount of Image Warping and Separation.\n" 
 				 "You can override this value.";
+	ui_category = "Divergence & Convergence";
 > = 35.0;
 
 uniform int Convergence_Mode <
 	ui_type = "combo";
 	ui_items = "ZPD Tied\0ZPD Locked\0ZPD Unlocked\0";
-	ui_label = "Convergence Mode";
+	ui_label = " Convergence Mode";
 	ui_tooltip = "Select your Convergence Mode for ZPD calculations.\n" 
 				 "ZPD Locked mode is locked to divergence & dissables ZPD control below.\n" 
 				 "ZPD Unlocked mode lets you control ZPD separately from Divergence.\n" 
 				 "ZPD Tied is controlled by ZPD. Works in tandam with Divergence.\n" 
 				 "For FPS with no custom weapon profile use Tied.\n" 
 				 "Default is ZPD Tied.";
+	ui_category = "Divergence & Convergence";
 > = 0;
 
 uniform float ZPD <
 	ui_type = "drag";
 	ui_min = 0.0; ui_max = 0.500;
-	ui_label = "Zero Parallax Distance";
+	ui_label = " Zero Parallax Distance";
 	ui_tooltip = "ZPD controls the focus distance for the screen Pop-out effect also known as Convergence.\n"
 				"For FPS Games keeps this low Since you don't want your gun to pop out of screen.\n"
 				"This is controled by Convergence Mode.\n"
 				"Default is 0.010, Zero is off.";
+	ui_category = "Divergence & Convergence";
 > = 0.010;
-
-uniform float Auto_Depth_Range <
-	ui_type = "drag";
-	ui_min = 0.0; ui_max = 0.625;
-	ui_label = "Auto Depth Range";
-	ui_tooltip = "The Map Automaticly scales to outdoor and indoor areas.\n" 
-				 "Default is Zero, Zero is off.";
-> = 0.0;
 
 uniform int Balance <
 	ui_type = "drag";
 	ui_min = -4.0; ui_max = 6.0;
-	ui_label = "Balance";
+	ui_label = " Balance";
 	ui_tooltip = "Balance between ZPD Depth and Scene Depth and works with ZPD option above.\n"
 				"Example Zero is 50/50 equal between ZPD Depth and Scene Depth.\n"
 				"Default is Zero.";
+	ui_category = "Divergence & Convergence";
 > = 0;
 
+uniform float Auto_Depth_Range <
+	ui_type = "drag";
+	ui_min = 0.0; ui_max = 0.625;
+	ui_label = " Auto Depth Range";
+	ui_tooltip = "The Map Automaticly scales to outdoor and indoor areas.\n" 
+				 "Default is Zero, Zero is off.";
+	ui_category = "Divergence & Convergence";
+> = 0.0;
+//Occlusion Masking//
 uniform int Disocclusion_Selection <
 	ui_type = "combo";
 	ui_items = "Off\0Radial Blur\0Normal Blur\0Depth Based\0Radial Depth Blur\0Normal Depth Blur\0";
-	ui_label = "Disocclusion Selection";
+	ui_label = "·Disocclusion Selection·";
 	ui_tooltip = "This is to select the z-Buffer bluring option for low level occlusion masking.\n"
 				"Default is Normal Blur.";
+	ui_category = "Occlusion Masking";
 > = 2;
 
 uniform float Disocclusion_Power_Adjust <
 	ui_type = "drag";
 	ui_min = 0.250; ui_max = 2.5;
-	ui_label = "Disocclusion Power Adjust";
+	ui_label = " Disocclusion Power Adjust";
 	ui_tooltip = "Automatic occlusion masking power adjust.\n"
 				"Default is 1.0";
+	ui_category = "Occlusion Masking";
 > = 1.0;
 
-uniform float Perspective <
-	ui_type = "drag";
-	ui_min = -100; ui_max = 100;
-	ui_label = "Perspective Slider";
-	ui_tooltip = "Determines the perspective point. Default is 0";
+uniform int View_Mode <
+	ui_type = "combo";
+	ui_items = "View Mode Normal\0View Mode Alpha\0View Mode Beta\0View Mode Gamma -=WIP=-\0";
+	ui_label = " View Mode";
+	ui_tooltip = "Change the way the shader warps the output to the screen.\n"
+				 "Default is Normal";
+	ui_category = "Occlusion Masking";
 > = 0;
 
+uniform int Custom_Sidebars <
+	ui_type = "combo";
+	ui_items = "Mirrored Edges\0Black Edges\0Stretched Edges\0";
+	ui_label = " Edge Handling";
+	ui_tooltip = "Edges selection for your screen output.";
+	ui_category = "Occlusion Masking";
+> = 1;
+//Depth Map//
+uniform int Depth_Map <
+	ui_type = "combo";
+	ui_items = " 0 Normal\0 1 Normal Reversed\0 2 Offset Normal\0 3 Offset Reversed\0";
+	ui_label = "·Depth Map Selection·";
+	ui_tooltip = "Linearization for the zBuffer also known as Depth Map.\n"
+			     "Normally you want to use 0 or 1.";
+	ui_category = "Depth Map";
+> = 0;
+
+uniform float Depth_Map_Adjust <
+	ui_type = "drag";
+	ui_min = 0.250; ui_max = 125.0;
+	ui_label = " Depth Map Adjustment";
+	ui_tooltip = "Adjust the depth map for your games.";
+	ui_category = "Depth Map";
+> = 7.5;
+
+uniform float Offsets <
+	ui_type = "drag";
+	ui_min = 0; ui_max = 1.0;
+	ui_label = " Offset";
+	ui_tooltip = "Offset is for the Special Depth Map Only";
+	ui_category = "Depth Map";
+> = 0.5;
+
 uniform bool Depth_Map_View <
-	ui_label = "Depth Map View";
+	ui_label = " Depth Map View";
 	ui_tooltip = "Display the Depth Map.";
+	ui_category = "Depth Map";
 > = false;
 
 uniform bool Depth_Map_Flip <
-	ui_label = "Depth Map Flip";
+	ui_label = " Depth Map Flip";
 	ui_tooltip = "Flip the depth map if it is upside down.";
+	ui_category = "Depth Map";
 > = false;
-
+//Weapon & HUD Depth Map//
 uniform int WP <
 	ui_type = "combo";
 	ui_items = "Weapon Profile Off\0Custom WP\0 WP 0\0 WP 1\0 WP 2\0 WP 3\0 WP 4\0 WP 5\0 WP 6\0 WP 7\0 WP 8\0 WP 9\0 WP 10\0 WP 11\0 WP 12\0 WP 13\0 WP 14\0 WP 15\0 WP 16\0 WP 17\0 WP 18\0 WP 19\0 WP 20\0 WP 21\0 WP 22\0 WP 23\0 WP 24\0 WP 25\0 WP 26\0 WP 27\0 WP 28\0 WP 29\0 WP 30\0 HUD Mode One\0";
-	ui_label = "HUD & Weapon Profile";
+	ui_label = "·HUD & Weapon Profiles·";
 	ui_tooltip = "Pick your HUD or Weapon Profile for your game or make your own.";
+	ui_category = "Weapon & HUD Depth Map";
 > = 0;
 
 uniform float4 Weapon_Adjust <
 	ui_type = "drag";
 	ui_min = -100.0; ui_max = 100.0;
-	ui_label = "Weapon Adjust Depth Map";
+	ui_label = " Weapon Adjust Depth Map";
 	ui_tooltip = "Adjust weapon depth map for FPS Hand & also HUD Mode.\n"
 				 "X, is FPS Hand Scale Adjustment & Adjusts HUD Mode.\n"
 				 "Y, is Cutoff Point Adjustment.\n"
@@ -175,96 +198,102 @@ uniform float4 Weapon_Adjust <
 				 "Pushes or Pulls the FPS Hand in or out of the screen.\n"
 				 "This also used to fine tune the Weapon Hand.\n" 
 				 "Default is (X 0.250, Y 0.0, Z 0.0, W 0.0).";
+	ui_category = "Weapon & HUD Depth Map";
 > = float4(0.0,0.250,0.0,0.0);
-
+//Stereoscopic Options//
 uniform int Stereoscopic_Mode <
 	ui_type = "combo";
 	ui_items = "Side by Side\0Top and Bottom\0Line Interlaced\0Column Interlaced\0Checkerboard 3D\0Anaglyph\0";
-	ui_label = "3D Display Mode";
+	ui_label = "·3D Display Modes·";
 	ui_tooltip = "Stereoscopic 3D display output selection.";
+	ui_category = "Stereoscopic Options";
 > = 0;
 
 uniform float Interlace_Optimization <
 	ui_type = "drag";
 	ui_min = 0.0; ui_max = 0.5;
-	ui_label = "Interlace Optimization";
+	ui_label = " Interlace Optimization";
 	ui_tooltip = "Interlace Optimization Is used to reduce alisesing in a Line or Column interlaced image.\n"
 	             "This has the side effect of softening the image.\n"
 	             "Default is 0.375";
+	ui_category = "Stereoscopic Options";
 > = 0.375;
-
-uniform int Scaling_Support <
-	ui_type = "combo";
-	ui_items = " 2160p\0 Native\0 1080p A\0 1080p B\0 1050p A\0 1050p B\0 720p A\0 720p B\0";
-	ui_label = "Scaling Support";
-	ui_tooltip = "Dynamic Super Resolution , Virtual Super Resolution, downscaling, or Upscaling support for Line Interlaced, Column Interlaced, & Checkerboard 3D displays.";
-> = 1;
 
 uniform int Anaglyph_Colors <
 	ui_type = "combo";
 	ui_items = "Red/Cyan\0Dubois Red/Cyan\0Green/Magenta\0Dubois Green/Magenta\0";
-	ui_label = "Anaglyph Color Mode";
+	ui_label = " Anaglyph Color Mode";
 	ui_tooltip = "Select colors for your 3D anaglyph glasses.";
+	ui_category = "Stereoscopic Options";
 > = 0;
 
 uniform float Anaglyph_Desaturation <
 	ui_type = "drag";
 	ui_min = 0.0; ui_max = 1.0;
-	ui_label = "Anaglyph Desaturation";
+	ui_label = " Anaglyph Desaturation";
 	ui_tooltip = "Adjust anaglyph desaturation, Zero is Black & White, One is full color.";
+	ui_category = "Stereoscopic Options";
 > = 1.0;
 
-uniform int View_Mode <
+uniform int Scaling_Support <
 	ui_type = "combo";
-	ui_items = "View Mode Normal\0View Mode Alpha\0View Mode Beta\0View Mode Gamma -=WIP=-\0";
-	ui_label = "View Mode";
-	ui_tooltip = "Change the way the shader warps the output to the screen.\n"
-				 "Default is Normal";
+	ui_items = " 2160p\0 Native\0 1080p A\0 1080p B\0 1050p A\0 1050p B\0 720p A\0 720p B\0";
+	ui_label = " Scaling Support";
+	ui_tooltip = "Dynamic Super Resolution , Virtual Super Resolution, downscaling, or Upscaling support for Line Interlaced, Column Interlaced, & Checkerboard 3D displays.";
+	ui_category = "Stereoscopic Options";
+> = 1;
+
+uniform float Perspective <
+	ui_type = "drag";
+	ui_min = -100; ui_max = 100;
+	ui_label = " Perspective Slider";
+	ui_tooltip = "Determines the perspective point. Default is 0";
+	ui_category = "Stereoscopic Options";
 > = 0;
 
 uniform bool Eye_Swap <
-	ui_label = "Swap Eyes";
+	ui_label = " Swap Eyes";
 	ui_tooltip = "L/R to R/L.";
+	ui_category = "Stereoscopic Options";
 > = false;
-
-uniform float4 Cross_Cursor_Adjust <
-	ui_type = "drag";
-	ui_min = 0.0; ui_max = 255.0;
-	ui_label = "Cross Cursor Adjust";
-	ui_tooltip = "Pick your own cross cursor color & Size.\n" 
-				 " Default is (R 255, G 255, B 255 , Size 25)";
-> = float4(255.0, 255.0, 255.0, 25.0);
-
-uniform int Custom_Sidebars <
-	ui_type = "combo";
-	ui_items = "Mirrored Edges\0Black Edges\0Stretched Edges\0";
-	ui_label = "Edge Selection";
-	ui_tooltip = "Edges selection for your screen output.";
-> = 1;
+//3D Ambient Occlusion//
 #if AO_TOGGLE
 uniform bool AO <
-	ui_label = "3D AO Mode";
-	ui_tooltip = "3D ambient occlusion mode switch.\n"
+	ui_label = "·3D AO Switch·";
+	ui_tooltip = "3D Ambient occlusion mode switch.\n"
 				 "Performance loss when enabled.\n"
 				 "Default is On.";
+	ui_category = "3D Ambient Occlusion";
 > = 1;
 
 uniform float AO_Control <
 	ui_type = "drag";
 	ui_min = 0.001; ui_max = 1.25;
-	ui_label = "3D AO Control";
+	ui_label = " 3D AO Control";
 	ui_tooltip = "Control the spread of the 3D AO.\n" 
 				 "Default is 0.5.";
+	ui_category = "3D Ambient Occlusion";
 > = 0.5;
 
 uniform float AO_Power <
 	ui_type = "drag";
 	ui_min = 0.001; ui_max = 0.100;
-	ui_label = "3D AO Power";
+	ui_label = " 3D AO Power";
 	ui_tooltip = "Adjust the power 3D AO.\n" 
 				 "Default is 0.05.";
+	ui_category = "3D Ambient Occlusion";
 > = 0.05;
 #endif
+//Cursor Adjustments//
+uniform float4 Cross_Cursor_Adjust <
+	ui_type = "drag";
+	ui_min = 0.0; ui_max = 255.0;
+	ui_label = "·Cross Cursor Adjust·";
+	ui_tooltip = "Pick your own cross cursor color & Size.\n" 
+				 " Default is (R 255, G 255, B 255 , Size 25)";
+	ui_category = "Cursor Adjustments";
+> = float4(255.0, 255.0, 255.0, 25.0);
+
 uniform bool Cancel_Depth < source = "key"; keycode = Cancel_Depth_Key; toggle = true; >;
 /////////////////////////////////////////////D3D Starts Here/////////////////////////////////////////////////////////////////
 #define pix float2(BUFFER_RCP_WIDTH, BUFFER_RCP_HEIGHT)
