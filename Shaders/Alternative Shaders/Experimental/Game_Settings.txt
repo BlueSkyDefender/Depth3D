@@ -9,10 +9,45 @@ https://docs.google.com/spreadsheets/d/18ujpY-97V_YuXpQUh-7bOomE4D5nUGwp3XppfU_0
 ---------------------------------------------------------------------------------------------------------------------------------
 Game List updates for Reshade 3.0
 _________________________________________________________________________________________________________________________________
-[Disocclusion Mask] - Use what looks good to you. If you don't like the look of it, turn it off.
-[Depth Map Adjustment] - Use what you think looks good. You don't have to use my adjustment. It's just a good place to start.
-[Depth Map Division] - Inner Shader Setting -=Line 25=-. For 4k Use 1.75 or 1.5. For 1440p Use 1.5 or 1.25. For 1080p use 1.
-[Depth Maps List] - For the Normal 3D Shader and Flash Back. If one Depth Map is used it for both shader.
+ReShade GUI Settings:
+[Depth_Map] - Linearization selection for the zBuffer.
+[Depth Map Adjustment] - Use what you think looks good. You don't have to use my adjustment. But, my settings are good place to start.
+[Offsets] - Use this if for a nonconforming zBuffer Linearization. Works with Depth buffer 2 & 3.
+[Divergence] - Determines the amount of Image Warping and Separation.
+[Convergence Mode] - Select your Convergence Mode for ZPD calculations.
+[ZPD] - Zero Parallax Distance controls the focus distance for the screen Pop-out effect also known as Convergence.
+[Auto Depth Range] - The Map Automaticly scales to outdoor and indoor areas.
+[Balance] - Balance between ZPD Depth and Scene Depth and works with ZPD option above.
+[Disocclusion Selection] - This is to select the z-Buffer bluring option for low level occlusion masking.
+[Disocclusion Power Adjust] - Automatic occlusion masking power adjust.
+[Perspective] - Determines the perspective point.
+[Depth Map View] - Display the Depth Map. Use this for Debuging.
+[HUD & Weapon Profile] - Pick your HUD or Weapon Profile for your game or make your own.
+[Weapon Adjust] - Adjust weapon depth map for FPS Hand & also HUD Mode. Used with the option above.
+[Stereoscopic Mode] - Stereoscopic 3D display output selection.
+[Interlace Optimization] - Interlace Optimization Is used to reduce alisesing in a Line or Column interlaced image.
+[Scaling Support] - Dynamic Super Resolution , Virtual Super Resolution, downscaling, or Upscaling support for Line Interlaced, Column Interlaced, & Checkerboard 3D displays.
+[Anaglyph Colors] - Select colors for your 3D anaglyph glasses.
+[Anaglyph Desaturation] - Adjust anaglyph desaturation, Zero is Black & White, One is full color.
+[View Mode] - Change the way the shader warps the output to the screen. The Higer you go the more performce will be needed.
+[Swap Eyes] - L/R to R/L image swaping.
+[Cross Cursor Adjust] - Pick your own cross cursor color & Size.
+[Custom Sidebars] - Edges selection for your screen output.
+
+AO_TOGGLE Needs to be enabled to get the Options below.
+[3D AO Mode] - 3D ambient occlusion mode On/Off switch.
+[3D AO Control] - Control the spread of the 3D AO.
+[3D AO Power] - Adjust the power 3D AO.
+
+Inner Shader Setting:
+[Depth Map Division] Depth_Map_Division -=Line 26=- For 4k Use 1.75 or 1.5. For 1440p Use 1.5 or 1.25. For 1080p use 1.
+[Max Depth] Depth_Max -=Line 29=- Determines the Max Depth amount, in ReShades GUI.
+[Full Black Depth Map Fix] FBDMF -=Line 32=- Enable this to fix the problem when there is a full screen Game Map Poping out of the screen.
+[Third Person Auto-ZPD] TPAuto_ZPD -=Line 35=- Third person auto zero parallax distance is a form of Automatic Near Field Adjustment.
+[Cancel Depth Key] Cancel_Depth_Key -=Line 41=- Determines the Cancel Depth Toggle Key useing keycode info.
+[3D AO] AO_TOGGLE -=Line 45=- enable this if you want better 3D seperation between objects. 
+[Horizontal & Vertical Depth Buffer Resize] Horizontal_and_Vertical -=Line 50=- For Horizontal & Vertical Depth Buffer Resize for non conforming BackBuffer.
+[Image Position Adjust] Image_Position_Adjust -=Line 53=- Image Position Adjust is used to move the Z-Buffer around.
 ---------------------------------------------------------------------------------------------------------------------------------
 
 [Adjustment] - The FlashBack Shader is about/around 2 Times this amount most of the time. Adjust this to what looks good to you. Don't Go to High or To Low.

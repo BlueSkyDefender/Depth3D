@@ -25,6 +25,9 @@
 // Determines The resolution of the Depth Map. For 4k Use 1.75 or 1.5. For 1440p Use 1.5 or 1.25. For 1080p use 1. Too low of a resolution will remove too much.
 #define Depth_Map_Division 1.0
 
+// Determines the Max Depth amount, in ReShades GUI.
+#define Depth_Max 50
+
 // Enable this to fix the problem when there is a full screen Game Map Poping out of the screen. AKA Full Black Depth Map Fix. I have this off by default. Zero is off, One is On.
 #define FBDMF 0 //Default 0 is Off. One is On.
 
@@ -37,21 +40,17 @@
 // key "." is Key Code 110. Ex. Key 110 is the code for Decimal Point.
 #define Cancel_Depth_Key 0
 
-//Use Depth Tool to adjust the lower preprocessor definitions.
+//3D AO Toggle enable this if you want better 3D seperation between objects. 
+//There will be a performance loss when enabled.
+#define AO_TOGGLE 0 //Default 0 is Off. One is On.
+
+//Use Depth Tool to adjust the lower preprocessor definitions below.
 //Horizontal & Vertical Depth Buffer Resize for non conforming BackBuffer.
 //Ex. Resident Evil 7 Has this problem. So you want to adjust it too around float2(0.9575,0.9575).
 #define Horizontal_and_Vertical float2(1.0, 1.0) //Min value is -0.5 & Max value is 0.5 Default is Zero.
 
-//Image Position Adjust is used to move the depth buffer around.
+//Image Position Adjust is used to move the Z-Buffer around.
 #define Image_Position_Adjust float2(0.0,0.0)
-//End Depth Buffer Adjustemnt.
-
-//3D AO Toggle enable this if you want better 3D seperation between objects. 
-//Performance loss when enabled.
-#define AO_TOGGLE 0 //Default 0 is Off. One is On.
-
-// Determines the Max Depth amount, in ReShades GUI.
-#define Depth_Max 50
 
 //USER EDITABLE PREPROCESSOR FUNCTIONS END//
 
@@ -89,7 +88,7 @@ uniform int Convergence_Mode <
 	ui_type = "combo";
 	ui_items = "ZPD Tied\0ZPD Locked\0ZPD Unlocked\0";
 	ui_label = "Convergence Mode";
-	ui_tooltip = "Select your Convergence for ZPD calculation.\n" 
+	ui_tooltip = "Select your Convergence Mode for ZPD calculations.\n" 
 				 "ZPD Locked mode is locked to divergence & dissables ZPD control below.\n" 
 				 "ZPD Unlocked mode lets you control ZPD separately from Divergence.\n" 
 				 "ZPD Tied is controlled by ZPD. Works in tandam with Divergence.\n" 
@@ -161,7 +160,7 @@ uniform int WP <
 	ui_type = "combo";
 	ui_items = "Weapon Profile Off\0Custom WP\0 WP 0\0 WP 1\0 WP 2\0 WP 3\0 WP 4\0 WP 5\0 WP 6\0 WP 7\0 WP 8\0 WP 9\0 WP 10\0 WP 11\0 WP 12\0 WP 13\0 WP 14\0 WP 15\0 WP 16\0 WP 17\0 WP 18\0 WP 19\0 WP 20\0 WP 21\0 WP 22\0 WP 23\0 WP 24\0 WP 25\0 WP 26\0 WP 27\0 WP 28\0 WP 29\0 WP 30\0 HUD Mode One\0";
 	ui_label = "HUD & Weapon Profile";
-	ui_tooltip = "Pick your weapon profile for game.";
+	ui_tooltip = "Pick your HUD or Weapon Profile for your game or make your own.";
 > = 0;
 
 uniform float4 Weapon_Adjust <
