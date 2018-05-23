@@ -21,9 +21,9 @@
  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Determines The Max Depth amount. The larger the amount harder it will hit on FPS will be.
 
-#define Depth_Max 25
+#define Depth_Max 30 // Max is 30 Due to how this shader works.
 
-uniform int Divergence <
+uniform int Depth <
 	ui_type = "drag";
 	ui_min = 1; ui_max = Depth_Max;
 	ui_label = "Divergence Slider";
@@ -76,29 +76,6 @@ uniform bool Debug_View <
 	ui_tooltip = "Debug View.";
 > = false;
 
-uniform float Spread <
-	ui_type = "drag";
-	ui_min = 1.0; ui_max = 20.0;
-	ui_label = "Shade Fill";
-	ui_tooltip = "Adjust This to have the shade effect to fill in areas.\n"
-				 "This is used for gap filling. AKA, Fake AO.\n"
-				 "Number 7.5 is default.";
-> = 7.5;
-
-uniform float X <
-	ui_type = "drag";
-	ui_min = -2.0; ui_max = 2.0;
-	ui_label = "X";
-	ui_tooltip = "X";
-> = 0.0;
-
-uniform float Y <
-	ui_type = "drag";
-	ui_min = -2.0; ui_max = 2.0;
-	ui_label = "Y";
-	ui_tooltip = "Y";
-> = 0.0;
-
 /////////////////////////////////////////////////////D3D Starts Here/////////////////////////////////////////////////////////////////
 #define pix float2(BUFFER_RCP_WIDTH, BUFFER_RCP_HEIGHT)
 #define TextureSize float2(BUFFER_WIDTH, BUFFER_HEIGHT)
@@ -109,24 +86,12 @@ sampler BackBuffer
 	{ 
 		Texture = BackBufferTex;
 	};
-	
-texture texBlur { Width = BUFFER_WIDTH*0.5; Height = BUFFER_HEIGHT*0.5; Format = RGBA8; MipLevels = 8;};
-
-sampler SamplerBlur
-	{
-		Texture = texBlur;
-		MipLODBias = 1.0f;
-		MinFilter = LINEAR;
-		MagFilter = LINEAR;
-		MipFilter = LINEAR;
-	};	
 		
-texture texFakeDB { Width = BUFFER_WIDTH*0.5; Height = BUFFER_HEIGHT*0.5; Format = RGBA8; MipLevels = 8;};
+texture texFakeDB { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA8; MipLevels = 8;};
 
 sampler SamplerFakeDB
 	{
 		Texture = texFakeDB;
-		MipLODBias = 1.0f;
 		MinFilter = LINEAR;
 		MagFilter = LINEAR;
 		MipFilter = LINEAR;
@@ -137,42 +102,47 @@ texture texMed { Width = BUFFER_WIDTH*0.5; Height = BUFFER_HEIGHT*0.5; Format = 
 sampler SamplerMed
 	{
 		Texture = texMed;
-		MipLODBias = 1.0f;
+		MipLODBias = 2.0f;
 		MinFilter = LINEAR;
 		MagFilter = LINEAR;
 		MipFilter = LINEAR;
 	};
+	
+	
+texture CurrentBackBuffer  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA32F;}; 
+
+sampler CBackBuffer
+	{
+		Texture = CurrentBackBuffer;
+	};
+
+texture PastBackBuffer  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA32F;}; 
+
+sampler PBackBuffer
+	{
+		Texture = PastBackBuffer;
+	};
+
+texture PastSingleBackBuffer  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA32F;}; 
+
+sampler PSBackBuffer
+	{
+		Texture = PastSingleBackBuffer;
+	};
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-void Blur(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 color : SV_Target0)                                                                          
-{                                                                                                                                                                 
-	float4 Out;
-    
-    float gWeights[2] = { 0.44908, 0.05092 };
-    float gOffsets[2] = { 0.53805, 2.06278 };
-    
-	[loop]
-    for( int i = 0; i < 2; i++ )                                                                                                                             
-    {
-		float2 texCoordOffset = gOffsets[i] * pix * 2;
-        float3 col = tex2D( BackBuffer, texcoord + texCoordOffset ).xyz + tex2D( BackBuffer, texcoord - texCoordOffset ).xyz;
-		Out.rgb += gWeights[i] * col;                                                                                                                               
-    }
-    color = Out;
-}
 
 float4 FakeDB(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0): SV_Target
 {
-float micro_size = 100;
+float micro_size = 12.5;
 float best_slope = 0.0;
-float best_match = 1.0;
+float best_match = 2.0;
  
 	for(float x = micro_size ; x >= 0.0; x -= 0.5) 
 	{
 		float score = 0.0;
-				float4 left = tex2Dgatheroffset(SamplerBlur,texcoord, float2(0,x),3);
-				float4 right = tex2Dgatheroffset(BackBuffer,texcoord, float2(0,x),3);
-				
+				float4 left = tex2D(BackBuffer,texcoord + float2(0,x) * pix);
+				float4 right = tex2D(PSBackBuffer,texcoord + float2(0,x) * pix);	
 				score += distance(left, right);
 
 		if(score < best_match) 
@@ -182,7 +152,13 @@ float best_match = 1.0;
 		}
 	}
 	float color = (best_slope / micro_size);
-	return float4(color, color, color, 1.0);
+	
+	float4 AD = 1-tex2D(BackBuffer,texcoord);
+	AD = smoothstep(0,2,AD);
+	AD *= ((1-texcoord.y)+1*pix.y)*2;
+	AD = lerp(float4(color, color, color, 1.0),AD,0.5);
+	
+	return AD;
 }
 
 #define s2(a, b)				temp = a; a = min(a, b); b = max(temp, b);
@@ -196,7 +172,7 @@ float best_match = 1.0;
 
 float4 Median(float4 position : SV_Position, float2 texcoord : TEXCOORD0) : SV_Target
 {
-	float2 ScreenCal = float2(5*pix.x,5*pix.y);
+	float2 ScreenCal = float2(3.75*pix.x,3.75*pix.y);
 
 	float4 v[9];
 	
@@ -216,9 +192,9 @@ float4 Median(float4 position : SV_Position, float2 texcoord : TEXCOORD0) : SV_T
 	mnmx5(v[1], v[2], v[3], v[4], v[6]);
 	mnmx4(v[2], v[3], v[4], v[7]);
 	mnmx3(v[3], v[4], v[8]);
-;
-	
-	return v[4];
+
+return v[4];
+
 }
 
 float4  Encode(in float2 texcoord : TEXCOORD0) //zBuffer Color Channel Encode
@@ -228,13 +204,13 @@ float4  Encode(in float2 texcoord : TEXCOORD0) //zBuffer Color Channel Encode
 	float GetDepthB = tex2D(SamplerMed,float2(texcoord.x,texcoord.y)).x;
 
 	// X	
-	float Rx = (1-texcoord.x)+Divergence*pix.x*GetDepthR;
+	float Rx = (1-texcoord.x)+Depth*pix.x*GetDepthR;
 	// Y
-	float Ry = (1-texcoord.x)+Divergence*pix.x*GetDepthR;
+	float Ry = (1-texcoord.x)+Depth*pix.x*GetDepthR;
 	// Z
-	float Bz = texcoord.x+Divergence*pix.x*GetDepthB;
+	float Bz = texcoord.x+Depth*pix.x*GetDepthB;
 	// W
-	float Bw = texcoord.x+Divergence*pix.x*GetDepthB;
+	float Bw = texcoord.x+Depth*pix.x*GetDepthB;
 	
 	float R = Rx; //X Encode
 	float G = Ry; //Y Encode
@@ -290,12 +266,78 @@ float4 Converter(float2 texcoord : TEXCOORD0)
 			TCL.y = texcoord.y;
 			TCR.y = texcoord.y;
 		}
-		
+			
+			//Workaround for DX9 Games
+			int x = 5;	
+			if (Depth == 0)		
+				x = 0;
+			else if (Depth == 1)	
+				x = 1;
+			else if (Depth == 2)
+				x = 2;
+			else if (Depth == 3)
+				x = 3;
+			else if (Depth == 4)
+				x = 4;
+			else if (Depth == 5)
+				x = 5;
+			else if (Depth == 6)
+				x = 6;
+			else if (Depth == 7)
+				x = 7;
+			else if (Depth == 8)
+				x = 8;
+			else if (Depth == 9)
+				x = 9;
+			else if (Depth == 10)
+				x = 10;
+			else if (Depth == 11)
+				x = 11;
+			else if (Depth == 12)
+				x = 12;
+			else if (Depth == 13)
+				x = 13;
+			else if (Depth == 14)
+				x = 14;
+			else if (Depth == 15)
+				x = 15;
+			else if (Depth == 16)
+				x = 16;
+			else if (Depth == 17)
+				x = 17;
+			else if (Depth == 18)
+				x = 18;
+			else if (Depth == 19)
+				x = 19;			
+			else if (Depth == 20)
+				x = 20;			
+			else if (Depth == 21)
+				x = 21;			
+			else if (Depth == 22)
+				x = 22;			
+			else if (Depth == 23)
+				x = 23;		
+			else if (Depth == 24)
+				x = 24;			
+			else if (Depth == 25)
+				x = 25;
+			else if (Depth == 26)
+				x = 26;
+			else if (Depth == 27)
+				x = 27;
+			else if (Depth == 28)
+				x = 28;
+			else if (Depth == 29)
+				x = 29;
+			else if (Depth == 30)
+				x = 30;
+			
+			//Workaround for DX9 Games	
 	
 		float4 cL, LL; //tex2D(BackBuffer,float2(TCL.x,TCL.y)); //objects that hit screen boundary is replaced with the BackBuffer 		
 		float4 cR, RR; //tex2D(BackBuffer,float2(TCR.x,TCR.y)); //objects that hit screen boundary is replaced with the BackBuffer
 		float RF, RN, LF, LN;
-		int x = Depth_Max;		
+				
 		[loop]
 		for (int i = 0; i <= x+1; i++) 
 		{
@@ -455,7 +497,12 @@ float4 Converter(float2 texcoord : TEXCOORD0)
 
 	return float4(Out.rgb,1);
 	}
-
+	
+void Past_BackBuffer(float4 position : SV_Position, float2 texcoord : TEXCOORD, out float4 PastSingle : SV_Target0, out float4 Past : SV_Target1)
+{	
+	Past = tex2D(BackBuffer,texcoord);
+	PastSingle = tex2D(CBackBuffer,texcoord);
+}
 ////////////////////////////////////////////////////////Logo/////////////////////////////////////////////////////////////////////////
 uniform float timer < source = "timer"; >;
 float4 Out(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Target
@@ -572,12 +619,6 @@ void PostProcessVS(in uint id : SV_VertexID, out float4 position : SV_Position, 
 //*Rendering passes*//
 technique Dimension_Plus
 {
-			pass BlurFilter
-		{
-			VertexShader = PostProcessVS;
-			PixelShader = Blur;
-			RenderTarget = texBlur;
-		}	
 			pass FakeDBFilter
 		{
 			VertexShader = PostProcessVS;
@@ -595,5 +636,12 @@ technique Dimension_Plus
 		{
 			VertexShader = PostProcessVS;
 			PixelShader = Out;	
+		}
+			pass PBB
+		{
+			VertexShader = PostProcessVS;
+			PixelShader = Past_BackBuffer;
+			RenderTarget0 = PastSingleBackBuffer;
+			RenderTarget1 = PastBackBuffer;		
 		}
 }

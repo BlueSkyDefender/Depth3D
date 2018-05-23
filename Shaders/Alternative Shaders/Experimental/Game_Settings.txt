@@ -50,7 +50,7 @@ Inner Shader Setting:
 [Image Position Adjust] Image_Position_Adjust -=Line 53=- Image Position Adjust is used to move the Z-Buffer around.
 ---------------------------------------------------------------------------------------------------------------------------------
 
-[Adjustment] - The FlashBack Shader is about/around 2 Times this amount most of the time. Adjust this to what looks good to you. Don't Go to High or To Low.
+[Adjustment] - Adjust this to what looks good to you. Don't Go to High or To Low.
 
 [ZDP Range] -  ZDP Range is the range where you should set Zero Parallax Distance.
 
