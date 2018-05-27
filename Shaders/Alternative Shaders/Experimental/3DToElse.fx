@@ -19,17 +19,12 @@
  //*																																												*//
  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-uniform int Perspective <
-	ui_type = "drag";
-	ui_min = -350; ui_max = 350;
-	ui_label = "Perspective Slider";
-	ui_tooltip = "Determines the perspective point.";
-> = 0;
 uniform int Stereoscopic_Mode_Input <
 	ui_type = "combo";
 	ui_items = "Side by Side\0Top and Bottom\0Line Interlaced\0Checkerboard 3D\0Anaglyph GS *WIP*\0Anaglyph Color *WIP*\0FS *WIP*\0";
 	ui_label = "Stereoscopic Mode Input";
 	ui_tooltip = "Change to the proper stereoscopic input.";
+	ui_category = "Stereoscopic Conversion";
 > = 0;
 
 uniform int Stereoscopic_Mode <
@@ -37,6 +32,15 @@ uniform int Stereoscopic_Mode <
 	ui_items = "Side by Side\0Top and Bottom\0Line Interlaced\0Column Interlaced\0Checkerboard 3D\0Anaglyph\0";
 	ui_label = "3D Display Mode";
 	ui_tooltip = "Stereoscopic 3D display output selection.";
+	ui_category = "Stereoscopic Conversion";
+> = 0;
+
+uniform int Perspective <
+	ui_type = "drag";
+	ui_min = -350; ui_max = 350;
+	ui_label = "Perspective Slider";
+	ui_tooltip = "Determines the perspective point.";
+	ui_category = "Stereoscopic Options";
 > = 0;
 
 uniform int Scaling_Support <
@@ -44,13 +48,25 @@ uniform int Scaling_Support <
 	ui_items = " 2160p\0 Native\0 1080p A\0 1080p B\0 1050p A\0 1050p B\0 720p A\0 720p B\0TEST\0";
 	ui_label = "Scaling Support";
 	ui_tooltip = "Dynamic Super Resolution , Virtual Super Resolution, downscaling, or Upscaling support for Line Interlaced, Column Interlaced, & Checkerboard 3D displays.";
+	ui_category = "Stereoscopic Options";
 > = 1;
+
+uniform float Interlace_Optimization <
+	ui_type = "drag";
+	ui_min = 0.0; ui_max = 0.5;
+	ui_label = " Interlace Optimization";
+	ui_tooltip = "Interlace Optimization Is used to reduce alisesing in a Line or Column interlaced image.\n"
+	             "This has the side effect of softening the image.\n"
+	             "Default is 0.375";
+	ui_category = "Stereoscopic Options";
+> = 0.375;
 
 uniform int Anaglyph_Colors <
 	ui_type = "combo";
 	ui_items = "Red/Cyan\0Dubois Red/Cyan\0Green/Magenta\0Dubois Green/Magenta\0";
 	ui_label = "Anaglyph Color Mode";
 	ui_tooltip = "Select colors for your 3D anaglyph glasses.";
+	ui_category = "Stereoscopic Options";
 > = 0;
 
 uniform float Anaglyph_Desaturation <
@@ -58,11 +74,13 @@ uniform float Anaglyph_Desaturation <
 	ui_min = 0.0; ui_max = 1.0;
 	ui_label = "Anaglyph Desaturation";
 	ui_tooltip = "Adjust anaglyph desaturation, Zero is Black & White, One is full color.";
+	ui_category = "Stereoscopic Options";
 > = 1.0;
 
 uniform bool Eye_Swap <
 	ui_label = "Eye Swap";
 	ui_tooltip = "Left right image change.";
+	ui_category = "Stereoscopic Options";
 > = false;
 
 uniform float TEST <
@@ -241,34 +259,72 @@ void PS_InputLR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0
 void PS0(float4 position : SV_Position, float2 texcoord : TEXCOORD0, out float4 color : SV_Target)
 {
 	float4 cL, cR;
-	float P;
-	if (!Eye_Swap)
-	{
-		P = Perspective;
-	}
-	else
-	{
-		P = -Perspective;
-	}
-	
-	if(Stereoscopic_Mode == 0)
-	{	
-		cL = tex2D(SamplerCL,float2(texcoord.x*2 + P * pix.x,texcoord.y));
-		cR = tex2D(SamplerCR,float2(texcoord.x*2-1 - P * pix.x,texcoord.y));
-	}
-	else if(Stereoscopic_Mode == 1)
-	{	
-		cL = tex2D(SamplerCL,float2(texcoord.x + P * pix.x,texcoord.y*2));
-		cR = tex2D(SamplerCR,float2(texcoord.x - P * pix.x,texcoord.y*2-1));
-	}
-	else
-	{
-		cL = tex2D(SamplerCL,float2(texcoord.x + P * pix.x,texcoord.y));
-		cR = tex2D(SamplerCR,float2(texcoord.x - P * pix.x,texcoord.y));	
-	}
-	
-	
+	float2 TCL, TCR;
+	float P = Perspective * pix.x;
+		if(Eye_Swap)
+		{
+			if ( Stereoscopic_Mode == 0 )
+			{
+				TCL.x = (texcoord.x*2-1) - P;
+				TCR.x = (texcoord.x*2) + P;
+				TCL.y = texcoord.y;
+				TCR.y = texcoord.y;
+			}
+			else if( Stereoscopic_Mode == 1 )
+			{
+				TCL.x = texcoord.x - P;
+				TCR.x = texcoord.x + P;
+				TCL.y = (texcoord.y*2-1);
+				TCR.y = (texcoord.y*2);
+			}
+			else
+			{
+				TCL.x = texcoord.x - P;
+				TCR.x = texcoord.x + P;
+				TCL.y = texcoord.y;
+				TCR.y = texcoord.y;
+			}
+		}	
+		else
+		{
+			if (Stereoscopic_Mode == 0)
+			{
+				TCR.x = (texcoord.x*2-1) - P;
+				TCL.x = (texcoord.x*2) + P;
+				TCR.y = texcoord.y;
+				TCL.y = texcoord.y;
+			}
+			else if(Stereoscopic_Mode == 1)
+			{
+				TCR.x = texcoord.x - P;
+				TCL.x = texcoord.x + P;
+				TCR.y = (texcoord.y*2-1);
+				TCL.y = (texcoord.y*2);
+			}
+			else
+			{
+				TCR.x = texcoord.x - P;
+				TCL.x = texcoord.x + P;
+				TCR.y = texcoord.y;
+				TCL.y = texcoord.y;
+			}
+		}
+		
+		//Optimization for line & column interlaced out.
+		if (Stereoscopic_Mode == 2)
+		{
+			TCL.y = TCL.y + (Interlace_Optimization * pix.y);
+			TCR.y = TCR.y - (Interlace_Optimization * pix.y);
+		}
+		else if (Stereoscopic_Mode == 3)
+		{
+			TCL.x = TCL.x + (Interlace_Optimization * pix.x);
+			TCR.x = TCR.x - (Interlace_Optimization * pix.x);
+		}
 
+		cL = tex2D(SamplerCL,float2(TCL.x,TCL.y));
+		cR = tex2D(SamplerCR,float2(TCR.x,TCR.y));
+	
 	float2 gridxy;
 
 	if(Scaling_Support == 0)

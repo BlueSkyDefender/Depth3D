@@ -351,7 +351,7 @@ sampler SamplerDis
 	};
 	
 #if AO_TOGGLE	
-texture texAO  { Width = BUFFER_WIDTH/2; Height = BUFFER_HEIGHT/2; Format = RGBA8; MipLevels = 1;}; 
+texture texAO  { Width = BUFFER_WIDTH*0.5; Height = BUFFER_HEIGHT*0.5; Format = RGBA8; MipLevels = 1;}; 
 
 sampler SamplerAO
 	{
@@ -1264,8 +1264,8 @@ float4 PS_calcLR(float2 texcoord)
 		}
 		else if (Stereoscopic_Mode == 3)
 		{
-			TCL.x = TCL.x + (Interlace_Optimization * pix.y);
-			TCR.x = TCR.x - (Interlace_Optimization * pix.y);
+			TCL.x = TCL.x + (Interlace_Optimization * pix.x);
+			TCR.x = TCR.x - (Interlace_Optimization * pix.x);
 		}
 			
 		if (View_Mode == 0)
