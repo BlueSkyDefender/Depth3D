@@ -21,7 +21,7 @@
 
 uniform int Stereoscopic_Mode_Input <
 	ui_type = "combo";
-	ui_items = "Side by Side\0Top and Bottom\0Line Interlaced\0Checkerboard 3D\0Anaglyph GS *WIP*\0Anaglyph Color *WIP*\0FS *WIP*\0";
+	ui_items = "Side by Side\0Top and Bottom\0Line Interlaced\0Checkerboard 3D\0Anaglyph GS *WIP*\0Anaglyph Color *WIP*\0";
 	ui_label = "Stereoscopic Mode Input";
 	ui_tooltip = "Change to the proper stereoscopic input.";
 	ui_category = "Stereoscopic Conversion";
@@ -83,13 +83,6 @@ uniform bool Eye_Swap <
 	ui_category = "Stereoscopic Options";
 > = false;
 
-uniform float TEST <
-	ui_type = "drag";
-	ui_min = 0.0; ui_max = 720.0;
-	ui_label = "TEST";
-	ui_tooltip = "TEST";
-> = 0.5;
-
 /////////////////////////////////////////////D3D Starts Here/////////////////////////////////////////////////////////////////
 #define pix float2(BUFFER_RCP_WIDTH, BUFFER_RCP_HEIGHT)
 #define TextureSize float2(BUFFER_WIDTH, BUFFER_HEIGHT)
@@ -126,8 +119,21 @@ sampler SamplerCR
 		AddressV = BORDER;
 		AddressW = BORDER;
 	};
+	
+texture texBB  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA32F; MipLevels = 8;}; 
+
+sampler SamplerBB
+	{
+		Texture = texBB;
+	};
   
 ////////////////////////////////////////////////Left/Right Eye////////////////////////////////////////////////////////
+
+void PS_InputBB(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 color : SV_Target)
+{
+	color = tex2D(BackBuffer, float2(texcoord.x,texcoord.y));
+}
+
 //Unilateral Left
 float4 UL(in float2 texcoord : TEXCOORD0)
 {
@@ -228,30 +234,48 @@ void PS_InputLR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0
 		color =  Bi_L(texcoord);
 		colorT = Bi_R(texcoord);
 	}
-	else if(Stereoscopic_Mode_Input == 4) // DeAnaglyph Need. Need to Do ReSearch.
+	else if(Stereoscopic_Mode_Input == 4)
 	{
-		float T = tex2D(BackBuffer,float2(texcoord.x,texcoord.y)).a;
-		float4 Red = tex2D(BackBuffer,float2(texcoord.x,texcoord.y)) - float4(0,1,1,T);
-		float4 Green = tex2D(BackBuffer,float2(texcoord.x,texcoord.y)) - float4(1,0,1,T);
-		float4 Blue = tex2D(BackBuffer,float2(texcoord.x,texcoord.y)) - float4(1,1,0,T);
+		float3 Red = tex2D(BackBuffer,float2(texcoord.x,texcoord.y)).rrr * float3(1,0,0);
+		float3 Green = tex2D(BackBuffer,float2(texcoord.x,texcoord.y)).ggg * float3(0,1,0);
+		float3 Blue = tex2D(BackBuffer,float2(texcoord.x,texcoord.y)).bbb * float3(0,0,1);
+			
+		float GS_R = length(Red);
+		float GS_GB = length(Blue+Green);
+		
+		float4 A = float4(GS_R,GS_R,GS_R,1);		
+		float4 B = float4(GS_GB,GS_GB,GS_GB,1);
 
-		
-		float grayscaleR = dot(Red.rrr, float3(0.3, 0.59, 0.11));
-		float grayscaleGB = dot(lerp(Blue.bbb,Green.ggg,0.5), float3(0.3, 0.59, 0.11));
-		
-		float A = float4(grayscaleR,grayscaleR,grayscaleR,T);
-		float B = float4(grayscaleGB,grayscaleGB,grayscaleGB,T);
-		
 		color =  A;
 		colorT = B;
 	}
 	else if(Stereoscopic_Mode_Input == 5) //  DeAnaglyph Need. Need to Do ReSearch.
 	{
+		float3 Red = tex2D(BackBuffer,float2(texcoord.x,texcoord.y)).rrr * float3(1,0,0);
+		float3 Green = tex2D(BackBuffer,float2(texcoord.x,texcoord.y)).ggg * float3(0,1,0);
+		float3 Blue = tex2D(BackBuffer,float2(texcoord.x,texcoord.y)).bbb * float3(0,0,1);
+			
+		float GS_R = length(Red);
+		float GS_GB = length(Blue+Green);
+		
+		float4 A = float4(GS_R,GS_R,GS_R,1);				
+		float4 B = float4(GS_GB,GS_GB,GS_GB,1);
+
+		A = lerp(A , tex2Dlod(SamplerBB,float4(texcoord,0,8.0)) , 0.025);		 
+		float3 GS_A = dot(A.rgb,float3(0.299, 0.587, 0.114));
+		float3 ADone = lerp(GS_A,A.rgb,62.5);
 	
-	}
-	else if(Stereoscopic_Mode_Input == 6) // FS Needs previous frame Filled.
-	{
+		B = lerp(B , tex2Dlod(SamplerBB,float4(texcoord,0,8.0)) , 0.025);		 
+		float3 GS_B = dot(B.rgb,float3(0.299, 0.587, 0.114));
+		float3 BDone = lerp(GS_B,B.rgb,62.5);
+		
 	
+		A = lerp(float4(ADone,1),float4(ADone,1)*tex2Dlod(SamplerBB,float4(texcoord,0,5.0)),0.25);
+		B = lerp(float4(BDone,1),float4(BDone,1)*tex2Dlod(SamplerBB,float4(texcoord,0,2.0)),0.25);
+		
+		color =  A;
+		colorT = B;
+		
 	}
 }
 
@@ -261,53 +285,27 @@ void PS0(float4 position : SV_Position, float2 texcoord : TEXCOORD0, out float4 
 	float4 cL, cR;
 	float2 TCL, TCR;
 	float P = Perspective * pix.x;
-		if(Eye_Swap)
+		
+		if (Stereoscopic_Mode == 0)
 		{
-			if ( Stereoscopic_Mode == 0 )
-			{
-				TCL.x = (texcoord.x*2-1) - P;
-				TCR.x = (texcoord.x*2) + P;
-				TCL.y = texcoord.y;
-				TCR.y = texcoord.y;
-			}
-			else if( Stereoscopic_Mode == 1 )
-			{
-				TCL.x = texcoord.x - P;
-				TCR.x = texcoord.x + P;
-				TCL.y = (texcoord.y*2-1);
-				TCR.y = (texcoord.y*2);
-			}
-			else
-			{
-				TCL.x = texcoord.x - P;
-				TCR.x = texcoord.x + P;
-				TCL.y = texcoord.y;
-				TCR.y = texcoord.y;
-			}
-		}	
+			TCR.x = (texcoord.x*2-1) - P;
+			TCL.x = (texcoord.x*2) + P;
+			TCR.y = texcoord.y;
+			TCL.y = texcoord.y;
+		}
+		else if(Stereoscopic_Mode == 1)
+		{
+			TCR.x = texcoord.x - P;
+			TCL.x = texcoord.x + P;
+			TCR.y = (texcoord.y*2-1);
+			TCL.y = (texcoord.y*2);
+		}
 		else
 		{
-			if (Stereoscopic_Mode == 0)
-			{
-				TCR.x = (texcoord.x*2-1) - P;
-				TCL.x = (texcoord.x*2) + P;
-				TCR.y = texcoord.y;
-				TCL.y = texcoord.y;
-			}
-			else if(Stereoscopic_Mode == 1)
-			{
-				TCR.x = texcoord.x - P;
-				TCL.x = texcoord.x + P;
-				TCR.y = (texcoord.y*2-1);
-				TCL.y = (texcoord.y*2);
-			}
-			else
-			{
-				TCR.x = texcoord.x - P;
-				TCL.x = texcoord.x + P;
-				TCR.y = texcoord.y;
-				TCL.y = texcoord.y;
-			}
+			TCR.x = texcoord.x - P;
+			TCL.x = texcoord.x + P;
+			TCR.y = texcoord.y;
+			TCL.y = texcoord.y;
 		}
 		
 		//Optimization for line & column interlaced out.
@@ -321,9 +319,17 @@ void PS0(float4 position : SV_Position, float2 texcoord : TEXCOORD0, out float4 
 			TCL.x = TCL.x + (Interlace_Optimization * pix.x);
 			TCR.x = TCR.x - (Interlace_Optimization * pix.x);
 		}
-
+		
+		if(Eye_Swap)
+		{
 		cL = tex2D(SamplerCL,float2(TCL.x,TCL.y));
 		cR = tex2D(SamplerCR,float2(TCR.x,TCR.y));
+		}
+		else
+		{
+		cL = tex2D(SamplerCR,float2(TCL.x,TCL.y));
+		cR = tex2D(SamplerCL,float2(TCR.x,TCR.y));
+		}
 	
 	float2 gridxy;
 
@@ -462,7 +468,13 @@ void PostProcessVS(in uint id : SV_VertexID, out float4 position : SV_Position, 
 //*Rendering passes*//
 
 technique To_Else
-{			
+{		
+			pass BB
+		{
+			VertexShader = PostProcessVS;
+			PixelShader = PS_InputBB;
+			RenderTarget = texBB;
+		}	
 			pass StereoInput
 		{
 			VertexShader = PostProcessVS;
