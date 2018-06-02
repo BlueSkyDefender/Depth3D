@@ -59,6 +59,7 @@ IF IT HAS AN *asterisk* I AM STILL WORKING ON IT. But, you can still use the set
 [Read Below] [Game List]                                  [Depth Map] [Adjustment] [Weapon DM] [Depth Flip] [ZDP Tied Range]
     RB        .Hack//G.U.                                     DM 1         25                                0.050-0.125 
              *ABZU                                            DM 1         50                                0.050                    
+              Agony                                           DM 1         62.5                              0.0025-0.500
               Alien Isolation                                 DM 0         25                                0.0375-0.075
              *Amnesia: Machine for Pigs                       DM 0         37.5        WDM 2                 0.050-0.075       
              *Amnesia: The Dark Descent                       DM 0         37.5        WDM 2                 0.050-0.075
@@ -68,6 +69,7 @@ IF IT HAS AN *asterisk* I AM STILL WORKING ON IT. But, you can still use the set
              *Batman Arkham Knight                            DM 0         15.0                              0.050-0.100                           
              *Batman Arkham Origins                           DM 0         15.0                              0.050-0.100
              *Batman: Arkham City                             DM 0         15.0                              0.050-0.100
+              Beware                                          DM 1         62.5                      Yes     0.100-0.150                       
              ?BladeStorm Nightmare                            DM ?         ?                                 ?       ?
     RB        Bioshock Remastred                              DM 0         7.5         WDM 28                0.050-0.175          
     RB       *BloodCM                                         DM 0         15.0                              0.100-0.300                                     

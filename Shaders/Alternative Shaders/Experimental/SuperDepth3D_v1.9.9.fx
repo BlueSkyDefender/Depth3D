@@ -271,9 +271,9 @@ uniform float AO_Control <
 	ui_min = 0.001; ui_max = 1.25;
 	ui_label = " 3D AO Control";
 	ui_tooltip = "Control the spread of the 3D AO.\n" 
-				 "Default is 0.5.";
+				 "Default is 0.5625.";
 	ui_category = "3D Ambient Occlusion";
-> = 0.5;
+> = 0.5625;
 
 uniform float AO_Power <
 	ui_type = "drag";
