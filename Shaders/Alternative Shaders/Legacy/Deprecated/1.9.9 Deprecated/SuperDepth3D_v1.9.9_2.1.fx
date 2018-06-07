@@ -143,10 +143,10 @@ uniform int Custom_Sidebars <
 //Depth Map//
 uniform int Depth_Map <
 	ui_type = "combo";
-	ui_items = "DM0 Normal\0DM1 Normal Reversed\0DM2 Offset Normal\0DM3 Offset Reversed\0";
+	ui_items = " 0 Normal\0 1 Normal Reversed\0 2 Offset Normal\0 3 Offset Reversed\0";
 	ui_label = "·Depth Map Selection·";
 	ui_tooltip = "Linearization for the zBuffer also known as Depth Map.\n"
-			     "Normally you want to use DM0 or DM1.";
+			     "Normally you want to use 0 or 1.";
 	ui_category = "Depth Map";
 > = 0;
 
@@ -437,7 +437,8 @@ float Depth(in float2 texcoord : TEXCOORD0)
 
 		//Conversions to linear space.....
 		//Near & Far Adjustment
-		float Far = 1, Near = 0.125/Depth_Map_Adjust, DA = Depth_Map_Adjust*2; //Division Depth Map Adjust - Near
+		float Near = 0.125/Depth_Map_Adjust; //Division Depth Map Adjust - Near
+		float Far = 1; //Far Adjustment
 
 		//Raw Z Offset
 		float Z = min(1,pow(abs(exp(zBuffer)*Offsets),2));
@@ -456,24 +457,24 @@ float Depth(in float2 texcoord : TEXCOORD0)
 		//3. Offset Reverse
 		float OffsetReverse = Far * Near / (Near + ZR * (Far - Near));
 			  OffsetReverse = lerp(Normal,OffsetReverse,0.875);//mixing
-		
+
 		float DM;
 		
 		if (Depth_Map == 0)
 		{
-			DM = Normal;
+		DM = Normal;
 		}		
 		else if (Depth_Map == 1)
 		{
-			DM = NormalReverse;
+		DM = NormalReverse;
 		}
 		else if (Depth_Map == 2)
 		{
-			DM = OffsetNormal;
+		DM = OffsetNormal;
 		}
 		else
 		{
-			DM = OffsetReverse;
+		DM = OffsetReverse;
 		}
 		
 	return DM;	

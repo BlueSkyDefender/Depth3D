@@ -138,7 +138,7 @@ void PS_InputBB(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0
 float4 UL(in float2 texcoord : TEXCOORD0)
 {
 	float gridy = floor(texcoord.y*(BUFFER_HEIGHT)); //Native
-	return int(gridy) % 2 ? 0 : tex2D(BackBuffer, float2(texcoord.x,texcoord.y)) ;
+	return int(gridy) & 1 ? 0 : tex2D(BackBuffer, float2(texcoord.x,texcoord.y)) ;
 }
 
 float4 Uni_L(in float2 texcoord : TEXCOORD0)
@@ -157,7 +157,7 @@ float4 Uni_L(in float2 texcoord : TEXCOORD0)
 float4 UR(in float2 texcoord : TEXCOORD0)
 {
 	float gridy = floor(texcoord.y*(BUFFER_HEIGHT)); //Native
-	return int(gridy) % 2 ? tex2D(BackBuffer, float2(texcoord.x,texcoord.y)) : 0 ;
+	return int(gridy) & 1 ? tex2D(BackBuffer, float2(texcoord.x,texcoord.y)) : 0 ;
 }
 
 float4 Uni_R(in float2 texcoord : TEXCOORD0)
@@ -176,7 +176,7 @@ float4 Uni_R(in float2 texcoord : TEXCOORD0)
 float4 BL(in float2 texcoord : TEXCOORD0)
 {
 	float2 gridxy = floor(float2(texcoord.x*BUFFER_WIDTH,texcoord.y*BUFFER_HEIGHT));
-	return int(gridxy.x+gridxy.y) % 2 ? 0 : tex2D(BackBuffer, float2(texcoord.x,texcoord.y)) ;
+	return int(gridxy.x+gridxy.y) & 1 ? 0 : tex2D(BackBuffer, float2(texcoord.x,texcoord.y)) ;
 }
 
 float4 Bi_L(in float2 texcoord : TEXCOORD0)
@@ -196,7 +196,7 @@ float4 Bi_L(in float2 texcoord : TEXCOORD0)
 float4 BR(in float2 texcoord : TEXCOORD0)
 {
 	float2 gridxy = floor(float2(texcoord.x*BUFFER_WIDTH,texcoord.y*BUFFER_HEIGHT));
-	return int(gridxy.x+gridxy.y) % 2 ? tex2D(BackBuffer, float2(texcoord.x,texcoord.y)) : 0 ;
+	return int(gridxy.x+gridxy.y) & 1 ? tex2D(BackBuffer, float2(texcoord.x,texcoord.y)) : 0 ;
 }
 
 float4 Bi_R(in float2 texcoord : TEXCOORD0)
@@ -212,27 +212,28 @@ float4 Bi_R(in float2 texcoord : TEXCOORD0)
    return done;
 }
 
-void PS_InputLR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 color : SV_Target0 , out float4 colorT: SV_Target1)
+void PS_InputLR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 colorA : SV_Target0 , out float4 colorB: SV_Target1)
 {	
+float4 Left,Right;
 	if(Stereoscopic_Mode_Input == 0) //SbS
 	{
-		color =  tex2D(BackBuffer,float2(texcoord.x*0.5,texcoord.y));
-		colorT = tex2D(BackBuffer,float2(texcoord.x*0.5+0.5,texcoord.y));
+		Left =  tex2D(BackBuffer,float2(texcoord.x*0.5,texcoord.y));
+		Right = tex2D(BackBuffer,float2(texcoord.x*0.5+0.5,texcoord.y));
 	}
 	else if(Stereoscopic_Mode_Input == 1) //TnB
 	{
-		color =  tex2D(BackBuffer,float2(texcoord.x,texcoord.y*0.5));
-		colorT = tex2D(BackBuffer,float2(texcoord.x,texcoord.y*0.5+0.5));
+		Left =  tex2D(BackBuffer,float2(texcoord.x,texcoord.y*0.5));
+		Right = tex2D(BackBuffer,float2(texcoord.x,texcoord.y*0.5+0.5));
 	}	
 	else if(Stereoscopic_Mode_Input == 2) //Line_Interlaced Unilateral Reconstruction needed.
 	{
-		color =  Uni_L(texcoord);
-		colorT = Uni_R(texcoord);
+		Left =  Uni_L(texcoord);
+		Right = Uni_R(texcoord);
 	}	
 	else if(Stereoscopic_Mode_Input == 3) //CB_3D Bilateral Reconstruction needed.
 	{
-		color =  Bi_L(texcoord);
-		colorT = Bi_R(texcoord);
+		Left =  Bi_L(texcoord);
+		Right = Bi_R(texcoord);
 	}
 	else if(Stereoscopic_Mode_Input == 4)
 	{
@@ -246,8 +247,8 @@ void PS_InputLR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0
 		float4 A = float4(GS_R,GS_R,GS_R,1);		
 		float4 B = float4(GS_GB,GS_GB,GS_GB,1);
 
-		color =  A;
-		colorT = B;
+		Left =  A;
+		Right = B;
 	}
 	else if(Stereoscopic_Mode_Input == 5) //  DeAnaglyph Need. Need to Do ReSearch.
 	{
@@ -273,16 +274,18 @@ void PS_InputLR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0
 		A = lerp(float4(ADone,1),float4(ADone,1)*tex2Dlod(SamplerBB,float4(texcoord,0,5.0)),0.25);
 		B = lerp(float4(BDone,1),float4(BDone,1)*tex2Dlod(SamplerBB,float4(texcoord,0,2.0)),0.25);
 		
-		color =  A;
-		colorT = B;
+		Left =  A;
+		Right = B;
 		
 	}
+	colorA = Left;
+	colorB = Right;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void PS0(float4 position : SV_Position, float2 texcoord : TEXCOORD0, out float4 color : SV_Target)
 {
-	float4 cL, cR;
+	float4 cL, cR , Out;
 	float2 TCL, TCR;
 	float P = Perspective * pix.x;
 		
@@ -368,23 +371,23 @@ void PS0(float4 position : SV_Position, float2 texcoord : TEXCOORD0, out float4 
 			
 	if(Stereoscopic_Mode == 0)
 	{	
-		color = texcoord.x < 0.5 ? cL : cR;
+		Out = texcoord.x < 0.5 ? cL : cR;
 	}
 	else if(Stereoscopic_Mode == 1)
 	{	
-		color = texcoord.y < 0.5 ? cL : cR;
+		Out = texcoord.y < 0.5 ? cL : cR;
 	}
 	else if(Stereoscopic_Mode == 2)
 	{
-		color = int(gridxy.y) & 1 ? cR : cL;	
+		Out = int(gridxy.y) & 1 ? cR : cL;	
 	}
 	else if(Stereoscopic_Mode == 3)
 	{
-		color = int(gridxy.x) & 1 ? cR : cL;		
+		Out = int(gridxy.x) & 1 ? cR : cL;		
 	}
 	else if(Stereoscopic_Mode == 4)
 	{	
-		color = int(gridxy.x+gridxy.y) & 1 ? cR : cL;
+		Out = int(gridxy.x+gridxy.y) & 1 ? cR : cL;
 	}
 	else if(Stereoscopic_Mode == 5)
 	{													
@@ -401,7 +404,7 @@ void PS0(float4 position : SV_Position, float2 texcoord : TEXCOORD0, out float4 
 			float4 LeftEyecolor = float4(1.0,0.0,0.0,1.0);
 			float4 RightEyecolor = float4(0.0,1.0,1.0,1.0);
 			
-			color =  (cA*LeftEyecolor) + (cB*RightEyecolor);
+			Out =  (cA*LeftEyecolor) + (cB*RightEyecolor);
 		}
 		else if (Anaglyph_Colors == 1)
 		{
@@ -420,14 +423,14 @@ void PS0(float4 position : SV_Position, float2 texcoord : TEXCOORD0, out float4 
 		
 		if (blue > 1) { blue = 1; }   if (blue < 0) { blue = 0; }
 
-		color = float4(red, green, blue, 0);
+		Out = float4(red, green, blue, 0);
 		}
 		else if (Anaglyph_Colors == 2)
 		{
 			float4 LeftEyecolor = float4(0.0,1.0,0.0,1.0);
 			float4 RightEyecolor = float4(1.0,0.0,1.0,1.0);
 			
-			color =  (cA*LeftEyecolor) + (cB*RightEyecolor);			
+			Out =  (cA*LeftEyecolor) + (cB*RightEyecolor);			
 		}
 		else
 		{
@@ -447,9 +450,10 @@ void PS0(float4 position : SV_Position, float2 texcoord : TEXCOORD0, out float4 
 		
 		if (blue > 1) { blue = 1; }   if (blue < 0) { blue = 0; }
 				
-		color = float4(red, green, blue, 0);
+		Out = float4(red, green, blue, 0);
 		}
 	}
+	color = Out;
 }
 
 

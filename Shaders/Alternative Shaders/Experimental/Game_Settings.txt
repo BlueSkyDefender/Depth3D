@@ -154,7 +154,7 @@ IF IT HAS AN *asterisk* I AM STILL WORKING ON IT. But, you can still use the set
               Sleeping Dogs: DE                               DM 0         7.0                               0.075-0.100 
               Soma                                            DM 0         11.25       WDM 20                0.025-0.100
              *Sonic Adventure 2                               DM 0         10.0                              0.150-0.250
-              Souls Games                                     DM 0         7.5                               0.050-0.100              
+              Souls Games                                     DM 0       7.5-25.0                            0.050-0.100              
               Stacking                                        DM 0         7.5                               0.200-0.300
     RB        Stay Close                                      DM 1         10                                0.200-0.300
               Tales of Zestiria                               DM 0         7.5                               0.350-0.400
