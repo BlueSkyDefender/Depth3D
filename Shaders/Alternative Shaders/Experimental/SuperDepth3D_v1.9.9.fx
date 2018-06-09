@@ -369,18 +369,8 @@ float4 MouseCursor(float4 position : SV_Position, float2 texcoord : TEXCOORD) : 
 {
 	float2 MousecoordsXY = Mousecoords * pix;
 	float2 CC_Size = Cross_Cursor_Adjust.a * pix;
-	float2 CC_Mode;
-	//Adjust for CC for Stereoscopic Mode.
-	if(Stereoscopic_Mode == 0 || Stereoscopic_Mode == 1)
-	{
-		CC_Mode = float2(1.0,0.75);
-	}
-	else
-	{
-		CC_Mode = float2(0.75,0.5);
-	}
-	
-	float4 Mpointer = all(abs(texcoord - MousecoordsXY) < CC_Size*CC_Mode) * (1 - all(abs(texcoord - MousecoordsXY) > CC_Size/(Cross_Cursor_Adjust.a*float2(0.5,1.0)))) ? float4(Cross_Cursor_Adjust.rgb/255, 1.0) : tex2D(BackBuffer, texcoord);//cross
+	float2 CC_ModeA = float2(1.25,1.0), CC_ModeB = float2(0.5,0.5);
+	float4 Mpointer = all(abs(texcoord - MousecoordsXY) < CC_Size*CC_ModeA) * (1 - all(abs(texcoord - MousecoordsXY) > CC_Size/(Cross_Cursor_Adjust.a*CC_ModeB))) ? float4(Cross_Cursor_Adjust.rgb/255, 1.0) : tex2D(BackBuffer, texcoord);//cross
 	
 	return Mpointer;
 }
