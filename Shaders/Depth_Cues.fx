@@ -82,7 +82,7 @@ sampler BackBuffer
 	{ 
 		Texture = BackBufferTex;
 	};
-	
+		
 texture texB { Width = BUFFER_WIDTH*0.5; Height = BUFFER_HEIGHT*0.5; Format = RGBA8; MipLevels = 8;};
 
 sampler SamplerBlur
@@ -96,7 +96,7 @@ sampler SamplerBlur
 	
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void Blur(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 color : SV_Target0)                                                                          
+void Blur(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 color : SV_Target)                                                                          
 {
 	float4 CC = tex2D(BackBuffer, texcoord);
 
@@ -159,7 +159,7 @@ float DepthCues(float2 texcoord : TEXCOORD0)
 	float3 RGB_A, RGB_B;	
 	
 	//Formula for Image Pop = Original + (Original / Blurred) * Amount.
-	RGB_A = GS( tex2D(BackBuffer,texcoord).rgb ) / GS( Adjust(texcoord).rgb );
+	RGB_A = GS(tex2D(BackBuffer,texcoord).rgb) / GS( Adjust(texcoord).rgb );
 	float3 FGPop = GS(RGB_A.rgb);
 	
 	//Formula for BackGround Pop = Original + (Original - Blurred) * Amount .
@@ -173,7 +173,7 @@ float DepthCues(float2 texcoord : TEXCOORD0)
 
 float4 CuesOut(float2 texcoord : TEXCOORD0)
 {		
-	float Con = Contrast, Mask = dot(tex2D(BackBuffer,texcoord),Luma())> (1-Mask_Adjust);
+	float Con = Contrast, Mask = dot(tex2D(BackBuffer,texcoord).rgb,Luma())> (1-Mask_Adjust);
 	float4 Out, Debug_Done = saturate(DepthCues(texcoord).xxxx + Mask), Combine = tex2D(BackBuffer,texcoord) * Debug_Done;
 			
 	Con = (Con < 0.0) ? max(Con/100.0, -100.0) : min(Con, 100.0);
@@ -307,15 +307,15 @@ void PostProcessVS(in uint id : SV_VertexID, out float4 position : SV_Position, 
 //*Rendering passes*//
 technique Monocular_Cues
 {
-			pass BlurFilter
-		{
-			VertexShader = PostProcessVS;
-			PixelShader = Blur;
-			RenderTarget = texB;
-		}	
-			pass CuesUnsharpMask
-		{
-			VertexShader = PostProcessVS;
-			PixelShader = Out;	
-		}
+		pass BlurFilter
+	{
+		VertexShader = PostProcessVS;
+		PixelShader = Blur;
+		RenderTarget = texB;
+	}	
+		pass CuesUnsharpMask
+	{
+		VertexShader = PostProcessVS;
+		PixelShader = Out;	
+	}
 }
