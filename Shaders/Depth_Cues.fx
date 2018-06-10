@@ -45,10 +45,26 @@ uniform float Spread <
 				 "Number 7.5 is default.";
 > = 7.5;
 
+uniform int Luma_Coefficient <
+	ui_type = "combo";
+	ui_label = "Luma";
+	ui_tooltip = "Changes how color get sharpened by Unsharped Masking\n"
+				 "This should only affect Normal, Color, & Greyscale output.";
+	ui_items = "SD video\0HD video\0HDR video\0";
+> = 0;
+
 uniform bool Debug_View <
 	ui_label = "Debug View";
 	ui_tooltip = "To view Shade & Blur effect on the game, movie piture & ect.";
 > = false;
+
+uniform float Mask_Adjust <
+	ui_type = "drag";
+	ui_min = 0.0; ui_max = 0.5;
+	ui_label = "Mask Adjustment";
+	ui_tooltip = "Mask is used to protect Bright Colors & Lights in the image from Fake AO intrusion.\n"
+				 "Zero is default, Off.";
+> = 0.0;
 
 /////////////////////////////////////////////////////D3D Starts Here/////////////////////////////////////////////////////////////////
 #define pix float2(BUFFER_RCP_WIDTH, BUFFER_RCP_HEIGHT)
@@ -119,13 +135,29 @@ float3 GS(float3 color)
 	return clamp(color,0.003,1.0);//clamping to protect from over Dark.
 }
 
+float3 Luma()
+{
+	float3 Luma;
+	
+	if (Luma_Coefficient == 0)
+	{
+		Luma = float3(0.299, 0.587, 0.114); // (SD video)
+	}
+	else if (Luma_Coefficient == 1)
+	{
+		Luma = float3(0.2126, 0.7152, 0.0722); // (HD video) https://en.wikipedia.org/wiki/Luma_(video)
+	}
+	else
+	{
+		Luma = float3(0.2627, 0.6780, 0.0593); //(HDR video) https://en.wikipedia.org/wiki/Rec._2100
+	}
+	return Luma;
+}
+
 float DepthCues(float2 texcoord : TEXCOORD0)
 {
-	//Luma (SD video)	float3(0.299, 0.587, 0.114)
-	//Luma (HD video)	float3(0.2126, 0.7152, 0.0722) https://en.wikipedia.org/wiki/Luma_(video)
-	//Luma (HDR video)	float3(0.2627, 0.6780, 0.0593) https://en.wikipedia.org/wiki/Rec._2100
-	float3 RGB_A, RGB_B, Luma_Coefficient = float3(0.2627, 0.6780, 0.0593);
-		
+	float3 RGB_A, RGB_B;	
+	
 	//Formula for Image Pop = Original + (Original / Blurred) * Amount.
 	RGB_A = GS( tex2D(BackBuffer,texcoord).rgb ) / GS( Adjust(texcoord).rgb );
 	float3 FGPop = GS(RGB_A.rgb);
@@ -133,29 +165,26 @@ float DepthCues(float2 texcoord : TEXCOORD0)
 	//Formula for BackGround Pop = Original + (Original - Blurred) * Amount .
 	RGB_B = GS(tex2D(BackBuffer,texcoord).rgb) - GS(Adjust(texcoord).rgb);
 	float3 BGPop = GS(1-RGB_B.rgb * Power);
-	
-	//RGB = saturate(RGB_A);
-	float Combine = dot(lerp(FGPop,BGPop,0.5),Luma_Coefficient);
+
+	float Combine = dot(lerp(FGPop,BGPop,0.5),Luma());
 	
 	return saturate(Combine);
 }
 
 float4 CuesOut(float2 texcoord : TEXCOORD0)
 {		
-	float4 Out, Combine = tex2D(BackBuffer,texcoord) * DepthCues(texcoord).xxxx;
-	float Con = Contrast;
+	float Con = Contrast, Mask = dot(tex2D(BackBuffer,texcoord),Luma())> (1-Mask_Adjust);
+	float4 Out, Debug_Done = saturate(DepthCues(texcoord).xxxx + Mask), Combine = tex2D(BackBuffer,texcoord) * Debug_Done;
 			
 	Con = (Con < 0.0) ? max(Con/100.0, -100.0) : min(Con, 100.0);
 	Combine.rgb=(Combine.rgb-0.5)*max(Con+1.0, 0.0)+0.5;
-		
-	float4 Debug_Done = DepthCues(texcoord).xxxx;
-		
+				
 	if (!Debug_View)
 	{
 		Out = Combine;
 	}
 	else
-	{		
+	{	
 		Out = Debug_Done;
 	}
 	
