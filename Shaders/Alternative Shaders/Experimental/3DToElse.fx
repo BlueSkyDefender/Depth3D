@@ -21,7 +21,7 @@
 
 uniform int Stereoscopic_Mode_Input <
 	ui_type = "combo";
-	ui_items = "Side by Side\0Top and Bottom\0Line Interlaced\0Checkerboard 3D\0Anaglyph GS *WIP*\0Anaglyph Color *WIP*\0";
+	ui_items = "Side by Side\0Top and Bottom\0Line Interlaced\0Checkerboard 3D\0Anaglyph GS *WIP*\0Anaglyph Color *WIP*\0Frame Sequential\0";
 	ui_label = "Stereoscopic Mode Input";
 	ui_tooltip = "Change to the proper stereoscopic input.";
 	ui_category = "Stereoscopic Conversion";
@@ -127,7 +127,23 @@ sampler SamplerBB
 		Texture = texBB;
 	};
   
+ texture CurrentBackBuffer  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA32F;}; 
+
+sampler CBackBuffer
+	{
+		Texture = CurrentBackBuffer;
+	};
+
+texture PastSingleBackBuffer  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA32F;}; 
+
+sampler PSBackBuffer
+	{
+		Texture = PastSingleBackBuffer;
+	};
+  
 ////////////////////////////////////////////////Left/Right Eye////////////////////////////////////////////////////////
+uniform uint framecount < source = "framecount"; >;
+//Total amount of frames since the game started.
 
 void PS_InputBB(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 color : SV_Target)
 {
@@ -278,6 +294,23 @@ float4 Left,Right;
 		Right = B;
 		
 	}
+	else //Frame Sequential Conversion.
+	{
+		float OddEven = framecount % 2 == 0;
+		
+		//Past Single Frame
+		Left = tex2D(PSBackBuffer,float2(texcoord.x,texcoord.y));
+		Right = tex2D(PSBackBuffer,float2(texcoord.x,texcoord.y));
+		//Current Single Frame
+		if (OddEven)
+		{	
+			Left =  tex2D(BackBuffer,float2(texcoord.x,texcoord.y));
+		}
+		else
+		{
+			Right = tex2D(BackBuffer,float2(texcoord.x,texcoord.y));
+		}
+	}
 	colorA = Left;
 	colorB = Right;
 }
@@ -333,7 +366,7 @@ void PS0(float4 position : SV_Position, float2 texcoord : TEXCOORD0, out float4 
 		cL = tex2D(SamplerCR,float2(TCL.x,TCL.y));
 		cR = tex2D(SamplerCL,float2(TCR.x,TCR.y));
 		}
-	
+
 	float2 gridxy;
 
 	if(Scaling_Support == 0)
@@ -456,6 +489,15 @@ void PS0(float4 position : SV_Position, float2 texcoord : TEXCOORD0, out float4 
 	color = Out;
 }
 
+void Current_BackBuffer(float4 position : SV_Position, float2 texcoord : TEXCOORD, out float4 color : SV_Target)
+{	 	
+	color = tex2D(BackBuffer,texcoord);
+}
+
+void Past_BackBuffer(float4 position : SV_Position, float2 texcoord : TEXCOORD, out float4 PastSingle : SV_Target)
+{	
+	PastSingle = tex2D(CBackBuffer,texcoord);
+}
 
 ///////////////////////////////////////////////////////////ReShade.fxh/////////////////////////////////////////////////////////////
 
@@ -473,6 +515,12 @@ void PostProcessVS(in uint id : SV_VertexID, out float4 position : SV_Position, 
 
 technique To_Else
 {		
+			pass CBB
+		{
+			VertexShader = PostProcessVS;
+			PixelShader = Current_BackBuffer;
+			RenderTarget = CurrentBackBuffer;
+		}
 			pass BB
 		{
 			VertexShader = PostProcessVS;
@@ -491,4 +539,11 @@ technique To_Else
 			VertexShader = PostProcessVS;
 			PixelShader = PS0;	
 		}
+			pass PBB
+		{
+			VertexShader = PostProcessVS;
+			PixelShader = Past_BackBuffer;
+			RenderTarget = PastSingleBackBuffer;	
+		}
+		
 }

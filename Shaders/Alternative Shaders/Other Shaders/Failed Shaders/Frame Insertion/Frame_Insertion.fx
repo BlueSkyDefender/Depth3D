@@ -22,11 +22,18 @@
  //*																																												*//
  //* 																																												*//
  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+uniform int TargetFrameTime <
+	ui_type = "combo";
+	ui_items = " 120hz\0 100hz\0 60hz\0 Auto\0";
+	ui_label = "Frame Sync";
+	ui_tooltip = "This is used for frame syncing.";
+> = 0;
+
 uniform int Frame_Selection <
 	ui_type = "combo";
 	ui_label = "Frame Selection";
 	ui_tooltip = "Select the type of frame insertion.";
-	ui_items = "Adjustable Frame\0Average B&W\0Average Color\0";
+	ui_items = "Adjustable Frame\0Average B&W\0Average Color\0BackBuffer 50%\0BackBuffer 75%\0";
 > = 0;
 
 uniform float Frame_Adjust <
@@ -100,35 +107,76 @@ float4 Average_Luminance(float4 position : SV_Position, float2 texcoord : TEXCOO
 	{
 		Color = Average_Lum_BW.xxx;
 	}
-	else
+	else if (Frame_Selection == 2)
 	{
 		Color = Average_Lum;
+	}
+	else
+	{
+		Color = 0;
 	}
 	
 	return float4(Color,1);
 }
-
+uniform float timer < source = "timer"; >;
 uniform uint framecount < source = "framecount"; >;
 //Total amount of frames since the game started.
 
 float4 BFIOut(float2 texcoord : TEXCOORD0)
-{	
+{
+	float FixedTime;
 	float4 Out;
-			
-		if (framecount % 2 == 0)//If number is Even
+	if (TargetFrameTime == 0)
+	{
+		FixedTime = 8.333; //120fps TargetFrameTime 8.333
+	}
+	else if (TargetFrameTime == 1)
+	{
+		FixedTime = 10.0; //100fps TargetFrameTime 10.0
+	}
+	else if (TargetFrameTime == 2)
+	{
+		FixedTime = 16.666; //60fps TargetFrameTime 16.666
+	}
+	else
+	{
+		FixedTime = 0;
+	}
+	
+	
+	float OddEven = framecount % 2 == 0; 
+	
+	if (TargetFrameTime <= 2)
+	{
+		OddEven = round(timer/FixedTime) % 2 == 0;
+	}			
+
+	if (OddEven)
+	{
+		Out = tex2D(BackBuffer,texcoord);
+	}
+	else
+	{
+		float4 Done = tex2Dlod(SamplerLum,float4(texcoord,0,0));
+		
+		if(Frame_Selection >= 3)
 		{
-			Out = tex2D(BackBuffer,texcoord);
+			float2 gridxy = floor(float2(texcoord.x*BUFFER_WIDTH,texcoord.y*BUFFER_HEIGHT)); //Native
+			Done = int(gridxy.x+gridxy.y) & 1 ? tex2D(BackBuffer,texcoord) : 0 ;
+			if(Frame_Selection == 4)
+			{
+				float gridy = floor(texcoord.y*(BUFFER_HEIGHT)); //Native
+				Done = int(gridy) & 1 ? 0 : Done ;
+			}
 		}
-		else
-		{
-			Out = tex2Dlod(SamplerLum,float4(texcoord,0,0));
-		}
+		
+		Out = Done;
+	}
 	
 	return Out;
 }
 
 ////////////////////////////////////////////////////////Logo/////////////////////////////////////////////////////////////////////////
-uniform float timer < source = "timer"; >;
 float4 Out(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Target
 {
 	float PosX = 0.5*BUFFER_WIDTH*pix.x,PosY = 0.5*BUFFER_HEIGHT*pix.y;	
