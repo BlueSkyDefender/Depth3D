@@ -52,8 +52,8 @@
 //Image Position Adjust is used to move the Z-Buffer around.
 #define Image_Position_Adjust float2(0.0,0.0)
 
-//Zero Is Off One+ is On. T Makes the Image Better ???? Maybe ???? Maybe Not. Who Knows. 
-#define Boost 0 //0/1/2/3
+//Zero Is Off One is On. Makes the Image Better ???? Maybe ???? Maybe Not. Who Knows.
+#define Boost 0
 
 //USER EDITABLE PREPROCESSOR FUNCTIONS END//
 //Divergence & Convergence//
@@ -129,7 +129,7 @@ uniform float Disocclusion_Power_Adjust <
 
 uniform int View_Mode <
 	ui_type = "combo";
-	ui_items = "View Mode Normal\0View Mode Alpha\0View Mode Beta\0View Mode Gamma\0";
+	ui_items = "View Mode Normal\0View Mode Alpha\0View Mode Beta\0";
 	ui_label = " View Mode";
 	ui_tooltip = "Change the way the shader warps the output to the screen.\n"
 				 "Default is Normal";
@@ -1081,27 +1081,170 @@ DBD = ( DBD - 1.0f ) / ( -187.5f - 1.0f );
 	{
 		X = 0.5;
 	}
-	
-	if (Boost == 2 || Boost == 3)//Super Secret Depth Boost.
-	{
-		X = lerp(X,-X,-0.0125);
-	}
 		
 	color = float4(X,Y,Z,W);
 }
 
 /////////////////////////////////////////L/R//////////////////////////////////////////////////////////////////////
-float4 PS_calcLR(float2 texcoord)
-{
-	float2 TCL, TCR, TexCoords = texcoord;
-	float4 color, Right, Left;
-	float DepthR = 1, DepthL = 1, Adjust_A = 0.11111111, Adjust_B = 0.07692307, N, S, X, L, R;
-	float samplesA[9] = {0.5,0.5625,0.625,0.6875,0.75,0.8125,0.875,0.9375,1.0};
-	float samplesB[13] = {0.5,0.546875,0.578125,0.625,0.659375,0.703125,0.75,0.796875,0.828125,0.875,0.921875,0.953125,1.0};
 
-	//MS is Max Separation P is Perspective Adjustment
-	float MS = Divergence * pix.x, P = Perspective * pix.x;
-					
+//Left Eye Image
+float4 Calculate_L(float2 texcoord)
+{
+	float4 color_L;
+	float2 TexCoords = texcoord;
+	float DepthL = 1, Adjust_A = 0.11111111, N, S, X, L;
+	float samplesA[5] = {0.5,0.625,0.75,0.875,1.0};
+	float samplesB[9] = {0.5,0.5625,0.625,0.6875,0.75,0.8125,0.875,0.9375,1.0};
+	
+	//MS is Max Separation
+	float MS = Divergence * pix.x;
+								
+		if (View_Mode == 0)
+			N = 5;
+		else if (View_Mode == 1)
+			N = 9;
+		else if (View_Mode == 2)
+			N = 9;
+
+		[loop]
+		for ( int i = 0 ; i < N; i++ ) 
+		{
+			if (View_Mode == 0)
+			{
+				S = samplesA[i] * MS;
+				DepthL = min(DepthL,tex2Dlod(SamplerDis,float4(texcoord.x+S, texcoord.y,0,0)).x);
+			}
+			else if (View_Mode == 1)
+			{
+				S = samplesB[i] * MS * 1.125;
+				L += tex2Dlod(SamplerDis,float4(texcoord.x+S, texcoord.y,0,0)).x*Adjust_A;
+				DepthL = saturate(L);
+			}
+			else if (View_Mode == 2)
+			{
+				X = samplesA[i] * MS;
+				S = samplesB[i] * MS * 1.125;
+				L += tex2Dlod(SamplerDis,float4(texcoord.x+S, texcoord.y,0,0)).x*Adjust_A;
+				L = saturate(L);
+				DepthL = min(DepthL,tex2Dlod(SamplerDis,float4(texcoord.x+X, texcoord.y,0,0)).x);
+			}
+		}
+							
+		if (View_Mode == 2)
+		{
+			DepthL = Conv(DepthL,TexCoords);//Zero Parallax Distance Pass
+			L = Conv(L,TexCoords);//Zero Parallax Distance Pass
+			DepthL = lerp(L,DepthL,0.5);//WORK ON ME
+		}
+		else
+		{
+			DepthL = Conv(DepthL,TexCoords);//Zero Parallax Distance Pass
+		}
+		
+		if (Boost == 1)//Super Secret Depth Boost.
+		DepthL = lerp(DepthL,-DepthL,-0.0125);
+			
+		float ReprojectionLeft = DepthL;
+
+			if(Custom_Sidebars == 0)
+			{
+				color_L = tex2Dlod(BackBufferMIRROR, float4(texcoord.x + ReprojectionLeft, texcoord.y,0,0));
+			}
+			else if(Custom_Sidebars == 1)
+			{
+				color_L = tex2Dlod(BackBufferBORDER, float4(texcoord.x + ReprojectionLeft, texcoord.y,0,0));
+			}
+			else
+			{
+				color_L = tex2Dlod(BackBufferCLAMP, float4(texcoord.x + ReprojectionLeft, texcoord.y,0,0));
+			}
+		
+	return color_L;
+}
+
+//Right Eye Image
+float4 Calculate_R(float2 texcoord)
+{
+	float4 color_R;
+	float2 TexCoords = texcoord;
+	float DepthR = 1, Adjust_A = 0.11111111, N, S, X, R;
+	float samplesA[5] = {0.5,0.625,0.75,0.875,1.0};
+	float samplesB[9] = {0.5,0.5625,0.625,0.6875,0.75,0.8125,0.875,0.9375,1.0};
+	
+	//MS is Max Separation 
+	float MS = Divergence * pix.x;
+			
+		if (View_Mode == 0)
+			N = 5;
+		else if (View_Mode == 1)
+			N = 9;
+		else if (View_Mode == 2)
+			N = 9;
+			
+		[loop]
+		for ( int i = 0 ; i < N; i++ ) 
+		{
+			if (View_Mode == 0)
+			{	
+				S = samplesA[i] * MS;
+				DepthR = min(DepthR,tex2Dlod(SamplerDis,float4(texcoord.x-S, texcoord.y,0,0)).x);
+			}
+			else if (View_Mode == 1)
+			{
+				S = samplesB[i] * MS * 1.125;
+				R += tex2Dlod(SamplerDis,float4(texcoord.x-S, texcoord.y,0,0)).x*Adjust_A;
+				DepthR = saturate(R);
+			}
+			else if (View_Mode == 2)
+			{
+				X = samplesA[i] * MS;
+				S = samplesB[i] * MS * 1.125;
+				R += tex2Dlod(SamplerDis,float4(texcoord.x-S, texcoord.y,0,0)).x*Adjust_A;
+				R = saturate(R);
+				DepthR = min(DepthR,tex2Dlod(SamplerDis,float4(texcoord.x-X, texcoord.y,0,0)).x);
+			}
+		}
+		
+		if (View_Mode == 2)
+		{				
+			DepthR = Conv(DepthR,TexCoords);//Zero Parallax Distance Pass
+			R = Conv(R,TexCoords);//Zero Parallax Distance Pass
+			DepthR = lerp(R,DepthR,0.5);//WORK ON ME
+		}
+		else
+		{
+			DepthR = Conv(DepthR,TexCoords);//Zero Parallax Distance Pass
+		}
+		
+		if (Boost == 1)//Super Secret Depth Boost.
+		DepthR = lerp(DepthR,-DepthR,-0.0125);
+			
+		float ReprojectionRight = DepthR;
+
+			if(Custom_Sidebars == 0)
+			{
+				color_R = tex2Dlod(BackBufferMIRROR, float4(texcoord.x - ReprojectionRight, texcoord.y,0,0));
+			}
+			else if(Custom_Sidebars == 1)
+			{
+				color_R = tex2Dlod(BackBufferBORDER, float4(texcoord.x - ReprojectionRight, texcoord.y,0,0));
+			}
+			else
+			{
+				color_R = tex2Dlod(BackBufferCLAMP, float4(texcoord.x - ReprojectionRight, texcoord.y,0,0));
+			}
+			
+	return color_R;
+}
+
+float4 LR_Format(float2 texcoord)
+{
+	float4 color, Left, Right;
+	float2 TCL, TCR, TexCoords = texcoord;
+	
+	//P is Perspective Adjustment
+	float P = Perspective * pix.x;
+	
 	if(Eye_Swap)
 	{
 		if ( Stereoscopic_Mode == 0 )
@@ -1147,107 +1290,21 @@ float4 PS_calcLR(float2 texcoord)
 	}
 	else if (Stereoscopic_Mode == 3)
 	{
-		TCL.x = TCL.x + (Interlace_Optimization * pix.y);
-		TCR.x = TCR.x - (Interlace_Optimization * pix.y);
+		TCL.x = TCL.x + (Interlace_Optimization * pix.x);
+		TCR.x = TCR.x - (Interlace_Optimization * pix.x);
 	}
-			
-	if (View_Mode == 0 || View_Mode == 1 || View_Mode == 2)
-		N = 9;
-	else if (View_Mode == 3)
-		N = 13;
-				
-	[loop]
-	for ( int i = 0 ; i < N; i++ ) 
-	{
-			if (View_Mode == 0)
-		{
-			S = samplesA[i] * MS;//9
-			DepthL = min(DepthL,tex2Dlod(SamplerDis,float4(TCL.x+S, TCL.y,0,0)).x);
-			DepthR = min(DepthR,tex2Dlod(SamplerDis,float4(TCR.x-S, TCR.y,0,0)).x);
-		}
-		else if (View_Mode == 1)
-		{
-			S = samplesB[i] * MS * 1.125;//9
-			L += tex2Dlod(SamplerDis,float4(TCL.x+S, TCL.y,0,0)).x*Adjust_A;
-			R += tex2Dlod(SamplerDis,float4(TCR.x-S, TCR.y,0,0)).x*Adjust_A;
-			DepthL = saturate(L);
-			DepthR = saturate(R);
-		}
-		else if (View_Mode == 2)
-		{
-			S = samplesA[i] * MS;//9
-			DepthL = min(DepthR,tex2Dlod(SamplerDis,float4(texcoord.x+S, texcoord.y,0,0)).x);
-			DepthR = min(DepthR,tex2Dlod(SamplerDis,float4(texcoord.x-S, texcoord.y,0,0)).x);
-			
-			X = samplesB[i] * MS * 1.125;//9
-			L += tex2Dlod(SamplerDis,float4(texcoord.x+X, texcoord.y,0,0)).x*Adjust_A;
-			R += tex2Dlod(SamplerDis,float4(texcoord.x-X, texcoord.y,0,0)).x*Adjust_A;
-			L = saturate(L);
-			R = saturate(R);
-		}
-		else if (View_Mode == 3)
-		{
-			S = samplesB[i] * MS;//9
-			DepthL = min(DepthR,tex2Dlod(SamplerDis,float4(texcoord.x+S, texcoord.y,0,0)).x);
-			DepthR = min(DepthR,tex2Dlod(SamplerDis,float4(texcoord.x-S, texcoord.y,0,0)).x);
-			
-			X = samplesB[i] * MS * 1.125;//13
-			L += tex2Dlod(SamplerDis,float4(texcoord.x+X, texcoord.y,0,0)).x*Adjust_B;
-			R += tex2Dlod(SamplerDis,float4(texcoord.x-X, texcoord.y,0,0)).x*Adjust_B;
-			L = saturate(L);
-			R = saturate(R);
-		}
-	}
-	
-	if (View_Mode == 2 || View_Mode == 3)
-	{	
-		DepthL = Conv(DepthL,TexCoords);//Zero Parallax Distance Pass
-		L = Conv(L,TexCoords);//Zero Parallax Distance Pass
-		DepthL = lerp(L,DepthL,0.5);//Left
 		
-		DepthR = Conv(DepthR,TexCoords);//Zero Parallax Distance Pass
-		R = Conv(R,TexCoords);//Zero Parallax Distance Pass
-		DepthR = lerp(R,DepthR,0.5);//Right
-	}
-	else
-	{
-		DepthL = Conv(DepthL,TexCoords);//Zero Parallax Distance Pass Left
-		DepthR = Conv(DepthR,TexCoords);//Zero Parallax Distance Pass Right
-	}
-	
-	if (Boost == 1 || Boost == 3)//Super Secret Depth Boost.
-	{
-		DepthL = lerp(DepthL,-DepthL,-0.0125);
-		DepthR = lerp(DepthR,-DepthR,-0.0125);
-	}
-			
-	float ReprojectionLeft =  DepthL;
-	float ReprojectionRight = DepthR;
-
-	if(Custom_Sidebars == 0)
-	{
-		Left = tex2Dlod(BackBufferMIRROR, float4(TCL.x + ReprojectionLeft, TCL.y,0,0));
-		Right = tex2Dlod(BackBufferMIRROR, float4(TCR.x - ReprojectionRight, TCR.y,0,0));
-	}
-	else if(Custom_Sidebars == 1)
-	{
-		Left = tex2Dlod(BackBufferBORDER, float4(TCL.x + ReprojectionLeft, TCL.y,0,0));
-		Right = tex2Dlod(BackBufferBORDER, float4(TCR.x - ReprojectionRight, TCR.y,0,0));
-	}
-	else
-	{
-		Left = tex2Dlod(BackBufferCLAMP, float4(TCL.x + ReprojectionLeft, TCL.y,0,0));
-		Right = tex2Dlod(BackBufferCLAMP, float4(TCR.x - ReprojectionRight, TCR.y,0,0));
-	}
-	
-	float4 cL = Left,cR = Right; //Left Image & Right Image
-
 	if ( Eye_Swap )
 	{
-		cL = Right;
-		cR = Left;	
+		Right = Calculate_L(TCL);
+		Left = Calculate_R(TCR);	
 	}
-		
+	else
+	{
+		Right = Calculate_R(TCR);
+		Left = Calculate_L(TCL);	
+	}
+			
 	if(!Depth_Map_View)
 	{	
 	float2 gridxy;
@@ -1287,30 +1344,30 @@ float4 PS_calcLR(float2 texcoord)
 			
 		if(Stereoscopic_Mode == 0)
 		{	
-			color = TexCoords.x < 0.5 ? cL : cR;
+			color = TexCoords.x < 0.5 ? Left : Right;
 		}
 		else if(Stereoscopic_Mode == 1)
 		{	
-			color = TexCoords.y < 0.5 ? cL : cR;
+			color = TexCoords.y < 0.5 ? Left : Right;
 		}
 		else if(Stereoscopic_Mode == 2)
 		{
-			color = int(gridxy.y) & 1 ? cR : cL;	
+			color = int(gridxy.y) & 1 ? Right : Left;	
 		}
 		else if(Stereoscopic_Mode == 3)
 		{
-			color = int(gridxy.x) & 1 ? cR : cL;		
+			color = int(gridxy.x) & 1 ? Right : Left;		
 		}
 		else if(Stereoscopic_Mode == 4)
 		{
-			color = int(gridxy.x+gridxy.y) & 1 ? cR : cL;
+			color = int(gridxy.x+gridxy.y) & 1 ? Right : Left;
 		}
 		else if(Stereoscopic_Mode == 5)
 		{													
-				float3 HalfLA = dot(cL.rgb,float3(0.299, 0.587, 0.114));
-				float3 HalfRA = dot(cR.rgb,float3(0.299, 0.587, 0.114));
-				float3 LMA = lerp(HalfLA,cL.rgb,Anaglyph_Desaturation);  
-				float3 RMA = lerp(HalfRA,cR.rgb,Anaglyph_Desaturation); 
+				float3 HalfLA = dot(Left.rgb,float3(0.299, 0.587, 0.114));
+				float3 HalfRA = dot(Right.rgb,float3(0.299, 0.587, 0.114));
+				float3 LMA = lerp(HalfLA,Left.rgb,Anaglyph_Desaturation);  
+				float3 RMA = lerp(HalfRA,Right.rgb,Anaglyph_Desaturation); 
 				
 				float4 cA = float4(LMA,1);
 				float4 cB = float4(RMA,1);
@@ -1388,7 +1445,7 @@ float4 Average_Luminance(float4 position : SV_Position, float2 texcoord : TEXCOO
 
 float4 Average_Luminance_Weapon(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Target
 {
-	float3 Average_Lum_Weapon = PS_calcLR(float2(texcoord.x,(texcoord.y + 0.500) * 0.500 + 0.250)).www;
+	float3 Average_Lum_Weapon = LR_Format(float2(texcoord.x,(texcoord.y + 0.500) * 0.500 + 0.250)).www;
 	return float4(Average_Lum_Weapon,1);
 }
 
@@ -1397,7 +1454,7 @@ uniform float timer < source = "timer"; >;
 float4 Out(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Target
 {
 	float PosX = 0.5*BUFFER_WIDTH*pix.x,PosY = 0.5*BUFFER_HEIGHT*pix.y;	
-	float4 Color = float4(PS_calcLR(texcoord).rgb,1),Done,Website,D,E,P,T,H,Three,DD,Dot,I,N,F,O;
+	float4 Color = float4(LR_Format(texcoord).rgb,1),Done,Website,D,E,P,T,H,Three,DD,Dot,I,N,F,O;
 	
 	if(timer <= 10000)
 	{
