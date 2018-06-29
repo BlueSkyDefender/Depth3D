@@ -19,11 +19,19 @@
  //*                                                                            																									*//
  //* 																																												*//
  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 // Determines The Max Depth amount. The larger the amount harder it will hit on FPS will be.
 
-#define Depth_Max 25
+#define Depth_Max 25 // Max is 30 Due to how this shader works.
 
-uniform int Divergence <
+uniform float X <
+	ui_type = "drag";
+	ui_min = 0; ui_max = 10.0;
+	ui_label = "X";
+	ui_tooltip = "Default is 0";
+> = 2.5;
+
+uniform int Depth <
 	ui_type = "drag";
 	ui_min = 1; ui_max = Depth_Max;
 	ui_label = "Divergence Slider";
@@ -33,7 +41,7 @@ uniform int Divergence <
 
 uniform float Perspective <
 	ui_type = "drag";
-	ui_min = -50.0; ui_max = 50.0;
+	ui_min = -Depth_Max; ui_max = Depth_Max;
 	ui_label = "Perspective Slider";
 	ui_tooltip = "Determines the perspective point. Default is 0";
 > = 0.0;
@@ -76,67 +84,50 @@ uniform bool Debug_View <
 	ui_tooltip = "Debug View.";
 > = false;
 
-uniform float Power <
-	ui_type = "drag";
-	ui_min = 0.5; ui_max = 1.0;
-	ui_label = "Shade Power";
-	ui_tooltip = "Adjust the Shade Power Lower is Higher & Higher is Lower.\n"
-				 "This improves AO, Shadows, & Darker Areas in game.\n"
-				 "Number 1.0 is default.";
-> = 1.0;
-
-uniform float Spread <
-	ui_type = "drag";
-	ui_min = 1.0; ui_max = 20.0;
-	ui_label = "Shade Fill";
-	ui_tooltip = "Adjust This to have the shade effect to fill in areas.\n"
-				 "This is used for gap filling. AKA, Fake AO.\n"
-				 "Number 7.5 is default.";
-> = 7.5;
-
-uniform int Mode <
-	ui_type = "combo";
-	ui_items = "Mode A\0Mode B\0Mode C\0";
-	ui_label = "Anaglyph Color Mode";
-	ui_tooltip = "Select colors for your 3D anaglyph glasses.";
-> = 0;
-
 /////////////////////////////////////////////////////D3D Starts Here/////////////////////////////////////////////////////////////////
 #define pix float2(BUFFER_RCP_WIDTH, BUFFER_RCP_HEIGHT)
-#define TextureSize float2(BUFFER_WIDTH, BUFFER_HEIGHT)
-	
+#define SIGMA 25
+
 texture BackBufferTex : COLOR;
 
 sampler BackBuffer 
 	{ 
 		Texture = BackBufferTex;
 	};
-	
-	
+		
+texture texFakeDB { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA8;MipLevels = 8;};
 
-texture texBlur { Width = BUFFER_WIDTH*0.5; Height = BUFFER_HEIGHT*0.5; Format = RGBA8; MipLevels = 8;};
+sampler SamplerFakeDB
+	{
+		Texture = texFakeDB;
+		MipLODBias = 1.0f;
+		MipFilter = Linear; 
+		MinFilter = Linear; 
+		MagFilter = Linear;
+	};
+	
+texture texB { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA8; MipLevels = 8;};
 
 sampler SamplerBlur
 	{
-		Texture = texBlur;
-		MipLODBias = 2.0f;
+		Texture = texB;
+		MipLODBias = 5.0f;
 		MinFilter = LINEAR;
 		MagFilter = LINEAR;
 		MipFilter = LINEAR;
 	};	
 
-texture texFakeDB { Width = BUFFER_WIDTH*0.5; Height = BUFFER_HEIGHT*0.5; Format = RGBA8; MipLevels = 8;};
+texture texBF { Width = BUFFER_WIDTH*0.5; Height = BUFFER_HEIGHT*0.5; Format = RGBA32F;MipLevels = 8;};
 
-sampler SamplerFakeDB
+sampler SamplerBF
 	{
-		Texture = texFakeDB;
-		MipLODBias = 2.0f;
-		MinFilter = LINEAR;
-		MagFilter = LINEAR;
-		MipFilter = LINEAR;
+		Texture = texBF;
+		MipLODBias = 1.0f;
+		MipFilter = Linear; 
+		MinFilter = Linear; 
+		MagFilter = Linear;
 	};
-	
-	
+
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 float3 rgb2hsv(float3 c)
 {
@@ -147,115 +138,148 @@ float3 rgb2hsv(float3 c)
     float d = q.x - min(q.w, q.y);
     float e = 1.0e-10;
     return float3(abs(q.z + (q.w - q.y) / (6.0 * d + e)), d / (q.x + e), q.x);
-    //return dot(float3(abs(q.z + (q.w - q.y) / (6.0 * d + e)), d / (q.x + e), q.x), float3(0.3, 0.59, 0.11));//Gray-scale conversion.
+    return dot(float3(abs(q.z + (q.w - q.y) / (6.0 * d + e)), d / (q.x + e), q.x), float3(0.3, 0.59, 0.11));//Gray-scale conversion.
 }
 
-float4 rgb2yuv(float3 rgb)
+float3 encodePalYuv(float3 rgb)
 {
-	float4 yuv;
-	yuv.x = rgb.r * 0.299 + rgb.g * 0.587 + rgb.b * 0.114;
-	yuv.y = rgb.r * -0.169 + rgb.g * -0.331 + rgb.b * 0.5 + 0.5;
-	yuv.z = rgb.r * 0.5 + rgb.g * -0.419 + rgb.b * -0.081 + 0.5;
+	float3 RGB2Y =  float3( 0.299, 0.587, 0.114);
+	float3 RGB2Cb = float3(-0.14713, -0.28886, 0.436);
+	float3 RGB2Cr = float3(0.615,-0.51499,-0.10001);
+
+	return float3(dot(rgb, RGB2Y), dot(rgb, RGB2Cb), dot(rgb, RGB2Cr));
+}
+
+float4 Blur(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0): SV_Target                                                                          
+{
+float4 left ,right;
+
+	float score;
+	float M = texcoord.y+(X*100)*pix.y;
+	left.rgb = rgb2hsv(tex2D(BackBuffer,texcoord + float2(M * pix.x,0)).rgb);
+	right.rgb = rgb2hsv(tex2D(BackBuffer,texcoord - float2(M * pix.x,0)).rgb);
+
+	score += distance(left, right);
+	score += score;
+	score += score;
 	
-	return yuv;
+	return 1-float4(score, score, score, 1.0);
 }
 
-void Blur(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 color : SV_Target0)                                                                          
+// transform range in world-z to 0-1 for near-far
+float DepthRange( float d )
 {
-   float4 tl = tex2D(BackBuffer,texcoord);
-   float4 tr = tex2D(BackBuffer,texcoord +float2(pix.x, 0.0));
-   float4 bl = tex2D(BackBuffer,texcoord +float2(0.0, pix.y));
-   float4 br = tex2D(BackBuffer,texcoord +float2(pix.x, pix.y));
-   float2 f = frac( texcoord * TextureSize );
-   float4 tA = lerp( tl, tr, f.x );
-   float4 tB = lerp( bl, br, f.x );
-   float4 done = lerp( tA, tB, f.y );//2.0 Gamma correction.
- color = done;
-}
-
-float4 Adjust(in float2 texcoord : TEXCOORD0)
-{
-float2 S = float2(Spread * pix.x,Spread * pix.y);// Hoizontal Sepration needs to be stronger
-float4 H = lerp(tex2D(SamplerBlur, float2(texcoord.x + S.x, texcoord.y)),tex2D(SamplerBlur, float2(texcoord.x - S.x, texcoord.y)),0.5);
-float4 V = lerp(tex2D(SamplerBlur, float2(texcoord.x, texcoord.y + S.y)),tex2D(SamplerBlur, float2(texcoord.x, texcoord.y - S.y)),0.5);
-float4 HVC = lerp(H,V,0.50);
-
-return HVC; 
-}
-
-float3 GS(float3 color)
-{
-    float grayscale = dot(color.rgb, float3(0.3, 0.59, 0.11));
-    color.r = grayscale;
-    color.g = grayscale;
-    color.b = grayscale;
-	return clamp(color,0.003,1.0);//clamping to protect from over Dark.
+	float nearPlane = 0;
+	float farPlane = 1;
+    return ( smoothstep(0,1,d) - nearPlane ) / ( farPlane - nearPlane );
 }
 
 float4 FakeDB(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0): SV_Target
 {
-	//Luma (SD video)	float3(0.299, 0.587, 0.114)
-	//Luma (HD video)	float3(0.2126, 0.7152, 0.0722) https://en.wikipedia.org/wiki/Luma_(video)
-	//Luma (HDR video)	float3(0.2627, 0.6780, 0.0593) https://en.wikipedia.org/wiki/Rec._2100
-	float3 RGB_A, RGB_B, Luma_Coefficient = float3(0.2627, 0.6780, 0.0593);
+	float R = encodePalYuv(tex2D(BackBuffer,texcoord).rgb).r;
+	float G = encodePalYuv(tex2D(BackBuffer,texcoord).rgb).g;
+	float B = encodePalYuv(tex2D(BackBuffer,texcoord).rgb).b;
+	
+	float4 AD = DepthRange(lerp(tex2D(SamplerBlur,texcoord),G.xxxx*10,0.5));
+	return AD-B.xxxx;
+}
+
+#define BSIGMA 0.1
+#define MSIZE 15
+
+float normpdf(in float x, in float sigma)
+{
+	return 0.39894*exp(-0.5*x*x/(sigma*sigma))/sigma;
+}
+
+float normpdf3(in float3 v, in float sigma)
+{
+	return 0.39894*exp(-0.5*dot(v,v)/(sigma*sigma))/sigma;
+}
+	
+float4 Bilateral_Filter(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Target
+{
+	//Bilateral Filter//                                                                                                                                                                   
+	float3 c = tex2D(SamplerFakeDB,texcoord.xy).rgb;
+	
+	float2 ScreenCal = float2(2.5*pix.x,2.5*pix.y);
+
+	float2 FinCal = ScreenCal;
+	
+	const int kSize = (MSIZE-1)/2;	
+
+	float weight[MSIZE] = 
+	{  
+	0.031225216, 
+	0.033322271, 
+	0.035206333, 
+	0.036826804, 
+	0.038138565, 
+	0.039104044, 
+	0.039695028, 
+	0.039894000, 
+	0.039695028, 
+	0.039104044, 
+	0.038138565, 
+	0.036826804, 
+	0.035206333, 
+	0.033322271, 
+	0.031225216
+	};  
+
+		float3 final_colour;
+		float Z;
+		[unroll]
+		for (int i = 0; i <= kSize; ++i)
+		{
+			weight[kSize+i] = normpdf(float(i), SIGMA);
+			weight[kSize-i] = normpdf(float(i), SIGMA);
+		}
 		
-	//Formula for Image Pop = Original + (Original / Blurred) * Amount.
-	RGB_A = GS( tex2D(BackBuffer,texcoord).rgb ) / GS( Adjust(texcoord).rgb );
-	float3 FGPop = GS(RGB_A.rgb);
+		float3 cc;
+		float factor;
+		float bZ = 1.0/normpdf(0.0, BSIGMA);
+		
+		[loop]
+		for (int j=-kSize; j <= kSize; ++j)
+		{
+			for (int k=-kSize; k <= kSize; ++k)
+			{
+			
+				float2 XY;
+
+					XY = float2(float(j),float(k))*FinCal;
+					cc = tex2D(SamplerFakeDB,texcoord.xy+XY).rgb;
 	
-	//Formula for BackGround Pop = Original + (Original - Blurred) * Amount .
-	RGB_B = GS(tex2D(BackBuffer,texcoord).rgb) - GS(Adjust(texcoord).rgb);
-	float3 BGPop = GS(1-RGB_B.rgb);
-	
-	//RGB = saturate(RGB_A);
-	float BG = dot(BGPop,Luma_Coefficient);
-	float FG = dot(FGPop,Luma_Coefficient);
-	
-	float3 BGt = 1-(saturate(BG)*(1-(rgb2yuv(tex2D(BackBuffer,texcoord).rgb).ggg*rgb2yuv(tex2D(BackBuffer,texcoord).rgb).bbb)));
-	float3 FGt = 1-(saturate(FG)*(1-(rgb2yuv(tex2D(BackBuffer,texcoord).rgb).ggg*rgb2yuv(tex2D(BackBuffer,texcoord).rgb).bbb)));
-	
-	float3 Done = 1-tex2D(BackBuffer,texcoord).rgb;
-	
-	float Num;
-	if(Mode == 0)
-	{
-	Done = GS(Done);
-	Num = 0.250;
-	}
-	else if(Mode == 1)
-	{
-	Done = rgb2yuv(Done).rgb;
-	Num = 0.250;
-	}
-	else
-	{
-	Done = rgb2hsv(Done);
-	Num = 0.500;
-	}
-	
-	float RGB = smoothstep(0,Power,1-distance(smoothstep(0,Num,FGt*BGt),Done));
-	
-	return float4(RGB,RGB,RGB,1);
+				factor = normpdf3(cc-c, BSIGMA)*bZ*weight[kSize+k]*weight[kSize+j];
+				Z += factor;
+				final_colour += factor*cc;
+
+			}
+		}
+		
+		float4 Bilateral_Filter = float4(final_colour/Z, 1.0);
+return Bilateral_Filter;
 }
 
 float4  Encode(in float2 texcoord : TEXCOORD0) //zBuffer Color Channel Encode
 {
 
-	float GetDepthR = tex2D(SamplerFakeDB,float2(texcoord.x,texcoord.y)).x;
-	float GetDepthB = tex2D(SamplerFakeDB,float2(texcoord.x,texcoord.y)).x;
+	float GetDepthR = tex2D(SamplerBF,float2(texcoord.x,texcoord.y)).x;
+	float GetDepthB = tex2D(SamplerBF,float2(texcoord.x,texcoord.y)).x;
 
 	// X	
-	float Rx = (1-texcoord.x)+Divergence*pix.x*GetDepthR;
+	float Rx = (1-texcoord.x)+Depth*pix.x*GetDepthR;
 	// Y
-	float Ry = (1-texcoord.x)+Divergence*pix.x*GetDepthR;
+	float Ry = (1-texcoord.x)+Depth*pix.x*GetDepthR;
 	// Z
-	float Bz = texcoord.x+Divergence*pix.x*GetDepthB;
+	float Bz = texcoord.x+Depth*pix.x*GetDepthB;
 	// W
-	float Bw = texcoord.x+Divergence*pix.x*GetDepthB;
+	float Bw = texcoord.x+Depth*pix.x*GetDepthB;
 	
-	float R = Rx; //X Encode
+	float R = Rx; //X Encode//
 	float G = Ry; //Y Encode
-	float B = Bz; //Z Encode
+	float B = Bz; //Z Encode//
 	float A = Bw; //W Encode
 	
 	return float4(R,G,B,A);
@@ -307,14 +331,81 @@ float4 Converter(float2 texcoord : TEXCOORD0)
 			TCL.y = texcoord.y;
 			TCR.y = texcoord.y;
 		}
-		
+			
+			//Workaround for DX9 Games
+			int x = 5;	
+			if (Depth == 0)		
+				x = 0;
+			else if (Depth == 1)	
+				x = 1;
+			else if (Depth == 2)
+				x = 2;
+			else if (Depth == 3)
+				x = 3;
+			else if (Depth == 4)
+				x = 4;
+			else if (Depth == 5)
+				x = 5;
+			else if (Depth == 6)
+				x = 6;
+			else if (Depth == 7)
+				x = 7;
+			else if (Depth == 8)
+				x = 8;
+			else if (Depth == 9)
+				x = 9;
+			else if (Depth == 10)
+				x = 10;
+			else if (Depth == 11)
+				x = 11;
+			else if (Depth == 12)
+				x = 12;
+			else if (Depth == 13)
+				x = 13;
+			else if (Depth == 14)
+				x = 14;
+			else if (Depth == 15)
+				x = 15;
+			else if (Depth == 16)
+				x = 16;
+			else if (Depth == 17)
+				x = 17;
+			else if (Depth == 18)
+				x = 18;
+			else if (Depth == 19)
+				x = 19;			
+			else if (Depth == 20)
+				x = 20;			
+			else if (Depth == 21)
+				x = 21;			
+			else if (Depth == 22)
+				x = 22;			
+			else if (Depth == 23)
+				x = 23;		
+			else if (Depth == 24)
+				x = 24;			
+			else if (Depth == 25)
+				x = 25;
+			else if (Depth == 26)
+				x = 26;
+			else if (Depth == 27)
+				x = 27;
+			else if (Depth == 28)
+				x = 28;
+			else if (Depth == 29)
+				x = 29;
+			else if (Depth == 30)
+				x = 30;
+			
+			//Workaround for DX9 Games	
 	
 		float4 cL, LL; //tex2D(BackBuffer,float2(TCL.x,TCL.y)); //objects that hit screen boundary is replaced with the BackBuffer 		
 		float4 cR, RR; //tex2D(BackBuffer,float2(TCR.x,TCR.y)); //objects that hit screen boundary is replaced with the BackBuffer
-		float RF, RN, LF, LN;
-		int x = Depth_Max;		
-		[loop]
-		for (int i = 0; i <= x+1; i++) 
+		float RF, RN, LF, LN, EX = Depth*100;
+		float A = texcoord.y+EX*pix.y;
+
+		[unroll]
+		for (int i = 0; i <= x; i++) 
 		{
 				//R Good
 				//if ( Encode(float2(TCR.x+i*pix.x,TCR.y)).x >= (1-TCR.x-pix.x/2) && Encode(float2(TCR.x+i*pix.x,TCR.y)).x <= (1-TCR.x+pix.x/2) ) //Decode X
@@ -327,23 +418,20 @@ float4 Converter(float2 texcoord : TEXCOORD0)
 				//if ( Encode(float2(TCL.x-i*pix.x,TCL.y)).z >= TCL.x-pix.x/2 && Encode(float2(TCL.x-i*pix.x,TCL.y)).z <= (TCR.x+pix.x/2)) //Decode Z
 				if ( Encode(float2(TCL.x-i*pix.x,TCL.y)).z >= TCL.x )
 				{
-				LF = i * pix.x; //Good
+				LF = i* pix.x; //Good
 				}
 		}
 			
-		cR = tex2Dlod(BackBuffer, float4(TCR.x+RF,TCR.y,0,0)); //Good
-		cL = tex2Dlod(BackBuffer, float4(TCL.x-LF,TCL.y,0,0)); //Good
+			cR = tex2Dlod(BackBuffer, float4(TCR.x+RF + (A * pix.x),TCR.y,0,0)); //Good
+			cL = tex2Dlod(BackBuffer, float4(TCL.x-LF - (A * pix.x),TCL.y,0,0)); //Good
 
-	
-			if ( Eye_Swap )
+			RR = cR;
+			LL = cL;
+			
+			if ( !Eye_Swap )
 			{
-				cR = tex2Dlod(BackBuffer, float4(TCR.x+RF,TCR.y,0,0)); //Good
-				cL = tex2Dlod(BackBuffer, float4(TCL.x-LF,TCL.y,0,0)); //Good
-			}
-			else
-			{
-				cL = tex2Dlod(BackBuffer, float4(TCR.x+RF,TCR.y,0,0)); //Good
-				cR = tex2Dlod(BackBuffer, float4(TCL.x-LF,TCL.y,0,0)); //Good
+				cR = LL; //Good
+				cL = RR; //Good
 			}
 			
 
@@ -468,11 +556,12 @@ float4 Converter(float2 texcoord : TEXCOORD0)
 		}
 	
 			if(Debug_View)
-			Out.rgb = tex2D(SamplerFakeDB,texcoord).xxx;
+			Out.rgb = tex2D(SamplerBF,texcoord).xxx;
 
 	return float4(Out.rgb,1);
-	}
+}
 
+	
 ////////////////////////////////////////////////////////Logo/////////////////////////////////////////////////////////////////////////
 uniform float timer < source = "timer"; >;
 float4 Out(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Target
@@ -593,7 +682,7 @@ technique Dimension_Plus
 		{
 			VertexShader = PostProcessVS;
 			PixelShader = Blur;
-			RenderTarget = texBlur;
+			RenderTarget = texB;
 		}	
 			pass FakeDBFilter
 		{
@@ -601,6 +690,12 @@ technique Dimension_Plus
 			PixelShader = FakeDB;
 			RenderTarget = texFakeDB;
 		}	
+			pass BilateralFilterPass
+		{
+			VertexShader = PostProcessVS;
+			PixelShader = Bilateral_Filter;
+			RenderTarget = texBF;
+		}		
 			pass CuesUnsharpMask
 		{
 			VertexShader = PostProcessVS;

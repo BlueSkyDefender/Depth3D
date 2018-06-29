@@ -1095,7 +1095,7 @@ float4 PS_calcLR(float2 texcoord)
 {
 	float2 TCL, TCR, TexCoords = texcoord;
 	float4 color, Right, Left;
-	float DepthR = 1, DepthL = 1, Adjust_A = 0.11111111, Adjust_B = 0.07692307, N, S, X, L, R;
+	float DepthR = 1, DepthL = 1, Adjust_A = 0.11111111, Adjust_B = 0.07692307, Mode_B_G = 0.5, N, S, X, L, R;
 	float samplesA[9] = {0.5,0.5625,0.625,0.6875,0.75,0.8125,0.875,0.9375,1.0};
 	float samplesB[13] = {0.5,0.546875,0.578125,0.625,0.659375,0.703125,0.75,0.796875,0.828125,0.875,0.921875,0.953125,1.0};
 
@@ -1176,38 +1176,41 @@ float4 PS_calcLR(float2 texcoord)
 		else if (View_Mode == 2)
 		{
 			S = samplesA[i] * MS;//9
-			DepthL = min(DepthR,tex2Dlod(SamplerDis,float4(texcoord.x+S, texcoord.y,0,0)).x);
-			DepthR = min(DepthR,tex2Dlod(SamplerDis,float4(texcoord.x-S, texcoord.y,0,0)).x);
+			DepthL = min(DepthR,tex2Dlod(SamplerDis,float4(TCL.x+S, TCL.y,0,0)).x);
+			DepthR = min(DepthR,tex2Dlod(SamplerDis,float4(TCR.x-S, TCR.y,0,0)).x);
 			
 			X = samplesB[i] * MS * 1.125;//9
-			L += tex2Dlod(SamplerDis,float4(texcoord.x+X, texcoord.y,0,0)).x*Adjust_A;
-			R += tex2Dlod(SamplerDis,float4(texcoord.x-X, texcoord.y,0,0)).x*Adjust_A;
+			L += tex2Dlod(SamplerDis,float4(TCL.x+X, TCL.y,0,0)).x*Adjust_A;
+			R += tex2Dlod(SamplerDis,float4(TCR.x-X, TCR.y,0,0)).x*Adjust_A;
 			L = saturate(L);
 			R = saturate(R);
 		}
 		else if (View_Mode == 3)
 		{
 			S = samplesB[i] * MS;//9
-			DepthL = min(DepthR,tex2Dlod(SamplerDis,float4(texcoord.x+S, texcoord.y,0,0)).x);
-			DepthR = min(DepthR,tex2Dlod(SamplerDis,float4(texcoord.x-S, texcoord.y,0,0)).x);
+			DepthL = min(DepthR,tex2Dlod(SamplerDis,float4(TCL.x+S, TCL.y,0,0)).x);
+			DepthR = min(DepthR,tex2Dlod(SamplerDis,float4(TCR.x-S, TCR.y,0,0)).x);
 			
 			X = samplesB[i] * MS * 1.125;//13
-			L += tex2Dlod(SamplerDis,float4(texcoord.x+X, texcoord.y,0,0)).x*Adjust_B;
-			R += tex2Dlod(SamplerDis,float4(texcoord.x-X, texcoord.y,0,0)).x*Adjust_B;
+			L += tex2Dlod(SamplerDis,float4(TCL.x+X, TCL.y,0,0)).x*Adjust_B;
+			R += tex2Dlod(SamplerDis,float4(TCR.x-X, TCR.y,0,0)).x*Adjust_B;
 			L = saturate(L);
 			R = saturate(R);
 		}
 	}
 	
+	if(View_Mode == 3)
+	Mode_B_G = 0.3125;
+	
 	if (View_Mode == 2 || View_Mode == 3)
 	{	
 		DepthL = Conv(DepthL,TexCoords);//Zero Parallax Distance Pass
 		L = Conv(L,TexCoords);//Zero Parallax Distance Pass
-		DepthL = lerp(L,DepthL,0.5);//Left
+		DepthL = lerp(L,DepthL,Mode_B_G);//Left
 		
 		DepthR = Conv(DepthR,TexCoords);//Zero Parallax Distance Pass
 		R = Conv(R,TexCoords);//Zero Parallax Distance Pass
-		DepthR = lerp(R,DepthR,0.5);//Right
+		DepthR = lerp(R,DepthR,Mode_B_G);//Right
 	}
 	else
 	{
