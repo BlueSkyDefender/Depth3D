@@ -24,12 +24,12 @@
 
 #define Depth_Max 25 // Max is 30 Due to how this shader works.
 
-uniform float X <
+uniform float Image_Texture_Complexity <
 	ui_type = "drag";
-	ui_min = 0; ui_max = 10.0;
-	ui_label = "X";
-	ui_tooltip = "Default is 0";
-> = 2.5;
+	ui_min = 0; ui_max = Depth_Max;
+	ui_label = "Image Texture Complexity";
+	ui_tooltip = "Default is 12.5";
+> = 12.5;
 
 uniform int Depth <
 	ui_type = "drag";
@@ -155,7 +155,7 @@ float4 Blur(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0): S
 float4 left ,right;
 
 	float score;
-	float M = texcoord.y+(X*100)*pix.y;
+	float M = texcoord.y+(Image_Texture_Complexity*100)*pix.y;
 	left.rgb = rgb2hsv(tex2D(BackBuffer,texcoord + float2(M * pix.x,0)).rgb);
 	right.rgb = rgb2hsv(tex2D(BackBuffer,texcoord - float2(M * pix.x,0)).rgb);
 
@@ -181,7 +181,8 @@ float4 FakeDB(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0):
 	float B = encodePalYuv(tex2D(BackBuffer,texcoord).rgb).b;
 	
 	float4 AD = DepthRange(lerp(tex2D(SamplerBlur,texcoord),G.xxxx*10,0.5));
-	return AD-B.xxxx;
+	float4 SG = abs(clamp(G.xxxx*10,0,1));
+	return (AD-B.xxxx)-SG;
 }
 
 #define BSIGMA 0.1
