@@ -32,7 +32,7 @@
 #define FBDMF 0 //Default 0 is Off. One is On.
 
 //Third person auto zero parallax distance is a form of Automatic Near Field Adjustment based on BOTW fix. This now should work on all Third Person Games. 
-#define TPAuto_ZPD 0 //Default 0 is Off. One is On.
+#define TPAuto_ZPD 0 //Default 0 is Off. One is On. Two is Alt.
 
 // Change the Cancel Depth Key
 // Determines the Cancel Depth Toggle Key useing keycode info
@@ -834,41 +834,33 @@ float Conv(float D,float2 texcoord)
 		float Divergence_Locked = Divergence*0.00105;
 		float ALC = abs(smoothstep(0,1.0,Lum(texcoord)));
 		
-			if(TPAuto_ZPD == 1)
-			{
-				if (ALC < 0.0078125)
-				{
-					Con = ZPD*2.0;
-				}	
-				if (ALC > 0.0078125)
-				{
-					Con = ZPD*1.750;
-				}
-				if (ALC > 0.015625)
-				{
-					Con = ZPD*1.625;
-				}
-				if (ALC > 0.03125)
-				{
-					Con = ZPD*1.5;
-				}
-				if (ALC > 0.03125)
-				{
-					Con = ZPD*1.375;
-				}
-				if (ALC > 0.0625)
-				{
-					Con = ZPD*1.250;
-				}
-				if (ALC > 0.125)
-				{
-					Con = ZPD;
-				}
-			}
-			else
-			{
+		if(TPAuto_ZPD == 1)
+		{			
+			if (ALC < 0.0078125)
+				Con = ZPD*2.0;	
+			if (ALC > 0.0078125)
+				Con = ZPD*1.750;
+			if (ALC > 0.015625)
+				Con = ZPD*1.625;
+			if (ALC > 0.03125)
+				Con = ZPD*1.5;
+			if (ALC > 0.03125)
+				Con = ZPD*1.375;
+			if (ALC > 0.0625)
+				Con = ZPD*1.250;
+			if (ALC >= 0.125)
 				Con = ZPD;
-			}
+				
+			Con = abs(smoothstep(1.0,0,Lum(texcoord)))*Con;
+		}
+		else if(TPAuto_ZPD == 2)
+		{			
+			Con = abs(smoothstep(1.0,0,Lum(texcoord)))*Con;
+		}
+		else
+		{
+			Con = ZPD;
+		}
 			
 		if (ALC <= 0.000425 && FBDMF) //Full Black Depth Map Fix.
 		{
