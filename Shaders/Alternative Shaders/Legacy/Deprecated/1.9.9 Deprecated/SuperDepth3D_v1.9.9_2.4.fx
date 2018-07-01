@@ -68,10 +68,11 @@ uniform float Divergence <
 
 uniform int Convergence_Mode <
 	ui_type = "combo";
-	ui_items = "ZPD Tied\0ZPD Locked\0";
+	ui_items = "ZPD Tied\0ZPD Locked\0ZPD Unlocked\0";
 	ui_label = " Convergence Mode";
 	ui_tooltip = "Select your Convergence Mode for ZPD calculations.\n" 
 				 "ZPD Locked mode is locked to divergence & dissables ZPD control below.\n" 
+				 "ZPD Unlocked mode lets you control ZPD separately from Divergence.\n" 
 				 "ZPD Tied is controlled by ZPD. Works in tandam with Divergence.\n" 
 				 "For FPS with no custom weapon profile use Tied.\n" 
 				 "Default is ZPD Tied.";
@@ -829,9 +830,9 @@ float AutoDepthRange( float d, float2 texcoord )
 
 float Conv(float D,float2 texcoord)
 {
-	float Z, ZP, Con = ZPD, NF_Power, MSZ = Divergence * pix.x;
+	float Z, ZP, Con = ZPD, NF_Power, MSZ, MS_A = Divergence * pix.x, MS_B = (ZPD*1000) * pix.x;
 
-		float Divergence_Locked = Divergence*0.00105;
+		float Divergence_Locked = Divergence*0.001;
 		float ALC = abs(smoothstep(0,1.0,Lum(texcoord)));
 		
 			if(TPAuto_ZPD == 1)
@@ -870,7 +871,7 @@ float Conv(float D,float2 texcoord)
 				Con = ZPD;
 			}
 			
-		if (ALC <= 0.000425 && FBDMF) //Full Black Depth Map Fix.
+		if (ALC <= 0.00005 && FBDMF) //Full Black Depth Map Fix.
 		{
 			Z = 0;
 			Divergence_Locked = 0;
@@ -882,41 +883,74 @@ float Conv(float D,float2 texcoord)
 		}	
 
 		if(Balance == -4)
-			NF_Power = 0.125;		
-		else if(Balance == -3)
+		{
+			NF_Power = 0.125;
+		}		
+		if(Balance == -3)
+		{
 			NF_Power = 0.250;
-		else if(Balance == -2)
+		}
+		if(Balance == -2)
+		{
 			NF_Power = 0.375;
+		}
 		else if(Balance == -1)
+		{
 			NF_Power = 0.425;
+		}
 		else if(Balance == 0)
+		{
 			NF_Power = 0.5;
+		}
 		else if(Balance == 1)
+		{
 			NF_Power = 0.5625;
+		}
 		else if(Balance == 2)
+		{
 			NF_Power = 0.625;
+		}
 		else if(Balance == 3)
+		{
 			NF_Power = 0.6875;
+		}
 		else if(Balance == 4)
+		{
 			NF_Power = 0.75;
+		}
 		else if(Balance == 5)
+		{
 			NF_Power = 0.8125;
+		}
 		else if(Balance == 6)
+		{
 			NF_Power = 0.875;
+		}
 		
-		ZP = NF_Power;
-		
-		if (ZPD == 0)
-		ZP = 1.0;
+		if(ZPD == 0)
+		{
+			ZP = 1.0;
+		}
+		else
+		{
+			ZP = NF_Power;
+		}
 		
 		float Convergence;		
 		
 		if(Convergence_Mode == 1)
 		{
+			MSZ = MS_A; //Locked ZPD easy for new people less settings.
 			Convergence = 1 - Divergence_Locked / D;
+		}
+		else if(Convergence_Mode == 2)
+		{
+			MSZ = MS_B; //Unhooked ZDP for Advance Users.
+			Convergence = 1 - Z / D;
 		}
 		else
 		{	
+			MSZ = MS_A; //Tied ZDP AKA Original Way, Mix of both 0 & 1.
 			Convergence = 1 - Z / D;
 		}
 		
@@ -924,9 +958,9 @@ float Conv(float D,float2 texcoord)
 		{
 			D = AutoDepthRange(D,texcoord);
 		}
-				
-		Z = lerp( MSZ * Convergence, MSZ * D, ZP);
-				
+		
+		Z = lerp(MSZ * Convergence,MS_A * D,ZP);
+			
     return Z;
 }
 
