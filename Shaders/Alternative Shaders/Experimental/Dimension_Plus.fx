@@ -20,16 +20,16 @@
  //* 																																												*//
  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-// Determines The Max Depth amount. The larger the amount harder it will hit on FPS will be.
-
-#define Depth_Max 25 // Max is 30 Due to how this shader works.
+// Determines The Max Depth amount.
+#define Depth_Max 25
 
 uniform float Image_Texture_Complexity <
 	ui_type = "drag";
 	ui_min = 0; ui_max = Depth_Max;
 	ui_label = "Image Texture Complexity";
-	ui_tooltip = "Default is 12.5";
-> = 12.5;
+	ui_tooltip = "Raise this to add more pop out to areas in the image that have more texture complexity.\n" 
+				 "Default is 1.0";
+> = 1.0;
 
 uniform int Depth <
 	ui_type = "drag";
@@ -100,7 +100,7 @@ texture texFakeDB { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA8
 sampler SamplerFakeDB
 	{
 		Texture = texFakeDB;
-		MipLODBias = 1.0f;
+		MipLODBias = 2.0f;
 		MipFilter = Linear; 
 		MinFilter = Linear; 
 		MagFilter = Linear;
@@ -111,7 +111,7 @@ texture texB { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA8; Mip
 sampler SamplerBlur
 	{
 		Texture = texB;
-		MipLODBias = 5.0f;
+		MipLODBias = 4.0f;
 		MinFilter = LINEAR;
 		MagFilter = LINEAR;
 		MipFilter = LINEAR;
@@ -122,7 +122,7 @@ texture texBF { Width = BUFFER_WIDTH*0.5; Height = BUFFER_HEIGHT*0.5; Format = R
 sampler SamplerBF
 	{
 		Texture = texBF;
-		MipLODBias = 1.0f;
+		MipLODBias = 2.0f;
 		MipFilter = Linear; 
 		MinFilter = Linear; 
 		MagFilter = Linear;
@@ -153,7 +153,9 @@ float3 encodePalYuv(float3 rgb)
 float4 Blur(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0): SV_Target                                                                          
 {
 float4 left ,right;
-
+	float G = encodePalYuv(tex2D(BackBuffer,texcoord).rgb).g;
+	float4 SG = 1-smoothstep(0,1,G.xxxx*10>0.250);
+	
 	float score;
 	float M = texcoord.y+(Image_Texture_Complexity*100)*pix.y;
 	left.rgb = rgb2hsv(tex2D(BackBuffer,texcoord + float2(M * pix.x,0)).rgb);
@@ -163,7 +165,7 @@ float4 left ,right;
 	score += score;
 	score += score;
 	
-	return 1-float4(score, score, score, 1.0);
+	return 1-float4(score, SG.x, score, 1.0);
 }
 
 // transform range in world-z to 0-1 for near-far
@@ -180,8 +182,8 @@ float4 FakeDB(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0):
 	float G = encodePalYuv(tex2D(BackBuffer,texcoord).rgb).g;
 	float B = encodePalYuv(tex2D(BackBuffer,texcoord).rgb).b;
 	
-	float4 AD = DepthRange(lerp(tex2D(SamplerBlur,texcoord),G.xxxx*10,0.5));
-	float4 SG = abs(clamp(G.xxxx*10,0,1));
+	float4 AD = DepthRange(lerp(tex2D(SamplerBlur,texcoord).xxxx,G.xxxx*10,0.5));
+	float4 SG = tex2D(SamplerBlur,texcoord).yyyy;
 	return (AD-B.xxxx)-SG;
 }
 
@@ -263,33 +265,12 @@ float4 Bilateral_Filter(float4 position : SV_Position, float2 texcoord : TEXCOOR
 return Bilateral_Filter;
 }
 
-float4  Encode(in float2 texcoord : TEXCOORD0) //zBuffer Color Channel Encode
-{
-
-	float GetDepthR = tex2D(SamplerBF,float2(texcoord.x,texcoord.y)).x;
-	float GetDepthB = tex2D(SamplerBF,float2(texcoord.x,texcoord.y)).x;
-
-	// X	
-	float Rx = (1-texcoord.x)+Depth*pix.x*GetDepthR;
-	// Y
-	float Ry = (1-texcoord.x)+Depth*pix.x*GetDepthR;
-	// Z
-	float Bz = texcoord.x+Depth*pix.x*GetDepthB;
-	// W
-	float Bw = texcoord.x+Depth*pix.x*GetDepthB;
-	
-	float R = Rx; //X Encode//
-	float G = Ry; //Y Encode
-	float B = Bz; //Z Encode//
-	float A = Bw; //W Encode
-	
-	return float4(R,G,B,A);
-}
-
 float4 Converter(float2 texcoord : TEXCOORD0)
 {		
 	float4 Out;
 	float2 TCL,TCR;
+	float samplesA[13] = {0.5,0.546875,0.578125,0.625,0.659375,0.703125,0.75,0.796875,0.828125,0.875,0.921875,0.953125,1.0};
+	float MS = Depth * pix.x, Adjust_A = 0.07692307;
 	//float Perspective = (Divergence * 0.5) + P;
 	if (Stereoscopic_Mode == 0)
 		{
@@ -332,96 +313,25 @@ float4 Converter(float2 texcoord : TEXCOORD0)
 			TCL.y = texcoord.y;
 			TCR.y = texcoord.y;
 		}
-			
-			//Workaround for DX9 Games
-			int x = 5;	
-			if (Depth == 0)		
-				x = 0;
-			else if (Depth == 1)	
-				x = 1;
-			else if (Depth == 2)
-				x = 2;
-			else if (Depth == 3)
-				x = 3;
-			else if (Depth == 4)
-				x = 4;
-			else if (Depth == 5)
-				x = 5;
-			else if (Depth == 6)
-				x = 6;
-			else if (Depth == 7)
-				x = 7;
-			else if (Depth == 8)
-				x = 8;
-			else if (Depth == 9)
-				x = 9;
-			else if (Depth == 10)
-				x = 10;
-			else if (Depth == 11)
-				x = 11;
-			else if (Depth == 12)
-				x = 12;
-			else if (Depth == 13)
-				x = 13;
-			else if (Depth == 14)
-				x = 14;
-			else if (Depth == 15)
-				x = 15;
-			else if (Depth == 16)
-				x = 16;
-			else if (Depth == 17)
-				x = 17;
-			else if (Depth == 18)
-				x = 18;
-			else if (Depth == 19)
-				x = 19;			
-			else if (Depth == 20)
-				x = 20;			
-			else if (Depth == 21)
-				x = 21;			
-			else if (Depth == 22)
-				x = 22;			
-			else if (Depth == 23)
-				x = 23;		
-			else if (Depth == 24)
-				x = 24;			
-			else if (Depth == 25)
-				x = 25;
-			else if (Depth == 26)
-				x = 26;
-			else if (Depth == 27)
-				x = 27;
-			else if (Depth == 28)
-				x = 28;
-			else if (Depth == 29)
-				x = 29;
-			else if (Depth == 30)
-				x = 30;
-			
-			//Workaround for DX9 Games	
+		
+		//Workaround for DX9 Games	
 	
 		float4 cL, LL; //tex2D(BackBuffer,float2(TCL.x,TCL.y)); //objects that hit screen boundary is replaced with the BackBuffer 		
 		float4 cR, RR; //tex2D(BackBuffer,float2(TCR.x,TCR.y)); //objects that hit screen boundary is replaced with the BackBuffer
-		float RF, RN, LF, LN, EX = Depth*100;
+		float S, RF, RN, LF, LN, EX = Depth*100;
 		float A = texcoord.y+EX*pix.y;
 
 		[unroll]
-		for (int i = 0; i <= x; i++) 
+		for (int i = 0; i < 13; i++) 
 		{
-				//R Good
-				//if ( Encode(float2(TCR.x+i*pix.x,TCR.y)).x >= (1-TCR.x-pix.x/2) && Encode(float2(TCR.x+i*pix.x,TCR.y)).x <= (1-TCR.x+pix.x/2) ) //Decode X
-				if ( Encode(float2(TCR.x+i*pix.x,TCR.y)).x >= (1-TCR.x) )
-				{
-				RF = i * pix.x; //Good
-				}
-
-				//L Good
-				//if ( Encode(float2(TCL.x-i*pix.x,TCL.y)).z >= TCL.x-pix.x/2 && Encode(float2(TCL.x-i*pix.x,TCL.y)).z <= (TCR.x+pix.x/2)) //Decode Z
-				if ( Encode(float2(TCL.x-i*pix.x,TCL.y)).z >= TCL.x )
-				{
-				LF = i* pix.x; //Good
-				}
+				S = samplesA[i] * MS * 1.21875;
+				LF += tex2D(SamplerBF,float2(TCL.x+S, TCL.y)).x*Adjust_A;
+				RF += tex2D(SamplerBF,float2(TCR.x-S, TCR.y)).x*Adjust_A;
+				LF = saturate(LF);
+				RF = saturate(RF);
 		}
+			LF = MS * LF;
+			RF = MS * RF;
 			
 			cR = tex2Dlod(BackBuffer, float4(TCR.x+RF + (A * pix.x),TCR.y,0,0)); //Good
 			cL = tex2Dlod(BackBuffer, float4(TCL.x-LF - (A * pix.x),TCL.y,0,0)); //Good
