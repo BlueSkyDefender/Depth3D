@@ -23,14 +23,6 @@
 // Determines The Max Depth amount.
 #define Depth_Max 25
 
-uniform float Image_Texture_Complexity <
-	ui_type = "drag";
-	ui_min = 0; ui_max = Depth_Max;
-	ui_label = "Image Texture Complexity";
-	ui_tooltip = "Raise this to add more pop out to areas in the image that have more texture complexity.\n" 
-				 "Default is 1.0";
-> = 1.0;
-
 uniform int Depth <
 	ui_type = "drag";
 	ui_min = 1; ui_max = Depth_Max;
@@ -78,6 +70,21 @@ uniform bool Eye_Swap <
 	ui_label = "Swap Eyes";
 	ui_tooltip = "L/R to R/L.";
 > = false;
+
+uniform float Image_Texture_Complexity <
+	ui_type = "drag";
+	ui_min = 0; ui_max = 12.5;
+	ui_label = "Image Texture Complexity";
+	ui_tooltip = "Raise this to add more pop out to areas in the image that have more texture complexity.\n" 
+				 "Default is 1.0";
+> = 2.5;
+
+uniform int Mode <
+	ui_type = "combo";
+	ui_items = "Mode A\0Mode B\0Mode C\0Mode D\0";
+	ui_label = "Depth Map Mode";
+	ui_tooltip = "Pick an fake Depth Map Mode.";
+> = 0;
 
 uniform bool Debug_View <
 	ui_label = "Debug View";
@@ -154,7 +161,7 @@ float4 Blur(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0): S
 {
 float4 left ,right;
 	float G = encodePalYuv(tex2D(BackBuffer,texcoord).rgb).g;
-	float4 SG = 1-smoothstep(0,1,G.xxxx*10>0.250);
+	float4 SG = 1-smoothstep(0,1,G.xxxx*10);
 	
 	float score;
 	float M = texcoord.y+(Image_Texture_Complexity*100)*pix.y;
@@ -178,13 +185,31 @@ float DepthRange( float d )
 
 float4 FakeDB(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0): SV_Target
 {
+	float4 Done;
 	float R = encodePalYuv(tex2D(BackBuffer,texcoord).rgb).r;
 	float G = encodePalYuv(tex2D(BackBuffer,texcoord).rgb).g;
 	float B = encodePalYuv(tex2D(BackBuffer,texcoord).rgb).b;
 	
 	float4 AD = DepthRange(lerp(tex2D(SamplerBlur,texcoord).xxxx,G.xxxx*10,0.5));
 	float4 SG = tex2D(SamplerBlur,texcoord).yyyy;
-	return (AD-B.xxxx)-SG;
+	if (Mode == 0)
+	{
+		Done = AD;
+	}
+	else if (Mode == 1)
+	{
+		Done = tex2D(SamplerBlur,texcoord).xxxx;
+	}
+	else if (Mode == 2)
+	{
+		Done = (AD-B.xxxx);
+	}
+	else
+	{
+		Done = (AD-B.xxxx)-SG;
+	}
+
+	return Done;
 }
 
 #define BSIGMA 0.1
