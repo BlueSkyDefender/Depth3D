@@ -107,6 +107,11 @@ uniform int Mode <
 	ui_tooltip = "Pick an fake Depth Map Mode.";
 > = 0;
 
+uniform bool Pop <
+	ui_label = "Pop";
+	ui_tooltip = "Add a little image pop out.";
+> = false;
+
 uniform bool Debug_View <
 	ui_label = "Debug View";
 	ui_tooltip = "Debug View.";
@@ -347,6 +352,7 @@ float4 Bilateral_Filter(float4 position : SV_Position, float2 texcoord : TEXCOOR
 		float4 Bilateral_Filter = float4(final_colour/Z, 1.0);
 return max(0.01,Bilateral_Filter);
 }
+
 float Conv(float D,float2 texcoord)
 {
 	float MSZ = Depth * pix.x;
@@ -361,6 +367,7 @@ float Conv(float D,float2 texcoord)
 				
     return Convergence;
 }
+
 float4 Converter(float2 texcoord : TEXCOORD0)
 {		
 	float4 Out;
@@ -423,7 +430,8 @@ float4 Converter(float2 texcoord : TEXCOORD0)
 		float4 cR, RR; //tex2D(BackBuffer,float2(TCR.x,TCR.y)); //objects that hit screen boundary is replaced with the BackBuffer
 		float S, RF, RN, LF, LN, EX = Depth*125;
 		float A = texcoord.y+EX*pix.y;
-
+		A *= pix.x;
+		
 		[unroll]
 		for (int i = 0; i < 13; i++) 
 		{
@@ -433,11 +441,18 @@ float4 Converter(float2 texcoord : TEXCOORD0)
 				LF = saturate(LF);
 				RF = saturate(RF);
 		}
-			LF = Conv(LF,TexCoords);
-			RF = Conv(RF,TexCoords);
-			
-			cR = tex2Dlod(BackBuffer, float4(TCR.x+RF + (A * pix.x),TCR.y,0,0)); //Good
-			cL = tex2Dlod(BackBuffer, float4(TCL.x-LF - (A * pix.x),TCL.y,0,0)); //Good
+			if(Pop)
+			{
+				LF = Conv(LF,TexCoords);
+				RF = Conv(RF,TexCoords);
+			}
+			else
+			{
+				LF = MS * LF;
+				RF = MS * RF;
+			}
+			cR = tex2Dlod(BackBuffer, float4( (TCR.x + RF) + A, TCR.y,0,0)); //Good
+			cL = tex2Dlod(BackBuffer, float4( (TCL.x - LF) - A, TCL.y,0,0)); //Good
 
 			RR = cR;
 			LL = cL;
