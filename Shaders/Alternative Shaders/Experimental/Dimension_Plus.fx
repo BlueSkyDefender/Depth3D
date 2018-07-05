@@ -197,28 +197,28 @@ float4 Blur(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0): S
 {
 	float4 left ,right;
 	
-	float A,B,C,D,E;
+	float3 A,B,C;
 	float M = texcoord.y+(Image_Texture_Complexity*100)*pix.y;
 	left.rgb = rgb2hsv(tex2D(BackBuffer,texcoord + float2(M * pix.x,0)).rgb);
 	right.rgb = rgb2hsv(tex2D(BackBuffer,texcoord - float2(M * pix.x,0)).rgb);
 
-	A += distance(left.x, right.x);
+	A += distance(left, right);
 	A += A;
 	A += A;
 	
 	left.rgb = rgb2hsv(tex2Dlod(SamplerBBlur,float4(texcoord,0,1)).rgb);
 	right.rgb = rgb2hsv(tex2D(BackBuffer,texcoord).rgb);
 	
-	B += distance(left.x, right.x);
+	B += distance(left, right);
 	B += B;
 	B += B;
 	
-	left.rgb = A.xxx;
-	right.rgb = B.xxx;
+	left.rgb = A;
+	right.rgb = B;
 	
-	C += distance(left.x, right.x);
+	C += distance(left, right);
 	
-	return 1-float4(C, 1, 1, 1);
+	return 1-float4(C.x, 1, 1, 1);
 }
 
 // transform range in world-z to 0-1 for near-far
