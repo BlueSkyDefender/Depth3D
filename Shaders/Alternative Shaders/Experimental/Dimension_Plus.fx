@@ -23,7 +23,7 @@
 // Determines The Max Depth amount.
 #define Depth_Max 25
 
-uniform int Depth <
+uniform float Depth <
 	ui_type = "drag";
 	ui_min = 1; ui_max = Depth_Max;
 	ui_label = "Divergence Slider";
@@ -73,15 +73,22 @@ uniform bool Eye_Swap <
 
 uniform float Image_Texture_Complexity <
 	ui_type = "drag";
-	ui_min = 0; ui_max = 12.5;
+	ui_min = 0; ui_max = 25.0;
 	ui_label = "Image Texture Complexity";
 	ui_tooltip = "Raise this to add more pop out to areas in the image that have more texture complexity.\n" 
-				 "Default is 1.0";
+				 "Default is 2.5";
 > = 2.5;
+
+uniform float Range_Adjust <
+	ui_type = "drag";
+	ui_min = 0.5; ui_max = 1.0;
+	ui_label = "Range Adjust";
+	ui_tooltip = "Range adjust determines the transform range in world. Default is 1.0";
+> = 1.0;
 
 uniform int Mode <
 	ui_type = "combo";
-	ui_items = "Mode A\0Mode B\0Mode C\0Mode D\0";
+	ui_items = "Movie Mode\0Game Mode FPS\0Game Mode Mix\0Game Mode RTS\0";
 	ui_label = "Depth Map Mode";
 	ui_tooltip = "Pick an fake Depth Map Mode.";
 > = 0;
@@ -113,12 +120,23 @@ sampler SamplerFakeDB
 		MagFilter = Linear;
 	};
 	
+texture texBB { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA8; MipLevels = 8;};
+
+sampler SamplerBBlur
+	{
+		Texture = texBB;
+		MipLODBias = 1.0f;
+		MinFilter = LINEAR;
+		MagFilter = LINEAR;
+		MipFilter = LINEAR;
+	};	
+		
 texture texB { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA8; MipLevels = 8;};
 
 sampler SamplerBlur
 	{
 		Texture = texB;
-		MipLODBias = 4.0f;
+		MipLODBias = 3.0f;
 		MinFilter = LINEAR;
 		MagFilter = LINEAR;
 		MipFilter = LINEAR;
@@ -157,59 +175,76 @@ float3 encodePalYuv(float3 rgb)
 	return float3(dot(rgb, RGB2Y), dot(rgb, RGB2Cb), dot(rgb, RGB2Cr));
 }
 
+float4 BBlur(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0): SV_Target                                                                          
+{
+	return tex2D(BackBuffer,texcoord);
+}
+
 float4 Blur(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0): SV_Target                                                                          
 {
-float4 left ,right;
-	float G = encodePalYuv(tex2D(BackBuffer,texcoord).rgb).g;
-	float4 SG = 1-smoothstep(0,1,G.xxxx*10);
+	float4 left ,right , AA,BB;
 	
-	float score;
+	float A,B,C,D,E;
 	float M = texcoord.y+(Image_Texture_Complexity*100)*pix.y;
 	left.rgb = rgb2hsv(tex2D(BackBuffer,texcoord + float2(M * pix.x,0)).rgb);
 	right.rgb = rgb2hsv(tex2D(BackBuffer,texcoord - float2(M * pix.x,0)).rgb);
 
-	score += distance(left, right);
-	score += score;
-	score += score;
+	A += distance(left, right);
+	A += A;
+	A += A;
 	
-	return 1-float4(score, SG.x, score, 1.0);
+	left.rgb = rgb2hsv(tex2D(SamplerBBlur,texcoord)).rgb;
+	right.rgb = rgb2hsv(tex2D(BackBuffer,texcoord).rgb);
+	
+	B += distance(left, right);
+	B += B;
+	B += B;
+	
+	left.rgb = A;
+	right.rgb = B;
+	
+	C += distance(left, right);
+	
+	return 1-float4(C, 1, 1, 1);
 }
 
 // transform range in world-z to 0-1 for near-far
 float DepthRange( float d )
 {
 	float nearPlane = 0;
-	float farPlane = 1;
-    return ( smoothstep(0,1,d) - nearPlane ) / ( farPlane - nearPlane );
+	float farPlane = Range_Adjust;
+    return ( d - nearPlane ) / ( farPlane - nearPlane );
 }
 
 float4 FakeDB(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0): SV_Target
 {
 	float4 Done;
-	float R = encodePalYuv(tex2D(BackBuffer,texcoord).rgb).r;
+	//float R = encodePalYuv(tex2D(BackBuffer,texcoord).rgb).r;
 	float G = encodePalYuv(tex2D(BackBuffer,texcoord).rgb).g;
-	float B = encodePalYuv(tex2D(BackBuffer,texcoord).rgb).b;
+	//float B = encodePalYuv(tex2D(BackBuffer,texcoord).rgb).b;
 	
-	float4 AD = DepthRange(lerp(tex2D(SamplerBlur,texcoord).xxxx,G.xxxx*10,0.5));
-	float4 SG = tex2D(SamplerBlur,texcoord).yyyy;
+	float AA = lerp(tex2D(SamplerBlur,texcoord).xxxx,G.xxxx*10,0.50);
+	float AB = lerp(tex2D(SamplerBlur,texcoord).xxxx,G.xxxx*10,0.425);
+	float AC = lerp(tex2D(SamplerBlur,texcoord).xxxx,G.xxxx*10,0.375);
+	
 	if (Mode == 0)
 	{
-		Done = AD;
+		Done = DepthRange(AA).xxxx;
 	}
 	else if (Mode == 1)
 	{
-		Done = tex2D(SamplerBlur,texcoord).xxxx;
+		Done = DepthRange(AB).xxxx;
 	}
 	else if (Mode == 2)
 	{
-		Done = (AD-B.xxxx);
+		Done = DepthRange(AC).xxxx;
 	}
-	else
+	else if (Mode == 3)
 	{
-		Done = (AD-B.xxxx)-SG;
+		Done = tex2D(SamplerBlur,texcoord).xxxx;
 	}
 
-	return Done;
+	return saturate(Done);
 }
 
 #define BSIGMA 0.1
@@ -287,9 +322,22 @@ float4 Bilateral_Filter(float4 position : SV_Position, float2 texcoord : TEXCOOR
 		}
 		
 		float4 Bilateral_Filter = float4(final_colour/Z, 1.0);
-return Bilateral_Filter;
+return max(0.01,Bilateral_Filter);
 }
+float Conv(float D,float2 texcoord)
+{
+	float MSZ = Depth * pix.x;
 
+		float Divergence_Locked = Depth * 0.001;
+		
+		float Convergence;		
+
+			Convergence = 1 - Divergence_Locked / D;
+	
+		Convergence = lerp( MSZ * Convergence, MSZ * D, 0.8125);
+				
+    return Convergence;
+}
 float4 Converter(float2 texcoord : TEXCOORD0)
 {		
 	float4 Out;
@@ -355,8 +403,8 @@ float4 Converter(float2 texcoord : TEXCOORD0)
 				LF = saturate(LF);
 				RF = saturate(RF);
 		}
-			LF = MS * LF;
-			RF = MS * RF;
+			LF = Conv(LF,texcoord);
+			RF = Conv(RF,texcoord);
 			
 			cR = tex2Dlod(BackBuffer, float4(TCR.x+RF + (A * pix.x),TCR.y,0,0)); //Good
 			cL = tex2Dlod(BackBuffer, float4(TCL.x-LF - (A * pix.x),TCL.y,0,0)); //Good
@@ -614,6 +662,12 @@ void PostProcessVS(in uint id : SV_VertexID, out float4 position : SV_Position, 
 //*Rendering passes*//
 technique Dimension_Plus
 {
+			pass BBlurFilter
+		{
+			VertexShader = PostProcessVS;
+			PixelShader = BBlur;
+			RenderTarget = texBB;
+		}
 			pass BlurFilter
 		{
 			VertexShader = PostProcessVS;
