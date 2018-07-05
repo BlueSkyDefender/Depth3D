@@ -95,14 +95,14 @@ uniform float Range_Adjust <
 	ui_tooltip = "Range adjust determines the transform range in world. Default is 0";
 > = 1.0;
 
-uniform bool Night_Mode <
-	ui_label = "Night Mode";
-	ui_tooltip = "Night_Mode.";
+uniform bool Day_Night_Mode <
+	ui_label = "Day & Night";
+	ui_tooltip = "This mode helps correct for some day and night scenes.";
 > = false;
 
 uniform int Mode <
 	ui_type = "combo";
-	ui_items = "Movie Mode\0Game Mode FPS\0Game Mode Mix\0Game Mode RTS\0";
+	ui_items = "Movie Mode\0Game Mode FPS\0Sport Mode\0Game Mode RTS\0";
 	ui_label = "Depth Map Mode";
 	ui_tooltip = "Pick an fake Depth Map Mode.";
 > = 0;
@@ -203,7 +203,7 @@ float4 Blur(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0): S
 	float4 left ,right;
 	
 	float3 A,B,C;
-	float M = texcoord.y+(Image_Texture_Complexity*100)*pix.y;
+	float M = texcoord.y+(Image_Texture_Complexity*125)*pix.y;
 	left.rgb = rgb2hsv(tex2D(BackBuffer,texcoord + float2(M * pix.x,0)).rgb);
 	right.rgb = rgb2hsv(tex2D(BackBuffer,texcoord - float2(M * pix.x,0)).rgb);
 
@@ -240,7 +240,7 @@ float4 FakeDB(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0):
 	//float R = encodePalYuv(tex2D(BackBuffer,texcoord).rgb).r;
 	float G = encodePalYuv(tex2D(BackBuffer,texcoord).rgb).g;
 	//float B = encodePalYuv(tex2D(BackBuffer,texcoord).rgb).b;
-	float M = texcoord.y+(Image_Texture_Complexity*100)*pix.y;
+	float M = texcoord.y+(Image_Texture_Complexity*125)*pix.y;
 	
 	left.rgb = encodePalYuv(tex2D(BackBuffer,texcoord + float2(M * pix.x,0)).rgb);
 	right.rgb = encodePalYuv(tex2D(BackBuffer,texcoord - float2(M * pix.x,0)).rgb);
@@ -248,12 +248,12 @@ float4 FakeDB(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0):
 	M = (left.x+right.x)/2;
 	G *= 10;
 	
-	if(Night_Mode)
+	if(Day_Night_Mode)
 	G += M;
 	
 	float AA = lerp(tex2D(SamplerBlur,texcoord).xxxx,G.xxxx,0.50).x;
 	float AB = lerp(tex2D(SamplerBlur,texcoord).xxxx,G.xxxx,0.425).x;
-	float AC = lerp(tex2D(SamplerBlur,texcoord).xxxx,G.xxxx,0.375).x;
+	float AC = lerp(tex2D(SamplerBlur,texcoord).xxxx,G.xxxx,0.25).x;
 	
 	if (Mode == 0)
 	{
