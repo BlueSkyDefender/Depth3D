@@ -45,6 +45,15 @@ uniform int Stereoscopic_Mode <
 	ui_tooltip = "Stereoscopic 3D display output selection.";
 > = 0;
 
+uniform float Interlace_Optimization <
+	ui_type = "drag";
+	ui_min = 0.0; ui_max = 0.5;
+	ui_label = " Interlace Optimization";
+	ui_tooltip = "Interlace Optimization Is used to reduce alisesing in a Line or Column interlaced image.\n"
+	             "This has the side effect of softening the image.\n"
+	             "Default is 0.375";
+> = 0.375;
+
 uniform int Scaling_Support <
 	ui_type = "combo";
 	ui_items = " 2160p\0 Native\0 1080p A\0 1080p B\0 1050p A\0 1050p B\0 720p A\0 720p B\0";
@@ -76,15 +85,20 @@ uniform float Image_Texture_Complexity <
 	ui_min = 0; ui_max = 25.0;
 	ui_label = "Image Texture Complexity";
 	ui_tooltip = "Raise this to add more pop out to areas in the image that have more texture complexity.\n" 
-				 "Default is 2.5";
-> = 2.5;
+				 "Default is 1.0";
+> = 1.0;
 
 uniform float Range_Adjust <
 	ui_type = "drag";
 	ui_min = 0.5; ui_max = 1.0;
 	ui_label = "Range Adjust";
-	ui_tooltip = "Range adjust determines the transform range in world. Default is 1.0";
+	ui_tooltip = "Range adjust determines the transform range in world. Default is 0";
 > = 1.0;
+
+uniform bool Night_Mode <
+	ui_label = "Night Mode";
+	ui_tooltip = "Night_Mode.";
+> = false;
 
 uniform int Mode <
 	ui_type = "combo";
@@ -125,7 +139,6 @@ texture texBB { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA8; Mi
 sampler SamplerBBlur
 	{
 		Texture = texBB;
-		MipLODBias = 1.0f;
 		MinFilter = LINEAR;
 		MagFilter = LINEAR;
 		MipFilter = LINEAR;
@@ -182,28 +195,28 @@ float4 BBlur(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0): 
 
 float4 Blur(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0): SV_Target                                                                          
 {
-	float4 left ,right , AA,BB;
+	float4 left ,right;
 	
 	float A,B,C,D,E;
 	float M = texcoord.y+(Image_Texture_Complexity*100)*pix.y;
 	left.rgb = rgb2hsv(tex2D(BackBuffer,texcoord + float2(M * pix.x,0)).rgb);
 	right.rgb = rgb2hsv(tex2D(BackBuffer,texcoord - float2(M * pix.x,0)).rgb);
 
-	A += distance(left, right);
+	A += distance(left.x, right.x);
 	A += A;
 	A += A;
 	
-	left.rgb = rgb2hsv(tex2D(SamplerBBlur,texcoord)).rgb;
+	left.rgb = rgb2hsv(tex2Dlod(SamplerBBlur,float4(texcoord,0,1)).rgb);
 	right.rgb = rgb2hsv(tex2D(BackBuffer,texcoord).rgb);
 	
-	B += distance(left, right);
+	B += distance(left.x, right.x);
 	B += B;
 	B += B;
 	
-	left.rgb = A;
-	right.rgb = B;
+	left.rgb = A.xxx;
+	right.rgb = B.xxx;
 	
-	C += distance(left, right);
+	C += distance(left.x, right.x);
 	
 	return 1-float4(C, 1, 1, 1);
 }
@@ -218,14 +231,24 @@ float DepthRange( float d )
 
 float4 FakeDB(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0): SV_Target
 {
-	float4 Done;
+	float4 Done, left, right;
 	//float R = encodePalYuv(tex2D(BackBuffer,texcoord).rgb).r;
 	float G = encodePalYuv(tex2D(BackBuffer,texcoord).rgb).g;
 	//float B = encodePalYuv(tex2D(BackBuffer,texcoord).rgb).b;
+	float M = texcoord.y+(Image_Texture_Complexity*100)*pix.y;
 	
-	float AA = lerp(tex2D(SamplerBlur,texcoord).xxxx,G.xxxx*10,0.50);
-	float AB = lerp(tex2D(SamplerBlur,texcoord).xxxx,G.xxxx*10,0.425);
-	float AC = lerp(tex2D(SamplerBlur,texcoord).xxxx,G.xxxx*10,0.375);
+	left.rgb = encodePalYuv(tex2D(BackBuffer,texcoord + float2(M * pix.x,0)).rgb);
+	right.rgb = encodePalYuv(tex2D(BackBuffer,texcoord - float2(M * pix.x,0)).rgb);
+
+	M = (left.x+right.x)/2;
+	G *= 10;
+	
+	if(Night_Mode)
+	G += M;
+	
+	float AA = lerp(tex2D(SamplerBlur,texcoord).xxxx,G.xxxx,0.50).x;
+	float AB = lerp(tex2D(SamplerBlur,texcoord).xxxx,G.xxxx,0.425).x;
+	float AC = lerp(tex2D(SamplerBlur,texcoord).xxxx,G.xxxx,0.375).x;
 	
 	if (Mode == 0)
 	{
@@ -341,57 +364,64 @@ float Conv(float D,float2 texcoord)
 float4 Converter(float2 texcoord : TEXCOORD0)
 {		
 	float4 Out;
-	float2 TCL,TCR;
+	float2 TCL,TCR,TexCoords = texcoord;
 	float samplesA[13] = {0.5,0.546875,0.578125,0.625,0.659375,0.703125,0.75,0.796875,0.828125,0.875,0.921875,0.953125,1.0};
 	float MS = Depth * pix.x, Adjust_A = 0.07692307;
-	//float Perspective = (Divergence * 0.5) + P;
-	if (Stereoscopic_Mode == 0)
+	float P = Perspective * pix.x;
+	if(Eye_Swap)
+	{
+		if ( Stereoscopic_Mode == 0 )
 		{
-		if (Eye_Swap)
-			{
-				TCL.x = (texcoord.x*2) - Perspective * pix.x;
-				TCR.x = (texcoord.x*2-1) + Perspective * pix.x;
-				TCL.y = texcoord.y;
-				TCR.y = texcoord.y;
-			}
-		else
-			{
-				TCL.x = (texcoord.x*2-1) - Perspective * pix.x;
-				TCR.x = (texcoord.x*2) + Perspective * pix.x;
-				TCL.y = texcoord.y;
-				TCR.y = texcoord.y;
-			}
+			TCL = float2((texcoord.x*2-1) - P,texcoord.y);
+			TCR = float2((texcoord.x*2) + P,texcoord.y);
 		}
-	else if(Stereoscopic_Mode == 1)
+		else if( Stereoscopic_Mode == 1 )
 		{
-		if (Eye_Swap)
-			{
-			TCL.x = texcoord.x - Perspective * pix.x;
-			TCR.x = texcoord.x + Perspective * pix.x;
-			TCL.y = texcoord.y*2;
-			TCR.y = texcoord.y*2-1;
-			}
-		else
-			{
-			TCL.x = texcoord.x - Perspective * pix.x;
-			TCR.x = texcoord.x + Perspective * pix.x;
-			TCL.y = texcoord.y*2-1;
-			TCR.y = texcoord.y*2;
-			}
+			TCL = float2(texcoord.x - P,texcoord.y*2-1);
+			TCR = float2(texcoord.x + P,texcoord.y*2);
 		}
+		else
+		{
+			TCL = float2(texcoord.x - P,texcoord.y);
+			TCR = float2(texcoord.x + P,texcoord.y);
+		}
+	}	
 	else
+	{
+		if (Stereoscopic_Mode == 0)
 		{
-			TCL.x = texcoord.x - Perspective * pix.x;
-			TCR.x = texcoord.x + Perspective * pix.x;
-			TCL.y = texcoord.y;
-			TCR.y = texcoord.y;
+			TCL = float2((texcoord.x*2) + P,texcoord.y);
+			TCR = float2((texcoord.x*2-1) - P,texcoord.y);
 		}
+		else if(Stereoscopic_Mode == 1)
+		{
+			TCL = float2(texcoord.x + P,texcoord.y*2);
+			TCR = float2(texcoord.x - P,texcoord.y*2-1);
+		}
+		else
+		{
+			TCL = float2(texcoord.x + P,texcoord.y);
+			TCR = float2(texcoord.x - P,texcoord.y);
+		}
+	}
+	
+	//Optimization for line & column interlaced out.
+	if (Stereoscopic_Mode == 2)
+	{
+		TCL.y = TCL.y + (Interlace_Optimization * pix.y);
+		TCR.y = TCR.y - (Interlace_Optimization * pix.y);
+	}
+	else if (Stereoscopic_Mode == 3)
+	{
+		TCL.x = TCL.x + (Interlace_Optimization * pix.y);
+		TCR.x = TCR.x - (Interlace_Optimization * pix.y);
+	}
 		
 		//Workaround for DX9 Games	
 	
 		float4 cL, LL; //tex2D(BackBuffer,float2(TCL.x,TCL.y)); //objects that hit screen boundary is replaced with the BackBuffer 		
 		float4 cR, RR; //tex2D(BackBuffer,float2(TCR.x,TCR.y)); //objects that hit screen boundary is replaced with the BackBuffer
-		float S, RF, RN, LF, LN, EX = Depth*100;
+		float S, RF, RN, LF, LN, EX = Depth*125;
 		float A = texcoord.y+EX*pix.y;
 
 		[unroll]
@@ -403,8 +433,8 @@ float4 Converter(float2 texcoord : TEXCOORD0)
 				LF = saturate(LF);
 				RF = saturate(RF);
 		}
-			LF = Conv(LF,texcoord);
-			RF = Conv(RF,texcoord);
+			LF = Conv(LF,TexCoords);
+			RF = Conv(RF,TexCoords);
 			
 			cR = tex2Dlod(BackBuffer, float4(TCR.x+RF + (A * pix.x),TCR.y,0,0)); //Good
 			cL = tex2Dlod(BackBuffer, float4(TCL.x-LF - (A * pix.x),TCL.y,0,0)); //Good
@@ -418,49 +448,48 @@ float4 Converter(float2 texcoord : TEXCOORD0)
 				cL = RR; //Good
 			}
 			
-
 	float2 gridxy;
 
 	if(Scaling_Support == 0)
 	{
-		gridxy = floor(float2(texcoord.x*3840.0,texcoord.y*2160.0));
+		gridxy = floor(float2(TexCoords.x*3840.0,TexCoords.y*2160.0));
 	}	
 	else if(Scaling_Support == 1)
 	{
-		gridxy = floor(float2(texcoord.x*BUFFER_WIDTH,texcoord.y*BUFFER_HEIGHT));
+		gridxy = floor(float2(TexCoords.x*BUFFER_WIDTH,TexCoords.y*BUFFER_HEIGHT));
 	}
 	else if(Scaling_Support == 2)
 	{
-		gridxy = floor(float2(texcoord.x*1920.0,texcoord.y*1080.0));
+		gridxy = floor(float2(TexCoords.x*1920.0,TexCoords.y*1080.0));
 	}
 	else if(Scaling_Support == 3)
 	{
-		gridxy = floor(float2(texcoord.x*1921.0,texcoord.y*1081.0));
+		gridxy = floor(float2(TexCoords.x*1921.0,TexCoords.y*1081.0));
 	}
 	else if(Scaling_Support == 4)
 	{
-		gridxy = floor(float2(texcoord.x*1680.0,texcoord.y*1050.0));
+		gridxy = floor(float2(TexCoords.x*1680.0,TexCoords.y*1050.0));
 	}
 	else if(Scaling_Support == 5)
 	{
-		gridxy = floor(float2(texcoord.x*1681.0,texcoord.y*1051.0));
+		gridxy = floor(float2(TexCoords.x*1681.0,TexCoords.y*1051.0));
 	}
 	else if(Scaling_Support == 6)
 	{
-		gridxy = floor(float2(texcoord.x*1280.0,texcoord.y*720.0));
+		gridxy = floor(float2(TexCoords.x*1280.0,TexCoords.y*720.0));
 	}
 	else if(Scaling_Support == 7)
 	{
-		gridxy = floor(float2(texcoord.x*1281.0,texcoord.y*721.0));
+		gridxy = floor(float2(TexCoords.x*1281.0,TexCoords.y*721.0));
 	}
 			
 		if(Stereoscopic_Mode == 0)
 		{	
-			Out = texcoord.x < 0.5 ? cL : cR;
+			Out = TexCoords.x < 0.5 ? cL : cR;
 		}
 		else if(Stereoscopic_Mode == 1)
 		{	
-			Out = texcoord.y < 0.5 ? cL : cR;
+			Out = TexCoords.y < 0.5 ? cL : cR;
 		}
 		else if(Stereoscopic_Mode == 2)
 		{
