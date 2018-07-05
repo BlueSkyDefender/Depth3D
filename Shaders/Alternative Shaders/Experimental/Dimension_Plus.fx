@@ -154,7 +154,7 @@ texture texB { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA8; Mip
 sampler SamplerBlur
 	{
 		Texture = texB;
-		MipLODBias = 3.0f;
+		MipLODBias = 4.0f;
 		MinFilter = LINEAR;
 		MagFilter = LINEAR;
 		MipFilter = LINEAR;
