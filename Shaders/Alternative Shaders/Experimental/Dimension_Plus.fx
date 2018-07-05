@@ -423,11 +423,8 @@ float4 Converter(float2 texcoord : TEXCOORD0)
 		TCL.x = TCL.x + (Interlace_Optimization * pix.y);
 		TCR.x = TCR.x - (Interlace_Optimization * pix.y);
 	}
-		
-		//Workaround for DX9 Games	
 	
-		float4 cL, LL; //tex2D(BackBuffer,float2(TCL.x,TCL.y)); //objects that hit screen boundary is replaced with the BackBuffer 		
-		float4 cR, RR; //tex2D(BackBuffer,float2(TCR.x,TCR.y)); //objects that hit screen boundary is replaced with the BackBuffer
+		float4 cL, cR; 
 		float S, RF, RN, LF, LN, EX = Depth*125;
 		float A = texcoord.y+EX*pix.y;
 		A *= pix.x;
@@ -451,16 +448,16 @@ float4 Converter(float2 texcoord : TEXCOORD0)
 				LF = MS * LF;
 				RF = MS * RF;
 			}
-			cR = tex2Dlod(BackBuffer, float4( (TCR.x + RF) + A, TCR.y,0,0)); //Good
-			cL = tex2Dlod(BackBuffer, float4( (TCL.x - LF) - A, TCL.y,0,0)); //Good
-
-			RR = cR;
-			LL = cL;
 			
-			if ( !Eye_Swap )
+			cL = tex2Dlod(BackBuffer, float4( (TCL.x + LF) + A, TCL.y,0,0)); //Good
+			cR = tex2Dlod(BackBuffer, float4( (TCR.x - RF) - A, TCR.y,0,0)); //Good
+			
+			float4 RR = cR, LL = cL;
+						
+			if (Eye_Swap)
 			{
-				cR = LL; //Good
-				cL = RR; //Good
+				cL = RR;
+				cR = LL;
 			}
 			
 	float2 gridxy;
