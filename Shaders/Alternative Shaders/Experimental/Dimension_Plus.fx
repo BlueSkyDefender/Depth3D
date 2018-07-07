@@ -102,7 +102,7 @@ uniform bool Day_Night_Mode <
 
 uniform int Mode <
 	ui_type = "combo";
-	ui_items = "Movie Mode\0Game Mode FPS\0Sport Mode\0Game Mode RTS\0";
+	ui_items = "Movie Mode\0Sport Mode\0FPS Game Mode\0Side Scroller Game Mode\0RTS Game Mode\0";
 	ui_label = "Depth Map Mode";
 	ui_tooltip = "Pick an fake Depth Map Mode.";
 > = 0;
@@ -170,7 +170,20 @@ sampler SamplerBF
 		MinFilter = Linear; 
 		MagFilter = Linear;
 	};
+	
+texture CurrentBB  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA32F;}; 
 
+sampler CBackBuffer
+	{
+		Texture = CurrentBB;
+	};
+
+texture PastSingleBB  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA32F;}; 
+
+sampler PSBackBuffer
+	{
+		Texture = PastSingleBB;
+	};
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 float3 rgb2hsv(float3 c)
 {
@@ -223,7 +236,14 @@ float4 Blur(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0): S
 	
 	C += distance(left, right);
 	
-	return 1-float4(C.x, 1, 1, 1);
+	if (Mode == 3)
+	{
+	C += C;
+	C += C;
+	C *= 0.5625;
+	}
+	
+	return 1-float4(saturate(C.x), 1, 1, 1);
 }
 
 // transform range in world-z to 0-1 for near-far
@@ -254,6 +274,7 @@ float4 FakeDB(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0):
 	float AA = lerp(tex2D(SamplerBlur,texcoord).xxxx,G.xxxx,0.50).x;
 	float AB = lerp(tex2D(SamplerBlur,texcoord).xxxx,G.xxxx,0.425).x;
 	float AC = lerp(tex2D(SamplerBlur,texcoord).xxxx,G.xxxx,0.25).x;
+	float AD = lerp(tex2D(SamplerBlur,texcoord).xxxx,G.xxxx,0.09375).x;
 	
 	if (Mode == 0)
 	{
@@ -261,13 +282,17 @@ float4 FakeDB(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0):
 	}
 	else if (Mode == 1)
 	{
-		Done = DepthRange(AB).xxxx;
+		Done = DepthRange(AC).xxxx;
 	}
 	else if (Mode == 2)
 	{
-		Done = DepthRange(AC).xxxx;
+		Done = DepthRange(AB).xxxx;
 	}
 	else if (Mode == 3)
+	{
+		Done = AD.xxxx;
+	}
+	else if (Mode == 4)
 	{
 		Done = tex2D(SamplerBlur,texcoord).xxxx;
 	}
@@ -452,6 +477,9 @@ float4 Converter(float2 texcoord : TEXCOORD0)
 			cL = tex2Dlod(BackBuffer, float4( (TCL.x + LF) + A, TCL.y,0,0)); //Good
 			cR = tex2Dlod(BackBuffer, float4( (TCR.x - RF) - A, TCR.y,0,0)); //Good
 			
+			if (Mode == 3)
+			cL = tex2Dlod(PSBackBuffer, float4( (TCL.x + LF) + A, TCL.y,0,0)); //Good
+				
 			float4 RR = cR, LL = cL;
 						
 			if (Eye_Swap)
@@ -586,6 +614,15 @@ float4 Converter(float2 texcoord : TEXCOORD0)
 	return float4(Out.rgb,1);
 }
 
+void Current_BackBuffer(float4 position : SV_Position, float2 texcoord : TEXCOORD, out float4 color : SV_Target)
+{	 	
+	color = tex2D(BackBuffer,texcoord);
+}
+
+void Past_BackBuffer(float4 position : SV_Position, float2 texcoord : TEXCOORD, out float4 PastSingle : SV_Target)
+{	
+	PastSingle = tex2D(CBackBuffer,texcoord);
+}
 	
 ////////////////////////////////////////////////////////Logo/////////////////////////////////////////////////////////////////////////
 uniform float timer < source = "timer"; >;
@@ -703,6 +740,12 @@ void PostProcessVS(in uint id : SV_VertexID, out float4 position : SV_Position, 
 //*Rendering passes*//
 technique Dimension_Plus
 {
+			pass CBB
+		{
+			VertexShader = PostProcessVS;
+			PixelShader = Current_BackBuffer;
+			RenderTarget = CurrentBB;
+		}
 			pass BBlurFilter
 		{
 			VertexShader = PostProcessVS;
@@ -731,5 +774,11 @@ technique Dimension_Plus
 		{
 			VertexShader = PostProcessVS;
 			PixelShader = Out;	
+		}
+			pass PBB
+		{
+			VertexShader = PostProcessVS;
+			PixelShader = Past_BackBuffer;
+			RenderTarget = PastSingleBB;	
 		}
 }
