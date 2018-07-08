@@ -102,15 +102,22 @@ uniform bool Day_Night_Mode <
 
 uniform int Mode <
 	ui_type = "combo";
-	ui_items = "Movie Mode\0Sport Mode\0FPS Game Mode\0Side Scroller Game Mode\0RTS Game Mode\0";
+	ui_items = "Movie Mode\0Sport Mode\0FPS Game Mode\0Side Scroller 2D Game Mode\0RTS Game Mode\0";
 	ui_label = "Depth Map Mode";
 	ui_tooltip = "Pick an fake Depth Map Mode.";
 > = 0;
 
 uniform bool Pop <
 	ui_label = "Pop";
-	ui_tooltip = "Add a little image pop out.";
+	ui_tooltip = "Add a little image pop out mainly used for FPS My be removed and bonded to FPS Game mode.";
 > = false;
+
+uniform int Pulfrich_Effect_Assist <
+	ui_type = "combo";
+	ui_items = "Off\0Left to Right\0Right to Left\0";
+	ui_label = "Pulfrich Effect Assist";
+	ui_tooltip = "Pulfrich effect is a psychophysical percept wherein lateral motion of an object in the field of view is interpreted by the visual cortex as having a depth.";
+> = 0;
 
 uniform bool Debug_View <
 	ui_label = "Debug View";
@@ -476,10 +483,12 @@ float4 Converter(float2 texcoord : TEXCOORD0)
 			
 			cL = tex2Dlod(BackBuffer, float4( (TCL.x + LF) + A, TCL.y,0,0)); //Good
 			cR = tex2Dlod(BackBuffer, float4( (TCR.x - RF) - A, TCR.y,0,0)); //Good
-			
-			if (Mode == 3)
-			cL = tex2Dlod(PSBackBuffer, float4( (TCL.x + LF) + A, TCL.y,0,0)); //Good
-				
+
+			if (Pulfrich_Effect_Assist == 1)
+				cL = tex2Dlod(PSBackBuffer, float4( (TCL.x + LF) + A, TCL.y,0,0)); //Good
+			else if (Pulfrich_Effect_Assist == 2)
+				cR = tex2Dlod(PSBackBuffer, float4( (TCR.x - RF) - A, TCR.y,0,0)); //Good
+
 			float4 RR = cR, LL = cL;
 						
 			if (Eye_Swap)
