@@ -114,10 +114,20 @@ uniform bool Pop <
 
 uniform int Pulfrich_Effect_Assist <
 	ui_type = "combo";
-	ui_items = "Off\0Left to Right\0Right to Left\0";
+	ui_items = "Off\0Left to Right\0Right to Left\0Special Mode\0";
 	ui_label = "Pulfrich Effect Assist";
-	ui_tooltip = "Pulfrich effect is a psychophysical percept wherein lateral motion of an object in the field of view is interpreted by the visual cortex as having a depth.";
+	ui_tooltip = "Pulfrich effect is a psychophysical percept wherein lateral motion of an object in the field of view is interpreted by the visual cortex as having a depth.Special Mode.\n" 
+				 "Special Mode is Both Left to Right and Right to Left.\n" 
+				 "Use Pulfrich Effect Adjust to adjust Special Mode.";
 > = 0;
+
+uniform float Pulfrich_Effect_Adjust <
+	ui_type = "drag";
+	ui_min = 0.375; ui_max = 1.0;
+	ui_label = "Pulfrich Effect Adjust";
+	ui_tooltip = "Pulfrich effect power adjustment for Special Mode.\n" 
+				 "Default is 0.75";
+> = 0.75;
 
 uniform bool Debug_View <
 	ui_label = "Debug View";
@@ -400,6 +410,9 @@ float Conv(float D,float2 texcoord)
     return Convergence;
 }
 
+uniform uint framecount < source = "framecount"; >;
+//Total amount of frames since the game started.
+
 float4 Converter(float2 texcoord : TEXCOORD0)
 {		
 	float4 Out;
@@ -456,7 +469,7 @@ float4 Converter(float2 texcoord : TEXCOORD0)
 		TCR.x = TCR.x - (Interlace_Optimization * pix.y);
 	}
 	
-		float4 cL, cR; 
+		float4 cL, cR, cPL, cPR; 
 		float S, RF, RN, LF, LN, EX = Depth*125;
 		float A = texcoord.y+EX*pix.y;
 		A *= pix.x;
@@ -485,10 +498,30 @@ float4 Converter(float2 texcoord : TEXCOORD0)
 			cR = tex2Dlod(BackBuffer, float4( (TCR.x - RF) - A, TCR.y,0,0)); //Good
 
 			if (Pulfrich_Effect_Assist == 1)
+			{
 				cL = tex2Dlod(PSBackBuffer, float4( (TCL.x + LF) + A, TCL.y,0,0)); //Good
+			}
 			else if (Pulfrich_Effect_Assist == 2)
+			{
 				cR = tex2Dlod(PSBackBuffer, float4( (TCR.x - RF) - A, TCR.y,0,0)); //Good
-
+			}
+			else if (Pulfrich_Effect_Assist >= 3)
+			{
+				float OddEven = framecount % 2 == 0;
+				float gridy = floor(texcoord.y*(BUFFER_HEIGHT)); //Native
+				
+				//Current Single Frame
+				if (OddEven)
+				{	
+					cPL = tex2Dlod(PSBackBuffer, float4( (TCL.x + LF) + A, TCL.y,0,0)); //Good
+					cL = int(gridy) & 1 ? cL : lerp(cL,cPL,Pulfrich_Effect_Adjust); //Good
+				}
+				else
+				{
+					cPR = tex2Dlod(PSBackBuffer, float4( (TCR.x - RF) - A, TCR.y,0,0)); //Good
+					cR = int(gridy) & 1 ? lerp(cR,cPR,Pulfrich_Effect_Adjust) : cR ; //Good
+				}
+			}
 			float4 RR = cR, LL = cL;
 						
 			if (Eye_Swap)
