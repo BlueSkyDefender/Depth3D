@@ -102,7 +102,7 @@ uniform bool Day_Night_Mode <
 
 uniform int Mode <
 	ui_type = "combo";
-	ui_items = "Movie Mode\0Sport Mode\0FPS Game Mode\0Side Scroller 2D Game Mode\0RTS Game Mode\0";
+	ui_items = "Movie Mode\0Sport Mode\0FPS Game Mode\0Side Scroller 2D Game Mode\0RTS Game Mode\0Mix Mode\0";
 	ui_label = "Depth Map Mode";
 	ui_tooltip = "Pick an fake Depth Map Mode.";
 > = 0;
@@ -253,7 +253,7 @@ float4 Blur(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0): S
 	
 	C += distance(left, right);
 	
-	if (Mode == 3)
+	if (Mode == 3 || Mode == 5)
 	{
 	C += C;
 	C += C;
@@ -292,6 +292,7 @@ float4 FakeDB(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0):
 	float AB = lerp(tex2D(SamplerBlur,texcoord).xxxx,G.xxxx,0.425).x;
 	float AC = lerp(tex2D(SamplerBlur,texcoord).xxxx,G.xxxx,0.25).x;
 	float AD = lerp(tex2D(SamplerBlur,texcoord).xxxx,G.xxxx,0.09375).x;
+	float AF = lerp(tex2D(SamplerBlur,texcoord).xxxx,G.xxxx,0.375).x;
 	
 	if (Mode == 0)
 	{
@@ -312,6 +313,10 @@ float4 FakeDB(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0):
 	else if (Mode == 4)
 	{
 		Done = tex2D(SamplerBlur,texcoord).xxxx;
+	}
+	else if (Mode == 5)
+	{
+		Done = DepthRange(AF).xxxx;
 	}
 
 	return saturate(Done);
