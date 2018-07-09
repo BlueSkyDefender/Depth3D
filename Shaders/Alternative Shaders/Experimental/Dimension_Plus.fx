@@ -508,18 +508,17 @@ float4 Converter(float2 texcoord : TEXCOORD0)
 			else if (Pulfrich_Effect_Assist >= 3)
 			{
 				float OddEven = framecount % 2 == 0;
-				float gridy = floor(texcoord.y*(BUFFER_HEIGHT)); //Native
-				
+							
 				//Current Single Frame
 				if (OddEven)
 				{	
 					cPL = tex2Dlod(PSBackBuffer, float4( (TCL.x + LF) + A, TCL.y,0,0)); //Good
-					cL = int(gridy) & 1 ? cL : lerp(cL,cPL,Pulfrich_Effect_Adjust); //Good
+					cL = lerp(cL,cPL,Pulfrich_Effect_Adjust); //Good
 				}
 				else
 				{
 					cPR = tex2Dlod(PSBackBuffer, float4( (TCR.x - RF) - A, TCR.y,0,0)); //Good
-					cR = int(gridy) & 1 ? lerp(cR,cPR,Pulfrich_Effect_Adjust) : cR ; //Good
+					cR = lerp(cR,cPR,Pulfrich_Effect_Adjust); //Good
 				}
 			}
 			float4 RR = cR, LL = cL;
