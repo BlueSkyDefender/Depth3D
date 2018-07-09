@@ -188,6 +188,7 @@ IF IT HAS AN *asterisk* I AM STILL WORKING ON IT. But, you can still use the set
     RB         Magicka 2                         DM 2       3.250                  0.3730               0.025-0.075
                Never Alone (Kisima Ingitchuna)   DM 2       3.125                  0.3688               0.090-0.140             
     RB         Requiem: Avenging Angel           DM 2       3.1875                 0.5740               0.010-0.025
+               Shadow Warrior Classic Redux      DM 2       7.5                    0.607                0.050-0.125
                Silent Hill: Homecoming           DM 2       1.50                   0.4080               0.100-0.125       
                Rise Of the Tomb Raider           DM 2       15.0                   0.3754               0.200-0.300
                Two Worlds EE                     DM 2       7.5                    0.395                0.025-0.075            

@@ -116,7 +116,7 @@ uniform int Pulfrich_Effect_Assist <
 	ui_type = "combo";
 	ui_items = "Off\0Left to Right\0Right to Left\0Special Mode\0";
 	ui_label = "Pulfrich Effect Assist";
-	ui_tooltip = "Pulfrich effect is a psychophysical percept wherein lateral motion of an object in the field of view is interpreted by the visual cortex as having a depth.Special Mode.\n" 
+	ui_tooltip = "Pulfrich effect is a psychophysical percept wherein lateral motion of an object in the field of view is interpreted by the visual cortex as having a depth.\n" 
 				 "Special Mode is Both Left to Right and Right to Left.\n" 
 				 "Use Pulfrich Effect Adjust to adjust Special Mode.";
 > = 0;
