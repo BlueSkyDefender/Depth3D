@@ -56,7 +56,7 @@ Inner Shader Setting:
 
 IF IT HAS AN *asterisk* I AM STILL WORKING ON IT. But, you can still use the settings.
                                                                       [- - - - - - - -=: Recommended Settings :=- - - - - - - -]
-[Read Below] [Game List]                                  [Depth Map] [Adjustment] [Weapon DM] [Depth Flip] [ZDP Tied Range]
+[Read Below] [Game List]                                  [Depth Map] [Adjustment] [Weapon DM] [Depth Flip] [ZPD Tied Range]
     RB        .Hack//G.U.                                     DM 1         25                                0.050-0.125 
              *ABZU                                            DM 1         50                                0.050                    
               Agony                                           DM 1         50                                0.0025-0.500
@@ -180,8 +180,8 @@ IF IT HAS AN *asterisk* I AM STILL WORKING ON IT. But, you can still use the set
               Zombie Army Trilogy                             DM 0         10.0                              0.050-0.075
 
                                                                                                                                         
-[Read Below]  [Special Depth Map Game List]  [Depth Map] [Adjustment] [Weapon DM] [Offset] [Depth Flip] [ZDP Range]
-               Crash Bandicoot™ N. Sane Trilogy  DM 2       6.25                   0.4600               ????
+[Read Below]  [Special Depth Map Game List]  [Depth Map] [Adjustment] [Weapon DM] [Offset] [Depth Flip] [ZPD Range]
+               Crash Bandicoot™ N. Sane Trilogy  DM 2       6.25                   0.4515               0.150-0.250
                Double Dragon Neon                DM 2       0.1                    0.6300               0.250-0.350
                Dungeons 2                        DM 2       0.350                  0.3750       Yes     0.150-0.250
                Fez                               DM 2       10.0                   0.6000       Yes     0.0         
