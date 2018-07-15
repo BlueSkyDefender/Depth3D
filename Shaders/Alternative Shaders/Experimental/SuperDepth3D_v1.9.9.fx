@@ -47,7 +47,7 @@
 //Use Depth Tool to adjust the lower preprocessor definitions below.
 //Horizontal & Vertical Depth Buffer Resize for non conforming BackBuffer.
 //Ex. Resident Evil 7 Has this problem. So you want to adjust it too around float2(0.9575,0.9575).
-#define Horizontal_and_Vertical float2(1.0, 1.0) //Min value is -0.5 & Max value is 0.5 Default is Zero.
+#define Horizontal_and_Vertical float2(1.0, 1.0) // 1.0 is Default.
 
 //Image Position Adjust is used to move the Z-Buffer around.
 #define Image_Position_Adjust float2(0.0,0.0)

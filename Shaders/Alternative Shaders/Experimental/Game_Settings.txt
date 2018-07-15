@@ -90,6 +90,7 @@ IF IT HAS AN *asterisk* I AM STILL WORKING ON IT. But, you can still use the set
     RB        Deadly Premonition:The Directors's Cut          DM 0         25.0                              0.100-0.200                                     
               DeadPool Game                                   DM 0         12.5                              0.175-0.275                        
               Dragon Age Inquisition                          DM 0         3.25                              0.075-0.375               
+    RB        Dragon Ball FightersZ                           DM 1         7.5                               0.050-0.075
               Dragon Ball Xenoverse                           DM 0         8.75                              0.150-0.200                          
               Dragons Dogma: Dark Arisen                      DM 0         8.75                              0.200-0.300
              *DreamFall Chapters                              DM 0         12.5                      Yes     0.075-0.125
@@ -269,6 +270,9 @@ Turn off AA.
 Render Resolution Native.
 Turn off AA.
 Don't use in game Supersampling
+
+{Dragon Ball FightersZ} - Use ReShade 3.1.2
+Online 3D works aswell. You need to use ReShade 3.1.2 That is whitelisted under EAC.
 
 {DeadRising 3}
 Use Native scailing I think it's called in game as Full.
