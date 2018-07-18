@@ -8,3 +8,10 @@ Used to adjust a image for VR.
 
 SuperDepth3D
 An Depth Based 3D Shader.
+
+HDR
+Tone Map Selector.
+Allows for HDR to SDR and SDR to HDR. WIP
+
+Dimension_Plus
+A 2D to 3D converter.

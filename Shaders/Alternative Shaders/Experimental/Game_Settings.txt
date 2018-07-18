@@ -95,6 +95,7 @@ IF IT HAS AN *asterisk* I AM STILL WORKING ON IT. But, you can still use the set
               Dragons Dogma: Dark Arisen                      DM 0         8.75                              0.200-0.300
              *DreamFall Chapters                              DM 0         12.5                      Yes     0.075-0.125
     RB        Dungeon Nightmares II                           DM 0         17.5                      Yes     0.375-0.500                                
+    RB        Dusk/Dusk World                                 DM 1         22.5                      Yes     0.025-0.075
               Dying Light                                     DM 1         22.5                              0.001-0.010
     RB        Emily Wants To Play                             DM 1         25.0                              0.150-0.200                                      
               Euro Trucks Sim 2                               DM 0         8.750       WDM 25         ?      0.150-0.200 
@@ -291,6 +292,10 @@ Install the contents of that folder in to Deadly Premonition Folder where you ch
 
 {Dungeon Nightmares II}
 Highest Setting is "Good" Any thing Lower will work and thing above will not work. Make sure to set your res to native.
+
+{Dusk/Dusk World} - Reshade 3.4.0
+In Reshade you need to set the Depth Buffer D32FS8 and Copy Before Clearing. Select Option 4 for World space. Keep in mind your weapond will not be Drawn in this Depth Buffer.
+The weapon Depth Buffer can be found on Option 1. But, can't be merged.....
 
 {Emily Wants To Play}
 Install reshade in to SteamLibrary\steamapps\common\Emily Wants To Play\Engine\Binaries\Win64

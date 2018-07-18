@@ -145,7 +145,7 @@ sampler BackBuffer
 		Texture = BackBufferTex;
 	};
 		
-texture texFakeDB { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA8;MipLevels = 8;};
+texture texFakeDB { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA8; MipLevels = 8;};
 
 sampler SamplerFakeDB
 	{

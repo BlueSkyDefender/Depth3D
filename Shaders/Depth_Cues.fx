@@ -29,7 +29,7 @@ uniform float Contrast <
 
 uniform float Power <
 	ui_type = "drag";
-	ui_min = 0.5; ui_max = 1.5;
+	ui_min = -2.5; ui_max = 1.5;
 	ui_label = "Shade Power";
 	ui_tooltip = "Adjust the Shade Power Lower is Higher & Higher is Lower.\n"
 				 "This improves AO, Shadows, & Darker Areas in game.\n"
@@ -60,7 +60,7 @@ uniform bool Debug_View <
 
 uniform float Mask_Adjust <
 	ui_type = "drag";
-	ui_min = 0.0; ui_max = 0.5;
+	ui_min = 0.0; ui_max = 0.625;
 	ui_label = "Mask Adjustment";
 	ui_tooltip = "Mask is used to protect Bright Colors & Lights in the image from Fake AO intrusion.\n"
 				 "Zero is default, Off.";
