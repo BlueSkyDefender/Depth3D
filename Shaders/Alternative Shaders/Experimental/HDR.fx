@@ -41,21 +41,6 @@ uniform int HDR_Tonemap_Select <
 			    "Normally pick what looks good too you.";
 > = 0;
 
-uniform int Dither_Mode <
-	ui_type = "combo";
-	ui_items = "Off\0Dither Mode A\0Dither Mode B\0Dither Mode C\0Dither Mode D\0";
-	ui_label = "Dither Mode Selection";
-	ui_tooltip = "Select the different dither methods.\n"
-			    "Default is Off.";
-> = 0;
-
-uniform float Dither_Bit <
-	ui_type = "drag";
-	ui_min = 1; ui_max = 10;
-	ui_label = "Dither Bit";
-	ui_tooltip = "Dither is an intentionally applied form of noise used to randomize quantization error, preventing banding in images.";
-> = 8.0;
-
 uniform float gamma <
 	ui_type = "drag";
 	ui_min = 1.0; ui_max = 3.0;
@@ -228,56 +213,7 @@ uniform int random < source = "random"; min = 1; max = 10; >;
 float4 SharderOut(float2 texcoord : TEXCOORD0)
 {	
 	float4 Color = tex2D(BackBuffer, texcoord);
-	
-	// Dither for DepthBuffer adapted from gedosato ramdom dither https://github.com/PeterTh/gedosato/blob/master/pack/assets/dx9/deband.fx
-	// I noticed in some games the depth buffer started to have banding so this is used to remove that.
-	float DB  = Dither_Bit,A = 1,B = 2,C = 3;
-	
-	if (Dither_Mode == 3 || Dither_Mode == 4)
-	{
-		A = random;
-		B = random + 1;
-		C = random + 2;
-	}
-	
-	float noise_A = frac(sin(dot(texcoord, float2(12.9898, 78.233))) * 43758.5453 * A);
-	float noise_B = frac(sin(dot(texcoord, float2(12.9898, 78.233))) * 43758.5453 * B);
-	float noise_C = frac(sin(dot(texcoord, float2(12.9898, 78.233))) * 43758.5453 * C);
-	float dither_shift = (1.0 / (pow(2,DB) - 1.0));
-	float dither_shift_half = (dither_shift * 0.5);
-	float dither_shift_A = dither_shift * noise_A - dither_shift_half;
-	float dither_shift_B = dither_shift * noise_B - dither_shift_half;
-	float dither_shift_C = dither_shift * noise_C - dither_shift_half;
-	
-	if (Dither_Mode == 1 || Dither_Mode == 3)
-	{
-		Color.r += -dither_shift_A;
-		Color.r += dither_shift_A;
-		Color.r += -dither_shift_A;
-		Color.g += -dither_shift_A;
-		Color.g += dither_shift_A;
-		Color.g += -dither_shift_A;
-		Color.b += -dither_shift_A;
-		Color.b += dither_shift_A;
-		Color.b += -dither_shift_A;
-	}
-	else if (Dither_Mode == 2 || Dither_Mode == 4)
-	{
-		Color.r += -dither_shift_A;
-		Color.r += dither_shift_A;
-		Color.r += -dither_shift_A;
-		Color.g += -dither_shift_B;
-		Color.g += dither_shift_B;
-		Color.g += -dither_shift_B;
-		Color.b += -dither_shift_C;
-		Color.b += dither_shift_C;
-		Color.b += -dither_shift_C;
-	}
-	else
-	{
-		Color = Color;
-	}
-	// Dither End
+
 	if(!HDR_To_SDR_Tonemap)
 	{ 
 		Color.rgb = recSevenONinetoTwentyTwenty(Color.rgb); //Good
