@@ -148,7 +148,8 @@ uniform int Depth_Map <
 	ui_items = "DM0 Normal\0DM1 Normal Reversed\0DM2 Offset Normal\0DM3 Offset Reversed\0";
 	ui_label = "·Depth Map Selection·";
 	ui_tooltip = "Linearization for the zBuffer also known as Depth Map.\n"
-			     "Normally you want to use DM0 or DM1.";
+			     "Normally you want to use DM0 or DM1 in most cases.\n"
+			     "Offset settings only work with DM2 or DM3.";
 	ui_category = "Depth Map";
 > = 0;
 
@@ -164,7 +165,7 @@ uniform float Offsets <
 	ui_type = "drag";
 	ui_min = 0; ui_max = 1.0;
 	ui_label = " Offset";
-	ui_tooltip = "Offset is for the Special Depth Map Only";
+	ui_tooltip = "Offset is for the Depth Map 2 and 3 Only.";
 	ui_category = "Depth Map";
 > = 0.5;
 
@@ -429,7 +430,7 @@ float Depth(in float2 texcoord : TEXCOORD0)
 
 		//Conversions to linear space.....
 		//Near & Far Adjustment
-		float Far = 1, Near = 0.125/Depth_Map_Adjust, DA = Depth_Map_Adjust*2; //Division Depth Map Adjust - Near
+		float Far = 1, Near = 0.125/Depth_Map_Adjust; //Division Depth Map Adjust - Near
 
 		//Raw Z Offset
 		float Z = min(1,pow(abs(exp(zBuffer)*Offsets),2));
@@ -447,7 +448,7 @@ float Depth(in float2 texcoord : TEXCOORD0)
 			  
 		//3. Offset Reverse
 		float OffsetReverse = Far * Near / (Near + ZR * (Far - Near));
-			  OffsetReverse = lerp(Normal,OffsetReverse,0.875);//mixing
+			  OffsetReverse = lerp(NormalReverse,OffsetReverse,0.875);//mixing
 		
 		float DM;
 		
