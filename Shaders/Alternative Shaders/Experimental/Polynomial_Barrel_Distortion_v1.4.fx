@@ -3,7 +3,7 @@
  //-----------------------------------------////
 
  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
- //* Barrel Distortion for HMD type Displays For SuperDepth3D v1.3																													*//
+ //* Barrel Distortion for HMD type Displays For SuperDepth3D v1.4																													*//
  //* For Reshade 3.0																																								*//
  //* --------------------------																																						*//
  //* This work is licensed under a Creative Commons Attribution 3.0 Unported License.																								*//
@@ -41,16 +41,6 @@ uniform int Stereoscopic_Mode_Convert <
 	ui_items = "Side by Side\0Top and Bottom\0SbS to Alt-TnB\0TnB to Alt-TnB\0Monoscopic\0Checkerboard Reconstruction\0";
 	ui_label = "3D Display Mode Conversion";
 	ui_tooltip = "3D display output conversion for SbS and TnB.";
-> = 0;
-
-uniform int Vertical_Repositioning <
-	ui_type = "drag";
-	ui_min = -500; ui_max = 500;
-	ui_label = "Vertical Repositioning";
-	ui_tooltip = "Please note if you have to use this please aline and adjust your headset.\n"
-				 "You can use the aliment markers to do this below.\n"
-				 "Determines the vertical position of the Image.\n"
-				 "Default is 0.";
 > = 0;
 
 uniform float Lens_Center <
@@ -93,9 +83,44 @@ uniform float2 Zoom_Aspect_Ratio <
 				 "Default is 1.0.";
 > = float2(1.0,1.0);
 
-uniform bool Aliment_Marker <
-	ui_label = "Aliment Marker";
+uniform int Vertical_Repositioning <
+	ui_type = "drag";
+	ui_min = -500; ui_max = 500;
+	ui_label = "Vertical Repositioning";
+	ui_tooltip = "Please note if you have to use this, please aline and adjust your headset before you use this.\n"
+				 "You can use the aliment markers to do this below.\n"
+				 "Determines the vertical position of the Image.\n"
+				 "Default is 0.";
+> = 0;
+
+uniform int2 Independent_Vertical_Repositioning <
+	ui_type = "drag";
+	ui_min = -500; ui_max = 500;
+	ui_label = "Independent Vertical Repositioning";
+	ui_tooltip = "Please note if you have to use this, please aline and adjust your headset before you use this.\n"
+				 "This tries to correct for Strabismus misalignment.\n"
+				 "Determines the vertical L & R positioning.\n"
+				 "Default is 0.";
+> = int2(0,0);
+
+uniform int2 Independent_Horizontal_Repositioning <
+	ui_type = "drag";
+	ui_min = -500; ui_max = 500;
+	ui_label = "Independent Horizontal Repositioning";
+	ui_tooltip = "Please note if you have to use this, please aline and adjust your headset before you use this.\n"
+				 "This tries to correct for Strabismus misalignment.\n"
+				 "Determines the vertical L & R positioning.\n"
+				 "Default is 0.";
+> = int2(0,0);
+
+uniform bool Lens_Aliment_Marker <
+	ui_label = "Lens Aliment Markers";
 	ui_tooltip = "Use to this green Cross Marker for lens aliment.";
+> = false;
+
+uniform bool Image_Aliment_Marker <
+	ui_label = "Image Aliment Markers";
+	ui_tooltip = "Use to this green Cross Marker for image aliment.";
 > = false;
 
 uniform bool Vignette <
@@ -130,7 +155,9 @@ float LDkT = Lens_Distortion.y;
 float Z = Zoom;
 float AR = Aspect_Ratio;
 float3 PC = Polynomial_Colors;
-float2 D =  Degrees;
+float2 D = Degrees;
+float2 IVRPLR = Independent_Vertical_Repositioning;
+float2 IHRPLR = Independent_Horizontal_Repositioning;
 float4x4 Done;
 
 	//Make your own Profile here.
@@ -145,6 +172,8 @@ float4x4 Done;
 		AR = 1.0;					//Aspect Ratio. Default is 1.0
 		PC = float3(1,1,1);			//Polynomial Colors. Default is (Red 1.0, Green 1.0, Blue 1.0)
 		D = float2(0,0);			//Left & Right Rotation Angle known as Degrees.
+		IVRPLR = float2(0,0);       //Independent Vertical Repositioning. Left & Right.
+		IHRPLR = float2(0,0);       //Independent Horizontal Repositioning. Left & Right.
 	}
 	
 	//Make your own Profile here.
@@ -159,6 +188,8 @@ float4x4 Done;
 		AR = 0.925;					//Aspect Ratio. Default is 1.0
 		PC = float3(0.5,0.75,1);	//Polynomial Colors. Default is (Red 1.0, Green 1.0, Blue 1.0)
 		D = float2(0,0);			//Left & Right Rotation Angle known as Degrees.
+		IVRPLR = float2(0,0);       //Independent Vertical Repositioning. Left & Right.
+		IHRPLR = float2(0,0);       //Independent Horizontal Repositioning. Left & Right.
 	}
 
 	//Rift Profile WIP
@@ -173,15 +204,17 @@ float4x4 Done;
 		AR = 1.0;					//Aspect Ratio. Default is 1.0
 		PC = float3(1,1,1);	        //Polynomial Colors. Default is (Red 1.0, Green 1.0, Blue 1.0)
 		D = float2(0,0);			//Left & Right Rotation Angle known as Degrees.
+		IVRPLR = float2(0,0);       //Independent Vertical Repositioning. Left & Right.
+		IHRPLR = float2(0,0);       //Independent Horizontal Repositioning. Left & Right.
 	}
 
 if(Diaspora)
 {
-	Done = float4x4(float4(IPD,PC.x,Z,0),float4(LC,PC.y,AR,0),float4(LDkT,PC.z,D.x,0),float4(LDkO,VRP,D.y,0)); //Diaspora frak up 4x4 fix
+	Done = float4x4(float4(IPD,PC.x,Z,IVRPLR.x),float4(LC,PC.y,AR,IVRPLR.y),float4(LDkT,PC.z,D.x,IHRPLR.x),float4(LDkO,VRP,D.y,IHRPLR.y)); //Diaspora frak up 4x4 fix
 }
 else
 {
-	Done = float4x4(float4(IPD,LC,LDkT,LDkO),float4(PC.x,PC.y,PC.z,VRP),float4(Z,AR,D.x,D.y),float4(0,0,0,0));
+	Done = float4x4(float4(IPD,LC,LDkT,LDkO),float4(PC.x,PC.y,PC.z,VRP),float4(Z,AR,D.x,D.y),float4(IVRPLR.x,IVRPLR.y,IHRPLR.x,IHRPLR.y));
 }
 return Done;
 }
@@ -237,6 +270,19 @@ float2 DEGREES()
 	return Degrees;
 }
 
+//Independent Vertical Repositioning Section//
+float2 IVRePosLR()
+{
+	float2 IVRePosLR = float2(HMDProfiles()[3][0],HMDProfiles()[3][1]);
+	return IVRePosLR;
+}
+
+//Independent Horizontal Repositioning Section//
+float2 IHRePosLR()
+{
+	float2 IHRePosLR = float2(HMDProfiles()[3][2],HMDProfiles()[3][3]);
+	return IHRePosLR;
+}
 /////////////////////////////////////////////D3D Starts Here/////////////////////////////////////////////////////////////////
 #define pix float2(BUFFER_RCP_WIDTH, BUFFER_RCP_HEIGHT)
 #define TextureSize float2(BUFFER_WIDTH, BUFFER_HEIGHT)
@@ -382,12 +428,23 @@ float4 base;
 				
 	texcoord = float2((L_Rotationtexcoord.x*X)-midW,(L_Rotationtexcoord.y*Y)-midH);	
 	
-	//Texture Position// https://developers.google.com/vr/jump/rendering-ods-content.pdf Page 10
-	texcoord.x -= (IPDS() * 0.5) * pix.x;
-	texcoord.y += VRePos() * pix.y;
+	//Texture Position
+	texcoord.y += VRePos() * pix.y;//Tied Vertical Repostion.
+	texcoord.y += IVRePosLR().x * pix.y;//Independent Vertical Repostion Left.
+	texcoord.x += IHRePosLR().x * pix.x;//Independent Horizontal Repostion Left.
 	//Texture Adjustment End//		
 		
 	base = tex2D(SamplerCLBORDER, texcoord);
+	   
+	//Cross Marker inside Left Image
+	float2 Horz = float2(1-0.49925,0.49925);
+	float2 Vert = float2(1-0.501,0.501);
+	float4 A = all( texcoord < float2(Horz.x,Vert.x)) || all( texcoord > float2(Horz.x,Vert.x));
+	float4 B = all( texcoord < float2(Horz.y,Vert.y)) || all( texcoord > float2(Horz.y,Vert.y));
+	float4 H = A-B;
+	
+	if( Image_Aliment_Marker )
+	base = H ? float4(1.0,1.0,0.0,1) : base; //Yellow
 	   
 	texcoord = -texcoord * texcoord + texcoord;
 	
@@ -425,12 +482,23 @@ float4 base;
 				
 	texcoord = float2((R_Rotationtexcoord.x*X)-midW,(R_Rotationtexcoord.y*Y)-midH);	
 
-	//Texture Position// https://developers.google.com/vr/jump/rendering-ods-content.pdf Page 10
-	texcoord.x += (IPDS() * 0.5) * pix.x;
+	//Texture Position
 	texcoord.y += VRePos() * pix.y;
+	texcoord.y += IVRePosLR().y * pix.y;//Independent Vertical Repostion Right.
+	texcoord.x += IHRePosLR().y * pix.x;//Independent Horizontal Repostion Right.
 	//Texture Adjustment End//
 
 	base = tex2D(SamplerCRBORDER, texcoord);
+
+	//Cross Marker inside Right Image
+	float2 Horz = float2(1-0.49925,0.49925);
+	float2 Vert = float2(1-0.501,0.501);
+	float4 A = all( texcoord < float2(Horz.x,Vert.x)) || all( texcoord > float2(Horz.x,Vert.x));
+	float4 B = all( texcoord < float2(Horz.y,Vert.y)) || all( texcoord > float2(Horz.y,Vert.y));
+	float4 H = A-B;
+	
+	if( Image_Aliment_Marker )
+	base = H ? float4(1.0,1.0,0.0,1) : base; //Yellow
 	   
 	texcoord = -texcoord * texcoord + texcoord;
 	
@@ -498,8 +566,8 @@ float4 PDL(float2 texcoord)		//Texture = texCL Left
 	float4 B = all( texcoord < float2(Horz.y,Vert.y)) || all( texcoord > float2(Horz.y,Vert.y));
 	float4 H = A-B;
 	
-	if( Aliment_Marker )
-	color = H ? float4(0.0,1.0,0.0,1) : color;
+	if( Lens_Aliment_Marker )
+	color = H ? float4(0.0,1.0,0.0,1) : color; //Green
 	
 	return color;	
 }
@@ -560,8 +628,8 @@ float2 DR(float2 p, float k_RGB) //Cubic Lens Distortion Right
 	float4 B = all( texcoord < float2(Horz.y,Vert.y)) || all( texcoord > float2(Horz.y,Vert.y));
 	float4 H = A-B;
 	
-	if( Aliment_Marker )
-	color = H ? float4(0.0,1.0,0.0,1) : color;
+	if( Lens_Aliment_Marker )
+	color = H ? float4(0.0,1.0,0.0,1) : color; //Green
 	
 	return color;
 		
@@ -571,19 +639,24 @@ float2 DR(float2 p, float k_RGB) //Cubic Lens Distortion Right
 
 float4 PBDOut(float2 texcoord : TEXCOORD0)
 {	
+	float IPDtexL = texcoord.x, IPDtexR = texcoord.x;
+	// https://developers.google.com/vr/jump/rendering-ods-content.pdf Page 10
+	IPDtexL -= (IPDS() * 0.5) * pix.x;// Left IPD
+	IPDtexR += (IPDS() * 0.5) * pix.x;// Right IPD
+	
 	float4 Out;
 		
 	if( Stereoscopic_Mode_Convert == 0 || Stereoscopic_Mode_Convert == 1|| Stereoscopic_Mode_Convert == 5 )
 	{
-		Out = texcoord.x < 0.5 ? PDL(float2(texcoord.x*2,texcoord.y)) : PDR(float2(texcoord.x*2-1 ,texcoord.y));
+		Out = texcoord.x < 0.5 ? PDL(float2(IPDtexL*2,texcoord.y)) : PDR(float2(IPDtexR*2-1 ,texcoord.y));
 	}
 	else if (Stereoscopic_Mode_Convert == 2 || Stereoscopic_Mode_Convert == 3)
 	{
-		Out = texcoord.y < 0.5 ? PDL(float2(texcoord.x,texcoord.y*2)) : PDR(float2(texcoord.x,texcoord.y*2-1));
+		Out = texcoord.y < 0.5 ? PDL(float2(IPDtexL,texcoord.y*2)) : PDR(float2(IPDtexR,texcoord.y*2-1));
 	}
 	else if (Stereoscopic_Mode_Convert == 4 )
 	{
-		Out = PDL(float2(texcoord.x ,texcoord.y));
+		Out = PDL(float2(IPDtexL ,texcoord.y));
 	}
 	
 	return Out;
