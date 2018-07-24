@@ -21,7 +21,7 @@
  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // Determines The Max Depth amount.
-#define Depth_Max 35
+#define Depth_Max 25
 
 uniform float Depth <
 	ui_type = "drag";
@@ -336,34 +336,124 @@ float4 FakeDB(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0):
 	return saturate(Done);
 }
 
-float4 Bilateral_Filter(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Target
+float4 Assist(in float2 texcoord : TEXCOORD0)                                                                         
 {
-	float Merge, Per = 0.25,Num = 2168.75f;
+	float Merge, Num = 1800.00f;
 	
 	if(DBA == 2)
-	Num = 1425.75f;
+	Num = 1125.00f;
 	
 	float Down = (texcoord.y-Num*pix.y).x, Up = 1-(texcoord.y+Num*pix.y).x, Left = (texcoord.x-Num*pix.x).x, Right = 1-(texcoord.x+Num*pix.x).x;
 	float Up_A = smoothstep(1,0.0,(texcoord.y+1.0*pix.y).x - 0.25);
 	
 	if(DBA == 1)
 	{
-		Merge = Down*Right*Up*Left;
+		Merge = smoothstep(0,0.375,Down*Right*Up*Left);
 	}
 	else if(DBA == 2)
 	{	
-		Merge = (Down*Up)-(Left*Right)*(Left*Right);
+		Merge = smoothstep(0,0.375,(Down*Up)-(Left*Right)*(Left*Right));
 	}
 	else if(DBA == 3)
 	{	
-		Merge = Up_A;
+		Merge = smoothstep(0,1,Up_A);
+	}
+	
+	//return lerp(tex2D(SamplerBF,texcoord.xy),Merge,Per);
+	return Merge;
+}
+
+#define BSIGMA 0.1
+#define MSIZE 15
+
+float normpdf(in float x, in float sigma)
+{
+	return 0.39894*exp(-0.5*x*x/(sigma*sigma))/sigma;
+}
+
+float normpdf3(in float3 v, in float sigma)
+{
+	return 0.39894*exp(-0.5*dot(v,v)/(sigma*sigma))/sigma;
+}
+
+float4 Bilateral_Filter(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Target
+{
+	//Bilateral Filter//                                                                                                                                                                   
+	float3 c = tex2D(SamplerFakeDB,texcoord.xy).rgb;
+	
+	float2 ScreenCal = float2(2.5*pix.x,2.5*pix.y);
+
+	float2 FinCal = ScreenCal;
+	
+	const int kSize = (MSIZE-1)/2;	
+
+	float weight[MSIZE] = 
+	{  
+	0.031225216, 
+	0.033322271, 
+	0.035206333, 
+	0.036826804, 
+	0.038138565, 
+	0.039104044, 
+	0.039695028, 
+	0.039894000, 
+	0.039695028, 
+	0.039104044, 
+	0.038138565, 
+	0.036826804, 
+	0.035206333, 
+	0.033322271, 
+	0.031225216
+	};  
+
+		float3 final_colour;
+		float Z;
+		[unroll]
+		for (int i = 0; i <= kSize; ++i)
+		{
+			weight[kSize+i] = normpdf(float(i), SIGMA);
+			weight[kSize-i] = normpdf(float(i), SIGMA);
+		}
+		
+		float3 cc;
+		float factor;
+		float bZ = 1.0/normpdf(0.0, BSIGMA);
+		
+		[loop]
+		for (int j=-kSize; j <= kSize; ++j)
+		{
+			for (int k=-kSize; k <= kSize; ++k)
+			{
+			
+				float2 XY;
+
+					XY = float2(float(j),float(k))*FinCal;
+					cc = tex2D(SamplerFakeDB,texcoord.xy+XY).rgb;
+	
+				factor = normpdf3(cc-c, BSIGMA)*bZ*weight[kSize+k]*weight[kSize+j];
+				Z += factor;
+				final_colour += factor*cc;
+			}
+		}
+	
+	float Per;
+		
+	if(DBA >= 1)
+	{
+		Per = 0.25;
 	}
 	else
 	{
 		Per = 0.0;
 	}
 	
-	return max(0.01,lerp(tex2D(SamplerFakeDB,texcoord.xy),Merge,Per));
+		float4 Bilateral_Filter = float4(final_colour/Z, 1.0);
+		
+		Bilateral_Filter = max(0.01,lerp(Bilateral_Filter,Assist(texcoord),Per));
+		
+		Bilateral_Filter = smoothstep(0.125,1.0,Bilateral_Filter);
+
+return Bilateral_Filter;
 }
 
 uniform uint framecount < source = "framecount"; >;
