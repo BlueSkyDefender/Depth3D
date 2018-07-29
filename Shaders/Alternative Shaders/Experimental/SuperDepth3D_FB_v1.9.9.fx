@@ -80,7 +80,7 @@ uniform int Convergence_Mode <
 
 uniform float ZPD <
 	ui_type = "drag";
-	ui_min = 0.0; ui_max = 0.500;
+	ui_min = 0.0; ui_max = 0.100;
 	ui_label = " Zero Parallax Distance";
 	ui_tooltip = "ZPD controls the focus distance for the screen Pop-out effect also known as Convergence.\n"
 				"For FPS Games keeps this low Since you don't want your gun to pop out of screen.\n"
