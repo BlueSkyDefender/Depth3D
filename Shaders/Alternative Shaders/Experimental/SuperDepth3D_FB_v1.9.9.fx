@@ -1,9 +1,9 @@
- ////------------- --//
- ///**SuperDepth3D**///
- //----------------////
+ ////--------------------------//
+ ///**SuperDepth3D_FlashBack**///
+ //--------------------------////
 
  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
- //* Depth Map Based 3D post-process shader v1.9.9          																														*//
+ //* Depth Map Based 3D post-process shader v1.9.9 FlashBack																														*//
  //* For Reshade 3.0																																								*//
  //* --------------------------																																						*//
  //* This work is licensed under a Creative Commons Attribution 3.0 Unported License.																								*//
@@ -11,28 +11,26 @@
  //* I would also love to hear about a project you are using it with.																												*//
  //* https://creativecommons.org/licenses/by/3.0/us/																																*//
  //*																																												*//
+ //* Have fun,																																										*//
  //* Jose Negrete AKA BlueSkyDefender																																				*//
  //*																																												*//
  //* http://reshade.me/forum/shader-presentation/2128-sidebyside-3d-depth-map-based-stereoscopic-shader																				*//	
  //* ---------------------------------																																				*//
  //*																																												*//
- //* Original work was based on the shader code of a CryTech 3 Dev http://www.slideshare.net/TiagoAlexSousa/secrets-of-cryengine-3-graphics-technology								*//
+ //* Original work was based on Shader Based on forum user 04348 and be located here http://reshade.me/forum/shader-presentation/1594-3d-anaglyph-red-cyan-shader-wip#15236			*//
  //*																																												*//
  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 //USER EDITABLE PREPROCESSOR FUNCTIONS START//
 
 // Determines The resolution of the Depth Map. For 4k Use 1.75 or 1.5. For 1440p Use 1.5 or 1.25. For 1080p use 1. Too low of a resolution will remove too much.
-#define Depth_Map_Division 1.0
+#define Depth_Map_Division 1.5
 
 // Determines the Max Depth amount, in ReShades GUI.
 #define Depth_Max 50
 
 // Enable this to fix the problem when there is a full screen Game Map Poping out of the screen. AKA Full Black Depth Map Fix. I have this off by default. Zero is off, One is On.
 #define FBDMF 0 //Default 0 is Off. One is On.
-
-//Third person auto zero parallax distance is a form of Automatic Near Field Adjustment based on BOTW fix. This now should work on all Third Person Games. 
-#define TPAuto_ZPD 0 //Default 0 is Off. One is On. Two is Alt.
 
 // Change the Cancel Depth Key
 // Determines the Cancel Depth Toggle Key useing keycode info
@@ -53,9 +51,14 @@
 #define Image_Position_Adjust float2(0.0,0.0)
 
 //Zero Is Off One+ is On. T Makes the Image Better ???? Maybe ???? Maybe Not. Who Knows. 
-#define Boost 0 //0/1/2/3
+#define Boost 0 //0/1
 
 //USER EDITABLE PREPROCESSOR FUNCTIONS END//
+	
+#if __RENDERER__ >= 0x09100 
+	#define RENDERER_IS_D3D9  1		
+#endif
+
 //Divergence & Convergence//
 uniform float Divergence <
 	ui_type = "drag";
@@ -68,12 +71,9 @@ uniform float Divergence <
 
 uniform int Convergence_Mode <
 	ui_type = "combo";
-	ui_items = "ZPD Tied\0ZPD Locked\0";
+	ui_items = "ZPD Tied\0";
 	ui_label = " Convergence Mode";
 	ui_tooltip = "Select your Convergence Mode for ZPD calculations.\n" 
-				 "ZPD Locked mode is locked to divergence & dissables ZPD control below.\n" 
-				 "ZPD Tied is controlled by ZPD. Works in tandam with Divergence.\n" 
-				 "For FPS with no custom weapon profile use Tied.\n" 
 				 "Default is ZPD Tied.";
 	ui_category = "Divergence & Convergence";
 > = 0;
@@ -91,7 +91,7 @@ uniform float ZPD <
 
 uniform int Balance <
 	ui_type = "drag";
-	ui_min = -4.0; ui_max = 6.0;
+	ui_min = 0.0; ui_max = 6.0;
 	ui_label = " Balance";
 	ui_tooltip = "Balance between ZPD Depth and Scene Depth and works with ZPD option above.\n"
 				"Example Zero is 50/50 equal between ZPD Depth and Scene Depth.\n"
@@ -113,9 +113,9 @@ uniform int Disocclusion_Selection <
 	ui_items = "Off\0Radial Blur\0Normal Blur\0Depth Based\0Radial Depth Blur\0Normal Depth Blur\0";
 	ui_label = "·Disocclusion Selection·";
 	ui_tooltip = "This is to select the z-Buffer blurring option for low level occlusion masking.\n"
-				"Default is Normal Blur.";
+				"Default is Radial Depth Blur.";
 	ui_category = "Occlusion Masking";
-> = 2;
+> = 4;
 
 uniform float Disocclusion_Power_Adjust <
 	ui_type = "drag";
@@ -128,7 +128,7 @@ uniform float Disocclusion_Power_Adjust <
 
 uniform int View_Mode <
 	ui_type = "combo";
-	ui_items = "View Mode Normal\0View Mode Alpha\0View Mode Beta\0";
+	ui_items = "View Mode Normal\0View Mode Alpha\0";
 	ui_label = " View Mode";
 	ui_tooltip = "Change the way the shader warps the output to the screen.\n"
 				 "Default is Normal";
@@ -351,6 +351,9 @@ texture texDis  { Width = BUFFER_WIDTH/Depth_Map_Division; Height = BUFFER_HEIGH
 sampler SamplerDis
 	{
 		Texture = texDis;
+		MinFilter = LINEAR;
+		MagFilter = LINEAR;
+		MipFilter = LINEAR;
 	};
 	
 #if AO_TOGGLE	
@@ -830,38 +833,10 @@ float AutoDepthRange( float d, float2 texcoord )
 
 float Conv(float D,float2 texcoord)
 {
-	float Z, ZP, Con = ZPD, NF_Power, MSZ = Divergence * pix.x;
+	float Z, ZP, Con = ZPD, NF_Power;
 
 		float Divergence_Locked = Divergence*0.00105;
 		float ALC = abs(smoothstep(0,1.0,Lum(texcoord)));
-		
-		if(TPAuto_ZPD == 1)
-		{			
-			if (ALC < 0.0078125)
-				Con = ZPD*2.0;	
-			if (ALC > 0.0078125)
-				Con = ZPD*1.750;
-			if (ALC > 0.015625)
-				Con = ZPD*1.625;
-			if (ALC > 0.03125)
-				Con = ZPD*1.5;
-			if (ALC > 0.03125)
-				Con = ZPD*1.375;
-			if (ALC > 0.0625)
-				Con = ZPD*1.250;
-			if (ALC >= 0.125)
-				Con = ZPD;
-				
-			Con = abs(smoothstep(1.0,0,Lum(texcoord)))*Con;
-		}
-		else if(TPAuto_ZPD == 2)
-		{			
-			Con = abs(smoothstep(1.0,0,Lum(texcoord)))*Con;
-		}
-		else
-		{
-			Con = ZPD;
-		}
 			
 		if (ALC <= 0.000425 && FBDMF) //Full Black Depth Map Fix.
 		{
@@ -874,15 +849,8 @@ float Conv(float D,float2 texcoord)
 			Divergence_Locked = Divergence_Locked;
 		}	
 
-		if(Balance == -4)
-			NF_Power = 0.125;		
-		else if(Balance == -3)
-			NF_Power = 0.250;
-		else if(Balance == -2)
-			NF_Power = 0.375;
-		else if(Balance == -1)
-			NF_Power = 0.425;
-		else if(Balance == 0)
+
+		if(Balance == 0)
 			NF_Power = 0.5;
 		else if(Balance == 1)
 			NF_Power = 0.5625;
@@ -902,23 +870,14 @@ float Conv(float D,float2 texcoord)
 		if (ZPD == 0)
 		ZP = 1.0;
 		
-		float Convergence;		
-		
-		if(Convergence_Mode == 1)
-		{
-			Convergence = 1 - Divergence_Locked / D;
-		}
-		else
-		{	
-			Convergence = 1 - Z / D;
-		}
+		float Convergence = 1 - Z / D;
 		
 		if (Auto_Depth_Range > 0)
 		{
 			D = AutoDepthRange(D,texcoord);
 		}
 				
-		Z = lerp( MSZ * Convergence, MSZ * D, ZP);
+		Z = lerp(Convergence,Convergence*D, ZP);
 				
     return Z;
 }
@@ -1041,7 +1000,7 @@ DBD = ( DBD - 1.0f ) / ( -187.5f - 1.0f );
 		X = 0.5;
 	}
 	
-	if (Boost == 2 || Boost == 3)//Super Secret Depth Boost.
+	if (Boost == 1)//Super Secret Depth Boost.
 	{
 		X = lerp(X,-X,-0.0125);
 	}
@@ -1050,13 +1009,28 @@ DBD = ( DBD - 1.0f ) / ( -187.5f - 1.0f );
 }
 
 /////////////////////////////////////////L/R//////////////////////////////////////////////////////////////////////
+float2  Encode(in float2 texcoord : TEXCOORD0) //zBuffer Color Channel Encode
+{
+	float GetDepthL = tex2Dlod(SamplerDis,float4(texcoord.x,texcoord.y,0,0)).x;
+	float GetDepthR = tex2Dlod(SamplerDis,float4(texcoord.x,texcoord.y,0,0)).x;
+	
+	GetDepthL = Conv(GetDepthL,texcoord);
+	GetDepthR = Conv(GetDepthR,texcoord);
+	
+	// X Left	
+	float X = texcoord.x+Divergence*pix.x*GetDepthL;
+	
+	// Y Right
+	float Y = (1-texcoord.x)+Divergence*pix.x*GetDepthR;	
+	
+	return float2(X,Y);
+}
+
 float4 PS_calcLR(float2 texcoord)
 {
 	float2 TCL, TCR, TexCoords = texcoord;
 	float4 color, Right, Left;
-	float DepthR = 1, DepthL = 1, Adjust_A = 0.11111112, Adjust_B = 0.07692307, N, S, X, L, R;
-	float samplesA[9] = {0.5,0.5625,0.625,0.6875,0.75,0.8125,0.875,0.9375,1.0};
-	float samplesB[13] = {0.5,0.546875,0.578125,0.625,0.659375,0.703125,0.75,0.796875,0.828125,0.875,0.921875,0.953125,1.0};
+	float DepthL, DepthR, N, S, X, L, R;
 
 	//MS is Max Separation P is Perspective Adjustment
 	float MS = Divergence * pix.x, P = Perspective * pix.x;
@@ -1109,48 +1083,38 @@ float4 PS_calcLR(float2 texcoord)
 		TCL.x = TCL.x + (Interlace_Optimization * pix.y);
 		TCR.x = TCR.x - (Interlace_Optimization * pix.y);
 	}
-			
-	if (View_Mode == 0 || View_Mode == 1)
-		N = 9;
-	else if (View_Mode == 2)
-		N = 13;
+		float NumA, NumB;
+		if (View_Mode == 0)
+		{
+			NumA = 1.0f;
+			NumB = 1.0f;
+		}
+		else
+		{
+			NumA = 0.975f;
+			NumB = 1.0025f;
+		}
+							
+		[loop]
+		for (int i = 0; i <= Divergence+1; i++) 
+		{
+				//L Good
+				//if ( Encode(float2(TCL.x-i*pix.x,TCL.y)).z >= TCL.x-pix.x/2 && Encode(float2(TCL.x-i*pix.x,TCL.y)).z <= (TCR.x+pix.x/2)) //Decode Z
+				if ( Encode(float2(TCL.x+i*pix.x/NumA,TCL.y)).y >= (1-TCL.x)/NumB )
+				{
+					DepthL = i * pix.x; //Good
+				}
 				
-	[loop]
-	for ( int i = 0 ; i < N; i++ ) 
-	{
-			if (View_Mode == 0)
-		{
-			S = samplesA[i] * MS;//9
-			DepthL = min(DepthL,tex2Dlod(SamplerDis,float4(TCL.x+S, TCL.y,0,0)).x);
-			DepthR = min(DepthR,tex2Dlod(SamplerDis,float4(TCR.x-S, TCR.y,0,0)).x);
+				//R Bad
+				//if ( Encode(float2(TCR.x+i*pix.x,TCR.y)).x >= (1-TCR.x-pix.x/2) && Encode(float2(TCR.x+i*pix.x,TCR.y)).x <= (1-TCR.x+pix.x/2) ) //Decode X
+				if ( Encode(float2(TCR.x-i*pix.x/NumA,TCR.y)).x >= TCR.x/NumB )
+				{
+					DepthR = i * pix.x; //Good
+				}
+			DepthL = min(1,DepthL);
+			DepthR = min(1,DepthR);
 		}
-		else if (View_Mode == 1)
-		{
-			S = samplesB[i] * MS * 1.21875;//9
-			L += tex2Dlod(SamplerDis,float4(TCL.x+S, TCL.y,0,0)).x*Adjust_A;
-			R += tex2Dlod(SamplerDis,float4(TCR.x-S, TCR.y,0,0)).x*Adjust_A;
-			DepthL = min(1,L);
-			DepthR = min(1,R);
-		}
-		else if (View_Mode == 2)
-		{
-			S = samplesB[i] * MS * 1.21875;//13
-			L += tex2Dlod(SamplerDis,float4(TCL.x+S, TCL.y,0,0)).x*Adjust_B;
-			R += tex2Dlod(SamplerDis,float4(TCR.x-S, TCR.y,0,0)).x*Adjust_B;
-			DepthL = min(1,L);
-			DepthR = min(1,R);
-		}
-	}
-		
-	DepthL = Conv(DepthL,TexCoords);//Zero Parallax Distance Pass Left
-	DepthR = Conv(DepthR,TexCoords);//Zero Parallax Distance Pass Right
-	
-	if (Boost == 1 || Boost == 3)//Super Secret Depth Boost.
-	{
-		DepthL = lerp(DepthL,-DepthL,-0.0125);
-		DepthR = lerp(DepthR,-DepthR,-0.0125);
-	}
-			
+					
 	float ReprojectionLeft =  DepthL;
 	float ReprojectionRight = DepthR;
 

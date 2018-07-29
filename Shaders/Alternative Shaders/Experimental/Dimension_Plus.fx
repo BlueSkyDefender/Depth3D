@@ -143,7 +143,7 @@ uniform bool Debug_View <
 
 /////////////////////////////////////////////////////D3D Starts Here/////////////////////////////////////////////////////////////////
 #define pix float2(BUFFER_RCP_WIDTH, BUFFER_RCP_HEIGHT)
-#define SIGMA 25
+#define SIGMA 10
 
 texture BackBufferTex : COLOR;
 
@@ -363,8 +363,8 @@ float4 Assist(in float2 texcoord : TEXCOORD0)
 	return Merge;
 }
 
-#define BSIGMA 0.1
-#define MSIZE 15
+#define BSIGMA 0.1125
+#define MSIZE 6
 
 float normpdf(in float x, in float sigma)
 {
@@ -387,24 +387,7 @@ float4 Bilateral_Filter(float4 position : SV_Position, float2 texcoord : TEXCOOR
 	
 	const int kSize = (MSIZE-1)/2;	
 
-	float weight[MSIZE] = 
-	{  
-	0.031225216, 
-	0.033322271, 
-	0.035206333, 
-	0.036826804, 
-	0.038138565, 
-	0.039104044, 
-	0.039695028, 
-	0.039894000, 
-	0.039695028, 
-	0.039104044, 
-	0.038138565, 
-	0.036826804, 
-	0.035206333, 
-	0.033322271, 
-	0.031225216
-	};  
+	float weight[MSIZE] = {0.031225216, 0.033322271, 0.035206333, 0.036826804, 0.038138565, 0.039104044};   
 
 		float3 final_colour;
 		float Z;
