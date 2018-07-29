@@ -20,10 +20,12 @@
  //* 																																												*//
  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+#define Depth_Map_Division 1.5
+
 // Determines The Max Depth amount.
 #define Depth_Max 25
 
-uniform float Depth <
+uniform float Divergence <
 	ui_type = "drag";
 	ui_min = 1; ui_max = Depth_Max;
 	ui_label = "Divergence Slider";
@@ -92,17 +94,12 @@ uniform float Range_Adjust <
 	ui_type = "drag";
 	ui_min = 0.5; ui_max = 1.0;
 	ui_label = "Range Adjust";
-	ui_tooltip = "Range adjust determines the transform range in world. Default is 0";
+	ui_tooltip = "Range adjust determines the transform range in world. Default is 1.0";
 > = 1.0;
 
 uniform bool Day_Night_Mode <
 	ui_label = "Day & Night";
 	ui_tooltip = "This mode helps correct for some day and night scenes.";
-> = false;
-
-uniform bool Pop <
-	ui_label = "Pop";
-	ui_tooltip = "Add a little image pop out mainly used for FPS My be removed and bonded to FPS Game mode.";
 > = false;
 
 uniform int Mode <
@@ -114,20 +111,12 @@ uniform int Mode <
 
 uniform int Pulfrich_Effect_Assist <
 	ui_type = "combo";
-	ui_items = "Off\0Left to Right\0Right to Left\0Special Mode\0";
+	ui_items = "Off\0Left to Right\0Right to Left\0";
 	ui_label = "Pulfrich Effect Assist";
 	ui_tooltip = "Pulfrich effect is a psychophysical percept wherein lateral motion of an object in the field of view is interpreted by the visual cortex as having a depth.\n" 
-				 "Special Mode is Both Left to Right and Right to Left.\n" 
+				 //"Special Mode is Both Left to Right and Right to Left.\n" 
 				 "Use Pulfrich Effect Adjust to adjust Special Mode.";
 > = 0;
-
-uniform float Pulfrich_Effect_Adjust <
-	ui_type = "drag";
-	ui_min = 0.375; ui_max = 1.0;
-	ui_label = "Pulfrich Effect Adjust";
-	ui_tooltip = "Pulfrich effect power adjustment for Special Mode.\n" 
-				 "Default is 0.75";
-> = 0.75;
 
 uniform int DBA <
 	ui_type = "combo";
@@ -143,7 +132,6 @@ uniform bool Debug_View <
 
 /////////////////////////////////////////////////////D3D Starts Here/////////////////////////////////////////////////////////////////
 #define pix float2(BUFFER_RCP_WIDTH, BUFFER_RCP_HEIGHT)
-#define SIGMA 10
 
 texture BackBufferTex : COLOR;
 
@@ -152,18 +140,18 @@ sampler BackBuffer
 		Texture = BackBufferTex;
 	};
 		
-texture texFakeDB { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA8; MipLevels = 8;};
+texture texFakeDB { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT/Depth_Map_Division; Format = RGBA8; MipLevels = 2;};
 
 sampler SamplerFakeDB
 	{
 		Texture = texFakeDB;
-		MipLODBias = 2.0f;
+		MipLODBias = 1.0f;
 		MipFilter = Linear; 
 		MinFilter = Linear; 
 		MagFilter = Linear;
 	};
 	
-texture texBB { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA8; MipLevels = 8;};
+texture texBB { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT/Depth_Map_Division; Format = RGBA8; MipLevels = 2;};
 
 sampler SamplerBBlur
 	{
@@ -173,18 +161,18 @@ sampler SamplerBBlur
 		MipFilter = LINEAR;
 	};	
 		
-texture texBl { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA8; MipLevels = 8;};
+texture texBl { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT/Depth_Map_Division; Format = RGBA8; MipLevels = 2;};
 
 sampler SamplerBlur
 	{
 		Texture = texBl;
-		MipLODBias = 2.0f;
+		MipLODBias = 1.0f;
 		MinFilter = LINEAR;
 		MagFilter = LINEAR;
 		MipFilter = LINEAR;
 	};	
 
-texture texBF { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA32F;MipLevels = 8;};
+texture texBF { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT/Depth_Map_Division; Format = RGBA32F;MipLevels = 2;};
 
 sampler SamplerBF
 	{
@@ -363,63 +351,10 @@ float4 Assist(in float2 texcoord : TEXCOORD0)
 	return Merge;
 }
 
-#define BSIGMA 0.1125
-#define MSIZE 6
-
-float normpdf(in float x, in float sigma)
-{
-	return 0.39894*exp(-0.5*x*x/(sigma*sigma))/sigma;
-}
-
-float normpdf3(in float3 v, in float sigma)
-{
-	return 0.39894*exp(-0.5*dot(v,v)/(sigma*sigma))/sigma;
-}
-
 float4 Bilateral_Filter(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Target
 {
-	//Bilateral Filter//                                                                                                                                                                   
-	float3 c = tex2D(SamplerFakeDB,texcoord.xy).rgb;
-	
-	float2 ScreenCal = float2(2.5*pix.x,2.5*pix.y);
 
-	float2 FinCal = ScreenCal;
-	
-	const int kSize = (MSIZE-1)/2;	
-
-	float weight[MSIZE] = {0.031225216, 0.033322271, 0.035206333, 0.036826804, 0.038138565, 0.039104044};   
-
-		float3 final_colour;
-		float Z;
-		[unroll]
-		for (int i = 0; i <= kSize; ++i)
-		{
-			weight[kSize+i] = normpdf(float(i), SIGMA);
-			weight[kSize-i] = normpdf(float(i), SIGMA);
-		}
-		
-		float3 cc;
-		float factor;
-		float bZ = 1.0/normpdf(0.0, BSIGMA);
-		
-		[loop]
-		for (int j=-kSize; j <= kSize; ++j)
-		{
-			for (int k=-kSize; k <= kSize; ++k)
-			{
-			
-				float2 XY;
-
-					XY = float2(float(j),float(k))*FinCal;
-					cc = tex2D(SamplerFakeDB,texcoord.xy+XY).rgb;
-	
-				factor = normpdf3(cc-c, BSIGMA)*bZ*weight[kSize+k]*weight[kSize+j];
-				Z += factor;
-				final_colour += factor*cc;
-			}
-		}
-	
-	float Per;
+	float Per, blursize = 2.0*pix.x;
 		
 	if(DBA >= 1)
 	{
@@ -429,26 +364,47 @@ float4 Bilateral_Filter(float4 position : SV_Position, float2 texcoord : TEXCOOR
 	{
 		Per = 0.0;
 	}
-	
-		float4 Bilateral_Filter = float4(final_colour/Z, 1.0);
 		
-		Bilateral_Filter = max(0.01,lerp(Bilateral_Filter,Assist(texcoord),Per));
+		float4 sum;
+		sum += tex2Dlod(SamplerFakeDB, float4(texcoord.x - 4.0*blursize, texcoord.y,0,0)) * 0.05;
+		sum += tex2Dlod(SamplerFakeDB, float4(texcoord.x, texcoord.y - 3.0*blursize,0,0)) * 0.09;
+		sum += tex2Dlod(SamplerFakeDB, float4(texcoord.x - 2.0*blursize, texcoord.y,0,0)) * 0.12;
+		sum += tex2Dlod(SamplerFakeDB, float4(texcoord.x, texcoord.y - blursize,0,0)) * 0.15;
+		sum += tex2Dlod(SamplerFakeDB, float4(texcoord.x + blursize, texcoord.y,0,0)) * 0.15;
+		sum += tex2Dlod(SamplerFakeDB, float4(texcoord.x, texcoord.y + 2.0*blursize,0,0)) * 0.12;
+		sum += tex2Dlod(SamplerFakeDB, float4(texcoord.x + 3.0*blursize, texcoord.y,0,0)) * 0.09;
+		sum += tex2Dlod(SamplerFakeDB, float4(texcoord.x, texcoord.y + 4.0*blursize,0,0)) * 0.05;
 		
-		Bilateral_Filter = smoothstep(0.125,1.0,Bilateral_Filter);
+		sum = max(0.01,lerp(sum,Assist(texcoord),Per));
+		
+		sum = smoothstep(0.125,1.0,sum);
 
-return Bilateral_Filter;
+return sum;
 }
 
-uniform uint framecount < source = "framecount"; >;
-//Total amount of frames since the game started.
+float2  Encode(in float2 texcoord : TEXCOORD0) //zBuffer Color Channel Encode
+{
+	float GetDepthL = tex2Dlod(SamplerBF,float4(texcoord.x,texcoord.y,0,0)).x;
+	float GetDepthR = tex2Dlod(SamplerBF,float4(texcoord.x,texcoord.y,0,0)).x;
+	
+	// X Left	
+	float X = texcoord.x+Divergence*pix.x*GetDepthL;
+	
+	// Y Right
+	float Y = (1-texcoord.x)+Divergence*pix.x*GetDepthR;	
+	
+	return float2(X,Y);
+}
 
 float4 Converter(float2 texcoord : TEXCOORD0)
 {		
-	float4 Out;
-	float2 TCL,TCR,TexCoords = texcoord;
-	float samplesA[13] = {0.5,0.546875,0.578125,0.625,0.659375,0.703125,0.75,0.796875,0.828125,0.875,0.921875,0.953125,1.0};
-	float MS = Depth * pix.x, Adjust_A = 0.07692307;
-	float P = Perspective * pix.x;
+	float2 TCL, TCR, TexCoords = texcoord;
+	float4 color, Right, Left;
+	float DepthL, DepthR, N, S, X, L, R;
+
+	//MS is Max Separation P is Perspective Adjustment
+	float MS = Divergence * pix.x, P = Perspective * pix.x;
+					
 	if(Eye_Swap)
 	{
 		if ( Stereoscopic_Mode == 0 )
@@ -497,67 +453,59 @@ float4 Converter(float2 texcoord : TEXCOORD0)
 		TCL.x = TCL.x + (Interlace_Optimization * pix.y);
 		TCR.x = TCR.x - (Interlace_Optimization * pix.y);
 	}
-	
-		float4 cL, cR, cPL, cPR; 
-		float S, LC, RC, RF, RN, LF, LN, EX = Depth*125;
-		float A = texcoord.y+EX*pix.y;
+		float NumA, NumB;
+			NumA = 0.975f;
+			NumB = 1.0025f;
+
+
+		float EX = Divergence*125, A = texcoord.y+EX*pix.y;
 		A *= pix.x;
 		
-		[unroll]
-		for (int i = 0; i < 13; i++) 
+		[loop]
+		for (int i = 0; i <= Divergence+1; i++) 
 		{
-				S = samplesA[i] * MS * 1.21875;
-				LF += tex2D(SamplerBF,float2(TCL.x+S, TCL.y)).x*Adjust_A;
-				RF += tex2D(SamplerBF,float2(TCR.x-S, TCR.y)).x*Adjust_A;
-				LF = saturate(LF);
-				RF = saturate(RF);
+				//L Good
+				//if ( Encode(float2(TCL.x-i*pix.x,TCL.y)).z >= TCL.x-pix.x/2 && Encode(float2(TCL.x-i*pix.x,TCL.y)).z <= (TCR.x+pix.x/2)) //Decode Z
+				if ( Encode(float2(TCL.x+i*pix.x/NumA,TCL.y)).y >= (1-TCL.x)/NumB )
+				{
+					DepthL = i * pix.x; //Good
+				}
+				
+				//R Bad
+				//if ( Encode(float2(TCR.x+i*pix.x,TCR.y)).x >= (1-TCR.x-pix.x/2) && Encode(float2(TCR.x+i*pix.x,TCR.y)).x <= (1-TCR.x+pix.x/2) ) //Decode X
+				if ( Encode(float2(TCR.x-i*pix.x/NumA,TCR.y)).x >= TCR.x/NumB )
+				{
+					DepthR = i * pix.x; //Good
+				}
+			DepthL = min(1,DepthL);
+			DepthR = min(1,DepthR);
 		}
-			if(Pop)
-			{
-				LF = MS * lerp(LF,-LF,-0.0625);
-				RF = MS * lerp(RF,-RF,-0.0625);
-			}
-			else
-			{
-				LF = MS * LF;
-				RF = MS * RF;
-			}
 			
-			cL = tex2Dlod(BackBuffer, float4( (TCL.x + LF) + A, TCL.y,0,0)); //Good
-			cR = tex2Dlod(BackBuffer, float4( (TCR.x - RF) - A, TCR.y,0,0)); //Good
+	float ReprojectionLeft =  DepthL;
+	float ReprojectionRight = DepthR;
 
+
+		Left = tex2Dlod(BackBuffer, float4((TCL.x + ReprojectionLeft) + A, TCL.y,0,0));
+		Right = tex2Dlod(BackBuffer, float4((TCR.x - ReprojectionRight)- A, TCR.y,0,0));
+				
 			if (Pulfrich_Effect_Assist == 1)
 			{
-				cL = tex2Dlod(PSBackBuffer, float4( (TCL.x + LF) + A, TCL.y,0,0)); //Good
+				Left = tex2Dlod(PSBackBuffer, float4((TCL.x + ReprojectionLeft) + A, TCL.y,0,0));
 			}
 			else if (Pulfrich_Effect_Assist == 2)
 			{
-				cR = tex2Dlod(PSBackBuffer, float4( (TCR.x - RF) - A, TCR.y,0,0)); //Good
+				Right = tex2Dlod(PSBackBuffer, float4((TCR.x - ReprojectionRight)- A, TCR.y,0,0));
 			}
-			else if (Pulfrich_Effect_Assist >= 3)
-			{
-				float OddEven = framecount % 2 == 0;
-							
-				//Current Single Frame
-				if (OddEven)
-				{	
-					cPL = tex2Dlod(PSBackBuffer, float4( (TCL.x + LF) + A, TCL.y,0,0)); //Good
-					cL = lerp(cL,cPL,Pulfrich_Effect_Adjust); //Good
-				}
-				else
-				{
-					cPR = tex2Dlod(PSBackBuffer, float4( (TCR.x - RF) - A, TCR.y,0,0)); //Good
-					cR = lerp(cR,cPR,Pulfrich_Effect_Adjust); //Good
-				}
-			}
-			float4 RR = cR, LL = cL;
-						
-			if (Eye_Swap)
-			{
-				cL = RR;
-				cR = LL;
-			}
-			
+
+float4 cL = Left,cR = Right; //Left Image & Right Image
+
+	if ( Eye_Swap )
+	{
+		cL = Right;
+		cR = Left;	
+	}
+		
+	
 	float2 gridxy;
 
 	if(Scaling_Support == 0)
@@ -595,23 +543,23 @@ float4 Converter(float2 texcoord : TEXCOORD0)
 			
 		if(Stereoscopic_Mode == 0)
 		{	
-			Out = TexCoords.x < 0.5 ? cL : cR;
+			color = TexCoords.x < 0.5 ? cL : cR;
 		}
 		else if(Stereoscopic_Mode == 1)
 		{	
-			Out = TexCoords.y < 0.5 ? cL : cR;
+			color = TexCoords.y < 0.5 ? cL : cR;
 		}
 		else if(Stereoscopic_Mode == 2)
 		{
-			Out = int(gridxy.y) & 1 ? cR : cL;	
+			color = int(gridxy.y) & 1 ? cR : cL;	
 		}
 		else if(Stereoscopic_Mode == 3)
 		{
-			Out = int(gridxy.x) & 1 ? cR : cL;		
+			color = int(gridxy.x) & 1 ? cR : cL;		
 		}
 		else if(Stereoscopic_Mode == 4)
 		{
-			Out = int(gridxy.x+gridxy.y) & 1 ? cR : cL;
+			color = int(gridxy.x+gridxy.y) & 1 ? cR : cL;
 		}
 		else if(Stereoscopic_Mode == 5)
 		{													
@@ -628,7 +576,7 @@ float4 Converter(float2 texcoord : TEXCOORD0)
 				float4 LeftEyecolor = float4(1.0,0.0,0.0,1.0);
 				float4 RightEyecolor = float4(0.0,1.0,1.0,1.0);
 				
-				Out =  (cA*LeftEyecolor) + (cB*RightEyecolor);
+				color =  (cA*LeftEyecolor) + (cB*RightEyecolor);
 			}
 			else if (Anaglyph_Colors == 1)
 			{
@@ -647,14 +595,14 @@ float4 Converter(float2 texcoord : TEXCOORD0)
 			
 			if (blue > 1) { blue = 1; }   if (blue < 0) { blue = 0; }
 
-			Out = float4(red, green, blue, 0);
+			color = float4(red, green, blue, 0);
 			}
 			else if (Anaglyph_Colors == 2)
 			{
 				float4 LeftEyecolor = float4(0.0,1.0,0.0,1.0);
 				float4 RightEyecolor = float4(1.0,0.0,1.0,1.0);
 				
-				Out =  (cA*LeftEyecolor) + (cB*RightEyecolor);			
+				color =  (cA*LeftEyecolor) + (cB*RightEyecolor);			
 			}
 			else
 			{
@@ -674,14 +622,14 @@ float4 Converter(float2 texcoord : TEXCOORD0)
 			
 			if (blue > 1) { blue = 1; }   if (blue < 0) { blue = 0; }
 					
-			Out = float4(red, green, blue, 0);
+			color = float4(red, green, blue, 0);
 			}
 		}
 	
-			if(Debug_View)
-			Out.rgb = tex2D(SamplerBF,texcoord).xxx;
+		if(Debug_View)
+		color.rgb = tex2D(SamplerBF,texcoord).xxx;
 
-	return float4(Out.rgb,1);
+	return float4(color.rgb,1);
 }
 
 void Current_BackBuffer(float4 position : SV_Position, float2 texcoord : TEXCOORD, out float4 color : SV_Target)

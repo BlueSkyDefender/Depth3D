@@ -1,5 +1,5 @@
 #SuperDepth3D
-Depth Map Based 3D post-process shader v1.9.8 for Reshade 3.0
+Depth Map Based 3D post-process shader v1.9.9 for Reshade 3.0
 
 There are the Basic Depth maps you can use for your games listed and not listed. Look at this link for other game Compatibility.
 
@@ -11,7 +11,7 @@ At this link look for Depth Map Compatibility.
 This should work for Both AMD/Nividia GPUs.
 
 Game Compatibility
-
+* .Hack//G.U.
 * ABZU
 * Alien Isolation
 * Amnesia: Machine for Pigs
@@ -57,19 +57,26 @@ Game Compatibility
 * Lifeless Planet
 * Lords of The Fallen
 * LuciusII
+* Mafia III
+* Mass Effect Andromeda
 * Magicka 2
 * Metal Gear Rising
 * Metro 2033 Redux
 * Metro Last Light Redux
 * Middle-earth: Shadow of Mordor
+* Mirror's Edge Catalyst
 * Monstrum DX11
 * Mordheim: City of the Damned
 * Naruto Shippuden UNS3 Full Blurst
 * NecroVision: Lost Company
 * Never Alone (Kisima Ingitchuna)
+* NieRAutomata
+* No Man's Sky
 * Nosferatu: The Wrath of Malachi
 * Penumbra: Black Plague
 * Phantasmal
+* Prey 2006
+* Prey 2017
 * Quake 2 XP
 * Quake 4
 * Quantum Break
@@ -98,12 +105,13 @@ Game Compatibility
 * Through The Woods
 * Turok: Dinosaur Hunter
 * Warhammer: End Times - Vermintide
+* Warhammer: Vermintide 2
 * Witcher 3
 * Wolfenstine: The New Order
 * Wolfenstine: The Old Blood
 * Zombie Army Trilogy
 
-Also, many more games.
+Also, Way many more games.
 
 Please read me ReadMeDepth3d.txt For Setting and More Information.
 
@@ -111,10 +119,6 @@ https://github.com/BlueSkyDefender/Depth3D/blob/master/ReadMe_Depth3D.txt
 
 Also read https://github.com/BlueSkyDefender/Depth3D/blob/master/Game_Settings.txt For Game Settings.
  
-## The Reshade 2.0 Repack For 1.9.0
-this needs to be updated................... Do Not Use
-http://www.mediafire.com/file/swji5143ga20b1t/ReShade_2.0.3f1_Super_DepthMap_3D_v1.9.0_Repack.7z
-
 ## User Game & Settings
 
 https://docs.google.com/spreadsheets/d/18ujpY-97V_YuXpQUh-7bOomE4D5nUGwp3XppfU_0N2k/edit?usp=sharing

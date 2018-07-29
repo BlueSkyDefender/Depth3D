@@ -1,5 +1,5 @@
 ﻿#SuperDepth3D
-Depth Map Based 3D post-process shader v1.9.8 for Reshade 3.0 WIP
+Depth Map Based 3D post-process shader v1.9.9 for Reshade 3.0
 
 This Shader allows for Depth Map Based 3D like What Nvidia does with Compatibility Mode 3D and Kind of what TriDef Does with Power 3D. 
 
@@ -30,9 +30,6 @@ Polynomial_Barrel_Distortion_M
 // Enable this to fix the problem when there is a full screen Game Map Poping out of the screen. AKA Full Black Depth Map Fix. I have this off by default. Zero is off, One is On.
 #define FBDMF 0
 
-// BOTW Fix WIP
-#define AADM 0
-
 ### In-game Menu Settings
 ======================================================================================================================================
 
@@ -40,8 +37,8 @@ Shift + f2 for Reshade 3.0 menu
 
 ## Basic 3D Settings Section
 
-* Alternate Depth Map 	      [Depth Map 0 ▼]         [0-40] Alternate Depth Map for Games. 
-* Depth                      -[◄0▪▪▪▪▪▪▪50►]+         Depth Default is 15. "Drag to Adjust Depth." You can enter what ever you want.
+* Alternate Depth Map 	      [Depth Map 0 ▼]         [0-4] Alternate Depth Map for Games. 
+* Divergence                 -[◄0▪▪▪▪▪▪▪50►]+         Divergence Default is 15. "Drag to Adjust Depth." You can enter what ever you want.
 * Perspective                -[◄-100▪▪▪100►]+         [-100:100] Perspective Default is 0. "Drag to Adjust Perspective."
 * Disocclusion Type           [Disocclusion Mask ▼]   Pick the type of disocclusion you want. Options are [Off ▼] [Normal ▼] [Radial ▼]
 
@@ -52,7 +49,7 @@ Shift + f2 for Reshade 3.0 menu
 * Near Far                   -[◄▪▪N▪▪►]+ -[◄▪▪F▪▪►]+  Adjustment for Near and Far Depth Map Precision. For [Custom Number ▼]
 
 ## Weapon Depth Map Section
-* Weapon Depth Map            [Weapon Depth Map Off ▼]Weapon depth map for games. [Custom Weapon Depth Map One - Four ▼] & [WDM 1-23 ▼]
+* Weapon Depth Map            [Weapon Depth Map Off ▼]Weapon depth map for games. [Custom Weapon Depth Map One - Four ▼] & [WDM 1-30 ▼]
 * Weapon_Adjust              -[◄▪▪▪▪0▪▪▪▪►]+          Adjust weapon depth map.For [Custom Weapon Depth Map Number ▼]
                              -[◄▪▪▪0.25▪▪►]+
                              -[◄▪▪1.001▪▪►]+ 

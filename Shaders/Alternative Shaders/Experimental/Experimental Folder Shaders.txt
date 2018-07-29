@@ -1,13 +1,5 @@
-3DToElse 
-3D conversion shader
-Ex. Line Interlace to Side By Side.
-
-Polynomial Barrel Distortion
-Used for CellPhone HMD or Normal HMDs.
-Used to adjust a image for VR.
-
-SuperDepth3D
-An Depth Based 3D Shader.
+SuperDepth3D FP
+An Alternet Depth Based 3D Shader.
 
 HDR
 Tone Map Selector.
@@ -15,6 +7,3 @@ Allows for HDR to SDR and SDR to HDR. WIP
 
 Dimension_Plus
 A 2D to 3D converter.
-
-Dither
-Image Debanding.

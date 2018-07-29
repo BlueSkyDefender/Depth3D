@@ -51,7 +51,7 @@
 #define Image_Position_Adjust float2(0.0,0.0)
 
 //Zero Is Off One+ is On. T Makes the Image Better ???? Maybe ???? Maybe Not. Who Knows. 
-#define Boost 0 //0/1
+#define Boost 0 //0/1/2/3
 
 //USER EDITABLE PREPROCESSOR FUNCTIONS END//
 	
@@ -1000,7 +1000,7 @@ DBD = ( DBD - 1.0f ) / ( -187.5f - 1.0f );
 		X = 0.5;
 	}
 	
-	if (Boost == 1)//Super Secret Depth Boost.
+	if (Boost == 1 || Boost == 4)//Super Secret Depth Boost.
 	{
 		X = lerp(X,-X,-0.0125);
 	}
@@ -1017,11 +1017,19 @@ float2  Encode(in float2 texcoord : TEXCOORD0) //zBuffer Color Channel Encode
 	GetDepthL = Conv(GetDepthL,texcoord);
 	GetDepthR = Conv(GetDepthR,texcoord);
 	
-	// X Left	
-	float X = texcoord.x+Divergence*pix.x*GetDepthL;
+	if (Boost == 2 || Boost == 4)//Super Secret Depth Boost.
+	{
+		GetDepthL = lerp(GetDepthL,-GetDepthL,-0.0125);
+		GetDepthR = lerp(GetDepthR,-GetDepthR,-0.0125);
+	}
 	
+	float MS = Divergence*pix.x;
+	
+	// X Left	
+	float X = texcoord.x+MS*GetDepthL;
+
 	// Y Right
-	float Y = (1-texcoord.x)+Divergence*pix.x*GetDepthR;	
+	float Y = (1-texcoord.x)+MS*GetDepthR;	
 	
 	return float2(X,Y);
 }
@@ -1032,8 +1040,8 @@ float4 PS_calcLR(float2 texcoord)
 	float4 color, Right, Left;
 	float DepthL, DepthR, N, S, X, L, R;
 
-	//MS is Max Separation P is Perspective Adjustment
-	float MS = Divergence * pix.x, P = Perspective * pix.x;
+	//P is Perspective Adjustment
+	float P = Perspective * pix.x;
 					
 	if(Eye_Swap)
 	{
@@ -1094,29 +1102,30 @@ float4 PS_calcLR(float2 texcoord)
 			NumA = 0.975f;
 			NumB = 1.0025f;
 		}
-							
+	
 		[loop]
-		for (int i = 0; i <= Divergence+1; i++) 
+		for (int i = 0; i < Divergence; i++) 
 		{
-				//L Good
-				//if ( Encode(float2(TCL.x-i*pix.x,TCL.y)).z >= TCL.x-pix.x/2 && Encode(float2(TCL.x-i*pix.x,TCL.y)).z <= (TCR.x+pix.x/2)) //Decode Z
-				if ( Encode(float2(TCL.x+i*pix.x/NumA,TCL.y)).y >= (1-TCL.x)/NumB )
-				{
-					DepthL = i * pix.x; //Good
-				}
-				
-				//R Bad
-				//if ( Encode(float2(TCR.x+i*pix.x,TCR.y)).x >= (1-TCR.x-pix.x/2) && Encode(float2(TCR.x+i*pix.x,TCR.y)).x <= (1-TCR.x+pix.x/2) ) //Decode X
-				if ( Encode(float2(TCR.x-i*pix.x/NumA,TCR.y)).x >= TCR.x/NumB )
-				{
-					DepthR = i * pix.x; //Good
-				}
-			DepthL = min(1,DepthL);
-			DepthR = min(1,DepthR);
+			//L Good
+			if ( Encode(float2(TCL.x+i*pix.x/NumA,TCL.y)).y >= (1-TCL.x)/NumB )
+			{
+				DepthL = i * pix.x; //Good
+			}
+			
+			//R Good
+			if ( Encode(float2(TCR.x-i*pix.x/NumA,TCR.y)).x >= TCR.x/NumB )
+			{
+				DepthR = i * pix.x; //Good
+			}
 		}
-					
-	float ReprojectionLeft =  DepthL;
-	float ReprojectionRight = DepthR;
+	if (Boost == 3 || Boost == 4)//Super Secret Depth Boost.
+	{
+		DepthL = lerp(DepthL,-GetDepthL,-0.0125);
+		DepthR = lerp(DepthR,-GetDepthR,-0.0125);
+	}
+				
+	float ReprojectionLeft =  min(1,DepthL);
+	float ReprojectionRight = min(1,DepthR);
 
 	if(Custom_Sidebars == 0)
 	{
