@@ -130,6 +130,31 @@ uniform bool Debug_View <
 	ui_tooltip = "Debug View.";
 > = false;
 
+uniform int Disocclusion_Selection <
+	ui_type = "combo";
+	ui_items = "Off\0Radial Blur\0Normal Blur\0";
+	ui_label = "Disocclusion Selection";
+	ui_tooltip = "This is to select the z-Buffer blurring option for low level occlusion masking.\n"
+				"Default is Off.";
+> = 0;
+
+uniform float Disocclusion_Power_Adjust <
+	ui_type = "drag";
+	ui_min = 2.5; ui_max = 12.5;
+	ui_label = " Disocclusion Power Adjust";
+	ui_tooltip = "Automatic occlusion masking power adjust.\n"
+				"Default is 2.5";
+> = 2.5;
+
+uniform int View_Mode <
+	ui_type = "combo";
+	ui_items = "View Mode Normal\0View Mode Alpha\0";
+	ui_label = " View Mode";
+	ui_tooltip = "Change the way the shader warps the output to the screen.\n"
+				 "Default is Normal";
+	ui_category = "Occlusion Masking";
+> = 0;
+
 /////////////////////////////////////////////////////D3D Starts Here/////////////////////////////////////////////////////////////////
 #define pix float2(BUFFER_RCP_WIDTH, BUFFER_RCP_HEIGHT)
 
@@ -177,7 +202,7 @@ texture texBF { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT/Depth_Map_Division;
 sampler SamplerBF
 	{
 		Texture = texBF;
-		MipLODBias = 2.0f;
+		MipLODBias = 1.0f;
 		MipFilter = Linear; 
 		MinFilter = Linear; 
 		MagFilter = Linear;
@@ -351,21 +376,10 @@ float4 Assist(in float2 texcoord : TEXCOORD0)
 	return Merge;
 }
 
-float4 Bilateral_Filter(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Target
+float4 Mix(in float2 texcoord : TEXCOORD0)                                                                         
 {
-
-	float Per, blursize = 2.0*pix.x;
-		
-	if(DBA >= 1)
-	{
-		Per = 0.25;
-	}
-	else
-	{
-		Per = 0.0;
-	}
-		
-		float4 sum;
+	float blursize = 2.0*pix.x;
+	float4 sum;
 		sum += tex2Dlod(SamplerFakeDB, float4(texcoord.x - 4.0*blursize, texcoord.y,0,0)) * 0.05;
 		sum += tex2Dlod(SamplerFakeDB, float4(texcoord.x, texcoord.y - 3.0*blursize,0,0)) * 0.09;
 		sum += tex2Dlod(SamplerFakeDB, float4(texcoord.x - 2.0*blursize, texcoord.y,0,0)) * 0.12;
@@ -374,12 +388,64 @@ float4 Bilateral_Filter(float4 position : SV_Position, float2 texcoord : TEXCOOR
 		sum += tex2Dlod(SamplerFakeDB, float4(texcoord.x, texcoord.y + 2.0*blursize,0,0)) * 0.12;
 		sum += tex2Dlod(SamplerFakeDB, float4(texcoord.x + 3.0*blursize, texcoord.y,0,0)) * 0.09;
 		sum += tex2Dlod(SamplerFakeDB, float4(texcoord.x, texcoord.y + 4.0*blursize,0,0)) * 0.05;
-		
-		sum = max(0.01,lerp(sum,Assist(texcoord),Per));
-		
-		sum = smoothstep(0.125,1.0,sum);
+	return sum;
+}
 
-return sum;
+float4 Bilateral_Filter(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Target
+{
+float X, Y, Z, W = 1, DM = Mix(texcoord).x, A, DP =  Divergence, Disocclusion_Power, AMoffset = 0.008, BMoffset = 0.00285714, CMoffset = 0.09090909;
+float2 dirA, dirB;
+
+	DP *= Disocclusion_Power_Adjust;
+		
+	if ( Disocclusion_Selection == 1 || Disocclusion_Selection == 4 ) // Radial    
+	{
+		Disocclusion_Power = DP*AMoffset;
+	}
+	else if ( Disocclusion_Selection == 2 || Disocclusion_Selection == 5 ) // Normal  
+	{
+		Disocclusion_Power = DP*BMoffset;
+	}
+
+	float Per;
+	if(DBA >= 1)
+	{
+		Per = 0.25;
+	}
+	else
+	{
+		Per = 0.0;
+	}
+		const float weight[11] = {0.0,0.010,-0.010,0.020,-0.020,0.030,-0.030,0.040,-0.040,0.050,-0.050}; //By 10
+		
+		if( Disocclusion_Selection == 1)
+		{
+			dirA = 0.5 - texcoord;
+			A = Disocclusion_Power;
+		}
+		else if ( Disocclusion_Selection == 2)
+		{
+			dirA = float2(0.5,0.0);
+			A = Disocclusion_Power;
+		}
+		
+		if ( Disocclusion_Selection >= 1 )
+		{			
+				DM = 0;
+				[loop]
+				for (int i = 0; i < 11; i++)
+				{	
+					DM +=  Mix(texcoord + dirA * weight[i] * A).x*CMoffset;
+				}
+		}
+		
+		float4 Done = DM.xxxx;
+		
+		Done = max(0.01,lerp(Done,Assist(texcoord),Per));
+		
+		Done = smoothstep(0.125,1.0,Done);
+
+return Done;
 }
 
 float2  Encode(in float2 texcoord : TEXCOORD0) //zBuffer Color Channel Encode
@@ -400,8 +466,9 @@ float4 Converter(float2 texcoord : TEXCOORD0)
 {		
 	float2 TCL, TCR, TexCoords = texcoord;
 	float4 color, Right, Left;
-	float DepthL, DepthR, N, S, X, L, R;
-
+	float DepthL, DepthR, Adjust_A = 0.07692307, N, S, X, L, R;
+	float samplesA[13] = {0.5,0.546875,0.578125,0.625,0.659375,0.703125,0.75,0.796875,0.828125,0.875,0.921875,0.953125,1.0};
+	
 	//MS is Max Separation P is Perspective Adjustment
 	float MS = Divergence * pix.x, P = Perspective * pix.x;
 					
@@ -460,27 +527,44 @@ float4 Converter(float2 texcoord : TEXCOORD0)
 
 		float EX = Divergence*125, A = texcoord.y+EX*pix.y;
 		A *= pix.x;
-		
+	
+	if(View_Mode == 1)
+	{	
 		[loop]
 		for (int i = 0; i <= Divergence+1; i++) 
 		{
-				//L Good
-				//if ( Encode(float2(TCL.x-i*pix.x,TCL.y)).z >= TCL.x-pix.x/2 && Encode(float2(TCL.x-i*pix.x,TCL.y)).z <= (TCR.x+pix.x/2)) //Decode Z
-				if ( Encode(float2(TCL.x+i*pix.x/NumA,TCL.y)).y >= (1-TCL.x)/NumB )
-				{
-					DepthL = i * pix.x; //Good
-				}
-				
-				//R Bad
-				//if ( Encode(float2(TCR.x+i*pix.x,TCR.y)).x >= (1-TCR.x-pix.x/2) && Encode(float2(TCR.x+i*pix.x,TCR.y)).x <= (1-TCR.x+pix.x/2) ) //Decode X
-				if ( Encode(float2(TCR.x-i*pix.x/NumA,TCR.y)).x >= TCR.x/NumB )
-				{
-					DepthR = i * pix.x; //Good
-				}
+			//L Good
+			//if ( Encode(float2(TCL.x-i*pix.x,TCL.y)).z >= TCL.x-pix.x/2 && Encode(float2(TCL.x-i*pix.x,TCL.y)).z <= (TCR.x+pix.x/2)) //Decode Z
+			if ( Encode(float2(TCL.x+i*pix.x/NumA,TCL.y)).y >= (1-TCL.x)/NumB )
+			{
+				DepthL = i * pix.x; //Good
+			}
+			
+			//R Bad
+			//if ( Encode(float2(TCR.x+i*pix.x,TCR.y)).x >= (1-TCR.x-pix.x/2) && Encode(float2(TCR.x+i*pix.x,TCR.y)).x <= (1-TCR.x+pix.x/2) ) //Decode X
+			if ( Encode(float2(TCR.x-i*pix.x/NumA,TCR.y)).x >= TCR.x/NumB )
+			{
+				DepthR = i * pix.x; //Good
+			}
 			DepthL = min(1,DepthL);
 			DepthR = min(1,DepthR);
 		}
-			
+	}
+	else
+	{
+		[loop]
+		for ( int x = 0 ; x < 13; x++ ) 
+		{
+			S = samplesA[x] * MS * 1.21875;//13
+			L += tex2Dlod(SamplerBF,float4(TCL.x+S, TCL.y,0,0)).x*Adjust_A;
+			R += tex2Dlod(SamplerBF,float4(TCR.x-S, TCR.y,0,0)).x*Adjust_A;
+			DepthL = min(1,L);
+			DepthR = min(1,R);
+		}
+		DepthL = DepthL * MS;
+		DepthR = DepthR * MS;
+	}		
+	
 	float ReprojectionLeft =  DepthL;
 	float ReprojectionRight = DepthR;
 
