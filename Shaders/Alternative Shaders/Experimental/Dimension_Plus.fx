@@ -25,6 +25,21 @@
 // Determines The Max Depth amount.
 #define Depth_Max 25
 
+uniform int DBA <
+	ui_type = "combo";
+	ui_items = "Off\0Circle Gradient\0Oval Gradient\0Vertical Gradient\0";
+	ui_label = "Depth Buffer Assiste";
+	ui_tooltip = "Select the assisting Depth Buffer or turn it off.";
+> = 0;
+
+uniform float GDepth <
+	ui_type = "drag";
+	ui_min = 1; ui_max = Depth_Max;
+	ui_label = "Gradient Depth Slider";
+	ui_tooltip = "Determines the amount of Image Warping and Separation.\n" 
+				 "You can override this value.";
+> = 15;
+
 uniform float Divergence <
 	ui_type = "drag";
 	ui_min = 1; ui_max = Depth_Max;
@@ -90,10 +105,17 @@ uniform float Image_Texture_Complexity <
 				 "Default is 1.0";
 > = 1.0;
 
-uniform float Range_Adjust <
+uniform float Range_Adjust_N <
+	ui_type = "drag";
+	ui_min = 0.0; ui_max = 0.250;
+	ui_label = "Range Adjust Near";
+	ui_tooltip = "Range adjust determines the transform range in world. Default is 0.125";
+> = 0.125;
+
+uniform float Range_Adjust_F <
 	ui_type = "drag";
 	ui_min = 0.5; ui_max = 1.0;
-	ui_label = "Range Adjust";
+	ui_label = "Range Adjust Far";
 	ui_tooltip = "Range adjust determines the transform range in world. Default is 1.0";
 > = 1.0;
 
@@ -104,7 +126,7 @@ uniform bool Day_Night_Mode <
 
 uniform int Mode <
 	ui_type = "combo";
-	ui_items = "Movie Mode\0Sport Mode\0FPS Game Mode\0Side Scroller 2D Game Mode\0RTS Game Mode\0Mix Mode\0";
+	ui_items = "Movie Mode\0Sport Mode\0FPS Game Mode\0Side Scroller 2D Game Mode\0RTS Game Mode\0Mix Mode\0Sport Mode +\0 ???\0";
 	ui_label = "Depth Map Mode";
 	ui_tooltip = "Pick an fake Depth Map Mode.";
 > = 0;
@@ -118,18 +140,6 @@ uniform int Pulfrich_Effect_Assist <
 				 "Use Pulfrich Effect Adjust to adjust Special Mode.";
 > = 0;
 
-uniform int DBA <
-	ui_type = "combo";
-	ui_items = "Off\0Circle Gradient\0Oval Gradient\0Vertical Gradient\0";
-	ui_label = "Depth Buffer Assiste";
-	ui_tooltip = "Select the assisting Depth Buffer or turn it off.";
-> = 0;
-
-uniform bool Debug_View <
-	ui_label = "Debug View";
-	ui_tooltip = "Debug View.";
-> = false;
-
 uniform int Disocclusion_Selection <
 	ui_type = "combo";
 	ui_items = "Off\0Radial Blur\0Normal Blur\0";
@@ -140,20 +150,16 @@ uniform int Disocclusion_Selection <
 
 uniform float Disocclusion_Power_Adjust <
 	ui_type = "drag";
-	ui_min = 2.5; ui_max = 12.5;
+	ui_min = 1.0; ui_max = 12.5;
 	ui_label = " Disocclusion Power Adjust";
 	ui_tooltip = "Automatic occlusion masking power adjust.\n"
 				"Default is 2.5";
 > = 2.5;
 
-uniform int View_Mode <
-	ui_type = "combo";
-	ui_items = "View Mode Normal\0View Mode Alpha\0";
-	ui_label = " View Mode";
-	ui_tooltip = "Change the way the shader warps the output to the screen.\n"
-				 "Default is Normal";
-	ui_category = "Occlusion Masking";
-> = 0;
+uniform bool Debug_View <
+	ui_label = "Debug View";
+	ui_tooltip = "Debug View.";
+> = false;
 
 /////////////////////////////////////////////////////D3D Starts Here/////////////////////////////////////////////////////////////////
 #define pix float2(BUFFER_RCP_WIDTH, BUFFER_RCP_HEIGHT)
@@ -280,7 +286,7 @@ float4 Blur(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0): S
 	
 	C += distance(left, right);
 	
-	if (Mode == 3 || Mode == 5)
+	if (Mode == 3 || Mode == 5 || Mode == 6)
 	{
 	C += C;
 	C += C;
@@ -294,7 +300,7 @@ float4 Blur(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0): S
 float DepthRange( float d )
 {
 	float nearPlane = 0;
-	float farPlane = Range_Adjust;
+	float farPlane = Range_Adjust_F;
     return ( d - nearPlane ) / ( farPlane - nearPlane );
 }
 
@@ -319,7 +325,9 @@ float4 FakeDB(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0):
 	float AB = lerp(tex2D(SamplerBlur,texcoord).xxxx,G.xxxx,0.425).x;
 	float AC = lerp(tex2D(SamplerBlur,texcoord).xxxx,G.xxxx,0.25).x;
 	float AD = lerp(tex2D(SamplerBlur,texcoord).xxxx,G.xxxx,0.09375).x;
-	float AF = lerp(tex2D(SamplerBlur,texcoord).xxxx,G.xxxx,0.375).x;
+	float AE = lerp(tex2D(SamplerBlur,texcoord).xxxx,G.xxxx,0.375).x;
+	float AF = lerp(tex2D(SamplerBlur,texcoord).xxxx,G.xxxx,0.25).x;
+	float AG = lerp(tex2D(SamplerBlur,texcoord).xxxx,G.xxxx,0.375).x;
 	
 	if (Mode == 0)
 	{
@@ -343,7 +351,15 @@ float4 FakeDB(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0):
 	}
 	else if (Mode == 5)
 	{
+		Done = DepthRange(AE).xxxx;
+	}
+	else if (Mode == 6)
+	{
 		Done = DepthRange(AF).xxxx;
+	}
+	else if (Mode == 7)
+	{
+		Done = DepthRange(AG).xxxx;
 	}
 
 	return saturate(Done);
@@ -407,15 +423,6 @@ float2 dirA, dirB;
 		Disocclusion_Power = DP*BMoffset;
 	}
 
-	float Per;
-	if(DBA >= 1)
-	{
-		Per = 0.25;
-	}
-	else
-	{
-		Per = 0.0;
-	}
 		const float weight[11] = {0.0,0.010,-0.010,0.020,-0.020,0.030,-0.030,0.040,-0.040,0.050,-0.050}; //By 10
 		
 		if( Disocclusion_Selection == 1)
@@ -441,25 +448,76 @@ float2 dirA, dirB;
 		
 		float4 Done = DM.xxxx;
 		
-		Done = max(0.01,lerp(Done,Assist(texcoord),Per));
+		Done = max(0.01,Done);
 		
-		Done = smoothstep(0.125,1.0,Done);
+		Done = smoothstep(Range_Adjust_N,1.0,Done);
 
 return Done;
 }
 
-float2  Encode(in float2 texcoord : TEXCOORD0) //zBuffer Color Channel Encode
+float4 LeftI(float2 texcoord : TEXCOORD0)
+{	
+	float4 Left;
+	float DepthL, Adjust_A = 0.07692307, S, L;
+	float samplesA[13] = {0.5,0.546875,0.578125,0.625,0.659375,0.703125,0.75,0.796875,0.828125,0.875,0.921875,0.953125,1.0};
+	
+	//MS is Max Separation P is Perspective Adjustment
+	float MS = Divergence * pix.x, P = Perspective * pix.x;
+
+		float EX = Divergence*125.0, A = texcoord.y+EX*pix.y;
+		A *= pix.x;
+	
+		[loop]
+		for ( int x = 0 ; x < 13; x++ ) 
+		{
+			S = samplesA[x] * MS * 1.21875;//13
+			L += tex2Dlod(SamplerBF,float4(texcoord.x+S, texcoord.y,0,0)).x*Adjust_A;
+			DepthL = min(1,L);
+		}
+		DepthL = DepthL * MS;	
+	
+	float ReprojectionLeft =  DepthL;
+
+		Left = tex2Dlod(BackBuffer, float4((texcoord.x + ReprojectionLeft) + A, texcoord.y,0,0));
+				
+			if (Pulfrich_Effect_Assist == 1)
+			{
+				Left = tex2Dlod(PSBackBuffer, float4((texcoord.x + ReprojectionLeft) + A, texcoord.y,0,0));
+			}
+return Left;
+}
+
+float4 RightI(float2 texcoord : TEXCOORD0)
 {
-	float GetDepthL = tex2Dlod(SamplerBF,float4(texcoord.x,texcoord.y,0,0)).x;
-	float GetDepthR = tex2Dlod(SamplerBF,float4(texcoord.x,texcoord.y,0,0)).x;
+	float4 Right;
+	float DepthR, Adjust_A = 0.07692307, S, R;
+	float samplesA[13] = {0.5,0.546875,0.578125,0.625,0.659375,0.703125,0.75,0.796875,0.828125,0.875,0.921875,0.953125,1.0};
 	
-	// X Left	
-	float X = texcoord.x+Divergence*pix.x*GetDepthL;
+	//MS is Max Separation P is Perspective Adjustment
+	float MS = Divergence * pix.x, P = Perspective * pix.x;
+
+		float EX = Divergence*125.0, A = texcoord.y+EX*pix.y;
+		A *= pix.x;
 	
-	// Y Right
-	float Y = (1-texcoord.x)+Divergence*pix.x*GetDepthR;	
+		[loop]
+		for ( int x = 0 ; x < 13; x++ ) 
+		{
+			S = samplesA[x] * MS * 1.21875;//13
+			R += tex2Dlod(SamplerBF,float4(texcoord.x-S, texcoord.y,0,0)).x*Adjust_A;
+			DepthR = min(1,R);
+		}
+		DepthR = DepthR * MS;	
 	
-	return float2(X,Y);
+	float ReprojectionRight =  DepthR;
+
+		Right = tex2Dlod(BackBuffer, float4((texcoord.x - ReprojectionRight) - A, texcoord.y,0,0));
+				
+			if (Pulfrich_Effect_Assist == 1)
+			{
+				Right = tex2Dlod(PSBackBuffer, float4((texcoord.x - ReprojectionRight) - A, texcoord.y,0,0));
+			}
+			
+return Right;
 }
 
 float4 Converter(float2 texcoord : TEXCOORD0)
@@ -470,7 +528,7 @@ float4 Converter(float2 texcoord : TEXCOORD0)
 	float samplesA[13] = {0.5,0.546875,0.578125,0.625,0.659375,0.703125,0.75,0.796875,0.828125,0.875,0.921875,0.953125,1.0};
 	
 	//MS is Max Separation P is Perspective Adjustment
-	float MS = Divergence * pix.x, P = Perspective * pix.x;
+	float MS = GDepth * pix.x, P = Perspective * pix.x;
 					
 	if(Eye_Swap)
 	{
@@ -520,65 +578,36 @@ float4 Converter(float2 texcoord : TEXCOORD0)
 		TCL.x = TCL.x + (Interlace_Optimization * pix.y);
 		TCR.x = TCR.x - (Interlace_Optimization * pix.y);
 	}
-		float NumA, NumB;
-			NumA = 0.975f;
-			NumB = 1.0025f;
 
-
-		float EX = Divergence*125, A = texcoord.y+EX*pix.y;
+		float EX = GDepth*125.0, A = texcoord.y+EX*pix.y;
 		A *= pix.x;
 	
-	if(View_Mode == 1)
-	{	
-		[loop]
-		for (int i = 0; i <= Divergence+1; i++) 
-		{
-			//L Good
-			//if ( Encode(float2(TCL.x-i*pix.x,TCL.y)).z >= TCL.x-pix.x/2 && Encode(float2(TCL.x-i*pix.x,TCL.y)).z <= (TCR.x+pix.x/2)) //Decode Z
-			if ( Encode(float2(TCL.x+i*pix.x/NumA,TCL.y)).y >= (1-TCL.x)/NumB )
-			{
-				DepthL = i * pix.x; //Good
-			}
-			
-			//R Bad
-			//if ( Encode(float2(TCR.x+i*pix.x,TCR.y)).x >= (1-TCR.x-pix.x/2) && Encode(float2(TCR.x+i*pix.x,TCR.y)).x <= (1-TCR.x+pix.x/2) ) //Decode X
-			if ( Encode(float2(TCR.x-i*pix.x/NumA,TCR.y)).x >= TCR.x/NumB )
-			{
-				DepthR = i * pix.x; //Good
-			}
-			DepthL = min(1,DepthL);
-			DepthR = min(1,DepthR);
-		}
-	}
-	else
-	{
 		[loop]
 		for ( int x = 0 ; x < 13; x++ ) 
 		{
 			S = samplesA[x] * MS * 1.21875;//13
-			L += tex2Dlod(SamplerBF,float4(TCL.x+S, TCL.y,0,0)).x*Adjust_A;
-			R += tex2Dlod(SamplerBF,float4(TCR.x-S, TCR.y,0,0)).x*Adjust_A;
+			L += Assist(float2(TCL.x+S, TCL.y)).x*Adjust_A;
+			R += Assist(float2(TCR.x-S, TCR.y)).x*Adjust_A;
 			DepthL = min(1,L);
 			DepthR = min(1,R);
 		}
 		DepthL = DepthL * MS;
-		DepthR = DepthR * MS;
-	}		
+		DepthR = DepthR * MS;		
 	
 	float ReprojectionLeft =  DepthL;
 	float ReprojectionRight = DepthR;
 
 
-		Left = tex2Dlod(BackBuffer, float4((TCL.x + ReprojectionLeft) + A, TCL.y,0,0));
-		Right = tex2Dlod(BackBuffer, float4((TCR.x - ReprojectionRight)- A, TCR.y,0,0));
+		Left = LeftI(float2((TCL.x + ReprojectionLeft) + A, TCL.y));
+		Right = RightI(float2((TCR.x - ReprojectionRight)- A, TCR.y));
 				
 			if (Pulfrich_Effect_Assist == 1)
 			{
-				Left = tex2Dlod(PSBackBuffer, float4((TCL.x + ReprojectionLeft) + A, TCL.y,0,0));
+				Left = LeftI(float2((TCL.x + ReprojectionLeft) + A, TCL.y));
 			}
 			else if (Pulfrich_Effect_Assist == 2)
 			{
-				Right = tex2Dlod(PSBackBuffer, float4((TCR.x - ReprojectionRight)- A, TCR.y,0,0));
+				Right = RightI(float2((TCR.x - ReprojectionRight)- A, TCR.y));
 			}
 
 float4 cL = Left,cR = Right; //Left Image & Right Image
