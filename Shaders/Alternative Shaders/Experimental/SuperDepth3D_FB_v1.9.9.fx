@@ -297,6 +297,14 @@ uniform float4 Cross_Cursor_Adjust <
 	ui_category = "Cursor Adjustments";
 > = float4(255.0, 255.0, 255.0, 25.0);
 
+uniform float TEST <
+	ui_type = "drag";
+	ui_min = 0.0; ui_max = 1.0;
+	ui_label = " 3D AO Power";
+	ui_tooltip = "TEST";
+
+> = 0.00;
+
 uniform bool Cancel_Depth < source = "key"; keycode = Cancel_Depth_Key; toggle = true; >;
 /////////////////////////////////////////////D3D Starts Here/////////////////////////////////////////////////////////////////
 #define pix float2(BUFFER_RCP_WIDTH, BUFFER_RCP_HEIGHT)
@@ -1223,7 +1231,7 @@ float4 PS_calcLR(float2 texcoord)
 				float4 LeftEyecolor = float4(1.0,0.0,0.0,1.0);
 				float4 RightEyecolor = float4(0.0,1.0,1.0,1.0);
 				
-				color =  (cA*LeftEyecolor) + (cB*RightEyecolor);
+				color = (cA*LeftEyecolor) + (cB*RightEyecolor);
 			}
 			else if (Anaglyph_Colors == 1)
 			{
@@ -1249,7 +1257,11 @@ float4 PS_calcLR(float2 texcoord)
 				float4 LeftEyecolor = float4(0.0,1.0,0.0,1.0);
 				float4 RightEyecolor = float4(1.0,0.0,1.0,1.0);
 				
-				color =  (cA*LeftEyecolor) + (cB*RightEyecolor);			
+				///TriOviz
+				//float4 LeftEyecolor = float4(0.0,1.0,0.5,1.0);
+				//float4 RightEyecolor = float4(1.0,0.0,0.5,1.0);
+				
+				color = (cA*LeftEyecolor) + (cB*RightEyecolor);			
 			}
 			else
 			{
