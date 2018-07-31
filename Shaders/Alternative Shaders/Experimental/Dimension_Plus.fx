@@ -110,23 +110,28 @@ uniform float Range_Adjust_N <
 	ui_min = 0.0; ui_max = 0.250;
 	ui_label = "Range Adjust Near";
 	ui_tooltip = "Range adjust determines the transform range in world. Default is 0.125";
-> = 0.125;
+> = 0.125f;
 
 uniform float Range_Adjust_F <
 	ui_type = "drag";
-	ui_min = 0.5; ui_max = 1.0;
+	ui_min = 0.375; ui_max = 1.0;
 	ui_label = "Range Adjust Far";
 	ui_tooltip = "Range adjust determines the transform range in world. Default is 1.0";
-> = 1.0;
+> = 1.0f;
 
 uniform bool Day_Night_Mode <
 	ui_label = "Day & Night";
 	ui_tooltip = "This mode helps correct for some day and night scenes.";
 > = false;
 
+uniform bool Neg_Tex <
+	ui_label = "Negitive Texture Complexity";
+	ui_tooltip = "This Mode Flip the Texture Complexity.";
+> = false;
+
 uniform int Mode <
 	ui_type = "combo";
-	ui_items = "Movie Mode\0Sport Mode\0FPS Game Mode\0Side Scroller 2D Game Mode\0RTS Game Mode\0Mix Mode\0Sport Mode +\0 ???\0";
+	ui_items = "Movie Mode\0Sport Mode\0FPS Game Mode\0Side Scroller 2D Game Mode\0RTS Game Mode\0Mix Mode\0";
 	ui_label = "Depth Map Mode";
 	ui_tooltip = "Pick an fake Depth Map Mode.";
 > = 0;
@@ -176,7 +181,7 @@ texture texFakeDB { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT/Depth_Map_Divis
 sampler SamplerFakeDB
 	{
 		Texture = texFakeDB;
-		MipLODBias = 1.0f;
+		//MipLODBias = 1.0f;
 		MipFilter = Linear; 
 		MinFilter = Linear; 
 		MagFilter = Linear;
@@ -238,7 +243,7 @@ float3 rgb2hsv(float3 c)
     float d = q.x - min(q.w, q.y);
     float e = 1.0e-10;
     return float3(abs(q.z + (q.w - q.y) / (6.0 * d + e)), d / (q.x + e), q.x);
-    return dot(float3(abs(q.z + (q.w - q.y) / (6.0 * d + e)), d / (q.x + e), q.x), float3(0.3, 0.59, 0.11));//Gray-scale conversion.
+    //return dot(float3(abs(q.z + (q.w - q.y) / (6.0 * d + e)), d / (q.x + e), q.x), float3(0.3, 0.59, 0.11));//Gray-scale conversion.
 }
 
 float3 encodePalYuv(float3 rgb)
@@ -265,17 +270,21 @@ float4 Blur(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0): S
 {
 	float4 left ,right;
 	
-	float3 A,B,C;
+	float3 A,B,C,Flip = 0;
+	
+	if(Neg_Tex)
+	Flip = 1.0;
+	
 	float M = texcoord.y+(Image_Texture_Complexity*125)*pix.y;
-	left.rgb = rgb2hsv(BB(texcoord + float2(M * pix.x,0)).rgb);
-	right.rgb = rgb2hsv(BB(texcoord - float2(M * pix.x,0)).rgb);
+	left.rgb = rgb2hsv(Flip-BB(texcoord + float2(M * pix.x,0)).rgb);
+	right.rgb = rgb2hsv(Flip-BB(texcoord - float2(M * pix.x,0)).rgb);
 
 	A += distance(left, right);
 	A += A;
 	A += A;
 	
-	left.rgb = rgb2hsv(tex2Dlod(SamplerBBlur,float4(texcoord,0,1)).rgb);
-	right.rgb = rgb2hsv(BB(texcoord).rgb);
+	left.rgb = rgb2hsv(Flip-tex2Dlod(SamplerBBlur,float4(texcoord,0,1)).rgb);
+	right.rgb = rgb2hsv(Flip-BB(texcoord).rgb);
 	
 	B += distance(left, right);
 	B += B;
@@ -326,8 +335,6 @@ float4 FakeDB(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0):
 	float AC = lerp(tex2D(SamplerBlur,texcoord).xxxx,G.xxxx,0.25).x;
 	float AD = lerp(tex2D(SamplerBlur,texcoord).xxxx,G.xxxx,0.09375).x;
 	float AE = lerp(tex2D(SamplerBlur,texcoord).xxxx,G.xxxx,0.375).x;
-	float AF = lerp(tex2D(SamplerBlur,texcoord).xxxx,G.xxxx,0.25).x;
-	float AG = lerp(tex2D(SamplerBlur,texcoord).xxxx,G.xxxx,0.375).x;
 	
 	if (Mode == 0)
 	{
@@ -352,14 +359,6 @@ float4 FakeDB(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0):
 	else if (Mode == 5)
 	{
 		Done = DepthRange(AE).xxxx;
-	}
-	else if (Mode == 6)
-	{
-		Done = DepthRange(AF).xxxx;
-	}
-	else if (Mode == 7)
-	{
-		Done = DepthRange(AG).xxxx;
 	}
 
 	return saturate(Done);

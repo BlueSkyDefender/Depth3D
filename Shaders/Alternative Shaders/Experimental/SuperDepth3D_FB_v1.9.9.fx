@@ -1120,8 +1120,8 @@ float4 PS_calcLR(float2 texcoord)
 		}
 	if (Boost == 3 || Boost == 4)//Super Secret Depth Boost.
 	{
-		DepthL = lerp(DepthL,-GetDepthL,-0.0125);
-		DepthR = lerp(DepthR,-GetDepthR,-0.0125);
+		DepthL = lerp(DepthL,-DepthL,-0.0125);
+		DepthR = lerp(DepthR,-DepthR,-0.0125);
 	}
 				
 	float ReprojectionLeft =  min(1,DepthL);
