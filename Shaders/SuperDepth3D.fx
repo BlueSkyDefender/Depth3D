@@ -639,7 +639,12 @@ float2 WeaponDepth(in float2 texcoord : TEXCOORD0)
 		else if(WP == 30)
 		{
 			WA_XYZ = float3(2.52475,0.05625,0.260);
-		}						
+		}
+		//WP 29 ; Serious Sam Revolition
+		else if(WP == 31)
+		{
+			WA_XYZ = float3(2.8,1.5625,0.350);
+		}					
 		//SWDMS Done//
  		
  		//TEXT MODE 31 Adjust

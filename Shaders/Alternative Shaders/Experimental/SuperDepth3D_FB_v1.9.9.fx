@@ -69,14 +69,11 @@ uniform float Divergence <
 	ui_category = "Divergence & Convergence";
 > = 35.0;
 
-uniform int Convergence_Mode <
-	ui_type = "combo";
-	ui_items = "ZPD Tied\0";
-	ui_label = " Convergence Mode";
-	ui_tooltip = "Select your Convergence Mode for ZPD calculations.\n" 
-				 "Default is ZPD Tied.";
+uniform bool ZPD_GUIDE <
+	ui_label = " ZPD GUIDE";
+	ui_tooltip = "A Guide used to Adjust Convergence.";
 	ui_category = "Divergence & Convergence";
-> = 0;
+> = false;
 
 uniform float ZPD <
 	ui_type = "drag";
@@ -650,7 +647,12 @@ float2 WeaponDepth(in float2 texcoord : TEXCOORD0)
 		else if(WP == 30)
 		{
 			WA_XYZ = float3(2.52475,0.05625,0.260);
-		}						
+		}
+		//WP 29 ; Serious Sam Revolition
+		else if(WP == 31)
+		{
+			WA_XYZ = float3(2.8,1.5625,0.350);
+		}							
 		//SWDMS Done//
  		
  		//TEXT MODE 31 Adjust
@@ -1044,10 +1046,15 @@ float2  Encode(in float2 texcoord : TEXCOORD0) //zBuffer Color Channel Encode
 
 float4 PS_calcLR(float2 texcoord)
 {
+	float Znum;
 	float2 TCL, TCR, TexCoords = texcoord;
 	float4 color, Right, Left;
-	float DepthL, DepthR, N, S, X, L, R;
-
+	
+	if(ZPD_GUIDE == 1)
+	Znum = 1;
+	
+	float DepthL = Znum, DepthR = Znum, N, S, X, L, R;
+	
 	//P is Perspective Adjustment
 	float P = Perspective * pix.x;
 					
