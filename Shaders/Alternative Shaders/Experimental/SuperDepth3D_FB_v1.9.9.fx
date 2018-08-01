@@ -887,7 +887,7 @@ float Conv(float D,float2 texcoord)
 			D = AutoDepthRange(D,texcoord);
 		}
 				
-		Z = lerp(Convergence,Convergence*D, ZP);
+		Z = lerp(Convergence,D, ZP);
 				
     return Z;
 }
