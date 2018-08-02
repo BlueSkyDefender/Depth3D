@@ -52,7 +52,7 @@
 //Image Position Adjust is used to move the Z-Buffer around.
 #define Image_Position_Adjust float2(0.0,0.0)
 
-//Zero Is Off One+ is On. T Makes the Image Better ???? Maybe ???? Maybe Not. Who Knows. 
+//Zero Is Off One is On.
 #define Depth_Boost 0 //0/1/
 
 //USER EDITABLE PREPROCESSOR FUNCTIONS END//
@@ -474,7 +474,7 @@ float Depth(in float2 texcoord : TEXCOORD0)
 		{
 			DM = OffsetReverse;
 		}
-		
+			
 	return DM;	
 }
 
@@ -712,7 +712,7 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 		float CutOFFCal = (CoP/Depth_Map_Adjust)/2; //Weapon Cutoff Calculation
 		
 		Cutoff = step(DM,CutOFFCal);
-				
+			
 		if (WP == 0)
 		{
 			DM = DM;
@@ -842,7 +842,7 @@ float AutoDepthRange( float d, float2 texcoord )
 float Conv(float D,float2 texcoord)
 {
 	float Z, ZP, Con = ZPD, NF_Power, MSZ = Divergence * pix.x;
-
+			
 		float Divergence_Locked = Divergence*0.00105;
 		float ALC = abs(smoothstep(0,1.0,Lum(texcoord)));
 		
@@ -913,6 +913,9 @@ float Conv(float D,float2 texcoord)
 		if (ZPD == 0)
 		ZP = 1.0;
 		
+		if (Depth_Map_Smoothing)
+		Z = Z*0.1f;
+		
 		float Convergence;		
 		
 		if(Convergence_Mode == 1)
@@ -928,18 +931,13 @@ float Conv(float D,float2 texcoord)
 		{
 			D = AutoDepthRange(D,texcoord);
 		}
-		
-		if (Depth_Map_Smoothing)
-		{
-		D = smoothstep(0,1,D);
-		}
-		
+				
 		if (Depth_Boost)
 		{
-		D += min(1,lerp(D,1-D,-0.1875));
+		D += min(1,lerp(D,1-D,-0.125));
 		D *= 0.5;
 		}
-		
+				
 		Z = lerp( MSZ * Convergence, MSZ * D, ZP);
 				
     return Z;
@@ -1062,7 +1060,10 @@ DBD = ( DBD - 1.0f ) / ( -187.5f - 1.0f );
 	{
 		X = 0.5;
 	}
-		
+	
+	if (Depth_Map_Smoothing)
+		X = smoothstep(0,1,X);		
+	
 	color = float4(X,Y,Z,W);
 }
 
