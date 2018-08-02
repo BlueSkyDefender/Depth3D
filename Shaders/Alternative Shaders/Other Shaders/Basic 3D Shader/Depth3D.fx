@@ -333,9 +333,7 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 		{
 			DM = OffsetReverse;
 		}
-		
-	DM = smoothstep(0,1,DM);	
-				
+						
 	Color = float4(DM,DM,DM,1.0);
 }
 
@@ -347,7 +345,7 @@ float AutoDepthRange( float d, float2 texcoord )
 
 float Conv(float D,float2 texcoord)
 {
-	float Z, ZP, Con = (ZPD*0.1), NF_Power, MSZ = Divergence * pix.x;
+	float Z, ZP, Con = ZPD, NF_Power, MSZ = Divergence * pix.x;
 
 		float Divergence_Locked = Divergence*0.00105;
 		float ALC = abs(smoothstep(0,1.0,Lum(texcoord)));
@@ -362,7 +360,9 @@ float Conv(float D,float2 texcoord)
 			Z = Con;
 			Divergence_Locked = Divergence_Locked;
 		}	
-	
+		
+		Z *= 0.1f;
+		
 		if (ZPD == 0)
 		ZP = 1.0;
 		
@@ -439,7 +439,9 @@ float2 dirA, dirB;
 	}
 
 	X = DM;
-		
+	
+	X = smoothstep(0,1,X);	
+	
 	color = float4(X,Y,Z,W);
 }
 
