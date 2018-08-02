@@ -52,9 +52,6 @@
 //Image Position Adjust is used to move the Z-Buffer around.
 #define Image_Position_Adjust float2(0.0,0.0)
 
-//Zero Is Off One is On.
-#define Depth_Boost 0 //0/1/
-
 //USER EDITABLE PREPROCESSOR FUNCTIONS END//
 //Divergence & Convergence//
 uniform float Divergence <
@@ -169,9 +166,15 @@ uniform float Offsets <
 	ui_category = "Depth Map";
 > = 0.5;
 
-uniform bool Depth_Map_Smoothing <
-	ui_label = " Depth Map Smoothing";
-	ui_tooltip = "Depth Map Smoothing uses a smoothstep to create a smooth transition between Near 0 and Far 1.";
+//uniform bool Depth_Map_Smoothing <
+//	ui_label = " Depth Map Smoothing";
+//	ui_tooltip = "Depth Map Smoothing uses a smoothstep to create a smooth transition between Near 0 and Far 1.";
+//	ui_category = "Depth Map";
+//> = false;
+
+uniform bool Depth_Boost <
+	ui_label = " Depth Boost";
+	ui_tooltip = "Depth Map Boosting helps increase depth.";
 	ui_category = "Depth Map";
 > = false;
 
@@ -473,8 +476,8 @@ float Depth(in float2 texcoord : TEXCOORD0)
 		else
 		{
 			DM = OffsetReverse;
-		}
-			
+		}	
+	
 	return DM;	
 }
 
@@ -913,8 +916,8 @@ float Conv(float D,float2 texcoord)
 		if (ZPD == 0)
 		ZP = 1.0;
 		
-		if (Depth_Map_Smoothing)
-		Z = Z*0.1f;
+		//if (Depth_Map_Smoothing)
+		//Z = Z*0.1f;
 		
 		float Convergence;		
 		
@@ -926,7 +929,10 @@ float Conv(float D,float2 texcoord)
 		{	
 			Convergence = 1 - Z / D;
 		}
-		
+				
+		//if (Depth_Map_Smoothing)
+		//D = smoothstep(0,1,D);	
+				
 		if (Auto_Depth_Range > 0)
 		{
 			D = AutoDepthRange(D,texcoord);
@@ -1060,10 +1066,7 @@ DBD = ( DBD - 1.0f ) / ( -187.5f - 1.0f );
 	{
 		X = 0.5;
 	}
-	
-	if (Depth_Map_Smoothing)
-		X = smoothstep(0,1,X);		
-	
+		
 	color = float4(X,Y,Z,W);
 }
 
