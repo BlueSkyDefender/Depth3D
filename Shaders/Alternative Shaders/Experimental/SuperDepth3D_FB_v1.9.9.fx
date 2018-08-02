@@ -166,6 +166,12 @@ uniform float Offsets <
 	ui_category = "Depth Map";
 > = 0.5;
 
+uniform bool Depth_Boost <
+	ui_label = " Depth Boost";
+	ui_tooltip = "Depth Map Boosting helps increase depth.";
+	ui_category = "Depth Map";
+> = false;
+
 uniform bool Depth_Map_View <
 	ui_label = " Depth Map View";
 	ui_tooltip = "Display the Depth Map.";
@@ -886,7 +892,13 @@ float Conv(float D,float2 texcoord)
 		{
 			D = AutoDepthRange(D,texcoord);
 		}
-				
+		
+		if (Depth_Boost)
+		{
+		D += lerp(D,1-D,-0.1875);
+		D *= 0.5;
+		}		
+		
 		Z = lerp(Convergence,D, ZP);
 				
     return Z;

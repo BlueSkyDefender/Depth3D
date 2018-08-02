@@ -53,7 +53,7 @@
 #define Image_Position_Adjust float2(0.0,0.0)
 
 //Zero Is Off One+ is On. T Makes the Image Better ???? Maybe ???? Maybe Not. Who Knows. 
-#define Boost 0 //0/1/2/3
+#define Depth_Boost 0 //0/1/
 
 //USER EDITABLE PREPROCESSOR FUNCTIONS END//
 //Divergence & Convergence//
@@ -168,6 +168,12 @@ uniform float Offsets <
 	ui_tooltip = "Offset is for the Depth Map 2 and 3 Only.";
 	ui_category = "Depth Map";
 > = 0.5;
+
+uniform bool Depth_Map_Smoothing <
+	ui_label = " Depth Map Smoothing";
+	ui_tooltip = "Depth Map Smoothing uses a smoothstep to create a smooth transition between Near 0 and Far 1.";
+	ui_category = "Depth Map";
+> = false;
 
 uniform bool Depth_Map_View <
 	ui_label = " Depth Map View";
@@ -922,7 +928,18 @@ float Conv(float D,float2 texcoord)
 		{
 			D = AutoDepthRange(D,texcoord);
 		}
-				
+		
+		if (Depth_Map_Smoothing)
+		{
+		D = smoothstep(0,1,D);
+		}
+		
+		if (Depth_Boost)
+		{
+		D += min(1,lerp(D,1-D,-0.1875));
+		D *= 0.5;
+		}
+		
 		Z = lerp( MSZ * Convergence, MSZ * D, ZP);
 				
     return Z;
@@ -1045,11 +1062,6 @@ DBD = ( DBD - 1.0f ) / ( -187.5f - 1.0f );
 	{
 		X = 0.5;
 	}
-	
-	if (Boost == 2 || Boost == 3)//Super Secret Depth Boost.
-	{
-		X = lerp(X,-X,-0.0125);
-	}
 		
 	color = float4(X,Y,Z,W);
 }
@@ -1149,12 +1161,6 @@ float4 PS_calcLR(float2 texcoord)
 		
 	DepthL = Conv(DepthL,TexCoords);//Zero Parallax Distance Pass Left
 	DepthR = Conv(DepthR,TexCoords);//Zero Parallax Distance Pass Right
-	
-	if (Boost == 1 || Boost == 3)//Super Secret Depth Boost.
-	{
-		DepthL = lerp(DepthL,-DepthL,-0.0125);
-		DepthR = lerp(DepthR,-DepthR,-0.0125);
-	}
 			
 	float ReprojectionLeft =  DepthL;
 	float ReprojectionRight = DepthR;
