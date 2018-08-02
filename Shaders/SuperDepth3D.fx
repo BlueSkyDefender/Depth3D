@@ -481,7 +481,7 @@ float Depth(in float2 texcoord : TEXCOORD0)
 		}	
 		
 		if (Depth_Map_Smoothing == 1 && WP == 0)
-		DM = smoothstep(0,1,DM);	
+		DM *= smoothstep(0,1,DM);	
 		
 	return DM;	
 }
@@ -937,11 +937,11 @@ float Conv(float D,float2 texcoord)
 				
 		if (Depth_Map_Smoothing == 1 && WP >= 1)
 		{
-			D = smoothstep(0,1,D);
+			D *= smoothstep(0,1,D);
 		}
 		else if (Depth_Map_Smoothing == 2)
 		{
-			D = smoothstep(0,1,D);	
+			D *= smoothstep(0,1,D);	
 		}
 				
 		if (Auto_Depth_Range > 0)

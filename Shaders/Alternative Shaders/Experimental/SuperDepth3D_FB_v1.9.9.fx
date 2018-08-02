@@ -203,6 +203,7 @@ uniform float4 Weapon_Adjust <
 				 "Default is (X 0.250, Y 0.0, Z 0.0, W 0.0).";
 	ui_category = "Weapon & HUD Depth Map";
 > = float4(0.0,0.250,0.0,0.0);
+
 //Stereoscopic Options//
 uniform int Stereoscopic_Mode <
 	ui_type = "combo";
@@ -296,14 +297,6 @@ uniform float4 Cross_Cursor_Adjust <
 				 " Default is (R 255, G 255, B 255 , Size 25)";
 	ui_category = "Cursor Adjustments";
 > = float4(255.0, 255.0, 255.0, 25.0);
-
-uniform float TEST <
-	ui_type = "drag";
-	ui_min = 0.0; ui_max = 1.0;
-	ui_label = " 3D AO Power";
-	ui_tooltip = "TEST";
-
-> = 0.00;
 
 uniform bool Cancel_Depth < source = "key"; keycode = Cancel_Depth_Key; toggle = true; >;
 /////////////////////////////////////////////D3D Starts Here/////////////////////////////////////////////////////////////////
@@ -479,7 +472,7 @@ float Depth(in float2 texcoord : TEXCOORD0)
 		{
 			DM = OffsetReverse;
 		}
-		
+				
 	return DM;	
 }
 
@@ -882,7 +875,7 @@ float Conv(float D,float2 texcoord)
 		
 		if (ZPD == 0)
 		ZP = 1.0;
-			
+				
 		float Convergence = 1 - Z / D;
 		
 		if (Auto_Depth_Range > 0)

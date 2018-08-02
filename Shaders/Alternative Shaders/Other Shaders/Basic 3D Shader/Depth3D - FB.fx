@@ -1,6 +1,6 @@
- ////-----------//
- ///**Depth3D**///
- //-------- --////
+ ////---------------------//
+ ///**Depth3D_FlashBack**///
+ //---------------------////
 
  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
  //* Depth Map Based 3D post-process shader v1.9.9          																														*//
@@ -40,7 +40,7 @@
 #define Image_Position_Adjust float2(0.0,0.0)
 
 //Zero Is Off One is On.
-#define Depth_Boost 0 //0/1/
+#define Depth_Boost 1 //0/1/
 
 //USER EDITABLE PREPROCESSOR FUNCTIONS END//
 //Divergence & Convergence//
@@ -52,6 +52,12 @@ uniform float Divergence <
 				 "You can override this value.";
 	ui_category = "Divergence & Convergence";
 > = 35.0;
+
+uniform bool ZPD_GUIDE <
+	ui_label = " ZPD GUIDE";
+	ui_tooltip = "A Guide used to Adjust Convergence.";
+	ui_category = "Divergence & Convergence";
+> = false;
 
 uniform float ZPD <
 	ui_type = "drag";
@@ -123,6 +129,12 @@ uniform float Offsets <
 	ui_tooltip = "Offset is for the Depth Map 2 and 3 Only.";
 	ui_category = "Depth Map";
 > = 0.5;
+
+uniform bool Depth_Map_Smoothing <
+	ui_label = " Depth Map Smoothing";
+	ui_tooltip = "Depth Map Smoothing uses a smoothstep to create a smooth transition between Near 0 and Far 1.";
+	ui_category = "Depth Map";
+> = false;
 
 uniform bool Depth_Map_View <
 	ui_label = " Depth Map View";
@@ -361,15 +373,17 @@ float Conv(float D,float2 texcoord)
 			Divergence_Locked = Divergence_Locked;
 		}	
 		
-		//Z *= 0.1f;
+		//if (Depth_Map_Smoothing)
+		Z *= 0.1f;
 		
 		if (ZPD == 0)
 		ZP = 1.0;
 		
 		float Convergence = 1 - Z / D;		
 		
-		D = smoothstep(0,1,D);
-		
+		if (Depth_Map_Smoothing)
+		D *= smoothstep(0,1,D);
+
 		if (Auto_Depth_Range > 0)
 		{
 			D = AutoDepthRange(D,texcoord);
@@ -377,11 +391,11 @@ float Conv(float D,float2 texcoord)
 			
 		if (Depth_Boost)
 		{
-		D += min(1,lerp(D,1-D,-0.125));
+		D += min(1,lerp(D,1-D,-0.1875));
 		D *= 0.5;
 		}
 		
-		Z = lerp( MSZ * Convergence, MSZ * D, 0.5);
+		Z = lerp(Convergence,D, 0.5);
 				
     return Z;
 }
@@ -446,15 +460,38 @@ float2 dirA, dirB;
 }
 
 /////////////////////////////////////////L/R//////////////////////////////////////////////////////////////////////
+float2  Encode(in float2 texcoord : TEXCOORD0) //zBuffer Color Channel Encode
+{
+	float GetDepthL = tex2Dlod(SamplerDis,float4(texcoord.x,texcoord.y,0,0)).x;
+	float GetDepthR = tex2Dlod(SamplerDis,float4(texcoord.x,texcoord.y,0,0)).x;
+	
+	GetDepthL = Conv(GetDepthL,texcoord);
+	GetDepthR = Conv(GetDepthR,texcoord);
+		
+	float MS = Divergence*pix.x;
+	
+	// X Left	
+	float X = texcoord.x+MS*GetDepthL;
+
+	// Y Right
+	float Y = (1-texcoord.x)+MS*GetDepthR;	
+	
+	return float2(X,Y);
+}
+
 float4 PS_calcLR(float2 texcoord)
 {
+	float Znum;
 	float2 TCL, TCR, TexCoords = texcoord;
 	float4 color, Right, Left;
-	float DepthR = 1, DepthL = 1, Adjust_A = 0.11111112, Adjust_B = 0.07692307, N, S, X, L, R;
-	float samplesA[9] = {0.5,0.5625,0.625,0.6875,0.75,0.8125,0.875,0.9375,1.0};
-
-	//MS is Max Separation P is Perspective Adjustment
-	float MS = Divergence * pix.x, P = Perspective * pix.x;
+	
+	if(ZPD_GUIDE == 1)
+	Znum = 1;
+	
+	float DepthL = Znum, DepthR = Znum, N, S, X, L, R;
+	
+	//P is Perspective Adjustment
+	float P = Perspective * pix.x;
 					
 	if(Eye_Swap)
 	{
@@ -504,22 +541,27 @@ float4 PS_calcLR(float2 texcoord)
 		TCL.x = TCL.x + (Interlace_Optimization * pix.y);
 		TCR.x = TCR.x - (Interlace_Optimization * pix.y);
 	}
+		float NumA = 0.975f, NumB = 1.0025f;
+	
+		[loop]
+		for (int i = 0; i < Divergence; i++) 
+		{
+			//L Good
+			if ( Encode(float2(TCL.x+i*pix.x/NumA,TCL.y)).y >= (1-TCL.x)/NumB )
+			{
+				DepthL = i * pix.x; //Good
+			}
 			
+			//R Good
+			if ( Encode(float2(TCR.x-i*pix.x/NumA,TCR.y)).x >= TCR.x/NumB )
+			{
+				DepthR = i * pix.x; //Good
+			}
+		}
 				
-	[loop]
-	for ( int i = 0 ; i < 9; i++ ) 
-	{
-		S = samplesA[i] * MS;//9
-		DepthL = min(DepthL,tex2Dlod(SamplerDis,float4(TCL.x+S, TCL.y,0,0)).x);
-		DepthR = min(DepthR,tex2Dlod(SamplerDis,float4(TCR.x-S, TCR.y,0,0)).x);
-	}
-		
-	DepthL = Conv(DepthL,TexCoords);//Zero Parallax Distance Pass Left
-	DepthR = Conv(DepthR,TexCoords);//Zero Parallax Distance Pass Right
-			
-	float ReprojectionLeft =  DepthL;
-	float ReprojectionRight = DepthR;
-
+	float ReprojectionLeft =  min(1,DepthL);
+	float ReprojectionRight = min(1,DepthR);
+	
 	if(Custom_Sidebars == 0)
 	{
 		Left = tex2Dlod(BackBufferMIRROR, float4(TCL.x + ReprojectionLeft, TCL.y,0,0));
