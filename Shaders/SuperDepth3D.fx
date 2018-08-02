@@ -166,11 +166,13 @@ uniform float Offsets <
 	ui_category = "Depth Map";
 > = 0.5;
 
-//uniform bool Depth_Map_Smoothing <
-//	ui_label = " Depth Map Smoothing";
-//	ui_tooltip = "Depth Map Smoothing uses a smoothstep to create a smooth transition between Near 0 and Far 1.";
-//	ui_category = "Depth Map";
-//> = false;
+uniform int Depth_Map_Smoothing <
+	ui_type = "combo";
+	ui_items = "Off\0DM Smoothing A\0DM Smoothing B\0";
+	ui_label = " Depth Map Smoothing";
+	ui_tooltip = "Depth Map Smoothing uses a smoothstep to create a smooth transition between Near 0 and Far 1.";
+	ui_category = "Depth Map";
+> = false;
 
 uniform bool Depth_Boost <
 	ui_label = " Depth Boost";
@@ -477,7 +479,10 @@ float Depth(in float2 texcoord : TEXCOORD0)
 		{
 			DM = OffsetReverse;
 		}	
-	
+		
+		if (Depth_Map_Smoothing == 1 && WP == 0)
+		DM = smoothstep(0,1,DM);	
+		
 	return DM;	
 }
 
@@ -916,8 +921,8 @@ float Conv(float D,float2 texcoord)
 		if (ZPD == 0)
 		ZP = 1.0;
 		
-		//if (Depth_Map_Smoothing)
-		//Z = Z*0.1f;
+		if (Depth_Map_Smoothing  == 1 && WP == 0)
+		Z = Z*0.1f;
 		
 		float Convergence;		
 		
@@ -930,8 +935,14 @@ float Conv(float D,float2 texcoord)
 			Convergence = 1 - Z / D;
 		}
 				
-		//if (Depth_Map_Smoothing)
-		//D = smoothstep(0,1,D);	
+		if (Depth_Map_Smoothing == 1 && WP >= 1)
+		{
+			D = smoothstep(0,1,D);
+		}
+		else if (Depth_Map_Smoothing == 2)
+		{
+			D = smoothstep(0,1,D);	
+		}
 				
 		if (Auto_Depth_Range > 0)
 		{

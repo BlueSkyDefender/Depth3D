@@ -176,6 +176,7 @@ IF IT HAS AN *asterisk* I AM STILL WORKING ON IT. But, you can still use the set
               Warhammer: Vermintide 2                         DM 0         8.75                              0.010-0.100         
     RB        Watch Dogs 2                                    DM 1         7.5                               0.050-0.100        
               Witcher 3                                       DM 1         7.5                               0.050-0.100            
+              Wolfenstine                                     DM 0         7.5         WDM 26                0.025-0.100
     RB        Wolfenstine: The New Order                      DM 0         25.00       WDM 7                 0.050-0.075
     RB        Wolfenstine: The Old Blood                      DM 0         25.00       WDM 7                 0.050-0.075
               Ziggurat                                        DM 0         7.5                               0.075-0.175
