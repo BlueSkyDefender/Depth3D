@@ -44,6 +44,12 @@
 //There will be a performance loss when enabled.
 #define AO_TOGGLE 0 //Default 0 is Off. One is On.
 
+//Depth Map Smoothing uses a smoothstep to create a smooth transition between Near 0 and Far 1. Usefull in some games such as Warhammer Vermintide 2.
+#define Depth_Map_Smoothing 0 //Zero is Off | One is Smoothing A | Two is Smoothing B 
+
+//Depth Map Boosting helps increase depth at the cost of accuracy.
+#define Depth_Boost 1 //Zero is Off | One is low | Two is Med | Three is High 
+
 //Use Depth Tool to adjust the lower preprocessor definitions below.
 //Horizontal & Vertical Depth Buffer Resize for non conforming BackBuffer.
 //Ex. Resident Evil 7 Has this problem. So you want to adjust it too around float2(0.9575,0.9575).
@@ -165,20 +171,6 @@ uniform float Offsets <
 	ui_tooltip = "Offset is for the Depth Map 2 and 3 Only.";
 	ui_category = "Depth Map";
 > = 0.5;
-
-uniform int Depth_Map_Smoothing <
-	ui_type = "combo";
-	ui_items = "Off\0DM Smoothing A\0DM Smoothing B\0";
-	ui_label = " Depth Map Smoothing";
-	ui_tooltip = "Depth Map Smoothing uses a smoothstep to create a smooth transition between Near 0 and Far 1.";
-	ui_category = "Depth Map";
-> = false;
-
-uniform bool Depth_Boost <
-	ui_label = " Depth Boost";
-	ui_tooltip = "Depth Map Boosting helps increase depth.";
-	ui_category = "Depth Map";
-> = false;
 
 uniform bool Depth_Map_View <
 	ui_label = " Depth Map View";
@@ -849,7 +841,7 @@ float AutoDepthRange( float d, float2 texcoord )
 
 float Conv(float D,float2 texcoord)
 {
-	float Z, ZP, Con = ZPD, NF_Power, MSZ = Divergence * pix.x;
+	float DB, Z, ZP, Con = ZPD, NF_Power, MSZ = Divergence * pix.x;
 			
 		float Divergence_Locked = Divergence*0.00105;
 		float ALC = abs(smoothstep(0,1.0,Lum(texcoord)));
@@ -948,11 +940,18 @@ float Conv(float D,float2 texcoord)
 		{
 			D = AutoDepthRange(D,texcoord);
 		}
-				
-		if (Depth_Boost)
+		
+		if (Depth_Boost > 0)
 		{
-		D += min(1,lerp(D,1-D,-0.125));
-		D *= 0.5;
+			if (Depth_Boost == 1)
+				DB = 0.0625; 
+			else if (Depth_Boost == 2)
+				DB = 0.125; 
+			else if (Depth_Boost == 3)
+				DB = 0.15625;
+							
+			D += min(1,lerp(D,1-D,-DB));
+			D *= 0.5;
 		}
 				
 		Z = lerp( MSZ * Convergence, MSZ * D, ZP);
