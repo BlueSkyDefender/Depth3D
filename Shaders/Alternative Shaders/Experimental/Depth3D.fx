@@ -1,6 +1,6 @@
- ////---------------------------//
- ///**Depth3D_FlashBack_Basic**///
- //---------------------------////
+ ////-------===-------//
+ ///**Depth3D_Basic**///
+ //-----------------////
 
  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
  //* Depth Map Based 3D post-process shader v1.9.9          																														*//
@@ -32,15 +32,6 @@
 #define Depth_Boost 1 //0/1/
 
 //USER EDITABLE PREPROCESSOR FUNCTIONS END//
-uniform int Mode <
-	ui_type = "combo";
-	ui_items = "Reprojection LR\0Reprojection RL\0Reprojection Both\0";
-	ui_label = "·Reprojection Mode·";
-	ui_tooltip = "Reprojection Mode changes the view output for this shader.\n"
-			     "Reprojection LR & RL uses a lot less resoruses than Both.\n"
-			     "Default is Reprojection LR.";
-	ui_category = "Performance";
-> = 0;
 
 //Divergence & Convergence//
 uniform float Divergence <
@@ -213,14 +204,6 @@ sampler BackBuffer
 	{ 
 		Texture = BackBufferTex;
 	};
-	
-sampler BackBufferMIRROR 
-	{ 
-		Texture = BackBufferTex;
-		AddressU = MIRROR;
-		AddressV = MIRROR;
-		AddressW = MIRROR;
-	};
 
 sampler BackBufferBORDER
 	{ 
@@ -228,14 +211,6 @@ sampler BackBufferBORDER
 		AddressU = BORDER;
 		AddressV = BORDER;
 		AddressW = BORDER;
-	};
-
-sampler BackBufferCLAMP
-	{ 
-		Texture = BackBufferTex;
-		AddressU = CLAMP;
-		AddressV = CLAMP;
-		AddressW = CLAMP;
 	};
 	
 texture texDepth  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT/Depth_Map_Division; Format = RGBA32F; MipLevels = 1;}; 
@@ -287,21 +262,7 @@ float Lumi(in float2 texcoord : TEXCOORD0)
 	}
 	
 /////////////////////////////////////////////////////////////////////////////////Depth Map Information/////////////////////////////////////////////////////////////////////////////////
-float D()
-{
-	float D;
-	
-	if(Mode == 2)
-	{
-		D = Divergence;
-	}
-	else
-	{
-		D = Divergence * 2;
-	}
 
-	return D;
-}
 
 float NearestScaled( float DM )
 {
@@ -324,6 +285,11 @@ float NearestScaled( float DM )
 	}
 	
 	DM = (smoothstep(0,1,DM) / NearestScaled ) - ScaleAdjust;
+	
+	float Far = 1, Near = 0.125/7.5; //Division Depth Map Adjust - Near
+	
+	DM = Far * Near / (Far + DM * (Near - Far));
+	
     return  DM;
 }
 
@@ -382,7 +348,7 @@ float AutoDepthRange( float d, float2 texcoord )
 
 float Conv(float DM_A,float DM_B,float2 texcoord)
 {
-	float DM, Convergence, Z = ZPD, ZP = 0.5625;
+	float DM, Convergence, Z = ZPD, ZP = 0.5625, MS = Divergence * pix.x;
 		
 		if (ZPD == 0)
 			ZP = 1.0;
@@ -400,21 +366,21 @@ float Conv(float DM_A,float DM_B,float2 texcoord)
 					
 		if (Depth_Boost)
 		{
-			DM_A += lerp(DM_A,1-DM_A,-0.125);
+			DM_A += lerp(DM_A,1-DM_A,-0.0625);
 			DM_A *= 0.5;
 		}
 		
 		DM = DM_A;		
 		Convergence	= Convergence_A;
 			
-		Z = lerp(Convergence,DM, ZP);
+		Z = lerp(MS * Convergence,MS * DM, ZP);
 		
     return Z;
 }
 
 void  Disocclusion(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 color : SV_Target0)
 {
-float X, Y, Z, W = 1, A, DP = D(), Disocclusion_PowerA, Disocclusion_PowerB , AMoffset = 0.008, BMoffset = 0.00285714, CMoffset = 0.09090909;
+float X, Y, Z, W = 1, A, DP = Divergence, Disocclusion_PowerA, Disocclusion_PowerB , AMoffset = 0.008, BMoffset = 0.00285714, CMoffset = 0.09090909;
 float2 dirA, dirB, DM;
 
 	DP *= Disocclusion_Power_Adjust;
@@ -459,47 +425,15 @@ float2 dirA, dirB, DM;
 }
 
 /////////////////////////////////////////L/R//////////////////////////////////////////////////////////////////////
-uniform uint framecount < source = "framecount"; >;
-//Total amount of frames since the game started.
-
-float2  Encode(in float2 texcoord : TEXCOORD0) //zBuffer Color Channel Encode
-{
-	float2 GetDepthL = tex2Dlod(SamplerDiso,float4(texcoord.x,texcoord.y,0,0)).xy;
-	float2 GetDepthR = tex2Dlod(SamplerDiso,float4(texcoord.x,texcoord.y,0,0)).xy;
-	
-	GetDepthL.x = Conv(GetDepthL.x,GetDepthL.y,texcoord);
-	GetDepthR.x = Conv(GetDepthR.x,GetDepthR.y,texcoord);
-	
-	float MS = D()*pix.x;
-	
-	// X Left	
-	float X = texcoord.x+MS*GetDepthL.x;
-
-	// Y Right
-	float Y = (1-texcoord.x)+MS*GetDepthR.x;	
-	
-	return float2(X,Y);
-}
-
 float4 PS_calcLR(float2 texcoord)
 {
-	float Znum;
-	float2 TCL, TCR, TexCoords = texcoord;
-	float4 color, Right, Left, RightN, LeftN, RightF, LeftF;
-	
-	if(Mode == 2)
-	{
-		Znum = 1;
-	}
-	else
-	{
-		Znum = 0;
-	}
-	
-	float NDepthL = Znum, NDepthR = Znum, FDepthL = Znum, FDepthR = Znum, N, S, X, L, R;
-	
-	//P is Perspective Adjustment
-	float P = Perspective * pix.x;
+	float2 DepthR = 1, DepthL = 1, TCL, TCR, TexCoords = texcoord;
+	float4 color, Right, Left;
+	float Adjust_A = 0.11111112, Adjust_B = 0.07692307, N, S, X, L, R;
+	float samplesA[9] = {0.5,0.5625,0.625,0.6875,0.75,0.8125,0.875,0.9375,1.0};
+
+	//MS is Max Separation P is Perspective Adjustment
+	float MS = Divergence * pix.x, P = Perspective * pix.x;
 					
 	if(Eye_Swap)
 	{
@@ -549,87 +483,24 @@ float4 PS_calcLR(float2 texcoord)
 		TCL.x = TCL.x + (Interlace_Optimization * pix.y);
 		TCR.x = TCR.x - (Interlace_Optimization * pix.y);
 	}
-		float NumA = 0.975f, NumB = 1.0025f,NumC = 0.975f;
-	
-		[loop]
-		for (int i = 0; i < D(); i++) 
-		{
-			if(Mode == 0)
-			{
-				//L Far
-				if ( Encode(float2(TCL.x+i*pix.x,TCL.y)).y >= (1-TCL.x)/NumB )
-				{
-					FDepthL = i * pix.x/NumC; //Good
-				}
-				//R Near
-				if ( Encode(float2(TCR.x+i*pix.x/NumA,TCR.y)).x <= TCR.x/NumB )
-				{
-					NDepthR = i * pix.x/NumC; //Good
-				}
-			}	
-			else if(Mode == 1)
-			{
-				//L Near
-				if ( Encode(float2(TCL.x-i*pix.x/NumA,TCL.y)).y <= (1-TCL.x)/NumB )
-				{
-					NDepthL = i * pix.x/NumC; //Good
-				}
+			
 				
-				//R Far
-				if ( Encode(float2(TCR.x-i*pix.x/NumA,TCR.y)).x >= TCR.x/NumB )
-				{
-					FDepthR = i * pix.x/NumC; //Good
-				}
-			}		
-			else if(Mode == 2)
-			{
-				//L Far
-				if ( Encode(float2(TCL.x+i*pix.x/NumA,TCL.y)).y >= (1-TCL.x)/NumB )
-				{
-					FDepthL = i * pix.x/NumC; //Good
-				}
-				
-				//R Far
-				if ( Encode(float2(TCR.x-i*pix.x/NumA,TCR.y)).x >= TCR.x/NumB )
-				{
-					FDepthR = i * pix.x/NumC; //Good
-				}
-				
-				//L Near
-				if ( Encode(float2(TCL.x-i*pix.x/NumA,TCL.y)).y <= (1-TCL.x)/NumB )
-				{
-					NDepthL = i * pix.x/NumC; //Good
-				}
-				
-				//R Near
-				if ( Encode(float2(TCR.x+i*pix.x/NumA,TCR.y)).x <= TCR.x/NumB )
-				{
-					NDepthR = i * pix.x/NumC; //Good
-				}
-			}
-		}
-				
-
-		LeftF = tex2Dlod(BackBufferBORDER, float4(TCL.x + FDepthL, TCL.y,0,0));
-		RightF = tex2Dlod(BackBufferBORDER, float4(TCR.x - FDepthR, TCR.y,0,0));
-		LeftN = tex2Dlod(BackBufferBORDER, float4(TCL.x - NDepthL, TCL.y,0,0));
-		RightN = tex2Dlod(BackBufferBORDER, float4(TCR.x + NDepthR, TCR.y,0,0));
-	
-	if(Mode == 0)
+	[loop]
+	for ( int i = 0 ; i < 9; i++ ) 
 	{
-		Left = LeftF;
-		Right = RightN;
-	}	
-	else if(Mode == 1)
-	{
-		Left = LeftN;
-		Right = RightF;
-	}		
-	else if(Mode == 2)
-	{
-		Left = LeftN + LeftF;
-		Right = RightN + RightF;
+		S = samplesA[i] * MS;//9
+		DepthL = min(DepthL.xy,tex2Dlod(SamplerDiso,float4(TCL.x+S, TCL.y,0,0)).xy);
+		DepthR = min(DepthR.xy,tex2Dlod(SamplerDiso,float4(TCR.x-S, TCR.y,0,0)).xy);
 	}
+	
+	DepthL.x = Conv(DepthL.x,DepthL.y,TexCoords);//Zero Parallax Distance Pass Left
+	DepthR.x = Conv(DepthR.x,DepthR.y,TexCoords);//Zero Parallax Distance Pass Right
+			
+	float ReprojectionLeft =  DepthL.x;
+	float ReprojectionRight = DepthR.x;
+
+	Left = tex2Dlod(BackBufferBORDER, float4(TCL.x + ReprojectionLeft, TCL.y,0,0));
+	Right = tex2Dlod(BackBufferBORDER, float4(TCR.x - ReprojectionRight, TCR.y,0,0));
 	
 	float4 cL = Left,cR = Right; //Left Image & Right Image
 
@@ -725,20 +596,19 @@ float4 PS_calcLR(float2 texcoord)
 			}
 		}
 	}
-		else
+	else
 	{		
 			float4 Top = TexCoords.x < 0.5 ? Lumi(float2(TexCoords.x*2,TexCoords.y*2)).xxxx : tex2Dlod(SamplerDepth,float4(TexCoords.x*2-1 , TexCoords.y*2,0,0)).gggg;
 			float4 Bottom = TexCoords.x < 0.5 ?  AutoDepthRange(tex2Dlod(SamplerDepth,float4(TexCoords.x*2 , TexCoords.y*2-1,0,0)).x,TexCoords) : tex2Dlod(SamplerDiso,float4(TexCoords.x*2-1,TexCoords.y*2-1,0,0)).xxxx;
 			color = TexCoords.y < 0.5 ? Top : Bottom;
 	}
-	float Average_Lum = TexCoords.y < 0.5 ? 0.5 : tex2D(SamplerDepth,float2(TexCoords.x,TexCoords.y)).g;
-	return float4(color.rgb,Average_Lum);
+	return float4(color.rgb,1.0);
 }
 
 float4 Average_Luminance(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Target
 {
 	float3 Average_Lum = tex2D(SamplerDepth,float2(texcoord.x,texcoord.y)).xxx;
-	return float4(Average_Lum,1);
+	return float4(Average_Lum,1.0);
 }
 
 ////////////////////////////////////////////////////////Logo/////////////////////////////////////////////////////////////////////////
@@ -746,7 +616,7 @@ uniform float timer < source = "timer"; >;
 float4 Out(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Target
 {
 	float PosX = 0.5*BUFFER_WIDTH*pix.x,PosY = 0.5*BUFFER_HEIGHT*pix.y;	
-	float4 Color = float4(PS_calcLR(texcoord).rgb,1),Done,Website,D,E,P,T,H,Three,DD,Dot,I,N,F,O;
+	float4 Color = float4(PS_calcLR(texcoord).rgb,1.0),Done,Website,D,E,P,T,H,Three,DD,Dot,I,N,F,O;
 	
 	if(timer <= 10000)
 	{
@@ -864,7 +734,7 @@ technique Cross_Cursor
 		}	
 }
 
-technique Depth3D
+technique Depth3D_FB
 {
 		pass zbuffer
 	{
