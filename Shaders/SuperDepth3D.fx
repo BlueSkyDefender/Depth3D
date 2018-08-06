@@ -196,11 +196,12 @@ uniform bool Depth_Map_Flip <
 	ui_tooltip = "Flip the depth map if it is upside down.";
 	ui_category = "Depth Map";
 > = false;
+
 //Weapon & HUD Depth Map//
 uniform int WP <
 	ui_type = "combo";
-	ui_items = "Weapon Profile Off\0Custom WP\0 WP 0\0 WP 1\0 WP 2\0 WP 3\0 WP 4\0 WP 5\0 WP 6\0 WP 7\0 WP 8\0 WP 9\0 WP 10\0 WP 11\0 WP 12\0 WP 13\0 WP 14\0 WP 15\0 WP 16\0 WP 17\0 WP 18\0 WP 19\0 WP 20\0 WP 21\0 WP 22\0 WP 23\0 WP 24\0 WP 25\0 WP 26\0 WP 27\0 WP 28\0 WP 29\0 WP 30\0 HUD Mode One\0";
-	ui_label = "·HUD & Weapon Profiles·";
+	ui_items = "Weapon Profile Off\0Custom WP\0WP 0\0WP 1\0WP 2\0WP 3\0WP 4\0WP 5\0WP 6\0WP 7\0WP 8\0WP 9\0WP 10\0WP 11\0WP 12\0WP 13\0WP 14\0WP 15\0WP 16\0WP 17\0WP 18\0WP 19\0WP 20\0WP 21\0WP 22\0WP 23\0WP 24\0WP 25\0WP 26\0WP 27\0WP 28\0WP 29\0WP 30\0WP 31\0WP 32\0WP 33\0WP 34\0WP 35\0HUD Mode One\0";
+	ui_label = "·Weapon Profiles & HUD·";
 	ui_tooltip = "Pick your HUD or Weapon Profile for your game or make your own.";
 	ui_category = "Weapon & HUD Depth Map";
 > = 0;
@@ -211,14 +212,15 @@ uniform float4 Weapon_Adjust <
 	ui_label = " Weapon Adjust Depth Map";
 	ui_tooltip = "Adjust weapon depth map for FPS Hand & also HUD Mode.\n"
 				 "X, is FPS Hand Scale Adjustment & Adjusts HUD Mode.\n"
-				 "Y, is Cutoff Point Adjustment.\n"
-				 "Z, Zero is Auto.\n"
+				 "Y, is FPS Hand Power Adjustment.\n"
+				 "Z, is Cutoff Point Adjustment.\n"
 				 "W, is Weapon Depth Adjustment.\n"
 				 "Pushes or Pulls the FPS Hand in or out of the screen.\n"
 				 "This also used to fine tune the Weapon Hand.\n" 
 				 "Default is (X 0.250, Y 0.0, Z 0.0, W 0.0).";
 	ui_category = "Weapon & HUD Depth Map";
 > = float4(0.0,0.250,0.0,0.0);
+
 //Stereoscopic Options//
 uniform int Stereoscopic_Mode <
 	ui_type = "combo";
@@ -572,12 +574,23 @@ float2 WeaponDepth(in float2 texcoord : TEXCOORD0)
 			WA_XYZ = float3(2.8,1.5625,0.350);     //Serious Sam Revolition
 		else if(WP == 32)//WP 30
 			WA_XYZ = float3(5.050,2.750,0.4913);   //Wolfenstine
+		//else if(WP == 33)//WP 31
+			//WA_XYZ = float3(0.0,0.0,0.0);        //Game
+		//else if(WP == 34)//WP 32
+			//WA_XYZ = float3(0.0,0.0,0.0);        //Game
+		//else if(WP == 35)//WP 33
+			//WA_XYZ = float3(0.0,0.0,0.0);        //Game
+		//else if(WP == 36)//WP 34
+			//WA_XYZ = float3(0.0,0.0,0.0);        //Game
+		//else if(WP == 37)//WP 35
+			//WA_XYZ = float3(0.0,0.0,0.0);        //Game
+		//Add Weapon Profiles Here
 		//SWDMS Done//
  		
- 		//TEXT MODE 31 Adjust
-		else if(WP == 33) //Text mode one.
+ 		//TEXT Mode Adjust
+		else if(WP == 38)//WP 36
 		{
-			WA_XYZ = float3(Weapon_Adjust.x,100.0,0.252);
+			WA_XYZ = float3(Weapon_Adjust.x,100.0,0.252); //Text mode one.
 		}
  		
 		//Scaled Section z-Buffer
@@ -599,7 +612,7 @@ float2 WeaponDepth(in float2 texcoord : TEXCOORD0)
 		
 		float WeaponLumAdjust = abs(smoothstep(0,0.5,LumWeapon(texcoord)*2.5)) * zBufferWH;	
 			
-		if( WP == 1 || WP == 22 || WP == 24 || WP == 27 || WP == 33 )//WP Adjust,SOMA, EuroTruckSim2, and HUD mode.
+		if( WP == 1 || WP == 22 || WP == 24 || WP == 27 || WP == 38 )//WP Adjust,SOMA, EuroTruckSim2, and HUD mode.
 		{
 			zBufferWH = zBufferWH;
 		}
