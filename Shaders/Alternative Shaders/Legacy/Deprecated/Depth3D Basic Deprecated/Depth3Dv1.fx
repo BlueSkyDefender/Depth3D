@@ -33,9 +33,10 @@
 #define Depth_Boost 1 //0/1/
 
 //USER EDITABLE PREPROCESSOR FUNCTIONS END//
+
 uniform int Mode <
 	ui_type = "combo";
-	ui_items = "Reprojection LR\0Reprojection RL\0Reprojection Both\0";
+	ui_items = "Default\0LR\0RL\0Both\0";
 	ui_label = "·Reprojection Mode·";
 	ui_tooltip = "Reprojection Mode changes the view output for this shader.\n"
 			     "Reprojection LR & RL uses a lot less resoruses than Both.\n"
@@ -48,7 +49,8 @@ uniform float Divergence <
 	ui_type = "drag";
 	ui_min = 1; ui_max = Depth_Max;
 	ui_label = "·Divergence Slider·";
-	ui_tooltip = "Determines the amount of Image Warping and Separation.\n" 
+	ui_tooltip = "Divergence increases differences between the left and right retinal images and allows you to experience depth.\n" 
+				 "The process of deriving binocular depth information is called stereopsis.\n"
 				 "You can override this value.";
 	ui_category = "Divergence & Convergence";
 > = 35.0;
@@ -95,10 +97,11 @@ uniform float Disocclusion_Power_Adjust <
 //Depth Map//
 uniform int Depth_Map <
 	ui_type = "combo";
-	ui_items = "DM0 Normal\0DM1 Normal Reversed\0";
+	ui_items = "DM0 Normal\0DM1 Normal Reversed\0DM2 Offset Normal\0DM3 Offset Reversed\0";
 	ui_label = "·Depth Map Selection·";
 	ui_tooltip = "Linearization for the zBuffer also known as Depth Map.\n"
-			     "Normally you want to use DM0 or DM1 in most cases.";
+			     "Normally you want to use DM0 or DM1 in most cases.\n"
+			     "Offset settings only work with DM2 or DM3.";
 	ui_category = "Depth Map";
 > = 0;
 
@@ -106,9 +109,19 @@ uniform float Depth_Map_Adjust <
 	ui_type = "drag";
 	ui_min = 0.250; ui_max = 125.0;
 	ui_label = " Depth Map Adjustment";
-	ui_tooltip = "Adjust the depth map for your games.";
+	ui_tooltip = "This allows for you to adjust the DM precision.\n"
+				 "Adjust this to keep it as low as possible.\n"
+				 "Default is 7.5";
 	ui_category = "Depth Map";
 > = 7.5;
+
+uniform float Offsets <
+	ui_type = "drag";
+	ui_min = 0; ui_max = 1.0;
+	ui_label = " Offset";
+	ui_tooltip = "Offset is for the DM2 and DM3 Only.";
+	ui_category = "Depth Map";
+> = 0.5;
 
 uniform bool Depth_Map_View <
 	ui_label = " Depth Map View";
@@ -122,6 +135,7 @@ uniform bool Depth_Map_Flip <
 	ui_category = "Depth Map";
 > = false;
 
+//Weapon Hand Scale Options//
 uniform int Weapon_Scale <
 	ui_type = "drag";
 	ui_min = 0; ui_max = 2;
@@ -135,9 +149,9 @@ uniform float3 Weapon_Adjust <
 	ui_min = 0.0; ui_max = 10.0;
 	ui_label = " Weapon Hand Adjust";
 	ui_tooltip = "Adjust Weapon depth map for your games.\n"
-	             "Default is float3(CutOff  is 0.0 Off,Power is 2.5,Trim is 2.0).";
+	             "Default is float3(CutOff  is 0.0 Off,Power is 2.0,Trim is 1.5).";
 	ui_category = "Weapon Depth Map";
-> = float3(0.0,2.5,2.0);
+> = float3(0.0,2.0,1.5);
 
 //Stereoscopic Options//
 uniform int Stereoscopic_Mode <
@@ -214,14 +228,6 @@ sampler BackBuffer
 	{ 
 		Texture = BackBufferTex;
 	};
-	
-sampler BackBufferMIRROR 
-	{ 
-		Texture = BackBufferTex;
-		AddressU = MIRROR;
-		AddressV = MIRROR;
-		AddressW = MIRROR;
-	};
 
 sampler BackBufferBORDER
 	{ 
@@ -230,31 +236,23 @@ sampler BackBufferBORDER
 		AddressV = BORDER;
 		AddressW = BORDER;
 	};
-
-sampler BackBufferCLAMP
-	{ 
-		Texture = BackBufferTex;
-		AddressU = CLAMP;
-		AddressV = CLAMP;
-		AddressW = CLAMP;
-	};
 	
-texture texDepth  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT/Depth_Map_Division; Format = RGBA32F; MipLevels = 1;}; 
+texture texDepth  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT/Depth_Map_Division; Format = RGBA32F;}; 
 
 sampler SamplerDepth
 	{
 		Texture = texDepth;
-		MipLODBias = 1.0f;
-		MinFilter = LINEAR;
-		MagFilter = LINEAR;
-		MipFilter = LINEAR;
 	};
 	
-texture texDiso  { Width = BUFFER_WIDTH/Depth_Map_Division; Height = BUFFER_HEIGHT/Depth_Map_Division; Format = RGBA32F;}; 
+texture texDiso  { Width = BUFFER_WIDTH/Depth_Map_Division; Height = BUFFER_HEIGHT/Depth_Map_Division; Format = RGBA32F; MipLevels = 1;}; 
 
 sampler SamplerDiso
 	{
 		Texture = texDiso;
+		MipLODBias = 1.0f;
+		MinFilter = LINEAR;
+		MagFilter = LINEAR;
+		MipFilter = LINEAR;
 	};
 			
 uniform float2 Mousecoords < source = "mousepoint"; > ;	
@@ -292,7 +290,7 @@ float D()
 {
 	float D;
 	
-	if(Mode == 2)
+	if(Mode == 3 || Mode == 1)
 	{
 		D = Divergence * 0.85;
 	}
@@ -352,6 +350,10 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 		//Near & Far Adjustment
 		float Far = 1, Near = 0.125/Depth_Map_Adjust, NearLocked = 0.125/7.5; //Division Depth Map Adjust - Near
 		
+		//Raw Z Offset
+		float Z = min(1,pow(abs(exp(zBuffer)*Offsets),2));
+		float ZR = min(1,pow(abs(exp(zBuffer)*Offsets),50));
+		
 		//0. Normal
 		float Normal = Far * Near / (Far + zBuffer * (Near - Far));
 		float NormalLocked = Far * NearLocked / (Far + zBuffer * (NearLocked - Far));
@@ -359,6 +361,14 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 		//1. Reverse
 		float NormalReverse = Far * Near / (Near + zBuffer * (Far - Near));
 		float NormalReverseLocked = Far * NearLocked / (NearLocked + zBuffer * (Far - NearLocked));
+				
+		//2. Offset Normal
+		float OffsetNormal = Far * Near / (Far + Z * (Near - Far));
+			  OffsetNormal = lerp(Normal,OffsetNormal,0.875);//mixing
+			  
+		//3. Offset Reverse
+		float OffsetReverse = Far * Near / (Near + ZR * (Far - Near));
+			  OffsetReverse = lerp(NormalReverse,OffsetReverse,0.875);//mixing
 			
 		float2 DM;
 		
@@ -372,10 +382,18 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 			DM.x = NormalReverse;
 			DM.y = NormalReverseLocked;
 		}
+		else if (Depth_Map == 2)
+		{
+			DM.xy = OffsetNormal.xx;
+		}
+		else
+		{
+			DM.xy = OffsetReverse.xx;
+		}
 		
-		R = DM.x;
+		R = saturate(DM.x);
 		
-		G = NearestScaledMerge(DM.y);
+		G = NearestScaledMerge(saturate(DM.y));
 	
 	Color = float4(R,G,B,A);
 }
@@ -384,6 +402,13 @@ float AutoDepthRange( float d, float2 texcoord )
 {
 	float LumAdjust = smoothstep(-0.0175,Auto_Depth_Range,Lumi(texcoord));
     return min(1,( d - 0 ) / ( LumAdjust - 0));
+}
+
+float SS(float edge0, float edge1, float x) {
+  // Scale, bias and saturate x to 0..1 range
+  x = (x - edge0) / (edge1 - edge0); 
+  // Evaluate polynomial
+  return x * x * (3 - 2 * x);
 }
 
 float Conv(float DM_A,float DM_B,float2 texcoord)
@@ -402,8 +427,8 @@ float Conv(float DM_A,float DM_B,float2 texcoord)
 		}
 		
 		if (Weapon_Adjust.x > 0)
-		Convergence_A = Convergence_B;
-					
+			Convergence_A = Convergence_B;
+
 		if (Depth_Boost)
 		{
 			DM_A += lerp(DM_A,1-DM_A,-0.125);
@@ -493,7 +518,7 @@ float4 PS_calcLR(float2 texcoord)
 	float2 TCL, TCR, TexCoords = texcoord;
 	float4 color, Right, Left, RightN, LeftN, RightF, LeftF;
 	
-	if(Mode == 2)
+	if(Mode == 3)
 	{
 		Znum = 1;
 	}
@@ -563,6 +588,20 @@ float4 PS_calcLR(float2 texcoord)
 			if(Mode == 0)
 			{
 				//L Far
+				if ( Encode(float2(TCL.x+i*pix.x/NumA,TCL.y)).y >= (1-TCL.x)/NumB )
+				{
+					FDepthL = i * pix.x/NumC; //Good
+				}
+				
+				//R Far
+				if ( Encode(float2(TCR.x-i*pix.x/NumA,TCR.y)).x >= TCR.x/NumB )
+				{
+					FDepthR = i * pix.x/NumC; //Good
+				}
+			}
+			else if(Mode == 1)
+			{
+				//L Far
 				if ( Encode(float2(TCL.x+i*pix.x,TCL.y)).y >= (1-TCL.x)/NumB )
 				{
 					FDepthL = i * pix.x/NumC; //Good
@@ -573,7 +612,7 @@ float4 PS_calcLR(float2 texcoord)
 					NDepthR = i * pix.x/NumC; //Good
 				}
 			}	
-			else if(Mode == 1)
+			else if(Mode == 2)
 			{
 				//L Near
 				if ( Encode(float2(TCL.x-i*pix.x/NumA,TCL.y)).y <= (1-TCL.x)/NumB )
@@ -587,7 +626,7 @@ float4 PS_calcLR(float2 texcoord)
 					FDepthR = i * pix.x/NumC; //Good
 				}
 			}		
-			else if(Mode == 2)
+			else if(Mode == 3)
 			{
 				//L Far
 				if ( Encode(float2(TCL.x+i*pix.x/NumA,TCL.y)).y >= (1-TCL.x)/NumB )
@@ -620,18 +659,23 @@ float4 PS_calcLR(float2 texcoord)
 		RightF = tex2Dlod(BackBufferBORDER, float4(TCR.x - FDepthR, TCR.y,0,0));
 		LeftN = tex2Dlod(BackBufferBORDER, float4(TCL.x - NDepthL, TCL.y,0,0));
 		RightN = tex2Dlod(BackBufferBORDER, float4(TCR.x + NDepthR, TCR.y,0,0));
-	
+
 	if(Mode == 0)
+	{
+		Left = LeftF;
+		Right = RightF;
+	}	
+	else if(Mode == 1)
 	{
 		Left = LeftF;
 		Right = RightN;
 	}	
-	else if(Mode == 1)
+	else if(Mode == 2)
 	{
 		Left = LeftN;
 		Right = RightF;
 	}		
-	else if(Mode == 2)
+	else if(Mode == 3)
 	{
 		Left = LeftN + LeftF;
 		Right = RightN + RightF;

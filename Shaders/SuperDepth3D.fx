@@ -45,7 +45,7 @@
 #define AO_TOGGLE 0 //Default 0 is Off. One is On.
 
 //Depth Map Smoothing uses a smoothstep to create a smooth transition between Near 0 and Far 1. Usefull in some games such as Warhammer Vermintide 2.
-#define Depth_Map_Smoothing 0 //Zero is Off | One is Smoothing A | Two is Smoothing B 
+#define Depth_Map_Smoothing 0 //Zero is Off, One is On. 
 
 //Depth Map Boosting helps increase depth at the cost of accuracy.
 #define Depth_Boost 1 //Zero is Off | One is low | Two is Med | Three is High 
@@ -64,7 +64,8 @@ uniform float Divergence <
 	ui_type = "drag";
 	ui_min = 1; ui_max = Depth_Max;
 	ui_label = "·Divergence Slider·";
-	ui_tooltip = "Determines the amount of Image Warping and Separation.\n" 
+	ui_tooltip = "Divergence increases differences between the left and right retinal images and allows you to experience depth.\n" 
+				 "The process of deriving binocular depth information is called stereopsis.\n"
 				 "You can override this value.";
 	ui_category = "Divergence & Convergence";
 > = 35.0;
@@ -94,7 +95,7 @@ uniform float ZPD <
 
 uniform int Balance <
 	ui_type = "drag";
-	ui_min = -4.0; ui_max = 6.0;
+	ui_min = 0.0; ui_max = 6.0;
 	ui_label = " Balance";
 	ui_tooltip = "Balance between ZPD Depth and Scene Depth and works with ZPD option above.\n"
 				"Example Zero is 50/50 equal between ZPD Depth and Scene Depth.\n"
@@ -160,7 +161,9 @@ uniform float Depth_Map_Adjust <
 	ui_type = "drag";
 	ui_min = 0.250; ui_max = 125.0;
 	ui_label = " Depth Map Adjustment";
-	ui_tooltip = "Adjust the depth map for your games.";
+	ui_tooltip = "This allows for you to adjust the DM precision.\n"
+				 "Adjust this to keep it as low as possible.\n"
+				 "Default is 7.5";
 	ui_category = "Depth Map";
 > = 7.5;
 
@@ -168,9 +171,19 @@ uniform float Offsets <
 	ui_type = "drag";
 	ui_min = 0; ui_max = 1.0;
 	ui_label = " Offset";
-	ui_tooltip = "Offset is for the Depth Map 2 and 3 Only.";
+	ui_tooltip = "Offset is for the DM2 and DM3 Only.";
 	ui_category = "Depth Map";
 > = 0.5;
+
+#if Depth_Map_Smoothing
+uniform float DM_Smoothing <
+	ui_type = "drag";
+	ui_min = -100.0; ui_max = 0.0;
+	ui_label = " Depth Map Smoothing";
+	ui_tooltip = "Depth Map Smoothing is used to clamp and smooth the transition from Near 0 to Far 1.";
+	ui_category = "Depth Map";
+> = 0.0;
+#endif
 
 uniform bool Depth_Map_View <
 	ui_label = " Depth Map View";
@@ -470,12 +483,9 @@ float Depth(in float2 texcoord : TEXCOORD0)
 		else
 		{
 			DM = OffsetReverse;
-		}	
+		}		
 		
-		if (Depth_Map_Smoothing == 1 && WP == 0)
-		DM *= smoothstep(0,1,DM);	
-		
-	return DM;	
+	return saturate(DM);	
 }
 
 float2 WeaponDepth(in float2 texcoord : TEXCOORD0)
@@ -885,15 +895,7 @@ float Conv(float D,float2 texcoord)
 			Divergence_Locked = Divergence_Locked;
 		}	
 
-		if(Balance == -4)
-			NF_Power = 0.125;		
-		else if(Balance == -3)
-			NF_Power = 0.250;
-		else if(Balance == -2)
-			NF_Power = 0.375;
-		else if(Balance == -1)
-			NF_Power = 0.425;
-		else if(Balance == 0)
+		if(Balance == 0)
 			NF_Power = 0.5;
 		else if(Balance == 1)
 			NF_Power = 0.5625;
@@ -913,9 +915,6 @@ float Conv(float D,float2 texcoord)
 		if (ZPD == 0)
 		ZP = 1.0;
 		
-		if (Depth_Map_Smoothing  == 1 && WP == 0)
-		Z = Z*0.1f;
-		
 		float Convergence;		
 		
 		if(Convergence_Mode == 1)
@@ -927,15 +926,10 @@ float Conv(float D,float2 texcoord)
 			Convergence = 1 - Z / D;
 		}
 				
-		if (Depth_Map_Smoothing == 1 && WP >= 1)
-		{
-			D *= smoothstep(0,1,D);
-		}
-		else if (Depth_Map_Smoothing == 2)
-		{
-			D *= smoothstep(0,1,D);	
-		}
-				
+		#if Depth_Map_Smoothing
+			D *= smoothstep(DM_Smoothing,1,D);
+		#endif
+		
 		if (Auto_Depth_Range > 0)
 		{
 			D = AutoDepthRange(D,texcoord);
