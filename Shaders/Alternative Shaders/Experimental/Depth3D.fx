@@ -410,13 +410,6 @@ float AutoDepthRange( float d, float2 texcoord )
     return min(1,( d - 0 ) / ( LumAdjust - 0));
 }
 
-float SS(float edge0, float edge1, float x) {
-  // Scale, bias and saturate x to 0..1 range
-  x = (x - edge0) / (edge1 - edge0); 
-  // Evaluate polynomial
-  return x * x * (3 - 2 * x);
-}
-
 float Conv(float DM_A,float DM_B,float2 texcoord)
 {
 	float DM, Convergence, Z = ZPD, ZP = 0.5625;

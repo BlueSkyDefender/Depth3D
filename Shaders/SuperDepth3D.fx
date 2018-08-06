@@ -506,161 +506,72 @@ float2 WeaponDepth(in float2 texcoord : TEXCOORD0)
  		
 		//Set Weapon Depth Map settings for the section below.//
 		float3 WA_XYZ; //WA_XYZ.x = Weapon_Adjust.x - WA_XYZ.y = Weapon_Adjust.y - Weapon Cutoff Point WA_XYZ.z = Weapon_Adjust.z 
+		
 		//WP = Weapon Adjust.xy
 		if (WP == 1)
-		{
-			WA_XYZ.xy = float2(Weapon_Adjust.x,Weapon_Adjust.y);
-		}		
-		//WP 0 ; Unreal Gold with v227
-		else if(WP == 2)
-		{
-			WA_XYZ = float3(2.855,0.1375,0.335);
-		}		
-		//WP 1 ; DOOM 2016
-		else if(WP == 3)
-		{
-			WA_XYZ = float3(2.775,0.666,0.2775);
-		}
-		//WP 2 ; Amnesia Games
-		else if(WP == 4)
-		{
-			WA_XYZ = float3(100.0,75.0, 8.0);
-		}
-		//WP 3 ; BorderLands 2
-		else if(WP == 5)
-		{
-			WA_XYZ = float3(2.855,1.0,0.300);
-		}		
-		//WP 4 ; CoD:AW
-		else if(WP == 6)
-		{
-			WA_XYZ = float3(98.0,-0.3625,0.300);
-		}		
-		//WP 5 ; CoD: Black Ops
-		else if(WP == 7)
-		{
-			WA_XYZ = float3(2.53945,0.0125,0.300);
-		}	
-		//WP 6 ; CoD: Black Ops
-		else if(WP == 8)
-		{
-			WA_XYZ = float3(5.0,15.625,0.455);
-		}	
-		//WP 7 ; Wolfenstine: The New Order
-		else if(WP == 9)
-		{
-			WA_XYZ = float3(5.500,1.550,0.550);
-		}
-		//WP 8 ; Fallout 4
-		else if(WP == 10)
-		{
-			WA_XYZ = float3(2.5275,0.0875,0.255);
-		}
-		//WP 9 ; Prey 2017 High and <
-		else if(WP == 11)
-		{
-			WA_XYZ = float3(19.700,-2.600,0.285);
-		}
-		//WP 10 ; Prey 2017 Very High
-		else if(WP == 12)
-		{
-			WA_XYZ = float3(28.450,-2.600,0.285);
-		}	
-		//WP 11 ; Metro Redux Games
-		else if(WP == 13)
-		{
-			WA_XYZ = float3(2.61375,1.0,0.260);
-		}	
-		//WP 12 ; NecroVisioN: Lost Company
-		else if(WP == 14)
-		{
-			WA_XYZ = float3(5.1375,7.5,0.485);
-		}
-		//WP 13 ; Kingpin Life of Crime
-		else if(WP == 15)
-		{
-			WA_XYZ = float3(3.925,17.5,0.400);
-		}
-		//WP 14 ; Rage64
-		else if(WP == 16)
-		{
-			WA_XYZ = float3(5.45,1.0,0.550);
-		}		
-		//WP 15 ; Quake DarkPlaces
-		else if(WP == 17)
-		{
-			WA_XYZ = float3(2.685,1.0,0.375);
-		}	
-		//WP 16 ; Quake 2 XP
-		else if(WP == 18)
-		{
-			WA_XYZ = float3(3.925,16.25,0.400);
-		}
-		//WP 17 ; Quake 4
-		else if(WP == 19)
-		{
-			WA_XYZ = float3(5.000000,7.0,0.500);
-		}
-		//WP 18 ; RTCW
-		else if(WP == 20)
-		{
-			WA_XYZ = float3(3.6875,7.250,0.400);
-		}
-		//WP 19 ; S.T.A.L.K.E.R: Games
-		else if(WP == 21)
-		{
-			WA_XYZ = float3(2.55925,0.75,0.255);
-		}
-		//WP 20 ; Soma
-		else if(WP == 22)
-		{
-			WA_XYZ = float3(16.250,87.50,0.825);
-		}
-		//WP 21 ; Skyrim: SE
-		else if(WP == 23)
-		{
-			WA_XYZ = float3(2.775,1.125,0.278);
-		}	
-		//WP 22 ; Turok: DH 2017
-		else if(WP == 24)
-		{
-			WA_XYZ = float3(2.553125,1.0,0.500);
-		}
-		//WP 23 ; Turok2: SoE 2017
-		else if(WP == 25)
-		{
-			WA_XYZ = float3(140.0,500.0,5.0);
-		}
-		//WP 24 ; Dying Light
-		else if(WP == 26)
-		{
-			WA_XYZ = float3(2.000,-40.0,2.0);
-		}
-		//WP 25 ; EuroTruckSim2
-		else if(WP == 27)
-		{
-			WA_XYZ = float3(2.800,1.0,0.280);
-		}	
-		//WP 26 ; Prey - 2006
-		else if(WP == 28)
-		{
-			WA_XYZ = float3(5.000,2.875,0.500);
-		}
-		//WP 27 ; TitanFall 2
-		else if(WP == 29)
-		{
-			WA_XYZ = float3(2.77575,0.3625,0.3625);
-		}
-		//WP 28 ; Bioshock Remastred
-		else if(WP == 30)
-		{
-			WA_XYZ = float3(2.52475,0.05625,0.260);
-		}
-		//WP 29 ; Serious Sam Revolition
-		else if(WP == 31)
-		{
-			WA_XYZ = float3(2.8,1.5625,0.350);
-		}					
+			WA_XYZ.xy = float2(Weapon_Adjust.x,Weapon_Adjust.y);		
+		else if(WP == 2) //WP 0
+			WA_XYZ = float3(2.855,0.1375,0.335);   //Unreal Gold with v227		
+		else if(WP == 3) //WP 1
+			WA_XYZ = float3(2.775,0.666,0.2775);   //DOOM 2016
+		else if(WP == 4) //WP 2
+			WA_XYZ = float3(100.0,75.0, 8.0);      //Amnesia Games
+		else if(WP == 5) //WP 3
+			WA_XYZ = float3(2.855,1.0,0.300);      //BorderLands 2		
+		else if(WP == 6) //WP 4
+			WA_XYZ = float3(98.0,-0.3625,0.300);   //CoD:AW		
+		else if(WP == 7) //WP 5
+			WA_XYZ = float3(2.53945,0.0125,0.300); //CoD: Black Ops
+		else if(WP == 8) //WP 6
+			WA_XYZ = float3(5.0,15.625,0.455);     //CoD: Black Ops II??	
+		else if(WP == 9) //WP 7
+			WA_XYZ = float3(5.500,1.550,0.550);    //Wolfenstine: The New Order
+		else if(WP == 10)//WP 8
+			WA_XYZ = float3(2.5275,0.0875,0.255);  //Fallout 4
+		else if(WP == 11)//WP 9
+			WA_XYZ = float3(19.700,-2.600,0.285);  //Prey 2017 High Settings and <
+		else if(WP == 12)//WP 10
+			WA_XYZ = float3(28.450,-2.600,0.285);  //Prey 2017 Very High	
+		else if(WP == 13)//WP 11
+			WA_XYZ = float3(2.61375,1.0,0.260);    //Metro Redux Games	
+		else if(WP == 14)//WP 12
+			WA_XYZ = float3(5.1375,7.5,0.485);     //NecroVisioN: Lost Company
+		else if(WP == 15)//WP 13
+			WA_XYZ = float3(3.925,17.5,0.400);     //Kingpin Life of Crime
+		else if(WP == 16)//WP 14
+			WA_XYZ = float3(5.45,1.0,0.550);       //Rage64		
+		else if(WP == 17)//WP 15
+			WA_XYZ = float3(2.685,1.0,0.375);      //Quake DarkPlaces	
+		else if(WP == 18)//WP 16
+			WA_XYZ = float3(3.925,16.25,0.400);    //Quake 2 XP
+		else if(WP == 19)//WP 17
+			WA_XYZ = float3(5.000000,7.0,0.500);   //Quake 4
+		else if(WP == 20)//WP 18
+			WA_XYZ = float3(3.6875,7.250,0.400);   //RTCW
+		else if(WP == 21)//WP 19
+			WA_XYZ = float3(2.55925,0.75,0.255);   //S.T.A.L.K.E.R: Games
+		else if(WP == 22)//WP 20
+			WA_XYZ = float3(16.250,87.50,0.825);   //SOMA
+		else if(WP == 23)//WP 21
+			WA_XYZ = float3(2.775,1.125,0.278);    //Skyrim: SE	
+		else if(WP == 24)//WP 22
+			WA_XYZ = float3(2.553125,1.0,0.500);   //Turok: DH 2017
+		else if(WP == 25)//WP 23
+			WA_XYZ = float3(140.0,500.0,5.0);      //Turok2: SoE 2017
+		else if(WP == 26)//WP 24
+			WA_XYZ = float3(2.000,-40.0,2.0);      //Dying Light
+		else if(WP == 27)//WP 25
+			WA_XYZ = float3(2.800,1.0,0.280);      //EuroTruckSim2
+		else if(WP == 28)//WP 26
+			WA_XYZ = float3(5.000,2.875,0.500);    //Prey - 2006
+		else if(WP == 29)//WP 27
+			WA_XYZ = float3(2.77575,0.3625,0.3625);//TitanFall 2
+		else if(WP == 30)//WP 28
+			WA_XYZ = float3(2.52475,0.05625,0.260);//Bioshock Remastred
+		else if(WP == 31)//WP 29
+			WA_XYZ = float3(2.8,1.5625,0.350);     //Serious Sam Revolition
+		else if(WP == 32)//WP 30
+			WA_XYZ = float3(5.050,2.750,0.4913);   //Wolfenstine
 		//SWDMS Done//
  		
  		//TEXT MODE 31 Adjust

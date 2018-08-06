@@ -75,7 +75,7 @@ uniform int Disocclusion_Selection <
 
 uniform float Disocclusion_Power_Adjust <
 	ui_type = "drag";
-	ui_min = 0.250; ui_max = 2.5;
+	ui_min = 0.250; ui_max = 5.0;
 	ui_label = " Disocclusion Power Adjust";
 	ui_tooltip = "Automatic occlusion masking power adjust.\n"
 				"Default is 1.0";
@@ -213,22 +213,22 @@ sampler BackBufferBORDER
 		AddressW = BORDER;
 	};
 	
-texture texDepth  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT/Depth_Map_Division; Format = RGBA32F; MipLevels = 1;}; 
+texture texDepth  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT/Depth_Map_Division; Format = RGBA32F;}; 
 
 sampler SamplerDepth
 	{
 		Texture = texDepth;
-		MipLODBias = 1.0f;
-		MinFilter = LINEAR;
-		MagFilter = LINEAR;
-		MipFilter = LINEAR;
 	};
 	
-texture texDiso  { Width = BUFFER_WIDTH/Depth_Map_Division; Height = BUFFER_HEIGHT/Depth_Map_Division; Format = RGBA32F;}; 
+texture texDiso  { Width = BUFFER_WIDTH/Depth_Map_Division; Height = BUFFER_HEIGHT/Depth_Map_Division; Format = RGBA32F; MipLevels = 1;}; 
 
 sampler SamplerDiso
 	{
 		Texture = texDiso;
+		MipLODBias = 1.0f; //Luminance adapted luminance value from 1x1 Texture Mip lvl of 8
+		MinFilter = LINEAR;
+		MagFilter = LINEAR;
+		MipFilter = LINEAR;
 	};
 			
 uniform float2 Mousecoords < source = "mousepoint"; > ;	
