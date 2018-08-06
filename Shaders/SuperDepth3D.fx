@@ -95,13 +95,13 @@ uniform float ZPD <
 
 uniform int Balance <
 	ui_type = "drag";
-	ui_min = 0.0; ui_max = 6.0;
+	ui_min = 0; ui_max = 6;
 	ui_label = " Balance";
 	ui_tooltip = "Balance between ZPD Depth and Scene Depth and works with ZPD option above.\n"
 				"Example Zero is 50/50 equal between ZPD Depth and Scene Depth.\n"
-				"Default is Zero.";
+				"Default is One.";
 	ui_category = "Divergence & Convergence";
-> = 0;
+> = 1;
 
 uniform float Auto_Depth_Range <
 	ui_type = "drag";

@@ -333,6 +333,8 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 			DM.y = NormalReverseLocked;
 		}
 		
+		DM = saturate(DM);
+		
 		R = DM.x;
 		
 		G = NearestScaledMerge(DM.y);
