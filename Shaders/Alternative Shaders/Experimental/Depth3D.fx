@@ -489,8 +489,6 @@ float2 dirA, dirB, DM;
 }
 
 /////////////////////////////////////////L/R//////////////////////////////////////////////////////////////////////
-uniform uint framecount < source = "framecount"; >;
-//Total amount of frames since the game started.
 
 float2  Encode(in float2 texcoord : TEXCOORD0) //zBuffer Color Channel Encode
 {
