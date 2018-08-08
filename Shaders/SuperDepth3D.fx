@@ -28,6 +28,9 @@
 // Determines the Max Depth amount, in ReShades GUI.
 #define Depth_Max 50
 
+// Determines the Max Zero Parallax Distance, in ReShades GUI. 0.150 is 150%
+#define ZPD_Max 0.500
+
 // Enable this to fix the problem when there is a full screen Game Map Poping out of the screen. AKA Full Black Depth Map Fix. I have this off by default. Zero is off, One is On.
 #define FBDMF 0 //Default 0 is Off. One is On.
 
@@ -84,7 +87,7 @@ uniform int Convergence_Mode <
 
 uniform float ZPD <
 	ui_type = "drag";
-	ui_min = 0.0; ui_max = 0.500;
+	ui_min = 0.0; ui_max = ZPD_Max;
 	ui_label = " Zero Parallax Distance";
 	ui_tooltip = "ZPD controls the focus distance for the screen Pop-out effect also known as Convergence.\n"
 				"For FPS Games keeps this low Since you don't want your gun to pop out of screen.\n"
@@ -99,9 +102,9 @@ uniform int Balance <
 	ui_label = " Balance";
 	ui_tooltip = "Balance between ZPD Depth and Scene Depth and works with ZPD option above.\n"
 				"Example Zero is 50/50 equal between ZPD Depth and Scene Depth.\n"
-				"Default is One.";
+				"Default is Zero.";
 	ui_category = "Divergence & Convergence";
-> = 1;
+> = 0;
 
 uniform float Auto_Depth_Range <
 	ui_type = "drag";
@@ -364,11 +367,14 @@ sampler SamplerDM
 		Texture = texDM;
 	};
 	
-texture texDis  { Width = BUFFER_WIDTH/Depth_Map_Division; Height = BUFFER_HEIGHT/Depth_Map_Division; Format = RGBA32F;}; 
+texture texDis  { Width = BUFFER_WIDTH/Depth_Map_Division; Height = BUFFER_HEIGHT/Depth_Map_Division; Format = RGBA32F;MipLevels = 2;}; 
 
 sampler SamplerDis
 	{
 		Texture = texDis;
+		MinFilter = LINEAR;
+		MagFilter = LINEAR;
+		MipFilter = LINEAR;
 	};
 	
 #if AO_TOGGLE	
@@ -775,9 +781,9 @@ float AutoDepthRange( float d, float2 texcoord )
 
 float Conv(float D,float2 texcoord)
 {
-	float DB, Z, ZP, Con = ZPD, NF_Power, MSZ = Divergence * pix.x;
+	float DB, Z, ZP, Con = ZPD, NF_Power;
 			
-		float Divergence_Locked = Divergence*0.00105;
+		float Divergence_Locked = Divergence*0.00105, MS = Divergence * pix.x;
 		float ALC = abs(smoothstep(0,1.0,Lum(texcoord)));
 		
 		if(TPAuto_ZPD == 1)
@@ -836,8 +842,11 @@ float Conv(float D,float2 texcoord)
 		
 		ZP = NF_Power;
 		
+		if (ZPD >= ZPD_Max)
+			Z = ZPD_Max;
+		
 		if (ZPD == 0)
-		ZP = 1.0;
+			ZP = 1.0;
 		
 		float Convergence;		
 		
@@ -859,20 +868,13 @@ float Conv(float D,float2 texcoord)
 			D = AutoDepthRange(D,texcoord);
 		}
 		
-		if (Depth_Boost > 0)
-		{
-			if (Depth_Boost == 1)
-				DB = 0.0625; 
-			else if (Depth_Boost == 2)
-				DB = 0.125; 
-			else if (Depth_Boost == 3)
-				DB = 0.15625;
-							
-			D += min(1,lerp(D,1-D,-DB));
+		if (Depth_Boost == 1)
+		{							
+			D += min(1,lerp(D,1-D,-0.0625));
 			D *= 0.5;
 		}
 				
-		Z = lerp( MSZ * Convergence, MSZ * D, ZP);
+		Z = lerp(MS * Convergence,MS * D, ZP);
 				
     return Z;
 }
@@ -999,16 +1001,31 @@ DBD = ( DBD - 1.0f ) / ( -187.5f - 1.0f );
 }
 
 /////////////////////////////////////////L/R//////////////////////////////////////////////////////////////////////
+float2  Encode(in float2 texcoord : TEXCOORD0) //zBuffer Color Channel Encode
+{
+	float M = 0,Z = ZPD;
+	
+	if (Disocclusion_Selection >= 1)
+		M = 2;
+
+	float DM = tex2Dlod(SamplerDis,float4(texcoord.x, texcoord.y,0,M)).x,DepthR = DM, DepthL = DM;
+	
+	// X Left & Y Right	
+	float X = DepthL, Y = DepthR;
+
+	return float2(X,Y);
+}
+
 float4 PS_calcLR(float2 texcoord)
 {
 	float2 TCL, TCR, TexCoords = texcoord;
 	float4 color, Right, Left;
-	float DepthR = 1, DepthL = 1, Adjust_A = 0.11111112, Adjust_B = 0.07692307, N, S, X, L, R;
+	float DepthR = 1, DepthL = 1, Adjust_A = 0.11111112, Adjust_B = 0.07692307, N, S, L, R;
 	float samplesA[9] = {0.5,0.5625,0.625,0.6875,0.75,0.8125,0.875,0.9375,1.0};
 	float samplesB[13] = {0.5,0.546875,0.578125,0.625,0.659375,0.703125,0.75,0.796875,0.828125,0.875,0.921875,0.953125,1.0};
 
 	//MS is Max Separation P is Perspective Adjustment
-	float MS = Divergence * pix.x, P = Perspective * pix.x;
+	float MS = (Divergence - 1) * pix.x, P = Perspective * pix.x;
 					
 	if(Eye_Swap)
 	{
@@ -1070,22 +1087,22 @@ float4 PS_calcLR(float2 texcoord)
 			if (View_Mode == 0)
 		{
 			S = samplesA[i] * MS;//9
-			DepthL = min(DepthL,tex2Dlod(SamplerDis,float4(TCL.x+S, TCL.y,0,0)).x);
-			DepthR = min(DepthR,tex2Dlod(SamplerDis,float4(TCR.x-S, TCR.y,0,0)).x);
+			DepthL = min(DepthL,Encode(float2(TCL.x+S, TCL.y)).x);
+			DepthR = min(DepthR,Encode(float2(TCR.x-S, TCR.y)).y);
 		}
 		else if (View_Mode == 1)
 		{
 			S = samplesB[i] * MS * 1.21875;//9
-			L += tex2Dlod(SamplerDis,float4(TCL.x+S, TCL.y,0,0)).x*Adjust_A;
-			R += tex2Dlod(SamplerDis,float4(TCR.x-S, TCR.y,0,0)).x*Adjust_A;
+			L += Encode(float2(TCL.x+S, TCL.y)).x*Adjust_A;
+			R += Encode(float2(TCR.x-S, TCR.y)).y*Adjust_A;
 			DepthL = min(1,L);
 			DepthR = min(1,R);
 		}
 		else if (View_Mode == 2)
 		{
 			S = samplesB[i] * MS * 1.21875;//13
-			L += tex2Dlod(SamplerDis,float4(TCL.x+S, TCL.y,0,0)).x*Adjust_B;
-			R += tex2Dlod(SamplerDis,float4(TCR.x-S, TCR.y,0,0)).x*Adjust_B;
+			L += Encode(float2(TCL.x+S, TCL.y)).x*Adjust_B;
+			R += Encode(float2(TCR.x-S, TCR.y)).y*Adjust_B;
 			DepthL = min(1,L);
 			DepthR = min(1,R);
 		}

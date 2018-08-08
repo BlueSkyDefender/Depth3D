@@ -28,6 +28,9 @@
 // Determines the Max Depth amount, in ReShades GUI.
 #define Depth_Max 50
 
+// Determines the Max Zero Parallax Distance, in ReShades GUI. 0.150 is 150%
+#define ZPD_Max 0.150
+
 // Change the Cancel Depth Key
 // Determines the Cancel Depth Toggle Key useing keycode info
 // You can use http://keycode.info/ to figure out what key is what.
@@ -101,7 +104,7 @@ uniform bool ZPD_GUIDE <
 
 uniform float ZPD <
 	ui_type = "drag";
-	ui_min = 0.0; ui_max = 0.150;
+	ui_min = 0.0; ui_max = ZPD_Max;
 	ui_label = " Zero Parallax Distance";
 	ui_tooltip = "ZPD controls the focus distance for the screen Pop-out effect also known as Convergence.\n"
 				"For FPS Games keeps this low Since you don't want your gun to pop out of screen.\n"
@@ -820,11 +823,11 @@ float Conv(float DM,float2 texcoord)
 		
 		ZP = NF_Power;
 		
-		if (ZPD >= 0.150)
-		Z = 0.150;
+		if (ZPD >= ZPD_Max)
+			Z = ZPD_Max;
 		
 		if (ZPD == 0)
-		ZP = 1.0;
+			ZP = 1.0;
 		
 		float Convergence;	
 			
@@ -987,18 +990,11 @@ float2  Encode(in float2 texcoord : TEXCOORD0) //zBuffer Color Channel Encode
 {
 	float DM = tex2Dlod(SamplerDisFB,float4(texcoord.x, texcoord.y,0,0)).x,DepthR = DM, DepthL = DM, S, MS = D()*pix.x,Adjust_A = 0.11111112;
 	
-	//DT = Distance_Trim;
-	//DepthL = min(DT,DepthL);
-	//DepthR = min(DT,DepthR);
-	
 	DepthL = Conv(DepthL,texcoord);
 	DepthR = Conv(DepthR,texcoord);
 	
-	// X Left	
-	float X = texcoord.x+MS*DepthL.x;
-
-	// Y Right
-	float Y = (1-texcoord.x)+MS*DepthR.x;	
+	// X Left & Y Right
+	float X = texcoord.x+MS*DepthL.x, Y = (1-texcoord.x)+MS*DepthR.x;
 
 	return float2(X,Y);
 }
@@ -1091,7 +1087,7 @@ float4 PS_calcLR(float2 texcoord)
 	}
 	
 		[loop]
-		for (int i = 0; i < D() + 1; i++) 
+		for (int i = 0; i < D() + 1.0; i++) 
 		{
 			if(Mode == 0)
 			{
