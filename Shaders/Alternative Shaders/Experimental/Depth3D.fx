@@ -33,7 +33,7 @@
 //Stereopsis Output//
 uniform int Mode <
 	ui_type = "combo";
-	ui_items = "Reproject L\0Reproject R\0Reproject L & R\0";
+	ui_items = "Reprojection L\0Reprojection R\0Reprojection L & R\0";
 	ui_label = "·Reprojection Mode·";
 	ui_tooltip = "Reprojection Mode changes the view output for this shader.\n"
 			     "Reproject L or R uses a lot less resoruses than L & R.\n"
@@ -99,7 +99,7 @@ uniform int Depth_Map <
 
 uniform float Depth_Map_Adjust <
 	ui_type = "drag";
-	ui_min = 0.250; ui_max = 125.0;
+	ui_min = 1.0; ui_max = 150.0;
 	ui_label = " Depth Map Adjustment";
 	ui_tooltip = "This allows for you to adjust the DM precision.\n"
 				 "Adjust this to keep it as low as possible.\n"
