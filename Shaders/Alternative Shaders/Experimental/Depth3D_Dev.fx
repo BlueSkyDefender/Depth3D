@@ -28,9 +28,6 @@
 // Determines the Max Depth amount, in ReShades GUI.
 #define Depth_Max 50
 
-//Zero Is Off One is On.
-#define Depth_Boost 1 //0/1/
-
 //USER EDITABLE PREPROCESSOR FUNCTIONS END//
 
 //Divergence & Convergence//
@@ -38,19 +35,27 @@ uniform float Divergence <
 	ui_type = "drag";
 	ui_min = 1; ui_max = Depth_Max;
 	ui_label = "·Divergence Slider·";
-	ui_tooltip = "Determines the amount of Image Warping and Separation.\n" 
+	ui_tooltip = "Divergence increases differences between the left and right retinal images and allows you to experience depth.\n" 
+				 "The process of deriving binocular depth information is called stereopsis.\n"
 				 "You can override this value.";
 	ui_category = "Divergence & Convergence";
-> = 35.0;
+> = 25.0;
+
+uniform bool ZPD_GUIDE <
+	ui_label = " ZPD Guide";
+	ui_tooltip = "A Guide used to help adjust convergence.";
+	ui_category = "Divergence & Convergence";
+> = false;
 
 uniform float ZPD <
 	ui_type = "drag";
 	ui_min = 0.0; ui_max = 0.100;
 	ui_label = " Zero Parallax Distance";
 	ui_tooltip = "ZPD controls the focus distance for the screen Pop-out effect also known as Convergence.\n"
-				"For FPS Games keeps this low Since you don't want your gun to pop out of screen.\n"
-				"If you want to push this higher you need to adjust your weapon hand below.\n"
-				"Default is 0.010, Zero is off.";
+				 "For FPS Games keeps this low Since you don't want your gun to pop out of screen.\n"
+				 "If you want to push this higher you need to adjust your weapon hand below.\n"
+				 "It helps to keep this around 0.03 when adjusting the depth map or weapon.\n"
+				 "Default is 0.010, Zero is off.";
 	ui_category = "Divergence & Convergence";
 > = 0.010;
 
@@ -63,24 +68,14 @@ uniform float Auto_Depth_Range <
 	ui_category = "Divergence & Convergence";
 > = 0.0;
 
-//Occlusion Masking//
-uniform int Disocclusion_Selection <
-	ui_type = "combo";
-	ui_items = "Off\0Normal Blur\0";
-	ui_label = "·Disocclusion Selection·";
-	ui_tooltip = "This is to select the z-Buffer blurring option for low level occlusion masking.\n"
-				"Default is Off.";
-	ui_category = "Occlusion Masking";
-> = 0;
-
 uniform float Disocclusion_Power_Adjust <
 	ui_type = "drag";
-	ui_min = 0.250; ui_max = 5.0;
+	ui_min = 0.0; ui_max = 5.0;
 	ui_label = " Disocclusion Power Adjust";
 	ui_tooltip = "Automatic occlusion masking power adjust.\n"
 				"Default is 1.0";
 	ui_category = "Occlusion Masking";
-> = 1.0;
+> = 1.250;
 
 //Depth Map//
 uniform int Depth_Map <
@@ -94,9 +89,11 @@ uniform int Depth_Map <
 
 uniform float Depth_Map_Adjust <
 	ui_type = "drag";
-	ui_min = 0.250; ui_max = 125.0;
+	ui_min = 1.0; ui_max = 150.0;
 	ui_label = " Depth Map Adjustment";
-	ui_tooltip = "Adjust the depth map for your games.";
+	ui_tooltip = "This allows for you to adjust the DM precision.\n"
+				 "Adjust this to keep it as low as possible.\n"
+				 "Default is 7.5";
 	ui_category = "Depth Map";
 > = 7.5;
 
@@ -112,12 +109,13 @@ uniform bool Depth_Map_Flip <
 	ui_category = "Depth Map";
 > = false;
 
+//Weapon Hand Scale Options//
 uniform int Weapon_Scale <
 	ui_type = "drag";
 	ui_min = 0; ui_max = 2;
 	ui_label = " Weapon Scale";
-	ui_tooltip = "Use this to target the weapon hand in world.";
-	ui_category = "Weapon Depth Map";
+	ui_tooltip = "Use this to set the proper weapon hand scale.";
+	ui_category = "Weapon Hand Adjust";
 > = 0;
 
 uniform float3 Weapon_Adjust <
@@ -125,14 +123,17 @@ uniform float3 Weapon_Adjust <
 	ui_min = 0.0; ui_max = 10.0;
 	ui_label = " Weapon Hand Adjust";
 	ui_tooltip = "Adjust Weapon depth map for your games.\n"
-	             "Default is float3(CutOff  is 0.0 Off,Power is 2.0,Trim is 1.5).";
-	ui_category = "Weapon Depth Map";
+				 "X, The CutOff point used to set a diffrent depth scale for first person view.\n"
+				 "Y, The Power needed to scale the first person view apart from world scale.\n"
+				 "Z, Adjust is used to fine tune the first person view scale.\n"
+	             "Default is float3(X 0.0, Y 2.0, Z 1.5).";
+	ui_category = "Weapon Hand Adjust";
 > = float3(0.0,2.0,1.5);
 
 //Stereoscopic Options//
 uniform int Stereoscopic_Mode <
 	ui_type = "combo";
-	ui_items = "Side by Side\0Top and Bottom\0Line Interlaced\0Checkerboard 3D\0Anaglyph\0";
+	ui_items = "Side by Side\0Top and Bottom\0Line Interlaced\0Anaglyph\0";
 	ui_label = "·3D Display Modes·";
 	ui_tooltip = "Stereoscopic 3D display output selection.";
 	ui_category = "Stereoscopic Options";
@@ -142,7 +143,7 @@ uniform float Interlace_Optimization <
 	ui_type = "drag";
 	ui_min = 0.0; ui_max = 0.5;
 	ui_label = " Interlace Optimization";
-	ui_tooltip = "Interlace Optimization Is used to reduce alisesing in a Line or Column interlaced image.\n"
+	ui_tooltip = "Interlace Optimization Is used to reduce alisesing in a Line Interlaced image.\n"
 	             "This has the side effect of softening the image.\n"
 	             "Default is 0.25";
 	ui_category = "Stereoscopic Options";
@@ -168,25 +169,16 @@ uniform float Perspective <
 	ui_type = "drag";
 	ui_min = -100; ui_max = 100;
 	ui_label = " Perspective Slider";
-	ui_tooltip = "Determines the perspective point. Default is 0";
+	ui_tooltip = "Determines the perspective point of your stereo pair.\n"
+				 "Default is 0.0";
 	ui_category = "Stereoscopic Options";
 > = 0;
 
 uniform bool Eye_Swap <
 	ui_label = " Swap Eyes";
-	ui_tooltip = "L/R to R/L.";
+	ui_tooltip = "Left : Right to Right : Left.";
 	ui_category = "Stereoscopic Options";
 > = false;
-
-//Cursor Adjustments//
-uniform float4 Cross_Cursor_Adjust <
-	ui_type = "drag";
-	ui_min = 0.0; ui_max = 255.0;
-	ui_label = "·Cross Cursor Adjust·";
-	ui_tooltip = "Pick your own cross cursor color & Size.\n" 
-				 " Default is (R 255, G 255, B 255 , Size 25)";
-	ui_category = "Cursor Adjustments";
-> = float4(255.0, 255.0, 255.0, 25.0);
 
 /////////////////////////////////////////////D3D Starts Here/////////////////////////////////////////////////////////////////
 #define pix float2(BUFFER_RCP_WIDTH, BUFFER_RCP_HEIGHT)
@@ -230,18 +222,7 @@ sampler SamplerDiso
 		MagFilter = LINEAR;
 		MipFilter = LINEAR;
 	};
-			
-uniform float2 Mousecoords < source = "mousepoint"; > ;	
-////////////////////////////////////////////////////////////////////////////////////Cross Cursor////////////////////////////////////////////////////////////////////////////////////	
-float4 MouseCursor(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Target
-{
-	float2 MousecoordsXY = Mousecoords * pix;
-	float2 CC_Size = Cross_Cursor_Adjust.a * pix;
-	float2 CC_ModeA = float2(1.25,1.0), CC_ModeB = float2(0.5,0.5);
-	float4 Mpointer = all(abs(texcoord - MousecoordsXY) < CC_Size*CC_ModeA) * (1 - all(abs(texcoord - MousecoordsXY) > CC_Size/(Cross_Cursor_Adjust.a*CC_ModeB))) ? float4(Cross_Cursor_Adjust.rgb/255, 1.0) : tex2D(BackBuffer, texcoord);//cross
-	
-	return Mpointer;
-}
+
 /////////////////////////////////////////////////////////////////////////////////Adapted Luminance/////////////////////////////////////////////////////////////////////////////////
 texture texLumi {Width = 256*0.5; Height = 256*0.5; Format = RGBA8; MipLevels = 8;}; //Sample at 256x256/2 and a mip bias of 8 should be 1x1 
 																				
@@ -263,41 +244,38 @@ float Lumi(in float2 texcoord : TEXCOORD0)
 	
 /////////////////////////////////////////////////////////////////////////////////Depth Map Information/////////////////////////////////////////////////////////////////////////////////
 
-
 float NearestScaled( float DM )
 {
-	float NearestScaled, ScaleAdjust;
+	float WDM = DM, Nearest_Scaled = Weapon_Adjust.y, Scale_Adjust = Weapon_Adjust.z,CutOff = Weapon_Adjust.x/100, Set_Scale;
 	
 	if (Weapon_Scale == 0)
 	{
-		NearestScaled = 0.001/(Weapon_Adjust.y*0.5);
-		ScaleAdjust = Weapon_Adjust.z * 1.5;
+		Nearest_Scaled = 0.001/(Nearest_Scaled*0.5);
+		Scale_Adjust = Scale_Adjust * 1.5;
+		Set_Scale = 7.5;
 	}
 	else if (Weapon_Scale == 1)
 	{
-		NearestScaled = 0.0001/(Weapon_Adjust.y*0.5);
-		ScaleAdjust = Weapon_Adjust.z * 6.25;
+		Nearest_Scaled = 0.0001/(Nearest_Scaled*0.5);
+		Scale_Adjust = Scale_Adjust * 6.25;
+		Set_Scale = 5.625;
 	}
 	else if (Weapon_Scale == 2)
 	{
-		NearestScaled = 0.00001/(Weapon_Adjust.y*0.5);
-		ScaleAdjust = Weapon_Adjust.z * 50.0;
+		Nearest_Scaled = 0.00001/(Nearest_Scaled*0.5);
+		Scale_Adjust = Scale_Adjust * 50.0;
+		Set_Scale = 3.75;
 	}
-	
-	DM = (smoothstep(0,1,DM) / NearestScaled ) - ScaleAdjust;
-	
-	float Far = 1, Near = 0.125/7.5; //Division Depth Map Adjust - Near
-	
-	DM = Far * Near / (Far + DM * (Near - Far));
-	
-    return  DM;
-}
 
-float NearestScaledMerge( float DM )
-{
-		float Merge = lerp(DM,NearestScaled(DM),step(DM,Weapon_Adjust.x/100));
-		Merge = lerp(Merge,DM,0.250);
-		return  Merge;
+	WDM = (smoothstep(0,1,WDM) / Nearest_Scaled ) - Scale_Adjust;
+	
+	float Far = 1, Near = 0.125/Set_Scale;
+	
+	WDM = Far * Near / (Far + WDM * (Near - Far));
+    
+	float Merge = lerp(DM,WDM,step(DM,CutOff)); //Cutoff point
+	Merge = lerp(Merge,DM,0.250);
+	return  Merge;
 }
 
 void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 Color : SV_Target)
@@ -327,17 +305,14 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 			DM.x = Normal;
 			DM.y = NormalLocked;
 		}		
-		else if (Depth_Map == 1)
+		else
 		{
 			DM.x = NormalReverse;
 			DM.y = NormalReverseLocked;
 		}
 		
-		DM = saturate(DM);
-		
-		R = DM.x;
-		
-		G = NearestScaledMerge(DM.y);
+		R = saturate(DM.x);
+		G = saturate(NearestScaled(DM.y));
 	
 	Color = float4(R,G,B,A);
 }
@@ -365,12 +340,6 @@ float Conv(float DM_A,float DM_B,float2 texcoord)
 		
 		if (Weapon_Adjust.x > 0)
 		Convergence_A = Convergence_B;
-					
-		if (Depth_Boost)
-		{
-			DM_A += lerp(DM_A,1-DM_A,-0.0625);
-			DM_A *= 0.5;
-		}
 		
 		DM = DM_A;		
 		Convergence	= Convergence_A;
@@ -726,16 +695,6 @@ void PostProcessVS(in uint id : SV_VertexID, out float4 position : SV_Position, 
 }
 
 //*Rendering passes*//
-
-technique Cross_Cursor
-{			
-			pass Cursor
-		{
-			VertexShader = PostProcessVS;
-			PixelShader = MouseCursor;
-		}	
-}
-
 technique Depth3D_FB
 {
 		pass zbuffer
