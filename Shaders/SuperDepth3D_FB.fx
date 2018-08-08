@@ -16,7 +16,7 @@
  //* http://reshade.me/forum/shader-presentation/2128-sidebyside-3d-depth-map-based-stereoscopic-shader																				*//	
  //* ---------------------------------																																				*//
  //*																																												*//
- //* Original work was based on the shader code of a CryTech 3 Dev http://www.slideshare.net/TiagoAlexSousa/secrets-of-cryengine-3-graphics-technology								*//
+ //* Original work was based on Shader Based on forum user 04348 and be located here http://reshade.me/forum/shader-presentation/1594-3d-anaglyph-red-cyan-shader-wip#15236			*//
  //*																																												*//
  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -820,6 +820,9 @@ float Conv(float DM,float2 texcoord)
 		
 		ZP = NF_Power;
 		
+		if (ZPD >= 0.150)
+		Z = 0.150;
+		
 		if (ZPD == 0)
 		ZP = 1.0;
 		
@@ -1087,23 +1090,21 @@ float4 PS_calcLR(float2 texcoord)
 		TCR.x = TCR.x - (Interlace_Optimization * pix.y);
 	}
 	
-		float NumA = 0.975f, NumB = 1.0025f,NumC = 0.975f;
-	
 		[loop]
-		for (int i = 0; i < D(); i++) 
+		for (int i = 0; i < D() + 1; i++) 
 		{
 			if(Mode == 0)
 			{
 				//L Far
-				if ( Encode(float2(TCL.x+i*pix.x/NumA,TCL.y)).y >= (1-TCL.x)/NumB )
+				if ( Encode(float2(TCL.x+i*pix.x,TCL.y)).y >= (1-TCL.x))
 				{
-					A_DepthL = i * pix.x/NumC;
+					A_DepthL = i * pix.x;
 				}
 				#if Convergence_Extended
 				//R Near
-				if ( Encode(float2(TCR.x+i*pix.x/NumA,TCR.y)).x <= TCR.x/NumB )
+				if ( Encode(float2(TCR.x+i*pix.x,TCR.y)).x <= TCR.x)
 				{
-					B_DepthR = i * pix.x/NumC;
+					B_DepthR = i * pix.x;
 				}
 				#else
 					A_DepthR = 0;
@@ -1114,17 +1115,17 @@ float4 PS_calcLR(float2 texcoord)
 			{
 				#if Convergence_Extended
 				//L Near
-				if ( Encode(float2(TCL.x-i*pix.x/NumA,TCL.y)).y <= (1-TCL.x)/NumB )
+				if ( Encode(float2(TCL.x-i*pix.x,TCL.y)).y <= (1-TCL.x))
 				{
-					B_DepthL = i * pix.x/NumC; //Good
+					B_DepthL = i * pix.x; //Good
 				}
 				#else
 					A_DepthL = 0;
 				#endif					
 				//R
-				if ( Encode(float2(TCR.x-i*pix.x/NumA,TCR.y)).x >= TCR.x/NumB )
+				if ( Encode(float2(TCR.x-i*pix.x,TCR.y)).x >= TCR.x)
 				{
-					A_DepthR = i * pix.x/NumC; //Good
+					A_DepthR = i * pix.x; //Good
 				}
 			}
 			
@@ -1132,27 +1133,27 @@ float4 PS_calcLR(float2 texcoord)
 			{
 				#if Convergence_Extended
 				//L Near
-				if ( Encode(float2(TCL.x-i*pix.x/NumA,TCL.y)).y <= (1-TCL.x)/NumB )
+				if ( Encode(float2(TCL.x-i*pix.x,TCL.y)).y <= (1-TCL.x))
 				{
-					B_DepthL = i * pix.x/NumC; //Good
+					B_DepthL = i * pix.x; //Good
 				}
 				
 				//R Near
-				if ( Encode(float2(TCR.x+i*pix.x/NumA,TCR.y)).x <= TCR.x/NumB )
+				if ( Encode(float2(TCR.x+i*pix.x,TCR.y)).x <= TCR.x)
 				{
-					B_DepthR = i * pix.x/NumC; //Good
+					B_DepthR = i * pix.x; //Good
 				}
 				#endif
 				//L
-				if ( Encode(float2(TCL.x+i*pix.x/NumA,TCL.y)).y >= (1-TCL.x)/NumB )
+				if ( Encode(float2(TCL.x+i*pix.x,TCL.y)).y >= (1-TCL.x))
 				{
-					A_DepthL = i * pix.x/NumC; //Good
+					A_DepthL = i * pix.x; //Good
 				}
 				
 				//R
-				if ( Encode(float2(TCR.x-i*pix.x/NumA,TCR.y)).x >= TCR.x/NumB )
+				if ( Encode(float2(TCR.x-i*pix.x,TCR.y)).x >= TCR.x)
 				{
-					A_DepthR = i * pix.x/NumC; //Good
+					A_DepthR = i * pix.x; //Good
 				}
 			}
 		}
