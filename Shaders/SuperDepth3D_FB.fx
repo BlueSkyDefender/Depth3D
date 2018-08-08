@@ -28,8 +28,8 @@
 // Determines the Max Depth amount, in ReShades GUI.
 #define Depth_Max 50
 
-// Determines the Max Zero Parallax Distance, in ReShades GUI. 0.150 is 150%
-#define ZPD_Max 0.150
+// Determines the Max Zero Parallax Distance, in ReShades GUI. 0.125 is 125%
+#define ZPD_Max 0.125
 
 // Change the Cancel Depth Key
 // Determines the Cancel Depth Toggle Key useing keycode info
@@ -60,7 +60,7 @@
 
 //USER EDITABLE PREPROCESSOR FUNCTIONS END//
 
-//Divergence & Convergence//
+//Stereopsis Output//
 uniform int Mode <
 	ui_type = "combo";
 	ui_items = "Reproject L\0Reproject R\0Reproject L & R\0";
