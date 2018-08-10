@@ -126,6 +126,7 @@ IF IT HAS AN *asterisk* I AM STILL WORKING ON IT. But, you can still use the set
     RB        Metro Last Light Redux                          DM 0         7.50        WDM 11                0.025-0.125                      
     RB        Middle-earth: Shadow of Mordor                  DM 1         25.0                              0.200-0.300        
               Mirror's Edge Catalyst                          DM 1         13.750                            0.1375-0.2375       
+    RB        Monster Hunter World                            DM 1         13.750                            0.025-0.075
               Mordheim: City of the Damned                    DM 0         12.500                    Yes     0.250-0.400         
     RB        Naruto Shippuden UNS3 Full Blurst HD            DM 0         36.25                             0.200-0.300        
               NecroVision: Lost Company                       DM 0         7.50        WDM 12                0.025-0.125 
@@ -368,6 +369,14 @@ Rename the d3d9.dll or dxgi.dll to d3d11.dll
 Borderless Full Screen will not work Window mode will not Work. 
 So if you want to Play at a lower resolution, then set your windows resolution lower then run the game in full screen and set your scaling to 100%. 
 Anything Lower or Higher then 100% will not work.
+
+{Monster Hunter World}
+Main settings for this game need to be set as follows. 
+Resolution Scaling "High" to keep the depth buffer from changing on you.
+Texture Full seems to reduce blurring.
+Use  FXAA or Nothing. TAA Causes too much blurring.
+LOD Bias "High" Max Lod Level "NoLimit" Depth Buffer chages cause issues and range checkerboarding problems.
+Needs a way to disable dissable DoF.
 
 {Naruto Shippuden UNS3 Full Blurst}
 Ignore the warnings click play.

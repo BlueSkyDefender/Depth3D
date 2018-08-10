@@ -102,9 +102,9 @@ uniform int Balance <
 	ui_label = " Balance";
 	ui_tooltip = "Balance between ZPD Depth and Scene Depth and works with ZPD option above.\n"
 				"Example Zero is 50/50 equal between ZPD Depth and Scene Depth.\n"
-				"Default is Zero.";
+				"Default is One.";
 	ui_category = "Divergence & Convergence";
-> = 0;
+> = 1;
 
 uniform float Auto_Depth_Range <
 	ui_type = "drag";
@@ -177,16 +177,6 @@ uniform float Offsets <
 	ui_tooltip = "Offset is for the DM2 and DM3 Only.";
 	ui_category = "Depth Map";
 > = 0.5;
-
-#if Depth_Map_Smoothing
-uniform float DM_Smoothing <
-	ui_type = "drag";
-	ui_min = -100.0; ui_max = 0.0;
-	ui_label = " Depth Map Smoothing";
-	ui_tooltip = "Depth Map Smoothing is used to clamp and smooth the transition from Near 0 to Far 1.";
-	ui_category = "Depth Map";
-> = 0.0;
-#endif
 
 uniform bool Depth_Map_View <
 	ui_label = " Depth Map View";
@@ -491,7 +481,7 @@ float Depth(in float2 texcoord : TEXCOORD0)
 			DM = OffsetReverse;
 		}		
 		
-	return saturate(DM);	
+	return DM;	
 }
 
 float2 WeaponDepth(in float2 texcoord : TEXCOORD0)
@@ -634,7 +624,7 @@ float2 WeaponDepth(in float2 texcoord : TEXCOORD0)
 			WA_XYZ.z = Weapon_Adjust.z; //Cutoff Point
 		}
 		
-	return float2(saturate(zBufferWH.r),WA_XYZ.z);	
+	return float2(zBufferWH.r,WA_XYZ.z);	
 }
 
 void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 Color : SV_Target)
@@ -663,7 +653,7 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 		R = DM;
 		G = Depth(texcoord); //AverageLuminance
 				
-	Color = float4(R,G,B,A);
+	Color = saturate(float4(R,G,B,A));
 }
 
 #if AO_TOGGLE
@@ -858,7 +848,7 @@ float Conv(float D,float2 texcoord)
 		}
 				
 		#if Depth_Map_Smoothing
-			D *= smoothstep(DM_Smoothing,1,D);
+			D *= smoothstep(0,1,D);
 		#endif
 		
 		if (Auto_Depth_Range > 0)
@@ -1001,7 +991,7 @@ DBD = ( DBD - 1.0f ) / ( -187.5f - 1.0f );
 /////////////////////////////////////////L/R//////////////////////////////////////////////////////////////////////
 float2  Encode(in float2 texcoord : TEXCOORD0) //zBuffer Color Channel Encode
 {
-	float M = 0,Z = ZPD;
+	float M = 1,Z = ZPD;
 	
 	if (Disocclusion_Selection >= 1)
 		M = 2;

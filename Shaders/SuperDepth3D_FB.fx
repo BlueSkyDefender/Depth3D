@@ -168,16 +168,6 @@ uniform float Offsets <
 	ui_category = "Depth Map";
 > = 0.5;
 
-#if Depth_Map_Smoothing
-uniform float DM_Smoothing <
-	ui_type = "drag";
-	ui_min = -100.0; ui_max = 0.0;
-	ui_label = " Depth Map Smoothing";
-	ui_tooltip = "Depth Map Smoothing is used to clamp and smooth the transition from Near 0 to Far 1.";
-	ui_category = "Depth Map";
-> = 0.0;
-#endif
-
 uniform bool Depth_Map_View <
 	ui_label = " Depth Map View";
 	ui_tooltip = "Display the Depth Map.";
@@ -817,7 +807,7 @@ float Conv(float DM,float2 texcoord)
 		#endif		
 				
 		#if Depth_Map_Smoothing
-			DM *= smoothstep(DM_Smoothing,1,DM);
+			DM *= smoothstep(0,1,DM);
 		#endif
 		
 		if (Auto_Depth_Range > 0)
