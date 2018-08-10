@@ -60,17 +60,6 @@
 
 //USER EDITABLE PREPROCESSOR FUNCTIONS END//
 
-//Stereopsis Output//
-uniform int Mode <
-	ui_type = "combo";
-	ui_items = "Reproject L\0Reproject R\0Reproject L & R\0";
-	ui_label = "·Reprojection Mode·";
-	ui_tooltip = "Reprojection Mode changes the view output for this shader.\n"
-			     "Reproject L or R uses a lot less resoruses than L & R.\n"
-			     "Default is Reprojection of Left & Right Eyes.";
-	ui_category = "Stereopsis Output";
-> = 2;
-
 //Divergence & Convergence//
 uniform float Divergence <
 	ui_type = "drag";
@@ -260,13 +249,11 @@ uniform float Anaglyph_Desaturation <
 	ui_category = "Stereoscopic Options";
 > = 1.0;
 
-uniform int Scaling_Support <
-	ui_type = "combo";
-	ui_items = " 2160p\0 Native\0 1080p A\0 1080p B\0 1050p A\0 1050p B\0 720p A\0 720p B\0";
+uniform bool Scaling_Support <
 	ui_label = " Scaling Support";
 	ui_tooltip = "Dynamic Super Resolution , Virtual Super Resolution, downscaling, or Upscaling support for Line Interlaced, Column Interlaced, & Checkerboard 3D displays.";
 	ui_category = "Stereoscopic Options";
-> = 1;
+> = false;
 
 uniform float Perspective <
 	ui_type = "drag";
@@ -446,21 +433,6 @@ float LumWeapon(in float2 texcoord : TEXCOORD0)
 	}
 	
 /////////////////////////////////////////////////////////////////////////////////Depth Map Information/////////////////////////////////////////////////////////////////////////////////
-
-float D()
-{
-	float D,D_Ammount = Divergence + 0.5;
-	if(Mode == 2)
-	{
-		D = D_Ammount;
-	}
-	else
-	{
-		D = D_Ammount * 2.0;
-	}
-
-	return D;
-}
 
 float Depth(in float2 texcoord : TEXCOORD0)
 {	
@@ -804,7 +776,7 @@ float Conv(float DM,float2 texcoord)
 {
 	float Z = ZPD, ZP, NF_Power;
 			
-		float Divergence_Locked = D()*0.00105;
+		float Divergence_Locked = Divergence*0.00105;
 					
 		if(Balance == 0)
 			NF_Power = 0.5;
@@ -866,7 +838,7 @@ float Conv(float DM,float2 texcoord)
 
 void  Disocclusion(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 color : SV_Target0)
 {
-float X, Y, Z, W = 1, DM, DMA, Out, A, B, DP =  D(), Disocclusion_PowerA, Disocclusion_PowerB , DBD = tex2Dlod(SamplerDMFB,float4(texcoord,0,0)).x , AMoffset = 0.008, BMoffset = 0.00285714, CMoffset = 0.09090909;
+float X, Y, Z, W = 1, DM, DMA, Out, A, B, DP =  Divergence, Disocclusion_PowerA, Disocclusion_PowerB , DBD = tex2Dlod(SamplerDMFB,float4(texcoord,0,0)).x , AMoffset = 0.008, BMoffset = 0.00285714, CMoffset = 0.09090909;
 float2 dirA, dirB;
 
 #if AO_TOGGLE
@@ -988,7 +960,7 @@ DBD = ( DBD - 1.0f ) / ( -187.5f - 1.0f );
 /////////////////////////////////////////L/R//////////////////////////////////////////////////////////////////////
 float2  Encode(in float2 texcoord : TEXCOORD0) //zBuffer Color Channel Encode
 {
-	float DM = tex2Dlod(SamplerDisFB,float4(texcoord.x, texcoord.y,0,0)).x,DepthR = DM, DepthL = DM, S, MS = D()*pix.x,Adjust_A = 0.11111112;
+	float DM = tex2Dlod(SamplerDisFB,float4(texcoord.x, texcoord.y,0,0)).x,DepthR = DM, DepthL = DM, S, MS = Divergence*pix.x,Adjust_A = 0.11111112;
 	
 	DepthL = Conv(DepthL,texcoord);
 	DepthR = Conv(DepthR,texcoord);
@@ -1005,16 +977,8 @@ float4 PS_calcLR(float2 texcoord)
 	float4 color, Left, Right, A_Left, A_Right, B_Left, B_Right;
 
 	#if Convergence_Extended
-	if(Mode == 2)
-	{
 		Znum.x = 1;
 		Znum.y = 1;
-	}
-	else
-	{
-		Znum.x = 0;
-		Znum.y = 0;
-	}
 	#else
 	if(ZPD_GUIDE == 1)
 	{
@@ -1030,12 +994,7 @@ float4 PS_calcLR(float2 texcoord)
 	float A_DepthR = Znum.y, A_DepthL = Znum.y, B_DepthR = Znum.x, B_DepthL = Znum.x;
 	
 	//P is Perspective Adjustment,PD is Perspective Aliment for mode 0 & 1.
-	float P = Perspective * pix.x, PD = (D() * 0.5) * pix.x;
-
-	if (Mode == 0)
-		texcoord.x = texcoord.x	- PD;	
-	else if (Mode == 1)
-		texcoord.x = texcoord.x	+ PD;	
+	float P = Perspective * pix.x;
 	
 	if(Eye_Swap)
 	{
@@ -1087,104 +1046,46 @@ float4 PS_calcLR(float2 texcoord)
 	}
 	
 		[loop]
-		for (int i = 0; i < D() + 1.0; i++) 
-		{
-			if(Mode == 0)
-			{
-				//L Far
-				if ( Encode(float2(TCL.x+i*pix.x,TCL.y)).y >= (1-TCL.x))
-				{
-					A_DepthL = i * pix.x;
-				}
-				#if Convergence_Extended
-				//R Near
-				if ( Encode(float2(TCR.x+i*pix.x,TCR.y)).x <= TCR.x)
-				{
-					B_DepthR = i * pix.x;
-				}
-				#else
-					A_DepthR = 0;
-				#endif	
-			}	
+		for (int i = 0; i < Divergence + 0.5; i++) 
+		{	
+			#if Convergence_Extended
+			//L Near
+			[flatten] if( Encode(float2(TCL.x-i*pix.x,TCL.y)).y <= (1-TCL.x))
+						B_DepthL = i*pix.x; //Good
 			
-			if(Mode == 1)
-			{
-				#if Convergence_Extended
-				//L Near
-				if ( Encode(float2(TCL.x-i*pix.x,TCL.y)).y <= (1-TCL.x))
-				{
-					B_DepthL = i * pix.x; //Good
-				}
-				#else
-					A_DepthL = 0;
-				#endif					
-				//R
-				if ( Encode(float2(TCR.x-i*pix.x,TCR.y)).x >= TCR.x)
-				{
-					A_DepthR = i * pix.x; //Good
-				}
-			}
+			//R Near
+			[flatten] if( Encode(float2(TCR.x+i*pix.x,TCR.y)).x <= TCR.x)
+						B_DepthR = i*pix.x; //Good
+			#endif
+			//L
+			[flatten] if( Encode(float2(TCL.x+i*pix.x,TCL.y)).y >= (1-TCL.x))
+						A_DepthL = i*pix.x; //Good
 			
-			if(Mode == 2)
-			{
-				#if Convergence_Extended
-				//L Near
-				if ( Encode(float2(TCL.x-i*pix.x,TCL.y)).y <= (1-TCL.x))
-				{
-					B_DepthL = i * pix.x; //Good
-				}
-				
-				//R Near
-				if ( Encode(float2(TCR.x+i*pix.x,TCR.y)).x <= TCR.x)
-				{
-					B_DepthR = i * pix.x; //Good
-				}
-				#endif
-				//L
-				if ( Encode(float2(TCL.x+i*pix.x,TCL.y)).y >= (1-TCL.x))
-				{
-					A_DepthL = i * pix.x; //Good
-				}
-				
-				//R
-				if ( Encode(float2(TCR.x-i*pix.x,TCR.y)).x >= TCR.x)
-				{
-					A_DepthR = i * pix.x; //Good
-				}
-			}
+			//R
+			[flatten] if( Encode(float2(TCR.x-i*pix.x,TCR.y)).x >= TCR.x)
+						A_DepthR = i*pix.x; //Good
 		}
 					
+	#if Convergence_Extended
 	float A_ReprojectL = A_DepthL;
 	float A_ReprojectR = A_DepthR;
 	float B_ReprojectL = B_DepthL;
 	float B_ReprojectR = B_DepthR;
-
-	#if Convergence_Extended
+	
 	A_Left = tex2Dlod(BackBufferBORDER, float4(TCL.x + A_ReprojectL, TCL.y,0,0));
 	A_Right = tex2Dlod(BackBufferBORDER, float4(TCR.x - A_ReprojectR, TCR.y,0,0));
 	B_Left = tex2Dlod(BackBufferBORDER, float4(TCL.x - B_ReprojectL, TCL.y,0,0));
 	B_Right = tex2Dlod(BackBufferBORDER, float4(TCR.x + B_ReprojectR, TCR.y,0,0));
 	#else
+	float A_ReprojectL = A_DepthL;
+	float A_ReprojectR = A_DepthR;
 	A_Left = tex2Dlod(BackBufferBORDER, float4(TCL.x + A_ReprojectL, TCL.y,0,0));
 	A_Right = tex2Dlod(BackBufferBORDER, float4(TCR.x - A_ReprojectR, TCR.y,0,0));
 	#endif
 	
 	#if Convergence_Extended
-	if(Mode == 0)
-	{
-		Left = A_Left;
-		Right = B_Right;
-	}	
-	else if(Mode == 1)
-	{
-		Left = B_Left;
-		Right = A_Right;
-	}		
-	else if(Mode == 2)
-	{
 		Left = B_Left + A_Left;
 		Right = B_Right + A_Right;
-	}
 	#else
 		Left = A_Left;
 		Right = A_Right;
@@ -1200,39 +1101,16 @@ float4 PS_calcLR(float2 texcoord)
 		
 	if(!Depth_Map_View)
 	{	
-	float2 gridxy;
+	float2 gridxy, BUFFER_WH = float2(BUFFER_WIDTH,BUFFER_HEIGHT);
 
-	if(Scaling_Support == 0)
+	if(Scaling_Support)
 	{
-		gridxy = floor(float2(TexCoords.x*3840.0,TexCoords.y*2160.0));
+		BUFFER_WH += 1.0f;
+		gridxy = floor(float2(TexCoords.x*BUFFER_WH.x,TexCoords.y*BUFFER_WH.y));
 	}	
-	else if(Scaling_Support == 1)
-	{
-		gridxy = floor(float2(TexCoords.x*BUFFER_WIDTH,TexCoords.y*BUFFER_HEIGHT));
-	}
-	else if(Scaling_Support == 2)
-	{
-		gridxy = floor(float2(TexCoords.x*1920.0,TexCoords.y*1080.0));
-	}
-	else if(Scaling_Support == 3)
-	{
-		gridxy = floor(float2(TexCoords.x*1921.0,TexCoords.y*1081.0));
-	}
-	else if(Scaling_Support == 4)
-	{
-		gridxy = floor(float2(TexCoords.x*1680.0,TexCoords.y*1050.0));
-	}
-	else if(Scaling_Support == 5)
-	{
-		gridxy = floor(float2(TexCoords.x*1681.0,TexCoords.y*1051.0));
-	}
-	else if(Scaling_Support == 6)
-	{
-		gridxy = floor(float2(TexCoords.x*1280.0,TexCoords.y*720.0));
-	}
-	else if(Scaling_Support == 7)
-	{
-		gridxy = floor(float2(TexCoords.x*1281.0,TexCoords.y*721.0));
+	else
+	{ 
+		gridxy = floor(float2(TexCoords.x*BUFFER_WH.x,TexCoords.y*BUFFER_WH.y));
 	}
 			
 		if(Stereoscopic_Mode == 0)

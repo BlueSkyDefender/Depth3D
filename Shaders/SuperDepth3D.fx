@@ -51,7 +51,7 @@
 #define Depth_Map_Smoothing 0 //Zero is Off, One is On. 
 
 //Depth Map Boosting helps increase depth at the cost of accuracy.
-#define Depth_Boost 1 //Zero is Off | One is low | Two is Med | Three is High 
+#define Depth_Boost 1 //Zero is Off, One is On. 
 
 //Use Depth Tool to adjust the lower preprocessor definitions below.
 //Horizontal & Vertical Depth Buffer Resize for non conforming BackBuffer.
@@ -259,13 +259,11 @@ uniform float Anaglyph_Desaturation <
 	ui_category = "Stereoscopic Options";
 > = 1.0;
 
-uniform int Scaling_Support <
-	ui_type = "combo";
-	ui_items = " 2160p\0 Native\0 1080p A\0 1080p B\0 1050p A\0 1050p B\0 720p A\0 720p B\0";
+uniform bool Scaling_Support <
 	ui_label = " Scaling Support";
 	ui_tooltip = "Dynamic Super Resolution , Virtual Super Resolution, downscaling, or Upscaling support for Line Interlaced, Column Interlaced, & Checkerboard 3D displays.";
 	ui_category = "Stereoscopic Options";
-> = 1;
+> = false;
 
 uniform float Perspective <
 	ui_type = "drag";
@@ -1025,7 +1023,7 @@ float4 PS_calcLR(float2 texcoord)
 	float samplesB[13] = {0.5,0.546875,0.578125,0.625,0.659375,0.703125,0.75,0.796875,0.828125,0.875,0.921875,0.953125,1.0};
 
 	//MS is Max Separation P is Perspective Adjustment
-	float MS = (Divergence - 1) * pix.x, P = Perspective * pix.x;
+	float MS = Divergence * pix.x, P = Perspective * pix.x;
 					
 	if(Eye_Swap)
 	{
@@ -1140,39 +1138,16 @@ float4 PS_calcLR(float2 texcoord)
 		
 	if(!Depth_Map_View)
 	{	
-	float2 gridxy;
+	float2 gridxy, BUFFER_WH = float2(BUFFER_WIDTH,BUFFER_HEIGHT);
 
-	if(Scaling_Support == 0)
+	if(Scaling_Support)
 	{
-		gridxy = floor(float2(TexCoords.x*3840.0,TexCoords.y*2160.0));
+		BUFFER_WH += 1.0f;
+		gridxy = floor(float2(TexCoords.x*BUFFER_WH.x,TexCoords.y*BUFFER_WH.y));
 	}	
-	else if(Scaling_Support == 1)
-	{
-		gridxy = floor(float2(TexCoords.x*BUFFER_WIDTH,TexCoords.y*BUFFER_HEIGHT));
-	}
-	else if(Scaling_Support == 2)
-	{
-		gridxy = floor(float2(TexCoords.x*1920.0,TexCoords.y*1080.0));
-	}
-	else if(Scaling_Support == 3)
-	{
-		gridxy = floor(float2(TexCoords.x*1921.0,TexCoords.y*1081.0));
-	}
-	else if(Scaling_Support == 4)
-	{
-		gridxy = floor(float2(TexCoords.x*1680.0,TexCoords.y*1050.0));
-	}
-	else if(Scaling_Support == 5)
-	{
-		gridxy = floor(float2(TexCoords.x*1681.0,TexCoords.y*1051.0));
-	}
-	else if(Scaling_Support == 6)
-	{
-		gridxy = floor(float2(TexCoords.x*1280.0,TexCoords.y*720.0));
-	}
-	else if(Scaling_Support == 7)
-	{
-		gridxy = floor(float2(TexCoords.x*1281.0,TexCoords.y*721.0));
+	else
+	{ 
+		gridxy = floor(float2(TexCoords.x*BUFFER_WH.x,TexCoords.y*BUFFER_WH.y));
 	}
 			
 		if(Stereoscopic_Mode == 0)
