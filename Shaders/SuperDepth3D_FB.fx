@@ -41,9 +41,6 @@
 //There will be a performance loss when enabled.
 #define AO_TOGGLE 0 //Default 0 is Off. One is On.
 
-//Depth Map Smoothing uses a smoothstep to create a smooth transition between Near 0 and Far 1. Usefull in some games such as Warhammer Vermintide 2.
-#define Depth_Map_Smoothing 0 //Zero is Off, One is On. 
-
 //Depth Map Boosting helps increase depth at the cost of accuracy.
 #define Depth_Boost 1 //Zero is Off, One is On. 
  
@@ -349,12 +346,11 @@ sampler SamplerDMFB
 		MipFilter = LINEAR;
 	};
 	
-texture texDisFB  { Width = BUFFER_WIDTH/Depth_Map_Division; Height = BUFFER_HEIGHT/Depth_Map_Division; Format = RGBA32F; MipLevels = 2;}; 
+texture texDisFB  { Width = BUFFER_WIDTH/Depth_Map_Division; Height = BUFFER_HEIGHT/Depth_Map_Division; Format = RGBA32F; MipLevels = 1;}; 
 
 sampler SamplerDisFB
 	{
 		Texture = texDisFB;
-		MipLODBias = 2.0f;
 		MinFilter = LINEAR;
 		MagFilter = LINEAR;
 		MipFilter = LINEAR;
@@ -805,10 +801,6 @@ float Conv(float DM,float2 texcoord)
 		#else
 				Convergence = 1 - Z / DM;
 		#endif		
-				
-		#if Depth_Map_Smoothing
-			DM *= smoothstep(0,1,DM);
-		#endif
 		
 		if (Auto_Depth_Range > 0)
 		{
@@ -950,7 +942,8 @@ DBD = ( DBD - 1.0f ) / ( -187.5f - 1.0f );
 /////////////////////////////////////////L/R//////////////////////////////////////////////////////////////////////
 float2  Encode(in float2 texcoord : TEXCOORD0) //zBuffer Color Channel Encode
 {
-	float DM = tex2Dlod(SamplerDisFB,float4(texcoord.x, texcoord.y,0,0)).x,DepthR = DM, DepthL = DM, S, MS = Divergence*pix.x,Adjust_A = 0.11111112;
+	float M = 1, PD = (Divergence * 0.05) * pix.x;
+	float DepthR = tex2Dlod(SamplerDisFB,float4(texcoord.x + PD, texcoord.y,0,M)).x, DepthL = tex2Dlod(SamplerDisFB,float4(texcoord.x - PD, texcoord.y,0,M)).x, S, MS = Divergence*pix.x;
 	
 	DepthL = Conv(DepthL,texcoord);
 	DepthR = Conv(DepthR,texcoord);
@@ -983,7 +976,7 @@ float4 PS_calcLR(float2 texcoord)
 	//A is Far, B is Near.
 	float A_DepthR = Znum.y, A_DepthL = Znum.y, B_DepthR = Znum.x, B_DepthL = Znum.x;
 	
-	//P is Perspective Adjustment,PD is Perspective Aliment for mode 0 & 1.
+	//P is Perspective Adjustment.
 	float P = Perspective * pix.x;
 	
 	if(Eye_Swap)
@@ -1036,24 +1029,24 @@ float4 PS_calcLR(float2 texcoord)
 	}
 	
 		[loop]
-		for (int i = 0; i < Divergence + 0.5; i++) 
+		for (int i = 0; i <= Divergence; i++) 
 		{	
 			#if Convergence_Extended
 			//L Near
-			[flatten] if( Encode(float2(TCL.x-i*pix.x,TCL.y)).y <= (1-TCL.x))
-						B_DepthL = i*pix.x; //Good
+			[flatten] if(Encode(float2(TCL.x-i*pix.x,TCL.y)).y <= (1-TCL.x))
+						B_DepthL = i*pix.x;
 			
 			//R Near
-			[flatten] if( Encode(float2(TCR.x+i*pix.x,TCR.y)).x <= TCR.x)
-						B_DepthR = i*pix.x; //Good
+			[flatten] if(Encode(float2(TCR.x+i*pix.x,TCR.y)).x <= TCR.x )
+						B_DepthR = i*pix.x;
 			#endif
 			//L
-			[flatten] if( Encode(float2(TCL.x+i*pix.x,TCL.y)).y >= (1-TCL.x))
-						A_DepthL = i*pix.x; //Good
+			[flatten] if(Encode(float2(TCL.x+i*pix.x,TCL.y)).y >= (1-TCL.x))
+						A_DepthL = i*pix.x;
 			
 			//R
-			[flatten] if( Encode(float2(TCR.x-i*pix.x,TCR.y)).x >= TCR.x)
-						A_DepthR = i*pix.x; //Good
+			[flatten] if(Encode(float2(TCR.x-i*pix.x,TCR.y)).x >= TCR.x )
+						A_DepthR = i*pix.x;
 		}
 					
 	#if Convergence_Extended

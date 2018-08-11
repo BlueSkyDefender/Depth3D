@@ -47,9 +47,6 @@
 //There will be a performance loss when enabled.
 #define AO_TOGGLE 0 //Default 0 is Off. One is On.
 
-//Depth Map Smoothing uses a smoothstep to create a smooth transition between Near 0 and Far 1. Usefull in some games such as Warhammer Vermintide 2.
-#define Depth_Map_Smoothing 0 //Zero is Off, One is On. 
-
 //Depth Map Boosting helps increase depth at the cost of accuracy.
 #define Depth_Boost 1 //Zero is Off, One is On. 
 
@@ -355,7 +352,7 @@ sampler SamplerDM
 		Texture = texDM;
 	};
 	
-texture texDis  { Width = BUFFER_WIDTH/Depth_Map_Division; Height = BUFFER_HEIGHT/Depth_Map_Division; Format = RGBA32F;MipLevels = 2;}; 
+texture texDis  { Width = BUFFER_WIDTH/Depth_Map_Division; Height = BUFFER_HEIGHT/Depth_Map_Division; Format = RGBA32F; MipLevels = 1;}; 
 
 sampler SamplerDis
 	{
@@ -846,10 +843,6 @@ float Conv(float D,float2 texcoord)
 		{	
 			Convergence = 1 - Z / D;
 		}
-				
-		#if Depth_Map_Smoothing
-			D *= smoothstep(0,1,D);
-		#endif
 		
 		if (Auto_Depth_Range > 0)
 		{
@@ -991,11 +984,7 @@ DBD = ( DBD - 1.0f ) / ( -187.5f - 1.0f );
 /////////////////////////////////////////L/R//////////////////////////////////////////////////////////////////////
 float2  Encode(in float2 texcoord : TEXCOORD0) //zBuffer Color Channel Encode
 {
-	float M = 1,Z = ZPD;
-	
-	if (Disocclusion_Selection >= 1)
-		M = 2;
-
+	float M = 1;
 	float DM = tex2Dlod(SamplerDis,float4(texcoord.x, texcoord.y,0,M)).x,DepthR = DM, DepthL = DM;
 	
 	// X Left & Y Right	
