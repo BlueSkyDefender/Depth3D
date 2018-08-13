@@ -72,13 +72,13 @@ Inner Shader Setting:
     RB        BloodCM                                      DM 0         15.0                              0.100-0.300                                     
     RB        BorderLands 2                                DM 0         15.0       *WDM 3                 0.025-0.075                          
     RB        Call of Duty: Advance Warfare                DM 1         15.0       *WDM 4                 0.050-0.075                                 
-    RB        Call of Duty: Black Ops                      DM 0         10.0        WDM 5                 0.050-0.075                            
+    RB        Call of Duty: Black Ops                      DM 0         10.0       *WDM 5                 0.050-0.075                            
     RB        Call of Duty: Black Ops 2                    DM 1         15.0       *WDM 4                 0.050-0.075    
     RB        Call of Duty: Ghost                          DM 1         15.0       *WDM 4                 0.050-0.075    
     RB        Call of Duty: Infinite Warfare               DM 1         15.0       *WDM 4                 0.050-0.075  
               Casltevania: Lord of Shadows - UE            DM 0         7.5                               0.150-0.250                                         
-              Castle of Illusion Micky Mouse               DM 0         12.5                              0.375-0.500
-              Cryostasis                                   DM 0         10.0        WDM 6                 0.025-0.075                         
+              Castle of Illusion Micky Mouse               DM 0         12.5                              ???????????
+              Cryostasis                                   DM 0         13.75      *WDM 6                 0.025-0.050                         
               DOOM 2016                                    DM 0         20.0       *WDM 1                 0.050-0.100       
               DarkSiders Warmastred Edition                DM 0         25.0                              0.100-0.150  
               Dead Effect                                  DM ?         6.25                              ?      
@@ -97,7 +97,7 @@ Inner Shader Setting:
     RB        Emily Wants To Play                          DM 1         25.0                              0.150-0.200                                      
               Euro Trucks Sim 2                            DM 0         8.750       WDM 25         ?      0.150-0.200 
               Everybody's Gone to the Rapture              DM 0         1.50                              0.375-0.625                      
-              Fallout 4                                    DM 0         6.875       WDM 8                 0.075-0.200          
+              Fallout 4                                    DM 0         6.875      *WDM 8                 0.075-0.200          
     RB        FarCry 3                                     DM 0         7.50                              0.100-0.200
               Firewatch                                    DM 0         5.0                       Yes     0.150-0.250
     RB        GTA V                                        DM 1         12.5                              0.150-0.175                                      
@@ -174,9 +174,9 @@ Inner Shader Setting:
               Warhammer: Vermintide 2                      DM 0         8.75                              0.010-0.100         
     RB        Watch Dogs 2                                 DM 1         7.5                               0.050-0.100        
               Witcher 3                                    DM 1         7.5                               0.050-0.100            
-              Wolfenstine                                  DM 0         7.5         WDM 30                0.025-0.100
-    RB        Wolfenstine: The New Order                   DM 0         25.00       WDM 7                 0.050-0.075
-    RB        Wolfenstine: The Old Blood                   DM 0         25.00       WDM 7                 0.050-0.075
+              Wolfenstine                                  DM 0         7.5        *WDM 2                 0.025-0.100
+    RB        Wolfenstine: The New Order                   DM 0         25.00      *WDM 7                 0.025-0.075
+    RB        Wolfenstine: The Old Blood                   DM 0         25.00      *WDM 7                 0.025-0.075
               Ziggurat                                     DM 0         7.5                               0.075-0.175
               Zombie Army Trilogy                          DM 0         10.0                              0.050-0.075
 
@@ -588,6 +588,8 @@ Note if you want to 4k It's the same process Start the game at 1600x1200 then sw
 Also note you can't switch back. So say you Start the game at 1600x1200 then switch to 4k then back too 1600x1200 it will not work. 
 If you change it one last time to 4k It will not work. You must restart your game for eatch change of resolution.
 You can always enable SMAA in reshade for AA or play at 4k with no AA.
+
+Update 2018: Running it in Windows 10 Disable Scaling to avoid problems.
 
 In order to completely disable DOF:
 

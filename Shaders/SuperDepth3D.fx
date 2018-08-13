@@ -206,7 +206,7 @@ uniform int Weapon_Scale <
 
 uniform float3 Weapon_Adjust <
 	ui_type = "drag";
-	ui_min = 0.0; ui_max = 10.0;
+	ui_min = 0.0; ui_max = 12.5;
 	ui_label = " Weapon Hand Adjust";
 	ui_tooltip = "Adjust Weapon depth map for your games.\n"
 				 "X, The CutOff point used to set a diffrent depth scale for first person view.\n"
@@ -478,7 +478,7 @@ float Depth(in float2 texcoord : TEXCOORD0)
 		
 	return DM;	
 }
-#define Num  6 //Adjust me everytime you add a weapon hand profile.
+#define Num  10 //Adjust me everytime you add a weapon hand profile.
 float3 WeaponDepth(in float2 texcoord : TEXCOORD0)
 {
 		float2 texXY = texcoord + Image_Position_Adjust * pix;		
@@ -520,67 +520,67 @@ float3 WeaponDepth(in float2 texcoord : TEXCOORD0)
 		if (WP == 1)                                            // WA_XYZW.x|WA_XYZW.y|WA_XYZW.z |WA_XYZW.w
 			WA_XYZW = float4(CutOff,Power,Adjust,Weapon_Scale); // X Cutoff | Y Power | Z Adjust | W Scale		
 		else if(WP == 2) //WP 0
-			WA_XYZW = float4(4.0,10.0,2.925,0);       //Unreal Gold with v227		
+			WA_XYZW = float4(4.0,10.0,2.925,0);      //Unreal Gold with v227		
 		else if(WP == 3) //WP 1
-			WA_XYZW = float4(5.750,0.625,0.350,1);    //DOOM 2016
+			WA_XYZW = float4(5.750,0.625,0.350,1);   //DOOM 2016
 		else if(WP == 4) //WP 2
-			WA_XYZW = float4(0.0,0.0,0.0,0);          //Open Profile
+			WA_XYZW = float4(3.2625,0.6275,0.0,0);   //Wolfenstine
 		else if(WP == 5) //WP 3
-			WA_XYZW = float4(5.0,6.875,1.7485,0);     //BorderLands 2		
+			WA_XYZW = float4(5.0,6.875,1.7485,0);    //BorderLands 2		
 		else if(WP == 6) //WP 4
-			WA_XYZW = float4(3.9,10.0,8.4786,2);      //CoD:AW		
+			WA_XYZW = float4(3.9,10.0,8.4786,2);     //CoD:AW		
 		else if(WP == 7) //WP 5
-			WA_XYZW = float4(2.53945,0.0125,0.300,0); //CoD: Black Ops
+			WA_XYZW = float4(3.9,12.5,10.603,2);     //CoD: Black Ops
 		else if(WP == 8) //WP 6
-			WA_XYZW = float4(5.0,15.625,0.455,0);     //CoD: Black Ops II??	
+			WA_XYZW = float4(2.975,0.7875,0.0,0);    //Cryostasis	
 		else if(WP == 9) //WP 7
-			WA_XYZW = float4(5.500,1.550,0.550,0);    //Wolfenstine: The New Order
+			WA_XYZW = float4(4.750,0.9375,0.52625,0);//Wolfenstine: The New Order
 		else if(WP == 10)//WP 8
-			WA_XYZW = float4(2.5275,0.0875,0.255,0);  //Fallout 4
+			WA_XYZW = float4(1.686,2.5,2.082,2);     //Fallout 4
 		else if(WP == 11)//WP 9
-			WA_XYZW = float4(19.700,-2.600,0.285,0);  //Prey 2017 High Settings and <
+			WA_XYZW = float4(19.700,-2.600,0.285,0); //Prey 2017 High Settings and <
 		else if(WP == 12)//WP 10
-			WA_XYZW = float4(28.450,-2.600,0.285,0);  //Prey 2017 Very High	
+			WA_XYZW = float4(28.450,-2.600,0.285,0); //Prey 2017 Very High	
 		else if(WP == 13)//WP 11
-			WA_XYZW = float4(2.61375,1.0,0.260,0);    //Metro Redux Games	
+			WA_XYZW = float4(2.61375,1.0,0.260,0);   //Metro Redux Games	
 		else if(WP == 14)//WP 12
-			WA_XYZW = float4(5.1375,7.5,0.485,0);     //NecroVisioN: Lost Company
+			WA_XYZW = float4(5.1375,7.5,0.485,0);    //NecroVisioN: Lost Company
 		else if(WP == 15)//WP 13
-			WA_XYZW = float4(3.925,17.5,0.400,0);     //Kingpin Life of Crime
+			WA_XYZW = float4(3.925,17.5,0.400,0);    //Kingpin Life of Crime
 		else if(WP == 16)//WP 14
-			WA_XYZW = float4(5.45,1.0,0.550,0);       //Rage64		
+			WA_XYZW = float4(5.45,1.0,0.550,0);      //Rage64		
 		else if(WP == 17)//WP 15
-			WA_XYZW = float4(2.685,1.0,0.375,0);      //Quake DarkPlaces	
+			WA_XYZW = float4(2.685,1.0,0.375,0);     //Quake DarkPlaces	
 		else if(WP == 18)//WP 16
-			WA_XYZW = float4(3.925,16.25,0.400,0);    //Quake 2 XP
+			WA_XYZW = float4(3.925,16.25,0.400,0);   //Quake 2 XP
 		else if(WP == 19)//WP 17
-			WA_XYZW = float4(5.000000,7.0,0.500,0);   //Quake 4
+			WA_XYZW = float4(5.000000,7.0,0.500,0);  //Quake 4
 		else if(WP == 20)//WP 18
-			WA_XYZW = float4(3.6875,7.250,0.400,0);   //RTCW
+			WA_XYZW = float4(3.6875,7.250,0.400,0);  //RTCW
 		else if(WP == 21)//WP 19
-			WA_XYZW = float4(2.55925,0.75,0.255,0);   //S.T.A.L.K.E.R: Games
+			WA_XYZW = float4(2.55925,0.75,0.255,0);  //S.T.A.L.K.E.R: Games
 		else if(WP == 22)//WP 20
-			WA_XYZW = float4(16.250,87.50,0.825,0);   //SOMA
+			WA_XYZW = float4(16.250,87.50,0.825,0);  //SOMA
 		else if(WP == 23)//WP 21
-			WA_XYZW = float4(2.775,1.125,0.278,0);    //Skyrim: SE	
+			WA_XYZW = float4(2.775,1.125,0.278,0);   //Skyrim: SE	
 		else if(WP == 24)//WP 22
-			WA_XYZW = float4(2.553125,1.0,0.500,0);   //Turok: DH 2017
+			WA_XYZW = float4(2.553125,1.0,0.500,0);  //Turok: DH 2017
 		else if(WP == 25)//WP 23
-			WA_XYZW = float4(140.0,500.0,5.0,0);      //Turok2: SoE 2017
+			WA_XYZW = float4(140.0,500.0,5.0,0);     //Turok2: SoE 2017
 		else if(WP == 26)//WP 24
-			WA_XYZW = float4(2.000,-40.0,2.0,0);      //Dying Light
+			WA_XYZW = float4(2.000,-40.0,2.0,0);     //Dying Light
 		else if(WP == 27)//WP 25
-			WA_XYZW = float4(2.800,1.0,0.280,0);      //EuroTruckSim2
+			WA_XYZW = float4(2.800,1.0,0.280,0);     //EuroTruckSim2
 		else if(WP == 28)//WP 26
-			WA_XYZW = float4(5.000,2.875,0.500,0);    //Prey - 2006
+			WA_XYZW = float4(5.000,2.875,0.500,0);   //Prey - 2006
 		else if(WP == 29)//WP 27
 			WA_XYZW = float4(2.77575,0.3625,0.3625,0);//TitanFall 2
 		else if(WP == 30)//WP 28
 			WA_XYZW = float4(2.52475,0.05625,0.260,0);//Bioshock Remastred
 		else if(WP == 31)//WP 29
-			WA_XYZW = float4(2.8,1.5625,0.350,0);     //Serious Sam Revolition
+			WA_XYZW = float4(2.8,1.5625,0.350,0);    //Serious Sam Revolition
 		else if(WP == 32)//WP 30
-			WA_XYZW = float4(5.050,2.750,0.4913,0);   //Wolfenstine
+			WA_XYZW = float4(5.050,2.750,0.4913,0);  //Wolfenstine
 		//else if(WP == 33)//WP 31
 			//WA_XYZW = float4(0.0,0.0,0.0,0);        //Game
 		//else if(WP == 34)//WP 32
