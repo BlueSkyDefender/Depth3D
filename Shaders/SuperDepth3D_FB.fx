@@ -37,9 +37,6 @@
 //3D AO Toggle enable this if you want better 3D seperation between objects. 
 //There will be a performance loss when enabled.
 #define AO_TOGGLE 0 //Default 0 is Off. One is On.
-
-//Depth Map Boosting helps increase depth at the cost of accuracy.
-#define Depth_Boost 1 //Zero is Off, One is On. 
  
 //Convergence Mode Full. Really High Performance Loss and Greater Image Errors Expected. If you turn this on set ZPD_Max to 0.250.
 #define Convergence_Extended 0 //Zero is Off, One is On.
@@ -101,10 +98,10 @@ uniform float ZPD <
 
 uniform int Balance <
 	ui_type = "drag";
-	ui_min = 0; ui_max = 6;
+	ui_min = 0; ui_max = 7;
 	ui_label = " Balance";
 	ui_tooltip = "Balance between ZPD Depth and Scene Depth and works with ZPD option above.\n"
-				"Example Zero is 50/50 equal between ZPD Depth and Scene Depth.\n"
+				"Example Zero is 50/50, Four is 25/75, & so on between ZPD and Scene Depth.\n"
 				"Default is One.";
 	ui_category = "Divergence & Convergence";
 > = 1;
@@ -474,7 +471,7 @@ float Depth(in float2 texcoord : TEXCOORD0)
 		
 	return DM;	
 }
-
+#define Num  6 //Adjust me everytime you add a weapon hand profile.
 float3 WeaponDepth(in float2 texcoord : TEXCOORD0)
 {
 		float2 texXY = texcoord + Image_Position_Adjust * pix;		
@@ -520,11 +517,11 @@ float3 WeaponDepth(in float2 texcoord : TEXCOORD0)
 		else if(WP == 3) //WP 1
 			WA_XYZW = float4(5.750,0.625,0.350,1);    //DOOM 2016
 		else if(WP == 4) //WP 2
-			WA_XYZW = float4(100.0,75.0, 8.0,0);      //Amnesia Games
+			WA_XYZW = float4(0.0,0.0,0.0,0);          //Open Profile
 		else if(WP == 5) //WP 3
-			WA_XYZW = float4(2.855,1.0,0.300,0);      //BorderLands 2		
+			WA_XYZW = float4(5.0,6.875,1.7485,0);     //BorderLands 2		
 		else if(WP == 6) //WP 4
-			WA_XYZW = float4(98.0,-0.3625,0.300,0);   //CoD:AW		
+			WA_XYZW = float4(3.9,10.0,8.4786,2);      //CoD:AW		
 		else if(WP == 7) //WP 5
 			WA_XYZW = float4(2.53945,0.0125,0.300,0); //CoD: Black Ops
 		else if(WP == 8) //WP 6
@@ -598,7 +595,7 @@ float3 WeaponDepth(in float2 texcoord : TEXCOORD0)
  		
 		//Scaled Section z-Buffer
 		
-		if(WP > 3)
+		if(WP > Num)
 		{
 			WA_XYZW.x *= 0.004;
 			WA_XYZW.y *= 0.004;
@@ -607,8 +604,7 @@ float3 WeaponDepth(in float2 texcoord : TEXCOORD0)
 			if(WP == 24)
 			zBufferWH_A += 1;
 		}
-		
-		if(WP <= 3)
+		else
 		{
 			float Nearest_Scaled = WA_XYZW.y, Scale_Adjust = WA_XYZW.z, Set_Scale;
 				
@@ -655,8 +651,14 @@ float3 WeaponDepth(in float2 texcoord : TEXCOORD0)
 			zBufferWH_A = lerp(WeaponLumAdjust,zBufferWH_A,0.025);
 		}
 		
-		if(WP <= 3) //remove once done.
-		og_Depth.x = og_Depth.y;
+		if(WP > Num)
+		{
+			WA_XYZW.x = WA_XYZW.z;
+		}
+		else
+		{
+			og_Depth.x = og_Depth.y;
+		}
 		
 	return float3(zBufferWH_A.x,og_Depth.x,WA_XYZW.x);	
 }
@@ -676,7 +678,7 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 		
 		CutOFFCal = step(DM,CutOFFCal);
 		
-		if(WP <= 3)
+		if(WP <= Num)
 		{
 			CutOFFCal = CoP/100;
 			CutOFFCal = step(WDM,CutOFFCal);
@@ -828,6 +830,8 @@ float Conv(float DM,float2 texcoord)
 			NF_Power = 0.8125;
 		else if(Balance == 6)
 			NF_Power = 0.875;
+		else if(Balance == 7)
+			NF_Power = 0.9375;
 		
 		ZP = NF_Power;
 		
@@ -855,12 +859,6 @@ float Conv(float DM,float2 texcoord)
 		if (Auto_Depth_Range > 0)
 		{
 			DM = AutoDepthRange(DM,texcoord);
-		}
-		
-		if (Depth_Boost == 1)
-		{							
-			DM += min(1,lerp(DM,1-DM,-0.0625));
-			DM *= 0.5;
 		}
 				
 		Z = lerp(Convergence,DM, ZP);

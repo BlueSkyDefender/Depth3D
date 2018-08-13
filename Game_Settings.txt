@@ -60,8 +60,6 @@ Inner Shader Setting:
               ABZU                                         DM 1         50                                0.050                    
               Agony                                        DM 1         50                                0.0025-0.500
               Alien Isolation                              DM 0         25                                0.0375-0.075
-              Amnesia: Machine for Pigs                    DM 0         37.5        WDM 2                 0.050-0.075       
-              Amnesia: The Dark Descent                    DM 0         37.5        WDM 2                 0.050-0.075
               Among The Sleep                              DM 0         37.5                      Yes     0.025
               Assassin Creed Unity                         DM 1         20.0                              0.100-0.150
               Bayonetta                                    DM 0         15.0                              0.125-0.150 
@@ -72,12 +70,12 @@ Inner Shader Setting:
               BladeStorm Nightmare                         DM ?         ?                                 ?
     RB        Bioshock Remastred                           DM 0         7.5         WDM 28                0.050-0.175          
     RB        BloodCM                                      DM 0         15.0                              0.100-0.300                                     
-    RB        BorderLands 2                                DM 0         15.0        WDM 3                 0.025-0.075                          
-    RB        Call of Duty: Advance Warfare                DM 1         15.0        WDM 4                 0.050-0.075                                 
+    RB        BorderLands 2                                DM 0         15.0       *WDM 3                 0.025-0.075                          
+    RB        Call of Duty: Advance Warfare                DM 1         15.0       *WDM 4                 0.050-0.075                                 
     RB        Call of Duty: Black Ops                      DM 0         10.0        WDM 5                 0.050-0.075                            
-    RB        Call of Duty: Black Ops 2                    DM 1         15.0        WDM 4                 0.050-0.075    
-    RB        Call of Duty: Ghost                          DM 1         15.0        WDM 4                 0.050-0.075    
-    RB        Call of Duty: Infinite Warfare               DM 1         15.0        WDM 4                 0.050-0.075  
+    RB        Call of Duty: Black Ops 2                    DM 1         15.0       *WDM 4                 0.050-0.075    
+    RB        Call of Duty: Ghost                          DM 1         15.0       *WDM 4                 0.050-0.075    
+    RB        Call of Duty: Infinite Warfare               DM 1         15.0       *WDM 4                 0.050-0.075  
               Casltevania: Lord of Shadows - UE            DM 0         7.5                               0.150-0.250                                         
               Castle of Illusion Micky Mouse               DM 0         12.5                              0.375-0.500
               Cryostasis                                   DM 0         10.0        WDM 6                 0.025-0.075                         
@@ -182,7 +180,9 @@ Inner Shader Setting:
               Ziggurat                                     DM 0         7.5                               0.075-0.175
               Zombie Army Trilogy                          DM 0         10.0                              0.050-0.075
 
-[Read Below] [Special Depth Map Game List]             [Depth Map] [Adjustment] [Weapon DM] [Offset] [Depth Flip] [ZPD Range] [HUD Mode & Value]
+[Read Below] [Special Depth Map Game List]             [Depth Map] [Adjustment] [Weapon DM] [Offset][Depth Flip][ZPD Range] [HUD Mode & Value]
+             Amnesia: Machine for Pigs                    DM 0       40.0                   1.00025              0.000-0.100       
+             Amnesia: The Dark Descent                    DM 0       40.0                   1.00025              0.000-0.100
             *Crash Bandicoot™ N. Sane Trilogy             DM 0       ????                   ??????               ???????????
              Double Dragon Neon                           DM 0       1.0                    2.1000               0.025-0.075
              Dungeons 2                                   DM 0       3.50                   1.0050      Yes      0.100-0.250
