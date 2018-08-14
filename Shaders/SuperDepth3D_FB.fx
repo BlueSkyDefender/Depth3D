@@ -117,7 +117,7 @@ uniform float Auto_Depth_Range <
 //Occlusion Masking//
 uniform int Disocclusion_Selection <
 	ui_type = "combo";
-	ui_items = "Off\0Radial\0Normal\0Depth Based\0Radial & Depth Based\0Normal & Depth Based\0";
+	ui_items = "Off\0Normal\0Depth Based\0Normal & Depth Based\0";
 	ui_label = "·Disocclusion Selection·";
 	ui_tooltip = "This is to select the z-Buffer blurring option for low level occlusion masking.\n"
 				"Default is Normal Blur.";
@@ -324,14 +324,6 @@ sampler BackBuffer
 	{ 
 		Texture = BackBufferTex;
 	};
-	
-sampler BackBufferMIRROR 
-	{ 
-		Texture = BackBufferTex;
-		AddressU = MIRROR;
-		AddressV = MIRROR;
-		AddressW = MIRROR;
-	};
 
 sampler BackBufferBORDER
 	{ 
@@ -340,24 +332,12 @@ sampler BackBufferBORDER
 		AddressV = BORDER;
 		AddressW = BORDER;
 	};
-
-sampler BackBufferCLAMP
-	{ 
-		Texture = BackBufferTex;
-		AddressU = CLAMP;
-		AddressV = CLAMP;
-		AddressW = CLAMP;
-	};
 	
-texture texDMFB  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT/Depth_Map_Division; Format = RGBA32F; MipLevels = 1;}; 
+texture texDMFB  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT/Depth_Map_Division; Format = RGBA32F;}; 
 
 sampler SamplerDMFB
 	{
 		Texture = texDMFB;
-		MipLODBias = 1.0f;
-		MinFilter = LINEAR;
-		MagFilter = LINEAR;
-		MipFilter = LINEAR;
 	};
 	
 texture texDisFB  { Width = BUFFER_WIDTH/Depth_Map_Division; Height = BUFFER_HEIGHT/Depth_Map_Division; Format = RGBA32F; MipLevels = 1;}; 
@@ -369,6 +349,13 @@ sampler SamplerDisFB
 		MagFilter = LINEAR;
 		MipFilter = LINEAR;
 	};
+
+texture texEncodeFB  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA32F;}; 
+
+sampler SamplerEncodeFB
+	{
+		Texture = texEncodeFB;
+	};	
 	
 #if AO_TOGGLE	
 texture texAOFB  { Width = BUFFER_WIDTH*0.5; Height = BUFFER_HEIGHT*0.5; Format = RGBA8; MipLevels = 1;}; 
@@ -868,7 +855,7 @@ float Conv(float DM,float2 texcoord)
 
 void  Disocclusion(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 color : SV_Target0)
 {
-float X, Y, Z, W = 1, DM, DMA, Out, A, B, DP =  Divergence, Disocclusion_PowerA, Disocclusion_PowerB , DBD = tex2Dlod(SamplerDMFB,float4(texcoord,0,0)).x , AMoffset = 0.008, BMoffset = 0.00285714, CMoffset = 0.09090909;
+float X, Y, Z, W = 1, DM, DMA, Out, A, B, DP =  Divergence, Disocclusion_PowerA, Disocclusion_PowerB , DBD = tex2Dlod(SamplerDMFB,float4(texcoord,0,0)).x , AMoffset = 0.00285714, CMoffset = 0.09090909;
 float2 dirA, dirB;
 
 #if AO_TOGGLE
@@ -894,21 +881,17 @@ DBD = ( DBD - 1.0f ) / ( -187.5f - 1.0f );
 
 	DP *= Disocclusion_Power_Adjust;
 		
-	if ( Disocclusion_Selection == 1 || Disocclusion_Selection == 4 ) // Radial    
+	if ( Disocclusion_Selection == 1 || Disocclusion_Selection == 3 ) // Normal  
 	{
 		Disocclusion_PowerA = DP*AMoffset;
 	}
-	else if ( Disocclusion_Selection == 2 || Disocclusion_Selection == 5 ) // Normal  
-	{
-		Disocclusion_PowerA = DP*BMoffset;
-	}
-	else if ( Disocclusion_Selection == 3 ) // Depth    
+	else if ( Disocclusion_Selection == 2 ) // Depth    
 	{
 		Disocclusion_PowerA = DBD*DP;
 	}
 		
 	// Mix Depth Start	
-	if ( Disocclusion_Selection == 4 || Disocclusion_Selection == 5 ) //Depth    
+	if ( Disocclusion_Selection == 3 ) //Depth    
 	{
 		Disocclusion_PowerB = DBD*DP;
 	}
@@ -918,21 +901,14 @@ DBD = ( DBD - 1.0f ) / ( -187.5f - 1.0f );
 	{
 		const float weight[11] = {0.0,0.010,-0.010,0.020,-0.020,0.030,-0.030,0.040,-0.040,0.050,-0.050}; //By 10
 		
-		if( Disocclusion_Selection == 1)
-		{
-			dirA = 0.5 - texcoord;
-			dirB = 0.5 - texcoord;
-			A = Disocclusion_PowerA;
-			B = Disocclusion_PowerB;
-		}
-		else if ( Disocclusion_Selection == 2 || Disocclusion_Selection == 3 || Disocclusion_Selection == 5)
+		if ( Disocclusion_Selection == 1 || Disocclusion_Selection == 3)
 		{
 			dirA = float2(0.5,0.0);
 			dirB = float2(0.5,0.0);
 			A = Disocclusion_PowerA;
 			B = Disocclusion_PowerB;
 		}
-		else if(Disocclusion_Selection == 4)
+		else if(Disocclusion_Selection == 2)
 		{
 			dirA = 0.5 - texcoord;
 			dirB = float2(0.5,0.0);
@@ -947,14 +923,14 @@ DBD = ( DBD - 1.0f ) / ( -187.5f - 1.0f );
 				{	
 					DM += tex2Dlod(SamplerDMFB,float4(texcoord + dirA * weight[i] * A,0,0)).x*CMoffset;
 					
-					if(Disocclusion_Selection == 4 || Disocclusion_Selection == 5)
+					if(Disocclusion_Selection == 3)
 					{
 						DMA += tex2Dlod(SamplerDMFB,float4(texcoord + dirB * weight[i] * B,0,0)).x*CMoffset;
 					}
 				}
 		}
 		
-		if ( Disocclusion_Selection == 4 || Disocclusion_Selection == 5)
+		if ( Disocclusion_Selection == 3)
 		{	
 			DM = lerp(DM,DMA,0.5);
 		}
@@ -988,18 +964,31 @@ DBD = ( DBD - 1.0f ) / ( -187.5f - 1.0f );
 }
 
 /////////////////////////////////////////L/R//////////////////////////////////////////////////////////////////////
-float2  Encode(in float2 texcoord : TEXCOORD0) //zBuffer Color Channel Encode
+void Encode(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 color : SV_Target0) //zBuffer Color Channel Encode
 {
-	float M = 1, PD = (Divergence * 0.05) * pix.x;
-	float DepthR = tex2Dlod(SamplerDisFB,float4(texcoord.x + PD, texcoord.y,0,M)).x, DepthL = tex2Dlod(SamplerDisFB,float4(texcoord.x - PD, texcoord.y,0,M)).x, S, MS = Divergence*pix.x;
+	float M = 0, MSL = (Divergence * 0.25) * pix.x;
+	float DepthR = 1, DepthL = 1, S, MS = Divergence*pix.x;
+	
+	if (Disocclusion_Selection >= 1)
+		M = 1.0;
+	
+	float samplesA[5] = {0.5,0.625,0.75,0.875,1.0};
+	
+	[loop]
+	for ( int i = 0 ; i < 5; i++ ) 
+	{
+		S = samplesA[i] * MSL;
+		DepthL = min(DepthL,tex2Dlod(SamplerDisFB,float4(texcoord.x - S, texcoord.y,0,M)).x);
+		DepthR = min(DepthR,tex2Dlod(SamplerDisFB,float4(texcoord.x + S, texcoord.y,0,M)).x);
+	}
 	
 	DepthL = Conv(DepthL,texcoord);
 	DepthR = Conv(DepthR,texcoord);
 	
 	// X Left & Y Right
-	float X = texcoord.x+MS*DepthL.x, Y = (1-texcoord.x)+MS*DepthR.x;
+	float X = texcoord.x+MS*DepthL, Y = (1-texcoord.x)+MS*DepthR;
 
-	return float2(X,Y);
+	color = float4(X,Y,0.0,1.0);
 }
 
 float4 PS_calcLR(float2 texcoord)
@@ -1081,19 +1070,19 @@ float4 PS_calcLR(float2 texcoord)
 		{	
 			#if Convergence_Extended
 			//L Near
-			[flatten] if(Encode(float2(TCL.x-i*pix.x,TCL.y)).y <= (1-TCL.x))
+			[flatten] if(tex2Dlod(SamplerEncodeFB,float4(TCL.x-i*pix.x,TCL.y,0,0)).y <= (1-TCL.x))
 						B_DepthL = i*pix.x;
 			
 			//R Near
-			[flatten] if(Encode(float2(TCR.x+i*pix.x,TCR.y)).x <= TCR.x )
+			[flatten] if(tex2Dlod(SamplerEncodeFB,float4(TCR.x+i*pix.x,TCR.y,0,0)).x <= TCR.x )
 						B_DepthR = i*pix.x;
 			#endif
 			//L
-			[flatten] if(Encode(float2(TCL.x+i*pix.x,TCL.y)).y >= (1-TCL.x))
+			[flatten] if(tex2Dlod(SamplerEncodeFB,float4(TCL.x+i*pix.x,TCL.y,0,0)).y >= (1-TCL.x))
 						A_DepthL = i*pix.x;
 			
 			//R
-			[flatten] if(Encode(float2(TCR.x-i*pix.x,TCR.y)).x >= TCR.x )
+			[flatten] if(tex2Dlod(SamplerEncodeFB,float4(TCR.x-i*pix.x,TCR.y,0,0)).x >= TCR.x )
 						A_DepthR = i*pix.x;
 		}
 					
@@ -1479,6 +1468,12 @@ technique SuperDepth3D_FlashBack
 		VertexShader = PostProcessVS;
 		PixelShader = Disocclusion;
 		RenderTarget = texDisFB;
+	}
+		pass Encoding
+	{
+		VertexShader = PostProcessVS;
+		PixelShader = Encode;
+		RenderTarget = texEncodeFB;
 	}
 		pass AverageLuminance
 	{
