@@ -236,7 +236,7 @@ uniform float Interlace_Optimization <
 
 uniform int Anaglyph_Colors <
 	ui_type = "combo";
-	ui_items = "Red/Cyan\0Dubois Red/Cyan\0Green/Magenta\0Dubois Green/Magenta\0";
+	ui_items = "Red/Cyan\0Dubois Red/Cyan\0Deghosted Red/Cyan\0Green/Magenta\0Dubois Green/Magenta\0Deghosted Green/Magenta\0Blue/Amber\0";
 	ui_label = " Anaglyph Color Mode";
 	ui_tooltip = "Select colors for your 3D anaglyph glasses.";
 	ui_category = "Stereoscopic Options";
@@ -471,7 +471,7 @@ float Depth(in float2 texcoord : TEXCOORD0)
 		
 	return DM;	
 }
-#define Num  10 //Adjust me everytime you add a weapon hand profile.
+#define Num  12 //Adjust me everytime you add a weapon hand profile.
 float3 WeaponDepth(in float2 texcoord : TEXCOORD0)
 {
 		float2 texXY = texcoord + Image_Position_Adjust * pix;		
@@ -531,9 +531,9 @@ float3 WeaponDepth(in float2 texcoord : TEXCOORD0)
 		else if(WP == 10)//WP 8
 			WA_XYZW = float4(1.686,2.5,2.082,2);     //Fallout 4
 		else if(WP == 11)//WP 9
-			WA_XYZW = float4(19.700,-2.600,0.285,0); //Prey 2017 High Settings and <
+			WA_XYZW = float4(1.900,0.750,0.4775,1);  //Prey 2017 High Settings and <
 		else if(WP == 12)//WP 10
-			WA_XYZW = float4(28.450,-2.600,0.285,0); //Prey 2017 Very High	
+			WA_XYZW = float4(1.900,1.5,1.005,1);     //Prey 2017 Very High		
 		else if(WP == 13)//WP 11
 			WA_XYZW = float4(2.61375,1.0,0.260,0);   //Metro Redux Games	
 		else if(WP == 14)//WP 12
@@ -1165,67 +1165,151 @@ float4 PS_calcLR(float2 texcoord)
 			color = int(gridxy.x+gridxy.y) & 1 ? cR : cL;
 		}
 		else if(Stereoscopic_Mode == 5)
-		{													
-				float3 HalfLA = dot(cL.rgb,float3(0.299, 0.587, 0.114));
-				float3 HalfRA = dot(cR.rgb,float3(0.299, 0.587, 0.114));
-				float3 LMA = lerp(HalfLA,cL.rgb,Anaglyph_Desaturation);  
-				float3 RMA = lerp(HalfRA,cR.rgb,Anaglyph_Desaturation); 
+		{			
+			float Contrast = 1.0, Deghost = 0.06, LOne, LTwo, ROne, RTwo;
+			float3 HalfLA = dot(cL.rgb,float3(0.299, 0.587, 0.114));
+			float3 HalfRA = dot(cR.rgb,float3(0.299, 0.587, 0.114));
+			float3 LMA = lerp(HalfLA,cL.rgb,Anaglyph_Desaturation);  
+			float3 RMA = lerp(HalfRA,cR.rgb,Anaglyph_Desaturation); 
+			float4 image = 1, accumRC, accumGM, accumBA;
+
+			float contrast = (Contrast*0.5)+0.5, deghost = Deghost;
 				
-				float4 cA = float4(LMA,1);
-				float4 cB = float4(RMA,1);
+			// Left/Right Image
+			float4 cA = float4(LMA,1);
+			float4 cB = float4(RMA,1);
 	
-			if (Anaglyph_Colors == 0)
+			if (Anaglyph_Colors == 0) // Red/Cyan
 			{
 				float4 LeftEyecolor = float4(1.0,0.0,0.0,1.0);
 				float4 RightEyecolor = float4(0.0,1.0,1.0,1.0);
 				
 				color =  (cA*LeftEyecolor) + (cB*RightEyecolor);
 			}
-			else if (Anaglyph_Colors == 1)
+			else if (Anaglyph_Colors == 1) // Dubois Red/Cyan
 			{
 			float red = 0.437 * cA.r + 0.449 * cA.g + 0.164 * cA.b
-					- 0.011 * cB.r - 0.032 * cB.g - 0.007 * cB.b;
-			
-			if (red > 1) { red = 1; }   if (red < 0) { red = 0; }
+						- 0.011 * cB.r - 0.032 * cB.g - 0.007 * cB.b;
+				
+				if (red > 1) { red = 1; }   if (red < 0) { red = 0; }
 
-			float green = -0.062 * cA.r -0.062 * cA.g -0.024 * cA.b 
-						+ 0.377 * cB.r + 0.761 * cB.g + 0.009 * cB.b;
-			
-			if (green > 1) { green = 1; }   if (green < 0) { green = 0; }
+				float green = -0.062 * cA.r -0.062 * cA.g -0.024 * cA.b 
+							+ 0.377 * cB.r + 0.761 * cB.g + 0.009 * cB.b;
+				
+				if (green > 1) { green = 1; }   if (green < 0) { green = 0; }
 
-			float blue = -0.048 * cA.r - 0.050 * cA.g - 0.017 * cA.b 
-						-0.026 * cB.r -0.093 * cB.g + 1.234  * cB.b;
-			
-			if (blue > 1) { blue = 1; }   if (blue < 0) { blue = 0; }
+				float blue = -0.048 * cA.r - 0.050 * cA.g - 0.017 * cA.b 
+							-0.026 * cB.r -0.093 * cB.g + 1.234  * cB.b;
+				
+				if (blue > 1) { blue = 1; }   if (blue < 0) { blue = 0; }
 
-			color = float4(red, green, blue, 0);
+				color = float4(red, green, blue, 0);
 			}
-			else if (Anaglyph_Colors == 2)
+			else if (Anaglyph_Colors == 2) // Deghosted Red/Cyan Code From http://iaian7.com/quartz/AnaglyphCompositing & vectorform.com by John Einselen
+			{
+				LOne = contrast*0.45;
+				LTwo = (1.0-LOne)*0.5;
+				ROne = contrast;
+				RTwo = 1.0-ROne;
+				deghost = Deghost*0.1;
+
+				accumRC = saturate(cA*float4(LOne,LTwo,LTwo,1.0));
+				image.r = pow(accumRC.r+accumRC.g+accumRC.b, 1.00);
+				image.a = accumRC.a;
+
+				accumRC = saturate(cB*float4(RTwo,ROne,0.0,1.0));
+				image.g = pow(accumRC.r+accumRC.g+accumRC.b, 1.15);
+				image.a = image.a+accumRC.a;
+
+				accumRC = saturate(cB*float4(RTwo,0.0,ROne,1.0));
+				image.b = pow(accumRC.r+accumRC.g+accumRC.b, 1.15);
+				image.a = (image.a+accumRC.a)/3.0;
+
+				accumRC = image;
+				image.r = (accumRC.r+(accumRC.r*(deghost))+(accumRC.g*(deghost*-0.5))+(accumRC.b*(deghost*-0.5)));
+				image.g = (accumRC.g+(accumRC.r*(deghost*-0.25))+(accumRC.g*(deghost*0.5))+(accumRC.b*(deghost*-0.25)));
+				image.b = (accumRC.b+(accumRC.r*(deghost*-0.25))+(accumRC.g*(deghost*-0.25))+(accumRC.b*(deghost*0.5)));
+				color = image;
+			}
+			else if(Anaglyph_Colors == 3) // Green/Magenta
 			{
 				float4 LeftEyecolor = float4(0.0,1.0,0.0,1.0);
 				float4 RightEyecolor = float4(1.0,0.0,1.0,1.0);
 				
 				color =  (cA*LeftEyecolor) + (cB*RightEyecolor);			
 			}
-			else
+			else if(Anaglyph_Colors == 4) // Dubois Green/Magenta
 			{
 								
-			float red = -0.062 * cA.r -0.158 * cA.g -0.039 * cA.b
-					+ 0.529 * cB.r + 0.705 * cB.g + 0.024 * cB.b;
-			
-			if (red > 1) { red = 1; }   if (red < 0) { red = 0; }
+				float red = -0.062 * cA.r -0.158 * cA.g -0.039 * cA.b
+						+ 0.529 * cB.r + 0.705 * cB.g + 0.024 * cB.b;
+				
+				if (red > 1) { red = 1; }   if (red < 0) { red = 0; }
 
-			float green = 0.284 * cA.r + 0.668 * cA.g + 0.143 * cA.b 
-						- 0.016 * cB.r - 0.015 * cB.g + 0.065 * cB.b;
-			
-			if (green > 1) { green = 1; }   if (green < 0) { green = 0; }
+				float green = 0.284 * cA.r + 0.668 * cA.g + 0.143 * cA.b 
+							- 0.016 * cB.r - 0.015 * cB.g + 0.065 * cB.b;
+				
+				if (green > 1) { green = 1; }   if (green < 0) { green = 0; }
 
-			float blue = -0.015 * cA.r -0.027 * cA.g + 0.021 * cA.b 
-						+ 0.009 * cB.r + 0.075 * cB.g + 0.937  * cB.b;
-			
-			if (blue > 1) { blue = 1; }   if (blue < 0) { blue = 0; }
-					
-			color = float4(red, green, blue, 0);
+				float blue = -0.015 * cA.r -0.027 * cA.g + 0.021 * cA.b 
+							+ 0.009 * cB.r + 0.075 * cB.g + 0.937  * cB.b;
+				
+				if (blue > 1) { blue = 1; }   if (blue < 0) { blue = 0; }
+						
+				color = float4(red, green, blue, 0);
+			}
+			else if (Anaglyph_Colors == 5) //Deghosted Green/Magenta Code From http://iaian7.com/quartz/AnaglyphCompositing & vectorform.com by John Einselen
+			{
+				LOne = contrast*0.45;
+				LTwo = (1.0-LOne)*0.5;
+				ROne = contrast*0.8;
+				RTwo = 1.0-ROne;
+				deghost = Deghost*0.275;
+
+				accumGM = saturate(cB*float4(ROne,RTwo,0.0,1.0));
+				image.r = pow(accumGM.r+accumGM.g+accumGM.b, 1.15);
+				image.a = accumGM.a;
+
+				accumGM = saturate(cA*float4(LTwo,LOne,LTwo,1.0));
+				image.g = pow(accumGM.r+accumGM.g+accumGM.b, 1.05);
+				image.a = image.a+accumGM.a;
+
+				accumGM = saturate(cB*float4(0.0,RTwo,ROne,1.0));
+				image.b = pow(accumGM.r+accumGM.g+accumGM.b, 1.15);
+				image.a = (image.a+accumGM.a)/3.0;
+
+				accumGM = image;
+				image.r = (accumGM.r+(accumGM.r*(deghost*0.5))+(accumGM.g*(deghost*-0.25))+(accumGM.b*(deghost*-0.25)));
+				image.g = (accumGM.g+(accumGM.r*(deghost*-0.5))+(accumGM.g*(deghost*0.25))+(accumGM.b*(deghost*-0.5)));
+				image.b = (accumGM.b+(accumGM.r*(deghost*-0.25))+(accumGM.g*(deghost*-0.25))+(accumGM.b*(deghost*0.5)));
+				color = image;
+			}
+			else // Blue/Amber Code From http://iaian7.com/quartz/AnaglyphCompositing & vectorform.com by John Einselen
+			{
+				LOne = contrast*0.45;
+				LTwo = (1.0-LOne)*0.5;
+				ROne = contrast;
+				RTwo = 1.0-ROne;
+				deghost = Deghost*0.275;
+
+				accumBA = saturate(cA*float4(ROne,0.0,RTwo,1.0));
+				image.r = pow(accumBA.r+accumBA.g+accumBA.b, 1.05);
+				image.a = accumBA.a;
+
+				accumBA = saturate(cA*float4(0.0,ROne,RTwo,1.0));
+				image.g = pow(accumBA.r+accumBA.g+accumBA.b, 1.10);
+				image.a = image.a+accumBA.a;
+
+				accumBA = saturate(cB*float4(LTwo,LTwo,LOne,1.0));
+				image.b = pow(accumBA.r+accumBA.g+accumBA.b, 1.0);
+				image.b = lerp(pow(image.b,(Deghost*0.15)+1.0),1.0-pow(1.0-image.b,(Deghost*0.15)+1.0),image.b);
+				image.a = (image.a+accumBA.a)/3.0;
+
+				accumBA = image;
+				image.r = (accumBA.r+(accumBA.r*(deghost*1.5))+(accumBA.g*(deghost*-0.75))+(accumBA.b*(deghost*-0.75)));
+				image.g = (accumBA.g+(accumBA.r*(deghost*-0.75))+(accumBA.g*(deghost*1.5))+(accumBA.b*(deghost*-0.75)));
+				image.b = (accumBA.b+(accumBA.r*(deghost*-1.5))+(accumBA.g*(deghost*-1.5))+(accumBA.b*(deghost*3.0)));
+				color = saturate(image);
 			}
 		}
 	}

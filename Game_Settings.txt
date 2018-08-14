@@ -135,7 +135,7 @@ Inner Shader Setting:
     RB        Penumbra: Black Plague                       DM 0         7.5                               0.150-0.200       
     RB        Phantasmal                                   DM 0         7.5                       Yes     0.010-0.020
     RB        Prey 2006                                    DM 0         12.5        WDM 26                0.050-0.075       
-    RB        Prey 2017                                    DM 1         18.75     WDM 9 & 10              0.025-0.075                
+    RB        Prey 2017                                    DM 1         18.75    *WDM 9 & 10              0.025-0.075                
     RB        Quake Epsilon                                DM 0         15.00       WDM 15                0.075-0.125 
               Quake 2 XP                                   DM 0         7.5         WDM 16                0.125-0.325
     RB        Quake 4                                      DM 0         7.5         WDM 17                0.025-0.125
