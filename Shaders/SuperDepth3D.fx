@@ -1033,8 +1033,7 @@ DBD = ( DBD - 1.0f ) / ( -187.5f - 1.0f );
 /////////////////////////////////////////L/R//////////////////////////////////////////////////////////////////////
 float2  Encode(in float2 texcoord : TEXCOORD0) //zBuffer Color Channel Encode
 {
-	float M = 1;
-	float DM = tex2Dlod(SamplerDis,float4(texcoord.x, texcoord.y,0,M)).x,DepthR = DM, DepthL = DM;
+	float DM = tex2Dlod(SamplerDis,float4(texcoord.x, texcoord.y,0,1)).x,DepthR = DM, DepthL = DM;
 	
 	// X Left & Y Right	
 	float X = DepthL, Y = DepthR;
@@ -1118,7 +1117,7 @@ float4 PS_calcLR(float2 texcoord)
 		}
 		else if (View_Mode == 1)
 		{
-			S = samplesB[i] * MS * 1.21875;//9
+			S = samplesA[i] * MS * 1.21875;//9
 			L += Encode(float2(TCL.x+S, TCL.y)).x*Adjust_A;
 			R += Encode(float2(TCR.x-S, TCR.y)).y*Adjust_A;
 			DepthL = min(1,L);

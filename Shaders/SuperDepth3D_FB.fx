@@ -966,11 +966,7 @@ DBD = ( DBD - 1.0f ) / ( -187.5f - 1.0f );
 /////////////////////////////////////////L/R//////////////////////////////////////////////////////////////////////
 void Encode(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 color : SV_Target0) //zBuffer Color Channel Encode
 {
-	float M = 0, MSL = (Divergence * 0.25) * pix.x;
-	float DepthR = 1, DepthL = 1, S, MS = Divergence*pix.x;
-	
-	if (Disocclusion_Selection >= 1)
-		M = 1.0;
+	float DepthR = 1, DepthL = 1,MSL = (Divergence * 0.25) * pix.x, S, MS = Divergence*pix.x;
 	
 	float samplesA[5] = {0.5,0.625,0.75,0.875,1.0};
 	
@@ -978,8 +974,8 @@ void Encode(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, ou
 	for ( int i = 0 ; i < 5; i++ ) 
 	{
 		S = samplesA[i] * MSL;
-		DepthL = min(DepthL,tex2Dlod(SamplerDisFB,float4(texcoord.x - S, texcoord.y,0,M)).x);
-		DepthR = min(DepthR,tex2Dlod(SamplerDisFB,float4(texcoord.x + S, texcoord.y,0,M)).x);
+		DepthL = min(DepthL,tex2Dlod(SamplerDisFB,float4(texcoord.x - S, texcoord.y,0,0)).x);
+		DepthR = min(DepthR,tex2Dlod(SamplerDisFB,float4(texcoord.x + S, texcoord.y,0,0)).x);
 	}
 	
 	DepthL = Conv(DepthL,texcoord);
