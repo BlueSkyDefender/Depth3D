@@ -55,7 +55,7 @@
 //USER EDITABLE PREPROCESSOR FUNCTIONS END//
 
 //Divergence & Convergence//
-uniform float Divergence <
+uniform int Divergence <
 	ui_type = "drag";
 	ui_min = 1; ui_max = Depth_Max;
 	ui_label = "·Divergence Slider·";
@@ -132,6 +132,15 @@ uniform float Disocclusion_Power_Adjust <
 				"Default is 1.0";
 	ui_category = "Occlusion Masking";
 > = 1.0;
+
+uniform int View_Mode <
+	ui_type = "combo";
+	ui_items = "View Mode Normal\0View Mode Alpha\0";
+	ui_label = " View Mode";
+	ui_tooltip = "Change the way the shader warps the output to the screen.\n"
+				 "Default is Normal";
+	ui_category = "Occlusion Masking";
+> = 0;
 
 //Depth Map//
 uniform int Depth_Map <
@@ -966,7 +975,7 @@ DBD = ( DBD - 1.0f ) / ( -187.5f - 1.0f );
 /////////////////////////////////////////L/R//////////////////////////////////////////////////////////////////////
 void Encode(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 color : SV_Target0) //zBuffer Color Channel Encode
 {
-	float DepthR = 1, DepthL = 1,MSL = (Divergence * 0.25) * pix.x, S, MS = Divergence*pix.x;
+	float DepthR = 1, DepthL = 1,MSL = (Divergence * 0.25) * pix.x, S, MS = (Divergence + 0.25) * pix.x;
 	
 	float samplesA[5] = {0.5,0.625,0.75,0.875,1.0};
 	
@@ -1007,7 +1016,7 @@ float4 PS_calcLR(float2 texcoord)
 	#endif	
 	
 	//A is Far, B is Near.
-	float A_DepthR = Znum.y, A_DepthL = Znum.y, B_DepthR = Znum.x, B_DepthL = Znum.x;
+	float A_DepthR = Znum.y, A_DepthL = Znum.y, B_DepthR = Znum.x, B_DepthL = Znum.x, j;
 	
 	//P is Perspective Adjustment.
 	float P = Perspective * pix.x;
@@ -1063,23 +1072,24 @@ float4 PS_calcLR(float2 texcoord)
 	
 		[loop]
 		for (int i = 0; i <= Divergence; i++) 
-		{	
+		{		
+			j = i + (i * 0.20);	
 			#if Convergence_Extended
 			//L Near
 			[flatten] if(tex2Dlod(SamplerEncodeFB,float4(TCL.x-i*pix.x,TCL.y,0,0)).y <= (1-TCL.x))
-						B_DepthL = i*pix.x;
+						B_DepthL = j*pix.x;
 			
 			//R Near
 			[flatten] if(tex2Dlod(SamplerEncodeFB,float4(TCR.x+i*pix.x,TCR.y,0,0)).x <= TCR.x )
-						B_DepthR = i*pix.x;
+						B_DepthR = j*pix.x;
 			#endif
 			//L
 			[flatten] if(tex2Dlod(SamplerEncodeFB,float4(TCL.x+i*pix.x,TCL.y,0,0)).y >= (1-TCL.x))
-						A_DepthL = i*pix.x;
+						A_DepthL = j*pix.x;
 			
 			//R
 			[flatten] if(tex2Dlod(SamplerEncodeFB,float4(TCR.x-i*pix.x,TCR.y,0,0)).x >= TCR.x )
-						A_DepthR = i*pix.x;
+						A_DepthR = j*pix.x;
 		}
 					
 	#if Convergence_Extended
