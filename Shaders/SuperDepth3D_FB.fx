@@ -21,7 +21,6 @@
  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 //USER EDITABLE PREPROCESSOR FUNCTIONS START//
-
 // Determines The resolution of the Depth Map. For 4k Use 1.75 or 1.5. For 1440p Use 1.5 or 1.25. For 1080p use 1. Too low of a resolution will remove too much.
 #define Depth_Map_Division 1.5
 
@@ -38,6 +37,12 @@
 //There will be a performance loss when enabled.
 #define AO_TOGGLE 0 //Default 0 is Off. One is On.
  
+// Dither is an intentionally applied form of noise used to randomize quantization error, preventing banding in images.
+#define Dither_Toggle 0 //Default 0 is Off. One is On.
+
+//The a power of noise applyed. Lower is stronger at the cost of noise. 
+#define Dither_Bit 6.0 //Default is Six.
+
 //Convergence Mode Full. Really High Performance Loss and Greater Image Errors Expected. If you turn this on set ZPD_Max to 0.250.
 #define Convergence_Extended 0 //Zero is Off, One is On.
 
@@ -349,7 +354,7 @@ sampler SamplerDMFB
 		Texture = texDMFB;
 	};
 	
-texture texDisFB  { Width = BUFFER_WIDTH/Depth_Map_Division; Height = BUFFER_HEIGHT/Depth_Map_Division; Format = RGBA32F; MipLevels = 1;}; 
+texture texDisFB  { Width = BUFFER_WIDTH/Depth_Map_Division; Height = BUFFER_HEIGHT/Depth_Map_Division; Format = RGBA32F; MipLevels = 2;}; 
 
 sampler SamplerDisFB
 	{
@@ -358,7 +363,17 @@ sampler SamplerDisFB
 		MagFilter = LINEAR;
 		MipFilter = LINEAR;
 	};
+#if Dither_Toggle	
+texture texMedFB { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA32F; MipLevels = 2;};
 
+sampler SamplerMedFB
+	{
+		Texture = texMedFB;
+		MipFilter = Linear; 
+		MinFilter = Linear; 
+		MagFilter = Linear;
+	};
+#endif	
 texture texEncodeFB  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA32F;}; 
 
 sampler SamplerEncodeFB
@@ -862,6 +877,78 @@ float Conv(float DM,float2 texcoord)
     return Z;
 }
 
+#if Dither_Toggle
+
+uniform float frametime < source = "frametime"; >;
+//Time in milliseconds it took for the last frame to complete.
+
+float Dither(float2 texcoord : TEXCOORD0)
+{	
+	float Dither = tex2D(SamplerDMFB, float4(texcoord,0,0)).x;
+	
+	float DB  = Dither_Bit;
+	float noise = frac(sin(dot(texcoord * frametime, float2(12.9898,78.233))) * 43758.5453);
+	float dither_shift = (1.0 / (pow(2,DB) - 1.0));
+	float dither_shift_half = (dither_shift * 0.5);
+	dither_shift = dither_shift * noise - dither_shift_half;
+	
+	Dither += -dither_shift;
+	Dither += dither_shift;
+	Dither += -dither_shift;
+	
+	return Dither; 
+}
+
+#define s2(a, b)				temp = a; a = min(a, b); b = max(temp, b);
+#define mn3(a, b, c)			s2(a, b); s2(a, c);
+#define mx3(a, b, c)			s2(b, c); s2(a, c);
+
+#define mnmx3(a, b, c)			mx3(a, b, c); s2(a, b);                                   // 3 exchanges
+#define mnmx4(a, b, c, d)		s2(a, b); s2(c, d); s2(a, c); s2(b, d);                   // 4 exchanges
+#define mnmx5(a, b, c, d, e)	s2(a, b); s2(c, d); mn3(a, c, e); mx3(b, d, e);           // 6 exchanges
+#define mnmx6(a, b, c, d, e, f) s2(a, d); s2(b, e); s2(c, f); mn3(a, b, c); mx3(d, e, f); // 7 exchanges
+	
+float4 Median(float4 position : SV_Position, float2 texcoord : TEXCOORD0) : SV_Target
+{
+	float2 ScreenCal = float2(3*pix.x,3*pix.y);
+
+	float2 FinCal = ScreenCal*0.6;
+
+	float4 v[9];
+	
+	[unroll]
+	for(int i = -1; i <= 1; ++i) 
+	{
+		for(int j = -1; j <= 1; ++j)
+		{		
+		  float2 offset = float2(float(i), float(j));
+
+		  v[(i + 1) * 3 + (j + 1)] = Dither(texcoord + offset * FinCal);
+		}
+	}
+
+	float4 temp;
+
+	mnmx6(v[0], v[1], v[2], v[3], v[4], v[5]);
+	mnmx5(v[1], v[2], v[3], v[4], v[6]);
+	mnmx4(v[2], v[3], v[4], v[7]);
+	mnmx3(v[3], v[4], v[8]);
+	
+	return v[4];
+}
+#endif
+
+float DeNoise(float2 texcoord : TEXCOORD0)
+{	
+	float Out;
+	#if Dither_Toggle
+		Out = tex2Dlod(SamplerMedFB,float4(texcoord,0,0)).x;	
+	#else
+		Out = tex2Dlod(SamplerDMFB,float4(texcoord,0,0)).x;
+	#endif
+	return Out; 
+}
+
 void  Disocclusion(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 color : SV_Target0)
 {
 float X, Y, Z, W = 1, DM, DMA, Out, A, B, DP =  Divergence, Disocclusion_PowerA, Disocclusion_PowerB , DBD = tex2Dlod(SamplerDMFB,float4(texcoord,0,0)).x , AMoffset = 0.00285714, CMoffset = 0.09090909;
@@ -930,11 +1017,11 @@ DBD = ( DBD - 1.0f ) / ( -187.5f - 1.0f );
 				[loop]
 				for (int i = 0; i < 11; i++)
 				{	
-					DM += tex2Dlod(SamplerDMFB,float4(texcoord + dirA * weight[i] * A,0,0)).x*CMoffset;
+					DM +=DeNoise(texcoord + dirA * weight[i] * A).x*CMoffset;
 					
 					if(Disocclusion_Selection == 3)
 					{
-						DMA += tex2Dlod(SamplerDMFB,float4(texcoord + dirB * weight[i] * B,0,0)).x*CMoffset;
+						DMA += DeNoise(texcoord + dirB * weight[i] * B).x*CMoffset;
 					}
 				}
 		}
@@ -946,7 +1033,7 @@ DBD = ( DBD - 1.0f ) / ( -187.5f - 1.0f );
 	}
 	else
 	{
-		DM = tex2Dlod(SamplerDMFB,float4(texcoord,0,0)).x;
+		DM = DeNoise(texcoord).x;
 	}
 
 	if (!Cancel_Depth)
@@ -983,8 +1070,8 @@ void Encode(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, ou
 	for ( int i = 0 ; i < 5; i++ ) 
 	{
 		S = samplesA[i] * MSL;
-		DepthL = min(DepthL,tex2Dlod(SamplerDisFB,float4(texcoord.x - S, texcoord.y,0,0)).x);
-		DepthR = min(DepthR,tex2Dlod(SamplerDisFB,float4(texcoord.x + S, texcoord.y,0,0)).x);
+		DepthL = min(DepthL,tex2Dlod(SamplerDisFB, float4(texcoord.x - S, texcoord.y,0,0)).x);
+		DepthR = min(DepthR,tex2Dlod(SamplerDisFB, float4(texcoord.x + S, texcoord.y,0,0)).x);
 	}
 	
 	DepthL = Conv(DepthL,texcoord);
@@ -992,7 +1079,7 @@ void Encode(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, ou
 	
 	// X Left & Y Right
 	float X = texcoord.x+MS*DepthL, Y = (1-texcoord.x)+MS*DepthR;
-
+	
 	color = float4(X,Y,0.0,1.0);
 }
 
@@ -1309,7 +1396,8 @@ float4 PS_calcLR(float2 texcoord)
 		}
 	}
 		else
-	{		
+	{			
+			float4 BR;
 			float4 Top = TexCoords.x < 0.5 ? Lum(float2(TexCoords.x*2,TexCoords.y*2)).xxxx : tex2Dlod(SamplerDMFB,float4(TexCoords.x*2-1 , TexCoords.y*2,0,0)).xxxx;
 			float4 Bottom = TexCoords.x < 0.5 ?  AutoDepthRange(tex2Dlod(SamplerDMFB,float4(TexCoords.x*2 , TexCoords.y*2-1,0,0)).x,TexCoords) : tex2Dlod(SamplerDisFB,float4(TexCoords.x*2-1,TexCoords.y*2-1,0,0)).xxxx;
 			color = TexCoords.y < 0.5 ? Top : Bottom;
@@ -1475,6 +1563,14 @@ technique SuperDepth3D_FlashBack
 		PixelShader = Disocclusion;
 		RenderTarget = texDisFB;
 	}
+	#if Dither_Toggle
+		pass MedianPass
+	{
+		VertexShader = PostProcessVS;
+		PixelShader = Median;
+		RenderTarget = texMedFB;
+	}
+	#endif
 		pass Encoding
 	{
 		VertexShader = PostProcessVS;
