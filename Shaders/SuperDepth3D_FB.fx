@@ -68,7 +68,7 @@ uniform int Divergence <
 				 "The process of deriving binocular depth information is called stereopsis.\n"
 				 "You can override this value. But, increasing this reduces performance.";
 	ui_category = "Divergence & Convergence";
-> = 35.0;
+> = 35;
 
 #if Convergence_Extended
 uniform int Convergence_Mode <
@@ -454,7 +454,7 @@ float Depth(in float2 texcoord : TEXCOORD0)
 		if (Depth_Map_Flip)
 			texcoord.y =  1 - texcoord.y;
 			
-		float zBuffer = tex2D(DepthBuffer, texcoord).xx; //Depth Buffer
+		float zBuffer = tex2D(DepthBuffer, texcoord).x; //Depth Buffer
 		
 		//Conversions to linear space.....
 		//Near & Far Adjustment
@@ -1158,7 +1158,7 @@ float4 PS_calcLR(float2 texcoord)
 	}
 	
 		[loop]
-		for (int i = 0; i <= Divergence; i++) 
+		for (int i = 0; i <= Divergence + 1; i++) 
 		{		
 			j = i + (i * 0.20);	
 			#if Convergence_Extended

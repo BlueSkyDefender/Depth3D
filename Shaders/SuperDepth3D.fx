@@ -450,7 +450,7 @@ float Depth(in float2 texcoord : TEXCOORD0)
 		if (Depth_Map_Flip)
 			texcoord.y =  1 - texcoord.y;
 			
-		float zBuffer = tex2D(DepthBuffer, texcoord).xx; //Depth Buffer
+		float zBuffer = tex2D(DepthBuffer, texcoord).x; //Depth Buffer
 		
 		//Conversions to linear space.....
 		//Near & Far Adjustment
