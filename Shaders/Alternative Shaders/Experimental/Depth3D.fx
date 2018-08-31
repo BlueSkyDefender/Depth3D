@@ -427,12 +427,12 @@ float2 dirA, DM;
 
 void Encode(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 color : SV_Target0) //zBuffer Color Channel Encode
 {
-	float2 DepthL = 1, DepthR = 1;
-	float samplesA[5] = {0.5,0.625,0.75,0.875,1.0}, MSL = (Divergence * 0.25) * pix.x, S, MS = (Divergence + 0.25) * pix.x;
+	float2 DepthL = 1.0, DepthR = 1.0;
+	float samples[3] = {0.5,0.75,1.0}, MSL = (Divergence * 0.25) * pix.x, S, MS = Divergence * pix.x;
 		[loop]
 	for ( int i = 0 ; i < 3; i++ ) 
 	{
-		S = samplesA[i] * MSL;
+		S = samples[i] * MSL;
 		DepthL = min(DepthL,tex2Dlod(SamplerDiso, float4(texcoord.x - S, texcoord.y,0,0)).xy);
 		DepthR = min(DepthR,tex2Dlod(SamplerDiso, float4(texcoord.x + S, texcoord.y,0,0)).xy);
 	}
@@ -443,7 +443,7 @@ void Encode(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, ou
 	// X Left & Y Right
 	float X = texcoord.x+MS*DepthL.x, Y = (1-texcoord.x)+MS*DepthR.x;
 	
-	color = float4(X,Y,0.0,1.0);;
+	color = float4(X,Y,0.0,1.0);
 }
 
 float4 PS_calcLR(float2 texcoord)

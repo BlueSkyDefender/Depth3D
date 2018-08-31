@@ -112,7 +112,7 @@ uniform float Auto_Depth_Range <
 //Occlusion Masking//
 uniform int Disocclusion_Selection <
 	ui_type = "combo";
-	ui_items = "Off\0Radial\0Normal\0Depth Based\0Radial & Depth Based\0Normal & Depth Based\0";
+	ui_items = "Off\0Radial\0Normal\0Depth Based\0Radial & Depth Based\0Normal & Depth Based\0Radial & Normal\0";
 	ui_label = "·Disocclusion Selection·";
 	ui_tooltip = "This is to select the z-Buffer blurring option for low level occlusion masking.\n"
 				"Default is Normal.";
@@ -911,7 +911,7 @@ float Conv(float D,float2 texcoord)
 
 void  Disocclusion(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 color : SV_Target0)
 {
-float X, Y, Z, W = 1, DM, DMA, Out, A, B, DP =  Divergence, Disocclusion_PowerA, Disocclusion_PowerB , DBD = tex2Dlod(SamplerDM,float4(texcoord,0,0)).x , AMoffset = 0.008, BMoffset = 0.00285714, CMoffset = 0.09090909;
+float X, Y, Z, W = 1, DM, DMA, DMB, A, B, S, MS =  Divergence * pix.x, DBD = 1-tex2Dlod(SamplerDM,float4(texcoord,0,0)).x , Div = 0.09090909;
 float2 dirA, dirB;
 
 #if AO_TOGGLE
@@ -929,77 +929,65 @@ if(AO == 1)
 	}
 #endif
 
-//DBD Adjustment Start
-DBD = (DBD - 0.025)/(1 - 0.025); 
-DBD = DBD*DBD*(3 - 2*DBD);
-DBD = ( DBD - 1.0f ) / ( -187.5f - 1.0f );
-//DBD Adjustment End
-
-	DP *= Disocclusion_Power_Adjust;
+	MS *= Disocclusion_Power_Adjust;
 		
 	if ( Disocclusion_Selection == 1 || Disocclusion_Selection == 4 ) // Radial    
 	{
-		Disocclusion_PowerA = DP*AMoffset;
+		A += 16.0; // Radial
+		B = DBD * 11.0; // Depth
+		dirA = 0.5 - texcoord;
+		dirB = float2(0.5,0.0);
 	}
 	else if ( Disocclusion_Selection == 2 || Disocclusion_Selection == 5 ) // Normal  
 	{
-		Disocclusion_PowerA = DP*BMoffset;
+		A += 5.5; // Normal
+		B = DBD * 11.0; // Depth
+		dirA = float2(0.5,0.0);
+		dirB = float2(0.5,0.0);
 	}
 	else if ( Disocclusion_Selection == 3 ) // Depth    
 	{
-		Disocclusion_PowerA = DBD*DP;
+		A = DBD * 11.0; // Depth
+		dirA = float2(0.5,0.0);
+	}
+	else if ( Disocclusion_Selection == 6 ) // Radial & Normal  
+	{
+		A += 16.0; // Radial
+		B += 5.5; // Normal
+		dirA = 0.5 - texcoord;
+		dirB = float2(0.5,0.0);
 	}
 		
-	// Mix Depth Start	
-	if ( Disocclusion_Selection == 4 || Disocclusion_Selection == 5 ) //Depth    
-	{
-		Disocclusion_PowerB = DBD*DP;
-	}
-	// Mix Depth End
-	
 	if (Disocclusion_Selection >= 1) 
 	{
-		const float weight[11] = {0.0,0.010,-0.010,0.020,-0.020,0.030,-0.030,0.040,-0.040,0.050,-0.050}; //By 10
-		
-		if( Disocclusion_Selection == 1)
-		{
-			dirA = 0.5 - texcoord;
-			dirB = 0.5 - texcoord;
-			A = Disocclusion_PowerA;
-			B = Disocclusion_PowerB;
-		}
-		else if ( Disocclusion_Selection == 2 || Disocclusion_Selection == 3 || Disocclusion_Selection == 5)
-		{
-			dirA = float2(0.5,0.0);
-			dirB = float2(0.5,0.0);
-			A = Disocclusion_PowerA;
-			B = Disocclusion_PowerB;
-		}
-		else if(Disocclusion_Selection == 4)
-		{
-			dirA = 0.5 - texcoord;
-			dirB = float2(0.5,0.0);
-			A = Disocclusion_PowerA;
-			B = Disocclusion_PowerB;
-		}
-		
+		const float weight[11] = {0.0,0.010,-0.010,0.020,-0.020,0.030,-0.030,0.040,-0.040,0.050,-0.050}; //By 11
+				
 		if ( Disocclusion_Selection >= 1 )
-		{			
+		{		
 				[loop]
 				for (int i = 0; i < 11; i++)
 				{	
-					DM += tex2Dlod(SamplerDM,float4(texcoord + dirA * weight[i] * A,0,0)).x*CMoffset;
+					S = weight[i] * MS;
+					DMA += tex2Dlod(SamplerDM,float4(texcoord + dirA * S * A,0,0)).x*Div;
 					
-					if(Disocclusion_Selection == 4 || Disocclusion_Selection == 5)
+					if(Disocclusion_Selection == 4 || Disocclusion_Selection == 5 || Disocclusion_Selection == 6)
 					{
-						DMA += tex2Dlod(SamplerDM,float4(texcoord + dirB * weight[i] * B,0,0)).x*CMoffset;
+						DMB += tex2Dlod(SamplerDM,float4(texcoord + dirB * S * B,0,0)).x*Div;
 					}
 				}
 		}
 		
 		if ( Disocclusion_Selection == 4 || Disocclusion_Selection == 5)
 		{	
-			DM = lerp(DM,DMA,0.5);
+			DM = lerp(DMA,DMB,0.25);
+		}
+		else if ( Disocclusion_Selection == 6)
+		{	
+			DM = lerp(DMA,DMB,0.25);
+		}
+		else
+		{
+			DM = DMA;
 		}
 	}
 	else
@@ -1045,9 +1033,9 @@ float4 PS_calcLR(float2 texcoord)
 {
 	float2 TCL, TCR, TexCoords = texcoord;
 	float4 color, Right, Left;
-	float DepthR = 1, DepthL = 1, Adjust_A = 0.11111112, Adjust_B = 0.07692307, N, S, L, R;
-	float samplesA[9] = {0.5,0.5625,0.625,0.6875,0.75,0.8125,0.875,0.9375,1.0};
-	float samplesB[13] = {0.5,0.546875,0.578125,0.625,0.659375,0.703125,0.75,0.796875,0.828125,0.875,0.921875,0.953125,1.0};
+	float DepthR = 1, DepthL = 1, Adjust_A = 0.11111111, Adjust_B = 0.07692307, N, S, L, R;
+	float samplesA[9] = {0.5,0.5625,0.625,0.6875,0.75,0.8125,0.875,0.9375,1.0}; //by 9
+	float samplesB[13] = {0.5,0.546875,0.578125,0.625,0.659375,0.703125,0.75,0.796875,0.828125,0.875,0.921875,0.953125,1.0};//by 13
 
 	//MS is Max Separation P is Perspective Adjustment
 	float MS = Divergence * pix.x, P = Perspective * pix.x;
@@ -1117,7 +1105,7 @@ float4 PS_calcLR(float2 texcoord)
 		}
 		else if (View_Mode == 1)
 		{
-			S = samplesA[i] * MS * 1.21875;//9
+			S = samplesA[i] * MS * 1.5;//9
 			L += Encode(float2(TCL.x+S, TCL.y)).x*Adjust_A;
 			R += Encode(float2(TCR.x-S, TCR.y)).y*Adjust_A;
 			DepthL = min(1,L);
@@ -1125,7 +1113,7 @@ float4 PS_calcLR(float2 texcoord)
 		}
 		else if (View_Mode == 2)
 		{
-			S = samplesB[i] * MS * 1.21875;//13
+			S = samplesB[i] * MS * 1.5;//13
 			L += Encode(float2(TCL.x+S, TCL.y)).x*Adjust_B;
 			R += Encode(float2(TCR.x-S, TCR.y)).y*Adjust_B;
 			DepthL = min(1,L);

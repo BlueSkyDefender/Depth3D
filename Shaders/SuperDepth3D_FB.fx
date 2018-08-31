@@ -138,15 +138,6 @@ uniform float Disocclusion_Power_Adjust <
 	ui_category = "Occlusion Masking";
 > = 1.0;
 
-uniform int View_Mode <
-	ui_type = "combo";
-	ui_items = "View Mode Normal\0View Mode Alpha\0";
-	ui_label = " View Mode";
-	ui_tooltip = "Change the way the shader warps the output to the screen.\n"
-				 "Default is Normal";
-	ui_category = "Occlusion Masking";
-> = 0;
-
 //Depth Map//
 uniform int Depth_Map <
 	ui_type = "combo";
@@ -951,8 +942,7 @@ float DeNoise(float2 texcoord : TEXCOORD0)
 
 void  Disocclusion(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 color : SV_Target0)
 {
-float X, Y, Z, W = 1, DM, DMA, Out, A, B, DP =  Divergence, Disocclusion_PowerA, Disocclusion_PowerB , DBD = tex2Dlod(SamplerDMFB,float4(texcoord,0,0)).x , AMoffset = 0.00285714, CMoffset = 0.09090909;
-float2 dirA, dirB;
+float X, Y, Z, W = 1, DM, DMA, DMB, A, B, S, MS = Divergence * pix.x, DBD = 1-tex2Dlod(SamplerDMFB,float4(texcoord,0,0)).x , Div = 0.09090909;
 
 #if AO_TOGGLE
 float blursize = 2.0*pix.x,sum;
@@ -969,67 +959,46 @@ if(AO == 1)
 	}
 #endif
 
-//DBD Adjustment Start
-DBD = (DBD - 0.025)/(1 - 0.025); 
-DBD = DBD*DBD*(3 - 2*DBD);
-DBD = ( DBD - 1.0f ) / ( -187.5f - 1.0f );
-//DBD Adjustment End
-
-	DP *= Disocclusion_Power_Adjust;
+	MS *= Disocclusion_Power_Adjust;
 		
-	if ( Disocclusion_Selection == 1 || Disocclusion_Selection == 3 ) // Normal  
+	if ( Disocclusion_Selection == 1 || Disocclusion_Selection == 3 )  
 	{
-		Disocclusion_PowerA = DP*AMoffset;
+		A += 2.75; // Normal
+		B = DBD * 2.75; // Depth
 	}
-	else if ( Disocclusion_Selection == 2 ) // Depth    
+	else if ( Disocclusion_Selection == 2 )    
 	{
-		Disocclusion_PowerA = DBD*DP;
+		A = DBD * 2.75; // Depth
 	}
-		
-	// Mix Depth Start	
-	if ( Disocclusion_Selection == 3 ) //Depth    
-	{
-		Disocclusion_PowerB = DBD*DP;
-	}
-	// Mix Depth End
 	
 	if (Disocclusion_Selection >= 1) 
 	{
 		const float weight[11] = {0.0,0.010,-0.010,0.020,-0.020,0.030,-0.030,0.040,-0.040,0.050,-0.050}; //By 10
-		
-		if ( Disocclusion_Selection == 1 || Disocclusion_Selection == 3)
-		{
-			dirA = float2(0.5,0.0);
-			dirB = float2(0.5,0.0);
-			A = Disocclusion_PowerA;
-			B = Disocclusion_PowerB;
-		}
-		else if(Disocclusion_Selection == 2)
-		{
-			dirA = 0.5 - texcoord;
-			dirB = float2(0.5,0.0);
-			A = Disocclusion_PowerA;
-			B = Disocclusion_PowerB;
-		}
-		
+
 		if ( Disocclusion_Selection >= 1 )
 		{			
 				[loop]
 				for (int i = 0; i < 11; i++)
-				{	
-					DM +=DeNoise(texcoord + dirA * weight[i] * A).x*CMoffset;
+				{
+					S = weight[i] * MS;						
+					DMA += DeNoise(float2(texcoord.x + S * A, texcoord.y)).x*Div;
 					
 					if(Disocclusion_Selection == 3)
 					{
-						DMA += DeNoise(texcoord + dirB * weight[i] * B).x*CMoffset;
+						DMB += DeNoise(float2(texcoord.x + S * B, texcoord.y)).x*Div;
 					}
 				}
 		}
 		
 		if ( Disocclusion_Selection == 3)
-		{	
-			DM = lerp(DM,DMA,0.5);
+		{
+			DM = lerp(DMA,DMB,0.25);
 		}
+		else
+		{
+			DM = DMA;
+		}
+		
 	}
 	else
 	{
@@ -1062,14 +1031,14 @@ DBD = ( DBD - 1.0f ) / ( -187.5f - 1.0f );
 /////////////////////////////////////////L/R//////////////////////////////////////////////////////////////////////
 void Encode(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 color : SV_Target0) //zBuffer Color Channel Encode
 {
-	float DepthR = 1, DepthL = 1,MSL = (Divergence * 0.25) * pix.x, S, MS = (Divergence + 0.25) * pix.x;
+	float DepthR = 1, DepthL = 1,MSL = (Divergence * 0.25) * pix.x, S, MS = Divergence  * pix.x;
 	
-	float samplesA[5] = {0.5,0.625,0.75,0.875,1.0};
+	float samples[5] = {0.5,0.625,0.75,0.875,1.0};
 	
 	[loop]
 	for ( int i = 0 ; i < 5; i++ ) 
 	{
-		S = samplesA[i] * MSL;
+		S = samples[i] * MSL;
 		DepthL = min(DepthL,tex2Dlod(SamplerDisFB, float4(texcoord.x - S, texcoord.y,0,0)).x);
 		DepthR = min(DepthR,tex2Dlod(SamplerDisFB, float4(texcoord.x + S, texcoord.y,0,0)).x);
 	}
@@ -1158,9 +1127,9 @@ float4 PS_calcLR(float2 texcoord)
 	}
 	
 		[loop]
-		for (int i = 0; i <= Divergence + 1; i++) 
+		for (int i = 0; i <= Divergence; i++) 
 		{		
-			j = i + (i * 0.20);	
+			j = i + (i * 0.1875);	
 			#if Convergence_Extended
 			//L Near
 			[flatten] if(tex2Dlod(SamplerEncodeFB,float4(TCL.x-i*pix.x,TCL.y,0,0)).y <= (1-TCL.x))
