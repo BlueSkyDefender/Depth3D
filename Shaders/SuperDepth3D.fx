@@ -45,7 +45,10 @@
 
 //3D AO Toggle enable this if you want better 3D seperation between objects. 
 //There will be a performance loss when enabled.
-#define AO_TOGGLE 0 //Default 0 is Off. One is On. 
+#define AO_TOGGLE 0 //Default 0 is Off. One is On.
+
+//View Mode Adjust is used to adjust the Occlusion Calling for View Mode Beta & Gamma. Around 1.125-1.500 is the range.  
+#define VM_Adjust 1.1875 //Default is 1.1875 Older used values are 1.19531 | 1.20312 | 1.21875
 
 //Use Depth Tool to adjust the lower preprocessor definitions below.
 //Horizontal & Vertical Depth Buffer Resize for non conforming BackBuffer.
@@ -454,7 +457,7 @@ float Depth(in float2 texcoord : TEXCOORD0)
 		
 		//Conversions to linear space.....
 		//Near & Far Adjustment
-		float Far = 1, Near = 0.125/Depth_Map_Adjust; //Division Depth Map Adjust - Near
+		float Far = 1.0, Near = 0.125/Depth_Map_Adjust; //Division Depth Map Adjust - Near
 		
 		if (Offset > 1.0)
 		zBuffer = min(1,zBuffer*Offset);
@@ -1099,13 +1102,13 @@ float4 PS_calcLR(float2 texcoord)
 	{
 			if (View_Mode == 0)
 		{
-			S = samplesA[i] * MS;//9
+			S = samplesA[i] * (MS + 0.00375);//9
 			DepthL = min(DepthL,Encode(float2(TCL.x+S, TCL.y)).x);
 			DepthR = min(DepthR,Encode(float2(TCR.x-S, TCR.y)).y);
 		}
 		else if (View_Mode == 1)
 		{
-			S = samplesA[i] * MS * 1.5;//9
+			S = samplesA[i] * MS * VM_Adjust;//9
 			L += Encode(float2(TCL.x+S, TCL.y)).x*Adjust_A;
 			R += Encode(float2(TCR.x-S, TCR.y)).y*Adjust_A;
 			DepthL = min(1,L);
@@ -1113,7 +1116,7 @@ float4 PS_calcLR(float2 texcoord)
 		}
 		else if (View_Mode == 2)
 		{
-			S = samplesB[i] * MS * 1.5;//13
+			S = samplesB[i] * MS * VM_Adjust;//13
 			L += Encode(float2(TCL.x+S, TCL.y)).x*Adjust_B;
 			R += Encode(float2(TCR.x-S, TCR.y)).y*Adjust_B;
 			DepthL = min(1,L);
