@@ -34,7 +34,10 @@
 // Enable this to fix the problem when there is a full screen Game Map Poping out of the screen. AKA Full Black Depth Map Fix. I have this off by default. Zero is off, One is On.
 #define FBDMF 0 //Default 0 is Off. One is On.
 
-//Third person auto zero parallax distance is a form of Automatic Near Field Adjustment based on BOTW fix. This now should work on all Third Person Games. 
+// Use this to Disable Anti-Z-Fighting for Weapon Hand.
+#define DWZF 0 //Default 0 is Off. One is On.
+
+// Third person auto zero parallax distance is a form of Automatic Near Field Adjustment based on BOTW fix. This now should work on all Third Person Games. 
 #define TPAuto_ZPD 0 //Default 0 is Off. One is On. Two is Alt.
 
 // Change the Cancel Depth Key
@@ -43,19 +46,19 @@
 // key "." is Key Code 110. Ex. Key 110 is the code for Decimal Point.
 #define Cancel_Depth_Key 0
 
-//3D AO Toggle enable this if you want better 3D seperation between objects. 
-//There will be a performance loss when enabled.
+// 3D AO Toggle enable this if you want better 3D seperation between objects. 
+// There will be a performance loss when enabled.
 #define AO_TOGGLE 0 //Default 0 is Off. One is On.
 
-//View Mode Adjust is used to adjust the Occlusion Calling for View Mode Beta & Gamma. Around 1.125-1.500 is the range.  
+// View Mode Adjust is used to adjust the Occlusion Calling for View Mode Beta & Gamma. Around 1.125-1.500 is the range.  
 #define VM_Adjust 1.1875 //Default is 1.1875 Older used values are 1.19531 | 1.20312 | 1.21875
 
-//Use Depth Tool to adjust the lower preprocessor definitions below.
-//Horizontal & Vertical Depth Buffer Resize for non conforming BackBuffer.
-//Ex. Resident Evil 7 Has this problem. So you want to adjust it too around float2(0.9575,0.9575).
+// Use Depth Tool to adjust the lower preprocessor definitions below.
+// Horizontal & Vertical Depth Buffer Resize for non conforming BackBuffer.
+// Ex. Resident Evil 7 Has this problem. So you want to adjust it too around float2(0.9575,0.9575).
 #define Horizontal_and_Vertical float2(1.0, 1.0) // 1.0 is Default.
 
-//Image Position Adjust is used to move the Z-Buffer around.
+// Image Position Adjust is used to move the Z-Buffer around.
 #define Image_Position_Adjust float2(0.0,0.0)
 
 //USER EDITABLE PREPROCESSOR FUNCTIONS END//
@@ -170,7 +173,7 @@ uniform float Depth_Map_Adjust <
 uniform float Offset <
 	ui_type = "drag";
 	ui_min = 1; ui_max = 2.0;
-	ui_label = " Offset";
+	ui_label = " Depth Map Offset";
 	ui_tooltip = "Depth Map Offset is for non conforming ZBuffer.\n"
 				 "It,s rare if you need to use this in any game.\n"
 				 "Use this to make adjustments to DM 0 or DM 1.\n"
@@ -652,7 +655,7 @@ float3 WeaponDepth(in float2 texcoord : TEXCOORD0)
 		//Auto Anti Weapon Depth Map Z-Fighting is always on.	
 		float WeaponLumAdjust = saturate(abs(smoothstep(0,0.5,LumWeapon(texcoord)*2.5)) * zBufferWH_A);	
 			
-		if( WP == 1 || WP == 22 || WP == 24 || WP == 27 || WP == 38 )//WP Adjust,SOMA, EuroTruckSim2, and HUD mode.
+		if( DWZF == 1 || WP == 1 || WP == 22 || WP == 24 || WP == 27 || WP == 38 )//WP Adjust,SOMA, EuroTruckSim2, and HUD mode.
 		{
 			zBufferWH_A = zBufferWH_A;
 		}

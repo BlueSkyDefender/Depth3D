@@ -27,6 +27,9 @@
 // Determines the Max Depth amount, in ReShades GUI.
 #define Depth_Max 50
 
+// Use this to Disable Anti-Z-Fighting for Weapon Hand.
+#define DWZF 0 //Default 0 is Off. One is On.
+
 // Change the Cancel Depth Key
 // Determines the Cancel Depth Toggle Key useing keycode info
 // You can use http://keycode.info/ to figure out what key is what.
@@ -40,21 +43,21 @@
 // Dither is an intentionally applied form of noise used to randomize quantization error, preventing banding in images.
 #define Dither_Toggle 0 //Default 0 is Off. One is On.
 
-//The a power of noise applyed. Lower is stronger at the cost of noise. 
+// The a power of noise applyed. Lower is stronger at the cost of noise. 
 #define Dither_Bit 6.0 //Default is Six.
 
-//Convergence Mode Full. Really High Performance Loss and Greater Image Errors Expected. If you turn this on set ZPD_Max to 0.250.
+// Convergence Mode Full. Really High Performance Loss and Greater Image Errors Expected. If you turn this on set ZPD_Max to 0.250.
 #define Convergence_Extended 0 //Zero is Off, One is On.
 
 // Determines the Max Zero Parallax Distance, in ReShades GUI. 0.125 is 125% If Convergence_Extended is on set this to 0.250
 #define ZPD_Max 0.125
 
-//Use Depth Tool to adjust the lower preprocessor definitions below.
-//Horizontal & Vertical Depth Buffer Resize for non conforming BackBuffer.
-//Ex. Resident Evil 7 Has this problem. So you want to adjust it too around float2(0.9575,0.9575).
+// Use Depth Tool to adjust the lower preprocessor definitions below.
+// Horizontal & Vertical Depth Buffer Resize for non conforming BackBuffer.
+// Ex. Resident Evil 7 Has this problem. So you want to adjust it too around float2(0.9575,0.9575).
 #define Horizontal_and_Vertical float2(1.0, 1.0) // 1.0 is Default.
 
-//Image Position Adjust is used to move the Z-Buffer around.
+// Image Position Adjust is used to move the Z-Buffer around.
 #define Image_Position_Adjust float2(0.0,0.0)
 
 //USER EDITABLE PREPROCESSOR FUNCTIONS END//
@@ -122,10 +125,10 @@ uniform float Auto_Depth_Range <
 //Occlusion Masking//
 uniform int Disocclusion_Selection <
 	ui_type = "combo";
-	ui_items = "Off\0Normal\0Depth Based\0Normal & Depth Based\0";
+	ui_items = "Off\0Radial\0Normal\0Depth Based\0Radial & Depth Based\0Normal & Depth Based\0Radial & Normal\0";
 	ui_label = "·Disocclusion Selection·";
 	ui_tooltip = "This is to select the z-Buffer blurring option for low level occlusion masking.\n"
-				"Default is Normal Blur.";
+				"Default is Normal.";
 	ui_category = "Occlusion Masking";
 > = 2;
 
@@ -161,7 +164,7 @@ uniform float Depth_Map_Adjust <
 uniform float Offset <
 	ui_type = "drag";
 	ui_min = 1; ui_max = 2.0;
-	ui_label = " Offset";
+	ui_label = " Depth Map Offset";
 	ui_tooltip = "Depth Map Offset is for non conforming ZBuffer.\n"
 				 "It,s rare if you need to use this in any game.\n"
 				 "Use this to make adjustments to DM 0 or DM 1.\n"
@@ -644,7 +647,7 @@ float3 WeaponDepth(in float2 texcoord : TEXCOORD0)
 		//Auto Anti Weapon Depth Map Z-Fighting is always on.	
 		float WeaponLumAdjust = saturate(abs(smoothstep(0,0.5,LumWeapon(texcoord)*2.5)) * zBufferWH_A);	
 			
-		if( WP == 1 || WP == 22 || WP == 24 || WP == 27 || WP == 38 )//WP Adjust,SOMA, EuroTruckSim2, and HUD mode.
+		if(DWZF == 1 || WP == 1 || WP == 22 || WP == 24 || WP == 27 || WP == 38 )//WP Adjust,SOMA, EuroTruckSim2, and HUD mode.
 		{
 			zBufferWH_A = zBufferWH_A;
 		}
@@ -942,7 +945,8 @@ float DeNoise(float2 texcoord : TEXCOORD0)
 
 void  Disocclusion(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 color : SV_Target0)
 {
-float X, Y, Z, W = 1, DM, DMA, DMB, A, B, S, MS = Divergence * pix.x, DBD = 1-tex2Dlod(SamplerDMFB,float4(texcoord,0,0)).x , Div = 0.09090909;
+float X, Y, Z, W = 1, DM, DMA, DMB, A, B, S, MS =  Divergence * pix.x, DBD = 1-tex2Dlod(SamplerDMFB,float4(texcoord,0,0)).x , Div = 0.09090909;
+float2 dirA, dirB;
 
 #if AO_TOGGLE
 float blursize = 2.0*pix.x,sum;
@@ -961,44 +965,64 @@ if(AO == 1)
 
 	MS *= Disocclusion_Power_Adjust;
 		
-	if ( Disocclusion_Selection == 1 || Disocclusion_Selection == 3 )  
+	if ( Disocclusion_Selection == 1 || Disocclusion_Selection == 4 ) // Radial    
 	{
-		A += 2.75; // Normal
-		B = DBD * 2.75; // Depth
+		A += 16.0; // Radial
+		B = DBD * 11.0; // Depth
+		dirA = 0.5 - texcoord;
+		dirB = float2(0.5,0.0);
 	}
-	else if ( Disocclusion_Selection == 2 )    
+	else if ( Disocclusion_Selection == 2 || Disocclusion_Selection == 5 ) // Normal  
 	{
-		A = DBD * 2.75; // Depth
+		A += 5.5; // Normal
+		B = DBD * 11.0; // Depth
+		dirA = float2(0.5,0.0);
+		dirB = float2(0.5,0.0);
 	}
-	
+	else if ( Disocclusion_Selection == 3 ) // Depth    
+	{
+		A = DBD * 11.0; // Depth
+		dirA = float2(0.5,0.0);
+	}
+	else if ( Disocclusion_Selection == 6 ) // Radial & Normal  
+	{
+		A += 16.0; // Radial
+		B += 5.5; // Normal
+		dirA = 0.5 - texcoord;
+		dirB = float2(0.5,0.0);
+	}
+		
 	if (Disocclusion_Selection >= 1) 
 	{
-		const float weight[11] = {0.0,0.010,-0.010,0.020,-0.020,0.030,-0.030,0.040,-0.040,0.050,-0.050}; //By 10
-
+		const float weight[11] = {0.0,0.010,-0.010,0.020,-0.020,0.030,-0.030,0.040,-0.040,0.050,-0.050}; //By 11
+				
 		if ( Disocclusion_Selection >= 1 )
-		{			
+		{		
 				[loop]
 				for (int i = 0; i < 11; i++)
-				{
-					S = weight[i] * MS;						
-					DMA += DeNoise(float2(texcoord.x + S * A, texcoord.y)).x*Div;
+				{	
+					S = weight[i] * MS;
+					DMA += DeNoise(texcoord + dirA * S * A).x*Div;
 					
-					if(Disocclusion_Selection == 3)
+					if(Disocclusion_Selection == 4 || Disocclusion_Selection == 5 || Disocclusion_Selection == 6)
 					{
-						DMB += DeNoise(float2(texcoord.x + S * B, texcoord.y)).x*Div;
+						DMB += DeNoise(texcoord + dirB * S * B).x*Div;
 					}
 				}
 		}
 		
-		if ( Disocclusion_Selection == 3)
-		{
+		if ( Disocclusion_Selection == 4 || Disocclusion_Selection == 5)
+		{	
+			DM = lerp(DMA,DMB,0.25);
+		}
+		else if ( Disocclusion_Selection == 6)
+		{	
 			DM = lerp(DMA,DMB,0.25);
 		}
 		else
 		{
 			DM = DMA;
 		}
-		
 	}
 	else
 	{
@@ -1025,7 +1049,7 @@ if(AO == 1)
 		X = 0.5;
 	}
 		
-	color = float4(X,Y,Z,W);
+	color = float4(X,Y,Z,W);			
 }
 
 /////////////////////////////////////////L/R//////////////////////////////////////////////////////////////////////
@@ -1129,7 +1153,7 @@ float4 PS_calcLR(float2 texcoord)
 		[loop]
 		for (int i = 0; i <= Divergence; i++) 
 		{		
-			j = i + (i * 0.1875);	
+			j = i + (i * 0.15625);	
 			#if Convergence_Extended
 			//L Near
 			[flatten] if(tex2Dlod(SamplerEncodeFB,float4(TCL.x-i*pix.x,TCL.y,0,0)).y <= (1-TCL.x))

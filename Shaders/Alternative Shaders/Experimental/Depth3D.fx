@@ -91,7 +91,7 @@ uniform int Depth_Map <
 uniform float Offset <
 	ui_type = "drag";
 	ui_min = 1; ui_max = 2.0;
-	ui_label = " Offset";
+	ui_label = " Depth Map Offset";
 	ui_tooltip = "Depth Map Offset is for non conforming ZBuffer.\n"
 				 "It,s rare if you need to use this in any game.\n"
 				 "Use this to make adjustments to DM 0 or DM 1.\n"
@@ -391,35 +391,33 @@ float Conv(float DM_A,float DM_B,float2 texcoord)
 
 void  Disocclusion(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 color : SV_Target0)
 {
-float X, Y, Z, W = 1, A, DP = Divergence, Disocclusion_PowerA , AMoffset = 0.00285714, BMoffset = 0.09090909;
-float2 dirA, DM;
+float X, Y, Z, W = 1, A, S, MS =  Divergence * pix.x, Div = 0.09090909;
+float2 DM, dir;
 
-	DP *= Disocclusion_Power_Adjust;
-		
-	Disocclusion_PowerA = DP*AMoffset;
-		
+	MS *= Disocclusion_Power_Adjust;
+	
+	A += 5.5; // Normal
+	dir = float2(0.5,0.0);	
+	
+	const float weight[11] = {0.0,0.010,-0.010,0.020,-0.020,0.030,-0.030,0.040,-0.040,0.050,-0.050}; //By 11
+				
 	if (Disocclusion_Power_Adjust > 0) 
-	{
-		const float weight[11] = {0.0,0.010,-0.010,0.020,-0.020,0.030,-0.030,0.040,-0.040,0.050,-0.050}; //By 10
-
-		dirA = float2(0.5,0.0);
-		A = Disocclusion_PowerA;
-
-		
+	{	
 		[loop]
 		for (int i = 0; i < 11; i++)
 		{	
-			DM += tex2Dlod(SamplerDepth,float4(texcoord + dirA * weight[i] * A,0,0)).xy*BMoffset;
-
-		}	
+			S = weight[i] * MS;
+			DM += tex2Dlod(SamplerDepth,float4(texcoord + dir * S * A,0,0)).xy*Div;
+		}
 	}
 	else
 	{
 		DM = tex2Dlod(SamplerDepth,float4(texcoord,0,0)).xy;
 	}
-
+	
 	X = DM.x;
 	Y = DM.y;	
+	
 	color = float4(X,Y,Z,W);
 }
 
@@ -461,7 +459,7 @@ float4 PS_calcLR(float2 texcoord)
 		Znum = 0;
 	}
 	
-	float DepthL = Znum, DepthR = Znum, N, S, L, R;
+	float DepthL = Znum, DepthR = Znum, N, S, j, L, R;
 	
 	//P is Perspective Adjustment.
 	float P = Perspective * pix.x;
@@ -516,15 +514,16 @@ float4 PS_calcLR(float2 texcoord)
 	}
 	
 		[loop]
-		for (int i = 0; i < Divergence + 1; i++) 
+		for (int i = 0; i < Divergence; i++) 
 		{
+			j = i + (i * 0.125);	
 			//L
 			[flatten] if(tex2Dlod(SamplerEncode,float4(TCL.x+i*pix.x,TCL.y,0,0)).y >= (1-TCL.x))
-						DepthL = i*pix.x;
+						DepthL = j*pix.x;
 			
 			//R
 			[flatten] if(tex2Dlod(SamplerEncode,float4(TCR.x-i*pix.x,TCR.y,0,0)).x >= TCR.x )
-						DepthR = i*pix.x;
+						DepthR = j*pix.x;
 		}				
 
 		Left = tex2Dlod(BackBuffer, float4(TCL.x + DepthL, TCL.y,0,0));
