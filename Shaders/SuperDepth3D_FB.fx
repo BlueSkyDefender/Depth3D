@@ -52,6 +52,9 @@
 // Determines the Max Zero Parallax Distance, in ReShades GUI. 0.125 is 125% If Convergence_Extended is on set this to 0.250
 #define ZPD_Max 0.125
 
+//Depth Map Boosting helps increase depth at the cost of accuracy.	//Depth Map Boosting helps increase depth at the cost of accuracy.
+#define Depth_Boost 0 //Zero is Off, One is Mode One, and Two is Mode Two. 
+
 // Use Depth Tool to adjust the lower preprocessor definitions below.
 // Horizontal & Vertical Depth Buffer Resize for non conforming BackBuffer.
 // Ex. Resident Evil 7 Has this problem. So you want to adjust it too around float2(0.9575,0.9575).
@@ -144,7 +147,7 @@ uniform float Disocclusion_Power_Adjust <
 //Depth Map//
 uniform int Depth_Map <
 	ui_type = "combo";
-	ui_items = "DM0 Normal\0DM1 Normal Reversed\0";
+	ui_items = "DM0 Normal\0DM1 Reversed\0";
 	ui_label = "·Depth Map Selection·";
 	ui_tooltip = "Linearization for the zBuffer also known as Depth Map.\n"
 			     "DM0 is Z-Normal and DM1 is Z-Reversed.\n";
@@ -163,14 +166,14 @@ uniform float Depth_Map_Adjust <
 
 uniform float Offset <
 	ui_type = "drag";
-	ui_min = 1; ui_max = 2.0;
+	ui_min = 0.0; ui_max = 1.0;
 	ui_label = " Depth Map Offset";
 	ui_tooltip = "Depth Map Offset is for non conforming ZBuffer.\n"
 				 "It,s rare if you need to use this in any game.\n"
 				 "Use this to make adjustments to DM 0 or DM 1.\n"
-				 "Default and starts at 1.0, & it's Off.";
+				 "Default and starts at Zero and it's Off.";
 	ui_category = "Depth Map";
-> = 1.0;
+> = 0.0;
 
 uniform bool Depth_Map_View <
 	ui_label = " Depth Map View";
@@ -238,9 +241,9 @@ uniform float Interlace_Optimization <
 	ui_label = " Interlace Optimization";
 	ui_tooltip = "Interlace Optimization Is used to reduce alisesing in a Line or Column interlaced image.\n"
 	             "This has the side effect of softening the image.\n"
-	             "Default is 0.375";
+	             "Default is 0.250";
 	ui_category = "Stereoscopic Options";
-> = 0.375;
+> = 0.250;
 
 uniform int Anaglyph_Colors <
 	ui_type = "combo";
@@ -448,33 +451,27 @@ float Depth(in float2 texcoord : TEXCOORD0)
 		if (Depth_Map_Flip)
 			texcoord.y =  1 - texcoord.y;
 			
-		float zBuffer = tex2D(DepthBuffer, texcoord).x; //Depth Buffer
+		float DM, zBuffer = tex2D(DepthBuffer, texcoord).x; //Depth Buffer
 		
 		//Conversions to linear space.....
 		//Near & Far Adjustment
-		float Far = 1, Near = 0.125/Depth_Map_Adjust; //Division Depth Map Adjust - Near
+		float Far = 1.0, Near = 0.125/Depth_Map_Adjust, DA = Depth_Map_Adjust * 2; //Division Depth Map Adjust - Near
 		
-		if (Offset > 1.0)
-		zBuffer = min(1,zBuffer*Offset);
-
-		//0. Normal
-		float Normal = Far * Near / (Far + zBuffer * (Near - Far));
+		float2 Offsets = float2(1 + Offset,1 - Offset), Z = float2( zBuffer, 1-zBuffer );
 		
-		//1. Reverse
-		float NormalReverse = Far * Near / (Near + zBuffer * (Far - Near));
-			  
-		float DM;
-		
-		if (Depth_Map == 0)
+		if (Offset > 0)
+		Z = min( 1, float2( Z.x*Offsets.x , ( Z.y - 0.0 ) / ( Offsets.y - 0.0 ) ) );
+				
+		if (Depth_Map == 0)//DM0. Normal
 		{
-			DM = Normal;
+			DM = 2.0 * Near * Far / (Far + Near - (2.0 * Z.x - 1.0) * (Far - Near));
 		}		
-		else if (Depth_Map == 1)
+		else if (Depth_Map == 1)//DM1. Reverse
 		{
-			DM = NormalReverse;
-		}		
+			DM = 2.0 * Near * Far / (Far + Near - Z.y * (Far - Near));
+		}
 		
-	return DM;	
+	return DM;
 }
 #define Num  12 //Adjust me everytime you add a weapon hand profile.
 float3 WeaponDepth(in float2 texcoord : TEXCOORD0)
@@ -496,16 +493,18 @@ float3 WeaponDepth(in float2 texcoord : TEXCOORD0)
  		
  		float Far = 1.0, Near = 0.125/7.5;
  		
-		if (Offset > 1.0)
-		zBufferWH_B = min(1,zBufferWH_B*Offset);
+		float2 Offsets = float2(1 + Offset,1 - Offset), Z = float2( zBufferWH_B, 1-zBufferWH_B );
+		
+		if (Offset > 0)
+		Z = min( 1, float2( Z.x*Offsets.x , ( Z.y - 0.0 ) / ( Offsets.y - 0.0 ) ) );
 		
 		if (Depth_Map == 0)
 		{
-			zBufferWH_B = Far * Near / (Far + zBufferWH_B * (Near - Far));
+			zBufferWH_B = Far * Near / (Far + Z.x * (Near - Far));
 		}
 		else if (Depth_Map == 1)
 		{
-			zBufferWH_B = Far * Near / (Near + zBufferWH_B * (Far - Near));
+			zBufferWH_B = Far * Near / (Far + Z.y * (Near - Far));
 		}
 		
 		float2 og_Depth = float2(zBufferWH_A,zBufferWH_B);
@@ -865,7 +864,12 @@ float Conv(float DM,float2 texcoord)
 		{
 			DM = AutoDepthRange(DM,texcoord);
 		}
-				
+		
+		if (Depth_Boost == 1)
+			DM = lerp( DM, 1.5 * DM - 0.125, 0.5);
+		else if (Depth_Boost == 2)
+			DM = lerp( DM, 1.75 * DM - 0.1875, 0.5);
+					
 		Z = lerp(Convergence,DM, ZP);
 				
     return Z;
