@@ -90,14 +90,14 @@ uniform int Depth_Map <
 
 uniform float Offset <
 	ui_type = "drag";
-	ui_min = 1; ui_max = 2.0;
+	ui_min = 0; ui_max = 1.0;
 	ui_label = " Depth Map Offset";
 	ui_tooltip = "Depth Map Offset is for non conforming ZBuffer.\n"
 				 "It,s rare if you need to use this in any game.\n"
 				 "Use this to make adjustments to DM 0 or DM 1.\n"
-				 "Default and starts at 1.0, & it's Off.";
+				 "Default and starts at Zero, & it's Off.";
 	ui_category = "Depth Map";
-> = 1.0;
+> = 0.0;
 
 uniform float Depth_Map_Adjust <
 	ui_type = "drag";
@@ -327,28 +327,18 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 		//Near & Far Adjustment
 		float Far = 1, Near = 0.125/Depth_Map_Adjust, NearLocked = 0.125/7.5; //Division Depth Map Adjust - Near
 		
-		if (Offset > 1.0)
-		zBuffer = min(1,zBuffer*Offset);
-
-		//0. Normal
-		float Normal = Far * Near / (Far + zBuffer * (Near - Far));
-		float NormalLocked = Far * NearLocked / (Far + zBuffer * (NearLocked - Far));
+		float2 DM, Offsets = float2(1 + Offset,1 - Offset), Z = float2( zBuffer, 1 - zBuffer );
 		
-		//1. Reverse
-		float NormalReverse = Far * Near / (Near + zBuffer * (Far - Near));
-		float NormalReverseLocked = Far * NearLocked / (NearLocked + zBuffer * (Far - NearLocked));
-			
-		float2 DM;
+		if (Offset > 0)
+		Z = min( 1, float2( Z.x*Offsets.x , ( Z.y - 0.0 ) / ( Offsets.y - 0.0 ) ) );
 		
-		if (Depth_Map == 0)
+		if (Depth_Map == 0) //DM0. Normal
 		{
-			DM.x = Normal;
-			DM.y = NormalLocked;
+			DM = float2( 2.0 * Near * Far / (Far + Near - (2.0 * Z.x - 1.0) * (Far - Near)), 2.0 * NearLocked * Far / (Far + NearLocked - (2.0 * Z.x - 1.0) * (Far - NearLocked)) );
 		}		
-		else
+		else //DM1. Reverse
 		{
-			DM.x = NormalReverse;
-			DM.y = NormalReverseLocked;
+			DM = float2( 2.0 * Near * Far / (Far + Near - Z.y * (Far - Near)) , 2.0 * NearLocked * Far / (Far + NearLocked - Z.y * (Far - NearLocked)) );
 		}
 		
 		R = saturate(DM.x);
@@ -363,25 +353,25 @@ float AutoDepthRange( float d, float2 texcoord )
     return min(1,( d - 0 ) / ( LumAdjust - 0));
 }
 
-float Conv(float DM_A,float DM_B,float2 texcoord)
+float Conv(float2 DM_IN,float2 texcoord)
 {
 	float DM, Convergence, Z = ZPD, ZP = 0.5625;
 		
 		if (ZPD == 0)
 			ZP = 1.0;
 				
-		float Convergence_A = 1 - Z / DM_A;		
-		float Convergence_B = 1 - Z / DM_B;
+		float Convergence_A = 1 - Z / DM_IN.x;		
+		float Convergence_B = 1 - Z / DM_IN.y;
 						
 		if (Auto_Depth_Range > 0)
 		{
-			DM_A = AutoDepthRange(DM_A,texcoord);
+			DM_IN.x = AutoDepthRange(DM_IN.x,texcoord);
 		}
 		
 		if (Weapon_Adjust.x > 0)
 			Convergence_A = Convergence_B;
 		
-		DM = DM_A;		
+		DM = DM_IN.x;		
 		Convergence	= Convergence_A;
 			
 		Z = lerp(Convergence,DM, ZP);
@@ -435,11 +425,11 @@ void Encode(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, ou
 		DepthR = min(DepthR,tex2Dlod(SamplerDiso, float4(texcoord.x + S, texcoord.y,0,0)).xy);
 	}
 	
-	DepthL.x = Conv(DepthL.x,DepthL.y,texcoord);
-	DepthR.x = Conv(DepthR.x,DepthR.y,texcoord);
+	float DL = Conv(DepthL,texcoord);
+	float DR = Conv(DepthR,texcoord);
 	
 	// X Left & Y Right
-	float X = texcoord.x+MS*DepthL.x, Y = (1-texcoord.x)+MS*DepthR.x;
+	float X = texcoord.x+MS*DL, Y = (1-texcoord.x)+MS*DR;
 	
 	color = float4(X,Y,0.0,1.0);
 }
@@ -751,6 +741,12 @@ technique Cross_Cursor
 
 technique Depth3D
 {
+		pass AverageLuminance
+	{
+		VertexShader = PostProcessVS;
+		PixelShader = Average_Luminance;
+		RenderTarget = texLumi;
+	}
 		pass zbuffer
 	{
 		VertexShader = PostProcessVS;
@@ -768,12 +764,6 @@ technique Depth3D
 		VertexShader = PostProcessVS;
 		PixelShader = Encode;
 		RenderTarget = texEncode;
-	}
-		pass AverageLuminance
-	{
-		VertexShader = PostProcessVS;
-		PixelShader = Average_Luminance;
-		RenderTarget = texLumi;
 	}
 		pass StereoOut
 	{
