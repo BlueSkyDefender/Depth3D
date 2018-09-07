@@ -473,7 +473,7 @@ float Depth(in float2 texcoord : TEXCOORD0)
 		}		
 		else if (Depth_Map == 1)//DM1. Reverse
 		{
-			DM = 2.0 * Near * Far / (Far + Near - Z.y * (Far - Near));
+			DM = 2.0 * Near * Far / (Far + Near - (1.375 * Z.y - 0.375) * (Far - Near));
 		}
 			
 	return DM;

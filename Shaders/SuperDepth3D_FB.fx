@@ -53,7 +53,7 @@
 #define ZPD_Max 0.125
 
 //Depth Map Boosting helps increase depth at the cost of accuracy.	//Depth Map Boosting helps increase depth at the cost of accuracy.
-#define Depth_Boost 0 //Zero is Off, One is Mode One, and Two is Mode Two. 
+#define Depth_Boost 0 //Default 0 is Off. One is On.
 
 // Use Depth Tool to adjust the lower preprocessor definitions below.
 // Horizontal & Vertical Depth Buffer Resize for non conforming BackBuffer.
@@ -468,7 +468,7 @@ float Depth(in float2 texcoord : TEXCOORD0)
 		}		
 		else if (Depth_Map == 1)//DM1. Reverse
 		{
-			DM = 2.0 * Near * Far / (Far + Near - Z.y * (Far - Near));
+			DM = 2.0 * Near * Far / (Far + Near - (1.375 * Z.y - 0.375) * (Far - Near));
 		}
 		
 	return DM;
@@ -866,8 +866,6 @@ float Conv(float DM,float2 texcoord)
 		}
 		
 		if (Depth_Boost == 1)
-			DM = lerp( DM, 1.5 * DM - 0.125, 0.5);
-		else if (Depth_Boost == 2)
 			DM = lerp( DM, 1.75 * DM - 0.1875, 0.5);
 					
 		Z = lerp(Convergence,DM, ZP);
