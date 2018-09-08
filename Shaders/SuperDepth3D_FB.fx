@@ -1155,7 +1155,7 @@ float4 PS_calcLR(float2 texcoord)
 		[loop]
 		for (int i = 0; i <= Divergence; i++) 
 		{		
-			j = i + (i * 0.15625);	
+			j = i + (i * 0.125);		
 			#if Convergence_Extended
 			//L Near
 			[flatten] if(tex2Dlod(SamplerEncodeFB,float4(TCL.x-i*pix.x,TCL.y,0,0)).y <= (1-TCL.x))
