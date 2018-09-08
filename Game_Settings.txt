@@ -152,6 +152,7 @@ Inner Shader Setting:
     RB        S.T.A.L.K.E.R:CoP Complete Mod               DM 0         7.5         WDM 19                0.200-0.350
     RB        S.T.A.L.K.E.R:SoC Complete Mod               DM 0         7.5         WDM 19                0.200-0.350
               Sleeping Dogs: DE                            DM 0         7.0                               0.075-0.100 
+              Sniper Elite 4                               DM 0         25.0                              0.025-0.075
               Soma                                         DM 0         11.25       WDM 20                0.025-0.100
               Sonic Adventure 2                            DM 0         10.0                              0.150-0.250
               Souls Games                                  DM 0       7.5-25.0                            0.050-0.100              
