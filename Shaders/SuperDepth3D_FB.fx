@@ -794,7 +794,7 @@ float Conv(float DM,float2 texcoord)
 			
 		float Divergence_Locked = Divergence*0.00105;
 				
-		ZP = 0.548125;
+		ZP = 0.54875;
 		
 		if (ZPD >= ZPD_Max)
 			Z = ZPD_Max;
@@ -807,15 +807,18 @@ float Conv(float DM,float2 texcoord)
 		#if Convergence_Extended
 		if(Convergence_Mode == 1)
 			Z = Divergence_Locked;
-				
-			Convergence = 1 - Z / DM;
-		#else
-			Convergence = 1 - Z / DM;
-		#endif
-		
+			
 		// You need to readjust the Z-Buffer if your going to use use the Convergence equation.
-		Convergence = Convergence/1-(-Z);		
+		float D = DM / (1-Z);	
 		
+			Convergence = 1 - Z / D;
+		#else
+		// You need to readjust the Z-Buffer if your going to use use the Convergence equation.
+		float D = DM / (1-Z);
+		
+			Convergence = 1 - Z / D;
+		#endif
+				
 		if (Auto_Depth_Range > 0)
 		{
 			DM = AutoDepthRange(DM,texcoord);
