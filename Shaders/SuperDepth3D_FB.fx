@@ -36,24 +36,18 @@
 // key "." is Key Code 110. Ex. Key 110 is the code for Decimal Point.
 #define Cancel_Depth_Key 0
 
+//Depth Map Boosting helps increase depth at the cost of accuracy.	//Depth Map Boosting helps increase depth at the cost of accuracy.
+#define Depth_Boost 0 //Default 0 is Off. One is On.
+
 //3D AO Toggle enable this if you want better 3D seperation between objects. 
 //There will be a performance loss when enabled.
 #define AO_TOGGLE 0 //Default 0 is Off. One is On.
- 
-// Dither is an intentionally applied form of noise used to randomize quantization error, preventing banding in images.
-#define Dither_Toggle 0 //Default 0 is Off. One is On.
-
-// The a power of noise applyed. Lower is stronger at the cost of noise. 
-#define Dither_Bit 6.0 //Default is Six.
 
 // Convergence Mode Full. Really High Performance Loss and Greater Image Errors Expected. If you turn this on set ZPD_Max to 0.250.
 #define Convergence_Extended 0 //Zero is Off, One is On.
 
-// Determines the Max Zero Parallax Distance, in ReShades GUI. 0.125 is 125% If Convergence_Extended is on set this to 0.250
+// Determines the Max Zero Parallax Distance, in ReShades GUI. 0.125 is 125% If Convergence_Extended is on you can set this to 0.250.
 #define ZPD_Max 0.125
-
-//Depth Map Boosting helps increase depth at the cost of accuracy.	//Depth Map Boosting helps increase depth at the cost of accuracy.
-#define Depth_Boost 0 //Default 0 is Off. One is On.
 
 // Use Depth Tool to adjust the lower preprocessor definitions below.
 // Horizontal & Vertical Depth Buffer Resize for non conforming BackBuffer.
@@ -106,16 +100,6 @@ uniform float ZPD <
 				"Default is 0.010, Zero is off.";
 	ui_category = "Divergence & Convergence";
 > = 0.010;
-
-uniform int Balance <
-	ui_type = "drag";
-	ui_min = 0; ui_max = 7;
-	ui_label = " Balance";
-	ui_tooltip = "Balance between ZPD Depth and Scene Depth and works with ZPD option above.\n"
-				"Example Zero is 50/50, Four is 25/75, & so on between ZPD and Scene Depth.\n"
-				"Default is One.";
-	ui_category = "Divergence & Convergence";
-> = 1;
 
 uniform float Auto_Depth_Range <
 	ui_type = "drag";
@@ -219,7 +203,7 @@ uniform float3 Weapon_Adjust <
 uniform float Weapon_Depth_Adjust <
 	ui_type = "drag";
 	ui_min = -100; ui_max = 100;
-	ui_label = "Weapon Depth Adjustment";
+	ui_label = " Weapon Depth Adjustment";
 	ui_tooltip = "Pushes or Pulls the FPS Hand in or out of the screen.\n"
 				 "This also used to fine tune the Weapon Hand.\n" 
 				 "Default is Zero.";
@@ -360,17 +344,7 @@ sampler SamplerDisFB
 		MagFilter = LINEAR;
 		MipFilter = LINEAR;
 	};
-#if Dither_Toggle	
-texture texMedFB { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA32F; MipLevels = 2;};
 
-sampler SamplerMedFB
-	{
-		Texture = texMedFB;
-		MipFilter = Linear; 
-		MinFilter = Linear; 
-		MagFilter = Linear;
-	};
-#endif	
 texture texEncodeFB  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA32F;}; 
 
 sampler SamplerEncodeFB
@@ -819,25 +793,8 @@ float Conv(float DM,float2 texcoord)
 	float Z = ZPD, ZP, NF_Power;
 			
 		float Divergence_Locked = Divergence*0.00105;
-					
-		if(Balance == 0)
-			NF_Power = 0.5;
-		else if(Balance == 1)
-			NF_Power = 0.5625;
-		else if(Balance == 2)
-			NF_Power = 0.625;
-		else if(Balance == 3)
-			NF_Power = 0.6875;
-		else if(Balance == 4)
-			NF_Power = 0.75;
-		else if(Balance == 5)
-			NF_Power = 0.8125;
-		else if(Balance == 6)
-			NF_Power = 0.875;
-		else if(Balance == 7)
-			NF_Power = 0.9375;
-		
-		ZP = NF_Power;
+				
+		ZP = 0.548125;
 		
 		if (ZPD >= ZPD_Max)
 			Z = ZPD_Max;
@@ -848,17 +805,16 @@ float Conv(float DM,float2 texcoord)
 		float Convergence;	
 			
 		#if Convergence_Extended
-			if(Convergence_Mode == 1)
-			{
-				Convergence = 1 - Divergence_Locked / DM;
-			}
-			else
-			{	
-				Convergence = 1 - Z / DM;
-			}
+		if(Convergence_Mode == 1)
+			Z = Divergence_Locked;
+				
+			Convergence = 1 - Z / DM;
 		#else
-				Convergence = 1 - Z / DM;
-		#endif		
+			Convergence = 1 - Z / DM;
+		#endif
+		
+		// You need to readjust the Z-Buffer if your going to use use the Convergence equation.
+		Convergence = Convergence/1-(-Z);		
 		
 		if (Auto_Depth_Range > 0)
 		{
@@ -871,78 +827,6 @@ float Conv(float DM,float2 texcoord)
 		Z = lerp(Convergence,DM, ZP);
 				
     return Z;
-}
-
-#if Dither_Toggle
-
-uniform float frametime < source = "frametime"; >;
-//Time in milliseconds it took for the last frame to complete.
-
-float Dither(float2 texcoord : TEXCOORD0)
-{	
-	float Dither = tex2D(SamplerDMFB, float4(texcoord,0,0)).x;
-	
-	float DB  = Dither_Bit;
-	float noise = frac(sin(dot(texcoord * frametime, float2(12.9898,78.233))) * 43758.5453);
-	float dither_shift = (1.0 / (pow(2,DB) - 1.0));
-	float dither_shift_half = (dither_shift * 0.5);
-	dither_shift = dither_shift * noise - dither_shift_half;
-	
-	Dither += -dither_shift;
-	Dither += dither_shift;
-	Dither += -dither_shift;
-	
-	return Dither; 
-}
-
-#define s2(a, b)				temp = a; a = min(a, b); b = max(temp, b);
-#define mn3(a, b, c)			s2(a, b); s2(a, c);
-#define mx3(a, b, c)			s2(b, c); s2(a, c);
-
-#define mnmx3(a, b, c)			mx3(a, b, c); s2(a, b);                                   // 3 exchanges
-#define mnmx4(a, b, c, d)		s2(a, b); s2(c, d); s2(a, c); s2(b, d);                   // 4 exchanges
-#define mnmx5(a, b, c, d, e)	s2(a, b); s2(c, d); mn3(a, c, e); mx3(b, d, e);           // 6 exchanges
-#define mnmx6(a, b, c, d, e, f) s2(a, d); s2(b, e); s2(c, f); mn3(a, b, c); mx3(d, e, f); // 7 exchanges
-	
-float4 Median(float4 position : SV_Position, float2 texcoord : TEXCOORD0) : SV_Target
-{
-	float2 ScreenCal = float2(3*pix.x,3*pix.y);
-
-	float2 FinCal = ScreenCal*0.6;
-
-	float4 v[9];
-	
-	[unroll]
-	for(int i = -1; i <= 1; ++i) 
-	{
-		for(int j = -1; j <= 1; ++j)
-		{		
-		  float2 offset = float2(float(i), float(j));
-
-		  v[(i + 1) * 3 + (j + 1)] = Dither(texcoord + offset * FinCal);
-		}
-	}
-
-	float4 temp;
-
-	mnmx6(v[0], v[1], v[2], v[3], v[4], v[5]);
-	mnmx5(v[1], v[2], v[3], v[4], v[6]);
-	mnmx4(v[2], v[3], v[4], v[7]);
-	mnmx3(v[3], v[4], v[8]);
-	
-	return v[4];
-}
-#endif
-
-float DeNoise(float2 texcoord : TEXCOORD0)
-{	
-	float Out;
-	#if Dither_Toggle
-		Out = tex2Dlod(SamplerMedFB,float4(texcoord,0,0)).x;	
-	#else
-		Out = tex2Dlod(SamplerDMFB,float4(texcoord,0,0)).x;
-	#endif
-	return Out; 
 }
 
 void  Disocclusion(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 color : SV_Target0)
@@ -1004,11 +888,11 @@ if(AO == 1)
 				for (int i = 0; i < 11; i++)
 				{	
 					S = weight[i] * MS;
-					DMA += DeNoise(texcoord + dirA * S * A).x*Div;
+					DMA += tex2Dlod(SamplerDMFB,float4(texcoord + dirA * S * A,0,0)).x*Div;
 					
 					if(Disocclusion_Selection == 4 || Disocclusion_Selection == 5 || Disocclusion_Selection == 6)
 					{
-						DMB += DeNoise(texcoord + dirB * S * B).x*Div;
+						DMB += tex2Dlod(SamplerDMFB,float4(texcoord + dirB * S * B,0,0)).x*Div;
 					}
 				}
 		}
@@ -1028,7 +912,7 @@ if(AO == 1)
 	}
 	else
 	{
-		DM = DeNoise(texcoord).x;
+		DM = tex2Dlod(SamplerDMFB,float4(texcoord,0,0)).x;
 	}
 
 	if (!Cancel_Depth)
@@ -1055,6 +939,24 @@ if(AO == 1)
 }
 
 /////////////////////////////////////////L/R//////////////////////////////////////////////////////////////////////
+float3 EncodeFloatRGB(float f)
+{
+	float3 color;
+	f *= 256;
+	color.x = floor(f);
+	f = (f - color.x) * 256;
+	color.y = floor(f);
+	color.z = f - color.y;
+	color.xy *= 0.00390625; // *= 1.0/256
+	return color;
+}
+
+float DecodeFloatRGB(float3 color)
+{
+	const float3 byte_to_float = float3(1.0, 1.0 / 256, 1.0 / (256 * 256));
+	return dot(color, byte_to_float);
+}
+
 void Encode(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 color : SV_Target0) //zBuffer Color Channel Encode
 {
 	float DepthR = 1, DepthL = 1,MSL = (Divergence * 0.25) * pix.x, S, MS = Divergence  * pix.x;
@@ -1068,12 +970,18 @@ void Encode(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, ou
 		DepthL = min(DepthL,tex2Dlod(SamplerDisFB, float4(texcoord.x - S, texcoord.y,0,0)).x);
 		DepthR = min(DepthR,tex2Dlod(SamplerDisFB, float4(texcoord.x + S, texcoord.y,0,0)).x);
 	}
-	
+		
 	DepthL = Conv(DepthL,texcoord);
 	DepthR = Conv(DepthR,texcoord);
 	
+	DepthL = EncodeFloatRGB(DepthL).x;
+	DepthR = EncodeFloatRGB(DepthR).x;
+	
 	// X Left & Y Right
 	float X = texcoord.x+MS*DepthL, Y = (1-texcoord.x)+MS*DepthR;
+	
+	X = DecodeFloatRGB(X);
+	Y = DecodeFloatRGB(Y);	
 	
 	color = float4(X,Y,0.0,1.0);
 }
@@ -1558,14 +1466,6 @@ technique SuperDepth3D_FlashBack
 		PixelShader = Disocclusion;
 		RenderTarget = texDisFB;
 	}
-	#if Dither_Toggle
-		pass MedianPass
-	{
-		VertexShader = PostProcessVS;
-		PixelShader = Median;
-		RenderTarget = texMedFB;
-	}
-	#endif
 		pass Encoding
 	{
 		VertexShader = PostProcessVS;

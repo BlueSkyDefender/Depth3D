@@ -46,12 +46,12 @@
 // key "." is Key Code 110. Ex. Key 110 is the code for Decimal Point.
 #define Cancel_Depth_Key 0
 
+//Depth Map Boosting helps increase depth at the cost of accuracy.	//Depth Map Boosting helps increase depth at the cost of accuracy.
+#define Depth_Boost 0 //Zero is Off, One is On. 
+
 // 3D AO Toggle enable this if you want better 3D seperation between objects. 
 // There will be a performance loss when enabled.
 #define AO_TOGGLE 0 //Default 0 is Off. One is On.
-
-//Depth Map Boosting helps increase depth at the cost of accuracy.	//Depth Map Boosting helps increase depth at the cost of accuracy.
-#define Depth_Boost 0 //Zero is Off, One is On. 
 
 // Use Depth Tool to adjust the lower preprocessor definitions below.
 // Horizontal & Vertical Depth Buffer Resize for non conforming BackBuffer.
@@ -95,16 +95,6 @@ uniform float ZPD <
 				"Default is 0.010, Zero is off.";
 	ui_category = "Divergence & Convergence";
 > = 0.010;
-
-uniform int Balance <
-	ui_type = "drag";
-	ui_min = 0; ui_max = 7;
-	ui_label = " Balance";
-	ui_tooltip = "Balance between ZPD Depth and Scene Depth and works with ZPD option above.\n"
-				"Example Zero is 50/50, Four is 25/75, & so on between ZPD and Scene Depth.\n"
-				"Default is One.";
-	ui_category = "Divergence & Convergence";
-> = 1;
 
 uniform float Auto_Depth_Range <
 	ui_type = "drag";
@@ -225,7 +215,7 @@ uniform float3 Weapon_Adjust <
 uniform float Weapon_Depth_Adjust <
 	ui_type = "drag";
 	ui_min = -100; ui_max = 100;
-	ui_label = "Weapon Depth Adjustment";
+	ui_label = " Weapon Depth Adjustment";
 	ui_tooltip = "Pushes or Pulls the FPS Hand in or out of the screen.\n"
 				 "This also used to fine tune the Weapon Hand.\n" 
 				 "Default is Zero.";
@@ -864,42 +854,22 @@ float Conv(float D,float2 texcoord)
 			Z = Con;
 			Divergence_Locked = Divergence_Locked;
 		}	
-
-		if(Balance == 0)
-			NF_Power = 0.5;
-		else if(Balance == 1)
-			NF_Power = 0.5625;
-		else if(Balance == 2)
-			NF_Power = 0.625;
-		else if(Balance == 3)
-			NF_Power = 0.6875;
-		else if(Balance == 4)
-			NF_Power = 0.75;
-		else if(Balance == 5)
-			NF_Power = 0.8125;
-		else if(Balance == 6)
-			NF_Power = 0.875;
-		else if(Balance == 7)
-			NF_Power = 0.9375;
-		
-		ZP = NF_Power;
+			
+		ZP = 0.548125;
 		
 		if (ZPD >= ZPD_Max)
 			Z = ZPD_Max;
 		
 		if (ZPD == 0)
 			ZP = 1.0;
-		
-		float Convergence;		
-		
+					
 		if(Convergence_Mode == 1)
-		{
-			Convergence = 1 - Divergence_Locked / D;
-		}
-		else
-		{	
-			Convergence = 1 - Z / D;
-		}
+		Z = Divergence_Locked;
+			
+		float Convergence = 1 - Z / D;
+		
+		// You need to readjust the Z-Buffer if your going to use use the Convergence equation.
+		Convergence = Convergence/1-(-Z);
 		
 		if (Auto_Depth_Range > 0)
 		{
@@ -1024,9 +994,10 @@ if(AO == 1)
 }
 
 /////////////////////////////////////////L/R//////////////////////////////////////////////////////////////////////
+
 float2  Encode(in float2 texcoord : TEXCOORD0) //zBuffer Color Channel Encode
 {
-	float DM = tex2Dlod(SamplerDis,float4(texcoord.x, texcoord.y,0,1)).x,DepthR = DM, DepthL = DM;
+	float DM = tex2Dlod(SamplerDis,float4(texcoord.x, texcoord.y,0,0)).x,DepthR = DM, DepthL = DM;
 	
 	// X Left & Y Right	
 	float X = DepthL, Y = DepthR;
