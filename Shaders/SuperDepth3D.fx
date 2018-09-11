@@ -257,17 +257,24 @@ uniform float Anaglyph_Desaturation <
 	ui_category = "Stereoscopic Options";
 > = 1.0;
 
-uniform bool Scaling_Support <
+uniform int Scaling_Support <
+	ui_type = "combo";
+	ui_items = "SR Native\0SR 2160p A\0SR 2160p B\0SR 1080p A\0SR 1080p B\0SR 1050p A\0SR 1050p B\0SR 720p A\0SR 720p B\0";
 	ui_label = " Scaling Support";
-	ui_tooltip = "Dynamic Super Resolution , Virtual Super Resolution, downscaling, or Upscaling support for Line Interlaced, Column Interlaced, & Checkerboard 3D displays.";
+	ui_tooltip = "Dynamic Super Resolution , Virtual Super Resolution, downscaling, or Upscaling support for Line Interlaced, Column Interlaced, & Checkerboard 3D displays.\n"
+				 "Set this to your native Screen Resolution A or B.\n"
+				 "Default is SR Native.";
 	ui_category = "Stereoscopic Options";
-> = false;
+> = 0;
 
 uniform float Perspective <
 	ui_type = "drag";
 	ui_min = -100; ui_max = 100;
 	ui_label = " Perspective Slider";
-	ui_tooltip = "Determines the perspective point. Default is 0";
+	ui_tooltip = "Determines the perspective point of the two images this shader produces.\n"
+				 "For an HMD, use Polynomial Barrel Distortion shader to adjust for IPD.\n" 
+				 "Do not use this perspective adjustment slider to adjust for IPD.\n"
+				 "Default is Zero.";
 	ui_category = "Stereoscopic Options";
 > = 0;
 
@@ -276,6 +283,7 @@ uniform bool Eye_Swap <
 	ui_tooltip = "L/R to R/L.";
 	ui_category = "Stereoscopic Options";
 > = false;
+
 //3D Ambient Occlusion//
 #if AO_TOGGLE
 uniform bool AO <
@@ -317,6 +325,12 @@ uniform float4 Cross_Cursor_Adjust <
 uniform bool Cancel_Depth < source = "key"; keycode = Cancel_Depth_Key; toggle = true; >;
 /////////////////////////////////////////////D3D Starts Here/////////////////////////////////////////////////////////////////
 #define pix float2(BUFFER_RCP_WIDTH, BUFFER_RCP_HEIGHT)
+
+float fmod(float a, float b) 
+{
+	float c = frac(abs(a / b)) * abs(b);
+	return a < 0 ? -c : c;
+}
 
 texture DepthBufferTex : DEPTH;
 
@@ -436,7 +450,6 @@ float LumWeapon(in float2 texcoord : TEXCOORD0)
 	}
 	
 /////////////////////////////////////////////////////////////////////////////////Depth Map Information/////////////////////////////////////////////////////////////////////////////////
-
 float Depth(in float2 texcoord : TEXCOORD0)
 {	
 		float2 texXY = texcoord + Image_Position_Adjust * pix;		
@@ -468,6 +481,7 @@ float Depth(in float2 texcoord : TEXCOORD0)
 			
 	return DM;
 }
+
 #define Num  12 //Adjust me everytime you add a weapon hand profile.
 float3 WeaponDepth(in float2 texcoord : TEXCOORD0)
 {
@@ -518,7 +532,7 @@ float3 WeaponDepth(in float2 texcoord : TEXCOORD0)
 		else if(WP == 4) //WP 2
 			WA_XYZW = float4(3.2625,0.6275,0.0,0);   //Wolfenstine
 		else if(WP == 5) //WP 3
-			WA_XYZW = float4(5.0,6.875,1.7485,0);    //BorderLands 2		
+			WA_XYZW = float4(3.25,6.875,1.7485,0);    //BorderLands 2		
 		else if(WP == 6) //WP 4
 			WA_XYZW = float4(3.9,10.0,8.4786,2);     //CoD:AW		
 		else if(WP == 7) //WP 5
@@ -994,7 +1008,6 @@ if(AO == 1)
 }
 
 /////////////////////////////////////////L/R//////////////////////////////////////////////////////////////////////
-
 float2  Encode(in float2 texcoord : TEXCOORD0) //zBuffer Color Channel Encode
 {
 	float DM = tex2Dlod(SamplerDis,float4(texcoord.x, texcoord.y,0,0)).x,DepthR = DM, DepthL = DM;
@@ -1023,7 +1036,7 @@ float4 PS_calcLR(float2 texcoord)
 			TCL = float2((texcoord.x*2-1) - P,texcoord.y);
 			TCR = float2((texcoord.x*2) + P,texcoord.y);
 		}
-		else if( Stereoscopic_Mode == 1 )
+		else if( Stereoscopic_Mode == 1)
 		{
 			TCL = float2(texcoord.x - P,texcoord.y*2-1);
 			TCR = float2(texcoord.x + P,texcoord.y*2);
@@ -1102,7 +1115,7 @@ float4 PS_calcLR(float2 texcoord)
 			
 	float ReprojectionLeft =  DepthL;
 	float ReprojectionRight = DepthR;
-
+	
 	if(Custom_Sidebars == 0)
 	{
 		Left = tex2Dlod(BackBufferMIRROR, float4(TCL.x + ReprojectionLeft, TCL.y,0,0));
@@ -1124,22 +1137,31 @@ float4 PS_calcLR(float2 texcoord)
 	if ( Eye_Swap )
 	{
 		cL = Right;
-		cR = Left;	
+		cR = Left;
 	}
-		
+	
 	if(!Depth_Map_View)
-	{	
-	float2 gridxy, BUFFER_WH = float2(BUFFER_WIDTH,BUFFER_HEIGHT);
-
-	if(Scaling_Support)
 	{
-		BUFFER_WH += 1.0f;
-		gridxy = floor(float2(TexCoords.x*BUFFER_WH.x,TexCoords.y*BUFFER_WH.y));
-	}	
-	else
-	{ 
-		gridxy = floor(float2(TexCoords.x*BUFFER_WH.x,TexCoords.y*BUFFER_WH.y));
-	}
+	float2 gridxy;
+
+	if(Scaling_Support == 0)
+		gridxy = floor(float2(TexCoords.x * BUFFER_WIDTH, TexCoords.y * BUFFER_HEIGHT)); //Native
+	else if(Scaling_Support == 1)
+		gridxy = floor(float2(TexCoords.x * 3840.0, TexCoords.y * 2160.0));	
+	else if(Scaling_Support == 2)
+		gridxy = floor(float2(TexCoords.x * 3841.0, TexCoords.y * 2161.0));
+	else if(Scaling_Support == 3)
+		gridxy = floor(float2(TexCoords.x * 1920.0, TexCoords.y * 1080.0));
+	else if(Scaling_Support == 4)
+		gridxy = floor(float2(TexCoords.x * 1921.0, TexCoords.y * 1081.0));
+	else if(Scaling_Support == 5)
+		gridxy = floor(float2(TexCoords.x * 1680.0, TexCoords.y * 1050.0));
+	else if(Scaling_Support == 6)
+		gridxy = floor(float2(TexCoords.x * 1681.0, TexCoords.y * 1051.0));
+	else if(Scaling_Support == 7)
+		gridxy = floor(float2(TexCoords.x * 1280.0, TexCoords.y * 720.0));
+	else if(Scaling_Support == 8)
+		gridxy = floor(float2(TexCoords.x * 1281.0, TexCoords.y * 721.0));
 			
 		if(Stereoscopic_Mode == 0)
 		{	
@@ -1151,15 +1173,15 @@ float4 PS_calcLR(float2 texcoord)
 		}
 		else if(Stereoscopic_Mode == 2)
 		{
-			color = int(gridxy.y) & 1 ? cR : cL;	
+			color = fmod(gridxy.y,2.0) ? cR : cL;	
 		}
 		else if(Stereoscopic_Mode == 3)
 		{
-			color = int(gridxy.x) & 1 ? cR : cL;		
+			color = fmod(gridxy.x,2.0) ? cR : cL;		
 		}
 		else if(Stereoscopic_Mode == 4)
 		{
-			color = int(gridxy.x+gridxy.y) & 1 ? cR : cL;
+			color = fmod(gridxy.x+gridxy.y,2.0) ? cR : cL;
 		}
 		else if(Stereoscopic_Mode == 5)
 		{			
@@ -1316,7 +1338,9 @@ float4 PS_calcLR(float2 texcoord)
 			float4 Bottom = TexCoords.x < 0.5 ?  AutoDepthRange(tex2Dlod(SamplerDM,float4(TexCoords.x*2 , TexCoords.y*2-1,0,0)).x,TexCoords) : tex2Dlod(SamplerDis,float4(TexCoords.x*2-1,TexCoords.y*2-1,0,0)).xxxx;
 			color = TexCoords.y < 0.5 ? Top : Bottom;
 	}
+			
 	float Average_Lum = TexCoords.y < 0.5 ? 0.5 : tex2D(SamplerDM,float2(TexCoords.x,TexCoords.y)).g;
+	
 	return float4(color.rgb,Average_Lum);
 }
 

@@ -22,7 +22,7 @@
 
 //USER EDITABLE PREPROCESSOR FUNCTIONS START//
 // Determines The resolution of the Depth Map. For 4k Use 1.75 or 1.5. For 1440p Use 1.5 or 1.25. For 1080p use 1. Too low of a resolution will remove too much.
-#define Depth_Map_Division 1.5
+#define Depth_Map_Division 1.75
 
 // Determines the Max Depth amount, in ReShades GUI.
 #define Depth_Max 50
@@ -38,6 +38,8 @@
 
 //Depth Map Boosting helps increase depth at the cost of accuracy.	//Depth Map Boosting helps increase depth at the cost of accuracy.
 #define Depth_Boost 0 //Default 0 is Off. One is On.
+
+#define Boost_Mode 0 //WIP
 
 //3D AO Toggle enable this if you want better 3D seperation between objects. 
 //There will be a performance loss when enabled.
@@ -245,17 +247,24 @@ uniform float Anaglyph_Desaturation <
 	ui_category = "Stereoscopic Options";
 > = 1.0;
 
-uniform bool Scaling_Support <
+uniform int Scaling_Support <
+	ui_type = "combo";
+	ui_items = "SR Native\0SR 2160p A\0SR 2160p B\0SR 1080p A\0SR 1080p B\0SR 1050p A\0SR 1050p B\0SR 720p A\0SR 720p B\0";
 	ui_label = " Scaling Support";
-	ui_tooltip = "Dynamic Super Resolution , Virtual Super Resolution, downscaling, or Upscaling support for Line Interlaced, Column Interlaced, & Checkerboard 3D displays.";
+	ui_tooltip = "Dynamic Super Resolution , Virtual Super Resolution, downscaling, or Upscaling support for Line Interlaced, Column Interlaced, & Checkerboard 3D displays.\n"
+				 "Set this to your native Screen Resolution A or B.\n"
+				 "Default is SR Native.";
 	ui_category = "Stereoscopic Options";
-> = false;
+> = 0;
 
 uniform float Perspective <
 	ui_type = "drag";
 	ui_min = -100; ui_max = 100;
 	ui_label = " Perspective Slider";
-	ui_tooltip = "Determines the perspective point. Default is 0";
+	ui_tooltip = "Determines the perspective point of the two images this shader produces.\n"
+				 "For an HMD, use Polynomial Barrel Distortion shader to adjust for IPD.\n" 
+				 "Do not use this perspective adjustment slider to adjust for IPD.\n"
+				 "Default is Zero.";
 	ui_category = "Stereoscopic Options";
 > = 0;
 
@@ -305,6 +314,12 @@ uniform float4 Cross_Cursor_Adjust <
 uniform bool Cancel_Depth < source = "key"; keycode = Cancel_Depth_Key; toggle = true; >;
 /////////////////////////////////////////////D3D Starts Here/////////////////////////////////////////////////////////////////
 #define pix float2(BUFFER_RCP_WIDTH, BUFFER_RCP_HEIGHT)
+
+float fmod(float a, float b) 
+{
+	float c = frac(abs(a / b)) * abs(b);
+	return a < 0 ? -c : c;
+}
 
 texture DepthBufferTex : DEPTH;
 
@@ -497,7 +512,7 @@ float3 WeaponDepth(in float2 texcoord : TEXCOORD0)
 		else if(WP == 4) //WP 2
 			WA_XYZW = float4(3.2625,0.6275,0.0,0);   //Wolfenstine
 		else if(WP == 5) //WP 3
-			WA_XYZW = float4(5.0,6.875,1.7485,0);    //BorderLands 2		
+			WA_XYZW = float4(3.25,6.875,1.7485,0);    //BorderLands 2		
 		else if(WP == 6) //WP 4
 			WA_XYZW = float4(3.9,10.0,8.4786,2);     //CoD:AW		
 		else if(WP == 7) //WP 5
@@ -1063,26 +1078,36 @@ float4 PS_calcLR(float2 texcoord)
 		TCR.x = TCR.x - (Interlace_Optimization * pix.y);
 	}
 	
+	float2 Pop;
+	if(Boost_Mode == 0)
+		Pop = float2(500.0,1.0);
+	else if(Boost_Mode == 1)
+		Pop = float2(250.0,0.950);
+	else if(Boost_Mode == 2)
+		Pop = float2(375.0,0.925);
+	else if(Boost_Mode == 3)
+		Pop = float2(500.0,0.900);
+		
 		[loop]
-		for (int i = 0; i <= Divergence; i++) 
+		for (int i = 0; i <= Divergence + 10; i++) 
 		{		
-			j = i + (i * 0.125);		
+			j = i + (i * (i/Pop.x));		
 			#if Convergence_Extended
 			//L Near
 			[flatten] if(tex2Dlod(SamplerEncodeFB,float4(TCL.x-i*pix.x,TCL.y,0,0)).y <= (1-TCL.x))
-						B_DepthL = j*pix.x;
+						B_DepthL = j*pix.x/Pop.y;
 			
 			//R Near
 			[flatten] if(tex2Dlod(SamplerEncodeFB,float4(TCR.x+i*pix.x,TCR.y,0,0)).x <= TCR.x )
-						B_DepthR = j*pix.x;
+						B_DepthR = j*pix.x/Pop.y;
 			#endif
 			//L
 			[flatten] if(tex2Dlod(SamplerEncodeFB,float4(TCL.x+i*pix.x,TCL.y,0,0)).y >= (1-TCL.x))
-						A_DepthL = j*pix.x;
+						A_DepthL = j*pix.x/Pop.y;
 			
 			//R
 			[flatten] if(tex2Dlod(SamplerEncodeFB,float4(TCR.x-i*pix.x,TCR.y,0,0)).x >= TCR.x )
-						A_DepthR = j*pix.x;
+						A_DepthR = j*pix.x/Pop.y;
 		}
 					
 	#if Convergence_Extended
@@ -1120,17 +1145,26 @@ float4 PS_calcLR(float2 texcoord)
 		
 	if(!Depth_Map_View)
 	{	
-	float2 gridxy, BUFFER_WH = float2(BUFFER_WIDTH,BUFFER_HEIGHT);
+	float2 gridxy;
 
-	if(Scaling_Support)
-	{
-		BUFFER_WH += 1.0f;
-		gridxy = floor(float2(TexCoords.x*BUFFER_WH.x,TexCoords.y*BUFFER_WH.y));
-	}	
-	else
-	{ 
-		gridxy = floor(float2(TexCoords.x*BUFFER_WH.x,TexCoords.y*BUFFER_WH.y));
-	}
+	if(Scaling_Support == 0)
+		gridxy = floor(float2(TexCoords.x * BUFFER_WIDTH, TexCoords.y * BUFFER_HEIGHT)); //Native
+	else if(Scaling_Support == 1)
+		gridxy = floor(float2(TexCoords.x * 3840.0, TexCoords.y * 2160.0));	
+	else if(Scaling_Support == 2)
+		gridxy = floor(float2(TexCoords.x * 3841.0, TexCoords.y * 2161.0));
+	else if(Scaling_Support == 3)
+		gridxy = floor(float2(TexCoords.x * 1920.0, TexCoords.y * 1080.0));
+	else if(Scaling_Support == 4)
+		gridxy = floor(float2(TexCoords.x * 1921.0, TexCoords.y * 1081.0));
+	else if(Scaling_Support == 5)
+		gridxy = floor(float2(TexCoords.x * 1680.0, TexCoords.y * 1050.0));
+	else if(Scaling_Support == 6)
+		gridxy = floor(float2(TexCoords.x * 1681.0, TexCoords.y * 1051.0));
+	else if(Scaling_Support == 7)
+		gridxy = floor(float2(TexCoords.x * 1280.0, TexCoords.y * 720.0));
+	else if(Scaling_Support == 8)
+		gridxy = floor(float2(TexCoords.x * 1281.0, TexCoords.y * 721.0));
 			
 		if(Stereoscopic_Mode == 0)
 		{	
@@ -1142,15 +1176,15 @@ float4 PS_calcLR(float2 texcoord)
 		}
 		else if(Stereoscopic_Mode == 2)
 		{
-			color = int(gridxy.y) & 1 ? cR : cL;	
+			color = fmod(gridxy.y,2.0) ? cR : cL;	
 		}
 		else if(Stereoscopic_Mode == 3)
 		{
-			color = int(gridxy.x) & 1 ? cR : cL;		
+			color = fmod(gridxy.x,2.0) ? cR : cL;		
 		}
 		else if(Stereoscopic_Mode == 4)
 		{
-			color = int(gridxy.x+gridxy.y) & 1 ? cR : cL;
+			color = fmod(gridxy.x+gridxy.y,2.0) ? cR : cL;
 		}
 		else if(Stereoscopic_Mode == 5)
 		{			

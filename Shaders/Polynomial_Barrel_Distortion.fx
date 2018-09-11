@@ -34,13 +34,15 @@ uniform int Interpupillary_Distance <
 	ui_tooltip = "Determines the distance between your eyes.\n" 
 				 "In Monoscopic mode it's x offset calibration.\n"
 				 "Default is 0.";
+	ui_category = "Eye Focus Adjustment";
 > = 0;
 
 uniform int Stereoscopic_Mode_Convert <
 	ui_type = "combo";
 	ui_items = "Side by Side\0Top and Bottom\0SbS to Alt-TnB\0TnB to Alt-TnB\0Monoscopic\0Checkerboard Reconstruction\0";
-	ui_label = "3D Display Mode Conversion";
-	ui_tooltip = "3D display output conversion for SbS and TnB.";
+	ui_label = "3D Mode Conversions";
+	ui_tooltip = "3D Mode Conversion for Head Mounted Displays.";
+	ui_category = "Stereoscopic Options";
 > = 0;
 
 uniform float Lens_Center <
@@ -48,6 +50,7 @@ uniform float Lens_Center <
 	ui_min = 0.475; ui_max = 0.575;
 	ui_label = "Lens Center";
 	ui_tooltip = "Adjust Lens Center. Default is 0.5";
+	ui_category = "Image Distortion Corrections";
 > = 0.5;
 
 uniform float2 Lens_Distortion <
@@ -57,15 +60,8 @@ uniform float2 Lens_Distortion <
 	ui_tooltip = "On the 1st lens distortion value, positive values of k1 gives barrel distortion, negative give pincushion.\n"
 				 "On the 2nd lens distortion value, positive values of k2 gives barrel distortion, negative give pincushion.\n"
 				 "Mainly start with k2. Default is 0.01";
+	ui_category = "Image Distortion Corrections";
 > = float2(0.01,0.01);
-
-uniform float2 Degrees <
-	ui_type = "drag";
-	ui_min = 0; ui_max =  360;
-	ui_label = "Rotation";
-	ui_tooltip = "Left & Right Rotation Angle known as Degrees.\n"
-				 "Default is Zero";
-> = float2(0.0,0.0);
 
 uniform float3 Polynomial_Colors <
 	ui_type = "drag";
@@ -73,6 +69,7 @@ uniform float3 Polynomial_Colors <
 	ui_tooltip = "Adjust the Polynomial Distortion Red, Green, Blue.\n"
 				 "Default is (R 1.0, G 1.0, B 1.0)";
 	ui_label = "Polynomial Color Distortion";
+	ui_category = "Image Distortion Corrections";
 > = float3(1.0, 1.0, 1.0);
 
 uniform float2 Zoom_Aspect_Ratio <
@@ -81,7 +78,17 @@ uniform float2 Zoom_Aspect_Ratio <
 	ui_label = "Lens Zoom & Aspect Ratio";
 	ui_tooltip = "Lens Zoom amd Aspect Ratio.\n" 
 				 "Default is 1.0.";
+	ui_category = "Image Adjustment";
 > = float2(1.0,1.0);
+
+uniform float2 Degrees <
+	ui_type = "drag";
+	ui_min = 0; ui_max =  360;
+	ui_label = "Rotation";
+	ui_tooltip = "Left & Right Rotation Angle known as Degrees.\n"
+				 "Default is Zero";
+	ui_category = "Image Repositioning";
+> = float2(0.0,0.0);
 
 uniform int Vertical_Repositioning <
 	ui_type = "drag";
@@ -91,6 +98,7 @@ uniform int Vertical_Repositioning <
 				 "You can use the aliment markers to do this below.\n"
 				 "Determines the vertical position of the Image.\n"
 				 "Default is 0.";
+	ui_category = "Image Repositioning";
 > = 0;
 
 uniform int2 Independent_Vertical_Repositioning <
@@ -101,6 +109,7 @@ uniform int2 Independent_Vertical_Repositioning <
 				 "This tries to correct for Strabismus misalignment.\n"
 				 "Determines the vertical L & R positioning.\n"
 				 "Default is 0.";
+	ui_category = "Image Repositioning";
 > = int2(0,0);
 
 uniform int2 Independent_Horizontal_Repositioning <
@@ -111,26 +120,31 @@ uniform int2 Independent_Horizontal_Repositioning <
 				 "This tries to correct for Strabismus misalignment.\n"
 				 "Determines the vertical L & R positioning.\n"
 				 "Default is 0.";
+	ui_category = "Image Repositioning";
 > = int2(0,0);
+
+uniform bool Vignette <
+	ui_label = "Vignette";
+	ui_tooltip = "Soft edge effect around the image.";
+	ui_category = "Image Effects";
+> = false;
 
 uniform bool Lens_Aliment_Marker <
 	ui_label = "Lens Aliment Markers";
 	ui_tooltip = "Use to this green Cross Marker for lens aliment.";
+	ui_category = "Image Markers";
 > = false;
 
 uniform bool Image_Aliment_Marker <
 	ui_label = "Image Aliment Markers";
 	ui_tooltip = "Use to this green Cross Marker for image aliment.";
-> = false;
-
-uniform bool Vignette <
-	ui_label = "Vignette";
-	ui_tooltip = "Soft edge effect around the image.";
+	ui_category = "Image Markers";
 > = false;
 
 uniform bool Diaspora <
 	ui_label = "Diaspora Fix";
 	ui_tooltip = "A small fix for the game Diaspora.";
+	ui_category = "Internal Matix Correction.";
 > = false;
 
 //////////////////////////////////////////////////HMD Profiles//////////////////////////////////////////////////////////////////
@@ -287,6 +301,11 @@ float2 IHRePosLR()
 #define pix float2(BUFFER_RCP_WIDTH, BUFFER_RCP_HEIGHT)
 #define TextureSize float2(BUFFER_WIDTH, BUFFER_HEIGHT)
 
+float fmod(float a, float b) 
+{
+	float c = frac(abs(a / b)) * abs(b);
+	return a < 0 ? -c : c;
+}
 
 texture BackBufferTex : COLOR;
 
@@ -331,40 +350,40 @@ sampler SamplerCRBORDER
 
 float4 L(in float2 texcoord : TEXCOORD0)
 {
-	float2 gridxy = floor(float2(texcoord.x*BUFFER_WIDTH,texcoord.y*BUFFER_HEIGHT)); //Native
-	return int(gridxy.x+gridxy.y) & 1 ? 0 : tex2D(BackBuffer, float2(texcoord.x,texcoord.y)) ;
+	float2 gridxy = floor(float2(texcoord.x * BUFFER_WIDTH,texcoord.y * BUFFER_HEIGHT));
+	return fmod(gridxy.x+gridxy.y,2.0) ? 0 : tex2D(BackBuffer, float2(texcoord.x,texcoord.y)) ;
 }
 
 float4 Bi_L(in float2 texcoord : TEXCOORD0)
 {
-   float4 tl = L(texcoord);
-   float4 tr = L(texcoord +float2(pix.x, 0.0));
-   float4 bl = L(texcoord +float2(0.0, pix.y));
-   float4 br = L(texcoord +float2(pix.x, pix.y));
-   float2 f = frac( texcoord * TextureSize );
-   float4 tA = lerp( tl, tr, f.x );
-   float4 tB = lerp( bl, br, f.x );
-   float4 done = lerp( tA, tB, f.y ) * 2.0;//2.0 Gamma correction.
-   return done;
+	   float4 tl = L(texcoord);
+	   float4 tr = L(texcoord +float2(pix.x, 0.0));
+	   float4 bl = L(texcoord +float2(0.0, pix.y));
+	   float4 br = L(texcoord +float2(pix.x, pix.y));
+	   float2 f = frac( texcoord * TextureSize );
+	   float4 tA = lerp( tl, tr, f.x );
+	   float4 tB = lerp( bl, br, f.x );
+	   float4 done = lerp( tA, tB, f.y ) * 2.0;//2.0 Gamma correction.
+	   return done;
 }
 
 float4 R(in float2 texcoord : TEXCOORD0)
 {
-	float2 gridxy = floor(float2(texcoord.x*BUFFER_WIDTH,texcoord.y*BUFFER_HEIGHT)); //Native
-	return int(gridxy.x+gridxy.y) & 1 ? tex2D(BackBuffer, float2(texcoord.x,texcoord.y)) : 0 ;
+	float2 gridxy = floor(float2(texcoord.x * BUFFER_WIDTH,texcoord.y * BUFFER_HEIGHT));
+	return fmod(gridxy.x+gridxy.y,2.0) ? tex2D(BackBuffer, float2(texcoord.x,texcoord.y)) : 0 ;
 }
 
 float4 Bi_R(in float2 texcoord : TEXCOORD0)
 {
-   float4 tl = R(texcoord);
-   float4 tr = R(texcoord +float2(pix.x, 0.0));
-   float4 bl = R(texcoord +float2(0.0, pix.y));
-   float4 br = R(texcoord +float2(pix.x, pix.y));
-   float2 f = frac( texcoord * TextureSize );
-   float4 tA = lerp( tl, tr, f.x );
-   float4 tB = lerp( bl, br, f.x );
-   float4 done = lerp( tA, tB, f.y ) * 2.0;//2.0 Gamma correction.
-   return done;
+	float4 tl = R(texcoord);
+	float4 tr = R(texcoord +float2(pix.x, 0.0));
+	float4 bl = R(texcoord +float2(0.0, pix.y));
+	float4 br = R(texcoord +float2(pix.x, pix.y));
+	float2 f = frac( texcoord * TextureSize );
+	float4 tA = lerp( tl, tr, f.x );
+	float4 tB = lerp( bl, br, f.x );
+	float4 done = lerp( tA, tB, f.y ) * 2.0;//2.0 Gamma correction.
+	return done;
 }
 
 void LR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 color : SV_Target0 , out float4 colorT: SV_Target1)
@@ -385,15 +404,9 @@ float4 SBSL, SBSR;
 		SBSL = tex2D(BackBuffer, float2(texcoord.x,texcoord.y)); //Monoscopic No stereo
 	}
 	else
-	{
-	//float gridy = floor(texcoord.y*(BUFFER_HEIGHT)); //Native
-	//float gridx = floor(texcoord.x*(BUFFER_WIDTH)); //Native
-	
-	//SBSL = (int(gridy+gridx) & 1) < 0.5 ? L(texcoord) : Bi_L(texcoord) ;
-	//SBSR = (int(gridy+gridx) & 1) < 0.5 ? Bi_R(texcoord) : R(texcoord) ;
-	
-	SBSL = Bi_L(texcoord);
-	SBSR = Bi_R(texcoord);   
+	{	
+		SBSL = Bi_L(texcoord);
+		SBSR = Bi_R(texcoord);   
 	}
 	
 color = SBSL;
@@ -487,7 +500,7 @@ float4 base;
 	texcoord.y += IVRePosLR().y * pix.y;//Independent Vertical Repostion Right.
 	texcoord.x += IHRePosLR().y * pix.x;//Independent Horizontal Repostion Right.
 	//Texture Adjustment End//
-
+	
 	base = tex2D(SamplerCRBORDER, texcoord);
 
 	//Cross Marker inside Right Image
@@ -646,11 +659,11 @@ float4 PBDOut(float2 texcoord : TEXCOORD0)
 	
 	float4 Out;
 		
-	if( Stereoscopic_Mode_Convert == 0 || Stereoscopic_Mode_Convert == 1|| Stereoscopic_Mode_Convert == 5 )
+	if( Stereoscopic_Mode_Convert == 0 || Stereoscopic_Mode_Convert == 1|| Stereoscopic_Mode_Convert == 5)
 	{
 		Out = texcoord.x < 0.5 ? PDL(float2(IPDtexL*2,texcoord.y)) : PDR(float2(IPDtexR*2-1 ,texcoord.y));
 	}
-	else if (Stereoscopic_Mode_Convert == 2 || Stereoscopic_Mode_Convert == 3)
+	else if (Stereoscopic_Mode_Convert == 2 || Stereoscopic_Mode_Convert == 3 )
 	{
 		Out = texcoord.y < 0.5 ? PDL(float2(IPDtexL,texcoord.y*2)) : PDR(float2(IPDtexR,texcoord.y*2-1));
 	}
