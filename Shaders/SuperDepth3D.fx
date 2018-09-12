@@ -46,9 +46,6 @@
 // key "." is Key Code 110. Ex. Key 110 is the code for Decimal Point.
 #define Cancel_Depth_Key 0
 
-//Depth Map Boosting helps increase depth at the cost of accuracy.	//Depth Map Boosting helps increase depth at the cost of accuracy.
-#define Depth_Boost 0 //Zero is Off, One is On. 
-
 // 3D AO Toggle enable this if you want better 3D seperation between objects. 
 // There will be a performance loss when enabled.
 #define AO_TOGGLE 0 //Default 0 is Off. One is On.
@@ -62,6 +59,7 @@
 #define Image_Position_Adjust float2(0.0,0.0)
 
 //USER EDITABLE PREPROCESSOR FUNCTIONS END//
+
 //Divergence & Convergence//
 uniform float Divergence <
 	ui_type = "drag";
@@ -890,8 +888,8 @@ float Conv(float D,float2 texcoord)
 			D = AutoDepthRange(D,texcoord);
 		}
 		
-		if (Depth_Boost == 1)
-			D = lerp( D, 1.75 * D - 0.1875, 0.5);
+		//Depth boost always on.
+		D = lerp( D, 1.25f * D, 0.5);
 						
 		Z = lerp(MS * Convergence,MS * D, ZP);
 				
@@ -1008,9 +1006,28 @@ if(AO == 1)
 }
 
 /////////////////////////////////////////L/R//////////////////////////////////////////////////////////////////////
+
+float3 EncodeFloatRGB(float f)
+{
+	float3 color;
+	f *= 256;
+	color.x = floor(f);
+	f = (f - color.x) * 256;
+	color.y = floor(f);
+	color.z = f - color.y;
+	color.xy *= 0.00390625; // *= 1.0/256
+	return color;
+}
+
+float DecodeFloatRGB(float3 color)
+{
+	const float3 byte_to_float = float3(1.0, 1.0 / 256, 1.0 / (256 * 256));
+	return dot(color, byte_to_float);
+}
+
 float2  Encode(in float2 texcoord : TEXCOORD0) //zBuffer Color Channel Encode
 {
-	float DM = tex2Dlod(SamplerDis,float4(texcoord.x, texcoord.y,0,0)).x,DepthR = DM, DepthL = DM;
+	float DM = EncodeFloatRGB(tex2Dlod(SamplerDis,float4(texcoord.x, texcoord.y,0,1))).x,DepthR = DM, DepthL = DM;
 	
 	// X Left & Y Right	
 	float X = DepthL, Y = DepthR;
@@ -1086,7 +1103,7 @@ float4 PS_calcLR(float2 texcoord)
 	[loop]
 	for ( int i = 0 ; i < N; i++ ) 
 	{
-			if (View_Mode == 0)
+		if (View_Mode == 0)
 		{
 			S = samplesA[i] * (MS + 0.00375);//9
 			DepthL = min(DepthL,Encode(float2(TCL.x+S, TCL.y)).x);
@@ -1110,11 +1127,11 @@ float4 PS_calcLR(float2 texcoord)
 		}
 	}
 		
-	DepthL = Conv(DepthL,TexCoords);//Zero Parallax Distance Pass Left
-	DepthR = Conv(DepthR,TexCoords);//Zero Parallax Distance Pass Right
-			
-	float ReprojectionLeft =  DepthL;
-	float ReprojectionRight = DepthR;
+	DepthL = Conv(DepthL * 1.125f,TexCoords);//Zero Parallax Distance Pass Left
+	DepthR = Conv(DepthR * 1.125f,TexCoords);//Zero Parallax Distance Pass Right
+		
+	float ReprojectionLeft = DecodeFloatRGB(DepthL);
+	float ReprojectionRight = DecodeFloatRGB(DepthR);
 	
 	if(Custom_Sidebars == 0)
 	{

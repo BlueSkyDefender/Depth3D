@@ -23,9 +23,6 @@
 
 //USER EDITABLE PREPROCESSOR FUNCTIONS START//
 
-// Determines The resolution of the Depth Map.
-#define Depth_Map_Division 2.0
-
 // Determines the Max Depth amount, in ReShades GUI.
 #define Depth_Max 50
 
@@ -76,7 +73,7 @@ uniform float Disocclusion_Power_Adjust <
 	ui_tooltip = "Automatic occlusion masking power adjust.\n"
 				"Default is 1.0";
 	ui_category = "Occlusion Masking";
-> = 1.250;
+> = 1.0;
 
 //Depth Map//
 uniform int Depth_Map <
@@ -88,6 +85,16 @@ uniform int Depth_Map <
 	ui_category = "Depth Map";
 > = 0;
 
+uniform float Depth_Map_Adjust <
+	ui_type = "drag";
+	ui_min = 1.0; ui_max = 150.0;
+	ui_label = " Depth Map Adjustment";
+	ui_tooltip = "This allows for you to adjust the DM precision.\n"
+				 "Adjust this to keep it as low as possible.\n"
+				 "Default is 7.5";
+	ui_category = "Depth Map";
+> = 7.5;
+
 uniform float Offset <
 	ui_type = "drag";
 	ui_min = 0; ui_max = 1.0;
@@ -98,16 +105,6 @@ uniform float Offset <
 				 "Default and starts at Zero, & it's Off.";
 	ui_category = "Depth Map";
 > = 0.0;
-
-uniform float Depth_Map_Adjust <
-	ui_type = "drag";
-	ui_min = 1.0; ui_max = 150.0;
-	ui_label = " Depth Map Adjustment";
-	ui_tooltip = "This allows for you to adjust the DM precision.\n"
-				 "Adjust this to keep it as low as possible.\n"
-				 "Default is 7.5";
-	ui_category = "Depth Map";
-> = 7.5;
 
 uniform bool Depth_Map_View <
 	ui_label = " Depth Map View";
@@ -220,7 +217,7 @@ sampler BackBuffer
 	AddressW = BORDER;
 };	
 	
-texture texDepth  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT/Depth_Map_Division; Format = RGBA32F; MipLevels = 1;}; 
+texture texDepth  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT * 0.5; Format = RGBA32F; MipLevels = 1;}; 
 
 sampler SamplerDepth
 	{
@@ -231,7 +228,7 @@ sampler SamplerDepth
 		MipFilter = LINEAR;
 	};
 	
-texture texDiso  { Width = BUFFER_WIDTH/Depth_Map_Division; Height = BUFFER_HEIGHT/Depth_Map_Division; Format = RGBA32F; MipLevels = 2;}; 
+texture texDiso  { Width = BUFFER_WIDTH * 0.5; Height = BUFFER_HEIGHT * 0.5; Format = RGBA32F; MipLevels = 2;}; 
 
 sampler SamplerDiso
 	{
@@ -242,11 +239,15 @@ sampler SamplerDiso
 		MipFilter = LINEAR;
 	};
 
-texture texEncode  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA32F;}; 
+texture texEncode  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA32F; MipLevels = 1;}; 
 
 sampler SamplerEncode
 	{
 		Texture = texEncode;
+		MipLODBias = 1.0f;
+		MinFilter = LINEAR;
+		MagFilter = LINEAR;
+		MipFilter = LINEAR;
 	};			
 
 uniform float2 Mousecoords < source = "mousepoint"; > ;	
@@ -355,7 +356,7 @@ float AutoDepthRange( float d, float2 texcoord )
 
 float Conv(float2 DM_IN,float2 texcoord)
 {
-	float DM, Convergence, Z = ZPD, ZP = 0.5625;
+	float DM, Convergence, Z = ZPD, ZP = 0.54875;
 		
 		if (ZPD == 0)
 			ZP = 1.0;
@@ -412,6 +413,11 @@ float2 DM, dir;
 }
 
 /////////////////////////////////////////L/R//////////////////////////////////////////////////////////////////////
+float BS_mask(float3 color) //Byte Shift for Debanding depth buffer in final 3D image.
+{
+	const float3 BtoF = float3(1.0, 1.0 / 256, 1.0 / (256 * 256));
+	return dot(color, BtoF);
+}
 
 void Encode(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 color : SV_Target0) //zBuffer Color Channel Encode
 {
@@ -425,13 +431,13 @@ void Encode(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, ou
 		DepthR = min(DepthR,tex2Dlod(SamplerDiso, float4(texcoord.x + S, texcoord.y,0,0)).xy);
 	}
 	
-	float DL = Conv(DepthL,texcoord);
-	float DR = Conv(DepthR,texcoord);
-	
+	float DL = Conv(DepthL * float2(1.125f,1.0f),texcoord);
+	float DR = Conv(DepthR * float2(1.125f,1.0f),texcoord);
+
 	// X Left & Y Right
 	float X = texcoord.x+MS*DL, Y = (1-texcoord.x)+MS*DR;
 	
-	color = float4(X,Y,0.0,1.0);
+	color = float4(BS_mask(X),BS_mask(Y),0.0,1.0);
 }
 
 float4 PS_calcLR(float2 texcoord)
@@ -504,9 +510,9 @@ float4 PS_calcLR(float2 texcoord)
 	}
 	
 		[loop]
-		for (int i = 0; i < Divergence; i++) 
+		for (int i = 0; i < Divergence + 10; i++) 
 		{
-			j = i + (i * 0.125);	
+			j = i + (i * 0.16f);	
 			//L
 			[flatten] if(tex2Dlod(SamplerEncode,float4(TCL.x+i*pix.x,TCL.y,0,0)).y >= (1-TCL.x))
 						DepthL = j*pix.x;
@@ -530,8 +536,7 @@ float4 PS_calcLR(float2 texcoord)
 	if(!Depth_Map_View)
 	{	
 	float2 gridxy = floor(float2(TexCoords.x*BUFFER_WIDTH,TexCoords.y*BUFFER_HEIGHT));
-
-			
+		
 		if(Stereoscopic_Mode == 0)
 		{	
 			color = TexCoords.x < 0.5 ? cL : cR;

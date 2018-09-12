@@ -36,11 +36,6 @@
 // key "." is Key Code 110. Ex. Key 110 is the code for Decimal Point.
 #define Cancel_Depth_Key 0
 
-//Depth Map Boosting helps increase depth at the cost of accuracy.	//Depth Map Boosting helps increase depth at the cost of accuracy.
-#define Depth_Boost 0 //Default 0 is Off. One is On.
-
-#define Boost_Mode 0 //WIP
-
 //3D AO Toggle enable this if you want better 3D seperation between objects. 
 //There will be a performance loss when enabled.
 #define AO_TOGGLE 0 //Default 0 is Off. One is On.
@@ -360,11 +355,15 @@ sampler SamplerDisFB
 		MipFilter = LINEAR;
 	};
 
-texture texEncodeFB  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA32F;}; 
+texture texEncodeFB  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA32F; MipLevels = 1;};
 
 sampler SamplerEncodeFB
 	{
 		Texture = texEncodeFB;
+		MipLODBias = 1.0f;
+		MinFilter = LINEAR;
+		MagFilter = LINEAR;
+		MipFilter = LINEAR;
 	};	
 	
 #if AO_TOGGLE	
@@ -839,8 +838,8 @@ float Conv(float DM,float2 texcoord)
 			DM = AutoDepthRange(DM,texcoord);
 		}
 		
-		if (Depth_Boost == 1)
-			DM = lerp( DM, 1.75 * DM - 0.1875, 0.5);
+		//Depth boost always on.
+		DM = lerp( DM, 1.25 * DM, 0.5);
 					
 		Z = lerp(Convergence,DM, ZP);
 				
@@ -989,8 +988,8 @@ void Encode(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, ou
 		DepthR = min(DepthR,tex2Dlod(SamplerDisFB, float4(texcoord.x + S, texcoord.y,0,0)).x);
 	}
 		
-	DepthL = Conv(DepthL,texcoord);
-	DepthR = Conv(DepthR,texcoord);
+	DepthL = Conv(DepthL * 1.125,texcoord);
+	DepthR = Conv(DepthR * 1.125,texcoord);
 	
 	DepthL = EncodeFloatRGB(DepthL).x;
 	DepthR = EncodeFloatRGB(DepthR).x;
@@ -1077,21 +1076,13 @@ float4 PS_calcLR(float2 texcoord)
 		TCL.x = TCL.x + (Interlace_Optimization * pix.y);
 		TCR.x = TCR.x - (Interlace_Optimization * pix.y);
 	}
-	
-	float2 Pop;
-	if(Boost_Mode == 0)
-		Pop = float2(500.0,1.0);
-	else if(Boost_Mode == 1)
-		Pop = float2(250.0,0.950);
-	else if(Boost_Mode == 2)
-		Pop = float2(375.0,0.925);
-	else if(Boost_Mode == 3)
-		Pop = float2(500.0,0.900);
+		
+	float2 Pop = float2(0.16f,0.9875f);
 		
 		[loop]
 		for (int i = 0; i <= Divergence + 10; i++) 
 		{		
-			j = i + (i * (i/Pop.x));		
+			j = i + (i * Pop.x);		
 			#if Convergence_Extended
 			//L Near
 			[flatten] if(tex2Dlod(SamplerEncodeFB,float4(TCL.x-i*pix.x,TCL.y,0,0)).y <= (1-TCL.x))
