@@ -461,7 +461,7 @@ float Depth(in float2 texcoord : TEXCOORD0)
 		
 	return DM;
 }
-#define Num  12 //Adjust me everytime you add a weapon hand profile.
+#define Num  13 //Adjust me everytime you add a weapon hand profile.
 float3 WeaponDepth(in float2 texcoord : TEXCOORD0)
 {
 		float2 texXY = texcoord + Image_Position_Adjust * pix;		
@@ -527,7 +527,7 @@ float3 WeaponDepth(in float2 texcoord : TEXCOORD0)
 		else if(WP == 12)//WP 10
 			WA_XYZW = float4(1.900,1.5,1.005,1);     //Prey 2017 Very High		
 		else if(WP == 13)//WP 11
-			WA_XYZW = float4(2.61375,1.0,0.260,0);   //Metro Redux Games	
+			WA_XYZW = float4(2.6,0.7049,0.34375,1);  //Metro Redux Games		
 		else if(WP == 14)//WP 12
 			WA_XYZW = float4(5.1375,7.5,0.485,0);    //NecroVisioN: Lost Company
 		else if(WP == 15)//WP 13

@@ -480,7 +480,7 @@ float Depth(in float2 texcoord : TEXCOORD0)
 	return DM;
 }
 
-#define Num  12 //Adjust me everytime you add a weapon hand profile.
+#define Num  13 //Adjust me everytime you add a weapon hand profile.
 float3 WeaponDepth(in float2 texcoord : TEXCOORD0)
 {
 		float2 texXY = texcoord + Image_Position_Adjust * pix;		
@@ -546,7 +546,7 @@ float3 WeaponDepth(in float2 texcoord : TEXCOORD0)
 		else if(WP == 12)//WP 10
 			WA_XYZW = float4(1.900,1.5,1.005,1);     //Prey 2017 Very High	
 		else if(WP == 13)//WP 11
-			WA_XYZW = float4(2.61375,1.0,0.260,0);   //Metro Redux Games	
+			WA_XYZW = float4(2.6,0.7048,0.34375,1);  //Metro Redux Games	
 		else if(WP == 14)//WP 12
 			WA_XYZW = float4(5.1375,7.5,0.485,0);    //NecroVisioN: Lost Company
 		else if(WP == 15)//WP 13
@@ -1006,22 +1006,9 @@ if(AO == 1)
 }
 
 /////////////////////////////////////////L/R//////////////////////////////////////////////////////////////////////
-
-float3 EncodeFloatRGB(float f)
-{
-	float3 color;
-	f *= 256;
-	color.x = floor(f);
-	f = (f - color.x) * 256;
-	color.y = floor(f);
-	color.z = f - color.y;
-	color.xy *= 0.00390625; // *= 1.0/256
-	return color;
-}
-
 float2  Encode(in float2 texcoord : TEXCOORD0) //zBuffer Color Channel Encode
 {
-	float DM = EncodeFloatRGB(tex2Dlod(SamplerDis,float4(texcoord.x, texcoord.y,0,1)).x).x,DepthR = DM, DepthL = DM;
+	float DM = tex2Dlod(SamplerDis,float4(texcoord.x, texcoord.y,0,1)).x,DepthR = DM, DepthL = DM;
 	
 	// X Left & Y Right	
 	float X = DepthL, Y = DepthR;

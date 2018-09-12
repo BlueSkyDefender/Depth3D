@@ -119,8 +119,8 @@ Inner Shader Setting:
     RB        Mafia III                                    DM 1         6.25                              0.025-0.075        
     RB        Mass Effect Andromeda                        DM 1         15.0                              0.075-0.175                                        
     RB        Metal Gear Rising                            DM 0         13.75                             0.025-0.250       
-    RB        Metro 2033 Redux                             DM 0         7.50        WDM 11                0.025-0.125                
-    RB        Metro Last Light Redux                       DM 0         7.50        WDM 11                0.025-0.125                      
+    RB        Metro 2033 Redux                             DM 0         7.50       *WDM 11                0.050-0.125                
+    RB        Metro Last Light Redux                       DM 0         7.50       *WDM 11                0.050-0.125                      
     RB        Middle-earth: Shadow of Mordor               DM 1         25.0                              0.025-0.250        
               Mirror's Edge Catalyst                       DM 1         13.750                            0.025-0.125       
     RB        Monster Hunter World                         DM 1         13.750                            0.025-0.075
