@@ -431,8 +431,8 @@ void Encode(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, ou
 		DepthR = min(DepthR,tex2Dlod(SamplerDiso, float4(texcoord.x + S, texcoord.y,0,0)).xy);
 	}
 	
-	float DL = Conv(DepthL * float2(1.125f,1.0f),texcoord);
-	float DR = Conv(DepthR * float2(1.125f,1.0f),texcoord);
+	float DL = Conv(DepthL,texcoord);
+	float DR = Conv(DepthR,texcoord);
 
 	// X Left & Y Right
 	float X = texcoord.x+MS*DL, Y = (1-texcoord.x)+MS*DR;

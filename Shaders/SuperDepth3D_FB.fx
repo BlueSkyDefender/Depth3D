@@ -988,8 +988,8 @@ void Encode(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, ou
 		DepthR = min(DepthR,tex2Dlod(SamplerDisFB, float4(texcoord.x + S, texcoord.y,0,0)).x);
 	}
 		
-	DepthL = Conv(DepthL * 1.125,texcoord);
-	DepthR = Conv(DepthR * 1.125,texcoord);
+	DepthL = Conv(DepthL,texcoord);
+	DepthR = Conv(DepthR,texcoord);
 	
 	DepthL = EncodeFloatRGB(DepthL).x;
 	DepthR = EncodeFloatRGB(DepthR).x;
