@@ -1019,15 +1019,9 @@ float3 EncodeFloatRGB(float f)
 	return color;
 }
 
-float DecodeFloatRGB(float3 color)
-{
-	const float3 byte_to_float = float3(1.0, 1.0 / 256, 1.0 / (256 * 256));
-	return dot(color, byte_to_float);
-}
-
 float2  Encode(in float2 texcoord : TEXCOORD0) //zBuffer Color Channel Encode
 {
-	float DM = EncodeFloatRGB(tex2Dlod(SamplerDis,float4(texcoord.x, texcoord.y,0,1))).x,DepthR = DM, DepthL = DM;
+	float DM = EncodeFloatRGB(tex2Dlod(SamplerDis,float4(texcoord.x, texcoord.y,0,1)).x).x,DepthR = DM, DepthL = DM;
 	
 	// X Left & Y Right	
 	float X = DepthL, Y = DepthR;
@@ -1130,8 +1124,8 @@ float4 PS_calcLR(float2 texcoord)
 	DepthL = Conv(DepthL * 1.125f,TexCoords);//Zero Parallax Distance Pass Left
 	DepthR = Conv(DepthR * 1.125f,TexCoords);//Zero Parallax Distance Pass Right
 		
-	float ReprojectionLeft = DecodeFloatRGB(DepthL);
-	float ReprojectionRight = DecodeFloatRGB(DepthR);
+	float ReprojectionLeft = DepthL;
+	float ReprojectionRight = DepthR;
 	
 	if(Custom_Sidebars == 0)
 	{

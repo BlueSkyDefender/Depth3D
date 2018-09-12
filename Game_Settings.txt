@@ -196,7 +196,7 @@ Inner Shader Setting:
              Shadow Warrior Classic Source Port           DM 0       8.75                   1.0000               0.075-0.150
              Shadow Warrior Classic Redux                 DM 0       8.75                   1.0000               0.075-0.150
              Silent Hill: Homecoming                      DM 0       12.5                   0.1155               0.025-0.075       
-             Rise Of the Tomb Raider                      DM 0       15.0                   0.0200               0.025-0.075
+             Rise Of the Tomb Raider                      DM 0       25.0                   0.0200               0.050-0.125
              Two Worlds EE                                DM 0       7.5                    0.0750               0.025-0.075            
 
 [Emulator][RB][Special Depth Map Game List]            [Depth Map] [Adjustment] [Weapon DM] [Offset] [Depth Flip] [ZDP Range]
