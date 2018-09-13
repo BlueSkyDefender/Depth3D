@@ -126,7 +126,7 @@ Inner Shader Setting:
     RB        Monster Hunter World                         DM 1         13.750                            0.025-0.075
               Mordheim: City of the Damned                 DM 0         12.500                    Yes     0.025-0.250         
     RB        Naruto Shippuden UNS3 Full Blurst HD         DM 0         36.25                             0.025-0.125        
-              NecroVision: Lost Company                    DM 0         7.50        WDM 12                0.025-0.125 
+    RB        NecroVision: Lost Company                    DM 0         7.50       *WDM 12                0.025-0.125 
               Need For Speed Rivals                        ?         ?                                    ?
               Need for Speed Most Wanted                   ?         ?                                    ?
               NieRAutomata                                 DM 0         20.0                              0.050-0.075
@@ -141,7 +141,7 @@ Inner Shader Setting:
     RB        Quake 4                                      DM 0         7.5         WDM 17                0.025-0.125
               Quantum Break                                DM 0         9.0                               0.025-0.275
     RB        Rage64                                       DM 0         20.00       WDM 14                0.025-0.100   
-    RB        Redout                                       DM ?         ?                         ?       ?
+    RB        Redout                                       DM ?         ?                                 ?      
               Remembrance                                  DM 1         7.5                       Yes     0.050-0.100
     RB        Resident Evil 7                              DM 1         22.5                              0.125-0.275                                        
     RB        Return To Castle Wolfenstine                 DM 0         10.0        WDM 18                0.075-0.250                     
@@ -378,6 +378,9 @@ Needs a way to disable dissable DoF.
 
 {Naruto Shippuden UNS3 Full Blurst}
 Ignore the warnings click play.
+
+{NecroVision: Lost Company} - Use ReShade ReShade 3.3.2
+I was unable to get the newest version of ReShade to work with this title. A link for older versions of reshade at the end of this doc.
 
 {Nosferatu: The Wrath of Malachi}
 You need DGVooDoo2

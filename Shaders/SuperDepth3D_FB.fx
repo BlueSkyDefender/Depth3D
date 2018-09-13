@@ -179,7 +179,7 @@ uniform int WP <
 
 uniform int Weapon_Scale <
 	ui_type = "drag";
-	ui_min = 0; ui_max = 2;
+	ui_min = -1; ui_max = 2;
 	ui_label = " Weapon Scale";
 	ui_tooltip = "Use this to set the proper weapon hand scale.";
 	ui_category = "Weapon & HUD Depth Map";
@@ -461,7 +461,7 @@ float Depth(in float2 texcoord : TEXCOORD0)
 		
 	return DM;
 }
-#define Num  13 //Adjust me everytime you add a weapon hand profile.
+#define Num  14 //Adjust me everytime you add a weapon hand profile.
 float3 WeaponDepth(in float2 texcoord : TEXCOORD0)
 {
 		float2 texXY = texcoord + Image_Position_Adjust * pix;		
@@ -529,7 +529,7 @@ float3 WeaponDepth(in float2 texcoord : TEXCOORD0)
 		else if(WP == 13)//WP 11
 			WA_XYZW = float4(2.6,0.7049,0.34375,1);  //Metro Redux Games		
 		else if(WP == 14)//WP 12
-			WA_XYZW = float4(5.1375,7.5,0.485,0);    //NecroVisioN: Lost Company
+			WA_XYZW = float4(3.250,1.8875,2.0,-1);   //NecroVisioN: Lost Company
 		else if(WP == 15)//WP 13
 			WA_XYZW = float4(3.925,17.5,0.400,0);    //Kingpin Life of Crime
 		else if(WP == 16)//WP 14
@@ -600,22 +600,28 @@ float3 WeaponDepth(in float2 texcoord : TEXCOORD0)
 		{
 			float Nearest_Scaled = WA_XYZW.y, Scale_Adjust = WA_XYZW.z, Set_Scale;
 				
-				if (WA_XYZW.w == 0)
+				if (WA_XYZW.w == -1)
 				{
 					Nearest_Scaled = 0.001/(Nearest_Scaled*0.5);
-					Scale_Adjust = Scale_Adjust * 1.5;
+					//Scale_Adjust *= 1.0;
+					Set_Scale = 1.0;
+				}
+				else if (WA_XYZW.w == 0)
+				{
+					Nearest_Scaled = 0.001/(Nearest_Scaled*0.5);
+					Scale_Adjust *= 1.5;
 					Set_Scale = 7.5;
 				}
 				else if (WA_XYZW.w == 1)
 				{
 					Nearest_Scaled = 0.0001/(Nearest_Scaled*0.5);
-					Scale_Adjust = Scale_Adjust * 6.25;
+					Scale_Adjust *= 6.25;
 					Set_Scale = 5.625;
 				}
 				else if (WA_XYZW.w == 2)
 				{
 					Nearest_Scaled = 0.00001/(Nearest_Scaled*0.5);
-					Scale_Adjust = Scale_Adjust * 50.0;
+					Scale_Adjust *= 50.0;
 					Set_Scale = 3.75;
 				}
 				
