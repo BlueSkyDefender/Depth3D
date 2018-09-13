@@ -27,7 +27,6 @@
 #define Depth_Max 50
 
 //USER EDITABLE PREPROCESSOR FUNCTIONS END//
-
 //Divergence & Convergence//
 uniform float Divergence <
 	ui_type = "drag";
@@ -47,7 +46,7 @@ uniform bool ZPD_GUIDE <
 
 uniform float ZPD <
 	ui_type = "drag";
-	ui_min = 0.0; ui_max = 0.100;
+	ui_min = 0.0; ui_max = 0.125;
 	ui_label = " Zero Parallax Distance";
 	ui_tooltip = "ZPD controls the focus distance for the screen Pop-out effect also known as Convergence.\n"
 				 "For FPS Games keeps this low Since you don't want your gun to pop out of screen.\n"
@@ -147,16 +146,6 @@ uniform int Stereoscopic_Mode <
 	ui_tooltip = "Stereoscopic 3D display output selection.";
 	ui_category = "Stereoscopic Options";
 > = 0;
-
-uniform float Interlace_Optimization <
-	ui_type = "drag";
-	ui_min = 0.0; ui_max = 0.5;
-	ui_label = " Interlace Optimization";
-	ui_tooltip = "Interlace Optimization Is used to reduce alisesing in a Line Interlaced image.\n"
-	             "This has the side effect of softening the image.\n"
-	             "Default is 0.25";
-	ui_category = "Stereoscopic Options";
-> = 0.25;
 
 uniform int Anaglyph_Colors <
 	ui_type = "combo";
@@ -413,10 +402,10 @@ float2 DM, dir;
 }
 
 /////////////////////////////////////////L/R//////////////////////////////////////////////////////////////////////
-float BS_mask(float3 color) //Byte Shift for Debanding depth buffer in final 3D image.
+float DecodeFloat(float color) //Byte Shift for Debanding depth buffer in final 3D image.
 {
-	const float3 BtoF = float3(1.0, 1.0 / 256, 1.0 / (256 * 256));
-	return dot(color, BtoF);
+	const float3 byte_to_float = float3(1.0, 1.0 / 256, 1.0 / (256 * 256));
+	return dot(color.xxx, byte_to_float);
 }
 
 void Encode(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 color : SV_Target0) //zBuffer Color Channel Encode
@@ -433,11 +422,11 @@ void Encode(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, ou
 	
 	float DL = Conv(DepthL,texcoord);
 	float DR = Conv(DepthR,texcoord);
-
+	
 	// X Left & Y Right
 	float X = texcoord.x+MS*DL, Y = (1-texcoord.x)+MS*DR;
-	
-	color = float4(BS_mask(X),BS_mask(Y),0.0,1.0);
+
+	color = float4(DecodeFloat(X),DecodeFloat(Y),0.0,1.0);
 }
 
 float4 PS_calcLR(float2 texcoord)
@@ -496,23 +485,23 @@ float4 PS_calcLR(float2 texcoord)
 			TCR = float2(texcoord.x - P,texcoord.y);
 		}
 	}
-	
+		
 	//Optimization for line & column interlaced out.
 	if (Stereoscopic_Mode == 2)
 	{
-		TCL.y = TCL.y + (Interlace_Optimization * pix.y);
-		TCR.y = TCR.y - (Interlace_Optimization * pix.y);
+		TCL.y = TCL.y + (0.25f * pix.y);
+		TCR.y = TCR.y - (0.25f * pix.y);
 	}
 	else if (Stereoscopic_Mode == 3)
 	{
-		TCL.x = TCL.x + (Interlace_Optimization * pix.y);
-		TCR.x = TCR.x - (Interlace_Optimization * pix.y);
+		TCL.x = TCL.x + (0.25f * pix.x);
+		TCR.x = TCR.x - (0.25f * pix.x);
 	}
-	
+		
 		[loop]
 		for (int i = 0; i < Divergence + 10; i++) 
 		{
-			j = i + (i * 0.16f);	
+			j = i + (i * 0.125f);	
 			//L
 			[flatten] if(tex2Dlod(SamplerEncode,float4(TCL.x+i*pix.x,TCL.y,0,0)).y >= (1-TCL.x))
 						DepthL = j*pix.x;

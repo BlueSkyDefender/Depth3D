@@ -28,8 +28,8 @@
 // Determines the Max Depth amount, in ReShades GUI.
 #define Depth_Max 50
 
-// Determines the Max Zero Parallax Distance, in ReShades GUI. 0.250 is 250%
-#define ZPD_Max 0.250
+// Determines the Max Zero Parallax Distance, in ReShades GUI. 0.500 is 500%
+#define ZPD_Max 0.500
 
 // Enable this to fix the problem when there is a full screen Game Map Poping out of the screen. AKA Full Black Depth Map Fix. I have this off by default. Zero is off, One is On.
 #define FBDMF 0 //Default 0 is Off. One is On.
@@ -1078,8 +1078,8 @@ float4 PS_calcLR(float2 texcoord)
 	}
 	else if (Stereoscopic_Mode == 3)
 	{
-		TCL.x = TCL.x + (Interlace_Optimization * pix.y);
-		TCR.x = TCR.x - (Interlace_Optimization * pix.y);
+		TCL.x = TCL.x + (Interlace_Optimization * pix.x);
+		TCR.x = TCR.x - (Interlace_Optimization * pix.x);
 	}
 			
 	if (View_Mode == 0 || View_Mode == 1)

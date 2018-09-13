@@ -962,22 +962,11 @@ if(AO == 1)
 }
 
 /////////////////////////////////////////L/R//////////////////////////////////////////////////////////////////////
-float3 EncodeFloatRGB(float f)
+float DecodeFloat(float color)//Byte Shift for Debanding depth buffer in final 3D image.
 {
-	float3 color;
-	f *= 256;
-	color.x = floor(f);
-	f = (f - color.x) * 256;
-	color.y = floor(f);
-	color.z = f - color.y;
-	color.xy *= 0.00390625; // *= 1.0/256
-	return color;
-}
-
-float DecodeFloatRGB(float3 color)
-{
-	const float3 byte_to_float = float3(1.0, 1.0 / 256, 1.0 / (256 * 256));
-	return dot(color, byte_to_float);
+	float ByteN = 256;
+	const float3 byte_to_float = float3(1.0, 1.0 / ByteN, 1.0 / (ByteN * ByteN));
+	return dot(color.xxx, byte_to_float);
 }
 
 void Encode(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 color : SV_Target0) //zBuffer Color Channel Encode
@@ -996,17 +985,11 @@ void Encode(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, ou
 		
 	DepthL = Conv(DepthL,texcoord);
 	DepthR = Conv(DepthR,texcoord);
-	
-	DepthL = EncodeFloatRGB(DepthL).x;
-	DepthR = EncodeFloatRGB(DepthR).x;
-	
+		
 	// X Left & Y Right
 	float X = texcoord.x+MS*DepthL, Y = (1-texcoord.x)+MS*DepthR;
-	
-	X = DecodeFloatRGB(X);
-	Y = DecodeFloatRGB(Y);	
-	
-	color = float4(X,Y,0.0,1.0);
+
+	color = float4(DecodeFloat(X),DecodeFloat(Y),0.0,1.0);
 }
 
 float4 PS_calcLR(float2 texcoord)
@@ -1079,11 +1062,11 @@ float4 PS_calcLR(float2 texcoord)
 	}
 	else if (Stereoscopic_Mode == 3)
 	{
-		TCL.x = TCL.x + (Interlace_Optimization * pix.y);
-		TCR.x = TCR.x - (Interlace_Optimization * pix.y);
+		TCL.x = TCL.x + (Interlace_Optimization * pix.x);
+		TCR.x = TCR.x - (Interlace_Optimization * pix.x);
 	}
 		
-	float2 Pop = float2(0.16f,0.9875f);
+	float2 Pop = float2(0.125f,0.9875f);
 		
 		[loop]
 		for (int i = 0; i <= Divergence + 10; i++) 
