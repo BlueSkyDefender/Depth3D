@@ -1,9 +1,9 @@
- ////---------------------------//
- ///**Depth3D_FlashBack_Basic**///
- //---------------------------////
+ ////-----------//
+ ///**Depth3D**///
+ //-----------////
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
- //* Depth Map Based 3D post-process shader v1.9.9 FlashBack																														*//
+ //* Depth Map Based 3D post-process shader Depth3D v1.0 																															*//
  //* For Reshade 3.0																																								*//
  //* --------------------------																																						*//
  //* This work is licensed under a Creative Commons Attribution 3.0 Unported License.																								*//
@@ -16,8 +16,10 @@
  //*																																												*//
  //* http://reshade.me/forum/shader-presentation/2128-sidebyside-3d-depth-map-based-stereoscopic-shader																				*//	
  //* ---------------------------------																																				*//
- //*																																												*//
- //* Original work was based on Shader Based on forum user 04348 and be located here http://reshade.me/forum/shader-presentation/1594-3d-anaglyph-red-cyan-shader-wip#15236			*//
+ //* 																																												*//
+ //* This Shader is an simplified version of SuperDepth3D_FlashBack.fx a shader I made for ReShade's collection standard effects. For the use with stereo 3D screen					*//
+ //* The main shader this Depth3D shader is based on is located here. https://github.com/BlueSkyDefender/Depth3D/blob/master/Shaders/SuperDepth3D_FB.fx								*//
+ //* Original work was based on Shader Based on forum user 04348 and be located here. http://reshade.me/forum/shader-presentation/1594-3d-anaglyph-red-cyan-shader-wip#15236		*//
  //*																																												*//
  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -39,7 +41,7 @@ uniform float Divergence <
 > = 25.0;
 
 uniform bool ZPD_GUIDE <
-	ui_label = " ZPD Guide";
+	ui_label = " Convergence Guide";
 	ui_tooltip = "A Guide used to help adjust convergence.";
 	ui_category = "Divergence & Convergence";
 > = false;
@@ -47,11 +49,11 @@ uniform bool ZPD_GUIDE <
 uniform float ZPD <
 	ui_type = "drag";
 	ui_min = 0.0; ui_max = 0.125;
-	ui_label = " Zero Parallax Distance";
-	ui_tooltip = "ZPD controls the focus distance for the screen Pop-out effect also known as Convergence.\n"
+	ui_label = " Convergence";
+	ui_tooltip = "Convergence controls the focus distance for the screen Pop-out effect also known as ZPD.\n"
 				 "For FPS Games keeps this low Since you don't want your gun to pop out of screen.\n"
-				 "If you want to push this higher you need to adjust your weapon hand below.\n"
-				 "It helps to keep this around 0.03 when adjusting the depth map or weapon.\n"
+				 "If you want to push this higher you need to adjust your Weapon Hand below.\n"
+				 "It helps to keep this around 0.03 when adjusting the DM or Weapon Hand.\n"
 				 "Default is 0.010, Zero is off.";
 	ui_category = "Divergence & Convergence";
 > = 0.010;
@@ -64,15 +66,6 @@ uniform float Auto_Depth_Range <
 				 "Default is Zero, Zero is off.";
 	ui_category = "Divergence & Convergence";
 > = 0.0;
-
-uniform float Disocclusion_Power_Adjust <
-	ui_type = "drag";
-	ui_min = 0.0; ui_max = 5.0;
-	ui_label = " Disocclusion Power Adjust";
-	ui_tooltip = "Automatic occlusion masking power adjust.\n"
-				"Default is 1.0";
-	ui_category = "Occlusion Masking";
-> = 1.0;
 
 //Depth Map//
 uniform int Depth_Map <
@@ -141,17 +134,9 @@ uniform float3 Weapon_Adjust <
 //Stereoscopic Options//
 uniform int Stereoscopic_Mode <
 	ui_type = "combo";
-	ui_items = "Side by Side\0Top and Bottom\0Line Interlaced\0Anaglyph\0";
+	ui_items = "Side by Side\0Top and Bottom\0Line Interlaced\0Anaglyph 3D Red/Cyan\0Anaglyph 3D Dubois Red/Cyan\0Anaglyph 3D Green/Magenta\0Anaglyph 3D Dubois Green/Magenta\0";
 	ui_label = "·3D Display Modes·";
 	ui_tooltip = "Stereoscopic 3D display output selection.";
-	ui_category = "Stereoscopic Options";
-> = 0;
-
-uniform int Anaglyph_Colors <
-	ui_type = "combo";
-	ui_items = "Red/Cyan\0Dubois Red/Cyan\0Green/Magenta\0Dubois Green/Magenta\0";
-	ui_label = " Anaglyph Color Mode";
-	ui_tooltip = "Select colors for your 3D anaglyph glasses.";
 	ui_category = "Stereoscopic Options";
 > = 0;
 
@@ -371,34 +356,22 @@ float Conv(float2 DM_IN,float2 texcoord)
 
 void  Disocclusion(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 color : SV_Target0)
 {
-float X, Y, Z, W = 1, A, S, MS =  Divergence * pix.x, Div = 0.09090909;
+float A, S, MS =  Divergence * pix.x, Div = 0.09090909;
 float2 DM, dir;
-
-	MS *= Disocclusion_Power_Adjust;
 	
 	A += 5.5; // Normal
 	dir = float2(0.5,0.0);	
 	
 	const float weight[11] = {0.0,0.010,-0.010,0.020,-0.020,0.030,-0.030,0.040,-0.040,0.050,-0.050}; //By 11
 				
-	if (Disocclusion_Power_Adjust > 0) 
+	[loop]
+	for (int i = 0; i < 11; i++)
 	{	
-		[loop]
-		for (int i = 0; i < 11; i++)
-		{	
-			S = weight[i] * MS;
-			DM += tex2Dlod(SamplerDepth,float4(texcoord + dir * S * A,0,0)).xy*Div;
-		}
-	}
-	else
-	{
-		DM = tex2Dlod(SamplerDepth,float4(texcoord,0,0)).xy;
+		S = weight[i] * MS;
+		DM += tex2Dlod(SamplerDepth,float4(texcoord + dir * S * A,0,0)).xy*Div;
 	}
 	
-	X = DM.x;
-	Y = DM.y;	
-	
-	color = float4(X,Y,Z,W);
+	color = float4(DM.x,DM.y,0,1.0);
 }
 
 /////////////////////////////////////////L/R//////////////////////////////////////////////////////////////////////
@@ -431,20 +404,14 @@ void Encode(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, ou
 
 float4 PS_calcLR(float2 texcoord)
 {
-	float Znum;
+	float Znum = 0;
 	float2 TCL, TCR, TexCoords = texcoord;
 	float4 color, Right, Left;
 	
 	if(ZPD_GUIDE == 1)
-	{
 		Znum = 1;
-	}
-	else
-	{
-		Znum = 0;
-	}
 	
-	float DepthL = Znum, DepthR = Znum, N, S, j, L, R;
+	float DepthL = Znum, DepthR = Znum, N, S, j;
 	
 	//P is Perspective Adjustment.
 	float P = Perspective * pix.x;
@@ -524,7 +491,7 @@ float4 PS_calcLR(float2 texcoord)
 		
 	if(!Depth_Map_View)
 	{	
-	float2 gridxy = floor(float2(TexCoords.x*BUFFER_WIDTH,TexCoords.y*BUFFER_HEIGHT));
+	float gridy = floor(TexCoords.y*BUFFER_HEIGHT);
 		
 		if(Stereoscopic_Mode == 0)
 		{	
@@ -536,9 +503,9 @@ float4 PS_calcLR(float2 texcoord)
 		}
 		else if(Stereoscopic_Mode == 2)
 		{
-			color = int(gridxy.y) & 1 ? cR : cL;	
+			color = int(gridy) & 1 ? cR : cL;	
 		}
-		else if(Stereoscopic_Mode == 3)
+		else if(Stereoscopic_Mode >= 3)
 		{													
 				float3 HalfLA = dot(cL.rgb,float3(0.299, 0.587, 0.114));
 				float3 HalfRA = dot(cR.rgb,float3(0.299, 0.587, 0.114));
@@ -548,14 +515,14 @@ float4 PS_calcLR(float2 texcoord)
 				float4 cA = float4(LMA,1);
 				float4 cB = float4(RMA,1);
 	
-			if (Anaglyph_Colors == 0)
+			if (Stereoscopic_Mode == 3)
 			{
 				float4 LeftEyecolor = float4(1.0,0.0,0.0,1.0);
 				float4 RightEyecolor = float4(0.0,1.0,1.0,1.0);
 				
 				color =  (cA*LeftEyecolor) + (cB*RightEyecolor);
 			}
-			else if (Anaglyph_Colors == 1)
+			else if (Stereoscopic_Mode == 4)
 			{
 			float red = 0.437 * cA.r + 0.449 * cA.g + 0.164 * cA.b
 					- 0.011 * cB.r - 0.032 * cB.g - 0.007 * cB.b;
@@ -574,14 +541,14 @@ float4 PS_calcLR(float2 texcoord)
 
 			color = float4(red, green, blue, 0);
 			}
-			else if (Anaglyph_Colors == 2)
+			else if (Stereoscopic_Mode == 5)
 			{
 				float4 LeftEyecolor = float4(0.0,1.0,0.0,1.0);
 				float4 RightEyecolor = float4(1.0,0.0,1.0,1.0);
 				
 				color =  (cA*LeftEyecolor) + (cB*RightEyecolor);			
 			}
-			else
+			else if (Stereoscopic_Mode == 6)
 			{
 								
 			float red = -0.062 * cA.r -0.158 * cA.g -0.039 * cA.b
@@ -605,9 +572,10 @@ float4 PS_calcLR(float2 texcoord)
 	}
 		else
 	{		
-			float4 Top = TexCoords.x < 0.5 ? Lumi(float2(TexCoords.x*2,TexCoords.y*2)).xxxx : tex2Dlod(SamplerDepth,float4(TexCoords.x*2-1 , TexCoords.y*2,0,0)).gggg;
-			float4 Bottom = TexCoords.x < 0.5 ?  AutoDepthRange(tex2Dlod(SamplerDepth,float4(TexCoords.x*2 , TexCoords.y*2-1,0,0)).x,TexCoords) : tex2Dlod(SamplerDiso,float4(TexCoords.x*2-1,TexCoords.y*2-1,0,0)).xxxx;
-			color = TexCoords.y < 0.5 ? Top : Bottom;
+			float R = tex2Dlod(SamplerDepth,float4(TexCoords.x, TexCoords.y,0,0)).x;
+			float G = AutoDepthRange(tex2Dlod(SamplerDepth,float4(TexCoords.x, TexCoords.y,0,0)).x,TexCoords);
+			float B = tex2Dlod(SamplerDiso,float4(TexCoords.x,TexCoords.y,0,0)).g;
+			color = float4(R,G,B,1.0);
 	}
 
 	return float4(color.rgb,1.0);
