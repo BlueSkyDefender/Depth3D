@@ -179,7 +179,7 @@ Inner Shader Setting:
     RB        Wolfenstine: The New Order                   DM 0         25.00      *WDM 7                 0.025-0.075
     RB        Wolfenstine: The Old Blood                   DM 0         25.00      *WDM 7                 0.025-0.075
               Ziggurat                                     DM 0         7.5                               0.075-0.175
-              Zombie Army Trilogy                          DM 0         10.0                              0.050-0.075
+              Zombie Army Trilogy                          DM 0         12.5                              0.050-0.075
 
 [Read Below] [Special Depth Map Game List]             [Depth Map] [Adjustment] [Weapon DM] [Offset][Depth Flip][ZPD Range] [HUD Mode & Value]
              Amnesia: Machine for Pigs                    DM 0       40.0                   0.00025              0.000-0.100       

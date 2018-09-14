@@ -217,23 +217,15 @@ uniform int Stereoscopic_Mode <
 	ui_category = "Stereoscopic Options";
 > = 0;
 
-uniform float Interlace_Optimization <
-	ui_type = "drag";
-	ui_min = 0.0; ui_max = 0.5;
-	ui_label = " Interlace Optimization";
-	ui_tooltip = "Interlace Optimization Is used to reduce alisesing in a Line or Column interlaced image.\n"
-	             "This has the side effect of softening the image.\n"
-	             "Default is 0.250";
-	ui_category = "Stereoscopic Options";
-> = 0.250;
-
-uniform float Anaglyph_Desaturation <
+uniform float2 Interlace_Anaglyph <
 	ui_type = "drag";
 	ui_min = 0.0; ui_max = 1.0;
-	ui_label = " Anaglyph Desaturation";
-	ui_tooltip = "Adjust Anaglyph 3D desaturation, Zero is Black & White, One is full color.";
+	ui_label = " Interlace & Anaglyph";
+	ui_tooltip = "Interlace Optimization is used to reduce alisesing in a Line or Column interlaced image. This has the side effect of softening the image.\n"
+	             "Anaglyph Desaturation allows for removing color from an anaglyph 3D image. Zero is Black & White, One is full color.\n"
+	             "Default for Interlace Optimization is 0.5 and for Anaglyph Desaturation is One.";
 	ui_category = "Stereoscopic Options";
-> = 1.0;
+> = float2(0.5,1.0);
 
 uniform int Scaling_Support <
 	ui_type = "combo";
@@ -436,7 +428,7 @@ float Depth(in float2 texcoord : TEXCOORD0)
 		
 		//Conversions to linear space.....
 		//Near & Far Adjustment
-		float Far = 1.0, Near = 0.125/Depth_Map_Adjust, DA = Depth_Map_Adjust * 2; //Division Depth Map Adjust - Near
+		float Far = 1.0, Near = 0.125/Depth_Map_Adjust; //Division Depth Map Adjust - Near
 		
 		float2 Offsets = float2(1 + Offset,1 - Offset), Z = float2( zBuffer, 1-zBuffer );
 		
@@ -1024,13 +1016,13 @@ float4 PS_calcLR(float2 texcoord)
 	//Optimization for line & column interlaced out.
 	if (Stereoscopic_Mode == 2)
 	{
-		TCL.y = TCL.y + (Interlace_Optimization * pix.y);
-		TCR.y = TCR.y - (Interlace_Optimization * pix.y);
+		TCL.y = TCL.y + ((Interlace_Anaglyph.x*0.5) * pix.y);
+		TCR.y = TCR.y - ((Interlace_Anaglyph.x*0.5) * pix.y);
 	}
 	else if (Stereoscopic_Mode == 3)
 	{
-		TCL.x = TCL.x + (Interlace_Optimization * pix.x);
-		TCR.x = TCR.x - (Interlace_Optimization * pix.x);
+		TCL.x = TCL.x + ((Interlace_Anaglyph.x*0.5) * pix.x);
+		TCR.x = TCR.x - ((Interlace_Anaglyph.x*0.5) * pix.x);
 	}
 		
 	float2 Pop = float2(0.125f,0.9875f);
@@ -1138,8 +1130,8 @@ float4 PS_calcLR(float2 texcoord)
 			float Contrast = 1.0, Deghost = 0.06, LOne, LTwo, ROne, RTwo;
 			float3 HalfLA = dot(cL.rgb,float3(0.299, 0.587, 0.114));
 			float3 HalfRA = dot(cR.rgb,float3(0.299, 0.587, 0.114));
-			float3 LMA = lerp(HalfLA,cL.rgb,Anaglyph_Desaturation);  
-			float3 RMA = lerp(HalfRA,cR.rgb,Anaglyph_Desaturation); 
+			float3 LMA = lerp(HalfLA,cL.rgb,Interlace_Anaglyph.y);  
+			float3 RMA = lerp(HalfRA,cR.rgb,Interlace_Anaglyph.y); 
 			float4 image = 1, accumRC, accumGM, accumBA;
 
 			float contrast = (Contrast*0.5)+0.5, deghost = Deghost;
