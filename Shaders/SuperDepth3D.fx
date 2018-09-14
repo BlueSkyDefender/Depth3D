@@ -223,7 +223,7 @@ uniform float Weapon_Depth_Adjust <
 //Stereoscopic Options//
 uniform int Stereoscopic_Mode <
 	ui_type = "combo";
-	ui_items = "Side by Side\0Top and Bottom\0Line Interlaced\0Column Interlaced\0Checkerboard 3D\0Anaglyph\0";
+	ui_items = "Side by Side\0Top and Bottom\0Line Interlaced\0Column Interlaced\0Checkerboard 3D\0Anaglyph 3D Red/Cyan\0Anaglyph 3D Red/Cyan Dubois\0Anaglyph 3D Red/Cyan Anachrome\0Anaglyph 3D Green/Magenta\0Anaglyph 3D Green/Magenta Dubois\0Anaglyph 3D Green/Magenta Triochrome\0Anaglyph 3D Blue/Amber ColorCode\0";
 	ui_label = "·3D Display Modes·";
 	ui_tooltip = "Stereoscopic 3D display output selection.";
 	ui_category = "Stereoscopic Options";
@@ -238,14 +238,6 @@ uniform float Interlace_Optimization <
 	             "Default is 0.250";
 	ui_category = "Stereoscopic Options";
 > = 0.250;
-
-uniform int Anaglyph_Colors <
-	ui_type = "combo";
-	ui_items = "Red/Cyan\0Dubois Red/Cyan\0Deghosted Red/Cyan\0Green/Magenta\0Dubois Green/Magenta\0Deghosted Green/Magenta\0Blue/Amber\0";
-	ui_label = " Anaglyph Color Mode";
-	ui_tooltip = "Select colors for your 3D anaglyph glasses.";
-	ui_category = "Stereoscopic Options";
-> = 0;
 
 uniform float Anaglyph_Desaturation <
 	ui_type = "drag";
@@ -1016,7 +1008,7 @@ float2  Encode(in float2 texcoord : TEXCOORD0) //zBuffer Color Channel Encode
 {
 	float DM = tex2Dlod(SamplerDis,float4(texcoord.x, texcoord.y,0,1)).x,DepthR = DM, DepthL = DM;
 	
-	// X Left & Y Right	
+	// X Left & Y Right
 	float X = DepthL, Y = DepthR;
 
 	return float2(X,Y);
@@ -1114,8 +1106,8 @@ float4 PS_calcLR(float2 texcoord)
 		}
 	}
 		
-	DepthL = Conv(DepthL * 1.125f,TexCoords);//Zero Parallax Distance Pass Left
-	DepthR = Conv(DepthR * 1.125f,TexCoords);//Zero Parallax Distance Pass Right
+	DepthL = Conv(DepthL,TexCoords);//Zero Parallax Distance Pass Left
+	DepthR = Conv(DepthR,TexCoords);//Zero Parallax Distance Pass Right
 		
 	float ReprojectionLeft = DepthL;
 	float ReprojectionRight = DepthR;
@@ -1187,7 +1179,7 @@ float4 PS_calcLR(float2 texcoord)
 		{
 			color = fmod(gridxy.x+gridxy.y,2.0) ? cR : cL;
 		}
-		else if(Stereoscopic_Mode == 5)
+		else if(Stereoscopic_Mode >= 5)
 		{			
 			float Contrast = 1.0, Deghost = 0.06, LOne, LTwo, ROne, RTwo;
 			float3 HalfLA = dot(cL.rgb,float3(0.299, 0.587, 0.114));
@@ -1202,14 +1194,14 @@ float4 PS_calcLR(float2 texcoord)
 			float4 cA = float4(LMA,1);
 			float4 cB = float4(RMA,1);
 	
-			if (Anaglyph_Colors == 0) // Red/Cyan
+			if (Stereoscopic_Mode == 5) // Anaglyph 3D Colors Red/Cyan
 			{
 				float4 LeftEyecolor = float4(1.0,0.0,0.0,1.0);
 				float4 RightEyecolor = float4(0.0,1.0,1.0,1.0);
 				
 				color =  (cA*LeftEyecolor) + (cB*RightEyecolor);
 			}
-			else if (Anaglyph_Colors == 1) // Dubois Red/Cyan
+			else if (Stereoscopic_Mode == 6) // Anaglyph 3D Dubois Red/Cyan
 			{
 			float red = 0.437 * cA.r + 0.449 * cA.g + 0.164 * cA.b
 						- 0.011 * cB.r - 0.032 * cB.g - 0.007 * cB.b;
@@ -1228,7 +1220,7 @@ float4 PS_calcLR(float2 texcoord)
 
 				color = float4(red, green, blue, 0);
 			}
-			else if (Anaglyph_Colors == 2) // Deghosted Red/Cyan Code From http://iaian7.com/quartz/AnaglyphCompositing & vectorform.com by John Einselen
+			else if (Stereoscopic_Mode == 7) // Anaglyph 3D Deghosted Red/Cyan Code From http://iaian7.com/quartz/AnaglyphCompositing & vectorform.com by John Einselen
 			{
 				LOne = contrast*0.45;
 				LTwo = (1.0-LOne)*0.5;
@@ -1254,14 +1246,14 @@ float4 PS_calcLR(float2 texcoord)
 				image.b = (accumRC.b+(accumRC.r*(deghost*-0.25))+(accumRC.g*(deghost*-0.25))+(accumRC.b*(deghost*0.5)));
 				color = image;
 			}
-			else if(Anaglyph_Colors == 3) // Green/Magenta
+			else if (Stereoscopic_Mode == 8) // Anaglyph 3D Green/Magenta
 			{
 				float4 LeftEyecolor = float4(0.0,1.0,0.0,1.0);
 				float4 RightEyecolor = float4(1.0,0.0,1.0,1.0);
 				
 				color =  (cA*LeftEyecolor) + (cB*RightEyecolor);			
 			}
-			else if(Anaglyph_Colors == 4) // Dubois Green/Magenta
+			else if (Stereoscopic_Mode == 9) // Anaglyph 3D Dubois Green/Magenta
 			{
 								
 				float red = -0.062 * cA.r -0.158 * cA.g -0.039 * cA.b
@@ -1281,7 +1273,7 @@ float4 PS_calcLR(float2 texcoord)
 						
 				color = float4(red, green, blue, 0);
 			}
-			else if (Anaglyph_Colors == 5) //Deghosted Green/Magenta Code From http://iaian7.com/quartz/AnaglyphCompositing & vectorform.com by John Einselen
+			else if (Stereoscopic_Mode == 10)// Anaglyph 3D Deghosted Green/Magenta Code From http://iaian7.com/quartz/AnaglyphCompositing & vectorform.com by John Einselen
 			{
 				LOne = contrast*0.45;
 				LTwo = (1.0-LOne)*0.5;
@@ -1307,7 +1299,7 @@ float4 PS_calcLR(float2 texcoord)
 				image.b = (accumGM.b+(accumGM.r*(deghost*-0.25))+(accumGM.g*(deghost*-0.25))+(accumGM.b*(deghost*0.5)));
 				color = image;
 			}
-			else // Blue/Amber Code From http://iaian7.com/quartz/AnaglyphCompositing & vectorform.com by John Einselen
+			else if (Stereoscopic_Mode == 11) // Anaglyph 3D Blue/Amber Code From http://iaian7.com/quartz/AnaglyphCompositing & vectorform.com by John Einselen
 			{
 				LOne = contrast*0.45;
 				LTwo = (1.0-LOne)*0.5;
