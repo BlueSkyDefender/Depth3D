@@ -1026,7 +1026,7 @@ float4 PS_calcLR(float2 texcoord)
 {
 	float2 TCL, TCR, TexCoords = texcoord;
 	float4 color, Right, Left;
-	float DepthR = 1, DepthL = 1, Adjust_A = 0.11111111, Adjust_B = 0.07692307, N, S, L, R;
+	float DepthR = 1, DepthL = 1, Adjust_A = 0.11111111, Adjust_B = 0.07692307, N, S, LDepth, RDepth;
 	float samplesA[9] = {0.5,0.5625,0.625,0.6875,0.75,0.8125,0.875,0.9375,1.0}; //by 9
 	float samplesB[13] = {0.5,0.546875,0.578125,0.625,0.659375,0.703125,0.75,0.796875,0.828125,0.875,0.921875,0.953125,1.0};//by 13
 
@@ -1099,18 +1099,18 @@ float4 PS_calcLR(float2 texcoord)
 		else if (View_Mode == 1)
 		{
 			S = samplesA[i] * MS * 1.1875;//9
-			L += Encode(float2(TCL.x+S, TCL.y)).x*Adjust_A;
-			R += Encode(float2(TCR.x-S, TCR.y)).y*Adjust_A;
-			DepthL = min(1,L);
-			DepthR = min(1,R);
+			LDepth += Encode(float2(TCL.x+S, TCL.y)).x*Adjust_A;
+			RDepth += Encode(float2(TCR.x-S, TCR.y)).y*Adjust_A;
+			DepthL = min(1,LDepth);
+			DepthR = min(1,RDepth);
 		}
 		else if (View_Mode == 2)
 		{
 			S = samplesB[i] * MS * 1.1875;//13
-			L += Encode(float2(TCL.x+S, TCL.y)).x*Adjust_B;
-			R += Encode(float2(TCR.x-S, TCR.y)).y*Adjust_B;
-			DepthL = min(1,L);
-			DepthR = min(1,R);
+			LDepth += Encode(float2(TCL.x+S, TCL.y)).x*Adjust_B;
+			RDepth += Encode(float2(TCR.x-S, TCR.y)).y*Adjust_B;
+			DepthL = min(1,LDepth);
+			DepthR = min(1,RDepth);
 		}
 	}
 		
@@ -1338,9 +1338,10 @@ float4 PS_calcLR(float2 texcoord)
 	}
 		else
 	{		
-			float4 Top = TexCoords.x < 0.5 ? Lum(float2(TexCoords.x*2,TexCoords.y*2)).xxxx : tex2Dlod(SamplerDM,float4(TexCoords.x*2-1 , TexCoords.y*2,0,0)).xxxx;
-			float4 Bottom = TexCoords.x < 0.5 ?  AutoDepthRange(tex2Dlod(SamplerDM,float4(TexCoords.x*2 , TexCoords.y*2-1,0,0)).x,TexCoords) : tex2Dlod(SamplerDis,float4(TexCoords.x*2-1,TexCoords.y*2-1,0,0)).xxxx;
-			color = TexCoords.y < 0.5 ? Top : Bottom;
+			float R = tex2Dlod(SamplerDM,float4(TexCoords.x, TexCoords.y,0,0)).x;
+			float G = AutoDepthRange(tex2Dlod(SamplerDM,float4(TexCoords.x, TexCoords.y,0,0)).x,TexCoords);
+			float B = tex2Dlod(SamplerDis,float4(TexCoords.x,TexCoords.y,0,0)).x;
+			color = float4(R,G,B,1.0);
 	}
 			
 	float Average_Lum = TexCoords.y < 0.5 ? 0.5 : tex2D(SamplerDM,float2(TexCoords.x,TexCoords.y)).g;

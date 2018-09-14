@@ -1317,10 +1317,10 @@ float4 PS_calcLR(float2 texcoord)
 	}
 		else
 	{			
-			float4 BR;
-			float4 Top = TexCoords.x < 0.5 ? Lum(float2(TexCoords.x*2,TexCoords.y*2)).xxxx : tex2Dlod(SamplerDMFB,float4(TexCoords.x*2-1 , TexCoords.y*2,0,0)).xxxx;
-			float4 Bottom = TexCoords.x < 0.5 ?  AutoDepthRange(tex2Dlod(SamplerDMFB,float4(TexCoords.x*2 , TexCoords.y*2-1,0,0)).x,TexCoords) : tex2Dlod(SamplerDisFB,float4(TexCoords.x*2-1,TexCoords.y*2-1,0,0)).xxxx;
-			color = TexCoords.y < 0.5 ? Top : Bottom;
+			float R = tex2Dlod(SamplerDMFB,float4(TexCoords.x, TexCoords.y,0,0)).x;
+			float G = AutoDepthRange(tex2Dlod(SamplerDMFB,float4(TexCoords.x, TexCoords.y,0,0)).x,TexCoords);
+			float B = tex2Dlod(SamplerDisFB,float4(TexCoords.x,TexCoords.y,0,0)).x;
+			color = float4(R,G,B,1.0);
 	}
 	float Average_Lum = TexCoords.y < 0.5 ? 0.5 : tex2D(SamplerDMFB,float2(TexCoords.x,TexCoords.y)).g;
 	return float4(color.rgb,Average_Lum);
