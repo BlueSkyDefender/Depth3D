@@ -40,11 +40,11 @@
 //There will be a performance loss when enabled.
 #define AO_TOGGLE 0 //Default 0 is Off. One is On.
 
-// Convergence Mode Full. Really High Performance Loss and Greater Image Errors Expected. If you turn this on set ZPD_Max to 0.250.
-#define Convergence_Extended 0 //Zero is Off, One is On.
+// Determines the Max Zero Parallax Distance, in ReShades GUI. 0.250 is 250%
+#define ZPD_Max 0.250
 
-// Determines the Max Zero Parallax Distance, in ReShades GUI. 0.125 is 125% If Convergence_Extended is on you can set this to 0.250.
-#define ZPD_Max 0.125
+// Convergence Mode Full. Really High Performance Loss and Greater Image Errors Expected. Do not use unless you know what your doing.
+#define Convergence_Extended 0 //Zero is Off, One is On.
 
 // Use Depth Tool to adjust the lower preprocessor definitions below.
 // Horizontal & Vertical Depth Buffer Resize for non conforming BackBuffer.
@@ -451,7 +451,7 @@ float Depth(in float2 texcoord : TEXCOORD0)
 			DM = 2.0 * Near * Far / (Far + Near - (1.375 * Z.y - 0.375) * (Far - Near));
 		}
 		
-	return DM;
+	return saturate(DM);
 }
 #define Num  14 //Adjust me everytime you add a weapon hand profile.
 float3 WeaponDepth(in float2 texcoord : TEXCOORD0)
@@ -657,7 +657,7 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 {
 		float N, R, G, B, D, A = 1;
 		
-		float DM = Depth(texcoord);
+		float DM = abs(Depth(texcoord));
 		float WDM = WeaponDepth(texcoord).y;
 		
 		float WD = lerp(WeaponDepth(texcoord).x,1,0.009375);
@@ -864,7 +864,7 @@ if(AO == 1)
 	}
 #endif
 
-	float M, N = 11, weight_A[11] = {0.0,0.0125,-0.0125,0.025,-0.025,0.0375,-0.0375,0.0425,-0.0425,0.050,-0.050}, weight_B[7] = {0.0,0.0125,-0.0125,0.0375,-0.0375,0.05,-0.05};
+	float M, N = 11, weight_A[11] = {0.0f,0.0125f,-0.0125f,0.025f,-0.025f,0.0375f,-0.0375f,0.0425f,-0.0425f,0.050f,-0.050f}, weight_B[7] = {0.0f,0.0125f,-0.0125f,0.0375f,-0.0375f,0.05f,-0.05f};
 	
 	A += 5.5; // Normal
 	B = DBD * 11.0; // Depth
@@ -938,21 +938,14 @@ if(AO == 1)
 }
 
 /////////////////////////////////////////L/R//////////////////////////////////////////////////////////////////////
-float DecodeFloat(float color)//Byte Shift for Debanding depth buffer in final 3D image.
-{
-	float ByteN = 256;
-	const float3 byte_to_float = float3(1.0, 1.0 / ByteN, 1.0 / (ByteN * ByteN));
-	return dot(color.xxx, byte_to_float);
-}
-
 void Encode(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 color : SV_Target0) //zBuffer Color Channel Encode
 {
-	float N = 5, samples_A[5] = {0.5,0.625,0.75,0.875,1.0}, samples_B[3] = {0.5,0.75,1.0};
+	float N = 5, samples_A[5] = {0.5f,0.625f,0.75f,0.875f,1.0f}, samples_B[3] = {0.5f,0.75f,1.0f};
 	
 	if (Performance_Mode)
 		N = 3;
 	
-	float DepthR = 1, DepthL = 1,MSL = (Divergence * 0.25) * pix.x, S, MS = (Divergence - 10)  * pix.x;
+	float DepthR = 1, DepthL = 1,MSL = (Divergence * 0.25f) * pix.x, S, MS = (Divergence - 10.0f)  * pix.x;
 		
 	[loop]
 	for ( int i = 0 ; i < N; i++ ) 
@@ -972,7 +965,18 @@ void Encode(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, ou
 	// X Left & Y Right
 	float X = texcoord.x+MS*DepthL, Y = (1-texcoord.x)+MS*DepthR;
 
-	color = float4(DecodeFloat(X),DecodeFloat(Y),0.0,1.0);
+	color = float4(X,Y,0.0,1.0);
+}
+
+float2 Decode(in float2 texcoord : TEXCOORD0)
+{
+	float3 X = abs(tex2Dlod(SamplerEncodeFB,float4(texcoord,0,0)).xxx), Y = abs(tex2Dlod(SamplerEncodeFB,float4(texcoord,0,0)).yyy);
+	float ByteN = 256; //Byte Shift for Debanding depth buffer in final 3D image.
+	float3 byte_to_float = float3(1.0f, 1.0f / ByteN, 1.0f / (ByteN * ByteN));
+	float A = dot(X, byte_to_float);
+	float B = dot(Y, byte_to_float);	
+	
+	return float2(A,B);
 }
 
 float4 PS_calcLR(float2 texcoord)
@@ -1057,19 +1061,19 @@ float4 PS_calcLR(float2 texcoord)
 			j = i + (i * Pop.x);		
 			#if Convergence_Extended
 			//L Near
-			[flatten] if(tex2Dlod(SamplerEncodeFB,float4(TCL.x-i*pix.x,TCL.y,0,0)).y <= (1-TCL.x))
+			[flatten] if(Decode(float2(TCL.x-i*pix.x,TCL.y)).y <= (1-TCL.x))
 						B_DepthL = j*pix.x/Pop.y;
 			
 			//R Near
-			[flatten] if(tex2Dlod(SamplerEncodeFB,float4(TCR.x+i*pix.x,TCR.y,0,0)).x <= TCR.x )
+			[flatten] if(Decode(float2(TCR.x+i*pix.x,TCR.y)).x <= TCR.x )
 						B_DepthR = j*pix.x/Pop.y;
 			#endif
 			//L
-			[flatten] if(tex2Dlod(SamplerEncodeFB,float4(TCL.x+i*pix.x,TCL.y,0,0)).y >= (1-TCL.x))
+			[flatten] if(Decode(float2(TCL.x+i*pix.x,TCL.y)).y >= (1-TCL.x))
 						A_DepthL = j*pix.x/Pop.y;
 			
 			//R
-			[flatten] if(tex2Dlod(SamplerEncodeFB,float4(TCR.x-i*pix.x,TCR.y,0,0)).x >= TCR.x )
+			[flatten] if(Decode(float2(TCR.x-i*pix.x,TCR.y)).x >= TCR.x )
 						A_DepthR = j*pix.x/Pop.y;
 		}
 					

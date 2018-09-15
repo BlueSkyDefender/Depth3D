@@ -151,6 +151,7 @@ Inner Shader Setting:
     RB        S.T.A.L.K.E.R:CS Complete Mod                DM 0         7.5         WDM 19                0.025-0.125
     RB        S.T.A.L.K.E.R:CoP Complete Mod               DM 0         7.5         WDM 19                0.025-0.125
     RB        S.T.A.L.K.E.R:SoC Complete Mod               DM 0         7.5         WDM 19                0.025-0.125
+    RB        Shadow of the Tomb Raider                    DM 1         17.5                              0.100-0.250 
               Sleeping Dogs: DE                            DM 0         7.0                               0.075-0.100 
               Sniper Elite 4                               DM 0         25.0                              0.025-0.075
               Soma                                         DM 0         11.25       WDM 20                0.025-0.100
@@ -196,7 +197,7 @@ Inner Shader Setting:
              Shadow Warrior Classic Source Port           DM 0       8.75                   1.0000               0.075-0.150
              Shadow Warrior Classic Redux                 DM 0       8.75                   1.0000               0.075-0.150
              Silent Hill: Homecoming                      DM 0       12.5                   0.1155               0.025-0.075       
-             Rise Of the Tomb Raider                      DM 0       25.0                   0.0200               0.050-0.125
+             Rise of the Tomb Raider                      DM 0       25.0                   0.0200               0.050-0.125
              Two Worlds EE                                DM 0       7.5                    0.0750               0.025-0.075            
 
 [Emulator][RB][Special Depth Map Game List]            [Depth Map] [Adjustment] [Weapon DM] [Offset] [Depth Flip] [ZDP Range]
@@ -494,6 +495,17 @@ Use nglide 1.05 or 1.04 to run this game.
 http://www.zeus-software.com/downloads/nglide
 
 Click on 3DFX.exe Untill it starts..... Some thing wrong with this game. It starts after around 6-10 time I try.
+
+{Shadow of the Tomb Raider}
+This game has it's own 3D Side by Side mode That renders around half and disabled some effects like AO. This mode has superior convergence/ZPD AKA Pop Out. 
+My suggestion is to play in native 3D Side by Side mode. But, Set the game resolution to 25% to 50% more and use MXAO as you AO in game.
+
+If your system can't handle the previous setting. Use Depth Clues and a sharpen with a better form of AA.
+
+A note for HMD Users. You need to limit pop out to the edge of your screen.
+You Don't want a mini Lara Croft In your skull do you? 
+
+SLI scaling Is good in this game. Almost full scaling on both cards. If you want to brute force FPS.
 
 {Stay Close}
 Install reshade in too Steam\steamapps\common\Stay Close\Migrate\Binaries\Win64
