@@ -21,14 +21,14 @@
  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 //USER EDITABLE PREPROCESSOR FUNCTIONS START//
-// Determines The resolution of the Depth Map. For 4k Use 1.75 or 1.5. For 1440p Use 1.5 or 1.25. For 1080p use 1. Too low of a resolution will remove too much.
-#define Depth_Map_Division 1.75
+// Determines the resolution of the Depth Map. Too low of a resolution will remove too much information. This will effect performance.
+#define Depth_Map_Division 1.75 //1.0 is 100% | 2.0 is 50%
 
 // Determines the Max Depth amount, in ReShades GUI.
 #define Depth_Max 50
 
 // Use this to Disable Anti-Z-Fighting for Weapon Hand.
-#define DWZF 0 //Default 0 is Off. One is On.
+#define DWZF 0 //Default Zero is Off. One is On.
 
 // Change the Cancel Depth Key
 // Determines the Cancel Depth Toggle Key useing keycode info
@@ -125,6 +125,15 @@ uniform float Disocclusion_Power_Adjust <
 				"Default is 1.0";
 	ui_category = "Occlusion Masking";
 > = 1.0;
+
+uniform bool Performance_Mode <
+	ui_label = " Performance Mode";
+	ui_tooltip = "This will determine the performance mode that this shader will run in.\n" 
+				 "This will try to save on CPU Cycles at the cost of shader quality.\n"
+				 "Please turn on Reshade own Performance mode and reset the game.\n"
+				 "Default is Off.";
+	ui_category = "Occlusion Masking";
+> = false;
 
 //Depth Map//
 uniform int Depth_Map <
@@ -281,6 +290,7 @@ uniform float AO_Power <
 	ui_category = "3D Ambient Occlusion";
 > = 0.05;
 #endif
+
 //Cursor Adjustments//
 uniform float4 Cross_Cursor_Adjust <
 	ui_type = "drag";
@@ -330,14 +340,11 @@ sampler SamplerDMFB
 		Texture = texDMFB;
 	};
 	
-texture texDisFB  { Width = BUFFER_WIDTH/Depth_Map_Division; Height = BUFFER_HEIGHT/Depth_Map_Division; Format = RGBA32F; MipLevels = 2;}; 
+texture texDisFB  { Width = BUFFER_WIDTH/Depth_Map_Division; Height = BUFFER_HEIGHT/Depth_Map_Division; Format = RGBA32F;}; 
 
 sampler SamplerDisFB
 	{
 		Texture = texDisFB;
-		MinFilter = LINEAR;
-		MagFilter = LINEAR;
-		MipFilter = LINEAR;
 	};
 
 texture texEncodeFB  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA32F; MipLevels = 1;};
@@ -839,7 +846,7 @@ float Conv(float DM,float2 texcoord)
 
 void  Disocclusion(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 color : SV_Target0)
 {
-float X, Y, Z, W = 1, DM, DMA, DMB, A, B, S, MS =  Divergence * pix.x, DBD = 1-tex2Dlod(SamplerDMFB,float4(texcoord,0,0)).x , Div = 0.09090909;
+float X, Y, Z, W = 1, DM, DMA, DMB, A, B, S, MS =  Divergence * pix.x, DBD = 1-tex2Dlod(SamplerDMFB,float4(texcoord,0,1)).x , Div = 0.09090909;
 float2 dirA, dirB;
 
 #if AO_TOGGLE
@@ -857,23 +864,33 @@ if(AO == 1)
 	}
 #endif
 
-	MS *= Disocclusion_Power_Adjust;
-		
+	float M, N = 11, weight_A[11] = {0.0,0.0125,-0.0125,0.025,-0.025,0.0375,-0.0375,0.0425,-0.0425,0.050,-0.050}, weight_B[7] = {0.0,0.0125,-0.0125,0.0375,-0.0375,0.05,-0.05};
+	
 	A += 5.5; // Normal
 	B = DBD * 11.0; // Depth
 	dirA = float2(0.5,0.0);
 	dirB = float2(0.5,0.0);
+	MS *= Disocclusion_Power_Adjust;
+	
+	if (Performance_Mode)
+		{
+			N = 7;
+			Div = 0.14285714;
+		}
 		
 	if (Disocclusion_Selection >= 1) 
-	{
-		const float weight[11] = {0.0,0.010,-0.010,0.020,-0.020,0.030,-0.030,0.040,-0.040,0.050,-0.050}; //By 11
-				
+	{			
 		if ( Disocclusion_Selection >= 1 )
 		{		
 				[loop]
-				for (int i = 0; i < 11; i++)
+				for (int i = 0; i < N; i++)
 				{	
-					S = weight[i] * MS;
+						
+					S = weight_A[i] * MS;
+					
+					if (Performance_Mode)
+						S = weight_B[i] * MS;
+					
 					DMA += tex2Dlod(SamplerDMFB,float4(texcoord + dirA * S * A,0,0)).x*Div;
 					
 					if( Disocclusion_Selection == 2 )
@@ -894,7 +911,7 @@ if(AO == 1)
 	}
 	else
 	{
-		DM = tex2Dlod(SamplerDMFB,float4(texcoord,0,0)).x;
+		DM = tex2Dlod(SamplerDMFB,float4(texcoord,0,M)).x;
 	}
 
 	if (!Cancel_Depth)
@@ -917,7 +934,7 @@ if(AO == 1)
 		X = 0.5;
 	}
 		
-	color = float4(X,Y,Z,W);			
+	color = saturate(float4(X,Y,Z,W));			
 }
 
 /////////////////////////////////////////L/R//////////////////////////////////////////////////////////////////////
@@ -930,14 +947,21 @@ float DecodeFloat(float color)//Byte Shift for Debanding depth buffer in final 3
 
 void Encode(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 color : SV_Target0) //zBuffer Color Channel Encode
 {
-	float DepthR = 1, DepthL = 1,MSL = (Divergence * 0.25) * pix.x, S, MS = Divergence  * pix.x;
+	float N = 5, samples_A[5] = {0.5,0.625,0.75,0.875,1.0}, samples_B[3] = {0.5,0.75,1.0};
 	
-	float samples[5] = {0.5,0.625,0.75,0.875,1.0};
+	if (Performance_Mode)
+		N = 3;
 	
+	float DepthR = 1, DepthL = 1,MSL = (Divergence * 0.25) * pix.x, S, MS = (Divergence - 10)  * pix.x;
+		
 	[loop]
-	for ( int i = 0 ; i < 5; i++ ) 
+	for ( int i = 0 ; i < N; i++ ) 
 	{
-		S = samples[i] * MSL;
+		S = samples_A[i] * MSL;
+		
+		if (Performance_Mode)
+			S = samples_B[i] * MSL;
+		
 		DepthL = min(DepthL,tex2Dlod(SamplerDisFB, float4(texcoord.x - S, texcoord.y,0,0)).x);
 		DepthR = min(DepthR,tex2Dlod(SamplerDisFB, float4(texcoord.x + S, texcoord.y,0,0)).x);
 	}
@@ -1025,10 +1049,10 @@ float4 PS_calcLR(float2 texcoord)
 		TCR.x = TCR.x - ((Interlace_Anaglyph.x*0.5) * pix.x);
 	}
 		
-	float2 Pop = float2(0.125f,0.9875f);
-		
+	float2 Pop = float2(0.125f,0.990625f);
+	
 		[loop]
-		for (int i = 0; i <= Divergence + 10; i++) 
+		for (int i = 0; i <= Divergence + 5; i++) 
 		{		
 			j = i + (i * Pop.x);		
 			#if Convergence_Extended

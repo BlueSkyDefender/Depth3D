@@ -384,7 +384,7 @@ float DecodeFloat(float color) //Byte Shift for Debanding depth buffer in final 
 void Encode(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 color : SV_Target0) //zBuffer Color Channel Encode
 {
 	float2 DepthL = 1.0, DepthR = 1.0;
-	float samples[3] = {0.5,0.75,1.0}, MSL = (Divergence * 0.25) * pix.x, S, MS = Divergence * pix.x;
+	float samples[3] = {0.5,0.75,1.0}, MSL = (Divergence * 0.25) * pix.x, S, MS = (Divergence - 10) * pix.x;
 		[loop]
 	for ( int i = 0 ; i < 3; i++ ) 
 	{
@@ -466,7 +466,7 @@ float4 PS_calcLR(float2 texcoord)
 	}
 		
 		[loop]
-		for (int i = 0; i < Divergence + 10; i++) 
+		for (int i = 0; i < Divergence + 5; i++) 
 		{
 			j = i + (i * 0.125f);	
 			//L
