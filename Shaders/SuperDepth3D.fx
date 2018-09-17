@@ -864,6 +864,11 @@ float Conv(float D,float2 texcoord)
 		
 		if (ZPD == 0)
 			ZP = 1.0;
+		
+		if (Auto_Depth_Range > 0)
+		{
+			D = AutoDepthRange(D,texcoord);
+		}
 					
 		if(Convergence_Mode == 1)
 		Z = Divergence_Locked;
@@ -872,12 +877,7 @@ float Conv(float D,float2 texcoord)
 		float DM = D/(1-Z);			
 				
 		float Convergence = 1 - Z / DM;
-				
-		if (Auto_Depth_Range > 0)
-		{
-			D = AutoDepthRange(D,texcoord);
-		}
-		
+						
 		//Depth boost always on.
 		D = lerp( D, 1.25f * D, 0.5);
 						
