@@ -20,18 +20,18 @@ uniform float Dither_Bit <
 	ui_min = 1; ui_max = 15;
 	ui_label = "Dither Bit";
 	ui_tooltip = "Dither is an intentionally applied form of noise used to randomize quantization error, preventing banding in images.";
-> = 7.5;
+> = 6;
 
 uniform int Depth_Map <
 	ui_type = "combo";
-	ui_items = "Normal\0Normal Reversed\0Normal Offset\0Normal Reversed Offset\0Raw\0Raw Reverse\0Debug\0";
+	ui_items = "Normal\0Reversed\0";
 	ui_label = "Custom Depth Map";
 	ui_tooltip = "Pick your Depth Map.";
 > = 0;
 
 uniform float Depth_Map_Adjust <
 	ui_type = "drag";
-	ui_min = 0.25; ui_max = 100.0;
+	ui_min = 0.25; ui_max = 250.0;
 	ui_label = "Depth Map Adjustment";
 	ui_tooltip = "Adjust the depth map and sharpness.";
 > = 5.0;
@@ -41,7 +41,7 @@ uniform float Offset <
 	ui_min = 0; ui_max = 1.0;
 	ui_label = "Offset";
 	ui_tooltip = "Offset is for the Special Depth Map Only";
-> = 0.375;
+> = 0.0;
 
 uniform bool Depth_Map_Flip <
 	ui_label = "Depth Map Flip";
@@ -74,87 +74,41 @@ sampler DepthBuffer
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #define pix float2(BUFFER_RCP_WIDTH, BUFFER_RCP_HEIGHT)
 
-float4 zBuffer(in float2 texcoord : TEXCOORD0)    
+uniform float frametime < source = "frametime"; >;
+float zBuffer(in float2 texcoord : TEXCOORD0)    
 {
-		float4 Out;
-		float texX = texcoord.x + Image_Position_Adjust.x * pix.x;
-		float texY = texcoord.y + Image_Position_Adjust.y * pix.y;	
-		float midV = (Horizontal_Vertical_Resize.y-1)*(BUFFER_HEIGHT*0.5)*pix.y;		
-		float midH = (Horizontal_Vertical_Resize.x-1)*(BUFFER_WIDTH*0.5)*pix.x;			
-		texcoord = float2((texX*Horizontal_Vertical_Resize.x)-midH,(texY*Horizontal_Vertical_Resize.y)-midV);	
+		float2 texXY = texcoord + Image_Position_Adjust * pix;		
+		float2 midHV = (Horizontal_Vertical_Resize-1) * float2(BUFFER_WIDTH * 0.5,BUFFER_HEIGHT * 0.5) * pix;			
+		texcoord = float2((texXY.x*Horizontal_Vertical_Resize.x)-midHV.x,(texXY.y*Horizontal_Vertical_Resize.y)-midHV.y);	
 		
 		if (Depth_Map_Flip)
 			texcoord.y =  1 - texcoord.y;
 			
-		float zBuffer = tex2D(DepthBuffer, texcoord).r; //Depth Buffer
-
+		float DM, zBuffer = tex2D(DepthBuffer, texcoord).x; //Depth Buffer
+			
 		//Conversions to linear space.....
 		//Near & Far Adjustment
-		float Near = 0.125/Depth_Map_Adjust; //Division Depth Map Adjust - Near
-		float Far = 1; //Far Adjustment
-		float DA = Depth_Map_Adjust*2; //Depth Map Adjust - Near
-				
-		//Raw Z Offset
-		float Z = min(1,pow(abs(exp(zBuffer)*Offset),2));
-		float ZR = min(1,pow(abs(exp(zBuffer)*Offset),50));
+		float Far = 1.0, Near = 0.125/Depth_Map_Adjust; //Division Depth Map Adjust - Near
 		
-		//0. Normal
-		float Normal = Far * Near / (Far + zBuffer * (Near - Far));
+		float2 Offsets = float2(1 + Offset,1 - Offset), Z = float2( zBuffer, 1-zBuffer );
 		
-		//1. Reverse
-		float NormalReverse = Far * Near / (Near + zBuffer * (Far - Near));
-		
-		//2. Offset Normal
-		float OffsetNormal = Far * Near / (Far + Z * (Near - Far));
-		
-		//3. Offset Reverse
-		float OffsetReverse = Far * Near / (Near + ZR * (Far - Near));
-		
-		//4. Raw Buffer
-		float Raw = min(1,pow(abs(zBuffer),DA));
-		
-		//5. Raw Buffer Reverse
-		float RawReverse = max(1,pow(abs(zBuffer - 1.0),DA));
-		
-		float DM,DM0,DM1,DM2,DM3;
-		
-		if (Depth_Map == 0)
+		if (Offset > 0)
+		Z = min( 1, float2( Z.x*Offsets.x , ( Z.y - 0.0 ) / ( Offsets.y - 0.0 ) ) );
+			
+		if (Depth_Map == 0)//DM0. Normal
 		{
-		DM = Normal;
+			DM = 2.0 * Near * Far / (Far + Near - (2.0 * Z.x - 1.0) * (Far - Near));
 		}		
-		else if (Depth_Map == 1)
+		else if (Depth_Map == 1)//DM1. Reverse
 		{
-		DM = NormalReverse;
-		}
-		else if (Depth_Map == 2)
-		{
-		DM = OffsetNormal;
-		}
-		else if (Depth_Map == 3)
-		{
-		DM = OffsetReverse;
-		}
-		else if (Depth_Map == 4)
-		{
-		DM = Raw;
-		}
-		else if (Depth_Map == 5)
-		{
-		DM = RawReverse;
-		}
-		else
-		{
-		DM0 = Normal;
-		DM1 = NormalReverse;
-		DM2 = OffsetNormal;
-		DM3 = OffsetReverse;
+			DM = 2.0 * Near * Far / (Far + Near - (1.375 * Z.y - 0.375) * (Far - Near));
 		}
 	
 	// Dither for DepthBuffer adapted from gedosato ramdom dither https://github.com/PeterTh/gedosato/blob/master/pack/assets/dx9/deband.fx
 	// I noticed in some games the depth buffer started to have banding so this is used to remove that.
-			
+				
 	float DB  = Dither_Bit;
-	float noise = frac(sin(dot(texcoord, float2(12.9898, 78.233))) * 43758.5453 * 1);
+	float noise = frac(sin(dot(texcoord * frametime, float2(12.9898, 78.233))) * 43758.5453);
 	float dither_shift = (1.0 / (pow(2,DB) - 1.0));
 	float dither_shift_half = (dither_shift * 0.5);
 	dither_shift = dither_shift * noise - dither_shift_half;
@@ -163,36 +117,23 @@ float4 zBuffer(in float2 texcoord : TEXCOORD0)
 	DM += -dither_shift;
 	
 	// Dither End
-	
-	if (Depth_Map == 6)
-	{
-	Out = float4(DM0,DM1,DM2,DM3);
-	}
-	else
-	{
-	Out = DM.xxxx;
-	}	
 		
-	return saturate(Out);	
+	return saturate(DM);	
 }
 
 ////////////////////////////////////////////////////////Logo/////////////////////////////////////////////////////////////////////////
 uniform float timer < source = "timer"; >;
 float4 Out(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Target
 {
-	float4 Color;
-	float Top = texcoord.x < 0.5 ? zBuffer(float2(texcoord.x*2,texcoord.y*2)).x : zBuffer(float2(texcoord.x*2-1 , texcoord.y*2)).y;
-	float Bottom = texcoord.x < 0.5 ?   zBuffer(float2(texcoord.x*2 , texcoord.y*2-1)).z :  zBuffer(float2(texcoord.x*2-1,texcoord.y*2-1)).w;
-	
-	if (Depth_Map == 6)
-	{
-		Color = texcoord.y < 0.5 ? Top.xxxx : Bottom.xxxx;
-	}
-	else
-	{
-		Color = zBuffer(texcoord).xxxx;
-	}
-	
+	float4 Color = float4(zBuffer(texcoord).xxx,1.0);
+
+	float ByteN = 640, BS; //Byte Shift
+	Color  *= ByteN;
+	BS = floor(Color);
+	Color = (Color  - BS) * ByteN;
+	BS *= 1.0/ByteN;
+	Color  = saturate(dot(BS.xxx, float3(1.0f, 1.0f / ByteN, 1.0f / (ByteN * ByteN)) )); //byte_to_float	
+		
 	float PosX = 0.5*BUFFER_WIDTH*pix.x,PosY = 0.5*BUFFER_HEIGHT*pix.y;	
 	float4 Done,Website,D,E,P,T,H,Three,DD,Dot,I,N,F,O;
 	

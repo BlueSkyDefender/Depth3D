@@ -445,7 +445,7 @@ float Depth(in float2 texcoord : TEXCOORD0)
 		
 		//Conversions to linear space.....
 		//Near & Far Adjustment
-		float Far = 1.0, Near = 0.125/Depth_Map_Adjust, DA = Depth_Map_Adjust * 2; //Division Depth Map Adjust - Near
+		float Far = 1.0, Near = 0.125/Depth_Map_Adjust; //Division Depth Map Adjust - Near
 		
 		float2 Offsets = float2(1 + Offset,1 - Offset), Z = float2( zBuffer, 1-zBuffer );
 		
