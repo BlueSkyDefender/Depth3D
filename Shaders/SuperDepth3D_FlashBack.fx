@@ -661,7 +661,7 @@ float3 WeaponDepth(in float2 texcoord : TEXCOORD0)
 			og_Depth.x = og_Depth.y;
 		}
 		
-	return saturate(float3(zBufferWH_A.x,og_Depth.x,WA_XYZW.x));	
+	return float3(zBufferWH_A.x,og_Depth.x,WA_XYZW.x);	
 }
 
 void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 Color : SV_Target)
