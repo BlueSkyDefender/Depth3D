@@ -20,6 +20,13 @@
  //* 																																												*//
  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+uniform float Balance <
+	ui_type = "drag";
+	ui_min = 0.250; ui_max = 1.0;
+	ui_label = "Balance";
+	ui_tooltip = "The Interpolation between Depth Cues and BackBuffer.";
+> = 1.0;
+
 uniform float Contrast <
 	ui_type = "drag";
 	ui_min = 0; ui_max = 1;
@@ -177,7 +184,10 @@ float4 CuesOut(float2 texcoord : TEXCOORD0)
 	float4 Out, Debug_Done = saturate(DepthCues(texcoord).xxxx + Mask), Combine = tex2D(BackBuffer,texcoord) * Debug_Done;
 			
 	Con = (Con < 0.0) ? max(Con/100.0, -100.0) : min(Con, 100.0);
-	Combine.rgb=(Combine.rgb-0.5)*max(Con+1.0, 0.0)+0.5;
+	
+	float3 Done = (Combine.rgb-0.5)*max(Con+1.0, 0.0)+0.5;
+	
+	Combine.rgb = lerp(tex2D(BackBuffer,texcoord).rgb,Done,Balance);
 				
 	if (!Debug_View)
 	{

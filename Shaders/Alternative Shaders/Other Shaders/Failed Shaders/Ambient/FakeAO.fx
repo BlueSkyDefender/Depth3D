@@ -23,43 +23,69 @@
  //* 																																												*//
  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+uniform float Spread <
+	ui_type = "drag";
+	ui_min = 1.0; ui_max = 250.00;
+	ui_label = "Shade Fill";
+	ui_tooltip = "Adjust This to have the shade effect to fill in areas.\n"
+				 "This is used for gap filling. AKA, Fake AO.\n"
+				 "Number 25 is default.";
+> = 25.0;
+
+uniform float Power <
+	ui_type = "drag";
+	ui_min = 1.0; ui_max = 12.50;
+	ui_label = "Fake AO Power";
+	ui_tooltip = "Adjust the Shade Power.\n"
+				 "Number 6.25 is default.";
+> = 6.25;
+
+uniform float Dither_Bit <
+	ui_type = "drag";
+	ui_min = 1; ui_max = 15;
+	ui_label = "Dither Bit";
+	ui_tooltip = "Dither is an intentionally applied form of noise used to randomize quantization error, preventing banding in images.";
+> = 6;
+
 uniform int Depth_Map <
 	ui_type = "combo";
-	ui_items = "Normal Raw\0Normal Reversed Raw\0Normal\0Normal Reversed\0";
+	ui_items = "Normal\0Reversed\0";
 	ui_label = "Custom Depth Map";
 	ui_tooltip = "Pick your Depth Map.";
-> = 2;
+> = 0;
+
+uniform float Depth_Map_Adjust <
+	ui_type = "drag";
+	ui_min = 0.25; ui_max = 250.0;
+	ui_label = "Depth Map Adjustment";
+	ui_tooltip = "Adjust the depth map and sharpness.";
+> = 5.0;
+
+uniform float Offset <
+	ui_type = "drag";
+	ui_min = 0; ui_max = 1.0;
+	ui_label = "Offset";
+	ui_tooltip = "Offset is for the Special Depth Map Only";
+> = 0.0;
 
 uniform bool Depth_Map_Flip <
 	ui_label = "Depth Map Flip";
 	ui_tooltip = "Flip the depth map if it is upside down.";
 > = false;
 
-uniform float Power <
+uniform float2 Image_Position_Adjust<
 	ui_type = "drag";
-	ui_min = 1.0; ui_max = 5.0;
-	ui_label = "Fake AO Power";
-	ui_tooltip = "Adjust the Shade Power.\n"
-				 "Number 2.5 is default.";
-> = 2.5;
-
-uniform float Balance <
+	ui_min = -4096.0; ui_max = 4096.0;
+	ui_label = "Image Position Adjust";
+	ui_tooltip = "Adjust the Image Postion if it's off by a bit. Default is Zero.";
+> = float2(0.0,0.0);
+	
+uniform float2 Horizontal_Vertical_Resize <
 	ui_type = "drag";
-	ui_min = 0.0; ui_max = 1.0;
-	ui_label = "Foreground and BackGround Balance";
-	ui_tooltip = "Adjust the Shade Blance for $%@$.\n"
-				 "Number 0.5 is default.";
-> = 0.5;
-
-
-uniform float Spread <
-	ui_type = "drag";
-	ui_min = 1.0; ui_max = 12.50;
-	ui_label = "Shade Fill";
-	ui_tooltip = "Adjust This to have the shade effect to fill in areas.\n"
-				 "This is used for gap filling. AKA, Fake AO.\n"
-				 "Number 6.250 is default.";
-> = 6.250;
+	ui_min = 0.125; ui_max = 2;
+	ui_label = "Horizontal & Vertical";
+	ui_tooltip = "Adjust Horizontal and Vertical Resize. Default is 1.0.";
+> = float2(1.0,1.0);
 
 uniform bool Debug_View <
 	ui_label = "Debug View";
@@ -89,117 +115,96 @@ texture texGuss { Width = BUFFER_WIDTH*0.5; Height = BUFFER_HEIGHT*0.5; Format =
 sampler SamplerBlur
 	{
 		Texture = texGuss;
-		MipLODBias = 1.0f;
+		MipLODBias = 2.0f;
 		MinFilter = LINEAR;
 		MagFilter = LINEAR;
 		MipFilter = LINEAR;
 	};	
 	
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-float2 zBuffer(in float2 texcoord : TEXCOORD0)    
-{		
-		float2 DM;
+uniform float frametime < source = "frametime"; >;
+float zBuffer(in float2 texcoord : TEXCOORD0)    
+{
+		float2 texXY = texcoord + Image_Position_Adjust * pix;		
+		float2 midHV = (Horizontal_Vertical_Resize-1) * float2(BUFFER_WIDTH * 0.5,BUFFER_HEIGHT * 0.5) * pix;			
+		texcoord = float2((texXY.x*Horizontal_Vertical_Resize.x)-midHV.x,(texXY.y*Horizontal_Vertical_Resize.y)-midHV.y);	
+		
 		if (Depth_Map_Flip)
 			texcoord.y =  1 - texcoord.y;
 			
-		float zBuffer = tex2D(DepthBuffer, texcoord).r; //Depth Buffer
-
-		//Depth_Map_Adjust
+		float DM, zBuffer = tex2D(DepthBuffer, texcoord).x; //Depth Buffer
+			
 		//Conversions to linear space.....
 		//Near & Far Adjustment
-		float FGNear = 0.125/2.5; //Division Depth Map Adjust - Near
-		float BGNear = 0.125/25; //Division Depth Map Adjust - Near
-		float Far = 1; //Far Adjustment
+		float Far = 1.0, Near = 0.125/Depth_Map_Adjust; //Division Depth Map Adjust - Near
 		
-		//1. Raw ZBuffer
-		float RawFG = min(1,pow(abs(zBuffer),75));
-		float RawBG = min(1,pow(abs(zBuffer),1000));
+		float2 Offsets = float2(1 + Offset,1 - Offset), Z = float2( zBuffer, 1-zBuffer );
 		
-		
-		//2. Raw ZBuffer Reverse
-		float RawReverseFG = max(1,pow(abs(zBuffer - 1.0),75));
-		float RawReverseBG = max(1,pow(abs(zBuffer - 1.0),1000));
-		
-		//3. Normal
-		float NormalFG = Far * FGNear / (Far + zBuffer * (FGNear - Far));
-		float NormalBG = Far * BGNear / (Far + zBuffer * (BGNear - Far));
-		
-		//4. Reverse
-		float NormalReverseFG = Far * FGNear / (FGNear + zBuffer * (Far - FGNear));
-		float NormalReverseBG = Far * BGNear / (BGNear + zBuffer * (Far - BGNear));
-		
-		if (Depth_Map == 0)
+		if (Offset > 0)
+		Z = min( 1, float2( Z.x*Offsets.x , ( Z.y - 0.0 ) / ( Offsets.y - 0.0 ) ) );
+			
+		if (Depth_Map == 0)//DM0. Normal
 		{
-		DM.x = RawFG;
-		DM.y = RawBG;
+			DM = 2.0 * Near * Far / (Far + Near - (2.0 * Z.x - 1.0) * (Far - Near));
 		}		
-		else if (Depth_Map == 1)
+		else if (Depth_Map == 1)//DM1. Reverse
 		{
-		DM.x = RawReverseFG;
-		DM.y = RawReverseBG;
-		}
-		else if (Depth_Map == 2)
-		{
-		DM.x = NormalFG;
-		DM.y = NormalBG;
-		}
-		else
-		{
-		DM.x = NormalReverseFG;
-		DM.y = NormalReverseBG;
+			DM = 2.0 * Near * Far / (Far + Near - (1.375 * Z.y - 0.375) * (Far - Near));
 		}
 	
-return clamp(DM.xy,0.003,1.0);//clamping to protect from over Dark.
+	// Dither for DepthBuffer adapted from gedosato ramdom dither https://github.com/PeterTh/gedosato/blob/master/pack/assets/dx9/deband.fx
+	// I noticed in some games the depth buffer started to have banding so this is used to remove that.
+				
+	float DB  = Dither_Bit;
+	float noise = frac(sin(dot(texcoord * frametime, float2(12.9898, 78.233))) * 43758.5453);
+	float dither_shift = (1.0 / (pow(2,DB) - 1.0));
+	float dither_shift_half = (dither_shift * 0.5);
+	dither_shift = dither_shift * noise - dither_shift_half;
+	DM += -dither_shift;
+	DM += dither_shift;
+	DM += -dither_shift;
+	
+	// Dither End
+		
+	return saturate(DM);	
 }
-void Blur(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 color : SV_Target0)                                                                          
+
+void Blur(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 color : SV_Target)                                                                          
 {
-	float2 CC = zBuffer(texcoord).xy;
+	float4 CC = zBuffer(texcoord);
 
-	float2 samples[10] = { float2(-0.695914, 0.457137), float2(-0.203345, 0.620716), float2(0.962340, -0.194983), float2(0.473434, -0.480026), float2(0.519456, 0.767022), 
-						   float2(0.185461, -0.893124), float2(0.507431, 0.064425), float2(0.896420, 0.412458), float2(-0.321940, -0.932615), float2(-0.791559, -0.597705) };  
-			
-	float2 Adjust = float2(Spread,Spread)*pix;
+	const float samples[7] = {0.0f,0.020f,-0.020f,0.030f,-0.030f,0.05f,-0.05f};
 
+    float factor = zBuffer(texcoord), aperture = 10000, maxBlur = Spread;
+
+    float2 dofblur = float2 ( clamp( factor * aperture, -maxBlur, maxBlur ),clamp( factor * aperture, -maxBlur, maxBlur ) ) * pix;
+    
+	float X, Y;
 		[unroll]
-		for (int i = 0; i < 10; i++)
+		for (int i = 0; i < 7; i++)
 		{  
-			CC += zBuffer(texcoord + Adjust * samples[i]).xy;
+			X = dofblur.x * samples[i] * 2;
+			Y = dofblur.y * samples[i] * 2;
+			CC += lerp(zBuffer(float2(texcoord.x + X,texcoord.y)),zBuffer(float2(texcoord.x ,texcoord.y + Y)),0.5);
+			CC += lerp(zBuffer(float2(texcoord.x - X ,texcoord.y - Y)),zBuffer(float2(texcoord.x + X ,texcoord.y - Y)),0.5);
 		} 
 		
-		CC *= 0.09090909f;
+		CC /= 14;
 		
-		color = float4(CC,1,1);
-}
-
-float2 Adjust(in float2 texcoord : TEXCOORD0)
-{
-float2 S = float2(Spread * pix.x,Spread * pix.y);
-
-float2 H = lerp(tex2D(SamplerBlur, float2(texcoord.x + S.x, texcoord.y)).xy,tex2D(SamplerBlur, float2(texcoord.x - S.x, texcoord.y)).xy,0.5);
-float2 V = lerp(tex2D(SamplerBlur, float2(texcoord.x, texcoord.y + S.y)).xy,tex2D(SamplerBlur, float2(texcoord.x, texcoord.y - S.y)).xy,0.5);
-float2 HVC = lerp(H,V,0.5);
-
-return HVC; 
+		color = CC;
 }
 
 float FakeAO(float2 texcoord : TEXCOORD0)
 {
-	//Luma (SD video)	float3(0.299, 0.587, 0.114)
-	//Luma (HD video)	float3(0.2126, 0.7152, 0.0722) https://en.wikipedia.org/wiki/Luma_(video)
-	//Luma (HDR video)	float3(0.2627, 0.6780, 0.0593) https://en.wikipedia.org/wiki/Rec._2100
-	float A = tex2D(BackBuffer,texcoord).a;
-	float3 RGB_A, RGB_B, Luma_Coefficient = float3(0.2627, 0.6780, 0.0593);
+
+	float ByteN = 640; //Byte Shift
+	float3 RGB, BS = float3(1.0f, 1.0f / ByteN, 1.0f / (ByteN * ByteN)),GS = float3(0.2989f, 0.5870f, 0.1140f);
 		
 	//Formula for FakeAO = Original * (Original - Blurred) * Amount.
-	RGB_A = zBuffer(texcoord).xxx  -  Adjust(texcoord).xxx ;
+	RGB = dot(zBuffer(texcoord).xxx,BS) - dot(tex2D(SamplerBlur,texcoord).xxx,BS) ;
 	
-	//Formula for FakeAO = Original * (Original - Blurred) * Amount.
-	RGB_B = zBuffer(texcoord).yyy  -  Adjust(texcoord).yyy ;
-	
-	//Foreground and Background Fake AO adjust
-	float FGPower = Power,BGPower = Power;
-	float Combine = lerp(dot(RGB_A,Luma_Coefficient * FGPower),dot(RGB_B,Luma_Coefficient * BGPower),Balance);
+	//Fake AO adjust
+	float Combine = dot(RGB,GS * Power);
 	
 	return saturate(1-Combine);
 }
@@ -207,10 +212,10 @@ float FakeAO(float2 texcoord : TEXCOORD0)
 float4 CuesOut(float2 texcoord : TEXCOORD0)
 {		
 	float4 Out;
-
-	float4 Combine = FakeAO(texcoord).xxxx * tex2D(BackBuffer, texcoord);
 	
-	float4 Debug_Done = FakeAO(texcoord).xxxx;
+	float4 Combine = lerp(FakeAO(texcoord).xxxx , 1.0 , zBuffer(texcoord)) * tex2D(BackBuffer, texcoord);
+	
+	float4 Debug_Done = lerp(FakeAO(texcoord).xxxx , 1.0 , zBuffer(texcoord));
 		
 	if (!Debug_View)
 	{

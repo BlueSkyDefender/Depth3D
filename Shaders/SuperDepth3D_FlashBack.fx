@@ -25,7 +25,7 @@
 #define Depth_Map_Resolution 0.625 //1.0 is 100% | 0.50 is 50%
 
 // Determines the Max Depth amount, in ReShades GUI.
-#define Depth_Max 50
+#define Depth_Max 50.0
 
 // Use this to Disable Anti-Z-Fighting for Weapon Hand.
 #define DWZF 0 //Default Zero is Off. One is On.
@@ -55,7 +55,7 @@
 //Divergence & Convergence//
 uniform float Divergence <
 	ui_type = "drag";
-	ui_min = 1; ui_max = Depth_Max;
+	ui_min = 1.0; ui_max = Depth_Max;
 	ui_label = "·Divergence Slider·";
 	ui_tooltip = "Divergence increases differences between the left and right retinal images and allows you to experience depth.\n" 
 				 "The process of deriving binocular depth information is called stereopsis.\n"
@@ -983,7 +983,7 @@ float4 PS_calcLR(float2 texcoord)
 	//P is Perspective Adjustment.
 	float DepthR, DepthL, P = Perspective * pix.x;
 	
-	if(Eye_Swap)
+	if(!Eye_Swap)
 	{
 		if ( Stereoscopic_Mode == 0 )
 		{
