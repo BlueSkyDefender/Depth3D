@@ -19,21 +19,14 @@
  //*                                                                            																									*//
  //* 																																												*//
  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-uniform int Luma_Coefficient <
-	ui_type = "combo";
-	ui_label = "Luma";
-	ui_tooltip = "Changes how color get sharpened by Unsharped Masking\n"
-				 "This should only affect Normal, Color, & Greyscale output.";
-	ui_items = "SD video\0HD video\0HDR video\0";
-> = 0;
 
-uniform float Balance <
-	ui_type = "drag";
-	ui_min = 0.250; ui_max = 1.0;
-	ui_label = "Balance";
-	ui_tooltip = "The Interpolation between Depth Cues and BackBuffer.\n"
-				 "Number 1.0 is default.";
-> = 1.0;
+uniform float Power <	
+	ui_type = "drag";	
+	ui_min = 0.0; ui_max = 1.0;	
+	ui_label = "Shade Power";	
+	ui_tooltip = "Adjust the Shade Power This improves AO, Shadows, & Darker Areas in game.\n"	
+				 "Number 0.5 is default.";
+> = 0.5;
 
 uniform float Spread <
 	ui_type = "drag";
@@ -43,6 +36,14 @@ uniform float Spread <
 				 "This is used for gap filling.\n"
 				 "Number 10.0 is default.";
 > = 10.0;
+
+uniform int Luma_Coefficient <
+	ui_type = "combo";
+	ui_label = "Luma";
+	ui_tooltip = "Changes how color get sharpened by Unsharped Masking\n"
+				 "This should only affect Normal, Color, & Greyscale output.";
+	ui_items = "SD video\0HD video\0HDR video\0";
+> = 0;
 
 uniform float Sharpen_Power <
 	ui_type = "drag";
@@ -157,9 +158,8 @@ float DepthCues(float2 texcoord : TEXCOORD0)
 	
 	//Formula for Image Pop = Original + (Original / Blurred) * Amount.
 	RGB = GS(tex2D(BackBuffer,texcoord).rgb) / GS( Adjust(texcoord).rgb );
-	float3 Pop = GS(RGB.rgb);
-	
-	float Done = dot(Pop,Luma());
+		
+	float Done = dot(RGB,Luma());
 	
 	return saturate(Done);
 }
@@ -187,9 +187,7 @@ float4 CuesOut(float2 texcoord : TEXCOORD0)
 		RGBA = saturate(Grayscale_Sharp_Control) + BB;
 	}
 		
-	float4 Out, Debug_Done = abs(DepthCues(texcoord).xxxx), Combine = RGBA * Debug_Done;
-	
-	Combine.rgb = lerp(tex2D(BackBuffer,texcoord).rgb,Combine.rgb,Balance);
+	float4 Out, Debug_Done = lerp(1.0f,abs(DepthCues(texcoord).xxxx),Power), Combine = RGBA * Debug_Done;
 				
 	if (!Debug_View)
 	{
