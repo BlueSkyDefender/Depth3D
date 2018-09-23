@@ -58,6 +58,9 @@
 // Image Position Adjust is used to move the Z-Buffer around.
 #define Image_Position_Adjust float2(0.0,0.0)
 
+//Anti Crosstalk is used to help with image ghosing.
+#define Anti_Crosstalk 0 //Default Zero is Off. One is On.
+
 //USER EDITABLE PREPROCESSOR FUNCTIONS END//
 
 //Divergence & Convergence//
@@ -294,6 +297,26 @@ uniform float AO_Power <
 	ui_category = "3D Ambient Occlusion";
 > = 0.05;
 #endif
+//Crosstalk Adjustments//
+#if Anti_Crosstalk	
+uniform float Gamma <
+	ui_type = "drag";
+	ui_min = 0.5; ui_max = 1.5;
+	ui_label = "Gamma Deghosting";
+	ui_tooltip = "Use this to help with Gamma ghosting.\n" 
+				 "Default is 2.2.";
+	ui_category = "Crosstalk";
+> = 2.2;
+
+uniform float Saturate <
+	ui_type = "drag";
+	ui_min = 0.0; ui_max = 1.0;
+	ui_label = "Color Deghosting";
+	ui_tooltip = "Use this to help with color ghosting.\n" 
+				 "Default is 1.0.";
+	ui_category = "Crosstalk";
+> = 1.0;
+	#endif
 //Cursor Adjustments//
 uniform float4 Cross_Cursor_Adjust <
 	ui_type = "drag";
@@ -1128,6 +1151,20 @@ float4 PS_calcLR(float2 texcoord)
 		cR = Left;
 	}
 	
+	#if Anti_Crosstalk	
+	float4x4 YUV = float4x4( 0.21260f, 0.71520f, 0.07220f,  0.0f,-0.09991f,-0.33609f, 0.43600f, 0.0f, 0.61500f,-0.55861f,-0.05639f,  0.0f, 0.0f, 0.0f, 0.0f, 1.0f ),
+			 RGB = float4x4( 1.0f, 0.00000f, 1.28033f, 0.0f, 1.0f,-0.21482f,-0.38059f, 0.0f, 1.0f, 2.12798f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f );
+
+	cL     = mul(YUV,cL);
+	cR     = mul(YUV,cR);
+	float4 CL = mul(YUV,cL);
+	float4 CR = mul(YUV,cR);
+	cL.rg  = float2(saturate(cL.r + pow(CL.r,Gamma)),cL.g * Saturate);
+	cR.rg  = float2(saturate(cR.r + pow(CR.r,Gamma)),cR.g * Saturate);
+	cL     = mul(RGB,cL);
+	cR     = mul(RGB,cR);
+	#endif	
+		
 	if(!Depth_Map_View)
 	{
 	float2 gridxy;
