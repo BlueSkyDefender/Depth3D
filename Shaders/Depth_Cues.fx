@@ -19,39 +19,6 @@
  //*                                                                            																									*//
  //* 																																												*//
  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-uniform float Balance <
-	ui_type = "drag";
-	ui_min = 0.250; ui_max = 1.0;
-	ui_label = "Balance";
-	ui_tooltip = "The Interpolation between Depth Cues and BackBuffer.";
-> = 1.0;
-
-uniform float Contrast <
-	ui_type = "drag";
-	ui_min = 0; ui_max = 1;
-	ui_label = "Contrast";
-	ui_tooltip = "Use if your Game is Too Dark";
-> = 0;
-
-uniform float Power <
-	ui_type = "drag";
-	ui_min = -2.5; ui_max = 1.5;
-	ui_label = "Shade Power";
-	ui_tooltip = "Adjust the Shade Power Lower is Higher & Higher is Lower.\n"
-				 "This improves AO, Shadows, & Darker Areas in game.\n"
-				 "Number 1.0 is default.";
-> = 1.0;
-
-uniform float Spread <
-	ui_type = "drag";
-	ui_min = 1.0; ui_max = 20.0;
-	ui_label = "Shade Fill";
-	ui_tooltip = "Adjust This to have the shade effect to fill in areas.\n"
-				 "This is used for gap filling. AKA, Fake AO.\n"
-				 "Number 7.5 is default.";
-> = 7.5;
-
 uniform int Luma_Coefficient <
 	ui_type = "combo";
 	ui_label = "Luma";
@@ -60,18 +27,42 @@ uniform int Luma_Coefficient <
 	ui_items = "SD video\0HD video\0HDR video\0";
 > = 0;
 
+uniform float Balance <
+	ui_type = "drag";
+	ui_min = 0.250; ui_max = 1.0;
+	ui_label = "Balance";
+	ui_tooltip = "The Interpolation between Depth Cues and BackBuffer.\n"
+				 "Number 1.0 is default.";
+> = 1.0;
+
+uniform float Spread <
+	ui_type = "drag";
+	ui_min = 1.0; ui_max = 20.0;
+	ui_label = "Shade Fill";
+	ui_tooltip = "Adjust This to have the shade effect to fill in areas.\n"
+				 "This is used for gap filling.\n"
+				 "Number 10.0 is default.";
+> = 10.0;
+
+uniform float Sharpen_Power <
+	ui_type = "drag";
+	ui_min = 0.0; ui_max = 0.250;
+	ui_label = "Sharpen Power";
+	ui_tooltip = "Increases or Decreases the Sharpen power.\n"
+				 "Number 0.125 is default.";
+> = 0.125;
+
+uniform int Output_Selection <
+	ui_type = "combo";
+	ui_items = "Normal\0Color Only\0Greyscale Only\0";
+	ui_label = "Sharpen Type";
+	ui_tooltip = "Select Sharpen Output Type.";
+> = 0;
+
 uniform bool Debug_View <
 	ui_label = "Debug View";
 	ui_tooltip = "To view Shade & Blur effect on the game, movie piture & ect.";
 > = false;
-
-uniform float Mask_Adjust <
-	ui_type = "drag";
-	ui_min = 0.0; ui_max = 0.625;
-	ui_label = "Mask Adjustment";
-	ui_tooltip = "Mask is used to protect Bright Colors & Lights in the image from Fake AO intrusion.\n"
-				 "Zero is default, Off.";
-> = 0.0;
 
 /////////////////////////////////////////////////////D3D Starts Here/////////////////////////////////////////////////////////////////
 #define pix float2(BUFFER_RCP_WIDTH, BUFFER_RCP_HEIGHT)
@@ -89,13 +80,13 @@ sampler BackBuffer
 	{ 
 		Texture = BackBufferTex;
 	};
-		
-texture texB { Width = BUFFER_WIDTH*0.5; Height = BUFFER_HEIGHT*0.5; Format = RGBA8; MipLevels = 8;};
+			
+texture texB { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA8; MipLevels = 3;};
 
 sampler SamplerBlur
 	{
 		Texture = texB;
-		MipLODBias = 1.0f;
+		MipLODBias = 3.0f;
 		MinFilter = LINEAR;
 		MagFilter = LINEAR;
 		MipFilter = LINEAR;
@@ -107,15 +98,14 @@ void Blur(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out 
 {
 	float4 CC = tex2D(BackBuffer, texcoord);
 
-	float2 samples[10] = { float2(-0.695914, 0.457137), float2(-0.203345, 0.620716), float2(0.962340, -0.194983), float2(0.473434, -0.480026), float2(0.519456, 0.767022), 
-						   float2(0.185461, -0.893124), float2(0.507431, 0.064425), float2(0.896420, 0.412458), float2(-0.321940, -0.932615), float2(-0.791559, -0.597705) };  
+	float samples[10] = { -0.695914, -0.203345, 0.962340, 0.473434, 0.519456, 0.185461, 0.507431, 0.896420, -0.321940, -0.791559 };  
 			
-	float2 Adjust = float2(Spread,Spread)*pix;
-
+	float Adjust = Spread * pix;
+	
 		[unroll]
 		for (int i = 0; i < 10; i++)
 		{  
-			CC += tex2D(BackBuffer, texcoord + Adjust * samples[i]);
+			CC += tex2D(BackBuffer, float2(texcoord.x + Adjust * samples[i],texcoord.y));
 		} 
 		
 		CC *= 0.09090909f;
@@ -125,21 +115,12 @@ void Blur(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out 
 
 float4 Adjust(in float2 texcoord : TEXCOORD0)
 {
-float2 S = float2(Spread * pix.x,Spread * 0.5 * pix.y);// Hoizontal Sepration needs to be stronger
-float4 H = lerp(tex2D(SamplerBlur, float2(texcoord.x + S.x, texcoord.y)),tex2D(SamplerBlur, float2(texcoord.x - S.x, texcoord.y)),0.5);
-float4 V = lerp(tex2D(SamplerBlur, float2(texcoord.x, texcoord.y + S.y)),tex2D(SamplerBlur, float2(texcoord.x, texcoord.y - S.y)),0.5);
-float4 HVC = lerp(H,V,0.50);
+float2 S = float2(Spread * 0.15625f, Spread * 0.15625f) * pix;
+float4 H = lerp(tex2D(SamplerBlur, float2(texcoord.x + S.x, texcoord.y + S.y)),tex2D(SamplerBlur, float2(texcoord.x - S.x, texcoord.y - S.y)),0.5);
+float4 V = lerp(tex2D(SamplerBlur, float2(texcoord.x - S.x, texcoord.y + S.y)),tex2D(SamplerBlur, float2(texcoord.x + S.x, texcoord.y - S.y)),0.5);
+float4 HVC = lerp(H,V,0.5);
 
 return HVC; 
-}
-
-float3 GS(float3 color)
-{
-    float grayscale = dot(color.rgb, float3(0.3, 0.59, 0.11));
-    color.r = grayscale;
-    color.g = grayscale;
-    color.b = grayscale;
-	return clamp(color,0.003,1.0);//clamping to protect from over Dark.
 }
 
 float3 Luma()
@@ -161,33 +142,54 @@ float3 Luma()
 	return Luma;
 }
 
+float3 GS(float3 color)
+{
+    float grayscale = dot(color.rgb, Luma());
+    color.r = grayscale;
+    color.g = grayscale;
+    color.b = grayscale;
+	return clamp(color,0.003,1.0);//clamping to protect from over Dark.
+}
+
 float DepthCues(float2 texcoord : TEXCOORD0)
 {
-	float3 RGB_A, RGB_B;	
+	float3 RGB;	
 	
 	//Formula for Image Pop = Original + (Original / Blurred) * Amount.
-	RGB_A = GS(tex2D(BackBuffer,texcoord).rgb) / GS( Adjust(texcoord).rgb );
-	float3 FGPop = GS(RGB_A.rgb);
+	RGB = GS(tex2D(BackBuffer,texcoord).rgb) / GS( Adjust(texcoord).rgb );
+	float3 Pop = GS(RGB.rgb);
 	
-	//Formula for BackGround Pop = Original + (Original - Blurred) * Amount .
-	RGB_B = GS(tex2D(BackBuffer,texcoord).rgb) - GS(Adjust(texcoord).rgb);
-	float3 BGPop = GS(1-RGB_B.rgb * Power);
-
-	float Combine = dot(lerp(FGPop,BGPop,0.5),Luma());
+	float Done = dot(Pop,Luma());
 	
-	return saturate(Combine);
+	return saturate(Done);
 }
 
 float4 CuesOut(float2 texcoord : TEXCOORD0)
 {		
-	float Con = Contrast, Mask = dot(tex2D(BackBuffer,texcoord).rgb,Luma())> (1-Mask_Adjust);
-	float4 Out, Debug_Done = saturate(DepthCues(texcoord).xxxx + Mask), Combine = tex2D(BackBuffer,texcoord) * Debug_Done;
-			
-	Con = (Con < 0.0) ? max(Con/100.0, -100.0) : min(Con, 100.0);
+	float4 RGBA, BB = tex2D(BackBuffer,texcoord);
+		
+	//Unsharp Mask
+	float RGB = tex2D(BackBuffer,texcoord).rgb - Adjust(texcoord).rgb; 
 	
-	float3 Done = (Combine.rgb-0.5)*max(Con+1.0, 0.0)+0.5;
+	float3 Color_Sharp_Control = RGB * Sharpen_Power; 
+	float Grayscale_Sharp_Control = dot(RGB, saturate(Luma() * Sharpen_Power));
 	
-	Combine.rgb = lerp(tex2D(BackBuffer,texcoord).rgb,Done,Balance);
+	if (Output_Selection == 0)
+	{
+		RGBA = saturate(lerp(Grayscale_Sharp_Control,float4(Color_Sharp_Control,1),0.5)) + BB;
+	}
+	else if (Output_Selection == 1)
+	{
+		RGBA = saturate(float4(Color_Sharp_Control,1)) + BB;
+	}
+	else
+	{
+		RGBA = saturate(Grayscale_Sharp_Control) + BB;
+	}
+		
+	float4 Out, Debug_Done = abs(DepthCues(texcoord).xxxx), Combine = RGBA * Debug_Done;
+	
+	Combine.rgb = lerp(tex2D(BackBuffer,texcoord).rgb,Combine.rgb,Balance);
 				
 	if (!Debug_View)
 	{
