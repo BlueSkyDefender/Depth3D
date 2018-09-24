@@ -45,21 +45,6 @@ uniform int Luma_Coefficient <
 	ui_items = "SD video\0HD video\0HDR video\0";
 > = 0;
 
-uniform float Sharpen_Power <
-	ui_type = "drag";
-	ui_min = 0.0; ui_max = 0.250;
-	ui_label = "Sharpen Power";
-	ui_tooltip = "Increases or Decreases the Sharpen power.\n"
-				 "Number 0.125 is default.";
-> = 0.125;
-
-uniform int Output_Selection <
-	ui_type = "combo";
-	ui_items = "Normal\0Color Only\0Greyscale Only\0";
-	ui_label = "Sharpen Type";
-	ui_tooltip = "Select Sharpen Output Type.";
-> = 0;
-
 uniform bool Debug_View <
 	ui_label = "Debug View";
 	ui_tooltip = "To view Shade & Blur effect on the game, movie piture & ect.";
@@ -101,7 +86,7 @@ void Blur(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out 
 
 	float samples[10] = { -0.695914, -0.203345, 0.962340, 0.473434, 0.519456, 0.185461, 0.507431, 0.896420, -0.321940, -0.791559 };  
 			
-	float Adjust = Spread * pix;
+	float Adjust = Spread * pix.x;
 	
 		[unroll]
 		for (int i = 0; i < 10; i++)
@@ -166,28 +151,7 @@ float DepthCues(float2 texcoord : TEXCOORD0)
 
 float4 CuesOut(float2 texcoord : TEXCOORD0)
 {		
-	float4 RGBA, BB = tex2D(BackBuffer,texcoord);
-		
-	//Unsharp Mask
-	float RGB = tex2D(BackBuffer,texcoord).rgb - Adjust(texcoord).rgb; 
-	
-	float3 Color_Sharp_Control = RGB * Sharpen_Power; 
-	float Grayscale_Sharp_Control = dot(RGB, saturate(Luma() * Sharpen_Power));
-	
-	if (Output_Selection == 0)
-	{
-		RGBA = saturate(lerp(Grayscale_Sharp_Control,float4(Color_Sharp_Control,1),0.5)) + BB;
-	}
-	else if (Output_Selection == 1)
-	{
-		RGBA = saturate(float4(Color_Sharp_Control,1)) + BB;
-	}
-	else
-	{
-		RGBA = saturate(Grayscale_Sharp_Control) + BB;
-	}
-		
-	float4 Out, Debug_Done = lerp(1.0f,abs(DepthCues(texcoord).xxxx),Power), Combine = RGBA * Debug_Done;
+	float4 Out, Debug_Done = lerp(1.0f,abs(DepthCues(texcoord).xxxx),Power), Combine = tex2D(BackBuffer,texcoord) * Debug_Done;
 				
 	if (!Debug_View)
 	{

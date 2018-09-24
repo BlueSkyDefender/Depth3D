@@ -27,10 +27,11 @@
  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Determines the power of the Bilateral Filter and sharpening quality. Lower the setting the more performance you would get along with lower quality.
 // 0 = Low
-// 1 = Medium 
-// 2 = High 
+// 1 = Default 
+// 2 = Medium
+// 3 = High 
 // Default is Low.
-#define Quality 0
+#define Quality 1
 
 uniform int Depth_Map <
 	ui_type = "combo";
@@ -117,17 +118,15 @@ float4 Depth(in float2 texcoord : TEXCOORD0)
 
 		//Conversions to linear space.....
 		//Near & Far Adjustment
-		float DDA = 0.125/Depth_Map_Adjust; //Division Depth Map Adjust - Near
-		float DA = Depth_Map_Adjust*2; //Depth Map Adjust - Near
+		float DA = Depth_Map_Adjust * 2.0f; //Depth Map Adjust - Near
 		//All 1.0f are Far Adjustment
 	
 		//1. Raw Buffer
 		float Raw = pow(abs(zBuffer),DA);
 		
 		//2. Raw Buffer Reverse
-		float RawReverse = pow(abs(zBuffer - 1.0),DA);
+		float RawReverse = pow(abs(zBuffer - 1.0f),DA);
 		
-
 		if (Depth_Map == 0)
 		{
 		zBuffer = Raw;
@@ -137,7 +136,7 @@ float4 Depth(in float2 texcoord : TEXCOORD0)
 		zBuffer = RawReverse;
 		}
 	
-	return 1-saturate(float4(zBuffer.rrr,1));	
+	return smoothstep(0.0f,1.0f,float4(zBuffer.rrr,1));	
 }
 
 
@@ -148,10 +147,13 @@ float4 Depth(in float2 texcoord : TEXCOORD0)
 	#define MSIZE 3
 #endif
 #if Quality == 1
-	#define MSIZE 6
+	#define MSIZE 5
 #endif
 #if Quality == 2
-	#define MSIZE 8
+	#define MSIZE 7
+#endif
+#if Quality == 3
+	#define MSIZE 9
 #endif
 
 
@@ -169,22 +171,20 @@ void Filters(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, o
 {
 	//Bilateral Filter//                                                                                                                                                                   
 	float3 c = tex2D(BackBuffer,texcoord.xy).rgb;
-	float sampleOffset = Depth(texcoord).r/0.425; //Depth Buffer Offset adjust
-	float2 ScreenCal = float2(2.5*pix.x,2.5*pix.y);
-
-	float2 FinCal = ScreenCal;
-	
 	const int kSize = (MSIZE-1)/2;	
-
+//													1			2			3			4				5			6			7			8				7			6			5				4			3			2			1
 //Full Kernal Size would be 15 as shown here (0.031225216, 0.033322271, 0.035206333, 0.036826804, 0.038138565, 0.039104044, 0.039695028, 0.039894000, 0.039695028, 0.039104044, 0.038138565, 0.036826804, 0.035206333, 0.033322271, 0.031225216)
 #if Quality == 0
-	float weight[MSIZE] = {0.031225216, 0.033322271, 0.035206333};
+	float weight[MSIZE] = {0.031225216, 0.039894000, 0.031225216}; // by 3
 #endif
 #if Quality == 1
-	float weight[MSIZE] = {0.031225216, 0.033322271, 0.035206333, 0.036826804, 0.038138565, 0.039104044};  
+	float weight[MSIZE] = {0.031225216, 0.036826804, 0.039894000, 0.036826804, 0.031225216};  // by 5
 #endif	
 #if Quality == 2
-	float weight[MSIZE] = {0.031225216, 0.033322271, 0.035206333, 0.036826804, 0.038138565, 0.039104044, 0.039695028, 0.039894000};  
+	float weight[MSIZE] = {0.031225216, 0.035206333, 0.039104044, 0.039894000, 0.039104044, 0.035206333, 0.031225216};   // by 7
+#endif
+#if Quality == 3
+	float weight[MSIZE] = {0.031225216, 0.035206333, 0.038138565, 0.039695028, 0.039894000, 0.039695028, 0.038138565, 0.035206333, 0.031225216};  // by 9
 #endif
 
 		float3 final_colour;
@@ -205,35 +205,29 @@ void Filters(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, o
 		{
 			for (int j=-kSize; j <= kSize; ++j)
 			{
-			
-				float2 XY;
-				
-				if(No_Depth_Map)
-				{
-					XY = float2(float(i),float(j))*FinCal;
-					cc = tex2D(BackBuffer,texcoord.xy+XY).rgb;
-				}
-				else
-				{
-					XY = float2(float(i),float(j))*FinCal;
-					cc = tex2D(BackBuffer,texcoord.xy+XY*sampleOffset).rgb;
-				}
+				float2 XY = float2(float(i),float(j))*pix;
+				cc = tex2D(BackBuffer,texcoord.xy+XY).rgb;
+
 				factor = normpdf3(cc-c, BSIGMA)*bZ*weight[kSize+j]*weight[kSize+i];
 				Z += factor;
 				final_colour += factor*cc;
-
 			}
 		}
 		
-		float4 Bilateral_Filter = float4(final_colour/Z, 1.0);
-		
-	color = Bilateral_Filter;
+	color = float4(final_colour/Z, 1.0);
 }
 
 float4 SharderOut(float2 texcoord : TEXCOORD0)
 {	
 	float4 Out,RGBA,BB = tex2D(BackBuffer,texcoord);
 	float3 Luma,RGB,RGBT,RGBB; //Used in Grayscale calculation I see no diffrence....
+	float DB = Depth(texcoord).r, DBBL = Depth(float2(texcoord.x*2,texcoord.y*2-1)).r;
+	
+	if(No_Depth_Map)
+	{
+		DB = 0.0;
+		DBBL = 1.0;
+	}
 	
 	if (Luma_Coefficient == 0)
 	{
@@ -268,37 +262,32 @@ float4 SharderOut(float2 texcoord : TEXCOORD0)
 
 	if (View_Adjustment == 0)
 	{
-		Out = RGBA;
+		Out = lerp(RGBA, BB, DB);
 	}
 	else
 	{
 		RGBT = tex2D(BackBuffer,float2(texcoord.x*2,texcoord.y*2)).rgb - tex2D(SamplerBF,float2(texcoord.x*2,texcoord.y*2)).rgb;
-		RGBB = tex2D(BackBuffer,float2(texcoord.x*2,texcoord.y*2-1)).rgb - tex2D(SamplerBF,float2(texcoord.x*2,texcoord.y*2-1)).rgb;
-		
+			
 		float3 CSCT = (RGBT * 5) * Sharpen_Power; 
 		float GSCT = dot(RGBT, saturate((Luma * 5 ) * Sharpen_Power));
 		
-		float3 CSCB = (RGBB * 2.5) * Sharpen_Power; 
-		float GSCB = dot(RGBB, saturate((Luma * 2.5) * Sharpen_Power));
-	
 		if (Output_Selection == 0)
 			{
 				RGB = saturate(lerp(GSCT,CSCT,0.5));
-				RGBA = saturate(lerp(GSCB,float4(CSCB,1),0.5)) + tex2D(BackBuffer,float2(texcoord.x*2,texcoord.y*2-1)) ;
 			}
 		else if (Output_Selection == 1)
 			{
 				RGB = saturate(CSCT);
-				RGBA = saturate(float4(CSCB,1)) + tex2D(BackBuffer,float2(texcoord.x*2,texcoord.y*2-1));
 			}
 		else
 			{
 				RGB = saturate(GSCT);
-				RGBA = saturate(GSCB) + tex2D(BackBuffer,float2(texcoord.x*2,texcoord.y*2-1));
 			}
 			
-		float4 VA_Top = texcoord.x < 0.5 ? float4(RGB,1) : 1 - Depth(float2(texcoord.x*2-1,texcoord.y*2));
-		float4 VA_Bottom = texcoord.x < 0.5 ? RGBA : tex2D(SamplerBF,float2(texcoord.x*2-1,texcoord.y*2-1));
+			float4 BL = lerp(float4(1.0f, 0.0f, 1.0f, 1.0f), tex2D(BackBuffer,float2(texcoord.x*2,texcoord.y*2-1)), DBBL);
+			
+		float4 VA_Top = texcoord.x < 0.5 ? float4(RGB,1) : Depth(float2(texcoord.x*2-1,texcoord.y*2));
+		float4 VA_Bottom = texcoord.x < 0.5 ? BL : tex2D(SamplerBF,float2(texcoord.x*2-1,texcoord.y*2-1));
 		
 	Out = texcoord.y < 0.5 ? VA_Top : VA_Bottom;
 	
