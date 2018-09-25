@@ -162,10 +162,10 @@ float4 Uni_L(in float2 texcoord : TEXCOORD0)
    float4 tl = UL(texcoord);
    float4 tr = UL(texcoord + float2(0.0, -pix.y));
    float4 bl = UL(texcoord + float2(0.0, pix.y));
-   float2 f = frac( texcoord * TextureSize );
-   float4 tA = lerp( tl, tr, f.x );
-   float4 tB = lerp( tl, bl, f.x );
-   float4 done = lerp( tA, tB, f.y ) * 2.0;//2.0 Gamma correction.
+   float h = 0.5f;
+   float4 tA = lerp( tl, tr, h );
+   float4 tB = lerp( tl, bl, h );
+   float4 done = lerp( tA, tB, h ) * 2.0;//2.0 Gamma correction.
    return done;
 }
 
@@ -181,10 +181,10 @@ float4 Uni_R(in float2 texcoord : TEXCOORD0)
    float4 tl = UR(texcoord);
    float4 tr = UR(texcoord + float2(0.0, -pix.y));
    float4 bl = UR(texcoord + float2(0.0, pix.y));
-   float2 f = frac( texcoord * TextureSize );
-   float4 tA = lerp( tl, tr, f.x );
-   float4 tB = lerp( tl, bl, f.x );
-   float4 done = lerp( tA, tB, f.y ) * 2.0;//2.0 Gamma correction.
+   float h = 0.5f;
+   float4 tA = lerp( tl, tr, h );
+   float4 tB = lerp( tl, bl, h );
+   float4 done = lerp( tA, tB, h ) * 2.0;//2.0 Gamma correction.
    return done;
 }
 
@@ -201,10 +201,10 @@ float4 Bi_L(in float2 texcoord : TEXCOORD0)
    float4 tr = BL(texcoord + float2(pix.x, 0.0));
    float4 bl = BL(texcoord + float2(0.0, pix.y));
    float4 br = BL(texcoord + float2(pix.x, pix.y));
-   float2 f = frac( texcoord * TextureSize );
-   float4 tA = lerp( tl, tr, f.x );
-   float4 tB = lerp( bl, br, f.x );
-   float4 done = lerp( tA, tB, f.y ) * 2.0;//2.0 Gamma correction.
+   float h = 0.5f;
+   float4 tA = lerp( tl, tr, h );
+   float4 tB = lerp( bl, br, h );
+   float4 done = lerp( tA, tB, h ) * 2.0;//2.0 Gamma correction.
    return done;
 }
 
@@ -221,10 +221,10 @@ float4 Bi_R(in float2 texcoord : TEXCOORD0)
    float4 tr = BR(texcoord + float2(pix.x, 0.0));
    float4 bl = BR(texcoord + float2(0.0, pix.y));
    float4 br = BR(texcoord + float2(pix.x, pix.y));
-   float2 f = frac( texcoord * TextureSize );
-   float4 tA = lerp( tl, tr, f.x );
-   float4 tB = lerp( bl, br, f.x );
-   float4 done = lerp( tA, tB, f.y ) * 2.0;//2.0 Gamma correction.
+   float h = 0.5f;
+   float4 tA = lerp( tl, tr, h );
+   float4 tB = lerp( bl, br, h );
+   float4 done = lerp( tA, tB, h ) * 2.0;//2.0 Gamma correction.
    return done;
 }
 
