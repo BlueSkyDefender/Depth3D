@@ -42,14 +42,6 @@ uniform int Luminace_Selection <
 	ui_tooltip = "Luminace color selection Green to RGB Luminace.";
 > = 0;
 
-uniform int Mask_Adjust <
-	ui_type = "drag";
-	ui_min = 1; ui_max = 10;
-	ui_label = "Mask Adjustment";
-	ui_tooltip = "Mask is used to protect Bright Colors & Lights in the image from Fake AO intrusion.\n"
-				 "One is default, Normal.";
-> = 1;
-
 /////////////////////////////////////////////////////D3D Starts Here/////////////////////////////////////////////////////////////////
 #define pix float2(BUFFER_RCP_WIDTH, BUFFER_RCP_HEIGHT)
 #define lambda 3.0f
@@ -104,7 +96,7 @@ float LI(in float3 value)
 //Information on Slide 44 says to run the edge processing jointly short and Large.
 float4 DLAA(float2 texcoord)
 {
-	//Short Edge Filter http://and.intercon.ru/releases/talks/dlaagdc2011/slides/#slide43
+//Short Edge Filter http://and.intercon.ru/releases/talks/dlaagdc2011/slides/#slide43
 	float4 DLAA; //DLAA is the completed AA Result.
 	
 	//5 bi-linear samples cross
@@ -118,14 +110,14 @@ float4 DLAA(float2 texcoord)
 	float4 combH		= Left + Right;
 	float4 combV   		= Up + Down;
 	
-	//Bi-directional anti-aliasing using *only* HORIZONTAL blur and horizontal edge detection
+	//Bi-directional anti-aliasing using HORIZONTAL & VERTICAL blur and horizontal edge detection
 	//Slide information triped me up here. Read slide 43.
-	float4 CenterDiffH	= abs( combH - 2.0 * Center ) * 0.5;  
-	//float4 CenterDiffV	= abs( combV - 2.0 * Center ) * 0.5;
+	float4 CenterDiffH	= abs( combH - 2.0 * Center ) * 0.5;
+	float4 CenterDiffV	= abs( combH - 2.0 * Center ) * 0.5;  
 	
 	//Edge detection
-	float EdgeLumH		= LI( CenterDiffH.rgb  * Mask_Adjust);
-	//float EdgeLumV		= LI( CenterDiffV.rgb );
+	float EdgeLumH		= LI( CenterDiffH.rgb ) ;
+	float EdgeLumV		= LI( CenterDiffV.rgb);
 		
 	//Blur
 	float4 blurredH		= ( combH + Center) * 0.33333333;
@@ -137,20 +129,20 @@ float4 DLAA(float2 texcoord)
 	
 	//t
 	float satAmountH 	= saturate( ( lambda * EdgeLumH - epsilon ) / LumH );
-    float satAmountV 	= saturate( ( lambda * EdgeLumH - epsilon ) / LumV );
+    float satAmountV 	= saturate( ( lambda * EdgeLumV - epsilon ) / LumV );
 	
 	//color = lerp(color,blur,sat(Edge/blur)
 	//Re-blend Short Edge Done
-	DLAA = lerp( Center,  blurredH, satAmountH );
-	DLAA = lerp( Center,  blurredV, satAmountV );
+	DLAA = lerp( Center, blurredH, satAmountH );
+	DLAA = lerp( DLAA,   blurredV, satAmountV );
    
    	if(View_Mode == 1)
 	{
-		DLAA = EdgeLumH.xxxx;
+		DLAA = (EdgeLumH.xxxx + EdgeLumV.xxxx) * 0.5;
 	}
 	else if (View_Mode == 2)
 	{
-		DLAA = lerp(DLAA,float4(1,0,0,1),EdgeLumH.x);
+		DLAA = lerp(DLAA,float4(1,0,0,1),(EdgeLumH + EdgeLumV) * 0.5);
 	}
 	else
 	{

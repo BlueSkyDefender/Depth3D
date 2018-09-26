@@ -20,28 +20,35 @@
  //* 																																												*//
  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-uniform int Debug_View <
+uniform int View_Mode <
 	ui_type = "combo";
-	ui_items = "Off\0Short Edge\0Long Edge\0";
-	ui_label = "Debug View";
-	ui_tooltip = "To view Edge Detect working on, movie piture & ect.";
+	ui_items = "DLAA Out\0Mask View A\0Mask View B\0Mask View C\0";
+	ui_label = "View Mode";
+	ui_tooltip = "This is used to select the normal view output or debug view.";
+> = 0;
+
+uniform int Luma_Coefficient <
+	ui_type = "combo";
+	ui_label = "Luma";
+	ui_tooltip = "Changes how color get sharpened by Unsharped Masking.\n"
+				 "This should only affect RGB Luminace.";
+	ui_items = "SD video\0HD video\0HDR video\0";
 > = 0;
 
 uniform int Luminace_Selection <
 	ui_type = "combo";
 	ui_items = "RGB Luminace\0Green Channel Luminace\0";
 	ui_label = "Luminace Selection";
-	ui_tooltip = "Luminace color selection Green to RGB.";
+	ui_tooltip = "Luminace color selection Green to RGB Luminace.";
 > = 0;
 
-uniform float Long_Edge_Seek <
+uniform float Mask_Adjust <
 	ui_type = "drag";
-	ui_min = 0.5; ui_max = 1.0;
-	ui_label = "Long Edge Seek";
-	ui_tooltip = "Use this to seek out long edged jaggys.\n"
-				 "The Sronger the blurryer the image.\n"
-				 "Default is 0.750";
-> = 0.750;
+	ui_min = 1.0; ui_max = 2.0;
+	ui_label = "Mask Adjustment";
+	ui_tooltip = "Mask is used to protect Bright Colors & Lights in the image from Fake AO intrusion.\n"
+				 "One is default, Normal.";
+> = 1.0;
 
 /////////////////////////////////////////////////////D3D Starts Here/////////////////////////////////////////////////////////////////
 #define pix float2(BUFFER_RCP_WIDTH, BUFFER_RCP_HEIGHT)
@@ -56,17 +63,35 @@ sampler BackBuffer
 	};
 	
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+float3 Luma()
+{
+	float3 Luma;
+	
+	if (Luma_Coefficient == 0)
+	{
+		Luma = float3(0.299, 0.587, 0.114); // (SD video)
+	}
+	else if (Luma_Coefficient == 1)
+	{
+		Luma = float3(0.2126, 0.7152, 0.0722); // (HD video) https://en.wikipedia.org/wiki/Luma_(video)
+	}
+	else
+	{
+		Luma = float3(0.2627, 0.6780, 0.0593); //(HDR video) https://en.wikipedia.org/wiki/Rec._2100
+	}
+	return Luma;
+}
+
 //Luminosity Intensity
 float LI(in float3 value)
 {	
 	//Luminosity Controll from 0.1 to 1.0 
 	//If GGG value of 0.333, 0.333, 0.333 is about right for Green channel. 
-	//If RGB channels are used as luminosity 0.299, 0.587, 0.114
 	//Slide 51 talk more about this.
 	float Lum;
 	if (Luminace_Selection == 0)
 	{
-		Lum = dot(value.xyz, float3(0.299, 0.587, 0.114));
+		Lum = dot(value.xyz,Luma());
 	}
 	else
 	{
@@ -80,27 +105,27 @@ float LI(in float3 value)
 float4 DLAA(float2 texcoord)
 {
 	//Short Edge Filter http://and.intercon.ru/releases/talks/dlaagdc2011/slides/#slide43
-	float4 DLAA; //DLAA is the completed AA Result.
+	float4 DLAA, DLAA_S, DLAA_L; //DLAA is the completed AA Result.
 	
 	//5 bi-linear samples cross
 	float4 Center 		= tex2D(BackBuffer, texcoord);    
 	float4 Left			= tex2D(BackBuffer, texcoord + float2(-pix.x,  0.0) );
 	float4 Right		= tex2D(BackBuffer, texcoord + float2( pix.x,  0.0) );
-	float4 Up			= tex2D(BackBuffer, texcoord + float2( 0.0, -pix.y) );
-	float4 Down			= tex2D(BackBuffer, texcoord + float2( 0.0,  pix.y) );   
+	float4 Up			= tex2D(BackBuffer, texcoord + float2( 0.0,-pix.y) );
+	float4 Down			= tex2D(BackBuffer, texcoord + float2( 0.0, pix.y) );   
 	
 	//Combine horizontal and vertical blurs together
 	float4 combH		= Left + Right;
 	float4 combV   		= Up + Down;
 	
-	//Bi-directional anti-aliasing using *only* HORIZONTAL blur and horizontal edge detection
+	//Bi-directional anti-aliasing using HORIZONTAL & VERTICAL blur and horizontal edge detection
 	//Slide information triped me up here. Read slide 43.
-	float4 CenterDiffH	= abs( combH - 2.0 * Center ) * 0.5;  
-	//float4 CenterDiffV	= abs( combV - 2.0 * Center ) * 0.5;
+	float4 CenterDiffH	= abs( combH - 2.0 * Center ) * 0.5;
+	float4 CenterDiffV	= abs( combH - 2.0 * Center ) * 0.5;  
 	
 	//Edge detection
-	float EdgeLumH		= LI( CenterDiffH.rgb );
-	//float EdgeLumV		= LI( CenterDiffV.rgb );
+	float EdgeLumH		= LI( CenterDiffH.rgb) ;
+	float EdgeLumV		= LI( CenterDiffV.rgb) ;
 		
 	//Blur
 	float4 blurredH		= ( combH + Center) * 0.33333333;
@@ -112,99 +137,98 @@ float4 DLAA(float2 texcoord)
 	
 	//t
 	float satAmountH 	= saturate( ( lambda * EdgeLumH - epsilon ) / LumH );
-    float satAmountV 	= saturate( ( lambda * EdgeLumH - epsilon ) / LumV );
+    float satAmountV 	= saturate( ( lambda * EdgeLumV - epsilon ) / LumV );
 	
 	//color = lerp(color,blur,sat(Edge/blur)
 	//Re-blend Short Edge Done
-	DLAA = lerp( Center,  blurredH, satAmountH );
-	DLAA = lerp( Center,  blurredV, satAmountV );
-	
-	float4 HNegA, HNegB, HNegC, HNegD, HPosA, HPosB, HPosC, HPosD, VNegA, VNegB, VNegC, VNegD, VPosA, VPosB, VPosC, VPosD, CenterH, CenterV;
+	DLAA_S = lerp( Center, blurredH, satAmountH );
+	DLAA_S = lerp( DLAA_S,   blurredV, satAmountV );
+   	
+	float4 	HNegA, HNegB, HNegC, 
+			HPosA, HPosB, HPosC, 
+			VNegA, VNegB, VNegC, 
+			VPosA, VPosB, VPosC;
 			
 	// Long Edges 
-    //16 bi-linear samples cross, 4 extra bi-linear samples in each direction. -7.5 to 7.5 Not the same as Slide 44
-	HNegA	= tex2D(BackBuffer, texcoord + float2(-pix.x,  0.0) );
-	HNegB   = tex2D(BackBuffer, texcoord + float2(-2.0 * pix.x,  0.0) );
-	HNegC   = tex2D(BackBuffer, texcoord + float2(-4.0 * pix.x,  0.0) );
-	HNegD   = tex2D(BackBuffer, texcoord + float2(-8.0 * pix.x,  0.0) );
-	HPosA   = tex2D(BackBuffer, texcoord + float2( pix.x,  0.0) );
-	HPosB   = tex2D(BackBuffer, texcoord + float2( 2.0 * pix.x,  0.0) );
-	HPosC   = tex2D(BackBuffer, texcoord + float2( 4.0 * pix.x,  0.0) );
-	HPosD   = tex2D(BackBuffer, texcoord + float2( 8.0 * pix.x,  0.0) );
-	 
-	VNegA   = tex2D(BackBuffer, texcoord + float2( 0.0,-pix.y) );
-	VNegB   = tex2D(BackBuffer, texcoord + float2( 0.0,-2.0 * pix.y) );
-	VNegC   = tex2D(BackBuffer, texcoord + float2( 0.0,-4.0 * pix.y) );
-	VNegD   = tex2D(BackBuffer, texcoord + float2( 0.0,-8.0 * pix.y) );
-	VPosA   = tex2D(BackBuffer, texcoord + float2( 0.0, pix.y) );
-	VPosB   = tex2D(BackBuffer, texcoord + float2( 0.0, 2.0 * pix.y) );
-	VPosC   = tex2D(BackBuffer, texcoord + float2( 0.0, 4.0 * pix.y) );
-	VPosD   = tex2D(BackBuffer, texcoord + float2( 0.0, 8.0 * pix.y) );
+    //14 bi-linear samples cross, added extra bi-linear samples in each direction.
+    HNegA   = tex2D(BackBuffer, texcoord + float2(-1.5 * pix.x,  0.0) );
+	HNegB   = tex2D(BackBuffer, texcoord + float2(-3.5 * pix.x,  0.0) );
+	HNegC   = tex2D(BackBuffer, texcoord + float2(-7.5 * pix.x,  0.0) );
+	HPosA   = tex2D(BackBuffer, texcoord + float2( 1.5 * pix.x,  0.0) );	
+	HPosB   = tex2D(BackBuffer, texcoord + float2( 3.5 * pix.x,  0.0) );
+	HPosC   = tex2D(BackBuffer, texcoord + float2( 7.5 * pix.x,  0.0) );
 	
-    //Long Edge detection H
-    float4 EdgeBlurH = ( HNegA + HNegB + HNegC + HNegD + HPosA + HPosB + HPosC + HPosD );
-    float4 longEdgeDH = abs( EdgeBlurH - 8.0 * DLAA ) * 0.5;
-    float LongEdgeLumH	= LI( longEdgeDH.rgb );
-
+	VNegA   = tex2D(BackBuffer, texcoord + float2( 0.0,-1.5 * pix.y) );
+	VNegB   = tex2D(BackBuffer, texcoord + float2( 0.0,-3.5 * pix.y) );
+	VNegC   = tex2D(BackBuffer, texcoord + float2( 0.0,-7.5 * pix.y) );
+	VPosA   = tex2D(BackBuffer, texcoord + float2( 0.0, 1.5 * pix.y) );
+	VPosB   = tex2D(BackBuffer, texcoord + float2( 0.0, 3.5 * pix.y) );
+	VPosC   = tex2D(BackBuffer, texcoord + float2( 0.0, 7.5 * pix.y) );
+	
     //Long Edge detection H & V
-    float LongEdgeLumHV = abs(LongEdgeLumH);
-    float LES = 1-Long_Edge_Seek; 
-    if ( LongEdgeLumH > LES )
-	{    	
+    float4 AvgBlurH = ( HNegA + HNegB + HNegC + Center + HPosA + HPosB + HPosC ) / 7;   
+    float4 AvgBlurV = ( VNegA + VNegB + VNegC + Center + VPosA + VPosB + VPosC ) / 7;
+    float EH = saturate(1 - AvgBlurH.a * 2);
+    float EV = saturate(1 - AvgBlurV.a * 2);
+    float EdgeAvgH = LI(abs(saturate(AvgBlurH - 2.0f * Center )));
+    float EdgeAvgV = LI(abs(saturate(AvgBlurV - 2.0f * Center )));
+    
+	float longEdge = max( EdgeAvgH, EdgeAvgV);
+	     
 	//Merge for BlurSamples.
 	//Long Blur H
-    float4 longBlurH = ( HNegA + HNegB + HNegC + HNegD + HPosA + HPosB + HPosC + HPosD ) * 0.125;
-    float LongBlurLumH	= LI( longBlurH.rgb );
+    float LongBlurLumH	= LI( AvgBlurH.rgb );
     
     //Long Blur V
-    float4 longBlurV = ( VNegA + VNegB + VNegC + VNegD + VPosA + VPosB + VPosC + VPosD ) * 0.125;
-	float LongBlurLumV	= LI( longBlurV.rgb );
-    
-    //t
-    float saturateALH 	= saturate( ( lambda * LongEdgeLumH - epsilon ) / LongBlurLumH );
-    
+	float LongBlurLumV	= LI( AvgBlurV.rgb );
+          
 	float CenterLI		= LI( Center.rgb );
 	float LeftLI		= LI( Left.rgb );
 	float RightLI		= LI( Right.rgb );
 	float UpLI			= LI( Up.rgb );
 	float DownLI		= LI( Down.rgb );
-    
-    float4 V = Center;
-    float4 H = Center;
-    
-    float blurUp = CenterLI == UpLI ? 0.0 : saturate( 0 + ( LongBlurLumH - UpLI    ) / ( CenterLI - UpLI    ) );
-    float blurDown = CenterLI == DownLI ? 0.0 : saturate( 1 + ( LongBlurLumH - CenterLI ) / ( CenterLI - DownLI ) );
-    float blurLeft = CenterLI == LeftLI ? 0.0 : saturate( 0 + ( LongBlurLumV - LeftLI   ) / ( CenterLI - LeftLI   ) );
-    float blurRight = CenterLI == RightLI ? 0.0 : saturate( 1 + ( LongBlurLumV - CenterLI ) / ( CenterLI - RightLI  ) );
+  
+    float blurUp = saturate( 0.0 + ( LongBlurLumH - UpLI    ) / (CenterLI - UpLI) );
+    float blurDown = saturate( 1.0 + ( LongBlurLumH - CenterLI ) / (CenterLI - DownLI) );
+    float blurLeft = saturate( 0.0 + ( LongBlurLumV - LeftLI   ) / (CenterLI - LeftLI) );
+    float blurRight = saturate( 1.0 + ( LongBlurLumV - CenterLI ) / (CenterLI - RightLI) );
 
     float4 UDLR = float4( blurLeft, blurRight, blurUp, blurDown );
-
-    V = lerp( Left  , V, UDLR.x );
-    V  = lerp( Right , V, UDLR.y );
-    H = lerp( Up   , H, UDLR.z );
-    H = lerp( Down, H, UDLR.w );
+	
+	UDLR = UDLR == float4(0.0, 0.0, 0.0, 0.0) ? float4(1.0, 1.0, 1.0, 1.0) : UDLR;
+        
+    float4 H = lerp( Left , Center, UDLR.x );
+		   H = lerp( Right, H	  , UDLR.y );
+    float4 V = lerp( Up   , Center, UDLR.z );
+		   V = lerp( Down , V	  , UDLR.w );
 	
 	//Reuse short samples and DLAA Long Edge Out.
-    DLAA = lerp( DLAA, V , saturateALH);
-	DLAA = lerp( DLAA, H , saturateALH);  
-    }
-   
-   	if(Debug_View == 1)
+    DLAA_L = lerp( Center, H , EV);
+	DLAA_L = lerp( DLAA_L, V , EH);  
+	
+	float SEHV = (EdgeLumH + EdgeLumV) * 0.5;
+	
+	
+	if(View_Mode == 1)
 	{
-		DLAA = EdgeLumH.xxxx;
+		DLAA = (SEHV + longEdge) * 0.5;
 	}
-	else if(Debug_View == 2)
+	else if (View_Mode == 2)
 	{
-		DLAA = LongEdgeLumH.xxxx;
+		DLAA = lerp(DLAA_S,float4(1,0,0,1),SEHV);
+	}
+		else if (View_Mode == 3)
+	{
+		DLAA = lerp(DLAA_S,float4(1,0,0,1),longEdge);
 	}
 	else
 	{
-		DLAA = DLAA;
+		DLAA = lerp(DLAA_S,DLAA_L,longEdge);
 	}
-
-	    
+	
 	return DLAA;
 }
+
 
 ////////////////////////////////////////////////////////Logo/////////////////////////////////////////////////////////////////////////
 uniform float timer < source = "timer"; >;
@@ -320,9 +344,9 @@ void PostProcessVS(in uint id : SV_VertexID, out float4 position : SV_Position, 
 }
 
 //*Rendering passes*//
-technique Directionally_Localized_Anti_Aliasing
+technique Directionally_Localized_Anti_Aliasing_Light
 {
-			pass DLAA
+			pass DLAA_Light
 		{
 			VertexShader = PostProcessVS;
 			PixelShader = Out;	
