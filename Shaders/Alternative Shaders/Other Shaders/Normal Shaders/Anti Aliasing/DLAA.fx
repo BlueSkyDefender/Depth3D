@@ -42,14 +42,6 @@ uniform int Luminace_Selection <
 	ui_tooltip = "Luminace color selection Green to RGB Luminace.";
 > = 0;
 
-uniform float Mask_Adjust <
-	ui_type = "drag";
-	ui_min = 1.0; ui_max = 2.0;
-	ui_label = "Mask Adjustment";
-	ui_tooltip = "Mask is used to protect Bright Colors & Lights in the image from Fake AO intrusion.\n"
-				 "One is default, Normal.";
-> = 1.0;
-
 /////////////////////////////////////////////////////D3D Starts Here/////////////////////////////////////////////////////////////////
 #define pix float2(BUFFER_RCP_WIDTH, BUFFER_RCP_HEIGHT)
 #define lambda 3.0f
@@ -344,7 +336,7 @@ void PostProcessVS(in uint id : SV_VertexID, out float4 position : SV_Position, 
 }
 
 //*Rendering passes*//
-technique Directionally_Localized_Anti_Aliasing_Light
+technique Directionally_Localized_Anti_Aliasing
 {
 			pass DLAA_Light
 		{
