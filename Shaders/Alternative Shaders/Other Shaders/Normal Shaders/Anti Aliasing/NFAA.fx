@@ -1,9 +1,9 @@
  ////--------------//
- ///**DLAA Light**///
+ ///**NFAA Light**///
  //--------------////
 
  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
- //* Directionally localized antialiasing.                                     																										*//
+ //* Normal Filter Anti Aliasing.                                     																										*//
  //* For Reshade 3.0																																								*//
  //* --------------------------																																						*//
  //* This work is licensed under a Creative Commons Attribution 3.0 Unported License.																								*//
@@ -22,7 +22,7 @@
 
 uniform int View_Mode <
 	ui_type = "combo";
-	ui_items = "DLAA Out\0Mask View A\0Mask View B\0";
+	ui_items = "NFAA Out\0Mask View A\0Mask View B\0";
 	ui_label = "View Mode";
 	ui_tooltip = "This is used to select the normal view output or debug view.";
 > = 0;
@@ -41,6 +41,14 @@ uniform int Luminace_Selection <
 	ui_label = "Luminace Selection";
 	ui_tooltip = "Luminace color selection Green to RGB Luminace.";
 > = 0;
+
+uniform float fScale <
+	ui_type = "drag";
+	ui_min = 0.5; ui_max = 1.0;
+	ui_label = "fScale";
+	ui_tooltip = "fScale.\n"
+				 "One is default, Normal.";
+> = 0.75;
 
 /////////////////////////////////////////////////////D3D Starts Here/////////////////////////////////////////////////////////////////
 #define pix float2(BUFFER_RCP_WIDTH, BUFFER_RCP_HEIGHT)
@@ -101,56 +109,89 @@ float4 DLAA(float2 texcoord)
 	
 	//5 bi-linear samples cross
 	float4 Center 		= tex2D(BackBuffer, texcoord);    
-	float4 Left			= tex2D(BackBuffer, texcoord + float2(-pix.x,  0.0) );
-	float4 Right		= tex2D(BackBuffer, texcoord + float2( pix.x,  0.0) );
-	float4 Up			= tex2D(BackBuffer, texcoord + float2( 0.0, -pix.y) );
-	float4 Down			= tex2D(BackBuffer, texcoord + float2( 0.0,  pix.y) );   
+	float4 LeftA			= tex2D(BackBuffer, texcoord + float2(-1.0 * pix.x, 0.0) );
+	float4 RightA		= tex2D(BackBuffer, texcoord + float2( 1.0 * pix.x, 0.0) );
+	float4 LeftB			= tex2D(BackBuffer, texcoord + float2(-0.5 * pix.x, 0.0) );
+	float4 RightB		= tex2D(BackBuffer, texcoord + float2( 0.5 * pix.x, 0.0) );
 	
-	//Combine horizontal and vertical blurs together
-	float4 combH		= Left + Right;
-	float4 combV   		= Up + Down;
+	//Combine horizontal together
+	float4 combH		= LeftA + RightA + LeftB + RightB;
 	
-	//Bi-directional anti-aliasing using HORIZONTAL & VERTICAL blur and horizontal edge detection
-	//Slide information triped me up here. Read slide 43.
-	float4 CenterDiffH	= abs( combH - 2.0 * Center ) * 0.5;
-	float4 CenterDiffV	= abs( combH - 2.0 * Center ) * 0.5;  
+	//Bi-directional anti-aliasing using HORIZONTAL edge detection
+	float4 CenterDiffH	= abs( combH - 4.0 * Center ) * 0.5;
 	
 	//Edge detection
-	float EdgeLumH		= LI( CenterDiffH.rgb ) ;
-	float EdgeLumV		= LI( CenterDiffV.rgb);
-		
+	float EdgeLumH		= LI( CenterDiffH.rgb );
+	
 	//Blur
-	float4 blurredH		= ( combH + Center) * 0.33333333;
-	float4 blurredV		= ( combV + Center) * 0.33333333;
+	float4 blurredH		= ( combH  + Center) * 0.2;
 	
 	//L(x)
 	float LumH			= LI( blurredH.rgb );
-	float LumV			= LI( blurredV.rgb );
 	
 	//t
 	float satAmountH 	= saturate( ( lambda * EdgeLumH - epsilon ) / LumH );
-    float satAmountV 	= saturate( ( lambda * EdgeLumV - epsilon ) / LumV );
 	
 	//color = lerp(color,blur,sat(Edge/blur)
 	//Re-blend Short Edge Done
 	DLAA = lerp( Center, blurredH, satAmountH );
-	DLAA = lerp( DLAA,   blurredV, satAmountV );
-   
+	    
+	return DLAA;
+}
+
+float4 NFAA(float2 texcoord)
+{
+float2 upOffset = float2( 0.0, pix.y ) * fScale;
+float2 rightOffset = float2( pix.x, 0.0 ) * fScale;
+
+float topHeight = LI( DLAA( texcoord.xy + upOffset).rgb );
+float bottomHeight = LI( DLAA( texcoord.xy - upOffset).rgb );
+float rightHeight = LI( DLAA( texcoord.xy + rightOffset).rgb );
+float leftHeight = LI( DLAA( texcoord.xy - rightOffset).rgb );
+float leftTopHeight = LI( DLAA( texcoord.xy - rightOffset + upOffset).rgb );
+float leftBottomHeight = LI( DLAA( texcoord.xy - rightOffset - upOffset).rgb );
+float rightBottomHeight = LI( DLAA( texcoord.xy + rightOffset + upOffset).rgb );
+float rightTopHeight = LI( DLAA( texcoord.xy + rightOffset - upOffset).rgb );
+
+// Normal map creation
+
+float sum0 = rightTopHeight + topHeight + rightBottomHeight;
+float sum1 = leftTopHeight + bottomHeight + leftBottomHeight;
+float sum2 = leftTopHeight + leftHeight + rightTopHeight;
+float sum3 = leftBottomHeight + rightHeight + rightBottomHeight;
+float vect1 = (sum1 - sum0);
+float vect2 = (sum2 - sum3);
+
+// Put them together and scale.
+
+float2 Normal = float2( vect1, vect2) * pix * fScale;
+
+// Color
+float4 Scene0 = DLAA( texcoord.xy );
+float4 Scene1 = DLAA( texcoord.xy + float2( Normal.x, Normal.y)       );
+float4 Scene2 = DLAA( texcoord.xy - float2( Normal.x, Normal.y)       );
+float4 Scene3 = DLAA( texcoord.xy + float2(-Normal.x, Normal.y) * 0.5 );
+float4 Scene4 = DLAA( texcoord.xy + float2( Normal.x,-Normal.y) * 0.5 );
+
+float4 NFAA = (Scene0 + Scene1 + Scene2 + Scene3 + Scene4) * 0.2;
+	
+float Mask = clamp(NFAA.a * 2.0 - 1.0 ,0.0,1.0);
+	
+	// Final color
    	if(View_Mode == 1)
 	{
-		DLAA = (EdgeLumH.xxxx + EdgeLumV.xxxx) * 0.5;
+		NFAA = float4(float2( vect1 - Mask, vect2 - Mask),0.0,1.0);
 	}
 	else if (View_Mode == 2)
 	{
-		DLAA = lerp(DLAA,float4(1,0,0,1),(EdgeLumH + EdgeLumV) * 0.5);
+		NFAA = lerp(NFAA,float4(1,0,0,1), ( vect1 + vect2) * 0.5 );
 	}
 	else
 	{
-		DLAA = DLAA;
+		NFAA = lerp(NFAA, tex2D(BackBuffer, texcoord), Mask);
 	}
-
-	    
-	return DLAA;
+	
+return NFAA;
 }
 
 ////////////////////////////////////////////////////////Logo/////////////////////////////////////////////////////////////////////////
@@ -158,7 +199,7 @@ uniform float timer < source = "timer"; >;
 float4 Out(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Target
 {
 	float PosX = 0.5*BUFFER_WIDTH*pix.x,PosY = 0.5*BUFFER_HEIGHT*pix.y;	
-	float4 Color = DLAA(texcoord),Done,Website,D,E,P,T,H,Three,DD,Dot,I,N,F,O;
+	float4 Color = NFAA(texcoord),Done,Website,D,E,P,T,H,Three,DD,Dot,I,N,F,O;
 	
 	if(timer <= 10000)
 	{
@@ -267,7 +308,7 @@ void PostProcessVS(in uint id : SV_VertexID, out float4 position : SV_Position, 
 }
 
 //*Rendering passes*//
-technique Directionally_Localized_Anti_Aliasing_Light
+technique Normal_Filter_Anti_Aliasing
 {
 			pass DLAA_Light
 		{
