@@ -961,7 +961,7 @@ void Encode(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, ou
 	}
 		
 	// X Right & Y Left
-	float X = texcoord.x + MS * Conv(DepthL,texcoord), Y = texcoord.x - MS * Conv(DepthR,texcoord);
+	float X = texcoord.x + MS * Conv(DepthL,texcoord), Y = (1 - texcoord.x) + MS * Conv(DepthR,texcoord);
 
 	color = float4(X,Y,0.0,1.0);
 }
@@ -1051,7 +1051,7 @@ float4 PS_calcLR(float2 texcoord)
 							Left = tex2Dlod(BackBuffer, float4(TCL.x - i * pix.x, TCL.y,0,0));
 			
 			//R
-			[flatten] if(Decode(float2(TCR.x+i*pix.x,TCR.y)).y > TCR.x-pix.x * 5 && Decode(float2(TCR.x+i*pix.x,TCR.y)).y < TCR.x+pix.x * 5 )
+			[flatten] if(Decode(float2(TCR.x+i*pix.x,TCR.y)).y > (1-TCR.x)-pix.x * 5 && Decode(float2(TCR.x+i*pix.x,TCR.y)).y < (1-TCR.x)+pix.x * 5 )
 							Right = tex2Dlod(BackBuffer, float4(TCR.x + i * pix.x, TCR.y,0,0));
 		}
 	
