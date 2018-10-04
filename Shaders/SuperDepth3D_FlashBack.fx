@@ -40,9 +40,6 @@
 //There will be a performance loss when enabled.
 #define AO_TOGGLE 0 //Default 0 is Off. One is On.
 
-// Determines the Max Zero Parallax Distance, in ReShades GUI. 0.250 is 250%
-#define ZPD_Max 0.250
-
 // Use Depth Tool to adjust the lower preprocessor definitions below.
 // Horizontal & Vertical Depth Buffer Resize for non conforming BackBuffer.
 // Ex. Resident Evil 7 Has this problem. So you want to adjust it too around float2(0.9575,0.9575).
@@ -71,7 +68,7 @@ uniform bool ZPD_GUIDE <
 
 uniform float ZPD <
 	ui_type = "drag";
-	ui_min = 0.0; ui_max = ZPD_Max;
+	ui_min = 0.0; ui_max = 0.250;
 	ui_label = " Zero Parallax Distance";
 	ui_tooltip = "ZPD controls the focus distance for the screen Pop-out effect also known as Convergence.\n"
 				"For FPS Games keeps this low Since you don't want your gun to pop out of screen.\n"
@@ -804,23 +801,18 @@ void AO_in(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out
 //AO END//
 #endif
 
-float AutoDepthRange( float D, float2 texcoord )
+float AutoDepthRange( float d, float2 texcoord )
 {
 	float LumAdjust = smoothstep(-0.0175f,Auto_Depth_Range,Lum(texcoord));
-    return min(1, D / LumAdjust );
+    return min(1,( d - 0 ) / ( LumAdjust - 0));
 }
 
 float Conv(float DM,float2 texcoord)
 {
 	float Z = ZPD, ZP, NF_Power;
-			
-		float Divergence_Locked = Divergence * 0.00105f;
 				
-		ZP = 0.54875;
-		
-		if (ZPD >= ZPD_Max)
-			Z = ZPD_Max;
-		
+		ZP = 0.54875f;
+				
 		if (ZPD == 0)
 			ZP = 1.0f;
 		
@@ -828,23 +820,11 @@ float Conv(float DM,float2 texcoord)
 		{
 			DM = AutoDepthRange(DM,texcoord);
 		}
-			
-		float Convergence;	
-			
-		#if Convergence_Extended
-		if(Convergence_Mode == 1)
-			Z = Divergence_Locked;
-			
-		// You need to readjust the Z-Buffer if your going to use use the Convergence equation.
-		float D = DM / (1-Z);	
-		
-			Convergence = 1 - Z / D;
-		#else
+				
 		// You need to readjust the Z-Buffer if your going to use use the Convergence equation.
 		float D = DM / (1-Z);
 		
-			Convergence = 1 - Z / D;
-		#endif
+		float Convergence = 1 - Z / D;
 		
 		//Depth boost always on.
 		DM = lerp( DM, 1.25f * DM, 0.5f);
@@ -856,7 +836,7 @@ float Conv(float DM,float2 texcoord)
 
 void  Disocclusion(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 color : SV_Target0)
 {
-float X, Y, Z, W = 1, DM, DMA, DMB, A, B, S, MS =  Divergence * pix.x, DBD = 1-tex2Dlod(SamplerDMFB,float4(texcoord,0,1)).x , Div = 0.09090909;
+float X, Y, Z, W = 1, DM, DMA, DMB, A, B, MS =  Divergence * pix.x, DBD = 1-tex2Dlod(SamplerDMFB,float4(texcoord,0,1)).x;
 
 #if AO_TOGGLE
 float blursize = 2.0f * pix.x,sum;
@@ -873,7 +853,7 @@ if(AO == 1)
 	}
 #endif
 
-	float M = 1, N = 11, weight_A[11] = {0.0f,0.0125f,-0.0125f,0.025f,-0.025f,0.0375f,-0.0375f,0.0425f,-0.0425f,0.050f,-0.050f}, weight_B[7] = {0.0f,0.0125f,-0.0125f,0.0375f,-0.0375f,0.05f,-0.05f};
+	float M = 1, N = 11, Div = 1.0f / N, weight_A[11] = {0.0f,0.010f,-0.010f,0.020f,-0.020f,0.030f,-0.030f,0.040f,-0.040f,0.050f,-0.050f}, weight_B[7] = {0.0f,0.0125f,-0.0125f,0.0375f,-0.0375f,0.05f,-0.05f};
 	
 	A += 5.5f; // Normal
 	float2 dir = float2(0.5f,0.0f);
@@ -882,7 +862,7 @@ if(AO == 1)
 	if (Performance_Mode)
 		{
 			N = 7;
-			Div = 0.14285714;
+			Div = 1.0f / N;
 		}
 		
 	if (Disocclusion_Selection >= 1) 
@@ -890,13 +870,14 @@ if(AO == 1)
 		[loop]
 		for (int i = 0; i < N; i++)
 		{	
-				
-			S = weight_A[i] * MS;
-			
-			if (Performance_Mode)
-				S = weight_B[i] * MS;
-			
-			DM += tex2Dlod(SamplerDMFB,float4(texcoord + dir * S * A,0,M)).x * Div;
+			if (!Performance_Mode)
+			{
+				DM += tex2Dlod(SamplerDMFB,float4(texcoord + dir * (weight_A[i] * MS) * A,0,M)).x * Div;
+			}
+			else
+			{
+				DM += tex2Dlod(SamplerDMFB,float4(texcoord + dir * (weight_B[i] * MS) * A,0,M)).x * Div;
+			}
 		}
 	}
 	else
@@ -935,7 +916,7 @@ void Encode(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, ou
 	if (Performance_Mode)
 		N = 3;
 	
-	float DepthR = 1.0f, DepthL = 1.0f, MSL = (Divergence * 0.1875f), S, MS = Divergence  * pix.x;
+	float DepthR = 1.0f, DepthL = 1.0f, MSL = (Divergence * 0.1875f), MS = Divergence  * pix.x;
 	
 	if (View_Mode >= 1)
 	{	
@@ -945,13 +926,16 @@ void Encode(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, ou
 		[loop]
 		for ( int i = 0 ; i < N; i++ ) 
 		{
-			S = samples_A[i] * MSL;
-			
-			if (Performance_Mode)
-				S = samples_B[i] * MSL;
-			
-			DepthL = min(DepthL,tex2Dlod(SamplerDisFB, float4(texcoord.x - S * pix.x, texcoord.y,0,0)).x);
-			DepthR = min(DepthR,tex2Dlod(SamplerDisFB, float4(texcoord.x + S * pix.x, texcoord.y,0,0)).x);
+			if (!Performance_Mode)
+			{
+				DepthL = min(DepthL,tex2Dlod(SamplerDisFB, float4(texcoord.x - (samples_A[i] * MSL) * pix.x, texcoord.y,0,0)).x);
+				DepthR = min(DepthR,tex2Dlod(SamplerDisFB, float4(texcoord.x + (samples_A[i] * MSL) * pix.x, texcoord.y,0,0)).x);
+			}
+			else
+			{
+				DepthL = min(DepthL,tex2Dlod(SamplerDisFB, float4(texcoord.x - (samples_B[i] * MSL) * pix.x, texcoord.y,0,0)).x);
+				DepthR = min(DepthR,tex2Dlod(SamplerDisFB, float4(texcoord.x + (samples_B[i] * MSL) * pix.x, texcoord.y,0,0)).x);
+			}
 		}
 	}
 	else

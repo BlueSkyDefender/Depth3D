@@ -28,9 +28,6 @@
 // Determines the Max Depth amount, in ReShades GUI.
 #define Depth_Max 50
 
-// Determines the Max Zero Parallax Distance, in ReShades GUI. 0.250 is 250%
-#define ZPD_Max 0.250
-
 // Enable this to fix the problem when there is a full screen Game Map Poping out of the screen. AKA Full Black Depth Map Fix. I have this off by default. Zero is off, One is On.
 #define FBDMF 0 //Default 0 is Off. One is On.
 
@@ -88,7 +85,7 @@ uniform int Convergence_Mode <
 
 uniform float ZPD <
 	ui_type = "drag";
-	ui_min = 0.0; ui_max = ZPD_Max;
+	ui_min = 0.0; ui_max = 0.250;
 	ui_label = " Zero Parallax Distance";
 	ui_tooltip = "ZPD controls the focus distance for the screen Pop-out effect also known as Convergence.\n"
 				"For FPS Games keeps this low Since you don't want your gun to pop out of screen.\n"
@@ -112,9 +109,9 @@ uniform int Disocclusion_Selection <
 	ui_items = "Off\0Radial\0Normal\0Depth Based\0Radial & Depth Based\0Normal & Depth Based\0Radial & Normal\0";
 	ui_label = "·Disocclusion Selection·";
 	ui_tooltip = "This is to select the z-Buffer blurring option for low level occlusion masking.\n"
-				"Default is Normal.";
+				"Default is Off.";
 	ui_category = "Occlusion Masking";
-> = 2;
+> = 0;
 
 uniform float Disocclusion_Power_Adjust <
 	ui_type = "drag";
@@ -127,7 +124,7 @@ uniform float Disocclusion_Power_Adjust <
 
 uniform int View_Mode <
 	ui_type = "combo";
-	ui_items = "View Mode Normal\0View Mode Alpha\0View Mode Beta\0";
+	ui_items = "View Mode Normal\0View Mode Alpha\0View Mode Beta\0View Mode Gamma\0";
 	ui_label = " View Mode";
 	ui_tooltip = "Change the way the shader warps the output to the screen.\n"
 				 "Default is Normal";
@@ -739,7 +736,7 @@ float3 GetPosition(float2 coords)
 
 float2 GetRandom(float2 co)
 {
-	float random = frac(sin(dot(co, float2(12.9898, 78.233))) * 43758.5453 * 1);
+	float random = frac(sin(dot(co, float2(12.9898, 78.233))) * 43758.5453 );
 	return float2(random,random);
 }
 
@@ -880,10 +877,7 @@ float Conv(float D,float2 texcoord)
 			Divergence_Locked = Divergence_Locked;
 		}	
 			
-		ZP = 0.54875;
-		
-		if (ZPD >= ZPD_Max)
-			Z = ZPD_Max;
+		ZP = 0.54875f;
 		
 		if (ZPD == 0)
 			ZP = 1.0;
@@ -895,23 +889,21 @@ float Conv(float D,float2 texcoord)
 					
 		if(Convergence_Mode == 1)
 		Z = Divergence_Locked;
-		
+				
 		// You need to readjust the Z-Buffer if your going to use use the Convergence equation.
-		float DM = D/(1-Z);			
+		float DM = D / (1 - Z);			
 				
 		float Convergence = 1 - Z / DM;
 						
 		//Depth boost always on.
 		D = lerp( D, 1.25f * D, 0.5);
-						
-		Z = lerp(MS * Convergence,MS * D, ZP);
 				
-    return Z;
+    return lerp(MS * Convergence,MS * D, ZP);
 }
 
 void  Disocclusion(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 color : SV_Target0)
 {
-float X, Y, Z, W = 1, DM, DMA, DMB, A, B, S, MS =  Divergence * pix.x, DBD = 1-tex2Dlod(SamplerDM,float4(texcoord,0,0)).x , Div = 0.09090909;
+float X, Y, Z, W = 1, DM, DMA, DMB, A, B, S, MS =  Divergence * pix.x, DBD = 1-tex2Dlod(SamplerDM,float4(texcoord,0,0)).x , Div = 1.0f / 11.0f;
 float2 dirA, dirB;
 
 #if AO_TOGGLE
@@ -1033,9 +1025,8 @@ float4 PS_calcLR(float2 texcoord)
 {
 	float2 TCL, TCR, TexCoords = texcoord;
 	float4 color, Right, Left;
-	float DepthR = 1, DepthL = 1, Adjust_A = 0.11111111, Adjust_B = 0.07692307, N, S, LDepth, RDepth;
+	float DepthR = 1, DepthL = 1, Adjust_A = 1.0f / 9.0f, N = 9, S, LDepth, RDepth;
 	float samplesA[9] = {0.5,0.5625,0.625,0.6875,0.75,0.8125,0.875,0.9375,1.0}; //by 9
-	float samplesB[13] = {0.5,0.546875,0.578125,0.625,0.659375,0.703125,0.75,0.796875,0.828125,0.875,0.921875,0.953125,1.0};//by 13
 
 	//MS is Max Separation P is Perspective Adjustment
 	float MS = Divergence * pix.x, P = Perspective * pix.x;
@@ -1088,36 +1079,122 @@ float4 PS_calcLR(float2 texcoord)
 		TCL.x = TCL.x + ((Interlace_Anaglyph.x*0.5) * pix.x);
 		TCR.x = TCR.x - ((Interlace_Anaglyph.x*0.5) * pix.x);
 	}
-			
-	if (View_Mode == 0 || View_Mode == 1)
-		N = 9;
-	else if (View_Mode == 2)
-		N = 13;
-				
+							
 	[loop]
 	for ( int i = 0 ; i < N; i++ ) 
 	{
 		if (View_Mode == 0)
 		{
-			S = samplesA[i] * (MS + 0.00375);//9
-			DepthL = min(DepthL,Encode(float2(TCL.x+S, TCL.y)).x);
-			DepthR = min(DepthR,Encode(float2(TCR.x-S, TCR.y)).y);
+			DepthL = min(DepthL,Encode(float2(TCL.x+ samplesA[i] * (MS + 0.00375), TCL.y)).x);
+			DepthR = min(DepthR,Encode(float2(TCR.x- samplesA[i] * (MS + 0.00375), TCR.y)).y);
 		}
 		else if (View_Mode == 1)
 		{
-			S = samplesA[i] * MS * 1.1875;//9
-			LDepth += Encode(float2(TCL.x+S, TCL.y)).x*Adjust_A;
-			RDepth += Encode(float2(TCR.x-S, TCR.y)).y*Adjust_A;
-			DepthL = min(1,LDepth);
-			DepthR = min(1,RDepth);
+			LDepth = min(DepthL,Encode(float2(TCL.x + samplesA[i] * (MS + 0.00375), TCL.y)).x);
+			RDepth = min(DepthR,Encode(float2(TCR.x - samplesA[i] * (MS + 0.00375), TCR.y)).y);
+			
+			LDepth += min(DepthL,Encode(float2(TCL.x + samplesA[i] * ((MS * 0.75) + 0.00375), TCL.y)).x);
+			RDepth += min(DepthR,Encode(float2(TCR.x - samplesA[i] * ((MS * 0.75) + 0.00375), TCR.y)).y);
+			
+			LDepth += min(DepthL,Encode(float2(TCL.x + samplesA[i] * ((MS * 0.5) + 0.00375), TCL.y)).x);
+			RDepth += min(DepthR,Encode(float2(TCR.x - samplesA[i] * ((MS * 0.5) + 0.00375), TCR.y)).y);
+			
+			LDepth += min(DepthL,Encode(float2(TCL.x + samplesA[i] * ((MS * 0.250) + 0.00375), TCL.y)).x);
+			RDepth += min(DepthR,Encode(float2(TCR.x - samplesA[i] * ((MS * 0.250) + 0.00375), TCR.y)).y);
+			
+			LDepth /= 4;
+			RDepth /= 4;
+			
+			DepthL = min(DepthL,LDepth);
+			DepthR = min(DepthR,RDepth);
 		}
 		else if (View_Mode == 2)
 		{
-			S = samplesB[i] * MS * 1.1875;//13
-			LDepth += Encode(float2(TCL.x+S, TCL.y)).x*Adjust_B;
-			RDepth += Encode(float2(TCR.x-S, TCR.y)).y*Adjust_B;
-			DepthL = min(1,LDepth);
-			DepthR = min(1,RDepth);
+			LDepth = min(DepthL,Encode(float2(TCL.x + samplesA[i] * (MS + 0.00375), TCL.y)).x);
+			RDepth = min(DepthR,Encode(float2(TCR.x - samplesA[i] * (MS + 0.00375), TCR.y)).y);
+			
+			LDepth += min(DepthL,Encode(float2(TCL.x + samplesA[i] * ((MS * 0.875) + 0.00375), TCL.y)).x);
+			RDepth += min(DepthR,Encode(float2(TCR.x - samplesA[i] * ((MS * 0.875) + 0.00375), TCR.y)).y);
+			
+			LDepth += min(DepthL,Encode(float2(TCL.x + samplesA[i] * ((MS * 0.75) + 0.00375), TCL.y)).x);
+			RDepth += min(DepthR,Encode(float2(TCR.x - samplesA[i] * ((MS * 0.75) + 0.00375), TCR.y)).y);
+			
+			LDepth += min(DepthL,Encode(float2(TCL.x + samplesA[i] * ((MS * 0.625) + 0.00375), TCL.y)).x);
+			RDepth += min(DepthR,Encode(float2(TCR.x - samplesA[i] * ((MS * 0.625) + 0.00375), TCR.y)).y);
+			
+			LDepth += min(DepthL,Encode(float2(TCL.x + samplesA[i] * ((MS * 0.5) + 0.00375), TCL.y)).x);
+			RDepth += min(DepthR,Encode(float2(TCR.x - samplesA[i] * ((MS * 0.5) + 0.00375), TCR.y)).y);
+		
+			LDepth += min(DepthL,Encode(float2(TCL.x + samplesA[i] * ((MS * 0.375) + 0.00375), TCL.y)).x);
+			RDepth += min(DepthR,Encode(float2(TCR.x - samplesA[i] * ((MS * 0.375) + 0.00375), TCR.y)).y);
+			
+			LDepth += min(DepthL,Encode(float2(TCL.x + samplesA[i] * ((MS * 0.250) + 0.00375), TCL.y)).x);
+			RDepth += min(DepthR,Encode(float2(TCR.x - samplesA[i] * ((MS * 0.250) + 0.00375), TCR.y)).y);
+			
+			LDepth += min(DepthL,Encode(float2(TCL.x + samplesA[i] * ((MS * 0.125) + 0.00375), TCL.y)).x);
+			RDepth += min(DepthR,Encode(float2(TCR.x - samplesA[i] * ((MS * 0.125) + 0.00375), TCR.y)).y);
+						
+			LDepth /= 8;
+			RDepth /= 8;
+			
+			DepthL = min(DepthL,LDepth);
+			DepthR = min(DepthR,RDepth);
+		}
+		else if (View_Mode == 3)
+		{
+			LDepth = min(DepthL,Encode(float2(TCL.x + samplesA[i] * (MS + 0.00375), TCL.y)).x);
+			RDepth = min(DepthR,Encode(float2(TCR.x - samplesA[i] * (MS + 0.00375), TCR.y)).y);
+			
+			LDepth += min(DepthL,Encode(float2(TCL.x + samplesA[i] * ((MS * 0.9375) + 0.00375), TCL.y)).x);
+			RDepth += min(DepthR,Encode(float2(TCR.x - samplesA[i] * ((MS * 0.9375) + 0.00375), TCR.y)).y);
+			
+			LDepth += min(DepthL,Encode(float2(TCL.x + samplesA[i] * ((MS * 0.875) + 0.00375), TCL.y)).x);
+			RDepth += min(DepthR,Encode(float2(TCR.x - samplesA[i] * ((MS * 0.875) + 0.00375), TCR.y)).y);
+			
+			LDepth += min(DepthL,Encode(float2(TCL.x + samplesA[i] * ((MS * 0.8125) + 0.00375), TCL.y)).x);
+			RDepth += min(DepthR,Encode(float2(TCR.x - samplesA[i] * ((MS * 0.8125) + 0.00375), TCR.y)).y);
+			
+			LDepth += min(DepthL,Encode(float2(TCL.x + samplesA[i] * ((MS * 0.75) + 0.00375), TCL.y)).x);
+			RDepth += min(DepthR,Encode(float2(TCR.x - samplesA[i] * ((MS * 0.75) + 0.00375), TCR.y)).y);
+			
+			LDepth += min(DepthL,Encode(float2(TCL.x + samplesA[i] * ((MS * 0.6875) + 0.00375), TCL.y)).x);
+			RDepth += min(DepthR,Encode(float2(TCR.x - samplesA[i] * ((MS * 0.6875) + 0.00375), TCR.y)).y);
+			
+			LDepth += min(DepthL,Encode(float2(TCL.x + samplesA[i] * ((MS * 0.625) + 0.00375), TCL.y)).x);
+			RDepth += min(DepthR,Encode(float2(TCR.x - samplesA[i] * ((MS * 0.625) + 0.00375), TCR.y)).y);
+			
+			LDepth += min(DepthL,Encode(float2(TCL.x + samplesA[i] * ((MS * 0.5625) + 0.00375), TCL.y)).x);
+			RDepth += min(DepthR,Encode(float2(TCR.x - samplesA[i] * ((MS * 0.5625) + 0.00375), TCR.y)).y);
+			
+			LDepth += min(DepthL,Encode(float2(TCL.x + samplesA[i] * ((MS * 0.5) + 0.00375), TCL.y)).x);
+			RDepth += min(DepthR,Encode(float2(TCR.x - samplesA[i] * ((MS * 0.5) + 0.00375), TCR.y)).y);
+			
+			LDepth += min(DepthL,Encode(float2(TCL.x + samplesA[i] * ((MS * 0.425) + 0.00375), TCL.y)).x);
+			RDepth += min(DepthR,Encode(float2(TCR.x - samplesA[i] * ((MS * 0.425) + 0.00375), TCR.y)).y);
+			
+			LDepth += min(DepthL,Encode(float2(TCL.x + samplesA[i] * ((MS * 0.375) + 0.00375), TCL.y)).x);
+			RDepth += min(DepthR,Encode(float2(TCR.x - samplesA[i] * ((MS * 0.375) + 0.00375), TCR.y)).y);
+			
+			LDepth += min(DepthL,Encode(float2(TCL.x + samplesA[i] * ((MS * 0.3125) + 0.00375), TCL.y)).x);
+			RDepth += min(DepthR,Encode(float2(TCR.x - samplesA[i] * ((MS * 0.3125) + 0.00375), TCR.y)).y);
+			
+			LDepth += min(DepthL,Encode(float2(TCL.x + samplesA[i] * ((MS * 0.250) + 0.00375), TCL.y)).x);
+			RDepth += min(DepthR,Encode(float2(TCR.x - samplesA[i] * ((MS * 0.250) + 0.00375), TCR.y)).y);
+			
+			LDepth += min(DepthL,Encode(float2(TCL.x + samplesA[i] * ((MS * 0.1875) + 0.00375), TCL.y)).x);
+			RDepth += min(DepthR,Encode(float2(TCR.x - samplesA[i] * ((MS * 0.1875) + 0.00375), TCR.y)).y);
+			
+			LDepth += min(DepthL,Encode(float2(TCL.x + samplesA[i] * ((MS * 0.125) + 0.00375), TCL.y)).x);
+			RDepth += min(DepthR,Encode(float2(TCR.x - samplesA[i] * ((MS * 0.125) + 0.00375), TCR.y)).y);
+			
+			LDepth += min(DepthL,Encode(float2(TCL.x + samplesA[i] * ((MS * 0.0625) + 0.00375), TCL.y)).x);
+			RDepth += min(DepthR,Encode(float2(TCR.x - samplesA[i] * ((MS * 0.0625) + 0.00375), TCR.y)).y);	
+								
+			LDepth /= 16;
+			RDepth /= 16;
+			
+			DepthL = min(DepthL,LDepth);
+			DepthR = min(DepthR,RDepth);
 		}
 	}
 		
