@@ -54,9 +54,9 @@ Inner Shader Setting:
 
 [ZDP Range] -  ZDP Range is the range where you should set Zero Parallax Distance.
 
-                                                       [- - - - - - - - - -=: Recommended Settings :=- - - - - - - - - -]
-[Read Below] [Game List]                               [Depth Map] [Adjustment] [Weapon DM] [Depth Flip] [ZPD Tied Range]
-    RB        .Hack//G.U.                                  DM 1         25                                0.050-0.125 
+                                                       [- - - - - - - - - - - - -=: Recommended Settings :=- - - - - - - - - - - - -]
+[Read Below] [Game List]                               [Depth Map] [Adjustment] [Weapon DM] [Depth Flip] [ZPD / Range] [Auto Depth]
+    RB        .Hack//G.U.                                  DM 1         25                                0.050-0.125        
               ABZU                                         DM 1         50                                0.050-0.250                    
               Agony                                        DM 1         50                                0.025-0.250
               Alien Isolation                              DM 0         25                                0.030-0.075
@@ -100,6 +100,7 @@ Inner Shader Setting:
               Fallout 4                                    DM 0         6.875      *WDM 8                 0.075-0.200          
     RB        FarCry 3                                     DM 0         7.50                              0.025-0.200
               Firewatch                                    DM 0         5.0                       Yes     0.025-0.250
+    RB        Grim Dawn                                    DM 0         32.5                              0.150-0.300     0.325 
     RB        GTA V                                        DM 1         12.5                              0.025-0.175                                      
               Gone Home                                    DM 0         5.0                       Yes     0.025-0.250
     RB        Hard Reset                                   DM 0         8.125                             0.050-0.125          
@@ -152,6 +153,7 @@ Inner Shader Setting:
     RB        S.T.A.L.K.E.R:CoP Complete Mod               DM 0         7.5         WDM 19                0.025-0.125
     RB        S.T.A.L.K.E.R:SoC Complete Mod               DM 0         7.5         WDM 19                0.025-0.125
     RB        Shadow of the Tomb Raider                    DM 1         17.5                              0.100-0.250 
+              Shadow Warrior 2                             DM 1         10.0                              0.0375-0.0625
               Sleeping Dogs: DE                            DM 0         7.0                               0.075-0.100 
               Sniper Elite 4                               DM 0         25.0                              0.025-0.075
               Soma                                         DM 0         11.25       WDM 20                0.025-0.100
@@ -304,6 +306,10 @@ Install reshade in to SteamLibrary\steamapps\common\Emily Wants To Play\Engine\B
 
 {FarCry 3}
 Ingame setting MSAA 2X should be on to enable Depth Map in DX11.
+
+{Grim Dawn}
+For this game I say you should use the FlashBack shader. Since it gives a better sence of Depth for this type of game. You also need to select the right Depth Buffer so that it does
+not go blank when you interact with people. This should be under the DX11 Tab in the newest ReShade. 
 
 {GTA 5}
 Rename the dxgi.dll too d3d11.dll for DX11 mode.
@@ -629,6 +635,10 @@ http://pcgamingwiki.com/wiki/You_Are_Empty
 _________________________________________________________________________________________________________________________________
 {Condemned: Criminal Origins}
 Depth Buffer Drops time to time Also Dissable FSAA (FSAA OFF)
+
+{Dead Space}
+Games Depth Buffer does not show till after the elevator part at the start. Depth Buffer also goes away when interacting with some objects and when you get video feeds.
+I suggest useing TriDef. For this game.
 
 {Monstrum}
 Start the game in OpenGL or DX3D mode. Game seems to change Depth Buffer now after update. I suggest useing TriDef.
