@@ -54,8 +54,8 @@ Inner Shader Setting:
 
 [ZDP Range] -  ZDP Range is the range where you should set Zero Parallax Distance.
 
-                                                       [- - - - - - - - - - - - -=: Recommended Settings :=- - - - - - - - - - - - -]
-[Read Below] [Game List]                               [Depth Map] [Adjustment] [Weapon DM] [Depth Flip] [ZPD / Range] [Auto Depth]
+                                                       [- - - - - - - - - - - - - - -=: Recommended Settings :=- - - - - - - - - - - - - - -]
+[Read Below] [Game List]                               [Depth Map] [Adjustment] [Weapon DM] [Depth Flip] [ZPD / Range] [Auto Depth] [SD / FB]
     RB        .Hack//G.U.                                  DM 1         25                                0.050-0.125        
               ABZU                                         DM 1         50                                0.050-0.250                    
               Agony                                        DM 1         50                                0.025-0.250
@@ -100,7 +100,6 @@ Inner Shader Setting:
               Fallout 4                                    DM 0         6.875      *WDM 8                 0.075-0.200          
     RB        FarCry 3                                     DM 0         7.50                              0.025-0.200
               Firewatch                                    DM 0         5.0                       Yes     0.025-0.250
-    RB        Grim Dawn                                    DM 0         32.5                              0.150-0.300     0.325 
     RB        GTA V                                        DM 1         12.5                              0.025-0.175                                      
               Gone Home                                    DM 0         5.0                       Yes     0.025-0.250
     RB        Hard Reset                                   DM 0         8.125                             0.050-0.125          
@@ -183,25 +182,28 @@ Inner Shader Setting:
     RB        Wolfenstine: The Old Blood                   DM 0         25.00      *WDM 7                 0.025-0.075
               Ziggurat                                     DM 0         7.5                               0.075-0.175
               Zombie Army Trilogy                          DM 0         12.5                              0.050-0.075
-
-[Read Below] [Special Depth Map Game List]             [Depth Map] [Adjustment] [Weapon DM] [Offset][Depth Flip][ZPD Range] [HUD Mode & Value]
-             Amnesia: Machine for Pigs                    DM 0       40.0                   0.00025              0.000-0.100       
-             Amnesia: The Dark Descent                    DM 0       40.0                   0.00025              0.000-0.100
-            *Crash Bandicoot™ N. Sane Trilogy             DM 0       ????                   ??????               ???????????
-             Double Dragon Neon                           DM 0       1.0                    1.1000               0.025-0.075
-             Dungeons 2                                   DM 0       3.50                   0.0050      Yes      0.025-0.250
-             Fez                                          DM 0       10.0                   0.9750      Yes      ?0.0-0.250?        
-             Lara Croft & Temple of Osiris                DM 0       250.0                  0.0207               0.025-0.200
-    RB       Magicka 2                                    DM 0       13.75                  0.0125               0.025-0.250
-             Never Alone (Kisima Ingitchuna)              DM 0       25.0                   0.0050               0.050-0.100             
-    RB       Requiem: Avenging Angel                      DM 0       50.0                   0.8000               0.030-0.060    HUD 01 & X6.5
-             Serious Sam Revolution                       DM 0       7.5         WDM 29     0.1111               0.025-0.075
-             Shadow Warrior Classic Source Port           DM 0       8.75                   1.0000               0.075-0.150
-             Shadow Warrior Classic Redux                 DM 0       8.75                   1.0000               0.075-0.150
-             Silent Hill: Homecoming                      DM 0       12.5                   0.1155               0.025-0.075       
-             Rise of the Tomb Raider                      DM 0       25.0                   0.0200               0.050-0.125
-             Two Worlds EE                                DM 0       7.5                    0.0750               0.025-0.075            
-
+              
+                                                       [- - - - - - - - - - - - - - - -=: Recommended Settings :=- - - - - - - - - - - - - - - -]
+[Read Below] [Special Depth Map Game List]             [Depth Map] [Adjustment] [Weapon DM] [Flip Z] [ZPD / Range] [Auto Depth] [SD / FB] [Offsets]
+             Amnesia: Machine for Pigs                    DM 0       40.0                     No      0.000-0.100                          0.00025       
+             Amnesia: The Dark Descent                    DM 0       40.0                     No      0.000-0.100                          0.00025
+            *Crash Bandicoot™ N. Sane Trilogy             DM 0       ????                   ??????    ???????????                          ??????
+             Double Dragon Neon                           DM 0       1.0                      No      0.025-0.075                          1.1000 
+             Dungeons 2                                   DM 0       3.50                     Yes     0.025-0.250                          0.0050
+             Fez                                          DM 0       10.0                     Yes     ?0.0-0.250?                          0.9750        
+    RB       Grim Dawn                                    DM 0       7.50                     No      0.250-0.300      0.575        FB     0.0040 
+             Lara Croft & Temple of Osiris                DM 0       250.0                    No      0.025-0.200                          0.0207
+    RB       Magicka 2                                    DM 0       13.75                    No      0.025-0.250                          0.0125
+             Never Alone (Kisima Ingitchuna)              DM 0       25.0                     No      0.050-0.100                          0.0050             
+    RB       Requiem: Avenging Angel                      DM 0       50.0                     No      0.030-0.060                          0.8000
+             Serious Sam Revolution                       DM 0       7.5         WDM 29       No      0.025-0.075                          0.1111
+             Shadow Tactics: Blades of the Shogun         DM 0       5.5                      Yes     0.250-0.350      0.2875       FB     0.0010
+             Shadow Warrior Classic Source Port           DM 0       8.75                     No      0.075-0.150                          1.0000
+             Shadow Warrior Classic Redux                 DM 0       8.75                     No      0.075-0.150                          1.0000
+             Silent Hill: Homecoming                      DM 0       12.5                     No      0.025-0.075                          0.1155
+             Rise of the Tomb Raider                      DM 0       25.0                     No      0.050-0.125                          0.0200
+             Two Worlds EE                                DM 0       7.5                      No      0.025-0.075                          0.0750
+                                
 [Emulator][RB][Special Depth Map Game List]            [Depth Map] [Adjustment] [Weapon DM] [Offset] [Depth Flip] [ZDP Range]
 CEMU          Mariokart 8                                  ????        ???                                Yes      ?
 CEMU          Super Mario 3D World                         ????        ???                                Yes      ?

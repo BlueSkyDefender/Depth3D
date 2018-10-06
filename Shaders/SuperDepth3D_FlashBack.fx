@@ -25,7 +25,7 @@
 #define Depth_Map_Resolution 0.625 //1.0 is 100% | 0.50 is 50%
 
 // Determines the Max Depth amount, in ReShades GUI.
-#define Depth_Max 50.0
+#define Depth_Max 52.5
 
 // Use this to Disable Anti-Z-Fighting for Weapon Hand.
 #define DWZF 0 //Default Zero is Off. One is On.
@@ -58,7 +58,7 @@ uniform float Divergence <
 				 "The process of deriving binocular depth information is called stereopsis.\n"
 				 "You can override this value. But, increasing this reduces performance.";
 	ui_category = "Divergence & Convergence";
-> = 35;
+> = 35.0;
 
 uniform bool ZPD_GUIDE <
 	ui_label = " ZPD GUIDE";
