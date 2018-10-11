@@ -168,6 +168,7 @@ Inner Shader Setting:
     RB        The Surge                                    DM *         ?                                 ?     
     RB        The Vanishing of Ethan Carter Redux          DM 1         7.5                               0.025-0.125
     RB        The Void                                     DM 0         7.5                               0.050-0.150           
+    RB        Through The Woods!                           DM 1         7.5                       Yes     0.025-0.075 
               Titanfall 2                                  DM 0         7.5         WDM 27                0.025-0.100 
               Total War: Warhammer                         DM 0         2.625                             0.025-0.075
     RB        Turok: Dinosaur Hunter                       DM 0         200.0       WDM 22                0.010-0.075
@@ -590,6 +591,9 @@ Instal Dll too D:\SteamLibrary\steamapps\common\The Vanishing of Ethan Carter Re
 {The Void} - Use Reshade 3.0.3
 You may need to install the other things in the game folder for the game to run such as DX9 runtime and AdbeRdr810_en_US. Also the PhysX run time if you are on AMD. I know, I know...... But, this was the only way I got it to run in windows 10 on AMD Hardware.
 
+{Through The Woods} - Use Reshade 3.4.1
+In game Set your Res to Native screen Res.
+
 {Turok: Dinosaur Hunter} - Use Reshade 3.0.4
 Turn Off "Light Scatter," in Graphics Menu.
 
@@ -663,13 +667,6 @@ Game Crashes if you leave r_drawvgui 0 when you die. Don't know how to fix this.
 Depth Buffer only in DX9 so launch it in Shadow Warrior XP and turn on FSAAX2 in game.
 
 Try useing TriDef Power3D in DX11 Mode.
-
-{Through The Woods}
-In game Set your Res to Native screen Res.
-Settings
-DM 1 Adjust 7.5 DepthFlip Yes      ZPDAuto and ZPD No Off / 0.025-0.075    [3]
-
-Issue DM is lost when looking at sertant angles. I don't know why this Happens.
 
 {Zombi} -Depth map Pops in and out-
 This Problem seems to happen when looking at one direction. Don't know why it happens. 
