@@ -124,7 +124,7 @@ uniform float Disocclusion_Power_Adjust <
 
 uniform int View_Mode <
 	ui_type = "combo";
-	ui_items = "View Mode Normal\0View Mode Alpha\0View Mode Beta\0View Mode Gamma\0";
+	ui_items = "View Mode Normal\0View Mode Alpha\0View Mode Beta\0";
 	ui_label = " View Mode";
 	ui_tooltip = "Change the way the shader warps the output to the screen.\n"
 				 "Default is Normal";
@@ -1136,62 +1136,6 @@ float4 PS_calcLR(float2 texcoord)
 						
 			LDepth /= 8;
 			RDepth /= 8;
-			
-			DepthL = min(DepthL,LDepth);
-			DepthR = min(DepthR,RDepth);
-		}
-		else if (View_Mode == 3)
-		{
-			LDepth = min(DepthL,Encode(float2(TCL.x + samplesA[i] * (MS + 0.00375), TCL.y)).x);
-			RDepth = min(DepthR,Encode(float2(TCR.x - samplesA[i] * (MS + 0.00375), TCR.y)).y);
-			
-			LDepth += min(DepthL,Encode(float2(TCL.x + samplesA[i] * ((MS * 0.9375) + 0.00375), TCL.y)).x);
-			RDepth += min(DepthR,Encode(float2(TCR.x - samplesA[i] * ((MS * 0.9375) + 0.00375), TCR.y)).y);
-			
-			LDepth += min(DepthL,Encode(float2(TCL.x + samplesA[i] * ((MS * 0.875) + 0.00375), TCL.y)).x);
-			RDepth += min(DepthR,Encode(float2(TCR.x - samplesA[i] * ((MS * 0.875) + 0.00375), TCR.y)).y);
-			
-			LDepth += min(DepthL,Encode(float2(TCL.x + samplesA[i] * ((MS * 0.8125) + 0.00375), TCL.y)).x);
-			RDepth += min(DepthR,Encode(float2(TCR.x - samplesA[i] * ((MS * 0.8125) + 0.00375), TCR.y)).y);
-			
-			LDepth += min(DepthL,Encode(float2(TCL.x + samplesA[i] * ((MS * 0.75) + 0.00375), TCL.y)).x);
-			RDepth += min(DepthR,Encode(float2(TCR.x - samplesA[i] * ((MS * 0.75) + 0.00375), TCR.y)).y);
-			
-			LDepth += min(DepthL,Encode(float2(TCL.x + samplesA[i] * ((MS * 0.6875) + 0.00375), TCL.y)).x);
-			RDepth += min(DepthR,Encode(float2(TCR.x - samplesA[i] * ((MS * 0.6875) + 0.00375), TCR.y)).y);
-			
-			LDepth += min(DepthL,Encode(float2(TCL.x + samplesA[i] * ((MS * 0.625) + 0.00375), TCL.y)).x);
-			RDepth += min(DepthR,Encode(float2(TCR.x - samplesA[i] * ((MS * 0.625) + 0.00375), TCR.y)).y);
-			
-			LDepth += min(DepthL,Encode(float2(TCL.x + samplesA[i] * ((MS * 0.5625) + 0.00375), TCL.y)).x);
-			RDepth += min(DepthR,Encode(float2(TCR.x - samplesA[i] * ((MS * 0.5625) + 0.00375), TCR.y)).y);
-			
-			LDepth += min(DepthL,Encode(float2(TCL.x + samplesA[i] * ((MS * 0.5) + 0.00375), TCL.y)).x);
-			RDepth += min(DepthR,Encode(float2(TCR.x - samplesA[i] * ((MS * 0.5) + 0.00375), TCR.y)).y);
-			
-			LDepth += min(DepthL,Encode(float2(TCL.x + samplesA[i] * ((MS * 0.425) + 0.00375), TCL.y)).x);
-			RDepth += min(DepthR,Encode(float2(TCR.x - samplesA[i] * ((MS * 0.425) + 0.00375), TCR.y)).y);
-			
-			LDepth += min(DepthL,Encode(float2(TCL.x + samplesA[i] * ((MS * 0.375) + 0.00375), TCL.y)).x);
-			RDepth += min(DepthR,Encode(float2(TCR.x - samplesA[i] * ((MS * 0.375) + 0.00375), TCR.y)).y);
-			
-			LDepth += min(DepthL,Encode(float2(TCL.x + samplesA[i] * ((MS * 0.3125) + 0.00375), TCL.y)).x);
-			RDepth += min(DepthR,Encode(float2(TCR.x - samplesA[i] * ((MS * 0.3125) + 0.00375), TCR.y)).y);
-			
-			LDepth += min(DepthL,Encode(float2(TCL.x + samplesA[i] * ((MS * 0.250) + 0.00375), TCL.y)).x);
-			RDepth += min(DepthR,Encode(float2(TCR.x - samplesA[i] * ((MS * 0.250) + 0.00375), TCR.y)).y);
-			
-			LDepth += min(DepthL,Encode(float2(TCL.x + samplesA[i] * ((MS * 0.1875) + 0.00375), TCL.y)).x);
-			RDepth += min(DepthR,Encode(float2(TCR.x - samplesA[i] * ((MS * 0.1875) + 0.00375), TCR.y)).y);
-			
-			LDepth += min(DepthL,Encode(float2(TCL.x + samplesA[i] * ((MS * 0.125) + 0.00375), TCL.y)).x);
-			RDepth += min(DepthR,Encode(float2(TCR.x - samplesA[i] * ((MS * 0.125) + 0.00375), TCR.y)).y);
-			
-			LDepth += min(DepthL,Encode(float2(TCL.x + samplesA[i] * ((MS * 0.0625) + 0.00375), TCL.y)).x);
-			RDepth += min(DepthR,Encode(float2(TCR.x - samplesA[i] * ((MS * 0.0625) + 0.00375), TCR.y)).y);	
-								
-			LDepth /= 16;
-			RDepth /= 16;
 			
 			DepthL = min(DepthL,LDepth);
 			DepthR = min(DepthR,RDepth);
