@@ -91,6 +91,7 @@ Inner Shader Setting:
               Dragon Ball Xenoverse                        DM 0         8.75                              0.025-0.200                          
               Dragons Dogma: Dark Arisen                   DM 0         8.75                              0.025-0.250
               DreamFall Chapters                           DM 0         12.5                      Yes     0.075-0.125
+    RB        Duke Nukem 3D 20th Anniversary World Tour    DM 0         7.5                               0.150-0.250
     RB        Dungeon Nightmares II                        DM 0         17.5                      Yes     0.025-0.250                                
     RB        Dusk/Dusk World                              DM 1         20.0                      Yes     0.025-0.075
               Dying Light                                  DM 1         22.5                              0.010-0.075
@@ -296,6 +297,14 @@ Then head to the folder and rename d3d9.dll to dxgi.dll.
 Now open the DPfix095.zip Directly from http://blog.metaclassofnil.com/wp-content/uploads/2013/12/DPfix095.zip or http://blog.metaclassofnil.com/?p=438.
 
 Install the contents of that folder in to Deadly Premonition Folder where you changed Reshade's d3d9.dll to dxgi.dll. Edit the DPfix.ini too what ever REZ you want. Then start the game.
+
+{Duke Nukem 3D Twentieth Anniversary World Tour} - Use ReShade 3.1.4
+Game now works with the new DX11_BUFFER_DETECTION.
+[DX11_BUFFER_DETECTION]
+DepthBufferRetrievalMode=1
+DepthBufferTextureFormat=2
+ExtendedDepthBufferDetection=1
+DepthBufferClearingNumber=3
 
 {Dungeon Nightmares II}
 Highest Setting is "Good" Any thing Lower will work and thing above will not work. Make sure to set your res to native.
