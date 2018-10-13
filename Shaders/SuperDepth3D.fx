@@ -141,7 +141,7 @@ uniform int Custom_Sidebars <
 //Depth Map//
 uniform int Depth_Map <
 	ui_type = "combo";
-	ui_items = "DM0 Normal\0DM1 Reversed\0";
+	ui_items = "DM0 Normal\0DM1 Reversed\0DM2 Alt-Normal\0DM3 Alt-Reversed\0";
 	ui_label = "·Depth Map Selection·";
 	ui_tooltip = "Linearization for the zBuffer also known as Depth Map.\n"
 			     "DM0 is Z-Normal and DM1 is Z-Reversed.\n";
@@ -480,6 +480,14 @@ float Depth(in float2 texcoord : TEXCOORD0)
 		{
 			DM = 2.0 * Near * Far / (Far + Near - pow(abs(Z.y),1.375) * (Far - Near));
 		}
+		else if (Depth_Map == 2)//DM2. Alt-Normal
+		{
+			DM = Far * Near / (Far + Z.x * (Near - Far));
+		}
+		else if (Depth_Map == 3)//DM3. Alt-Reverse
+		{
+			DM = Far * Near / (Far + Z.y * (Near - Far));
+		}
 			
 	return DM;
 }
@@ -509,11 +517,11 @@ float3 WeaponDepth(in float2 texcoord : TEXCOORD0)
 		if (Offset > 0)
 		Z = min( 1, float2( Z.x*Offsets.x , ( Z.y - 0.0 ) / ( Offsets.y - 0.0 ) ) );
 		
-		if (Depth_Map == 0)
+		if (Depth_Map == 0 || Depth_Map == 2)
 		{
 			zBufferWH_B = Far * Near / (Far + Z.x * (Near - Far));
 		}
-		else if (Depth_Map == 1)
+		else if (Depth_Map == 1 || Depth_Map == 3)
 		{
 			zBufferWH_B = Far * Near / (Far + Z.y * (Near - Far));
 		}
