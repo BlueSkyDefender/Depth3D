@@ -1098,7 +1098,7 @@ float4 PS_calcLR(float2 texcoord)
 	for ( int i = 0 ; i < N; i++ ) 
 	{
 		if(Disocclusion_Ex)
-		MS = MS + 0.00125f;
+		MS = MS + 0.001875f;
 		
 		if (View_Mode == 0)
 		{
