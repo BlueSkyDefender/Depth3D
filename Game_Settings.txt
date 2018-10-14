@@ -182,6 +182,7 @@ Inner Shader Setting:
               Wolfenstine                                  DM 0         7.5        *WDM 2                 0.025-0.100
     RB        Wolfenstine: The New Order                   DM 0         25.00      *WDM 7                 0.025-0.075
     RB        Wolfenstine: The Old Blood                   DM 0         25.00      *WDM 7                 0.025-0.075
+    RB        Yooka-Laylee                                 DM 2         6.875                     Yes     0.025-0.075
               Ziggurat                                     DM 0         7.5                               0.075-0.175
               Zombie Army Trilogy                          DM 0         12.5                              0.050-0.075
               
@@ -298,8 +299,8 @@ Now open the DPfix095.zip Directly from http://blog.metaclassofnil.com/wp-conten
 
 Install the contents of that folder in to Deadly Premonition Folder where you changed Reshade's d3d9.dll to dxgi.dll. Edit the DPfix.ini too what ever REZ you want. Then start the game.
 
-{Duke Nukem 3D Twentieth Anniversary World Tour} - Use ReShade 3.1.4
-Game now works with the new DX11_BUFFER_DETECTION.
+{Duke Nukem 3D Twentieth Anniversary World Tour} - Use ReShade 3.4.1
+Game now works with the new DX11_BUFFER_DETECTION. You can set this also in ReShades DX11 Tab in game.
 [DX11_BUFFER_DETECTION]
 DepthBufferRetrievalMode=1
 DepthBufferTextureFormat=2
@@ -645,6 +646,16 @@ Ex.
 {You Are Empty}
 Read Here you will need patch 1.2 and 1snd.
 http://pcgamingwiki.com/wiki/You_Are_Empty
+
+{Yooka-Laylee} - Use ReShade 3.4.1
+Game now works with the new DX11_BUFFER_DETECTION. You can set this also in ReShades DX11 Tab in game.
+[DX11_BUFFER_DETECTION]
+DepthBufferRetrievalMode=0
+DepthBufferTextureFormat=3
+ExtendedDepthBufferDetection=1
+DepthBufferClearingNumber=0
+
+Game was tested with Max setting.
 
 -=Problem Games=-
 _________________________________________________________________________________________________________________________________
