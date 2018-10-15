@@ -827,7 +827,7 @@ float Conv(float DM,float2 texcoord)
 		float Convergence = 1 - Z / D;
 		
 		//Depth boost always on.
-		DM = lerp( DM, 1.25f * DM, 0.5f);
+		DM = lerp( DM, min(1.0f,1.25f * DM), 0.4375f);
 											
 		Z = lerp(Convergence,DM, ZP);
 				
