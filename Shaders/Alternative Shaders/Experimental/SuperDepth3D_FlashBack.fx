@@ -96,15 +96,6 @@ uniform float Disocclusion_Power_Adjust <
 	ui_category = "Occlusion Masking";
 > = 0.5;
 
-uniform int View_Mode <
-	ui_type = "combo";
-	ui_items = "View Mode Alpha\0View Mode Beta\0";
-	ui_label = " View Mode";
-	ui_tooltip = "Change the way the shader warps the output to the screen.\n"
-				 "Default is Alpha";
-	ui_category = "Occlusion Masking";
-> = 0;
-
 //Depth Map//
 uniform int Depth_Map <
 	ui_type = "combo";
@@ -835,18 +826,40 @@ if(AO == 1)
 	}
 #endif
 
-	float M = 1, N = 7, Div = 1.0f / N, weight_A[7] = {0.0f,0.0125f,-0.0125f,0.0375f,-0.0375f,0.05f,-0.05f};
+	float L = 1.0, R = 1.0, M = 1, N = 7, Div = 1.0f / N, samples_A[7] = {0.0f,0.0125f,0.1875,0.250f,0.0375f,0.04375f,0.05f};
 	
-	A += 5.5f; // Normal
-	float2 dir = float2(0.5f,0.0f);
-	MS *= Disocclusion_Power_Adjust;
+	MS *= Disocclusion_Power_Adjust * 10000.0;
 		
 	if (Disocclusion_Power_Adjust > 0) 
 	{		
 		[loop]
-		for (int i = 0; i < N; i++)
-		{	
-			DM += tex2Dlod(SamplerDMFB,float4(texcoord + dir * (weight_A[i] * MS) * A,0,M)).x * Div;
+		for ( int i = 0 ; i < N; i++ ) 
+		{
+			L = min(M,tex2Dlod(SamplerDMFB, float4(texcoord.x - (samples_A[i] * MS) * pix.x, texcoord.y,0,M)).x);
+			R = min(M,tex2Dlod(SamplerDMFB, float4(texcoord.x + (samples_A[i] * MS) * pix.x, texcoord.y,0,M)).x);
+			
+			L += min(M,tex2Dlod(SamplerDMFB, float4(texcoord.x - (samples_A[i] * (MS * 0.875f)) * pix.x, texcoord.y,0,M)).x);
+			R += min(M,tex2Dlod(SamplerDMFB, float4(texcoord.x + (samples_A[i] * (MS * 0.875f)) * pix.x, texcoord.y,0,M)).x);
+			
+			L += min(M,tex2Dlod(SamplerDMFB, float4(texcoord.x - (samples_A[i] * (MS * 0.750f)) * pix.x, texcoord.y,0,M)).x);
+			R += min(M,tex2Dlod(SamplerDMFB, float4(texcoord.x + (samples_A[i] * (MS * 0.750f)) * pix.x, texcoord.y,0,M)).x);
+			
+			L += min(M,tex2Dlod(SamplerDMFB, float4(texcoord.x - (samples_A[i] * (MS * 0.625f)) * pix.x, texcoord.y,0,M)).x);
+			R += min(M,tex2Dlod(SamplerDMFB, float4(texcoord.x + (samples_A[i] * (MS * 0.625f)) * pix.x, texcoord.y,0,M)).x);
+			
+			L += min(M,tex2Dlod(SamplerDMFB, float4(texcoord.x - (samples_A[i] * (MS * 0.500f)) * pix.x, texcoord.y,0,M)).x);
+			R += min(M,tex2Dlod(SamplerDMFB, float4(texcoord.x + (samples_A[i] * (MS * 0.500f)) * pix.x, texcoord.y,0,M)).x);
+			
+			L += min(M,tex2Dlod(SamplerDMFB, float4(texcoord.x - (samples_A[i] * (MS * 0.375f)) * pix.x, texcoord.y,0,M)).x);
+			R += min(M,tex2Dlod(SamplerDMFB, float4(texcoord.x + (samples_A[i] * (MS * 0.375f)) * pix.x, texcoord.y,0,M)).x);
+			
+			L += min(M,tex2Dlod(SamplerDMFB, float4(texcoord.x - (samples_A[i] * (MS * 0.250f)) * pix.x, texcoord.y,0,M)).x);
+			R += min(M,tex2Dlod(SamplerDMFB, float4(texcoord.x + (samples_A[i] * (MS * 0.250f)) * pix.x, texcoord.y,0,M)).x);
+			
+			L /= 7.0; 
+			R /= 7.0; 
+			
+			DM = (L+R) * 0.5f;
 		}
 	}
 	else
@@ -887,20 +900,11 @@ void Encode(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, ou
 	[loop]
 	for ( int i = 0 ; i < N; i++ ) 
 	{
-		if (View_Mode == 0)
-		{
-			MSL = Divergence * 0.1875f;
-			DepthL = min(DepthL,tex2Dlod(SamplerDisFB, float4(texcoord.x - (samples_A[i] * MSL) * pix.x, texcoord.y,0,0)).x);
-			DepthR = min(DepthR,tex2Dlod(SamplerDisFB, float4(texcoord.x + (samples_A[i] * MSL) * pix.x, texcoord.y,0,0)).x);
-		}
-		else if (View_Mode == 1)
-		{
-			MSL = -Divergence * 0.1875f;
-			DepthL = min(DepthL,tex2Dlod(SamplerDisFB, float4(texcoord.x - (samples_A[i] * MSL) * pix.x, texcoord.y,0,0)).x);
-			DepthR = min(DepthR,tex2Dlod(SamplerDisFB, float4(texcoord.x + (samples_A[i] * MSL) * pix.x, texcoord.y,0,0)).x);
-		}
+		MSL = Divergence * 0.1875f;
+		DepthL = min(DepthL,tex2Dlod(SamplerDisFB, float4(texcoord.x - (samples_A[i] * MSL) * pix.x, texcoord.y,0,0)).x);
+		DepthR = min(DepthR,tex2Dlod(SamplerDisFB, float4(texcoord.x + (samples_A[i] * MSL) * pix.x, texcoord.y,0,0)).x);
 	}	
-	
+
 	// X Right & Y Left
 	float X = texcoord.x + MS * Conv(DepthL,texcoord), Y = (1 - texcoord.x) + MS * Conv(DepthR,texcoord);
 
