@@ -102,25 +102,25 @@ uniform float Auto_Depth_Range <
 				 "Default is Zero, Zero is off.";
 	ui_category = "Divergence & Convergence";
 > = 0.0;
-
+	
 //Occlusion Masking//
 uniform int Disocclusion_Selection <
 	ui_type = "combo";
-	ui_items = "Off\0Radial\0Normal\0Depth Based\0Radial & Depth Based\0Normal & Depth Based\0Radial & Normal\0";
+	ui_items = "Off\0Normal\0Radial\0Radial & Normal\0Normal Depth Based\0Radial Depth Based\0Radial & Normal Depth Based\0";
 	ui_label = "·Disocclusion Selection·";
 	ui_tooltip = "This is to select the z-Buffer blurring option for low level occlusion masking.\n"
 				"Default is Off.";
 	ui_category = "Occlusion Masking";
 > = 0;
 
-uniform float Disocclusion_Power_Adjust <
+uniform float2 Disocclusion_Adjust <
 	ui_type = "drag";
-	ui_min = 0.250; ui_max = 2.5;
-	ui_label = " Disocclusion Power Adjust";
-	ui_tooltip = "Automatic occlusion masking power adjust.\n"
-				"Default is 0.5";
+	ui_min = 0.0; ui_max = 1.0;
+	ui_label = " Disocclusion Adjust";
+	ui_tooltip = "Automatic occlusion masking power & Depth Based culling adjustments.\n"
+				"Default is ( 0.5f, 0.625f)";
 	ui_category = "Occlusion Masking";
-> = 0.5;
+> = float2( 0.5, 0.625);
 
 uniform int View_Mode <
 	ui_type = "combo";
@@ -907,7 +907,7 @@ float Conv(float D,float2 texcoord)
 
 void  Disocclusion(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 color : SV_Target0)
 {
-float X, Y, Z, W = 1, DM, DMA, DMB, A, B, S, MS =  Divergence * pix.x, DBD = 1-tex2Dlod(SamplerDM,float4(texcoord,0,0)).x , Div = 1.0f / 11.0f;
+float X, Y, Z, W = 1, DM, DMA, DMB, A, B, S, MS =  Divergence * pix.x, Div = 1.0f / 11.0f;
 float2 dirA, dirB;
 
 #if AO_TOGGLE
@@ -925,28 +925,19 @@ if(AO == 1)
 	}
 #endif
 
-	MS *= Disocclusion_Power_Adjust;
+	MS *= Disocclusion_Adjust.x * 2.0f;
 		
-	if ( Disocclusion_Selection == 1 || Disocclusion_Selection == 4 ) // Radial    
-	{
-		A += 16.0; // Radial
-		B = DBD * 11.0; // Depth
-		dirA = 0.5 - texcoord;
-		dirB = float2(0.5,0.0);
-	}
-	else if ( Disocclusion_Selection == 2 || Disocclusion_Selection == 5 ) // Normal  
+	if ( Disocclusion_Selection == 1 || Disocclusion_Selection == 4 ) // Normal    
 	{
 		A += 5.5; // Normal
-		B = DBD * 11.0; // Depth
 		dirA = float2(0.5,0.0);
-		dirB = float2(0.5,0.0);
 	}
-	else if ( Disocclusion_Selection == 3 ) // Depth    
+	else if ( Disocclusion_Selection == 2 || Disocclusion_Selection == 5 ) // Radial  
 	{
-		A = DBD * 11.0; // Depth
-		dirA = float2(0.5,0.0);
+		A += 16.0; // Radial
+		dirA = 0.5 - texcoord;
 	}
-	else if ( Disocclusion_Selection == 6 ) // Radial & Normal  
+	else if ( Disocclusion_Selection == 3 || Disocclusion_Selection == 6 ) // Radial & Normal  
 	{
 		A += 16.0; // Radial
 		B += 5.5; // Normal
@@ -966,25 +957,26 @@ if(AO == 1)
 					S = weight[i] * MS;
 					DMA += tex2Dlod(SamplerDM,float4(texcoord + dirA * S * A,0,0)).x*Div;
 					
-					if(Disocclusion_Selection == 4 || Disocclusion_Selection == 5 || Disocclusion_Selection == 6)
+					if(Disocclusion_Selection == 3 || Disocclusion_Selection == 6)
 					{
 						DMB += tex2Dlod(SamplerDM,float4(texcoord + dirB * S * B,0,0)).x*Div;
 					}
 				}
 		}
 		
-		if ( Disocclusion_Selection == 4 || Disocclusion_Selection == 5)
-		{	
-			DM = lerp(DMA,DMB,0.25);
-		}
-		else if ( Disocclusion_Selection == 6)
+		float DBA = step(tex2Dlod(SamplerDM,float4(texcoord,0,0)).x,Disocclusion_Adjust.y);
+		
+		if ( Disocclusion_Selection == 3 || Disocclusion_Selection == 6 )
 		{	
 			DM = lerp(DMA,DMB,0.25);
 		}
 		else
 		{
 			DM = DMA;
-		}
+		}	
+		
+		if ( Disocclusion_Selection == 4 || Disocclusion_Selection == 5 || Disocclusion_Selection == 6 )
+			DM = lerp(tex2Dlod(SamplerDM,float4(texcoord,0,1)).x,DM,step(DM,DBA));
 	}
 	else
 	{
@@ -1405,7 +1397,7 @@ float4 PS_calcLR(float2 texcoord)
 			float R = tex2Dlod(SamplerDM,float4(TexCoords.x, TexCoords.y,0,0)).x;
 			float G = AutoDepthRange(tex2Dlod(SamplerDM,float4(TexCoords.x, TexCoords.y,0,0)).x,TexCoords);
 			float B = tex2Dlod(SamplerDis,float4(TexCoords.x,TexCoords.y,0,0)).x;
-			color = float4(R,G,B,1.0);
+			color = float4(B,B,B,1.0);
 	}
 			
 	float Average_Lum = TexCoords.y < 0.5 ? 0.5 : tex2D(SamplerDM,float2(TexCoords.x,TexCoords.y)).g;
