@@ -97,7 +97,23 @@ uniform bool Auto_Balance <
 				 "Default is Off.";
 	ui_category = "Divergence & Convergence";
 > = false;
-	
+
+uniform bool Dual_Depth <
+	ui_label = " Dual Depth";
+	ui_tooltip = "Select the Dual Depth Mode.\n" 
+				 "Only Works with ZPD Locked.\n" 
+				 "Default is Off.";
+	ui_category = "Divergence & Convergence";
+> = false;
+
+uniform bool Dominate_Eye <
+	ui_label = " Dominate Eye";
+	ui_tooltip = "Select the Dominate Eye for Auto Balance.\n" 
+				 "Only Works with ZPD Locked and Dual Depth.\n" 
+				 "Default is Off.";
+	ui_category = "Divergence & Convergence";
+> = false;
+
 //Occlusion Masking//
 uniform int Disocclusion_Selection <
 	ui_type = "combo";
@@ -824,7 +840,7 @@ void AO_in(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out
 //AO END//
 #endif
 
-float Conv(float D,float2 texcoord)
+float2 Conv(float D,float2 texcoord)
 {
 	float DB, Z, ZP, Con = ZPD, NF_Power;
 			
@@ -843,24 +859,46 @@ float Conv(float D,float2 texcoord)
 		}	
 			
 		ZP = 0.5f;
-											
+		
+		if (ZPD == 0)
+			ZP = 1.0;
+			
+		float ZPA = ZP;
+																
 		if(Convergence_Mode)
 		{
 			Z = Divergence_Locked;
 			
 			if(Auto_Balance)
-			ZP = max(0.125,ALC);
+			{
+				ZPA = max(0.125,ALC);
+			}
+			else
+			{
+				ZPA = 0.125f; // Max
+			}
 		}
-		
-		if (ZPD == 0)
-			ZP = 1.0;
-								
+										
 		float Convergence = 1 - Z / D;
 						
 		//Depth boost always on.
 		D = lerp( D, min(1.0f,1.25f * D), 0.425f);
-				
-    return lerp(MS * Convergence,MS * D, ZP);
+		
+		float2 DMD = float2(lerp(MS * Convergence,MS * D, ZP),lerp(MS * Convergence,MS * D, ZPA));
+
+		if ( Dual_Depth	)
+		{
+			DMD = float2(DMD.x,DMD.y);
+			
+			if (Dominate_Eye)
+				DMD = float2(DMD.y,DMD.x);
+		}
+		else
+		{
+			DMD = (DMD.y,DMD.y);
+		}
+				    
+    return DMD;
 }
 
 void  Disocclusion(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 color : SV_Target0)
@@ -1111,10 +1149,10 @@ float4 PS_calcLR(float2 texcoord)
 			DepthR = min(DepthR,RDepth / 8.0f);
 		}
 	}
-		
-	DepthL = Conv(DepthL,TexCoords);//Zero Parallax Distance Pass Left
-	DepthR = Conv(DepthR,TexCoords);//Zero Parallax Distance Pass Right
-		
+	
+	DepthL = Conv(DepthL,TexCoords).x;//Zero Parallax Distance Pass Left
+	DepthR = Conv(DepthR,TexCoords).y;//Zero Parallax Distance Pass Right
+	
 	float ReprojectionLeft = DepthL;
 	float ReprojectionRight = DepthR;
 	
