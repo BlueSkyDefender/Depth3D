@@ -96,6 +96,15 @@ uniform float Disocclusion_Power_Adjust <
 	ui_category = "Occlusion Masking";
 > = 1.0;
 
+uniform int View_Mode <
+	ui_type = "combo";
+	ui_items = "View Mode Normal\0View Mode Alpha\0";
+	ui_label = " View Mode";
+	ui_tooltip = "Change the way the shader warps the output to the screen.\n"
+				 "Default is Normal";
+	ui_category = "Occlusion Masking";
+> = 0;
+
 //Depth Map//
 uniform int Depth_Map <
 	ui_type = "combo";
@@ -801,7 +810,7 @@ float Conv(float DM,float2 texcoord)
 		
 		//Depth boost always on.
 		DM = lerp( DM, min(1.0f,1.25f * DM), 0.4375f);
-											
+									
 		Z = lerp(Convergence,DM, ZP);
 				
     return Z;
@@ -904,7 +913,7 @@ float4 PS_calcLR(float2 texcoord)
 	float4 color, Left, Right;
 	
 	//P is Perspective Adjustment.
-	float DepthR, DepthL, P = Perspective * pix.x;
+	float DepthR, DepthL, P = Perspective * pix.x, ES = Eye_Swap;
 	
 	if(!Eye_Swap)
 	{
@@ -969,21 +978,42 @@ float4 PS_calcLR(float2 texcoord)
 		[loop]
 		for (int i = 0; i < Divergence + 5; i++) 
 		{	
-			//L
-			[flatten] if(Decode(float2(TCL.x-i*pix.x,TCL.y)).x > TCL.x-pix.x * 5 && Decode(float2(TCL.x-i*pix.x,TCL.y)).x < TCL.x+pix.x * 5 )
+			if(View_Mode == 1)
+			{
+				//L
+				[flatten] if(Decode(float2(TCL.x-i*pix.x,TCL.y)).x > TCL.x-pix.x * 5 && Decode(float2(TCL.x-i*pix.x,TCL.y)).x < TCL.x+pix.x * 5 )
 							Left = tex2Dlod(BackBuffer, float4(TCL.x - i * pix.x, TCL.y,0,0));
-			
-			//R
-			[flatten] if(Decode(float2(TCR.x+i*pix.x,TCR.y)).y > (1-TCR.x)-pix.x * 5 && Decode(float2(TCR.x+i*pix.x,TCR.y)).y < (1-TCR.x)+pix.x * 5 )
+				
+				//R
+				[flatten] if(Decode(float2(TCR.x+i*pix.x,TCR.y)).y > (1-TCR.x)-pix.x * 5 && Decode(float2(TCR.x+i*pix.x,TCR.y)).y < (1-TCR.x)+pix.x * 5 )
 							Right = tex2Dlod(BackBuffer, float4(TCR.x + i * pix.x, TCR.y,0,0));
+			}				
+			else
+			{
+				//L
+				[flatten] if( Decode(float2(TCL.x+i*pix.x,TCL.y)).y > (1-TCL.x)-pix.x * 5 )
+							Left = tex2Dlod(BackBuffer, float4(TCL.x + i * pix.x, TCL.y,0,0));
+				
+				//R
+				[flatten] if( Decode(float2(TCR.x-i*pix.x,TCR.y)).x > TCR.x-pix.x * 5 )
+							Right = tex2Dlod(BackBuffer,float4(TCR.x - i * pix.x, TCR.y,0,0));
+			}
 		}
 	
-	float4 cL = Right,cR = Left; //Left Image & Right Image
-
-	if ( Eye_Swap )
+	float4 cL,cR; //Left Image & Right Image
+	
+	if (View_Mode == 0)
+		ES = !ES;
+		
+	if (ES)
 	{
 		cL = Left;
 		cR = Right;	
+	}
+	else
+	{
+		cL = Right;
+		cR = Left;	
 	}
 		
 	if(!Depth_Map_View)

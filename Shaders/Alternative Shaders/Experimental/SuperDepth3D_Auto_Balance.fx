@@ -56,7 +56,6 @@
 #define Anti_Crosstalk 0 //Default Zero is Off. One is On.
 
 //USER EDITABLE PREPROCESSOR FUNCTIONS END//
-
 //Divergence & Convergence//
 uniform float Divergence <
 	ui_type = "drag";
@@ -91,14 +90,13 @@ uniform float ZPD <
 	ui_category = "Divergence & Convergence";
 > = 0.010;
 
-uniform float Auto_Depth_Range <
-	ui_type = "drag";
-	ui_min = 0.0; ui_max = 0.625;
-	ui_label = " Auto Depth Range";
-	ui_tooltip = "The Map Automaticly scales to outdoor and indoor areas.\n" 
-				 "Default is Zero, Zero is off.";
+uniform bool Auto_Balance <
+	ui_label = " Auto Balance";
+	ui_tooltip = "Automatically Balance between ZPD Depth and Scene Depth.\n" 
+				 "Only Works with ZPD Locked.\n" 
+				 "Default is Off.";
 	ui_category = "Divergence & Convergence";
-> = 0.0;
+> = false;
 	
 //Occlusion Masking//
 uniform int Disocclusion_Selection <
@@ -826,18 +824,12 @@ void AO_in(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out
 //AO END//
 #endif
 
-float AutoDepthRange( float d, float2 texcoord )
-{
-	float LumAdjust = smoothstep(-0.0175,Auto_Depth_Range,Lum(texcoord));
-    return min(1,( d - 0 ) / ( LumAdjust - 0));
-}
-
 float Conv(float D,float2 texcoord)
 {
 	float DB, Z, ZP, Con = ZPD, NF_Power;
 			
 		float Divergence_Locked = Divergence*0.001, MS = Divergence * pix.x;
-		float ALC = abs(Lum(texcoord));
+		float ALC = abs(saturate(Lum(texcoord)));
 					
 		if (ALC <= 0.000425 && FBDMF) //Full Black Depth Map Fix.
 		{
@@ -851,18 +843,18 @@ float Conv(float D,float2 texcoord)
 		}	
 			
 		ZP = 0.5f;
+											
+		if(Convergence_Mode)
+		{
+			Z = Divergence_Locked;
+			
+			if(Auto_Balance)
+			ZP = max(0.125,ALC);
+		}
 		
 		if (ZPD == 0)
 			ZP = 1.0;
-		
-		if (Auto_Depth_Range > 0)
-		{
-			D = AutoDepthRange(D,texcoord);
-		}
-					
-		if(Convergence_Mode == 1)
-		Z = Divergence_Locked;
-				
+								
 		float Convergence = 1 - Z / D;
 						
 		//Depth boost always on.
@@ -1359,8 +1351,8 @@ float4 PS_calcLR(float2 texcoord)
 		else
 	{		
 			float R = tex2Dlod(SamplerDM,float4(TexCoords.x, TexCoords.y,0,0)).x;
-			float G = AutoDepthRange(tex2Dlod(SamplerDM,float4(TexCoords.x, TexCoords.y,0,0)).x,TexCoords);
-			float B = tex2Dlod(SamplerDis,float4(TexCoords.x,TexCoords.y,0,0)).x;
+			float G = tex2Dlod(SamplerDis,float4(TexCoords.x, TexCoords.y,0,0)).x;
+			float B = tex2Dlod(SamplerDis,float4(TexCoords.x, TexCoords.y,0,0)).x;
 			color = float4(R,G,B,1.0);
 	}
 			
