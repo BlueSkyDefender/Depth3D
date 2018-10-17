@@ -91,14 +91,12 @@ uniform float ZPD <
 	ui_category = "Divergence & Convergence";
 > = 0.010;
 
-uniform float Auto_Depth_Range <
-	ui_type = "drag";
-	ui_min = 0.0; ui_max = 0.625;
-	ui_label = " Auto Depth Range";
-	ui_tooltip = "The Map Automaticly scales to outdoor and indoor areas.\n" 
-				 "Default is Zero, Zero is off.";
+uniform bool Auto_Balance <
+	ui_label = " Auto Balance";
+	ui_tooltip = "Automatically Balance between ZPD Depth and Scene Depth.\n" 
+				 "Default is Off.";
 	ui_category = "Divergence & Convergence";
-> = 0.0;
+> = false;
 	
 //Occlusion Masking//
 uniform int Disocclusion_Selection <
@@ -121,7 +119,7 @@ uniform float2 Disocclusion_Adjust <
 
 uniform int View_Mode <
 	ui_type = "combo";
-	ui_items = "View Mode Normal\0View Mode Alpha\0View Mode Beta\0View Mode Gamma\0";
+	ui_items = "View Mode Normal\0View Mode Alpha\0View Mode Beta\0";
 	ui_label = " View Mode";
 	ui_tooltip = "Change the way the shader warps the output to the screen.\n"
 				 "Default is Normal";
@@ -826,12 +824,6 @@ void AO_in(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out
 //AO END//
 #endif
 
-float AutoDepthRange( float d, float2 texcoord )
-{
-	float LumAdjust = smoothstep(-0.0175,Auto_Depth_Range,Lum(texcoord));
-    return min(1,( d - 0 ) / ( LumAdjust - 0));
-}
-
 float Conv(float D,float2 texcoord)
 {
 	float DB, Z, ZP, Con = ZPD, NF_Power;
@@ -854,14 +846,12 @@ float Conv(float D,float2 texcoord)
 		
 		if (ZPD == 0)
 			ZP = 1.0;
-		
-		if (Auto_Depth_Range > 0)
-		{
-			D = AutoDepthRange(D,texcoord);
-		}
-					
-		if(Convergence_Mode == 1)
-		Z = Divergence_Locked;
+
+		if(Convergence_Mode)
+			Z = Divergence_Locked;
+			
+		if(Auto_Balance)
+			ZP = max(0.125,ALC);
 				
 		float Convergence = 1 - Z / D;
 						
@@ -1088,35 +1078,6 @@ float4 PS_calcLR(float2 texcoord)
 								
 			DepthL = min(DepthL,LDepth / 6.0f);
 			DepthR = min(DepthR,RDepth / 6.0f);
-		}
-		else if (View_Mode == 3)
-		{			
-			LDepth = min(DepthL,Encode(float2(TCL.x + S * MSM, TCL.y)).x);
-			RDepth = min(DepthR,Encode(float2(TCR.x - S * MSM, TCR.y)).y);
-			
-			LDepth += min(DepthL,Encode(float2(TCL.x + S * (MSM * 0.875f), TCL.y)).x);
-			RDepth += min(DepthR,Encode(float2(TCR.x - S * (MSM * 0.875f), TCR.y)).y);
-			
-			LDepth += min(DepthL,Encode(float2(TCL.x + S * (MSM * 0.75f), TCL.y)).x);
-			RDepth += min(DepthR,Encode(float2(TCR.x - S * (MSM * 0.75f), TCR.y)).y);
-			
-			LDepth += min(DepthL,Encode(float2(TCL.x + S * (MSM * 0.625f), TCL.y)).x);
-			RDepth += min(DepthR,Encode(float2(TCR.x - S * (MSM * 0.625f), TCR.y)).y);
-			
-			LDepth += min(DepthL,Encode(float2(TCL.x + S * (MSM * 0.500f), TCL.y)).x);
-			RDepth += min(DepthR,Encode(float2(TCR.x - S * (MSM * 0.500f), TCR.y)).y);
-		
-			LDepth += min(DepthL,Encode(float2(TCL.x + S * (MSM * 0.375f), TCL.y)).x);
-			RDepth += min(DepthR,Encode(float2(TCR.x - S * (MSM * 0.375f), TCR.y)).y);
-			
-			LDepth += min(DepthL,Encode(float2(TCL.x + S * (MSM * 0.250f), TCL.y)).x);
-			RDepth += min(DepthR,Encode(float2(TCR.x - S * (MSM * 0.250f), TCR.y)).y);
-			
-			LDepth += min(DepthL,Encode(float2(TCL.x + S * (MSM * 0.125f), TCL.y)).x);
-			RDepth += min(DepthR,Encode(float2(TCR.x - S * (MSM * 0.125f), TCR.y)).y);
-					
-			DepthL = min(DepthL,LDepth / 8.0f);
-			DepthR = min(DepthR,RDepth / 8.0f);
 		}
 	}
 		
@@ -1358,8 +1319,8 @@ float4 PS_calcLR(float2 texcoord)
 	}
 		else
 	{		
-			float R = tex2Dlod(SamplerDM,float4(TexCoords.x, TexCoords.y,0,0)).x;
-			float G = AutoDepthRange(tex2Dlod(SamplerDM,float4(TexCoords.x, TexCoords.y,0,0)).x,TexCoords);
+			float R = tex2Dlod(SamplerDis,float4(TexCoords.x, TexCoords.y,0,0)).x;
+			float G = tex2Dlod(SamplerDM,float4(TexCoords.x, TexCoords.y,0,0)).x;
 			float B = tex2Dlod(SamplerDis,float4(TexCoords.x,TexCoords.y,0,0)).x;
 			color = float4(R,G,B,1.0);
 	}
