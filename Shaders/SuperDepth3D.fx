@@ -97,6 +97,15 @@ uniform bool Auto_Balance <
 				 "Default is Off.";
 	ui_category = "Divergence & Convergence";
 > = false;
+
+uniform float Auto_Depth_Range <
+	ui_type = "drag";
+	ui_min = 0.0; ui_max = 0.625;
+	ui_label = " Auto Depth Range";
+	ui_tooltip = "The Map Automaticly scales to outdoor and indoor areas.\n" 
+				 "Default is Zero, Zero is off.";
+	ui_category = "Divergence & Convergence";
+> = 0.0;
 	
 //Occlusion Masking//
 uniform int Disocclusion_Selection <
@@ -824,6 +833,12 @@ void AO_in(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out
 //AO END//
 #endif
 
+float AutoDepthRange( float d, float2 texcoord )
+{
+	float LumAdjust = smoothstep(-0.0175f,Auto_Depth_Range,Lum(texcoord));
+    return min(1,( d - 0 ) / ( LumAdjust - 0));
+}
+
 float Conv(float D,float2 texcoord)
 {
 	float DB, Z, ZP, Con = ZPD, NF_Power;
@@ -846,12 +861,17 @@ float Conv(float D,float2 texcoord)
 		
 		if (ZPD == 0)
 			ZP = 1.0;
-
+		
+		if (Auto_Depth_Range > 0)
+		{
+			D = AutoDepthRange(D,texcoord);
+		}
+		
 		if(Convergence_Mode)
 			Z = Divergence_Locked;
 			
 		if(Auto_Balance)
-			ZP = max(0.125,ALC);
+			ZP = clamp(ALC,0.0f,1.0f);
 				
 		float Convergence = 1 - Z / D;
 						

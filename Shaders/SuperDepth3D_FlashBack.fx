@@ -794,7 +794,7 @@ float Conv(float DM,float2 texcoord)
 			ZP = 1.0f;
 		
 		if(Auto_Balance)
-			ZP = max(0.0,ALC);
+			ZP = clamp(ALC,0.0f,1.0f);
 						
 		float Convergence = 1 - Z / DM;
 		
