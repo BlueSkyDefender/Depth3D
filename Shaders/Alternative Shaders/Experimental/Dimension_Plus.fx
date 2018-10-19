@@ -20,7 +20,7 @@
  //* 																																												*//
  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#define Depth_Map_Division 1.5
+#define Depth_Map_Division 1.75
 
 // Determines The Max Depth amount.
 #define Depth_Max 25
@@ -34,11 +34,11 @@ uniform int DBA <
 
 uniform float GDepth <
 	ui_type = "drag";
-	ui_min = 1; ui_max = Depth_Max;
+	ui_min = 1; ui_max = 12.5;
 	ui_label = "Gradient Depth Slider";
 	ui_tooltip = "Determines the amount of Image Warping and Separation.\n" 
-				 "You can override this value.";
-> = 15;
+				 "You can override this value Default is One.";
+> = 1.0;
 
 uniform float Divergence <
 	ui_type = "drag";
@@ -97,6 +97,14 @@ uniform bool Eye_Swap <
 	ui_tooltip = "L/R to R/L.";
 > = false;
 
+uniform int Fill <
+	ui_type = "drag";
+	ui_min = 0; ui_max = 4.0;
+	ui_label = "Fill";
+	ui_tooltip = "Raise this to fill in areas in the image.\n" 
+				 "Default is 2";
+> = 2;
+
 uniform float Image_Texture_Complexity <
 	ui_type = "drag";
 	ui_min = 0; ui_max = 25.0;
@@ -107,16 +115,16 @@ uniform float Image_Texture_Complexity <
 
 uniform float Range_Adjust_N <
 	ui_type = "drag";
-	ui_min = 0.0; ui_max = 0.250;
+	ui_min = 0.0; ui_max = 0.25;
 	ui_label = "Range Adjust Near";
-	ui_tooltip = "Range adjust determines the transform range in world. Default is 0.125";
-> = 0.125f;
+	ui_tooltip = "Range adjust determines the transform range in world. Default is Zero.";
+> = 0.0f;
 
 uniform float Range_Adjust_F <
 	ui_type = "drag";
-	ui_min = 0.375; ui_max = 1.0;
+	ui_min = 0.75; ui_max = 1.0;
 	ui_label = "Range Adjust Far";
-	ui_tooltip = "Range adjust determines the transform range in world. Default is 1.0";
+	ui_tooltip = "Range adjust determines the transform range in world. Default is One.";
 > = 1.0f;
 
 uniform bool Day_Night_Mode <
@@ -129,12 +137,13 @@ uniform bool Neg_Tex <
 	ui_tooltip = "This Mode Flip the Texture Complexity.";
 > = false;
 
-uniform int Mode <
-	ui_type = "combo";
-	ui_items = "Movie Mode\0Sport Mode\0FPS Game Mode\0Side Scroller 2D Game Mode\0RTS Game Mode\0Mix Mode\0";
-	ui_label = "Depth Map Mode";
-	ui_tooltip = "Pick an fake Depth Map Mode.";
-> = 0;
+uniform float Balance <
+	ui_type = "drag";
+	ui_min = 0.0; ui_max = 1.0;
+	ui_label = " Balance";
+	ui_tooltip = "Balance Between Edge Detection and Cr.\n"
+				"Default is 0.5";
+> = 0.5;
 
 uniform int Pulfrich_Effect_Assist <
 	ui_type = "combo";
@@ -143,14 +152,6 @@ uniform int Pulfrich_Effect_Assist <
 	ui_tooltip = "Pulfrich effect is a psychophysical percept wherein lateral motion of an object in the field of view is interpreted by the visual cortex as having a depth.\n" 
 				 //"Special Mode is Both Left to Right and Right to Left.\n" 
 				 "Use Pulfrich Effect Adjust to adjust Special Mode.";
-> = 0;
-
-uniform int Disocclusion_Selection <
-	ui_type = "combo";
-	ui_items = "Off\0Radial Blur\0Normal Blur\0";
-	ui_label = "Disocclusion Selection";
-	ui_tooltip = "This is to select the z-Buffer blurring option for low level occlusion masking.\n"
-				"Default is Off.";
 > = 0;
 
 uniform float Disocclusion_Power_Adjust <
@@ -187,7 +188,7 @@ sampler SamplerFakeDB
 		MagFilter = Linear;
 	};
 	
-texture texBB { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT/Depth_Map_Division; Format = RGBA8; MipLevels = 2;};
+texture texBB { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT/Depth_Map_Division; Format = RGBA8; MipLevels = 8;};
 
 sampler SamplerBBlur
 	{
@@ -263,7 +264,30 @@ float4 BB(in float2 texcoord : TEXCOORD0)
 
 float4 BBlur(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0): SV_Target                                                                          
 {
-	return BB(texcoord);
+	float2 samples[12] = {  
+	float2(-0.326212, -0.405805),  
+	float2(-0.840144, -0.073580),  
+	float2(-0.695914, 0.457137),  
+	float2(-0.203345, 0.620716),  
+	float2(0.962340, -0.194983),  
+	float2(0.473434, -0.480026),  
+	float2(0.519456, 0.767022),  
+	float2(0.185461, -0.893124),  
+	float2(0.507431, 0.064425),  
+	float2(0.896420, 0.412458),  
+	float2(-0.321940, -0.932615),  
+	float2(-0.791559, -0.597705)  
+	};  
+	  
+	float4 sum = BB( texcoord);  
+	for (int i = 0; i < 12; i++)
+	{  
+		sum += BB( texcoord + samples[i] * pix * 6);  
+	}  
+
+	sum *= 0.07692307;  
+
+		return sum;
 }
 
 float4 Blur(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0): SV_Target                                                                          
@@ -283,7 +307,7 @@ float4 Blur(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0): S
 	A += A;
 	A += A;
 	
-	left.rgb = rgb2hsv(Flip-tex2Dlod(SamplerBBlur,float4(texcoord,0,1)).rgb);
+	left.rgb = rgb2hsv(Flip-tex2Dlod(SamplerBBlur,float4(texcoord,0,Fill)).rgb);
 	right.rgb = rgb2hsv(Flip-BB(texcoord).rgb);
 	
 	B += distance(left, right);
@@ -294,21 +318,14 @@ float4 Blur(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0): S
 	right.rgb = B;
 	
 	C += distance(left, right);
-	
-	if (Mode == 3 || Mode == 5 || Mode == 6)
-	{
-	C += C;
-	C += C;
-	C *= 0.5625;
-	}
-	
+		
 	return 1-float4(saturate(C.x), 1, 1, 1);
 }
 
 // transform range in world-z to 0-1 for near-far
 float DepthRange( float d )
 {
-	float nearPlane = 0;
+	float nearPlane = Range_Adjust_N;
 	float farPlane = Range_Adjust_F;
     return ( d - nearPlane ) / ( farPlane - nearPlane );
 }
@@ -316,51 +333,19 @@ float DepthRange( float d )
 float4 FakeDB(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0): SV_Target
 {
 	float4 Done, left, right;
-	//float R = encodePalYuv(tex2D(BackBuffer,texcoord).rgb).r;
-	float G = encodePalYuv(BB(texcoord).rgb).g;
-	//float B = encodePalYuv(tex2D(BackBuffer,texcoord).rgb).b;
+	float B = encodePalYuv(tex2D(BackBuffer,texcoord).rgb).b;
 	float M = texcoord.y+(Image_Texture_Complexity*125)*pix.y;
 	
 	left.rgb = encodePalYuv(BB(texcoord + float2(M * pix.x,0)).rgb);
 	right.rgb = encodePalYuv(BB(texcoord - float2(M * pix.x,0)).rgb);
 
 	M = (left.x+right.x)/2;
-	G *= 10;
-	
+		
 	if(Day_Night_Mode)
-	G += M;
+	B += M;
 	
-	float AA = lerp(tex2D(SamplerBlur,texcoord).xxxx,G.xxxx,0.50).x;
-	float AB = lerp(tex2D(SamplerBlur,texcoord).xxxx,G.xxxx,0.425).x;
-	float AC = lerp(tex2D(SamplerBlur,texcoord).xxxx,G.xxxx,0.25).x;
-	float AD = lerp(tex2D(SamplerBlur,texcoord).xxxx,G.xxxx,0.09375).x;
-	float AE = lerp(tex2D(SamplerBlur,texcoord).xxxx,G.xxxx,0.375).x;
+	Done = lerp(tex2D(SamplerBlur,texcoord).xxxx,B.xxxx,Balance).xxxx;
 	
-	if (Mode == 0)
-	{
-		Done = DepthRange(AA).xxxx;
-	}
-	else if (Mode == 1)
-	{
-		Done = DepthRange(AC).xxxx;
-	}
-	else if (Mode == 2)
-	{
-		Done = DepthRange(AB).xxxx;
-	}
-	else if (Mode == 3)
-	{
-		Done = AD.xxxx;
-	}
-	else if (Mode == 4)
-	{
-		Done = tex2D(SamplerBlur,texcoord).xxxx;
-	}
-	else if (Mode == 5)
-	{
-		Done = DepthRange(AE).xxxx;
-	}
-
 	return saturate(Done);
 }
 
@@ -393,86 +378,112 @@ float4 Assist(in float2 texcoord : TEXCOORD0)
 
 float4 Mix(in float2 texcoord : TEXCOORD0)                                                                         
 {
-	float blursize = 2.0*pix.x;
-	float4 sum;
-		sum += tex2Dlod(SamplerFakeDB, float4(texcoord.x - 4.0*blursize, texcoord.y,0,0)) * 0.05;
-		sum += tex2Dlod(SamplerFakeDB, float4(texcoord.x, texcoord.y - 3.0*blursize,0,0)) * 0.09;
-		sum += tex2Dlod(SamplerFakeDB, float4(texcoord.x - 2.0*blursize, texcoord.y,0,0)) * 0.12;
-		sum += tex2Dlod(SamplerFakeDB, float4(texcoord.x, texcoord.y - blursize,0,0)) * 0.15;
-		sum += tex2Dlod(SamplerFakeDB, float4(texcoord.x + blursize, texcoord.y,0,0)) * 0.15;
-		sum += tex2Dlod(SamplerFakeDB, float4(texcoord.x, texcoord.y + 2.0*blursize,0,0)) * 0.12;
-		sum += tex2Dlod(SamplerFakeDB, float4(texcoord.x + 3.0*blursize, texcoord.y,0,0)) * 0.09;
-		sum += tex2Dlod(SamplerFakeDB, float4(texcoord.x, texcoord.y + 4.0*blursize,0,0)) * 0.05;
-	return sum;
+float W = 1, DM, A, MS =  Divergence * pix.x;
+
+	float M = 1, N = 9, Div = 1.0f / N, weight_A[9] = {0.0f,0.0125f,-0.0125f,0.025f,-0.025f,0.0375f,-0.0375f,0.05f,-0.05f};
+	
+	A += 5.5f; // Normal
+	float2 dir = float2(0.5f,0.0f);
+	MS *= Disocclusion_Power_Adjust;
+		
+	if (Disocclusion_Power_Adjust > 0) 
+	{		
+		[loop]
+		for (int i = 0; i < N; i++)
+		{	
+			DM += tex2Dlod(SamplerFakeDB,float4(texcoord + dir * (weight_A[i] * MS) * A,0,M)).x * Div;
+		}
+	}
+	else
+	{
+		DM = tex2Dlod(SamplerFakeDB,float4(texcoord,0,M)).x;
+	}
+		
+	return saturate(float4(DepthRange(DM).xxx,W));		
+}
+
+#define SIGMA 10
+#define BSIGMA 0.1125
+#define MSIZE 9
+
+float normpdf(in float x, in float sigma)
+{
+	return 0.39894*exp(-0.5*x*x/(sigma*sigma))/sigma;
+}
+
+float normpdf3(in float3 v, in float sigma)
+{
+	return 0.39894*exp(-0.5*dot(v,v)/(sigma*sigma))/sigma;
 }
 
 float4 Bilateral_Filter(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Target
 {
-float X, Y, Z, W = 1, DM = Mix(texcoord).x, A, DP =  Divergence, Disocclusion_Power, AMoffset = 0.008, BMoffset = 0.00285714, CMoffset = 0.09090909;
-float2 dirA, dirB;
+	//Bilateral Filter//                                                                                                                                                                   
+	float3 c =  Mix(texcoord.xy).rgb;
+	const int kSize = (MSIZE-1)/2;	
 
-	DP *= Disocclusion_Power_Adjust;
-		
-	if ( Disocclusion_Selection == 1 || Disocclusion_Selection == 4 ) // Radial    
-	{
-		Disocclusion_Power = DP*AMoffset;
-	}
-	else if ( Disocclusion_Selection == 2 || Disocclusion_Selection == 5 ) // Normal  
-	{
-		Disocclusion_Power = DP*BMoffset;
-	}
+	float weight[MSIZE] = {0.031225216, 0.035206333, 0.038138565, 0.039695028, 0.039894000, 0.039695028, 0.038138565, 0.035206333, 0.031225216};  // by 9
 
-		const float weight[11] = {0.0,0.010,-0.010,0.020,-0.020,0.030,-0.030,0.040,-0.040,0.050,-0.050}; //By 10
-		
-		if( Disocclusion_Selection == 1)
+
+		float3 final_colour;
+		float Z;
+		[unroll]
+		for (int j = 0; j <= kSize; ++j)
 		{
-			dirA = 0.5 - texcoord;
-			A = Disocclusion_Power;
+			weight[kSize+j] = normpdf(float(j), SIGMA);
+			weight[kSize-j] = normpdf(float(j), SIGMA);
 		}
-		else if ( Disocclusion_Selection == 2)
+		
+		float3 cc;
+		float factor;
+		float bZ = 1.0/normpdf(0.0, BSIGMA);
+		
+		[loop]
+		for (int i=-kSize; i <= kSize; ++i)
 		{
-			dirA = float2(0.5,0.0);
-			A = Disocclusion_Power;
-		}
-		
-		if ( Disocclusion_Selection >= 1 )
-		{			
-				DM = 0;
-				[loop]
-				for (int i = 0; i < 11; i++)
-				{	
-					DM +=  Mix(texcoord + dirA * weight[i] * A).x*CMoffset;
-				}
-		}
-		
-		float4 Done = DM.xxxx;
-		
-		Done = max(0.01,Done);
-		
-		Done = smoothstep(Range_Adjust_N,1.0,Done);
+			for (int j=-kSize; j <= kSize; ++j)
+			{
+				float2 XY = float2(float(i),float(j))*pix;
+				cc =  Mix(texcoord.xy+XY).rgb;
 
-return Done;
+				factor = normpdf3(cc-c, BSIGMA)*bZ*weight[kSize+j]*weight[kSize+i];
+				Z += factor;
+				final_colour += factor*cc;
+			}
+		}
+		
+	return float4(final_colour/Z, 1.0);
 }
 
 float4 LeftI(float2 texcoord : TEXCOORD0)
 {	
 	float4 Left;
-	float DepthL, Adjust_A = 0.07692307, S, L;
-	float samplesA[13] = {0.5,0.546875,0.578125,0.625,0.659375,0.703125,0.75,0.796875,0.828125,0.875,0.921875,0.953125,1.0};
+	float DepthL = 1, N = 9, LDepth, samplesA[9] = {0.5,0.5625,0.625,0.6875,0.75,0.8125,0.875,0.9375,1.0};
 	
 	//MS is Max Separation P is Perspective Adjustment
-	float MS = Divergence * pix.x, P = Perspective * pix.x;
-
-		float EX = Divergence*125.0, A = texcoord.y+EX*pix.y;
-		A *= pix.x;
+	float MS = Divergence * pix.x, EX = Divergence*125.0, A = texcoord.y+EX*pix.y;
 	
+		A *= pix.x;	
+		
 		[loop]
-		for ( int x = 0 ; x < 13; x++ ) 
+		for ( int x = 0 ; x < N; x++ ) 
 		{
-			S = samplesA[x] * MS * 1.21875;//13
-			L += tex2Dlod(SamplerBF,float4(texcoord.x+S, texcoord.y,0,0)).x*Adjust_A;
-			DepthL = min(1,L);
+			float S = samplesA[x], MSM = MS + 0.001f;
+			LDepth = min(DepthL,tex2Dlod(SamplerBF,float4(texcoord.x + S * MSM, texcoord.y,0,0)).x);
+				
+			LDepth += min(DepthL,tex2Dlod(SamplerBF,float4(texcoord.x + S * (MSM * 0.9375f), texcoord.y,0,0)).x);
+						
+			LDepth += min(DepthL,tex2Dlod(SamplerBF,float4(texcoord.x + S * (MSM * 0.6875f), texcoord.y,0,0)).x);
+			
+			LDepth += min(DepthL,tex2Dlod(SamplerBF,float4(texcoord.x + S * (MSM * 0.500f), texcoord.y,0,0)).x);
+		
+			LDepth += min(DepthL,tex2Dlod(SamplerBF,float4(texcoord.x + S * (MSM * 0.4375f), texcoord.y,0,0)).x);
+			
+			LDepth += min(DepthL,tex2Dlod(SamplerBF,float4(texcoord.x + S * (MSM * 0.1875f), texcoord.y,0,0)).x);
+								
+			DepthL = min(DepthL,LDepth / 6.0f);
 		}
+		
 		DepthL = DepthL * MS;	
 	
 	float ReprojectionLeft =  DepthL;
@@ -489,22 +500,32 @@ return Left;
 float4 RightI(float2 texcoord : TEXCOORD0)
 {
 	float4 Right;
-	float DepthR, Adjust_A = 0.07692307, S, R;
-	float samplesA[13] = {0.5,0.546875,0.578125,0.625,0.659375,0.703125,0.75,0.796875,0.828125,0.875,0.921875,0.953125,1.0};
+	float DepthR = 1, N = 9, RDepth, samplesA[9] = {0.5,0.5625,0.625,0.6875,0.75,0.8125,0.875,0.9375,1.0};
 	
 	//MS is Max Separation P is Perspective Adjustment
-	float MS = Divergence * pix.x, P = Perspective * pix.x;
-
-		float EX = Divergence*125.0, A = texcoord.y+EX*pix.y;
-		A *= pix.x;
+	float MS = Divergence * pix.x, EX = Divergence*125.0, A = texcoord.y+EX*pix.y;
 	
+		A *= pix.x;	
+			
 		[loop]
-		for ( int x = 0 ; x < 13; x++ ) 
+		for ( int x = 0 ; x < N; x++ ) 
 		{
-			S = samplesA[x] * MS * 1.21875;//13
-			R += tex2Dlod(SamplerBF,float4(texcoord.x-S, texcoord.y,0,0)).x*Adjust_A;
-			DepthR = min(1,R);
+			float S = samplesA[x], MSM = MS + 0.001f;
+			RDepth = min(DepthR,tex2Dlod(SamplerBF,float4(texcoord.x - S * MSM, texcoord.y,0,0)).x);
+				
+			RDepth += min(DepthR,tex2Dlod(SamplerBF,float4(texcoord.x - S * (MSM * 0.9375f), texcoord.y,0,0)).x);
+						
+			RDepth += min(DepthR,tex2Dlod(SamplerBF,float4(texcoord.x - S * (MSM * 0.6875f), texcoord.y,0,0)).x);
+			
+			RDepth += min(DepthR,tex2Dlod(SamplerBF,float4(texcoord.x - S * (MSM * 0.500f), texcoord.y,0,0)).x);
+		
+			RDepth += min(DepthR,tex2Dlod(SamplerBF,float4(texcoord.x - S * (MSM * 0.4375f), texcoord.y,0,0)).x);
+			
+			RDepth += min(DepthR,tex2Dlod(SamplerBF,float4(texcoord.x - S * (MSM * 0.1875f), texcoord.y,0,0)).x);
+								
+			DepthR = min(DepthR,RDepth / 6.0f);
 		}
+		
 		DepthR = DepthR * MS;	
 	
 	float ReprojectionRight =  DepthR;
@@ -523,8 +544,8 @@ float4 Converter(float2 texcoord : TEXCOORD0)
 {		
 	float2 TCL, TCR, TexCoords = texcoord;
 	float4 color, Right, Left;
-	float DepthL, DepthR, Adjust_A = 0.07692307, N, S, X, L, R;
-	float samplesA[13] = {0.5,0.546875,0.578125,0.625,0.659375,0.703125,0.75,0.796875,0.828125,0.875,0.921875,0.953125,1.0};
+	float DepthL, DepthR, N, S, X, L, R;
+	float samplesA[9] = {0.5,0.5625,0.625,0.6875,0.75,0.8125,0.875,0.9375,1.0};
 	
 	//MS is Max Separation P is Perspective Adjustment
 	float MS = GDepth * pix.x, P = Perspective * pix.x;
@@ -582,11 +603,11 @@ float4 Converter(float2 texcoord : TEXCOORD0)
 		A *= pix.x;
 	
 		[loop]
-		for ( int x = 0 ; x < 13; x++ ) 
+		for ( int x = 0 ; x < 9; x++ ) 
 		{
-			S = samplesA[x] * MS * 1.21875;//13
-			L += Assist(float2(TCL.x+S, TCL.y)).x*Adjust_A;
-			R += Assist(float2(TCR.x-S, TCR.y)).x*Adjust_A;
+			S = samplesA[x] * MS * 1.21875;
+			L += Assist(float2(TCL.x+S, TCL.y)).x/9;
+			R += Assist(float2(TCR.x-S, TCR.y)).x/9;
 			DepthL = min(1,L);
 			DepthR = min(1,R);
 		}
