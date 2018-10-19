@@ -78,6 +78,14 @@ uniform bool Auto_Balance <
 	ui_category = "Divergence & Convergence";
 > = false;
 
+uniform float Auto_Depth_Range <
+	ui_type = "drag";
+	ui_min = 0.0; ui_max = 0.625;
+	ui_label = " Auto Depth Range";
+	ui_tooltip = "The Map Automaticly scales to outdoor and indoor areas.\n" 
+				 "Default is 0.1f, Zero is off.";
+	ui_category = "Divergence & Convergence";
+> = 0.1;
 //Occlusion Masking//
 uniform float Disocclusion_Power_Adjust <
 	ui_type = "drag";
@@ -778,11 +786,11 @@ void AO_in(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out
 //AO END//
 #endif
 
-//float AutoDepthRange( float d, float2 texcoord )
-//{
-//	float LumAdjust = smoothstep(-0.0175f,Auto_Depth_Range,Lum(texcoord));
-//    return min(1,( d - 0 ) / ( LumAdjust - 0));
-//}
+float AutoDepthRange( float d, float2 texcoord )
+{
+	float LumAdjust = smoothstep(-0.0175f,Auto_Depth_Range,Lum(texcoord));
+    return min(1,( d - 0 ) / ( LumAdjust - 0));
+}
 
 float Conv(float DM,float2 texcoord)
 {
@@ -792,6 +800,9 @@ float Conv(float DM,float2 texcoord)
 				
 		if (ZPD == 0)
 			ZP = 1.0f;
+		
+		if (Auto_Depth_Range > 0)
+			DM = AutoDepthRange(DM,texcoord);
 		
 		if(Auto_Balance)
 			ZP = clamp(ALC,0.0f,1.0f);
@@ -1215,7 +1226,7 @@ float4 PS_calcLR(float2 texcoord)
 		else
 	{			
 			float R = tex2Dlod(SamplerDisFB,float4(TexCoords.x,TexCoords.y,0,0)).x;
-			float G = tex2Dlod(SamplerDMFB,float4(TexCoords.x, TexCoords.y,0,0)).x;
+			float G = AutoDepthRange(tex2Dlod(SamplerDMFB,float4(TexCoords.x, TexCoords.y,0,0)).x,TexCoords);
 			float B = tex2Dlod(SamplerDisFB,float4(TexCoords.x,TexCoords.y,0,0)).x;
 			color = float4(R,G,B,1.0);
 	}

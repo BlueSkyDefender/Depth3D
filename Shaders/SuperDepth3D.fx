@@ -103,9 +103,9 @@ uniform float Auto_Depth_Range <
 	ui_min = 0.0; ui_max = 0.625;
 	ui_label = " Auto Depth Range";
 	ui_tooltip = "The Map Automaticly scales to outdoor and indoor areas.\n" 
-				 "Default is Zero, Zero is off.";
+				 "Default is 0.1f, Zero is off.";
 	ui_category = "Divergence & Convergence";
-> = 0.0;
+> = 0.1;
 	
 //Occlusion Masking//
 uniform int Disocclusion_Selection <
@@ -863,9 +863,7 @@ float Conv(float D,float2 texcoord)
 			ZP = 1.0;
 		
 		if (Auto_Depth_Range > 0)
-		{
 			D = AutoDepthRange(D,texcoord);
-		}
 		
 		if(Convergence_Mode)
 			Z = Divergence_Locked;
@@ -1340,7 +1338,7 @@ float4 PS_calcLR(float2 texcoord)
 		else
 	{		
 			float R = tex2Dlod(SamplerDis,float4(TexCoords.x, TexCoords.y,0,0)).x;
-			float G = tex2Dlod(SamplerDM,float4(TexCoords.x, TexCoords.y,0,0)).x;
+			float G = AutoDepthRange(tex2Dlod(SamplerDM,float4(TexCoords.x, TexCoords.y,0,0)).x,TexCoords);
 			float B = tex2Dlod(SamplerDis,float4(TexCoords.x,TexCoords.y,0,0)).x;
 			color = float4(R,G,B,1.0);
 	}
