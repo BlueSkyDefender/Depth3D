@@ -330,7 +330,6 @@ texture texDisFB  { Width = BUFFER_WIDTH * Depth_Map_Resolution; Height = BUFFER
 sampler SamplerDisFB
 	{
 		Texture = texDisFB;
-		MipLODBias = 1;
 		MinFilter = LINEAR;
 		MagFilter = LINEAR;
 		MipFilter = LINEAR;
@@ -883,19 +882,19 @@ void Encode(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, ou
 {
 	float MSL, N = 3, samples_A[3] = {0.5f,0.75f,1.0f};
 	
-	float DepthR = 1.0f, DepthL = 1.0f, MS = Divergence  * pix.x;
+	float DepthR = 1.0f, DepthL = 1.0f, MS = Divergence * pix.x;
 	
 	[loop]
 	for ( int i = 0 ; i < N; i++ ) 
 	{
 		MSL = Divergence * 0.1875f;
-		DepthL = min(DepthL,tex2Dlod(SamplerDisFB, float4(texcoord.x - (samples_A[i] * MSL) * pix.x, texcoord.y,0,0)).x);
-		DepthR = min(DepthR,tex2Dlod(SamplerDisFB, float4(texcoord.x + (samples_A[i] * MSL) * pix.x, texcoord.y,0,0)).x);
+		DepthL = min(DepthL,tex2Dlod(SamplerDisFB, float4(texcoord.x - (samples_A[i] * MSL) * pix.x, texcoord.y,0,1)).x);
+		DepthR = min(DepthR,tex2Dlod(SamplerDisFB, float4(texcoord.x + (samples_A[i] * MSL) * pix.x, texcoord.y,0,1)).x);
 	}	
 
 	// X Right & Y Left
 	float X = texcoord.x + MS * Conv(DepthL,texcoord), Y = (1 - texcoord.x) + MS * Conv(DepthR,texcoord);
-	float Z = Conv(tex2Dlod(SamplerDisFB,float4(texcoord,0,1)).x,texcoord);
+	float Z = Conv(tex2Dlod(SamplerDisFB,float4(texcoord,0,0)).x,texcoord);
 	color = float4(X,Y,Z,1.0);
 }
 
@@ -903,7 +902,7 @@ float4 Decode(in float2 texcoord : TEXCOORD0)
 {
 	float3 X = abs(tex2Dlod(SamplerEncodeFB,float4(texcoord,0,0)).xxx), Y = abs(tex2Dlod(SamplerEncodeFB,float4(texcoord,0,0)).yyy);
 	float3 Z = abs(tex2Dlod(SamplerEncodeFB,float4(texcoord,0,0)).zzz);
-	float ByteN = 640; //Byte Shift for Debanding depth buffer in final 3D image.
+	float ByteN = 256; //Byte Shift for Debanding depth buffer in final 3D image.
 	float A = dot(X, float3(1.0f, 1.0f / ByteN, 1.0f / (ByteN * ByteN)) ); //byte_to_float
 	float B = dot(Y, float3(1.0f, 1.0f / ByteN, 1.0f / (ByteN * ByteN)) ); //byte_to_float
 	float C = dot(Z, float3(1.0f, 1.0f / ByteN, 1.0f / (ByteN * ByteN)) ); //byte_to_float
@@ -967,8 +966,8 @@ float4 PS_calcLR(float2 texcoord)
 		TCR.x = TCR.x - ((Interlace_Anaglyph.x * 0.5f) * pix.x);
 	}
 		
-		float CCL = -MS * Decode(TCL).z;
-		float CCR = -MS * Decode(TCR).z;
+		float CCL = -MS * Decode(float2(TCL.x + (Divergence * 0.1875) * pix.x, TCL.y)).z;
+		float CCR = -MS * Decode(float2(TCR.x - (Divergence * 0.1875) * pix.x, TCR.y)).z;
 			
 		if(Custom_Sidebars == 0)
 		{
@@ -987,10 +986,10 @@ float4 PS_calcLR(float2 texcoord)
 		}
 		
 		[loop]
-		for (int i = 0; i < Divergence ; i++) 
+		for (int i = 0; i < Divergence + 7.5; i++) 
 		{				
 		//L
-		[flatten] if( Decode(float2(TCL.x+i*pix.x,TCL.y)).y > (1-TCL.x)-pix.x )
+		[flatten] if( Decode(float2(TCL.x+i*pix.x,TCL.y)).y >= (1-TCL.x)-pix.x )
 					{
 						if(Custom_Sidebars == 0)
 						{
@@ -1006,7 +1005,7 @@ float4 PS_calcLR(float2 texcoord)
 						}
 					}
 		//R
-		[flatten] if( Decode(float2(TCR.x-i*pix.x,TCR.y)).x > TCR.x-pix.x )
+		[flatten] if( Decode(float2(TCR.x-i*pix.x,TCR.y)).x >= TCR.x-pix.x )
 					{
 						if(Custom_Sidebars == 0)
 						{
