@@ -1,5 +1,6 @@
 ﻿#SuperDepth3D 1.9.9
 _________________________________________________________________________________________________________________________________
+-=:[Settings have to be change and adjusted for diffrent Resolutions, screen size, and screen types]:=-
 
 Here is a quick and dirty game list of working Depth Maps. They are only suggestions. You can use any setting that works for you.
 
@@ -48,11 +49,8 @@ Inner Shader Setting:
 [3D AO] AO_TOGGLE -=Line 45=- enable this if you want better 3D seperation between objects. 
 [Horizontal & Vertical Depth Buffer Resize] Horizontal_and_Vertical -=Line 50=- For Horizontal & Vertical Depth Buffer Resize for non conforming BackBuffer.
 [Image Position Adjust] Image_Position_Adjust -=Line 53=- Image Position Adjust is used to move the Z-Buffer around.
----------------------------------------------------------------------------------------------------------------------------------
-
-[Adjustment] - Adjust this to what looks good to you. Don't Go to High or To Low.
-
-[ZDP Range] -  ZDP Range is the range where you should set Zero Parallax Distance.
+=================================================================================================================================
+-=:[Settings have to be change and adjusted for diffrent Resolutions, screen size, and screen types]:=-
 
                                                        [- - - - - - - - - - - - - - -=: Recommended Settings :=- - - - - - - - - - - - - - -]
 [Read Below] [Game List]                               [Depth Map] [Adjustment] [Weapon DM] [Depth Flip] [ZPD / Range] [Auto Depth] [SD / FB]
@@ -63,7 +61,7 @@ Inner Shader Setting:
               Among The Sleep                              DM 0         37.5                      Yes     0.025-0.075
               Assassin Creed Unity                         DM 1         20.0                              0.025-0.125
               Bayonetta                                    DM 0         15.0                              0.025-0.125 
-              Batman Arkham Knight                         DM 0         15.0                              0.050-0.100                           
+              Batman Arkham Knight                         DM 0         22.5                              0.050-0.100                           
               Batman Arkham Origins                        DM 0         15.0                              0.050-0.100
               Batman: Arkham City                          DM 0         15.0                              0.050-0.100
               Beware                                       DM 1         62.5                      Yes     0.100-0.150                       
@@ -212,6 +210,8 @@ CEMU          Mariokart 8                                  ????        ???      
 CEMU          Super Mario 3D World                         ????        ???                                Yes      ?
 CEMU       RB The Legend of Zelda: Breath of the Wild      ????        ???                                Yes      ?
 _________________________________________________________________________________________________________________________________
+-=:[Settings have to be change and adjusted for diffrent Resolutions, screen size, and screen types]:=-
+---------------------------------------------------------------------------------------------------------------------------------
 More Info
 
 You can also try different depth maps for other games your self by changing Depth Map number From 0-4. 
