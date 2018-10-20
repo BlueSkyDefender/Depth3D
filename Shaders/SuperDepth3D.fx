@@ -56,7 +56,6 @@
 #define Anti_Crosstalk 0 //Default Zero is Off. One is On.
 
 //USER EDITABLE PREPROCESSOR FUNCTIONS END//
-
 //Divergence & Convergence//
 uniform float Divergence <
 	ui_type = "drag";
@@ -1350,13 +1349,13 @@ float4 PS_calcLR(float2 texcoord)
 
 float4 Average_Luminance(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Target
 {
-	float3 Average_Lum = tex2D(SamplerDM,float2(texcoord.x,texcoord.y)).ggg;
+	float3 Average_Lum = tex2D(SamplerDM,float2(texcoord.x,texcoord.y * 0.750 )).ggg;
 	return float4(Average_Lum,1);
 }
 
 float4 Average_Luminance_Weapon(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Target
 {
-	float3 Average_Lum_Weapon = PS_calcLR(float2(texcoord.x,(texcoord.y + 0.500) * 0.500 + 0.250)).www;
+	float3 Average_Lum_Weapon = PS_calcLR(float2(texcoord.x,texcoord.y * 0.500 + 0.500 )).www;
 	return float4(Average_Lum_Weapon,1);
 }
 
