@@ -1,5 +1,5 @@
-SuperDepth3D FP
-An Alternet Depth Based 3D Shader.
+SuperDepth3D_2.0.0 WIP
+New Weapon Hand Code Still WIP No Profiles are set. But, Code is working.
 
 HDR
 Tone Map Selector.

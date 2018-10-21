@@ -1,0 +1,698 @@
+﻿#SuperDepth3D 2.0.0
+_________________________________________________________________________________________________________________________________
+-=:[Settings have to be change and adjusted for diffrent Resolutions, screen size, and screen types]:=-
+
+Here is a quick and dirty game list of working Depth Maps. They are only suggestions. You can use any setting that works for you.
+
+User Settings
+https://docs.google.com/spreadsheets/d/18ujpY-97V_YuXpQUh-7bOomE4D5nUGwp3XppfU_0N2k/edit?usp=sharing
+
+---------------------------------------------------------------------------------------------------------------------------------
+Game List updates for Reshade 3.0
+_________________________________________________________________________________________________________________________________
+ReShade GUI Settings:
+[Depth_Map] - Linearization selection for the zBuffer.
+[Depth Map Adjustment] - Use what you think looks good. You don't have to use my adjustment. But, my settings are good place to start.
+[Offsets] - Use this if for a nonconforming zBuffer Linearization. Works with Depth buffer 2 & 3.
+[Divergence] - Determines the amount of Image Warping and Separation.
+[Convergence Mode] - Select your Convergence Mode for ZPD calculations.
+[ZPD] - Zero Parallax Distance controls the focus distance for the screen Pop-out effect also known as Convergence.
+[Auto Depth Range] - The Map Automaticly scales to outdoor and indoor areas.
+[Balance] - Balance between ZPD Depth and Scene Depth and works with ZPD option above.
+[Disocclusion Selection] - This is to select the z-Buffer bluring option for low level occlusion masking.
+[Disocclusion Power Adjust] - Automatic occlusion masking power adjust.
+[Perspective] - Determines the perspective point.
+[Depth Map View] - Display the Depth Map. Use this for Debuging.
+[HUD & Weapon Profile] - Pick your HUD or Weapon Profile for your game or make your own.
+[Weapon Adjust] - Adjust weapon depth map for FPS Hand & also HUD Mode. Used with the option above.
+[Stereoscopic Mode] - Stereoscopic 3D display output selection.
+[Interlace Optimization] - Interlace Optimization Is used to reduce alisesing in a Line or Column interlaced image.
+[Scaling Support] - Dynamic Super Resolution , Virtual Super Resolution, downscaling, or Upscaling support for Line Interlaced, Column Interlaced, & Checkerboard 3D displays.
+[Anaglyph Colors] - Select colors for your 3D anaglyph glasses.
+[Anaglyph Desaturation] - Adjust anaglyph desaturation, Zero is Black & White, One is full color.
+[View Mode] - Change the way the shader warps the output to the screen. The Higer you go the more performce will be needed.
+[Swap Eyes] - L/R to R/L image swaping.
+[Cross Cursor Adjust] - Pick your own cross cursor color & Size.
+[Custom Sidebars] - Edges selection for your screen output.
+
+AO_TOGGLE Needs to be enabled to get the Options below.
+[3D AO Mode] - 3D ambient occlusion mode On/Off switch.
+[3D AO Control] - Control the spread of the 3D AO.
+[3D AO Power] - Adjust the power 3D AO.
+
+Inner Shader Setting:
+[Depth Map Division] Depth_Map_Division -=Line 26=- For 4k Use 1.75 or 1.5. For 1440p Use 1.5 or 1.25. For 1080p use 1.
+[Max Depth] Depth_Max -=Line 29=- Determines the Max Depth amount, in ReShades GUI.
+[Full Black Depth Map Fix] FBDMF -=Line 32=- Enable this to fix the problem when there is a full screen Game Map Poping out of the screen.
+[Third Person Auto-ZPD] TPAuto_ZPD -=Line 35=- Third person auto zero parallax distance is a form of Automatic Near Field Adjustment.
+[Cancel Depth Key] Cancel_Depth_Key -=Line 41=- Determines the Cancel Depth Toggle Key useing keycode info.
+[3D AO] AO_TOGGLE -=Line 45=- enable this if you want better 3D seperation between objects. 
+[Horizontal & Vertical Depth Buffer Resize] Horizontal_and_Vertical -=Line 50=- For Horizontal & Vertical Depth Buffer Resize for non conforming BackBuffer.
+[Image Position Adjust] Image_Position_Adjust -=Line 53=- Image Position Adjust is used to move the Z-Buffer around.
+=================================================================================================================================
+-=:[Settings have to be change and adjusted for diffrent Resolutions, screen size, and screen types]:=-
+
+                                                       [- - - - - - - - - - - - - - -=: Recommended Settings :=- - - - - - - - - - - - - - -]
+[Read Below] [Game List]                               [Depth Map] [Adjustment] [Weapon DM] [Depth Flip] [ZPD / Range] [Auto Depth] [SD / FB]
+    RB        .Hack//G.U.                                  DM 1         25                                0.050-0.125        
+              ABZU                                         DM 1         50                                0.050-0.250                    
+              Agony                                        DM 1         50                                0.025-0.250
+              Alien Isolation                              DM 0         25                                0.030-0.075
+              Among The Sleep                              DM 0         37.5                      Yes     0.025-0.075
+              Assassin Creed Unity                         DM 1         20.0                              0.025-0.125
+              Bayonetta                                    DM 0         15.0                              0.025-0.125 
+              Batman Arkham Knight                         DM 0         22.5                              0.050-0.100                           
+              Batman Arkham Origins                        DM 0         15.0                              0.050-0.100
+              Batman: Arkham City                          DM 0         15.0                              0.050-0.100
+              Beware                                       DM 1         62.5                      Yes     0.100-0.150                       
+              BladeStorm Nightmare                         DM ?         ?                                 ?
+    RB        Bioshock Remastred                           DM 0         7.5         WDM 28                0.050-0.175          
+    RB        BloodCM                                      DM 0         15.0                              0.025-0.250                                     
+    RB        BorderLands 2                                DM 0         15.0       *WDM 3                 0.025-0.075                          
+    RB        Call of Duty: Advance Warfare                DM 1         22.5       *WDM 4                 0.050-0.075                                 
+    RB        Call of Duty: Black Ops                      DM 0         10.0       *WDM 5                 0.050-0.075                            
+    RB        Call of Duty: Black Ops 2                    DM 1         22.5       *WDM 4                 0.050-0.075    
+    RB        Call of Duty: Ghost                          DM 1         22.5       *WDM 4                 0.050-0.075    
+    RB        Call of Duty: Infinite Warfare               DM 1         22.5       *WDM 4                 0.050-0.075  
+              Casltevania: Lord of Shadows - UE            DM 0         7.5                               0.025-0.250                                         
+              Castle of Illusion Micky Mouse               DM 0         12.5                              ???????????
+              Cryostasis                                   DM 0         13.75      *WDM 6                 0.025-0.050                         
+              DOOM 2016                                    DM 0         20.0       *WDM 1                 0.050-0.100       
+              DarkSiders Warmastred Edition                DM 0         22.5                              0.025-0.075  
+              Dead Effect                                  DM ?         6.25                              ?      
+              Dead Island                                  DM 0         5.0                               0.025-0.075                       
+    RB        Dead Rising 3                                DM 0         12.5                              0.075-0.175                         
+    RB        Deadly Premonition:The Directors's Cut       DM 0         25.0                              0.025-0.200                                     
+              DeadPool Game                                DM 0         12.5                              0.025-0.250                        
+              Dragon Age Inquisition                       DM 0         3.25                              0.075-0.375               
+    RB        Dragon Ball FightersZ                        DM 1         7.5                               0.050-0.075
+              Dragon Ball Xenoverse                        DM 0         8.75                              0.025-0.200                          
+              Dragons Dogma: Dark Arisen                   DM 0         8.75                              0.025-0.250
+              DreamFall Chapters                           DM 0         12.5                      Yes     0.075-0.125
+    RB        Duke Nukem 3D 20th Anniversary World Tour    DM 0         7.5                               0.150-0.250
+    RB        Dungeon Nightmares II                        DM 0         17.5                      Yes     0.025-0.250                                
+    RB        Dusk/Dusk World                              DM 1         20.0                      Yes     0.025-0.075
+              Dying Light                                  DM 1         22.5                              0.010-0.075
+    RB        Emily Wants To Play                          DM 1         25.0                              0.025-0.200                                      
+              Euro Trucks Sim 2                            DM 0         8.750       WDM 25         ?      0.025-0.200 
+              Everybody's Gone to the Rapture              DM 0         1.50                              0.025-0.250                      
+              Fallout 4                                    DM 0         6.875      *WDM 8                 0.075-0.200          
+    RB        FarCry 3                                     DM 0         7.50                              0.025-0.200
+              Firewatch                                    DM 0         5.0                       Yes     0.025-0.250
+    RB        GTA V                                        DM 1         12.5                              0.025-0.175                                      
+              Gone Home                                    DM 0         5.0                       Yes     0.025-0.250
+    RB        Hard Reset                                   DM 0         8.125                             0.050-0.125          
+              Hellblade: Senua's Sacrifice                 DM 1         10.0                              0.025-0.250
+              Hellpoint                                    DM 1         5.0                       Yes     0.025-0.250
+    RB        Hitman: Absolution                           DM 0         17.500                            0.025-0.250
+    RB        Hitman 2016                                  DM ?         ?                         ?       ?                                     
+    RB        Homefront The Revolution                     DM ?         ?                         ?       ?                                     
+              Just Cause 3                                 DM 1         10.0                              0.025-0.250  
+    RB        KHOLAT                                       DM 1         10.0                              0.025-0.250        
+    RB        Kingpin: Life of Crime                       DM 0         7.50        WDM 13                0.025-0.125
+              Layers of Fear                               DM 0         7.5                       Yes     0.125-0.175
+              Life is Strange: Before the Storm            DM 1         150.0                     Yes     0.075-0.375
+              Lifeless Planet                              DM 0         17.50                     Yes     0.025-0.075
+              Lords of The Fallen                          DM 0         14.750                            0.050-0.250
+    RB        LuciusII                                     DM 0         20.000                    Yes     0.025-0.250 
+    RB        Mafia III                                    DM 1         6.25                              0.025-0.075        
+    RB        Mass Effect Andromeda                        DM 1         15.0                              0.075-0.175                                        
+    RB        Metal Gear Rising                            DM 0         13.75                             0.025-0.250       
+    RB        Metro 2033 Redux                             DM 0         7.50       *WDM 11                0.050-0.125                
+    RB        Metro Last Light Redux                       DM 0         7.50       *WDM 11                0.050-0.125                      
+    RB        Middle-earth: Shadow of Mordor               DM 1         25.0                              0.025-0.250        
+              Mirror's Edge Catalyst                       DM 1         13.750                            0.025-0.125       
+    RB        Monster Hunter World                         DM 1         13.750                            0.025-0.075
+              Mordheim: City of the Damned                 DM 0         12.500                    Yes     0.025-0.250         
+    RB        Naruto Shippuden UNS3 Full Blurst HD         DM 0         36.25                             0.025-0.125        
+    RB        NecroVision: Lost Company                    DM 0         7.50       *WDM 12                0.025-0.125 
+              Need For Speed Rivals                        ?         ?                                    ?
+              Need for Speed Most Wanted                   ?         ?                                    ?
+              NieRAutomata                                 DM 0         20.0                              0.050-0.075
+    RB        Nosferatu: The Wrath of Malachi              DM 0         62.5                              0.150-0.175 
+              Observer                                     DM 1         10.0                              0.025-0.250 
+    RB        Penumbra: Black Plague                       DM 0         7.5                               0.025-0.250       
+    RB        Phantasmal                                   DM 0         7.5                       Yes     0.010-0.020
+    RB        Prey 2006                                    DM 0         12.5        WDM 26                0.050-0.075       
+    RB        Prey 2017                                    DM 1         18.75    *WDM 9 & 10              0.025-0.075                
+    RB        Quake Epsilon                                DM 0         15.00       WDM 15                0.075-0.125 
+              Quake 2 XP                                   DM 0         7.5         WDM 16                0.025-0.150
+    RB        Quake 4                                      DM 0         7.5         WDM 17                0.025-0.125
+              Quantum Break                                DM 0         9.0                               0.025-0.275
+    RB        Rage64                                       DM 0         20.00       WDM 14                0.025-0.100   
+    RB        Redout                                       DM ?         ?                                 ?      
+              Remembrance                                  DM 1         7.5                       Yes     0.050-0.100
+    RB        Resident Evil 7                              DM 1         22.5                              0.125-0.275                                        
+    RB        Return To Castle Wolfenstine                 DM 0         10.0        WDM 18                0.075-0.250                     
+              Rez Infinite                                 DM 1         20.0                              0.075-0.150
+              Ryse: Son of Rome                            DM 0         7.500                             0.025-0.050        
+              Scorn                                        DM 1         40.0                              0.015-0.050
+    RB        S.T.A.L.K.E.R:CS Complete Mod                DM 0         7.5         WDM 19                0.025-0.125
+    RB        S.T.A.L.K.E.R:CoP Complete Mod               DM 0         7.5         WDM 19                0.025-0.125
+    RB        S.T.A.L.K.E.R:SoC Complete Mod               DM 0         7.5         WDM 19                0.025-0.125
+    RB        Shadow of the Tomb Raider                    DM 1         17.5                              0.100-0.250 
+              Shadow Warrior 2                             DM 1         10.0                              0.0375-0.0625
+              Sleeping Dogs: DE                            DM 0         7.0                               0.075-0.100 
+              Sniper Elite 4                               DM 0         25.0                              0.025-0.075
+              Soma                                         DM 0         11.25       WDM 20                0.025-0.100
+              Sonic Adventure 2                            DM 0         10.0                              0.025-0.125
+              Souls Games                                  DM 0       7.5-25.0                            0.050-0.100              
+              Stacking                                     DM 0         7.5                               0.025-0.125
+    RB        Stay Close                                   DM 1         10                                0.025-0.125
+              Tales of Zestiria                            DM 0         7.5                               0.025-0.125
+              The Elder Scrolls V: SE                      DM 0         6.875       WDM 21                0.075-0.150
+    RB        The Evil Within                              DM 0         28.75                             0.175-0.250   
+              The Evil Within 2                            DM 0      4.675-17.5                           0.150-0.200     
+    RB        The Legend of Korra                          DM 0         10                                0.025-0.125
+    RB        The Surge                                    DM *         ?                                 ?     
+    RB        The Vanishing of Ethan Carter Redux          DM 1         7.5                               0.025-0.125
+    RB        The Void                                     DM 0         7.5                               0.050-0.150           
+    RB        Through The Woods!                           DM 1         7.5                       Yes     0.025-0.075 
+              Titanfall 2                                  DM 0         7.5         WDM 27                0.025-0.100 
+              Total War: Warhammer                         DM 0         2.625                             0.025-0.075
+    RB        Turok: Dinosaur Hunter                       DM 0         200.0       WDM 22                0.010-0.075
+              Turok 2: Seeds of Evil                       DM 0         200.0       WDM 23                0.050-0.150
+    RB        Unreal Gold with v227                        DM 0         17.50      *WDM 0                 0.010-0.050      
+              Warhammer: End Times - Vermintide            DM 0         10.0                              0.010-0.100
+              Warhammer: Vermintide 2                      DM 0         8.75                              0.010-0.100         
+    RB        Watch Dogs 2                                 DM 1         7.5                               0.050-0.100        
+              Witcher 3                                    DM 1         7.5                               0.050-0.100            
+              Wolfenstine                                  DM 0         7.5        *WDM 2                 0.025-0.100
+    RB        Wolfenstine: The New Order                   DM 0         25.00      *WDM 7                 0.025-0.075
+    RB        Wolfenstine: The Old Blood                   DM 0         25.00      *WDM 7                 0.025-0.075
+    RB        Yooka-Laylee                                 DM 1         6.875                     Yes     0.025-0.075
+              Ziggurat                                     DM 0         7.5                               0.075-0.175
+              Zombie Army Trilogy                          DM 0         12.5                              0.050-0.075
+              
+                                                       [- - - - - - - - - - - - - - - -=: Recommended Settings :=- - - - - - - - - - - - - - - -]
+[Read Below] [Special Depth Map Game List]             [Depth Map] [Adjustment] [Weapon DM] [FlipZ] [ZPD / Range] [Auto Depth] [SD / FB] [Offset]
+             Amnesia: Machine for Pigs                    DM 0       50.00                    No      0.025-0.050                         0.00005       
+             Amnesia: The Dark Descent                    DM 0       50.00                    No      0.025-0.050                         0.00005
+            *Crash Bandicoot™ N. Sane Trilogy             DM 0       ????                   ??????    ???????????                         ??????
+             Double Dragon Neon                           DM 0       1.0                      No      0.025-0.075                         1.1000 
+             Dungeons 2                                   DM 0       3.50                     Yes     0.025-0.250                         0.0050
+             Fez                                          DM 0       10.0                     Yes     ?0.0-0.250?                         0.9750        
+    RB       Grim Dawn                                    DM 0       7.50                     No      0.250-0.300      0.575        FB    0.0040 
+             Lara Croft & Temple of Osiris                DM 0       250.0                    No      0.025-0.200                         0.0207
+    RB       Magicka 2                                    DM 0       13.75                    No      0.025-0.250                         0.0125
+             Never Alone (Kisima Ingitchuna)              DM 0       25.0                     No      0.050-0.100                         0.0050             
+    RB       Requiem: Avenging Angel                      DM 0       50.0                     No      0.030-0.060                         0.8000
+             Serious Sam Revolution                       DM 0       7.5           WDM 29     No      0.025-0.075                         0.1111
+             Shadow Tactics: Blades of the Shogun         DM 0       5.5                      Yes     0.250-0.350      0.2875       FB    0.0010
+             Shadow Warrior Classic Source Port           DM 0       8.75                     No      0.075-0.150                         1.0000
+             Shadow Warrior Classic Redux                 DM 0       8.75                     No      0.075-0.150                         1.0000
+             Silent Hill: Homecoming                      DM 0       12.5                     No      0.025-0.075                         0.1155
+             Rise of the Tomb Raider                      DM 0       25.0                     No      0.050-0.125                         0.0200
+             Two Worlds EE                                DM 0       7.5                      No      0.025-0.075                         0.0750
+                                
+[Emulator][RB][Special Depth Map Game List]            [Depth Map] [Adjustment] [Weapon DM] [Offset] [Depth Flip] [ZDP Range]
+CEMU          Mariokart 8                                  ????        ???                                Yes      ?
+CEMU          Super Mario 3D World                         ????        ???                                Yes      ?
+CEMU       RB The Legend of Zelda: Breath of the Wild      ????        ???                                Yes      ?
+_________________________________________________________________________________________________________________________________
+-=:[Settings have to be change and adjusted for diffrent Resolutions, screen size, and screen types]:=-
+---------------------------------------------------------------------------------------------------------------------------------
+More Info
+
+You can also try different depth maps for other games your self by changing Depth Map number From 0-4. 
+You *may* want to disable AA in game. You can always enable SMAA in reshade for AA or play at 4k with no AA. 
+Turn Off DOF in all games if possible. Unless you want to know how it feels to be neer sighted. Turn On SSAO or HABO They help a lot.
+Motion Blur Off
+
+Also Keep in mind if you don't like the depth map I made. You can always adjust your own.
+_________________________________________________________________________________________________________________________________
+Special Versions of Reshade
+
+My shader was also tested with SpecialK moded Reshade.
+As for a guide to use SpecialK Follow this link.
+https://steamcommunity.com/sharedfiles/filedetails/?id=933337066
+
+.................................................................................................................................
+Read Below Section
+
+=================================================================================================================================
+{.Hack//G.U.} - used reshade 3.0.8
+Once you install Reshade. Install this fix that allows for depth buffer access. This fix uses 3DMigoto to dissable a shader that was blocking acess to the depth buffer.
+http://www.mediafire.com/file/d5ep3qlsnbbbmvl/dotHack%20GU%20fix%20for%20Depth3D.zip
+
+{BoarderLands 2}
+Use a Controller for menus navigation or keyboard. 
+Mouse and keyboard is good for gameplay. 
+Use Cross_Cursor for navigation with mouse.
+
+{Bioshock Remastred}
+In the game settings you would need to dissable Real Time Reflections and use the DLL listed here.
+
+https://reshade.me/forum/releases/3744-3-1?start=200#26443
+
+{Blood Crossmatching}
+Get it here http://m210.duke4.net/index.php/files/viewdownload/3-eduke32/38-blood-crossmatching
+
+Install Reshade 3.0.4 This is needed to use some lighting & shadows. But, if you don't care for lighting use the newest one.
+Install as Direct 3D 10+ so you don't delete opengl32.dll. 
+This or install opengl and override opengl32.dll and used a bloom shader from Reshade.
+Install to \BloodCM\distr
+
+Once that is done now you can install. High-Resolution Textures Pack for BloodCM game.
+https://sourceforge.net/projects/bloodcmhrp/
+
+Put xhrp_05fix.zip and zip archives in \BloodCM\autoload folder and check "Enable autoload folder" checkbox in eduke32 setup window. If you don't want to use the textures just disable them in-game that way you can still have the 3D models.
+
+Now the last thing is to start the game and set your settings.
+
+To help fix the depth buffer with lighting & shadows use Console command r_pr_maxlightpasses "1".
+This will limit the amount lights processed per surface. Seems to be a hard bug to fix in eduke32.
+So I don't think this will get fixed anytime soon.
+
+{Call of Duty: Advance Warfare}
+Render Resolution Native.
+Turn off AA.
+Don't use in game Supersampling
+FOV Sucks i know.
+
+{Call of Duty: Ghost}
+Set Image Quality to Extra.
+
+{Call of Duty: Black Ops 2}
+Turn off AA.
+
+{Call of Duty: Infinite Warfare}
+Render Resolution Native.
+Turn off AA.
+Don't use in game Supersampling
+
+{Dragon Ball FightersZ} - Use ReShade 3.1.2
+Online 3D works aswell. You need to use ReShade 3.1.2 That is whitelisted under EAC.
+
+{DeadRising 3}
+Use Native scailing I think it's called in game as Full.
+I also suggest useing the 60FPS and 80FOV Fix for this game.
+
+https://pcgamingwiki.com/wiki/Dead_Rising_3
+
+{Deadly Premonition}
+Can Run with Higer Rez useing DPfix095.
+To Use it with Reshade Just Start Up Reshade and Make a profile for it like any other game.
+
+Then head to the folder and rename d3d9.dll to dxgi.dll. 
+Now open the DPfix095.zip Directly from http://blog.metaclassofnil.com/wp-content/uploads/2013/12/DPfix095.zip or http://blog.metaclassofnil.com/?p=438.
+
+Install the contents of that folder in to Deadly Premonition Folder where you changed Reshade's d3d9.dll to dxgi.dll. Edit the DPfix.ini too what ever REZ you want. Then start the game.
+
+{Duke Nukem 3D Twentieth Anniversary World Tour} - Use ReShade 3.4.1
+Game now works with the new DX11_BUFFER_DETECTION. You can set this also in ReShades DX11 Tab in game.
+[DX11_BUFFER_DETECTION]
+DepthBufferRetrievalMode=1
+DepthBufferTextureFormat=2
+ExtendedDepthBufferDetection=1
+DepthBufferClearingNumber=3
+
+{Dungeon Nightmares II}
+Highest Setting is "Good" Any thing Lower will work and thing above will not work. Make sure to set your res to native.
+
+{Dusk/Dusk World} - Reshade 3.4.0
+In Reshade you need to set the Depth Buffer D32FS8 and Copy Before Clearing. Select Option 4 for World space. Keep in mind your weapond will not be Drawn in this Depth Buffer.
+The weapon Depth Buffer can be found on Option 1. But, can't be merged.....
+
+{Emily Wants To Play}
+Install reshade in to SteamLibrary\steamapps\common\Emily Wants To Play\Engine\Binaries\Win64
+
+{FarCry 3}
+Ingame setting MSAA 2X should be on to enable Depth Map in DX11.
+
+{Grim Dawn}
+For this game I say you should use the FlashBack shader. Since it gives a better sence of Depth for this type of game. You also need to select the right Depth Buffer so that it does
+not go blank when you interact with people. This should be under the DX11 Tab in the newest ReShade. 
+
+{GTA 5}
+Rename the dxgi.dll too d3d11.dll for DX11 mode.
+If the game is crashing in fullscreen. Switch over to Window or Borderless window mode.
+ZDP Range can also be set to Zero.
+Divergence can be set higer then normal up to 75. I play with at 42.5. But, thats just me.
+
+{Hard Reset}
+Must Enable FSAA for depth buffer access.
+
+{HomeFront the Revolution} - Thank you zig11727
+Path to Install E:\Steam\SteamApps\common\Homefront_The_Revolution\Bin64
+Works Don't know the settings.
+
+{Hitman: Absolution}
+Change the Reflections to Medium. Any higher then this will mess with the Depth Map. Seems like a in game bug.
+
+{Hitman 2016} - Thank you zig11727
+Install to \Steam\SteamApps\common\Hitman\Retail
+Works Don't know the settings.
+
+{KHOLAT}
+Install reshade in to SteamLibrary\steamapps\common\KHOLAT\Kholat\Binaries\Win64
+In setting scaling 100%
+
+{Kingpin: Life of Crime}
+Use GLDirect download it from here.
+https://sourceforge.net/projects/gldirect/?source=typ_redirect
+OpenGL to DX9 Wrapper. 
+
+Then install Reshade DX9. You will also need the res mod. 
+http://steamcommunity.com/sharedfiles/filedetails/?id=170642945
+
+{LuciusII}
+Set Globla Settings to Medium. Turn off FXAA Every thing else can be maxed out.
+
+{Mafia III} - Thank you zig11727
+Path to install \Steam\SteamApps\common\Mafia III
+
+{Magicka 2} 
+Rename the opengl.dll to dxgi.dll
+Also Use a Controller for game play.
+
+{Mass Effect Andromeda} - Thank you zig11727
+Install path \Program Files\Origin\Mass Effect Andromeda
+
+{Metal Gear Rising}
+Use a Controller for game play.
+Patch the game with MGROverride To get the right resolution for your screen. You can skip this if your max resolution is 1920x1080.
+You will also need Borderless Gaming github.com/Codeusa/Borderless-Gaming/releases
+Start the game and set it to window mode with the resolution and set MSAA to off.
+Once that's done. Use the Borderless Gaming app the make it Borderless Full screen.
+
+{Metro Last Light Redux}
+Rename the d3d9.dll or dxgi.dll to d3d11.dll
+
+{Metro 2033 Redux}
+Rename the d3d9.dll or dxgi.dll to d3d11.dll
+
+{Middle-earth: Shadow of Mordor}
+3D only works if your game at 100% scaling and FullScreen mode. 
+Borderless Full Screen will not work Window mode will not Work. 
+So if you want to Play at a lower resolution, then set your windows resolution lower then run the game in full screen and set your scaling to 100%. 
+Anything Lower or Higher then 100% will not work.
+
+{Monster Hunter World}
+Main settings for this game need to be set as follows. 
+Resolution Scaling "High" to keep the depth buffer from changing on you.
+Texture Full seems to reduce blurring.
+Use  FXAA or Nothing. TAA Causes too much blurring.
+LOD Bias "High" Max Lod Level "NoLimit" Depth Buffer chages cause issues and range checkerboarding problems.
+Needs a way to disable dissable DoF.
+
+{Naruto Shippuden UNS3 Full Blurst}
+Ignore the warnings click play.
+
+{NecroVision: Lost Company} - Use ReShade ReShade 3.3.2
+I was unable to get the newest version of ReShade to work with this title. A link for older versions of reshade at the end of this doc.
+
+{Nosferatu: The Wrath of Malachi}
+You need DGVooDoo2
+YouTube Guide.
+https://www.youtube.com/watch?v=opVni9cRN7Q
+
+No film Grain Guide.
+Editing the pack.csa file
+Open the pack.csa file in Notepad++ (or whatever you are useing to edit with) and find "Version\Data\filmgrain_0000.jpg"
+
+Now change one of the 0's to 1. It dosen't matter which one. So it looks like Version\Data\filmgrain_1000.jpg
+
+Save and close Notepad++ (or whatever you are useing to edit with).
+
+Now download this filmgrain_0000.jpg pic http://www.mediafire.com/view/mgl3ukaizwkjrdo/filmgrain_0000.jpg
+
+Now put the pic C:\Program Files (x86)\Steam\steamapps\common\Nosferatu The Wrath of Malachi\Version\Data
+
+Start the game with no more film grain!
+
+Geometry 3D may be done with TriDef Try It.
+
+{Phantasmal}
+A buggy Opengl game. But, hold down ctrl when starting the game and set your resolution. That or use "-show-screen-selector" in launch options. 
+Once in game Start it. 
+Then you will get a overblown screen. 
+From here press Alt+Enter. 
+Then hit escape and set your resoution and settings to ultra dissable motion blur. 
+Set your settings and now press shift+f2 for reshade and set your settings for Depth3D.
+
+{Penumbra: Black Plague} - Use reshade 3.0.4.
+Go here
+C:\Users\...\Documents\Penumbra\settings.cfg
+Open the settings and set your res. 
+<Screen Width="3840" Height="2160" FullScreen="true" Vsync="true" />
+
+{Prey 2006} - Using Reshade 3.1.0 
+
+Credit goes to Devil Master User on ReShades Forums
+
+Disable the glow in the game options so the DepthMap Shows. Link to the Forum Post.
+https://reshade.me/forum/general-discussion/3219-doom-3-vs-prey-2006-depth-buffer#24982
+
+{Prey 2017}
+Path to install \Steam\steamapps\common\Prey\Binaries\Danielle\x64\Release
+
+Object Detail Setting seems to change the Near Depth by a small amount. When you have Object Detail set to Very High.
+
+I also notice a problem with starting the game with reshade 3.0.7. I used reshade 3.0.4.
+
+{Quake} - DarkPlaces Quake 1 mod
+For geometry stereo open the console and use the commands listed here.
+r_stereo_horizontal "1" SbS
+r_stereo_vertical "1" TnB
+Now after that to adjust the viewmodle use
+cl_viewmodel_scale "2" 1-3
+For separation of eyes in the world (try negative values too)
+r_stereo_separation	"4"
+
+Also please use DarkPlaces "build 20140513" from here. https://icculus.org/twilight/darkplaces/download.html
+
+{Quake Epsilon} - DarkPlaces Quake 1 mod
+Install Reshade as OpenGl or use above setting for geometry 3D.
+
+Also please use DarkPlaces "build 20140513" from here. https://icculus.org/twilight/darkplaces/download.html
+
+{Quake 4}
+If some how you can click on the menu......... Good Luck. Try Alt-Tab borderless window mode.
+You may also want to put in your setting by hand in your own ini.
+
+Use Reshade 3.0.4 and good luck. BTW it really does work just hard to enter any settings.....
+
+{Rage}
+Start the game with out Reshade Set your game resolution First Turn off AA. 
+Exit, Then use reshade and set your setting you want then launch your game. You can not change your resolution once in game This sill remove the depth map.
+Rage 64 was tested only.
+
+{Redout} - Thank you zig11727
+Path to install \Steam\SteamApps\common\Redout\redout\Binaries
+
+{Resident Evil 7}
+Make sure Render Mode is Normal.
+Also Scale should be 1 for 1:1.
+
+{Return To Castle Wolfenstine}
+Increase Depth to 25+ Do this by typing in your amount.
+The game seems to run really slow with my shader at the start. 
+This may be a problem with my old card.
+But, Wait untill the frame rate stablizes. Then play the game.
+
+Setting you want to change if you want to play at 4k.
+
+Look in your config to see what you need to change. wolfconfig.cfg
+Ex.
+seta r_customaspect "1"
+
+seta r_customheight "2160"
+
+seta r_customwidth "3840"
+
+seta r_fullscreen "1"
+
+seta r_mode "-1"
+
+If you have nGlide installed.
+seta r_glIgnoreWicked3D "1"
+or just set your res to 800x600 and set your res in nGlide to your native res. I say use nGlide it looks better and you get to see the in game movies.
+
+{Requiem: Avenging Angel}
+Use nglide 1.05 or 1.04 to run this game.
+http://www.zeus-software.com/downloads/nglide
+
+Click on 3DFX.exe Untill it starts..... Some thing wrong with this game. It starts after around 6-10 time I try.
+
+{Shadow of the Tomb Raider}
+This game has it's own 3D Side by Side mode That renders around half and disabled some effects like AO. This mode has superior convergence/ZPD AKA Pop Out. 
+My suggestion is to play in native 3D Side by Side mode. But, Set the game resolution to 25% to 50% more and use MXAO as you AO in game.
+
+If your system can't handle the previous setting. Use Depth Clues and a sharpen with a better form of AA.
+
+A note for HMD Users. You need to limit pop out to the edge of your screen.
+You Don't want a mini Lara Croft In your skull do you? 
+
+SLI scaling Is good in this game. Almost full scaling on both cards. If you want to brute force FPS.
+
+{Stay Close}
+Install reshade in too Steam\steamapps\common\Stay Close\Migrate\Binaries\Win64
+
+{S.T.A.L.K.E.R.: Games} -  I suggest windows 7 or Windows 10 Anniversary.
+
+Call of Pripyat; 
+..\S.T.A.L.K.E.R. Call of Pripyat\bin\xrEngine.exe 
+First Start the Game with out modding and set the settings.
+Please install the Complete Mods since I did all my testing with this mod.
+Most of the games have problems running in Windows 10 and Long Load times. Run in Compatilbility Mode Windows XP (Service Pack 3) and DPI scaling.
+
+In Windows 10 Anniversary Delete the files in the "prefecth," folder. SteamLibrary\steamapps\common\Stalker Call of Pripyat\gamedata\configs\prefetch This folder should stay empty. 
+It normaly contains prefetch.ltx and or prefetch_single.ltx in the folder. 
+You should not need Compatilbility Mode.
+
+Now in Windows 10 Creators update you want to disable Compatilbility Mode.
+
+Clear Sky;
+..\S.T.A.L.K.E.R. Clear Sky\bin\xrEngine.exe 
+Run in Compatilbility Mode Windows 7 and DPI scaling. First Start the Game with out modding and set the settings. First load should take a long time.
+After that it should not take too long any more.
+
+Now in Windows 10 Creators update you want to disable Compatilbility Mode.
+
+Shadow of Chernobyl; - use reshade 3.0.2
+..\S.T.A.L.K.E.R. Shadow of Chernobyl\bin\XR_3DA.exe 
+Run in Compatilbility Mode Windows 7 and DPI scaling. First Start the Game with out modding and set the settings.
+Has a depth map that fluctuates for some reason.
+
+Now in Windows 10 Creators update you want to disable Compatilbility Mode and you still need to use Reshade 3.0.2.
+
+{The Evil With In}
+Game too big for screen DPI scaling. 
+To fix this go to where the program is installed and find the EXE
+
+Steam\steamapps\common\TheEvilWithin
+Right click the EvilWithin.exe
+Go to Compatibility
+Check Disable Display Scaling On High DPI Settings
+
+This should fix it. For more look up this problem on google.
+
+I would say also use an FOV fix. Like the one found at http://www.flawlesswidescreen.org/#Download.
+
+{The Legend of Korra}
+If you want 4K in this res locked game you SpecialK build of Reshade.
+Guide Here.
+https://steamcommunity.com/sharedfiles/filedetails/?id=933337066
+
+{The Legend of Zelda: Breath of the Wild} - Note:  I will not show you how to set up the emulator or the Rom. This part on you. But, If you love the game buy it on console.
+First set up the shader as the above settings then.
+
+You may want to enable Full Black Depth Map Fix. In this game as well.
+
+ReShade it self has issues when you enter a menu to change your weapon/clothes/Stuff. 
+To fix this follow this procedure.
+
+Start up CEMU and the enter the game world. Then go back to the CEMU program.
+In CEMU to Options. In this Pull-Down Menu click on Separate Gamepad View.
+Once this is done go back in to the game and go back to your items Menu.
+If going back to your items menu does not give you depth try pressing down on your right stick on your Wii U game Pad or what ever your using to play the game.
+The press it again.
+
+This should fix your problem.
+
+{The Surge} - Thank you zig11727
+Install Directory \SteamLibrary\steamapps\common\The Surge\bin
+
+{The Vanishing of Ethan Carter Redux}
+May Have an issue with the Title screen. Ignore this. In game it fine.
+Instal Dll too D:\SteamLibrary\steamapps\common\The Vanishing of Ethan Carter Redux\EthanCarter\Binaries\Win64
+
+{The Void} - Use Reshade 3.0.3
+You may need to install the other things in the game folder for the game to run such as DX9 runtime and AdbeRdr810_en_US. Also the PhysX run time if you are on AMD. I know, I know...... But, this was the only way I got it to run in windows 10 on AMD Hardware.
+
+{Through The Woods} - Use Reshade 3.4.1
+In game Set your Res to Native screen Res.
+
+{Turok: Dinosaur Hunter} - Use Reshade 3.0.4
+Turn Off "Light Scatter," in Graphics Menu.
+
+{Unreal Gold}
+Use v227 patch. Use the DX9 render. Install Rehsade 3.0 to System folder select DX9.
+In Unreal Set your res and the go to advance settings.
+Turn Off AA and go back in to the game. Start a game.
+
+{Watch Dogs 2}
+Go to the WatchDog2.exe and use compatibility mode.
+Set it too Windows 8.
+Install reshade and use dxgi.dll
+Ok befor you launch use this command.
+-eac_launcher <---- as the start up command.
+
+{Wolfenstine: Games} - working in Reshade 3.0 and Rehade 2.0
+[Set Launch Options](+r_multisamples "0" +vt_maxaniso "16")
+This game must be started at the lower Resoution 1600x1200 Then Switch to 1920x1080. Befor you exit switch it back to 1600x1200. 
+Note if you want to 4k It's the same process Start the game at 1600x1200 then switch it to 3840x2160.
+Also note you can't switch back. So say you Start the game at 1600x1200 then switch to 4k then back too 1600x1200 it will not work. 
+If you change it one last time to 4k It will not work. You must restart your game for eatch change of resolution.
+You can always enable SMAA in reshade for AA or play at 4k with no AA.
+
+Update 2018: Running it in Windows 10 Disable Scaling to avoid problems.
+
+In order to completely disable DOF:
+
+open up graphicsprofiles.json and find the postprocessdof line and change high and ultra to 0. \SteamLibrary\steamapps\common\Wolfenstein.The.New.Order\base\graphicsprofiles.json
+
+Should look like this;
+Ex.
+"r_postProcessDofMode" : 
+	{ 
+		"low" : 0,
+		"mid" : 0,
+		"high" : 0,
+		"ultra" : 0
+	},
+	
+{You Are Empty}
+Read Here you will need patch 1.2 and 1snd.
+http://pcgamingwiki.com/wiki/You_Are_Empty
+
+{Yooka-Laylee} - Use ReShade 3.4.1
+Game now works with the new DX11_BUFFER_DETECTION. You can set this also in ReShades DX11 Tab in game.
+[DX11_BUFFER_DETECTION]
+DepthBufferRetrievalMode=0
+DepthBufferTextureFormat=3
+ExtendedDepthBufferDetection=1
+DepthBufferClearingNumber=0
+
+Game was tested with Max setting.
+
+-=Problem Games=-
+_________________________________________________________________________________________________________________________________
+{Condemned: Criminal Origins}
+Depth Buffer Drops time to time Also Dissable FSAA (FSAA OFF)
+
+{Dead Space}
+Games Depth Buffer does not show till after the elevator part at the start. Depth Buffer also goes away when interacting with some objects and when you get video feeds.
+I suggest useing TriDef. For this game.
+
+{Monstrum}
+Start the game in OpenGL or DX3D mode. Game seems to change Depth Buffer now after update. I suggest useing TriDef.
+
+{Portal 2} -Game crashes when loading-
+Install to the Bin Folder DX9.
+Max out everything. Turn off AA
+Open the console.
+Type in console;
+ 
+sv_cheats 1
+bind 3 "r_drawvgui 1"
+bind 2 "r_drawvgui 0"
+
+Once in game press 2 and you should have acess to a Depth Map.
+Game Crashes if you leave r_drawvgui 0 when you die. Don't know how to fix this.
+
+{Shadow warrior(2013)}
+ DM 5        2.5-5.0
+Depth Buffer only in DX9 so launch it in Shadow Warrior XP and turn on FSAAX2 in game.
+
+Try useing TriDef Power3D in DX11 Mode.
+
+{Zombi} -Depth map Pops in and out-
+This Problem seems to happen when looking at one direction. Don't know why it happens. 
+But, I suggest useing a othere 3D application like Tridef or Nvidia 3D Vision.
+_________________________________________________________________________________________________________________________________
+Also Keep in mind if you don't like the depth map I made. You can alawys make your own.
+
+For older versions of reshade.
+https://www.mediafire.com/folder/8ar1jhh1809cl/ReShade_Repository
