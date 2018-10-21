@@ -55,15 +55,6 @@
 //Anti Crosstalk is used to help with image ghosing.
 #define Anti_Crosstalk 0 //Default Zero is Off. One is On.
 
-//Divergence & Convergence//
-uniform float SS <
-	ui_type = "drag";
-	ui_min = 0; ui_max = 1;
-	ui_label = "·Scale Slider·";
-	ui_tooltip = "SS.";
-	ui_category = "SS";
-> = 0.0;
-
 //USER EDITABLE PREPROCESSOR FUNCTIONS END//
 //Divergence & Convergence//
 uniform float Divergence <
@@ -111,9 +102,9 @@ uniform float Auto_Depth_Range <
 	ui_min = 0.0; ui_max = 0.625;
 	ui_label = " Auto Depth Range";
 	ui_tooltip = "The Map Automaticly scales to outdoor and indoor areas.\n" 
-				 "Default is 0.150f, Zero is off.";
+				 "Default is 0.1f, Zero is off.";
 	ui_category = "Divergence & Convergence";
-> = 0.150;
+> = 0.1;
 	
 //Occlusion Masking//
 uniform int Disocclusion_Selection <
@@ -505,7 +496,7 @@ float2 WeaponDepth(in float2 texcoord : TEXCOORD0)
 			if (Depth_Map_Flip)
 			texcoord.y =  1 - texcoord.y;
 			
-		float zBufferWH = tex2D(DepthBuffer, texcoord).x, CutOff = Weapon_Adjust.x, Adjust = Weapon_Adjust.y, Scale = Weapon_Scale;
+		float zBufferWH = tex2D(DepthBuffer, texcoord).x, CutOff = Weapon_Adjust.x , Adjust = Weapon_Adjust.y, Scale = Weapon_Scale;
 		
 		float3 WA_XYZ;
 		
@@ -556,7 +547,7 @@ float2 WeaponDepth(in float2 texcoord : TEXCOORD0)
 		else if(WP == 23)//WP 21
 			WA_XYZ = float3(2.775,1.125,0.278);   //Skyrim: SE	
 		else if(WP == 24)//WP 22
-			WA_XYZ = float3(2.553125,1.0,-2);  //Turok: DH 2017
+			WA_XYZ = float3(1.0,0.313,-2);  //Turok: DH 2017
 		else if(WP == 25)//WP 23
 			WA_XYZ = float3(140.0,500.0,-2);     //Turok2: SoE 2017
 		else if(WP == 26)//WP 24
@@ -623,7 +614,7 @@ float2 WeaponDepth(in float2 texcoord : TEXCOORD0)
 		if (DWZF == 0)//Anti Weapon Hand Z-Fighting code.
 			zBufferWH = lerp(0.020,saturate(zBufferWH),  saturate(abs(LumWeapon(texcoord))));
 		
-	return float2(zBufferWH.x,WA_XYZ.x);	
+	return float2(zBufferWH.x,WA_XYZ.x * 5.0f);	
 }
 
 void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 Color : SV_Target)

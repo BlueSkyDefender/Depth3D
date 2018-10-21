@@ -68,16 +68,16 @@ Inner Shader Setting:
               BladeStorm Nightmare                         DM ?         ?                                 ?
     RB        Bioshock Remastred                           DM 0         7.5         WDM 28                0.050-0.175          
     RB        BloodCM                                      DM 0         15.0                              0.025-0.250                                     
-    RB        BorderLands 2                                DM 0         15.0       *WDM 3                 0.025-0.075                          
-    RB        Call of Duty: Advance Warfare                DM 1         22.5       *WDM 4                 0.050-0.075                                 
-    RB        Call of Duty: Black Ops                      DM 0         10.0       *WDM 5                 0.050-0.075                            
-    RB        Call of Duty: Black Ops 2                    DM 1         22.5       *WDM 4                 0.050-0.075    
-    RB        Call of Duty: Ghost                          DM 1         22.5       *WDM 4                 0.050-0.075    
-    RB        Call of Duty: Infinite Warfare               DM 1         22.5       *WDM 4                 0.050-0.075  
+    RB        BorderLands 2                                DM 0         15.0        WDM 3                 0.025-0.075                          
+    RB        Call of Duty: Advance Warfare                DM 1         22.5        WDM 4                 0.050-0.075                                 
+    RB        Call of Duty: Black Ops                      DM 0         10.0        WDM 5                 0.050-0.075                            
+    RB        Call of Duty: Black Ops 2                    DM 1         22.5        WDM 4                 0.050-0.075    
+    RB        Call of Duty: Ghost                          DM 1         22.5        WDM 4                 0.050-0.075    
+    RB        Call of Duty: Infinite Warfare               DM 1         22.5        WDM 4                 0.050-0.075  
               Casltevania: Lord of Shadows - UE            DM 0         7.5                               0.025-0.250                                         
               Castle of Illusion Micky Mouse               DM 0         12.5                              ???????????
-              Cryostasis                                   DM 0         13.75      *WDM 6                 0.025-0.050                         
-              DOOM 2016                                    DM 0         20.0       *WDM 1                 0.050-0.100       
+              Cryostasis                                   DM 0         13.75       WDM 6                 0.025-0.050                         
+              DOOM 2016                                    DM 0         20.0        WDM 1                 0.050-0.100       
               DarkSiders Warmastred Edition                DM 0         22.5                              0.025-0.075  
               Dead Effect                                  DM ?         6.25                              ?      
               Dead Island                                  DM 0         5.0                               0.025-0.075                       
@@ -96,7 +96,7 @@ Inner Shader Setting:
     RB        Emily Wants To Play                          DM 1         25.0                              0.025-0.200                                      
               Euro Trucks Sim 2                            DM 0         8.750       WDM 25         ?      0.025-0.200 
               Everybody's Gone to the Rapture              DM 0         1.50                              0.025-0.250                      
-              Fallout 4                                    DM 0         6.875      *WDM 8                 0.075-0.200          
+              Fallout 4                                    DM 0         6.875       WDM 8                 0.075-0.200          
     RB        FarCry 3                                     DM 0         7.50                              0.025-0.200
               Firewatch                                    DM 0         5.0                       Yes     0.025-0.250
     RB        GTA V                                        DM 1         12.5                              0.025-0.175                                      
@@ -118,14 +118,14 @@ Inner Shader Setting:
     RB        Mafia III                                    DM 1         6.25                              0.025-0.075        
     RB        Mass Effect Andromeda                        DM 1         15.0                              0.075-0.175                                        
     RB        Metal Gear Rising                            DM 0         13.75                             0.025-0.250       
-    RB        Metro 2033 Redux                             DM 0         7.50       *WDM 11                0.050-0.125                
-    RB        Metro Last Light Redux                       DM 0         7.50       *WDM 11                0.050-0.125                      
+    RB        Metro 2033 Redux                             DM 0         7.50        WDM 11                0.050-0.125                
+    RB        Metro Last Light Redux                       DM 0         7.50        WDM 11                0.050-0.125                      
     RB        Middle-earth: Shadow of Mordor               DM 1         25.0                              0.025-0.250        
               Mirror's Edge Catalyst                       DM 1         13.750                            0.025-0.125       
     RB        Monster Hunter World                         DM 1         13.750                            0.025-0.075
               Mordheim: City of the Damned                 DM 0         12.500                    Yes     0.025-0.250         
     RB        Naruto Shippuden UNS3 Full Blurst HD         DM 0         36.25                             0.025-0.125        
-    RB        NecroVision: Lost Company                    DM 0         7.50       *WDM 12                0.025-0.125 
+    RB        NecroVision: Lost Company                    DM 0         7.50        WDM 12                0.025-0.125 
               Need For Speed Rivals                        ?         ?                                    ?
               Need for Speed Most Wanted                   ?         ?                                    ?
               NieRAutomata                                 DM 0         20.0                              0.050-0.075
@@ -134,7 +134,7 @@ Inner Shader Setting:
     RB        Penumbra: Black Plague                       DM 0         7.5                               0.025-0.250       
     RB        Phantasmal                                   DM 0         7.5                       Yes     0.010-0.020
     RB        Prey 2006                                    DM 0         12.5        WDM 26                0.050-0.075       
-    RB        Prey 2017                                    DM 1         18.75    *WDM 9 & 10              0.025-0.075                
+    RB        Prey 2017                                    DM 1         18.75     WDM 9 & 10              0.025-0.075                
     RB        Quake Epsilon                                DM 0         15.00       WDM 15                0.075-0.125 
               Quake 2 XP                                   DM 0         7.5         WDM 16                0.025-0.150
     RB        Quake 4                                      DM 0         7.5         WDM 17                0.025-0.125
@@ -170,16 +170,16 @@ Inner Shader Setting:
     RB        Through The Woods!                           DM 1         7.5                       Yes     0.025-0.075 
               Titanfall 2                                  DM 0         7.5         WDM 27                0.025-0.100 
               Total War: Warhammer                         DM 0         2.625                             0.025-0.075
-    RB        Turok: Dinosaur Hunter                       DM 0         200.0       WDM 22                0.010-0.075
+    RB       *Turok: Dinosaur Hunter                       DM 0         250.0      *WDM 22                0.0375-0.0625
               Turok 2: Seeds of Evil                       DM 0         200.0       WDM 23                0.050-0.150
-    RB        Unreal Gold with v227                        DM 0         17.50      *WDM 0                 0.010-0.050      
+    RB        Unreal Gold with v227                        DM 0         17.50       WDM 0                 0.010-0.050      
               Warhammer: End Times - Vermintide            DM 0         10.0                              0.010-0.100
               Warhammer: Vermintide 2                      DM 0         8.75                              0.010-0.100         
     RB        Watch Dogs 2                                 DM 1         7.5                               0.050-0.100        
               Witcher 3                                    DM 1         7.5                               0.050-0.100            
-              Wolfenstine                                  DM 0         7.5        *WDM 2                 0.025-0.100
-    RB        Wolfenstine: The New Order                   DM 0         25.00      *WDM 7                 0.025-0.075
-    RB        Wolfenstine: The Old Blood                   DM 0         25.00      *WDM 7                 0.025-0.075
+              Wolfenstine                                  DM 0         7.5         WDM 2                 0.025-0.100
+    RB        Wolfenstine: The New Order                   DM 0         25.00       WDM 7                 0.025-0.075
+    RB        Wolfenstine: The Old Blood                   DM 0         25.00       WDM 7                 0.025-0.075
     RB        Yooka-Laylee                                 DM 1         6.875                     Yes     0.025-0.075
               Ziggurat                                     DM 0         7.5                               0.075-0.175
               Zombie Army Trilogy                          DM 0         12.5                              0.050-0.075
@@ -604,8 +604,8 @@ You may need to install the other things in the game folder for the game to run 
 {Through The Woods} - Use Reshade 3.4.1
 In game Set your Res to Native screen Res.
 
-{Turok: Dinosaur Hunter} - Use Reshade 3.0.4
-Turn Off "Light Scatter," in Graphics Menu.
+{Turok: Dinosaur Hunter} - Use Reshade 3.4.1
+If you are useing an older build of reshade you have to turn off "Light Scatter," in Graphics Menu.
 
 {Unreal Gold}
 Use v227 patch. Use the DX9 render. Install Rehsade 3.0 to System folder select DX9.
