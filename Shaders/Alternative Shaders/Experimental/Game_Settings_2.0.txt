@@ -96,7 +96,7 @@ Inner Shader Setting:
     RB        Emily Wants To Play                          DM 1         25.0                              0.025-0.200                                      
               Euro Trucks Sim 2                            DM 0         8.750       WDM 25         ?      0.025-0.200 
               Everybody's Gone to the Rapture              DM 0         1.50                              0.025-0.250                      
-              Fallout 4                                    DM 0         6.875       WDM 8                 0.075-0.200          
+             *Fallout 4                                    DM 0         6.25       *WDM 8                 0.0375-0.0625          
     RB        FarCry 3                                     DM 0         7.50                              0.025-0.200
               Firewatch                                    DM 0         5.0                       Yes     0.025-0.250
     RB        GTA V                                        DM 1         12.5                              0.025-0.175                                      
@@ -126,8 +126,8 @@ Inner Shader Setting:
               Mordheim: City of the Damned                 DM 0         12.500                    Yes     0.025-0.250         
     RB        Naruto Shippuden UNS3 Full Blurst HD         DM 0         36.25                             0.025-0.125        
     RB        NecroVision: Lost Company                    DM 0         7.50        WDM 12                0.025-0.125 
-              Need For Speed Rivals                        ?         ?                                    ?
-              Need for Speed Most Wanted                   ?         ?                                    ?
+              Need For Speed Rivals                        ?            ?                                 ?
+              Need for Speed Most Wanted                   ?            ?                                 ?
               NieRAutomata                                 DM 0         20.0                              0.050-0.075
     RB        Nosferatu: The Wrath of Malachi              DM 0         62.5                              0.150-0.175 
               Observer                                     DM 1         10.0                              0.025-0.250 
@@ -171,7 +171,7 @@ Inner Shader Setting:
               Titanfall 2                                  DM 0         7.5         WDM 27                0.025-0.100 
               Total War: Warhammer                         DM 0         2.625                             0.025-0.075
     RB       *Turok: Dinosaur Hunter                       DM 0         250.0      *WDM 22                0.0375-0.0625
-              Turok 2: Seeds of Evil                       DM 0         200.0       WDM 23                0.050-0.150
+             *Turok 2: Seeds of Evil                       DM 0         250.0      *WDM 23                0.0375-0.0625
     RB        Unreal Gold with v227                        DM 0         17.50       WDM 0                 0.010-0.050      
               Warhammer: End Times - Vermintide            DM 0         10.0                              0.010-0.100
               Warhammer: Vermintide 2                      DM 0         8.75                              0.010-0.100         
@@ -186,8 +186,8 @@ Inner Shader Setting:
               
                                                        [- - - - - - - - - - - - - - - -=: Recommended Settings :=- - - - - - - - - - - - - - - -]
 [Read Below] [Special Depth Map Game List]             [Depth Map] [Adjustment] [Weapon DM] [FlipZ] [ZPD / Range] [Auto Depth] [SD / FB] [Offset]
-             Amnesia: Machine for Pigs                    DM 0       50.00                    No      0.025-0.050                         0.00005       
-             Amnesia: The Dark Descent                    DM 0       50.00                    No      0.025-0.050                         0.00005
+             Amnesia: Machine for Pigs                    DM 0       50.00                    No      0.025-0.050                         0.00025       
+             Amnesia: The Dark Descent                    DM 0       50.00                    No      0.025-0.050                         0.00025
             *Crash Bandicoot™ N. Sane Trilogy             DM 0       ????                   ??????    ???????????                         ??????
              Double Dragon Neon                           DM 0       1.0                      No      0.025-0.075                         1.1000 
              Dungeons 2                                   DM 0       3.50                     Yes     0.025-0.250                         0.0050

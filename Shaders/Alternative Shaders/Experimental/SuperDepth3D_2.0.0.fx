@@ -90,12 +90,14 @@ uniform float ZPD <
 	ui_category = "Divergence & Convergence";
 > = 0.010;
 
-uniform bool Auto_Balance <
+uniform int Auto_Balance_Ex <
+	ui_type = "drag";
+	ui_min = 0; ui_max = 2;
 	ui_label = " Auto Balance";
 	ui_tooltip = "Automatically Balance between ZPD Depth and Scene Depth.\n" 
 				 "Default is Off.";
 	ui_category = "Divergence & Convergence";
-> = false;
+> = 0;
 
 uniform float Auto_Depth_Range <
 	ui_type = "drag";
@@ -201,7 +203,7 @@ uniform int Weapon_Scale <
 	ui_category = "Weapon & HUD Depth Map";
 > = 0;
 
-uniform float2 Weapon_Adjust <
+uniform float3 Weapon_Adjust <
 	ui_type = "drag";
 	ui_min = 0.0; ui_max = 1.0;
 	ui_label = " Weapon Hand Adjust";
@@ -209,9 +211,9 @@ uniform float2 Weapon_Adjust <
 				 "X, CutOff Point used to set a diffrent scale for first person hand apart from world scale.\n"
 				 "Y, Precision is used to locate the first person hand in world scale.\n"
 				 "Z, Power needed to fine tune first person hand.\n"
-	             "Default is float3(X 0.0, Y 0.0, Z 0.0)";
+	             "Default is float3(X 0.0, Y 0.0, Z 0.0, w)";
 	ui_category = "Weapon & HUD Depth Map";
-> = float2(0.0,0.0);
+> = float3(0.0,0.0,0.0);
 
 uniform float Weapon_Depth_Adjust <
 	ui_type = "drag";
@@ -496,105 +498,114 @@ float2 WeaponDepth(in float2 texcoord : TEXCOORD0)
 			if (Depth_Map_Flip)
 			texcoord.y =  1 - texcoord.y;
 			
-		float zBufferWH = tex2D(DepthBuffer, texcoord).x, CutOff = Weapon_Adjust.x , Adjust = Weapon_Adjust.y, Scale = Weapon_Scale;
+		float zBufferWH = tex2D(DepthBuffer, texcoord).x, CutOff = Weapon_Adjust.x , Adjust = Weapon_Adjust.y, Tune = Weapon_Adjust.z, Scale = Weapon_Scale;
 		
-		float3 WA_XYZ;
+		float4 WA_XYZW;
 		
-		if (WP == 1)                                // WA_XYZ.x | WA_XYZ.y | WA_XYZ.z
-			WA_XYZ = float3(CutOff, Adjust, Scale); // X Cutoff | Y Adjust | Z Scale		
+		if (WP == 1)                                       // WA_XYZW.x | WA_XYZW.y | WA_XYZW.z | WA_XYZW.w 
+			WA_XYZW = float4(CutOff, Adjust, Tune, Scale); // X Cutoff  | Y Adjust  | Z Tuneing | W Scaling 		
 		else if(WP == 2) //WP 0
-			WA_XYZ = float3(4.0,0,0);      //Unreal Gold with v227		
+			WA_XYZW = float4(4.0,0,0,0);      //Unreal Gold with v227		
 		else if(WP == 3) //WP 1
-			WA_XYZ = float3(5.750,0.625,1);   //DOOM 2016
+			WA_XYZW = float4(5.750,0.625,0,1);   //DOOM 2016
 		else if(WP == 4) //WP 2
-			WA_XYZ = float3(3.2625,0.6275,0);   //Wolfenstine
+			WA_XYZW = float4(3.2625,0.6275,0,0);   //Wolfenstine
 		else if(WP == 5) //WP 3
-			WA_XYZ = float3(3.25,6.875,0);    //BorderLands 2		
+			WA_XYZW = float4(3.25,6.875,0,0);    //BorderLands 2		
 		else if(WP == 6) //WP 4
-			WA_XYZ = float3(3.9,10.0,2);     //CoD:AW		
+			WA_XYZW = float4(3.9,10.0,0,2);     //CoD:AW		
 		else if(WP == 7) //WP 5
-			WA_XYZ = float3(3.9,12.5,2);     //CoD: Black Ops
+			WA_XYZW = float4(3.9,12.5,0,2);     //CoD: Black Ops
 		else if(WP == 8) //WP 6
-			WA_XYZ = float3(2.975,0.7875,0);    //Cryostasis	
+			WA_XYZW = float4(2.975,0.7875,0,0);    //Cryostasis	
 		else if(WP == 9) //WP 7
-			WA_XYZ = float3(4.750,0.9375,0);//Wolfenstine: The New Order
+			WA_XYZW = float4(4.750,0.9375,0,0);//Wolfenstine: The New Order
 		else if(WP == 10)//WP 8
-			WA_XYZ = float3(1.686,2.5,2);     //Fallout 4
+			WA_XYZW = float4(0.253,0.450,0,2);     //Fallout 4
 		else if(WP == 11)//WP 9
-			WA_XYZ = float3(1.900,0.750,1);  //Prey 2017 High Settings and <
+			WA_XYZW = float4(1.900,0.750,0,1);  //Prey 2017 High Settings and <
 		else if(WP == 12)//WP 10
-			WA_XYZ = float3(1.900,1.5,1);     //Prey 2017 Very High	
+			WA_XYZW = float4(1.900,1.5,0,1);     //Prey 2017 Very High	
 		else if(WP == 13)//WP 11
-			WA_XYZ = float3(2.6,0.7048,1);  //Metro Redux Games	
+			WA_XYZW = float4(2.6,0.7048,0,1);  //Metro Redux Games	
 		else if(WP == 14)//WP 12
-			WA_XYZ = float3(3.250,1.8875,-1);   //NecroVisioN: Lost Company
+			WA_XYZW = float4(3.250,1.8875,0,-1);   //NecroVisioN: Lost Company
 		else if(WP == 15)//WP 13
-			WA_XYZ = float3(3.925,17.5,0.400);    //Kingpin Life of Crime
+			WA_XYZW = float4(3.925,17.5,0,0.400);    //Kingpin Life of Crime
 		else if(WP == 16)//WP 14
-			WA_XYZ = float3(5.45,1.0,0.550);      //Rage64		
+			WA_XYZW = float4(5.45,1.0,0,0.550);      //Rage64		
 		else if(WP == 17)//WP 15
-			WA_XYZ = float3(2.685,1.0,0.375);     //Quake DarkPlaces	
+			WA_XYZW = float4(2.685,1.0,0,0.375);     //Quake DarkPlaces	
 		else if(WP == 18)//WP 16
-			WA_XYZ = float3(3.925,16.25,0.400);   //Quake 2 XP
+			WA_XYZW = float4(3.925,16.25,0,0.400);   //Quake 2 XP
 		else if(WP == 19)//WP 17
-			WA_XYZ = float3(5.000000,7.0,0.500);  //Quake 4
+			WA_XYZW = float4(5.000000,7.0,0,0.500);  //Quake 4
 		else if(WP == 20)//WP 18
-			WA_XYZ = float3(3.6875,7.250,0.400);  //RTCW
+			WA_XYZW = float4(3.6875,7.250,0,0.400);  //RTCW
 		else if(WP == 21)//WP 19
-			WA_XYZ = float3(2.55925,0.75,0.255);  //S.T.A.L.K.E.R: Games
+			WA_XYZW = float4(2.55925,0.75,0,0.255);  //S.T.A.L.K.E.R: Games
 		else if(WP == 22)//WP 20
-			WA_XYZ = float3(16.250,87.50,0.825);  //SOMA
+			WA_XYZW = float4(16.250,87.50,0,0.825);  //SOMA
 		else if(WP == 23)//WP 21
-			WA_XYZ = float3(2.775,1.125,0.278);   //Skyrim: SE	
+			WA_XYZW = float4(2.775,1.125,0,0.278);   //Skyrim: SE	
 		else if(WP == 24)//WP 22
-			WA_XYZ = float3(1.0,0.313,-2);  //Turok: DH 2017
+			WA_XYZW = float4(1.0,1.0,0.075,-2);         //Turok: DH 2017*
 		else if(WP == 25)//WP 23
-			WA_XYZ = float3(140.0,500.0,-2);     //Turok2: SoE 2017
+			WA_XYZW = float4(0.570,1.0,0.005,-2);     //Turok2: SoE 2017*
 		else if(WP == 26)//WP 24
-			WA_XYZ = float3(2.000,-40.0,2.0);     //Dying Light
+			WA_XYZW = float4(2.000,-40.0,0,2.0);     //Dying Light
 		else if(WP == 27)//WP 25
-			WA_XYZ = float3(2.800,1.0,0.280);     //EuroTruckSim2
+			WA_XYZW = float4(2.800,1.0,0,0.280);     //EuroTruckSim2
 		else if(WP == 28)//WP 26
-			WA_XYZ = float3(5.000,2.875,0.500);   //Prey - 2006
+			WA_XYZW = float4(5.000,2.875,0,0.500);   //Prey - 2006
 		else if(WP == 29)//WP 27
-			WA_XYZ = float3(2.77575,0.3625,0.3625);//TitanFall 2
+			WA_XYZW = float4(2.77575,0.3625,0,0.3625);//TitanFall 2
 		else if(WP == 30)//WP 28
-			WA_XYZ = float3(2.52475,0.05625,0.260);//Bioshock Remastred
+			WA_XYZW = float4(2.52475,0.05625,0,0.260);//Bioshock Remastred
 		else if(WP == 31)//WP 29
-			WA_XYZ = float3(2.8,1.5625,0.350);    //Serious Sam Revolition
+			WA_XYZW = float4(2.8,1.5625,0,0.350);    //Serious Sam Revolition
 		else if(WP == 32)//WP 30
-			WA_XYZ = float3(5.050,2.750,0.4913);  //Wolfenstine
+			WA_XYZW = float4(5.050,2.750,0,0.4913);  //Wolfenstine
 		//else if(WP == 33)//WP 31
-			//WA_XYZ = float3(0.0,0.0,0.0);        //Game
+			//WA_XYZW = float4(0.0,0.0,0,0.0);        //Game
 		//else if(WP == 34)//WP 32
-			//WA_XYZ = float3(0.0,0.0,0.0);        //Game
+			//WA_XYZW = float4(0.0,0.0,0,0.0);        //Game
 		//else if(WP == 35)//WP 33
-			//WA_XYZ = float3(0.0,0.0,0.0);        //Game
+			//WA_XYZW = float4(0.0,0.0,0,0.0);        //Game
 		//else if(WP == 36)//WP 34
-			//WA_XYZ = float3(0.0,0.0,0.0);        //Game
+			//WA_XYZW = float4(0.0,0.0,0,0.0);        //Game
 		//else if(WP == 37)//WP 35
-			//WA_XYZ = float3(0.0,0.0,0.0);        //Game
+			//WA_XYZW = float4(0.0,0.0,0,0.0);        //Game
 		//Add Weapon Profiles Here
-
-		// WA_XYZ.x | WA_XYZ.y | WA_XYZ.z
-		// X Cutoff | Y Adjust | Z Scale
+		
 		// Hear on out is the Weapon Hand Adjustment code.
 		
-		float Set_Scale , P = (WA_XYZ.y + 0.00000001) * 100;
+		float Set_Scale , P = (WA_XYZW.y + 0.00000001) * 100;
 		
-		if (WA_XYZ.z == -2)
-			Set_Scale = 0.525;
-		else if (WA_XYZ.z == -1)
+		if (WA_XYZW.w == -2)
+		{
+			WA_XYZW.x *= 21.0f;
+			Set_Scale = 0.5f;
+		}
+		else if (WA_XYZW.w == -1)
+		{
 			Set_Scale = 0.3345;
-		else if (WA_XYZ.z == 0)
-			Set_Scale = 0.105;
-		else if (WA_XYZ.z == 1)
+		}
+		else if (WA_XYZW.w == 0)
+		{
+			Set_Scale = 0.100;
+		}
+		else if (WA_XYZW.w == 1)
+		{
 			Set_Scale = 0.0870;
-		else if (WA_XYZ.z == 2)
+		}
+		else if (WA_XYZW.w == 2)
+		{
 			Set_Scale = 0.01;
+		}
 			
 		//FPS Hand Depth Maps require more precision at smaller scales to look right.		 		
- 		float Far = P * Set_Scale, Near = P;
+ 		float Far = (P * Set_Scale) * (1+WA_XYZW.z), Near = P;
  		
 		float2 Z = float2( zBufferWH, 1-zBufferWH );
 				
@@ -610,11 +621,14 @@ float2 WeaponDepth(in float2 texcoord : TEXCOORD0)
 		//This code is used to adjust the already set Weapon Hand Profile.
 		float WA = 1 - Weapon_Depth_Adjust;
 		zBufferWH /= WA - zBufferWH * (0 - WA);
-
-		if (DWZF == 0)//Anti Weapon Hand Z-Fighting code.
-			zBufferWH = lerp(0.020,saturate(zBufferWH),  saturate(abs(LumWeapon(texcoord))));
 		
-	return float2(zBufferWH.x,WA_XYZ.x * 5.0f);	
+		//Auto Anti Weapon Depth Map Z-Fighting is always on.
+		float WeaponLumAdjust = saturate(abs(smoothstep(0,0.5,LumWeapon(texcoord)*2.5)));	
+		
+		if (DWZF == 0)//Anti Weapon Hand Z-Fighting code trigger
+			zBufferWH = lerp(0.020,saturate(zBufferWH), saturate(WeaponLumAdjust) );
+		
+	return float2(zBufferWH.x,WA_XYZW.x);	
 }
 
 void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 Color : SV_Target)
@@ -778,7 +792,7 @@ float Conv(float D,float2 texcoord)
 		if(Convergence_Mode)
 			Z = Divergence_Locked;
 			
-		if(Auto_Balance)
+		if(Auto_Balance_Ex > 0)
 			ZP = clamp(ALC,0.0f,1.0f);
 				
 		float Convergence = 1 - Z / D;
@@ -1261,7 +1275,12 @@ float4 PS_calcLR(float2 texcoord)
 
 float4 Average_Luminance(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Target
 {
-	float3 Average_Lum = tex2D(SamplerDM,float2(texcoord.x,texcoord.y * 0.750 )).ggg;
+	float ABE = 0.750;
+	
+	if(Auto_Balance_Ex == 2)
+		ABE = 0.5;
+	
+	float3 Average_Lum = tex2D(SamplerDM,float2(texcoord.x,texcoord.y * ABE )).ggg;
 	return float4(Average_Lum,1);
 }
 
@@ -1272,7 +1291,7 @@ float4 Average_Luminance_Weapon(float4 position : SV_Position, float2 texcoord :
 }
 
 ////////////////////////////////////////////////////////Logo/////////////////////////////////////////////////////////////////////////
-uniform float timer < source = "timer"; >;
+uniform float timer < source = "timer"; >; //Please do not remove.
 float4 Out(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Target
 {
 	float PosX = 0.5*BUFFER_WIDTH*pix.x,PosY = 0.5*BUFFER_HEIGHT*pix.y;	
