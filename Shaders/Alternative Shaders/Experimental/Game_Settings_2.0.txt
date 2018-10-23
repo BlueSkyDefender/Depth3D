@@ -52,9 +52,9 @@ Inner Shader Setting:
 =================================================================================================================================
 -=:[Settings have to be change and adjusted for diffrent Resolutions, screen size, and screen types]:=-
 
-                                                       [- - - - - - - - - - - - - - -=: Recommended Settings :=- - - - - - - - - - - - - - -]
-[Read Below] [Game List]                               [Depth Map] [Adjustment] [Weapon DM] [Depth Flip] [ZPD / Range] [Auto Depth] [SD / FB]
-    RB        .Hack//G.U.                                  DM 1         25                                0.050-0.125        
+                                                       [- - - - - - - - - - - - - - - -=: Recommended Settings :=- - - - - - - - - - - - - - - -]
+[Read Below] [Game List]                               [Depth Map] [Adjustment] [Weapon DM] [Depth Flip] [+ZPD / +Range] [Auto Balance] [SD / FB]
+    RB        .Hack//G.U.                                  DM 1         25                                0.0500-0.1250        
               ABZU                                         DM 1         50                                0.050-0.250                    
               Agony                                        DM 1         50                                0.025-0.250
               Alien Isolation                              DM 0         25                                0.030-0.075
@@ -68,7 +68,7 @@ Inner Shader Setting:
               BladeStorm Nightmare                         DM ?         ?                                 ?
     RB        Bioshock Remastred                           DM 0         7.5         WDM 28                0.050-0.175          
     RB        BloodCM                                      DM 0         15.0                              0.025-0.250                                     
-    RB        BorderLands 2                                DM 0         15.0        WDM 3                 0.025-0.075                          
+    RB       *BorderLands 2                                DM 0         20.0       *WDM 3                 0.0375-0.0625      Yes 2          SD                          
     RB        Call of Duty: Advance Warfare                DM 1         22.5        WDM 4                 0.050-0.075                                 
     RB        Call of Duty: Black Ops                      DM 0         10.0        WDM 5                 0.050-0.075                            
     RB        Call of Duty: Black Ops 2                    DM 1         22.5        WDM 4                 0.050-0.075    
@@ -96,7 +96,7 @@ Inner Shader Setting:
     RB        Emily Wants To Play                          DM 1         25.0                              0.025-0.200                                      
               Euro Trucks Sim 2                            DM 0         8.750       WDM 25         ?      0.025-0.200 
               Everybody's Gone to the Rapture              DM 0         1.50                              0.025-0.250                      
-             *Fallout 4                                    DM 0         6.25       *WDM 8                 0.0375-0.0625          
+             *Fallout 4                                    DM 0         6.25       *WDM 8                 0.0375-0.0625      Yes 2          SD          
     RB        FarCry 3                                     DM 0         7.50                              0.025-0.200
               Firewatch                                    DM 0         5.0                       Yes     0.025-0.250
     RB        GTA V                                        DM 1         12.5                              0.025-0.175                                      
@@ -134,7 +134,7 @@ Inner Shader Setting:
     RB        Penumbra: Black Plague                       DM 0         7.5                               0.025-0.250       
     RB        Phantasmal                                   DM 0         7.5                       Yes     0.010-0.020
     RB        Prey 2006                                    DM 0         12.5        WDM 26                0.050-0.075       
-    RB        Prey 2017                                    DM 1         18.75     WDM 9 & 10              0.025-0.075                
+    RB       *Prey 2017                                    DM 1         18.75    *WDM 9 & 10              0.0375-0.0500      Yes 2          SD                
     RB        Quake Epsilon                                DM 0         15.00       WDM 15                0.075-0.125 
               Quake 2 XP                                   DM 0         7.5         WDM 16                0.025-0.150
     RB        Quake 4                                      DM 0         7.5         WDM 17                0.025-0.125
@@ -170,8 +170,8 @@ Inner Shader Setting:
     RB        Through The Woods!                           DM 1         7.5                       Yes     0.025-0.075 
               Titanfall 2                                  DM 0         7.5         WDM 27                0.025-0.100 
               Total War: Warhammer                         DM 0         2.625                             0.025-0.075
-    RB       *Turok: Dinosaur Hunter                       DM 0         250.0      *WDM 22                0.0375-0.0625
-             *Turok 2: Seeds of Evil                       DM 0         250.0      *WDM 23                0.0375-0.0625
+    RB       *Turok: Dinosaur Hunter                       DM 0         250.0      *WDM 22                0.0375-0.0625      Yes 2          SD
+             *Turok 2: Seeds of Evil                       DM 0         250.0      *WDM 23                0.0375-0.0625      Yes 2          SD
     RB        Unreal Gold with v227                        DM 0         17.50       WDM 0                 0.010-0.050      
               Warhammer: End Times - Vermintide            DM 0         10.0                              0.010-0.100
               Warhammer: Vermintide 2                      DM 0         8.75                              0.010-0.100         

@@ -205,7 +205,7 @@ uniform int Weapon_Scale <
 
 uniform float3 Weapon_Adjust <
 	ui_type = "drag";
-	ui_min = 0.0; ui_max = 2.0;
+	ui_min = 0.0; ui_max = 25.0;
 	ui_label = " Weapon Hand Adjust";
 	ui_tooltip = "Adjust Weapon depth map for your games.\n"
 				 "X, CutOff Point used to set a diffrent scale for first person hand apart from world scale.\n"
@@ -511,7 +511,7 @@ float2 WeaponDepth(in float2 texcoord : TEXCOORD0)
 		else if(WP == 4) //WP 2
 			WA_XYZW = float4(3.2625,0.6275,0,0);   //Wolfenstine
 		else if(WP == 5) //WP 3
-			WA_XYZW = float4(3.25,6.875,0,0);    //BorderLands 2		
+			WA_XYZW = float4(0.625,1.250,0.0375,0);    //BorderLands 2		
 		else if(WP == 6) //WP 4
 			WA_XYZW = float4(3.9,10.0,0,2);     //CoD:AW		
 		else if(WP == 7) //WP 5
@@ -523,9 +523,9 @@ float2 WeaponDepth(in float2 texcoord : TEXCOORD0)
 		else if(WP == 10)//WP 8
 			WA_XYZW = float4(0.253,1.0,0.0125,2);     //Fallout 4
 		else if(WP == 11)//WP 9
-			WA_XYZW = float4(1.900,0.750,0,1);  //Prey 2017 High Settings and <
+			WA_XYZW = float4(0.2832,20.0,0,0);  //Prey 2017 High Settings and <
 		else if(WP == 12)//WP 10
-			WA_XYZW = float4(1.900,1.5,0,1);     //Prey 2017 Very High	
+			WA_XYZW = float4(0.2712,25.0,0,1);     //Prey 2017 Very High	
 		else if(WP == 13)//WP 11
 			WA_XYZW = float4(2.6,0.7048,0,1);  //Metro Redux Games	
 		else if(WP == 14)//WP 12
@@ -593,11 +593,11 @@ float2 WeaponDepth(in float2 texcoord : TEXCOORD0)
 		}
 		else if (WA_XYZW.w == 0)
 		{
-			Set_Scale = 0.100;
+			Set_Scale = 0.105;
 		}
 		else if (WA_XYZW.w == 1)
 		{
-			Set_Scale = 0.0870;
+			Set_Scale = 0.07265625;
 		}
 		else if (WA_XYZW.w == 2)
 		{
