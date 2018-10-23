@@ -205,7 +205,7 @@ uniform int Weapon_Scale <
 
 uniform float3 Weapon_Adjust <
 	ui_type = "drag";
-	ui_min = 0.0; ui_max = 1.0;
+	ui_min = 0.0; ui_max = 2.0;
 	ui_label = " Weapon Hand Adjust";
 	ui_tooltip = "Adjust Weapon depth map for your games.\n"
 				 "X, CutOff Point used to set a diffrent scale for first person hand apart from world scale.\n"
@@ -442,16 +442,16 @@ sampler SamplerLumWeapon
 		MipFilter = LINEAR;
 	};	
 	
-float Lum(in float2 texcoord : TEXCOORD0)
+float2 Lum(in float2 texcoord : TEXCOORD0)
 	{
-		float Luminance = tex2Dlod(SamplerLum,float4(texcoord,0,0)).r; //Average Luminance Texture Sample 
+		float2 Luminance = tex2Dlod(SamplerLum,float4(texcoord,0,0)).xy; //Average Luminance Texture Sample 
 
 		return Luminance;
 	}
 	
 float LumWeapon(in float2 texcoord : TEXCOORD0)
 	{
-		float Luminance = tex2Dlod(SamplerLumWeapon,float4(texcoord,0,0)).r; //Average Luminance Texture Sample 
+		float Luminance = tex2Dlod(SamplerLumWeapon,float4(texcoord,0,0)).x; //Average Luminance Texture Sample 
 
 		return Luminance;
 	}
@@ -521,7 +521,7 @@ float2 WeaponDepth(in float2 texcoord : TEXCOORD0)
 		else if(WP == 9) //WP 7
 			WA_XYZW = float4(4.750,0.9375,0,0);//Wolfenstine: The New Order
 		else if(WP == 10)//WP 8
-			WA_XYZW = float4(0.253,0.450,0,2);     //Fallout 4
+			WA_XYZW = float4(0.253,1.0,0.0125,2);     //Fallout 4
 		else if(WP == 11)//WP 9
 			WA_XYZW = float4(1.900,0.750,0,1);  //Prey 2017 High Settings and <
 		else if(WP == 12)//WP 10
@@ -551,7 +551,7 @@ float2 WeaponDepth(in float2 texcoord : TEXCOORD0)
 		else if(WP == 24)//WP 22
 			WA_XYZW = float4(1.0,1.0,0.075,-2);         //Turok: DH 2017*
 		else if(WP == 25)//WP 23
-			WA_XYZW = float4(0.570,1.0,0.005,-2);     //Turok2: SoE 2017*
+			WA_XYZW = float4(0.570,2.0,0.0,-2);     //Turok2: SoE 2017*
 		else if(WP == 26)//WP 24
 			WA_XYZW = float4(2.000,-40.0,0,2.0);     //Dying Light
 		else if(WP == 27)//WP 25
@@ -624,10 +624,10 @@ float2 WeaponDepth(in float2 texcoord : TEXCOORD0)
 		
 		//Auto Anti Weapon Depth Map Z-Fighting is always on.
 		float WeaponLumAdjust = saturate(abs(smoothstep(0,0.5,LumWeapon(texcoord)*2.5)));	
-		
+				
 		if (DWZF == 0)//Anti Weapon Hand Z-Fighting code trigger
-			zBufferWH = lerp(0.020,saturate(zBufferWH), saturate(WeaponLumAdjust) );
-		
+			zBufferWH = saturate(lerp(0.025, zBufferWH, saturate(WeaponLumAdjust)));
+					
 	return float2(zBufferWH.x,WA_XYZW.x);	
 }
 
@@ -767,7 +767,7 @@ void AO_in(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out
 
 float AutoDepthRange( float d, float2 texcoord )
 {
-	float LumAdjust = smoothstep(-0.0175f,Auto_Depth_Range,Lum(texcoord));
+	float LumAdjust = smoothstep(-0.0175f,Auto_Depth_Range,Lum(texcoord).y);
     return min(1,( d - 0 ) / ( LumAdjust - 0));
 }
 
@@ -776,7 +776,7 @@ float Conv(float D,float2 texcoord)
 	float DB, Z, ZP, Con = ZPD, NF_Power;
 			
 		float Divergence_Locked = Divergence*0.001, MS = Divergence * pix.x;
-		float ALC = abs(Lum(texcoord));
+		float ALC = abs(Lum(texcoord).x);
 					
 		Z = Con;
 		Divergence_Locked = Divergence_Locked;
@@ -797,8 +797,8 @@ float Conv(float D,float2 texcoord)
 				
 		float Convergence = 1 - Z / D;
 						
-		//Depth boost always on.
-		D = lerp( D, min(1.0f,1.25f * D), 0.425f);
+		//Depth boost
+		//D = lerp( D, min(1.0f,1.25f * D), 0.425f);
 				
     return lerp(MS * Convergence,MS * D, ZP);
 }
@@ -1280,8 +1280,9 @@ float4 Average_Luminance(float4 position : SV_Position, float2 texcoord : TEXCOO
 	if(Auto_Balance_Ex == 2)
 		ABE = 0.5;
 	
-	float3 Average_Lum = tex2D(SamplerDM,float2(texcoord.x,texcoord.y * ABE )).ggg;
-	return float4(Average_Lum,1);
+	float Average_Lum_ZPD = tex2D(SamplerDM,float2(texcoord.x,texcoord.y * ABE )).y;
+	float Average_Lum_Full = tex2D(SamplerDM,float2(texcoord.x,texcoord.y )).y;
+	return float4(Average_Lum_ZPD,Average_Lum_Full,0,1);
 }
 
 float4 Average_Luminance_Weapon(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Target
