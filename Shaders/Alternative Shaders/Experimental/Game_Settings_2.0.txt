@@ -66,17 +66,17 @@ Inner Shader Setting:
               Batman: Arkham City                          DM 0         15.0                              0.050-0.100
               Beware                                       DM 1         62.5                      Yes     0.100-0.150                       
               BladeStorm Nightmare                         DM ?         ?                                 ?
-    RB        Bioshock Remastred                           DM 0         7.5         WDM 28                0.050-0.175          
+    RB        Bioshock Remastred                           DM 0         7.5         WDM *                 0.050-0.175          
     RB        BloodCM                                      DM 0         15.0                              0.025-0.250                                     
-    RB       *BorderLands 2                                DM 0         20.0       *WDM 3                 0.0375-0.0625      Yes 2          SD                          
-    RB        Call of Duty: Advance Warfare                DM 1         22.5        WDM 4                 0.050-0.075                                 
-    RB        Call of Duty: Black Ops                      DM 0         10.0        WDM 5                 0.050-0.075                            
-    RB        Call of Duty: Black Ops 2                    DM 1         22.5        WDM 4                 0.050-0.075    
-    RB        Call of Duty: Ghost                          DM 1         22.5        WDM 4                 0.050-0.075    
-    RB        Call of Duty: Infinite Warfare               DM 1         22.5        WDM 4                 0.050-0.075  
+    RB       *BorderLands 2                                DM 0         20.0       *WDM 2                 0.0375-0.0625      Yes 2          SD                          
+    RB       *Call of Duty: Advance Warfare                DM 1         15.0       *WDM 8                 0.0375-0.0625      Yes 2          SD                                 
+    RB       *Call of Duty: Black Ops                      DM 0         10.0        WDM *                 0.050-0.075                            
+    RB       *Call of Duty: Black Ops 2                    DM 1         15.0       *WDM 8                 0.0375-0.0625      Yes 2          SD    
+    RB       *Call of Duty: Ghost                          DM 1         15.0       *WDM 8                 0.0375-0.0625      Yes 2          SD    
+    RB       *Call of Duty: Infinite Warfare               DM 1         15.0       *WDM 8                 0.0375-0.0625      Yes 2          SD  
               Casltevania: Lord of Shadows - UE            DM 0         7.5                               0.025-0.250                                         
               Castle of Illusion Micky Mouse               DM 0         12.5                              ???????????
-              Cryostasis                                   DM 0         13.75       WDM 1                 0.025-0.050                         
+              Cryostasis                                   DM 0         13.75       WDM *                 0.025-0.050                         
              *DOOM 2016                                    DM 0         20.0       *WDM 6                 0.0250-0.0500      Yes 3          SD       
               DarkSiders Warmastred Edition                DM 0         22.5                              0.025-0.075  
               Dead Effect                                  DM ?         6.25                              ?      
@@ -94,9 +94,9 @@ Inner Shader Setting:
     RB        Dusk/Dusk World                              DM 1         20.0                      Yes     0.025-0.075
               Dying Light                                  DM 1         22.5                              0.010-0.075
     RB        Emily Wants To Play                          DM 1         25.0                              0.025-0.200                                      
-              Euro Trucks Sim 2                            DM 0         8.750       WDM 25         ?      0.025-0.200 
+              Euro Trucks Sim 2                            DM 0         8.750       WDM *          ?      0.025-0.200 
               Everybody's Gone to the Rapture              DM 0         1.50                              0.025-0.250                      
-             *Fallout 4                                    DM 0         6.25       *WDM 8                 0.0375-0.0625      Yes 2          SD          
+             *Fallout 4                                    DM 0         6.25       *WDM 4                 0.0375-0.0625      Yes 2          SD          
     RB        FarCry 3                                     DM 0         7.50                              0.025-0.200
               Firewatch                                    DM 0         5.0                       Yes     0.025-0.250
     RB        GTA V                                        DM 1         12.5                              0.025-0.175                                      
@@ -109,7 +109,7 @@ Inner Shader Setting:
     RB        Homefront The Revolution                     DM ?         ?                         ?       ?                                     
               Just Cause 3                                 DM 1         10.0                              0.025-0.250  
     RB        KHOLAT                                       DM 1         10.0                              0.025-0.250        
-    RB        Kingpin: Life of Crime                       DM 0         7.50        WDM 13                0.025-0.125
+    RB        Kingpin: Life of Crime                       DM 0         7.50        WDM *                 0.025-0.125
               Layers of Fear                               DM 0         7.5                       Yes     0.125-0.175
               Life is Strange: Before the Storm            DM 1         150.0                     Yes     0.075-0.375
               Lifeless Planet                              DM 0         17.50                     Yes     0.025-0.075
@@ -118,8 +118,8 @@ Inner Shader Setting:
     RB        Mafia III                                    DM 1         6.25                              0.025-0.075        
     RB        Mass Effect Andromeda                        DM 1         15.0                              0.075-0.175                                        
     RB        Metal Gear Rising                            DM 0         13.75                             0.025-0.250       
-    RB        Metro 2033 Redux                             DM 0         7.50        WDM 11                0.050-0.125                
-    RB        Metro Last Light Redux                       DM 0         7.50        WDM 11                0.050-0.125                      
+    RB        Metro 2033 Redux                             DM 0         7.50        WDM ||                0.050-0.125                
+    RB        Metro Last Light Redux                       DM 0         7.50        WDM ||                0.050-0.125                      
     RB        Middle-earth: Shadow of Mordor               DM 1         25.0                              0.025-0.250        
               Mirror's Edge Catalyst                       DM 1         13.750                            0.025-0.125       
     RB        Monster Hunter World                         DM 1         13.750                            0.025-0.075
@@ -133,34 +133,34 @@ Inner Shader Setting:
               Observer                                     DM 1         10.0                              0.025-0.250 
     RB        Penumbra: Black Plague                       DM 0         7.5                               0.025-0.250       
     RB        Phantasmal                                   DM 0         7.5                       Yes     0.010-0.020
-    RB        Prey 2006                                    DM 0         12.5        WDM 26                0.050-0.075       
+    RB        Prey 2006                                    DM 0         12.5        WDM *                 0.050-0.075       
     RB       *Prey 2017                                    DM 1         18.75    *WDM 9 & 10              0.0375-0.0500      Yes 2          SD                
-    RB        Quake Epsilon                                DM 0         15.00       WDM 15                0.075-0.125 
-              Quake 2 XP                                   DM 0         7.5         WDM 16                0.025-0.150
-    RB        Quake 4                                      DM 0         7.5         WDM 17                0.025-0.125
+    RB        Quake Epsilon                                DM 0         15.00       WDM *                 0.075-0.125 
+              Quake 2 XP                                   DM 0         7.5         WDM *                 0.025-0.150
+    RB        Quake 4                                      DM 0         7.5         WDM *                 0.025-0.125
               Quantum Break                                DM 0         9.0                               0.025-0.275
-    RB        Rage64                                       DM 0         20.00       WDM 14                0.025-0.100   
+    RB        Rage64                                       DM 0         20.00       WDM *                 0.025-0.100   
     RB        Redout                                       DM ?         ?                                 ?      
               Remembrance                                  DM 1         7.5                       Yes     0.050-0.100
     RB        Resident Evil 7                              DM 1         22.5                              0.125-0.275                                        
-    RB        Return To Castle Wolfenstine                 DM 0         10.0        WDM 18                0.075-0.250                     
+    RB        Return To Castle Wolfenstine                 DM 0         10.0        WDM *                 0.075-0.250                     
               Rez Infinite                                 DM 1         20.0                              0.075-0.150
               Ryse: Son of Rome                            DM 0         7.500                             0.025-0.050        
               Scorn                                        DM 1         40.0                              0.015-0.050
-    RB        S.T.A.L.K.E.R:CS Complete Mod                DM 0         7.5         WDM 19                0.025-0.125
-    RB        S.T.A.L.K.E.R:CoP Complete Mod               DM 0         7.5         WDM 19                0.025-0.125
-    RB        S.T.A.L.K.E.R:SoC Complete Mod               DM 0         7.5         WDM 19                0.025-0.125
+    RB        S.T.A.L.K.E.R:CS Complete Mod                DM 0         7.5         WDM ||                0.025-0.125
+    RB        S.T.A.L.K.E.R:CoP Complete Mod               DM 0         7.5         WDM ||                0.025-0.125
+    RB        S.T.A.L.K.E.R:SoC Complete Mod               DM 0         7.5         WDM ||                0.025-0.125
     RB        Shadow of the Tomb Raider                    DM 1         17.5                              0.100-0.250 
               Shadow Warrior 2                             DM 1         10.0                              0.0375-0.0625
               Sleeping Dogs: DE                            DM 0         7.0                               0.075-0.100 
               Sniper Elite 4                               DM 0         25.0                              0.025-0.075
-              Soma                                         DM 0         11.25       WDM 20                0.025-0.100
+              Soma                                         DM 0         11.25       WDM *                 0.025-0.100
               Sonic Adventure 2                            DM 0         10.0                              0.025-0.125
               Souls Games                                  DM 0       7.5-25.0                            0.050-0.100              
               Stacking                                     DM 0         7.5                               0.025-0.125
     RB        Stay Close                                   DM 1         10                                0.025-0.125
               Tales of Zestiria                            DM 0         7.5                               0.025-0.125
-              The Elder Scrolls V: SE                      DM 0         6.875       WDM 21                0.075-0.150
+              The Elder Scrolls V: SE                      DM 0         6.875       WDM *                 0.075-0.150
     RB        The Evil Within                              DM 0         28.75                             0.175-0.250   
               The Evil Within 2                            DM 0      4.675-17.5                           0.150-0.200     
     RB        The Legend of Korra                          DM 0         10                                0.025-0.125
@@ -168,18 +168,18 @@ Inner Shader Setting:
     RB        The Vanishing of Ethan Carter Redux          DM 1         7.5                               0.025-0.125
     RB        The Void                                     DM 0         7.5                               0.050-0.150           
     RB        Through The Woods!                           DM 1         7.5                       Yes     0.025-0.075 
-              Titanfall 2                                  DM 0         7.5         WDM 27                0.025-0.100 
+              Titanfall 2                                  DM 0         7.5         WDM *                 0.025-0.100 
               Total War: Warhammer                         DM 0         2.625                             0.025-0.075
     RB       *Turok: Dinosaur Hunter                       DM 0         250.0      *WDM 22                0.0375-0.0625      Yes 2          SD
              *Turok 2: Seeds of Evil                       DM 0         250.0      *WDM 23                0.0375-0.0625      Yes 2          SD
-    RB        Unreal Gold with v227                        DM 0         17.50       WDM 0                 0.010-0.050      
+    RB        Unreal Gold with v227                        DM 0         17.50       WDM *                 0.010-0.050      
               Warhammer: End Times - Vermintide            DM 0         10.0                              0.010-0.100
               Warhammer: Vermintide 2                      DM 0         8.75                              0.010-0.100         
     RB        Watch Dogs 2                                 DM 1         7.5                               0.050-0.100        
               Witcher 3                                    DM 1         7.5                               0.050-0.100            
-              Wolfenstine                                  DM 0         7.5         WDM 2                 0.025-0.100
-    RB        Wolfenstine: The New Order                   DM 0         25.00       WDM 7                 0.025-0.075
-    RB        Wolfenstine: The Old Blood                   DM 0         25.00       WDM 7                 0.025-0.075
+              Wolfenstine                                  DM 0         7.5         WDM *                 0.025-0.100
+    RB        Wolfenstine: The New Order                   DM 0         25.00       WDM ||                0.025-0.075
+    RB        Wolfenstine: The Old Blood                   DM 0         25.00       WDM ||                0.025-0.075
     RB        Yooka-Laylee                                 DM 1         6.875                     Yes     0.025-0.075
               Ziggurat                                     DM 0         7.5                               0.075-0.175
               Zombie Army Trilogy                          DM 0         12.5                              0.050-0.075
@@ -197,7 +197,7 @@ Inner Shader Setting:
     RB       Magicka 2                                    DM 0       13.75                    No      0.025-0.250                         0.0125
              Never Alone (Kisima Ingitchuna)              DM 0       25.0                     No      0.050-0.100                         0.0050             
     RB       Requiem: Avenging Angel                      DM 0       50.0                     No      0.030-0.060                         0.8000
-             Serious Sam Revolution                       DM 0       7.5           WDM 29     No      0.025-0.075                         0.1111
+             Serious Sam Revolution                       DM 0       7.5           WDM *      No      0.025-0.075                         0.1111
              Shadow Tactics: Blades of the Shogun         DM 0       5.5                      Yes     0.250-0.350      0.2875       FB    0.0010
              Shadow Warrior Classic Source Port           DM 0       8.75                     No      0.075-0.150                         1.0000
              Shadow Warrior Classic Redux                 DM 0       8.75                     No      0.075-0.150                         1.0000
