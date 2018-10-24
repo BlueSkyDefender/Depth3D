@@ -76,8 +76,8 @@ Inner Shader Setting:
     RB        Call of Duty: Infinite Warfare               DM 1         22.5        WDM 4                 0.050-0.075  
               Casltevania: Lord of Shadows - UE            DM 0         7.5                               0.025-0.250                                         
               Castle of Illusion Micky Mouse               DM 0         12.5                              ???????????
-              Cryostasis                                   DM 0         13.75       WDM 6                 0.025-0.050                         
-              DOOM 2016                                    DM 0         20.0        WDM 1                 0.050-0.100       
+              Cryostasis                                   DM 0         13.75       WDM 1                 0.025-0.050                         
+             *DOOM 2016                                    DM 0         20.0       *WDM 6                 0.0250-0.0500      Yes 3          SD       
               DarkSiders Warmastred Edition                DM 0         22.5                              0.025-0.075  
               Dead Effect                                  DM ?         6.25                              ?      
               Dead Island                                  DM 0         5.0                               0.025-0.075                       
@@ -125,7 +125,7 @@ Inner Shader Setting:
     RB        Monster Hunter World                         DM 1         13.750                            0.025-0.075
               Mordheim: City of the Damned                 DM 0         12.500                    Yes     0.025-0.250         
     RB        Naruto Shippuden UNS3 Full Blurst HD         DM 0         36.25                             0.025-0.125        
-    RB        NecroVision: Lost Company                    DM 0         7.50        WDM 12                0.025-0.125 
+    RB       *NecroVision: Lost Company                    DM 0         10.000      *WDM 12               0.0250-0.0500      Yes 2          SD 
               Need For Speed Rivals                        ?            ?                                 ?
               Need for Speed Most Wanted                   ?            ?                                 ?
               NieRAutomata                                 DM 0         20.0                              0.050-0.075
