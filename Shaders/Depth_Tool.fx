@@ -127,7 +127,7 @@ float4 Out(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Targe
 {
 	float4 Color = float4(zBuffer(texcoord).xxx,1.0);
 
-	float float ByteN = 640, BS; //Byte Shift, BS; //Byte Shift
+	float ByteN = 256, BS; //Byte Shift, BS; //Byte Shift
 	Color  *= ByteN;
 	BS = floor(Color);
 	Color = (Color  - BS) * ByteN;
