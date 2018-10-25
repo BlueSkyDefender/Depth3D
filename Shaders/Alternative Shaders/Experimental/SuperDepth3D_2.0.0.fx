@@ -28,11 +28,8 @@
 // Determines the Max Depth amount, in ReShades GUI.
 #define Depth_Max 50
 
-// Enable this to fix the problem when there is a full screen Game Map Poping out of the screen. AKA Full Black Depth Map Fix. I have this off by default. Zero is off, One is On.
-#define FBDMF 0 //Default 0 is Off. One is On.
-
-// Use this to Disable Anti-Z-Fighting for Weapon Hand.
-#define DWZF 0 //Default 0 is Off. One is On.
+// Use this to Disable or Enable Anti-Z-Fighting Modes for Weapon Hand.
+#define WZF 0 //Default 0 is Off. One is On.
 
 // Change the Cancel Depth Key
 // Determines the Cancel Depth Toggle Key useing keycode info
@@ -209,9 +206,8 @@ uniform float2 Weapon_Adjust <
 	ui_label = " Weapon Hand Adjust";
 	ui_tooltip = "Adjust Weapon depth map for your games.\n"
 				 "X, CutOff Point used to set a diffrent scale for first person hand apart from world scale.\n"
-				 "Y, Precision is used to locate the first person hand in world scale.\n"
-				 "Z, Power needed to fine tune first person hand.\n"
-	             "Default is float3(X 0.0, Y 0.0)";
+				 "Y, Precision is used to adjust the first person hand in world scale.\n"
+	             "Default is float2(X 0.0, Y 0.0)";
 	ui_category = "Weapon & HUD Depth Map";
 > = float2(0.0,0.0);
 
@@ -219,12 +215,37 @@ uniform float Weapon_Depth_Adjust <
 	ui_type = "drag";
 	ui_min = -25.0; ui_max = 25.0;
 	ui_label = " Weapon Depth Adjustment";
-	ui_tooltip = "Pushes or Pulls the FPS Hand in or out of the screen.\n"
-				 "This also used to fine tune the Weapon Hand.\n" 
+	ui_tooltip = "Pushes or Pulls the FPS Hand in or out of the screen if a weapon profile is selected.\n"
+				 "This also used to fine tune the Weapon Hand if creating a weapon profile.\n" 
 				 "Default is Zero.";
 	ui_category = "Weapon & HUD Depth Map";
 > = 0;
 
+#if WZF
+uniform int Anti_Z_Fighting <
+	ui_type = "drag";
+	ui_min = 0; ui_max = 5;
+	ui_label = " Weapon Anti Z-Fighting Target";
+	ui_tooltip = "Anti Z-Fighting is use help prevent weapon hand Z-Fighting.\n"
+				 "0 -> The Center of the Screen Small.\n"
+				 "1 -> The Center of the Screen Long.\n"
+				 "2 -> The Lower Half of the Screen.\n"
+				 "3 -> Lower L-Half of the Screen.\n"
+				 "4 -> Lower R-Half of the Screen.\n"
+				 "5 -> Full Screen.\n"
+				 "Default is Two.";
+	ui_category = "Weapon Anti Z-Fighting";
+> = 2;
+
+uniform float WZF_Adjust <
+	ui_type = "drag";
+	ui_min = 0; ui_max = 0.125;
+	ui_label = " Weapon Anti Z-Fighting Adjust";
+	ui_tooltip = "Use this to adjust the auto adjuster.\n"
+				 "Default is Zero.";
+	ui_category = "Weapon Anti Z-Fighting";
+> = 0;
+#endif
 //Stereoscopic Options//
 uniform int Stereoscopic_Mode <
 	ui_type = "combo";
@@ -500,8 +521,7 @@ float2 WeaponDepth(in float2 texcoord : TEXCOORD0)
 			
 		float zBufferWH = tex2D(DepthBuffer, texcoord).x, CutOff = Weapon_Adjust.x , Adjust = Weapon_Adjust.y, Tune = Weapon_Depth_Adjust, Scale = Weapon_Scale;
 		
-		float4 WA_XYZW;
-		
+		float4 WA_XYZW;//Weapon Profiles Starts Here
 		if (WP == 1)                                   // WA_XYZW.x | WA_XYZW.y | WA_XYZW.z | WA_XYZW.w 
 			WA_XYZW = float4(CutOff,Adjust,Tune,Scale);// X Cutoff  | Y Adjust  | Z Tuneing | W Scaling 		
 		else if(WP == 2) //HUD Mode
@@ -608,7 +628,11 @@ float2 WeaponDepth(in float2 texcoord : TEXCOORD0)
 			//WA_XYZW = float4(0.0,0.0,0,0.0);         //Game
 		//else if(WP == 52)//WP 50
 			//WA_XYZW = float4(0.0,0.0,0,0.0);         //Game
-		//Add Weapon Profiles Here
+		//End Weapon Profiles//
+		
+		// Code Adjustment Values.
+		// WA_XYZW.x | WA_XYZW.y | WA_XYZW.z | WA_XYZW.w 
+		// X Cutoff  | Y Adjust  | Z Tuneing | W Scaling 	
 		
 		// Hear on out is the Weapon Hand Adjustment code.		
 		float Set_Scale , P = WA_XYZW.y;
@@ -645,7 +669,7 @@ float2 WeaponDepth(in float2 texcoord : TEXCOORD0)
 			P = (P + 0.00000001) * 100;
 		}
 		//FPS Hand Depth Maps require more precision at smaller scales to look right.		 		
- 		float Far = (P * Set_Scale) * (1+(Weapon_Depth_Adjust * 0.01f)), Near = P;
+ 		float Far = (P * Set_Scale) * (1+(WA_XYZW.z * 0.01f)), Near = P;
  		
 		float2 Z = float2( zBufferWH, 1-zBufferWH );
 				
@@ -658,15 +682,18 @@ float2 WeaponDepth(in float2 texcoord : TEXCOORD0)
 			zBufferWH /= Far - Z.y * (Near - Far);
 		}
 		
+		zBufferWH = saturate(zBufferWH);
+		
 		//This code is used to adjust the already set Weapon Hand Profile.
-		//float WA = 1 - Weapon_Depth_Adjust;
-		//zBufferWH /= WA - zBufferWH * (0 - WA);
+		float WA = 1 - (Weapon_Depth_Adjust * 0.03);
+		if (WP > 2)
+		zBufferWH /= WA - zBufferWH * (0 - WA);
 		
 		//Auto Anti Weapon Depth Map Z-Fighting is always on.
 		float WeaponLumAdjust = saturate(abs(smoothstep(0,0.5,LumWeapon(texcoord)*2.5)));	
 				
-		if (DWZF == 0)//Anti Weapon Hand Z-Fighting code trigger
-			zBufferWH = saturate(lerp(0.025, zBufferWH, saturate(WeaponLumAdjust)));
+		//Anti Weapon Hand Z-Fighting code trigger
+		zBufferWH = saturate(lerp(0.025, zBufferWH, saturate(WeaponLumAdjust)));
 					
 	return float2(zBufferWH.x,WA_XYZW.x);	
 }
@@ -1307,9 +1334,12 @@ float4 PS_calcLR(float2 texcoord)
 			float B = tex2Dlod(SamplerDis,float4(TexCoords.x,TexCoords.y,0,0)).x;
 			color = float4(R,G,B,1.0);
 	}
-			
+		
+	#if WZF		
+	float WZF_A = WZF_Adjust, Average_Lum = (tex2D(SamplerDM,float2(TexCoords.x,TexCoords.y)).g - WZF_A) / ( 1 - WZF_A);
+	#else
 	float Average_Lum = tex2D(SamplerDM,float2(TexCoords.x,TexCoords.y)).g;
-	
+	#endif
 	return float4(color.rgb,Average_Lum);
 }
 
@@ -1329,7 +1359,22 @@ float4 Average_Luminance(float4 position : SV_Position, float2 texcoord : TEXCOO
 
 float4 Average_Luminance_Weapon(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Target
 {
-	float3 Average_Lum_Weapon = PS_calcLR(float2(texcoord.x,texcoord.y * 0.500 + 0.500 )).www;
+	float4 AZF = float4(0.500, 0.500,0.0,1.0);//Lower Half
+	#if WZF
+	if ( Anti_Z_Fighting == 0)
+		AZF = float4(0.4375, 0.125,0.375,0.250);//Center Small
+	else if ( Anti_Z_Fighting == 1)
+		AZF = float4(0.0, 1.0, 0.375,0.250);//Center Long
+	else if ( Anti_Z_Fighting == 2)
+		AZF = float4(0.500, 0.500,0.0,1.0);//Lower Half
+	else if ( Anti_Z_Fighting == 3)
+		AZF = float4(0.5, 0.5, 0.0, 0.5);//Lower Left
+	else if ( Anti_Z_Fighting == 4)
+		AZF = float4(0.5, 0.5, 0.5, 0.5);//Lower Right
+	else if ( Anti_Z_Fighting == 5)
+		AZF = float4(0.0, 1.0, 0.0, 1.0);//Full Screen
+	#endif
+	float3 Average_Lum_Weapon = PS_calcLR(float2(AZF.z + texcoord.x * AZF.w,AZF.x + texcoord.y * AZF.y )).www;
 	return float4(Average_Lum_Weapon,1);
 }
 
