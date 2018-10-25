@@ -172,7 +172,7 @@ Inner Shader Setting:
               Total War: Warhammer                         DM 0         2.625                             0.025-0.075
     RB       *Turok: Dinosaur Hunter                       DM 0         250.0      *WDM 22                0.0375-0.0625      Yes 2          SD
              *Turok 2: Seeds of Evil                       DM 0         250.0      *WDM 23                0.0375-0.0625      Yes 2          SD
-    RB        Unreal Gold with v227                        DM 0         17.50       WDM *                 0.010-0.050      
+    RB       *Unreal Gold with v227                        DM 0         17.50       WDM 0                 0.0250-0.0500      Yes 1          SD      
               Warhammer: End Times - Vermintide            DM 0         10.0                              0.010-0.100
               Warhammer: Vermintide 2                      DM 0         8.75                              0.010-0.100         
     RB        Watch Dogs 2                                 DM 1         7.5                               0.050-0.100        

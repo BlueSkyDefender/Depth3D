@@ -183,13 +183,13 @@ uniform bool Depth_Map_Flip <
 	ui_category = "Depth Map";
 > = false;
 
-//Weapon & HUD Depth Map//
+//Weapon Hand Adjust//
 uniform int WP <
 	ui_type = "combo";
-	ui_items = "Weapon Profile Off\0Custom WP\0HUD Mode\0WP 0\0WP 1\0WP 2\0WP 3\0WP 4\0WP 5\0WP 6\0WP 7\0WP 8\0WP 9\0WP 10\0WP 11\0WP 12\0WP 13\0WP 14\0WP 15\0WP 16\0WP 17\0WP 18\0WP 19\0WP 20\0WP 21\0WP 22\0WP 23\0WP 24\0WP 25\0WP 26\0WP 27\0WP 28\0WP 29\0WP 30\0WP 31\0WP 32\0WP 33\0WP 34\0WP 35\0";
-	ui_label = "·Weapon Profiles & HUD·";
-	ui_tooltip = "Pick your HUD or Weapon Profile for your game or make your own.";
-	ui_category = "Weapon & HUD Depth Map";
+	ui_items = "Weapon Profile Off\0Custom WP\0WP 0\0WP 1\0WP 2\0WP 3\0WP 4\0WP 5\0WP 6\0WP 7\0WP 8\0WP 9\0WP 10\0WP 11\0WP 12\0WP 13\0WP 14\0WP 15\0WP 16\0WP 17\0WP 18\0WP 19\0WP 20\0WP 21\0WP 22\0WP 23\0WP 24\0WP 25\0WP 26\0WP 27\0WP 28\0WP 29\0WP 30\0WP 31\0WP 32\0WP 33\0WP 34\0WP 35\0";
+	ui_label = "·Weapon Profiles·";
+	ui_tooltip = "Pick Weapon Profile for your game or make your own.";
+	ui_category = "Weapon Hand Adjust";
 > = 0;
 
 uniform int Weapon_Scale <
@@ -197,7 +197,7 @@ uniform int Weapon_Scale <
 	ui_min = -2; ui_max = 3;
 	ui_label = " Weapon Scale";
 	ui_tooltip = "Use this to set the proper weapon hand scale.";
-	ui_category = "Weapon & HUD Depth Map";
+	ui_category = "Weapon Hand Adjust";
 > = 0;
 
 uniform float2 Weapon_Adjust <
@@ -208,7 +208,7 @@ uniform float2 Weapon_Adjust <
 				 "X, CutOff Point used to set a diffrent scale for first person hand apart from world scale.\n"
 				 "Y, Precision is used to adjust the first person hand in world scale.\n"
 	             "Default is float2(X 0.0, Y 0.0)";
-	ui_category = "Weapon & HUD Depth Map";
+	ui_category = "Weapon Hand Adjust";
 > = float2(0.0,0.0);
 
 uniform float Weapon_Depth_Adjust <
@@ -218,14 +218,14 @@ uniform float Weapon_Depth_Adjust <
 	ui_tooltip = "Pushes or Pulls the FPS Hand in or out of the screen if a weapon profile is selected.\n"
 				 "This also used to fine tune the Weapon Hand if creating a weapon profile.\n" 
 				 "Default is Zero.";
-	ui_category = "Weapon & HUD Depth Map";
+	ui_category = "Weapon Hand Adjust";
 > = 0;
 
 #if WZF
 uniform int Anti_Z_Fighting <
 	ui_type = "drag";
 	ui_min = 0; ui_max = 5;
-	ui_label = " Weapon Anti Z-Fighting Target";
+	ui_label = "·Weapon Anti Z-Fighting Target·";
 	ui_tooltip = "Anti Z-Fighting is use help prevent weapon hand Z-Fighting.\n"
 				 "0 -> The Center of the Screen Small.\n"
 				 "1 -> The Center of the Screen Long.\n"
@@ -246,6 +246,26 @@ uniform float WZF_Adjust <
 	ui_category = "Weapon Anti Z-Fighting";
 > = 0;
 #endif
+//Heads-Up Display
+uniform bool HUD_MODE <
+	ui_label = "·HUD Mode·";
+	ui_tooltip = "Use this to turn HUD MODE On or Off.\n"
+				 "Only Usefull if HUD Shows in Depth Buffer.\n"
+				 "Default is Off.";
+	ui_category = "Heads-Up Display";
+> = false;
+
+uniform float2 HUD_Adjust <
+	ui_type = "drag";
+	ui_min = 0.0; ui_max = 1.0;
+	ui_label = " HUD Adjust";
+	ui_tooltip = "Adjust HUD for your games.\n"
+				 "X, CutOff Point used to set a seperation point bettwen world scale and the HUD.\n"
+				 "Y, Pushes or Pulls the HUD in or out of the screen if HUD MODE is on.\n"
+	             "Default is float2(X 0.0, Y 0.5)";
+	ui_category = "Heads-Up Display";
+> = float2(0.0,0.5);
+
 //Stereoscopic Options//
 uniform int Stereoscopic_Mode <
 	ui_type = "combo";
@@ -346,9 +366,9 @@ uniform float4 Cross_Cursor_Adjust <
 	ui_min = 0.0; ui_max = 255.0;
 	ui_label = "·Cross Cursor Adjust·";
 	ui_tooltip = "Pick your own cross cursor color & Size.\n" 
-				 " Default is (R 255, G 255, B 255 , Size 25)";
+				 " Default is (R 255, G 255, B 255 , Size 10)";
 	ui_category = "Cursor Adjustments";
-> = float4(255.0, 255.0, 255.0, 25.0);
+> = float4(255.0, 255.0, 255.0, 10.0);
 
 uniform bool Cancel_Depth < source = "key"; keycode = Cancel_Depth_Key; toggle = true; >;
 /////////////////////////////////////////////D3D Starts Here/////////////////////////////////////////////////////////////////
@@ -398,11 +418,14 @@ sampler BackBufferCLAMP
 		AddressW = CLAMP;
 	};
 	
-texture texDM  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT/Depth_Map_Division; Format = RGBA32F;}; 
+texture texDM  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT/Depth_Map_Division; Format = RGBA32F; MipLevels = 8;}; 
 
 sampler SamplerDM
 	{
 		Texture = texDM;
+		MinFilter = LINEAR;
+		MagFilter = LINEAR;
+		MipFilter = LINEAR;
 	};
 	
 texture texDis  { Width = BUFFER_WIDTH/Depth_Map_Division; Height = BUFFER_HEIGHT/Depth_Map_Division; Format = RGBA32F; MipLevels = 1;}; 
@@ -524,79 +547,77 @@ float2 WeaponDepth(in float2 texcoord : TEXCOORD0)
 		float4 WA_XYZW;//Weapon Profiles Starts Here
 		if (WP == 1)                                   // WA_XYZW.x | WA_XYZW.y | WA_XYZW.z | WA_XYZW.w 
 			WA_XYZW = float4(CutOff,Adjust,Tune,Scale);// X Cutoff  | Y Adjust  | Z Tuneing | W Scaling 		
-		else if(WP == 2) //HUD Mode
-			WA_XYZW = float4(CutOff,Adjust,Tune,Scale);//USED FOR GAME HUDS If IN DB	
-		else if(WP == 3) //WP 0
-			WA_XYZW = float4(4.0,0,0,0);               //Unreal Gold with v227		
-		else if(WP == 4) //WP 1
+		else if(WP == 2) //WP 0
+			WA_XYZW = float4(0.286,7.5,5.5,0);         //Unreal Gold with v227		
+		else if(WP == 3) //WP 1
 			WA_XYZW = float4(2.975,0.7875,0,0);        //Cryostasis
-		else if(WP == 5) //WP 2
+		else if(WP == 4) //WP 2
 			WA_XYZW = float4(0.625,1.250,3.75,0);      //BorderLands 2*	
-		else if(WP == 6) //WP 3
+		else if(WP == 5) //WP 3
 			WA_XYZW = float4(3.2625,0.6275,0,0);       //Wolfenstine	
-		else if(WP == 7) //WP 4
+		else if(WP == 6) //WP 4
 			WA_XYZW = float4(0.253,1.0,1.25,2);        //Fallout 4*			
-		else if(WP == 8) //WP 5
+		else if(WP == 7) //WP 5
 			WA_XYZW = float4(2.8,1.5625,0,0.350);      //Serious Sam Revolition
-		else if(WP == 9) //WP 6
+		else if(WP == 8) //WP 6
 			WA_XYZW = float4(0.338,0.8125,-14.500,0);  //DOOM 2016*	
-		else if(WP == 10)//WP 7
+		else if(WP == 9)//WP 7
 			WA_XYZW = float4(3.9,12.5,0,2);            //CoD: Black Ops
-		else if(WP == 11)//WP 8
+		else if(WP == 10)//WP 8
 			WA_XYZW = float4(0.254,25.0,-0.5,2);       //CoD:AW*	
-		else if(WP == 12)//WP 9
+		else if(WP == 11)//WP 9
 			WA_XYZW = float4(0.2832,20.0,0,0);         //Prey 2017 High Settings and <*
-		else if(WP == 13)//WP 10
+		else if(WP == 12)//WP 10
 			WA_XYZW = float4(0.2712,25.0,0,1);         //Prey 2017 Very High*	
-		else if(WP == 14)//WP 11
+		else if(WP == 13)//WP 11
 			WA_XYZW = float4(2.6,0.7048,0,1);          //Metro Redux Games	
-		else if(WP == 15)//WP 12
+		else if(WP == 14)//WP 12
 			WA_XYZW = float4(0.489,3.75,0,-1);         //NecroVisioN: Lost Company*
-		else if(WP == 16)//WP 13
+		else if(WP == 15)//WP 13
 			WA_XYZW = float4(3.925,17.5,0,0.400);      //Kingpin Life of Crime
-		else if(WP == 17)//WP 14
+		else if(WP == 16)//WP 14
 			WA_XYZW = float4(5.45,1.0,0,0.550);        //Rage64		
-		else if(WP == 18)//WP 15
+		else if(WP == 17)//WP 15
 			WA_XYZW = float4(2.685,1.0,0,0.375);       //Quake DarkPlaces	
-		else if(WP == 19)//WP 16
+		else if(WP == 18)//WP 16
 			WA_XYZW = float4(3.925,16.25,0,0.400);     //Quake 2 XP
-		else if(WP == 20)//WP 17
+		else if(WP == 19)//WP 17
 			WA_XYZW = float4(5.000000,7.0,0,0.500);    //Quake 4
-		else if(WP == 21)//WP 18
+		else if(WP == 20)//WP 18
 			WA_XYZW = float4(3.6875,7.250,0,0.400);    //RTCW
-		else if(WP == 22)//WP 19
+		else if(WP == 21)//WP 19
 			WA_XYZW = float4(2.55925,0.75,0,0.255);    //S.T.A.L.K.E.R: Games
-		else if(WP == 23)//WP 20
+		else if(WP == 22)//WP 20
 			WA_XYZW = float4(16.250,87.50,0,0.825);    //SOMA
-		else if(WP == 24)//WP 21
+		else if(WP == 23)//WP 21
 			WA_XYZW = float4(2.775,1.125,0,0.278);     //Skyrim: SE	
-		else if(WP == 25)//WP 22
+		else if(WP == 24)//WP 22
 			WA_XYZW = float4(1.0,1.0,7.5,-2);          //Turok: DH 2017*
-		else if(WP == 26)//WP 23
+		else if(WP == 25)//WP 23
 			WA_XYZW = float4(0.570,2.0,0.0,-2);        //Turok2: SoE 2017*
-		else if(WP == 27)//WP 24
+		else if(WP == 26)//WP 24
 			WA_XYZW = float4(2.000,-40.0,0,2.0);       //Dying Light
-		else if(WP == 28)//WP 25
+		else if(WP == 27)//WP 25
 			WA_XYZW = float4(2.800,1.0,0,0.280);       //EuroTruckSim2
-		else if(WP == 29)//WP 26
+		else if(WP == 28)//WP 26
 			WA_XYZW = float4(5.000,2.875,0,0.500);     //Prey - 2006
-		else if(WP == 30)//WP 27
+		else if(WP == 29)//WP 27
 			WA_XYZW = float4(2.77575,0.3625,0,0.3625); //TitanFall 2
-		else if(WP == 31)//WP 28
+		else if(WP == 30)//WP 28
 			WA_XYZW = float4(2.52475,0.05625,0,0.260); //Bioshock Remastred
-		else if(WP == 32)//WP 29
+		else if(WP == 31)//WP 29
 			WA_XYZW = float4(4.750,0.9375,0,0);        //Wolfenstine: The New Order
-		else if(WP == 33)//WP 30
+		else if(WP == 32)//WP 30
 			WA_XYZW = float4(5.050,2.750,0,0.4913);    //Wolfenstine
-		//else if(WP == 34)//WP 31
+		//else if(WP == 33)//WP 31
 			//WA_XYZW = float4(0.0,0.0,0,0.0);         //Game
-		//else if(WP == 35)//WP 32
+		//else if(WP == 34)//WP 32
 			//WA_XYZW = float4(0.0,0.0,0,0.0);         //Game
-		//else if(WP == 36)//WP 33
+		//else if(WP == 35)//WP 33
 			//WA_XYZW = float4(0.0,0.0,0,0.0);         //Game
-		//else if(WP == 37)//WP 34
+		//else if(WP == 36)//WP 34
 			//WA_XYZW = float4(0.0,0.0,0,0.0);         //Game
-		//else if(WP == 38)//WP 35
+		//else if(WP == 37)//WP 35
 			//WA_XYZW = float4(0.0,0.0,0,0.0);         //Game
 		//else if(WP == 38)//WP 36
 			//WA_XYZW = float4(0.0,0.0,0,0.0);         //Game
@@ -686,13 +707,14 @@ float2 WeaponDepth(in float2 texcoord : TEXCOORD0)
 		
 		//This code is used to adjust the already set Weapon Hand Profile.
 		float WA = 1 - (Weapon_Depth_Adjust * 0.03);
-		if (WP > 2)
+		if (WP > 1)
 		zBufferWH /= WA - zBufferWH * (0 - WA);
 		
 		//Auto Anti Weapon Depth Map Z-Fighting is always on.
 		float WeaponLumAdjust = saturate(abs(smoothstep(0,0.5,LumWeapon(texcoord)*2.5)));	
 				
 		//Anti Weapon Hand Z-Fighting code trigger
+		//if (WP > 1)
 		zBufferWH = saturate(lerp(0.025, zBufferWH, saturate(WeaponLumAdjust)));
 					
 	return float2(zBufferWH.x,WA_XYZW.x);	
@@ -832,6 +854,28 @@ void AO_in(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out
 //AO END//
 #endif
 
+float HUD_Depth(float zBufferHUD, float2 texcoord ) 
+{		
+	// HUD_XY.x Cutoff | HUD_XY.y Adjust
+	float2 HUD_XY = float2(HUD_Adjust.x, HUD_Adjust.y);
+
+	float CutOFFCal = ((HUD_XY.x * 0.5)/Depth_Map_Adjust) * 0.5, HUD_A = (0.5 - HUD_XY.y) * 0.05; //Weapon Cutoff Calculation
+					
+	CutOFFCal = step(Depth(texcoord).x,CutOFFCal);
+				
+	if (HUD_MODE)
+	{
+		//This code is used to adjust the already set Z-Buffer	
+		zBufferHUD = lerp(zBufferHUD,HUD_A,CutOFFCal);
+	}
+	else
+	{
+		zBufferHUD = zBufferHUD;
+	}
+							
+	return zBufferHUD;	
+}
+
 float AutoDepthRange( float d, float2 texcoord )
 {
 	float LumAdjust = smoothstep(-0.0175f,Auto_Depth_Range,Lum(texcoord).y);
@@ -863,11 +907,13 @@ float Conv(float D,float2 texcoord)
 			ZP = clamp(ALC,0.0f,1.0f);
 				
 		float Convergence = 1 - Z / D;
-						
-		//Depth boost
-		//D = lerp( D, min(1.0f,1.25f * D), 0.425f);
 				
-    return lerp(MS * Convergence,MS * D, ZP);
+    return HUD_Depth(lerp(MS * Convergence,MS * D, ZP),texcoord);
+}
+
+float zBuffer(in float2 texcoord : TEXCOORD0)
+{
+	return tex2Dlod(SamplerDM,float4(texcoord,0,0)).x;
 }
 
 void  Disocclusion(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 color : SV_Target0)
@@ -921,11 +967,11 @@ if(AO == 1)
 				for (int i = 0; i < 11; i++)
 				{	
 					S = weight[i] * MS;
-					DMA += tex2Dlod(SamplerDM,float4(texcoord + dirA * S * A,0,M)).x*Div;
+					DMA += zBuffer(texcoord + dirA * S * A).x*Div;
 					
 					if(Disocclusion_Selection == 3 || Disocclusion_Selection == 6)
 					{
-						DMB += tex2Dlod(SamplerDM,float4(texcoord + dirB * S * B,0,M)).x*Div;
+						DMB += zBuffer(texcoord + dirB * S * B).x*Div;
 					}
 				}
 		}
@@ -940,11 +986,11 @@ if(AO == 1)
 		}	
 		
 		if ( Disocclusion_Selection == 4 || Disocclusion_Selection == 5 || Disocclusion_Selection == 6 )
-			DM = lerp(tex2Dlod(SamplerDM,float4(texcoord,0,M)).x,DM,step(tex2Dlod(SamplerDM,float4(texcoord,0,M)).x,Disocclusion_Adjust.y));
+			DM = lerp(zBuffer(texcoord).x,DM,step(zBuffer(texcoord).x,Disocclusion_Adjust.y));
 	}
 	else
 	{
-		DM = tex2Dlod(SamplerDM,float4(texcoord,0,M)).x;
+		DM = zBuffer(texcoord).x;
 	}
 
 	if (!Cancel_Depth)
@@ -971,14 +1017,10 @@ if(AO == 1)
 }
 
 /////////////////////////////////////////L/R//////////////////////////////////////////////////////////////////////
-float2  Encode(in float2 texcoord : TEXCOORD0) //zBuffer Color Channel Encode
+float2  Encode(in float2 texcoord : TEXCOORD0)
 {
-	float DM = tex2Dlod(SamplerDis,float4(texcoord.x, texcoord.y,0,1)).x,DepthR = DM, DepthL = DM;
-	
-	// X Left & Y Right
-	float X = DepthL, Y = DepthR;
-
-	return float2(X,Y);
+	float2 DM = tex2Dlod(SamplerDis,float4(texcoord.x, texcoord.y,0,1)).xx;
+	return float2(DM.x,DM.y);
 }
 
 float4 PS_calcLR(float2 texcoord)
