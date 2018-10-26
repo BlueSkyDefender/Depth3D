@@ -537,15 +537,15 @@ float2 WeaponDepth(in float2 texcoord : TEXCOORD0)
 		if (WP == 1)                                   // WA_XYZW.x | WA_XYZW.y | WA_XYZW.z | WA_XYZW.w 
 			WA_XYZW = float4(CutOff,Adjust,Tune,Scale);// X Cutoff  | Y Adjust  | Z Tuneing | W Scaling 		
 		else if(WP == 2) //WP 0
-			WA_XYZW = float4(0.286,7.5,5.5,0);         //Unreal Gold with v227		
+			WA_XYZW = float4(0.286,7.5,5.5,0);         //Unreal Gold with v227*		
 		else if(WP == 3) //WP 1
-			WA_XYZW = float4(2.975,0.7875,0,0);        //Cryostasis
+			WA_XYZW = float4(0.445,0.500,0,-1);        //Cryostasis
 		else if(WP == 4) //WP 2
 			WA_XYZW = float4(0.625,1.250,3.75,0);      //BorderLands 2*	
 		else if(WP == 5) //WP 3
 			WA_XYZW = float4(3.2625,0.6275,0,0);       //Wolfenstine	
 		else if(WP == 6) //WP 4
-			WA_XYZW = float4(0.253,1.0,1.25,2);        //Fallout 4*			
+			WA_XYZW = float4(0.253,1.0,1.25,3);        //Fallout 4*			
 		else if(WP == 7) //WP 5
 			WA_XYZW = float4(2.8,1.5625,0,0.350);      //Serious Sam Revolition
 		else if(WP == 8) //WP 6
@@ -1141,8 +1141,8 @@ float4 PS_calcLR(float2 texcoord)
 	}
 	
 	float HUD_Adjustment = ((0.5 - HUD_Adjust.y)*25) * pix.x;
-	cL = HUD(cL,float2(TexCoords.x - HUD_Adjustment,TexCoords.y));
-	cR = HUD(cR,float2(TexCoords.x + HUD_Adjustment,TexCoords.y));
+	cL = HUD(cL,float2(TCL.x - HUD_Adjustment,TCL.y));
+	cR = HUD(cR,float2(TCR.x + HUD_Adjustment,TCR.y));
 	
 	#if Anti_Crosstalk	
 	float4x4 YUV = float4x4( 0.21260f, 0.71520f, 0.07220f,  0.0f,-0.09991f,-0.33609f, 0.43600f, 0.0f, 0.61500f,-0.55861f,-0.05639f,  0.0f, 0.0f, 0.0f, 0.0f, 1.0f ),

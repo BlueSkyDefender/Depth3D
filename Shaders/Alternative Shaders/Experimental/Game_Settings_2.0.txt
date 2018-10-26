@@ -76,7 +76,7 @@ Inner Shader Setting:
     RB       *Call of Duty: Infinite Warfare               DM 1         15.0       *WDM 8                 0.0375-0.0625      Yes 2          SD  
               Casltevania: Lord of Shadows - UE            DM 0         7.5                               0.025-0.250                                         
               Castle of Illusion Micky Mouse               DM 0         12.5                              ???????????
-              Cryostasis                                   DM 0         13.75       WDM *                 0.025-0.050                         
+             *Cryostasis                                   DM 0         13.75      *WDM 1                 0.0375-0.0625      Yes 3          SD                         
              *DOOM 2016                                    DM 0         20.0       *WDM 6                 0.0250-0.0500      Yes 3          SD       
               DarkSiders Warmastred Edition                DM 0         22.5                              0.025-0.075  
               Dead Effect                                  DM ?         6.25                              ?      
