@@ -410,14 +410,11 @@ sampler BackBufferCLAMP
 		AddressW = CLAMP;
 	};
 	
-texture texDM  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT/Depth_Map_Division; Format = RGBA32F; MipLevels = 8;}; 
+texture texDM  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT/Depth_Map_Division; Format = RGBA32F;}; 
 
 sampler SamplerDM
 	{
 		Texture = texDM;
-		MinFilter = LINEAR;
-		MagFilter = LINEAR;
-		MipFilter = LINEAR;
 	};
 	
 texture texDis  { Width = BUFFER_WIDTH/Depth_Map_Division; Height = BUFFER_HEIGHT/Depth_Map_Division; Format = RGBA32F; MipLevels = 1;}; 
@@ -601,8 +598,8 @@ float2 WeaponDepth(in float2 texcoord : TEXCOORD0)
 			WA_XYZW = float4(4.750,0.9375,0,0);        //Wolfenstine: The New Order
 		else if(WP == 32)//WP 30
 			WA_XYZW = float4(5.050,2.750,0,0.4913);    //Wolfenstine
-		//else if(WP == 33)//WP 31
-			//WA_XYZW = float4(0.0,0.0,0,0.0);         //Game
+		else if(WP == 33)//WP 31
+			WA_XYZW = float4(0.458,0.3375,0,-1);       //F.E.A.R 2
 		//else if(WP == 34)//WP 32
 			//WA_XYZW = float4(0.0,0.0,0,0.0);         //Game
 		//else if(WP == 35)//WP 33
@@ -698,9 +695,9 @@ float2 WeaponDepth(in float2 texcoord : TEXCOORD0)
 		zBufferWH = saturate(zBufferWH);
 		
 		//This code is used to adjust the already set Weapon Hand Profile.
-		float WA = 1 - (Weapon_Depth_Adjust * 0.03);
+		float WA = 1 + (Weapon_Depth_Adjust * 0.03);
 		if (WP > 1)
-		zBufferWH /= WA - zBufferWH * (0 - WA);
+		zBufferWH = (zBufferWH - 0) /  (WA - 0);
 		
 		//Auto Anti Weapon Depth Map Z-Fighting is always on.
 		float WeaponLumAdjust = saturate(abs(smoothstep(0,0.5,LumWeapon(texcoord)*2.5)));	
@@ -871,14 +868,11 @@ float AutoDepthRange( float d, float2 texcoord )
 
 float Conv(float D,float2 texcoord)
 {
-	float DB, Z, ZP, Con = ZPD, NF_Power;
+	float Z = ZPD, ZP;
 			
 		float Divergence_Locked = Divergence*0.001, MS = Divergence * pix.x;
 		float ALC = abs(Lum(texcoord).x);
 					
-		Z = Con;
-		Divergence_Locked = Divergence_Locked;
-			
 		ZP = 0.5f;
 		
 		if (ZPD == 0)
@@ -905,7 +899,7 @@ float zBuffer(in float2 texcoord : TEXCOORD0)
 
 void  Disocclusion(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 color : SV_Target0)
 {
-float M = 0, X, Y, Z, W = 1, DM, DMA, DMB, A, B, S, MS =  Divergence * pix.x, Div = 1.0f / 11.0f;
+float X, Y, Z, W = 1, DM, DMA, DMB, A, B, S, MS =  Divergence * pix.x, Div = 1.0f / 11.0f;
 float2 dirA, dirB;
 
 #if AO_TOGGLE
@@ -1004,17 +998,16 @@ if(AO == 1)
 }
 
 /////////////////////////////////////////L/R//////////////////////////////////////////////////////////////////////
-float2  Encode(in float2 texcoord : TEXCOORD0)
+float Encode(in float2 texcoord : TEXCOORD0)
 {
-	float2 DM = tex2Dlod(SamplerDis,float4(texcoord.x, texcoord.y,0,1)).xx;
-	return DM;
+	return tex2Dlod(SamplerDis,float4(texcoord.x, texcoord.y,0,0)).x;
 }
 
 float4 PS_calcLR(float2 texcoord)
 {
 	float2 TCL, TCR, TexCoords = texcoord;
 	float4 color, Right, Left;
-	float DepthR = 1, DepthL = 1, N = 9, LDepth, RDepth, samplesA[9] = {0.5,0.5625,0.625,0.6875,0.75,0.8125,0.875,0.9375,1.0};
+	float DepthR = 1, DepthL = 1, LDepth, RDepth, N = 9, samplesA[9] = {0.5,0.5625,0.625,0.6875,0.75,0.8125,0.875,0.9375,1.0};
 		
 	//MS is Max Separation P is Perspective Adjustment
 	float MS = Divergence * pix.x, P = Perspective * pix.x;
@@ -1146,6 +1139,7 @@ float4 PS_calcLR(float2 texcoord)
 		cL = Right;
 		cR = Left;
 	}
+	
 	float HUD_Adjustment = ((0.5 - HUD_Adjust.y)*25) * pix.x;
 	cL = HUD(cL,float2(TexCoords.x - HUD_Adjustment,TexCoords.y));
 	cR = HUD(cR,float2(TexCoords.x + HUD_Adjustment,TexCoords.y));
