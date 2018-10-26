@@ -247,20 +247,12 @@ uniform float WZF_Adjust <
 > = 0;
 #endif
 //Heads-Up Display
-uniform bool HUD_MODE <
-	ui_label = "·HUD Mode·";
-	ui_tooltip = "Use this to turn HUD MODE On or Off.\n"
-				 "Only Usefull if HUD Shows in Depth Buffer.\n"
-				 "Default is Off.";
-	ui_category = "Heads-Up Display";
-> = false;
-
 uniform float2 HUD_Adjust <
 	ui_type = "drag";
 	ui_min = 0.0; ui_max = 1.0;
-	ui_label = " HUD Adjust";
+	ui_label = "·HUD Mode·";
 	ui_tooltip = "Adjust HUD for your games.\n"
-				 "X, CutOff Point used to set a seperation point bettwen world scale and the HUD.\n"
+				 "X, CutOff Point used to set a seperation point bettwen world scale and the HUD also used to turn HUD MODE On or Off.\n"
 				 "Y, Pushes or Pulls the HUD in or out of the screen if HUD MODE is on.\n"
 	             "Default is float2(X 0.0, Y 0.5)";
 	ui_category = "Heads-Up Display";
@@ -722,29 +714,27 @@ float2 WeaponDepth(in float2 texcoord : TEXCOORD0)
 
 void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 Color : SV_Target)
 {
-		float N, R, G, B, D, A = 1;
+		float4 DM = Depth(texcoord).xxxx;
 		
-		float DM = Depth(texcoord);
+		float R, G, B, A, WD = WeaponDepth(texcoord).x, CoP = WeaponDepth(texcoord).y, CutOFFCal = (CoP/Depth_Map_Adjust)/2; //Weapon Cutoff Calculation
 		
-		float WD = WeaponDepth(texcoord).x;
-		
-		float CoP = WeaponDepth(texcoord).y; //Weapon Cutoff Point
-				
-		float CutOFFCal = (CoP/Depth_Map_Adjust)/2; //Weapon Cutoff Calculation
-		
-		CutOFFCal = step(DM,CutOFFCal);
+		CutOFFCal = step(DM.x,CutOFFCal);
 					
 		if (WP == 0)
 		{
-			DM = DM;
+			DM.x = DM.x;
 		}
 		else
 		{
-			DM = lerp(DM,WD,CutOFFCal);
+			DM.x = lerp(DM.x,WD,CutOFFCal);
+			//DM.y = lerp(DM.x,0,CutOFFCal);
+			//DM.z = lerp(0,WD,CutOFFCal);
 		}
 		
-		R = DM;
-		G = Depth(texcoord); //AverageLuminance
+		R = DM.x; //Mix Depth
+		//G = DM.y; //Depth -Weapon Hand
+		//B = DM.z; //Weapon Hand - Depth
+		A = DM.w; //AverageLuminance
 				
 	Color = saturate(float4(R,G,B,A));
 }
@@ -753,7 +743,7 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 //3D AO START//
 float AO_Depth(float2 coords)
 {
-	float DM = tex2Dlod(SamplerDM,float4(coords.xy,0,0)).r;
+	float DM = tex2Dlod(SamplerDM,float4(coords.xy,0,0)).x;
 	return ( DM - 0 ) / ( AO_Control - 0);
 }
 
@@ -854,26 +844,23 @@ void AO_in(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out
 //AO END//
 #endif
 
-float HUD_Depth(float zBufferHUD, float2 texcoord ) 
+float4 HUD(float4 HUD, float2 texcoord ) 
 {		
-	// HUD_XY.x Cutoff | HUD_XY.y Adjust
-	float2 HUD_XY = float2(HUD_Adjust.x, HUD_Adjust.y);
-
-	float CutOFFCal = ((HUD_XY.x * 0.5)/Depth_Map_Adjust) * 0.5, HUD_A = (0.5 - HUD_XY.y) * 0.05; //Weapon Cutoff Calculation
+	float CutOFFCal = ((HUD_Adjust.x * 0.5)/Depth_Map_Adjust) * 0.5; //HUD Cutoff Calculation
 					
 	CutOFFCal = step(Depth(texcoord).x,CutOFFCal);
 				
-	if (HUD_MODE)
+	if (HUD_Adjust.x > 0)
 	{
-		//This code is used to adjust the already set Z-Buffer	
-		zBufferHUD = lerp(zBufferHUD,HUD_A,CutOFFCal);
+		//This code is for hud segregation.
+		HUD = CutOFFCal > 0 ? tex2D(BackBuffer,texcoord) : HUD;
 	}
 	else
 	{
-		zBufferHUD = zBufferHUD;
+		HUD = HUD;
 	}
-							
-	return zBufferHUD;	
+				
+	return HUD;	
 }
 
 float AutoDepthRange( float d, float2 texcoord )
@@ -907,8 +894,8 @@ float Conv(float D,float2 texcoord)
 			ZP = clamp(ALC,0.0f,1.0f);
 				
 		float Convergence = 1 - Z / D;
-				
-    return HUD_Depth(lerp(MS * Convergence,MS * D, ZP),texcoord);
+		
+    return lerp(MS * Convergence, MS * D, ZP);
 }
 
 float zBuffer(in float2 texcoord : TEXCOORD0)
@@ -967,11 +954,11 @@ if(AO == 1)
 				for (int i = 0; i < 11; i++)
 				{	
 					S = weight[i] * MS;
-					DMA += zBuffer(texcoord + dirA * S * A).x*Div;
+					DMA += zBuffer(texcoord + dirA * S * A)*Div;
 					
 					if(Disocclusion_Selection == 3 || Disocclusion_Selection == 6)
 					{
-						DMB += zBuffer(texcoord + dirB * S * B).x*Div;
+						DMB += zBuffer(texcoord + dirB * S * B)*Div;
 					}
 				}
 		}
@@ -986,11 +973,11 @@ if(AO == 1)
 		}	
 		
 		if ( Disocclusion_Selection == 4 || Disocclusion_Selection == 5 || Disocclusion_Selection == 6 )
-			DM = lerp(zBuffer(texcoord).x,DM,step(zBuffer(texcoord).x,Disocclusion_Adjust.y));
+			DM = lerp(zBuffer(texcoord),DM,step(zBuffer(texcoord),Disocclusion_Adjust.y));
 	}
 	else
 	{
-		DM = zBuffer(texcoord).x;
+		DM = zBuffer(texcoord);
 	}
 
 	if (!Cancel_Depth)
@@ -1020,7 +1007,7 @@ if(AO == 1)
 float2  Encode(in float2 texcoord : TEXCOORD0)
 {
 	float2 DM = tex2Dlod(SamplerDis,float4(texcoord.x, texcoord.y,0,1)).xx;
-	return float2(DM.x,DM.y);
+	return DM;
 }
 
 float4 PS_calcLR(float2 texcoord)
@@ -1088,56 +1075,53 @@ float4 PS_calcLR(float2 texcoord)
 				
 		if (View_Mode == 0)
 		{
-			DepthL = min(DepthL,Encode(float2(TCL.x + S * MSM, TCL.y)).x);
-			DepthR = min(DepthR,Encode(float2(TCR.x - S * MSM, TCR.y)).y);
+			DepthL = min(DepthL, Encode(float2(TCL.x + S * MSM, TCL.y)) );
+			DepthR = min(DepthR, Encode(float2(TCR.x - S * MSM, TCR.y)) );
 		}
 		else if (View_Mode == 1)
 		{		
-			LDepth = min(DepthL,Encode(float2(TCL.x + S * MSM, TCL.y)).x);
-			RDepth = min(DepthR,Encode(float2(TCR.x - S * MSM, TCR.y)).y);
+			LDepth = min(DepthL, Encode(float2(TCL.x + S * MSM, TCL.y)) );
+			RDepth = min(DepthR, Encode(float2(TCR.x - S * MSM, TCR.y)) );
 						
-			LDepth += min(DepthL,Encode(float2(TCL.x + S * (MSM * 0.75f), TCL.y)).x);
-			RDepth += min(DepthR,Encode(float2(TCR.x - S * (MSM * 0.75f), TCR.y)).y);
+			LDepth += min(DepthL, Encode(float2(TCL.x + S * (MSM * 0.75f), TCL.y)) );
+			RDepth += min(DepthR, Encode(float2(TCR.x - S * (MSM * 0.75f), TCR.y)) );
 						
-			LDepth += min(DepthL,Encode(float2(TCL.x + S * (MSM * 0.500f), TCL.y)).x);
-			RDepth += min(DepthR,Encode(float2(TCR.x - S * (MSM * 0.500f), TCR.y)).y);
+			LDepth += min(DepthL, Encode(float2(TCL.x + S * (MSM * 0.500f), TCL.y)) );
+			RDepth += min(DepthR, Encode(float2(TCR.x - S * (MSM * 0.500f), TCR.y)) );
 					
-			LDepth += min(DepthL,Encode(float2(TCL.x + S * (MSM * 0.250f), TCL.y)).x);
-			RDepth += min(DepthR,Encode(float2(TCR.x - S * (MSM * 0.250f), TCR.y)).y);
+			LDepth += min(DepthL, Encode(float2(TCL.x + S * (MSM * 0.250f), TCL.y)) );
+			RDepth += min(DepthR, Encode(float2(TCR.x - S * (MSM * 0.250f), TCR.y)) );
 			
 			DepthL = min(DepthL,LDepth / 4.0f);
 			DepthR = min(DepthR,RDepth / 4.0f);
 		}
 		else if (View_Mode == 2)
 		{			
-			LDepth = min(DepthL,Encode(float2(TCL.x + S * MSM, TCL.y)).x);
-			RDepth = min(DepthR,Encode(float2(TCR.x - S * MSM, TCR.y)).y);
+			LDepth = min(DepthL, Encode(float2(TCL.x + S * MSM, TCL.y)) );
+			RDepth = min(DepthR, Encode(float2(TCR.x - S * MSM, TCR.y)) );
 				
-			LDepth += min(DepthL,Encode(float2(TCL.x + S * (MSM * 0.9375f), TCL.y)).x);
-			RDepth += min(DepthR,Encode(float2(TCR.x - S * (MSM * 0.9375f), TCR.y)).y);
+			LDepth += min(DepthL, Encode(float2(TCL.x + S * (MSM * 0.9375f), TCL.y)) );
+			RDepth += min(DepthR, Encode(float2(TCR.x - S * (MSM * 0.9375f), TCR.y)) );
 						
-			LDepth += min(DepthL,Encode(float2(TCL.x + S * (MSM * 0.6875f), TCL.y)).x);
-			RDepth += min(DepthR,Encode(float2(TCR.x - S * (MSM * 0.6875f), TCR.y)).y);
+			LDepth += min(DepthL, Encode(float2(TCL.x + S * (MSM * 0.6875f), TCL.y)) );
+			RDepth += min(DepthR, Encode(float2(TCR.x - S * (MSM * 0.6875f), TCR.y)) );
 			
-			LDepth += min(DepthL,Encode(float2(TCL.x + S * (MSM * 0.500f), TCL.y)).x);
-			RDepth += min(DepthR,Encode(float2(TCR.x - S * (MSM * 0.500f), TCR.y)).y);
+			LDepth += min(DepthL, Encode(float2(TCL.x + S * (MSM * 0.500f), TCL.y)) );
+			RDepth += min(DepthR, Encode(float2(TCR.x - S * (MSM * 0.500f), TCR.y)) );
 		
-			LDepth += min(DepthL,Encode(float2(TCL.x + S * (MSM * 0.4375f), TCL.y)).x);
-			RDepth += min(DepthR,Encode(float2(TCR.x - S * (MSM * 0.4375f), TCR.y)).y);
+			LDepth += min(DepthL, Encode(float2(TCL.x + S * (MSM * 0.4375f), TCL.y)) );
+			RDepth += min(DepthR, Encode(float2(TCR.x - S * (MSM * 0.4375f), TCR.y)) );
 			
-			LDepth += min(DepthL,Encode(float2(TCL.x + S * (MSM * 0.1875f), TCL.y)).x);
-			RDepth += min(DepthR,Encode(float2(TCR.x - S * (MSM * 0.1875f), TCR.y)).y);
+			LDepth += min(DepthL, Encode(float2(TCL.x + S * (MSM * 0.1875f), TCL.y)) );
+			RDepth += min(DepthR, Encode(float2(TCR.x - S * (MSM * 0.1875f), TCR.y)) );
 								
 			DepthL = min(DepthL,LDepth / 6.0f);
 			DepthR = min(DepthR,RDepth / 6.0f);
 		}
 	}
-		
-	DepthL = Conv(DepthL,TexCoords);//Zero Parallax Distance Pass Left
-	DepthR = Conv(DepthR,TexCoords);//Zero Parallax Distance Pass Right
-		
-	float ReprojectionLeft = DepthL;
-	float ReprojectionRight = DepthR;
+			
+	float ReprojectionLeft = Conv(DepthL,TexCoords);//Zero Parallax Distance Pass Left
+	float ReprojectionRight = Conv(DepthR,TexCoords);//Zero Parallax Distance Pass Right
 	
 	if(Custom_Sidebars == 0)
 	{
@@ -1162,6 +1146,9 @@ float4 PS_calcLR(float2 texcoord)
 		cL = Right;
 		cR = Left;
 	}
+	float HUD_Adjustment = ((0.5 - HUD_Adjust.y)*25) * pix.x;
+	cL = HUD(cL,float2(TexCoords.x - HUD_Adjustment,TexCoords.y));
+	cR = HUD(cR,float2(TexCoords.x + HUD_Adjustment,TexCoords.y));
 	
 	#if Anti_Crosstalk	
 	float4x4 YUV = float4x4( 0.21260f, 0.71520f, 0.07220f,  0.0f,-0.09991f,-0.33609f, 0.43600f, 0.0f, 0.61500f,-0.55861f,-0.05639f,  0.0f, 0.0f, 0.0f, 0.0f, 1.0f ),
@@ -1378,9 +1365,9 @@ float4 PS_calcLR(float2 texcoord)
 	}
 		
 	#if WZF		
-	float WZF_A = WZF_Adjust, Average_Lum = (tex2D(SamplerDM,float2(TexCoords.x,TexCoords.y)).g - WZF_A) / ( 1 - WZF_A);
+	float WZF_A = WZF_Adjust, Average_Lum = (tex2D(SamplerDM,float2(TexCoords.x,TexCoords.y)).w - WZF_A) / ( 1 - WZF_A);
 	#else
-	float Average_Lum = tex2D(SamplerDM,float2(TexCoords.x,TexCoords.y)).g;
+	float Average_Lum = tex2D(SamplerDM,float2(TexCoords.x,TexCoords.y)).w;
 	#endif
 	return float4(color.rgb,Average_Lum);
 }
@@ -1394,8 +1381,8 @@ float4 Average_Luminance(float4 position : SV_Position, float2 texcoord : TEXCOO
 	else if(Auto_Balance_Ex == 3)
 		ABE = float2(0.15625, 0.46875);
 	
-	float Average_Lum_ZPD = tex2D(SamplerDM,float2(texcoord.x, ABE.x + texcoord.y * ABE.y )).y;
-	float Average_Lum_Full = tex2D(SamplerDM,float2(texcoord.x,texcoord.y )).y;
+	float Average_Lum_ZPD = tex2D(SamplerDM,float2(texcoord.x, ABE.x + texcoord.y * ABE.y )).w;
+	float Average_Lum_Full = tex2D(SamplerDM,float2(texcoord.x,texcoord.y )).w;
 	return float4(Average_Lum_ZPD,Average_Lum_Full,0,1);
 }
 
