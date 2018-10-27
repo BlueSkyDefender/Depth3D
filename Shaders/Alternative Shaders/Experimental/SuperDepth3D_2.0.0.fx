@@ -52,6 +52,9 @@
 //Define Display aspect ratio for screen cursor. A 16:9 aspect ratio will equal (1.77:1)
 #define DAR float2(1.76, 1.0)
 
+//Screen Cursor to Screen Crosshair Lock
+#define SCSC 0
+
 //Anti Crosstalk is used to help with image ghosing.
 #define Anti_Crosstalk 0 //Default Zero is Off. One is On.
 
@@ -464,7 +467,10 @@ float4 MouseCursor(float4 position : SV_Position, float2 texcoord : TEXCOORD) : 
 {
 	float Cursor, CCA = 0.1,CCB = 0.0025, CCC = 0.025, CCD = 0.05;
 	float2 MousecoordsXY = Mousecoords * pix, center = texcoord, Screen_Ratio = float2(DAR.x,DAR.y), Size_Thickness = float2(Cursor_STT.x,Cursor_STT.y + 0.00000001);
-
+	
+	if (SCSC)
+	MousecoordsXY = float2(0.5,0.5);
+	
 	float dist_fromHorizontal = abs(center.x - MousecoordsXY.x) * Screen_Ratio.x, Size_H = Size_Thickness.x * CCA, THICC_H = Size_Thickness.y * CCB;
 	float dist_fromVertical = abs(center.y - MousecoordsXY.y) * Screen_Ratio.y , Size_V = Size_Thickness.x * CCA, THICC_V = Size_Thickness.y * CCB;	
 	
