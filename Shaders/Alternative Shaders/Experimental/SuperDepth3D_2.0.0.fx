@@ -49,6 +49,9 @@
 // Image Position Adjust is used to move the Z-Buffer around.
 #define Image_Position_Adjust float2(0.0,0.0)
 
+//Define Display aspect ratio for screen cursor. A 16:9 aspect ratio will equal (1.77:1)
+#define DAR float2(1.76, 1.0)
+
 //Anti Crosstalk is used to help with image ghosing.
 #define Anti_Crosstalk 0 //Default Zero is Off. One is On.
 
@@ -353,14 +356,29 @@ uniform float Saturate <
 > = 1.0;
 	#endif
 //Cursor Adjustments//
-uniform float4 Cross_Cursor_Adjust <
+uniform int Cursor_Type <
 	ui_type = "drag";
-	ui_min = 0.0; ui_max = 255.0;
-	ui_label = "·Cross Cursor Adjust·";
-	ui_tooltip = "Pick your own cross cursor color & Size.\n" 
-				 " Default is (R 255, G 255, B 255 , Size 10)";
+	ui_min = 0; ui_max = 10;
+	ui_label = "·Cursor Selection·";
+	ui_tooltip = "Choose the cursor type you like to use.\n" 
+				 "Default is Zero.";
 	ui_category = "Cursor Adjustments";
-> = float4(255.0, 255.0, 255.0, 10.0);
+> = 0;
+
+uniform float3 Cursor_STT <
+	ui_type = "drag";
+	ui_min = 0; ui_max = 1;
+	ui_label = " Cursor Adjustments";
+	ui_tooltip = "This controlls the Size, Thickness, & Transparency.\n" 
+				 "Defaults are ( X 0.250, Y 0.5, Z 0.75 ).";
+	ui_category = "Cursor Adjustments";
+> = float3(0.250,0.5,0.75);
+
+uniform float3 Cursor_Color <
+	ui_type = "color";
+	ui_label = " Cursor Color";
+	ui_category = "Cursor Adjustments";
+> = float3(1.0,1.0,1.0);
 
 uniform bool Cancel_Depth < source = "key"; keycode = Cancel_Depth_Key; toggle = true; >;
 /////////////////////////////////////////////D3D Starts Here/////////////////////////////////////////////////////////////////
@@ -444,12 +462,56 @@ uniform float2 Mousecoords < source = "mousepoint"; > ;
 ////////////////////////////////////////////////////////////////////////////////////Cross Cursor////////////////////////////////////////////////////////////////////////////////////	
 float4 MouseCursor(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Target
 {
-	float2 MousecoordsXY = Mousecoords * pix;
-	float2 CC_Size = Cross_Cursor_Adjust.a * pix;
-	float2 CC_ModeA = float2(1.25,1.0), CC_ModeB = float2(0.5,0.5);
-	float4 Mpointer = all(abs(texcoord - MousecoordsXY) < CC_Size*CC_ModeA) * (1 - all(abs(texcoord - MousecoordsXY) > CC_Size/(Cross_Cursor_Adjust.a*CC_ModeB))) ? float4(Cross_Cursor_Adjust.rgb/255, 1.0) : tex2D(BackBuffer, texcoord);//cross
+	float Cursor, CCA = 0.1,CCB = 0.0025, CCC = 0.025, CCD = 0.05;
+	float2 MousecoordsXY = Mousecoords * pix, center = texcoord, Screen_Ratio = float2(DAR.x,DAR.y), Size_Thickness = float2(Cursor_STT.x,Cursor_STT.y + 0.00000001);
+
+	float dist_fromHorizontal = abs(center.x - MousecoordsXY.x) * Screen_Ratio.x, Size_H = Size_Thickness.x * CCA, THICC_H = Size_Thickness.y * CCB;
+	float dist_fromVertical = abs(center.y - MousecoordsXY.y) * Screen_Ratio.y , Size_V = Size_Thickness.x * CCA, THICC_V = Size_Thickness.y * CCB;	
 	
-	return Mpointer;
+	//Cross Cursor
+	float B = min(max(THICC_H - dist_fromHorizontal,0)/THICC_H,max(Size_H-dist_fromVertical,0));
+	float A = min(max(THICC_V - dist_fromVertical,0)/THICC_V,max(Size_V-dist_fromHorizontal,0));
+	float CC = A+B; //Cross Cursor
+	
+	//Ring Cursor
+	float dist_fromCenter = distance(texcoord * Screen_Ratio , MousecoordsXY * Screen_Ratio ), Size_Ring = Size_Thickness.x * CCA, THICC_Ring = Size_Thickness.y * CCB;
+	float dist_fromIdeal = abs(dist_fromCenter - Size_Ring);
+	float RC = max(THICC_Ring - dist_fromIdeal,0) / THICC_Ring; //Ring Cursor
+	
+	//Square Cursor
+	float Square_Size_A = (Size_Thickness.x * 1.5) * CCA, Square_Size_B = (Size_Thickness.x * 1.5) * CCD, Square_THICC = 1+(1-Size_Thickness.y);
+	float SC_A = min(max(Square_Size_A/Square_THICC - dist_fromHorizontal,0),max(Square_Size_A/Square_THICC-dist_fromVertical,0)); 
+	float SC_B = min(max(Square_Size_B - dist_fromHorizontal,0),max(Square_Size_B-dist_fromVertical,0));
+	float SC = SC_B ? 0 : SC_A; //Square Cursor
+	
+	//Solid Square Cursor
+	float Solid_Square_Size = Size_Thickness.x * CCC;
+	float SSC = min(max(Solid_Square_Size - dist_fromHorizontal,0)/Solid_Square_Size,max(Solid_Square_Size-dist_fromVertical,0)); //Solid Square Cursor
+
+	if(Cursor_Type == 0)
+		Cursor = CC;
+	else if(Cursor_Type == 1)
+		Cursor = RC;
+	else if(Cursor_Type == 2)
+		Cursor = SC;
+	else if(Cursor_Type == 3)
+		Cursor = SSC;
+	else if(Cursor_Type == 4)
+		Cursor = SSC + CC;
+	else if(Cursor_Type == 5)
+		Cursor = SSC + RC;
+	else if(Cursor_Type == 6)
+		Cursor = SSC + SC;
+	else if(Cursor_Type == 7)
+		Cursor = CC + RC;
+	else if(Cursor_Type == 8)
+		Cursor = CC + SC;
+	else if(Cursor_Type == 9)
+		Cursor = CC + SC + SSC;
+	else if(Cursor_Type == 10)
+		Cursor = CC + RC + SSC;
+	
+	return lerp( Cursor  ? float4(Cursor_Color.rgb, 1.0) : tex2D(BackBuffer, texcoord),tex2D(BackBuffer, texcoord),1-Cursor_STT.z);
 }
 
 /////////////////////////////////////////////////////////////////////////////////Adapted Luminance/////////////////////////////////////////////////////////////////////////////////
