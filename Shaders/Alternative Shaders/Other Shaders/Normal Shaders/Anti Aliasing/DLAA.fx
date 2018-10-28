@@ -163,7 +163,7 @@ float4 DLAA(float2 texcoord)
 	VPosC   = tex2D(BackBuffer, texcoord + float2( 0.0, 7.5 * pix.y) );
 	
     //Long Edge detection H & V
-    float4 AvgBlurH = ( HNegA + HNegB + HNegB + Center + HPosA + HPosB + HPosC ) / 7;   
+    float4 AvgBlurH = ( HNegA + HNegB + HNegC + Center + HPosA + HPosB + HPosC ) / 7;   
     float4 AvgBlurV = ( VNegA + VNegB + VNegC + Center + VPosA + VPosB + VPosC ) / 7;
 	float EAH = clamp( AvgBlurH.a * 2.0 - 1.0 ,0.0,1.0);
 	float EAV = clamp( AvgBlurV.a * 2.0 - 1.0 ,0.0,1.0);

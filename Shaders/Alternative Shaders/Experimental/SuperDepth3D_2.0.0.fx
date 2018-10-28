@@ -219,7 +219,7 @@ uniform float2 Weapon_Adjust <
 
 uniform float Weapon_Depth_Adjust <
 	ui_type = "drag";
-	ui_min = -25.0; ui_max = 25.0;
+	ui_min = -50.0; ui_max = 50.0;
 	ui_label = " Weapon Depth Adjustment";
 	ui_tooltip = "Pushes or Pulls the FPS Hand in or out of the screen if a weapon profile is selected.\n"
 				 "This also used to fine tune the Weapon Hand if creating a weapon profile.\n" 
@@ -607,19 +607,19 @@ float2 WeaponDepth(in float2 texcoord : TEXCOORD0)
 		else if(WP == 2) //WP 0
 			WA_XYZW = float4(0.286,7.5,5.5,0);         //Unreal Gold with v227*		
 		else if(WP == 3) //WP 1
-			WA_XYZW = float4(0.445,0.500,0,-1);        //Cryostasis
+			WA_XYZW = float4(0.445,0.500,0,-1);        //Cryostasis*
 		else if(WP == 4) //WP 2
 			WA_XYZW = float4(0.625,1.250,3.75,0);      //BorderLands 2*	
 		else if(WP == 5) //WP 3
-			WA_XYZW = float4(3.2625,0.6275,0,0);       //Wolfenstine	
+			WA_XYZW = float4(0,0,0,0);                 //Game	
 		else if(WP == 6) //WP 4
 			WA_XYZW = float4(0.253,1.0,1.25,3);        //Fallout 4*			
 		else if(WP == 7) //WP 5
-			WA_XYZW = float4(2.8,1.5625,0,0.350);      //Serious Sam Revolition
+			WA_XYZW = float4(0,0,0,0);                 //Game
 		else if(WP == 8) //WP 6
 			WA_XYZW = float4(0.338,0.8125,-14.500,0);  //DOOM 2016*	
-		else if(WP == 9)//WP 7
-			WA_XYZW = float4(3.9,12.5,0,2);            //CoD: Black Ops
+		else if(WP == 9) //WP 7
+			WA_XYZW = float4(0.255,0.5625,-0.750,2);   //CoD: Black Ops*
 		else if(WP == 10)//WP 8
 			WA_XYZW = float4(0.254,25.0,-0.5,2);       //CoD:AW*	
 		else if(WP == 11)//WP 9
@@ -627,7 +627,7 @@ float2 WeaponDepth(in float2 texcoord : TEXCOORD0)
 		else if(WP == 12)//WP 10
 			WA_XYZW = float4(0.2712,25.0,0,1);         //Prey 2017 Very High*	
 		else if(WP == 13)//WP 11
-			WA_XYZW = float4(2.6,0.7048,0,1);          //Metro Redux Games	
+			WA_XYZW = float4(0.450,0.175,-43.75,1);    //Metro Redux Games	
 		else if(WP == 14)//WP 12
 			WA_XYZW = float4(0.489,3.75,0,-1);         //NecroVisioN: Lost Company*
 		else if(WP == 15)//WP 13
@@ -667,9 +667,9 @@ float2 WeaponDepth(in float2 texcoord : TEXCOORD0)
 		else if(WP == 32)//WP 30
 			WA_XYZW = float4(5.050,2.750,0,0.4913);    //Wolfenstine
 		else if(WP == 33)//WP 31
+			WA_XYZW = float4(3.2625,0.6275,0,0);       //Return to Castle Wolfenstine
+		else if(WP == 34)//WP 32
 			WA_XYZW = float4(0.458,0.3375,0,-1);       //F.E.A.R 2
-		//else if(WP == 34)//WP 32
-			//WA_XYZW = float4(0.0,0.0,0,0.0);         //Game
 		//else if(WP == 35)//WP 33
 			//WA_XYZW = float4(0.0,0.0,0,0.0);         //Game
 		//else if(WP == 36)//WP 34
@@ -763,7 +763,7 @@ float2 WeaponDepth(in float2 texcoord : TEXCOORD0)
 		zBufferWH = saturate(zBufferWH);
 		
 		//This code is used to adjust the already set Weapon Hand Profile.
-		float WA = 1 + (Weapon_Depth_Adjust * 0.03);
+		float WA = 1 + (Weapon_Depth_Adjust * 0.015);
 		if (WP > 1)
 		zBufferWH = (zBufferWH - 0) /  (WA - 0);
 		
