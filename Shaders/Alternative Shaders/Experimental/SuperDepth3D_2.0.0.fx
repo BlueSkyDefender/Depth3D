@@ -973,7 +973,6 @@ float2 dirA, dirB;
 					{
 						DMB += zBuffer(texcoord + dirB * S * B)*Div;
 					}
-				continue;
 				}
 		}
 				
@@ -1001,49 +1000,52 @@ float Encode(in float2 texcoord : TEXCOORD0)
 
 float4 PS_calcLR(float2 texcoord)
 {
-	float4 color, Right, Left;
+	float4 color, Right, Left, R, L;
 	float2 TCL, TCR, TexCoords = texcoord;
 	float DepthR = 1, DepthL = 1, LDepth, RDepth, N = 9, samplesA[9] = {0.5,0.5625,0.625,0.6875,0.75,0.8125,0.875,0.9375,1.0};
-		
-	//MS is Max Separation P is Perspective Adjustment
-	float MS = Divergence * pix.x, P = Perspective * pix.x;
-					
+							
 	if(Eye_Swap)
 	{
 		if ( Stereoscopic_Mode == 0 )
 		{
-			TCL = float2((texcoord.x*2-1) - P,texcoord.y);
-			TCR = float2((texcoord.x*2) + P,texcoord.y);
+			TCL = float2(texcoord.x*2-1,texcoord.y);
+			TCR = float2(texcoord.x*2,texcoord.y);
 		}
 		else if( Stereoscopic_Mode == 1)
 		{
-			TCL = float2(texcoord.x - P,texcoord.y*2-1);
-			TCR = float2(texcoord.x + P,texcoord.y*2);
+			TCL = float2(texcoord.x,texcoord.y*2-1);
+			TCR = float2(texcoord.x,texcoord.y*2);
 		}
 		else
 		{
-			TCL = float2(texcoord.x - P,texcoord.y);
-			TCR = float2(texcoord.x + P,texcoord.y);
+			TCL = float2(texcoord.x,texcoord.y);
+			TCR = float2(texcoord.x,texcoord.y);
 		}
 	}	
 	else
 	{
 		if (Stereoscopic_Mode == 0)
 		{
-			TCL = float2((texcoord.x*2) + P,texcoord.y);
-			TCR = float2((texcoord.x*2-1) - P,texcoord.y);
+			TCL = float2(texcoord.x*2,texcoord.y);
+			TCR = float2(texcoord.x*2-1,texcoord.y);
 		}
 		else if(Stereoscopic_Mode == 1)
 		{
-			TCL = float2(texcoord.x + P,texcoord.y*2);
-			TCR = float2(texcoord.x - P,texcoord.y*2-1);
+			TCL = float2(texcoord.x,texcoord.y*2);
+			TCR = float2(texcoord.x,texcoord.y*2-1);
 		}
 		else
 		{
-			TCL = float2(texcoord.x + P,texcoord.y);
-			TCR = float2(texcoord.x - P,texcoord.y);
+			TCL = float2(texcoord.x,texcoord.y);
+			TCR = float2(texcoord.x,texcoord.y);
 		}
 	}
+	
+	//MS is Max Separation P is Perspective Adjustment
+	float MS = Divergence * pix.x, P = Perspective * pix.x;
+	
+	TCL.x += P;
+	TCR.x -= P;
 	
 	//Optimization for line & column interlaced out.
 	if (Stereoscopic_Mode == 2)
@@ -1066,6 +1068,7 @@ float4 PS_calcLR(float2 texcoord)
 		{
 			DepthL = min(DepthL, Encode(float2(TCL.x + S * MSM, TCL.y)) );
 			DepthR = min(DepthR, Encode(float2(TCR.x - S * MSM, TCR.y)) );
+			continue;
 		}
 		else if (View_Mode == 1)
 		{		
@@ -1083,6 +1086,7 @@ float4 PS_calcLR(float2 texcoord)
 			
 			DepthL = min(DepthL,LDepth / 4.0f);
 			DepthR = min(DepthR,RDepth / 4.0f);
+			continue;
 		}
 		else if (View_Mode == 2)
 		{			
@@ -1106,8 +1110,8 @@ float4 PS_calcLR(float2 texcoord)
 								
 			DepthL = min(DepthL,LDepth / 6.0f);
 			DepthR = min(DepthR,RDepth / 6.0f);
+			continue;
 		}
-		continue;
 	}
 			
 	float ReprojectionLeft = Conv(DepthL,TexCoords);//Zero Parallax Distance Pass Left
@@ -1128,11 +1132,14 @@ float4 PS_calcLR(float2 texcoord)
 		Left = tex2Dlod(BackBufferCLAMP, float4(TCL.x + ReprojectionLeft, TCL.y,0,0));
 		Right = tex2Dlod(BackBufferCLAMP, float4(TCR.x - ReprojectionRight, TCR.y,0,0));
 	}
-
-	if ( Eye_Swap )
+	
+	L = Left; //Used for Eye Swap
+	R = Right;//Used for Eye Swap
+		
+	if ( Eye_Swap ) //Is Eye Swap
 	{
-		Left = Right;
-		Right = Left;
+		Left = R;
+		Right = L;
 	}
 	
 	float HUD_Adjustment = ((0.5 - HUD_Adjust.y)*25) * pix.x;
