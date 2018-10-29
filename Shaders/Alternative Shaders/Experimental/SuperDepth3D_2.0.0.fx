@@ -1060,7 +1060,7 @@ float4 PS_calcLR(float2 texcoord)
 	[loop]
 	for ( int i = 0 ; i < N; i++ ) 
 	{	
-		float S = samplesA[i], MSM = MS + 0.00125f;//You can adjust this from 0.001f to 0.005f range.			
+		float S = samplesA[i], MSM = MS + (Divergence * 0.0001);//Adjustment for range scaling.		
 				
 		if (View_Mode == 0)
 		{
