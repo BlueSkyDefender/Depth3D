@@ -438,7 +438,7 @@ sampler SamplerDM
 		Texture = texDM;
 	};
 	
-texture texDis  { Width = BUFFER_WIDTH/Depth_Map_Division; Height = BUFFER_HEIGHT/Depth_Map_Division; Format = RGBA32F; MipLevels = 1;}; 
+texture texDis  { Width = BUFFER_WIDTH/Depth_Map_Division; Height = BUFFER_HEIGHT/Depth_Map_Division; Format = RGBA32F;}; 
 
 sampler SamplerDis
 	{
@@ -961,30 +961,46 @@ float Conv(float D,float2 texcoord)
 }
 
 float zBuffer(in float2 texcoord : TEXCOORD0)
-{
-	return tex2Dlod(SamplerDM,float4(texcoord,0,0)).x;
+{	
+	float DM = tex2Dlod(SamplerDM,float4(texcoord,0,0)).x;
+	
+	#if AO_TOGGLE
+	float blursize = 2.0*pix.x,sum;
+	if(AO == 1)
+		{
+			sum += tex2Dlod(SamplerAO, float4(texcoord.x - 4.0*blursize, texcoord.y,0,1)).x;
+			sum += tex2Dlod(SamplerAO, float4(texcoord.x, texcoord.y - 3.0*blursize,0,1)).x;
+			sum += tex2Dlod(SamplerAO, float4(texcoord.x - 2.0*blursize, texcoord.y,0,1)).x;
+			sum += tex2Dlod(SamplerAO, float4(texcoord.x, texcoord.y - blursize,0,1)).x;
+			sum += tex2Dlod(SamplerAO, float4(texcoord.x + blursize, texcoord.y,0,1)).x;
+			sum += tex2Dlod(SamplerAO, float4(texcoord.x, texcoord.y + 2.0*blursize,0,1)).x;
+			sum += tex2Dlod(SamplerAO, float4(texcoord.x + 3.0*blursize, texcoord.y,0,1)).x;
+			sum += tex2Dlod(SamplerAO, float4(texcoord.x, texcoord.y + 4.0*blursize,0,1)).x;
+			sum /= 8.0;
+		}
+	#endif
+	
+	#if AO_TOGGLE
+	if(AO == 1)
+	{
+		DM = lerp(DM, (DM+sum) * 0.5,AO_Power);
+	}
+	else
+	{
+		DM = DM;
+	}
+	#endif
+	
+	if (Cancel_Depth)
+		DM = 0.5;
+		
+	return DM;
 }
 
 void  Disocclusion(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 color : SV_Target0)
 {
 float X, Y, Z, W = 1, DM, DMA, DMB, A, B, S, MS =  Divergence * pix.x, Div = 1.0f / 11.0f;
 float2 dirA, dirB;
-
-#if AO_TOGGLE
-float blursize = 2.0*pix.x,sum;
-if(AO == 1)
-	{
-		sum += tex2Dlod(SamplerAO, float4(texcoord.x - 4.0*blursize, texcoord.y,0,1)).x;
-		sum += tex2Dlod(SamplerAO, float4(texcoord.x, texcoord.y - 3.0*blursize,0,1)).x;
-		sum += tex2Dlod(SamplerAO, float4(texcoord.x - 2.0*blursize, texcoord.y,0,1)).x;
-		sum += tex2Dlod(SamplerAO, float4(texcoord.x, texcoord.y - blursize,0,1)).x;
-		sum += tex2Dlod(SamplerAO, float4(texcoord.x + blursize, texcoord.y,0,1)).x;
-		sum += tex2Dlod(SamplerAO, float4(texcoord.x, texcoord.y + 2.0*blursize,0,1)).x;
-		sum += tex2Dlod(SamplerAO, float4(texcoord.x + 3.0*blursize, texcoord.y,0,1)).x;
-		sum += tex2Dlod(SamplerAO, float4(texcoord.x, texcoord.y + 4.0*blursize,0,1)).x;
-		sum /= 8.0;
-	}
-#endif
 
 	MS *= Disocclusion_Adjust.x * 2.0f;
 		
@@ -1041,26 +1057,8 @@ if(AO == 1)
 	{
 		DM = zBuffer(texcoord);
 	}
-
-	if (!Cancel_Depth)
-	{	
-		#if AO_TOGGLE
-		if(AO == 1)
-		{
-			X =lerp(DM,DM+sum,AO_Power);
-		}
-		else
-		{
-			X = DM;
-		}
-		#else
-			X = DM;
-		#endif	
-	}
-	else
-	{
-		X = 0.5;
-	}
+	
+	X = DM;	
 		
 	color = float4(X,Y,Z,W);
 }
@@ -1420,9 +1418,9 @@ float4 PS_calcLR(float2 texcoord)
 	}
 		else
 	{		
-			float R = tex2Dlod(SamplerDis,float4(TexCoords.x, TexCoords.y,0,0)).x;
+			float R = ( DepthL + DepthR ) * 0.5f;
 			float G = AutoDepthRange(tex2Dlod(SamplerDM,float4(TexCoords.x, TexCoords.y,0,0)).x,TexCoords);
-			float B = tex2Dlod(SamplerDis,float4(TexCoords.x,TexCoords.y,0,0)).x;
+			float B = tex2Dlod(SamplerDis,float4(TexCoords.x, TexCoords.y,0,0)).x;
 			color = float4(R,G,B,1.0);
 	}
 		
