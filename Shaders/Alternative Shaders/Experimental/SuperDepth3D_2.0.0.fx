@@ -55,9 +55,6 @@
 //Screen Cursor to Screen Crosshair Lock
 #define SCSC 0
 
-//Anti Crosstalk is used to help with image ghosing.
-#define Anti_Crosstalk 0 //Default Zero is Off. One is On.
-
 //USER EDITABLE PREPROCESSOR FUNCTIONS END//
 //Divergence & Convergence//
 uniform float Divergence <
@@ -95,7 +92,7 @@ uniform float ZPD <
 
 uniform int Auto_Balance_Ex <
 	ui_type = "drag";
-	ui_min = 0; ui_max = 3;
+	ui_min = 0; ui_max = 4;
 	ui_label = " Auto Balance";
 	ui_tooltip = "Automatically Balance between ZPD Depth and Scene Depth.\n" 
 				 "Default is Off.";
@@ -230,15 +227,14 @@ uniform float Weapon_Depth_Adjust <
 #if WZF
 uniform int Anti_Z_Fighting <
 	ui_type = "drag";
-	ui_min = 0; ui_max = 5;
+	ui_min = 0; ui_max = 4;
 	ui_label = "·Weapon Anti Z-Fighting Target·";
 	ui_tooltip = "Anti Z-Fighting is use help prevent weapon hand Z-Fighting.\n"
-				 "0 -> The Center of the Screen Small.\n"
-				 "1 -> The Center of the Screen Long.\n"
-				 "2 -> The Lower Half of the Screen.\n"
+				 "0 -> The Lower Half of the Screen.\n"
+				 "1 -> The Center of the Screen Small.\n"
+				 "2 -> The Center of the Screen Long.\n"
 				 "3 -> Lower L-Half of the Screen.\n"
 				 "4 -> Lower R-Half of the Screen.\n"
-				 "5 -> Full Screen.\n"
 				 "Default is Two.";
 	ui_category = "Weapon Anti Z-Fighting";
 > = 2;
@@ -338,30 +334,10 @@ uniform float AO_Power <
 	ui_category = "3D Ambient Occlusion";
 > = 0.05;
 #endif
-//Crosstalk Adjustments//
-#if Anti_Crosstalk	
-uniform float Gamma <
-	ui_type = "drag";
-	ui_min = 0.5; ui_max = 1.5;
-	ui_label = "Gamma Deghosting";
-	ui_tooltip = "Use this to help with Gamma ghosting.\n" 
-				 "Default is 2.2.";
-	ui_category = "Crosstalk";
-> = 2.2;
-
-uniform float Saturate <
-	ui_type = "drag";
-	ui_min = 0.0; ui_max = 1.0;
-	ui_label = "Color Deghosting";
-	ui_tooltip = "Use this to help with color ghosting.\n" 
-				 "Default is 1.0.";
-	ui_category = "Crosstalk";
-> = 1.0;
-	#endif
 //Cursor Adjustments//
 uniform int Cursor_Type <
 	ui_type = "drag";
-	ui_min = 0; ui_max = 10;
+	ui_min = 0; ui_max = 6;
 	ui_label = "·Cursor Selection·";
 	ui_tooltip = "Choose the cursor type you like to use.\n" 
 				 "Default is Zero.";
@@ -465,7 +441,7 @@ uniform float2 Mousecoords < source = "mousepoint"; > ;
 ////////////////////////////////////////////////////////////////////////////////////Cross Cursor////////////////////////////////////////////////////////////////////////////////////	
 float4 MouseCursor(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Target
 {
-	float Cursor, CCA = 0.1,CCB = 0.0025, CCC = 0.025, CCD = 0.05;
+	float CCA = 0.1,CCB = 0.0025, CCC = 0.025, CCD = 0.05;
 	float2 MousecoordsXY = Mousecoords * pix, center = texcoord, Screen_Ratio = float2(DAR.x,DAR.y), Size_Thickness = float2(Cursor_STT.x,Cursor_STT.y + 0.00000001);
 	
 	if (SCSC)
@@ -484,37 +460,23 @@ float4 MouseCursor(float4 position : SV_Position, float2 texcoord : TEXCOORD) : 
 	float dist_fromIdeal = abs(dist_fromCenter - Size_Ring);
 	float RC = max(THICC_Ring - dist_fromIdeal,0) / THICC_Ring; //Ring Cursor
 	
-	//Square Cursor
-	float Square_Size_A = (Size_Thickness.x * 1.5) * CCA, Square_Size_B = (Size_Thickness.x * 1.5) * CCD, Square_THICC = 1+(1-Size_Thickness.y);
-	float SC_A = min(max(Square_Size_A/Square_THICC - dist_fromHorizontal,0),max(Square_Size_A/Square_THICC-dist_fromVertical,0)); 
-	float SC_B = min(max(Square_Size_B - dist_fromHorizontal,0),max(Square_Size_B-dist_fromVertical,0));
-	float SC = SC_B ? 0 : SC_A; //Square Cursor
-	
 	//Solid Square Cursor
 	float Solid_Square_Size = Size_Thickness.x * CCC;
 	float SSC = min(max(Solid_Square_Size - dist_fromHorizontal,0)/Solid_Square_Size,max(Solid_Square_Size-dist_fromVertical,0)); //Solid Square Cursor
-
-	if(Cursor_Type == 0)
-		Cursor = CC;
-	else if(Cursor_Type == 1)
+	
+	float Cursor = CC;
+	
+	if(Cursor_Type == 1)
 		Cursor = RC;
 	else if(Cursor_Type == 2)
-		Cursor = SC;
-	else if(Cursor_Type == 3)
 		Cursor = SSC;
-	else if(Cursor_Type == 4)
+	else if(Cursor_Type == 3)
 		Cursor = SSC + CC;
-	else if(Cursor_Type == 5)
+	else if(Cursor_Type == 4)
 		Cursor = SSC + RC;
-	else if(Cursor_Type == 6)
-		Cursor = SSC + SC;
-	else if(Cursor_Type == 7)
+	else if(Cursor_Type == 5)
 		Cursor = CC + RC;
-	else if(Cursor_Type == 8)
-		Cursor = CC + SC;
-	else if(Cursor_Type == 9)
-		Cursor = CC + SC + SSC;
-	else if(Cursor_Type == 10)
+	else if(Cursor_Type == 6)
 		Cursor = CC + RC + SSC;
 	
 	return lerp( Cursor  ? float4(Cursor_Color.rgb, 1.0) : tex2D(BackBuffer, texcoord),tex2D(BackBuffer, texcoord),1-Cursor_STT.z);
@@ -579,13 +541,9 @@ float Depth(in float2 texcoord : TEXCOORD0)
 		Z = min( 1, float2( Z.x*Offsets.x , Z.y /  Offsets.y  ));
 			
 		if (Depth_Map == 0)//DM0. Normal
-		{
-			zBuffer = Far * Near / (Far + Z.x * (Near - Far));
-		}		
+			zBuffer = Far * Near / (Far + Z.x * (Near - Far));		
 		else if (Depth_Map == 1)//DM1. Reverse
-		{
 			zBuffer = Far * Near / (Far + Z.y * (Near - Far));
-		}
 			
 	return zBuffer;
 }
@@ -752,13 +710,9 @@ float2 WeaponDepth(in float2 texcoord : TEXCOORD0)
 		float2 Z = float2( zBufferWH, 1-zBufferWH );
 				
 		if ( Depth_Map == 0 )
-		{
 			zBufferWH /= Far - Z.x * (Near - Far);
-		}
 		else if ( Depth_Map == 1 )
-		{
 			zBufferWH /= Far - Z.y * (Near - Far);
-		}
 		
 		zBufferWH = saturate(zBufferWH);
 		
@@ -911,20 +865,12 @@ void AO_in(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out
 
 float4 HUD(float4 HUD, float2 texcoord ) 
 {		
-	float CutOFFCal = ((HUD_Adjust.x * 0.5)/Depth_Map_Adjust) * 0.5; //HUD Cutoff Calculation
-					
-	CutOFFCal = step(Depth(texcoord).x,CutOFFCal);
-				
+	float CutOFFCal = ((HUD_Adjust.x * 0.5)/Depth_Map_Adjust) * 0.5, COC = step(Depth(texcoord).x,CutOFFCal);; //HUD Cutoff Calculation
+	
+	//This code is for hud segregation.			
 	if (HUD_Adjust.x > 0)
-	{
-		//This code is for hud segregation.
-		HUD = CutOFFCal > 0 ? tex2D(BackBuffer,texcoord) : HUD;
-	}
-	else
-	{
-		HUD = HUD;
-	}
-				
+		HUD = COC > 0 ? tex2D(BackBuffer,texcoord) : HUD;
+					
 	return HUD;	
 }
 
@@ -936,12 +882,7 @@ float AutoDepthRange( float d, float2 texcoord )
 
 float Conv(float D,float2 texcoord)
 {
-	float Z = ZPD, ZP;
-			
-		float Divergence_Locked = Divergence*0.001, MS = Divergence * pix.x;
-		float ALC = abs(Lum(texcoord).x);
-					
-		ZP = 0.5f;
+	float Z = ZPD, ZP = 0.5f, Divergence_Locked = Divergence*0.001, MS = Divergence * pix.x, ALC = abs(Lum(texcoord).x);
 		
 		if (ZPD == 0)
 			ZP = 1.0;
@@ -982,24 +923,18 @@ float zBuffer(in float2 texcoord : TEXCOORD0)
 	
 	#if AO_TOGGLE
 	if(AO == 1)
-	{
 		DM = lerp(DM, (DM+sum) * 0.5,AO_Power);
-	}
-	else
-	{
-		DM = DM;
-	}
 	#endif
 	
 	if (Cancel_Depth)
-		DM = 0.5;
+		DM = 0.5f;
 		
 	return DM;
 }
 
 void  Disocclusion(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 color : SV_Target0)
 {
-float X, Y, Z, W = 1, DM, DMA, DMB, A, B, S, MS =  Divergence * pix.x, Div = 1.0f / 11.0f;
+float DM = zBuffer(texcoord), DMA, DMB, A, B, S, MS =  Divergence * pix.x, Div = 1.0f / 11.0f;
 float2 dirA, dirB;
 
 	MS *= Disocclusion_Adjust.x * 2.0f;
@@ -1038,12 +973,13 @@ float2 dirA, dirB;
 					{
 						DMB += zBuffer(texcoord + dirB * S * B)*Div;
 					}
+				continue;
 				}
 		}
 				
 		if ( Disocclusion_Selection == 3 || Disocclusion_Selection == 6 )
 		{	
-			DM = lerp(DMA,DMB,0.25);
+			DM = lerp(DMA,DMB,0.1875);
 		}
 		else
 		{
@@ -1053,14 +989,8 @@ float2 dirA, dirB;
 		if ( Disocclusion_Selection == 4 || Disocclusion_Selection == 5 || Disocclusion_Selection == 6 )
 			DM = lerp(zBuffer(texcoord),DM,step(zBuffer(texcoord),Disocclusion_Adjust.y));
 	}
-	else
-	{
-		DM = zBuffer(texcoord);
-	}
-	
-	X = DM;	
 		
-	color = float4(X,Y,Z,W);
+	color = float4(DM,0.0,0.0,1.0);
 }
 
 /////////////////////////////////////////L/R//////////////////////////////////////////////////////////////////////
@@ -1071,8 +1001,8 @@ float Encode(in float2 texcoord : TEXCOORD0)
 
 float4 PS_calcLR(float2 texcoord)
 {
-	float2 TCL, TCR, TexCoords = texcoord;
 	float4 color, Right, Left;
+	float2 TCL, TCR, TexCoords = texcoord;
 	float DepthR = 1, DepthL = 1, LDepth, RDepth, N = 9, samplesA[9] = {0.5,0.5625,0.625,0.6875,0.75,0.8125,0.875,0.9375,1.0};
 		
 	//MS is Max Separation P is Perspective Adjustment
@@ -1118,19 +1048,19 @@ float4 PS_calcLR(float2 texcoord)
 	//Optimization for line & column interlaced out.
 	if (Stereoscopic_Mode == 2)
 	{
-		TCL.y = TCL.y + ((Interlace_Anaglyph.x*0.5) * pix.y);
-		TCR.y = TCR.y - ((Interlace_Anaglyph.x*0.5) * pix.y);
+		TCL.y += (Interlace_Anaglyph.x*0.5) * pix.y;
+		TCR.y -= (Interlace_Anaglyph.x*0.5) * pix.y;
 	}
 	else if (Stereoscopic_Mode == 3)
 	{
-		TCL.x = TCL.x + ((Interlace_Anaglyph.x*0.5) * pix.x);
-		TCR.x = TCR.x - ((Interlace_Anaglyph.x*0.5) * pix.x);
+		TCL.x += (Interlace_Anaglyph.x*0.5) * pix.x;
+		TCR.x -= (Interlace_Anaglyph.x*0.5) * pix.x;
 	}
 							
 	[loop]
 	for ( int i = 0 ; i < N; i++ ) 
 	{	
-		float S = samplesA[i], MSM = MS + 0.001f;			
+		float S = samplesA[i], MSM = MS + 0.00125f;//You can adjust this from 0.001f to 0.005f range.			
 				
 		if (View_Mode == 0)
 		{
@@ -1177,6 +1107,7 @@ float4 PS_calcLR(float2 texcoord)
 			DepthL = min(DepthL,LDepth / 6.0f);
 			DepthR = min(DepthR,RDepth / 6.0f);
 		}
+		continue;
 	}
 			
 	float ReprojectionLeft = Conv(DepthL,TexCoords);//Zero Parallax Distance Pass Left
@@ -1197,33 +1128,17 @@ float4 PS_calcLR(float2 texcoord)
 		Left = tex2Dlod(BackBufferCLAMP, float4(TCL.x + ReprojectionLeft, TCL.y,0,0));
 		Right = tex2Dlod(BackBufferCLAMP, float4(TCR.x - ReprojectionRight, TCR.y,0,0));
 	}
-	
-	float4 cL = Left,cR = Right; //Left Image & Right Image
 
 	if ( Eye_Swap )
 	{
-		cL = Right;
-		cR = Left;
+		Left = Right;
+		Right = Left;
 	}
 	
 	float HUD_Adjustment = ((0.5 - HUD_Adjust.y)*25) * pix.x;
-	cL = HUD(cL,float2(TCL.x - HUD_Adjustment,TCL.y));
-	cR = HUD(cR,float2(TCR.x + HUD_Adjustment,TCR.y));
-	
-	#if Anti_Crosstalk	
-	float4x4 YUV = float4x4( 0.21260f, 0.71520f, 0.07220f,  0.0f,-0.09991f,-0.33609f, 0.43600f, 0.0f, 0.61500f,-0.55861f,-0.05639f,  0.0f, 0.0f, 0.0f, 0.0f, 1.0f ),
-			 RGB = float4x4( 1.0f, 0.00000f, 1.28033f, 0.0f, 1.0f,-0.21482f,-0.38059f, 0.0f, 1.0f, 2.12798f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f );
-
-	cL     = mul(YUV,cL);
-	cR     = mul(YUV,cR);
-	float4 CL = mul(YUV,cL);
-	float4 CR = mul(YUV,cR);
-	cL.rg  = float2(saturate(cL.r + pow(CL.r,Gamma)),cL.g * Saturate);
-	cR.rg  = float2(saturate(cR.r + pow(CR.r,Gamma)),cR.g * Saturate);
-	cL     = mul(RGB,cL);
-	cR     = mul(RGB,cR);
-	#endif	
-		
+	Left = HUD(Left,float2(TCL.x - HUD_Adjustment,TCL.y));
+	Right = HUD(Right,float2(TCR.x + HUD_Adjustment,TCR.y));
+			
 	if(!Depth_Map_View)
 	{
 	float2 gridxy;
@@ -1249,31 +1164,31 @@ float4 PS_calcLR(float2 texcoord)
 			
 		if(Stereoscopic_Mode == 0)
 		{	
-			color = TexCoords.x < 0.5 ? cL : cR;
+			color = TexCoords.x < 0.5 ? Left : Right;
 		}
 		else if(Stereoscopic_Mode == 1)
 		{	
-			color = TexCoords.y < 0.5 ? cL : cR;
+			color = TexCoords.y < 0.5 ? Left : Right;
 		}
 		else if(Stereoscopic_Mode == 2)
 		{
-			color = fmod(gridxy.y,2.0) ? cR : cL;	
+			color = fmod(gridxy.y,2.0) ? Right : Left;	
 		}
 		else if(Stereoscopic_Mode == 3)
 		{
-			color = fmod(gridxy.x,2.0) ? cR : cL;		
+			color = fmod(gridxy.x,2.0) ? Right : Left;		
 		}
 		else if(Stereoscopic_Mode == 4)
 		{
-			color = fmod(gridxy.x+gridxy.y,2.0) ? cR : cL;
+			color = fmod(gridxy.x+gridxy.y,2.0) ? Right : Left;
 		}
 		else if(Stereoscopic_Mode >= 5)
 		{			
 			float Contrast = 1.0, Deghost = 0.06, LOne, LTwo, ROne, RTwo;
-			float3 HalfLA = dot(cL.rgb,float3(0.299, 0.587, 0.114));
-			float3 HalfRA = dot(cR.rgb,float3(0.299, 0.587, 0.114));
-			float3 LMA = lerp(HalfLA,cL.rgb,Interlace_Anaglyph.y);  
-			float3 RMA = lerp(HalfRA,cR.rgb,Interlace_Anaglyph.y); 
+			float3 HalfLA = dot(Left.rgb,float3(0.299, 0.587, 0.114));
+			float3 HalfRA = dot(Right.rgb,float3(0.299, 0.587, 0.114));
+			float3 LMA = lerp(HalfLA,Left.rgb,Interlace_Anaglyph.y);  
+			float3 RMA = lerp(HalfRA,Right.rgb,Interlace_Anaglyph.y); 
 			float4 image = 1, accumRC, accumGM, accumBA;
 
 			float contrast = (Contrast*0.5)+0.5, deghost = Deghost;
@@ -1418,7 +1333,7 @@ float4 PS_calcLR(float2 texcoord)
 	}
 		else
 	{		
-			float R = ( DepthL + DepthR ) * 0.5f;
+			float R = lerp(DepthL,DepthR,0.5f);
 			float G = AutoDepthRange(tex2Dlod(SamplerDM,float4(TexCoords.x, TexCoords.y,0,0)).x,TexCoords);
 			float B = tex2Dlod(SamplerDis,float4(TexCoords.x, TexCoords.y,0,0)).x;
 			color = float4(R,G,B,1.0);
@@ -1434,14 +1349,16 @@ float4 PS_calcLR(float2 texcoord)
 
 float4 Average_Luminance(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Target
 {
-	float2 ABE = float2(0.0, 0.750);
+	float4 ABE = float4(0.0,1.0,0.0, 0.750);//Upper Extra Wide
 	
 	if(Auto_Balance_Ex == 2)
-		ABE = float2(0.0, 0.5);		
+		ABE = float4(0.0,1.0,0.0, 0.5);//Upper Wide
 	else if(Auto_Balance_Ex == 3)
-		ABE = float2(0.15625, 0.46875);
-	
-	float Average_Lum_ZPD = tex2D(SamplerDM,float2(texcoord.x, ABE.x + texcoord.y * ABE.y )).w;
+		ABE = float4(0.0,1.0,0.15625, 0.46875);//Upper Short
+	else if(Auto_Balance_Ex == 4)
+		ABE = float4(0.4375, 0.125,0.375,0.250);//Center Small
+			
+	float Average_Lum_ZPD = tex2D(SamplerDM,float2(ABE.z + texcoord.x * ABE.w, ABE.x + texcoord.y * ABE.y )).w;
 	float Average_Lum_Full = tex2D(SamplerDM,float2(texcoord.x,texcoord.y )).w;
 	return float4(Average_Lum_ZPD,Average_Lum_Full,0,1);
 }
@@ -1450,18 +1367,14 @@ float4 Average_Luminance_Weapon(float4 position : SV_Position, float2 texcoord :
 {
 	float4 AZF = float4(0.500, 0.500,0.0,1.0);//Lower Half
 	#if WZF
-	if ( Anti_Z_Fighting == 0)
+	if ( Anti_Z_Fighting == 1)
 		AZF = float4(0.4375, 0.125,0.375,0.250);//Center Small
-	else if ( Anti_Z_Fighting == 1)
-		AZF = float4(0.0, 1.0, 0.375,0.250);//Center Long
 	else if ( Anti_Z_Fighting == 2)
-		AZF = float4(0.500, 0.500,0.0,1.0);//Lower Half
+		AZF = float4(0.0, 1.0, 0.375,0.250);//Center Long
 	else if ( Anti_Z_Fighting == 3)
 		AZF = float4(0.5, 0.5, 0.0, 0.5);//Lower Left
 	else if ( Anti_Z_Fighting == 4)
 		AZF = float4(0.5, 0.5, 0.5, 0.5);//Lower Right
-	else if ( Anti_Z_Fighting == 5)
-		AZF = float4(0.0, 1.0, 0.0, 1.0);//Full Screen
 	#endif
 	float3 Average_Lum_Weapon = PS_calcLR(float2(AZF.z + texcoord.x * AZF.w,AZF.x + texcoord.y * AZF.y )).www;
 	return float4(Average_Lum_Weapon,1);
