@@ -1340,7 +1340,7 @@ float4 PS_calcLR(float2 texcoord)
 	}
 		else
 	{		
-			float R = lerp(DepthL,DepthR,0.5f);
+			float R = tex2Dlod(SamplerDis,float4(TexCoords.x, TexCoords.y,0,0)).x;
 			float G = AutoDepthRange(tex2Dlod(SamplerDM,float4(TexCoords.x, TexCoords.y,0,0)).x,TexCoords);
 			float B = tex2Dlod(SamplerDis,float4(TexCoords.x, TexCoords.y,0,0)).x;
 			color = float4(R,G,B,1.0);
@@ -1361,11 +1361,13 @@ float4 Average_Luminance(float4 position : SV_Position, float2 texcoord : TEXCOO
 	if(Auto_Balance_Ex == 2)
 		ABE = float4(0.0,1.0,0.0, 0.5);//Upper Wide
 	else if(Auto_Balance_Ex == 3)
-		ABE = float4(0.0,1.0,0.15625, 0.46875);//Upper Short
+		ABE = float4(0.0,1.0, 0.15625, 0.46875);//Upper Short
 	else if(Auto_Balance_Ex == 4)
-		ABE = float4(0.4375, 0.125,0.375,0.250);//Center Small
+		ABE = float4(0.375, 0.250, 0.4375, 0.125);//Center Small
+	else if(Auto_Balance_Ex == 5)
+		ABE = float4(0.0, 1.0, 0.4375, 0.125);//Center Long
 			
-	float Average_Lum_ZPD = tex2D(SamplerDM,float2(ABE.z + texcoord.x * ABE.w, ABE.x + texcoord.y * ABE.y )).w;
+	float Average_Lum_ZPD = tex2D(SamplerDM,float2(ABE.x + texcoord.x * ABE.y, ABE.z + texcoord.y * ABE.w )).w;
 	float Average_Lum_Full = tex2D(SamplerDM,float2(texcoord.x,texcoord.y )).w;
 	return float4(Average_Lum_ZPD,Average_Lum_Full,0,1);
 }
