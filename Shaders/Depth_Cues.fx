@@ -67,12 +67,12 @@ sampler BackBuffer
 		Texture = BackBufferTex;
 	};
 			
-texture texB { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA8; MipLevels = 3;};
+texture texB { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA8; MipLevels = 2;};
 
 sampler SamplerBlur
 	{
 		Texture = texB;
-		MipLODBias = 3.0f;
+		MipLODBias = 2.0f;
 		MinFilter = LINEAR;
 		MagFilter = LINEAR;
 		MipFilter = LINEAR;
@@ -104,7 +104,8 @@ float4 Adjust(in float2 texcoord : TEXCOORD0)
 float2 S = float2(Spread * 0.15625f, Spread * 0.15625f) * pix;
 float4 H = lerp(tex2D(SamplerBlur, float2(texcoord.x + S.x, texcoord.y + S.y)),tex2D(SamplerBlur, float2(texcoord.x - S.x, texcoord.y - S.y)),0.5);
 float4 V = lerp(tex2D(SamplerBlur, float2(texcoord.x - S.x, texcoord.y + S.y)),tex2D(SamplerBlur, float2(texcoord.x + S.x, texcoord.y - S.y)),0.5);
-float4 HVC = lerp(H,V,0.5);
+float4 C = tex2D(SamplerBlur, float2(texcoord.x, texcoord.y));
+float4 HVC = (H + V + C) / 3;
 
 return HVC; 
 }
