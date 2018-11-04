@@ -123,9 +123,9 @@ uniform float2 Disocclusion_Adjust <
 	ui_min = 0.0; ui_max = 1.0;
 	ui_label = " Disocclusion Adjust";
 	ui_tooltip = "Automatic occlusion masking power & Depth Based culling adjustments.\n"
-				"Default is ( 0.5f, 0.625f)";
+				"Default is ( 0.250f, 0.625f)";
 	ui_category = "Occlusion Masking";
-> = float2( 0.5, 0.625);
+> = float2( 0.250, 0.625);
 
 uniform int View_Mode <
 	ui_type = "combo";
@@ -414,7 +414,7 @@ sampler SamplerDM
 		Texture = texDM;
 	};
 	
-texture texDis  { Width = BUFFER_WIDTH/Depth_Map_Division; Height = BUFFER_HEIGHT/Depth_Map_Division; Format = RGBA32F;}; 
+texture texDis  { Width = BUFFER_WIDTH/Depth_Map_Division; Height = BUFFER_HEIGHT/Depth_Map_Division; Format = RGBA32F; MipLevels = 1;}; 
 
 sampler SamplerDis
 	{
@@ -957,45 +957,45 @@ float2 dirA, dirB;
 		dirB = float2(0.5,0.0);
 	}
 		
-	if (Disocclusion_Selection >= 1) 
-	{
-		const float weight[11] = {0.0,0.010,-0.010,0.020,-0.020,0.030,-0.030,0.040,-0.040,0.050,-0.050}; //By 11
+	const float weight[11] = {0.0,0.010,-0.010,0.020,-0.020,0.030,-0.030,0.040,-0.040,0.050,-0.050}; //By 11
 				
-		if ( Disocclusion_Selection >= 1 )
-		{		
-				[loop]
-				for (int i = 0; i < 11; i++)
-				{	
-					S = weight[i] * MS;
-					DMA += zBuffer(texcoord + dirA * S * A)*Div;
-					
-					if(Disocclusion_Selection == 3 || Disocclusion_Selection == 6)
-					{
-						DMB += zBuffer(texcoord + dirB * S * B)*Div;
-					}
-				}
-		}
-				
-		if ( Disocclusion_Selection == 3 || Disocclusion_Selection == 6 )
+	if ( Disocclusion_Selection >= 1 && Disocclusion_Adjust.x > 0)
+	{		
+		[loop]
+		for (int i = 0; i < 11; i++)
 		{	
-			DM = lerp(DMA,DMB,0.1875);
+			S = weight[i] * MS;
+			DMA += zBuffer(texcoord + dirA * S * A)*Div;
+			
+			if(Disocclusion_Selection == 3 || Disocclusion_Selection == 6)
+			{
+				DMB += zBuffer(texcoord + dirB * S * B)*Div;
+			}
 		}
-		else
-		{
-			DM = DMA;
-		}	
-		
-		if ( Disocclusion_Selection == 4 || Disocclusion_Selection == 5 || Disocclusion_Selection == 6 )
-			DM = lerp(zBuffer(texcoord),DM,step(zBuffer(texcoord),Disocclusion_Adjust.y));
+				
+	if ( Disocclusion_Selection == 3 || Disocclusion_Selection == 6 )
+	{	
+		DM = lerp(DMA,DMB,0.1875);
 	}
-		
+	else
+	{
+		DM = DMA;
+	}	
+	
+	if ( Disocclusion_Selection == 4 || Disocclusion_Selection == 5 || Disocclusion_Selection == 6 )
+		DM = lerp(zBuffer(texcoord),DM,step(zBuffer(texcoord),Disocclusion_Adjust.y));
+	}
+	else
+	{
+		DM = zBuffer(texcoord);
+	}
 	color = float4(DM,0.0,0.0,1.0);
 }
 
 /////////////////////////////////////////L/R//////////////////////////////////////////////////////////////////////
 float Encode(in float2 texcoord : TEXCOORD0)
 {
-	return tex2Dlod(SamplerDis,float4(texcoord.x, texcoord.y,0,0)).x;
+	return tex2Dlod(SamplerDis,float4(texcoord.x, texcoord.y,0,1)).x;
 }
 
 float4 PS_calcLR(float2 texcoord)

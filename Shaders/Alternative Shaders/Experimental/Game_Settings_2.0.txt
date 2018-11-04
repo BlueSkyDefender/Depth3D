@@ -190,23 +190,24 @@ Inner Shader Setting:
 [Read Below] [Special Depth Map Game List]             [Depth Map] [Adjustment] [Weapon DM] [FlipZ] [ZPD / Range] [Auto Depth] [SD / FB] [Offset]
              Amnesia: Machine for Pigs                    DM 0       50.00                    No      0.025-0.050                         0.00025       
              Amnesia: The Dark Descent                    DM 0       50.00                    No      0.025-0.050                         0.00025
-             Crash Bandicoot™ N. Sane Trilogy             DM 0       ????                   ??????    ???????????                         ??????
-             Double Dragon Neon                           DM 0       1.0                      No      0.025-0.075                         1.1000 
-             Dungeons 2                                   DM 0       3.50                     Yes     0.025-0.250                         0.0050
-             Fez                                          DM 0       10.0                     Yes     ?0.0-0.250?                         0.9750        
-    RB       Grim Dawn                                    DM 0       7.50                     No      0.250-0.300      0.575        FB    0.0040 
-             HellDiver                                    DM 0       50.0                     No      0.200-0.300      0.600        FB    0.0010
-             Lara Croft & Temple of Osiris                DM 0       250.0                    No      0.025-0.200                         0.0207
-    RB       Magicka 2                                    DM 0       13.75                    No      0.025-0.250                         0.0125
-             Never Alone (Kisima Ingitchuna)              DM 0       25.0                     No      0.050-0.100                         0.0050             
-    RB       Requiem: Avenging Angel                      DM 0       50.0                     No      0.030-0.060                         0.8000
-             Serious Sam Revolution                       DM 0       7.5           WDM *      No      0.025-0.075                         0.1111
-             Shadow Tactics: Blades of the Shogun         DM 0       5.5                      Yes     0.250-0.350      0.2875       FB    0.0010
-             Shadow Warrior Classic Source Port           DM 0       8.75                     No      0.075-0.150                         1.0000
-             Shadow Warrior Classic Redux                 DM 0       8.75                     No      0.075-0.150                         1.0000
-             Silent Hill: Homecoming                      DM 0       12.5                     No      0.025-0.075                         0.1155
-             Rise of the Tomb Raider                      DM 0       25.0                     No      0.050-0.125                         0.0200
-             Two Worlds EE                                DM 0       7.5                      No      0.025-0.075                         0.0750
+             Crash Bandicoot™ N. Sane Trilogy             DM 0       ????                   ??????    ???????????                         ???????
+             Double Dragon Neon                           DM 0       1.0                      No      0.025-0.075                         1.10000 
+             Dungeons 2                                   DM 0       3.50                     Yes     0.025-0.250                         0.00500
+             Fez                                          DM 0       10.0                     Yes     ?0.0-0.250?                         0.97500        
+    RB       Grim Dawn                                    DM 0       7.50                     No      0.250-0.300      0.575        FB    0.00400 
+             HellDiver                                    DM 0       50.0                     No      0.200-0.300      0.600        FB    0.00100
+             Lara Croft & Temple of Osiris                DM 0       250.0                    No      0.025-0.200                         0.02070
+    RB       Magicka 2                                    DM 0       13.75                    No      0.025-0.250                         0.01250
+             Never Alone (Kisima Ingitchuna)              DM 0       25.0                     No      0.050-0.100                         0.00500             
+    RB       Requiem: Avenging Angel                      DM 0       50.0                     No      0.030-0.060                         0.80000
+             Serious Sam Revolution                       DM 0       7.5           WDM *      No      0.025-0.075                         0.11110
+             Shadow Tactics: Blades of the Shogun         DM 0       5.5                      Yes     0.250-0.350      0.2875       FB    0.00100
+             Shadow Warrior Classic Source Port           DM 0       8.75                     No      0.075-0.150                         1.00000
+             Shadow Warrior Classic Redux                 DM 0       8.75                     No      0.075-0.150                         1.00000
+             Silent Hill: Homecoming                      DM 0       12.5                     No      0.025-0.075                         0.11550
+             Rise of the Tomb Raider                      DM 0       25.0                     No      0.050-0.125                         0.02000
+             Tomb Raider: Anniversary                     DM 0       20.0                     No      0.0375-0.625      0.100       SD    0.02070
+             Two Worlds EE                                DM 0       7.5                      No      0.025-0.075                         0.07500
                                 
 [Emulator][RB][Special Depth Map Game List]            [Depth Map] [Adjustment] [Weapon DM] [Offset] [Depth Flip] [ZDP Range]
 CEMU          Mariokart 8                                  ????        ???                                Yes      ?
