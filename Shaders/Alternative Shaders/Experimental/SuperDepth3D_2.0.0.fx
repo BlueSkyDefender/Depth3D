@@ -983,7 +983,8 @@ float2 dirA, dirB;
 	}	
 	
 	if ( Disocclusion_Selection == 4 || Disocclusion_Selection == 5 || Disocclusion_Selection == 6 )
-		DM = lerp(zBuffer(texcoord),DM,step(zBuffer(texcoord),Disocclusion_Adjust.y));
+		DM = lerp(zBuffer(texcoord), DM, step(zBuffer(texcoord), Disocclusion_Adjust.y));
+	
 	}
 	else
 	{
@@ -995,7 +996,7 @@ float2 dirA, dirB;
 /////////////////////////////////////////L/R//////////////////////////////////////////////////////////////////////
 float Encode(in float2 texcoord : TEXCOORD0)
 {
-	return tex2Dlod(SamplerDis,float4(texcoord.x, texcoord.y,0,1)).x;
+	return tex2Dlod(SamplerDis,float4(texcoord.x, texcoord.y,0,0)).x;
 }
 
 float4 PS_calcLR(float2 texcoord)
