@@ -65,7 +65,7 @@ uniform float Power <
 uniform int Fill <
 	ui_type = "drag";
 	ui_min = 0; ui_max = 4;
-	ui_label = "Fill Amount";
+	ui_label = " Fill Amount";
 	ui_tooltip = "Adjust Fill Amount";
 > = 3;
 
