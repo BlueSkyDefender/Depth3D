@@ -18,17 +18,6 @@
  //* ---------------------------------																																				*//
  //*																																												*//
  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-uniform bool ToMB <
-	ui_label = " Tacked On Motion Blur";
-	ui_tooltip = "This was from my Trails shader code.";
-> = false;
-
-uniform float MBSeeking <
-	ui_type = "drag";
-	ui_min = 0.0; ui_max = 1.00;
-	ui_label = " Motion Blur Seeking";
-	ui_tooltip = "MBS.";
-> = 0.75;
 
 uniform float Persistence <
 	ui_type = "drag";
@@ -39,35 +28,53 @@ uniform float Persistence <
 				"This can be used for light painting in games.\n"
 				"1000/1 is 1.0, so 1/2 is 0.5 and so forth.\n"
 				"Default is 1/250 so 0.750, 0 is infinity.";
+	ui_category = "Trails Adjust";
 > = 0.300;
 
-uniform int T_P_Q <
+uniform float T_P_Q <
 	ui_type = "drag";
-	ui_min = 1; ui_max = 5;
+	ui_min = 0; ui_max = 2.0;
 	ui_label = " Trail Quality & Persistence Quality";
 	ui_tooltip = "Adjust trail and persistence blur effect.";
-> = 2;
+	ui_category = "Trails Adjust";
+> = 1.0;
+
+uniform float MBSeeking <
+	ui_type = "drag";
+	ui_min = 0.0; ui_max = 1.00;
+	ui_label = " Motion Blur Seeking";
+	ui_tooltip = "Motion Blur Seeking effets the mask used for the effect.";
+> = 0.75;
 
 uniform float MPower <
 	ui_type = "drag";
 	ui_min = 1.0; ui_max = 250.0;
-	ui_label = " MPower";
-	ui_tooltip = "MPower.";
+	ui_label = " Motion Seeking Power";
+	ui_tooltip = "This is used for general screen motion information.";
+	ui_category = "Trails Adjust";
 > = 125.0;
 
-uniform float Power <
+uniform float PowerL <
 	ui_type = "drag";
 	ui_min = 0.0; ui_max = 0.10;
-	ui_label = " Power";
-	ui_tooltip = "Power.";
+	ui_label = " Power Limiter";
+	ui_tooltip = "Power Limiter is used to limit the seeking size of moving objects.";
+	ui_category = "Trails Adjust";
 > = 0.0;
 
 uniform int Fill <
 	ui_type = "drag";
-	ui_min = 0; ui_max = 4;
+	ui_min = 1; ui_max = 4;
 	ui_label = " Fill Amount";
-	ui_tooltip = "Adjust Fill Amount";
-> = 3;
+	ui_tooltip = "Adjust the Fill area for the Mask";
+	ui_category = "Trails Adjust";
+> = 2;
+
+uniform bool Mask_View <
+	ui_label = " Mask View";
+	ui_tooltip = "To view the Mask use for Trails.";
+	ui_category = "Trails Debug";
+> = false;
 
 //Depth Map//
 uniform int Depth_Map <
@@ -81,7 +88,7 @@ uniform int Depth_Map <
 
 uniform float Depth_Map_Adjust <
 	ui_type = "drag";
-	ui_min = 0.250; ui_max = 250.0;
+	ui_min = 0.250; ui_max = 25.0;
 	ui_label = " Depth Map Adjustment";
 	ui_tooltip = "This allows for you to adjust the DM precision.\n"
 				 "Adjust this to keep it as low as possible.\n"
@@ -106,11 +113,6 @@ uniform bool Depth_Map_Flip <
 	ui_category = "Depth Map";
 > = false;
 
-uniform bool Debug_View <
-	ui_label = " Debug View";
-	ui_tooltip = "To view the blur mask.";
-> = false;
-
 /////////////////////////////////////////////D3D Starts Here/////////////////////////////////////////////////////////////////
 #define pix float2(BUFFER_RCP_WIDTH, BUFFER_RCP_HEIGHT)
 
@@ -128,11 +130,11 @@ sampler BackBuffer
 		Texture = BackBufferTex;
 	};
 
-texture texDM  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA32F;}; 
+texture texTDM  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA32F;}; 
 
 sampler DepthBuffer
 	{
-		Texture = texDM;
+		Texture = texTDM;
 	};
 	
 texture Mtex  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA32F; MipLevels = 8;}; 
@@ -251,7 +253,7 @@ float4 Mask(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Targ
 
 float4 VBuffer(float2 texcoord : TEXCOORD0)
 {	
-	float X = tex2Dlod(MaskBuffer,float4(texcoord,0,Fill)).b > (Power+0.005) ? 1 : 0;
+	float X = tex2Dlod(MaskBuffer,float4(texcoord,0,Fill)).b > (PowerL+0.005) ? 1 : 0;
 	float Ma = lerp(0,AveLum(texcoord).r,tex2D(DepthBuffer,texcoord).r), Mb = X;
 	float4 color;
 	
@@ -260,32 +262,21 @@ float4 VBuffer(float2 texcoord : TEXCOORD0)
 	
 	float P = 1-Persistence;
 	past_buffer.rgb = past_buffer.rgb * P;
-		
+	
 	current_buffer.rgb = max( current_buffer.rgb, past_buffer.rgb);
+
+	float2 A = tex2D(DepthBuffer,texcoord).rr * 0.5 + 0.5;
+	float2 B = float2(0, Ma);
+	float2 C = float2(0, Mb * 0.5);
+	float2 VelocityD = A - B - C;
+	float Vm = saturate((VelocityD.x + VelocityD.y) *0.5);
+			
+	color =  float4(lerp( current_buffer.rgb ,tex2D(BackBuffer,texcoord).rgb,Vm.xxx > MBSeeking),1.0);
+
 	
-	if(!Debug_View)
-	{
-	    float2 a = tex2D(DepthBuffer,texcoord).rr * 0.5 + 0.5;
-		float2 b = float2(0, Ma);
-		float2 c = float2(0, Mb * 0.5);
-		float2 Velocity = a - b - c;
-		color = float4(Velocity,0,1.0);
-	}
-	else
-	{
-		color =  Mb.xxxx;
-	}
-	
-	if(ToMB)
-	{
-		float2 A = tex2D(DepthBuffer,texcoord).rr * 0.5 + 0.5;
-		float2 B = float2(0, Ma);
-		float2 C = float2(0, Mb * 0.5);
-		float2 VelocityD = A - B - C;
-		float Vm = saturate((VelocityD.x + VelocityD.y) *0.5);
-		
-		color =  float4(lerp(current_buffer.rgb,tex2D(BackBuffer,texcoord),Vm.xxxx > MBSeeking),1.0);
-	}	
+	if (Mask_View)
+		color = lerp(Vm.xxxx * 2.0,Vm.xxxx > MBSeeking, 1-MBSeeking);
+			
 return color;
 }
 //CB
@@ -306,15 +297,20 @@ void Past_BackBuffer(float4 position : SV_Position, float2 texcoord : TEXCOORD, 
 	}; 
 	
 	Past = tex2D(BackBuffer,texcoord);
-	float2 Adjust = float2(T_P_Q,T_P_Q)*pix;
-	[loop]
-	for (int i = 0; i < 6; i++)
-	{  
-		Past += tex2D(BackBuffer, texcoord + Adjust * samples[i]);
-	} 
-	
-	Past *= 0.16666666;
 	PastSingle = tex2D(CBackBuffer,texcoord);
+	
+	float2 Adjust = float2(T_P_Q,T_P_Q)*pix;
+	if(T_P_Q > 0)
+	{
+		[loop]
+		for (int i = 0; i < 6; i++)
+		{  
+			Past += tex2D(BackBuffer, texcoord + Adjust * samples[i]);
+			continue;
+		}
+		
+	Past *= 0.16666666;
+	}
 }
 //DB
 void Current_DepthBuffer(float4 position : SV_Position, float2 texcoord : TEXCOORD, out float4 color : SV_Target)
@@ -461,7 +457,7 @@ technique Trails
 	{
 		VertexShader = PostProcessVS;
 		PixelShader = DepthMap;
-		RenderTarget = texDM;
+		RenderTarget = texTDM;
 	}
 		pass MaskBuffer
 	{
