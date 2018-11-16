@@ -29,7 +29,7 @@ uniform float Persistence <
 				"1000/1 is 1.0, so 1/2 is 0.5 and so forth.\n"
 				"Default is 1/250 so 0.750, 0 is infinity.";
 	ui_category = "Trails Adjust";
-> = 0.250;
+> = 0.4375;
 
 uniform float T_P_Q <
 	ui_type = "drag";
