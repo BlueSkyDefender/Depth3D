@@ -201,9 +201,9 @@ float4 Dust(float2 texcoord : TEXCOORD0)
 	Frot = mul(Frot - PivotPoint, float2x2(float2(cos_factor, sin_factor), float2(-sin_factor, cos_factor)));	
 	Frot += PivotPoint;
 
-    float2 uv = float2(1.0375,0) - Frot;
+    float2 uv = float2(1.0,0) - Frot;
     
-    float M = smoothstep(0,1,LumC(texcoord).w), Speed_Clamp = (50.0-SC)*pix.x, S = Size, ST = 0.9, Sp = Speed;
+    float M = smoothstep(0,1,LumC(texcoord).w), Speed_Clamp = (50.0-SC)*pix.x, S = Size, Sp = Speed;
 
     if(M > Speed_Clamp)
     {
@@ -223,7 +223,6 @@ float4 Dust(float2 texcoord : TEXCOORD0)
    	if(M > (Speed_Clamp * 2.5f))
 	{
 		S *= 0.0f;
-		ST = 0.0; 
 	}
     
     float T = timer * (Sp/25) * pix.x;
@@ -235,7 +234,7 @@ float4 Dust(float2 texcoord : TEXCOORD0)
         float sammount = rnd(cos(i)) * cos( i / Amount );
         float2 center = float2(rnd(i) + Waviness * cos(T + sin(i)) , fmod( sin(i) - sammount * (T * 2.5), 1.0));
 
-        float DC = ST * drawCircle( center, sammount * S * pix.x, uv);
+        float DC = drawCircle( center, sammount * S * pix.x, uv);
         Color += float4(DC, DC , DC, M);
         continue;
     }

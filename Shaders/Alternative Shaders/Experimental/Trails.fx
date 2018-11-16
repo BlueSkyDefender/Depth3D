@@ -64,15 +64,17 @@ uniform float PowerL <
 
 uniform int Fill <
 	ui_type = "drag";
-	ui_min = 1; ui_max = 4;
+	ui_min = 1; ui_max = 5;
 	ui_label = " Fill Amount";
 	ui_tooltip = "Adjust the Fill area for the Mask";
 	ui_category = "Trails Adjust";
-> = 2;
+> = 3;
 
-uniform bool Mask_View <
-	ui_label = " Mask View";
-	ui_tooltip = "To view the Mask use for Trails.";
+uniform int Mask_View <
+	ui_type = "combo";
+	ui_items = "Off\0Mask View One\0Mask View Two\0";
+	ui_label = " Mask Views";
+	ui_tooltip = "To view the Mask used for Trails.";
 	ui_category = "Trails Debug";
 > = false;
 
@@ -251,9 +253,20 @@ float4 Mask(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Targ
 	return float4(Vr,Vg,Vb,1.0);
 }
 
+float Adjust(in float2 texcoord : TEXCOORD0)
+{
+float2 S = float2(Fill * 1.0f, Fill * 1.0f) * pix;
+float H = lerp(tex2Dlod(MaskBuffer,float4(texcoord.x + S.x, texcoord.y + S.y,0,Fill)).b,tex2Dlod(MaskBuffer,float4(texcoord.x - S.x, texcoord.y - S.y,0,Fill)).b,0.5);
+float V = lerp(tex2Dlod(MaskBuffer,float4(texcoord.x - S.x, texcoord.y + S.y,0,Fill)).b,tex2Dlod(MaskBuffer,float4(texcoord.x + S.x, texcoord.y - S.y,0,Fill)).b,0.5);
+float C = tex2D(MaskBuffer, float4(texcoord.x, texcoord.y,0,Fill)).b;
+float HVC = (H + V + C) / 3;
+
+return HVC; 
+}
+
 float4 VBuffer(float2 texcoord : TEXCOORD0)
 {	
-	float X = tex2Dlod(MaskBuffer,float4(texcoord,0,Fill)).b > (PowerL+0.005) ? 1 : 0;
+	float X = Adjust(texcoord) > (PowerL+0.005) ? 1 : 0;
 	float Ma = lerp(0,AveLum(texcoord).r,tex2D(DepthBuffer,texcoord).r), Mb = X;
 	float4 color;
 	
@@ -269,13 +282,20 @@ float4 VBuffer(float2 texcoord : TEXCOORD0)
 	float2 B = float2(0, Ma);
 	float2 C = float2(0, Mb * 0.5);
 	float2 VelocityD = A - B - C;
-	float Vm = saturate((VelocityD.x + VelocityD.y) *0.5);
-			
-	color =  float4(lerp( current_buffer.rgb ,tex2D(BackBuffer,texcoord).rgb,Vm.xxx > MBSeeking),1.0);
-
+	float Vm = saturate((VelocityD.x + VelocityD.y) * 0.5);
 	
-	if (Mask_View)
-		color = lerp(Vm.xxxx * 2.0,Vm.xxxx > MBSeeking, 1-MBSeeking);
+	if (Mask_View == 1)
+	{
+		color = Vm.xxxx;
+	}
+	else if (Mask_View == 2)
+	{
+		color = Vm.xxxx > MBSeeking;
+	}
+	else
+	{
+		color =  float4(lerp( current_buffer.rgb ,tex2D(BackBuffer,texcoord).rgb,Vm.xxx > MBSeeking),1.0);
+	}
 			
 return color;
 }
