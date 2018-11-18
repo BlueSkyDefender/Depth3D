@@ -132,6 +132,7 @@ Inner Shader Setting:
               Need for Speed Most Wanted                   ?            ?                                 ?
               NieRAutomata                                 DM 0         20.0                              0.050-0.075
     RB        Nosferatu: The Wrath of Malachi              DM 0         62.5                              0.150-0.175 
+             *Obscuritas                                   DM 0         20.0                              0.0125-0.0500      Yes 5          SD 
               Observer                                     DM 1         10.0                              0.025-0.250 
     RB        Penumbra: Black Plague                       DM 0         7.5                               0.025-0.250       
     RB        Phantasmal                                   DM 0         7.5                       Yes     0.010-0.020

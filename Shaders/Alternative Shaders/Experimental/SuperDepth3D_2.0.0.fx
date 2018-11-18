@@ -92,7 +92,7 @@ uniform float ZPD <
 
 uniform int Auto_Balance_Ex <
 	ui_type = "drag";
-	ui_min = 0; ui_max = 4;
+	ui_min = 0; ui_max = 5;
 	ui_label = " Auto Balance";
 	ui_tooltip = "Automatically Balance between ZPD Depth and Scene Depth.\n" 
 				 "Default is Off.";
@@ -1366,7 +1366,7 @@ float4 Average_Luminance(float4 position : SV_Position, float2 texcoord : TEXCOO
 	else if(Auto_Balance_Ex == 4)
 		ABE = float4(0.375, 0.250, 0.4375, 0.125);//Center Small
 	else if(Auto_Balance_Ex == 5)
-		ABE = float4(0.0, 1.0, 0.4375, 0.125);//Center Long
+		ABE = float4(0.375, 0.250, 0.0, 1.0);//Center Long
 			
 	float Average_Lum_ZPD = tex2D(SamplerDM,float2(ABE.x + texcoord.x * ABE.y, ABE.z + texcoord.y * ABE.w )).w;
 	float Average_Lum_Full = tex2D(SamplerDM,float2(texcoord.x,texcoord.y )).w;
