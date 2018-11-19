@@ -595,9 +595,9 @@ float2 WeaponDepth(in float2 texcoord : TEXCOORD0)
 		else if(WP == 17)//WP 15
 			WA_XYZW = float4(0.375,2.5,-44.75,0);      //Quake DarkPlaces*	
 		else if(WP == 18)//WP 16
-			WA_XYZW = float4(3.925,16.25,0,0.400);     //Quake 2 XP
+			WA_XYZW = float4(0.7,0.4,-30.0,-1);        //Quake 2 XP*
 		else if(WP == 19)//WP 17
-			WA_XYZW = float4(5.000000,7.0,0,0.500);    //Quake 4
+			WA_XYZW = float4(0.750,1.5,-1.250,-1);     //Quake 4*
 		else if(WP == 20)//WP 18
 			WA_XYZW = float4(3.6875,7.250,0,0.400);    //RTCW
 		else if(WP == 21)//WP 19
@@ -615,7 +615,7 @@ float2 WeaponDepth(in float2 texcoord : TEXCOORD0)
 		else if(WP == 27)//WP 25
 			WA_XYZW = float4(2.800,1.0,0,0.280);       //EuroTruckSim2
 		else if(WP == 28)//WP 26
-			WA_XYZW = float4(5.000,2.875,0,0.500);     //Prey - 2006
+			WA_XYZW = float4(0.750,3.4375,0,-1);       //Prey - 2006*
 		else if(WP == 29)//WP 27
 			WA_XYZW = float4(2.77575,0.3625,0,0.3625); //TitanFall 2
 		else if(WP == 30)//WP 28

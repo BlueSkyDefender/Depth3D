@@ -137,11 +137,11 @@ Inner Shader Setting:
               Observer                                     DM 1         10.0                              0.025-0.250 
     RB        Penumbra: Black Plague                       DM 0         7.5                               0.025-0.250       
     RB        Phantasmal                                   DM 0         7.5                       Yes     0.010-0.020
-    RB        Prey 2006                                    DM 0         12.5        WDM *                 0.050-0.075       
+    RB       *Prey 2006                                    DM 0         7.5       *WDM 26                 0.0250-0.0500      Yes 3          SD       
     RB       *Prey 2017                                    DM 1         18.75    *WDM 9 & 10              0.0375-0.0500      Yes 2          SD                
     RB       *Quake Epsilon                                DM 0         15.00      *WDM 15                0.0375-0.0625      Yes 2          SD 
-              Quake 2 XP                                   DM 0         7.5         WDM *                 0.025-0.150
-    RB        Quake 4                                      DM 0         7.5         WDM *                 0.025-0.125
+             *Quake 2 XP                                   DM 0         7.5        *WDM 16                0.0250-0.0500      No  0          SD
+    RB       *Quake 4                                      DM 0         10.0       *WDM 17                0.0250-0.0500      Yes 5          SD
               Quantum Break                                DM 0         9.0                               0.025-0.275
     RB       *Rage64                                       DM 0         20.00       WDM 14                0.0125-0.0375      Yes 2          SD  
     RB        Redout                                       DM ?         ?                                 ?      
@@ -451,6 +451,13 @@ Credit goes to Devil Master User on ReShades Forums
 Disable the glow in the game options so the DepthMap Shows. Link to the Forum Post.
 https://reshade.me/forum/general-discussion/3219-doom-3-vs-prey-2006-depth-buffer#24982
 
+ReShade overlay inaccessible to mouse work around.
+
+Bypass the game's mouse bind
+Press Alt+Tab to switch into windowed mode
+Press Ctrl+ Alt + ~ to open the console
+Access the ReShade GUI
+
 {Prey 2017}
 Path to install \Steam\steamapps\common\Prey\Binaries\Danielle\x64\Release
 
@@ -475,10 +482,17 @@ Install Reshade as OpenGl or use above setting for geometry 3D.
 Also please use DarkPlaces "build 20140513" from here. https://icculus.org/twilight/darkplaces/download.html
 
 {Quake 4}
-If some how you can click on the menu......... Good Luck. Try Alt-Tab borderless window mode.
-You may also want to put in your setting by hand in your own ini.
-
 Use Reshade 3.0.4 and good luck. BTW it really does work just hard to enter any settings.....
+
+ReShade overlay inaccessible to mouse work around.
+
+Bypass the game's mouse bind
+Open <path-to-game>\q4base\Quake4Config.cfg
+Search the line seta com_allowConsole and set the value to "1".
+Start the game.
+Press Alt+Tab to switch into windowed mode
+Press ~ to open the console
+Access the ReShade GUI
 
 {Rage}
 Start the game with out Reshade Set your game resolution First Turn off AA. 
