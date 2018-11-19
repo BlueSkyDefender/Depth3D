@@ -585,15 +585,15 @@ float2 WeaponDepth(in float2 texcoord : TEXCOORD0)
 		else if(WP == 12)//WP 10
 			WA_XYZW = float4(0.2712,25.0,0,1);         //Prey 2017 Very High*	
 		else if(WP == 13)//WP 11
-			WA_XYZW = float4(0.450,0.175,-43.75,1);    //Metro Redux Games	
+			WA_XYZW = float4(0.450,0.175,-43.75,1);    //Metro Redux Games*	
 		else if(WP == 14)//WP 12
 			WA_XYZW = float4(0.489,3.75,0,-1);         //NecroVisioN: Lost Company*
 		else if(WP == 15)//WP 13
-			WA_XYZW = float4(3.925,17.5,0,0.400);      //Kingpin Life of Crime
+			WA_XYZW = float4(0.625,0.275,-25.0,-1);    //Kingpin Life of Crime*
 		else if(WP == 16)//WP 14
-			WA_XYZW = float4(5.45,1.0,0,0.550);        //Rage64		
+			WA_XYZW = float4(1.0,27.5,6.25,-1);        //Rage64*		
 		else if(WP == 17)//WP 15
-			WA_XYZW = float4(2.685,1.0,0,0.375);       //Quake DarkPlaces	
+			WA_XYZW = float4(0.375,2.5,-44.75,0);      //Quake DarkPlaces*	
 		else if(WP == 18)//WP 16
 			WA_XYZW = float4(3.925,16.25,0,0.400);     //Quake 2 XP
 		else if(WP == 19)//WP 17
@@ -627,9 +627,9 @@ float2 WeaponDepth(in float2 texcoord : TEXCOORD0)
 		else if(WP == 33)//WP 31
 			WA_XYZW = float4(3.2625,0.6275,0,0);       //Return to Castle Wolfenstine
 		else if(WP == 34)//WP 32
-			WA_XYZW = float4(0.458,0.3375,0,-1);       //F.E.A.R 2
-		//else if(WP == 35)//WP 33
-			//WA_XYZW = float4(0.0,0.0,0,0.0);         //Game
+			WA_XYZW = float4(0.458,0.3375,0,-1);       //F.E.A.R 2*
+		else if(WP == 35)//WP 33
+			WA_XYZW = float4(0.278,2.0,-12.0,0);       //Black Mesa*
 		//else if(WP == 36)//WP 34
 			//WA_XYZW = float4(0.0,0.0,0,0.0);         //Game
 		//else if(WP == 37)//WP 35
@@ -1328,7 +1328,7 @@ float4 PS_calcLR(float2 texcoord)
 
 				accumBA = saturate(cB*float4(LTwo,LTwo,LOne,1.0));
 				image.b = pow(accumBA.r+accumBA.g+accumBA.b, 1.0);
-				image.b = lerp(pow(image.b,(Deghost*0.15)+1.0),1.0-pow(1.0-image.b,(Deghost*0.15)+1.0),image.b);
+				image.b = lerp(pow(image.b,(Deghost*0.15)+1.0),1.0-pow(abs(1.0-image.b),(Deghost*0.15)+1.0),image.b);
 				image.a = (image.a+accumBA.a)/3.0;
 
 				accumBA = image;

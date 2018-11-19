@@ -67,6 +67,7 @@ Inner Shader Setting:
               Beware                                       DM 1         62.5                      Yes     0.100-0.150                       
               BladeStorm Nightmare                         DM ?         ?                                 ?
     RB        Bioshock Remastred                           DM 0         7.5         WDM *                 0.050-0.175          
+             *Black Mesa                                   DM 0         8.75       *WDM 33                0.0250-0.0500      Yes 1          SD
     RB        BloodCM                                      DM 0         15.0                              0.025-0.250                                     
     RB       *BorderLands 2                                DM 0         20.0       *WDM 2                 0.0375-0.0625      Yes 2          SD                          
     RB       *Call of Duty: Advance Warfare                DM 1         15.0       *WDM 8                 0.0375-0.0625      Yes 2          SD                                 
@@ -111,7 +112,7 @@ Inner Shader Setting:
     RB        Homefront The Revolution                     DM ?         ?                         ?       ?                                     
               Just Cause 3                                 DM 1         10.0                              0.025-0.250  
     RB        KHOLAT                                       DM 1         10.0                              0.025-0.250        
-    RB        Kingpin: Life of Crime                       DM 0         7.50        WDM *                 0.025-0.125
+    RB       *Kingpin: Life of Crime                       DM 0         10.0       *WDM 13                0.0250-0.1250      Yes 4          SD
               Layers of Fear                               DM 0         7.5                       Yes     0.125-0.175
               Life is Strange: Before the Storm            DM 1         150.0                     Yes     0.075-0.375
               Lifeless Planet                              DM 0         17.50                     Yes     0.025-0.075
@@ -138,11 +139,11 @@ Inner Shader Setting:
     RB        Phantasmal                                   DM 0         7.5                       Yes     0.010-0.020
     RB        Prey 2006                                    DM 0         12.5        WDM *                 0.050-0.075       
     RB       *Prey 2017                                    DM 1         18.75    *WDM 9 & 10              0.0375-0.0500      Yes 2          SD                
-    RB        Quake Epsilon                                DM 0         15.00       WDM *                 0.075-0.125 
+    RB       *Quake Epsilon                                DM 0         15.00      *WDM 15                0.0375-0.0625      Yes 2          SD 
               Quake 2 XP                                   DM 0         7.5         WDM *                 0.025-0.150
     RB        Quake 4                                      DM 0         7.5         WDM *                 0.025-0.125
               Quantum Break                                DM 0         9.0                               0.025-0.275
-    RB        Rage64                                       DM 0         20.00       WDM *                 0.025-0.100   
+    RB       *Rage64                                       DM 0         20.00       WDM 14                0.0125-0.0375      Yes 2          SD  
     RB        Redout                                       DM ?         ?                                 ?      
               Remembrance                                  DM 1         7.5                       Yes     0.050-0.100
     RB        Resident Evil 7                              DM 1         22.5                              0.125-0.275                                        
