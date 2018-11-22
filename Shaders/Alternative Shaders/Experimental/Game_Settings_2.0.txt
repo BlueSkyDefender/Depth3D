@@ -69,6 +69,7 @@ Inner Shader Setting:
     RB        Bioshock Remastred                           DM 0         7.5         WDM *                 0.050-0.175          
              *Black Mesa                                   DM 0         8.75       *WDM 33                0.0250-0.0500      Yes 1          SD
     RB        BloodCM                                      DM 0         15.0                              0.025-0.250                                     
+    RB       *Blood 2                                      DM 0         7.5        *WDM 34/35             0.0250-0.0500      Yes 3          SD/FB 
     RB       *BorderLands 2                                DM 0         20.0       *WDM 2                 0.0375-0.0625      Yes 2          SD                          
     RB       *Call of Duty: Advance Warfare                DM 1         15.0       *WDM 8                 0.0375-0.0625      Yes 2          SD                                 
     RB       *Call of Duty: Black Ops                      DM 0         12.5       *WDM 7                 0.0375-0.0500      Yes 3          SD         
@@ -138,7 +139,7 @@ Inner Shader Setting:
     RB        Penumbra: Black Plague                       DM 0         7.5                               0.025-0.250       
     RB        Phantasmal                                   DM 0         7.5                       Yes     0.010-0.020
     RB       *Prey 2006                                    DM 0         7.5       *WDM 26                 0.0250-0.0500      Yes 3          SD       
-    RB       *Prey 2017                                    DM 1         18.75    *WDM 9 & 10              0.0375-0.0500      Yes 2          SD                
+    RB       *Prey 2017                                    DM 1         18.75     *WDM 9/10              0.0375-0.0500      Yes 2          SD                
     RB       *Quake Epsilon                                DM 0         15.00      *WDM 15                0.0375-0.0625      Yes 2          SD 
              *Quake 2 XP                                   DM 0         7.5        *WDM 16                0.0250-0.0500      No  0          SD
     RB       *Quake 4                                      DM 0         10.0       *WDM 17                0.0250-0.0500      Yes 5          SD
@@ -270,6 +271,49 @@ Now the last thing is to start the game and set your settings.
 To help fix the depth buffer with lighting & shadows use Console command r_pr_maxlightpasses "1".
 This will limit the amount lights processed per surface. Seems to be a hard bug to fix in eduke32.
 So I don't think this will get fixed anytime soon.
+
+{Blood 2} - ReShade 4.0.2
+You need DGVooDoo2 installed with the following settings and information.
+First Start DGVoodoo 2.55.4 Control Panel
+Config folder /Running instance click "Add" and guide it to your GOG Games "Blood 2," Folder.
+-=General Tab=- 
+	+Output API: Best 
+-=DirectX=-
+	+Videocard: dgVoodoo Virtual 3D - VRAM 1024
+	+Texture Filtering: Force Ani 16x
+	+Resolution: Your Pref
+	+Application Controlled FullScreen/windowed state
+	+Bilinear Bit strecthing
+	+Fast Video Memory Access
+	+Apply Phong
+	+Antialiasing (MSAA): Off
+Apply settings then hit OK.
+
+Navigate to the Folder and look for "dgVoodoo.conf," open it up with note pad.
+You want to look for "DirectXExt," section.
+[DirectXExt] 
+you want to change DepthBuffersBitDepth from appdriven to forcemin24bit
+
+DepthBuffersBitDepth                = appdriven
+TO
+DepthBuffersBitDepth                = forcemin24bit
+
+One you are done with that go back to the dgVoodoo Folder and open the MS folder. Copy D3D8.dll, D3DImm.dll, and DDraw.dll into your GOG Games "Blood 2," Folder. 
+
+Start your game with the GoG app.
+Check Nightmares Add-on
+Click on Advanced..
+
+Check Box list:
+Disable DirectX6 commands
+Enable Optimized surfaces
+Enable Poly Gap Fixing
+Enable mipmap sharpening
+Enable Single-Pass multi-textureing.
+
+Click OK
+
+Click Launch Nightmares.
 
 {Call of Duty: Advance Warfare}
 Render Resolution Native.

@@ -189,7 +189,7 @@ uniform bool Depth_Map_Flip <
 //Weapon Hand Adjust//
 uniform int WP <
 	ui_type = "combo";
-	ui_items = "Weapon Profile Off\0Custom WP\0WP 0\0WP 1\0WP 2\0WP 3\0WP 4\0WP 5\0WP 6\0WP 7\0WP 8\0WP 9\0WP 10\0WP 11\0WP 12\0WP 13\0WP 14\0WP 15\0WP 16\0WP 17\0WP 18\0WP 19\0WP 20\0WP 21\0WP 22\0WP 23\0WP 24\0WP 25\0WP 26\0WP 27\0WP 28\0WP 29\0WP 30\0WP 31\0WP 32\0WP 33\0WP 34\0WP 35\0";
+	ui_items = "Weapon Profile Off\0Custom WP\0WP 0\0WP 1\0WP 2\0WP 3\0WP 4\0WP 5\0WP 6\0WP 7\0WP 8\0WP 9\0WP 10\0WP 11\0WP 12\0WP 13\0WP 14\0WP 15\0WP 16\0WP 17\0WP 18\0WP 19\0WP 20\0WP 21\0WP 22\0WP 23\0WP 24\0WP 25\0WP 26\0WP 27\0WP 28\0WP 29\0WP 30\0WP 31\0WP 32\0WP 33\0WP 34\0WP 35\0WP 36\0WP 37\0WP 38\0WP 39\0WP 40\0";
 	ui_label = "·Weapon Profiles·";
 	ui_tooltip = "Pick Weapon Profile for your game or make your own.";
 	ui_category = "Weapon Hand Adjust";
@@ -630,40 +630,40 @@ float2 WeaponDepth(in float2 texcoord : TEXCOORD0)
 			WA_XYZW = float4(0.458,0.3375,0,-1);       //F.E.A.R 2*
 		else if(WP == 35)//WP 33
 			WA_XYZW = float4(0.278,2.0,-12.0,0);       //Black Mesa*
-		//else if(WP == 36)//WP 34
-			//WA_XYZW = float4(0.0,0.0,0,0.0);         //Game
-		//else if(WP == 37)//WP 35
-			//WA_XYZW = float4(0.0,0.0,0,0.0);         //Game
+		else if(WP == 36)//WP 34
+			WA_XYZW = float4(0.420,0.1,0.0,-1);        //Blood 2*
+		else if(WP == 37)//WP 35
+			WA_XYZW = float4(0.500,0.0625,18.75,-1);   //Blood 2 Alt*
 		//else if(WP == 38)//WP 36
-			//WA_XYZW = float4(0.0,0.0,0,0.0);         //Game
+			//WA_XYZW = float4(0.0,0.0,0,0);         //Game
 		//else if(WP == 39)//WP 37
-			//WA_XYZW = float4(0.0,0.0,0,0.0);         //Game
+			//WA_XYZW = float4(0.0,0.0,0,0);         //Game
 		//else if(WP == 40)//WP 38
-			//WA_XYZW = float4(0.0,0.0,0,0.0);         //Game
+			//WA_XYZW = float4(0.0,0.0,0,0);         //Game
 		//else if(WP == 41)//WP 39
-			//WA_XYZW = float4(0.0,0.0,0,0.0);         //Game
+			//WA_XYZW = float4(0.0,0.0,0,0);         //Game
 		//else if(WP == 42)//WP 40
-			//WA_XYZW = float4(0.0,0.0,0,0.0);         //Game
+			//WA_XYZW = float4(0.0,0.0,0,0);         //Game
 		//else if(WP == 43)//WP 41
-			//WA_XYZW = float4(0.0,0.0,0,0.0);         //Game
+			//WA_XYZW = float4(0.0,0.0,0,0);         //Game
 		//else if(WP == 44)//WP 42
-			//WA_XYZW = float4(0.0,0.0,0,0.0);         //Game
+			//WA_XYZW = float4(0.0,0.0,0,0);         //Game
 		//else if(WP == 45)//WP 43
-			//WA_XYZW = float4(0.0,0.0,0,0.0);         //Game
+			//WA_XYZW = float4(0.0,0.0,0,0);         //Game
 		//else if(WP == 46)//WP 44
-			//WA_XYZW = float4(0.0,0.0,0,0.0);         //Game
+			//WA_XYZW = float4(0.0,0.0,0,0);         //Game
 		//else if(WP == 47)//WP 45
-			//WA_XYZW = float4(0.0,0.0,0,0.0);         //Game
+			//WA_XYZW = float4(0.0,0.0,0,0);         //Game
 		//else if(WP == 48)//WP 46
-			//WA_XYZW = float4(0.0,0.0,0,0.0);         //Game
+			//WA_XYZW = float4(0.0,0.0,0,0);         //Game
 		//else if(WP == 49)//WP 47
-			//WA_XYZW = float4(0.0,0.0,0,0.0);         //Game
+			//WA_XYZW = float4(0.0,0.0,0,0);         //Game
 		//else if(WP == 50)//WP 48
-			//WA_XYZW = float4(0.0,0.0,0,0.0);         //Game
+			//WA_XYZW = float4(0.0,0.0,0,0);         //Game
 		//else if(WP == 51)//WP 49
-			//WA_XYZW = float4(0.0,0.0,0,0.0);         //Game
+			//WA_XYZW = float4(0.0,0.0,0,0);         //Game
 		//else if(WP == 52)//WP 50
-			//WA_XYZW = float4(0.0,0.0,0,0.0);         //Game
+			//WA_XYZW = float4(0.0,0.0,0,0);         //Game
 		//End Weapon Profiles//
 		
 		// Code Adjustment Values.
