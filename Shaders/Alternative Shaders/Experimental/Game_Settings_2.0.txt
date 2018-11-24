@@ -139,10 +139,10 @@ Inner Shader Setting:
     RB        Penumbra: Black Plague                       DM 0         7.5                               0.025-0.250       
     RB        Phantasmal                                   DM 0         7.5                       Yes     0.010-0.020
     RB       *Prey 2006                                    DM 0         7.5       *WDM 26                 0.0250-0.0500      Yes 3          SD       
-    RB       *Prey 2017                                    DM 1         18.75     *WDM 9/10              0.0375-0.0500      Yes 2          SD                
-    RB       *Quake Epsilon                                DM 0         15.00      *WDM 15                0.0375-0.0625      Yes 2          SD 
-             *Quake 2 XP                                   DM 0         7.5        *WDM 16                0.0250-0.0500      No  0          SD
-    RB       *Quake 4                                      DM 0         10.0       *WDM 17                0.0250-0.0500      Yes 5          SD
+    RB       *Prey 2017                                    DM 1         18.75     *WDM 9/10               0.0375-0.0500      Yes 2          SD                
+    RB       *Quake Epsilon                                DM 0         15.00     *WDM 15                 0.0375-0.0625      Yes 2          SD 
+             *Quake 2 XP                                   DM 0         7.5       *WDM 16                 0.0250-0.0500      No  0          SD
+    RB       *Quake 4                                      DM 0         10.0      *WDM 17                 0.0250-0.0500      Yes 5          SD
               Quantum Break                                DM 0         9.0                               0.025-0.275
     RB       *Rage64                                       DM 0         20.00       WDM 14                0.0125-0.0375      Yes 2          SD  
     RB        Redout                                       DM ?         ?                                 ?      
@@ -152,9 +152,9 @@ Inner Shader Setting:
               Rez Infinite                                 DM 1         20.0                              0.075-0.150
               Ryse: Son of Rome                            DM 0         7.500                             0.025-0.050        
               Scorn                                        DM 1         40.0                              0.015-0.050
-    RB        S.T.A.L.K.E.R:CS Complete Mod                DM 0         7.5         WDM ||                0.025-0.125
-    RB        S.T.A.L.K.E.R:CoP Complete Mod               DM 0         7.5         WDM ||                0.025-0.125
-    RB        S.T.A.L.K.E.R:SoC Complete Mod               DM 0         7.5         WDM ||                0.025-0.125
+    RB       *S.T.A.L.K.E.R:CS Complete Mod                DM 0         10.0       *WDM 19                0.0250-0.0625      Yes 4          SD
+    RB       *S.T.A.L.K.E.R:CoP Complete Mod               DM 0         10.0       *WDM 19                0.0250-0.0625      Yes 4          SD
+    RB       *S.T.A.L.K.E.R:SoC Complete Mod               DM 0         10.0       *WDM 19                0.0250-0.0625      Yes 4          SD
     RB        Shadow of the Tomb Raider                    DM 1         17.5                              0.100-0.250 
               Shadow Warrior 2                             DM 1         10.0                              0.0375-0.0625
               Sleeping Dogs: DE                            DM 0         7.0                               0.075-0.100 

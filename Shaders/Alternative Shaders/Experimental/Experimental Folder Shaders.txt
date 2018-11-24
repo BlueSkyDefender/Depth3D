@@ -1,9 +1,5 @@
 SuperDepth3D_2.0.0 WIP
 New Weapon Hand Code Still WIP No Profiles are set. But, Code is working.
 
-HDR
-Tone Map Selector.
-Allows for HDR to SDR and SDR to HDR. WIP
-
 Dimension_Plus
 A 2D to 3D converter.

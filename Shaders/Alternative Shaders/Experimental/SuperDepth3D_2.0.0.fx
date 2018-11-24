@@ -56,10 +56,17 @@
 #define SCSC 0
 
 //USER EDITABLE PREPROCESSOR FUNCTIONS END//
+
+#if !defined(__RESHADE__) || __RESHADE__ < 40000
+	#define Compatibility 1
+#else
+	#define Compatibility 0
+#endif
+
 //Divergence & Convergence//
 uniform float Divergence <
 	ui_type = "drag";
-	ui_min = 1; ui_max = Depth_Max;
+	ui_min = 1; ui_max = Depth_Max; ui_step = 0.5;
 	ui_label = "·Divergence Slider·";
 	ui_tooltip = "Divergence increases differences between the left and right retinal images and allows you to experience depth.\n" 
 				 "The process of deriving binocular depth information is called stereopsis.\n"
@@ -155,7 +162,7 @@ uniform int Depth_Map <
 
 uniform float Depth_Map_Adjust <
 	ui_type = "drag";
-	ui_min = 1.0; ui_max = 250.0;
+	ui_min = 1.0; ui_max = 250.0; ui_step = 0.125;
 	ui_label = " Depth Map Adjustment";
 	ui_tooltip = "This allows for you to adjust the DM precision.\n"
 				 "Adjust this to keep it as low as possible.\n"
@@ -216,7 +223,7 @@ uniform float2 Weapon_Adjust <
 
 uniform float Weapon_Depth_Adjust <
 	ui_type = "drag";
-	ui_min = -50.0; ui_max = 50.0;
+	ui_min = -50.0; ui_max = 50.0; ui_step = 0.25;
 	ui_label = " Weapon Depth Adjustment";
 	ui_tooltip = "Pushes or Pulls the FPS Hand in or out of the screen if a weapon profile is selected.\n"
 				 "This also used to fine tune the Weapon Hand if creating a weapon profile.\n" 
@@ -289,7 +296,7 @@ uniform int Scaling_Support <
 	ui_category = "Stereoscopic Options";
 > = 0;
 
-uniform float Perspective <
+uniform int Perspective <
 	ui_type = "drag";
 	ui_min = -100; ui_max = 100;
 	ui_label = " Perspective Slider";
@@ -336,7 +343,11 @@ uniform float AO_Power <
 #endif
 //Cursor Adjustments//
 uniform int Cursor_Type <
+	#if Compatibility
 	ui_type = "drag";
+	#else
+	ui_type = "slider";
+	#endif
 	ui_min = 0; ui_max = 6;
 	ui_label = "·Cursor Selection·";
 	ui_tooltip = "Choose the cursor type you like to use.\n" 
@@ -349,9 +360,9 @@ uniform float3 Cursor_STT <
 	ui_min = 0; ui_max = 1;
 	ui_label = " Cursor Adjustments";
 	ui_tooltip = "This controlls the Size, Thickness, & Transparency.\n" 
-				 "Defaults are ( X 0.250, Y 0.5, Z 0.75 ).";
+				 "Defaults are ( X 0.125, Y 0.5, Z 0.75 ).";
 	ui_category = "Cursor Adjustments";
-> = float3(0.250,0.5,0.75);
+> = float3(0.125,0.5,0.75);
 
 uniform float3 Cursor_Color <
 	ui_type = "color";
@@ -599,9 +610,9 @@ float2 WeaponDepth(in float2 texcoord : TEXCOORD0)
 		else if(WP == 19)//WP 17
 			WA_XYZW = float4(0.750,1.5,-1.250,-1);     //Quake 4*
 		else if(WP == 20)//WP 18
-			WA_XYZW = float4(3.6875,7.250,0,0.400);    //RTCW
+			WA_XYZW = float4(0,0,0,0);                 //Game
 		else if(WP == 21)//WP 19
-			WA_XYZW = float4(2.55925,0.75,0,0.255);    //S.T.A.L.K.E.R: Games
+			WA_XYZW = float4(0.255,0.01,22.5,2);       //S.T.A.L.K.E.R: Games*
 		else if(WP == 22)//WP 20
 			WA_XYZW = float4(16.250,87.50,0,0.825);    //SOMA
 		else if(WP == 23)//WP 21
