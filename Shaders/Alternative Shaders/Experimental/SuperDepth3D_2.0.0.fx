@@ -203,8 +203,12 @@ uniform int WP <
 > = 0;
 
 uniform int Weapon_Scale <
+	#if Compatibility
 	ui_type = "drag";
-	ui_min = -2; ui_max = 3;
+	#else
+	ui_type = "slider";
+	#endif
+	ui_min = -3; ui_max = 3;
 	ui_label = " Weapon Scale";
 	ui_tooltip = "Use this to set the proper weapon hand scale.";
 	ui_category = "Weapon Hand Adjust";
@@ -233,7 +237,11 @@ uniform float Weapon_Depth_Adjust <
 
 #if WZF
 uniform int Anti_Z_Fighting <
+	#if Compatibility
 	ui_type = "drag";
+	#else
+	ui_type = "slider";
+	#endif
 	ui_min = 0; ui_max = 4;
 	ui_label = "·Weapon Anti Z-Fighting Target·";
 	ui_tooltip = "Anti Z-Fighting is use help prevent weapon hand Z-Fighting.\n"
@@ -618,9 +626,9 @@ float2 WeaponDepth(in float2 texcoord : TEXCOORD0)
 		else if(WP == 23)//WP 21
 			WA_XYZW = float4(2.775,1.125,0,0.278);     //Skyrim: SE	
 		else if(WP == 24)//WP 22
-			WA_XYZW = float4(1.0,1.0,7.5,-2);          //Turok: DH 2017*
+			WA_XYZW = float4(1.0,1.0,7.5,-3);          //Turok: DH 2017*
 		else if(WP == 25)//WP 23
-			WA_XYZW = float4(0.570,2.0,0.0,-2);        //Turok2: SoE 2017*
+			WA_XYZW = float4(0.570,2.0,0.0,-3);        //Turok2: SoE 2017*
 		else if(WP == 26)//WP 24
 			WA_XYZW = float4(2.000,-40.0,0,2.0);       //Dying Light
 		else if(WP == 27)//WP 25
@@ -683,10 +691,15 @@ float2 WeaponDepth(in float2 texcoord : TEXCOORD0)
 		
 		// Hear on out is the Weapon Hand Adjustment code.		
 		float Set_Scale , P = WA_XYZW.y;
-					
-		if (WA_XYZW.w == -2)
+		
+		if (WA_XYZW.w == -3)
 		{
 			WA_XYZW.x *= 21.0f;
+			P = (P + 0.00000001) * 100;
+			Set_Scale = 0.5f;
+		}			
+		if (WA_XYZW.w == -2)
+		{
 			P = (P + 0.00000001) * 100;
 			Set_Scale = 0.5f;
 		}
