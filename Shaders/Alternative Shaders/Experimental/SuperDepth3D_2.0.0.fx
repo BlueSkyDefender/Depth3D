@@ -26,7 +26,7 @@
 #define Depth_Map_Division 1.0
 
 // Determines the Max Depth amount, in ReShades GUI.
-#define Depth_Max 50
+#define Depth_Max 55
 
 // Use this to Disable or Enable Anti-Z-Fighting Modes for Weapon Hand.
 #define WZF 0 //Default 0 is Off. One is On.
@@ -98,7 +98,11 @@ uniform float ZPD <
 > = 0.010;
 
 uniform int Auto_Balance_Ex <
+	#if Compatibility
 	ui_type = "drag";
+	#else
+	ui_type = "slider";
+	#endif
 	ui_min = 0; ui_max = 5;
 	ui_label = " Auto Balance";
 	ui_tooltip = "Automatically Balance between ZPD Depth and Scene Depth.\n" 
@@ -130,9 +134,9 @@ uniform float2 Disocclusion_Adjust <
 	ui_min = 0.0; ui_max = 1.0;
 	ui_label = " Disocclusion Adjust";
 	ui_tooltip = "Automatic occlusion masking power & Depth Based culling adjustments.\n"
-				"Default is ( 0.250f, 0.625f)";
+				"Default is ( 0.375f, 0.625f)";
 	ui_category = "Occlusion Masking";
-> = float2( 0.250, 0.625);
+> = float2( 0.375, 0.625);
 
 uniform int View_Mode <
 	ui_type = "combo";
@@ -592,7 +596,7 @@ float2 WeaponDepth(in float2 texcoord : TEXCOORD0)
 		else if(WP == 6) //WP 4
 			WA_XYZW = float4(0.253,1.0,1.25,3);        //Fallout 4*			
 		else if(WP == 7) //WP 5
-			WA_XYZW = float4(0,0,0,0);                 //Game
+			WA_XYZW = float4(0.276,0.6875,20.0,1);     //Skyrim: SE*
 		else if(WP == 8) //WP 6
 			WA_XYZW = float4(0.338,0.8125,-14.500,0);  //DOOM 2016*	
 		else if(WP == 9) //WP 7
@@ -622,9 +626,9 @@ float2 WeaponDepth(in float2 texcoord : TEXCOORD0)
 		else if(WP == 21)//WP 19
 			WA_XYZW = float4(0.255,0.01,22.5,2);       //S.T.A.L.K.E.R: Games*
 		else if(WP == 22)//WP 20
-			WA_XYZW = float4(16.250,87.50,0,0.825);    //SOMA
+			WA_XYZW = float4(0.785,0.0875,43.75,-2);   //SOMA*
 		else if(WP == 23)//WP 21
-			WA_XYZW = float4(2.775,1.125,0,0.278);     //Skyrim: SE	
+			WA_XYZW = float4(0,0,0,0);                 //Game	
 		else if(WP == 24)//WP 22
 			WA_XYZW = float4(1.0,1.0,7.5,-3);          //Turok: DH 2017*
 		else if(WP == 25)//WP 23

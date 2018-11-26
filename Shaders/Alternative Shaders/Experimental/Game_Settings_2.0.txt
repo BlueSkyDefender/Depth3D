@@ -159,13 +159,13 @@ Inner Shader Setting:
               Shadow Warrior 2                             DM 1         10.0                              0.0375-0.0625
               Sleeping Dogs: DE                            DM 0         7.0                               0.075-0.100 
               Sniper Elite 4                               DM 0         25.0                              0.025-0.075
-              Soma                                         DM 0         11.25       WDM *                 0.025-0.100
+             *Soma                                         DM 0         10.0       *WDM 20                0.0250-0.0500      Yes 5          SD
               Sonic Adventure 2                            DM 0         10.0                              0.025-0.125
               Souls Games                                  DM 0       7.5-25.0                            0.050-0.100              
               Stacking                                     DM 0         7.5                               0.025-0.125
     RB        Stay Close                                   DM 1         10                                0.025-0.125
               Tales of Zestiria                            DM 0         7.5                               0.025-0.125
-              The Elder Scrolls V: SE                      DM 0         6.875       WDM *                 0.075-0.150
+             *The Elder Scrolls V: SE                      DM 0         6.25       *WDM 5                 0.0375-0.0625      Yes 2          SD
     RB        The Evil Within                              DM 0         28.75                             0.175-0.250   
               The Evil Within 2                            DM 0      4.675-17.5                           0.150-0.200     
     RB        The Legend of Korra                          DM 0         10                                0.025-0.125
