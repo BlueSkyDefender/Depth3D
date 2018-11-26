@@ -26,7 +26,7 @@
 #define Depth_Map_Division 1.0
 
 // Determines the Max Depth amount, in ReShades GUI.
-#define Depth_Max 55
+#define Depth_Max 50
 
 // Use this to Disable or Enable Anti-Z-Fighting Modes for Weapon Hand.
 #define WZF 0 //Default 0 is Off. One is On.
@@ -134,9 +134,9 @@ uniform float2 Disocclusion_Adjust <
 	ui_min = 0.0; ui_max = 1.0;
 	ui_label = " Disocclusion Adjust";
 	ui_tooltip = "Automatic occlusion masking power & Depth Based culling adjustments.\n"
-				"Default is ( 0.375f, 0.625f)";
+				"Default is ( 0.250f, 0.625f)";
 	ui_category = "Occlusion Masking";
-> = float2( 0.375, 0.625);
+> = float2( 0.250, 0.625);
 
 uniform int View_Mode <
 	ui_type = "combo";
@@ -200,7 +200,7 @@ uniform bool Depth_Map_Flip <
 //Weapon Hand Adjust//
 uniform int WP <
 	ui_type = "combo";
-	ui_items = "Weapon Profile Off\0Custom WP\0WP 0\0WP 1\0WP 2\0WP 3\0WP 4\0WP 5\0WP 6\0WP 7\0WP 8\0WP 9\0WP 10\0WP 11\0WP 12\0WP 13\0WP 14\0WP 15\0WP 16\0WP 17\0WP 18\0WP 19\0WP 20\0WP 21\0WP 22\0WP 23\0WP 24\0WP 25\0WP 26\0WP 27\0WP 28\0WP 29\0WP 30\0WP 31\0WP 32\0WP 33\0WP 34\0WP 35\0WP 36\0WP 37\0WP 38\0WP 39\0WP 40\0";
+	ui_items = "Weapon Profile Off\0Custom WP\0WP 0\0WP 1\0WP 2\0WP 3\0WP 4\0WP 5\0WP 6\0WP 7\0WP 8\0WP 9\0WP 10\0WP 11\0WP 12\0WP 13\0WP 14\0WP 15\0WP 16\0WP 17\0WP 18\0WP 19\0WP 20\0WP 21\0WP 22\0WP 23\0WP 24\0WP 25\0WP 26\0WP 27\0WP 28\0WP 29\0WP 30\0WP 31\0WP 32\0WP 33\0WP 34\0WP 35\0WP 36\0WP 37\0WP 38\0WP 39\0WP 40\0WP 41\0WP 42\0WP 43\0WP 44\0WP 45\0WP 46\0WP 47\0WP 48\0WP 49\0WP 50\0";
 	ui_label = "·Weapon Profiles·";
 	ui_tooltip = "Pick Weapon Profile for your game or make your own.";
 	ui_category = "Weapon Hand Adjust";
@@ -586,9 +586,9 @@ float2 WeaponDepth(in float2 texcoord : TEXCOORD0)
 		if (WP == 1)                                   // WA_XYZW.x | WA_XYZW.y | WA_XYZW.z | WA_XYZW.w 
 			WA_XYZW = float4(CutOff,Adjust,Tune,Scale);// X Cutoff  | Y Adjust  | Z Tuneing | W Scaling 		
 		else if(WP == 2) //WP 0
-			WA_XYZW = float4(0.286,7.5,5.5,0);         //Unreal Gold with v227*		
+			WA_XYZW = float4(0,0,0,0);                 //Game		
 		else if(WP == 3) //WP 1
-			WA_XYZW = float4(0.445,0.500,0,-1);        //Cryostasis*
+			WA_XYZW = float4(0,0,0,0);                 //Game
 		else if(WP == 4) //WP 2
 			WA_XYZW = float4(0.625,1.250,3.75,0);      //BorderLands 2*	
 		else if(WP == 5) //WP 3
@@ -604,15 +604,15 @@ float2 WeaponDepth(in float2 texcoord : TEXCOORD0)
 		else if(WP == 10)//WP 8
 			WA_XYZW = float4(0.254,25.0,-0.5,2);       //CoD:AW*	
 		else if(WP == 11)//WP 9
-			WA_XYZW = float4(0.2832,20.0,0,0);         //Prey 2017 High Settings and <*
+			WA_XYZW = float4(0,0,0,0);                 //Bioshock Remastred
 		else if(WP == 12)//WP 10
-			WA_XYZW = float4(0.2712,25.0,0,1);         //Prey 2017 Very High*	
+			WA_XYZW = float4(0,0,0,0);                 //Bioshock Infinite
 		else if(WP == 13)//WP 11
 			WA_XYZW = float4(0.450,0.175,-43.75,1);    //Metro Redux Games*	
 		else if(WP == 14)//WP 12
-			WA_XYZW = float4(0.489,3.75,0,-1);         //NecroVisioN: Lost Company*
+			WA_XYZW = float4(0,0,0,0);                 //Game
 		else if(WP == 15)//WP 13
-			WA_XYZW = float4(0.625,0.275,-25.0,-1);    //Kingpin Life of Crime*
+			WA_XYZW = float4(0,0,0,0);                 //TitanFall 2
 		else if(WP == 16)//WP 14
 			WA_XYZW = float4(1.0,27.5,6.25,-1);        //Rage64*		
 		else if(WP == 17)//WP 15
@@ -626,67 +626,67 @@ float2 WeaponDepth(in float2 texcoord : TEXCOORD0)
 		else if(WP == 21)//WP 19
 			WA_XYZW = float4(0.255,0.01,22.5,2);       //S.T.A.L.K.E.R: Games*
 		else if(WP == 22)//WP 20
-			WA_XYZW = float4(0.785,0.0875,43.75,-2);   //SOMA*
+			WA_XYZW = float4(0,0,0,0);                 //Game
 		else if(WP == 23)//WP 21
-			WA_XYZW = float4(0,0,0,0);                 //Game	
-		else if(WP == 24)//WP 22
 			WA_XYZW = float4(1.0,1.0,7.5,-3);          //Turok: DH 2017*
-		else if(WP == 25)//WP 23
+		else if(WP == 24)//WP 22
 			WA_XYZW = float4(0.570,2.0,0.0,-3);        //Turok2: SoE 2017*
+		else if(WP == 25)//WP 23
+			WA_XYZW = float4(0,0,0,0);                 //Turok 3: Shadow of Oblivion
 		else if(WP == 26)//WP 24
-			WA_XYZW = float4(2.000,-40.0,0,2.0);       //Dying Light
+			WA_XYZW = float4(0,0,0,0);                 //Turok: Evolution
 		else if(WP == 27)//WP 25
-			WA_XYZW = float4(2.800,1.0,0,0.280);       //EuroTruckSim2
+			WA_XYZW = float4(0,0,0,0);                 //Game
 		else if(WP == 28)//WP 26
 			WA_XYZW = float4(0.750,3.4375,0,-1);       //Prey - 2006*
 		else if(WP == 29)//WP 27
-			WA_XYZW = float4(2.77575,0.3625,0,0.3625); //TitanFall 2
+			WA_XYZW = float4(0.2832,20.0,0,0);         //Prey 2017 High Settings and <*
 		else if(WP == 30)//WP 28
-			WA_XYZW = float4(2.52475,0.05625,0,0.260); //Bioshock Remastred
+			WA_XYZW = float4(0.2712,25.0,0,1);         //Prey 2017 Very High*
 		else if(WP == 31)//WP 29
-			WA_XYZW = float4(4.750,0.9375,0,0);        //Wolfenstine: The New Order
+			WA_XYZW = float4(4.750,0.9375,0,0);        //Return to Castle Wolfenstine
 		else if(WP == 32)//WP 30
-			WA_XYZW = float4(5.050,2.750,0,0.4913);    //Wolfenstine
+			WA_XYZW = float4(0,0,0,0);                 //Wolfenstine
 		else if(WP == 33)//WP 31
-			WA_XYZW = float4(3.2625,0.6275,0,0);       //Return to Castle Wolfenstine
+			WA_XYZW = float4(0,0,0,0);                 //Wolfenstine: The New Order / The Old Blood
 		else if(WP == 34)//WP 32
-			WA_XYZW = float4(0.458,0.3375,0,-1);       //F.E.A.R 2*
+			WA_XYZW = float4(0,0,0,0);                 //Wolfenstein II: The New Colossus / Cyberpilot
 		else if(WP == 35)//WP 33
 			WA_XYZW = float4(0.278,2.0,-12.0,0);       //Black Mesa*
 		else if(WP == 36)//WP 34
 			WA_XYZW = float4(0.420,0.1,0.0,-1);        //Blood 2*
 		else if(WP == 37)//WP 35
 			WA_XYZW = float4(0.500,0.0625,18.75,-1);   //Blood 2 Alt*
-		//else if(WP == 38)//WP 36
-			//WA_XYZW = float4(0.0,0.0,0,0);         //Game
-		//else if(WP == 39)//WP 37
-			//WA_XYZW = float4(0.0,0.0,0,0);         //Game
-		//else if(WP == 40)//WP 38
-			//WA_XYZW = float4(0.0,0.0,0,0);         //Game
-		//else if(WP == 41)//WP 39
-			//WA_XYZW = float4(0.0,0.0,0,0);         //Game
-		//else if(WP == 42)//WP 40
-			//WA_XYZW = float4(0.0,0.0,0,0);         //Game
-		//else if(WP == 43)//WP 41
-			//WA_XYZW = float4(0.0,0.0,0,0);         //Game
-		//else if(WP == 44)//WP 42
-			//WA_XYZW = float4(0.0,0.0,0,0);         //Game
-		//else if(WP == 45)//WP 43
-			//WA_XYZW = float4(0.0,0.0,0,0);         //Game
-		//else if(WP == 46)//WP 44
-			//WA_XYZW = float4(0.0,0.0,0,0);         //Game
-		//else if(WP == 47)//WP 45
-			//WA_XYZW = float4(0.0,0.0,0,0);         //Game
-		//else if(WP == 48)//WP 46
-			//WA_XYZW = float4(0.0,0.0,0,0);         //Game
-		//else if(WP == 49)//WP 47
-			//WA_XYZW = float4(0.0,0.0,0,0);         //Game
-		//else if(WP == 50)//WP 48
-			//WA_XYZW = float4(0.0,0.0,0,0);         //Game
-		//else if(WP == 51)//WP 49
-			//WA_XYZW = float4(0.0,0.0,0,0);         //Game
-		//else if(WP == 52)//WP 50
-			//WA_XYZW = float4(0.0,0.0,0,0);         //Game
+		else if(WP == 38)//WP 36
+			WA_XYZW = float4(0.785,0.0875,43.75,-2);   //SOMA*
+		else if(WP == 39)//WP 37
+			WA_XYZW = float4(0.445,0.500,0,-1);        //Cryostasis*
+		else if(WP == 40)//WP 38
+			WA_XYZW = float4(0.286,7.5,5.5,0);         //Unreal Gold with v227*	
+		else if(WP == 41)//WP 39
+			WA_XYZW = float4(0.280,1.125,-16.25,0);    //Serious Sam Revolution / Serious Sam HD: The First Encounter / The Second Encounter / Serious Sam 3: BFE?*
+		else if(WP == 42)//WP 40
+			WA_XYZW = float4(0.280,1.0,16.25,1);       //Serious Sam 2
+		else if(WP == 43)//WP 41
+			WA_XYZW = float4(0,0,0,0);                 //Serious Sam 4: Planet Badass
+		else if(WP == 44)//WP 42
+			WA_XYZW = float4(0,0,0,0);                 //Game
+		else if(WP == 45)//WP 43
+			WA_XYZW = float4(0,0,0,0);                 //Game
+		else if(WP == 46)//WP 44
+			WA_XYZW = float4(0.625,0.275,-25.0,-1);    //Kingpin Life of Crime*
+		else if(WP == 47)//WP 45
+			WA_XYZW = float4(0,0,0,0);                 //EuroTruckSim2
+		else if(WP == 48)//WP 46
+			WA_XYZW = float4(0.458,0.3375,0,-1);       //F.E.A.R & F.E.A.R. 2: Project Origin*
+		else if(WP == 49)//WP 47
+			WA_XYZW = float4(0,0,0,0);                 //Game	
+		else if(WP == 50)//WP 48
+			WA_XYZW = float4(0,0,0,0);                 //Game
+		else if(WP == 51)//WP 49
+			WA_XYZW = float4(0,0,0,0);                 //NecroVisioN
+		else if(WP == 52)//WP 50
+			WA_XYZW = float4(0.489,3.75,0,-1);         //NecroVisioN: Lost Company*
 		//End Weapon Profiles//
 		
 		// Code Adjustment Values.

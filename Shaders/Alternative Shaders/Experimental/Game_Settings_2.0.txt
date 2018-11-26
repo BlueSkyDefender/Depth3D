@@ -78,7 +78,7 @@ Inner Shader Setting:
     RB       *Call of Duty: Infinite Warfare               DM 1         15.0       *WDM 8                 0.0375-0.0625      Yes 2          SD  
               Casltevania: Lord of Shadows - UE            DM 0         7.5                               0.025-0.250                                         
               Castle of Illusion Micky Mouse               DM 0         12.5                              ???????????
-             *Cryostasis                                   DM 0         13.75      *WDM 1                 0.0375-0.0625      Yes 3          SD                         
+             *Cryostasis                                   DM 0         13.75      *WDM 37                0.0375-0.0625      Yes 3          SD                         
              *DOOM 2016                                    DM 0         20.0       *WDM 6                 0.0250-0.0500      Yes 3          SD       
               DarkSiders Warmastred Edition                DM 0         22.5                              0.025-0.075  
               Dead Effect                                  DM ?         6.25                              ?      
@@ -98,8 +98,10 @@ Inner Shader Setting:
               Dying Light                                  DM 1         22.5                              0.010-0.075
     RB        Emily Wants To Play                          DM 1         25.0                              0.025-0.200                                      
               Euro Trucks Sim 2                            DM 0         8.750       WDM *          ?      0.025-0.200 
-              Everybody's Gone to the Rapture              DM 0         1.50                              0.025-0.250                      
-             *F.E.A.R 2                                    DM 0         8.75       *WDM 32                0.0375-0.0625      Yes 3          SD
+              Everybody's Gone to the Rapture              DM 0         1.50                              0.025-0.250
+             *F.E.A.R                                      DM 0         8.75       *WDM 46                0.0375-0.0625      Yes 3          SD                      
+             *F.E.A.R 2                                    DM 0         8.75       *WDM 46                0.0375-0.0625      Yes 3          SD
+             *F.E.A.R 3                                    DM 0         6.00                              0.0250-0.0500      Yes 4          SD
              *Fallout 4                                    DM 0         6.25       *WDM 4                 0.0375-0.0625      Yes 2          SD          
     RB        FarCry 3                                     DM 0         7.50                              0.025-0.200
               Firewatch                                    DM 0         5.0                       Yes     0.025-0.250
@@ -113,7 +115,7 @@ Inner Shader Setting:
     RB        Homefront The Revolution                     DM ?         ?                         ?       ?                                     
               Just Cause 3                                 DM 1         10.0                              0.025-0.250  
     RB        KHOLAT                                       DM 1         10.0                              0.025-0.250        
-    RB       *Kingpin: Life of Crime                       DM 0         10.0       *WDM 13                0.0250-0.1250      Yes 4          SD
+    RB       *Kingpin: Life of Crime                       DM 0         10.0       *WDM 44                0.0250-0.1250      Yes 4          SD
               Layers of Fear                               DM 0         7.5                       Yes     0.125-0.175
               Life is Strange: Before the Storm            DM 1         150.0                     Yes     0.075-0.375
               Lifeless Planet                              DM 0         17.50                     Yes     0.025-0.075
@@ -129,7 +131,7 @@ Inner Shader Setting:
     RB        Monster Hunter World                         DM 1         13.750                            0.025-0.075
               Mordheim: City of the Damned                 DM 0         12.500                    Yes     0.025-0.250         
     RB        Naruto Shippuden UNS3 Full Blurst HD         DM 0         36.25                             0.025-0.125        
-    RB       *NecroVision: Lost Company                    DM 0         10.000      *WDM 12               0.0250-0.0500      Yes 2          SD 
+    RB       *NecroVision: Lost Company                    DM 0         10.000      *WDM 50               0.0250-0.0500      Yes 2          SD 
               Need For Speed Rivals                        ?            ?                                 ?
               Need for Speed Most Wanted                   ?            ?                                 ?
               NieRAutomata                                 DM 0         20.0                              0.050-0.075
@@ -139,7 +141,7 @@ Inner Shader Setting:
     RB        Penumbra: Black Plague                       DM 0         7.5                               0.025-0.250       
     RB        Phantasmal                                   DM 0         7.5                       Yes     0.010-0.020
     RB       *Prey 2006                                    DM 0         7.5       *WDM 26                 0.0250-0.0500      Yes 3          SD       
-    RB       *Prey 2017                                    DM 1         18.75     *WDM 9/10               0.0375-0.0500      Yes 2          SD                
+    RB       *Prey 2017                                    DM 1         18.75     *WDM 27/28              0.0375-0.0500      Yes 2          SD                
     RB       *Quake Epsilon                                DM 0         15.00     *WDM 15                 0.0375-0.0625      Yes 2          SD 
              *Quake 2 XP                                   DM 0         7.5       *WDM 16                 0.0250-0.0500      No  0          SD
     RB       *Quake 4                                      DM 0         10.0      *WDM 17                 0.0250-0.0500      Yes 5          SD
@@ -159,7 +161,7 @@ Inner Shader Setting:
               Shadow Warrior 2                             DM 1         10.0                              0.0375-0.0625
               Sleeping Dogs: DE                            DM 0         7.0                               0.075-0.100 
               Sniper Elite 4                               DM 0         25.0                              0.025-0.075
-             *Soma                                         DM 0         10.0       *WDM 20                0.0250-0.0500      Yes 5          SD
+             *Soma                                         DM 0         10.0       *WDM 36                0.0250-0.0500      Yes 5          SD
               Sonic Adventure 2                            DM 0         10.0                              0.025-0.125
               Souls Games                                  DM 0       7.5-25.0                            0.050-0.100              
               Stacking                                     DM 0         7.5                               0.025-0.125
@@ -175,9 +177,9 @@ Inner Shader Setting:
     RB        Through The Woods!                           DM 1         7.5                       Yes     0.025-0.075 
               Titanfall 2                                  DM 0         7.5         WDM *                 0.025-0.100 
               Total War: Warhammer                         DM 0         2.625                             0.025-0.075
-    RB       *Turok: Dinosaur Hunter                       DM 0         250.0      *WDM 22                0.0375-0.0625      Yes 2          SD
-             *Turok 2: Seeds of Evil                       DM 0         250.0      *WDM 23                0.0375-0.0625      Yes 2          SD
-    RB       *Unreal Gold with v227                        DM 0         17.50       WDM 0                 0.0250-0.0500      Yes 1          SD      
+    RB       *Turok: Dinosaur Hunter                       DM 0         250.0      *WDM 21                0.0375-0.0625      Yes 2          SD
+             *Turok 2: Seeds of Evil                       DM 0         250.0      *WDM 22                0.0375-0.0625      Yes 2          SD
+    RB       *Unreal Gold with v227                        DM 0         17.50      *WDM 38                0.0250-0.0500      Yes 1          SD      
               Warhammer: End Times - Vermintide            DM 0         10.0                              0.010-0.100
               Warhammer: Vermintide 2                      DM 0         8.75                              0.010-0.100         
     RB        Watch Dogs 2                                 DM 1         7.5                               0.050-0.100        
@@ -204,7 +206,7 @@ Inner Shader Setting:
     RB       Magicka 2                                    DM 0       13.75                    No      0.025-0.250                         0.01250
              Never Alone (Kisima Ingitchuna)              DM 0       25.0                     No      0.050-0.100                         0.00500             
     RB       Requiem: Avenging Angel                      DM 0       50.0                     No      0.030-0.060                         0.80000
-             Serious Sam Revolution                       DM 0       7.5           WDM *      No      0.025-0.075                         0.11110
+             Serious Sam Revolution                       DM 0       7.5           WDM 39     No      0.025-0.075                         0.11110
              Shadow Tactics: Blades of the Shogun         DM 0       5.5                      Yes     0.250-0.350      0.2875       FB    0.00100
              Shadow Warrior Classic Source Port           DM 0       8.75                     No      0.075-0.150                         1.00000
              Shadow Warrior Classic Redux                 DM 0       8.75                     No      0.075-0.150                         1.00000
