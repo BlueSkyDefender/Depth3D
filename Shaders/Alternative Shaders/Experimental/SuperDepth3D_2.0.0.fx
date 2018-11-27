@@ -604,7 +604,7 @@ float2 WeaponDepth(in float2 texcoord : TEXCOORD0)
 		else if(WP == 10)//WP 8
 			WA_XYZW = float4(0.254,25.0,-0.5,2);       //CoD:AW*	
 		else if(WP == 11)//WP 9
-			WA_XYZW = float4(0,0,0,0);                 //Bioshock Remastred
+			WA_XYZW = float4(0.450,0.0375,-37.813,2);  //Bioshock Remastred*
 		else if(WP == 12)//WP 10
 			WA_XYZW = float4(0,0,0,0);                 //Bioshock Infinite
 		else if(WP == 13)//WP 11
@@ -634,7 +634,7 @@ float2 WeaponDepth(in float2 texcoord : TEXCOORD0)
 		else if(WP == 25)//WP 23
 			WA_XYZW = float4(0,0,0,0);                 //Turok 3: Shadow of Oblivion
 		else if(WP == 26)//WP 24
-			WA_XYZW = float4(0,0,0,0);                 //Turok: Evolution
+			WA_XYZW = float4(0,0,0,0);                 //Game
 		else if(WP == 27)//WP 25
 			WA_XYZW = float4(0,0,0,0);                 //Game
 		else if(WP == 28)//WP 26
