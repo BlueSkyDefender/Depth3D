@@ -140,18 +140,18 @@ uniform float2 Disocclusion_Adjust <
 
 uniform int View_Mode <
 	ui_type = "combo";
-	ui_items = "View Mode Normal\0View Mode Alpha\0View Mode Beta\0";
+	ui_items = "View Mode Normal\0View Mode Alpha\0View Mode Beta\0View Mode Gamma\0";
 	ui_label = " View Mode";
 	ui_tooltip = "Change the way the shader warps the output to the screen.\n"
 				 "Default is Normal";
 	ui_category = "Occlusion Masking";
 > = 0;
 
-uniform float A_n_B <
+uniform float B_n_G <
 	ui_type = "drag";
-	ui_min = 0.0; ui_max = 0.750;
-	ui_label = " Alpha & Beta Adjust";
-	ui_tooltip = "This is used to adjust Alpha & Beta View Modes.\n" 
+	ui_min = 0.0; ui_max = 0.5;
+	ui_label = " Beta & Gamma Adjust";
+	ui_tooltip = "This is used to adjust Beta & Gamma View Modes.\n" 
 				 "Default is Zero, Zero is off.";
 	ui_category = "Occlusion Masking";
 > = 0.0;
@@ -1108,15 +1108,16 @@ float4 PS_calcLR(float2 texcoord)
 			DepthR = min(DepthR, Encode(float2(TCR.x - S * MSM, TCR.y)) );
 			continue;
 		}
-		//else if (View_Mode == 1)
-		//{
-		//	DL += Encode(float2(TCL.x + S * MSM, TCL.y));
-		//	DR += Encode(float2(TCR.x - S * MSM, TCR.y));	
-		//	DepthL = saturate(DL*0.11111111);
-		//	DepthR = saturate(DR*0.11111111);
-		//	continue;
-		//}
 		else if (View_Mode == 1)
+		{
+			DL += Encode(float2(TCL.x + S * MSM, TCL.y))/9;
+			DR += Encode(float2(TCR.x - S * MSM, TCR.y))/9;	
+			
+			DepthL = saturate(DL);
+			DepthR = saturate(DR);
+			continue;
+		}
+		else if (View_Mode == 2)
 		{		
 			LDepth = min(DepthL, Encode(float2(TCL.x + S * MSM, TCL.y)) );
 			RDepth = min(DepthR, Encode(float2(TCR.x - S * MSM, TCR.y)) );
@@ -1136,14 +1137,14 @@ float4 PS_calcLR(float2 texcoord)
 			DepthL = min(DepthL,LDepth / 4.0f);
 			DepthR = min(DepthR,RDepth / 4.0f);
 			
-			if(A_n_B > 0 && A_n_B < 1)
+			if(B_n_G > 0 && B_n_G < 1)
 			{
-				DepthL = lerp(DL, DepthL, 1-A_n_B);
-				DepthR = lerp(DR, DepthR, 1-A_n_B);
+				DepthL = lerp(DL, DepthL, 1-B_n_G);
+				DepthR = lerp(DR, DepthR, 1-B_n_G);
 			}
 			continue;
 		}
-		else if (View_Mode == 2)
+		else if (View_Mode == 3)
 		{			
 			LDepth = min(DepthL, Encode(float2(TCL.x + S * MSM, TCL.y)) );
 			RDepth = min(DepthR, Encode(float2(TCR.x - S * MSM, TCR.y)) );
@@ -1169,10 +1170,10 @@ float4 PS_calcLR(float2 texcoord)
 			DepthL = min(DepthL,LDepth / 6.0f);
 			DepthR = min(DepthR,RDepth / 6.0f);
 			
-			if(A_n_B > 0 && A_n_B < 1)
+			if(B_n_G > 0 && B_n_G < 1)
 			{
-				DepthL = lerp(DL, DepthL, 1-A_n_B);
-				DepthR = lerp(DR, DepthR, 1-A_n_B);
+				DepthL = lerp(DL, DepthL, 1-B_n_G);
+				DepthR = lerp(DR, DepthR, 1-B_n_G);
 			}
 			continue;
 		}
