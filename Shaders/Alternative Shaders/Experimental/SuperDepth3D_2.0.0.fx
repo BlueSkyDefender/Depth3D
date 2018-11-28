@@ -147,6 +147,15 @@ uniform int View_Mode <
 	ui_category = "Occlusion Masking";
 > = 0;
 
+uniform float A_n_B <
+	ui_type = "drag";
+	ui_min = 0.0; ui_max = 0.750;
+	ui_label = " Alpha & Beta Adjust";
+	ui_tooltip = "This is used to adjust Alpha & Beta View Modes.\n" 
+				 "Default is Zero, Zero is off.";
+	ui_category = "Occlusion Masking";
+> = 0.0;
+
 uniform int Custom_Sidebars <
 	ui_type = "combo";
 	ui_items = "Mirrored Edges\0Black Edges\0Stretched Edges\0";
@@ -1031,7 +1040,7 @@ float4 PS_calcLR(float2 texcoord)
 {
 	float4 color, Right, Left, R, L;
 	float2 TCL, TCR, TexCoords = texcoord;
-	float DepthR = 1, DepthL = 1, LDepth, RDepth, N = 9, samplesA[9] = {0.5,0.5625,0.625,0.6875,0.75,0.8125,0.875,0.9375,1.0};
+	float DepthR = 1, DepthL = 1, LDepth, RDepth, DL, DR, N = 9, samplesA[9] = {0.5,0.5625,0.625,0.6875,0.75,0.8125,0.875,0.9375,1.0};
 							
 	if(Eye_Swap)
 	{
@@ -1099,10 +1108,21 @@ float4 PS_calcLR(float2 texcoord)
 			DepthR = min(DepthR, Encode(float2(TCR.x - S * MSM, TCR.y)) );
 			continue;
 		}
+		//else if (View_Mode == 1)
+		//{
+		//	DL += Encode(float2(TCL.x + S * MSM, TCL.y));
+		//	DR += Encode(float2(TCR.x - S * MSM, TCR.y));	
+		//	DepthL = saturate(DL*0.11111111);
+		//	DepthR = saturate(DR*0.11111111);
+		//	continue;
+		//}
 		else if (View_Mode == 1)
 		{		
 			LDepth = min(DepthL, Encode(float2(TCL.x + S * MSM, TCL.y)) );
 			RDepth = min(DepthR, Encode(float2(TCR.x - S * MSM, TCR.y)) );
+			
+			DL = LDepth;
+			DR = RDepth;
 						
 			LDepth += min(DepthL, Encode(float2(TCL.x + S * (MSM * 0.75f), TCL.y)) );
 			RDepth += min(DepthR, Encode(float2(TCR.x - S * (MSM * 0.75f), TCR.y)) );
@@ -1115,13 +1135,22 @@ float4 PS_calcLR(float2 texcoord)
 			
 			DepthL = min(DepthL,LDepth / 4.0f);
 			DepthR = min(DepthR,RDepth / 4.0f);
+			
+			if(A_n_B > 0 && A_n_B < 1)
+			{
+				DepthL = lerp(DL, DepthL, 1-A_n_B);
+				DepthR = lerp(DR, DepthR, 1-A_n_B);
+			}
 			continue;
 		}
 		else if (View_Mode == 2)
 		{			
 			LDepth = min(DepthL, Encode(float2(TCL.x + S * MSM, TCL.y)) );
 			RDepth = min(DepthR, Encode(float2(TCR.x - S * MSM, TCR.y)) );
-				
+			
+			DL = LDepth;
+			DR = RDepth;
+	
 			LDepth += min(DepthL, Encode(float2(TCL.x + S * (MSM * 0.9375f), TCL.y)) );
 			RDepth += min(DepthR, Encode(float2(TCR.x - S * (MSM * 0.9375f), TCR.y)) );
 						
@@ -1139,6 +1168,12 @@ float4 PS_calcLR(float2 texcoord)
 								
 			DepthL = min(DepthL,LDepth / 6.0f);
 			DepthR = min(DepthR,RDepth / 6.0f);
+			
+			if(A_n_B > 0 && A_n_B < 1)
+			{
+				DepthL = lerp(DL, DepthL, 1-A_n_B);
+				DepthR = lerp(DR, DepthR, 1-A_n_B);
+			}
 			continue;
 		}
 	}
