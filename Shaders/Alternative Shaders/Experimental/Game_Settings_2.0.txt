@@ -190,7 +190,7 @@ Inner Shader Setting:
     RB        The Vanishing of Ethan Carter Redux          DM 1       7.5000                                       0.025-0.125
     RB        The Void                                     DM 0       7.5000                                       0.050-0.150           
     RB        Through The Woods!                           DM 1       7.5000                               Yes     0.025-0.075 
-              Titanfall 2                                  DM 0       7.5000                 WDM *                 0.025-0.100 
+    RB       *Titanfall 2                                  DM 0       7.5000                *WDM 42                0.0250-0.0500      Yes 4          SD
               Tomb Raider: Anniversary                     DM 0       20.000    0.02070                            0.0375-0.6250                     SD
               Total War: Warhammer                         DM 0       2.6250                                       0.025-0.075
     RB       *Turok: Dinosaur Hunter                       DM 0       250.00                *WDM 21                0.0375-0.0625      Yes 2          SD
@@ -664,6 +664,13 @@ You may need to install the other things in the game folder for the game to run 
 
 {Through The Woods} - Use Reshade 3.4.1
 In game Set your Res to Native screen Res.
+
+{Titanfall 2} - Used Reshade 4.0.2
+Install ReShade into the Bin/x64_retail folder. 
+
+In game settings:
+Adaptive Resolution FPS Target = 144
+Adaptive Supersampling = Enabled
 
 {Turok: Dinosaur Hunter} - Use Reshade 3.4.1
 If you are useing an older build of reshade you have to turn off "Light Scatter," in Graphics Menu.

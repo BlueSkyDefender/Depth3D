@@ -149,7 +149,7 @@ uniform int View_Mode <
 
 uniform float B_n_G <
 	ui_type = "drag";
-	ui_min = 0.0; ui_max = 0.5;
+	ui_min = 0.0; ui_max = 0.75;
 	ui_label = " Beta & Gamma Adjust";
 	ui_tooltip = "This is used to adjust Beta & Gamma View Modes.\n" 
 				 "Default is Zero, Zero is off.";
@@ -615,13 +615,13 @@ float2 WeaponDepth(in float2 texcoord : TEXCOORD0)
 		else if(WP == 11)//WP 9
 			WA_XYZW = float4(0.450,0.0375,-37.813,2);  //Bioshock Remastred*
 		else if(WP == 12)//WP 10
-			WA_XYZW = float4(0,0,0,0);                 //Bioshock Infinite
+			WA_XYZW = float4(0,0,0,0);                 //Game
 		else if(WP == 13)//WP 11
 			WA_XYZW = float4(0.450,0.175,-43.75,1);    //Metro Redux Games*	
 		else if(WP == 14)//WP 12
 			WA_XYZW = float4(0,0,0,0);                 //Game
 		else if(WP == 15)//WP 13
-			WA_XYZW = float4(0,0,0,0);                 //TitanFall 2
+			WA_XYZW = float4(0,0,0,0);                 //Game
 		else if(WP == 16)//WP 14
 			WA_XYZW = float4(1.0,27.5,6.25,-1);        //Rage64*		
 		else if(WP == 17)//WP 15
@@ -675,11 +675,11 @@ float2 WeaponDepth(in float2 texcoord : TEXCOORD0)
 		else if(WP == 41)//WP 39
 			WA_XYZW = float4(0.280,1.125,-16.25,0);    //Serious Sam Revolution / Serious Sam HD: The First Encounter / The Second Encounter / Serious Sam 3: BFE?*
 		else if(WP == 42)//WP 40
-			WA_XYZW = float4(0.280,1.0,16.25,1);       //Serious Sam 2
+			WA_XYZW = float4(0.280,1.0,16.25,1);       //Serious Sam 2*
 		else if(WP == 43)//WP 41
 			WA_XYZW = float4(0,0,0,0);                 //Serious Sam 4: Planet Badass
 		else if(WP == 44)//WP 42
-			WA_XYZW = float4(0,0,0,0);                 //Game
+			WA_XYZW = float4(0.277,0.875,-11.875,0);   //TitanFall 2*
 		else if(WP == 45)//WP 43
 			WA_XYZW = float4(0,0,0,0);                 //Game
 		else if(WP == 46)//WP 44
