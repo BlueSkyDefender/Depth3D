@@ -122,7 +122,7 @@ uniform float Auto_Depth_Range <
 //Occlusion Masking//
 uniform int Disocclusion_Selection <
 	ui_type = "combo";
-	ui_items = "Off\0Normal\0Radial\0Radial & Normal\0Normal Depth Based\0Radial Depth Based\0Radial & Normal Depth Based\0";
+	ui_items = "Off\0Normal\0Radial\0Radial & Normal\0";
 	ui_label = "·Disocclusion Selection·";
 	ui_tooltip = "This is to select the z-Buffer blurring option for low level occlusion masking.\n"
 				"Default is Off.";
@@ -133,10 +133,10 @@ uniform float2 Disocclusion_Adjust <
 	ui_type = "drag";
 	ui_min = 0.0; ui_max = 1.0;
 	ui_label = " Disocclusion Adjust";
-	ui_tooltip = "Automatic occlusion masking power & Depth Based culling adjustments.\n"
-				"Default is ( 0.250f, 0.625f)";
+	ui_tooltip = "Automatic occlusion masking power & Mask Based culling adjustments.\n"
+				 "Default is ( 0.250f, 0.200f)";
 	ui_category = "Occlusion Masking";
-> = float2( 0.250, 0.625);
+> = float2( 0.250, 0.620);
 
 uniform int View_Mode <
 	ui_type = "combo";
@@ -163,6 +163,12 @@ uniform int Custom_Sidebars <
 	ui_tooltip = "Edges selection for your screen output.";
 	ui_category = "Occlusion Masking";
 > = 1;
+
+uniform bool Enable_Mask <
+	ui_label = " Mask Toggle";
+	ui_tooltip = "This enables the mask used for Occlusion Masking Culling.";
+	ui_category = "Occlusion Masking";
+> = false;
 //Depth Map//
 uniform int Depth_Map <
 	ui_type = "combo";
@@ -971,22 +977,35 @@ float zBuffer(in float2 texcoord : TEXCOORD0)
 
 void  Disocclusion(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 color : SV_Target0)
 {
-float DM = zBuffer(texcoord), DMA, DMB, A, B, S, MS =  Divergence * pix.x, Div = 1.0f / 11.0f;
-float2 dirA, dirB;
-
+	float DM = zBuffer(texcoord), DMA, DMB, A, B, S, MS =  Divergence * pix.x, Div = 1.0f / 11.0f, DepthR = 1, DepthL = 1, N = 5, samples[5] = {0.5,0.625,0.75,0.875,1.0};
+	float2 dirA, dirB;
+	
+	if ( Enable_Mask )
+	{
+		[loop]
+		for ( int i = 0 ; i < N; i++ ) 
+		{	
+			DepthL = min(DepthL, zBuffer(float2(texcoord.x + samples[i] * MS, texcoord.y)) );
+			DepthR = min(DepthR, zBuffer(float2(texcoord.x - samples[i] * MS, texcoord.y)) );
+			continue;
+		}
+	}
+	
+	float MA = (Disocclusion_Adjust.y * 10), LMask = distance(DepthL,DM), RMask = distance(DepthL,DM), Mask = abs(saturate((LMask * MA - 1.0)+(RMask * MA - 1.0)*0.5) > 0.0);
+			
 	MS *= Disocclusion_Adjust.x * 2.0f;
 		
-	if ( Disocclusion_Selection == 1 || Disocclusion_Selection == 4 ) // Normal    
+	if ( Disocclusion_Selection == 1 ) // Normal    
 	{
 		A += 5.5; // Normal
 		dirA = float2(0.5,0.0);
 	}
-	else if ( Disocclusion_Selection == 2 || Disocclusion_Selection == 5 ) // Radial  
+	else if ( Disocclusion_Selection == 2 ) // Radial  
 	{
 		A += 16.0; // Radial
 		dirA = 0.5 - texcoord;
 	}
-	else if ( Disocclusion_Selection == 3 || Disocclusion_Selection == 6 ) // Radial & Normal  
+	else if ( Disocclusion_Selection == 3 ) // Radial & Normal  
 	{
 		A += 16.0; // Radial
 		B += 5.5; // Normal
@@ -1004,29 +1023,30 @@ float2 dirA, dirB;
 			S = weight[i] * MS;
 			DMA += zBuffer(texcoord + dirA * S * A)*Div;
 			
-			if(Disocclusion_Selection == 3 || Disocclusion_Selection == 6)
+			if(Disocclusion_Selection == 3)
 			{
 				DMB += zBuffer(texcoord + dirB * S * B)*Div;
 			}
+			continue;
 		}
 				
-	if ( Disocclusion_Selection == 3 || Disocclusion_Selection == 6 )
-	{	
-		DM = lerp(DMA,DMB,0.1875);
-	}
-	else
-	{
-		DM = DMA;
-	}	
-	
-	if ( Disocclusion_Selection == 4 || Disocclusion_Selection == 5 || Disocclusion_Selection == 6 )
-		DM = lerp(zBuffer(texcoord), DM, step(zBuffer(texcoord), Disocclusion_Adjust.y));
-	
+		if ( Disocclusion_Selection == 3  )
+		{	
+			DM = lerp(DMA,DMB,0.1875);
+		}
+		else
+		{
+			DM = DMA;
+		}	
+		
+		if ( Enable_Mask )
+		DM = lerp(zBuffer(texcoord), DM, Mask);
 	}
 	else
 	{
 		DM = zBuffer(texcoord);
 	}
+	
 	color = float4(DM,0.0,0.0,1.0);
 }
 
