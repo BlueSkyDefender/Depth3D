@@ -977,22 +977,21 @@ float zBuffer(in float2 texcoord : TEXCOORD0)
 
 void  Disocclusion(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 color : SV_Target0)
 {
-	float DM = zBuffer(texcoord), DMA, DMB, A, B, S, MS =  Divergence * pix.x, Div = 1.0f / 11.0f, DepthR = 1, DepthL = 1, N = 5, samples[5] = {0.5,0.625,0.75,0.875,1.0};
+	float DM = zBuffer(texcoord), DMA, DMB, A, B, S, MS =  Divergence * pix.x, Div = 1.0f / 11.0f, DR = 1, DL = 1, N = 5, samples[5] = {0.5,0.625,0.75,0.875,1.0};
 	float2 dirA, dirB;
 	
 	if ( Enable_Mask )
 	{
 		[loop]
-		for ( int i = 0 ; i < N; i++ ) 
+		for ( int j = 0 ; j < N; j++ ) 
 		{	
-			DepthL = min(DepthL, zBuffer(float2(texcoord.x + samples[i] * MS, texcoord.y)) );
-			DepthR = min(DepthR, zBuffer(float2(texcoord.x - samples[i] * MS, texcoord.y)) );
-			continue;
+			DL = min(DL, zBuffer(float2(texcoord.x + samples[j] * (MS*0.5), texcoord.y)) );
+			DR = min(DR, zBuffer(float2(texcoord.x - samples[j] * (MS*0.5), texcoord.y)) );
 		}
 	}
 	
-	float MA = (Disocclusion_Adjust.y * 10), LMask = distance(DepthL,DM), RMask = distance(DepthL,DM), Mask = abs(saturate((LMask * MA - 1.0)+(RMask * MA - 1.0)*0.5) > 0.0);
-			
+	float MA = (Disocclusion_Adjust.y * 25.0f), M = distance((DL+DR) * 0.5f,DM), Mask = saturate(M * MA - 1.0f) > 0.0f;
+	
 	MS *= Disocclusion_Adjust.x * 2.0f;
 		
 	if ( Disocclusion_Selection == 1 ) // Normal    
@@ -1032,7 +1031,7 @@ void  Disocclusion(in float4 position : SV_Position, in float2 texcoord : TEXCOO
 				
 		if ( Disocclusion_Selection == 3  )
 		{	
-			DM = lerp(DMA,DMB,0.1875);
+			DM = lerp(DMA,DMB,0.250);
 		}
 		else
 		{
@@ -1040,7 +1039,7 @@ void  Disocclusion(in float4 position : SV_Position, in float2 texcoord : TEXCOO
 		}	
 		
 		if ( Enable_Mask )
-		DM = lerp(zBuffer(texcoord), DM, Mask);
+			DM = lerp(zBuffer(texcoord), DM, abs(Mask));
 	}
 	else
 	{
@@ -1414,12 +1413,11 @@ float4 PS_calcLR(float2 texcoord)
 			}
 		}
 	}
-		else
+	else
 	{		
-			float R = tex2Dlod(SamplerDis,float4(TexCoords.x, TexCoords.y,0,0)).x;
-			float G = AutoDepthRange(tex2Dlod(SamplerDM,float4(TexCoords.x, TexCoords.y,0,0)).x,TexCoords);
-			float B = tex2Dlod(SamplerDis,float4(TexCoords.x, TexCoords.y,0,0)).x;
-			color = float4(R,G,B,1.0);
+		float3 RGB = tex2Dlod(SamplerDis,float4(TexCoords.x, TexCoords.y,0,0)).xxx;
+
+		color = float4(RGB.x,AutoDepthRange(RGB.y,TexCoords),RGB.z,1.0);
 	}
 		
 	#if WZF		
