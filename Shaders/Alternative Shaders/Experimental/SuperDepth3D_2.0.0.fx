@@ -688,7 +688,7 @@ float2 WeaponDepth(in float2 texcoord : TEXCOORD0)
 		else if(WP == 49)//WP 47
 			WA_XYZW = float4(0,0,0,0);                 //Game	
 		else if(WP == 50)//WP 48
-			WA_XYZW = float4(0,0,0,0);                 //Game
+			WA_XYZW = float4(1.9375,0.5,40.0,-1);      //Immortal Redneck
 		else if(WP == 51)//WP 49
 			WA_XYZW = float4(0,0,0,0);                 //NecroVisioN
 		else if(WP == 52)//WP 50
