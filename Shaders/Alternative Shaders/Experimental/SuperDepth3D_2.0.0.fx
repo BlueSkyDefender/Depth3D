@@ -134,9 +134,9 @@ uniform float2 Disocclusion_Adjust <
 	ui_min = 0.0; ui_max = 1.0;
 	ui_label = " Disocclusion Adjust";
 	ui_tooltip = "Automatic occlusion masking power & Mask Based culling adjustments.\n"
-				 "Default is ( 0.250f, 0.200f)";
+				 "Default is ( 0.250f, 0.250f)";
 	ui_category = "Occlusion Masking";
-> = float2( 0.250, 0.620);
+> = float2( 0.250, 0.250 );
 
 uniform int View_Mode <
 	ui_type = "combo";
@@ -146,15 +146,6 @@ uniform int View_Mode <
 				 "Default is Normal";
 	ui_category = "Occlusion Masking";
 > = 0;
-
-uniform float A_n_B <
-	ui_type = "drag";
-	ui_min = 0.0; ui_max = 0.75;
-	ui_label = " Alpha & Beta Adjust";
-	ui_tooltip = "This is used to adjust Alpha & Beta View Modes.\n" 
-				 "Default is Zero, Zero is off.";
-	ui_category = "Occlusion Masking";
-> = 0.0;
 
 uniform int Custom_Sidebars <
 	ui_type = "combo";
@@ -977,7 +968,7 @@ float zBuffer(in float2 texcoord : TEXCOORD0)
 
 void  Disocclusion(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 color : SV_Target0)
 {
-	float DM = zBuffer(texcoord), DMA, DMB, A, B, S, MS =  Divergence * pix.x, Div = 1.0f / 11.0f, DR = 1, DL = 1, N = 5, samples[5] = {0.5,0.625,0.75,0.875,1.0};
+	float DM, DMA, DMB, A, B, S, MS =  Divergence * pix.x, Div = 1.0f / 11.0f, DR = 1, DL = 1, N = 5, samples[5] = {0.5,0.625,0.75,0.875,1.0};
 	float2 dirA, dirB;
 	
 	if ( Enable_Mask )
@@ -990,7 +981,7 @@ void  Disocclusion(in float4 position : SV_Position, in float2 texcoord : TEXCOO
 		}
 	}
 	
-	float MA = (Disocclusion_Adjust.y * 25.0f), M = distance((DL+DR) * 0.5f,DM), Mask = saturate(M * MA - 1.0f) > 0.0f;
+	float MA = (Disocclusion_Adjust.y * 25.0f), M = distance((DL+DR) * 0.5f, zBuffer(texcoord)), Mask = saturate(M * MA - 1.0f) > 0.0f;
 	
 	MS *= Disocclusion_Adjust.x * 2.0f;
 		
@@ -1037,8 +1028,10 @@ void  Disocclusion(in float4 position : SV_Position, in float2 texcoord : TEXCOO
 		{
 			DM = DMA;
 		}	
-		
-		if ( Enable_Mask )
+				
+		if ( Enable_Mask && View_Mode == 0)
+			DM = lerp(lerp(zBuffer(texcoord), DM, abs(Mask)), DM, 0.625f );
+		else if ( Enable_Mask )
 			DM = lerp(zBuffer(texcoord), DM, abs(Mask));
 	}
 	else
@@ -1128,13 +1121,13 @@ float4 PS_calcLR(float2 texcoord)
 			continue;
 		}
 		else if (View_Mode == 1)
-		{		
+		{	
 			LDepth = min(DepthL, Encode(float2(TCL.x + S * MSM, TCL.y)) );
 			RDepth = min(DepthR, Encode(float2(TCR.x - S * MSM, TCR.y)) );
 			
 			DL = LDepth;
 			DR = RDepth;
-						
+									
 			LDepth += min(DepthL, Encode(float2(TCL.x + S * (MSM * 0.75f), TCL.y)) );
 			RDepth += min(DepthR, Encode(float2(TCR.x - S * (MSM * 0.75f), TCR.y)) );
 						
@@ -1146,12 +1139,9 @@ float4 PS_calcLR(float2 texcoord)
 			
 			DepthL = min(DepthL,LDepth / 4.0f);
 			DepthR = min(DepthR,RDepth / 4.0f);
-			
-			if(A_n_B > 0 && A_n_B < 1)
-			{
-				DepthL = lerp(DL, DepthL, 1-A_n_B);
-				DepthR = lerp(DR, DepthR, 1-A_n_B);
-			}
+					
+			DepthL = lerp(DepthL, DL, 0.1875f);
+			DepthR = lerp(DepthR, DR, 0.1875f);			
 			continue;
 		}
 		else if (View_Mode == 2)
@@ -1161,7 +1151,7 @@ float4 PS_calcLR(float2 texcoord)
 			
 			DL = LDepth;
 			DR = RDepth;
-	
+						
 			LDepth += min(DepthL, Encode(float2(TCL.x + S * (MSM * 0.9375f), TCL.y)) );
 			RDepth += min(DepthR, Encode(float2(TCR.x - S * (MSM * 0.9375f), TCR.y)) );
 						
@@ -1180,11 +1170,8 @@ float4 PS_calcLR(float2 texcoord)
 			DepthL = min(DepthL,LDepth / 6.0f);
 			DepthR = min(DepthR,RDepth / 6.0f);
 			
-			if(A_n_B > 0 && A_n_B < 1)
-			{
-				DepthL = lerp(DL, DepthL, 1-A_n_B);
-				DepthR = lerp(DR, DepthR, 1-A_n_B);
-			}
+			DepthL = lerp(DepthL, DL, 0.1875f);
+			DepthR = lerp(DepthR, DR, 0.1875f);		
 			continue;
 		}
 	}
