@@ -140,6 +140,7 @@ Inner Shader Setting:
     RB        Monster Hunter World                         DM 1       13.750                                       0.025-0.075
               Mordheim: City of the Damned                 DM 0       12.500                               Yes     0.025-0.250         
     RB        Naruto Shippuden UNS3 Full Blurst HD         DM 0       36.250                                       0.025-0.125        
+    RB       *NecroVision                                  DM 0       10.000                *WDM 50                0.0250-0.0500      Yes 2          SD 
     RB       *NecroVision: Lost Company                    DM 0       10.000                *WDM 50                0.0250-0.0500      Yes 2          SD 
               Need For Speed Rivals                        ?            ?                                          ?
               Need for Speed Most Wanted                   ?            ?                                          ?
@@ -458,8 +459,10 @@ Needs a way to disable dissable DoF.
 {Naruto Shippuden UNS3 Full Blurst}
 Ignore the warnings click play.
 
-{NecroVision: Lost Company} - Use ReShade ReShade 3.3.2
+{NecroVision: Games} - Use ReShade ReShade 3.3.2
 I was unable to get the newest version of ReShade to work with this title. A link for older versions of reshade at the end of this doc.
+
+Carefull try not to alt-tab game may hang.
 
 {Nosferatu: The Wrath of Malachi}
 You need DGVooDoo2
