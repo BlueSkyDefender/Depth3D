@@ -624,7 +624,7 @@ float2 WeaponDepth(in float2 texcoord : TEXCOORD0)
 		else if(WP == 17)//WP 15
 			WA_XYZW = float4(0.375,2.5,-44.75,0);      //Quake DarkPlaces*	
 		else if(WP == 18)//WP 16
-			WA_XYZW = float4(0.7,0.4,-30.0,-1);        //Quake 2 XP*
+			WA_XYZW = float4(0.7,0.4,-30.0,-1);        //Quake 2 XP & Return to Castle Wolfenstine*
 		else if(WP == 19)//WP 17
 			WA_XYZW = float4(0.750,1.5,-1.250,-1);     //Quake 4*
 		else if(WP == 20)//WP 18
@@ -650,11 +650,11 @@ float2 WeaponDepth(in float2 texcoord : TEXCOORD0)
 		else if(WP == 30)//WP 28
 			WA_XYZW = float4(0.2712,25.0,0,1);         //Prey 2017 Very High*
 		else if(WP == 31)//WP 29
-			WA_XYZW = float4(4.750,0.9375,0,0);        //Return to Castle Wolfenstine
+			WA_XYZW = float4(0,0,0,0);                 //Game
 		else if(WP == 32)//WP 30
-			WA_XYZW = float4(0,0,0,0);                 //Wolfenstine
+			WA_XYZW = float4(0.490,5.0,0.5625,-1);     //Wolfenstine
 		else if(WP == 33)//WP 31
-			WA_XYZW = float4(0,0,0,0);                 //Wolfenstine: The New Order / The Old Blood
+			WA_XYZW = float4(1.0,13.75,6.4,-1);        //Wolfenstine: The New Order / The Old Blood
 		else if(WP == 34)//WP 32
 			WA_XYZW = float4(0,0,0,0);                 //Wolfenstein II: The New Colossus / Cyberpilot
 		else if(WP == 35)//WP 33

@@ -69,7 +69,7 @@ Inner Shader Setting:
     RB       *Bioshock Remastred                           DM 0       7.5000    0.00600     *WDM 9                 0.0250-0.0500      Yes 3          SD          
              *Black Mesa                                   DM 0       8.7500                *WDM 33                0.0250-0.0500      Yes 1          SD
     RB        BloodCM                                      DM 0       15.000                                       0.025-0.250                                     
-    RB       *Blood 2                                      DM 0       7.5000                *WDM 34/35             0.0250-0.0500      Yes 3          SD/FB 
+    RB       *Blood 2                                      DM 0       7.5000                *WDM 34/35             0.0250-0.0500      Yes 3        SD / FB 
     RB       *BorderLands 2                                DM 0       20.000                *WDM 2                 0.0375-0.0625      Yes 2          SD                          
              *Call of Chthulhu                             DM 1       9.3750                                       0.0250-0.0500      Yes 1          SD     0.1625   
     RB       *Call of Duty: Advance Warfare                DM 1       15.000                *WDM 8                 0.0375-0.0625      Yes 2          SD                                 
@@ -110,7 +110,7 @@ Inner Shader Setting:
               Fez                                          DM 0       10.000    0.97500                    Yes     ?0.0-0.250?                            
               Firewatch                                    DM 0       5.0000                               Yes     0.025-0.250
     RB        Grim Dawn                                    DM 0       7.5000    0.00400                            0.2500-0.3000                     FB     0.5750    
-    RB        GTA V                                        DM 1       9.3750                                       0.0500-0.1000      Yes 5          SD/FB                 
+    RB        GTA V                                        DM 1       9.3750                                       0.0500-0.1000      Yes 5        SD / FB                 
               Gone Home                                    DM 0       5.0000                               Yes     0.025-0.250
     RB        Hard Reset                                   DM 0       8.1250                                       0.050-0.125          
               Hellblade: Senua's Sacrifice                 DM 1       10.000                                       0.025-0.250
@@ -160,7 +160,7 @@ Inner Shader Setting:
     RB        Redout                                       DM ?         ?                                          ?      
               Remembrance                                  DM 1       7.5000                               Yes     0.050-0.100
     RB        Resident Evil 7                              DM 1       22.500                                       0.125-0.275                                        
-    RB        Return To Castle Wolfenstine                 DM 0       10.000                 WDM *                 0.075-0.250                     
+    RB       *Return To Castle Wolfenstine                 DM 0       8.75000               *WDM 16                0.0250-0.0500      Yes 2        SD / FB                       
     RB        Requiem: Avenging Angel                      DM 0       50.000    0.80000                            0.0300-0.0600                         
               Rez Infinite                                 DM 1       20.000                                       0.075-0.150
               Rise of the Tomb Raider                      DM 0       25.000    0.02000                            0.0500-0.1250                         
@@ -204,9 +204,9 @@ Inner Shader Setting:
     RB        Watch Dogs 2                                 DM 1       7.5000                                       0.050-0.100        
               We Where Here Too                            DM 1       42.500                                       0.0375-0.0625      Yes 1          SD      
               Witcher 3                                    DM 1       7.5000                                       0.050-0.100            
-              Wolfenstine                                  DM 0       7.5000                WDM *                  0.025-0.100
-    RB        Wolfenstine: The New Order                   DM 0       25.000                WDM ||                 0.025-0.075
-    RB        Wolfenstine: The Old Blood                   DM 0       25.000                WDM ||                 0.025-0.075
+             *Wolfenstine                                  DM 0       7.5000               *WDM 30                 0.0250-0.0500      Yes 2        SD / FB 
+    RB       *Wolfenstine: The New Order                   DM 0       25.000    0.00125    *WDM 31                 0.0375-0.0625      Yes 5        SD / FB     
+    RB       *Wolfenstine: The Old Blood                   DM 0       25.000    0.00125    *WDM 31                 0.0375-0.0625      Yes 5        SD / FB     
     RB        Yooka-Laylee                                 DM 0       6.8750                               Yes     0.025-0.075
               Ziggurat                                     DM 0       7.5000                                       0.075-0.175
               Zombie Army Trilogy                          DM 0       12.500                                       0.050-0.075                         
@@ -401,7 +401,7 @@ DepthBufferTextureFormat=4
 ExtendedDepthBufferDetection=0
 DepthBufferClearingNumber=2
 
-Please main menu has a diffrent detection from in game.
+Please note main menu has a diffrent detection from in game.
 
 {KHOLAT}
 Install reshade in to SteamLibrary\steamapps\common\KHOLAT\Kholat\Binaries\Win64
@@ -699,13 +699,16 @@ Install reshade and use dxgi.dll
 Ok befor you launch use this command.
 -eac_launcher <---- as the start up command.
 
-{Wolfenstine: Games} - working in Reshade 3.0 and Rehade 2.0
+{Wolfenstine: Games} - working in Reshade 4.0.2
 [Set Launch Options](+r_multisamples "0" +vt_maxaniso "16")
-This game must be started at the lower Resoution 1600x1200 Then Switch to 1920x1080. Befor you exit switch it back to 1600x1200. 
-Note if you want to 4k It's the same process Start the game at 1600x1200 then switch it to 3840x2160.
-Also note you can't switch back. So say you Start the game at 1600x1200 then switch to 4k then back too 1600x1200 it will not work. 
-If you change it one last time to 4k It will not work. You must restart your game for eatch change of resolution.
-You can always enable SMAA in reshade for AA or play at 4k with no AA.
+This game must be started at the lower Resoution 1600x1200 Windowed, Then Switch to 1920x1080 Fullscreen Windowed. 
+Befor you exit switch it back to 1600x1200 Windowed.
+ 
+Note if you want to 4k It's the same process Start the game at 1600x1200 Windowed then switch it to 3840x2160 Fullscreen Windowed.
+Also note you can't switch back. 
+
+So say you Start the game at 1600x1200 then switch to 4k then back too 1600x1200 it will not work. 
+You must restart your game for eatch change of resolution.
 
 Update 2018: Running it in Windows 10 Disable Scaling to avoid problems.
 
@@ -722,6 +725,8 @@ Ex.
 		"high" : 0,
 		"ultra" : 0
 	},
+Update 12.9.2018 When testing with AMD cards the depth buffer seems to not be accessable. I don't know why it's not working.
+Tested with 18.9.3 Adrenalin.
 	
 {You Are Empty}
 Read Here you will need patch 1.2 and 1snd.
