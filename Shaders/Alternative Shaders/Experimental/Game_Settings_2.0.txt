@@ -61,7 +61,7 @@ Inner Shader Setting:
               Among The Sleep                              DM 0       37.500                               Yes     0.025-0.075
               Assassin Creed Unity                         DM 1       20.000                                       0.025-0.125
               Bayonetta                                    DM 0       15.000                                       0.025-0.125 
-    RB        Battlefield One                              DM 1       8.7500                                       0.0375-0.0625      Yes 3        SD / FB          
+    RB        Battlefield One                              DM 1       8.1250                                       0.0375-0.0625      Yes 3        SD / FB          
               Batman Arkham Knight                         DM 0       22.500                                       0.0500-0.1000      Yes 4          SD                             
               Batman Arkham Origins                        DM 0       15.000                                       0.050-0.100
               Batman: Arkham City                          DM 0       15.000                                       0.050-0.100

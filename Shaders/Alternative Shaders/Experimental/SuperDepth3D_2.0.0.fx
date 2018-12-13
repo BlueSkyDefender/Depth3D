@@ -32,11 +32,9 @@
 #define DB_TOGGLE 0 // You can use http://keycode.info/ to figure out what key is what.
 #define Alt_Depth_Map_Adjust 0 // You can set this from 1.0 to 250.
 
-// Change the Cancel Depth Key
-// Determines the Cancel Depth Toggle Key useing keycode info
-// You can use http://keycode.info/ to figure out what key is what.
+// Change the Cancel Depth Key. Determines the Cancel Depth Toggle Key useing keycode info
 // key "." is Key Code 110. Ex. Key 110 is the code for Decimal Point.
-#define Cancel_Depth_Key 0
+#define Cancel_Depth_Key 0 // You can use http://keycode.info/ to figure out what key is what.
 
 // 3D AO Toggle enable this if you want better 3D seperation between objects. 
 // There will be a performance loss when enabled.
