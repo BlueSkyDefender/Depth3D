@@ -61,6 +61,7 @@ Inner Shader Setting:
               Among The Sleep                              DM 0       37.500                               Yes     0.025-0.075
               Assassin Creed Unity                         DM 1       20.000                                       0.025-0.125
               Bayonetta                                    DM 0       15.000                                       0.025-0.125 
+    RB        Battlefield One                              DM 1       8.7500                                       0.0375-0.0625      Yes 3        SD / FB          
               Batman Arkham Knight                         DM 0       22.500                                       0.0500-0.1000      Yes 4          SD                             
               Batman Arkham Origins                        DM 0       15.000                                       0.050-0.100
               Batman: Arkham City                          DM 0       15.000                                       0.050-0.100
@@ -140,8 +141,8 @@ Inner Shader Setting:
     RB        Monster Hunter World                         DM 1       13.750                                       0.025-0.075
               Mordheim: City of the Damned                 DM 0       12.500                               Yes     0.025-0.250         
     RB        Naruto Shippuden UNS3 Full Blurst HD         DM 0       36.250                                       0.025-0.125        
-    RB       *NecroVision                                  DM 0       10.000                *WDM 50                0.0250-0.0500      Yes 2          SD 
-    RB       *NecroVision: Lost Company                    DM 0       10.000                *WDM 50                0.0250-0.0500      Yes 2          SD 
+    RB       *NecroVisioN                                  DM 0       10.000                *WDM 50                0.0250-0.0500      Yes 2          SD 
+    RB       *NecroVisioN: Lost Company                    DM 0       10.000                *WDM 50                0.0250-0.0500      Yes 2          SD 
               Need For Speed Rivals                        ?            ?                                          ?
               Need for Speed Most Wanted                   ?            ?                                          ?
               NieRAutomata                                 DM 0       20.000                                       0.050-0.075
@@ -238,9 +239,13 @@ https://steamcommunity.com/sharedfiles/filedetails/?id=933337066
 Read Below Section
 
 =================================================================================================================================
-{.Hack//G.U.} - used reshade 3.0.8
+{.Hack//G.U.} - Used ReShade 3.0.8
 Once you install Reshade. Install this fix that allows for depth buffer access. This fix uses 3DMigoto to dissable a shader that was blocking acess to the depth buffer.
 http://www.mediafire.com/file/d5ep3qlsnbbbmvl/dotHack%20GU%20fix%20for%20Depth3D.zip
+
+{Battlefield One} - Used ReShade 4.0.2
+Added alternet settings mode to my shader. This can be done with the newly added Alternet Depth Buffer Adjust Toggle PREPROCESSOR FUNCTIONS. This is in Shader.
+Ex. FPS mode will be around 7.50. But, For Tank mode you want to use around 20.0.
 
 {BoarderLands 2}
 Use a Controller for menus navigation or keyboard. 

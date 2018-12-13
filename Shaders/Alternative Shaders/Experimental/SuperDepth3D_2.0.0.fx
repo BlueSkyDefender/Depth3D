@@ -28,8 +28,9 @@
 // Determines the Max Depth amount, in ReShades GUI.
 #define Depth_Max 50
 
-// Use this to Disable or Enable Anti-Z-Fighting Modes for Weapon Hand.
-#define WZF 0 //Default 0 is Off. One is On.
+// Alternet Depth Buffer Adjust Toggle Key. The key "o" is Key Code 79. Ex. Key 79 is the code for o.
+#define DB_TOGGLE 0 // You can use http://keycode.info/ to figure out what key is what.
+#define Alt_Depth_Map_Adjust 0 // You can set this from 1.0 to 250.
 
 // Change the Cancel Depth Key
 // Determines the Cancel Depth Toggle Key useing keycode info
@@ -54,6 +55,9 @@
 
 //Screen Cursor to Screen Crosshair Lock
 #define SCSC 0
+
+// Use this to Disable or Enable Anti-Z-Fighting Modes for Weapon Hand.
+#define WZF 0 //Default 0 is Off. One is On.
 
 //USER EDITABLE PREPROCESSOR FUNCTIONS END//
 
@@ -389,6 +393,7 @@ uniform float3 Cursor_Color <
 > = float3(1.0,1.0,1.0);
 
 uniform bool Cancel_Depth < source = "key"; keycode = Cancel_Depth_Key; toggle = true; >;
+uniform bool Depth_Adjust < source = "key"; keycode = DB_TOGGLE; toggle = true; >;
 /////////////////////////////////////////////D3D Starts Here/////////////////////////////////////////////////////////////////
 #define pix float2(BUFFER_RCP_WIDTH, BUFFER_RCP_HEIGHT)
 
@@ -558,11 +563,14 @@ float Depth(in float2 texcoord : TEXCOORD0)
 		if (Depth_Map_Flip)
 			texcoord.y =  1 - texcoord.y;
 			
-		float zBuffer = tex2D(DepthBuffer, texcoord).x; //Depth Buffer
+		float zBuffer = tex2D(DepthBuffer, texcoord).x, DMA = Depth_Map_Adjust; //Depth Buffer
+		
+		if(Depth_Adjust)
+		DMA = Alt_Depth_Map_Adjust;
 		
 		//Conversions to linear space.....
 		//Near & Far Adjustment
-		float Far = 1.0, Near = 0.125/Depth_Map_Adjust; //Division Depth Map Adjust - Near
+		float Far = 1.0, Near = 0.125/DMA; //Division Depth Map Adjust - Near
 		
 		float2 Offsets = float2(1 + Offset,1 - Offset), Z = float2( zBuffer, 1-zBuffer );
 		
@@ -769,7 +777,12 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 {
 		float4 DM = Depth(texcoord).xxxx;
 		
-		float R, G, B, A, WD = WeaponDepth(texcoord).x, CoP = WeaponDepth(texcoord).y, CutOFFCal = (CoP/Depth_Map_Adjust)/2; //Weapon Cutoff Calculation
+		float DMA = Depth_Map_Adjust;
+		
+		if(Depth_Adjust)
+		DMA = Alt_Depth_Map_Adjust;
+		
+		float R, G, B, A, WD = WeaponDepth(texcoord).x, CoP = WeaponDepth(texcoord).y, CutOFFCal = (CoP/DMA)/2; //Weapon Cutoff Calculation
 		
 		CutOFFCal = step(DM.x,CutOFFCal);
 					
@@ -898,8 +911,13 @@ void AO_in(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out
 #endif
 
 float4 HUD(float4 HUD, float2 texcoord ) 
-{		
-	float CutOFFCal = ((HUD_Adjust.x * 0.5)/Depth_Map_Adjust) * 0.5, COC = step(Depth(texcoord).x,CutOFFCal);; //HUD Cutoff Calculation
+{	
+	float DMA = Depth_Map_Adjust;
+		
+	if(Depth_Adjust)
+		DMA = Alt_Depth_Map_Adjust;
+	
+	float CutOFFCal = ((HUD_Adjust.x * 0.5)/DMA) * 0.5, COC = step(Depth(texcoord).x,CutOFFCal); //HUD Cutoff Calculation
 	
 	//This code is for hud segregation.			
 	if (HUD_Adjust.x > 0)
@@ -926,8 +944,8 @@ float Conv(float D,float2 texcoord)
 		
 		if(Convergence_Mode)
 			Z = Divergence_Locked;
-			
-		if(Auto_Balance_Ex > 0)
+				
+		if(Auto_Balance_Ex > 0 )
 			ZP = clamp(ALC,0.0f,1.0f);
 				
 		float Convergence = 1 - Z / D;
@@ -1418,7 +1436,7 @@ float4 PS_calcLR(float2 texcoord)
 float4 Average_Luminance(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Target
 {
 	float4 ABE = float4(0.0,1.0,0.0, 0.750);//Upper Extra Wide
-	
+		
 	if(Auto_Balance_Ex == 2)
 		ABE = float4(0.0,1.0,0.0, 0.5);//Upper Wide
 	else if(Auto_Balance_Ex == 3)
