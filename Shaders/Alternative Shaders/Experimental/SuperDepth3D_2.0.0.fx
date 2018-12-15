@@ -40,6 +40,9 @@
 // There will be a performance loss when enabled.
 #define AO_TOGGLE 0 //Default 0 is Off. One is On.
 
+// Use this to Disable or Enable Anti-Z-Fighting Modes for Weapon Hand.
+#define WZF 0 //Default 0 is Off. One is On.
+
 // Use Depth Tool to adjust the lower preprocessor definitions below.
 // Horizontal & Vertical Depth Buffer Resize for non conforming BackBuffer.
 // Ex. Resident Evil 7 Has this problem. So you want to adjust it too around float2(0.9575,0.9575).
@@ -53,9 +56,6 @@
 
 //Screen Cursor to Screen Crosshair Lock
 #define SCSC 0
-
-// Use this to Disable or Enable Anti-Z-Fighting Modes for Weapon Hand.
-#define WZF 0 //Default 0 is Off. One is On.
 
 //USER EDITABLE PREPROCESSOR FUNCTIONS END//
 
@@ -439,7 +439,7 @@ sampler BackBufferCLAMP
 		AddressW = CLAMP;
 	};
 	
-texture texDM  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT/Depth_Map_Division; Format = RGBA32F;}; 
+texture texDM  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT/Depth_Map_Division; Format = RGBA32F; }; 
 
 sampler SamplerDM
 	{
@@ -992,12 +992,12 @@ void  Disocclusion(in float4 position : SV_Position, in float2 texcoord : TEXCOO
 		[loop]
 		for ( int j = 0 ; j < N; j++ ) 
 		{	
-			DL = min(DL, zBuffer(float2(texcoord.x + samples[j] * (MS*0.5), texcoord.y)) );
-			DR = min(DR, zBuffer(float2(texcoord.x - samples[j] * (MS*0.5), texcoord.y)) );
+			DL = min(DL, tex2Dlod(SamplerDM,float4(texcoord.x + samples[j] * (MS * 0.5f), texcoord.y,0,0)).w );
+			DR = min(DR, tex2Dlod(SamplerDM,float4(texcoord.x - samples[j] * (MS * 0.5f), texcoord.y,0,0)).w );
 		}
 	}
 	
-	float MA = (Disocclusion_Adjust.y * 25.0f), M = distance((DL+DR) * 0.5f, zBuffer(texcoord)), Mask = saturate(M * MA - 1.0f) > 0.0f;
+	float MA = (Disocclusion_Adjust.y * 25.0f), M = distance((DL+DR) * 0.5f, tex2Dlod(SamplerDM,float4(texcoord,0,0)).w), Mask = saturate(M * MA - 1.0f) > 0.0f;
 	
 	MS *= Disocclusion_Adjust.x * 2.0f;
 		
@@ -1038,7 +1038,7 @@ void  Disocclusion(in float4 position : SV_Position, in float2 texcoord : TEXCOO
 				
 		if ( Disocclusion_Selection == 3  )
 		{	
-			DM = lerp(DMA,DMB,0.250);
+			DM = lerp(DMA,DMB,0.1875f);
 		}
 		else
 		{

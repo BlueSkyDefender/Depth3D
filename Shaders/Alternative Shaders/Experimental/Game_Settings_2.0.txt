@@ -247,6 +247,9 @@ http://www.mediafire.com/file/d5ep3qlsnbbbmvl/dotHack%20GU%20fix%20for%20Depth3D
 Added alternet settings mode to my shader. This can be done with the newly added Alternet Depth Buffer Adjust Toggle PREPROCESSOR FUNCTIONS. This is in Shader.
 Ex. FPS mode will be around 7.50. But, For Tank mode you want to use around 20.0.
 
+Please Note:
+If you run AMD and have a 2nd GPU in your system like a Nvidia Card. ReShade will Crash this game on start up.
+
 {BoarderLands 2}
 Use a Controller for menus navigation or keyboard. 
 Mouse and keyboard is good for gameplay. 
