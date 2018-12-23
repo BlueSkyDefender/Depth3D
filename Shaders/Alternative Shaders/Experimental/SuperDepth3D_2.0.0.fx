@@ -310,8 +310,9 @@ uniform int Scaling_Support <
 	ui_type = "combo";
 	ui_items = "SR Native\0SR 2160p A\0SR 2160p B\0SR 1080p A\0SR 1080p B\0SR 1050p A\0SR 1050p B\0SR 720p A\0SR 720p B\0";
 	ui_label = " Scaling Support";
-	ui_tooltip = "Dynamic Super Resolution , Virtual Super Resolution, downscaling, or Upscaling support for Line Interlaced, Column Interlaced, & Checkerboard 3D displays.\n"
-				 "Set this to your native Screen Resolution A or B.\n"
+	ui_tooltip = "Dynamic Super Resolution scaling support for Line Interlaced, Column Interlaced, & Checkerboard 3D displays.\n"
+				 "Set this to your native Screen Resolution A or B, DSR Smoothing must be set to 0%.\n"
+				 "This does not work with a hardware ware scaling done by VSR.\n"
 				 "Default is SR Native.";
 	ui_category = "Stereoscopic Options";
 > = 0;
@@ -439,14 +440,14 @@ sampler BackBufferCLAMP
 		AddressW = CLAMP;
 	};
 	
-texture texDM  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT/Depth_Map_Division; Format = RGBA32F; }; 
+texture texDM  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT/Depth_Map_Division; Format = RGBA38; }; 
 
 sampler SamplerDM
 	{
 		Texture = texDM;
 	};
 	
-texture texDis  { Width = BUFFER_WIDTH/Depth_Map_Division; Height = BUFFER_HEIGHT/Depth_Map_Division; Format = RGBA32F; MipLevels = 1;}; 
+texture texDis  { Width = BUFFER_WIDTH/Depth_Map_Division; Height = BUFFER_HEIGHT/Depth_Map_Division; Format = RGBA8; MipLevels = 1;}; 
 
 sampler SamplerDis
 	{
