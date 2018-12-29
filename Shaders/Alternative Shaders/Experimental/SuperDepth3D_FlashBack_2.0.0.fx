@@ -926,9 +926,6 @@ float Conv(float DM,float2 texcoord)
 			ZP = clamp(ALC,0.0f,1.0f);
 						
 		float Convergence = 1 - Z / DM;
-		
-		//Depth boost always on.
-		//DM = lerp( DM, min(1.0f,1.25f * DM), 0.4375f);
 									
 		Z = lerp(Convergence,DM, ZP);
 				
@@ -999,7 +996,7 @@ void  Disocclusion(in float4 position : SV_Position, in float2 texcoord : TEXCOO
 /////////////////////////////////////////L/R//////////////////////////////////////////////////////////////////////
 void Encode(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 color : SV_Target0) //zBuffer Color Channel Encode
 {
-	float MSL, N = 3, samples_A[3] = {0.5f,0.75f,1.0f};
+	float MSL, N = 3, samples[3] = {0.5f,0.75f,1.0f};
 	
 	float DepthR = 1.0f, DepthL = 1.0f, MS = Divergence * pix.x;
 	
@@ -1007,22 +1004,20 @@ void Encode(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, ou
 	for ( int i = 0 ; i < N; i++ ) 
 	{
 		MSL = Divergence * 0.1875f;
-		DepthL = min(DepthL,tex2Dlod(SamplerDisFB, float4(texcoord.x - (samples_A[i] * MSL) * pix.x, texcoord.y,0,0)).x);
-		DepthR = min(DepthR,tex2Dlod(SamplerDisFB, float4(texcoord.x + (samples_A[i] * MSL) * pix.x, texcoord.y,0,0)).x);
+		DepthL = min(DepthL,tex2Dlod(SamplerDisFB, float4(texcoord.x - (samples[i] * MSL) * pix.x, texcoord.y,0,0)).x);
+		DepthR = min(DepthR,tex2Dlod(SamplerDisFB, float4(texcoord.x + (samples[i] * MSL) * pix.x, texcoord.y,0,0)).x);
 		continue;
 	}	
 
 	// X Right & Y Left
-	float X = texcoord.x + MS * Conv(DepthL,texcoord), Y = (1 - texcoord.x) + MS * Conv(DepthR,texcoord);
-	float Z = Conv(tex2Dlod(SamplerDisFB,float4(texcoord,0,0)).x,texcoord);
+	float X = Conv(DepthL,texcoord), Y = Conv(DepthR,texcoord), Z = Conv(tex2Dlod(SamplerDisFB,float4(texcoord,0,0)).x,texcoord);
 	color = float4(X,Y,Z,1.0);
 }
 
 float4 Decode(in float2 texcoord : TEXCOORD0)
 {
-	float3 X = abs(tex2Dlod(SamplerEncodeFB,float4(texcoord,0,0)).xxx), Y = abs(tex2Dlod(SamplerEncodeFB,float4(texcoord,0,0)).yyy);
-	float3 Z = abs(tex2Dlod(SamplerEncodeFB,float4(texcoord,0,0)).zzz);
-	float ByteN = Byte_Shift; //Byte Shift for Debanding depth buffer in final 3D image.
+	float MS = Divergence * pix.x, ByteN = Byte_Shift; //Byte Shift for Debanding depth buffer in final 3D image.
+	float3 ZB = tex2Dlod(SamplerEncodeFB,float4(texcoord,0,0)).xyz, X = texcoord.x + MS * ZB.xxx, Y = (1 - texcoord.x) + MS * ZB.yyy, Z = ZB.zzz;
 	float A = dot(X, float3(1.0f, 1.0f / ByteN, 1.0f / (ByteN * ByteN)) ); //byte_to_float
 	float B = dot(Y, float3(1.0f, 1.0f / ByteN, 1.0f / (ByteN * ByteN)) ); //byte_to_float
 	float C = dot(Z, float3(1.0f, 1.0f / ByteN, 1.0f / (ByteN * ByteN)) ); //byte_to_float
@@ -1108,38 +1103,38 @@ float4 PS_calcLR(float2 texcoord)
 		[loop]
 		for (int i = 0; i < Divergence + 7.5; i++) 
 		{				
-		//L
-		[flatten] if( Decode(float2(TCL.x+i*pix.x,TCL.y)).y >= (1-TCL.x)-pix.x )
+			//L
+			if( Decode(float2(TCL.x+i*pix.x,TCL.y)).y >= (1-TCL.x)-pix.x )
+				{
+					if(Custom_Sidebars == 0)
 					{
-						if(Custom_Sidebars == 0)
-						{
-							Left = tex2Dlod(BackBufferMIRROR, float4(TCL.x + i*pix.x, TCL.y,0,0));
-						}
-						else if(Custom_Sidebars == 1)
-						{
-							Left = tex2Dlod(BackBufferBORDER, float4(TCL.x + i*pix.x, TCL.y,0,0));
-						}
-						else
-						{
-							Left = tex2Dlod(BackBufferCLAMP, float4(TCL.x + i*pix.x, TCL.y,0,0));
-						}
+						Left = tex2Dlod(BackBufferMIRROR, float4(TCL.x + i*pix.x, TCL.y,0,0));
 					}
-		//R
-		[flatten] if( Decode(float2(TCR.x-i*pix.x,TCR.y)).x >= TCR.x-pix.x )
+					else if(Custom_Sidebars == 1)
 					{
-						if(Custom_Sidebars == 0)
-						{
-							Right = tex2Dlod(BackBufferMIRROR, float4(TCR.x - i*pix.x, TCR.y,0,0));
-						}
-						else if(Custom_Sidebars == 1)
-						{
-							Right = tex2Dlod(BackBufferBORDER, float4(TCR.x - i*pix.x, TCR.y,0,0));
-						}
-						else
-						{
-							Right = tex2Dlod(BackBufferCLAMP, float4(TCR.x - i*pix.x, TCR.y,0,0));
-						}
+						Left = tex2Dlod(BackBufferBORDER, float4(TCL.x + i*pix.x, TCL.y,0,0));
 					}
+					else
+					{
+						Left = tex2Dlod(BackBufferCLAMP, float4(TCL.x + i*pix.x, TCL.y,0,0));
+					}
+				}
+			//R
+			if( Decode(float2(TCR.x-i*pix.x,TCR.y)).x >= TCR.x-pix.x )
+				{
+					if(Custom_Sidebars == 0)
+					{
+						Right = tex2Dlod(BackBufferMIRROR, float4(TCR.x - i*pix.x, TCR.y,0,0));
+					}
+					else if(Custom_Sidebars == 1)
+					{
+						Right = tex2Dlod(BackBufferBORDER, float4(TCR.x - i*pix.x, TCR.y,0,0));
+					}
+					else
+					{
+						Right = tex2Dlod(BackBufferCLAMP, float4(TCR.x - i*pix.x, TCR.y,0,0));
+					}
+				}
 		}
 				
 	float4 cL = Left,cR = Right; //Left Image & Right Image
