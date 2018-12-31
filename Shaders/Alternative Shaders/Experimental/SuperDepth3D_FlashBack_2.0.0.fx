@@ -116,9 +116,9 @@ uniform float2 Disocclusion_Adjust <
 	ui_min = 0.0; ui_max = 1.0;
 	ui_label = " Disocclusion Adjust";
 	ui_tooltip = "Automatic occlusion masking power & Mask Based culling adjustments.\n"
-				 "Default is ( 0.250f, 0.250f)";
+				 "Default is ( 0.375f, 0.250f)";
 	ui_category = "Occlusion Masking";
-> = float2( 0.250, 0.250 );
+> = float2( 0.375, 0.250 );
 
 uniform int Custom_Sidebars <
 	ui_type = "combo";
@@ -421,6 +421,7 @@ texture texDisFB  { Width = BUFFER_WIDTH * Depth_Map_Resolution; Height = BUFFER
 sampler SamplerDisFB
 	{
 		Texture = texDisFB;
+		MipLODBias = 1;
 		MinFilter = LINEAR;
 		MagFilter = LINEAR;
 		MipFilter = LINEAR;
@@ -967,7 +968,7 @@ void  Disocclusion(in float4 position : SV_Position, in float2 texcoord : TEXCOO
 {
 	float DM, Adj, MS =  Divergence * pix.x, DR = 1, DL = 1, N = 9, Div = 1.0f / N, weight[9] = {0.0f,0.0125f,-0.0125f,0.025f,-0.025f,0.0375f,-0.0375f,0.05f,-0.05f};
 	
-	float MA = (Disocclusion_Adjust.y * 8.75f), M = distance(1.0f , tex2Dlod(SamplerDMFB,float4(texcoord,0,0)).w), Mask = saturate(M * MA - 1.0f) > 0.0f;
+	float MA = (Disocclusion_Adjust.y * 8.0f), M = distance(1.0f , tex2Dlod(SamplerDMFB,float4(texcoord,0,0)).w), Mask = saturate(M * MA - 1.0f) > 0.0f;
 	
 	Adj += 5.5f; // Normal
 	float2 dir = float2(0.5f,0.0f);
@@ -996,16 +997,15 @@ void  Disocclusion(in float4 position : SV_Position, in float2 texcoord : TEXCOO
 /////////////////////////////////////////L/R//////////////////////////////////////////////////////////////////////
 void Encode(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 color : SV_Target0) //zBuffer Color Channel Encode
 {
-	float MSL, N = 3, samples[3] = {0.5f,0.75f,1.0f};
+	float N = 3, samples[3] = {0.5f,0.75f,1.0f};
 	
-	float DepthR = 1.0f, DepthL = 1.0f, MS = Divergence * pix.x;
+	float DepthR = 1.0f, DepthL = 1.0f, MS = (-Divergence * pix.x) * 0.1f, MSL = (Divergence * pix.x) * 0.1875f;
 	
 	[loop]
 	for ( int i = 0 ; i < N; i++ ) 
 	{
-		MSL = Divergence * 0.1875f;
-		DepthL = min(DepthL,tex2Dlod(SamplerDisFB, float4(texcoord.x - (samples[i] * MSL) * pix.x, texcoord.y,0,0)).x);
-		DepthR = min(DepthR,tex2Dlod(SamplerDisFB, float4(texcoord.x + (samples[i] * MSL) * pix.x, texcoord.y,0,0)).x);
+		DepthL = min(DepthL,tex2Dlod(SamplerDisFB, float4((texcoord.x - MS) - (samples[i] * MSL), texcoord.y,0,0)).x);
+		DepthR = min(DepthR,tex2Dlod(SamplerDisFB, float4((texcoord.x + MS) + (samples[i] * MSL), texcoord.y,0,0)).x);
 		continue;
 	}	
 

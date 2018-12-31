@@ -186,6 +186,7 @@ Inner Shader Setting:
               Stacking                                     DM 0       7.5000                                       0.025-0.125
     RB        Stay Close                                   DM 1       10.000                                       0.025-0.125
               Tales of Zestiria                            DM 0       7.5000                                       0.025-0.125
+    RB        The Forest                                   DM 1       7.5000                                       0.0125-0.0375      Yes 2        SD / FB                             
              *The Elder Scrolls V: SE                      DM 0       6.2500                *WDM 5                 0.0375-0.0625      Yes 2          SD
     RB        The Evil Within                              DM 0       28.750                                       0.175-0.250   
               The Evil Within 2                            DM 0       ?                                            0.150-0.200     
@@ -640,6 +641,12 @@ Run in Compatilbility Mode Windows 7 and DPI scaling. First Start the Game with 
 Has a depth map that fluctuates for some reason.
 
 Now in Windows 10 Creators update you want to disable Compatilbility Mode and you still need to use Reshade 3.0.2.
+
+{The Forest}
+Depth Buffer Hides some times Need to look for it in the DX11 Tab. Keep a low Divergence ammount around 25.
+Also something to note. Depth Buffer is lost sometimes out in open waters.
+
+ReShade works when playing this game with friends online. So enjoy.
 
 {The Evil With In}
 Game too big for screen DPI scaling. 
