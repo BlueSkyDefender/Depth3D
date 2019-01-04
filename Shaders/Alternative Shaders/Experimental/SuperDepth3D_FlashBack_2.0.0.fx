@@ -116,9 +116,9 @@ uniform float2 Disocclusion_Adjust <
 	ui_min = 0.0; ui_max = 1.0;
 	ui_label = " Disocclusion Adjust";
 	ui_tooltip = "Automatic occlusion masking power & Mask Based culling adjustments.\n"
-				 "Default is ( 0.375f, 0.250f)";
+				 "Default is ( 0.300f, 0.250f)";
 	ui_category = "Occlusion Masking";
-> = float2( 0.375, 0.250 );
+> = float2( 0.300, 0.250 );
 
 uniform int Custom_Sidebars <
 	ui_type = "combo";
@@ -926,11 +926,9 @@ float Conv(float DM,float2 texcoord)
 		if(Auto_Balance_Ex > 0 )
 			ZP = clamp(ALC,0.0f,1.0f);
 						
-		float Convergence = 1 - Z / DM;
-									
-		Z = lerp(Convergence,DM, ZP);
+		float Convergence = 1 - Z / DM;				
 				
-    return Z;
+    return lerp(Convergence,DM, ZP);
 }
 
 float zBuffer(in float2 texcoord : TEXCOORD0)
@@ -999,25 +997,24 @@ void Encode(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, ou
 {
 	float N = 3, samples[3] = {0.5f,0.75f,1.0f};
 	
-	float DepthR = 1.0f, DepthL = 1.0f, MS = (-Divergence * pix.x) * 0.1f, MSL = (Divergence * pix.x) * 0.1875f;
+	float DepthR = 1.0f, DepthL = 1.0f, MSL = Divergence * 0.1875f;
 	
 	[loop]
 	for ( int i = 0 ; i < N; i++ ) 
 	{
-		DepthL = min(DepthL,tex2Dlod(SamplerDisFB, float4((texcoord.x - MS) - (samples[i] * MSL), texcoord.y,0,0)).x);
-		DepthR = min(DepthR,tex2Dlod(SamplerDisFB, float4((texcoord.x + MS) + (samples[i] * MSL), texcoord.y,0,0)).x);
-		continue;
+		DepthL = min(DepthL,tex2Dlod(SamplerDisFB, float4(texcoord.x - (samples[i] * MSL) * pix.x, texcoord.y,0,1)).x);
+		DepthR = min(DepthR,tex2Dlod(SamplerDisFB, float4(texcoord.x + (samples[i] * MSL) * pix.x, texcoord.y,0,1)).x);
 	}	
 
 	// X Right & Y Left
-	float X = Conv(DepthL,texcoord), Y = Conv(DepthR,texcoord), Z = Conv(tex2Dlod(SamplerDisFB,float4(texcoord,0,0)).x,texcoord);
+	float X = DepthL, Y = DepthR, Z = tex2Dlod(SamplerDisFB,float4(texcoord,0,0)).x;
 	color = float4(X,Y,Z,1.0);
 }
 
 float4 Decode(in float2 texcoord : TEXCOORD0)
 {
 	float MS = Divergence * pix.x, ByteN = Byte_Shift; //Byte Shift for Debanding depth buffer in final 3D image.
-	float3 ZB = tex2Dlod(SamplerEncodeFB,float4(texcoord,0,0)).xyz, X = texcoord.x + MS * ZB.xxx, Y = (1 - texcoord.x) + MS * ZB.yyy, Z = ZB.zzz;
+	float3 ZB = Conv(tex2Dlod(SamplerEncodeFB,float4(texcoord,0,0)).xyz,texcoord), X = texcoord.x + MS * ZB.xxx, Y = (1 - texcoord.x) + MS * ZB.yyy, Z = ZB.zzz;
 	float A = dot(X, float3(1.0f, 1.0f / ByteN, 1.0f / (ByteN * ByteN)) ); //byte_to_float
 	float B = dot(Y, float3(1.0f, 1.0f / ByteN, 1.0f / (ByteN * ByteN)) ); //byte_to_float
 	float C = dot(Z, float3(1.0f, 1.0f / ByteN, 1.0f / (ByteN * ByteN)) ); //byte_to_float
@@ -1081,8 +1078,8 @@ float4 PS_calcLR(float2 texcoord)
 		TCR.x = TCR.x - ((Interlace_Anaglyph.x * 0.5f) * pix.x);
 	}
 		
-		float CCL = -MS * Decode(float2(TCL.x + (Divergence * 0.1875) * pix.x, TCL.y)).z;
-		float CCR = -MS * Decode(float2(TCR.x - (Divergence * 0.1875) * pix.x, TCR.y)).z;
+		float CCL = MS * Decode(float2(TCL.x + (Divergence * 0.1875) * pix.x, TCL.y)).z;
+		float CCR = MS * Decode(float2(TCR.x - (Divergence * 0.1875) * pix.x, TCR.y)).z;
 			
 		if(Custom_Sidebars == 0)
 		{
