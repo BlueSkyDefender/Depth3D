@@ -116,9 +116,9 @@ uniform float2 Disocclusion_Adjust <
 	ui_min = 0.0; ui_max = 1.0;
 	ui_label = " Disocclusion Adjust";
 	ui_tooltip = "Automatic occlusion masking power & Mask Based culling adjustments.\n"
-				 "Default is ( 0.300f, 0.250f)";
+				 "Default is ( 0.250f, 0.250f)";
 	ui_category = "Occlusion Masking";
-> = float2( 0.300, 0.250 );
+> = float2( 0.250, 0.250 );
 
 uniform int Custom_Sidebars <
 	ui_type = "combo";
@@ -997,13 +997,14 @@ void Encode(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, ou
 {
 	float N = 3, samples[3] = {0.5f,0.75f,1.0f};
 	
-	float DepthR = 1.0f, DepthL = 1.0f, MSL = Divergence * 0.1875f;
+	float DepthR = 1.0f, DepthL = 1.0f, MS = (-Divergence * pix.x) * 0.1f, MSL = (Divergence * pix.x) * 0.3f;
 	
 	[loop]
 	for ( int i = 0 ; i < N; i++ ) 
 	{
-		DepthL = min(DepthL,tex2Dlod(SamplerDisFB, float4(texcoord.x - (samples[i] * MSL) * pix.x, texcoord.y,0,1)).x);
-		DepthR = min(DepthR,tex2Dlod(SamplerDisFB, float4(texcoord.x + (samples[i] * MSL) * pix.x, texcoord.y,0,1)).x);
+		DepthL = min(DepthL,tex2Dlod(SamplerDisFB, float4((texcoord.x - MS) - (samples[i] * MSL), texcoord.y,0,0)).x);
+		DepthR = min(DepthR,tex2Dlod(SamplerDisFB, float4((texcoord.x + MS) + (samples[i] * MSL), texcoord.y,0,0)).x);
+		continue;
 	}	
 
 	// X Right & Y Left
@@ -1078,8 +1079,8 @@ float4 PS_calcLR(float2 texcoord)
 		TCR.x = TCR.x - ((Interlace_Anaglyph.x * 0.5f) * pix.x);
 	}
 		
-		float CCL = MS * Decode(float2(TCL.x + (Divergence * 0.1875) * pix.x, TCL.y)).z;
-		float CCR = MS * Decode(float2(TCR.x - (Divergence * 0.1875) * pix.x, TCR.y)).z;
+		float CCL = MS * Decode(float2(TCL.x, TCL.y)).z;
+		float CCR = MS * Decode(float2(TCR.x, TCR.y)).z;
 			
 		if(Custom_Sidebars == 0)
 		{
