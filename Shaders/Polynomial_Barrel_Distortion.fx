@@ -3,7 +3,7 @@
  //-----------------------------------------////
 
  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
- //* Barrel Distortion for HMD type Displays For SuperDepth3D v1.4																													*//
+ //* Barrel Distortion for HMD type Displays For SuperDepth3D v2.0																													*//
  //* For Reshade 3.0																																								*//
  //* --------------------------																																						*//
  //* This work is licensed under a Creative Commons Attribution 3.0 Unported License.																								*//
@@ -44,6 +44,13 @@ uniform int Stereoscopic_Mode_Convert <
 	ui_tooltip = "3D Mode Conversion for Head Mounted Displays.";
 	ui_category = "Stereoscopic Options";
 > = 0;
+
+uniform bool Checkerboard_Reconstruction_Compatibility <
+	ui_label = "CBR Compatibility";
+	ui_tooltip = "Use this to toggle Checkerboard Reconstruction Compatibility.\n"
+				 "This can help with CBR issues.";
+	ui_category = "Stereoscopic Options";
+> = false;
 
 uniform float Lens_Center <
 	ui_type = "drag";
@@ -356,15 +363,18 @@ float4 L(in float2 texcoord : TEXCOORD0)
 
 float4 Bi_L(in float2 texcoord : TEXCOORD0)
 {
-	   float4 tl = L(texcoord);
-	   float4 tr = L(texcoord +float2(pix.x, 0.0));
-	   float4 bl = L(texcoord +float2(0.0, pix.y));
-	   float4 br = L(texcoord +float2(pix.x, pix.y));
-	   float h = 0.5f;
-	   float4 tA = lerp( tl, tr, h );
-	   float4 tB = lerp( bl, br, h );
-	   float4 done = lerp( tA, tB, h ) * 2.0;//2.0 Gamma correction.
-	   return done;
+	float4 tl = L(texcoord);
+	float4 tr = L(texcoord +float2(pix.x, 0.0));
+	float4 bl = L(texcoord +float2(0.0, pix.y));
+	float4 br = L(texcoord +float2(pix.x, pix.y));
+	float2 f = 0.5f;
+	
+	if(Checkerboard_Reconstruction_Compatibility)
+		f = frac( texcoord * TextureSize);
+   
+	float4 tA = lerp( tl, tr, f.x );
+	float4 tB = lerp( bl, br, f.x );
+	return lerp( tA, tB, f.y ) * 2.0;//2.0 Gamma correction.
 }
 
 float4 R(in float2 texcoord : TEXCOORD0)
@@ -379,11 +389,14 @@ float4 Bi_R(in float2 texcoord : TEXCOORD0)
 	float4 tr = R(texcoord +float2(pix.x, 0.0));
 	float4 bl = R(texcoord +float2(0.0, pix.y));
 	float4 br = R(texcoord +float2(pix.x, pix.y));
-	float h = 0.5f;
-	float4 tA = lerp( tl, tr, h );
-	float4 tB = lerp( bl, br, h );
-	float4 done = lerp( tA, tB, h ) * 2.0;//2.0 Gamma correction.
-	return done;
+	float2 f = 0.5f;
+	
+	if(Checkerboard_Reconstruction_Compatibility)
+		f = frac( texcoord * TextureSize);
+	
+	float4 tA = lerp( tl, tr, f.x );
+	float4 tB = lerp( bl, br, f.x );
+	return lerp( tA, tB, f.y ) * 2.0;//2.0 Gamma correction.
 }
 
 void LR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 color : SV_Target0 , out float4 colorT: SV_Target1)
