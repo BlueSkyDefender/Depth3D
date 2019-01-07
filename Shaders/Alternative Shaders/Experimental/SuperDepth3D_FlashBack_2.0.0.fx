@@ -1014,11 +1014,11 @@ void Encode(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, ou
 
 float4 Decode(in float2 texcoord : TEXCOORD0)
 {
-	float MS = Divergence * pix.x, ByteN = Byte_Shift; //Byte Shift for Debanding depth buffer in final 3D image.
-	float3 ZB = Conv(tex2Dlod(SamplerEncodeFB,float4(texcoord,0,0)).xyz,texcoord), X = texcoord.x + MS * ZB.xxx, Y = (1 - texcoord.x) + MS * ZB.yyy, Z = ZB.zzz;
-	float A = dot(X, float3(1.0f, 1.0f / ByteN, 1.0f / (ByteN * ByteN)) ); //byte_to_float
-	float B = dot(Y, float3(1.0f, 1.0f / ByteN, 1.0f / (ByteN * ByteN)) ); //byte_to_float
-	float C = dot(Z, float3(1.0f, 1.0f / ByteN, 1.0f / (ByteN * ByteN)) ); //byte_to_float
+	//Byte Shift for Debanding depth buffer in final 3D image & Disocclusion Decoding.
+	float ByteN = Byte_Shift, MS = Divergence * pix.x, X = texcoord.x + MS * Conv(tex2Dlod(SamplerEncodeFB,float4(texcoord,0,0)).x,texcoord), Y = (1 - texcoord.x) + MS * Conv(tex2Dlod(SamplerEncodeFB,float4(texcoord,0,0)).y,texcoord), Z = Conv(tex2Dlod(SamplerEncodeFB,float4(texcoord,0,0)).z,texcoord);
+	float A = dot(X.xxx, float3(1.0f, 1.0f / ByteN, 1.0f / (ByteN * ByteN)) ); //byte_to_float Left
+	float B = dot(Y.xxx, float3(1.0f, 1.0f / ByteN, 1.0f / (ByteN * ByteN)) ); //byte_to_float Right
+	float C = dot(Z.xxx, float3(1.0f, 1.0f / ByteN, 1.0f / (ByteN * ByteN)) ); //byte_to_float ZPD L & R
 	return float4(A,B,C,1.0);
 }
 
@@ -1102,7 +1102,7 @@ float4 PS_calcLR(float2 texcoord)
 		for (int i = 0; i < Divergence + 7.5; i++) 
 		{				
 			//L
-			if( Decode(float2(TCL.x+i*pix.x,TCL.y)).y >= (1-TCL.x)-pix.x )
+			if( Decode(float2(TCL.x+i*pix.x,TCL.y)).y >= (1-TCL.x)-pix.x * 0.5f && Decode(float2(TCL.x+i*pix.x,TCL.y)).y <= (1-TCL.x)+pix.x * 7.5)
 				{
 					if(Custom_Sidebars == 0)
 					{
@@ -1118,7 +1118,7 @@ float4 PS_calcLR(float2 texcoord)
 					}
 				}
 			//R
-			if( Decode(float2(TCR.x-i*pix.x,TCR.y)).x >= TCR.x-pix.x )
+			if( Decode(float2(TCR.x-i*pix.x,TCR.y)).x >= TCR.x-pix.x * 0.5f && Decode(float2(TCR.x-i*pix.x,TCR.y)).x <= TCR.x+pix.x * 7.5)
 				{
 					if(Custom_Sidebars == 0)
 					{
