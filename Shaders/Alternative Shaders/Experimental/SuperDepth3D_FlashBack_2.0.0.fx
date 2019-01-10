@@ -253,6 +253,7 @@ uniform float2 HUD_Adjust <
 	ui_tooltip = "Adjust HUD for your games.\n"
 				 "X, CutOff Point used to set a seperation point bettwen world scale and the HUD also used to turn HUD MODE On or Off.\n"
 				 "Y, Pushes or Pulls the HUD in or out of the screen if HUD MODE is on.\n"
+				 "This is only for UI elements that show up in the Depth Buffer.\n"
 	             "Default is float2(X 0.0, Y 0.5)";
 	ui_category = "Heads-Up Display";
 > = float2(0.0,0.5);

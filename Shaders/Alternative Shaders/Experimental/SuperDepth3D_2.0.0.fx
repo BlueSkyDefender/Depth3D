@@ -142,7 +142,7 @@ uniform float2 Disocclusion_Adjust <
 
 uniform int View_Mode <
 	ui_type = "combo";
-	ui_items = "View Mode Normal\0View Mode Alpha\0View Mode Beta\0View Mode Gamma\0";
+	ui_items = "View Mode Normal\0View Mode Alpha\0View Mode Beta\0";
 	ui_label = " View Mode";
 	ui_tooltip = "Change the way the shader warps the output to the screen.\n"
 				 "Default is Normal";
@@ -283,6 +283,7 @@ uniform float2 HUD_Adjust <
 	ui_tooltip = "Adjust HUD for your games.\n"
 				 "X, CutOff Point used to set a seperation point bettwen world scale and the HUD also used to turn HUD MODE On or Off.\n"
 				 "Y, Pushes or Pulls the HUD in or out of the screen if HUD MODE is on.\n"
+				 "This is only for UI elements that show up in the Depth Buffer.\n"
 	             "Default is float2(X 0.0, Y 0.5)";
 	ui_category = "Heads-Up Display";
 > = float2(0.0,0.5);
@@ -1046,8 +1047,6 @@ void  Disocclusion(in float4 position : SV_Position, in float2 texcoord : TEXCOO
 		
 		if ( Enable_Mask && View_Mode == 0 )
 			DM = lerp(lerp(zBuffer(texcoord), DM, abs(Mask)), DM, 0.625f );
-		if ( Enable_Mask && View_Mode == 3 )
-			DM = lerp(lerp(zBuffer(texcoord), DM, abs(Mask)), DM, 0.375f );
 		if ( Enable_Mask && (View_Mode == 1 || View_Mode == 2) )
 			DM = lerp(zBuffer(texcoord), DM, abs(Mask));	
 	}
@@ -1189,14 +1188,6 @@ float4 PS_calcLR(float2 texcoord)
 			
 			DepthL = lerp(DepthL, DL, 0.1875f);
 			DepthR = lerp(DepthR, DR, 0.1875f);		
-			continue;
-		}
-		else if (View_Mode == 3)
-		{			
-			LDepth += Encode(float2(TCL.x + S * (MSM * 1.2f), TCL.y))*Adjust_A;
-			RDepth += Encode(float2(TCR.x - S * (MSM * 1.2f), TCR.y))*Adjust_A;
-			DepthL = min(1,LDepth);
-			DepthR = min(1,RDepth);	
 			continue;
 		}
 	}
