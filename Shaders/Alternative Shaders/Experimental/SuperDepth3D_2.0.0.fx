@@ -142,7 +142,7 @@ uniform float2 Disocclusion_Adjust <
 
 uniform int View_Mode <
 	ui_type = "combo";
-	ui_items = "View Mode Normal\0View Mode Alpha\0View Mode Beta\0";
+	ui_items = "View Mode Normal\0View Mode Alpha\0View Mode Beta\0View Mode Gamma\0";
 	ui_label = " View Mode";
 	ui_tooltip = "Change the way the shader warps the output to the screen.\n"
 				 "Default is Normal";
@@ -792,14 +792,12 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 		else
 		{
 			DM.x = lerp(DM.x,WD,CutOFFCal);
-			//DM.y = lerp(DM.x,0,CutOFFCal);
-			//DM.z = lerp(0,WD,CutOFFCal);
 		}
 		
 		R = DM.x; //Mix Depth
-		//G = DM.y; //Depth -Weapon Hand
-		//B = DM.z; //Weapon Hand - Depth
-		A = DM.w; //AverageLuminance
+		G = DM.y; //Weapon Average Luminance
+		B = DM.z; //Average Luminance
+		A = DM.w; //Normal Depth
 				
 	Color = saturate(float4(R,G,B,A));
 }
@@ -998,7 +996,7 @@ void  Disocclusion(in float4 position : SV_Position, in float2 texcoord : TEXCOO
 		}
 	}
 	
-	float MA = (Disocclusion_Adjust.y * 25.0f), M = distance((DL+DR) * 0.5f, tex2Dlod(SamplerDM,float4(texcoord,0,0)).w), Mask = saturate(M * MA - 1.0f) > 0.0f;
+	float MA = (Disocclusion_Adjust.y * 25.0f), M = distance((DL+DR) * 0.5f, tex2Dlod(SamplerDM,float4(texcoord,0,0)).z), Mask = saturate(M * MA - 1.0f) > 0.0f;
 	
 	MS *= Disocclusion_Adjust.x * 2.0f;
 		
@@ -1045,11 +1043,13 @@ void  Disocclusion(in float4 position : SV_Position, in float2 texcoord : TEXCOO
 		{
 			DM = DMA;
 		}	
-				
-		if ( Enable_Mask && View_Mode == 0)
+		
+		if ( Enable_Mask && View_Mode == 0 )
 			DM = lerp(lerp(zBuffer(texcoord), DM, abs(Mask)), DM, 0.625f );
-		else if ( Enable_Mask )
-			DM = lerp(zBuffer(texcoord), DM, abs(Mask));
+		if ( Enable_Mask && View_Mode == 3 )
+			DM = lerp(lerp(zBuffer(texcoord), DM, abs(Mask)), DM, 0.375f );
+		if ( Enable_Mask && (View_Mode == 1 || View_Mode == 2) )
+			DM = lerp(zBuffer(texcoord), DM, abs(Mask));	
 	}
 	else
 	{
@@ -1069,7 +1069,7 @@ float4 PS_calcLR(float2 texcoord)
 {
 	float4 color, Right, Left, R, L;
 	float2 TCL, TCR, TexCoords = texcoord;
-	float DepthR = 1, DepthL = 1, LDepth, RDepth, DL, DR, N = 9, samplesA[9] = {0.5,0.5625,0.625,0.6875,0.75,0.8125,0.875,0.9375,1.0};
+	float DepthR = 1, DepthL = 1, LDepth, RDepth, DL, DR, N = 9, samplesA[9] = {0.5,0.5625,0.625,0.6875,0.75,0.8125,0.875,0.9375,1.0}, Adjust_A = 1 / N;;
 							
 	if(Eye_Swap)
 	{
@@ -1189,6 +1189,14 @@ float4 PS_calcLR(float2 texcoord)
 			
 			DepthL = lerp(DepthL, DL, 0.1875f);
 			DepthR = lerp(DepthR, DR, 0.1875f);		
+			continue;
+		}
+		else if (View_Mode == 3)
+		{			
+			LDepth += Encode(float2(TCL.x + S * (MSM * 1.2f), TCL.y))*Adjust_A;
+			RDepth += Encode(float2(TCR.x - S * (MSM * 1.2f), TCR.y))*Adjust_A;
+			DepthL = min(1,LDepth);
+			DepthR = min(1,RDepth);	
 			continue;
 		}
 	}
@@ -1425,9 +1433,9 @@ float4 PS_calcLR(float2 texcoord)
 	}
 		
 	#if WZF		
-	float WZF_A = WZF_Adjust, Average_Lum = (tex2D(SamplerDM,float2(TexCoords.x,TexCoords.y)).w - WZF_A) / ( 1 - WZF_A);
+	float WZF_A = WZF_Adjust, Average_Lum = (tex2D(SamplerDM,float2(TexCoords.x,TexCoords.y)).y - WZF_A) / ( 1 - WZF_A);
 	#else
-	float Average_Lum = tex2D(SamplerDM,float2(TexCoords.x,TexCoords.y)).w;
+	float Average_Lum = tex2D(SamplerDM,float2(TexCoords.x,TexCoords.y)).y;
 	#endif
 	return float4(color.rgb,Average_Lum);
 }
@@ -1445,8 +1453,8 @@ float4 Average_Luminance(float4 position : SV_Position, float2 texcoord : TEXCOO
 	else if(Auto_Balance_Ex == 5)
 		ABE = float4(0.375, 0.250, 0.0, 1.0);//Center Long
 			
-	float Average_Lum_ZPD = tex2D(SamplerDM,float2(ABE.x + texcoord.x * ABE.y, ABE.z + texcoord.y * ABE.w )).w;
-	float Average_Lum_Full = tex2D(SamplerDM,float2(texcoord.x,texcoord.y )).w;
+	float Average_Lum_ZPD = tex2D(SamplerDM,float2(ABE.x + texcoord.x * ABE.y, ABE.z + texcoord.y * ABE.w )).z;
+	float Average_Lum_Full = tex2D(SamplerDM,float2(texcoord.x,texcoord.y )).z;
 	return float4(Average_Lum_ZPD,Average_Lum_Full,0,1);
 }
 

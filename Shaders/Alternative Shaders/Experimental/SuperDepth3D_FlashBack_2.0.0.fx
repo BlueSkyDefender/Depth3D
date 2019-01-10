@@ -774,14 +774,12 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 		else
 		{
 			DM.x = lerp(DM.x,WD,CutOFFCal);
-			//DM.y = lerp(DM.x,0,CutOFFCal);
-			//DM.z = lerp(0,WD,CutOFFCal);
 		}
 		
 		R = DM.x; //Mix Depth
-		//G = DM.y; //Depth -Weapon Hand
-		//B = DM.z; //Weapon Hand - Depth
-		A = DM.w; //AverageLuminance
+		G = DM.y; //Weapon Average Luminance
+		B = DM.z; //Average Luminance
+		A = DM.w; //Normal Depth
 				
 	Color = saturate(float4(R,G,B,A));
 }
@@ -1343,9 +1341,9 @@ float4 PS_calcLR(float2 texcoord)
 	}
 		
 	#if WZF		
-	float WZF_A = WZF_Adjust, Average_Lum = (tex2D(SamplerDMFB,float2(TexCoords.x,TexCoords.y)).w - WZF_A) / ( 1 - WZF_A);
+	float WZF_A = WZF_Adjust, Average_Lum = (tex2D(SamplerDMFB,float2(TexCoords.x,TexCoords.y)).y - WZF_A) / ( 1 - WZF_A);
 	#else
-	float Average_Lum = tex2D(SamplerDMFB,float2(TexCoords.x,TexCoords.y)).w;
+	float Average_Lum = tex2D(SamplerDMFB,float2(TexCoords.x,TexCoords.y)).y;
 	#endif
 	return float4(color.rgb,Average_Lum);
 }
@@ -1363,8 +1361,8 @@ float4 Average_Luminance(float4 position : SV_Position, float2 texcoord : TEXCOO
 	else if(Auto_Balance_Ex == 5)
 		ABE = float4(0.375, 0.250, 0.0, 1.0);//Center Long
 			
-	float Average_Lum_ZPD = tex2D(SamplerDMFB,float2(ABE.x + texcoord.x * ABE.y, ABE.z + texcoord.y * ABE.w )).w;
-	float Average_Lum_Full = tex2D(SamplerDMFB,float2(texcoord.x,texcoord.y )).w;
+	float Average_Lum_ZPD = tex2D(SamplerDMFB,float2(ABE.x + texcoord.x * ABE.y, ABE.z + texcoord.y * ABE.w )).z;
+	float Average_Lum_Full = tex2D(SamplerDMFB,float2(texcoord.x,texcoord.y )).z;
 	return float4(Average_Lum_ZPD,Average_Lum_Full,0,1);
 }
 
