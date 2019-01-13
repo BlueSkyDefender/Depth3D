@@ -27,12 +27,12 @@
 // Determines the Max Depth amount, in ReShades GUI.
 #define Depth_Max 50
 
-// Alternet Depth Buffer Adjust Toggle Key. The key "o" is Key Code 79. Ex. Key 79 is the code for o.
+// Alternet Depth Buffer Adjust Toggle Key. The Key Code for "o" is Number 79.
 #define DB_TOGGLE 0 // You can use http://keycode.info/ to figure out what key is what.
 #define Alt_Depth_Map_Adjust 0 // You can set this from 1.0 to 250.
 
 // Change the Cancel Depth Key. Determines the Cancel Depth Toggle Key useing keycode info
-// key "." is Key Code 110. Ex. Key 110 is the code for Decimal Point.
+// The Key Code for Decimal Point is Number 110. Ex. for "." Cancel_Depth_Key 110
 #define Cancel_Depth_Key 0 // You can use http://keycode.info/ to figure out what key is what.
 
 // 3D AO Toggle enable this if you want better 3D seperation between objects. 
@@ -50,27 +50,27 @@
 // Image Position Adjust is used to move the Z-Buffer around.
 #define Image_Position_Adjust float2(0.0,0.0)
 
-//Define Display aspect ratio for screen cursor. A 16:9 aspect ratio will equal (1.77:1)
+// Define Display aspect ratio for screen cursor. A 16:9 aspect ratio will equal (1.77:1)
 #define DAR float2(1.76, 1.0)
 
 //Byte Shift for Debanding depth buffer in final 3D image. Incraments of 128.
 #define Byte_Shift 512 //Ranges from 256 to 1024. Default is 512 
 
-//Screen Cursor to Screen Crosshair Lock
+// Screen Cursor to Screen Crosshair Lock
 #define SCSC 0
 
 // Turn UI Mask Off or On. This is used to set Two UI Masks for any game. Keep this in mind when you enable UI_MASK.
-// You Will have to create Two Textures named Mask_A.png and Mask_B.png with transparency along side this shader.
-// They will also need to be the same res as what you have set for the game and Black where the UI is to mask it.
+// You Will have to create Three PNG Textures named Mask_A.png and Mask_B.png with transparency for this option.
+// They will also need to be the same resolution as what you have set for the game and the color black where the UI is.
 #define UI_MASK 0 // Set this to 1 if you did the steps above.
 
-// To Cycle though the textures set a key. Key "n" is Key Code 78. Ex. Number 78 is the code for N.
+// To cycle through the textures set a Key. The Key Code for "n" is Key Code Number 78.
 #define Mask_Cycle_Key 0 // You can use http://keycode.info/ to figure out what key is what.
 // Texture EX. Before |::::::::::| After |**********|
 //                    |:::       |       |***       |
 //                    |:::_______|       |***_______|
-// So :::: are UI Elements in the before image. The ** is what the Mask needs to cover up. The Mask needs to look like the after image.
-//The rest need to be trasparent and the UI Mask needs to be black. This all has to be done in PNG formated image.
+// So :::: are UI Elements in game. The *** is what the Mask needs to cover up.
+// The game part needs to be trasparent and the UI part needs to be black.
 
 //USER EDITABLE PREPROCESSOR FUNCTIONS END//
 
@@ -918,25 +918,25 @@ float4 HUD(float4 HUD, float2 texcoord )
 		
 	if(Depth_Adjust)
 		DMA = Alt_Depth_Map_Adjust;	
-
-#if UI_MASK
-	float Mask_Tex;
-
-	if(Mask_Cycle)
-		Mask_Tex = tex2D(SamplerMaskB,texcoord.xy).a;
-	else
-		Mask_Tex = tex2D(SamplerMaskA,texcoord.xy).a;
-
-	float MAC = step(1.0f-Mask_Tex,0.5f); //Mask Adjustment Calculation
-	//This code is for hud segregation.			
-		HUD = MAC > 0 ? tex2D(BackBuffer,texcoord) : HUD;
-#else
+		
 	float CutOFFCal = ((HUD_Adjust.x * 0.5)/DMA) * 0.5, COC = step(Depth(texcoord).x,CutOFFCal); //HUD Cutoff Calculation
 	
 	//This code is for hud segregation.			
 	if (HUD_Adjust.x > 0)
-		HUD = COC > 0 ? tex2D(BackBuffer,texcoord) : HUD;
-#endif					
+		HUD = COC > 0 ? tex2D(BackBuffer,texcoord) : HUD;	
+		
+#if UI_MASK
+	float Mask_Tex, MC = Mask_Cycle;
+	
+    if (MC == true) 
+        Mask_Tex = tex2D(SamplerMaskB,texcoord.xy).a;
+    else
+        Mask_Tex = tex2D(SamplerMaskA,texcoord.xy).a;
+
+	float MAC = step(1.0f-Mask_Tex,0.5f); //Mask Adjustment Calculation
+	//This code is for hud segregation.			
+		HUD = MAC > 0 ? tex2D(BackBuffer,texcoord) : HUD;
+#endif		
 	return HUD;	
 }
 
