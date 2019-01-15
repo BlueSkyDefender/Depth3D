@@ -28,6 +28,9 @@
 // Determines the Max Depth amount, in ReShades GUI.
 #define Depth_Max 50
 
+// RE Fix is used to fix the issue with Resident Evil's 2 Remake 1-Shot cutscenes.
+#define RE_Fix 0 //Default 0 is Off. One is On. 
+
 // Alternet Depth Buffer Adjust Toggle Key. The Key Code for "o" is Number 79.
 #define DB_TOGGLE 0 // You can use http://keycode.info/ to figure out what key is what.
 #define Alt_Depth_Map_Adjust 0 // You can set this from 1.0 to 250.
@@ -963,11 +966,19 @@ float AutoDepthRange( float d, float2 texcoord )
 	float LumAdjust = smoothstep(-0.0175f,Auto_Depth_Range,Lum(texcoord).y);
     return min(1,( d - 0 ) / ( LumAdjust - 0));
 }
-
+#if RE_Fix
+float AutoZPDRange(float ZPD, float2 texcoord )
+{
+	float LumAdjust = smoothstep(-0.0175f,0.0,Lum(texcoord).y); //Adjusted to only effect really intense differences.
+    return smoothstep(0.0,1,LumAdjust * ZPD);
+}
+#endif
 float Conv(float D,float2 texcoord)
 {
 	float Z = ZPD, ZP = 0.5f, Divergence_Locked = Divergence*0.001, MS = Divergence * pix.x, ALC = abs(Lum(texcoord).x);
-		
+	#if RE_Fix	
+		Z = AutoZPDRange(Z,texcoord);
+	#endif	
 		if (ZPD == 0)
 			ZP = 1.0;
 		
