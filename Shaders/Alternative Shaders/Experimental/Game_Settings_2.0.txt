@@ -161,8 +161,9 @@ Inner Shader Setting:
     RB       *Rage64                                       DM 0       20.000                *WDM 14                0.0125-0.0375      Yes 2          SD  
     RB        Redout                                       DM ?         ?                                          ?      
               Remembrance                                  DM 1       7.5000                               Yes     0.050-0.100
+    RB       *RESIDENT EVIL 2  BIOHAZARD RE2 Remake        DM 1       62.500    0.00015                            0.0250-0.1625      Yes 5        SD / FB  0.0800
     RB        Resident Evil 7                              DM 1       22.500                                       0.125-0.275                                        
-    RB       *Return To Castle Wolfenstine                 DM 0       8.75000               *WDM 16                0.0250-0.0500      Yes 2        SD / FB                       
+    RB       *Return To Castle Wolfenstine                 DM 0       8.7500                *WDM 16                0.0250-0.0500      Yes 2        SD / FB                       
     RB        Requiem: Avenging Angel                      DM 0       50.000    0.80000                            0.0300-0.0600                         
               Rez Infinite                                 DM 1       20.000                                       0.075-0.150
               Rise of the Tomb Raider                      DM 0       25.000    0.02000                            0.0500-0.1250                         
@@ -566,6 +567,10 @@ Rage 64 was tested only.
 
 {Redout} - Thank you zig11727
 Path to install \Steam\SteamApps\common\Redout\redout\Binaries
+
+{RESIDENT EVIL 2  BIOHAZARD RE2 Remake}
+Enable RE_Fix in shader "USER EDITABLE PREPROCESSOR FUNCTIONS."
+To do this open up the shader and set RE_Fix to 1.
 
 {Resident Evil 7}
 Make sure Render Mode is Normal.
