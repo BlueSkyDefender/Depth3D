@@ -24,8 +24,8 @@
 // Determines the resolution of the Depth Map. Too low of a resolution will remove too much information. This will effect performance.
 #define Depth_Map_Resolution 1.0 //1.0 is 100% | 0.50 is 50%
 
-// Determines the Max Depth amount, in ReShades GUI.
-#define Depth_Max 50
+// RE Fix is used to fix the issue with Resident Evil's 2 Remake 1-Shot cutscenes.
+#define RE_Fix 0 //Default 0 is Off. One is On.
 
 // Alternet Depth Buffer Adjust Toggle Key. The Key Code for "o" is Number 79.
 #define DB_TOGGLE 0 // You can use http://keycode.info/ to figure out what key is what.
@@ -83,7 +83,7 @@
 //Divergence & Convergence//
 uniform float Divergence <
 	ui_type = "drag";
-	ui_min = 1; ui_max = Depth_Max; ui_step = 0.5;
+	ui_min = 1; ui_max = 50; ui_step = 0.5;
 	ui_label = "·Divergence Slider·";
 	ui_tooltip = "Divergence increases differences between the left and right retinal images and allows you to experience depth.\n" 
 				 "The process of deriving binocular depth information is called stereopsis.\n"
@@ -945,14 +945,19 @@ float AutoDepthRange( float d, float2 texcoord )
 	float LumAdjust = smoothstep(-0.0175f,Auto_Depth_Range,Lum(texcoord).y);
     return min(1,( d - 0 ) / ( LumAdjust - 0));
 }
-
+#if RE_Fix
+float AutoZPDRange(float ZPD, float2 texcoord )
+{
+	float LumAdjust = smoothstep(-0.0175f,0.125,Lum(texcoord).y); //Adjusted to only effect really intense differences.
+    return saturate(LumAdjust * ZPD);
+}
+#endif
 float Conv(float DM,float2 texcoord)
 {
 	float Z = ZPD, ZP = 0.54875f, ALC = abs(Lum(texcoord).x);
-				
-		if (ZPD == 0)
-			ZP = 1.0f;
-		
+	#if RE_Fix	
+		Z = AutoZPDRange(Z,texcoord);
+	#endif					
 		if (Auto_Depth_Range > 0)
 			DM = AutoDepthRange(DM,texcoord);
 		
@@ -960,7 +965,10 @@ float Conv(float DM,float2 texcoord)
 			ZP = clamp(ALC,0.0f,1.0f);
 						
 		float Convergence = 1 - Z / DM;				
-				
+		
+		if (ZPD == 0)
+			ZP = 1.0f;
+		
     return lerp(Convergence,DM, ZP);
 }
 
