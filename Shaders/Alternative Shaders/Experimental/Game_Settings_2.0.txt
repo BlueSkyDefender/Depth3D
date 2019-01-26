@@ -56,8 +56,8 @@ Inner Shader Setting:
               ABZU                                         DM 1       50.000                                       0.050-0.250                    
               Agony                                        DM 1       50.000                                       0.025-0.250
               Alien Isolation                              DM 0       25.000                                       0.030-0.075
-              Amnesia: Machine for Pigs                    DM 0       50.000    0.00025                            0.0250-0.0500                                
-              Amnesia: The Dark Descent                    DM 0       50.000    0.00025                            0.0250-0.0500                         
+    RB       *Amnesia: Machine for Pigs                    DM 0       60.000    0.00025                            0.0125-0.0500      Yes 4        SD / FB                                 
+    RB       *Amnesia: The Dark Descent                    DM 0       60.000    0.00025                            0.0125-0.0500      Yes 4        SD / FB                          
               Among The Sleep                              DM 0       37.500                               Yes     0.025-0.075
               Assassin Creed Unity                         DM 1       20.000                                       0.025-0.125
               Bayonetta                                    DM 0       15.000                                       0.025-0.125 
@@ -129,6 +129,7 @@ Inner Shader Setting:
               Life is Strange: Before the Storm            DM 1       150.00                               Yes     0.075-0.375
               Lifeless Planet                              DM 0       17.500                               Yes     0.025-0.075
               Lords of The Fallen                          DM 0       14.750                                       0.050-0.250
+              Lost in Vivo                                 DM 0       8.7500                               Yes     0.0375-0.0625      Yes 4        SD / FB
     RB        LuciusII                                     DM 0       20.000                               Yes     0.025-0.250 
     RB        Mafia III                                    DM 1       6.2500                                       0.025-0.075        
     RB        Mass Effect Andromeda                        DM 1       15.000                                       0.075-0.175                                        
@@ -245,6 +246,9 @@ Read Below Section
 {.Hack//G.U.} - Used ReShade 3.0.8
 Once you install Reshade. Install this fix that allows for depth buffer access. This fix uses 3DMigoto to dissable a shader that was blocking acess to the depth buffer.
 http://www.mediafire.com/file/d5ep3qlsnbbbmvl/dotHack%20GU%20fix%20for%20Depth3D.zip
+
+{Amnesia: Games} - Used Reshade 4.1.0
+Issue with ReShade 4.0.0+ If you install ReShade as opengl32.dll you have to rename it to dxgi.dll in the game folder. Windows 10 Issue it seems
 
 {Battlefield One} - Used ReShade 4.0.2
 Added alternet settings mode to my shader. This can be done with the newly added Alternet Depth Buffer Adjust Toggle PREPROCESSOR FUNCTIONS. This is in Shader.

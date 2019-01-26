@@ -54,9 +54,6 @@
 // Define Display aspect ratio for screen cursor. A 16:9 aspect ratio will equal (1.77:1)
 #define DAR float2(1.76, 1.0)
 
-// Screen Cursor to Screen Crosshair Lock
-#define SCSC 0
-
 // Turn UI Mask Off or On. This is used to set Two UI Masks for any game. Keep this in mind when you enable UI_MASK.
 // You Will have to create Three PNG Textures named Mask_A.png and Mask_B.png with transparency for this option.
 // They will also need to be the same resolution as what you have set for the game and the color black where the UI is.
@@ -405,6 +402,12 @@ uniform float3 Cursor_Color <
 	ui_category = "Cursor Adjustments";
 > = float3(1.0,1.0,1.0);
 
+uniform bool SCSC <
+	ui_label = " Cursor Lock";
+	ui_tooltip = "Screen Cursor to Screen Crosshair Lock.";
+	ui_category = "Cursor Adjustments";
+> = false;
+
 uniform bool Cancel_Depth < source = "key"; keycode = Cancel_Depth_Key; toggle = true; >;
 uniform bool Mask_Cycle < source = "key"; keycode = Mask_Cycle_Key; toggle = true; >;
 uniform bool Depth_Adjust < source = "key"; keycode = DB_TOGGLE; toggle = true; >;
@@ -576,6 +579,17 @@ float LumWeapon(in float2 texcoord : TEXCOORD0)
 	}
 	
 /////////////////////////////////////////////////////////////////////////////////Depth Map Information/////////////////////////////////////////////////////////////////////////////////
+
+float DMA()//Depth Map Adjustment
+{
+	float DMA = Depth_Map_Adjust;
+		
+	if(Depth_Adjust)
+		DMA = Alt_Depth_Map_Adjust;
+
+	return DMA;
+}
+
 float Depth(in float2 texcoord : TEXCOORD0)
 {	
 	float2 texXY = texcoord + Image_Position_Adjust * pix;		
@@ -585,14 +599,11 @@ float Depth(in float2 texcoord : TEXCOORD0)
 	if (Depth_Map_Flip)
 		texcoord.y =  1 - texcoord.y;
 		
-	float zBuffer = tex2D(DepthBuffer, texcoord).x, DMA = Depth_Map_Adjust; //Depth Buffer
-	
-	if(Depth_Adjust)
-	DMA = Alt_Depth_Map_Adjust;
+	float zBuffer = tex2D(DepthBuffer, texcoord).x; //Depth Buffer
 	
 	//Conversions to linear space.....
 	//Near & Far Adjustment
-	float Far = 1.0, Near = 0.125/DMA; //Division Depth Map Adjust - Near
+	float Far = 1.0, Near = 0.125/DMA(); //Division Depth Map Adjust - Near
 	
 	float2 Offsets = float2(1 + Offset,1 - Offset), Z = float2( zBuffer, 1-zBuffer );
 	
@@ -799,12 +810,7 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 {
 		float4 DM = Depth(texcoord).xxxx;
 		
-		float DMA = Depth_Map_Adjust;
-		
-		if(Depth_Adjust)
-		DMA = Alt_Depth_Map_Adjust;
-		
-		float R, G, B, A, WD = WeaponDepth(texcoord).x, CoP = WeaponDepth(texcoord).y, CutOFFCal = (CoP/DMA)/2; //Weapon Cutoff Calculation
+		float R, G, B, A, WD = WeaponDepth(texcoord).x, CoP = WeaponDepth(texcoord).y, CutOFFCal = (CoP/DMA())/2; //Weapon Cutoff Calculation
 		
 		CutOFFCal = step(DM.x,CutOFFCal);
 					
@@ -931,43 +937,36 @@ void AO_in(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out
 #endif
 
 float4 HUD(float4 HUD, float2 texcoord ) 
-{	
-	float DMA = Depth_Map_Adjust;
-		
-	if(Depth_Adjust)
-		DMA = Alt_Depth_Map_Adjust;	
-		
-	float CutOFFCal = ((HUD_Adjust.x * 0.5)/DMA) * 0.5, COC = step(Depth(texcoord).x,CutOFFCal); //HUD Cutoff Calculation
+{		
+	float Mask_Tex, CutOFFCal = ((HUD_Adjust.x * 0.5)/DMA()) * 0.5, COC = step(Depth(texcoord).x,CutOFFCal); //HUD Cutoff Calculation
 	
 	//This code is for hud segregation.			
 	if (HUD_Adjust.x > 0)
 		HUD = COC > 0 ? tex2D(BackBuffer,texcoord) : HUD;	
 		
-#if UI_MASK
-	float Mask_Tex, MC = Mask_Cycle;
-	
-    if (MC == true) 
+#if UI_MASK	
+    if (Mask_Cycle == true) 
         Mask_Tex = tex2D(SamplerMaskB,texcoord.xy).a;
     else
         Mask_Tex = tex2D(SamplerMaskA,texcoord.xy).a;
 
 	float MAC = step(1.0f-Mask_Tex,0.5f); //Mask Adjustment Calculation
 	//This code is for hud segregation.			
-		HUD = MAC > 0 ? tex2D(BackBuffer,texcoord) : HUD;
+	HUD = MAC > 0 ? tex2D(BackBuffer,texcoord) : HUD;
 #endif		
 	return HUD;	
 }
 
 float AutoDepthRange( float d, float2 texcoord )
 {
-	float LumAdjust = smoothstep(-0.0175f,Auto_Depth_Range,Lum(texcoord).y);
-    return min(1,( d - 0 ) / ( LumAdjust - 0));
+	float LumAdjust_ADR = smoothstep(-0.0175f,Auto_Depth_Range,Lum(texcoord).y);
+    return min(1,( d - 0 ) / ( LumAdjust_ADR - 0));
 }
 #if RE_Fix
 float AutoZPDRange(float ZPD, float2 texcoord )
 {
-	float LumAdjust = smoothstep(-0.0175f,0.125,Lum(texcoord).y); //Adjusted to only effect really intense differences.
-    return saturate(LumAdjust * ZPD);
+	float LumAdjust_AZDPR = smoothstep(-0.0175f,0.125,Lum(texcoord).y); //Adjusted to only effect really intense differences.
+    return saturate(LumAdjust_AZDPR * ZPD);
 }
 #endif
 float Conv(float D,float2 texcoord)
@@ -1026,7 +1025,7 @@ float zBuffer(in float2 texcoord : TEXCOORD0)
 
 void  Disocclusion(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 color : SV_Target0)
 {
-	float DM, DMA, DMB, A, B, S, MS =  Divergence * pix.x, Div = 1.0f / 11.0f, DR = 1, DL = 1, N = 5, samples[5] = {0.5,0.625,0.75,0.875,1.0};
+	float DM, DM_A, DM_B, A, B, S, MS =  Divergence * pix.x, Div = 1.0f / 11.0f, DR = 1, DL = 1, N = 5, samples[5] = {0.5,0.625,0.75,0.875,1.0};
 	float2 dirA, dirB;
 	
 	if ( Enable_Mask )
@@ -1069,22 +1068,22 @@ void  Disocclusion(in float4 position : SV_Position, in float2 texcoord : TEXCOO
 		for (int i = 0; i < 11; i++)
 		{	
 			S = weight[i] * MS;
-			DMA += zBuffer(texcoord + dirA * S * A)*Div;
+			DM_A += zBuffer(texcoord + dirA * S * A)*Div;
 			
 			if(Disocclusion_Selection == 3)
 			{
-				DMB += zBuffer(texcoord + dirB * S * B)*Div;
+				DM_B += zBuffer(texcoord + dirB * S * B)*Div;
 			}
 			continue;
 		}
 				
 		if ( Disocclusion_Selection == 3  )
 		{	
-			DM = lerp(DMA,DMB,0.1875f);
+			DM = lerp(DM_A,DM_B,0.1875f);
 		}
 		else
 		{
-			DM = DMA;
+			DM = DM_A;
 		}	
 		
 		if ( Enable_Mask && View_Mode == 0 )
@@ -1110,7 +1109,7 @@ float4 PS_calcLR(float2 texcoord)
 {
 	float4 color, Right, Left, R, L;
 	float2 TCL, TCR, TexCoords = texcoord;
-	float DepthR = 1, DepthL = 1, LDepth, RDepth, DL, DR, N = 9, samplesA[9] = {0.5,0.5625,0.625,0.6875,0.75,0.8125,0.875,0.9375,1.0}, Adjust_A = 1 / N;;
+	float DepthR = 1, DepthL = 1, LDepth, RDepth, DL, DR, N = 9, samplesA[9] = {0.5,0.5625,0.625,0.6875,0.75,0.8125,0.875,0.9375,1.0}, Adjust_A = 1 / N;
 							
 	if(Eye_Swap)
 	{

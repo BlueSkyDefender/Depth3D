@@ -56,9 +56,6 @@
 //Byte Shift for Debanding depth buffer in final 3D image. Incraments of 128.
 #define Byte_Shift 512 //Ranges from 256 to 1024. Default is 512 
 
-// Screen Cursor to Screen Crosshair Lock
-#define SCSC 0
-
 // Turn UI Mask Off or On. This is used to set Two UI Masks for any game. Keep this in mind when you enable UI_MASK.
 // You Will have to create Three PNG Textures named Mask_A.png and Mask_B.png with transparency for this option.
 // They will also need to be the same resolution as what you have set for the game and the color black where the UI is.
@@ -374,6 +371,12 @@ uniform float3 Cursor_Color <
 	ui_category = "Cursor Adjustments";
 > = float3(1.0,1.0,1.0);
 
+uniform bool SCSC <
+	ui_label = " Cursor Lock";
+	ui_tooltip = "Screen Cursor to Screen Crosshair Lock.";
+	ui_category = "Cursor Adjustments";
+> = false;
+
 uniform bool Cancel_Depth < source = "key"; keycode = Cancel_Depth_Key; toggle = true; >;
 uniform bool Mask_Cycle < source = "key"; keycode = Mask_Cycle_Key; toggle = true; >;
 uniform bool Depth_Adjust < source = "key"; keycode = DB_TOGGLE; toggle = true; >;
@@ -557,6 +560,15 @@ float LumWeapon(in float2 texcoord : TEXCOORD0)
 	}
 	
 /////////////////////////////////////////////////////////////////////////////////Depth Map Information/////////////////////////////////////////////////////////////////////////////////
+float DMA()//Depth Map Adjustment
+{
+	float DMA = Depth_Map_Adjust;
+		
+	if(Depth_Adjust)
+		DMA = Alt_Depth_Map_Adjust;
+
+	return DMA;
+}
 
 float Depth(in float2 texcoord : TEXCOORD0)
 {	
@@ -567,14 +579,11 @@ float Depth(in float2 texcoord : TEXCOORD0)
 	if (Depth_Map_Flip)
 		texcoord.y =  1 - texcoord.y;
 		
-	float zBuffer = tex2D(DepthBuffer, texcoord).x, DMA = Depth_Map_Adjust; //Depth Buffer
-	
-	if(Depth_Adjust)
-	DMA = Alt_Depth_Map_Adjust;
+	float zBuffer = tex2D(DepthBuffer, texcoord).x; //Depth Buffer
 	
 	//Conversions to linear space.....
 	//Near & Far Adjustment
-	float Far = 1.0, Near = 0.125/DMA; //Division Depth Map Adjust - Near
+	float Far = 1.0, Near = 0.125/DMA(); //Division Depth Map Adjust - Near
 	
 	float2 Offsets = float2(1 + Offset,1 - Offset), Z = float2( zBuffer, 1-zBuffer );
 	
@@ -781,12 +790,7 @@ void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, 
 {
 		float4 DM = Depth(texcoord).xxxx;
 		
-		float DMA = Depth_Map_Adjust;
-		
-		if(Depth_Adjust)
-		DMA = Alt_Depth_Map_Adjust;
-		
-		float R, G, B, A, WD = WeaponDepth(texcoord).x, CoP = WeaponDepth(texcoord).y, CutOFFCal = (CoP/DMA)/2; //Weapon Cutoff Calculation
+		float R, G, B, A, WD = WeaponDepth(texcoord).x, CoP = WeaponDepth(texcoord).y, CutOFFCal = (CoP/DMA())/2; //Weapon Cutoff Calculation
 		
 		CutOFFCal = step(DM.x,CutOFFCal);
 					
@@ -913,22 +917,15 @@ void AO_in(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out
 #endif
 
 float4 HUD(float4 HUD, float2 texcoord ) 
-{	
-	float DMA = Depth_Map_Adjust;
-		
-	if(Depth_Adjust)
-		DMA = Alt_Depth_Map_Adjust;	
-		
-	float CutOFFCal = ((HUD_Adjust.x * 0.5)/DMA) * 0.5, COC = step(Depth(texcoord).x,CutOFFCal); //HUD Cutoff Calculation
+{			
+	float Mask_Tex, CutOFFCal = ((HUD_Adjust.x * 0.5)/DMA()) * 0.5, COC = step(Depth(texcoord).x,CutOFFCal); //HUD Cutoff Calculation
 	
 	//This code is for hud segregation.			
 	if (HUD_Adjust.x > 0)
 		HUD = COC > 0 ? tex2D(BackBuffer,texcoord) : HUD;	
 		
 #if UI_MASK
-	float Mask_Tex, MC = Mask_Cycle;
-	
-    if (MC == true) 
+    if (Mask_Cycle == true) 
         Mask_Tex = tex2D(SamplerMaskB,texcoord.xy).a;
     else
         Mask_Tex = tex2D(SamplerMaskA,texcoord.xy).a;
@@ -1143,7 +1140,7 @@ float4 PS_calcLR(float2 texcoord)
 		for (int i = 0; i < Divergence + 7.5; i++) 
 		{				
 			//L
-			if( Decode(float2(TCL.x+i*pix.x,TCL.y)).y >= (1-TCL.x)-pix.x * 0.5f && Decode(float2(TCL.x+i*pix.x,TCL.y)).y <= (1-TCL.x)+pix.x * 7.5)
+			if( Decode(float2(TCL.x+i*pix.x,TCL.y)).y >= (1-TCL.x)-pix.x * 0.5f && Decode(float2(TCL.x+i*pix.x,TCL.y)).y <= (1-TCL.x)+pix.x * 7.5 )
 				{
 					if(Custom_Sidebars == 0)
 					{
@@ -1159,7 +1156,7 @@ float4 PS_calcLR(float2 texcoord)
 					}
 				}
 			//R
-			if( Decode(float2(TCR.x-i*pix.x,TCR.y)).x >= TCR.x-pix.x * 0.5f && Decode(float2(TCR.x-i*pix.x,TCR.y)).x <= TCR.x+pix.x * 7.5)
+			if( Decode(float2(TCR.x-i*pix.x,TCR.y)).x >= TCR.x-pix.x * 0.5f && Decode(float2(TCR.x-i*pix.x,TCR.y)).x <= TCR.x+pix.x * 7.5 )
 				{
 					if(Custom_Sidebars == 0)
 					{
