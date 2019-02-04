@@ -54,7 +54,7 @@
 #define DAR float2(1.76, 1.0)
 
 //Byte Shift for Debanding depth buffer in final 3D image. Incraments of 128.
-#define Byte_Shift 512 //Ranges from 256 to 1024. Default is 512 
+#define Byte_Shift 256 //Ranges from 128 to 1024. Default is 256 
 
 // Turn UI Mask Off or On. This is used to set Two UI Masks for any game. Keep this in mind when you enable UI_MASK.
 // You Will have to create Three PNG Textures named Mask_A.png and Mask_B.png with transparency for this option.
@@ -1047,6 +1047,7 @@ void Encode(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, ou
 
 	// X Right & Y Left
 	float X = DepthL, Y = DepthR, Z = tex2Dlod(SamplerDisFB,float4(texcoord,0,0)).x;
+	
 	color = float4(X,Y,Z,1.0);
 }
 
@@ -1116,9 +1117,17 @@ float4 PS_calcLR(float2 texcoord)
 		TCL.x = TCL.x + ((Interlace_Anaglyph.x * 0.5f) * pix.x);
 		TCR.x = TCR.x - ((Interlace_Anaglyph.x * 0.5f) * pix.x);
 	}
-		
-		float CCL = MS * Decode(float2(TCL.x, TCL.y)).z;
-		float CCR = MS * Decode(float2(TCR.x, TCR.y)).z;
+			
+	float CCL = 1, CCR = 1,N = 3, samplesA[3] = {0.5,0.75,1.0};
+	[loop]
+	for ( int j = 0 ; j < N; j++ ) 
+	{	
+		float S = samplesA[j];//Adjustment for range scaling.		
+
+		CCL = MS *  min(CCL, Decode(float2(TCL.x + S * MS, TCL.y)).z);
+		CCR = MS *  min(CCR, Decode(float2(TCR.x - S * MS, TCR.y)).z);
+		continue;
+	}
 			
 		if(Custom_Sidebars == 0)
 		{
@@ -1140,7 +1149,7 @@ float4 PS_calcLR(float2 texcoord)
 		for (int i = 0; i < Divergence + 7.5; i++) 
 		{				
 			//L
-			if( Decode(float2(TCL.x+i*pix.x,TCL.y)).y >= (1-TCL.x)-pix.x * 0.5f && Decode(float2(TCL.x+i*pix.x,TCL.y)).y <= (1-TCL.x)+pix.x * 7.5 )
+			if( Decode(float2(TCL.x+i*pix.x,TCL.y)).y >= (1-TCL.x)-pix.x * 0.5f && Decode(float2(TCL.x+i*pix.x,TCL.y)).y <= (1-TCL.x)+pix.x * 10 )
 				{
 					if(Custom_Sidebars == 0)
 					{
@@ -1156,7 +1165,7 @@ float4 PS_calcLR(float2 texcoord)
 					}
 				}
 			//R
-			if( Decode(float2(TCR.x-i*pix.x,TCR.y)).x >= TCR.x-pix.x * 0.5f && Decode(float2(TCR.x-i*pix.x,TCR.y)).x <= TCR.x+pix.x * 7.5 )
+			if( Decode(float2(TCR.x-i*pix.x,TCR.y)).x >= TCR.x-pix.x * 0.5f && Decode(float2(TCR.x-i*pix.x,TCR.y)).x <= TCR.x+pix.x * 10 )
 				{
 					if(Custom_Sidebars == 0)
 					{

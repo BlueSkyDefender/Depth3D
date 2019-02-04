@@ -989,7 +989,7 @@ float Conv(float D,float2 texcoord)
 		if (ZPD == 0)
 			ZP = 1.0;
 		
-    return lerp(MS * Convergence, MS * D, ZP);
+    return MS * lerp(Convergence,D, ZP);
 }
 
 float zBuffer(in float2 texcoord : TEXCOORD0)
