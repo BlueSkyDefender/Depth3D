@@ -25,6 +25,9 @@
 // Determines The resolution of the Depth Map. For 4k Use 1.75 or 1.5. For 1440p Use 1.5 or 1.25. For 1080p use 1. Too low of a resolution will remove too much.
 #define Depth_Map_Division 1.0
 
+// Zero Parallax Distance Mode allows you to switch control from manual to automatic and vice versa.
+#define ZPD_Mode 0 //Default 0 is Automatic. One is Manual.
+
 // RE Fix is used to fix the issue with Resident Evil's 2 Remake 1-Shot cutscenes.
 #define RE_Fix 0 //Default 0 is Off. One is On. 
 
@@ -109,6 +112,17 @@ uniform float ZPD <
 	ui_category = "Divergence & Convergence";
 > = 0.010;
 
+#if ZPD_Mode
+uniform float ZPD_Balance <
+	ui_type = "drag";
+	ui_min = 0.0; ui_max = 1.0;
+	ui_label = " ZPD Balance";
+	ui_tooltip = "Zero Parallax Distance balances between ZPD Depth and Scene Depth.\n"
+				"Default is Zero is full Convergence and One is Full Depth.";
+	ui_category = "Divergence & Convergence";
+> = 0.5;
+#define Auto_Balance_Ex 0
+#else
 uniform int Auto_Balance_Ex <
 	#if Compatibility
 	ui_type = "drag";
@@ -121,6 +135,7 @@ uniform int Auto_Balance_Ex <
 				 "Default is Off.";
 	ui_category = "Divergence & Convergence";
 > = 0;
+#endif
 
 uniform float Auto_Depth_Range <
 	ui_type = "drag";
@@ -980,9 +995,13 @@ float Conv(float D,float2 texcoord)
 		
 		if(Convergence_Mode)
 			Z = Divergence_Locked;
-				
+			
+	#if ZPD_Mode
+			ZP = saturate(ZPD_Balance);			
+	#else
 		if(Auto_Balance_Ex > 0 )
 			ZP = clamp(ALC,0.0f,1.0f);
+	#endif
 				
 		float Convergence = 1 - Z / D;
 
