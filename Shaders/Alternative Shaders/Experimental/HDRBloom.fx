@@ -100,8 +100,7 @@ uniform int MipLevelAdjust <
 uniform int Luma_Coefficient <
 	ui_type = "combo";
 	ui_label = "Luma";
-	ui_tooltip = "Changes how color get sharpened by Unsharped Masking\n"
-				 "This should only affect Normal, Color, & Greyscale output.";
+	ui_tooltip = "Changes how color get used for the other effects.\n";
 	ui_items = "SD video\0HD video\0HDR video\0";
 > = 0;
 
