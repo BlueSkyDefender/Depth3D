@@ -34,7 +34,7 @@ uniform float HDR_Adjust <
 	ui_min = 1.0; ui_max = 2.0;
 	ui_label = "HDR Adjust";
 	ui_tooltip = "Use this to adjust HDR level for your content.";
-> = 1.25;
+> = 1.225;
 
 uniform float Exposure<
 	#if Compatibility
@@ -42,10 +42,10 @@ uniform float Exposure<
 	#else
 	ui_type = "slider";
 	#endif
-	ui_min = 0.0; ui_max = 3.0;
+	ui_min = 0.0; ui_max = 1.0;
 	ui_label = "Exposure";
 	ui_tooltip = "Use this to set HDR exposure for your content.";
-> = 0.2;
+> = 0.1;
 
 uniform float CBT_Adjust <
 	#if Compatibility
@@ -57,8 +57,8 @@ uniform float CBT_Adjust <
 	ui_label = "Brightness Threshold";
 	ui_tooltip = "Use this to set the color based brightness threshold content for what is and what isn't allowed.\n"
 				"This is the most important setting.\n"
-				"Number 0.5 is default.";
-> = 0.50;
+				"Number 0.625 is default.";
+> = 0.625;
 
 uniform float Saturation <
 	#if Compatibility
