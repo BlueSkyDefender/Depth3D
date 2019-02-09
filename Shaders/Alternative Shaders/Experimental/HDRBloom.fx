@@ -194,17 +194,15 @@ float4 Blur(float2 texcoord : TEXCOORD0)
     float2 tex_offset = (Spread * 0.5) * pix; // gets texel offset
     float3 result = BrightColor(texcoord).rgb * weight[0]; // current fragment's contribution
     
-    if(horizontal)
-    {
-        for(int i = 1; i < 5; ++i)
-        {
-            result += BrightColor(texcoord + float2(tex_offset.x * i, 0.0)).rgb * weight[i];
-            result += BrightColor(texcoord - float2(tex_offset.x * i, 0.0)).rgb * weight[i];
-        }
-   }
-    else
-   {
-		for(int i = 1; i < 5; ++i)
+	[loop]
+	for(int i = 1; i < 5; ++i)
+	{
+	    if(horizontal)
+		{
+			result += BrightColor(texcoord + float2(tex_offset.x * i, 0.0)).rgb * weight[i];
+			result += BrightColor(texcoord - float2(tex_offset.x * i, 0.0)).rgb * weight[i];
+		}
+		else
 		{
 			result += BrightColor(texcoord + float2(0.0, tex_offset.y * i)).rgb * weight[i];
 			result += BrightColor(texcoord - float2(0.0, tex_offset.y * i)).rgb * weight[i];
