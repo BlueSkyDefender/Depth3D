@@ -19,6 +19,7 @@
  //*                                                                            																									*//
  //* 																																												*//
  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 #if !defined(__RESHADE__) || __RESHADE__ < 40000
 	#define Compatibility 1
 #else
@@ -34,6 +35,7 @@ uniform float HDR_Adjust <
 	ui_min = 1.0; ui_max = 2.0;
 	ui_label = "HDR Adjust";
 	ui_tooltip = "Use this to adjust HDR level for your content.";
+	ui_category = "HDR Adjustments";
 > = 1.225;
 
 uniform float Exposure<
@@ -45,6 +47,7 @@ uniform float Exposure<
 	ui_min = 0.0; ui_max = 1.0;
 	ui_label = "Exposure";
 	ui_tooltip = "Use this to set HDR exposure for your content.";
+	ui_category = "HDR Adjustments";
 > = 0.1;
 
 uniform float CBT_Adjust <
@@ -58,6 +61,7 @@ uniform float CBT_Adjust <
 	ui_tooltip = "Use this to set the color based brightness threshold content for what is and what isn't allowed.\n"
 				"This is the most important setting.\n"
 				"Number 0.625 is default.";
+	ui_category = "HDR Adjustments";
 > = 0.625;
 
 uniform float Saturation <
@@ -70,6 +74,7 @@ uniform float Saturation <
 	ui_label = "Bloom Saturation";
 	ui_tooltip = "Adjustment The amount to adjust the saturation of the color.\n"
 				"Number 1.0 is default.";
+	ui_category = "HDR Adjustments";
 > = 1.0;
 
 uniform float Spread <
@@ -78,11 +83,12 @@ uniform float Spread <
 	#else
 	ui_type = "slider";
 	#endif
-	ui_min = 5; ui_max = 20.0; ui_step = 0.5;
+	ui_min = 5; ui_max = 25.0; ui_step = 0.5;
 	ui_label = "Bloom Spread";
 	ui_tooltip = "Adjust This to have the Bloom effect to fill in areas.\n"
 				 "This is used for Bloom gap filling.\n"
 				 "Number 12.5 is default.";
+	ui_category = "HDR Adjustments";
 > = 12.5;
 
 uniform int MipLevelAdjust <
@@ -95,6 +101,7 @@ uniform int MipLevelAdjust <
 	ui_label = "Bloom Miplvl";
 	ui_tooltip ="This is used for removing banding in the Bloom.\n"
 				"Zero is off and 2 is default.";
+	ui_category = "HDR Adjustments";
 > = 2;
 
 uniform int Luma_Coefficient <
@@ -102,11 +109,13 @@ uniform int Luma_Coefficient <
 	ui_label = "Luma";
 	ui_tooltip = "Changes how color get used for the other effects.\n";
 	ui_items = "SD video\0HD video\0HDR video\0";
+	ui_category = "HDR Adjustments";
 > = 0;
 
 uniform bool Debug_View <
 	ui_label = "Debug View";
 	ui_tooltip = "To view Shade & Blur effect on the game, movie piture & ect.";
+	ui_category = "Debugging";
 > = false;
 
 /////////////////////////////////////////////////////D3D Starts Here/////////////////////////////////////////////////////////////////
@@ -226,11 +235,13 @@ float4 HDROut(float2 texcoord : TEXCOORD0)
 {		
 	float4 Out;
 
-    float3 Color = tex2D(BackBuffer, texcoord).rgb, HDR = tex2D(BackBuffer, texcoord).rgb;      
+    float3 TM, Color = tex2D(BackBuffer, texcoord).rgb, HDR = tex2D(BackBuffer, texcoord).rgb;      
     float3 bloomColor = (tex2Dlod(SamplerMip, float4(texcoord,0,MipLevelAdjust)).rgb + tex2Dlod(PSBackBuffer, float4(texcoord,0,MipLevelAdjust)).rgb) * 0.5f; // Merge Current and past frame.
-    HDR += bloomColor; //HDR
-	float3 Mix = 1.0 - exp(-HDR * Exposure);
-	Color = pow(Mix + Color, HDR_Adjust); 
+    //HDR 
+    HDR += bloomColor; 
+    // Tone Mapping done here.
+	TM = 1.0 - exp(-HDR * Exposure);//Basic 
+	Color = saturate(pow(abs(Color + TM), HDR_Adjust)); 
 	
 	if (!Debug_View)
 	{
