@@ -19,9 +19,18 @@
  //*                                                                            																									*//
  //* 																																												*//
  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+#if !defined(__RESHADE__) || __RESHADE__ < 40000
+	#define Compatibility 1
+#else
+	#define Compatibility 0
+#endif
 
 uniform float Power <	
-	ui_type = "drag";	
+	#if Compatibility
+	ui_type = "drag";
+	#else
+	ui_type = "slider";
+	#endif
 	ui_min = 0.0; ui_max = 1.0;	
 	ui_label = "Shade Power";	
 	ui_tooltip = "Adjust the Shade Power This improves AO, Shadows, & Darker Areas in game.\n"	
@@ -29,8 +38,12 @@ uniform float Power <
 > = 0.5;
 
 uniform float Spread <
+	#if Compatibility
 	ui_type = "drag";
-	ui_min = 1.0; ui_max = 20.0;
+	#else
+	ui_type = "slider";
+	#endif
+	ui_min = 5; ui_max = 20.0; ui_step = 0.125;
 	ui_label = "Shade Fill";
 	ui_tooltip = "Adjust This to have the shade effect to fill in areas.\n"
 				 "This is used for gap filling.\n"
@@ -67,15 +80,11 @@ sampler BackBuffer
 		Texture = BackBufferTex;
 	};
 			
-texture texB { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA8; MipLevels = 2;};
+texture texB { Width = BUFFER_WIDTH * 0.5; Height = BUFFER_HEIGHT * 0.5; Format = RGBA8; };
 
 sampler SamplerBlur
 	{
 		Texture = texB;
-		MipLODBias = 2.0f;
-		MinFilter = LINEAR;
-		MagFilter = LINEAR;
-		MipFilter = LINEAR;
 	};	
 	
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

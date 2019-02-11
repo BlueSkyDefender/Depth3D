@@ -27,8 +27,18 @@
 // Zero = Slave;
 #define TOGGLE 1
 
+#if !defined(__RESHADE__) || __RESHADE__ < 40000
+	#define Compatibility 1
+#else
+	#define Compatibility 0
+#endif
+
 uniform int Interpupillary_Distance <
+	#if Compatibility
 	ui_type = "drag";
+	#else
+	ui_type = "slider";
+	#endif
 	ui_min = 0; ui_max = 100;
 	ui_label = "Interpupillary Distance";
 	ui_tooltip = "Determines the distance between your eyes.\n" 
@@ -53,7 +63,11 @@ uniform bool Checkerboard_Reconstruction_Compatibility <
 > = false;
 
 uniform float Lens_Center <
+	#if Compatibility
 	ui_type = "drag";
+	#else
+	ui_type = "slider";
+	#endif
 	ui_min = 0.475; ui_max = 0.575;
 	ui_label = "Lens Center";
 	ui_tooltip = "Adjust Lens Center. Default is 0.5";
@@ -61,7 +75,11 @@ uniform float Lens_Center <
 > = 0.5;
 
 uniform float2 Lens_Distortion <
+	#if Compatibility
 	ui_type = "drag";
+	#else
+	ui_type = "slider";
+	#endif
 	ui_min = -0.325; ui_max = 5;
 	ui_label = "K1 & K2 Lens Distortion";
 	ui_tooltip = "On the 1st lens distortion value, positive values of k1 gives barrel distortion, negative give pincushion.\n"
@@ -71,7 +89,11 @@ uniform float2 Lens_Distortion <
 > = float2(0.01,0.01);
 
 uniform float3 Polynomial_Colors <
+	#if Compatibility
 	ui_type = "drag";
+	#else
+	ui_type = "slider";
+	#endif
 	ui_min = 0.250; ui_max = 2.0;
 	ui_tooltip = "Adjust the Polynomial Distortion Red, Green, Blue.\n"
 				 "Default is (R 1.0, G 1.0, B 1.0)";
@@ -80,7 +102,11 @@ uniform float3 Polynomial_Colors <
 > = float3(1.0, 1.0, 1.0);
 
 uniform float2 Zoom_Aspect_Ratio <
+	#if Compatibility
 	ui_type = "drag";
+	#else
+	ui_type = "slider";
+	#endif
 	ui_min = 0.5; ui_max = 2;
 	ui_label = "Lens Zoom & Aspect Ratio";
 	ui_tooltip = "Lens Zoom amd Aspect Ratio.\n" 
@@ -89,7 +115,11 @@ uniform float2 Zoom_Aspect_Ratio <
 > = float2(1.0,1.0);
 
 uniform float2 Degrees <
+	#if Compatibility
 	ui_type = "drag";
+	#else
+	ui_type = "slider";
+	#endif
 	ui_min = 0; ui_max =  360;
 	ui_label = "Rotation";
 	ui_tooltip = "Left & Right Rotation Angle known as Degrees.\n"
@@ -98,7 +128,11 @@ uniform float2 Degrees <
 > = float2(0.0,0.0);
 
 uniform int Vertical_Repositioning <
+	#if Compatibility
 	ui_type = "drag";
+	#else
+	ui_type = "slider";
+	#endif
 	ui_min = -500; ui_max = 500;
 	ui_label = "Vertical Repositioning";
 	ui_tooltip = "Please note if you have to use this, please aline and adjust your headset before you use this.\n"
@@ -109,7 +143,11 @@ uniform int Vertical_Repositioning <
 > = 0;
 
 uniform int2 Independent_Vertical_Repositioning <
+	#if Compatibility
 	ui_type = "drag";
+	#else
+	ui_type = "slider";
+	#endif
 	ui_min = -500; ui_max = 500;
 	ui_label = "Independent Vertical Repositioning";
 	ui_tooltip = "Please note if you have to use this, please aline and adjust your headset before you use this.\n"
@@ -120,7 +158,11 @@ uniform int2 Independent_Vertical_Repositioning <
 > = int2(0,0);
 
 uniform int2 Independent_Horizontal_Repositioning <
+	#if Compatibility
 	ui_type = "drag";
+	#else
+	ui_type = "slider";
+	#endif
 	ui_min = -500; ui_max = 500;
 	ui_label = "Independent Horizontal Repositioning";
 	ui_tooltip = "Please note if you have to use this, please aline and adjust your headset before you use this.\n"

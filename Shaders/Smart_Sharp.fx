@@ -33,6 +33,12 @@
 // Default is Low.
 #define Quality 1
 
+#if !defined(__RESHADE__) || __RESHADE__ < 40000
+	#define Compatibility 1
+#else
+	#define Compatibility 0
+#endif
+
 uniform int Depth_Map <
 	ui_type = "combo";
 	ui_items = "Raw\0Raw Reverse\0";
@@ -41,8 +47,12 @@ uniform int Depth_Map <
 > = 0;
 
 uniform float Depth_Map_Adjust <
+	#if Compatibility
 	ui_type = "drag";
-	ui_min = 0.25; ui_max = 100.0;
+	#else
+	ui_type = "slider";
+	#endif
+	ui_min = 0.25; ui_max = 100.0; ui_step = 0.125;
 	ui_label = "Depth Map Adjustment";
 	ui_tooltip = "Adjust the depth map and sharpness.";
 > = 5.0;
@@ -65,8 +75,12 @@ uniform int Output_Selection <
 > = 0;
 
 uniform float Sharpen_Power <
+	#if Compatibility
 	ui_type = "drag";
-	ui_min = 0.0; ui_max = 5;
+	#else
+	ui_type = "slider";
+	#endif
+	ui_min = 0.0; ui_max = 5; ui_step = 0.10;
 	ui_label = "Sharpen Power";
 	ui_tooltip = "Increases or Decreases the Sharpen power.";
 > = 0.5;
