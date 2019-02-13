@@ -26,17 +26,32 @@
 	#define Compatibility 0
 #endif
 
+uniform float CBT_Adjust <
+	#if Compatibility
+	ui_type = "drag";
+	#else
+	ui_type = "slider";
+	#endif
+	ui_min = 0.0; ui_max = 1.0;
+	ui_label = "Extracting Bright Colors";
+	ui_tooltip = "Use this to set the color based brightness threshold for what is and what isn't allowed.\n"
+				"This is the most important setting, use Debug View to adjust this.\n"
+				"Number 0.5 is default.";
+	ui_category = "HDR Adjustments";
+> = 0.5;
+
 uniform float HDR_Adjust <
 	#if Compatibility
 	ui_type = "drag";
 	#else
 	ui_type = "slider";
 	#endif
-	ui_min = 1.0; ui_max = 2.0;
+	ui_min = 0.5; ui_max = 2.0;
 	ui_label = "HDR Adjust";
-	ui_tooltip = "Use this to adjust HDR level for your content.";
+	ui_tooltip = "Use this to adjust HDR levels for your content.\n"
+				"Number 1.100 is default.";
 	ui_category = "HDR Adjustments";
-> = 1.225;
+> = 1.100;
 
 uniform float Exposure<
 	#if Compatibility
@@ -46,36 +61,10 @@ uniform float Exposure<
 	#endif
 	ui_min = 0.0; ui_max = 1.0;
 	ui_label = "Exposure";
-	ui_tooltip = "Use this to set HDR exposure for your content.";
+	ui_tooltip = "Use this to set HDR exposure for your content.\n"
+				"Number 0.1 is default.";
 	ui_category = "HDR Adjustments";
 > = 0.1;
-
-uniform float CBT_Adjust <
-	#if Compatibility
-	ui_type = "drag";
-	#else
-	ui_type = "slider";
-	#endif
-	ui_min = 0.0; ui_max = 1.0;
-	ui_label = "Brightness Threshold";
-	ui_tooltip = "Use this to set the color based brightness threshold content for what is and what isn't allowed.\n"
-				"This is the most important setting.\n"
-				"Number 0.625 is default.";
-	ui_category = "HDR Adjustments";
-> = 0.625;
-
-uniform float B_Brightness <
-	#if Compatibility
-	ui_type = "drag";
-	#else
-	ui_type = "slider";
-	#endif
-	ui_min = 0.5; ui_max = 2.5;
-	ui_label = "Bloom Brightness";
-	ui_tooltip = "Adjustment The amount Bloom Brightness.\n"
-				"Number 0.5 is default.";
-	ui_category = "HDR Adjustments";
-> = 0.5;
 
 uniform float Saturation <
 	#if Compatibility
@@ -83,7 +72,7 @@ uniform float Saturation <
 	#else
 	ui_type = "slider";
 	#endif
-	ui_min = 0.0; ui_max = 2.0;
+	ui_min = 0.0; ui_max = 2.5;
 	ui_label = "Bloom Saturation";
 	ui_tooltip = "Adjustment The amount to adjust the saturation of the color.\n"
 				"Number 1.0 is default.";
@@ -96,13 +85,13 @@ uniform float Spread <
 	#else
 	ui_type = "slider";
 	#endif
-	ui_min = 5; ui_max = 50.0; ui_step = 0.5;
+	ui_min = 25; ui_max = 50.0; ui_step = 0.5;
 	ui_label = "Bloom Spread";
 	ui_tooltip = "Adjust This to have the Bloom effect to fill in areas.\n"
 				 "This is used for Bloom gap filling.\n"
-				 "Number 12.5 is default.";
+				 "Number 37.5 is default.";
 	ui_category = "HDR Adjustments";
-> = 12.5;
+> = 37.5;
 
 uniform int Luma_Coefficient <
 	ui_type = "combo";
@@ -156,7 +145,8 @@ sampler PSBackBuffer
 uniform uint framecount < source = "framecount"; >;	
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #define Alternate framecount % 2 == 0  
-#define MipLevelAdjust 1 //This is used for removing banding in the Bloom.
+#define MipLevelAdjust 2 //This is used for removing banding in the Bloom.
+
 float3 Luma()
 {
 	float3 Luma;
@@ -276,12 +266,12 @@ float4 HDROut(float2 texcoord : TEXCOORD0)
 {		
 	float4 Out;
     float3 TM, Color = tex2D(BackBuffer, texcoord).rgb, HDR = tex2D(BackBuffer, texcoord).rgb;      
-    float3 bloomColor = (tex2Dlod(SamplerMip, float4(texcoord,0,MipLevelAdjust)).rgb + tex2D(PSBackBuffer, texcoord).rgb) * B_Brightness; // Merge Current and past frame.
+    float3 bloomColor = (tex2Dlod(SamplerMip, float4(texcoord,0,MipLevelAdjust)).rgb + tex2D(PSBackBuffer, texcoord).rgb); // Merge Current and past frame.
     //HDR 
     HDR += bloomColor; 
     // Tone Mapping done here.
 	TM = 1.0 - exp(-HDR * Exposure);//Basic Exposure Adjustment
-	Color = pow(abs(Color + TM), HDR_Adjust); 
+	Color = lerp(pow(abs(Color + TM),HDR_Adjust),Color,0.5); 
 	
 	if (!Debug_View)
 	{
