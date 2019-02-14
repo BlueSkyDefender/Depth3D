@@ -62,9 +62,9 @@ uniform float Exposure<
 	ui_min = 0.0; ui_max = 1.0;
 	ui_label = "Exposure";
 	ui_tooltip = "Use this to set HDR exposure for your content.\n"
-				"Number 0.1 is default.";
+				"Number 0.125 is default.";
 	ui_category = "HDR Adjustments";
-> = 0.1;
+> = 0.125;
 
 uniform float Saturation <
 	#if Compatibility
@@ -85,13 +85,13 @@ uniform float Spread <
 	#else
 	ui_type = "slider";
 	#endif
-	ui_min = 25; ui_max = 50.0; ui_step = 0.5;
+	ui_min = 12.5; ui_max = 37.5; ui_step = 0.5;
 	ui_label = "Bloom Spread";
 	ui_tooltip = "Adjust This to have the Bloom effect to fill in areas.\n"
 				 "This is used for Bloom gap filling.\n"
-				 "Number 37.5 is default.";
+				 "Number 25.0 is default.";
 	ui_category = "HDR Adjustments";
-> = 37.5;
+> = 25.0;
 
 uniform int Luma_Coefficient <
 	ui_type = "combo";
@@ -123,8 +123,18 @@ sampler BackBuffer
 	{ 
 		Texture = BackBufferTex;
 	};
-				
-texture texM { Width = BUFFER_WIDTH * 0.5; Height = BUFFER_HEIGHT * 0.5; Format = RGBA8; MipLevels = 2;};
+texture texBC { Width = BUFFER_WIDTH * 0.5; Height = BUFFER_HEIGHT * 0.5; Format = RGBA8; MipLevels = 4;};
+
+sampler SamplerBC
+	{
+		Texture = texBC;
+		MipLODBias = 3.0f;
+		MinFilter = LINEAR;
+		MagFilter = LINEAR;
+		MipFilter = LINEAR;
+	};
+					
+texture texM { Width = BUFFER_WIDTH * 0.5; Height = BUFFER_HEIGHT * 0.5; Format = RGBA8; MipLevels = 3;};
 
 sampler SamplerMip
 	{
@@ -166,10 +176,10 @@ float3 Luma()
 	return Luma;
 }
  
-float4 BrightColor(in float2 texcoords : TEXCOORD0)
+float4 BrightColors(float4 position : SV_Position, float2 texcoords : TEXCOORD) : SV_Target //bright-pass filter is applied to dim-down the darkest areas of the scene.
 {   
 	float4 BC, Color = tex2D(BackBuffer, texcoords);
-	// check whether fragment output is higher than threshold, if so output as brightness color
+	// check whether fragment output is higher than threshold, if so output as brightness color.
     float brightness = dot(Color.rgb, Luma());
     
     if(brightness > CBT_Adjust)
@@ -179,69 +189,69 @@ float4 BrightColor(in float2 texcoords : TEXCOORD0)
 	
 	float3 intensity = dot(BC.rgb,Luma());
     BC.rgb = lerp(intensity,BC.rgb,Saturation);  
-   
+   // The result of the bright-pass filter is then downscaled.
    return float4(BC.rgb,1.0);
 }
 
-float4 Blur(float2 texcoords : TEXCOORD0)                                                                       
+float4 Blur(float2 texcoords : TEXCOORD0)//Then blurred.                                                                        
 {    
-    float2 tex_offset = (Spread * 0.125f) * pix; // gets texel offset
-    float4 result = BrightColor(texcoords); // current fragment's contribution
+    float2 tex_offset = (Spread * 0.25f) * pix; // gets texel offset
+    float4 result = tex2D(SamplerBC,texcoords); // current fragment's contribution
 	if (Alternate)
 	{
-		result += BrightColor(texcoords + float2(-2.0f * tex_offset.x, -3.0f * tex_offset.y));
-		result += BrightColor(texcoords + float2(-1.0f * tex_offset.x, -3.0f * tex_offset.y));
-		result += BrightColor(texcoords + float2(0,                    -3.0f * tex_offset.y));
-		result += BrightColor(texcoords + float2(1.0f * tex_offset.x,  -3.0f * tex_offset.y));
-		result += BrightColor(texcoords + float2(2.0f * tex_offset.x,  -3.0f * tex_offset.y));
+		result += tex2D(SamplerBC,texcoords + float2(-2.0f * tex_offset.x, -3.0f * tex_offset.y));
+		result += tex2D(SamplerBC,texcoords + float2(-1.0f * tex_offset.x, -3.0f * tex_offset.y));
+		result += tex2D(SamplerBC,texcoords + float2(0,                    -3.0f * tex_offset.y));
+		result += tex2D(SamplerBC,texcoords + float2(1.0f * tex_offset.x,  -3.0f * tex_offset.y));
+		result += tex2D(SamplerBC,texcoords + float2(2.0f * tex_offset.x,  -3.0f * tex_offset.y));
 
-		result += BrightColor(texcoords + float2(-3.0f * tex_offset.x, -2.0f * tex_offset.y));
-		result += BrightColor(texcoords + float2(-2.0f * tex_offset.x, -2.0f * tex_offset.y));
-		result += BrightColor(texcoords + float2(-1.0f * tex_offset.x, -2.0f * tex_offset.y));
-		result += BrightColor(texcoords + float2(0,                    -2.0f * tex_offset.y));
-		result += BrightColor(texcoords + float2(1.0f * tex_offset.x,  -2.0f * tex_offset.y));
-		result += BrightColor(texcoords + float2(2.0f * tex_offset.x,  -2.0f * tex_offset.y));
-		result += BrightColor(texcoords + float2(3.0f * tex_offset.x,  -2.0f * tex_offset.y));
+		result += tex2D(SamplerBC,texcoords + float2(-3.0f * tex_offset.x, -2.0f * tex_offset.y));
+		result += tex2D(SamplerBC,texcoords + float2(-2.0f * tex_offset.x, -2.0f * tex_offset.y));
+		result += tex2D(SamplerBC,texcoords + float2(-1.0f * tex_offset.x, -2.0f * tex_offset.y));
+		result += tex2D(SamplerBC,texcoords + float2(0,                    -2.0f * tex_offset.y));
+		result += tex2D(SamplerBC,texcoords + float2(1.0f * tex_offset.x,  -2.0f * tex_offset.y));
+		result += tex2D(SamplerBC,texcoords + float2(2.0f * tex_offset.x,  -2.0f * tex_offset.y));
+		result += tex2D(SamplerBC,texcoords + float2(3.0f * tex_offset.x,  -2.0f * tex_offset.y));
 
-		result += BrightColor(texcoords + float2(-3.0f * tex_offset.x, -1.0f * tex_offset.y));
-		result += BrightColor(texcoords + float2(-2.0f * tex_offset.x, -1.0f * tex_offset.y));
-		result += BrightColor(texcoords + float2(-1.0f * tex_offset.x, -1.0f * tex_offset.y));
-		result += BrightColor(texcoords + float2(0,                    -1.0f * tex_offset.y));
-		result += BrightColor(texcoords + float2(1.0f * tex_offset.x,  -1.0f * tex_offset.y));
-		result += BrightColor(texcoords + float2(2.0f * tex_offset.x,  -1.0f * tex_offset.y));
-		result += BrightColor(texcoords + float2(3.0f * tex_offset.x,  -1.0f * tex_offset.y));
+		result += tex2D(SamplerBC,texcoords + float2(-3.0f * tex_offset.x, -1.0f * tex_offset.y));
+		result += tex2D(SamplerBC,texcoords + float2(-2.0f * tex_offset.x, -1.0f * tex_offset.y));
+		result += tex2D(SamplerBC,texcoords + float2(-1.0f * tex_offset.x, -1.0f * tex_offset.y));
+		result += tex2D(SamplerBC,texcoords + float2(0,                    -1.0f * tex_offset.y));
+		result += tex2D(SamplerBC,texcoords + float2(1.0f * tex_offset.x,  -1.0f * tex_offset.y));
+		result += tex2D(SamplerBC,texcoords + float2(2.0f * tex_offset.x,  -1.0f * tex_offset.y));
+		result += tex2D(SamplerBC,texcoords + float2(3.0f * tex_offset.x,  -1.0f * tex_offset.y));
 
-		result += BrightColor(texcoords + float2(-3.0f * tex_offset.x, 0));
-		result += BrightColor(texcoords + float2(-2.0f * tex_offset.x, 0));
-		result += BrightColor(texcoords + float2(-1.0f * tex_offset.x, 0));
+		result += tex2D(SamplerBC,texcoords + float2(-3.0f * tex_offset.x, 0));
+		result += tex2D(SamplerBC,texcoords + float2(-2.0f * tex_offset.x, 0));
+		result += tex2D(SamplerBC,texcoords + float2(-1.0f * tex_offset.x, 0));
     }
     else
     {
-		result += BrightColor(texcoords + float2(1.0f * tex_offset.x,  0));
-		result += BrightColor(texcoords + float2(2.0f * tex_offset.x,  0));
-		result += BrightColor(texcoords + float2(3.0f * tex_offset.x,  0));
+		result += tex2D(SamplerBC,texcoords + float2(1.0f * tex_offset.x,  0));
+		result += tex2D(SamplerBC,texcoords + float2(2.0f * tex_offset.x,  0));
+		result += tex2D(SamplerBC,texcoords + float2(3.0f * tex_offset.x,  0));
 
-		result += BrightColor(texcoords + float2(-3.0f * tex_offset.x, 1.0f * tex_offset.y));
-		result += BrightColor(texcoords + float2(-2.0f * tex_offset.x, 1.0f * tex_offset.y));
-		result += BrightColor(texcoords + float2(-1.0f * tex_offset.x, 1.0f * tex_offset.y));
-		result += BrightColor(texcoords + float2(0,                    1.0f * tex_offset.y));
-		result += BrightColor(texcoords + float2(1.0f * tex_offset.x,  1.0f * tex_offset.y));
-		result += BrightColor(texcoords + float2(2.0f * tex_offset.x,  1.0f * tex_offset.y));
-		result += BrightColor(texcoords + float2(3.0f * tex_offset.x,  1.0f * tex_offset.y));
+		result += tex2D(SamplerBC,texcoords + float2(-3.0f * tex_offset.x, 1.0f * tex_offset.y));
+		result += tex2D(SamplerBC,texcoords + float2(-2.0f * tex_offset.x, 1.0f * tex_offset.y));
+		result += tex2D(SamplerBC,texcoords + float2(-1.0f * tex_offset.x, 1.0f * tex_offset.y));
+		result += tex2D(SamplerBC,texcoords + float2(0,                    1.0f * tex_offset.y));
+		result += tex2D(SamplerBC,texcoords + float2(1.0f * tex_offset.x,  1.0f * tex_offset.y));
+		result += tex2D(SamplerBC,texcoords + float2(2.0f * tex_offset.x,  1.0f * tex_offset.y));
+		result += tex2D(SamplerBC,texcoords + float2(3.0f * tex_offset.x,  1.0f * tex_offset.y));
 
-		result += BrightColor(texcoords + float2(-3.0f * tex_offset.x, 2.0f * tex_offset.y));
-		result += BrightColor(texcoords + float2(-2.0f * tex_offset.x, 2.0f * tex_offset.y));
-		result += BrightColor(texcoords + float2(-1.0f * tex_offset.x, 2.0f * tex_offset.y));
-		result += BrightColor(texcoords + float2(0,                    2.0f * tex_offset.y));
-		result += BrightColor(texcoords + float2(1.0f * tex_offset.x,  2.0f * tex_offset.y));
-		result += BrightColor(texcoords + float2(2.0f * tex_offset.x,  2.0f * tex_offset.y));
-		result += BrightColor(texcoords + float2(3.0f * tex_offset.x,  2.0f * tex_offset.y));
+		result += tex2D(SamplerBC,texcoords + float2(-3.0f * tex_offset.x, 2.0f * tex_offset.y));
+		result += tex2D(SamplerBC,texcoords + float2(-2.0f * tex_offset.x, 2.0f * tex_offset.y));
+		result += tex2D(SamplerBC,texcoords + float2(-1.0f * tex_offset.x, 2.0f * tex_offset.y));
+		result += tex2D(SamplerBC,texcoords + float2(0,                    2.0f * tex_offset.y));
+		result += tex2D(SamplerBC,texcoords + float2(1.0f * tex_offset.x,  2.0f * tex_offset.y));
+		result += tex2D(SamplerBC,texcoords + float2(2.0f * tex_offset.x,  2.0f * tex_offset.y));
+		result += tex2D(SamplerBC,texcoords + float2(3.0f * tex_offset.x,  2.0f * tex_offset.y));
 
-		result += BrightColor(texcoords + float2(-2.0f * tex_offset.x, 3.0f * tex_offset.y));
-		result += BrightColor(texcoords + float2(-1.0f * tex_offset.x, 3.0f * tex_offset.y));
-		result += BrightColor(texcoords + float2(0,                    3.0f * tex_offset.y));
-		result += BrightColor(texcoords + float2(1.0f * tex_offset.x,  3.0f * tex_offset.y));
-		result += BrightColor(texcoords + float2(2.0f * tex_offset.x,  3.0f * tex_offset.y));
+		result += tex2D(SamplerBC,texcoords + float2(-2.0f * tex_offset.x, 3.0f * tex_offset.y));
+		result += tex2D(SamplerBC,texcoords + float2(-1.0f * tex_offset.x, 3.0f * tex_offset.y));
+		result += tex2D(SamplerBC,texcoords + float2(0,                    3.0f * tex_offset.y));
+		result += tex2D(SamplerBC,texcoords + float2(1.0f * tex_offset.x,  3.0f * tex_offset.y));
+		result += tex2D(SamplerBC,texcoords + float2(2.0f * tex_offset.x,  3.0f * tex_offset.y));
    }
    
    result /= 23;
@@ -249,29 +259,16 @@ float4 Blur(float2 texcoords : TEXCOORD0)
    return result;
 }
 
-float4 MIPs(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Target
-{
-	float4 HVC, H, V, C = Blur(float2(texcoord.x, texcoord.y));
-	float2 S = float2(Spread * 0.04f, Spread * 0.04f) * pix;
-	
-	H = lerp(Blur(float2(texcoord.x + S.x, texcoord.y + S.y)),Blur(float2(texcoord.x - S.x, texcoord.y - S.y)),0.5);
-	V = lerp(Blur(float2(texcoord.x - S.x, texcoord.y + S.y)),Blur(float2(texcoord.x + S.x, texcoord.y - S.y)),0.5);
-	
-	HVC = (H + V + C) * 0.33333333f;
-
-return HVC; 
-}
-
 float4 HDROut(float2 texcoord : TEXCOORD0)
 {		
 	float4 Out;
     float3 TM, Color = tex2D(BackBuffer, texcoord).rgb, HDR = tex2D(BackBuffer, texcoord).rgb;      
-    float3 bloomColor = (tex2Dlod(SamplerMip, float4(texcoord,0,MipLevelAdjust)).rgb + tex2D(PSBackBuffer, texcoord).rgb); // Merge Current and past frame.
-    //HDR 
-    HDR += bloomColor; 
-    // Tone Mapping done here.
-	TM = 1.0 - exp(-HDR * Exposure);//Basic Exposure Adjustment
-	Color = lerp(pow(abs(Color + TM),HDR_Adjust),Color,0.5); 
+    float3 bloomColor = tex2Dlod(SamplerMip, float4(texcoord,0,MipLevelAdjust)).rgb + tex2D(PSBackBuffer, texcoord).rgb; // Merge Current and past frame.
+    //Tone Mapping done here.
+	TM = 1.0 - exp(-bloomColor * Exposure);//Basic Exposure Adjustment
+	//HDR
+	HDR += TM;
+	Color = pow(HDR,HDR_Adjust); 
 	
 	if (!Debug_View)
 	{
@@ -283,6 +280,11 @@ float4 HDROut(float2 texcoord : TEXCOORD0)
 	}
 	
 	return Out;
+}
+
+float4 MIPs(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Target
+{
+return Blur(float2(texcoord.x, texcoord.y)); 
 }
 
 void Past_BackSingleBuffer(float4 position : SV_Position, float2 texcoord : TEXCOORD, out float4 PastSingle : SV_Target)
@@ -406,7 +408,13 @@ void PostProcessVS(in uint id : SV_VertexID, out float4 position : SV_Position, 
 //*Rendering passes*//
 technique Blooming_HDR
 {
-		pass MIPsFilter
+		pass Bright_Filter
+	{
+		VertexShader = PostProcessVS;
+		PixelShader = BrightColors;
+		RenderTarget = texBC;
+	}
+		pass Blur_Filter
 	{
 		VertexShader = PostProcessVS;
 		PixelShader = MIPs;
