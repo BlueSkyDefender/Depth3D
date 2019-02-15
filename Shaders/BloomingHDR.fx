@@ -49,9 +49,16 @@ uniform float HDR_Adjust <
 	ui_min = 0.5; ui_max = 2.0;
 	ui_label = "HDR Adjust";
 	ui_tooltip = "Use this to adjust HDR levels for your content.\n"
-				"Number 1.100 is default.";
+				"Number 1.125 is default.";
 	ui_category = "HDR Adjustments";
-> = 1.100;
+> = 1.125;
+
+uniform bool Auto_Exposure <
+	ui_label = "Auto Exposure";
+	ui_tooltip = "This will enable the shader to adjust exposure automaticly.\n"
+				"You will still need to adjust exposure below.";
+	ui_category = "HDR Adjustments";
+> = false;
 
 uniform float Exposure<
 	#if Compatibility
@@ -62,9 +69,9 @@ uniform float Exposure<
 	ui_min = 0.0; ui_max = 1.0;
 	ui_label = "Exposure";
 	ui_tooltip = "Use this to set HDR exposure for your content.\n"
-				"Number 0.125 is default.";
+				"Number 0.100 is default.";
 	ui_category = "HDR Adjustments";
-> = 0.125;
+> = 0.100;
 
 uniform float Saturation <
 	#if Compatibility
@@ -153,6 +160,7 @@ sampler PSBackBuffer
 		
 //Total amount of frames since the game started.
 uniform uint framecount < source = "framecount"; >;	
+uniform float frametime < source = "frametime";>;
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #define Alternate framecount % 2 == 0  
 #define MipLevelAdjust 2 //This is used for removing banding in the Bloom.
@@ -175,7 +183,45 @@ float3 Luma()
 	}
 	return Luma;
 }
- 
+
+/////////////////////////////////////////////////////////////////////////////////Adapted Luminance/////////////////////////////////////////////////////////////////////////////////
+texture texLumAvg {Width = 128; Height = 128; Format = RGBA8; MipLevels = 8;}; //Sample at 128x128 and a mip bias of 8 should be 1x1 
+																				
+sampler SamplerLum																
+	{
+		Texture = texLumAvg;
+		MipLODBias = 8.0f; //Luminance adapted luminance value from 1x1 Texture Mip lvl of 8
+		MinFilter = LINEAR;
+		MagFilter = LINEAR;
+		MipFilter = LINEAR;
+	};
+	
+texture PStexLumAvg {Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA8; };
+																				
+sampler SamplerPSLum																
+	{
+		Texture = PStexLumAvg;
+		MinFilter = LINEAR;
+		MagFilter = LINEAR;
+		MipFilter = LINEAR;
+	};
+	
+float Luminance(float4 pos : SV_Position, float2 texcoord : TEXCOORD) : SV_Target
+{
+	float GSBB = dot(tex2D(BackBuffer, texcoord).rgb, Luma());
+	return GSBB;
+}
+
+float Average_Luminance(float2 texcoords : TEXCOORD)
+{
+	float lum = tex2D(SamplerLum, 0.5).x;
+	float lumlast = length(tex2D(PSBackBuffer, 0.0).www);
+	//Temporal adaptation https://knarkowicz.wordpress.com/2016/01/09/automatic-exposure/
+   return lumlast + (lum - lumlast) * (1.0 - exp2(-frametime));
+}
+   
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	
 float4 BrightColors(float4 position : SV_Position, float2 texcoords : TEXCOORD) : SV_Target //bright-pass filter is applied to dim-down the darkest areas of the scene.
 {   
 	float4 BC, Color = tex2D(BackBuffer, texcoords);
@@ -260,12 +306,17 @@ float4 Blur(float2 texcoords : TEXCOORD0)//Then blurred.
 }
 
 float4 HDROut(float2 texcoord : TEXCOORD0)
-{		
+{	
+	float AL = Average_Luminance(texcoord).x, Ex = Exposure;
+	
+	if(Auto_Exposure)
+	Ex = Ex * AL;
+         
 	float4 Out;
     float3 TM, Color = tex2D(BackBuffer, texcoord).rgb, HDR = tex2D(BackBuffer, texcoord).rgb;      
     float3 bloomColor = tex2Dlod(SamplerMip, float4(texcoord,0,MipLevelAdjust)).rgb + tex2D(PSBackBuffer, texcoord).rgb; // Merge Current and past frame.
     //Tone Mapping done here.
-	TM = 1.0 - exp(-bloomColor * Exposure);//Basic Exposure Adjustment
+	TM = 1.0 - exp(-bloomColor * Ex );
 	//HDR
 	HDR += TM;
 	Color = pow(HDR,HDR_Adjust); 
@@ -289,7 +340,7 @@ return Blur(float2(texcoord.x, texcoord.y));
 
 void Past_BackSingleBuffer(float4 position : SV_Position, float2 texcoord : TEXCOORD, out float4 PastSingle : SV_Target)
 {	
-	PastSingle = tex2Dlod(SamplerMip, float4(texcoord,0,MipLevelAdjust));
+	PastSingle = float4(tex2Dlod(SamplerMip, float4(texcoord,0,MipLevelAdjust)).rgb,Average_Luminance(0.0).x);
 }
 
 uniform float timer < source = "timer"; >;
@@ -407,7 +458,7 @@ void PostProcessVS(in uint id : SV_VertexID, out float4 position : SV_Position, 
 
 //*Rendering passes*//
 technique Blooming_HDR
-{
+{	
 		pass Bright_Filter
 	{
 		VertexShader = PostProcessVS;
@@ -420,6 +471,12 @@ technique Blooming_HDR
 		PixelShader = MIPs;
 		RenderTarget = texM;
 	}
+		pass AvgLum
+    {
+        VertexShader = PostProcessVS;
+        PixelShader = Luminance;
+        RenderTarget = texLumAvg;
+    }
 		pass HDROut
 	{
 		VertexShader = PostProcessVS;
