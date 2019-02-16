@@ -25,8 +25,8 @@
 // Determines The resolution of the Depth Map. For 4k Use 1.75 or 1.5. For 1440p Use 1.5 or 1.25. For 1080p use 1. Too low of a resolution will remove too much.
 #define Depth_Map_Division 1.0
 
-// Zero Parallax Distance Mode allows you to switch control from manual to automatic and vice versa. You need to turn this on to use UI Masking options.
-#define ZPD_Mode 0 //Default 0 is Automatic. One is Manual.
+// Zero Parallax Distance Balance Mode allows you to switch control from manual to automatic and vice versa. You need to turn this on to use UI Masking options.
+#define Balance_Mode 0 //Default 0 is Automatic. One is Manual.
 
 // RE Fix is used to fix the issue with Resident Evil's 2 Remake 1-Shot cutscenes.
 #define RE_Fix 0 //Default 0 is Off. One is On. 
@@ -112,7 +112,7 @@ uniform float ZPD <
 	ui_category = "Divergence & Convergence";
 > = 0.010;
 
-#if ZPD_Mode
+#if Balance_Mode
 uniform float ZPD_Balance <
 	ui_type = "drag";
 	ui_min = 0.0; ui_max = 1.0;
@@ -300,7 +300,7 @@ uniform float WZF_Adjust <
 	ui_category = "Weapon Anti Z-Fighting";
 > = 0;
 #endif
-#if ZPD_Mode
+#if Balance_Mode
 //Heads-Up Display
 uniform float2 HUD_Adjust <
 	ui_type = "drag";
@@ -951,7 +951,7 @@ void AO_in(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out
 
 //AO END//
 #endif
-#if ZPD_Mode
+#if Balance_Mode
 float4 HUD(float4 HUD, float2 texcoord ) 
 {		
 	float Mask_Tex, CutOFFCal = ((HUD_Adjust.x * 0.5)/DMA()) * 0.5, COC = step(Depth(texcoord).x,CutOFFCal); //HUD Cutoff Calculation
@@ -997,7 +997,7 @@ float Conv(float D,float2 texcoord)
 		if(Convergence_Mode)
 			Z = Divergence_Locked;
 			
-	#if ZPD_Mode
+	#if Balance_Mode
 			ZP = saturate(ZPD_Balance);			
 	#else
 		if(Auto_Balance_Ex > 0 )
@@ -1280,7 +1280,7 @@ float4 PS_calcLR(float2 texcoord)
 		Left = R;
 		Right = L;
 	}
-	#if ZPD_Mode	
+	#if Balance_Mode	
 	float HUD_Adjustment = ((0.5 - HUD_Adjust.y)*25) * pix.x;
 	Left = HUD(Left,float2(TCL.x - HUD_Adjustment,TCL.y));
 	Right = HUD(Right,float2(TCR.x + HUD_Adjustment,TCR.y));
