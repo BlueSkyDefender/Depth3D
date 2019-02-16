@@ -24,6 +24,9 @@
 // Determines the resolution of the Depth Map. Too low of a resolution will remove too much information. This will effect performance.
 #define Depth_Map_Resolution 1.0 //1.0 is 100% | 0.50 is 50%
 
+// Zero Parallax Distance Mode allows you to switch control from manual to automatic and vice versa. You need to turn this on to use UI Masking options.
+#define ZPD_Mode 0 //Default 0 is Automatic. One is Manual.
+
 // RE Fix is used to fix the issue with Resident Evil's 2 Remake 1-Shot cutscenes.
 #define RE_Fix 0 //Default 0 is Off. One is On.
 
@@ -99,6 +102,17 @@ uniform float ZPD <
 	ui_category = "Divergence & Convergence";
 > = 0.010;
 				 
+#if ZPD_Mode
+uniform float ZPD_Balance <
+	ui_type = "drag";
+	ui_min = 0.0; ui_max = 1.0;
+	ui_label = " ZPD Balance";
+	ui_tooltip = "Zero Parallax Distance balances between ZPD Depth and Scene Depth.\n"
+				"Default is Zero is full Convergence and One is Full Depth.";
+	ui_category = "Divergence & Convergence";
+> = 0.5;
+#define Auto_Balance_Ex 0
+#else
 uniform int Auto_Balance_Ex <
 	#if Compatibility
 	ui_type = "drag";
@@ -111,6 +125,7 @@ uniform int Auto_Balance_Ex <
 				 "Default is Off.";
 	ui_category = "Divergence & Convergence";
 > = 0;
+#endif
 
 uniform float Auto_Depth_Range <
 	ui_type = "drag";
@@ -255,6 +270,7 @@ uniform float WZF_Adjust <
 	ui_category = "Weapon Anti Z-Fighting";
 > = 0;
 #endif
+#if ZPD_Mode
 //Heads-Up Display
 uniform float2 HUD_Adjust <
 	ui_type = "drag";
@@ -267,7 +283,7 @@ uniform float2 HUD_Adjust <
 	             "Default is float2(X 0.0, Y 0.5)";
 	ui_category = "Heads-Up Display";
 > = float2(0.0,0.5);
-
+#endif
 //Stereoscopic Options//
 uniform int Stereoscopic_Mode <
 	ui_type = "combo";
@@ -915,7 +931,7 @@ void AO_in(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out
 
 //AO END//
 #endif
-
+#if ZPD_Mode
 float4 HUD(float4 HUD, float2 texcoord ) 
 {			
 	float Mask_Tex, CutOFFCal = ((HUD_Adjust.x * 0.5)/DMA()) * 0.5, COC = step(Depth(texcoord).x,CutOFFCal); //HUD Cutoff Calculation
@@ -936,7 +952,7 @@ float4 HUD(float4 HUD, float2 texcoord )
 #endif		
 	return HUD;	
 }
-
+#endif	
 float AutoDepthRange( float d, float2 texcoord )
 {
 	float LumAdjust = smoothstep(-0.0175f,Auto_Depth_Range,Lum(texcoord).y);
@@ -957,10 +973,12 @@ float Conv(float DM,float2 texcoord)
 	#endif					
 		if (Auto_Depth_Range > 0)
 			DM = AutoDepthRange(DM,texcoord);
-		
+	#if ZPD_Mode
+			ZP = saturate(ZPD_Balance);			
+	#else
 		if(Auto_Balance_Ex > 0 )
-			ZP = clamp(ALC,0.0f,1.0f);
-						
+			ZP = saturate(ALC);
+	#endif					
 		float Convergence = 1 - Z / DM;				
 		
 		if (ZPD == 0)
@@ -1189,11 +1207,11 @@ float4 PS_calcLR(float2 texcoord)
 		cL = Right;
 		cR = Left;	
 	}
-	
+	#if ZPD_Mode	
 	float HUD_Adjustment = ((0.5 - HUD_Adjust.y)*25) * pix.x;
 	cL = HUD(cL,float2(TCL.x - HUD_Adjustment,TCL.y));
 	cR = HUD(cR,float2(TCR.x + HUD_Adjustment,TCR.y));
-	
+	#endif	
 	if(!Depth_Map_View)
 	{	
 	float2 gridxy;

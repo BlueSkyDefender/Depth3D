@@ -25,7 +25,7 @@
 // Determines The resolution of the Depth Map. For 4k Use 1.75 or 1.5. For 1440p Use 1.5 or 1.25. For 1080p use 1. Too low of a resolution will remove too much.
 #define Depth_Map_Division 1.0
 
-// Zero Parallax Distance Mode allows you to switch control from manual to automatic and vice versa.
+// Zero Parallax Distance Mode allows you to switch control from manual to automatic and vice versa. You need to turn this on to use UI Masking options.
 #define ZPD_Mode 0 //Default 0 is Automatic. One is Manual.
 
 // RE Fix is used to fix the issue with Resident Evil's 2 Remake 1-Shot cutscenes.
@@ -300,6 +300,7 @@ uniform float WZF_Adjust <
 	ui_category = "Weapon Anti Z-Fighting";
 > = 0;
 #endif
+#if ZPD_Mode
 //Heads-Up Display
 uniform float2 HUD_Adjust <
 	ui_type = "drag";
@@ -312,7 +313,7 @@ uniform float2 HUD_Adjust <
 	             "Default is float2(X 0.0, Y 0.5)";
 	ui_category = "Heads-Up Display";
 > = float2(0.0,0.5);
-
+#endif
 //Stereoscopic Options//
 uniform int Stereoscopic_Mode <
 	ui_type = "combo";
@@ -950,7 +951,7 @@ void AO_in(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out
 
 //AO END//
 #endif
-
+#if ZPD_Mode
 float4 HUD(float4 HUD, float2 texcoord ) 
 {		
 	float Mask_Tex, CutOFFCal = ((HUD_Adjust.x * 0.5)/DMA()) * 0.5, COC = step(Depth(texcoord).x,CutOFFCal); //HUD Cutoff Calculation
@@ -971,7 +972,7 @@ float4 HUD(float4 HUD, float2 texcoord )
 #endif		
 	return HUD;	
 }
-
+#endif
 float AutoDepthRange( float d, float2 texcoord )
 {
 	float LumAdjust_ADR = smoothstep(-0.0175f,Auto_Depth_Range,Lum(texcoord).y);
@@ -1000,7 +1001,7 @@ float Conv(float D,float2 texcoord)
 			ZP = saturate(ZPD_Balance);			
 	#else
 		if(Auto_Balance_Ex > 0 )
-			ZP = clamp(ALC,0.0f,1.0f);
+			ZP = saturate(ALC);
 	#endif
 				
 		float Convergence = 1 - Z / D;
@@ -1279,11 +1280,11 @@ float4 PS_calcLR(float2 texcoord)
 		Left = R;
 		Right = L;
 	}
-	
+	#if ZPD_Mode	
 	float HUD_Adjustment = ((0.5 - HUD_Adjust.y)*25) * pix.x;
 	Left = HUD(Left,float2(TCL.x - HUD_Adjustment,TCL.y));
 	Right = HUD(Right,float2(TCR.x + HUD_Adjustment,TCR.y));
-			
+	#endif	
 	if(!Depth_Map_View)
 	{
 	float2 gridxy;
