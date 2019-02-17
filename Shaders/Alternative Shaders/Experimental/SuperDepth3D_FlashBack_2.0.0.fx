@@ -1080,11 +1080,11 @@ void Encode(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, ou
 float4 Decode(in float2 texcoord : TEXCOORD0)
 {
 	//Byte Shift for Debanding depth buffer in final 3D image & Disocclusion Decoding.
-	float ByteN = Byte_Shift, MS = Divergence * pix.x, X = texcoord.x + MS * Conv(UnpackDepth(tex2D(SamplerEncodeFBA,texcoord)),texcoord), Y = (1 - texcoord.x) + MS * Conv(UnpackDepth(tex2D(SamplerEncodeFBB,texcoord)),texcoord), Z = Conv(UnpackDepth(tex2Dlod(SamplerDisFB,float4(texcoord,0,0))),texcoord);
-	//float A = dot(X.xxx, float3(1.0f, 1.0f / ByteN, 1.0f / (ByteN * ByteN)) ); //byte_to_float Left
-	//float B = dot(Y.xxx, float3(1.0f, 1.0f / ByteN, 1.0f / (ByteN * ByteN)) ); //byte_to_float Right
-	//float C = dot(Z.xxx, float3(1.0f, 1.0f / ByteN, 1.0f / (ByteN * ByteN)) ); //byte_to_float ZPD L & R
-	return float4(X,Y,Z,1.0);
+	float ByteN = Byte_Shift, MS = Divergence * pix.x, X = texcoord.x + MS * Conv(UnpackDepth(tex2Dlod(SamplerEncodeFBA,float4(texcoord,0,0))),texcoord), Y = (1 - texcoord.x) + MS * Conv(UnpackDepth(tex2Dlod(SamplerEncodeFBB,float4(texcoord,0,0))),texcoord), Z = Conv(UnpackDepth(tex2Dlod(SamplerDisFB,float4(texcoord,0,0))),texcoord);
+	float A = dot(X.xxx, float3(1.0f, 1.0f / ByteN, 1.0f / (ByteN * ByteN)) ); //byte_to_float Left
+	float B = dot(Y.xxx, float3(1.0f, 1.0f / ByteN, 1.0f / (ByteN * ByteN)) ); //byte_to_float Right
+	float C = dot(Z.xxx, float3(1.0f, 1.0f / ByteN, 1.0f / (ByteN * ByteN)) ); //byte_to_float ZPD L & R
+	return float4(A,B,C,1.0);
 }
 
 float4 PS_calcLR(float2 texcoord)
