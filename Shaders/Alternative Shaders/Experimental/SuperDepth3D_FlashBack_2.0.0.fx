@@ -1172,7 +1172,7 @@ float4 PS_calcLR(float2 texcoord)
 		for (int i = 0; i < Divergence + 7.5; i++) 
 		{				
 			//L
-			if( Decode(float2(TCL.x+i*pix.x,TCL.y)).y >= (1-TCL.x)-pix.x * 0.5f && Decode(float2(TCL.x+i*pix.x,TCL.y)).y <= (1-TCL.x)+pix.x * 10 )
+			if( Decode(float2(TCL.x+i*pix.x,TCL.y)).y >= (1-TCL.x)-pix.x && Decode(float2(TCL.x+i*pix.x,TCL.y)).y <= (1-TCL.x)+pix.x * 10 )
 				{
 					if(Custom_Sidebars == 0)
 					{
@@ -1188,7 +1188,7 @@ float4 PS_calcLR(float2 texcoord)
 					}
 				}
 			//R
-			if( Decode(float2(TCR.x-i*pix.x,TCR.y)).x >= TCR.x-pix.x * 0.5f && Decode(float2(TCR.x-i*pix.x,TCR.y)).x <= TCR.x+pix.x * 10 )
+			if( Decode(float2(TCR.x-i*pix.x,TCR.y)).x >= TCR.x-pix.x && Decode(float2(TCR.x-i*pix.x,TCR.y)).x <= TCR.x+pix.x * 10 )
 				{
 					if(Custom_Sidebars == 0)
 					{
