@@ -583,20 +583,17 @@ float LumWeapon(in float2 texcoord : TEXCOORD0)
 	}
 	
 /////////////////////////////////////////////////////////////////////////////////Depth Map Information/////////////////////////////////////////////////////////////////////////////////
-float4 PackDepth(in float frag_depth) 
+float4 PackDepth(in float depth) 
 {
-    const float4 bitSh = float4(256.0 * 256.0 * 256.0, 256.0 * 256.0, 256.0, 1.0);
-    const float4 bitMsk = float4(0.0, 1.0 / 256.0, 1.0 / 256.0, 1.0 / 256.0);
-    float4 enc = frac(frag_depth * bitSh);
-    enc -= enc.xxyz * bitMsk;
-    return enc;
+    depth *= (256.0*256.0*256.0 - 1.0) / (256.0*256.0*256.0);
+    float4 encode = frac( depth * float4(1.0, 256.0, 256.0*256.0, 256.0*256.0*256.0) );
+    return float4( encode.xyz - encode.yzw / 256.0, encode.w ) + 1.0/512.0;
 }
 
-float UnpackDepth(in float4 enc ) 
+float UnpackDepth(in float4 pack ) 
 {
-    const float4 bit_shift = float4( 1.0 / ( 256.0 * 256.0 * 256.0 ), 1.0 / ( 256.0 * 256.0 ), 1.0 / 256.0, 1.0 );
-    float decoded = dot( enc, bit_shift );
-    return decoded;
+    float depth = dot( pack, 1.0 / float4(1.0, 256.0, 256.0*256.0, 256.0*256.0*256.0) );
+    return depth * (256.0*256.0*256.0) / (256.0*256.0*256.0 - 1.0);
 }
 
 float DMA()//Depth Map Adjustment
@@ -852,7 +849,7 @@ float4 CD(in float2 texcoord : TEXCOORD0)
 
 void DepthMap(in float4 position : SV_Position, in float2 tcs : TEXCOORD0, out float4 Color : SV_Target)
 {			
-	Color = PackDepth(CD(tcs).xxxx);
+	Color = PackDepth(CD(tcs).x);
 }
 
 float UPDepth(float2 coords)
@@ -1055,7 +1052,7 @@ void  Disocclusion(in float4 position : SV_Position, in float2 texcoord : TEXCOO
 		DM = zBuffer(texcoord).x;
 	}
 
-	color = PackDepth(DM.xxxx);	
+	color = PackDepth(min(1.0f,DM));	
 }
 
 /////////////////////////////////////////L/R//////////////////////////////////////////////////////////////////////
@@ -1073,8 +1070,8 @@ void Encode(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, ou
 		continue;
 	}	
 	
-	color_X = PackDepth(DepthL.xxxx);
-	color_Y = PackDepth(DepthR.xxxx);
+	color_X = PackDepth(DepthL);
+	color_Y = PackDepth(DepthR);
 }
 
 float4 Decode(in float2 texcoord : TEXCOORD0)

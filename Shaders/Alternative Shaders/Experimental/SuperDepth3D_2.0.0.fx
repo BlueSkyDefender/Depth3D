@@ -594,20 +594,17 @@ float LumWeapon(in float2 texcoord : TEXCOORD0)
 	}
 	
 /////////////////////////////////////////////////////////////////////////////////Depth Map Information/////////////////////////////////////////////////////////////////////////////////
-float4 PackDepth(in float frag_depth) 
+float4 PackDepth(in float depth) 
 {
-    const float4 bitSh = float4(256.0 * 256.0 * 256.0, 256.0 * 256.0, 256.0, 1.0);
-    const float4 bitMsk = float4(0.0, 1.0 / 256.0, 1.0 / 256.0, 1.0 / 256.0);
-    float4 enc = frac(frag_depth * bitSh);
-    enc -= enc.xxyz * bitMsk;
-    return enc;
+    depth *= (256.0*256.0*256.0 - 1.0) / (256.0*256.0*256.0);
+    float4 encode = frac( depth * float4(1.0, 256.0, 256.0*256.0, 256.0*256.0*256.0) );
+    return float4( encode.xyz - encode.yzw / 256.0, encode.w ) + 1.0/512.0;
 }
 
-float UnpackDepth(in float4 enc ) 
+float UnpackDepth(in float4 pack ) 
 {
-    const float4 bit_shift = float4( 1.0 / ( 256.0 * 256.0 * 256.0 ), 1.0 / ( 256.0 * 256.0 ), 1.0 / 256.0, 1.0 );
-    float decoded = dot( enc, bit_shift );
-    return decoded;
+    float depth = dot( pack, 1.0 / float4(1.0, 256.0, 256.0*256.0, 256.0*256.0*256.0) );
+    return depth * (256.0*256.0*256.0) / (256.0*256.0*256.0 - 1.0);
 }
 
 float DMA()//Depth Map Adjustment
@@ -863,7 +860,7 @@ float4 CD(in float2 texcoord : TEXCOORD0)
 
 void DepthMap(in float4 position : SV_Position, in float2 tcs : TEXCOORD0, out float4 Color : SV_Target)
 {			
-	Color = PackDepth(CD(tcs).xxxx);
+	Color = PackDepth(CD(tcs).x);
 }
 
 float UPDepth(float2 coords)
@@ -1116,7 +1113,7 @@ void  Disocclusion(in float4 position : SV_Position, in float2 texcoord : TEXCOO
 		DM = zBuffer(texcoord);
 	}
 	
-	color = PackDepth(DM.xxxx);
+	color = PackDepth(min(1.0f,DM));
 }
 
 /////////////////////////////////////////L/R//////////////////////////////////////////////////////////////////////
@@ -1479,7 +1476,7 @@ float4 PS_calcLR(float2 texcoord)
 	}
 	else
 	{		
-		float3 RGB = UnpackDepth(tex2Dlod(SamplerDis,float4(TexCoords.x, TexCoords.y,0,0)));
+		float3 RGB = Encode(TexCoords);
 
 		color = float4(RGB.x,AutoDepthRange(RGB.y,TexCoords),RGB.z,1.0);
 	}
