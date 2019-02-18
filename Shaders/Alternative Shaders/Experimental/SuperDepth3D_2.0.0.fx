@@ -373,12 +373,12 @@ uniform bool AO <
 
 uniform float AO_Control <
 	ui_type = "drag";
-	ui_min = 0.001; ui_max = 1.25;
+	ui_min = 0.001; ui_max = 1.5;
 	ui_label = " 3D AO Control";
 	ui_tooltip = "Control the spread of the 3D AO.\n" 
-				 "Default is 0.5625.";
+				 "Default is 0.625.";
 	ui_category = "3D Ambient Occlusion";
-> = 0.5625;
+> = 0.625;
 
 uniform float AO_Power <
 	ui_type = "drag";
@@ -888,16 +888,12 @@ float3 normal_from_depth(float2 texcoords)
 	float offset_N = 100.0f;
 	const float2 offset1 = float2(0,pix.y - offset_N);
 	const float2 offset2 = float2(pix.x - offset_N,0);
-	  
 	float depth1 = AO_Depth(texcoords + offset1).x;
-	float depth2 = AO_Depth(texcoords + offset2).x;
-	  
+	float depth2 = AO_Depth(texcoords + offset2).x; 
 	float3 p1 = float3(offset1, depth1 - AO_Depth(texcoords).x);
-	float3 p2 = float3(offset2, depth2 - AO_Depth(texcoords).x);
-	  
+	float3 p2 = float3(offset2, depth2 - AO_Depth(texcoords).x);  
 	float3 normal = cross(p1, p2);
-	normal.z = -normal.z;
-	  
+	normal.z = -normal.z;  
 	return normalize(normal);
 }
 
@@ -907,7 +903,6 @@ float aoFF(in float3 diff,in float3 cnorm, in float c1, in float c2, float2 texc
 	float Adjust_AO = 1.0f, d = length(diff);
 	float3 Snorm = normal_from_depth(texcoords + float2(c1,c2)), v = normalize(diff);
 	return clamp(dot(normal_from_depth(float2(c1,c2)),-v),-Adjust_AO,1.0) * clamp(dot(Snorm,v) + 2.0 ,-Adjust_AO,1.0) * (1.0 - 1.0/sqrt(1.0/(d*d) + 1.0));
-
 }
 
 void AO_in(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 color : SV_Target0 )
@@ -915,41 +910,34 @@ void AO_in(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out
     //current normal , position and random static texture.
     float3 normal = normal_from_depth(texcoord);
     float3 Gposition = GetPosition(texcoord);
-	float random = frac(sin(dot(texcoord, float2(12.9898, 78.233))) * 43758.5453);
-    
+	float random = frac(sin(dot(texcoord, float2(12.9898, 78.233))) * 43758.5453);    
     //initialize variables:
     int iterations = 2;
-    float aout, num = 4, incx = 2.0f * pix.x, width = pix.x, incy = 2.0f * pix.y, height = pix.y;
-        	
+    float aout, num = 4, incx = 2.0f * pix.x, width = pix.x, incy = 2.0f * pix.y, height = pix.y;    	
 	//2 iterations
 	[loop]
     for(int i = 0; i < iterations; ++i) 
     {
        float npw = (width+incx*random.x)/AO_Depth(texcoord).x;
-       float nph = (height+incy*random.x)/AO_Depth(texcoord).x;
-       
+       float nph = (height+incy*random.x)/AO_Depth(texcoord).x;    
 		if(AO == 1)
 		{
 			float3 ddiff = GetPosition(texcoord.xy+float2(npw,nph))-Gposition;
 			float3 ddiff2 = GetPosition(texcoord.xy+float2(npw,-nph))-Gposition;
 			float3 ddiff3 = GetPosition(texcoord.xy+float2(-npw,nph))-Gposition;
 			float3 ddiff4 = GetPosition(texcoord.xy+float2(-npw,-nph))-Gposition;
-
 			aout += aoFF(ddiff,normal,npw,nph,texcoord);
 			aout += aoFF(ddiff2,normal,npw,-nph,texcoord);
 			aout += aoFF(ddiff3,normal,-npw,nph,texcoord);
 			aout += aoFF(ddiff4,normal,-npw,-nph,texcoord);
-		}
-		
+		}	
 		//increase sampling area
 		width += incx;  
 		height += incy;	    
     } 
     aout /= num * iterations;
-
 	//Luminance adjust used for overbright correction.
-	float OBC =  dot(min(1.0,aout).xxx, float3(0.2627, 0.6780, 0.0593) * 2);
-	color = smoothstep(0,1,OBC.xxxx);
+	color = smoothstep(0,1,dot(min(1.0,aout).xxx, float3(0.2627, 0.6780, 0.0593) * 2).xxxx);
 }
 //AO END//
 #endif
@@ -1025,13 +1013,11 @@ float zBuffer(in float2 texcoord : TEXCOORD0)
 			sum += tex2Dlod(SamplerAO, float4(texcoord.x, texcoord.y,0,1)).x;
 			sum += tex2Dlod(SamplerAO, float4(texcoord.x, texcoord.y,0,2)).x;
 			sum += tex2Dlod(SamplerAO, float4(texcoord.x, texcoord.y,0,3)).x;
-			sum /= 4.0;
+			sum += tex2Dlod(SamplerAO, float4(texcoord.x, texcoord.y,0,4)).x;
+			sum /= 5.0f;
 		}
-	#endif
-	
-	#if AO_TOGGLE
 	if(AO == 1)
-		DM = lerp(DM, (DM+sum) * 0.5,AO_Power);
+		DM = lerp(DM,saturate(sum+DM), AO_Power);
 	#endif
 	
 	if (Cancel_Depth)
