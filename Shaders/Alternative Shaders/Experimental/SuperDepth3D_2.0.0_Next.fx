@@ -84,7 +84,7 @@ uniform float Divergence <
 				 "The process of deriving binocular depth information is called stereopsis.\n"
 				 "You can override this value.";
 	ui_category = "Divergence & Convergence";
-> = 35.0;
+> = 25.0;
 
 uniform int Convergence_Mode <
 	ui_type = "combo";
@@ -150,9 +150,18 @@ uniform int Disocclusion <
 	ui_label = "·Occlusion Quality·";
 	ui_tooltip = "Occlusion masking power & Mask Based culling adjustments.\n"
 				 "Affects Gap/Hole Filling quality.\n"
-				 "Default is 32.";
+				 "Default is 48.";
 	ui_category = "Occlusion Masking";
-> = 32;
+> = 48;
+
+uniform int Dis_Adjust <
+	ui_type = "drag";
+	ui_min = 0; ui_max = 100;
+	ui_label = " Disocclusion Adjust";
+	ui_tooltip = "Use this to adjust the Occlusion Mask.\n"
+				 "Default is Zero.";
+	ui_category = "Occlusion Masking";
+> = 0; //WIP
 
 uniform int Custom_Sidebars <
 	ui_type = "combo";
@@ -842,13 +851,13 @@ float Encode(in float2 texcoord : TEXCOORD0)
 }
 
 // Horizontal parallax offset & Hole filling effect
-float2 Parallax( float MS, float2 Coordinates, float Offset)
+float2 Parallax( float MS, float2 Coordinates, float Offset, float Goffset)
 {
 	//ParallaxSteps
 	int Steps = Disocclusion;
 	
-	// Offset per step progress
-	float LayerDepth = 1.0 / Steps;
+	// Offset per step progress & Limit
+	float LayerDepth = 1.0 / min(256, Steps);
 
 	// Netto layer offset change
 	float deltaCoordinates = MS * LayerDepth;
@@ -859,6 +868,7 @@ float2 Parallax( float MS, float2 Coordinates, float Offset)
 
 	// Steep parallax mapping
 	float CurrentLayerDepth;
+	[loop]
 	while(CurrentLayerDepth < CurrentDepthMapValue)
 	{
 		// Shift coordinates horizontally in linear fasion
@@ -883,6 +893,7 @@ float2 Parallax( float MS, float2 Coordinates, float Offset)
 	ParallaxCoord = PrevParallaxCoord * weight + ParallaxCoord * (1.0f - weight);
 
 	// Apply gap masking (by JMF) Don't know who this Is to credit him.... :(
+	DepthDifference *= Goffset;//WIP
 	DepthDifference *= pix.x; // Replace function
 	ParallaxCoord.x += DepthDifference;
 
@@ -948,8 +959,8 @@ float4 PS_calcLR(float2 texcoord)
 		TCR.x -= (Interlace_Anaglyph.x*0.5) * pix.x;
 	}
 		
-	TCL = Parallax(-MS, TCL, Divergence);						
-	TCR = Parallax(MS, TCR, -Divergence);	
+	TCL = Parallax(-MS, TCL, Divergence,-Dis_Adjust);						
+	TCR = Parallax( MS, TCR,-Divergence, Dis_Adjust);	
 				
 	if(Custom_Sidebars == 0)
 	{
