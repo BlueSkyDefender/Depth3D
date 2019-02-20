@@ -657,7 +657,7 @@ float2 WeaponDepth(in float2 texcoord : TEXCOORD0)
 	else if(WP == 44)//WP 42
 		WA_XYZW = float4(0.277,0.875,-11.875,0);   //TitanFall 2*
 	else if(WP == 45)//WP 43
-		WA_XYZW = float4(0,0,0,0);                 //Game
+		WA_XYZW = float4(0.7,0.250,0,-2);          //Project Warlock*
 	else if(WP == 46)//WP 44
 		WA_XYZW = float4(0.625,0.275,-25.0,-1);    //Kingpin Life of Crime*
 	else if(WP == 47)//WP 45
@@ -932,11 +932,10 @@ float4 PS_calcLR(float2 texcoord)
 	}
 	
 	//MS is Max Separation P is Perspective Adjustment
-	float MS = Divergence * pix.x, P = Perspective * pix.x;
-	
+	float MS = Divergence * pix.x, P = Perspective * pix.x;	
 	TCL.x += P;
 	TCR.x -= P;
-	
+		
 	//Optimization for line & column interlaced out.
 	if (Stereoscopic_Mode == 2)
 	{
