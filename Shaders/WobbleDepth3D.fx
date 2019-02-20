@@ -264,7 +264,7 @@ float2 Parallax( float MS, float2 Coordinates, float Offset,float Goffset)
 	// Netto layer offset change
 	float deltaCoordinates = MS * LayerDepth;
 
-	//Max Seperation Offset is 3% of screen space. But, I like 4%.
+	//Max Seperation Offset is 3% of screen space.
 	float2 ParallaxCoord = Coordinates, DB_Off = float2((Offset * 0.03f) * pix.x,0);
 	float CurrentDepthMapValue = Encode(ParallaxCoord).x;
 
