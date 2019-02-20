@@ -40,10 +40,6 @@
 // The Key Code for Decimal Point is Number 110. Ex. for "." Cancel_Depth_Key 110
 #define Cancel_Depth_Key 0 // You can use http://keycode.info/ to figure out what key is what.
 
-// 3D AO Toggle enable this if you want better 3D seperation between objects. 
-// There will be a performance loss when enabled.
-#define AO_TOGGLE 0 //Default 0 is Off. One is On.
-
 // Use this to Disable or Enable Anti-Z-Fighting Modes for Weapon Hand.
 #define WZF 0 //Default 0 is Off. One is On.
 
@@ -340,34 +336,6 @@ uniform bool Eye_Swap <
 	ui_category = "Stereoscopic Options";
 > = false;
 
-//3D Ambient Occlusion//
-#if AO_TOGGLE
-uniform bool AO <
-	ui_label = "·3D AO Switch·";
-	ui_tooltip = "3D Ambient occlusion mode switch.\n"
-				 "Performance loss when enabled.\n"
-				 "Default is On.";
-	ui_category = "3D Ambient Occlusion";
-> = 1;
-
-uniform float AO_Control <
-	ui_type = "drag";
-	ui_min = 0.001; ui_max = 1.5;
-	ui_label = " 3D AO Control";
-	ui_tooltip = "Control the spread of the 3D AO.\n" 
-				 "Default is 0.625.";
-	ui_category = "3D Ambient Occlusion";
-> = 0.625;
-
-uniform float AO_Power <
-	ui_type = "drag";
-	ui_min = 0.001; ui_max = 0.100;
-	ui_label = " 3D AO Power";
-	ui_tooltip = "Adjust the power 3D AO.\n" 
-				 "Default is 0.0625.";
-	ui_category = "3D Ambient Occlusion";
-> = 0.0625;
-#endif
 //Cursor Adjustments//
 uniform int Cursor_Type <
 	#if Compatibility
@@ -459,19 +427,7 @@ sampler SamplerDM
 	{
 		Texture = texDM;
 	};
-		
-#if AO_TOGGLE	
-texture texAOSD  { Width = BUFFER_WIDTH*0.5; Height = BUFFER_HEIGHT*0.5; Format = RGBA8; MipLevels = 5;}; 
-
-sampler SamplerAO
-	{
-		Texture = texAOSD;
-		MinFilter = LINEAR;
-		MagFilter = LINEAR;
-		MipFilter = LINEAR;
-	};
-#endif
-
+	
 #if UI_MASK
 texture TexMaskA < source = "Mask_A.png"; > { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA8; };
 sampler SamplerMaskA { Texture = TexMaskA;};
@@ -563,19 +519,6 @@ float LumWeapon(in float2 texcoord : TEXCOORD0)
 	}
 	
 /////////////////////////////////////////////////////////////////////////////////Depth Map Information/////////////////////////////////////////////////////////////////////////////////
-float4 PackDepth(in float depth) 
-{
-    depth *= (256.0*256.0*256.0 - 1.0) / (256.0*256.0*256.0);
-    float4 encode = frac( depth * float4(1.0, 256.0, 256.0*256.0, 256.0*256.0*256.0) );
-    return float4( encode.xyz - encode.yzw / 256.0, encode.w ) + 1.0/512.0;
-}
-
-float UnpackDepth(in float4 pack ) 
-{
-    float depth = dot( pack, 1.0 / float4(1.0, 256.0, 256.0*256.0, 256.0*256.0*256.0) );
-    return depth * (256.0*256.0*256.0) / (256.0*256.0*256.0 - 1.0);
-}
-
 float DMA()//Depth Map Adjustment
 {
 	float DMA = Depth_Map_Adjust;	
@@ -801,23 +744,17 @@ float2 WeaponDepth(in float2 texcoord : TEXCOORD0)
 	return float2(zBufferWH.x,WA_XYZW.x);	
 }
 
-//Combined Depth
-float4 CD(in float2 texcoord : TEXCOORD0)
-{	
+float4 DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0) : SV_Target
+{
 		float4 DM = Depth(texcoord).xxxx;
 		
 		float R, G, B, A, WD = WeaponDepth(texcoord).x, CoP = WeaponDepth(texcoord).y, CutOFFCal = (CoP/DMA())/2; //Weapon Cutoff Calculation
-		
 		CutOFFCal = step(DM.x,CutOFFCal);
 					
 		if (WP == 0)
-		{
 			DM.x = DM.x;
-		}
 		else
-		{
 			DM.x = lerp(DM.x,WD,CutOFFCal);
-		}
 		
 		R = DM.x; //Mix Depth
 		G = DM.y; //Weapon Average Luminance
@@ -827,89 +764,6 @@ float4 CD(in float2 texcoord : TEXCOORD0)
 	return saturate(float4(R,G,B,A));
 }
 
-void DepthMap(in float4 position : SV_Position, in float2 tcs : TEXCOORD0, out float4 Color : SV_Target)
-{			
-	Color = PackDepth(CD(tcs).x);
-}
-
-float UPDepth(float2 coords)
-{
-	float DM = UnpackDepth(tex2Dlod(SamplerDM,float4(coords.xy,0,0)));
-	return DM;
-}
-
-#if AO_TOGGLE
-//3D AO START//
-float AO_Depth(float2 coords)
-{
-	float DM = UPDepth(coords.xy);
-	return ( DM - 0 ) / ( AO_Control - 0);
-}
-
-float3 GetPosition(float2 texcoords)
-{
-	float3 DM = AO_Depth(texcoords).xxx;
-	return float3(texcoords.xy*2.0-1.0,1.0)*DM;
-}
-
-float3 normal_from_depth(float2 texcoords) 
-{
-	float offset_N = 100.0f;
-	const float2 offset1 = float2(0,pix.y - offset_N);
-	const float2 offset2 = float2(pix.x - offset_N,0);
-	float depth1 = AO_Depth(texcoords + offset1).x;
-	float depth2 = AO_Depth(texcoords + offset2).x; 
-	float3 p1 = float3(offset1, depth1 - AO_Depth(texcoords).x);
-	float3 p2 = float3(offset2, depth2 - AO_Depth(texcoords).x);  
-	float3 normal = cross(p1, p2);
-	normal.z = -normal.z;  
-	return normalize(normal);
-}
-
-//Ambient Occlusion form factor
-float aoFF(in float3 diff,in float3 cnorm, in float c1, in float c2, float2 texcoords)
-{
-	float Adjust_AO = 1.0f, d = length(diff);
-	float3 Snorm = normal_from_depth(texcoords + float2(c1,c2)), v = normalize(diff);
-	return clamp(dot(normal_from_depth(float2(c1,c2)),-v),-Adjust_AO,1.0) * clamp(dot(Snorm,v) + 2.0 ,-Adjust_AO,1.0) * (1.0 - 1.0/sqrt(1.0/(d*d) + 1.0));
-}
-
-void AO_in(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 color : SV_Target0 )
-{ 
-    //current normal , position and random static texture.
-    float3 normal = normal_from_depth(texcoord);
-    float3 Gposition = GetPosition(texcoord);
-	float random = frac(sin(dot(texcoord, float2(12.9898, 78.233))) * 43758.5453);    
-    //initialize variables:
-    int iterations = 2;
-    float aout, num = 4, incx = 2.0f * pix.x, width = pix.x, incy = 2.0f * pix.y, height = pix.y;    	
-	//2 iterations
-	[loop]
-    for(int i = 0; i < iterations; ++i) 
-    {
-       float npw = (width+incx*random.x)/AO_Depth(texcoord).x;
-       float nph = (height+incy*random.x)/AO_Depth(texcoord).x;    
-		if(AO == 1)
-		{
-			float3 ddiff = GetPosition(texcoord.xy+float2(npw,nph))-Gposition;
-			float3 ddiff2 = GetPosition(texcoord.xy+float2(npw,-nph))-Gposition;
-			float3 ddiff3 = GetPosition(texcoord.xy+float2(-npw,nph))-Gposition;
-			float3 ddiff4 = GetPosition(texcoord.xy+float2(-npw,-nph))-Gposition;
-			aout += aoFF(ddiff,normal,npw,nph,texcoord);
-			aout += aoFF(ddiff2,normal,npw,-nph,texcoord);
-			aout += aoFF(ddiff3,normal,-npw,nph,texcoord);
-			aout += aoFF(ddiff4,normal,-npw,-nph,texcoord);
-		}	
-		//increase sampling area
-		width += incx;  
-		height += incy;	    
-    } 
-    aout /= num * iterations;
-	//Luminance adjust used for overbright correction.
-	color = smoothstep(0,1,dot(aout.xxx, float3(0.2627, 0.6780, 0.0593)).xxxx);
-}
-//AO END//
-#endif
 #if Balance_Mode
 float4 HUD(float4 HUD, float2 texcoord ) 
 {		
@@ -973,23 +827,8 @@ float Conv(float D,float2 texcoord)
 
 float zBuffer(in float2 texcoord : TEXCOORD0)
 {	
-	float DM = UPDepth(texcoord);
-	
-	#if AO_TOGGLE
-	float sum = tex2Dlod(SamplerAO, float4(texcoord.x, texcoord.y,0,0)).x;
-	if(AO == 1)
-		{
-			sum += tex2Dlod(SamplerAO, float4(texcoord.x, texcoord.y,0,1)).x;
-			sum += tex2Dlod(SamplerAO, float4(texcoord.x, texcoord.y,0,2)).x;
-			sum += tex2Dlod(SamplerAO, float4(texcoord.x, texcoord.y,0,3)).x;
-			sum += tex2Dlod(SamplerAO, float4(texcoord.x, texcoord.y,0,4)).x;
-			sum += tex2Dlod(SamplerAO, float4(texcoord.x, texcoord.y,0,5)).x;
-			sum /= 6.0f;
-		}
-	if(AO == 1)
-		DM = lerp(DM,saturate(sum+DM), AO_Power);
-	#endif
-	
+	float DM = tex2Dlod(SamplerDM,float4(texcoord,0,0)).x;
+		
 	if (Cancel_Depth)
 		DM = 0.5f;
 		
@@ -1342,9 +1181,9 @@ float4 PS_calcLR(float2 texcoord)
 	}
 		
 	#if WZF		
-	float WZF_A = WZF_Adjust, Average_Lum = (CD(float2(TexCoords.x,TexCoords.y)).y - WZF_A) / ( 1 - WZF_A);
+	float WZF_A = WZF_Adjust, Average_Lum = (tex2Dlod(SamplerDM,float4(TexCoords.x,TexCoords.y, 0, 0)).y - WZF_A) / ( 1 - WZF_A);
 	#else
-	float Average_Lum = CD(float2(TexCoords.x,TexCoords.y)).y;
+	float Average_Lum = tex2Dlod(SamplerDM,float4(TexCoords.x,TexCoords.y, 0, 0)).y;
 	#endif
 	return float4(color.rgb,Average_Lum);
 }
@@ -1362,8 +1201,8 @@ float4 Average_Luminance(float4 position : SV_Position, float2 texcoord : TEXCOO
 	else if(Auto_Balance_Ex == 5)
 		ABE = float4(0.375, 0.250, 0.0, 1.0);//Center Long
 			
-	float Average_Lum_ZPD = CD(float2(ABE.x + texcoord.x * ABE.y, ABE.z + texcoord.y * ABE.w )).z;
-	float Average_Lum_Full = CD(float2(texcoord.x,texcoord.y )).z;
+	float Average_Lum_ZPD = tex2Dlod(SamplerDM,float4(ABE.x + texcoord.x * ABE.y, ABE.z + texcoord.y * ABE.w, 0, 0)).z;
+	float Average_Lum_Full = tex2Dlod(SamplerDM,float4(texcoord.x,texcoord.y, 0, 0)).z;
 	return float4(Average_Lum_ZPD,Average_Lum_Full,0,1);
 }
 
@@ -1515,14 +1354,6 @@ technique SuperDepth3D
 		PixelShader = DepthMap;
 		RenderTarget = texDM;
 	}
-	#if AO_TOGGLE
-		pass AmbientOcclusion
-	{
-		VertexShader = PostProcessVS;
-		PixelShader = AO_in;
-		RenderTarget = texAOSD;
-	}
-	#endif
 		pass AverageLuminance
 	{
 		VertexShader = PostProcessVS;
