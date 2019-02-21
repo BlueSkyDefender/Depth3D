@@ -145,15 +145,15 @@ uniform float Wobble_Speed <
 	ui_type = "drag";
 	ui_min = 0; ui_max = 1;
 	ui_category = "Stereoscopic Options";
-> = 0.5;
+> = 0.725;
 
 uniform int Wobble_Mode <
 	ui_type = "combo";
-	ui_items = "Wobble Mode X Rotation\0Wobble Mode X Heartbeat\0Wobble Mode X L/R\0Wobble Mode X Lerp\0";
+	ui_items = "Wobble Mode X Rotation\0Wobble Mode X Heartbeat\0Wobble Mode X L/R\0Wobble Mode X Lerp\0Wobble Mode X Full\0";
 	ui_label = "Wobble Transition Effect";
 	ui_tooltip = "Change the Transition of the Wobble 3D Effect.";
 	ui_category = "Stereoscopic Options";
-> = 0;
+> = 4;
 
 /////////////////////////////////////////////D3D Starts Here/////////////////////////////////////////////////////////////////
 
@@ -243,31 +243,27 @@ float Encode(in float2 texcoord : TEXCOORD0)
 }
 
 // Horizontal parallax offset & Hole filling effect
-float2 Parallax( float MS, float2 Coordinates, float Offset)
+float2 Parallax( float Divergence, float2 Coordinates)
 {
 	//ParallaxSteps
 	int Steps = Disocclusion;
 	
-	// Offset per step progress
-	float LayerDepth = 1.0 / Steps;
+	// Offset per step progress & Limit
+	float LayerDepth = 1.0 / min(256, Steps);
 
-	// Netto layer offset change
-	float deltaCoordinates = MS * LayerDepth;
-
-	//Max Seperation Offset is 3% - 5% of screen space.
-	Offset *= 0.05;
-	float2 ParallaxCoord = Coordinates, DB_Off = float2(Offset * pix.x,0);
-	float CurrentDepthMapValue = Encode(ParallaxCoord).x;
+	//Offsets listed here Max Seperation is 3% - 5% of screen space with Depth Offsets & Netto layer offset change based on MS.
+	float MS = Divergence * pix.x, deltaCoordinates = MS * LayerDepth, Offsets = Divergence * 0.05f;
+	float2 ParallaxCoord = Coordinates, DB_Offset = float2(Offsets * pix.x, 0);
+	float CurrentDepthMapValue = Encode(ParallaxCoord).x, CurrentLayerDepth = 0;
 
 	// Steep parallax mapping
-	float CurrentLayerDepth;
 	[loop]
 	while(CurrentLayerDepth < CurrentDepthMapValue)
 	{
 		// Shift coordinates horizontally in linear fasion
 		ParallaxCoord.x -= deltaCoordinates;
 		// Get depth value at current coordinates
-		CurrentDepthMapValue = Encode(ParallaxCoord + DB_Off).x; // Offset
+		CurrentDepthMapValue = Encode(ParallaxCoord - DB_Offset).x; // Offset
 		// Get depth of next layer
 		CurrentLayerDepth += LayerDepth;
 		continue;
@@ -281,14 +277,14 @@ float2 Parallax( float MS, float2 Coordinates, float Offset)
 	// Store depth read difference for masking
 	float DepthDifference = beforeDepthValue - CurrentDepthMapValue;
 
-	beforeDepthValue += LayerDepth - CurrentLayerDepth;
+	beforeDepthValue += distance(LayerDepth,CurrentLayerDepth);
 	// Interpolate coordinates
 	float weight = afterDepthValue / (afterDepthValue - beforeDepthValue);
 	ParallaxCoord = PrevParallaxCoord * weight + ParallaxCoord * (1.0f - weight);
 
 	// Apply gap masking (by JMF) Don't know who this Is to credit him.... :(
-	DepthDifference *= -Offset;//Offset of 5% of Max Seperation seems to work well.
-	DepthDifference *= pix.x; // Replace function
+	DepthDifference *= Offsets; // Seems to be good.
+	DepthDifference *= pix.x;
 	ParallaxCoord.x += DepthDifference;
 
 	return ParallaxCoord;
@@ -307,34 +303,50 @@ float PingPong(float t, float L)
 
 float4 WobbleLRC(in float2 texcoord : TEXCOORD0)
 {	
-	float2 TCL = float2(texcoord.x,texcoord.y), TCR = float2(texcoord.x,texcoord.y);
-	float4 color, Left, Right, Center = tex2D(BackBuffer, texcoord);
-	float w = PingPong(timer/((1-Wobble_Speed)*1000),1);
+	float2 TCL = texcoord, TCR = texcoord, TCC = texcoord;
+	float4 color, Left, Right, Center;
+	float w = PingPong(timer/((1-Wobble_Speed)*1000),1), DW = w;
 	//MS is Max Separation P is Perspective Adjustment
 	float MS = Divergence * pix.x, P = Perspective * pix.x;	
 	TCL.x += P;
 	TCR.x -= P;
 	
+	DW -= 0.5;
+	DW *= Divergence;
+	DW *= 2;
+		
 	TCL.x -= MS * 0.5f;
 	TCR.x += MS * 0.5f;
+	TCC.x += (DW * pix.x) * 0.5;
 	
-	TCL = Parallax(-MS, TCL, Divergence);						
-	TCR = Parallax(MS, TCR, -Divergence);	
-	
-	if(Custom_Sidebars == 0)
+	//Left & Right Parallax for Stereo Vision
+	if (Wobble_Mode <= 3)
 	{
-		Left = tex2D(BackBufferMIRROR,float2(TCL.x, TCL.y));
-		Right = tex2D(BackBufferMIRROR,float2(TCR.x,TCR.y));
-	}
-	else if(Custom_Sidebars == 1)
-	{
-		Left = tex2D(BackBufferBORDER,float2(TCL.x, TCL.y));
-		Right = tex2D(BackBufferBORDER,float2(TCR.x,TCR.y));
+		TCL = Parallax(-Divergence, TCL); //Stereoscopic 3D using Reprojection Left					
+		TCR = Parallax( Divergence, TCR); //Stereoscopic 3D using Reprojection Right	
 	}
 	else
 	{
-		Left = tex2D(BackBufferCLAMP,float2(TCL.x, TCL.y));
-		Right = tex2D(BackBufferCLAMP,float2(TCR.x,TCR.y));
+		TCC = Parallax( DW, TCC);
+	}
+	
+	if(Custom_Sidebars == 0)
+	{
+		Left = tex2D(BackBufferMIRROR,TCL);
+		Right = tex2D(BackBufferMIRROR,TCR);
+		Center = tex2D(BackBufferMIRROR,TCC);
+	}
+	else if(Custom_Sidebars == 1)
+	{
+		Left = tex2D(BackBufferBORDER,TCL);
+		Right = tex2D(BackBufferBORDER,TCR);
+		Center = tex2D(BackBufferBORDER,TCC);
+	}
+	else
+	{
+		Left = tex2D(BackBufferCLAMP,TCL.x);
+		Right = tex2D(BackBufferCLAMP,TCR.x);
+		Center = tex2D(BackBufferCLAMP,TCC);
 	}	
 	
 
@@ -343,57 +355,43 @@ if(!Depth_Map_View)
 		if (Wobble_Mode == 0)
 			{
 				if (w < 0.25)
-				{
 					color = Left;
-				}
 				else if(w > 0.75)
-				{
 					color = Right;
-				}
 				else
-				{
-					color = Center;
-				}
+					color = tex2D(BackBuffer, texcoord);
 			}
 			else if(Wobble_Mode == 1)
 			{
 				if (texcoord.x < w)
-				{
 					color = Left;
-				}
 				else if (texcoord.x > w)
-				{
 					color = Right;	
-				}
 				else
-				{
-					color = Center;
-				}
+					color = tex2D(BackBuffer, texcoord);
 			}
 			else if(Wobble_Mode == 2)
 			{
 				if (w < 0.50)
-				{
 					color = Left;
-				}
 				else if (w > 0.50)
-				{
 					color = Right;
-				}
 				else
-				{
-					color = Center;
-				}
+					color = tex2D(BackBuffer, texcoord);
+			}
+			else if(Wobble_Mode == 3)
+			{
+				color = lerp(Right,Left, w);
 			}
 			else
 			{
-					color = lerp(Right,Left, w);
+				color = Center;
 			}
 			
 	}
 	else
 	{
-		color =  Encode(texcoord.xy);
+		color =  Encode(texcoord);
 	}
 	return color;
 }
