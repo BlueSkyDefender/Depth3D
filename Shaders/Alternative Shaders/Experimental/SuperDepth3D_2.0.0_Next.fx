@@ -146,22 +146,13 @@ uniform float Auto_Depth_Range <
 //Occlusion Masking//
 uniform int Disocclusion <
 	ui_type = "drag";
-	ui_min = 16; ui_max = 128;
+	ui_min = 24; ui_max = 128;
 	ui_label = "·Occlusion Quality·";
 	ui_tooltip = "Occlusion masking power & Mask Based culling adjustments.\n"
 				 "Affects Gap/Hole Filling quality.\n"
 				 "Default is 48.";
 	ui_category = "Occlusion Masking";
 > = 48;
-
-uniform int Dis_Adjust <
-	ui_type = "drag";
-	ui_min = 0; ui_max = 100;
-	ui_label = " Disocclusion Adjust";
-	ui_tooltip = "Use this to adjust the Occlusion Mask.\n"
-				 "Default is Zero.";
-	ui_category = "Occlusion Masking";
-> = 0; //WIP
 
 uniform int Custom_Sidebars <
 	ui_type = "combo";
@@ -851,7 +842,7 @@ float Encode(in float2 texcoord : TEXCOORD0)
 }
 
 // Horizontal parallax offset & Hole filling effect
-float2 Parallax( float MS, float2 Coordinates, float Offset, float Goffset)
+float2 Parallax( float MS, float2 Coordinates, float Offset)
 {
 	//ParallaxSteps
 	int Steps = Disocclusion;
@@ -862,8 +853,9 @@ float2 Parallax( float MS, float2 Coordinates, float Offset, float Goffset)
 	// Netto layer offset change
 	float deltaCoordinates = MS * LayerDepth;
 
-	//Max Seperation Offset is 3% of screen space.
-	float2 ParallaxCoord = Coordinates, DB_Off = float2((Offset * 0.03) * pix.x,0);
+	//Max Seperation Offset is 3% - 5% of screen space.
+	Offset *= 0.05;
+	float2 ParallaxCoord = Coordinates, DB_Off = float2(Offset * pix.x,0);
 	float CurrentDepthMapValue = Encode(ParallaxCoord).x;
 
 	// Steep parallax mapping
@@ -893,7 +885,7 @@ float2 Parallax( float MS, float2 Coordinates, float Offset, float Goffset)
 	ParallaxCoord = PrevParallaxCoord * weight + ParallaxCoord * (1.0f - weight);
 
 	// Apply gap masking (by JMF) Don't know who this Is to credit him.... :(
-	DepthDifference *= Goffset;//WIP
+	DepthDifference *= -Offset;//WIP
 	DepthDifference *= pix.x; // Replace function
 	ParallaxCoord.x += DepthDifference;
 
@@ -959,8 +951,8 @@ float4 PS_calcLR(float2 texcoord)
 		TCR.x -= (Interlace_Anaglyph.x*0.5) * pix.x;
 	}
 		
-	TCL = Parallax(-MS, TCL, Divergence,-Dis_Adjust);						
-	TCR = Parallax( MS, TCR,-Divergence, Dis_Adjust);	
+	TCL = Parallax(-MS, TCL, Divergence);						
+	TCR = Parallax( MS, TCR,-Divergence);	
 				
 	if(Custom_Sidebars == 0)
 	{

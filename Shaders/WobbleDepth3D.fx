@@ -130,16 +130,6 @@ uniform bool Depth_Map_Flip <
 	ui_category = "Depth Map";
 > = false;
 
-uniform int Adjust <
-	ui_type = "drag";
-	ui_min = 0; ui_max = 100;
-	ui_label = " Adjust Hole Filling";
-	ui_tooltip = "Hole.\n"
-				 "Default is Zero.";
-	ui_category = "Stereoscopic Options";
-> = 0;
-
-
 uniform int Perspective <
 	ui_type = "drag";
 	ui_min = -100; ui_max = 100;
@@ -253,7 +243,7 @@ float Encode(in float2 texcoord : TEXCOORD0)
 }
 
 // Horizontal parallax offset & Hole filling effect
-float2 Parallax( float MS, float2 Coordinates, float Offset,float Goffset)
+float2 Parallax( float MS, float2 Coordinates, float Offset)
 {
 	//ParallaxSteps
 	int Steps = Disocclusion;
@@ -264,8 +254,9 @@ float2 Parallax( float MS, float2 Coordinates, float Offset,float Goffset)
 	// Netto layer offset change
 	float deltaCoordinates = MS * LayerDepth;
 
-	//Max Seperation Offset is 3% of screen space.
-	float2 ParallaxCoord = Coordinates, DB_Off = float2((Offset * 0.03f) * pix.x,0);
+	//Max Seperation Offset is 3% - 5% of screen space.
+	Offset *= 0.05;
+	float2 ParallaxCoord = Coordinates, DB_Off = float2(Offset * pix.x,0);
 	float CurrentDepthMapValue = Encode(ParallaxCoord).x;
 
 	// Steep parallax mapping
@@ -296,7 +287,7 @@ float2 Parallax( float MS, float2 Coordinates, float Offset,float Goffset)
 	ParallaxCoord = PrevParallaxCoord * weight + ParallaxCoord * (1.0f - weight);
 
 	// Apply gap masking (by JMF) Don't know who this Is to credit him.... :(
-	DepthDifference *= Goffset;
+	DepthDifference *= -Offset;//Offset of 5% of Max Seperation seems to work well.
 	DepthDifference *= pix.x; // Replace function
 	ParallaxCoord.x += DepthDifference;
 
@@ -327,8 +318,8 @@ float4 WobbleLRC(in float2 texcoord : TEXCOORD0)
 	TCL.x -= MS * 0.5f;
 	TCR.x += MS * 0.5f;
 	
-	TCL = Parallax(-MS, TCL, Divergence,-Adjust);						
-	TCR = Parallax(MS, TCR, -Divergence, Adjust);	
+	TCL = Parallax(-MS, TCL, Divergence);						
+	TCR = Parallax(MS, TCR, -Divergence);	
 	
 	if(Custom_Sidebars == 0)
 	{
