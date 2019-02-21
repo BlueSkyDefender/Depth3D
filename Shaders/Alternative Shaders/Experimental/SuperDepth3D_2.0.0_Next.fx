@@ -842,7 +842,7 @@ float Encode(in float2 texcoord : TEXCOORD0)
 }
 
 // Horizontal parallax offset & Hole filling effect
-float2 Parallax( float MS, float2 Coordinates, float Offset)
+float2 Parallax( float Divergence, float2 Coordinates)
 {
 	//ParallaxSteps
 	int Steps = Disocclusion;
@@ -850,25 +850,22 @@ float2 Parallax( float MS, float2 Coordinates, float Offset)
 	// Offset per step progress & Limit
 	float LayerDepth = 1.0 / min(256, Steps);
 
-	// Netto layer offset change
-	float deltaCoordinates = MS * LayerDepth;
-
-	//Max Seperation Offset is 3% - 5% of screen space.
-	Offset *= 0.05;
-	float2 ParallaxCoord = Coordinates, DB_Off = float2(Offset * pix.x,0);
-	float CurrentDepthMapValue = Encode(ParallaxCoord).x;
+	//Offsets listed here Max Seperation is 3% - 5% of screen space with Depth Offsets & Netto layer offset change based on MS.
+	float MS = Divergence * pix.x, deltaCoordinates = MS * LayerDepth, Offsets = Divergence * 0.05f;
+	float2 ParallaxCoord = Coordinates, DB_Offset = float2(Offsets * pix.x, 0);
+	float CurrentDepthMapValue = Encode(ParallaxCoord).x, CurrentLayerDepth = 0;
 
 	// Steep parallax mapping
-	float CurrentLayerDepth;
 	[loop]
 	while(CurrentLayerDepth < CurrentDepthMapValue)
 	{
 		// Shift coordinates horizontally in linear fasion
 		ParallaxCoord.x -= deltaCoordinates;
 		// Get depth value at current coordinates
-		CurrentDepthMapValue = Encode(ParallaxCoord + DB_Off).x; // Offset
+		CurrentDepthMapValue = Encode(ParallaxCoord - DB_Offset).x; // Offset
 		// Get depth of next layer
 		CurrentLayerDepth += LayerDepth;
+		continue;
 	}
 
 	// Parallax Occlusion Mapping
@@ -879,14 +876,14 @@ float2 Parallax( float MS, float2 Coordinates, float Offset)
 	// Store depth read difference for masking
 	float DepthDifference = beforeDepthValue - CurrentDepthMapValue;
 
-	beforeDepthValue += LayerDepth - CurrentLayerDepth;
+	beforeDepthValue += distance(LayerDepth,CurrentLayerDepth);
 	// Interpolate coordinates
 	float weight = afterDepthValue / (afterDepthValue - beforeDepthValue);
 	ParallaxCoord = PrevParallaxCoord * weight + ParallaxCoord * (1.0f - weight);
 
 	// Apply gap masking (by JMF) Don't know who this Is to credit him.... :(
-	DepthDifference *= -Offset;//WIP
-	DepthDifference *= pix.x; // Replace function
+	DepthDifference *= Offsets; // Seems to be good.
+	DepthDifference *= pix.x;
 	ParallaxCoord.x += DepthDifference;
 
 	return ParallaxCoord;
@@ -934,8 +931,8 @@ float4 PS_calcLR(float2 texcoord)
 		}
 	}
 	
-	//MS is Max Separation P is Perspective Adjustment
-	float MS = Divergence * pix.x, P = Perspective * pix.x;	
+	//P is Perspective Adjustment
+	float P = Perspective * pix.x;	
 	TCL.x += P;
 	TCR.x -= P;
 		
@@ -950,9 +947,10 @@ float4 PS_calcLR(float2 texcoord)
 		TCL.x += (Interlace_Anaglyph.x*0.5) * pix.x;
 		TCR.x -= (Interlace_Anaglyph.x*0.5) * pix.x;
 	}
-		
-	TCL = Parallax(-MS, TCL, Divergence);						
-	TCR = Parallax( MS, TCR,-Divergence);	
+	
+	//Left & Right Parallax for Stereo Vision
+	TCL = Parallax(-Divergence, TCL); //Stereoscopic 3D using Reprojection Left					
+	TCR = Parallax( Divergence, TCR); //Stereoscopic 3D using Reprojection Right	
 				
 	if(Custom_Sidebars == 0)
 	{
