@@ -1,3 +1,0 @@
-This is a read me txt file.
-
-Make sure you only use only one of the shaders at a time.

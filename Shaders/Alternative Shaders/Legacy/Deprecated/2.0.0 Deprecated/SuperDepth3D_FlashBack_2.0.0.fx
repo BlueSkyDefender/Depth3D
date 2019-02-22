@@ -38,10 +38,6 @@
 // The Key Code for Decimal Point is Number 110. Ex. for "." Cancel_Depth_Key 110
 #define Cancel_Depth_Key 0 // You can use http://keycode.info/ to figure out what key is what.
 
-// 3D AO Toggle enable this if you want better 3D seperation between objects. 
-// There will be a performance loss when enabled.
-#define AO_TOGGLE 0 //Default 0 is Off. One is On.
-
 // Use this to Disable or Enable Anti-Z-Fighting Modes for Weapon Hand.
 #define WZF 0 //Default 0 is Off. One is On.
 
@@ -330,34 +326,7 @@ uniform bool Eye_Swap <
 	ui_tooltip = "L/R to R/L.";
 	ui_category = "Stereoscopic Options";
 > = false;
-//3D Ambient Occlusion//
-#if AO_TOGGLE
-uniform bool AO <
-	ui_label = "·3D AO Switch·";
-	ui_tooltip = "3D Ambient occlusion mode switch.\n"
-				 "Performance loss when enabled.\n"
-				 "Default is On.";
-	ui_category = "3D Ambient Occlusion";
-> = 1;
 
-uniform float AO_Control <
-	ui_type = "drag";
-	ui_min = 0.001; ui_max = 1.25;
-	ui_label = " 3D AO Control";
-	ui_tooltip = "Control the spread of the 3D AO.\n" 
-				 "Default is 0.5625.";
-	ui_category = "3D Ambient Occlusion";
-> = 0.5625;
-
-uniform float AO_Power <
-	ui_type = "drag";
-	ui_min = 0.001; ui_max = 0.100;
-	ui_label = " 3D AO Power";
-	ui_tooltip = "Adjust the power 3D AO.\n" 
-				 "Default is 0.05625.";
-	ui_category = "3D Ambient Occlusion";
-> = 0.05;
-#endif
 //Cursor Adjustments//
 uniform int Cursor_Type <
 	#if Compatibility
@@ -443,11 +412,18 @@ sampler BackBufferCLAMP
 		AddressW = CLAMP;
 	};
 	
-texture texDMFB  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT * Depth_Map_Resolution; Format = RGBA16F;}; 
+texture texDMFB_A  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT * Depth_Map_Resolution; Format = RGBA16F;}; 
 
-sampler SamplerDMFB
+sampler SamplerDMFB_A
 	{
-		Texture = texDMFB;
+		Texture = texDMFB_A;
+	};
+
+texture texDMFB_B  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT * Depth_Map_Resolution; Format = RGBA16F;}; 
+
+sampler SamplerDMFB_B
+	{
+		Texture = texDMFB_B;
 	};
 	
 texture texDisFB  { Width = BUFFER_WIDTH * Depth_Map_Resolution; Height = BUFFER_HEIGHT * Depth_Map_Resolution; Format = RGBA16F;};
@@ -459,7 +435,7 @@ sampler SamplerDisFB
 		MagFilter = LINEAR;
 		MipFilter = LINEAR;
 	};
-
+	
 texture texEncodeFB_A  { Width = BUFFER_WIDTH * 0.5; Height = BUFFER_HEIGHT * 0.5; Format = RGBA16F; };
 
 sampler SamplerEncodeFBA
@@ -479,19 +455,6 @@ sampler SamplerEncodeFBB
 		MagFilter = LINEAR;
 		MipFilter = LINEAR;
 	};	
-	
-#if AO_TOGGLE	
-texture texAOFB  { Width = BUFFER_WIDTH * 0.5; Height = BUFFER_HEIGHT * 0.5; Format = RGBA8; MipLevels = 4;}; 
-
-sampler SamplerAOFB
-	{
-		Texture = texAOFB;
-		MinFilter = LINEAR;
-		MagFilter = LINEAR;
-		MipFilter = LINEAR;
-	};
-#endif
-
 #if UI_MASK
 texture TexMaskA < source = "Mask_A.png"; > { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA8; };
 sampler SamplerMaskA { Texture = TexMaskA;};
@@ -734,7 +697,7 @@ float2 WeaponDepth(in float2 texcoord : TEXCOORD0)
 	else if(WP == 44)//WP 42
 		WA_XYZW = float4(0.277,0.875,-11.875,0);   //TitanFall 2*
 	else if(WP == 45)//WP 43
-		WA_XYZW = float4(0,0,0,0);                 //Game
+		WA_XYZW = float4(0.7,0.250,0,-2);          //Project Warlock*
 	else if(WP == 46)//WP 44
 		WA_XYZW = float4(0.625,0.275,-25.0,-1);    //Kingpin Life of Crime*
 	else if(WP == 47)//WP 45
@@ -822,7 +785,7 @@ float2 WeaponDepth(in float2 texcoord : TEXCOORD0)
 }
 
 //Combined Depth
-float4 CD(in float2 texcoord : TEXCOORD0)
+void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 ColorA : SV_Target0, out float4 ColorB : SV_Target1)
 {	
 		float4 DM = Depth(texcoord).xxxx;
 		
@@ -831,106 +794,19 @@ float4 CD(in float2 texcoord : TEXCOORD0)
 		CutOFFCal = step(DM.x,CutOFFCal);
 					
 		if (WP == 0)
-		{
 			DM.x = DM.x;
-		}
 		else
-		{
 			DM.x = lerp(DM.x,WD,CutOFFCal);
-		}
 		
 		R = DM.x; //Mix Depth
 		G = DM.y; //Weapon Average Luminance
 		B = DM.z; //Average Luminance
 		A = DM.w; //Normal Depth
 		
-	return saturate(float4(R,G,B,A));
+	ColorA = saturate(float4(R,G,B,A));
+	ColorB = PackDepth(saturate(R));
 }
 
-void DepthMap(in float4 position : SV_Position, in float2 tcs : TEXCOORD0, out float4 Color : SV_Target)
-{			
-	Color = PackDepth(CD(tcs).x);
-}
-
-float UPDepth(float2 coords)
-{
-	float DM = UnpackDepth(tex2Dlod(SamplerDMFB,float4(coords.xy,0,0)));
-	return DM;
-}
-
-#if AO_TOGGLE
-//3D AO START//
-float AO_Depth(float2 coords)
-{
-	float DM = UPDepth(coords.xy);
-	return ( DM - 0 ) / ( AO_Control - 0);
-}
-
-float3 GetPosition(float2 texcoords)
-{
-	float3 DM = AO_Depth(texcoords).xxx;
-	return float3(texcoords.xy*2.0-1.0,1.0)*DM;
-}
-
-float3 normal_from_depth(float2 texcoords) 
-{
-	float offset_N = 100.0f;
-	const float2 offset1 = float2(0,pix.y - offset_N);
-	const float2 offset2 = float2(pix.x - offset_N,0);  
-	float depth1 = AO_Depth(texcoords + offset1).x;
-	float depth2 = AO_Depth(texcoords + offset2).x;  
-	float3 p1 = float3(offset1, depth1 - AO_Depth(texcoords).x);
-	float3 p2 = float3(offset2, depth2 - AO_Depth(texcoords).x);  
-	float3 normal = cross(p1, p2);
-	normal.z = -normal.z; 
-	return normalize(normal);
-}
-
-//Ambient Occlusion form factor
-float aoFF(in float3 diff,in float3 cnorm, in float c1, in float c2, float2 texcoords)
-{
-	float Adjust_AO = 1.0f, d = length(diff);
-	float3 Snorm = normal_from_depth(texcoords + float2(c1,c2)), v = normalize(diff);
-	return clamp(dot(normal_from_depth(float2(c1,c2)),-v),-Adjust_AO,1.0) * clamp(dot(Snorm,v) + 2.0 ,-Adjust_AO,1.0) * (1.0 - 1.0/sqrt(1.0/(d*d) + 1.0));
-}
-
-void AO_in(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 color : SV_Target0 )
-{ 
-    //current normal , position and random static texture.
-    float3 normal = normal_from_depth(texcoord);
-    float3 Gposition = GetPosition(texcoord);
-	float random = frac(sin(dot(texcoord, float2(12.9898, 78.233))) * 43758.5453);
-    //initialize variables:
-    int iterations = 2;
-    float aout, num = 4, incx = 2.0f * pix.x, width = pix.x, incy = 2.0f * pix.y, height = pix.y;   	
-	//2 iterations
-	[loop]
-    for(int i = 0; i < iterations; ++i) 
-    {
-       float npw = (width+incx*random.x)/AO_Depth(texcoord).x;
-       float nph = (height+incy*random.x)/AO_Depth(texcoord).x;
-		if(AO == 1)
-		{
-			float3 ddiff = GetPosition(texcoord.xy+float2(npw,nph))-Gposition;
-			float3 ddiff2 = GetPosition(texcoord.xy+float2(npw,-nph))-Gposition;
-			float3 ddiff3 = GetPosition(texcoord.xy+float2(-npw,nph))-Gposition;
-			float3 ddiff4 = GetPosition(texcoord.xy+float2(-npw,-nph))-Gposition;
-			aout += aoFF(ddiff,normal,npw,nph,texcoord);
-			aout += aoFF(ddiff2,normal,npw,-nph,texcoord);
-			aout += aoFF(ddiff3,normal,-npw,nph,texcoord);
-			aout += aoFF(ddiff4,normal,-npw,-nph,texcoord);
-		}	
-		//increase sampling area
-		width += incx;  
-		height += incy;	    
-    } 
-    aout /= num * iterations;
-	//Luminance adjust used for overbright correction.
-	color = smoothstep(0,1,dot(min(1.0,aout).xxx, float3(0.2627, 0.6780, 0.0593) * 2).xxxx);
-}
-
-//AO END//
-#endif
 #if Balance_Mode
 float4 HUD(float4 HUD, float2 texcoord ) 
 {			
@@ -989,33 +865,19 @@ float Conv(float DM,float2 texcoord)
 
 float zBuffer(in float2 texcoord : TEXCOORD0)
 {	
-	float DM =  UnpackDepth(tex2Dlod(SamplerDMFB,float4(texcoord,0,0)));
-	
-	#if AO_TOGGLE
-	float sum = tex2Dlod(SamplerAOFB, float4(texcoord.x, texcoord.y,0,0)).x;
-	if(AO == 1)
-		{
-			sum += tex2Dlod(SamplerAOFB, float4(texcoord.x, texcoord.y,0,1)).x;
-			sum += tex2Dlod(SamplerAOFB, float4(texcoord.x, texcoord.y,0,2)).x;
-			sum += tex2Dlod(SamplerAOFB, float4(texcoord.x, texcoord.y,0,3)).x;
-			sum += tex2Dlod(SamplerAOFB, float4(texcoord.x, texcoord.y,0,4)).x;
-			sum /= 5.0f;
-		}
-	if(AO == 1)
-		DM = lerp(DM, saturate(sum+DM), AO_Power);
-	#endif
-	
+	float DM =  UnpackDepth(tex2Dlod(SamplerDMFB_B,float4(texcoord,0,0)));
+		
 	if (Cancel_Depth)
 		DM = 0.5f;
 		
 	return DM;
 }
 
-void  Disocclusion(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 color : SV_Target0)
+void Disocclusion(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 color : SV_Target0)
 {
 	float DM, Adj, MS =  Divergence * pix.x, DR = 1, DL = 1, N = 9, Div = 1.0f / N, weight[9] = {0.0f,0.0125f,-0.0125f,0.025f,-0.025f,0.0375f,-0.0375f,0.05f,-0.05f};
 	
-	float MA = (Disocclusion_Adjust.y * 8.0f), M = distance(1.0f , CD(texcoord).w), Mask = saturate(M * MA - 1.0f) > 0.0f;
+	float MA = (Disocclusion_Adjust.y * 8.0f), M = distance(1.0f , tex2D(SamplerDMFB_A,texcoord).w), Mask = saturate(M * MA - 1.0f) > 0.0f;
 	
 	Adj += 5.5f; // Normal
 	float2 dir = float2(0.5f,0.0f);
@@ -1069,6 +931,7 @@ float4 Decode(in float2 texcoord : TEXCOORD0)
 	float C = dot(Z.xxx, float3(1.0f, 1.0f / ByteN, 1.0f / (ByteN * ByteN)) ); //byte_to_float ZPD L & R
 	return float4(A,B,C,1.0);
 }
+
 
 float4 PS_calcLR(float2 texcoord)
 {
@@ -1403,9 +1266,9 @@ float4 PS_calcLR(float2 texcoord)
 	}
 		
 	#if WZF		
-	float WZF_A = WZF_Adjust, Average_Lum = (CD(float2(TexCoords.x,TexCoords.y)).y - WZF_A) / ( 1 - WZF_A);
+	float WZF_A = WZF_Adjust, Average_Lum = (tex2D(SamplerDMFB_A,float2(TexCoords.x,TexCoords.y)).y - WZF_A) / ( 1 - WZF_A);
 	#else
-	float Average_Lum = CD(float2(TexCoords.x,TexCoords.y)).y;
+	float Average_Lum = tex2D(SamplerDMFB_A,float2(TexCoords.x,TexCoords.y)).y;
 	#endif
 	return float4(color.rgb,Average_Lum);
 }
@@ -1423,8 +1286,8 @@ float4 Average_Luminance(float4 position : SV_Position, float2 texcoord : TEXCOO
 	else if(Auto_Balance_Ex == 5)
 		ABE = float4(0.375, 0.250, 0.0, 1.0);//Center Long
 			
-	float Average_Lum_ZPD = CD(float2(ABE.x + texcoord.x * ABE.y, ABE.z + texcoord.y * ABE.w )).z;
-	float Average_Lum_Full = CD(float2(texcoord.x,texcoord.y )).z;
+	float Average_Lum_ZPD = tex2D(SamplerDMFB_A,float2(ABE.x + texcoord.x * ABE.y, ABE.z + texcoord.y * ABE.w )).z;
+	float Average_Lum_Full = tex2D(SamplerDMFB_A,float2(texcoord.x,texcoord.y )).z;
 	return float4(Average_Lum_ZPD,Average_Lum_Full,0,1);
 }
 
@@ -1574,16 +1437,9 @@ technique SuperDepth3D_FlashBack
 	{
 		VertexShader = PostProcessVS;
 		PixelShader = DepthMap;
-		RenderTarget = texDMFB;
+		RenderTarget0 = texDMFB_A;
+		RenderTarget1 = texDMFB_B;
 	}
-	#if AO_TOGGLE
-		pass AmbientOcclusion
-	{
-		VertexShader = PostProcessVS;
-		PixelShader = AO_in;
-		RenderTarget = texAOFB;
-	}
-	#endif
 		pass Disocclusion
 	{
 		VertexShader = PostProcessVS;

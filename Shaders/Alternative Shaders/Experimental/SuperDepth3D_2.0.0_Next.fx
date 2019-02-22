@@ -421,11 +421,11 @@ sampler BackBufferCLAMP
 		AddressW = CLAMP;
 	};
 	
-texture texDM  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT/Depth_Map_Division; Format = RGBA16F; }; 
+texture texDMN  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT/Depth_Map_Division; Format = RGBA16F; }; 
 
-sampler SamplerDM
+sampler SamplerDMN
 	{
-		Texture = texDM;
+		Texture = texDMN;
 	};
 	
 #if UI_MASK
@@ -482,22 +482,22 @@ float4 MouseCursor(float4 position : SV_Position, float2 texcoord : TEXCOORD) : 
 }
 
 /////////////////////////////////////////////////////////////////////////////////Adapted Luminance/////////////////////////////////////////////////////////////////////////////////
-texture texLum {Width = 256*0.5; Height = 256*0.5; Format = RGBA8; MipLevels = 8;}; //Sample at 256x256/2 and a mip bias of 8 should be 1x1 
+texture texLumN {Width = 256*0.5; Height = 256*0.5; Format = RGBA8; MipLevels = 8;}; //Sample at 256x256/2 and a mip bias of 8 should be 1x1 
 																				
-sampler SamplerLum																
+sampler SamplerLumN																
 	{
-		Texture = texLum;
+		Texture = texLumN;
 		MipLODBias = 8.0f; //Luminance adapted luminance value from 1x1 Texture Mip lvl of 8
 		MinFilter = LINEAR;
 		MagFilter = LINEAR;
 		MipFilter = LINEAR;
 	};
 	
-texture texLumWeapon {Width = 256*0.5; Height = 256*0.5; Format = RGBA8; MipLevels = 8;}; //Sample at 256x256*0.5 and a mip bias of 8 should be 1x1 
+texture texLumWeaponN {Width = 256*0.5; Height = 256*0.5; Format = RGBA8; MipLevels = 8;}; //Sample at 256x256*0.5 and a mip bias of 8 should be 1x1 
 																				
-sampler SamplerLumWeapon																
+sampler SamplerLumWeaponN																
 	{
-		Texture = texLumWeapon;
+		Texture = texLumWeaponN;
 		MipLODBias = 8.0f; //Luminance adapted luminance value from 1x1 Texture Mip lvl of 8
 		MinFilter = LINEAR;
 		MagFilter = LINEAR;
@@ -506,14 +506,14 @@ sampler SamplerLumWeapon
 	
 float2 Lum(in float2 texcoord : TEXCOORD0)
 	{
-		float2 Luminance = tex2Dlod(SamplerLum,float4(texcoord,0,0)).xy; //Average Luminance Texture Sample 
+		float2 Luminance = tex2Dlod(SamplerLumN,float4(texcoord,0,0)).xy; //Average Luminance Texture Sample 
 
 		return Luminance;
 	}
 	
 float LumWeapon(in float2 texcoord : TEXCOORD0)
 	{
-		float Luminance = tex2Dlod(SamplerLumWeapon,float4(texcoord,0,0)).x; //Average Luminance Texture Sample 
+		float Luminance = tex2Dlod(SamplerLumWeaponN,float4(texcoord,0,0)).x; //Average Luminance Texture Sample 
 
 		return Luminance;
 	}
@@ -827,7 +827,7 @@ float Conv(float D,float2 texcoord)
 
 float zBuffer(in float2 texcoord : TEXCOORD0)
 {	
-	float DM = tex2Dlod(SamplerDM,float4(texcoord,0,0)).x;
+	float DM = tex2Dlod(SamplerDMN,float4(texcoord,0,0)).x;
 		
 	if (Cancel_Depth)
 		DM = 0.5f;
@@ -1181,9 +1181,9 @@ float4 PS_calcLR(float2 texcoord)
 	}
 		
 	#if WZF		
-	float WZF_A = WZF_Adjust, Average_Lum = (tex2Dlod(SamplerDM,float4(TexCoords.x,TexCoords.y, 0, 0)).y - WZF_A) / ( 1 - WZF_A);
+	float WZF_A = WZF_Adjust, Average_Lum = (tex2Dlod(SamplerDMN,float4(TexCoords.x,TexCoords.y, 0, 0)).y - WZF_A) / ( 1 - WZF_A);
 	#else
-	float Average_Lum = tex2Dlod(SamplerDM,float4(TexCoords.x,TexCoords.y, 0, 0)).y;
+	float Average_Lum = tex2Dlod(SamplerDMN,float4(TexCoords.x,TexCoords.y, 0, 0)).y;
 	#endif
 	return float4(color.rgb,Average_Lum);
 }
@@ -1201,8 +1201,8 @@ float4 Average_Luminance(float4 position : SV_Position, float2 texcoord : TEXCOO
 	else if(Auto_Balance_Ex == 5)
 		ABE = float4(0.375, 0.250, 0.0, 1.0);//Center Long
 			
-	float Average_Lum_ZPD = tex2Dlod(SamplerDM,float4(ABE.x + texcoord.x * ABE.y, ABE.z + texcoord.y * ABE.w, 0, 0)).z;
-	float Average_Lum_Full = tex2Dlod(SamplerDM,float4(texcoord.x,texcoord.y, 0, 0)).z;
+	float Average_Lum_ZPD = tex2Dlod(SamplerDMN,float4(ABE.x + texcoord.x * ABE.y, ABE.z + texcoord.y * ABE.w, 0, 0)).z;
+	float Average_Lum_Full = tex2Dlod(SamplerDMN,float4(texcoord.x,texcoord.y, 0, 0)).z;
 	return float4(Average_Lum_ZPD,Average_Lum_Full,0,1);
 }
 
@@ -1352,19 +1352,19 @@ technique SuperDepth3D
 	{
 		VertexShader = PostProcessVS;
 		PixelShader = DepthMap;
-		RenderTarget = texDM;
+		RenderTarget = texDMN;
 	}
 		pass AverageLuminance
 	{
 		VertexShader = PostProcessVS;
 		PixelShader = Average_Luminance;
-		RenderTarget = texLum;
+		RenderTarget = texLumN;
 	}
 		pass AverageLuminanceWeapon
 	{
 		VertexShader = PostProcessVS;
 		PixelShader = Average_Luminance_Weapon;
-		RenderTarget = texLumWeapon;
+		RenderTarget = texLumWeaponN;
 	}
 		pass StereoOut
 	{
