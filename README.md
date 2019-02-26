@@ -1,4 +1,4 @@
-#SuperDepth3D
+# SuperDepth3D
 Depth Map Based 3D post-process shader v1.9.9 for Reshade 3.0
 
 There are the Basic Depth maps you can use for your games listed and not listed. Look at this link for other game Compatibility.
@@ -26,7 +26,7 @@ Game Compatibility
 * Call of Duty: Black Ops 2
 * Call of Duty: Ghost
 * Call of Duty: Infinite Warfare
-* Casltevania: Lord of Shadows - UE
+* Castlevania: Lord of Shadows - UE
 * Condemned: Criminal Origins
 * Cryostasis
 * DOOM 2016
