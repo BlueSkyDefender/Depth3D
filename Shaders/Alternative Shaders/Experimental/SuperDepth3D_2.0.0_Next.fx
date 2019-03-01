@@ -78,7 +78,7 @@
 //Divergence & Convergence//
 uniform float Divergence <
 	ui_type = "drag";
-	ui_min = 1; ui_max = 100; ui_step = 0.5;
+	ui_min = 1; ui_max = 50; ui_step = 0.5;
 	ui_label = "·Divergence Slider·";
 	ui_tooltip = "Divergence increases differences between the left and right retinal images and allows you to experience depth.\n" 
 				 "The process of deriving binocular depth information is called stereopsis.\n"
@@ -146,13 +146,22 @@ uniform float Auto_Depth_Range <
 //Occlusion Masking//
 uniform int Disocclusion <
 	ui_type = "drag";
-	ui_min = 24; ui_max = 128;
+	ui_min = 32; ui_max = 128;
 	ui_label = "·Occlusion Quality·";
 	ui_tooltip = "Occlusion masking power & Mask Based culling adjustments.\n"
 				 "Affects Gap/Hole Filling quality.\n"
-				 "Default is 48.";
+				 "Default is 64, Max is 256.";
 	ui_category = "Occlusion Masking";
-> = 48;
+> = 64;
+
+uniform int View_Mode <
+	ui_type = "combo";
+	ui_items = "View Mode Normal\0View Mode Alpha\0View Mode Beta\0";
+	ui_label = " View Mode";
+	ui_tooltip = "Change the way the shader warps the output to the screen.\n"
+				 "Default is Normal";
+	ui_category = "Occlusion Masking";
+> = 0;
 
 uniform int Custom_Sidebars <
 	ui_type = "combo";
@@ -815,10 +824,12 @@ float Conv(float D,float2 texcoord)
 	#else
 		if(Auto_Balance_Ex > 0 )
 			ZP = saturate(ALC);
-	#endif
-				
-		float Convergence = 1 - Z / D;
-
+	#endif	
+		float Convergence = 1 - Z / (D * 2.5);
+		
+		// You need to readjust the Z-Buffer if your going to use use the Convergence equation. You can do it this way Convergence/1-(-ZPD)	
+		Convergence /= 1-(-ZPD);
+		
 		if (ZPD == 0)
 			ZP = 1.0;
 		
@@ -832,14 +843,10 @@ float zBuffer(in float2 texcoord : TEXCOORD0)
 	if (Cancel_Depth)
 		DM = 0.5f;
 		
-	return saturate(DM);
+	return Conv(saturate(DM),texcoord);
 }
 
 /////////////////////////////////////////L/R//////////////////////////////////////////////////////////////////////
-float Encode(in float2 texcoord : TEXCOORD0)
-{
-	return Conv(zBuffer(texcoord),texcoord); //Convergence is done here.
-}
 
 // Horizontal parallax offset & Hole filling effect
 float2 Parallax( float Divergence, float2 Coordinates)
@@ -848,12 +855,12 @@ float2 Parallax( float Divergence, float2 Coordinates)
 	int Steps = Disocclusion;
 	
 	// Offset per step progress & Limit
-	float LayerDepth = 1.0 / min(256, Steps);
+	float LayerDepth = 1.0 / clamp(Steps,32,255);
 
 	//Offsets listed here Max Seperation is 3% - 5% of screen space with Depth Offsets & Netto layer offset change based on MS.
-	float MS = Divergence * pix.x, deltaCoordinates = MS * LayerDepth, Offsets = Divergence * 0.05f;
-	float2 ParallaxCoord = Coordinates, DB_Offset = float2(Offsets * pix.x, 0);
-	float CurrentDepthMapValue = Encode(ParallaxCoord).x, CurrentLayerDepth = 0;
+	float MS = Divergence * pix.x, deltaCoordinates = MS * LayerDepth, Offsets = Divergence * 0.1f;
+	float2 ParallaxCoord = Coordinates, DB_Offset = float2((Divergence * 0.03f) * pix.x, 0);
+	float CurrentDepthMapValue = zBuffer(ParallaxCoord), CurrentLayerDepth, DepthDifference;
 
 	// Steep parallax mapping
 	[loop]
@@ -862,28 +869,28 @@ float2 Parallax( float Divergence, float2 Coordinates)
 		// Shift coordinates horizontally in linear fasion
 		ParallaxCoord.x -= deltaCoordinates;
 		// Get depth value at current coordinates
-		CurrentDepthMapValue = Encode(ParallaxCoord - DB_Offset).x; // Offset
+		CurrentDepthMapValue = zBuffer(ParallaxCoord - DB_Offset).x; // Offset
 		// Get depth of next layer
 		CurrentLayerDepth += LayerDepth;
-		continue;
 	}
 
 	// Parallax Occlusion Mapping
 	float2 PrevParallaxCoord = ParallaxCoord;
 	PrevParallaxCoord.x += deltaCoordinates;
 	float afterDepthValue = CurrentDepthMapValue - CurrentLayerDepth;
-	float beforeDepthValue = Encode(PrevParallaxCoord).x;
-	// Store depth read difference for masking
-	float DepthDifference = beforeDepthValue - CurrentDepthMapValue;
-
-	beforeDepthValue += distance(LayerDepth,CurrentLayerDepth);
+	float beforeDepthValue = zBuffer(PrevParallaxCoord).x - CurrentLayerDepth + LayerDepth;
+	
 	// Interpolate coordinates
 	float weight = afterDepthValue / (afterDepthValue - beforeDepthValue);
 	ParallaxCoord = PrevParallaxCoord * weight + ParallaxCoord * (1.0f - weight);
 
 	// Apply gap masking (by JMF) Don't know who this Is to credit him.... :(
-	DepthDifference *= Offsets; // Seems to be good.
-	DepthDifference *= pix.x;
+	DepthDifference = distance(afterDepthValue,afterDepthValue) * MS; //Normal 2
+	if(View_Mode == 0)
+	DepthDifference += beforeDepthValue * Offsets * pix.x; //Normal
+	if(View_Mode == 1)
+	DepthDifference += lerp(beforeDepthValue * Offsets * pix.x,beforeDepthValue * MS,0.125f); //Mirror
+	
 	ParallaxCoord.x += DepthDifference;
 
 	return ParallaxCoord;
@@ -1175,7 +1182,7 @@ float4 PS_calcLR(float2 texcoord)
 	}
 	else
 	{		
-		float3 RGB = Encode(TexCoords);
+		float3 RGB = zBuffer(TexCoords);
 
 		color = float4(RGB.x,AutoDepthRange(RGB.y,TexCoords),RGB.z,1.0);
 	}
