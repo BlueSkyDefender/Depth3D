@@ -23,7 +23,7 @@
 
 //USER EDITABLE PREPROCESSOR FUNCTIONS START//
 
-// Determines The resolution of the Depth Map. For 4k Use 1.75 or 1.5. For 1440p Use 1.5 or 1.25. For 1080p use 1. Too low of a resolution will remove too much.
+// Determines The resolution of the Depth Map. For 4k Use 0.75 or 0.5. For 1440p Use 0.75. For 1080p use 1. Too low of a resolution will remove too much detail.
 #define Depth_Map_Division 1.0
 
 // Zero Parallax Distance Balance Mode allows you to switch control from manual to automatic and vice versa. You need to turn this on to use UI Masking options.
@@ -46,7 +46,7 @@
 // Use Depth Tool to adjust the lower preprocessor definitions below.
 // Horizontal & Vertical Depth Buffer Resize for non conforming BackBuffer.
 // Ex. Resident Evil 7 Has this problem. So you want to adjust it too around float2(0.9575,0.9575).
-#define Horizontal_and_Vertical float2(1.0, 1.0) // 1.0 is Default.
+#define Horizontal_and_Vertical float2(1.0, 1.00) // 1.0 is Default.
 
 // Image Position Adjust is used to move the Z-Buffer around.
 #define Image_Position_Adjust float2(0.0,0.0)
@@ -78,13 +78,13 @@
 //Divergence & Convergence//
 uniform float Divergence <
 	ui_type = "drag";
-	ui_min = 1; ui_max = 50; ui_step = 0.5;
+	ui_min = 1; ui_max = 75; ui_step = 0.5;
 	ui_label = "·Divergence Slider·";
 	ui_tooltip = "Divergence increases differences between the left and right retinal images and allows you to experience depth.\n" 
 				 "The process of deriving binocular depth information is called stereopsis.\n"
 				 "You can override this value.";
 	ui_category = "Divergence & Convergence";
-> = 25.0;
+> = 37.5;
 
 uniform int Convergence_Mode <
 	ui_type = "combo";
@@ -430,7 +430,7 @@ sampler BackBufferCLAMP
 		AddressW = CLAMP;
 	};
 	
-texture texDMN  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT/Depth_Map_Division; Format = RGBA16F; }; 
+texture texDMN  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT*Depth_Map_Division; Format = RGBA16F; }; 
 
 sampler SamplerDMN
 	{
@@ -857,7 +857,7 @@ float2 Parallax( float Divergence, float2 Coordinates)
 	// Offset per step progress & Limit
 	float LayerDepth = 1.0 / clamp(Steps,32,255);
 
-	//Offsets listed here Max Seperation is 3% - 5% of screen space with Depth Offsets & Netto layer offset change based on MS.
+	//Offsets listed here Max Seperation is 3% - 6% of screen space with Depth Offsets & Netto layer offset change based on MS.
 	float MS = Divergence * pix.x, deltaCoordinates = MS * LayerDepth, Offsets = Divergence * 0.1f;
 	float2 ParallaxCoord = Coordinates, DB_Offset = float2((Divergence * 0.03f) * pix.x, 0);
 	float CurrentDepthMapValue = zBuffer(ParallaxCoord), CurrentLayerDepth, DepthDifference;
@@ -875,13 +875,12 @@ float2 Parallax( float Divergence, float2 Coordinates)
 	}
 
 	// Parallax Occlusion Mapping
-	float2 PrevParallaxCoord = ParallaxCoord;
-	PrevParallaxCoord.x += deltaCoordinates;
+	float2 PrevParallaxCoord = ParallaxCoord + deltaCoordinates;
 	float afterDepthValue = CurrentDepthMapValue - CurrentLayerDepth;
 	float beforeDepthValue = zBuffer(PrevParallaxCoord).x - CurrentLayerDepth + LayerDepth;
 	
 	// Interpolate coordinates
-	float weight = afterDepthValue / (afterDepthValue - beforeDepthValue);
+	float weight = saturate(afterDepthValue / (afterDepthValue - beforeDepthValue));
 	ParallaxCoord = PrevParallaxCoord * weight + ParallaxCoord * (1.0f - weight);
 
 	// Apply gap masking (by JMF) Don't know who this Is to credit him.... :(
@@ -1353,7 +1352,7 @@ technique Cross_Cursor
 		}	
 }
 
-technique SuperDepth3D
+technique SuperDepth3D_Next
 {
 		pass zbuffer
 	{
