@@ -869,7 +869,7 @@ float2 Parallax( float Divergence, float2 Coordinates)
 		// Shift coordinates horizontally in linear fasion
 		ParallaxCoord.x -= deltaCoordinates;
 		// Get depth value at current coordinates
-		CurrentDepthMapValue = zBuffer(ParallaxCoord - DB_Offset).x; // Offset
+		CurrentDepthMapValue = zBuffer(ParallaxCoord - DB_Offset); // Offset
 		// Get depth of next layer
 		CurrentLayerDepth += LayerDepth;
 	}
@@ -877,11 +877,11 @@ float2 Parallax( float Divergence, float2 Coordinates)
 	// Parallax Occlusion Mapping
 	float2 PrevParallaxCoord = ParallaxCoord + deltaCoordinates;
 	float afterDepthValue = CurrentDepthMapValue - CurrentLayerDepth;
-	float beforeDepthValue = zBuffer(PrevParallaxCoord).x - CurrentLayerDepth + LayerDepth;
+	float beforeDepthValue = (zBuffer(PrevParallaxCoord) - CurrentLayerDepth) + LayerDepth;
 	
 	// Interpolate coordinates
-	float weight = saturate(afterDepthValue / (afterDepthValue - beforeDepthValue));
-	ParallaxCoord = PrevParallaxCoord * weight + ParallaxCoord * (1.0f - weight);
+	float weight = afterDepthValue / (afterDepthValue - beforeDepthValue);
+	ParallaxCoord = PrevParallaxCoord * max(0,weight) + ParallaxCoord * min(1,1.0f - weight);
 
 	// Apply gap masking (by JMF) Don't know who this Is to credit him.... :(
 	DepthDifference = distance(afterDepthValue,afterDepthValue) * MS; //Normal 2
