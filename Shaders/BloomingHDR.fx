@@ -104,7 +104,7 @@ uniform int Luma_Coefficient <
 	ui_type = "combo";
 	ui_label = "Luma";
 	ui_tooltip = "Changes how color get used for the other effects.\n";
-	ui_items = "SD video\0HD video\0HDR video\0";
+	ui_items = "SD video\0HD video\0HDR video\0Intensity\0";
 	ui_category = "HDR Adjustments";
 > = 0;
 
@@ -177,23 +177,29 @@ float3 Luma()
 	{
 		Luma = float3(0.2126, 0.7152, 0.0722); // (HD video) https://en.wikipedia.org/wiki/Luma_(video)
 	}
+	else if (Luma_Coefficient == 2)
+	{
+		Luma = float3(0.2627, 0.6780, 0.0593); // (HDR video) https://en.wikipedia.org/wiki/Rec._2100
+	}
 	else
 	{
-		Luma = float3(0.2627, 0.6780, 0.0593); //(HDR video) https://en.wikipedia.org/wiki/Rec._2100
+		Luma = float3(0.3333, 0.3333, 0.3333); // Intensity
 	}
 	return Luma;
 }
 
 /////////////////////////////////////////////////////////////////////////////////Adapted Luminance/////////////////////////////////////////////////////////////////////////////////
-texture texLumAvg {Width = 128; Height = 128; Format = RGBA8; MipLevels = 8;}; //Sample at 128x128 and a mip bias of 8 should be 1x1 
+texture texLumAvg {Width = 256; Height = 256; Format = RGBA8; MipLevels = 8;}; //Sample at 256x256 map only has nine mip levels; 0-1-2-3-4-5-6-7-8 : 256,128,64,32,16,8,4,2, and 1 (1x1).
 																				
 sampler SamplerLum																
 	{
 		Texture = texLumAvg;
-		MipLODBias = 8.0f; //Luminance adapted luminance value from 1x1 Texture Mip lvl of 8
+		MipLODBias = 8.0f; //Luminance adapted luminance value from 1x1 So you would only have to adjust the boxes from Image to 8.
 		MinFilter = LINEAR;
 		MagFilter = LINEAR;
 		MipFilter = LINEAR;
+		AddressU = Clamp; 
+		AddressV = Clamp;
 	};
 	
 texture PStexLumAvg {Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA8; };
@@ -204,11 +210,38 @@ sampler SamplerPSLum
 		MinFilter = LINEAR;
 		MagFilter = LINEAR;
 		MipFilter = LINEAR;
+		AddressU = Clamp; 
+		AddressV = Clamp;
 	};
 	
-float Luminance(float4 pos : SV_Position, float2 texcoord : TEXCOORD) : SV_Target
+float Luminance(float4 pos : SV_Position, float2 texcoords : TEXCOORD) : SV_Target
 {
-	float GSBB = dot(tex2D(BackBuffer, texcoord).rgb, Luma());
+	float2 tex_offset = 5.0f * pix; // gets texel offset
+    float4 result = tex2D(BackBuffer,texcoords); // current fragment's contribution
+	
+	result += tex2D(BackBuffer,texcoords + float2(-1.0f * tex_offset.x,-0.5f * tex_offset.y));
+		
+	result += tex2D(BackBuffer,texcoords + float2(0.5f * tex_offset.x, -1.0f * tex_offset.y));
+	
+	result += tex2D(BackBuffer,texcoords + float2(0,                   -1.0f * tex_offset.y));
+	
+	result += tex2D(BackBuffer,texcoords + float2(-1.0f * tex_offset.x, 				  0));
+	
+	result += tex2D(BackBuffer,texcoords + float2(0.5f * tex_offset.x, -0.5f * tex_offset.y));
+	
+	result += tex2D(BackBuffer,texcoords + float2(-0.5f * tex_offset.x, 0.5f * tex_offset.y));
+
+	result += tex2D(BackBuffer,texcoords + float2(1.0f * tex_offset.x,  				  0));
+	
+	result += tex2D(BackBuffer,texcoords + float2(0,                    1.0f * tex_offset.y));
+	
+	result += tex2D(BackBuffer,texcoords + float2(-0.5f * tex_offset.x, 1.0f * tex_offset.y));
+	
+	result += tex2D(BackBuffer,texcoords + float2(1.0f * tex_offset.x,  0.5f * tex_offset.y));
+	
+	result /= 11;
+   
+	float GSBB = dot(result.rgb, Luma());
 	return GSBB;
 }
 
