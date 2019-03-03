@@ -249,12 +249,12 @@ float2 Parallax( float Divergence, float2 Coordinates)
 	int Steps = Disocclusion;
 	
 	// Offset per step progress & Limit
-	float LayerDepth = 1.0 / min(256, Steps);
+	float LayerDepth = 1.0 / clamp(Steps,32,255);
 
-	//Offsets listed here Max Seperation is 3% - 5% of screen space with Depth Offsets & Netto layer offset change based on MS.
-	float MS = Divergence * pix.x, deltaCoordinates = MS * LayerDepth, Offsets = Divergence * 0.05f;
-	float2 ParallaxCoord = Coordinates, DB_Offset = float2(Offsets * pix.x, 0);
-	float CurrentDepthMapValue = Encode(ParallaxCoord).x, CurrentLayerDepth = 0;
+	//Offsets listed here Max Seperation is 3% - 6% of screen space with Depth Offsets & Netto layer offset change based on MS.
+	float MS = Divergence * pix.x, deltaCoordinates = MS * LayerDepth, Offsets = Divergence * 0.1f;
+	float2 ParallaxCoord = Coordinates, DB_Offset = float2((Divergence * 0.0375f) * pix.x, 0);
+	float CurrentDepthMapValue = zBuffer(ParallaxCoord), CurrentLayerDepth, DepthDifference;
 
 	// Steep parallax mapping
 	[loop]
@@ -263,28 +263,23 @@ float2 Parallax( float Divergence, float2 Coordinates)
 		// Shift coordinates horizontally in linear fasion
 		ParallaxCoord.x -= deltaCoordinates;
 		// Get depth value at current coordinates
-		CurrentDepthMapValue = Encode(ParallaxCoord - DB_Offset).x; // Offset
+		CurrentDepthMapValue = zBuffer(ParallaxCoord - DB_Offset); // Offset
 		// Get depth of next layer
 		CurrentLayerDepth += LayerDepth;
-		continue;
 	}
 
 	// Parallax Occlusion Mapping
-	float2 PrevParallaxCoord = ParallaxCoord;
-	PrevParallaxCoord.x += deltaCoordinates;
+	float2 PrevParallaxCoord = float2(ParallaxCoord.x + deltaCoordinates, ParallaxCoord.y);
 	float afterDepthValue = CurrentDepthMapValue - CurrentLayerDepth;
-	float beforeDepthValue = Encode(PrevParallaxCoord).x;
-	// Store depth read difference for masking
-	float DepthDifference = beforeDepthValue - CurrentDepthMapValue;
-
-	beforeDepthValue += distance(LayerDepth,CurrentLayerDepth);
+	float beforeDepthValue = zBuffer(PrevParallaxCoord - DB_Offset) - CurrentLayerDepth + LayerDepth;
+	
 	// Interpolate coordinates
 	float weight = afterDepthValue / (afterDepthValue - beforeDepthValue);
-	ParallaxCoord = PrevParallaxCoord * weight + ParallaxCoord * (1.0f - weight);
+	ParallaxCoord = PrevParallaxCoord * max(0,weight) + ParallaxCoord * min(1,1.0f - weight);
 
 	// Apply gap masking (by JMF) Don't know who this Is to credit him.... :(
-	DepthDifference *= Offsets; // Seems to be good.
-	DepthDifference *= pix.x;
+	DepthDifference = distance(afterDepthValue,afterDepthValue) * MS;
+	DepthDifference += beforeDepthValue * Offsets * pix.x;
 	ParallaxCoord.x += DepthDifference;
 
 	return ParallaxCoord;

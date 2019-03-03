@@ -88,13 +88,13 @@ uniform float Divergence <
 
 uniform int Convergence_Mode <
 	ui_type = "combo";
-	ui_items = "ZPD Tied\0ZPD Locked\0";
+	ui_items = "Convergence Tied\0Convergence Locked\0";
 	ui_label = " Convergence Mode";
 	ui_tooltip = "Select your Convergence Mode for ZPD calculations.\n" 
-				 "ZPD Locked mode is locked to divergence & dissables ZPD control below.\n" 
-				 "ZPD Tied is controlled by ZPD. Works in tandam with Divergence.\n" 
+				 "Convergence Locked mode is locked to divergence & dissables ZPD control below.\n" 
+				 "Convergence Tied is controlled by ZPD. Works in tandam with Divergence.\n" 
 				 "For FPS with no custom weapon profile use Tied.\n" 
-				 "Default is ZPD Tied.";
+				 "Default is Convergence Tied.";
 	ui_category = "Divergence & Convergence";
 > = 0;
 
@@ -133,6 +133,19 @@ uniform int Auto_Balance_Ex <
 	ui_category = "Divergence & Convergence";
 > = 0;
 #endif
+
+uniform int Convergence_Limits <
+	ui_type = "combo";
+	ui_items = "Limits None\0Limit Near\0Limit Far\0Limits Both\0";
+	ui_label = " Convergence Limits";
+	ui_tooltip = "Select your Convergence Limits for ZPD Limits Calculations.\n" 
+				 "Limits None has no restrictions placed on Zero Parallax Distance.\n" 
+				 "Limit Near has restrictions on Near.\n" 
+				 "Limit Far has restrictions on Far.\n" 
+				 "Limits Both has full restrictions.\n" 
+				 "Default is None.";
+	ui_category = "Divergence & Convergence";
+> = 0;
 
 uniform float Auto_Depth_Range <
 	ui_type = "drag";
@@ -824,12 +837,16 @@ float Conv(float D,float2 texcoord)
 	#else
 		if(Auto_Balance_Ex > 0 )
 			ZP = saturate(ALC);
-	#endif	
-		float Convergence = 1 - Z / (D * 2.5);
+	#endif
+		float DM = D;	
+		if (Convergence_Limits == 1 || Convergence_Limits == 3) // You can also readjust convergence Z-Buffer if you want less Near Depth.
+			DM = ( D - 0 ) / ( (1-Z) - 0);	
 		
-		// You need to readjust the Z-Buffer if your going to use use the Convergence equation. You can do it this way Convergence/1-(-ZPD)	
-		Convergence /= 1-(-ZPD);
-		
+		float Convergence = 1 - Z / DM;
+				
+		if (Convergence_Limits == 2 || Convergence_Limits == 3) // You can also readjust convergence Z-Buffer if you want less Range Depth.
+			Convergence /= 1-(-ZPD);
+			
 		if (ZPD == 0)
 			ZP = 1.0;
 		
