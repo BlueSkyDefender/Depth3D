@@ -143,9 +143,10 @@ uniform int Perspective <
 
 uniform float Wobble_Speed <
 	ui_type = "drag";
-	ui_min = 0; ui_max = 1;
+	ui_min = -1; ui_max = 1;
+	ui_label = " Wobble Speed";
 	ui_category = "Stereoscopic Options";
-> = 0.725;
+> = 0.0;
 
 uniform int Wobble_Mode <
 	ui_type = "combo";
@@ -304,9 +305,13 @@ float4 WobbleLRC(in float2 texcoord : TEXCOORD0)
 	float2 TCL = texcoord, TCR = texcoord, TCC = texcoord;
 	float4 color, Left, Right, Center;
 	float w = PingPong(timer/((1-Wobble_Speed)*1000),1), DW = w;
-	float P = Perspective * pix.x;
-	TCL.x += P;
-	TCR.x -= P;
+	float MS = Divergence * pix.x, P = Perspective * pix.x;
+	
+	TCL.x -= MS * 0.5f;
+	TCR.x += MS * 0.5f;
+	
+	TCL.x -= P * 0.5f;
+	TCR.x += P * 0.5f;
 	
 	DW -= 0.5;
 	DW *= Divergence;
