@@ -432,6 +432,11 @@ OpenGL to DX9 Wrapper.
 Then install Reshade DX9. You will also need the res mod. 
 http://steamcommunity.com/sharedfiles/filedetails/?id=170642945
 
+Or
+
+You can also follow this guide.
+https://www.tapatalk.com/groups/kingpinforever/viewtopic.php?f=1&t=2184&p=10574#p10574
+
 {LuciusII}
 Set Globla Settings to Medium. Turn off FXAA Every thing else can be maxed out.
 

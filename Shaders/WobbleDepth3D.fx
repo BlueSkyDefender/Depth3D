@@ -243,19 +243,22 @@ float Encode(in float2 texcoord : TEXCOORD0)
 }
 
 // Horizontal parallax offset & Hole filling effect
-float2 Parallax( float Divergence, float2 Coordinates)
+float2 Parallax( float Dive, float2 Coordinates)
 {
 	//ParallaxSteps
 	int Steps = Disocclusion;
 	
 	// Offset per step progress & Limit
 	float LayerDepth = 1.0 / clamp(Steps,32,255);
-
+	
 	//Offsets listed here Max Seperation is 3% - 6% of screen space with Depth Offsets & Netto layer offset change based on MS.
-	float MS = Divergence * pix.x, deltaCoordinates = MS * LayerDepth, Offsets = Divergence * 0.1f;
-	float2 ParallaxCoord = Coordinates, DB_Offset = float2((Divergence * 0.0375f) * pix.x, 0);
-	float CurrentDepthMapValue = zBuffer(ParallaxCoord), CurrentLayerDepth, DepthDifference;
-
+	float MS = Dive * pix.x, P = (100 - (Perspective * 2)) * 0.01f, deltaCoordinates = MS * LayerDepth, Offsets = Dive * 0.1f, M;
+	float2 ParallaxCoord = Coordinates, DB_Offset = float2((Dive * 0.0375f) * pix.x, 0);
+	float CurrentDepthMapValue = Encode(ParallaxCoord), CurrentLayerDepth, DepthDifference;
+	
+	if (Wobble_Mode == 4)
+	ParallaxCoord.x += (MS * 0.5f) * P;
+	
 	// Steep parallax mapping
 	[loop]
 	while(CurrentLayerDepth < CurrentDepthMapValue)
@@ -263,7 +266,7 @@ float2 Parallax( float Divergence, float2 Coordinates)
 		// Shift coordinates horizontally in linear fasion
 		ParallaxCoord.x -= deltaCoordinates;
 		// Get depth value at current coordinates
-		CurrentDepthMapValue = zBuffer(ParallaxCoord - DB_Offset); // Offset
+		CurrentDepthMapValue = Encode(ParallaxCoord - DB_Offset); // Offset
 		// Get depth of next layer
 		CurrentLayerDepth += LayerDepth;
 	}
@@ -271,7 +274,7 @@ float2 Parallax( float Divergence, float2 Coordinates)
 	// Parallax Occlusion Mapping
 	float2 PrevParallaxCoord = float2(ParallaxCoord.x + deltaCoordinates, ParallaxCoord.y);
 	float afterDepthValue = CurrentDepthMapValue - CurrentLayerDepth;
-	float beforeDepthValue = zBuffer(PrevParallaxCoord - DB_Offset) - CurrentLayerDepth + LayerDepth;
+	float beforeDepthValue = Encode(PrevParallaxCoord - DB_Offset) - CurrentLayerDepth + LayerDepth;
 	
 	// Interpolate coordinates
 	float weight = afterDepthValue / (afterDepthValue - beforeDepthValue);
@@ -301,8 +304,7 @@ float4 WobbleLRC(in float2 texcoord : TEXCOORD0)
 	float2 TCL = texcoord, TCR = texcoord, TCC = texcoord;
 	float4 color, Left, Right, Center;
 	float w = PingPong(timer/((1-Wobble_Speed)*1000),1), DW = w;
-	//MS is Max Separation P is Perspective Adjustment
-	float MS = Divergence * pix.x, P = Perspective * pix.x;	
+	float P = Perspective * pix.x;
 	TCL.x += P;
 	TCR.x -= P;
 	
@@ -310,10 +312,6 @@ float4 WobbleLRC(in float2 texcoord : TEXCOORD0)
 	DW *= Divergence;
 	DW *= 2;
 		
-	TCL.x -= MS * 0.5f;
-	TCR.x += MS * 0.5f;
-	TCC.x += (DW * pix.x) * 0.5;
-	
 	//Left & Right Parallax for Stereo Vision
 	if (Wobble_Mode <= 3)
 	{
