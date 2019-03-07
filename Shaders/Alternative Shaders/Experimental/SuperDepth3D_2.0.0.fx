@@ -936,9 +936,9 @@ void  Disocclusion(in float4 position : SV_Position, in float2 texcoord : TEXCOO
 			DM = DM_A;
 		}	
 		
-		if ( Enable_Mask && View_Mode == 0 )
+		if ( Enable_Mask && (View_Mode == 0 || View_Mode == 1) )
 			DM = lerp(lerp(zBuffer(texcoord), DM, abs(Mask)), DM, 0.625f );
-		if ( Enable_Mask && (View_Mode == 1 || View_Mode == 2) )
+		if ( Enable_Mask && View_Mode == 2 )
 			DM = lerp(zBuffer(texcoord), DM, abs(Mask));	
 	}
 	else
@@ -952,55 +952,49 @@ void  Disocclusion(in float4 position : SV_Position, in float2 texcoord : TEXCOO
 /////////////////////////////////////////L/R//////////////////////////////////////////////////////////////////////
 float Encode(in float2 texcoord : TEXCOORD0)
 {
-	return tex2Dlod(SamplerDis,float4(texcoord.x, texcoord.y,0,0)).x;
+	return Conv(tex2Dlod(SamplerDis,float4(texcoord.x, texcoord.y,0,0)).x,texcoord);
 }
 
 float Parallax(in float Diverge,in float2 texcoord)
 {
-	float Depth = 1, M = 1, D, MS = Diverge * pix.x, N = 9, samplesA[9] = {0.5,0.5625,0.625,0.6875,0.75,0.8125,0.875,0.9375,1.0}, Adjust_A = 1 / N;
+	float Depth = 1, D, SD, MS = Diverge * pix.x, N = 9, samplesA[9] = {0.5,0.5625,0.625,0.6875,0.75,0.8125,0.875,0.9375,1.0}, DepthDifference;
 	[loop]
 	for ( int i = 0 ; i < N; i++ ) 
 	{	
-		float S = samplesA[i];//Adjustment for range scaling.		
-				
-		Depth = min(M, Encode(float2(texcoord.x + S * MS, texcoord.y)) );
-
-		if (View_Mode == 1)
+		float S = samplesA[i], MSM = MS + (Diverge * 0.0001), D = Depth;//Adjustment for range scaling.
+		if (View_Mode == 0)
+		{			
+			Depth = min(Depth, Encode(float2(texcoord.x + S * MSM, texcoord.y)) );
+			continue;
+		}
+		else if (View_Mode == 1)
 		{	
+			Depth = min(Depth, Encode(float2(texcoord.x + S * MSM, texcoord.y)) );
 			
-			D = Depth;
-									
-			Depth += min(M, Encode(float2(texcoord.x + S * (MS * 0.75f), texcoord.y)) );
-						
-			Depth += min(M, Encode(float2(texcoord.x + S * (MS * 0.500f), texcoord.y)) );
-					
-			Depth += min(M, Encode(float2(texcoord.x + S * (MS * 0.250f), texcoord.y)) );
-			
-			Depth = min(M, Depth / 4.0f);
-					
-			Depth = lerp(Depth, D, 0.1875f);			
+			D = min(D, Encode(float2((texcoord.x - (MSM * 0.375f)) + S * MSM, texcoord.y)) );
+			DepthDifference = Depth - D;
+			DepthDifference *= 0.5625;
+			Depth -= DepthDifference;	
 			continue;
 		}
 		else if (View_Mode == 2)
-		{						
-			D = Depth;
+		{	
+			Depth = min(Depth, Encode(float2(texcoord.x + S * MSM, texcoord.y)) );
+											
+			Depth += min(D, Encode(float2(texcoord.x + S * (MSM * 0.9375f), texcoord.y)) );
 						
-			Depth += min(M, Encode(float2(texcoord.x + S * (MS * 0.9375f), texcoord.y)) );
-						
-			Depth += min(M, Encode(float2(texcoord.x + S * (MS * 0.6875f), texcoord.y)) );
+			Depth += min(D, Encode(float2(texcoord.x + S * (MSM * 0.875f), texcoord.y)) );
+					
+			Depth += min(D, Encode(float2(texcoord.x + S * (MSM * 0.750f), texcoord.y)) );
 			
-			Depth += min(M, Encode(float2(texcoord.x + S * (MS * 0.500f), texcoord.y)) );
-		
-			Depth += min(M, Encode(float2(texcoord.x + S * (MS * 0.4375f), texcoord.y)) );
+			Depth += min(D, Encode(float2(texcoord.x + S * (MSM * 0.625f), texcoord.y)) );
 			
-			Depth += min(M, Encode(float2(texcoord.x + S * (MS * 0.1875f), texcoord.y)) );
-								
-			Depth = min(M, Depth / 6.0f);
+			Depth += min(D, Encode(float2(texcoord.x + S * (MSM * 0.500f), texcoord.y)) );
 			
-			Depth = lerp(Depth, D, 0.1875f);	
+			Depth /= 6;	
 			continue;
 		}
-	}
+	}			
 	return Depth;				
 }
 
@@ -1067,8 +1061,8 @@ float4 LR(float2 texcoord)
 	float DepthL = Parallax( Divergence,TCL); //Parallax Left					
 	float DepthR = Parallax(-Divergence,TCR); //Parallax Right
 			
-	float ReprojectionLeft = MS * Conv( DepthL,TexCoords);//Zero Parallax Distance Pass Left
-	float ReprojectionRight = MS * Conv(DepthR,TexCoords);//Zero Parallax Distance Pass Right
+	float ReprojectionLeft = MS * DepthL;
+	float ReprojectionRight = MS * DepthR;
 	
 	if(Custom_Sidebars == 0)
 	{
