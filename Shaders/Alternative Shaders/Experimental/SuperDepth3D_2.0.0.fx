@@ -838,7 +838,7 @@ float AutoZPDRange(float ZPD, float2 texcoord )
 #endif
 float Conv(float D,float2 texcoord)
 {
-	float Z = ZPD, ZP = 0.5f, Divergence_Locked = Divergence*0.001, MS = Divergence * pix.x, ALC = abs(Lum(texcoord).x);
+	float Z = ZPD, ZP = 0.5f, Divergence_Locked = Divergence*0.001, ALC = abs(Lum(texcoord).x);
 	#if RE_Fix	
 		Z = AutoZPDRange(Z,texcoord);
 	#endif	
@@ -860,7 +860,7 @@ float Conv(float D,float2 texcoord)
 		if (ZPD == 0)
 			ZP = 1.0;
 		
-    return MS * lerp(Convergence,D, ZP);
+    return lerp(Convergence,D, ZP);
 }
 
 float zBuffer(in float2 texcoord : TEXCOORD0)
@@ -955,12 +955,60 @@ float Encode(in float2 texcoord : TEXCOORD0)
 	return tex2Dlod(SamplerDis,float4(texcoord.x, texcoord.y,0,0)).x;
 }
 
-float4 PS_calcLR(float2 texcoord)
+float Parallax(in float Diverge,in float2 texcoord)
 {
-	float4 color, Right, Left, R, L;
+	float Depth = 1, M = 1, D, MS = Diverge * pix.x, N = 9, samplesA[9] = {0.5,0.5625,0.625,0.6875,0.75,0.8125,0.875,0.9375,1.0}, Adjust_A = 1 / N;
+	[loop]
+	for ( int i = 0 ; i < N; i++ ) 
+	{	
+		float S = samplesA[i];//Adjustment for range scaling.		
+				
+		Depth = min(M, Encode(float2(texcoord.x + S * MS, texcoord.y)) );
+
+		if (View_Mode == 1)
+		{	
+			
+			D = Depth;
+									
+			Depth += min(M, Encode(float2(texcoord.x + S * (MS * 0.75f), texcoord.y)) );
+						
+			Depth += min(M, Encode(float2(texcoord.x + S * (MS * 0.500f), texcoord.y)) );
+					
+			Depth += min(M, Encode(float2(texcoord.x + S * (MS * 0.250f), texcoord.y)) );
+			
+			Depth = min(M, Depth / 4.0f);
+					
+			Depth = lerp(Depth, D, 0.1875f);			
+			continue;
+		}
+		else if (View_Mode == 2)
+		{						
+			D = Depth;
+						
+			Depth += min(M, Encode(float2(texcoord.x + S * (MS * 0.9375f), texcoord.y)) );
+						
+			Depth += min(M, Encode(float2(texcoord.x + S * (MS * 0.6875f), texcoord.y)) );
+			
+			Depth += min(M, Encode(float2(texcoord.x + S * (MS * 0.500f), texcoord.y)) );
+		
+			Depth += min(M, Encode(float2(texcoord.x + S * (MS * 0.4375f), texcoord.y)) );
+			
+			Depth += min(M, Encode(float2(texcoord.x + S * (MS * 0.1875f), texcoord.y)) );
+								
+			Depth = min(M, Depth / 6.0f);
+			
+			Depth = lerp(Depth, D, 0.1875f);	
+			continue;
+		}
+	}
+	return Depth;				
+}
+
+float4 LR(float2 texcoord)
+{
+	float4 color, Left, Right, L, R;
 	float2 TCL, TCR, TexCoords = texcoord;
-	float DepthR = 1, DepthL = 1, LDepth, RDepth, DL, DR, N = 9, samplesA[9] = {0.5,0.5625,0.625,0.6875,0.75,0.8125,0.875,0.9375,1.0}, Adjust_A = 1 / N;
-							
+								
 	if(Eye_Swap)
 	{
 		if ( Stereoscopic_Mode == 0 )
@@ -1015,76 +1063,12 @@ float4 PS_calcLR(float2 texcoord)
 		TCL.x += (Interlace_Anaglyph.x*0.5) * pix.x;
 		TCR.x -= (Interlace_Anaglyph.x*0.5) * pix.x;
 	}
-							
-	[loop]
-	for ( int i = 0 ; i < N; i++ ) 
-	{	
-		float S = samplesA[i], MSM = MS + (Divergence * 0.0001);//Adjustment for range scaling.		
-				
-		if (View_Mode == 0)
-		{
-			DepthL = min(DepthL, Encode(float2(TCL.x + S * MSM, TCL.y)) );
-			DepthR = min(DepthR, Encode(float2(TCR.x - S * MSM, TCR.y)) );
-			continue;
-		}
-		else if (View_Mode == 1)
-		{	
-			LDepth = min(DepthL, Encode(float2(TCL.x + S * MSM, TCL.y)) );
-			RDepth = min(DepthR, Encode(float2(TCR.x - S * MSM, TCR.y)) );
+	
+	float DepthL = Parallax( Divergence,TCL); //Parallax Left					
+	float DepthR = Parallax(-Divergence,TCR); //Parallax Right
 			
-			DL = LDepth;
-			DR = RDepth;
-									
-			LDepth += min(DepthL, Encode(float2(TCL.x + S * (MSM * 0.75f), TCL.y)) );
-			RDepth += min(DepthR, Encode(float2(TCR.x - S * (MSM * 0.75f), TCR.y)) );
-						
-			LDepth += min(DepthL, Encode(float2(TCL.x + S * (MSM * 0.500f), TCL.y)) );
-			RDepth += min(DepthR, Encode(float2(TCR.x - S * (MSM * 0.500f), TCR.y)) );
-					
-			LDepth += min(DepthL, Encode(float2(TCL.x + S * (MSM * 0.250f), TCL.y)) );
-			RDepth += min(DepthR, Encode(float2(TCR.x - S * (MSM * 0.250f), TCR.y)) );
-			
-			DepthL = min(DepthL,LDepth / 4.0f);
-			DepthR = min(DepthR,RDepth / 4.0f);
-					
-			DepthL = lerp(DepthL, DL, 0.1875f);
-			DepthR = lerp(DepthR, DR, 0.1875f);			
-			continue;
-		}
-		else if (View_Mode == 2)
-		{			
-			LDepth = min(DepthL, Encode(float2(TCL.x + S * MSM, TCL.y)) );
-			RDepth = min(DepthR, Encode(float2(TCR.x - S * MSM, TCR.y)) );
-			
-			DL = LDepth;
-			DR = RDepth;
-						
-			LDepth += min(DepthL, Encode(float2(TCL.x + S * (MSM * 0.9375f), TCL.y)) );
-			RDepth += min(DepthR, Encode(float2(TCR.x - S * (MSM * 0.9375f), TCR.y)) );
-						
-			LDepth += min(DepthL, Encode(float2(TCL.x + S * (MSM * 0.6875f), TCL.y)) );
-			RDepth += min(DepthR, Encode(float2(TCR.x - S * (MSM * 0.6875f), TCR.y)) );
-			
-			LDepth += min(DepthL, Encode(float2(TCL.x + S * (MSM * 0.500f), TCL.y)) );
-			RDepth += min(DepthR, Encode(float2(TCR.x - S * (MSM * 0.500f), TCR.y)) );
-		
-			LDepth += min(DepthL, Encode(float2(TCL.x + S * (MSM * 0.4375f), TCL.y)) );
-			RDepth += min(DepthR, Encode(float2(TCR.x - S * (MSM * 0.4375f), TCR.y)) );
-			
-			LDepth += min(DepthL, Encode(float2(TCL.x + S * (MSM * 0.1875f), TCL.y)) );
-			RDepth += min(DepthR, Encode(float2(TCR.x - S * (MSM * 0.1875f), TCR.y)) );
-								
-			DepthL = min(DepthL,LDepth / 6.0f);
-			DepthR = min(DepthR,RDepth / 6.0f);
-			
-			DepthL = lerp(DepthL, DL, 0.1875f);
-			DepthR = lerp(DepthR, DR, 0.1875f);		
-			continue;
-		}
-	}
-			
-	float ReprojectionLeft = Conv(DepthL,TexCoords);//Zero Parallax Distance Pass Left
-	float ReprojectionRight = Conv(DepthR,TexCoords);//Zero Parallax Distance Pass Right
+	float ReprojectionLeft = MS * Conv( DepthL,TexCoords);//Zero Parallax Distance Pass Left
+	float ReprojectionRight = MS * Conv(DepthR,TexCoords);//Zero Parallax Distance Pass Right
 	
 	if(Custom_Sidebars == 0)
 	{
@@ -1353,7 +1337,7 @@ float4 Average_Luminance_Weapon(float4 position : SV_Position, float2 texcoord :
 	else if ( Anti_Z_Fighting == 4)
 		AZF = float4(0.5, 0.5, 0.5, 0.5);//Lower Right
 	#endif
-	float3 Average_Lum_Weapon = PS_calcLR(float2(AZF.z + texcoord.x * AZF.w,AZF.x + texcoord.y * AZF.y )).www;
+	float3 Average_Lum_Weapon = LR(float2(AZF.z + texcoord.x * AZF.w,AZF.x + texcoord.y * AZF.y )).www;
 	return float4(Average_Lum_Weapon,1);
 }
 
@@ -1362,7 +1346,7 @@ uniform float timer < source = "timer"; >; //Please do not remove.
 float4 Out(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Target
 {
 	float PosX = 0.5*BUFFER_WIDTH*pix.x,PosY = 0.5*BUFFER_HEIGHT*pix.y;	
-	float4 Color = float4(PS_calcLR(texcoord).rgb,1),Done,Website,D,E,P,T,H,Three,DD,Dot,I,N,F,O;
+	float4 Color = float4(LR(texcoord).rgb,1),Done,Website,D,E,P,T,H,Three,DD,Dot,I,N,F,O;
 	
 	if(timer <= 10000)
 	{

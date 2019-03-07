@@ -569,11 +569,11 @@ float Depth(in float2 texcoord : TEXCOORD0)
 	
 	if (Offset > 0)
 	Z = min( 1, float2( Z.x*Offsets.x , Z.y /  Offsets.y  ));
-		
+	
 	if (Depth_Map == 0)//DM0. Normal
 		zBuffer = Far * Near / (Far + Z.x * (Near - Far));		
 	else if (Depth_Map == 1)//DM1. Reverse
-		zBuffer = Far * Near / (Far + Z.y * (Near - Far));
+		zBuffer = Far * Near / (Far + Z.y * (Near - Far));		
 		
 	return zBuffer;
 }
