@@ -134,19 +134,6 @@ uniform int Auto_Balance_Ex <
 > = 0;
 #endif
 
-uniform int Convergence_Limits <
-	ui_type = "combo";
-	ui_items = "Limits None\0Limit Near\0Limit Far\0Limits Both\0";
-	ui_label = " Convergence Limits";
-	ui_tooltip = "Select your Convergence Limits for ZPD Limits Calculations.\n" 
-				 "Limits None has no restrictions placed on Zero Parallax Distance.\n" 
-				 "Limit Near has restrictions on Near.\n" 
-				 "Limit Far has restrictions on Far.\n" 
-				 "Limits Both has full restrictions.\n" 
-				 "Default is None.";
-	ui_category = "Divergence & Convergence";
-> = 0;
-
 uniform float Auto_Depth_Range <
 	ui_type = "drag";
 	ui_min = 0.0; ui_max = 0.625;
@@ -159,7 +146,7 @@ uniform float Auto_Depth_Range <
 //Occlusion Masking//
 uniform int Disocclusion <
 	ui_type = "drag";
-	ui_min = 32; ui_max = 128;
+		ui_min = 32; ui_max = 128;
 	ui_label = "·Occlusion Quality·";
 	ui_tooltip = "Occlusion masking power & Mask Based culling adjustments.\n"
 				 "Affects Gap/Hole Filling quality.\n"
@@ -169,7 +156,7 @@ uniform int Disocclusion <
 
 uniform int View_Mode <
 	ui_type = "combo";
-	ui_items = "View Mode Normal\0View Mode Alpha\0View Mode Beta\0";
+	ui_items = "View Mode Normal\0View Mode Alpha\0";
 	ui_label = " View Mode";
 	ui_tooltip = "Change the way the shader warps the output to the screen.\n"
 				 "Default is Normal";
@@ -838,14 +825,7 @@ float Conv(float D,float2 texcoord)
 		if(Auto_Balance_Ex > 0 )
 			ZP = saturate(ALC);
 	#endif
-		float DM = D;	
-		if (Convergence_Limits == 1 || Convergence_Limits == 3) // You can also readjust convergence Z-Buffer if you want less Near Depth.
-			DM = ( D - 0 ) / ( (1-Z) - 0);	
-		
-		float Convergence = 1 - Z / DM;
-				
-		if (Convergence_Limits == 2 || Convergence_Limits == 3) // You can also readjust convergence Z-Buffer if you want less Range Depth.
-			Convergence /= 1-(-ZPD);
+		float Convergence = 1 - Z / D;
 			
 		if (ZPD == 0)
 			ZP = 1.0;
@@ -875,8 +855,8 @@ float2 Parallax( float Divergence, float2 Coordinates)
 	float LayerDepth = 1.0 / clamp(Steps,32,255);
 
 	//Offsets listed here Max Seperation is 3% - 6% of screen space with Depth Offsets & Netto layer offset change based on MS.
-	float MS = Divergence * pix.x, deltaCoordinates = MS * LayerDepth, Offsets = Divergence * 0.1f;
-	float2 ParallaxCoord = Coordinates, DB_Offset = float2((Divergence * 0.0375f) * pix.x, 0);
+	float MS = Divergence * pix.x, deltaCoordinates = MS * LayerDepth;
+	float2 ParallaxCoord = Coordinates, DB_Offset = float2((Divergence * 0.05f) * pix.x, 0);
 	float CurrentDepthMapValue = zBuffer(ParallaxCoord), CurrentLayerDepth, DepthDifference;
 
 	// Steep parallax mapping
@@ -900,15 +880,13 @@ float2 Parallax( float Divergence, float2 Coordinates)
 	float weight = afterDepthValue / (afterDepthValue - beforeDepthValue);
 	ParallaxCoord = PrevParallaxCoord * max(0,weight) + ParallaxCoord * min(1,1.0f - weight);
 
-	// Apply gap masking (by JMF) Don't know who this Is to credit him.... :(
-	DepthDifference = distance(afterDepthValue,afterDepthValue) * MS; //Normal 2
-	if(View_Mode == 0)
-	DepthDifference += beforeDepthValue * Offsets * pix.x; //Normal
+	// Apply gap masking
 	if(View_Mode == 1)
-	DepthDifference += lerp(beforeDepthValue * Offsets * pix.x,beforeDepthValue * MS,0.125f); //Mirror
+	{
+		DepthDifference = (afterDepthValue-beforeDepthValue) * MS;
+		ParallaxCoord.x = lerp(ParallaxCoord.x - DepthDifference,ParallaxCoord.x,0.5f);
+	}
 	
-	ParallaxCoord.x += DepthDifference;
-
 	return ParallaxCoord;
 };
 
