@@ -86,18 +86,6 @@ uniform float Divergence <
 	ui_category = "Divergence & Convergence";
 > = 37.5;
 
-uniform int Convergence_Mode <
-	ui_type = "combo";
-	ui_items = "Convergence Tied\0Convergence Locked\0";
-	ui_label = " Convergence Mode";
-	ui_tooltip = "Select your Convergence Mode for ZPD calculations.\n" 
-				 "Convergence Locked mode is locked to divergence & dissables ZPD control below.\n" 
-				 "Convergence Tied is controlled by ZPD. Works in tandam with Divergence.\n" 
-				 "For FPS with no custom weapon profile use Tied.\n" 
-				 "Default is Convergence Tied.";
-	ui_category = "Divergence & Convergence";
-> = 0;
-
 uniform float ZPD <
 	ui_type = "drag";
 	ui_min = 0.0; ui_max = 0.250;
@@ -809,15 +797,12 @@ float AutoZPDRange(float ZPD, float2 texcoord )
 #endif
 float Conv(float D,float2 texcoord)
 {
-	float Z = ZPD, ZP = 0.5f, Divergence_Locked = Divergence*0.001, MS = Divergence * pix.x, ALC = abs(Lum(texcoord).x);
+	float Z = ZPD, ZP = 0.5f, ALC = abs(Lum(texcoord).x);
 	#if RE_Fix	
 		Z = AutoZPDRange(Z,texcoord);
 	#endif	
 		if (Auto_Depth_Range > 0)
 			D = AutoDepthRange(D,texcoord);
-		
-		if(Convergence_Mode)
-			Z = Divergence_Locked;
 			
 	#if Balance_Mode
 			ZP = saturate(ZPD_Balance);			
@@ -846,7 +831,7 @@ float zBuffer(in float2 texcoord : TEXCOORD0)
 /////////////////////////////////////////L/R//////////////////////////////////////////////////////////////////////
 
 // Horizontal parallax offset & Hole filling effect
-float2 Parallax( float Diverge, float2 Coordinates)
+float2 Parallax( float Divergence, float2 Coordinates)
 {
 	//ParallaxSteps
 	int Steps = Disocclusion;
@@ -855,8 +840,8 @@ float2 Parallax( float Diverge, float2 Coordinates)
 	float LayerDepth = 1.0 / clamp(Steps,32,255);
 
 	//Offsets listed here Max Seperation is 3% - 6% of screen space with Depth Offsets & Netto layer offset change based on MS.
-	float MS = Diverge * pix.x, deltaCoordinates = MS * LayerDepth;
-	float2 ParallaxCoord = Coordinates, DB_Offset = float2((Diverge * 0.05f) * pix.x, 0);
+	float MS = Divergence * pix.x, deltaCoordinates = MS * LayerDepth;
+	float2 ParallaxCoord = Coordinates, DB_Offset = float2((Divergence * 0.05f) * pix.x, 0);
 	float CurrentDepthMapValue = zBuffer(ParallaxCoord), CurrentLayerDepth, DepthDifference;
 
 	// Steep parallax mapping
