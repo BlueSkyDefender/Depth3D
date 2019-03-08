@@ -846,7 +846,7 @@ float zBuffer(in float2 texcoord : TEXCOORD0)
 /////////////////////////////////////////L/R//////////////////////////////////////////////////////////////////////
 
 // Horizontal parallax offset & Hole filling effect
-float2 Parallax( float Divergence, float2 Coordinates)
+float2 Parallax( float Diverge, float2 Coordinates)
 {
 	//ParallaxSteps
 	int Steps = Disocclusion;
@@ -855,8 +855,8 @@ float2 Parallax( float Divergence, float2 Coordinates)
 	float LayerDepth = 1.0 / clamp(Steps,32,255);
 
 	//Offsets listed here Max Seperation is 3% - 6% of screen space with Depth Offsets & Netto layer offset change based on MS.
-	float MS = Divergence * pix.x, deltaCoordinates = MS * LayerDepth;
-	float2 ParallaxCoord = Coordinates, DB_Offset = float2((Divergence * 0.05f) * pix.x, 0);
+	float MS = Diverge * pix.x, deltaCoordinates = MS * LayerDepth;
+	float2 ParallaxCoord = Coordinates, DB_Offset = float2((Diverge * 0.05f) * pix.x, 0);
 	float CurrentDepthMapValue = zBuffer(ParallaxCoord), CurrentLayerDepth, DepthDifference;
 
 	// Steep parallax mapping
