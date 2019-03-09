@@ -78,7 +78,7 @@
 //Divergence & Convergence//
 uniform float Divergence <
 	ui_type = "drag";
-	ui_min = 1; ui_max = 62.5; ui_step = 0.5;
+	ui_min = 1; ui_max = 75; ui_step = 0.5;
 	ui_label = "·Divergence Slider·";
 	ui_tooltip = "Divergence increases differences between the left and right retinal images and allows you to experience depth.\n" 
 				 "The process of deriving binocular depth information is called stereopsis.\n"
@@ -834,29 +834,26 @@ float zBuffer(in float2 texcoord : TEXCOORD0)
 float2 Parallax( float Divergence, float2 Coordinates)
 {
 	//ParallaxSteps
-	int Steps = clamp(Disocclusion,32,255);
+	int Steps = Disocclusion;
 	
 	// Offset per step progress & Limit
-	float LayerDepth = 1.0 / Steps;
+	float LayerDepth = 1.0 / clamp(Steps,32,255);
 
 	//Offsets listed here Max Seperation is 3% - 6% of screen space with Depth Offsets & Netto layer offset change based on MS.
 	float MS = Divergence * pix.x, deltaCoordinates = MS * LayerDepth;
 	float2 ParallaxCoord = Coordinates, DB_Offset = float2((Divergence * 0.05f) * pix.x, 0);
-	float CurrentDepthMapValue = zBuffer(ParallaxCoord), CurrentLayerDepth = 0, DepthDifference;
+	float CurrentDepthMapValue = zBuffer(ParallaxCoord), CurrentLayerDepth, DepthDifference;
 
-	[loop] //Steep parallax mapping
-    for ( int i = 0 ; i < Steps; i++ )
-    {
-		// Doing it this way should stop crashes in older version of reshade, I hope.
-        if (CurrentLayerDepth > CurrentDepthMapValue)
-           break; // We have hit the limit so we dont need to loop anymore
-        // Get depth of next layer
-        CurrentLayerDepth += LayerDepth;
-        // Shift coordinates horizontally in linear fasion
-        ParallaxCoord.x -= deltaCoordinates;
-        // Get depth value at current coordinates
-        CurrentDepthMapValue = zBuffer( ParallaxCoord - DB_Offset);
-    }
+	[loop] // Steep parallax mapping
+	while(CurrentLayerDepth < CurrentDepthMapValue)
+	{
+		// Shift coordinates horizontally in linear fasion
+		ParallaxCoord.x -= deltaCoordinates;
+		// Get depth value at current coordinates
+		CurrentDepthMapValue = zBuffer(ParallaxCoord - DB_Offset); // Offset
+		// Get depth of next layer
+		CurrentLayerDepth += LayerDepth;
+	}
 
 	// Parallax Occlusion Mapping
 	float2 PrevParallaxCoord = float2(ParallaxCoord.x + deltaCoordinates, ParallaxCoord.y);
@@ -866,12 +863,13 @@ float2 Parallax( float Divergence, float2 Coordinates)
 	// Interpolate coordinates
 	float weight = afterDepthValue / (afterDepthValue - beforeDepthValue);
 	ParallaxCoord = PrevParallaxCoord * max(0,weight) + ParallaxCoord * min(1,1.0f - weight);
-
+	float PPC = ParallaxCoord.x;
+	
 	// Apply gap masking
 	DepthDifference = (afterDepthValue-beforeDepthValue) * MS;
 	if(View_Mode == 1)
 		ParallaxCoord.x = lerp(ParallaxCoord.x - DepthDifference,ParallaxCoord.x,0.5f);
-	
+		
 	return ParallaxCoord;
 };
 

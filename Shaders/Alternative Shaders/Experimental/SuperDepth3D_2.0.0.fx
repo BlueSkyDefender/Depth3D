@@ -83,7 +83,7 @@ uniform float Divergence <
 				 "The process of deriving binocular depth information is called stereopsis.\n"
 				 "You can override this value.";
 	ui_category = "Divergence & Convergence";
-> = 35.0;
+> = 37.5;
 
 uniform int Convergence_Mode <
 	ui_type = "combo";
