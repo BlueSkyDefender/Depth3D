@@ -45,7 +45,7 @@ uniform int Perspective <
 
 uniform int Scaling_Support <
 	ui_type = "combo";
-	ui_items = " 2160p\0 Native\0 1080p A\0 1080p B\0 1050p A\0 1050p B\0 720p A\0 720p B\0TEST\0";
+	ui_items = " 2160p\0 Native\0 1080p A\0 1080p B\0 1050p A\0 1050p B\0 720p A\0 720p B\0";
 	ui_label = "Scaling Support";
 	ui_tooltip = "Dynamic Super Resolution , Virtual Super Resolution, downscaling, or Upscaling support for Line Interlaced, Column Interlaced, & Checkerboard 3D displays.";
 	ui_category = "Stereoscopic Options";
@@ -145,6 +145,12 @@ sampler PSBackBuffer
 uniform uint framecount < source = "framecount"; >;
 //Total amount of frames since the game started.
 
+float fmod(float a, float b) 
+{
+	float c = frac(abs(a / b)) * abs(b);
+	return a < 0 ? -c : c;
+}
+
 void PS_InputBB(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 color : SV_Target)
 {
 	color = tex2D(BackBuffer, float2(texcoord.x,texcoord.y));
@@ -154,7 +160,7 @@ void PS_InputBB(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0
 float4 UL(in float2 texcoord : TEXCOORD0)
 {
 	float gridy = floor(texcoord.y*(BUFFER_HEIGHT)); //Native
-	return int(gridy) & 1 ? 0 : tex2D(BackBuffer, float2(texcoord.x,texcoord.y)) ;
+	return fmod(gridy,2.0) ? 0 : tex2D(BackBuffer, float2(texcoord.x,texcoord.y));
 }
 
 float4 Uni_L(in float2 texcoord : TEXCOORD0)
@@ -173,7 +179,7 @@ float4 Uni_L(in float2 texcoord : TEXCOORD0)
 float4 UR(in float2 texcoord : TEXCOORD0)
 {
 	float gridy = floor(texcoord.y*(BUFFER_HEIGHT)); //Native
-	return int(gridy) & 1 ? tex2D(BackBuffer, float2(texcoord.x,texcoord.y)) : 0 ;
+	return fmod(gridy,2.0) ? tex2D(BackBuffer, float2(texcoord.x,texcoord.y)) : 0 ;
 }
 
 float4 Uni_R(in float2 texcoord : TEXCOORD0)
@@ -192,7 +198,7 @@ float4 Uni_R(in float2 texcoord : TEXCOORD0)
 float4 BL(in float2 texcoord : TEXCOORD0)
 {
 	float2 gridxy = floor(float2(texcoord.x*BUFFER_WIDTH,texcoord.y*BUFFER_HEIGHT));
-	return int(gridxy.x+gridxy.y) & 1 ? 0 : tex2D(BackBuffer, float2(texcoord.x,texcoord.y)) ;
+	return fmod(gridxy.x+gridxy.y,2.0) ? 0 : tex2D(BackBuffer, float2(texcoord.x,texcoord.y)) ;
 }
 
 float4 Bi_L(in float2 texcoord : TEXCOORD0)
@@ -212,7 +218,7 @@ float4 Bi_L(in float2 texcoord : TEXCOORD0)
 float4 BR(in float2 texcoord : TEXCOORD0)
 {
 	float2 gridxy = floor(float2(texcoord.x*BUFFER_WIDTH,texcoord.y*BUFFER_HEIGHT));
-	return int(gridxy.x+gridxy.y) & 1 ? tex2D(BackBuffer, float2(texcoord.x,texcoord.y)) : 0 ;
+	return fmod(gridxy.x+gridxy.y,2.0) ? tex2D(BackBuffer, float2(texcoord.x,texcoord.y)) : 0 ;
 }
 
 float4 Bi_R(in float2 texcoord : TEXCOORD0)
@@ -412,15 +418,15 @@ void PS0(float4 position : SV_Position, float2 texcoord : TEXCOORD0, out float4 
 	}
 	else if(Stereoscopic_Mode == 2)
 	{
-		Out = int(gridxy.y) & 1 ? cR : cL;	
+		Out = fmod(gridxy.y,2.0) ? cR : cL;	
 	}
 	else if(Stereoscopic_Mode == 3)
 	{
-		Out = int(gridxy.x) & 1 ? cR : cL;		
+		Out = fmod(gridxy.x,2.0) ? cR : cL;		
 	}
 	else if(Stereoscopic_Mode == 4)
 	{	
-		Out = int(gridxy.x+gridxy.y) & 1 ? cR : cL;
+		Out = fmod(gridxy.x+gridxy.y,2.0) ? cR : cL;
 	}
 	else if(Stereoscopic_Mode == 5)
 	{													
