@@ -29,7 +29,7 @@
 uniform float Divergence <
 	ui_type = "drag";
 	ui_min = 1; ui_max = 100; ui_step = 0.5;
-	ui_label = "·Divergence Slider·";
+	ui_label = "Â·Divergence SliderÂ·";
 	ui_tooltip = "Divergence increases differences between the left and right retinal images and allows you to experience depth.\n" 
 				 "The process of deriving binocular depth information is called stereopsis.\n"
 				 "You can override this value.";
@@ -72,7 +72,7 @@ uniform float ZPD_Balance <
 uniform int Disocclusion <
 	ui_type = "drag";
 	ui_min = 16; ui_max = 128;
-	ui_label = "·Occlusion Quality·";
+	ui_label = "Â·Occlusion QualityÂ·";
 	ui_tooltip = "Occlusion masking power & Mask Based culling adjustments.\n"
 				 "Affects Gap/Hole Filling quality.\n"
 				 "Default is 32.";
@@ -91,7 +91,7 @@ uniform int Custom_Sidebars <
 uniform int Depth_Map <
 	ui_type = "combo";
 	ui_items = "DM0 Normal\0DM1 Reversed\0";
-	ui_label = "·Depth Map Selection·";
+	ui_label = "Â·Depth Map SelectionÂ·";
 	ui_tooltip = "Linearization for the zBuffer also known as Depth Map.\n"
 			     "DM0 is Z-Normal and DM1 is Z-Reversed.\n";
 	ui_category = "Depth Map";
