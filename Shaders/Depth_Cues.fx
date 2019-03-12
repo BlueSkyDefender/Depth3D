@@ -108,6 +108,7 @@ void Blur(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out 
 		color = CC;
 }
 
+//Spread the blur a bit more. 
 float4 Adjust(in float2 texcoord : TEXCOORD0)
 {
 float2 S = float2(Spread * 0.15625f, Spread * 0.15625f) * pix;

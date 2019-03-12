@@ -210,7 +210,7 @@ float4 Bi_L(in float2 texcoord : TEXCOORD0)
    float h = 0.5f;
    float4 tA = lerp( tl, tr, h );
    float4 tB = lerp( bl, br, h );
-   float4 done = lerp( tA, tB, h ) * 2.0;//2.0 Gamma correction.
+   float4 done = lerp( tA, tB, h ) * 2.0;//2.0 Gamma correction
    return done;
 }
 
@@ -230,7 +230,7 @@ float4 Bi_R(in float2 texcoord : TEXCOORD0)
    float h = 0.5f;
    float4 tA = lerp( tl, tr, h );
    float4 tB = lerp( bl, br, h );
-   float4 done = lerp( tA, tB, h ) * 2.0;//2.0 Gamma correction.
+   float4 done = lerp( tA, tB, h ) * 2.0;//2.0 Gamma correction
    return done;
 }
 

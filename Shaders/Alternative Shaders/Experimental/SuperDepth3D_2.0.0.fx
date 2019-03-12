@@ -951,12 +951,13 @@ void  Disocclusion(in float4 position : SV_Position, in float2 texcoord : TEXCOO
 /////////////////////////////////////////L/R//////////////////////////////////////////////////////////////////////
 float Encode(in float2 texcoord : TEXCOORD0)
 {
-	return tex2Dlod(SamplerDis,float4(texcoord.x, texcoord.y,0,0)).x;
+	return Conv(tex2Dlod(SamplerDis,float4(texcoord.x, texcoord.y,0,0)).x,texcoord);
 }
 
-float Parallax(in float Diverge,in float2 texcoord)
+float Parallax(in float Diverge,in float2 texcoords)
 {
 	float Depth = 1, D, SD, MS = Diverge * pix.x, N = 9, samplesA[9] = {0.5,0.5625,0.625,0.6875,0.75,0.8125,0.875,0.9375,1.0}, DepthDifference;
+	float2 texcoord = float2(texcoords.x - (MS * 0.1),texcoords.y);
 	[loop]
 	for ( int i = 0 ; i < N; i++ ) 
 	{	
@@ -1063,11 +1064,8 @@ float4 LR(float2 texcoord)
 		TCR.x -= (Interlace_Anaglyph.x*0.5) * pix.x;
 	}
 	
-	float DepthL = Parallax( Divergence,TCL); //Parallax Left					
-	float DepthR = Parallax(-Divergence,TCR); //Parallax Right
-			
-	float ReprojectionLeft = MS * Conv(DepthL,TexCoords);
-	float ReprojectionRight = MS * Conv(DepthR,TexCoords);
+	float ReprojectionLeft = MS * Parallax( Divergence,TCL); //Parallax Left					
+	float ReprojectionRight = MS * Parallax(-Divergence,TCR); //Parallax Right
 	
 	if(Custom_Sidebars == 0)
 	{

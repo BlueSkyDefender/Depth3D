@@ -274,8 +274,8 @@ float4 BrightColors(float4 position : SV_Position, float2 texcoords : TEXCOORD) 
 
 float4 Blur(float2 texcoords : TEXCOORD0)//Then blurred.                                                                        
 {    
-    float2 tex_offset = (Spread * 0.25f) * pix; // gets texel offset
-    float4 result = tex2D(SamplerBC,texcoords); // current fragment's contribution
+    float2 tex_offset = (Spread * 0.25f) * pix; // Gets texel offset
+    float4 result = tex2D(SamplerBC,texcoords); // Current fragment's contribution
 	if (Alternate)
 	{
 		result += tex2D(SamplerBC,texcoords + float2(-2.0f * tex_offset.x, -3.0f * tex_offset.y));
