@@ -504,7 +504,7 @@ technique Blooming_HDR
 		PixelShader = MIPs;
 		RenderTarget = texM;
 	}
-		pass AvgLum
+		pass Avg_Lum
     {
         VertexShader = PostProcessVS;
         PixelShader = Luminance;

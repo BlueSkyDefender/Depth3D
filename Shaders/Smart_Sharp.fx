@@ -25,6 +25,7 @@
  //*																																												*//
  //* 																																												*//
  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 // Determines the power of the Bilateral Filter and sharpening quality. Lower the setting the more performance you would get along with lower quality.
 // 0 = Low
 // 1 = Default 

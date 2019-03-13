@@ -244,7 +244,7 @@ float Encode(in float2 texcoord : TEXCOORD0)
 }
 
 // Horizontal parallax offset & Hole filling effect
-float2 Parallax( float Dive, float2 Coordinates)
+float2 Parallax( float Dive, float2 Coordinates) //WIP
 {
 	//ParallaxSteps
 	int Steps = Disocclusion;
