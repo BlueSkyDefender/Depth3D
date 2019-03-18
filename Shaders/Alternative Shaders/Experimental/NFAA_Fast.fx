@@ -41,8 +41,8 @@ uniform float filterSpread_var <
 				 "alised with a spread of 1.0, steeper lines will need higher\n"
 				 "values. The tradeoff for setting a high spread value is the overall\n"
 				 "softness of the image. Values between 0.875f and 1.875f work best.\n"
-				 "Default is 1.3f.";
-> = 1.3;
+				 "Default is 1.0f.";
+> = 1.0;
 
 uniform int View_Mode <
 	ui_type = "combo";
@@ -58,7 +58,7 @@ uniform int Luma_Coefficient <
 	ui_type = "combo";
 	ui_label = "Luma";
 	ui_tooltip = "Changes how color get used for the other effects.\n";
-	ui_items = "SD video\0HD video\0HDR video\0Intensity\0";
+	ui_items = "SD video\0HD video\0HDR video\0Intensity\0Color\0";
 > = 3;
 
 /////////////////////////////////////////////////////D3D Starts Here/////////////////////////////////////////////////////////////////
@@ -88,7 +88,7 @@ float3 Luma()
 	{
 		Luma = float3(0.2627, 0.6780, 0.0593); //(HDR video) https://en.wikipedia.org/wiki/Rec._2100
 	}
-	else
+	else if (Luma_Coefficient == 3)
 	{
 		Luma = float3(0.333, 0.333, 0.333); //If GGG value of 0.333, 0.333, 0.333 is about right for Green channel. 
 	}
@@ -113,14 +113,26 @@ float4 GetBB(float2 texcoord : TEXCOORD)
 float4 NFAA(float2 texcoord)
 {
 	float4 NFAA;
-    float2 UV = texcoord.xy;     
-	float2 S = float2(w, w) * pix;
-    float   t = LI(GetBB( float2( UV.x , UV.y - S.y ) ).rgb),
-			l = LI(GetBB( float2( UV.x - S.x , UV.y ) ).rgb),
-			r = LI(GetBB( float2( UV.x + S.x , UV.y ) ).rgb),
-			d = LI(GetBB( float2( UV.x , UV.y + S.y ) ).rgb);
-			
-    float2  n = float2(t - d, r - l);
+    float2 UV = texcoord.xy, S = w;	
+	float2 SW = S * pix;
+	float t, l, r, d, n;
+	float3 ct, cl, cr, cd;
+	if (Luma_Coefficient == 4) 
+	{ 	
+		ct = GetBB( float2( UV.x , UV.y - SW.y ) ).rgb;
+		cl = GetBB( float2( UV.x - SW.x , UV.y ) ).rgb;
+		cr = GetBB( float2( UV.x + SW.x , UV.y ) ).rgb;
+		cd = GetBB( float2( UV.x , UV.y + SW.y ) ).rgb;
+		n = float2(length(ct - cd),length(cr - cl));
+	}
+	else
+	{		
+		t = LI(GetBB( float2( UV.x , UV.y - SW.y ) ).rgb);
+		l = LI(GetBB( float2( UV.x - SW.x , UV.y ) ).rgb);
+		r = LI(GetBB( float2( UV.x + SW.x , UV.y ) ).rgb);
+		d = LI(GetBB( float2( UV.x , UV.y + SW.y ) ).rgb);
+		n = float2(t - d, r - l);
+	}	
     float   nl = length(n) * filterStrength_var;
  
     if (nl < (1.0 / 16))
