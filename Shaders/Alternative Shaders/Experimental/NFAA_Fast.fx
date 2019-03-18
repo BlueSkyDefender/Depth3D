@@ -1,9 +1,9 @@
- ////--------//
- ///**DLAA**///
- //--------////
+ ////-------------//
+ ///**NFAA Fast**///
+ //-------------////
 
  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
- //* Directionally localized antialiasing.                                     																										*//
+ //* Normal Filter Anti Aliasing.                                     																										        *//
  //* For Reshade 3.0																																								*//
  //* --------------------------																																						*//
  //* This work is licensed under a Creative Commons Attribution 3.0 Unported License.																								*//
@@ -13,40 +13,57 @@
  //*																																												*//
  //* Have fun,																																										*//
  //* Jose Negrete AKA BlueSkyDefender																																				*//
- //*																																												*//
- //* http://and.intercon.ru/releases/talks/dlaagdc2011/																																*//	
+ //* Based on port by b34r                       																																	*//
+ //* https://www.gamedev.net/forums/topic/580517-nfaa---a-post-process-anti-aliasing-filter-results-implementation-details/?page=2													*//	
  //* ---------------------------------																																				*//
  //*                                                                            																									*//
  //* 																																												*//
  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+uniform float filterStrength_var <
+	ui_type = "drag";
+	ui_min = 0.5; ui_max = 1.0;
+	ui_label = "Strength";
+	ui_tooltip = "Filter Strength Adjusts the overall power of the filter. \n"
+				 "Values in the range of 0.5 to 1.0 should provide good results without\n"
+				 "blurring the overal image too much. Anything higher will also likely\n"
+				 "cause ugly blocky or spikey artifacts.\n"
+				 "Default is 0.75f.";
+> = 0.75;
+
+uniform float filterSpread_var <
+	ui_type = "drag";
+	ui_min = 0.875; ui_max = 1.875;
+	ui_label = "Spread";
+	ui_tooltip = "Filter Spread controls how large an area the filter tries to sample\n"
+				 "and fix aliasing within. This has a direct relationship to the angle\n"
+				 "of lines the filter can smooth well. A 45 degree line will be perfectly\n"
+				 "alised with a spread of 1.0, steeper lines will need higher\n"
+				 "values. The tradeoff for setting a high spread value is the overall\n"
+				 "softness of the image. Values between 0.875f and 1.875f work best.\n"
+				 "Default is 1.3f.";
+> = 1.3;
+
 uniform int View_Mode <
 	ui_type = "combo";
-	ui_items = "DLAA Out\0Mask View A\0Mask View B\0Mask View C\0";
+	ui_items = "NFAA\0Mask View A\0Mask View B\0";
 	ui_label = "View Mode";
-	ui_tooltip = "This is used to select the normal view output or debug view.";
+	ui_tooltip = "This is used to select the normal view output or debug view.\n"
+				 "NFAA Masked Needs Stroner Settings where as NFAA Pure needs Weaker settings.\n"
+				 "Default is NFAA Masked.";
+
 > = 0;
 
 uniform int Luma_Coefficient <
 	ui_type = "combo";
 	ui_label = "Luma";
-	ui_tooltip = "Changes how color get sharpened by Unsharped Masking.\n"
-				 "This should only affect RGB Luminace.";
-	ui_items = "SD video\0HD video\0HDR video\0";
-> = 0;
-
-uniform int Luminace_Selection <
-	ui_type = "combo";
-	ui_items = "RGB Luminace\0Green Channel Luminace\0";
-	ui_label = "Luminace Selection";
-	ui_tooltip = "Luminace color selection Green to RGB Luminace.";
-> = 0;
+	ui_tooltip = "Changes how color get used for the other effects.\n";
+	ui_items = "SD video\0HD video\0HDR video\0Intensity\0";
+> = 3;
 
 /////////////////////////////////////////////////////D3D Starts Here/////////////////////////////////////////////////////////////////
 #define pix float2(BUFFER_RCP_WIDTH, BUFFER_RCP_HEIGHT)
-#define lambda 3.0f
-#define epsilon 0.1f
-
+#define w filterSpread_var
 texture BackBufferTex : COLOR;
 
 sampler BackBuffer 
@@ -67,9 +84,13 @@ float3 Luma()
 	{
 		Luma = float3(0.2126, 0.7152, 0.0722); // (HD video) https://en.wikipedia.org/wiki/Luma_(video)
 	}
-	else
+	else if (Luma_Coefficient == 2)
 	{
 		Luma = float3(0.2627, 0.6780, 0.0593); //(HDR video) https://en.wikipedia.org/wiki/Rec._2100
+	}
+	else
+	{
+		Luma = float3(0.333, 0.333, 0.333); //If GGG value of 0.333, 0.333, 0.333 is about right for Green channel. 
 	}
 	return Luma;
 }
@@ -77,159 +98,74 @@ float3 Luma()
 //Luminosity Intensity
 float LI(in float3 value)
 {	
-	//Luminosity Controll from 0.1 to 1.0 
-	//If GGG value of 0.333, 0.333, 0.333 is about right for Green channel. 
-	//Slide 51 talk more about this.
-	float Lum;
-	if (Luminace_Selection == 0)
-	{
-		Lum = dot(value.xyz,Luma());
-	}
-	else
-	{
-		Lum = dot(value.yyy, float3(0.333, 0.333, 0.333));
-	}
+	//Luminosity Controll
+	if (Luma_Coefficient == 2)
+		value.rgb = value.ggg;
 	
-	return Lum;
+	return dot(value.rgb,Luma());
 }
 
-//Information on Slide 44 says to run the edge processing jointly short and Large.
-float4 DLAA(float2 texcoord)
+float4 GetBB(float2 texcoord : TEXCOORD)
 {
-	//Short Edge Filter http://and.intercon.ru/releases/talks/dlaagdc2011/slides/#slide43
-	float4 DLAA, DLAA_S, DLAA_L; //DLAA is the completed AA Result.
-	
-	//5 bi-linear samples cross
-	float4 Center 		= tex2D(BackBuffer, texcoord);
-	   
-	float4 Left			= tex2D(BackBuffer, texcoord + float2(-1.5 * pix.x, 0.0		   ) );
-	float4 Right		= tex2D(BackBuffer, texcoord + float2( 1.5 * pix.x, 0.0		   ) );
-	
-	float4 Up			= tex2D(BackBuffer, texcoord + float2( 0.0		  ,-1.0 * pix.y) );
-	float4 Down			= tex2D(BackBuffer, texcoord + float2( 0.0		  , 1.0 * pix.y) );   
+	return tex2D(BackBuffer, texcoord);
+}
 
-	
-	//Combine horizontal and vertical blurs together
-	float4 combH		= Left + Right;
-	float4 combV   		= Up + Down;
-	
-	//Bi-directional anti-aliasing using HORIZONTAL & VERTICAL blur and horizontal edge detection
-	//Slide information triped me up here. Read slide 43.
-	float4 CenterDiffH	= abs( combH - 2.0 * Center ) * 0.5;
-	float4 CenterDiffV	= abs( combV - 2.0 * Center ) * 0.5;
-	
-	//Edge detection
-	float EdgeLumH		= LI( CenterDiffH.rgb );
-	float EdgeLumV		= LI( CenterDiffV.rgb );
-	
-	//Blur
-	float4 blurredH		= ( combH  + Center) / 3;
-	float4 blurredV		= ( combV  + Center) / 3;
-	
-	//L(x)
-	float LumH			= LI( blurredH.rgb );
-	float LumV			= LI( blurredV.rgb );
-	
-	//t
-	float satAmountH 	= saturate( ( lambda * EdgeLumH - epsilon ) / LumH );
-	float satAmountV 	= saturate( ( lambda * EdgeLumV - epsilon ) / LumV );
-	
-	//color = lerp(color,blur,sat(Edge/blur)
-	//Re-blend Short Edge Done
-	DLAA = lerp( Center, blurredH, satAmountH );
-	DLAA = lerp( DLAA,   blurredV, satAmountH );
-   	
-	float4 	HNegA, HNegB, HNegC, HNegD, HNegE, 
-			HPosA, HPosB, HPosC, HPosD, HPosE, 
-			VNegA, VNegB, VNegC, 
-			VPosA, VPosB, VPosC;
+float4 NFAA(float2 texcoord)
+{
+	float4 NFAA;
+    float2 UV = texcoord.xy;     
+	float2 S = float2(w, w) * pix;
+    float   t = LI(GetBB( float2( UV.x , UV.y - S.y ) ).rgb),
+			l = LI(GetBB( float2( UV.x - S.x , UV.y ) ).rgb),
+			r = LI(GetBB( float2( UV.x + S.x , UV.y ) ).rgb),
+			d = LI(GetBB( float2( UV.x , UV.y + S.y ) ).rgb);
 			
-	// Long Edges 
-    //16 bi-linear samples cross, added extra bi-linear samples in each direction.
-    HNegA   = tex2D(BackBuffer, texcoord + float2(-3.5 * pix.x,  0.0) );
-	HNegB   = tex2D(BackBuffer, texcoord + float2(-5.5 * pix.x,  0.0) );
-	HNegC   = tex2D(BackBuffer, texcoord + float2(-7.5 * pix.x,  0.0) );
-	
-	HPosA   = tex2D(BackBuffer, texcoord + float2( 3.5 * pix.x,  0.0) );	
-	HPosB   = tex2D(BackBuffer, texcoord + float2( 5.5 * pix.x,  0.0) );
-	HPosC   = tex2D(BackBuffer, texcoord + float2( 7.5 * pix.x,  0.0) );
-	
-	VNegA   = tex2D(BackBuffer, texcoord + float2( 0.0,-3.5 * pix.y) );
-	VNegB   = tex2D(BackBuffer, texcoord + float2( 0.0,-5.5 * pix.y) );
-	VNegC   = tex2D(BackBuffer, texcoord + float2( 0.0,-7.5 * pix.y) );
-	
-	VPosA   = tex2D(BackBuffer, texcoord + float2( 0.0, 3.5 * pix.y) );
-	VPosB   = tex2D(BackBuffer, texcoord + float2( 0.0, 5.5 * pix.y) );
-	VPosC   = tex2D(BackBuffer, texcoord + float2( 0.0, 7.5 * pix.y) );
-	
-    //Long Edge detection H & V
-    float4 AvgBlurH = ( HNegA + HNegB + HNegC + Center + HPosA + HPosB + HPosC ) / 7;   
-    float4 AvgBlurV = ( VNegA + VNegB + VNegC + Center + VPosA + VPosB + VPosC ) / 7;
-	float EAH = clamp( AvgBlurH.a * 2.0 - 1.0 ,0.0,1.0);
-	float EAV = clamp( AvgBlurV.a * 2.0 - 1.0 ,0.0,1.0);
-        
-	float longEdge = max( EAH, EAV);
-	
-	//Used to Protect Text
-	if ( longEdge > 1.0 )
-    {    
-	//Merge for BlurSamples.
-	//Long Blur H
-    float LongBlurLumH	= LI( AvgBlurH.rgb);
-    
-    //Long Blur V
-	float LongBlurLumV	= LI( AvgBlurV.rgb );
-
-	float CenterLI		= LI( Center.rgb );
-	float LeftLI		= LI( Left.rgb );
-	float RightLI		= LI( Right.rgb );
-	float UpLI			= LI( Up.rgb );
-	float DownLI		= LI( Down.rgb );
-  
-    float blurUp = saturate( 0.0 + ( LongBlurLumH - UpLI    ) / (CenterLI - UpLI) );
-    float blurDown = saturate( 1.0 + ( LongBlurLumH - CenterLI ) / (CenterLI - DownLI) );
-    float blurLeft = saturate( 0.0 + ( LongBlurLumV - LeftLI   ) / (CenterLI - LeftLI) );
-    float blurRight = saturate( 1.0 + ( LongBlurLumV - CenterLI ) / (CenterLI - RightLI) );
-
-    float4 UDLR = float4( blurLeft, blurRight, blurUp, blurDown );
-	
-	UDLR = UDLR == float4(0.0, 0.0, 0.0, 0.0) ? float4(1.0, 1.0, 1.0, 1.0) : UDLR;
-        
-    float4 H = lerp( Left , Center, UDLR.x );
-		   H = lerp( Right, H	  , UDLR.y );
-    float4 V = lerp( Up   , Center, UDLR.z );
-		   V = lerp( Down , V	  , UDLR.w );
-	
-	//Reuse short samples and DLAA Long Edge Out.
-    DLAA = lerp( Center, H , EAH);
-	DLAA = lerp( DLAA  , V , EAV);  
+    float2  n = float2(t - d, r - l);
+    float   nl = length(n) * filterStrength_var;
+ 
+    if (nl < (1.0 / 16))
+    {
+		NFAA = GetBB(UV);
+	}
+    else
+    {
+	n *= pix / nl;
+ 
+	float4   o = GetBB( UV ),
+			t0 = GetBB( UV + n * 0.5) * 0.9,
+			t1 = GetBB( UV - n * 0.5) * 0.9,
+			t2 = GetBB( UV + n) * 0.75,
+			t3 = GetBB( UV - n) * 0.75;
+ 
+		NFAA = (o + t0 + t1 + t2 + t3) / 4.3;
 	}
 	
-	float Mask = (EdgeLumH + (longEdge > 0.5)) * 0.5;
+	float Mask = nl;
 	
+	if (Mask > 0.05)
+	Mask = 1-Mask;
+	else
+	Mask = 1;
+	
+	// Final color
 	if(View_Mode == 1)
 	{
-		DLAA = Mask;
+		NFAA = lerp(float4(2.5,0,0,1),GetBB( texcoord.xy ), Mask );
 	}
 	else if (View_Mode == 2)
 	{
-		DLAA = lerp(DLAA,float4(1,0,0,1),Mask);
-	}
-	else
-	{
-		DLAA = DLAA;
-	}
-	
-	return DLAA;
-}
+		NFAA = Mask.xxxx;
+	}	
 
+return NFAA;
+}
 
 ////////////////////////////////////////////////////////Logo/////////////////////////////////////////////////////////////////////////
 uniform float timer < source = "timer"; >;
 float4 Out(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Target
 {
 	float PosX = 0.5*BUFFER_WIDTH*pix.x,PosY = 0.5*BUFFER_HEIGHT*pix.y;	
-	float4 Color = DLAA(texcoord),Done,Website,D,E,P,T,H,Three,DD,Dot,I,N,F,O;
+	float4 Color = NFAA(texcoord),Done,Website,D,E,P,T,H,Three,DD,Dot,I,N,F,O;
 	
 	if(timer <= 10000)
 	{
@@ -338,9 +274,9 @@ void PostProcessVS(in uint id : SV_VertexID, out float4 position : SV_Position, 
 }
 
 //*Rendering passes*//
-technique Directionally_Localized_Anti_Aliasing
+technique Normal_Filter_Anti_Aliasing
 {
-			pass DLAA_Light
+			pass NFAA_Fast
 		{
 			VertexShader = PostProcessVS;
 			PixelShader = Out;	
