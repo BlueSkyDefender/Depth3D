@@ -22,27 +22,27 @@
 
 uniform float filterStrength_var <
 	ui_type = "drag";
-	ui_min = 0.5; ui_max = 1.0;
+	ui_min = 0.25;ui_max = 1.0;
 	ui_label = "Strength";
 	ui_tooltip = "Filter Strength Adjusts the overall power of the filter. \n"
-				 "Values in the range of 0.5 to 1.0 should provide good results without\n"
+				 "Values in the range of 0.25 to 1.0 should provide good results without\n"
 				 "blurring the overal image too much. Anything higher will also likely\n"
 				 "cause ugly blocky or spikey artifacts.\n"
-				 "Default is 0.75f.";
-> = 0.75;
+				 "Default is 0.5f.";
+> = 0.5;
 
 uniform float filterSpread_var <
 	ui_type = "drag";
-	ui_min = 0.875; ui_max = 1.875;
+	ui_min = 0.5; ui_max = 1.0;
 	ui_label = "Spread";
 	ui_tooltip = "Filter Spread controls how large an area the filter tries to sample\n"
 				 "and fix aliasing within. This has a direct relationship to the angle\n"
 				 "of lines the filter can smooth well. A 45 degree line will be perfectly\n"
 				 "alised with a spread of 1.0, steeper lines will need higher\n"
 				 "values. The tradeoff for setting a high spread value is the overall\n"
-				 "softness of the image. Values between 0.875f and 1.875f work best.\n"
-				 "Default is 1.0f.";
-> = 1.0;
+				 "softness of the image. Values between 0.5f and 1.0f work best.\n"
+				 "Default is 0.750f.";
+> = 0.75;
 
 uniform int View_Mode <
 	ui_type = "combo";
@@ -114,8 +114,8 @@ float4 NFAA(float2 texcoord)
 {
 	float4 NFAA;
     float2 UV = texcoord.xy, S = w;	
-	float2 SW = S * pix;
-	float t, l, r, d, n;
+	float2 SW = S * pix, n;
+	float t, l, r, d;
 	float3 ct, cl, cr, cd;
 	if (Luma_Coefficient == 4) 
 	{ 	
