@@ -19,43 +19,33 @@
  //*                                                                            																									*//
  //* 																																												*//
  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-uniform float filterStrength_var <
-	ui_type = "drag";
-	ui_min = 0.0; ui_max = 5.0;
-	ui_label = "Mask Strength";
-	ui_tooltip = "Filter Strength Adjusts the overall power of the filter. \n"
-				 "Values in the range of 0.0 to 1.0 should provide good results without\n"
-				 "blurring the overal image too much. Anything higher will also likely\n"
-				 "cause ugly blocky or spikey artifacts.\n"
-				 "Default is 1.0f.";
-> = 1.0;
 
 uniform float filterSpread_var <
 	ui_type = "drag";
-	ui_min = 0.5; ui_max = 1.5;
+	ui_min = 0.5; ui_max = 2.0;
 	ui_label = "Spread";
 	ui_tooltip = "Filter Spread controls how large an area the filter tries to sample\n"
 				 "and fix aliasing within. This has a direct relationship to the angle\n"
 				 "of lines the filter can smooth well. A 45 degree line will be perfectly\n"
 				 "alised with a spread of 1.0, steeper lines will need higher\n"
 				 "values. The tradeoff for setting a high spread value is the overall\n"
-				 "softness of the image. Values between 0.5f and 1.5f work best.\n"
-				 "Default is 0.750f.";
-> = 0.75;
+				 "Softness/Ghosting of the image. Values between 0.5f and 2.0f work best.\n"
+				 "Default is 1.0f.";
+> = 1.0;
 
 uniform int View_Mode <
 	ui_type = "combo";
-	ui_items = "TNFAA\0Mask View A\0Mask View B\0";
+	ui_items = "Temporal-NFAA\0Mask View A\0Mask View B\0Non-Masked View\0";
 	ui_label = "View Mode";
-	ui_tooltip = "This is used to select the normal view output or debug view.\n"
-				 "NFAA Masked Needs Stroner Settings where as NFAA Pure needs Weaker settings.\n"
-				 "Default is NFAA Masked.";
-
+	ui_tooltip = "This is used to select the Temporal views output or debug views.\n"
+				 "Non-Masked View is only good for semi-static scenes.\n"
+				 "Default is Temporal-NFAA.";
 > = 0;
 
 /////////////////////////////////////////////////////D3D Starts Here/////////////////////////////////////////////////////////////////
 #define pix float2(BUFFER_RCP_WIDTH, BUFFER_RCP_HEIGHT)
-#define w filterSpread_var
+#define ws 0.5
+#define Jitter_Ammount 0.5 //Adjust Randomized Halton base(2,3) Jitter and Dejitter filter. This should be subpix 0.5-0.75
 texture BackBufferTex : COLOR;
 
 sampler BackBuffer 
@@ -107,7 +97,7 @@ float Halton(float i, float base)
 
 float4 T_Out(float2 texcoord : TEXCOORD)
 {		
-	float Persistence = 0.950f;
+	float Persistence = 0.95f;
     float4 C = GetBB(texcoord);
     
     C.rgb = tex2Dlod(PBackBuffer, float4(texcoord,0,0)).rgb;
@@ -119,60 +109,37 @@ float4 T_Out(float2 texcoord : TEXCOORD)
     return C;
 }
 	
-float4 NFAA(float2 texcoord)
+float4 NFAA(float2 texcoord : TEXCOORD)
 {	
-	float4 NFAA;
-    float2 UV = texcoord.xy, S = w, SW = S * pix, n;
+	float3 NFAA;
+    float2 UV = texcoord.xy, S = ws, SW = S * pix, n;
 			
-	float3	ct = GetBB( float2( UV.x , UV.y - SW.y ) ).rgb,
-			cl = GetBB( float2( UV.x - SW.x , UV.y ) ).rgb,
-			cr = GetBB( float2( UV.x + SW.x , UV.y ) ).rgb,
-			cd = GetBB( float2( UV.x , UV.y + SW.y ) ).rgb;
-			n = float2(length(ct - cd),length(cr - cl));
+	float3 ct = GetBB( float2( UV.x , UV.y - SW.y ) ).rgb,
+		   cl = GetBB( float2( UV.x - SW.x , UV.y ) ).rgb,
+		   cr = GetBB( float2( UV.x + SW.x , UV.y ) ).rgb,
+		   cd = GetBB( float2( UV.x , UV.y + SW.y ) ).rgb;
+		   n = float2(length(ct - cd),length(cr - cl));
 		
-    float   nl = length(n);
+    float   nl = length(n) * filterSpread_var;
  
     if (nl < (1.0 / 16))
     {
-		NFAA = GetBB(UV);
+		NFAA = GetBB(UV).rgb;
 	}
     else
     {
 	n *= pix / nl;
  
-	float4   o = T_Out( UV ),
-			t0 = T_Out( UV + n * 0.5) * 0.9,
-			t1 = T_Out( UV - n * 0.5) * 0.9,
-			t2 = T_Out( UV + n) * 0.75,
-			t3 = T_Out( UV - n) * 0.75;
+	float3   o = GetBB( UV ).rgb,
+			t0 = GetBB( UV + n * 0.5).rgb * 0.9,
+			t1 = GetBB( UV - n * 0.5).rgb * 0.9,
+			t2 = GetBB( UV + n).rgb * 0.75,
+			t3 = GetBB( UV - n).rgb * 0.75;
  
 		NFAA = (o + t0 + t1 + t2 + t3) / 4.3;
 	}
-	
-	float Mask = nl;
-	
-	if (Mask > 0.05)
-	Mask = 1-Mask;
-	else
-	Mask = 1;
-	
-	Mask = saturate(lerp(Mask,1,-filterStrength_var));
-	
-	// Final color
-	if(View_Mode == 0)
-	{
-		NFAA = lerp(NFAA,GetBB( texcoord.xy ), abs(Mask) );
-	}
-	else if(View_Mode == 1)
-	{
-		NFAA = lerp(float4(1,0,0,1),GetBB( texcoord.xy ), abs(Mask) );
-	}
-	else if (View_Mode == 2)
-	{
-		NFAA = Mask.xxxx;
-	}	
 
-return NFAA;
+return float4(NFAA,nl);
 }
 
 void Current_BackBuffer(float4 position : SV_Position, float2 texcoord : TEXCOORD, out float4 color : SV_Target)
@@ -181,14 +148,14 @@ void Current_BackBuffer(float4 position : SV_Position, float2 texcoord : TEXCOOR
 	float2 XY = float2(random,random);
 	//Randomized Halton base(2,3)
 	XY = float2(Halton(XY.x, 2),Halton(XY.y, 3));
-	XY = XY * 0.5;//subpix jitter
+	XY = XY * Jitter_Ammount;//subpix jitter
 	
 	float2 W = XY * pix;
 	float3 ct, cl, cr, cd;	
-	ct = GetBB( float2( texcoord.x , texcoord.y - W.y ) ).rgb;
-	cl = GetBB( float2( texcoord.x - W.x , texcoord.y ) ).rgb;
-	cr = GetBB( float2( texcoord.x + W.x , texcoord.y ) ).rgb;
-	cd = GetBB( float2( texcoord.x , texcoord.y + W.y ) ).rgb;
+	ct = NFAA( float2( texcoord.x , texcoord.y - W.y ) ).rgb;
+	cl = NFAA( float2( texcoord.x - W.x , texcoord.y ) ).rgb;
+	cr = NFAA( float2( texcoord.x + W.x , texcoord.y ) ).rgb;
+	cd = NFAA( float2( texcoord.x , texcoord.y + W.y ) ).rgb;
 	color = float4((ct + cd + cr + cl) / 4, 1 );
 }
 
@@ -197,12 +164,51 @@ void Past_BackBuffer(float4 position : SV_Position, float2 texcoord : TEXCOORD, 
 	PastSingle = tex2D(CBackBuffer,texcoord);
 	Past = tex2D(BackBuffer,texcoord);
 }
+
+float4 TNFAA(float2 texcoord : TEXCOORD)
+{
+	float Mask = NFAA(texcoord).w, filterStrength_var = 2.5f;
+	
+	if (Mask > 0.05)
+	Mask = 1-Mask;
+	else
+	Mask = 1;
+	
+	Mask = saturate(lerp(Mask,1,-filterStrength_var));
+    float2 UV = texcoord.xy, SW = Jitter_Ammount * pix, n;
+			
+	float3  ct = T_Out( float2( UV.x , UV.y - SW.y ) ).rgb,
+			cl = T_Out( float2( UV.x - SW.x , UV.y ) ).rgb,
+			cr = T_Out( float2( UV.x + SW.x , UV.y ) ).rgb,
+			cd = T_Out( float2( UV.x , UV.y + SW.y ) ).rgb;
+	float4 NFAA = float4((ct + cd + cr + cl) / 4, Mask);	
+	
+	// Final color
+	if(View_Mode == 0)
+	{
+		NFAA = lerp(NFAA,GetBB( texcoord.xy ), Mask );
+	}
+	else if(View_Mode == 1)
+	{
+		NFAA = lerp(float4(1,0,0,1),GetBB( texcoord.xy ), Mask );
+	}
+	else if (View_Mode == 2)
+	{
+		NFAA = Mask.xxxx;
+	}
+	else if (View_Mode == 3)
+	{
+		NFAA = NFAA;
+	}
+
+	return NFAA;	
+}
 ////////////////////////////////////////////////////////Logo/////////////////////////////////////////////////////////////////////////
 uniform float timer < source = "timer"; >;
 float4 Out(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Target
 {
 	float PosX = 0.5*BUFFER_WIDTH*pix.x,PosY = 0.5*BUFFER_HEIGHT*pix.y;	
-	float4 Color = NFAA(texcoord),Done,Website,D,E,P,T,H,Three,DD,Dot,I,N,F,O;
+	float4 Color = TNFAA(texcoord),Done,Website,D,E,P,T,H,Three,DD,Dot,I,N,F,O;
 	
 	if(timer <= 10000)
 	{

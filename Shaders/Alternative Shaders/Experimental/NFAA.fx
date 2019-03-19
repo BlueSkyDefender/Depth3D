@@ -20,17 +20,6 @@
  //* 																																												*//
  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-uniform float filterStrength_var <
-	ui_type = "drag";
-	ui_min = 0.25;ui_max = 1.0;
-	ui_label = "Strength";
-	ui_tooltip = "Filter Strength Adjusts the overall power of the filter. \n"
-				 "Values in the range of 0.25 to 1.0 should provide good results without\n"
-				 "blurring the overal image too much. Anything higher will also likely\n"
-				 "cause ugly blocky or spikey artifacts.\n"
-				 "Default is 0.5f.";
-> = 0.5;
-
 uniform float filterSpread_var <
 	ui_type = "drag";
 	ui_min = 0.5; ui_max = 1.0;
@@ -63,7 +52,7 @@ uniform int Luma_Coefficient <
 
 /////////////////////////////////////////////////////D3D Starts Here/////////////////////////////////////////////////////////////////
 #define pix float2(BUFFER_RCP_WIDTH, BUFFER_RCP_HEIGHT)
-#define w filterSpread_var
+#define sw filterSpread_var
 texture BackBufferTex : COLOR;
 
 sampler BackBuffer 
@@ -113,8 +102,7 @@ float4 GetBB(float2 texcoord : TEXCOORD)
 float4 NFAA(float2 texcoord)
 {
 	float4 NFAA;
-    float2 UV = texcoord.xy, S = w;	
-	float2 SW = S * pix, n;
+    float2 UV = texcoord.xy, SW = sw * pix, n;	
 	float t, l, r, d;
 	float3 ct, cl, cr, cd;
 	if (Luma_Coefficient == 4) 
@@ -133,7 +121,7 @@ float4 NFAA(float2 texcoord)
 		d = LI(GetBB( float2( UV.x , UV.y + SW.y ) ).rgb);
 		n = float2(t - d, r - l);
 	}	
-    float   nl = length(n) * filterStrength_var;
+    float   nl = length(n) * 0.5;
  
     if (nl < (1.0 / 16))
     {
@@ -154,10 +142,12 @@ float4 NFAA(float2 texcoord)
 	
 	float Mask = nl;
 	
-	if (Mask > 0.05)
+	if (Mask > 0.025)
 	Mask = 1-Mask;
 	else
 	Mask = 1;
+	
+	Mask = saturate(lerp(Mask,1,-5.0));
 	
 	// Final color
 	if(View_Mode == 1)
