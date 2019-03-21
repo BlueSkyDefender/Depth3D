@@ -28,27 +28,21 @@ uniform float Persistence <
 				"1000/1 is 1.0, so 1/2 is 0.5 and so forth.\n"
 				"Default is 1/250 so 0.750, 0 is infinity.";
 	ui_category = "Motion Blur Adjust";
-> = 0.50;
+> = 0.625;
 
 uniform float Power <
 	ui_type = "drag";
-	ui_min = 1.0; ui_max = 2.5;
+	ui_min = 1.0; ui_max = 5.0;
 	ui_label = "Power";
 	ui_tooltip = "Power.";
-> = 1.75;
+> = 2.5;
 
 uniform float Blur_Amount <
 	ui_type = "drag";
-	ui_min = 0.5; ui_max = 1.5;
+	ui_min = 0.0; ui_max = 5.0;
 	ui_label = "Blur Amount";
 	ui_tooltip = "Adjust Blur Amount";
-> = 1.0;
-
-
-uniform bool Blur_Boost <
-	ui_label = " Blur Boost";
-	ui_tooltip = "Boost Blur by lowering image res by half.";
-> = 0;
+> = 2.5;
 
 //Depth Map//
 uniform int Depth_Map <
@@ -96,9 +90,10 @@ uniform bool Depth_Map_Flip <
 
 uniform int Debug_View <
 	ui_type = "combo";
-	ui_items = "A\0B\0C\0D\0";
+	ui_items = "PMB\0PMB Mask\0Mask\0Past Frames\0";
 	ui_label = " Debug Views";
 > = 0;
+
 
 /////////////////////////////////////////////D3D Starts Here/////////////////////////////////////////////////////////////////
 #define pix float2(BUFFER_RCP_WIDTH, BUFFER_RCP_HEIGHT)
@@ -117,7 +112,7 @@ sampler BackBuffer
 		Texture = BackBufferTex;
 	};
 
-texture CurrentColorBuffer  { Width = BUFFER_WIDTH ; Height = BUFFER_HEIGHT; Format = RGBA32F;  MipLevels = 2; }; 
+texture CurrentColorBuffer  { Width = BUFFER_WIDTH ; Height = BUFFER_HEIGHT; Format = RGBA32F;  MipLevels = 3; }; 
 
 sampler CColorBuffer
 	{
@@ -131,6 +126,21 @@ sampler CDepthBuffer
 		Texture = CurrentDepthBuffer;
 	};
 
+texture PastColorBuffer  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA32F; }; 
+
+sampler PColorBuffer
+	{
+		Texture = PastColorBuffer;
+	};
+	
+texture PastSingleColorBuffer  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA32F; }; 
+
+sampler PSColorBuffer
+	{
+		Texture = PastSingleColorBuffer;
+	};
+	
+
 texture PastDepthBuffer  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA32F; }; 
 
 sampler PDepthBuffer
@@ -138,13 +148,6 @@ sampler PDepthBuffer
 		Texture = PastDepthBuffer;
 	};
 
-
-texture PastColorBuffer  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA32F; }; 
-
-sampler PCDepthBuffer
-	{
-		Texture = PastColorBuffer;
-	};
 
 texture PastSingleDepthBuffer  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA32F;}; 
 
@@ -179,17 +182,44 @@ float DepthMap(float2 texcoord : TEXCOORD0)
 	return zBuffer;
 }
 
-float4 Bbuffer(float2 texcoord : TEXCOORD)
+float4 Bbuffer(float2 texcoords : TEXCOORD)
 {		
 	float P = Persistence;
-    float4 C = tex2D(BackBuffer, texcoord);
+    float4 C = tex2D(BackBuffer, texcoords);
     
-    C = tex2D(PCDepthBuffer, texcoord);
+    C = tex2D(PColorBuffer, texcoords);
     
     C = C * P;
     
-    C = max( tex2Dlod(CColorBuffer, float4(texcoord,0,Blur_Boost)), C);
+    int Blur_Boost = floor(Blur_Amount * 0.5);
     
+    float2 tex_offset = Blur_Amount * pix; // gets texel offset
+    float4 result = tex2Dlod(CColorBuffer,float4(texcoords,0,Blur_Boost)); // current fragment's contribution
+		
+		result += tex2Dlod(CColorBuffer,float4(texcoords + float2(-1.0f * tex_offset.x,-0.5f * tex_offset.y),0,Blur_Boost));
+			
+		result += tex2Dlod(CColorBuffer,float4(texcoords + float2(0.5f * tex_offset.x, -1.0f * tex_offset.y),0,Blur_Boost));
+		
+		result += tex2Dlod(CColorBuffer,float4(texcoords + float2(0,                   -1.0f * tex_offset.y),0,Blur_Boost));
+		
+		result += tex2Dlod(CColorBuffer,float4(texcoords + float2(-1.0f * tex_offset.x, 				  0),0,Blur_Boost));
+		
+		result += tex2Dlod(CColorBuffer,float4(texcoords + float2(0.5f * tex_offset.x, -0.5f * tex_offset.y),0,Blur_Boost));
+		
+		result += tex2Dlod(CColorBuffer,float4(texcoords + float2(-0.5f * tex_offset.x, 0.5f * tex_offset.y),0,Blur_Boost));
+	
+		result += tex2Dlod(CColorBuffer,float4(texcoords + float2(1.0f * tex_offset.x,  				  0),0,Blur_Boost));
+		
+		result += tex2Dlod(CColorBuffer,float4(texcoords + float2(0,                    1.0f * tex_offset.y),0,Blur_Boost));
+		
+		result += tex2Dlod(CColorBuffer,float4(texcoords + float2(-0.5f * tex_offset.x, 1.0f * tex_offset.y),0,Blur_Boost));
+		
+		result += tex2Dlod(CColorBuffer,float4(texcoords + float2(1.0f * tex_offset.x,  0.5f * tex_offset.y),0,Blur_Boost));
+
+		result /= 11;
+	
+    C = max( result , C);
+
     return C;
 }
 
@@ -208,12 +238,12 @@ float4 Vbuffer(float2 texcoord : TEXCOORD)
 
 float4 MotionBlur(float2 texcoord : TEXCOORD0)
 {	
-	float DB = DepthMap(texcoord), Mask = saturate(lerp(1-Vbuffer(texcoord).r,1,-1));
-	float2 AVB = saturate(Vbuffer(texcoord).rg * 0.5 + 0.5);
+	float DB = DepthMap(texcoord), Mask = saturate(lerp(1-Vbuffer(texcoord).r,1,-2.5));
+
 	float4 color = tex2D(BackBuffer, texcoord); 
 	if(Debug_View == 0)
 	{ // Bbuffer(texcoord)
-		color =  lerp(Bbuffer(texcoord), tex2D(BackBuffer, texcoord), Mask );	
+		color =  lerp(float4(Bbuffer(texcoord).rgb,1), tex2D(BackBuffer, texcoord), Mask );	
 	}
 	else if(Debug_View == 1)
 	{
@@ -227,10 +257,6 @@ float4 MotionBlur(float2 texcoord : TEXCOORD0)
 	{
 		color = Bbuffer(texcoord);
 	}
-	//else
-	//{
-		//color = tex2D(BackBuffer, texcoord + AVB * pix * 2);
-	//}
 	
 	if(Depth_Map_View)
 		color =  DepthMap(texcoord).xxxx;
@@ -238,41 +264,18 @@ float4 MotionBlur(float2 texcoord : TEXCOORD0)
 return color;
 }
 
-void Current_DepthBuffer(float4 position : SV_Position, float2 texcoords : TEXCOORD, out float4 Depth : SV_Target0, out float4 Color : SV_Target1)
+void Current_Buffers(float4 position : SV_Position, float2 texcoords : TEXCOORD, out float4 Depth : SV_Target0, out float4 Color : SV_Target1)
 {	 	
 	Depth = DepthMap(texcoords);
-	float2 tex_offset = Blur_Amount * pix; // gets texel offset
-    float4 result = tex2D(BackBuffer,texcoords); // current fragment's contribution
-	
-	result += tex2D(BackBuffer,texcoords + float2(-1.0f * tex_offset.x,-0.5f * tex_offset.y));
-		
-	result += tex2D(BackBuffer,texcoords + float2(0.5f * tex_offset.x, -1.0f * tex_offset.y));
-	
-	result += tex2D(BackBuffer,texcoords + float2(0,                   -1.0f * tex_offset.y));
-	
-	result += tex2D(BackBuffer,texcoords + float2(-1.0f * tex_offset.x, 				  0));
-	
-	result += tex2D(BackBuffer,texcoords + float2(0.5f * tex_offset.x, -0.5f * tex_offset.y));
-	
-	result += tex2D(BackBuffer,texcoords + float2(-0.5f * tex_offset.x, 0.5f * tex_offset.y));
-
-	result += tex2D(BackBuffer,texcoords + float2(1.0f * tex_offset.x,  				  0));
-	
-	result += tex2D(BackBuffer,texcoords + float2(0,                    1.0f * tex_offset.y));
-	
-	result += tex2D(BackBuffer,texcoords + float2(-0.5f * tex_offset.x, 1.0f * tex_offset.y));
-	
-	result += tex2D(BackBuffer,texcoords + float2(1.0f * tex_offset.x,  0.5f * tex_offset.y));
-	
-	result /= 11;
-	Color = result;
+	Color = tex2D(BackBuffer,texcoords);
 }
 
-void Past_DepthBuffer(float4 position : SV_Position, float2 texcoord : TEXCOORD, out float4 PastSingleD : SV_Target0, out float4 PastD : SV_Target1,out float4 PastC : SV_Target2)
+void Past_DepthBuffer(float4 position : SV_Position, float2 texcoord : TEXCOORD, out float4 PastSingleD : SV_Target0, out float4 PastD : SV_Target1, out float4 PastSingleC : SV_Target2,out float4 PastC : SV_Target3)
 {	
 	PastD = DepthMap(texcoord);
-	PastC = tex2D(BackBuffer, texcoord);
 	PastSingleD = tex2D(CDepthBuffer,texcoord);
+	PastSingleC = tex2D(CColorBuffer, texcoord);
+	PastC = tex2D(BackBuffer, texcoord);
 }
 
 uniform float timer < source = "timer"; >;
@@ -395,7 +398,7 @@ technique Pseudo_Motion_Blur
 		pass CBB
 	{
 		VertexShader = PostProcessVS;
-		PixelShader = Current_DepthBuffer;
+		PixelShader = Current_Buffers;
 		RenderTarget0 = CurrentDepthBuffer;
 		RenderTarget1 = CurrentColorBuffer;
 	}	
@@ -410,6 +413,7 @@ technique Pseudo_Motion_Blur
 		PixelShader = Past_DepthBuffer;
 		RenderTarget0 = PastSingleDepthBuffer;
 		RenderTarget1 = PastDepthBuffer;
-		RenderTarget2 = PastColorBuffer;		
+		RenderTarget2 = PastSingleColorBuffer;
+		RenderTarget3 = PastColorBuffer;		
 	}		
 }
