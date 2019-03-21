@@ -28,7 +28,7 @@ uniform float Persistence <
 				"1000/1 is 1.0, so 1/2 is 0.5 and so forth.\n"
 				"Default is 1/250 so 0.750, 0 is infinity.";
 	ui_category = "Motion Blur Adjust";
-> = 0.750;
+> = 0.50;
 
 uniform float Power <
 	ui_type = "drag";
@@ -53,7 +53,7 @@ uniform bool Blur_Boost <
 //Depth Map//
 uniform int Depth_Map <
 	ui_type = "combo";
-	ui_items = "DM0 Normal\0DM1 Reversed\0DM2 Alt-Reversed\0";
+	ui_items = "DM0 Normal\0DM1 Reversed\0";
 	ui_label = " Depth Map Adjustment";
 	ui_tooltip = "Linearization for the zBuffer also known as Depth Map.\n"
 			     "DM0 is Z-Normal and DM1 is Z-Reversed.\n";
@@ -181,12 +181,12 @@ float DepthMap(float2 texcoord : TEXCOORD0)
 
 float4 Bbuffer(float2 texcoord : TEXCOORD)
 {		
-	float Persistence = Persistence;
+	float P = Persistence;
     float4 C = tex2D(BackBuffer, texcoord);
     
     C = tex2D(PCDepthBuffer, texcoord);
     
-    C = C * Persistence;
+    C = C * P;
     
     C = max( tex2Dlod(CColorBuffer, float4(texcoord,0,Blur_Boost)), C);
     
