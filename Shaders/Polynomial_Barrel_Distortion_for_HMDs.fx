@@ -1,10 +1,10 @@
- ////-----------------------------------------//
+////-----------------------------------------//
  ///**Polynomial Barrel Distortion for HMDs**///
  //-----------------------------------------////
 
  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
- //* Barrel Distortion for HMD type Displays For SuperDepth3D v2.0																													*//
- //* For Reshade 3.0																																								*//
+ //* Barrel Distortion for HMD type Displays                    																													*//
+ //* For Reshade 3.0+																																					    		*//
  //* --------------------------																																						*//
  //* This work is licensed under a Creative Commons Attribution 3.0 Unported License.																								*//
  //* So you are free to share, modify and adapt it for your needs, and even use it for commercial use.																				*//
@@ -22,9 +22,9 @@
  //* 																																												*//
  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-// Determines Slave and Master Shader Toggle. This is used if you want pair this shader up with a other one of the same kind.
-// One = Master;
-// Zero = Slave;
+// Determines Primary and Secondary Shader Toggle. This is used if you want pair this shader up with a other one of the same type.
+// One = Primary;
+// Zero = Secondary;
 #define TOGGLE 1
 
 #if !defined(__RESHADE__) || __RESHADE__ < 40000
@@ -346,6 +346,7 @@ float2 IHRePosLR()
 	float2 IHRePosLR = float2(HMDProfiles()[3][2],HMDProfiles()[3][3]);
 	return IHRePosLR;
 }
+
 /////////////////////////////////////////////D3D Starts Here/////////////////////////////////////////////////////////////////
 #define pix float2(BUFFER_RCP_WIDTH, BUFFER_RCP_HEIGHT)
 #define TextureSize float2(BUFFER_WIDTH, BUFFER_HEIGHT)
@@ -364,8 +365,8 @@ sampler BackBuffer
 	};
 	
 #if TOGGLE
-texture texCLM  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA8;}; 
-texture texCRM  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA8;}; 
+texture texCLP  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA8;}; 
+texture texCRP  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA8;}; 
 #else
 texture texCLS  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA8;}; 
 texture texCRS  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA8;}; 
@@ -374,7 +375,7 @@ texture texCRS  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA8;}
 sampler SamplerCLBORDER
 	{
 		#if TOGGLE
-		Texture = texCLM;
+		Texture = texCLP;
 		#else
 		Texture = texCLS;
 		#endif
@@ -386,7 +387,7 @@ sampler SamplerCLBORDER
 sampler SamplerCRBORDER
 	{
 		#if TOGGLE
-		Texture = texCRM;
+		Texture = texCRP;
 		#else
 		Texture = texCRS;
 		#endif
@@ -733,7 +734,6 @@ float4 PBDOut(float2 texcoord : TEXCOORD0)
 ////////////////////////////////////////////////////////Logo/////////////////////////////////////////////////////////////////////////
 uniform float timer < source = "timer"; >;
 
-
 float4 Out(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Target
 {
 	float PosX = 0.5*BUFFER_WIDTH*pix.x,PosY = 0.5*BUFFER_HEIGHT*pix.y;	
@@ -847,7 +847,7 @@ void PostProcessVS(in uint id : SV_VertexID, out float4 position : SV_Position, 
 
 //*Rendering passes*//
 #if TOGGLE
-technique Polynomial_Barrel_Distortion_M
+technique Polynomial_Barrel_Distortion_P
 #else
 technique Polynomial_Barrel_Distortion_S
 #endif
@@ -857,8 +857,8 @@ technique Polynomial_Barrel_Distortion_S
 			VertexShader = PostProcessVS;
 			PixelShader = LR;
 			#if TOGGLE
-			RenderTarget0 = texCLM;
-			RenderTarget1 = texCRM;
+			RenderTarget0 = texCLP;
+			RenderTarget1 = texCRP;
 			#else
 			RenderTarget0 = texCLS;
 			RenderTarget1 = texCRS;
