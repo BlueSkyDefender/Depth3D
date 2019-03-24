@@ -35,6 +35,7 @@ uniform int Ambiance <
 	ui_label = "Nose Ambiance";
 	ui_tooltip = "Use this to allow ambiance to affect the nose.\n"
 				 "Default is Off.";
+	ui_category = "Virtual Nose";
 > = 0;
 
 uniform int Human_Skin_Color <
