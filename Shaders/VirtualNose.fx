@@ -1,14 +1,24 @@
  ////----------------//
  ///**Virtual Nose**///
  //----------------////
- 
- 
- //---------------------------------------------------------------------------------------------//
- //		Virutal Nose Made By Jose Negrete. AKA BlueSkyDefender									// 
- //		His website is ---------------- 														//
- //		GitHub Link for source info ------------------------	  								//
- // 	Direct Link ------------------------------------------------  Thank You.	  			//
- //_____________________________________________________________________________________________//
+
+
+ //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+ //* VR Virtual Nose for reducing nausia AKA VR Sickness                                                                                                                            *//
+ //* For Reshade 3.0+                                                                                                                                                               *//
+ //*  ---------------------------------                                                                                                                                             *//
+ //* This work is licensed under a Creative Commons Attribution 3.0 Unported License.                                                                                               *//
+ //* So you are free to share, modify and adapt it for your needs, and even use it for commercial use.                                                                              *//
+ //* I would also love to hear about a project you are using it with.                                                                                                               *//
+ //* https://creativecommons.org/licenses/by/3.0/us/																																*//
+ //*																																												*//
+ //* Jose Negrete AKA BlueSkyDefender																											                                   *//
+ //*																																												*//
+ //* http://reshade.me/forum/shader-presentation/2128-sidebyside-3d-depth-map-based-stereoscopic-shader                                                                             *//	
+ //* ---------------------------------															                                                                                  *//
+ //*																																												*//
+ //*                                                    																															*//
+ //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 uniform int BlurAdjust <
 	ui_type = "drag";
@@ -49,9 +59,9 @@ uniform float3 NoseWH <
 	ui_min = -5.0; ui_max = 5.0;
 	ui_label = "Adjust Nose";
 	ui_tooltip = "Adjust the Width and Height of the Virtual Nose
-				 "Default is Zero.";
+				 "Default is float3(0,2.5,0).";
 	ui_category = "Virtual Nose";
-> = float3(0,0,0);
+> = float3(0,2.5,0);
 
 //Human Skin Color//
 float3 HSC()
@@ -81,14 +91,6 @@ float3 HSC()
 #define pix float2(BUFFER_RCP_WIDTH, BUFFER_RCP_HEIGHT)
 #define TextureSize float2(BUFFER_WIDTH, BUFFER_HEIGHT)
 #define HumanColor float3( HSC().x/255, HSC().y/255, HSC().z/255)//RGB Conversion 0-1 range
-
-texture texOC { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; };
-
-sampler OriginalColor 	
-	{
-		Texture = texOC;
-
-	};
 	
 texture BackBufferTex : COLOR;
 
@@ -108,7 +110,7 @@ sampler ShadeSampler
 		MipFilter = LINEAR;
 	};
 	
-texture texNM { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA8; MipLevels = 4;};
+texture texNM { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA8; MipLevels = 3;};
 
 sampler NMSampler
 	{
@@ -117,12 +119,7 @@ sampler NMSampler
 		MagFilter = LINEAR;
 		MipFilter = LINEAR;
 	};
-	
-float4 StoreColor(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Target
-{
-	return tex2D(BackBuffer,texcoord);
-}
-	
+		
 float4 AbianceBlur(float2 texcoord : TEXCOORD0)
 {
 	float2 XYoffset[4] = { float2( 0, 1 ), float2( 0,-1 ), float2( 1, 0 ), float2(-1, 0) };
@@ -136,22 +133,29 @@ float4 AbianceBlur(float2 texcoord : TEXCOORD0)
 }			
 float4 NoseCreation(float2 texcoord : TEXCOORD0)
 {
-	//float dist = texcoord.x + texcoord.y; //Triangle Turned out not to be needed
 	texcoord.x -= 0.5*TextureSize.x*pix.x;
 	texcoord.y -= 0.5*TextureSize.y*pix.y;	
-	texcoord.y += (-2.5+NoseWH.y) * 25.0f * pix.y; //Nose Height
+	//Nose Height
+	texcoord.y += (-2.5+NoseWH.y) * 25.0f * pix.y;
 	//Nose Size
-	texcoord.x *= 1 + (5-NoseWH.z) * 0.05f;
-	texcoord.y *= 1 + (5-NoseWH.z) * 0.05f;
-	texcoord.x *= 1 + (-NoseWH.x) * 0.10f; //Nose Width
+	texcoord *= 1 + (5-NoseWH.z) * 0.05f;
+	//Nose Width
+	texcoord.x *= 1 + (-NoseWH.x) * 0.10f;
 	//Strange Bug if I remove the -0 it loses postion????	 
 	float2 XY_A = float2(0 - texcoord.x * 5.0f, 0.75f - texcoord.y);//Bridge
 	float dist_A = distance(XY_A.x,texcoord.x)+distance(XY_A.y,texcoord.y);
 	
 	float2 XY_B = float2(texcoord.x * 5.395f, 2.0f - texcoord.y * 4.165f);//Nostro
 	float dist_B = XY_B.x * XY_B.x + XY_B.y * XY_B.y;
+
+	texcoord.x *= 0.9625;
+	float2 XY_C = float2(0 - texcoord.x * 5.0f, 0.75f -texcoord.y);//Bridge
+	float dist_C = distance(XY_C.x,texcoord.x)+distance(XY_C.y,texcoord.y);
+	//float2 MXY_B = texcoord * JJ;
+	float2 XY_D = float2(texcoord.x * 5.395f, 2.0f - texcoord.y * 4.165f);//Nostro
+	float dist_D = XY_D.x * XY_D.x + XY_D.y * XY_D.y;
 	
-	return float4(dist_A,dist_B,0,0);
+	return float4(dist_A,dist_B,dist_C,dist_D);
 }
 
 float4 NoseColor(float2 texcoord : TEXCOORD0)
@@ -170,11 +174,11 @@ float4 NoseColor(float2 texcoord : TEXCOORD0)
 		  Nose.rgb += -dither_shift;
 	return Nose;
 }
-	
+
 float4 NoseMask(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Target
 {
 	float4 Out;		
-	float NC_A = NoseCreation(texcoord).x, NC_B = NoseCreation(texcoord).y, M;
+	float NC_A = NoseCreation(texcoord).x, NC_B = NoseCreation(texcoord).y, NC_C = NoseCreation(texcoord).z, NC_D = NoseCreation(texcoord).w, M;
 		
 		if(NC_A < 1 || NC_B < 1)
 			{	
@@ -184,38 +188,37 @@ float4 NoseMask(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_
 					Out.rgb = NoseColor(texcoord).rgb * dot(AbianceBlur(texcoord).rgb, float3(0.299, 0.587, 0.114));
 				else if(Ambiance == 2)
 					Out.rgb = NoseColor(texcoord).rgb * AbianceBlur(texcoord).rgb;
-					
-				M = 1;
 			}
 		else
 			{
-				Out.rgb = AbianceBlur(texcoord).rgb;	
-				M = 0;
+				Out.rgb = tex2D(BackBuffer,texcoord).rgb;	
 			}
 			
-			return float4(Out.rgb,M);
+		if(NC_C < 1 || NC_D < 1)
+			M = 1;
+		else
+			M = 0;
+		
+	return float4(Out.rgb,M);
 }
 
 float4 VNose(float2 texcoord : TEXCOORD0)
 {
 	int Blur_Boost = floor(BlurAdjust * 0.5);
-	float BA = BlurAdjust * 2.0f,NM = tex2D(NMSampler,texcoord).w; 
-	float2 XYoffset[4] = { float2( 0, 1 ), float2( 0,-1 ), float2( 1, 0 ), float2(-1, 0) };
+	float BA = BlurAdjust * 2.0f;
 	float4 Blur, Out;
 	if(Human_Skin_Color < 0 || Human_Skin_Color > 0)
-	{		  
-		   Blur += tex2Dlod(NMSampler,float4( texcoord + XYoffset[0] * BA * pix,0,Blur_Boost));
-		   Blur += tex2Dlod(NMSampler,float4( texcoord + XYoffset[1] * BA * pix,0,Blur_Boost));
-		   Blur += tex2Dlod(NMSampler,float4( texcoord + XYoffset[2] * BA * pix,0,Blur_Boost));
-		   Blur += tex2Dlod(NMSampler,float4( texcoord + XYoffset[3] * BA * pix,0,Blur_Boost));
-		   Blur += tex2Dlod(NMSampler,float4( texcoord + XYoffset[2] * (BA * 0.75) * pix,0,Blur_Boost));
-		   Blur += tex2Dlod(NMSampler,float4( texcoord + XYoffset[3] * (BA * 0.75) * pix,0,Blur_Boost));
-		   Blur += tex2Dlod(NMSampler,float4( texcoord + XYoffset[2] * (BA * 0.5) * pix,0,Blur_Boost));
-		   Blur += tex2Dlod(NMSampler,float4( texcoord + XYoffset[3] * (BA * 0.5) * pix,0,Blur_Boost));
-		   Blur += tex2Dlod(NMSampler,float4( texcoord + XYoffset[2] * (BA * 0.25) * pix,0,Blur_Boost));
-		   Blur += tex2Dlod(NMSampler,float4( texcoord + XYoffset[3] * (BA * 0.25) * pix,0,Blur_Boost));
-		   Blur /= 10;
-		   
+	{	  
+		   Blur += tex2Dlod(NMSampler,float4( texcoord + float2( 1, 0) * BA * pix,0,Blur_Boost));
+		   Blur += tex2Dlod(NMSampler,float4( texcoord + float2(-1, 0) * BA * pix,0,Blur_Boost));
+		   Blur += tex2Dlod(NMSampler,float4( texcoord + float2( 1, 0) * (BA * 0.75) * pix,0,Blur_Boost));
+		   Blur += tex2Dlod(NMSampler,float4( texcoord + float2(-1, 0) * (BA * 0.75) * pix,0,Blur_Boost));
+		   Blur += tex2Dlod(NMSampler,float4( texcoord + float2( 1, 0) * (BA * 0.50) * pix,0,Blur_Boost));
+		   Blur += tex2Dlod(NMSampler,float4( texcoord + float2(-1, 0) * (BA * 0.50) * pix,0,Blur_Boost));
+		   Blur += tex2Dlod(NMSampler,float4( texcoord + float2( 1, 0) * (BA * 0.25) * pix,0,Blur_Boost));
+		   Blur += tex2Dlod(NMSampler,float4( texcoord + float2(-1, 0) * (BA * 0.25) * pix,0,Blur_Boost));
+		   Blur /= 8;
+		float NM = tex2D(NMSampler,texcoord).w;  
 		Out = NM ? Blur : tex2D(BackBuffer,texcoord);
 	}
 	else
@@ -226,14 +229,19 @@ float4 VNose(float2 texcoord : TEXCOORD0)
 	return Out;
 }
 
+float4 VRLeft(float2 texcoord : TEXCOORD0)
+{
+	return tex2D(BackBuffer,float2(texcoord.x*0.5,texcoord.y));
+}
+
 float4 Shade(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Target
 {	
 	float2 XYoffset[4] = { float2( 0, 1 ), float2( 0,-1 ), float2( 1, 0 ), float2(-1, 0) };
 	float4 Blur; 
-		   Blur += tex2D(OriginalColor,texcoord + XYoffset[0] * 10 * pix);
-		   Blur += tex2D(OriginalColor,texcoord + XYoffset[1] * 10 * pix);
-		   Blur += tex2D(OriginalColor,texcoord + XYoffset[2] * 10 * pix);
-		   Blur += tex2D(OriginalColor,texcoord + XYoffset[3] * 10 * pix);
+		   Blur += VRLeft(texcoord + XYoffset[0] * 10 * pix);
+		   Blur += VRLeft(texcoord + XYoffset[1] * 10 * pix);
+		   Blur += VRLeft(texcoord + XYoffset[2] * 10 * pix);
+		   Blur += VRLeft(texcoord + XYoffset[3] * 10 * pix);
 		   Blur /= 4;
 	return Blur; 
 }
@@ -352,16 +360,7 @@ void PostProcessVS(in uint id : SV_VertexID, out float4 position : SV_Position, 
 }
 
 //*Rendering passes*//
-technique Virtual_Nose_Before {
- 	   pass First_Color
-	{
-        VertexShader = PostProcessVS;
-        PixelShader = StoreColor;
-        RenderTarget = texOC;
-    }
-}
-
-technique Virtual_Nose_After
+technique Virtual_Nose
 {		
 			pass Ambiance_Shading
 		{

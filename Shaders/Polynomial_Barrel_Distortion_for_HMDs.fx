@@ -271,14 +271,15 @@ float4x4 Done;
 		IHRPLR = float2(0,0);       //Independent Horizontal Repositioning. Left & Right.
 	}
 
-if(Diaspora)
-{
-	Done = float4x4(float4(IPD,PC.x,Z,IVRPLR.x),float4(LC,PC.y,AR,IVRPLR.y),float4(LDkT,PC.z,D.x,IHRPLR.x),float4(LDkO,VRP,D.y,IHRPLR.y)); //Diaspora frak up 4x4 fix
-}
-else
-{
-	Done = float4x4(float4(IPD,LC,LDkT,LDkO),float4(PC.x,PC.y,PC.z,VRP),float4(Z,AR,D.x,D.y),float4(IVRPLR.x,IVRPLR.y,IHRPLR.x,IHRPLR.y));
-}
+	if(Diaspora)
+	{
+		Done = float4x4(float4(IPD,PC.x,Z,IVRPLR.x),float4(LC,PC.y,AR,IVRPLR.y),float4(LDkT,PC.z,D.x,IHRPLR.x),float4(LDkO,VRP,D.y,IHRPLR.y)); //Diaspora frak up 4x4 fix
+	}
+	else
+	{
+		Done = float4x4(float4(IPD,LC,LDkT,LDkO),float4(PC.x,PC.y,PC.z,VRP),float4(Z,AR,D.x,D.y),float4(IVRPLR.x,IVRPLR.y,IHRPLR.x,IHRPLR.y));
+	}
+	
 return Done;
 }
 
