@@ -35,8 +35,8 @@ uniform float Shade_Power <
 	ui_min = 0.25; ui_max = 1.0;	
 	ui_label = "Shade Power";	
 	ui_tooltip = "Adjust the Shade Power This improves AO, Shadows, & Darker Areas in game.\n"	
-				 "Number 0.5 is default.";
-> = 0.5;
+				 "Number 0.25 is default.";
+> = 0.25;
 
 uniform float Sharpen_Power <	
 	#if Compatibility
@@ -56,7 +56,7 @@ uniform float Spread <
 	#else
 	ui_type = "slider";
 	#endif
-	ui_min = 5; ui_max = 20.0; ui_step = 0.125;
+	ui_min = 5; ui_max = 25.0; ui_step = 0.5;
 	ui_label = "Shade Fill";
 	ui_tooltip = "Adjust This to have the shade effect to fill in areas.\n"
 				 "This is used for gap filling.\n"
