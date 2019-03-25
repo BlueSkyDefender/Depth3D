@@ -26,17 +26,29 @@
 	#define Compatibility 0
 #endif
 
-uniform float Power <	
+uniform float Shade_Power <	
+	#if Compatibility
+	ui_type = "drag";
+	#else
+	ui_type = "slider";
+	#endif
+	ui_min = 0.25; ui_max = 1.0;	
+	ui_label = "Shade Power";	
+	ui_tooltip = "Adjust the Shade Power This improves AO, Shadows, & Darker Areas in game.\n"	
+				 "Number 0.5 is default.";
+> = 0.5;
+
+uniform float Sharpen_Power <	
 	#if Compatibility
 	ui_type = "drag";
 	#else
 	ui_type = "slider";
 	#endif
 	ui_min = 0.0; ui_max = 1.0;	
-	ui_label = "Shade Power";	
-	ui_tooltip = "Adjust the Shade Power This improves AO, Shadows, & Darker Areas in game.\n"	
-				 "Number 0.5 is default.";
-> = 0.5;
+	ui_label = "Sharpen Power";	
+	ui_tooltip = "Adjust the Sharpening Power, Shadows, & Darker Areas in game.\n"	
+				 "Zero is default, Off.";
+> = 0.0;
 
 uniform float Spread <
 	#if Compatibility
@@ -90,35 +102,38 @@ sampler SamplerBlur
 	
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void Blur(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 color : SV_Target)                                                                          
+void Blur(in float4 position : SV_Position, in float2 texcoords : TEXCOORD0, out float4 color : SV_Target)                                                                          
 {
-	float4 CC = tex2D(BackBuffer, texcoord);
-
-	float samples[10] = { -0.695914, -0.203345, 0.962340, 0.473434, 0.519456, 0.185461, 0.507431, 0.896420, -0.321940, -0.791559 };  
-			
-	float Adjust = Spread * pix.x;
-	
-		[unroll]
-		for (int i = 0; i < 10; i++)
-		{  
-			CC += tex2D(BackBuffer, float2(texcoord.x + Adjust * samples[i],texcoord.y));
-		} 
-		
-		CC *= 0.09090909f;
-		
-		color = CC;
+	float2 Adjust = (Spread * 0.75 ) * pix;
+	float4 result = tex2D(BackBuffer,texcoords);	
+	result += tex2D(BackBuffer,texcoords + float2( 1, 0) * Adjust );
+	result += tex2D(BackBuffer,texcoords + float2(-1, 0) * Adjust );	
+	result += tex2D(BackBuffer,texcoords + float2( 1, 0) * 0.25 * Adjust );
+	result += tex2D(BackBuffer,texcoords + float2(-1, 0) * 0.25 * Adjust );	
+	result += tex2D(BackBuffer,texcoords + float2( 1, 0) * 0.5 * Adjust );
+	result += tex2D(BackBuffer,texcoords + float2(-1, 0) * 0.5 * Adjust );	
+	result += tex2D(BackBuffer,texcoords + float2( 1, 0) * 0.75 * Adjust );
+	result += tex2D(BackBuffer,texcoords + float2(-1, 0) * 0.75 * Adjust );	
+	color = result / 9;
 }
 
 //Spread the blur a bit more. 
-float4 Adjust(in float2 texcoord : TEXCOORD0)
+float4 Adjust(in float2 texcoords : TEXCOORD0)
 {
-float2 S = float2(Spread * 0.15625f, Spread * 0.15625f) * pix;
-float4 H = lerp(tex2D(SamplerBlur, float2(texcoord.x + S.x, texcoord.y + S.y)),tex2D(SamplerBlur, float2(texcoord.x - S.x, texcoord.y - S.y)),0.5);
-float4 V = lerp(tex2D(SamplerBlur, float2(texcoord.x - S.x, texcoord.y + S.y)),tex2D(SamplerBlur, float2(texcoord.x + S.x, texcoord.y - S.y)),0.5);
-float4 C = tex2D(SamplerBlur, float2(texcoord.x, texcoord.y));
-float4 HVC = (H + V + C) / 3;
+float2 S = Spread * 0.1875f * pix;
 
-return HVC; 
+	float4 result;
+	result += tex2D(SamplerBlur,texcoords + float2( 1, 0) * S );
+	result += tex2D(SamplerBlur,texcoords + float2( 0, 1) * S );
+	result += tex2D(SamplerBlur,texcoords + float2(-1, 0) * S );
+	result += tex2D(SamplerBlur,texcoords + float2( 0,-1) * S );
+	S *= 0.75f;
+	result += tex2D(SamplerBlur,texcoords + float2( 1, 1) * S );
+	result += tex2D(SamplerBlur,texcoords + float2(-1,-1) * S );	
+	result += tex2D(SamplerBlur,texcoords + float2( 1,-1) * S );
+	result += tex2D(SamplerBlur,texcoords + float2(-1, 1) * S );	
+
+return result / 8; 
 }
 
 float3 Luma()
@@ -161,10 +176,20 @@ float DepthCues(float2 texcoord : TEXCOORD0)
 	return saturate(Done);
 }
 
+float4 UnsharpMask(float2 texcoord : TEXCOORD0)
+{
+	float4 RGBA;	
+	RGBA = tex2D(BackBuffer,texcoord) + (tex2D(BackBuffer,texcoord) - Adjust(texcoord)) * (Sharpen_Power * 0.5f);
+	return saturate(RGBA);
+}
+
 float4 CuesOut(float2 texcoord : TEXCOORD0)
 {		
-	float4 Out, Debug_Done = lerp(1.0f,abs(DepthCues(texcoord).xxxx),Power), Combine = tex2D(BackBuffer,texcoord) * Debug_Done;
-				
+	float4 Out, Debug_Done = lerp(1.0f,DepthCues(texcoord).xxxx,Shade_Power), Combine = tex2D(BackBuffer,texcoord) * Debug_Done;
+		
+		if (Sharpen_Power > 0)
+			Combine = lerp(Combine,UnsharpMask(texcoord),1-(Debug_Done.x < 1));
+			
 	if (!Debug_View)
 	{
 		Out = Combine;
