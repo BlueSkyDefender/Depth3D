@@ -151,6 +151,12 @@ uniform int View_Mode <
 	ui_category = "Occlusion Masking";
 > = 0;
 
+uniform bool Side_Bars <
+	ui_label = " Side Bars";
+	ui_tooltip = "Adds Side Bar to the Left and Right Edges";
+	ui_category = "Occlusion Masking";
+> = false;
+
 uniform int Custom_Sidebars <
 	ui_type = "combo";
 	ui_items = "Mirrored Edges\0Black Edges\0Stretched Edges\0";
@@ -875,6 +881,23 @@ float2 Parallax( float Divergence, float2 Coordinates)
 	return ParallaxCoord;
 };
 
+float4 EdgeMask( float Diverge, float4 Image, float2 texcoords)
+{
+	float Side_A = 0, Side_B = -1;
+	
+	if(Diverge > 0)
+		{
+			Side_A = -1;	 
+			Side_B = 0;
+		}
+		
+	float PA = Side_A+(BUFFER_WIDTH*pix.x), PB = Side_B+(BUFFER_WIDTH*pix.x), Y = BUFFER_HEIGHT*pix.y;
+	float4 Bar_A = all( abs(float2( texcoords.x-PA, texcoords.y-Y)) < float2(Divergence * pix.x,1.0f));
+	float4 Bar_B = all( abs(float2( texcoords.x-PB, texcoords.y-Y)) < float2(Divergence * pix.x,1.0f));
+		
+	return Bar_A + Bar_B ? float4(0,0,0,1) : Image;
+}
+
 float4 PS_calcLR(float2 texcoord)
 {
 	float4 color, Right, Left, R, L;
@@ -935,23 +958,29 @@ float4 PS_calcLR(float2 texcoord)
 	}
 	
 	//Left & Right Parallax for Stereo Vision
-	TCL = Parallax(-Divergence, TCL); //Stereoscopic 3D using Reprojection Left					
-	TCR = Parallax( Divergence, TCR); //Stereoscopic 3D using Reprojection Right	
+	float2 TL = Parallax(-Divergence, TCL); //Stereoscopic 3D using Reprojection Left					
+	float2 TR = Parallax( Divergence, TCR); //Stereoscopic 3D using Reprojection Right	
 				
 	if(Custom_Sidebars == 0)
 	{
-		Left = tex2Dlod(BackBufferMIRROR, float4(TCL.x, TCL.y,0,0));
-		Right = tex2Dlod(BackBufferMIRROR, float4(TCR.x , TCR.y,0,0));
+		Left = tex2Dlod(BackBufferMIRROR, float4(TL,0,0));
+		Right = tex2Dlod(BackBufferMIRROR, float4(TR,0,0));
 	}
 	else if(Custom_Sidebars == 1)
 	{
-		Left = tex2Dlod(BackBufferBORDER, float4(TCL.x, TCL.y,0,0));
-		Right = tex2Dlod(BackBufferBORDER, float4(TCR.x, TCR.y,0,0));
+		Left = tex2Dlod(BackBufferBORDER, float4(TL,0,0));
+		Right = tex2Dlod(BackBufferBORDER, float4(TR,0,0));
 	}
 	else
 	{
-		Left = tex2Dlod(BackBufferCLAMP, float4(TCL.x, TCL.y,0,0));
-		Right = tex2Dlod(BackBufferCLAMP, float4(TCR.x , TCR.y,0,0));
+		Left = tex2Dlod(BackBufferCLAMP, float4(TL,0,0));
+		Right = tex2Dlod(BackBufferCLAMP, float4(TR,0,0));
+	}
+		
+	if (Side_Bars)
+	{
+		Left = EdgeMask(-Divergence,Left,TCL);
+		Right = EdgeMask(Divergence,Right,TCR);
 	}
 	
 	L = Left; //Used for Eye Swap

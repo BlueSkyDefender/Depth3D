@@ -38,18 +38,6 @@ uniform float Shade_Power <
 				 "Number 0.25 is default.";
 > = 0.25;
 
-uniform float Sharpen_Power <	
-	#if Compatibility
-	ui_type = "drag";
-	#else
-	ui_type = "slider";
-	#endif
-	ui_min = 0.0; ui_max = 1.0;	
-	ui_label = "Sharpen Power";	
-	ui_tooltip = "Adjust the Sharpening Power, Shadows, & Darker Areas in game.\n"	
-				 "Zero is default, Off.";
-> = 0.0;
-
 uniform float Spread <
 	#if Compatibility
 	ui_type = "drag";
@@ -70,6 +58,11 @@ uniform int Luma_Coefficient <
 				 "This should only affect Normal, Color, & Greyscale output.";
 	ui_items = "SD video\0HD video\0HDR video\0";
 > = 0;
+
+//uniform bool Sharpen_Toggle <
+	//ui_label = "Sharpen";
+	//ui_tooltip = "Toggle this on clear up the image the game, movie piture & ect.";
+//> = false;
 
 uniform bool Debug_View <
 	ui_label = "Debug View";
@@ -176,19 +169,20 @@ float DepthCues(float2 texcoord : TEXCOORD0)
 	return saturate(Done);
 }
 
-float4 UnsharpMask(float2 texcoord : TEXCOORD0)
-{
-	float4 RGBA;	
-	RGBA = tex2D(BackBuffer,texcoord) + (tex2D(BackBuffer,texcoord) - Adjust(texcoord)) * (Sharpen_Power * 0.5f);
-	return saturate(RGBA);
-}
+//float4 UnsharpMask(float2 texcoord : TEXCOORD0)
+//{
+	//float M = length(tex2D(BackBuffer,texcoord) - Adjust(texcoord));
+	//float4 RGBA;	
+	//RGBA = tex2D(BackBuffer,texcoord) + (tex2D(BackBuffer,texcoord) - Adjust(texcoord)) * 0.5f;
+	//return lerp(tex2D(BackBuffer,texcoord) ,saturate(RGBA) , M);
+//}
 
 float4 CuesOut(float2 texcoord : TEXCOORD0)
 {		
 	float4 Out, Debug_Done = lerp(1.0f,DepthCues(texcoord).xxxx,Shade_Power), Combine = tex2D(BackBuffer,texcoord) * Debug_Done;
 		
-		if (Sharpen_Power > 0)
-			Combine = lerp(Combine,UnsharpMask(texcoord),1-(Debug_Done.x < 1));
+		//if (Sharpen_Toggle)
+			//Combine = lerp(Combine,UnsharpMask(texcoord),1-(Debug_Done.x < 1));
 			
 	if (!Debug_View)
 	{

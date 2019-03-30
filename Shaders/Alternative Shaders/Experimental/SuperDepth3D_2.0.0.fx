@@ -170,6 +170,12 @@ uniform int View_Mode <
 	ui_category = "Occlusion Masking";
 > = 0;
 
+uniform bool Side_Bars <
+	ui_label = " Side Bars";
+	ui_tooltip = "Adds Side Bar to the Left and Right Edges";
+	ui_category = "Occlusion Masking";
+> = false;
+
 uniform int Custom_Sidebars <
 	ui_type = "combo";
 	ui_items = "Mirrored Edges\0Black Edges\0Stretched Edges\0";
@@ -182,7 +188,7 @@ uniform bool Enable_Mask <
 	ui_label = " Mask Toggle";
 	ui_tooltip = "This enables the mask used for Occlusion Masking Culling.";
 	ui_category = "Occlusion Masking";
-> = false;
+> = true;
 //Depth Map//
 uniform int Depth_Map <
 	ui_type = "combo";
@@ -1004,6 +1010,23 @@ float Parallax(in float Diverge,in float2 texcoords)
 	return Depth;				
 }
 
+float4 EdgeMask( float Diverge, float4 Image, float2 texcoords)
+{
+	float Side_A = 0, Side_B = -1;
+	
+	if(Diverge > 0)
+		{
+			Side_A = -1;	 
+			Side_B = 0;
+		}
+		
+	float PA = Side_A+(BUFFER_WIDTH*pix.x), PB = Side_B+(BUFFER_WIDTH*pix.x), Y = BUFFER_HEIGHT*pix.y;
+	float4 Bar_A = all( abs(float2( texcoords.x-PA, texcoords.y-Y)) < float2(Divergence * pix.x,1.0f));
+	float4 Bar_B = all( abs(float2( texcoords.x-PB, texcoords.y-Y)) < float2(Divergence * pix.x,1.0f));
+		
+	return Bar_A + Bar_B ? float4(0,0,0,1) : Image;
+}
+
 float4 LR(float2 texcoord)
 {
 	float4 color, Left, Right, L, R;
@@ -1081,6 +1104,12 @@ float4 LR(float2 texcoord)
 	{
 		Left = tex2Dlod(BackBufferCLAMP, float4(TCL.x + ReprojectionLeft, TCL.y,0,0));
 		Right = tex2Dlod(BackBufferCLAMP, float4(TCR.x - ReprojectionRight, TCR.y,0,0));
+	}
+	
+	if(Side_Bars)
+	{
+		Left = EdgeMask(-Divergence,Left,TCL);
+		Right = EdgeMask(Divergence,Right,TCR);
 	}
 	
 	L = Left; //Used for Eye Swap
