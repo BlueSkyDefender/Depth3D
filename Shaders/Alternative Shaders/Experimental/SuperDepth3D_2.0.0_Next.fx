@@ -151,12 +151,6 @@ uniform int View_Mode <
 	ui_category = "Occlusion Masking";
 > = 0;
 
-uniform bool Side_Bars <
-	ui_label = " Side Bars";
-	ui_tooltip = "Adds Side Bar to the Left and Right Edges";
-	ui_category = "Occlusion Masking";
-> = false;
-
 uniform int Custom_Sidebars <
 	ui_type = "combo";
 	ui_items = "Mirrored Edges\0Black Edges\0Stretched Edges\0";
@@ -165,6 +159,11 @@ uniform int Custom_Sidebars <
 	ui_category = "Occlusion Masking";
 > = 1;
 
+uniform bool Side_Bars <
+	ui_label = " Side Bars";
+	ui_tooltip = "Adds Side Bar to the Left and Right Edges";
+	ui_category = "Occlusion Masking";
+> = false;
 //Depth Map//
 uniform int Depth_Map <
 	ui_type = "combo";
