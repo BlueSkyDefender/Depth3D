@@ -62,44 +62,31 @@ uniform bool Checkerboard_Reconstruction_Compatibility <
 	ui_category = "Stereoscopic Options";
 > = false;
 
-uniform float Lens_Center <
+uniform float3 Polynomial_Colors_K1 <
 	#if Compatibility
 	ui_type = "drag";
 	#else
 	ui_type = "slider";
 	#endif
-	ui_min = 0.475; ui_max = 0.575;
-	ui_label = "Lens Center";
-	ui_tooltip = "Adjust Lens Center. Default is 0.5";
+	ui_min = 0.0; ui_max = 1.0;
+	ui_tooltip = "Adjust the Polynomial Distortion K1_Red, K1_Green, & K1_Blue.\n"
+				 "Default is (R 0.22, G 0.22, B 0.22)";
+	ui_label = "Polynomial Color Distortion K1";
 	ui_category = "Image Distortion Corrections";
-> = 0.5;
+> = float3(0.22, 0.22, 0.22);
 
-uniform float2 Lens_Distortion <
+uniform float3 Polynomial_Colors_K2 <
 	#if Compatibility
 	ui_type = "drag";
 	#else
 	ui_type = "slider";
 	#endif
-	ui_min = -0.325; ui_max = 5;
-	ui_label = "K1 & K2 Lens Distortion";
-	ui_tooltip = "On the 1st lens distortion value, positive values of k1 gives barrel distortion, negative give pincushion.\n"
-				 "On the 2nd lens distortion value, positive values of k2 gives barrel distortion, negative give pincushion.\n"
-				 "Mainly start with k2. Default is 0.01";
+	ui_min = 0.0; ui_max = 1.0;
+	ui_tooltip = "Adjust the Polynomial Distortion K2_Red, K2_Green, & K2_Blue.\n"
+				 "Default is (R 0.24, G 0.24, B 0.24)";
+	ui_label = "Polynomial Color Distortion K2";
 	ui_category = "Image Distortion Corrections";
-> = float2(0.01,0.01);
-
-uniform float3 Polynomial_Colors <
-	#if Compatibility
-	ui_type = "drag";
-	#else
-	ui_type = "slider";
-	#endif
-	ui_min = 0.250; ui_max = 2.0;
-	ui_tooltip = "Adjust the Polynomial Distortion Red, Green, Blue.\n"
-				 "Default is (R 1.0, G 1.0, B 1.0)";
-	ui_label = "Polynomial Color Distortion";
-	ui_category = "Image Distortion Corrections";
-> = float3(1.0, 1.0, 1.0);
+> = float3(0.24, 0.24, 0.24);
 
 uniform float2 Zoom_Aspect_Ratio <
 	#if Compatibility
@@ -172,7 +159,13 @@ uniform int2 Independent_Horizontal_Repositioning <
 	ui_category = "Image Repositioning";
 > = int2(0,0);
 
-uniform bool Vignette <
+uniform int Vignette <
+	#if Compatibility
+	ui_type = "drag";
+	#else
+	ui_type = "slider";
+	#endif
+	ui_min = 0; ui_max = 10;
 	ui_label = "Vignette";
 	ui_tooltip = "Soft edge effect around the image.";
 	ui_category = "Image Effects";
@@ -212,12 +205,10 @@ float Aspect_Ratio = Zoom_Aspect_Ratio.y;
 
 float IPD = Interpupillary_Distance;
 float VRP = Vertical_Repositioning;
-float LC = Lens_Center;
-float LDkO = Lens_Distortion.x;
-float LDkT = Lens_Distortion.y;
+float3 PC2 = Polynomial_Colors_K2;
 float Z = Zoom;
 float AR = Aspect_Ratio;
-float3 PC = Polynomial_Colors;
+float3 PC1 = Polynomial_Colors_K1;
 float2 D = Degrees;
 float2 IVRPLR = Independent_Vertical_Repositioning;
 float2 IHRPLR = Independent_Horizontal_Repositioning;
@@ -228,12 +219,10 @@ float4x4 Done;
 	{
 		IPD = 0.0;					//Interpupillary Distance. Default is 0
 		VRP = 0;                    //Vertical Repositioning.
-		LC = 0.5; 					//Lens Center. Default is 0.5
-		LDkO = 0.01;				//Lens Distortion k1. Default is 0.01
-		LDkT = 0.01;				//Lens Distortion k2. Default is 0.01
 		Z = 1.0;					//Zoom. Default is 1.0
 		AR = 1.0;					//Aspect Ratio. Default is 1.0
-		PC = float3(1,1,1);			//Polynomial Colors. Default is (Red 1.0, Green 1.0, Blue 1.0)
+		PC1 = float3(0.22,0.22,0.22);//Polynomial Colors K_1. Default is (Red 0.0, Green 0.0, Blue 0.0)
+		PC2 = float3(0.24,0.24,0.24);//Polynomial Colors K_2. Default is (Red 0.0, Green 0.0, Blue 0.0)
 		D = float2(0,0);			//Left & Right Rotation Angle known as Degrees.
 		IVRPLR = float2(0,0);       //Independent Vertical Repositioning. Left & Right.
 		IHRPLR = float2(0,0);       //Independent Horizontal Repositioning. Left & Right.
@@ -244,12 +233,10 @@ float4x4 Done;
 	{
 		IPD = -25.0;				//Interpupillary Distance.
 		VRP = 0;                    //Vertical Repositioning.
-		LC = 0.5; 					//Lens Center. Default is 0.5
-		LDkO = 0.01;				//Lens Distortion k1. Default is 0.01
-		LDkT = 0.250;				//Lens Distortion k2. Default is 0.01
 		Z = 1.0;					//Zoom. Default is 1.0
 		AR = 0.925;					//Aspect Ratio. Default is 1.0
-		PC = float3(0.5,0.75,1);	//Polynomial Colors. Default is (Red 1.0, Green 1.0, Blue 1.0)
+		PC1 = float3(0.22,0.22,0.22);//Polynomial Colors K_1. Default is (Red 0.0, Green 0.0, Blue 0.0)
+		PC2 = float3(0.24,0.24,0.24);//Polynomial Colors K_2. Default is (Red 0.0, Green 0.0, Blue 0.0)
 		D = float2(0,0);			//Left & Right Rotation Angle known as Degrees.
 		IVRPLR = float2(0,0);       //Independent Vertical Repositioning. Left & Right.
 		IHRPLR = float2(0,0);       //Independent Horizontal Repositioning. Left & Right.
@@ -260,12 +247,10 @@ float4x4 Done;
 	{
 		IPD = -272.5;				//Interpupillary Distance.
 		VRP = 0;                    //Vertical Repositioning.
-		LC = 0.5; 					//Lens Center. Default is 0.5
-		LDkO = 0.01;				//Lens Distortion k1. Default is 0.01
-		LDkT = 0.250;				//Lens Distortion k2. Default is 0.01
 		Z = 1.0;					//Zoom. Default is 1.0
 		AR = 1.0;					//Aspect Ratio. Default is 1.0
-		PC = float3(1,1,1);	        //Polynomial Colors. Default is (Red 1.0, Green 1.0, Blue 1.0)
+		PC1 = float3(0.22,0.22,0.22);//Polynomial Colors K_1. Default is (Red 0.0, Green 0.0, Blue 0.0)
+		PC2 = float3(0.24,0.24,0.24);//Polynomial Colors K_2. Default is (Red 0.0, Green 0.0, Blue 0.0)
 		D = float2(0,0);			//Left & Right Rotation Angle known as Degrees.
 		IVRPLR = float2(0,0);       //Independent Vertical Repositioning. Left & Right.
 		IHRPLR = float2(0,0);       //Independent Horizontal Repositioning. Left & Right.
@@ -273,11 +258,11 @@ float4x4 Done;
 
 	if(Diaspora)
 	{
-		Done = float4x4(float4(IPD,PC.x,Z,IVRPLR.x),float4(LC,PC.y,AR,IVRPLR.y),float4(LDkT,PC.z,D.x,IHRPLR.x),float4(LDkO,VRP,D.y,IHRPLR.y)); //Diaspora frak up 4x4 fix
+		Done = float4x4(float4(IPD,PC1.x,Z,IVRPLR.x),float4(PC2.x,PC1.y,AR,IVRPLR.y),float4(PC2.y,PC1.z,D.x,IHRPLR.x),float4(PC2.z,VRP,D.y,IHRPLR.y)); //Diaspora frak up 4x4 fix
 	}
 	else
 	{
-		Done = float4x4(float4(IPD,LC,LDkT,LDkO),float4(PC.x,PC.y,PC.z,VRP),float4(Z,AR,D.x,D.y),float4(IVRPLR.x,IVRPLR.y,IHRPLR.x,IHRPLR.y));
+		Done = float4x4(float4(IPD,PC2.x,PC2.y,PC2.z),float4(PC1.x,PC1.y,PC1.z,VRP),float4(Z,AR,D.x,D.y),float4(IVRPLR.x,IVRPLR.y,IHRPLR.x,IHRPLR.y));
 	}
 	
 return Done;
@@ -299,20 +284,6 @@ float VRePos()
 	return VRePos;
 }
 
-//Lens Center Section//
-float LCS()
-{
-	float LCS = HMDProfiles()[0][1];
-	return LCS;
-}
-
-//Lens Distortion Section//
-float2 LD_kN()
-{
-	float2 LD = float2(HMDProfiles()[0][2],HMDProfiles()[0][3]);
-	return LD;
-}
-
 //Lens Zoom & Aspect Ratio Section//
 float2 Z_A()
 {
@@ -321,7 +292,14 @@ float2 Z_A()
 }
 
 //Polynomial Colors Section//
-float3 P_C()
+float3 P_CT()//K_2
+{
+	float3 PC = float3(HMDProfiles()[0][1],HMDProfiles()[0][2],HMDProfiles()[0][3]);
+	return PC;
+}
+
+//Polynomial Colors Section//
+float3 P_CO()//K_1
 {
 	float3 PC = float3(HMDProfiles()[1][0],HMDProfiles()[1][1],HMDProfiles()[1][2]);
 	return PC;
@@ -518,8 +496,8 @@ float4 base;
 	   
 	texcoord = -texcoord * texcoord + texcoord;
 	
-	if( Vignette )
-	base.rgb *= saturate(texcoord.x * texcoord.y * 250);
+	if( Vignette > 0)
+	base.rgb *= saturate(texcoord.x * texcoord.y * pow(10-Vignette,3));
 		
 	return base;    
 }
@@ -572,49 +550,40 @@ float4 base;
 	   
 	texcoord = -texcoord * texcoord + texcoord;
 	
-	if( Vignette )
-	base.rgb *= saturate(texcoord.x * texcoord.y * 250);
+	if( Vignette > 0)
+	base.rgb *= saturate(texcoord.x * texcoord.y * pow(10-Vignette,3));
 
 	return base;    
 }
 
 ////////////////////////////////////////////////////Polynomial_Distortion/////////////////////////////////////////////////////
 
-float2 DL(float2 p, float k_RGB) //Cubic Lens Distortion Left
+float2 D(float2 p, float k1, float k2) //Cubic Lens Distortion Left & Right
 {
-	float LC = 1-LCS();
-	float LD_k1 = LD_kN().y, LD_k2 = LD_kN().x; //Lens distortion value, positive values of k1 & k 2 give barrel distortion, negative give pincushion.
-	float k3 = k_RGB; //Polynomial
-	
-	float r = sqrt((p.x-LC) * (p.x-LC) + (p.y-0.5) * (p.y-0.5));       
-	float r2 = pow(r, 2.0f);
-					
-	float newRadius = (1.0f + r2 * LD_k1) + (LD_k2 * pow(r, 4.0f)) + (k3 * pow(r, 6.0f));
-	
-	 p.x = newRadius * (p.x-0.5)+0.5;
-	 p.y = newRadius * (p.y-0.5)+0.5;
-	
-	return p;
+		float r2 = p.x * p.x + p.y * p.y;
+		float r4 = r2 * r2;
+		//float r6 = r4 * r2;
+		//float Radius_coeff = (1.0 + k1*r2 + k2*r4 + k3*r6);
+		float newRadius = (1.0 + k1*r2 + k2*r4);
+		p.x = p.x * newRadius;
+		p.y = p.y * newRadius;
+		
+		return p;
 }
 
 float4 PDL(float2 texcoord)		//Texture = texCL Left
 {		
 	float4 color;
-	float2 uv_red, uv_green, uv_blue;
+	float2 uv_red, uv_green, uv_blue, sectorOrigin;
 	float4 color_red, color_green, color_blue;
-	float Red, Green, Blue;
-	float2 sectorOrigin;
-
+	float K1_Red = P_CO().x, K1_Green = P_CO().y, K1_Blue = P_CO().z;
+	float K2_Red = P_CT().x, K2_Green = P_CT().y, K2_Blue = P_CT().z;
 	// Radial distort around center
-	sectorOrigin = (texcoord.xy-0.5,0,0);
+	sectorOrigin = 0.5;
 	
-	Red = 1 / P_C().x;
-	Green = 1 / P_C().y;
-	Blue = 1 / P_C().z;
-	
-	uv_red = DL(texcoord.xy-sectorOrigin,Red) + sectorOrigin;
-	uv_green = DL(texcoord.xy-sectorOrigin,Green) + sectorOrigin;
-	uv_blue = DL(texcoord.xy-sectorOrigin,Blue) + sectorOrigin;
+	uv_red = D(texcoord.xy-sectorOrigin,K1_Red,K2_Red) + sectorOrigin;
+	uv_green = D(texcoord.xy-sectorOrigin,K1_Green,K2_Green) + sectorOrigin;
+	uv_blue = D(texcoord.xy-sectorOrigin,K1_Blue,K2_Blue) + sectorOrigin;
 	
 	color_red = vignetteL(uv_red).r;
 	color_green = vignetteL(uv_green).g;
@@ -641,42 +610,21 @@ float4 PDL(float2 texcoord)		//Texture = texCL Left
 	
 	return color;	
 }
-
-float2 DR(float2 p, float k_RGB) //Cubic Lens Distortion Right
-{
-	float LC = LCS();
-	float LD_k1 = LD_kN().y, LD_k2 = LD_kN().x; //Lens distortion value, positive values of k1 & k 2 give barrel distortion, negative give pincushion.
-	float k3 = k_RGB; //Polynomial
 	
-	float r = sqrt((p.x-LC) * (p.x-LC) + (p.y-0.5) * (p.y-0.5));       
-	float r2 = pow(r, 2.0f);
-					
-	float newRadius = (1.0f + r2 * LD_k1) + (LD_k2 * pow(r, 4.0f)) + (k3 * pow(r, 6.0f));
-	
-	 p.x = newRadius * (p.x-0.5)+0.5;
-	 p.y = newRadius * (p.y-0.5)+0.5;
-	
-	return p;
-}
-	
-	float4 PDR(float2 texcoord)		//Texture = texCR Right
+float4 PDR(float2 texcoord)		//Texture = texCR Right
 {		
 	float4 color;
-	float2 uv_red, uv_green, uv_blue;
+	float2 uv_red, uv_green, uv_blue, sectorOrigin;
 	float4 color_red, color_green, color_blue;
-	float Red, Green, Blue;
-	float2 sectorOrigin;
+	float K1_Red = P_CO().x, K1_Green = P_CO().y, K1_Blue = P_CO().z;
+	float K2_Red = P_CT().x, K2_Green = P_CT().y, K2_Blue = P_CT().z;
 
 	// Radial distort around center
-	sectorOrigin = (texcoord.xy-0.5,0,0); //sectorOrigin = (texcoord.xy-0.5,0,0);
+	sectorOrigin = 0.5;
 	
-	Red = 1 / P_C().x;
-	Green = 1 / P_C().y;
-	Blue = 1 / P_C().z;
-	
-	uv_red = DR(texcoord.xy-sectorOrigin,Red) + sectorOrigin;
-	uv_green = DR(texcoord.xy-sectorOrigin,Green) + sectorOrigin;
-	uv_blue = DR(texcoord.xy-sectorOrigin,Blue) + sectorOrigin;
+	uv_red = D(texcoord.xy-sectorOrigin,K1_Red,K2_Red) + sectorOrigin;
+	uv_green = D(texcoord.xy-sectorOrigin,K1_Green,K2_Green) + sectorOrigin;
+	uv_blue = D(texcoord.xy-sectorOrigin,K1_Blue,K2_Blue) + sectorOrigin;
 
 	color_red = vignetteR(uv_red).r;
 	color_green = vignetteR(uv_green).g;
