@@ -39,6 +39,9 @@
 // The Key Code for Decimal Point is Number 110. Ex. for "." Cancel_Depth_Key 110
 #define Cancel_Depth_Key 0 // You can use http://keycode.info/ to figure out what key is what.
 
+// Use this to Disable or Enable Anti-Z-Fighting Modes for Weapon Hand.
+#define WZF 0 //Default 0 is Off. One is On.
+
 // Use Depth Tool to adjust the lower preprocessor definitions below.
 // Horizontal & Vertical Depth Buffer Resize for non conforming BackBuffer.
 // Ex. Resident Evil 7 Has this problem. So you want to adjust it too around float2(0.9575,0.9575).
@@ -263,7 +266,7 @@ uniform float2 Weapon_Adjust <
 
 uniform float Weapon_Depth_Adjust <
 	ui_type = "drag";
-	ui_min = -100.0; ui_max = 100.0; ui_step = 0.25;
+	ui_min = -50.0; ui_max = 50.0; ui_step = 0.25;
 	ui_label = " Weapon Depth Adjustment";
 	ui_tooltip = "Pushes or Pulls the FPS Hand in or out of the screen if a weapon profile is selected.\n"
 				 "This also used to fine tune the Weapon Hand if creating a weapon profile.\n" 
@@ -271,16 +274,6 @@ uniform float Weapon_Depth_Adjust <
 	ui_category = "Weapon Hand Adjust";
 > = 0;
 
-uniform float WZPD <
-	ui_type = "drag";
-	ui_min = 0.0; ui_max = 0.5;
-	ui_label = " Weapon Zero Parallax Distance";
-	ui_tooltip = "WZPD controls the focus distance for the screen Pop-out effect also known as Convergence for the weapon hand.\n"
-				"For FPS Games keeps this low Since you don't want your gun to pop out of screen.\n"
-				"This is controled by Convergence Mode.\n"
-				"Default is Zero & it's off.";
-	ui_category = "Weapon Hand Adjust";
-> = 0;
 #if WZF
 uniform int Anti_Z_Fighting <
 	#if Compatibility
@@ -535,19 +528,39 @@ sampler SamplerLum
 		MinFilter = LINEAR;
 		MagFilter = LINEAR;
 		MipFilter = LINEAR;
+	};
+	
+texture texLumWeapon {Width = 256*0.5; Height = 256*0.5; Format = RGBA8; MipLevels = 8;}; //Sample at 256x256*0.5 and a mip bias of 8 should be 1x1 
+																				
+sampler SamplerLumWeapon																
+	{
+		Texture = texLumWeapon;
+		MipLODBias = 8.0f; //Luminance adapted luminance value from 1x1 Texture Mip lvl of 8
+		MinFilter = LINEAR;
+		MagFilter = LINEAR;
+		MipFilter = LINEAR;
 	};	
 	
 float2 Lum(in float2 texcoord : TEXCOORD0)
 	{
 		float2 Luminance = tex2Dlod(SamplerLum,float4(texcoord,0,0)).xy; //Average Luminance Texture Sample 
 
-		return saturate(Luminance);
+		return Luminance;
 	}
-		
+	
+float LumWeapon(in float2 texcoord : TEXCOORD0)
+	{
+		float Luminance = tex2Dlod(SamplerLumWeapon,float4(texcoord,0,0)).x; //Average Luminance Texture Sample 
+
+		return Luminance;
+	}
+	
 /////////////////////////////////////////////////////////////////////////////////Depth Map Information/////////////////////////////////////////////////////////////////////////////////
+
 float DMA()//Depth Map Adjustment
 {
-	float DMA = Depth_Map_Adjust;	
+	float DMA = Depth_Map_Adjust;
+		
 	if(Depth_Adjust)
 		DMA = Alt_Depth_Map_Adjust;
 
@@ -573,11 +586,11 @@ float Depth(in float2 texcoord : TEXCOORD0)
 	
 	if (Offset > 0)
 	Z = min( 1, float2( Z.x*Offsets.x , Z.y /  Offsets.y  ));
-	
+		
 	if (Depth_Map == 0)//DM0. Normal
 		zBuffer = Far * Near / (Far + Z.x * (Near - Far));		
 	else if (Depth_Map == 1)//DM1. Reverse
-		zBuffer = Far * Near / (Far + Z.y * (Near - Far));		
+		zBuffer = Far * Near / (Far + Z.y * (Near - Far));
 		
 	return zBuffer;
 }
@@ -597,7 +610,7 @@ float2 WeaponDepth(in float2 texcoord : TEXCOORD0)
 	if (WP == 1)                                   // WA_XYZW.x | WA_XYZW.y | WA_XYZW.z | WA_XYZW.w 
 		WA_XYZW = float4(CutOff,Adjust,Tune,Scale);// X Cutoff  | Y Adjust  | Z Tuneing | W Scaling 		
 	else if(WP == 2) //WP 0
-		WA_XYZW = float4(0.425,0.025,0,-2);                 //ES: Oblivion		
+		WA_XYZW = float4(0,0,0,0);                 //Game		
 	else if(WP == 3) //WP 1
 		WA_XYZW = float4(0,0,0,0);                 //Game
 	else if(WP == 4) //WP 2
@@ -753,25 +766,29 @@ float2 WeaponDepth(in float2 texcoord : TEXCOORD0)
 	else if ( Depth_Map == 1 )
 		zBufferWH /= Far - Z.y * (Near - Far);
 	
-	zBufferWH = saturate(zBufferWH);	
+	zBufferWH = saturate(zBufferWH);
+	
 	//This code is used to adjust the already set Weapon Hand Profile.
 	float WA = 1 + (Weapon_Depth_Adjust * 0.015);
 	if (WP > 1)
-	zBufferWH = (zBufferWH - 0) / (WA - 0);
-	//Wish I didn't have to do this.	
-	if (WZPD > 0)
-	zBufferWH = lerp(zBufferWH,0.75f,0.25f);
-	else
-	zBufferWH = smoothstep(-0.2,0.8,zBufferWH);
+	zBufferWH = (zBufferWH - 0) /  (WA - 0);
 	
+	//Auto Anti Weapon Depth Map Z-Fighting is always on.
+	float WeaponLumAdjust = saturate(abs(smoothstep(0,0.5,LumWeapon(texcoord)*2.5)));	
+			
+	//Anti Weapon Hand Z-Fighting code trigger
+	//if (WP > 1)
+	zBufferWH = saturate(lerp(0.025, zBufferWH, saturate(WeaponLumAdjust)));
+				
 	return float2(zBufferWH.x,WA_XYZW.x);	
 }
 
-float4 DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0) : SV_Target
+void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 Color : SV_Target)
 {
 		float4 DM = Depth(texcoord).xxxx;
 		
-		float R, G, B, A, WD = WeaponDepth(texcoord).x, CoP = WeaponDepth(texcoord).y, CutOFFCal = (CoP/DMA()) * 0.5f; //Weapon Cutoff Calculation
+		float R, G, B, A, WD = WeaponDepth(texcoord).x, CoP = WeaponDepth(texcoord).y, CutOFFCal = (CoP/DMA())/2; //Weapon Cutoff Calculation
+		
 		CutOFFCal = step(DM.x,CutOFFCal);
 					
 		if (WP == 0)
@@ -781,15 +798,14 @@ float4 DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0
 		else
 		{
 			DM.x = lerp(DM.x,WD,CutOFFCal);
-			DM.y = lerp(0.0,WD,CutOFFCal);
 		}
 		
 		R = DM.x; //Mix Depth
-		G = DM.z < DM.y; //Weapon Mask
+		G = DM.y; //Weapon Average Luminance
 		B = DM.z; //Average Luminance
 		A = DM.w; //Normal Depth
-		
-	return saturate(float4(R,G,B,A));
+				
+	Color = saturate(float4(R,G,B,A));
 }
 
 #if Balance_Mode
@@ -826,19 +842,6 @@ float AutoZPDRange(float ZPD, float2 texcoord )
     return saturate(LumAdjust_AZDPR * ZPD);
 }
 #endif
-float WHConv(float D,float2 texcoord)
-{
-	float Z = WZPD, ZP = 0.125,ALC = abs(Lum(texcoord).x) ,Convergence = 1 - Z / (D * 2);
-	
-	if (Z <= 0)
-		ZP = 1;
-		
-	if (ALC <= 0.025f)
-		ZP = 1;
-	 
-   return lerp(Convergence,D,ZP);
-}
-
 float Conv(float D,float2 texcoord)
 {
 	float Z = ZPD, ZP = 0.5f, Divergence_Locked = Divergence*0.001, ALC = abs(Lum(texcoord).x);
@@ -865,28 +868,19 @@ float Conv(float D,float2 texcoord)
     return lerp(Convergence,D, ZP);
 }
 
-float zBuffer(in float2 texcoords : TEXCOORD0)
+float zBuffer(in float2 texcoord : TEXCOORD0)
 {	
-	float3 DM = tex2Dlod(SamplerDM,float4(texcoords,0,0)).xyz;
-		DM.z = lerp(Conv(DM.z,texcoords), WHConv(DM.x,texcoords), DM.y);
-		
-	if (WZPD <= 0)
-	DM.z = Conv(DM.x,texcoords);
-	
-	float ALC = abs(Lum(texcoords).x);
-	
-	if (ALC <= 0.025f)
-		DM.z = 0;
+	float DM = tex2Dlod(SamplerDM,float4(texcoord,0,0)).x;
 		
 	if (Cancel_Depth)
-		DM.z = 0.25f;
-
-	return DM.z;
+		DM = 0.5f;
+		
+	return DM;
 }
 
 void  Disocclusion(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 color : SV_Target0)
 {
-	float DM, DM_A, DM_B, A, B, S, MS =  Divergence * pix.x, Div = 1.0f / 11.0f, DR = 1, DL = 1, N = 3, samples[3] = {0.5,0.75,1.0};
+	float DM, DM_A, DM_B, A, B, S, MS =  Divergence * pix.x, Div = 1.0f / 11.0f, DR = 1, DL = 1, N = 5, samples[5] = {0.5,0.625,0.75,0.875,1.0};
 	float2 dirA, dirB;
 	
 	if ( Enable_Mask )
@@ -959,10 +953,11 @@ void  Disocclusion(in float4 position : SV_Position, in float2 texcoord : TEXCOO
 	
 	color = float4(DM,0.0,0.0,1.0);
 }
+
 /////////////////////////////////////////L/R//////////////////////////////////////////////////////////////////////
 float Encode(in float2 texcoord : TEXCOORD0)
 {
-	return tex2Dlod(SamplerDis,float4(texcoord,0,0)).x;
+	return Conv(tex2Dlod(SamplerDis,float4(texcoord.x, texcoord.y,0,0)).x,texcoord);
 }
 
 float Parallax(in float Diverge,in float2 texcoords)
@@ -1325,12 +1320,15 @@ float4 LR(float2 texcoord)
 	else
 	{		
 		float3 RGB = tex2Dlod(SamplerDis,float4(TexCoords.x, TexCoords.y,0,0)).xxx;
-		//AutoDepthRange(RGB.y,TexCoords)
-		color = float4(RGB.x,RGB.y,RGB.z,1.0);
-	}
-	
-	float Average_Lum = tex2D(SamplerDM,float2(TexCoords.x,TexCoords.y)).y;
 
+		color = float4(RGB.x,AutoDepthRange(RGB.y,TexCoords),RGB.z,1.0);
+	}
+		
+	#if WZF		
+	float WZF_A = WZF_Adjust, Average_Lum = (tex2D(SamplerDM,float2(TexCoords.x,TexCoords.y)).y - WZF_A) / ( 1 - WZF_A);
+	#else
+	float Average_Lum = tex2D(SamplerDM,float2(TexCoords.x,TexCoords.y)).y;
+	#endif
 	return float4(color.rgb,Average_Lum);
 }
 
@@ -1350,6 +1348,23 @@ float4 Average_Luminance(float4 position : SV_Position, float2 texcoord : TEXCOO
 	float Average_Lum_ZPD = tex2D(SamplerDM,float2(ABE.x + texcoord.x * ABE.y, ABE.z + texcoord.y * ABE.w )).z;
 	float Average_Lum_Full = tex2D(SamplerDM,float2(texcoord.x,texcoord.y )).z;
 	return float4(Average_Lum_ZPD,Average_Lum_Full,0,1);
+}
+
+float4 Average_Luminance_Weapon(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Target
+{
+	float4 AZF = float4(0.500, 0.500,0.0,1.0);//Lower Half
+	#if WZF
+	if ( Anti_Z_Fighting == 1)
+		AZF = float4(0.4375, 0.125,0.375,0.250);//Center Small
+	else if ( Anti_Z_Fighting == 2)
+		AZF = float4(0.0, 1.0, 0.375,0.250);//Center Long
+	else if ( Anti_Z_Fighting == 3)
+		AZF = float4(0.5, 0.5, 0.0, 0.5);//Lower Left
+	else if ( Anti_Z_Fighting == 4)
+		AZF = float4(0.5, 0.5, 0.5, 0.5);//Lower Right
+	#endif
+	float3 Average_Lum_Weapon = LR(float2(AZF.z + texcoord.x * AZF.w,AZF.x + texcoord.y * AZF.y )).www;
+	return float4(Average_Lum_Weapon,1);
 }
 
 ////////////////////////////////////////////////////////Logo/////////////////////////////////////////////////////////////////////////
@@ -1494,6 +1509,12 @@ technique SuperDepth3D
 		VertexShader = PostProcessVS;
 		PixelShader = Average_Luminance;
 		RenderTarget = texLum;
+	}
+		pass AverageLuminanceWeapon
+	{
+		VertexShader = PostProcessVS;
+		PixelShader = Average_Luminance_Weapon;
+		RenderTarget = texLumWeapon;
 	}
 		pass StereoOut
 	{
