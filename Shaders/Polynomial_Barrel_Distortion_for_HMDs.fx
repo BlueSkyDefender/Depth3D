@@ -558,17 +558,19 @@ float4 base;
 
 ////////////////////////////////////////////////////Polynomial_Distortion/////////////////////////////////////////////////////
 
-float2 D(float2 p, float k1, float k2) //Cubic Lens Distortion Left & Right
+float2 D(float2 p, float k1, float k2) //Polynomial Lens Distortion Left & Right
 {
-		float r2 = p.x * p.x + p.y * p.y;
-		float r4 = r2 * r2;
-		//float r6 = r4 * r2;
-		//float Radius_coeff = (1.0 + k1*r2 + k2*r4 + k3*r6);
-		float newRadius = (1.0 + k1*r2 + k2*r4);
-		p.x = p.x * newRadius;
-		p.y = p.y * newRadius;
-		
-		return p;
+	// https://github.com/sobotka/blender/blob/master/intern/libmv/libmv/simple_pipeline/distortion_models.h#L66
+	float r2 = p.x * p.x + p.y * p.y;
+	float r4 = r2 * r2;
+	//use this if you want to add K3.
+	//float r6 = r4 * r2;
+	//float newRadius = (1.0 + k1*r2 + k2*r4 + k3*r6);
+	float newRadius = (1.0 + k1*r2 + k2*r4);
+	p.x = p.x * newRadius;
+	p.y = p.y * newRadius;
+	
+	return p;
 }
 
 float4 PDL(float2 texcoord)		//Texture = texCL Left
