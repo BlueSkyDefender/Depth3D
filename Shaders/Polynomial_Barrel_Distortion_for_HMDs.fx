@@ -88,6 +88,13 @@ uniform float3 Polynomial_Colors_K2 <
 	ui_category = "Image Distortion Corrections";
 > = float3(0.24, 0.24, 0.24);
 
+uniform bool Distortion_Aliment_Grid <
+	ui_label = "Distortion Grid";
+	ui_tooltip = "Use to this White & Black Grid for Distortion Correction.";
+	ui_category = "Image Distortion Corrections";
+> = false;
+
+
 uniform float2 Zoom_Aspect_Ratio <
 	#if Compatibility
 	ui_type = "drag";
@@ -172,13 +179,13 @@ uniform int Vignette <
 > = false;
 
 uniform bool Lens_Aliment_Marker <
-	ui_label = "Lens Aliment Markers";
+	ui_label = "Lens Aliment Marker";
 	ui_tooltip = "Use to this green Cross Marker for lens aliment.";
 	ui_category = "Image Markers";
 > = false;
 
 uniform bool Image_Aliment_Marker <
-	ui_label = "Image Aliment Markers";
+	ui_label = "Image Aliment Marker";
 	ui_tooltip = "Use to this green Cross Marker for image aliment.";
 	ui_category = "Image Markers";
 > = false;
@@ -421,34 +428,61 @@ float4 Bi_R(in float2 texcoord : TEXCOORD0)
 	return lerp( tA, tB, f.y ) * 2.0;//2.0 Gamma correction.
 }
 
+float4 Grid_Lines(in float2 texcoords : TEXCOORD0)
+
+{ 
+    float4 Out;
+    float2 UV = (texcoords - 0.5f) * 25.0f, xy = frac(UV); // adjust coords to visualize in a grid
+    // Draw a black and white grid.
+    Out = (xy.x > 0.9 || xy.y > 0.9) ? 1 : 0;
+
+	return Out;
+}	
+
 void LR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 color : SV_Target0 , out float4 colorT: SV_Target1)
 {	
 float4 SBSL, SBSR;
-	if(Stereoscopic_Mode_Convert == 0 || Stereoscopic_Mode_Convert == 2) //SbS
+	if (!Distortion_Aliment_Grid)
 	{
-		SBSL = tex2D(BackBuffer, float2(texcoord.x*0.5,texcoord.y));
-		SBSR = tex2D(BackBuffer, float2(texcoord.x*0.5+0.5,texcoord.y));
-	}
-	else if(Stereoscopic_Mode_Convert == 1 || Stereoscopic_Mode_Convert == 3) //TnB
-	{
-		SBSL = tex2D(BackBuffer, float2(texcoord.x,texcoord.y*0.5));
-		SBSR = tex2D(BackBuffer, float2(texcoord.x,texcoord.y*0.5+0.5));
-	}
-	else if(Stereoscopic_Mode_Convert == 4)
-	{
-		SBSL = tex2D(BackBuffer, float2(texcoord.x,texcoord.y)); //Monoscopic No stereo
+		if(Stereoscopic_Mode_Convert == 0 || Stereoscopic_Mode_Convert == 2) //SbS
+		{
+			SBSL = tex2D(BackBuffer, float2(texcoord.x*0.5,texcoord.y));
+			SBSR = tex2D(BackBuffer, float2(texcoord.x*0.5+0.5,texcoord.y));
+		}
+		else if(Stereoscopic_Mode_Convert == 1 || Stereoscopic_Mode_Convert == 3) //TnB
+		{
+			SBSL = tex2D(BackBuffer, float2(texcoord.x,texcoord.y*0.5));
+			SBSR = tex2D(BackBuffer, float2(texcoord.x,texcoord.y*0.5+0.5));
+		}
+		else if(Stereoscopic_Mode_Convert == 4)
+		{
+			SBSL = tex2D(BackBuffer, float2(texcoord.x,texcoord.y)); //Monoscopic No stereo
+		}
+		else
+		{	
+			SBSL = Bi_L(texcoord);
+			SBSR = Bi_R(texcoord);   
+		}
 	}
 	else
-	{	
-		SBSL = Bi_L(texcoord);
-		SBSR = Bi_R(texcoord);   
-	}
-	
+	{
+		SBSL = Grid_Lines(texcoord);
+		SBSR = Grid_Lines(texcoord);
+	}	
+
 color = SBSL;
 colorT = SBSR;
 }
 
 ////////////////////////////////////////////////////Texture_Modifier/////////////////////////////////////////////////////
+float4 Cross_Marker(in float2 texcoord : TEXCOORD0) //Cross Marker inside Left Image
+{  
+	// Compute anti-aliased world-space grid lines
+	float2 grid = abs(frac(texcoord - 0.25) - 0.25) / fwidth(texcoord);
+	float lines = min(grid.x, grid.y) * 0.5;
+	float GLS = 1.0 - min(lines, 1.0);		
+	return float4(GLS.xxx, 1.0);	
+}	
 
 float4 vignetteL(in float2 texcoord : TEXCOORD0)
 {  
@@ -483,16 +517,9 @@ float4 base;
 	//Texture Adjustment End//		
 		
 	base = tex2D(SamplerCLBORDER, texcoord);
-	   
-	//Cross Marker inside Left Image
-	float2 Horz = float2(1-0.49925,0.49925);
-	float2 Vert = float2(1-0.501,0.501);
-	float4 A = all( texcoord < float2(Horz.x,Vert.x)) || all( texcoord > float2(Horz.x,Vert.x));
-	float4 B = all( texcoord < float2(Horz.y,Vert.y)) || all( texcoord > float2(Horz.y,Vert.y));
-	float4 H = A-B;
-	
+	   	
 	if( Image_Aliment_Marker )
-	base = H ? float4(1.0,1.0,0.0,1) : base; //Yellow
+	base = Cross_Marker(texcoord) ? float4(1.0,1.0,0.0,1) : base; //Yellow
 	   
 	texcoord = -texcoord * texcoord + texcoord;
 	
@@ -507,7 +534,6 @@ float4 vignetteR(in float2 texcoord : TEXCOORD0)
 float4 base;
 	
 	//Texture Rotation//
-	
 	//Converts the specified value from radians to degrees.
 	float LD = radians(DEGREES().x);
 	float RD = radians(-DEGREES().y);
@@ -520,7 +546,6 @@ float4 base;
     float R_cos_factor = cos(RD);
     R_Rotationtexcoord = mul(R_Rotationtexcoord - R_PivotPoint, float2x2(float2(R_cos_factor, R_sin_factor), float2(-R_sin_factor, R_cos_factor)));
 	R_Rotationtexcoord += R_PivotPoint;
-	
 	
 	//Texture Zoom & Aspect Ratio//
 	float X = Z_A().x;
@@ -537,16 +562,9 @@ float4 base;
 	//Texture Adjustment End//
 	
 	base = tex2D(SamplerCRBORDER, texcoord);
-
-	//Cross Marker inside Right Image
-	float2 Horz = float2(1-0.49925,0.49925);
-	float2 Vert = float2(1-0.501,0.501);
-	float4 A = all( texcoord < float2(Horz.x,Vert.x)) || all( texcoord > float2(Horz.x,Vert.x));
-	float4 B = all( texcoord < float2(Horz.y,Vert.y)) || all( texcoord > float2(Horz.y,Vert.y));
-	float4 H = A-B;
 	
 	if( Image_Aliment_Marker )
-	base = H ? float4(1.0,1.0,0.0,1) : base; //Yellow
+	base = Cross_Marker(texcoord) ? float4(1.0,1.0,0.0,1) : base; //Yellow
 	   
 	texcoord = -texcoord * texcoord + texcoord;
 	
@@ -599,16 +617,9 @@ float4 PDL(float2 texcoord)		//Texture = texCL Left
 	{
 		color = float4(0,0,0,1);
 	}
-	
-	//Cross Marker inside left Polynomial
-	float2 Horz = float2(1-0.49925,0.49925);
-	float2 Vert = float2(1-0.501,0.501);
-	float4 A = all( texcoord < float2(Horz.x,Vert.x)) || all( texcoord > float2(Horz.x,Vert.x));
-	float4 B = all( texcoord < float2(Horz.y,Vert.y)) || all( texcoord > float2(Horz.y,Vert.y));
-	float4 H = A-B;
-	
+		
 	if( Lens_Aliment_Marker )
-	color = H ? float4(0.0,1.0,0.0,1) : color; //Green
+	color = Cross_Marker(texcoord) ? float4(0.0,1.0,0.0,1) : color; //Green
 	
 	return color;	
 }
@@ -641,15 +652,8 @@ float4 PDR(float2 texcoord)		//Texture = texCR Right
 		color = float4(0,0,0,1);
 	}
 	
-	//Cross Marker inside Right Polynomial
-	float2 Horz = float2(1-0.49925,0.49925);
-	float2 Vert = float2(1-0.501,0.501);
-	float4 A = all( texcoord < float2(Horz.x,Vert.x)) || all( texcoord > float2(Horz.x,Vert.x));
-	float4 B = all( texcoord < float2(Horz.y,Vert.y)) || all( texcoord > float2(Horz.y,Vert.y));
-	float4 H = A-B;
-	
 	if( Lens_Aliment_Marker )
-	color = H ? float4(0.0,1.0,0.0,1) : color; //Green
+	color = Cross_Marker(texcoord) ? float4(0.0,1.0,0.0,1) : color; //Green
 	
 	return color;
 		
