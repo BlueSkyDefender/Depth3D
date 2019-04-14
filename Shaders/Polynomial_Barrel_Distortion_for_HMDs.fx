@@ -115,26 +115,11 @@ uniform float2 Degrees <
 	ui_type = "slider";
 	#endif
 	ui_min = 0; ui_max =  360;
-	ui_label = "Rotation";
+	ui_label = "Independent Rotation";
 	ui_tooltip = "Left & Right Rotation Angle known as Degrees.\n"
 				 "Default is Zero";
 	ui_category = "Image Repositioning";
 > = float2(0.0,0.0);
-
-uniform int Vertical_Repositioning <
-	#if Compatibility
-	ui_type = "drag";
-	#else
-	ui_type = "slider";
-	#endif
-	ui_min = -500; ui_max = 500;
-	ui_label = "Vertical Repositioning";
-	ui_tooltip = "Please note if you have to use this, please aline and adjust your headset before you use this.\n"
-				 "You can use the aliment markers to do this below.\n"
-				 "Determines the vertical position of the Image.\n"
-				 "Default is 0.";
-	ui_category = "Image Repositioning";
-> = 0;
 
 uniform int2 Independent_Vertical_Repositioning <
 	#if Compatibility
@@ -165,6 +150,13 @@ uniform int2 Independent_Horizontal_Repositioning <
 				 "Default is 0.";
 	ui_category = "Image Repositioning";
 > = int2(0,0);
+
+uniform bool Tied_H_V <
+	ui_label = "Tied Horiz & Vert Repositioning";
+	ui_tooltip = "Lets you control the Horizontal and Vertical with the first value only.\n"
+				 "Default is On.";
+	ui_category = "Image Repositioning";
+> = true;
 
 uniform int Vignette <
 	#if Compatibility
@@ -203,6 +195,7 @@ uniform int HMD_Profiles <
 	ui_items = "Off\0Profile One\0Profile Two\0"; //Add your own Profile here.
 	ui_label = "HMD Profiles";
 	ui_tooltip = "Head Mounted Display Profiles.";
+	ui_category = "Custom HMD Profiles.";
 > = 0;
 
 float4x4 HMDProfiles()
@@ -211,7 +204,7 @@ float Zoom = Zoom_Aspect_Ratio.x;
 float Aspect_Ratio = Zoom_Aspect_Ratio.y;
 
 float IPD = Interpupillary_Distance;
-float VRP = Vertical_Repositioning;
+float NoValue = 0;//value used for future adjustment.
 float3 PC2 = Polynomial_Colors_K2;
 float Z = Zoom;
 float AR = Aspect_Ratio;
@@ -225,11 +218,10 @@ float4x4 Done;
 	if (HMD_Profiles == 1)
 	{
 		IPD = 0.0;					//Interpupillary Distance. Default is 0
-		VRP = 0;                    //Vertical Repositioning.
 		Z = 1.0;					//Zoom. Default is 1.0
 		AR = 1.0;					//Aspect Ratio. Default is 1.0
-		PC1 = float3(0.22,0.22,0.22);//Polynomial Colors K_1. Default is (Red 0.0, Green 0.0, Blue 0.0)
-		PC2 = float3(0.24,0.24,0.24);//Polynomial Colors K_2. Default is (Red 0.0, Green 0.0, Blue 0.0)
+		PC1 = float3(0.22,0.22,0.22);//Polynomial Colors K_1. Default is (Red 0.22, Green 0.22, Blue 0.22)
+		PC2 = float3(0.24,0.24,0.24);//Polynomial Colors K_2. Default is (Red 0.24, Green 0.24, Blue 0.24)
 		D = float2(0,0);			//Left & Right Rotation Angle known as Degrees.
 		IVRPLR = float2(0,0);       //Independent Vertical Repositioning. Left & Right.
 		IHRPLR = float2(0,0);       //Independent Horizontal Repositioning. Left & Right.
@@ -239,11 +231,10 @@ float4x4 Done;
 	if (HMD_Profiles == 2)
 	{
 		IPD = -25.0;				//Interpupillary Distance.
-		VRP = 0;                    //Vertical Repositioning.
 		Z = 1.0;					//Zoom. Default is 1.0
 		AR = 0.925;					//Aspect Ratio. Default is 1.0
-		PC1 = float3(0.22,0.22,0.22);//Polynomial Colors K_1. Default is (Red 0.0, Green 0.0, Blue 0.0)
-		PC2 = float3(0.24,0.24,0.24);//Polynomial Colors K_2. Default is (Red 0.0, Green 0.0, Blue 0.0)
+		PC1 = float3(0.22,0.22,0.22);//Polynomial Colors K_1. Default is (Red 0.22, Green 0.22, Blue 0.22)
+		PC2 = float3(0.24,0.24,0.24);//Polynomial Colors K_2. Default is (Red 0.24, Green 0.24, Blue 0.24)
 		D = float2(0,0);			//Left & Right Rotation Angle known as Degrees.
 		IVRPLR = float2(0,0);       //Independent Vertical Repositioning. Left & Right.
 		IHRPLR = float2(0,0);       //Independent Horizontal Repositioning. Left & Right.
@@ -252,12 +243,11 @@ float4x4 Done;
 	//Rift Profile WIP
 	if (HMD_Profiles == 3)
 	{
-		IPD = -272.5;				//Interpupillary Distance.
-		VRP = 0;                    //Vertical Repositioning.
+		IPD = -27.25;				//Interpupillary Distance.
 		Z = 1.0;					//Zoom. Default is 1.0
 		AR = 1.0;					//Aspect Ratio. Default is 1.0
-		PC1 = float3(0.22,0.22,0.22);//Polynomial Colors K_1. Default is (Red 0.0, Green 0.0, Blue 0.0)
-		PC2 = float3(0.24,0.24,0.24);//Polynomial Colors K_2. Default is (Red 0.0, Green 0.0, Blue 0.0)
+		PC1 = float3(0.22,0.22,0.22);//Polynomial Colors K_1. Default is (Red 0.22, Green 0.22, Blue 0.22)
+		PC2 = float3(0.24,0.24,0.24);//Polynomial Colors K_2. Default is (Red 0.24, Green 0.24, Blue 0.24)
 		D = float2(0,0);			//Left & Right Rotation Angle known as Degrees.
 		IVRPLR = float2(0,0);       //Independent Vertical Repositioning. Left & Right.
 		IHRPLR = float2(0,0);       //Independent Horizontal Repositioning. Left & Right.
@@ -265,11 +255,11 @@ float4x4 Done;
 
 	if(Diaspora)
 	{
-		Done = float4x4(float4(IPD,PC1.x,Z,IVRPLR.x),float4(PC2.x,PC1.y,AR,IVRPLR.y),float4(PC2.y,PC1.z,D.x,IHRPLR.x),float4(PC2.z,VRP,D.y,IHRPLR.y)); //Diaspora frak up 4x4 fix
+		Done = float4x4(float4(IPD,PC1.x,Z,IVRPLR.x),float4(PC2.x,PC1.y,AR,IVRPLR.y),float4(PC2.y,PC1.z,D.x,IHRPLR.x),float4(PC2.z,NoValue,D.y,IHRPLR.y)); //Diaspora frak up 4x4 fix
 	}
 	else
 	{
-		Done = float4x4(float4(IPD,PC2.x,PC2.y,PC2.z),float4(PC1.x,PC1.y,PC1.z,VRP),float4(Z,AR,D.x,D.y),float4(IVRPLR.x,IVRPLR.y,IHRPLR.x,IHRPLR.y));
+		Done = float4x4(float4(IPD,PC2.x,PC2.y,PC2.z),float4(PC1.x,PC1.y,PC1.z,NoValue),float4(Z,AR,D.x,D.y),float4(IVRPLR.x,IVRPLR.y,IHRPLR.x,IHRPLR.y));
 	}
 	
 return Done;
@@ -284,11 +274,11 @@ float IPDS()
 	return IPDS;
 }
 
-//Vertical Repositioning Section//
-float VRePos()
+//No Value//
+float NoValue() // for future adjustments
 {
-	float VRePos = HMDProfiles()[1][3];
-	return VRePos;
+	float NoValue = HMDProfiles()[1][3];
+	return NoValue;
 }
 
 //Lens Zoom & Aspect Ratio Section//
@@ -299,16 +289,16 @@ float2 Z_A()
 }
 
 //Polynomial Colors Section//
-float3 P_CT()//K_2
+float3 P_C_A()//K_1
 {
-	float3 PC = float3(HMDProfiles()[0][1],HMDProfiles()[0][2],HMDProfiles()[0][3]);
+	float3 PC = float3(HMDProfiles()[1][0],HMDProfiles()[1][1],HMDProfiles()[1][2]);
 	return PC;
 }
 
 //Polynomial Colors Section//
-float3 P_CO()//K_1
+float3 P_C_B()//K_2
 {
-	float3 PC = float3(HMDProfiles()[1][0],HMDProfiles()[1][1],HMDProfiles()[1][2]);
+	float3 PC = float3(HMDProfiles()[0][1],HMDProfiles()[0][2],HMDProfiles()[0][3]);
 	return PC;
 }
 
@@ -429,45 +419,37 @@ float4 Bi_R(in float2 texcoord : TEXCOORD0)
 }
 
 float4 Grid_Lines(in float2 texcoords : TEXCOORD0)
-
 { 
     float4 Out;
-    float2 UV = (texcoords - 0.5f) * 25.0f, xy = frac(UV); // adjust coords to visualize in a grid
+    float2 UV = (texcoords - 0.5f) * 25.0f, xy = abs(frac(UV)); // adjust coords to visualize in a grid
     // Draw a black and white grid.
     Out = (xy.x > 0.9 || xy.y > 0.9) ? 1 : 0;
 
-	return Out;
+	return Out;	
 }	
 
 void LR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 color : SV_Target0 , out float4 colorT: SV_Target1)
 {	
 float4 SBSL, SBSR;
-	if (!Distortion_Aliment_Grid)
+
+	if(Stereoscopic_Mode_Convert == 0 || Stereoscopic_Mode_Convert == 2) //SbS
 	{
-		if(Stereoscopic_Mode_Convert == 0 || Stereoscopic_Mode_Convert == 2) //SbS
-		{
-			SBSL = tex2D(BackBuffer, float2(texcoord.x*0.5,texcoord.y));
-			SBSR = tex2D(BackBuffer, float2(texcoord.x*0.5+0.5,texcoord.y));
-		}
-		else if(Stereoscopic_Mode_Convert == 1 || Stereoscopic_Mode_Convert == 3) //TnB
-		{
-			SBSL = tex2D(BackBuffer, float2(texcoord.x,texcoord.y*0.5));
-			SBSR = tex2D(BackBuffer, float2(texcoord.x,texcoord.y*0.5+0.5));
-		}
-		else if(Stereoscopic_Mode_Convert == 4)
-		{
-			SBSL = tex2D(BackBuffer, float2(texcoord.x,texcoord.y)); //Monoscopic No stereo
-		}
-		else
-		{	
-			SBSL = Bi_L(texcoord);
-			SBSR = Bi_R(texcoord);   
-		}
+		SBSL = tex2D(BackBuffer, float2(texcoord.x*0.5,texcoord.y));
+		SBSR = tex2D(BackBuffer, float2(texcoord.x*0.5+0.5,texcoord.y));
+	}
+	else if(Stereoscopic_Mode_Convert == 1 || Stereoscopic_Mode_Convert == 3) //TnB
+	{
+		SBSL = tex2D(BackBuffer, float2(texcoord.x,texcoord.y*0.5));
+		SBSR = tex2D(BackBuffer, float2(texcoord.x,texcoord.y*0.5+0.5));
+	}
+	else if(Stereoscopic_Mode_Convert == 4)
+	{
+		SBSL = tex2D(BackBuffer, float2(texcoord.x,texcoord.y)); //Monoscopic No stereo
 	}
 	else
-	{
-		SBSL = Grid_Lines(texcoord);
-		SBSR = Grid_Lines(texcoord);
+	{	
+		SBSL = Bi_L(texcoord);
+		SBSR = Bi_R(texcoord);   
 	}	
 
 color = SBSL;
@@ -491,9 +473,7 @@ float4 base;
 	//Texture Rotation//
 	//Converts the specified value from radians to degrees.
 	float LD = radians(DEGREES().x);
-	float RD = radians(-DEGREES().y);
-	float MD = radians(DEGREES().x);
-	
+		
 	//Left
 	float2 L_PivotPoint = float2(0.5,0.5);
     float2 L_Rotationtexcoord = texcoord;
@@ -511,12 +491,13 @@ float4 base;
 	texcoord = float2((L_Rotationtexcoord.x*X)-midW,(L_Rotationtexcoord.y*Y)-midH);	
 	
 	//Texture Position
-	texcoord.y += VRePos() * pix.y;//Tied Vertical Repostion.
 	texcoord.y += IVRePosLR().x * pix.y;//Independent Vertical Repostion Left.
 	texcoord.x += IHRePosLR().x * pix.x;//Independent Horizontal Repostion Left.
-	//Texture Adjustment End//		
-		
-	base = tex2D(SamplerCLBORDER, texcoord);
+	//Texture Adjustment End//			
+	if (!Distortion_Aliment_Grid)
+		base = tex2D(SamplerCLBORDER, texcoord);
+	else
+		base = Grid_Lines(texcoord);
 	   	
 	if( Image_Aliment_Marker )
 	base = Cross_Marker(texcoord) ? float4(1.0,1.0,0.0,1) : base; //Yellow
@@ -535,10 +516,14 @@ float4 base;
 	
 	//Texture Rotation//
 	//Converts the specified value from radians to degrees.
-	float LD = radians(DEGREES().x);
-	float RD = radians(-DEGREES().y);
-	float MD = radians(DEGREES().x);
-	
+	float RD = radians(DEGREES().y), IVRR = IVRePosLR().y * pix.y, IHRR = IHRePosLR().y * pix.x;
+	if (Tied_H_V) // only done on the right eye.
+	{
+		IVRR = IVRePosLR().x * pix.y;
+		IHRR = IHRePosLR().x * pix.x;
+		RD = radians(DEGREES().x);
+	}
+
 	//Right
 	float2 R_PivotPoint = float2(0.5,0.5);
     float2 R_Rotationtexcoord = texcoord;
@@ -555,13 +540,14 @@ float4 base;
 				
 	texcoord = float2((R_Rotationtexcoord.x*X)-midW,(R_Rotationtexcoord.y*Y)-midH);	
 
-	//Texture Position
-	texcoord.y += VRePos() * pix.y;
-	texcoord.y += IVRePosLR().y * pix.y;//Independent Vertical Repostion Right.
-	texcoord.x += IHRePosLR().y * pix.x;//Independent Horizontal Repostion Right.
+	//Texture Position	
+	texcoord.y += IVRR;//Independent Vertical Repostion Right.
+	texcoord.x += IHRR;//Independent Horizontal Repostion Right.
 	//Texture Adjustment End//
-	
-	base = tex2D(SamplerCRBORDER, texcoord);
+	if (!Distortion_Aliment_Grid)
+		base = tex2D(SamplerCRBORDER, texcoord);
+	else
+		base = Grid_Lines(texcoord);
 	
 	if( Image_Aliment_Marker )
 	base = Cross_Marker(texcoord) ? float4(1.0,1.0,0.0,1) : base; //Yellow
@@ -596,8 +582,8 @@ float4 PDL(float2 texcoord)		//Texture = texCL Left
 	float4 color;
 	float2 uv_red, uv_green, uv_blue, sectorOrigin;
 	float4 color_red, color_green, color_blue;
-	float K1_Red = P_CO().x, K1_Green = P_CO().y, K1_Blue = P_CO().z;
-	float K2_Red = P_CT().x, K2_Green = P_CT().y, K2_Blue = P_CT().z;
+	float K1_Red = P_C_A().x, K1_Green = P_C_A().y, K1_Blue = P_C_A().z;
+	float K2_Red = P_C_B().x, K2_Green = P_C_B().y, K2_Blue = P_C_B().z;
 	// Radial distort around center
 	sectorOrigin = 0.5;
 	
@@ -629,8 +615,8 @@ float4 PDR(float2 texcoord)		//Texture = texCR Right
 	float4 color;
 	float2 uv_red, uv_green, uv_blue, sectorOrigin;
 	float4 color_red, color_green, color_blue;
-	float K1_Red = P_CO().x, K1_Green = P_CO().y, K1_Blue = P_CO().z;
-	float K2_Red = P_CT().x, K2_Green = P_CT().y, K2_Blue = P_CT().z;
+	float K1_Red = P_C_A().x, K1_Green = P_C_A().y, K1_Blue = P_C_A().z;
+	float K2_Red = P_C_B().x, K2_Green = P_C_B().y, K2_Blue = P_C_B().z;
 
 	// Radial distort around center
 	sectorOrigin = 0.5;
