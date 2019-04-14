@@ -39,13 +39,20 @@ uniform int Interpupillary_Distance <
 	#else
 	ui_type = "slider";
 	#endif
-	ui_min = 0; ui_max = 100;
+	ui_min = -100; ui_max = 100;
 	ui_label = "Interpupillary Distance";
 	ui_tooltip = "Determines the distance between your eyes.\n" 
 				 "In Monoscopic mode it's x offset calibration.\n"
 				 "Default is 0.";
 	ui_category = "Eye Focus Adjustment";
 > = 0;
+
+uniform bool LD_IPD <
+	ui_label = "Lens Dependent IPD";
+	ui_tooltip = "Set Interpupillary Distance by Lens Postion instead of screen space postion.\n" 
+				 "This is for HMD that can't move the internal Displays with the Lenses.";
+	ui_category = "Eye Focus Adjustment";
+> = false;
 
 uniform int Stereoscopic_Mode_Convert <
 	ui_type = "combo";
@@ -107,6 +114,19 @@ uniform float2 Zoom_Aspect_Ratio <
 				 "Default is 1.0.";
 	ui_category = "Image Adjustment";
 > = float2(1.0,1.0);
+
+uniform float Field_of_View <
+	#if Compatibility
+	ui_type = "drag";
+	#else
+	ui_type = "slider";
+	#endif
+	ui_min = 0.0; ui_max = 0.250;
+	ui_label = "Field of View";
+	ui_tooltip = "Lets you adjust the FoV of the Image.\n" 
+				 "Default is 0.0.";
+	ui_category = "Image Adjustment";
+> = 0;
 
 uniform float2 Degrees <
 	#if Compatibility
@@ -204,7 +224,7 @@ float Zoom = Zoom_Aspect_Ratio.x;
 float Aspect_Ratio = Zoom_Aspect_Ratio.y;
 
 float IPD = Interpupillary_Distance;
-float NoValue = 0;//value used for future adjustment.
+float FOV = Field_of_View;
 float3 PC2 = Polynomial_Colors_K2;
 float Z = Zoom;
 float AR = Aspect_Ratio;
@@ -218,6 +238,7 @@ float4x4 Done;
 	if (HMD_Profiles == 1)
 	{
 		IPD = 0.0;					//Interpupillary Distance. Default is 0
+		FOV = 0.0;
 		Z = 1.0;					//Zoom. Default is 1.0
 		AR = 1.0;					//Aspect Ratio. Default is 1.0
 		PC1 = float3(0.22,0.22,0.22);//Polynomial Colors K_1. Default is (Red 0.22, Green 0.22, Blue 0.22)
@@ -230,7 +251,8 @@ float4x4 Done;
 	//Make your own Profile here.
 	if (HMD_Profiles == 2)
 	{
-		IPD = -25.0;				//Interpupillary Distance.
+		IPD = 25.0;				//Interpupillary Distance.
+		FOV = 0.0;
 		Z = 1.0;					//Zoom. Default is 1.0
 		AR = 0.925;					//Aspect Ratio. Default is 1.0
 		PC1 = float3(0.22,0.22,0.22);//Polynomial Colors K_1. Default is (Red 0.22, Green 0.22, Blue 0.22)
@@ -243,7 +265,8 @@ float4x4 Done;
 	//Rift Profile WIP
 	if (HMD_Profiles == 3)
 	{
-		IPD = -27.25;				//Interpupillary Distance.
+		IPD = 27.25;				//Interpupillary Distance.
+		FOV = 0.0;
 		Z = 1.0;					//Zoom. Default is 1.0
 		AR = 1.0;					//Aspect Ratio. Default is 1.0
 		PC1 = float3(0.22,0.22,0.22);//Polynomial Colors K_1. Default is (Red 0.22, Green 0.22, Blue 0.22)
@@ -255,11 +278,11 @@ float4x4 Done;
 
 	if(Diaspora)
 	{
-		Done = float4x4(float4(IPD,PC1.x,Z,IVRPLR.x),float4(PC2.x,PC1.y,AR,IVRPLR.y),float4(PC2.y,PC1.z,D.x,IHRPLR.x),float4(PC2.z,NoValue,D.y,IHRPLR.y)); //Diaspora frak up 4x4 fix
+		Done = float4x4(float4(IPD,PC1.x,Z,IVRPLR.x),float4(PC2.x,PC1.y,AR,IVRPLR.y),float4(PC2.y,PC1.z,D.x,IHRPLR.x),float4(PC2.z,FOV,D.y,IHRPLR.y)); //Diaspora frak up 4x4 fix
 	}
 	else
 	{
-		Done = float4x4(float4(IPD,PC2.x,PC2.y,PC2.z),float4(PC1.x,PC1.y,PC1.z,NoValue),float4(Z,AR,D.x,D.y),float4(IVRPLR.x,IVRPLR.y,IHRPLR.x,IHRPLR.y));
+		Done = float4x4(float4(IPD,PC2.x,PC2.y,PC2.z),float4(PC1.x,PC1.y,PC1.z,FOV),float4(Z,AR,D.x,D.y),float4(IVRPLR.x,IVRPLR.y,IHRPLR.x,IHRPLR.y));
 	}
 	
 return Done;
@@ -274,11 +297,11 @@ float IPDS()
 	return IPDS;
 }
 
-//No Value//
-float NoValue() // for future adjustments
+//Field of View//
+float F_o_V()
 {
-	float NoValue = HMDProfiles()[1][3];
-	return NoValue;
+	float F_o_V = HMDProfiles()[1][3];
+	return F_o_V;
 }
 
 //Lens Zoom & Aspect Ratio Section//
@@ -430,8 +453,8 @@ float4 Grid_Lines(in float2 texcoords : TEXCOORD0)
 
 void LR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 color : SV_Target0 , out float4 colorT: SV_Target1)
 {	
-float4 SBSL, SBSR;
-
+	float4 SBSL, SBSR;
+	
 	if(Stereoscopic_Mode_Convert == 0 || Stereoscopic_Mode_Convert == 2) //SbS
 	{
 		SBSL = tex2D(BackBuffer, float2(texcoord.x*0.5,texcoord.y));
@@ -468,12 +491,13 @@ float4 Cross_Marker(in float2 texcoord : TEXCOORD0) //Cross Marker inside Left I
 
 float4 vignetteL(in float2 texcoord : TEXCOORD0)
 {  
-float4 base;
-	
+	float4 base;
 	//Texture Rotation//
 	//Converts the specified value from radians to degrees.
 	float LD = radians(DEGREES().x);
-		
+	//Texture Position
+	texcoord.y += IVRePosLR().x * pix.y;//Independent Vertical Repostion Left.
+	texcoord.x += IHRePosLR().x * pix.x;//Independent Horizontal Repostion Left.		
 	//Left
 	float2 L_PivotPoint = float2(0.5,0.5);
     float2 L_Rotationtexcoord = texcoord;
@@ -481,7 +505,6 @@ float4 base;
     float L_cos_factor = cos(LD);
     L_Rotationtexcoord = mul(L_Rotationtexcoord - L_PivotPoint, float2x2(float2(L_cos_factor, L_sin_factor), float2(-L_sin_factor, L_cos_factor)));
 	L_Rotationtexcoord += L_PivotPoint;
-	
 	//Texture Zoom & Aspect Ratio//
 	float X = Z_A().x;
 	float Y = Z_A().y * Z_A().x * 2;
@@ -489,15 +512,19 @@ float4 base;
 	float midH = (Y - 1)*(BUFFER_HEIGHT*0.5)*pix.y;	
 				
 	texcoord = float2((L_Rotationtexcoord.x*X)-midW,(L_Rotationtexcoord.y*Y)-midH);	
+	//Field of View
+	float F = -F_o_V() + 1,HA = (F - 1)*(BUFFER_WIDTH*0.5)*pix.x;	
 	
-	//Texture Position
-	texcoord.y += IVRePosLR().x * pix.y;//Independent Vertical Repostion Left.
-	texcoord.x += IHRePosLR().x * pix.x;//Independent Horizontal Repostion Left.
-	//Texture Adjustment End//			
+	texcoord.x = (texcoord.x*F)-HA;	
+	//Normal HMDs IPD
+	float IPDtexL = texcoord.x;	
+	if (!LD_IPD) // https://developers.google.com/vr/jump/rendering-ods-content.pdf Page 10
+		IPDtexL -= (IPDS()) * pix.x;// Left IPD
+	//Texture Adjustment End//
 	if (!Distortion_Aliment_Grid)
-		base = tex2D(SamplerCLBORDER, texcoord);
+		base = tex2D(SamplerCLBORDER, float2(IPDtexL,texcoord.y));
 	else
-		base = Grid_Lines(texcoord);
+		base = Grid_Lines(float2(IPDtexL,texcoord.y));
 	   	
 	if( Image_Aliment_Marker )
 	base = Cross_Marker(texcoord) ? float4(1.0,1.0,0.0,1) : base; //Yellow
@@ -523,7 +550,9 @@ float4 base;
 		IHRR = IHRePosLR().x * pix.x;
 		RD = radians(DEGREES().x);
 	}
-
+	//Texture Position	
+	texcoord.y += IVRR;//Independent Vertical Repostion Right.
+	texcoord.x += IHRR;//Independent Horizontal Repostion Right.
 	//Right
 	float2 R_PivotPoint = float2(0.5,0.5);
     float2 R_Rotationtexcoord = texcoord;
@@ -531,23 +560,26 @@ float4 base;
     float R_cos_factor = cos(RD);
     R_Rotationtexcoord = mul(R_Rotationtexcoord - R_PivotPoint, float2x2(float2(R_cos_factor, R_sin_factor), float2(-R_sin_factor, R_cos_factor)));
 	R_Rotationtexcoord += R_PivotPoint;
-	
 	//Texture Zoom & Aspect Ratio//
 	float X = Z_A().x;
 	float Y = Z_A().y * Z_A().x * 2;
 	float midW = (X - 1)*(BUFFER_WIDTH*0.5)*pix.x;	
 	float midH = (Y - 1)*(BUFFER_HEIGHT*0.5)*pix.y;	
 				
-	texcoord = float2((R_Rotationtexcoord.x*X)-midW,(R_Rotationtexcoord.y*Y)-midH);	
-
-	//Texture Position	
-	texcoord.y += IVRR;//Independent Vertical Repostion Right.
-	texcoord.x += IHRR;//Independent Horizontal Repostion Right.
+	texcoord = float2((R_Rotationtexcoord.x*X)-midW,(R_Rotationtexcoord.y*Y)-midH);
+	//Field of View
+	float F = -F_o_V() + 1,HA = (F - 1)*(BUFFER_WIDTH*0.5)*pix.x;	
+	
+	texcoord.x = (texcoord.x*F)-HA;
+	//Normal HMDs IPD
+	float IPDtexR = texcoord.x;	
+	if (!LD_IPD) // https://developers.google.com/vr/jump/rendering-ods-content.pdf Page 10
+		IPDtexR += (IPDS()) * pix.x;// Left IPD
 	//Texture Adjustment End//
 	if (!Distortion_Aliment_Grid)
-		base = tex2D(SamplerCRBORDER, texcoord);
+		base = tex2D(SamplerCRBORDER, float2(IPDtexR,texcoord.y));
 	else
-		base = Grid_Lines(texcoord);
+		base = Grid_Lines(float2(IPDtexR,texcoord.y));
 	
 	if( Image_Aliment_Marker )
 	base = Cross_Marker(texcoord) ? float4(1.0,1.0,0.0,1) : base; //Yellow
@@ -578,7 +610,7 @@ float2 D(float2 p, float k1, float k2) //Polynomial Lens Distortion Left & Right
 }
 
 float4 PDL(float2 texcoord)		//Texture = texCL Left
-{		
+{	
 	float4 color;
 	float2 uv_red, uv_green, uv_blue, sectorOrigin;
 	float4 color_red, color_green, color_blue;
@@ -648,26 +680,23 @@ float4 PDR(float2 texcoord)		//Texture = texCR Right
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 float4 PBDOut(float2 texcoord : TEXCOORD0)
-{	
-	float IPDtexL = texcoord.x, IPDtexR = texcoord.x;
-	// https://developers.google.com/vr/jump/rendering-ods-content.pdf Page 10
-	IPDtexL -= (IPDS() * 0.5) * pix.x;// Left IPD
-	IPDtexR += (IPDS() * 0.5) * pix.x;// Right IPD
-	
+{
 	float4 Out;
+	//For Cell HMDs
+	float IPDtexL = texcoord.x, IPDtexR = texcoord.x;
+ 
+	if (LD_IPD) // https://developers.google.com/vr/jump/rendering-ods-content.pdf Page 10
+	{
+		IPDtexL -= (IPDS() * 0.5) * pix.x;// Left IPD
+		IPDtexR += (IPDS() * 0.5) * pix.x;// Right IPD
+	}
 		
 	if( Stereoscopic_Mode_Convert == 0 || Stereoscopic_Mode_Convert == 1|| Stereoscopic_Mode_Convert == 5)
-	{
-		Out = texcoord.x < 0.5 ? PDL(float2(IPDtexL*2,texcoord.y)) : PDR(float2(IPDtexR*2-1 ,texcoord.y));
-	}
+		Out = texcoord.x < 0.5 ? PDL(float2(IPDtexL*2,texcoord.y)) : PDR(float2(IPDtexR*2-1,texcoord.y));
 	else if (Stereoscopic_Mode_Convert == 2 || Stereoscopic_Mode_Convert == 3 )
-	{
 		Out = texcoord.y < 0.5 ? PDL(float2(IPDtexL,texcoord.y*2)) : PDR(float2(IPDtexR,texcoord.y*2-1));
-	}
 	else if (Stereoscopic_Mode_Convert == 4 )
-	{
 		Out = PDL(float2(IPDtexL ,texcoord.y));
-	}
 	
 	return Out;
 }
