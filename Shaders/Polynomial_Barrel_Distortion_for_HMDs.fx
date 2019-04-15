@@ -178,7 +178,7 @@ uniform bool NFAA_TOGGLE <
 	ui_category = "Image Effects";
 > = false;
 
-uniform int Vignette <
+uniform float Vignette <
 	#if Compatibility
 	ui_type = "drag";
 	#else
@@ -507,7 +507,7 @@ float4 vignetteL(in float2 texcoord : TEXCOORD0)
 	texcoord = -texcoord * texcoord + texcoord;
 	
 	if( Vignette > 0)
-	base.rgb *= saturate(texcoord.x * texcoord.y * pow(10-Vignette,3));
+	base.rgb *= saturate(texcoord.x * texcoord.y * pow(12-Vignette,3));
 		
 	return base;    
 }
@@ -560,7 +560,7 @@ float4 base;
 	texcoord = -texcoord * texcoord + texcoord;
 	
 	if( Vignette > 0)
-	base.rgb *= saturate(texcoord.x * texcoord.y * pow(10-Vignette,3));
+	base.rgb *= saturate(texcoord.x * texcoord.y * pow(12-Vignette,3));
 
 	return base;    
 }
@@ -675,60 +675,7 @@ float4 PBD(float2 texcoord : TEXCOORD)
 
 float LI(in float3 value)
 {	
-	return dot(value.rgb,float3(0.333, 0.333, 0.333));
-}
-
-float4 NFAA(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Target
-{
-	float4 NFAA;
-    float2 UV = texcoord.xy, SW = 2 * pix, n;	
-	float t, l, r, d;
-	float3 ct, cl, cr, cd;
-	if (NFAA_TOGGLE)
-	{
-		t = LI(tex2D( BackBuffer, float2( UV.x , UV.y - SW.y ) ).rgb);
-		l = LI(tex2D( BackBuffer, float2( UV.x - SW.x , UV.y ) ).rgb);
-		r = LI(tex2D( BackBuffer, float2( UV.x + SW.x , UV.y ) ).rgb);
-		d = LI(tex2D( BackBuffer, float2( UV.x , UV.y + SW.y ) ).rgb);
-		n = float2(t - d, r - l);
-				
-		float   nl = length(n);
-	 
-		if (nl < (1.0 / 16))
-		{
-			NFAA = tex2D(BackBuffer,UV);
-		}
-		else
-		{
-		n *= pix / nl;
-	 
-		float4   o = tex2D( BackBuffer, UV ),
-				t0 = tex2D( BackBuffer, UV + n * 0.5) * 0.9,
-				t1 = tex2D( BackBuffer, UV - n * 0.5) * 0.9,
-				t2 = tex2D( BackBuffer, UV + n) * 0.75,
-				t3 = tex2D( BackBuffer, UV - n) * 0.75;
-	 
-			NFAA = (o + t0 + t1 + t2 + t3) / 4.3;
-		}
-		
-			float Mask = nl * 0.5f;
-	
-	if (Mask > 0.025)
-	Mask = 1-Mask;
-	else
-	Mask = 1;
-	
-	Mask = saturate(lerp(Mask,1,-10.0));
-	
-	NFAA = lerp(NFAA,tex2D( BackBuffer,UV), Mask );
-		
-	}
-	else
-	{
-		NFAA = tex2D( BackBuffer,UV);
-	}
-
-  return NFAA;
+	return dot(value.rgb,float3(0.333, 0.333, 0.333)); 
 }
 
 float4 Combine(float4 a,float4 b)
@@ -744,34 +691,69 @@ float4 Combine(float4 a,float4 b)
 	return COMB_OUT;
 }
 
-float4 UnSharpMask(float4 position : SV_Position, float2 texcoords : TEXCOORD) : SV_Target
+float4 NFAA(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Target
 {
-	float4 result;
-	float2 P = pix;
-	if(Sharpen_Power > 0)
+	float4 NFAA;
+    float2 UV = texcoord.xy, SW = pix, n;	
+	float3 t, l, r, d;
+	float3 ct, cl, cr, cd, Blur;
+	if (NFAA_TOGGLE || Sharpen_Power > 0) //Useing the AA samples for sharpen.
 	{
-		result += tex2D( BackBuffer, texcoords + float2( 1, 0) * P );
-		result += tex2D( BackBuffer, texcoords + float2(-1, 0) * P );
-		result += tex2D( BackBuffer, texcoords + float2( 1, 1) * (P * 0.75f));
-		result += tex2D( BackBuffer, texcoords + float2(-1,-1) * (P * 0.75f));
-		result += tex2D( BackBuffer, texcoords + float2( 1,-1) * (P * 0.75f));
-		result += tex2D( BackBuffer, texcoords + float2(-1, 1) * (P * 0.75f));
-		result /= 6;
+		t = tex2D( BackBuffer, float2( UV.x , UV.y - SW.y ) ).rgb;
+		l = tex2D( BackBuffer, float2( UV.x - SW.x , UV.y ) ).rgb;
+		r = tex2D( BackBuffer, float2( UV.x + SW.x , UV.y ) ).rgb;
+		d = tex2D( BackBuffer, float2( UV.x , UV.y + SW.y ) ).rgb;
+		n = float2(LI(t) - LI(d), LI(r) - LI(l));
+		
+		Blur = (t + l + r + d) * 0.25f;
+	}
+		if (NFAA_TOGGLE)
+	{	
+		float   nl = length(n);
+	 
+		if (nl < (1.0 / 16))
+		{
+			NFAA = tex2D(BackBuffer,UV);
+		}
+		else
+		{
+		n *= pix / (nl * 0.5f);
+	 
+		float4   o = tex2D( BackBuffer, UV ),
+				t0 = tex2D( BackBuffer, UV + n * 0.5f) * 0.9f,
+				t1 = tex2D( BackBuffer, UV - n * 0.5f) * 0.9f,
+				t2 = tex2D( BackBuffer, UV + n) * 0.75f,
+				t3 = tex2D( BackBuffer, UV - n) * 0.75f;
+	 
+			NFAA = (o + t0 + t1 + t2 + t3) / 4.3f;
+		}
+		
+			float Mask = nl * 0.5f;
+	
+	if (Mask > 0.025f)
+	Mask = 1-Mask;
+	else
+	Mask = 1;
+	
+	Mask = saturate(lerp(Mask,1,-7.5f));
+	
+	NFAA = lerp(NFAA,tex2D( BackBuffer,UV), Mask );
+		
 	}
 	else
 	{
-		result = tex2D( BackBuffer, texcoords );
+		NFAA = tex2D( BackBuffer,UV);
 	}
 	
 	if(Sharpen_Power > 0)
 	{
 		//UnsharpMask
-		result = tex2D( BackBuffer, texcoords ) + ( tex2D( BackBuffer, texcoords ) - result) * Sharpen_Power;
+		Blur.rgb = NFAA.rgb + ( NFAA.rgb - Blur ) * Sharpen_Power;
 		//Blending
-		result = Combine( tex2D( BackBuffer, texcoords ), result);
+		NFAA = Combine( NFAA, float4(Blur,1));
 	}
 	
-	return result;
+  return NFAA;
 }
 
 ////////////////////////////////////////////////////////Logo/////////////////////////////////////////////////////////////////////////
@@ -895,11 +877,6 @@ technique Polynomial_Barrel_Distortion_P
 technique Polynomial_Barrel_Distortion_S
 #endif
 {	
-			pass Sharpen
-		{
-			VertexShader = PostProcessVS;
-			PixelShader = UnSharpMask;
-		}
 			pass AA
 		{
 			VertexShader = PostProcessVS;

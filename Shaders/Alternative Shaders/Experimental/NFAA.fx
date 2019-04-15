@@ -22,7 +22,7 @@
 
 uniform float filterSpread_var <
 	ui_type = "drag";
-	ui_min = 0.5; ui_max = 1.0;
+	ui_min = 1.0; ui_max = 10.0;
 	ui_label = "Spread";
 	ui_tooltip = "Filter Spread controls how large an area the filter tries to sample\n"
 				 "and fix aliasing within. This has a direct relationship to the angle\n"
@@ -31,11 +31,11 @@ uniform float filterSpread_var <
 				 "values. The tradeoff for setting a high spread value is the overall\n"
 				 "softness of the image. Values between 0.5f and 1.0f work best.\n"
 				 "Default is 0.750f.";
-> = 0.75;
+> = 1.0;
 
 uniform int View_Mode <
 	ui_type = "combo";
-	ui_items = "NFAA\0Mask View A\0Mask View B\0";
+	ui_items = "NFAA\0NFAA Masked\0Mask View A\0Mask View B\0";
 	ui_label = "View Mode";
 	ui_tooltip = "This is used to select the normal view output or debug view.\n"
 				 "NFAA Masked Needs Stroner Settings where as NFAA Pure needs Weaker settings.\n"
@@ -87,10 +87,6 @@ float3 Luma()
 //Luminosity Intensity
 float LI(in float3 value)
 {	
-	//Luminosity Controll
-	if (Luma_Coefficient == 2)
-		value.rgb = value.ggg;
-	
 	return dot(value.rgb,Luma());
 }
 
@@ -102,7 +98,7 @@ float4 GetBB(float2 texcoord : TEXCOORD)
 float4 NFAA(float2 texcoord)
 {
 	float4 NFAA;
-    float2 UV = texcoord.xy, SW = sw * pix, n;	
+    float2 UV = texcoord.xy, SW = pix, n;	
 	float t, l, r, d;
 	float3 ct, cl, cr, cd;
 	if (Luma_Coefficient == 4) 
@@ -121,7 +117,7 @@ float4 NFAA(float2 texcoord)
 		d = LI(GetBB( float2( UV.x , UV.y + SW.y ) ).rgb);
 		n = float2(t - d, r - l);
 	}	
-    float   nl = length(n) * 0.5;
+    float   nl = length(n);
  
     if (nl < (1.0 / 16))
     {
@@ -129,32 +125,36 @@ float4 NFAA(float2 texcoord)
 	}
     else
     {
-	n *= pix / nl;
+	n *= pix / (nl * 0.5f);
  
 	float4   o = GetBB( UV ),
-			t0 = GetBB( UV + n * 0.5) * 0.9,
-			t1 = GetBB( UV - n * 0.5) * 0.9,
-			t2 = GetBB( UV + n) * 0.75,
-			t3 = GetBB( UV - n) * 0.75;
+			t0 = GetBB( UV + n * 0.5f) * 0.9f,
+			t1 = GetBB( UV - n * 0.5f) * 0.9f,
+			t2 = GetBB( UV + n) * 0.75f,
+			t3 = GetBB( UV - n) * 0.75f;
  
 		NFAA = (o + t0 + t1 + t2 + t3) / 4.3;
 	}
 	
-	float Mask = nl;
+	float Mask = nl * 0.5;
 	
 	if (Mask > 0.025)
 	Mask = 1-Mask;
 	else
 	Mask = 1;
 	
-	Mask = saturate(lerp(Mask,1,-5.0));
+	Mask = saturate(lerp(Mask,1,-7.5f));
 	
 	// Final color
 	if(View_Mode == 1)
 	{
+		NFAA = lerp(NFAA,GetBB( texcoord.xy ), Mask );
+	}
+	if(View_Mode == 2)
+	{
 		NFAA = lerp(float4(2.5,0,0,1),GetBB( texcoord.xy ), Mask );
 	}
-	else if (View_Mode == 2)
+	else if (View_Mode == 3)
 	{
 		NFAA = Mask.xxxx;
 	}	
