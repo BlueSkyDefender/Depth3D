@@ -56,18 +56,11 @@ uniform bool LD_IPD <
 
 uniform int Stereoscopic_Mode_Convert <
 	ui_type = "combo";
-	ui_items = "Side by Side\0Top and Bottom\0SbS to Alt-TnB\0TnB to Alt-TnB\0Monoscopic\0Checkerboard Reconstruction\0";
+	ui_items = "Side by Side\0Top and Bottom\0SbS to Alt-TnB\0TnB to Alt-TnB\0Monoscopic\0";
 	ui_label = "3D Mode Conversions";
 	ui_tooltip = "3D Mode Conversion for Head Mounted Displays.";
 	ui_category = "Stereoscopic Options";
 > = 0;
-
-uniform bool Checkerboard_Reconstruction_Compatibility <
-	ui_label = "CBR Compatibility";
-	ui_tooltip = "Use this to toggle Checkerboard Reconstruction Compatibility.\n"
-				 "This can help with CBR issues.";
-	ui_category = "Stereoscopic Options";
-> = false;
 
 uniform float3 Polynomial_Colors_K1 <
 	#if Compatibility
@@ -390,11 +383,11 @@ sampler BackBuffer
 	};
 	
 #if TOGGLE
-texture texCLP  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA8;}; 
+texture texCLP  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA8;};  
 texture texCRP  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA8;}; 
 #else
-texture texCLS  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA8;}; 
-texture texCRS  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA8;}; 
+texture texCLS  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA8;};  
+texture texCRS  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA8;};
 #endif
 	
 sampler SamplerCLBORDER
@@ -421,61 +414,7 @@ sampler SamplerCRBORDER
 		AddressW = BORDER;
 	};
 	
-texture texColor  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA8; MipLevels = 2;}; 
-
-sampler SampleColor
-	{
-		Texture = texColor;
-		AddressU = BORDER;
-		AddressV = BORDER;
-		AddressW = BORDER;
-	};	
 ////////////////////////////////////////////////////Texture_Intercepter/////////////////////////////////////////////////////
-
-float4 L(in float2 texcoord : TEXCOORD0)
-{
-	float2 gridxy = floor(float2(texcoord.x * BUFFER_WIDTH,texcoord.y * BUFFER_HEIGHT));
-	return fmod(gridxy.x+gridxy.y,2.0) ? 0 : tex2D(BackBuffer, float2(texcoord.x,texcoord.y)) ;
-}
-
-float4 Bi_L(in float2 texcoord : TEXCOORD0)
-{
-	float4 tl = L(texcoord);
-	float4 tr = L(texcoord +float2(pix.x, 0.0));
-	float4 bl = L(texcoord +float2(0.0, pix.y));
-	float4 br = L(texcoord +float2(pix.x, pix.y));
-	float2 f = 0.5f;
-	
-	if(Checkerboard_Reconstruction_Compatibility)
-		f = frac( texcoord * TextureSize);
-   
-	float4 tA = lerp( tl, tr, f.x );
-	float4 tB = lerp( bl, br, f.x );
-	return lerp( tA, tB, f.y ) * 2.0;//2.0 Gamma correction.
-}
-
-float4 R(in float2 texcoord : TEXCOORD0)
-{
-	float2 gridxy = floor(float2(texcoord.x * BUFFER_WIDTH,texcoord.y * BUFFER_HEIGHT));
-	return fmod(gridxy.x+gridxy.y,2.0) ? tex2D(BackBuffer, float2(texcoord.x,texcoord.y)) : 0 ;
-}
-
-float4 Bi_R(in float2 texcoord : TEXCOORD0)
-{
-	float4 tl = R(texcoord);
-	float4 tr = R(texcoord +float2(pix.x, 0.0));
-	float4 bl = R(texcoord +float2(0.0, pix.y));
-	float4 br = R(texcoord +float2(pix.x, pix.y));
-	float2 f = 0.5f;
-	
-	if(Checkerboard_Reconstruction_Compatibility)
-		f = frac( texcoord * TextureSize);
-	
-	float4 tA = lerp( tl, tr, f.x );
-	float4 tB = lerp( bl, br, f.x );
-	return lerp( tA, tB, f.y ) * 2.0;//2.0 Gamma correction.
-}
-
 float4 Grid_Lines(in float2 texcoords : TEXCOORD0)
 { 
     float4 Out;
@@ -486,32 +425,35 @@ float4 Grid_Lines(in float2 texcoords : TEXCOORD0)
 	return Out;	
 }	
 
-void LR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 color : SV_Target0 , out float4 colorT: SV_Target1)
+void LR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 color_A : SV_Target0 , out float4 color_B: SV_Target1)
 {	
-	float4 SBSL, SBSR;
-	
+	float4 SBSR, SBSL;
 	if(Stereoscopic_Mode_Convert == 0 || Stereoscopic_Mode_Convert == 2) //SbS
 	{
 		SBSL = tex2D(BackBuffer, float2(texcoord.x*0.5,texcoord.y));
 		SBSR = tex2D(BackBuffer, float2(texcoord.x*0.5+0.5,texcoord.y));
-	}
+	}	
 	else if(Stereoscopic_Mode_Convert == 1 || Stereoscopic_Mode_Convert == 3) //TnB
-	{
-		SBSL = tex2D(BackBuffer, float2(texcoord.x,texcoord.y*0.5));
+	{	
 		SBSR = tex2D(BackBuffer, float2(texcoord.x,texcoord.y*0.5+0.5));
-	}
-	else if(Stereoscopic_Mode_Convert == 4)
-	{
-		SBSL = tex2D(BackBuffer, float2(texcoord.x,texcoord.y)); //Monoscopic No stereo
+		SBSL = tex2D(BackBuffer, float2(texcoord.x,texcoord.y*0.5));
 	}
 	else
-	{	
-		SBSL = Bi_L(texcoord);
-		SBSR = Bi_R(texcoord);   
+	{
+		SBSL = tex2D(BackBuffer, float2(texcoord.x,texcoord.y)); //Monoscopic No stereo
+		SBSR = 0;
+	}
+	
+	if (!Distortion_Aliment_Grid)
+	{
+		color_A = SBSL;
+		color_B = SBSR;
 	}	
-
-color = SBSL;
-colorT = SBSR;
+	else
+	{
+		color_A = Grid_Lines(texcoord);
+		color_B = Grid_Lines(texcoord);
+	}
 }
 
 ////////////////////////////////////////////////////Texture_Modifier/////////////////////////////////////////////////////
@@ -522,7 +464,7 @@ float4 Cross_Marker(in float2 texcoord : TEXCOORD0) //Cross Marker inside Left I
 	float lines = min(grid.x, grid.y) * 0.5;
 	float GLS = 1.0 - min(lines, 1.0);		
 	return float4(GLS.xxx, 1.0);	
-}	
+}
 
 float4 vignetteL(in float2 texcoord : TEXCOORD0)
 {  
@@ -556,10 +498,8 @@ float4 vignetteL(in float2 texcoord : TEXCOORD0)
 	if (!LD_IPD) // https://developers.google.com/vr/jump/rendering-ods-content.pdf Page 10
 		IPDtexL -= (IPDS()) * pix.x;// Left IPD
 	//Texture Adjustment End//
-	if (!Distortion_Aliment_Grid)
-		base = tex2D(SamplerCLBORDER, float2(IPDtexL,texcoord.y));
-	else
-		base = Grid_Lines(float2(IPDtexL,texcoord.y));
+
+	base = tex2D(SamplerCLBORDER,float2(IPDtexL,texcoord.y));
 	   	
 	if( Image_Aliment_Marker )
 	base = Cross_Marker(texcoord) ? float4(1.0,1.0,0.0,1) : base; //Yellow
@@ -611,10 +551,8 @@ float4 base;
 	if (!LD_IPD) // https://developers.google.com/vr/jump/rendering-ods-content.pdf Page 10
 		IPDtexR += (IPDS()) * pix.x;// Left IPD
 	//Texture Adjustment End//
-	if (!Distortion_Aliment_Grid)
-		base = tex2D(SamplerCRBORDER, float2(IPDtexR,texcoord.y));
-	else
-		base = Grid_Lines(float2(IPDtexR,texcoord.y));
+	
+	base = tex2D(SamplerCRBORDER,float2(IPDtexR,texcoord.y));
 	
 	if( Image_Aliment_Marker )
 	base = Cross_Marker(texcoord) ? float4(1.0,1.0,0.0,1) : base; //Yellow
@@ -713,7 +651,7 @@ float4 PDR(float2 texcoord)		//Texture = texCR Right
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-float4 PBDOut(float2 texcoord : TEXCOORD0)
+float4 PBD(float2 texcoord : TEXCOORD)
 {	
 	float4 Out;
 	//For Cell HMDs
@@ -735,11 +673,6 @@ float4 PBDOut(float2 texcoord : TEXCOORD0)
 	return Out;
 }
 
-float4 GetBB(float2 texcoord : TEXCOORD0)
-{	
-	return tex2D(BackBuffer,texcoord);
-}
-
 float LI(in float3 value)
 {	
 	return dot(value.rgb,float3(0.333, 0.333, 0.333));
@@ -748,15 +681,15 @@ float LI(in float3 value)
 float4 NFAA(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Target
 {
 	float4 NFAA;
-    float2 UV = texcoord.xy, SW = 1 * pix, n;	
+    float2 UV = texcoord.xy, SW = 2 * pix, n;	
 	float t, l, r, d;
 	float3 ct, cl, cr, cd;
-	if (NFAA_TOGGLE && !Stereoscopic_Mode_Convert == 5)
+	if (NFAA_TOGGLE)
 	{
-		t = LI(GetBB( float2( UV.x , UV.y - SW.y ) ).rgb);
-		l = LI(GetBB( float2( UV.x - SW.x , UV.y ) ).rgb);
-		r = LI(GetBB( float2( UV.x + SW.x , UV.y ) ).rgb);
-		d = LI(GetBB( float2( UV.x , UV.y + SW.y ) ).rgb);
+		t = LI(tex2D( BackBuffer, float2( UV.x , UV.y - SW.y ) ).rgb);
+		l = LI(tex2D( BackBuffer, float2( UV.x - SW.x , UV.y ) ).rgb);
+		r = LI(tex2D( BackBuffer, float2( UV.x + SW.x , UV.y ) ).rgb);
+		d = LI(tex2D( BackBuffer, float2( UV.x , UV.y + SW.y ) ).rgb);
 		n = float2(t - d, r - l);
 				
 		float   nl = length(n);
@@ -769,16 +702,16 @@ float4 NFAA(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Targ
 		{
 		n *= pix / nl;
 	 
-		float4   o = GetBB( UV ),
-				t0 = GetBB( UV + n * 0.5) * 0.9,
-				t1 = GetBB( UV - n * 0.5) * 0.9,
-				t2 = GetBB( UV + n) * 0.75,
-				t3 = GetBB( UV - n) * 0.75;
+		float4   o = tex2D( BackBuffer, UV ),
+				t0 = tex2D( BackBuffer, UV + n * 0.5) * 0.9,
+				t1 = tex2D( BackBuffer, UV - n * 0.5) * 0.9,
+				t2 = tex2D( BackBuffer, UV + n) * 0.75,
+				t3 = tex2D( BackBuffer, UV - n) * 0.75;
 	 
 			NFAA = (o + t0 + t1 + t2 + t3) / 4.3;
 		}
 		
-			float Mask = nl * 0.5;
+			float Mask = nl * 0.5f;
 	
 	if (Mask > 0.025)
 	Mask = 1-Mask;
@@ -787,12 +720,12 @@ float4 NFAA(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Targ
 	
 	Mask = saturate(lerp(Mask,1,-10.0));
 	
-	NFAA = lerp(NFAA,GetBB(UV), Mask );
+	NFAA = lerp(NFAA,tex2D( BackBuffer,UV), Mask );
 		
 	}
 	else
 	{
-		NFAA = GetBB(UV);
+		NFAA = tex2D( BackBuffer,UV);
 	}
 
   return NFAA;
@@ -815,27 +748,27 @@ float4 UnSharpMask(float4 position : SV_Position, float2 texcoords : TEXCOORD) :
 {
 	float4 result;
 	float2 P = pix;
-	if(Sharpen_Power > 0 && !Stereoscopic_Mode_Convert == 5)
+	if(Sharpen_Power > 0)
 	{
-		result += GetBB( texcoords + float2( 1, 0) * P );
-		result += GetBB( texcoords + float2(-1, 0) * P );
-		result += GetBB( texcoords + float2( 1, 1) * (P * 0.75f));
-		result += GetBB( texcoords + float2(-1,-1) * (P * 0.75f));
-		result += GetBB( texcoords + float2( 1,-1) * (P * 0.75f));
-		result += GetBB( texcoords + float2(-1, 1) * (P * 0.75f));
+		result += tex2D( BackBuffer, texcoords + float2( 1, 0) * P );
+		result += tex2D( BackBuffer, texcoords + float2(-1, 0) * P );
+		result += tex2D( BackBuffer, texcoords + float2( 1, 1) * (P * 0.75f));
+		result += tex2D( BackBuffer, texcoords + float2(-1,-1) * (P * 0.75f));
+		result += tex2D( BackBuffer, texcoords + float2( 1,-1) * (P * 0.75f));
+		result += tex2D( BackBuffer, texcoords + float2(-1, 1) * (P * 0.75f));
 		result /= 6;
 	}
 	else
 	{
-		result = GetBB( texcoords );
+		result = tex2D( BackBuffer, texcoords );
 	}
 	
-	if(Sharpen_Power > 0 && !Stereoscopic_Mode_Convert == 5)
+	if(Sharpen_Power > 0)
 	{
 		//UnsharpMask
-		result = GetBB( texcoords ) + (GetBB( texcoords ) - result) * Sharpen_Power;
+		result = tex2D( BackBuffer, texcoords ) + ( tex2D( BackBuffer, texcoords ) - result) * Sharpen_Power;
 		//Blending
-		result = Combine(GetBB( texcoords ), result);
+		result = Combine( tex2D( BackBuffer, texcoords ), result);
 	}
 	
 	return result;
@@ -847,7 +780,7 @@ uniform float timer < source = "timer"; >;
 float4 Out(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Target
 {
 	float PosX = 0.5*BUFFER_WIDTH*pix.x,PosY = 0.5*BUFFER_HEIGHT*pix.y;	
-	float4 Color = PBDOut(texcoord),Done,Website,D,E,P,T,H,Three,DD,Dot,I,N,F,O;
+	float4 Color = PBD(texcoord),Done,Website,D,E,P,T,H,Three,DD,Dot,I,N,F,O;
 	
 	if(timer <= 10000)
 	{
@@ -962,15 +895,15 @@ technique Polynomial_Barrel_Distortion_P
 technique Polynomial_Barrel_Distortion_S
 #endif
 {	
-			pass AA
-		{
-			VertexShader = PostProcessVS;
-			PixelShader = NFAA;
-		}	
 			pass Sharpen
 		{
 			VertexShader = PostProcessVS;
 			PixelShader = UnSharpMask;
+		}
+			pass AA
+		{
+			VertexShader = PostProcessVS;
+			PixelShader = NFAA;
 		}
 			pass StereoMonoPass
 		{
@@ -984,7 +917,7 @@ technique Polynomial_Barrel_Distortion_S
 			RenderTarget1 = texCRS;
 			#endif
 		}
-			pass PBDout
+			pass PBD
 		{
 			VertexShader = PostProcessVS;
 			PixelShader = Out;	
