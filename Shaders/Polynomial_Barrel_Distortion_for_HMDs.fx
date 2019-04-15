@@ -1,9 +1,9 @@
- ////-----------------------------------------//
+////-----------------------------------------//
  ///**Polynomial Barrel Distortion for HMDs**///
  //-----------------------------------------////
 
  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
- //* Barrel Distortion for HMD type Displays V2.0                  																													*//
+ //* Barrel Distortion for HMD type Displays                    																													*//
  //* For Reshade 3.0+																																					    		*//
  //* --------------------------																																						*//
  //* This work is licensed under a Creative Commons Attribution 3.0 Unported License.																								*//
@@ -178,6 +178,13 @@ uniform bool Tied_H_V <
 	ui_category = "Image Repositioning";
 > = true;
 
+uniform bool NFAA_TOGGLE <
+	ui_label = "NFAA";
+	ui_tooltip = "The Adds Normal Filter Anti-Aliasing to the Image before processing.\n"
+				 "Default is off.";
+	ui_category = "Image Effects";
+> = false;
+
 uniform int Vignette <
 	#if Compatibility
 	ui_type = "drag";
@@ -188,7 +195,7 @@ uniform int Vignette <
 	ui_label = "Vignette";
 	ui_tooltip = "Soft edge effect around the image.";
 	ui_category = "Image Effects";
-> = false;
+> = 0;
 
 uniform int Blend_Mode <
 	ui_type = "combo";
@@ -414,11 +421,11 @@ sampler SamplerCRBORDER
 		AddressW = BORDER;
 	};
 	
-texture texCLR  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA8; MipLevels = 2;}; 
+texture texColor  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA8; MipLevels = 2;}; 
 
-sampler SamplerLR
+sampler SampleColor
 	{
-		Texture = texCLR;
+		Texture = texColor;
 		AddressU = BORDER;
 		AddressV = BORDER;
 		AddressW = BORDER;
@@ -706,9 +713,8 @@ float4 PDR(float2 texcoord)		//Texture = texCR Right
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-float4 PBD(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Target
-{
+float4 PBDOut(float2 texcoord : TEXCOORD0)
+{	
 	float4 Out;
 	//For Cell HMDs
 	float IPDtexL = texcoord.x, IPDtexR = texcoord.x;
@@ -729,6 +735,69 @@ float4 PBD(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Targe
 	return Out;
 }
 
+float4 GetBB(float2 texcoord : TEXCOORD0)
+{	
+	return tex2D(BackBuffer,texcoord);
+}
+
+float LI(in float3 value)
+{	
+	return dot(value.rgb,float3(0.333, 0.333, 0.333));
+}
+
+float4 NFAA(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Target
+{
+	float4 NFAA;
+    float2 UV = texcoord.xy, SW = 1 * pix, n;	
+	float t, l, r, d;
+	float3 ct, cl, cr, cd;
+	if (NFAA_TOGGLE && !Stereoscopic_Mode_Convert == 5)
+	{
+		t = LI(GetBB( float2( UV.x , UV.y - SW.y ) ).rgb);
+		l = LI(GetBB( float2( UV.x - SW.x , UV.y ) ).rgb);
+		r = LI(GetBB( float2( UV.x + SW.x , UV.y ) ).rgb);
+		d = LI(GetBB( float2( UV.x , UV.y + SW.y ) ).rgb);
+		n = float2(t - d, r - l);
+				
+		float   nl = length(n);
+	 
+		if (nl < (1.0 / 16))
+		{
+			NFAA = tex2D(BackBuffer,UV);
+		}
+		else
+		{
+		n *= pix / nl;
+	 
+		float4   o = GetBB( UV ),
+				t0 = GetBB( UV + n * 0.5) * 0.9,
+				t1 = GetBB( UV - n * 0.5) * 0.9,
+				t2 = GetBB( UV + n) * 0.75,
+				t3 = GetBB( UV - n) * 0.75;
+	 
+			NFAA = (o + t0 + t1 + t2 + t3) / 4.3;
+		}
+		
+			float Mask = nl * 0.5;
+	
+	if (Mask > 0.025)
+	Mask = 1-Mask;
+	else
+	Mask = 1;
+	
+	Mask = saturate(lerp(Mask,1,-10.0));
+	
+	NFAA = lerp(NFAA,GetBB(UV), Mask );
+		
+	}
+	else
+	{
+		NFAA = GetBB(UV);
+	}
+
+  return NFAA;
+}
+
 float4 Combine(float4 a,float4 b)
 {
 	float4 COMB_OUT;
@@ -742,34 +811,36 @@ float4 Combine(float4 a,float4 b)
 	return COMB_OUT;
 }
 
-float4 PBDOut(float2 texcoords : TEXCOORD0)
-{	
+float4 UnSharpMask(float4 position : SV_Position, float2 texcoords : TEXCOORD) : SV_Target
+{
 	float4 result;
-	if(Sharpen_Power)
+	float2 P = pix;
+	if(Sharpen_Power > 0 && !Stereoscopic_Mode_Convert == 5)
 	{
-		result += tex2Dlod(SamplerLR, float4(texcoords + float2( 1, 0) * pix ,0,1));
-		result += tex2Dlod(SamplerLR, float4(texcoords + float2(-1, 0) * pix ,0,1));
-		result += tex2Dlod(SamplerLR, float4(texcoords + float2( 1, 1) * (pix * 0.75f) ,0,1));
-		result += tex2Dlod(SamplerLR, float4(texcoords + float2(-1,-1) * (pix * 0.75f) ,0,1));
-		result += tex2Dlod(SamplerLR, float4(texcoords + float2( 1,-1) * (pix * 0.75f) ,0,1));
-		result += tex2Dlod(SamplerLR, float4(texcoords + float2(-1, 1) * (pix * 0.75f) ,0,1));
+		result += GetBB( texcoords + float2( 1, 0) * P );
+		result += GetBB( texcoords + float2(-1, 0) * P );
+		result += GetBB( texcoords + float2( 1, 1) * (P * 0.75f));
+		result += GetBB( texcoords + float2(-1,-1) * (P * 0.75f));
+		result += GetBB( texcoords + float2( 1,-1) * (P * 0.75f));
+		result += GetBB( texcoords + float2(-1, 1) * (P * 0.75f));
 		result /= 6;
 	}
 	else
 	{
-		result = tex2Dlod(SamplerLR, float4(texcoords,0,0));
+		result = GetBB( texcoords );
 	}
 	
-	if(Sharpen_Power)
+	if(Sharpen_Power > 0 && !Stereoscopic_Mode_Convert == 5)
 	{
 		//UnsharpMask
-		result = tex2Dlod(SamplerLR, float4(texcoords,0,0)) + (tex2Dlod(SamplerLR, float4(texcoords,0,0)) - result) * Sharpen_Power;
+		result = GetBB( texcoords ) + (GetBB( texcoords ) - result) * Sharpen_Power;
 		//Blending
-		result = Combine(tex2Dlod(SamplerLR, float4(texcoords,0,0)), result);
+		result = Combine(GetBB( texcoords ), result);
 	}
 	
-	return result; 
+	return result;
 }
+
 ////////////////////////////////////////////////////////Logo/////////////////////////////////////////////////////////////////////////
 uniform float timer < source = "timer"; >;
 
@@ -890,7 +961,17 @@ technique Polynomial_Barrel_Distortion_P
 #else
 technique Polynomial_Barrel_Distortion_S
 #endif
-{		
+{	
+			pass AA
+		{
+			VertexShader = PostProcessVS;
+			PixelShader = NFAA;
+		}	
+			pass Sharpen
+		{
+			VertexShader = PostProcessVS;
+			PixelShader = UnSharpMask;
+		}
 			pass StereoMonoPass
 		{
 			VertexShader = PostProcessVS;
@@ -902,13 +983,6 @@ technique Polynomial_Barrel_Distortion_S
 			RenderTarget0 = texCLS;
 			RenderTarget1 = texCRS;
 			#endif
-		}
-			pass Effects
-		{
-			VertexShader = PostProcessVS;
-			PixelShader = PBD;
-			RenderTarget = texCLR;
-
 		}
 			pass PBDout
 		{
