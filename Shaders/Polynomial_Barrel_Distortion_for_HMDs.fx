@@ -1,9 +1,9 @@
-////-----------------------------------------//
+ ////-----------------------------------------//
  ///**Polynomial Barrel Distortion for HMDs**///
  //-----------------------------------------////
 
  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
- //* Barrel Distortion for HMD type Displays                    																													*//
+ //* Barrel Distortion for HMD type Displays V2.0                  																													*//
  //* For Reshade 3.0+																																					    		*//
  //* --------------------------																																						*//
  //* This work is licensed under a Creative Commons Attribution 3.0 Unported License.																								*//
@@ -189,6 +189,25 @@ uniform int Vignette <
 	ui_tooltip = "Soft edge effect around the image.";
 	ui_category = "Image Effects";
 > = false;
+
+uniform int Blend_Mode <
+	ui_type = "combo";
+	ui_items = "None\0Lighten\0Darken\0";
+	ui_label = "Sharpen Blending";
+	ui_tooltip = "Blend Mode for UnSharp Mask Sharppening.";
+	ui_category = "Image Effects";
+> = 0;
+
+uniform float Sharpen_Power <
+	#if Compatibility
+	ui_type = "drag";
+	#else
+	ui_type = "slider";
+	#endif
+	ui_min = 0.0; ui_max = 1.0;
+	ui_label = "Sharpen Power";
+	ui_tooltip = "Adjust this on clear up the image the game, movie piture & ect.";
+> = 0;
 
 uniform bool Lens_Aliment_Marker <
 	ui_label = "Lens Aliment Marker";
@@ -395,6 +414,15 @@ sampler SamplerCRBORDER
 		AddressW = BORDER;
 	};
 	
+texture texCLR  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA8; MipLevels = 2;}; 
+
+sampler SamplerLR
+	{
+		Texture = texCLR;
+		AddressU = BORDER;
+		AddressV = BORDER;
+		AddressW = BORDER;
+	};	
 ////////////////////////////////////////////////////Texture_Intercepter/////////////////////////////////////////////////////
 
 float4 L(in float2 texcoord : TEXCOORD0)
@@ -679,7 +707,7 @@ float4 PDR(float2 texcoord)		//Texture = texCR Right
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-float4 PBDOut(float2 texcoord : TEXCOORD0)
+float4 PBD(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Target
 {
 	float4 Out;
 	//For Cell HMDs
@@ -701,6 +729,47 @@ float4 PBDOut(float2 texcoord : TEXCOORD0)
 	return Out;
 }
 
+float4 Combine(float4 a,float4 b)
+{
+	float4 COMB_OUT;
+	if(Blend_Mode == 0)     // Pure	
+		COMB_OUT = b;
+	else if(Blend_Mode == 1)// Lighten
+		COMB_OUT = max(a, b);
+	else if(Blend_Mode == 2)// Darken
+		COMB_OUT = min(a, b); 	
+		
+	return COMB_OUT;
+}
+
+float4 PBDOut(float2 texcoords : TEXCOORD0)
+{	
+	float4 result;
+	if(Sharpen_Power)
+	{
+		result += tex2Dlod(SamplerLR, float4(texcoords + float2( 1, 0) * pix ,0,1));
+		result += tex2Dlod(SamplerLR, float4(texcoords + float2(-1, 0) * pix ,0,1));
+		result += tex2Dlod(SamplerLR, float4(texcoords + float2( 1, 1) * (pix * 0.75f) ,0,1));
+		result += tex2Dlod(SamplerLR, float4(texcoords + float2(-1,-1) * (pix * 0.75f) ,0,1));
+		result += tex2Dlod(SamplerLR, float4(texcoords + float2( 1,-1) * (pix * 0.75f) ,0,1));
+		result += tex2Dlod(SamplerLR, float4(texcoords + float2(-1, 1) * (pix * 0.75f) ,0,1));
+		result /= 6;
+	}
+	else
+	{
+		result = tex2Dlod(SamplerLR, float4(texcoords,0,0));
+	}
+	
+	if(Sharpen_Power)
+	{
+		//UnsharpMask
+		result = tex2Dlod(SamplerLR, float4(texcoords,0,0)) + (tex2Dlod(SamplerLR, float4(texcoords,0,0)) - result) * Sharpen_Power;
+		//Blending
+		result = Combine(tex2Dlod(SamplerLR, float4(texcoords,0,0)), result);
+	}
+	
+	return result; 
+}
 ////////////////////////////////////////////////////////Logo/////////////////////////////////////////////////////////////////////////
 uniform float timer < source = "timer"; >;
 
@@ -834,7 +903,14 @@ technique Polynomial_Barrel_Distortion_S
 			RenderTarget1 = texCRS;
 			#endif
 		}
-			pass PBD
+			pass Effects
+		{
+			VertexShader = PostProcessVS;
+			PixelShader = PBD;
+			RenderTarget = texCLR;
+
+		}
+			pass PBDout
 		{
 			VertexShader = PostProcessVS;
 			PixelShader = Out;	
