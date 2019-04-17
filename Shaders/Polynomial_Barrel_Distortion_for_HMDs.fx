@@ -171,6 +171,18 @@ uniform bool Tied_H_V <
 	ui_category = "Image Repositioning";
 > = true;
 
+uniform float Sharpen_Power <
+	#if Compatibility
+	ui_type = "drag";
+	#else
+	ui_type = "slider";
+	#endif
+	ui_min = 0.0; ui_max = 1.5;
+	ui_label = "Sharpen Power";
+	ui_tooltip = "Adjust this on clear up the image the game, movie piture & ect.";
+	ui_category = "Image Effects";
+> = 0;
+
 uniform bool NFAA_TOGGLE <
 	ui_label = "NFAA";
 	ui_tooltip = "The Adds Normal Filter Anti-Aliasing to the Image before processing.\n"
@@ -178,36 +190,23 @@ uniform bool NFAA_TOGGLE <
 	ui_category = "Image Effects";
 > = false;
 
-uniform float Vignette <
-	#if Compatibility
-	ui_type = "drag";
-	#else
-	ui_type = "slider";
-	#endif
-	ui_min = 0; ui_max = 10;
-	ui_label = "Vignette";
-	ui_tooltip = "Soft edge effect around the image.";
-	ui_category = "Image Effects";
-> = 0;
+//uniform float Vignette <
+//	#if Compatibility
+//	ui_type = "drag";
+//	#else
+//	ui_type = "slider";
+//	#endif
+//	ui_min = 0; ui_max = 10;
+//	ui_label = "Vignette";
+//	ui_tooltip = "Soft edge effect around the image.";
+//	ui_category = "Image Effects";
+//> = 0;
 
-uniform int Blend_Mode <
-	ui_type = "combo";
-	ui_items = "None\0Lighten\0Darken\0";
-	ui_label = "Sharpen Blending";
-	ui_tooltip = "Blend Mode for UnSharp Mask Sharppening.";
-	ui_category = "Image Effects";
-> = 0;
-
-uniform float Sharpen_Power <
-	#if Compatibility
-	ui_type = "drag";
-	#else
-	ui_type = "slider";
-	#endif
-	ui_min = 0.0; ui_max = 1.0;
-	ui_label = "Sharpen Power";
-	ui_tooltip = "Adjust this on clear up the image the game, movie piture & ect.";
-> = 0;
+uniform bool Median_Toggle <
+	ui_label = "Anti-Moire";
+	ui_tooltip = "Adjust this to remove the Moire pattern causing radial banding by adding a Median Filter to the image.\n"
+				 "The moire pattern here is a result of the high-contrast lines approaching the Nyquist Frequency.";
+> = false;
 
 uniform bool Lens_Aliment_Marker <
 	ui_label = "Lens Aliment Marker";
@@ -380,35 +379,6 @@ texture BackBufferTex : COLOR;
 sampler BackBuffer 
 	{ 
 		Texture = BackBufferTex;
-	};
-	
-#if TOGGLE
-texture texCLP  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA8;};  
-texture texCRP  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA8;}; 
-#else
-texture texCLS  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA8;};  
-texture texCRS  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA8;};
-#endif
-	
-sampler SamplerCLBORDER
-	{
-		#if TOGGLE
-		Texture = texCLP;
-		#else
-		Texture = texCLS;
-		#endif
-		AddressU = BORDER;
-		AddressV = BORDER;
-		AddressW = BORDER;
-	};
-	
-sampler SamplerCRBORDER
-	{
-		#if TOGGLE
-		Texture = texCRP;
-		#else
-		Texture = texCRS;
-		#endif
 		AddressU = BORDER;
 		AddressV = BORDER;
 		AddressW = BORDER;
@@ -425,37 +395,46 @@ float4 Grid_Lines(in float2 texcoords : TEXCOORD0)
 	return Out;	
 }	
 
-void LR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 color_A : SV_Target0 , out float4 color_B: SV_Target1)
-{	
-	float4 SBSR, SBSL;
+float4 Left(in float2 texcoord : TEXCOORD0)
+{
+	float HV;
 	if(Stereoscopic_Mode_Convert == 0 || Stereoscopic_Mode_Convert == 2) //SbS
 	{
-		SBSL = tex2D(BackBuffer, float2(texcoord.x*0.5,texcoord.y));
-		SBSR = tex2D(BackBuffer, float2(texcoord.x*0.5+0.5,texcoord.y));
+		texcoord = float2(texcoord.x*0.5f,texcoord.y);
+		HV = texcoord.x;
 	}	
 	else if(Stereoscopic_Mode_Convert == 1 || Stereoscopic_Mode_Convert == 3) //TnB
 	{	
-		SBSR = tex2D(BackBuffer, float2(texcoord.x,texcoord.y*0.5+0.5));
-		SBSL = tex2D(BackBuffer, float2(texcoord.x,texcoord.y*0.5));
+		texcoord = float2(texcoord.x,texcoord.y*0.5f);
+		HV = texcoord.y;
 	}
-	else
-	{
-		SBSL = tex2D(BackBuffer, float2(texcoord.x,texcoord.y)); //Monoscopic No stereo
-		SBSR = 0;
-	}
-	
+		
 	if (!Distortion_Aliment_Grid)
-	{
-		color_A = SBSL;
-		color_B = SBSR;
-	}	
+		return HV > 0.5f ? 0 : tex2D(BackBuffer,texcoord);	
 	else
-	{
-		color_A = Grid_Lines(texcoord);
-		color_B = Grid_Lines(texcoord);
-	}
+		return Grid_Lines(texcoord);
 }
 
+
+float4 Right(in float2 texcoord : TEXCOORD0)
+{
+	float HV;
+	if(Stereoscopic_Mode_Convert == 0 || Stereoscopic_Mode_Convert == 2) //SbS
+	{
+		texcoord = float2(texcoord.x*0.5f+0.5f,texcoord.y);	
+		HV = texcoord.x;
+	}
+	else if(Stereoscopic_Mode_Convert == 1 || Stereoscopic_Mode_Convert == 3) //TnB
+	{	
+		texcoord = float2(texcoord.x,texcoord.y*0.5f+0.5f);
+		HV = texcoord.y;
+	}
+		
+	if (!Distortion_Aliment_Grid)
+		return HV > 0.5f ? tex2D(BackBuffer,texcoord) : 0;	
+	else
+		return Grid_Lines(texcoord);
+}
 ////////////////////////////////////////////////////Texture_Modifier/////////////////////////////////////////////////////
 float4 Cross_Marker(in float2 texcoord : TEXCOORD0) //Cross Marker inside Left Image
 {  
@@ -499,15 +478,15 @@ float4 vignetteL(in float2 texcoord : TEXCOORD0)
 		IPDtexL -= (IPDS()) * pix.x;// Left IPD
 	//Texture Adjustment End//
 
-	base = tex2D(SamplerCLBORDER,float2(IPDtexL,texcoord.y));
+	base = Left(float2(IPDtexL,texcoord.y));
 	   	
 	if( Image_Aliment_Marker )
 	base = Cross_Marker(texcoord) ? float4(1.0,1.0,0.0,1) : base; //Yellow
-	   
-	texcoord = -texcoord * texcoord + texcoord;
 	
-	if( Vignette > 0)
-	base.rgb *= saturate(texcoord.x * texcoord.y * pow(12-Vignette,3));
+	//texcoord = -texcoord * texcoord + texcoord;
+	
+	//if( Vignette > 0)
+	//base.rgb *= saturate(texcoord.x * texcoord.y * pow(12.5f-Vignette,3));
 		
 	return base;    
 }
@@ -552,15 +531,15 @@ float4 base;
 		IPDtexR += (IPDS()) * pix.x;// Left IPD
 	//Texture Adjustment End//
 	
-	base = tex2D(SamplerCRBORDER,float2(IPDtexR,texcoord.y));
+	base = Right(float2(IPDtexR,texcoord.y));
 	
 	if( Image_Aliment_Marker )
 	base = Cross_Marker(texcoord) ? float4(1.0,1.0,0.0,1) : base; //Yellow
-	   
-	texcoord = -texcoord * texcoord + texcoord;
 	
-	if( Vignette > 0)
-	base.rgb *= saturate(texcoord.x * texcoord.y * pow(12-Vignette,3));
+	//texcoord = -texcoord * texcoord + texcoord;
+	
+	//if( Vignette > 0)
+	//base.rgb *= saturate(texcoord.x * texcoord.y * pow(12.5f-Vignette,3));
 
 	return base;    
 }
@@ -570,16 +549,17 @@ float4 base;
 float2 D(float2 p, float k1, float k2) //Polynomial Lens Distortion Left & Right
 {
 	// https://github.com/sobotka/blender/blob/master/intern/libmv/libmv/simple_pipeline/distortion_models.h#L66
-	float r2 = p.x * p.x + p.y * p.y;
-	float r4 = r2 * r2;
+	float r2 = p.x * p.x + p.y * p.y,r4 = pow(r2,2);//pow is faster
 	//use this if you want to add K3.
 	//float r6 = r4 * r2;
 	//float newRadius = (1.0 + k1*r2 + k2*r4 + k3*r6);
-	float newRadius = (1.0 + k1*r2 + k2*r4);
+	float newRadius = (1.0 + k1 * r2 + k2 * r4);
 	p.x = p.x * newRadius;
 	p.y = p.y * newRadius;
-	
-	return p;
+	float p1, p2;	
+	//p.x = p.x * newRadius + 2.0*p1*p.x*p.y + p2*(r2 + 2.0*p.x*p.x);
+    //p.y = p.y * newRadius + 2.0*p2*p.x*p.y + p1*(r2 + 2.0*p.y*p.y);	
+return p;
 }
 
 float4 PDL(float2 texcoord)		//Texture = texCL Left
@@ -590,7 +570,7 @@ float4 PDL(float2 texcoord)		//Texture = texCL Left
 	float K1_Red = P_C_A().x, K1_Green = P_C_A().y, K1_Blue = P_C_A().z;
 	float K2_Red = P_C_B().x, K2_Green = P_C_B().y, K2_Blue = P_C_B().z;
 	// Radial distort around center
-	sectorOrigin = 0.5;
+	sectorOrigin = 0.5f;
 	
 	uv_red = D(texcoord.xy-sectorOrigin,K1_Red,K2_Red) + sectorOrigin;
 	uv_green = D(texcoord.xy-sectorOrigin,K1_Green,K2_Green) + sectorOrigin;
@@ -624,7 +604,7 @@ float4 PDR(float2 texcoord)		//Texture = texCR Right
 	float K2_Red = P_C_B().x, K2_Green = P_C_B().y, K2_Blue = P_C_B().z;
 
 	// Radial distort around center
-	sectorOrigin = 0.5;
+	sectorOrigin = 0.5f;
 	
 	uv_red = D(texcoord.xy-sectorOrigin,K1_Red,K2_Red) + sectorOrigin;
 	uv_green = D(texcoord.xy-sectorOrigin,K1_Green,K2_Green) + sectorOrigin;
@@ -669,7 +649,7 @@ float4 PBD(float2 texcoord : TEXCOORD)
 		Out = texcoord.y < 0.5 ? PDL(float2(IPDtexL,texcoord.y*2)) : PDR(float2(IPDtexR,texcoord.y*2-1));
 	else if (Stereoscopic_Mode_Convert == 4 )
 		Out = PDL(float2(IPDtexL ,texcoord.y));
-	
+		
 	return Out;
 }
 
@@ -678,25 +658,16 @@ float LI(in float3 value)
 	return dot(value.rgb,float3(0.333, 0.333, 0.333)); 
 }
 
-float4 Combine(float4 a,float4 b)
-{
-	float4 COMB_OUT;
-	if(Blend_Mode == 0)     // Pure	
-		COMB_OUT = b;
-	else if(Blend_Mode == 1)// Lighten
-		COMB_OUT = max(a, b);
-	else if(Blend_Mode == 2)// Darken
-		COMB_OUT = min(a, b); 	
-		
-	return COMB_OUT;
-}
-
 float4 NFAA(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Target
 {
-	float4 NFAA;
+	float4 NFAA;	
+	float3 t, l, r, d, ct, cl, cr, cd, Blur;
     float2 UV = texcoord.xy, SW = pix, n;	
-	float3 t, l, r, d;
-	float3 ct, cl, cr, cd, Blur;
+	float SP = Sharpen_Power;
+	
+	if( Median_Toggle == 1 )
+		SP *= 0.125f; 
+	
 	if (NFAA_TOGGLE || Sharpen_Power > 0) //Useing the AA samples for sharpen.
 	{
 		t = tex2D( BackBuffer, float2( UV.x , UV.y - SW.y ) ).rgb;
@@ -735,7 +706,7 @@ float4 NFAA(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Targ
 	else
 	Mask = 1;
 	
-	Mask = saturate(lerp(Mask,1,-7.5f));
+	Mask = saturate(lerp(Mask,1,-5.0f));
 	
 	NFAA = lerp(NFAA,tex2D( BackBuffer,UV), Mask );
 		
@@ -744,18 +715,60 @@ float4 NFAA(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Targ
 	{
 		NFAA = tex2D( BackBuffer,UV);
 	}
-	
+	//UnsharpMask
 	if(Sharpen_Power > 0)
-	{
-		//UnsharpMask
-		Blur.rgb = NFAA.rgb + ( NFAA.rgb - Blur ) * Sharpen_Power;
-		//Blending
-		NFAA = Combine( NFAA, float4(Blur,1));
-	}
-	
+		NFAA.rgb = NFAA.rgb + ( NFAA.rgb - Blur ) * SP;
+
   return NFAA;
 }
+//moire pattern here is a result of the high-contrast lines approaching the Nyquist Frequency.
+#define s2(a, b)				temp = a; a = min(a, b); b = max(temp, b);
+#define mn3(a, b, c)			s2(a, b); s2(a, c);
+#define mx3(a, b, c)			s2(b, c); s2(a, c);
 
+#define mnmx3(a, b, c)			mx3(a, b, c); s2(a, b);                                 // 3 exchanges
+#define mnmx4(a, b, c, d)		s2(a, b); s2(c, d); s2(a, c); s2(b, d);                  // 4 exchanges
+#define mnmx5(a, b, c, d, e)	s2(a, b); s2(c, d); mn3(a, c, e); mx3(b, d, e);           // 6 exchanges
+#define mnmx6(a, b, c, d, e, f) s2(a, d); s2(b, e); s2(c, f); mn3(a, b, c); mx3(d, e, f); // 7 exchanges	
+// Median used for anti moire. If there is a better way to remove this please tell me.
+float4 Median(float4 position : SV_Position, float2 texcoord : TEXCOORD0) : SV_Target
+{
+	float2 ScreenCal = pix;
+
+	float2 FinCal = ScreenCal*0.6;
+
+	float4 v[9], Median_Out;
+	if (Median_Toggle) //Useing the AA samples for sharpen.
+	{	
+		[unroll]
+		for(int i = -1; i <= 1; ++i) 
+		{
+			for(int j = -1; j <= 1; ++j)
+			{		
+			  float2 offset = float2(float(i), float(j));
+	
+			  v[(i + 1) * 3 + (j + 1)] = tex2D(BackBuffer, texcoord + offset * FinCal);
+			}
+		}
+	
+		float4 temp;
+	
+		mnmx6(v[0], v[1], v[2], v[3], v[4], v[5]);
+		mnmx5(v[1], v[2], v[3], v[4], v[6]);
+		mnmx4(v[2], v[3], v[4], v[7]);
+		mnmx3(v[3], v[4], v[8]);
+		Median_Out = v[4];
+	}
+		else
+	{
+		Median_Out = tex2D( BackBuffer,texcoord);
+	}
+	//UnsharpMask
+	if(Sharpen_Power > 0 && Median_Toggle == 1)
+		Median_Out = tex2D( BackBuffer,texcoord) + ( tex2D( BackBuffer,texcoord)- Median_Out ) * Sharpen_Power;
+	
+	return Median_Out;
+}
 ////////////////////////////////////////////////////////Logo/////////////////////////////////////////////////////////////////////////
 uniform float timer < source = "timer"; >;
 
@@ -877,22 +890,15 @@ technique Polynomial_Barrel_Distortion_P
 technique Polynomial_Barrel_Distortion_S
 #endif
 {	
-			pass AA
+			pass AA_Filter
 		{
 			VertexShader = PostProcessVS;
 			PixelShader = NFAA;
 		}
-			pass StereoMonoPass
+			pass Median_Filter
 		{
 			VertexShader = PostProcessVS;
-			PixelShader = LR;
-			#if TOGGLE
-			RenderTarget0 = texCLP;
-			RenderTarget1 = texCRP;
-			#else
-			RenderTarget0 = texCLS;
-			RenderTarget1 = texCRS;
-			#endif
+			PixelShader = Median;
 		}
 			pass PBD
 		{

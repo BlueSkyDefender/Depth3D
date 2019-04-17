@@ -1319,7 +1319,7 @@ void PostProcessVS(in uint id : SV_VertexID, out float4 position : SV_Position, 
 
 //*Rendering passes*//
 
-technique Cross_Cursor
+technique Cross_Cursor_Next
 {			
 			pass Cursor
 		{
