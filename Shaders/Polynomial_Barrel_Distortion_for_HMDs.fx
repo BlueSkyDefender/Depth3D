@@ -205,7 +205,8 @@ uniform bool NFAA_TOGGLE <
 uniform bool Median_Toggle <
 	ui_label = "Anti-Moire";
 	ui_tooltip = "Adjust this to remove the Moire pattern causing radial banding by adding a Median Filter to the image.\n"
-				 "The moire pattern here is a result of the high-contrast lines approaching the Nyquist Frequency.";
+				 "The moire pattern here is a result of the high-contrast lines approaching the Nyquist Frequency.\n"
+				 "I also suggest you use Sharpen if you enable this.";
 > = false;
 
 uniform bool Lens_Aliment_Marker <
@@ -631,6 +632,9 @@ float4 PDR(float2 texcoord)		//Texture = texCR Right
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+#define lambda 3.0f
+#define epsilon 0.1f
+
 float4 PBD(float2 texcoord : TEXCOORD)
 {	
 	float4 Out;
@@ -652,7 +656,6 @@ float4 PBD(float2 texcoord : TEXCOORD)
 		
 	return Out;
 }
-
 float LI(in float3 value)
 {	
 	return dot(value.rgb,float3(0.333, 0.333, 0.333)); 
@@ -663,23 +666,15 @@ float4 NFAA(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Targ
 	float4 NFAA;	
 	float3 t, l, r, d, ct, cl, cr, cd, Blur;
     float2 UV = texcoord.xy, SW = pix, n;	
-	float SP = Sharpen_Power;
 	
-	if( Median_Toggle == 1 )
-		SP *= 0.125f; 
-	
-	if (NFAA_TOGGLE || Sharpen_Power > 0) //Useing the AA samples for sharpen.
+	if (NFAA_TOGGLE) //Useing the AA samples for sharpen.
 	{
 		t = tex2D( BackBuffer, float2( UV.x , UV.y - SW.y ) ).rgb;
 		l = tex2D( BackBuffer, float2( UV.x - SW.x , UV.y ) ).rgb;
 		r = tex2D( BackBuffer, float2( UV.x + SW.x , UV.y ) ).rgb;
 		d = tex2D( BackBuffer, float2( UV.x , UV.y + SW.y ) ).rgb;
 		n = float2(LI(t) - LI(d), LI(r) - LI(l));
-		
-		Blur = (t + l + r + d) * 0.25f;
-	}
-		if (NFAA_TOGGLE)
-	{	
+	
 		float   nl = length(n);
 	 
 		if (nl < (1.0 / 16))
@@ -715,9 +710,6 @@ float4 NFAA(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Targ
 	{
 		NFAA = tex2D( BackBuffer,UV);
 	}
-	//UnsharpMask
-	if(Sharpen_Power > 0)
-		NFAA.rgb = NFAA.rgb + ( NFAA.rgb - Blur ) * SP;
 
   return NFAA;
 }
@@ -756,19 +748,45 @@ float4 Median(float4 position : SV_Position, float2 texcoord : TEXCOORD0) : SV_T
 		mnmx6(v[0], v[1], v[2], v[3], v[4], v[5]);
 		mnmx5(v[1], v[2], v[3], v[4], v[6]);
 		mnmx4(v[2], v[3], v[4], v[7]);
-		mnmx3(v[3], v[4], v[8]);
+			mnmx3(v[3], v[4], v[8]);
 		Median_Out = v[4];
 	}
 		else
 	{
 		Median_Out = tex2D( BackBuffer,texcoord);
 	}
-	//UnsharpMask
-	if(Sharpen_Power > 0 && Median_Toggle == 1)
-		Median_Out = tex2D( BackBuffer,texcoord) + ( tex2D( BackBuffer,texcoord)- Median_Out ) * Sharpen_Power;
-	
+
 	return Median_Out;
 }
+
+float4 USM(float4 position : SV_Position, float2 texcoord : TEXCOORD0) : SV_Target
+{
+	float SP = Sharpen_Power;	
+	if (Median_Toggle)
+		SP *= 2.0f;
+		
+	float2 tex_offset = pix; // Gets texel offset
+	float4 result =  tex2D(BackBuffer, float2(texcoord));
+	if(Sharpen_Power > 0)
+	{		
+		   result += tex2D(BackBuffer, float2(texcoord + float2( 1, 0) * tex_offset));
+		   result += tex2D(BackBuffer, float2(texcoord + float2(-1, 0) * tex_offset));
+		   result += tex2D(BackBuffer, float2(texcoord + float2( 0, 1) * tex_offset));
+		   result += tex2D(BackBuffer, float2(texcoord + float2( 0,-1) * tex_offset));
+		   tex_offset *= 0.75;		   
+		   result += tex2D(BackBuffer, float2(texcoord + float2( 1, 1) * tex_offset));
+		   result += tex2D(BackBuffer, float2(texcoord + float2(-1,-1) * tex_offset));
+		   result += tex2D(BackBuffer, float2(texcoord + float2( 1,-1) * tex_offset));
+		   result += tex2D(BackBuffer, float2(texcoord + float2(-1, 1) * tex_offset));
+   		result /= 9;
+   		
+		result = tex2D(BackBuffer, texcoord) + ( tex2D(BackBuffer, texcoord) - result ) * SP;
+	}
+	
+	return result;
+}
+
+
 ////////////////////////////////////////////////////////Logo/////////////////////////////////////////////////////////////////////////
 uniform float timer < source = "timer"; >;
 
@@ -890,15 +908,20 @@ technique Polynomial_Barrel_Distortion_P
 technique Polynomial_Barrel_Distortion_S
 #endif
 {	
-			pass AA_Filter
-		{
-			VertexShader = PostProcessVS;
-			PixelShader = NFAA;
-		}
 			pass Median_Filter
 		{
 			VertexShader = PostProcessVS;
 			PixelShader = Median;
+		}
+			pass UnSharpMask_Filter
+		{
+			VertexShader = PostProcessVS;
+			PixelShader = USM;
+		}
+			pass AA_Filter
+		{
+			VertexShader = PostProcessVS;
+			PixelShader = NFAA;
 		}
 			pass PBD
 		{
