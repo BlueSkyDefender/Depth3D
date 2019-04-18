@@ -35,8 +35,8 @@ uniform float Shade_Power <
 	ui_min = 0.25; ui_max = 1.0;	
 	ui_label = "Shade Power";	
 	ui_tooltip = "Adjust the Shade Power This improves AO, Shadows, & Darker Areas in game.\n"	
-				 "Number 0.25 is default.";
-> = 0.25;
+				 "Number 0.5 is default.";
+> = 0.5;
 
 uniform float Spread <
 	#if Compatibility
@@ -44,25 +44,25 @@ uniform float Spread <
 	#else
 	ui_type = "slider";
 	#endif
-	ui_min = 5; ui_max = 25.0; ui_step = 0.5;
+	ui_min = 5; ui_max = 10.0; ui_step = 0.5;
 	ui_label = "Shade Fill";
 	ui_tooltip = "Adjust This to have the shade effect to fill in areas.\n"
 				 "This is used for gap filling.\n"
-				 "Number 10.0 is default.";
-> = 10.0;
+				 "Number 7.5 is default.";
+> = 7.5;
 
-uniform int Luma_Coefficient <
-	ui_type = "combo";
-	ui_label = "Luma";
-	ui_tooltip = "Changes how color get sharpened by Unsharped Masking\n"
-				 "This should only affect Normal, Color, & Greyscale output.";
-	ui_items = "SD video\0HD video\0HDR video\0";
+uniform float Sharpen_Power <
+	#if Compatibility
+	ui_type = "drag";
+	#else
+	ui_type = "slider";
+	#endif
+	ui_min = 0.0; ui_max = 2.0;
+	ui_label = "Sharpen Power";
+	ui_tooltip = "Adjust this on clear up the image the game, movie piture & ect.";
+	ui_category = "Image Effects";
 > = 0;
 
-//uniform bool Sharpen_Toggle <
-	//ui_label = "Sharpen";
-	//ui_tooltip = "Toggle this on clear up the image the game, movie piture & ect.";
-//> = false;
 
 uniform bool Debug_View <
 	ui_label = "Debug View";
@@ -129,32 +129,18 @@ float2 S = Spread * 0.1875f * pix;
 return result / 8; 
 }
 
-float3 Luma()
-{
-	float3 Luma;
-	
-	if (Luma_Coefficient == 0)
-	{
-		Luma = float3(0.299, 0.587, 0.114); // (SD video)
-	}
-	else if (Luma_Coefficient == 1)
-	{
-		Luma = float3(0.2126, 0.7152, 0.0722); // (HD video) https://en.wikipedia.org/wiki/Luma_(video)
-	}
-	else
-	{
-		Luma = float3(0.2627, 0.6780, 0.0593); //(HDR video) https://en.wikipedia.org/wiki/Rec._2100
-	}
-	return Luma;
-}
-
 float3 GS(float3 color)
 {
-    float grayscale = dot(color.rgb, Luma());
+    float grayscale = dot(color.rgb, float3(0.2126, 0.7152, 0.0722));
     color.r = grayscale;
     color.g = grayscale;
     color.b = grayscale;
 	return clamp(color,0.003,1.0);//clamping to protect from over Dark.
+}
+
+float LI(in float3 value)
+{	
+	return dot(value.rgb,float3(0.333, 0.333, 0.333)); 
 }
 
 float DepthCues(float2 texcoord : TEXCOORD0)
@@ -164,26 +150,44 @@ float DepthCues(float2 texcoord : TEXCOORD0)
 	//Formula for Image Pop = Original + (Original / Blurred) * Amount.
 	RGB = GS(tex2D(BackBuffer,texcoord).rgb) / GS( Adjust(texcoord).rgb );
 		
-	float Done = dot(RGB,Luma());
+	float Done = dot(RGB,float3(0.333, 0.333, 0.333));
 	
 	return saturate(Done);
 }
 
-//float4 UnsharpMask(float2 texcoord : TEXCOORD0)
-//{
-	//float M = length(tex2D(BackBuffer,texcoord) - Adjust(texcoord));
-	//float4 RGBA;	
-	//RGBA = tex2D(BackBuffer,texcoord) + (tex2D(BackBuffer,texcoord) - Adjust(texcoord)) * 0.5f;
-	//return lerp(tex2D(BackBuffer,texcoord) ,saturate(RGBA) , M);
-//}
+float4 UnsharpMask(float4 position : SV_Position, float2 texcoord : TEXCOORD0) : SV_Target
+{	
+	float4 result = tex2D(BackBuffer, float2(texcoord)), t, l, r, d;
+	float2 tex_offset = pix;
+	if(Sharpen_Power > 0)
+	{		
+			   
+		   t = tex2D(BackBuffer, float2(texcoord + float2( 0.0,-tex_offset.y)));
+		   l = tex2D(BackBuffer, float2(texcoord + float2(-tex_offset.x, 0.0)));
+		   r = tex2D(BackBuffer, float2(texcoord + float2( tex_offset.x, 0.0)));
+		   d = tex2D(BackBuffer, float2(texcoord + float2( 0.0, tex_offset.y)));
+
+   		result = (t + l + r + d + result) / 5;
+   		float2 n = float2(LI(t.rgb) - LI(d.rgb), LI(r.rgb) - LI(l.rgb));
+		float Mask = length(n) * 0.5f;
+	
+		if (Mask > 0.025f)
+			Mask = 1-Mask;
+		else
+			Mask = 1;
+
+		Mask = saturate(lerp(Mask,1,-7.5f));
+		result = tex2D(BackBuffer, texcoord) + ( tex2D(BackBuffer, texcoord) - result ) * Sharpen_Power;
+		result = lerp(tex2D(BackBuffer, texcoord) ,result, Mask);
+	}
+	
+	return result;
+}
 
 float4 CuesOut(float2 texcoord : TEXCOORD0)
 {		
 	float4 Out, Debug_Done = lerp(1.0f,DepthCues(texcoord).xxxx,Shade_Power), Combine = tex2D(BackBuffer,texcoord) * Debug_Done;
-		
-		//if (Sharpen_Toggle)
-			//Combine = lerp(Combine,UnsharpMask(texcoord),1-(Debug_Done.x < 1));
-			
+					
 	if (!Debug_View)
 	{
 		Out = Combine;
@@ -317,10 +321,15 @@ technique Monocular_Cues
 		VertexShader = PostProcessVS;
 		PixelShader = Blur;
 		RenderTarget = texB;
-	}	
+	}		
 		pass CuesUnsharpMask
 	{
 		VertexShader = PostProcessVS;
 		PixelShader = Out;	
+	}
+		pass UnSharpMask_Filter
+	{
+		VertexShader = PostProcessVS;
+		PixelShader = UnsharpMask;
 	}
 }
