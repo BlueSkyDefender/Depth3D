@@ -171,13 +171,37 @@ uniform bool Tied_H_V <
 	ui_category = "Image Repositioning";
 > = true;
 
+uniform float Vignette <
+	#if Compatibility
+	ui_type = "drag";
+	#else
+	ui_type = "slider";
+	#endif
+	ui_min = 0; ui_max = 10;
+	ui_label = "Vignette";
+	ui_tooltip = "Soft edge effect around the image.";
+	ui_category = "Image Effects";
+> = 0;
+
+uniform float Saturation <
+	#if Compatibility
+	ui_type = "drag";
+	#else
+	ui_type = "slider";
+	#endif
+	ui_min = 0; ui_max = 1;
+	ui_label = "Saturation";
+	ui_tooltip = "Lets you saturate image, Basicly add more color.";
+	ui_category = "Image Effects";
+> = 0;
+
 uniform float Sharpen_Power <
 	#if Compatibility
 	ui_type = "drag";
 	#else
 	ui_type = "slider";
 	#endif
-	ui_min = 0.0; ui_max = 1.5;
+	ui_min = 0.0; ui_max = 2.0;
 	ui_label = "Sharpen Power";
 	ui_tooltip = "Adjust this on clear up the image the game, movie piture & ect.";
 	ui_category = "Image Effects";
@@ -188,25 +212,6 @@ uniform bool NFAA_TOGGLE <
 	ui_tooltip = "The Adds Normal Filter Anti-Aliasing to the Image before processing.\n"
 				 "Default is off.";
 	ui_category = "Image Effects";
-> = false;
-
-//uniform float Vignette <
-//	#if Compatibility
-//	ui_type = "drag";
-//	#else
-//	ui_type = "slider";
-//	#endif
-//	ui_min = 0; ui_max = 10;
-//	ui_label = "Vignette";
-//	ui_tooltip = "Soft edge effect around the image.";
-//	ui_category = "Image Effects";
-//> = 0;
-
-uniform bool Median_Toggle <
-	ui_label = "Anti-Moire";
-	ui_tooltip = "Adjust this to remove the Moire pattern causing radial banding by adding a Median Filter to the image.\n"
-				 "The moire pattern here is a result of the high-contrast lines approaching the Nyquist Frequency.\n"
-				 "I also suggest you use Sharpen if you enable this.";
 > = false;
 
 uniform bool Lens_Aliment_Marker <
@@ -484,10 +489,10 @@ float4 vignetteL(in float2 texcoord : TEXCOORD0)
 	if( Image_Aliment_Marker )
 	base = Cross_Marker(texcoord) ? float4(1.0,1.0,0.0,1) : base; //Yellow
 	
-	//texcoord = -texcoord * texcoord + texcoord;
+	texcoord = -texcoord * texcoord + texcoord;
 	
-	//if( Vignette > 0)
-	//base.rgb *= saturate(texcoord.x * texcoord.y * pow(12.5f-Vignette,3));
+	if( Vignette > 0)
+	base.rgb *= saturate(texcoord.x * texcoord.y * pow(12.5f-Vignette,3));
 		
 	return base;    
 }
@@ -537,10 +542,10 @@ float4 base;
 	if( Image_Aliment_Marker )
 	base = Cross_Marker(texcoord) ? float4(1.0,1.0,0.0,1) : base; //Yellow
 	
-	//texcoord = -texcoord * texcoord + texcoord;
+	texcoord = -texcoord * texcoord + texcoord;
 	
-	//if( Vignette > 0)
-	//base.rgb *= saturate(texcoord.x * texcoord.y * pow(12.5f-Vignette,3));
+	if( Vignette > 0)
+	base.rgb *= saturate(texcoord.x * texcoord.y * pow(12.5f-Vignette,3));
 
 	return base;    
 }
@@ -656,6 +661,7 @@ float4 PBD(float2 texcoord : TEXCOORD)
 		
 	return Out;
 }
+
 float LI(in float3 value)
 {	
 	return dot(value.rgb,float3(0.333, 0.333, 0.333)); 
@@ -664,19 +670,27 @@ float LI(in float3 value)
 float4 NFAA(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Target
 {
 	float4 NFAA;	
-	float3 t, l, r, d, ct, cl, cr, cd, Blur;
+	float3 t, l, r, d;
     float2 UV = texcoord.xy, SW = pix, n;	
+	float nl, Mask; //Useing the AA samples for sharpen.
+	t = tex2D( BackBuffer, float2( UV.x , UV.y - SW.y ) ).rgb;
+	l = tex2D( BackBuffer, float2( UV.x - SW.x , UV.y ) ).rgb;
+	r = tex2D( BackBuffer, float2( UV.x + SW.x , UV.y ) ).rgb;
+	d = tex2D( BackBuffer, float2( UV.x , UV.y + SW.y ) ).rgb;
+	n = float2(LI(t) - LI(d), LI(r) - LI(l));
 	
-	if (NFAA_TOGGLE) //Useing the AA samples for sharpen.
-	{
-		t = tex2D( BackBuffer, float2( UV.x , UV.y - SW.y ) ).rgb;
-		l = tex2D( BackBuffer, float2( UV.x - SW.x , UV.y ) ).rgb;
-		r = tex2D( BackBuffer, float2( UV.x + SW.x , UV.y ) ).rgb;
-		d = tex2D( BackBuffer, float2( UV.x , UV.y + SW.y ) ).rgb;
-		n = float2(LI(t) - LI(d), LI(r) - LI(l));
+	nl = length(n);
+	Mask = nl * 0.5f;
 	
-		float   nl = length(n);
-	 
+	if (Mask > 0.025f)
+	Mask = 1-Mask;
+	else
+	Mask = 1;
+	
+	Mask = saturate(lerp(Mask,1,-6.25f));
+	
+	 if (NFAA_TOGGLE)
+	 {
 		if (nl < (1.0 / 16))
 		{
 			NFAA = tex2D(BackBuffer,UV);
@@ -693,16 +707,7 @@ float4 NFAA(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Targ
 	 
 			NFAA = (o + t0 + t1 + t2 + t3) / 4.3f;
 		}
-		
-			float Mask = nl * 0.5f;
-	
-	if (Mask > 0.025f)
-	Mask = 1-Mask;
-	else
-	Mask = 1;
-	
-	Mask = saturate(lerp(Mask,1,-5.0f));
-	
+			
 	NFAA = lerp(NFAA,tex2D( BackBuffer,UV), Mask );
 		
 	}
@@ -710,65 +715,21 @@ float4 NFAA(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Targ
 	{
 		NFAA = tex2D( BackBuffer,UV);
 	}
-
-  return NFAA;
-}
-//moire pattern here is a result of the high-contrast lines approaching the Nyquist Frequency.
-#define s2(a, b)				temp = a; a = min(a, b); b = max(temp, b);
-#define mn3(a, b, c)			s2(a, b); s2(a, c);
-#define mx3(a, b, c)			s2(b, c); s2(a, c);
-
-#define mnmx3(a, b, c)			mx3(a, b, c); s2(a, b);                                 // 3 exchanges
-#define mnmx4(a, b, c, d)		s2(a, b); s2(c, d); s2(a, c); s2(b, d);                  // 4 exchanges
-#define mnmx5(a, b, c, d, e)	s2(a, b); s2(c, d); mn3(a, c, e); mx3(b, d, e);           // 6 exchanges
-#define mnmx6(a, b, c, d, e, f) s2(a, d); s2(b, e); s2(c, f); mn3(a, b, c); mx3(d, e, f); // 7 exchanges	
-// Median used for anti moire. If there is a better way to remove this please tell me.
-float4 Median(float4 position : SV_Position, float2 texcoord : TEXCOORD0) : SV_Target
-{
-	float2 ScreenCal = pix;
-
-	float2 FinCal = ScreenCal*0.6;
-
-	float4 v[9], Median_Out;
-	if (Median_Toggle) //Useing the AA samples for sharpen.
-	{	
-		[unroll]
-		for(int i = -1; i <= 1; ++i) 
-		{
-			for(int j = -1; j <= 1; ++j)
-			{		
-			  float2 offset = float2(float(i), float(j));
 	
-			  v[(i + 1) * 3 + (j + 1)] = tex2D(BackBuffer, texcoord + offset * FinCal);
-			}
-		}
-	
-		float4 temp;
-	
-		mnmx6(v[0], v[1], v[2], v[3], v[4], v[5]);
-		mnmx5(v[1], v[2], v[3], v[4], v[6]);
-		mnmx4(v[2], v[3], v[4], v[7]);
-			mnmx3(v[3], v[4], v[8]);
-		Median_Out = v[4];
-	}
-		else
-	{
-		Median_Out = tex2D( BackBuffer,texcoord);
-	}
+    float greyscale = dot(NFAA.rgb, float3(0.2125, 0.7154, 0.0721)); 
+    NFAA.rgb = lerp(greyscale, NFAA.rgb, NFAA.a * (Saturation + 1.0));       
 
-	return Median_Out;
+  return float4(NFAA.rgb,Mask);
 }
 
 float4 USM(float4 position : SV_Position, float2 texcoord : TEXCOORD0) : SV_Target
 {
 	float SP = Sharpen_Power;	
-	if (Median_Toggle)
-		SP *= 2.0f;
 		
 	float2 tex_offset = pix; // Gets texel offset
 	float4 result =  tex2D(BackBuffer, float2(texcoord));
 	if(Sharpen_Power > 0)
-	{		
+	{				   
 		   result += tex2D(BackBuffer, float2(texcoord + float2( 1, 0) * tex_offset));
 		   result += tex2D(BackBuffer, float2(texcoord + float2(-1, 0) * tex_offset));
 		   result += tex2D(BackBuffer, float2(texcoord + float2( 0, 1) * tex_offset));
@@ -781,6 +742,7 @@ float4 USM(float4 position : SV_Position, float2 texcoord : TEXCOORD0) : SV_Targ
    		result /= 9;
    		
 		result = tex2D(BackBuffer, texcoord) + ( tex2D(BackBuffer, texcoord) - result ) * SP;
+		result = lerp(tex2D(BackBuffer, texcoord) ,result,tex2D(BackBuffer, texcoord).w);
 	}
 	
 	return result;
@@ -908,20 +870,15 @@ technique Polynomial_Barrel_Distortion_P
 technique Polynomial_Barrel_Distortion_S
 #endif
 {	
-			pass Median_Filter
+			pass AA_Filter
 		{
 			VertexShader = PostProcessVS;
-			PixelShader = Median;
+			PixelShader = NFAA;
 		}
 			pass UnSharpMask_Filter
 		{
 			VertexShader = PostProcessVS;
 			PixelShader = USM;
-		}
-			pass AA_Filter
-		{
-			VertexShader = PostProcessVS;
-			PixelShader = NFAA;
 		}
 			pass PBD
 		{
