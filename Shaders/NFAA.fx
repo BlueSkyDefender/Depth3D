@@ -25,14 +25,16 @@ uniform int View_Mode <
 	ui_items = "NFAA\0NFAA Masked\0Mask View A\0Mask View B\0";
 	ui_label = "View Mode";
 	ui_tooltip = "This is used to select the normal view output or debug view.\n"
-				 "NFAA Masked Needs Stroner Settings where as NFAA Pure needs Weaker settings.\n"
+				 "Mask View A & B gives view of the edge detection.\n"
+				 "NFAA Masked gives you a sharper image.\n"
+				 "NFAA is the full fat NFAA experiance.\n"
 				 "Default is NFAA Masked.";
 
 > = 1;
 
 /////////////////////////////////////////////////////D3D Starts Here/////////////////////////////////////////////////////////////////
 #define pix float2(BUFFER_RCP_WIDTH, BUFFER_RCP_HEIGHT)
-#define sw filterSpread_var
+
 texture BackBufferTex : COLOR;
 
 sampler BackBuffer 
