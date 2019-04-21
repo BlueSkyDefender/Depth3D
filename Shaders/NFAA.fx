@@ -20,6 +20,19 @@
  //* 																																												*//
  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+uniform float Mask_Adjust <
+	#if Compatibility
+	ui_type = "drag";
+	#else
+	ui_type = "slider";
+	#endif
+	ui_min = 0.125; ui_max = 0.625;
+	ui_label = "Mask Adjustment";
+	ui_tooltip = "Use this to adjust the Mask.\n"
+				 "Default is 0.375";
+	ui_category = "NFAA";
+> = 0.375;
+
 uniform int View_Mode <
 	ui_type = "combo";
 	ui_items = "NFAA\0NFAA Masked\0Mask View A\0Mask View B\0";
@@ -29,7 +42,7 @@ uniform int View_Mode <
 				 "NFAA Masked gives you a sharper image.\n"
 				 "NFAA is the full fat NFAA experiance.\n"
 				 "Default is NFAA Masked.";
-
+	ui_category = "NFAA";
 > = 1;
 
 /////////////////////////////////////////////////////D3D Starts Here/////////////////////////////////////////////////////////////////
@@ -59,13 +72,12 @@ float4 NFAA(float2 texcoord)
 	float4 NFAA;
     float2 UV = texcoord.xy, SW = pix, n;	
 	float t, l, r, d;
-	float3 ct, cl, cr, cd;
 		
 	t = LI(GetBB( float2( UV.x , UV.y - SW.y ) ).rgb);
+	d = LI(GetBB( float2( UV.x , UV.y + SW.y ) ).rgb);
 	l = LI(GetBB( float2( UV.x - SW.x , UV.y ) ).rgb);
 	r = LI(GetBB( float2( UV.x + SW.x , UV.y ) ).rgb);
-	d = LI(GetBB( float2( UV.x , UV.y + SW.y ) ).rgb);
-	n = float2(t - d, r - l);
+	n = float2(t - d,r - l);
 		
     float   nl = length(n);
  
@@ -80,13 +92,13 @@ float4 NFAA(float2 texcoord)
 	float4   o = GetBB( UV ),
 			t0 = GetBB( UV + n * 0.5f) * 0.9f,
 			t1 = GetBB( UV - n * 0.5f) * 0.9f,
-			t2 = GetBB( UV + n) * 0.75f,
-			t3 = GetBB( UV - n) * 0.75f;
+			t2 = GetBB( UV + n * 0.9f) * 0.75f,
+			t3 = GetBB( UV - n * 0.9f) * 0.75f;
  
 		NFAA = (o + t0 + t1 + t2 + t3) / 4.3;
 	}
 	
-	float Mask = nl * 0.5;
+	float Mask = nl * Mask_Adjust;
 	
 	if (Mask > 0.025)
 	Mask = 1-Mask;
