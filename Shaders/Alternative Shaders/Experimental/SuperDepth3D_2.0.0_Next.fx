@@ -131,7 +131,7 @@ uniform float Auto_Depth_Range <
 //Occlusion Masking//
 uniform int Disocclusion <
 	ui_type = "drag";
-		ui_min = 32; ui_max = 128;
+		ui_min = 25; ui_max = 128;
 	ui_label = "·Occlusion Quality·";
 	ui_tooltip = "Occlusion masking power & Mask Based culling adjustments.\n"
 				 "Affects Gap/Hole Filling quality.\n"
@@ -510,7 +510,7 @@ float Depth(in float2 texcoord : TEXCOORD0)
 	
 	if (Offset > 0)
 	Z = min( 1, float2( Z.x*Offsets.x , Z.y /  Offsets.y  ));
-	
+
 	if (Depth_Map == 0)//DM0. Normal
 		zBuffer = Far * Near / (Far + Z.x * (Near - Far));		
 	else if (Depth_Map == 1)//DM1. Reverse
@@ -827,7 +827,7 @@ float zBuffer(in float2 texcoord : TEXCOORD0)
 float2 Parallax( float Divergence, float2 Coordinates)
 {
 	//ParallaxSteps
-	int Steps = clamp(Disocclusion,32,255);
+	int Steps = clamp(Disocclusion,25,255);
 	
 	// Offset per step progress & Limit
 	float LayerDepth = 1.0 / Steps;
@@ -848,14 +848,21 @@ float2 Parallax( float Divergence, float2 Coordinates)
         // Shift coordinates horizontally in linear fasion
         ParallaxCoord.x -= deltaCoordinates;
         // Get depth value at current coordinates
-        CurrentDepthMapValue = zBuffer( ParallaxCoord - DB_Offset);
+        if(View_Mode == 1)
+        	CurrentDepthMapValue = zBuffer( ParallaxCoord);
+        else
+        	CurrentDepthMapValue = zBuffer( ParallaxCoord - DB_Offset);
     }
 
 	// Parallax Occlusion Mapping
 	float2 PrevParallaxCoord = float2(ParallaxCoord.x + deltaCoordinates, ParallaxCoord.y);
-	float afterDepthValue = CurrentDepthMapValue - CurrentLayerDepth;
-	float beforeDepthValue = zBuffer(PrevParallaxCoord - DB_Offset) - CurrentLayerDepth + LayerDepth;
+	float afterDepthValue = CurrentDepthMapValue - CurrentLayerDepth, beforeDepthValue;
 	
+	if(View_Mode == 1)
+		beforeDepthValue = zBuffer(PrevParallaxCoord) - CurrentLayerDepth + LayerDepth;
+	else
+		beforeDepthValue = zBuffer(PrevParallaxCoord - DB_Offset) - CurrentLayerDepth + LayerDepth;
+		
 	// Interpolate coordinates
 	float weight = afterDepthValue / (afterDepthValue - beforeDepthValue);
 	ParallaxCoord = PrevParallaxCoord * max(0,weight) + ParallaxCoord * min(1,1.0f - weight);
