@@ -57,7 +57,7 @@ uniform float Sharpen_Power <
 	#else
 	ui_type = "slider";
 	#endif
-	ui_min = 0.0; ui_max = 2.0;
+	ui_min = 0.0; ui_max = 2.5;
 	ui_label = "Sharpen Power";
 	ui_tooltip = "Adjust this on clear up the image the game, movie piture & ect.";
 	ui_category = "Image Effects";
