@@ -278,37 +278,9 @@ uniform float WZPD <
 	ui_tooltip = "WZPD controls the focus distance for the screen Pop-out effect also known as Convergence for the weapon hand.\n"
 				"For FPS Games keeps this low Since you don't want your gun to pop out of screen.\n"
 				"This is controled by Convergence Mode.\n"
-				"Default is Zero & it's off.";
+				"Default is 0.375f & Zero is off.";
 	ui_category = "Weapon Hand Adjust";
-> = 0;
-#if WZF
-uniform int Anti_Z_Fighting <
-	#if Compatibility
-	ui_type = "drag";
-	#else
-	ui_type = "slider";
-	#endif
-	ui_min = 0; ui_max = 4;
-	ui_label = "·Weapon Anti Z-Fighting Target·";
-	ui_tooltip = "Anti Z-Fighting is use help prevent weapon hand Z-Fighting.\n"
-				 "0 -> The Lower Half of the Screen.\n"
-				 "1 -> The Center of the Screen Small.\n"
-				 "2 -> The Center of the Screen Long.\n"
-				 "3 -> Lower L-Half of the Screen.\n"
-				 "4 -> Lower R-Half of the Screen.\n"
-				 "Default is Two.";
-	ui_category = "Weapon Anti Z-Fighting";
-> = 2;
-
-uniform float WZF_Adjust <
-	ui_type = "drag";
-	ui_min = 0; ui_max = 0.125;
-	ui_label = " Weapon Anti Z-Fighting Adjust";
-	ui_tooltip = "Use this to adjust the auto adjuster.\n"
-				 "Default is Zero.";
-	ui_category = "Weapon Anti Z-Fighting";
-> = 0;
-#endif
+> = 0.375;
 #if Balance_Mode
 //Heads-Up Display
 uniform float2 HUD_Adjust <
@@ -573,7 +545,7 @@ float Depth(in float2 texcoord : TEXCOORD0)
 	
 	if (Offset > 0)
 	Z = min( 1, float2( Z.x*Offsets.x , Z.y /  Offsets.y  ));
-	
+
 	if (Depth_Map == 0)//DM0. Normal
 		zBuffer = Far * Near / (Far + Z.x * (Near - Far));		
 	else if (Depth_Map == 1)//DM1. Reverse
@@ -653,7 +625,7 @@ float2 WeaponDepth(in float2 texcoord : TEXCOORD0)
 	else if(WP == 29)//WP 27
 		WA_XYZW = float4(0.2832,20.0,0,0);         //Prey 2017 High Settings and <*
 	else if(WP == 30)//WP 28
-		WA_XYZW = float4(0.2712,25.0,0,1);         //Prey 2017 Very High*
+		WA_XYZW = float4(0.2712,25.0,0.325,1);     //Prey 2017 Very High*
 	else if(WP == 31)//WP 29
 		WA_XYZW = float4(0,0,0,0);                 //Game
 	else if(WP == 32)//WP 30
@@ -835,6 +807,8 @@ float WHConv(float D,float2 texcoord)
 		
 	if (ALC <= 0.025f)
 		ZP = 1;
+
+	 Convergence /= 1-(-Z);
 	 
    return lerp(Convergence,D,ZP);
 }
@@ -865,21 +839,22 @@ float Conv(float D,float2 texcoord)
     return lerp(Convergence,D, ZP);
 }
 
-float zBuffer(in float2 texcoords : TEXCOORD0)
+float zBuffer(in float2 texcoord : TEXCOORD0)
 {	
-	float3 DM = tex2Dlod(SamplerDM,float4(texcoords,0,0)).xyz;
-		DM.z = lerp(Conv(DM.z,texcoords), WHConv(DM.x,texcoords), DM.y);
+	float4 DM = tex2Dlod(SamplerDM,float4(texcoord,0,0));
+
+	DM.z = lerp(Conv(DM.z,texcoord), WHConv(DM.x,texcoord), DM.y);
 		
 	if (WZPD <= 0)
-	DM.z = Conv(DM.x,texcoords);
+	DM.z = Conv(DM.x,texcoord);
 	
-	float ALC = abs(Lum(texcoords).x);
+	float ALC = abs(Lum(texcoord).x);
 	
 	if (ALC <= 0.025f)
-		DM.z = 0;
+		DM = 0;
 		
 	if (Cancel_Depth)
-		DM.z = 0.25f;
+		DM = 0.25f;
 
 	return DM.z;
 }

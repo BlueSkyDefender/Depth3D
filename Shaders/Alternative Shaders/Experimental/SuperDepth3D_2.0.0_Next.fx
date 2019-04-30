@@ -253,9 +253,9 @@ uniform float WZPD <
 	ui_tooltip = "WZPD controls the focus distance for the screen Pop-out effect also known as Convergence for the weapon hand.\n"
 				"For FPS Games keeps this low Since you don't want your gun to pop out of screen.\n"
 				"This is controled by Convergence Mode.\n"
-				"Default is Zero & it's off.";
+				"Default is 0.375f & Zero is off.";
 	ui_category = "Weapon Hand Adjust";
-> = 0;
+> = 0.375;
 #if Balance_Mode
 //Heads-Up Display
 uniform float2 HUD_Adjust <
@@ -590,7 +590,7 @@ float2 WeaponDepth(in float2 texcoord : TEXCOORD0)
 	else if(WP == 29)//WP 27
 		WA_XYZW = float4(0.2832,20.0,0,0);         //Prey 2017 High Settings and <*
 	else if(WP == 30)//WP 28
-		WA_XYZW = float4(0.2712,25.0,0,1);         //Prey 2017 Very High*
+		WA_XYZW = float4(0.2712,25.0,0.325,1);     //Prey 2017 Very High*
 	else if(WP == 31)//WP 29
 		WA_XYZW = float4(0,0,0,0);                 //Game
 	else if(WP == 32)//WP 30
@@ -822,7 +822,6 @@ float zBuffer(in float2 texcoord : TEXCOORD0)
 }
 
 /////////////////////////////////////////L/R//////////////////////////////////////////////////////////////////////
-
 // Horizontal parallax offset & Hole filling effect
 float2 Parallax( float Divergence, float2 Coordinates)
 {

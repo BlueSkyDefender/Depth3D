@@ -219,9 +219,9 @@ Inner Shader Setting:
               Zombie Army Trilogy                          DM 0       12.500                                       0.050-0.075                         
                                 
 [RB][Emulator][Special Depth Map Game List]            [Depth Map] [Adjustment] [Offset] [Weapon DM] [Depth Flip] [+ZPD / +Range] [Auto Balance] [Auto D]
-       CEMU    Mariokart 8                                 ????        ???                                Yes      ?
-       CEMU    Super Mario 3D World                        ????        ???                                Yes      ?
- RB    CEMU    The Legend of Zelda: Breath of the Wild     ????        ???                                Yes      ?
+       CEMU    Mariokart 8                                 ????        ???                               Yes      ?
+       CEMU    Super Mario 3D World                        ????        ???                               Yes      ?
+ RB    CEMU    The Legend of Zelda: Breath of the Wild     DM0         25       0.000                    Yes      0.0250-0.0500	      Yes 3 
 _________________________________________________________________________________________________________________________________
 -=:[Settings have to be change and adjusted for diffrent Resolutions, screen size, and screen types]:=-
 ---------------------------------------------------------------------------------------------------------------------------------
@@ -685,8 +685,6 @@ https://steamcommunity.com/sharedfiles/filedetails/?id=933337066
 {The Legend of Zelda: Breath of the Wild} - Note:  I will not show you how to set up the emulator or the Rom. This part on you. But, If you love the game buy it on console.
 First set up the shader as the above settings then.
 
-You may want to enable Full Black Depth Map Fix. In this game as well.
-
 ReShade it self has issues when you enter a menu to change your weapon/clothes/Stuff. 
 To fix this follow this procedure.
 
@@ -697,6 +695,11 @@ If going back to your items menu does not give you depth try pressing down on yo
 The press it again.
 
 This should fix your problem.
+
+If it's stuck with no Depth Try moving it in window mode and resizing it then going back to fullscreen Mode
+
+I also noticed a bug in 1.12.1+ in CEMU that still has not been fixed. DepthBuffer is switching making it unplayable in 3D. So if you want to play in 3D use CEMU 1.12.0d It's the latest one I know so far that works.
+Do Not Ask me for this version.
 
 {The Surge} - Thank you zig11727
 Install Directory \SteamLibrary\steamapps\common\The Surge\bin
