@@ -75,7 +75,7 @@
 //Divergence & Convergence//
 uniform float Divergence <
 	ui_type = "drag";
-	ui_min = 1; ui_max = 62.5; ui_step = 0.5;
+	ui_min = 1; ui_max = 50; ui_step = 0.5;
 	ui_label = "·Divergence Slider·";
 	ui_tooltip = "Divergence increases differences between the left and right retinal images and allows you to experience depth.\n" 
 				 "The process of deriving binocular depth information is called stereopsis.\n"
@@ -831,24 +831,24 @@ float2 Parallax( float Divergence, float2 Coordinates)
 	// Offset per step progress & Limit
 	float LayerDepth = 1.0 / Steps;
 
-	//Offsets listed here Max Seperation is 3% - 6% of screen space with Depth Offsets & Netto layer offset change based on MS.
+	//Offsets listed here Max Seperation is 3% - 8% of screen space with Depth Offsets & Netto layer offset change based on MS.
 	float MS = Divergence * pix.x, deltaCoordinates = MS * LayerDepth;
-	float2 ParallaxCoord = Coordinates, DB_Offset = float2((Divergence * 0.06f) * pix.x, 0);
+	float2 ParallaxCoord = Coordinates,DB_Offset = float2((Divergence * 0.075f) * pix.x, 0), DB_OffsetA = float2((Divergence * 0.03f) * pix.x, 0);
 	float CurrentDepthMapValue = zBuffer(ParallaxCoord), CurrentLayerDepth = 0, DepthDifference;
 
 	[loop] //Steep parallax mapping
     for ( int i = 0 ; i < Steps; i++ )
     {
 		// Doing it this way should stop crashes in older version of reshade, I hope.
-        if (CurrentLayerDepth > CurrentDepthMapValue)
-			continue; // Once we hit the limit skip the rest of the loop and go back to thes start of the loop.
+        if (CurrentDepthMapValue <= CurrentLayerDepth)
+			break; // Once we hit the limit Stop Exit Loop.
         // Get depth of next layer
         CurrentLayerDepth += LayerDepth;
         // Shift coordinates horizontally in linear fasion
         ParallaxCoord.x -= deltaCoordinates;
         // Get depth value at current coordinates
         if(View_Mode == 1)
-        	CurrentDepthMapValue = zBuffer( ParallaxCoord);
+        	CurrentDepthMapValue = zBuffer( ParallaxCoord - DB_OffsetA);
         else
         	CurrentDepthMapValue = zBuffer( ParallaxCoord - DB_Offset);
     }
@@ -858,7 +858,7 @@ float2 Parallax( float Divergence, float2 Coordinates)
 	float afterDepthValue = CurrentDepthMapValue - CurrentLayerDepth, beforeDepthValue;
 	
 	if(View_Mode == 1)
-		beforeDepthValue = zBuffer(PrevParallaxCoord) - CurrentLayerDepth + LayerDepth;
+		beforeDepthValue = zBuffer(PrevParallaxCoord - DB_OffsetA) - CurrentLayerDepth + LayerDepth;
 	else
 		beforeDepthValue = zBuffer(PrevParallaxCoord - DB_Offset) - CurrentLayerDepth + LayerDepth;
 		
@@ -890,12 +890,12 @@ float4 EdgeMask( float Diverge, float4 Image, float2 texcoords)
 		
 	return Bar_A + Bar_B ? float4(0,0,0,1) : Image;
 }
-
+	
 float4 PS_calcLR(float2 texcoord)
 {
-	float4 color, Right, Left, R, L;
+	float4 color, Right, Left;
 	float2 TCL, TCR, TexCoords = texcoord;
-							
+
 	if(Eye_Swap)
 	{
 		if ( Stereoscopic_Mode == 0 )
@@ -932,28 +932,30 @@ float4 PS_calcLR(float2 texcoord)
 			TCR = float2(texcoord.x,texcoord.y);
 		}
 	}
-	
 	//P is Perspective Adjustment
 	float P = Perspective * pix.x;	
 	TCL.x += P;
 	TCR.x -= P;
-		
-	//Optimization for line & column interlaced out.
-	if (Stereoscopic_Mode == 2)
-	{
-		TCL.y += (Interlace_Anaglyph.x*0.5) * pix.y;
-		TCR.y -= (Interlace_Anaglyph.x*0.5) * pix.y;
-	}
-	else if (Stereoscopic_Mode == 3)
-	{
-		TCL.x += (Interlace_Anaglyph.x*0.5) * pix.x;
-		TCR.x -= (Interlace_Anaglyph.x*0.5) * pix.x;
-	}
-	
 	//Left & Right Parallax for Stereo Vision
-	float2 TL = Parallax(-Divergence, TCL); //Stereoscopic 3D using Reprojection Left					
-	float2 TR = Parallax( Divergence, TCR); //Stereoscopic 3D using Reprojection Right	
-				
+	float2 TL, TR; //Stereoscopic 3D using Reprojection Left & Right	
+	if(Stereoscopic_Mode == 2)// Work around for DX9
+	{
+		//Optimization for line interlaced.
+		TL = Parallax(-Divergence, float2(TCL.x,TCL.y + (Interlace_Anaglyph.x * 0.5f) * pix.y));					
+		TR = Parallax( Divergence, float2(TCR.x,TCR.y - (Interlace_Anaglyph.x * 0.5f) * pix.y));	
+	}
+	else if(Stereoscopic_Mode == 3)// Work around for DX9
+	{	
+		//Optimization for column interlaced.
+		TL = Parallax(-Divergence, float2(TCL.x + (Interlace_Anaglyph.x * 0.5f) * pix.x,TCL.y));					
+		TR = Parallax( Divergence, float2(TCR.x - (Interlace_Anaglyph.x * 0.5f) * pix.x,TCR.y));	
+	}
+	else
+	{
+		TL = Parallax(-Divergence, TCL);					
+		TR = Parallax( Divergence, TCR);
+	}
+			
 	if(Custom_Sidebars == 0)
 	{
 		Left = tex2Dlod(BackBufferMIRROR, float4(TL,0,0));
@@ -975,15 +977,13 @@ float4 PS_calcLR(float2 texcoord)
 		Left = EdgeMask(-Divergence,Left,TCL);
 		Right = EdgeMask(Divergence,Right,TCR);
 	}
-	
-	L = Left; //Used for Eye Swap
-	R = Right;//Used for Eye Swap
-		
+	//Eye Swaping Workaround
+	float4 L = Left, R = Right;//Used for Eye Swap		
 	if ( Eye_Swap ) //Is Eye Swap
 	{
 		Left = R;
 		Right = L;
-	}
+	}	
 	#if Balance_Mode	
 	float HUD_Adjustment = ((0.5 - HUD_Adjust.y)*25) * pix.x;
 	Left = HUD(Left,float2(TCL.x - HUD_Adjustment,TCL.y));
@@ -1183,9 +1183,7 @@ float4 PS_calcLR(float2 texcoord)
 	}
 	else
 	{		
-		float3 RGB = zBuffer(TexCoords);
-
-		color = float4(RGB.x,RGB.y,RGB.z,1.0);
+		color = float4(zBuffer(TexCoords).x,zBuffer(TexCoords).x,zBuffer(TexCoords).x,1.0);
 	}
 		
 	float Average_Lum = tex2Dlod(SamplerDMN,float4(TexCoords.x,TexCoords.y, 0, 0)).y;
