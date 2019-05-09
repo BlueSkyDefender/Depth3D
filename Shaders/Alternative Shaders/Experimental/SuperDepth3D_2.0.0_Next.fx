@@ -37,7 +37,7 @@
 #define Alt_Depth_Map_Adjust 0 // You can set this from 1.0 to 250.
 
 // Change the Cancel Depth Key. Determines the Cancel Depth Toggle Key useing keycode info
-// The Key Code for Decimal Point is Number 110. Ex. for "." Cancel_Depth_Key 110
+// The Key Code for Decimal Point is Number 110. Ex. for Numpad Decimal "." Cancel_Depth_Key 110
 #define Cancel_Depth_Key 0 // You can use http://keycode.info/ to figure out what key is what.
 
 // Use Depth Tool to adjust the lower preprocessor definitions below.
@@ -813,7 +813,7 @@ float zBuffer(in float2 texcoord : TEXCOORD0)
 		DM = 0;
 		
 	if (Cancel_Depth)
-		DM = 0.25f;
+		DM = 0.‬0625f;
 
 	return DM.z;
 }
