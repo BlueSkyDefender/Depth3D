@@ -813,7 +813,7 @@ float zBuffer(in float2 texcoord : TEXCOORD0)
 		DM = 0;
 		
 	if (Cancel_Depth)
-		DM = 0.‬0625f;
+		DM = 0.0625f;
 
 	return DM.z;
 }
