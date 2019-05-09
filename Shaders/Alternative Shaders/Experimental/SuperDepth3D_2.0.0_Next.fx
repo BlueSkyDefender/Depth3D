@@ -63,6 +63,8 @@
 //                    |:::_______|       |***_______|
 // So :::: are UI Elements in game. The *** is what the Mask needs to cover up.
 // The game part needs to be trasparent and the UI part needs to be black.
+//Select your Convergence Limits for ZPD Limits Calculations. Limits ZPD has a restriction placed on Zero Parallax Distance Near the Camera
+#define Convergence_Limit 0 //Default is off
 
 //USER EDITABLE PREPROCESSOR FUNCTIONS END//
 
@@ -790,7 +792,12 @@ float Conv(float D,float2 texcoord)
 		if(Auto_Balance_Ex > 0 )
 			ZP = saturate(ALC);
 	#endif
-		float Convergence = 1 - Z / D;
+		float DM = D;	
+		#if Convergence_Limit
+			DM = ( D - 0 ) / ( (1-Z) - 0);	
+		#endif
+		
+		float Convergence = 1 - Z / DM;
 			
 		if (ZPD == 0)
 			ZP = 1.0;
@@ -844,8 +851,6 @@ float2 Parallax( float Diverge, float2 Coordinates)
 		// Doing it this way should stop crashes in older version of reshade, I hope.
         if (CurrentDepthMapValue <= CurrentLayerDepth)
 			break; // Once we hit the limit Stop Exit Loop.
-        // Get depth of next layer
-        CurrentLayerDepth += LayerDepth;
         // Shift coordinates horizontally in linear fasion
         ParallaxCoord.x -= deltaCoordinates;
         // Get depth value at current coordinates
@@ -853,6 +858,8 @@ float2 Parallax( float Diverge, float2 Coordinates)
         	CurrentDepthMapValue = zBuffer( ParallaxCoord - DB_OffsetA);
         else
         	CurrentDepthMapValue = zBuffer( ParallaxCoord - DB_Offset);
+        // Get depth of next layer
+        CurrentLayerDepth += LayerDepth;
     }
 
 	// Parallax Occlusion Mapping
