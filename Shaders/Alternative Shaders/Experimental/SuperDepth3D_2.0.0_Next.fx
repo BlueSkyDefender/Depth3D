@@ -63,8 +63,6 @@
 //                    |:::_______|       |***_______|
 // So :::: are UI Elements in game. The *** is what the Mask needs to cover up.
 // The game part needs to be trasparent and the UI part needs to be black.
-//Select your Convergence Limits for ZPD Limits Calculations. Limits ZPD has a restriction placed on Zero Parallax Distance Near the Camera
-#define Convergence_Limit 0 //Default is off
 
 //USER EDITABLE PREPROCESSOR FUNCTIONS END//
 
@@ -130,13 +128,6 @@ uniform float Auto_Depth_Range <
 	ui_category = "Divergence & Convergence";
 > = 0.1;
 
-//Occlusion Masking//
-uniform bool Performance_Mode <
-	ui_label = "Performance Mode";
-	ui_tooltip = "Occlusion Quality Processing.\n"
-				 "Default is True.";
-	ui_category = "Occlusion Masking";
-> = true;
 
 uniform int View_Mode <
 	ui_type = "combo";
@@ -791,13 +782,8 @@ float Conv(float D,float2 texcoord)
 	#else
 		if(Auto_Balance_Ex > 0 )
 			ZP = saturate(ALC);
-	#endif
-		float DM = D;	
-		#if Convergence_Limit
-			DM = ( D - 0 ) / ( (1-Z) - 0);	
-		#endif
-		
-		float Convergence = 1 - Z / DM;
+	#endif		
+		float Convergence = 1 - Z / D;
 			
 		if (ZPD == 0)
 			ZP = 1.0;
@@ -829,10 +815,7 @@ float zBuffer(in float2 texcoord : TEXCOORD0)
 // Horizontal parallax offset & Hole filling effect
 float2 Parallax( float Diverge, float2 Coordinates)
 {
-	float Cal_Steps = (Divergence * 0.5) + (Divergence * 0.04);
-	
-	if(!Performance_Mode)
-	Cal_Steps = Divergence + (Divergence * 0.04);
+	float Cal_Steps = Divergence + (Divergence * 0.04);
 	
 	//ParallaxSteps
 	float Steps = clamp(Cal_Steps,0,255);
@@ -842,7 +825,7 @@ float2 Parallax( float Diverge, float2 Coordinates)
 
 	//Offsets listed here Max Seperation is 3% - 8% of screen space with Depth Offsets & Netto layer offset change based on MS.
 	float MS = Diverge * pix.x, deltaCoordinates = MS * LayerDepth;
-	float2 ParallaxCoord = Coordinates,DB_Offset = float2((Diverge * 0.075f) * pix.x, 0), DB_OffsetA = float2((Diverge * 0.03f) * pix.x, 0);
+	float2 ParallaxCoord = Coordinates,DB_Offset = float2((Diverge * 0.075f) * pix.x, 0);
 	float CurrentDepthMapValue = zBuffer(ParallaxCoord), CurrentLayerDepth = 0, DepthDifference;
 
 	[loop] //Steep parallax mapping
@@ -855,21 +838,17 @@ float2 Parallax( float Diverge, float2 Coordinates)
         ParallaxCoord.x -= deltaCoordinates;
         // Get depth value at current coordinates
         if(View_Mode == 1)
-        	CurrentDepthMapValue = zBuffer( ParallaxCoord - DB_OffsetA);
+        	CurrentDepthMapValue = zBuffer( ParallaxCoord );
         else
         	CurrentDepthMapValue = zBuffer( ParallaxCoord - DB_Offset);
         // Get depth of next layer
         CurrentLayerDepth += LayerDepth;
     }
-
+   	
 	// Parallax Occlusion Mapping
 	float2 PrevParallaxCoord = float2(ParallaxCoord.x + deltaCoordinates, ParallaxCoord.y);
-	float afterDepthValue = CurrentDepthMapValue - CurrentLayerDepth, beforeDepthValue;
-	
-	if(View_Mode == 1)
-		beforeDepthValue = zBuffer(PrevParallaxCoord - DB_OffsetA) - CurrentLayerDepth + LayerDepth;
-	else
-		beforeDepthValue = zBuffer(PrevParallaxCoord - DB_Offset) - CurrentLayerDepth + LayerDepth;
+	float afterDepthValue = CurrentDepthMapValue - CurrentLayerDepth;
+	float beforeDepthValue = zBuffer( ParallaxCoord ) - CurrentLayerDepth + LayerDepth;
 		
 	// Interpolate coordinates
 	float weight = afterDepthValue / (afterDepthValue - beforeDepthValue);
