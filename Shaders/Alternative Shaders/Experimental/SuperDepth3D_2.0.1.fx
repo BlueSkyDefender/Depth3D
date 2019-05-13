@@ -404,7 +404,7 @@ sampler BackBufferCLAMP
 		AddressW = CLAMP;
 	};
 	
-texture texDM  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT/Depth_Map_Division; Format = RGBA16F; }; 
+texture texDM  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT/Depth_Map_Division; Format = RGBA16F;  MipLevels = 3;};//Mips Set for furture adjustment. 
 
 sampler SamplerDM
 	{
@@ -808,8 +808,8 @@ float Conv(float D,float2 texcoord)
 
 float zBuffer(in float2 texcoord : TEXCOORD0)
 {	
-	float4 DM = tex2Dlod(SamplerDM,float4(texcoord,0,0));
-
+	float4 DM = tex2Dlod(SamplerDM,float4(float2(texcoord.x,texcoord.y),0,0));
+	   
 	DM.z = lerp(Conv(DM.z,texcoord), WHConv(DM.x,texcoord), DM.y);
 		
 	if (WZPD <= 0)
@@ -829,7 +829,8 @@ float zBuffer(in float2 texcoord : TEXCOORD0)
 /////////////////////////////////////////L/R//////////////////////////////////////////////////////////////////////
 float Encode(in float2 texcoord : TEXCOORD0)
 {
-	return zBuffer(texcoord).x;
+	float DM = zBuffer(float2(texcoord.x,texcoord.y));
+	return DM;
 }
 
 float Parallax(in float Diverge,in float2 texcoords)
@@ -848,18 +849,9 @@ float Parallax(in float Diverge,in float2 texcoords)
 		float S = samples[i],SD = Depth;//Adjustment for range scaling.
 		D = min(D, Encode(float2(texcoord.x + S * MS, texcoord.y)) );
 					
-		if (View_Mode == 0)
+		if (View_Mode == 1)
 		{
 			Depth = min(Depth, Encode(float2(texcoord.x + S * MS, texcoord.y)) ) + MSN;
-		}
-		else if (View_Mode == 1)
-		{	
-			Depth = min(Depth, Encode(float2(texcoord.x + S * MS, texcoord.y)) ) + MSN;
-																								
-			Depth += min(SD, Encode(float2(texcoord.x + S * (MS * 1.1f), texcoord.y)) ) + MSN;
-			
-			Depth /= 2;
-
 		}
 		else if (View_Mode == 2)
 		{	
@@ -867,9 +859,8 @@ float Parallax(in float Diverge,in float2 texcoords)
 																								
 			Depth += min(SD, Encode(float2(texcoord.x + S * (MS * 1.1f), texcoord.y)) ) + MSN;
 			
-			Depth += min(SD, Encode(float2(texcoord.x + S * (MS * 1.2f), texcoord.y)) ) + MSN;
-			
-			Depth /= 3;
+			Depth /= 2;
+
 		}
 		else if (View_Mode == 3)
 		{	
@@ -879,16 +870,16 @@ float Parallax(in float Diverge,in float2 texcoords)
 			
 			Depth += min(SD, Encode(float2(texcoord.x + S * (MS * 1.2f), texcoord.y)) ) + MSN;
 			
-			Depth += min(SD, Encode(float2(texcoord.x + S * (MS * 1.3f), texcoord.y)) ) + MSN;
-			
-			Depth /= 4;
-
+			Depth /= 3;
 		}
 	}
 
 float MA = (0.375f * 8.0f), M = distance(1.0f , D), Mask = saturate(M * MA - 1.0f) ;
-
+			
+		if(View_Mode >= 1)
 			Depth = lerp(D, Depth, abs(Mask));
+		else
+			Depth = D;
 	
 	return  Depth;				
 }
