@@ -3,7 +3,7 @@
  //----------------////
 
  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
- //* Depth Map Based 3D post-process shader v2.0.0          																														*//
+ //* Depth Map Based 3D post-process shader v2.0.1          																														*//
  //* For Reshade 3.0																																								*//
  //* --------------------------																																						*//
  //* This work is licensed under a Creative Commons Attribution 3.0 Unported License.																								*//
@@ -16,17 +16,16 @@
  //* http://reshade.me/forum/shader-presentation/2128-sidebyside-3d-depth-map-based-stereoscopic-shader																				*//	
  //* ---------------------------------																																				*//
  //*																																												*//
- //* Original work was based on the shader code from																																*//
- //* CryTech 3 Dev http://www.slideshare.net/TiagoAlexSousa/secrets-of-cryengine-3-graphics-technology																				*//
- //* Also Fu-Bama a shader dev at the reshade forums https://reshade.me/forum/shader-presentation/5104-vr-universal-shader															*//
+ //* Original work was based on the shader code of a CryTech 3 Dev http://www.slideshare.net/TiagoAlexSousa/secrets-of-cryengine-3-graphics-technology								*//
+ //*																																												*//
  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 //USER EDITABLE PREPROCESSOR FUNCTIONS START//
 
-// Determines The resolution of the Depth Map. For 4k Use 0.75 or 0.5. For 1440p Use 0.75. For 1080p use 1. Too low of a resolution will remove too much detail.
+// Determines The resolution of the Depth Map. For 4k Use 1.75 or 1.5. For 1440p Use 1.5 or 1.25. For 1080p use 1. Too low of a resolution will remove too much.
 #define Depth_Map_Division 1.0
 
-// Zero Parallax Distance Balance Mode allows you to switch control from manual to automatic and vice versa. You need to turn this on to use UI Masking options.
+// Zero Parallax Distance Mode allows you to switch control from manual to automatic and vice versa. You need to turn this on to use UI Masking options.
 #define Balance_Mode 0 //Default 0 is Automatic. One is Manual.
 
 // RE Fix is used to fix the issue with Resident Evil's 2 Remake 1-Shot cutscenes.
@@ -43,7 +42,7 @@
 // Use Depth Tool to adjust the lower preprocessor definitions below.
 // Horizontal & Vertical Depth Buffer Resize for non conforming BackBuffer.
 // Ex. Resident Evil 7 Has this problem. So you want to adjust it too around float2(0.9575,0.9575).
-#define Horizontal_and_Vertical float2(1.0, 1.00) // 1.0 is Default.
+#define Horizontal_and_Vertical float2(1.0, 1.0) // 1.0 is Default.
 
 // Image Position Adjust is used to move the Z-Buffer around.
 #define Image_Position_Adjust float2(0.0,0.0)
@@ -82,6 +81,18 @@ uniform float Divergence <
 				 "You can override this value.";
 	ui_category = "Divergence & Convergence";
 > = 37.5;
+
+uniform int Convergence_Mode <
+	ui_type = "combo";
+	ui_items = "ZPD Tied\0ZPD Locked\0";
+	ui_label = " Convergence Mode";
+	ui_tooltip = "Select your Convergence Mode for ZPD calculations.\n" 
+				 "ZPD Locked mode is locked to divergence & dissables ZPD control below.\n" 
+				 "ZPD Tied is controlled by ZPD. Works in tandam with Divergence.\n" 
+				 "For FPS with no custom weapon profile use Tied.\n" 
+				 "Default is ZPD Tied.";
+	ui_category = "Divergence & Convergence";
+> = 0;
 
 uniform float ZPD <
 	ui_type = "drag";
@@ -127,11 +138,11 @@ uniform float Auto_Depth_Range <
 				 "Default is 0.1f, Zero is off.";
 	ui_category = "Divergence & Convergence";
 > = 0.1;
-
-
+	
+//Occlusion Masking//
 uniform int View_Mode <
 	ui_type = "combo";
-	ui_items = "View Mode Normal\0View Mode Alpha\0";
+	ui_items = "View Mode Normal\0View Mode Alpha\0View Mode Beta\0View Mode Gamma\0";
 	ui_label = " View Mode";
 	ui_tooltip = "Change the way the shader warps the output to the screen.\n"
 				 "Default is Normal";
@@ -151,6 +162,7 @@ uniform bool Side_Bars <
 	ui_tooltip = "Adds Side Bar to the Left and Right Edges";
 	ui_category = "Occlusion Masking";
 > = false;
+
 //Depth Map//
 uniform int Depth_Map <
 	ui_type = "combo";
@@ -392,13 +404,13 @@ sampler BackBufferCLAMP
 		AddressW = CLAMP;
 	};
 	
-texture texDMN  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT*Depth_Map_Division; Format = RGBA16F; }; 
+texture texDM  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT/Depth_Map_Division; Format = RGBA16F; }; 
 
-sampler SamplerDMN
+sampler SamplerDM
 	{
-		Texture = texDMN;
+		Texture = texDM;
 	};
-	
+
 #if UI_MASK
 texture TexMaskA < source = "Mask_A.png"; > { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA8; };
 sampler SamplerMaskA { Texture = TexMaskA;};
@@ -453,11 +465,11 @@ float4 MouseCursor(float4 position : SV_Position, float2 texcoord : TEXCOORD) : 
 }
 
 /////////////////////////////////////////////////////////////////////////////////Adapted Luminance/////////////////////////////////////////////////////////////////////////////////
-texture texLumN {Width = 256*0.5; Height = 256*0.5; Format = RGBA8; MipLevels = 8;}; //Sample at 256x256/2 and a mip bias of 8 should be 1x1 
+texture texLum {Width = 256*0.5; Height = 256*0.5; Format = RGBA8; MipLevels = 8;}; //Sample at 256x256/2 and a mip bias of 8 should be 1x1 
 																				
-sampler SamplerLumN																
+sampler SamplerLum																
 	{
-		Texture = texLumN;
+		Texture = texLum;
 		MipLODBias = 8.0f; //Luminance adapted luminance value from 1x1 Texture Mip lvl of 8
 		MinFilter = LINEAR;
 		MagFilter = LINEAR;
@@ -466,7 +478,7 @@ sampler SamplerLumN
 	
 float2 Lum(in float2 texcoord : TEXCOORD0)
 	{
-		float2 Luminance = tex2Dlod(SamplerLumN,float4(texcoord,0,0)).xy; //Average Luminance Texture Sample 
+		float2 Luminance = tex2Dlod(SamplerLum,float4(texcoord,0,0)).xy; //Average Luminance Texture Sample 
 
 		return saturate(Luminance);
 	}
@@ -770,30 +782,33 @@ float WHConv(float D,float2 texcoord)
 
 float Conv(float D,float2 texcoord)
 {
-	float Z = ZPD, ZP = 0.5f, ALC = abs(Lum(texcoord).x);
+	float Z = ZPD, ZP = 0.5f, Divergence_Locked = Divergence*0.001, ALC = abs(Lum(texcoord).x);
 	#if RE_Fix	
 		Z = AutoZPDRange(Z,texcoord);
 	#endif	
 		if (Auto_Depth_Range > 0)
 			D = AutoDepthRange(D,texcoord);
+		
+		if(Convergence_Mode)
+			Z = Divergence_Locked;
 			
 	#if Balance_Mode
 			ZP = saturate(ZPD_Balance);			
 	#else
 		if(Auto_Balance_Ex > 0 )
 			ZP = saturate(ALC);
-	#endif		
+	#endif			
 		float Convergence = 1 - Z / D;
-			
+
 		if (ZPD == 0)
 			ZP = 1.0;
-					
+		
     return lerp(Convergence,D, ZP);
 }
 
 float zBuffer(in float2 texcoord : TEXCOORD0)
 {	
-	float4 DM = tex2Dlod(SamplerDMN,float4(texcoord,0,0));
+	float4 DM = tex2Dlod(SamplerDM,float4(texcoord,0,0));
 
 	DM.z = lerp(Conv(DM.z,texcoord), WHConv(DM.x,texcoord), DM.y);
 		
@@ -812,55 +827,71 @@ float zBuffer(in float2 texcoord : TEXCOORD0)
 }
 
 /////////////////////////////////////////L/R//////////////////////////////////////////////////////////////////////
-// Horizontal parallax offset & Hole filling effect
-float2 Parallax( float Diverge, float2 Coordinates)
+float Encode(in float2 texcoord : TEXCOORD0)
 {
-	float Cal_Steps = Divergence + (Divergence * 0.04);
-	
-	//ParallaxSteps
-	float Steps = clamp(Cal_Steps,0,255);
-	
-	// Offset per step progress & Limit
-	float LayerDepth = 1.0 / Steps;
+	return zBuffer(texcoord).x;
+}
 
-	//Offsets listed here Max Seperation is 3% - 8% of screen space with Depth Offsets & Netto layer offset change based on MS.
-	float MS = Diverge * pix.x, deltaCoordinates = MS * LayerDepth;
-	float2 ParallaxCoord = Coordinates,DB_Offset = float2((Diverge * 0.075f) * pix.x, 0);
-	float CurrentDepthMapValue = zBuffer(ParallaxCoord), CurrentLayerDepth = 0, DepthDifference;
-
-	[loop] //Steep parallax mapping
-    for ( int i = 0 ; i < Steps; i++ )
-    {
-		// Doing it this way should stop crashes in older version of reshade, I hope.
-        if (CurrentDepthMapValue <= CurrentLayerDepth)
-			break; // Once we hit the limit Stop Exit Loop.
-        // Shift coordinates horizontally in linear fasion
-        ParallaxCoord.x -= deltaCoordinates;
-        // Get depth value at current coordinates
-        if(View_Mode == 1)
-        	CurrentDepthMapValue = zBuffer( ParallaxCoord );
-        else
-        	CurrentDepthMapValue = zBuffer( ParallaxCoord - DB_Offset);
-        // Get depth of next layer
-        CurrentLayerDepth += LayerDepth;
-    }
-   	
-	// Parallax Occlusion Mapping
-	float2 PrevParallaxCoord = float2(ParallaxCoord.x + deltaCoordinates, ParallaxCoord.y);
-	float afterDepthValue = CurrentDepthMapValue - CurrentLayerDepth;
-	float beforeDepthValue = zBuffer( ParallaxCoord ) - CurrentLayerDepth + LayerDepth;
-		
-	// Interpolate coordinates
-	float weight = afterDepthValue / (afterDepthValue - beforeDepthValue);
-	ParallaxCoord = PrevParallaxCoord * max(0,weight) + ParallaxCoord * min(1,1.0f - weight);
-
-	// Apply gap masking
-	DepthDifference = (afterDepthValue-beforeDepthValue) * MS;
-	if(View_Mode == 1)
-		ParallaxCoord.x = lerp(ParallaxCoord.x - DepthDifference,ParallaxCoord.x,0.5f);
+float Parallax(in float Diverge,in float2 texcoords)
+{
+	float Depth = 1, D = Depth, SD, MS = Diverge * pix.x, MSN, N = 9, samples[9] = {0.5,0.5625,0.625,0.6875,0.75,0.8125,0.875,0.9375,1.0};
+	float2 texcoord = float2(texcoords.x - (MS * 1.625f),texcoords.y);
 	
-	return ParallaxCoord;
-};
+	if(Diverge == -Divergence)
+		MSN = -MS * 2.0f;
+	else
+		MSN = MS * 2.0f;
+	
+	[loop]
+	for ( int i = 0 ; i < N; i++ ) 
+	{	
+		float S = samples[i],SD = Depth;//Adjustment for range scaling.
+		D = min(D, Encode(float2(texcoord.x + S * MS, texcoord.y)) );
+					
+		if (View_Mode == 0)
+		{
+			Depth = min(Depth, Encode(float2(texcoord.x + S * MS, texcoord.y)) ) + MSN;
+		}
+		else if (View_Mode == 1)
+		{	
+			Depth = min(Depth, Encode(float2(texcoord.x + S * MS, texcoord.y)) ) + MSN;
+																								
+			Depth += min(SD, Encode(float2(texcoord.x + S * (MS * 1.1f), texcoord.y)) ) + MSN;
+			
+			Depth /= 2;
+
+		}
+		else if (View_Mode == 2)
+		{	
+			Depth = min(Depth, Encode(float2(texcoord.x + S * MS, texcoord.y)) ) + MSN;
+																								
+			Depth += min(SD, Encode(float2(texcoord.x + S * (MS * 1.1f), texcoord.y)) ) + MSN;
+			
+			Depth += min(SD, Encode(float2(texcoord.x + S * (MS * 1.2f), texcoord.y)) ) + MSN;
+			
+			Depth /= 3;
+		}
+		else if (View_Mode == 3)
+		{	
+			Depth = min(Depth, Encode(float2(texcoord.x + S * MS, texcoord.y)) ) + MSN;
+																								
+			Depth += min(SD, Encode(float2(texcoord.x + S * (MS * 1.1f), texcoord.y)) ) + MSN;
+			
+			Depth += min(SD, Encode(float2(texcoord.x + S * (MS * 1.2f), texcoord.y)) ) + MSN;
+			
+			Depth += min(SD, Encode(float2(texcoord.x + S * (MS * 1.3f), texcoord.y)) ) + MSN;
+			
+			Depth /= 4;
+
+		}
+	}
+
+float MA = (0.375f * 8.0f), M = distance(1.0f , D), Mask = saturate(M * MA - 1.0f) ;
+
+			Depth = lerp(D, Depth, abs(Mask));
+	
+	return  Depth;				
+}
 
 float4 EdgeMask( float Diverge, float4 Image, float2 texcoords)
 {
@@ -878,12 +909,12 @@ float4 EdgeMask( float Diverge, float4 Image, float2 texcoords)
 		
 	return Bar_A + Bar_B ? float4(0,0,0,1) : Image;
 }
-	
-float4 PS_calcLR(float2 texcoord)
-{
-	float4 color, Right, Left;
-	float2 TCL, TCR, TexCoords = texcoord;
 
+float4 LR(float2 texcoord)
+{
+	float4 color, Left, Right, L, R;
+	float2 TCL, TCR, TexCoords = texcoord;
+								
 	if(Eye_Swap)
 	{
 		if ( Stereoscopic_Mode == 0 )
@@ -920,58 +951,58 @@ float4 PS_calcLR(float2 texcoord)
 			TCR = float2(texcoord.x,texcoord.y);
 		}
 	}
-	//P is Perspective Adjustment
-	float P = Perspective * pix.x;	
+	
+	//MS is Max Separation P is Perspective Adjustment
+	float MS = Divergence * pix.x, P = Perspective * pix.x;
+	
 	TCL.x += P;
 	TCR.x -= P;
-	//Left & Right Parallax for Stereo Vision
-	float2 TL, TR; //Stereoscopic 3D using Reprojection Left & Right	
-	if(Stereoscopic_Mode == 2)// Work around for DX9
+	
+	//Optimization for line & column interlaced out.
+	if (Stereoscopic_Mode == 2)
 	{
-		//Optimization for line interlaced.
-		TL = Parallax(-Divergence, float2(TCL.x,TCL.y + (Interlace_Anaglyph.x * 0.5f) * pix.y));					
-		TR = Parallax( Divergence, float2(TCR.x,TCR.y - (Interlace_Anaglyph.x * 0.5f) * pix.y));	
+		TCL.y += (Interlace_Anaglyph.x*0.5) * pix.y;
+		TCR.y -= (Interlace_Anaglyph.x*0.5) * pix.y;
 	}
-	else if(Stereoscopic_Mode == 3)// Work around for DX9
-	{	
-		//Optimization for column interlaced.
-		TL = Parallax(-Divergence, float2(TCL.x + (Interlace_Anaglyph.x * 0.5f) * pix.x,TCL.y));					
-		TR = Parallax( Divergence, float2(TCR.x - (Interlace_Anaglyph.x * 0.5f) * pix.x,TCR.y));	
-	}
-	else
+	else if (Stereoscopic_Mode == 3)
 	{
-		TL = Parallax(-Divergence, TCL);					
-		TR = Parallax( Divergence, TCR);
+		TCL.x += (Interlace_Anaglyph.x*0.5) * pix.x;
+		TCR.x -= (Interlace_Anaglyph.x*0.5) * pix.x;
 	}
-			
+	
+	float ReprojectionLeft = MS * Parallax(-Divergence,TCL); //Parallax Left					
+	float ReprojectionRight = MS * Parallax(Divergence,TCR); //Parallax Right
+	
 	if(Custom_Sidebars == 0)
 	{
-		Left = tex2Dlod(BackBufferMIRROR, float4(TL,0,0));
-		Right = tex2Dlod(BackBufferMIRROR, float4(TR,0,0));
+		Left = tex2Dlod(BackBufferMIRROR, float4(TCL.x + ReprojectionLeft, TCL.y,0,0));
+		Right = tex2Dlod(BackBufferMIRROR, float4(TCR.x - ReprojectionRight, TCR.y,0,0));
 	}
 	else if(Custom_Sidebars == 1)
 	{
-		Left = tex2Dlod(BackBufferBORDER, float4(TL,0,0));
-		Right = tex2Dlod(BackBufferBORDER, float4(TR,0,0));
+		Left = tex2Dlod(BackBufferBORDER, float4(TCL.x + ReprojectionLeft, TCL.y,0,0));
+		Right = tex2Dlod(BackBufferBORDER, float4(TCR.x - ReprojectionRight, TCR.y,0,0));
 	}
 	else
 	{
-		Left = tex2Dlod(BackBufferCLAMP, float4(TL,0,0));
-		Right = tex2Dlod(BackBufferCLAMP, float4(TR,0,0));
+		Left = tex2Dlod(BackBufferCLAMP, float4(TCL.x + ReprojectionLeft, TCL.y,0,0));
+		Right = tex2Dlod(BackBufferCLAMP, float4(TCR.x - ReprojectionRight, TCR.y,0,0));
 	}
-		
-	if (Side_Bars)
+	
+	if(Side_Bars)
 	{
 		Left = EdgeMask(-Divergence,Left,TCL);
 		Right = EdgeMask(Divergence,Right,TCR);
 	}
-	//Eye Swaping Workaround
-	float4 L = Left, R = Right;//Used for Eye Swap		
+	
+	L = Left; //Used for Eye Swap
+	R = Right;//Used for Eye Swap
+		
 	if ( Eye_Swap ) //Is Eye Swap
 	{
 		Left = R;
 		Right = L;
-	}	
+	}
 	#if Balance_Mode	
 	float HUD_Adjustment = ((0.5 - HUD_Adjust.y)*25) * pix.x;
 	Left = HUD(Left,float2(TCL.x - HUD_Adjustment,TCL.y));
@@ -1173,9 +1204,9 @@ float4 PS_calcLR(float2 texcoord)
 	{		
 		color = float4(zBuffer(TexCoords).x,zBuffer(TexCoords).x,zBuffer(TexCoords).x,1.0);
 	}
-		
-	float Average_Lum = tex2Dlod(SamplerDMN,float4(TexCoords.x,TexCoords.y, 0, 0)).y;
 	
+	float Average_Lum = tex2D(SamplerDM,float2(TexCoords.x,TexCoords.y)).y;
+
 	return float4(color.rgb,Average_Lum);
 }
 
@@ -1192,17 +1223,16 @@ float4 Average_Luminance(float4 position : SV_Position, float2 texcoord : TEXCOO
 	else if(Auto_Balance_Ex == 5)
 		ABE = float4(0.375, 0.250, 0.0, 1.0);//Center Long
 			
-	float Average_Lum_ZPD = tex2Dlod(SamplerDMN,float4(ABE.x + texcoord.x * ABE.y, ABE.z + texcoord.y * ABE.w, 0, 0)).z;
-	float Average_Lum_Full = tex2Dlod(SamplerDMN,float4(texcoord.x,texcoord.y, 0, 0)).z;
+	float Average_Lum_ZPD = tex2D(SamplerDM,float2(ABE.x + texcoord.x * ABE.y, ABE.z + texcoord.y * ABE.w )).z;
+	float Average_Lum_Full = tex2D(SamplerDM,float2(texcoord.x,texcoord.y )).z;
 	return float4(Average_Lum_ZPD,Average_Lum_Full,0,1);
 }
-
 ////////////////////////////////////////////////////////Logo/////////////////////////////////////////////////////////////////////////
 uniform float timer < source = "timer"; >; //Please do not remove.
 float4 Out(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Target
 {
 	float PosX = 0.9525f*BUFFER_WIDTH*pix.x,PosY = 0.975f*BUFFER_HEIGHT*pix.y;	
-	float4 Color = float4(PS_calcLR(texcoord).rgb,1.0),D,E,P,T,H,Three,DD,Dot,I,N,F,O;
+	float4 Color = float4(LR(texcoord).rgb,1.0),D,E,P,T,H,Three,DD,Dot,I,N,F,O;
 	
 	if(timer <= 12500)
 	{
@@ -1304,7 +1334,7 @@ void PostProcessVS(in uint id : SV_VertexID, out float4 position : SV_Position, 
 
 //*Rendering passes*//
 
-technique Cross_Cursor_Next
+technique Cross_Cursor
 {			
 			pass Cursor
 		{
@@ -1313,19 +1343,19 @@ technique Cross_Cursor_Next
 		}	
 }
 
-technique SuperDepth3D_Next
+technique SuperDepth3D
 {
 		pass zbuffer
 	{
 		VertexShader = PostProcessVS;
 		PixelShader = DepthMap;
-		RenderTarget = texDMN;
+		RenderTarget = texDM;
 	}
 		pass AverageLuminance
 	{
 		VertexShader = PostProcessVS;
 		PixelShader = Average_Luminance;
-		RenderTarget = texLumN;
+		RenderTarget = texLum;
 	}
 		pass StereoOut
 	{
