@@ -65,7 +65,7 @@ uniform int IPD <
 	ui_type = "slider";
 	#endif
 	ui_min = 0; ui_max = 100;
-	ui_label = "Interpupillary Distance";
+	ui_label = "·Interpupillary Distance·";
 	ui_tooltip = "Determines the distance between your eyes.\n" 
 				 "Default is 64.";
 	ui_category = "Eye Focus Adjustment";
@@ -97,14 +97,14 @@ uniform float ZPD <
 uniform int View_Mode <
 	ui_type = "combo";
 	ui_items = "View Mode Normal\0View Mode Alpha\0";
-	ui_label = " View Mode";
+	ui_label = "·View Mode·";
 	ui_tooltip = "Change the way the shader warps the output to the screen.\n"
 				 "Default is Normal";
 	ui_category = "Occlusion Masking";
 > = 0;
 
 uniform bool Performance_Mode <
-	ui_label = "Performance Mode";
+	ui_label = " Performance Mode";
 	ui_tooltip = "Occlusion Quality Processing.\n"
 				 "Default is True.";
 	ui_category = "Occlusion Masking";
@@ -161,11 +161,15 @@ uniform float Weapon_Depth_Adjust <
 	ui_category = "Weapon Hand Adjust";
 > = 0;
 
-uniform bool Theater_Mode <
-	ui_label = " Theater Mode";
-	ui_tooltip = "Sets the VR Shader in to Theater mode.";
+uniform int Barrel_Distortion <
+	ui_type = "combo";
+	ui_items = "Off\0Blinders A\0Blinders B\0";
+	ui_label = "·Barrel Distortion·";
+	ui_tooltip = "Use this to dissable or enable Barrel Distortion A & B.\n"
+				 "This also lets you select from two diffrent Blinders.\n"
+			     "Default is Blinders A.\n";
 	ui_category = "Image Adjustment";
-> = false;
+> = 0;
 
 uniform float FoV <
 	#if Compatibility
@@ -174,18 +178,11 @@ uniform float FoV <
 	ui_type = "slider";
 	#endif
 	ui_min = 0; ui_max = 0.5;
-	ui_label = "Field of View";
+	ui_label = " Field of View";
 	ui_tooltip = "Lets you adjust the FoV of the Image.\n" 
 				 "Default is 0.0.";
 	ui_category = "Image Adjustment";
 > = 0;
-
-uniform bool Barrel_Distortion<
-	ui_label = "Barrel Distortion";
-	ui_tooltip = "Use this to dissable or enable Barrel Distortion.\n"
-				 "Default is True.";
-	ui_category = "Image Adjustment";
-> = true;
 
 uniform float3 Polynomial_Colors_K1 <
 	#if Compatibility
@@ -194,6 +191,7 @@ uniform float3 Polynomial_Colors_K1 <
 	ui_type = "slider";
 	#endif
 	ui_min = 0.0; ui_max = 1.0;
+	ui_label = " Polynomial Distortion K1";
 	ui_tooltip = "Adjust the Polynomial Distortion K1_Red, K1_Green, & K1_Blue.\n"
 				 "Default is (R 0.22, G 0.22, B 0.22)";
 	ui_category = "Image Adjustment";
@@ -206,11 +204,17 @@ uniform float3 Polynomial_Colors_K2 <
 	ui_type = "slider";
 	#endif
 	ui_min = 0.0; ui_max = 1.0;
+	ui_label = " Polynomial Distortion K2";
 	ui_tooltip = "Adjust the Polynomial Distortion K2_Red, K2_Green, & K2_Blue.\n"
 				 "Default is (R 0.24, G 0.24, B 0.24)";
-	ui_label = "Polynomial Color Distortion K2";
 	ui_category = "Image Adjustment";
 > = float3(0.24, 0.24, 0.24);
+
+uniform bool Theater_Mode <
+	ui_label = " Theater Mode";
+	ui_tooltip = "Sets the VR Shader in to Theater mode.";
+	ui_category = "Image Adjustment";
+> = false;
 
 uniform float Vignette <
 	#if Compatibility
@@ -219,10 +223,10 @@ uniform float Vignette <
 	ui_type = "slider";
 	#endif
 	ui_min = 0; ui_max = 1;
-	ui_label = "Vignette";
+	ui_label = "·Vignette·";
 	ui_tooltip = "Soft edge effect around the image.";
 	ui_category = "Image Effects";
-> = 0.15;
+> = 0.25;
 	
 uniform float Sharpen_Power <
 	#if Compatibility
@@ -231,7 +235,7 @@ uniform float Sharpen_Power <
 	ui_type = "slider";
 	#endif
 	ui_min = 0.0; ui_max = 2.0;
-	ui_label = "Sharpen Power";
+	ui_label = " Sharpen Power";
 	ui_tooltip = "Adjust this on clear up the image the game, movie piture & ect.";
 	ui_category = "Image Effects";
 > = 0;
@@ -243,7 +247,7 @@ uniform float Saturation <
 	ui_type = "slider";
 	#endif
 	ui_min = 0; ui_max = 1;
-	ui_label = "Saturation";
+	ui_label = " Saturation";
 	ui_tooltip = "Lets you saturate image, Basicly add more color.";
 	ui_category = "Image Effects";
 > = 0;
@@ -254,7 +258,7 @@ uniform int Cursor_Type <
 	#else
 	ui_type = "slider";
 	#endif
-	ui_min = 0; ui_max = 6;
+	ui_min = 0; ui_max = 5;
 	ui_label = "·Cursor Selection·";
 	ui_tooltip = "Choose the cursor type you like to use.\n" 
 				 "Default is Zero.";
@@ -307,11 +311,11 @@ sampler BackBufferBORDER
 		AddressW = BORDER;
 	};
 	
-texture texDMN  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT*Depth_Map_Division; Format = RGBA16F; }; 
+texture texDMVR  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT*Depth_Map_Division; Format = RGBA16F; }; 
 
-sampler SamplerDMN
+sampler SamplerDMVR
 	{
-		Texture = texDMN;
+		Texture = texDMVR;
 	};
 	
 texture LeftTex  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT*Depth_Map_Division; Format = RGBA8; }; 
@@ -374,12 +378,7 @@ float4 MouseCursor(float4 position : SV_Position, float2 texcoord : TEXCOORD) : 
 	else if(Cursor_Type == 4)
 		Cursor = SSC + CC;
 	else if(Cursor_Type == 5)
-		Cursor = SSC + RC;
-	else if(Cursor_Type == 6)
-		Cursor = CC + RC;
-	else if(Cursor_Type == 7)
-		Cursor = CC + RC + SSC;
-	
+		Cursor = SSC + RC;	
 	
 	if (Cursor_STT.z == 1 )
 		Color.rgb = float3(1,1,1);
@@ -411,11 +410,11 @@ float4 MouseCursor(float4 position : SV_Position, float2 texcoord : TEXCOORD) : 
 }
 
 /////////////////////////////////////////////////////////////////////////////////Adapted Luminance/////////////////////////////////////////////////////////////////////////////////
-texture texLumN {Width = 256*0.5; Height = 256*0.5; Format = RGBA8; MipLevels = 8;}; //Sample at 256x256/2 and a mip bias of 8 should be 1x1 
+texture texLumVR {Width = 256*0.5; Height = 256*0.5; Format = RGBA8; MipLevels = 8;}; //Sample at 256x256/2 and a mip bias of 8 should be 1x1 
 																				
-sampler SamplerLumN																
+sampler SamplerLumVR																
 	{
-		Texture = texLumN;
+		Texture = texLumVR;
 		MipLODBias = 8.0f; //Luminance adapted luminance value from 1x1 Texture Mip lvl of 8
 		MinFilter = LINEAR;
 		MagFilter = LINEAR;
@@ -424,7 +423,7 @@ sampler SamplerLumN
 	
 float Lum(in float2 texcoord : TEXCOORD0)
 	{
-		float Luminance = tex2Dlod(SamplerLumN,float4(texcoord,0,0)).x; //Average Luminance Texture Sample 
+		float Luminance = tex2Dlod(SamplerLumVR,float4(texcoord,0,0)).x; //Average Luminance Texture Sample 
 
 		return saturate(Luminance);
 	}
@@ -714,7 +713,7 @@ float Conv(float D,float2 texcoord)
 
 float zBuffer(in float2 texcoord : TEXCOORD0)
 {	
-	float4 DM = tex2Dlod(SamplerDMN,float4(texcoord,0,0));
+	float4 DM = tex2Dlod(SamplerDMVR,float4(texcoord,0,0));
 
 	DM.z = lerp(Conv(DM.z,texcoord), WHConv(DM.x,texcoord), DM.y);
 		
@@ -734,49 +733,42 @@ float zBuffer(in float2 texcoord : TEXCOORD0)
 
 /////////////////////////////////////////L/R//////////////////////////////////////////////////////////////////////
 // Horizontal parallax offset & Hole filling effect
-float2 Parallax( float Diverg, float2 Coordinates)
+float2 Parallax( float Diverge, float2 Coordinates)
 {
 	float Cal_Steps = (Divergence * 0.5) + (Divergence * 0.04);
 	
 	if(!Performance_Mode)
 	Cal_Steps = Divergence + (Divergence * 0.04);
 	
-	//ParallaxSteps
-	float Steps = clamp(Cal_Steps,0,255);
-	
 	// Offset per step progress & Limit
-	float LayerDepth = 1.0 / Steps;
+	float LayerDepth = 1.0 / Cal_Steps;
 
 	//Offsets listed here Max Seperation is 3% - 8% of screen space with Depth Offsets & Netto layer offset change based on MS.
-	float MS = Diverg * pix.x, deltaCoordinates = MS * LayerDepth;
-	float2 ParallaxCoord = Coordinates,DB_Offset = float2((Diverg * 0.075f) * pix.x, 0), DB_OffsetA = float2((Diverg * 0.03f) * pix.x, 0);
+	float MS = Diverge * pix.x, deltaCoordinates = MS * LayerDepth;
+	float2 ParallaxCoord = Coordinates,DB_Offset = float2((Diverge * 0.075f) * pix.x, 0);
 	float CurrentDepthMapValue = zBuffer(ParallaxCoord), CurrentLayerDepth = 0, DepthDifference;
 
 	[loop] //Steep parallax mapping
-    for ( int i = 0 ; i < Steps; i++ )
+    for ( int i = 0 ; i < Cal_Steps; i++ )
     {
 		// Doing it this way should stop crashes in older version of reshade, I hope.
         if (CurrentDepthMapValue <= CurrentLayerDepth)
 			break; // Once we hit the limit Stop Exit Loop.
-        // Get depth of next layer
-        CurrentLayerDepth += LayerDepth;
         // Shift coordinates horizontally in linear fasion
         ParallaxCoord.x -= deltaCoordinates;
         // Get depth value at current coordinates
         if(View_Mode == 1)
-        	CurrentDepthMapValue = zBuffer( ParallaxCoord - DB_OffsetA);
+        	CurrentDepthMapValue = zBuffer( ParallaxCoord );
         else
         	CurrentDepthMapValue = zBuffer( ParallaxCoord - DB_Offset);
+        // Get depth of next layer
+        CurrentLayerDepth += LayerDepth;
     }
-
+   	
 	// Parallax Occlusion Mapping
 	float2 PrevParallaxCoord = float2(ParallaxCoord.x + deltaCoordinates, ParallaxCoord.y);
-	float afterDepthValue = CurrentDepthMapValue - CurrentLayerDepth, beforeDepthValue;
-	
-	if(View_Mode == 1)
-		beforeDepthValue = zBuffer(PrevParallaxCoord - DB_OffsetA) - CurrentLayerDepth + LayerDepth;
-	else
-		beforeDepthValue = zBuffer(PrevParallaxCoord - DB_Offset) - CurrentLayerDepth + LayerDepth;
+	float afterDepthValue = CurrentDepthMapValue - CurrentLayerDepth;
+	float beforeDepthValue = zBuffer( ParallaxCoord ) - CurrentLayerDepth + LayerDepth;
 		
 	// Interpolate coordinates
 	float weight = afterDepthValue / (afterDepthValue - beforeDepthValue);
@@ -828,24 +820,27 @@ void LR_Out(float4 position : SV_Position, float2 texcoord : TEXCOORD, out float
 
 float4 Circle(float4 C, float2 TC)
 {		
-		float2 C_A = float2(1.0f,1.1375f), midHV = (C_A-1) * float2(BUFFER_WIDTH * 0.5,BUFFER_HEIGHT * 0.5) * pix;			
+	if(Barrel_Distortion == 2)
+		discard;
 		
-		float2 uv = float2(TC.x,TC.y);
-		
-		uv = float2((TC.x*C_A.x)-midHV.x,(TC.y*C_A.y)-midHV.y);
-		
-		float borderA = 2.5; // 0.01
-		float borderB = Vignette*0.1; // 0.01
-		float circle_radius = 0.55; // 0.5
-		float4 circle_color = 0; // vec4(1.0, 1.0, 1.0, 1.0)
-		float2 circle_center = 0.5; // vec2(0.5, 0.5)  
-		// Offset uv with the center of the circle.
-		uv -= circle_center;
-		  
-		float dist =  sqrt(dot(uv, uv));
+	float2 C_A = float2(1.0f,1.1375f), midHV = (C_A-1) * float2(BUFFER_WIDTH * 0.5,BUFFER_HEIGHT * 0.5) * pix;			
+	
+	float2 uv = float2(TC.x,TC.y);
+	
+	uv = float2((TC.x*C_A.x)-midHV.x,(TC.y*C_A.y)-midHV.y);
+	
+	float borderA = 2.5; // 0.01
+	float borderB = Vignette*0.1; // 0.01
+	float circle_radius = 0.55; // 0.5
+	float4 circle_color = 0; // vec4(1.0, 1.0, 1.0, 1.0)
+	float2 circle_center = 0.5; // vec2(0.5, 0.5)  
+	// Offset uv with the center of the circle.
+	uv -= circle_center;
+	  
+	float dist =  sqrt(dot(uv, uv));
 
-		float t = 1.0 + smoothstep(circle_radius, circle_radius+borderA, dist) 
-		        	  - smoothstep(circle_radius-borderB, circle_radius, dist);
+	float t = 1.0 + smoothstep(circle_radius, circle_radius+borderA, dist) 
+				  - smoothstep(circle_radius-borderB, circle_radius, dist);
 
 	return lerp(circle_color, C,t);
 }
@@ -887,7 +882,21 @@ float2 D(float2 p, float k1, float k2) //Polynomial Lens + Radial lens undistort
 	// De-normalize to the original range
 	p.x = (x2 + 1.0) * 1.0 / 2.0;
 	p.y = (y2 + 1.0) * 1.0 / 2.0;
-
+		
+	if(!Theater_Mode)
+	{
+	//Blinders Code Fast
+	float C_A1 = 0.45f, C_A2 = C_A1 * 0.5f;
+	float C_B1 = 0.375f, C_B2 = C_B1 * 0.5f;
+	float C_C1 = 0.9375f, C_C2 = C_C1 * 0.5f;
+	if(length(p.xy*float2(C_A1,1.0f)-float2(C_A2,0.5f)) > 0.5f)
+		p = 1000;//offscreen
+	else if(length(p.xy*float2(1.0f,C_B1)-float2(0.5f,C_B2)) > 0.5f)
+		p = 1000;//offscreen
+	else if(length(p.xy*float2(C_C1,1.0f)-float2(C_C2,0.5f)) > 0.625f)
+		p = 1000;//offscreen
+	}
+	
 return p;
 }
 
@@ -897,7 +906,7 @@ float4 PS_calcLR(float2 texcoord)
 	float4 color, Left, Right, color_redL, color_greenL, color_blueL, color_redR, color_greenR, color_blueR;
 	float K1_Red = Polynomial_Colors_K1.x, K1_Green = Polynomial_Colors_K1.y, K1_Blue = Polynomial_Colors_K1.z;
 	float K2_Red = Polynomial_Colors_K2.x, K2_Green = Polynomial_Colors_K2.y, K2_Blue = Polynomial_Colors_K2.z;
-	if(Barrel_Distortion)
+	if(Barrel_Distortion == 1 || Barrel_Distortion == 2)
 	{
 		uv_redL = D(TCL.xy,K1_Red,K2_Red);
 		uv_greenL = D(TCL.xy,K1_Green,K2_Green);
@@ -927,10 +936,12 @@ float4 PS_calcLR(float2 texcoord)
 	if(!Depth_Map_View)
 	{	
 
-		color = texcoord.x < 0.5 ? Circle(Left,float2(texcoord.x*2,texcoord.y)) : Circle(Right,float2(texcoord.x*2-1,texcoord.y));
-		if(!Barrel_Distortion)
+		if(Barrel_Distortion == 0)
 		color = texcoord.x < 0.5 ? Left : Right;
-	
+		else if(Barrel_Distortion == 1)
+		color = texcoord.x < 0.5 ? Circle(Left,float2(texcoord.x*2,texcoord.y)) : Circle(Right,float2(texcoord.x*2-1,texcoord.y));
+		else if(Barrel_Distortion == 2)
+		color = texcoord.x < 0.5 ? Left : Right;
 	}
 	else
 	{		
@@ -939,14 +950,14 @@ float4 PS_calcLR(float2 texcoord)
 		color = float4(RGB.x,RGB.y,RGB.z,1.0);
 	}
 		
-	float Average_Lum = tex2Dlod(SamplerDMN,float4(texcoord.x,texcoord.y, 0, 0)).y;
+	float Average_Lum = tex2Dlod(SamplerDMVR,float4(texcoord.x,texcoord.y, 0, 0)).y;
 	
 	return float4(color.rgb,Average_Lum);
 }
 
 float4 Average_Luminance(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Target
 {
-	return float4(tex2Dlod(SamplerDMN,float4(texcoord.x,texcoord.y, 0, 0)).z,0,0,1); //Average_Lum_Full
+	return float4(tex2Dlod(SamplerDMVR,float4(texcoord.x,texcoord.y, 0, 0)).z,0,0,1); //Average_Lum_Full
 }
 
 ////////////////////////////////////////////////////////Logo/////////////////////////////////////////////////////////////////////////
@@ -1079,7 +1090,7 @@ void PostProcessVS(in uint id : SV_VertexID, out float4 position : SV_Position, 
 }
 
 //*Rendering passes*//
-technique SuperDepth3D_Next
+technique SuperDepth3D_VR
 {
 		pass Cursor
 	{
@@ -1090,7 +1101,7 @@ technique SuperDepth3D_Next
 	{
 		VertexShader = PostProcessVS;
 		PixelShader = DepthMap;
-		RenderTarget = texDMN;
+		RenderTarget = texDMVR;
 	}
 		pass LRtoBD
 	{
@@ -1103,14 +1114,14 @@ technique SuperDepth3D_Next
 	{
 		VertexShader = PostProcessVS;
 		PixelShader = Average_Luminance;
-		RenderTarget = texLumN;
+		RenderTarget = texLumVR;
 	}
 		pass StereoOut
 	{
 		VertexShader = PostProcessVS;
 		PixelShader = Out;
 	}
-			pass UnSharpMask_Filter
+		pass UnSharpMask_Filter
 	{
 		VertexShader = PostProcessVS;
 		PixelShader = USM;
