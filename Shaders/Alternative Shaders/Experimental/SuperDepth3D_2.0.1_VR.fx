@@ -780,7 +780,7 @@ float2 Parallax( float Diverge, float2 Coordinates)
 		ParallaxCoord.x = lerp(ParallaxCoord.x - DepthDifference,ParallaxCoord.x,0.5f);
 	
 	return ParallaxCoord;
-};
+}
 
 #define Interpupillary_Distance IPD * pix.x
 float4 saturation(float4 C)
