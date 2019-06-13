@@ -1,9 +1,9 @@
- ////-------------------//
- ///**SuperDepth3D_VR**///
- //-------------------////
+ ////---------------------//
+ ///**SuperDepth3D_Next**///
+ //---------------------////
 
  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
- //* Depth Map Based 3D post-process shader v1.0.0          																														*//
+ //* Depth Map Based 3D post-process shader v2.0.1          																														*//
  //* For Reshade 3.0																																								*//
  //* --------------------------																																						*//
  //* This work is licensed under a Creative Commons Attribution 3.0 Unported License.																								*//
@@ -26,29 +26,40 @@
 // Determines The resolution of the Depth Map. For 4k Use 0.75 or 0.5. For 1440p Use 0.75. For 1080p use 1. Too low of a resolution will remove too much detail.
 #define Depth_Map_Division 1.0
 
-//Weapon Zero Parallax Distance
-#define WZPD 0.375 //WZPD controls the focus distance for the screen Pop-out effect also known as Convergence for the weapon hand. Zero is off.
+// Zero Parallax Distance Balance Mode allows you to switch control from manual to automatic and vice versa. You need to turn this on to use UI Masking options.
+#define Balance_Mode 0 //Default 0 is Automatic. One is Manual.
 
 // RE Fix is used to fix the issue with Resident Evil's 2 Remake 1-Shot cutscenes.
 #define RE_Fix 0 //Default 0 is Off. One is On. 
 
-//Depth Buffer Offset is for non conforming ZBuffer needed in some games.
-#define Offset 0.0 // From 0 to 1 : Depth Map Offset is for non conforming ZBuffer.
+// Alternet Depth Buffer Adjust Toggle Key. The Key Code for "o" is Number 79.
+#define DB_TOGGLE 0 // You can use http://keycode.info/ to figure out what key is what.
+#define Alt_Depth_Map_Adjust 0 // You can set this from 1.0 to 250.
 
 // Change the Cancel Depth Key. Determines the Cancel Depth Toggle Key useing keycode info
-// The Key Code for Decimal Point is Number 110. Ex. for "." Cancel_Depth_Key 110
+// The Key Code for Decimal Point is Number 110. Ex. for Numpad Decimal "." Cancel_Depth_Key 110
 #define Cancel_Depth_Key 0 // You can use http://keycode.info/ to figure out what key is what.
 
-// Use Depth Tool to adjust the lower preprocessor definitions below.
 // Horizontal & Vertical Depth Buffer Resize for non conforming BackBuffer.
+// Also used to enable Image Position Adjust is used to move the Z-Buffer around.
 // Ex. Resident Evil 7 Has this problem. So you want to adjust it too around float2(0.9575,0.9575).
-#define Horizontal_and_Vertical float2(1.0, 1.0) // 1.0 is Default.
-
-// Image Position Adjust is used to move the Z-Buffer around.
-#define Image_Position_Adjust float2(0.0,0.0)
+#define DB_Size_Postion 0 //Default 0 is Off. One is On. 
 
 // Define Display aspect ratio for screen cursor. A 16:9 aspect ratio will equal (1.77:1)
 #define DAR float2(1.76, 1.0)
+
+// Turn UI Mask Off or On. This is used to set Two UI Masks for any game. Keep this in mind when you enable UI_MASK.
+// You Will have to create Three PNG Textures named Mask_A.png and Mask_B.png with transparency for this option.
+// They will also need to be the same resolution as what you have set for the game and the color black where the UI is.
+#define UI_MASK 0 // Set this to 1 if you did the steps above.
+
+// To cycle through the textures set a Key. The Key Code for "n" is Key Code Number 78.
+#define Mask_Cycle_Key 0 // You can use http://keycode.info/ to figure out what key is what.
+// Texture EX. Before |::::::::::| After |**********|
+//                    |:::       |       |***       |
+//                    |:::_______|       |***_______|
+// So :::: are UI Elements in game. The *** is what the Mask needs to cover up.
+// The game part needs to be trasparent and the UI part needs to be black.
 
 //USER EDITABLE PREPROCESSOR FUNCTIONS END//
 
@@ -57,19 +68,6 @@
 #else
 	#define Compatibility 0
 #endif
-
-uniform int IPD <
-	#if Compatibility
-	ui_type = "drag";
-	#else
-	ui_type = "slider";
-	#endif
-	ui_min = 0; ui_max = 100;
-	ui_label = "·Interpupillary Distance·";
-	ui_tooltip = "Determines the distance between your eyes.\n" 
-				 "Default is 64.";
-	ui_category = "Eye Focus Adjustment";
-> = 64;
 
 //Divergence & Convergence//
 uniform float Divergence <
@@ -89,27 +87,67 @@ uniform float ZPD <
 	ui_tooltip = "ZPD controls the focus distance for the screen Pop-out effect also known as Convergence.\n"
 				"For FPS Games keeps this low Since you don't want your gun to pop out of screen.\n"
 				"This is controled by Convergence Mode.\n"
-				"Default is 0.03, Zero is off.";
+				"Default is 0.010, Zero is off.";
 	ui_category = "Divergence & Convergence";
-> = 0.03;
+> = 0.010;
 
-//Occlusion Masking//
+#if Balance_Mode
+uniform float ZPD_Balance <
+	ui_type = "drag";
+	ui_min = 0.0; ui_max = 1.0;
+	ui_label = " ZPD Balance";
+	ui_tooltip = "Zero Parallax Distance balances between ZPD Depth and Scene Depth.\n"
+				"Default is Zero is full Convergence and One is Full Depth.";
+	ui_category = "Divergence & Convergence";
+> = 0.5;
+#define Auto_Balance_Ex 0
+#else
+uniform int Auto_Balance_Ex <
+	#if Compatibility
+	ui_type = "drag";
+	#else
+	ui_type = "slider";
+	#endif
+	ui_min = 0; ui_max = 5;
+	ui_label = " Auto Balance";
+	ui_tooltip = "Automatically Balance between ZPD Depth and Scene Depth.\n" 
+				 "Default is Off.";
+	ui_category = "Divergence & Convergence";
+> = 0;
+#endif
+
+uniform float Auto_Depth_Range <
+	ui_type = "drag";
+	ui_min = 0.0; ui_max = 0.625;
+	ui_label = " Auto Depth Range";
+	ui_tooltip = "The Map Automaticly scales to outdoor and indoor areas.\n" 
+				 "Default is 0.1f, Zero is off.";
+	ui_category = "Divergence & Convergence";
+> = 0.1;
+
+
 uniform int View_Mode <
 	ui_type = "combo";
 	ui_items = "View Mode Normal\0View Mode Alpha\0";
-	ui_label = "·View Mode·";
+	ui_label = " View Mode";
 	ui_tooltip = "Change the way the shader warps the output to the screen.\n"
 				 "Default is Normal";
 	ui_category = "Occlusion Masking";
 > = 0;
 
-uniform bool Performance_Mode <
-	ui_label = " Performance Mode";
-	ui_tooltip = "Occlusion Quality Processing.\n"
-				 "Default is True.";
+uniform int Custom_Sidebars <
+	ui_type = "combo";
+	ui_items = "Mirrored Edges\0Black Edges\0Stretched Edges\0";
+	ui_label = " Edge Handling";
+	ui_tooltip = "Edges selection for your screen output.";
 	ui_category = "Occlusion Masking";
-> = true;
+> = 1;
 
+uniform bool Side_Bars <
+	ui_label = " Side Bars";
+	ui_tooltip = "Adds Side Bar to the Left and Right Edges";
+	ui_category = "Occlusion Masking";
+> = false;
 //Depth Map//
 uniform int Depth_Map <
 	ui_type = "combo";
@@ -130,6 +168,17 @@ uniform float Depth_Map_Adjust <
 	ui_category = "Depth Map";
 > = 7.5;
 
+uniform float Offset <
+	ui_type = "drag";
+	ui_min = 0.0; ui_max = 1.0;
+	ui_label = " Depth Map Offset";
+	ui_tooltip = "Depth Map Offset is for non conforming ZBuffer.\n"
+				 "It,s rare if you need to use this in any game.\n"
+				 "Use this to make adjustments to DM 0 or DM 1.\n"
+				 "Default and starts at Zero and it's Off.";
+	ui_category = "Depth Map";
+> = 0.0;
+
 uniform bool Depth_Map_View <
 	ui_label = " Depth Map View";
 	ui_tooltip = "Display the Depth Map.";
@@ -141,15 +190,57 @@ uniform bool Depth_Map_Flip <
 	ui_tooltip = "Flip the depth map if it is upside down.";
 	ui_category = "Depth Map";
 > = false;
-
+#if DB_Size_Postion 
+uniform int2 Image_Position_Adjust<
+	ui_type = "drag";
+	ui_min = -4096.0; ui_max = 4096.0;
+	ui_label = "Z Position Adjust";
+	ui_tooltip = "Adjust the Image Postion if it's off by a bit. Default is Zero.";
+	ui_category = "Depth Map";
+> = int2(0.0,0.0);
+	
+uniform float2 Horizontal_and_Vertical <
+	ui_type = "drag";
+	ui_min = 0.125; ui_max = 2;
+	ui_label = "Z Horizontal & Vertical";
+	ui_tooltip = "Adjust Horizontal and Vertical Resize. Default is 1.0.";
+	ui_category = "Depth Map";
+> = float2(1.0,1.0);
+#else
+	#define Image_Position_Adjust 0
+	#define Horizontal_and_Vertical float2(1,1)
+#endif
 //Weapon Hand Adjust//
 uniform int WP <
 	ui_type = "combo";
-	ui_items = "Weapon Profile Off\0Pick Profiles Bellow\0WP 0\0WP 1\0WP 2\0WP 3\0WP 4\0WP 5\0WP 6\0WP 7\0WP 8\0WP 9\0WP 10\0WP 11\0WP 12\0WP 13\0WP 14\0WP 15\0WP 16\0WP 17\0WP 18\0WP 19\0WP 20\0WP 21\0WP 22\0WP 23\0WP 24\0WP 25\0WP 26\0WP 27\0WP 28\0WP 29\0WP 30\0WP 31\0WP 32\0WP 33\0WP 34\0WP 35\0WP 36\0WP 37\0WP 38\0WP 39\0WP 40\0WP 41\0WP 42\0WP 43\0WP 44\0WP 45\0WP 46\0WP 47\0WP 48\0WP 49\0WP 50\0";
+	ui_items = "Weapon Profile Off\0Custom WP\0WP 0\0WP 1\0WP 2\0WP 3\0WP 4\0WP 5\0WP 6\0WP 7\0WP 8\0WP 9\0WP 10\0WP 11\0WP 12\0WP 13\0WP 14\0WP 15\0WP 16\0WP 17\0WP 18\0WP 19\0WP 20\0WP 21\0WP 22\0WP 23\0WP 24\0WP 25\0WP 26\0WP 27\0WP 28\0WP 29\0WP 30\0WP 31\0WP 32\0WP 33\0WP 34\0WP 35\0WP 36\0WP 37\0WP 38\0WP 39\0WP 40\0WP 41\0WP 42\0WP 43\0WP 44\0WP 45\0WP 46\0WP 47\0WP 48\0WP 49\0WP 50\0";
 	ui_label = "·Weapon Profiles·";
 	ui_tooltip = "Pick Weapon Profile for your game or make your own.";
 	ui_category = "Weapon Hand Adjust";
 > = 0;
+
+uniform int Weapon_Scale <
+	#if Compatibility
+	ui_type = "drag";
+	#else
+	ui_type = "slider";
+	#endif
+	ui_min = -3; ui_max = 3;
+	ui_label = " Weapon Scale";
+	ui_tooltip = "Use this to set the proper weapon hand scale.";
+	ui_category = "Weapon Hand Adjust";
+> = 0;
+
+uniform float2 Weapon_Adjust <
+	ui_type = "drag";
+	ui_min = 0.0; ui_max = 25.0;
+	ui_label = " Weapon Hand Adjust";
+	ui_tooltip = "Adjust Weapon depth map for your games.\n"
+				 "X, CutOff Point used to set a diffrent scale for first person hand apart from world scale.\n"
+				 "Y, Precision is used to adjust the first person hand in world scale.\n"
+	             "Default is float2(X 0.0, Y 0.0)";
+	ui_category = "Weapon Hand Adjust";
+> = float2(0.0,0.0);
 
 uniform float Weapon_Depth_Adjust <
 	ui_type = "drag";
@@ -161,96 +252,77 @@ uniform float Weapon_Depth_Adjust <
 	ui_category = "Weapon Hand Adjust";
 > = 0;
 
-uniform int Barrel_Distortion <
+uniform float WZPD <
+	ui_type = "drag";
+	ui_min = 0.0; ui_max = 0.5;
+	ui_label = " Weapon Zero Parallax Distance";
+	ui_tooltip = "WZPD controls the focus distance for the screen Pop-out effect also known as Convergence for the weapon hand.\n"
+				"For FPS Games keeps this low Since you don't want your gun to pop out of screen.\n"
+				"This is controled by Convergence Mode.\n"
+				"Default is 0.375f & Zero is off.";
+	ui_category = "Weapon Hand Adjust";
+> = 0.375;
+#if Balance_Mode
+//Heads-Up Display
+uniform float2 HUD_Adjust <
+	ui_type = "drag";
+	ui_min = 0.0; ui_max = 1.0;
+	ui_label = "·HUD Mode·";
+	ui_tooltip = "Adjust HUD for your games.\n"
+				 "X, CutOff Point used to set a seperation point bettwen world scale and the HUD also used to turn HUD MODE On or Off.\n"
+				 "Y, Pushes or Pulls the HUD in or out of the screen if HUD MODE is on.\n"
+				 "This is only for UI elements that show up in the Depth Buffer.\n"
+	             "Default is float2(X 0.0, Y 0.5)";
+	ui_category = "Heads-Up Display";
+> = float2(0.0,0.5);
+#endif
+//Stereoscopic Options//
+uniform int Stereoscopic_Mode <
 	ui_type = "combo";
-	ui_items = "Off\0Blinders A\0Blinders B\0";
-	ui_label = "·Barrel Distortion·";
-	ui_tooltip = "Use this to dissable or enable Barrel Distortion A & B.\n"
-				 "This also lets you select from two diffrent Blinders.\n"
-			     "Default is Blinders A.\n";
-	ui_category = "Image Adjustment";
+	ui_items = "Side by Side\0Top and Bottom\0Line Interlaced\0Column Interlaced\0Checkerboard 3D\0Anaglyph 3D Red/Cyan\0Anaglyph 3D Red/Cyan Dubois\0Anaglyph 3D Red/Cyan Anachrome\0Anaglyph 3D Green/Magenta\0Anaglyph 3D Green/Magenta Dubois\0Anaglyph 3D Green/Magenta Triochrome\0Anaglyph 3D Blue/Amber ColorCode\0";
+	ui_label = "·3D Display Modes·";
+	ui_tooltip = "Stereoscopic 3D display output selection.";
+	ui_category = "Stereoscopic Options";
 > = 0;
 
-uniform float FoV <
-	#if Compatibility
+uniform float2 Interlace_Anaglyph <
 	ui_type = "drag";
-	#else
-	ui_type = "slider";
-	#endif
-	ui_min = 0; ui_max = 0.5;
-	ui_label = " Field of View";
-	ui_tooltip = "Lets you adjust the FoV of the Image.\n" 
-				 "Default is 0.0.";
-	ui_category = "Image Adjustment";
+	ui_min = 0.0; ui_max = 1.0;
+	ui_label = " Interlace & Anaglyph";
+	ui_tooltip = "Interlace Optimization is used to reduce alisesing in a Line or Column interlaced image. This has the side effect of softening the image.\n"
+	             "Anaglyph Desaturation allows for removing color from an anaglyph 3D image. Zero is Black & White, One is full color.\n"
+	             "Default for Interlace Optimization is 0.5 and for Anaglyph Desaturation is One.";
+	ui_category = "Stereoscopic Options";
+> = float2(0.5,1.0);
+
+uniform int Scaling_Support <
+	ui_type = "combo";
+	ui_items = "SR Native\0SR 2160p A\0SR 2160p B\0SR 1080p A\0SR 1080p B\0SR 1050p A\0SR 1050p B\0SR 720p A\0SR 720p B\0";
+	ui_label = " Scaling Support";
+	ui_tooltip = "Dynamic Super Resolution scaling support for Line Interlaced, Column Interlaced, & Checkerboard 3D displays.\n"
+				 "Set this to your native Screen Resolution A or B, DSR Smoothing must be set to 0%.\n"
+				 "This does not work with a hardware ware scaling done by VSR.\n"
+				 "Default is SR Native.";
+	ui_category = "Stereoscopic Options";
 > = 0;
 
-uniform float3 Polynomial_Colors_K1 <
-	#if Compatibility
+uniform int Perspective <
 	ui_type = "drag";
-	#else
-	ui_type = "slider";
-	#endif
-	ui_min = 0.0; ui_max = 1.0;
-	ui_label = " Polynomial Distortion K1";
-	ui_tooltip = "Adjust the Polynomial Distortion K1_Red, K1_Green, & K1_Blue.\n"
-				 "Default is (R 0.22, G 0.22, B 0.22)";
-	ui_category = "Image Adjustment";
-> = float3(0.22, 0.22, 0.22);
+	ui_min = -100; ui_max = 100;
+	ui_label = " Perspective Slider";
+	ui_tooltip = "Determines the perspective point of the two images this shader produces.\n"
+				 "For an HMD, use Polynomial Barrel Distortion shader to adjust for IPD.\n" 
+				 "Do not use this perspective adjustment slider to adjust for IPD.\n"
+				 "Default is Zero.";
+	ui_category = "Stereoscopic Options";
+> = 0;
 
-uniform float3 Polynomial_Colors_K2 <
-	#if Compatibility
-	ui_type = "drag";
-	#else
-	ui_type = "slider";
-	#endif
-	ui_min = 0.0; ui_max = 1.0;
-	ui_label = " Polynomial Distortion K2";
-	ui_tooltip = "Adjust the Polynomial Distortion K2_Red, K2_Green, & K2_Blue.\n"
-				 "Default is (R 0.24, G 0.24, B 0.24)";
-	ui_category = "Image Adjustment";
-> = float3(0.24, 0.24, 0.24);
-
-uniform bool Theater_Mode <
-	ui_label = " Theater Mode";
-	ui_tooltip = "Sets the VR Shader in to Theater mode.";
-	ui_category = "Image Adjustment";
+uniform bool Eye_Swap <
+	ui_label = " Swap Eyes";
+	ui_tooltip = "L/R to R/L.";
+	ui_category = "Stereoscopic Options";
 > = false;
 
-uniform float Vignette <
-	#if Compatibility
-	ui_type = "drag";
-	#else
-	ui_type = "slider";
-	#endif
-	ui_min = 0; ui_max = 1;
-	ui_label = "·Vignette·";
-	ui_tooltip = "Soft edge effect around the image.";
-	ui_category = "Image Effects";
-> = 0.25;
-	
-uniform float Sharpen_Power <
-	#if Compatibility
-	ui_type = "drag";
-	#else
-	ui_type = "slider";
-	#endif
-	ui_min = 0.0; ui_max = 2.0;
-	ui_label = " Sharpen Power";
-	ui_tooltip = "Adjust this on clear up the image the game, movie piture & ect.";
-	ui_category = "Image Effects";
-> = 0;
-
-uniform float Saturation <
-	#if Compatibility
-	ui_type = "drag";
-	#else
-	ui_type = "slider";
-	#endif
-	ui_min = 0; ui_max = 1;
-	ui_label = " Saturation";
-	ui_tooltip = "Lets you saturate image, Basicly add more color.";
-	ui_category = "Image Effects";
-> = 0;
 //Cursor Adjustments//
 uniform int Cursor_Type <
 	#if Compatibility
@@ -258,7 +330,7 @@ uniform int Cursor_Type <
 	#else
 	ui_type = "slider";
 	#endif
-	ui_min = 0; ui_max = 5;
+	ui_min = 0; ui_max = 6;
 	ui_label = "·Cursor Selection·";
 	ui_tooltip = "Choose the cursor type you like to use.\n" 
 				 "Default is Zero.";
@@ -269,17 +341,26 @@ uniform float3 Cursor_STT <
 	ui_type = "drag";
 	ui_min = 0; ui_max = 1;
 	ui_label = " Cursor Adjustments";
-	ui_tooltip = "This controlls the Size, Thickness, & Color.\n" 
-				 "Defaults are ( X 0.125, Y 0.5, Z 1.0).";
+	ui_tooltip = "This controlls the Size, Thickness, & Transparency.\n" 
+				 "Defaults are ( X 0.125, Y 0.5, Z 0.75 ).";
 	ui_category = "Cursor Adjustments";
-> = float3(0.125,0.5,1.0);
+> = float3(0.125,0.5,0.75);
+
+uniform float3 Cursor_Color <
+	ui_type = "color";
+	ui_label = " Cursor Color";
+	ui_category = "Cursor Adjustments";
+> = float3(1.0,1.0,1.0);
 
 uniform bool SCSC <
 	ui_label = " Cursor Lock";
 	ui_tooltip = "Screen Cursor to Screen Crosshair Lock.";
 	ui_category = "Cursor Adjustments";
 > = false;
+
 uniform bool Cancel_Depth < source = "key"; keycode = Cancel_Depth_Key; toggle = true; >;
+uniform bool Mask_Cycle < source = "key"; keycode = Mask_Cycle_Key; toggle = true; >;
+uniform bool Depth_Adjust < source = "key"; keycode = DB_TOGGLE; toggle = true; >;
 /////////////////////////////////////////////D3D Starts Here/////////////////////////////////////////////////////////////////
 #define pix float2(BUFFER_RCP_WIDTH, BUFFER_RCP_HEIGHT)
 
@@ -293,7 +374,10 @@ texture DepthBufferTex : DEPTH;
 
 sampler DepthBuffer 
 	{ 
-		Texture = DepthBufferTex; 
+		Texture = DepthBufferTex;
+		AddressU = BORDER;
+		AddressV = BORDER;
+		AddressW = BORDER;
 	};
 
 texture BackBufferTex : COLOR;
@@ -301,6 +385,14 @@ texture BackBufferTex : COLOR;
 sampler BackBuffer 
 	{ 
 		Texture = BackBufferTex;
+	};
+	
+sampler BackBufferMIRROR 
+	{ 
+		Texture = BackBufferTex;
+		AddressU = MIRROR;
+		AddressV = MIRROR;
+		AddressW = MIRROR;
 	};
 
 sampler BackBufferBORDER
@@ -310,40 +402,37 @@ sampler BackBufferBORDER
 		AddressV = BORDER;
 		AddressW = BORDER;
 	};
-	
-texture texDMVR  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT*Depth_Map_Division; Format = RGBA16F; }; 
 
-sampler SamplerDMVR
-	{
-		Texture = texDMVR;
+sampler BackBufferCLAMP
+	{ 
+		Texture = BackBufferTex;
+		AddressU = CLAMP;
+		AddressV = CLAMP;
+		AddressW = CLAMP;
 	};
 	
-texture LeftTex  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA8; }; 
+texture texDMN  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT*Depth_Map_Division; Format = RGBA16F; }; 
 
-sampler SamplerLeft
+sampler SamplerDMN
 	{
-		Texture = LeftTex;
+		Texture = texDMN;
 		AddressU = BORDER;
 		AddressV = BORDER;
-		AddressW = BORDER;	
+		AddressW = BORDER;
 	};
 	
-texture RightTex  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA8; }; 
+#if UI_MASK
+texture TexMaskA < source = "Mask_A.png"; > { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA8; };
+sampler SamplerMaskA { Texture = TexMaskA;};
 
-sampler SamplerRight
-	{
-		Texture = RightTex;
-		AddressU = BORDER;
-		AddressV = BORDER;
-		AddressW = BORDER;	
-	};	
-					
+texture TexMaskB < source = "Mask_B.png"; > { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA8; };
+sampler SamplerMaskB { Texture = TexMaskB;};
+#endif
+		
 uniform float2 Mousecoords < source = "mousepoint"; > ;	
 ////////////////////////////////////////////////////////////////////////////////////Cross Cursor////////////////////////////////////////////////////////////////////////////////////	
 float4 MouseCursor(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Target
 {
-	
-	float4 Out = tex2D(BackBuffer, texcoord),Color; 
 	float CCA = 0.1,CCB = 0.0025, CCC = 0.025, CCD = 0.05;
 	float2 MousecoordsXY = Mousecoords * pix, center = texcoord, Screen_Ratio = float2(DAR.x,DAR.y), Size_Thickness = float2(Cursor_STT.x,Cursor_STT.y + 0.00000001);
 	
@@ -367,68 +456,53 @@ float4 MouseCursor(float4 position : SV_Position, float2 texcoord : TEXCOORD) : 
 	float Solid_Square_Size = Size_Thickness.x * CCC;
 	float SSC = min(max(Solid_Square_Size - dist_fromHorizontal,0)/Solid_Square_Size,max(Solid_Square_Size-dist_fromVertical,0)); //Solid Square Cursor
 	
-	float Cursor;
+	float Cursor = CC;
 	
 	if(Cursor_Type == 1)
-		Cursor = CC;
-	else if(Cursor_Type == 2)
 		Cursor = RC;
-	else if(Cursor_Type == 3)
+	else if(Cursor_Type == 2)
 		Cursor = SSC;
-	else if(Cursor_Type == 4)
+	else if(Cursor_Type == 3)
 		Cursor = SSC + CC;
+	else if(Cursor_Type == 4)
+		Cursor = SSC + RC;
 	else if(Cursor_Type == 5)
-		Cursor = SSC + RC;	
+		Cursor = CC + RC;
+	else if(Cursor_Type == 6)
+		Cursor = CC + RC + SSC;
 	
-	if (Cursor_STT.z == 1 )
-		Color.rgb = float3(1,1,1);
-	else if (Cursor_STT.z >= 0.9 )
-		Color.rgb = float3(0,0,1);
-	else if (Cursor_STT.z >= 0.8 )
-		Color.rgb = float3(0,1,0);
-	else if (Cursor_STT.z >= 0.7 )
-		Color.rgb = float3(1,0,0);	
-	else if (Cursor_STT.z >= 0.6 )
-		Color.rgb = float3(0,1,1);
-	else if (Cursor_STT.z >= 0.5 )
-		Color.rgb = float3(1,0,1);
-	else if (Cursor_STT.z >= 0.4 )
-		Color.rgb = float3(1,1,0);
-	else if (Cursor_STT.z >= 0.3 )
-		Color.rgb = float3(1,0.4,0.7);
-	else if (Cursor_STT.z >= 0.2 )
-		Color.rgb = float3(1,0.64,0);
-	else if (Cursor_STT.z >= 0.1 )
-		Color.rgb = float3(0.5,0,0.5);
-		
-	if(Cursor_Type == 0)
-	Out = tex2D(BackBuffer, texcoord); 
-	else	
-	Out = Cursor  ? Color : Out;
-	
-	return Out;
+	return lerp( Cursor  ? float4(Cursor_Color.rgb, 1.0) : tex2D(BackBuffer, texcoord),tex2D(BackBuffer, texcoord),1-Cursor_STT.z);
 }
 
 /////////////////////////////////////////////////////////////////////////////////Adapted Luminance/////////////////////////////////////////////////////////////////////////////////
-texture texLumVR {Width = 256*0.5; Height = 256*0.5; Format = RGBA8; MipLevels = 8;}; //Sample at 256x256/2 and a mip bias of 8 should be 1x1 
+texture texLumN {Width = 256*0.5; Height = 256*0.5; Format = RGBA8; MipLevels = 8;}; //Sample at 256x256/2 and a mip bias of 8 should be 1x1 
 																				
-sampler SamplerLumVR																
+sampler SamplerLumN																
 	{
-		Texture = texLumVR;
+		Texture = texLumN;
 		MipLODBias = 8.0f; //Luminance adapted luminance value from 1x1 Texture Mip lvl of 8
 		MinFilter = LINEAR;
 		MagFilter = LINEAR;
 		MipFilter = LINEAR;
 	};	
 	
-float Lum(in float2 texcoord : TEXCOORD0)
+float2 Lum(in float2 texcoord : TEXCOORD0)
 	{
-		float Luminance = tex2Dlod(SamplerLumVR,float4(texcoord,0,0)).x; //Average Luminance Texture Sample 
+		float2 Luminance = tex2Dlod(SamplerLumN,float4(texcoord,0,0)).xy; //Average Luminance Texture Sample 
 
 		return saturate(Luminance);
 	}
 		
 /////////////////////////////////////////////////////////////////////////////////Depth Map Information/////////////////////////////////////////////////////////////////////////////////
+float DMA()//Depth Map Adjustment
+{
+	float DMA = Depth_Map_Adjust;	
+	if(Depth_Adjust)
+		DMA = Alt_Depth_Map_Adjust;
+
+	return DMA;
+}
+
 float Depth(in float2 texcoord : TEXCOORD0)
 {	
 	float2 texXY = texcoord + Image_Position_Adjust * pix;		
@@ -442,17 +516,17 @@ float Depth(in float2 texcoord : TEXCOORD0)
 	
 	//Conversions to linear space.....
 	//Near & Far Adjustment
-	float Far = 1.0, Near = 0.125/Depth_Map_Adjust; //Division Depth Map Adjust - Near
+	float Far = 1.0, Near = 0.125/DMA(), DA = DMA() * 2.0f;  //Division Depth Map Adjust - Near
 	
 	float2 Offsets = float2(1 + Offset,1 - Offset), Z = float2( zBuffer, 1-zBuffer );
 	
 	if (Offset > 0)
 	Z = min( 1, float2( Z.x*Offsets.x , Z.y /  Offsets.y  ));
 
-	if (Depth_Map == 0)//DM0. Normal
+	[branch] if (Depth_Map == 0)//DM0. Normal
 		zBuffer = Far * Near / (Far + Z.x * (Near - Far));		
 	else if (Depth_Map == 1)//DM1. Reverse
-		zBuffer = Far * Near / (Far + Z.y * (Near - Far));		
+		zBuffer = Far * Near / (Far + Z.y * (Near - Far));
 		
 	return zBuffer;
 }
@@ -466,13 +540,13 @@ float2 WeaponDepth(in float2 texcoord : TEXCOORD0)
 		if (Depth_Map_Flip)
 		texcoord.y =  1 - texcoord.y;
 		
-	float zBufferWH = tex2D(DepthBuffer, texcoord).x, CutOff = 0 , Adjust = 0, Tune = 0, Scale = 0;
+	float zBufferWH = tex2D(DepthBuffer, texcoord).x, CutOff = Weapon_Adjust.x , Adjust = Weapon_Adjust.y, Tune = Weapon_Depth_Adjust, Scale = Weapon_Scale;
 	
 	float4 WA_XYZW;//Weapon Profiles Starts Here
-	if (WP == 1)                                   // WA_XYZW.x | WA_XYZW.y | WA_XYZW.z | WA_XYZW.w 
+	[branch] if (WP == 1)                                   // WA_XYZW.x | WA_XYZW.y | WA_XYZW.z | WA_XYZW.w 
 		WA_XYZW = float4(CutOff,Adjust,Tune,Scale);// X Cutoff  | Y Adjust  | Z Tuneing | W Scaling 		
 	else if(WP == 2) //WP 0
-		WA_XYZW = float4(0.425,0.025,0,-2);        //ES: Oblivion		
+		WA_XYZW = float4(0.425,0.025,0,-2);                 //ES: Oblivion		
 	else if(WP == 3) //WP 1
 		WA_XYZW = float4(0,0,0,0);                 //Game
 	else if(WP == 4) //WP 2
@@ -582,13 +656,13 @@ float2 WeaponDepth(in float2 texcoord : TEXCOORD0)
 	// Hear on out is the Weapon Hand Adjustment code.		
 	float Set_Scale , P = WA_XYZW.y;
 	
-	if (WA_XYZW.w == -3)
+	[branch] if (WA_XYZW.w == -3)
 	{
 		WA_XYZW.x *= 21.0f;
 		P = (P + 0.00000001) * 100;
 		Set_Scale = 0.5f;
 	}			
-	if (WA_XYZW.w == -2)
+	else if (WA_XYZW.w == -2)
 	{
 		P = (P + 0.00000001) * 100;
 		Set_Scale = 0.5f;
@@ -623,7 +697,7 @@ float2 WeaponDepth(in float2 texcoord : TEXCOORD0)
 	
 	float2 Z = float2( zBufferWH, 1-zBufferWH );
 			
-	if ( Depth_Map == 0 )
+	[branch] if ( Depth_Map == 0 )
 		zBufferWH /= Far - Z.x * (Near - Far);
 	else if ( Depth_Map == 1 )
 		zBufferWH /= Far - Z.y * (Near - Far);
@@ -634,7 +708,7 @@ float2 WeaponDepth(in float2 texcoord : TEXCOORD0)
 	if (WP > 1)
 	zBufferWH = (zBufferWH - 0) / (WA - 0);
 	//Wish I didn't have to do this.	
-	if (WZPD > 0)
+	[branch] if (WZPD > 0)
 	zBufferWH = lerp(zBufferWH,0.75f,0.25f);
 	else
 	zBufferWH = smoothstep(-0.2,0.8,zBufferWH);
@@ -646,10 +720,10 @@ float4 DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0
 {
 		float4 DM = Depth(texcoord).xxxx;
 		
-		float R, G, B, A, WD = WeaponDepth(texcoord).x, CoP = WeaponDepth(texcoord).y, CutOFFCal = (CoP/Depth_Map_Adjust) * 0.5f; //Weapon Cutoff Calculation
+		float R, G, B, A, WD = WeaponDepth(texcoord).x, CoP = WeaponDepth(texcoord).y, CutOFFCal = (CoP/DMA()) * 0.5f; //Weapon Cutoff Calculation
 		CutOFFCal = step(DM.x,CutOFFCal);
 					
-		if (WP == 0)
+		[branch] if (WP == 0)
 		{
 			DM.x = DM.x;
 		}
@@ -667,21 +741,43 @@ float4 DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0
 	return saturate(float4(R,G,B,A));
 }
 
+#if Balance_Mode
+float4 HUD(float4 HUD, float2 texcoord ) 
+{		
+	float Mask_Tex, CutOFFCal = ((HUD_Adjust.x * 0.5)/DMA()) * 0.5, COC = step(Depth(texcoord).x,CutOFFCal); //HUD Cutoff Calculation
+	
+	//This code is for hud segregation.			
+	if (HUD_Adjust.x > 0)
+		HUD = COC > 0 ? tex2D(BackBuffer,texcoord) : HUD;	
+		
+#if UI_MASK	
+    [branch] if (Mask_Cycle == true) 
+        Mask_Tex = tex2D(SamplerMaskB,texcoord.xy).a;
+    else
+        Mask_Tex = tex2D(SamplerMaskA,texcoord.xy).a;
+
+	float MAC = step(1.0f-Mask_Tex,0.5f); //Mask Adjustment Calculation
+	//This code is for hud segregation.			
+	HUD = MAC > 0 ? tex2D(BackBuffer,texcoord) : HUD;
+#endif		
+	return HUD;	
+}
+#endif
 float AutoDepthRange( float d, float2 texcoord )
 {
-	float LumAdjust_ADR = smoothstep(-0.0175f,0.1f,Lum(texcoord));
+	float LumAdjust_ADR = smoothstep(-0.0175f,Auto_Depth_Range,Lum(texcoord).y);
     return min(1,( d - 0 ) / ( LumAdjust_ADR - 0));
 }
 #if RE_Fix
 float AutoZPDRange(float ZPD, float2 texcoord )
 {
-	float LumAdjust_AZDPR = smoothstep(-0.0175f,0.125,Lum(texcoord)); //Adjusted to only effect really intense differences.
+	float LumAdjust_AZDPR = smoothstep(-0.0175f,0.125,Lum(texcoord).y); //Adjusted to only effect really intense differences.
     return saturate(LumAdjust_AZDPR * ZPD);
 }
 #endif
 float WHConv(float D,float2 texcoord)
 {
-	float Z = WZPD, ZP = 0.125,ALC = abs(Lum(texcoord)) ,Convergence = 1 - Z / (D * 2);
+	float Z = WZPD, ZP = 0.125,ALC = abs(Lum(texcoord).x) ,Convergence = 1 - Z / (D * 2);
 	
 	if (Z <= 0)
 		ZP = 1;
@@ -696,13 +792,19 @@ float WHConv(float D,float2 texcoord)
 
 float Conv(float D,float2 texcoord)
 {
-	float Z = ZPD, ZP = 0.4375f;
+	float Z = ZPD, ZP = 0.5f, ALC = abs(Lum(texcoord).x);
 	#if RE_Fix	
 		Z = AutoZPDRange(Z,texcoord);
 	#endif	
-
-			D = AutoDepthRange(D,texcoord);	
-
+		if (Auto_Depth_Range > 0)
+			D = AutoDepthRange(D,texcoord);
+			
+	#if Balance_Mode
+			ZP = saturate(ZPD_Balance);			
+	#else
+		if(Auto_Balance_Ex > 0 )
+			ZP = saturate(ALC);
+	#endif		
 		float Convergence = 1 - Z / D;
 			
 		if (ZPD == 0)
@@ -713,14 +815,14 @@ float Conv(float D,float2 texcoord)
 
 float zBuffer(in float2 texcoord : TEXCOORD0)
 {	
-	float4 DM = tex2Dlod(SamplerDMVR,float4(texcoord,0,0));
+	float4 DM = tex2Dlod(SamplerDMN,float4(texcoord,0,0));
 
 	DM.z = lerp(Conv(DM.z,texcoord), WHConv(DM.x,texcoord), DM.y);
 		
 	if (WZPD <= 0)
 	DM.z = Conv(DM.x,texcoord);
 	
-	float ALC = abs(Lum(texcoord));
+	float ALC = abs(Lum(texcoord).x);
 	
 	if (ALC <= 0.025f)
 		DM = 0;
@@ -735,13 +837,13 @@ float zBuffer(in float2 texcoord : TEXCOORD0)
 // Horizontal parallax offset & Hole filling effect
 float2 Parallax( float Diverge, float2 Coordinates)
 {
-	float Cal_Steps = (Divergence * 0.5) + (Divergence * 0.04);
+	float Cal_Steps = Divergence + (Divergence * 0.04);
 	
-	if(!Performance_Mode)
-	Cal_Steps = Divergence + (Divergence * 0.04);
+	//ParallaxSteps
+	float Steps = clamp(Cal_Steps,0,255);
 	
 	// Offset per step progress & Limit
-	float LayerDepth = 1.0 / Cal_Steps;
+	float LayerDepth = 1.0 / Steps;
 
 	//Offsets listed here Max Seperation is 3% - 8% of screen space with Depth Offsets & Netto layer offset change based on MS.
 	float MS = Diverge * pix.x, deltaCoordinates = MS * LayerDepth;
@@ -749,15 +851,14 @@ float2 Parallax( float Diverge, float2 Coordinates)
 	float CurrentDepthMapValue = zBuffer(ParallaxCoord), CurrentLayerDepth = 0, DepthDifference;
 
 	[loop] //Steep parallax mapping
-    for ( int i = 0 ; i < Cal_Steps; i++ )
-    {
-		// Doing it this way should stop crashes in older version of reshade, I hope.
+    for ( int i = 0; i < Steps; i++ )
+    {	// Doing it this way should stop crashes in older version of reshade, I hope.
         if (CurrentDepthMapValue <= CurrentLayerDepth)
 			break; // Once we hit the limit Stop Exit Loop.
         // Shift coordinates horizontally in linear fasion
         ParallaxCoord.x -= deltaCoordinates;
         // Get depth value at current coordinates
-        if(View_Mode == 1)
+        [branch] if(View_Mode == 1)
         	CurrentDepthMapValue = zBuffer( ParallaxCoord );
         else
         	CurrentDepthMapValue = zBuffer( ParallaxCoord - DB_Offset);
@@ -782,182 +883,337 @@ float2 Parallax( float Diverge, float2 Coordinates)
 	return ParallaxCoord;
 }
 
-#define Interpupillary_Distance IPD * pix.x
-float4 saturation(float4 C)
+float4 EdgeMask( float Diverge, float4 Image, float2 texcoords)
 {
-  float greyscale = dot(C.rgb, float3(0.2125, 0.7154, 0.0721)); 
-   return lerp(greyscale.xxxx, C, (Saturation + 1.0));
-}
-
-void LR_Out(float4 position : SV_Position, float2 texcoord : TEXCOORD, out float4 Left : SV_Target0, out float4 Right : SV_Target1)
-{
-	//Field of View
-	float fov = FoV-(FoV*0.2), F = -fov + 1,HA = (F - 1)*(BUFFER_WIDTH*0.5)*pix.x;
-	//Field of View Application
-	float2 Z_A = float2(1.0,1.0); //Theater Mode
-	if(!Theater_Mode)
-	{
-		Z_A = float2(1.0,0.5); //Full Screen Mode
-		texcoord.x = (texcoord.x*F)-HA;
-	}
-	//Texture Zoom & Aspect Ratio//
-	float X = Z_A.x;
-	float Y = Z_A.y * Z_A.x * 2;
-	float midW = (X - 1)*(BUFFER_WIDTH*0.5)*pix.x;	
-	float midH = (Y - 1)*(BUFFER_HEIGHT*0.5)*pix.y;	
-				
-	texcoord = float2((texcoord.x*X)-midW,(texcoord.y*Y)-midH);
-	//Store Texcoords for left and right eye
-	float2 TCL = texcoord,TCR = texcoord;
-	//IPD Right Adjustment
-	TCL.x -= Interpupillary_Distance*0.5f;
-	TCR.x += Interpupillary_Distance*0.5f;
+	float Side_A = 0, Side_B = -1;
+	
+	if(Diverge > 0)
+		{
+			Side_A = -1;	 
+			Side_B = 0;
+		}
 		
-	//Left & Right Parallax for Stereo Vision	
-	Left = saturation(tex2Dlod(BackBufferBORDER, float4(Parallax(-Divergence, TCL),0,0))); //Stereoscopic 3D using Reprojection Left
-	Right = saturation(tex2Dlod(BackBufferBORDER, float4(Parallax( Divergence, TCR),0,0)));//Stereoscopic 3D using Reprojection Right
-}
-
-float4 Circle(float4 C, float2 TC)
-{		
-	if(Barrel_Distortion == 2)
-		discard;
+	float PA = Side_A+(BUFFER_WIDTH*pix.x), PB = Side_B+(BUFFER_WIDTH*pix.x), Y = BUFFER_HEIGHT*pix.y;
+	float4 Bar_A = all( abs(float2( texcoords.x-PA, texcoords.y-Y)) < float2(Divergence * pix.x,1.0f));
+	float4 Bar_B = all( abs(float2( texcoords.x-PB, texcoords.y-Y)) < float2(Divergence * pix.x,1.0f));
 		
-	float2 C_A = float2(1.0f,1.1375f), midHV = (C_A-1) * float2(BUFFER_WIDTH * 0.5,BUFFER_HEIGHT * 0.5) * pix;			
-	
-	float2 uv = float2(TC.x,TC.y);
-	
-	uv = float2((TC.x*C_A.x)-midHV.x,(TC.y*C_A.y)-midHV.y);
-	
-	float borderA = 2.5; // 0.01
-	float borderB = Vignette*0.1; // 0.01
-	float circle_radius = 0.55; // 0.5
-	float4 circle_color = 0; // vec4(1.0, 1.0, 1.0, 1.0)
-	float2 circle_center = 0.5; // vec2(0.5, 0.5)  
-	// Offset uv with the center of the circle.
-	uv -= circle_center;
-	  
-	float dist =  sqrt(dot(uv, uv));
-
-	float t = 1.0 + smoothstep(circle_radius, circle_radius+borderA, dist) 
-				  - smoothstep(circle_radius-borderB, circle_radius, dist);
-
-	return lerp(circle_color, C,t);
-}
-
-float4 VigneteL(float2 texcoord)
-{
-	float2 TC = -texcoord * texcoord*32 + texcoord*32;
-	float4 Left = tex2D(SamplerLeft,texcoord);
-		Left.rgb *= smoothstep(0,Vignette*27.0f,TC.x * TC.y);
-return Left;
-}
-
-float4 VigneteR(float2 texcoord)
-{
-	float2 TC = -texcoord * texcoord*32 + texcoord*32;
-	float4 Left = tex2D(SamplerRight,texcoord);
-		Left.rgb *= smoothstep(0,Vignette*27.0f,TC.x * TC.y);
-return Left;
+	return Bar_A + Bar_B ? float4(0,0,0,1) : Image;
 }
 	
-
-float2 D(float2 p, float k1, float k2) //Polynomial Lens + Radial lens undistortion filtering Left & Right
-{
-	if(!Barrel_Distortion)
-		discard;
-	// Normalize the u,v coordinates in the range [-1;+1]
-	p = (2.0f * p - 1.0f) / 1.0f;
-	// Calculate Zoom
-	if(!Theater_Mode)
-		p *= 0.83;
-	else
-		p *= 0.8; 
-	// Calculate l2 norm
-	float r2 = p.x*p.x + p.y*p.y;
-	float r4 = pow(r2,2);
-	// Forward transform
-	float x2 = p.x * (1.0 + k1 * r2 + k2 * r4);
-	float y2 = p.y * (1.0 + k1 * r2 + k2 * r4);
-	// De-normalize to the original range
-	p.x = (x2 + 1.0) * 1.0 / 2.0;
-	p.y = (y2 + 1.0) * 1.0 / 2.0;
-		
-	if(!Theater_Mode)
-	{
-	//Blinders Code Fast
-	float C_A1 = 0.45f, C_A2 = C_A1 * 0.5f;
-	float C_B1 = 0.375f, C_B2 = C_B1 * 0.5f;
-	float C_C1 = 0.9375f, C_C2 = C_C1 * 0.5f;
-	if(length(p.xy*float2(C_A1,1.0f)-float2(C_A2,0.5f)) > 0.5f)
-		p = 1000;//offscreen
-	else if(length(p.xy*float2(1.0f,C_B1)-float2(0.5f,C_B2)) > 0.5f)
-		p = 1000;//offscreen
-	else if(length(p.xy*float2(C_C1,1.0f)-float2(C_C2,0.5f)) > 0.625f)
-		p = 1000;//offscreen
-	}
-	
-return p;
-}
-
 float4 PS_calcLR(float2 texcoord)
 {
-	float2 TCL = float2(texcoord.x * 2,texcoord.y), TCR = float2(texcoord.x * 2 - 1,texcoord.y), uv_redL, uv_greenL, uv_blueL, uv_redR, uv_greenR, uv_blueR;
-	float4 color, Left, Right, color_redL, color_greenL, color_blueL, color_redR, color_greenR, color_blueR;
-	float K1_Red = Polynomial_Colors_K1.x, K1_Green = Polynomial_Colors_K1.y, K1_Blue = Polynomial_Colors_K1.z;
-	float K2_Red = Polynomial_Colors_K2.x, K2_Green = Polynomial_Colors_K2.y, K2_Blue = Polynomial_Colors_K2.z;
-	if(Barrel_Distortion == 1 || Barrel_Distortion == 2)
+	float4 color, Right, Left;
+	float2 TCL, TCR, TexCoords = texcoord;
+
+	[branch] if(Eye_Swap)
 	{
-		uv_redL = D(TCL.xy,K1_Red,K2_Red);
-		uv_greenL = D(TCL.xy,K1_Green,K2_Green);
-		uv_blueL = D(TCL.xy,K1_Blue,K2_Blue);
-		
-		uv_redR = D(TCR.xy,K1_Red,K2_Red);
-		uv_greenR = D(TCR.xy,K1_Green,K2_Green);
-		uv_blueR = D(TCR.xy,K1_Blue,K2_Blue);
-		
-		color_redL = VigneteL(uv_redL).r;
-		color_greenL = VigneteL(uv_greenL).g;
-		color_blueL = VigneteL(uv_blueL).b;
-		
-		color_redR = VigneteR(uv_redR).r;
-		color_greenR = VigneteR(uv_greenR).g;
-		color_blueR = VigneteR(uv_blueR).b;
-	
-		Left = float4(color_redL.x, color_greenL.y, color_blueL.z, 1.0);
-		Right = float4(color_redR.x, color_greenR.y, color_blueR.z, 1.0);
+		[branch] if ( Stereoscopic_Mode == 0 )
+		{
+			TCL = float2(texcoord.x*2-1,texcoord.y);
+			TCR = float2(texcoord.x*2,texcoord.y);
+		}
+		else if( Stereoscopic_Mode == 1)
+		{
+			TCL = float2(texcoord.x,texcoord.y*2-1);
+			TCR = float2(texcoord.x,texcoord.y*2);
+		}
+		else
+		{
+			TCL = float2(texcoord.x,texcoord.y);
+			TCR = float2(texcoord.x,texcoord.y);
+		}
+	}	
+	else
+	{
+		[branch] if (Stereoscopic_Mode == 0)
+		{
+			TCL = float2(texcoord.x*2,texcoord.y);
+			TCR = float2(texcoord.x*2-1,texcoord.y);
+		}
+		else if(Stereoscopic_Mode == 1)
+		{
+			TCL = float2(texcoord.x,texcoord.y*2);
+			TCR = float2(texcoord.x,texcoord.y*2-1);
+		}
+		else
+		{
+			TCL = float2(texcoord.x,texcoord.y);
+			TCR = float2(texcoord.x,texcoord.y);
+		}
+	}
+	//P is Perspective Adjustment
+	float P = Perspective * pix.x;	
+	TCL.x += P;
+	TCR.x -= P;
+	//Left & Right Parallax for Stereo Vision
+	float2 TL, TR; //Stereoscopic 3D using Reprojection Left & Right
+	[branch] if(Stereoscopic_Mode == 2)// Work around for DX9
+	{	//Optimization for line interlaced.
+		TL = Parallax(-Divergence, float2(TCL.x,TCL.y + (Interlace_Anaglyph.x * 0.5f) * pix.y));					
+		TR = Parallax( Divergence, float2(TCR.x,TCR.y - (Interlace_Anaglyph.x * 0.5f) * pix.y));	
+	}
+	else if(Stereoscopic_Mode == 3)// Work around for DX9
+	{	//Optimization for column interlaced.
+		TL = Parallax(-Divergence, float2(TCL.x + (Interlace_Anaglyph.x * 0.5f) * pix.x,TCL.y));					
+		TR = Parallax( Divergence, float2(TCR.x - (Interlace_Anaglyph.x * 0.5f) * pix.x,TCR.y));	
 	}
 	else
 	{
-		Left = VigneteL(TCL);
-		Right = VigneteR(TCR);
+		TL = Parallax(-Divergence, TCL);
+		TR = Parallax( Divergence, TCR);
 	}
-
+	
+	[branch] if(Custom_Sidebars == 0)
+	{
+		Left = tex2Dlod(BackBufferMIRROR, float4(TL,0,0));
+		Right = tex2Dlod(BackBufferMIRROR, float4(TR,0,0));
+	}
+	else if(Custom_Sidebars == 1)
+	{
+		Left = tex2Dlod(BackBufferBORDER, float4(TL,0,0));
+		Right = tex2Dlod(BackBufferBORDER, float4(TR,0,0));
+	}
+	else
+	{
+		Left = tex2Dlod(BackBufferCLAMP, float4(TL,0,0));
+		Right = tex2Dlod(BackBufferCLAMP, float4(TR,0,0));
+	}
+		
+	if (Side_Bars)
+	{
+		Left = EdgeMask(-Divergence,Left,TCL);
+		Right = EdgeMask(Divergence,Right,TCR);
+	}
+	//Eye Swaping Workaround
+	float4 L = Left, R = Right;//Used for Eye Swap		
+	if ( Eye_Swap ) //Is Eye Swap
+	{
+		Left = R;
+		Right = L;
+	}	
+	#if Balance_Mode	
+	float HUD_Adjustment = ((0.5 - HUD_Adjust.y)*25) * pix.x;
+	Left = HUD(Left,float2(TCL.x - HUD_Adjustment,TCL.y));
+	Right = HUD(Right,float2(TCR.x + HUD_Adjustment,TCR.y));
+	#endif	
 	if(!Depth_Map_View)
-	{	
+	{
+	float2 gridxy;
 
-		if(Barrel_Distortion == 0)
-		color = texcoord.x < 0.5 ? Left : Right;
-		else if(Barrel_Distortion == 1)
-		color = texcoord.x < 0.5 ? Circle(Left,float2(texcoord.x*2,texcoord.y)) : Circle(Right,float2(texcoord.x*2-1,texcoord.y));
-		else if(Barrel_Distortion == 2)
-		color = texcoord.x < 0.5 ? Left : Right;
+	[branch] if(Scaling_Support == 0)
+		gridxy = floor(float2(TexCoords.x * BUFFER_WIDTH, TexCoords.y * BUFFER_HEIGHT)); //Native
+	else if(Scaling_Support == 1)
+		gridxy = floor(float2(TexCoords.x * 3840.0, TexCoords.y * 2160.0));	
+	else if(Scaling_Support == 2)
+		gridxy = floor(float2(TexCoords.x * 3841.0, TexCoords.y * 2161.0));
+	else if(Scaling_Support == 3)
+		gridxy = floor(float2(TexCoords.x * 1920.0, TexCoords.y * 1080.0));
+	else if(Scaling_Support == 4)
+		gridxy = floor(float2(TexCoords.x * 1921.0, TexCoords.y * 1081.0));
+	else if(Scaling_Support == 5)
+		gridxy = floor(float2(TexCoords.x * 1680.0, TexCoords.y * 1050.0));
+	else if(Scaling_Support == 6)
+		gridxy = floor(float2(TexCoords.x * 1681.0, TexCoords.y * 1051.0));
+	else if(Scaling_Support == 7)
+		gridxy = floor(float2(TexCoords.x * 1280.0, TexCoords.y * 720.0));
+	else if(Scaling_Support == 8)
+		gridxy = floor(float2(TexCoords.x * 1281.0, TexCoords.y * 721.0));
+			
+		[branch] if(Stereoscopic_Mode == 0)
+		{	
+			color = TexCoords.x < 0.5 ? Left : Right;
+		}
+		else if(Stereoscopic_Mode == 1)
+		{	
+			color = TexCoords.y < 0.5 ? Left : Right;
+		}
+		else if(Stereoscopic_Mode == 2)
+		{
+			color = fmod(gridxy.y,2.0) ? Right : Left;	
+		}
+		else if(Stereoscopic_Mode == 3)
+		{
+			color = fmod(gridxy.x,2.0) ? Right : Left;		
+		}
+		else if(Stereoscopic_Mode == 4)
+		{
+			color = fmod(gridxy.x+gridxy.y,2.0) ? Right : Left;
+		}
+		else if(Stereoscopic_Mode >= 5)
+		{			
+			float Contrast = 1.0, Deghost = 0.06, LOne, LTwo, ROne, RTwo;
+			float3 HalfLA = dot(Left.rgb,float3(0.299, 0.587, 0.114));
+			float3 HalfRA = dot(Right.rgb,float3(0.299, 0.587, 0.114));
+			float3 LMA = lerp(HalfLA,Left.rgb,Interlace_Anaglyph.y);  
+			float3 RMA = lerp(HalfRA,Right.rgb,Interlace_Anaglyph.y); 
+			float4 image = 1, accumRC, accumGM, accumBA;
+
+			float contrast = (Contrast*0.5)+0.5, deghost = Deghost;
+				
+			// Left/Right Image
+			float4 cA = float4(LMA,1);
+			float4 cB = float4(RMA,1);
+	
+			if (Stereoscopic_Mode == 5) // Anaglyph 3D Colors Red/Cyan
+			{
+				float4 LeftEyecolor = float4(1.0,0.0,0.0,1.0);
+				float4 RightEyecolor = float4(0.0,1.0,1.0,1.0);
+				
+				color =  (cA*LeftEyecolor) + (cB*RightEyecolor);
+			}
+			else if (Stereoscopic_Mode == 6) // Anaglyph 3D Dubois Red/Cyan
+			{
+			float red = 0.437 * cA.r + 0.449 * cA.g + 0.164 * cA.b
+						- 0.011 * cB.r - 0.032 * cB.g - 0.007 * cB.b;
+				
+				if (red > 1) { red = 1; }   if (red < 0) { red = 0; }
+
+				float green = -0.062 * cA.r -0.062 * cA.g -0.024 * cA.b 
+							+ 0.377 * cB.r + 0.761 * cB.g + 0.009 * cB.b;
+				
+				if (green > 1) { green = 1; }   if (green < 0) { green = 0; }
+
+				float blue = -0.048 * cA.r - 0.050 * cA.g - 0.017 * cA.b 
+							-0.026 * cB.r -0.093 * cB.g + 1.234  * cB.b;
+				
+				if (blue > 1) { blue = 1; }   if (blue < 0) { blue = 0; }
+
+				color = float4(red, green, blue, 0);
+			}
+			else if (Stereoscopic_Mode == 7) // Anaglyph 3D Deghosted Red/Cyan Code From http://iaian7.com/quartz/AnaglyphCompositing & vectorform.com by John Einselen
+			{
+				LOne = contrast*0.45;
+				LTwo = (1.0-LOne)*0.5;
+				ROne = contrast;
+				RTwo = 1.0-ROne;
+				deghost = Deghost*0.1;
+
+				accumRC = saturate(cA*float4(LOne,LTwo,LTwo,1.0));
+				image.r = pow(accumRC.r+accumRC.g+accumRC.b, 1.00);
+				image.a = accumRC.a;
+
+				accumRC = saturate(cB*float4(RTwo,ROne,0.0,1.0));
+				image.g = pow(accumRC.r+accumRC.g+accumRC.b, 1.15);
+				image.a = image.a+accumRC.a;
+
+				accumRC = saturate(cB*float4(RTwo,0.0,ROne,1.0));
+				image.b = pow(accumRC.r+accumRC.g+accumRC.b, 1.15);
+				image.a = (image.a+accumRC.a)/3.0;
+
+				accumRC = image;
+				image.r = (accumRC.r+(accumRC.r*(deghost))+(accumRC.g*(deghost*-0.5))+(accumRC.b*(deghost*-0.5)));
+				image.g = (accumRC.g+(accumRC.r*(deghost*-0.25))+(accumRC.g*(deghost*0.5))+(accumRC.b*(deghost*-0.25)));
+				image.b = (accumRC.b+(accumRC.r*(deghost*-0.25))+(accumRC.g*(deghost*-0.25))+(accumRC.b*(deghost*0.5)));
+				color = image;
+			}
+			else if (Stereoscopic_Mode == 8) // Anaglyph 3D Green/Magenta
+			{
+				float4 LeftEyecolor = float4(0.0,1.0,0.0,1.0);
+				float4 RightEyecolor = float4(1.0,0.0,1.0,1.0);
+				
+				color =  (cA*LeftEyecolor) + (cB*RightEyecolor);			
+			}
+			else if (Stereoscopic_Mode == 9) // Anaglyph 3D Dubois Green/Magenta
+			{
+								
+				float red = -0.062 * cA.r -0.158 * cA.g -0.039 * cA.b
+						+ 0.529 * cB.r + 0.705 * cB.g + 0.024 * cB.b;
+				
+				if (red > 1) { red = 1; }   if (red < 0) { red = 0; }
+
+				float green = 0.284 * cA.r + 0.668 * cA.g + 0.143 * cA.b 
+							- 0.016 * cB.r - 0.015 * cB.g + 0.065 * cB.b;
+				
+				if (green > 1) { green = 1; }   if (green < 0) { green = 0; }
+
+				float blue = -0.015 * cA.r -0.027 * cA.g + 0.021 * cA.b 
+							+ 0.009 * cB.r + 0.075 * cB.g + 0.937  * cB.b;
+				
+				if (blue > 1) { blue = 1; }   if (blue < 0) { blue = 0; }
+						
+				color = float4(red, green, blue, 0);
+			}
+			else if (Stereoscopic_Mode == 10)// Anaglyph 3D Deghosted Green/Magenta Code From http://iaian7.com/quartz/AnaglyphCompositing & vectorform.com by John Einselen
+			{
+				LOne = contrast*0.45;
+				LTwo = (1.0-LOne)*0.5;
+				ROne = contrast*0.8;
+				RTwo = 1.0-ROne;
+				deghost = Deghost*0.275;
+
+				accumGM = saturate(cB*float4(ROne,RTwo,0.0,1.0));
+				image.r = pow(accumGM.r+accumGM.g+accumGM.b, 1.15);
+				image.a = accumGM.a;
+
+				accumGM = saturate(cA*float4(LTwo,LOne,LTwo,1.0));
+				image.g = pow(accumGM.r+accumGM.g+accumGM.b, 1.05);
+				image.a = image.a+accumGM.a;
+
+				accumGM = saturate(cB*float4(0.0,RTwo,ROne,1.0));
+				image.b = pow(accumGM.r+accumGM.g+accumGM.b, 1.15);
+				image.a = (image.a+accumGM.a)/3.0;
+
+				accumGM = image;
+				image.r = (accumGM.r+(accumGM.r*(deghost*0.5))+(accumGM.g*(deghost*-0.25))+(accumGM.b*(deghost*-0.25)));
+				image.g = (accumGM.g+(accumGM.r*(deghost*-0.5))+(accumGM.g*(deghost*0.25))+(accumGM.b*(deghost*-0.5)));
+				image.b = (accumGM.b+(accumGM.r*(deghost*-0.25))+(accumGM.g*(deghost*-0.25))+(accumGM.b*(deghost*0.5)));
+				color = image;
+			}
+			else if (Stereoscopic_Mode == 11) // Anaglyph 3D Blue/Amber Code From http://iaian7.com/quartz/AnaglyphCompositing & vectorform.com by John Einselen
+			{
+				LOne = contrast*0.45;
+				LTwo = (1.0-LOne)*0.5;
+				ROne = contrast;
+				RTwo = 1.0-ROne;
+				deghost = Deghost*0.275;
+
+				accumBA = saturate(cA*float4(ROne,0.0,RTwo,1.0));
+				image.r = pow(accumBA.r+accumBA.g+accumBA.b, 1.05);
+				image.a = accumBA.a;
+
+				accumBA = saturate(cA*float4(0.0,ROne,RTwo,1.0));
+				image.g = pow(accumBA.r+accumBA.g+accumBA.b, 1.10);
+				image.a = image.a+accumBA.a;
+
+				accumBA = saturate(cB*float4(LTwo,LTwo,LOne,1.0));
+				image.b = pow(accumBA.r+accumBA.g+accumBA.b, 1.0);
+				image.b = lerp(pow(image.b,(Deghost*0.15)+1.0),1.0-pow(abs(1.0-image.b),(Deghost*0.15)+1.0),image.b);
+				image.a = (image.a+accumBA.a)/3.0;
+
+				accumBA = image;
+				image.r = (accumBA.r+(accumBA.r*(deghost*1.5))+(accumBA.g*(deghost*-0.75))+(accumBA.b*(deghost*-0.75)));
+				image.g = (accumBA.g+(accumBA.r*(deghost*-0.75))+(accumBA.g*(deghost*1.5))+(accumBA.b*(deghost*-0.75)));
+				image.b = (accumBA.b+(accumBA.r*(deghost*-1.5))+(accumBA.g*(deghost*-1.5))+(accumBA.b*(deghost*3.0)));
+				color = saturate(image);
+			}
+		}
 	}
 	else
 	{		
-		float3 RGB = zBuffer(texcoord);
-
-		color = float4(RGB.x,RGB.y,RGB.z,1.0);
+		color = float4(zBuffer(TexCoords).x,zBuffer(TexCoords).x,zBuffer(TexCoords).x,1.0);
 	}
 		
-	float Average_Lum = tex2Dlod(SamplerDMVR,float4(texcoord.x,texcoord.y, 0, 0)).y;
+	float Average_Lum = tex2Dlod(SamplerDMN,float4(TexCoords.x,TexCoords.y, 0, 0)).y;
 	
 	return float4(color.rgb,Average_Lum);
 }
 
 float4 Average_Luminance(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Target
 {
-	return float4(tex2Dlod(SamplerDMVR,float4(texcoord.x,texcoord.y, 0, 0)).z,0,0,1); //Average_Lum_Full
+	float4 ABE = float4(0.0,1.0,0.0, 0.750);//Upper Extra Wide
+		
+	[branch] if(Auto_Balance_Ex == 2)
+		ABE = float4(0.0,1.0,0.0, 0.5);//Upper Wide
+	else if(Auto_Balance_Ex == 3)
+		ABE = float4(0.0,1.0, 0.15625, 0.46875);//Upper Short
+	else if(Auto_Balance_Ex == 4)
+		ABE = float4(0.375, 0.250, 0.4375, 0.125);//Center Small
+	else if(Auto_Balance_Ex == 5)
+		ABE = float4(0.375, 0.250, 0.0, 1.0);//Center Long
+			
+	float Average_Lum_ZPD = tex2Dlod(SamplerDMN,float4(ABE.x + texcoord.x * ABE.y, ABE.z + texcoord.y * ABE.w, 0, 0)).z;
+	float Average_Lum_Full = tex2Dlod(SamplerDMN,float4(texcoord.x,texcoord.y, 0, 0)).z;
+	return float4(Average_Lum_ZPD,Average_Lum_Full,0,1);
 }
 
 ////////////////////////////////////////////////////////Logo/////////////////////////////////////////////////////////////////////////
@@ -967,7 +1223,7 @@ float4 Out(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Targe
 	float PosX = 0.9525f*BUFFER_WIDTH*pix.x,PosY = 0.975f*BUFFER_HEIGHT*pix.y;	
 	float4 Color = float4(PS_calcLR(texcoord).rgb,1.0),D,E,P,T,H,Three,DD,Dot,I,N,F,O;
 	
-	if(timer <= 12500)
+	[branch] if(timer <= 12500)
 	{
 		//DEPTH
 		//D
@@ -1056,30 +1312,6 @@ float4 Out(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Targe
 	}
 }
 
-float4 USM(float4 position : SV_Position, float2 texcoord : TEXCOORD0) : SV_Target
-{
-	float SP = Sharpen_Power;	
-		
-	float2 tex_offset = pix; // Gets texel offset
-	float4 result =  tex2D(BackBuffer, float2(texcoord));
-	if(Sharpen_Power > 0)
-	{				   
-		   result += tex2D(BackBuffer, float2(texcoord + float2( 1, 0) * tex_offset));
-		   result += tex2D(BackBuffer, float2(texcoord + float2(-1, 0) * tex_offset));
-		   result += tex2D(BackBuffer, float2(texcoord + float2( 0, 1) * tex_offset));
-		   result += tex2D(BackBuffer, float2(texcoord + float2( 0,-1) * tex_offset));
-		   tex_offset *= 0.75;		   
-		   result += tex2D(BackBuffer, float2(texcoord + float2( 1, 1) * tex_offset));
-		   result += tex2D(BackBuffer, float2(texcoord + float2(-1,-1) * tex_offset));
-		   result += tex2D(BackBuffer, float2(texcoord + float2( 1,-1) * tex_offset));
-		   result += tex2D(BackBuffer, float2(texcoord + float2(-1, 1) * tex_offset));
-   		result /= 9;
-   		
-		result = tex2D(BackBuffer, texcoord) + ( tex2D(BackBuffer, texcoord) - result ) * SP;
-	}
-	
-	return result;
-}
 ///////////////////////////////////////////////////////////ReShade.fxh/////////////////////////////////////////////////////////////
 // Vertex shader generating a triangle covering the entire screen
 void PostProcessVS(in uint id : SV_VertexID, out float4 position : SV_Position, out float2 texcoord : TEXCOORD)
@@ -1090,41 +1322,33 @@ void PostProcessVS(in uint id : SV_VertexID, out float4 position : SV_Position, 
 }
 
 //*Rendering passes*//
-technique SuperDepth3D_VR
+
+technique Cross_Cursor_Next
+{			
+			pass Cursor
+		{
+			VertexShader = PostProcessVS;
+			PixelShader = MouseCursor;
+		}	
+}
+
+technique SuperDepth3D_Next
 {
-		pass Cursor
-	{
-		VertexShader = PostProcessVS;
-		PixelShader = MouseCursor;
-	}	
 		pass zbuffer
 	{
 		VertexShader = PostProcessVS;
 		PixelShader = DepthMap;
-		RenderTarget = texDMVR;
-	}
-		pass LRtoBD
-	{
-		VertexShader = PostProcessVS;
-		PixelShader = LR_Out;
-		RenderTarget0 = LeftTex;
-		RenderTarget1 = RightTex;	
+		RenderTarget = texDMN;
 	}
 		pass AverageLuminance
 	{
 		VertexShader = PostProcessVS;
 		PixelShader = Average_Luminance;
-		RenderTarget = texLumVR;
+		RenderTarget = texLumN;
 	}
 		pass StereoOut
 	{
 		VertexShader = PostProcessVS;
 		PixelShader = Out;
 	}
-		pass UnSharpMask_Filter
-	{
-		VertexShader = PostProcessVS;
-		PixelShader = USM;
-	}
-	
 }

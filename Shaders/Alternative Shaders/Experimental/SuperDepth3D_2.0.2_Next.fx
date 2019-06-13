@@ -3,8 +3,8 @@
  //---------------------////
 
  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
- //* Depth Map Based 3D post-process shader v2.0.1          																														*//
- //* For Reshade 3.0																																								*//
+ //* Depth Map Based 3D post-process shader v2.0.2          																														*//
+ //* For Reshade 3.0+																																								*//
  //* --------------------------																																						*//
  //* This work is licensed under a Creative Commons Attribution 3.0 Unported License.																								*//
  //* So you are free to share, modify and adapt it for your needs, and even use it for commercial use.																				*//
@@ -40,13 +40,10 @@
 // The Key Code for Decimal Point is Number 110. Ex. for Numpad Decimal "." Cancel_Depth_Key 110
 #define Cancel_Depth_Key 0 // You can use http://keycode.info/ to figure out what key is what.
 
-// Use Depth Tool to adjust the lower preprocessor definitions below.
 // Horizontal & Vertical Depth Buffer Resize for non conforming BackBuffer.
+// Also used to enable Image Position Adjust is used to move the Z-Buffer around.
 // Ex. Resident Evil 7 Has this problem. So you want to adjust it too around float2(0.9575,0.9575).
-#define Horizontal_and_Vertical float2(1.0, 1.00) // 1.0 is Default.
-
-// Image Position Adjust is used to move the Z-Buffer around.
-#define Image_Position_Adjust float2(0.0,0.0)
+#define DB_Size_Postion 0 //Default 0 is Off. One is On. 
 
 // Define Display aspect ratio for screen cursor. A 16:9 aspect ratio will equal (1.77:1)
 #define DAR float2(1.76, 1.0)
@@ -138,14 +135,6 @@ uniform int View_Mode <
 	ui_category = "Occlusion Masking";
 > = 0;
 
-uniform int Custom_Sidebars <
-	ui_type = "combo";
-	ui_items = "Mirrored Edges\0Black Edges\0Stretched Edges\0";
-	ui_label = " Edge Handling";
-	ui_tooltip = "Edges selection for your screen output.";
-	ui_category = "Occlusion Masking";
-> = 1;
-
 uniform bool Side_Bars <
 	ui_label = " Side Bars";
 	ui_tooltip = "Adds Side Bar to the Left and Right Edges";
@@ -193,7 +182,23 @@ uniform bool Depth_Map_Flip <
 	ui_tooltip = "Flip the depth map if it is upside down.";
 	ui_category = "Depth Map";
 > = false;
-
+#if DB_Size_Postion 
+uniform int2 Image_Position_Adjust<
+	ui_type = "drag";
+	ui_min = -4096.0; ui_max = 4096.0;
+	ui_label = "Z Position Adjust";
+	ui_tooltip = "Adjust the Image Postion if it's off by a bit. Default is Zero.";
+	ui_category = "Depth Map";
+> = int2(0.0,0.0);
+	
+uniform float2 Horizontal_and_Vertical <
+	ui_type = "drag";
+	ui_min = 0.125; ui_max = 2;
+	ui_label = "Z Horizontal & Vertical";
+	ui_tooltip = "Adjust Horizontal and Vertical Resize. Default is 1.0.";
+	ui_category = "Depth Map";
+> = float2(1.0,1.0);
+#endif
 //Weapon Hand Adjust//
 uniform int WP <
 	ui_type = "combo";
@@ -306,7 +311,6 @@ uniform bool Eye_Swap <
 	ui_tooltip = "L/R to R/L.";
 	ui_category = "Stereoscopic Options";
 > = false;
-
 //Cursor Adjustments//
 uniform int Cursor_Type <
 	#if Compatibility
@@ -325,16 +329,10 @@ uniform float3 Cursor_STT <
 	ui_type = "drag";
 	ui_min = 0; ui_max = 1;
 	ui_label = " Cursor Adjustments";
-	ui_tooltip = "This controlls the Size, Thickness, & Transparency.\n" 
-				 "Defaults are ( X 0.125, Y 0.5, Z 0.75 ).";
+	ui_tooltip = "This controlls the Size, Thickness, & Color.\n" 
+				 "Defaults are ( X 0.125, Y 0.5, Z 1.0).";
 	ui_category = "Cursor Adjustments";
-> = float3(0.125,0.5,0.75);
-
-uniform float3 Cursor_Color <
-	ui_type = "color";
-	ui_label = " Cursor Color";
-	ui_category = "Cursor Adjustments";
-> = float3(1.0,1.0,1.0);
+> = float3(0.125,0.5,1.0);
 
 uniform bool SCSC <
 	ui_label = " Cursor Lock";
@@ -358,7 +356,10 @@ texture DepthBufferTex : DEPTH;
 
 sampler DepthBuffer 
 	{ 
-		Texture = DepthBufferTex; 
+		Texture = DepthBufferTex;
+		AddressU = BORDER;
+		AddressV = BORDER;
+		AddressW = BORDER;
 	};
 
 texture BackBufferTex : COLOR;
@@ -366,14 +367,6 @@ texture BackBufferTex : COLOR;
 sampler BackBuffer 
 	{ 
 		Texture = BackBufferTex;
-	};
-	
-sampler BackBufferMIRROR 
-	{ 
-		Texture = BackBufferTex;
-		AddressU = MIRROR;
-		AddressV = MIRROR;
-		AddressW = MIRROR;
 	};
 
 sampler BackBufferBORDER
@@ -383,22 +376,17 @@ sampler BackBufferBORDER
 		AddressV = BORDER;
 		AddressW = BORDER;
 	};
-
-sampler BackBufferCLAMP
-	{ 
-		Texture = BackBufferTex;
-		AddressU = CLAMP;
-		AddressV = CLAMP;
-		AddressW = CLAMP;
-	};
 	
 texture texDMN  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT*Depth_Map_Division; Format = RGBA16F; }; 
 
 sampler SamplerDMN
 	{
 		Texture = texDMN;
+		AddressU = BORDER;
+		AddressV = BORDER;
+		AddressW = BORDER;
 	};
-	
+			
 #if UI_MASK
 texture TexMaskA < source = "Mask_A.png"; > { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA8; };
 sampler SamplerMaskA { Texture = TexMaskA;};
@@ -408,9 +396,9 @@ sampler SamplerMaskB { Texture = TexMaskB;};
 #endif
 		
 uniform float2 Mousecoords < source = "mousepoint"; > ;	
-////////////////////////////////////////////////////////////////////////////////////Cross Cursor////////////////////////////////////////////////////////////////////////////////////	
 float4 MouseCursor(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Target
 {
+	float4 Out = tex2D(BackBuffer, texcoord),Color; 
 	float CCA = 0.1,CCB = 0.0025, CCC = 0.025, CCD = 0.05;
 	float2 MousecoordsXY = Mousecoords * pix, center = texcoord, Screen_Ratio = float2(DAR.x,DAR.y), Size_Thickness = float2(Cursor_STT.x,Cursor_STT.y + 0.00000001);
 	
@@ -449,7 +437,30 @@ float4 MouseCursor(float4 position : SV_Position, float2 texcoord : TEXCOORD) : 
 	else if(Cursor_Type == 6)
 		Cursor = CC + RC + SSC;
 	
-	return lerp( Cursor  ? float4(Cursor_Color.rgb, 1.0) : tex2D(BackBuffer, texcoord),tex2D(BackBuffer, texcoord),1-Cursor_STT.z);
+	[branch]if (Cursor_STT.z == 1 )
+		Color.rgb = float3(1,1,1);
+	else if (Cursor_STT.z >= 0.9 )
+		Color.rgb = float3(0,0,1);
+	else if (Cursor_STT.z >= 0.8 )
+		Color.rgb = float3(0,1,0);
+	else if (Cursor_STT.z >= 0.7 )
+		Color.rgb = float3(1,0,0);	
+	else if (Cursor_STT.z >= 0.6 )
+		Color.rgb = float3(0,1,1);
+	else if (Cursor_STT.z >= 0.5 )
+		Color.rgb = float3(1,0,1);
+	else if (Cursor_STT.z >= 0.4 )
+		Color.rgb = float3(1,1,0);
+	else if (Cursor_STT.z >= 0.3 )
+		Color.rgb = float3(1,0.4,0.7);
+	else if (Cursor_STT.z >= 0.2 )
+		Color.rgb = float3(1,0.64,0);
+	else if (Cursor_STT.z >= 0.1 )
+		Color.rgb = float3(0.5,0,0.5);
+		
+	Out = Cursor  ? Color : Out;
+	
+	return Out;
 }
 
 /////////////////////////////////////////////////////////////////////////////////Adapted Luminance/////////////////////////////////////////////////////////////////////////////////
@@ -483,10 +494,11 @@ float DMA()//Depth Map Adjustment
 
 float Depth(in float2 texcoord : TEXCOORD0)
 {	
+	#if DB_Size_Postion
 	float2 texXY = texcoord + Image_Position_Adjust * pix;		
 	float2 midHV = (Horizontal_and_Vertical-1) * float2(BUFFER_WIDTH * 0.5,BUFFER_HEIGHT * 0.5) * pix;			
 	texcoord = float2((texXY.x*Horizontal_and_Vertical.x)-midHV.x,(texXY.y*Horizontal_and_Vertical.y)-midHV.y);	
-	
+	#endif
 	if (Depth_Map_Flip)
 		texcoord.y =  1 - texcoord.y;
 		
@@ -494,37 +506,38 @@ float Depth(in float2 texcoord : TEXCOORD0)
 	
 	//Conversions to linear space.....
 	//Near & Far Adjustment
-	float Far = 1.0, Near = 0.125/DMA(); //Division Depth Map Adjust - Near
+	float Far = 1.0, Near = 0.125/DMA(), DA = DMA() * 2.0f;  //Division Depth Map Adjust - Near
 	
 	float2 Offsets = float2(1 + Offset,1 - Offset), Z = float2( zBuffer, 1-zBuffer );
 	
 	if (Offset > 0)
 	Z = min( 1, float2( Z.x*Offsets.x , Z.y /  Offsets.y  ));
 
-	if (Depth_Map == 0)//DM0. Normal
+	[branch] if (Depth_Map == 0)//DM0. Normal
 		zBuffer = Far * Near / (Far + Z.x * (Near - Far));		
 	else if (Depth_Map == 1)//DM1. Reverse
-		zBuffer = Far * Near / (Far + Z.y * (Near - Far));		
+		zBuffer = Far * Near / (Far + Z.y * (Near - Far));
 		
 	return zBuffer;
 }
 
 float2 WeaponDepth(in float2 texcoord : TEXCOORD0)
 {
+	#if DB_Size_Postion
 	float2 texXY = texcoord + Image_Position_Adjust * pix;		
 	float2 midHV = (Horizontal_and_Vertical-1) * float2(BUFFER_WIDTH * 0.5,BUFFER_HEIGHT * 0.5) * pix;			
 	texcoord = float2((texXY.x*Horizontal_and_Vertical.x)-midHV.x,(texXY.y*Horizontal_and_Vertical.y)-midHV.y);	
-		
+	#endif	
 		if (Depth_Map_Flip)
 		texcoord.y =  1 - texcoord.y;
 		
 	float zBufferWH = tex2D(DepthBuffer, texcoord).x, CutOff = Weapon_Adjust.x , Adjust = Weapon_Adjust.y, Tune = Weapon_Depth_Adjust, Scale = Weapon_Scale;
 	
 	float4 WA_XYZW;//Weapon Profiles Starts Here
-	if (WP == 1)                                   // WA_XYZW.x | WA_XYZW.y | WA_XYZW.z | WA_XYZW.w 
+	[branch] if (WP == 1)                                   // WA_XYZW.x | WA_XYZW.y | WA_XYZW.z | WA_XYZW.w 
 		WA_XYZW = float4(CutOff,Adjust,Tune,Scale);// X Cutoff  | Y Adjust  | Z Tuneing | W Scaling 		
 	else if(WP == 2) //WP 0
-		WA_XYZW = float4(0.425,0.025,0,-2);                 //ES: Oblivion		
+		WA_XYZW = float4(0.425,0.025,0,-2);        //ES: Oblivion		
 	else if(WP == 3) //WP 1
 		WA_XYZW = float4(0,0,0,0);                 //Game
 	else if(WP == 4) //WP 2
@@ -634,13 +647,13 @@ float2 WeaponDepth(in float2 texcoord : TEXCOORD0)
 	// Hear on out is the Weapon Hand Adjustment code.		
 	float Set_Scale , P = WA_XYZW.y;
 	
-	if (WA_XYZW.w == -3)
+	[branch] if (WA_XYZW.w == -3)
 	{
 		WA_XYZW.x *= 21.0f;
 		P = (P + 0.00000001) * 100;
 		Set_Scale = 0.5f;
 	}			
-	if (WA_XYZW.w == -2)
+	else if (WA_XYZW.w == -2)
 	{
 		P = (P + 0.00000001) * 100;
 		Set_Scale = 0.5f;
@@ -675,7 +688,7 @@ float2 WeaponDepth(in float2 texcoord : TEXCOORD0)
 	
 	float2 Z = float2( zBufferWH, 1-zBufferWH );
 			
-	if ( Depth_Map == 0 )
+	[branch] if ( Depth_Map == 0 )
 		zBufferWH /= Far - Z.x * (Near - Far);
 	else if ( Depth_Map == 1 )
 		zBufferWH /= Far - Z.y * (Near - Far);
@@ -686,7 +699,7 @@ float2 WeaponDepth(in float2 texcoord : TEXCOORD0)
 	if (WP > 1)
 	zBufferWH = (zBufferWH - 0) / (WA - 0);
 	//Wish I didn't have to do this.	
-	if (WZPD > 0)
+	[branch] if (WZPD > 0)
 	zBufferWH = lerp(zBufferWH,0.75f,0.25f);
 	else
 	zBufferWH = smoothstep(-0.2,0.8,zBufferWH);
@@ -701,7 +714,7 @@ float4 DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0
 		float R, G, B, A, WD = WeaponDepth(texcoord).x, CoP = WeaponDepth(texcoord).y, CutOFFCal = (CoP/DMA()) * 0.5f; //Weapon Cutoff Calculation
 		CutOFFCal = step(DM.x,CutOFFCal);
 					
-		if (WP == 0)
+		[branch] if (WP == 0)
 		{
 			DM.x = DM.x;
 		}
@@ -729,7 +742,7 @@ float4 HUD(float4 HUD, float2 texcoord )
 		HUD = COC > 0 ? tex2D(BackBuffer,texcoord) : HUD;	
 		
 #if UI_MASK	
-    if (Mask_Cycle == true) 
+    [branch] if (Mask_Cycle == true) 
         Mask_Tex = tex2D(SamplerMaskB,texcoord.xy).a;
     else
         Mask_Tex = tex2D(SamplerMaskA,texcoord.xy).a;
@@ -810,7 +823,6 @@ float zBuffer(in float2 texcoord : TEXCOORD0)
 
 	return DM.z;
 }
-
 /////////////////////////////////////////L/R//////////////////////////////////////////////////////////////////////
 // Horizontal parallax offset & Hole filling effect
 float2 Parallax( float Diverge, float2 Coordinates)
@@ -829,15 +841,14 @@ float2 Parallax( float Diverge, float2 Coordinates)
 	float CurrentDepthMapValue = zBuffer(ParallaxCoord), CurrentLayerDepth = 0, DepthDifference;
 
 	[loop] //Steep parallax mapping
-    for ( int i = 0 ; i < Steps; i++ )
-    {
-		// Doing it this way should stop crashes in older version of reshade, I hope.
+    for ( int i = 0; i < Steps; i++ )
+    {	// Doing it this way should stop crashes in older version of reshade, I hope.
         if (CurrentDepthMapValue <= CurrentLayerDepth)
 			break; // Once we hit the limit Stop Exit Loop.
         // Shift coordinates horizontally in linear fasion
         ParallaxCoord.x -= deltaCoordinates;
         // Get depth value at current coordinates
-        if(View_Mode == 1)
+        [branch] if(View_Mode == 1)
         	CurrentDepthMapValue = zBuffer( ParallaxCoord );
         else
         	CurrentDepthMapValue = zBuffer( ParallaxCoord - DB_Offset);
@@ -860,7 +871,38 @@ float2 Parallax( float Diverge, float2 Coordinates)
 		ParallaxCoord.x = lerp(ParallaxCoord.x - DepthDifference,ParallaxCoord.x,0.5f);
 	
 	return ParallaxCoord;
-};
+}
+//Per is Perspective & Optimization for line interlaced Adjustment. 
+#define Per float2( (Perspective * pix.x) * 0.5f, 0)
+#define AI Interlace_Anaglyph.x * 0.5f
+
+float4 LeftEye(float2 TCL)
+{
+	float D = -Divergence;
+	if (Eye_Swap)
+		D = Divergence;
+		
+	[branch] if(Stereoscopic_Mode == 2)
+		TCL.y += AI * pix.y; //Optimization for line interlaced.						
+	else if(Stereoscopic_Mode == 3)
+		TCL.x += AI * pix.x; //Optimization for column interlaced.					
+		
+	return tex2Dlod(BackBufferBORDER, float4(Parallax(D, TCL),0,0));
+}
+
+float4 RightEye(float2 TCR)
+{
+	float D = Divergence;
+	if (Eye_Swap)
+		D = -Divergence;
+		
+	[branch] if(Stereoscopic_Mode == 2)					
+		TCR.y -= AI * pix.y; //Optimization for line interlaced.	
+	else if(Stereoscopic_Mode == 3)				
+		TCR.x -= AI * pix.x; //Optimization for column interlaced.
+		
+	return tex2Dlod(BackBufferBORDER, float4(Parallax(D, TCR),0,0));
+}
 
 float4 EdgeMask( float Diverge, float4 Image, float2 texcoords)
 {
@@ -881,97 +923,34 @@ float4 EdgeMask( float Diverge, float4 Image, float2 texcoords)
 	
 float4 PS_calcLR(float2 texcoord)
 {
-	float4 color, Right, Left;
 	float2 TCL, TCR, TexCoords = texcoord;
 
-	if(Eye_Swap)
+	[branch] if (Stereoscopic_Mode == 0)
 	{
-		if ( Stereoscopic_Mode == 0 )
-		{
-			TCL = float2(texcoord.x*2-1,texcoord.y);
-			TCR = float2(texcoord.x*2,texcoord.y);
-		}
-		else if( Stereoscopic_Mode == 1)
-		{
-			TCL = float2(texcoord.x,texcoord.y*2-1);
-			TCR = float2(texcoord.x,texcoord.y*2);
-		}
-		else
-		{
-			TCL = float2(texcoord.x,texcoord.y);
-			TCR = float2(texcoord.x,texcoord.y);
-		}
-	}	
-	else
-	{
-		if (Stereoscopic_Mode == 0)
-		{
-			TCL = float2(texcoord.x*2,texcoord.y);
-			TCR = float2(texcoord.x*2-1,texcoord.y);
-		}
-		else if(Stereoscopic_Mode == 1)
-		{
-			TCL = float2(texcoord.x,texcoord.y*2);
-			TCR = float2(texcoord.x,texcoord.y*2-1);
-		}
-		else
-		{
-			TCL = float2(texcoord.x,texcoord.y);
-			TCR = float2(texcoord.x,texcoord.y);
-		}
+		TCL = float2(texcoord.x*2,texcoord.y);
+		TCR = float2(texcoord.x*2-1,texcoord.y);
 	}
-	//P is Perspective Adjustment
-	float P = Perspective * pix.x;	
-	TCL.x += P;
-	TCR.x -= P;
-	//Left & Right Parallax for Stereo Vision
-	float2 TL, TR; //Stereoscopic 3D using Reprojection Left & Right	
-	if(Stereoscopic_Mode == 2)// Work around for DX9
+	else if(Stereoscopic_Mode == 1)
 	{
-		//Optimization for line interlaced.
-		TL = Parallax(-Divergence, float2(TCL.x,TCL.y + (Interlace_Anaglyph.x * 0.5f) * pix.y));					
-		TR = Parallax( Divergence, float2(TCR.x,TCR.y - (Interlace_Anaglyph.x * 0.5f) * pix.y));	
-	}
-	else if(Stereoscopic_Mode == 3)// Work around for DX9
-	{	
-		//Optimization for column interlaced.
-		TL = Parallax(-Divergence, float2(TCL.x + (Interlace_Anaglyph.x * 0.5f) * pix.x,TCL.y));					
-		TR = Parallax( Divergence, float2(TCR.x - (Interlace_Anaglyph.x * 0.5f) * pix.x,TCR.y));	
+		TCL = float2(texcoord.x,texcoord.y*2);
+		TCR = float2(texcoord.x,texcoord.y*2-1);
 	}
 	else
 	{
-		TL = Parallax(-Divergence, TCL);					
-		TR = Parallax( Divergence, TCR);
+		TCL = float2(texcoord.x,texcoord.y);
+		TCR = float2(texcoord.x,texcoord.y);
 	}
-			
-	if(Custom_Sidebars == 0)
-	{
-		Left = tex2Dlod(BackBufferMIRROR, float4(TL,0,0));
-		Right = tex2Dlod(BackBufferMIRROR, float4(TR,0,0));
-	}
-	else if(Custom_Sidebars == 1)
-	{
-		Left = tex2Dlod(BackBufferBORDER, float4(TL,0,0));
-		Right = tex2Dlod(BackBufferBORDER, float4(TR,0,0));
-	}
-	else
-	{
-		Left = tex2Dlod(BackBufferCLAMP, float4(TL,0,0));
-		Right = tex2Dlod(BackBufferCLAMP, float4(TR,0,0));
-	}
+
+	TCL += Per;
+	TCR -= Per;
+	
+	float4 color, Left = LeftEye(TCL), Right = RightEye(TCR);
 		
 	if (Side_Bars)
 	{
 		Left = EdgeMask(-Divergence,Left,TCL);
 		Right = EdgeMask(Divergence,Right,TCR);
 	}
-	//Eye Swaping Workaround
-	float4 L = Left, R = Right;//Used for Eye Swap		
-	if ( Eye_Swap ) //Is Eye Swap
-	{
-		Left = R;
-		Right = L;
-	}	
 	#if Balance_Mode	
 	float HUD_Adjustment = ((0.5 - HUD_Adjust.y)*25) * pix.x;
 	Left = HUD(Left,float2(TCL.x - HUD_Adjustment,TCL.y));
@@ -981,7 +960,7 @@ float4 PS_calcLR(float2 texcoord)
 	{
 	float2 gridxy;
 
-	if(Scaling_Support == 0)
+	[branch] if(Scaling_Support == 0)
 		gridxy = floor(float2(TexCoords.x * BUFFER_WIDTH, TexCoords.y * BUFFER_HEIGHT)); //Native
 	else if(Scaling_Support == 1)
 		gridxy = floor(float2(TexCoords.x * 3840.0, TexCoords.y * 2160.0));	
@@ -1000,7 +979,7 @@ float4 PS_calcLR(float2 texcoord)
 	else if(Scaling_Support == 8)
 		gridxy = floor(float2(TexCoords.x * 1281.0, TexCoords.y * 721.0));
 			
-		if(Stereoscopic_Mode == 0)
+		[branch] if(Stereoscopic_Mode == 0)
 		{	
 			color = TexCoords.x < 0.5 ? Left : Right;
 		}
@@ -1183,7 +1162,7 @@ float4 Average_Luminance(float4 position : SV_Position, float2 texcoord : TEXCOO
 {
 	float4 ABE = float4(0.0,1.0,0.0, 0.750);//Upper Extra Wide
 		
-	if(Auto_Balance_Ex == 2)
+	[branch] if(Auto_Balance_Ex == 2)
 		ABE = float4(0.0,1.0,0.0, 0.5);//Upper Wide
 	else if(Auto_Balance_Ex == 3)
 		ABE = float4(0.0,1.0, 0.15625, 0.46875);//Upper Short
@@ -1204,7 +1183,7 @@ float4 Out(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Targe
 	float PosX = 0.9525f*BUFFER_WIDTH*pix.x,PosY = 0.975f*BUFFER_HEIGHT*pix.y;	
 	float4 Color = float4(PS_calcLR(texcoord).rgb,1.0),D,E,P,T,H,Three,DD,Dot,I,N,F,O;
 	
-	if(timer <= 12500)
+	[branch] if(timer <= 12500)
 	{
 		//DEPTH
 		//D
@@ -1321,6 +1300,7 @@ technique SuperDepth3D_Next
 		PixelShader = DepthMap;
 		RenderTarget = texDMN;
 	}
+
 		pass AverageLuminance
 	{
 		VertexShader = PostProcessVS;
