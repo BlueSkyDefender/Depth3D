@@ -424,7 +424,7 @@ float4 MouseCursor(float4 position : SV_Position, float2 texcoord : TEXCOORD) : 
 	
 	float Cursor = CC;
 	
-	if(Cursor_Type == 1)
+	[branch] if(Cursor_Type == 1)
 		Cursor = RC;
 	else if(Cursor_Type == 2)
 		Cursor = SSC;
@@ -876,34 +876,6 @@ float2 Parallax( float Diverge, float2 Coordinates)
 #define Per float2( (Perspective * pix.x) * 0.5f, 0)
 #define AI Interlace_Anaglyph.x * 0.5f
 
-float4 LeftEye(float2 TCL)
-{
-	float D = -Divergence;
-	if (Eye_Swap)
-		D = Divergence;
-		
-	[branch] if(Stereoscopic_Mode == 2)
-		TCL.y += AI * pix.y; //Optimization for line interlaced.						
-	else if(Stereoscopic_Mode == 3)
-		TCL.x += AI * pix.x; //Optimization for column interlaced.					
-		
-	return tex2Dlod(BackBufferBORDER, float4(Parallax(D, TCL),0,0));
-}
-
-float4 RightEye(float2 TCR)
-{
-	float D = Divergence;
-	if (Eye_Swap)
-		D = -Divergence;
-		
-	[branch] if(Stereoscopic_Mode == 2)					
-		TCR.y -= AI * pix.y; //Optimization for line interlaced.	
-	else if(Stereoscopic_Mode == 3)				
-		TCR.x -= AI * pix.x; //Optimization for column interlaced.
-		
-	return tex2Dlod(BackBufferBORDER, float4(Parallax(D, TCR),0,0));
-}
-
 float4 EdgeMask( float Diverge, float4 Image, float2 texcoords)
 {
 	float Side_A = 0, Side_B = -1;
@@ -944,7 +916,22 @@ float4 PS_calcLR(float2 texcoord)
 	TCL += Per;
 	TCR -= Per;
 	
-	float4 color, Left = LeftEye(TCL), Right = RightEye(TCR);
+	float D = Divergence;
+	if (Eye_Swap)
+		D = -Divergence;
+		
+	[branch] if(Stereoscopic_Mode == 2)
+	{
+		TCL.y += AI * pix.y; //Optimization for line interlaced.
+		TCR.y -= AI * pix.y; //Optimization for line interlaced.						
+	}
+	else if(Stereoscopic_Mode == 3)
+	{
+		TCL.x += AI * pix.x; //Optimization for column interlaced.
+		TCR.x -= AI * pix.x; //Optimization for column interlaced.					
+	}	
+	
+	float4 color, Left = tex2Dlod(BackBufferBORDER, float4(Parallax(-D, TCL),0,0)), Right = tex2Dlod(BackBufferBORDER, float4(Parallax(D, TCR),0,0));
 		
 	if (Side_Bars)
 	{
