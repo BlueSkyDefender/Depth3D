@@ -53,7 +53,7 @@ uniform float Depth_Map_Adjust <
 	#else
 	ui_type = "slider";
 	#endif
-	ui_min = 0.25; ui_max = 100.0; ui_step = 0.125;
+	ui_min = 0.25; ui_max = 500.0; ui_step = 0.25f;
 	ui_label = "Depth Map Adjustment";
 	ui_tooltip = "Adjust the depth map and sharpness.";
 > = 5.0;
@@ -101,15 +101,17 @@ uniform int Luma_Coefficient <
 	ui_items = "SD video\0HD video\0HDR video\0";
 > = 0;
 
-uniform bool Contrast_Aware <
+uniform float Contrast_Aware <
+	ui_type = "drag";
+	ui_min = 0; ui_max = 4.0; ui_step = 0.25;
 	ui_label = "Contrast Aware";
-	ui_tooltip = "This makes the shapren contrast aware.\n"
+	ui_tooltip = "This is used to adjust contrast awareness or to turn it off.\n"
 				 "It will not shapren High Contrast areas in game.";
-> = false;
+> = 2.0;
 
-uniform bool View_Adjustment <
-	ui_label = "View Adjustment";
-	ui_tooltip = "Adjust the depth map and Depth Blur.";
+uniform bool Debug_View <
+	ui_label = "Debug View";
+	ui_tooltip = "Used to see what the shaderis changing in the image.";
 > = false;
 
 /////////////////////////////////////////////////////D3D Starts Here/////////////////////////////////////////////////////////////////
@@ -305,14 +307,13 @@ float4 SharderOut(float2 texcoord : TEXCOORD0)
 	}
 	
 	float3 Blur = USM(texcoord).rgb, BackBuff = BB.rgb;
-	if (View_Adjustment)
+	if (Debug_View)
 	{
 		Blur = USM(float2(texcoord.x*2,texcoord.y*2-1)).rgb;
 		BackBuff = tex2D(BackBuffer,float2(texcoord.x*2,texcoord.y*2-1)).rgb;
 	}
-	
 	//High Contrast Mask
-	float HCM = saturate(dot(( BackBuff - Blur ) , Luma * 50) > 1);
+	float CA = Contrast_Aware * 25.0f, HCM = saturate(dot(( BackBuff - Blur ) , Luma * CA) > 1);
 		
 	RGB = tex2D(BackBuffer,float2(texcoord.x,texcoord.y)).rgb - tex2D(SamplerBF,float2(texcoord.x,texcoord.y)).rgb;
 	
@@ -332,10 +333,10 @@ float4 SharderOut(float2 texcoord : TEXCOORD0)
 		RGBA = saturate(Grayscale_Sharp_Control) + BB;
 	}
 
-	if (View_Adjustment == 0)
+	if (Debug_View == 0)
 	{
 		Out = lerp(RGBA, BB, DB);
-		if(Contrast_Aware)
+		if(Contrast_Aware > 0)
 		Out = lerp(Out, BB, HCM);
 	}
 	else
@@ -360,11 +361,11 @@ float4 SharderOut(float2 texcoord : TEXCOORD0)
 			
 		float4 BL = lerp(float4(1.0f, 0.0f, 1.0f, 1.0f), tex2D(BackBuffer,float2(texcoord.x*2,texcoord.y*2-1)), DBBL);
 		
-		if(!Contrast_Aware)
+		if(Contrast_Aware == 0)
 			HCM = 0;
 		
 		float4 VA_Top = texcoord.x < 0.5 ? float4(RGB,1) : Depth(float2(texcoord.x*2-1,texcoord.y*2));
-		float4 VA_Bottom = texcoord.x < 0.5 ? BL - HCM : tex2D(SamplerBF,float2(texcoord.x*2-1,texcoord.y*2-1));
+		float4 VA_Bottom = texcoord.x < 0.5 ? BL + float4(0,HCM,0,0) : tex2D(SamplerBF,float2(texcoord.x*2-1,texcoord.y*2-1));
 		
 	Out = texcoord.y < 0.5 ? VA_Top : VA_Bottom;
 	
