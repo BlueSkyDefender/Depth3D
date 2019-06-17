@@ -3,8 +3,8 @@
  //-------------------////
 
  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
- //* Depth Map Based 3D post-process shader v1.0.0          																														*//
- //* For Reshade 3.0																																								*//
+ //* Depth Map Based 3D post-process shader v2.0.2          																														*//
+ //* For Reshade 3.0+																																								*//
  //* --------------------------																																						*//
  //* This work is licensed under a Creative Commons Attribution 3.0 Unported License.																								*//
  //* So you are free to share, modify and adapt it for your needs, and even use it for commercial use.																				*//
@@ -239,6 +239,19 @@ uniform float Sharpen_Power <
 	ui_tooltip = "Adjust this on clear up the image the game, movie piture & ect.";
 	ui_category = "Image Effects";
 > = 0;
+
+uniform float Contrast_Aware <
+	#if Compatibility
+	ui_type = "drag";
+	#else
+	ui_type = "slider";
+	#endif
+	ui_min = 0; ui_max = 2.0; ui_step = 0.125;
+	ui_label = " Contrast Aware";
+	ui_tooltip = "This is used to adjust contrast awareness or to turn it off.\n"
+				 "It will not shapren High Contrast areas in image.";
+	ui_category = "Image Effects";
+> = 0.5;
 
 uniform float Saturation <
 	#if Compatibility
@@ -1058,10 +1071,8 @@ float4 Out(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Targe
 
 float4 USM(float4 position : SV_Position, float2 texcoord : TEXCOORD0) : SV_Target
 {
-	float SP = Sharpen_Power;	
-		
 	float2 tex_offset = pix; // Gets texel offset
-	float4 result =  tex2D(BackBuffer, float2(texcoord));
+	float4 result = tex2D(BackBuffer, texcoord);
 	if(Sharpen_Power > 0)
 	{				   
 		   result += tex2D(BackBuffer, float2(texcoord + float2( 1, 0) * tex_offset));
@@ -1074,8 +1085,12 @@ float4 USM(float4 position : SV_Position, float2 texcoord : TEXCOORD0) : SV_Targ
 		   result += tex2D(BackBuffer, float2(texcoord + float2( 1,-1) * tex_offset));
 		   result += tex2D(BackBuffer, float2(texcoord + float2(-1, 1) * tex_offset));
    		result /= 9;
+		//High Contrast Mask
+		float CA = Contrast_Aware * 25.0f, HCM = saturate(dot(( tex2D(BackBuffer, texcoord).rgb - result.rgb ) , float3(0.333, 0.333, 0.333) * CA) > 1);
    		
-		result = tex2D(BackBuffer, texcoord) + ( tex2D(BackBuffer, texcoord) - result ) * SP;
+		result = tex2D(BackBuffer, texcoord) + ( tex2D(BackBuffer, texcoord) - result ) * Sharpen_Power;
+		if(Contrast_Aware > 0)
+		result = lerp(result, tex2D(BackBuffer, texcoord), HCM);
 	}
 	
 	return result;
