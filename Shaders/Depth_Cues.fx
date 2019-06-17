@@ -57,17 +57,23 @@ uniform float Sharpen_Power <
 	#else
 	ui_type = "slider";
 	#endif
-	ui_min = 0.0; ui_max = 2.5;
+	ui_min = 0.0; ui_max = 2.5; ui_step = 0.125;
 	ui_label = "Sharpen Power";
 	ui_tooltip = "Adjust this on clear up the image the game, movie piture & ect.";
 	ui_category = "Image Effects";
 > = 0;
 
-uniform bool Contrast_Aware <
+uniform float Contrast_Aware <
+	#if Compatibility
+	ui_type = "drag";
+	#else
+	ui_type = "slider";
+	#endif
+	ui_min = 0; ui_max = 2.5; ui_step = 0.125;
 	ui_label = "Contrast Aware";
-	ui_tooltip = "This makes the shapren contrast aware.\n"
-				 "It will not shapren High Contrast areas in the image.";
-> = false;
+	ui_tooltip = "This is used to adjust contrast awareness or to turn it off.\n"
+				 "It will not shapren High Contrast areas in game.";
+> = 0.5;
 
 uniform bool Debug_View <
 	ui_label = "Debug View";
@@ -206,8 +212,8 @@ float4 UnsharpMask(float4 position : SV_Position, float2 texcoord : TEXCOORD0) :
 		result = tex2D(BackBuffer, texcoord) + ( tex2D(BackBuffer, texcoord) - result ) * Sharpen_Power;
 		result = lerp(tex2D(BackBuffer, texcoord) ,result, Mask);	
 		//High Contrast Mask
-		float HCM = saturate(dot(( tex2D(BackBuffer, texcoord).rgb - USM(texcoord).rgb ) , float3(0.333, 0.333, 0.333) * 50) > 1);
-		if(Contrast_Aware)
+		float CA = Contrast_Aware * 25.0f, HCM = saturate(dot(( tex2D(BackBuffer, texcoord).rgb - USM(texcoord).rgb ) , float3(0.333, 0.333, 0.333) * CA) > 1);
+		if(Contrast_Aware > 0)
 			result = lerp(result, tex2D(BackBuffer, texcoord), HCM);
 	}			
 
