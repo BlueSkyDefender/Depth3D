@@ -182,6 +182,12 @@ uniform bool Depth_Map_Flip <
 	ui_tooltip = "Flip the depth map if it is upside down.";
 	ui_category = "Depth Map";
 > = false;
+
+uniform bool Menu_Detection <
+	ui_label = " Menu Detection";
+	ui_tooltip = "Use this to dissable/enable in game Menu Detection.";
+	ui_category = "Depth Map";
+> = false;
 #if DB_Size_Postion 
 uniform int2 Image_Position_Adjust<
 	ui_type = "drag";
@@ -815,8 +821,11 @@ float zBuffer(in float2 texcoord : TEXCOORD0)
 	
 	float ALC = abs(Lum(texcoord).x);
 	
-	if (ALC <= 0.025f)
+	if (Menu_Detection)
+	{
+		if (ALC <= 0.025f)
 		DM = 0;
+	}
 		
 	if (Cancel_Depth)
 		DM = 0.0625f;

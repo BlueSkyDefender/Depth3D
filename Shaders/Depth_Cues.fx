@@ -4,7 +4,7 @@
 
  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
  //* Depth Based Unsharp Mask                                      																													*//
- //* For Reshade 3.0																																								*//
+ //* For Reshade 3.0+																																								*//
  //* --------------------------																																						*//
  //* This work is licensed under a Creative Commons Attribution 3.0 Unported License.																								*//
  //* So you are free to share, modify and adapt it for your needs, and even use it for commercial use.																				*//
@@ -122,7 +122,7 @@ void Blur(in float4 position : SV_Position, in float2 texcoords : TEXCOORD0, out
 }
 
 //Spread the blur a bit more. 
-float4 Adjust(in float2 texcoords : TEXCOORD0)
+float4 Adjust(float2 texcoords)
 {
 float2 S = Spread * 0.1875f * pix;
 
@@ -149,12 +149,12 @@ float3 GS(float3 color)
 	return clamp(color,0.003,1.0);//clamping to protect from over Dark.
 }
 
-float LI(in float3 value)
+float LI(float3 value)
 {	
 	return dot(value.rgb,float3(0.333, 0.333, 0.333)); 
 }
 
-float DepthCues(float2 texcoord : TEXCOORD0)
+float DepthCues(float2 texcoord)
 {
 	float3 RGB;	
 	
@@ -166,7 +166,7 @@ float DepthCues(float2 texcoord : TEXCOORD0)
 	return saturate(Done);
 }
 
-float4 USM( float2 texcoord )
+float4 USM(float2 texcoord )
 {
 	float2 tex_offset = pix; // Gets texel offset
 	float4 result =  tex2D(BackBuffer, float2(texcoord));
@@ -183,7 +183,6 @@ float4 USM( float2 texcoord )
 		   result += tex2D(BackBuffer, float2(texcoord + float2(-1, 1) * tex_offset));
    		result /= 9;
 	}
-	
 	return result;
 }
 
