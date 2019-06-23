@@ -32,11 +32,11 @@ uniform float Shade_Power <
 	#else
 	ui_type = "slider";
 	#endif
-	ui_min = 0.25; ui_max = 1.0;	
+	ui_min = 0.5; ui_max = 1.0;	
 	ui_label = "Shade Power";	
 	ui_tooltip = "Adjust the Shade Power This improves AO, Shadows, & Darker Areas in game.\n"	
-				 "Number 0.5 is default.";
-> = 0.5;
+				 "Number 0.75 is default.";
+> = 0.75;
 
 uniform float Blur_Cues <	
 	#if Compatibility
@@ -56,36 +56,12 @@ uniform float Spread <
 	#else
 	ui_type = "slider";
 	#endif
-	ui_min = 5; ui_max = 10.0; ui_step = 0.5;
+	ui_min = 5; ui_max = 12.5; ui_step = 0.25;
 	ui_label = "Shade Fill";
 	ui_tooltip = "Adjust This to have the shade effect to fill in areas.\n"
 				 "This is used for gap filling.\n"
 				 "Number 7.5 is default.";
 > = 7.5;
-
-uniform float Sharpen_Power <
-	#if Compatibility
-	ui_type = "drag";
-	#else
-	ui_type = "slider";
-	#endif
-	ui_min = 0.0; ui_max = 2.5; ui_step = 0.125;
-	ui_label = "Sharpen Power";
-	ui_tooltip = "Adjust this on clear up the image the game, movie piture & ect.";
-	ui_category = "Image Effects";
-> = 0;
-
-uniform float Contrast_Aware <
-	#if Compatibility
-	ui_type = "drag";
-	#else
-	ui_type = "slider";
-	#endif
-	ui_min = 0; ui_max = 2.5; ui_step = 0.125;
-	ui_label = "Contrast Aware";
-	ui_tooltip = "This is used to adjust contrast awareness or to turn it off.\n"
-				 "It will not shapren High Contrast areas in game.";
-> = 0.5;
 
 uniform bool Debug_View <
 	ui_label = "Debug View";
@@ -166,6 +142,7 @@ float LI(float3 value)
 	return dot(value.rgb,float3(0.333, 0.333, 0.333)); 
 }
 
+
 float DepthCues(float2 texcoord)
 {
 	float3 RGB;	
@@ -177,59 +154,27 @@ float DepthCues(float2 texcoord)
 	return saturate(Done);
 }
 
-float4 USM(float2 texcoord )
+float USM(float2 texcoord )
 {
 	float2 tex_offset = pix; // Gets texel offset
-	float4 result =  float4(tex2D(BackBuffer, texcoord).rgb,DepthCues(texcoord).x);
-		   result += float4(tex2D(BackBuffer, float2(texcoord + float2( 1, 0) * tex_offset)).rgb,DepthCues( float2(texcoord + float2( 1, 0) * tex_offset)).x);
-		   result += float4(tex2D(BackBuffer, float2(texcoord + float2(-1, 0) * tex_offset)).rgb,DepthCues( float2(texcoord + float2(-1, 0) * tex_offset)).x);
-		   result += float4(tex2D(BackBuffer, float2(texcoord + float2( 0, 1) * tex_offset)).rgb,DepthCues( float2(texcoord + float2( 0, 1) * tex_offset)).x);
-		   result += float4(tex2D(BackBuffer, float2(texcoord + float2( 0,-1) * tex_offset)).rgb,DepthCues( float2(texcoord + float2( 0, 1) * tex_offset)).x);
-		   tex_offset *= 0.75;		   
-		   result += float4(tex2D(BackBuffer, float2(texcoord + float2( 1, 1) * tex_offset)).rgb,DepthCues( float2(texcoord + float2( 1, 1) * tex_offset)).x);
-		   result += float4(tex2D(BackBuffer, float2(texcoord + float2(-1,-1) * tex_offset)).rgb,DepthCues( float2(texcoord + float2(-1,-1) * tex_offset)).x);
-		   result += float4(tex2D(BackBuffer, float2(texcoord + float2( 1,-1) * tex_offset)).rgb,DepthCues( float2(texcoord + float2( 1,-1) * tex_offset)).x);
-		   result += float4(tex2D(BackBuffer, float2(texcoord + float2(-1, 1) * tex_offset)).rgb,DepthCues( float2(texcoord + float2(-1, 1) * tex_offset)).x);
-   		result /= 9;
+	float result =  DepthCues(texcoord);
+		  result += DepthCues( float2(texcoord + float2( 1, 0) * tex_offset));
+		  result += DepthCues( float2(texcoord + float2(-1, 0) * tex_offset));
+		  result += DepthCues( float2(texcoord + float2( 0, 1) * tex_offset));
+		  result += DepthCues( float2(texcoord + float2( 0, 1) * tex_offset));
+		  tex_offset *= 0.75;		   
+		  result += DepthCues( float2(texcoord + float2( 1, 1) * tex_offset));
+		  result += DepthCues( float2(texcoord + float2(-1,-1) * tex_offset));
+		  result += DepthCues( float2(texcoord + float2( 1,-1) * tex_offset));
+		  result += DepthCues( float2(texcoord + float2(-1, 1) * tex_offset));
 
-	return result;
+	return result/9;
 }
 
-float4 UnsharpMask(float4 position : SV_Position, float2 texcoord : TEXCOORD0) : SV_Target
-{	
-	float4 result = tex2D(BackBuffer, float2(texcoord)), t, l, r, d;
-	float2 tex_offset = pix;
-	if(Sharpen_Power > 0)
-	{		
-		   t = tex2D(BackBuffer, float2(texcoord + float2( 0.0,-tex_offset.y)));
-		   l = tex2D(BackBuffer, float2(texcoord + float2(-tex_offset.x, 0.0)));
-		   r = tex2D(BackBuffer, float2(texcoord + float2( tex_offset.x, 0.0)));
-		   d = tex2D(BackBuffer, float2(texcoord + float2( 0.0, tex_offset.y)));
-
-   		result = (t + l + r + d + result) / 5;
-   		float2 n = float2(LI(t.rgb) - LI(d.rgb), LI(r.rgb) - LI(l.rgb));
-		float Mask = length(n) * 0.5f;
-	
-		if (Mask > 0.025f)
-			Mask = 1-Mask;
-		else
-			Mask = 1;
-
-		Mask = saturate(lerp(Mask,1,-7.5f));
-		result = tex2D(BackBuffer, texcoord) + ( tex2D(BackBuffer, texcoord) - result ) * Sharpen_Power;
-		result = lerp(tex2D(BackBuffer, texcoord) ,result, Mask);	
-		//High Contrast Mask
-		float CA = Contrast_Aware * 25.0f, HCM = saturate(dot(( tex2D(BackBuffer, texcoord).rgb - USM(texcoord).rgb ) , float3(0.333, 0.333, 0.333) * CA) > 1);
-		if(Contrast_Aware > 0)
-			result = lerp(result, tex2D(BackBuffer, texcoord), HCM);
-	}			
-
-	return result;
-}
 
 float4 CuesOut(float2 texcoord : TEXCOORD0)
 {		
-	float4 Out, Debug_Done = saturate(lerp(1.0f,lerp(USM(texcoord).wwww,DepthCues(texcoord).xxxx,1-Blur_Cues),Shade_Power)), Combine = tex2D(BackBuffer,texcoord) * Debug_Done;
+	float4 Out, Debug_Done = saturate(lerp(1.0f,lerp(USM(texcoord).xxxx,DepthCues(texcoord).xxxx,1-Blur_Cues),Shade_Power)), Combine = tex2D(BackBuffer,texcoord) * Debug_Done;
 	
 if (!Debug_View)
 		Out = Combine;
@@ -348,11 +293,6 @@ void PostProcessVS(in uint id : SV_VertexID, out float4 position : SV_Position, 
 //*Rendering passes*//
 technique Monocular_Cues
 {
-		pass UnSharpMask_Filter
-	{
-		VertexShader = PostProcessVS;
-		PixelShader = UnsharpMask;
-	}
 		pass BlurFilter
 	{
 		VertexShader = PostProcessVS;
