@@ -38,6 +38,18 @@ uniform float Shade_Power <
 				 "Number 0.5 is default.";
 > = 0.5;
 
+uniform float Blur_Cues <	
+	#if Compatibility
+	ui_type = "drag";
+	#else
+	ui_type = "slider";
+	#endif
+	ui_min = 0.0; ui_max = 1.0;	
+	ui_label = "Blur Shade";	
+	ui_tooltip = "Adjust the to make Shade Softer in the Image.\n"	
+				 "Number 0.5 is default.";
+> = 0.5;
+
 uniform float Spread <
 	#if Compatibility
 	ui_type = "drag";
@@ -157,7 +169,6 @@ float LI(float3 value)
 float DepthCues(float2 texcoord)
 {
 	float3 RGB;	
-	
 	//Formula for Image Pop = Original + (Original / Blurred) * Amount.
 	RGB = GS(tex2D(BackBuffer,texcoord).rgb) / GS( Adjust(texcoord).rgb );
 		
@@ -169,20 +180,18 @@ float DepthCues(float2 texcoord)
 float4 USM(float2 texcoord )
 {
 	float2 tex_offset = pix; // Gets texel offset
-	float4 result =  tex2D(BackBuffer, float2(texcoord));
-	if(Sharpen_Power > 0)
-	{				   
-		   result += tex2D(BackBuffer, float2(texcoord + float2( 1, 0) * tex_offset));
-		   result += tex2D(BackBuffer, float2(texcoord + float2(-1, 0) * tex_offset));
-		   result += tex2D(BackBuffer, float2(texcoord + float2( 0, 1) * tex_offset));
-		   result += tex2D(BackBuffer, float2(texcoord + float2( 0,-1) * tex_offset));
+	float4 result =  float4(tex2D(BackBuffer, texcoord).rgb,DepthCues(texcoord).x);
+		   result += float4(tex2D(BackBuffer, float2(texcoord + float2( 1, 0) * tex_offset)).rgb,DepthCues( float2(texcoord + float2( 1, 0) * tex_offset)).x);
+		   result += float4(tex2D(BackBuffer, float2(texcoord + float2(-1, 0) * tex_offset)).rgb,DepthCues( float2(texcoord + float2(-1, 0) * tex_offset)).x);
+		   result += float4(tex2D(BackBuffer, float2(texcoord + float2( 0, 1) * tex_offset)).rgb,DepthCues( float2(texcoord + float2( 0, 1) * tex_offset)).x);
+		   result += float4(tex2D(BackBuffer, float2(texcoord + float2( 0,-1) * tex_offset)).rgb,DepthCues( float2(texcoord + float2( 0, 1) * tex_offset)).x);
 		   tex_offset *= 0.75;		   
-		   result += tex2D(BackBuffer, float2(texcoord + float2( 1, 1) * tex_offset));
-		   result += tex2D(BackBuffer, float2(texcoord + float2(-1,-1) * tex_offset));
-		   result += tex2D(BackBuffer, float2(texcoord + float2( 1,-1) * tex_offset));
-		   result += tex2D(BackBuffer, float2(texcoord + float2(-1, 1) * tex_offset));
+		   result += float4(tex2D(BackBuffer, float2(texcoord + float2( 1, 1) * tex_offset)).rgb,DepthCues( float2(texcoord + float2( 1, 1) * tex_offset)).x);
+		   result += float4(tex2D(BackBuffer, float2(texcoord + float2(-1,-1) * tex_offset)).rgb,DepthCues( float2(texcoord + float2(-1,-1) * tex_offset)).x);
+		   result += float4(tex2D(BackBuffer, float2(texcoord + float2( 1,-1) * tex_offset)).rgb,DepthCues( float2(texcoord + float2( 1,-1) * tex_offset)).x);
+		   result += float4(tex2D(BackBuffer, float2(texcoord + float2(-1, 1) * tex_offset)).rgb,DepthCues( float2(texcoord + float2(-1, 1) * tex_offset)).x);
    		result /= 9;
-	}
+
 	return result;
 }
 
@@ -192,7 +201,6 @@ float4 UnsharpMask(float4 position : SV_Position, float2 texcoord : TEXCOORD0) :
 	float2 tex_offset = pix;
 	if(Sharpen_Power > 0)
 	{		
-			   
 		   t = tex2D(BackBuffer, float2(texcoord + float2( 0.0,-tex_offset.y)));
 		   l = tex2D(BackBuffer, float2(texcoord + float2(-tex_offset.x, 0.0)));
 		   r = tex2D(BackBuffer, float2(texcoord + float2( tex_offset.x, 0.0)));
@@ -221,18 +229,13 @@ float4 UnsharpMask(float4 position : SV_Position, float2 texcoord : TEXCOORD0) :
 
 float4 CuesOut(float2 texcoord : TEXCOORD0)
 {		
-
-	float4 Out, Debug_Done = lerp(1.0f,DepthCues(texcoord).xxxx,Shade_Power), Combine = tex2D(BackBuffer,texcoord) * Debug_Done;
+	float4 Out, Debug_Done = saturate(lerp(1.0f,lerp(USM(texcoord).wwww,DepthCues(texcoord).xxxx,1-Blur_Cues),Shade_Power)), Combine = tex2D(BackBuffer,texcoord) * Debug_Done;
 	
 if (!Debug_View)
-	{
 		Out = Combine;
-	}
 	else
-	{	
 		Out = Debug_Done;
-	}
-	
+			
 	return Out;
 }
 
