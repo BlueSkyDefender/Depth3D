@@ -20,18 +20,8 @@
  //* 																																												*//
  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#if !defined(__RESHADE__) || __RESHADE__ < 40000
-	#define Compatibility 1
-#else
-	#define Compatibility 0
-#endif
-
 uniform float Shade_Power <	
-	#if Compatibility
 	ui_type = "drag";
-	#else
-	ui_type = "slider";
-	#endif
 	ui_min = 0.5; ui_max = 1.0;	
 	ui_label = "Shade Power";	
 	ui_tooltip = "Adjust the Shade Power This improves AO, Shadows, & Darker Areas in game.\n"	
@@ -39,11 +29,7 @@ uniform float Shade_Power <
 > = 0.75;
 
 uniform float Blur_Cues <	
-	#if Compatibility
 	ui_type = "drag";
-	#else
-	ui_type = "slider";
-	#endif
 	ui_min = 0.0; ui_max = 1.0;	
 	ui_label = "Blur Shade";	
 	ui_tooltip = "Adjust the to make Shade Softer in the Image.\n"	
@@ -51,11 +37,7 @@ uniform float Blur_Cues <
 > = 0.5;
 
 uniform float Spread <
-	#if Compatibility
 	ui_type = "drag";
-	#else
-	ui_type = "slider";
-	#endif
 	ui_min = 5; ui_max = 12.5; ui_step = 0.25;
 	ui_label = "Shade Fill";
 	ui_tooltip = "Adjust This to have the shade effect to fill in areas.\n"

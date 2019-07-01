@@ -26,7 +26,7 @@
 // Determines The resolution of the Depth Map. For 4k Use 0.75 or 0.5. For 1440p Use 0.75. For 1080p use 1. Too low of a resolution will remove too much detail.
 #define Depth_Map_Division 1.0
 
-// Zero Parallax Distance Balance Mode allows you to switch control from manual to automatic and vice versa. You need to turn this on to use UI Masking options.
+// Zero Parallax Distance Balance Mode allows you to switch control from manual to automatic and vice versa.
 #define Balance_Mode 0 //Default 0 is Automatic. One is Manual.
 
 // RE Fix is used to fix the issue with Resident Evil's 2 Remake 1-Shot cutscenes.
@@ -47,6 +47,12 @@
 
 // Define Display aspect ratio for screen cursor. A 16:9 aspect ratio will equal (1.77:1)
 #define DAR float2(1.76, 1.0)
+
+// HUD Mode is for Extra UI MASK and Basic HUD Adjustments. This is usefull for UI elements that are drawn in the Depth Buffer.
+// Such as the game Naruto Shippuden: Ultimate Ninja and or Unreal Gold 277. That have this issue. This also allows for more advance users
+// Too Make there Own UI MASK if need be.
+// You need to turn this on to use UI Masking options Below.
+#define HUD_MODE 0 // Set this to 1 if basic HUD items are drawn in the depth buffer to be adjustable.
 
 // Turn UI Mask Off or On. This is used to set Two UI Masks for any game. Keep this in mind when you enable UI_MASK.
 // You Will have to create Three PNG Textures named Mask_A.png and Mask_B.png with transparency for this option.
@@ -235,7 +241,7 @@ uniform float WZPD <
 				"Default is 0.03f & Zero is off.";
 	ui_category = "Weapon Hand Adjust";
 > = 0.03;
-#if Balance_Mode
+#if HUD_MODE
 //Heads-Up Display
 uniform float2 HUD_Adjust <
 	ui_type = "drag";
@@ -324,7 +330,7 @@ uniform bool SCSC <
 	ui_category = "Cursor Adjustments";
 > = false;
 
-uniform bool Cancel_Depth < source = "key"; keycode = Cancel_Depth_Key; toggle = true; >;
+uniform bool Cancel_Depth < source = "key"; keycode = Cancel_Depth_Key; toggle = true; mode = "toggle";>;
 uniform bool Mask_Cycle < source = "key"; keycode = Mask_Cycle_Key; toggle = true; >;
 uniform bool Depth_Adjust < source = "key"; keycode = DB_TOGGLE; toggle = true; >;
 /////////////////////////////////////////////D3D Starts Here/////////////////////////////////////////////////////////////////
@@ -582,9 +588,9 @@ float2 WeaponDepth(in float2 texcoord : TEXCOORD0)
 	else if(WP == 31)//WP 29
 		WA_XYZ = float3(0,0,0);                //Game
 	else if(WP == 32)//WP 30
-		WA_XYZ = float3(0.490,5.0,0.5625);     //Wolfenstine
+		WA_XYZ = float3(0.490,5.0,0.5625);     //Wolfenstein
 	else if(WP == 33)//WP 31
-		WA_XYZ = float3(1.0,13.75,6.4);        //Wolfenstine: The New Order / The Old Blood
+		WA_XYZ = float3(1.0,13.75,6.4);        //Wolfenstein: The New Order / The Old Blood
 	else if(WP == 34)//WP 32
 		WA_XYZ = float3(0,0,0);                //Wolfenstein II: The New Colossus / Cyberpilot
 	else if(WP == 35)//WP 33
@@ -598,7 +604,7 @@ float2 WeaponDepth(in float2 texcoord : TEXCOORD0)
 	else if(WP == 39)//WP 37
 		WA_XYZ = float3(0.445,0.500,0);        //Cryostasis
 	else if(WP == 40)//WP 38
-		WA_XYZ = float3(0.286,7.5,5.5);        //Unreal Gold with v227	
+		WA_XYZ = float3(0.286,80.0,7.0);       //Unreal Gold with v227*	
 	else if(WP == 41)//WP 39
 		WA_XYZ = float3(0.280,1.125,-16.25);   //Serious Sam Revolution / Serious Sam HD: The First Encounter / The Second Encounter / Serious Sam 3: BFE?*
 	else if(WP == 42)//WP 40
@@ -625,7 +631,7 @@ float2 WeaponDepth(in float2 texcoord : TEXCOORD0)
 		WA_XYZ = float3(0.489,3.75,0);         //NecroVisioN: Lost Company
 	//End Weapon Profiles//
 	
-	// Hear on out is the Weapon Hand Adjustment code.		
+	// Here on out is the Weapon Hand Adjustment code.		
 	//Conversions to linear space.....
 	//Near & Far Adjustment
 	float Far = 1.0, Near = 0.125/WA_XYZ.y;  //Division Depth Map Adjust - Near	
@@ -667,8 +673,7 @@ float4 DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0
 		
 	return saturate(float4(R,G,B,A));
 }
-
-#if Balance_Mode
+#if HUD_MODE
 float4 HUD(float4 HUD, float2 texcoord ) 
 {		
 	float Mask_Tex, CutOFFCal = ((HUD_Adjust.x * 0.5)/DMA()) * 0.5, COC = step(Depth(texcoord).x,CutOFFCal); //HUD Cutoff Calculation
@@ -788,10 +793,7 @@ float2 Parallax( float Diverge, float2 Coordinates)
         // Shift coordinates horizontally in linear fasion
         ParallaxCoord.x -= deltaCoordinates;
         // Get depth value at current coordinates
-        [branch] if(View_Mode == 1)
-        	CurrentDepthMapValue = zBuffer( ParallaxCoord );
-        else
-        	CurrentDepthMapValue = zBuffer( ParallaxCoord - DB_Offset);
+        CurrentDepthMapValue = zBuffer( ParallaxCoord - DB_Offset);
         // Get depth of next layer
         CurrentLayerDepth += LayerDepth;
     }
@@ -878,11 +880,11 @@ float4 PS_calcLR(float2 texcoord)
 		Left = EdgeMask(-Divergence,Left,TCL);
 		Right = EdgeMask(Divergence,Right,TCR);
 	}
-	#if Balance_Mode	
+	#if HUD_MODE	
 	float HUD_Adjustment = ((0.5 - HUD_Adjust.y)*25) * pix.x;
 	Left = HUD(Left,float2(TCL.x - HUD_Adjustment,TCL.y));
 	Right = HUD(Right,float2(TCR.x + HUD_Adjustment,TCR.y));
-	#endif	
+	#endif
 	if(!Depth_Map_View)
 	{
 	float2 gridxy;
