@@ -93,9 +93,9 @@ uniform float ZPD <
 	ui_tooltip = "ZPD controls the focus distance for the screen Pop-out effect also known as Convergence.\n"
 				"For FPS Games keeps this low Since you don't want your gun to pop out of screen.\n"
 				"This is controled by Convergence Mode.\n"
-				"Default is 0.010, Zero is off.";
+				"Default is 0.025, Zero is off.";
 	ui_category = "Divergence & Convergence";
-> = 0.010;
+> = 0.025;
 
 #if Balance_Mode
 uniform float ZPD_Balance <
@@ -582,13 +582,13 @@ float2 WeaponDepth(in float2 texcoord : TEXCOORD0)
 	else if(WP == 28)//WP 26
 		WA_XYZ = float3(0.750,3.4375,0);       //Prey - 2006
 	else if(WP == 29)//WP 27
-		WA_XYZ = float3(0.2832,20.0,0);        //Prey 2017 High Settings and <
+		WA_XYZ = float3(0.2832,30.0,0.8775);   //Prey 2017 High Settings and <*
 	else if(WP == 30)//WP 28
-		WA_XYZ = float3(0.2712,25.0,0.325);    //Prey 2017 Very High
+		WA_XYZ = float3(0.2832,35,0.91875);    //Prey 2017 Very High*
 	else if(WP == 31)//WP 29
 		WA_XYZ = float3(0,0,0);                //Game
 	else if(WP == 32)//WP 30
-		WA_XYZ = float3(0.490,5.0,0.5625);     //Wolfenstein
+		WA_XYZ = float3(0.4894,75.0,1.00375);  //Wolfenstein*
 	else if(WP == 33)//WP 31
 		WA_XYZ = float3(1.0,13.75,6.4);        //Wolfenstein: The New Order / The Old Blood
 	else if(WP == 34)//WP 32

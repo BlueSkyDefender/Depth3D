@@ -211,9 +211,9 @@ Inner Shader Setting:
               We Where Here Too                            DM 1       42.500                                       0.0375-0.0625      Yes 1              
               What Remains of Edith Finch                  DM 1       52.500    0.000025                           0.0125-0.0375      Yes 2                         
               Witcher 3                                    DM 1       7.5000                                       0.050-0.100            
-             *Wolfenstine                                  DM 0       7.5000               *WDM 30                 0.0250-0.0500      Yes 2          
-    RB       *Wolfenstine: The New Order                   DM 0       25.000    0.00125    *WDM 31                 0.0375-0.0625      Yes 5              
-    RB       *Wolfenstine: The Old Blood                   DM 0       25.000    0.00125    *WDM 31                 0.0375-0.0625      Yes 5              
+             *Wolfenstein                                  DM 0       7.5000               *WDM 30                 0.0250-0.0500      Yes 2          
+    RB       *Wolfenstein: The New Order                   DM 0       25.000    0.00125    *WDM 31                 0.0375-0.0625      Yes 5              
+    RB       *Wolfenstein: The Old Blood                   DM 0       25.000    0.00125    *WDM 31                 0.0375-0.0625      Yes 5              
     RB        Yooka-Laylee                                 DM 0       6.8750                               Yes     0.025-0.075
               Ziggurat                                     DM 0       7.5000                                       0.075-0.175
               Zombie Army Trilogy                          DM 0       12.500                                       0.050-0.075                         
