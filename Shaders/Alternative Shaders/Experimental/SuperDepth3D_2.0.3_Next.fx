@@ -594,7 +594,7 @@ float2 WeaponDepth(in float2 texcoord : TEXCOORD0)
 	else if(WP == 34)//WP 32
 		WA_XYZ = float3(0,0,0);                //Wolfenstein II: The New Colossus / Cyberpilot
 	else if(WP == 35)//WP 33
-		WA_XYZ = float3(0.278,2.0,-12.0);      //Black Mesa
+		WA_XYZ = float3(0.278,56.25,9.050);    //Black Mesa*
 	else if(WP == 36)//WP 34
 		WA_XYZ = float3(0.420,0.1,0.0);        //Blood 2
 	else if(WP == 37)//WP 35
@@ -614,7 +614,7 @@ float2 WeaponDepth(in float2 texcoord : TEXCOORD0)
 	else if(WP == 44)//WP 42
 		WA_XYZ = float3(0.277,0.875,-11.875);  //TitanFall 2
 	else if(WP == 45)//WP 43
-		WA_XYZ = float3(0.7,0.250,0);          //Project Warlock
+		WA_XYZ = float3(0.7,16.250,0.300);     //Project Warlock*
 	else if(WP == 46)//WP 44
 		WA_XYZ = float3(0.625,0.275,-25.0);    //Kingpin Life of Crime
 	else if(WP == 47)//WP 45
@@ -624,7 +624,7 @@ float2 WeaponDepth(in float2 texcoord : TEXCOORD0)
 	else if(WP == 49)//WP 47
 		WA_XYZ = float3(0,0,0);                //Game	
 	else if(WP == 50)//WP 48
-		WA_XYZ = float3(1.9375,0.5,40.0);      //Immortal Redneck
+		WA_XYZ = float3(2.0,20.0,0.100);       //Immortal Redneck CP alt 1.9375*
 	else if(WP == 51)//WP 49
 		WA_XYZ = float3(0,0,0);                //NecroVisioN
 	else if(WP == 52)//WP 50
