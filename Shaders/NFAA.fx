@@ -4,7 +4,7 @@
 
  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
  //* Normal Filter Anti Aliasing.                                     																										        *//
- //* For Reshade 3.0																																								*//
+ //* For Reshade 3.0+																																								*//
  //* --------------------------																																						*//
  //* This work is licensed under a Creative Commons Attribution 3.0 Unported License.																								*//
  //* So you are free to share, modify and adapt it for your needs, and even use it for commercial use.																				*//
@@ -20,15 +20,6 @@
  //* 																																												*//
  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-uniform float Mask_Adjust <
-	ui_type = "drag";
-	ui_min = 0.125; ui_max = 0.625;
-	ui_label = "Mask Adjustment";
-	ui_tooltip = "Use this to adjust the Mask.\n"
-				 "Default is 0.375";
-	ui_category = "NFAA";
-> = 0.375;
-
 uniform int View_Mode <
 	ui_type = "combo";
 	ui_items = "NFAA\0NFAA Masked\0Mask View A\0Mask View B\0DLSS\0";
@@ -41,6 +32,15 @@ uniform int View_Mode <
 				 "Default is NFAA.";
 	ui_category = "NFAA";
 > = 0;
+
+uniform float Mask_Adjust <
+	ui_type = "drag";
+	ui_min = 0.125; ui_max = 0.625;
+	ui_label = "Mask Adjustment";
+	ui_tooltip = "Use this to adjust the Mask.\n"
+				 "Default is 0.375";
+	ui_category = "NFAA";
+> = 0.375;
 
 /////////////////////////////////////////////////////D3D Starts Here/////////////////////////////////////////////////////////////////
 #define pix float2(BUFFER_RCP_WIDTH, BUFFER_RCP_HEIGHT)
@@ -66,28 +66,29 @@ float4 GetBB(float2 texcoord : TEXCOORD)
 
 float4 NFAA(float2 texcoord)
 {
-	float4 NFAA;
-    float2 UV = texcoord.xy, SW = pix, n;	
+	float4 NFAA; // The Edge Seeking code can be adjusted to look for longer edges.
+    float2 UV = texcoord.xy, SW = pix, n; // But, I don't think it's really needed.
 	float t, l, r, d;
-		
+	// Find Edges
 	t = LI(GetBB( float2( UV.x , UV.y - SW.y ) ).rgb);
 	d = LI(GetBB( float2( UV.x , UV.y + SW.y ) ).rgb);
 	l = LI(GetBB( float2( UV.x - SW.x , UV.y ) ).rgb);
 	r = LI(GetBB( float2( UV.x + SW.x , UV.y ) ).rgb);
 	n = float2(t - d,r - l);
-		
+	// I should have made rep adjustable. But, I didn't see the need.
+	// Since my goal was to make this AA fast cheap and simple.	
     float   nl = length(n), Rep = 1 / 16.;
  
 	if(View_Mode == 4)
 		Rep = 1 / 128.;  
- 
+	// Seek aliasing and apply AA. Think of this as basicly blur control.
     if (nl < Rep)
     {
 		NFAA = GetBB(UV);
 	}
     else
     {
-	n *= pix / (nl * 0.5);
+		n *= pix / (nl * 0.5);
  
 	float4   o = GetBB( UV ),
 			t0 = GetBB( UV + n * 0.5) * 0.9,
@@ -97,14 +98,14 @@ float4 NFAA(float2 texcoord)
  
 		NFAA = (o + t0 + t1 + t2 + t3) / 4.3;
 	}
-	
+	// Lets make that mask for a sharper image.
 	float Mask = nl * Mask_Adjust;
 	
 	if (Mask > 0.025)
-	Mask = 1-Mask;
+		Mask = 1-Mask;
 	else
-	Mask = 1;
-	
+		Mask = 1;
+	// Super Evil Magic Number.
 	Mask = saturate(lerp(Mask,1,-6.25));
 	
 	// Final color
@@ -125,7 +126,7 @@ return NFAA;
 }
 
 ////////////////////////////////////////////////////////Logo/////////////////////////////////////////////////////////////////////////
-uniform float timer < source = "timer"; >; //Please do not remove.
+uniform float timer < source = "timer"; >; // Please do not remove.
 float4 Out(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Target
 {
 	float PosX = 0.9525*BUFFER_WIDTH*pix.x,PosY = 0.975*BUFFER_HEIGHT*pix.y;	

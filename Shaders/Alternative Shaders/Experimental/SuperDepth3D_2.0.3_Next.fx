@@ -538,7 +538,7 @@ float2 WeaponDepth(in float2 texcoord : TEXCOORD0)
 	else if(WP == 6) //WP 4
 		WA_XYZ = float3(0.253,40.0,97.5);      //Fallout 4*			
 	else if(WP == 7) //WP 5
-		WA_XYZ = float3(0.276,0.6875,20.0);    //Skyrim: SE
+		WA_XYZ = float3(0.276,20.0,9.5625);    //Skyrim: SE*
 	else if(WP == 8) //WP 6
 		WA_XYZ = float3(0.338,25.0,9.0);       //DOOM 2016*	
 	else if(WP == 9) //WP 7
@@ -570,9 +570,9 @@ float2 WeaponDepth(in float2 texcoord : TEXCOORD0)
 	else if(WP == 22)//WP 20
 		WA_XYZ = float3(0,0,0);                //Game
 	else if(WP == 23)//WP 21
-		WA_XYZ = float3(1.0,1.0,7.5);          //Turok: DH 2017
+		WA_XYZ = float3(8.6,30,0.0025);        //Turok: DH 2017*
 	else if(WP == 24)//WP 22
-		WA_XYZ = float3(0.570,2.0,0.0);        //Turok2: SoE 2017
+		WA_XYZ = float3(8.275,30.0,0.0025);    //Turok2: SoE 2017*
 	else if(WP == 25)//WP 23
 		WA_XYZ = float3(0,0,0);                //Turok 3: Shadow of Oblivion
 	else if(WP == 26)//WP 24
