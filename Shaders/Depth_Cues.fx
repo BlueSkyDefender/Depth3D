@@ -22,11 +22,11 @@
 
 uniform float Shade_Power <	
 	ui_type = "drag";
-	ui_min = 0.5; ui_max = 1.0;	
+	ui_min = 0.25; ui_max = 0.75;	
 	ui_label = "Shade Power";	
 	ui_tooltip = "Adjust the Shade Power This improves AO, Shadows, & Darker Areas in game.\n"	
-				 "Number 0.75 is default.";
-> = 0.75;
+				 "Number 0.5 is default.";
+> = 0.5;
 
 uniform float Blur_Cues <	
 	ui_type = "drag";
@@ -38,7 +38,7 @@ uniform float Blur_Cues <
 
 uniform float Spread <
 	ui_type = "drag";
-	ui_min = 5; ui_max = 12.5; ui_step = 0.25;
+	ui_min = 5.0; ui_max = 25.0; ui_step = 0.25;
 	ui_label = "Shade Fill";
 	ui_tooltip = "Adjust This to have the shade effect to fill in areas.\n"
 				 "This is used for gap filling.\n"
@@ -52,13 +52,6 @@ uniform bool Debug_View <
 
 /////////////////////////////////////////////////////D3D Starts Here/////////////////////////////////////////////////////////////////
 #define pix float2(BUFFER_RCP_WIDTH, BUFFER_RCP_HEIGHT)
-
-texture DepthBufferTex : DEPTH;
-
-sampler DepthBuffer 
-	{ 
-		Texture = DepthBufferTex; 
-	};
 	
 texture BackBufferTex : COLOR;
 
@@ -75,39 +68,38 @@ sampler SamplerBlur
 	};	
 	
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 void Blur(in float4 position : SV_Position, in float2 texcoords : TEXCOORD0, out float4 color : SV_Target)                                                                          
 {
 	float2 Adjust = (Spread * 0.75 ) * pix;
 	float4 result = tex2D(BackBuffer,texcoords);	
-	result += tex2D(BackBuffer,texcoords + float2( 1, 0) * Adjust );
-	result += tex2D(BackBuffer,texcoords + float2(-1, 0) * Adjust );	
-	result += tex2D(BackBuffer,texcoords + float2( 1, 0) * 0.25 * Adjust );
-	result += tex2D(BackBuffer,texcoords + float2(-1, 0) * 0.25 * Adjust );	
-	result += tex2D(BackBuffer,texcoords + float2( 1, 0) * 0.5 * Adjust );
-	result += tex2D(BackBuffer,texcoords + float2(-1, 0) * 0.5 * Adjust );	
-	result += tex2D(BackBuffer,texcoords + float2( 1, 0) * 0.75 * Adjust );
-	result += tex2D(BackBuffer,texcoords + float2(-1, 0) * 0.75 * Adjust );	
+		result += tex2D(BackBuffer,texcoords + float2( 1, 0) * Adjust );
+		result += tex2D(BackBuffer,texcoords + float2(-1, 0) * Adjust );	
+		result += tex2D(BackBuffer,texcoords + float2( 1, 0) * 0.25 * Adjust );
+		result += tex2D(BackBuffer,texcoords + float2(-1, 0) * 0.25 * Adjust );	
+		result += tex2D(BackBuffer,texcoords + float2( 1, 0) * 0.5 * Adjust );
+		result += tex2D(BackBuffer,texcoords + float2(-1, 0) * 0.5 * Adjust );	
+		result += tex2D(BackBuffer,texcoords + float2( 1, 0) * 0.75 * Adjust );
+		result += tex2D(BackBuffer,texcoords + float2(-1, 0) * 0.75 * Adjust );	
 	color = result / 9;
 }
 
-//Spread the blur a bit more. 
+// Spread the blur a bit more. 
 float4 Adjust(float2 texcoords)
 {
-float2 S = Spread * 0.1875f * pix;
+	float2 S = Spread * 0.1875f * pix;
 
-	float4 result;
-	result += tex2D(SamplerBlur,texcoords + float2( 1, 0) * S );
-	result += tex2D(SamplerBlur,texcoords + float2( 0, 1) * S );
-	result += tex2D(SamplerBlur,texcoords + float2(-1, 0) * S );
-	result += tex2D(SamplerBlur,texcoords + float2( 0,-1) * S );
-	S *= 0.75f;
-	result += tex2D(SamplerBlur,texcoords + float2( 1, 1) * S );
-	result += tex2D(SamplerBlur,texcoords + float2(-1,-1) * S );	
-	result += tex2D(SamplerBlur,texcoords + float2( 1,-1) * S );
-	result += tex2D(SamplerBlur,texcoords + float2(-1, 1) * S );	
+		float4 result;
+		result += tex2D(SamplerBlur,texcoords + float2( 1, 0) * S );
+		result += tex2D(SamplerBlur,texcoords + float2( 0, 1) * S );
+		result += tex2D(SamplerBlur,texcoords + float2(-1, 0) * S );
+		result += tex2D(SamplerBlur,texcoords + float2( 0,-1) * S );
+		S *= 0.75f;
+		result += tex2D(SamplerBlur,texcoords + float2( 1, 1) * S );
+		result += tex2D(SamplerBlur,texcoords + float2(-1,-1) * S );	
+		result += tex2D(SamplerBlur,texcoords + float2( 1,-1) * S );
+		result += tex2D(SamplerBlur,texcoords + float2(-1, 1) * S );	
 
-return result / 8; 
+	return result / 8; 
 }
 
 float3 GS(float3 color)
@@ -116,7 +108,7 @@ float3 GS(float3 color)
     color.r = grayscale;
     color.g = grayscale;
     color.b = grayscale;
-	return clamp(color,0.003,1.0);//clamping to protect from over Dark.
+	return clamp(color,0.003,1.0); // Clamping to protect from over dark.
 }
 
 float LI(float3 value)
@@ -126,10 +118,9 @@ float LI(float3 value)
 
 
 float DepthCues(float2 texcoord)
-{
-	float3 RGB;	
-	//Formula for Image Pop = Original + (Original / Blurred) * Amount.
-	RGB = GS(tex2D(BackBuffer,texcoord).rgb) / GS( Adjust(texcoord).rgb );
+{	
+	// Formula for Image Pop = Original + (Original / Blurred) * Amount.
+	float3 RGB = GS(tex2D(BackBuffer,texcoord).rgb) / GS( Adjust(texcoord).rgb );
 		
 	float Done = dot(RGB,float3(0.333, 0.333, 0.333));
 	
@@ -158,7 +149,7 @@ float4 CuesOut(float2 texcoord : TEXCOORD0)
 {		
 	float4 Out, Debug_Done = saturate(lerp(1.0f,lerp(USM(texcoord).xxxx,DepthCues(texcoord).xxxx,1-Blur_Cues),Shade_Power)), Combine = tex2D(BackBuffer,texcoord) * Debug_Done;
 	
-if (!Debug_View)
+	if (!Debug_View)
 		Out = Combine;
 	else
 		Out = Debug_Done;
@@ -167,7 +158,7 @@ if (!Debug_View)
 }
 
 ////////////////////////////////////////////////////////Logo/////////////////////////////////////////////////////////////////////////
-uniform float timer < source = "timer"; >; //Please do not remove.
+uniform float timer < source = "timer"; >; // Please do not remove.
 float4 Out(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Target
 {
 	float PosX = 0.9525f*BUFFER_WIDTH*pix.x,PosY = 0.975f*BUFFER_HEIGHT*pix.y;	
