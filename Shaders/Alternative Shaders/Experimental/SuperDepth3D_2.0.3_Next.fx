@@ -600,9 +600,9 @@ float2 WeaponDepth(in float2 texcoord : TEXCOORD0)
 	else if(WP == 37)//WP 35
 		WA_XYZ = float3(0.500,0.0625,18.75);   //Blood 2 Alt
 	else if(WP == 38)//WP 36
-		WA_XYZ = float3(0.785,0.0875,43.75);   //SOMA
+		WA_XYZ = float3(0.785,21.25,0.3875);   //SOMA*
 	else if(WP == 39)//WP 37
-		WA_XYZ = float3(0.445,0.500,0);        //Cryostasis
+		WA_XYZ = float3(0.444,20.0,1.1875);    //Cryostasis*
 	else if(WP == 40)//WP 38
 		WA_XYZ = float3(0.286,80.0,7.0);       //Unreal Gold with v227*	
 	else if(WP == 41)//WP 39
@@ -626,9 +626,9 @@ float2 WeaponDepth(in float2 texcoord : TEXCOORD0)
 	else if(WP == 50)//WP 48
 		WA_XYZ = float3(2.0,20.0,0.100);       //Immortal Redneck CP alt 1.9375*
 	else if(WP == 51)//WP 49
-		WA_XYZ = float3(0,0,0);                //NecroVisioN
+		WA_XYZ = float3(0,0,0);                //Game
 	else if(WP == 52)//WP 50
-		WA_XYZ = float3(0.489,3.75,0);         //NecroVisioN: Lost Company
+		WA_XYZ = float3(0.489,68.75,1.02);     //NecroVisioN & NecroVisioN: Lost Company*
 	//End Weapon Profiles//
 	
 	// Here on out is the Weapon Hand Adjustment code.		
