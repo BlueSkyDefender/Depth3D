@@ -23,9 +23,6 @@
 
 //USER EDITABLE PREPROCESSOR FUNCTIONS START//
 
-// Determines The resolution of the Depth Map. For 4k Use 0.75 or 0.5. For 1440p Use 0.75. For 1080p use 1. Too low of a resolution will remove too much detail.
-#define Depth_Map_Division 1.0
-
 // Zero Parallax Distance Balance Mode allows you to switch control from manual to automatic and vice versa.
 #define Balance_Mode 0 //Default 0 is Automatic. One is Manual.
 
@@ -49,7 +46,7 @@
 #define DAR float2(1.76, 1.0)
 
 // HUD Mode is for Extra UI MASK and Basic HUD Adjustments. This is usefull for UI elements that are drawn in the Depth Buffer.
-// Such as the game Naruto Shippuden: Ultimate Ninja and or Unreal Gold 277. That have this issue. This also allows for more advance users
+// Such as the game Naruto Shippuden: Ultimate Ninja, TitanFall 2, and or Unreal Gold 277. That have this issue. This also allows for more advance users
 // Too Make there Own UI MASK if need be.
 // You need to turn this on to use UI Masking options Below.
 #define HUD_MODE 0 // Set this to 1 if basic HUD items are drawn in the depth buffer to be adjustable.
@@ -137,6 +134,7 @@ uniform int View_Mode <
 	ui_items = "View Mode Normal\0View Mode Alpha\0";
 	ui_label = " View Mode";
 	ui_tooltip = "Change the way the shader warps the output to the screen.\n"
+					 "For High Foliage games Use Alpha.\n"
 				 "Default is Normal";
 	ui_category = "Occlusion Masking";
 > = 0;
@@ -367,7 +365,7 @@ sampler BackBufferBORDER
 		AddressW = BORDER;
 	};
 	
-texture texDMN  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT*Depth_Map_Division; Format = RGBA16F; }; 
+texture texDMN  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA16F; }; 
 
 sampler SamplerDMN
 	{
@@ -459,7 +457,7 @@ texture texLumN {Width = 256*0.5; Height = 256*0.5; Format = RGBA8; MipLevels = 
 sampler SamplerLumN																
 	{
 		Texture = texLumN;
-		MipLODBias = 8.0f; //Luminance adapted luminance value from 1x1 Texture Mip lvl of 8
+		MipLODBias = 8; //Luminance adapted luminance value from 1x1 Texture Mip lvl of 8
 		MinFilter = LINEAR;
 		MagFilter = LINEAR;
 		MipFilter = LINEAR;
@@ -496,7 +494,7 @@ float Depth(in float2 texcoord : TEXCOORD0)
 	
 	//Conversions to linear space.....
 	//Near & Far Adjustment
-	float Far = 1.0, Near = 0.125/DMA();  //Division Depth Map Adjust - Near
+	float Far = 1., Near = 0.125/DMA();  //Division Depth Map Adjust - Near
 	
 	float2 Offsets = float2(1 + Offset,1 - Offset), Z = float2( zBuffer, 1-zBuffer );
 	
@@ -528,7 +526,7 @@ float2 WeaponDepth(in float2 texcoord : TEXCOORD0)
 	[branch] if (WP == 1)                   // WA_XYZ.x | WA_XYZ.y | WA_XYZ.z 
 		WA_XYZ = float3(CutOff,Adjust,Tune);// X Cutoff | Y Adjust | Z Tuneing 		
 	else if(WP == 2) //WP 0
-		WA_XYZ = float3(0.425,0.025,0);        //ES: Oblivion		
+		WA_XYZ = float3(0.425,4.375,1.6875);   //ES: Oblivion*		
 	else if(WP == 3) //WP 1
 		WA_XYZ = float3(0,0,0);                //Game
 	else if(WP == 4) //WP 2
@@ -558,15 +556,15 @@ float2 WeaponDepth(in float2 texcoord : TEXCOORD0)
 	else if(WP == 16)//WP 14
 		WA_XYZ = float3(1.0,27.5,6.25);        //Rage64		
 	else if(WP == 17)//WP 15
-		WA_XYZ = float3(0.375,2.5,-44.75);     //Quake DarkPlaces	
+		WA_XYZ = float3(0.375,60.0,15.15625);  //Quake DarkPlaces*
 	else if(WP == 18)//WP 16
-		WA_XYZ = float3(0.7,0.4,-30.0);        //Quake 2 XP & Return to Castle Wolfenstine
+		WA_XYZ = float3(0.7,14.375,2.5);       //Quake 2 XP & Return to Castle Wolfenstine*
 	else if(WP == 19)//WP 17
 		WA_XYZ = float3(0.750,1.5,-1.250);     //Quake 4
 	else if(WP == 20)//WP 18
 		WA_XYZ = float3(0,0,0);                //Game
 	else if(WP == 21)//WP 19
-		WA_XYZ = float3(0.255,0.01,22.5);      //S.T.A.L.K.E.R: Games
+		WA_XYZ = float3(0.255,5.5,52.0);       //S.T.A.L.K.E.R: Games*
 	else if(WP == 22)//WP 20
 		WA_XYZ = float3(0,0,0);                //Game
 	else if(WP == 23)//WP 21
@@ -606,13 +604,13 @@ float2 WeaponDepth(in float2 texcoord : TEXCOORD0)
 	else if(WP == 40)//WP 38
 		WA_XYZ = float3(0.286,80.0,7.0);       //Unreal Gold with v227*	
 	else if(WP == 41)//WP 39
-		WA_XYZ = float3(0.280,1.125,-16.25);   //Serious Sam Revolution / Serious Sam HD: The First Encounter / The Second Encounter / Serious Sam 3: BFE?*
+		WA_XYZ = float3(0.280,1.125,-16.25);   //Serious Sam Revolution / Serious Sam HD: The First Encounter / The Second Encounter / Serious Sam 3: BFE?
 	else if(WP == 42)//WP 40
 		WA_XYZ = float3(0.280,1.0,16.25);      //Serious Sam 2
 	else if(WP == 43)//WP 41
 		WA_XYZ = float3(0,0,0);                //Serious Sam 4: Planet Badass
 	else if(WP == 44)//WP 42
-		WA_XYZ = float3(0.277,0.875,-11.875);  //TitanFall 2
+		WA_XYZ = float3(0.277,20.0,8.8);       //TitanFall 2*
 	else if(WP == 45)//WP 43
 		WA_XYZ = float3(0.7,16.250,0.300);     //Project Warlock*
 	else if(WP == 46)//WP 44
@@ -620,7 +618,7 @@ float2 WeaponDepth(in float2 texcoord : TEXCOORD0)
 	else if(WP == 47)//WP 45
 		WA_XYZ = float3(0,0,0);                //EuroTruckSim2
 	else if(WP == 48)//WP 46
-		WA_XYZ = float3(0.458,0.3375,0);       //F.E.A.R & F.E.A.R. 2: Project Origin
+		WA_XYZ = float3(0.458,10.5,1.105);     //F.E.A.R & F.E.A.R. 2: Project Origin*
 	else if(WP == 49)//WP 47
 		WA_XYZ = float3(0,0,0);                //Game	
 	else if(WP == 50)//WP 48
@@ -652,7 +650,7 @@ float4 DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0
 {
 		float4 DM = Depth(texcoord).xxxx;
 		
-		float R, G, B, A, WD = WeaponDepth(texcoord).x, CoP = WeaponDepth(texcoord).y, CutOFFCal = (CoP/DMA()) * 0.5f; //Weapon Cutoff Calculation
+		float R, G, B, A, WD = WeaponDepth(texcoord).x, CoP = WeaponDepth(texcoord).y, CutOFFCal = (CoP/DMA()) * 0.5; //Weapon Cutoff Calculation
 		CutOFFCal = step(DM.x,CutOFFCal);
 					
 		[branch] if (WP == 0)
@@ -688,7 +686,7 @@ float4 HUD(float4 HUD, float2 texcoord )
     else
         Mask_Tex = tex2D(SamplerMaskA,texcoord.xy).a;
 
-	float MAC = step(1.0f-Mask_Tex,0.5f); //Mask Adjustment Calculation
+	float MAC = step(1.0-Mask_Tex,0.5); //Mask Adjustment Calculation
 	//This code is for hud segregation.			
 	HUD = MAC > 0 ? tex2D(BackBuffer,texcoord) : HUD;
 #endif		
@@ -697,24 +695,24 @@ float4 HUD(float4 HUD, float2 texcoord )
 #endif
 float AutoDepthRange( float d, float2 texcoord )
 {
-	float LumAdjust_ADR = smoothstep(-0.0175f,Auto_Depth_Range,Lum(texcoord).y);
+	float LumAdjust_ADR = smoothstep(-0.0175,Auto_Depth_Range,Lum(texcoord).y);
     return min(1,( d - 0 ) / ( LumAdjust_ADR - 0));
 }
 #if RE_Fix
 float AutoZPDRange(float ZPD, float2 texcoord )
 {
-	float LumAdjust_AZDPR = smoothstep(-0.0175f,0.125,Lum(texcoord).y); //Adjusted to only effect really intense differences.
+	float LumAdjust_AZDPR = smoothstep(-0.0175,0.125,Lum(texcoord).y); //Adjusted to only effect really intense differences.
     return saturate(LumAdjust_AZDPR * ZPD);
 }
 #endif
 float WHConv(float D,float2 texcoord)
 {
-	float Z = WZPD, ZP = 0.5f,ALC = abs(Lum(texcoord).x) ,Convergence = 1 - Z / D;
+	float Z = WZPD, ZP = 0.5,ALC = abs(Lum(texcoord).x) ,Convergence = 1 - Z / D;
 	
 	if (Z <= 0)
 		ZP = 1;
 		
-	if (ALC <= 0.025f)
+	if (ALC <= 0.025)
 		ZP = 1;
 	 
    return lerp(Convergence,D,ZP);
@@ -722,7 +720,7 @@ float WHConv(float D,float2 texcoord)
 
 float Conv(float D,float2 texcoord)
 {
-	float Z = ZPD, ZP = 0.5f, ALC = abs(Lum(texcoord).x);
+	float Z = ZPD, ZP = 0.5, ALC = abs(Lum(texcoord).x);
 	#if RE_Fix	
 		Z = AutoZPDRange(Z,texcoord);
 	#endif	
@@ -738,7 +736,7 @@ float Conv(float D,float2 texcoord)
 		float Convergence = 1 - Z / D;
 			
 		if (ZPD == 0)
-			ZP = 1.0;
+			ZP = 1.;
 					
     return lerp(Convergence,D, ZP);
 }
@@ -759,12 +757,12 @@ float zBuffer(in float2 texcoord : TEXCOORD0)
 	
 	if (Menu_Detection)
 	{
-		if (ALC <= 0.025f)
+		if (ALC <= 0.025)
 		DM = 0;
 	}
 		
 	if (Cancel_Depth)
-		DM = 0.0625f;
+		DM = 0.0625;
 
 	return DM.y;
 }
@@ -782,7 +780,7 @@ float2 Parallax( float Diverge, float2 Coordinates)
 
 	//Offsets listed here Max Seperation is 3% - 8% of screen space with Depth Offsets & Netto layer offset change based on MS.
 	float MS = Diverge * pix.x, deltaCoordinates = MS * LayerDepth;
-	float2 ParallaxCoord = Coordinates,DB_Offset = float2((Diverge * 0.075f) * pix.x, 0);
+	float2 ParallaxCoord = Coordinates,DB_Offset = float2((Diverge * 0.0375) * pix.x, 0);
 	float CurrentDepthMapValue = zBuffer(ParallaxCoord), CurrentLayerDepth = 0, DepthDifference;
 
 	[loop] //Steep parallax mapping
@@ -793,7 +791,10 @@ float2 Parallax( float Diverge, float2 Coordinates)
         // Shift coordinates horizontally in linear fasion
         ParallaxCoord.x -= deltaCoordinates;
         // Get depth value at current coordinates
-        CurrentDepthMapValue = zBuffer( ParallaxCoord - DB_Offset);
+    	[branch] if(View_Mode == 1)
+        	CurrentDepthMapValue = zBuffer( ParallaxCoord );
+        else
+        	CurrentDepthMapValue = zBuffer( ParallaxCoord - DB_Offset);
         // Get depth of next layer
         CurrentLayerDepth += LayerDepth;
     }
@@ -806,17 +807,20 @@ float2 Parallax( float Diverge, float2 Coordinates)
 	// Interpolate coordinates
 	float weight = afterDepthValue / (afterDepthValue - beforeDepthValue);
 	ParallaxCoord = PrevParallaxCoord * max(0,weight) + ParallaxCoord * min(1,1.0f - weight);
-
+	
+	if(View_Mode == 0)
+	ParallaxCoord += DB_Offset;
+	
 	// Apply gap masking
 	DepthDifference = (afterDepthValue-beforeDepthValue) * MS;
 	if(View_Mode == 1)
-		ParallaxCoord.x = lerp(ParallaxCoord.x - DepthDifference,ParallaxCoord.x,0.5f);
+		ParallaxCoord.x = ParallaxCoord.x - DepthDifference;
 	
 	return ParallaxCoord;
 }
 //Per is Perspective & Optimization for line interlaced Adjustment. 
-#define Per float2( (Perspective * pix.x) * 0.5f, 0)
-#define AI Interlace_Anaglyph.x * 0.5f
+#define Per float2( (Perspective * pix.x) * 0.5, 0)
+#define AI Interlace_Anaglyph.x * 0.5
 
 float4 EdgeMask( float Diverge, float4 Image, float2 texcoords)
 {
@@ -829,8 +833,8 @@ float4 EdgeMask( float Diverge, float4 Image, float2 texcoords)
 		}
 		
 	float PA = Side_A+(BUFFER_WIDTH*pix.x), PB = Side_B+(BUFFER_WIDTH*pix.x), Y = BUFFER_HEIGHT*pix.y;
-	float4 Bar_A = all( abs(float2( texcoords.x-PA, texcoords.y-Y)) < float2(Divergence * pix.x,1.0f));
-	float4 Bar_B = all( abs(float2( texcoords.x-PB, texcoords.y-Y)) < float2(Divergence * pix.x,1.0f));
+	float4 Bar_A = all( abs(float2( texcoords.x-PA, texcoords.y-Y)) < float2((Divergence * .9375) * pix.x,1.0f));
+	float4 Bar_B = all( abs(float2( texcoords.x-PB, texcoords.y-Y)) < float2((Divergence * .9375) * pix.x,1.0f));
 		
 	return Bar_A + Bar_B ? float4(0,0,0,1) : Image;
 }
@@ -881,7 +885,7 @@ float4 PS_calcLR(float2 texcoord)
 		Right = EdgeMask(Divergence,Right,TCR);
 	}
 	#if HUD_MODE	
-	float HUD_Adjustment = ((0.5 - HUD_Adjust.y)*25) * pix.x;
+	float HUD_Adjustment = ((0.5 - HUD_Adjust.y)*25.) * pix.x;
 	Left = HUD(Left,float2(TCL.x - HUD_Adjustment,TCL.y));
 	Right = HUD(Right,float2(TCR.x + HUD_Adjustment,TCR.y));
 	#endif
@@ -1110,95 +1114,93 @@ uniform float timer < source = "timer"; >; //Please do not remove.
 float4 Out(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Target
 {
 	float PosX = 0.9525f*BUFFER_WIDTH*pix.x,PosY = 0.975f*BUFFER_HEIGHT*pix.y;	
-	float4 Color = float4(PS_calcLR(texcoord).rgb,1.0),D,E,P,T,H,Three,DD,Dot,I,N,F,O;
+	float3 Color = PS_calcLR(texcoord).rgb,D,E,P,T,H,Three,DD,Dot,I,N,F,O;
 	
 	[branch] if(timer <= 12500)
 	{
 		//DEPTH
 		//D
 		float PosXD = -0.035+PosX, offsetD = 0.001;
-		float4 OneD = all( abs(float2( texcoord.x -PosXD, texcoord.y-PosY)) < float2(0.0025,0.009));
-		float4 TwoD = all( abs(float2( texcoord.x -PosXD-offsetD, texcoord.y-PosY)) < float2(0.0025,0.007));
+		float3 OneD = all( abs(float2( texcoord.x -PosXD, texcoord.y-PosY)) < float2(0.0025,0.009));
+		float3 TwoD = all( abs(float2( texcoord.x -PosXD-offsetD, texcoord.y-PosY)) < float2(0.0025,0.007));
 		D = OneD-TwoD;
 		
 		//E
 		float PosXE = -0.028+PosX, offsetE = 0.0005;
-		float4 OneE = all( abs(float2( texcoord.x -PosXE, texcoord.y-PosY)) < float2(0.003,0.009));
-		float4 TwoE = all( abs(float2( texcoord.x -PosXE-offsetE, texcoord.y-PosY)) < float2(0.0025,0.007));
-		float4 ThreeE = all( abs(float2( texcoord.x -PosXE, texcoord.y-PosY)) < float2(0.003,0.001));
+		float3 OneE = all( abs(float2( texcoord.x -PosXE, texcoord.y-PosY)) < float2(0.003,0.009));
+		float3 TwoE = all( abs(float2( texcoord.x -PosXE-offsetE, texcoord.y-PosY)) < float2(0.0025,0.007));
+		float3 ThreeE = all( abs(float2( texcoord.x -PosXE, texcoord.y-PosY)) < float2(0.003,0.001));
 		E = (OneE-TwoE)+ThreeE;
 		
 		//P
 		float PosXP = -0.0215+PosX, PosYP = -0.0025+PosY, offsetP = 0.001, offsetP1 = 0.002;
-		float4 OneP = all( abs(float2( texcoord.x -PosXP, texcoord.y-PosYP)) < float2(0.0025,0.009*0.775));
-		float4 TwoP = all( abs(float2( texcoord.x -PosXP-offsetP, texcoord.y-PosYP)) < float2(0.0025,0.007*0.680));
-		float4 ThreeP = all( abs(float2( texcoord.x -PosXP+offsetP1, texcoord.y-PosY)) < float2(0.0005,0.009));
+		float3 OneP = all( abs(float2( texcoord.x -PosXP, texcoord.y-PosYP)) < float2(0.0025,0.009*0.775));
+		float3 TwoP = all( abs(float2( texcoord.x -PosXP-offsetP, texcoord.y-PosYP)) < float2(0.0025,0.007*0.680));
+		float3 ThreeP = all( abs(float2( texcoord.x -PosXP+offsetP1, texcoord.y-PosY)) < float2(0.0005,0.009));
 		P = (OneP-TwoP) + ThreeP;
 
 		//T
 		float PosXT = -0.014+PosX, PosYT = -0.008+PosY;
-		float4 OneT = all( abs(float2( texcoord.x -PosXT, texcoord.y-PosYT)) < float2(0.003,0.001));
-		float4 TwoT = all( abs(float2( texcoord.x -PosXT, texcoord.y-PosY)) < float2(0.000625,0.009));
+		float3 OneT = all( abs(float2( texcoord.x -PosXT, texcoord.y-PosYT)) < float2(0.003,0.001));
+		float3 TwoT = all( abs(float2( texcoord.x -PosXT, texcoord.y-PosY)) < float2(0.000625,0.009));
 		T = OneT+TwoT;
 		
 		//H
 		float PosXH = -0.0072+PosX;
-		float4 OneH = all( abs(float2( texcoord.x -PosXH, texcoord.y-PosY)) < float2(0.002,0.001));
-		float4 TwoH = all( abs(float2( texcoord.x -PosXH, texcoord.y-PosY)) < float2(0.002,0.009));
-		float4 ThreeH = all( abs(float2( texcoord.x -PosXH, texcoord.y-PosY)) < float2(0.00325,0.009));
+		float3 OneH = all( abs(float2( texcoord.x -PosXH, texcoord.y-PosY)) < float2(0.002,0.001));
+		float3 TwoH = all( abs(float2( texcoord.x -PosXH, texcoord.y-PosY)) < float2(0.002,0.009));
+		float3 ThreeH = all( abs(float2( texcoord.x -PosXH, texcoord.y-PosY)) < float2(0.00325,0.009));
 		H = (OneH-TwoH)+ThreeH;
 		
 		//Three
 		float offsetFive = 0.001, PosX3 = -0.001+PosX;
-		float4 OneThree = all( abs(float2( texcoord.x -PosX3, texcoord.y-PosY)) < float2(0.002,0.009));
-		float4 TwoThree = all( abs(float2( texcoord.x -PosX3 - offsetFive, texcoord.y-PosY)) < float2(0.003,0.007));
-		float4 ThreeThree = all( abs(float2( texcoord.x -PosX3, texcoord.y-PosY)) < float2(0.002,0.001));
+		float3 OneThree = all( abs(float2( texcoord.x -PosX3, texcoord.y-PosY)) < float2(0.002,0.009));
+		float3 TwoThree = all( abs(float2( texcoord.x -PosX3 - offsetFive, texcoord.y-PosY)) < float2(0.003,0.007));
+		float3 ThreeThree = all( abs(float2( texcoord.x -PosX3, texcoord.y-PosY)) < float2(0.002,0.001));
 		Three = (OneThree-TwoThree)+ThreeThree;
 		
 		//DD
 		float PosXDD = 0.006+PosX, offsetDD = 0.001;	
-		float4 OneDD = all( abs(float2( texcoord.x -PosXDD, texcoord.y-PosY)) < float2(0.0025,0.009));
-		float4 TwoDD = all( abs(float2( texcoord.x -PosXDD-offsetDD, texcoord.y-PosY)) < float2(0.0025,0.007));
+		float3 OneDD = all( abs(float2( texcoord.x -PosXDD, texcoord.y-PosY)) < float2(0.0025,0.009));
+		float3 TwoDD = all( abs(float2( texcoord.x -PosXDD-offsetDD, texcoord.y-PosY)) < float2(0.0025,0.007));
 		DD = OneDD-TwoDD;
 		
 		//Dot
 		float PosXDot = 0.011+PosX, PosYDot = 0.008+PosY;		
-		float4 OneDot = all( abs(float2( texcoord.x -PosXDot, texcoord.y-PosYDot)) < float2(0.00075,0.0015));
+		float3 OneDot = all( abs(float2( texcoord.x -PosXDot, texcoord.y-PosYDot)) < float2(0.00075,0.0015));
 		Dot = OneDot;
 		
 		//INFO
 		//I
 		float PosXI = 0.0155+PosX, PosYI = 0.004+PosY, PosYII = 0.008+PosY;
-		float4 OneI = all( abs(float2( texcoord.x - PosXI, texcoord.y - PosY)) < float2(0.003,0.001));
-		float4 TwoI = all( abs(float2( texcoord.x - PosXI, texcoord.y - PosYI)) < float2(0.000625,0.005));
-		float4 ThreeI = all( abs(float2( texcoord.x - PosXI, texcoord.y - PosYII)) < float2(0.003,0.001));
+		float3 OneI = all( abs(float2( texcoord.x - PosXI, texcoord.y - PosY)) < float2(0.003,0.001));
+		float3 TwoI = all( abs(float2( texcoord.x - PosXI, texcoord.y - PosYI)) < float2(0.000625,0.005));
+		float3 ThreeI = all( abs(float2( texcoord.x - PosXI, texcoord.y - PosYII)) < float2(0.003,0.001));
 		I = OneI+TwoI+ThreeI;
 		
 		//N
 		float PosXN = 0.0225+PosX, PosYN = 0.005+PosY,offsetN = -0.001;
-		float4 OneN = all( abs(float2( texcoord.x - PosXN, texcoord.y - PosYN)) < float2(0.002,0.004));
-		float4 TwoN = all( abs(float2( texcoord.x - PosXN, texcoord.y - PosYN - offsetN)) < float2(0.003,0.005));
+		float3 OneN = all( abs(float2( texcoord.x - PosXN, texcoord.y - PosYN)) < float2(0.002,0.004));
+		float3 TwoN = all( abs(float2( texcoord.x - PosXN, texcoord.y - PosYN - offsetN)) < float2(0.003,0.005));
 		N = OneN-TwoN;
 		
 		//F
 		float PosXF = 0.029+PosX, PosYF = 0.004+PosY, offsetF = 0.0005, offsetF1 = 0.001;
-		float4 OneF = all( abs(float2( texcoord.x -PosXF-offsetF, texcoord.y-PosYF-offsetF1)) < float2(0.002,0.004));
-		float4 TwoF = all( abs(float2( texcoord.x -PosXF, texcoord.y-PosYF)) < float2(0.0025,0.005));
-		float4 ThreeF = all( abs(float2( texcoord.x -PosXF, texcoord.y-PosYF)) < float2(0.0015,0.00075));
+		float3 OneF = all( abs(float2( texcoord.x -PosXF-offsetF, texcoord.y-PosYF-offsetF1)) < float2(0.002,0.004));
+		float3 TwoF = all( abs(float2( texcoord.x -PosXF, texcoord.y-PosYF)) < float2(0.0025,0.005));
+		float3 ThreeF = all( abs(float2( texcoord.x -PosXF, texcoord.y-PosYF)) < float2(0.0015,0.00075));
 		F = (OneF-TwoF)+ThreeF;
 		
 		//O
 		float PosXO = 0.035+PosX, PosYO = 0.004+PosY;
-		float4 OneO = all( abs(float2( texcoord.x -PosXO, texcoord.y-PosYO)) < float2(0.003,0.005));
-		float4 TwoO = all( abs(float2( texcoord.x -PosXO, texcoord.y-PosYO)) < float2(0.002,0.003));
+		float3 OneO = all( abs(float2( texcoord.x -PosXO, texcoord.y-PosYO)) < float2(0.003,0.005));
+		float3 TwoO = all( abs(float2( texcoord.x -PosXO, texcoord.y-PosYO)) < float2(0.002,0.003));
 		O = OneO-TwoO;
 		//Website
-		return D+E+P+T+H+Three+DD+Dot+I+N+F+O ? 1-texcoord.y*50.0+48.35f : Color;
+		return D+E+P+T+H+Three+DD+Dot+I+N+F+O ? 1-texcoord.y*50.0+48.35f : float4(Color,1.);
 	}
 	else
-	{
-		return Color;
-	}
+		return float4(Color,1.);
 }
 
 ///////////////////////////////////////////////////////////ReShade.fxh/////////////////////////////////////////////////////////////
