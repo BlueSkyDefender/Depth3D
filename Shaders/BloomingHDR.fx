@@ -79,12 +79,12 @@ uniform float Saturation <
 	#else
 	ui_type = "slider";
 	#endif
-	ui_min = 0.0; ui_max = 2.5;
+	ui_min = 0.0; ui_max = 5.0;
 	ui_label = "Bloom Saturation";
 	ui_tooltip = "Adjustment The amount to adjust the saturation of the color.\n"
-				"Number 1.0 is default.";
+				"Number 2.0 is default.";
 	ui_category = "HDR Adjustments";
-> = 1.0;
+> = 2.0;
 
 uniform float Spread <
 	#if Compatibility
@@ -92,13 +92,13 @@ uniform float Spread <
 	#else
 	ui_type = "slider";
 	#endif
-	ui_min = 25.0; ui_max = 50.0; ui_step = 0.5;
+	ui_min = 25.0; ui_max = 125.0; ui_step = 0.25;
 	ui_label = "Bloom Spread";
 	ui_tooltip = "Adjust This to have the Bloom effect to fill in areas.\n"
 				 "This is used for Bloom gap filling.\n"
-				 "Number 37.5 is default.";
+				 "Number 75.0 is default.";
 	ui_category = "HDR Adjustments";
-> = 37.5;
+> = 75.0;
 
 uniform int Luma_Coefficient <
 	ui_type = "combo";
@@ -130,28 +130,40 @@ sampler BackBuffer
 	{ 
 		Texture = BackBufferTex;
 	};
-texture texBC { Width = BUFFER_WIDTH * 0.5; Height = BUFFER_HEIGHT * 0.5; Format = RGBA8; MipLevels = 4;};
+	
+texture texBC { Width = BUFFER_WIDTH * 0.25; Height = BUFFER_HEIGHT * 0.25; Format = RGBA16F; MipLevels = 3;};
 
 sampler SamplerBC
 	{
 		Texture = texBC;
-		MipLODBias = 2.0f;
+		MipLODBias = 2;
 		MinFilter = LINEAR;
 		MagFilter = LINEAR;
 		MipFilter = LINEAR;
 	};
 					
-texture texBlur { Width = BUFFER_WIDTH * 0.5; Height = BUFFER_HEIGHT * 0.5; Format = RGBA8; MipLevels = 3;};
+texture texBlur { Width = BUFFER_WIDTH * 0.25; Height = BUFFER_HEIGHT * 0.25; Format = RGBA16F; MipLevels = 3;};
 
 sampler SamplerBlur
 	{
 		Texture = texBlur;
+		MipLODBias = 2;
+		MinFilter = LINEAR;
+		MagFilter = LINEAR;
+		MipFilter = LINEAR;	
+	};
+	
+texture texBloom { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA16F; MipLevels = 6;};
+
+sampler SamplerBloom
+	{
+		Texture = texBloom;
 		MinFilter = LINEAR;
 		MagFilter = LINEAR;
 		MipFilter = LINEAR;
 	};
-	
-texture PastSingle_BackBuffer { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA8;};
+		
+texture PastSingle_BackBuffer { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA16F;};
 
 sampler PSBackBuffer
 	{
@@ -163,7 +175,6 @@ uniform uint framecount < source = "framecount"; >;
 uniform float frametime < source = "frametime";>;
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #define Alternate framecount % 2 == 0  
-#define MipLevelAdjust 2 //This is used for removing banding in the Bloom.
 
 float3 Luma()
 {
@@ -260,51 +271,73 @@ float4 BrightColors(float4 position : SV_Position, float2 texcoords : TEXCOORD) 
 
 float4 Blur(float4 position : SV_Position, float2 texcoords : TEXCOORD) : SV_Target//Then blurred.                                                                        
 {    
-    float2 tex_offset = (Spread * 0.5f) * pix; // Gets texel offset
+    float2 tex_offset = (Spread * 0.4) * pix; // Gets texel offset
     float4 result = tex2D(SamplerBC,texcoords); // Current fragment's contribution
+	
 	if (Alternate)
-	{
-		result += tex2D(SamplerBC,texcoords + float2( 1, 0) * tex_offset );
-		result += tex2D(SamplerBC,texcoords + float2(-1, 0) * tex_offset );
-		result += tex2D(SamplerBC,texcoords + float2( 0, 1) * tex_offset );
-		result += tex2D(SamplerBC,texcoords + float2( 0,-1) * tex_offset );
-		tex_offset *= 0.75;
-		result += tex2D(SamplerBC,texcoords + float2( 1, 1) * tex_offset );
-		result += tex2D(SamplerBC,texcoords + float2(-1,-1) * tex_offset );
-		result += tex2D(SamplerBC,texcoords + float2( 1,-1) * tex_offset );
-		result += tex2D(SamplerBC,texcoords + float2(-1, 1) * tex_offset );
-    }
-    else
-    {
 		tex_offset *= 0.5;
-		result += tex2D(SamplerBC,texcoords + float2( 1, 0) * tex_offset );
-		result += tex2D(SamplerBC,texcoords + float2(-1, 0) * tex_offset );
-		result += tex2D(SamplerBC,texcoords + float2( 0, 1) * tex_offset );
-		result += tex2D(SamplerBC,texcoords + float2( 0,-1) * tex_offset );
+
+		result += tex2D(SamplerBC,texcoords + float2( 0.5, 0) * tex_offset );
+		result += tex2D(SamplerBC,texcoords + float2(-0.5, 0) * tex_offset );
+		result += tex2D(SamplerBC,texcoords + float2( 0, 0.5) * tex_offset );
+		result += tex2D(SamplerBC,texcoords + float2( 0,-0.5) * tex_offset );
+		
+		result += tex2D(SamplerBC,texcoords + float2( 1.0, 0) * tex_offset );
+		result += tex2D(SamplerBC,texcoords + float2(-1.0, 0) * tex_offset );
+		result += tex2D(SamplerBC,texcoords + float2( 0, 1.0) * tex_offset );
+		result += tex2D(SamplerBC,texcoords + float2( 0,-1.0) * tex_offset );
+		
 		tex_offset *= 0.75;
+		
+		result += tex2D(SamplerBC,texcoords + float2( 0.5, 0.5) * tex_offset );
+		result += tex2D(SamplerBC,texcoords + float2(-0.5,-0.5) * tex_offset );
+		result += tex2D(SamplerBC,texcoords + float2( 0.5,-0.5) * tex_offset );
+		result += tex2D(SamplerBC,texcoords + float2(-0.5, 0.5) * tex_offset );
+		
 		result += tex2D(SamplerBC,texcoords + float2( 1, 1) * tex_offset );
 		result += tex2D(SamplerBC,texcoords + float2(-1,-1) * tex_offset );
 		result += tex2D(SamplerBC,texcoords + float2( 1,-1) * tex_offset );
 		result += tex2D(SamplerBC,texcoords + float2(-1, 1) * tex_offset );
-	}
 	    
-   return result / 9;
+   return result / 17;
 }
 
-float3 LastBlur(float2 texcoord : TEXCOORD0)
+float3 LastBlur(float2 texcoords : TEXCOORD0)
 {
-	float2 tex_offset = (Spread * 0.25f) * pix; // Gets texel offset
-	float3 result =  tex2Dlod(SamplerBlur, float4(texcoord, 0,MipLevelAdjust)).rgb;
-		   result += tex2Dlod(SamplerBlur, float4(texcoord + float2( 1, 0) * tex_offset, 0, MipLevelAdjust)).rgb;
-		   result += tex2Dlod(SamplerBlur, float4(texcoord + float2(-1, 0) * tex_offset, 0, MipLevelAdjust)).rgb;
-		   result += tex2Dlod(SamplerBlur, float4(texcoord + float2( 0, 1) * tex_offset, 0, MipLevelAdjust)).rgb;
-		   result += tex2Dlod(SamplerBlur, float4(texcoord + float2( 0,-1) * tex_offset, 0, MipLevelAdjust)).rgb;
-		   tex_offset *= 0.75;		   
-		   result += tex2Dlod(SamplerBlur, float4(texcoord + float2( 1, 1) * tex_offset, 0, MipLevelAdjust)).rgb;
-		   result += tex2Dlod(SamplerBlur, float4(texcoord + float2(-1,-1) * tex_offset, 0, MipLevelAdjust)).rgb;
-		   result += tex2Dlod(SamplerBlur, float4(texcoord + float2( 1,-1) * tex_offset, 0, MipLevelAdjust)).rgb;
-		   result += tex2Dlod(SamplerBlur, float4(texcoord + float2(-1, 1) * tex_offset, 0, MipLevelAdjust)).rgb;
-   return result / 9;
+	float2 tex_offset = Spread * pix; // Gets texel offset
+	float3 result;
+	
+	if (Alternate)
+		tex_offset *= 0.5;
+	
+		result += tex2D(SamplerBlur,texcoords + float2( 0.5, 0) * tex_offset ).rgb;
+		result += tex2D(SamplerBlur,texcoords + float2(-0.5, 0) * tex_offset ).rgb;
+		result += tex2D(SamplerBlur,texcoords + float2( 0, 0.5) * tex_offset ).rgb;
+		result += tex2D(SamplerBlur,texcoords + float2( 0,-0.5) * tex_offset ).rgb;
+		
+		result += tex2D(SamplerBlur,texcoords + float2( 1.0, 0) * tex_offset ).rgb;
+		result += tex2D(SamplerBlur,texcoords + float2(-1.0, 0) * tex_offset ).rgb;
+		result += tex2D(SamplerBlur,texcoords + float2( 0, 1.0) * tex_offset ).rgb;
+		result += tex2D(SamplerBlur,texcoords + float2( 0,-1.0) * tex_offset ).rgb;
+		
+		tex_offset *= 0.75;
+		
+		result += tex2D(SamplerBlur,texcoords + float2( 0.5, 0.5) * tex_offset ).rgb;
+		result += tex2D(SamplerBlur,texcoords + float2(-0.5,-0.5) * tex_offset ).rgb;
+		result += tex2D(SamplerBlur,texcoords + float2( 0.5,-0.5) * tex_offset ).rgb;
+		result += tex2D(SamplerBlur,texcoords + float2(-0.5, 0.5) * tex_offset ).rgb;
+		
+		result += tex2D(SamplerBlur,texcoords + float2( 1, 1) * tex_offset ).rgb;
+		result += tex2D(SamplerBlur,texcoords + float2(-1,-1) * tex_offset ).rgb;
+		result += tex2D(SamplerBlur,texcoords + float2( 1,-1) * tex_offset ).rgb;
+		result += tex2D(SamplerBlur,texcoords + float2(-1, 1) * tex_offset ).rgb;
+
+   return result / 17;
+}
+
+float4 Mix_Bloom(float4 position : SV_Position, float2 texcoords : TEXCOORD) : SV_Target//Then blurred.                                                                        
+{  
+	return float4(LastBlur(texcoords) + tex2D(PSBackBuffer, texcoords).rgb,1.); // Merge Current and past frame.
 }
 
 float4 HDROut(float2 texcoord : TEXCOORD0)
@@ -313,10 +346,17 @@ float4 HDROut(float2 texcoord : TEXCOORD0)
 	
 	if(Auto_Exposure)
 	Ex = Ex * AL;
+	//Blur Acculimation 
+	float3 acc = tex2Dlod(SamplerBloom, float4(texcoord,0,0)).rgb;
+		   acc += tex2Dlod(SamplerBloom, float4(texcoord,0,1)).rgb;
+		   acc += tex2Dlod(SamplerBloom, float4(texcoord,0,2)).rgb;
+		   acc += tex2Dlod(SamplerBloom, float4(texcoord,0,3)).rgb;
+		   acc += tex2Dlod(SamplerBloom, float4(texcoord,0,4)).rgb;
+		   acc += tex2Dlod(SamplerBloom, float4(texcoord,0,5)).rgb;
+	   	acc /= 6;	
          
 	float4 Out;
-    float3 TM, Color = tex2D(BackBuffer, texcoord).rgb, HDR = tex2D(BackBuffer, texcoord).rgb;      
-    float3 bloomColor = LastBlur(texcoord) + tex2D(PSBackBuffer, texcoord).rgb; // Merge Current and past frame.
+    float3 TM, Color = tex2D(BackBuffer, texcoord).rgb, HDR = tex2D(BackBuffer, texcoord).rgb, bloomColor = acc.rgb; // Merge Current and past frame.
     //Tone Mapping done here.
 	TM = 1.0 - exp(-bloomColor * Ex );
 	//HDR
@@ -329,7 +369,7 @@ float4 HDROut(float2 texcoord : TEXCOORD0)
 	}
 	else
 	{	
-		Out = float4(bloomColor, 1.0);
+		Out = float4(TM, 1.0);
 	}
 	
 	return Out;
@@ -462,11 +502,17 @@ technique Blooming_HDR
 		PixelShader = BrightColors;
 		RenderTarget = texBC;
 	}
-		pass Blur_Filter
+		pass Blur_Filter_One
 	{
 		VertexShader = PostProcessVS;
 		PixelShader = Blur;
 		RenderTarget = texBlur;
+	}
+		pass Temporal_Mixing_Bloom
+	{
+		VertexShader = PostProcessVS;
+		PixelShader = Mix_Bloom;
+		RenderTarget = texBloom;
 	}
 		pass Avg_Lum
     {
