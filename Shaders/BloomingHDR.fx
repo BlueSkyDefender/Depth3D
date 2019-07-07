@@ -25,6 +25,18 @@
 #else
 	#define Compatibility 0
 #endif
+uniform float HDR_Adjust <
+	#if Compatibility
+	ui_type = "drag";
+	#else
+	ui_type = "slider";
+	#endif
+	ui_min = 0.5; ui_max = 2.0;
+	ui_label = "HDR Adjust";
+	ui_tooltip = "Use this to adjust Fake HDR levels for your content.\n"
+				"Number 1.125 is default.";
+	ui_category = "HDR Adjustments";
+> = 1.5;
 
 uniform float CBT_Adjust <
 	#if Compatibility
@@ -37,40 +49,27 @@ uniform float CBT_Adjust <
 	ui_tooltip = "Use this to set the color based brightness threshold for what is and what isn't allowed.\n"
 				"This is the most important setting, use Debug View to adjust this.\n"
 				"Number 0.5 is default.";
-	ui_category = "HDR Adjustments";
+	ui_category = "Bloom Adjustments";
 > = 0.5;
 
-uniform float HDR_Adjust <
-	#if Compatibility
-	ui_type = "drag";
-	#else
-	ui_type = "slider";
-	#endif
-	ui_min = 0.5; ui_max = 2.0;
-	ui_label = "HDR Adjust";
-	ui_tooltip = "Use this to adjust HDR levels for your content.\n"
-				"Number 1.125 is default.";
-	ui_category = "HDR Adjustments";
-> = 1.125;
-
-uniform bool Auto_Exposure <
-	ui_label = "Auto Exposure";
-	ui_tooltip = "This will enable the shader to adjust exposure automaticly.\n"
+uniform bool Auto_Bloom_Intensity <
+	ui_label = "Auto Bloom Intensity";
+	ui_tooltip = "This will enable the shader to adjust Bloom Intensity automaticly.\n"
 				"You will still need to adjust exposure below.";
-	ui_category = "HDR Adjustments";
+	ui_category = "Bloom Adjustments";
 > = false;
 
-uniform float Exposure<
+uniform float Bloom_Intensity<
 	#if Compatibility
 	ui_type = "drag";
 	#else
 	ui_type = "slider";
 	#endif
 	ui_min = 0.0; ui_max = 1.0;
-	ui_label = "Exposure";
-	ui_tooltip = "Use this to set HDR exposure for your content.\n"
+		ui_label = "Bloom Intensity";
+	ui_tooltip = "Use this to set Bloom Intensity for your content.\n"
 				"Number 0.100 is default.";
-	ui_category = "HDR Adjustments";
+	ui_category = "Bloom Adjustments";
 > = 0.100;
 
 uniform float Saturation <
@@ -79,12 +78,12 @@ uniform float Saturation <
 	#else
 	ui_type = "slider";
 	#endif
-	ui_min = 0.0; ui_max = 5.0;
+	ui_min = 0.0; ui_max = 10.0;
 	ui_label = "Bloom Saturation";
 	ui_tooltip = "Adjustment The amount to adjust the saturation of the color.\n"
-				"Number 2.0 is default.";
-	ui_category = "HDR Adjustments";
-> = 2.0;
+				"Number 2.5 is default.";
+	ui_category = "Bloom Adjustments";
+> = 2.5;
 
 uniform float Spread <
 	#if Compatibility
@@ -92,12 +91,12 @@ uniform float Spread <
 	#else
 	ui_type = "slider";
 	#endif
-	ui_min = 25.0; ui_max = 125.0; ui_step = 0.25;
+	ui_min = 50.0; ui_max = 100.0; ui_step = 0.25;
 	ui_label = "Bloom Spread";
 	ui_tooltip = "Adjust This to have the Bloom effect to fill in areas.\n"
 				 "This is used for Bloom gap filling.\n"
 				 "Number 75.0 is default.";
-	ui_category = "HDR Adjustments";
+	ui_category = "Bloom Adjustments";
 > = 75.0;
 
 uniform int Luma_Coefficient <
@@ -105,13 +104,36 @@ uniform int Luma_Coefficient <
 	ui_label = "Luma";
 	ui_tooltip = "Changes how color get used for the other effects.\n";
 	ui_items = "SD video\0HD video\0HDR video\0Intensity\0";
-	ui_category = "HDR Adjustments";
+	ui_category = "Tonemapper Adjustments";
 > = 0;
+
+uniform float W <
+	ui_type = "drag";
+	ui_min = 0.00; ui_max = 20.00;
+	ui_label = "Linear White Point Value";
+	ui_category = "Tonemapper Adjustments";
+> = 11.2;
+
+uniform float Exp <
+	ui_type = "drag";
+	ui_min = 1.00; ui_max = 20.00;
+	ui_label = "Exposure";
+	ui_category = "Tonemapper Adjustments";
+> = 1.0;
+
+uniform float Gamma <
+	ui_type = "drag";
+	ui_min = 1.00; ui_max = 3.00;
+	ui_label = "Gamma value";
+	ui_tooltip = "Most monitors/images use a value of 2.2. Setting this to 1 disables the inital color space conversion from gamma to linear.";
+	ui_category = "Tonemapper Adjustments";
+> = 2.2;
 
 uniform bool Debug_View <
 	ui_label = "Debug View";
 	ui_tooltip = "To view Shade & Blur effect on the game, movie piture & ect.";
 	ui_category = "Debugging";
+	ui_category = "Tonemapper Adjustments";
 > = false;
 
 /////////////////////////////////////////////////////D3D Starts Here/////////////////////////////////////////////////////////////////
@@ -131,7 +153,7 @@ sampler BackBuffer
 		Texture = BackBufferTex;
 	};
 	
-texture texBC { Width = BUFFER_WIDTH * 0.25; Height = BUFFER_HEIGHT * 0.25; Format = RGBA16F; MipLevels = 3;};
+texture texBC { Width = BUFFER_WIDTH * 0.375; Height = BUFFER_HEIGHT * 0.375; Format = RGBA16F; MipLevels = 3;};
 
 sampler SamplerBC
 	{
@@ -142,7 +164,7 @@ sampler SamplerBC
 		MipFilter = LINEAR;
 	};
 					
-texture texBlur { Width = BUFFER_WIDTH * 0.25; Height = BUFFER_HEIGHT * 0.25; Format = RGBA16F; MipLevels = 3;};
+texture texBlur { Width = BUFFER_WIDTH * 0.375; Height = BUFFER_HEIGHT * 0.375; Format = RGBA16F; MipLevels = 3;};
 
 sampler SamplerBlur
 	{
@@ -255,6 +277,7 @@ float Average_Luminance(float2 texcoords : TEXCOORD)
 float4 BrightColors(float4 position : SV_Position, float2 texcoords : TEXCOORD) : SV_Target //bright-pass filter is applied to dim-down the darkest areas of the scene.
 {   
 	float4 BC, Color = tex2D(BackBuffer, texcoords);
+
 	// check whether fragment output is higher than threshold, if so output as brightness color.
     float brightness = dot(Color.rgb, Luma());
     
@@ -294,10 +317,10 @@ float4 Blur(float4 position : SV_Position, float2 texcoords : TEXCOORD) : SV_Tar
 		result += tex2D(SamplerBC,texcoords + float2( 0.5,-0.5) * tex_offset );
 		result += tex2D(SamplerBC,texcoords + float2(-0.5, 0.5) * tex_offset );
 		
-		result += tex2D(SamplerBC,texcoords + float2( 1, 1) * tex_offset );
-		result += tex2D(SamplerBC,texcoords + float2(-1,-1) * tex_offset );
-		result += tex2D(SamplerBC,texcoords + float2( 1,-1) * tex_offset );
-		result += tex2D(SamplerBC,texcoords + float2(-1, 1) * tex_offset );
+		result += tex2D(SamplerBC,texcoords + float2( 0.75, 0.75) * tex_offset );
+		result += tex2D(SamplerBC,texcoords + float2(-0.75,-0.75) * tex_offset );
+		result += tex2D(SamplerBC,texcoords + float2( 0.75,-0.75) * tex_offset );
+		result += tex2D(SamplerBC,texcoords + float2(-0.75, 0.75) * tex_offset );
 	    
    return result / 17;
 }
@@ -327,10 +350,10 @@ float3 LastBlur(float2 texcoords : TEXCOORD0)
 		result += tex2D(SamplerBlur,texcoords + float2( 0.5,-0.5) * tex_offset ).rgb;
 		result += tex2D(SamplerBlur,texcoords + float2(-0.5, 0.5) * tex_offset ).rgb;
 		
-		result += tex2D(SamplerBlur,texcoords + float2( 1, 1) * tex_offset ).rgb;
-		result += tex2D(SamplerBlur,texcoords + float2(-1,-1) * tex_offset ).rgb;
-		result += tex2D(SamplerBlur,texcoords + float2( 1,-1) * tex_offset ).rgb;
-		result += tex2D(SamplerBlur,texcoords + float2(-1, 1) * tex_offset ).rgb;
+		result += tex2D(SamplerBlur,texcoords + float2( 0.75, 0.75) * tex_offset ).rgb;
+		result += tex2D(SamplerBlur,texcoords + float2(-0.75,-0.75) * tex_offset ).rgb;
+		result += tex2D(SamplerBlur,texcoords + float2( 0.75,-0.75) * tex_offset ).rgb;
+		result += tex2D(SamplerBlur,texcoords + float2(-0.75, 0.75) * tex_offset ).rgb;
 
    return result / 17;
 }
@@ -340,11 +363,24 @@ float4 Mix_Bloom(float4 position : SV_Position, float2 texcoords : TEXCOORD) : S
 	return float4(LastBlur(texcoords) + tex2D(PSBackBuffer, texcoords).rgb,1.); // Merge Current and past frame.
 }
 
+
+float3 HableTonemap(float3 x)
+{
+	float A,B,C,D,E,F;
+	A = 0.22f;
+	B = 0.30f;
+	C = 0.10f;
+	D = 0.20f;
+	E = 0.01f;
+	F = 0.22f;
+   return ((x*(A*x+C*B)+D*E)/(x*(A*x+B)+D*F))-E/F;
+}
+
 float4 HDROut(float2 texcoord : TEXCOORD0)
 {	
-	float AL = Average_Luminance(texcoord).x, Ex = Exposure;
+	float AL = Average_Luminance(texcoord).x, Ex = Bloom_Intensity;
 	
-	if(Auto_Exposure)
+	if(Auto_Bloom_Intensity)
 	Ex = Ex * AL;
 	//Blur Acculimation 
 	float3 acc = tex2Dlod(SamplerBloom, float4(texcoord,0,0)).rgb;
@@ -356,22 +392,44 @@ float4 HDROut(float2 texcoord : TEXCOORD0)
 	   	acc /= 6;	
          
 	float4 Out;
-    float3 TM, Color = tex2D(BackBuffer, texcoord).rgb, HDR = tex2D(BackBuffer, texcoord).rgb, bloomColor = acc.rgb; // Merge Current and past frame.
-    //Tone Mapping done here.
-	TM = 1.0 - exp(-bloomColor * Ex );
-	//HDR
-	HDR += TM;
-	Color = pow(HDR,HDR_Adjust); 
+    float3 TM, Color = tex2D(BackBuffer, texcoord).rgb, Bloom = acc.rgb, bloomColor = acc.rgb;
+	// Do inital de-gamma of the game image to ensure we're operating in the correct colour range.
+	if( Gamma > 1.00 )
+		Color = pow(Color,Gamma);
+	//Bloom Intensity
+	bloomColor = 1.0 - exp(-bloomColor * Ex);
 	
+	//Add Bloom
+	Color += bloomColor;
+	
+	//UTM		
+	Color *= Exp;  // Exposure Adjustment
+
+	float ExposureBias = 2.0f;
+	float3 curr;
+	
+	float3 lum = Luma().x * Color.r + Luma().y * Color.g + Luma().z * Color.b;
+	float3 newLum = HableTonemap(ExposureBias*lum);
+	float3 lumScale = newLum / lum;
+	curr = Color*lumScale;
+
+	float3 whiteScale = 1.0f/HableTonemap(W);
+	
+	Color = curr*whiteScale;
+    
+	// Do the post-tonemapping gamma correction
+	if( Gamma > 1.00 )
+		Color = pow(Color,1/Gamma);
+
+
+	//FAKE HDR
+	Color = pow(abs(Color),HDR_Adjust) + (Color * 0.25);
+
 	if (!Debug_View)
-	{
 		Out = float4(Color, 1.0);
-	}
 	else
-	{	
-		Out = float4(TM, 1.0);
-	}
-	
+		Out = float4(1. - exp(-Bloom), 1.0);	
+		
 	return Out;
 }
 
