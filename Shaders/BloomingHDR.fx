@@ -68,9 +68,9 @@ uniform float Bloom_Intensity<
 	ui_min = 0.0; ui_max = 1.0;
 		ui_label = "Bloom Intensity";
 	ui_tooltip = "Use this to set Bloom Intensity for your content.\n"
-				"Number 0.100 is default.";
+				"Number 0.075 is default.";
 	ui_category = "Bloom Adjustments";
-> = 0.100;
+> = 0.075;
 
 uniform float Saturation <
 	#if Compatibility
@@ -105,7 +105,7 @@ uniform int Luma_Coefficient <
 	ui_tooltip = "Changes how color get used for the other effects.\n";
 	ui_items = "SD video\0HD video\0HDR video\0Intensity\0";
 	ui_category = "Tonemapper Adjustments";
-> = 0;
+> = 1;
 
 uniform float W <
 	ui_type = "drag";
@@ -423,7 +423,7 @@ float4 HDROut(float2 texcoord : TEXCOORD0)
 
 
 	//FAKE HDR
-	Color = pow(abs(Color),HDR_Adjust) + (Color * 0.25);
+	Color = pow(abs(Color),HDR_Adjust) + (Color * 0.5);
 
 	if (!Debug_View)
 		Out = float4(Color, 1.0);
