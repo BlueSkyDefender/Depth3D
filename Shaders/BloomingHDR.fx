@@ -241,7 +241,7 @@ float3 Luma()
 }
 
 /////////////////////////////////////////////////////////////////////////////////Adapted Luminance/////////////////////////////////////////////////////////////////////////////////
-texture texLum {Width = 256; Height = 256; Format = R16F; MipLevels = 12;}; //Sample at 256x256 map only has nine mip levels; 0-1-2-3-4-5-6-7-8 : 256,128,64,32,16,8,4,2, and 1 (1x1).
+texture texLum {Width = 256; Height = 256; Format = R16F; MipLevels = 9;}; //Sample at 256x256 map only has nine mip levels; 0-1-2-3-4-5-6-7-8 : 256,128,64,32,16,8,4,2, and 1 (1x1).
 																				
 sampler SamplerLum																
 	{
@@ -435,7 +435,7 @@ float4 HDROut(float2 texcoord : TEXCOORD0)
 	else if(Debug_View == 1)
 		Out = float4(1. - exp(-Bloom), 1.0);	
 	else
-		Out = A.xxx;
+		Out = A.xxxx;
 		
 	return Out;
 }
@@ -538,7 +538,7 @@ float4 Out(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Targe
 		float3 TwoO = all( abs(float2( texcoord.x -PosXO, texcoord.y-PosYO)) < float2(0.002,0.003));
 		O = OneO-TwoO;
 		//Website
-		return D+E+P+T+H+Three+DD+Dot+I+N+F+O ? 1-texcoord.y*50.0+48.35f : float4(Color,1.);
+		return float4(D+E+P+T+H+Three+DD+Dot+I+N+F+O,1.) ? 1-texcoord.y*50.0+48.35f : float4(Color,1.);
 	}
 	else
 		return float4(Color,1.);

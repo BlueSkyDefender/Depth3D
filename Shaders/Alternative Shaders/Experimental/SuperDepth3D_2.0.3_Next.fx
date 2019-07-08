@@ -1196,7 +1196,7 @@ float4 Out(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Targe
 		float3 TwoO = all( abs(float2( texcoord.x -PosXO, texcoord.y-PosYO)) < float2(0.002,0.003));
 		O = OneO-TwoO;
 		//Website
-		return D+E+P+T+H+Three+DD+Dot+I+N+F+O ? 1-texcoord.y*50.0+48.35f : float4(Color,1.);
+		return float4(D+E+P+T+H+Three+DD+Dot+I+N+F+O,1.) ? 1-texcoord.y*50.0+48.35f : float4(Color,1.);
 	}
 	else
 		return float4(Color,1.);
