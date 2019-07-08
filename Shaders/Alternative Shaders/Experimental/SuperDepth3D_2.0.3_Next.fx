@@ -1108,9 +1108,8 @@ float4 Average_Luminance(float4 position : SV_Position, float2 texcoord : TEXCOO
 	float Average_Lum_Full = tex2Dlod(SamplerDMN,float4(texcoord.x,texcoord.y, 0, 0)).w;
 	return float4(Average_Lum_ZPD,Average_Lum_Full,0,1);
 }
-
-////////////////////////////////////////////////////////Logo/////////////////////////////////////////////////////////////////////////
 uniform float timer < source = "timer"; >; //Please do not remove.
+////////////////////////////////////////////////////////Logo/////////////////////////////////////////////////////////////////////////
 float4 Out(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Target
 {
 	float PosX = 0.9525f*BUFFER_WIDTH*pix.x,PosY = 0.975f*BUFFER_HEIGHT*pix.y;	

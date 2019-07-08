@@ -48,9 +48,9 @@ uniform float CBT_Adjust <
 	ui_label = "Extracting Bright Colors";
 	ui_tooltip = "Use this to set the color based brightness threshold for what is and what isn't allowed.\n"
 				"This is the most important setting, use Debug View to adjust this.\n"
-				"Number 0.5 is default.";
+				"Number 0.625 is default.";
 	ui_category = "Bloom Adjustments";
-> = 0.5;
+> = 0.625;
 
 uniform bool Auto_Bloom_Intensity <
 	ui_label = "Auto Bloom Intensity";
@@ -68,9 +68,9 @@ uniform float Bloom_Intensity<
 	ui_min = 0.0; ui_max = 1.0;
 		ui_label = "Bloom Intensity";
 	ui_tooltip = "Use this to set Bloom Intensity for your content.\n"
-				"Number 0.075 is default.";
+				"Number 0.1 is default.";
 	ui_category = "Bloom Adjustments";
-> = 0.075;
+> = 0.1;
 
 uniform float Saturation <
 	#if Compatibility
@@ -114,6 +114,13 @@ uniform float W <
 	ui_category = "Tonemapper Adjustments";
 > = 11.2;
 
+uniform bool Auto_Exposure <
+	ui_label = "Auto Exposure";
+	ui_tooltip = "This will enable the shader to adjust Exposure automaticly.\n"
+				"You will still need to adjust exposure below.";
+	ui_category = "Tonemapper Adjustments";
+> = false;
+
 uniform float Exp <
 	ui_type = "drag";
 	ui_min = 1.00; ui_max = 20.00;
@@ -123,18 +130,30 @@ uniform float Exp <
 
 uniform float Gamma <
 	ui_type = "drag";
-	ui_min = 1.00; ui_max = 3.00;
+	ui_min = 1.0; ui_max = 3.0;
 	ui_label = "Gamma value";
 	ui_tooltip = "Most monitors/images use a value of 2.2. Setting this to 1 disables the inital color space conversion from gamma to linear.";
 	ui_category = "Tonemapper Adjustments";
 > = 2.2;
 
-uniform bool Debug_View <
+uniform float Adapt_Adjust <
+	ui_type = "drag";
+	ui_min = 0.0; ui_max = 1.0;
+	ui_label = "Eye Adapt Speed";
+	ui_tooltip = "Use this to Adjust Eye Adaptation Speed.\n"
+				 "Set from Zero to One, Zero is the slowest.\n"
+				 "Number 0.5 is default.";
+	ui_category = "Tonemapper Adjustments";
+> = 0.5;
+
+uniform int Debug_View <
+	ui_type = "combo";
 	ui_label = "Debug View";
+	ui_items = "Normal View\0Bloom View\0Adapt View\0";
 	ui_tooltip = "To view Shade & Blur effect on the game, movie piture & ect.";
 	ui_category = "Debugging";
 	ui_category = "Tonemapper Adjustments";
-> = false;
+> = 0;
 
 /////////////////////////////////////////////////////D3D Starts Here/////////////////////////////////////////////////////////////////
 #define pix float2(BUFFER_RCP_WIDTH, BUFFER_RCP_HEIGHT)
@@ -222,57 +241,37 @@ float3 Luma()
 }
 
 /////////////////////////////////////////////////////////////////////////////////Adapted Luminance/////////////////////////////////////////////////////////////////////////////////
-//Something seems off in the new reshade.
-texture texLumAvg {Width = 256; Height = 256; Format = RGBA8; MipLevels = 9;}; //Sample at 256x256 map only has nine mip levels; 0-1-2-3-4-5-6-7-8 : 256,128,64,32,16,8,4,2, and 1 (1x1).
+texture texLum {Width = 256; Height = 256; Format = R16F; MipLevels = 12;}; //Sample at 256x256 map only has nine mip levels; 0-1-2-3-4-5-6-7-8 : 256,128,64,32,16,8,4,2, and 1 (1x1).
 																				
 sampler SamplerLum																
 	{
-		Texture = texLumAvg;
-		MipLODBias = 11; //Luminance adapted luminance value from 1x1 So you would only have to adjust the boxes from Image to 8.
-		MinFilter = LINEAR;
-		MagFilter = LINEAR;
-		MipFilter = LINEAR;
-		AddressU = Clamp; 
-		AddressV = Clamp;
+		Texture = texLum;
 	};
-	
-texture PStexLumAvg {Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA8; };
+
+texture texAvgLum { Format = R16F; };
 																				
-sampler SamplerPSLum																
+sampler SamplerAvgLum															
 	{
-		Texture = PStexLumAvg;
-		MinFilter = LINEAR;
-		MagFilter = LINEAR;
-		MipFilter = LINEAR;
-		AddressU = Clamp; 
-		AddressV = Clamp;
+		Texture = texAvgLum;
 	};
 	
-float Luminance(float4 pos : SV_Position, float2 texcoords : TEXCOORD) : SV_Target
+texture2D TexAvgLumaLast { Format = R16F; };
+sampler SamplerAvgLumaLast { Texture = TexAvgLumaLast; };	
+	
+float Luminance(float4 pos : SV_Position, float2 texcoord : TEXCOORD) : SV_Target	
 {   
-	float GSBB = dot(tex2D(BackBuffer,texcoords).rgb, Luma());
-	return GSBB;
+	return dot(tex2D(BackBuffer,texcoord).rgb, Luma());
 }
 
-float Average_Luminance(float2 texcoords : TEXCOORD)
+float Average_Luminance(float4 pos : SV_Position, float2 texcoord : TEXCOORD) : SV_Target	
 {
-	float2 tex_offset = 50 * pix; // gets texel offset
-    float L = tex2D(SamplerLum, texcoords).x, PL = tex2D(PSBackBuffer, texcoords).w;
-		  //L += tex2D(SamplerLum, texcoords + float2( 1, 0) * tex_offset ).x;
-		  //L += tex2D(SamplerLum, texcoords + float2(-1, 0) * tex_offset ).x;
-		  //L += tex2D(SamplerLum, texcoords + float2( 0, 1) * tex_offset ).x;
-		  //L += tex2D(SamplerLum, texcoords + float2( 0,-1) * tex_offset ).x;
-		  //PL += tex2D(PSBackBuffer, texcoords + float2( 1, 0) * tex_offset ).w;
-		  //PL += tex2D(PSBackBuffer, texcoords + float2(-1, 0) * tex_offset ).w;
-		  //PL += tex2D(PSBackBuffer, texcoords + float2( 0, 1) * tex_offset ).w;
-		  //PL += tex2D(PSBackBuffer, texcoords + float2( 0,-1) * tex_offset ).w;
-	float lum = L;
-	float lumlast = PL;
+	float AA = 1-Adapt_Adjust, L =  tex2Dlod(SamplerLum,float4(texcoord,0,11)).x, PL = tex2D(SamplerAvgLumaLast, texcoord).x;
 	//Temporal adaptation https://knarkowicz.wordpress.com/2016/01/09/automatic-exposure/
-   return lumlast + (lum - lumlast) * (1.0 - exp2(-frametime));
+ 
+	return PL + (L - PL) * (1.0 - exp(-frametime/(AA*1000)));   	
 }
    
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	
 float4 BrightColors(float4 position : SV_Position, float2 texcoords : TEXCOORD) : SV_Target //bright-pass filter is applied to dim-down the darkest areas of the scene.
 {   
@@ -363,7 +362,6 @@ float4 Mix_Bloom(float4 position : SV_Position, float2 texcoords : TEXCOORD) : S
 	return float4(LastBlur(texcoords) + tex2D(PSBackBuffer, texcoords).rgb,1.); // Merge Current and past frame.
 }
 
-
 float3 HableTonemap(float3 x)
 {
 	float A,B,C,D,E,F;
@@ -378,10 +376,15 @@ float3 HableTonemap(float3 x)
 
 float4 HDROut(float2 texcoord : TEXCOORD0)
 {	
-	float AL = Average_Luminance(texcoord).x, Ex = Bloom_Intensity;
+	float A = 1-tex2D(SamplerAvgLum,0.0).x, BI = Bloom_Intensity, Ex = Exp,NC = smoothstep(0,1,A);
 	
+	NC = saturate(NC - 0.5);
+     	
 	if(Auto_Bloom_Intensity)
-	Ex = Ex * AL;
+	{
+		BI = 0.375;
+		BI *= NC;
+	}
 	//Blur Acculimation 
 	float3 acc = tex2Dlod(SamplerBloom, float4(texcoord,0,0)).rgb;
 		   acc += tex2Dlod(SamplerBloom, float4(texcoord,0,1)).rgb;
@@ -395,15 +398,17 @@ float4 HDROut(float2 texcoord : TEXCOORD0)
     float3 TM, Color = tex2D(BackBuffer, texcoord).rgb, Bloom = acc.rgb, bloomColor = acc.rgb;
 	// Do inital de-gamma of the game image to ensure we're operating in the correct colour range.
 	if( Gamma > 1.00 )
-		Color = pow(Color,Gamma);
+		Color = pow(abs(Color),Gamma);
 	//Bloom Intensity
-	bloomColor = 1.0 - exp(-bloomColor * Ex);
+	bloomColor = 1.0 - exp(-bloomColor * BI);
 	
 	//Add Bloom
 	Color += bloomColor;
-	
+
+	if(Auto_Exposure)
+		Ex = A * 1.25;
 	//UTM		
-	Color *= Exp;  // Exposure Adjustment
+	Color *= Ex;  // Exposure Adjustment
 
 	float ExposureBias = 2.0f;
 	float3 curr;
@@ -419,126 +424,124 @@ float4 HDROut(float2 texcoord : TEXCOORD0)
     
 	// Do the post-tonemapping gamma correction
 	if( Gamma > 1.00 )
-		Color = pow(Color,1/Gamma);
+		Color = pow(abs(Color),1/Gamma);
 
 
 	//FAKE HDR
 	Color = pow(abs(Color),HDR_Adjust) + (Color * 0.5);
 
-	if (!Debug_View)
+	if (Debug_View == 0)
 		Out = float4(Color, 1.0);
-	else
+	else if(Debug_View == 1)
 		Out = float4(1. - exp(-Bloom), 1.0);	
+	else
+		Out = A.xxx;
 		
 	return Out;
 }
 
-void Past_BackSingleBuffer(float4 position : SV_Position, float2 texcoords : TEXCOORD, out float4 PastSingle : SV_Target)
+float4 Past_BackSingleBuffer(float4 pos : SV_Position, float2 texcoord : TEXCOORD) : SV_Target
 {	
-	PastSingle = float4(LastBlur(texcoords),Average_Luminance(texcoords).x);
+	 return float4(LastBlur(texcoord),1.0);
+}
+
+float PS_StoreAvgLuma(float4 pos : SV_Position, float2 texcoord : TEXCOORD) : SV_Target
+{
+    return tex2D(SamplerAvgLum,texcoord).x;
 }
 
 uniform float timer < source = "timer"; >;
 ////////////////////////////////////////////////////////Logo/////////////////////////////////////////////////////////////////////////
 float4 Out(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Target
 {
-	float PosX = 0.5*BUFFER_WIDTH*pix.x,PosY = 0.5*BUFFER_HEIGHT*pix.y;	
-	float4 Color = HDROut(texcoord),Done,Website,D,E,P,T,H,Three,DD,Dot,I,N,F,O;
+	float PosX = 0.9525f*BUFFER_WIDTH*pix.x,PosY = 0.975f*BUFFER_HEIGHT*pix.y;	
+	float3 Color = HDROut(texcoord).rgb,D,E,P,T,H,Three,DD,Dot,I,N,F,O;
 	
-	if(timer <= 10000)
+	[branch] if(timer <= 12500)
 	{
-	//DEPTH
-	//D
-	float PosXD = -0.035+PosX, offsetD = 0.001;
-	float4 OneD = all( abs(float2( texcoord.x -PosXD, texcoord.y-PosY)) < float2(0.0025,0.009));
-	float4 TwoD = all( abs(float2( texcoord.x -PosXD-offsetD, texcoord.y-PosY)) < float2(0.0025,0.007));
-	D = OneD-TwoD;
-	
-	//E
-	float PosXE = -0.028+PosX, offsetE = 0.0005;
-	float4 OneE = all( abs(float2( texcoord.x -PosXE, texcoord.y-PosY)) < float2(0.003,0.009));
-	float4 TwoE = all( abs(float2( texcoord.x -PosXE-offsetE, texcoord.y-PosY)) < float2(0.0025,0.007));
-	float4 ThreeE = all( abs(float2( texcoord.x -PosXE, texcoord.y-PosY)) < float2(0.003,0.001));
-	E = (OneE-TwoE)+ThreeE;
-	
-	//P
-	float PosXP = -0.0215+PosX, PosYP = -0.0025+PosY, offsetP = 0.001, offsetP1 = 0.002;
-	float4 OneP = all( abs(float2( texcoord.x -PosXP, texcoord.y-PosYP)) < float2(0.0025,0.009*0.682));
-	float4 TwoP = all( abs(float2( texcoord.x -PosXP-offsetP, texcoord.y-PosYP)) < float2(0.0025,0.007*0.682));
-	float4 ThreeP = all( abs(float2( texcoord.x -PosXP+offsetP1, texcoord.y-PosY)) < float2(0.0005,0.009));
-	P = (OneP-TwoP) + ThreeP;
+		//DEPTH
+		//D
+		float PosXD = -0.035+PosX, offsetD = 0.001;
+		float3 OneD = all( abs(float2( texcoord.x -PosXD, texcoord.y-PosY)) < float2(0.0025,0.009));
+		float3 TwoD = all( abs(float2( texcoord.x -PosXD-offsetD, texcoord.y-PosY)) < float2(0.0025,0.007));
+		D = OneD-TwoD;
+		
+		//E
+		float PosXE = -0.028+PosX, offsetE = 0.0005;
+		float3 OneE = all( abs(float2( texcoord.x -PosXE, texcoord.y-PosY)) < float2(0.003,0.009));
+		float3 TwoE = all( abs(float2( texcoord.x -PosXE-offsetE, texcoord.y-PosY)) < float2(0.0025,0.007));
+		float3 ThreeE = all( abs(float2( texcoord.x -PosXE, texcoord.y-PosY)) < float2(0.003,0.001));
+		E = (OneE-TwoE)+ThreeE;
+		
+		//P
+		float PosXP = -0.0215+PosX, PosYP = -0.0025+PosY, offsetP = 0.001, offsetP1 = 0.002;
+		float3 OneP = all( abs(float2( texcoord.x -PosXP, texcoord.y-PosYP)) < float2(0.0025,0.009*0.775));
+		float3 TwoP = all( abs(float2( texcoord.x -PosXP-offsetP, texcoord.y-PosYP)) < float2(0.0025,0.007*0.680));
+		float3 ThreeP = all( abs(float2( texcoord.x -PosXP+offsetP1, texcoord.y-PosY)) < float2(0.0005,0.009));
+		P = (OneP-TwoP) + ThreeP;
 
-	//T
-	float PosXT = -0.014+PosX, PosYT = -0.008+PosY;
-	float4 OneT = all( abs(float2( texcoord.x -PosXT, texcoord.y-PosYT)) < float2(0.003,0.001));
-	float4 TwoT = all( abs(float2( texcoord.x -PosXT, texcoord.y-PosY)) < float2(0.000625,0.009));
-	T = OneT+TwoT;
-	
-	//H
-	float PosXH = -0.0071+PosX;
-	float4 OneH = all( abs(float2( texcoord.x -PosXH, texcoord.y-PosY)) < float2(0.002,0.001));
-	float4 TwoH = all( abs(float2( texcoord.x -PosXH, texcoord.y-PosY)) < float2(0.002,0.009));
-	float4 ThreeH = all( abs(float2( texcoord.x -PosXH, texcoord.y-PosY)) < float2(0.003,0.009));
-	H = (OneH-TwoH)+ThreeH;
-	
-	//Three
-	float offsetFive = 0.001, PosX3 = -0.001+PosX;
-	float4 OneThree = all( abs(float2( texcoord.x -PosX3, texcoord.y-PosY)) < float2(0.002,0.009));
-	float4 TwoThree = all( abs(float2( texcoord.x -PosX3 - offsetFive, texcoord.y-PosY)) < float2(0.003,0.007));
-	float4 ThreeThree = all( abs(float2( texcoord.x -PosX3, texcoord.y-PosY)) < float2(0.002,0.001));
-	Three = (OneThree-TwoThree)+ThreeThree;
-	
-	//DD
-	float PosXDD = 0.006+PosX, offsetDD = 0.001;	
-	float4 OneDD = all( abs(float2( texcoord.x -PosXDD, texcoord.y-PosY)) < float2(0.0025,0.009));
-	float4 TwoDD = all( abs(float2( texcoord.x -PosXDD-offsetDD, texcoord.y-PosY)) < float2(0.0025,0.007));
-	DD = OneDD-TwoDD;
-	
-	//Dot
-	float PosXDot = 0.011+PosX, PosYDot = 0.008+PosY;		
-	float4 OneDot = all( abs(float2( texcoord.x -PosXDot, texcoord.y-PosYDot)) < float2(0.00075,0.0015));
-	Dot = OneDot;
-	
-	//INFO
-	//I
-	float PosXI = 0.0155+PosX, PosYI = 0.004+PosY, PosYII = 0.008+PosY;
-	float4 OneI = all( abs(float2( texcoord.x - PosXI, texcoord.y - PosY)) < float2(0.003,0.001));
-	float4 TwoI = all( abs(float2( texcoord.x - PosXI, texcoord.y - PosYI)) < float2(0.000625,0.005));
-	float4 ThreeI = all( abs(float2( texcoord.x - PosXI, texcoord.y - PosYII)) < float2(0.003,0.001));
-	I = OneI+TwoI+ThreeI;
-	
-	//N
-	float PosXN = 0.0225+PosX, PosYN = 0.005+PosY,offsetN = -0.001;
-	float4 OneN = all( abs(float2( texcoord.x - PosXN, texcoord.y - PosYN)) < float2(0.002,0.004));
-	float4 TwoN = all( abs(float2( texcoord.x - PosXN, texcoord.y - PosYN - offsetN)) < float2(0.003,0.005));
-	N = OneN-TwoN;
-	
-	//F
-	float PosXF = 0.029+PosX, PosYF = 0.004+PosY, offsetF = 0.0005, offsetF1 = 0.001;
-	float4 OneF = all( abs(float2( texcoord.x -PosXF-offsetF, texcoord.y-PosYF-offsetF1)) < float2(0.002,0.004));
-	float4 TwoF = all( abs(float2( texcoord.x -PosXF, texcoord.y-PosYF)) < float2(0.0025,0.005));
-	float4 ThreeF = all( abs(float2( texcoord.x -PosXF, texcoord.y-PosYF)) < float2(0.0015,0.00075));
-	F = (OneF-TwoF)+ThreeF;
-	
-	//O
-	float PosXO = 0.035+PosX, PosYO = 0.004+PosY;
-	float4 OneO = all( abs(float2( texcoord.x -PosXO, texcoord.y-PosYO)) < float2(0.003,0.005));
-	float4 TwoO = all( abs(float2( texcoord.x -PosXO, texcoord.y-PosYO)) < float2(0.002,0.003));
-	O = OneO-TwoO;
-	}
-	
-	Website = D+E+P+T+H+Three+DD+Dot+I+N+F+O ? float4(1.0,1.0,1.0,1) : Color;
-	
-	if(timer >= 10000)
-	{
-	Done = Color;
+		//T
+		float PosXT = -0.014+PosX, PosYT = -0.008+PosY;
+		float3 OneT = all( abs(float2( texcoord.x -PosXT, texcoord.y-PosYT)) < float2(0.003,0.001));
+		float3 TwoT = all( abs(float2( texcoord.x -PosXT, texcoord.y-PosY)) < float2(0.000625,0.009));
+		T = OneT+TwoT;
+		
+		//H
+		float PosXH = -0.0072+PosX;
+		float3 OneH = all( abs(float2( texcoord.x -PosXH, texcoord.y-PosY)) < float2(0.002,0.001));
+		float3 TwoH = all( abs(float2( texcoord.x -PosXH, texcoord.y-PosY)) < float2(0.002,0.009));
+		float3 ThreeH = all( abs(float2( texcoord.x -PosXH, texcoord.y-PosY)) < float2(0.00325,0.009));
+		H = (OneH-TwoH)+ThreeH;
+		
+		//Three
+		float offsetFive = 0.001, PosX3 = -0.001+PosX;
+		float3 OneThree = all( abs(float2( texcoord.x -PosX3, texcoord.y-PosY)) < float2(0.002,0.009));
+		float3 TwoThree = all( abs(float2( texcoord.x -PosX3 - offsetFive, texcoord.y-PosY)) < float2(0.003,0.007));
+		float3 ThreeThree = all( abs(float2( texcoord.x -PosX3, texcoord.y-PosY)) < float2(0.002,0.001));
+		Three = (OneThree-TwoThree)+ThreeThree;
+		
+		//DD
+		float PosXDD = 0.006+PosX, offsetDD = 0.001;	
+		float3 OneDD = all( abs(float2( texcoord.x -PosXDD, texcoord.y-PosY)) < float2(0.0025,0.009));
+		float3 TwoDD = all( abs(float2( texcoord.x -PosXDD-offsetDD, texcoord.y-PosY)) < float2(0.0025,0.007));
+		DD = OneDD-TwoDD;
+		
+		//Dot
+		float PosXDot = 0.011+PosX, PosYDot = 0.008+PosY;		
+		float3 OneDot = all( abs(float2( texcoord.x -PosXDot, texcoord.y-PosYDot)) < float2(0.00075,0.0015));
+		Dot = OneDot;
+		
+		//INFO
+		//I
+		float PosXI = 0.0155+PosX, PosYI = 0.004+PosY, PosYII = 0.008+PosY;
+		float3 OneI = all( abs(float2( texcoord.x - PosXI, texcoord.y - PosY)) < float2(0.003,0.001));
+		float3 TwoI = all( abs(float2( texcoord.x - PosXI, texcoord.y - PosYI)) < float2(0.000625,0.005));
+		float3 ThreeI = all( abs(float2( texcoord.x - PosXI, texcoord.y - PosYII)) < float2(0.003,0.001));
+		I = OneI+TwoI+ThreeI;
+		
+		//N
+		float PosXN = 0.0225+PosX, PosYN = 0.005+PosY,offsetN = -0.001;
+		float3 OneN = all( abs(float2( texcoord.x - PosXN, texcoord.y - PosYN)) < float2(0.002,0.004));
+		float3 TwoN = all( abs(float2( texcoord.x - PosXN, texcoord.y - PosYN - offsetN)) < float2(0.003,0.005));
+		N = OneN-TwoN;
+		
+		//F
+		float PosXF = 0.029+PosX, PosYF = 0.004+PosY, offsetF = 0.0005, offsetF1 = 0.001;
+		float3 OneF = all( abs(float2( texcoord.x -PosXF-offsetF, texcoord.y-PosYF-offsetF1)) < float2(0.002,0.004));
+		float3 TwoF = all( abs(float2( texcoord.x -PosXF, texcoord.y-PosYF)) < float2(0.0025,0.005));
+		float3 ThreeF = all( abs(float2( texcoord.x -PosXF, texcoord.y-PosYF)) < float2(0.0015,0.00075));
+		F = (OneF-TwoF)+ThreeF;
+		
+		//O
+		float PosXO = 0.035+PosX, PosYO = 0.004+PosY;
+		float3 OneO = all( abs(float2( texcoord.x -PosXO, texcoord.y-PosYO)) < float2(0.003,0.005));
+		float3 TwoO = all( abs(float2( texcoord.x -PosXO, texcoord.y-PosYO)) < float2(0.002,0.003));
+		O = OneO-TwoO;
+		//Website
+		return D+E+P+T+H+Three+DD+Dot+I+N+F+O ? 1-texcoord.y*50.0+48.35f : float4(Color,1.);
 	}
 	else
-	{
-	Done = Website;
-	}
-
-	return Done;
+		return float4(Color,1.);
 }
 
 ///////////////////////////////////////////////////////////ReShade.fxh/////////////////////////////////////////////////////////////
@@ -572,12 +575,19 @@ technique Blooming_HDR
 		PixelShader = Mix_Bloom;
 		RenderTarget = texBloom;
 	}
-		pass Avg_Lum
+		pass Lum
     {
         VertexShader = PostProcessVS;
         PixelShader = Luminance;
-        RenderTarget = texLumAvg;
+        RenderTarget = texLum;
     }
+    	pass Avg_Lum
+    {
+        VertexShader = PostProcessVS;
+        PixelShader = Average_Luminance;
+        RenderTarget = texAvgLum;
+    }
+	    
 		pass HDROut
 	{
 		VertexShader = PostProcessVS;
@@ -589,4 +599,12 @@ technique Blooming_HDR
 		PixelShader = Past_BackSingleBuffer;
 		RenderTarget = PastSingle_BackBuffer;	
 	}
+	
+	  pass StoreAvgLuma
+    {
+        VertexShader = PostProcessVS;
+        PixelShader = PS_StoreAvgLuma;
+        RenderTarget = TexAvgLumaLast;
+    }	
+	
 }
