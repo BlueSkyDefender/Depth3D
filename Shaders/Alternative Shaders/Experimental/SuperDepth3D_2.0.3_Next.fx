@@ -540,7 +540,7 @@ float2 WeaponDepth(in float2 texcoord : TEXCOORD0)
 	else if(WP == 8) //WP 6
 		WA_XYZ = float3(0.338,25.0,9.0);       //DOOM 2016*	
 	else if(WP == 9) //WP 7
-		WA_XYZ = float3(0.255,0.5625,-0.750);  //CoD: Black Ops
+		WA_XYZ = float3(0.255,187.5,63.1);     //CoD: Black Ops
 	else if(WP == 10)//WP 8
 		WA_XYZ = float3(0.254,300.0,0.9843);   //CoD:AW*	
 	else if(WP == 11)//WP 9
@@ -604,11 +604,11 @@ float2 WeaponDepth(in float2 texcoord : TEXCOORD0)
 	else if(WP == 40)//WP 38
 		WA_XYZ = float3(0.286,80.0,7.0);       //Unreal Gold with v227*	
 	else if(WP == 41)//WP 39
-		WA_XYZ = float3(0.280,1.125,-16.25);   //Serious Sam Revolution / Serious Sam HD: The First Encounter / The Second Encounter / Serious Sam 3: BFE?
+		WA_XYZ = float3(0.280,15.5,9.1);       //Serious Sam Revolution #EB9EEB74/Serious Sam HD: The First Encounter /The Second Encounter /Serious Sam 2 #8238E9CA/ Serious Sam 3: BFE* 
 	else if(WP == 42)//WP 40
-		WA_XYZ = float3(0.280,1.0,16.25);      //Serious Sam 2
-	else if(WP == 43)//WP 41
 		WA_XYZ = float3(0,0,0);                //Serious Sam 4: Planet Badass
+	else if(WP == 43)//WP 41
+		WA_XYZ = float3(0,0,0);                //Game
 	else if(WP == 44)//WP 42
 		WA_XYZ = float3(0.277,20.0,8.8);       //TitanFall 2*
 	else if(WP == 45)//WP 43
@@ -616,7 +616,7 @@ float2 WeaponDepth(in float2 texcoord : TEXCOORD0)
 	else if(WP == 46)//WP 44
 		WA_XYZ = float3(0.625,0.275,-25.0);    //Kingpin Life of Crime
 	else if(WP == 47)//WP 45
-		WA_XYZ = float3(0,0,0);                //EuroTruckSim2
+		WA_XYZ = float3(0.28,20.0,9.0);        //EuroTruckSim2* #9C5C946E
 	else if(WP == 48)//WP 46
 		WA_XYZ = float3(0.458,10.5,1.105);     //F.E.A.R & F.E.A.R. 2: Project Origin*
 	else if(WP == 49)//WP 47
