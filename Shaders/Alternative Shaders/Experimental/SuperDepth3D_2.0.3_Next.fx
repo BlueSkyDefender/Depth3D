@@ -540,7 +540,7 @@ float2 WeaponDepth(in float2 texcoord : TEXCOORD0)
 	else if(WP == 8) //WP 6
 		WA_XYZ = float3(0.338,25.0,9.0);       //DOOM 2016*	
 	else if(WP == 9) //WP 7
-		WA_XYZ = float3(0.255,187.5,63.1);     //CoD: Black Ops
+		WA_XYZ = float3(0.255,187.5,63.1);     //CoD: Black Ops*
 	else if(WP == 10)//WP 8
 		WA_XYZ = float3(0.254,300.0,0.9843);   //CoD:AW*	
 	else if(WP == 11)//WP 9
@@ -594,9 +594,9 @@ float2 WeaponDepth(in float2 texcoord : TEXCOORD0)
 	else if(WP == 35)//WP 33
 		WA_XYZ = float3(0.278,56.25,9.050);    //Black Mesa*
 	else if(WP == 36)//WP 34
-		WA_XYZ = float3(0.420,0.1,0.0);        //Blood 2
+		WA_XYZ = float3(0.420,4.75,1.0);       //Blood 2* #6D3CD99E
 	else if(WP == 37)//WP 35
-		WA_XYZ = float3(0.500,0.0625,18.75);   //Blood 2 Alt
+		WA_XYZ = float3(0.500,4.75,0.75);      //Blood 2 Alt*
 	else if(WP == 38)//WP 36
 		WA_XYZ = float3(0.785,21.25,0.3875);   //SOMA*
 	else if(WP == 39)//WP 37
