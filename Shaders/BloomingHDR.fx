@@ -25,6 +25,14 @@
 #else
 	#define Compatibility 0
 #endif
+
+uniform bool FHDR <
+	ui_label = "HDR Likeness";
+	ui_tooltip = "This will enable or dissable the shader's HDR Likeness mode.\n"
+				 "Please Note if off you may want to adjust Bloom Saturation.";
+	ui_category = "HDR Adjustments";
+> = true;
+
 uniform float HDR_Adjust <
 	#if Compatibility
 	ui_type = "drag";
@@ -34,9 +42,9 @@ uniform float HDR_Adjust <
 	ui_min = 0.5; ui_max = 2.0;
 	ui_label = "HDR Adjust";
 	ui_tooltip = "Use this to adjust Fake HDR levels for your content.\n"
-				"Number 1.125 is default.";
+				"Number 1.25 is default.";
 	ui_category = "HDR Adjustments";
-> = 1.5;
+> = 1.25;
 
 uniform float CBT_Adjust <
 	#if Compatibility
@@ -50,14 +58,14 @@ uniform float CBT_Adjust <
 				"This is the most important setting, use Debug View to adjust this.\n"
 				"Number 0.625 is default.";
 	ui_category = "Bloom Adjustments";
-> = 0.625;
+> = 0.5;
 
 uniform bool Auto_Bloom_Intensity <
 	ui_label = "Auto Bloom Intensity";
 	ui_tooltip = "This will enable the shader to adjust Bloom Intensity automaticly.\n"
-				"You will still need to adjust exposure below.";
+				 "This will disable Bloom Intensity adjustment below.";
 	ui_category = "Bloom Adjustments";
-> = false;
+> = true;
 
 uniform float Bloom_Intensity<
 	#if Compatibility
@@ -78,7 +86,7 @@ uniform float Saturation <
 	#else
 	ui_type = "slider";
 	#endif
-	ui_min = 0.0; ui_max = 10.0;
+	ui_min = 0.0; ui_max = 5.0;
 	ui_label = "Bloom Saturation";
 	ui_tooltip = "Adjustment The amount to adjust the saturation of the color.\n"
 				"Number 2.5 is default.";
@@ -117,7 +125,7 @@ uniform float W <
 uniform bool Auto_Exposure <
 	ui_label = "Auto Exposure";
 	ui_tooltip = "This will enable the shader to adjust Exposure automaticly.\n"
-				"You will still need to adjust exposure below.";
+			 	"This will disable Exposure adjustment below.";
 	ui_category = "Tonemapper Adjustments";
 > = false;
 
@@ -428,7 +436,8 @@ float4 HDROut(float2 texcoord : TEXCOORD0)
 
 
 	//FAKE HDR
-	Color = pow(abs(Color),HDR_Adjust) + (Color * 0.5);
+	if(FHDR)
+		Color = pow(abs(Color),HDR_Adjust) + (Color * 0.5);
 
 	if (Debug_View == 0)
 		Out = float4(Color, 1.0);
