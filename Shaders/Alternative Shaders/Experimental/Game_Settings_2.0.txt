@@ -293,10 +293,13 @@ First Start DGVoodoo 2.55.4 Control Panel
 Config folder /Running instance click "Add" and guide it to your GOG Games "Blood 2," Folder.
 -=General Tab=- 
 	+Output API: Best 
+	-Keep Window Aspect
+	-Capture Mouse
+	+Center App Window
 -=DirectX=-
 	+Videocard: dgVoodoo Virtual 3D - VRAM 1024
 	+Texture Filtering: Force Ani 16x
-	+Resolution: Your Pref
+	+Resolution: Unforced
 	+Application Controlled FullScreen/windowed state
 	+Bilinear Bit strecthing
 	+Fast Video Memory Access
@@ -313,7 +316,7 @@ DepthBuffersBitDepth                = appdriven
 TO
 DepthBuffersBitDepth                = forcemin24bit
 
-One you are done with that go back to the dgVoodoo Folder and open the MS folder. Copy D3D8.dll, D3DImm.dll, and DDraw.dll into your GOG Games "Blood 2," Folder. 
+One you are done with that go back to the dgVoodoo Folder and open the MS folder. Copy D3DImm.dll, and DDraw.dll into your GOG Games "Blood 2," Folder. 
 
 Start your game with the GoG app.
 Check Nightmares Add-on
@@ -324,11 +327,16 @@ Disable DirectX6 commands
 Enable Optimized surfaces
 Enable Poly Gap Fixing
 Enable mipmap sharpening
-Enable Single-Pass multi-textureing.
 
 Click OK
 
 Click Launch Nightmares.
+
+Windows 10 Issues Black Box only audio work around.
+You will have to click Launch Nightmares and click again a window before the game launches then alt-tab back to the the game.
+
+AMD White Texture work around. Find detailhi.cfg in the Blood 2 folder and set "MipmapOffset" to "1.000000"
+You will lose a lot of texture detail. I do not recommend playing like this.
 
 {Call of Duty: Advance Warfare}
 Render Resolution Native.
