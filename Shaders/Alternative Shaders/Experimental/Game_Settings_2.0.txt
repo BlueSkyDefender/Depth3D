@@ -157,7 +157,7 @@ Inner Shader Setting:
              *Project Warlock                              DM 1       17.500    0.001       *WDM 43                0.0250-0.0625      Yes 2          
     RB       *Quake Epsilon                                DM 0       15.000                *WDM 15                0.0375-0.0625      Yes 2         
              *Quake 2 XP                                   DM 0       7.5000                *WDM 16                0.0250-0.0500      No  0     
-    RB       *Quake 4                                      DM 0       10.000                *WDM 17                0.0250-0.0500      Yes 5      
+    RB       *Quake 4                                      DM 0       15.000                *WDM 17                0.0250-0.0500      Yes 5      
               Quantum Break                                DM 0       9.0000                                       0.025-0.275
     RB       *Rage64                                       DM 0       20.000                *WDM 14                0.0125-0.0375      Yes 2          
     RB        Redout                                       DM ?         ?                                          ?      
@@ -747,7 +747,7 @@ Install reshade and use dxgi.dll
 Ok befor you launch use this command.
 -eac_launcher <---- as the start up command.
 
-{Wolfenstine: Games} - working in Reshade 4.0.2
+{Wolfenstine: Games} - working in Reshade 4.1.1
 [Set Launch Options](+r_multisamples "0" +vt_maxaniso "16")
 This game must be started at the lower Resoution 1600x1200 Windowed, Then Switch to 1920x1080 Fullscreen Windowed. 
 Befor you exit switch it back to 1600x1200 Windowed.
@@ -755,7 +755,8 @@ Befor you exit switch it back to 1600x1200 Windowed.
 Note if you want to 4k It's the same process Start the game at 1600x1200 Windowed then switch it to 3840x2160 Fullscreen Windowed.
 Also note you can't switch back. 
 
-So say you Start the game at 1600x1200 then switch to 4k then back too 1600x1200 it will not work. 
+So say you Start the game at 1600x1200 then switch to 4k then back too 1600x1200 it will not work. If you don't have this resolution.
+Create it your self.
 You must restart your game for eatch change of resolution.
 
 Update 2018: Running it in Windows 10 Disable Scaling to avoid problems.
@@ -773,8 +774,7 @@ Ex.
 		"high" : 0,
 		"ultra" : 0
 	},
-Update 12.9.2018 When testing with AMD cards the depth buffer seems to not be accessable. I don't know why it's not working.
-Tested with 18.9.3 Adrenalin.
+Update 7.23.2019 When testing with AMD cards the depth buffer seems to not be accessable. I don't know why it's not working.
 	
 {You Are Empty}
 Read Here you will need patch 1.2 and 1snd.

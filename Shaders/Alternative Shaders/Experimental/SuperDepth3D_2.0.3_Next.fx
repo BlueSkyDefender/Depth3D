@@ -554,13 +554,13 @@ float2 WeaponDepth(in float2 texcoord : TEXCOORD0)
 	else if(WP == 15)//WP 13
 		WA_XYZ = float3(0,0,0);                //Game
 	else if(WP == 16)//WP 14
-		WA_XYZ = float3(1.0,27.5,6.25);        //Rage64		
+		WA_XYZ = float3(1.0,237.5,0.83625);    //Rage64* #AA6B948E		
 	else if(WP == 17)//WP 15
 		WA_XYZ = float3(0.375,60.0,15.15625);  //Quake DarkPlaces*
 	else if(WP == 18)//WP 16
 		WA_XYZ = float3(0.7,14.375,2.5);       //Quake 2 XP & Return to Castle Wolfenstine*
 	else if(WP == 19)//WP 17
-		WA_XYZ = float3(0.750,1.5,-1.250);     //Quake 4
+		WA_XYZ = float3(0.750,30.0,1.050);     //Quake 4* #ED7B83DE
 	else if(WP == 20)//WP 18
 		WA_XYZ = float3(0,0,0);                //Game
 	else if(WP == 21)//WP 19
@@ -578,7 +578,7 @@ float2 WeaponDepth(in float2 texcoord : TEXCOORD0)
 	else if(WP == 27)//WP 25
 		WA_XYZ = float3(0,0,0);                //Game
 	else if(WP == 28)//WP 26
-		WA_XYZ = float3(0.750,3.4375,0);       //Prey - 2006
+		WA_XYZ = float3(0.750,30.0,1.025);     //Prey - 2006* #DE2F0F4D
 	else if(WP == 29)//WP 27
 		WA_XYZ = float3(0.2832,30.0,0.8775);   //Prey 2017 High Settings and <*
 	else if(WP == 30)//WP 28
@@ -588,7 +588,7 @@ float2 WeaponDepth(in float2 texcoord : TEXCOORD0)
 	else if(WP == 32)//WP 30
 		WA_XYZ = float3(0.4894,75.0,1.00375);  //Wolfenstein*
 	else if(WP == 33)//WP 31
-		WA_XYZ = float3(1.0,13.75,6.4);        //Wolfenstein: The New Order / The Old Blood
+		WA_XYZ = float3(1.0,93.75,0.81875);    //Wolfenstein: The New Order* #C770832 / The Old Blood* #3E42619F
 	else if(WP == 34)//WP 32
 		WA_XYZ = float3(0,0,0);                //Wolfenstein II: The New Colossus / Cyberpilot
 	else if(WP == 35)//WP 33
@@ -614,7 +614,7 @@ float2 WeaponDepth(in float2 texcoord : TEXCOORD0)
 	else if(WP == 45)//WP 43
 		WA_XYZ = float3(0.7,16.250,0.300);     //Project Warlock*
 	else if(WP == 46)//WP 44
-		WA_XYZ = float3(0.625,0.275,-25.0);    //Kingpin Life of Crime
+		WA_XYZ = float3(0.625,9.0,2.375);      //Kingpin Life of Crime* #7DCCBBBD
 	else if(WP == 47)//WP 45
 		WA_XYZ = float3(0.28,20.0,9.0);        //EuroTruckSim2* #9C5C946E
 	else if(WP == 48)//WP 46
