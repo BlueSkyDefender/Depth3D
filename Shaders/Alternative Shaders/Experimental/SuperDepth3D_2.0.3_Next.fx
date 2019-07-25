@@ -465,18 +465,17 @@ float4 MouseCursor(float4 position : SV_Position, float2 texcoord : TEXCOORD) : 
 	else if (Cursor_STT.z >= 0.1 )
 		Color.rgb = float3(0.5,0,0.5);
 		
-	Out = Cursor  ? Color : Out;
+	Out = Cursor ? Color : Out;
 	
 	return Out;
 }
 
 /////////////////////////////////////////////////////////////////////////////////Adapted Luminance/////////////////////////////////////////////////////////////////////////////////
-texture texLumN {Width = 256*0.5; Height = 256*0.5; Format = RGBA8; MipLevels = 8;}; //Sample at 256x256/2 and a mip bias of 8 should be 1x1 
+texture texLumN {Width = 256*0.5; Height = 256*0.5; Format = RG8; MipLevels = 8;}; //Sample at 256x256/2 and a mip bias of 8 should be 1x1 
 																				
 sampler SamplerLumN																
 	{
 		Texture = texLumN;
-		MipLODBias = 8; //Luminance adapted luminance value from 1x1 Texture Mip lvl of 8
 		MinFilter = LINEAR;
 		MagFilter = LINEAR;
 		MipFilter = LINEAR;
@@ -484,7 +483,7 @@ sampler SamplerLumN
 	
 float2 Lum(in float2 texcoord : TEXCOORD0)
 	{
-		float2 Luminance = tex2Dlod(SamplerLumN,float4(texcoord,0,0)).xy; //Average Luminance Texture Sample 
+		float2 Luminance = tex2Dlod(SamplerLumN,float4(texcoord,0,11)).xy; //Average Luminance Texture Sample 
 
 		return saturate(Luminance);
 	}
@@ -549,11 +548,11 @@ float2 WeaponDepth(in float2 texcoord : TEXCOORD0)
 	else if(WP == 3) //WP 1
 		WA_XYZ = float3(0,0,0);                //Game
 	else if(WP == 4) //WP 2
-		WA_XYZ = float3(0.625,37.5,7.25);      //BorderLands 2*	
+		WA_XYZ = float3(0.625,37.5,7.25);      //BorderLands 2* #7B81CCAB	
 	else if(WP == 5) //WP 3
 		WA_XYZ = float3(0,0,0);                //Game	
 	else if(WP == 6) //WP 4
-		WA_XYZ = float3(0.253,40.0,97.5);      //Fallout 4*			
+		WA_XYZ = float3(0.253,28.75,98.5);     //Fallout 4* #2D950D30			
 	else if(WP == 7) //WP 5
 		WA_XYZ = float3(0.276,20.0,9.5625);    //Skyrim: SE*
 	else if(WP == 8) //WP 6
