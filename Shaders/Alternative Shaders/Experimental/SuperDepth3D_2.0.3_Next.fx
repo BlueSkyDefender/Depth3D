@@ -138,7 +138,13 @@ uniform int View_Mode <
 				 "Default is Normal";
 	ui_category = "Occlusion Masking";
 > = 0;
-
+uniform int Custom_Sidebars <
+	ui_type = "combo";
+	ui_items = "Mirrored Edges\0Black Edges\0Stretched Edges\0";
+	ui_label = " Edge Handling";
+	ui_tooltip = "Edges selection for your screen output.";
+	ui_category = "Occlusion Masking";
+> = 1;
 uniform bool Side_Bars <
 	ui_label = " Side Bars";
 	ui_tooltip = "Adds Side Bar to the Left and Right Edges";
@@ -357,6 +363,14 @@ sampler BackBuffer
 		Texture = BackBufferTex;
 	};
 
+sampler BackBufferMIRROR 
+	{ 
+		Texture = BackBufferTex;
+		AddressU = MIRROR;
+		AddressV = MIRROR;
+		AddressW = MIRROR;
+	};
+
 sampler BackBufferBORDER
 	{ 
 		Texture = BackBufferTex;
@@ -364,15 +378,20 @@ sampler BackBufferBORDER
 		AddressV = BORDER;
 		AddressW = BORDER;
 	};
+
+sampler BackBufferCLAMP
+	{ 
+		Texture = BackBufferTex;
+		AddressU = CLAMP;
+		AddressV = CLAMP;
+		AddressW = CLAMP;
+	};	
 	
 texture texDMN  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA16F; }; 
 
 sampler SamplerDMN
 	{
 		Texture = texDMN;
-		AddressU = BORDER;
-		AddressV = BORDER;
-		AddressW = BORDER;
 	};
 			
 #if UI_MASK
@@ -526,7 +545,7 @@ float2 WeaponDepth(in float2 texcoord : TEXCOORD0)
 	[branch] if (WP == 1)                   // WA_XYZ.x | WA_XYZ.y | WA_XYZ.z 
 		WA_XYZ = float3(CutOff,Adjust,Tune);// X Cutoff | Y Adjust | Z Tuneing 		
 	else if(WP == 2) //WP 0
-		WA_XYZ = float3(0.425,4.375,1.6875);   //ES: Oblivion*		
+		WA_XYZ = float3(0.425,4.375,1.6875);   //ES: Oblivion* #C753DADB		
 	else if(WP == 3) //WP 1
 		WA_XYZ = float3(0,0,0);                //Game
 	else if(WP == 4) //WP 2
@@ -821,22 +840,24 @@ float2 Parallax( float Diverge, float2 Coordinates)
 //Per is Perspective & Optimization for line interlaced Adjustment. 
 #define Per float2( (Perspective * pix.x) * 0.5, 0)
 #define AI Interlace_Anaglyph.x * 0.5
-
+	
 float4 EdgeMask( float Diverge, float4 Image, float2 texcoords)
 {
-	float Side_A = 0, Side_B = -1;
-	
-	if(Diverge > 0)
-		{
-			Side_A = -1;	 
-			Side_B = 0;
-		}
-		
-	float PA = Side_A+(BUFFER_WIDTH*pix.x), PB = Side_B+(BUFFER_WIDTH*pix.x), Y = BUFFER_HEIGHT*pix.y;
-	float4 Bar_A = all( abs(float2( texcoords.x-PA, texcoords.y-Y)) < float2((Divergence * .9375) * pix.x,1.0f));
-	float4 Bar_B = all( abs(float2( texcoords.x-PB, texcoords.y-Y)) < float2((Divergence * .9375) * pix.x,1.0f));
-		
-	return Bar_A + Bar_B ? float4(0,0,0,1) : Image;
+	float SB_R = 1-(Divergence * 0.02) * 0.025,SB_L = (Divergence * 0.02) * 0.025;
+		if(texcoords.x < SB_R && texcoords.x > SB_L)
+		return Image;//tex2Dlod(BackBuffer,float4(texcoords,0,0));
+	else
+		return float4(0,0,0,1);
+}
+
+float4 CSB(float2 texcoords)
+{
+	if(Custom_Sidebars == 0)
+		return tex2Dlod(BackBufferMIRROR,float4(texcoords,0,0));
+	else if(Custom_Sidebars == 1)
+		return tex2Dlod(BackBufferBORDER,float4(texcoords,0,0));
+	else
+		return tex2Dlod(BackBufferCLAMP,float4(texcoords,0,0));
 }
 	
 float4 PS_calcLR(float2 texcoord)
@@ -844,7 +865,7 @@ float4 PS_calcLR(float2 texcoord)
 	float2 TCL, TCR, TexCoords = texcoord;
 
 	[branch] if (Stereoscopic_Mode == 0)
-	{
+		{
 		TCL = float2(texcoord.x*2,texcoord.y);
 		TCR = float2(texcoord.x*2-1,texcoord.y);
 	}
@@ -876,8 +897,8 @@ float4 PS_calcLR(float2 texcoord)
 		TCL.x += AI * pix.x; //Optimization for column interlaced.
 		TCR.x -= AI * pix.x; //Optimization for column interlaced.					
 	}	
-	
-	float4 color, Left = tex2Dlod(BackBufferBORDER, float4(Parallax(-D, TCL),0,0)), Right = tex2Dlod(BackBufferBORDER, float4(Parallax(D, TCR),0,0));
+
+	float4 color, Left = CSB(Parallax(-D, TCL)), Right = CSB(Parallax(D, TCR));
 		
 	if (Side_Bars)
 	{
