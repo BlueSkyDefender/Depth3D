@@ -66,17 +66,19 @@ Inner Shader Setting:
               Batman: Arkham City                          DM 0       15.000                                       0.050-0.100
               Beware                                       DM 1       62.500                               Yes     0.100-0.150                       
               BladeStorm Nightmare                         DM ?         ?                                          ?
-    RB       *Bioshock Remastred                           DM 0       7.5000    0.00600     *WDM 9                 0.0250-0.0500      Yes 3                 
+    RB       *Bioshock Remastred                           DM 0       7.5000    0.00600     *WDM 49                0.0250-0.0500      Yes 3                 
              *Black Mesa                                   DM 0       8.7500                *WDM 33                0.0250-0.0500      Yes 1      
     RB        BloodCM                                      DM 0       15.000                                       0.025-0.250                                     
     RB       *Blood 2                                      DM 0       7.5000                *WDM 34/35             0.0250-0.0500      Yes 3         
     RB       *BorderLands 2                                DM 0       20.000                *WDM 2                 0.0375-0.0625      Yes 2                                
              *Call of Chthulhu                             DM 1       9.3750                                       0.0250-0.0500      Yes 1       0.1625   
-    RB       *Call of Duty: Advance Warfare                DM 1       13.750               *WDM 8                 0.0375-0.0625      Yes 2                                       
+    RB       *Call of Duty: Advance Warfare                DM 1       13.750                *WDM 10                0.0375-0.0625      Yes 2                                       
     RB       *Call of Duty: Black Ops                      DM 0       12.500                *WDM 7                 0.0375-0.0500      Yes 3               
     RB       *Call of Duty: Black Ops 2                    DM 1       13.750                *WDM 8                 0.0375-0.0625      Yes 2            
-    RB       *Call of Duty: Ghost                          DM 1       13.750                *WDM 8                 0.0375-0.0625      Yes 2            
-    RB       *Call of Duty: Infinite Warfare               DM 1       13.750                *WDM 8                 0.0375-0.0625      Yes 2          
+    RB       *Call of Duty: Ghost                          DM 1       13.750                *WDM 9                 0.0375-0.0625      Yes 2            
+    RB       *Call of Duty: Infinite Warfare               DM 1       13.750                *WDM 11                0.0375-0.0625      Yes 2
+    RB       *Call of Duty: Modern Warfare 3               DM 0       12.500                *WDM 7                 0.0375-0.0500      Yes 3
+             *Call of Duty: World at War                   DM 0       12.500                *WDM 12                0.0375-0.0500      Yes 3          
               Casltevania: Lord of Shadows - UE            DM 0       7.5000                                       0.025-0.250                                         
               Castle of Illusion Micky Mouse               DM 0       12.500                                       ???????????
               Crash Bandicoot™ N. Sane Trilogy             DM 0        ????     ?????                              ???????????                         
@@ -134,8 +136,8 @@ Inner Shader Setting:
     RB        Mass Effect Andromeda                        DM 1       15.000                                       0.075-0.175                                        
     RB        Magicka 2                                    DM 0       13.750    0.01250                            0.0250-0.2500                         
     RB        Metal Gear Rising                            DM 0       13.750                                       0.025-0.250       
-    RB       *Metro 2033 Redux                             DM 0       12.500                *WDM 11                0.0500-0.1000      Yes 2                        
-    RB       *Metro Last Light Redux                       DM 0       12.500                *WDM 11                0.0500-0.1000      Yes 2                              
+    RB       *Metro 2033 Redux                             DM 0       12.500                *WDM 19                0.0500-0.1000      Yes 2                        
+    RB       *Metro Last Light Redux                       DM 0       12.500                *WDM 19                0.0500-0.1000      Yes 2                              
     RB        Middle-earth: Shadow of Mordor               DM 1       25.000                                       0.025-0.250        
               Mirror's Edge Catalyst                       DM 1       13.750                                       0.025-0.125       
     RB        Monster Hunter World                         DM 1       13.750                                       0.025-0.075
@@ -171,9 +173,9 @@ Inner Shader Setting:
               Ryse: Son of Rome                            DM 0       7.5000                                       0.025-0.050        
               Scorn                                        DM 1       40.000                                       0.015-0.050
              *Serious Sam Revolution                       DM 0       7.5000    0.11110     *WDM 39                0.0250-0.0750
-    RB       *S.T.A.L.K.E.R:CS Complete Mod                DM 0       10.000                *WDM 19                0.0250-0.0625      Yes 4        
-    RB       *S.T.A.L.K.E.R:CoP Complete Mod               DM 0       10.000                *WDM 19                0.0250-0.0625      Yes 4       
-    RB       *S.T.A.L.K.E.R:SoC Complete Mod               DM 0       10.000                *WDM 19                0.0250-0.0625      Yes 4       
+    RB       *S.T.A.L.K.E.R:CS Complete Mod                DM 0       10.000                *WDM 24                0.0250-0.0625      Yes 4        
+    RB       *S.T.A.L.K.E.R:CoP Complete Mod               DM 0       10.000                *WDM 24                0.0250-0.0625      Yes 4       
+    RB       *S.T.A.L.K.E.R:SoC Complete Mod               DM 0       10.000                *WDM 24                0.0250-0.0625      Yes 4       
     RB        Shadow of the Tomb Raider                    DM 1       17.500                                       0.100-0.250 
               Shadow Tactics: Blades of the Shogun         DM 0       5.5000    0.00100                    Yes     0.2500-0.3500                   0.2875    
               Shadow Warrior Classic Source Port           DM 0       8.7500    1.00000                            0.0750-0.1500                         
@@ -337,6 +339,10 @@ You will have to click Launch Nightmares and click again a window before the gam
 
 AMD White Texture work around. Find detailhi.cfg in the Blood 2 folder and set "MipmapOffset" to "1.000000"
 You will lose a lot of texture detail. I do not recommend playing like this.
+
+{Call of Duty: Modern Warfare 3}
+Set Image Quality to Native.
+You can also use DGVoodoo 2.6 to make the game DX11 and grab a better depth buffer maybe.
 
 {Call of Duty: Advance Warfare}
 Render Resolution Native.

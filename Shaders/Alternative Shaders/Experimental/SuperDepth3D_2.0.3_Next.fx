@@ -145,11 +145,11 @@ uniform int Custom_Sidebars <
 	ui_tooltip = "Edges selection for your screen output.";
 	ui_category = "Occlusion Masking";
 > = 1;
-uniform bool Side_Bars <
-	ui_label = " Side Bars";
-	ui_tooltip = "Adds Side Bar to the Left and Right Edges";
-	ui_category = "Occlusion Masking";
-> = false;
+//uniform bool Side_Bars <
+//	ui_label = " Side Bars";
+//	ui_tooltip = "Adds Side Bar to the Left and Right Edges";
+//	ui_category = "Occlusion Masking";
+//> = false;
 //Depth Map//
 uniform int Depth_Map <
 	ui_type = "combo";
@@ -226,7 +226,7 @@ uniform int WP <
 
 uniform float3 Weapon_Adjust <
 	ui_type = "drag";
-	ui_min = 0.0; ui_max = 25.0;
+	ui_min = 0.0; ui_max = 300.0;
 	ui_label = " Weapon Hand Adjust";
 	ui_tooltip = "Adjust Weapon depth map for your games.\n"
 				 "X, CutOff Point used to set a diffrent scale for first person hand apart from world scale.\n"
@@ -544,31 +544,31 @@ float2 WeaponDepth(in float2 texcoord : TEXCOORD0)
 	[branch] if (WP == 1)                   // WA_XYZ.x | WA_XYZ.y | WA_XYZ.z 
 		WA_XYZ = float3(CutOff,Adjust,Tune);// X Cutoff | Y Adjust | Z Tuneing 		
 	else if(WP == 2) //WP 0
-		WA_XYZ = float3(0.425,4.375,1.6875);   //ES: Oblivion* #C753DADB		
+		WA_XYZ = float3(0.425,4.375,1.6875);   //ES: Oblivion #C753DADB		
 	else if(WP == 3) //WP 1
 		WA_XYZ = float3(0,0,0);                //Game
 	else if(WP == 4) //WP 2
-		WA_XYZ = float3(0.625,37.5,7.25);      //BorderLands 2* #7B81CCAB	
+		WA_XYZ = float3(0.625,37.5,7.25);      //BorderLands 2 #7B81CCAB	
 	else if(WP == 5) //WP 3
 		WA_XYZ = float3(0,0,0);                //Game	
 	else if(WP == 6) //WP 4
-		WA_XYZ = float3(0.253,28.75,98.5);     //Fallout 4* #2D950D30			
+		WA_XYZ = float3(0.253,28.75,98.5);     //Fallout 4 #2D950D30			
 	else if(WP == 7) //WP 5
-		WA_XYZ = float3(0.276,20.0,9.5625);    //Skyrim: SE*
+		WA_XYZ = float3(0.276,20.0,9.5625);    //Skyrim: SE #3950D04E
 	else if(WP == 8) //WP 6
-		WA_XYZ = float3(0.338,25.0,9.0);       //DOOM 2016*	
+		WA_XYZ = float3(0.338,20.0,9.25);      //DOOM 2016 #142EDFD6	
 	else if(WP == 9) //WP 7
-		WA_XYZ = float3(0.255,187.5,63.1);     //CoD: Black Ops*
+		WA_XYZ = float3(0.255,177.5,63.025);   //CoD:Black Ops #17232880 CoD:MW2 #9D77A7C4 CoD:MW3 #22EF526F
 	else if(WP == 10)//WP 8
-		WA_XYZ = float3(0.254,300.0,0.9843);   //CoD:AW*	
+		WA_XYZ = float3(0.254,100.0,0.9843);   //CoD:Black Ops II #D691718C	
 	else if(WP == 11)//WP 9
-		WA_XYZ = float3(0.425,25.0,100.0);     //Bioshock Remastred*
+		WA_XYZ = float3(0.254,203.125,0.98435);//CoD:Ghost #7448721B
 	else if(WP == 12)//WP 10
-		WA_XYZ = float3(0,0,0);                //Game
+		WA_XYZ = float3(0.254,203.125,0.98433);//CoD:AW #23AB8876 CoD:MW Re #BF4D4A41
 	else if(WP == 13)//WP 11
-		WA_XYZ = float3(0.450,12.0,23.75);     //Metro Redux Games*	
+		WA_XYZ = float3(0.254,125.0,0.9843);   //CoD:IW #1544075
 	else if(WP == 14)//WP 12
-		WA_XYZ = float3(0,0,0);                //Game
+		WA_XYZ = float3(0.255,200.0,63.0);     //CoD:WaW #697CDA52
 	else if(WP == 15)//WP 13
 		WA_XYZ = float3(0,0,0);                //Game
 	else if(WP == 16)//WP 14
@@ -582,7 +582,7 @@ float2 WeaponDepth(in float2 texcoord : TEXCOORD0)
 	else if(WP == 20)//WP 18
 		WA_XYZ = float3(0,0,0);                //Game
 	else if(WP == 21)//WP 19
-		WA_XYZ = float3(0.255,5.5,52.0);       //S.T.A.L.K.E.R: Games*
+		WA_XYZ = float3(0.450,12.0,23.75);     //Metro Redux Games*
 	else if(WP == 22)//WP 20
 		WA_XYZ = float3(0,0,0);                //Game
 	else if(WP == 23)//WP 21
@@ -592,7 +592,7 @@ float2 WeaponDepth(in float2 texcoord : TEXCOORD0)
 	else if(WP == 25)//WP 23
 		WA_XYZ = float3(0,0,0);                //Turok 3: Shadow of Oblivion
 	else if(WP == 26)//WP 24
-		WA_XYZ = float3(0,0,0);                //Game
+		WA_XYZ = float3(0.255,5.5,52.0);       //S.T.A.L.K.E.R: Games*
 	else if(WP == 27)//WP 25
 		WA_XYZ = float3(0,0,0);                //Game
 	else if(WP == 28)//WP 26
@@ -642,7 +642,7 @@ float2 WeaponDepth(in float2 texcoord : TEXCOORD0)
 	else if(WP == 50)//WP 48
 		WA_XYZ = float3(2.0,20.0,0.100);       //Immortal Redneck CP alt 1.9375*
 	else if(WP == 51)//WP 49
-		WA_XYZ = float3(0,0,0);                //Game
+		WA_XYZ = float3(0.425,25.0,100.0);     //Bioshock Remastred*
 	else if(WP == 52)//WP 50
 		WA_XYZ = float3(0.489,68.75,1.02);     //NecroVisioN & NecroVisioN: Lost Company*
 	//End Weapon Profiles//
@@ -840,14 +840,14 @@ float2 Parallax( float Diverge, float2 Coordinates)
 #define Per float2( (Perspective * pix.x) * 0.5, 0)
 #define AI Interlace_Anaglyph.x * 0.5
 	
-float4 EdgeMask( float Diverge, float4 Image, float2 texcoords)
-{
-	float SB_R = 1-(Divergence * 0.02) * 0.025,SB_L = (Divergence * 0.02) * 0.025;
-		if(texcoords.x < SB_R && texcoords.x > SB_L)
-		return Image;//tex2Dlod(BackBuffer,float4(texcoords,0,0));
-	else
-		return float4(0,0,0,1);
-}
+//float4 EdgeMask( float Diverge, float4 Image, float2 texcoords)
+//{
+//	float SB_R = 1-(Divergence * 0.02) * 0.025,SB_L = (Divergence * 0.02) * 0.025;
+//		if(texcoords.x < SB_R && texcoords.x > SB_L)
+//		return Image;//tex2Dlod(BackBuffer,float4(texcoords,0,0));
+//	else
+//		return float4(0,0,0,1);
+//}
 
 float4 CSB(float2 texcoords)
 {
@@ -899,11 +899,11 @@ float4 PS_calcLR(float2 texcoord)
 
 	float4 color, Left = CSB(Parallax(-D, TCL)), Right = CSB(Parallax(D, TCR));
 		
-	if (Side_Bars)
-	{
-		Left = EdgeMask(-Divergence,Left,TCL);
-		Right = EdgeMask(Divergence,Right,TCR);
-	}
+	//if (Side_Bars)
+	//{
+	//	Left = EdgeMask(-Divergence,Left,TCL);
+	//	Right = EdgeMask(Divergence,Right,TCR);
+	//}
 	#if HUD_MODE	
 	float HUD_Adjustment = ((0.5 - HUD_Adjust.y)*25.) * pix.x;
 	Left = HUD(Left,float2(TCL.x - HUD_Adjustment,TCL.y));

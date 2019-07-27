@@ -92,7 +92,7 @@ uniform bool No_Depth_Map <
 
 uniform int Sharpen_Type <
 	ui_type = "combo";
-	ui_items = "AMD CAS\0Bilateral CAS\0Median CAS\0";
+	ui_items = "AMD CAS\0Bilateral CAS\0";
 	ui_label = "Sharpen Type";
 	ui_tooltip = "Select Sharpen type.";
 	ui_category = "Smart Sharp";
@@ -131,7 +131,7 @@ uniform bool Depth_Cues <
 	ui_tooltip = "Depth Cues.\n"	
 				 "If enabled it disables Depth Cues additional shading.";
 	ui_category = "Depth Cues";
-> = true;
+> = false;
 
 uniform float Shade_Power <	
 	#if Compatibility
@@ -205,15 +205,6 @@ uniform int Debug_View <
 	#define MSIZE 9
 #endif
 
-#define s2(a, b)				temp = a; a = min(a, b); b = max(temp, b);
-#define mn3(a, b, c)			s2(a, b); s2(a, c);
-#define mx3(a, b, c)			s2(b, c); s2(a, c);
-
-#define mnmx3(a, b, c)			mx3(a, b, c); s2(a, b);                                   // 3 exchanges
-#define mnmx4(a, b, c, d)		s2(a, b); s2(c, d); s2(a, c); s2(b, d);                   // 4 exchanges
-#define mnmx5(a, b, c, d, e)	s2(a, b); s2(c, d); mn3(a, c, e); mx3(b, d, e);           // 6 exchanges
-#define mnmx6(a, b, c, d, e, f) s2(a, d); s2(b, e); s2(c, f); mn3(a, b, c); mx3(d, e, f); // 7 exchanges
-	
 texture DepthBufferTex : DEPTH;
 
 sampler DepthBuffer 
@@ -375,13 +366,13 @@ return float4(Done,dot(ampRGB,float3(0.2126, 0.7152, 0.0722)));
 
 float3 BS( float2 texcoord )
 {
-	if(Sharpen_Type != 1 )
+	if(Sharpen_Type != 1)
 		discard;
 	//Bilateral Filter//                                                                                                                                                                   
 	float3 c = tex2D(BackBuffer,texcoord.xy).rgb;
 	const int kSize = (MSIZE-1)/2;	
 //													1			2			3			4				5			6			7			8				7			6			5				4			3			2			1
-//Full Kernal Size would be 15 as shown here (0.031225216, 0.033322271, 0.035206333, 0.036826804, 0.038138565, 0.039104044, 0.039695028, 0.039894000, 0.039695028, 0.039104044, 0.038138565, 0.036826804, 0.035206333, 0.033322271, 0.031225216)
+//Full Kernal Size would be 15 as shown here (0.031225216, 0.03332227	1, 0.035206333, 0.036826804, 0.038138565, 0.039104044, 0.039695028, 0.039894000, 0.039695028, 0.039104044, 0.038138565, 0.036826804, 0.035206333, 0.033322271, 0.031225216)
 #if Quality == 0
 	float weight[MSIZE] = {0.031225216, 0.039894000, 0.031225216}; // by 3
 #endif
@@ -391,10 +382,19 @@ float3 BS( float2 texcoord )
 #if Quality == 2
 	float weight[MSIZE] = {0.031225216, 0.035206333, 0.039104044, 0.039894000, 0.039104044, 0.035206333, 0.031225216};   // by 7
 #endif
-#if Quality == 3
+#if Quality == 3	
 	float weight[MSIZE] = {0.031225216, 0.035206333, 0.038138565, 0.039695028, 0.039894000, 0.039695028, 0.038138565, 0.035206333, 0.031225216};  // by 9
 #endif
 
+ float Q = 1.;
+
+if(Quality == 1)
+	Q *= 0.5;	
+if(Quality == 2)
+	Q *= 0.375;	
+if(Quality == 3)
+	Q *= 0.25;
+	
 		float3 final_colour;
 		float Z;
 		[unroll]
@@ -413,7 +413,7 @@ float3 BS( float2 texcoord )
 		{
 			for (int j=-kSize; j <= kSize; ++j)
 			{
-				float2 XY = float2(float(i),float(j))*pix*0.5;
+				float2 XY = float2(float(i),float(j))*pix*Q;
 				cc = E(texcoord.xy+XY);
 
 				factor = normpdf3(cc-c, BSIGMA)*bZ*weight[kSize+j]*weight[kSize+i];
@@ -425,40 +425,8 @@ float3 BS( float2 texcoord )
 	return final_colour/Z;
 }
 
-float3 Median(float2 texcoord )
-{
-	if(Sharpen_Type != 2 )
-		discard;
-		
-	float2 ScreenCal = float2(pix.x,pix.y);
-	
-	float2 FinCal = ScreenCal*0.6;
-
-	float3 v[9];
-	
-	[unroll]
-	for(int i = -1; i <= 1; ++i) 
-	{
-		for(int j = -1; j <= 1; ++j)
-		{		
-		  float2 offset = float2(float(i), float(j));
-
-		  v[(i + 1) * 3 + (j + 1)] = E(texcoord + offset * FinCal);
-		}
-	}
-
-	float3 temp;
-
-	mnmx6(v[0], v[1], v[2], v[3], v[4], v[5]);
-	mnmx5(v[1], v[2], v[3], v[4], v[6]);
-	mnmx4(v[2], v[3], v[4], v[7]);
-	mnmx3(v[3], v[4], v[8]);
-	
-	return v[4];	
-}
-
 void Filters(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 color : SV_Target0)                                                                          
-{
+{					
 	float3 Done;
 	float2 Adjust = (Spread * 0.625 ) * pix;
 	float3 result;	
@@ -476,13 +444,15 @@ void Filters(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, o
 		result += E(texcoord + float2( 1,-1) * 0.50 * Adjust );
 		result += E(texcoord + float2(-1, 1) * 0.50 * Adjust );
 		
-				
-	if(Sharpen_Type == 0)
-		Done = CAS(texcoord).rgb;
+	if (Sharpen_Type == 0)	
+		Done = CAS(texcoord).rgb;	
 	else if (Sharpen_Type == 1)
-		Done = lerp(E(texcoord),E(texcoord)+(E(texcoord) - BS(texcoord))*(Sharpness*3.),CAS(texcoord).w * Sharpness);
-	else
-		Done = lerp(E(texcoord),E(texcoord)+(E(texcoord) - Median(texcoord))*(Sharpness*3.75),CAS(texcoord).w * Sharpness);
+		Done = lerp(E(texcoord),E(texcoord)+(E(texcoord) - BS(texcoord))*(Sharpness*3.),saturate(CAS(texcoord).w * Sharpness));
+	//else if (Sharpen_Type == 2)
+		//Done = 0;	
+	//else
+		//Done = 0;	
+
 		 
 	color = float4( Done,dot(result / 12, float3(0.2126, 0.7152, 0.0722) ) );
 }
@@ -510,7 +480,7 @@ float DepthCues(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_
 		float2 S = Spread * 0.75f * pix;
 
 		float result;
-		result +=Adjust(texcoord + float2( 1, 0) * S ).x;
+		result += Adjust(texcoord + float2( 1, 0) * S ).x;
 		result += Adjust(texcoord + float2( 0, 1) * S ).x;
 		result += Adjust(texcoord + float2(-1, 0) * S ).x;
 		result += Adjust(texcoord + float2( 0,-1) * S ).x;
