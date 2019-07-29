@@ -66,9 +66,7 @@
 
 // The Key Code for the mouse is 0-4 key 1 is right mouse button.
 #define Fade_Key 1 // You can use http://keycode.info/ to figure out what key is what.
-
-#define Fade_Time_Adjust 0.625 // From 0 to 1 is the Fade Time adjust for this mode. Default is 0.625;
-
+#define Fade_Time_Adjust 0.5625 // From 0 to 1 is the Fade Time adjust for this mode. Default is 0.5625;
 #define Eye_Fade_Reduction 0 // From 0 to 2 Default is both eyes Depth reduction. One is Right Eye only Two is Left Eye Only
 
 //USER EDITABLE PREPROCESSOR FUNCTIONS END//
@@ -513,7 +511,6 @@ float Fade_in_out(float2 texcoord : TEXCOORD)
 {
 	float Trigger_Fade, AA = (1-Fade_Time_Adjust)*1000, PStoredfade = tex2D(SamplerLumN,texcoord).z;
 	//Fade in toggle. 
-	
 	if(FPSDFIO == 1)
 		Trigger_Fade = Trigger_Fade_A;
 	else if(FPSDFIO == 2)
@@ -577,7 +574,7 @@ float2 WeaponDepth(in float2 texcoord : TEXCOORD0)
 	[branch] if (WP == 1)                   // WA_XYZ.x | WA_XYZ.y | WA_XYZ.z 
 		WA_XYZ = float3(CutOff,Adjust,Tune);// X Cutoff | Y Adjust | Z Tuneing 		
 	else if(WP == 2) //WP 0
-		WA_XYZ = float3(0.425,4.375,1.6875);   //ES: Oblivion #C753DADB		
+		WA_XYZ = float3(0.425,5.0,1.125);     //ES: Oblivion #C753DADB		
 	else if(WP == 3) //WP 1
 		WA_XYZ = float3(0,0,0);                //Game
 	else if(WP == 4) //WP 2
@@ -956,22 +953,16 @@ float4 PS_calcLR(float2 texcoord)
 	float FadeIO = smoothstep(0,1,1-Fade_in_out(texcoord).x), FD = D;
 	
 	if (FPSDFIO == 1 || FPSDFIO == 2)
-		FD = lerp(FD * 0.075,FD,FadeIO);
+		FD = lerp(FD * 0.0625,FD,FadeIO);
 		
-	float DL = FD, DR = FD;
+	float2 DLR = float2(FD,FD);
 	
 	if( Eye_Fade_Reduction == 1)
-		{
-			DL = D;
-			DR = FD;
-		}
+			DLR = float2(D,FD);
 	else if( Eye_Fade_Reduction == 2)
-		{
-			DL = FD;
-			DR = D;
-		}
+			DLR = float2(FD,D);
 
-	float4 color, Left = CSB(Parallax(-DL, TCL)), Right = CSB(Parallax(DR, TCR));
+	float4 color, Left = CSB(Parallax(-DLR.x, TCL)), Right = CSB(Parallax(DLR.y, TCR));
 		
 	//if (Side_Bars)
 	//{
