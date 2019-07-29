@@ -64,9 +64,12 @@
 // So :::: are UI Elements in game. The *** is what the Mask needs to cover up.
 // The game part needs to be trasparent and the UI part needs to be black.
 
-// Toggle Key useing keycode info
-// The Key Code for Decimal Point is Number 110. Ex. for Numpad Decimal "." Cancel_Depth_Key 110
-#define Fade_Key 110 // You can use http://keycode.info/ to figure out what key is what.
+// The Key Code for the mouse is 0-4 key 1 is right mouse button.
+#define Fade_Key 1 // You can use http://keycode.info/ to figure out what key is what.
+
+#define Fade_Time_Adjust 0.625 // From 0 to 1 is the Fade Time adjust for this mode. Default is 0.625;
+
+#define Eye_Fade_Reduction 0 // From 0 to 2 Default is both eyes Depth reduction. One is Right Eye only Two is Left Eye Only
 
 //USER EDITABLE PREPROCESSOR FUNCTIONS END//
 
@@ -249,6 +252,15 @@ uniform float WZPD <
 				"Default is 0.03f & Zero is off.";
 	ui_category = "Weapon Hand Adjust";
 > = 0.03;
+
+uniform int FPSDFIO <
+	ui_type = "combo";
+	ui_items = "Off\0Press\0Hold Down\0";
+	ui_label = " FPS Focus Depth";
+	ui_tooltip = "This lets the shader handle real time depth reduction for aiming down your sights.\n"
+				 "This may induce Eye Strain so take this as an Warning.";
+	ui_category = "Weapon Hand Adjust";
+> = 0;
 #if HUD_MODE
 //Heads-Up Display
 uniform float2 HUD_Adjust <
@@ -339,7 +351,6 @@ uniform bool SCSC <
 > = false;
 
 uniform bool Cancel_Depth < source = "key"; keycode = Cancel_Depth_Key; toggle = true; mode = "toggle";>;
-uniform bool Trigger_Fade < source = "key"; keycode = Fade_Key; toggle = true; mode = "toggle";>;
 uniform bool Mask_Cycle < source = "key"; keycode = Mask_Cycle_Key; toggle = true; >;
 uniform bool Depth_Adjust < source = "key"; keycode = DB_TOGGLE; toggle = true; >;
 /////////////////////////////////////////////D3D Starts Here/////////////////////////////////////////////////////////////////
@@ -495,14 +506,21 @@ float2 Lum(in float2 texcoord : TEXCOORD0)
 	
 uniform float frametime < source = "frametime";>;
 /////////////////////////////////////////////////////////////////////////////////Fade In and Out Toggle/////////////////////////////////////////////////////////////////////////////////	
+uniform bool Trigger_Fade_A < source = "mousebutton"; keycode = Fade_Key; toggle = true; mode = "toggle";>;
+uniform bool Trigger_Fade_B < source = "mousebutton"; keycode = Fade_Key;>;
+
 float Fade_in_out(float2 texcoord : TEXCOORD)	
 {
-	float Fade_Time_Adjust = .5 , AA = (1-Fade_Time_Adjust)*1000, PStoredfade = tex2D(SamplerLumN,texcoord).z;
+	float Trigger_Fade, AA = (1-Fade_Time_Adjust)*1000, PStoredfade = tex2D(SamplerLumN,texcoord).z;
 	//Fade in toggle. 
+	
+	if(FPSDFIO == 1)
+		Trigger_Fade = Trigger_Fade_A;
+	else if(FPSDFIO == 2)
+		Trigger_Fade = Trigger_Fade_B;
 	
 	return PStoredfade + (Trigger_Fade - PStoredfade) * (1.0 - exp(-frametime/AA)); ///exp2 would be even slower  	
 }
-
 /////////////////////////////////////////////////////////////////////////////////Depth Map Information/////////////////////////////////////////////////////////////////////////////////
 float DMA()//Depth Map Adjustment
 {
@@ -695,9 +713,6 @@ float2 WeaponDepth(in float2 texcoord : TEXCOORD0)
 		zBufferWH = Far * Near / (Far + Z.x * (Near - Far));		
 	else if (Depth_Map == 1)//DM1. Reverse
 		zBufferWH = Far * Near / (Far + Z.y * (Near - Far));	
-
-	//float FadeIO = smoothstep(0,1,1-Fade_in_out(texcoord).x);
-	//				zBufferWH.x = lerp(ZPD,zBufferWH.x,FadeIO);
 					
 	return float2(saturate(zBufferWH.x),WA_XYZ.x);	
 }
@@ -938,7 +953,25 @@ float4 PS_calcLR(float2 texcoord)
 		TCR.x -= AI * pix.x; //Optimization for column interlaced.					
 	}	
 
-	float4 color, Left = CSB(Parallax(-D, TCL)), Right = CSB(Parallax(D, TCR));
+	float FadeIO = smoothstep(0,1,1-Fade_in_out(texcoord).x), FD = D;
+	
+	if (FPSDFIO == 1 || FPSDFIO == 2)
+		FD = lerp(FD * 0.075,FD,FadeIO);
+		
+	float DL = FD, DR = FD;
+	
+	if( Eye_Fade_Reduction == 1)
+		{
+			DL = D;
+			DR = FD;
+		}
+	else if( Eye_Fade_Reduction == 2)
+		{
+			DL = FD;
+			DR = D;
+		}
+
+	float4 color, Left = CSB(Parallax(-DL, TCL)), Right = CSB(Parallax(DR, TCR));
 		
 	//if (Side_Bars)
 	//{
@@ -1276,11 +1309,11 @@ void PostProcessVS(in uint id : SV_VertexID, out float4 position : SV_Position, 
 
 technique Cross_Cursor_Next
 {			
-			pass Cursor
-		{
+		pass Cursor
+	{
 			VertexShader = PostProcessVS;
-			PixelShader = MouseCursor;
-		}	
+		PixelShader = MouseCursor;
+	}	
 }
 
 technique SuperDepth3D_Next
