@@ -161,7 +161,7 @@ Inner Shader Setting:
              *Quake 2 XP                                   DM 0       7.5000                *WDM 16                0.0250-0.0500      No  0     
     RB       *Quake 4                                      DM 0       15.000                *WDM 17                0.0250-0.0500      Yes 5      
               Quantum Break                                DM 0       9.0000                                       0.025-0.275
-    RB       *Rage64                                       DM 0       20.000                *WDM 14                0.0125-0.0375      Yes 2          
+    RB       *Rage64                                       DM 0       20.000                *WDM 51                0.0125-0.0375      Yes 2          
     RB        Redout                                       DM ?         ?                                          ?      
               Remembrance                                  DM 1       7.5000                               Yes     0.050-0.100
     RB       *RESIDENT EVIL 2  BIOHAZARD RE2 Remake        DM 1       62.500    0.00015                            0.0250-0.1625      Yes 5        0.0800

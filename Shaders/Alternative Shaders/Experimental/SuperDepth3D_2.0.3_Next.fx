@@ -64,6 +64,10 @@
 // So :::: are UI Elements in game. The *** is what the Mask needs to cover up.
 // The game part needs to be trasparent and the UI part needs to be black.
 
+// Toggle Key useing keycode info
+// The Key Code for Decimal Point is Number 110. Ex. for Numpad Decimal "." Cancel_Depth_Key 110
+#define Fade_Key 110 // You can use http://keycode.info/ to figure out what key is what.
+
 //USER EDITABLE PREPROCESSOR FUNCTIONS END//
 
 #if !defined(__RESHADE__) || __RESHADE__ < 40000
@@ -335,6 +339,7 @@ uniform bool SCSC <
 > = false;
 
 uniform bool Cancel_Depth < source = "key"; keycode = Cancel_Depth_Key; toggle = true; mode = "toggle";>;
+uniform bool Trigger_Fade < source = "key"; keycode = Fade_Key; toggle = true; mode = "toggle";>;
 uniform bool Mask_Cycle < source = "key"; keycode = Mask_Cycle_Key; toggle = true; >;
 uniform bool Depth_Adjust < source = "key"; keycode = DB_TOGGLE; toggle = true; >;
 /////////////////////////////////////////////D3D Starts Here/////////////////////////////////////////////////////////////////
@@ -471,7 +476,7 @@ float4 MouseCursor(float4 position : SV_Position, float2 texcoord : TEXCOORD) : 
 }
 
 /////////////////////////////////////////////////////////////////////////////////Adapted Luminance/////////////////////////////////////////////////////////////////////////////////
-texture texLumN {Width = 256*0.5; Height = 256*0.5; Format = RG8; MipLevels = 8;}; //Sample at 256x256/2 and a mip bias of 8 should be 1x1 
+texture texLumN {Width = 256*0.5; Height = 256*0.5; Format = RGBA16F; MipLevels = 8;}; //Sample at 256x256/2 and a mip bias of 8 should be 1x1 
 																				
 sampler SamplerLumN																
 	{
@@ -487,7 +492,17 @@ float2 Lum(in float2 texcoord : TEXCOORD0)
 
 		return saturate(Luminance);
 	}
-		
+	
+uniform float frametime < source = "frametime";>;
+/////////////////////////////////////////////////////////////////////////////////Fade In and Out Toggle/////////////////////////////////////////////////////////////////////////////////	
+float Fade_in_out(float2 texcoord : TEXCOORD)	
+{
+	float Fade_Time_Adjust = .5 , AA = (1-Fade_Time_Adjust)*1000, PStoredfade = tex2D(SamplerLumN,texcoord).z;
+	//Fade in toggle. 
+	
+	return PStoredfade + (Trigger_Fade - PStoredfade) * (1.0 - exp(-frametime/AA)); ///exp2 would be even slower  	
+}
+
 /////////////////////////////////////////////////////////////////////////////////Depth Map Information/////////////////////////////////////////////////////////////////////////////////
 float DMA()//Depth Map Adjustment
 {
@@ -570,9 +585,9 @@ float2 WeaponDepth(in float2 texcoord : TEXCOORD0)
 	else if(WP == 14)//WP 12
 		WA_XYZ = float3(0.255,200.0,63.0);     //CoD:WaW #697CDA52
 	else if(WP == 15)//WP 13
-		WA_XYZ = float3(0,0,0);                //Game
+		WA_XYZ = float3(0.510,162.5,3.975);    //Cod:UO #239E5522
 	else if(WP == 16)//WP 14
-		WA_XYZ = float3(1.0,237.5,0.83625);    //Rage64* #AA6B948E		
+		WA_XYZ = float3(0,0,0);                //Game		
 	else if(WP == 17)//WP 15
 		WA_XYZ = float3(0.375,60.0,15.15625);  //Quake DarkPlaces*
 	else if(WP == 18)//WP 16
@@ -645,6 +660,26 @@ float2 WeaponDepth(in float2 texcoord : TEXCOORD0)
 		WA_XYZ = float3(0.425,25.0,100.0);     //Bioshock Remastred*
 	else if(WP == 52)//WP 50
 		WA_XYZ = float3(0.489,68.75,1.02);     //NecroVisioN & NecroVisioN: Lost Company*
+	else if(WP == 53)//WP 51
+		WA_XYZ = float3(1.0,237.5,0.83625);    //Rage64* #AA6B948E
+	else if(WP == 54)//WP 52
+		WA_XYZ = float3(0,0,0);                //Game
+	else if(WP == 55)//WP 53
+		WA_XYZ = float3(0,0,0);                //Game
+	else if(WP == 56)//WP 54
+		WA_XYZ = float3(0,0,0);                //Game
+	else if(WP == 57)//WP 55
+		WA_XYZ = float3(0,0,0);                //Game
+	else if(WP == 58)//WP 56
+		WA_XYZ = float3(0,0,0);                //Game
+	else if(WP == 59)//WP 57
+		WA_XYZ = float3(0,0,0);                //Game
+	else if(WP == 60)//WP 58
+		WA_XYZ = float3(0,0,0);                //Game
+	else if(WP == 61)//WP 59
+		WA_XYZ = float3(0,0,0);                //Game
+	else if(WP == 62)//WP 60
+		WA_XYZ = float3(0,0,0);                //Game
 	//End Weapon Profiles//
 	
 	// Here on out is the Weapon Hand Adjustment code.		
@@ -660,14 +695,17 @@ float2 WeaponDepth(in float2 texcoord : TEXCOORD0)
 		zBufferWH = Far * Near / (Far + Z.x * (Near - Far));		
 	else if (Depth_Map == 1)//DM1. Reverse
 		zBufferWH = Far * Near / (Far + Z.y * (Near - Far));	
-	
+
+	//float FadeIO = smoothstep(0,1,1-Fade_in_out(texcoord).x);
+	//				zBufferWH.x = lerp(ZPD,zBufferWH.x,FadeIO);
+					
 	return float2(saturate(zBufferWH.x),WA_XYZ.x);	
 }
 
 float4 DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0) : SV_Target
 {
 		float4 DM = Depth(texcoord).xxxx;
-		
+				
 		float R, G, B, A, WD = WeaponDepth(texcoord).x, CoP = WeaponDepth(texcoord).y, CutOFFCal = (CoP/DMA()) * 0.5; //Weapon Cutoff Calculation
 		CutOFFCal = step(DM.x,CutOFFCal);
 					
@@ -676,7 +714,7 @@ float4 DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0
 			DM.x = DM.x;
 		}
 		else
-		{
+		{	
 			DM.x = lerp(DM.x,WD,CutOFFCal);
 			DM.y = lerp(0.0,WD,CutOFFCal);
 			DM.z = lerp(0.5,WD,CutOFFCal);
@@ -686,6 +724,9 @@ float4 DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0
 		G = DM.y > smoothstep(0,2.5,DM.w); //Weapon Mask
 		B = DM.z; //Weapon Hand
 		A = DM.w; //Normal Depth
+		
+	if(texcoord.x < pix.x * 2 && texcoord.y < pix.y * 2)
+		A = Fade_in_out(texcoord);
 		
 	return saturate(float4(R,G,B,A));
 }
@@ -732,7 +773,7 @@ float WHConv(float D,float2 texcoord)
 		
 	if (ALC <= 0.025)
 		ZP = 1;
-	 
+		 
    return lerp(Convergence,D,ZP);
 }
 
@@ -1126,7 +1167,7 @@ float4 Average_Luminance(float4 position : SV_Position, float2 texcoord : TEXCOO
 			
 	float Average_Lum_ZPD = tex2Dlod(SamplerDMN,float4(ABE.x + texcoord.x * ABE.y, ABE.z + texcoord.y * ABE.w, 0, 0)).w;
 	float Average_Lum_Full = tex2Dlod(SamplerDMN,float4(texcoord.x,texcoord.y, 0, 0)).w;
-	return float4(Average_Lum_ZPD,Average_Lum_Full,0,1);
+			return float4(Average_Lum_ZPD,Average_Lum_Full,tex2Dlod(SamplerDMN,float4(0,0, 0, 0)).w,1);
 }
 uniform float timer < source = "timer"; >; //Please do not remove.
 ////////////////////////////////////////////////////////Logo/////////////////////////////////////////////////////////////////////////
@@ -1250,16 +1291,15 @@ technique SuperDepth3D_Next
 		PixelShader = DepthMap;
 		RenderTarget = texDMN;
 	}
-
+		pass StereoOut
+	{
+		VertexShader = PostProcessVS;
+		PixelShader = Out;
+	}
 		pass AverageLuminance
 	{
 		VertexShader = PostProcessVS;
 		PixelShader = Average_Luminance;
 		RenderTarget = texLumN;
-	}
-		pass StereoOut
-	{
-		VertexShader = PostProcessVS;
-		PixelShader = Out;
 	}
 }
