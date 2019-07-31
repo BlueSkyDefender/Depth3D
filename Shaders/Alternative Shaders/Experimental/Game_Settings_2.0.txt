@@ -126,7 +126,7 @@ Inner Shader Setting:
     RB        KHOLAT                                       DM 1       10.000                                       0.025-0.250        
     RB       *Kingpin: Life of Crime                       DM 0       10.000                *WDM 44                0.0250-0.1250      Yes 4    
               Lara Croft & Temple of Osiris                DM 0       250.00    0.02070                            0.0250-0.2000               
-              Layers of Fear                               DM 0       7.5000                               Yes     0.125-0.175
+              Layers of Fear                               DM 0       17.500                               Yes     0.125-0.175
               Life is Strange: Before the Storm            DM 1       150.00                               Yes     0.075-0.375
               Lifeless Planet                              DM 0       17.500                               Yes     0.025-0.075
               Lords of The Fallen                          DM 0       14.750                                       0.050-0.250
@@ -166,7 +166,7 @@ Inner Shader Setting:
               Remembrance                                  DM 1       7.5000                               Yes     0.050-0.100
     RB       *RESIDENT EVIL 2  BIOHAZARD RE2 Remake        DM 1       62.500    0.00015                            0.0250-0.1625      Yes 5        0.0800
     RB        Resident Evil 7                              DM 1       22.500                                       0.125-0.275                                        
-    RB       *Return To Castle Wolfenstine                 DM 0       8.7500                *WDM 16                0.0250-0.0500      Yes 2                                
+    RB       *Return To Castle Wolfenstine                 DM 0       8.7500                *WDM 29                0.0250-0.0500      Yes 2                                
     RB        Requiem: Avenging Angel                      DM 0       50.000    0.80000                            0.0300-0.0600                         
               Rez Infinite                                 DM 1       20.000                                       0.075-0.150
               Rise of the Tomb Raider                      DM 0       25.000    0.02000                            0.0500-0.1250                         

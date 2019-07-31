@@ -198,11 +198,14 @@ uniform bool Depth_Map_Flip <
 	ui_category = "Depth Map";
 > = false;
 
-uniform bool Menu_Detection <
+uniform float Menu_Detection <
+	ui_type = "drag";
+	ui_min = 0.0; ui_max = 2.5; ui_step = 0.5;
 	ui_label = " Menu Detection";
 	ui_tooltip = "Use this to dissable/enable in game Menu Detection.";
 	ui_category = "Depth Map";
-> = false;
+> = 1.5;
+
 #if DB_Size_Postion 
 uniform int2 Image_Position_Adjust<
 	ui_type = "drag";
@@ -600,13 +603,13 @@ float2 WeaponDepth(in float2 texcoord : TEXCOORD0)
 	else if(WP == 14)//WP 12
 		WA_XYZ = float3(0.255,200.0,63.0);     //CoD:WaW #697CDA52
 	else if(WP == 15)//WP 13
-		WA_XYZ = float3(0.510,162.5,3.975);    //Cod:UO #239E5522
+		WA_XYZ = float3(0.510,162.5,3.975);    //CoD #4383C12A CoD:UO #239E5522 CoD:2 #3591DE9C
 	else if(WP == 16)//WP 14
 		WA_XYZ = float3(0,0,0);                //Game		
 	else if(WP == 17)//WP 15
-		WA_XYZ = float3(0.375,60.0,15.15625);  //Quake DarkPlaces*
+		WA_XYZ = float3(0.375,60.0,15.15625);  //Quake DarkPlaces #37BD797D
 	else if(WP == 18)//WP 16
-		WA_XYZ = float3(0.7,14.375,2.5);       //Quake 2 XP & Return to Castle Wolfenstine*
+		WA_XYZ = float3(0.7,14.375,2.5);       //Quake 2 XP #34F4B6C
 	else if(WP == 19)//WP 17
 		WA_XYZ = float3(0.750,30.0,1.050);     //Quake 4* #ED7B83DE
 	else if(WP == 20)//WP 18
@@ -632,7 +635,7 @@ float2 WeaponDepth(in float2 texcoord : TEXCOORD0)
 	else if(WP == 30)//WP 28
 		WA_XYZ = float3(0.2832,35,0.91875);    //Prey 2017 Very High*
 	else if(WP == 31)//WP 29
-		WA_XYZ = float3(0,0,0);                //Game
+		WA_XYZ = float3(0.7,9.0,2.3625);       //Return to Castle Wolfenstine #BF757E3A
 	else if(WP == 32)//WP 30
 		WA_XYZ = float3(0.4894,75.0,1.00375);  //Wolfenstein*
 	else if(WP == 33)//WP 31
@@ -826,9 +829,9 @@ float zBuffer(in float2 texcoord : TEXCOORD0)
 	
 	float ALC = abs(Lum(texcoord).x);
 	
-	if (Menu_Detection)
+	if (Menu_Detection >= 1)
 	{
-		if (ALC <= 0.025)
+		if (ALC <= (0.025 / Menu_Detection))
 		DM = 0;
 	}
 		
