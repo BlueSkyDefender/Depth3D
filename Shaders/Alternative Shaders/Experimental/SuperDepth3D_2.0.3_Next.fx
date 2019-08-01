@@ -226,7 +226,7 @@ uniform float2 Horizontal_and_Vertical <
 //Weapon Hand Adjust//
 uniform int WP <
 	ui_type = "combo";
-	ui_items = "Weapon Profile Off\0Custom WP\0WP 0\0WP 1\0WP 2\0WP 3\0WP 4\0WP 5\0WP 6\0WP 7\0WP 8\0WP 9\0WP 10\0WP 11\0WP 12\0WP 13\0WP 14\0WP 15\0WP 16\0WP 17\0WP 18\0WP 19\0WP 20\0WP 21\0WP 22\0WP 23\0WP 24\0WP 25\0WP 26\0WP 27\0WP 28\0WP 29\0WP 30\0WP 31\0WP 32\0WP 33\0WP 34\0WP 35\0WP 36\0WP 37\0WP 38\0WP 39\0WP 40\0WP 41\0WP 42\0WP 43\0WP 44\0WP 45\0WP 46\0WP 47\0WP 48\0WP 49\0WP 50\0";
+	ui_items = "Weapon Profile Off\0Custom WP\0WP 0\0WP 1\0WP 2\0WP 3\0WP 4\0WP 5\0WP 6\0WP 7\0WP 8\0WP 9\0WP 10\0WP 11\0WP 12\0WP 13\0WP 14\0WP 15\0WP 16\0WP 17\0WP 18\0WP 19\0WP 20\0WP 21\0WP 22\0WP 23\0WP 24\0WP 25\0WP 26\0WP 27\0WP 28\0WP 29\0WP 30\0WP 31\0WP 32\0WP 33\0WP 34\0WP 35\0WP 36\0WP 37\0WP 38\0WP 39\0WP 40\0WP 41\0WP 42\0WP 43\0WP 44\0WP 45\0WP 46\0WP 47\0WP 48\0WP 49\0WP 50\0WP 51\0WP 52\0WP 53\0WP 54\0WP 55\0WP 56\0WP 57\0WP 58\0WP 59\0WP 60\0";
 	ui_label = "·Weapon Profiles·";
 	ui_tooltip = "Pick Weapon Profile for your game or make your own.";
 	ui_category = "Weapon Hand Adjust";
@@ -234,7 +234,7 @@ uniform int WP <
 
 uniform float3 Weapon_Adjust <
 	ui_type = "drag";
-	ui_min = 0.0; ui_max = 300.0;
+	ui_min = 0.0; ui_max = 250.0;
 	ui_label = " Weapon Hand Adjust";
 	ui_tooltip = "Adjust Weapon depth map for your games.\n"
 				 "X, CutOff Point used to set a diffrent scale for first person hand apart from world scale.\n"
@@ -611,43 +611,43 @@ float2 WeaponDepth(in float2 texcoord : TEXCOORD0)
 	else if(WP == 18)//WP 16
 		WA_XYZ = float3(0.7,14.375,2.5);       //Quake 2 XP #34F4B6C
 	else if(WP == 19)//WP 17
-		WA_XYZ = float3(0.750,30.0,1.050);     //Quake 4* #ED7B83DE
+		WA_XYZ = float3(0.750,30.0,1.050);     //Quake 4 #ED7B83DE
 	else if(WP == 20)//WP 18
 		WA_XYZ = float3(0,0,0);                //Game
 	else if(WP == 21)//WP 19
-		WA_XYZ = float3(0.450,12.0,23.75);     //Metro Redux Games*
+		WA_XYZ = float3(0.450,12.0,23.75);     //Metro Redux Games #886386A
 	else if(WP == 22)//WP 20
 		WA_XYZ = float3(0,0,0);                //Game
 	else if(WP == 23)//WP 21
-		WA_XYZ = float3(8.6,30,0.0025);        //Turok: DH 2017*
+		WA_XYZ = float3(0,0,0);                //Game
 	else if(WP == 24)//WP 22
-		WA_XYZ = float3(8.275,30.0,0.0025);    //Turok2: SoE 2017*
+		WA_XYZ = float3(0,0,0);                //Game
 	else if(WP == 25)//WP 23
-		WA_XYZ = float3(0,0,0);                //Turok 3: Shadow of Oblivion
+		WA_XYZ = float3(0,0,0);                //Game
 	else if(WP == 26)//WP 24
-		WA_XYZ = float3(0.255,5.5,52.0);       //S.T.A.L.K.E.R: Games*
+		WA_XYZ = float3(0.255,6.375,53.75);     //S.T.A.L.K.E.R: Games #F5C7AA92 #493B5C71
 	else if(WP == 27)//WP 25
 		WA_XYZ = float3(0,0,0);                //Game
 	else if(WP == 28)//WP 26
 		WA_XYZ = float3(0.750,30.0,1.025);     //Prey - 2006* #DE2F0F4D
 	else if(WP == 29)//WP 27
-		WA_XYZ = float3(0.2832,30.0,0.8775);   //Prey 2017 High Settings and <*
+		WA_XYZ = float3(0.2832,13.125,0.8725); //Prey 2017 High Settings and < #36976F6D
 	else if(WP == 30)//WP 28
-		WA_XYZ = float3(0.2832,35,0.91875);    //Prey 2017 Very High*
+		WA_XYZ = float3(0.2832,13.75,0.915625);//Prey 2017 Very High #36976F6D
 	else if(WP == 31)//WP 29
 		WA_XYZ = float3(0.7,9.0,2.3625);       //Return to Castle Wolfenstine #BF757E3A
 	else if(WP == 32)//WP 30
 		WA_XYZ = float3(0.4894,75.0,1.00375);  //Wolfenstein*
 	else if(WP == 33)//WP 31
-		WA_XYZ = float3(1.0,93.75,0.81875);    //Wolfenstein: The New Order* #C770832 / The Old Blood* #3E42619F
+		WA_XYZ = float3(1.0,93.75,0.81875);    //Wolfenstein: The New Order #C770832 / The Old Blood #3E42619F
 	else if(WP == 34)//WP 32
 		WA_XYZ = float3(0,0,0);                //Wolfenstein II: The New Colossus / Cyberpilot
 	else if(WP == 35)//WP 33
 		WA_XYZ = float3(0.278,56.25,9.050);    //Black Mesa*
 	else if(WP == 36)//WP 34
-		WA_XYZ = float3(0.420,4.75,1.0);       //Blood 2* #6D3CD99E
+		WA_XYZ = float3(0.420,4.75,1.0);       //Blood 2 #6D3CD99E
 	else if(WP == 37)//WP 35
-		WA_XYZ = float3(0.500,4.75,0.75);      //Blood 2 Alt*
+		WA_XYZ = float3(0.500,4.75,0.75);      //Blood 2 Alt #6D3CD99E
 	else if(WP == 38)//WP 36
 		WA_XYZ = float3(0.785,21.25,0.3875);   //SOMA*
 	else if(WP == 39)//WP 37
@@ -699,6 +699,10 @@ float2 WeaponDepth(in float2 texcoord : TEXCOORD0)
 	else if(WP == 62)//WP 60
 		WA_XYZ = float3(0,0,0);                //Game
 	//End Weapon Profiles//
+	
+	//Notes for Other games
+	//Turok: DH 2017 #22BA110F ZPD 0.002
+	//Game Turok2: SoE 2017 #5F1DBD3B ZPD 0.002
 	
 	// Here on out is the Weapon Hand Adjustment code.		
 	//Conversions to linear space.....
