@@ -186,6 +186,14 @@ uniform float Offset <
 	ui_category = "Depth Map";
 > = 0.0;
 
+uniform float Menu_Detection <
+	ui_type = "drag";
+	ui_min = 0.0; ui_max = 2.5; ui_step = 0.5;
+	ui_label = " Menu Detection";
+	ui_tooltip = "Use this to dissable/enable in game Menu Detection.";
+	ui_category = "Depth Map";
+> = 1.5;
+
 uniform bool Depth_Map_View <
 	ui_label = " Depth Map View";
 	ui_tooltip = "Display the Depth Map.";
@@ -197,15 +205,6 @@ uniform bool Depth_Map_Flip <
 	ui_tooltip = "Flip the depth map if it is upside down.";
 	ui_category = "Depth Map";
 > = false;
-
-uniform float Menu_Detection <
-	ui_type = "drag";
-	ui_min = 0.0; ui_max = 2.5; ui_step = 0.5;
-	ui_label = " Menu Detection";
-	ui_tooltip = "Use this to dissable/enable in game Menu Detection.";
-	ui_category = "Depth Map";
-> = 1.5;
-
 #if DB_Size_Postion 
 uniform int2 Image_Position_Adjust<
 	ui_type = "drag";
@@ -637,23 +636,23 @@ float2 WeaponDepth(in float2 texcoord : TEXCOORD0)
 	else if(WP == 31)//WP 29
 		WA_XYZ = float3(0.7,9.0,2.3625);       //Return to Castle Wolfenstine #BF757E3A
 	else if(WP == 32)//WP 30
-		WA_XYZ = float3(0.4894,75.0,1.00375);  //Wolfenstein*
+		WA_XYZ = float3(0.4894,62.50,0.98875); //Wolfenstein #30030941
 	else if(WP == 33)//WP 31
 		WA_XYZ = float3(1.0,93.75,0.81875);    //Wolfenstein: The New Order #C770832 / The Old Blood #3E42619F
 	else if(WP == 34)//WP 32
 		WA_XYZ = float3(0,0,0);                //Wolfenstein II: The New Colossus / Cyberpilot
 	else if(WP == 35)//WP 33
-		WA_XYZ = float3(0.278,56.25,9.050);    //Black Mesa*
+		WA_XYZ = float3(0.278,37.50,9.1);      //Black Mesa #6FC1FF71
 	else if(WP == 36)//WP 34
 		WA_XYZ = float3(0.420,4.75,1.0);       //Blood 2 #6D3CD99E
 	else if(WP == 37)//WP 35
 		WA_XYZ = float3(0.500,4.75,0.75);      //Blood 2 Alt #6D3CD99E
 	else if(WP == 38)//WP 36
-		WA_XYZ = float3(0.785,21.25,0.3875);   //SOMA*
+		WA_XYZ = float3(0.785,21.25,0.3875);   //SOMA #F22A9C7D
 	else if(WP == 39)//WP 37
-		WA_XYZ = float3(0.444,20.0,1.1875);    //Cryostasis*
+		WA_XYZ = float3(0.444,20.0,1.1875);    //Cryostasis #6FB6410B
 	else if(WP == 40)//WP 38
-		WA_XYZ = float3(0.286,80.0,7.0);       //Unreal Gold with v227*	
+		WA_XYZ = float3(0.286,80.0,7.0);       //Unreal Gold with v227 #16B8D61A	
 	else if(WP == 41)//WP 39
 		WA_XYZ = float3(0.280,15.5,9.1);       //Serious Sam Revolution #EB9EEB74/Serious Sam HD: The First Encounter /The Second Encounter /Serious Sam 2 #8238E9CA/ Serious Sam 3: BFE* 
 	else if(WP == 42)//WP 40
