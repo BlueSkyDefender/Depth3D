@@ -417,7 +417,7 @@ Must Enable FSAA for depth buffer access.
 Path to Install E:\Steam\SteamApps\common\Homefront_The_Revolution\Bin64
 Works Don't know the settings.
 
-{Hitman: Absolution}
+{Hitman: Absolution} - Used Reshade 3.0.8
 Change the Reflections to Medium. Any higher then this will mess with the Depth Map. Seems like a in game bug.
 
 {Hitman 2016} - Thank you zig11727

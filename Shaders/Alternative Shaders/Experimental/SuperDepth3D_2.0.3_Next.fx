@@ -660,25 +660,25 @@ float2 WeaponDepth(in float2 texcoord : TEXCOORD0)
 	else if(WP == 43)//WP 41
 		WA_XYZ = float3(0,0,0);                //Game
 	else if(WP == 44)//WP 42
-		WA_XYZ = float3(0.277,20.0,8.8);       //TitanFall 2*
+		WA_XYZ = float3(0.277,20.0,8.8);       //TitanFall 2 #308AEBEA
 	else if(WP == 45)//WP 43
-		WA_XYZ = float3(0.7,16.250,0.300);     //Project Warlock*
+		WA_XYZ = float3(0.7,16.250,0.300);     //Project Warlock #5FCFB1E5
 	else if(WP == 46)//WP 44
-		WA_XYZ = float3(0.625,9.0,2.375);      //Kingpin Life of Crime* #7DCCBBBD
+		WA_XYZ = float3(0.625,9.0,2.375);      //Kingpin Life of Crime #7DCCBBBD
 	else if(WP == 47)//WP 45
-		WA_XYZ = float3(0.28,20.0,9.0);        //EuroTruckSim2* #9C5C946E
+		WA_XYZ = float3(0.28,20.0,9.0);        //EuroTruckSim2 #9C5C946E
 	else if(WP == 48)//WP 46
-		WA_XYZ = float3(0.458,10.5,1.105);     //F.E.A.R & F.E.A.R. 2: Project Origin*
+		WA_XYZ = float3(0.458,10.5,1.105);     //F.E.A.R #B302EC7 & F.E.A.R 2: Project Origin #91D9EBAF
 	else if(WP == 49)//WP 47
 		WA_XYZ = float3(0,0,0);                //Game	
 	else if(WP == 50)//WP 48
-		WA_XYZ = float3(2.0,20.0,0.100);       //Immortal Redneck CP alt 1.9375*
+		WA_XYZ = float3(2.0,16.25,0.09);       //Immortal Redneck CP alt 1.9375 #2C742D7C
 	else if(WP == 51)//WP 49
-		WA_XYZ = float3(0.425,25.0,100.0);     //Bioshock Remastred*
+		WA_XYZ = float3(0.425,25.0,100.0);     //Bioshock Remastred
 	else if(WP == 52)//WP 50
-		WA_XYZ = float3(0.489,68.75,1.02);     //NecroVisioN & NecroVisioN: Lost Company*
+		WA_XYZ = float3(0.489,68.75,1.02);     //NecroVisioN & NecroVisioN: Lost Company
 	else if(WP == 53)//WP 51
-		WA_XYZ = float3(1.0,237.5,0.83625);    //Rage64* #AA6B948E
+		WA_XYZ = float3(1.0,237.5,0.83625);    //Rage64 #AA6B948E
 	else if(WP == 54)//WP 52
 		WA_XYZ = float3(0,0,0);                //Game
 	else if(WP == 55)//WP 53
