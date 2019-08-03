@@ -674,7 +674,7 @@ float2 WeaponDepth(in float2 texcoord : TEXCOORD0)
 	else if(WP == 50)//WP 48
 		WA_XYZ = float3(2.0,16.25,0.09);       //Immortal Redneck CP alt 1.9375 #2C742D7C
 	else if(WP == 51)//WP 49
-		WA_XYZ = float3(0.425,25.0,100.0);     //Bioshock Remastred
+		WA_XYZ = float3(0.425,15.0,99.0);      //Bioshock Remastred #44BD41E1
 	else if(WP == 52)//WP 50
 		WA_XYZ = float3(0.489,68.75,1.02);     //NecroVisioN & NecroVisioN: Lost Company
 	else if(WP == 53)//WP 51
