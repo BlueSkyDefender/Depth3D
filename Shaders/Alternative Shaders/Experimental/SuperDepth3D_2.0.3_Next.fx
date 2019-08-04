@@ -3,22 +3,22 @@
  //---------------------////
 
  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
- //* Depth Map Based 3D post-process shader v2.0.3          																														*//
- //* For Reshade 3.0+																																								*//
- //* --------------------------																																						*//
- //* This work is licensed under a Creative Commons Attribution 3.0 Unported License.																								*//
- //* So you are free to share, modify and adapt it for your needs, and even use it for commercial use.																				*//
- //* I would also love to hear about a project you are using it with.																												*//
- //* https://creativecommons.org/licenses/by/3.0/us/																																*//
- //*																																												*//
- //* Jose Negrete AKA BlueSkyDefender																																				*//
- //*																																												*//
- //* http://reshade.me/forum/shader-presentation/2128-sidebyside-3d-depth-map-based-stereoscopic-shader																				*//	
- //* ---------------------------------																																				*//
- //*																																												*//
- //* Original work was based on the shader code from																																*//
- //* CryTech 3 Dev http://www.slideshare.net/TiagoAlexSousa/secrets-of-cryengine-3-graphics-technology																				*//
- //* Also Fu-Bama a shader dev at the reshade forums https://reshade.me/forum/shader-presentation/5104-vr-universal-shader															*//
+ //* Depth Map Based 3D post-process shader v2.0.3          																														
+ //* For Reshade 3.0+																																								
+ //* --------------------------																																					
+ //* This work is licensed under a Creative Commons Attribution 3.0 Unported License.																							
+ //* So you are free to share, modify and adapt it for your needs, and even use it for commercial use.																			
+ //* I would also love to hear about a project you are using it with.																											
+ //* https://creativecommons.org/licenses/by/3.0/us/																																
+ //*																																												
+ //* Jose Negrete AKA BlueSkyDefender																																				
+ //*																																												
+ //* http://reshade.me/forum/shader-presentation/2128-sidebyside-3d-depth-map-based-stereoscopic-shader																				
+ //* ---------------------------------																																			
+ //*																																												
+ //* Original work was based on the shader code from																																
+ //* CryTech 3 Dev http://www.slideshare.net/TiagoAlexSousa/secrets-of-cryengine-3-graphics-technology																				
+ //* Also Fu-Bama a shader dev at the reshade forums https://reshade.me/forum/shader-presentation/5104-vr-universal-shader															
  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 //USER EDITABLE PREPROCESSOR FUNCTIONS START//
@@ -49,7 +49,7 @@
 // Such as the game Naruto Shippuden: Ultimate Ninja, TitanFall 2, and or Unreal Gold 277. That have this issue. This also allows for more advance users
 // Too Make there Own UI MASK if need be.
 // You need to turn this on to use UI Masking options Below.
-#define HUD_MODE 0 // Set this to 1 if basic HUD items are drawn in the depth buffer to be adjustable.
+#define HUD_MODE 1 // Set this to 1 if basic HUD items are drawn in the depth buffer to be adjustable.
 
 // Turn UI Mask Off or On. This is used to set Two UI Masks for any game. Keep this in mind when you enable UI_MASK.
 // You Will have to create Three PNG Textures named Mask_A.png and Mask_B.png with transparency for this option.
@@ -674,7 +674,7 @@ float2 WeaponDepth(in float2 texcoord : TEXCOORD0)
 	else if(WP == 50)//WP 48
 		WA_XYZ = float3(2.0,16.25,0.09);       //Immortal Redneck CP alt 1.9375 #2C742D7C
 	else if(WP == 51)//WP 49
-		WA_XYZ = float3(0.425,15.0,99.0);      //Bioshock Remastred #44BD41E1
+		WA_XYZ = float3(0,0,0);                //Game	
 	else if(WP == 52)//WP 50
 		WA_XYZ = float3(0.489,68.75,1.02);     //NecroVisioN & NecroVisioN: Lost Company
 	else if(WP == 53)//WP 51
@@ -682,9 +682,9 @@ float2 WeaponDepth(in float2 texcoord : TEXCOORD0)
 	else if(WP == 54)//WP 52
 		WA_XYZ = float3(0,0,0);                //Game
 	else if(WP == 55)//WP 53
-		WA_XYZ = float3(0,0,0);                //Game
+		WA_XYZ = float3(0.425,15.0,99.0);      //Bioshock Remastred #44BD41E1
 	else if(WP == 56)//WP 54
-		WA_XYZ = float3(0,0,0);                //Game
+		WA_XYZ = float3(0.425,21.25,99.5);     //Bioshock 2 Remastred #7CF5A01
 	else if(WP == 57)//WP 55
 		WA_XYZ = float3(0,0,0);                //Game
 	else if(WP == 58)//WP 56

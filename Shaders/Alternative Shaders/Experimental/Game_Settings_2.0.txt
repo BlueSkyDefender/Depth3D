@@ -66,7 +66,8 @@ Inner Shader Setting:
               Batman: Arkham City                          DM 0       15.000                                       0.050-0.100
               Beware                                       DM 1       62.500                               Yes     0.100-0.150                       
               BladeStorm Nightmare                         DM ?         ?                                          ?
-    RB       *Bioshock Remastred                           DM 0       7.5000    0.00600     *WDM 49                0.0250-0.0500      Yes 3                 
+    RB       *Bioshock Remastred                           DM 0       7.5000    0.00600     *WDM 53                0.0250-0.0500      Yes 3   
+    RB       *Bioshock 2 Remastred                         DM 0       7.5000    0.00600     *WDM 54                0.0250-0.0500      Yes 3                  
              *Black Mesa                                   DM 0       8.7500                *WDM 33                0.0250-0.0500      Yes 1      
     RB        BloodCM                                      DM 0       15.000                                       0.025-0.250                                     
     RB       *Blood 2                                      DM 0       7.5000                *WDM 34/35             0.0250-0.0500      Yes 3         
