@@ -1,25 +1,25 @@
- ////---------------------//
- ///**SuperDepth3D_Next**///
- //---------------------////
+////---------------------//
+///**SuperDepth3D_Next**///
+//---------------------////
 
- //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
- //* Depth Map Based 3D post-process shader v2.0.3          																														
- //* For Reshade 3.0+																																								
- //* --------------------------																																					
- //* This work is licensed under a Creative Commons Attribution 3.0 Unported License.																							
- //* So you are free to share, modify and adapt it for your needs, and even use it for commercial use.																			
- //* I would also love to hear about a project you are using it with.																											
- //* https://creativecommons.org/licenses/by/3.0/us/																																
- //*																																												
- //* Jose Negrete AKA BlueSkyDefender																																				
- //*																																												
- //* http://reshade.me/forum/shader-presentation/2128-sidebyside-3d-depth-map-based-stereoscopic-shader																				
- //* ---------------------------------																																			
- //*																																												
- //* Original work was based on the shader code from																																
- //* CryTech 3 Dev http://www.slideshare.net/TiagoAlexSousa/secrets-of-cryengine-3-graphics-technology																				
- //* Also Fu-Bama a shader dev at the reshade forums https://reshade.me/forum/shader-presentation/5104-vr-universal-shader															
- //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//* Depth Map Based 3D post-process shader v2.0.3          																														
+//* For Reshade 3.0+																																								
+//* --------------------------																																					
+//* This work is licensed under a Creative Commons Attribution 3.0 Unported License.																							
+//* So you are free to share, modify and adapt it for your needs, and even use it for commercial use.																			
+//* I would also love to hear about a project you are using it with.																											
+//* https://creativecommons.org/licenses/by/3.0/us/																																
+//*																																												
+//* Jose Negrete AKA BlueSkyDefender																																				
+//*																																												
+//* http://reshade.me/forum/shader-presentation/2128-sidebyside-3d-depth-map-based-stereoscopic-shader																				
+//* ---------------------------------																																			
+//*																																												
+//* Original work was based on the shader code from																																
+//* CryTech 3 Dev http://www.slideshare.net/TiagoAlexSousa/secrets-of-cryengine-3-graphics-technology																				
+//* Also Fu-Bama a shader dev at the reshade forums https://reshade.me/forum/shader-presentation/5104-vr-universal-shader															
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 //USER EDITABLE PREPROCESSOR FUNCTIONS START//
 
@@ -49,7 +49,7 @@
 // Such as the game Naruto Shippuden: Ultimate Ninja, TitanFall 2, and or Unreal Gold 277. That have this issue. This also allows for more advance users
 // Too Make there Own UI MASK if need be.
 // You need to turn this on to use UI Masking options Below.
-#define HUD_MODE 1 // Set this to 1 if basic HUD items are drawn in the depth buffer to be adjustable.
+#define HUD_MODE 0 // Set this to 1 if basic HUD items are drawn in the depth buffer to be adjustable.
 
 // Turn UI Mask Off or On. This is used to set Two UI Masks for any game. Keep this in mind when you enable UI_MASK.
 // You Will have to create Three PNG Textures named Mask_A.png and Mask_B.png with transparency for this option.
@@ -77,6 +77,12 @@
 	#define Compatibility 0
 #endif
 
+#if __VENDOR__ == 0x10DE //AMD = 0x1002 //Nv = 0x10DE //Intel = ???
+	#define Ven 1
+#else
+	#define Ven 0
+#endif
+
 //Divergence & Convergence//
 uniform float Divergence <
 	ui_type = "drag";
@@ -98,7 +104,6 @@ uniform float ZPD <
 				"Default is 0.025, Zero is off.";
 	ui_category = "Divergence & Convergence";
 > = 0.025;
-
 #if Balance_Mode
 uniform float ZPD_Balance <
 	ui_type = "drag";
@@ -108,7 +113,8 @@ uniform float ZPD_Balance <
 				"Default is Zero is full Convergence and One is Full Depth.";
 	ui_category = "Divergence & Convergence";
 > = 0.5;
-#define Auto_Balance_Ex 0
+
+static const int Auto_Balance_Ex = 0;
 #else
 uniform int Auto_Balance_Ex <
 	#if Compatibility
@@ -123,7 +129,6 @@ uniform int Auto_Balance_Ex <
 	ui_category = "Divergence & Convergence";
 > = 0;
 #endif
-
 uniform float Auto_Depth_Range <
 	ui_type = "drag";
 	ui_min = 0.0; ui_max = 0.625;
@@ -132,7 +137,6 @@ uniform float Auto_Depth_Range <
 				 "Default is 0.1f, Zero is off.";
 	ui_category = "Divergence & Convergence";
 > = 0.1;
-
 
 uniform int View_Mode <
 	ui_type = "combo";
@@ -293,7 +297,7 @@ uniform float2 Interlace_Anaglyph <
 	             "Default for Interlace Optimization is 0.5 and for Anaglyph Desaturation is One.";
 	ui_category = "Stereoscopic Options";
 > = float2(0.5,1.0);
-
+#if Ven
 uniform int Scaling_Support <
 	ui_type = "combo";
 	ui_items = "SR Native\0SR 2160p A\0SR 2160p B\0SR 1080p A\0SR 1080p B\0SR 1050p A\0SR 1050p B\0SR 720p A\0SR 720p B\0";
@@ -304,7 +308,9 @@ uniform int Scaling_Support <
 				 "Default is SR Native.";
 	ui_category = "Stereoscopic Options";
 > = 0;
-
+#else
+static const int Scaling_Support = 0;
+#endif
 uniform int Perspective <
 	ui_type = "drag";
 	ui_min = -100; ui_max = 100;
@@ -624,7 +630,7 @@ float2 WeaponDepth(in float2 texcoord : TEXCOORD0)
 	else if(WP == 25)//WP 23
 		WA_XYZ = float3(0,0,0);                //Game
 	else if(WP == 26)//WP 24
-		WA_XYZ = float3(0.255,6.375,53.75);     //S.T.A.L.K.E.R: Games #F5C7AA92 #493B5C71
+		WA_XYZ = float3(0.255,6.375,53.75);    //S.T.A.L.K.E.R: Games #F5C7AA92 #493B5C71
 	else if(WP == 27)//WP 25
 		WA_XYZ = float3(0,0,0);                //Game
 	else if(WP == 28)//WP 26
@@ -676,7 +682,7 @@ float2 WeaponDepth(in float2 texcoord : TEXCOORD0)
 	else if(WP == 51)//WP 49
 		WA_XYZ = float3(0,0,0);                //Game	
 	else if(WP == 52)//WP 50
-		WA_XYZ = float3(0.489,68.75,1.02);     //NecroVisioN & NecroVisioN: Lost Company
+		WA_XYZ = float3(0.489,68.75,1.02);     //NecroVisioN & NecroVisioN: Lost Company #663E66FE 
 	else if(WP == 53)//WP 51
 		WA_XYZ = float3(1.0,237.5,0.83625);    //Rage64 #AA6B948E
 	else if(WP == 54)//WP 52
@@ -698,11 +704,7 @@ float2 WeaponDepth(in float2 texcoord : TEXCOORD0)
 	else if(WP == 62)//WP 60
 		WA_XYZ = float3(0,0,0);                //Game
 	//End Weapon Profiles//
-	
-	//Notes for Other games
-	//Turok: DH 2017 #22BA110F ZPD 0.002
-	//Game Turok2: SoE 2017 #5F1DBD3B ZPD 0.002
-	
+		
 	// Here on out is the Weapon Hand Adjustment code.		
 	//Conversions to linear space.....
 	//Near & Far Adjustment
@@ -984,7 +986,7 @@ float4 PS_calcLR(float2 texcoord)
 	{
 	float2 gridxy;
 
-	[branch] if(Scaling_Support == 0)
+	if(Scaling_Support == 0)
 		gridxy = floor(float2(TexCoords.x * BUFFER_WIDTH, TexCoords.y * BUFFER_HEIGHT)); //Native
 	else if(Scaling_Support == 1)
 		gridxy = floor(float2(TexCoords.x * 3840.0, TexCoords.y * 2160.0));	
@@ -1308,7 +1310,7 @@ technique Cross_Cursor_Next
 {			
 		pass Cursor
 	{
-			VertexShader = PostProcessVS;
+		VertexShader = PostProcessVS;
 		PixelShader = MouseCursor;
 	}	
 }
