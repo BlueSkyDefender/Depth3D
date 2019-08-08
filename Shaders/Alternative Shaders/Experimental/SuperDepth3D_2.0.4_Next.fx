@@ -20,7 +20,13 @@
 //* CryTech 3 Dev http://www.slideshare.net/TiagoAlexSousa/secrets-of-cryengine-3-graphics-technology																				
 //* Also Fu-Bama a shader dev at the reshade forums https://reshade.me/forum/shader-presentation/5104-vr-universal-shader															
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
+//Overwatch Intercepter//	
+#if exists "Overwatch.fxh"
+	#include "Overwatch.fxh"
+#else  // ZPD[0][0] | Depth_Adjust[0][1] | Offset[0][2] | Depth_Linearization[0][3] ---- // Depth_Flip[1][0] | Null[1][1] | Null[1][2] | Weapon_Hand[1][3] 
+		static const float4x4 SD3D_D = float4x4( float4(0.025,7.5,0.0,0.0), float4(0,0,0,0.0), float4(0.0,0.5,0,0), float4(1,1,0.0,0.0) );
+	#define HM 0		
+#endif //HUDX[2][0] | HUDY[2][1] | Null[2][2] | Null[2][3] ---- // HV_X[3][0] | HV_X[3][1] | DepthPX[3][2] | DepthPY[3][3]
 //USER EDITABLE PREPROCESSOR FUNCTIONS START//
 
 // Zero Parallax Distance Balance Mode allows you to switch control from manual to automatic and vice versa.
@@ -103,7 +109,7 @@ uniform float ZPD <
 				"This is controled by Convergence Mode.\n"
 				"Default is 0.025, Zero is off.";
 	ui_category = "Divergence & Convergence";
-> = 0.025;
+> = SD3D_D[0][0];
 #if Balance_Mode
 uniform float ZPD_Balance <
 	ui_type = "drag";
@@ -167,7 +173,7 @@ uniform int Depth_Map <
 	ui_tooltip = "Linearization for the zBuffer also known as Depth Map.\n"
 			     "DM0 is Z-Normal and DM1 is Z-Reversed.\n";
 	ui_category = "Depth Map";
-> = 0;
+> = SD3D_D[0][3];
 
 uniform float Depth_Map_Adjust <
 	ui_type = "drag";
@@ -177,7 +183,7 @@ uniform float Depth_Map_Adjust <
 				 "Adjust this to keep it as low as possible.\n"
 				 "Default is 7.5";
 	ui_category = "Depth Map";
-> = 7.5;
+> = SD3D_D[0][1];
 
 uniform float Offset <
 	ui_type = "drag";
@@ -188,7 +194,7 @@ uniform float Offset <
 				 "Use this to make adjustments to DM 0 or DM 1.\n"
 				 "Default and starts at Zero and it's Off.";
 	ui_category = "Depth Map";
-> = 0.0;
+> = SD3D_D[0][2];
 
 uniform float Menu_Detection <
 	ui_type = "drag";
@@ -208,7 +214,7 @@ uniform bool Depth_Map_Flip <
 	ui_label = " Depth Map Flip";
 	ui_tooltip = "Flip the depth map if it is upside down.";
 	ui_category = "Depth Map";
-> = false;
+> = SD3D_D[1][0];
 #if DB_Size_Postion 
 uniform int2 Image_Position_Adjust<
 	ui_type = "drag";
@@ -216,7 +222,7 @@ uniform int2 Image_Position_Adjust<
 	ui_label = "Z Position Adjust";
 	ui_tooltip = "Adjust the Image Postion if it's off by a bit. Default is Zero.";
 	ui_category = "Depth Map";
-> = int2(0.0,0.0);
+> = int2(SD3D_D[3][2],SD3D_D[3][3]);
 	
 uniform float2 Horizontal_and_Vertical <
 	ui_type = "drag";
@@ -224,7 +230,7 @@ uniform float2 Horizontal_and_Vertical <
 	ui_label = "Z Horizontal & Vertical";
 	ui_tooltip = "Adjust Horizontal and Vertical Resize. Default is 1.0.";
 	ui_category = "Depth Map";
-> = float2(1.0,1.0);
+> = float2(SD3D_D[3][0],SD3D_D[3][1]);
 #endif
 //Weapon Hand Adjust//
 uniform int WP <
@@ -233,7 +239,7 @@ uniform int WP <
 	ui_label = "·Weapon Profiles·";
 	ui_tooltip = "Pick Weapon Profile for your game or make your own.";
 	ui_category = "Weapon Hand Adjust";
-> = 0;
+> = SD3D_D[1][3];
 
 uniform float3 Weapon_Adjust <
 	ui_type = "drag";
@@ -265,7 +271,7 @@ uniform int FPSDFIO <
 				 "This may induce Eye Strain so take this as an Warning.";
 	ui_category = "Weapon Hand Adjust";
 > = 0;
-#if HUD_MODE
+#if HUD_MODE || HM
 //Heads-Up Display
 uniform float2 HUD_Adjust <
 	ui_type = "drag";
@@ -277,7 +283,7 @@ uniform float2 HUD_Adjust <
 				 "This is only for UI elements that show up in the Depth Buffer.\n"
 	             "Default is float2(X 0.0, Y 0.5)";
 	ui_category = "Heads-Up Display";
-> = float2(0.0,0.5);
+> = float2(SD3D_D[2][0],SD3D_D[2][1]);
 #endif
 //Stereoscopic Options//
 uniform int Stereoscopic_Mode <
@@ -634,7 +640,7 @@ float2 WeaponDepth(in float2 texcoord : TEXCOORD0)
 	else if(WP == 27)//WP 25
 		WA_XYZ = float3(0,0,0);                //Game
 	else if(WP == 28)//WP 26
-		WA_XYZ = float3(0.750,30.0,1.025);     //Prey - 2006* #DE2F0F4D
+		WA_XYZ = float3(0.750,30.0,1.025);     //Prey 2006 #DE2F0F4D
 	else if(WP == 29)//WP 27
 		WA_XYZ = float3(0.2832,13.125,0.8725); //Prey 2017 High Settings and < #36976F6D
 	else if(WP == 30)//WP 28
@@ -750,7 +756,7 @@ float4 DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0
 		
 	return saturate(float4(R,G,B,A));
 }
-#if HUD_MODE
+#if HUD_MODE || HM
 float4 HUD(float4 HUD, float2 texcoord ) 
 {		
 	float Mask_Tex, CutOFFCal = ((HUD_Adjust.x * 0.5)/DMA()) * 0.5, COC = step(Depth(texcoord).x,CutOFFCal); //HUD Cutoff Calculation
@@ -977,7 +983,7 @@ float4 PS_calcLR(float2 texcoord)
 	//	Left = EdgeMask(-Divergence,Left,TCL);
 	//	Right = EdgeMask(Divergence,Right,TCR);
 	//}
-	#if HUD_MODE	
+	#if HUD_MODE || HM	
 	float HUD_Adjustment = ((0.5 - HUD_Adjust.y)*25.) * pix.x;
 	Left = HUD(Left,float2(TCL.x - HUD_Adjustment,TCL.y));
 	Right = HUD(Right,float2(TCR.x + HUD_Adjustment,TCR.y));
