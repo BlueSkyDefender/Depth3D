@@ -17,8 +17,8 @@
 	
 //SuperDepth3D Defaults
 static const float ZPD_D = 0.025;
-static const float Depth_Adjust = 7.5;
-static const float Offset = 0.0;
+static const float Depth_Adjust_D = 7.5;
+static const float Offset_D = 0.0;
 static const int Depth_Linearization = 0;
 static const int Depth_Flip = 0;
 static const float Null_A = 0.0;
@@ -202,10 +202,10 @@ static const float DepthPY = 0.0;
     #define DA_X ZPD_D
 #endif
 #ifndef DA_Y
-    #define DA_Y Depth_Adjust
+    #define DA_Y Depth_Adjust_D
 #endif
 #ifndef DA_Z
-    #define DA_Z Offset
+    #define DA_Z Offset_D
 #endif
 #ifndef DA_W
     #define DA_W Depth_Linearization
@@ -249,5 +249,3 @@ static const float DepthPY = 0.0;
 #ifndef DD_W
     #define DD_W DepthPY
 #endif
-
-static const float4x4 SD3D_D = float4x4( float4(DA_X,DA_Y,DA_Z,DA_W), float4(DB_X,DB_Y,DB_Z,DB_W), float4(DC_X,DC_Y,DC_Z,DC_W), float4(DD_X,DD_Y,DD_Z,DD_W) );

@@ -1,55 +1,81 @@
- ////-------------------//
- ///**SuperDepth3D_VR**///
- //-------------------////
+////-------------------//
+///**SuperDepth3D_VR**///
+//-------------------////
 
- //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
- //* Depth Map Based 3D post-process shader v2.0.2          																														*//
- //* For Reshade 3.0+																																								*//
- //* --------------------------																																						*//
- //* This work is licensed under a Creative Commons Attribution 3.0 Unported License.																								*//
- //* So you are free to share, modify and adapt it for your needs, and even use it for commercial use.																				*//
- //* I would also love to hear about a project you are using it with.																												*//
- //* https://creativecommons.org/licenses/by/3.0/us/																																*//
- //*																																												*//
- //* Jose Negrete AKA BlueSkyDefender																																				*//
- //*																																												*//
- //* http://reshade.me/forum/shader-presentation/2128-sidebyside-3d-depth-map-based-stereoscopic-shader																				*//	
- //* ---------------------------------																																				*//
- //*																																												*//
- //* Original work was based on the shader code from																																*//
- //* CryTech 3 Dev http://www.slideshare.net/TiagoAlexSousa/secrets-of-cryengine-3-graphics-technology																				*//
- //* Also Fu-Bama a shader dev at the reshade forums https://reshade.me/forum/shader-presentation/5104-vr-universal-shader															*//
- //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//* Depth Map Based 3D post-process shader v2.0.3          																														
+//* For Reshade 3.0+																																								
+//* --------------------------																																					
+//* This work is licensed under a Creative Commons Attribution 3.0 Unported License.																							
+//* So you are free to share, modify and adapt it for your needs, and even use it for commercial use.																			
+//* I would also love to hear about a project you are using it with.																											
+//* https://creativecommons.org/licenses/by/3.0/us/																																
+//*																																												
+//* Jose Negrete AKA BlueSkyDefender																																				
+//*																																												
+//* http://reshade.me/forum/shader-presentation/2128-sidebyside-3d-depth-map-based-stereoscopic-shader																				
+//* ---------------------------------																																			
+//*																																												
+//* Original work was based on the shader code from																																
+//* CryTech 3 Dev http://www.slideshare.net/TiagoAlexSousa/secrets-of-cryengine-3-graphics-technology																				
+//* Also Fu-Bama a shader dev at the reshade forums https://reshade.me/forum/shader-presentation/5104-vr-universal-shader															
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+#if exists "Overwatch.fxh"                                           //Overwatch Intercepter//	
+	#include "Overwatch.fxh"
+#else //DA_X ZPD | DA_Y Depth_Adjust | DA_Z Offset | DA_W Depth_Linearization | DB_X Depth_Flip | DB_Y Null | DB_Z Null | DB_W Weapon_Hand | DC_X HUDX | DC_Y HUDY | DC_Z Null | DC_W Null | DD_X HV_X | DD_Y HV_Y | DD_Z DepthPX | DD_W DepthPY
+	static const float DA_X = 0.025, DA_Y = 7.5, DA_Z = 0.0, DA_W = 0.0, DB_X = 0, DB_Y = 0, DB_Z = 0, DB_W = 0.0, DC_X =0.0, DC_Y = 0.5, DC_Z = 0, DC_W = 0, DD_X = 1,DD_Y = 1, DD_Z = 0.0, DD_W = 0.0;
+	#define HM 0		
+#endif
 //USER EDITABLE PREPROCESSOR FUNCTIONS START//
 
-// Determines The resolution of the Depth Map. For 4k Use 0.75 or 0.5. For 1440p Use 0.75. For 1080p use 1. Too low of a resolution will remove too much detail.
-#define Depth_Map_Division 1.0
-
 //Weapon Zero Parallax Distance
-#define WZPD 0.375 //WZPD controls the focus distance for the screen Pop-out effect also known as Convergence for the weapon hand. Zero is off.
+#define WZPD 0.03 //WZPD controls the focus distance for the screen Pop-out effect also known as Convergence for the weapon hand. Zero is off.
+
+// Zero Parallax Distance Balance Mode allows you to switch control from manual to automatic and vice versa.
+#define Balance_Mode 0 //Default 0 is Automatic. One is Manual.
 
 // RE Fix is used to fix the issue with Resident Evil's 2 Remake 1-Shot cutscenes.
 #define RE_Fix 0 //Default 0 is Off. One is On. 
 
-//Depth Buffer Offset is for non conforming ZBuffer needed in some games.
-#define Offset 0.0 // From 0 to 1 : Depth Map Offset is for non conforming ZBuffer.
+// Alternet Depth Buffer Adjust Toggle Key. The Key Code for "o" is Number 79.
+#define DB_TOGGLE 0 // You can use http://keycode.info/ to figure out what key is what.
+#define Alt_Depth_Map_Adjust 0 // You can set this from 1.0 to 250.
 
 // Change the Cancel Depth Key. Determines the Cancel Depth Toggle Key useing keycode info
-// The Key Code for Decimal Point is Number 110. Ex. for "." Cancel_Depth_Key 110
+// The Key Code for Decimal Point is Number 110. Ex. for Numpad Decimal "." Cancel_Depth_Key 110
 #define Cancel_Depth_Key 0 // You can use http://keycode.info/ to figure out what key is what.
 
-// Use Depth Tool to adjust the lower preprocessor definitions below.
 // Horizontal & Vertical Depth Buffer Resize for non conforming BackBuffer.
+// Also used to enable Image Position Adjust is used to move the Z-Buffer around.
 // Ex. Resident Evil 7 Has this problem. So you want to adjust it too around float2(0.9575,0.9575).
-#define Horizontal_and_Vertical float2(1.0, 1.0) // 1.0 is Default.
-
-// Image Position Adjust is used to move the Z-Buffer around.
-#define Image_Position_Adjust float2(0.0,0.0)
+#define DB_Size_Postion 0 //Default 0 is Off. One is On. 
 
 // Define Display aspect ratio for screen cursor. A 16:9 aspect ratio will equal (1.77:1)
 #define DAR float2(1.76, 1.0)
 
+// HUD Mode is for Extra UI MASK and Basic HUD Adjustments. This is usefull for UI elements that are drawn in the Depth Buffer.
+// Such as the game Naruto Shippuden: Ultimate Ninja, TitanFall 2, and or Unreal Gold 277. That have this issue. This also allows for more advance users
+// Too Make there Own UI MASK if need be.
+// You need to turn this on to use UI Masking options Below.
+#define HUD_MODE 0 // Set this to 1 if basic HUD items are drawn in the depth buffer to be adjustable.
+
+// Turn UI Mask Off or On. This is used to set Two UI Masks for any game. Keep this in mind when you enable UI_MASK.
+// You Will have to create Three PNG Textures named Mask_A.png and Mask_B.png with transparency for this option.
+// They will also need to be the same resolution as what you have set for the game and the color black where the UI is.
+#define UI_MASK 0 // Set this to 1 if you did the steps above.
+
+// To cycle through the textures set a Key. The Key Code for "n" is Key Code Number 78.
+#define Mask_Cycle_Key 0 // You can use http://keycode.info/ to figure out what key is what.
+// Texture EX. Before |::::::::::| After |**********|
+//                    |:::       |       |***       |
+//                    |:::_______|       |***_______|
+// So :::: are UI Elements in game. The *** is what the Mask needs to cover up.
+// The game part needs to be trasparent and the UI part needs to be black.
+
+// The Key Code for the mouse is 0-4 key 1 is right mouse button.
+#define Fade_Key 1 // You can use http://keycode.info/ to figure out what key is what.
+#define Fade_Time_Adjust 0.5625 // From 0 to 1 is the Fade Time adjust for this mode. Default is 0.5625;
+#define Eye_Fade_Reduction 0 // From 0 to 2 Default is both eyes Depth reduction. One is Right Eye only Two is Left Eye Only
 //USER EDITABLE PREPROCESSOR FUNCTIONS END//
 
 #if !defined(__RESHADE__) || __RESHADE__ < 40000
@@ -89,10 +115,37 @@ uniform float ZPD <
 	ui_tooltip = "ZPD controls the focus distance for the screen Pop-out effect also known as Convergence.\n"
 				"For FPS Games keeps this low Since you don't want your gun to pop out of screen.\n"
 				"This is controled by Convergence Mode.\n"
-				"Default is 0.03, Zero is off.";
+				"Default is 0.025, Zero is off.";
 	ui_category = "Divergence & Convergence";
-> = 0.03;
+> = DA_X;
 
+uniform float Auto_Depth_Range <
+	ui_type = "drag";
+	ui_min = 0.0; ui_max = 0.625;
+	ui_label = " Auto Depth Range";
+	ui_tooltip = "The Map Automaticly scales to outdoor and indoor areas.\n" 
+				 "Default is 0.1f, Zero is off.";
+	ui_category = "Divergence & Convergence";
+> = 0.1;
+#if Balance_Mode
+uniform float ZPD_Balance <
+	ui_type = "drag";
+	ui_min = 0.0; ui_max = 1.0;
+	ui_label = " ZPD Balance";
+	ui_tooltip = "Zero Parallax Distance balances between ZPD Depth and Scene Depth.\n"
+				"Default is Zero is full Convergence and One is Full Depth.";
+	ui_category = "Divergence & Convergence";
+> = 0.5;
+
+static const int Auto_Balance = 0;
+#else
+uniform bool Auto_Balance <
+	ui_label = " Auto Balance";
+	ui_tooltip = "Automatically Balance between ZPD Depth and Scene Depth.\n" 
+				 "Default is Off.";
+	ui_category = "Divergence & Convergence";
+> = false;
+#endif
 //Occlusion Masking//
 uniform int View_Mode <
 	ui_type = "combo";
@@ -109,7 +162,6 @@ uniform bool Performance_Mode <
 				 "Default is True.";
 	ui_category = "Occlusion Masking";
 > = true;
-
 //Depth Map//
 uniform int Depth_Map <
 	ui_type = "combo";
@@ -118,7 +170,7 @@ uniform int Depth_Map <
 	ui_tooltip = "Linearization for the zBuffer also known as Depth Map.\n"
 			     "DM0 is Z-Normal and DM1 is Z-Reversed.\n";
 	ui_category = "Depth Map";
-> = 0;
+> = DA_W;
 
 uniform float Depth_Map_Adjust <
 	ui_type = "drag";
@@ -128,7 +180,26 @@ uniform float Depth_Map_Adjust <
 				 "Adjust this to keep it as low as possible.\n"
 				 "Default is 7.5";
 	ui_category = "Depth Map";
-> = 7.5;
+> = DA_Y;
+
+uniform float Offset <
+	ui_type = "drag";
+	ui_min = 0.0; ui_max = 1.0;
+	ui_label = " Depth Map Offset";
+	ui_tooltip = "Depth Map Offset is for non conforming ZBuffer.\n"
+				 "It,s rare if you need to use this in any game.\n"
+				 "Use this to make adjustments to DM 0 or DM 1.\n"
+				 "Default and starts at Zero and it's Off.";
+	ui_category = "Depth Map";
+> = DA_Z;
+
+uniform float Menu_Detection <
+	ui_type = "drag";
+	ui_min = 0.0; ui_max = 2.5; ui_step = 0.5;
+	ui_label = " Menu Detection";
+	ui_tooltip = "Use this to dissable/enable in game Menu Detection.";
+	ui_category = "Depth Map";
+> = 1.5;
 
 uniform bool Depth_Map_View <
 	ui_label = " Depth Map View";
@@ -140,26 +211,67 @@ uniform bool Depth_Map_Flip <
 	ui_label = " Depth Map Flip";
 	ui_tooltip = "Flip the depth map if it is upside down.";
 	ui_category = "Depth Map";
-> = false;
-
+> = DB_X;
+#if DB_Size_Postion 
+uniform int2 Image_Position_Adjust<
+	ui_type = "drag";
+	ui_min = -4096.0; ui_max = 4096.0;
+	ui_label = "Z Position Adjust";
+	ui_tooltip = "Adjust the Image Postion if it's off by a bit. Default is Zero.";
+	ui_category = "Depth Map";
+> = int2(DD_Z,DD_W);
+	
+uniform float2 Horizontal_and_Vertical <
+	ui_type = "drag";
+	ui_min = 0.125; ui_max = 2;
+	ui_label = "Z Horizontal & Vertical";
+	ui_tooltip = "Adjust Horizontal and Vertical Resize. Default is 1.0.";
+	ui_category = "Depth Map";
+> = float2(DD_X,DD_Y);
+#endif
 //Weapon Hand Adjust//
 uniform int WP <
 	ui_type = "combo";
-	ui_items = "Weapon Profile Off\0Pick Profiles Bellow\0WP 0\0WP 1\0WP 2\0WP 3\0WP 4\0WP 5\0WP 6\0WP 7\0WP 8\0WP 9\0WP 10\0WP 11\0WP 12\0WP 13\0WP 14\0WP 15\0WP 16\0WP 17\0WP 18\0WP 19\0WP 20\0WP 21\0WP 22\0WP 23\0WP 24\0WP 25\0WP 26\0WP 27\0WP 28\0WP 29\0WP 30\0WP 31\0WP 32\0WP 33\0WP 34\0WP 35\0WP 36\0WP 37\0WP 38\0WP 39\0WP 40\0WP 41\0WP 42\0WP 43\0WP 44\0WP 45\0WP 46\0WP 47\0WP 48\0WP 49\0WP 50\0";
+	ui_items = "Weapon Profile Off\0Custom WP\0WP 0\0WP 1\0WP 2\0WP 3\0WP 4\0WP 5\0WP 6\0WP 7\0WP 8\0WP 9\0WP 10\0WP 11\0WP 12\0WP 13\0WP 14\0WP 15\0WP 16\0WP 17\0WP 18\0WP 19\0WP 20\0WP 21\0WP 22\0WP 23\0WP 24\0WP 25\0WP 26\0WP 27\0WP 28\0WP 29\0WP 30\0WP 31\0WP 32\0WP 33\0WP 34\0WP 35\0WP 36\0WP 37\0WP 38\0WP 39\0WP 40\0WP 41\0WP 42\0WP 43\0WP 44\0WP 45\0WP 46\0WP 47\0WP 48\0WP 49\0WP 50\0WP 51\0WP 52\0WP 53\0WP 54\0WP 55\0WP 56\0WP 57\0WP 58\0WP 59\0WP 60\0";
 	ui_label = "·Weapon Profiles·";
 	ui_tooltip = "Pick Weapon Profile for your game or make your own.";
 	ui_category = "Weapon Hand Adjust";
-> = 0;
+> = DB_W;
 
-uniform float Weapon_Depth_Adjust <
+uniform float3 Weapon_Adjust <
 	ui_type = "drag";
-	ui_min = -100.0; ui_max = 100.0; ui_step = 0.25;
-	ui_label = " Weapon Depth Adjustment";
-	ui_tooltip = "Pushes or Pulls the FPS Hand in or out of the screen if a weapon profile is selected.\n"
-				 "This also used to fine tune the Weapon Hand if creating a weapon profile.\n" 
-				 "Default is Zero.";
+	ui_min = 0.0; ui_max = 250.0;
+	ui_label = " Weapon Hand Adjust";
+	ui_tooltip = "Adjust Weapon depth map for your games.\n"
+				 "X, CutOff Point used to set a diffrent scale for first person hand apart from world scale.\n"
+				 "Y, Precision is used to adjust the first person hand in world scale.\n"
+	             "Default is float2(X 0.0, Y 0.0, Z 0.0)";
+	ui_category = "Weapon Hand Adjust";
+> = float3(0.0,0.0,0.0);
+
+uniform int FPSDFIO <
+	ui_type = "combo";
+	ui_items = "Off\0Press\0Hold Down\0";
+	ui_label = " FPS Focus Depth";
+	ui_tooltip = "This lets the shader handle real time depth reduction for aiming down your sights.\n"
+				 "This may induce Eye Strain so take this as an Warning.";
 	ui_category = "Weapon Hand Adjust";
 > = 0;
+
+#if HUD_MODE || HM
+//Heads-Up Display
+uniform float2 HUD_Adjust <
+	ui_type = "drag";
+	ui_min = 0.0; ui_max = 1.0;
+	ui_label = "·HUD Mode·";
+	ui_tooltip = "Adjust HUD for your games.\n"
+				 "X, CutOff Point used to set a seperation point bettwen world scale and the HUD also used to turn HUD MODE On or Off.\n"
+				 "Y, Pushes or Pulls the HUD in or out of the screen if HUD MODE is on.\n"
+				 "This is only for UI elements that show up in the Depth Buffer.\n"
+	             "Default is float2(X 0.0, Y 0.5)";
+	ui_category = "Heads-Up Display";
+> = float2(DC_X,DC_Y);
+#endif
 
 uniform int Barrel_Distortion <
 	ui_type = "combo";
@@ -236,22 +348,11 @@ uniform float Sharpen_Power <
 	#endif
 	ui_min = 0.0; ui_max = 2.0;
 	ui_label = " Sharpen Power";
-	ui_tooltip = "Adjust this on clear up the image the game, movie piture & ect.";
+	ui_tooltip = "Adjust this on clear up the image the game, movie piture & ect.\n"
+				 "This has basic contrast awareness and it will try too\n"
+				 "not shapren High Contrast areas in image.";
 	ui_category = "Image Effects";
 > = 0;
-
-uniform float Contrast_Aware <
-	#if Compatibility
-	ui_type = "drag";
-	#else
-	ui_type = "slider";
-	#endif
-	ui_min = 0; ui_max = 2.0; ui_step = 0.125;
-	ui_label = " Contrast Aware";
-	ui_tooltip = "This is used to adjust contrast awareness or to turn it off.\n"
-				 "It will not shapren High Contrast areas in image.";
-	ui_category = "Image Effects";
-> = 0.5;
 
 uniform float Saturation <
 	#if Compatibility
@@ -292,7 +393,10 @@ uniform bool SCSC <
 	ui_tooltip = "Screen Cursor to Screen Crosshair Lock.";
 	ui_category = "Cursor Adjustments";
 > = false;
-uniform bool Cancel_Depth < source = "key"; keycode = Cancel_Depth_Key; toggle = true; >;
+
+uniform bool Cancel_Depth < source = "key"; keycode = Cancel_Depth_Key; toggle = true; mode = "toggle";>;
+uniform bool Mask_Cycle < source = "key"; keycode = Mask_Cycle_Key; toggle = true; >;
+uniform bool Depth_Adjust < source = "key"; keycode = DB_TOGGLE; toggle = true; >;
 /////////////////////////////////////////////D3D Starts Here/////////////////////////////////////////////////////////////////
 #define pix float2(BUFFER_RCP_WIDTH, BUFFER_RCP_HEIGHT)
 
@@ -324,7 +428,7 @@ sampler BackBufferBORDER
 		AddressW = BORDER;
 	};
 	
-texture texDMVR  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT*Depth_Map_Division; Format = RGBA16F; }; 
+texture texDMVR  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT*0.75; Format = RGBA16F; }; 
 
 sampler SamplerDMVR
 	{
@@ -421,33 +525,48 @@ float4 MouseCursor(float4 position : SV_Position, float2 texcoord : TEXCOORD) : 
 	
 	return Out;
 }
-
 /////////////////////////////////////////////////////////////////////////////////Adapted Luminance/////////////////////////////////////////////////////////////////////////////////
-texture texLumVR {Width = 256*0.5; Height = 256*0.5; Format = RGBA8; MipLevels = 8;}; //Sample at 256x256/2 and a mip bias of 8 should be 1x1 
+texture texLumVR {Width = 256*0.5; Height = 256*0.5; Format = RGBA16F; MipLevels = 8;}; //Sample at 256x256/2 and a mip bias of 8 should be 1x1 
 																				
 sampler SamplerLumVR																
 	{
 		Texture = texLumVR;
-		MipLODBias = 8.0f; //Luminance adapted luminance value from 1x1 Texture Mip lvl of 8
 		MinFilter = LINEAR;
 		MagFilter = LINEAR;
 		MipFilter = LINEAR;
 	};	
 	
-float Lum(in float2 texcoord : TEXCOORD0)
+float2 Lum(in float2 texcoord : TEXCOORD0)
 	{
-		float Luminance = tex2Dlod(SamplerLumVR,float4(texcoord,0,0)).x; //Average Luminance Texture Sample 
+		float2 Luminance = tex2Dlod(SamplerLumVR,float4(texcoord,0,11)).xy; //Average Luminance Texture Sample 
 
 		return saturate(Luminance);
 	}
-		
+	
+uniform float frametime < source = "frametime";>;
+/////////////////////////////////////////////////////////////////////////////////Fade In and Out Toggle/////////////////////////////////////////////////////////////////////////////////	
+uniform bool Trigger_Fade_A < source = "mousebutton"; keycode = Fade_Key; toggle = true; mode = "toggle";>;
+uniform bool Trigger_Fade_B < source = "mousebutton"; keycode = Fade_Key;>;
+
+float Fade_in_out(float2 texcoord : TEXCOORD)	
+{
+	float Trigger_Fade, AA = (1-Fade_Time_Adjust)*1000, PStoredfade = tex2D(SamplerLumVR,texcoord).z;
+	//Fade in toggle. 
+	if(FPSDFIO == 1)
+		Trigger_Fade = Trigger_Fade_A;
+	else if(FPSDFIO == 2)
+		Trigger_Fade = Trigger_Fade_B;
+	
+	return PStoredfade + (Trigger_Fade - PStoredfade) * (1.0 - exp(-frametime/AA)); ///exp2 would be even slower  	
+}	
 /////////////////////////////////////////////////////////////////////////////////Depth Map Information/////////////////////////////////////////////////////////////////////////////////
 float Depth(in float2 texcoord : TEXCOORD0)
 {	
+	#if DB_Size_Postion
 	float2 texXY = texcoord + Image_Position_Adjust * pix;		
 	float2 midHV = (Horizontal_and_Vertical-1) * float2(BUFFER_WIDTH * 0.5,BUFFER_HEIGHT * 0.5) * pix;			
 	texcoord = float2((texXY.x*Horizontal_and_Vertical.x)-midHV.x,(texXY.y*Horizontal_and_Vertical.y)-midHV.y);	
-	
+	#endif
 	if (Depth_Map_Flip)
 		texcoord.y =  1 - texcoord.y;
 		
@@ -455,293 +574,300 @@ float Depth(in float2 texcoord : TEXCOORD0)
 	
 	//Conversions to linear space.....
 	//Near & Far Adjustment
-	float Far = 1.0, Near = 0.125/Depth_Map_Adjust; //Division Depth Map Adjust - Near
+	float Far = 1., Near = 0.125/Depth_Map_Adjust;  //Division Depth Map Adjust - Near
 	
 	float2 Offsets = float2(1 + Offset,1 - Offset), Z = float2( zBuffer, 1-zBuffer );
 	
 	if (Offset > 0)
-	Z = min( 1, float2( Z.x*Offsets.x , Z.y /  Offsets.y  ));
+	Z = min( 1, float2( Z.x * Offsets.x , Z.y / Offsets.y  ));
 
-	if (Depth_Map == 0)//DM0. Normal
+	[branch] if (Depth_Map == 0)//DM0. Normal
 		zBuffer = Far * Near / (Far + Z.x * (Near - Far));		
 	else if (Depth_Map == 1)//DM1. Reverse
-		zBuffer = Far * Near / (Far + Z.y * (Near - Far));		
+		zBuffer = Far * Near / (Far + Z.y * (Near - Far));
 		
 	return zBuffer;
 }
 
 float2 WeaponDepth(in float2 texcoord : TEXCOORD0)
 {
+	#if DB_Size_Postion
 	float2 texXY = texcoord + Image_Position_Adjust * pix;		
 	float2 midHV = (Horizontal_and_Vertical-1) * float2(BUFFER_WIDTH * 0.5,BUFFER_HEIGHT * 0.5) * pix;			
 	texcoord = float2((texXY.x*Horizontal_and_Vertical.x)-midHV.x,(texXY.y*Horizontal_and_Vertical.y)-midHV.y);	
-		
-		if (Depth_Map_Flip)
+	#endif	
+	
+	if (Depth_Map_Flip)
 		texcoord.y =  1 - texcoord.y;
-		
-	float zBufferWH = tex2D(DepthBuffer, texcoord).x, CutOff = 0 , Adjust = 0, Tune = 0, Scale = 0;
+
+	float zBufferWH = tex2D(DepthBuffer, texcoord).x, CutOff = Weapon_Adjust.x , Adjust = Weapon_Adjust.y, Tune = Weapon_Adjust.z;
 	
-	float4 WA_XYZW;//Weapon Profiles Starts Here
-	if (WP == 1)                                   // WA_XYZW.x | WA_XYZW.y | WA_XYZW.z | WA_XYZW.w 
-		WA_XYZW = float4(CutOff,Adjust,Tune,Scale);// X Cutoff  | Y Adjust  | Z Tuneing | W Scaling 		
+	float3 WA_XYZ;//Weapon Profiles Starts Here
+	[branch] if (WP == 1)                   // WA_XYZ.x | WA_XYZ.y | WA_XYZ.z 
+		WA_XYZ = float3(CutOff,Adjust,Tune);// X Cutoff | Y Adjust | Z Tuneing 		
 	else if(WP == 2) //WP 0
-		WA_XYZW = float4(0.425,0.025,0,-2);        //ES: Oblivion		
+		WA_XYZ = float3(0.425,5.0,1.125);     //ES: Oblivion #C753DADB		
 	else if(WP == 3) //WP 1
-		WA_XYZW = float4(0,0,0,0);                 //Game
+		WA_XYZ = float3(0,0,0);                //Game
 	else if(WP == 4) //WP 2
-		WA_XYZW = float4(0.625,1.250,3.75,0);      //BorderLands 2*	
+		WA_XYZ = float3(0.625,37.5,7.25);      //BorderLands 2 #7B81CCAB	
 	else if(WP == 5) //WP 3
-		WA_XYZW = float4(0,0,0,0);                 //Game	
+		WA_XYZ = float3(0,0,0);                //Game	
 	else if(WP == 6) //WP 4
-		WA_XYZW = float4(0.253,1.0,1.25,3);        //Fallout 4*			
+		WA_XYZ = float3(0.253,28.75,98.5);     //Fallout 4 #2D950D30			
 	else if(WP == 7) //WP 5
-		WA_XYZW = float4(0.276,0.6875,20.0,1);     //Skyrim: SE*
+		WA_XYZ = float3(0.276,20.0,9.5625);    //Skyrim: SE #3950D04E
 	else if(WP == 8) //WP 6
-		WA_XYZW = float4(0.338,0.8125,-14.500,0);  //DOOM 2016*	
+		WA_XYZ = float3(0.338,20.0,9.25);      //DOOM 2016 #142EDFD6	
 	else if(WP == 9) //WP 7
-		WA_XYZW = float4(0.255,0.5625,-0.750,2);   //CoD: Black Ops*
+		WA_XYZ = float3(0.255,177.5,63.025);   //CoD:Black Ops #17232880 CoD:MW2 #9D77A7C4 CoD:MW3 #22EF526F
 	else if(WP == 10)//WP 8
-		WA_XYZW = float4(0.254,25.0,-0.5,2);       //CoD:AW*	
+		WA_XYZ = float3(0.254,100.0,0.9843);   //CoD:Black Ops II #D691718C	
 	else if(WP == 11)//WP 9
-		WA_XYZW = float4(0.450,0.0375,-37.813,2);  //Bioshock Remastred*
+		WA_XYZ = float3(0.254,203.125,0.98435);//CoD:Ghost #7448721B
 	else if(WP == 12)//WP 10
-		WA_XYZW = float4(0,0,0,0);                 //Game
+		WA_XYZ = float3(0.254,203.125,0.98433);//CoD:AW #23AB8876 CoD:MW Re #BF4D4A41
 	else if(WP == 13)//WP 11
-		WA_XYZW = float4(0.450,0.175,-43.75,1);    //Metro Redux Games*	
+		WA_XYZ = float3(0.254,125.0,0.9843);   //CoD:IW #1544075
 	else if(WP == 14)//WP 12
-		WA_XYZW = float4(0,0,0,0);                 //Game
+		WA_XYZ = float3(0.255,200.0,63.0);     //CoD:WaW #697CDA52
 	else if(WP == 15)//WP 13
-		WA_XYZW = float4(0,0,0,0);                 //Game
+		WA_XYZ = float3(0.510,162.5,3.975);    //CoD #4383C12A CoD:UO #239E5522 CoD:2 #3591DE9C
 	else if(WP == 16)//WP 14
-		WA_XYZW = float4(1.0,27.5,6.25,-1);        //Rage64*		
+		WA_XYZ = float3(0,0,0);                //Game		
 	else if(WP == 17)//WP 15
-		WA_XYZW = float4(0.375,2.5,-44.75,0);      //Quake DarkPlaces*	
+		WA_XYZ = float3(0.375,60.0,15.15625);  //Quake DarkPlaces #37BD797D
 	else if(WP == 18)//WP 16
-		WA_XYZW = float4(0.7,0.4,-30.0,-1);        //Quake 2 XP & Return to Castle Wolfenstine*
+		WA_XYZ = float3(0.7,14.375,2.5);       //Quake 2 XP #34F4B6C
 	else if(WP == 19)//WP 17
-		WA_XYZW = float4(0.750,1.5,-1.250,-1);     //Quake 4*
+		WA_XYZ = float3(0.750,30.0,1.050);     //Quake 4 #ED7B83DE
 	else if(WP == 20)//WP 18
-		WA_XYZW = float4(0,0,0,0);                 //Game
+		WA_XYZ = float3(0,0,0);                //Game
 	else if(WP == 21)//WP 19
-		WA_XYZW = float4(0.255,0.01,22.5,2);       //S.T.A.L.K.E.R: Games*
+		WA_XYZ = float3(0.450,12.0,23.75);     //Metro Redux Games #886386A
 	else if(WP == 22)//WP 20
-		WA_XYZW = float4(0,0,0,0);                 //Game
+		WA_XYZ = float3(0,0,0);                //Game
 	else if(WP == 23)//WP 21
-		WA_XYZW = float4(1.0,1.0,7.5,-3);          //Turok: DH 2017*
+		WA_XYZ = float3(0,0,0);                //Game
 	else if(WP == 24)//WP 22
-		WA_XYZW = float4(0.570,2.0,0.0,-3);        //Turok2: SoE 2017*
+		WA_XYZ = float3(0,0,0);                //Game
 	else if(WP == 25)//WP 23
-		WA_XYZW = float4(0,0,0,0);                 //Turok 3: Shadow of Oblivion
+		WA_XYZ = float3(0,0,0);                //Game
 	else if(WP == 26)//WP 24
-		WA_XYZW = float4(0,0,0,0);                 //Game
+		WA_XYZ = float3(0.255,6.375,53.75);    //S.T.A.L.K.E.R: Games #F5C7AA92 #493B5C71
 	else if(WP == 27)//WP 25
-		WA_XYZW = float4(0,0,0,0);                 //Game
+		WA_XYZ = float3(0,0,0);                //Game
 	else if(WP == 28)//WP 26
-		WA_XYZW = float4(0.750,3.4375,0,-1);       //Prey - 2006*
+		WA_XYZ = float3(0.750,30.0,1.025);     //Prey 2006 #DE2F0F4D
 	else if(WP == 29)//WP 27
-		WA_XYZW = float4(0.2832,20.0,0,0);         //Prey 2017 High Settings and <*
+		WA_XYZ = float3(0.2832,13.125,0.8725); //Prey 2017 High Settings and < #36976F6D
 	else if(WP == 30)//WP 28
-		WA_XYZW = float4(0.2712,25.0,0.325,1);     //Prey 2017 Very High*
+		WA_XYZ = float3(0.2832,13.75,0.915625);//Prey 2017 Very High #36976F6D
 	else if(WP == 31)//WP 29
-		WA_XYZW = float4(0,0,0,0);                 //Game
+		WA_XYZ = float3(0.7,9.0,2.3625);       //Return to Castle Wolfenstine #BF757E3A
 	else if(WP == 32)//WP 30
-		WA_XYZW = float4(0.490,5.0,0.5625,-1);     //Wolfenstine
+		WA_XYZ = float3(0.4894,62.50,0.98875); //Wolfenstein #30030941
 	else if(WP == 33)//WP 31
-		WA_XYZW = float4(1.0,13.75,6.4,-1);        //Wolfenstine: The New Order / The Old Blood
+		WA_XYZ = float3(1.0,93.75,0.81875);    //Wolfenstein: The New Order #C770832 / The Old Blood #3E42619F
 	else if(WP == 34)//WP 32
-		WA_XYZW = float4(0,0,0,0);                 //Wolfenstein II: The New Colossus / Cyberpilot
+		WA_XYZ = float3(0,0,0);                //Wolfenstein II: The New Colossus / Cyberpilot
 	else if(WP == 35)//WP 33
-		WA_XYZW = float4(0.278,2.0,-12.0,0);       //Black Mesa*
+		WA_XYZ = float3(0.278,37.50,9.1);      //Black Mesa #6FC1FF71
 	else if(WP == 36)//WP 34
-		WA_XYZW = float4(0.420,0.1,0.0,-1);        //Blood 2*
+		WA_XYZ = float3(0.420,4.75,1.0);       //Blood 2 #6D3CD99E
 	else if(WP == 37)//WP 35
-		WA_XYZW = float4(0.500,0.0625,18.75,-1);   //Blood 2 Alt*
+		WA_XYZ = float3(0.500,4.75,0.75);      //Blood 2 Alt #6D3CD99E
 	else if(WP == 38)//WP 36
-		WA_XYZW = float4(0.785,0.0875,43.75,-2);   //SOMA*
+		WA_XYZ = float3(0.785,21.25,0.3875);   //SOMA #F22A9C7D
 	else if(WP == 39)//WP 37
-		WA_XYZW = float4(0.445,0.500,0,-1);        //Cryostasis*
+		WA_XYZ = float3(0.444,20.0,1.1875);    //Cryostasis #6FB6410B
 	else if(WP == 40)//WP 38
-		WA_XYZW = float4(0.286,7.5,5.5,0);         //Unreal Gold with v227*	
+		WA_XYZ = float3(0.286,80.0,7.0);       //Unreal Gold with v227 #16B8D61A	
 	else if(WP == 41)//WP 39
-		WA_XYZW = float4(0.280,1.125,-16.25,0);    //Serious Sam Revolution / Serious Sam HD: The First Encounter / The Second Encounter / Serious Sam 3: BFE?*
+		WA_XYZ = float3(0.280,15.5,9.1);       //Serious Sam Revolution #EB9EEB74/Serious Sam HD: The First Encounter /The Second Encounter /Serious Sam 2 #8238E9CA/ Serious Sam 3: BFE* 
 	else if(WP == 42)//WP 40
-		WA_XYZW = float4(0.280,1.0,16.25,1);       //Serious Sam 2*
+		WA_XYZ = float3(0,0,0);                //Serious Sam 4: Planet Badass
 	else if(WP == 43)//WP 41
-		WA_XYZW = float4(0,0,0,0);                 //Serious Sam 4: Planet Badass
+		WA_XYZ = float3(0,0,0);                //Game
 	else if(WP == 44)//WP 42
-		WA_XYZW = float4(0.277,0.875,-11.875,0);   //TitanFall 2*
+		WA_XYZ = float3(0.277,20.0,8.8);       //TitanFall 2 #308AEBEA
 	else if(WP == 45)//WP 43
-		WA_XYZW = float4(0.7,0.250,0,-2);          //Project Warlock*
+		WA_XYZ = float3(0.7,16.250,0.300);     //Project Warlock #5FCFB1E5
 	else if(WP == 46)//WP 44
-		WA_XYZW = float4(0.625,0.275,-25.0,-1);    //Kingpin Life of Crime*
+		WA_XYZ = float3(0.625,9.0,2.375);      //Kingpin Life of Crime #7DCCBBBD
 	else if(WP == 47)//WP 45
-		WA_XYZW = float4(0,0,0,0);                 //EuroTruckSim2
+		WA_XYZ = float3(0.28,20.0,9.0);        //EuroTruckSim2 #9C5C946E
 	else if(WP == 48)//WP 46
-		WA_XYZW = float4(0.458,0.3375,0,-1);       //F.E.A.R & F.E.A.R. 2: Project Origin*
+		WA_XYZ = float3(0.458,10.5,1.105);     //F.E.A.R #B302EC7 & F.E.A.R 2: Project Origin #91D9EBAF
 	else if(WP == 49)//WP 47
-		WA_XYZW = float4(0,0,0,0);                 //Game	
+		WA_XYZ = float3(0,0,0);                //Game	
 	else if(WP == 50)//WP 48
-		WA_XYZW = float4(1.9375,0.5,40.0,-1);      //Immortal Redneck
+		WA_XYZ = float3(2.0,16.25,0.09);       //Immortal Redneck CP alt 1.9375 #2C742D7C
 	else if(WP == 51)//WP 49
-		WA_XYZW = float4(0,0,0,0);                 //NecroVisioN
+		WA_XYZ = float3(0,0,0);                //Game	
 	else if(WP == 52)//WP 50
-		WA_XYZW = float4(0.489,3.75,0,-1);         //NecroVisioN: Lost Company*
+		WA_XYZ = float3(0.489,68.75,1.02);     //NecroVisioN & NecroVisioN: Lost Company #663E66FE 
+	else if(WP == 53)//WP 51
+		WA_XYZ = float3(1.0,237.5,0.83625);    //Rage64 #AA6B948E
+	else if(WP == 54)//WP 52
+		WA_XYZ = float3(0,0,0);                //Game
+	else if(WP == 55)//WP 53
+		WA_XYZ = float3(0.425,15.0,99.0);      //Bioshock Remastred #44BD41E1
+	else if(WP == 56)//WP 54
+		WA_XYZ = float3(0.425,21.25,99.5);     //Bioshock 2 Remastred #7CF5A01
+	else if(WP == 57)//WP 55
+		WA_XYZ = float3(0,0,0);                //Game
+	else if(WP == 58)//WP 56
+		WA_XYZ = float3(0,0,0);                //Game
+	else if(WP == 59)//WP 57
+		WA_XYZ = float3(0,0,0);                //Game
+	else if(WP == 60)//WP 58
+		WA_XYZ = float3(0,0,0);                //Game
+	else if(WP == 61)//WP 59
+		WA_XYZ = float3(0,0,0);                //Game
+	else if(WP == 62)//WP 60
+		WA_XYZ = float3(0,0,0);                //Game
 	//End Weapon Profiles//
+		
+	// Here on out is the Weapon Hand Adjustment code.		
+	//Conversions to linear space.....
+	//Near & Far Adjustment
+	float Far = 1.0, Near = 0.125/WA_XYZ.y;  //Division Depth Map Adjust - Near	
+	float2 Offsets = float2(1 + WA_XYZ.z,1 - WA_XYZ.z), Z = float2( zBufferWH, 1-zBufferWH );
 	
-	// Code Adjustment Values.
-	// WA_XYZW.x | WA_XYZW.y | WA_XYZW.z | WA_XYZW.w 
-	// X Cutoff  | Y Adjust  | Z Tuneing | W Scaling 	
-	
-	// Hear on out is the Weapon Hand Adjustment code.		
-	float Set_Scale , P = WA_XYZW.y;
-	
-	if (WA_XYZW.w == -3)
-	{
-		WA_XYZW.x *= 21.0f;
-		P = (P + 0.00000001) * 100;
-		Set_Scale = 0.5f;
-	}			
-	if (WA_XYZW.w == -2)
-	{
-		P = (P + 0.00000001) * 100;
-		Set_Scale = 0.5f;
-	}
-	else if (WA_XYZW.w == -1)
-	{
-		Set_Scale = 0.332;
-		P = (P + 0.00000001) * 100;
-	}
-	else if (WA_XYZW.w == 0)
-	{
-		Set_Scale = 0.105;
-		P = (P + 0.00000001) * 100;
-	}
-	else if (WA_XYZW.w == 1)
-	{
-		Set_Scale = 0.07265625;
-		P = (P + 0.00000001) * 100;
-	}
-	else if (WA_XYZW.w == 2)
-	{
-		Set_Scale = 0.0155;
-		P = (P + 0.00000001) * 2000;
-	}	
-	else if (WA_XYZW.w == 3)
-	{
-		Set_Scale = 0.01;
-		P = (P + 0.00000001) * 100;
-	}
-	//FPS Hand Depth Maps require more precision at smaller scales to look right.		 		
-	float Far = (P * Set_Scale) * (1+(WA_XYZW.z * 0.01f)), Near = P;
-	
-	float2 Z = float2( zBufferWH, 1-zBufferWH );
-			
-	if ( Depth_Map == 0 )
-		zBufferWH /= Far - Z.x * (Near - Far);
-	else if ( Depth_Map == 1 )
-		zBufferWH /= Far - Z.y * (Near - Far);
-	
-	zBufferWH = saturate(zBufferWH);	
-	//This code is used to adjust the already set Weapon Hand Profile.
-	float WA = 1 + (Weapon_Depth_Adjust * 0.015);
-	if (WP > 1)
-	zBufferWH = (zBufferWH - 0) / (WA - 0);
-	//Wish I didn't have to do this.	
-	if (WZPD > 0)
-	zBufferWH = lerp(zBufferWH,0.75f,0.25f);
-	else
-	zBufferWH = smoothstep(-0.2,0.8,zBufferWH);
-	
-	return float2(zBufferWH.x,WA_XYZW.x);	
+	if (WA_XYZ.z > 0)
+	Z = min( 1, float2( Z.x * Offsets.x , Z.y / Offsets.y  ));
+
+	[branch] if (Depth_Map == 0)//DM0. Normal
+		zBufferWH = Far * Near / (Far + Z.x * (Near - Far));		
+	else if (Depth_Map == 1)//DM1. Reverse
+		zBufferWH = Far * Near / (Far + Z.y * (Near - Far));	
+					
+	return float2(saturate(zBufferWH.x),WA_XYZ.x);	
 }
 
 float4 DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0) : SV_Target
 {
 		float4 DM = Depth(texcoord).xxxx;
-		
-		float R, G, B, A, WD = WeaponDepth(texcoord).x, CoP = WeaponDepth(texcoord).y, CutOFFCal = (CoP/Depth_Map_Adjust) * 0.5f; //Weapon Cutoff Calculation
+				
+		float R, G, B, A, WD = WeaponDepth(texcoord).x, CoP = WeaponDepth(texcoord).y, CutOFFCal = (CoP/Depth_Map_Adjust) * 0.5; //Weapon Cutoff Calculation
 		CutOFFCal = step(DM.x,CutOFFCal);
 					
-		if (WP == 0)
+		[branch] if (WP == 0)
 		{
 			DM.x = DM.x;
 		}
 		else
-		{
+		{	
 			DM.x = lerp(DM.x,WD,CutOFFCal);
 			DM.y = lerp(0.0,WD,CutOFFCal);
+			DM.z = lerp(0.5,WD,CutOFFCal);
 		}
 		
 		R = DM.x; //Mix Depth
-		G = DM.z < DM.y; //Weapon Mask
-		B = DM.z; //Average Luminance
+		G = DM.y > smoothstep(0,2.5,DM.w); //Weapon Mask
+		B = DM.z; //Weapon Hand
 		A = DM.w; //Normal Depth
+		
+	if(texcoord.x < pix.x * 2 && texcoord.y < pix.y * 2)
+		A = Fade_in_out(texcoord);
 		
 	return saturate(float4(R,G,B,A));
 }
+#if HUD_MODE || HM
+float4 HUD(float4 HUD, float2 texcoord ) 
+{		
+	float Mask_Tex, CutOFFCal = ((HUD_Adjust.x * 0.5)/Depth_Map_Adjust) * 0.5, COC = step(Depth(texcoord).x,CutOFFCal); //HUD Cutoff Calculation
+	
+	//This code is for hud segregation.			
+	if (HUD_Adjust.x > 0)
+		HUD = COC > 0 ? tex2D(BackBuffer,texcoord) : HUD;	
+		
+#if UI_MASK	
+    [branch] if (Mask_Cycle == true) 
+        Mask_Tex = tex2D(SamplerMaskB,texcoord.xy).a;
+    else
+        Mask_Tex = tex2D(SamplerMaskA,texcoord.xy).a;
 
+	float MAC = step(1.0-Mask_Tex,0.5); //Mask Adjustment Calculation
+	//This code is for hud segregation.			
+	HUD = MAC > 0 ? tex2D(BackBuffer,texcoord) : HUD;
+#endif		
+	return HUD;	
+}
+#endif
 float AutoDepthRange( float d, float2 texcoord )
 {
-	float LumAdjust_ADR = smoothstep(-0.0175f,0.1f,Lum(texcoord));
+	float LumAdjust_ADR = smoothstep(-0.0175,Auto_Depth_Range,Lum(texcoord).y);
     return min(1,( d - 0 ) / ( LumAdjust_ADR - 0));
 }
 #if RE_Fix
 float AutoZPDRange(float ZPD, float2 texcoord )
 {
-	float LumAdjust_AZDPR = smoothstep(-0.0175f,0.125,Lum(texcoord)); //Adjusted to only effect really intense differences.
+	float LumAdjust_AZDPR = smoothstep(-0.0175,0.125,Lum(texcoord).y); //Adjusted to only effect really intense differences.
     return saturate(LumAdjust_AZDPR * ZPD);
 }
 #endif
 float WHConv(float D,float2 texcoord)
 {
-	float Z = WZPD, ZP = 0.125,ALC = abs(Lum(texcoord)) ,Convergence = 1 - Z / (D * 2);
+	float Z = WZPD, ZP = 0.5,ALC = abs(Lum(texcoord).x) ,Convergence = 1 - Z / D;
 	
 	if (Z <= 0)
 		ZP = 1;
 		
-	if (ALC <= 0.025f)
+	if (ALC <= 0.025)
 		ZP = 1;
-
-	 Convergence /= 1-(-Z);
-	 
+		 
    return lerp(Convergence,D,ZP);
 }
 
 float Conv(float D,float2 texcoord)
 {
-	float Z = ZPD, ZP = 0.4375f;
+	float Z = ZPD, ZP = 0.5, ALC = abs(Lum(texcoord).x);
 	#if RE_Fix	
 		Z = AutoZPDRange(Z,texcoord);
 	#endif	
-
-			D = AutoDepthRange(D,texcoord);	
-
+		if (Auto_Depth_Range > 0)
+			D = AutoDepthRange(D,texcoord);
+			
+	#if Balance_Mode
+			ZP = saturate(ZPD_Balance);			
+	#else
+		if(Auto_Balance)
+			ZP = saturate(ALC);
+	#endif		
 		float Convergence = 1 - Z / D;
 			
 		if (ZPD == 0)
-			ZP = 1.0;
+			ZP = 1.;
 					
     return lerp(Convergence,D, ZP);
 }
 
-float zBuffer(in float2 texcoord : TEXCOORD0)
+float zBuffer(float2 texcoord : TEXCOORD0)
 {	
 	float4 DM = tex2Dlod(SamplerDMVR,float4(texcoord,0,0));
-
-	DM.z = lerp(Conv(DM.z,texcoord), WHConv(DM.x,texcoord), DM.y);
+	
+	if (WP == 0)
+		DM.y = 0;
+	
+	DM.y = lerp(Conv(DM.x,texcoord), WHConv(DM.z,texcoord), DM.y);
 		
 	if (WZPD <= 0)
-	DM.z = Conv(DM.x,texcoord);
+	DM.y = Conv(DM.x,texcoord);
 	
-	float ALC = abs(Lum(texcoord));
+	float ALC = abs(Lum(texcoord).x);
 	
-	if (ALC <= 0.025f)
+	if (Menu_Detection >= 1)
+	{
+		if (ALC <= (0.025 / Menu_Detection))
 		DM = 0;
-		
+	}
+	
 	if (Cancel_Depth)
-		DM = 0.0625f;
+		DM = 0.0625;
 
-	return DM.z;
+	return DM.y;
 }
 
 /////////////////////////////////////////L/R//////////////////////////////////////////////////////////////////////
@@ -825,10 +951,30 @@ void LR_Out(float4 position : SV_Position, float2 texcoord : TEXCOORD, out float
 	//IPD Right Adjustment
 	TCL.x -= Interpupillary_Distance*0.5f;
 	TCR.x += Interpupillary_Distance*0.5f;
+	
+	float D = Divergence;
+	float FadeIO = smoothstep(0,1,1-Fade_in_out(texcoord).x), FD = D;
+	
+	if (FPSDFIO == 1 || FPSDFIO == 2)
+		FD = lerp(FD * 0.0625,FD,FadeIO);
 		
+	float2 DLR = float2(FD,FD);
+	
+	if( Eye_Fade_Reduction == 1)
+			DLR = float2(D,FD);
+	else if( Eye_Fade_Reduction == 2)
+			DLR = float2(FD,D);
+				
 	//Left & Right Parallax for Stereo Vision	
-	Left = saturation(tex2Dlod(BackBufferBORDER, float4(Parallax(-Divergence, TCL),0,0))); //Stereoscopic 3D using Reprojection Left
-	Right = saturation(tex2Dlod(BackBufferBORDER, float4(Parallax( Divergence, TCR),0,0)));//Stereoscopic 3D using Reprojection Right
+	Left = saturation(tex2Dlod(BackBufferBORDER, float4(Parallax(-DLR.x, TCL),0,0))); //Stereoscopic 3D using Reprojection Left
+	Right = saturation(tex2Dlod(BackBufferBORDER, float4(Parallax( DLR.y, TCR),0,0)));//Stereoscopic 3D using Reprojection Right
+	
+	#if HUD_MODE || HM	
+	float HUD_Adjustment = ((0.5 - HUD_Adjust.y)*25.) * pix.x;
+	Left = HUD(Left,float2(TCL.x - HUD_Adjustment,TCL.y));
+	Right = HUD(Right,float2(TCR.x + HUD_Adjustment,TCR.y));
+	#endif
+
 }
 
 float4 Circle(float4 C, float2 TC)
@@ -874,7 +1020,6 @@ float4 VigneteR(float2 texcoord)
 return Left;
 }
 	
-
 float2 D(float2 p, float k1, float k2) //Polynomial Lens + Radial lens undistortion filtering Left & Right
 {
 	if(!Barrel_Distortion)
@@ -948,7 +1093,6 @@ float4 PS_calcLR(float2 texcoord)
 
 	if(!Depth_Map_View)
 	{	
-
 		if(Barrel_Distortion == 0)
 		color = texcoord.x < 0.5 ? Left : Right;
 		else if(Barrel_Distortion == 1)
@@ -958,23 +1102,22 @@ float4 PS_calcLR(float2 texcoord)
 	}
 	else
 	{		
-		float3 RGB = zBuffer(texcoord);
-
-		color = float4(RGB.x,RGB.y,RGB.z,1.0);
+		color = Depth(texcoord).xxxx;
 	}
 		
-	float Average_Lum = tex2Dlod(SamplerDMVR,float4(texcoord.x,texcoord.y, 0, 0)).y;
+	float Average_Lum = tex2Dlod(SamplerDMVR,float4(texcoord.x,texcoord.y, 0, 0)).w;
 	
 	return float4(color.rgb,Average_Lum);
 }
 
 float4 Average_Luminance(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Target
 {
-	return float4(tex2Dlod(SamplerDMVR,float4(texcoord.x,texcoord.y, 0, 0)).z,0,0,1); //Average_Lum_Full
+	float ALF = tex2Dlod(SamplerDMVR,float4(texcoord.x,texcoord.y, 0, 0)).w;//Average_Lum_Full
+	return float4(ALF,ALF,tex2Dlod(SamplerDMVR,float4(0,0,0,0)).w,1);
 }
 
-////////////////////////////////////////////////////////Logo/////////////////////////////////////////////////////////////////////////
 uniform float timer < source = "timer"; >; //Please do not remove.
+////////////////////////////////////////////////////////Logo/////////////////////////////////////////////////////////////////////////
 float4 Out(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Target
 {
 	float PosX = 0.9525f*BUFFER_WIDTH*pix.x,PosY = 0.975f*BUFFER_HEIGHT*pix.y;	
@@ -1086,10 +1229,9 @@ float4 USM(float4 position : SV_Position, float2 texcoord : TEXCOORD0) : SV_Targ
 		   result += tex2D(BackBuffer, float2(texcoord + float2(-1, 1) * tex_offset));
    		result /= 9;
 		//High Contrast Mask
-		float CA = Contrast_Aware * 25.0f, HCM = saturate(dot(( tex2D(BackBuffer, texcoord).rgb - result.rgb ) , float3(0.333, 0.333, 0.333) * CA) > 1);
-   		
+		float CA = 0.375f * 25.0f, HCM = saturate(dot(( tex2D(BackBuffer, texcoord).rgb - result.rgb ) , float3(0.333, 0.333, 0.333) * CA) ); 		
 		result = tex2D(BackBuffer, texcoord) + ( tex2D(BackBuffer, texcoord) - result ) * Sharpen_Power;
-		if(Contrast_Aware > 0)
+		//Contrast Aware
 		result = lerp(result, tex2D(BackBuffer, texcoord), HCM);
 	}
 	
@@ -1125,12 +1267,6 @@ technique SuperDepth3D_VR
 		RenderTarget0 = LeftTex;
 		RenderTarget1 = RightTex;	
 	}
-		pass AverageLuminance
-	{
-		VertexShader = PostProcessVS;
-		PixelShader = Average_Luminance;
-		RenderTarget = texLumVR;
-	}
 		pass StereoOut
 	{
 		VertexShader = PostProcessVS;
@@ -1141,5 +1277,10 @@ technique SuperDepth3D_VR
 		VertexShader = PostProcessVS;
 		PixelShader = USM;
 	}
-	
+		pass AverageLuminance
+	{
+		VertexShader = PostProcessVS;
+		PixelShader = Average_Luminance;
+		RenderTarget = texLumVR;
+	}
 }

@@ -51,6 +51,16 @@ uniform float Pivot_Point <
 	ui_category = "Divergence & Convergence";
 > = 0.5;
 
+uniform bool invertX <
+	ui_label = " Invert X";
+	ui_tooltip = "Invert X.";
+> = false;
+
+uniform bool invertY <
+	ui_label = " Invert Y";
+	ui_tooltip = "Invert Y.";
+> = false;
+
 uniform float Auto_Depth_Range <
 	ui_type = "drag";
 	ui_min = 0.0; ui_max = 0.625;
@@ -238,6 +248,12 @@ float4 PS_calcLRUD(float2 texcoord)
 	float4 color;
 	float2 MousecoordsXY = (Tsize - Mousecoords) * pix;
 	Center = MousecoordsXY - 0.5;
+	
+	if( invertX )
+		Center.x = -Center.x;
+	if( invertY )
+		Center.y = -Center.y;
+		
 	float PP = Divergence * Pivot_Point;
 	
 	float2 Per = (Center * pix) * PP;

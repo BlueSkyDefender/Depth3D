@@ -20,13 +20,12 @@
 //* CryTech 3 Dev http://www.slideshare.net/TiagoAlexSousa/secrets-of-cryengine-3-graphics-technology																				
 //* Also Fu-Bama a shader dev at the reshade forums https://reshade.me/forum/shader-presentation/5104-vr-universal-shader															
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//Overwatch Intercepter//	
-#if exists "Overwatch.fxh"
+#if exists "Overwatch.fxh"                                           //Overwatch Intercepter//	
 	#include "Overwatch.fxh"
-#else  // ZPD[0][0] | Depth_Adjust[0][1] | Offset[0][2] | Depth_Linearization[0][3] ---- // Depth_Flip[1][0] | Null[1][1] | Null[1][2] | Weapon_Hand[1][3] 
-		static const float4x4 SD3D_D = float4x4( float4(0.025,7.5,0.0,0.0), float4(0,0,0,0.0), float4(0.0,0.5,0,0), float4(1,1,0.0,0.0) );
+#else //DA_X ZPD | DA_Y Depth_Adjust | DA_Z Offset | DA_W Depth_Linearization | DB_X Depth_Flip | DB_Y Null | DB_Z Null | DB_W Weapon_Hand | DC_X HUDX | DC_Y HUDY | DC_Z Null | DC_W Null | DD_X HV_X | DD_Y HV_Y | DD_Z DepthPX | DD_W DepthPY
+	static const float DA_X = 0.025, DA_Y = 7.5, DA_Z = 0.0, DA_W = 0.0, DB_X = 0, DB_Y = 0, DB_Z = 0, DB_W = 0.0, DC_X =0.0, DC_Y = 0.5, DC_Z = 0, DC_W = 0, DD_X = 1,DD_Y = 1, DD_Z = 0.0, DD_W = 0.0;
 	#define HM 0		
-#endif //HUDX[2][0] | HUDY[2][1] | Null[2][2] | Null[2][3] ---- // HV_X[3][0] | HV_X[3][1] | DepthPX[3][2] | DepthPY[3][3]
+#endif
 //USER EDITABLE PREPROCESSOR FUNCTIONS START//
 
 // Zero Parallax Distance Balance Mode allows you to switch control from manual to automatic and vice versa.
@@ -109,7 +108,7 @@ uniform float ZPD <
 				"This is controled by Convergence Mode.\n"
 				"Default is 0.025, Zero is off.";
 	ui_category = "Divergence & Convergence";
-> = SD3D_D[0][0];
+> = DA_X;
 #if Balance_Mode
 uniform float ZPD_Balance <
 	ui_type = "drag";
@@ -173,7 +172,7 @@ uniform int Depth_Map <
 	ui_tooltip = "Linearization for the zBuffer also known as Depth Map.\n"
 			     "DM0 is Z-Normal and DM1 is Z-Reversed.\n";
 	ui_category = "Depth Map";
-> = SD3D_D[0][3];
+> = DA_W;
 
 uniform float Depth_Map_Adjust <
 	ui_type = "drag";
@@ -183,7 +182,7 @@ uniform float Depth_Map_Adjust <
 				 "Adjust this to keep it as low as possible.\n"
 				 "Default is 7.5";
 	ui_category = "Depth Map";
-> = SD3D_D[0][1];
+> = DA_Y;
 
 uniform float Offset <
 	ui_type = "drag";
@@ -194,7 +193,7 @@ uniform float Offset <
 				 "Use this to make adjustments to DM 0 or DM 1.\n"
 				 "Default and starts at Zero and it's Off.";
 	ui_category = "Depth Map";
-> = SD3D_D[0][2];
+> = DA_Z;
 
 uniform float Menu_Detection <
 	ui_type = "drag";
@@ -214,7 +213,7 @@ uniform bool Depth_Map_Flip <
 	ui_label = " Depth Map Flip";
 	ui_tooltip = "Flip the depth map if it is upside down.";
 	ui_category = "Depth Map";
-> = SD3D_D[1][0];
+> = DB_X;
 #if DB_Size_Postion 
 uniform int2 Image_Position_Adjust<
 	ui_type = "drag";
@@ -222,7 +221,7 @@ uniform int2 Image_Position_Adjust<
 	ui_label = "Z Position Adjust";
 	ui_tooltip = "Adjust the Image Postion if it's off by a bit. Default is Zero.";
 	ui_category = "Depth Map";
-> = int2(SD3D_D[3][2],SD3D_D[3][3]);
+> = int2(DD_Z,DD_W);
 	
 uniform float2 Horizontal_and_Vertical <
 	ui_type = "drag";
@@ -230,7 +229,7 @@ uniform float2 Horizontal_and_Vertical <
 	ui_label = "Z Horizontal & Vertical";
 	ui_tooltip = "Adjust Horizontal and Vertical Resize. Default is 1.0.";
 	ui_category = "Depth Map";
-> = float2(SD3D_D[3][0],SD3D_D[3][1]);
+> = float2(DD_X,DD_Y);
 #endif
 //Weapon Hand Adjust//
 uniform int WP <
@@ -239,7 +238,7 @@ uniform int WP <
 	ui_label = "·Weapon Profiles·";
 	ui_tooltip = "Pick Weapon Profile for your game or make your own.";
 	ui_category = "Weapon Hand Adjust";
-> = SD3D_D[1][3];
+> = DB_W;
 
 uniform float3 Weapon_Adjust <
 	ui_type = "drag";
@@ -283,7 +282,7 @@ uniform float2 HUD_Adjust <
 				 "This is only for UI elements that show up in the Depth Buffer.\n"
 	             "Default is float2(X 0.0, Y 0.5)";
 	ui_category = "Heads-Up Display";
-> = float2(SD3D_D[2][0],SD3D_D[2][1]);
+> = float2(DC_X,DC_Y);
 #endif
 //Stereoscopic Options//
 uniform int Stereoscopic_Mode <
