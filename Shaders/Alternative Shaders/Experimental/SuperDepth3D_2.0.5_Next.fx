@@ -3,7 +3,7 @@
 //---------------------////
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//* Depth Map Based 3D post-process shader v2.0.3          																														
+//* Depth Map Based 3D post-process shader v2.0.5          																														
 //* For Reshade 3.0+																																								
 //* --------------------------																																					
 //* This work is licensed under a Creative Commons Attribution 3.0 Unported License.																							
@@ -201,7 +201,7 @@ uniform float Menu_Detection <
 	ui_label = " Menu Detection";
 	ui_tooltip = "Use this to dissable/enable in game Menu Detection.";
 	ui_category = "Depth Map";
-> = 1.5;
+> = 0.5;
 
 uniform bool Depth_Map_View <
 	ui_label = " Depth Map View";
@@ -351,9 +351,9 @@ uniform float3 Cursor_STT <
 	ui_min = 0; ui_max = 1;
 	ui_label = " Cursor Adjustments";
 	ui_tooltip = "This controlls the Size, Thickness, & Color.\n" 
-				 "Defaults are ( X 0.125, Y 0.5, Z 1.0).";
+				 "Defaults are ( X 0.125, Y 0.5, Z 0.0).";
 	ui_category = "Cursor Adjustments";
-> = float3(0.125,0.5,1.0);
+> = float3(0.125,0.5,0.0);
 
 uniform bool SCSC <
 	ui_label = " Cursor Lock";
@@ -443,8 +443,7 @@ float4 MouseCursor(float4 position : SV_Position, float2 texcoord : TEXCOORD) : 
 	float dist_fromVertical = abs(center.y - MousecoordsXY.y) * Screen_Ratio.y , Size_V = Size_Thickness.x * CCA, THICC_V = Size_Thickness.y * CCB;	
 	
 	//Cross Cursor
-	float B = min(max(THICC_H - dist_fromHorizontal,0)/THICC_H,max(Size_H-dist_fromVertical,0));
-	float A = min(max(THICC_V - dist_fromVertical,0)/THICC_V,max(Size_V-dist_fromHorizontal,0));
+	float B = min(max(THICC_H - dist_fromHorizontal,0)/THICC_H,max(Size_H-dist_fromVertical,0)), A = min(max(THICC_V - dist_fromVertical,0)/THICC_V,max(Size_V-dist_fromHorizontal,0));
 	float CC = A+B; //Cross Cursor
 	
 	//Ring Cursor
@@ -455,43 +454,33 @@ float4 MouseCursor(float4 position : SV_Position, float2 texcoord : TEXCOORD) : 
 	//Solid Square Cursor
 	float Solid_Square_Size = Size_Thickness.x * CCC;
 	float SSC = min(max(Solid_Square_Size - dist_fromHorizontal,0)/Solid_Square_Size,max(Solid_Square_Size-dist_fromVertical,0)); //Solid Square Cursor
-	
-	float Cursor = CC;
-	
-	[branch] if(Cursor_Type == 1)
-		Cursor = RC;
-	else if(Cursor_Type == 2)
-		Cursor = SSC;
-	else if(Cursor_Type == 3)
-		Cursor = SSC + CC;
-	else if(Cursor_Type == 4)
-		Cursor = SSC + RC;
-	else if(Cursor_Type == 5)
-		Cursor = CC + RC;
-	else if(Cursor_Type == 6)
-		Cursor = CC + RC + SSC;
-	
-	[branch]if (Cursor_STT.z == 1 )
-		Color.rgb = float3(1,1,1);
-	else if (Cursor_STT.z >= 0.9 )
-		Color.rgb = float3(0,0,1);
-	else if (Cursor_STT.z >= 0.8 )
-		Color.rgb = float3(0,1,0);
-	else if (Cursor_STT.z >= 0.7 )
-		Color.rgb = float3(1,0,0);	
-	else if (Cursor_STT.z >= 0.6 )
-		Color.rgb = float3(0,1,1);
-	else if (Cursor_STT.z >= 0.5 )
-		Color.rgb = float3(1,0,1);
-	else if (Cursor_STT.z >= 0.4 )
-		Color.rgb = float3(1,1,0);
-	else if (Cursor_STT.z >= 0.3 )
-		Color.rgb = float3(1,0.4,0.7);
-	else if (Cursor_STT.z >= 0.2 )
-		Color.rgb = float3(1,0.64,0);
-	else if (Cursor_STT.z >= 0.1 )
-		Color.rgb = float3(0.5,0,0.5);
-		
+	// Cursor Array //
+	float Cursor, CArray[7] = {
+		CC,			 //Cross Cursor
+		RC, 	     //Ring Cursor		
+		SSC,         //Solid Square Cursor
+		SSC + CC,    //Solid Square Cursor / Cross Cursor
+		SSC + RC,    //Solid Square Cursor / Ring Cursor		
+		CC + RC,     //Cross Cursor / Ring Cursor
+		CC + RC + SSC//Cross Cursor / Ring Cursor / Solid Square Cursor
+	};
+	Cursor =  CArray[Cursor_Type];
+	// Cursor Color Array //
+	float3 CCArray[10] = {
+		float3(1,1,1),
+		float3(0,0,1),	
+		float3(0,1,0),
+		float3(1,0,0),	
+		float3(0,1,1),
+		float3(1,0,1),
+		float3(1,1,0),
+		float3(1,0.4,0.7),
+		float3(1,0.64,0),
+		float3(0.5,0,0.5)
+	};
+	int CSTT = int(Cursor_STT.z * 10);
+	Color.rgb = CCArray[CSTT];
+
 	Out = Cursor ? Color : Out;
 	
 	return Out;
@@ -508,7 +497,7 @@ sampler SamplerLumN
 		MipFilter = LINEAR;
 	};	
 	
-float2 Lum(in float2 texcoord : TEXCOORD0)
+float2 Lum(float2 texcoord)
 	{
 		float2 Luminance = tex2Dlod(SamplerLumN,float4(texcoord,0,11)).xy; //Average Luminance Texture Sample 
 
@@ -520,7 +509,7 @@ uniform float frametime < source = "frametime";>;
 uniform bool Trigger_Fade_A < source = "mousebutton"; keycode = Fade_Key; toggle = true; mode = "toggle";>;
 uniform bool Trigger_Fade_B < source = "mousebutton"; keycode = Fade_Key;>;
 
-float Fade_in_out(float2 texcoord : TEXCOORD)	
+float Fade_in_out(float2 texcoord)	
 {
 	float Trigger_Fade, AA = (1-Fade_Time_Adjust)*1000, PStoredfade = tex2D(SamplerLumN,texcoord).z;
 	//Fade in toggle. 
@@ -541,7 +530,7 @@ float DMA()//Depth Map Adjustment
 	return DMA;
 }
 
-float Depth(in float2 texcoord : TEXCOORD0)
+float Depth(float2 texcoord)
 {	
 	#if DB_Size_Postion
 	float2 texXY = texcoord + Image_Position_Adjust * pix;		
@@ -570,7 +559,7 @@ float Depth(in float2 texcoord : TEXCOORD0)
 	return zBuffer;
 }
 
-float2 WeaponDepth(in float2 texcoord : TEXCOORD0)
+float2 WeaponDepth(float2 texcoord)
 {
 	#if DB_Size_Postion
 	float2 texXY = texcoord + Image_Position_Adjust * pix;		
@@ -580,136 +569,76 @@ float2 WeaponDepth(in float2 texcoord : TEXCOORD0)
 	
 	if (Depth_Map_Flip)
 		texcoord.y =  1 - texcoord.y;
-
+	//Weapon Profiles Starts Here
 	float zBufferWH = tex2D(DepthBuffer, texcoord).x, CutOff = Weapon_Adjust.x , Adjust = Weapon_Adjust.y, Tune = Weapon_Adjust.z;
-	
-	float3 WA_XYZ;//Weapon Profiles Starts Here
-	[branch] if (WP == 1)                   // WA_XYZ.x | WA_XYZ.y | WA_XYZ.z 
-		WA_XYZ = float3(CutOff,Adjust,Tune);// X Cutoff | Y Adjust | Z Tuneing 		
-	else if(WP == 2) //WP 0
-		WA_XYZ = float3(0.425,5.0,1.125);     //ES: Oblivion #C753DADB		
-	else if(WP == 3) //WP 1
-		WA_XYZ = float3(0,0,0);                //Game
-	else if(WP == 4) //WP 2
-		WA_XYZ = float3(0.625,37.5,7.25);      //BorderLands 2 #7B81CCAB	
-	else if(WP == 5) //WP 3
-		WA_XYZ = float3(0,0,0);                //Game	
-	else if(WP == 6) //WP 4
-		WA_XYZ = float3(0.253,28.75,98.5);     //Fallout 4 #2D950D30			
-	else if(WP == 7) //WP 5
-		WA_XYZ = float3(0.276,20.0,9.5625);    //Skyrim: SE #3950D04E
-	else if(WP == 8) //WP 6
-		WA_XYZ = float3(0.338,20.0,9.25);      //DOOM 2016 #142EDFD6	
-	else if(WP == 9) //WP 7
-		WA_XYZ = float3(0.255,177.5,63.025);   //CoD:Black Ops #17232880 CoD:MW2 #9D77A7C4 CoD:MW3 #22EF526F
-	else if(WP == 10)//WP 8
-		WA_XYZ = float3(0.254,100.0,0.9843);   //CoD:Black Ops II #D691718C	
-	else if(WP == 11)//WP 9
-		WA_XYZ = float3(0.254,203.125,0.98435);//CoD:Ghost #7448721B
-	else if(WP == 12)//WP 10
-		WA_XYZ = float3(0.254,203.125,0.98433);//CoD:AW #23AB8876 CoD:MW Re #BF4D4A41
-	else if(WP == 13)//WP 11
-		WA_XYZ = float3(0.254,125.0,0.9843);   //CoD:IW #1544075
-	else if(WP == 14)//WP 12
-		WA_XYZ = float3(0.255,200.0,63.0);     //CoD:WaW #697CDA52
-	else if(WP == 15)//WP 13
-		WA_XYZ = float3(0.510,162.5,3.975);    //CoD #4383C12A CoD:UO #239E5522 CoD:2 #3591DE9C
-	else if(WP == 16)//WP 14
-		WA_XYZ = float3(0,0,0);                //Game		
-	else if(WP == 17)//WP 15
-		WA_XYZ = float3(0.375,60.0,15.15625);  //Quake DarkPlaces #37BD797D
-	else if(WP == 18)//WP 16
-		WA_XYZ = float3(0.7,14.375,2.5);       //Quake 2 XP #34F4B6C
-	else if(WP == 19)//WP 17
-		WA_XYZ = float3(0.750,30.0,1.050);     //Quake 4 #ED7B83DE
-	else if(WP == 20)//WP 18
-		WA_XYZ = float3(0,0,0);                //Game
-	else if(WP == 21)//WP 19
-		WA_XYZ = float3(0.450,12.0,23.75);     //Metro Redux Games #886386A
-	else if(WP == 22)//WP 20
-		WA_XYZ = float3(0,0,0);                //Game
-	else if(WP == 23)//WP 21
-		WA_XYZ = float3(0,0,0);                //Game
-	else if(WP == 24)//WP 22
-		WA_XYZ = float3(0,0,0);                //Game
-	else if(WP == 25)//WP 23
-		WA_XYZ = float3(0,0,0);                //Game
-	else if(WP == 26)//WP 24
-		WA_XYZ = float3(0.255,6.375,53.75);    //S.T.A.L.K.E.R: Games #F5C7AA92 #493B5C71
-	else if(WP == 27)//WP 25
-		WA_XYZ = float3(0,0,0);                //Game
-	else if(WP == 28)//WP 26
-		WA_XYZ = float3(0.750,30.0,1.025);     //Prey 2006 #DE2F0F4D
-	else if(WP == 29)//WP 27
-		WA_XYZ = float3(0.2832,13.125,0.8725); //Prey 2017 High Settings and < #36976F6D
-	else if(WP == 30)//WP 28
-		WA_XYZ = float3(0.2832,13.75,0.915625);//Prey 2017 Very High #36976F6D
-	else if(WP == 31)//WP 29
-		WA_XYZ = float3(0.7,9.0,2.3625);       //Return to Castle Wolfenstine #BF757E3A
-	else if(WP == 32)//WP 30
-		WA_XYZ = float3(0.4894,62.50,0.98875); //Wolfenstein #30030941
-	else if(WP == 33)//WP 31
-		WA_XYZ = float3(1.0,93.75,0.81875);    //Wolfenstein: The New Order #C770832 / The Old Blood #3E42619F
-	else if(WP == 34)//WP 32
-		WA_XYZ = float3(0,0,0);                //Wolfenstein II: The New Colossus / Cyberpilot
-	else if(WP == 35)//WP 33
-		WA_XYZ = float3(0.278,37.50,9.1);      //Black Mesa #6FC1FF71
-	else if(WP == 36)//WP 34
-		WA_XYZ = float3(0.420,4.75,1.0);       //Blood 2 #6D3CD99E
-	else if(WP == 37)//WP 35
-		WA_XYZ = float3(0.500,4.75,0.75);      //Blood 2 Alt #6D3CD99E
-	else if(WP == 38)//WP 36
-		WA_XYZ = float3(0.785,21.25,0.3875);   //SOMA #F22A9C7D
-	else if(WP == 39)//WP 37
-		WA_XYZ = float3(0.444,20.0,1.1875);    //Cryostasis #6FB6410B
-	else if(WP == 40)//WP 38
-		WA_XYZ = float3(0.286,80.0,7.0);       //Unreal Gold with v227 #16B8D61A	
-	else if(WP == 41)//WP 39
-		WA_XYZ = float3(0.280,15.5,9.1);       //Serious Sam Revolution #EB9EEB74/Serious Sam HD: The First Encounter /The Second Encounter /Serious Sam 2 #8238E9CA/ Serious Sam 3: BFE* 
-	else if(WP == 42)//WP 40
-		WA_XYZ = float3(0,0,0);                //Serious Sam 4: Planet Badass
-	else if(WP == 43)//WP 41
-		WA_XYZ = float3(0,0,0);                //Game
-	else if(WP == 44)//WP 42
-		WA_XYZ = float3(0.277,20.0,8.8);       //TitanFall 2 #308AEBEA
-	else if(WP == 45)//WP 43
-		WA_XYZ = float3(0.7,16.250,0.300);     //Project Warlock #5FCFB1E5
-	else if(WP == 46)//WP 44
-		WA_XYZ = float3(0.625,9.0,2.375);      //Kingpin Life of Crime #7DCCBBBD
-	else if(WP == 47)//WP 45
-		WA_XYZ = float3(0.28,20.0,9.0);        //EuroTruckSim2 #9C5C946E
-	else if(WP == 48)//WP 46
-		WA_XYZ = float3(0.458,10.5,1.105);     //F.E.A.R #B302EC7 & F.E.A.R 2: Project Origin #91D9EBAF
-	else if(WP == 49)//WP 47
-		WA_XYZ = float3(0,0,0);                //Game	
-	else if(WP == 50)//WP 48
-		WA_XYZ = float3(2.0,16.25,0.09);       //Immortal Redneck CP alt 1.9375 #2C742D7C
-	else if(WP == 51)//WP 49
-		WA_XYZ = float3(0,0,0);                //Game	
-	else if(WP == 52)//WP 50
-		WA_XYZ = float3(0.489,68.75,1.02);     //NecroVisioN & NecroVisioN: Lost Company #663E66FE 
-	else if(WP == 53)//WP 51
-		WA_XYZ = float3(1.0,237.5,0.83625);    //Rage64 #AA6B948E
-	else if(WP == 54)//WP 52
-		WA_XYZ = float3(0,0,0);                //Game
-	else if(WP == 55)//WP 53
-		WA_XYZ = float3(0.425,15.0,99.0);      //Bioshock Remastred #44BD41E1
-	else if(WP == 56)//WP 54
-		WA_XYZ = float3(0.425,21.25,99.5);     //Bioshock 2 Remastred #7CF5A01
-	else if(WP == 57)//WP 55
-		WA_XYZ = float3(0,0,0);                //Game
-	else if(WP == 58)//WP 56
-		WA_XYZ = float3(0,0,0);                //Game
-	else if(WP == 59)//WP 57
-		WA_XYZ = float3(0,0,0);                //Game
-	else if(WP == 60)//WP 58
-		WA_XYZ = float3(0,0,0);                //Game
-	else if(WP == 61)//WP 59
-		WA_XYZ = float3(0,0,0);                //Game
-	else if(WP == 62)//WP 60
-		WA_XYZ = float3(0,0,0);                //Game
+	//Weapon Setting Array // - Thank you TrayM for the idea.
+	float3 WA_XYZ, WSArray[62] = {
+	// X Cutoff | Y Adjust | Z Tuneing //
+		float3(CutOff,Adjust,Tune),	  //Custom Weapon Array Starts at 0
+		float3(0.425,5.0,1.125), 	  //WP 0  | ES: Oblivion #C753DADB		
+		float3(0,0,0),                //WP 1  | Game
+		float3(0.625,37.5,7.25),      //WP 2  | BorderLands 2 #7B81CCAB
+		float3(0,0,0),                //WP 3  | Game
+		float3(0.253,28.75,98.5),     //WP 4  | Fallout 4 #2D950D30	
+		float3(0.276,20.0,9.5625),    //WP 5  | Skyrim: SE #3950D04E
+		float3(0.338,20.0,9.25),      //WP 6  | DOOM 2016 #142EDFD6	
+		float3(0.255,177.5,63.025),   //WP 7  | CoD:Black Ops #17232880 CoD:MW2 #9D77A7C4 CoD:MW3 #22EF526F
+		float3(0.254,100.0,0.9843),   //WP 8  | CoD:Black Ops II #D691718C	
+		float3(0.254,203.125,0.98435),//WP 9  | CoD:Ghost #7448721B
+		float3(0.254,203.125,0.98433),//WP 10 | CoD:AW #23AB8876 CoD:MW Re #BF4D4A41
+		float3(0.254,125.0,0.9843),   //WP 11 | CoD:IW #1544075
+		float3(0.255,200.0,63.0),     //WP 12 | CoD:WaW #697CDA52
+		float3(0.510,162.5,3.975),    //WP 13 | CoD #4383C12A CoD:UO #239E5522 CoD:2 #3591DE9C
+		float3(0.254,23.75,0.98425),  //WP 14 | CoD: Black Ops IIII #73FA91DC
+		float3(0.375,60.0,15.15625),  //WP 15 | Quake DarkPlaces #37BD797D
+		float3(0.7,14.375,2.5),       //WP 16 | Quake 2 XP #34F4B6C
+		float3(0.750,30.0,1.050),     //WP 17 | Quake 4 #ED7B83DE
+		float3(0,0,0),                //WP 18 | Game
+		float3(0.450,12.0,23.75),     //WP 19 | Metro Redux Games #886386A
+		float3(0,0,0),                //WP 20 | Game
+		float3(0,0,0),                //WP 21 | Game
+		float3(0,0,0),                //WP 22 | Game
+		float3(0,0,0),                //WP 23 | Game
+		float3(0.255,6.375,53.75),    //WP 24 | S.T.A.L.K.E.R: Games #F5C7AA92 #493B5C71
+		float3(0,0,0),                //WP 25 | Game
+		float3(0.750,30.0,1.025),     //WP 26 | Prey 2006 #DE2F0F4D
+		float3(0.2832,13.125,0.8725), //WP 27 | Prey 2017 High Settings and < #36976F6D
+		float3(0.2832,13.75,0.915625),//WP 28 | Prey 2017 Very High #36976F6D
+		float3(0.7,9.0,2.3625),       //WP 29 | Return to Castle Wolfenstine #BF757E3A
+		float3(0.4894,62.50,0.98875), //WP 30 | Wolfenstein #30030941
+		float3(1.0,93.75,0.81875),    //WP 31 | Wolfenstein: The New Order #C770832 / The Old Blood #3E42619F
+		float3(0,0,0),                //WP 32 | Wolfenstein II: The New Colossus / Cyberpilot
+		float3(0.278,37.50,9.1),      //WP 33 | Black Mesa #6FC1FF71
+		float3(0.420,4.75,1.0),       //WP 34 | Blood 2 #6D3CD99E
+		float3(0.500,4.75,0.75),      //WP 35 | Blood 2 Alt #6D3CD99E
+		float3(0.785,21.25,0.3875),   //WP 36 | SOMA #F22A9C7D
+		float3(0.444,20.0,1.1875),    //WP 37 | Cryostasis #6FB6410B
+		float3(0.286,80.0,7.0),       //WP 38 | Unreal Gold with v227 #16B8D61A
+		float3(0.280,15.5,9.1),       //WP 39 | Serious Sam Revolution #EB9EEB74/Serious Sam HD: The First Encounter /The Second Encounter /Serious Sam 2 #8238E9CA/ Serious Sam 3: BFE* 
+		float3(0,0,0),                //WP 40 | Serious Sam 4: Planet Badass
+		float3(0,0,0),                //WP 41 | Game
+		float3(0.277,20.0,8.8),       //WP 42 | TitanFall 2 #308AEBEA
+		float3(0.7,16.250,0.300),     //WP 43 | Project Warlock #5FCFB1E5
+		float3(0.625,9.0,2.375),      //WP 44 | Kingpin Life of Crime #7DCCBBBD
+		float3(0.28,20.0,9.0),        //WP 45 | EuroTruckSim2 #9C5C946E
+		float3(0.458,10.5,1.105),     //WP 46 | F.E.A.R #B302EC7 & F.E.A.R 2: Project Origin #91D9EBAF
+		float3(0,0,0),                //WP 47 | Game
+		float3(2.0,16.25,0.09),       //WP 48 | Immortal Redneck CP alt 1.9375 #2C742D7C
+		float3(0,0,0),                //WP 49 | Game
+		float3(0.489,68.75,1.02),     //WP 50 | NecroVisioN & NecroVisioN: Lost Company #663E66FE 
+		float3(1.0,237.5,0.83625),    //WP 51 | Rage64 #AA6B948E
+		float3(0,0,0),                //WP 52 | Rage 2
+		float3(0.425,15.0,99.0),      //WP 53 | Bioshock Remastred #44BD41E1
+		float3(0.425,21.25,99.5),     //WP 54 | Bioshock 2 Remastred #7CF5A01
+		float3(0,0,0),                //WP 55 | Game
+		float3(0,0,0),                //WP 56 | Game
+		float3(0,0,0),                //WP 57 | Game
+		float3(0,0,0),                //WP 58 | Game
+		float3(0,0,0),                //WP 59 | Game
+		float3(0,0,0),                //WP 60 | Game
+	};
 	//End Weapon Profiles//
-		
+	WA_XYZ = WSArray[WP-1];	
 	// Here on out is the Weapon Hand Adjustment code.		
 	//Conversions to linear space.....
 	//Near & Far Adjustment
@@ -777,7 +706,7 @@ float4 HUD(float4 HUD, float2 texcoord )
 	return HUD;	
 }
 #endif
-float AutoDepthRange( float d, float2 texcoord )
+float AutoDepthRange(float d, float2 texcoord )
 {
 	float LumAdjust_ADR = smoothstep(-0.0175,Auto_Depth_Range,Lum(texcoord).y);
     return min(1,( d - 0 ) / ( LumAdjust_ADR - 0));
@@ -789,7 +718,7 @@ float AutoZPDRange(float ZPD, float2 texcoord )
     return saturate(LumAdjust_AZDPR * ZPD);
 }
 #endif
-float WHConv(float D,float2 texcoord)
+float WHConv(float D, float2 texcoord)
 {
 	float Z = WZPD, ZP = 0.5,ALC = abs(Lum(texcoord).x) ,Convergence = 1 - Z / D;
 	
@@ -825,7 +754,7 @@ float Conv(float D,float2 texcoord)
     return lerp(Convergence,D, ZP);
 }
 
-float zBuffer(in float2 texcoord : TEXCOORD0)
+float zBuffer(float2 texcoord)
 {	
 	float4 DM = tex2Dlod(SamplerDMN,float4(texcoord,0,0));
 	
@@ -852,7 +781,7 @@ float zBuffer(in float2 texcoord : TEXCOORD0)
 }
 /////////////////////////////////////////L/R//////////////////////////////////////////////////////////////////////
 // Horizontal parallax offset & Hole filling effect
-float2 Parallax( float Diverge, float2 Coordinates)
+float2 Parallax(float Diverge, float2 Coordinates)
 {
 	float Cal_Steps = Divergence + (Divergence * 0.04);
 	
@@ -904,8 +833,7 @@ float2 Parallax( float Diverge, float2 Coordinates)
 }
 //Per is Perspective & Optimization for line interlaced Adjustment. 
 #define Per float2( (Perspective * pix.x) * 0.5, 0)
-#define AI Interlace_Anaglyph.x * 0.5
-	
+#define AI Interlace_Anaglyph.x * 0.5	
 //float4 EdgeMask( float Diverge, float4 Image, float2 texcoords)
 //{
 //	float SB_R = 1-(Divergence * 0.02) * 0.025,SB_L = (Divergence * 0.02) * 0.025;
@@ -914,7 +842,6 @@ float2 Parallax( float Diverge, float2 Coordinates)
 //	else
 //		return float4(0,0,0,1);
 //}
-
 float4 CSB(float2 texcoords)
 {
 	if(Custom_Sidebars == 0)
@@ -930,7 +857,7 @@ float4 PS_calcLR(float2 texcoord)
 	float2 TCL, TCR, TexCoords = texcoord;
 
 	[branch] if (Stereoscopic_Mode == 0)
-		{
+	{
 		TCL = float2(texcoord.x*2,texcoord.y);
 		TCR = float2(texcoord.x*2-1,texcoord.y);
 	}
@@ -975,8 +902,7 @@ float4 PS_calcLR(float2 texcoord)
 	else if( Eye_Fade_Reduction == 2)
 			DLR = float2(FD,D);
 
-	float4 color, Left = CSB(Parallax(-DLR.x, TCL)), Right = CSB(Parallax(DLR.y, TCR));
-		
+	float4 color, Left = CSB(Parallax(-DLR.x, TCL)), Right = CSB(Parallax(DLR.y, TCR));		
 	//if (Side_Bars)
 	//{
 	//	Left = EdgeMask(-Divergence,Left,TCL);
@@ -989,26 +915,19 @@ float4 PS_calcLR(float2 texcoord)
 	#endif
 	if(!Depth_Map_View)
 	{
-	float2 gridxy;
-
-	if(Scaling_Support == 0)
-		gridxy = floor(float2(TexCoords.x * BUFFER_WIDTH, TexCoords.y * BUFFER_HEIGHT)); //Native
-	else if(Scaling_Support == 1)
-		gridxy = floor(float2(TexCoords.x * 3840.0, TexCoords.y * 2160.0));	
-	else if(Scaling_Support == 2)
-		gridxy = floor(float2(TexCoords.x * 3841.0, TexCoords.y * 2161.0));
-	else if(Scaling_Support == 3)
-		gridxy = floor(float2(TexCoords.x * 1920.0, TexCoords.y * 1080.0));
-	else if(Scaling_Support == 4)
-		gridxy = floor(float2(TexCoords.x * 1921.0, TexCoords.y * 1081.0));
-	else if(Scaling_Support == 5)
-		gridxy = floor(float2(TexCoords.x * 1680.0, TexCoords.y * 1050.0));
-	else if(Scaling_Support == 6)
-		gridxy = floor(float2(TexCoords.x * 1681.0, TexCoords.y * 1051.0));
-	else if(Scaling_Support == 7)
-		gridxy = floor(float2(TexCoords.x * 1280.0, TexCoords.y * 720.0));
-	else if(Scaling_Support == 8)
-		gridxy = floor(float2(TexCoords.x * 1281.0, TexCoords.y * 721.0));
+	
+	float2 gridxy, GXYArray[9] = {
+		float2(TexCoords.x * BUFFER_WIDTH, TexCoords.y * BUFFER_HEIGHT), //Native
+		float2(TexCoords.x * 3840.0, TexCoords.y * 2160.0),
+		float2(TexCoords.x * 3841.0, TexCoords.y * 2161.0),
+		float2(TexCoords.x * 1920.0, TexCoords.y * 1080.0),
+		float2(TexCoords.x * 1921.0, TexCoords.y * 1081.0),
+		float2(TexCoords.x * 1680.0, TexCoords.y * 1050.0),
+		float2(TexCoords.x * 1681.0, TexCoords.y * 1051.0),
+		float2(TexCoords.x * 1280.0, TexCoords.y * 720.0),
+		float2(TexCoords.x * 1281.0, TexCoords.y * 721.0)
+	};
+	gridxy = floor(GXYArray[Scaling_Support]);
 			
 		[branch] if(Stereoscopic_Mode == 0)
 		{	
@@ -1191,20 +1110,18 @@ float4 PS_calcLR(float2 texcoord)
 
 float4 Average_Luminance(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Target
 {
-	float4 ABE = float4(0.0,1.0,0.0, 0.750);//Upper Extra Wide
-		
-	[branch] if(Auto_Balance_Ex == 2)
-		ABE = float4(0.0,1.0,0.0, 0.5);//Upper Wide
-	else if(Auto_Balance_Ex == 3)
-		ABE = float4(0.0,1.0, 0.15625, 0.46875);//Upper Short
-	else if(Auto_Balance_Ex == 4)
-		ABE = float4(0.375, 0.250, 0.4375, 0.125);//Center Small
-	else if(Auto_Balance_Ex == 5)
-		ABE = float4(0.375, 0.250, 0.0, 1.0);//Center Long
+	float4 ABEA, ABEArray[5] = {
+		float4(0.0,1.0,0.0, 0.750),         //Upper Extra Wide
+		float4(0.0,1.0,0.0, 0.5),           //Upper Wide
+		float4(0.0,1.0, 0.15625, 0.46875),  //Upper Short
+		float4(0.375, 0.250, 0.4375, 0.125),//Center Small
+		float4(0.375, 0.250, 0.0, 1.0)      //Center Long
+	};
+	ABEA = ABEArray[Auto_Balance_Ex - 1];
 			
-	float Average_Lum_ZPD = tex2Dlod(SamplerDMN,float4(ABE.x + texcoord.x * ABE.y, ABE.z + texcoord.y * ABE.w, 0, 0)).w;
+	float Average_Lum_ZPD = tex2Dlod(SamplerDMN,float4(ABEA.x + texcoord.x * ABEA.y, ABEA.z + texcoord.y * ABEA.w, 0, 0)).w;
 	float Average_Lum_Full = tex2Dlod(SamplerDMN,float4(texcoord.x,texcoord.y, 0, 0)).w;
-			return float4(Average_Lum_ZPD,Average_Lum_Full,tex2Dlod(SamplerDMN,float4(0,0, 0, 0)).w,1);
+	return float4(Average_Lum_ZPD,Average_Lum_Full,tex2Dlod(SamplerDMN,float4(0,0, 0, 0)).w,1);
 }
 uniform float timer < source = "timer"; >; //Please do not remove.
 ////////////////////////////////////////////////////////Logo/////////////////////////////////////////////////////////////////////////

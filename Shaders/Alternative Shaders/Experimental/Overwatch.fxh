@@ -86,6 +86,11 @@ static const float DepthPY = 0.0;
 #elif (App == 0x4383C12A || App == 0x239E5522 || App == 0x3591DE9C)	//CoD | CoD:UO | CoD:2
 	#define DB_W 15
 	#define HM 0
+#elif (App == 0x73FA91DC)	//CoD: Black Ops IIII
+	#define DA_Y 22.5
+	#define DA_W 1
+	#define DB_W 16
+	#define HM 0 
 #elif (App == 0x37BD797D)	//Quake DarkPlaces
 	#define DA_Y 15.0
 	#define DB_W 17

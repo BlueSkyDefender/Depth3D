@@ -530,7 +530,7 @@ float4 ShaderOut(float2 texcoord : TEXCOORD0)
 	
 	if (Debug_View == 0)
 	{			
-		Out = lerp(Sharpen, BB, DB);
+		Out.rgb = lerp(Sharpen, BB, DB);
 		
 		if(Depth_Cues)
 			Out = Out*lerp(DepthCues,1., DB);
