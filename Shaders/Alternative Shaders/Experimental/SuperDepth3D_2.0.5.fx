@@ -1,6 +1,6 @@
-////---------------------//
-///**SuperDepth3D_Next**///
-//---------------------////
+////----------------//
+///**SuperDepth3D**///
+//----------------////
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //* Depth Map Based 3D post-process shader v2.0.5          																														
@@ -27,6 +27,8 @@
 	#define HM 0		
 #endif
 //USER EDITABLE PREPROCESSOR FUNCTIONS START//
+//This enables the older SuperDepth3D method of producing an 3D image. This is better for older systems that have an hard time running the new mode.
+#define Legacy_Mode 0 //Zero is off and One is On.
 
 // Zero Parallax Distance Balance Mode allows you to switch control from manual to automatic and vice versa.
 #define Balance_Mode 0 //Default 0 is Automatic. One is Manual.
@@ -783,17 +785,38 @@ float zBuffer(float2 texcoord)
 // Horizontal parallax offset & Hole filling effect
 float2 Parallax(float Diverge, float2 Coordinates)
 {
-	float Cal_Steps = Divergence + (Divergence * 0.04);
-	
-	//ParallaxSteps
-	float Steps = clamp(Cal_Steps,0,255);
-	
+	float2 ParallaxCoord = Coordinates;
+	float DepthLR = 1, LRDepth, Z, MS = Diverge * pix.x, MSM, N = 9, S[9] = {0.5,0.5625,0.625,0.6875,0.75,0.8125,0.875,0.9375,1.0};
+	#if Legacy_Mode	
+	MS = -MS;
+	[loop]
+	for ( int i = 0 ; i < N; i++ ) 
+	{	MSM = MS + 0.001;
+				
+		DepthLR = min(DepthLR, zBuffer(float2(ParallaxCoord.x + S[i] * MS, ParallaxCoord.y)) );
+		if(View_Mode == 1)
+		{
+			LRDepth =  min(DepthLR,zBuffer(float2(ParallaxCoord.x + S[i] * MSM, ParallaxCoord.y)) );						
+			LRDepth += min(DepthLR,zBuffer(float2(ParallaxCoord.x + S[i] * (MSM * 0.9375), ParallaxCoord.y)) );			
+			LRDepth += min(DepthLR,zBuffer(float2(ParallaxCoord.x + S[i] * (MSM * 0.875), ParallaxCoord.y)) );	
+			LRDepth += min(DepthLR,zBuffer(float2(ParallaxCoord.x + S[i] * (MSM * 0.6875), ParallaxCoord.y)) );			
+			LRDepth += min(DepthLR,zBuffer(float2(ParallaxCoord.x + S[i] * (MSM * 0.500), ParallaxCoord.y)) );	
+			
+			DepthLR = lerp(LRDepth * rcp(5), DepthLR, 0.1875);
+		}		
+	}
+	//Reprojection Left and Right
+	ParallaxCoord = float2(Coordinates.x + (MS * DepthLR), Coordinates.y);
+	#else
+	//ParallaxSteps Calculations
+	float D = abs(length(Diverge)), Cal_Steps = D + (D * 0.04), Steps = clamp(Cal_Steps,0,255);
+
 	// Offset per step progress & Limit
-	float LayerDepth = 1.0 / Steps;
+	float LayerDepth = rcp(Steps);
 
 	//Offsets listed here Max Seperation is 3% - 8% of screen space with Depth Offsets & Netto layer offset change based on MS.
-	float MS = Diverge * pix.x, deltaCoordinates = MS * LayerDepth;
-	float2 ParallaxCoord = Coordinates,DB_Offset = float2((Diverge * 0.0375) * pix.x, 0);
+	float deltaCoordinates = MS * LayerDepth;
+	float2 DB_Offset = float2((Diverge * 0.0375) * pix.x, 0);
 	float CurrentDepthMapValue = zBuffer(ParallaxCoord), CurrentLayerDepth = 0, DepthDifference;
 
 	[loop] //Steep parallax mapping
@@ -828,7 +851,7 @@ float2 Parallax(float Diverge, float2 Coordinates)
 	DepthDifference = (afterDepthValue-beforeDepthValue) * MS;
 	if(View_Mode == 1)
 		ParallaxCoord.x = ParallaxCoord.x - DepthDifference;
-	
+	#endif
 	return ParallaxCoord;
 }
 //Per is Perspective & Optimization for line interlaced Adjustment. 

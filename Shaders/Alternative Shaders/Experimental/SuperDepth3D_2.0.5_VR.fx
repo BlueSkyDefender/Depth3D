@@ -27,6 +27,8 @@
 	#define HM 0		
 #endif
 //USER EDITABLE PREPROCESSOR FUNCTIONS START//
+//This enables the older SuperDepth3D method of producing an 3D image. This is better for older systems that have an hard time running the new mode.
+#define Legacy_Mode 0 //Zero is off and One is On.
 
 //Weapon Zero Parallax Distance
 #define WZPD 0.03 //WZPD controls the focus distance for the screen Pop-out effect also known as Convergence for the weapon hand. Zero is off.
@@ -801,13 +803,11 @@ float zBuffer(float2 texcoord : TEXCOORD0)
 // Horizontal parallax offset & Hole filling effect
 float2 Parallax( float Diverge, float2 Coordinates)
 {
-	float Cal_Steps = (Divergence * 0.5) + (Divergence * 0.04);
-	
-	if(!Performance_Mode)
-	Cal_Steps = Divergence + (Divergence * 0.04);
-	
+	//ParallaxSteps Calculations
+	float D = abs(length(Diverge)), Cal_Steps = D + (D * 0.04), Steps = clamp(Cal_Steps,0,255);
+
 	// Offset per step progress & Limit
-	float LayerDepth = 1.0 / Cal_Steps;
+	float LayerDepth = rcp(Steps);
 
 	//Offsets listed here Max Seperation is 3% - 8% of screen space with Depth Offsets & Netto layer offset change based on MS.
 	float MS = Diverge * pix.x, deltaCoordinates = MS * LayerDepth;
