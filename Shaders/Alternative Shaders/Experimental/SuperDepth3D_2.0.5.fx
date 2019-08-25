@@ -567,7 +567,7 @@ float2 WeaponDepth(float2 texcoord)
 	float2 texXY = texcoord + Image_Position_Adjust * pix;		
 	float2 midHV = (Horizontal_and_Vertical-1) * float2(BUFFER_WIDTH * 0.5,BUFFER_HEIGHT * 0.5) * pix;			
 	texcoord = float2((texXY.x*Horizontal_and_Vertical.x)-midHV.x,(texXY.y*Horizontal_and_Vertical.y)-midHV.y);	
-	#endif	
+	#endif
 	
 	if (Depth_Map_Flip)
 		texcoord.y =  1 - texcoord.y;
@@ -784,8 +784,8 @@ float zBuffer(float2 texcoord)
 /////////////////////////////////////////L/R//////////////////////////////////////////////////////////////////////
 // Horizontal parallax offset & Hole filling effect
 float2 Parallax(float Diverge, float2 Coordinates)
-{
-	float2 ParallaxCoord = Coordinates;
+{	float2 ParallaxCoord = Coordinates;
+
 	float DepthLR = 1, LRDepth, Z, MS = Diverge * pix.x, MSM, N = 9, S[9] = {0.5,0.5625,0.625,0.6875,0.75,0.8125,0.875,0.9375,1.0};
 	#if Legacy_Mode	
 	MS = -MS;
@@ -857,14 +857,7 @@ float2 Parallax(float Diverge, float2 Coordinates)
 //Per is Perspective & Optimization for line interlaced Adjustment. 
 #define Per float2( (Perspective * pix.x) * 0.5, 0)
 #define AI Interlace_Anaglyph.x * 0.5	
-//float4 EdgeMask( float Diverge, float4 Image, float2 texcoords)
-//{
-//	float SB_R = 1-(Divergence * 0.02) * 0.025,SB_L = (Divergence * 0.02) * 0.025;
-//		if(texcoords.x < SB_R && texcoords.x > SB_L)
-//		return Image;//tex2Dlod(BackBuffer,float4(texcoords,0,0));
-//	else
-//		return float4(0,0,0,1);
-//}
+
 float4 CSB(float2 texcoords)
 {
 	if(Custom_Sidebars == 0)
@@ -926,11 +919,7 @@ float4 PS_calcLR(float2 texcoord)
 			DLR = float2(FD,D);
 
 	float4 color, Left = CSB(Parallax(-DLR.x, TCL)), Right = CSB(Parallax(DLR.y, TCR));		
-	//if (Side_Bars)
-	//{
-	//	Left = EdgeMask(-Divergence,Left,TCL);
-	//	Right = EdgeMask(Divergence,Right,TCR);
-	//}
+
 	#if HUD_MODE || HM	
 	float HUD_Adjustment = ((0.5 - HUD_Adjust.y)*25.) * pix.x;
 	Left = HUD(Left,float2(TCL.x - HUD_Adjustment,TCL.y));

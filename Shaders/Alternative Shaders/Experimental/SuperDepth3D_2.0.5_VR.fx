@@ -157,13 +157,14 @@ uniform int View_Mode <
 				 "Default is Normal";
 	ui_category = "Occlusion Masking";
 > = 0;
-
+#if !Legacy_Mode	
 uniform bool Performance_Mode <
 	ui_label = " Performance Mode";
 	ui_tooltip = "Occlusion Quality Processing.\n"
 				 "Default is True.";
 	ui_category = "Occlusion Masking";
 > = true;
+#endif
 //Depth Map//
 uniform int Depth_Map <
 	ui_type = "combo";
@@ -802,16 +803,39 @@ float zBuffer(float2 texcoord : TEXCOORD0)
 /////////////////////////////////////////L/R//////////////////////////////////////////////////////////////////////
 // Horizontal parallax offset & Hole filling effect
 float2 Parallax( float Diverge, float2 Coordinates)
-{
+{	float2 ParallaxCoord = Coordinates;
+	int N = 9;
+	float DepthLR = 1, LRDepth, Perf = 1, MS = Diverge * pix.x, MSM, S[N] = {0.5,0.5625,0.625,0.6875,0.75,0.8125,0.875,0.9375,1.0};
+	#if Legacy_Mode	
+	MS = -MS;
+	[loop]
+	for ( int i = 0 ; i < N; i++ ) 
+	{	MSM = MS + 0.001;
+				
+		DepthLR = min(DepthLR, zBuffer(float2(ParallaxCoord.x + S[i] * MS, ParallaxCoord.y)) );
+		if(View_Mode == 1)
+		{
+			LRDepth =  min(DepthLR,zBuffer(float2(ParallaxCoord.x + S[i] * MSM, ParallaxCoord.y)) );							
+			LRDepth += min(DepthLR,zBuffer(float2(ParallaxCoord.x + S[i] * (MSM * 0.875), ParallaxCoord.y)) );			
+			LRDepth += min(DepthLR,zBuffer(float2(ParallaxCoord.x + S[i] * (MSM * 0.500), ParallaxCoord.y)) );	
+			
+			DepthLR = lerp(LRDepth * rcp(3), DepthLR, 0.1875);
+		}		
+	}
+	//Reprojection Left and Right
+	ParallaxCoord = float2(Coordinates.x + (MS * DepthLR), Coordinates.y);
+	#else
+	if(!Performance_Mode)
+	Perf = .5;
 	//ParallaxSteps Calculations
-	float D = abs(length(Diverge)), Cal_Steps = D + (D * 0.04), Steps = clamp(Cal_Steps,0,255);
-
+	float D = abs(length(Diverge)), Cal_Steps = (D * Perf) + (D * 0.04), Steps = clamp(Cal_Steps,0,255);
+		
 	// Offset per step progress & Limit
 	float LayerDepth = rcp(Steps);
 
 	//Offsets listed here Max Seperation is 3% - 8% of screen space with Depth Offsets & Netto layer offset change based on MS.
-	float MS = Diverge * pix.x, deltaCoordinates = MS * LayerDepth;
-	float2 ParallaxCoord = Coordinates,DB_Offset = float2((Diverge * 0.075f) * pix.x, 0);
+	float deltaCoordinates = MS * LayerDepth;
+	float2 DB_Offset = float2((Diverge * 0.0625f) * pix.x, 0);
 	float CurrentDepthMapValue = zBuffer(ParallaxCoord), CurrentLayerDepth = 0, DepthDifference;
 
 	[loop] //Steep parallax mapping
@@ -844,7 +868,7 @@ float2 Parallax( float Diverge, float2 Coordinates)
 	DepthDifference = (afterDepthValue-beforeDepthValue) * MS;
 	if(View_Mode == 1)
 		ParallaxCoord.x = lerp(ParallaxCoord.x - DepthDifference,ParallaxCoord.x,0.5f);
-	
+	#endif
 	return ParallaxCoord;
 }
 
