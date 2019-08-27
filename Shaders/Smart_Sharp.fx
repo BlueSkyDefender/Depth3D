@@ -11,9 +11,9 @@
 // 																																											
 // https://github.com/BlueSkyDefender/Depth3D																	
 //  ---------------------------------																																	                                                                                                        																	
-// 											Bilateral Filter Made by mrharicot ported over to Reshade by BSD													
-//											GitHub Link for sorce info github.com/SableRaf/Filters4Processin																
-// 											Shadertoy Link https://www.shadertoy.com/view/4dfGDH  Thank You.																	
+// 								Bilateral Filter Made by mrharicot ported over to Reshade by BSD													
+//								 GitHub Link for sorce info github.com/SableRaf/Filters4Processin																
+// 								Shadertoy Link https://www.shadertoy.com/view/4dfGDH  Thank You.																	
 // LICENSE
 // =======
 // Copyright (c) 2017-2019 Advanced Micro Devices, Inc. All rights reserved.
@@ -231,7 +231,8 @@ texture texDC { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = R8;};
 sampler SamplerDC
 	{
 			Texture = texDC;
-	};	
+	};
+	
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 float Depth(in float2 texcoord : TEXCOORD0)
 {
@@ -434,7 +435,7 @@ void Filters(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, o
 		result += E(texcoord + float2(-1, 0) * Adjust );
 		result += E(texcoord + float2( 1, 0) * 0.75 * Adjust );
 		result += E(texcoord + float2(-1, 0) * 0.75 * Adjust );		
-		result += E(texcoord + float2( 1, 1) * 0.50 * Adjust );
+		result += E(texcoord + float2( 1, 0) * 0.50 * Adjust );
 		result += E(texcoord + float2(-1, 0) * 0.50 * Adjust );
 		result += E(texcoord + float2( 1, 0) * 0.25 * Adjust );
 		result += E(texcoord + float2(-1, 0) * 0.25 * Adjust );
@@ -452,9 +453,8 @@ void Filters(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, o
 		//Done = 0;	
 	//else
 		//Done = 0;	
-
 		 
-	color = float4( Done,dot(result / 12, float3(0.2126, 0.7152, 0.0722) ) );
+	color = float4( Done,dot(result * 0.083333333, float3(0.2126, 0.7152, 0.0722) ) );
 }
 // Spread the blur a bit more. 
 float Adjust(float2 texcoord : TEXCOORD) 
@@ -472,7 +472,7 @@ float Adjust(float2 texcoord : TEXCOORD)
 		result += tex2Dlod(SamplerBF,float4(texcoord + float2(-1, 0) * 0.5 * S ,0,0)).w;
 		result += tex2Dlod(SamplerBF,float4(texcoord + float2( 0,-1) * 0.5 * S ,0,0)).w;
 	
-	return result / 8; 
+	return result * 0.125; 
 }
 
 float DepthCues(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Target
@@ -490,7 +490,7 @@ float DepthCues(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_
 		result += Adjust(texcoord + float2(-1, 0) * 0.5 * S ).x;
 		result += Adjust(texcoord + float2( 0,-1) * 0.5 * S ).x;
 		
-		result /= 8;
+		result *= 0.125;
 	
 	// Formula for Image Pop = Original + (Original / Blurred).
 	float DC = (dot(E(texcoord),float3(0.2126, 0.7152, 0.0722)) / result );
@@ -510,9 +510,8 @@ float DC(float2 texcoord )
 		  result += tex2D(SamplerDC, float2(texcoord + float2(-1,-1) * tex_offset)).x;
 		  result += tex2D(SamplerDC, float2(texcoord + float2( 1,-1) * tex_offset)).x;
 		  result += tex2D(SamplerDC, float2(texcoord + float2(-1, 1) * tex_offset)).x;
-		  result /= 9;
 		  
-	return lerp(1.0f,lerp(result,tex2D(SamplerDC,texcoord).x,1-Blur_Cues),Shade_Power);
+	return lerp(1.0f,lerp(result * 0.11111111,tex2D(SamplerDC,texcoord).x,1-Blur_Cues),Shade_Power);
 }
 
 float4 ShaderOut(float2 texcoord : TEXCOORD0)
