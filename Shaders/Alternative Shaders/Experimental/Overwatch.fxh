@@ -191,17 +191,17 @@ static const float DepthPY = 0.0;
 	#define DC_X 0.5034
 	#define HM 1
 #elif (App == 0x22BA110F )	//Turok: DH 2017
-	DA.x = 0.002
+	#define DA_X 0.002
 	#define DA_Y 250.0
 	#define HM 0  
 #elif (App == 0x5F1DBD3B )	//Turok2: SoE 2017
-	DA.x = 0.002
+	#define DA_X 0.002
 	#define DA_Y 250.0
 	#define HM 0  
 //#else
 	//#define HM 0 	
 #endif
-
+//Change Output
 //#ifndef checks whether the given token has been #defined earlier in the file or in an included file
 #ifndef DA_X
     #define DA_X ZPD_D

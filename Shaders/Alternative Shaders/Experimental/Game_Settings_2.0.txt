@@ -69,7 +69,8 @@ Inner Shader Setting:
              *Call of Chthulhu                             DM 1       9.3750                                       0.0250-0.0500      Yes 1       0.1625   
     RB       *Call of Duty: Advance Warfare                DM 1       13.750                *WDM 10                0.0375-0.0625      Yes 2                                       
     RB       *Call of Duty: Black Ops                      DM 0       12.500                *WDM 7                 0.0375-0.0500      Yes 3               
-    RB       *Call of Duty: Black Ops 2                    DM 1       13.750                *WDM 8                 0.0375-0.0625      Yes 2            
+    RB       *Call of Duty: Black Ops 2                    DM 1       13.750                *WDM 8                 0.0375-0.0625      Yes 2
+    RB       *Call of Duty: Black Ops 4                    DM 1       22.50                 *WDM 14                0.0375-0.0625      ?             
     RB       *Call of Duty: Ghost                          DM 1       13.750                *WDM 9                 0.0375-0.0625      Yes 2            
     RB       *Call of Duty: Infinite Warfare               DM 1       13.750                *WDM 11                0.0375-0.0625      Yes 2
     RB       *Call of Duty: Modern Warfare 3               DM 0       12.500                *WDM 7                 0.0375-0.0500      Yes 3
@@ -350,6 +351,10 @@ Set Image Quality to Extra.
 
 {Call of Duty: Black Ops 2}
 Turn off AA.
+
+{Call of Duty: Black Ops 4}
+Game crashes under Nv Hardware.
+Use an AMD Card to play this game in 3D.
 
 {Call of Duty: Infinite Warfare}
 Render Resolution Native.

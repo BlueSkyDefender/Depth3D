@@ -209,7 +209,7 @@ float2 Parallax( float2 Diverge, float2 Coordinates)
 
 	//Offsets listed here Max Seperation is 3% - 8% of screen space with Depth Offsets & Netto layer offset change based on MS.
 	float2 MS = Diverge * pix;
-	float2  deltaCoordinates = MS * LayerDepth, ParallaxCoord = Coordinates, DB_Offset = (Diverge * 0.0375) * pix;
+	float2  deltaCoordinates = MS * LayerDepth, ParallaxCoord = Coordinates, DB_Offset = (Diverge * 0.025) * pix;
 	float CurrentDepthMapValue = zBuffer(ParallaxCoord), CurrentLayerDepth = 0;
 
 	[loop] //Steep parallax mapping
