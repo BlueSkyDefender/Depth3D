@@ -375,10 +375,10 @@ uniform int Cursor_Type <
 	#else
 	ui_type = "slider";
 	#endif
-	ui_min = 0; ui_max = 5;
+	ui_min = 0; ui_max = 7;
 	ui_label = "·Cursor Selection·";
 	ui_tooltip = "Choose the cursor type you like to use.\n" 
-				 "Default is Zero.";
+		    	 "Default is Zero off.";
 	ui_category = "Cursor Adjustments";
 > = 0;
 
@@ -387,9 +387,9 @@ uniform float3 Cursor_STT <
 	ui_min = 0; ui_max = 1;
 	ui_label = " Cursor Adjustments";
 	ui_tooltip = "This controlls the Size, Thickness, & Color.\n" 
-				 "Defaults are ( X 0.125, Y 0.5, Z 1.0).";
+		  	   "Defaults are ( X 0.125, Y 0.5, Z 0.0).";
 	ui_category = "Cursor Adjustments";
-> = float3(0.125,0.5,1.0);
+> = float3(0.125,0.5,0.0);
 
 uniform bool SCSC <
 	ui_label = " Cursor Lock";
@@ -431,7 +431,7 @@ sampler BackBufferBORDER
 		AddressW = BORDER;
 	};
 	
-texture texDMVR  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT*0.75; Format = RGBA16F; }; 
+texture texDMVR  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA16F; }; 
 
 sampler SamplerDMVR
 	{
@@ -461,7 +461,7 @@ sampler SamplerRight
 uniform float2 Mousecoords < source = "mousepoint"; > ;	
 ////////////////////////////////////////////////////////////////////////////////////Cross Cursor////////////////////////////////////////////////////////////////////////////////////	
 float4 MouseCursor(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Target
-{
+{		
 	float4 Out = tex2D(BackBuffer, texcoord),Color; 
 	float CCA = 0.1,CCB = 0.0025, CCC = 0.025, CCD = 0.05;
 	float2 MousecoordsXY = Mousecoords * pix, center = texcoord, Screen_Ratio = float2(DAR.x,DAR.y), Size_Thickness = float2(Cursor_STT.x,Cursor_STT.y + 0.00000001);
@@ -494,7 +494,7 @@ float4 MouseCursor(float4 position : SV_Position, float2 texcoord : TEXCOORD) : 
 		CC + RC,     //Cross Cursor / Ring Cursor
 		CC + RC + SSC//Cross Cursor / Ring Cursor / Solid Square Cursor
 	};
-	Cursor =  CArray[Cursor_Type];
+	Cursor =  CArray[clamp(Cursor_Type - 1,0,6)];
 	// Cursor Color Array //
 	float3 CCArray[10] = {
 		float3(1,1,1),
@@ -510,7 +510,7 @@ float4 MouseCursor(float4 position : SV_Position, float2 texcoord : TEXCOORD) : 
 	};
 	int CSTT = int(Cursor_STT.z * 10);
 	Color.rgb = CCArray[CSTT];
-
+	if(Cursor_Type > 0)
 	Out = Cursor ? Color : Out;
 	
 	return Out;
@@ -521,16 +521,11 @@ texture texLumVR {Width = 256*0.5; Height = 256*0.5; Format = RGBA16F; MipLevels
 sampler SamplerLumVR																
 	{
 		Texture = texLumVR;
-		MinFilter = LINEAR;
-		MagFilter = LINEAR;
-		MipFilter = LINEAR;
 	};	
 	
 float2 Lum(in float2 texcoord : TEXCOORD0)
-	{
-		float2 Luminance = tex2Dlod(SamplerLumVR,float4(texcoord,0,11)).xy; //Average Luminance Texture Sample 
-
-		return saturate(Luminance);
+	{   //Luminance
+		return saturate(tex2Dlod(SamplerLumVR,float4(texcoord,0,11)).xy); //Average Luminance Texture Sample 
 	}
 	
 uniform float frametime < source = "frametime";>;
@@ -738,22 +733,9 @@ float AutoZPDRange(float ZPD, float2 texcoord )
     return saturate(LumAdjust_AZDPR * ZPD);
 }
 #endif
-float WHConv(float D,float2 texcoord)
+float2 Conv(float D,float2 texcoord)
 {
-	float Z = WZPD, ZP = 0.5,ALC = abs(Lum(texcoord).x) ,Convergence = 1 - Z / D;
-	
-	if (Z <= 0)
-		ZP = 1;
-		
-	if (ALC <= 0.025)
-		ZP = 1;
-		 
-   return lerp(Convergence,D,ZP);
-}
-
-float Conv(float D,float2 texcoord)
-{
-	float Z = ZPD, ZP = 0.5, ALC = abs(Lum(texcoord).x);
+	float Z = ZPD, WZP = 0.5, ZP = 0.5, ALC = abs(Lum(texcoord).x), WConvergence = 1 - WZPD / D;
 	#if RE_Fix	
 		Z = AutoZPDRange(Z,texcoord);
 	#endif	
@@ -763,28 +745,35 @@ float Conv(float D,float2 texcoord)
 	#if Balance_Mode
 			ZP = saturate(ZPD_Balance);			
 	#else
-		if(Auto_Balance)
+		if(Auto_Balance > 0 )
 			ZP = saturate(ALC);
 	#endif		
 		float Convergence = 1 - Z / D;
 			
 		if (ZPD == 0)
-			ZP = 1.;
-					
-    return lerp(Convergence,D, ZP);
+			ZP = 1;
+
+		if (WZPD <= 0)
+			WZP = 1;
+		
+		if (ALC <= 0.025)
+			WZP = 1;		
+			
+    return float2(lerp(Convergence,D, ZP),lerp(WConvergence,D,WZP));
 }
 
-float zBuffer(float2 texcoord : TEXCOORD0)
+float zBuffer(float2 texcoord)
 {	
 	float4 DM = tex2Dlod(SamplerDMVR,float4(texcoord,0,0));
 	
 	if (WP == 0)
 		DM.y = 0;
-	
-	DM.y = lerp(Conv(DM.x,texcoord), WHConv(DM.z,texcoord), DM.y);
-		
+
+	DM.y = lerp(Conv(DM.x,texcoord).x, Conv(DM.z,texcoord).y, DM.y);	
+			
 	if (WZPD <= 0)
-	DM.y = Conv(DM.x,texcoord);
+		DM.y = Conv(DM.x,texcoord).x;
+
 	
 	float ALC = abs(Lum(texcoord).x);
 	
@@ -793,7 +782,7 @@ float zBuffer(float2 texcoord : TEXCOORD0)
 		if (ALC <= (0.025 / Menu_Detection))
 		DM = 0;
 	}
-	
+		
 	if (Cancel_Depth)
 		DM = 0.0625;
 
@@ -803,13 +792,12 @@ float zBuffer(float2 texcoord : TEXCOORD0)
 /////////////////////////////////////////L/R//////////////////////////////////////////////////////////////////////
 // Horizontal parallax offset & Hole filling effect
 float2 Parallax( float Diverge, float2 Coordinates)
-{	float2 ParallaxCoord = Coordinates;
-	int N = 9;
-	float DepthLR = 1, LRDepth, Perf = 1, MS = Diverge * pix.x, MSM, S[N] = {0.5,0.5625,0.625,0.6875,0.75,0.8125,0.875,0.9375,1.0};
+{   float2 ParallaxCoord = Coordinates;
+	float DepthLR = 1, LRDepth, Perf = 1, MS = Diverge * pix.x, MSM, S[9] = {0.5,0.5625,0.625,0.6875,0.75,0.8125,0.875,0.9375,1.0};
 	#if Legacy_Mode	
 	MS = -MS;
 	[loop]
-	for ( int i = 0 ; i < N; i++ ) 
+	for ( int i = 0 ; i < 9; i++ ) 
 	{	MSM = MS + 0.001;
 				
 		DepthLR = min(DepthLR, zBuffer(float2(ParallaxCoord.x + S[i] * MS, ParallaxCoord.y)) );
@@ -825,7 +813,7 @@ float2 Parallax( float Diverge, float2 Coordinates)
 	//Reprojection Left and Right
 	ParallaxCoord = float2(Coordinates.x + (MS * DepthLR), Coordinates.y);
 	#else
-	if(!Performance_Mode)
+	if(Performance_Mode)
 	Perf = .5;
 	//ParallaxSteps Calculations
 	float D = abs(length(Diverge)), Cal_Steps = (D * Perf) + (D * 0.04), Steps = clamp(Cal_Steps,0,255);

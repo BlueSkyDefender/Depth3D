@@ -161,12 +161,7 @@ uniform int Custom_Sidebars <
 	ui_tooltip = "Edges selection for your screen output.";
 	ui_category = "Occlusion Masking";
 > = 1;
-//uniform bool Side_Bars <
-//	ui_label = " Side Bars";
-//	ui_tooltip = "Adds Side Bar to the Left and Right Edges";
-//	ui_category = "Occlusion Masking";
-//> = false;
-//Depth Map//
+
 uniform int Depth_Map <
 	ui_type = "combo";
 	ui_items = "DM0 Normal\0DM1 Reversed\0";
@@ -494,16 +489,11 @@ texture texLumN {Width = 256*0.5; Height = 256*0.5; Format = RGBA16F; MipLevels 
 sampler SamplerLumN																
 	{
 		Texture = texLumN;
-		MinFilter = LINEAR;
-		MagFilter = LINEAR;
-		MipFilter = LINEAR;
 	};	
 	
 float2 Lum(float2 texcoord)
-	{
-		float2 Luminance = tex2Dlod(SamplerLumN,float4(texcoord,0,11)).xy; //Average Luminance Texture Sample 
-
-		return saturate(Luminance);
+	{   //Luminance
+		return saturate(tex2Dlod(SamplerLumN,float4(texcoord,0,11)).xy);//Average Luminance Texture Sample 
 	}
 	
 uniform float frametime < source = "frametime";>;
@@ -576,8 +566,8 @@ float2 WeaponDepth(float2 texcoord)
 	//Weapon Setting Array // - Thank you TrayM for the idea.
 	float3 WA_XYZ, WSArray[62] = {
 	// X Cutoff | Y Adjust | Z Tuneing //
-		float3(CutOff,Adjust,Tune),	  //Custom Weapon Array Starts at 0
-		float3(0.425,5.0,1.125), 	  //WP 0  | ES: Oblivion #C753DADB		
+		float3(CutOff,Adjust,Tune),   //Custom Weapon Array Starts at 0
+		float3(0.425,5.0,1.125), 	 //WP 0  | ES: Oblivion #C753DADB		
 		float3(0,0,0),                //WP 1  | Game
 		float3(0.625,37.5,7.25),      //WP 2  | BorderLands 2 #7B81CCAB
 		float3(0,0,0),                //WP 3  | Game
@@ -660,8 +650,7 @@ float2 WeaponDepth(float2 texcoord)
 
 float4 DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0) : SV_Target
 {
-		float4 DM = Depth(texcoord).xxxx;
-				
+		float4 DM = Depth(texcoord).xxxx;				
 		float R, G, B, A, WD = WeaponDepth(texcoord).x, CoP = WeaponDepth(texcoord).y, CutOFFCal = (CoP/DMA()) * 0.5; //Weapon Cutoff Calculation
 		CutOFFCal = step(DM.x,CutOFFCal);
 					
@@ -720,22 +709,10 @@ float AutoZPDRange(float ZPD, float2 texcoord )
     return saturate(LumAdjust_AZDPR * ZPD);
 }
 #endif
-float WHConv(float D, float2 texcoord)
-{
-	float Z = WZPD, ZP = 0.5,ALC = abs(Lum(texcoord).x) ,Convergence = 1 - Z / D;
-	
-	if (Z <= 0)
-		ZP = 1;
-		
-	if (ALC <= 0.025)
-		ZP = 1;
-		 
-   return lerp(Convergence,D,ZP);
-}
 
-float Conv(float D,float2 texcoord)
+float2 Conv(float D,float2 texcoord)
 {
-	float Z = ZPD, ZP = 0.5, ALC = abs(Lum(texcoord).x);
+	float Z = ZPD, WZP = 0.5, ZP = 0.5, ALC = abs(Lum(texcoord).x), WConvergence = 1 - WZPD / D;
 	#if RE_Fix	
 		Z = AutoZPDRange(Z,texcoord);
 	#endif	
@@ -751,9 +728,15 @@ float Conv(float D,float2 texcoord)
 		float Convergence = 1 - Z / D;
 			
 		if (ZPD == 0)
-			ZP = 1.;
-					
-    return lerp(Convergence,D, ZP);
+			ZP = 1;
+
+		if (WZPD <= 0)
+			WZP = 1;
+		
+		if (ALC <= 0.025)
+			WZP = 1;		
+			
+    return float2(lerp(Convergence,D, ZP),lerp(WConvergence,D,WZP));
 }
 
 float zBuffer(float2 texcoord)
@@ -762,11 +745,12 @@ float zBuffer(float2 texcoord)
 	
 	if (WP == 0)
 		DM.y = 0;
-	
-	DM.y = lerp(Conv(DM.x,texcoord), WHConv(DM.z,texcoord), DM.y);
-		
+
+	DM.y = lerp(Conv(DM.x,texcoord).x, Conv(DM.z,texcoord).y, DM.y);	
+			
 	if (WZPD <= 0)
-	DM.y = Conv(DM.x,texcoord);
+		DM.y = Conv(DM.x,texcoord).x;
+
 	
 	float ALC = abs(Lum(texcoord).x);
 	
@@ -784,8 +768,7 @@ float zBuffer(float2 texcoord)
 /////////////////////////////////////////L/R//////////////////////////////////////////////////////////////////////
 // Horizontal parallax offset & Hole filling effect
 float2 Parallax(float Diverge, float2 Coordinates)
-{	float2 ParallaxCoord = Coordinates;
-
+{   float2 ParallaxCoord = Coordinates;
 	float DepthLR = 1, LRDepth, Z, MS = Diverge * pix.x, MSM, N = 9, S[9] = {0.5,0.5625,0.625,0.6875,0.75,0.8125,0.875,0.9375,1.0};
 	#if Legacy_Mode	
 	MS = -MS;
@@ -1122,14 +1105,16 @@ float4 PS_calcLR(float2 texcoord)
 
 float4 Average_Luminance(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Target
 {
-	float4 ABEA, ABEArray[5] = {
+
+	float4 ABEA, ABEArray[6] = {
+		float4(0.0,1.0,0.0, 1.0),           //No Edit
 		float4(0.0,1.0,0.0, 0.750),         //Upper Extra Wide
 		float4(0.0,1.0,0.0, 0.5),           //Upper Wide
 		float4(0.0,1.0, 0.15625, 0.46875),  //Upper Short
 		float4(0.375, 0.250, 0.4375, 0.125),//Center Small
 		float4(0.375, 0.250, 0.0, 1.0)      //Center Long
 	};
-	ABEA = ABEArray[Auto_Balance_Ex - 1];
+	ABEA = ABEArray[Auto_Balance_Ex];
 			
 	float Average_Lum_ZPD = tex2Dlod(SamplerDMN,float4(ABEA.x + texcoord.x * ABEA.y, ABEA.z + texcoord.y * ABEA.w, 0, 0)).w;
 	float Average_Lum_Full = tex2Dlod(SamplerDMN,float4(texcoord.x,texcoord.y, 0, 0)).w;
