@@ -78,7 +78,7 @@ Inner Shader Setting:
               Castle of Illusion Micky Mouse               DM 0       12.500                                       ???????????
               Crash Bandicoot™ N. Sane Trilogy             DM 0        ????     ?????                              ???????????                         
              *Cryostasis                                   DM 0       13.750                *WDM 37                0.0375-0.0625      Yes 3                                 
-             *DOOM 2016                                    DM 0       20.000                *WDM 6                 0.0250-0.0500      Yes 3               
+    RB       *DOOM 2016                                    DM 0       20.000                *WDM 6                 0.0250-0.0500      Yes 3               
               DarkSiders Warmastred Edition                DM 0       22.500                                       0.025-0.075  
               Dead Effect                                  DM ?       6.2500                                       ?      
               Dead Island                                  DM 0       5.0000                                       0.025-0.075                       
@@ -356,9 +356,6 @@ Render Resolution Native.
 Turn off AA.
 Don't use in game Supersampling
 
-{Dragon Ball FightersZ} - Use ReShade 3.1.2
-Online 3D works aswell. You need to use ReShade 3.1.2 That is whitelisted under EAC.
-
 {DeadRising 3}
 Use Native scailing I think it's called in game as Full.
 I also suggest useing the 60FPS and 80FOV Fix for this game.
@@ -374,6 +371,14 @@ Now open the DPfix095.zip Directly from http://blog.metaclassofnil.com/wp-conten
 
 Install the contents of that folder in to Deadly Premonition Folder where you changed Reshade's d3d9.dll to dxgi.dll. Edit the DPfix.ini too what ever REZ you want. Then start the game.
 
+{DOOM - 2016}
+Issues with AMD hardware. No depth buffer.
+
+If I am wiling to gues it's because it defaults from Opengl 4.6.0 to 4.3.0 under AMD. Guess you should use a Nv Card for this game. If you know of a way to fix this tell me.
+
+{Dragon Ball FightersZ} - Use ReShade 3.1.2
+Online 3D works aswell. You need to use ReShade 3.1.2 That is whitelisted under EAC.
+
 {Duke Nukem 3D Twentieth Anniversary World Tour} - Use ReShade 3.4.1
 Game now works with the new DX11_BUFFER_DETECTION. You can set this also in ReShades DX11 Tab in game.
 [DX11_BUFFER_DETECTION]
@@ -388,6 +393,7 @@ Highest Setting is "Good" Any thing Lower will work and thing above will not wor
 {Dusk/Dusk World} - Reshade 3.4.0
 In Reshade you need to set the Depth Buffer D32FS8 and Copy Before Clearing. Select Option 4 for World space. Keep in mind your weapond will not be Drawn in this Depth Buffer.
 The weapon Depth Buffer can be found on Option 1. But, can't be merged.....
+
 
 {Emily Wants To Play}
 Install reshade in to SteamLibrary\steamapps\common\Emily Wants To Play\Engine\Binaries\Win64
