@@ -20,9 +20,18 @@
  //* 																																												*//
  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+uniform int AA_Adjust <
+	ui_type = "drag";
+	ui_min = 1; ui_max = 32;
+	ui_label = "AA Power";
+	ui_tooltip = "Use this to adjust the AA power.\n"
+				 "Default is 16";
+	ui_category = "NFAA";
+> = 16;
+
 uniform int View_Mode <
 	ui_type = "combo";
-	ui_items = "NFAA\0NFAA Masked\0Mask View A\0Mask View B\0DLSS\0";
+	ui_items = "NFAA\0Mask View A\0Mask View B\0DLSS\0";
 	ui_label = "View Mode";
 	ui_tooltip = "This is used to select the normal view output or debug view.\n"
 				 "Mask View A & B gives view of the edge detection.\n"
@@ -35,12 +44,12 @@ uniform int View_Mode <
 
 uniform float Mask_Adjust <
 	ui_type = "drag";
-	ui_min = 0.075; ui_max = 0.75;
+	ui_min = 0.0; ui_max = 2.0;
 	ui_label = "Mask Adjustment";
 	ui_tooltip = "Use this to adjust the Mask.\n"
-				 "Default is 0.250";
+				 "Default is 1.00";
 	ui_category = "NFAA";
-> = 0.250;
+> = 1.00;
 
 /////////////////////////////////////////////////////D3D Starts Here/////////////////////////////////////////////////////////////////
 #define pix float2(BUFFER_RCP_WIDTH, BUFFER_RCP_HEIGHT)
@@ -67,7 +76,7 @@ float4 GetBB(float2 texcoord : TEXCOORD)
 float4 NFAA(float2 texcoord)
 {
 	float4 NFAA; // The Edge Seeking code can be adjusted to look for longer edges.
-    float2 UV = texcoord.xy, SW = pix, n; // But, I don't think it's really needed.
+	float2 UV = texcoord.xy, SW = pix, n; // But, I don't think it's really needed.
 	float t, l, r, d;
 	// Find Edges
 	t = LI(GetBB( float2( UV.x , UV.y - SW.y ) ).rgb);
@@ -77,10 +86,10 @@ float4 NFAA(float2 texcoord)
 	n = float2(t - d,r - l);
 	// I should have made rep adjustable. But, I didn't see the need.
 	// Since my goal was to make this AA fast cheap and simple.	
-    float   nl = length(n), Rep = 1 / 16.;
+    float   nl = length(n), Rep = rcp(AA_Adjust);
  
-	if(View_Mode == 4)
-		Rep = 1 / 128.;  
+	if(View_Mode == 3)
+		Rep = rcp(128);  
 	// Seek aliasing and apply AA. Think of this as basicly blur control.
     if (nl < Rep)
     {
@@ -89,7 +98,7 @@ float4 NFAA(float2 texcoord)
     else
     {
 		n *= pix / (nl * 0.5);
- 
+ 	
 	float4   o = GetBB( UV ),
 			t0 = GetBB( UV + n * 0.5) * 0.9,
 			t1 = GetBB( UV - n * 0.5) * 0.9,
@@ -99,29 +108,29 @@ float4 NFAA(float2 texcoord)
 		NFAA = (o + t0 + t1 + t2 + t3) / 4.3;
 	}
 	// Lets make that mask for a sharper image.
-	float Mask = nl * Mask_Adjust;
+	float Mask = nl*(2.5 * Mask_Adjust);
 	
 	if (Mask > 0.025)
 		Mask = 1-Mask;
 	else
 		Mask = 1;
 	// Super Evil Magic Number.
-	Mask = saturate(lerp(Mask,1,-6.25));
+	Mask = saturate(lerp(Mask,1,-1));
 	
 	// Final color
-	if(View_Mode == 1)
+	if(View_Mode == 0)
 	{
 		NFAA = lerp(NFAA,GetBB( texcoord.xy ), Mask );
 	}
-	else if(View_Mode == 2)
+	else if(View_Mode == 1)
 	{
 		NFAA = lerp(float4(2.5,0,0,1),GetBB( texcoord.xy ), Mask );
 	}
-	else if (View_Mode == 3)
+	else if (View_Mode == 2)
 	{
-		NFAA = Mask.xxxx;
+		NFAA = Mask;
 	}
-
+	
 return NFAA;
 }
 
