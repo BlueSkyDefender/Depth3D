@@ -51,7 +51,7 @@ static const float DepthPY = 0.0;
 	#define DA_Y 6.25
 	#define DB_W 7
 	#define HM 0 
-#elif (App == 0x142EDFD6)	//DOOM 2016
+#elif (App == 0x142EDFD6 || App == 0x2A0ECCC9)	//DOOM 2016
 	#define DA_Y 20.0
 	#define DB_W 8
 	#define HM 0 
