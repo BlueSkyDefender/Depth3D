@@ -161,7 +161,14 @@ uniform int Custom_Sidebars <
 	ui_tooltip = "Edges selection for your screen output.";
 	ui_category = "Occlusion Masking";
 > = 1;
-
+#if !Legacy_Mode	
+uniform bool Performance_Mode <
+	ui_label = " Performance Mode";
+	ui_tooltip = "Occlusion Quality Processing.\n"
+				 "Default is False.";
+	ui_category = "Occlusion Masking";
+> = false;
+#endif
 uniform int Depth_Map <
 	ui_type = "combo";
 	ui_items = "DM0 Normal\0DM1 Reversed\0";
@@ -769,7 +776,7 @@ float zBuffer(float2 texcoord)
 // Horizontal parallax offset & Hole filling effect
 float2 Parallax(float Diverge, float2 Coordinates)
 {   float2 ParallaxCoord = Coordinates;
-	float DepthLR = 1, LRDepth, Z, MS = Diverge * pix.x, MSM, N = 9, S[9] = {0.5,0.5625,0.625,0.6875,0.75,0.8125,0.875,0.9375,1.0};
+	float DepthLR = 1, LRDepth, Perf = 1, Z, MS = Diverge * pix.x, MSM, N = 9, S[9] = {0.5,0.5625,0.625,0.6875,0.75,0.8125,0.875,0.9375,1.0};
 	#if Legacy_Mode	
 	MS = -MS;
 	[loop]
@@ -791,8 +798,10 @@ float2 Parallax(float Diverge, float2 Coordinates)
 	//Reprojection Left and Right
 	ParallaxCoord = float2(Coordinates.x + (MS * DepthLR), Coordinates.y);
 	#else
+	if(Performance_Mode)
+	Perf = .5;
 	//ParallaxSteps Calculations
-	float D = abs(length(Diverge)), Cal_Steps = D + (D * 0.04), Steps = clamp(Cal_Steps,0,255);
+	float D = abs(length(Diverge)), Cal_Steps = (D * Perf) + (D * 0.04), Steps = clamp(Cal_Steps,0,255);
 
 	// Offset per step progress & Limit
 	float LayerDepth = rcp(Steps);
