@@ -240,7 +240,7 @@ uniform float2 Horizontal_and_Vertical <
 //Weapon Hand Adjust//
 uniform int WP <
 	ui_type = "combo";
-	ui_items = "Weapon Profile Off\0Custom WP\0WP 0\0WP 1\0WP 2\0WP 3\0WP 4\0WP 5\0WP 6\0WP 7\0WP 8\0WP 9\0WP 10\0WP 11\0WP 12\0WP 13\0WP 14\0WP 15\0WP 16\0WP 17\0WP 18\0WP 19\0WP 20\0WP 21\0WP 22\0WP 23\0WP 24\0WP 25\0WP 26\0WP 27\0WP 28\0WP 29\0WP 30\0WP 31\0WP 32\0WP 33\0WP 34\0WP 35\0WP 36\0WP 37\0WP 38\0WP 39\0WP 40\0WP 41\0WP 42\0WP 43\0WP 44\0WP 45\0WP 46\0WP 47\0WP 48\0WP 49\0WP 50\0WP 51\0WP 52\0WP 53\0WP 54\0WP 55\0WP 56\0WP 57\0WP 58\0WP 59\0WP 60\0";
+	ui_items = "Weapon Profile Off\0Custom WP\0WP 0\0WP 1\0WP 2\0WP 3\0WP 4\0WP 5\0WP 6\0WP 7\0WP 8\0WP 9\0WP 10\0WP 11\0WP 12\0WP 13\0WP 14\0WP 15\0WP 16\0WP 17\0WP 18\0WP 19\0WP 20\0WP 21\0WP 22\0WP 23\0WP 24\0WP 25\0WP 26\0WP 27\0WP 28\0WP 29\0WP 30\0WP 31\0WP 32\0WP 33\0WP 34\0WP 35\0WP 36\0WP 37\0WP 38\0WP 39\0WP 40\0WP 41\0WP 42\0WP 43\0WP 44\0WP 45\0WP 46\0WP 47\0WP 48\0WP 49\0WP 50\0WP 51\0WP 52\0WP 53\0WP 54\0WP 55\0WP 56\0WP 57\0WP 58\0WP 59\0";
 	ui_label = "·Weapon Profiles·";
 	ui_tooltip = "Pick Weapon Profile for your game or make your own.";
 	ui_category = "Weapon Hand Adjust";
@@ -527,7 +527,6 @@ float DMA()//Depth Map Adjustment
 	float DMA = Depth_Map_Adjust;	
 	if(Depth_Adjust)
 		DMA = Alt_Depth_Map_Adjust;
-
 	return DMA;
 }
 
@@ -540,23 +539,18 @@ float Depth(float2 texcoord)
 	#endif
 	if (Depth_Map_Flip)
 		texcoord.y =  1 - texcoord.y;
-		
-	float zBuffer = tex2D(DepthBuffer, texcoord).x; //Depth Buffer
-	
 	//Conversions to linear space.....
-	//Near & Far Adjustment
-	float Far = 1., Near = 0.125/DMA();  //Division Depth Map Adjust - Near
+	float zBuffer = tex2D(DepthBuffer, texcoord).x, Far = 1., Near = 0.125/DMA(); //Near & Far Adjustment
 	
 	float2 Offsets = float2(1 + Offset,1 - Offset), Z = float2( zBuffer, 1-zBuffer );
 	
 	if (Offset > 0)
 	Z = min( 1, float2( Z.x * Offsets.x , Z.y / Offsets.y  ));
 
-	[branch] if (Depth_Map == 0)//DM0. Normal
+	if (Depth_Map == 0)//DM0. Normal
 		zBuffer = Far * Near / (Far + Z.x * (Near - Far));		
 	else if (Depth_Map == 1)//DM1. Reverse
 		zBuffer = Far * Near / (Far + Z.y * (Near - Far));
-		
 	return zBuffer;
 }
 
@@ -567,15 +561,9 @@ float2 WeaponDepth(float2 texcoord)
 	float2 midHV = (Horizontal_and_Vertical-1) * float2(BUFFER_WIDTH * 0.5,BUFFER_HEIGHT * 0.5) * pix;			
 	texcoord = float2((texXY.x*Horizontal_and_Vertical.x)-midHV.x,(texXY.y*Horizontal_and_Vertical.y)-midHV.y);	
 	#endif
-	
-	if (Depth_Map_Flip)
-		texcoord.y =  1 - texcoord.y;
-	//Weapon Profiles Starts Here
-	float zBufferWH = tex2D(DepthBuffer, texcoord).x, CutOff = Weapon_Adjust.x , Adjust = Weapon_Adjust.y, Tune = Weapon_Adjust.z;
-	//Weapon Setting Array // - Thank you TrayM for the idea.
-	float3 WA_XYZ, WSArray[62] = {
-	// X Cutoff | Y Adjust | Z Tuneing //
-		float3(CutOff,Adjust,Tune),   //Custom Weapon Array Starts at 0
+	//Weapon Setting Array // - Thank you TrayM for the idea & FPS drop past 61....
+	float3 WA_XYZ = float3(Weapon_Adjust.x,Weapon_Adjust.y,Weapon_Adjust.z), WSArray[61] = { 
+		WA_XYZ,                       // X Cutoff | Y Adjust | Z Tuneing //
 		float3(0.425,5.0,1.125), 	 //WP 0  | ES: Oblivion #C753DADB		
 		float3(0,0,0),                //WP 1  | Game
 		float3(0.625,37.5,7.25),      //WP 2  | BorderLands 2 #7B81CCAB
@@ -635,15 +623,15 @@ float2 WeaponDepth(float2 texcoord)
 		float3(0,0,0),                //WP 56 | Game
 		float3(0,0,0),                //WP 57 | Game
 		float3(0,0,0),                //WP 58 | Game
-		float3(0,0,0),                //WP 59 | Game
-		float3(0,0,0),                //WP 60 | Game
+		float3(0,0,0)                 //WP 59 | Game
 	};
-	//End Weapon Profiles//
-	WA_XYZ = WSArray[max(0,WP-1)];	
-	// Here on out is the Weapon Hand Adjustment code.		
+	//Weapon Profiles Ends Here//
+	WA_XYZ = WSArray[ max(0,WP-1) ];
+	// Here on out is the Weapon Hand Adjustment code.	
+	if (Depth_Map_Flip)
+		texcoord.y =  1 - texcoord.y;
 	//Conversions to linear space.....
-	//Near & Far Adjustment
-	float Far = 1.0, Near = 0.125/WA_XYZ.y;  //Division Depth Map Adjust - Near	
+	float zBufferWH = tex2D(DepthBuffer, texcoord).x, Far = 1.0, Near = 0.125/WA_XYZ.y;  //Near & Far Adjustment
 	float2 Offsets = float2(1 + WA_XYZ.z,1 - WA_XYZ.z), Z = float2( zBufferWH, 1-zBufferWH );
 	
 	if (WA_XYZ.z > 0)
@@ -653,8 +641,7 @@ float2 WeaponDepth(float2 texcoord)
 		zBufferWH = Far * Near / (Far + Z.x * (Near - Far));		
 	else if (Depth_Map == 1)//DM1. Reverse
 		zBufferWH = Far * Near / (Far + Z.y * (Near - Far));	
-					
-	return float2(saturate(zBufferWH.x),WA_XYZ.x);	
+	return float2(saturate(zBufferWH), WA_XYZ.x);
 }
 
 float4 DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0) : SV_Target
@@ -718,7 +705,6 @@ float AutoZPDRange(float ZPD, float2 texcoord )
     return saturate(LumAdjust_AZDPR * ZPD);
 }
 #endif
-
 float2 Conv(float D,float2 texcoord)
 {
 	float Z = ZPD, WZP = 0.5, ZP = 0.5, ALC = abs(Lum(texcoord).x), WConvergence = 1 - WZPD / D;
@@ -775,8 +761,7 @@ float zBuffer(float2 texcoord)
 	return DM.y;
 }
 /////////////////////////////////////////L/R//////////////////////////////////////////////////////////////////////
-// Horizontal parallax offset & Hole filling effect
-float2 Parallax(float Diverge, float2 Coordinates)
+float2 Parallax(float Diverge, float2 Coordinates) // Horizontal parallax offset & Hole filling effect
 {   float2 ParallaxCoord = Coordinates;
 	float DepthLR = 1, LRDepth, Perf = 1, Z, MS = Diverge * pix.x, MSM, N = 9, S[9] = {0.5,0.5625,0.625,0.6875,0.75,0.8125,0.875,0.9375,1.0};
 	#if Legacy_Mode	
@@ -851,7 +836,6 @@ float2 Parallax(float Diverge, float2 Coordinates)
 //Per is Perspective & Optimization for line interlaced Adjustment. 
 #define Per float2( (Perspective * pix.x) * 0.5, 0)
 #define AI Interlace_Anaglyph.x * 0.5	
-
 float4 CSB(float2 texcoords)
 {
 	if(Custom_Sidebars == 0)
@@ -919,6 +903,9 @@ float4 PS_calcLR(float2 texcoord)
 	Left = HUD(Left,float2(TCL.x - HUD_Adjustment,TCL.y));
 	Right = HUD(Right,float2(TCR.x + HUD_Adjustment,TCR.y));
 	#endif
+	
+	color = float4(zBuffer(TexCoords).x,zBuffer(TexCoords).x,zBuffer(TexCoords).x,1.0);
+	
 	if(!Depth_Map_View)
 	{
 	
@@ -1104,11 +1091,7 @@ float4 PS_calcLR(float2 texcoord)
 			}
 		}
 	}
-	else
-	{		
-		color = float4(zBuffer(TexCoords).x,zBuffer(TexCoords).x,zBuffer(TexCoords).x,1.0);
-	}
-		
+	
 	float Average_Lum = tex2Dlod(SamplerDMN,float4(TexCoords.x,TexCoords.y, 0, 0)).w;
 	
 	return float4(color.rgb,Average_Lum);
@@ -1246,7 +1229,7 @@ technique Cross_Cursor
 }
 
 technique SuperDepth3D
-< ui_tooltip = "Suggestion : Please enable 'Performance Mode Checkbox,' in the lower bottom right of the ReShade's Main UI.\n"
+< ui_tooltip = "Suggestion : You Can Enable 'Performance Mode Checkbox,' in the lower bottom right of the ReShade's Main UI.\n"
 			   "             Do this once you set your 3D settings of course."; >
 {
 		pass zbuffer
