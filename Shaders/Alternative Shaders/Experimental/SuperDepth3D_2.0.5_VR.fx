@@ -160,10 +160,12 @@ uniform int View_Mode <
 #if !Legacy_Mode	
 uniform bool Performance_Mode <
 	ui_label = " Performance Mode";
-	ui_tooltip = "Occlusion Quality Processing.\n"
-				 "Default is True.";
+	ui_tooltip = "Performance Mode Lowers Occlusion Quality Processing so that there is a small boost to FPS.\n"
+				 "Please enable the 'Performance Mode Checkbox,' in ReShade's GUI.\n"
+				 "It's located in the lower bottom right of the ReShade's Main UI.\n"
+				 "Default is False.";
 	ui_category = "Occlusion Masking";
-> = true;
+> = false;
 #endif
 //Depth Map//
 uniform int Depth_Map <
@@ -653,7 +655,7 @@ float2 WeaponDepth(float2 texcoord)
 		float3(0,0,0),                //WP 60 | Game
 	};
 	//End Weapon Profiles//
-	WA_XYZ = WSArray[WP-1];	
+	WA_XYZ = WSArray[max(0,WP-1)];	
 	// Here on out is the Weapon Hand Adjustment code.		
 	//Conversions to linear space.....
 	//Near & Far Adjustment
@@ -1187,6 +1189,7 @@ void PostProcessVS(in uint id : SV_VertexID, out float4 position : SV_Position, 
 
 //*Rendering passes*//
 technique SuperDepth3D_VR
+< ui_tooltip = "Suggestion : Please enable 'Performance Mode Checkbox,' in the lower bottom right of the ReShade's Main UI."; >
 {
 		pass Cursor
 	{

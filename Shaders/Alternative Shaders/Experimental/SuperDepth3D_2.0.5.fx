@@ -161,10 +161,12 @@ uniform int Custom_Sidebars <
 	ui_tooltip = "Edges selection for your screen output.";
 	ui_category = "Occlusion Masking";
 > = 1;
-#if !Legacy_Mode	
+#if !Legacy_Mode
 uniform bool Performance_Mode <
 	ui_label = " Performance Mode";
-	ui_tooltip = "Occlusion Quality Processing.\n"
+	ui_tooltip = "Performance Mode Lowers Occlusion Quality Processing so that there is a small boost to FPS.\n"
+				 "Please enable the 'Performance Mode Checkbox,' in ReShade's GUI.\n"
+				 "It's located in the lower bottom right of the ReShade's Main UI.\n"
 				 "Default is False.";
 	ui_category = "Occlusion Masking";
 > = false;
@@ -1234,7 +1236,7 @@ void PostProcessVS(in uint id : SV_VertexID, out float4 position : SV_Position, 
 
 //*Rendering passes*//
 
-technique Cross_Cursor_Next
+technique Cross_Cursor
 {			
 		pass Cursor
 	{
@@ -1243,7 +1245,8 @@ technique Cross_Cursor_Next
 	}	
 }
 
-technique SuperDepth3D_Next
+technique SuperDepth3D
+< ui_tooltip = "Suggestion : Please enable 'Performance Mode Checkbox,' in the lower bottom right of the ReShade's Main UI."; >
 {
 		pass zbuffer
 	{
