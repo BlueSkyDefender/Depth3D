@@ -637,7 +637,7 @@ float2 WeaponDepth(float2 texcoord)
 		float3(0,0,0),                //WP 60 | Game
 	};
 	//End Weapon Profiles//
-	WA_XYZ = WSArray[WP-1];	
+	WA_XYZ = WSArray[max(0,WP-1)];	
 	// Here on out is the Weapon Hand Adjustment code.		
 	//Conversions to linear space.....
 	//Near & Far Adjustment
