@@ -1189,7 +1189,8 @@ void PostProcessVS(in uint id : SV_VertexID, out float4 position : SV_Position, 
 
 //*Rendering passes*//
 technique SuperDepth3D_VR
-< ui_tooltip = "Suggestion : Please enable 'Performance Mode Checkbox,' in the lower bottom right of the ReShade's Main UI."; >
+< ui_tooltip = "Suggestion : Please enable 'Performance Mode Checkbox,' in the lower bottom right of the ReShade's Main UI.\n"
+			   "             Do this once you set your 3D settings of course."; >
 {
 		pass Cursor
 	{
