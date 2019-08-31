@@ -561,72 +561,132 @@ float2 WeaponDepth(float2 texcoord)
 	float2 midHV = (Horizontal_and_Vertical-1) * float2(BUFFER_WIDTH * 0.5,BUFFER_HEIGHT * 0.5) * pix;			
 	texcoord = float2((texXY.x*Horizontal_and_Vertical.x)-midHV.x,(texXY.y*Horizontal_and_Vertical.y)-midHV.y);	
 	#endif
-	//Weapon Setting Array // - Thank you TrayM for the idea & FPS drop past 61....
-	float3 WA_XYZ = float3(Weapon_Adjust.x,Weapon_Adjust.y,Weapon_Adjust.z), WSArray[61] = { 
-		WA_XYZ,                       // X Cutoff | Y Adjust | Z Tuneing //
-		float3(0.425,5.0,1.125), 	 //WP 0  | ES: Oblivion #C753DADB		
-		float3(0,0,0),                //WP 1  | Game
-		float3(0.625,37.5,7.25),      //WP 2  | BorderLands 2 #7B81CCAB
-		float3(0,0,0),                //WP 3  | Game
-		float3(0.253,28.75,98.5),     //WP 4  | Fallout 4 #2D950D30	
-		float3(0.276,20.0,9.5625),    //WP 5  | Skyrim: SE #3950D04E
-		float3(0.338,20.0,9.25),      //WP 6  | DOOM 2016 #142EDFD6	
-		float3(0.255,177.5,63.025),   //WP 7  | CoD:Black Ops #17232880 CoD:MW2 #9D77A7C4 CoD:MW3 #22EF526F
-		float3(0.254,100.0,0.9843),   //WP 8  | CoD:Black Ops II #D691718C	
-		float3(0.254,203.125,0.98435),//WP 9  | CoD:Ghost #7448721B
-		float3(0.254,203.125,0.98433),//WP 10 | CoD:AW #23AB8876 CoD:MW Re #BF4D4A41
-		float3(0.254,125.0,0.9843),   //WP 11 | CoD:IW #1544075
-		float3(0.255,200.0,63.0),     //WP 12 | CoD:WaW #697CDA52
-		float3(0.510,162.5,3.975),    //WP 13 | CoD #4383C12A CoD:UO #239E5522 CoD:2 #3591DE9C
-		float3(0.254,23.75,0.98425),  //WP 14 | CoD: Black Ops IIII #73FA91DC
-		float3(0.375,60.0,15.15625),  //WP 15 | Quake DarkPlaces #37BD797D
-		float3(0.7,14.375,2.5),       //WP 16 | Quake 2 XP #34F4B6C
-		float3(0.750,30.0,1.050),     //WP 17 | Quake 4 #ED7B83DE
-		float3(0,0,0),                //WP 18 | Game
-		float3(0.450,12.0,23.75),     //WP 19 | Metro Redux Games #886386A
-		float3(0,0,0),                //WP 20 | Game
-		float3(0,0,0),                //WP 21 | Game
-		float3(0,0,0),                //WP 22 | Game
-		float3(0,0,0),                //WP 23 | Game
-		float3(0.255,6.375,53.75),    //WP 24 | S.T.A.L.K.E.R: Games #F5C7AA92 #493B5C71
-		float3(0,0,0),                //WP 25 | Game
-		float3(0.750,30.0,1.025),     //WP 26 | Prey 2006 #DE2F0F4D
-		float3(0.2832,13.125,0.8725), //WP 27 | Prey 2017 High Settings and < #36976F6D
-		float3(0.2832,13.75,0.915625),//WP 28 | Prey 2017 Very High #36976F6D
-		float3(0.7,9.0,2.3625),       //WP 29 | Return to Castle Wolfenstine #BF757E3A
-		float3(0.4894,62.50,0.98875), //WP 30 | Wolfenstein #30030941
-		float3(1.0,93.75,0.81875),    //WP 31 | Wolfenstein: The New Order #C770832 / The Old Blood #3E42619F
-		float3(0,0,0),                //WP 32 | Wolfenstein II: The New Colossus / Cyberpilot
-		float3(0.278,37.50,9.1),      //WP 33 | Black Mesa #6FC1FF71
-		float3(0.420,4.75,1.0),       //WP 34 | Blood 2 #6D3CD99E
-		float3(0.500,4.75,0.75),      //WP 35 | Blood 2 Alt #6D3CD99E
-		float3(0.785,21.25,0.3875),   //WP 36 | SOMA #F22A9C7D
-		float3(0.444,20.0,1.1875),    //WP 37 | Cryostasis #6FB6410B
-		float3(0.286,80.0,7.0),       //WP 38 | Unreal Gold with v227 #16B8D61A
-		float3(0.280,15.5,9.1),       //WP 39 | Serious Sam Revolution #EB9EEB74/Serious Sam HD: The First Encounter /The Second Encounter /Serious Sam 2 #8238E9CA/ Serious Sam 3: BFE* 
-		float3(0,0,0),                //WP 40 | Serious Sam 4: Planet Badass
-		float3(0,0,0),                //WP 41 | Game
-		float3(0.277,20.0,8.8),       //WP 42 | TitanFall 2 #308AEBEA
-		float3(0.7,16.250,0.300),     //WP 43 | Project Warlock #5FCFB1E5
-		float3(0.625,9.0,2.375),      //WP 44 | Kingpin Life of Crime #7DCCBBBD
-		float3(0.28,20.0,9.0),        //WP 45 | EuroTruckSim2 #9C5C946E
-		float3(0.458,10.5,1.105),     //WP 46 | F.E.A.R #B302EC7 & F.E.A.R 2: Project Origin #91D9EBAF
-		float3(0,0,0),                //WP 47 | Game
-		float3(2.0,16.25,0.09),       //WP 48 | Immortal Redneck CP alt 1.9375 #2C742D7C
-		float3(0,0,0),                //WP 49 | Game
-		float3(0.489,68.75,1.02),     //WP 50 | NecroVisioN & NecroVisioN: Lost Company #663E66FE 
-		float3(1.0,237.5,0.83625),    //WP 51 | Rage64 #AA6B948E
-		float3(0,0,0),                //WP 52 | Rage 2
-		float3(0.425,15.0,99.0),      //WP 53 | Bioshock Remastred #44BD41E1
-		float3(0.425,21.25,99.5),     //WP 54 | Bioshock 2 Remastred #7CF5A01
-		float3(0,0,0),                //WP 55 | Game
-		float3(0,0,0),                //WP 56 | Game
-		float3(0,0,0),                //WP 57 | Game
-		float3(0,0,0),                //WP 58 | Game
-		float3(0,0,0)                 //WP 59 | Game
-	};
+	//Weapon Setting//
+	float3 WA_XYZ = float3(Weapon_Adjust.x,Weapon_Adjust.y,Weapon_Adjust.z);
+	if(WP == 2)                // X Cutoff | Y Adjust | Z Tuneing //
+		WA_XYZ = float3(0.425,5.0,1.125); 	 //WP 0  | ES: Oblivion #C753DADB
+	else if(WP == 3)	
+		WA_XYZ = float3(0,0,0);                //WP 1  | Game
+	else if(WP == 4)
+		WA_XYZ = float3(0.625,37.5,7.25);      //WP 2  | BorderLands 2 #7B81CCAB
+	else if(WP == 5)	
+		WA_XYZ = float3(0,0,0);                //WP 3  | Game
+	else if(WP == 6)
+		WA_XYZ = float3(0.253,28.75,98.5);     //WP 4  | Fallout 4 #2D950D30
+	else if(WP == 7)	
+		WA_XYZ = float3(0.276,20.0,9.5625);    //WP 5  | Skyrim: SE #3950D04E
+	else if(WP == 8)
+		WA_XYZ = float3(0.338,20.0,9.25);      //WP 6  | DOOM 2016 #142EDFD6
+	else if(WP == 9)	
+		WA_XYZ = float3(0.255,177.5,63.025);   //WP 7  | CoD:Black Ops #17232880 CoD:MW2 #9D77A7C4 CoD:MW3 #22EF526F
+	else if(WP == 10)
+		WA_XYZ = float3(0.254,100.0,0.9843);   //WP 8  | CoD:Black Ops II #D691718C
+	else if(WP == 11)	
+		WA_XYZ = float3(0.254,203.125,0.98435);//WP 9  | CoD:Ghost #7448721B
+	else if(WP == 12)
+		WA_XYZ = float3(0.254,203.125,0.98433);//WP 10 | CoD:AW #23AB8876 CoD:MW Re #BF4D4A41
+	else if(WP == 13)
+		WA_XYZ = float3(0.254,125.0,0.9843);   //WP 11 | CoD:IW #1544075
+	else if(WP == 14)
+		WA_XYZ = float3(0.255,200.0,63.0);     //WP 12 | CoD:WaW #697CDA52
+	else if(WP == 15)
+		WA_XYZ = float3(0.510,162.5,3.975);    //WP 13 | CoD #4383C12A CoD:UO #239E5522 CoD:2 #3591DE9C
+	else if(WP == 16)
+		WA_XYZ = float3(0.254,23.75,0.98425);  //WP 14 | CoD: Black Ops IIII #73FA91DC
+	else if(WP == 17)
+		WA_XYZ = float3(0.375,60.0,15.15625);  //WP 15 | Quake DarkPlaces #37BD797D
+	else if(WP == 18)
+		WA_XYZ = float3(0.7,14.375,2.5);       //WP 16 | Quake 2 XP #34F4B6C
+	else if(WP == 19)
+		WA_XYZ = float3(0.750,30.0,1.050);     //WP 17 | Quake 4 #ED7B83DE
+	else if(WP == 20)
+		WA_XYZ = float3(0,0,0);                //WP 18 | Game
+	else if(WP == 21)
+		WA_XYZ = float3(0.450,12.0,23.75);     //WP 19 | Metro Redux Games #886386A
+	else if(WP == 22)
+		WA_XYZ = float3(0,0,0);                //WP 20 | Game
+	else if(WP == 23)
+		WA_XYZ = float3(0,0,0);                //WP 21 | Game
+	else if(WP == 24)
+		WA_XYZ = float3(0,0,0);                //WP 22 | Game
+	else if(WP == 25)
+		WA_XYZ = float3(0,0,0);                //WP 23 | Game
+	else if(WP == 26)
+		WA_XYZ = float3(0.255,6.375,53.75);    //WP 24 | S.T.A.L.K.E.R: Games #F5C7AA92 #493B5C71
+	else if(WP == 27)
+		 WA_XYZ = float3(0,0,0);                //WP 25 | Game
+	else if(WP == 28)
+		WA_XYZ = float3(0.750,30.0,1.025);     //WP 26 | Prey 2006 #DE2F0F4D
+	else if(WP == 29)
+		WA_XYZ = float3(0.2832,13.125,0.8725); //WP 27 | Prey 2017 High Settings and < #36976F6D
+	else if(WP == 30)
+		WA_XYZ = float3(0.2832,13.75,0.915625);//WP 28 | Prey 2017 Very High #36976F6D
+	else if(WP == 31)
+		WA_XYZ = float3(0.7,9.0,2.3625);       //WP 29 | Return to Castle Wolfenstine #BF757E3A
+	else if(WP == 32)
+		WA_XYZ = float3(0.4894,62.50,0.98875); //WP 30 | Wolfenstein #30030941
+	else if(WP == 33)
+		WA_XYZ = float3(1.0,93.75,0.81875);    //WP 31 | Wolfenstein: The New Order #C770832 / The Old Blood #3E42619F
+	else if(WP == 34)
+		WA_XYZ = float3(0,0,0);                //WP 32 | Wolfenstein II: The New Colossus / Cyberpilot
+	else if(WP == 35)
+		WA_XYZ = float3(0.278,37.50,9.1);      //WP 33 | Black Mesa #6FC1FF71
+	else if(WP == 36)
+		WA_XYZ = float3(0.420,4.75,1.0);       //WP 34 | Blood 2 #6D3CD99E
+	else if(WP == 37)	
+		WA_XYZ = float3(0.500,4.75,0.75);      //WP 35 | Blood 2 Alt #6D3CD99E
+	else if(WP == 38)
+		WA_XYZ = float3(0.785,21.25,0.3875);   //WP 36 | SOMA #F22A9C7D
+	else if(WP == 39)
+		WA_XYZ = float3(0.444,20.0,1.1875);    //WP 37 | Cryostasis #6FB6410B
+	else if(WP == 40)
+		WA_XYZ = float3(0.286,80.0,7.0);       //WP 38 | Unreal Gold with v227 #16B8D61A
+	else if(WP == 41)
+		WA_XYZ = float3(0.280,15.5,9.1);       //WP 39 | Serious Sam Revolution #EB9EEB74/Serious Sam HD: The First Encounter /The Second Encounter /Serious Sam 2 #8238E9CA/ Serious Sam 3: BFE* 
+	else if(WP == 42)
+		WA_XYZ = float3(0,0,0);                //WP 40 | Serious Sam 4: Planet Badass
+	else if(WP == 43)
+		WA_XYZ = float3(0,0,0);                //WP 41 | Game
+	else if(WP == 44)
+		WA_XYZ = float3(0.277,20.0,8.8);       //WP 42 | TitanFall 2 #308AEBEA
+	else if(WP == 45)
+		WA_XYZ = float3(0.7,16.250,0.300);     //WP 43 | Project Warlock #5FCFB1E5
+	else if(WP == 46)
+		WA_XYZ = float3(0.625,9.0,2.375);      //WP 44 | Kingpin Life of Crime #7DCCBBBD
+	else if(WP == 47)
+		WA_XYZ = float3(0.28,20.0,9.0);        //WP 45 | EuroTruckSim2 #9C5C946E
+	else if(WP == 48)
+		WA_XYZ = float3(0.458,10.5,1.105);     //WP 46 | F.E.A.R #B302EC7 & F.E.A.R 2: Project Origin #91D9EBAF
+	else if(WP == 49)
+		WA_XYZ = float3(0,0,0);                //WP 47 | Game
+	else if(WP == 50)
+		WA_XYZ = float3(2.0,16.25,0.09);       //WP 48 | Immortal Redneck CP alt 1.9375 #2C742D7C
+	else if(WP == 51)
+		WA_XYZ = float3(0,0,0);                //WP 49 | Game
+	else if(WP == 52)
+		WA_XYZ = float3(0.489,68.75,1.02);     //WP 50 | NecroVisioN & NecroVisioN: Lost Company #663E66FE 
+	else if(WP == 53)
+		WA_XYZ = float3(1.0,237.5,0.83625);    //WP 51 | Rage64 #AA6B948E
+	else if(WP == 54)
+		WA_XYZ = float3(0,0,0);                //WP 52 | Rage 2
+	else if(WP == 55)
+		WA_XYZ = float3(0.425,15.0,99.0);      //WP 53 | Bioshock Remastred #44BD41E1
+	else if(WP == 56)
+		WA_XYZ = float3(0.425,21.25,99.5);     //WP 54 | Bioshock 2 Remastred #7CF5A01
+	else if(WP == 57)
+		WA_XYZ = float3(0,0,0);                //WP 55 | Game
+	else if(WP == 58)
+		WA_XYZ = float3(0,0,0);                //WP 56 | Game
+	else if(WP == 59)
+		WA_XYZ = float3(0,0,0);                //WP 57 | Game
+	else if(WP == 60)
+		WA_XYZ = float3(0,0,0);                //WP 58 | Game
+	else if(WP == 61)
+		WA_XYZ = float3(0,0,0);                //WP 59 | Game
+	else if(WP == 62)
+		WA_XYZ = float3(0,0,0);                //WP 60 | Game
 	//Weapon Profiles Ends Here//
-	WA_XYZ = WSArray[ max(0,WP-1) ];
+
 	// Here on out is the Weapon Hand Adjustment code.	
 	if (Depth_Map_Flip)
 		texcoord.y =  1 - texcoord.y;
