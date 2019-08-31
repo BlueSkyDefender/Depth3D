@@ -3,7 +3,7 @@
  //---------------////
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Depth Based Unsharp Mask Contrast Adaptive Sharpening                                     																										
+// Depth Based Unsharp Mask Bilateral Contrast Adaptive Sharpening                                     																										
 // For Reshade 3.0+																																					
 // --------------------------																																			
 // Have fun,																																								
@@ -90,14 +90,6 @@ uniform bool No_Depth_Map <
 	ui_category = "Depth Buffer";
 > = false;
 
-uniform int Sharpen_Type <
-	ui_type = "combo";
-	ui_items = "AMD CAS\0Bilateral CAS\0";
-	ui_label = "Sharpen Type";
-	ui_tooltip = "Select Sharpen type.";
-	ui_category = "Smart Sharp";
-> = 0;	
-
 uniform float Sharpness <
 	#if Compatibility
 	ui_type = "drag";
@@ -105,11 +97,11 @@ uniform float Sharpness <
 	ui_type = "slider";
 	#endif
     ui_label = "Sharpening Strength";
-    ui_min = 0.0; ui_max = 1.0;
+    ui_min = 0.0; ui_max = 1.125;
     ui_tooltip = "Scaled by the sharpness knob while being transformed to a negative lobe (values at -1/5 * adjust).\n"
 				 "Zero = no sharpening, to One = full sharpening.\n"
 				 "Number 0.625 is default.";
-	ui_category = "Smart Sharp";
+	ui_category = "Bilateral CAS";
 > = 0.625;
 
 //uniform int Luma_Coefficient <
@@ -123,13 +115,14 @@ uniform float Sharpness <
 uniform bool CAS_BETTER_DIAGONALS <
 	ui_label = "CAS Better Diagonals";
 	ui_tooltip = "Instead of using the 3x3 'box' with the 5-tap 'circle' this uses just the 'circle'.";
-	ui_category = "Smart Sharp";
+	ui_category = "Bilateral CAS";
 > = false;
 
 uniform bool Depth_Cues <
 	ui_label = "Depth Cues";
 	ui_tooltip = "Depth Cues.\n"	
-				 "If enabled it disables Depth Cues additional shading.";
+				 "If enabled it disables Depth Cues additional shading.\n"
+				 "This enhances real AO.";
 	ui_category = "Depth Cues";
 > = false;
 
@@ -350,28 +343,9 @@ float4 CAS(float2 texcoord)
     // Shaping amount of sharpening.
     ampRGB = sqrt(ampRGB);
       
-   // Filter shape.
-   //  0 w 0
-   //  w 1 w
-   //  0 w 0  
-   //same as -1/number;
-   float peak = -rcp(5.) * max(0,Sharpness);
-   	
-   float3 wRGB = ampRGB * peak;
-     
-   float3 rcpWeightRGB = rcp(1. + 4. * wRGB);
-   
-   float3 Done = saturate((B(texcoord) * wRGB + D(texcoord) * wRGB + F(texcoord) * wRGB + H(texcoord) * wRGB + E(texcoord)) * rcpWeightRGB);
-return float4(Done,dot(ampRGB,float3(0.2126, 0.7152, 0.0722)));
-}
-
-float3 BS( float2 texcoord )
-{
-	if(Sharpen_Type != 1)
-		discard;
 	//Bilateral Filter//                                                                                                                                                                   
-	float3 c = tex2D(BackBuffer,texcoord.xy).rgb;
-	const int kSize = (MSIZE-1)/2;	
+	float3 c = E(texcoord.xy);
+	const int kSize = MSIZE * 0.5;	
 //													1			2			3			4				5			6			7			8				7			6			5				4			3			2			1
 //Full Kernal Size would be 15 as shown here (0.031225216, 0.03332227	1, 0.035206333, 0.036826804, 0.038138565, 0.039104044, 0.039695028, 0.039894000, 0.039695028, 0.039104044, 0.038138565, 0.036826804, 0.035206333, 0.033322271, 0.031225216)
 #if Quality == 0
@@ -388,7 +362,6 @@ float3 BS( float2 texcoord )
 #endif
 
  float Q = 1.;
-
 if(Quality == 1)
 	Q *= 0.5;	
 if(Quality == 2)
@@ -407,7 +380,7 @@ if(Quality == 3)
 		
 		float3 cc;
 		float factor;
-		float bZ = 1.0/normpdf(0.0, BSIGMA);
+		float bZ = rcp(normpdf(0.0, BSIGMA));
 		
 		[loop]
 		for (int i=-kSize; i <= kSize; ++i)
@@ -422,8 +395,8 @@ if(Quality == 3)
 				final_colour += factor*cc;
 			}
 		}
-		
-	return final_colour/Z;
+			
+return float4(final_colour/Z,dot(ampRGB,float3(0.2126, 0.7152, 0.0722)));
 }
 
 void Filters(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 color : SV_Target0)                                                                          
@@ -445,14 +418,7 @@ void Filters(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, o
 		result += E(texcoord + float2( 1,-1) * 0.50 * Adjust );
 		result += E(texcoord + float2(-1, 1) * 0.50 * Adjust );
 		
-	if (Sharpen_Type == 0)	
-		Done = CAS(texcoord).rgb;	
-	else if (Sharpen_Type == 1)
-		Done = lerp(E(texcoord),E(texcoord)+(E(texcoord) - BS(texcoord))*(Sharpness*3.),saturate(CAS(texcoord).w * Sharpness));
-	//else if (Sharpen_Type == 2)
-		//Done = 0;	
-	//else
-		//Done = 0;	
+		Done = lerp(E(texcoord),E(texcoord)+(E(texcoord) - CAS(texcoord).rgb)*(Sharpness*3.),saturate(CAS(texcoord).w * Sharpness));
 		 
 	color = float4( Done,dot(result * 0.083333333, float3(0.2126, 0.7152, 0.0722) ) );
 }
