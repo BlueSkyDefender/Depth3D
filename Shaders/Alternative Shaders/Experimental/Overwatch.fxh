@@ -198,6 +198,10 @@ static const float DepthPY = 0.0;
 	#define DA_X 0.002
 	#define DA_Y 250.0
 	#define HM 0  
+#elif (App == 0x3FDD232A )	//FEZ
+	#define DA_X 0
+	#define DA_Z 0.9625
+	#define HM 0  
 //#else
 	//#define HM 0 	
 #endif

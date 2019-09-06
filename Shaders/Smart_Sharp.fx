@@ -13,7 +13,11 @@
 //  ---------------------------------																																	                                                                                                        																	
 // 								Bilateral Filter Made by mrharicot ported over to Reshade by BSD													
 //								 GitHub Link for sorce info github.com/SableRaf/Filters4Processin																
-// 								Shadertoy Link https://www.shadertoy.com/view/4dfGDH  Thank You.																	
+// 								Shadertoy Link https://www.shadertoy.com/view/4dfGDH  Thank You.
+//                                                       
+//                                                      Depth Cues
+//                                Extra Information for where I got the Idea for Depth Cues.
+//                             https://www.uni-konstanz.de/mmsp/pubsys/publishedFiles/LuCoDe06.pdf																	
 // LICENSE
 // =======
 // Copyright (c) 2017-2019 Advanced Micro Devices, Inc. All rights reserved.
@@ -97,24 +101,22 @@ uniform float Sharpness <
 	ui_type = "slider";
 	#endif
     ui_label = "Sharpening Strength";
-    ui_min = 0.0; ui_max = 1.125;
+    ui_min = 0.0; ui_max = 1.0;
     ui_tooltip = "Scaled by the sharpness knob while being transformed to a negative lobe (values at -1/5 * adjust).\n"
-				 "Zero = no sharpening, to One = full sharpening.\n"
+				 "Zero = no sharpening, to One = full sharpening, Past One = Extra Crispy.\n"
 				 "Number 0.625 is default.";
 	ui_category = "Bilateral CAS";
 > = 0.625;
 
-//uniform int Luma_Coefficient <
-//	ui_type = "combo";
-//	ui_label = "Luma";
-//	ui_tooltip = "Changes how color get sharpened by Unsharped Masking\n"
-//				 "This should only affect Normal & Greyscale output.";
-//	ui_items = "SD video\0HD video\0HDR video\0";
-//> = 0;
-
 uniform bool CAS_BETTER_DIAGONALS <
 	ui_label = "CAS Better Diagonals";
 	ui_tooltip = "Instead of using the 3x3 'box' with the 5-tap 'circle' this uses just the 'circle'.";
+	ui_category = "Bilateral CAS";
+> = false;
+
+uniform bool CAS_Mask_Boost <
+	ui_label = "CAS Boost";
+	ui_tooltip = "This boosts the power of Contrast Adaptive Masking part of the shader.";
 	ui_category = "Bilateral CAS";
 > = false;
 
@@ -158,7 +160,7 @@ uniform float Spread <
 	#else
 	ui_type = "slider";
 	#endif
-	ui_min = 1.0; ui_max = 24.0; ui_step = 0.25;
+	ui_min = 1.0; ui_max = 25.0; ui_step = 0.25;
 	ui_label = "Shade Fill";
 	ui_tooltip = "Adjust This to have the shade effect to fill in areas gives fakeAO effect.\n"
 				 "This is used for gap filling.\n"
@@ -395,15 +397,17 @@ if(Quality == 3)
 				final_colour += factor*cc;
 			}
 		}
-			
-return float4(final_colour/Z,dot(ampRGB,float3(0.2126, 0.7152, 0.0722)));
+	float CAS_Mask = dot(ampRGB,float3(0.2126, 0.7152, 0.0722));
+
+	if(CAS_Mask_Boost)
+		CAS_Mask = lerp(CAS_Mask,CAS_Mask * CAS_Mask,saturate(Sharpness * 0.5));		
+	
+return saturate(float4(final_colour/Z,CAS_Mask));
 }
 
 void Filters(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 color : SV_Target0)                                                                          
-{					
-	float3 Done;
-	float2 Adjust = (Spread * 0.625 ) * pix;
-	float3 result;	
+{   float2 Adjust = (Spread * 0.625 ) * pix;
+	float3 Done, result;	
 		result += E(texcoord + float2( 1, 0) * Adjust );
 		result += E(texcoord + float2(-1, 0) * Adjust );
 		result += E(texcoord + float2( 1, 0) * 0.75 * Adjust );
@@ -416,9 +420,9 @@ void Filters(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, o
 		result += E(texcoord + float2( 1, 1) * 0.50 * Adjust );
 		result += E(texcoord + float2(-1,-1) * 0.50 * Adjust );
 		result += E(texcoord + float2( 1,-1) * 0.50 * Adjust );
-		result += E(texcoord + float2(-1, 1) * 0.50 * Adjust );
-		
-		Done = lerp(E(texcoord),E(texcoord)+(E(texcoord) - CAS(texcoord).rgb)*(Sharpness*3.),saturate(CAS(texcoord).w * Sharpness));
+		result += E(texcoord + float2(-1, 1) * 0.50 * Adjust );		
+	//Sharpen Out
+	Done = lerp(E(texcoord),E(texcoord)+(E(texcoord) - CAS(texcoord).rgb)*(Sharpness*3.), CAS(texcoord).w * saturate(Sharpness));
 		 
 	color = float4( Done,dot(result * 0.083333333, float3(0.2126, 0.7152, 0.0722) ) );
 }
@@ -484,13 +488,12 @@ float4 ShaderOut(float2 texcoord : TEXCOORD0)
 {	
 	float4 Out, DepthCues = DC( texcoord ).xxxx;
 	float3 Luma, Sharpen = tex2D(SamplerBF,texcoord).rgb,BB = tex2D(BackBuffer,texcoord).rgb;
-	float DB = Depth(texcoord).r,DBTL = Depth(float2(texcoord.x*2,texcoord.y*2)).r, DBBL = Depth(float2(texcoord.x*2,texcoord.y*2-1)).r,DBBR = Depth(float2(texcoord.x*2-1,texcoord.y*2-1)).r;
+	float DB = Depth(texcoord).r,DBTL = Depth(float2(texcoord.x*2,texcoord.y*2)).r, DBBL = Depth(float2(texcoord.x*2,texcoord.y*2-1)).r;
 	
 	if(No_Depth_Map)
 	{
 		DB = 0.0;
 		DBBL = 0.0;
-		DBBR = 0.0;
 	}
 	
 	if (Debug_View == 0)
@@ -508,7 +511,7 @@ float4 ShaderOut(float2 texcoord : TEXCOORD0)
 		
 		float3 Bottom_Left = lerp(float3(1., 0., 1.),tex2D(BackBuffer,float2(texcoord.x*2,texcoord.y*2-1)).rgb,DBBL);	
 
-		float3 Bottom_Right = lerp(tex2D(BackBuffer,float2(texcoord.x*2-1,texcoord.y*2-1)).rgb,tex2D(SamplerBF,float2(texcoord.x*2-1,texcoord.y*2-1)).rgb,1-DBBR);	
+		float3 Bottom_Right = CAS(float2(texcoord.x*2-1,texcoord.y*2-1)).rgb;	
 		
 		float4 VA_Top = texcoord.x < 0.5 ? float4(Top_Left,1.) : float4(Top_Right,1.) ;
 		float4 VA_Bottom = texcoord.x < 0.5 ? float4(Bottom_Left,1.) : float4(Bottom_Right,1.) ;
@@ -631,7 +634,6 @@ void PostProcessVS(in uint id : SV_VertexID, out float4 position : SV_Position, 
 }
 
 //*Rendering passes*//
-
 technique Smart_Sharp
 {		
 			pass FilterOut
