@@ -31,12 +31,12 @@ uniform int AA_Adjust <
 
 uniform int View_Mode <
 	ui_type = "combo";
-	ui_items = "NFAA\0Mask View A\0Mask View B\0DLSS\0";
+	ui_items = "NFAA\0Mask View\0Normals\0DLSS\0";
 	ui_label = "View Mode";
 	ui_tooltip = "This is used to select the normal view output or debug view.\n"
-				 "Mask View A & B gives view of the edge detection.\n"
-				 "NFAA Masked gives you a sharper image.\n"
-				 "NFAA is the full fat NFAA experiance.\n"
+				 "NFAA Masked gives you a sharper image with applyed Normals AA.\n"
+				 "Masked View gives you a view of the edge detection.\n"
+				 "Normals gives you an view of the normals created.\n"
 				 "DLSS is NV_AI_DLSS Parody experiance.\n"
 				 "Default is NFAA.";
 	ui_category = "NFAA";
@@ -83,7 +83,7 @@ float4 NFAA(float2 texcoord)
 	d = LI(GetBB( float2( UV.x , UV.y + SW.y ) ).rgb);
 	l = LI(GetBB( float2( UV.x - SW.x , UV.y ) ).rgb);
 	r = LI(GetBB( float2( UV.x + SW.x , UV.y ) ).rgb);
-	n = float2(t - d,r - l);
+	n = float2(t - d,-(r - l));
 	// I should have made rep adjustable. But, I didn't see the need.
 	// Since my goal was to make this AA fast cheap and simple.	
     float   nl = length(n), Rep = rcp(AA_Adjust);
@@ -124,11 +124,11 @@ float4 NFAA(float2 texcoord)
 	}
 	else if(View_Mode == 1)
 	{
-		NFAA = lerp(float4(2.5,0,0,1),GetBB( texcoord.xy ), Mask );
+		NFAA = Mask;
 	}
 	else if (View_Mode == 2)
 	{
-		NFAA = Mask;
+		NFAA = float3(float2(t - d,-(r - l)) * 0.5 + 0.5,1);
 	}
 	
 return NFAA;
