@@ -36,10 +36,6 @@
 // RE Fix is used to fix the issue with Resident Evil's 2 Remake 1-Shot cutscenes.
 #define RE_Fix 0 //Default 0 is Off. One is On. 
 
-// Alternet Depth Buffer Adjust Toggle Key. The Key Code for "o" is Number 79.
-#define DB_TOGGLE 0 // You can use http://keycode.info/ to figure out what key is what.
-#define Alt_Depth_Map_Adjust 0 // You can set this from 1.0 to 250.
-
 // Change the Cancel Depth Key. Determines the Cancel Depth Toggle Key useing keycode info
 // The Key Code for Decimal Point is Number 110. Ex. for Numpad Decimal "." Cancel_Depth_Key 110
 #define Cancel_Depth_Key 0 // You can use http://keycode.info/ to figure out what key is what.
@@ -209,11 +205,13 @@ uniform float Menu_Detection <
 	ui_category = "Depth Map";
 > = 0.5;
 
-uniform bool Depth_Map_View <
+uniform int Depth_Map_View <
+	ui_type = "combo";
+	ui_items = "Off\0Stero Depth View\0Normal Depth View\0";
 	ui_label = " Depth Map View";
-	ui_tooltip = "Display the Depth Map.";
+	ui_tooltip = "Display the Depth Map";
 	ui_category = "Depth Map";
-> = false;
+> = 0;
 
 uniform bool Depth_Map_Flip <
 	ui_label = " Depth Map Flip";
@@ -369,7 +367,6 @@ uniform bool SCSC <
 
 uniform bool Cancel_Depth < source = "key"; keycode = Cancel_Depth_Key; toggle = true; mode = "toggle";>;
 uniform bool Mask_Cycle < source = "key"; keycode = Mask_Cycle_Key; toggle = true; >;
-uniform bool Depth_Adjust < source = "key"; keycode = DB_TOGGLE; toggle = true; >;
 /////////////////////////////////////////////D3D Starts Here/////////////////////////////////////////////////////////////////
 #define pix float2(BUFFER_RCP_WIDTH, BUFFER_RCP_HEIGHT)
 
@@ -522,14 +519,6 @@ float Fade_in_out(float2 texcoord)
 	return PStoredfade + (Trigger_Fade - PStoredfade) * (1.0 - exp(-frametime/AA)); ///exp2 would be even slower  	
 }
 /////////////////////////////////////////////////////////////////////////////////Depth Map Information/////////////////////////////////////////////////////////////////////////////////
-float DMA()//Depth Map Adjustment
-{
-	float DMA = Depth_Map_Adjust;	
-	if(Depth_Adjust)
-		DMA = Alt_Depth_Map_Adjust;
-	return DMA;
-}
-
 float Depth(float2 texcoord)
 {	
 	#if DB_Size_Postion
@@ -540,16 +529,16 @@ float Depth(float2 texcoord)
 	if (Depth_Map_Flip)
 		texcoord.y =  1 - texcoord.y;
 	//Conversions to linear space.....
-	float zBuffer = tex2D(DepthBuffer, texcoord).x, Far = 1., Near = 0.125/DMA(); //Near & Far Adjustment
+	float zBuffer = tex2D(DepthBuffer, texcoord).x, Far = 1., Near = 0.125/Depth_Map_Adjust; //Near & Far Adjustment
 	
 	float2 Offsets = float2(1 + Offset,1 - Offset), Z = float2( zBuffer, 1-zBuffer );
 	
 	if (Offset > 0)
 	Z = min( 1, float2( Z.x * Offsets.x , Z.y / Offsets.y  ));
 
-	if (Depth_Map == 0)//DM0. Normal
+	if (Depth_Map == 0) //DM0 Normal
 		zBuffer = Far * Near / (Far + Z.x * (Near - Far));		
-	else if (Depth_Map == 1)//DM1. Reverse
+	else if (Depth_Map == 1) //DM1 Reverse
 		zBuffer = Far * Near / (Far + Z.y * (Near - Far));
 	return zBuffer;
 }
@@ -700,14 +689,15 @@ float2 WeaponDepth(float2 texcoord)
 	[branch] if (Depth_Map == 0)//DM0. Normal
 		zBufferWH = Far * Near / (Far + Z.x * (Near - Far));		
 	else if (Depth_Map == 1)//DM1. Reverse
-		zBufferWH = Far * Near / (Far + Z.y * (Near - Far));	
+		zBufferWH = Far * Near / (Far + Z.y * (Near - Far));
+	
 	return float2(saturate(zBufferWH), WA_XYZ.x);
 }
 
 float4 DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0) : SV_Target
 {
 		float4 DM = Depth(texcoord).xxxx;				
-		float R, G, B, A, WD = WeaponDepth(texcoord).x, CoP = WeaponDepth(texcoord).y, CutOFFCal = (CoP/DMA()) * 0.5; //Weapon Cutoff Calculation
+		float R, G, B, A, WD = WeaponDepth(texcoord).x, CoP = WeaponDepth(texcoord).y, CutOFFCal = (CoP/Depth_Map_Adjust) * 0.5; //Weapon Cutoff Calculation
 		CutOFFCal = step(DM.x,CutOFFCal);
 					
 		[branch] if (WP == 0)
@@ -734,7 +724,7 @@ float4 DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0
 #if HUD_MODE || HM
 float4 HUD(float4 HUD, float2 texcoord ) 
 {		
-	float Mask_Tex, CutOFFCal = ((HUD_Adjust.x * 0.5)/DMA()) * 0.5, COC = step(Depth(texcoord).x,CutOFFCal); //HUD Cutoff Calculation
+	float Mask_Tex, CutOFFCal = ((HUD_Adjust.x * 0.5)/Depth_Map_Adjust) * 0.5, COC = step(Depth(texcoord).x,CutOFFCal); //HUD Cutoff Calculation
 	
 	//This code is for hud segregation.			
 	if (HUD_Adjust.x > 0)
@@ -898,12 +888,14 @@ float2 Parallax(float Diverge, float2 Coordinates) // Horizontal parallax offset
 #define AI Interlace_Anaglyph.x * 0.5	
 float4 CSB(float2 texcoords)
 {
-	if(Custom_Sidebars == 0)
+	if(Custom_Sidebars == 0 && Depth_Map_View == 0)
 		return tex2Dlod(BackBufferMIRROR,float4(texcoords,0,0));
-	else if(Custom_Sidebars == 1)
+	else if(Custom_Sidebars == 1 && Depth_Map_View == 0)
 		return tex2Dlod(BackBufferBORDER,float4(texcoords,0,0));
-	else
+	else if(Custom_Sidebars == 2 && Depth_Map_View == 0)
 		return tex2Dlod(BackBufferCLAMP,float4(texcoords,0,0));
+	else
+		return zBuffer(texcoords).xxxx;
 }
 	
 float4 PS_calcLR(float2 texcoord)
@@ -963,12 +955,7 @@ float4 PS_calcLR(float2 texcoord)
 	Left = HUD(Left,float2(TCL.x - HUD_Adjustment,TCL.y));
 	Right = HUD(Right,float2(TCR.x + HUD_Adjustment,TCR.y));
 	#endif
-	
-	color = float4(zBuffer(TexCoords).x,zBuffer(TexCoords).x,zBuffer(TexCoords).x,1.0);
-	
-	if(!Depth_Map_View)
-	{
-	
+		
 	float2 gridxy, GXYArray[9] = {
 		float2(TexCoords.x * BUFFER_WIDTH, TexCoords.y * BUFFER_HEIGHT), //Native
 		float2(TexCoords.x * 3840.0, TexCoords.y * 2160.0),
@@ -982,179 +969,179 @@ float4 PS_calcLR(float2 texcoord)
 	};
 	gridxy = floor(GXYArray[Scaling_Support]);
 			
-		[branch] if(Stereoscopic_Mode == 0)
-		{	
-			color = TexCoords.x < 0.5 ? Left : Right;
-		}
-		else if(Stereoscopic_Mode == 1)
-		{	
-			color = TexCoords.y < 0.5 ? Left : Right;
-		}
-		else if(Stereoscopic_Mode == 2)
+	[branch] if(Stereoscopic_Mode == 0)
+	{	
+		color = TexCoords.x < 0.5 ? Left : Right;
+	}
+	else if(Stereoscopic_Mode == 1)
+	{	
+		color = TexCoords.y < 0.5 ? Left : Right;
+	}
+	else if(Stereoscopic_Mode == 2)
+	{
+		color = fmod(gridxy.y,2.0) ? Right : Left;	
+	}
+	else if(Stereoscopic_Mode == 3)
+	{
+		color = fmod(gridxy.x,2.0) ? Right : Left;		
+	}
+	else if(Stereoscopic_Mode == 4)
+	{
+		color = fmod(gridxy.x+gridxy.y,2.0) ? Right : Left;
+	}
+	else if(Stereoscopic_Mode >= 5)
+	{			
+		float Contrast = 1.0, Deghost = 0.06, LOne, LTwo, ROne, RTwo;
+		float3 HalfLA = dot(Left.rgb,float3(0.299, 0.587, 0.114));
+		float3 HalfRA = dot(Right.rgb,float3(0.299, 0.587, 0.114));
+		float3 LMA = lerp(HalfLA,Left.rgb,Interlace_Anaglyph.y);  
+		float3 RMA = lerp(HalfRA,Right.rgb,Interlace_Anaglyph.y); 
+		float4 image = 1, accumRC, accumGM, accumBA;
+
+		float contrast = (Contrast*0.5)+0.5, deghost = Deghost;
+			
+		// Left/Right Image
+		float4 cA = float4(LMA,1);
+		float4 cB = float4(RMA,1);
+
+		if (Stereoscopic_Mode == 5) // Anaglyph 3D Colors Red/Cyan
 		{
-			color = fmod(gridxy.y,2.0) ? Right : Left;	
+			float4 LeftEyecolor = float4(1.0,0.0,0.0,1.0);
+			float4 RightEyecolor = float4(0.0,1.0,1.0,1.0);
+			
+			color =  (cA*LeftEyecolor) + (cB*RightEyecolor);
 		}
-		else if(Stereoscopic_Mode == 3)
+		else if (Stereoscopic_Mode == 6) // Anaglyph 3D Dubois Red/Cyan
 		{
-			color = fmod(gridxy.x,2.0) ? Right : Left;		
+		float red = 0.437 * cA.r + 0.449 * cA.g + 0.164 * cA.b
+					- 0.011 * cB.r - 0.032 * cB.g - 0.007 * cB.b;
+			
+			if (red > 1) { red = 1; }   if (red < 0) { red = 0; }
+
+			float green = -0.062 * cA.r -0.062 * cA.g -0.024 * cA.b 
+						+ 0.377 * cB.r + 0.761 * cB.g + 0.009 * cB.b;
+			
+			if (green > 1) { green = 1; }   if (green < 0) { green = 0; }
+
+			float blue = -0.048 * cA.r - 0.050 * cA.g - 0.017 * cA.b 
+						-0.026 * cB.r -0.093 * cB.g + 1.234  * cB.b;
+			
+			if (blue > 1) { blue = 1; }   if (blue < 0) { blue = 0; }
+
+			color = float4(red, green, blue, 0);
 		}
-		else if(Stereoscopic_Mode == 4)
+		else if (Stereoscopic_Mode == 7) // Anaglyph 3D Deghosted Red/Cyan Code From http://iaian7.com/quartz/AnaglyphCompositing & vectorform.com by John Einselen
 		{
-			color = fmod(gridxy.x+gridxy.y,2.0) ? Right : Left;
+			LOne = contrast*0.45;
+			LTwo = (1.0-LOne)*0.5;
+			ROne = contrast;
+			RTwo = 1.0-ROne;
+			deghost = Deghost*0.1;
+
+			accumRC = saturate(cA*float4(LOne,LTwo,LTwo,1.0));
+			image.r = pow(accumRC.r+accumRC.g+accumRC.b, 1.00);
+			image.a = accumRC.a;
+
+			accumRC = saturate(cB*float4(RTwo,ROne,0.0,1.0));
+			image.g = pow(accumRC.r+accumRC.g+accumRC.b, 1.15);
+			image.a = image.a+accumRC.a;
+
+			accumRC = saturate(cB*float4(RTwo,0.0,ROne,1.0));
+			image.b = pow(accumRC.r+accumRC.g+accumRC.b, 1.15);
+			image.a = (image.a+accumRC.a)/3.0;
+
+			accumRC = image;
+			image.r = (accumRC.r+(accumRC.r*(deghost))+(accumRC.g*(deghost*-0.5))+(accumRC.b*(deghost*-0.5)));
+			image.g = (accumRC.g+(accumRC.r*(deghost*-0.25))+(accumRC.g*(deghost*0.5))+(accumRC.b*(deghost*-0.25)));
+			image.b = (accumRC.b+(accumRC.r*(deghost*-0.25))+(accumRC.g*(deghost*-0.25))+(accumRC.b*(deghost*0.5)));
+			color = image;
 		}
-		else if(Stereoscopic_Mode >= 5)
-		{			
-			float Contrast = 1.0, Deghost = 0.06, LOne, LTwo, ROne, RTwo;
-			float3 HalfLA = dot(Left.rgb,float3(0.299, 0.587, 0.114));
-			float3 HalfRA = dot(Right.rgb,float3(0.299, 0.587, 0.114));
-			float3 LMA = lerp(HalfLA,Left.rgb,Interlace_Anaglyph.y);  
-			float3 RMA = lerp(HalfRA,Right.rgb,Interlace_Anaglyph.y); 
-			float4 image = 1, accumRC, accumGM, accumBA;
+		else if (Stereoscopic_Mode == 8) // Anaglyph 3D Green/Magenta
+		{
+			float4 LeftEyecolor = float4(0.0,1.0,0.0,1.0);
+			float4 RightEyecolor = float4(1.0,0.0,1.0,1.0);
+			
+			color =  (cA*LeftEyecolor) + (cB*RightEyecolor);			
+		}
+		else if (Stereoscopic_Mode == 9) // Anaglyph 3D Dubois Green/Magenta
+		{
+							
+			float red = -0.062 * cA.r -0.158 * cA.g -0.039 * cA.b
+					+ 0.529 * cB.r + 0.705 * cB.g + 0.024 * cB.b;
+			
+			if (red > 1) { red = 1; }   if (red < 0) { red = 0; }
 
-			float contrast = (Contrast*0.5)+0.5, deghost = Deghost;
-				
-			// Left/Right Image
-			float4 cA = float4(LMA,1);
-			float4 cB = float4(RMA,1);
-	
-			if (Stereoscopic_Mode == 5) // Anaglyph 3D Colors Red/Cyan
-			{
-				float4 LeftEyecolor = float4(1.0,0.0,0.0,1.0);
-				float4 RightEyecolor = float4(0.0,1.0,1.0,1.0);
-				
-				color =  (cA*LeftEyecolor) + (cB*RightEyecolor);
-			}
-			else if (Stereoscopic_Mode == 6) // Anaglyph 3D Dubois Red/Cyan
-			{
-			float red = 0.437 * cA.r + 0.449 * cA.g + 0.164 * cA.b
-						- 0.011 * cB.r - 0.032 * cB.g - 0.007 * cB.b;
-				
-				if (red > 1) { red = 1; }   if (red < 0) { red = 0; }
+			float green = 0.284 * cA.r + 0.668 * cA.g + 0.143 * cA.b 
+						- 0.016 * cB.r - 0.015 * cB.g + 0.065 * cB.b;
+			
+			if (green > 1) { green = 1; }   if (green < 0) { green = 0; }
 
-				float green = -0.062 * cA.r -0.062 * cA.g -0.024 * cA.b 
-							+ 0.377 * cB.r + 0.761 * cB.g + 0.009 * cB.b;
-				
-				if (green > 1) { green = 1; }   if (green < 0) { green = 0; }
+			float blue = -0.015 * cA.r -0.027 * cA.g + 0.021 * cA.b 
+						+ 0.009 * cB.r + 0.075 * cB.g + 0.937  * cB.b;
+			
+			if (blue > 1) { blue = 1; }   if (blue < 0) { blue = 0; }
+					
+			color = float4(red, green, blue, 0);
+		}
+		else if (Stereoscopic_Mode == 10)// Anaglyph 3D Deghosted Green/Magenta Code From http://iaian7.com/quartz/AnaglyphCompositing & vectorform.com by John Einselen
+		{
+			LOne = contrast*0.45;
+			LTwo = (1.0-LOne)*0.5;
+			ROne = contrast*0.8;
+			RTwo = 1.0-ROne;
+			deghost = Deghost*0.275;
 
-				float blue = -0.048 * cA.r - 0.050 * cA.g - 0.017 * cA.b 
-							-0.026 * cB.r -0.093 * cB.g + 1.234  * cB.b;
-				
-				if (blue > 1) { blue = 1; }   if (blue < 0) { blue = 0; }
+			accumGM = saturate(cB*float4(ROne,RTwo,0.0,1.0));
+			image.r = pow(accumGM.r+accumGM.g+accumGM.b, 1.15);
+			image.a = accumGM.a;
 
-				color = float4(red, green, blue, 0);
-			}
-			else if (Stereoscopic_Mode == 7) // Anaglyph 3D Deghosted Red/Cyan Code From http://iaian7.com/quartz/AnaglyphCompositing & vectorform.com by John Einselen
-			{
-				LOne = contrast*0.45;
-				LTwo = (1.0-LOne)*0.5;
-				ROne = contrast;
-				RTwo = 1.0-ROne;
-				deghost = Deghost*0.1;
+			accumGM = saturate(cA*float4(LTwo,LOne,LTwo,1.0));
+			image.g = pow(accumGM.r+accumGM.g+accumGM.b, 1.05);
+			image.a = image.a+accumGM.a;
 
-				accumRC = saturate(cA*float4(LOne,LTwo,LTwo,1.0));
-				image.r = pow(accumRC.r+accumRC.g+accumRC.b, 1.00);
-				image.a = accumRC.a;
+			accumGM = saturate(cB*float4(0.0,RTwo,ROne,1.0));
+			image.b = pow(accumGM.r+accumGM.g+accumGM.b, 1.15);
+			image.a = (image.a+accumGM.a)/3.0;
 
-				accumRC = saturate(cB*float4(RTwo,ROne,0.0,1.0));
-				image.g = pow(accumRC.r+accumRC.g+accumRC.b, 1.15);
-				image.a = image.a+accumRC.a;
+			accumGM = image;
+			image.r = (accumGM.r+(accumGM.r*(deghost*0.5))+(accumGM.g*(deghost*-0.25))+(accumGM.b*(deghost*-0.25)));
+			image.g = (accumGM.g+(accumGM.r*(deghost*-0.5))+(accumGM.g*(deghost*0.25))+(accumGM.b*(deghost*-0.5)));
+			image.b = (accumGM.b+(accumGM.r*(deghost*-0.25))+(accumGM.g*(deghost*-0.25))+(accumGM.b*(deghost*0.5)));
+			color = image;
+		}
+		else if (Stereoscopic_Mode == 11) // Anaglyph 3D Blue/Amber Code From http://iaian7.com/quartz/AnaglyphCompositing & vectorform.com by John Einselen
+		{
+			LOne = contrast*0.45;
+			LTwo = (1.0-LOne)*0.5;
+			ROne = contrast;
+			RTwo = 1.0-ROne;
+			deghost = Deghost*0.275;
 
-				accumRC = saturate(cB*float4(RTwo,0.0,ROne,1.0));
-				image.b = pow(accumRC.r+accumRC.g+accumRC.b, 1.15);
-				image.a = (image.a+accumRC.a)/3.0;
+			accumBA = saturate(cA*float4(ROne,0.0,RTwo,1.0));
+			image.r = pow(accumBA.r+accumBA.g+accumBA.b, 1.05);
+			image.a = accumBA.a;
 
-				accumRC = image;
-				image.r = (accumRC.r+(accumRC.r*(deghost))+(accumRC.g*(deghost*-0.5))+(accumRC.b*(deghost*-0.5)));
-				image.g = (accumRC.g+(accumRC.r*(deghost*-0.25))+(accumRC.g*(deghost*0.5))+(accumRC.b*(deghost*-0.25)));
-				image.b = (accumRC.b+(accumRC.r*(deghost*-0.25))+(accumRC.g*(deghost*-0.25))+(accumRC.b*(deghost*0.5)));
-				color = image;
-			}
-			else if (Stereoscopic_Mode == 8) // Anaglyph 3D Green/Magenta
-			{
-				float4 LeftEyecolor = float4(0.0,1.0,0.0,1.0);
-				float4 RightEyecolor = float4(1.0,0.0,1.0,1.0);
-				
-				color =  (cA*LeftEyecolor) + (cB*RightEyecolor);			
-			}
-			else if (Stereoscopic_Mode == 9) // Anaglyph 3D Dubois Green/Magenta
-			{
-								
-				float red = -0.062 * cA.r -0.158 * cA.g -0.039 * cA.b
-						+ 0.529 * cB.r + 0.705 * cB.g + 0.024 * cB.b;
-				
-				if (red > 1) { red = 1; }   if (red < 0) { red = 0; }
+			accumBA = saturate(cA*float4(0.0,ROne,RTwo,1.0));
+			image.g = pow(accumBA.r+accumBA.g+accumBA.b, 1.10);
+			image.a = image.a+accumBA.a;
 
-				float green = 0.284 * cA.r + 0.668 * cA.g + 0.143 * cA.b 
-							- 0.016 * cB.r - 0.015 * cB.g + 0.065 * cB.b;
-				
-				if (green > 1) { green = 1; }   if (green < 0) { green = 0; }
+			accumBA = saturate(cB*float4(LTwo,LTwo,LOne,1.0));
+			image.b = pow(accumBA.r+accumBA.g+accumBA.b, 1.0);
+			image.b = lerp(pow(image.b,(Deghost*0.15)+1.0),1.0-pow(abs(1.0-image.b),(Deghost*0.15)+1.0),image.b);
+			image.a = (image.a+accumBA.a)/3.0;
 
-				float blue = -0.015 * cA.r -0.027 * cA.g + 0.021 * cA.b 
-							+ 0.009 * cB.r + 0.075 * cB.g + 0.937  * cB.b;
-				
-				if (blue > 1) { blue = 1; }   if (blue < 0) { blue = 0; }
-						
-				color = float4(red, green, blue, 0);
-			}
-			else if (Stereoscopic_Mode == 10)// Anaglyph 3D Deghosted Green/Magenta Code From http://iaian7.com/quartz/AnaglyphCompositing & vectorform.com by John Einselen
-			{
-				LOne = contrast*0.45;
-				LTwo = (1.0-LOne)*0.5;
-				ROne = contrast*0.8;
-				RTwo = 1.0-ROne;
-				deghost = Deghost*0.275;
-
-				accumGM = saturate(cB*float4(ROne,RTwo,0.0,1.0));
-				image.r = pow(accumGM.r+accumGM.g+accumGM.b, 1.15);
-				image.a = accumGM.a;
-
-				accumGM = saturate(cA*float4(LTwo,LOne,LTwo,1.0));
-				image.g = pow(accumGM.r+accumGM.g+accumGM.b, 1.05);
-				image.a = image.a+accumGM.a;
-
-				accumGM = saturate(cB*float4(0.0,RTwo,ROne,1.0));
-				image.b = pow(accumGM.r+accumGM.g+accumGM.b, 1.15);
-				image.a = (image.a+accumGM.a)/3.0;
-
-				accumGM = image;
-				image.r = (accumGM.r+(accumGM.r*(deghost*0.5))+(accumGM.g*(deghost*-0.25))+(accumGM.b*(deghost*-0.25)));
-				image.g = (accumGM.g+(accumGM.r*(deghost*-0.5))+(accumGM.g*(deghost*0.25))+(accumGM.b*(deghost*-0.5)));
-				image.b = (accumGM.b+(accumGM.r*(deghost*-0.25))+(accumGM.g*(deghost*-0.25))+(accumGM.b*(deghost*0.5)));
-				color = image;
-			}
-			else if (Stereoscopic_Mode == 11) // Anaglyph 3D Blue/Amber Code From http://iaian7.com/quartz/AnaglyphCompositing & vectorform.com by John Einselen
-			{
-				LOne = contrast*0.45;
-				LTwo = (1.0-LOne)*0.5;
-				ROne = contrast;
-				RTwo = 1.0-ROne;
-				deghost = Deghost*0.275;
-
-				accumBA = saturate(cA*float4(ROne,0.0,RTwo,1.0));
-				image.r = pow(accumBA.r+accumBA.g+accumBA.b, 1.05);
-				image.a = accumBA.a;
-
-				accumBA = saturate(cA*float4(0.0,ROne,RTwo,1.0));
-				image.g = pow(accumBA.r+accumBA.g+accumBA.b, 1.10);
-				image.a = image.a+accumBA.a;
-
-				accumBA = saturate(cB*float4(LTwo,LTwo,LOne,1.0));
-				image.b = pow(accumBA.r+accumBA.g+accumBA.b, 1.0);
-				image.b = lerp(pow(image.b,(Deghost*0.15)+1.0),1.0-pow(abs(1.0-image.b),(Deghost*0.15)+1.0),image.b);
-				image.a = (image.a+accumBA.a)/3.0;
-
-				accumBA = image;
-				image.r = (accumBA.r+(accumBA.r*(deghost*1.5))+(accumBA.g*(deghost*-0.75))+(accumBA.b*(deghost*-0.75)));
-				image.g = (accumBA.g+(accumBA.r*(deghost*-0.75))+(accumBA.g*(deghost*1.5))+(accumBA.b*(deghost*-0.75)));
-				image.b = (accumBA.b+(accumBA.r*(deghost*-1.5))+(accumBA.g*(deghost*-1.5))+(accumBA.b*(deghost*3.0)));
-				color = saturate(image);
-			}
+			accumBA = image;
+			image.r = (accumBA.r+(accumBA.r*(deghost*1.5))+(accumBA.g*(deghost*-0.75))+(accumBA.b*(deghost*-0.75)));
+			image.g = (accumBA.g+(accumBA.r*(deghost*-0.75))+(accumBA.g*(deghost*1.5))+(accumBA.b*(deghost*-0.75)));
+			image.b = (accumBA.b+(accumBA.r*(deghost*-1.5))+(accumBA.g*(deghost*-1.5))+(accumBA.b*(deghost*3.0)));
+			color = saturate(image);
 		}
 	}
 	
-	float Average_Lum = tex2Dlod(SamplerDMN,float4(TexCoords.x,TexCoords.y, 0, 0)).w;
-	
-	return float4(color.rgb,Average_Lum);
+	if	(Depth_Map_View == 2)
+		color = zBuffer(TexCoords).xxxx;
+		
+	return color;
 }
 
 float4 Average_Luminance(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Target
