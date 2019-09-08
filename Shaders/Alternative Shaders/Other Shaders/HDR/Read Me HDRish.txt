@@ -1,0 +1,1 @@
+HDRish will not work untill reshade supports a way to activate window's HDR.
