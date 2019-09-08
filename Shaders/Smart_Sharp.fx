@@ -363,13 +363,13 @@ float4 CAS(float2 texcoord)
 	float weight[MSIZE] = {0.031225216, 0.035206333, 0.038138565, 0.039695028, 0.039894000, 0.039695028, 0.038138565, 0.035206333, 0.031225216};  // by 9
 #endif
 
- float Q = 1.;
+ float Q = 0.875;
 if(Quality == 1)
-	Q *= 0.5;	
+	Q *= 0.4375;	
 if(Quality == 2)
-	Q *= 0.375;	
+	Q *= 0.21875;	
 if(Quality == 3)
-	Q *= 0.25;
+	Q *= 0.109375;
 	
 		float3 final_colour;
 		float Z;
