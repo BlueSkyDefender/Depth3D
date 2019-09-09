@@ -185,7 +185,7 @@ uniform int Debug_View <
 #define pix float2(BUFFER_RCP_WIDTH, BUFFER_RCP_HEIGHT)
 
 #define SIGMA 10
-#define BSIGMA 0.1125
+#define BSIGMA 0.25
 
 #if Quality == 0
 	#define MSIZE 3
@@ -362,14 +362,6 @@ float4 CAS(float2 texcoord)
 #if Quality == 3	
 	float weight[MSIZE] = {0.031225216, 0.035206333, 0.038138565, 0.039695028, 0.039894000, 0.039695028, 0.038138565, 0.035206333, 0.031225216};  // by 9
 #endif
-
- float Q = 0.875;
-if(Quality == 1)
-	Q *= 0.4375;	
-if(Quality == 2)
-	Q *= 0.21875;	
-if(Quality == 3)
-	Q *= 0.109375;
 	
 		float3 final_colour;
 		float Z;
@@ -389,10 +381,10 @@ if(Quality == 3)
 		{
 			for (int j=-kSize; j <= kSize; ++j)
 			{
-				float2 XY = float2(float(i),float(j))*pix*Q;
+				float2 XY = float2(float(i),float(j))*pix*0.5;
 				cc = E(texcoord.xy+XY);
-
-				factor = normpdf3(cc-c, BSIGMA)*bZ*weight[kSize+j]*weight[kSize+i];
+				
+				factor = normpdf3(cc-c, BSIGMA) * bZ * weight[kSize + j] * weight[kSize + i];
 				Z += factor;
 				final_colour += factor*cc;
 			}
