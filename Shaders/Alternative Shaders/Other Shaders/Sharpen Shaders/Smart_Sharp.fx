@@ -213,15 +213,8 @@ sampler BackBuffer
 	{ 
 		Texture = BackBufferTex;
 	};
-		
-texture texBF { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA8;};
-
-sampler SamplerBF
-	{
-		Texture = texBF;
-	};
-	
-texture texDC { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = R8;};
+			
+texture texDC { Width = BUFFER_WIDTH * 0.5; Height = BUFFER_HEIGHT * 0.5; Format = R8; MipLevels = 1;};
 
 sampler SamplerDC
 	{
@@ -269,68 +262,45 @@ float normpdf3(in float3 v, in float sigma)
 {
 	return 0.39894*exp(-0.5*dot(v,v)/(sigma*sigma))/sigma;
 }
-// fetch a 3x3 neighborhood around the pixel 'e',
-//  a b c
-//  d(e)f
-//  g h i
-//Unsharp
-float3 A(in float2 texcoord)
+
+float3 BB(in float2 texcoord, float2 AD)
 {
-	return tex2Dlod(BackBuffer, float4(texcoord + float2(-pix.x, -pix.y),0,0)).rgb;
-}
-float3 B(in float2 texcoord)
-{
-	return tex2Dlod(BackBuffer, float4(texcoord + float2(   0.0, -pix.y),0,0)).rgb;
-}
-float3 C(in float2 texcoord)
-{
-	return tex2Dlod(BackBuffer, float4(texcoord + float2( pix.x, -pix.y),0,0)).rgb;
-}
-float3 D(in float2 texcoord)
-{
-	return tex2Dlod(BackBuffer, float4(texcoord + float2(-pix.x,    0.0),0,0)).rgb;
-}
-float3 E(in float2 texcoord)
-{
-	return tex2Dlod(BackBuffer, float4(texcoord,0,0)).rgb;
-}
-float3 F(in float2 texcoord)
-{
-	return tex2Dlod(BackBuffer, float4(texcoord + float2( pix.x,    0.0),0,0)).rgb;
-}
-float3 G(in float2 texcoord)
-{
-	return tex2Dlod(BackBuffer, float4(texcoord + float2(-pix.x,  pix.y),0,0)).rgb;
-}
-float3 H(in float2 texcoord)
-{
-	return tex2Dlod(BackBuffer, float4(texcoord + float2(   0.0,  pix.y),0,0)).rgb;
-}
-float3 I(in float2 texcoord)
-{
-	return tex2Dlod(BackBuffer, float4(texcoord + float2( pix.x,  pix.y),0,0)).rgb;
+	return tex2Dlod(BackBuffer, float4(texcoord + AD,0,0)).rgb;
 }
 
 float4 CAS(float2 texcoord)
 {
+	// fetch a 3x3 neighborhood around the pixel 'e',
+	//  a b c
+	//  d(e)f
+	//  g h i
+	float3 A = tex2Doffset(BackBuffer, texcoord, int2(-1,-1)).rgb;
+    float3 B = tex2Doffset(BackBuffer, texcoord, int2( 0,-1)).rgb;
+    float3 C = tex2Doffset(BackBuffer, texcoord, int2( 1,-1)).rgb;
+    float3 D = tex2Doffset(BackBuffer, texcoord, int2(-1, 0)).rgb;
+    float3 E = tex2Doffset(BackBuffer, texcoord, int2( 0, 0)).rgb;
+    float3 F = tex2Doffset(BackBuffer, texcoord, int2( 1, 0)).rgb;
+    float3 G = tex2Doffset(BackBuffer, texcoord, int2(-1, 1)).rgb;
+    float3 H = tex2Doffset(BackBuffer, texcoord, int2( 0, 1)).rgb;
+    float3 I = tex2Doffset(BackBuffer, texcoord, int2( 1, 1)).rgb;
 	// Soft min and max.
 	//  a b c             b
 	//  d e f * 0.5  +  d e f * 0.5
 	//  g h i             h
     // These are 2.0x bigger (factored out the extra multiply).
-    float3 mnRGB2, mnRGB = Min3( Min3(D(texcoord), E(texcoord), F(texcoord)), B(texcoord), H(texcoord));
+    float3 mnRGB2, mnRGB = Min3( Min3(D, E, F), B, H);
 	
 	if( CAS_BETTER_DIAGONALS)
     {
-		mnRGB2 = Min3( Min3(mnRGB, A(texcoord), C(texcoord)), G(texcoord), I(texcoord));
+		mnRGB2 = Min3( Min3(mnRGB, A, C), G, I);
 		mnRGB += mnRGB2;
 	}
     
-    float3 mxRGB2, mxRGB = Max3( Max3(D(texcoord), E(texcoord), F(texcoord)), B(texcoord), H(texcoord));
+    float3 mxRGB2, mxRGB = Max3( Max3(D, E, F), B, H);
     
     if( CAS_BETTER_DIAGONALS )
     {
-		mxRGB2 = Max3( Max3(mxRGB, A(texcoord), C(texcoord)), G(texcoord), I(texcoord));  
+		mxRGB2 = Max3( Max3(mxRGB, A, C), G, I);  
 		mxRGB += mxRGB2;
     }
     
@@ -346,7 +316,7 @@ float4 CAS(float2 texcoord)
     ampRGB = sqrt(ampRGB);
       
 	//Bilateral Filter//                                                                                                                                                                   
-	float3 c = E(texcoord.xy);
+	float3 c = BB(texcoord.xy,0);
 	const int kSize = MSIZE * 0.5;	
 //													1			2			3			4				5			6			7			8				7			6			5				4			3			2			1
 //Full Kernal Size would be 15 as shown here (0.031225216, 0.03332227	1, 0.035206333, 0.036826804, 0.038138565, 0.039104044, 0.039695028, 0.039894000, 0.039695028, 0.039104044, 0.038138565, 0.036826804, 0.035206333, 0.033322271, 0.031225216)
@@ -382,7 +352,7 @@ float4 CAS(float2 texcoord)
 			for (int j=-kSize; j <= kSize; ++j)
 			{
 				float2 XY = float2(float(i),float(j))*pix*0.5;
-				cc = E(texcoord.xy+XY);
+				cc = BB(texcoord.xy,XY);
 				
 				factor = normpdf3(cc-c, BSIGMA) * bZ * weight[kSize + j] * weight[kSize + i];
 				Z += factor;
@@ -397,89 +367,81 @@ float4 CAS(float2 texcoord)
 return saturate(float4(final_colour/Z,CAS_Mask));
 }
 
-void Filters(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 color : SV_Target0)                                                                          
+float4 Filters(float2 texcoord)                                                                          
 {   float2 Adjust = (Spread * 0.625 ) * pix;
-	float3 Done, result;	
-		result += E(texcoord + float2( 1, 0) * Adjust );
-		result += E(texcoord + float2(-1, 0) * Adjust );
-		result += E(texcoord + float2( 1, 0) * 0.75 * Adjust );
-		result += E(texcoord + float2(-1, 0) * 0.75 * Adjust );		
-		result += E(texcoord + float2( 1, 0) * 0.50 * Adjust );
-		result += E(texcoord + float2(-1, 0) * 0.50 * Adjust );
-		result += E(texcoord + float2( 1, 0) * 0.25 * Adjust );
-		result += E(texcoord + float2(-1, 0) * 0.25 * Adjust );
+	float3 Done = BB(texcoord ,0), result;	
+		result += BB(texcoord , float2( 1, 0) * Adjust ).rgb;
+		result += BB(texcoord , float2(-1, 0) * Adjust ).rgb;
+		result += BB(texcoord , float2( 1, 0) * 0.75 * Adjust ).rgb;
+		result += BB(texcoord , float2(-1, 0) * 0.75 * Adjust ).rgb;		
+		result += BB(texcoord , float2( 1, 0) * 0.50 * Adjust ).rgb;
+		result += BB(texcoord , float2(-1, 0) * 0.50 * Adjust ).rgb;
+		result += BB(texcoord , float2( 1, 0) * 0.25 * Adjust ).rgb;
+		result += BB(texcoord , float2(-1, 0) * 0.25 * Adjust ).rgb;
 		
-		result += E(texcoord + float2( 1, 1) * 0.50 * Adjust );
-		result += E(texcoord + float2(-1,-1) * 0.50 * Adjust );
-		result += E(texcoord + float2( 1,-1) * 0.50 * Adjust );
-		result += E(texcoord + float2(-1, 1) * 0.50 * Adjust );		
+		result += BB(texcoord , float2( 1, 1) * 0.50 * Adjust ).rgb;
+		result += BB(texcoord , float2(-1,-1) * 0.50 * Adjust ).rgb;
+		result += BB(texcoord , float2( 1,-1) * 0.50 * Adjust ).rgb;
+		result += BB(texcoord , float2(-1, 1) * 0.50 * Adjust ).rgb;		
 	//Sharpen Out
-	Done = lerp(E(texcoord),E(texcoord)+(E(texcoord) - CAS(texcoord).rgb)*(Sharpness*3.), CAS(texcoord).w * saturate(Sharpness));
+	Done = lerp(Done,Done+(Done - CAS(texcoord).rgb)*(Sharpness*3.), CAS(texcoord).w * saturate(Sharpness));
 		 
-	color = float4( Done,dot(result * 0.083333333, float3(0.2126, 0.7152, 0.0722) ) );
+	return float4( Done,dot(result * 0.083333333, float3(0.2126, 0.7152, 0.0722) ) );
 }
 // Spread the blur a bit more. 
-float Adjust(float2 texcoord : TEXCOORD) 
+float Adjust(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Target
 {
 	float2 S = Spread * 0.125f * pix;
 
 		float result;
-		result += tex2Dlod(SamplerBF,float4(texcoord + float2( 1, 0) * S ,0,0)).w;
-		result += tex2Dlod(SamplerBF,float4(texcoord + float2( 0, 1) * S ,0,0)).w;
-		result += tex2Dlod(SamplerBF,float4(texcoord + float2(-1, 0) * S ,0,0)).w;
-		result += tex2Dlod(SamplerBF,float4(texcoord + float2( 0,-1) * S ,0,0)).w;
+		result += Filters(texcoord + float2( 1, 0) * S ).w;
+		result += Filters(texcoord + float2( 0, 1) * S ).w;
+		result += Filters(texcoord + float2(-1, 0) * S ).w;
+		result += Filters(texcoord + float2( 0,-1) * S ).w;
 		
-		result += tex2Dlod(SamplerBF,float4(texcoord + float2( 1, 0) * 0.5 * S ,0,0)).w;
-		result += tex2Dlod(SamplerBF,float4(texcoord + float2( 0, 1) * 0.5 * S ,0,0)).w;
-		result += tex2Dlod(SamplerBF,float4(texcoord + float2(-1, 0) * 0.5 * S ,0,0)).w;
-		result += tex2Dlod(SamplerBF,float4(texcoord + float2( 0,-1) * 0.5 * S ,0,0)).w;
+		result += Filters(texcoord + float2( 1, 0) * 0.5 * S).w;
+		result += Filters(texcoord + float2( 0, 1) * 0.5 * S).w;
+		result += Filters(texcoord + float2(-1, 0) * 0.5 * S).w;
+		result += Filters(texcoord + float2( 0,-1) * 0.5 * S).w;
 	
 	return result * 0.125; 
 }
 
-float DepthCues(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Target
+float DepthCues(float2 texcoord) 
 {	
 		float2 S = Spread * 0.75f * pix;
 
-		float result;
-		result += Adjust(texcoord + float2( 1, 0) * S ).x;
-		result += Adjust(texcoord + float2( 0, 1) * S ).x;
-		result += Adjust(texcoord + float2(-1, 0) * S ).x;
-		result += Adjust(texcoord + float2( 0,-1) * S ).x;
+		float result,M_Cues = 1;
+		result += tex2Dlod(SamplerDC,float4(texcoord + float2( 1, 0) * S ,0,M_Cues)).x;
+		result += tex2Dlod(SamplerDC,float4(texcoord + float2( 0, 1) * S ,0,M_Cues)).x;
+		result += tex2Dlod(SamplerDC,float4(texcoord + float2(-1, 0) * S ,0,M_Cues)).x;
+		result += tex2Dlod(SamplerDC,float4(texcoord + float2( 0,-1) * S ,0,M_Cues)).x;
 		
-		result += Adjust(texcoord + float2( 1, 0) * 0.5 * S ).x;
-		result += Adjust(texcoord + float2( 0, 1) * 0.5 * S ).x;
-		result += Adjust(texcoord + float2(-1, 0) * 0.5 * S ).x;
-		result += Adjust(texcoord + float2( 0,-1) * 0.5 * S ).x;
+		result += tex2Dlod(SamplerDC,float4(texcoord + float2( 1, 0) * 0.5 * S ,0,M_Cues)).x;
+		result += tex2Dlod(SamplerDC,float4(texcoord + float2( 0, 1) * 0.5 * S ,0,M_Cues)).x;
+		result += tex2Dlod(SamplerDC,float4(texcoord + float2(-1, 0) * 0.5 * S ,0,M_Cues)).x;
+		result += tex2Dlod(SamplerDC,float4(texcoord + float2( 0,-1) * 0.5 * S ,0,M_Cues)).x;
 		
 		result *= 0.125;
 	
 	// Formula for Image Pop = Original + (Original / Blurred).
-	float DC = (dot(E(texcoord),float3(0.2126, 0.7152, 0.0722)) / result );
-return saturate(DC);
-}
-
-float DC(float2 texcoord )
-{
-	float2 tex_offset = pix; // Gets texel offset
-	float result =  tex2D(SamplerDC,texcoord).x;
-		  result += tex2D(SamplerDC, float2(texcoord + float2( 1, 0) * tex_offset)).x;
-		  result += tex2D(SamplerDC, float2(texcoord + float2(-1, 0) * tex_offset)).x;
-		  result += tex2D(SamplerDC, float2(texcoord + float2( 0, 1) * tex_offset)).x;
-		  result += tex2D(SamplerDC, float2(texcoord + float2( 0, 1) * tex_offset)).x;
-		  tex_offset *= 0.75;		   
-		  result += tex2D(SamplerDC, float2(texcoord + float2( 1, 1) * tex_offset)).x;
-		  result += tex2D(SamplerDC, float2(texcoord + float2(-1,-1) * tex_offset)).x;
-		  result += tex2D(SamplerDC, float2(texcoord + float2( 1,-1) * tex_offset)).x;
-		  result += tex2D(SamplerDC, float2(texcoord + float2(-1, 1) * tex_offset)).x;
-		  
-	return lerp(1.0f,lerp(result * 0.11111111,tex2D(SamplerDC,texcoord).x,1-Blur_Cues),Shade_Power);
+	float DC = (dot(tex2D(BackBuffer,texcoord).rgb,float3(0.2126, 0.7152, 0.0722)) / result );
+return lerp(1.0f,saturate(DC),Shade_Power);
 }
 
 float4 ShaderOut(float2 texcoord : TEXCOORD0)
 {	
-	float4 Out, DepthCues = DC( texcoord ).xxxx;
-	float3 Luma, Sharpen = tex2D(SamplerBF,texcoord).rgb,BB = tex2D(BackBuffer,texcoord).rgb;
+	float DCB = DepthCues( texcoord ).x;
+	if(Blur_Cues > 0)
+	{
+		DCB += DepthCues( texcoord + float2( Blur_Cues, 0) * pix).x;
+		DCB += DepthCues( texcoord + float2(-Blur_Cues, 0) * pix).x;
+		DCB += DepthCues( texcoord + float2( 0,-Blur_Cues) * pix).x;
+		DCB += DepthCues( texcoord + float2( 0, Blur_Cues) * pix).x;
+		DCB *= 0.2;
+	}
+	float4 Out, DC = DCB.xxxx;
+	float3 Luma, Sharpen = Filters(texcoord).rgb,BB = tex2D(BackBuffer,texcoord).rgb;
 	float DB = Depth(texcoord).r,DBTL = Depth(float2(texcoord.x*2,texcoord.y*2)).r, DBBL = Depth(float2(texcoord.x*2,texcoord.y*2-1)).r;
 	
 	if(No_Depth_Map)
@@ -493,7 +455,7 @@ float4 ShaderOut(float2 texcoord : TEXCOORD0)
 		Out.rgb = lerp(Sharpen, BB, DB);
 		
 		if(Depth_Cues)
-			Out = Out*lerp(DepthCues,1., DB);
+			Out = Out*lerp(DC,1., DB);
 	}
 	else if (Debug_View == 1)
 	{
@@ -512,7 +474,7 @@ float4 ShaderOut(float2 texcoord : TEXCOORD0)
 	}
 	else if (Debug_View == 2)
 	{
-		Out = lerp(DepthCues,1., DB);
+		Out = lerp(DC,1., DB);
 		if(!Depth_Cues)
 			Out = 1;
 	}
@@ -628,17 +590,11 @@ void PostProcessVS(in uint id : SV_VertexID, out float4 position : SV_Position, 
 //*Rendering passes*//
 technique Smart_Sharp
 {		
-			pass FilterOut
-		{
-			VertexShader = PostProcessVS;
-			PixelShader = Filters;
-			RenderTarget = texBF;
-		}
 
 			pass DepthCuesOut
 		{
 			VertexShader = PostProcessVS;
-			PixelShader = DepthCues;
+			PixelShader = Adjust;
 			RenderTarget = texDC;
 		}
 			pass UnsharpMask
