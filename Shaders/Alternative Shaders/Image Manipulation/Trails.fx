@@ -19,7 +19,7 @@
 //*																																												
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#define PerColor 0
+#define PerColor 0 // Lets you adjust per Color Channel.Default 0 off
 
 #if !PerColor
 uniform float Persistence <
@@ -30,8 +30,8 @@ uniform float Persistence <
 				"If pushed out the effect is alot like long exposure.\n"
 				"This can be used for light painting in games.\n"
 				"1000/1 is 1.0, so 1/2 is 0.5 and so forth.\n"
-				"Default is 1/250 so 0.750, 0 is infinity.";
-> = 0.75;
+				"Default is 0.25, 0 is infinity.";
+> = 0.25;
 #else
 uniform float3 Persistence <
 	ui_type = "drag";
@@ -41,11 +41,11 @@ uniform float3 Persistence <
 				"If pushed out the effect is alot like long exposure.\n"
 				"This can be used for light painting in games.\n"
 				"1000/1 is 1.0, so 1/2 is 0.5 and so forth.\n"
-				"Default is 1/250 so 0.750, 0 is infinity.";
-> = float3(0.75,0.75,0.75);
+				"Default is 0.25, 0 is infinity.";
+> = float3(0.25,0.25,0.25);
 #endif
 
-uniform float TQ<
+uniform float TQ <
 	ui_type = "drag";
 	ui_min = 0.0; ui_max = 1.0;
 	ui_label = "Trail Quality";
@@ -76,7 +76,7 @@ uniform float frametime < source = "frametime"; >;
 float3 T_Out(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Target
 {	
     float3 C = tex2D(BackBuffer, texcoord).rgb;
-    
+
     C.rgb = tex2Dlod(PBackBuffer, float4(texcoord,0,TQ)).rgb;
 
     #if !PerColor
@@ -92,11 +92,31 @@ float3 T_Out(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Tar
     return C;
 }
 
-
-
 void Past_BB(float4 position : SV_Position, float2 texcoord : TEXCOORD, out float4 Past : SV_Target)
-{  
-	Past = tex2D(BackBuffer,texcoord);  
+{   float2 samples[12] = {
+	float2(-0.326212, -0.405805),  
+	float2(-0.840144, -0.073580),  
+	float2(-0.695914, 0.457137),  
+	float2(-0.203345, 0.620716),  
+	float2(0.962340, -0.194983),  
+	float2(0.473434, -0.480026),  
+	float2(0.519456, 0.767022),  
+	float2(0.185461, -0.893124),  
+	float2(0.507431, 0.064425),  
+	float2(0.896420, 0.412458),  
+	float2(-0.321940, -0.932615),  
+	float2(-0.791559, -0.597705)  
+	};  
+	  
+	float4 sum = tex2D(BackBuffer,texcoord);  
+	float Adjust = TQ*pix.x;
+	for (int i = 0; i < 12; i++)
+	{  
+		sum += tex2D(BackBuffer, texcoord + Adjust * samples[i]);  
+	} 
+ 
+	Past = sum * 0.07692307;  
+ 
 }
 
 ///////////////////////////////////////////////////////////ReShade.fxh/////////////////////////////////////////////////////////////
