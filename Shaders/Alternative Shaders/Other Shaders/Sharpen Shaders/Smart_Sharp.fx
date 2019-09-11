@@ -50,7 +50,7 @@
 // 3 = Medium
 // 4 = High 
 // Default is off.
-#define M_Quality 0 //ManualQuality Shader Defaults to 2
+#define M_Quality 0 //Manual Quality Shader Defaults to 2 when set to off.
 
 // It is best to run Smart Sharp after tonemapping.
 
@@ -203,11 +203,6 @@ float3 Max3(float3 x, float3 y, float3 z)
     return max(x, max(y, z));
 }
 
-float normpdf(in float x, in float sigma)
-{
-	return 0.39894*exp(-0.5*x*x/(sigma*sigma))/sigma;
-}
-
 float normpdf3(in float3 v, in float sigma)
 {
 	return 0.39894*exp(-0.5*dot(v,v)/(sigma*sigma))/sigma;
@@ -265,9 +260,9 @@ float4 CAS(float2 texcoord)
     // Shaping amount of sharpening.
     ampRGB = sqrt(ampRGB);
       
-	//Bilateral Filter//                                                                                                                                                                   
-	float3 c = BB(texcoord.xy,0);
-	const int kSize = MSIZE * 0.5;	
+	//Bilateral Filter//                                                Q1         Q2       Q3        Q4                                                                                          
+	const int kSize = MSIZE * 0.5; // Default M-size is Quality 2 so [MSIZE 3] [MSIZE 5] [MSIZE 7] [MSIZE 9] / 2.
+														
 //													1			2			3			4				5			6			7			8				7			6			5				4			3			2			1
 //Full Kernal Size would be 15 as shown here (0.031225216, 0.03332227	1, 0.035206333, 0.036826804, 0.038138565, 0.039104044, 0.039695028, 0.039894000, 0.039695028, 0.039104044, 0.038138565, 0.036826804, 0.035206333, 0.033322271, 0.031225216)
 #if Quality == 1
@@ -283,28 +278,17 @@ float4 CAS(float2 texcoord)
 	float weight[MSIZE] = {0.031225216, 0.035206333, 0.038138565, 0.039695028, 0.039894000, 0.039695028, 0.038138565, 0.035206333, 0.031225216};  // by 9
 #endif
 	
-		float3 final_colour;
-		float Z;
-		[unroll]
-		for (int o = 0; o <= kSize; ++o)
-		{
-			weight[kSize+o] = normpdf(float(o), SIGMA);
-			weight[kSize-o] = normpdf(float(o), SIGMA);
-		}
-		
-		float3 cc;
-		float factor;
-		float bZ = rcp(normpdf(0.0, BSIGMA));
-		
-		[loop]
-		for (int i=-kSize; i < kSize; ++i)
-		{			
-			cc = BB(texcoord.xy, float2( float(i) ,float(i) ) * pix * 0.5 );
-			
-			factor = normpdf3(cc-c, BSIGMA) * bZ * weight[kSize + i] * weight[kSize + i];
-			Z += factor;
-			final_colour += factor*cc;
-		}
+	float3 final_colour, c = BB(texcoord.xy,0), cc;
+	float Z, factor;
+	
+	[loop]
+	for (int i=-kSize; i < kSize; ++i)
+	{			
+		cc = BB(texcoord.xy, i * pix * rcp(kSize) );
+		factor = normpdf3(cc-c, BSIGMA);
+		Z += factor;
+		final_colour += factor * cc;
+	}
 		
 	float CAS_Mask = dot(ampRGB,float3(0.2126, 0.7152, 0.0722));
 
