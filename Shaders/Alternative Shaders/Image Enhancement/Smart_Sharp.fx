@@ -113,22 +113,15 @@ uniform bool CAS_BETTER_DIAGONALS <
 > = false;
 
 uniform bool CA_Mask_Boost <
-	ui_label = "CAS Boost";
+	ui_label = "CAM Boost";
 	ui_tooltip = "This boosts the power of Contrast Adaptive Masking part of the shader.";
 	ui_category = "Bilateral CAS";
 > = false;
 
-uniform bool CA_Removale <
-	ui_label = "CAS Masking";
+uniform bool CA_Removal <
+	ui_label = "CAM Removal";
 	ui_tooltip = "This removes Contrast Adaptive Masking part of the shader.\n"
 				 "This is for people who like the Raw look of Bilateral Sharpen.";
-	ui_category = "Bilateral CAS";
-> = false;
-
-uniform bool Slow_Mode <
-	ui_label = "CAS Slow Mode";
-	ui_tooltip = "This enables release Quality of Bilateral Sharpen that is 2X the amount of image bluring at the cost of in game FPS.\n"
-				 "If you want this to be usable at higher resolutions go in shader and change the preprocessor M_Quality, to low.";
 	ui_category = "Bilateral CAS";
 > = false;
 
@@ -297,24 +290,11 @@ float4 CAS(float2 texcoord)
 	
 	[loop]
 	for (int i=-kSize; i <= kSize; ++i)
-	{
-[branch]if(Slow_Mode)
-		{
-			for (int j=-kSize; j <= kSize; ++j)
-			{
-				cc = BB(texcoord.xy, float2(i,j) * pix * rcp(kSize) );
-				factor = normpdf3(cc-c, BSIGMA);
-				Z += factor;
-				final_colour += factor * cc;
-			}
-		}
-		else
-		{		
-			cc = BB(texcoord.xy, float2( i, 1 - (i * i) * 0.5 ) * pix * rcp(kSize) );
-			factor = normpdf3(cc-c, BSIGMA);
-			Z += factor;
-			final_colour += factor * cc;
-		}
+	{	
+		cc = BB(texcoord.xy, float2( i, 1 - (i * i) * 0.5 ) * pix * rcp(kSize) );
+		factor = normpdf3(cc-c, BSIGMA);
+		Z += factor;
+		final_colour += factor * cc;
 	}
 		
 	float CAS_Mask = dot(ampRGB,float3(0.2126, 0.7152, 0.0722));
@@ -322,7 +302,7 @@ float4 CAS(float2 texcoord)
 	if(CA_Mask_Boost)
 		CAS_Mask = lerp(CAS_Mask,CAS_Mask * CAS_Mask,saturate(Sharpness * 0.5));
 		
-	if(CA_Removale)
+	if(CA_Removal)
 		CAS_Mask = 1;
 		
 return saturate(float4(final_colour/Z,CAS_Mask));
