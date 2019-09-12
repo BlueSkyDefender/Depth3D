@@ -33,7 +33,7 @@
 // ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-// This is the practical limit for the algorithm's scaling ability. Example resolutions,
+// This is the practical limit for the algorithm's scaling ability. Example resolutions;
 //  1280x720  -> 1080p = 2.25x area
 //  1536x864  -> 1080p = 1.56x area
 //  1792x1008 -> 1440p = 2.04x area
@@ -100,8 +100,8 @@ uniform float Sharpness <
 	#endif
     ui_label = "Sharpening Strength";
     ui_min = 0.0; ui_max = 1.0;
-    ui_tooltip = "Scaled by the sharpness knob while being transformed to a negative lobe (values at -1/5 * adjust).\n"
-				 "Zero = no sharpening, to One = full sharpening, Past One = Extra Crispy.\n"
+    ui_tooltip = "Scaled by adjusting this slider from Zero to One to increase sharpness of the image.\n"
+				 "Zero = No Sharpening, to One = Full Sharpening, and Past One = Extra Crispy.\n"
 				 "Number 0.625 is default.";
 	ui_category = "Bilateral CAS";
 > = 0.625;
@@ -112,9 +112,23 @@ uniform bool CAS_BETTER_DIAGONALS <
 	ui_category = "Bilateral CAS";
 > = false;
 
-uniform bool CAS_Mask_Boost <
+uniform bool CA_Mask_Boost <
 	ui_label = "CAS Boost";
 	ui_tooltip = "This boosts the power of Contrast Adaptive Masking part of the shader.";
+	ui_category = "Bilateral CAS";
+> = false;
+
+uniform bool CA_Removale <
+	ui_label = "CAS Masking";
+	ui_tooltip = "This removes Contrast Adaptive Masking part of the shader.\n"
+				 "This is for people who like the Raw look of Bilateral Sharpen.";
+	ui_category = "Bilateral CAS";
+> = false;
+
+uniform bool Slow_Mode <
+	ui_label = "CAS Slow Mode";
+	ui_tooltip = "This enables release Quality of Bilateral Sharpen that is 2X the amount of image bluring at the cost of in game FPS.\n"
+				 "If you want this to be usable at higher resolutions go in shader and change the preprocessor M_Quality, to low.";
 	ui_category = "Bilateral CAS";
 > = false;
 
@@ -282,19 +296,35 @@ float4 CAS(float2 texcoord)
 	float Z, factor;
 	
 	[loop]
-	for (int i=-kSize; i < kSize; ++i)
-	{			
-		cc = BB(texcoord.xy, i * pix * rcp(kSize) );
-		factor = normpdf3(cc-c, BSIGMA);
-		Z += factor;
-		final_colour += factor * cc;
+	for (int i=-kSize; i <= kSize; ++i)
+	{
+[branch]if(Slow_Mode)
+		{
+			for (int j=-kSize; j <= kSize; ++j)
+			{
+				cc = BB(texcoord.xy, float2(i,j) * pix * rcp(kSize) );
+				factor = normpdf3(cc-c, BSIGMA);
+				Z += factor;
+				final_colour += factor * cc;
+			}
+		}
+		else
+		{
+			cc = BB(texcoord.xy, float2(i,i) * pix * rcp(kSize) );
+			factor = normpdf3(cc-c, BSIGMA);
+			Z += factor;
+			final_colour += factor * cc;
+		}
 	}
 		
 	float CAS_Mask = dot(ampRGB,float3(0.2126, 0.7152, 0.0722));
 
-	if(CAS_Mask_Boost)
-		CAS_Mask = lerp(CAS_Mask,CAS_Mask * CAS_Mask,saturate(Sharpness * 0.5));		
-	
+	if(CA_Mask_Boost)
+		CAS_Mask = lerp(CAS_Mask,CAS_Mask * CAS_Mask,saturate(Sharpness * 0.5));
+		
+	if(CA_Removale)
+		CAS_Mask = 1;
+		
 return saturate(float4(final_colour/Z,CAS_Mask));
 }
 
