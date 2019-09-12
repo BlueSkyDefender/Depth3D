@@ -309,8 +309,8 @@ float4 CAS(float2 texcoord)
 			}
 		}
 		else
-		{
-			cc = BB(texcoord.xy, float2(i,i) * pix * rcp(kSize) );
+		{		
+			cc = BB(texcoord.xy, float2( i, 1 - (i * i) * 0.5 ) * pix * rcp(kSize) );
 			factor = normpdf3(cc-c, BSIGMA);
 			Z += factor;
 			final_colour += factor * cc;
