@@ -76,13 +76,6 @@ uniform float Anaglyph_Desaturation <
 	ui_tooltip = "Adjust anaglyph desaturation, Zero is Black & White, One is full color.";
 	ui_category = "Stereoscopic Options";
 > = 1.0;
-uniform float Fill <
-	ui_type = "drag";
-	ui_min = 0.0; ui_max = 2.0;
-	ui_label = "Fill";
-	ui_tooltip = "Adjust anaglyph desaturation, Zero is Black & White, One is full color.";
-	ui_category = "Stereoscopic Options";
-> = 1.0;
 
 uniform bool Eye_Swap <
 	ui_label = "Eye Swap";
@@ -189,10 +182,14 @@ float4 B_U_R(in float2 texcoord : TEXCOORD0)
 	
 	return BR;
 }
-//#define Fill 1.2
+
 #define Samples 2
 float3 Content_Aware_Fill_L(float2 TC)
 {  
+	float Fill = 1.0; 
+	if(Stereoscopic_Mode_Input == 2)
+		Fill = 0.5;
+		
     float4 Color = B_U_L(TC), total;
     [loop]
     for (int HF = -Samples; HF <= Samples; HF++)
@@ -201,14 +198,14 @@ float3 Content_Aware_Fill_L(float2 TC)
         {
 		float2 Box = float2( HF, j );
 		float2 Calculate = Box * Fill;
-		float Distance = sqrt(HF>j);
+		float Distance = sqrt(HF>=j);
    
         Calculate *= Distance;//get it calculate distance :D...
                
         Color = B_U_L(TC + Calculate * pix);
         total += Color * rcp(1 + Distance);//bluring can be done here but you will have to have and AA mask.
         
-		if (total.a >= 1.0) //Mask Treshhold
+		if (total.a >= 0.5) //Mask Treshhold
 			break; 
 		}      
     }
@@ -218,6 +215,10 @@ float3 Content_Aware_Fill_L(float2 TC)
 
 float3 Content_Aware_Fill_R(float2 TC)
 { 
+	float Fill = 1.0; 
+	if(Stereoscopic_Mode_Input == 2)
+		Fill = 0.5;
+		
     float4 Color = B_U_R(TC), total;
     [loop]
     for (int HF = -Samples; HF <= Samples; HF++)
@@ -226,14 +227,14 @@ float3 Content_Aware_Fill_R(float2 TC)
         {
 		float2 Box = float2( HF, j );
 		float2 Calculate = Box * Fill;
-		float Distance = sqrt(HF>j);
+		float Distance = sqrt(HF>=j);
    
         Calculate *= Distance;//get it calculate distance :D...
                
         Color = B_U_R(TC + Calculate * pix);
         total += Color * rcp(1 + Distance);//bluring can be done here but you will have to have and AA mask.
         
-		if (total.a >= 1.0) //Mask Treshhold
+		if (total.a >= 0.5) //Mask Treshhold
 			break; 
 		}      
     }
