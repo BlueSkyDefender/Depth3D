@@ -76,6 +76,13 @@ uniform float Anaglyph_Desaturation <
 	ui_tooltip = "Adjust anaglyph desaturation, Zero is Black & White, One is full color.";
 	ui_category = "Stereoscopic Options";
 > = 1.0;
+uniform float Fill <
+	ui_type = "drag";
+	ui_min = 0.0; ui_max = 2.0;
+	ui_label = "Fill";
+	ui_tooltip = "Adjust anaglyph desaturation, Zero is Black & White, One is full color.";
+	ui_category = "Stereoscopic Options";
+> = 1.0;
 
 uniform bool Eye_Swap <
 	ui_label = "Eye Swap";
@@ -127,20 +134,6 @@ sampler SamplerBB
 		Texture = texBB;
 	};
 	
-texture texBiL  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA8; MipLevels = 1;}; 
-
-sampler SamplerBiL
-	{
-		Texture = texBiL;
-	};
-
-texture texBiR  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA8; MipLevels = 1;}; 
-
-sampler SamplerBiR
-	{
-		Texture = texBiR;
-	};
-	
 texture CurrentBackBuffer  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA8;}; 
 
 sampler CBackBuffer
@@ -175,126 +168,77 @@ float2 GridXY(float2 texcoord)
 	return floor(float2(texcoord.x*BUFFER_WIDTH,texcoord.y*BUFFER_HEIGHT));
 }
 //Bilateral & Unilateral Left
-float3 B_U_L(float2 texcoord : TEXCOORD0)
+float4 B_U_L(float2 texcoord : TEXCOORD0)
 {
-	float3 BL = fmod(GridXY(texcoord).x+GridXY(texcoord).y,2.0) ? 0 : tex2D(BackBuffer, float2(texcoord.x,texcoord.y)).rgb;
-	float3 UL = fmod(GridXY(texcoord).y,2.0) ? 0 : tex2D(BackBuffer, float2(texcoord.x,texcoord.y)).rgb;
-	
+	float4 BL = fmod(GridXY(texcoord).x+GridXY(texcoord).y,2.0) ? 0 : tex2Dlod(BackBuffer, float4(texcoord,0,0));
+	float4 UL = fmod(GridXY(texcoord).y,2.0) ? 0 : tex2Dlod(BackBuffer, float4(texcoord,0,0) );
+		
 	if(Stereoscopic_Mode_Input == 2)
 		BL = UL;
-	
+
 	return BL;
 }
 //Bilateral & Unilateral Right
-float3 B_U_R(in float2 texcoord : TEXCOORD0)
+float4 B_U_R(in float2 texcoord : TEXCOORD0)
 {
-	float3 BR = fmod(GridXY(texcoord).x+GridXY(texcoord).y,2.0) ? tex2D(BackBuffer, float2(texcoord.x,texcoord.y)).rgb : 0 ;
-	float3 UR = fmod(GridXY(texcoord).y,2.0) ? tex2D(BackBuffer, float2(texcoord.x,texcoord.y)).rgb : 0 ;
+	float4 BR = fmod(GridXY(texcoord).x+GridXY(texcoord).y,2.0) ? tex2Dlod(BackBuffer, float4(texcoord,0,0)) : 0 ;
+	float4 UR = fmod(GridXY(texcoord).y,2.0) ? tex2Dlod(BackBuffer, float4(texcoord,0,0)) : 0 ;
 		
 	if(Stereoscopic_Mode_Input == 2)
 		BR = UR;
 	
 	return BR;
 }
-
-void BiLR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 Left : SV_Target0 , out float4 Right : SV_Target1)
-{
-		Left =  float4(B_U_L(texcoord),1.);
-		Right = float4(B_U_R(texcoord),1.);
+//#define Fill 1.2
+#define Samples 2
+float3 Content_Aware_Fill_L(float2 TC)
+{  
+    float4 Color = B_U_L(TC), total;
+    [loop]
+    for (int HF = -Samples; HF <= Samples; HF++)
+    {  
+        for (int j = -Samples; j <= Samples; j++)
+        {
+		float2 Box = float2( HF, j );
+		float2 Calculate = Box * Fill;
+		float Distance = sqrt(HF>j);
+   
+        Calculate *= Distance;//get it calculate distance :D...
+               
+        Color = B_U_L(TC + Calculate * pix);
+        total += Color * rcp(1 + Distance);//bluring can be done here but you will have to have and AA mask.
+        
+		if (total.a >= 1.0) //Mask Treshhold
+			break; 
+		}      
+    }
+       
+	return total.rgb/total.a;
 }
 
-float3 Bi_U_L(float2 texcoord )
-{  //CB Reconstruction;
-   float h = 0.5;
-   float3 C = tex2D(SamplerBiL,texcoord).rgb,imageA, imageB, tA, tB, tC, tD;
-   float3 L = tex2D(SamplerBiL,texcoord + float2( pix.x, 0.0)).rgb;
-   float3 R = tex2D(SamplerBiL,texcoord + float2(-pix.x, 0.0)).rgb;
-   float3 U = tex2D(SamplerBiL,texcoord + float2( 0.0, pix.y)).rgb;
-   float3 D = tex2D(SamplerBiL,texcoord + float2( 0.0, -pix.y)).rgb;
-   float3 UL = tex2D(SamplerBiL,texcoord + float2( pix.x, pix.y)).rgb;
-   float3 UR = tex2D(SamplerBiL,texcoord + float2(-pix.x, pix.y)).rgb;
+float3 Content_Aware_Fill_R(float2 TC)
+{ 
+    float4 Color = B_U_R(TC), total;
+    [loop]
+    for (int HF = -Samples; HF <= Samples; HF++)
+    {  
+        for (int j = -Samples; j <= Samples; j++)
+        {
+		float2 Box = float2( HF, j );
+		float2 Calculate = Box * Fill;
+		float Distance = sqrt(HF>j);
    
-   if(Stereoscopic_Mode_Input == 2)
-   {
-   	//////////////////   
-	   //      U       // 
-	   //      C       //
-	   //      +       //
-	   //      C       //
-	   //      D       // 
-	   //////////////////   
-	   tA = lerp( C, U, h);
-	   tB = lerp( C, D, h);
-	   imageA = tA * 2.;
-	   imageB = tB * 2.;
-   }
-   else
-   {
-	   //////////////////   
-	   // UL U   U  UR // 
-	   //      +       //
-	   // L  C   C  R  // 
-	   //////////////////   
-	   tA = lerp( UL, U, h);
-	   tB = lerp( C, L, h );
-	   imageA = lerp(tA,tB,h) * 2.;
-
-	   tC = lerp( UR, U, h);
-	   tD = lerp( C, R, h );
-	   imageB = lerp(tC,tD,h) * 2.;
-	}	  
-   //Super Resoluition
-   float3 SR = lerp(imageA,0,1/2);
-   	   SR += lerp(imageB,0,1/3);
-   	   SR *= 0.5;
-   return SR;
-}
-
-float3 Bi_U_R(float2 texcoord)
-{  //CB Reconstruction;
-   float h = 0.5;
-   float3 C = tex2D(SamplerBiR,texcoord).rgb,imageA, imageB, tA, tB, tC, tD;
-   float3 L = tex2D(SamplerBiR,texcoord + float2( pix.x, 0.0)).rgb;
-   float3 R = tex2D(SamplerBiR,texcoord + float2(-pix.x, 0.0)).rgb;
-   float3 U = tex2D(SamplerBiR,texcoord + float2( 0.0, pix.y)).rgb;
-   float3 D = tex2D(SamplerBiR,texcoord + float2( 0.0, -pix.y)).rgb;
-   float3 UL = tex2D(SamplerBiR,texcoord + float2( pix.x, pix.y)).rgb;
-   float3 UR = tex2D(SamplerBiR,texcoord + float2(-pix.x, pix.y)).rgb;
-   
-   if(Stereoscopic_Mode_Input == 2)
-   {
-   	//////////////////   
-	   //      U       // 
-	   //      C       //
-	   //      +       //
-	   //      C       //
-	   //      D       // 
-	   //////////////////   
-	   tA = lerp( C, U, h);
-	   tB = lerp( C, D, h);
-	   imageA = tA * 2.;
-	   imageB = tB * 2.;
-   }
-   else
-   {
-	   //////////////////   
-	   // UL U   U  UR // 
-	   //      +       //
-	   // L  C   C  R  // 
-	   //////////////////   
-	   tA = lerp( UL, U, h);
-	   tB = lerp( C, L, h );
-	   imageA = lerp(tA,tB,h) * 2.;
-
-	   tC = lerp( UR, U, h);
-	   tD = lerp( C, R, h );
-	   imageB = lerp(tC,tD,h) * 2.;
-	}	  
-   //Super Resoluition
-   float3 SR = lerp(imageA,0,1/2);
-   	   SR += lerp(imageB,0,1/3);
-   	   SR *= 0.5;
-   return SR;
+        Calculate *= Distance;//get it calculate distance :D...
+               
+        Color = B_U_R(TC + Calculate * pix);
+        total += Color * rcp(1 + Distance);//bluring can be done here but you will have to have and AA mask.
+        
+		if (total.a >= 1.0) //Mask Treshhold
+			break; 
+		}      
+    }
+       
+	return total.rgb/total.a;
 }
 
 void PS_InputLR(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0, out float4 colorA : SV_Target0 , out float4 colorB: SV_Target1)
@@ -312,11 +256,11 @@ float4 Left,Right;
 	}	
 	else if(Stereoscopic_Mode_Input == 2 || Stereoscopic_Mode_Input == 3) //Bi & Unilateral Reconstruction needed.
 	{
-		Left =  fmod(GridXY(texcoord).x+GridXY(texcoord).y,2.0) ? float4(Bi_U_L(texcoord + float2((-pix.x * 0.5) ,(-pix.y * 0.5))),1.) : tex2D(SamplerBiL,texcoord);
-		Left = lerp(float4(Bi_U_L(texcoord + float2((-pix.x * 0.5) ,(-pix.y * 0.5))),1.) , Left, 0.5);
+		Left = Content_Aware_Fill_L(texcoord);
+
 		
-		Right = fmod(GridXY(texcoord).x+GridXY(texcoord).y,2.0) ? tex2D(SamplerBiR,texcoord ) : float4(Bi_U_R(texcoord+ float2((-pix.x * 0.5) ,(-pix.y * 0.5))),1.);
-		Right = lerp(float4(Bi_U_R(texcoord+ float2((-pix.x * 0.5) ,(-pix.y * 0.5))),1.), Right, 0.5);
+		Right = Content_Aware_Fill_R(texcoord );
+
 	}
 	else if(Stereoscopic_Mode_Input == 4)
 	{
@@ -686,13 +630,6 @@ technique To_Else
 			PixelShader = PS_InputBB;
 			RenderTarget = texBB;
 		}	
-			pass Bi
-		{
-			VertexShader = PostProcessVS;
-			PixelShader = BiLR;
-			RenderTarget0 = texBiL;
-			RenderTarget1 = texBiR;
-		}
 			pass StereoInput
 		{
 			VertexShader = PostProcessVS;
