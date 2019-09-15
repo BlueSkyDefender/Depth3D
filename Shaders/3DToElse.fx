@@ -120,7 +120,7 @@ sampler SamplerCR
 		AddressW = BORDER;
 	};
 	
-texture texBB  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA8; MipLevels = 8;}; 
+texture texBB  { Width = 128; Height = 128; Format = RGBA8; MipLevels = 8;}; 
 
 sampler SamplerBB
 	{
@@ -192,20 +192,20 @@ float3 Content_Aware_Fill_L(float2 TC)
 		
     float4 Color = B_U_L(TC), total;
     [loop]
-    for (int HF = -Samples; HF <= Samples; HF++)
+    for (int x = -Samples; x <= Samples; x++)
     {  
-        for (int j = -Samples; j <= Samples; j++)
-        {
-		float2 Box = float2( HF, j );
+    	for (int y = -Samples; y <= Samples; y++)
+   	 {  
+		float2 Box = float2( x, y );
 		float2 Calculate = Box * Fill;
-		float Distance = sqrt(HF>=j);
+		float Distance = sqrt(x > y);
    
         Calculate *= Distance;//get it calculate distance :D...
                
         Color = B_U_L(TC + Calculate * pix);
-        total += Color * rcp(1 + Distance);//bluring can be done here but you will have to have and AA mask.
+        total += Color ;//bluring can be done here but you will have to have and AA mask.
         
-		if (total.a >= 0.5) //Mask Treshhold
+		if (total.a >= 1) //Mask Treshhold
 			break; 
 		}      
     }
@@ -221,20 +221,20 @@ float3 Content_Aware_Fill_R(float2 TC)
 		
     float4 Color = B_U_R(TC), total;
     [loop]
-    for (int HF = -Samples; HF <= Samples; HF++)
+    for (int x = -Samples; x <= Samples; x++)
     {  
-        for (int j = -Samples; j <= Samples; j++)
-        {
-		float2 Box = float2( HF, j );
+    	for (int y = -Samples; y <= Samples; y++)
+   	 {  
+		float2 Box = float2( x, y );
 		float2 Calculate = Box * Fill;
-		float Distance = sqrt(HF>=j);
+		float Distance = sqrt(x>y);
    
         Calculate *= Distance;//get it calculate distance :D...
                
         Color = B_U_R(TC + Calculate * pix);
-        total += Color * rcp(1 + Distance);//bluring can be done here but you will have to have and AA mask.
+        total += Color ;//bluring can be done here but you will have to have and AA mask.
         
-		if (total.a >= 0.5) //Mask Treshhold
+		if (total.a >= 1) //Mask Treshhold
 			break; 
 		}      
     }
@@ -290,17 +290,17 @@ float4 Left,Right;
 		float4 A = float4(GS_R,GS_R,GS_R,1);				
 		float4 B = float4(GS_GB,GS_GB,GS_GB,1);
 
-		A = lerp(A , tex2Dlod(SamplerBB,float4(texcoord,0,8.0)) , 0.025);		 
+		A = lerp(A , tex2Dlod(SamplerBB,float4(texcoord,0,5)) , 0.025);		 
 		float3 GS_A = dot(A.rgb,float3(0.299, 0.587, 0.114));
 		float3 ADone = lerp(GS_A,A.rgb,62.5);
 	
-		B = lerp(B , tex2Dlod(SamplerBB,float4(texcoord,0,8.0)) , 0.025);		 
+		B = lerp(B , tex2Dlod(SamplerBB,float4(texcoord,0,5)) , 0.025);		 
 		float3 GS_B = dot(B.rgb,float3(0.299, 0.587, 0.114));
 		float3 BDone = lerp(GS_B,B.rgb,62.5);
 		
 	
-		A = lerp(float4(ADone,1),float4(ADone,1)*tex2Dlod(SamplerBB,float4(texcoord,0,5.0)),0.25);
-		B = lerp(float4(BDone,1),float4(BDone,1)*tex2Dlod(SamplerBB,float4(texcoord,0,2.0)),0.25);
+		A = lerp(float4(ADone,1),float4(ADone,1)*tex2Dlod(SamplerBB,float4(texcoord,0,5)),0.25);
+		B = lerp(float4(BDone,1),float4(BDone,1)*tex2Dlod(SamplerBB,float4(texcoord,0,5)),0.25);
 		
 		Left =  A;
 		Right = B;
