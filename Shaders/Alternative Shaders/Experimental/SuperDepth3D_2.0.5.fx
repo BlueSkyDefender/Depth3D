@@ -22,7 +22,7 @@
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #if exists "Overwatch.fxh"                                           //Overwatch Intercepter//	
 	#include "Overwatch.fxh"
-#else //DA_X ZPD | DA_Y Depth_Adjust | DA_Z Offset | DA_W Depth_Linearization | DB_X Depth_Flip | DB_Y Null | DB_Z Null | DB_W Weapon_Hand | DC_X HUDX | DC_Y HUDY | DC_Z Null | DC_W Null | DD_X HV_X | DD_Y HV_Y | DD_Z DepthPX | DD_W DepthPY
+#else //DA_X ZPD | DA_Y Depth_Adjust | DA_Z Offset | DA_W Depth_Linearization | DB_X Depth_Flip | DB_Y Auto_Balance | DB_Z Null | DB_W Weapon_Hand | DC_X HUDX | DC_Y HUDY | DC_Z Null | DC_W Null | DD_X HV_X | DD_Y HV_Y | DD_Z DepthPX | DD_W DepthPY
 	static const float DA_X = 0.025, DA_Y = 7.5, DA_Z = 0.0, DA_W = 0.0, DB_X = 0, DB_Y = 0, DB_Z = 0, DB_W = 0.0, DC_X =0.0, DC_Y = 0.5, DC_Z = 0, DC_W = 0, DD_X = 1,DD_Y = 1, DD_Z = 0.0, DD_W = 0.0;
 	#define HM 0		
 #endif
@@ -130,7 +130,7 @@ uniform int Auto_Balance_Ex <
 	ui_tooltip = "Automatically Balance between ZPD Depth and Scene Depth.\n" 
 				 "Default is Off.";
 	ui_category = "Divergence & Convergence";
-> = 0;
+> = DB_Y;
 #endif
 uniform float Auto_Depth_Range <
 	ui_type = "drag";

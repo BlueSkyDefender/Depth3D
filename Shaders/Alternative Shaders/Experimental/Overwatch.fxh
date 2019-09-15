@@ -16,22 +16,22 @@
 //--------------------------------------Code Start---------------------------------------//
 	
 //SuperDepth3D Defaults
-static const float ZPD_D = 0.025;
-static const float Depth_Adjust_D = 7.5;
-static const float Offset_D = 0.0;
-static const int Depth_Linearization = 0;
-static const int Depth_Flip = 0;
-static const float Null_A = 0.0;
+static const float ZPD_D = 0.025;         //ZPD
+static const float Depth_Adjust_D = 7.5;  //Depth Adjust
+static const float Offset_D = 0.0;        //Offset
+static const int Depth_Linearization = 0; //Linearization
+static const int Depth_Flip = 0;          //Depth Flip
+static const int Auto_Balance = 0;        //Auto Balance
 static const float Null_B = 0.0;
-static const int Weapon_Hand = 0;
-static const float HUDX = 0.0;
-static const float HUDY = 0.5;
+static const int Weapon_Hand = 0;         //Weapon Profile
+static const float HUDX = 0.0;            //Heads Up Display Cut Off Point
+static const float HUDY = 0.5;            //Heads Up Display ZPD Adjustment
 static const float Null_C = 0.0;
 static const float Null_D = 0.0;
-static const float HV_X = 1.0;
-static const float HV_Y = 1.0;
-static const float DepthPX = 0.0;
-static const float DepthPY = 0.0;
+static const float HV_X = 1.0;            //Horizontal Postion
+static const float HV_Y = 1.0;            //Vertical Postion
+static const float DepthPX = 0.0;         //Horizontal Size
+static const float DepthPY = 0.0;         //Vertical Size
 
 //Hashes List//
 //Game Hashes//
@@ -202,6 +202,28 @@ static const float DepthPY = 0.0;
 	#define DA_X 0
 	#define DA_Z 0.9625
 	#define HM 0  
+#elif (App == 0x619964A3 )	//What Remains of Edith Finch
+	#define DA_Y 50.0
+	#define DA_Z 0.000025
+	#define DA_W 1
+	#define DB_Y 2
+	#define HM 0 
+#elif (App == 0x941D8A46 )	//Tomb Raider Anniversary :)
+	#define DA_Y 75.0
+	#define DA_Z 0.0206
+	#define DB_Y 2 
+	#define HM 0 
+#elif (App == 0xcF0100C34 )	//Two Worlds Epic Edition
+	#define DA_Y 43.75
+	#define DA_Z 0.07575 
+	#define HM 0 
+#elif (App == 0xcA4C82737 )	//Silent Hill: Homecoming
+	#define DA_Y 25.0
+	#define DA_X 0.0375
+	#define DA_Z 0.11625
+	#define DB_Y 4 
+	#define DC_X 0.5
+	#define HM 1 
 //#else
 	//#define HM 0 	
 #endif
@@ -224,7 +246,7 @@ static const float DepthPY = 0.0;
     #define DB_X Depth_Flip
 #endif
 #ifndef DB_Y
-    #define DB_Y Null_A
+    #define DB_Y Auto_Balance
 #endif
 #ifndef DB_Z
     #define DB_Z Null_B
