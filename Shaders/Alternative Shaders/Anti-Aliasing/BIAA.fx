@@ -43,7 +43,7 @@ uniform float Mask_Adjust <
 	ui_tooltip = "Use this to adjust the Mask.\n"
 				 "Default is 0.5";
 	ui_category = "BIAA";
-> = 0.5;
+> = 0.375;
 /*
 uniform float Adjust <
 	ui_type = "drag";
@@ -128,7 +128,7 @@ float4 BIAA(float2 texcoord)
 
     // Set result
    if (View_Mode == 0)
-   	Done = lerp(float4(result,1.0),Done,saturate(Mask));
+   	Done = float4(result,1.0);
    else
    	Done = lerp(float4(1.0,0.0,1.0,1.0),Done,saturate(Mask));
 	
