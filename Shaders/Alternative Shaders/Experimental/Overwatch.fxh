@@ -213,17 +213,29 @@ static const float DepthPY = 0.0;         //Vertical Size
 	#define DA_Z 0.0206
 	#define DB_Y 2 
 	#define HM 0 
-#elif (App == 0xcF0100C34 )	//Two Worlds Epic Edition
+#elif (App == 0xF0100C34 )	//Two Worlds Epic Edition
 	#define DA_Y 43.75
 	#define DA_Z 0.07575 
 	#define HM 0 
-#elif (App == 0xcA4C82737 )	//Silent Hill: Homecoming
+#elif (App == 0xA4C82737 )	//Silent Hill: Homecoming
 	#define DA_Y 25.0
 	#define DA_X 0.0375
 	#define DA_Z 0.11625
 	#define DB_Y 4 
 	#define DC_X 0.5
 	#define HM 1 
+#elif (App == 0x61243AED )	//Shadow Warrior Classic source port
+	#define DA_Y 10.0
+	#define DA_X 0.05
+	#define DA_Z 1.0
+	#define DB_Y 4 
+	#define HM 0 
+#elif (App == 0x5AE8FA62 )	//Shadow Warrior Clasic Redux
+	#define DA_Y 10.0
+	#define DA_X 0.05
+	#define DA_Z 1.0
+	#define DB_Y 4 
+	#define HM 0 
 //#else
 	//#define HM 0 	
 #endif
