@@ -226,43 +226,35 @@ float4 CAS(float2 texcoord)
 	//  a b c
 	//  d(e)f
 	//  g h i
-	float3 A = tex2Doffset(BackBuffer, texcoord, int2(-1,-1)).rgb;
-    float3 B = tex2Doffset(BackBuffer, texcoord, int2( 0,-1)).rgb;
-    float3 C = tex2Doffset(BackBuffer, texcoord, int2( 1,-1)).rgb;
-    float3 D = tex2Doffset(BackBuffer, texcoord, int2(-1, 0)).rgb;
-    float3 E = tex2Doffset(BackBuffer, texcoord, int2( 0, 0)).rgb;
-    float3 F = tex2Doffset(BackBuffer, texcoord, int2( 1, 0)).rgb;
-    float3 G = tex2Doffset(BackBuffer, texcoord, int2(-1, 1)).rgb;
-    float3 H = tex2Doffset(BackBuffer, texcoord, int2( 0, 1)).rgb;
-    float3 I = tex2Doffset(BackBuffer, texcoord, int2( 1, 1)).rgb;
+	float3 A = BB(texcoord, float2(-pix.x,-pix.y));
+    float3 B = BB(texcoord, float2( 0,-pix.y));
+    float3 C = BB(texcoord, float2( pix.x,-pix.y));
+    float3 D = BB(texcoord, float2(-pix.x, 0));
+    float3 E = BB(texcoord, 0);
+    float3 F = BB(texcoord, float2( pix.x, 0));
+    float3 G = BB(texcoord, float2(-pix.x, pix.y));
+    float3 H = BB(texcoord, float2( 0, pix.y));
+    float3 I = BB(texcoord, float2( pix.x, pix.y));
 	// Soft min and max.
 	//  a b c             b
 	//  d e f * 0.5  +  d e f * 0.5
 	//  g h i             h
     // These are 2.0x bigger (factored out the extra multiply).
-    float3 mnRGB2, mnRGB = Min3( Min3(D, E, F), B, H);
+    float3 mnRGB = Min3( Min3(D, E, F), B, H), mnRGB2 = Min3( Min3(mnRGB, A, C), G, I);
 	
 	if( CAS_BETTER_DIAGONALS)
-    {
-		mnRGB2 = Min3( Min3(mnRGB, A, C), G, I);
 		mnRGB += mnRGB2;
-	}
     
-    float3 mxRGB2, mxRGB = Max3( Max3(D, E, F), B, H);
+    float3 mxRGB = Max3( Max3(D, E, F), B, H), mxRGB2 = Max3( Max3(mxRGB, A, C), G, I);
     
     if( CAS_BETTER_DIAGONALS )
-    {
-		mxRGB2 = Max3( Max3(mxRGB, A, C), G, I);  
 		mxRGB += mxRGB2;
-    }
     
     // Smooth minimum distance to signal limit divided by smooth max.
-    float3 ampRGB, rcpMRGB = rcp(mxRGB);
+    float3 rcpMRGB = rcp(mxRGB), ampRGB = saturate(min(mnRGB, 2.0 - mxRGB) * rcpMRGB);
 
 	if( CAS_BETTER_DIAGONALS)
 		ampRGB = saturate(min(mnRGB, 2.0 - mxRGB) * rcpMRGB);
-	else
-		ampRGB = saturate(min(mnRGB, 1.0 - mxRGB) * rcpMRGB);
     
     // Shaping amount of sharpening.
     ampRGB = sqrt(ampRGB);
@@ -309,7 +301,7 @@ return saturate(float4(final_colour/Z,CAS_Mask));
 }
 
 float3 Sharpen_Out(float2 texcoord)                                                                          
-{   float3 Done = BB(texcoord ,0);	
+{   float3 Done = tex2D(BackBuffer,texcoord).rgb;	
 	return lerp(Done,Done+(Done - CAS(texcoord).rgb)*(Sharpness*3.), CAS(texcoord).w * saturate(Sharpness)); //Sharpen Out
 }
 
