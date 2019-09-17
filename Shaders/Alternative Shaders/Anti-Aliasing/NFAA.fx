@@ -86,7 +86,7 @@ float4 NFAA(float2 texcoord)
 	n = float2(t - d,-(r - l));
 	// I should have made rep adjustable. But, I didn't see the need.
 	// Since my goal was to make this AA fast cheap and simple.	
-    float   nl = length(n), Rep = rcp(AA_Adjust);
+    float nl = length(n), Rep = rcp(AA_Adjust);
  
 	if(View_Mode == 3)
 		Rep = rcp(128);  
@@ -100,8 +100,8 @@ float4 NFAA(float2 texcoord)
 		n *= pix / (nl * 0.5);
  	
 	float4   o = GetBB( UV ),
-			t0 = GetBB( UV + n * 0.5) * 0.9,
-			t1 = GetBB( UV - n * 0.5) * 0.9,
+			t0 = GetBB( UV + float2(n.x, -n.y)  * 0.5) * 0.9,
+			t1 = GetBB( UV - float2(n.x, -n.y)  * 0.5) * 0.9,
 			t2 = GetBB( UV + n * 0.9) * 0.75,
 			t3 = GetBB( UV - n * 0.9) * 0.75;
  
@@ -128,7 +128,7 @@ float4 NFAA(float2 texcoord)
 	}
 	else if (View_Mode == 2)
 	{
-		NFAA = float3(float2(t - d,-(r - l)) * 0.5 + 0.5,1);
+		NFAA = float3(-float2(-(r - l),-(t - d)) * 0.5 + 0.5,1);
 	}
 	
 return NFAA;
