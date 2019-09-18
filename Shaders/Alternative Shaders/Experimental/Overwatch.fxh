@@ -27,7 +27,7 @@ static const int Weapon_Hand = 0;         //Weapon Profile
 static const float HUDX = 0.0;            //Heads Up Display Cut Off Point
 static const float HUDY = 0.5;            //Heads Up Display ZPD Adjustment
 static const float Null_C = 0.0;
-static const float Null_D = 0.0;
+static const int Text_Warning = 0;        //Text Warning
 static const float HV_X = 1.0;            //Horizontal Postion
 static const float HV_Y = 1.0;            //Vertical Postion
 static const float DepthPX = 0.0;         //Horizontal Size
@@ -85,6 +85,7 @@ static const float DepthPY = 0.0;         //Vertical Size
 	#define HM 0 	
 #elif (App == 0x4383C12A || App == 0x239E5522 || App == 0x3591DE9C)	//CoD | CoD:UO | CoD:2
 	#define DB_W 15
+	#define DC_W 1 
 	#define HM 0
 #elif (App == 0x73FA91DC)	//CoD: Black Ops IIII
 	#define DA_Y 22.5
@@ -116,6 +117,7 @@ static const float DepthPY = 0.0;         //Vertical Size
 #elif (App == 0x36976F6D)	//Prey 2017 High Settings and <
 	#define DA_Y 18.7
 	#define DB_W 29
+	#define DC_W 1 
 	#define HM 0 	
 #elif (App == 0xBF757E3A)	//Return to Castle Wolfenstine
 	#define DA_Y 8.75
@@ -132,6 +134,7 @@ static const float DepthPY = 0.0;         //Vertical Size
 	#define HM 0 	
 #elif (App == 0x6D3CD99E )	//Blood 2
 	#define DB_W 36
+	#define DC_W 1 
 	#define HM 0 	
 #elif (App == 0xF22A9C7D )	//SOMA
 	#define DA_Y 10.0
@@ -161,6 +164,7 @@ static const float DepthPY = 0.0;         //Vertical Size
 #elif (App == 0x7DCCBBBD)	//Kingpin Life of Crime
 	#define DA_Y 10.0
 	#define DB_W 46
+	#define DC_W 1 
 	#define HM 0 	
 #elif (App == 0x9C5C946E)	//EuroTruckSim2
 	#define DB_W 47
@@ -236,6 +240,10 @@ static const float DepthPY = 0.0;         //Vertical Size
 	#define DA_Z 1.0
 	#define DB_Y 4 
 	#define HM 0 
+#elif (App == 0xFE54BF56 )	//No One Lives Forever and 2
+	#define DA_X 0.0375
+	#define DC_W 1 
+	#define HM 0 
 //#else
 	//#define HM 0 	
 #endif
@@ -277,7 +285,7 @@ static const float DepthPY = 0.0;         //Vertical Size
     #define DC_Z Null_C
 #endif
 #ifndef DC_W
-    #define DC_W Null_D
+    #define DC_W Text_Warning
 #endif
 
 #ifndef DD_X
