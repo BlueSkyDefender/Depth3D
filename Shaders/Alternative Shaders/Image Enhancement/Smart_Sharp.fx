@@ -200,12 +200,12 @@ float Depth(in float2 texcoord : TEXCOORD0)
 	return saturate(zBuffer);	
 }	
 
-float3 Min3(float3 x, float3 y, float3 z)
+float Min3(float x, float y, float z)
 {
     return min(x, min(y, z));
 }
 
-float3 Max3(float3 x, float3 y, float3 z)
+float Max3(float x, float y, float z)
 {
     return max(x, max(y, z));
 }
@@ -219,6 +219,10 @@ float3 BB(in float2 texcoord, float2 AD)
 {
 	return tex2Dlod(BackBuffer, float4(texcoord + AD,0,0)).rgb;
 }
+float LI(float3 RGB)
+{
+	return dot(RGB,float3(0.2126, 0.7152, 0.0722));
+}
 
 float4 CAS(float2 texcoord)
 {
@@ -226,32 +230,32 @@ float4 CAS(float2 texcoord)
 	//  a b c
 	//  d(e)f
 	//  g h i
-	float3 A = BB(texcoord, float2(-pix.x,-pix.y));
-    float3 B = BB(texcoord, float2( 0,-pix.y));
-    float3 C = BB(texcoord, float2( pix.x,-pix.y));
-    float3 D = BB(texcoord, float2(-pix.x, 0));
-    float3 E = BB(texcoord, 0);
-    float3 F = BB(texcoord, float2( pix.x, 0));
-    float3 G = BB(texcoord, float2(-pix.x, pix.y));
-    float3 H = BB(texcoord, float2( 0, pix.y));
-    float3 I = BB(texcoord, float2( pix.x, pix.y));
+	float A = LI(BB(texcoord, float2(-pix.x,-pix.y)));
+    float B = LI(BB(texcoord, float2( 0,-pix.y)));
+    float C = LI(BB(texcoord, float2( pix.x,-pix.y)));
+    float D = LI(BB(texcoord, float2(-pix.x, 0)));
+    float E = LI(BB(texcoord, 0));
+    float F = LI(BB(texcoord, float2( pix.x, 0)));
+    float G = LI(BB(texcoord, float2(-pix.x, pix.y)));
+    float H = LI(BB(texcoord, float2( 0, pix.y)));
+    float I = LI(BB(texcoord, float2( pix.x, pix.y)));
 	// Soft min and max.
 	//  a b c             b
 	//  d e f * 0.5  +  d e f * 0.5
 	//  g h i             h
     // These are 2.0x bigger (factored out the extra multiply).
-    float3 mnRGB = Min3( Min3(D, E, F), B, H), mnRGB2 = Min3( Min3(mnRGB, A, C), G, I);
+    float mnRGB = Min3( Min3(D, E, F), B, H), mnRGB2 = Min3( Min3(mnRGB, A, C), G, I);
 	
 	if( CAS_BETTER_DIAGONALS)
 		mnRGB += mnRGB2;
     
-    float3 mxRGB = Max3( Max3(D, E, F), B, H), mxRGB2 = Max3( Max3(mxRGB, A, C), G, I);
+    float mxRGB = Max3( Max3(D, E, F), B, H), mxRGB2 = Max3( Max3(mxRGB, A, C), G, I);
     
     if( CAS_BETTER_DIAGONALS )
 		mxRGB += mxRGB2;
     
     // Smooth minimum distance to signal limit divided by smooth max.
-    float3 rcpMRGB = rcp(mxRGB), ampRGB = saturate(min(mnRGB, 2.0 - mxRGB) * rcpMRGB);
+    float rcpMRGB = rcp(mxRGB), ampRGB = saturate(min(mnRGB, 2.0 - mxRGB) * rcpMRGB);
 
 	if( CAS_BETTER_DIAGONALS)
 		ampRGB = saturate(min(mnRGB, 2.0 - mxRGB) * rcpMRGB);
@@ -289,7 +293,7 @@ float4 CAS(float2 texcoord)
 		final_colour += factor * cc;
 	}
 		
-	float CAS_Mask = dot(ampRGB,float3(0.2126, 0.7152, 0.0722));
+	float CAS_Mask = ampRGB;
 
 	if(CA_Mask_Boost)
 		CAS_Mask = lerp(CAS_Mask,CAS_Mask * CAS_Mask,saturate(Sharpness * 0.5));
