@@ -106,9 +106,10 @@ uniform float Sharpness <
 	ui_category = "Bilateral CAS";
 > = 0.625;
 
-uniform bool CAS_BETTER_DIAGONALS <
-	ui_label = "CAS Better Diagonals";
-	ui_tooltip = "Instead of using the 3x3 'box' with the 5-tap 'circle' this uses just the 'circle'.";
+uniform bool CAM_IOB <
+	ui_label = "CAM Ignore Overbright";
+	ui_tooltip = "Instead of of allowing Overbright in the mask this allows sharpening of this area.\n"
+				 "I think it's more accurate to turn this on.";
 	ui_category = "Bilateral CAS";
 > = false;
 
@@ -219,6 +220,7 @@ float3 BB(in float2 texcoord, float2 AD)
 {
 	return tex2Dlod(BackBuffer, float4(texcoord + AD,0,0)).rgb;
 }
+
 float LI(float3 RGB)
 {
 	return dot(RGB,float3(0.2126, 0.7152, 0.0722));
@@ -226,38 +228,25 @@ float LI(float3 RGB)
 
 float4 CAS(float2 texcoord)
 {
-	// fetch a 3x3 neighborhood around the pixel 'e',
-	//  a b c
-	//  d(e)f
-	//  g h i
-	float A = LI(BB(texcoord, float2(-pix.x,-pix.y)));
-    float B = LI(BB(texcoord, float2( 0,-pix.y)));
-    float C = LI(BB(texcoord, float2( pix.x,-pix.y)));
-    float D = LI(BB(texcoord, float2(-pix.x, 0)));
-    float E = LI(BB(texcoord, 0));
-    float F = LI(BB(texcoord, float2( pix.x, 0)));
-    float G = LI(BB(texcoord, float2(-pix.x, pix.y)));
-    float H = LI(BB(texcoord, float2( 0, pix.y)));
-    float I = LI(BB(texcoord, float2( pix.x, pix.y)));
-	// Soft min and max.
-	//  a b c             b
-	//  d e f * 0.5  +  d e f * 0.5
-	//  g h i             h
-    // These are 2.0x bigger (factored out the extra multiply).
-    float mnRGB = Min3( Min3(D, E, F), B, H), mnRGB2 = Min3( Min3(mnRGB, A, C), G, I);
-	
-	if( CAS_BETTER_DIAGONALS)
-		mnRGB += mnRGB2;
-    
-    float mxRGB = Max3( Max3(D, E, F), B, H), mxRGB2 = Max3( Max3(mxRGB, A, C), G, I);
-    
-    if( CAS_BETTER_DIAGONALS )
-		mxRGB += mxRGB2;
-    
-    // Smooth minimum distance to signal limit divided by smooth max.
-    float rcpMRGB = rcp(mxRGB), ampRGB = saturate(min(mnRGB, 2.0 - mxRGB) * rcpMRGB);
+	// fetch a Cross neighborhood around the pixel 'C',
+	//         Up
+	//
+	//  Left(Center)Right
+	//
+	//        Down  
+    float Up = LI(BB(texcoord, float2( 0,-pix.y)));
+    float Left = LI(BB(texcoord, float2(-pix.x, 0)));
+    float Center = LI(BB(texcoord, 0));
+    float Right = LI(BB(texcoord, float2( pix.x, 0)));
+    float Down = LI(BB(texcoord, float2( 0, pix.y)));
 
-	if( CAS_BETTER_DIAGONALS)
+    float mnRGB = Min3( Min3(Left, Center, Right), Up, Down);
+    float mxRGB = Max3( Max3(Left, Center, Right), Up, Down);
+       
+    // Smooth minimum distance to signal limit divided by smooth max.
+    float rcpMRGB = rcp(mxRGB), ampRGB = saturate(min(mnRGB, 1.0 - mxRGB) * rcpMRGB);
+
+	if( CAM_IOB )
 		ampRGB = saturate(min(mnRGB, 2.0 - mxRGB) * rcpMRGB);
     
     // Shaping amount of sharpening.
@@ -306,7 +295,7 @@ return saturate(float4(final_colour/Z,CAS_Mask));
 
 float3 Sharpen_Out(float2 texcoord)                                                                          
 {   float3 Done = tex2D(BackBuffer,texcoord).rgb;	
-	return lerp(Done,Done+(Done - CAS(texcoord).rgb)*(Sharpness*3.), CAS(texcoord).w * saturate(Sharpness)); //Sharpen Out
+	return lerp(Done,Done+(Done - CAS(texcoord).rgb)*(Sharpness*3.1), CAS(texcoord).w * saturate(Sharpness)); //Sharpen Out
 }
 
 
@@ -451,6 +440,8 @@ void PostProcessVS(in uint id : SV_VertexID, out float4 position : SV_Position, 
 
 //*Rendering passes*//
 technique Smart_Sharp
+< ui_tooltip = "Suggestion : You Can Enable 'Performance Mode Checkbox,' in the lower bottom right of the ReShade's Main UI.\n"
+			   "             Do this once you set your Smart Sharp settings of course."; >
 {		
 			pass UnsharpMask
 		{
