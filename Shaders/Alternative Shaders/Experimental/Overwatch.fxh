@@ -253,6 +253,13 @@ static const float DepthPY = 0.0;         //Vertical Size
 	#define DB_X 1 
 	#define DC_W 1 
 	#define HM 0 
+#elif (App == 0xE63BF4A4 )	//World of Warcraft DX12
+	#define DA_Y 7.5
+	#define DA_W 1
+	#define DB_Y 3
+	#define DB_Z 0.1375
+	#define DC_W 1 
+	#define HM 0 
 //#else
 	//#define HM 0 	
 #endif

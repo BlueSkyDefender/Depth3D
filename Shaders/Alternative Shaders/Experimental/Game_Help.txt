@@ -680,8 +680,9 @@ SLI scaling Is good in this game. Almost full scaling on both cards. If you want
 
 {Shadow Tactics: Blades of the Shogun}
 Only way I was able to get this game to run on GOG is to enable the GOG Overlay. If you don't ReShade will crash.
+Seems like GOG Overlay is the only way this game will run....... So you know where to get it.
 
-Read the section for Dealing with mouse pointer issues. At the top.
+Read the section for Dealing with mouse pointer issues. At the top. 
 
 {Stay Close}
 Install reshade in too Steam\steamapps\common\Stay Close\Migrate\Binaries\Win64
@@ -788,12 +789,19 @@ Use v227 patch. Use the DX9 render. Install Rehsade 3.0 to System folder select 
 In Unreal Set your res and the go to advance settings.
 Turn Off AA and go back in to the game. Start a game.
 
-{Watch Dogs 2}
+{Watch Dogs 2} or use the white listed reshade version.
 Go to the WatchDog2.exe and use compatibility mode.
 Set it too Windows 8.
 Install reshade and use dxgi.dll
 Ok befor you launch use this command.
 -eac_launcher <---- as the start up command.
+
+{World of Warcraft} - DX12 Reshade 4.4 Network check disables dll. 
+First Do not ask me for this DLL. You have to find it on your own or make your own. Don't ask me for this.
+
+Now I suggest you use use The Mouse Pointer Guide above and to make a Custom UI mask for SuperDepth3D and bind it to the key you want. You can Make a total of 2 UI masks.
+
+Other thing I suggest is to dissable Outlines Highlighting in WoW.
 
 {Wolfenstine: Games} - working in Reshade 4.1.1
 [Set Launch Options](+r_multisamples "0" +vt_maxaniso "16")
