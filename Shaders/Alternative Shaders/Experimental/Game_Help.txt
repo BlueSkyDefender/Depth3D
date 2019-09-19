@@ -175,7 +175,7 @@ Inner Shader Setting:
     RB       *S.T.A.L.K.E.R:CoP Complete Mod               DM 0       10.000                *WDM 24                    Yes 4       
     RB       *S.T.A.L.K.E.R:SoC Complete Mod               DM 0       10.000                *WDM 24                    Yes 4       
     RB        Shadow of the Tomb Raider                    DM 1       17.500                                       
-              Shadow Tactics: Blades of the Shogun         DM 0       5.5000    0.00100                    Yes                      0.2875    
+    RB        Shadow Tactics: Blades of the Shogun         DM 0       5.5000    0.00100                    Yes                      0.2875    
     RB        Shadow Warrior Classic Source Port           DM 0       10.000    1.00000                            
               Shadow Warrior Classic Redux                 DM 0       8.7500    1.00000                            
               Shadow Warrior 2                             DM 1       10.000                                       
@@ -233,6 +233,28 @@ Turn Off DOF in all games if possible. Unless you want to know how it feels to b
 Motion Blur Off
 
 Also Keep in mind if you don't like the depth map I made. You can always adjust your own.
+
+-=:[Mouse Pointer]:=-
+---------------------------------------------------------------------------------------------------------------------------------
+I can alter the size of your Mouse Pointer by going here.
+http://www.rw-designer.com/cursor-set/smalldot
+
+More info: First, you would need to enable the CrossCursor in Depth3D
+
+Now from here the only thing I can think about is using a program called YoloMouse and Modifying/Adding a custom tiny little cursor.
+You Can Get it here.
+pandateemo.github.io/YoloMouse/
+You have to make a Tiny Little Mouse Cursor So It's Not Distracting. You can even make multiple for different units. 
+Like a Little X, a little Dot, or a little crosshair.
+You can make it with www.rw-designer.com/online-cursor-editor
+image 1
+https://cdn.discordapp.com/attachments/458063532567691284/574848158731862020/unknown.png
+Once you make it, rename it to one of the built-in cur files for Yolo Mouse. ex: "1.cur"
+image 2
+https://cdn.discordapp.com/attachments/458063532567691284/574849534945919007/unknown.png
+This will NOT solve your problem 100%, But it will mitigate it.
+
+I hope this helps.
 _________________________________________________________________________________________________________________________________
 Special Versions of Reshade
 
@@ -655,6 +677,11 @@ A note for HMD Users. You need to limit pop out to the edge of your screen.
 You Don't want a mini Lara Croft In your skull do you? 
 
 SLI scaling Is good in this game. Almost full scaling on both cards. If you want to brute force FPS.
+
+{Shadow Tactics: Blades of the Shogun}
+Only way I was able to get this game to run on GOG is to enable the GOG Overlay. If you don't ReShade will crash.
+
+Read the section for Dealing with mouse pointer issues. At the top.
 
 {Stay Close}
 Install reshade in too Steam\steamapps\common\Stay Close\Migrate\Binaries\Win64

@@ -22,7 +22,7 @@ static const float Offset_D = 0.0;        //Offset
 static const int Depth_Linearization = 0; //Linearization
 static const int Depth_Flip = 0;          //Depth Flip
 static const int Auto_Balance = 0;        //Auto Balance
-static const float Null_B = 0.0;
+static const float Auto_Depth = 0.1;      //Auto Depth Range
 static const int Weapon_Hand = 0;         //Weapon Profile
 static const float HUDX = 0.0;            //Heads Up Display Cut Off Point
 static const float HUDY = 0.5;            //Heads Up Display ZPD Adjustment
@@ -244,6 +244,15 @@ static const float DepthPY = 0.0;         //Vertical Size
 	#define DA_X 0.0375
 	#define DC_W 1 
 	#define HM 0 
+#elif (App == 0x9E7AA0C4 )	//Shadow Tactics: Blades of the Shogun
+	#define DA_Y 7.0
+	#define DA_Z 0.001
+	#define DA_X 0.150
+	#define DB_Y 5
+	#define DB_Z 0.305
+	#define DB_X 1 
+	#define DC_W 1 
+	#define HM 0 
 //#else
 	//#define HM 0 	
 #endif
@@ -269,7 +278,7 @@ static const float DepthPY = 0.0;         //Vertical Size
     #define DB_Y Auto_Balance
 #endif
 #ifndef DB_Z
-    #define DB_Z Null_B
+    #define DB_Z Auto_Depth
 #endif
 #ifndef DB_W
     #define DB_W Weapon_Hand
