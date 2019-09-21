@@ -162,7 +162,7 @@ Inner Shader Setting:
     RB       *Rage64                                       DM 0       20.000                *WDM 51                    Yes 2          
     RB        Redout                                       DM ?         ?                                          ?      
               Remembrance                                  DM 1       7.5000                               Yes     
-    RB       *RESIDENT EVIL 2  BIOHAZARD RE2 Remake        DM 1       62.500    0.00015                                Yes 5        0.0800
+    RB       *RESIDENT EVIL 2  BIOHAZARD RE2 Remake        DM 1       51.250    0.00015                                Yes 3        0.0800
     RB        Resident Evil 7                              DM 1       22.500                                       
     RB       *Return To Castle Wolfenstine                 DM 0       8.7500                *WDM 29                    Yes 2                                
     RB        Requiem: Avenging Angel                      DM 0       50.000    0.80000                            
