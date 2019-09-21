@@ -22,9 +22,10 @@
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #if exists "Overwatch.fxh"                                           //Overwatch Intercepter//	
 	#include "Overwatch.fxh"
-#else //DA_X ZPD | DA_Y Depth_Adjust | DA_Z Offset | DA_W Depth_Linearization | DB_X Depth_Flip | DB_Y Auto_Balance | DB_Z Auto_Depth | DB_W Weapon_Hand | DC_X HUDX | DC_Y HUDY | DC_Z Null | DC_W Text Warning | DD_X HV_X | DD_Y HV_Y | DD_Z DepthPX | DD_W DepthPY
-	static const float DA_X = 0.025, DA_Y = 7.5, DA_Z = 0.0, DA_W = 0.0, DB_X = 0, DB_Y = 0, DB_Z = 0.1, DB_W = 0.0, DC_X =0.0, DC_Y = 0.5, DC_Z = 0, DC_W = 0, DD_X = 1,DD_Y = 1, DD_Z = 0.0, DD_W = 0.0;
-	#define HM 0		
+#else //DA_X ZPD | DA_Y Depth_Adjust | DA_Z Offset | DA_W Depth_Linearization | DB_X Depth_Flip | DB_Y Auto_Balance | DB_Z Auto_Depth | DB_W Weapon_Hand | DC_X HUDX | DC_Y Null_A | DC_Z Null_B | DC_W Text Warning | DD_X HV_X | DD_Y HV_Y | DD_Z DepthPX | DD_W DepthPY
+	static const float DA_X = 0.025, DA_Y = 7.5, DA_Z = 0.0, DA_W = 0.0, DB_X = 0, DB_Y = 0, DB_Z = 0.1, DB_W = 0.0, DC_X =0.0, DC_Y = 0, DC_Z = 0, DC_W = 0, DD_X = 1,DD_Y = 1, DD_Z = 0.0, DD_W = 0.0;
+	#define HM 0
+	#define RE 0		
 #endif
 //USER EDITABLE PREPROCESSOR FUNCTIONS START//
 //This enables the older SuperDepth3D method of producing an 3D image. This is better for older systems that have an hard time running the new mode.
@@ -275,7 +276,7 @@ uniform float2 HUD_Adjust <
 				 "This is only for UI elements that show up in the Depth Buffer.\n"
 	             "Default is float2(X 0.0, Y 0.5)";
 	ui_category = "Heads-Up Display";
-> = float2(DC_X,DC_Y);
+> = float2(DC_X,0.5);
 #endif
 
 uniform int Barrel_Distortion <
@@ -525,9 +526,9 @@ sampler SamplerLumVR
 		Texture = texLumVR;
 	};	
 	
-float2 Lum(in float2 texcoord : TEXCOORD0)
+float3 Lum(in float2 texcoord : TEXCOORD0)
 	{   //Luminance
-		return saturate(tex2Dlod(SamplerLumVR,float4(texcoord,0,11)).xy); //Average Luminance Texture Sample 
+		return saturate(tex2Dlod(SamplerLumVR,float4(texcoord,0,11)).xyw); //Average Luminance Texture Sample 
 	}
 	
 uniform float frametime < source = "frametime";>;
@@ -776,17 +777,17 @@ float AutoDepthRange( float d, float2 texcoord )
 	float LumAdjust_ADR = smoothstep(-0.0175,Auto_Depth_Range,Lum(texcoord).y);
     return min(1,( d - 0 ) / ( LumAdjust_ADR - 0));
 }
-#if RE_Fix
+#if RE_Fix || RE
 float AutoZPDRange(float ZPD, float2 texcoord )
 {
-	float LumAdjust_AZDPR = smoothstep(-0.0175,0.125,Lum(texcoord).y); //Adjusted to only effect really intense differences.
+	float LumAdjust_AZDPR = smoothstep(-0.0175,0.1875,Lum(texcoord).z); //Adjusted to only effect really intense differences.
     return saturate(LumAdjust_AZDPR * ZPD);
 }
 #endif
 float2 Conv(float D,float2 texcoord)
 {
 	float Z = ZPD, WZP = 0.5, ZP = 0.5, ALC = abs(Lum(texcoord).x), WConvergence = 1 - WZPD / D;
-	#if RE_Fix	
+	#if RE_Fix || RE
 		Z = AutoZPDRange(Z,texcoord);
 	#endif	
 		if (Auto_Depth_Range > 0)
@@ -1100,9 +1101,10 @@ float4 PS_calcLR(float2 texcoord)
 }
 
 float4 Average_Luminance(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Target
-{
+{	float AL =tex2Dlod(SamplerDMVR,float4(0.375 + texcoord.x * 0.250, 0.4375 + texcoord.y * 0.125, 0, 0)).w; //Center Short
 	float ALF = tex2Dlod(SamplerDMVR,float4(texcoord.x,texcoord.y, 0, 0)).w;//Average_Lum_Full
-	return float4(ALF,ALF,tex2Dlod(SamplerDMVR,float4(0,0,0,0)).w,1);
+	float Bottom_Sample = tex2Dlod(SamplerDMVR,float4( 0.125 + texcoord.x * 0.750,0.95 + texcoord.y, 0, 0)).w; //RE_Fix	
+	return float4(AL,ALF,tex2Dlod(SamplerDMVR,float4(0,0,0,0)).w,Bottom_Sample);
 }
 
 uniform float timer < source = "timer"; >; //Please do not remove.

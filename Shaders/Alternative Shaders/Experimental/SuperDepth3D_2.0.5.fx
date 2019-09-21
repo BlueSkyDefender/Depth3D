@@ -1159,7 +1159,6 @@ float4 PS_calcLR(float2 texcoord)
 
 float4 Average_Luminance(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Target
 {
-
 	float4 ABEA, ABEArray[6] = {
 		float4(0.0,1.0,0.0, 1.0),           //No Edit
 		float4(0.0,1.0,0.0, 0.750),         //Upper Extra Wide
