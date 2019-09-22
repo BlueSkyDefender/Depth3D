@@ -235,7 +235,39 @@ static const int HM = 0;                  //HUD Mode
 	#define DA_W 1
 	#define DA_Z 0.00015
 	#define RE 1 
-//#else
+#elif (App == 0x60F436C6 )	//RESIDENT EVIL 2  BIOHAZARD RE2
+	#define DA_X 0.1375
+	#define DB_Y 3
+	#define DB_Z 0.015
+	#define DA_Y 51.25
+	#define DA_W 1
+	#define DA_Z 0.00015
+	#define RE 1 
+#elif (App == 0xF0D4DB3D )	//Never Alone
+	#define DA_X 0.1375
+	#define DB_Y 2
+	#define DA_Y 31.25
+	#define DA_Z 0.004
+#elif (App == 0x3EB1D73A )	//Magica 2
+	#define DA_X 0.2
+	#define DB_Y 5
+	#define DA_Y 27.5
+	#define DA_Z 0.007
+#elif (App == 0x6D35D4BE )	//Lara Croft and the Temple of Osiris
+	#define DA_X 0.15
+	#define DB_Y 4
+	#define DB_Z 0.4
+	#define DA_Y 75.0
+	#define DA_Z 0.021
+	#define RE 1 
+#elif (App == 0xAAA18268 )	//Hellblade
+	#define DB_Y 1
+	#define DA_Y 25.0
+	#define DA_W 1
+	#define DA_Z 0.0005
+	#define DB_Z 0.25
+#else
+	#define NP 1 //No Profile
 #endif
 
 //Change Output

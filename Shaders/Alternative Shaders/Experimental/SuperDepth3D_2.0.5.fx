@@ -961,7 +961,7 @@ float4 PS_calcLR(float2 texcoord)
 	else if( Eye_Fade_Reduction == 2)
 			DLR = float2(FD,D);
 
-	float4 color, Left = CSB(Parallax(-DLR.x, TCL)), Right = CSB(Parallax(DLR.y, TCR));		
+	float4 image = 1, accum, color, Left = CSB(Parallax(-DLR.x, TCL)), Right = CSB(Parallax(DLR.y, TCR));		
 
 	#if HUD_MODE || HM	
 	float HUD_Adjustment = ((0.5 - HUD_Adjust.y)*25.) * pix.x;
@@ -982,36 +982,23 @@ float4 PS_calcLR(float2 texcoord)
 	};
 	gridxy = floor(GXYArray[Scaling_Support]);
 			
-	[branch] if(Stereoscopic_Mode == 0)
-	{	
+	if(Stereoscopic_Mode == 0)
 		color = TexCoords.x < 0.5 ? Left : Right;
-	}
-	else if(Stereoscopic_Mode == 1)
-	{	
+	else if(Stereoscopic_Mode == 1)	
 		color = TexCoords.y < 0.5 ? Left : Right;
-	}
 	else if(Stereoscopic_Mode == 2)
-	{
 		color = fmod(gridxy.y,2.0) ? Right : Left;	
-	}
 	else if(Stereoscopic_Mode == 3)
-	{
 		color = fmod(gridxy.x,2.0) ? Right : Left;		
-	}
 	else if(Stereoscopic_Mode == 4)
-	{
 		color = fmod(gridxy.x+gridxy.y,2.0) ? Right : Left;
-	}
 	else if(Stereoscopic_Mode >= 5)
 	{			
-		float Contrast = 1.0, Deghost = 0.06, LOne, LTwo, ROne, RTwo;
-		float3 HalfLA = dot(Left.rgb,float3(0.299, 0.587, 0.114));
-		float3 HalfRA = dot(Right.rgb,float3(0.299, 0.587, 0.114));
-		float3 LMA = lerp(HalfLA,Left.rgb,Interlace_Anaglyph.y);  
-		float3 RMA = lerp(HalfRA,Right.rgb,Interlace_Anaglyph.y); 
-		float4 image = 1, accumRC, accumGM, accumBA;
+		float Contrast = 1.0, DeGhost = 0.06, LOne, ROne;
+		float3 HalfLA = dot(Left.rgb,float3(0.299, 0.587, 0.114)), HalfRA = dot(Right.rgb,float3(0.299, 0.587, 0.114));
+		float3 LMA = lerp(HalfLA,Left.rgb,Interlace_Anaglyph.y), RMA = lerp(HalfRA,Right.rgb,Interlace_Anaglyph.y); 
 
-		float contrast = (Contrast*0.5)+0.5, deghost = Deghost;
+		float contrast = (Contrast*0.5)+0.5;
 			
 		// Left/Right Image
 		float4 cA = float4(LMA,1);
@@ -1026,18 +1013,15 @@ float4 PS_calcLR(float2 texcoord)
 		}
 		else if (Stereoscopic_Mode == 6) // Anaglyph 3D Dubois Red/Cyan
 		{
-		float red = 0.437 * cA.r + 0.449 * cA.g + 0.164 * cA.b
-					- 0.011 * cB.r - 0.032 * cB.g - 0.007 * cB.b;
+		float red = 0.437 * cA.r + 0.449 * cA.g + 0.164 * cA.b - 0.011 * cB.r - 0.032 * cB.g - 0.007 * cB.b;
 			
 			if (red > 1) { red = 1; }   if (red < 0) { red = 0; }
 
-			float green = -0.062 * cA.r -0.062 * cA.g -0.024 * cA.b 
-						+ 0.377 * cB.r + 0.761 * cB.g + 0.009 * cB.b;
+			float green = -0.062 * cA.r -0.062 * cA.g -0.024 * cA.b + 0.377 * cB.r + 0.761 * cB.g + 0.009 * cB.b;
 			
 			if (green > 1) { green = 1; }   if (green < 0) { green = 0; }
 
-			float blue = -0.048 * cA.r - 0.050 * cA.g - 0.017 * cA.b 
-						-0.026 * cB.r -0.093 * cB.g + 1.234  * cB.b;
+			float blue = -0.048 * cA.r - 0.050 * cA.g - 0.017 * cA.b -0.026 * cB.r -0.093 * cB.g + 1.234  * cB.b;
 			
 			if (blue > 1) { blue = 1; }   if (blue < 0) { blue = 0; }
 
@@ -1046,27 +1030,25 @@ float4 PS_calcLR(float2 texcoord)
 		else if (Stereoscopic_Mode == 7) // Anaglyph 3D Deghosted Red/Cyan Code From http://iaian7.com/quartz/AnaglyphCompositing & vectorform.com by John Einselen
 		{
 			LOne = contrast*0.45;
-			LTwo = (1.0-LOne)*0.5;
 			ROne = contrast;
-			RTwo = 1.0-ROne;
-			deghost = Deghost*0.1;
+			DeGhost *= 0.1;
 
-			accumRC = saturate(cA*float4(LOne,LTwo,LTwo,1.0));
-			image.r = pow(accumRC.r+accumRC.g+accumRC.b, 1.00);
-			image.a = accumRC.a;
+			accum = saturate(cA*float4(LOne,(1.0-LOne)*0.5,(1.0-LOne)*0.5,1.0));
+			image.r = pow(accum.r+accum.g+accum.b, 1.00);
+			image.a = accum.a;
 
-			accumRC = saturate(cB*float4(RTwo,ROne,0.0,1.0));
-			image.g = pow(accumRC.r+accumRC.g+accumRC.b, 1.15);
-			image.a = image.a+accumRC.a;
+			accum = saturate(cB*float4(1.0-ROne,ROne,0.0,1.0));
+			image.g = pow(accum.r+accum.g+accum.b, 1.15);
+			image.a = image.a+accum.a;
 
-			accumRC = saturate(cB*float4(RTwo,0.0,ROne,1.0));
-			image.b = pow(accumRC.r+accumRC.g+accumRC.b, 1.15);
-			image.a = (image.a+accumRC.a)/3.0;
+			accum = saturate(cB*float4(1.0-ROne,0.0,ROne,1.0));
+			image.b = pow(accum.r+accum.g+accum.b, 1.15);
+			image.a = (image.a+accum.a)/3.0;
 
-			accumRC = image;
-			image.r = (accumRC.r+(accumRC.r*(deghost))+(accumRC.g*(deghost*-0.5))+(accumRC.b*(deghost*-0.5)));
-			image.g = (accumRC.g+(accumRC.r*(deghost*-0.25))+(accumRC.g*(deghost*0.5))+(accumRC.b*(deghost*-0.25)));
-			image.b = (accumRC.b+(accumRC.r*(deghost*-0.25))+(accumRC.g*(deghost*-0.25))+(accumRC.b*(deghost*0.5)));
+			accum = image;
+			image.r = (accum.r+(accum.r*DeGhost)+(accum.g*(DeGhost*-0.5))+(accum.b*(DeGhost*-0.5)));
+			image.g = (accum.g+(accum.r*(DeGhost*-0.25))+(accum.g*(DeGhost*0.5))+(accum.b*(DeGhost*-0.25)));
+			image.b = (accum.b+(accum.r*(DeGhost*-0.25))+(accum.g*(DeGhost*-0.25))+(accum.b*(DeGhost*0.5)));
 			color = image;
 		}
 		else if (Stereoscopic_Mode == 8) // Anaglyph 3D Green/Magenta
@@ -1079,18 +1061,15 @@ float4 PS_calcLR(float2 texcoord)
 		else if (Stereoscopic_Mode == 9) // Anaglyph 3D Dubois Green/Magenta
 		{
 							
-			float red = -0.062 * cA.r -0.158 * cA.g -0.039 * cA.b
-					+ 0.529 * cB.r + 0.705 * cB.g + 0.024 * cB.b;
+			float red = -0.062 * cA.r -0.158 * cA.g -0.039 * cA.b + 0.529 * cB.r + 0.705 * cB.g + 0.024 * cB.b;
 			
 			if (red > 1) { red = 1; }   if (red < 0) { red = 0; }
 
-			float green = 0.284 * cA.r + 0.668 * cA.g + 0.143 * cA.b 
-						- 0.016 * cB.r - 0.015 * cB.g + 0.065 * cB.b;
+			float green = 0.284 * cA.r + 0.668 * cA.g + 0.143 * cA.b - 0.016 * cB.r - 0.015 * cB.g + 0.065 * cB.b;
 			
 			if (green > 1) { green = 1; }   if (green < 0) { green = 0; }
 
-			float blue = -0.015 * cA.r -0.027 * cA.g + 0.021 * cA.b 
-						+ 0.009 * cB.r + 0.075 * cB.g + 0.937  * cB.b;
+			float blue = -0.015 * cA.r -0.027 * cA.g + 0.021 * cA.b + 0.009 * cB.r + 0.075 * cB.g + 0.937  * cB.b;
 			
 			if (blue > 1) { blue = 1; }   if (blue < 0) { blue = 0; }
 					
@@ -1099,54 +1078,50 @@ float4 PS_calcLR(float2 texcoord)
 		else if (Stereoscopic_Mode == 10)// Anaglyph 3D Deghosted Green/Magenta Code From http://iaian7.com/quartz/AnaglyphCompositing & vectorform.com by John Einselen
 		{
 			LOne = contrast*0.45;
-			LTwo = (1.0-LOne)*0.5;
 			ROne = contrast*0.8;
-			RTwo = 1.0-ROne;
-			deghost = Deghost*0.275;
+			DeGhost *= 0.275;
 
-			accumGM = saturate(cB*float4(ROne,RTwo,0.0,1.0));
-			image.r = pow(accumGM.r+accumGM.g+accumGM.b, 1.15);
-			image.a = accumGM.a;
+			accum = saturate(cB*float4(ROne,1.0-ROne,0.0,1.0));
+			image.r = pow(accum.r+accum.g+accum.b, 1.15);
+			image.a = accum.a;
 
-			accumGM = saturate(cA*float4(LTwo,LOne,LTwo,1.0));
-			image.g = pow(accumGM.r+accumGM.g+accumGM.b, 1.05);
-			image.a = image.a+accumGM.a;
+			accum = saturate(cA*float4((1.0-LOne)*0.5,LOne,(1.0-LOne)*0.5,1.0));
+			image.g = pow(accum.r+accum.g+accum.b, 1.05);
+			image.a = image.a+accum.a;
 
-			accumGM = saturate(cB*float4(0.0,RTwo,ROne,1.0));
-			image.b = pow(accumGM.r+accumGM.g+accumGM.b, 1.15);
-			image.a = (image.a+accumGM.a)/3.0;
+			accum = saturate(cB*float4(0.0,1.0-ROne,ROne,1.0));
+			image.b = pow(accum.r+accum.g+accum.b, 1.15);
+			image.a = (image.a+accum.a)*0.33333333;
 
-			accumGM = image;
-			image.r = (accumGM.r+(accumGM.r*(deghost*0.5))+(accumGM.g*(deghost*-0.25))+(accumGM.b*(deghost*-0.25)));
-			image.g = (accumGM.g+(accumGM.r*(deghost*-0.5))+(accumGM.g*(deghost*0.25))+(accumGM.b*(deghost*-0.5)));
-			image.b = (accumGM.b+(accumGM.r*(deghost*-0.25))+(accumGM.g*(deghost*-0.25))+(accumGM.b*(deghost*0.5)));
+			accum = image;
+			image.r = accum.r+(accum.r*(DeGhost*0.5))+(accum.g*(DeGhost*-0.25))+(accum.b*(DeGhost*-0.25));
+			image.g = accum.g+(accum.r*(DeGhost*-0.5))+(accum.g*(DeGhost*0.25))+(accum.b*(DeGhost*-0.5));
+			image.b = accum.b+(accum.r*(DeGhost*-0.25))+(accum.g*(DeGhost*-0.25))+(accum.b*(DeGhost*0.5));
 			color = image;
 		}
 		else if (Stereoscopic_Mode == 11) // Anaglyph 3D Blue/Amber Code From http://iaian7.com/quartz/AnaglyphCompositing & vectorform.com by John Einselen
 		{
 			LOne = contrast*0.45;
-			LTwo = (1.0-LOne)*0.5;
 			ROne = contrast;
-			RTwo = 1.0-ROne;
-			deghost = Deghost*0.275;
+			DeGhost *= 0.275;
 
-			accumBA = saturate(cA*float4(ROne,0.0,RTwo,1.0));
-			image.r = pow(accumBA.r+accumBA.g+accumBA.b, 1.05);
-			image.a = accumBA.a;
+			accum = saturate(cA*float4(ROne,0.0,1.0-ROne,1.0));
+			image.r = pow(accum.r+accum.g+accum.b, 1.05);
+			image.a = accum.a;
 
-			accumBA = saturate(cA*float4(0.0,ROne,RTwo,1.0));
-			image.g = pow(accumBA.r+accumBA.g+accumBA.b, 1.10);
-			image.a = image.a+accumBA.a;
+			accum = saturate(cA*float4(0.0,ROne,1.0-ROne,1.0));
+			image.g = pow(accum.r+accum.g+accum.b, 1.10);
+			image.a = image.a+accum.a;
 
-			accumBA = saturate(cB*float4(LTwo,LTwo,LOne,1.0));
-			image.b = pow(accumBA.r+accumBA.g+accumBA.b, 1.0);
-			image.b = lerp(pow(image.b,(Deghost*0.15)+1.0),1.0-pow(abs(1.0-image.b),(Deghost*0.15)+1.0),image.b);
-			image.a = (image.a+accumBA.a)/3.0;
+			accum = saturate(cB*float4((1.0-LOne)*0.5,(1.0-LOne)*0.5,LOne,1.0));
+			image.b = pow(accum.r+accum.g+accum.b, 1.0);
+			image.b = lerp(pow(image.b,(DeGhost*0.15)+1.0),1.0-pow(abs(1.0-image.b),(DeGhost*0.15)+1.0),image.b);
+			image.a = (image.a+accum.a)*0.33333333;
 
-			accumBA = image;
-			image.r = (accumBA.r+(accumBA.r*(deghost*1.5))+(accumBA.g*(deghost*-0.75))+(accumBA.b*(deghost*-0.75)));
-			image.g = (accumBA.g+(accumBA.r*(deghost*-0.75))+(accumBA.g*(deghost*1.5))+(accumBA.b*(deghost*-0.75)));
-			image.b = (accumBA.b+(accumBA.r*(deghost*-1.5))+(accumBA.g*(deghost*-1.5))+(accumBA.b*(deghost*3.0)));
+			accum = image;
+			image.r = accum.r+(accum.r*(DeGhost*1.5))+(accum.g*(DeGhost*-0.75))+(accum.b*(DeGhost*-0.75));
+			image.g = accum.g+(accum.r*(DeGhost*-0.75))+(accum.g*(DeGhost*1.5))+(accum.b*(DeGhost*-0.75));
+			image.b = accum.b+(accum.r*(DeGhost*-1.5))+(accum.g*(DeGhost*-1.5))+(accum.b*(DeGhost*3.0));
 			color = saturate(image);
 		}
 	}
