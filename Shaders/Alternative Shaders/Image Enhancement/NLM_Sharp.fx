@@ -1,9 +1,9 @@
- ////--------------------//
- ///**3x3 Median Sharp**///
- //--------------------////
+ ////-------------//
+ ///**NLM_Sharp**///
+ //-------------////
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Depth Based Unsharp Mask Median Contrast Adaptive Sharpening                                     																										
+// Depth Based Unsharp Mask Non Local Means Contrast Adaptive Sharpening                                     																										
 // For Reshade 3.0+																																					
 // --------------------------																																			
 // Have fun,																																								
@@ -11,25 +11,26 @@
 // 																																											
 // https://github.com/BlueSkyDefender/Depth3D																	
 //  ---------------------------------																																	                                                                                                        																	
-// 								3x3 Median Filter Made by Morgan McGuire and Kyle Whitson ported over to Reshade by BSD													
-//								 Link for sorce info https://casual-effects.com/research/McGuire2008Median/index.html																
-// 								Shadertoy Link http://graphics.cs.williams.edu  Thank You.
+// 								Non Local Means Made by panda1234lee ported over to Reshade by BSD													
+//								 Link for sorce info listed below																
+// 								https://creativecommons.org/licenses/by-sa/4.0/ CC Thank You.
 //                                                       
 // LICENSE
 // =======
-// Copyright (c) Morgan McGuire and Williams College, 2006
-// All rights reserved.
-//
-// Redistribution and use in source and binary forms, with or without
-// modification, are permitted provided that the following conditions are
-// met:
-//
-// Redistributions of source code must retain the above copyright notice,
-// this list of conditions and the following disclaimer.
-//
-// Redistributions in binary form must reproduce the above copyright
-// notice, this list of conditions and the following disclaimer in the
-// documentation and/or other materials provided with the distribution.
+// Copyright (c) 2017-2019 Advanced Micro Devices, Inc. All rights reserved.
+// -------
+// Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation
+// files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy,
+// modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the
+// Software is furnished to do so, subject to the following conditions:
+// -------
+// The above copyright notice and this permission notice shall be included in all copies or substantial portions of the
+// Software.
+// -------
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE
+// WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE AUTHORS OR
+// COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
+// ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // This is the practical limit for the algorithm's scaling ability. Example resolutions;
@@ -42,7 +43,7 @@
 //  2560x1440 ->    4K = 2.25x area
 //  3072x1728 ->    4K = 1.56x area
 
-// It is best to run Median Sharp after tonemapping.
+// It is best to run Smart Sharp after tonemapping.
 
 #if !defined(__RESHADE__) || __RESHADE__ < 40000
 	#define Compatibility 1
@@ -89,17 +90,31 @@ uniform float Sharpness <
 	ui_type = "slider";
 	#endif
     ui_label = "Sharpening Strength";
-    ui_min = 0.0; ui_max = 1.25;
+    ui_min = 0.0; ui_max = 1.0;
     ui_tooltip = "Scaled by adjusting this slider from Zero to One to increase sharpness of the image.\n"
 				 "Zero = No Sharpening, to One = Full Sharpening, and Past One = Extra Crispy.\n"
 				 "Number 0.625 is default.";
-	ui_category = "Median CAS";
+	ui_category = "Bilateral CAS";
 > = 0.625;
+
+uniform bool CAM_IOB <
+	ui_label = "CAM Ignore Overbright";
+	ui_tooltip = "Instead of of allowing Overbright in the mask this allows sharpening of this area.\n"
+				 "I think it's more accurate to turn this on.";
+	ui_category = "Bilateral CAS";
+> = false;
 
 uniform bool CA_Mask_Boost <
 	ui_label = "CAM Boost";
 	ui_tooltip = "This boosts the power of Contrast Adaptive Masking part of the shader.";
-	ui_category = "Median CAS";
+	ui_category = "Bilateral CAS";
+> = false;
+
+uniform bool CA_Removal <
+	ui_label = "CAM Removal";
+	ui_tooltip = "This removes Contrast Adaptive Masking part of the shader.\n"
+				 "This is for people who like the Raw look of Bilateral Sharpen.";
+	ui_category = "Bilateral CAS";
 > = false;
 
 uniform int Debug_View <
@@ -155,65 +170,108 @@ float Depth(in float2 texcoord : TEXCOORD0)
 	return saturate(zBuffer);	
 }	
 
-float3 BB(in float2 texcoord, float2 AD)
+float Min3(float x, float y, float z)
 {
-	return tex2Dlod(BackBuffer, float4(texcoord + AD,0,0)).rgb;
+    return min(x, min(y, z));
 }
 
-#define s2(a, b)				temp = a; a = min(a, b); b = max(temp, b);
-#define mn3(a, b, c)			s2(a, b); s2(a, c);
-#define mx3(a, b, c)			s2(b, c); s2(a, c);
+float Max3(float x, float y, float z)
+{
+    return max(x, max(y, z));
+}
 
-#define mnmx3(a, b, c)			mx3(a, b, c); s2(a, b);                                   // 3 exchanges
-#define mnmx4(a, b, c, d)		s2(a, b); s2(c, d); s2(a, c); s2(b, d);                   // 4 exchanges
-#define mnmx5(a, b, c, d, e)	s2(a, b); s2(c, d); mn3(a, c, e); mx3(b, d, e);           // 6 exchanges
-#define mnmx6(a, b, c, d, e, f) s2(a, d); s2(b, e); s2(c, f); mn3(a, b, c); mx3(d, e, f); // 7 exchanges	
+float normaL2(float4 RGB) 
+{ 
+   return pow(RGB.r, 2) + pow(RGB.g, 2) + pow(RGB.b, 2) + pow(RGB.a, 2);
+}
 
-float4 MCAS(float2 texcoord)
-{   
-	float2 ScreenCal = pix;
+float4 BB(in float2 texcoord, float2 AD)
+{
+	return tex2Dlod(BackBuffer, float4(texcoord + AD,0,0));
+}
 
-	
-	float2 FinCal = ScreenCal*0.6;
+float LI(float3 RGB)
+{
+	return dot(RGB,float3(0.2126, 0.7152, 0.0722));
+}
 
-	float3 v[9];
-	
-	[unroll]
-	for(int i = -1; i <= 1; ++i) 
-	{
-		for(int j = -1; j <= 1; ++j)
-		{		
-		  float2 offset = float2(i, j);
+#define search_radius 1 //Search window radius D = 3
+#define block_radius 0.5 //Base Window Radius D = 1
 
-		  v[(i + 1) * 3 + (j + 1)] = BB( texcoord , offset * FinCal);
-		}
-	}
+#define search_window 2 * search_radius + 1 //Search window size
+#define minus_search_window2_inv -rcp(search_window * search_window) //Refactor Search Window 
 
-	float3 temp;
+#define h 10 //Control the degree of attenuation of the Gaussian function
+#define minus_h2_inv -rcp(h * h * 4) //The number of channels is four
+#define noise_mult minus_h2_inv * 500 //Used for precision
 
-	mnmx6(v[0], v[1], v[2], v[3], v[4], v[5]);
-	mnmx5(v[1], v[2], v[3], v[4], v[6]);
-	mnmx4(v[2], v[3], v[4], v[7]);
-	mnmx3(v[3], v[4], v[8]);
-		
-	float3 ampRGB, rcpMRGB = abs(v[0] - BB( texcoord ,0));
+float4 CAS(float2 texcoord)
+{
+	// fetch a Cross neighborhood around the pixel 'C',
+	//         Up
+	//
+	//  Left(Center)Right
+	//
+	//        Down  
+    float Up = LI(BB(texcoord, float2( 0,-pix.y)).rgb);
+    float Left = LI(BB(texcoord, float2(-pix.x, 0)).rgb);
+    float Center = LI(BB(texcoord, 0).rgb);
+    float Right = LI(BB(texcoord, float2( pix.x, 0)).rgb);
+    float Down = LI(BB(texcoord, float2( 0, pix.y)).rgb);
 
-	ampRGB = saturate(rcpMRGB);
-    
-    // Shaping amount of sharpening.
-    ampRGB = sqrt(ampRGB);
-    
-	float CAS_Mask = 1-length(ampRGB);
+    float mnRGB = Min3( Min3(Left, Center, Right), Up, Down);
+    float mxRGB = Max3( Max3(Left, Center, Right), Up, Down);
+       
+    // Smooth minimum distance to signal limit divided by smooth max.
+    float rcpMRGB = rcp(mxRGB), RGB_D = saturate(min(mnRGB, 1.0 - mxRGB) * rcpMRGB);
+
+	if( CAM_IOB )
+		RGB_D = saturate(min(mnRGB, 2.0 - mxRGB) * rcpMRGB);
+          
+	//Non Local Mean// - https://blog.csdn.net/panda1234lee/article/details/88016834      
+   float sum2;
+   float4 sum1;
+	//Traverse the search window
+   for(float y = -search_radius; y <= search_radius; ++y)
+   {
+      for(float x = -search_radius; x <= search_radius; ++x)
+      { //Count the sum of the L2 norms of the colors in a search window (the colors in all Base windows
+          float dist = 0;
+ 
+		  //Traversing the Base window
+          for(float ty = -block_radius; ty <= block_radius; ++ty)
+          { 
+             for(float tx = -block_radius; tx <= block_radius; ++tx)
+             {  //clamping to increase performance & Search window neighborhoods
+                float4 bv = saturate(  BB(texcoord, float2(x + tx, y + ty) * pix) );
+                //Current pixel neighborhood
+                float4 av = saturate(  BB(texcoord, float2(tx, ty) * pix) );
+                
+                dist += normaL2(av - bv);
+             }
+          }
+		  //Gaussian weights (calculated from the color distance and pixel distance of all base windows) under a search window
+          float window = exp(dist * noise_mult + (pow(x, 2) + pow(y, 2)) * minus_search_window2_inv);
+ 
+          sum1 +=  window * saturate( BB(texcoord, float2(x, y) * pix) ); //Gaussian weight * pixel value         
+          sum2 += window; //Accumulate Gaussian weights for all search windows for normalization
+      }
+   }
+   // Shaping amount of sharpening masked
+	float CAS_Mask = RGB_D;
 
 	if(CA_Mask_Boost)
 		CAS_Mask = lerp(CAS_Mask,CAS_Mask * CAS_Mask,saturate(Sharpness * 0.5));
 		
-return saturate(float4(v[4],CAS_Mask));
+	if(CA_Removal)
+		CAS_Mask = 1;
+		
+return saturate(float4(sum1.rgb / sum2,CAS_Mask));
 }
 
 float3 Sharpen_Out(float2 texcoord)                                                                          
-{   float3 Done = BB(texcoord ,0);	
-	return lerp(Done,Done+(Done - MCAS(texcoord).rgb)*(Sharpness*3.), MCAS(texcoord).w * saturate(Sharpness)); //Sharpen Out
+{   float3 Done = tex2D(BackBuffer,texcoord).rgb;	
+	return lerp(Done,Done+(Done - CAS(texcoord).rgb)*(Sharpness*3.1), CAS(texcoord).w * saturate(Sharpness)); //Sharpen Out
 }
 
 
@@ -234,13 +292,13 @@ float3 ShaderOut(float2 texcoord : TEXCOORD0)
 	}
 	else if (Debug_View == 1)
 	{
-		float3 Top_Left = lerp(float3(1.,1.,1.),MCAS(float2(texcoord.x*2,texcoord.y*2)).www,1-DBTL);
+		float3 Top_Left = lerp(float3(1.,1.,1.),CAS(float2(texcoord.x*2,texcoord.y*2)).www,1-DBTL);
 		
 		float3 Top_Right =  Depth(float2(texcoord.x*2-1,texcoord.y*2)).rrr;		
 		
 		float3 Bottom_Left = lerp(float3(1., 0., 1.),tex2D(BackBuffer,float2(texcoord.x*2,texcoord.y*2-1)).rgb,DBBL);	
 
-		float3 Bottom_Right = MCAS(float2(texcoord.x*2-1,texcoord.y*2-1)).rgb;	
+		float3 Bottom_Right = CAS(float2(texcoord.x*2-1,texcoord.y*2-1)).rgb;	
 		
 		float3 VA_Top = texcoord.x < 0.5 ? Top_Left : Top_Right ;
 		float3 VA_Bottom = texcoord.x < 0.5 ? Bottom_Left : Bottom_Right ;
@@ -357,7 +415,9 @@ void PostProcessVS(in uint id : SV_VertexID, out float4 position : SV_Position, 
 }
 
 //*Rendering passes*//
-technique Median_Sharp
+technique NLM_Sharp
+< ui_tooltip = "Suggestion : You Can Enable 'Performance Mode Checkbox,' in the lower bottom right of the ReShade's Main UI.\n"
+			   "             Do this once you set your Smart Sharp settings of course."; >
 {		
 			pass UnsharpMask
 		{

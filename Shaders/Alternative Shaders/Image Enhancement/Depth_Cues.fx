@@ -142,7 +142,7 @@ uniform float Fake_AO_Adjust <
 */
 /////////////////////////////////////////////////////D3D Starts Here/////////////////////////////////////////////////////////////////
 #define pix float2(BUFFER_RCP_WIDTH, BUFFER_RCP_HEIGHT)
-#define BlurSamples 12 //BlurSamples = # * 2
+#define BlurSamples 10 //BlurSamples = # * 2
 #define S_Power Spread * Multi
 #define M_Power Blur_Cues * Multi
 
@@ -194,23 +194,28 @@ float Depth(in float2 texcoord : TEXCOORD0)
 		zBuffer = Far * Near / (Far + Z.y * (Near - Far));	
 		 
 	return saturate(zBuffer);	
-}	
+}
+	
+float lum(float3 RGB)
+{
+		return dot(RGB, float3(0.2126, 0.7152, 0.0722) );
+}
 
-float3 BB(in float2 texcoord, float2 AD)
+float BB(in float2 texcoord, float2 AD)
 {
 	/*
 	if(Fake_AO)
 		return 1-(1 - Fake_AO_Adjust/Depth(texcoord + AD).xxx);
 	else
 	*/
-		return tex2Dlod(BackBuffer, float4(texcoord + AD,0,0)).rgb;
+		return lum(tex2Dlod(BackBuffer, float4(texcoord + AD,0,0)).rgb);
 }
 
 float H_Blur(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Target                                                                          
 {
 	float S = S_Power * 0.125;
 	
-	float3 sum = BB(texcoord,0).rgb * BlurSamples;
+	float sum = BB(texcoord,0) * BlurSamples;
     
     float total = BlurSamples;
     
@@ -222,11 +227,11 @@ float H_Blur(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Tar
 
         total += W;
     }
-	return dot(sum / total, float3(0.2126, 0.7152, 0.0722) ); // Get it  Total sum..... :D				
+	return saturate(sum / total); // Get it  Total sum..... :D				
 }
 
 // Spread the blur a bit more. 
-float DepthCues(float2 texcoord) 
+float DepthCues(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Target  
 {	
 		float2 S = S_Power * 0.75f * pix;
 
@@ -243,31 +248,22 @@ float DepthCues(float2 texcoord)
 		result *= rcp(9);
 	
 	// Formula for Image Pop = Original + (Original / Blurred).
-	float DC = (dot(BB(texcoord,0),float3(0.2126, 0.7152, 0.0722)) / result );
-return lerp(1.0f,saturate(DC),Shade_Power);
+	float DC = BB(texcoord,0) / result;
+return saturate(lerp(1.0f,DC,Shade_Power));
 }
 
-float DC(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Target                                                                          
-{
-	return DepthCues(texcoord); // Get it  Total sum..... :D				
-}
-
-float4 ShaderOut(float2 texcoord : TEXCOORD0)
+float3 ShaderOut(float2 texcoord : TEXCOORD0)
 {	
-	float DCB = tex2Dlod(SamplerDC,float4(texcoord,0,M_Power)).x;
-	float4 Out;
-	float3 DC = DCB.xxx , BBN = tex2D(BackBuffer,texcoord).rgb;
-	float DB = Depth(texcoord).r;
+	float DCB = tex2Dlod(SamplerDC,float4(texcoord,0,M_Power)).x,DB = Depth(texcoord).x;
+	float3 Out, BBN = tex2D(BackBuffer,texcoord).rgb;
 	
 	if(No_Depth_Map)
-	{
 		DB = 0.0;
-	}
 	
-	Out.rgb = BBN * lerp(DC,1., DB);
+	Out.rgb = BBN * lerp(DCB,1., DB);
 	
 	if (Debug_View)
-		Out = lerp(DC,1., DB);
+		Out = lerp(DCB,1., DB);
 	
 	if (DEPTH_DEBUG)
 		Out = DB;
@@ -278,91 +274,91 @@ uniform float timer < source = "timer"; >; //Please do not remove.
 ////////////////////////////////////////////////////////Logo/////////////////////////////////////////////////////////////////////////
 float4 Out(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Target
 {
-	float PosX = 0.9525f*BUFFER_WIDTH*pix.x,PosY = 0.975f*BUFFER_HEIGHT*pix.y;	
-	float3 Color = ShaderOut(texcoord).rgb,D,E,P,T,H,Three,DD,Dot,I,N,F,O;
+	float PosX = 0.9525f*BUFFER_WIDTH*pix.x,PosY = 0.975f*BUFFER_HEIGHT*pix.y,D,E,P,T,H,Three,DD,Dot,I,N,F,O;	
+	float3 Color = ShaderOut(texcoord).rgb;
 	
 	[branch] if(timer <= 12500)
 	{
 		//DEPTH
 		//D
 		float PosXD = -0.035+PosX, offsetD = 0.001;
-		float3 OneD = all( abs(float2( texcoord.x -PosXD, texcoord.y-PosY)) < float2(0.0025,0.009));
-		float3 TwoD = all( abs(float2( texcoord.x -PosXD-offsetD, texcoord.y-PosY)) < float2(0.0025,0.007));
+		float OneD = all( abs(float2( texcoord.x -PosXD, texcoord.y-PosY)) < float2(0.0025,0.009));
+		float TwoD = all( abs(float2( texcoord.x -PosXD-offsetD, texcoord.y-PosY)) < float2(0.0025,0.007));
 		D = OneD-TwoD;
 		
 		//E
 		float PosXE = -0.028+PosX, offsetE = 0.0005;
-		float3 OneE = all( abs(float2( texcoord.x -PosXE, texcoord.y-PosY)) < float2(0.003,0.009));
-		float3 TwoE = all( abs(float2( texcoord.x -PosXE-offsetE, texcoord.y-PosY)) < float2(0.0025,0.007));
-		float3 ThreeE = all( abs(float2( texcoord.x -PosXE, texcoord.y-PosY)) < float2(0.003,0.001));
+		float OneE = all( abs(float2( texcoord.x -PosXE, texcoord.y-PosY)) < float2(0.003,0.009));
+		float TwoE = all( abs(float2( texcoord.x -PosXE-offsetE, texcoord.y-PosY)) < float2(0.0025,0.007));
+		float ThreeE = all( abs(float2( texcoord.x -PosXE, texcoord.y-PosY)) < float2(0.003,0.001));
 		E = (OneE-TwoE)+ThreeE;
 		
 		//P
 		float PosXP = -0.0215+PosX, PosYP = -0.0025+PosY, offsetP = 0.001, offsetP1 = 0.002;
-		float3 OneP = all( abs(float2( texcoord.x -PosXP, texcoord.y-PosYP)) < float2(0.0025,0.009*0.775));
-		float3 TwoP = all( abs(float2( texcoord.x -PosXP-offsetP, texcoord.y-PosYP)) < float2(0.0025,0.007*0.680));
-		float3 ThreeP = all( abs(float2( texcoord.x -PosXP+offsetP1, texcoord.y-PosY)) < float2(0.0005,0.009));
+		float OneP = all( abs(float2( texcoord.x -PosXP, texcoord.y-PosYP)) < float2(0.0025,0.009*0.775));
+		float TwoP = all( abs(float2( texcoord.x -PosXP-offsetP, texcoord.y-PosYP)) < float2(0.0025,0.007*0.680));
+		float ThreeP = all( abs(float2( texcoord.x -PosXP+offsetP1, texcoord.y-PosY)) < float2(0.0005,0.009));
 		P = (OneP-TwoP) + ThreeP;
 
 		//T
 		float PosXT = -0.014+PosX, PosYT = -0.008+PosY;
-		float3 OneT = all( abs(float2( texcoord.x -PosXT, texcoord.y-PosYT)) < float2(0.003,0.001));
-		float3 TwoT = all( abs(float2( texcoord.x -PosXT, texcoord.y-PosY)) < float2(0.000625,0.009));
+		float OneT = all( abs(float2( texcoord.x -PosXT, texcoord.y-PosYT)) < float2(0.003,0.001));
+		float TwoT = all( abs(float2( texcoord.x -PosXT, texcoord.y-PosY)) < float2(0.000625,0.009));
 		T = OneT+TwoT;
 		
 		//H
 		float PosXH = -0.0072+PosX;
-		float3 OneH = all( abs(float2( texcoord.x -PosXH, texcoord.y-PosY)) < float2(0.002,0.001));
-		float3 TwoH = all( abs(float2( texcoord.x -PosXH, texcoord.y-PosY)) < float2(0.002,0.009));
-		float3 ThreeH = all( abs(float2( texcoord.x -PosXH, texcoord.y-PosY)) < float2(0.00325,0.009));
+		float OneH = all( abs(float2( texcoord.x -PosXH, texcoord.y-PosY)) < float2(0.002,0.001));
+		float TwoH = all( abs(float2( texcoord.x -PosXH, texcoord.y-PosY)) < float2(0.002,0.009));
+		float ThreeH = all( abs(float2( texcoord.x -PosXH, texcoord.y-PosY)) < float2(0.00325,0.009));
 		H = (OneH-TwoH)+ThreeH;
 		
 		//Three
 		float offsetFive = 0.001, PosX3 = -0.001+PosX;
-		float3 OneThree = all( abs(float2( texcoord.x -PosX3, texcoord.y-PosY)) < float2(0.002,0.009));
-		float3 TwoThree = all( abs(float2( texcoord.x -PosX3 - offsetFive, texcoord.y-PosY)) < float2(0.003,0.007));
-		float3 ThreeThree = all( abs(float2( texcoord.x -PosX3, texcoord.y-PosY)) < float2(0.002,0.001));
+		float OneThree = all( abs(float2( texcoord.x -PosX3, texcoord.y-PosY)) < float2(0.002,0.009));
+		float TwoThree = all( abs(float2( texcoord.x -PosX3 - offsetFive, texcoord.y-PosY)) < float2(0.003,0.007));
+		float ThreeThree = all( abs(float2( texcoord.x -PosX3, texcoord.y-PosY)) < float2(0.002,0.001));
 		Three = (OneThree-TwoThree)+ThreeThree;	
 		
 		//DD
 		float PosXDD = 0.006+PosX, offsetDD = 0.001;	
-		float3 OneDD = all( abs(float2( texcoord.x -PosXDD, texcoord.y-PosY)) < float2(0.0025,0.009));
-		float3 TwoDD = all( abs(float2( texcoord.x -PosXDD-offsetDD, texcoord.y-PosY)) < float2(0.0025,0.007));
+		float OneDD = all( abs(float2( texcoord.x -PosXDD, texcoord.y-PosY)) < float2(0.0025,0.009));
+		float TwoDD = all( abs(float2( texcoord.x -PosXDD-offsetDD, texcoord.y-PosY)) < float2(0.0025,0.007));
 		DD = OneDD-TwoDD;
 		
 		//Dot
 		float PosXDot = 0.011+PosX, PosYDot = 0.008+PosY;		
-		float3 OneDot = all( abs(float2( texcoord.x -PosXDot, texcoord.y-PosYDot)) < float2(0.00075,0.0015));
+		float OneDot = all( abs(float2( texcoord.x -PosXDot, texcoord.y-PosYDot)) < float2(0.00075,0.0015));
 		Dot = OneDot;
 		
 		//INFO
 		//I	
 		float PosXI = 0.0155+PosX, PosYI = 0.004+PosY, PosYII = 0.008+PosY;
-		float3 OneI = all( abs(float2( texcoord.x - PosXI, texcoord.y - PosY)) < float2(0.003,0.001));
-		float3 TwoI = all( abs(float2( texcoord.x - PosXI, texcoord.y - PosYI)) < float2(0.000625,0.005));
-		float3 ThreeI = all( abs(float2( texcoord.x - PosXI, texcoord.y - PosYII)) < float2(0.003,0.001));
+		float OneI = all( abs(float2( texcoord.x - PosXI, texcoord.y - PosY)) < float2(0.003,0.001));
+		float TwoI = all( abs(float2( texcoord.x - PosXI, texcoord.y - PosYI)) < float2(0.000625,0.005));
+		float ThreeI = all( abs(float2( texcoord.x - PosXI, texcoord.y - PosYII)) < float2(0.003,0.001));
 		I = OneI+TwoI+ThreeI;
 		
 		//N
 		float PosXN = 0.0225+PosX, PosYN = 0.005+PosY,offsetN = -0.001;
-		float3 OneN = all( abs(float2( texcoord.x - PosXN, texcoord.y - PosYN)) < float2(0.002,0.004));
-		float3 TwoN = all( abs(float2( texcoord.x - PosXN, texcoord.y - PosYN - offsetN)) < float2(0.003,0.005));
+		float OneN = all( abs(float2( texcoord.x - PosXN, texcoord.y - PosYN)) < float2(0.002,0.004));
+		float TwoN = all( abs(float2( texcoord.x - PosXN, texcoord.y - PosYN - offsetN)) < float2(0.003,0.005));
 		N = OneN-TwoN;
 		
 		//F
 		float PosXF = 0.029+PosX, PosYF = 0.004+PosY, offsetF = 0.0005, offsetF1 = 0.001;
-		float3 OneF = all( abs(float2( texcoord.x -PosXF-offsetF, texcoord.y-PosYF-offsetF1)) < float2(0.002,0.004));
-		float3 TwoF = all( abs(float2( texcoord.x -PosXF, texcoord.y-PosYF)) < float2(0.0025,0.005));
-		float3 ThreeF = all( abs(float2( texcoord.x -PosXF, texcoord.y-PosYF)) < float2(0.0015,0.00075));
+		float OneF = all( abs(float2( texcoord.x -PosXF-offsetF, texcoord.y-PosYF-offsetF1)) < float2(0.002,0.004));
+		float TwoF = all( abs(float2( texcoord.x -PosXF, texcoord.y-PosYF)) < float2(0.0025,0.005));
+		float ThreeF = all( abs(float2( texcoord.x -PosXF, texcoord.y-PosYF)) < float2(0.0015,0.00075));
 		F = (OneF-TwoF)+ThreeF;
 		
 		//O
 		float PosXO = 0.035+PosX, PosYO = 0.004+PosY;
-		float3 OneO = all( abs(float2( texcoord.x -PosXO, texcoord.y-PosYO)) < float2(0.003,0.005));
-		float3 TwoO = all( abs(float2( texcoord.x -PosXO, texcoord.y-PosYO)) < float2(0.002,0.003));
+		float OneO = all( abs(float2( texcoord.x -PosXO, texcoord.y-PosYO)) < float2(0.003,0.005));
+		float TwoO = all( abs(float2( texcoord.x -PosXO, texcoord.y-PosYO)) < float2(0.002,0.003));
 		O = OneO-TwoO;
 		//Website
-		return float4(D+E+P+T+H+Three+DD+Dot+I+N+F+O,1.) ? 1-texcoord.y*50.0+48.35f : float4(Color,1.);
+		return D+E+P+T+H+Three+DD+Dot+I+N+F+O ? 1-texcoord.y*50.0+48.35f : float4(Color,1.);
 	}
 	else
 		return float4(Color,1.);
@@ -391,7 +387,7 @@ technique Monocular_Cues
 			pass BlurDC
 		{
 			VertexShader = PostProcessVS;
-			PixelShader = DC;
+			PixelShader = DepthCues;
 			RenderTarget = texDC;
 		}
 			pass UnsharpMask
