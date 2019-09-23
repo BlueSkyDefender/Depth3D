@@ -10,11 +10,17 @@
 // Jose Negrete AKA BlueSkyDefender																																		
 // 																																											
 // https://github.com/BlueSkyDefender/Depth3D																	
-//  ---------------------------------																																	                                                                                                        																	
+//  ---------------------------------
+//	https://web.stanford.edu/class/cs448f/lectures/2.1/Sharpening.pdf
+//																																	                                                                                                        																	
 // 								Non-Local Means Made by panda1234lee ported over to Reshade by BSD													
 //								Link for sorce info listed below																
 // 								https://creativecommons.org/licenses/by-sa/4.0/ CC Thank You.
-//                                                       
+//
+//								Non-Local Means sharpening figures out what
+//								makes me different from other similar things
+//								in the image, and exaggerates that
+//                                                     
 // LICENSE
 // =======
 // Copyright (c) 2017-2019 Advanced Micro Devices, Inc. All rights reserved.
@@ -117,16 +123,23 @@ uniform bool CA_Removal <
 	ui_category = "Non-Local Means CAS";
 > = false;
 
-uniform int Debug_View <
+
+uniform int NLM_Grounding <
 	ui_type = "combo";
-	ui_items = "Normal View\0Sharp Debug\0Z-Buffer Debug\0";
+	ui_items = "Fine\0Medium\0Coarse\0";
+	ui_label = "Grounding Type";
+	ui_tooltip = "Like Coffee pick how rough do you want this shader to be.\n"
+				 "Gives more control of Non-Local Means Sharpen.";
+	ui_category = "Non-Local Means Filtering";
+> = 0;
+
+uniform bool Debug_View <
 	ui_label = "View Mode";
 	ui_tooltip = "This is used to select the normal view output or debug view.\n"
 				 "Used to see what the shaderis changing in the image.\n"
 				 "Normal gives you the normal out put of this shader.\n"
-				 "Sharp is the full Debug for Smart sharp.\n"
+				 "Sharp is the full Debug for NLM Sharp.\n"
 				 "Depth Cues is the Shaded output.\n"
-				 "Z-Buffer id Depth Buffer only.\n"
 				 "Default is Normal View.";
 	ui_category = "Debug";
 > = 0;
@@ -195,8 +208,18 @@ float LI(float3 RGB)
 	return dot(RGB,float3(0.2126, 0.7152, 0.0722));
 }
 
-#define search_radius 1 //Search window radius D = 3
-#define block_radius 0.5 //Base Window Radius D = 1
+float GT()
+{
+if (NLM_Grounding == 2)
+	return 1.5;
+else if(NLM_Grounding == 1)
+	return 1.25;
+else
+	return 1.0;
+}
+
+#define search_radius 1 //Search window radius D = 1    2   3
+#define block_radius 0.5 //Base Window Radius D = 0.5 0.75 1.0
 
 #define search_window 2 * search_radius + 1 //Search window size
 #define minus_search_window2_inv -rcp(search_window * search_window) //Refactor Search Window 
@@ -230,6 +253,7 @@ float4 CAS(float2 texcoord)
           
 	//Non-Local Mean// - https://blog.csdn.net/panda1234lee/article/details/88016834      
    float sum2;
+   float2 RPC_WS = pix * GT();
    float4 sum1;
 	//Traverse the search window
    for(float y = -search_radius; y <= search_radius; ++y)
@@ -243,9 +267,9 @@ float4 CAS(float2 texcoord)
           { 
              for(float tx = -block_radius; tx <= block_radius; ++tx)
              {  //clamping to increase performance & Search window neighborhoods
-                float4 bv = saturate(  BB(texcoord, float2(x + tx, y + ty) * pix) );
+                float4 bv = saturate(  BB(texcoord, float2(x + tx, y + ty) * RPC_WS) );
                 //Current pixel neighborhood
-                float4 av = saturate(  BB(texcoord, float2(tx, ty) * pix) );
+                float4 av = saturate(  BB(texcoord, float2(tx, ty) * RPC_WS) );
                 
                 dist += normaL2(av - bv);
              }
@@ -253,7 +277,7 @@ float4 CAS(float2 texcoord)
 		  //Gaussian weights (calculated from the color distance and pixel distance of all base windows) under a search window
           float window = exp(dist * noise_mult + (pow(x, 2) + pow(y, 2)) * minus_search_window2_inv);
  
-          sum1 +=  window * saturate( BB(texcoord, float2(x, y) * pix) ); //Gaussian weight * pixel value         
+          sum1 +=  window * saturate( BB(texcoord, float2(x, y) * RPC_WS) ); //Gaussian weight * pixel value         
           sum2 += window; //Accumulate Gaussian weights for all search windows for normalization
       }
    }
@@ -286,11 +310,9 @@ float3 ShaderOut(float2 texcoord : TEXCOORD0)
 		DBBL = 0.0;
 	}
 	
-	if (Debug_View == 0)
-	{			
+	if (Debug_View == 0)			
 		Out.rgb = lerp(Sharpen, BB, DB);
-	}
-	else if (Debug_View == 1)
+	else
 	{
 		float3 Top_Left = lerp(float3(1.,1.,1.),CAS(float2(texcoord.x*2,texcoord.y*2)).www,1-DBTL);
 		
@@ -305,8 +327,7 @@ float3 ShaderOut(float2 texcoord : TEXCOORD0)
 		
 		Out = texcoord.y < 0.5 ? VA_Top : VA_Bottom;
 	}
-	else
-		Out = Depth(texcoord);
+
 
 	return Out;
 }

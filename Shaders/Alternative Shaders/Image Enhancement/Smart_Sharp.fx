@@ -10,11 +10,14 @@
 // Jose Negrete AKA BlueSkyDefender																																		
 // 																																											
 // https://github.com/BlueSkyDefender/Depth3D																	
-//  ---------------------------------																																	                                                                                                        																	
+//  ---------------------------------
+//	https://web.stanford.edu/class/cs448f/lectures/2.1/Sharpening.pdf
+//																																                                                                                                        																	
 // 								Bilateral Filter Made by mrharicot ported over to Reshade by BSD													
 //								GitHub Link for sorce info github.com/SableRaf/Filters4Processin																
 // 								Shadertoy Link https://www.shadertoy.com/view/4dfGDH  Thank You.
-//                                                       
+//
+//                                     Everyone wants to best the bilateral filter.....                        
 // LICENSE
 // =======
 // Copyright (c) 2017-2019 Advanced Micro Devices, Inc. All rights reserved.
@@ -126,6 +129,23 @@ uniform bool CA_Removal <
 	ui_category = "Bilateral CAS";
 > = false;
 
+uniform int B_Grounding <
+	ui_type = "combo";
+	ui_items = "Fine\0Medium\0Coarse\0";
+	ui_label = "Grounding Type";
+	ui_tooltip = "Like Coffee pick how rough do you want this shader to be.\n"
+				 "Gives more control of Bilateral Filtering.";
+	ui_category = "Bilateral Filtering";
+> = 0;
+
+uniform bool Slow_Mode <
+	ui_label = "CAS Slow Mode";
+	ui_tooltip = "This enables release Quality of Bilateral Sharpen that is 2X the amount of image bluring at the cost of in game FPS.\n"
+				 "If you want this to be usable at higher resolutions go in shader and change the preprocessor M_Quality, to low.\n"
+				 "This toggle only for accuracy.";
+	ui_category = "Bilateral Filtering";
+> = false;
+
 uniform int Debug_View <
 	ui_type = "combo";
 	ui_items = "Normal View\0Sharp Debug\0Z-Buffer Debug\0";
@@ -226,6 +246,16 @@ float LI(float3 RGB)
 	return dot(RGB,float3(0.2126, 0.7152, 0.0722));
 }
 
+float GT()
+{
+if (B_Grounding == 2)
+	return 1.5;
+else if(B_Grounding == 1)
+	return 1.25;
+else
+	return 1.0;
+}
+
 float4 CAS(float2 texcoord)
 {
 	// fetch a Cross neighborhood around the pixel 'C',
@@ -268,15 +298,29 @@ float4 CAS(float2 texcoord)
 #endif
 	
 	float3 final_colour, c = BB(texcoord.xy,0), cc;
+	float2 RPC_WS = pix * GT();
 	float Z, factor;
 	
 	[loop]
 	for (int i=-kSize; i <= kSize; ++i)
 	{	
-		cc = BB(texcoord.xy, float2( i, 1 - (i * i) * 0.5 ) * pix * rcp(kSize) );
-		factor = normpdf3(cc-c, BSIGMA);
-		Z += factor;
-		final_colour += factor * cc;
+	[branch]if(Slow_Mode)
+		{
+			for (int j=-kSize; j <= kSize; ++j)
+			{
+				cc = BB(texcoord.xy, float2(i,j) * RPC_WS * rcp(kSize) );
+				factor = normpdf3(cc-c, BSIGMA);
+				Z += factor;
+				final_colour += factor * cc;
+			}
+		}
+		else
+		{		
+			cc = BB(texcoord.xy, float2( i, 1 - (i * i) * 0.5 ) * RPC_WS * rcp(kSize) );
+			factor = normpdf3(cc-c, BSIGMA);
+			Z += factor;
+			final_colour += factor * cc;
+		}
 	}
 	
 	//// Shaping amount of sharpening masked	
