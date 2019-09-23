@@ -11,8 +11,8 @@
 // 																																											
 // https://github.com/BlueSkyDefender/Depth3D																	
 //  ---------------------------------																																	                                                                                                        																	
-// 								Non Local Means Made by panda1234lee ported over to Reshade by BSD													
-//								 Link for sorce info listed below																
+// 								Non-Local Means Made by panda1234lee ported over to Reshade by BSD													
+//								Link for sorce info listed below																
 // 								https://creativecommons.org/licenses/by-sa/4.0/ CC Thank You.
 //                                                       
 // LICENSE
@@ -228,7 +228,7 @@ float4 CAS(float2 texcoord)
 	if( CAM_IOB )
 		RGB_D = saturate(min(mnRGB, 2.0 - mxRGB) * rcpMRGB);
           
-	//Non Local Mean// - https://blog.csdn.net/panda1234lee/article/details/88016834      
+	//Non-Local Mean// - https://blog.csdn.net/panda1234lee/article/details/88016834      
    float sum2;
    float4 sum1;
 	//Traverse the search window

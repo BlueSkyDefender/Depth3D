@@ -12,7 +12,7 @@
 // https://github.com/BlueSkyDefender/Depth3D																	
 //  ---------------------------------																																	                                                                                                        																	
 // 								Bilateral Filter Made by mrharicot ported over to Reshade by BSD													
-//								 GitHub Link for sorce info github.com/SableRaf/Filters4Processin																
+//								GitHub Link for sorce info github.com/SableRaf/Filters4Processin																
 // 								Shadertoy Link https://www.shadertoy.com/view/4dfGDH  Thank You.
 //                                                       
 // LICENSE
@@ -244,10 +244,10 @@ float4 CAS(float2 texcoord)
     float mxRGB = Max3( Max3(Left, Center, Right), Up, Down);
        
     // Smooth minimum distance to signal limit divided by smooth max.
-    float rcpMRGB = rcp(mxRGB), ampRGB = saturate(min(mnRGB, 1.0 - mxRGB) * rcpMRGB);
+    float rcpMRGB = rcp(mxRGB), RGB_D = saturate(min(mnRGB, 1.0 - mxRGB) * rcpMRGB);
 
 	if( CAM_IOB )
-		ampRGB = saturate(min(mnRGB, 2.0 - mxRGB) * rcpMRGB);
+		RGB_D = saturate(min(mnRGB, 2.0 - mxRGB) * rcpMRGB);
           
 	//Bilateral Filter//                                                Q1         Q2       Q3        Q4                                                                                          
 	const int kSize = MSIZE * 0.5; // Default M-size is Quality 2 so [MSIZE 3] [MSIZE 5] [MSIZE 7] [MSIZE 9] / 2.
@@ -280,7 +280,7 @@ float4 CAS(float2 texcoord)
 	}
 	
 	//// Shaping amount of sharpening masked	
-	float CAS_Mask = ampRGB;
+	float CAS_Mask = RGB_D;
 
 	if(CA_Mask_Boost)
 		CAS_Mask = lerp(CAS_Mask,CAS_Mask * CAS_Mask,saturate(Sharpness * 0.5));
