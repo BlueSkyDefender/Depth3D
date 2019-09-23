@@ -94,27 +94,27 @@ uniform float Sharpness <
     ui_tooltip = "Scaled by adjusting this slider from Zero to One to increase sharpness of the image.\n"
 				 "Zero = No Sharpening, to One = Full Sharpening, and Past One = Extra Crispy.\n"
 				 "Number 0.625 is default.";
-	ui_category = "Bilateral CAS";
+	ui_category = "Non-Local Means CAS";
 > = 0.625;
 
 uniform bool CAM_IOB <
 	ui_label = "CAM Ignore Overbright";
 	ui_tooltip = "Instead of of allowing Overbright in the mask this allows sharpening of this area.\n"
 				 "I think it's more accurate to turn this on.";
-	ui_category = "Bilateral CAS";
+	ui_category = "Non-Local Means CAS";
 > = false;
 
 uniform bool CA_Mask_Boost <
 	ui_label = "CAM Boost";
 	ui_tooltip = "This boosts the power of Contrast Adaptive Masking part of the shader.";
-	ui_category = "Bilateral CAS";
+	ui_category = "Non-Local Means CAS";
 > = false;
 
 uniform bool CA_Removal <
 	ui_label = "CAM Removal";
 	ui_tooltip = "This removes Contrast Adaptive Masking part of the shader.\n"
-				 "This is for people who like the Raw look of Bilateral Sharpen.";
-	ui_category = "Bilateral CAS";
+				 "This is for people who like the Raw look of Non-Local Means Sharpen.";
+	ui_category = "Non-Local Means CAS";
 > = false;
 
 uniform int Debug_View <
