@@ -511,7 +511,7 @@ float4 MouseCursor(float4 position : SV_Position, float2 texcoord : TEXCOORD) : 
 		float3(1,0.64,0),
 		float3(0.5,0,0.5)
 	};
-	int CSTT = int(saturate(Cursor_STT.z) * 9.999999);
+	int CSTT = min(int(saturate(Cursor_STT.z) * 10),9);
 	Color.rgb = CCArray[CSTT];
 	if(Cursor_Type > 0)
 	Out = Cursor ? Color : Out;

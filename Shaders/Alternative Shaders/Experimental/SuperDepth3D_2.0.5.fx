@@ -355,7 +355,7 @@ uniform float3 Cursor_STT <
 	ui_type = "drag";
 	ui_min = 0; ui_max = 1;
 	ui_label = " Cursor Adjustments";
-	ui_tooltip = "This controlls the Size, Thickness, & Color.\n" 
+	ui_tooltip = "This controlls the Size, Thickness, & Color/Transparency.\n" 
 				 "Defaults are ( X 0.125, Y 0.5, Z 0.0).";
 	ui_category = "Cursor Adjustments";
 > = float3(0.125,0.5,0.0);
@@ -492,14 +492,14 @@ float4 MouseCursor(float4 position : SV_Position, float2 texcoord : TEXCOORD) : 
 		float3(1,1,0),
 		float3(1,0.4,0.7),
 		float3(1,0.64,0),
-		float3(0.5,0,0.5)
+		float3(0,0,0)
 	};
-	int CSTT = int(saturate(Cursor_STT.z) * 9.999999);
+	int CSTT = min(int(saturate(Cursor_STT.z) * 10),9);
 	Color.rgb = CCArray[CSTT];
 
-	Out = Cursor ? Color : Out;
+	Color = Cursor ? Color : Out;
 	
-	return Out;
+	return lerp(Color,Out,fmod(min(saturate(Cursor_STT.z),0.999) * 10 ,1));
 }
 
 /////////////////////////////////////////////////////////////////////////////////Adapted Luminance/////////////////////////////////////////////////////////////////////////////////
