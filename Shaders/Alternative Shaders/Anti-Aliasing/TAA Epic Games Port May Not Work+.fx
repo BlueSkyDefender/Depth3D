@@ -4,15 +4,19 @@
 // Originally written by yvt for https://www.shadertoy.com/view/4tcXD2
 // Feel free to use this in your shader!
 
-
-
-uniform float Motion_Blur <
+uniform int Motion_Seeking <
 	ui_type = "drag";
-	ui_min = 0; ui_max = 1.0;
-	ui_label = "Motion_Blur Adjust";
-	ui_tooltip = "Adjust Motion Blur Power.\n" 
-				 "Default is Zero.";
-> = 0.0;
+	ui_min = 1; ui_max = 5;
+	ui_label = "Motion Seeking";
+	ui_tooltip = "The power of Seeking things in motion.\n" 
+				 "Default is One.";
+> = 1;
+
+uniform bool DeBug <
+	ui_label = "DeBug View";
+	ui_tooltip = "See whats wrong.";
+	//ui_category = "Depth Buffer";
+> = false;
 
 /////////////////////////////////////////////D3D Starts Here/////////////////////////////////////////////////////////////////
 texture BackBufferTex : COLOR;
@@ -22,25 +26,25 @@ sampler BackBuffer
 		Texture = BackBufferTex;
 	};
 	
-texture CurrentBackBuffer  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA32F;}; 
+texture CurrentBackBufferTAA  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA32F;}; 
 
-sampler CBackBuffer
+sampler CBackBufferTAA
 	{
-		Texture = CurrentBackBuffer;
+		Texture = CurrentBackBufferTAA;
 	};
 	
-//texture PastBackBuffer  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA32F;}; 
+//texture PastBackBufferTAA  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA32F;}; 
 
-//sampler PBackBuffer
+//sampler PBackBufferTAA
 	//{
-	//	Texture = PastBackBuffer;
+	//	Texture = PastBackBufferTAA;
 	//};
 
-texture PastSingleBackBuffer  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA32F;}; 
+texture PastSingleBackBufferTAA  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA32F;}; 
 
-sampler PSBackBuffer
+sampler PSBackBufferTAA
 	{
-		Texture = PastSingleBackBuffer;
+		Texture = PastSingleBackBufferTAA;
 	};
 	
 ///////////////////////////////////////////////////////////TAA/////////////////////////////////////////////////////////////////////	
@@ -70,7 +74,7 @@ float3 decodePalYuv(float3 ycc)
 float4 TAA(float2 texcoord)
 {	
 
-    float4 PastColor = tex2Dlod(PSBackBuffer,float4(texcoord,0,0) );//Past Back Buffer
+    float4 PastColor = tex2Dlod(PSBackBufferTAA,float4(texcoord,0,0) );//Past Back Buffer
     
     float3 antialiased = PastColor.xyz;
     float mixRate = min(PastColor.w, 0.5);
@@ -99,10 +103,9 @@ float4 TAA(float2 texcoord)
     in6 = encodePalYuv(in6);
     in7 = encodePalYuv(in7);
     in8 = encodePalYuv(in8);
-	float MB = Motion_Blur;
     
-    float3 minColor = min(min(min(in0, in1), min(in2, in3)), in4) - MB;
-    float3 maxColor = max(max(max(in0, in1), max(in2, in3)), in4) + MB;
+    float3 minColor = min(min(min(in0, in1), min(in2, in3)), in4) ;
+    float3 maxColor = max(max(max(in0, in1), max(in2, in3)), in4) ;
     minColor = lerp(minColor, min(min(min(in5, in6), min(in7, in8)), minColor), 0.5);
     maxColor = lerp(maxColor, max(max(max(in5, in6), max(in7, in8)), maxColor), 0.5);
     
@@ -114,12 +117,17 @@ float4 TAA(float2 texcoord)
     float3 diff = antialiased - preclamping;
     float clampAmount = dot(diff,diff);
     
-    mixRate += clampAmount * 4.0;
+    mixRate += clampAmount * pow(4.0,Motion_Seeking);
     mixRate = clamp(mixRate, 0.05, 0.5);
     
     antialiased = decodePalYuv(antialiased);
-        
-    return float4(antialiased,mixRate);
+    
+    float4 Done = float4(antialiased,mixRate);
+	
+	if(DeBug) 
+		Done = mixRate;
+    
+    return Done;
 }
 
 void Out(float4 position : SV_Position, float2 texcoord : TEXCOORD, out float4 color : SV_Target)
@@ -127,14 +135,14 @@ void Out(float4 position : SV_Position, float2 texcoord : TEXCOORD, out float4 c
 	color = TAA(texcoord);
 }
 
-void Current_BackBuffer(float4 position : SV_Position, float2 texcoord : TEXCOORD, out float4 color : SV_Target)
+void Current_BackBufferTAA(float4 position : SV_Position, float2 texcoord : TEXCOORD, out float4 color : SV_Target)
 {
 	color = tex2D(BackBuffer,texcoord);
 }
 
-void Past_BackBuffer(float4 position : SV_Position, float2 texcoord : TEXCOORD, out float4 PastSingle : SV_Target0)//, out float4 Past : SV_Target1)
+void Past_BackBufferTAA(float4 position : SV_Position, float2 texcoord : TEXCOORD, out float4 PastSingle : SV_Target0)//, out float4 Past : SV_Target1)
 {
-	PastSingle = tex2D(CBackBuffer,texcoord);
+	PastSingle = tex2D(CBackBufferTAA,texcoord);
 	//Past = tex2D(BackBuffer,texcoord);
 }
 
@@ -152,8 +160,8 @@ technique TAA
 			pass CBB
 		{
 			VertexShader = PostProcessVS;
-			PixelShader = Current_BackBuffer;
-			RenderTarget = CurrentBackBuffer;
+			PixelShader = Current_BackBufferTAA;
+			RenderTarget = CurrentBackBufferTAA;
 		}
 			pass Out
 		{
@@ -163,9 +171,9 @@ technique TAA
 			pass PBB
 		{
 			VertexShader = PostProcessVS;
-			PixelShader = Past_BackBuffer;
-			RenderTarget0 = PastSingleBackBuffer;
-			//RenderTarget1 = PastBackBuffer;
+			PixelShader = Past_BackBufferTAA;
+			RenderTarget0 = PastSingleBackBufferTAA;
+			//RenderTarget1 = PastBackBufferTAA;
 			
 		}
 	}
