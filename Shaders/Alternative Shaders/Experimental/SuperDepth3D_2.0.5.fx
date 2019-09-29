@@ -707,10 +707,10 @@ float2 WeaponDepth(float2 texcoord)
 	return float2(saturate(zBufferWH), WA_XYZ.x);
 }
 
-float4 DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0) : SV_Target
+float3 DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0) : SV_Target
 {
 		float4 DM = Depth(texcoord).xxxx;				
-		float R, G, B, A, WD = WeaponDepth(texcoord).x, CoP = WeaponDepth(texcoord).y, CutOFFCal = (CoP/Depth_Map_Adjust) * 0.5; //Weapon Cutoff Calculation
+		float R, G, B, WD = WeaponDepth(texcoord).x, CoP = WeaponDepth(texcoord).y, CutOFFCal = (CoP/Depth_Map_Adjust) * 0.5; //Weapon Cutoff Calculation
 		CutOFFCal = step(DM.x,CutOFFCal);
 					
 		[branch] if (WP == 0)
@@ -727,21 +727,21 @@ float4 DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0
 		R = DM.x; //Mix Depth
 		G = DM.y > smoothstep(0,2.5,DM.w); //Weapon Mask
 		B = DM.z; //Weapon Hand
-		A = DM.w; //Normal Depth
+		//A = DM.w; //Normal Depth
 		
 	if(texcoord.x < pix.x * 2 && texcoord.y < pix.y * 2)
-		A = Fade_in_out(texcoord);
-		
-	return saturate(float4(R,G,B,A));
+		R = Fade_in_out(texcoord);
+	//Alpha Don't work in DX9	
+	return saturate(float3(R,G,B));
 }
 #if HUD_MODE || HM
-float4 HUD(float4 HUD, float2 texcoord ) 
+float3 HUD(float3 HUD, float2 texcoord ) 
 {		
 	float Mask_Tex, CutOFFCal = ((HUD_Adjust.x * 0.5)/Depth_Map_Adjust) * 0.5, COC = step(Depth(texcoord).x,CutOFFCal); //HUD Cutoff Calculation
 	
 	//This code is for hud segregation.			
 	if (HUD_Adjust.x > 0)
-		HUD = COC > 0 ? tex2D(BackBuffer,texcoord) : HUD;	
+		HUD = COC > 0 ? tex2D(BackBuffer,texcoord).rgb : HUD;	
 		
 #if UI_MASK	
     [branch] if (Mask_Cycle == true) 
@@ -751,7 +751,7 @@ float4 HUD(float4 HUD, float2 texcoord )
 
 	float MAC = step(1.0-Mask_Tex,0.5); //Mask Adjustment Calculation
 	//This code is for hud segregation.			
-	HUD = MAC > 0 ? tex2D(BackBuffer,texcoord) : HUD;
+	HUD = MAC > 0 ? tex2D(BackBuffer,texcoord).rgb : HUD;
 #endif		
 	return HUD;	
 }
@@ -799,7 +799,7 @@ float2 Conv(float D,float2 texcoord)
 
 float zBuffer(float2 texcoord)
 {	
-	float4 DM = tex2Dlod(SamplerDMN,float4(texcoord,0,0));
+	float3 DM = tex2Dlod(SamplerDMN,float4(texcoord,0,0)).xyz;
 	
 	if (WP == 0)
 		DM.y = 0;
@@ -911,7 +911,7 @@ float4 CSB(float2 texcoords)
 		return zBuffer(texcoords).xxxx;
 }
 	
-float4 PS_calcLR(float2 texcoord)
+float3 PS_calcLR(float2 texcoord)
 {
 	float2 TCL, TCR, TexCoords = texcoord;
 
@@ -965,8 +965,8 @@ float4 PS_calcLR(float2 texcoord)
 
 	#if HUD_MODE || HM	
 	float HUD_Adjustment = ((0.5 - HUD_Adjust.y)*25.) * pix.x;
-	Left = HUD(Left,float2(TCL.x - HUD_Adjustment,TCL.y));
-	Right = HUD(Right,float2(TCR.x + HUD_Adjustment,TCR.y));
+	Left.rgb = HUD(Left,float2(TCL.x - HUD_Adjustment,TCL.y));
+	Right.rgb = HUD(Right,float2(TCR.x + HUD_Adjustment,TCR.y));
 	#endif
 		
 	float2 gridxy, GXYArray[9] = {
@@ -1126,10 +1126,10 @@ float4 PS_calcLR(float2 texcoord)
 		}
 	}
 	
-	if	(Depth_Map_View == 2)
-		color = zBuffer(TexCoords).xxxx;
+	if (Depth_Map_View == 2)
+		color.rgb = zBuffer(TexCoords).xxx;
 		
-	return color;
+	return color.rgb;
 }
 
 float4 Average_Luminance(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Target
@@ -1144,14 +1144,12 @@ float4 Average_Luminance(float4 position : SV_Position, float2 texcoord : TEXCOO
 	};
 	ABEA = ABEArray[Auto_Balance_Ex];
 			
-	float Average_Lum_ZPD = tex2Dlod(SamplerDMN,float4(ABEA.x + texcoord.x * ABEA.y, ABEA.z + texcoord.y * ABEA.w, 0, 0)).w;
-	float Average_Lum_Full = tex2Dlod(SamplerDMN,float4(texcoord.x,texcoord.y, 0, 0)).w;
-	float Bottom_Sample = tex2Dlod(SamplerDMN,float4( 0.125 + texcoord.x * 0.750,0.95 + texcoord.y, 0, 0)).w;
-	return float4(Average_Lum_ZPD,Average_Lum_Full,tex2Dlod(SamplerDMN,float4(0,0, 0, 0)).w,Bottom_Sample);
+	float Average_Lum_ZPD = Depth(float2(ABEA.x + texcoord.x * ABEA.y, ABEA.z + texcoord.y * ABEA.w)), Average_Lum_Full = Depth(texcoord), Bottom_Sample = Depth(float2( 0.125 + texcoord.x * 0.750,0.95 + texcoord.y));
+	return float4(Average_Lum_ZPD,Average_Lum_Full,tex2D(SamplerDMN,0).x,Bottom_Sample);
 }
 uniform float timer < source = "timer"; >; //Please do not remove.
 ////////////////////////////////////////////////////////Logo/////////////////////////////////////////////////////////////////////////
-float4 Out(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Target
+float3 Out(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Target
 {
 	float PosX = 0.9525f*BUFFER_WIDTH*pix.x,PosY = 0.975f*BUFFER_HEIGHT*pix.y, Text_Timer = 12500;
 	float D,E,P,T,H,Three,DD,Dot,I,N,F,O,R,EE,A,DDD,HH,EEE,L,PP, Help;	
@@ -1296,10 +1294,10 @@ float4 Out(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Targe
 		if(DC_W == 1)
 			Help = R+EE+A+DDD+HH+EEE+L+PP;
 		//Website
-		return D+E+P+T+H+Three+DD+Dot+I+N+F+O+Help ? (1-texcoord.y*50.0+48.85)*texcoord.y-0.500: float4(Color,1.);
+		return D+E+P+T+H+Three+DD+Dot+I+N+F+O+Help ? (1-texcoord.y*50.0+48.85)*texcoord.y-0.500: Color;
 	}
 	else
-		return float4(Color,1.);
+		return Color;
 }
 
 ///////////////////////////////////////////////////////////ReShade.fxh/////////////////////////////////////////////////////////////

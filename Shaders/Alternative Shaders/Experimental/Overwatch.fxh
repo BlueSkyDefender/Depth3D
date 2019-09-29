@@ -41,6 +41,7 @@ static const int HM = 0;                  //HUD Mode
 #define App __APPLICATION__ 
 #if (App == 0xC753DADB )		//ES: Oblivion 
 	#define DB_W 2
+	#define DB_Y 3
 #elif (App == 0x7B81CCAB )	//BorderLands 2
     #define DA_Y 20.0
     #define DB_W 4.0
