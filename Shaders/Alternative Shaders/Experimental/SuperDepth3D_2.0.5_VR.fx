@@ -140,14 +140,20 @@ uniform float ZPD_Balance <
 	ui_category = "Divergence & Convergence";
 > = 0.5;
 
-static const int Auto_Balance = 0;
+static const int Auto_Balance_Ex = 0;
 #else
-uniform bool Auto_Balance <
+uniform int Auto_Balance_Ex <
+	#if Compatibility
+	ui_type = "drag";
+	#else
+	ui_type = "slider";
+	#endif
+	ui_min = 0; ui_max = 5;
 	ui_label = " Auto Balance";
 	ui_tooltip = "Automatically Balance between ZPD Depth and Scene Depth.\n" 
 				 "Default is Off.";
 	ui_category = "Divergence & Convergence";
-> = false;
+> = DB_Y;
 #endif
 //Occlusion Masking//
 uniform int View_Mode <
@@ -722,7 +728,7 @@ float2 WeaponDepth(float2 texcoord)
 	return float2(saturate(zBufferWH), WA_XYZ.x);
 }
 
-float4 DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0) : SV_Target
+float3 DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0) : SV_Target
 {
 		float4 DM = Depth(texcoord).xxxx;
 				
@@ -743,21 +749,21 @@ float4 DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0
 		R = DM.x; //Mix Depth
 		G = DM.y > smoothstep(0,2.5,DM.w); //Weapon Mask
 		B = DM.z; //Weapon Hand
-		A = DM.w; //Normal Depth
+		//A = DM.w; //Normal Depth
 		
 	if(texcoord.x < pix.x * 2 && texcoord.y < pix.y * 2)
-		A = Fade_in_out(texcoord);
-		
-	return saturate(float4(R,G,B,A));
+		R = Fade_in_out(texcoord);
+	//DX9 issues with passing information in alpha.	
+	return saturate(float3(R,G,B));
 }
 #if HUD_MODE || HM
-float4 HUD(float4 HUD, float2 texcoord ) 
+float3 HUD(float3 HUD, float2 texcoord ) 
 {		
 	float Mask_Tex, CutOFFCal = ((HUD_Adjust.x * 0.5)/Depth_Map_Adjust) * 0.5, COC = step(Depth(texcoord).x,CutOFFCal); //HUD Cutoff Calculation
 	
 	//This code is for hud segregation.			
 	if (HUD_Adjust.x > 0)
-		HUD = COC > 0 ? tex2D(BackBuffer,texcoord) : HUD;	
+		HUD = COC > 0 ? tex2D(BackBuffer,texcoord).rgb : HUD;	
 		
 #if UI_MASK	
     [branch] if (Mask_Cycle == true) 
@@ -767,7 +773,7 @@ float4 HUD(float4 HUD, float2 texcoord )
 
 	float MAC = step(1.0-Mask_Tex,0.5); //Mask Adjustment Calculation
 	//This code is for hud segregation.			
-	HUD = MAC > 0 ? tex2D(BackBuffer,texcoord) : HUD;
+	HUD = MAC > 0 ? tex2D(BackBuffer,texcoord).rgb : HUD;
 #endif		
 	return HUD;	
 }
@@ -815,7 +821,7 @@ float2 Conv(float D,float2 texcoord)
 
 float zBuffer(float2 texcoord)
 {	
-	float4 DM = tex2Dlod(SamplerDMVR,float4(texcoord,0,0));
+	float3 DM = tex2Dlod(SamplerDMVR,float4(texcoord,0,0)).xyz;
 	
 	if (WP == 0)
 		DM.y = 0;
@@ -961,8 +967,8 @@ void LR_Out(float4 position : SV_Position, float2 texcoord : TEXCOORD, out float
 	
 	#if HUD_MODE || HM	
 	float HUD_Adjustment = ((0.5 - HUD_Adjust.y)*25.) * pix.x;
-	Left = HUD(Left,float2(TCL.x - HUD_Adjustment,TCL.y));
-	Right = HUD(Right,float2(TCR.x + HUD_Adjustment,TCR.y));
+	Left.rgb = HUD(Left,float2(TCL.x - HUD_Adjustment,TCL.y));
+	Right.rgb = HUD(Right,float2(TCR.x + HUD_Adjustment,TCR.y));
 	#endif
 
 }
@@ -994,19 +1000,19 @@ float4 Circle(float4 C, float2 TC)
 	return lerp(circle_color, C,t);
 }
 
-float4 VigneteL(float2 texcoord)
+float3 VigneteL(float2 texcoord)
 {
 	float2 TC = -texcoord * texcoord*32 + texcoord*32;
-	float4 Left = tex2D(SamplerLeft,texcoord);
-		Left.rgb *= smoothstep(0,Vignette*27.0f,TC.x * TC.y);
+	float3 Left = tex2D(SamplerLeft,texcoord).rgb;
+		Left *= smoothstep(0,Vignette*27.0f,TC.x * TC.y);
 return Left;
 }
 
-float4 VigneteR(float2 texcoord)
+float3 VigneteR(float2 texcoord)
 {
 	float2 TC = -texcoord * texcoord*32 + texcoord*32;
-	float4 Left = tex2D(SamplerRight,texcoord);
-		Left.rgb *= smoothstep(0,Vignette*27.0f,TC.x * TC.y);
+	float3 Left = tex2D(SamplerRight,texcoord).rgb;
+		Left *= smoothstep(0,Vignette*27.0f,TC.x * TC.y);
 return Left;
 }
 	
@@ -1034,9 +1040,7 @@ float2 D(float2 p, float k1, float k2) //Polynomial Lens + Radial lens undistort
 	if(!Theater_Mode)
 	{
 	//Blinders Code Fast
-	float C_A1 = 0.45f, C_A2 = C_A1 * 0.5f;
-	float C_B1 = 0.375f, C_B2 = C_B1 * 0.5f;
-	float C_C1 = 0.9375f, C_C2 = C_C1 * 0.5f;
+	float C_A1 = 0.45f, C_A2 = C_A1 * 0.5f, C_B1 = 0.375f, C_B2 = C_B1 * 0.5f, C_C1 = 0.9375f, C_C2 = C_C1 * 0.5f;//offsets
 	if(length(p.xy*float2(C_A1,1.0f)-float2(C_A2,0.5f)) > 0.5f)
 		p = 1000;//offscreen
 	else if(length(p.xy*float2(1.0f,C_B1)-float2(0.5f,C_B2)) > 0.5f)
@@ -1048,7 +1052,7 @@ float2 D(float2 p, float k1, float k2) //Polynomial Lens + Radial lens undistort
 return p;
 }
 
-float4 PS_calcLR(float2 texcoord)
+float3 PS_calcLR(float2 texcoord)
 {
 	float2 TCL = float2(texcoord.x * 2,texcoord.y), TCR = float2(texcoord.x * 2 - 1,texcoord.y), uv_redL, uv_greenL, uv_blueL, uv_redR, uv_greenR, uv_blueR;
 	float4 color, Left, Right, color_redL, color_greenL, color_blueL, color_redR, color_greenR, color_blueR;
@@ -1077,8 +1081,8 @@ float4 PS_calcLR(float2 texcoord)
 	}
 	else
 	{
-		Left = VigneteL(TCL);
-		Right = VigneteR(TCR);
+		Left = VigneteL(TCL).rgb;
+		Right = VigneteR(TCR).rgb;
 	}
 
 	if(!Depth_Map_View)
@@ -1090,21 +1094,25 @@ float4 PS_calcLR(float2 texcoord)
 		else if(Barrel_Distortion == 2)
 		color = texcoord.x < 0.5 ? Left : Right;
 	}
-	else
-	{		
-		color = Depth(texcoord).xxxx;
-	}
-		
-	float Average_Lum = tex2Dlod(SamplerDMVR,float4(texcoord.x,texcoord.y, 0, 0)).w;
-	
-	return float4(color.rgb,Average_Lum);
+	else		
+		color.rgb = Depth(texcoord).xxx;
+
+	return color.rgb;
 }
 
 float4 Average_Luminance(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Target
-{	float AL =tex2Dlod(SamplerDMVR,float4(0.375 + texcoord.x * 0.250, 0.4375 + texcoord.y * 0.125, 0, 0)).w; //Center Short
-	float ALF = tex2Dlod(SamplerDMVR,float4(texcoord.x,texcoord.y, 0, 0)).w;//Average_Lum_Full
-	float Bottom_Sample = tex2Dlod(SamplerDMVR,float4( 0.125 + texcoord.x * 0.750,0.95 + texcoord.y, 0, 0)).w; //RE_Fix	
-	return float4(AL,ALF,tex2Dlod(SamplerDMVR,float4(0,0,0,0)).w,Bottom_Sample);
+{	float4 ABEA, ABEArray[6] = {
+		float4(0.0,1.0,0.0, 1.0),           //No Edit
+		float4(0.0,1.0,0.0, 0.750),         //Upper Extra Wide
+		float4(0.0,1.0,0.0, 0.5),           //Upper Wide
+		float4(0.0,1.0, 0.15625, 0.46875),  //Upper Short
+		float4(0.375, 0.250, 0.4375, 0.125),//Center Small
+		float4(0.375, 0.250, 0.0, 1.0)      //Center Long
+	};
+	ABEA = ABEArray[Auto_Balance_Ex];
+			
+	float Average_Lum_ZPD = Depth(float2(ABEA.x + texcoord.x * ABEA.y, ABEA.z + texcoord.y * ABEA.w)), Average_Lum_Full = Depth(texcoord), Bottom_Sample = Depth(float2( 0.125 + texcoord.x * 0.750,0.95 + texcoord.y));
+	return float4(Average_Lum_ZPD,Average_Lum_Full,tex2D(SamplerDMVR,0).x,Bottom_Sample);
 }
 
 uniform float timer < source = "timer"; >; //Please do not remove.
@@ -1260,27 +1268,27 @@ float4 Out(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Targe
 		return float4(Color,1.);
 }
 
-float4 USM(float4 position : SV_Position, float2 texcoord : TEXCOORD0) : SV_Target
+float3 USM(float4 position : SV_Position, float2 texcoord : TEXCOORD0) : SV_Target
 {
 	float2 tex_offset = pix; // Gets texel offset
-	float4 result = tex2D(BackBuffer, texcoord);
+	float3 result = tex2D(BackBuffer, texcoord).rgb;
 	if(Sharpen_Power > 0)
 	{				   
-		   result += tex2D(BackBuffer, float2(texcoord + float2( 1, 0) * tex_offset));
-		   result += tex2D(BackBuffer, float2(texcoord + float2(-1, 0) * tex_offset));
-		   result += tex2D(BackBuffer, float2(texcoord + float2( 0, 1) * tex_offset));
-		   result += tex2D(BackBuffer, float2(texcoord + float2( 0,-1) * tex_offset));
+		   result += tex2D(BackBuffer, float2(texcoord + float2( 1, 0) * tex_offset)).rgb;
+		   result += tex2D(BackBuffer, float2(texcoord + float2(-1, 0) * tex_offset)).rgb;
+		   result += tex2D(BackBuffer, float2(texcoord + float2( 0, 1) * tex_offset)).rgb;
+		   result += tex2D(BackBuffer, float2(texcoord + float2( 0,-1) * tex_offset)).rgb;
 		   tex_offset *= 0.75;		   
-		   result += tex2D(BackBuffer, float2(texcoord + float2( 1, 1) * tex_offset));
-		   result += tex2D(BackBuffer, float2(texcoord + float2(-1,-1) * tex_offset));
-		   result += tex2D(BackBuffer, float2(texcoord + float2( 1,-1) * tex_offset));
-		   result += tex2D(BackBuffer, float2(texcoord + float2(-1, 1) * tex_offset));
-   		result /= 9;
+		   result += tex2D(BackBuffer, float2(texcoord + float2( 1, 1) * tex_offset)).rgb;
+		   result += tex2D(BackBuffer, float2(texcoord + float2(-1,-1) * tex_offset)).rgb;
+		   result += tex2D(BackBuffer, float2(texcoord + float2( 1,-1) * tex_offset)).rgb;
+		   result += tex2D(BackBuffer, float2(texcoord + float2(-1, 1) * tex_offset)).rgb;
+   		result *= rcp(9);
 		//High Contrast Mask
 		float CA = 0.375f * 25.0f, HCM = saturate(dot(( tex2D(BackBuffer, texcoord).rgb - result.rgb ) , float3(0.333, 0.333, 0.333) * CA) ); 		
-		result = tex2D(BackBuffer, texcoord) + ( tex2D(BackBuffer, texcoord) - result ) * Sharpen_Power;
+		result = tex2D(BackBuffer, texcoord).rgb + ( tex2D(BackBuffer, texcoord).rgb - result ) * Sharpen_Power;
 		//Contrast Aware
-		result = lerp(result, tex2D(BackBuffer, texcoord), HCM);
+		result = lerp(result, tex2D(BackBuffer, texcoord).rgb, HCM);
 	}
 	
 	return result;
