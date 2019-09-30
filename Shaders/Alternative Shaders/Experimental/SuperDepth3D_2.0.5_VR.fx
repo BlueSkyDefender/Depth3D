@@ -164,15 +164,15 @@ uniform int View_Mode <
 				 "Default is Normal";
 	ui_category = "Occlusion Masking";
 > = 0;
-#if !Legacy_Mode	
-uniform bool Performance_Mode <
-	ui_label = " Performance Mode";
-	ui_tooltip = "Performance Mode Lowers Occlusion Quality Processing so that there is a small boost to FPS.\n"
-				 "Please enable the 'Performance Mode Checkbox,' in ReShade's GUI.\n"
-				 "It's located in the lower bottom right of the ReShade's Main UI.\n"
-				 "Default is False.";
+#if Legacy_Mode
+uniform float2 Disocclusion_Adjust <
+	ui_type = "drag";
+	ui_min = 0.0; ui_max = 1.0;
+	ui_label = " Disocclusion Adjust";
+	ui_tooltip = "Automatic occlusion masking power, & Depth Based culling adjustments.\n"
+				"Default is ( 0.5f,0.25f)";
 	ui_category = "Occlusion Masking";
-> = false;
+> = float2( 0.5, 0.25);
 #endif
 //Depth Map//
 uniform int Depth_Map <
@@ -446,7 +446,14 @@ sampler SamplerDMVR
 	{
 		Texture = texDMVR;
 	};
-	
+#if Legacy_Mode
+texture texzBufferVR  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = R16F; }; 
+
+sampler SamplerzBufferVR
+	{
+		Texture = texzBufferVR;
+	};
+#endif	
 texture LeftTex  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA8; }; 
 
 sampler SamplerLeft
@@ -818,10 +825,32 @@ float2 Conv(float D,float2 texcoord)
 			
     return float2(lerp(Convergence,D, ZP),lerp(WConvergence,D,WZP));
 }
-
+#if Legacy_Mode 
+float zBuffer(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0) : SV_Target
+{
+	float S = 5 * Disocclusion_Adjust.x;
+	int BlurSamples = 6;  //BlurSamples = # * 2
+	float3 D = tex2Dlod(SamplerDMVR,float4(texcoord,0,0)).xyz,DM = tex2Dlod(SamplerDMVR,float4(texcoord,0,0)).xyz * BlurSamples;
+#else
 float zBuffer(float2 texcoord)
-{	
-	float3 DM = tex2Dlod(SamplerDMVR,float4(texcoord,0,0)).xyz;
+{
+	float3 DM = tex2Dlod(SamplerDMVR,float4(texcoord,0,0)).xyz;		
+#endif
+	
+	#if Legacy_Mode 
+    float total = BlurSamples;
+    
+    for ( int j = -BlurSamples; j <= BlurSamples; ++j)
+    {
+        float W = BlurSamples;
+        
+		DM += tex2Dlod(SamplerDMVR,float4(texcoord + float2(pix.x * S,0) * j,0,0 ) ).xyz * W;
+
+        total += W;
+    }
+    
+	DM = lerp(saturate(DM / total) , D , saturate(( D - 0 ) / ( Disocclusion_Adjust.y - 0)) );
+	#endif
 	
 	if (WP == 0)
 		DM.y = 0;
@@ -850,28 +879,32 @@ float zBuffer(float2 texcoord)
 // Horizontal parallax offset & Hole filling effect
 float2 Parallax( float Diverge, float2 Coordinates)
 {   float2 ParallaxCoord = Coordinates;
-	float DepthLR = 1, LRDepth, Perf = 1, MS = Diverge * pix.x, MSM, S[9] = {0.5,0.5625,0.625,0.6875,0.75,0.8125,0.875,0.9375,1.0};
+	float DepthLR = 1, LRDepth, Perf = 0.5, MS = Diverge * pix.x, MSM, N = 5, S[5] = {0.5,0.625,0.75,0.875,1.0};
 	#if Legacy_Mode	
 	MS = -MS;
 	[loop]
-	for ( int i = 0 ; i < 9; i++ ) 
+	for ( int i = 0 ; i < N; i++ ) 
 	{	MSM = MS + 0.001;
 				
-		DepthLR = min(DepthLR, zBuffer(float2(ParallaxCoord.x + S[i] * MS, ParallaxCoord.y)) );
+		DepthLR = min(DepthLR, tex2Dlod(SamplerzBufferVR,float4(ParallaxCoord.x + S[i] * MS, ParallaxCoord.y,0,0)).x );
+		if(View_Mode == 0)
+		{					
+			LRDepth = min(DepthLR,tex2Dlod(SamplerzBufferVR,float4(ParallaxCoord.x + S[i] * (MSM * 0.25), ParallaxCoord.y,0,0)).x );			
+
+			DepthLR = lerp(LRDepth , DepthLR, 0.1875);
+		}
 		if(View_Mode == 1)
-		{
-			LRDepth =  min(DepthLR,zBuffer(float2(ParallaxCoord.x + S[i] * MSM, ParallaxCoord.y)) );							
-			LRDepth += min(DepthLR,zBuffer(float2(ParallaxCoord.x + S[i] * (MSM * 0.875), ParallaxCoord.y)) );			
-			LRDepth += min(DepthLR,zBuffer(float2(ParallaxCoord.x + S[i] * (MSM * 0.500), ParallaxCoord.y)) );	
-			
+		{		
+			LRDepth =  min(DepthLR,tex2Dlod(SamplerzBufferVR,float4(ParallaxCoord.x + S[i] * MSM, ParallaxCoord.y,0,0)).x );						
+			LRDepth += min(DepthLR,tex2Dlod(SamplerzBufferVR,float4(ParallaxCoord.x + S[i] * (MSM * 0.25), ParallaxCoord.y,0,0)).x );			
+			LRDepth += min(DepthLR,tex2Dlod(SamplerzBufferVR,float4(ParallaxCoord.x + S[i] * (MSM * 0.5), ParallaxCoord.y,0,0)).x );	
 			DepthLR = lerp(LRDepth * rcp(3), DepthLR, 0.1875);
 		}		
 	}
 	//Reprojection Left and Right
 	ParallaxCoord = float2(Coordinates.x + (MS * DepthLR), Coordinates.y);
 	#else
-	if(Performance_Mode)
-	Perf = .5;
+	
 	//ParallaxSteps Calculations
 	float D = abs(length(Diverge)), Cal_Steps = (D * Perf) + (D * 0.04), Steps = clamp(Cal_Steps,0,255);
 		
@@ -1312,12 +1345,20 @@ technique SuperDepth3D_VR
 		VertexShader = PostProcessVS;
 		PixelShader = MouseCursor;
 	}	
-		pass zbuffer
+		pass DepthBuffer
 	{
 		VertexShader = PostProcessVS;
 		PixelShader = DepthMap;
 		RenderTarget = texDMVR;
 	}
+	#if Legacy_Mode
+		pass zbuffer
+	{
+		VertexShader = PostProcessVS;
+		PixelShader = zBuffer;
+		RenderTarget = texzBufferVR;
+	}
+	#endif
 		pass LRtoBD
 	{
 		VertexShader = PostProcessVS;

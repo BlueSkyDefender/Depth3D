@@ -151,6 +151,16 @@ uniform int View_Mode <
 				 "Default is Normal";
 	ui_category = "Occlusion Masking";
 > = 0;
+#if Legacy_Mode
+uniform float2 Disocclusion_Adjust <
+	ui_type = "drag";
+	ui_min = 0.0; ui_max = 1.0;
+	ui_label = " Disocclusion Adjust";
+	ui_tooltip = "Automatic occlusion masking power, & Depth Based culling adjustments.\n"
+				"Default is ( 0.5f,0.25f)";
+	ui_category = "Occlusion Masking";
+> = float2( 0.5, 0.25);
+#endif
 uniform int Custom_Sidebars <
 	ui_type = "combo";
 	ui_items = "Mirrored Edges\0Black Edges\0Stretched Edges\0";
@@ -365,19 +375,19 @@ uniform bool SCSC <
 	ui_tooltip = "Screen Cursor to Screen Crosshair Lock.";
 	ui_category = "Cursor Adjustments";
 > = false;
-
-//uniform float2 Adjust <
-//	#if Compatibility
-//	ui_type = "drag";
-//	#else
-//	ui_type = "slider";
-//	#endif
-//	ui_min = -1; ui_max = 1; ui_step = 0.001;
-//	ui_label = "·Adjust·";
-//	ui_tooltip = "Adjust.";
-//	ui_category = "Adjust";
-//> = float2(0,0);
-
+/*
+uniform float2 Adjust <
+	#if Compatibility
+	ui_type = "drag";
+	#else
+	ui_type = "slider";
+	#endif
+	ui_min = -2; ui_max = 2; ui_step = 0.001;
+	ui_label = "·Adjust·";
+	ui_tooltip = "Adjust.";
+	ui_category = "Adjust";
+> = float2(0,0);
+*/
 uniform bool Cancel_Depth < source = "key"; keycode = Cancel_Depth_Key; toggle = true; mode = "toggle";>;
 uniform bool Mask_Cycle < source = "key"; keycode = Mask_Cycle_Key; toggle = true; >;
 /////////////////////////////////////////////D3D Starts Here/////////////////////////////////////////////////////////////////
@@ -436,7 +446,16 @@ sampler SamplerDMN
 	{
 		Texture = texDMN;
 	};
-			
+		
+#if Legacy_Mode
+texture texzBufferN  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = R16F; }; 
+
+sampler SamplerzBufferN
+	{
+		Texture = texzBufferN;
+	};
+#endif
+	
 #if UI_MASK
 texture TexMaskA < source = "Mask_A.png"; > { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA8; };
 sampler SamplerMaskA { Texture = TexMaskA;};
@@ -796,10 +815,32 @@ float2 Conv(float D,float2 texcoord)
 			
     return float2(lerp(Convergence,D, ZP),lerp(WConvergence,D,WZP));
 }
-
+#if Legacy_Mode 
+float zBuffer(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0) : SV_Target
+{
+	float S = 5 * Disocclusion_Adjust.x;
+	int BlurSamples = 6;  //BlurSamples = # * 2
+	float3 D = tex2Dlod(SamplerDMN,float4(texcoord,0,0)).xyz,DM = tex2Dlod(SamplerDMN,float4(texcoord,0,0)).xyz * BlurSamples;
+#else
 float zBuffer(float2 texcoord)
-{	
-	float3 DM = tex2Dlod(SamplerDMN,float4(texcoord,0,0)).xyz;
+{
+	float3 DM = tex2Dlod(SamplerDMN,float4(texcoord,0,0)).xyz;		
+#endif
+	
+	#if Legacy_Mode 
+    float total = BlurSamples;
+    
+    for ( int j = -BlurSamples; j <= BlurSamples; ++j)
+    {
+        float W = BlurSamples;
+        
+		DM += tex2Dlod(SamplerDMN,float4(texcoord + float2(pix.x * S,0) * j,0,0 ) ).xyz * W;
+
+        total += W;
+    }
+    
+	DM = lerp(saturate(DM / total) , D , saturate(( D - 0 ) / ( Disocclusion_Adjust.y - 0)) );
+	#endif
 	
 	if (WP == 0)
 		DM.y = 0;
@@ -826,23 +867,26 @@ float zBuffer(float2 texcoord)
 /////////////////////////////////////////L/R//////////////////////////////////////////////////////////////////////
 float2 Parallax(float Diverge, float2 Coordinates) // Horizontal parallax offset & Hole filling effect
 {   float2 ParallaxCoord = Coordinates;
-	float DepthLR = 1, LRDepth, Perf = 1, Z, MS = Diverge * pix.x, MSM, N = 9, S[9] = {0.5,0.5625,0.625,0.6875,0.75,0.8125,0.875,0.9375,1.0};
+	float DepthLR = 1, LRDepth, Perf = 1, Z, MS = Diverge * pix.x, MSM, N = 5, S[5] = {0.5,0.625,0.75,0.875,1.0};
 	#if Legacy_Mode	
 	MS = -MS;
 	[loop]
 	for ( int i = 0 ; i < N; i++ ) 
 	{	MSM = MS + 0.001;
 				
-		DepthLR = min(DepthLR, zBuffer(float2(ParallaxCoord.x + S[i] * MS, ParallaxCoord.y)) );
+		DepthLR = min(DepthLR, tex2Dlod(SamplerzBufferN,float4(ParallaxCoord.x + S[i] * MS, ParallaxCoord.y,0,0)).x );
+		if(View_Mode == 0)
+		{					
+			LRDepth = min(DepthLR,tex2Dlod(SamplerzBufferN,float4(ParallaxCoord.x + S[i] * (MSM * 0.25), ParallaxCoord.y,0,0)).x );			
+
+			DepthLR = lerp(LRDepth , DepthLR, 0.1875);
+		}
 		if(View_Mode == 1)
-		{
-			LRDepth =  min(DepthLR,zBuffer(float2(ParallaxCoord.x + S[i] * MSM, ParallaxCoord.y)) );						
-			LRDepth += min(DepthLR,zBuffer(float2(ParallaxCoord.x + S[i] * (MSM * 0.9375), ParallaxCoord.y)) );			
-			LRDepth += min(DepthLR,zBuffer(float2(ParallaxCoord.x + S[i] * (MSM * 0.875), ParallaxCoord.y)) );	
-			LRDepth += min(DepthLR,zBuffer(float2(ParallaxCoord.x + S[i] * (MSM * 0.6875), ParallaxCoord.y)) );			
-			LRDepth += min(DepthLR,zBuffer(float2(ParallaxCoord.x + S[i] * (MSM * 0.500), ParallaxCoord.y)) );	
-			
-			DepthLR = lerp(LRDepth * rcp(5), DepthLR, 0.1875);
+		{		
+			LRDepth =  min(DepthLR,tex2Dlod(SamplerzBufferN,float4(ParallaxCoord.x + S[i] * MSM, ParallaxCoord.y,0,0)).x );						
+			LRDepth += min(DepthLR,tex2Dlod(SamplerzBufferN,float4(ParallaxCoord.x + S[i] * (MSM * 0.25), ParallaxCoord.y,0,0)).x );			
+			LRDepth += min(DepthLR,tex2Dlod(SamplerzBufferN,float4(ParallaxCoord.x + S[i] * (MSM * 0.5), ParallaxCoord.y,0,0)).x );	
+			DepthLR = lerp(LRDepth * rcp(3), DepthLR, 0.1875);
 		}		
 	}
 	//Reprojection Left and Right
@@ -908,7 +952,13 @@ float4 CSB(float2 texcoords)
 	else if(Custom_Sidebars == 2 && Depth_Map_View == 0)
 		return tex2Dlod(BackBufferCLAMP,float4(texcoords,0,0));
 	else
+	{
+		#if Legacy_Mode		
+		return tex2D(SamplerzBufferN,texcoords).xxxx;
+		#else
 		return zBuffer(texcoords).xxxx;
+		#endif
+	}
 }
 	
 float3 PS_calcLR(float2 texcoord)
@@ -1127,7 +1177,13 @@ float3 PS_calcLR(float2 texcoord)
 	}
 	
 	if (Depth_Map_View == 2)
+		{
+		#if Legacy_Mode		
+		color.rgb = tex2D(SamplerzBufferN,TexCoords).xxx;
+		#else
 		color.rgb = zBuffer(TexCoords).xxx;
+		#endif
+	}
 		
 	return color.rgb;
 }
@@ -1324,7 +1380,21 @@ technique SuperDepth3D
 < ui_tooltip = "Suggestion : You Can Enable 'Performance Mode Checkbox,' in the lower bottom right of the ReShade's Main UI.\n"
 			   "             Do this once you set your 3D settings of course."; >
 {
+		pass DepthBuffer
+	{
+		VertexShader = PostProcessVS;
+		PixelShader = DepthMap;
+		RenderTarget = texDMN;
+	}
+	#if Legacy_Mode
 		pass zbuffer
+	{
+		VertexShader = PostProcessVS;
+		PixelShader = zBuffer;
+		RenderTarget = texzBufferN;
+	}
+	#endif
+		pass zbufferLM
 	{
 		VertexShader = PostProcessVS;
 		PixelShader = DepthMap;
