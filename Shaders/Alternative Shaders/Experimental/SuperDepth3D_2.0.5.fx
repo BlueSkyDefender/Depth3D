@@ -90,7 +90,7 @@
 //Divergence & Convergence//
 uniform float Divergence <
 	ui_type = "drag";
-	ui_min = 1; ui_max = 50; ui_step = 0.5;
+	ui_min = 5; ui_max = 55; ui_step = 0.5;
 	ui_label = "·Divergence Slider·";
 	ui_tooltip = "Divergence increases differences between the left and right retinal images and allows you to experience depth.\n" 
 				 "The process of deriving binocular depth information is called stereopsis.\n"
@@ -157,9 +157,9 @@ uniform float2 Disocclusion_Adjust <
 	ui_min = 0.0; ui_max = 1.0;
 	ui_label = " Disocclusion Adjust";
 	ui_tooltip = "Automatic occlusion masking power, & Depth Based culling adjustments.\n"
-				"Default is ( 0.5f,0.25f)";
+				"Default is ( 0.1f,0.25f)";
 	ui_category = "Occlusion Masking";
-> = float2( 0.5, 0.25);
+> = float2( 0.1, 0.25);
 #endif
 uniform int Custom_Sidebars <
 	ui_type = "combo";

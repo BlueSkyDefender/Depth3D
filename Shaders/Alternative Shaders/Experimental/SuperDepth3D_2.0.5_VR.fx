@@ -103,7 +103,7 @@ uniform int IPD <
 //Divergence & Convergence//
 uniform float Divergence <
 	ui_type = "drag";
-	ui_min = 1; ui_max = 50; ui_step = 0.5;
+	ui_min = 5; ui_max = 55; ui_step = 0.5;
 	ui_label = "·Divergence Slider·";
 	ui_tooltip = "Divergence increases differences between the left and right retinal images and allows you to experience depth.\n" 
 				 "The process of deriving binocular depth information is called stereopsis.\n"
@@ -170,9 +170,18 @@ uniform float2 Disocclusion_Adjust <
 	ui_min = 0.0; ui_max = 1.0;
 	ui_label = " Disocclusion Adjust";
 	ui_tooltip = "Automatic occlusion masking power, & Depth Based culling adjustments.\n"
-				"Default is ( 0.5f,0.25f)";
+				"Default is ( 0.1f,0.25f)";
 	ui_category = "Occlusion Masking";
-> = float2( 0.5, 0.25);
+> = float2( 0.1, 0.25);
+#else
+uniform bool Performance_Mode <
+	ui_label = " Performance Mode";
+	ui_tooltip = "Performance Mode Lowers Occlusion Quality Processing so that there is a small boost to FPS.\n"
+				 "Please enable the 'Performance Mode Checkbox,' in ReShade's GUI.\n"
+				 "It's located in the lower bottom right of the ReShade's Main UI.\n"
+				 "Default is False.";
+	ui_category = "Occlusion Masking";
+> = false;
 #endif
 //Depth Map//
 uniform int Depth_Map <
@@ -879,7 +888,7 @@ float zBuffer(float2 texcoord)
 // Horizontal parallax offset & Hole filling effect
 float2 Parallax( float Diverge, float2 Coordinates)
 {   float2 ParallaxCoord = Coordinates;
-	float DepthLR = 1, LRDepth, Perf = 0.5, MS = Diverge * pix.x, MSM, N = 5, S[5] = {0.5,0.625,0.75,0.875,1.0};
+	float DepthLR = 1, LRDepth, Perf = 1.0, MS = Diverge * pix.x, MSM, N = 5, S[5] = {0.5,0.625,0.75,0.875,1.0};
 	#if Legacy_Mode	
 	MS = -MS;
 	[loop]
@@ -904,7 +913,8 @@ float2 Parallax( float Diverge, float2 Coordinates)
 	//Reprojection Left and Right
 	ParallaxCoord = float2(Coordinates.x + (MS * DepthLR), Coordinates.y);
 	#else
-	
+	if (Performance_Mode)
+		Perf = 0.5;
 	//ParallaxSteps Calculations
 	float D = abs(length(Diverge)), Cal_Steps = (D * Perf) + (D * 0.04), Steps = clamp(Cal_Steps,0,255);
 		

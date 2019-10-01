@@ -236,14 +236,6 @@ static const int HM = 0;                  //HUD Mode
 	#define DA_W 1
 	#define DA_Z 0.00015
 	#define RE 1 
-#elif (App == 0x60F436C6 )	//RESIDENT EVIL 2  BIOHAZARD RE2
-	#define DA_X 0.1375
-	#define DB_Y 3
-	#define DB_Z 0.015
-	#define DA_Y 51.25
-	#define DA_W 1
-	#define DA_Z 0.00015
-	#define RE 1 
 #elif (App == 0xF0D4DB3D )	//Never Alone
 	#define DA_X 0.1375
 	#define DB_Y 2
@@ -267,6 +259,16 @@ static const int HM = 0;                  //HUD Mode
 	#define DA_W 1
 	#define DA_Z 0.0005
 	#define DB_Z 0.25
+#elif (App == 0x287BBA4C || App == 0x59BFE7AC )	//Grim Dawn 64bit/32bit
+	#define DB_Y 2
+	#define DA_Y 125.0
+	#define DA_Z 0.003
+#elif (App == 0x8EAF7114 )	//Firewatch
+	#define DB_Y 3
+	#define DA_Y 5.0
+	#define DA_X 0.0375
+	#define DB_X 1
+	#define DA_W 1
 #else
 	#define NP 1 //No Profile
 #endif
