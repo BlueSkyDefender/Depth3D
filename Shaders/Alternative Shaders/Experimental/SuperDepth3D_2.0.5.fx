@@ -145,7 +145,7 @@ uniform float Auto_Depth_Range <
 uniform int View_Mode <
 	ui_type = "combo";
 	ui_items = "View Mode Normal\0View Mode Alpha\0";
-	ui_label = " View Mode";
+	ui_label = "·View Mode·";
 	ui_tooltip = "Change the way the shader warps the output to the screen.\n"
 					 "For High Foliage games Use Alpha.\n"
 				 "Default is Normal";

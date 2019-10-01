@@ -31,7 +31,7 @@
 #endif
 uniform float G_Attenuation <
 	ui_type = "drag";
-	ui_min = 1; ui_max = 20; ui_step = 0.01;
+	ui_min = 1; ui_max = 25; ui_step = 0.01;
 	ui_tooltip = "Control the degree of attenuation of the Gaussian function.";
 	ui_label = "Gaussian Attenuation";
 > = 10;
@@ -234,11 +234,11 @@ void PostProcessVS(in uint id : SV_VertexID, out float4 position : SV_Position, 
 }
 
 //*Rendering passes*//
-technique NLM
+technique NonLocal_Means
 < ui_tooltip = "Suggestion : You Can Enable 'Performance Mode Checkbox,' in the lower bottom right of the ReShade's Main UI.\n"
 			   "             Do this once you set your Smart Sharp settings of course."; >
 {		
-			pass nlm
+			pass NLM
 		{
 			VertexShader = PostProcessVS;
 			PixelShader = Out;	
