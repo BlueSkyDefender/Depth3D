@@ -6,7 +6,7 @@
 // If you are reading this stop. Go away and never look back. From this point on if you  //
 // still think it's is worth looking at this..... Then no one can save you or your soul. //
 // You will be cursed with never enjoying any memes to their fullest potential.......... //
-// Ya that's it.                                                                         //
+// Ya that's it. JK                                                                      //
 // The name comes from this.                                                             //
 // https://en.wikipedia.org/wiki/Overwatch_(military_tactic)                             //
 // Since this File looks ahead and sends information the Main shader to prepair it self. //
@@ -14,7 +14,7 @@
 //Special Thanks to CeeJay.dk for code simplification and guidance.                      // 
 //You can contact him here https://github.com/CeeJayDK                                   //
 //--------------------------------------Code Start---------------------------------------//
-	
+
 //SuperDepth3D Defaults
 static const float ZPD_D = 0.025;         //ZPD
 static const float Depth_Adjust_D = 7.5;  //Depth Adjust
@@ -37,9 +37,23 @@ static const float DepthPY = 0.0;         //Vertical Size
 static const int REF = 0;                 //Resident Evil Fix
 static const int HM = 0;                  //HUD Mode
 
+//Check for ReShade Version for 64bit game Bug.
+#if !defined(__RESHADE__) || __RESHADE__ < 43000
+	#if exists "DOOMx64.exe" 						//DOOM 2016
+		#define App 0x142EDFD6
+	#elif exists "RED-Win64-Shipping.exe"			//DragonBall Fighters Z
+		#define App 0x31BF8AF6
+	#elif exists "HellbladeGame-Win64-Shipping.exe" //Hellblade Senua's Sacrifice
+		#define App 0xAAA18268
+	#else
+		#define App __APPLICATION__ 	
+	#endif
+#else
+	#define App __APPLICATION__ 
+#endif
+
 //Game Hashes//
-#define App __APPLICATION__ 
-#if (App == 0xC753DADB )		//ES: Oblivion 
+#if (App == 0xC753DADB )	//ES: Oblivion 
 	#define DB_W 2
 	#define DB_Y 3
 #elif (App == 0x7B81CCAB )	//BorderLands 2
@@ -311,6 +325,24 @@ static const int HM = 0;                  //HUD Mode
 	#define DB_Y 2
 	#define DA_Z 0.001
 	#define DB_X 1
+#elif (App == 0x31BF8AF6 )	//DragonBall Fighters Z
+	#define DA_Y 10.0
+	#define DA_W 1
+	#define DA_X 0.130
+	#define DB_Y 3
+	#define DB_Z 0.625 //I know, I know........
+#elif (App == 0x3F017CF )	//Call of Cthulhu
+	#define DA_W 1
+	#define DA_X 0.0375
+	#define DB_Y 3
+	#define DB_Z 0.10
+#elif (App == 0x874318FE )	//Batman Arkham Asylum
+	#define DA_Y 18.75
+	#define DA_X 0.0375
+	#define DA_Z 0.00025
+	#define DB_Y 4
+	#define DB_Z 0.15
+	#define DC_W 1
 #else
 	#define NP 1 //No Profile
 #endif
@@ -329,7 +361,6 @@ static const int HM = 0;                  //HUD Mode
 #ifndef DA_W
     #define DA_W Depth_Linearization
 #endif
-
 #ifndef DB_X
     #define DB_X Depth_Flip
 #endif
@@ -342,7 +373,6 @@ static const int HM = 0;                  //HUD Mode
 #ifndef DB_W
     #define DB_W Weapon_Hand
 #endif
-
 #ifndef DC_X
     #define DC_X HUDX
 #endif
@@ -355,7 +385,6 @@ static const int HM = 0;                  //HUD Mode
 #ifndef DC_W
     #define DC_W Text_Warning
 #endif
-
 #ifndef DD_X
     #define DD_X HV_X
 #endif
