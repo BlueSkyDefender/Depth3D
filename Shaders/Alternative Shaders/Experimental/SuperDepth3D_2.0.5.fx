@@ -90,7 +90,7 @@
 //Divergence & Convergence//
 uniform float Divergence <
 	ui_type = "drag";
-	ui_min = 5; ui_max = 55; ui_step = 0.5;
+	ui_min = 5; ui_max = 50; ui_step = 0.5;
 	ui_label = "·Divergence Slider·";
 	ui_tooltip = "Divergence increases differences between the left and right retinal images and allows you to experience depth.\n" 
 				 "The process of deriving binocular depth information is called stereopsis.\n"
@@ -529,9 +529,9 @@ sampler SamplerLumN
 		Texture = texLumN;
 	};	
 	
-float3 Lum(float2 texcoord)
+float2 Lum(float2 texcoord)
 	{   //Luminance
-		return saturate(tex2Dlod(SamplerLumN,float4(texcoord,0,11)).xyw);//Average Luminance Texture Sample 
+		return saturate(tex2Dlod(SamplerLumN,float4(texcoord,0,11)).xy);//Average Luminance Texture Sample 
 	}
 	
 uniform float frametime < source = "frametime";>;
@@ -777,13 +777,13 @@ float3 HUD(float3 HUD, float2 texcoord )
 #endif
 float AutoDepthRange(float d, float2 texcoord )
 {
-	float LumAdjust_ADR = smoothstep(-0.0175,Auto_Depth_Range,Lum(texcoord).y);
+	float LumAdjust_ADR = smoothstep(-0.0175,Auto_Depth_Range,Lum(texcoord).x);
     return min(1,( d - 0 ) / ( LumAdjust_ADR - 0));
 }
 #if RE_Fix || RE
 float AutoZPDRange(float ZPD, float2 texcoord )
 {
-	float LumAdjust_AZDPR = smoothstep(-0.0175,0.1875,Lum(texcoord).z); //Adjusted to only effect really intense differences.
+	float LumAdjust_AZDPR = smoothstep(-0.0175,0.1875,Lum(texcoord).y); //Adjusted to only effect really intense differences.
     return saturate(LumAdjust_AZDPR * ZPD);
 }
 #endif
@@ -1188,7 +1188,7 @@ float3 PS_calcLR(float2 texcoord)
 	return color.rgb;
 }
 
-float4 Average_Luminance(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Target
+float3 Average_Luminance(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Target
 {
 	float4 ABEA, ABEArray[6] = {
 		float4(0.0,1.0,0.0, 1.0),           //No Edit
@@ -1199,9 +1199,9 @@ float4 Average_Luminance(float4 position : SV_Position, float2 texcoord : TEXCOO
 		float4(0.375, 0.250, 0.0, 1.0)      //Center Long
 	};
 	ABEA = ABEArray[Auto_Balance_Ex];
-			
-	float Average_Lum_ZPD = Depth(float2(ABEA.x + texcoord.x * ABEA.y, ABEA.z + texcoord.y * ABEA.w)), Average_Lum_Full = Depth(texcoord), Bottom_Sample = Depth(float2( 0.125 + texcoord.x * 0.750,0.95 + texcoord.y));
-	return float4(Average_Lum_ZPD,Average_Lum_Full,tex2D(SamplerDMN,0).x,Bottom_Sample);
+
+	float Average_Lum_ZPD = Depth(float2(ABEA.x + texcoord.x * ABEA.y, ABEA.z + texcoord.y * ABEA.w)), Average_Lum_Bottom = tex2D(SamplerDMN,float2( 0.125 + texcoord.x * 0.750,0.95 + texcoord.y)).x;
+	return float3(Average_Lum_ZPD,Average_Lum_Bottom,tex2D(SamplerDMN,0).x);
 }
 uniform float timer < source = "timer"; >; //Please do not remove.
 ////////////////////////////////////////////////////////Logo/////////////////////////////////////////////////////////////////////////

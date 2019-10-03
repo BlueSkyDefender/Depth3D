@@ -103,7 +103,7 @@ uniform int IPD <
 //Divergence & Convergence//
 uniform float Divergence <
 	ui_type = "drag";
-	ui_min = 5; ui_max = 55; ui_step = 0.5;
+	ui_min = 5; ui_max = 50; ui_step = 0.5;
 	ui_label = "·Divergence Slider·";
 	ui_tooltip = "Divergence increases differences between the left and right retinal images and allows you to experience depth.\n" 
 				 "The process of deriving binocular depth information is called stereopsis.\n"

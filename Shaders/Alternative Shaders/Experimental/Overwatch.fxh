@@ -336,13 +336,20 @@ static const int HM = 0;                  //HUD Mode
 	#define DA_X 0.0375
 	#define DB_Y 3
 	#define DB_Z 0.10
-#elif (App == 0x874318FE )	//Batman Arkham Asylum
+#elif (App == 0x874318FE || App == 0x7CBA2E8C || App == 0x69277DAF )	//Batman Arkham Asylum / City / Origins
 	#define DA_Y 18.75
 	#define DA_X 0.0375
 	#define DA_Z 0.00025
 	#define DB_Y 4
 	#define DB_Z 0.15
 	#define DC_W 1
+#elif (App == 0xC2762327 )	//Lego Batman 
+	#define DA_Y 27.5
+	#define DA_X 0.125
+	#define DA_Z 0.001
+	#define DB_Y 2
+	#define DB_Z 0.025
+	#define RE 1
 #else
 	#define NP 1 //No Profile
 #endif
