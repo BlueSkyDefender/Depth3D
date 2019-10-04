@@ -124,6 +124,9 @@ Inner Shader Setting:
     RB        Kingpin: Life of Crime                       DM 0       10.000                WDM 44                    Yes 4    
               Lara Croft & Temple of Osiris                DM 0       75.000    0.021                                  Yes 4
               Layers of Fear                               DM 0       17.500                               Yes     
+              LEGO Batman                                  DM 0
+              LEGO Batman 2                                DM 0
+    RB        LEGO Batman 3                                DM 0
               Life is Strange: Before the Storm            DM 1       150.00                               Yes     
               Lifeless Planet                              DM 0       17.500                               Yes     
               Lords of The Fallen                          DM 0       14.750                                       
@@ -484,6 +487,11 @@ Or
 
 You can also follow this guide.
 https://www.tapatalk.com/groups/kingpinforever/viewtopic.php?f=1&t=2184&p=10574#p10574
+
+{LEGO Batman 3}
+Issues with depth buffer when Black Bars are on screen.
+Depth Buffer may not show in main menu.
+You need to set your Depth Buffer to preserve in th DX 11 tab.
 
 {LuciusII}
 Set Globla Settings to Medium. Turn off FXAA Every thing else can be maxed out.

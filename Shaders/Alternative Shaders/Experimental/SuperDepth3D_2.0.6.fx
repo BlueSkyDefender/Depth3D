@@ -3,7 +3,7 @@
 //----------------////
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//* Depth Map Based 3D post-process shader v2.0.5          																														
+//* Depth Map Based 3D post-process shader v2.0.6          																														
 //* For Reshade 3.0+																																								
 //* --------------------------																																					
 //* This work is licensed under a Creative Commons Attribution 3.0 Unported License.																							
@@ -22,10 +22,12 @@
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #if exists "Overwatch.fxh"                                           //Overwatch Intercepter//	
 	#include "Overwatch.fxh"
-#else //DA_X ZPD | DA_Y Depth_Adjust | DA_Z Offset | DA_W Depth_Linearization | DB_X Depth_Flip | DB_Y Auto_Balance | DB_Z Auto_Depth | DB_W Weapon_Hand | DC_X HUDX | DC_Y Null_A | DC_Z Null_B | DC_W Text Warning | DD_X HV_X | DD_Y HV_Y | DD_Z DepthPX | DD_W DepthPY
+#else //DA_X ZPD | DA_Y Depth_Adjust | DA_Z Offset | DA_W Depth_Linearization | DB_X Depth_Flip | DB_Y Auto_Balance | DB_Z Auto_Depth | DB_W Weapon_Hand | DC_X HUDX | DC_Y Null_A | DC_Z Null_B | DC_W Null_C | DD_X HV_X | DD_Y HV_Y | DD_Z DepthPX | DD_W DepthPY
 	static const float DA_X = 0.025, DA_Y = 7.5, DA_Z = 0.0, DA_W = 0.0, DB_X = 0, DB_Y = 0, DB_Z = 0.1, DB_W = 0.0, DC_X =0.0, DC_Y = 0, DC_Z = 0, DC_W = 0, DD_X = 1,DD_Y = 1, DD_Z = 0.0, DD_W = 0.0;
-	#define HM 0
-	#define RE 0		
+	#define RE 0
+	#define NC 0
+	#define TW 0
+	#define NP 0	
 #endif
 //USER EDITABLE PREPROCESSOR FUNCTIONS START//
 //This enables the older SuperDepth3D method of producing an 3D image. This is better for older systems that have an hard time running the new mode.
@@ -85,6 +87,12 @@
 	#define Ven 1
 #else
 	#define Ven 0
+#endif
+
+#if DC_X > 0
+	#define HM 1
+#else
+	#define HM 0
 #endif
 
 //Divergence & Convergence//
@@ -376,17 +384,17 @@ uniform bool SCSC <
 	ui_category = "Cursor Adjustments";
 > = false;
 /*
-uniform float2 Adjust <
+uniform float3 Adjust <
 	#if Compatibility
 	ui_type = "drag";
 	#else
 	ui_type = "slider";
 	#endif
-	ui_min = -2; ui_max = 2; ui_step = 0.001;
+	ui_min = -1; ui_max = 1; ui_step = 0.0001;
 	ui_label = "·Adjust·";
 	ui_tooltip = "Adjust.";
 	ui_category = "Adjust";
-> = float2(0,0);
+> = float3(0,0,0);
 */
 uniform bool Cancel_Depth < source = "key"; keycode = Cancel_Depth_Key; toggle = true; mode = "toggle";>;
 uniform bool Mask_Cycle < source = "key"; keycode = Mask_Cycle_Key; toggle = true; >;
@@ -1207,11 +1215,11 @@ uniform float timer < source = "timer"; >; //Please do not remove.
 ////////////////////////////////////////////////////////Logo/////////////////////////////////////////////////////////////////////////
 float3 Out(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Target
 {
-	float PosX = 0.9525f*BUFFER_WIDTH*pix.x,PosY = 0.975f*BUFFER_HEIGHT*pix.y, Text_Timer = 12500;
-	float D,E,P,T,H,Three,DD,Dot,I,N,F,O,R,EE,A,DDD,HH,EEE,L,PP, Help;	
+	float PosX = 0.9525f*BUFFER_WIDTH*pix.x,PosY = 0.975f*BUFFER_HEIGHT*pix.y, Text_Timer = 12500, BT = smoothstep(0,1,sin(timer*(3.75/1000)));
+	float D,E,P,T,H,Three,DD,Dot,I,N,F,O,R,EE,A,DDD,HH,EEE,L,PP,Help,NN,PPP,C,Not,No;	
 	float3 Color = PS_calcLR(texcoord).rgb;
 	
-	if(DC_W == 1)
+	if(TW || NC || NP)
 		Text_Timer = 18750;
 		
 	[branch] if(timer <= Text_Timer)
@@ -1221,53 +1229,45 @@ float3 Out(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Targe
 		float PosXD = -0.035+PosX, offsetD = 0.001;
 		float OneD = all( abs(float2( texcoord.x -PosXD, texcoord.y-PosY)) < float2(0.0025,0.009));
 		float TwoD = all( abs(float2( texcoord.x -PosXD-offsetD, texcoord.y-PosY)) < float2(0.0025,0.007));
-		D = OneD-TwoD;
-		
+		D = OneD-TwoD;	
 		//E
 		float PosXE = -0.028+PosX, offsetE = 0.0005;
 		float OneE = all( abs(float2( texcoord.x -PosXE, texcoord.y-PosY)) < float2(0.003,0.009));
 		float TwoE = all( abs(float2( texcoord.x -PosXE-offsetE, texcoord.y-PosY)) < float2(0.0025,0.007));
 		float ThreeE = all( abs(float2( texcoord.x -PosXE, texcoord.y-PosY)) < float2(0.003,0.001));
-		E = (OneE-TwoE)+ThreeE;
-		
+		E = (OneE-TwoE)+ThreeE;		
 		//P
 		float PosXP = -0.0215+PosX, PosYP = -0.0025+PosY, offsetP = 0.001, offsetP1 = 0.002;
 		float OneP = all( abs(float2( texcoord.x -PosXP, texcoord.y-PosYP)) < float2(0.0025,0.009*0.775));
 		float TwoP = all( abs(float2( texcoord.x -PosXP-offsetP, texcoord.y-PosYP)) < float2(0.0025,0.007*0.680));
 		float ThreeP = all( abs(float2( texcoord.x -PosXP+offsetP1, texcoord.y-PosY)) < float2(0.0005,0.009));
 		P = (OneP-TwoP) + ThreeP;
-
 		//T
 		float PosXT = -0.014+PosX, PosYT = -0.008+PosY;
 		float OneT = all( abs(float2( texcoord.x -PosXT, texcoord.y-PosYT)) < float2(0.003,0.001));
 		float TwoT = all( abs(float2( texcoord.x -PosXT, texcoord.y-PosY)) < float2(0.000625,0.009));
-		T = OneT+TwoT;
-		
+		T = OneT+TwoT;	
 		//H
 		float PosXH = -0.0072+PosX;
 		float OneH = all( abs(float2( texcoord.x -PosXH, texcoord.y-PosY)) < float2(0.002,0.001));
 		float TwoH = all( abs(float2( texcoord.x -PosXH, texcoord.y-PosY)) < float2(0.002,0.009));
 		float ThreeH = all( abs(float2( texcoord.x -PosXH, texcoord.y-PosY)) < float2(0.00325,0.009));
-		H = (OneH-TwoH)+ThreeH;
-		
+		H = (OneH-TwoH)+ThreeH;	
 		//Three
 		float offsetFive = 0.001, PosX3 = -0.001+PosX;
 		float OneThree = all( abs(float2( texcoord.x -PosX3, texcoord.y-PosY)) < float2(0.002,0.009));
 		float TwoThree = all( abs(float2( texcoord.x -PosX3 - offsetFive, texcoord.y-PosY)) < float2(0.003,0.007));
 		float ThreeThree = all( abs(float2( texcoord.x -PosX3, texcoord.y-PosY)) < float2(0.002,0.001));
-		Three = (OneThree-TwoThree)+ThreeThree;
-		
+		Three = (OneThree-TwoThree)+ThreeThree;	
 		//DD
 		float PosXDD = 0.006+PosX, offsetDD = 0.001;	
 		float OneDD = all( abs(float2( texcoord.x -PosXDD, texcoord.y-PosY)) < float2(0.0025,0.009));
 		float TwoDD = all( abs(float2( texcoord.x -PosXDD-offsetDD, texcoord.y-PosY)) < float2(0.0025,0.007));
-		DD = OneDD-TwoDD;
-		
+		DD = OneDD-TwoDD;		
 		//Dot
 		float PosXDot = 0.011+PosX, PosYDot = 0.008+PosY;		
 		float OneDot = all( abs(float2( texcoord.x -PosXDot, texcoord.y-PosYDot)) < float2(0.00075,0.0015));
-		Dot = OneDot;
-		
+		Dot = OneDot;	
 		//INFO
 		//I
 		float PosXI = 0.0155+PosX, PosYI = 0.004+PosY, PosYII = 0.008+PosY;
@@ -1275,20 +1275,17 @@ float3 Out(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Targe
 		float TwoI = all( abs(float2( texcoord.x - PosXI, texcoord.y - PosYI)) < float2(0.000625,0.005));
 		float ThreeI = all( abs(float2( texcoord.x - PosXI, texcoord.y - PosYII)) < float2(0.003,0.001));
 		I = OneI+TwoI+ThreeI;
-		
 		//N
 		float PosXN = 0.0225+PosX, PosYN = 0.005+PosY,offsetN = -0.001;
 		float OneN = all( abs(float2( texcoord.x - PosXN, texcoord.y - PosYN)) < float2(0.002,0.004));
 		float TwoN = all( abs(float2( texcoord.x - PosXN, texcoord.y - PosYN - offsetN)) < float2(0.003,0.005));
-		N = OneN-TwoN;
-		
+		N = OneN-TwoN;	
 		//F
 		float PosXF = 0.029+PosX, PosYF = 0.004+PosY, offsetF = 0.0005, offsetF1 = 0.001;
 		float OneF = all( abs(float2( texcoord.x -PosXF-offsetF, texcoord.y-PosYF-offsetF1)) < float2(0.002,0.004));
 		float TwoF = all( abs(float2( texcoord.x -PosXF, texcoord.y-PosYF)) < float2(0.0025,0.005));
 		float ThreeF = all( abs(float2( texcoord.x -PosXF, texcoord.y-PosYF)) < float2(0.0015,0.00075));
-		F = (OneF-TwoF)+ThreeF;
-		
+		F = (OneF-TwoF)+ThreeF;		
 		//O
 		float PosXO = 0.035+PosX, PosYO = 0.004+PosY;
 		float OneO = all( abs(float2( texcoord.x -PosXO, texcoord.y-PosYO)) < float2(0.003,0.005));
@@ -1301,29 +1298,26 @@ float3 Out(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Targe
 		float OneR = all( abs(float2( texcoord.x -PosXR, texcoord.y-PosYR)) < float2(0.0025,0.009*0.775));
 		float TwoR = all( abs(float2( texcoord.x -PosXR-offsetR, texcoord.y-PosYR)) < float2(0.0025,0.007*0.680));
 		float ThreeR = all( abs(float2( texcoord.x -PosXR+offsetR1, texcoord.y-PosY)) < float2(0.0005,0.009));
-		float FourR = all( abs(float2( texcoord.x -PosXR+offsetR2, texcoord.y-PosY-offsetR3)) < float2(0.0005,0.0025));
+		float FourR = all( abs(float2( texcoord.x -PosXR+offsetR2, texcoord.y-PosY-offsetR3)) < float2(0.0005,0.0020));
 		R = (OneR-TwoR) + ThreeR + FourR;
 		//EE
 		float PosXEE = -0.472+PosX, offsetEE = 0.0005;
 		float OneEE = all( abs(float2( texcoord.x -PosXEE, texcoord.y-PosY)) < float2(0.003,0.009));
 		float TwoEE = all( abs(float2( texcoord.x -PosXEE-offsetEE, texcoord.y-PosY)) < float2(0.0025,0.007));
 		float ThreeEE = all( abs(float2( texcoord.x -PosXEE, texcoord.y-PosY)) < float2(0.003,0.001));
-		EE = (OneEE-TwoEE)+ThreeEE;
-		
+		EE = (OneEE-TwoEE)+ThreeEE;		
 		//A
 		float PosXA = -0.465+PosX,PosYA = -0.008+PosY;
 		float OneA = all( abs(float2( texcoord.x -PosXA, texcoord.y-PosY)) < float2(0.002,0.001));
 		float TwoA = all( abs(float2( texcoord.x -PosXA, texcoord.y-PosY)) < float2(0.002,0.009));
 		float ThreeA = all( abs(float2( texcoord.x -PosXA, texcoord.y-PosY)) < float2(0.00325,0.009));
 		float FourA = all( abs(float2( texcoord.x -PosXA, texcoord.y-PosYA)) < float2(0.003,0.001));		
-		A = (OneA-TwoA)+ThreeA+FourA;
-		
+		A = (OneA-TwoA)+ThreeA+FourA;		
 		//DDD
 		float PosXDDD = -0.458+PosX, offsetDDD = 0.001;	
 		float OneDDD = all( abs(float2( texcoord.x -PosXDDD, texcoord.y-PosY)) < float2(0.0025,0.009));
 		float TwoDDD = all( abs(float2( texcoord.x -PosXDDD-offsetDDD, texcoord.y-PosY)) < float2(0.0025,0.007));
-		DDD = OneDDD-TwoDDD;
-		
+		DDD = OneDDD-TwoDDD;	
 		//HH
 		float PosXHH = -0.445+PosX;
 		float OneHH = all( abs(float2( texcoord.x -PosXHH, texcoord.y-PosY)) < float2(0.002,0.001));
@@ -1347,10 +1341,32 @@ float3 Out(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Targe
 		float TwoPP = all( abs(float2( texcoord.x -PosXPP-offsetPP, texcoord.y-PosYPP)) < float2(0.0025,0.007*0.680));
 		float ThreePP = all( abs(float2( texcoord.x -PosXPP+offsetPP1, texcoord.y-PosY)) < float2(0.0005,0.009));
 		PP = (OnePP-TwoPP) + ThreePP;
-		if(DC_W == 1)
-			Help = R+EE+A+DDD+HH+EEE+L+PP;
+		//No Profile / Not Compatible
+		PosY += 0.953;
+		PosX -= 0.483;
+		float PosXNN = -0.458+PosX, offsetNN = 0.0015;	
+		float OneNN = all( abs(float2( texcoord.x -PosXNN, texcoord.y-PosY)) < float2(0.00325,0.009));
+		float TwoNN = all( abs(float2( texcoord.x -PosXNN, texcoord.y-PosY-offsetNN)) < float2(0.002,0.008));
+		NN = OneNN-TwoNN;
+		//PPP
+		float PosXPPP = -0.451+PosX, PosYPPP = -0.0025+PosY, offsetPPP = 0.001, offsetPPP1 = 0.002;
+		float OnePPP = all( abs(float2( texcoord.x -PosXPPP, texcoord.y-PosYPPP)) < float2(0.0025,0.009*0.775));
+		float TwoPPP = all( abs(float2( texcoord.x -PosXPPP-offsetPPP, texcoord.y-PosYPPP)) < float2(0.0025,0.007*0.680));
+		float ThreePPP = all( abs(float2( texcoord.x -PosXPPP+offsetPPP1, texcoord.y-PosY)) < float2(0.0005,0.009));
+		PPP = (OnePPP-TwoPPP) + ThreePPP;
+		//C
+		float PosXC = -0.450+PosX, offsetC = 0.001;
+		float OneC = all( abs(float2( texcoord.x -PosXC, texcoord.y-PosY)) < float2(0.0035,0.009));
+		float TwoC = all( abs(float2( texcoord.x -PosXC-offsetC, texcoord.y-PosY)) < float2(0.0025,0.007));
+		C = OneC-TwoC;
+		if(NP)
+		No = (NN + PPP) * BT; //Blinking Text
+		if(NC)
+		Not = (NN + C) * BT; //Blinking Text
+		if(TW)
+			Help = (R+EE+A+DDD+HH+EEE+L+PP) * BT; //Blinking Text
 		//Website
-		return D+E+P+T+H+Three+DD+Dot+I+N+F+O+Help ? (1-texcoord.y*50.0+48.85)*texcoord.y-0.500: Color;
+		return D+E+P+T+H+Three+DD+Dot+I+N+F+O+Help+No+Not ? (1-texcoord.y*50.0+48.85)*texcoord.y-0.500: Color;
 	}
 	else
 		return Color;

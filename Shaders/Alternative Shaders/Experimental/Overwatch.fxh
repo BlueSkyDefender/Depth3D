@@ -26,30 +26,43 @@ static const float Auto_Depth = 0.1;      //Auto Depth Range
 static const int Weapon_Hand = 0;         //Weapon Profile
 static const float HUDX = 0.0;            //Heads Up Display Cut Off Point
 static const float Null_A = 0.0;            
-static const float Null_B = 0.0;
-static const int Text_Warning = 0;        //Text Warning
+static const float Null_B = 0.0;  
+static const float Null_C = 0.0;  
 static const float HV_X = 1.0;            //Horizontal Postion
 static const float HV_Y = 1.0;            //Vertical Postion
 static const float DepthPX = 0.0;         //Horizontal Size
 static const float DepthPY = 0.0;         //Vertical Size
 
-//Special Toggles
+//Special Toggles Defaults
 static const int REF = 0;                 //Resident Evil Fix
-static const int HM = 0;                  //HUD Mode
+static const int NCW = 0;                 //Not Compatible Warning
+static const int FTW = 0;                 //Flasing Text Warning
+static const int NPW = 0;                 //No Profile Warning
+
+//Special Handling
+#if exists "LEGOBatman.exe" 							//Lego Batman
+	#define sApp 0xA100000
+#elif exists "LEGOBatman2.exe"							//LEGO Batman 2
+	#define sApp 0xA100000
+#elif exists "GameComponentsOzzy_Win32Steam_Release.dll"//Batman BlackGate
+	#define sApp 0xA200000
+#else
+	#define sApp __APPLICATION__ 	
+#endif
 
 //Check for ReShade Version for 64bit game Bug.
 #if !defined(__RESHADE__) || __RESHADE__ < 43000
-	#if exists "DOOMx64.exe" 						//DOOM 2016
+	#if exists "DOOMx64.exe" 								//DOOM 2016
 		#define App 0x142EDFD6
-	#elif exists "RED-Win64-Shipping.exe"			//DragonBall Fighters Z
+	#elif exists "RED-Win64-Shipping.exe"					//DragonBall Fighters Z
 		#define App 0x31BF8AF6
-	#elif exists "HellbladeGame-Win64-Shipping.exe" //Hellblade Senua's Sacrifice
+	#elif exists "HellbladeGame-Win64-Shipping.exe" 		//Hellblade Senua's Sacrifice
 		#define App 0xAAA18268
 	#else
-		#define App __APPLICATION__ 	
-	#endif
+		#define App sApp
+	#endif	
 #else
-	#define App __APPLICATION__ 
+	#define App sApp 	
 #endif
 
 //Game Hashes//
@@ -101,7 +114,7 @@ static const int HM = 0;                  //HUD Mode
 	#define DB_W 14	
 #elif (App == 0x4383C12A || App == 0x239E5522 || App == 0x3591DE9C )	//CoD | CoD:UO | CoD:2
 	#define DB_W 15
-	#define DC_W 1 
+	#define TW 1 
 #elif (App == 0x73FA91DC )	//CoD: Black Ops IIII
 	#define DA_Y 22.5
 	#define DA_W 1
@@ -131,7 +144,7 @@ static const int HM = 0;                  //HUD Mode
 	#define DA_Y 18.7
 	#define DB_W 29
 	#define DB_Y 2
-	#define DC_W 1 	
+	#define TW 1 	
 #elif (App == 0xBF757E3A )	//Return to Castle Wolfenstine
 	#define DA_Y 8.75
 	#define DB_Y 2
@@ -148,7 +161,7 @@ static const int HM = 0;                  //HUD Mode
 #elif (App == 0x6D3CD99E )	//Blood 2
 	#define DB_W 36
 	#define DB_Y 3
-	#define DC_W 1 	
+	#define TW 1 	
 #elif (App == 0xF22A9C7D )	//SOMA
 	#define DA_Y 10.0
 	#define DB_Y 5
@@ -161,8 +174,7 @@ static const int HM = 0;                  //HUD Mode
 	#define DA_Y 17.5
 	#define DB_Y 1
 	#define DB_W 40
-	#define DC_X 0.534
-	#define HM 1 	
+	#define DC_X 0.534 	
 #elif (App == 0xEB9EEB74 || App == 0x8238E9CA )	//Serious Sam Revolution | Serious Sam 2
 	#define DA_Z 0.1111
 	#define DB_W 41 
@@ -178,7 +190,7 @@ static const int HM = 0;                  //HUD Mode
 	#define DA_Y 10.0
 	#define DB_Y 4
 	#define DB_W 46
-	#define DC_W 1 	
+	#define TW 1 	
 #elif (App == 0x9C5C946E )	//EuroTruckSim2
 	#define DB_W 47	
 #elif (App == 0xB302EC7 || App == 0x91D9EBAF )	//F.E.A.R | F.E.A.R 2: Project Origin
@@ -206,7 +218,6 @@ static const int HM = 0;                  //HUD Mode
 	#define DB_W 56
 	#define DB_Y 3
 	#define DC_X 0.5034
-	#define HM 1
 #elif (App == 0x22BA110F )	//Turok: DH 2017
 	#define DA_X 0.002
 	#define DA_Y 250.0 
@@ -234,7 +245,6 @@ static const int HM = 0;                  //HUD Mode
 	#define DA_Z 0.11625
 	#define DB_Y 4 
 	#define DC_X 0.5
-	#define HM 1 
 #elif (App == 0x61243AED )	//Shadow Warrior Classic source port
 	#define DA_Y 10.0
 	#define DA_X 0.05
@@ -247,7 +257,7 @@ static const int HM = 0;                  //HUD Mode
 	#define DB_Y 4  
 #elif (App == 0xFE54BF56 )	//No One Lives Forever and 2
 	#define DA_X 0.0375
-	#define DC_W 1  
+	#define TW 1  
 #elif (App == 0x9E7AA0C4 )	//Shadow Tactics: Blades of the Shogun
 	#define DA_Y 7.0
 	#define DA_Z 0.001
@@ -255,19 +265,18 @@ static const int HM = 0;                  //HUD Mode
 	#define DB_Y 5
 	#define DB_Z 0.305
 	#define DB_X 1 
-	#define DC_W 1 	 
+	#define TW 1 	 
 #elif (App == 0xE63BF4A4 )	//World of Warcraft DX12
 	#define DA_Y 7.5
 	#define DA_W 1
 	#define DB_Y 3
 	#define DB_Z 0.1375
-	#define DC_W 1 
+	#define TW 1 
 #elif (App == 0x5961D1CC )	//Requiem: Avenging Angel
 	#define DA_Y 37.5
 	#define DA_X 0.0375
 	#define DA_Z 0.8
 	#define DC_X 0.501
-	#define HM 1 
 #elif (App == 0x86D33094 )	//Rise of the TombRaider
 	#define DA_X 0.075
 	#define DB_Y 3
@@ -342,14 +351,26 @@ static const int HM = 0;                  //HUD Mode
 	#define DA_Z 0.00025
 	#define DB_Y 4
 	#define DB_Z 0.15
-	#define DC_W 1
-#elif (App == 0xC2762327 )	//Lego Batman 
+	#define TW 1
+#elif (App == 0xA100000 )	//Lego Batman 1 & 2
 	#define DA_Y 27.5
 	#define DA_X 0.125
 	#define DA_Z 0.001
 	#define DB_Y 2
 	#define DB_Z 0.025
 	#define RE 1
+#elif (App == 0x5F2CA572 )	//Lego Batman 3
+	#define DA_X 0.03
+	#define DA_Z 0.001
+	#define DB_Y 4
+	#define TW 1
+#elif (App == 0xA200000 )	//Batman BlackGate
+	#define DA_Y 12.5
+	#define DA_X 0.0375
+	#define DA_Z 0.00025
+	#define DB_Y 3
+#elif (App == 0xCB1CCDC )	//BATMAN TTS
+	#define NC 1 //Not Compatible
 #else
 	#define NP 1 //No Profile
 #endif
@@ -390,7 +411,7 @@ static const int HM = 0;                  //HUD Mode
     #define DC_Z Null_B
 #endif
 #ifndef DC_W
-    #define DC_W Text_Warning
+    #define DC_W Null_C
 #endif
 #ifndef DD_X
     #define DD_X HV_X
@@ -406,9 +427,15 @@ static const int HM = 0;                  //HUD Mode
 #endif
 
 //Special Toggles
-#ifndef HM
-    #define HM HUD
-#endif
 #ifndef RE
-    #define RE REF
+    #define RE REF //Resident Evil Fix
+#endif
+#ifndef NC
+    #define NC NCW //Not Compatible Warning
+#endif
+#ifndef TW
+    #define TW FTW //Flasing Text Warning
+#endif
+#ifndef NP
+    #define NP NPW //No Profile Warning
 #endif
