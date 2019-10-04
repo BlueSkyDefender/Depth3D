@@ -823,31 +823,26 @@ float2 Conv(float D,float2 texcoord)
 			
     return float2(lerp(Convergence,D, ZP),lerp(WConvergence,D,WZP));
 }
+#define BlurSamples 6  //BlurSamples = # * 2
 #if Legacy_Mode 
 float zBuffer(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0) : SV_Target
 {
-	float S = 5 * Disocclusion_Adjust.x;
-	int BlurSamples = 6;  //BlurSamples = # * 2
-	float3 D = tex2Dlod(SamplerDMN,float4(texcoord,0,0)).xyz,DM = tex2Dlod(SamplerDMN,float4(texcoord,0,0)).xyz * BlurSamples;
 #else
 float zBuffer(float2 texcoord)
 {
-	float3 DM = tex2Dlod(SamplerDMN,float4(texcoord,0,0)).xyz;		
 #endif
-	
+	float3 DM = tex2Dlod(SamplerDMN,float4(texcoord,0,0)).xyz;	
 	#if Legacy_Mode 
-    float total = BlurSamples;
-    
-    for ( int j = -BlurSamples; j <= BlurSamples; ++j)
-    {
-        float W = BlurSamples;
-        
-		DM += tex2Dlod(SamplerDMN,float4(texcoord + float2(pix.x * S,0) * j,0,0 ) ).xyz * W;
-
-        total += W;
-    }
-    
-	DM = lerp(saturate(DM / total) , D , saturate(( D - 0 ) / ( Disocclusion_Adjust.y - 0)) );
+	    float total = BlurSamples, S = 5 * Disocclusion_Adjust.x;
+	    float3 D = DM * BlurSamples;
+	    for ( int j = -BlurSamples; j <= BlurSamples; ++j)
+	    {
+	        float W = BlurSamples;      
+			D += tex2Dlod(SamplerDMN,float4(texcoord + float2(pix.x * S,0) * j,0,0 ) ).xyz * W;
+	        total += W;
+	    }
+	    
+		DM = lerp(saturate(D / total),DM,step(Disocclusion_Adjust.y,DM));
 	#endif
 	
 	if (WP == 0)
