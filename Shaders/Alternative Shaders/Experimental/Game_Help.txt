@@ -55,6 +55,7 @@ Inner Shader Setting:
               Assassin Creed Unity                         DM 1       20.000                                       
               Bayonetta                                    DM 0       15.000                                       
     RB        Battlefield One                              DM 1       8.1250                                           Yes 3                  
+    RB        BattleTech                                   DM 1       75.000                                           Yes 1                  
     RB        Batman Arkham Asylum                         DM 0       18.750                                           Yes 4
               Batman Arkham Knight                         DM 0       22.500                                           Yes 4                                     
               Batman Arkham Origins                        DM 0       18.750                                           Yes 4                                        
@@ -283,6 +284,10 @@ Ex. FPS mode will be around 7.50. But, For Tank mode you want to use around 20.0
 
 Please Note:
 If you run AMD and have a 2nd GPU in your system like a Nvidia Card. ReShade will Crash this game on start up.
+
+{BattleTech}
+
+Read the section for Dealing with mouse pointer issues. At the top. 
 
 {Batman Arkham Asylum} -Use ReShade 4.4.0+
 In older versions of Reshade you may incounter Depth Flickering.

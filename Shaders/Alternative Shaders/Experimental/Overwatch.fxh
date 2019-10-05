@@ -52,7 +52,9 @@ static const int NPW = 0;                 //No Profile Warning
 
 //Check for ReShade Version for 64bit game Bug.
 #if !defined(__RESHADE__) || __RESHADE__ < 43000
-	#if exists "DOOMx64.exe" 								//DOOM 2016
+	#if exists "BatmanAK.exe" 								//Batman Arkham Knight
+		#define App 0x4A2297E4
+	#elif exists "DOOMx64.exe" 								//DOOM 2016
 		#define App 0x142EDFD6
 	#elif exists "RED-Win64-Shipping.exe"					//DragonBall Fighters Z
 		#define App 0x31BF8AF6
@@ -371,6 +373,18 @@ static const int NPW = 0;                 //No Profile Warning
 	#define DB_Y 3
 #elif (App == 0xCB1CCDC )	//BATMAN TTS
 	#define NC 1 //Not Compatible
+#elif (App == 0x4A2297E4 )	//Batman Arkham Knight
+	#define DA_Y 22.500
+	#define DA_X 0.04375
+	#define DB_Y 4
+#elif (App == 0xE9A02687 )	//BattleTech
+	#define DA_W 1
+	#define DB_X 1
+	#define DA_Y 75.0
+	#define DA_X 0.250
+	#define DB_Y 1
+	#define RE 1 
+	#define TW 1
 #else
 	#define NP 1 //No Profile
 #endif
