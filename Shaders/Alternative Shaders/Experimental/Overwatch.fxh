@@ -52,7 +52,9 @@ static const int NPW = 0;                 //No Profile Warning
 
 //Check for ReShade Version for 64bit game Bug.
 #if !defined(__RESHADE__) || __RESHADE__ < 43000
-	#if exists "BatmanAK.exe" 								//Batman Arkham Knight
+	#if exists "ACU.exe" 									//Assassin's Creed Unity
+		#define App 0xA0762A98
+	#elif exists "BatmanAK.exe" 							//Batman Arkham Knight
 		#define App 0x4A2297E4
 	#elif exists "DOOMx64.exe" 								//DOOM 2016
 		#define App 0x142EDFD6
@@ -391,6 +393,12 @@ static const int NPW = 0;                 //No Profile Warning
 	#define DA_X 0.04
 	#define DB_Y 5
 	#define RE 2
+#elif (App == 0xA0762A98 )	//Assassin's Creed Unity
+	#define DA_W 1
+	#define DA_Y 20.0
+	#define DA_Z 0.00025
+	#define DA_X 0.04375
+	#define DB_Z 0.2
 #else
 	#define NP 1 //No Profile
 #endif

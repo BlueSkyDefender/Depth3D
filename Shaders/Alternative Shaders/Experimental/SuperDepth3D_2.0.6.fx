@@ -287,7 +287,7 @@ uniform float WZPD <
 
 uniform int FPSDFIO <
 	ui_type = "combo";
-	ui_items = "Off\0Press\0Hold Down\0Press Adjust\0Hold Down Adjust\0";
+	ui_items = "Off\0Press\0Hold Down\0";
 	ui_label = " FPS Focus Depth";
 	ui_tooltip = "This lets the shader handle real time depth reduction for aiming down your sights.\n"
 				 "This may induce Eye Strain so take this as an Warning.";
@@ -296,11 +296,11 @@ uniform int FPSDFIO <
 
 uniform float FD_Adjust <
 	ui_type = "drag";
-	ui_min = 0.125; ui_max = 0.5;
+	ui_min = 0.0625; ui_max = 0.5;
 	ui_label = " Focus Depth Adjust";
-	ui_tooltip = "FPS Focus Depth Adjustment. Default is 0.25f.";
+	ui_tooltip = "FPS Focus Depth Adjustment. Default is 0.0625f.";
 	ui_category = "Weapon Hand Adjust";
-> = 0.25;
+> = 0.0625;
 #if HUD_MODE || HM
 //Heads-Up Display
 uniform float2 HUD_Adjust <
@@ -559,9 +559,9 @@ float Fade_in_out(float2 texcoord)
 {
 	float Trigger_Fade, AA = (1-Fade_Time_Adjust)*1000, PStoredfade = tex2D(SamplerLumN,texcoord).z;
 	//Fade in toggle. 
-	if(FPSDFIO == 1 || FPSDFIO == 3)
+	if(FPSDFIO == 1)
 		Trigger_Fade = Trigger_Fade_A;
-	else if(FPSDFIO == 2 || FPSDFIO == 4)
+	else if(FPSDFIO == 2)
 		Trigger_Fade = Trigger_Fade_B;
 	
 	return PStoredfade + (Trigger_Fade - PStoredfade) * (1.0 - exp(-frametime/AA)); ///exp2 would be even slower  	
@@ -1015,9 +1015,7 @@ float3 PS_calcLR(float2 texcoord)
 	float FadeIO = smoothstep(0,1,1-Fade_in_out(texcoord).x), FD = D;
 	
 	if (FPSDFIO == 1 || FPSDFIO == 2)
-		FD = lerp(FD * 0.0625,FD,FadeIO);	
-	else if (FPSDFIO == 3 || FPSDFIO == 4)
-		FD = lerp(FD * FD_Adjust,FD,FadeIO);
+		FD = lerp(FD * FD_Adjust,FD,FadeIO);	
 		
 	float2 DLR = float2(FD,FD);
 	
