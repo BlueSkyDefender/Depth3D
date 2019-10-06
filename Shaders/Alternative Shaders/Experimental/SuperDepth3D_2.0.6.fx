@@ -249,7 +249,7 @@ uniform int2 Image_Position_Adjust<
 uniform float2 Horizontal_and_Vertical <
 	ui_type = "drag";
 	ui_min = 0.125; ui_max = 2;
-	ui_label = "Z Horizontal & Vertical";
+	ui_label = " Z Horizontal & Vertical";
 	ui_tooltip = "Adjust Horizontal and Vertical Resize. Default is 1.0.";
 	ui_category = "Depth Map";
 > = float2(DD_X,DD_Y);
@@ -287,12 +287,20 @@ uniform float WZPD <
 
 uniform int FPSDFIO <
 	ui_type = "combo";
-	ui_items = "Off\0Press\0Hold Down\0";
+	ui_items = "Off\0Press\0Hold Down\0Press Adjust\0Hold Down Adjust\0";
 	ui_label = " FPS Focus Depth";
 	ui_tooltip = "This lets the shader handle real time depth reduction for aiming down your sights.\n"
 				 "This may induce Eye Strain so take this as an Warning.";
 	ui_category = "Weapon Hand Adjust";
 > = 0;
+
+uniform float FD_Adjust <
+	ui_type = "drag";
+	ui_min = 0.125; ui_max = 0.5;
+	ui_label = " Focus Depth Adjust";
+	ui_tooltip = "FPS Focus Depth Adjustment. Default is 0.25f.";
+	ui_category = "Weapon Hand Adjust";
+> = 0.25;
 #if HUD_MODE || HM
 //Heads-Up Display
 uniform float2 HUD_Adjust <
@@ -390,7 +398,7 @@ uniform float3 Adjust <
 	#else
 	ui_type = "slider";
 	#endif
-	ui_min = -1; ui_max = 1; ui_step = 0.0001;
+	ui_min = 0; ui_max = 1; ui_step = 0.0001;
 	ui_label = "·Adjust·";
 	ui_tooltip = "Adjust.";
 	ui_category = "Adjust";
@@ -551,9 +559,9 @@ float Fade_in_out(float2 texcoord)
 {
 	float Trigger_Fade, AA = (1-Fade_Time_Adjust)*1000, PStoredfade = tex2D(SamplerLumN,texcoord).z;
 	//Fade in toggle. 
-	if(FPSDFIO == 1)
+	if(FPSDFIO == 1 || FPSDFIO == 3)
 		Trigger_Fade = Trigger_Fade_A;
-	else if(FPSDFIO == 2)
+	else if(FPSDFIO == 2 || FPSDFIO == 4)
 		Trigger_Fade = Trigger_Fade_B;
 	
 	return PStoredfade + (Trigger_Fade - PStoredfade) * (1.0 - exp(-frametime/AA)); ///exp2 would be even slower  	
@@ -790,8 +798,10 @@ float AutoDepthRange(float d, float2 texcoord )
 }
 #if RE_Fix || RE
 float AutoZPDRange(float ZPD, float2 texcoord )
-{
-	float LumAdjust_AZDPR = smoothstep(-0.0175,0.1875,Lum(texcoord).y); //Adjusted to only effect really intense differences.
+{   //Adjusted to only effect really intense differences.
+	float LumAdjust_AZDPR = smoothstep(-0.0175,0.1875,Lum(texcoord).y);
+	if(RE_Fix == 2 || RE == 2)
+		LumAdjust_AZDPR = smoothstep(0,0.075,Lum(texcoord).y);
     return saturate(LumAdjust_AZDPR * ZPD);
 }
 #endif
@@ -1005,7 +1015,9 @@ float3 PS_calcLR(float2 texcoord)
 	float FadeIO = smoothstep(0,1,1-Fade_in_out(texcoord).x), FD = D;
 	
 	if (FPSDFIO == 1 || FPSDFIO == 2)
-		FD = lerp(FD * 0.0625,FD,FadeIO);
+		FD = lerp(FD * 0.0625,FD,FadeIO);	
+	else if (FPSDFIO == 3 || FPSDFIO == 4)
+		FD = lerp(FD * FD_Adjust,FD,FadeIO);
 		
 	float2 DLR = float2(FD,FD);
 	

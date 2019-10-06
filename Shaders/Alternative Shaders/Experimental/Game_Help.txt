@@ -54,7 +54,7 @@ Inner Shader Setting:
               Among The Sleep                              DM 0       37.500                               Yes     
               Assassin Creed Unity                         DM 1       20.000                                       
               Bayonetta                                    DM 0       15.000                                       
-    RB        Battlefield One                              DM 1       8.1250                                           Yes 3                  
+    RB        Battlefield One                              DM 1       8.1250                                           Yes 5                  
     RB        BattleTech                                   DM 1       75.000                                           Yes 1                  
     RB        Batman Arkham Asylum                         DM 0       18.750                                           Yes 4
               Batman Arkham Knight                         DM 0       22.500                                           Yes 4                                     

@@ -385,6 +385,12 @@ static const int NPW = 0;                 //No Profile Warning
 	#define DB_Y 1
 	#define RE 1 
 	#define TW 1
+#elif (App == 0x1335BAB8 )	//BattleField 1 
+	#define DA_W 1
+	#define DA_Y 8.125
+	#define DA_X 0.04
+	#define DB_Y 5
+	#define RE 2
 #else
 	#define NP 1 //No Profile
 #endif
