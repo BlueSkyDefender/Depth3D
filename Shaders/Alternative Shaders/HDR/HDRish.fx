@@ -1,15 +1,11 @@
- ////-------//
- ///**HDR**///
- //-------////
+ ////----------//
+ ///**HDRish**///
+ //----------////
 
  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
- //* HDR                                  																																			*//
+ //* HDRish                                  																																			*//
  //* For Reshade 3.0																																								*//
  //* --------------------------																																						*//
- //* This work is licensed under a Creative Commons Attribution 3.0 Unported License.																								*//
- //* So you are free to share, modify and adapt it for your needs, and even use it for commercial use.																				*//
- //* I would also love to hear about a project you are using it with.																												*//
- //* https://creativecommons.org/licenses/by/3.0/us/																																*//
  //*																																												*//
  //* Have fun,																																										*//
  //* Jose Negrete AKA BlueSkyDefender																																				*//
@@ -30,7 +26,7 @@
  //*		--																																										*//
  //*		Zavie                                                                                                         															*//
  //*																																												*//
- //* 																																												*//
+ //* 	Notes this shader should not work for use unless some how you can enable HDR out in it's raw form.																																											*//
  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 uniform int HDR_Tonemap_Select <

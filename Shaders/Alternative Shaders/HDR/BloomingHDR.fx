@@ -2,33 +2,64 @@
  ///**Blooming HDR**///
  //----------------////
 
- //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
- //* HDR Bloom AKA FakeHDR + Bloom                                               																									*//
- //* For Reshade 3.0																																								*//
- //* --------------------------																																						*//
- //* This work is licensed under a Creative Commons Attribution 3.0 Unported License.																								*//
- //* So you are free to share, modify and adapt it for your needs, and even use it for commercial use.																				*//
- //* I would also love to hear about a project you are using it with.																												*//
- //* https://creativecommons.org/licenses/by/3.0/us/																																*//
- //*																																												*//
- //* Have fun,																																										*//
- //* Jose Negrete AKA BlueSkyDefender																																				*//
- //*																																												*//
- //* http://reshade.me/forum/shader-presentation/2128-sidebyside-3d-depth-map-based-stereoscopic-shader																				*//	
- //* ---------------------------------																																				*//
- //*                                                                            																									*//
- //* 																																												*//
- //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////                                               																									*//
+// For Reshade 3.0 HDR Bloom AKA FakeHDR + Bloom 																																							
+// --------------------------																																						
+// LICENSE
+// ============
+// Blooming HDR is licenses under: Attribution-NoDerivatives 4.0 International
+//
+// You are free to:
+// Share - copy and redistribute the material in any medium or format
+// for any purpose, even commercially.
+// The licensor cannot revoke these freedoms as long as you follow the license terms.
+// Under the following terms:
+// Attribution - You must give appropriate credit, provide a link to the license, and indicate if changes were made. 
+// You may do so in any reasonable manner, but not in any way that suggests the licensor endorses you or your use.
+//
+// NoDerivatives - If you remix, transform, or build upon the material, you may not distribute the modified material.
+//
+// No additional restrictions - You may not apply legal terms or technological measures that legally restrict others from doing anything the license permits.
+//
+// https://creativecommons.org/licenses/by-nd/4.0/
+//
+// Have fun,																																								
+// Jose Negrete AKA BlueSkyDefender																																		
+// 																																											
+// https://github.com/BlueSkyDefender/Depth3D	
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+//Tone Mapping calulations, this changes the shader at an fundamental level.
+#define Simple_Tone_Mapping 0
+
+// Max Bloom ammount.
+#define Bloom_Max 250
+
+// This lets you addjust BlurSamples in ReShade UI and disables BlurSamples below.
+#define In_UI_Samples 0 //ON 1 - Off 0
+
+//The ammount of samples used for the Bloom, This is used for Blur quality
+#define BS 6 //Blur Samples = # * 4 with temporal mixing
+
+//WIP Automatic Blur Adjustment based on Resolutionsup to 8k considered. WIP
+#if (BUFFER_HEIGHT <= 720)
+	#define Multi 0.5
+#elif (BUFFER_HEIGHT <= 1080)
+	#define Multi 1.0
+#elif (BUFFER_HEIGHT <= 1440)
+	#define Multi 1.5
+#elif (BUFFER_HEIGHT <= 2160)
+	#define Multi 2
+#else
+	#define Quality 2.5
+#endif
+// WIP
 
 #if !defined(__RESHADE__) || __RESHADE__ < 40000
 	#define Compatibility 1
 #else
 	#define Compatibility 0
 #endif
-
-#define Simple_Tone_Mapping 0
-
-#define Bloom_Max 100
 			
 uniform float CBT_Adjust <
 	#if Compatibility
@@ -77,13 +108,28 @@ uniform float Saturation <
 	ui_category = "Bloom Adjustments";
 > = 2.5;
 
+#if In_UI_Samples
+uniform int Blur_Samples <
+	#if Compatibility
+	ui_type = "drag";
+	#else
+	ui_type = "slider";
+	#endif
+	ui_min = 5.0; ui_max = 25;
+	ui_label = "Bloom Samples";
+	ui_tooltip = "The ammount of samples used for the Bloom, This is used for Blur quality.\n"
+				 "Blur Samples = # * 4 with temporal mixing.\n"
+				 "Number 5 is default.";
+	ui_category = "Bloom Adjustments";
+> = 5;
+#endif
 uniform float Bloom_Spread_A <
 	#if Compatibility
 	ui_type = "drag";
 	#else
 	ui_type = "slider";
 	#endif
-	ui_min = 50.0; ui_max = Bloom_Max; ui_step = 0.25;
+	ui_min = 25.0; ui_max = Bloom_Max; ui_step = 0.25;
 	ui_label = "Bloom Spread";
 	ui_tooltip = "Adjust This to have the Bloom effect Spread.\n"
 				 "This is used for spreading Bloom.\n"
@@ -199,8 +245,16 @@ uniform int Debug_View <
 	ui_category = "Tonemapper Adjustments";
 > = 0;
 
+//Change Output
+#if In_UI_Samples
+    #define BlurSamples Blur_Samples
+#else
+	#define BlurSamples BS
+#endif
 /////////////////////////////////////////////////////D3D Starts Here/////////////////////////////////////////////////////////////////
 #define pix float2(BUFFER_RCP_WIDTH, BUFFER_RCP_HEIGHT)
+#define S_Power Bloom_Spread_A * 0.125
+uniform float timer < source = "timer"; >; 
 
 texture DepthBufferTex : DEPTH;
 
@@ -215,6 +269,17 @@ sampler BackBuffer
 	{ 
 		Texture = BackBufferTex;
 	};
+
+texture texMBlur_H { Width = BUFFER_WIDTH * 0.5; Height = BUFFER_HEIGHT *0.5; Format = RGBA16F; MipLevels = 2;};
+
+sampler SamplerBlur_H
+	{
+		Texture = texMBlur_H;
+		MinFilter = LINEAR;
+		MagFilter = LINEAR;
+		MipFilter = LINEAR;	
+	};	
+		
 				
 texture texMBlur_HVX { Width = BUFFER_WIDTH * 0.5; Height = BUFFER_HEIGHT *0.5; Format = RGBA16F; MipLevels = 2;};
 
@@ -312,7 +377,6 @@ float Average_Luminance(float4 pos : SV_Position, float2 texcoord : TEXCOORD) : 
 float3 Bright_Colors(float2 texcoords)
 {   
 	float BI = Bloom_Intensity, NC = saturate(smoothstep(0,1,1. - tex2D(SamplerAvgLum,0.0).x) - 0.625);
-    float2 tex_offset = (Bloom_Spread_A * 0.25) * pix; // Gets texel offset
 	float3 BC = tex2D(BackBuffer, texcoords).rgb;
      	
 	if(Auto_Bloom_Intensity)
@@ -335,54 +399,51 @@ float3 Bright_Colors(float2 texcoords)
 }
 
 
-float3 Blur_H(float2 texcoords )
+float3 Blur_H(float4 position : SV_Position, float2 texcoords : TEXCOORD) : SV_Target
 {
-	float2 tex_offset = Bloom_Spread_A  * pix ; // Gets texel offset
-	
-	if (Alternate)
-		tex_offset *= 0.5;
-		
-	float3 HB = Bright_Colors(texcoords).rgb;
 	//H	
-	HB += Bright_Colors(texcoords + float2( 1.0, 0) * tex_offset).rgb;
-	HB += Bright_Colors(texcoords + float2(-1.0, 0) * tex_offset).rgb;
-		
-	HB += Bright_Colors(texcoords + float2( 0.75, 0) * tex_offset).rgb;
-	HB += Bright_Colors(texcoords + float2(-0.75, 0) * tex_offset).rgb;
-		
-	HB += Bright_Colors(texcoords + float2( 0.5, 0) * tex_offset).rgb;
-	HB += Bright_Colors(texcoords + float2(-0.5, 0) * tex_offset).rgb;
+	float S = S_Power;
 	
+		if (Alternate)
+		S *= 0.5;
 	
-	HB += Bright_Colors(texcoords + float2( 0.25, 0) * tex_offset).rgb;
-	HB += Bright_Colors(texcoords + float2(-0.25, 0) * tex_offset).rgb;
-		
-	return HB / 9;	
+	float3 sum = Bright_Colors(texcoords) * BlurSamples;
+    
+    float total = BlurSamples;
+    
+    for ( int j = -BlurSamples; j <= BlurSamples; ++j)
+    {
+        float W = BlurSamples;
+        
+		sum += Bright_Colors(texcoords + float2(pix.x * S,0) * j ) * W;
+
+        total += W;
+    }
+	return saturate(sum / total); // Get it  Total sum..... :D		
 }
 
 float3 CombBlur_HV(float4 position : SV_Position, float2 texcoords : TEXCOORD) : SV_Target
 {
-	float2 tex_offset = Bloom_Spread_A  * pix ; // Gets texel offset
-	
-	if (Alternate)
-		tex_offset *= 0.5;
-		
-	float3 VB = Blur_H(texcoords).rgb;
 	//V	
-	VB += Blur_H(texcoords + float2( 0.0, 1.0) * tex_offset).rgb;
-	VB += Blur_H(texcoords + float2( 0.0,-1.0) * tex_offset).rgb;
-		
-	VB += Blur_H(texcoords + float2( 0.0, 0.75) * tex_offset).rgb;
-	VB += Blur_H(texcoords + float2( 0.0,-0.75) * tex_offset).rgb;
+	float S = S_Power;
 	
-	VB += Blur_H(texcoords + float2( 0.0, 0.5) * tex_offset).rgb;
-	VB += Blur_H(texcoords + float2( 0.0,-0.5) * tex_offset).rgb;
-		
-	VB += Blur_H(texcoords + float2( 0.0, 0.25) * tex_offset).rgb;
-	VB += Blur_H(texcoords + float2( 0.0,-0.25) * tex_offset).rgb;
+		if (Alternate)
+		S *= 0.5;
+	
+	float3 sum = tex2D(SamplerBlur_H,texcoords).rgb * BlurSamples;
+    
+    float total = BlurSamples;
+    
+    for ( int j = -BlurSamples; j <= BlurSamples; ++j)
+    {
+        float W = BlurSamples;
+        
+		sum += tex2D(SamplerBlur_H,texcoords + float2(0,pix.y * S) * j ).rgb * W;
 
-	
-	return VB / 9;	
+        total += W;
+    }
+	return saturate(sum / total); // Get it  Total sum..... :D		
+
  }
 
 float3 LastBlur(float2 texcoords : TEXCOORD0)
@@ -404,8 +465,7 @@ float3 LastBlur(float2 texcoords : TEXCOORD0)
 		result += tex2Dlod(SamplerBlur_HVX, float4(texcoords + float2( 0.5, 0.5) * tex_offset, 0, 0 + TM)).rgb;
 		result += tex2Dlod(SamplerBlur_HVX, float4(texcoords + float2(-0.5,-0.5) * tex_offset, 0, 0 + TM)).rgb;
 		result += tex2Dlod(SamplerBlur_HVX, float4(texcoords + float2(-0.5, 0.5) * tex_offset, 0, 0 + TM)).rgb;
-		result += tex2Dlod(SamplerBlur_HVX, float4(texcoords + float2( 0.5,-0.5) * tex_offset, 0, 0 + TM)).rgb;
-		
+		result += tex2Dlod(SamplerBlur_HVX, float4(texcoords + float2( 0.5,-0.5) * tex_offset, 0, 0 + TM)).rgb;	
    return result / 9;
 }
 
@@ -428,16 +488,7 @@ float4 HDROut(float2 texcoords : TEXCOORD0)
 
 	//Blur Acculimation 		
 	float3 acc = tex2Dlod(SamplerBloom,float4(texcoords,0, BSA)).rgb;
-	//H
-	acc += tex2Dlod(SamplerBloom,float4(texcoords + float2( 0.75 , 0) * tex_offset,0, BSA)).rgb;
-	acc += tex2Dlod(SamplerBloom,float4(texcoords + float2(-0.75 , 0) * tex_offset,0, BSA)).rgb;
-	acc += tex2Dlod(SamplerBloom,float4(texcoords + float2( 0.5, 0) * tex_offset,0, BSA)).rgb;
-	acc += tex2Dlod(SamplerBloom,float4(texcoords + float2(-0.5, 0) * tex_offset,0, BSA)).rgb;
-	//V
-	acc += tex2Dlod(SamplerBloom,float4(texcoords + float2( 0, 0.75 ) * tex_offset,0, BSA)).rgb;
-	acc += tex2Dlod(SamplerBloom,float4(texcoords + float2( 0,-0.75 ) * tex_offset,0, BSA)).rgb;
-	acc += tex2Dlod(SamplerBloom,float4(texcoords + float2( 0, 0.5) * tex_offset,0, BSA)).rgb;
-	acc += tex2Dlod(SamplerBloom,float4(texcoords + float2( 0,-0.5) * tex_offset,0, BSA)).rgb;
+	
 	//X
 	acc += tex2Dlod(SamplerBloom,float4(texcoords + float2( 0.75, 0.75 ) * tex_offset,0, BSA)).rgb;
 	acc += tex2Dlod(SamplerBloom,float4(texcoords + float2(-0.75,-0.75 ) * tex_offset,0, BSA)).rgb;
@@ -448,9 +499,9 @@ float4 HDROut(float2 texcoords : TEXCOORD0)
 	acc += tex2Dlod(SamplerBloom,float4(texcoords + float2(-0.5,-0.5) * tex_offset,0, BSA)).rgb;
 	acc += tex2Dlod(SamplerBloom,float4(texcoords + float2( 0.5,-0.5) * tex_offset,0, BSA)).rgb;
 	acc += tex2Dlod(SamplerBloom,float4(texcoords + float2(-0.5, 0.5) * tex_offset,0, BSA)).rgb;
-
-	acc /= 17;
-		
+	
+	acc /= 9;
+	
 	float4 Out;
     float3 Color = tex2D(BackBuffer, texcoords).rgb, Bloom = acc;
 		
@@ -513,7 +564,6 @@ float PS_StoreAvgLuma(float4 pos : SV_Position, float2 texcoord : TEXCOORD) : SV
     return tex2D(SamplerAvgLum,texcoord).x;
 }
 
-uniform float timer < source = "timer"; >;
 ////////////////////////////////////////////////////////Logo/////////////////////////////////////////////////////////////////////////
 float4 Out(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Target
 {
@@ -620,13 +670,19 @@ void PostProcessVS(in uint id : SV_VertexID, out float4 position : SV_Position, 
 //*Rendering passes*//
 technique Blooming_HDR
 {	
-		pass MIP_Blur_HVX
+		pass MIP_Blur_H
+	{
+		VertexShader = PostProcessVS;
+		PixelShader = Blur_H;
+		RenderTarget0 = texMBlur_H;
+	}
+		pass MIP_Blur_HV
 	{
 		VertexShader = PostProcessVS;
 		PixelShader = CombBlur_HV;
 		RenderTarget0 = texMBlur_HVX;
 	}
-			pass Temporal_Mixing_Bloom
+		pass Temporal_Mixing_Bloom
 	{
 		VertexShader = PostProcessVS;
 		PixelShader = Mix_Bloom;
@@ -657,7 +713,7 @@ technique Blooming_HDR
 		RenderTarget = PastSingle_BackBuffer;	
 	}
 	
-	  pass StoreAvgLuma
+	    pass StoreAvgLuma
     {
         VertexShader = PostProcessVS;
         PixelShader = PS_StoreAvgLuma;

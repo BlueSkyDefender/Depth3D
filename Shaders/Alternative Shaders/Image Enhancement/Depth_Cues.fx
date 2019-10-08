@@ -3,13 +3,8 @@
  //---------------////
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Depth Based Unsharp Mask Bilateral Contrast Adaptive Sharpening                                     																										
-// For Reshade 3.0+																																					
-// --------------------------																																			
-// Have fun,																																								
-// Jose Negrete AKA BlueSkyDefender																																		
-// 																																											
-// https://github.com/BlueSkyDefender/Depth3D																	
+// Depth Based Unsharp Mask haloing                                     																										
+// For Reshade 3.0+																																																																																						
 //  ---------------------------------																																	                                                                                                        																	                                                      
 //                                                       Depth Cues
 //                                Extra Information for where I got the Idea for Depth Cues.
@@ -32,6 +27,11 @@
 // No additional restrictions - You may not apply legal terms or technological measures that legally restrict others from doing anything the license permits.
 //
 // https://creativecommons.org/licenses/by-nd/4.0/
+//
+// Have fun,																																								
+// Jose Negrete AKA BlueSkyDefender																																		
+// 																																											
+// https://github.com/BlueSkyDefender/Depth3D	
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #if exists "Overwatch.fxh"                                           //Overwatch Intercepter//	
 	#include "Overwatch.fxh"
