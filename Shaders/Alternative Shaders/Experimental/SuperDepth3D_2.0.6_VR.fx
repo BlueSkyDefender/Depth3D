@@ -5,20 +5,40 @@
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //* Depth Map Based 3D post-process shader v2.0.6          																														
 //* For Reshade 3.0+																																								
-//* --------------------------																																					
-//* This work is licensed under a Creative Commons Attribution 3.0 Unported License.																							
-//* So you are free to share, modify and adapt it for your needs, and even use it for commercial use.																			
-//* I would also love to hear about a project you are using it with.																											
-//* https://creativecommons.org/licenses/by/3.0/us/																																
-//*																																												
-//* Jose Negrete AKA BlueSkyDefender																																				
-//*																																												
-//* http://reshade.me/forum/shader-presentation/2128-sidebyside-3d-depth-map-based-stereoscopic-shader																				
 //* ---------------------------------																																			
 //*																																												
 //* Original work was based on the shader code from																																
 //* CryTech 3 Dev http://www.slideshare.net/TiagoAlexSousa/secrets-of-cryengine-3-graphics-technology																				
-//* Also Fu-Bama a shader dev at the reshade forums https://reshade.me/forum/shader-presentation/5104-vr-universal-shader															
+//* Also Fu-Bama a shader dev at the reshade forums https://reshade.me/forum/shader-presentation/5104-vr-universal-shader
+//* Also had to rework Philippe David http://graphics.cs.brown.edu/games/SteepParallax/index.html code to work with reshade. This is used for the parallax effect.               
+//* This idea was taken from this shader here located at https://github.com/Fubaxiusz/fubax-shaders/blob/596d06958e156d59ab6cd8717db5f442e95b2e6b/Shaders/VR.fx#L395              
+//* It's also based on Philippe David Steep Parallax mapping code. If I missed any information please contact me so I can make corrections.                                      
+//*
+//* 													Multi-licensing	
+//* LICENSE
+//* ============
+//* Overwatch & Code out side the work of people mention above is licenses under: Attribution-NoDerivatives 4.0 International
+//*
+//* You are free to:
+//* Share - copy and redistribute the material in any medium or format
+//* for any purpose, even commercially.
+//* The licensor cannot revoke these freedoms as long as you follow the license terms.
+//* Under the following terms:
+//* Attribution - You must give appropriate credit, provide a link to the license, and indicate if changes were made. 
+// *You may do so in any reasonable manner, but not in any way that suggests the licensor endorses you or your use.
+//*
+//* NoDerivatives - If you remix, transform, or build upon the material, you may not distribute the modified material.
+//*
+//* No additional restrictions - You may not apply legal terms or technological measures that legally restrict others from doing anything the license permits.
+//*
+//* https://creativecommons.org/licenses/by-nd/4.0/
+//*														
+//* Have fun,                                                                                                                                                                    
+//* Jose Negrete AKA BlueSkyDefender                                                                                                                                              
+//*                                                                                                                                                                              
+//* https://github.com/BlueSkyDefender/Depth3D                                                                                                                                 
+//* http://reshade.me/forum/shader-presentation/2128-sidebyside-3d-depth-map-based-stereoscopic-shader                                                                            
+//*
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #if exists "Overwatch.fxh"                                           //Overwatch Intercepter//	
 	#include "Overwatch.fxh"

@@ -5,13 +5,8 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Depth Based Unsharp Mask Non Local Means Contrast Adaptive Sharpening                                     																										
 // For Reshade 3.0+																																					
-// --------------------------																																			
-// Have fun,																																								
-// Jose Negrete AKA BlueSkyDefender																																		
-// 																																											
-// https://github.com/BlueSkyDefender/Depth3D																	
 //  ---------------------------------
-//	https://web.stanford.edu/class/cs448f/lectures/2.1/Sharpening.pdf
+//								https://web.stanford.edu/class/cs448f/lectures/2.1/Sharpening.pdf
 //																																	                                                                                                        																	
 // 								Non-Local Means Made by panda1234lee ported over to Reshade by BSD													
 //								Link for sorce info listed below																
@@ -20,7 +15,8 @@
 //								Non-Local Means sharpening figures out what
 //								makes me different from other similar things
 //								in the image, and exaggerates that
-//                                                     
+//
+// 													Multi-licensing                                                     
 // LICENSE
 // =======
 // Copyright (c) 2017-2019 Advanced Micro Devices, Inc. All rights reserved.
@@ -37,11 +33,10 @@
 // WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE AUTHORS OR
 // COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
 // ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE
-// Ext. LICENSE
+//
+// LICENSE
 // ============
-// Overwatch is licenses under: Attribution-NoDerivatives 4.0 International
-// This includes sections of the Debugging code and NLM sharps special modification out side of the code that was changed from AMD's
-// CAS.
+// Overwatch & Code out side the work of people mention above is licenses under: Attribution-NoDerivatives 4.0 International
 //
 // You are free to:
 // Share - copy and redistribute the material in any medium or format
@@ -56,7 +51,14 @@
 // No additional restrictions - You may not apply legal terms or technological measures that legally restrict others from doing anything the license permits.
 //
 // https://creativecommons.org/licenses/by-nd/4.0/
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//														
+// Have fun,                                                                                                                                                                    
+// Jose Negrete AKA BlueSkyDefender                                                                                                                                              
+//                                                                                                                                                                              
+// https://github.com/BlueSkyDefender/Depth3D                                                                                                                                 
+// http://reshade.me/forum/shader-presentation/2128-sidebyside-3d-depth-map-based-stereoscopic-shader                                                                            
+//
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #if exists "Overwatch.fxh"                                           //Overwatch Intercepter//	
 	#include "Overwatch.fxh"
 #else //DA_W Depth_Linearization | DB_X Depth_Flip
@@ -276,9 +278,10 @@ float4 CAS(float2 texcoord)
 	if( CAM_IOB )
 		RGB_D = saturate(min(mnRGB, 2.0 - mxRGB) * rcpMRGB);
           
-	//Non-Local Mean// - https://blog.csdn.net/panda1234lee/article/details/88016834      
+	//Non-Local Mean// - https://blog.csdn.net/panda1234lee/article/details/88016834   
+    //Also indicated if changes were made. Included with the porting to ReShade FX.  
    float sum2;
-   float2 RPC_WS = pix * GT();
+   float2 RPC_WS = pix * GT(); //Inversetexl Size selection.
    float4 sum1;
 	//Traverse the search window
    for(float y = -search_radius; y <= search_radius; ++y)
@@ -292,20 +295,21 @@ float4 CAS(float2 texcoord)
           { 
              for(float tx = -block_radius; tx <= block_radius; ++tx)
              {  //clamping to increase performance & Search window neighborhoods
-                float4 bv = saturate(  BB(texcoord, float2(x + tx, y + ty) * RPC_WS) );
+                float4 bv = saturate(  BB(texcoord, float2(x + tx, y + ty) * RPC_WS) ); //Changed the texture input to allow for ReShade FX HLSL
                 //Current pixel neighborhood
-                float4 av = saturate(  BB(texcoord, float2(tx, ty) * RPC_WS) );
+                float4 av = saturate(  BB(texcoord, float2(tx, ty) * RPC_WS) );//Changed the texture input to allow for ReShade FX HLSL
                 
                 dist += normaL2(av - bv);
              }
           }
 		  //Gaussian weights (calculated from the color distance and pixel distance of all base windows) under a search window
           float window = exp(dist * noise_mult + (pow(x, 2) + pow(y, 2)) * minus_search_window2_inv);
- 
-          sum1 +=  window * saturate( BB(texcoord, float2(x, y) * RPC_WS) ); //Gaussian weight * pixel value         
+		  //Gaussian weight * pixel value 
+          sum1 +=  window * saturate( BB(texcoord, float2(x, y) * RPC_WS) ); //Changed the texture input to allow for ReShade FX HLSL        
           sum2 += window; //Accumulate Gaussian weights for all search windows for normalization
       }
    }
+   //NLM Code Ends here
    // Shaping amount of sharpening masked
 	float CAS_Mask = RGB_D;
 

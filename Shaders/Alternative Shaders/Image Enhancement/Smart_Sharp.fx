@@ -5,19 +5,16 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Depth Based Unsharp Mask Bilateral Contrast Adaptive Sharpening                                     																										
 // For Reshade 3.0+																																					
-// --------------------------																																			
-// Have fun,																																								
-// Jose Negrete AKA BlueSkyDefender																																		
-// 																																											
-// https://github.com/BlueSkyDefender/Depth3D																	
 //  ---------------------------------
-//	https://web.stanford.edu/class/cs448f/lectures/2.1/Sharpening.pdf
+//								https://web.stanford.edu/class/cs448f/lectures/2.1/Sharpening.pdf
 //																																                                                                                                        																	
 // 								Bilateral Filter Made by mrharicot ported over to Reshade by BSD													
 //								GitHub Link for sorce info github.com/SableRaf/Filters4Processin																
 // 								Shadertoy Link https://www.shadertoy.com/view/4dfGDH  Thank You.
 //
-//                                     Everyone wants to best the bilateral filter.....                        
+//                                     Everyone wants to best the bilateral filter.....  
+//                      
+// 													Multi-licensing                                                     
 // LICENSE
 // =======
 // Copyright (c) 2017-2019 Advanced Micro Devices, Inc. All rights reserved.
@@ -34,11 +31,11 @@
 // WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE AUTHORS OR
 // COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
 // ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE
-// Ext. LICENSE
+//
+// LICENSE
 // ============
-// Overwatch is licenses under: Attribution-NoDerivatives 4.0 International
-// This includes sections of the Debugging code and smart sharps special modification out side of the code that was changed from AMD's
-// CAS.
+// Overwatch & Code out side the work of people mention above is licenses under: Attribution-NoDerivatives 4.0 International
+//
 // You are free to:
 // Share - copy and redistribute the material in any medium or format
 // for any purpose, even commercially.
@@ -52,7 +49,14 @@
 // No additional restrictions - You may not apply legal terms or technological measures that legally restrict others from doing anything the license permits.
 //
 // https://creativecommons.org/licenses/by-nd/4.0/
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//														
+// Have fun,                                                                                                                                                                    
+// Jose Negrete AKA BlueSkyDefender                                                                                                                                              
+//                                                                                                                                                                              
+// https://github.com/BlueSkyDefender/Depth3D                                                                                                                                 
+// http://reshade.me/forum/shader-presentation/2128-sidebyside-3d-depth-map-based-stereoscopic-shader                                                                            
+//
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #if exists "Overwatch.fxh"                                           //Overwatch Intercepter//	
 	#include "Overwatch.fxh"
 #else //DA_W Depth_Linearization | DB_X Depth_Flip
