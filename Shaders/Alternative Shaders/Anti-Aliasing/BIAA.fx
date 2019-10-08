@@ -115,13 +115,17 @@ float4 BIAA(float2 texcoord)
 	    Edge += EdgeDetection( texcoord +X -Y, Offset);
 	    Edge += EdgeDetection( texcoord +X +Y, Offset);
 	       	    
-	    //Revert then Normalize New gradient
+	    //Revert gradient
 	    N = float2(Edge.x,-Edge.y);
-	    N = normalize(N);
+
 	    
 	    // Like NFAA reproject with samples along the edge and adjust againts it self.
-		// May add 2-4 more samples later like NFAA 
-	    float AA_Adjust = (AA_Power * 0.5);   
+		// Will Be Making changes for short edges and long later.
+	    float AA_Adjust = AA_Power * rcp(6);   
+		result += tex2D(BackBuffer, texcoord+(N * 0.5)*Offset).rgb * AA_Adjust;
+		result += tex2D(BackBuffer, texcoord-(N * 0.5)*Offset).rgb * AA_Adjust;
+		result += tex2D(BackBuffer, texcoord+(N * 0.25)*Offset).rgb * AA_Adjust;
+		result += tex2D(BackBuffer, texcoord-(N * 0.25)*Offset).rgb * AA_Adjust;
 		result += tex2D(BackBuffer, texcoord+N*Offset).rgb * AA_Adjust;
 		result += tex2D(BackBuffer, texcoord-N*Offset).rgb * AA_Adjust;
 	}
