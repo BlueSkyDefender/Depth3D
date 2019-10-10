@@ -39,7 +39,7 @@
 #define In_UI_Samples 0 //ON 1 - Off 0
 
 //The ammount of samples used for the Bloom, This is used for Blur quality
-#define BS 6 //Blur Samples = # * 4 with temporal mixing
+#define BS 10 //Blur Samples = # * 4 with temporal mixing
 
 //WIP Automatic Blur Adjustment based on Resolutionsup to 8k considered. WIP
 #if (BUFFER_HEIGHT <= 720)
@@ -61,7 +61,7 @@
 	#define Compatibility 0
 #endif
 			
-uniform float CBT_Adjust <
+uniform float2 CBT_Adjust <
 	#if Compatibility
 	ui_type = "drag";
 	#else
@@ -71,9 +71,10 @@ uniform float CBT_Adjust <
 	ui_label = "Extracting Bright Colors";
 	ui_tooltip = "Use this to set the color based brightness threshold for what is and what isn't allowed.\n"
 				"This is the most important setting, use Debug View to adjust this.\n"
-				"Number 0.5 is default.";
+				"X is for primary and Y is for Secondary.\n"
+				"Number X 0.5 is default and for Y 0.625.";
 	ui_category = "Bloom Adjustments";
-> = 0.5;
+> = float2(0.5,0.625);
 
 uniform bool Auto_Bloom_Intensity <
 	ui_label = "Auto Bloom Intensity";
@@ -81,32 +82,6 @@ uniform bool Auto_Bloom_Intensity <
 				 "Auto Bloom Intensity will set Bloom Intensity below.";
 	ui_category = "Bloom Adjustments";
 > = true;
-
-uniform float Bloom_Intensity<
-	#if Compatibility
-	ui_type = "drag";
-	#else
-	ui_type = "slider";
-	#endif
-	ui_min = 0.0; ui_max = 5.0;
-		ui_label = "Bloom Intensity";
-	ui_tooltip = "Use this to set Bloom Intensity for your content.\n"
-				"Number 1.0 is default.";
-	ui_category = "Bloom Adjustments";
-> = 1.0;
-
-uniform float Saturation <
-	#if Compatibility
-	ui_type = "drag";
-	#else
-	ui_type = "slider";
-	#endif
-	ui_min = 0.0; ui_max = 4.0;
-	ui_label = "Bloom Saturation";
-	ui_tooltip = "Adjustment The amount to adjust the saturation of the color.\n"
-				"Number 2.5 is default.";
-	ui_category = "Bloom Adjustments";
-> = 2.5;
 
 #if In_UI_Samples
 uniform int Blur_Samples <
@@ -123,32 +98,72 @@ uniform int Blur_Samples <
 	ui_category = "Bloom Adjustments";
 > = 5;
 #endif
+
+uniform float Bloom_Intensity_A<
+	#if Compatibility
+	ui_type = "drag";
+	#else
+	ui_type = "slider";
+	#endif
+	ui_min = 0.0; ui_max = 5.0;
+		ui_label = "Primary Bloom Intensity";
+	ui_tooltip = "Use this to set Bloom Intensity for your content.\n"
+				"Number 1.0 is default.";
+	ui_category = "Bloom Adjustments";
+> = 1.0;
+
 uniform float Bloom_Spread_A <
 	#if Compatibility
 	ui_type = "drag";
 	#else
 	ui_type = "slider";
 	#endif
-	ui_min = 25.0; ui_max = Bloom_Max; ui_step = 0.25;
-	ui_label = "Bloom Spread";
-	ui_tooltip = "Adjust This to have the Bloom effect Spread.\n"
+	ui_min = 12.5; ui_max = Bloom_Max; ui_step = 0.25;
+	ui_label = "Primary Bloom Spread";
+	ui_tooltip = "Adjust to spread out the primary Bloom.\n"
 				 "This is used for spreading Bloom.\n"
 				 "Number 50.0 is default.";
 	ui_category = "Bloom Adjustments";
 > = 50.0;
 
-//uniform float Bloom_Spread_B <
-//	#if Compatibility
-//	ui_type = "drag";
-//	#else
-//	ui_type = "slider";
-//	#endif
-//	ui_min = 1.0; ui_max = 50.0; ui_step = 0.125;
-//	ui_label = "Bloom Spread+";
-//	ui_tooltip = "Adjust This to have the Bloom expand even more.\n"
-//				 "Number One is default.";
-//	ui_category = "Bloom Adjustments";
-//> = 2.5;
+uniform float Saturation <
+	#if Compatibility
+	ui_type = "drag";
+	#else
+	ui_type = "slider";
+	#endif
+	ui_min = 0.0; ui_max = 4.0;
+	ui_label = "Bloom Saturation";
+	ui_tooltip = "Adjustment The amount to adjust the saturation of the color.\n"
+				"Number 2.5 is default.";
+	ui_category = "Bloom Adjustments";
+> = 2.5;
+
+uniform float Bloom_Intensity_B<
+	#if Compatibility
+	ui_type = "drag";
+	#else
+	ui_type = "slider";
+	#endif
+	ui_min = 0.0; ui_max = 5.0;
+		ui_label = "Secondary Bloom Intensity";
+	ui_tooltip = "Use this to set Bloom Intensity for your content.\n"
+				"Number 1.0 is default.";
+	ui_category = "Bloom Adjustments";
+> = 1.0;
+
+uniform float Bloom_Spread_B <
+	#if Compatibility
+	ui_type = "drag";
+	#else
+	ui_type = "slider";
+	#endif
+	ui_min = 1.0; ui_max = 5.0; ui_step = 0.125;
+	ui_label = "Secondary Bloom Spread";
+	ui_tooltip = "Use this to adjust smaller bloom size.\n"
+				 "Number One is 2.5.";
+	ui_category = "Bloom Adjustments";
+> = 2.5;
 
 uniform int Luma_Coefficient <
 	ui_type = "combo";
@@ -239,7 +254,7 @@ uniform float Adapt_Seek <
 uniform int Debug_View <
 	ui_type = "combo";
 	ui_label = "Debug View";
-	ui_items = "Normal View\0Bloom View\0";
+	ui_items = "Normal View\0Bloom View A\0Bloom View B\0";
 	ui_tooltip = "To view Shade & Blur effect on the game, movie piture & ect.";
 	ui_category = "Debugging";
 	ui_category = "Tonemapper Adjustments";
@@ -253,7 +268,10 @@ uniform int Debug_View <
 #endif
 /////////////////////////////////////////////////////D3D Starts Here/////////////////////////////////////////////////////////////////
 #define pix float2(BUFFER_RCP_WIDTH, BUFFER_RCP_HEIGHT)
-#define S_Power Bloom_Spread_A * 0.125
+#define S_Power Bloom_Spread_A * rcp(BlurSamples)
+#define M_Power (Bloom_Spread_B + 1)
+#define Added_BG 0.125 //magic number
+
 uniform float timer < source = "timer"; >; 
 
 texture DepthBufferTex : DEPTH;
@@ -290,7 +308,29 @@ sampler SamplerBlur_HVX
 		MagFilter = LINEAR;
 		MipFilter = LINEAR;	
 	};	
-		
+//Mini start
+
+texture texMBlur_Hm { Width = BUFFER_WIDTH * 0.5; Height = BUFFER_HEIGHT *0.5; Format = RGBA16F; MipLevels = 2;};
+
+sampler SamplerBlur_Hm
+	{
+		Texture = texMBlur_Hm;
+		MinFilter = LINEAR;
+		MagFilter = LINEAR;
+		MipFilter = LINEAR;	
+	};
+
+texture texMBlur_HVXm { Width = BUFFER_WIDTH * 0.5; Height = BUFFER_HEIGHT *0.5; Format = RGBA16F; MipLevels = 2;};
+
+sampler SamplerBlur_HVXm
+	{
+		Texture = texMBlur_HVXm;
+		MinFilter = LINEAR;
+		MagFilter = LINEAR;
+		MipFilter = LINEAR;	
+	};		
+
+//Mini end		
 texture texBloom { Width = BUFFER_WIDTH ; Height = BUFFER_HEIGHT ; Format = RGBA16F; MipLevels = 2;};
 
 sampler SamplerBloom
@@ -353,7 +393,11 @@ sampler SamplerAvgLum
 	};
 	
 texture2D TexAvgLumaLast { Format = R16F; };
-sampler SamplerAvgLumaLast { Texture = TexAvgLumaLast; };	
+
+sampler SamplerAvgLumaLast 
+	{ 
+		Texture = TexAvgLumaLast; 
+	};	
 	
 float Luminance(float4 pos : SV_Position, float2 texcoord : TEXCOORD) : SV_Target	
 {   
@@ -374,55 +418,72 @@ float Average_Luminance(float4 pos : SV_Position, float2 texcoord : TEXCOORD) : 
    
 //////////////////////////////////////////////////////////////	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-float3 Bright_Colors(float2 texcoords)
+float3 Bright_Colors_A(float2 texcoords)
 {   
-	float BI = Bloom_Intensity, NC = saturate(smoothstep(0,1,1. - tex2D(SamplerAvgLum,0.0).x) - 0.625);
-	float3 BC = tex2D(BackBuffer, texcoords).rgb;
-     	
+	float BI_A = Bloom_Intensity_A, BI_B = Bloom_Intensity_B, NC = saturate(smoothstep(0,1,1. - tex2D(SamplerAvgLum,0.0).x) - 0.625);
+	
 	if(Auto_Bloom_Intensity)
-		BI *= NC;
+		BI_A *= NC;
 	else
-		BI = 0.25 * Bloom_Intensity;
-		
+		BI_A = 0.25 * Bloom_Intensity_A;
+
+	float3 BC = tex2D(BackBuffer, texcoords).rgb,intensity = dot(BC.rgb,Luma());			
 	// Check whether fragment output is higher than threshold,if so output as brightness color.
     float brightness = dot(BC.rgb, Luma());
     
-    if(brightness > CBT_Adjust)
-    	BC.rgb = BC.rgb;
-    else
-    	BC.rgb = lerp(float3(0.0, 0.0, 0.0),BC.rgb,0.1875);
-	
-	float3 intensity = dot(BC.rgb,Luma());
+    BC.rgb = brightness > CBT_Adjust.x ? BC.rgb : lerp(0,BC.rgb,Added_BG);
+	intensity.rgb = brightness > CBT_Adjust.x ? intensity.rgb : lerp(0,intensity.rgb,Added_BG);
+
     BC.rgb = lerp(intensity,BC.rgb,Saturation);  
-	// The result of the bright-pass filter is then downscaled.
-	return BC * BI;	
+	// The result of the bright-pass filter is then downscaled.	
+	return BC * BI_A;	
 }
 
-
-float3 Blur_H(float4 position : SV_Position, float2 texcoords : TEXCOORD) : SV_Target
-{
-	//H	
-	float S = S_Power;
+float3 Bright_Colors_B(float2 texcoords)
+{   
+	float BI_B = Bloom_Intensity_B, NC = saturate(smoothstep(0,1,1. - tex2D(SamplerAvgLum,0.0).x) - 0.625);
 	
-		if (Alternate)
+	if(Auto_Bloom_Intensity)
+		BI_B *= NC;
+	else
+		BI_B = 0.25 * Bloom_Intensity_B;
+
+	float3 BC = tex2D(BackBuffer, texcoords).rgb,intensity = dot(BC.rgb,Luma());			
+	// Check whether fragment output is higher than threshold,if so output as brightness color.
+    float brightness = dot(BC.rgb, Luma());
+    
+    BC.rgb = brightness > CBT_Adjust.y ? BC.rgb : lerp(0,BC.rgb,Added_BG);
+	intensity.rgb = brightness > CBT_Adjust.y ? intensity.rgb : lerp(0,intensity.rgb,Added_BG);
+	
+    BC.rgb = lerp(intensity,BC.rgb,Saturation);  
+	// The result of the bright-pass filter is then downscaled.	
+	return BC * BI_B;	
+}
+
+void Blur_H(in float4 position : SV_Position, in float2 texcoords : TEXCOORD0, out float3 color_A : SV_Target0 , out float3 color_B: SV_Target1)
+{   float S = S_Power;  
+	if (Alternate)
 		S *= 0.5;
+	//H
+	float3 sum_A = Bright_Colors_A(texcoords).rgb * BlurSamples, sum_B = Bright_Colors_B(texcoords).rgb * BlurSamples;
 	
-	float3 sum = Bright_Colors(texcoords) * BlurSamples;
-    
-    float total = BlurSamples;
-    
-    for ( int j = -BlurSamples; j <= BlurSamples; ++j)
-    {
-        float W = BlurSamples;
-        
-		sum += Bright_Colors(texcoords + float2(pix.x * S,0) * j ) * W;
-
-        total += W;
-    }
-	return saturate(sum / total); // Get it  Total sum..... :D		
+	float total = BlurSamples;
+	
+	for ( int j = -BlurSamples; j <= BlurSamples; ++j)
+	{
+	    float W = BlurSamples;
+	    
+		sum_A += Bright_Colors_A(texcoords + float2(pix.x * S,0) * j ).rgb * W;		
+		sum_B += Bright_Colors_B(texcoords + float2(pix.x * M_Power,0) * j ).rgb * W;
+		
+	    total += W;
+	}
+	
+	color_A = sum_A / total; // Get it  Total sum..... :D
+	color_B = sum_B / total;	
 }
 
-float3 CombBlur_HV(float4 position : SV_Position, float2 texcoords : TEXCOORD) : SV_Target
+void CombBlur_HV(in float4 position : SV_Position, in float2 texcoords : TEXCOORD0, out float3 color_A : SV_Target0 , out float3 color_B: SV_Target1)
 {
 	//V	
 	float S = S_Power;
@@ -430,7 +491,7 @@ float3 CombBlur_HV(float4 position : SV_Position, float2 texcoords : TEXCOORD) :
 		if (Alternate)
 		S *= 0.5;
 	
-	float3 sum = tex2D(SamplerBlur_H,texcoords).rgb * BlurSamples;
+	float3 sum_A = tex2Dlod(SamplerBlur_H,float4(texcoords,0,1)).rgb * BlurSamples, sum_B = tex2Dlod(SamplerBlur_H,float4(texcoords,0,1)).rgb * BlurSamples;
     
     float total = BlurSamples;
     
@@ -438,17 +499,19 @@ float3 CombBlur_HV(float4 position : SV_Position, float2 texcoords : TEXCOORD) :
     {
         float W = BlurSamples;
         
-		sum += tex2D(SamplerBlur_H,texcoords + float2(0,pix.y * S) * j ).rgb * W;
-
+		sum_A += tex2Dlod(SamplerBlur_H,float4(texcoords + float2(0,pix.y * S) * j,0,1) ).rgb * W;
+		sum_B += tex2Dlod(SamplerBlur_Hm,float4(texcoords + float2(0,pix.y * M_Power) * j,0,1) ).rgb * W;
+		
         total += W;
     }
-	return saturate(sum / total); // Get it  Total sum..... :D		
-
+    //saturate()
+color_A = sum_A / total; // Get it  Total sum..... :D
+color_B = sum_B / total;		
  }
 
 float3 LastBlur(float2 texcoords : TEXCOORD0)
-{
-	int TM;
+{			
+	float TM;
 	float2 tex_offset = Bloom_Spread_A * pix; // Gets texel offset
 		
 	if (Alternate)
@@ -456,22 +519,27 @@ float3 LastBlur(float2 texcoords : TEXCOORD0)
 		TM = 1;
 		tex_offset *= 0.5;
 	}
-	float3 result = tex2Dlod(SamplerBlur_HVX, float4(texcoords,0,0 + TM)).rgb;
+		// C
+		float3 result = tex2Dlod(SamplerBlur_HVX, float4(texcoords,0,0 + TM)).rgb;
+		// H
 		result += tex2Dlod(SamplerBlur_HVX, float4(texcoords + float2( 1.0, 0.0) * tex_offset, 0, 0 + TM)).rgb;
 		result += tex2Dlod(SamplerBlur_HVX, float4(texcoords + float2(-1.0, 0.0) * tex_offset, 0, 0 + TM)).rgb;
+		// V
 		result += tex2Dlod(SamplerBlur_HVX, float4(texcoords + float2( 0.0, 1.0) * tex_offset, 0, 0 + TM)).rgb;
 		result += tex2Dlod(SamplerBlur_HVX, float4(texcoords + float2( 0.0,-1.0) * tex_offset, 0, 0 + TM)).rgb;
-				
+		// /		
 		result += tex2Dlod(SamplerBlur_HVX, float4(texcoords + float2( 0.5, 0.5) * tex_offset, 0, 0 + TM)).rgb;
 		result += tex2Dlod(SamplerBlur_HVX, float4(texcoords + float2(-0.5,-0.5) * tex_offset, 0, 0 + TM)).rgb;
+		// \
 		result += tex2Dlod(SamplerBlur_HVX, float4(texcoords + float2(-0.5, 0.5) * tex_offset, 0, 0 + TM)).rgb;
-		result += tex2Dlod(SamplerBlur_HVX, float4(texcoords + float2( 0.5,-0.5) * tex_offset, 0, 0 + TM)).rgb;	
-   return result / 9;
+		result += tex2Dlod(SamplerBlur_HVX, float4(texcoords + float2( 0.5,-0.5) * tex_offset, 0, 0 + TM)).rgb;
+		
+   return result * rcp(9);
 }
 
 float3 Mix_Bloom(float4 position : SV_Position, float2 texcoords : TEXCOORD) : SV_Target	
 {
-	return LastBlur(texcoords) + tex2D(PSBackBuffer, texcoords).rgb; // Merge Current and past frame.
+	return LastBlur(texcoords).rgb + tex2D(PSBackBuffer, texcoords).rgb; // Merge Current and past frame.
 }
 
 float3 HableTonemap(float3 x)
@@ -483,13 +551,18 @@ float3 HableTonemap(float3 x)
 
 float4 HDROut(float2 texcoords : TEXCOORD0)
 {	
-	float A = 1-tex2D(SamplerAvgLum,0.0).x, Ex = Exp, BSA = Bloom_Spread_A * rcp(Bloom_Max*0.5); 
-	float2 tex_offset = (Bloom_Spread_A * 0.125) * pix; // Gets texel offsett
+	float AL = 1-tex2D(SamplerAvgLum,0.0).x, Ex = Exp, BSA = Bloom_Spread_A * rcp(Bloom_Max*0.5); 
+	float2 tex_offset = S_Power * pix,offset = (M_Power * pix) * 2; // Gets texel offsett
 
 	//Blur Acculimation 		
-	float3 acc = tex2Dlod(SamplerBloom,float4(texcoords,0, BSA)).rgb;
+	float3 acc = tex2Dlod(SamplerBloom,float4(texcoords,0, BSA)).rgb,Mini_Bloom = tex2Dlod(SamplerBlur_HVXm, float4(texcoords,0,1)).rgb;
 	
-	//X
+	//X	
+	Mini_Bloom += tex2Dlod(SamplerBlur_HVXm,float4(texcoords + float2( 0.5, 0.5) * offset,0, BSA)).rgb;
+	Mini_Bloom += tex2Dlod(SamplerBlur_HVXm,float4(texcoords + float2(-0.5,-0.5) * offset,0, BSA)).rgb;
+	Mini_Bloom += tex2Dlod(SamplerBlur_HVXm,float4(texcoords + float2( 0.5,-0.5) * offset,0, BSA)).rgb;
+	Mini_Bloom += tex2Dlod(SamplerBlur_HVXm,float4(texcoords + float2(-0.5, 0.5) * offset,0, BSA)).rgb;
+	
 	acc += tex2Dlod(SamplerBloom,float4(texcoords + float2( 0.75, 0.75 ) * tex_offset,0, BSA)).rgb;
 	acc += tex2Dlod(SamplerBloom,float4(texcoords + float2(-0.75,-0.75 ) * tex_offset,0, BSA)).rgb;
 	acc += tex2Dlod(SamplerBloom,float4(texcoords + float2( 0.75,-0.75 ) * tex_offset,0, BSA)).rgb;
@@ -500,13 +573,41 @@ float4 HDROut(float2 texcoords : TEXCOORD0)
 	acc += tex2Dlod(SamplerBloom,float4(texcoords + float2( 0.5,-0.5) * tex_offset,0, BSA)).rgb;
 	acc += tex2Dlod(SamplerBloom,float4(texcoords + float2(-0.5, 0.5) * tex_offset,0, BSA)).rgb;
 	
-	acc /= 9;
+	acc /= 8;
+	Mini_Bloom /= 4;
+	
+	
+	float DB  = 7,A = 1,B = 2,C = 3;
+	
+	A = frametime;
+	B = frametime + B;
+	C = frametime + C;
+	
+	float noise_A = frac(sin(dot(texcoords * A, float2(12.9898, 78.233))) * 43758.5453 * A);
+	float noise_B = frac(sin(dot(texcoords * B, float2(12.9898, 78.233))) * 43758.5453 * B);
+	float noise_C = frac(sin(dot(texcoords * C, float2(12.9898, 78.233))) * 43758.5453 * C);
+	float dither_shift = (1.0 / (pow(2,DB) - 1.0));
+	float dither_shift_half = (dither_shift * 0.5);
+	float dither_shift_A = dither_shift * noise_A - dither_shift_half;
+	float dither_shift_B = dither_shift * noise_B - dither_shift_half;
+	float dither_shift_C = dither_shift * noise_C - dither_shift_half;
+	
+	Mini_Bloom.r += -dither_shift_A;
+	Mini_Bloom.r += dither_shift_A;
+	Mini_Bloom.r += -dither_shift_A;
+	Mini_Bloom.g += -dither_shift_B;
+	Mini_Bloom.g += dither_shift_B;
+	Mini_Bloom.g += -dither_shift_B;
+	Mini_Bloom.b += -dither_shift_C;
+	Mini_Bloom.b += dither_shift_C;
+	Mini_Bloom.b += -dither_shift_C;	
 	
 	float4 Out;
-    float3 Color = tex2D(BackBuffer, texcoords).rgb, Bloom = acc;
-		
+    float3 Color = tex2D(BackBuffer, texcoords).rgb;
+	
 	//Add Bloom Done Befor Gamma and TM for hdr
-	Color += Bloom;
+	Color += acc;
+	Color += Mini_Bloom;
 	
 	// Do inital de-gamma of the game image to ensure we're operating in the correct colour range.
 	if( Gamma > 1. )
@@ -514,7 +615,7 @@ float4 HDROut(float2 texcoords : TEXCOORD0)
 	
 	//Tone map all the things	
 	if(Auto_Exposure)
-		Ex = A;
+		Ex = AL;
 
 	//Tone map all the things. But, first start with exposure.		
 	Color *= Ex;
@@ -549,14 +650,16 @@ float4 HDROut(float2 texcoords : TEXCOORD0)
 	if (Debug_View == 0)
 		Out = float4(Color, 1.);	
 	else if(Debug_View == 1)
-		Out = float4(Bloom, 1.);	
+		Out = float4(acc, 1.);
+	else if(Debug_View == 2)
+		Out = float4(Mini_Bloom, 1.);	
 		
 	return Out;
 }
 
 float4 Past_BackSingleBuffer(float4 pos : SV_Position, float2 texcoord : TEXCOORD) : SV_Target
 {	
-	 return float4(LastBlur(texcoord),1.0);
+	return float4(LastBlur(texcoord).rgb,1.0);
 }
 
 float PS_StoreAvgLuma(float4 pos : SV_Position, float2 texcoord : TEXCOORD) : SV_Target
@@ -675,12 +778,14 @@ technique Blooming_HDR
 		VertexShader = PostProcessVS;
 		PixelShader = Blur_H;
 		RenderTarget0 = texMBlur_H;
+		RenderTarget1 = texMBlur_Hm;
 	}
 		pass MIP_Blur_HV
 	{
 		VertexShader = PostProcessVS;
 		PixelShader = CombBlur_HV;
 		RenderTarget0 = texMBlur_HVX;
+		RenderTarget1 = texMBlur_HVXm;
 	}
 		pass Temporal_Mixing_Bloom
 	{
