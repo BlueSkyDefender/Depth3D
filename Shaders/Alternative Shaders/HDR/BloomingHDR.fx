@@ -37,7 +37,7 @@
 #define Simple_Tone_Mapping 0
 
 // Max Bloom ammount.
-#define Bloom_Max 250 //Limit is about 333
+#define Bloom_Max 300
 
 // This lets you addjust BlurSamples in ReShade UI and disables BlurSamples below.
 #define In_UI_Samples 0 //ON 1 - Off 0
@@ -303,7 +303,7 @@ sampler BackBuffer
 		Texture = BackBufferTex;
 	};
 
-texture texMBlur_H { Width = BUFFER_WIDTH * 0.5; Height = BUFFER_HEIGHT *0.5; Format = RGBA16F; MipLevels = 2;};
+texture texMBlur_H { Width = BUFFER_WIDTH * 0.25; Height = BUFFER_HEIGHT *0.25; Format = RGBA16F;};
 
 sampler SamplerBlur_H
 	{
@@ -314,7 +314,7 @@ sampler SamplerBlur_H
 	};	
 		
 				
-texture texMBlur_HVX { Width = BUFFER_WIDTH * 0.5; Height = BUFFER_HEIGHT *0.5; Format = RGBA16F; MipLevels = 2;};
+texture texMBlur_HVX { Width = BUFFER_WIDTH * 0.25; Height = BUFFER_HEIGHT *0.25; Format = RGBA16F; MipLevels = 2;};
 
 sampler SamplerBlur_HVX
 	{
@@ -324,7 +324,7 @@ sampler SamplerBlur_HVX
 		MipFilter = LINEAR;	
 	};	
 
-texture texBloom { Width = BUFFER_WIDTH ; Height = BUFFER_HEIGHT ; Format = RGBA16F; MipLevels = 2;};
+texture texBloom { Width = BUFFER_WIDTH * 0.5 ; Height = BUFFER_HEIGHT * 0.5 ; Format = RGBA16F; MipLevels = 2;};
 
 sampler SamplerBloom
 	{
@@ -468,7 +468,7 @@ void CombBlur_HV(in float4 position : SV_Position, in float2 texcoords : TEXCOOR
     {
         float W = BlurSamples;
         
-		sum_A += tex2Dlod(SamplerBlur_H,float4(texcoords + float2(0,pix.y * S) * j,0,1) ).rgb * W;
+		sum_A += tex2Dlod(SamplerBlur_H,float4(texcoords + float2(0,pix.y * S) * j,0,0) ).rgb * W;
 		
         total += W;
     }
