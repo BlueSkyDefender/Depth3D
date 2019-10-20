@@ -63,6 +63,7 @@ static const int REF = 0;                 //Resident Evil Fix
 static const int NCW = 0;                 //Not Compatible Warning
 static const int FTW = 0;                 //Flasing Text Warning
 static const int NPW = 0;                 //No Profile Warning
+static const int IDF = 0;                 //Inverted Depth Fix
 
 //Special Handling
 #if exists "LEGOBatman.exe" 							//Lego Batman
@@ -424,6 +425,23 @@ static const int NPW = 0;                 //No Profile Warning
 	#define DA_Z 0.00025
 	#define DA_X 0.04375
 	#define DB_Z 0.2
+#elif (App == 0xBF222C03 )	//Among The Sleep
+	#define DA_X 0.05
+	#define DA_Y 15.0
+	#define DA_Z 0.0005
+	#define DB_Y 4
+	#define DB_X 1
+	#define ID 1
+#elif (App == 0xB75F3C89 )	//Amnesia: The Dark Descent
+	#define DA_X 0.05
+	#define DA_Y 45.0
+	#define DA_Z 0.0005
+	#define DB_Y 3
+#elif (App == 0x91FF5778 )	//Amnesia: Machine for Pigs
+	#define DA_X 0.05
+	#define DA_Y 45.0
+	#define DA_Z 0.0005
+	#define DB_Y 3
 #else
 	#define NP 1 //No Profile
 #endif
@@ -491,4 +509,7 @@ static const int NPW = 0;                 //No Profile Warning
 #endif
 #ifndef NP
     #define NP NPW //No Profile Warning
+#endif
+#ifndef ID
+    #define NI IDF //Inverted Depth Fix
 #endif

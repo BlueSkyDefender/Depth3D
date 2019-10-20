@@ -29,7 +29,7 @@
 // https://github.com/BlueSkyDefender/Depth3D	
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#define S_Bloom 1 //Secondary Bloom	
+#define S_Bloom 0 //Secondary Bloom	
 
 //Tone Mapping calulations, this changes the shader at an fundamental level.
 #define Simple_Tone_Mapping 0
@@ -141,7 +141,7 @@ uniform float Saturation <
 	#else
 	ui_type = "slider";
 	#endif
-	ui_min = 0.0; ui_max = 4.0;
+	ui_min = 0.0; ui_max = 5.0;
 	ui_label = "Bloom Saturation";
 	ui_tooltip = "Adjustment The amount to adjust the saturation of the color.\n"
 				"Number 2.5 is default.";
@@ -440,16 +440,17 @@ float3 Bright_Colors_A(float2 texcoords)
 	else
 		BI_A = 0.25 * Bloom_Intensity_A;
 
-	float3 BC = tex2D(BackBuffer, texcoords).rgb,intensity = dot(BC.rgb,Luma());			
-	// Check whether fragment output is higher than threshold,if so output as brightness color.
-    float brightness = dot(BC.rgb, Luma());
-    
-    BC.rgb = brightness > CBT_Adjust.x ? BC.rgb : lerp(0,BC.rgb,Added_BG);
-	intensity.rgb = brightness > CBT_Adjust.x ? intensity.rgb : lerp(0,intensity.rgb,Added_BG);
+    float4 BC    = tex2D(BackBuffer, texcoords);
+          
+           // Luma Threshold Thank you Adyss
+           BC.a    = dot(BC.rgb, Luma() );//Luma
+           BC.rgb /= max(BC.a, 0.001);
+           BC.a    = max(0.0, BC.a - CBT_Adjust.x);
+           BC.rgb *= BC.a;
 
-    BC.rgb = lerp(intensity,BC.rgb,Saturation);  
-	// The result of the bright-pass filter is then downscaled.	
-	return BC * BI_A;	
+           BC.rgb  = lerp(BC.a, BC.rgb, Saturation);
+
+    return saturate(BC.rgb * BI_A);	
 }
 #if S_Bloom
 float3 Bright_Colors_B(float2 texcoords)
@@ -461,16 +462,17 @@ float3 Bright_Colors_B(float2 texcoords)
 	else
 		BI_B = 0.25 * Bloom_Intensity_B;
 
-	float3 BC = tex2D(BackBuffer, texcoords).rgb,intensity = dot(BC.rgb,Luma());			
-	// Check whether fragment output is higher than threshold,if so output as brightness color.
-    float brightness = dot(BC.rgb, Luma());
-    
-    BC.rgb = brightness > CBT_Adjust.y ? BC.rgb : lerp(0,BC.rgb,Added_BG);
-	intensity.rgb = brightness > CBT_Adjust.y ? intensity.rgb : lerp(0,intensity.rgb,Added_BG);
+    float4 BC    = tex2D(BackBuffer, texcoords);
 
-    BC.rgb = lerp(intensity,BC.rgb,Saturation);  
-	// The result of the bright-pass filter is then downscaled.	
-	return BC * BI_B;	
+           // Luma Threshold Thank you Adyss x2
+           BC.a    = dot(BC.rgb, Luma() );//Luma
+           BC.rgb /= max(BC.a, 0.001);
+           BC.a    = max(0.0, BC.a - CBT_Adjust.y);
+           BC.rgb *= BC.a;
+
+           BC.rgb  = lerp(BC.a, BC.rgb, Saturation);
+
+    return saturate(BC.rgb * BI_B);	
 }
 
 void SBlur_V(in float4 position : SV_Position, in float2 texcoords : TEXCOORD0, out float3 color : SV_Target0)

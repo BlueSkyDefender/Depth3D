@@ -46,7 +46,8 @@
 	#define RE 0
 	#define NC 0
 	#define TW 0
-	#define NP 0	
+	#define NP 0
+	#define ID 0	
 #endif
 //USER EDITABLE PREPROCESSOR FUNCTIONS START//
 //This enables the older SuperDepth3D method of producing an 3D image. This is better for older systems that have an hard time running the new mode.
@@ -68,6 +69,9 @@
 // Change the Cancel Depth Key. Determines the Cancel Depth Toggle Key useing keycode info
 // The Key Code for Decimal Point is Number 110. Ex. for Numpad Decimal "." Cancel_Depth_Key 110
 #define Cancel_Depth_Key 0 // You can use http://keycode.info/ to figure out what key is what.
+
+// Rare Games like Among the Sleep Need this to be turned on.
+#define Invert_Depth 0 //Default 0 is Off. One is On. 
 
 // Horizontal & Vertical Depth Buffer Resize for non conforming BackBuffer.
 // Also used to enable Image Position Adjust is used to move the Z-Buffer around.
@@ -616,6 +620,10 @@ float Depth(in float2 texcoord : TEXCOORD0)
 	//Conversions to linear space.....
 	float zBuffer = tex2D(DepthBuffer, texcoord).x, Far = 1., Near = 0.125/Depth_Map_Adjust; //Near & Far Adjustment
 	
+	#if Invert_Depth || ID
+	zBuffer = 1 - zBuffer;
+	#endif
+	
 	float2 Offsets = float2(1 + Offset,1 - Offset), Z = float2( zBuffer, 1-zBuffer );
 	
 	if (Offset > 0)
@@ -766,6 +774,11 @@ float2 WeaponDepth(float2 texcoord)
 		texcoord.y =  1 - texcoord.y;
 	//Conversions to linear space.....
 	float zBufferWH = tex2D(DepthBuffer, texcoord).x, Far = 1.0, Near = 0.125/WA_XYZ.y;  //Near & Far Adjustment
+	
+	#if Invert_Depth || ID
+	zBufferWH = 1 - zBufferWH;
+	#endif
+	
 	float2 Offsets = float2(1 + WA_XYZ.z,1 - WA_XYZ.z), Z = float2( zBufferWH, 1-zBufferWH );
 	
 	if (WA_XYZ.z > 0)

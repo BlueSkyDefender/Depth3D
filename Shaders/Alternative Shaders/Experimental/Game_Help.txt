@@ -49,8 +49,8 @@ Inner Shader Setting:
               ABZU                                         DM 1       50.000                                                        
               Agony                                        DM 1       50.000                                       
               Alien Isolation                              DM 0       25.000                                       
-    RB        Amnesia: Machine for Pigs                    DM 0       60.000    0.00025                                Yes 4                                         
-    RB        Amnesia: The Dark Descent                    DM 0       60.000    0.00025                                Yes 4                                 
+    RB        Amnesia: Machine for Pigs                    DM 0       45.000    0.0005                                 Yes 4                                         
+    RB        Amnesia: The Dark Descent                    DM 0       45.000    0.0005                                 Yes 4                                 
               Among The Sleep                              DM 0       37.500                               Yes     
               Assassin Creed Unity                         DM 1       20.000                                       
               Bayonetta                                    DM 0       15.000                                       
