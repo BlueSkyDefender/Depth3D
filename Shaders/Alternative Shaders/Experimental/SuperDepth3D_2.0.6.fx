@@ -47,7 +47,8 @@
 	#define NC 0
 	#define TW 0
 	#define NP 0
-	#define ID 0	
+	#define ID 0
+	#define SP 0	
 #endif
 //USER EDITABLE PREPROCESSOR FUNCTIONS START//
 //This enables the older SuperDepth3D method of producing an 3D image. This is better for older systems that have an hard time running the new mode.
@@ -261,21 +262,24 @@ uniform bool Depth_Map_Flip <
 	ui_category = "Depth Map";
 > = DB_X;
 #if DB_Size_Postion 
-uniform int2 Image_Position_Adjust<
-	ui_type = "drag";
-	ui_min = -4096.0; ui_max = 4096.0;
-	ui_label = "Z Position Adjust";
-	ui_tooltip = "Adjust the Image Postion if it's off by a bit. Default is Zero.";
-	ui_category = "Depth Map";
-> = int2(DD_Z,DD_W);
-	
 uniform float2 Horizontal_and_Vertical <
 	ui_type = "drag";
 	ui_min = 0.125; ui_max = 2;
-	ui_label = " Z Horizontal & Vertical";
+	ui_label = " Z Horizontal & Vertical Size";
 	ui_tooltip = "Adjust Horizontal and Vertical Resize. Default is 1.0.";
 	ui_category = "Depth Map";
 > = float2(DD_X,DD_Y);
+
+uniform int2 Image_Position_Adjust<
+	ui_type = "drag";
+	ui_min = -4096.0; ui_max = 4096.0;
+	ui_label = "Z Position";
+	ui_tooltip = "Adjust the Image Postion if it's off by a bit. Default is Zero.";
+	ui_category = "Depth Map";
+> = int2(DD_Z,DD_W);
+#else
+static const float2 Horizontal_and_Vertical = float2(DD_X,DD_Y);
+static const int2 Image_Position_Adjust = int2(DD_Z,DD_W);
 #endif
 //Weapon Hand Adjust//
 uniform int WP <
@@ -592,7 +596,7 @@ float Fade_in_out(float2 texcoord)
 /////////////////////////////////////////////////////////////////////////////////Depth Map Information/////////////////////////////////////////////////////////////////////////////////
 float Depth(float2 texcoord)
 {	
-	#if DB_Size_Postion
+	#if DB_Size_Postion || SP
 	float2 texXY = texcoord + Image_Position_Adjust * pix;		
 	float2 midHV = (Horizontal_and_Vertical-1) * float2(BUFFER_WIDTH * 0.5,BUFFER_HEIGHT * 0.5) * pix;			
 	texcoord = float2((texXY.x*Horizontal_and_Vertical.x)-midHV.x,(texXY.y*Horizontal_and_Vertical.y)-midHV.y);	
@@ -620,7 +624,7 @@ float Depth(float2 texcoord)
 
 float2 WeaponDepth(float2 texcoord)
 {
-	#if DB_Size_Postion
+	#if DB_Size_Postion || SP
 	float2 texXY = texcoord + Image_Position_Adjust * pix;		
 	float2 midHV = (Horizontal_and_Vertical-1) * float2(BUFFER_WIDTH * 0.5,BUFFER_HEIGHT * 0.5) * pix;			
 	texcoord = float2((texXY.x*Horizontal_and_Vertical.x)-midHV.x,(texXY.y*Horizontal_and_Vertical.y)-midHV.y);	
@@ -946,34 +950,40 @@ float2 Parallax(float Diverge, float2 Coordinates) // Horizontal parallax offset
 	float LayerDepth = rcp(Steps);
 
 	//Offsets listed here Max Seperation is 3% - 8% of screen space with Depth Offsets & Netto layer offset change based on MS.
-	float deltaCoordinates = MS * LayerDepth;
-	float2 DB_Offset = float2((Diverge * 0.0375) * pix.x, 0);
-	float CurrentDepthMapValue = zBuffer(ParallaxCoord), CurrentLayerDepth = 0, DepthDifference;
+	float deltaCoordinates = MS * LayerDepth, CurrentDepthMapValue = zBuffer(ParallaxCoord), CurrentLayerDepth = 0, DepthDifference;
+	float2 DB_Offset = float2(Diverge * 0.0375, 0) * pix;
 
+    if(View_Mode == 1)
+    	DB_Offset = 0;
+    
 	[loop] //Steep parallax mapping
+	#if !Compatibility
+	while(CurrentLayerDepth < CurrentDepthMapValue)
+	{
+	#else
     for ( int i = 0; i < Steps; i++ )
     {	// Doing it this way should stop crashes in older version of reshade, I hope.
-        if (CurrentDepthMapValue <= CurrentLayerDepth)
+        if (CurrentDepthMapValue < CurrentLayerDepth)
 			break; // Once we hit the limit Stop Exit Loop.
+	#endif		
         // Shift coordinates horizontally in linear fasion
         ParallaxCoord.x -= deltaCoordinates;
         // Get depth value at current coordinates
-    	[branch] if(View_Mode == 1)
-        	CurrentDepthMapValue = zBuffer( ParallaxCoord );
-        else
-        	CurrentDepthMapValue = zBuffer( ParallaxCoord - DB_Offset);
+    	CurrentDepthMapValue = zBuffer( ParallaxCoord - DB_Offset);
         // Get depth of next layer
         CurrentLayerDepth += LayerDepth;
+     #if !Compatibility   
+        continue;
+     #endif
     }
    	
 	// Parallax Occlusion Mapping
 	float2 PrevParallaxCoord = float2(ParallaxCoord.x + deltaCoordinates, ParallaxCoord.y);
-	float afterDepthValue = CurrentDepthMapValue - CurrentLayerDepth;
-	float beforeDepthValue = zBuffer( ParallaxCoord ) - CurrentLayerDepth + LayerDepth;
+	float beforeDepthValue = zBuffer( ParallaxCoord ) - CurrentLayerDepth + LayerDepth, afterDepthValue = CurrentDepthMapValue - CurrentLayerDepth;
 		
 	// Interpolate coordinates
 	float weight = afterDepthValue / (afterDepthValue - beforeDepthValue);
-	ParallaxCoord = PrevParallaxCoord * max(0,weight) + ParallaxCoord * min(1,1.0f - weight);
+	ParallaxCoord = PrevParallaxCoord * max(0.,weight) + ParallaxCoord * min(1.,1. - weight);
 	
 	if(View_Mode == 0)
 	ParallaxCoord += DB_Offset;

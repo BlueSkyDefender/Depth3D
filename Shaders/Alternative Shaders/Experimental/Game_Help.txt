@@ -45,10 +45,13 @@ Inner Shader Setting:
 
                                                        [- - - - - - - - - - - - -  -=: Recommended Settings :=- - - - - - - - - - - - - -]
 [Read Below] [Game List]                               [Depth Map] [Adjustment] [Offset] [Weapon DM] [Depth Flip] [Auto Balance] [Auto D]
+    RB        35MM                                         DM 0       35.000                               Yes         Yes 2
     RB        .Hack//G.U.                                  DM 1       25.000                                             
               ABZU                                         DM 1       50.000                                                        
-              Agony                                        DM 1       50.000                                       
-              Alien Isolation                              DM 0       25.000                                       
+              Agony                                        DM 1       43.750                                           Yes 5                                       
+    RB        Alan Wake                                    DM 0       32.500                                           Yes 1 
+    RB        Alan Wake's American Nightmare               DM 0       32.500                                           Yes 1 
+    RB        Alien Isolation                              DM 0       25.000                                           
     RB        Amnesia: Machine for Pigs                    DM 0       45.000    0.0005                                 Yes 4                                         
     RB        Amnesia: The Dark Descent                    DM 0       45.000    0.0005                                 Yes 4                                 
               Among The Sleep                              DM 0       37.500                               Yes     
@@ -271,9 +274,36 @@ https://steamcommunity.com/sharedfiles/filedetails/?id=933337066
 Read Below Section
 
 =================================================================================================================================
+{35MM} - Used ReShade 4.0+
+Depth Buffer may hang for a sec if you move your view to fast. Hope ReShade 4.4 fixes this.
+
 {.Hack//G.U.} - Used ReShade 3.0.8
 Once you install Reshade. Install this fix that allows for depth buffer access. This fix uses 3DMigoto to dissable a shader that was blocking acess to the depth buffer.
 http://www.mediafire.com/file/d5ep3qlsnbbbmvl/dotHack%20GU%20fix%20for%20Depth3D.zip
+
+{Alan Wake} - Any Reshade Version with Xenos_2.3.2 Injector
+Install game and before you launch it put -noblur in your set lunch options. -steam
+Set you settings in game and notice the locked MSAA.Just leave it at 2x, Save your settings and turn off the game.
+
+Download https://github.com/DarthTon/Xenos/releases and the latest version of reshade.
+
+Create a folder and extract Xenos 2.3.2 you only really need the Xenos.exe 32 bit program and also extract ReShade 32bit d3d9.dll in to the same folder
+as Xenos. Place SuperDepth3D with Overwatch.fxh in this folder and start Xenos.exe.
+
+Click on Manual Launch radio button.
+Click on Add and select the d3d9.dll.
+Click on Select and find the AlanWake.exe
+
+Now click Inject. Then launch your game like normal.
+
+I suggest you use alpha mode in SuperDepth3D for this game and Alan Wake's American Nightmare.
+
+You will not need to do this for the sequel. Make sure you turn off this injector for any other game. 
+Please note most AV's will detect this as threat.
+
+{Alien Isolation} - Used ReShade 4.3.0
+Issue with Depth Buffer sizing work around is to resize it SuperDepth3D. But it will still not be 100% right. Legacy mode works well to mask this issue.
+The real fix is to apply a perspective correction on the Z-Buffer. But, that is too much work for only one game. Looks Ok right now.
 
 {Amnesia: Games} - Used ReShade 4.1.0
 Issue with ReShade 4.0.0+ If you install ReShade as opengl32.dll you have to rename it to dxgi.dll in the game folder. Windows 10 Issue it seems

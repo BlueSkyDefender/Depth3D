@@ -53,10 +53,10 @@ static const float HUDX = 0.0;            //Heads Up Display Cut Off Point
 static const float Null_A = 0.0;            
 static const float Null_B = 0.0;  
 static const float Null_C = 0.0;  
-static const float HV_X = 1.0;            //Horizontal Postion
-static const float HV_Y = 1.0;            //Vertical Postion
-static const float DepthPX = 0.0;         //Horizontal Size
-static const float DepthPY = 0.0;         //Vertical Size
+static const float HVS_X = 0.0;            //Horizontal Size
+static const float HVS_Y = 0.0;            //Vertical Size
+static const float HVP_X = 1.0;            //Horizontal Postion
+static const float HVP_Y = 1.0;            //Vertical Postion
 
 //Special Toggles Defaults
 static const int REF = 0;                 //Resident Evil Fix
@@ -64,6 +64,7 @@ static const int NCW = 0;                 //Not Compatible Warning
 static const int FTW = 0;                 //Flasing Text Warning
 static const int NPW = 0;                 //No Profile Warning
 static const int IDF = 0;                 //Inverted Depth Fix
+static const int SPF = 0;                 //Size & Postion Fix
 
 //Special Handling
 #if exists "LEGOBatman.exe" 							//Lego Batman
@@ -442,6 +443,36 @@ static const int IDF = 0;                 //Inverted Depth Fix
 	#define DA_Y 45.0
 	#define DA_Z 0.0005
 	#define DB_Y 3
+#elif (App == 0x8B0F15E7 )	//Alan Wake
+	#define DA_X 0.03
+	#define DA_Y 32.5
+	#define DB_Y 1
+	#define TW 1
+#elif (App == 0xCFE885A2 )	//Alan Wake's American Nightmare
+	#define DA_X 0.03
+	#define DA_Y 32.5
+	#define DB_Y 1
+	#define TW 1
+#elif (App == 0x56D8243B )	//Agony Unrated
+	#define DA_W 1
+	#define DA_X 0.04375
+	#define DA_Y 43.75
+	#define DB_Y 5
+	#define TW 1
+#elif (App == 0x23D5135F )	//Alien Isolation
+	#define DA_X 0.040
+	#define DA_Y 18.00
+	#define DA_Z 0.0005
+	#define DB_Y 4
+    #define DD_X 0.975
+    #define DD_Y 0.975
+	#define SP 1
+	#define TW 1
+#elif (App == 0x5839915F )	//35MM
+	#define DA_Y 35.00
+	#define DB_X 1
+	#define DB_Y 2
+	#define TW 1
 #else
 	#define NP 1 //No Profile
 #endif
@@ -485,16 +516,16 @@ static const int IDF = 0;                 //Inverted Depth Fix
     #define DC_W Null_C
 #endif
 #ifndef DD_X
-    #define DD_X HV_X
+    #define DD_X HVS_X
 #endif
 #ifndef DD_Y
-    #define DD_Y HV_Y
+    #define DD_Y HVS_Y
 #endif
 #ifndef DD_Z
-    #define DD_Z DepthPX
+    #define DD_Z HVP_X
 #endif
 #ifndef DD_W
-    #define DD_W DepthPY
+    #define DD_W HVP_Y
 #endif
 
 //Special Toggles
@@ -512,4 +543,7 @@ static const int IDF = 0;                 //Inverted Depth Fix
 #endif
 #ifndef ID
     #define NI IDF //Inverted Depth Fix
+#endif
+#ifndef SP
+    #define SP SPF //Size & Postion Fix
 #endif
