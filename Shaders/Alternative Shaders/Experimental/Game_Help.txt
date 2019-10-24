@@ -82,9 +82,10 @@ Inner Shader Setting:
               Call of Duty: World at War                   DM 0       12.500                WDM 12                     Yes 3          
               Casltevania: Lord of Shadows - UE            DM 0       7.5000                                                
               Castle of Illusion Micky Mouse               DM 0       12.500                                       ???????????
+    RB        Condemned Criminal Origins                   DM 0       167.50    0.00025     WDM 47                     Yes 4
               Crash Bandicoot™ N. Sane Trilogy             DM 0        ????     ?????                              ???????????                         
-              Cryostasis                                   DM 0       13.750                *WDM 37                     Yes 3                                 
-    RB        DOOM 2016                                    DM 0       20.000                *WDM 6                      Yes 3               
+              Cryostasis                                   DM 0       13.750                *WDM 37                    Yes 3                                 
+    RB        DOOM 2016                                    DM 0       20.000                *WDM 6                     Yes 3               
               DarkSiders Warmastred Edition                DM 0       22.500                                       
               Dead Effect                                  DM ?       6.2500                                       ?      
               Dead Island                                  DM 0       5.0000                                                         
@@ -426,6 +427,12 @@ Use an AMD Card to play this game in 3D.
 Render Resolution Native.
 Turn off AA.
 Don't use in game Supersampling
+
+{Condemned Criminal Origins} - Used ReShade 4.4
+Issues with Depth it will stop after scripted events try to use the newest option at the bottom of depth buffer compatablity for DX9.
+Also Dissable FSAA (FSAA OFF) or was it turn it on I forget.
+This is bug in game that drops fps in to the single diglets...... you need a pokemon that strong againts ground types.
+I kid I kid I don't know how to fix this issue try pc gaming wiki when fps drops in the the single digits.
 
 {DeadRising 3}
 Use Native scailing I think it's called in game as Full.
@@ -895,10 +902,7 @@ Game was tested with Max setting.
 
 -=Problem Games=-
 _________________________________________________________________________________________________________________________________
-{Condemned: Criminal Origins}
-Depth Buffer Drops time to time Also Dissable FSAA (FSAA OFF)
-
-{Dead Space}
+{Dead Space} - retested 10/21/2019
 Games Depth Buffer does not show till after the elevator part at the start. Depth Buffer also goes away when interacting with some objects and when you get video feeds.
 I suggest useing TriDef. For this game.
 
