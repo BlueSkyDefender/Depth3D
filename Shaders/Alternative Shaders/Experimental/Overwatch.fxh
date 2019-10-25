@@ -496,15 +496,39 @@ static const int IDF = 0;                 //Image Distortion Fix
 	#define DB_Y 4
 	#define TW 1
 #elif (App == 0x60F43F45 )	//Resident Evil 7
-		#define DA_W 1
-		#define DA_Y 31.25
-		#define DA_Z 0.0002
-		#define DA_X 0.0375
-		#define DB_Y 3
-		#define DC 1
-		#define DC_Y -0.24
-		#define DC_W 0.05
-		#define TW 1
+	#define DA_W 1
+	#define DA_Y 31.25
+	#define DA_Z 0.0002
+	#define DA_X 0.0375
+	#define DB_Y 3
+	#define DC 1
+	#define DC_Y -0.24
+	#define DC_W 0.05
+	#define TW 1
+#elif (App == 0x1B8B9F54 )	//TheEvilWithin
+	#define DA_Y 40.0
+	#define DA_Z 0.0001
+	#define DA_X 0.1
+	#define DB_Y 4
+#elif (App == 0x7D9B7A37 )	//TheEvilWithin II
+	#define DA_Y 30.0
+	#define DA_Z 0.0001
+	#define DA_X 0.04
+	#define DB_Y 5
+#elif (App == 0xBF49B12E )	//Vampyr
+	#define DA_W 1
+	#define DA_Y 23.0
+	#define DA_X 0.05
+	#define DB_Y 5
+#elif (App == 0x85F0A0FF )	//LUST for Darkness
+	#define DA_W 1
+	#define DB_X 1
+	#define DA_Y 13.75
+	#define DA_Z 0.001
+	#define DA_X 0.04
+	#define DB_Y 4
+	#define DB_Z 0.125
+	#define TW 1
 #else
 	#define NP 1 //No Profile
 #endif
