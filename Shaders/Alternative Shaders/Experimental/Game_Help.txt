@@ -126,7 +126,7 @@ Inner Shader Setting:
     RB        Immortal Redneck                             DM 1       20.000    0.00025     WDM 48         Yes         Yes 5                                      
               Just Cause 3                                 DM 1       10.000                                       
     RB        KHOLAT                                       DM 1       10.000                                       
-    RB        Kingpin: Life of Crime                       DM 0       10.000                WDM 44                    Yes 4    
+    RB        Kingpin: Life of Crime                       DM 0       10.000                WDM 44                     Yes 4    
               Lara Croft & Temple of Osiris                DM 0       75.000    0.021                                  Yes 4
               Layers of Fear                               DM 0       17.500                               Yes     
               LEGO Batman                                  DM 0
@@ -137,6 +137,7 @@ Inner Shader Setting:
               Lords of The Fallen                          DM 0       14.750                                       
               Lost in Vivo                                 DM 0       8.7500                               Yes         Yes 4         
     RB        LuciusII                                     DM 0       20.000                               Yes     
+    RB        LUST for Darkness                            DM 1       13.750                               Yes         Yes 4
     RB        Mafia III                                    DM 1       6.2500                                       
     RB        Mass Effect Andromeda                        DM 1       15.000                                       
     RB        Magicka 2                                    DM 0       13.750    0.01250                            
@@ -537,6 +538,10 @@ You need to set your Depth Buffer to preserve in th DX 11 tab.
 
 {LuciusII}
 Set Globla Settings to Medium. Turn off FXAA Every thing else can be maxed out.
+
+{LUST for Darkness} - Used Reshade 4.3
+You need to set DX11 Depth Texture Formant to D32FS8.
+Also select the first Buffer.
 
 {Mafia III} - Thank you zig11727
 Path to install \Steam\SteamApps\common\Mafia III
