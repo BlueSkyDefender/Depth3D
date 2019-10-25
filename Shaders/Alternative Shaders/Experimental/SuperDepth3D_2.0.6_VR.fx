@@ -1164,7 +1164,7 @@ float3 VigneteR(float2 texcoord)
 return Left;
 }
 
-float2 D(float2 p, float k1, float k2) //Polynomial Lens + Radial lens undistortion filtering Left & Right
+float2 BD(float2 p, float k1, float k2) //Polynomial Lens + Radial lens undistortion filtering Left & Right
 {
 	if(!Barrel_Distortion)
 		discard;
@@ -1208,13 +1208,13 @@ float3 PS_calcLR(float2 texcoord)
 	float K2_Red = Polynomial_Colors_K2.x, K2_Green = Polynomial_Colors_K2.y, K2_Blue = Polynomial_Colors_K2.z;
 	if(Barrel_Distortion == 1 || Barrel_Distortion == 2)
 	{
-		uv_redL = D(TCL.xy,K1_Red,K2_Red);
-		uv_greenL = D(TCL.xy,K1_Green,K2_Green);
-		uv_blueL = D(TCL.xy,K1_Blue,K2_Blue);
+		uv_redL = BD(TCL.xy,K1_Red,K2_Red);
+		uv_greenL = BD(TCL.xy,K1_Green,K2_Green);
+		uv_blueL = BD(TCL.xy,K1_Blue,K2_Blue);
 
-		uv_redR = D(TCR.xy,K1_Red,K2_Red);
-		uv_greenR = D(TCR.xy,K1_Green,K2_Green);
-		uv_blueR = D(TCR.xy,K1_Blue,K2_Blue);
+		uv_redR = BD(TCR.xy,K1_Red,K2_Red);
+		uv_greenR = BD(TCR.xy,K1_Green,K2_Green);
+		uv_blueR = BD(TCR.xy,K1_Blue,K2_Blue);
 
 		color_redL = VigneteL(uv_redL).r;
 		color_greenL = VigneteL(uv_greenL).g;
