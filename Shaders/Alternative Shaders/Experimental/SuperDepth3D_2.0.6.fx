@@ -43,7 +43,7 @@
 	#include "Overwatch.fxh"
 #else //DA_X ZPD | DA_Y Depth_Adjust | DA_Z Offset | DA_W Depth_Linearization | DB_X Depth_Flip | DB_Y Auto_Balance | DB_Z Auto_Depth | DB_W Weapon_Hand | DC_X HUDX | DC_Y BD_K1 | DC_Z BD_K2 | DC_W BD_Zoom | DD_X HV_X | DD_Y HV_Y | DD_Z DepthPX | DD_W DepthPY
 	static const float DA_X = 0.025, DA_Y = 7.5, DA_Z = 0.0, DA_W = 0.0, DB_X = 0, DB_Y = 0, DB_Z = 0.1, DB_W = 0.0, DC_X = 0.0, DC_Y = 0, DC_Z = 0, DC_W = 0, DD_X = 1,DD_Y = 1, DD_Z = 0.0, DD_W = 0.0;
-	static const int RE, NC, TW, NP, ID, SP, DC;
+	static const int RE = 0, NC = 0, TW = 0, NP = 0, ID = 0, SP = 0, DC = 0;
 #endif
 //USER EDITABLE PREPROCESSOR FUNCTIONS START//
 //This enables the older SuperDepth3D method of producing an 3D image. This is better for older systems that have an hard time running the new mode.
@@ -879,8 +879,10 @@ float3 HUD(float3 HUD, float2 texcoord )
 }
 #endif
 float AutoDepthRange(float d, float2 texcoord )
-{
-	float LumAdjust_ADR = smoothstep(-0.0175,Auto_Depth_Range,Lum(texcoord).x);
+{ float LumAdjust_ADR = smoothstep(-0.0175,Auto_Depth_Range,Lum(texcoord).y);
+	if (RE)
+		LumAdjust_ADR = smoothstep(-0.0175,Auto_Depth_Range,Lum(texcoord).x);
+
     return min(1,( d - 0 ) / ( LumAdjust_ADR - 0));
 }
 #if RE_Fix || RE
@@ -1306,7 +1308,10 @@ float3 Average_Luminance(float4 position : SV_Position, float2 texcoord : TEXCOO
 	};
 	ABEA = ABEArray[Auto_Balance_Ex];
 
-	float Average_Lum_ZPD = Depth(float2(ABEA.x + texcoord.x * ABEA.y, ABEA.z + texcoord.y * ABEA.w)), Average_Lum_Bottom = tex2D(SamplerDMN,float2( 0.125 + texcoord.x * 0.750,0.95 + texcoord.y)).x;
+	float Average_Lum_ZPD = Depth(float2(ABEA.x + texcoord.x * ABEA.y, ABEA.z + texcoord.y * ABEA.w)), Average_Lum_Bottom = Depth( texcoord );
+	if(RE)
+	Average_Lum_Bottom = tex2D(SamplerDMN,float2( 0.125 + texcoord.x * 0.750,0.95 + texcoord.y)).x;
+
 	return float3(Average_Lum_ZPD,Average_Lum_Bottom,tex2D(SamplerDMN,0).x);
 }
 uniform float timer < source = "timer"; >; //Please do not remove.
