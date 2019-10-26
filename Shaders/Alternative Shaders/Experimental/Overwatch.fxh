@@ -529,6 +529,17 @@ static const int IDF = 0;                 //Image Distortion Fix
 	#define DB_Y 4
 	#define DB_Z 0.125
 	#define TW 1
+#elif (App == 0x706C8618 )	//Layer of Fear
+	#define DB_X 1
+	#define DA_Y 17.50
+	#define DA_X 0.035
+	#define DB_Y 5
+	#define TW 1
+#elif (App == 0x2F0BD376 )	//Minecraft
+	#define DA_Y 17.50
+	#define DA_X 0.075
+	#define DB_W 25
+	#define TW 1
 #else
 	#define NP 1 //No Profile
 #endif

@@ -729,7 +729,7 @@ float2 WeaponDepth(float2 texcoord)
 	else if(WP == 24)
 		WA_XYZ = float3(0,0,0);                //WP 22 | Game
 	else if(WP == 25)
-		WA_XYZ = float3(0,0,0);                //WP 23 | Game
+		WA_XYZ = float3(0.625,350.0,0.785);    //WP 23 | Minecraft
 	else if(WP == 26)
 		WA_XYZ = float3(0.255,6.375,53.75);    //WP 24 | S.T.A.L.K.E.R: Games #F5C7AA92 #493B5C71
 	else if(WP == 27)
@@ -932,7 +932,7 @@ float zBuffer(float2 texcoord)
 #endif
 	float3 DM = tex2Dlod(SamplerDMN,float4(texcoord,0,0)).xyz;
 	#if Legacy_Mode
-	    float total = BlurSamples, S = 5 * Disocclusion_Adjust.x;
+	    float total = BlurSamples, S = 5 * saturate(Disocclusion_Adjust.x);
 	    float3 D = DM * BlurSamples;
 	    for ( int j = -BlurSamples; j <= BlurSamples; ++j)
 	    {
@@ -941,7 +941,7 @@ float zBuffer(float2 texcoord)
 	        total += W;
 	    }
 
-		DM = lerp(saturate(D / total),DM,step(Disocclusion_Adjust.y,DM));
+		DM = lerp(saturate(D / total),DM,step(saturate(Disocclusion_Adjust.y),DM));
 	#endif
 
 	if (WP == 0)

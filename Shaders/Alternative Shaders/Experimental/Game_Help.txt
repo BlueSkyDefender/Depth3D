@@ -128,7 +128,7 @@ Inner Shader Setting:
     RB        KHOLAT                                       DM 1       10.000                                       
     RB        Kingpin: Life of Crime                       DM 0       10.000                WDM 44                     Yes 4    
               Lara Croft & Temple of Osiris                DM 0       75.000    0.021                                  Yes 4
-              Layers of Fear                               DM 0       17.500                               Yes     
+    RB        Layers of Fear                               DM 0       17.500                               Yes     
               LEGO Batman                                  DM 0
               LEGO Batman 2                                DM 0
     RB        LEGO Batman 3                                DM 0
@@ -145,6 +145,7 @@ Inner Shader Setting:
     RB        Metro 2033 Redux                             DM 0       12.500                WDM 19                     Yes 2                        
     RB        Metro Last Light Redux                       DM 0       12.500                WDM 19                     Yes 2                              
     RB        Middle-earth: Shadow of Mordor               DM 1       25.000                                       
+    RB        Minecraft Java                               DM 0       17.500                WDM 23                     No  0           
               Mirror's Edge Catalyst                       DM 1       13.750                                       
     RB        Monster Hunter World                         DM 1       13.750                                       
               Mordheim: City of the Damned                 DM 0       12.500                               Yes     
@@ -531,6 +532,9 @@ Or
 You can also follow this guide.
 https://www.tapatalk.com/groups/kingpinforever/viewtopic.php?f=1&t=2184&p=10574#p10574
 
+{Layers of Fear} - Used ReShade 4.3. But You should use an older version of reshade around 3.0 era
+If you use modern Reshade then Select DX11 Tab and se the Depth Buffer to like the 3rd one 0x4659D7BC
+
 {LEGO Batman 3}
 Issues with depth buffer when Black Bars are on screen.
 Depth Buffer may not show in main menu.
@@ -571,6 +575,14 @@ Rename the d3d9.dll or dxgi.dll to d3d11.dll
 Borderless Full Screen will not work Window mode will not Work. 
 So if you want to Play at a lower resolution, then set your windows resolution lower then run the game in full screen and set your scaling to 100%. 
 Anything Lower or Higher then 100% will not work.
+
+{Minecraft} -Used Reshade 4.3 with Network Check disabled. 
+Don't Ask my for newtwork check disabled builds of ReShade.
+
+I used Minecraft with Optifine https://optifine.net/downloads
+In game go to Options > Video Settings > Shaders  Make sure you select Internal or the shader pack you want. I didn't test anything past Internal.
+
+I recommend you use View Mode Alpha + Perfromance Mode and Performance Mode in ReShade as well.
 
 {Monster Hunter World}
 Main settings for this game need to be set as follows. 
