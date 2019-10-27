@@ -66,6 +66,7 @@ static const int NPW = 0;                 //No Profile Warning
 static const int IDF = 0;                 //Inverted Depth Fix
 static const int SPF = 0;                 //Size & Position Fix
 static const int IDF = 0;                 //Image Distortion Fix
+static const int HMT = 0;                 //HUD Mode Trigger
 
 //Special Handling
 #if exists "LEGOBatman.exe"															//Lego Batman
@@ -209,6 +210,7 @@ static const int IDF = 0;                 //Image Distortion Fix
 	#define DB_Y 1
 	#define DB_W 40
 	#define DC_X 0.534
+	#define HM 1
 #elif (App == 0xEB9EEB74 || App == 0x8238E9CA )	//Serious Sam Revolution | Serious Sam 2
 	#define DA_Z 0.1111
 	#define DB_W 41
@@ -252,6 +254,7 @@ static const int IDF = 0;                 //Image Distortion Fix
 	#define DB_W 56
 	#define DB_Y 3
 	#define DC_X 0.5034
+	#define HM 1
 #elif (App == 0x22BA110F )	//Turok: DH 2017
 	#define DA_X 0.002
 	#define DA_Y 250.0
@@ -279,6 +282,7 @@ static const int IDF = 0;                 //Image Distortion Fix
 	#define DA_Z 0.11625
 	#define DB_Y 4
 	#define DC_X 0.5
+	#define HM 1
 #elif (App == 0x61243AED )	//Shadow Warrior Classic source port
 	#define DA_Y 10.0
 	#define DA_X 0.05
@@ -311,6 +315,7 @@ static const int IDF = 0;                 //Image Distortion Fix
 	#define DA_X 0.0375
 	#define DA_Z 0.8
 	#define DC_X 0.501
+	#define HM 1
 #elif (App == 0x86D33094 )	//Rise of the TombRaider
 	#define DA_X 0.075
 	#define DB_Y 3
@@ -531,24 +536,24 @@ static const int IDF = 0;                 //Image Distortion Fix
 	#define DB_Y 4
 	#define DB_Z 0.125
 	#define TW 1
-#elif (App == 0x706C8618 )	//Layer of Fear
+#elif (App == 0x706C8618 ) //Layer of Fear
 	#define DB_X 1
 	#define DA_Y 17.50
 	#define DA_X 0.035
 	#define DB_Y 5
 	#define TW 1
-#elif (App == 0x2F0BD376 )	//Minecraft
+#elif (App == 0x2F0BD376 ) //Minecraft
 	#define DA_Y 17.50
 	#define DA_X 0.0725
 	#define DB_W 25
 	#define TW 1
-#elif (App == 0x84D341E3 )	//Little Nightmares
+#elif (App == 0x84D341E3 ) //Little Nightmares
 	#define DA_W 1
 	#define DA_Y 33.75
 	#define DA_X 0.25
 	#define DA_Z 0.0015
 	#define DB_Y 5
-#elif (App == 0xC0AC5174 )	//Observer
+#elif (App == 0xC0AC5174 ) //Observer
 	#define DA_W 1
 	#define DA_Y 21.5
 	#define DA_X 0.0375
@@ -561,6 +566,19 @@ static const int IDF = 0;                 //Image Distortion Fix
 	#define DA_X 0.04375
 	#define DB_Y 3
 	#define TW 1
+#elif (App == 0x67A4A23A ) //Crash Bandicoot N.Saine Trilogy
+	#define DA_Y 7.5
+	#define DA_Z 0.250
+	#define DA_X 0.1
+	#define DB_Y 4
+	#define DC_X 0.580
+	#define HM 1
+	#elif (App == 0xE160AE14 ) //Spyro Reignited Trilogy
+		#define DA_W 1
+		#define DA_Y 12.5
+		#define DA_Z 0.0001
+		#define DA_X 0.05625
+		#define DB_Y 3
 #else
 	#define NP 1 //No Profile
 #endif
@@ -637,4 +655,7 @@ static const int IDF = 0;                 //Image Distortion Fix
 #endif
 #ifndef DC
     #define DC IDF //Image Distortion Fix
+#endif
+#ifndef HM
+    #define HM HMT //HUD Mode Trigger
 #endif
