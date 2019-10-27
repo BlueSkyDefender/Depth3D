@@ -553,12 +553,14 @@ static const int IDF = 0;                 //Image Distortion Fix
 	#define DA_Y 21.5
 	#define DA_X 0.0375
 	#define DB_Y 4
+	#define TW 1
 #elif (App == 0xABAA2255 )	//The Forest
 	#define DA_W 1
 	#define DB_X 1
 	#define DA_Y 7.5
 	#define DA_X 0.04375
 	#define DB_Y 3
+	#define TW 1
 #else
 	#define NP 1 //No Profile
 #endif
