@@ -68,9 +68,9 @@ static const int SPF = 0;                 //Size & Position Fix
 static const int IDF = 0;                 //Image Distortion Fix
 
 //Special Handling
-#if exists "LEGOBatman.exe" 							//Lego Batman
+#if exists "LEGOBatman.exe"															//Lego Batman
 	#define sApp 0xA100000
-#elif exists "LEGOBatman2.exe"							//LEGO Batman 2
+#elif exists "LEGOBatman2.exe"													//LEGO Batman 2
 	#define sApp 0xA100000
 #elif exists "GameComponentsOzzy_Win32Steam_Release.dll"//Batman BlackGate
 	#define sApp 0xA200000
@@ -80,16 +80,18 @@ static const int IDF = 0;                 //Image Distortion Fix
 
 //Check for ReShade Version for 64bit game Bug.
 #if !defined(__RESHADE__) || __RESHADE__ < 43000
-	#if exists "ACU.exe" 									//Assassin's Creed Unity
+	#if exists "ACU.exe"																	//Assassin's Creed Unity
 		#define App 0xA0762A98
-	#elif exists "BatmanAK.exe" 							//Batman Arkham Knight
+	#elif exists "BatmanAK.exe"														//Batman Arkham Knight
 		#define App 0x4A2297E4
-	#elif exists "DOOMx64.exe" 								//DOOM 2016
+	#elif exists "DOOMx64.exe"														//DOOM 2016
 		#define App 0x142EDFD6
-	#elif exists "RED-Win64-Shipping.exe"					//DragonBall Fighters Z
+	#elif exists "RED-Win64-Shipping.exe"									//DragonBall Fighters Z
 		#define App 0x31BF8AF6
-	#elif exists "HellbladeGame-Win64-Shipping.exe" 		//Hellblade Senua's Sacrifice
+	#elif exists "HellbladeGame-Win64-Shipping.exe" 			//Hellblade Senua's Sacrifice
 		#define App 0xAAA18268
+	#elif exists "TheForest.exe"													//The Forest
+		#define App 0xABAA2255
 	#else
 		#define App sApp
 	#endif
@@ -177,7 +179,7 @@ static const int IDF = 0;                 //Image Distortion Fix
 	#define DB_W 29
 	#define DB_Y 2
 	#define TW 1
-#elif (App == 0xBF757E3A )	//Return to Castle Wolfenstine
+#elif (App == 0xBF757E3A )	//Return to Castle Wolfenstein
 	#define DA_Y 8.75
 	#define DB_Y 2
 	#define DB_W 31
@@ -241,11 +243,11 @@ static const int IDF = 0;                 //Image Distortion Fix
 	#define DA_Y 20.0
 	#define DB_Y 2
 	#define DB_W 53
-#elif (App == 0x44BD41E1 )	//Bioshock Remastred
+#elif (App == 0x44BD41E1 )	//Bioshock Remaster
 	#define DA_Z 0.001
 	#define DB_Y 3
 	#define DB_W 55
-#elif (App == 0x7CF5A01 )	//Bioshock 2 Remastred
+#elif (App == 0x7CF5A01 )	//Bioshock 2 Remaster
 	#define DA_Z 0.001
 	#define DB_W 56
 	#define DB_Y 3
@@ -537,9 +539,26 @@ static const int IDF = 0;                 //Image Distortion Fix
 	#define TW 1
 #elif (App == 0x2F0BD376 )	//Minecraft
 	#define DA_Y 17.50
-	#define DA_X 0.075
+	#define DA_X 0.0725
 	#define DB_W 25
 	#define TW 1
+#elif (App == 0x84D341E3 )	//Little Nightmares
+	#define DA_W 1
+	#define DA_Y 33.75
+	#define DA_X 0.25
+	#define DA_Z 0.0015
+	#define DB_Y 5
+#elif (App == 0xC0AC5174 )	//Observer
+	#define DA_W 1
+	#define DA_Y 21.5
+	#define DA_X 0.0375
+	#define DB_Y 4
+#elif (App == 0xABAA2255 )	//The Forest
+	#define DA_W 1
+	#define DB_X 1
+	#define DA_Y 7.5
+	#define DA_X 0.04375
+	#define DB_Y 3
 #else
 	#define NP 1 //No Profile
 #endif

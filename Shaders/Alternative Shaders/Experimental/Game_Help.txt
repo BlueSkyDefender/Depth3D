@@ -134,6 +134,7 @@ Inner Shader Setting:
     RB        LEGO Batman 3                                DM 0
               Life is Strange: Before the Storm            DM 1       150.00                               Yes     
               Lifeless Planet                              DM 0       17.500                               Yes     
+    RB        Little Nightmares                            DM 1       33.750    0.00150                                Yes 5
               Lords of The Fallen                          DM 0       14.750                                       
               Lost in Vivo                                 DM 0       8.7500                               Yes         Yes 4         
     RB        LuciusII                                     DM 0       20.000                               Yes     
@@ -160,7 +161,7 @@ Inner Shader Setting:
     RB        No One Lives Forever 2                       DM 0       7.5000                WDM 56                     No  0
     RB        Nosferatu: The Wrath of Malachi              DM 0       62.500                                       
               Obscuritas                                   DM 0       20.000                                           Yes 5         
-              Observer                                     DM 1       10.000                                       
+    RB        Observer                                     DM 1       10.000                                       
     RB        Penumbra: Black Plague                       DM 0       7.5000                                       
     RB        Phantasmal                                   DM 0       7.5000                               Yes     
     RB        Prey 2006                                    DM 0       7.5000                WDM 26                     Yes 3               
@@ -540,6 +541,9 @@ Issues with depth buffer when Black Bars are on screen.
 Depth Buffer may not show in main menu.
 You need to set your Depth Buffer to preserve in th DX 11 tab.
 
+{Little Nightmares} - Used ReShade 4.3
+In setting set Post Processing to low ore Med.
+
 {LuciusII}
 Set Globla Settings to Medium. Turn off FXAA Every thing else can be maxed out.
 
@@ -627,6 +631,27 @@ Now put the pic C:\Program Files (x86)\Steam\steamapps\common\Nosferatu The Wrat
 Start the game with no more film grain!
 
 Geometry 3D may be done with TriDef Try It.
+
+{Observer} - Used ReShade 4.3
+In the folder: C:\Users\"Sys_user_name"\AppData\Local\TheObserver\Saved\Config\WindowsNoEditor 
+Open up the Scalability.ini file and paste this:
+
+[PostProcessQuality@3]
+r.SceneColorFringeQuality=0
+r.SceneColorFringe.Max=0
+r.DepthOfFieldQuality=0
+
+You need to set video quality settings on HIGH or CUSTOM as well.
+Save and then make the file read-only.
+
+or
+
+In the folder: C:\Users\"Sys_user_name"\AppData\Local\TheObserver\Saved\Config\WindowsNoEditor 
+Open up the Engine.ini file and paste this:
+[SystemSettings]
+r.SceneColorFringeQuality=0
+r.DepthOfFieldQuality=0
+r.MaxAnisotropy=16
 
 {Phantasmal}
 A buggy Opengl game. But, hold down ctrl when starting the game and set your resolution. That or use "-show-screen-selector" in launch options. 
@@ -786,9 +811,13 @@ Has a depth map that fluctuates for some reason.
 
 Now in Windows 10 Creators update you want to disable Compatilbility Mode and you still need to use Reshade 3.0.2.
 
-{The Forest}
-Depth Buffer Hides some times Need to look for it in the DX11 Tab. Keep a low Divergence ammount around 25.
-Also something to note. Depth Buffer is lost sometimes out in open waters.
+{The Forest} - Used ReShade 4.3
+Depth Buffer Hides some times Need to look for it in the DX11 Tab. Keep a low Divergence lower then normal in this game.
+Also something to note. Depth Buffer is lost sometimes out in open waters. I find that setting Depth Settings as bellow help.
+
+Under DX11 Tab
+Depth Texture Formant: D32FS8
+Depth Buffer: 0x00000000082ED0FD8 like the 4th one down.
 
 ReShade works when playing this game with friends online. So enjoy.
 
