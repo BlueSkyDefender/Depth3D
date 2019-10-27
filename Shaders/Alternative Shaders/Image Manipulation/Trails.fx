@@ -20,6 +20,7 @@
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 #define PerColor 0 // Lets you adjust per Color Channel.Default 0 off
+#define AddDepth 0 // Lets this effect be affected by Depth..Default 0 off
 
 #if !PerColor
 uniform float Persistence <
@@ -52,7 +53,67 @@ uniform float TQ <
 	ui_tooltip = "Adjust Trail Quality";
 > = 0.5;
 
+uniform bool PS2 <
+	ui_label = "PS2 Style Echo";
+	ui_tooltip = "This enables PS2 Style Echo in your game.\n"
+				 "This disables Trail Quality.";
+> = false;
+#if AddDepth
+uniform bool Allow_Depth <
+	ui_label = "Depth Map Toggle";
+	ui_tooltip = "This Alows Depth to be used in Trails.";
+	ui_category = "Depth Buffer";
+> = 0;
+
+uniform int Depth_Map <
+	ui_type = "combo";
+	ui_items = "Normal\0Reverse\0";
+	ui_label = "Custom Depth Map";
+	ui_tooltip = "Pick your Depth Map.";
+	ui_category = "Depth Buffer";
+> = 0;
+
+uniform float Depth_Map_Adjust <
+	ui_type = "slider";
+	ui_min = 0.125; ui_max = 1000.0; ui_step = 0.125;
+	ui_label = "Depth Map Adjustment";
+	ui_tooltip = "Adjust the depth map and sharpness distance.";
+	ui_category = "Depth Buffer";
+> = 7.5;
+
+uniform bool Depth_Map_Flip <
+	ui_label = "Depth Map Flip";
+	ui_tooltip = "Flip the depth map if it is upside down.";
+	ui_category = "Depth Buffer";
+> = 0;
+
+uniform bool Invert_Depth <
+	ui_label = "Depth Map Inverte";
+	ui_tooltip = "Inverts Depth so you can target only your weapon or what's near you.";
+	ui_category = "Depth Buffer";
+> = 0;
+
+uniform bool Depth_View <
+	ui_label = "Depth Map View";
+	ui_tooltip = "Lets you see Depth so you can Debug.";
+	ui_category = "Depth Buffer";
+> = 0;
+#else
+static const int Allow_Depth = 0;
+static const int Depth_Map = 0;
+static const float Depth_Map_Adjust = 7.5;
+static const int Depth_Map_Flip = 0;
+static const int Invert_Depth = 0;
+static const int Depth_View = 0;
+#endif
 /////////////////////////////////////////////D3D Starts Here/////////////////////////////////////////////////////////////////
+texture DepthBufferTex : DEPTH;
+
+sampler DepthBuffer 
+	{ 	
+		Texture = DepthBufferTex; 
+	};
+	
 texture BackBufferTex : COLOR;
 
 sampler BackBuffer 
@@ -68,28 +129,63 @@ sampler PBackBuffer
 	};
 	
 ///////////////////////////////////////////////////////////TAA/////////////////////////////////////////////////////////////////////	
-#define pix float2(BUFFER_RCP_WIDTH, BUFFER_RCP_HEIGHT)
-#define iResolution float2(BUFFER_WIDTH, BUFFER_HEIGHT)
-
-uniform float frametime < source = "frametime"; >;
+#define pix float2(BUFFER_RCP_WIDTH, BUFFER_RCP_HEIGHT)	
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+float Depth(in float2 texcoord : TEXCOORD0)
+{
+	if (Depth_Map_Flip)
+		texcoord.y =  1 - texcoord.y;
+		
+	float zBuffer = tex2D(DepthBuffer, texcoord).x; //Depth Buffer
+	
+	//Conversions to linear space.....
+	//Near & Far Adjustment
+	float Far = 1.0, Near = 0.125/Depth_Map_Adjust; //Division Depth Map Adjust - Near
+	
+	float2 Z = float2( zBuffer, 1-zBuffer );
+	
+	if (Depth_Map == 0)//DM0. Normal
+		zBuffer = Far * Near / (Far + Z.x * (Near - Far));		
+	else if (Depth_Map == 1)//DM1. Reverse
+		zBuffer = Far * Near / (Far + Z.y * (Near - Far));	
+		 
+	return saturate(zBuffer);	
+}
 
 float3 T_Out(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Target
-{	
-    float3 C = tex2D(BackBuffer, texcoord).rgb;
+{
+	float TQA = TQ, D = Depth(texcoord);	
+	if(PS2)
+	TQA = 0;
+		
+    float3 B = tex2D(BackBuffer, texcoord).rgb;
 
-    C.rgb = tex2Dlod(PBackBuffer, float4(texcoord,0,TQ)).rgb;
+    float3 A = tex2Dlod(PBackBuffer, float4(texcoord,0,TQA)).rgb;
 
     #if !PerColor
-    float P = 1-Persistence;
-    C *= P;
+      float P = 1-Persistence;
     #else
-    float3 P = 1-Persistence;
-	C = C * P; 
+      float3 P = 1-Persistence;
     #endif
+  
+	if(Invert_Depth)
+	D = 1-D;   
+	
+	if(Allow_Depth)  
+    P *= D;
     
-    C = max( tex2D(BackBuffer, texcoord).rgb, C);
+    if(!PS2)
+    {
+      A *= P;
+      B = max( tex2D(BackBuffer, texcoord).rgb, A);
+    }
+    else
+      B = (1-P) * B + P * A;
 
-    return C;
+	if(Depth_View)
+		B = D;  
+        
+  return B;
 }
 
 void Past_BB(float4 position : SV_Position, float2 texcoord : TEXCOORD, out float4 Past : SV_Target)
@@ -108,14 +204,19 @@ void Past_BB(float4 position : SV_Position, float2 texcoord : TEXCOORD, out floa
 	float2(-0.791559, -0.597705)  
 	};  
 	  
-	float4 sum = tex2D(BackBuffer,texcoord);  
-	float Adjust = TQ*pix.x;
-	for (int i = 0; i < 12; i++)
+	float4 sum = tex2D(BackBuffer,texcoord);
+	float TQA = TQ;	
+	if(PS2)
 	{  
-		sum += tex2D(BackBuffer, texcoord + Adjust * samples[i]);  
-	} 
- 
-	Past = sum * 0.07692307;  
+		float Adjust = TQ*pix.x;
+		for (int i = 0; i < 12; i++)
+		{  
+			sum += tex2D(BackBuffer, texcoord + Adjust * samples[i]);  
+		} 
+	Past = sum * 0.07692307; 
+	}
+	else
+	Past = sum;  
  
 }
 
