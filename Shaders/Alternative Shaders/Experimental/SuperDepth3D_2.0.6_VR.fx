@@ -41,8 +41,8 @@
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #if exists "Overwatch.fxh"                                           //Overwatch Intercepter//
 	#include "Overwatch.fxh"
-#else //DA_X ZPD | DA_Y Depth_Adjust | DA_Z Offset | DA_W Depth_Linearization | DB_X Depth_Flip | DB_Y Auto_Balance | DB_Z Auto_Depth | DB_W Weapon_Hand | DC_X HUDX | DC_Y BD_K1 | DC_Z BD_K2 | DC_W BD_Zoom | DD_X HV_X | DD_Y HV_Y | DD_Z DepthPX | DD_W DepthPY
-	static const float DA_X = 0.025, DA_Y = 7.5, DA_Z = 0.0, DA_W = 0.0, DB_X = 0, DB_Y = 0, DB_Z = 0.1, DB_W = 0.0, DC_X = 0.0, DC_Y = 0, DC_Z = 0, DC_W = 0, DD_X = 1,DD_Y = 1, DD_Z = 0.0, DD_W = 0.0;
+#else //DA_X ZPD | DA_Y Depth_Adjust | DA_Z Offset | DA_W Depth_Linearization | DB_X Depth_Flip | DB_Y Auto_Balance | DB_Z Auto_Depth | DB_W Weapon_Hand | DC_X HUDX | DC_Y BD_K1 | DC_Z BD_K2 | DC_W BD_Zoom | DD_X HV_X | DD_Y HV_Y | DD_Z DepthPX | DD_W DepthPY | DE_X Auto_Balance_Clamp_D
+	static const float DA_X = 0.025, DA_Y = 7.5, DA_Z = 0.0, DA_W = 0.0, DB_X = 0, DB_Y = 0, DB_Z = 0.1, DB_W = 0.0, DC_X = 0.0, DC_Y = 0, DC_Z = 0, DC_W = 0, DD_X = 1,DD_Y = 1, DD_Z = 0.0, DD_W = 0.0, DE_X = 1.0;
 	static const int RE = 0, NC = 0, TW = 0, NP = 0, ID = 0, SP = 0, DC = 0, HM = 0;
 #endif
 //USER EDITABLE PREPROCESSOR FUNCTIONS START//
@@ -102,6 +102,12 @@
 #define Fade_Key 1 // You can use http://keycode.info/ to figure out what key is what.
 #define Fade_Time_Adjust 0.5625 // From 0 to 1 is the Fade Time adjust for this mode. Default is 0.5625;
 #define Eye_Fade_Reduction 0 // From 0 to 2 Default is both eyes Depth reduction. One is Right Eye only Two is Left Eye Only
+
+//USER EDITABLE FUNCTIONS UP FOR REVIEW//
+
+// Menu Detection | Use this to dissable/enable in game Menu Detection.
+static const float Menu_Detection = 0.5;
+
 //USER EDITABLE PREPROCESSOR FUNCTIONS END//
 
 #if !defined(__RESHADE__) || __RESHADE__ < 40000
@@ -144,15 +150,6 @@ uniform float ZPD <
 				"Default is 0.025, Zero is off.";
 	ui_category = "Divergence & Convergence";
 > = DA_X;
-
-uniform float Auto_Depth_Range <
-	ui_type = "drag";
-	ui_min = 0.0; ui_max = 0.625;
-	ui_label = " Auto Depth Range";
-	ui_tooltip = "The Map Automaticly scales to outdoor and indoor areas.\n"
-				 "Default is 0.1f, Zero is off.";
-	ui_category = "Divergence & Convergence";
-> = DB_Z;
 #if Balance_Mode
 uniform float ZPD_Balance <
 	ui_type = "drag";
@@ -164,6 +161,7 @@ uniform float ZPD_Balance <
 > = 0.5;
 
 static const int Auto_Balance_Ex = 0;
+static const float Auto_Balance_Clamp = 1.0;
 #else
 uniform int Auto_Balance_Ex <
 	#if Compatibility
@@ -177,6 +175,15 @@ uniform int Auto_Balance_Ex <
 				 "Default is Off.";
 	ui_category = "Divergence & Convergence";
 > = DB_Y;
+
+uniform float Auto_Balance_Clamp <
+	ui_type = "drag";
+	ui_min = 0.5; ui_max = 1.0;
+	ui_label = " Auto Balance Clamp";
+	ui_tooltip = "This Clamps Auto Balance's max Distance.\n"
+				 "Default is 1.0f, One is off.";
+	ui_category = "Divergence & Convergence";
+> = DE_X;
 #endif
 //Occlusion Masking//
 uniform int View_Mode <
@@ -237,13 +244,14 @@ uniform float Offset <
 	ui_category = "Depth Map";
 > = DA_Z;
 
-uniform float Menu_Detection <
+uniform float Auto_Depth_Adjust <
 	ui_type = "drag";
-	ui_min = 0.0; ui_max = 2.5; ui_step = 0.5;
-	ui_label = " Menu Detection";
-	ui_tooltip = "Use this to dissable/enable in game Menu Detection.";
+	ui_min = 0.0; ui_max = 0.625;
+	ui_label = " Auto Depth Adjust";
+	ui_tooltip = "The Map Automaticly scales to outdoor and indoor areas.\n"
+				 "Default is 0.1f, Zero is off.";
 	ui_category = "Depth Map";
-> = 0.5;
+> = DB_Z;
 
 uniform bool Depth_Map_View <
 	ui_label = " Depth Map View";
@@ -814,7 +822,7 @@ float2 WeaponDepth(float2 texcoord)
 	else if(WP == 61)
 		WA_XYZ = float3(0,0,0);                //WP 59 | Game
 	else if(WP == 62)
-		WA_XYZ = float3(0,0,0);                //WP 60 | Game
+		WA_XYZ = float3(1.962,5.5,0);          //WP 60 | Dying Light
 	//Weapon Profiles Ends Here//
 
 	// Here on out is the Weapon Hand Adjustment code.
@@ -890,9 +898,9 @@ float3 HUD(float3 HUD, float2 texcoord )
 }
 #endif
 float AutoDepthRange( float d, float2 texcoord )
-{ float LumAdjust_ADR = smoothstep(-0.0175,Auto_Depth_Range,Lum(texcoord).y);
+{ float LumAdjust_ADR = smoothstep(-0.0175,Auto_Depth_Adjust,Lum(texcoord).y);
 	if(RE)
-	LumAdjust_ADR = smoothstep(-0.0175,Auto_Depth_Range,Lum(texcoord).x);
+	LumAdjust_ADR = smoothstep(-0.0175,Auto_Depth_Adjust,Lum(texcoord).x);
 
 	  return min(1,( d - 0 ) / ( LumAdjust_ADR - 0));
 }
@@ -911,7 +919,7 @@ float2 Conv(float D,float2 texcoord)
 	#if RE_Fix || RE
 		Z = AutoZPDRange(Z,texcoord);
 	#endif
-		if (Auto_Depth_Range > 0)
+		if (Auto_Depth_Adjust > 0)
 			D = AutoDepthRange(D,texcoord);
 
 	#if Balance_Mode
@@ -930,6 +938,8 @@ float2 Conv(float D,float2 texcoord)
 
 		if (ALC <= 0.025)
 			WZP = 1;
+
+		ZP = min(ZP,Auto_Balance_Clamp);
 
     return float2(lerp(Convergence,D, ZP),lerp(WConvergence,D,WZP));
 }
@@ -1022,24 +1032,16 @@ float2 Parallax( float Diverge, float2 Coordinates) // Horizontal parallax offse
     	DB_Offset = 0;
 
 	[loop] //Steep parallax mapping
-	#if !Compatibility
-	while(CurrentLayerDepth < CurrentDepthMapValue)
-	{
-	#else
     for ( int i = 0; i < Steps; i++ )
-    {	// Doing it this way should stop crashes in older version of reshade, I hope.
+    {	  // Doing it this way should stop crashes in older version of reshade, I hope.
         if (CurrentDepthMapValue < CurrentLayerDepth)
-			break; // Once we hit the limit Stop Exit Loop.
-	#endif
+					break; // Once we hit the limit Stop Exit Loop.
         // Shift coordinates horizontally in linear fasion
         ParallaxCoord.x -= deltaCoordinates;
         // Get depth value at current coordinates
-    	CurrentDepthMapValue = zBuffer( ParallaxCoord - DB_Offset);
+    		CurrentDepthMapValue = zBuffer( ParallaxCoord - DB_Offset);
         // Get depth of next layer
         CurrentLayerDepth += LayerDepth;
-     #if !Compatibility
-        continue;
-     #endif
     }
 
 	// Parallax Occlusion Mapping

@@ -41,7 +41,7 @@
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #if exists "Overwatch.fxh"                                           //Overwatch Intercepter//
 	#include "Overwatch.fxh"
-#else //DA_X ZPD | DA_Y Depth_Adjust | DA_Z Offset | DA_W Depth_Linearization | DB_X Depth_Flip | DB_Y Auto_Balance | DB_Z Auto_Depth | DB_W Weapon_Hand | DC_X HUDX | DC_Y BD_K1 | DC_Z BD_K2 | DC_W BD_Zoom | DD_X HV_X | DD_Y HV_Y | DD_Z DepthPX | DD_W DepthPY | DE_X Auto_Balance_D
+#else //DA_X ZPD | DA_Y Depth_Adjust | DA_Z Offset | DA_W Depth_Linearization | DB_X Depth_Flip | DB_Y Auto_Balance | DB_Z Auto_Depth | DB_W Weapon_Hand | DC_X HUDX | DC_Y BD_K1 | DC_Z BD_K2 | DC_W BD_Zoom | DD_X HV_X | DD_Y HV_Y | DD_Z DepthPX | DD_W DepthPY | DE_X Auto_Balance_Clamp_D
 	static const float DA_X = 0.025, DA_Y = 7.5, DA_Z = 0.0, DA_W = 0.0, DB_X = 0, DB_Y = 0, DB_Z = 0.1, DB_W = 0.0, DC_X = 0.0, DC_Y = 0, DC_Z = 0, DC_W = 0, DD_X = 1,DD_Y = 1, DD_Z = 0.0, DD_W = 0.0, DE_X = 1.0;
 	static const int RE = 0, NC = 0, TW = 0, NP = 0, ID = 0, SP = 0, DC = 0, HM = 0;
 #endif
@@ -238,7 +238,7 @@ uniform float Offset <
 	ui_category = "Depth Map";
 > = DA_Z;
 
-uniform float Auto_Depth_Range <
+uniform float Auto_Depth_Adjust <
 	ui_type = "drag";
 	ui_min = 0.0; ui_max = 0.625;
 	ui_label = " Auto Depth Adjust";
@@ -881,9 +881,9 @@ float3 HUD(float3 HUD, float2 texcoord )
 }
 #endif
 float AutoDepthRange(float d, float2 texcoord )
-{ float LumAdjust_ADR = smoothstep(-0.0175,Auto_Depth_Range,Lum(texcoord).y);
+{ float LumAdjust_ADR = smoothstep(-0.0175,Auto_Depth_Adjust,Lum(texcoord).y);
 	if (RE)
-		LumAdjust_ADR = smoothstep(-0.0175,Auto_Depth_Range,Lum(texcoord).x);
+		LumAdjust_ADR = smoothstep(-0.0175,Auto_Depth_Adjust,Lum(texcoord).x);
 
     return min(1,( d - 0 ) / ( LumAdjust_ADR - 0));
 }
@@ -902,7 +902,7 @@ float2 Conv(float D,float2 texcoord)
 	#if RE_Fix || RE
 		Z = AutoZPDRange(Z,texcoord);
 	#endif
-		if (Auto_Depth_Range > 0)
+		if (Auto_Depth_Adjust > 0)
 			D = AutoDepthRange(D,texcoord);
 
 	#if Balance_Mode
@@ -1024,7 +1024,6 @@ float2 Parallax(float Diverge, float2 Coordinates) // Horizontal parallax offset
     		CurrentDepthMapValue = zBuffer( ParallaxCoord - DB_Offset);
         // Get depth of next layer
         CurrentLayerDepth += LayerDepth;
-
     }
 
 	// Parallax Occlusion Mapping
