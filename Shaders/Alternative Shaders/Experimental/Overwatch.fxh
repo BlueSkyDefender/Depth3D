@@ -41,32 +41,34 @@
 //--------------------------------------Code Start---------------------------------------//
 
 //SuperDepth3D Defaults
-static const float ZPD_D = 0.025;         //ZPD
-static const float Depth_Adjust_D = 7.5;  //Depth Adjust
-static const float Offset_D = 0.0;        //Offset
-static const int Depth_Linearization = 0; //Linearization
-static const int Depth_Flip = 0;          //Depth Flip
-static const int Auto_Balance = 0;        //Auto Balance
-static const float Auto_Depth = 0.1;      //Auto Depth Range
-static const int Weapon_Hand = 0;         //Weapon Profile
-static const float HUDX = 0.0;            //Heads Up Display Cut Off Point
-static const float BD_K1 = 0.0;           //Barrel Distortion K1
-static const float BD_K2 = 0.0;           //Barrel Distortion K2
-static const float BD_Zoom = 0.0;         //Barrel Distortion Zoom
-static const float HVS_X = 1.0;           //Horizontal Size
-static const float HVS_Y = 1.0;           //Vertical Size
-static const int HVP_X = 0;               //Horizontal Position
-static const int HVP_Y = 0;               //Vertical Position
+static const float ZPD_D = 0.025;                       //ZPD
+static const float Depth_Adjust_D = 7.5;                //Depth Adjust
+static const float Offset_D = 0.0;                      //Offset
+static const int Depth_Linearization_D = 0;             //Linearization
+static const int Depth_Flip_D = 0;                      //Depth Flip
+static const int Auto_Balance_D = 0;                    //Auto Balance
+static const float Auto_Depth_D = 0.1;                  //Auto Depth Range
+static const int Weapon_Hand_D = 0;                     //Weapon Profile
+static const float HUDX_D = 0.0;                        //Heads Up Display Cut Off Point
+static const float BD_K1_D = 0.0;                       //Barrel Distortion K1
+static const float BD_K2_D = 0.0;                       //Barrel Distortion K2
+static const float BD_Zoom_D = 0.0;                     //Barrel Distortion Zoom
+static const float HVS_X_D = 1.0;                       //Horizontal Size
+static const float HVS_Y_D = 1.0;                       //Vertical Size
+static const int HVP_X_D = 0;                           //Horizontal Position
+static const int HVP_Y_D = 0;                           //Vertical Position
+static const float Auto_Balance_Clamp_D = 1.0;          //Auto Balance Clamp
+
 
 //Special Toggles Defaults
-static const int REF = 0;                 //Resident Evil Fix
-static const int NCW = 0;                 //Not Compatible Warning
-static const int FTW = 0;                 //Flashing Text Warning
-static const int NPW = 0;                 //No Profile Warning
-static const int IDF = 0;                 //Inverted Depth Fix
-static const int SPF = 0;                 //Size & Position Fix
-static const int IDF = 0;                 //Image Distortion Fix
-static const int HMT = 0;                 //HUD Mode Trigger
+static const int REF = 0;                               //Resident Evil Fix
+static const int NCW = 0;                               //Not Compatible Warning
+static const int FTW = 0;                               //Flashing Text Warning
+static const int NPW = 0;                               //No Profile Warning
+static const int IDF = 0;                               //Inverted Depth Fix
+static const int SPF = 0;                               //Size & Position Fix
+static const int IDF = 0;                               //Image Distortion Fix
+static const int HMT = 0;                               //HUD Mode Trigger
 
 //Special Handling
 #if exists "LEGOBatman.exe"															//Lego Batman
@@ -573,12 +575,18 @@ static const int HMT = 0;                 //HUD Mode Trigger
 	#define DB_Y 4
 	#define DC_X 0.580
 	#define HM 1
-	#elif (App == 0xE160AE14 ) //Spyro Reignited Trilogy
-		#define DA_W 1
-		#define DA_Y 12.5
-		#define DA_Z 0.0001
-		#define DA_X 0.05625
-		#define DB_Y 3
+#elif (App == 0xE160AE14 ) //Spyro Reignited Trilogy
+	#define DA_W 1
+	#define DA_Y 12.5
+	#define DA_Z 0.0001
+	#define DA_X 0.05625
+	#define DB_Y 3
+#elif (App == 0x5833F81C ) //Dying Light
+	#define DA_W 1
+	#define DA_Y 21.25
+	#define DA_X 0.065
+	#define DB_Y 4
+	#define DE_X 0.5
 #else
 	#define NP 1 //No Profile
 #endif
@@ -595,43 +603,46 @@ static const int HMT = 0;                 //HUD Mode Trigger
     #define DA_Z Offset_D
 #endif
 #ifndef DA_W
-    #define DA_W Depth_Linearization
+    #define DA_W Depth_Linearization_D
 #endif
 #ifndef DB_X
-    #define DB_X Depth_Flip
+    #define DB_X Depth_Flip_D
 #endif
 #ifndef DB_Y
-    #define DB_Y Auto_Balance
+    #define DB_Y Auto_Balance_D
 #endif
 #ifndef DB_Z
-    #define DB_Z Auto_Depth
+    #define DB_Z Auto_Depth_D
 #endif
 #ifndef DB_W
-    #define DB_W Weapon_Hand
+    #define DB_W Weapon_Hand_D
 #endif
 #ifndef DC_X
-    #define DC_X HUDX
+    #define DC_X HUDX_D
 #endif
 #ifndef DC_Y
-    #define DC_Y BD_K1
+    #define DC_Y BD_K1_D
 #endif
 #ifndef DC_Z
-    #define DC_Z BD_K2
+    #define DC_Z BD_K2_D
 #endif
 #ifndef DC_W
-    #define DC_W BD_Zoom
+    #define DC_W BD_Zoom_D
 #endif
 #ifndef DD_X
-    #define DD_X HVS_X
+    #define DD_X HVS_X_D
 #endif
 #ifndef DD_Y
-    #define DD_Y HVS_Y
+    #define DD_Y HVS_Y_D
 #endif
 #ifndef DD_Z
-    #define DD_Z HVP_X
+    #define DD_Z HVP_X_D
 #endif
 #ifndef DD_W
-    #define DD_W HVP_Y
+    #define DD_W HVP_Y_D
+#endif
+#ifndef DE_X
+    #define DE_X Auto_Balance_Clamp_D
 #endif
 
 //Special Toggles
