@@ -96,13 +96,7 @@
 #define Fade_Time_Adjust 0.5625 // From 0 to 1 is the Fade Time adjust for this mode. Default is 0.5625;
 #define Eye_Fade_Reduction 0 // From 0 to 2 Default is both eyes Depth reduction. One is Right Eye only Two is Left Eye Only
 
-//USER EDITABLE FUNCTIONS UP FOR REVIEW//
-
-// Menu Detection | Use this to dissable/enable in game Menu Detection.
-static const float Menu_Detection = 0.5;
-
 //USER EDITABLE PREPROCESSOR FUNCTIONS END//
-
 #if !defined(__RESHADE__) || __RESHADE__ < 40000
 	#define Compatibility 1
 #else
@@ -254,6 +248,12 @@ uniform int Depth_Map_View <
 	ui_tooltip = "Display the Depth Map";
 	ui_category = "Depth Map";
 > = 0;
+// New Menu Detection Code WIP
+uniform bool Depth_Detection <
+	ui_label = " Depth Detection";
+	ui_tooltip = "Use this to dissable/enable in game Depth Detection.";
+	ui_category = "Depth Map";
+> = false;
 
 uniform bool Depth_Map_Flip <
 	ui_label = " Depth Map Flip";
@@ -657,7 +657,7 @@ float Depth(float2 texcoord)
 	if (Depth_Map_Flip)
 		texcoord.y =  1 - texcoord.y;
 	//Conversions to linear space.....
-	float zBuffer = tex2D(DepthBuffer, texcoord).x, Far = 1., Near = 0.125/Depth_Map_Adjust; //Near & Far Adjustment
+	float zBuffer = tex2Dlod(DepthBuffer, float4(texcoord,0,0)).x, Far = 1., Near = 0.125/Depth_Map_Adjust; //Near & Far Adjustment
 
 	#if Invert_Depth || ID
 	zBuffer = 1 - zBuffer;
@@ -672,7 +672,7 @@ float Depth(float2 texcoord)
 		zBuffer = Far * Near / (Far + Z.x * (Near - Far));
 	else if (Depth_Map == 1) //DM1 Reverse
 		zBuffer = Far * Near / (Far + Z.y * (Near - Far));
-	return zBuffer;
+	return saturate(zBuffer);
 }
 
 float2 WeaponDepth(float2 texcoord)
@@ -959,10 +959,16 @@ float zBuffer(float2 texcoord)
 
 	float ALC = abs(Lum(texcoord).x);
 
-	if (Menu_Detection >= 1)
+	if (Depth_Detection)
 	{
-		if (ALC <= (0.025 / Menu_Detection))
-		DM = 0;
+		//Check Depth at 3 Point D_A Top_Center / Bottom_Center
+		float D_A = Depth(float2(0.5,0.0)), D_B = Depth(float2(0.5,1.0));
+		
+		if (D_A != 1 && D_B != 1)
+		{
+			if (D_A == D_B)
+				DM = 0.0625;
+		}
 	}
 
 	if (Cancel_Depth)
@@ -1508,19 +1514,13 @@ technique SuperDepth3D
 		RenderTarget = texDMN;
 	}
 	#if Legacy_Mode
-		pass zbuffer
+		pass zbufferLM
 	{
 		VertexShader = PostProcessVS;
 		PixelShader = zBuffer;
 		RenderTarget = texzBufferN;
 	}
 	#endif
-		pass zbufferLM
-	{
-		VertexShader = PostProcessVS;
-		PixelShader = DepthMap;
-		RenderTarget = texDMN;
-	}
 		pass StereoOut
 	{
 		VertexShader = PostProcessVS;

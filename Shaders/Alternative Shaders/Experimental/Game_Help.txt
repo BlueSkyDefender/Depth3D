@@ -534,7 +534,11 @@ You can also follow this guide.
 https://www.tapatalk.com/groups/kingpinforever/viewtopic.php?f=1&t=2184&p=10574#p10574
 
 {Layers of Fear} - Used ReShade 4.3. But You should use an older version of reshade around 3.0 era
-If you use modern Reshade then Select DX11 Tab and se the Depth Buffer to like the 3rd one 0x4659D7BC
+If you use modern Reshade then Select DX11 Tab and set the Depth Buffer settings to.
+Depth Texture Formant - D24S8
+Depth Buffer - to the one with 0 Draw Calls
+
+Helps to look at a lamp or light to get that buffer to stand still. You will know what I mean.
 
 {LEGO Batman 3}
 Issues with depth buffer when Black Bars are on screen.

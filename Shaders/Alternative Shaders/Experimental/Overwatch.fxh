@@ -546,8 +546,10 @@ static const int HMT = 0;                               //HUD Mode Trigger
 	#define TW 1
 #elif (App == 0x2F0BD376 ) //Minecraft
 	#define DA_Y 17.50
-	#define DA_X 0.0725
+	#define DA_X 0.0625
 	#define DB_W 25
+	#define DB_Y 3
+	#define DE_X 0.5
 	#define TW 1
 #elif (App == 0x84D341E3 ) //Little Nightmares
 	#define DA_W 1
