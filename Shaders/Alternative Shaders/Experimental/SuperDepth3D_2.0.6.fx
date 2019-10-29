@@ -165,6 +165,15 @@ uniform float Auto_Balance_Clamp <
 	ui_category = "Divergence & Convergence";
 > = DE_X;
 #endif
+uniform int ZPD_Boundary <
+	ui_type = "combo";
+	ui_items = "Off\0Normal\0FPS\0";
+	ui_label = " ZPD Boundary Detection";
+	ui_tooltip = "This selection menu gives extra boundary conditions to ZPD.\n"
+				 			 "This treats your screen as a virtual wall.\n"
+				 		   "Default is Off.";
+	ui_category = "Divergence & Convergence";
+> = 0;
 
 uniform int View_Mode <
 	ui_type = "combo";
@@ -455,17 +464,25 @@ uniform float3 Adjust <
 	ui_category = "Adjust";
 > = float3(0,0,0);
 */
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 uniform bool Cancel_Depth < source = "key"; keycode = Cancel_Depth_Key; toggle = true; mode = "toggle";>;
 uniform bool Mask_Cycle < source = "key"; keycode = Mask_Cycle_Key; toggle = true; >;
-/////////////////////////////////////////////D3D Starts Here/////////////////////////////////////////////////////////////////
+uniform bool Trigger_Fade_A < source = "mousebutton"; keycode = Fade_Key; toggle = true; mode = "toggle";>;
+uniform bool Trigger_Fade_B < source = "mousebutton"; keycode = Fade_Key;>;
+uniform int ran < source = "random"; min = 0; max = 1; >;
+uniform float frametime < source = "frametime";>;
+uniform float timer < source = "timer"; >;
+
 #define pix float2(BUFFER_RCP_WIDTH, BUFFER_RCP_HEIGHT)
+#define Per float2( (Perspective * pix.x) * 0.5, 0) //Per is Perspective
+#define AI Interlace_Anaglyph.x * 0.5 //Optimization for line interlaced Adjustment.
 
 float fmod(float a, float b)
 {
 	float c = frac(abs(a / b)) * abs(b);
 	return a < 0 ? -c : c;
 }
-
+///////////////////////////////////////////////////////////////3D Starts Here/////////////////////////////////////////////////////////////////
 texture DepthBufferTex : DEPTH;
 
 sampler DepthBuffer
@@ -477,11 +494,6 @@ sampler DepthBuffer
 	};
 
 texture BackBufferTex : COLOR;
-
-sampler BackBuffer
-	{
-		Texture = BackBufferTex;
-	};
 
 sampler BackBufferMIRROR
 	{
@@ -514,14 +526,12 @@ sampler SamplerDMN
 		Texture = texDMN;
 	};
 
-#if Legacy_Mode
 texture texzBufferN  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = R16F; };
 
 sampler SamplerzBufferN
 	{
 		Texture = texzBufferN;
 	};
-#endif
 
 #if UI_MASK
 texture TexMaskA < source = "Mask_A.png"; > { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA8; };
@@ -530,7 +540,19 @@ sampler SamplerMaskA { Texture = TexMaskA;};
 texture TexMaskB < source = "Mask_B.png"; > { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA8; };
 sampler SamplerMaskB { Texture = TexMaskB;};
 #endif
-////////////////////////////////////////////////////Distortion_Correction/////////////////////////////////////////////////////
+////////////////////////////////////////////////////////Adapted Luminance/////////////////////////////////////////////////////////////////////
+texture texLumN {Width = 256*0.5; Height = 256*0.5; Format = RGBA16F; MipLevels = 8;}; //Sample at 256x256/2 and a mip bias of 8 should be 1x1
+
+sampler SamplerLumN
+	{
+		Texture = texLumN;
+	};
+
+float2 Lum(float2 texcoord)
+	{   //Luminance
+		return saturate(tex2Dlod(SamplerLumN,float4(texcoord,0,11)).xy);//Average Luminance Texture Sample
+	}
+////////////////////////////////////////////////////Distortion Correction//////////////////////////////////////////////////////////////////////
 #if BD_Correction || DC
 float2 D(float2 p, float k1, float k2) //Lens + Radial lens undistortion filtering Left & Right
 {
@@ -556,14 +578,14 @@ float3 PBD(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Targe
 	float2 K1_K2 = Colors_K1_K2.xy * 0.1;
 	float2 uv = D(texcoord.xy,K1_K2.x,K1_K2.y);
 
-return tex2D(BackBuffer,uv).rgb;
+return tex2D(BackBufferCLAMP,uv).rgb;
 }
 #endif
-////////////////////////////////////////////////////Cross Cursor/////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////Cross Cursor///////////////////////////////////////////////////////////////////////////
 uniform float2 Mousecoords < source = "mousepoint"; > ;
 float4 MouseCursor(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Target
 {
-	float4 Out = tex2D(BackBuffer, texcoord),Color;
+	float4 Out = tex2D(BackBufferCLAMP, texcoord),Color;
 	float CCA = 0.1,CCB = 0.0025, CCC = 0.025, CCD = 0.05;
 	float2 MousecoordsXY = Mousecoords * pix, center = texcoord, Screen_Ratio = float2(DAR.x,DAR.y), Size_Thickness = float2(Cursor_STT.x,Cursor_STT.y + 0.00000001);
 
@@ -587,8 +609,8 @@ float4 MouseCursor(float4 position : SV_Position, float2 texcoord : TEXCOORD) : 
 	float SSC = min(max(Solid_Square_Size - dist_fromHorizontal,0)/Solid_Square_Size,max(Solid_Square_Size-dist_fromVertical,0)); //Solid Square Cursor
 	// Cursor Array //
 	float Cursor, CArray[7] = {
-		CC,			 //Cross Cursor
-		RC, 	     //Ring Cursor
+		CC,			     //Cross Cursor
+		RC, 	       //Ring Cursor
 		SSC,         //Solid Square Cursor
 		SSC + CC,    //Solid Square Cursor / Cross Cursor
 		SSC + RC,    //Solid Square Cursor / Ring Cursor
@@ -616,37 +638,7 @@ float4 MouseCursor(float4 position : SV_Position, float2 texcoord : TEXCOORD) : 
 
 	return lerp(Color,Out,fmod(min(saturate(Cursor_STT.z),0.999) * 10 ,1));
 }
-
-/////////////////////////////////////////////////////////////////////////////////Adapted Luminance/////////////////////////////////////////////////////////////////////////////////
-texture texLumN {Width = 256*0.5; Height = 256*0.5; Format = RGBA16F; MipLevels = 8;}; //Sample at 256x256/2 and a mip bias of 8 should be 1x1
-
-sampler SamplerLumN
-	{
-		Texture = texLumN;
-	};
-
-float2 Lum(float2 texcoord)
-	{   //Luminance
-		return saturate(tex2Dlod(SamplerLumN,float4(texcoord,0,11)).xy);//Average Luminance Texture Sample
-	}
-
-uniform float frametime < source = "frametime";>;
-/////////////////////////////////////////////////////////////////////////////////Fade In and Out Toggle/////////////////////////////////////////////////////////////////////////////////
-uniform bool Trigger_Fade_A < source = "mousebutton"; keycode = Fade_Key; toggle = true; mode = "toggle";>;
-uniform bool Trigger_Fade_B < source = "mousebutton"; keycode = Fade_Key;>;
-
-float Fade_in_out(float2 texcoord)
-{
-	float Trigger_Fade, AA = (1-Fade_Time_Adjust)*1000, PStoredfade = tex2D(SamplerLumN,texcoord).z;
-	//Fade in toggle.
-	if(FPSDFIO == 1)
-		Trigger_Fade = Trigger_Fade_A;
-	else if(FPSDFIO == 2)
-		Trigger_Fade = Trigger_Fade_B;
-
-	return PStoredfade + (Trigger_Fade - PStoredfade) * (1.0 - exp(-frametime/AA)); ///exp2 would be even slower
-}
-/////////////////////////////////////////////////////////////////////////////////Depth Map Information/////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////Depth Map Information/////////////////////////////////////////////////////////////////////
 float Depth(float2 texcoord)
 {
 	#if DB_Size_Postion || SP
@@ -674,7 +666,51 @@ float Depth(float2 texcoord)
 		zBuffer = Far * Near / (Far + Z.y * (Near - Far));
 	return saturate(zBuffer);
 }
+/////////////////////////////////////////////////////////Fade In and Out Toggle/////////////////////////////////////////////////////////////////////
+float Fade_in_out(float2 texcoord)
+{
+	float Trigger_Fade, AA = (1-Fade_Time_Adjust)*1000, PStoredfade = tex2D(SamplerLumN,texcoord - 1).z;
+	//Fade in toggle.
+	if(FPSDFIO == 1)
+		Trigger_Fade = Trigger_Fade_A;
+	else if(FPSDFIO == 2)
+		Trigger_Fade = Trigger_Fade_B;
 
+	return PStoredfade + (Trigger_Fade - PStoredfade) * (1.0 - exp(-frametime/AA)); ///exp2 would be even slower
+}
+
+float Fade(float2 texcoord)
+{
+	//Check Depth
+	float CD, Detect, RArray[2] = {0.375,0.625};
+	if(ZPD_Boundary > 0)
+	{
+		float CDArrayX_B[4] = {0.25,0.5,0.75,RArray[ran]};
+		float CDArrayY_B[4] = {0.125,0.25,0.375,0.5};
+		float CDArray[4] = {0.25,0.5,0.75,RArray[ran]};
+
+		//Screen Space Detector
+		[loop]
+		for( int i = 0 ; i < 4; i++ )
+		{
+			for( int j = 0 ; j < 4; j++ )
+			{
+				if(ZPD_Boundary == 1)
+					CD = 1 - ZPD / Depth( float2( CDArray[i], CDArray[j]) );
+				else if(ZPD_Boundary == 2)
+					CD = 1 - ZPD / Depth( float2( CDArrayX_B[i], CDArrayY_B[j]) );
+
+				if( CD < 0)
+					Detect = 1;
+			}
+		}
+	}
+	float Trigger_Fade = Detect, AA = (1-Fade_Time_Adjust)*1000, PStoredfade = tex2Dlod(SamplerLumN,float4(texcoord + 1,0,0)).z;
+	//Fade in toggle.
+	return PStoredfade + (Trigger_Fade - PStoredfade) * (1.0 - exp(-frametime/AA)); ///exp2 would be even slower
+}
+
+//////////////////////////////////////////////////////////Depth Map Alterations/////////////////////////////////////////////////////////////////////
 float2 WeaponDepth(float2 texcoord)
 {
 	#if DB_Size_Postion || SP
@@ -852,34 +888,15 @@ float3 DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0
 		G = DM.y > smoothstep(0,2.5,DM.w); //Weapon Mask
 		B = DM.z; //Weapon Hand
 		//A = DM.w; //Normal Depth
-
-	if(texcoord.x < pix.x * 2 && texcoord.y < pix.y * 2)
-		R = Fade_in_out(texcoord);
+		//Fade Storage
+		if(texcoord.x < pix.x * 2 && texcoord.y < pix.y * 2)
+			R = Fade_in_out(texcoord);
+		if(1-texcoord.x < pix.x * 2 && 1-texcoord.y < pix.y * 2)
+			R = Fade(texcoord);
 	//Alpha Don't work in DX9
 	return saturate(float3(R,G,B));
 }
-#if HUD_MODE || HM
-float3 HUD(float3 HUD, float2 texcoord )
-{
-	float Mask_Tex, CutOFFCal = ((HUD_Adjust.x * 0.5)/Depth_Map_Adjust) * 0.5, COC = step(Depth(texcoord).x,CutOFFCal); //HUD Cutoff Calculation
 
-	//This code is for hud segregation.
-	if (HUD_Adjust.x > 0)
-		HUD = COC > 0 ? tex2D(BackBuffer,texcoord).rgb : HUD;
-
-#if UI_MASK
-    [branch] if (Mask_Cycle == true)
-        Mask_Tex = tex2D(SamplerMaskB,texcoord.xy).a;
-    else
-        Mask_Tex = tex2D(SamplerMaskA,texcoord.xy).a;
-
-	float MAC = step(1.0-Mask_Tex,0.5); //Mask Adjustment Calculation
-	//This code is for hud segregation.
-	HUD = MAC > 0 ? tex2D(BackBuffer,texcoord).rgb : HUD;
-#endif
-	return HUD;
-}
-#endif
 float AutoDepthRange(float d, float2 texcoord )
 { float LumAdjust_ADR = smoothstep(-0.0175,Auto_Depth_Adjust,Lum(texcoord).y);
 	if (RE)
@@ -911,8 +928,8 @@ float2 Conv(float D,float2 texcoord)
 		if(Auto_Balance_Ex > 0 )
 			ZP = saturate(ALC);
 	#endif
+		Z *= lerp( 1, 0.5, smoothstep(0,1,tex2Dlod(SamplerLumN,float4(texcoord + 1,0,0)).z));
 		float Convergence = 1 - Z / D;
-
 		if (ZPD == 0)
 			ZP = 1;
 
@@ -927,13 +944,9 @@ float2 Conv(float D,float2 texcoord)
     return float2(lerp(Convergence,D, ZP),lerp(WConvergence,D,WZP));
 }
 #define BlurSamples 6  //BlurSamples = # * 2
-#if Legacy_Mode
+
 float zBuffer(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0) : SV_Target
 {
-#else
-float zBuffer(float2 texcoord)
-{
-#endif
 	float3 DM = tex2Dlod(SamplerDMN,float4(texcoord,0,0)).xyz;
 	#if Legacy_Mode
 	    float total = BlurSamples, S = 5 * saturate(Disocclusion_Adjust.x);
@@ -962,8 +975,8 @@ float zBuffer(float2 texcoord)
 	if (Depth_Detection)
 	{
 		//Check Depth at 3 Point D_A Top_Center / Bottom_Center
-		float D_A = Depth(float2(0.5,0.0)), D_B = Depth(float2(0.5,1.0));
-		
+		float D_A = tex2Dlod(SamplerDMN,float4(float2(0.5,0.0),0,0)).x, D_B = tex2Dlod(SamplerDMN,float4(float2(0.0,1.0),0,0)).x;
+
 		if (D_A != 1 && D_B != 1)
 		{
 			if (D_A == D_B)
@@ -976,7 +989,7 @@ float zBuffer(float2 texcoord)
 
 	return DM.y;
 }
-/////////////////////////////////////////L/R//////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////Parallax Generation///////////////////////////////////////////////////////////////////////
 float2 Parallax(float Diverge, float2 Coordinates) // Horizontal parallax offset & Hole filling effect
 {   float2 ParallaxCoord = Coordinates;
 	float DepthLR = 1, LRDepth, Perf = 1, Z, MS = Diverge * pix.x, MSM, N = 5, S[5] = {0.5,0.625,0.75,0.875,1.0};
@@ -1013,7 +1026,7 @@ float2 Parallax(float Diverge, float2 Coordinates) // Horizontal parallax offset
 	float LayerDepth = rcp(Steps);
 
 	//Offsets listed here Max Seperation is 3% - 8% of screen space with Depth Offsets & Netto layer offset change based on MS.
-	float deltaCoordinates = MS * LayerDepth, CurrentDepthMapValue = zBuffer(ParallaxCoord), CurrentLayerDepth = 0, DepthDifference;
+	float deltaCoordinates = MS * LayerDepth, CurrentDepthMapValue = tex2Dlod(SamplerzBufferN,float4(ParallaxCoord,0,0)).x, CurrentLayerDepth = 0, DepthDifference;
 	float2 DB_Offset = float2(Diverge * 0.0375, 0) * pix;
 
     if(View_Mode == 1)
@@ -1027,14 +1040,14 @@ float2 Parallax(float Diverge, float2 Coordinates) // Horizontal parallax offset
         // Shift coordinates horizontally in linear fasion
         ParallaxCoord.x -= deltaCoordinates;
         // Get depth value at current coordinates
-    		CurrentDepthMapValue = zBuffer( ParallaxCoord - DB_Offset);
+    		CurrentDepthMapValue = tex2Dlod(SamplerzBufferN,float4(ParallaxCoord - DB_Offset,0,0)).x;
         // Get depth of next layer
         CurrentLayerDepth += LayerDepth;
     }
 
 	// Parallax Occlusion Mapping
 	float2 PrevParallaxCoord = float2(ParallaxCoord.x + deltaCoordinates, ParallaxCoord.y);
-	float beforeDepthValue = zBuffer( ParallaxCoord ) - CurrentLayerDepth + LayerDepth, afterDepthValue = CurrentDepthMapValue - CurrentLayerDepth;
+	float beforeDepthValue = tex2Dlod(SamplerzBufferN,float4( ParallaxCoord ,0,0)).x - CurrentLayerDepth + LayerDepth, afterDepthValue = CurrentDepthMapValue - CurrentLayerDepth;
 
 	// Interpolate coordinates
 	float weight = afterDepthValue / (afterDepthValue - beforeDepthValue);
@@ -1050,9 +1063,30 @@ float2 Parallax(float Diverge, float2 Coordinates) // Horizontal parallax offset
 	#endif
 	return ParallaxCoord;
 }
-//Per is Perspective & Optimization for line interlaced Adjustment.
-#define Per float2( (Perspective * pix.x) * 0.5, 0)
-#define AI Interlace_Anaglyph.x * 0.5
+//////////////////////////////////////////////////////////////HUD Alterations///////////////////////////////////////////////////////////////////////
+#if HUD_MODE || HM
+float3 HUD(float3 HUD, float2 texcoord )
+{
+	float Mask_Tex, CutOFFCal = ((HUD_Adjust.x * 0.5)/Depth_Map_Adjust) * 0.5, COC = step(Depth(texcoord).x,CutOFFCal); //HUD Cutoff Calculation
+
+	//This code is for hud segregation.
+	if (HUD_Adjust.x > 0)
+		HUD = COC > 0 ? tex2D(BackBufferCLAMP,texcoord).rgb : HUD;
+
+	#if UI_MASK
+	    [branch] if (Mask_Cycle == true)
+	        Mask_Tex = tex2D(SamplerMaskB,texcoord.xy).a;
+	    else
+	        Mask_Tex = tex2D(SamplerMaskA,texcoord.xy).a;
+
+		float MAC = step(1.0-Mask_Tex,0.5); //Mask Adjustment Calculation
+		//This code is for hud segregation.
+		HUD = MAC > 0 ? tex2D(BackBufferCLAMP,texcoord).rgb : HUD;
+	#endif
+	return HUD;
+}
+#endif
+///////////////////////////////////////////////////////////3D Image Adjustments/////////////////////////////////////////////////////////////////////
 float4 CSB(float2 texcoords)
 {
 	if(Custom_Sidebars == 0 && Depth_Map_View == 0)
@@ -1062,15 +1096,9 @@ float4 CSB(float2 texcoords)
 	else if(Custom_Sidebars == 2 && Depth_Map_View == 0)
 		return tex2Dlod(BackBufferCLAMP,float4(texcoords,0,0));
 	else
-	{
-		#if Legacy_Mode
 		return tex2D(SamplerzBufferN,texcoords).xxxx;
-		#else
-		return zBuffer(texcoords).xxxx;
-		#endif
-	}
 }
-
+///////////////////////////////////////////////////////////Stereo Calculation///////////////////////////////////////////////////////////////////////
 float3 PS_calcLR(float2 texcoord)
 {
 	float2 TCL, TCR, TexCoords = texcoord;
@@ -1287,17 +1315,11 @@ float3 PS_calcLR(float2 texcoord)
 	}
 
 	if (Depth_Map_View == 2)
-		{
-		#if Legacy_Mode
 		color.rgb = tex2D(SamplerzBufferN,TexCoords).xxx;
-		#else
-		color.rgb = zBuffer(TexCoords).xxx;
-		#endif
-	}
 
 	return color.rgb;
 }
-
+/////////////////////////////////////////////////////////Average Luminance Textures/////////////////////////////////////////////////////////////////
 float3 Average_Luminance(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Target
 {
 	float4 ABEA, ABEArray[6] = {
@@ -1314,10 +1336,11 @@ float3 Average_Luminance(float4 position : SV_Position, float2 texcoord : TEXCOO
 	if(RE)
 	Average_Lum_Bottom = tex2D(SamplerDMN,float2( 0.125 + texcoord.x * 0.750,0.95 + texcoord.y)).x;
 
-	return float3(Average_Lum_ZPD,Average_Lum_Bottom,tex2D(SamplerDMN,0).x);
+	float Storage = texcoord < 0.5 ? tex2D(SamplerDMN,0).x : tex2D(SamplerDMN,1).x;
+
+	return float3(Average_Lum_ZPD,Average_Lum_Bottom,Storage);
 }
-uniform float timer < source = "timer"; >; //Please do not remove.
-////////////////////////////////////////////////////////Logo/////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////Logo///////////////////////////////////////////////////////////////////////
 float3 Out(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Target
 {
 	float PosX = 0.9525f*BUFFER_WIDTH*pix.x,PosY = 0.975f*BUFFER_HEIGHT*pix.y, Text_Timer = 12500, BT = smoothstep(0,1,sin(timer*(3.75/1000)));
@@ -1476,11 +1499,9 @@ float3 Out(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Targe
 	else
 		return Color;
 }
-
-///////////////////////////////////////////////////////////ReShade.fxh/////////////////////////////////////////////////////////////
-// Vertex shader generating a triangle covering the entire screen
+///////////////////////////////////////////////////////////////////ReShade.fxh//////////////////////////////////////////////////////////////////////
 void PostProcessVS(in uint id : SV_VertexID, out float4 position : SV_Position, out float2 texcoord : TEXCOORD)
-{
+{// Vertex shader generating a triangle covering the entire screen
 	texcoord.x = (id == 2) ? 2.0 : 0.0;
 	texcoord.y = (id == 1) ? 2.0 : 0.0;
 	position = float4(texcoord * float2(2.0, -2.0) + float2(-1.0, 1.0), 0.0, 1.0);
@@ -1513,14 +1534,12 @@ technique SuperDepth3D
 		PixelShader = DepthMap;
 		RenderTarget = texDMN;
 	}
-	#if Legacy_Mode
 		pass zbufferLM
 	{
 		VertexShader = PostProcessVS;
 		PixelShader = zBuffer;
 		RenderTarget = texzBufferN;
 	}
-	#endif
 		pass StereoOut
 	{
 		VertexShader = PostProcessVS;
