@@ -52,8 +52,8 @@ Also, Way many more games listed in Games_Help.txt
 Please read me ReadMeDepth3d.txt For Setting and More Information.
 
 **Want to leave me a message at the forums:** BlueSkyKnight<br />
-https://reshade.me/forum/shader-presentation/2128-sidebyside-3d-depth-map-based-stereoscopic-shader
+https://reshade.me/forum/shader-presentation/2128-sidebyside-3d-depth-map-based-stereoscopic-shader<br />
 **Want to leave me a message:** BlueSkyDefender<br />
-Also my steam page steamcommunity.com/id/BlueSkyDefender
+Also my steam page steamcommunity.com/id/BlueSkyDefender<br />
 **Want to leave me a message or talk to me:** BlueSkyDefender<br />
-Discord Server discord.gg/W2f7YhX
+Discord Server discord.gg/W2f7YhX<br />
