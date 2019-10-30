@@ -15,10 +15,6 @@ This will enhance Depth Effects that are already apart of the scene.
 **Trails**<br />
 This is an echoing based shader to add a trail to your image as you increase the image persitance. Mainly used for light painting.
 
-**Depth Cues**<br />
-Depth Based Unsharp Mask intentional haloing. This will work with or with out depth. On video, video games, and with with still images.
-This will enhance Depth Effects that are already apart of the scene.
-
 **NFAA**<br />
 A modded port of Normal Filter Anti Aliasing. With an intersting use case. Use this to assist SMAA or FXAA to catch all them jaggys with out bluring the screen.
 
