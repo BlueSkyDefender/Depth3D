@@ -1,7 +1,5 @@
-## Depth3D 
-Post-process Shaders Reshade & Freestyle
-
-## Highlighted Enhancements
+## Depth Based 3D & Other post-process shaders for ReShade and Freestyle
+### Highlighted Enhancements
 **SuperDepth3D & SuperDepth3D VR**<br />
 This Shader allows for Depth Map Based 3D like What Nvidia does with Compatibility Mode 3D and Kind of what TriDef Does with Power 3D. 
 With Many more options then regular Depth3D.
@@ -29,7 +27,7 @@ A Basic High Bloom low Perf Fake HDR shader that allows for automatic funtions t
 
 And many more in the works.
 
-## Shader Assistant
+### Shader Assistant
 **Overwatch.fxh**<br />
 Overwatch will assist many of my shaders by setting the Depth Settings for you in select games. To be honest this is the reason donations help me, help you. With every donation this allows Overwatch to grow. This make it easier to just load it along side my Depth
 Based Shaders and have some settings set for you. Less Hassle more FUN.
@@ -37,7 +35,7 @@ Based Shaders and have some settings set for you. Less Hassle more FUN.
 If you enjoyed these shader and like to donate you can do so at https://paypal.me/BlueSkyDefender
 Fundly is comming soon.
 
-## Game Compatibility
+### Game Compatibility
 **Game Compatibility Information**
 
 http://reshade.me/compatibility
