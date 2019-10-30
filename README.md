@@ -34,7 +34,7 @@ And many more in the works.
 Overwatch will assist many of my shaders by setting the Depth Settings for you in select games. To be honest this is the reason donations help me, help you. With every donation this allows Overwatch to grow. This make it easier to just load it along side my Depth
 Based Shaders and have some settings set for you. Less Hassle more FUN.
 
-If you enjoyed these shader and like to donate you can do so at paypal.me/BlueSkyDefender
+If you enjoyed these shader and like to donate you can do so at https://paypal.me/BlueSkyDefender
 Fundly is comming soon.
 
 ## Game Compatibility
@@ -54,6 +54,6 @@ Please read me ReadMeDepth3d.txt For Setting and More Information.
 **Want to leave me a message at the forums:** BlueSkyKnight<br />
 https://reshade.me/forum/shader-presentation/2128-sidebyside-3d-depth-map-based-stereoscopic-shader<br />
 **Want to leave me a message:** BlueSkyDefender<br />
-Also my steam page steamcommunity.com/id/BlueSkyDefender<br />
+Also my steam page https://steamcommunity.com/id/BlueSkyDefender<br />
 **Want to leave me a message or talk to me:** BlueSkyDefender<br />
-Discord Server discord.gg/W2f7YhX<br />
+Discord Server https://discord.gg/W2f7YhX<br />
