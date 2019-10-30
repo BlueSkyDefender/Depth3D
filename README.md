@@ -1,4 +1,4 @@
-## Post-Process shaders for ReShade, Freestyle & Ansel.
+## Post-Process shaders for ReShade, Freestyle, & Ansel
 ### Highlighted Shaders
 **SuperDepth3D & SuperDepth3D VR**<br />
 This Shader allows for Depth Map Based 3D like What Nvidia does with Compatibility Mode 3D and Kind of what TriDef Does with Power 3D. 
