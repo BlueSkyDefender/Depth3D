@@ -110,7 +110,7 @@
 	#define Ven 0
 #endif
 
-#if __RENDERER__ == 0x10000 || __RENDERER__ == 0x20000
+#if (__RENDERER__ >= 0x10000 || __RENDERER__ >= 0x20000)
 	#define Rend 1
 #else
 	#define Rend 0
@@ -906,12 +906,12 @@ float AutoZPDRange(float ZPD, float2 texcoord )
 float2 Conv(float D,float2 texcoord)
 {
 	float Z = ZPD, WZP = 0.5, ZP = 0.5, ALC = abs(Lum(texcoord).x),WBS = 0.25, W_Convergence = WZPD;
-	
+
 	if (Weapon_ZPD_Boundary == 2)
 		WBS = 0.375;
 	else if (Weapon_ZPD_Boundary == 3)
 		WBS = 0.5;
-		
+
 	if (Weapon_ZPD_Boundary >= 1)
 	{   //only really only need to check one point just above the center bottom.
 		float WZPDB = 1 - WZPD / tex2Dlod(SamplerDMN,float4(float2(0.5,0.9375),0,0)).x;
@@ -1018,8 +1018,8 @@ float2 Parallax(float Diverge, float2 Coordinates) // Horizontal parallax offset
     	DB_Offset = 0;
 	#if Rend //Steep parallax mapping
 	[loop]
-  for ( int i = 0; i < Steps; i++ )
-  {	  // Doing it this way should stop crashes in older version of reshade, I hope.
+	for ( int i = 0; i < Steps; i++ )
+	{	  // Doing it this way should stop crashes in older version of reshade, I hope.
       if(CurrentDepthMapValue < CurrentLayerDepth)
 		break; // Once we hit the limit Stop Exit Loop.
       // Shift coordinates horizontally in linear fasion
@@ -1028,11 +1028,11 @@ float2 Parallax(float Diverge, float2 Coordinates) // Horizontal parallax offset
   	CurrentDepthMapValue = tex2Dlod(SamplerzBufferN,float4(ParallaxCoord - DB_Offset,0,0)).x;
       // Get depth of next layer
       CurrentLayerDepth += LayerDepth;
-  }
+	}
 	#else
 	[loop]
-  do
-  {   // Shift coordinates horizontally in linear fasion
+	do
+	{   // Shift coordinates horizontally in linear fasion
 	    ParallaxCoord.x -= deltaCoordinates;
 	    // Get depth value at current coordinates
 	    CurrentDepthMapValue = tex2Dlod(SamplerzBufferN,float4(ParallaxCoord - DB_Offset,0,0)).x;
