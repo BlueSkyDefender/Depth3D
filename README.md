@@ -1,35 +1,39 @@
 ### **Post-Process shaders for ReShade, Freestyle, & Ansel**
-### Highlighted Shaders
+### Highlighted Shaders ReShade 
 **SuperDepth3D & SuperDepth3D VR**<br />
 This Shader allows for Depth Map Based 3D like What Nvidia does with Compatibility Mode 3D and Kind of what TriDef Does with Power 3D. 
-With Many more options then regular Depth3D.
+With many more options than regular Depth3D. Depth3D is my shader that helps introduce users to the world of 3D. SuperDepth3D allows much more control and support for different devices.
 
 **Smart Sharp**<br />
 A Smart Bilateral Sharpening filer that uses depth to gradually phase out it's effect to keep very distant objects from becoming sharp.
-Who want's razor sharp clouds. Birds don't, so why should you. Everyone wants to best the bilateral filter..... 
+Because who wants razor-sharp clouds? Birds don't, so why should you.
 
 **Depth Cues**<br />
-Depth Based Unsharp Mask intentional haloing. This will work with or with out depth. On video, video games, and with with still images.
+Depth Based Unsharp Mask intentional haloing. This will work with or without depth. On video, video games, and with still images.
 This will enhance Depth Effects that are already apart of the scene.
 
 **Trails**<br />
-This is an echoing based shader to add a trail to your image as you increase the image persitance. Mainly used for light painting.
+This is an echoing based shader to add a trail to your image as you increase the image persistence. Mainly used for light painting.
 
 **NFAA**<br />
-A modded port of Normal Filter Anti Aliasing. With an intersting use case. Use this to assist SMAA or FXAA to catch all them jaggys with out bluring the screen.
+A modded port of Normal Filter Anti Aliasing. With an interesting use case. Use this to assist SMAA or FXAA to catch all of them jaggies without blurring the screen.
 
 **Blooming HDR**<br />
-A Basic High Bloom low Perf Fake HDR shader that allows for automatic funtions to help setting it up in game.
+A Basic High Bloom low Perf Fake HDR shader that allows for automatic functions to help setting it up in-game.
 
 And many more in the works.
 
 ### Shader Assistant
 **Overwatch.fxh**<br />
-Overwatch will assist many of my shaders by setting the Depth Settings for you in select games. To be honest this is the reason donations help me, help you. With every donation this allows Overwatch to grow. This make it easier to just load it along side my Depth
+Overwatch will assist many of my shaders by setting the Depth Settings for you in select games. To be honest this is the reason donations help me, help you. With every donation this allows Overwatch to grow. This makes it easier to just load it alongside my Depth
 Based Shaders and have some settings set for you. Less Hassle more FUN.
 
-If you enjoyed these shader and like to donate you can do so at https://paypal.me/BlueSkyDefender
-Fundly is comming soon.
+If you enjoyed these shaders and like to donate you can do so at https://paypal.me/BlueSkyDefender
+Fundly is coming soon....
+
+### Highlighted Shaders Freestyle & Ansel
+**3DViewer**<br />
+This Shader allows for Depth Map Based 3D. With more user control to adjust the image too how they want. Compatible with 3DTV's 3DMonitors & VR HMDs. Made with Freestyle & Ansel in mind.
 
 ### Game Compatibility
 **Game Compatibility Information**
