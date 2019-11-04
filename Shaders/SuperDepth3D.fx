@@ -346,11 +346,13 @@ uniform int2 Eye_Fade_Reduction_n_Power <
 	ui_category = "Weapon Hand Adjust";
 > = int2(0,0);
 
-uniform bool Weapon_ZPD_Boundary <
+uniform int Weapon_ZPD_Boundary <
+	ui_type = "slider";
+	ui_min = 0; ui_max = 3;
 	ui_label = " Weapon Screen Boundary Detection";
 	ui_tooltip = "This selection menu gives extra boundary conditions to WZPD.";
 	ui_category = "Weapon Hand Adjust";
-> = false;
+> = 0;
 #if HUD_MODE || HM
 //Heads-Up Display
 uniform float2 HUD_Adjust <
@@ -903,13 +905,18 @@ float AutoZPDRange(float ZPD, float2 texcoord )
 #endif
 float2 Conv(float D,float2 texcoord)
 {
-	float Z = ZPD, WZP = 0.5, ZP = 0.5, ALC = abs(Lum(texcoord).x), W_Convergence = WZPD;
-
-	if (Weapon_ZPD_Boundary == 1)
+	float Z = ZPD, WZP = 0.5, ZP = 0.5, ALC = abs(Lum(texcoord).x),WBS = 0.25, W_Convergence = WZPD;
+	
+	if (Weapon_ZPD_Boundary == 2)
+		WBS = 0.375;
+	else if (Weapon_ZPD_Boundary == 3)
+		WBS = 0.5;
+		
+	if (Weapon_ZPD_Boundary >= 1)
 	{   //only really only need to check one point just above the center bottom.
 		float WZPDB = 1 - WZPD / tex2Dlod(SamplerDMN,float4(float2(0.5,0.9375),0,0)).x;
 		if (WZPDB < -0.1)
-			W_Convergence *= 0.25;
+			W_Convergence *= WBS;
 	}
 
 	W_Convergence = 1 - W_Convergence / D;

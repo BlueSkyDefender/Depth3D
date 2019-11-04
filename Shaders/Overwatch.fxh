@@ -67,7 +67,7 @@ static const int FTW = 0;                               //Flashing Text Warning
 static const int NPW = 0;                               //No Profile Warning
 static const int IDF = 0;                               //Inverted Depth Fix
 static const int SPF = 0;                               //Size & Position Fix
-static const int IDF = 0;                               //Image Distortion Fix
+static const int BDF = 0;                               //Barrel Distortion Fix
 static const int HMT = 0;                               //HUD Mode Trigger
 
 //Special Handling
@@ -590,6 +590,12 @@ static const int HMT = 0;                               //HUD Mode Trigger
 	#define DB_Y 4
 	#define DE_X 0.5
 	#define DB_W 62
+#elif (App == 0x42C1A2B )	//CoD: WWII
+  #define DA_X 0.04
+	#define DA_W 1
+	#define DB_Y 4
+	#define DB_W 12
+	#define DE_X 0.5
 #else
 	#define NP 1 //No Profile
 #endif
@@ -668,7 +674,7 @@ static const int HMT = 0;                               //HUD Mode Trigger
     #define SP SPF //Size & Position Fix
 #endif
 #ifndef DC
-    #define DC IDF //Image Distortion Fix
+    #define DC BDF //Barrel Distortion Fix
 #endif
 #ifndef HM
     #define HM HMT //HUD Mode Trigger
