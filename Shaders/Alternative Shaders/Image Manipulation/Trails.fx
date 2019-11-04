@@ -1,22 +1,22 @@
 ////----------//
 ///**Trails**///
 //----------////
- 
+
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//* Trails                            																														
-//* For Reshade 3.0																																								
-//* --------------------------																																						
-//* This work is licensed under a Creative Commons Attribution 3.0 Unported License.																								
-//* So you are free to share, modify and adapt it for your needs, and even use it for commercial use.																				
-//* I would also love to hear about a project you are using it with.																												
-//* https://creativecommons.org/licenses/by/3.0/us/																																
-//*																																												
-//* Have fun,																																										
-//* Jose Negrete AKA BlueSkyDefender																																				
-//*																																												
-//* https://github.com/BlueSkyDefender/Depth3D																				
-//* ---------------------------------																																				
-//*																																												
+//* Trails
+//* For Reshade 3.0
+//* --------------------------
+//* This work is licensed under a Creative Commons Attribution 3.0 Unported License.
+//* So you are free to share, modify and adapt it for your needs, and even use it for commercial use.
+//* I would also love to hear about a project you are using it with.
+//* https://creativecommons.org/licenses/by/3.0/us/
+//*
+//* Have fun,
+//* Jose Negrete AKA BlueSkyDefender
+//*
+//* https://github.com/BlueSkyDefender/Depth3D
+//* ---------------------------------
+//*
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 #define PerColor 0 // Lets you adjust per Color Channel.Default 0 off
@@ -109,115 +109,115 @@ static const int Depth_View = 0;
 /////////////////////////////////////////////D3D Starts Here/////////////////////////////////////////////////////////////////
 texture DepthBufferTex : DEPTH;
 
-sampler DepthBuffer 
-	{ 	
-		Texture = DepthBufferTex; 
+sampler DepthBuffer
+	{
+		Texture = DepthBufferTex;
 	};
-	
+
 texture BackBufferTex : COLOR;
 
-sampler BackBuffer 
-	{ 
+sampler BackBuffer
+	{
 		Texture = BackBufferTex;
 	};
-	
-texture PBB  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA32F; MipLevels = 1;}; 
+
+texture PBB  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA32F; MipLevels = 1;};
 
 sampler PBackBuffer
 	{
 		Texture = PBB;
 	};
-	
-///////////////////////////////////////////////////////////TAA/////////////////////////////////////////////////////////////////////	
-#define pix float2(BUFFER_RCP_WIDTH, BUFFER_RCP_HEIGHT)	
+
+///////////////////////////////////////////////////////////TAA/////////////////////////////////////////////////////////////////////
+#define pix float2(BUFFER_RCP_WIDTH, BUFFER_RCP_HEIGHT)
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 float Depth(in float2 texcoord : TEXCOORD0)
 {
 	if (Depth_Map_Flip)
 		texcoord.y =  1 - texcoord.y;
-		
+
 	float zBuffer = tex2D(DepthBuffer, texcoord).x; //Depth Buffer
-	
+
 	//Conversions to linear space.....
 	//Near & Far Adjustment
 	float Far = 1.0, Near = 0.125/Depth_Map_Adjust; //Division Depth Map Adjust - Near
-	
+
 	float2 Z = float2( zBuffer, 1-zBuffer );
-	
+
 	if (Depth_Map == 0)//DM0. Normal
-		zBuffer = Far * Near / (Far + Z.x * (Near - Far));		
+		zBuffer = Far * Near / (Far + Z.x * (Near - Far));
 	else if (Depth_Map == 1)//DM1. Reverse
-		zBuffer = Far * Near / (Far + Z.y * (Near - Far));	
-		 
-	return saturate(zBuffer);	
+		zBuffer = Far * Near / (Far + Z.y * (Near - Far));
+
+	return saturate(zBuffer);
 }
 
 float3 T_Out(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Target
 {
-	float TQA = TQ, D = Depth(texcoord);	
+	float TQA = TQ, D = Depth(texcoord);
 	if(PS2)
 	TQA = 0;
 		
-    float3 B = tex2D(BackBuffer, texcoord).rgb;
+    float3 C = tex2D(BackBuffer, texcoord).rgb;
 
-    float3 A = tex2Dlod(PBackBuffer, float4(texcoord,0,TQA)).rgb;
+    float3 P = tex2Dlod(PBackBuffer, float4(texcoord,0,TQA)).rgb;
 
     #if !PerColor
-      float P = 1-Persistence;
+      float Per = 1-Persistence;
     #else
-      float3 P = 1-Persistence;
+      float3 Per = 1-Persistence;
     #endif
-  
+
 	if(Invert_Depth)
-	D = 1-D;   
-	
-	if(Allow_Depth)  
-    P *= D;
-    
+	D = 1-D;
+
+	if(Allow_Depth)
+    Per *= D;
+
     if(!PS2)
     {
-      A *= P;
-      B = max( tex2D(BackBuffer, texcoord).rgb, A);
+      P *= Per;
+      C = max( tex2D(BackBuffer, texcoord).rgb, P);
     }
     else
-      B = (1-P) * B + P * A;
+      C = (1-Per) * C + Per * P;
 
 	if(Depth_View)
-		B = D;  
-        
-  return B;
+		C = D;
+
+  return C;
 }
 
 void Past_BB(float4 position : SV_Position, float2 texcoord : TEXCOORD, out float4 Past : SV_Target)
 {   float2 samples[12] = {
-	float2(-0.326212, -0.405805),  
-	float2(-0.840144, -0.073580),  
-	float2(-0.695914, 0.457137),  
-	float2(-0.203345, 0.620716),  
-	float2(0.962340, -0.194983),  
-	float2(0.473434, -0.480026),  
-	float2(0.519456, 0.767022),  
-	float2(0.185461, -0.893124),  
-	float2(0.507431, 0.064425),  
-	float2(0.896420, 0.412458),  
-	float2(-0.321940, -0.932615),  
-	float2(-0.791559, -0.597705)  
-	};  
-	  
+	float2(-0.326212, -0.405805),
+	float2(-0.840144, -0.073580),
+	float2(-0.695914, 0.457137),
+	float2(-0.203345, 0.620716),
+	float2(0.962340, -0.194983),
+	float2(0.473434, -0.480026),
+	float2(0.519456, 0.767022),
+	float2(0.185461, -0.893124),
+	float2(0.507431, 0.064425),
+	float2(0.896420, 0.412458),
+	float2(-0.321940, -0.932615),
+	float2(-0.791559, -0.597705)
+	};
+
 	float4 sum = tex2D(BackBuffer,texcoord);
-	float TQA = TQ;	
+	float TQA = TQ;
 	if(PS2)
-	{  
+	{
 		float Adjust = TQ*pix.x;
 		for (int i = 0; i < 12; i++)
-		{  
-			sum += tex2D(BackBuffer, texcoord + Adjust * samples[i]);  
-		} 
-	Past = sum * 0.07692307; 
+		{
+			sum += tex2D(BackBuffer, texcoord + Adjust * samples[i]);
+		}
+	Past = sum * 0.07692307;
 	}
 	else
-	Past = sum;  
- 
+	Past = sum;
+
 }
 
 ///////////////////////////////////////////////////////////ReShade.fxh/////////////////////////////////////////////////////////////
@@ -240,6 +240,6 @@ technique Trails
 			VertexShader = PostProcessVS;
 			PixelShader = Past_BB;
 			RenderTarget = PBB;
-			
+
 		}
 	}
