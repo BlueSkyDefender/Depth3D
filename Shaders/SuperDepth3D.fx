@@ -602,7 +602,8 @@ float4 MouseCursor(float4 position : SV_Position, float2 texcoord : TEXCOORD) : 
 			dist_fromVertical = abs(center.y - Size_B - MousecoordsXY.y);
 		}
 		//Cursor
-		float C = all(min(max(Size_B - dist_fromHorizontal,0),max(Size_B-dist_fromVertical,0))) - all(min(max(Size_B - dist_fromHorizontal * Arrow_Size_C,0),max(Size_B - dist_fromVertical * Arrow_Size_C,0)));
+		float C = all(min(max(Size_B - dist_fromHorizontal,0),max(Size_B-dist_fromVertical,0)));//removing the line below removes the square.
+			  C -= all(min(max(Size_B - dist_fromHorizontal * Arrow_Size_C,0),max(Size_B - dist_fromVertical * Arrow_Size_C,0)));//Need to add this to fix a - bool issue in openGL
 			  C -= all(min(max((Size_B * Arrow_Size_A) - S_dist_fromHorizontal,0),max((Size_B * Arrow_Size_A)-S_dist_fromVertical,0)));
 		// Cursor Array //
 		if(Cursor_Type == 0)
