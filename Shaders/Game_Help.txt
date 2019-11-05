@@ -310,7 +310,9 @@ Issue with Depth Buffer sizing work around is to resize it SuperDepth3D. But it 
 The real fix is to apply a perspective correction on the Z-Buffer. But, that is too much work for only one game. Looks Ok right now.
 
 {Amnesia: Games} - Used ReShade 4.1.0
-Issue with ReShade 4.0.0+ If you install ReShade as opengl32.dll you have to rename it to dxgi.dll in the game folder. Windows 10 Issue it seems
+Issue with ReShade 4.0.0+ If you install ReShade as opengl32.dll you have to rename it to dxgi.dll in the game folder. Windows 10 Issue it seems.
+
+Also Make sure to disable the insanity post process effect. It messes with the 3D in the game.
 
 {Battlefield One} - Used ReShade 4.0.2
 Added alternet settings mode to my shader. This can be done with the newly added Alternet Depth Buffer Adjust Toggle PREPROCESSOR FUNCTIONS. This is in Shader.
