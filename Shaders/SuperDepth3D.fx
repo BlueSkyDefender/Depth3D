@@ -110,11 +110,6 @@
 	#define Ven 0
 #endif
 
-#if (__RENDERER__ >= 0x10000 || __RENDERER__ >= 0x20000)
-	#define Rend 1
-#else
-	#define Rend 0
-#endif
 //Divergence & Convergence//
 uniform float Divergence <
 	ui_type = "drag";
@@ -1016,8 +1011,7 @@ float2 Parallax(float Diverge, float2 Coordinates) // Horizontal parallax offset
 
     if(View_Mode == 1)
     	DB_Offset = 0;
-	#if Rend //Steep parallax mapping
-	[loop]
+	[loop]//Steep parallax mapping
 	for ( int i = 0; i < Steps; i++ )
 	{	  // Doing it this way should stop crashes in older version of reshade, I hope.
       if(CurrentDepthMapValue < CurrentLayerDepth)
@@ -1029,28 +1023,18 @@ float2 Parallax(float Diverge, float2 Coordinates) // Horizontal parallax offset
       // Get depth of next layer
       CurrentLayerDepth += LayerDepth;
 	}
-	#else
-	[loop]
-	do
-	{   // Shift coordinates horizontally in linear fasion
-	    ParallaxCoord.x -= deltaCoordinates;
-	    // Get depth value at current coordinates
-	    CurrentDepthMapValue = tex2Dlod(SamplerzBufferN,float4(ParallaxCoord - DB_Offset,0,0)).x;
-	    // Get depth of next layer
-	    CurrentLayerDepth += LayerDepth;
-	}   while ( CurrentDepthMapValue > CurrentLayerDepth);
-	#endif
 	// Parallax Occlusion Mapping
 	float2 PrevParallaxCoord = float2(ParallaxCoord.x + deltaCoordinates, ParallaxCoord.y);
 	float beforeDepthValue = tex2Dlod(SamplerzBufferN,float4( ParallaxCoord ,0,0)).x, afterDepthValue = CurrentDepthMapValue - CurrentLayerDepth;
-	if(View_Mode == 1 || View_Mode == 2)
+	if(View_Mode == 1)
 		beforeDepthValue += LayerDepth - CurrentLayerDepth;
-
+	else
+		beforeDepthValue += LayerDepth + CurrentLayerDepth;
 	// Interpolate coordinates
 	float weight = afterDepthValue / (afterDepthValue - beforeDepthValue);
 	ParallaxCoord = PrevParallaxCoord * weight + ParallaxCoord * (1. - weight);
 
-	if(View_Mode == 0 || View_Mode == 2)//This is to limit artifacts.
+	if(View_Mode == 0)//This is to limit artifacts.
 	ParallaxCoord += DB_Offset * 0.625;
 	// Apply gap masking
 	DepthDifference = (afterDepthValue-beforeDepthValue) * MS;
