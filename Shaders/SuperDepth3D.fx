@@ -110,6 +110,11 @@
 	#define Ven 0
 #endif
 
+#if __RENDERER__ >= 0x10000 || __RENDERER__ >= 0x20000
+	#define Rend 1
+#else
+	#define Rend 0
+#endif
 //Divergence & Convergence//
 uniform float Divergence <
 	ui_type = "drag";
@@ -187,11 +192,10 @@ uniform float2 Disocclusion_Adjust <
 #else
 uniform int View_Mode <
 	ui_type = "combo";
-	ui_items = "View Mode Normal\0View Mode Alpha\0View Mode Beta\0";
+	ui_items = "View Mode Normal\0View Mode Alpha\0";
 	ui_label = "·View Mode·";
 	ui_tooltip = "Changes the way the shader fills in the occlude section in the image.\n"
                  "Normal is default output and Alpha is used for higher ammounts of Semi-Transparent objects.\n"
-                 "Beta is the same as Normal but, for lower bit depth buffers, Use this if you see banding.\n"
 				 "Default is Normal";
 	ui_category = "Occlusion Masking";
 > = 0;
@@ -341,9 +345,9 @@ uniform int2 Eye_Fade_Reduction_n_Power <
 	ui_category = "Weapon Hand Adjust";
 > = int2(0,0);
 
-uniform int Weapon_ZPD_Boundary <
+uniform float Weapon_ZPD_Boundary <
 	ui_type = "slider";
-	ui_min = 0; ui_max = 3;
+	ui_min = 0; ui_max = 0.5;
 	ui_label = " Weapon Screen Boundary Detection";
 	ui_tooltip = "This selection menu gives extra boundary conditions to WZPD.";
 	ui_category = "Weapon Hand Adjust";
@@ -899,19 +903,13 @@ float AutoZPDRange(float ZPD, float2 texcoord )
 }
 #endif
 float2 Conv(float D,float2 texcoord)
-{
-	float Z = ZPD, WZP = 0.5, ZP = 0.5, ALC = abs(Lum(texcoord).x),WBS = 0.25, W_Convergence = WZPD;
+{	float Z = ZPD, WZP = 0.5, ZP = 0.5, ALC = abs(Lum(texcoord).x), W_Convergence = WZPD;
 
-	if (Weapon_ZPD_Boundary == 2)
-		WBS = 0.375;
-	else if (Weapon_ZPD_Boundary == 3)
-		WBS = 0.5;
-
-	if (Weapon_ZPD_Boundary >= 1)
+	if (Weapon_ZPD_Boundary > 0)
 	{   //only really only need to check one point just above the center bottom.
 		float WZPDB = 1 - WZPD / tex2Dlod(SamplerDMN,float4(float2(0.5,0.9375),0,0)).x;
 		if (WZPDB < -0.1)
-			W_Convergence *= WBS;
+			W_Convergence *= 0.5-Weapon_ZPD_Boundary;
 	}
 
 	W_Convergence = 1 - W_Convergence / D;
@@ -982,7 +980,7 @@ float zBuffer(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0) 
 	return DM.y;
 }
 //////////////////////////////////////////////////////////Parallax Generation///////////////////////////////////////////////////////////////////////
-float2 Parallax(float Diverge, float2 Coordinates) // Horizontal parallax offset & Hole filling effect
+float2 Parallax(float Diverge, float2 Coordinates, float IO) // Horizontal parallax offset & Hole filling effect
 {   float2 ParallaxCoord = Coordinates;
 	float DepthLR = 1, LRDepth, Perf = 1, Z, MS = Diverge * pix.x, N , S[5] = {0.5,0.625,0.75,0.875,1.0};
 	#if Legacy_Mode
@@ -1011,25 +1009,33 @@ float2 Parallax(float Diverge, float2 Coordinates) // Horizontal parallax offset
 
     if(View_Mode == 1)
     	DB_Offset = 0;
-	[loop]//Steep parallax mapping
-	for ( int i = 0; i < Steps; i++ )
-	{	  // Doing it this way should stop crashes in older version of reshade, I hope.
-      if(CurrentDepthMapValue < CurrentLayerDepth)
-		break; // Once we hit the limit Stop Exit Loop.
-      // Shift coordinates horizontally in linear fasion
-      ParallaxCoord.x -= deltaCoordinates;
-      // Get depth value at current coordinates
-  	CurrentDepthMapValue = tex2Dlod(SamplerzBufferN,float4(ParallaxCoord - DB_Offset,0,0)).x;
-      // Get depth of next layer
-      CurrentLayerDepth += LayerDepth;
+	#if Rend //Steep parallax mapping
+	[loop]
+	while ( CurrentDepthMapValue > CurrentLayerDepth)
+	{   // Shift coordinates horizontally in linear fasion
+	    ParallaxCoord.x -= deltaCoordinates;
+	    // Get depth value at current coordinates
+	    CurrentDepthMapValue = tex2Dlod(SamplerzBufferN,float4(ParallaxCoord - DB_Offset,0,0)).x;
+	    // Get depth of next layer
+	    CurrentLayerDepth += LayerDepth;
+		continue;
 	}
+	#else
+	[loop]
+	do
+	{   // Shift coordinates horizontally in linear fasion
+	    ParallaxCoord.x -= deltaCoordinates;
+	    // Get depth value at current coordinates
+	    CurrentDepthMapValue = tex2Dlod(SamplerzBufferN,float4(ParallaxCoord - DB_Offset,0,0)).x;
+	    // Get depth of next layer
+	    CurrentLayerDepth += LayerDepth;
+	}   while ( CurrentDepthMapValue > CurrentLayerDepth);
+	#endif
 	// Parallax Occlusion Mapping
 	float2 PrevParallaxCoord = float2(ParallaxCoord.x + deltaCoordinates, ParallaxCoord.y);
 	float beforeDepthValue = tex2Dlod(SamplerzBufferN,float4( ParallaxCoord ,0,0)).x, afterDepthValue = CurrentDepthMapValue - CurrentLayerDepth;
-	if(View_Mode == 1)
 		beforeDepthValue += LayerDepth - CurrentLayerDepth;
-	else
-		beforeDepthValue += LayerDepth + CurrentLayerDepth;
+
 	// Interpolate coordinates
 	float weight = afterDepthValue / (afterDepthValue - beforeDepthValue);
 	ParallaxCoord = PrevParallaxCoord * weight + ParallaxCoord * (1. - weight);
@@ -1040,8 +1046,12 @@ float2 Parallax(float Diverge, float2 Coordinates) // Horizontal parallax offset
 	DepthDifference = (afterDepthValue-beforeDepthValue) * MS;
 	if(View_Mode == 1)
 		ParallaxCoord.x -= DepthDifference;
-
 	#endif
+	if(Stereoscopic_Mode == 2)
+		ParallaxCoord.y += IO * pix.y; //Optimization for line interlaced.
+	else if(Stereoscopic_Mode == 3)
+		ParallaxCoord.x += IO * pix.x; //Optimization for column interlaced.
+
 	return ParallaxCoord;
 }
 //////////////////////////////////////////////////////////////HUD Alterations///////////////////////////////////////////////////////////////////////
@@ -1107,35 +1117,23 @@ float3 PS_calcLR(float2 texcoord)
 	if (Eye_Swap)
 		D = -Divergence;
 
-	[branch] if(Stereoscopic_Mode == 2)
-	{
-		TCL.y += AI * pix.y; //Optimization for line interlaced.
-		TCR.y -= AI * pix.y; //Optimization for line interlaced.
-	}
-	else if(Stereoscopic_Mode == 3)
-	{
-		TCL.x += AI * pix.x; //Optimization for column interlaced.
-		TCR.x -= AI * pix.x; //Optimization for column interlaced.
-	}
+	float FadeIO = smoothstep(0,1,1-Fade_in_out(texcoord).x), FD = D, FD_Adjust = 0.1;
 
-		float FadeIO = smoothstep(0,1,1-Fade_in_out(texcoord).x), FD = D, FD_Adjust = 0.1;
+	if( Eye_Fade_Reduction_n_Power.y == 1)
+		FD_Adjust = 0.2;
+	else if( Eye_Fade_Reduction_n_Power.y == 2)
+		FD_Adjust = 0.3;
 
-		if( Eye_Fade_Reduction_n_Power.y == 1)
-			FD_Adjust = 0.2;
-		else if( Eye_Fade_Reduction_n_Power.y == 2)
-			FD_Adjust = 0.3;
+	if (FPSDFIO == 1 || FPSDFIO == 2)
+		FD = lerp(FD * FD_Adjust,FD,FadeIO);
 
-		if (FPSDFIO == 1 || FPSDFIO == 2)
-			FD = lerp(FD * FD_Adjust,FD,FadeIO);
+	float2 DLR = float2(FD,FD);
+	if( Eye_Fade_Reduction_n_Power.x == 1)
+			DLR = float2(D,FD);
+	else if( Eye_Fade_Reduction_n_Power.x == 2)
+			DLR = float2(FD,D);
 
-		float2 DLR = float2(FD,FD);
-
-		if( Eye_Fade_Reduction_n_Power.x == 1)
-				DLR = float2(D,FD);
-		else if( Eye_Fade_Reduction_n_Power.x == 2)
-				DLR = float2(FD,D);
-
-	float4 image = 1, accum, color, Left = CSB(Parallax(-DLR.x, TCL)), Right = CSB(Parallax(DLR.y, TCR));
+	float4 image = 1, accum, color, Left = CSB(Parallax(-DLR.x, TCL, AI)), Right = CSB(Parallax(DLR.y, TCR, -AI));
 
 	#if HUD_MODE || HM
 	float HUD_Adjustment = ((0.5 - HUD_Adjust.y)*25.) * pix.x;
