@@ -3,18 +3,18 @@
  //---------------////
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Depth Based Unsharp Mask Bilateral Contrast Adaptive Sharpening                                     																										
-// For Reshade 3.0+																																					
+// Depth Based Unsharp Mask Bilateral Contrast Adaptive Sharpening
+// For Reshade 3.0+
 //  ---------------------------------
 //								https://web.stanford.edu/class/cs448f/lectures/2.1/Sharpening.pdf
-//																																                                                                                                        																	
-// 								Bilateral Filter Made by mrharicot ported over to Reshade by BSD													
-//								GitHub Link for sorce info github.com/SableRaf/Filters4Processin																
+//
+// 								Bilateral Filter Made by mrharicot ported over to Reshade by BSD
+//								GitHub Link for sorce info github.com/SableRaf/Filters4Processin
 // 								Shadertoy Link https://www.shadertoy.com/view/4dfGDH  Thank You.
 //
-//                                     Everyone wants to best the bilateral filter.....  
-//                      
-// 													Multi-licensing                                                     
+//                                     Everyone wants to best the bilateral filter.....
+//
+// 													Multi-licensing
 // LICENSE
 // =======
 // Copyright (c) 2017-2019 Advanced Micro Devices, Inc. All rights reserved.
@@ -41,7 +41,7 @@
 // for any purpose, even commercially.
 // The licensor cannot revoke these freedoms as long as you follow the license terms.
 // Under the following terms:
-// Attribution - You must give appropriate credit, provide a link to the license, and indicate if changes were made. 
+// Attribution - You must give appropriate credit, provide a link to the license, and indicate if changes were made.
 // You may do so in any reasonable manner, but not in any way that suggests the licensor endorses you or your use.
 //
 // NoDerivatives - If you remix, transform, or build upon the material, you may not distribute the modified material.
@@ -49,20 +49,20 @@
 // No additional restrictions - You may not apply legal terms or technological measures that legally restrict others from doing anything the license permits.
 //
 // https://creativecommons.org/licenses/by-nd/4.0/
-//														
-// Have fun,                                                                                                                                                                    
-// Jose Negrete AKA BlueSkyDefender                                                                                                                                              
-//                                                                                                                                                                              
-// https://github.com/BlueSkyDefender/Depth3D                                                                                                                                 
-// http://reshade.me/forum/shader-presentation/2128-sidebyside-3d-depth-map-based-stereoscopic-shader                                                                            
+//
+// Have fun,
+// Jose Negrete AKA BlueSkyDefender
+//
+// https://github.com/BlueSkyDefender/Depth3D
+// http://reshade.me/forum/shader-presentation/2128-sidebyside-3d-depth-map-based-stereoscopic-shader
 //
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-#if exists "Overwatch.fxh"                                           //Overwatch Intercepter//	
+#if exists "Overwatch.fxh"                                           //Overwatch Intercepter//
 	#include "Overwatch.fxh"
 #else //DA_W Depth_Linearization | DB_X Depth_Flip
 	static const float DA_W = 0.0, DB_X = 0;
 	#define NC 0
-	#define NP 0	
+	#define NP 0
 #endif
 
 // This is the practical limit for the algorithm's scaling ability. Example resolutions;
@@ -78,9 +78,9 @@
 // Determines the power of the Bilateral Filter and sharpening quality. Lower the setting the more performance you would get along with lower quality.
 // 0 = Off
 // 1 = Low
-// 2 = Default 
+// 2 = Default
 // 3 = Medium
-// 4 = High 
+// 4 = High
 // Default is off.
 #define M_Quality 0 //Manual Quality Shader Defaults to 2 when set to off.
 
@@ -131,7 +131,7 @@ uniform float Sharpness <
 	ui_type = "slider";
 	#endif
     ui_label = "Sharpening Strength";
-    ui_min = 0.0; ui_max = 1.0;
+    ui_min = 0.0; ui_max = 2.0;
     ui_tooltip = "Scaled by adjusting this slider from Zero to One to increase sharpness of the image.\n"
 				 "Zero = No Sharpening, to One = Full Sharpening, and Past One = Extra Crispy.\n"
 				 "Number 0.625 is default.";
@@ -167,24 +167,15 @@ uniform int B_Grounding <
 	ui_category = "Bilateral Filtering";
 > = 0;
 
-uniform bool Slow_Mode <
-	ui_label = "CAS Slow Mode";
-	ui_tooltip = "This enables release Quality of Bilateral Sharpen that is 2X the amount of image bluring at the cost of in game FPS.\n"
-				 "If you want this to be usable at higher resolutions go in shader and change the preprocessor M_Quality, to low.\n"
-				 "This toggle only for accuracy.";
-	ui_category = "Bilateral Filtering";
-> = false;
-
 uniform int Debug_View <
 	ui_type = "combo";
-	ui_items = "Normal View\0Sharp Debug\0Z-Buffer Debug\0";
+	ui_items = "Normal View\0Sharp Debug\0";
 	ui_label = "View Mode";
 	ui_tooltip = "This is used to select the normal view output or debug view.\n"
 				 "Used to see what the shaderis changing in the image.\n"
 				 "Normal gives you the normal out put of this shader.\n"
 				 "Sharp is the full Debug for Smart sharp.\n"
 				 "Depth Cues is the Shaded output.\n"
-				 "Z-Buffer id Depth Buffer only.\n"
 				 "Default is Normal View.";
 	ui_category = "Debug";
 > = 0;
@@ -217,39 +208,39 @@ uniform float timer < source = "timer"; >;
 
 texture DepthBufferTex : DEPTH;
 
-sampler DepthBuffer 
-	{ 	
-		Texture = DepthBufferTex; 
+sampler DepthBuffer
+	{
+		Texture = DepthBufferTex;
 	};
-	
-texture BackBufferTex : COLOR;	
 
-sampler BackBuffer 
-	{ 
+texture BackBufferTex : COLOR;
+
+sampler BackBuffer
+	{
 		Texture = BackBufferTex;
 	};
-				
+
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 float Depth(in float2 texcoord : TEXCOORD0)
 {
 	if (Depth_Map_Flip)
 		texcoord.y =  1 - texcoord.y;
-		
+
 	float zBuffer = tex2D(DepthBuffer, texcoord).x; //Depth Buffer
-	
+
 	//Conversions to linear space.....
 	//Near & Far Adjustment
 	float Far = 1.0, Near = 0.125/Depth_Map_Adjust; //Division Depth Map Adjust - Near
-	
+
 	float2 Z = float2( zBuffer, 1-zBuffer );
-	
+
 	if (Depth_Map == 0)//DM0. Normal
-		zBuffer = Far * Near / (Far + Z.x * (Near - Far));		
+		zBuffer = Far * Near / (Far + Z.x * (Near - Far));
 	else if (Depth_Map == 1)//DM1. Reverse
-		zBuffer = Far * Near / (Far + Z.y * (Near - Far));	
-		 
-	return saturate(zBuffer);	
-}	
+		zBuffer = Far * Near / (Far + Z.y * (Near - Far));
+
+	return saturate(zBuffer);
+}
 
 float Min3(float x, float y, float z)
 {
@@ -293,7 +284,7 @@ float4 CAS(float2 texcoord)
 	//
 	//  Left(Center)Right
 	//
-	//        Down  
+	//        Down
     float Up = LI(BB(texcoord, float2( 0,-pix.y)));
     float Left = LI(BB(texcoord, float2(-pix.x, 0)));
     float Center = LI(BB(texcoord, 0));
@@ -302,16 +293,16 @@ float4 CAS(float2 texcoord)
 
     float mnRGB = Min3( Min3(Left, Center, Right), Up, Down);
     float mxRGB = Max3( Max3(Left, Center, Right), Up, Down);
-       
+
     // Smooth minimum distance to signal limit divided by smooth max.
     float rcpMRGB = rcp(mxRGB), RGB_D = saturate(min(mnRGB, 1.0 - mxRGB) * rcpMRGB);
 
 	if( CAM_IOB )
 		RGB_D = saturate(min(mnRGB, 2.0 - mxRGB) * rcpMRGB);
-          
-	//Bilateral Filter//                                                Q1         Q2       Q3        Q4                                                                                          
+
+	//Bilateral Filter//                                                Q1         Q2       Q3        Q4
 	const int kSize = MSIZE * 0.5; // Default M-size is Quality 2 so [MSIZE 3] [MSIZE 5] [MSIZE 7] [MSIZE 9] / 2.
-														
+
 //													1			2			3			4				5			6			7			8				7			6			5				4			3			2			1
 //Full Kernal Size would be 15 as shown here (0.031225216, 0.03332227	1, 0.035206333, 0.036826804, 0.038138565, 0.039104044, 0.039695028, 0.039894000, 0.039695028, 0.039104044, 0.038138565, 0.036826804, 0.035206333, 0.033322271, 0.031225216)
 #if Quality == 1
@@ -319,23 +310,21 @@ float4 CAS(float2 texcoord)
 #endif
 #if Quality == 2
 	float weight[MSIZE] = {0.031225216, 0.036826804, 0.039894000, 0.036826804, 0.031225216};  // by 5
-#endif	
+#endif
 #if Quality == 3
 	float weight[MSIZE] = {0.031225216, 0.035206333, 0.039104044, 0.039894000, 0.039104044, 0.035206333, 0.031225216};   // by 7
 #endif
-#if Quality == 4	
+#if Quality == 4
 	float weight[MSIZE] = {0.031225216, 0.035206333, 0.038138565, 0.039695028, 0.039894000, 0.039695028, 0.038138565, 0.035206333, 0.031225216};  // by 9
 #endif
-	
+
 	float3 final_colour, c = BB(texcoord.xy,0), cc;
 	float2 RPC_WS = pix * GT();
 	float Z, factor;
-	
+
 	[loop]
 	for (int i=-kSize; i <= kSize; ++i)
-	{	
-	[branch]if(Slow_Mode)
-		{
+	{
 			for (int j=-kSize; j <= kSize; ++j)
 			{
 				cc = BB(texcoord.xy, float2(i,j) * RPC_WS * rcp(kSize) );
@@ -343,66 +332,54 @@ float4 CAS(float2 texcoord)
 				Z += factor;
 				final_colour += factor * cc;
 			}
-		}
-		else
-		{		
-			cc = BB(texcoord.xy, float2( i, 1 - (i * i) * 0.5 ) * RPC_WS * rcp(kSize) );
-			factor = normpdf3(cc-c, BSIGMA);
-			Z += factor;
-			final_colour += factor * cc;
-		}
 	}
-	
-	//// Shaping amount of sharpening masked	
+
+	//// Shaping amount of sharpening masked
 	float CAS_Mask = RGB_D;
 
 	if(CA_Mask_Boost)
 		CAS_Mask = lerp(CAS_Mask,CAS_Mask * CAS_Mask,saturate(Sharpness * 0.5));
-		
+
 	if(CA_Removal)
 		CAS_Mask = 1;
-		
+
 return saturate(float4(final_colour/Z,CAS_Mask));
 }
 
-float3 Sharpen_Out(float2 texcoord)                                                                          
-{   float3 Done = tex2D(BackBuffer,texcoord).rgb;	
+float3 Sharpen_Out(float2 texcoord)
+{   float3 Done = tex2D(BackBuffer,texcoord).rgb;
 	return lerp(Done,Done+(Done - CAS(texcoord).rgb)*(Sharpness*3.1), CAS(texcoord).w * saturate(Sharpness)); //Sharpen Out
 }
 
 
 float3 ShaderOut(float2 texcoord : TEXCOORD0)
-{	
+{
 	float3 Out, Luma, Sharpen = Sharpen_Out(texcoord).rgb,BB = tex2D(BackBuffer,texcoord).rgb;
 	float DB = Depth(texcoord).r,DBTL = Depth(float2(texcoord.x*2,texcoord.y*2)).r, DBBL = Depth(float2(texcoord.x*2,texcoord.y*2-1)).r;
-	
+
 	if(No_Depth_Map)
 	{
 		DB = 0.0;
 		DBBL = 0.0;
 	}
-	
-	if (Debug_View == 0)
-	{			
+
+	if (!Debug_View)
 		Out.rgb = lerp(Sharpen, BB, DB);
-	}
-	else if (Debug_View == 1)
+	else
 	{
 		float3 Top_Left = lerp(float3(1.,1.,1.),CAS(float2(texcoord.x*2,texcoord.y*2)).www,1-DBTL);
-		
-		float3 Top_Right =  Depth(float2(texcoord.x*2-1,texcoord.y*2)).rrr;		
-		
-		float3 Bottom_Left = lerp(float3(1., 0., 1.),tex2D(BackBuffer,float2(texcoord.x*2,texcoord.y*2-1)).rgb,DBBL);	
 
-		float3 Bottom_Right = CAS(float2(texcoord.x*2-1,texcoord.y*2-1)).rgb;	
-		
+		float3 Top_Right =  Depth(float2(texcoord.x*2-1,texcoord.y*2)).rrr;
+
+		float3 Bottom_Left = lerp(float3(1., 0., 1.),tex2D(BackBuffer,float2(texcoord.x*2,texcoord.y*2-1)).rgb,DBBL);
+
+		float3 Bottom_Right = CAS(float2(texcoord.x*2-1,texcoord.y*2-1)).rgb;
+
 		float3 VA_Top = texcoord.x < 0.5 ? Top_Left : Top_Right ;
 		float3 VA_Bottom = texcoord.x < 0.5 ? Bottom_Left : Bottom_Right ;
-		
+
 		Out = texcoord.y < 0.5 ? VA_Top : VA_Bottom;
 	}
-	else
-		Out = Depth(texcoord);
 
 	return Out;
 }
@@ -410,12 +387,12 @@ float3 ShaderOut(float2 texcoord : TEXCOORD0)
 float3 Out(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Target
 {   //Overwatch integration
 	float PosX = 0.9525f*BUFFER_WIDTH*pix.x,PosY = 0.975f*BUFFER_HEIGHT*pix.y, Text_Timer = 12500, BT = smoothstep(0,1,sin(timer*(3.75/1000)));
-	float D,E,P,T,H,Three,DD,Dot,I,N,F,O,R,EE,A,DDD,HH,EEE,L,PP,NN,PPP,C,Not,No;	
+	float D,E,P,T,H,Three,DD,Dot,I,N,F,O,R,EE,A,DDD,HH,EEE,L,PP,NN,PPP,C,Not,No;
 	float3 Color = ShaderOut(texcoord).rgb;
-	
+
 	if(NC || NP)
 		Text_Timer = 18750;
-		
+
 	[branch] if(timer <= Text_Timer)
 	{
 		//DEPTH
@@ -423,13 +400,13 @@ float3 Out(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Targe
 		float PosXD = -0.035+PosX, offsetD = 0.001;
 		float OneD = all( abs(float2( texcoord.x -PosXD, texcoord.y-PosY)) < float2(0.0025,0.009));
 		float TwoD = all( abs(float2( texcoord.x -PosXD-offsetD, texcoord.y-PosY)) < float2(0.0025,0.007));
-		D = OneD-TwoD;	
+		D = OneD-TwoD;
 		//E
 		float PosXE = -0.028+PosX, offsetE = 0.0005;
 		float OneE = all( abs(float2( texcoord.x -PosXE, texcoord.y-PosY)) < float2(0.003,0.009));
 		float TwoE = all( abs(float2( texcoord.x -PosXE-offsetE, texcoord.y-PosY)) < float2(0.0025,0.007));
 		float ThreeE = all( abs(float2( texcoord.x -PosXE, texcoord.y-PosY)) < float2(0.003,0.001));
-		E = (OneE-TwoE)+ThreeE;		
+		E = (OneE-TwoE)+ThreeE;
 		//P
 		float PosXP = -0.0215+PosX, PosYP = -0.0025+PosY, offsetP = 0.001, offsetP1 = 0.002;
 		float OneP = all( abs(float2( texcoord.x -PosXP, texcoord.y-PosYP)) < float2(0.0025,0.009*0.775));
@@ -440,28 +417,28 @@ float3 Out(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Targe
 		float PosXT = -0.014+PosX, PosYT = -0.008+PosY;
 		float OneT = all( abs(float2( texcoord.x -PosXT, texcoord.y-PosYT)) < float2(0.003,0.001));
 		float TwoT = all( abs(float2( texcoord.x -PosXT, texcoord.y-PosY)) < float2(0.000625,0.009));
-		T = OneT+TwoT;	
+		T = OneT+TwoT;
 		//H
 		float PosXH = -0.0072+PosX;
 		float OneH = all( abs(float2( texcoord.x -PosXH, texcoord.y-PosY)) < float2(0.002,0.001));
 		float TwoH = all( abs(float2( texcoord.x -PosXH, texcoord.y-PosY)) < float2(0.002,0.009));
 		float ThreeH = all( abs(float2( texcoord.x -PosXH, texcoord.y-PosY)) < float2(0.00325,0.009));
-		H = (OneH-TwoH)+ThreeH;	
+		H = (OneH-TwoH)+ThreeH;
 		//Three
 		float offsetFive = 0.001, PosX3 = -0.001+PosX;
 		float OneThree = all( abs(float2( texcoord.x -PosX3, texcoord.y-PosY)) < float2(0.002,0.009));
 		float TwoThree = all( abs(float2( texcoord.x -PosX3 - offsetFive, texcoord.y-PosY)) < float2(0.003,0.007));
 		float ThreeThree = all( abs(float2( texcoord.x -PosX3, texcoord.y-PosY)) < float2(0.002,0.001));
-		Three = (OneThree-TwoThree)+ThreeThree;	
+		Three = (OneThree-TwoThree)+ThreeThree;
 		//DD
-		float PosXDD = 0.006+PosX, offsetDD = 0.001;	
+		float PosXDD = 0.006+PosX, offsetDD = 0.001;
 		float OneDD = all( abs(float2( texcoord.x -PosXDD, texcoord.y-PosY)) < float2(0.0025,0.009));
 		float TwoDD = all( abs(float2( texcoord.x -PosXDD-offsetDD, texcoord.y-PosY)) < float2(0.0025,0.007));
-		DD = OneDD-TwoDD;		
+		DD = OneDD-TwoDD;
 		//Dot
-		float PosXDot = 0.011+PosX, PosYDot = 0.008+PosY;		
+		float PosXDot = 0.011+PosX, PosYDot = 0.008+PosY;
 		float OneDot = all( abs(float2( texcoord.x -PosXDot, texcoord.y-PosYDot)) < float2(0.00075,0.0015));
-		Dot = OneDot;	
+		Dot = OneDot;
 		//INFO
 		//I
 		float PosXI = 0.0155+PosX, PosYI = 0.004+PosY, PosYII = 0.008+PosY;
@@ -473,13 +450,13 @@ float3 Out(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Targe
 		float PosXN = 0.0225+PosX, PosYN = 0.005+PosY,offsetN = -0.001;
 		float OneN = all( abs(float2( texcoord.x - PosXN, texcoord.y - PosYN)) < float2(0.002,0.004));
 		float TwoN = all( abs(float2( texcoord.x - PosXN, texcoord.y - PosYN - offsetN)) < float2(0.003,0.005));
-		N = OneN-TwoN;	
+		N = OneN-TwoN;
 		//F
 		float PosXF = 0.029+PosX, PosYF = 0.004+PosY, offsetF = 0.0005, offsetF1 = 0.001;
 		float OneF = all( abs(float2( texcoord.x -PosXF-offsetF, texcoord.y-PosYF-offsetF1)) < float2(0.002,0.004));
 		float TwoF = all( abs(float2( texcoord.x -PosXF, texcoord.y-PosYF)) < float2(0.0025,0.005));
 		float ThreeF = all( abs(float2( texcoord.x -PosXF, texcoord.y-PosYF)) < float2(0.0015,0.00075));
-		F = (OneF-TwoF)+ThreeF;		
+		F = (OneF-TwoF)+ThreeF;
 		//O
 		float PosXO = 0.035+PosX, PosYO = 0.004+PosY;
 		float OneO = all( abs(float2( texcoord.x -PosXO, texcoord.y-PosYO)) < float2(0.003,0.005));
@@ -488,7 +465,7 @@ float3 Out(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Targe
 		//Text Warnings: No Profile / Not Compatible
 		//PosY += 0.953;
 		PosX -= 0.483;
-		float PosXNN = -0.458+PosX, offsetNN = 0.0015;	
+		float PosXNN = -0.458+PosX, offsetNN = 0.0015;
 		float OneNN = all( abs(float2( texcoord.x -PosXNN, texcoord.y-PosY)) < float2(0.00325,0.009));
 		float TwoNN = all( abs(float2( texcoord.x -PosXNN, texcoord.y-PosY-offsetNN)) < float2(0.002,0.008));
 		NN = OneNN-TwoNN;
@@ -528,10 +505,10 @@ void PostProcessVS(in uint id : SV_VertexID, out float4 position : SV_Position, 
 technique Smart_Sharp
 < ui_tooltip = "Suggestion : You Can Enable 'Performance Mode Checkbox,' in the lower bottom right of the ReShade's Main UI.\n"
 			   "             Do this once you set your Smart Sharp settings of course."; >
-{		
+{
 			pass UnsharpMask
 		{
 			VertexShader = PostProcessVS;
-			PixelShader = Out;	
+			PixelShader = Out;
 		}
 }

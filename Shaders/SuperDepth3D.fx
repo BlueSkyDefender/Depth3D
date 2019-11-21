@@ -41,8 +41,8 @@
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #if exists "Overwatch.fxh"                                           //Overwatch Intercepter//
 	#include "Overwatch.fxh"
-#else //DA_X ZPD | DA_Y Depth_Adjust | DA_Z Offset | DA_W Depth_Linearization | DB_X Depth_Flip | DB_Y Auto_Balance | DB_Z Auto_Depth | DB_W Weapon_Hand | DC_X HUDX | DC_Y BD_K1 | DC_Z BD_K2 | DC_W BD_Zoom | DD_X HV_X | DD_Y HV_Y | DD_Z DepthPX | DD_W DepthPY | DE_X Auto_Balance_Clamp_D
-	static const float DA_X = 0.025, DA_Y = 7.5, DA_Z = 0.0, DA_W = 0.0, DB_X = 0, DB_Y = 0, DB_Z = 0.1, DB_W = 0.0, DC_X = 0.0, DC_Y = 0, DC_Z = 0, DC_W = 0, DD_X = 1,DD_Y = 1, DD_Z = 0.0, DD_W = 0.0, DE_X = 1.0;
+#else //DA_X ZPD | DA_Y Depth_Adjust | DA_Z Offset | DA_W Depth_Linearization | DB_X Depth_Flip | DB_Y Auto_Balance | DB_Z Auto_Depth | DB_W Weapon_Hand | DC_X HUDX | DC_Y BD_K1 | DC_Z BD_K2 | DC_W BD_Zoom | DD_X HV_X | DD_Y HV_Y | DD_Z DepthPX | DD_W DepthPY
+	static const float DA_X = 0.025, DA_Y = 7.5, DA_Z = 0.0, DA_W = 0.0, DB_X = 0, DB_Y = 0, DB_Z = 0.1, DB_W = 0.0, DC_X = 0.0, DC_Y = 0, DC_Z = 0, DC_W = 0, DD_X = 1,DD_Y = 1, DD_Z = 0.0, DD_W = 0.0;
 	static const int RE = 0, NC = 0, TW = 0, NP = 0, ID = 0, SP = 0, DC = 0, HM = 0;
 #endif
 //USER EDITABLE PREPROCESSOR FUNCTIONS START//
@@ -118,7 +118,7 @@
 //Divergence & Convergence//
 uniform float Divergence <
 	ui_type = "drag";
-	ui_min = 10; ui_max = 60; ui_step = 0.5;
+	ui_min = 10; ui_max = 75; ui_step = 0.5;
 	ui_label = "·Divergence Slider·";
 	ui_tooltip = "Divergence increases differences between the left and right retinal images and allows you to experience depth.\n"
 				 "The process of deriving binocular depth information is called stereopsis.\n"
@@ -147,7 +147,6 @@ uniform float ZPD_Balance <
 > = 0.5;
 
 static const int Auto_Balance_Ex = 0;
-static const float Auto_Balance_Clamp = 1.0;
 #else
 uniform int Auto_Balance_Ex <
 	#if Compatibility
@@ -161,15 +160,6 @@ uniform int Auto_Balance_Ex <
 				 "Default is Off.";
 	ui_category = "Divergence & Convergence";
 > = DB_Y;
-
-uniform float Auto_Balance_Clamp <
-	ui_type = "drag";
-	ui_min = 0.5; ui_max = 1.0;
-	ui_label = " Auto Balance Clamp";
-	ui_tooltip = "This Clamps Auto Balance's max Distance.\n"
-				 "Default is 1.0f, One is off.";
-	ui_category = "Divergence & Convergence";
-> = DE_X;
 #endif
 uniform int ZPD_Boundary <
 	ui_type = "combo";
@@ -180,6 +170,14 @@ uniform int ZPD_Boundary <
 				 		   "Default is Off.";
 	ui_category = "Divergence & Convergence";
 > = 0;
+
+uniform float ZPD_Boundary_Adjust <
+	ui_type = "slider";
+	ui_min = 0; ui_max = 0.5;
+	ui_label = " ZPD Boundary Adjust";
+	ui_tooltip = "This selection menu gives extra boundary conditions to ZPD.";
+	ui_category = "Divergence & Convergence";
+> = 0.5;
 #if Legacy_Mode
 uniform float2 Disocclusion_Adjust <
 	ui_type = "drag";
@@ -472,6 +470,8 @@ uniform int ran < source = "random"; min = 0; max = 1; >;
 uniform float2 Mousecoords < source = "mousepoint"; > ;
 uniform float frametime < source = "frametime";>;
 uniform float timer < source = "timer"; >;
+
+static const float Auto_Balance_Clamp = 0.5; //This Clamps Auto Balance's max Distance.
 
 #define pix float2(BUFFER_RCP_WIDTH, BUFFER_RCP_HEIGHT)
 #define Per float2( (Perspective * pix.x) * 0.5, 0) //Per is Perspective
@@ -926,7 +926,7 @@ float2 Conv(float D,float2 texcoord)
 		if(Auto_Balance_Ex > 0 )
 			ZP = saturate(ALC);
 	#endif
-		Z *= lerp( 1, 0.5, smoothstep(0,1,tex2Dlod(SamplerLumN,float4(texcoord + 1,0,0)).z));
+		Z *= lerp( 1, ZPD_Boundary_Adjust, smoothstep(0,1,tex2Dlod(SamplerLumN,float4(texcoord + 1,0,0)).z));
 		float Convergence = 1 - Z / D;
 		if (ZPD == 0)
 			ZP = 1;
@@ -1038,12 +1038,12 @@ float2 Parallax(float Diverge, float2 Coordinates, float IO) // Horizontal paral
 
 	// Interpolate coordinates
 	float weight = afterDepthValue / (afterDepthValue - beforeDepthValue);
-	ParallaxCoord = PrevParallaxCoord * weight + ParallaxCoord * (1. - weight);
+		ParallaxCoord = PrevParallaxCoord * weight + ParallaxCoord * (1. - weight);
 
 	if(View_Mode == 0)//This is to limit artifacts.
-	ParallaxCoord += DB_Offset * 0.625;
+		ParallaxCoord += DB_Offset * 0.625;
 	// Apply gap masking
-	DepthDifference = (afterDepthValue-beforeDepthValue) * MS;
+	DepthDifference = (afterDepthValue-beforeDepthValue) * MS * 4;
 	if(View_Mode == 1)
 		ParallaxCoord.x -= DepthDifference;
 	#endif

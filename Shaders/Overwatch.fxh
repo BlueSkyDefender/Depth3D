@@ -57,8 +57,6 @@ static const float HVS_X_D = 1.0;                       //Horizontal Size
 static const float HVS_Y_D = 1.0;                       //Vertical Size
 static const int HVP_X_D = 0;                           //Horizontal Position
 static const int HVP_Y_D = 0;                           //Vertical Position
-static const float Auto_Balance_Clamp_D = 1.0;          //Auto Balance Clamp
-
 
 //Special Toggles Defaults
 static const int REF = 0;                               //Resident Evil Fix
@@ -549,7 +547,6 @@ static const int HMT = 0;                               //HUD Mode Trigger
 	#define DA_X 0.0625
 	#define DB_W 25
 	#define DB_Y 3
-	#define DE_X 0.5
 	#define TW 1
 #elif (App == 0x84D341E3 ) //Little Nightmares
 	#define DA_W 1
@@ -588,14 +585,12 @@ static const int HMT = 0;                               //HUD Mode Trigger
 	#define DA_Y 21.25
 	#define DA_X 0.065
 	#define DB_Y 4
-	#define DE_X 0.5
 	#define DB_W 62
 #elif (App == 0x42C1A2B )	//CoD: WWII
   #define DA_X 0.04
 	#define DA_W 1
 	#define DB_Y 4
 	#define DB_W 12
-	#define DE_X 0.5
 #else
 	#define NP 1 //No Profile
 #endif
@@ -649,9 +644,6 @@ static const int HMT = 0;                               //HUD Mode Trigger
 #endif
 #ifndef DD_W
     #define DD_W HVP_Y_D
-#endif
-#ifndef DE_X
-    #define DE_X Auto_Balance_Clamp_D
 #endif
 
 //Special Toggles
