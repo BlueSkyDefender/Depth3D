@@ -1,1 +1,1 @@
-HDRish will not work untill reshade supports a way to activate window's HDR.
+HDRish will not work untill reshade supports a way to activate window's HDR. But, It can still down convert content.
