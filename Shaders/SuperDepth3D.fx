@@ -41,8 +41,17 @@
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #if exists "Overwatch.fxh"                                           //Overwatch Intercepter//
 	#include "Overwatch.fxh"
-#else //DA_X ZPD | DA_Y Depth_Adjust | DA_Z Offset | DA_W Depth_Linearization | DB_X Depth_Flip | DB_Y Auto_Balance | DB_Z Auto_Depth | DB_W Weapon_Hand | DC_X HUDX | DC_Y BD_K1 | DC_Z BD_K2 | DC_W BD_Zoom | DD_X HV_X | DD_Y HV_Y | DD_Z DepthPX | DD_W DepthPY
-	static const float DA_X = 0.025, DA_Y = 7.5, DA_Z = 0.0, DA_W = 0.0, DB_X = 0, DB_Y = 0, DB_Z = 0.1, DB_W = 0.0, DC_X = 0.0, DC_Y = 0, DC_Z = 0, DC_W = 0, DD_X = 1,DD_Y = 1, DD_Z = 0.0, DD_W = 0.0;
+#else// DA_X = [ZPD] DA_Y = [Depth Adjust] DA_Z = [Offset] DA_W = [Depth Linearization]
+	static const float DA_X = 0.025, DA_Y = 7.5, DA_Z = 0.0, DA_W = 0.0;
+	// DC_X = [Depth Flip] DC_Y = [Auto Balance] DC_Z = [Auto Depth] DC_W = [Weapon Hand]
+	static const float DB_X = 0, DB_Y = 0, DB_Z = 0.1, DB_W = 0.0;
+	// DC_X = [HUD] DC_Y = [Barrel Distortion K1] DC_Z = [Barrel Distortion K2] DC_W = [Barrel Distortion Zoom]
+	static const float DC_X = 0.0, DC_Y = 0, DC_Z = 0, DC_W = 0;
+	// DD_X = [Horizontal Size] DD_Y = [Vertical Size] DD_Z = [Horizontal Position] DD_W = [Vertical Position]
+	static const float DD_X = 1,DD_Y = 1, DD_Z = 0.0, DD_W = 0.0;
+	// DE_X = [ZPD Boundary Type] DE_Y = [ZPD Boundary Scaling] DE_Z = [ZPD Boundary Fade Time] DE_W = [Null]
+	static const float DE_X = 0,DE_Y = 0.5, DE_Z = 0.25, DE_W = 0.0;
+	//Triggers
 	static const int RE = 0, NC = 0, TW = 0, NP = 0, ID = 0, SP = 0, DC = 0, HM = 0;
 #endif
 //USER EDITABLE PREPROCESSOR FUNCTIONS START//
@@ -118,7 +127,7 @@
 //Divergence & Convergence//
 uniform float Divergence <
 	ui_type = "drag";
-	ui_min = 10; ui_max = 75; ui_step = 0.5;
+	ui_min = 10; ui_max = 50; ui_step = 0.5;
 	ui_label = "·Divergence Slider·";
 	ui_tooltip = "Divergence increases differences between the left and right retinal images and allows you to experience depth.\n"
 				 "The process of deriving binocular depth information is called stereopsis.\n"
@@ -163,21 +172,21 @@ uniform int Auto_Balance_Ex <
 #endif
 uniform int ZPD_Boundary <
 	ui_type = "combo";
-	ui_items = "Off\0Normal\0FPS\0";
+	ui_items = "Off\0Normal\0FPS A\0FPS B\0";
 	ui_label = " ZPD Boundary Detection";
 	ui_tooltip = "This selection menu gives extra boundary conditions to ZPD.\n"
 				 			 "This treats your screen as a virtual wall.\n"
 				 		   "Default is Off.";
 	ui_category = "Divergence & Convergence";
-> = 0;
+> = DE_X;
 
-uniform float ZPD_Boundary_Adjust <
+uniform float2 ZPD_Boundary_n_Fade <
 	ui_type = "slider";
-	ui_min = 0; ui_max = 0.5;
-	ui_label = " ZPD Boundary Adjust";
-	ui_tooltip = "This selection menu gives extra boundary conditions to ZPD.";
+	ui_min = 0.0; ui_max = 0.5;
+	ui_label = " ZPD Boundary & Fade Time";
+	ui_tooltip = "This selection menu gives extra boundary conditions to scale ZPD & lets you adjust Fade time.";
 	ui_category = "Divergence & Convergence";
-> = 0.5;
+> = float2(DE_Y,DE_Z);
 #if Legacy_Mode
 uniform float2 Disocclusion_Adjust <
 	ui_type = "drag";
@@ -466,7 +475,7 @@ uniform bool Mask_Cycle < source = "key"; keycode = Mask_Cycle_Key; toggle = tru
 uniform bool CLK < source = "mousebutton"; keycode = Cursor_Lock_Key; toggle = true; mode = "toggle";>;
 uniform bool Trigger_Fade_A < source = "mousebutton"; keycode = Fade_Key; toggle = true; mode = "toggle";>;
 uniform bool Trigger_Fade_B < source = "mousebutton"; keycode = Fade_Key;>;
-uniform int ran < source = "random"; min = 0; max = 1; >;
+//uniform int ran < source = "random"; min = 0; max = 1; >;
 uniform float2 Mousecoords < source = "mousepoint"; > ;
 uniform float frametime < source = "frametime";>;
 uniform float timer < source = "timer"; >;
@@ -674,29 +683,32 @@ float Fade_in_out(float2 texcoord)
 
 float Fade(float2 texcoord)
 { //Check Depth
-	float CD, Detect, RArray[2] = {0.375,0.625};
+	float CD, Detect, FPS_M2 = 0.875;
 	if(ZPD_Boundary > 0)
-	{
-		float CDArrayX_B[4] = {0.25,0.5,0.75,RArray[ran]};
-		float CDArrayY_B[4] = {0.125,0.25,0.375,0.5};
-		float CDArray[4] = {0.25,0.5,0.75,RArray[ran]};
-		//Screen Space Detector
-		[loop]
-		for( int i = 0 ; i < 4; i++ )
+	{	
+	if(ZPD_Boundary == 3)
+		FPS_M2 = 0.1875;
+		float CDArray[7] = { 0.125 ,0.25, 0.375,0.5, 0.625, 0.75, 0.875};
+		float CDArrayX_B[7] = { 0.125, 0.25, 0.375,0.5, 0.625, 0.75, FPS_M2};
+		float CDArrayY_B[7] = { 0.125, 0.1875, 0.25,0.3125, 0.375, 0.40625, 0.4375};
+		float CDArrayZPD[7] = { ZPD * 0.3, ZPD * 0.5, ZPD * 0.75, ZPD, ZPD * 0.75, ZPD * 0.5, ZPD * 0.3 };
+		//Screen Space Detector 7x7 Grid from between 0 to 1 and ZPD Detection becomes stronger as it gets closer to the Center.
+		[unroll]
+		for( int i = 0 ; i < 7; i++ )
 		{
-			for( int j = 0 ; j < 4; j++ )
+			for( int j = 0 ; j < 7; j++ )
 			{
 				if(ZPD_Boundary == 1)
-					CD = 1 - ZPD / Depth( float2( CDArray[i], CDArray[j]) );
-				else if(ZPD_Boundary == 2)
-					CD = 1 - ZPD / Depth( float2( CDArrayX_B[i], CDArrayY_B[j]) );
+					CD = 1 - CDArrayZPD[i] / Depth( float2( CDArray[i], CDArray[j]) );
+				else if(ZPD_Boundary == 2 || ZPD_Boundary == 3)
+					CD = 1 - CDArrayZPD[i] / Depth( float2( CDArrayX_B[i], CDArrayY_B[j]) );
 
 				if( CD < 0)
 					Detect = 1;
 			}
 		}
 	}
-	float Trigger_Fade = Detect, AA = (1-Fade_Time_Adjust)*1000, PStoredfade = tex2Dlod(SamplerLumN,float4(texcoord + 1,0,0)).z;
+	float Trigger_Fade = Detect, AA = (1-(ZPD_Boundary_n_Fade.y*2.))*1000, PStoredfade = tex2Dlod(SamplerLumN,float4(texcoord + 1,0,0)).z;
 	//Fade in toggle.
 	return PStoredfade + (Trigger_Fade - PStoredfade) * (1.0 - exp(-frametime/AA)); ///exp2 would be even slower
 }
@@ -926,7 +938,7 @@ float2 Conv(float D,float2 texcoord)
 		if(Auto_Balance_Ex > 0 )
 			ZP = saturate(ALC);
 	#endif
-		Z *= lerp( 1, ZPD_Boundary_Adjust, smoothstep(0,1,tex2Dlod(SamplerLumN,float4(texcoord + 1,0,0)).z));
+		Z *= lerp( 1, ZPD_Boundary_n_Fade.x, smoothstep(0,1,tex2Dlod(SamplerLumN,float4(texcoord + 1,0,0)).z));
 		float Convergence = 1 - Z / D;
 		if (ZPD == 0)
 			ZP = 1;

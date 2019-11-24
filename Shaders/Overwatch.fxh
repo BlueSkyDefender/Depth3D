@@ -47,7 +47,7 @@ static const float Offset_D = 0.0;                      //Offset
 static const int Depth_Linearization_D = 0;             //Linearization
 static const int Depth_Flip_D = 0;                      //Depth Flip
 static const int Auto_Balance_D = 0;                    //Auto Balance
-static const float Auto_Depth_D = 0.1;                  //Auto Depth Range
+static const float Auto_Depth_D = 0.1;                  //Auto Depth Range //Under Review...
 static const int Weapon_Hand_D = 0;                     //Weapon Profile
 static const float HUDX_D = 0.0;                        //Heads Up Display Cut Off Point
 static const float BD_K1_D = 0.0;                       //Barrel Distortion K1
@@ -57,6 +57,10 @@ static const float HVS_X_D = 1.0;                       //Horizontal Size
 static const float HVS_Y_D = 1.0;                       //Vertical Size
 static const int HVP_X_D = 0;                           //Horizontal Position
 static const int HVP_Y_D = 0;                           //Vertical Position
+static const int ZPD_Boundary_Type_D = 0;               //ZPD Boundary Type
+static const float ZPD_Boundary_Scaling_D = 0.5;        //ZPD Boundary Scaling
+static const float ZPD_Boundary_Fade_Time_D = 0.25;     //ZPD Boundary Fade Time
+static const float Null = 0;                            //NULL
 
 //Special Toggles Defaults
 static const int REF = 0;                               //Resident Evil Fix
@@ -301,14 +305,14 @@ static const int HMT = 0;                               //HUD Mode Trigger
 	#define DA_Z 0.001
 	#define DA_X 0.150
 	#define DB_Y 5
-	#define DB_Z 0.305
+	#define DB_Z 0.305 //Under Review
 	#define DB_X 1
 	#define TW 1
 #elif (App == 0xE63BF4A4 )	//World of Warcraft DX12
 	#define DA_Y 7.5
 	#define DA_W 1
 	#define DB_Y 3
-	#define DB_Z 0.1375
+	#define DB_Z 0.1375 //Under Review
 	#define TW 1
 #elif (App == 0x5961D1CC )	//Requiem: Avenging Angel
 	#define DA_Y 37.5
@@ -324,7 +328,7 @@ static const int HMT = 0;                               //HUD Mode Trigger
 #elif (App == 0x60F436C6 )	//RESIDENT EVIL 2  BIOHAZARD RE2
 	#define DA_X 0.1375
 	#define DB_Y 3
-	#define DB_Z 0.015
+	#define DB_Z 0.015 //Under Review
 	#define DA_Y 51.25
 	#define DA_W 1
 	#define DA_Z 0.00015
@@ -342,7 +346,7 @@ static const int HMT = 0;                               //HUD Mode Trigger
 #elif (App == 0x6D35D4BE )	//Lara Croft and the Temple of Osiris
 	#define DA_X 0.15
 	#define DB_Y 4
-	#define DB_Z 0.4
+	#define DB_Z 0.4 //Under Review
 	#define DA_Y 75.0
 	#define DA_Z 0.021
 	#define RE 1
@@ -351,7 +355,7 @@ static const int HMT = 0;                               //HUD Mode Trigger
 	#define DA_Y 25.0
 	#define DA_W 1
 	#define DA_Z 0.0005
-	#define DB_Z 0.25
+	#define DB_Z 0.25 //Under Review
 #elif (App == 0x287BBA4C || App == 0x59BFE7AC )	//Grim Dawn 64bit/32bit
 	#define DB_Y 2
 	#define DA_Y 125.0
@@ -378,25 +382,24 @@ static const int HMT = 0;                               //HUD Mode Trigger
 	#define DA_W 1
 	#define DA_X 0.130
 	#define DB_Y 3
-	#define DB_Z 0.625 //I know, I know........
+	#define DB_Z 0.625 //I know, I know........ //Under Review
 #elif (App == 0x3F017CF )	//Call of Cthulhu
 	#define DA_W 1
 	#define DA_X 0.0375
 	#define DB_Y 3
-	#define DB_Z 0.10
 #elif (App == 0x874318FE || App == 0x7CBA2E8C || App == 0x69277DAF )	//Batman Arkham Asylum / City / Origins
 	#define DA_Y 18.75
 	#define DA_X 0.0375
 	#define DA_Z 0.00025
 	#define DB_Y 4
-	#define DB_Z 0.15
+	#define DB_Z 0.15 //Under Review
 	#define TW 1
 #elif (App == 0xA100000 )	//Lego Batman 1 & 2
 	#define DA_Y 27.5
 	#define DA_X 0.125
 	#define DA_Z 0.001
 	#define DB_Y 2
-	#define DB_Z 0.025
+	#define DB_Z 0.025 //Under Review
 	#define RE 1
 #elif (App == 0x5F2CA572 )	//Lego Batman 3
 	#define DA_X 0.03
@@ -433,7 +436,7 @@ static const int HMT = 0;                               //HUD Mode Trigger
 	#define DA_Y 20.0
 	#define DA_Z 0.00025
 	#define DA_X 0.04375
-	#define DB_Z 0.2
+	#define DB_Z 0.2 //Under Review
 #elif (App == 0xBF222C03 )	//Among The Sleep
 	#define DA_X 0.05
 	#define DA_Y 15.0
@@ -534,7 +537,7 @@ static const int HMT = 0;                               //HUD Mode Trigger
 	#define DA_Z 0.001
 	#define DA_X 0.04
 	#define DB_Y 4
-	#define DB_Z 0.125
+	#define DB_Z 0.125 //Under Review
 	#define TW 1
 #elif (App == 0x706C8618 ) //Layer of Fear
 	#define DB_X 1
@@ -591,12 +594,23 @@ static const int HMT = 0;                               //HUD Mode Trigger
 	#define DA_W 1
 	#define DB_Y 4
 	#define DB_W 12
+#elif (App == 0x86562CC2 ) //STARWARS Jedi Fallen Order
+	  #define DA_X 0.14375
+		#define DA_W 1
+    #define DA_Y 13.75
+		#define DA_Z 0.00025
+		#define DB_Y 5
+    #define DE_X 1
+    #define DE_Y 0.1875
+    #define DE_Z 0.475
+	  #define DB_Z 0.375  //Under Review
 #else
 	#define NP 1 //No Profile
 #endif
 
 //Change Output
 //#ifndef checks whether the given token has been #defined earlier in the file or in an included file
+// X = [ZPD] Y = [Depth Adjust] Z = [Offset] W = [Depth Linearization]
 #ifndef DA_X
     #define DA_X ZPD_D
 #endif
@@ -609,6 +623,7 @@ static const int HMT = 0;                               //HUD Mode Trigger
 #ifndef DA_W
     #define DA_W Depth_Linearization_D
 #endif
+// X = [Depth Flip] Y = [Auto Balance] Z = [Auto Depth] W = [Weapon Hand]
 #ifndef DB_X
     #define DB_X Depth_Flip_D
 #endif
@@ -616,11 +631,12 @@ static const int HMT = 0;                               //HUD Mode Trigger
     #define DB_Y Auto_Balance_D
 #endif
 #ifndef DB_Z
-    #define DB_Z Auto_Depth_D
+    #define DB_Z Auto_Depth_D //Under Review
 #endif
 #ifndef DB_W
     #define DB_W Weapon_Hand_D
 #endif
+// X = [HUD] Y = [Barrel Distortion K1] Z = [Barrel Distortion K2] W = [Barrel Distortion Zoom]
 #ifndef DC_X
     #define DC_X HUDX_D
 #endif
@@ -633,6 +649,7 @@ static const int HMT = 0;                               //HUD Mode Trigger
 #ifndef DC_W
     #define DC_W BD_Zoom_D
 #endif
+// X = [Horizontal Size] Y = [Vertical Size] Z = [Horizontal Position] W = [Vertical Position]
 #ifndef DD_X
     #define DD_X HVS_X_D
 #endif
@@ -644,6 +661,19 @@ static const int HMT = 0;                               //HUD Mode Trigger
 #endif
 #ifndef DD_W
     #define DD_W HVP_Y_D
+#endif
+// X = [ZPD Boundary Type] Y = [ZPD Boundary Scaling] Z = [ZPD Boundary Fade Time] W = [Null]
+#ifndef DE_X
+    #define DE_X ZPD_Boundary_Type_D
+#endif
+#ifndef DE_Y
+    #define DE_Y ZPD_Boundary_Scaling_D
+#endif
+#ifndef DE_Z
+    #define DE_Z ZPD_Boundary_Fade_Time_D
+#endif
+#ifndef DE_W
+    #define DE_W Null
 #endif
 
 //Special Toggles
