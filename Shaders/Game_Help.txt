@@ -197,8 +197,10 @@ Inner Shader Setting:
               Soma                                         DM 0       10.000                WDM 36                     Yes 5        
               Sonic Adventure 2                            DM 0       10.000                                       
               Souls Games                                  DM 0       ?                                            
-              Stacking                                     DM 0       7.5000                                       
+              Stacking                                     DM 0       7.5000    0.00025                                Yes 5                                       
+    RB        StarWars Jedi Fallen Order                   DM 1       13.750
     RB        Stay Close                                   DM 1       10.000                                       
+    RB        Strange Brigade                              DM 0       20.000    0.00050                                Yes 5 
               Tales of Zestiria                            DM 0       7.5000                                       
     RB        The Forest                                   DM 1       7.5000                                           Yes 2                                      
               The Elder Scrolls V: SE                      DM 0       6.2500                WDM 5                      Yes 2          
@@ -786,8 +788,25 @@ Seems like GOG Overlay is the only way this game will run....... So you know whe
 
 Read the section for Dealing with mouse pointer issues. At the top. 
 
+{StarWars Jedi Fallen Order} - Used ReShade 4.2.0
+Disable CA, FG, MB in the Visuals
+
+Also to Disable AA and DoF
+1. Go to the Video Settings and change the last setting to (< Medium >) to set (Graphics Quality) set to (< Custom >)
+2. Select (< Custom >) graphics quality hold down left arrow <--- until you get to (< Medium >) then press the [Esc] key wile still holding the arrow key.
+3. Now set your settings.
+
+https://www.pcgamingwiki.com/wiki/Star_Wars_Jedi:_Fallen_Order#Enable_low_settings
+https://www.youtube.com/watch?time_continue=8&v=1vmTpYWkNCE
+
+             
 {Stay Close}
 Install reshade in too Steam\steamapps\common\Stay Close\Migrate\Binaries\Win64
+
+{Strange Brigade} - Used ReShade 4.4.2 and 4.4.2+
+You Need to reload the shader in game to grab the Depth Buffer??? Ya I don't know why this happens. But, Once loaded it should work.
+
+If you can get Vulkan working the experinace in this game is much better. You can raise the ZPD some more.
 
 {S.T.A.L.K.E.R.: Games} -  I suggest windows 7 or Windows 10 Anniversary.
 

@@ -109,7 +109,7 @@ static const int HMT = 0;                               //HUD Mode Trigger
 	#define DB_W 2
 	#define DB_Y 3
 #elif (App == 0x7B81CCAB )	//BorderLands 2
-    #define DA_Y 20.0
+    #define DA_Y 25.0
 	#define DB_Y 2
     #define DB_W 4.0
 #elif (App == 0x2D950D30 )	//Fallout 4
@@ -382,7 +382,7 @@ static const int HMT = 0;                               //HUD Mode Trigger
 	#define DA_W 1
 	#define DA_X 0.130
 	#define DB_Y 3
-	#define DB_Z 0.625 //I know, I know........ //Under Review
+	#define DB_Z 0.625 //I know, I know........
 #elif (App == 0x3F017CF )	//Call of Cthulhu
 	#define DA_W 1
 	#define DA_X 0.0375
@@ -392,14 +392,14 @@ static const int HMT = 0;                               //HUD Mode Trigger
 	#define DA_X 0.0375
 	#define DA_Z 0.00025
 	#define DB_Y 4
-	#define DB_Z 0.15 //Under Review
+	#define DB_Z 0.15
 	#define TW 1
 #elif (App == 0xA100000 )	//Lego Batman 1 & 2
 	#define DA_Y 27.5
 	#define DA_X 0.125
 	#define DA_Z 0.001
 	#define DB_Y 2
-	#define DB_Z 0.025 //Under Review
+	#define DB_Z 0.025
 	#define RE 1
 #elif (App == 0x5F2CA572 )	//Lego Batman 3
 	#define DA_X 0.03
@@ -436,7 +436,7 @@ static const int HMT = 0;                               //HUD Mode Trigger
 	#define DA_Y 20.0
 	#define DA_Z 0.00025
 	#define DA_X 0.04375
-	#define DB_Z 0.2 //Under Review
+	#define DB_Z 0.2
 #elif (App == 0xBF222C03 )	//Among The Sleep
 	#define DA_X 0.05
 	#define DA_Y 15.0
@@ -603,7 +603,17 @@ static const int HMT = 0;                               //HUD Mode Trigger
     #define DE_X 1
     #define DE_Y 0.1875
     #define DE_Z 0.475
-	  #define DB_Z 0.375  //Under Review
+	  #define DB_Z 0.375
+		#define TW 1
+#elif (App == 0x88004DC9 || 0x1DDA9341) //Strange Brigade DX12 & Vulkan
+	  #define DA_X 0.05625
+    #define DA_Y 20.0
+		#define DA_Z 0.0005
+		#define DB_Y 5
+    #define DE_X 2
+    #define DE_Y 0.3
+    #define DE_Z 0.475
+		#define TW 1
 #else
 	#define NP 1 //No Profile
 #endif
@@ -631,7 +641,7 @@ static const int HMT = 0;                               //HUD Mode Trigger
     #define DB_Y Auto_Balance_D
 #endif
 #ifndef DB_Z
-    #define DB_Z Auto_Depth_D //Under Review
+    #define DB_Z Auto_Depth_D
 #endif
 #ifndef DB_W
     #define DB_W Weapon_Hand_D

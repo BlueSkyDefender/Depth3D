@@ -3,7 +3,7 @@
 //----------------////
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//* Depth Map Based 3D post-process shader v2.0.8
+//* Depth Map Based 3D post-process shader v2.1.0
 //* For Reshade 3.0+
 //* ---------------------------------
 //*
@@ -124,16 +124,25 @@
 #else
 	#define Rend 0
 #endif
+//Resolution Scaling because I can't tell your monitor size. Each level is 25 more then it should be.
+#if (BUFFER_HEIGHT <= 1080)
+	#define Max_Divergence 50
+#elif (BUFFER_HEIGHT <= 1440)
+	#define Max_Divergence 75
+#elif (BUFFER_HEIGHT <= 2160)
+	#define Max_Divergence 100
+#else
+	#define Max_Divergence 125
+#endif
 //Divergence & Convergence//
 uniform float Divergence <
 	ui_type = "drag";
-	ui_min = 10; ui_max = 50; ui_step = 0.5;
+	ui_min = 10; ui_max = Max_Divergence; ui_step = 0.5;
 	ui_label = "·Divergence Slider·";
 	ui_tooltip = "Divergence increases differences between the left and right retinal images and allows you to experience depth.\n"
-				 "The process of deriving binocular depth information is called stereopsis.\n"
-				 "You can override this value.";
+				 "The process of deriving binocular depth information is called stereopsis.";
 	ui_category = "Divergence & Convergence";
-> = 37.5;
+> = 25;
 
 uniform float ZPD <
 	ui_type = "drag";
@@ -172,7 +181,7 @@ uniform int Auto_Balance_Ex <
 #endif
 uniform int ZPD_Boundary <
 	ui_type = "combo";
-	ui_items = "Off\0Normal\0FPS A\0FPS B\0";
+	ui_items = "Off\0Normal A\0Normal B\0FPS A\0FPS B\0";
 	ui_label = " ZPD Boundary Detection";
 	ui_tooltip = "This selection menu gives extra boundary conditions to ZPD.\n"
 				 			 "This treats your screen as a virtual wall.\n"
@@ -688,10 +697,13 @@ float Fade(float2 texcoord)
 	{	
 	if(ZPD_Boundary == 3)
 		FPS_M2 = 0.1875;
-		float CDArray[7] = { 0.125 ,0.25, 0.375,0.5, 0.625, 0.75, 0.875};
-		float CDArrayX_B[7] = { 0.125, 0.25, 0.375,0.5, 0.625, 0.75, FPS_M2};
-		float CDArrayY_B[7] = { 0.125, 0.1875, 0.25,0.3125, 0.375, 0.40625, 0.4375};
+		//Normal A & B
+		float CDArray_A[7] = { 0.125 ,0.25, 0.375,0.5, 0.625, 0.75, 0.875};
+		float CDArray_B[7] = { 0.25 ,0.375, 0.4375, 0.5, 0.5625, 0.625, 0.75};
 		float CDArrayZPD[7] = { ZPD * 0.3, ZPD * 0.5, ZPD * 0.75, ZPD, ZPD * 0.75, ZPD * 0.5, ZPD * 0.3 };
+		//FPS
+		float CDArrayX[7] = { 0.125, 0.25, 0.375,0.5, 0.625, 0.75, FPS_M2};
+		float CDArrayY[7] = { 0.125, 0.1875, 0.25,0.3125, 0.375, 0.40625, 0.4375};
 		//Screen Space Detector 7x7 Grid from between 0 to 1 and ZPD Detection becomes stronger as it gets closer to the Center.
 		[unroll]
 		for( int i = 0 ; i < 7; i++ )
@@ -699,9 +711,11 @@ float Fade(float2 texcoord)
 			for( int j = 0 ; j < 7; j++ )
 			{
 				if(ZPD_Boundary == 1)
-					CD = 1 - CDArrayZPD[i] / Depth( float2( CDArray[i], CDArray[j]) );
-				else if(ZPD_Boundary == 2 || ZPD_Boundary == 3)
-					CD = 1 - CDArrayZPD[i] / Depth( float2( CDArrayX_B[i], CDArrayY_B[j]) );
+					CD = 1 - CDArrayZPD[i] / Depth( float2( CDArray_A[i], CDArray_A[j]) );
+				else if(ZPD_Boundary == 2 )
+					CD = 1 - CDArrayZPD[i] / Depth( float2( CDArray_B[i], CDArray_B[j]) );
+				else if(ZPD_Boundary == 3 || ZPD_Boundary == 4)
+					CD = 1 - CDArrayZPD[i] / Depth( float2( CDArrayX[i], CDArrayY[j]) );
 
 				if( CD < 0)
 					Detect = 1;
