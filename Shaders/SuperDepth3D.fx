@@ -667,15 +667,15 @@ float Depth(float2 texcoord)
 	zBuffer = 1 - zBuffer;
 	#endif
 
-	float2 Offsets = float2(1 + Offset,1 - Offset), Z = float2( zBuffer, 1-zBuffer );
+	float2 C = float2( Far / Near, 1. - Far / Near ), Offsets = float2(1 + Offset,1 - Offset), Z = float2( zBuffer, 1-zBuffer );
 
 	if (Offset > 0)
-	Z = min( 1, float2( Z.x * Offsets.x , Z.y / Offsets.y  ));
-
+		Z = min( 1., float2( Z.x * Offsets.x , Z.y / Offsets.y  ));
+	//MAD - RCP
 	if (Depth_Map == 0) //DM0 Normal
-		zBuffer = Far * Near / (Far + Z.x * (Near - Far));
+		zBuffer = rcp(Z.x * C.y + C.x);
 	else if (Depth_Map == 1) //DM1 Reverse
-		zBuffer = Far * Near / (Far + Z.y * (Near - Far));
+		zBuffer = rcp(Z.y * C.y + C.x);
 	return saturate(zBuffer);
 }
 /////////////////////////////////////////////////////////Fade In and Out Toggle/////////////////////////////////////////////////////////////////////
@@ -694,7 +694,7 @@ float Fade(float2 texcoord)
 { //Check Depth
 	float CD, Detect, FPS_M2 = 0.875;
 	if(ZPD_Boundary > 0)
-	{	
+	{
 	if(ZPD_Boundary == 3)
 		FPS_M2 = 0.1875;
 		//Normal A & B
@@ -1035,8 +1035,8 @@ float2 Parallax(float Diverge, float2 Coordinates, float IO) // Horizontal paral
 
     if(View_Mode == 1)
     	DB_Offset = 0;
-	#if Rend //Steep parallax mapping
-	[loop]
+
+	[loop] //Steep parallax mapping
 	while ( CurrentDepthMapValue > CurrentLayerDepth)
 	{   // Shift coordinates horizontally in linear fasion
 	    ParallaxCoord.x -= deltaCoordinates;
@@ -1046,17 +1046,7 @@ float2 Parallax(float Diverge, float2 Coordinates, float IO) // Horizontal paral
 	    CurrentLayerDepth += LayerDepth;
 		continue;
 	}
-	#else
-	[loop]
-	do
-	{   // Shift coordinates horizontally in linear fasion
-	    ParallaxCoord.x -= deltaCoordinates;
-	    // Get depth value at current coordinates
-	    CurrentDepthMapValue = tex2Dlod(SamplerzBufferN,float4(ParallaxCoord - DB_Offset,0,0)).x;
-	    // Get depth of next layer
-	    CurrentLayerDepth += LayerDepth;
-	}   while ( CurrentDepthMapValue > CurrentLayerDepth);
-	#endif
+
 	// Parallax Occlusion Mapping
 	float2 PrevParallaxCoord = float2(ParallaxCoord.x + deltaCoordinates, ParallaxCoord.y);
 	float beforeDepthValue = tex2Dlod(SamplerzBufferN,float4( ParallaxCoord ,0,0)).x, afterDepthValue = CurrentDepthMapValue - CurrentLayerDepth;
@@ -1069,7 +1059,7 @@ float2 Parallax(float Diverge, float2 Coordinates, float IO) // Horizontal paral
 	if(View_Mode == 0)//This is to limit artifacts.
 		ParallaxCoord += DB_Offset * 0.625;
 	// Apply gap masking
-	DepthDifference = (afterDepthValue-beforeDepthValue) * MS * 4;
+	DepthDifference = (afterDepthValue-beforeDepthValue) * MS;
 	if(View_Mode == 1)
 		ParallaxCoord.x -= DepthDifference;
 	#endif

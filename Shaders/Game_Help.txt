@@ -788,7 +788,7 @@ Seems like GOG Overlay is the only way this game will run....... So you know whe
 
 Read the section for Dealing with mouse pointer issues. At the top. 
 
-{StarWars Jedi Fallen Order} - Used ReShade 4.2.0
+{StarWars Jedi Fallen Order} - Used ReShade 4.4.2
 Disable CA, FG, MB in the Visuals
 
 Also to Disable AA and DoF
@@ -798,15 +798,14 @@ Also to Disable AA and DoF
 
 https://www.pcgamingwiki.com/wiki/Star_Wars_Jedi:_Fallen_Order#Enable_low_settings
 https://www.youtube.com/watch?time_continue=8&v=1vmTpYWkNCE
-
-             
+            
 {Stay Close}
 Install reshade in too Steam\steamapps\common\Stay Close\Migrate\Binaries\Win64
 
 {Strange Brigade} - Used ReShade 4.4.2 and 4.4.2+
 You Need to reload the shader in game to grab the Depth Buffer??? Ya I don't know why this happens. But, Once loaded it should work.
 
-If you can get Vulkan working the experinace in this game is much better. You can raise the ZPD some more.
+If you can get Vulkan working the experinace in this game is much better.
 
 {S.T.A.L.K.E.R.: Games} -  I suggest windows 7 or Windows 10 Anniversary.
 
