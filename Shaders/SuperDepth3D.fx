@@ -190,7 +190,11 @@ uniform int ZPD_Boundary <
 > = DE_X;
 
 uniform float2 ZPD_Boundary_n_Fade <
+	#if Compatibility
+	ui_type = "drag";
+	#else
 	ui_type = "slider";
+	#endif
 	ui_min = 0.0; ui_max = 0.5;
 	ui_label = " ZPD Boundary & Fade Time";
 	ui_tooltip = "This selection menu gives extra boundary conditions to scale ZPD & lets you adjust Fade time.";
@@ -352,7 +356,11 @@ uniform int FPSDFIO <
 > = 0;
 
 uniform int2 Eye_Fade_Reduction_n_Power <
+	#if Compatibility
+	ui_type = "drag";
+	#else
 	ui_type = "slider";
+	#endif
 	ui_min = 0; ui_max = 2;
 	ui_label = " Eye Selection & Fade Reduction";
 	ui_tooltip = "Fade Reduction decresses the depth ammount by a current percentage.\n"
@@ -1025,13 +1033,11 @@ float2 Parallax(float Diverge, float2 Coordinates, float IO) // Horizontal paral
 	Perf = .5;
 	//ParallaxSteps Calculations
 	float D = abs(Diverge), Cal_Steps = (D * Perf) + (D * 0.04), Steps = clamp(Cal_Steps,0,255);
-
 	// Offset per step progress & Limit
-	float LayerDepth = rcp(Steps);
-
+	float LayerDepth = rcp(Steps), TP = 0.03;
 	//Offsets listed here Max Seperation is 3% - 8% of screen space with Depth Offsets & Netto layer offset change based on MS.
 	float deltaCoordinates = MS * LayerDepth, CurrentDepthMapValue = tex2Dlod(SamplerzBufferN,float4(ParallaxCoord,0,0)).x, CurrentLayerDepth = 0, DepthDifference;
-	float2 DB_Offset = float2(Diverge * 0.03, 0) * pix;
+	float2 DB_Offset = float2(Diverge * TP, 0) * pix;
 
     if(View_Mode == 1)
     	DB_Offset = 0;
@@ -1046,18 +1052,16 @@ float2 Parallax(float Diverge, float2 Coordinates, float IO) // Horizontal paral
 	    CurrentLayerDepth += LayerDepth;
 		continue;
 	}
-
 	// Parallax Occlusion Mapping
 	float2 PrevParallaxCoord = float2(ParallaxCoord.x + deltaCoordinates, ParallaxCoord.y);
 	float beforeDepthValue = tex2Dlod(SamplerzBufferN,float4( ParallaxCoord ,0,0)).x, afterDepthValue = CurrentDepthMapValue - CurrentLayerDepth;
 		beforeDepthValue += LayerDepth - CurrentLayerDepth;
-
 	// Interpolate coordinates
 	float weight = afterDepthValue / (afterDepthValue - beforeDepthValue);
 		ParallaxCoord = PrevParallaxCoord * weight + ParallaxCoord * (1. - weight);
-
-	if(View_Mode == 0)//This is to limit artifacts.
-		ParallaxCoord += DB_Offset * 0.625;
+	//This is to limit artifacts.
+	if(View_Mode == 0)
+		ParallaxCoord += DB_Offset * 0.5;
 	// Apply gap masking
 	DepthDifference = (afterDepthValue-beforeDepthValue) * MS;
 	if(View_Mode == 1)
@@ -1075,7 +1079,6 @@ float2 Parallax(float Diverge, float2 Coordinates, float IO) // Horizontal paral
 float3 HUD(float3 HUD, float2 texcoord )
 {
 	float Mask_Tex, CutOFFCal = ((HUD_Adjust.x * 0.5)/Depth_Map_Adjust) * 0.5, COC = step(Depth(texcoord).x,CutOFFCal); //HUD Cutoff Calculation
-
 	//This code is for hud segregation.
 	if (HUD_Adjust.x > 0)
 		HUD = COC > 0 ? tex2D(BackBufferCLAMP,texcoord).rgb : HUD;

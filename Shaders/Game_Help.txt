@@ -791,13 +791,19 @@ Read the section for Dealing with mouse pointer issues. At the top.
 {StarWars Jedi Fallen Order} - Used ReShade 4.4.2
 Disable CA, FG, MB in the Visuals
 
-Also to Disable AA and DoF
+Also You dont' have to dissable AA. But, you can Disable DoF.
 1. Go to the Video Settings and change the last setting to (< Medium >) to set (Graphics Quality) set to (< Custom >)
 2. Select (< Custom >) graphics quality hold down left arrow <--- until you get to (< Medium >) then press the [Esc] key wile still holding the arrow key.
-3. Now set your settings.
+3. Now set the Last Setting to (< Low >)
 
 https://www.pcgamingwiki.com/wiki/Star_Wars_Jedi:_Fallen_Order#Enable_low_settings
 https://www.youtube.com/watch?time_continue=8&v=1vmTpYWkNCE
+
+Now Motion Blur still not fully disable. This next step can be done of of two ways.
+1. https://gamertagzero.com/star-wars-jedi-fallen-order-how-to-completely-remove-disable-motion-blur-guide/
+or Download
+2. http://www.mediafire.com/file/w0n67mo5aitaomm/pakchunk99-Mods_CustomMod_P.pak/file
+Now Place the "pakchunk99-Mods_CustomMod_P.pak" file to your Fallen Order\SwGame\Content\Paks\ folder
             
 {Stay Close}
 Install reshade in too Steam\steamapps\common\Stay Close\Migrate\Binaries\Win64
