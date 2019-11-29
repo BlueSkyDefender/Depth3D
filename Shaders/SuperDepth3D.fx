@@ -3,7 +3,7 @@
 //----------------////
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//* Depth Map Based 3D post-process shader v2.1.0
+//* Depth Map Based 3D post-process shader v2.1.1
 //* For Reshade 3.0+
 //* ---------------------------------
 //*
@@ -126,18 +126,18 @@
 #endif
 //Resolution Scaling because I can't tell your monitor size. Each level is 25 more then it should be.
 #if (BUFFER_HEIGHT <= 1080)
-	#define Max_Divergence 50
+	#define Max_Divergence 50.0
 #elif (BUFFER_HEIGHT <= 1440)
-	#define Max_Divergence 75
+	#define Max_Divergence 75.0
 #elif (BUFFER_HEIGHT <= 2160)
-	#define Max_Divergence 100
+	#define Max_Divergence 100.0
 #else
-	#define Max_Divergence 125
+	#define Max_Divergence 125.0
 #endif
 //Divergence & Convergence//
 uniform float Divergence <
 	ui_type = "drag";
-	ui_min = 10; ui_max = Max_Divergence; ui_step = 0.5;
+	ui_min = 10.0; ui_max = Max_Divergence; ui_step = 0.5;
 	ui_label = "·Divergence Slider·";
 	ui_tooltip = "Divergence increases differences between the left and right retinal images and allows you to experience depth.\n"
 				 "The process of deriving binocular depth information is called stereopsis.";
@@ -1041,7 +1041,7 @@ float2 Parallax(float Diverge, float2 Coordinates, float IO) // Horizontal paral
 
     if(View_Mode == 1)
     	DB_Offset = 0;
-
+	#if !Compatibility
 	[loop] //Steep parallax mapping
 	while ( CurrentDepthMapValue > CurrentLayerDepth)
 	{   // Shift coordinates horizontally in linear fasion
@@ -1052,6 +1052,20 @@ float2 Parallax(float Diverge, float2 Coordinates, float IO) // Horizontal paral
 	    CurrentLayerDepth += LayerDepth;
 		continue;
 	}
+	#else
+	[loop] //Steep parallax mapping
+	for ( int i = 0; i < Steps; i++ )
+	{   // Doing it this way should stop crashes in older version of reshade, I hope.
+			if(CurrentDepthMapValue < CurrentLayerDepth)
+				break; // Once we hit the limit Stop Exit Loop.
+			// Shift coordinates horizontally in linear fasion
+			ParallaxCoord.x -= deltaCoordinates;
+			// Get depth value at current coordinates
+			CurrentDepthMapValue = tex2Dlod(SamplerzBufferN,float4(ParallaxCoord - DB_Offset,0,0)).x;
+			// Get depth of next layer
+			CurrentLayerDepth += LayerDepth;
+	}
+	#endif
 	// Parallax Occlusion Mapping
 	float2 PrevParallaxCoord = float2(ParallaxCoord.x + deltaCoordinates, ParallaxCoord.y);
 	float beforeDepthValue = tex2Dlod(SamplerzBufferN,float4( ParallaxCoord ,0,0)).x, afterDepthValue = CurrentDepthMapValue - CurrentLayerDepth;
