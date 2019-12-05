@@ -595,25 +595,34 @@ static const int HMT = 0;                               //HUD Mode Trigger
 	#define DB_Y 4
 	#define DB_W 12
 #elif (App == 0x86562CC2 ) //STARWARS Jedi Fallen Order
-	  #define DA_X 0.140
-		#define DA_W 1
-    #define DA_Y 13.75
-		#define DA_Z 0.00025
-		#define DB_Y 5
-    #define DE_X 1
-    #define DE_Y 0.1875
-    #define DE_Z 0.475
-	  #define DB_Z 0.375
-		#define TW 1
-#elif (App == 0x88004DC9 || 0x1DDA9341) //Strange Brigade DX12 & Vulkan
-	  #define DA_X 0.0625
-    #define DA_Y 20.0
-		#define DA_Z 0.0005
-		#define DB_Y 5
-    #define DE_X 2
-    #define DE_Y 0.3
-    #define DE_Z 0.475
-		#define TW 1
+  #define DA_X 0.140
+	#define DA_W 1
+  #define DA_Y 13.75
+	#define DA_Z 0.00025
+	#define DB_Y 5
+  #define DE_X 1
+  #define DE_Y 0.1875
+  #define DE_Z 0.475
+  #define DB_Z 0.375
+	#define TW 1
+#elif (App == 0x88004DC9 || App == 0x1DDA9341) //Strange Brigade DX12 & Vulkan
+  #define DA_X 0.0625
+  #define DA_Y 20.0
+	#define DA_Z 0.0005
+	#define DB_Y 5
+  #define DE_X 2
+  #define DE_Y 0.3
+  #define DE_Z 0.475
+	#define TW 1
+#elif (App == 0xC0052CC4) //Halo The Master Chief Collection
+	#define DA_X 0.05
+	#define DA_W 1
+	#define DA_Y 80.0
+	#define DB_Y 5
+	#define DE_X 4
+	#define DE_Y 0.375
+	#define DE_Z 0.475
+	#define TW 1
 #else
 	#define NP 1 //No Profile
 #endif

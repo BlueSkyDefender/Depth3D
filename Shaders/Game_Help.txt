@@ -60,7 +60,7 @@ Inner Shader Setting:
     RB        Battlefield One                              DM 1       8.1250                                           Yes 5                  
     RB        BattleTech                                   DM 1       75.000                                           Yes 1                  
     RB        Batman Arkham Asylum                         DM 0       18.750                                           Yes 4
-              Batman Arkham Knight                         DM 0       22.500                                           Yes 4                                     
+    RB        Batman Arkham Knight                         DM 0       22.500                                           Yes 4                                     
               Batman Arkham Origins                        DM 0       18.750                                           Yes 4                                        
               Batman: Arkham City                          DM 0       18.750                                           Yes 4                                         
               Beware                                       DM 1       62.500                               Yes               
@@ -324,11 +324,13 @@ Please Note:
 If you run AMD and have a 2nd GPU in your system like a Nvidia Card. ReShade will Crash this game on start up.
 
 {BattleTech}
-
 Read the section for Dealing with mouse pointer issues. At the top. 
 
 {Batman Arkham Asylum} -Use ReShade 4.4.0+
 In older versions of Reshade you may incounter Depth Flickering.
+
+{Batman Arkham Knight} -Use ReShade ???
+Depth Buffer seems to drop off in some locations. As reported. This is a ReShade issue not a SuperDepth3D Issue.
 
 {BoarderLands 2}
 Use a Controller for menus navigation or keyboard. 
