@@ -49,7 +49,7 @@
 	static const float DC_X = 0.0, DC_Y = 0, DC_Z = 0, DC_W = 0;
 	// DD_X = [Horizontal Size] DD_Y = [Vertical Size] DD_Z = [Horizontal Position] DD_W = [Vertical Position]
 	static const float DD_X = 1,DD_Y = 1, DD_Z = 0.0, DD_W = 0.0;
-	// DE_X = [ZPD Boundary Type] DE_Y = [ZPD Boundary Scaling] DE_Z = [ZPD Boundary Fade Time] DE_W = [Null]
+	// DE_X = [ZPD Boundary Type] DE_Y = [ZPD Boundary Scaling] DE_Z = [ZPD Boundary Fade Time] DE_W = [Weapon Near Depth]
 	static const float DE_X = 0,DE_Y = 0.5, DE_Z = 0.25, DE_W = 0.0;
 	//Triggers
 	static const int RE = 0, NC = 0, TW = 0, NP = 0, ID = 0, SP = 0, DC = 0, HM = 0;
@@ -345,6 +345,13 @@ uniform float WZPD <
 				"Default is 0.03f & Zero is off.";
 	ui_category = "Weapon Hand Adjust";
 > = 0.03;
+
+uniform float WeaponND <
+	ui_type = "drag";
+	ui_min = 0.0; ui_max = 2.0;
+	ui_label = " Weapon Near Depth";
+	ui_category = "Weapon Hand Adjust";
+> = DE_W;
 
 uniform int FPSDFIO <
 	ui_type = "combo";
@@ -912,11 +919,16 @@ float3 DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0
 		B = DM.z; //Weapon Hand
 		//A = DM.w; //Normal Depth
 		//Fade Storage
+	float ScaleND = lerp(R,1,smoothstep(-WeaponND,1,R));
+	
+	if (WeaponND > 0)
+		R = lerp(ScaleND,R,smoothstep(0,0.25,ScaleND));
+	
 		if(texcoord.x < pix.x * 2 && texcoord.y < pix.y * 2)
 			R = Fade_in_out(texcoord);
 		if(1-texcoord.x < pix.x * 2 && 1-texcoord.y < pix.y * 2)
 			R = Fade(texcoord);
-	//Alpha Don't work in DX9
+		//Alpha Don't work in DX9
 	return saturate(float3(R,G,B));
 }
 

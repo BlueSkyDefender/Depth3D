@@ -60,7 +60,7 @@ static const int HVP_Y_D = 0;                           //Vertical Position
 static const int ZPD_Boundary_Type_D = 0;               //ZPD Boundary Type
 static const float ZPD_Boundary_Scaling_D = 0.5;        //ZPD Boundary Scaling
 static const float ZPD_Boundary_Fade_Time_D = 0.25;     //ZPD Boundary Fade Time
-static const float Null = 0;                            //NULL
+static const float Weapon_Near_Depth_D = 0;             //Weapon Near Depth
 
 //Special Toggles Defaults
 static const int REF = 0;                               //Resident Evil Fix
@@ -623,10 +623,19 @@ static const int HMT = 0;                               //HUD Mode Trigger
 	#define DE_Y 0.375
 	#define DE_Z 0.475
 	#define TW 1
+#elif (App == 0x2AB9ECF9) //System ReShock
+	#define DA_X 0.05
+	#define DA_W 1
+	#define DA_Y 11.25
+  #define DA_Z 0.00125
+	#define DB_Y 4
+	#define DE_X 4
+	#define DE_Y 0.4375
+	#define DE_Z 0.375
+	#define DE_W 0.055
 #else
 	#define NP 1 //No Profile
 #endif
-
 //Change Output
 //#ifndef checks whether the given token has been #defined earlier in the file or in an included file
 // X = [ZPD] Y = [Depth Adjust] Z = [Offset] W = [Depth Linearization]
@@ -692,7 +701,7 @@ static const int HMT = 0;                               //HUD Mode Trigger
     #define DE_Z ZPD_Boundary_Fade_Time_D
 #endif
 #ifndef DE_W
-    #define DE_W Null
+    #define DE_W Weapon_Near_Depth_D
 #endif
 
 //Special Toggles
