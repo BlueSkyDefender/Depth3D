@@ -73,9 +73,9 @@ static const int BDF = 0;                               //Barrel Distortion Fix
 static const int HMT = 0;                               //HUD Mode Trigger
 
 //Special Handling
-#if exists "LEGOBatman.exe"															//Lego Batman
+#if exists "LEGOBatman.exe"							 //Lego Batman
 	#define sApp 0xA100000
-#elif exists "LEGOBatman2.exe"													//LEGO Batman 2
+#elif exists "LEGOBatman2.exe"						  //LEGO Batman 2
 	#define sApp 0xA100000
 #elif exists "GameComponentsOzzy_Win32Steam_Release.dll"//Batman BlackGate
 	#define sApp 0xA200000
@@ -85,17 +85,17 @@ static const int HMT = 0;                               //HUD Mode Trigger
 
 //Check for ReShade Version for 64bit game Bug.
 #if !defined(__RESHADE__) || __RESHADE__ < 43000
-	#if exists "ACU.exe"																	//Assassin's Creed Unity
+	#if exists "ACU.exe"								 //Assassin's Creed Unity
 		#define App 0xA0762A98
-	#elif exists "BatmanAK.exe"														//Batman Arkham Knight
+	#elif exists "BatmanAK.exe"						  //Batman Arkham Knight
 		#define App 0x4A2297E4
-	#elif exists "DOOMx64.exe"														//DOOM 2016
+	#elif exists "DOOMx64.exe"						   //DOOM 2016
 		#define App 0x142EDFD6
-	#elif exists "RED-Win64-Shipping.exe"									//DragonBall Fighters Z
+	#elif exists "RED-Win64-Shipping.exe"				//DragonBall Fighters Z
 		#define App 0x31BF8AF6
-	#elif exists "HellbladeGame-Win64-Shipping.exe" 			//Hellblade Senua's Sacrifice
+	#elif exists "HellbladeGame-Win64-Shipping.exe" 	 //Hellblade Senua's Sacrifice
 		#define App 0xAAA18268
-	#elif exists "TheForest.exe"													//The Forest
+	#elif exists "TheForest.exe"						 //The Forest
 		#define App 0xABAA2255
 	#else
 		#define App sApp
@@ -590,44 +590,43 @@ static const int HMT = 0;                               //HUD Mode Trigger
 	#define DB_Y 4
 	#define DB_W 62
 #elif (App == 0x42C1A2B )	//CoD: WWII
-  #define DA_X 0.04
+	#define DA_X 0.04
 	#define DA_W 1
 	#define DB_Y 4
 	#define DB_W 12
 #elif (App == 0x86562CC2 ) //STARWARS Jedi Fallen Order
-  #define DA_X 0.140
+	#define DA_X 0.140
 	#define DA_W 1
-  #define DA_Y 13.75
+	#define DA_Y 13.75
 	#define DA_Z 0.00025
 	#define DB_Y 5
-  #define DE_X 1
-  #define DE_Y 0.1875
-  #define DE_Z 0.475
-  #define DB_Z 0.375
+	#define DE_X 1
+	#define DE_Y 0.1875
+	#define DE_Z 0.475
+	#define DB_Z 0.375
 	#define TW 1
 #elif (App == 0x88004DC9 || App == 0x1DDA9341) //Strange Brigade DX12 & Vulkan
-  #define DA_X 0.0625
-  #define DA_Y 20.0
+	#define DA_X 0.0625
+	#define DA_Y 20.0
 	#define DA_Z 0.0005
 	#define DB_Y 5
-  #define DE_X 2
-  #define DE_Y 0.3
-  #define DE_Z 0.475
+	#define DE_X 2
+	#define DE_Y 0.3
+	#define DE_Z 0.475
 	#define TW 1
 #elif (App == 0xC0052CC4) //Halo The Master Chief Collection
-	#define DA_X 0.05
+	#define DA_X 0.04
 	#define DA_W 1
-	#define DA_Y 80.0
+	#define DA_Y 75.0
 	#define DB_Y 5
-	#define DE_X 4
-	#define DE_Y 0.375
 	#define DE_Z 0.475
+	#define DE_W 0.340
 	#define TW 1
 #elif (App == 0x2AB9ECF9) //System ReShock
 	#define DA_X 0.05
 	#define DA_W 1
 	#define DA_Y 11.25
-  #define DA_Z 0.00125
+	#define DA_Z 0.00125
 	#define DB_Y 4
 	#define DE_X 4
 	#define DE_Y 0.4375

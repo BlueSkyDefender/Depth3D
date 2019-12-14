@@ -335,23 +335,16 @@ uniform float3 Weapon_Adjust <
 	ui_category = "Weapon Hand Adjust";
 > = float3(0.0,0.0,0.0);
 
-uniform float WZPD <
+uniform float2 WZPD_and_WND <
 	ui_type = "drag";
 	ui_min = 0.0; ui_max = 0.5;
-	ui_label = " Weapon Zero Parallax Distance";
+	ui_label = " Weapon ZPD and Near Depth";
 	ui_tooltip = "WZPD controls the focus distance for the screen Pop-out effect also known as Convergence for the weapon hand.\n"
 				"For FPS Games keeps this low Since you don't want your gun to pop out of screen.\n"
 				"This is controled by Convergence Mode.\n"
-				"Default is 0.03f & Zero is off.";
+				"Default is (X 0.03, Y 0.0) & Zero is off.";
 	ui_category = "Weapon Hand Adjust";
-> = 0.03;
-
-uniform float WeaponND <
-	ui_type = "drag";
-	ui_min = 0.0; ui_max = 2.0;
-	ui_label = " Weapon Near Depth";
-	ui_category = "Weapon Hand Adjust";
-> = DE_W;
+> = float2(0.03,DE_W);
 
 uniform int FPSDFIO <
 	ui_type = "combo";
@@ -919,9 +912,9 @@ float3 DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0
 		B = DM.z; //Weapon Hand
 		//A = DM.w; //Normal Depth
 		//Fade Storage
-	float ScaleND = lerp(R,1,smoothstep(-WeaponND,1,R));
+	float ScaleND = lerp(R,1,smoothstep(-WZPD_and_WND.y,1,R));
 	
-	if (WeaponND > 0)
+	if (WZPD_and_WND.y > 0)
 		R = lerp(ScaleND,R,smoothstep(0,0.25,ScaleND));
 	
 		if(texcoord.x < pix.x * 2 && texcoord.y < pix.y * 2)
@@ -949,11 +942,11 @@ float AutoZPDRange(float ZPD, float2 texcoord )
 }
 #endif
 float2 Conv(float D,float2 texcoord)
-{	float Z = ZPD, WZP = 0.5, ZP = 0.5, ALC = abs(Lum(texcoord).x), W_Convergence = WZPD;
+{	float Z = ZPD, WZP = 0.5, ZP = 0.5, ALC = abs(Lum(texcoord).x), W_Convergence = WZPD_and_WND.x;
 
 	if (Weapon_ZPD_Boundary > 0)
 	{   //only really only need to check one point just above the center bottom.
-		float WZPDB = 1 - WZPD / tex2Dlod(SamplerDMN,float4(float2(0.5,0.9375),0,0)).x;
+		float WZPDB = 1 - WZPD_and_WND.x / tex2Dlod(SamplerDMN,float4(float2(0.5,0.9375),0,0)).x;
 		if (WZPDB < -0.1)
 			W_Convergence *= 0.5-Weapon_ZPD_Boundary;
 	}
@@ -977,7 +970,7 @@ float2 Conv(float D,float2 texcoord)
 		if (ZPD == 0)
 			ZP = 1;
 
-		if (WZPD <= 0)
+		if (WZPD_and_WND.x <= 0)
 			WZP = 1;
 
 		if (ALC <= 0.025)
@@ -1004,7 +997,7 @@ float zBuffer(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0) 
 		DM = lerp(saturate(D / total),DM,step(saturate(Disocclusion_Adjust.y),DM));
 	#endif
 
-	if (WP == 0 || WZPD <= 0)
+	if (WP == 0 || WZPD_and_WND.x <= 0)
 		DM.y = 0;
 
 	DM.y = lerp(Conv(DM.x,texcoord).x, Conv(DM.z,texcoord).y, DM.y);
