@@ -607,14 +607,14 @@ return tex2D(BackBufferCLAMP,uv).rgb;
 /////////////////////////////////////////////////////////////Cursor///////////////////////////////////////////////////////////////////////////
 float4 MouseCursor(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Target
 {   float4 Out = tex2D(BackBufferCLAMP, texcoord),Color;
-		float Cursor, CCA = 0.005, CCB = 0.00025, CCC = 0.25, CCD = 0.00125, CCE = 0.00375, Arrow_Size_A = 0.7, Arrow_Size_B = 1.3, Arrow_Size_C = 4.0;//scaling
+		float Cursor, Arrow_Size_A = 0.7, Arrow_Size_B = 1.3, Arrow_Size_C = 4.0;//scaling
 		float2 MousecoordsXY = Mousecoords * pix, center = texcoord, Screen_Ratio = float2(1.75,1.0), Size_Color = float2(1+Cursor_SC.x,Cursor_SC.y);
-		float THICC = (1.5+Size_Color.x) * CCB, Size_A = Size_Color.x * CCA, Size_Cubed = Size_Color.x * CCD, Size_B = Size_Color.x * CCE;
+		float THICC = (1.5+Size_Color.x) * 0.00025, Size_A = Size_Color.x * 0.005, Size_Cubed = Size_Color.x * 0.00125, Size_B = Size_Color.x * 0.00375;
 
 		if (Cursor_Lock && !CLK)
-		MousecoordsXY = float2(0.5,0.5);
+			MousecoordsXY = float2(0.5,0.5);
 		if (Cursor_Type == 3)
-		Screen_Ratio = float2(1.6,1.0);
+			Screen_Ratio = float2(1.6,1.0);
 
 		float S_dist_fromHorizontal = abs((center.x - (Size_B* Arrow_Size_B) / Screen_Ratio.x) - MousecoordsXY.x) * Screen_Ratio.x, dist_fromHorizontal = abs(center.x - MousecoordsXY.x) * Screen_Ratio.x;
 		float S_dist_fromVertical = abs((center.y - (Size_B* Arrow_Size_B)) - MousecoordsXY.y), dist_fromVertical = abs(center.y - MousecoordsXY.y);
@@ -890,7 +890,7 @@ float2 WeaponDepth(float2 texcoord)
 	return float2(saturate(zBufferWH), WA_XYZ.x);
 }
 
-float3 DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0) : SV_Target
+float3 DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD) : SV_Target
 {
 		float4 DM = Depth(texcoord).xxxx;
 		float R, G, B, WD = WeaponDepth(texcoord).x, CoP = WeaponDepth(texcoord).y, CutOFFCal = (CoP/Depth_Map_Adjust) * 0.5; //Weapon Cutoff Calculation
@@ -913,10 +913,10 @@ float3 DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0
 		//A = DM.w; //Normal Depth
 		//Fade Storage
 	float ScaleND = lerp(R,1,smoothstep(-WZPD_and_WND.y,1,R));
-	
+
 	if (WZPD_and_WND.y > 0)
 		R = lerp(ScaleND,R,smoothstep(0,0.25,ScaleND));
-	
+
 		if(texcoord.x < pix.x * 2 && texcoord.y < pix.y * 2)
 			R = Fade_in_out(texcoord);
 		if(1-texcoord.x < pix.x * 2 && 1-texcoord.y < pix.y * 2)
@@ -981,7 +981,7 @@ float2 Conv(float D,float2 texcoord)
     return float2(lerp(Convergence,D, ZP),lerp(W_Convergence,D,WZP));
 }
 #define BlurSamples 6  //BlurSamples = # * 2
-float zBuffer(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0) : SV_Target
+float zBuffer(in float4 position : SV_Position, in float2 texcoord : TEXCOORD) : SV_Target
 {
 	float3 DM = tex2Dlod(SamplerDMN,float4(texcoord,0,0)).xyz;
 	#if Legacy_Mode

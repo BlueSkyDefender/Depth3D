@@ -292,7 +292,7 @@ static const int HMT = 0;                               //HUD Mode Trigger
 	#define DA_X 0.05
 	#define DA_Z 1.0
 	#define DB_Y 4
-#elif (App == 0x5AE8FA62 )	//Shadow Warrior Clasic Redux
+#elif (App == 0x5AE8FA62 )	//Shadow Warrior Classic Redux
 	#define DA_Y 10.0
 	#define DA_X 0.05
 	#define DA_Z 1.0
@@ -632,6 +632,13 @@ static const int HMT = 0;                               //HUD Mode Trigger
 	#define DE_Y 0.4375
 	#define DE_Z 0.375
 	#define DE_W 0.055
+#elif (App == 0xC50993EC) //COD: Modern Warfare 2019
+	#define DA_X 0.0375
+	#define DA_W 1
+	#define DA_Y 37.5
+	#define DA_Z 0.000125
+	#define DB_Y 5
+	#define DB_W 12
 #else
 	#define NP 1 //No Profile
 #endif

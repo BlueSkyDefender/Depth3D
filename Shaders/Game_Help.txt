@@ -78,6 +78,7 @@ Inner Shader Setting:
     RB        Call of Duty: Black Ops 4                    DM 1       22.50                 WDM 14                    ?             
     RB        Call of Duty: Ghost                          DM 1       13.750                WDM 9                      Yes 2            
     RB        Call of Duty: Infinite Warfare               DM 1       13.750                WDM 11                     Yes 2
+    RB        Call of Duty: Modern Warfare 2019            DM 0       37.500                WDM 10                     Yes 2
     RB        Call of Duty: Modern Warfare 3               DM 0       12.500                WDM 7                      Yes 3
               Call of Duty: World at War                   DM 0       12.500                WDM 12                     Yes 3          
               Casltevania: Lord of Shadows - UE            DM 0       7.5000                                                
@@ -411,6 +412,16 @@ You will have to click Launch Nightmares and click again a window before the gam
 
 AMD White Texture work around. Find detailhi.cfg in the Blood 2 folder and set "MipmapOffset" to "1.000000"
 You will lose a lot of texture detail. I do not recommend playing like this.
+
+{Call of Duty: Modern Warfare 2019} - ReShade 4.4.2
+First of all please set the game's "Shadow Map Resolution to [Normal <>]." Also Make sure you turn off DOF and Motion Blur.
+
+Next follow this yourtube Video to set ReShade Depth Buffer Settings.
+https://youtu.be/JzkgHkXRMCg
+
+You have to reset setting in the depth buffer tab and then set it to D16 and restart your game and follow the strange ritual again. 
+
+Your game may and most likely will crash when you uncheck the 2nd option.
 
 {Call of Duty: Modern Warfare 3}
 Set Image Quality to Native.
