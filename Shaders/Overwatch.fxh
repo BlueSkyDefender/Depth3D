@@ -639,6 +639,7 @@ static const int HMT = 0;                               //HUD Mode Trigger
 	#define DA_Z 0.000125
 	#define DB_Y 5
 	#define DB_W 12
+	#define TW 1
 #else
 	#define NP 1 //No Profile
 #endif

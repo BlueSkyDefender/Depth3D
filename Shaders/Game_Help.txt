@@ -423,6 +423,8 @@ You have to reset setting in the depth buffer tab and then set it to D16 and res
 
 Your game may and most likely will crash when you uncheck the 2nd option.
 
+Also no real way to fix the 1frame delay due to issue in this game.
+
 {Call of Duty: Modern Warfare 3}
 Set Image Quality to Native.
 You can also use DGVoodoo 2.6 to make the game DX11 and grab a better depth buffer maybe.
