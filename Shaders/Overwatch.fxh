@@ -640,6 +640,14 @@ static const int HMT = 0;                               //HUD Mode Trigger
 	#define DB_Y 5
 	#define DB_W 12
 	#define TW 1
+#elif (App == 0xA640659C) //MegaMan 2.5D in 3D
+	#define DA_X 0.150
+	#define DA_Y 8.75
+	#define DA_Z 1005.0
+	#define DE_X 1
+	#define DE_Y 0.275
+	#define DE_Z 0.375
+	#define TW 1
 #else
 	#define NP 1 //No Profile
 #endif

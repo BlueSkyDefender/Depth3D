@@ -143,6 +143,7 @@ Inner Shader Setting:
     RB        Mafia III                                    DM 1       6.2500                                       
     RB        Mass Effect Andromeda                        DM 1       15.000                                       
     RB        Magicka 2                                    DM 0       13.750    0.01250                            
+    RB        MegaMan 2.5D Now in 3D                       DM 0       8.7500    1005.00                                No 0   
     RB        Metal Gear Rising                            DM 0       13.750                                       
     RB        Metro 2033 Redux                             DM 0       12.500                WDM 19                     Yes 2                        
     RB        Metro Last Light Redux                       DM 0       12.500                WDM 19                     Yes 2                              
@@ -587,6 +588,22 @@ Install path \Program Files\Origin\Mass Effect Andromeda
 {Master Chief Collection: Halo} - 4.4.2
 Reach: Heavy issues with Weapon Hand. Please contact Devs to see if they can fix it. [https://www.halowaypoint.com/en-us/forums/85d779d52cfd46918b4f8b638f2e3c7b/topics/weapon-hand-issue-with-mcc-on-pc-with-reshade/4f0e0b7b-06b6-44b9-959e-0614586ffc64/posts]
 [https://youtu.be/d6Ez7b8iabA]
+
+{MegaMan 2.5D Now in 3D} - ReShade 4.5.0 Xenos_2.3.2 Injector
+Install game and make sure in launches in fullscreen and native resolution.
+
+Download https://github.com/DarthTon/Xenos/releases and the latest version of reshade.
+
+Create a folder and extract Xenos 2.3.2 you only really need the Xenos.exe 32 bit program and also extract ReShade 32bit dxgi.dll in to the same folder
+as Xenos. Place SuperDepth3D with Overwatch.fxh in this folder and start Xenos.exe.
+
+Click on Manual Launch radio button.
+Click on Add and select the dxgi.dll.
+Click on Select and find the MM25DGame.exe
+
+Now click Inject. Then launch your game like normal.
+
+Keep in mind if you alt-tab or lose this window you will lose depth.
 
 {Metal Gear Rising}
 Use a Controller for game play.
