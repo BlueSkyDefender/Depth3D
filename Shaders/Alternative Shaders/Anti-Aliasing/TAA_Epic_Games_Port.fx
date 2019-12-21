@@ -6,21 +6,35 @@
 
 
 
-uniform float Motion_Blur <
+uniform float Clamping_Adjust <
 	ui_type = "drag";
-	ui_min = 0; ui_max = 1.0;
-	ui_label = "Motion Blur Adjust";
-	ui_tooltip = "Adjust Motion Blur Power, By removing clamping.\n" 
+	ui_min = 0; ui_max = 0.5;
+	ui_label = "Clamping Adjust";
+	ui_tooltip = "Adjust Clamping that effects Blur.\n" 
 				 "Default is Zero.";
 > = 0.0;
 
-uniform int Motion_Seeking <
-	ui_type = "drag";
-	ui_min = 1; ui_max = 5;
-	ui_label = "Motion Seeking";
-	ui_tooltip = "The power of Seeking things in motion.\n" 
-				 "Default is One.";
+uniform int Clamping <
+	ui_type = "combo";
+	ui_items = "All Differences\0Some Differences\0";
+	ui_label = "Clamping Type";
+	ui_tooltip = "Clamping Type changes the type of masking used for TAA.";
 > = 1;
+
+uniform int Past_Frame <
+	ui_type = "combo";
+	ui_items = "Default\0Per Mode One\0Per Mode Two\0";
+	ui_label = "Past Frame";
+	ui_tooltip = "Select the Past Frame Blending.";
+> = 0;
+
+
+uniform float Persistence <
+	ui_type = "drag";
+	ui_min = 0.0; ui_max = 1.00;
+	ui_label = "Persistence";
+	ui_tooltip = "Increase persistence of the frames.";
+> = 1.0;
 
 uniform bool Debug <
 	ui_label = "Debug View";
@@ -41,12 +55,12 @@ sampler CBackBuffer
 		Texture = CurrentBackBuffer;
 	};
 	
-//texture PastBackBuffer  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA32F;}; 
+texture PastBackBuffer  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA32F;}; 
 
-//sampler PBackBuffer
-	//{
-	//	Texture = PastBackBuffer;
-	//};
+sampler PBackBuffer
+	{
+		Texture = PastBackBuffer;
+	};
 
 texture PastSingleBackBuffer  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA32F;}; 
 
@@ -80,9 +94,20 @@ float3 decodePalYuv(float3 ycc)
 
 
 float4 TAA(float2 texcoord)
-{	
-
+{   float Per = 1-Persistence;
     float4 PastColor = tex2Dlod(PSBackBuffer,float4(texcoord,0,0) );//Past Back Buffer
+    
+    if(Past_Frame == 1)    
+    {
+    	PastColor = tex2Dlod(PBackBuffer,float4(texcoord,0,0) );
+		PastColor = (1-Per) * tex2D(PSBackBuffer, texcoord) + Per * PastColor;
+	}
+	else if(Past_Frame == 2)
+	{
+		PastColor = tex2Dlod(PBackBuffer,float4(texcoord,0,0) );
+    	PastColor *= Per;
+    	PastColor = max( tex2D(PSBackBuffer, texcoord), PastColor);
+    }
     
     float3 antialiased = PastColor.xyz;
     float mixRate = min(PastColor.w, 0.5);
@@ -111,7 +136,7 @@ float4 TAA(float2 texcoord)
     in6 = encodePalYuv(in6);
     in7 = encodePalYuv(in7);
     in8 = encodePalYuv(in8);
-	float MB = Motion_Blur;
+	float MB = Clamping_Adjust;
     
     float3 minColor = min(min(min(in0, in1), min(in2, in3)), in4) - MB;
     float3 maxColor = max(max(max(in0, in1), max(in2, in3)), in4) + MB;
@@ -124,9 +149,15 @@ float4 TAA(float2 texcoord)
     mixRate = rcp(1.0 / mixRate + 1.0);
     
     float3 diff = antialiased - preclamping;
-    float clampAmount = dot(diff,diff);
     
-    mixRate += clampAmount * pow(4.0,Motion_Seeking);
+	if(Clamping)
+    	diff.x = dot(diff,diff);
+    else
+    	diff.x = length(diff);
+    	
+    float clampAmount = diff.x;
+    
+    mixRate += clampAmount * 4.0;
     mixRate = clamp(mixRate, 0.05, 0.5);
     
     antialiased = decodePalYuv(antialiased);
@@ -147,10 +178,10 @@ void Current_BackBuffer(float4 position : SV_Position, float2 texcoord : TEXCOOR
 	color = tex2D(BackBuffer,texcoord);
 }
 
-void Past_BackBuffer(float4 position : SV_Position, float2 texcoord : TEXCOORD, out float4 PastSingle : SV_Target0)//, out float4 Past : SV_Target1)
+void Past_BackBuffer(float4 position : SV_Position, float2 texcoord : TEXCOORD, out float4 PastSingle : SV_Target0, out float4 Past : SV_Target1)
 {
 	PastSingle = tex2D(CBackBuffer,texcoord);
-	//Past = tex2D(BackBuffer,texcoord);
+	Past = tex2D(BackBuffer,texcoord);
 }
 
 ///////////////////////////////////////////////////////////ReShade.fxh/////////////////////////////////////////////////////////////
@@ -180,7 +211,7 @@ technique TAA
 			VertexShader = PostProcessVS;
 			PixelShader = Past_BackBuffer;
 			RenderTarget0 = PastSingleBackBuffer;
-			//RenderTarget1 = PastBackBuffer;
+			RenderTarget1 = PastBackBuffer;
 			
 		}
 	}

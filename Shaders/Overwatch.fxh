@@ -648,6 +648,32 @@ static const int HMT = 0;                               //HUD Mode Trigger
 	#define DE_Y 0.275
 	#define DE_Z 0.375
 	#define TW 1
+#elif (App == 0x49654776) //Paratopic
+	#define DA_X 0.05
+	#define DA_W 1
+	#define DA_Y 8.75
+	#define DA_Z 0.000250
+	#define DB_Y 3
+	#define DB_X 1
+	#define TW 1
+#elif (App == 0xF7590C95) //Yume Nikki -Dream Diary-
+	#define DA_X 0.0625
+	#define DA_W 1
+	#define DA_Y 20.0
+	#define DA_Z 0.002
+	#define DB_X 1
+	#define DB_Y 1
+	#define DE_X 1
+	#define DE_Y 0.35
+	#define DE_Z 0.25
+	#define TW 1
+#elif (App == 0x65F37CDF) //American Truck Simulator
+	#define DA_X 0.05375
+	#define DA_Y 15.0
+	#define DA_Z 0.005
+	#define DB_X 1
+	#define DB_Y 2
+	#define DB_W 47
 #else
 	#define NP 1 //No Profile
 #endif

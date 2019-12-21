@@ -105,7 +105,7 @@ Inner Shader Setting:
     RB        Dusk/Dusk World                              DM 1       20.000                               Yes     
               Dying Light                                  DM 1       22.500                                       
     RB        Emily Wants To Play                          DM 1       25.000                                                          
-              Euro Trucks Sim 2                            DM 0       7.5000                WDM 45          ?                       0.005  
+              Euro/American Truck Simulator                DM 0       15.000    0.00500     WDM 45         Yes         Yes 2
               Everybody's Gone to the Rapture              DM 0       1.5000                                       
               F.E.A.R                                      DM 0       8.7500                WDM 46                     Yes 3                              
               F.E.A.R 2                                    DM 0       8.7500                WDM 46                     Yes 3      
@@ -164,6 +164,7 @@ Inner Shader Setting:
     RB        Nosferatu: The Wrath of Malachi              DM 0       62.500                                       
               Obscuritas                                   DM 0       20.000                                           Yes 5         
     RB        Observer                                     DM 1       10.000                                       
+    RB        Paratopic                                    DM 1       8.7500    0.00025                    Yes         Yes 3
     RB        Penumbra: Black Plague                       DM 0       7.5000                                       
     RB        Phantasmal                                   DM 0       7.5000                               Yes     
     RB        Prey 2006                                    DM 0       7.5000                WDM 26                     Yes 3               
@@ -289,7 +290,7 @@ Depth Buffer may hang for a sec if you move your view to fast. Hope ReShade 4.4 
 Once you install Reshade. Install this fix that allows for depth buffer access. This fix uses 3DMigoto to dissable a shader that was blocking acess to the depth buffer.
 http://www.mediafire.com/file/d5ep3qlsnbbbmvl/dotHack%20GU%20fix%20for%20Depth3D.zip
 
-{Alan Wake} - Any Reshade Version with Xenos_2.3.2 Injector
+{Alan Wake} - With Reshade versions up to 4.5.1 you would need the Xenos_2.3.2 Injector. ReShade 4.5.2 Work 
 Install game and before you launch it put -noblur in your set lunch options. -steam
 Set you settings in game and notice the locked MSAA.Just leave it at 2x, Save your settings and turn off the game.
 
@@ -697,6 +698,9 @@ r.SceneColorFringeQuality=0
 r.DepthOfFieldQuality=0
 r.MaxAnisotropy=16
 
+{Paratopic} - Reshade 4.5
+Need to select the right buffer from time to time and it seems to be a lower resolution. I suggest you play this game at 4k.
+
 {Phantasmal}
 A buggy Opengl game. But, hold down ctrl when starting the game and set your resolution. That or use "-show-screen-selector" in launch options. 
 Once in game Start it. 
@@ -1039,6 +1043,9 @@ Game Crashes if you leave r_drawvgui 0 when you die. Don't know how to fix this.
 Depth Buffer only in DX9 so launch it in Shadow Warrior XP and turn on FSAAX2 in game.
 
 Try useing TriDef Power3D in DX11 Mode.
+
+{Yume Nikki -Dream Diary-} - ReShade 4.4
+ReShade Has a hard time picking the best Depth Buffer......... Sometimes you can't get the best Depth Buffer.
 
 {Zombi} -Depth map Pops in and out-
 This Problem seems to happen when looking at one direction. Don't know why it happens. 
