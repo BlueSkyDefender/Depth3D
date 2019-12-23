@@ -43,8 +43,8 @@ Inner Shader Setting:
 =================================================================================================================================
 -=:[Settings have to be change and adjusted for diffrent Resolutions, screen size, and screen types]:=-
 
-                                                       [- - - - - - - - - - - - -  -=: Recommended Settings :=- - - - - - - - - - - - - -]
-[Read Below] [Game List]                               [Depth Map] [Adjustment] [Offset] [Weapon DM] [Depth Flip] [Auto Balance] [Auto D]
+                                                       [- - - - - - - - - - - -=: Recommended Settings :=- - - - - - - - - - - -]
+[Read Below] [Game List]                               [Depth Map] [Adjustment] [Offset] [Weapon DM] [Depth Flip] [Auto Balance]
     RB        35MM                                         DM 0       35.000                               Yes         Yes 2
     RB        .Hack//G.U.                                  DM 1       25.000                                             
               ABZU                                         DM 1       50.000                                                        
@@ -71,7 +71,7 @@ Inner Shader Setting:
     RB        BloodCM                                      DM 0       15.000                                                                          
     RB        Blood 2                                      DM 0       7.5000                WDM 34/35                  Yes 3         
     RB        BorderLands 2                                DM 0       20.000                WDM 2                      Yes 2                                
-              Call of Chthulhu                             DM 1       7.5000                                           Yes 3       ?0.1625?   
+              Call of Chthulhu                             DM 1       7.5000                                           Yes 3   
     RB        Call of Duty: Advance Warfare                DM 1       13.750                WDM 10                     Yes 2                                       
     RB        Call of Duty: Black Ops                      DM 0       12.500                WDM 7                      Yes 3               
     RB        Call of Duty: Black Ops 2                    DM 1       13.750                WDM 8                      Yes 2
@@ -114,12 +114,12 @@ Inner Shader Setting:
     RB        FarCry 3                                     DM 0       7.5000                                       
               Fez                                          DM 0       10.000    0.97500                    Yes     
               Firewatch                                    DM 0       5.0000                               Yes     
-    RB        Grim Dawn                                    DM 0       7.5000    0.00400                                              0.5750    
+    RB        Grim Dawn                                    DM 0       7.5000    0.00400                                        
     RB        GTA V                                        DM 1       9.3750                                           Yes 5                          
               Gone Home                                    DM 0       5.0000                               Yes     
     RB        Hard Reset                                   DM 0       8.1250                                      
               Hellblade: Senua's Sacrifice                 DM 1       22.500    0.00100                                Yes 5         
-              HellDiver                                    DM 0       50.000    0.00100                                              0.6000
+              HellDiver                                    DM 0       50.000    0.00100                                     
               Hellpoint                                    DM 1       5.0000                               Yes     
     RB        Hitman: Absolution                           DM 0       17.500                                     
     RB        Hitman 2016                                  DM ?         ?                                  ?       ?                                     
@@ -143,7 +143,7 @@ Inner Shader Setting:
     RB        Mafia III                                    DM 1       6.2500                                       
     RB        Mass Effect Andromeda                        DM 1       15.000                                       
     RB        Magicka 2                                    DM 0       13.750    0.01250                            
-    RB        MegaMan 2.5D Now in 3D                       DM 0       8.7500    1005.00                                No 0   
+    RB        MegaMan 2.5D Now in 3D                       DM 0       8.7500    1005.00                                No  0   
     RB        Metal Gear Rising                            DM 0       13.750                                       
     RB        Metro 2033 Redux                             DM 0       12.500                WDM 19                     Yes 2                        
     RB        Metro Last Light Redux                       DM 0       12.500                WDM 19                     Yes 2                              
@@ -177,7 +177,7 @@ Inner Shader Setting:
     RB        Rage64                                       DM 0       20.000                WDM 51                     Yes 2          
     RB        Redout                                       DM ?         ?                                          ?      
               Remembrance                                  DM 1       7.5000                               Yes     
-    RB        RESIDENT EVIL 2  BIOHAZARD RE2 Remake        DM 1       51.250    0.00015                                Yes 3        0.0800
+    RB        RESIDENT EVIL 2  BIOHAZARD RE2 Remake        DM 1       51.250    0.00015                                Yes 3
     RB        Resident Evil 7                              DM 1       22.500                                       
     RB        Return To Castle Wolfenstine                 DM 0       8.7500                WDM 29                     Yes 2                                
     RB        Requiem: Avenging Angel                      DM 0       50.000    0.80000                            
@@ -190,7 +190,7 @@ Inner Shader Setting:
     RB        S.T.A.L.K.E.R:CoP Complete Mod               DM 0       10.000                WDM 24                     Yes 4       
     RB        S.T.A.L.K.E.R:SoC Complete Mod               DM 0       10.000                WDM 24                     Yes 4       
     RB        Shadow of the Tomb Raider                    DM 1       17.500                                       
-    RB        Shadow Tactics: Blades of the Shogun         DM 0       5.5000    0.00100                    Yes                      0.2875    
+    RB        Shadow Tactics: Blades of the Shogun         DM 0       5.5000    0.00100                    Yes                 
     RB        Shadow Warrior Classic Source Port           DM 0       10.000    1.00000                            
               Shadow Warrior Classic Redux                 DM 0       8.7500    1.00000                            
               Shadow Warrior 2                             DM 1       10.000                                       
@@ -204,12 +204,14 @@ Inner Shader Setting:
     RB        StarWars Jedi Fallen Order                   DM 1       13.750
     RB        Stay Close                                   DM 1       10.000                                       
     RB        Strange Brigade                              DM 0       20.000    0.00050                                Yes 5 
+    RB        Strife: Veteran Edition                      DM 0       250.00                WDM 57                     No  0 
               Tales of Zestiria                            DM 0       7.5000                                       
     RB        The Forest                                   DM 1       7.5000                                           Yes 2                                      
               The Elder Scrolls V: SE                      DM 0       6.2500                WDM 5                      Yes 2          
     RB        The Evil Within                              DM 0       28.750                                       
               The Evil Within 2                            DM 0       ?                                            
     RB        The Legend of Korra                          DM 0       10.000                                       
+    RB        The Park                                     DM 1       12.500                                           Yes 1
     RB        The Surge                                    DM *       ?                                            ?     
     RB        The Vanishing of Ethan Carter Redux          DM 1       7.5000                                       
     RB        The Void                                     DM 0       7.5000                                       
@@ -235,7 +237,7 @@ Inner Shader Setting:
               Ziggurat                                     DM 0       7.5000                                       
               Zombie Army Trilogy                          DM 0       12.500                                       
                                 
-[RB][Emulator][Special Depth Map Game List]            [Depth Map] [Adjustment] [Offset] [Weapon DM] [Depth Flip] [Auto Balance] [Auto D]
+[RB][Emulator][Special Depth Map Game List]            [Depth Map] [Adjustment] [Offset] [Weapon DM] [Depth Flip] [Auto Balance]
        CEMU    Mariokart 8                                 ????        ???                               Yes      ?
        CEMU    Super Mario 3D World                        ????        ???                               Yes      ?
  RB    CEMU    The Legend of Zelda: Breath of the Wild     DM0         25       0.000                    Yes           Yes 3 
@@ -515,6 +517,26 @@ Divergence can be set higer then normal up to 75. I play with at 42.5. But, that
 
 {Hard Reset}
 Must Enable FSAA for depth buffer access.
+{Hedon} - ReShade None
+This game has build in 3D Options.
+
+GZDoom Does not draw Sprites in the Depth Buffer So you have to use in game 3D options.
+Adjust them in the Options. Then fine tune them with. 
+
+vr_mode "#"
+vr_swap false
+vr_weapon_height 0.0
+vr_weapondist 0.6
+vr_sprite_scale 0.4 //weapon size
+vr_view_yoffset 4.0
+
+Stereo Example & values to try.
+vr_ipd        "0.3" "0.25" "0.2" "0.15" "0.1"
+vr_screendist "1.5" "1.25" "1.0" "0.75" "0.5"
+
+I use IPD 0.1875 and SD 0.85 So....... Do what looks good for you.
+
+top formula is IPD * 5 = SD you can try  4.5 or 5.5 instead of 5.
 
 {HomeFront the Revolution} - Thank you zig11727
 Path to Install E:\Steam\SteamApps\common\Homefront_The_Revolution\Bin64
@@ -851,6 +873,11 @@ Install reshade in too Steam\steamapps\common\Stay Close\Migrate\Binaries\Win64
 {Strange Brigade} - Used ReShade 4.4.2 and 4.4.2+
 You Need to reload the shader in game to grab the Depth Buffer??? Ya I don't know why this happens. But, Once loaded it should work.
 
+{Strife: Veteran Edition} - ReShade 4.5.2
+Make sure you set Sprite Cliping to OFF.
+
+The Sky Renders strange Ignore it.
+
 If you can get Vulkan working the experinace in this game is much better.
 
 {S.T.A.L.K.E.R.: Games} -  I suggest windows 7 or Windows 10 Anniversary.
@@ -930,6 +957,11 @@ So if you want to play in 3D use CEMU 1.12.0d It's the latest one I know so far 
 Do Not Ask me for this version & Yes you should be able to finnish the game with this version of cemu.
 
 You will also need to use a resolution graphics pack form here. https://slashiee.github.io/cemu_graphic_packs/ (Older Version 2)
+
+{The Park} - ReShade 4.4.2
+This Has Some Depth Buffer issues in cutscenes. Also you need to find a way to disable the depth of field
+The good is that, Unreal 4 engine games do indeed have DepthOfField line in SystemSettings section of UDKSystemSettings.ini. That can 
+controls mainly depth of field effects. But, may not work you have to test this.
 
 {The Surge} - Thank you zig11727
 Install Directory \SteamLibrary\steamapps\common\The Surge\bin

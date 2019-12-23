@@ -674,6 +674,17 @@ static const int HMT = 0;                               //HUD Mode Trigger
 	#define DB_X 1
 	#define DB_Y 2
 	#define DB_W 47
+#elif (App == 0xB5789234) //The Park
+	#define DA_X 0.05625
+	#define DA_W 1
+	#define DA_Y 12.5
+	#define DB_Y 1
+	#define TW 1
+#elif (App == 0xB7C22840) //Strife
+	#define DA_X 0.1
+	#define DA_Y 250.0
+	#define DB_W 59
+	#define TW 1
 #else
 	#define NP 1 //No Profile
 #endif
