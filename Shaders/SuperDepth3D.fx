@@ -857,7 +857,7 @@ float3 Weapon_Profiles()
     case 60:
         return float3(0.350,9.0,1.8);        //WP 58 | Gold Source
     case 61:
-        return float3(0,0,0);                //WP 59 | Game
+        return float3(1.825,13.75,0);        //WP 59 | No Man Sky FPS Mode
     case 62:
         return float3(1.962,5.5,0);          //WP 60 | Dying Light
 	default:

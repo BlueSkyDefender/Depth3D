@@ -162,6 +162,7 @@ Inner Shader Setting:
               Never Alone (Kisima Ingitchuna)              DM 0       25.000    0.00500                            
     RB        No One Lives Forever                         DM 0       7.5000                WDM 55                     Yes 4
     RB        No One Lives Forever 2                       DM 0       7.5000                WDM 56                     No  0
+    RB        No Man Sky                                   DM 1       72.500                                           Yes 5 
     RB        Nosferatu: The Wrath of Malachi              DM 0       62.500                                       
               Obscuritas                                   DM 0       20.000                                           Yes 5         
     RB        Observer                                     DM 1       10.000                                       
@@ -675,6 +676,7 @@ Ignore the warnings click play.
 I was unable to get the newest version of ReShade to work with this title. A link for older versions of reshade at the end of this doc.
 
 Carefull try not to alt-tab game may hang.
+
 {No One Lives Forever and 2} - Reshade 4.4+
 For No One Lives Forever an DX7 game you will need to use DGVoodoo2 for it to work, With ReShade.
 
@@ -682,6 +684,13 @@ For No One Lives Forever 2 an DX8 game you will need to use DGVoodoo2 or DX8toDX
 
 Know Issues. With AMD Cards Main Menu Selections are unreadable in No One Lives Forever 2 with DGVoodoo2, use an Nv Card or the DX8toDX9 Converter.
 Know Issues. With AMD Cards in No One Lives Forever White modles and artifacts. I was told you can use DGVoodoo 55.4.1. Don't knowif it will help. You can also use a NvCard.
+
+{No Man Sky: Next} - ReShade 4.5.2 Vulkan
+You need to start the game with out ReShade and set the game to Borderless Window mode.
+You will also need to install this mode specifictly to remove CA.
+https://www.nexusmods.com/nomanssky/mods/619?tab=description
+
+After that start the game like normal and point reshade to SuperDepth3D and Overwatch.fxh location and set your settings.
 
 {Nosferatu: The Wrath of Malachi}
 You need DGVooDoo2

@@ -691,6 +691,16 @@ static const int HMT = 0;                               //HUD Mode Trigger
 	#define DA_Z 0.0003
 	#define DB_Y 3
 	#define DB_W 60
+#elif (App == 0xC2E621A5) //No Man Sky
+	#define DA_X 0.04375
+	#define DA_W 1
+	#define DA_Y 72.5
+	#define DB_Y 5
+    #define DB_Z 0.0
+    #define DE_X 1
+	#define DE_Y 0.375
+	#define DE_Z 0.4
+	#define TW 1
 #else
 	#define NP 1 //No Profile
 #endif
