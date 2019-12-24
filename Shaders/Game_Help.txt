@@ -116,7 +116,7 @@ Inner Shader Setting:
               Firewatch                                    DM 0       5.0000                               Yes     
     RB        Grim Dawn                                    DM 0       7.5000    0.00400                                        
     RB        GTA V                                        DM 1       9.3750                                           Yes 5                          
-              Gold Source                                  DM 0       21.250    0.000300                               Yes 3 
+    RB        Gold Source                                  DM 0       21.250    0.000300                               Yes 3 
               Gone Home                                    DM 0       5.0000                               Yes     
     RB        Hard Reset                                   DM 0       8.1250                                      
               Hellblade: Senua's Sacrifice                 DM 1       22.500    0.00100                                Yes 5         
@@ -506,6 +506,9 @@ Install reshade in to SteamLibrary\steamapps\common\Emily Wants To Play\Engine\B
 {FarCry 3}
 Ingame setting MSAA 2X should be on to enable Depth Map in DX11.
 
+{Gold Source: Games} - ReShade 4.5.2
+When you install the opengl32.dll right click it and set it to read only.
+
 {Grim Dawn}
 For this game I say you should use the FlashBack shader. Since it gives a better sence of Depth for this type of game. You also need to select the right Depth Buffer so that it does
 not go blank when you interact with people. This should be under the DX11 Tab in the newest ReShade. 
@@ -518,6 +521,7 @@ Divergence can be set higer then normal up to 75. I play with at 42.5. But, that
 
 {Hard Reset}
 Must Enable FSAA for depth buffer access.
+
 {Hedon} - ReShade None
 This game has build in 3D Options.
 
