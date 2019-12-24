@@ -116,6 +116,7 @@ Inner Shader Setting:
               Firewatch                                    DM 0       5.0000                               Yes     
     RB        Grim Dawn                                    DM 0       7.5000    0.00400                                        
     RB        GTA V                                        DM 1       9.3750                                           Yes 5                          
+              Gold Source                                  DM 0       21.250    0.000300                               Yes 3 
               Gone Home                                    DM 0       5.0000                               Yes     
     RB        Hard Reset                                   DM 0       8.1250                                      
               Hellblade: Senua's Sacrifice                 DM 1       22.500    0.00100                                Yes 5         

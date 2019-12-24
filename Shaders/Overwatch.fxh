@@ -685,6 +685,12 @@ static const int HMT = 0;                               //HUD Mode Trigger
 	#define DA_Y 250.0
 	#define DB_W 59
 	#define TW 1
+#elif (App == 0x21DC397E || App == 0x653AF1E1) //Gold Source
+	#define DA_X 0.045
+	#define DA_Y 21.25
+	#define DA_Z 0.0003
+	#define DB_Y 3
+	#define DB_W 60
 #else
 	#define NP 1 //No Profile
 #endif

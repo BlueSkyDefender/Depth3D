@@ -318,7 +318,7 @@ static const int2 Image_Position_Adjust = int2(DD_Z,DD_W);
 //Weapon Hand Adjust//
 uniform int WP <
 	ui_type = "combo";
-	ui_items = "Weapon Profile Off\0Custom WP\0WP 0\0WP 1\0WP 2\0WP 3\0WP 4\0WP 5\0WP 6\0WP 7\0WP 8\0WP 9\0WP 10\0WP 11\0WP 12\0WP 13\0WP 14\0WP 15\0WP 16\0WP 17\0WP 18\0WP 19\0WP 20\0WP 21\0WP 22\0WP 23\0WP 24\0WP 25\0WP 26\0WP 27\0WP 28\0WP 29\0WP 30\0WP 31\0WP 32\0WP 33\0WP 34\0WP 35\0WP 36\0WP 37\0WP 38\0WP 39\0WP 40\0WP 41\0WP 42\0WP 43\0WP 44\0WP 45\0WP 46\0WP 47\0WP 48\0WP 49\0WP 50\0WP 51\0WP 52\0WP 53\0WP 54\0WP 55\0WP 56\0WP 57\0WP 58\0WP 59\0";
+	ui_items = "Weapon Profile Off\0Custom WP\0WP 0\0WP 1\0WP 2\0WP 3\0WP 4\0WP 5\0WP 6\0WP 7\0WP 8\0WP 9\0WP 10\0WP 11\0WP 12\0WP 13\0WP 14\0WP 15\0WP 16\0WP 17\0WP 18\0WP 19\0WP 20\0WP 21\0WP 22\0WP 23\0WP 24\0WP 25\0WP 26\0WP 27\0WP 28\0WP 29\0WP 30\0WP 31\0WP 32\0WP 33\0WP 34\0WP 35\0WP 36\0WP 37\0WP 38\0WP 39\0WP 40\0WP 41\0WP 42\0WP 43\0WP 44\0WP 45\0WP 46\0WP 47\0WP 48\0WP 49\0WP 50\0WP 51\0WP 52\0WP 53\0WP 54\0WP 55\0WP 56\0WP 57\0WP 58\0WP 59\0WP 60\0";
 	ui_label = "·Weapon Profiles·";
 	ui_tooltip = "Pick Weapon Profile for your game or make your own.";
 	ui_category = "Weapon Hand Adjust";
@@ -654,9 +654,9 @@ float4 MouseCursor(float4 position : SV_Position, float2 texcoord : TEXCOORD) : 
 			float3(0,0,0) //Black
 		};
 		int CSTT = clamp(Cursor_SC.y,0,11);
-		Color.rgb = CCArray[CSTT];
+		Color.rgba = CCArray[CSTT];
 
-	return Cursor ? Color : Out;
+	return Cursor ? float4(Color.rgb,1.0) : Out;
 }
 //////////////////////////////////////////////////////////Depth Map Information/////////////////////////////////////////////////////////////////////
 float Depth(float2 texcoord)
@@ -821,7 +821,7 @@ float3 Weapon_Profiles()
     case 42:
         return float3(0,0,0);                //WP 40 | Serious Sam 4: Planet Badass
     case 43:
-        return float3(0,0,0);                //WP 41  | Game
+        return float3(0,0,0);                //WP 41 | Game
     case 44:
         return float3(0.277,20.0,8.8);       //WP 42 | TitanFall 2 #308AEBEA
     case 45:
@@ -837,7 +837,7 @@ float3 Weapon_Profiles()
     case 50:
         return float3(2.0,16.25,0.09);       //WP 48 | Immortal Redneck CP alt 1.9375 #2C742D7C
     case 51:
-        return float3(0,0,0);                //WP 49  | Game
+        return float3(0,0,0);                //WP 49 | Game
     case 52:
         return float3(0.489,68.75,1.02);     //WP 50 | NecroVisioN & NecroVisioN: Lost Company #663E66FE
     case 53:
@@ -853,11 +853,11 @@ float3 Weapon_Profiles()
     case 58:
         return float3(0.519,31.25,8.875);    //WP 56 | No One Lives Forever 2
     case 59:
-        return float3(0.5,8.0,0);            //WP 57  | Strife
+        return float3(0.5,8.0,0);            //WP 57 | Strife
     case 60:
-        return float3(0,0,0);                //WP 58  | Game
+        return float3(0.350,9.0,1.8);        //WP 58 | Gold Source
     case 61:
-        return float3(0,0,0);                //WP 58  | Game
+        return float3(0,0,0);                //WP 59 | Game
     case 62:
         return float3(1.962,5.5,0);          //WP 60 | Dying Light
 	default:
