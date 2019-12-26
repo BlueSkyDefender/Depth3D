@@ -51,6 +51,8 @@
 	static const float DD_X = 1,DD_Y = 1, DD_Z = 0.0, DD_W = 0.0;
 	// DE_X = [ZPD Boundary Type] DE_Y = [ZPD Boundary Scaling] DE_Z = [ZPD Boundary Fade Time] DE_W = [Weapon Near Depth]
 	static const float DE_X = 0,DE_Y = 0.5, DE_Z = 0.25, DE_W = 0.0;
+		// DF_X = [Weapon ZPD Boundary] DF_Y = [Null_A] DF_Z = [Null_B] DF_W = [Null_C]
+	static const float DF_X = 0.0,DF_Y = 0.0, DF_Z = 0.0, DF_W = 0.0;
 	//Triggers
 	static const int RE = 0, NC = 0, TW = 0, NP = 0, ID = 0, SP = 0, DC = 0, HM = 0;
 #endif
@@ -371,11 +373,11 @@ uniform int2 Eye_Fade_Reduction_n_Power <
 
 uniform float Weapon_ZPD_Boundary <
 	ui_type = "slider";
-	ui_min = 0; ui_max = 0.5;
+	ui_min = 0.0; ui_max = 0.5;
 	ui_label = " Weapon Screen Boundary Detection";
 	ui_tooltip = "This selection menu gives extra boundary conditions to WZPD.";
 	ui_category = "Weapon Hand Adjust";
-> = 0;
+> = DF_X;
 #if HUD_MODE || HM
 //Heads-Up Display
 uniform float2 HUD_Adjust <
@@ -486,6 +488,7 @@ uniform float Zoom <
 static const float2 Colors_K1_K2 = float2(DC_Y,DC_Z);
 static const float Zoom = DC_W;
 #endif
+
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 uniform bool Cancel_Depth < source = "key"; keycode = Cancel_Depth_Key; toggle = true; mode = "toggle";>;
 uniform bool Mask_Cycle < source = "key"; keycode = Mask_Cycle_Key; toggle = true; >;
@@ -775,11 +778,11 @@ float3 Weapon_Profiles()
     case 19:
         return float3(0.750,30.0,1.050);     //WP 17 | Quake 4 #ED7B83DE
     case 20:
-		return float3(0,0,0);                //WP 18 | Game
-	case 21:
-		return float3(0.450,12.0,23.75);     //WP 19 | Metro Redux Games #886386A
+        return float3(0,0,0);                //WP 18 | Game
+    case 21:
+        return float3(0.450,12.0,23.75);     //WP 19 | Metro Redux Games #886386A
     case 22:
-        return float3(0,0,0);                //WP 20  | Game
+        return float3(0.350,12.5,2.0);       //WP 20  | Soldier of Fortune
     case 23:
         return float3(0,0,0);                //WP 21  | Game
     case 24:
@@ -950,12 +953,19 @@ float AutoZPDRange(float ZPD, float2 texcoord )
 #endif
 float2 Conv(float D,float2 texcoord)
 {	float Z = ZPD, WZP = 0.5, ZP = 0.5, ALC = abs(Lum(texcoord).x), W_Convergence = WZPD_and_WND.x;
-
+    //Screen Space Detector.
 	if (Weapon_ZPD_Boundary > 0)
-	{   //only really only need to check one point just above the center bottom.
-		float WZPDB = 1 - WZPD_and_WND.x / tex2Dlod(SamplerDMN,float4(float2(0.5,0.9375),0,0)).x;
-		if (WZPDB < -0.1)
-			W_Convergence *= 0.5-Weapon_ZPD_Boundary;
+	{   float WArray[8] = { 0.5, 0.5625, 0.625, 0.6875, 0.75, 0.8125, 0.875, 0.9375};
+		float WZDPArray[8] = { 1.0, 0.5, 0.75, 0.5, 0.625, 0.5, 0.55, 0.5};//SoF ZPD Weapon Map		
+		[unroll] //only really only need to check one point just above the center bottom and to the right.
+		for( int i = 0 ; i < 8; i++ )
+		{   float WZPDB = 1 - WZPD_and_WND.x / tex2Dlod(SamplerDMN,float4(float2(WArray[i],0.9375),0,0)).z;
+			if(WP == 22)//SoF
+				WZPDB = 1 - (WZPD_and_WND.x * WZDPArray[i]) / tex2Dlod(SamplerDMN,float4(float2(WArray[i],0.9375),0,0)).z;
+
+			if (WZPDB < -0.1)
+				W_Convergence *= 1.0-abs(Weapon_ZPD_Boundary);
+		}
 	}
 
 	W_Convergence = 1 - W_Convergence / D;

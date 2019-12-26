@@ -47,7 +47,7 @@ static const float Offset_D = 0.0;                      //Offset
 static const int Depth_Linearization_D = 0;             //Linearization
 static const int Depth_Flip_D = 0;                      //Depth Flip
 static const int Auto_Balance_D = 0;                    //Auto Balance
-static const float Auto_Depth_D = 0.1;                  //Auto Depth Range //Under Review...
+static const float Auto_Depth_D = 0.1;                  //Auto Depth Range
 static const int Weapon_Hand_D = 0;                     //Weapon Profile
 static const float HUDX_D = 0.0;                        //Heads Up Display Cut Off Point
 static const float BD_K1_D = 0.0;                       //Barrel Distortion K1
@@ -61,6 +61,10 @@ static const int ZPD_Boundary_Type_D = 0;               //ZPD Boundary Type
 static const float ZPD_Boundary_Scaling_D = 0.5;        //ZPD Boundary Scaling
 static const float ZPD_Boundary_Fade_Time_D = 0.25;     //ZPD Boundary Fade Time
 static const float Weapon_Near_Depth_D = 0;             //Weapon Near Depth
+static const float ZPD_Weapon_Boundary_Adjust = 0;      //ZPD Weapon Boundary Adjust
+static const float NULL_A = 0;
+static const float NULL_B = 0;
+static const float NULL_C = 0;
 
 //Special Toggles Defaults
 static const int REF = 0;                               //Resident Evil Fix
@@ -291,12 +295,12 @@ static const int HMT = 0;                               //HUD Mode Trigger
 	#define DA_Y 10.0
 	#define DA_X 0.05
 	#define DA_Z 1.0
-	#define DB_Y 4
+	#define DB_Y 5
 #elif (App == 0x5AE8FA62 )	//Shadow Warrior Classic Redux
 	#define DA_Y 10.0
 	#define DA_X 0.05
 	#define DA_Z 1.0
-	#define DB_Y 4
+	#define DB_Y 5
 #elif (App == 0xFE54BF56 )	//No One Lives Forever and 2
 	#define DA_X 0.0375
 	#define TW 1
@@ -701,6 +705,23 @@ static const int HMT = 0;                               //HUD Mode Trigger
 	#define DE_Y 0.375
 	#define DE_Z 0.4
 	#define TW 1
+#elif (App == 0x1E9DCD00) //Witch it
+	#define DA_X 0.0475
+	#define DA_W 1
+	#define DA_Y 47.5
+	#define DB_Y 5
+    #define DE_W 0.325
+#elif (App == 0x6B58D180) //Outlaws
+	#define DA_X 0.14375
+	#define DA_Y 30
+	#define DB_Y 5
+	#define DB_Z 0.225
+#elif (App == 0x5AC0F7E3) //SoF
+	#define DA_X 0.04375
+	#define DA_Y 17.5
+	#define DB_Y 5
+	#define DB_W 22
+	#define DF_X 0.5
 #else
 	#define NP 1 //No Profile
 #endif
@@ -770,6 +791,19 @@ static const int HMT = 0;                               //HUD Mode Trigger
 #endif
 #ifndef DE_W
     #define DE_W Weapon_Near_Depth_D
+#endif
+// X = [ZPD Weapon Boundary] Y = [NULL_A] Z = [NULL_B] W = [NULL_C]
+#ifndef DF_X
+    #define DF_X ZPD_Weapon_Boundary_Adjust
+#endif
+#ifndef DF_Y
+    #define DF_Y NULL_A
+#endif
+#ifndef DF_Z
+    #define DF_Z NULL_B
+#endif
+#ifndef DF_W
+    #define DF_W NULL_C
 #endif
 
 //Special Toggles

@@ -166,6 +166,7 @@ Inner Shader Setting:
     RB        Nosferatu: The Wrath of Malachi              DM 0       62.500                                       
               Obscuritas                                   DM 0       20.000                                           Yes 5         
     RB        Observer                                     DM 1       10.000                                       
+    RB        Outlaws 1997                                 DM 0       30.000                                           Yes 5
     RB        Paratopic                                    DM 1       8.7500    0.00025                    Yes         Yes 3
     RB        Penumbra: Black Plague                       DM 0       7.5000                                       
     RB        Phantasmal                                   DM 0       7.5000                               Yes     
@@ -199,6 +200,7 @@ Inner Shader Setting:
               Silent Hill: Homecoming                      DM 0       12.500    0.11625                            
               Sleeping Dogs: DE                            DM 0       7.0000                                       
               Sniper Elite 4                               DM 0       25.000                                       
+    RB        Soldier of Fortune                           DM 0       17.5                  WDM 20                     Yes 5
               Soma                                         DM 0       10.000                WDM 36                     Yes 5        
               Sonic Adventure 2                            DM 0       10.000                                       
               Souls Games                                  DM 0       ?                                            
@@ -231,6 +233,7 @@ Inner Shader Setting:
     RB        Watch Dogs 2                                 DM 1       7.5000                                       
               We Where Here Too                            DM 1       42.500                                           Yes 1              
               What Remains of Edith Finch                  DM 1       52.500    0.000025                               Yes 2                         
+              Witch it                                     DM 1       47.500                                           Yes 5
               Witcher 3                                    DM 1       7.5000                                       
               Wolfenstein                                  DM 0       7.5000                WDM 30                     Yes 2          
     RB        Wolfenstein: The New Order                   DM 0       25.000    0.00125     WDM 31                     Yes 5              
@@ -419,7 +422,7 @@ You will have to click Launch Nightmares and click again a window before the gam
 AMD White Texture work around. Find detailhi.cfg in the Blood 2 folder and set "MipmapOffset" to "1.000000"
 You will lose a lot of texture detail. I do not recommend playing like this.
 
-{Call of Duty: Modern Warfare 2019} - ReShade 4.4.2
+{Call of Duty: Modern Warfare 2019} - ReShade 4.4.2 [Some people had some luck with ReShade 4.2.]
 First of all please set the game's "Shadow Map Resolution to [Normal <>]." Also Make sure you turn off DOF and Motion Blur.
 
 Next follow this yourtube Video to set ReShade Depth Buffer Settings.
@@ -734,6 +737,9 @@ r.SceneColorFringeQuality=0
 r.DepthOfFieldQuality=0
 r.MaxAnisotropy=16
 
+{Outlaws 1997} - ReShade 4.5.2 Vulkan
+Use NGlide in Vulkan mode.
+
 {Paratopic} - Reshade 4.5
 Need to select the right buffer from time to time and it seems to be a lower resolution. I suggest you play this game at 4k.
 
@@ -857,6 +863,14 @@ A note for HMD Users. You need to limit pop out to the edge of your screen.
 You Don't want a mini Lara Croft In your skull do you? 
 
 SLI scaling Is good in this game. Almost full scaling on both cards. If you want to brute force FPS.
+
+{Soldier of Fortune} - ReShade 4.5.2
+Download and use the SoF Plus patch. Then Delete QeffectsGL.dll and rename ReShade opengl32.dll to QeffectsGL.dll.
+Get it here https://sof1.megalag.org/sofplus/
+
+In game max out all the settings and set your resolution you need. Apply settings
+Then set Video Driver : Default OpenGL to QeffectsGL (QFX)
+Apply settings and you should be good to go.
 
 {Shadow Tactics: Blades of the Shogun}
 Only way I was able to get this game to run on GOG is to enable the GOG Overlay. If you don't ReShade will crash.
