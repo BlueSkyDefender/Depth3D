@@ -19,7 +19,7 @@ This is an echoing based shader to add a trail to your image as you increase the
 A modded port of Normal Filter Anti Aliasing. With an interesting use case. Use this to assist SMAA or FXAA to catch all of them jaggies without blurring the screen.
 
 **Blooming HDR**<br />
-A Basic High Bloom low Perf Fake HDR shader that allows for automatic functions to help setting it up in-game.
+A Basic High Bloom low Perf Fake HDR shader that allows for automatic functions to help setting it up in-game. WIP
 
 And many more in the works.
 
@@ -34,6 +34,12 @@ Fundly is coming soon....
 ### Highlighted Shaders Freestyle & Ansel
 **3DViewer**<br />
 This Shader allows for Depth Map Based 3D. With more user control to adjust the image too how they want. Compatible with 3DTV's 3DMonitors & VR HMDs. Made with Freestyle & Ansel in mind.
+
+**Enhance**<br />
+Info Pending
+
+**Flair**<br />
+Info Pending
 
 ### Game Compatibility
 **Game Compatibility Information**

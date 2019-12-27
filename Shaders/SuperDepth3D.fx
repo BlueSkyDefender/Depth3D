@@ -3,7 +3,7 @@
 //----------------////
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//* Depth Map Based 3D post-process shader v2.2.0
+//* Depth Map Based 3D post-process shader v2.2.1
 //* For Reshade 3.0+
 //* ---------------------------------
 //*
@@ -51,7 +51,7 @@
 	static const float DD_X = 1,DD_Y = 1, DD_Z = 0.0, DD_W = 0.0;
 	// DE_X = [ZPD Boundary Type] DE_Y = [ZPD Boundary Scaling] DE_Z = [ZPD Boundary Fade Time] DE_W = [Weapon Near Depth]
 	static const float DE_X = 0,DE_Y = 0.5, DE_Z = 0.25, DE_W = 0.0;
-		// DF_X = [Weapon ZPD Boundary] DF_Y = [Null_A] DF_Z = [Null_B] DF_W = [Null_C]
+	// DF_X = [Weapon ZPD Boundary] DF_Y = [Null_A] DF_Z = [Null_B] DF_W = [Null_C]
 	static const float DF_X = 0.0,DF_Y = 0.0, DF_Z = 0.0, DF_W = 0.0;
 	//Triggers
 	static const int RE = 0, NC = 0, TW = 0, NP = 0, ID = 0, SP = 0, DC = 0, HM = 0;
@@ -443,21 +443,21 @@ uniform bool Eye_Swap <
 //Cursor Adjustments
 uniform int Cursor_Type <
 	ui_type = "combo";
-	ui_items = "FPS\0ALL\0RTS\0";
-	ui_label = "·Cursor Selection·";
+	ui_items = "Off\0FPS\0ALL\0RTS\0";
+	ui_label = " Cursor Selection";
 	ui_tooltip = "Choose the cursor type you like to use.\n"
 							 "Default is Zero.";
 	ui_category = "Cursor Adjustments";
-> = 1;
+> = 0;
 
 uniform int2 Cursor_SC <
 	ui_type = "drag";
 	ui_min = 0; ui_max = 10;
 	ui_label = " Cursor Adjustments";
 	ui_tooltip = "This controlls the Size & Color.\n"
-							 "Defaults are ( X 1, Y 3 ).";
+							 "Defaults are ( X 1, Y 2 ).";
 	ui_category = "Cursor Adjustments";
-> = int2(1,3);
+> = int2(1,0);
 
 uniform bool Cursor_Lock <
 	ui_label = " Cursor Lock";
@@ -607,43 +607,63 @@ float3 PBD(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Targe
 return tex2D(BackBufferCLAMP,uv).rgb;
 }
 #endif
+///////////////////////////////////////////////////////////3D Image Adjustments/////////////////////////////////////////////////////////////////////
+float4 CSB(float2 texcoords)
+{
+	if(Custom_Sidebars == 0 && Depth_Map_View == 0)
+		return tex2Dlod(BackBufferMIRROR,float4(texcoords,0,0));
+	else if(Custom_Sidebars == 1 && Depth_Map_View == 0)
+		return tex2Dlod(BackBufferBORDER,float4(texcoords,0,0));
+	else if(Custom_Sidebars == 2 && Depth_Map_View == 0)
+		return tex2Dlod(BackBufferCLAMP,float4(texcoords,0,0));
+	else
+		return tex2D(SamplerzBufferN,texcoords).xxxx;
+}
 /////////////////////////////////////////////////////////////Cursor///////////////////////////////////////////////////////////////////////////
-float4 MouseCursor(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Target
-{   float4 Out = tex2D(BackBufferCLAMP, texcoord),Color;
-		float Cursor, Arrow_Size_A = 0.7, Arrow_Size_B = 1.3, Arrow_Size_C = 4.0;//scaling
-		float2 MousecoordsXY = Mousecoords * pix, center = texcoord, Screen_Ratio = float2(1.75,1.0), Size_Color = float2(1+Cursor_SC.x,Cursor_SC.y);
-		float THICC = (1.5+Size_Color.x) * 0.00025, Size_A = Size_Color.x * 0.005, Size_Cubed = Size_Color.x * 0.00125, Size_B = Size_Color.x * 0.00375;
+float4 MouseCursor(float2 texcoord )
+{   float4 Out = CSB(texcoord),Color;
+		float A = 0.959375, B = 1-A;
+		float Cursor;
+		if(Cursor_Type > 0)
+		{
+			float CCA = 0.005, CCB = 0.00025, CCC = 0.25, CCD = 0.00125, Arrow_Size_A = 0.7, Arrow_Size_B = 1.3, Arrow_Size_C = 4.0;//scaling
+			float2 MousecoordsXY = Mousecoords * pix, center = texcoord, Screen_Ratio = float2(1.75,1.0), Size_Color = float2(1+Cursor_SC.x,Cursor_SC.y);
+			float THICC = (1.5+Size_Color.x) * CCB, Size = Size_Color.x * CCA, Size_Cubed = (Size_Color.x*Size_Color.x) * CCD;
 
-		if (Cursor_Lock && !CLK)
+			if (Cursor_Lock && !CLK)
 			MousecoordsXY = float2(0.5,0.5);
-		if (Cursor_Type == 3)
+			if (Cursor_Type == 3)
 			Screen_Ratio = float2(1.6,1.0);
 
-		float S_dist_fromHorizontal = abs((center.x - (Size_B* Arrow_Size_B) / Screen_Ratio.x) - MousecoordsXY.x) * Screen_Ratio.x, dist_fromHorizontal = abs(center.x - MousecoordsXY.x) * Screen_Ratio.x;
-		float S_dist_fromVertical = abs((center.y - (Size_B* Arrow_Size_B)) - MousecoordsXY.y), dist_fromVertical = abs(center.y - MousecoordsXY.y);
-		//Cross Cursor
-		float B = min(max(THICC - dist_fromHorizontal,0),max(Size_A-dist_fromVertical,0)), A = min(max(THICC - dist_fromVertical,0),max(Size_A-dist_fromHorizontal,0));
-		float CC = A+B; //Cross Cursor
-		//Solid Square Cursor
-		float SSC = min(max(Size_Cubed - dist_fromHorizontal,0),max(Size_Cubed-dist_fromVertical,0));
-		if (Cursor_Type == 2)
-		{
-			dist_fromHorizontal = abs((center.x - Size_B / Screen_Ratio.x) - MousecoordsXY.x) * Screen_Ratio.x ;
-			dist_fromVertical = abs(center.y - Size_B - MousecoordsXY.y);
-		}
-		//Cursor
-		float C = all(min(max(Size_B - dist_fromHorizontal,0),max(Size_B-dist_fromVertical,0)));//removing the line below removes the square.
-			  C -= all(min(max(Size_B - dist_fromHorizontal * Arrow_Size_C,0),max(Size_B - dist_fromVertical * Arrow_Size_C,0)));//Need to add this to fix a - bool issue in openGL
-			  C -= all(min(max((Size_B * Arrow_Size_A) - S_dist_fromHorizontal,0),max((Size_B * Arrow_Size_A)-S_dist_fromVertical,0)));
-		// Cursor Array //
-		if(Cursor_Type == 0)
-			Cursor = CC;
-		else if (Cursor_Type == 1)
-			Cursor = SSC;
-		else if (Cursor_Type == 2)
-			Cursor = C;
-		// Cursor Color Array //
-		float3 CCArray[11] = {
+			float S_dist_fromHorizontal = abs((center.x - (Size* Arrow_Size_B) / Screen_Ratio.x) - MousecoordsXY.x) * Screen_Ratio.x, dist_fromHorizontal = abs(center.x - MousecoordsXY.x) * Screen_Ratio.x ;
+			float S_dist_fromVertical = abs((center.y - (Size* Arrow_Size_B)) - MousecoordsXY.y), dist_fromVertical = abs(center.y - MousecoordsXY.y);
+
+			//Cross Cursor
+			float B = min(max(THICC - dist_fromHorizontal,0),max(Size-dist_fromVertical,0)), A = min(max(THICC - dist_fromVertical,0),max(Size-dist_fromHorizontal,0));
+			float CC = A+B; //Cross Cursor
+
+			//Solid Square Cursor
+			float SSC = min(max(Size_Cubed - dist_fromHorizontal,0),max(Size_Cubed-dist_fromVertical,0)); //Solid Square Cursor
+
+			if (Cursor_Type == 3)
+			{
+				dist_fromHorizontal = abs((center.x - Size / Screen_Ratio.x) - MousecoordsXY.x) * Screen_Ratio.x ;
+				dist_fromVertical = abs(center.y - Size - MousecoordsXY.y);
+			}
+			//Cursor
+			float C = all(min(max(Size - dist_fromHorizontal,0),max(Size-dist_fromVertical,0)));//removing the line below removes the square.
+				  C -= all(min(max(Size - dist_fromHorizontal * Arrow_Size_C,0),max(Size - dist_fromVertical * Arrow_Size_C,0)));//Need to add this to fix a - bool issue in openGL
+				  C -= all(min(max((Size * Arrow_Size_A) - S_dist_fromHorizontal,0),max((Size * Arrow_Size_A)-S_dist_fromVertical,0)));
+			// Cursor Array //
+			if(Cursor_Type == 1)
+				Cursor = CC;
+			else if (Cursor_Type == 2)
+				Cursor = SSC;
+			else if (Cursor_Type == 3)
+				Cursor = C;
+
+			// Cursor Color Array //
+			float3 CCArray[11] = {
 			float3(1,1,1),//White
 			float3(0,0,1),//Blue
 			float3(0,1,0),//Green
@@ -655,11 +675,12 @@ float4 MouseCursor(float4 position : SV_Position, float2 texcoord : TEXCOORD) : 
 			float3(1,0.64,0),
 			float3(0.5,0,0.5),
 			float3(0,0,0) //Black
-		};
-		int CSTT = clamp(Cursor_SC.y,0,11);
-		Color.rgba = CCArray[CSTT];
+			};
+			int CSTT = clamp(Cursor_SC.y,0,10);
+			Color.rgb = CCArray[CSTT];
+		}
 
-	return Cursor ? float4(Color.rgb,1.0) : Out;
+return Cursor ? Color : Out;
 }
 //////////////////////////////////////////////////////////Depth Map Information/////////////////////////////////////////////////////////////////////
 float Depth(float2 texcoord)
@@ -673,10 +694,6 @@ float Depth(float2 texcoord)
 		texcoord.y =  1 - texcoord.y;
 	//Conversions to linear space.....
 	float zBuffer = tex2Dlod(DepthBuffer, float4(texcoord,0,0)).x, Far = 1., Near = 0.125/Depth_Map_Adjust; //Near & Far Adjustment
-
-	#if Invert_Depth || ID
-	zBuffer = 1 - zBuffer;
-	#endif
 
 	float2 C = float2( Far / Near, 1. - Far / Near ), Offsets = float2(1 + Offset,1 - Offset), Z = float2( zBuffer, 1-zBuffer );
 
@@ -883,10 +900,6 @@ float2 WeaponDepth(float2 texcoord)
 	//Conversions to linear space.....
 	float zBufferWH = tex2D(DepthBuffer, texcoord).x, Far = 1.0, Near = 0.125/WA_XYZ.y;  //Near & Far Adjustment
 
-	#if Invert_Depth || ID
-	zBufferWH = 1 - zBufferWH;
-	#endif
-
 	float2 Offsets = float2(1 + WA_XYZ.z,1 - WA_XYZ.z), Z = float2( zBufferWH, 1-zBufferWH );
 
 	if (WA_XYZ.z > 0)
@@ -956,7 +969,7 @@ float2 Conv(float D,float2 texcoord)
     //Screen Space Detector.
 	if (Weapon_ZPD_Boundary > 0)
 	{   float WArray[8] = { 0.5, 0.5625, 0.625, 0.6875, 0.75, 0.8125, 0.875, 0.9375};
-		float WZDPArray[8] = { 1.0, 0.5, 0.75, 0.5, 0.625, 0.5, 0.55, 0.5};//SoF ZPD Weapon Map		
+		float WZDPArray[8] = { 1.0, 0.5, 0.75, 0.5, 0.625, 0.5, 0.55, 0.5};//SoF ZPD Weapon Map
 		[unroll] //only really only need to check one point just above the center bottom and to the right.
 		for( int i = 0 ; i < 8; i++ )
 		{   float WZPDB = 1 - WZPD_and_WND.x / tex2Dlod(SamplerDMN,float4(float2(WArray[i],0.9375),0,0)).z;
@@ -1032,6 +1045,10 @@ float zBuffer(in float4 position : SV_Position, in float2 texcoord : TEXCOORD) :
 
 	if (Cancel_Depth)
 		DM = 0.0625;
+
+	#if Invert_Depth || ID
+		DM.y = 1 - DM.y;
+	#endif
 
 	return DM.y;
 }
@@ -1132,18 +1149,6 @@ float3 HUD(float3 HUD, float2 texcoord )
 	return HUD;
 }
 #endif
-///////////////////////////////////////////////////////////3D Image Adjustments/////////////////////////////////////////////////////////////////////
-float4 CSB(float2 texcoords)
-{
-	if(Custom_Sidebars == 0 && Depth_Map_View == 0)
-		return tex2Dlod(BackBufferMIRROR,float4(texcoords,0,0));
-	else if(Custom_Sidebars == 1 && Depth_Map_View == 0)
-		return tex2Dlod(BackBufferBORDER,float4(texcoords,0,0));
-	else if(Custom_Sidebars == 2 && Depth_Map_View == 0)
-		return tex2Dlod(BackBufferCLAMP,float4(texcoords,0,0));
-	else
-		return tex2D(SamplerzBufferN,texcoords).xxxx;
-}
 ///////////////////////////////////////////////////////////Stereo Calculation///////////////////////////////////////////////////////////////////////
 float3 PS_calcLR(float2 texcoord)
 {
@@ -1188,7 +1193,7 @@ float3 PS_calcLR(float2 texcoord)
 	else if( Eye_Fade_Reduction_n_Power.x == 2)
 			DLR = float2(FD,D);
 
-	float4 image = 1, accum, color, Left = CSB(Parallax(-DLR.x, TCL, AI)), Right = CSB(Parallax(DLR.y, TCR, -AI));
+	float4 image = 1, accum, color, Left = MouseCursor(Parallax(-DLR.x, TCL, AI)), Right = MouseCursor(Parallax(DLR.y, TCR, -AI));
 
 	#if HUD_MODE || HM
 	float HUD_Adjustment = ((0.5 - HUD_Adjust.y)*25.) * pix.x;
@@ -1543,15 +1548,6 @@ void PostProcessVS(in uint id : SV_VertexID, out float4 position : SV_Position, 
 	texcoord.x = (id == 2) ? 2.0 : 0.0;
 	texcoord.y = (id == 1) ? 2.0 : 0.0;
 	position = float4(texcoord * float2(2.0, -2.0) + float2(-1.0, 1.0), 0.0, 1.0);
-}
-//*Rendering passes*//
-technique Cross_Cursor
-{
-		pass Cursor
-	{
-		VertexShader = PostProcessVS;
-		PixelShader = MouseCursor;
-	}
 }
 
 technique SuperDepth3D
