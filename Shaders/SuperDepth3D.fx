@@ -1,9 +1,8 @@
 ////----------------//
 ///**SuperDepth3D**///
 //----------------////
-
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//* Depth Map Based 3D post-process shader v2.2.1
+//* Depth Map Based 3D post-process shader v2.2.2
 //* For Reshade 3.0+
 //* ---------------------------------
 //*
@@ -16,30 +15,23 @@
 //*
 //* LICENSE
 //* ============
-//* Overwatch & Code out side the work of people mention above is licenses under: Attribution-NoDerivatives 4.0 International
+//* Overwatch Interceptor & Code out side the work of people mention above is licenses under: Copyright (C) Depth3D - All Rights Reserved
 //*
-//* You are free to:
-//* Share - copy and redistribute the material in any medium or format
-//* for any purpose, even commercially.
-//* The licensor cannot revoke these freedoms as long as you follow the license terms.
-//* Under the following terms:
-//* Attribution - You must give appropriate credit, provide a link to the license, and indicate if changes were made.
-//* You may do so in any reasonable manner, but not in any way that suggests the licensor endorses you or your use.
+//* Unauthorized copying of this file, via any medium is strictly prohibited
+//* Proprietary and confidential.
 //*
-//* NoDerivatives - If you remix, transform, or build upon the material, you may not distribute the modified material.
-//*
-//* No additional restrictions - You may not apply legal terms or technological measures that legally restrict others from doing anything the license permits.
-//*
-//* https://creativecommons.org/licenses/by-nd/4.0/
+//* You are allowed to obviously download this and use this for your personal use.
+//* Just don't redistribute this file unless I authorize it.
 //*
 //* Have fun,
-//* Jose Negrete AKA BlueSkyDefender
+//* Written by Jose Negrete AKA BlueSkyDefender <UntouchableBlueSky@gmail.com>, December 2019
 //*
+//* Please feel free to contact me if you want to use this in your project.
 //* https://github.com/BlueSkyDefender/Depth3D
 //* http://reshade.me/forum/shader-presentation/2128-sidebyside-3d-depth-map-based-stereoscopic-shader
-//*
+//* https://discord.gg/Q2n97Uj
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-#if exists "Overwatch.fxh"                                           //Overwatch Intercepter//
+#if exists "Overwatch.fxh"                                           //Overwatch Interceptor//
 	#include "Overwatch.fxh"
 #else// DA_X = [ZPD] DA_Y = [Depth Adjust] DA_Z = [Offset] DA_W = [Depth Linearization]
 	static const float DA_X = 0.025, DA_Y = 7.5, DA_Z = 0.0, DA_W = 0.0;
@@ -229,6 +221,19 @@ uniform int Custom_Sidebars <
 	ui_tooltip = "Edges selection for your screen output.";
 	ui_category = "Occlusion Masking";
 > = 1;
+
+uniform float Depth_Edge_Mask <
+	#if Compatibility
+	ui_type = "drag";
+	#else
+	ui_type = "slider";
+	#endif
+	ui_min = 0.0; ui_max = 1.0;
+	ui_label = "Edge Mask";
+	ui_tooltip = "Use this to adjust for articafts.\n"
+				 "Default is Zero, Off";
+	ui_category = "Occlusion Masking";
+> = 0.0;
 #if !Legacy_Mode
 uniform bool Performance_Mode <
 	ui_label = " Performance Mode";
@@ -755,134 +760,132 @@ float Fade(float2 texcoord)
 	return PStoredfade + (Trigger_Fade - PStoredfade) * (1.0 - exp(-frametime/AA)); ///exp2 would be even slower
 }
 //////////////////////////////////////////////////////////Depth Map Alterations/////////////////////////////////////////////////////////////////////
-float3 Weapon_Profiles()
-{  [branch] switch(WP)
-	{
-    case 2:
+#define WP_Switch(x) else if(WP == x)
+float3 Weapon_Profiles()//Tried Switch But, can't compile in older versions of reshade.
+{   if(WP == 2)
         return float3(0.425,5.0,1.125); 	 //WP 0  | ES: Oblivion #C753DADB
-    case 3:
+    WP_Switch(3)
         return float3(0,0,0);                //WP 1  | Game
-    case 4:
+    WP_Switch(4)
         return float3(0.625,37.5,7.25);      //WP 2  | BorderLands 2 #7B81CCAB
-    case 5:
+    WP_Switch(5)
         return float3(0,0,0);                //WP 3  | Game
-    case 6:
+    WP_Switch(6)
         return float3(0.253,28.75,98.5);     //WP 4  | Fallout 4 #2D950D30
-    case 7:
+    WP_Switch(7)
         return float3(0.276,20.0,9.5625);    //WP 5  | Skyrim: SE #3950D04E
-    case 8:
+    WP_Switch(8)
         return float3(0.338,20.0,9.25);      //WP 6  | DOOM 2016 #142EDFD6
-    case 9:
+    WP_Switch(9)
         return float3(0.255,177.5,63.025);   //WP 7  | CoD:Black Ops #17232880 CoD:MW2 #9D77A7C4 CoD:MW3 #22EF526F
-    case 10:
+    WP_Switch(10)
         return float3(0.254,100.0,0.9843);   //WP 8  | CoD:Black Ops II #D691718C
-    case 11:
+    WP_Switch(11)
         return float3(0.254,203.125,0.98435);//WP 9  | CoD:Ghost #7448721B
-    case 12:
+    WP_Switch(12)
         return float3(0.254,203.125,0.98433);//WP 10 | CoD:AW #23AB8876 CoD:MW Re #BF4D4A4e
-    case 13:
+    WP_Switch(13)
         return float3(0.254,125.0,0.9843);   //WP 11 | CoD:IW #1544075
-    case 14:
+    WP_Switch(14)
         return float3(0.255,200.0,63.0);     //WP 12 | CoD:WaW #697CDA52
-    case 15:
+    WP_Switch(15)
         return float3(0.510,162.5,3.975);    //WP 13 | CoD #4383C12A CoD:UO #239E5522 CoD:2 #3591DE9C
-    case 16:
+    WP_Switch(16)
         return float3(0.254,23.75,0.98425);  //WP 14 | CoD: Black Ops IIII #73FA91DC
-    case 17:
+    WP_Switch(17)
         return float3(0.375,60.0,15.15625);  //WP 15 | Quake DarkPlaces #37BD797D
-    case 18:
+    WP_Switch(18)
         return float3(0.7,14.375,2.5);       //WP 16 | Quake 2 XP #34F4B6C
-    case 19:
+    WP_Switch(19)
         return float3(0.750,30.0,1.050);     //WP 17 | Quake 4 #ED7B83DE
-    case 20:
+    WP_Switch(20)
         return float3(0,0,0);                //WP 18 | Game
-    case 21:
+    WP_Switch(21)
         return float3(0.450,12.0,23.75);     //WP 19 | Metro Redux Games #886386A
-    case 22:
-        return float3(0.350,12.5,2.0);       //WP 20  | Soldier of Fortune
-    case 23:
-        return float3(0,0,0);                //WP 21  | Game
-    case 24:
-        return float3(0,0,0);                //WP 22  | Game
-    case 25:
+    WP_Switch(22)
+        return float3(0.350,12.5,2.0);       //WP 20 | Soldier of Fortune
+    WP_Switch(23)
+        return float3(0.286,1500.0,7);       //WP 21 | Deus Ex
+    WP_Switch(24)
+        return float3(0,0,0);                //WP 22 | Game
+    WP_Switch(25)
         return float3(0.625,350.0,0.785);    //WP 23 | Minecraft
-    case 26:
+    WP_Switch(26)
         return float3(0.255,6.375,53.75);    //WP 24 | S.T.A.L.K.E.R: Games #F5C7AA92 #493B5C71
-    case 27:
+    WP_Switch(27)
         return float3(0,0,0);                //WP 25 | Game
-    case 28:
+    WP_Switch(28)
         return float3(0.750,30.0,1.025);     //WP 26 | Prey 2006 #DE2F0F4D
-    case 29:
+    WP_Switch(29)
         return float3(0.2832,13.125,0.8725); //WP 27 | Prey 2017 High Settings and < #36976F6D
-    case 30:
+    WP_Switch(30)
         return float3(0.2832,13.75,0.915625);//WP 28 | Prey 2017 Very High #36976F6D
-    case 31:
+    WP_Switch(31)
         return float3(0.7,9.0,2.3625);       //WP 29 | Return to Castle Wolfenstine #BF757E3A
-    case 32:
+    WP_Switch(32)
         return float3(0.4894,62.50,0.98875); //WP 30 | Wolfenstein #30030941
-    case 33:
+    WP_Switch(33)
         return float3(1.0,93.75,0.81875);    //WP 31 | Wolfenstein: The New Order #C770832 / The Old Blood #3E42619F
-    case 34:
+    WP_Switch(34)
         return float3(0,0,0);                //WP 32 | Wolfenstein II: The New Colossus / Cyberpilot
-    case 35:
+    WP_Switch(35)
         return float3(0.278,37.50,9.1);      //WP 33 | Black Mesa #6FC1FF71
-    case 36:
+    WP_Switch(36)
         return float3(0.420,4.75,1.0);       //WP 34 | Blood 2 #6D3CD99E
-    case 37:
+    WP_Switch(37)
         return float3(0.500,4.75,0.75);      //WP 35 | Blood 2 Alt #6D3CD99E
-    case 38:
+    WP_Switch(38)
         return float3(0.785,21.25,0.3875);   //WP 36 | SOMA #F22A9C7D
-    case 39:
+    WP_Switch(39)
         return float3(0.444,20.0,1.1875);    //WP 37 | Cryostasis #6FB6410B
-    case 40:
+    WP_Switch(40)
         return float3(0.286,80.0,7.0);       //WP 38 | Unreal Gold with v227 #16B8D61A
-    case 41:
+    WP_Switch(41)
         return float3(0.280,15.5,9.1);       //WP 39 | Serious Sam Revolution #EB9EEB74/Serious Sam HD: The First Encounter /The Second Encounter /Serious Sam 2 #8238E9CA/ Serious Sam 3: BFE*
-    case 42:
+    WP_Switch(42)
         return float3(0,0,0);                //WP 40 | Serious Sam 4: Planet Badass
-    case 43:
+    WP_Switch(43)
         return float3(0,0,0);                //WP 41 | Game
-    case 44:
+    WP_Switch(44)
         return float3(0.277,20.0,8.8);       //WP 42 | TitanFall 2 #308AEBEA
-    case 45:
+    WP_Switch(45)
         return float3(0.7,16.250,0.300);     //WP 43 | Project Warlock #5FCFB1E5
-    case 46:
+    WP_Switch(46)
         return float3(0.625,9.0,2.375);      //WP 44 | Kingpin Life of Crime #7DCCBBBD
-    case 47:
+    WP_Switch(47)
         return float3(0.28,20.0,9.0);        //WP 45 | EuroTruckSim2 #9C5C946E
-    case 48:
+    WP_Switch(48)
         return float3(0.458,10.5,1.105);     //WP 46 | F.E.A.R #B302EC7 & F.E.A.R 2: Project Origin #91D9EBAF
-    case 49:
+    WP_Switch(49)
         return float3(1.5,37.5,0.99875);     //WP 47 | Condemned Criminal Origins
-    case 50:
+    WP_Switch(50)
         return float3(2.0,16.25,0.09);       //WP 48 | Immortal Redneck CP alt 1.9375 #2C742D7C
-    case 51:
-        return float3(0,0,0);                //WP 49 | Game
-    case 52:
+    WP_Switch(51)
+        return float3(0.485,62.5,0.9625);    //WP 49 | Dementium 2
+    WP_Switch(52)
         return float3(0.489,68.75,1.02);     //WP 50 | NecroVisioN & NecroVisioN: Lost Company #663E66FE
-    case 53:
+    WP_Switch(53)
         return float3(1.0,237.5,0.83625);    //WP 51 | Rage64 #AA6B948E
-    case 54:
+    WP_Switch(54)
         return float3(0,0,0);                //WP 52 | Rage 2
-    case 55:
+    WP_Switch(55)
         return float3(0.425,15.0,99.0);      //WP 53 | Bioshock Remastred #44BD41E1
-    case 56:
+    WP_Switch(56)
         return float3(0.425,21.25,99.5);     //WP 54 | Bioshock 2 Remastred #7CF5A01
-    case 57:
+    WP_Switch(57)
         return float3(0.425,5.25,1.0);       //WP 55 | No One Lives Forever
-    case 58:
+    WP_Switch(58)
         return float3(0.519,31.25,8.875);    //WP 56 | No One Lives Forever 2
-    case 59:
+    WP_Switch(59)
         return float3(0.5,8.0,0);            //WP 57 | Strife
-    case 60:
+    WP_Switch(60)
         return float3(0.350,9.0,1.8);        //WP 58 | Gold Source
-    case 61:
+    WP_Switch(61)
         return float3(1.825,13.75,0);        //WP 59 | No Man Sky FPS Mode
-    case 62:
+    WP_Switch(62)
         return float3(1.962,5.5,0);          //WP 60 | Dying Light
-	default:
+	else
     	return float3(Weapon_Adjust.x,Weapon_Adjust.y,Weapon_Adjust.z);
-	}
 }
 
 float2 WeaponDepth(float2 texcoord)
@@ -1052,6 +1055,26 @@ float zBuffer(in float4 position : SV_Position, in float2 texcoord : TEXCOORD) :
 
 	return DM.y;
 }
+//////////////////////////////////////////////////////////Depth Edge Trimming///////////////////////////////////////////////////////////////////////
+float GetDB(float2 texcoord)
+{
+	return tex2Dlod(SamplerzBufferN, float4(texcoord,0,0) ).x;
+}
+
+float DepthEdge(float2 texcoord)
+{   float2 SW = pix, n;// Find Edges
+	float t = GetDB( float2( texcoord.x , texcoord.y - SW.y ) ),
+		  d = GetDB( float2( texcoord.x , texcoord.y + SW.y ) ),
+		  l = GetDB( float2( texcoord.x - SW.x , texcoord.y ) ),
+		  r = GetDB( float2( texcoord.x + SW.x , texcoord.y ) );
+	n = float2(t - d,-(r - l));
+	// Lets make that mask from Edges
+	float Mask = length(n)*Depth_Edge_Mask;
+		  Mask = Mask > 0 ? 1-Mask : 1;
+		  Mask = saturate(lerp(Mask,1,-1));// Super Evil Mix.
+	// Final Depth
+return Depth_Edge_Mask == 0 ? GetDB( texcoord.xy ) : lerp(0,GetDB( texcoord.xy ),Mask);
+}
 //////////////////////////////////////////////////////////Parallax Generation///////////////////////////////////////////////////////////////////////
 float2 Parallax(float Diverge, float2 Coordinates, float IO) // Horizontal parallax offset & Hole filling effect
 {   float2 ParallaxCoord = Coordinates;
@@ -1063,7 +1086,7 @@ float2 Parallax(float Diverge, float2 Coordinates, float IO) // Horizontal paral
 	for ( int i = 0 ; i < 5; ++i )
 	{
 		N = S[i] * MS;
-		DepthLR = min(DepthLR, tex2Dlod(SamplerzBufferN,float4(ParallaxCoord.x + N, ParallaxCoord.y,0,0)).x );
+		DepthLR = min(DepthLR, DepthEdge(float2(ParallaxCoord.x + N, ParallaxCoord.y,0,0)).x );
 	}
 	//Reprojection Left and Right
 	ParallaxCoord = float2(Coordinates.x + MS * DepthLR, Coordinates.y);
@@ -1075,7 +1098,7 @@ float2 Parallax(float Diverge, float2 Coordinates, float IO) // Horizontal paral
 	// Offset per step progress & Limit
 	float LayerDepth = rcp(Steps), TP = 0.03;
 	//Offsets listed here Max Seperation is 3% - 8% of screen space with Depth Offsets & Netto layer offset change based on MS.
-	float deltaCoordinates = MS * LayerDepth, CurrentDepthMapValue = tex2Dlod(SamplerzBufferN,float4(ParallaxCoord,0,0)).x, CurrentLayerDepth = 0, DepthDifference;
+	float deltaCoordinates = MS * LayerDepth, CurrentDepthMapValue = DepthEdge(ParallaxCoord), CurrentLayerDepth = 0, DepthDifference;
 	float2 DB_Offset = float2(Diverge * TP, 0) * pix;
 
     if(View_Mode == 1)
@@ -1086,7 +1109,7 @@ float2 Parallax(float Diverge, float2 Coordinates, float IO) // Horizontal paral
 	{   // Shift coordinates horizontally in linear fasion
 	    ParallaxCoord.x -= deltaCoordinates;
 	    // Get depth value at current coordinates
-	    CurrentDepthMapValue = tex2Dlod(SamplerzBufferN,float4(ParallaxCoord - DB_Offset,0,0)).x;
+	    CurrentDepthMapValue = DepthEdge(float2(ParallaxCoord - DB_Offset));
 	    // Get depth of next layer
 	    CurrentLayerDepth += LayerDepth;
 		continue;
@@ -1100,14 +1123,14 @@ float2 Parallax(float Diverge, float2 Coordinates, float IO) // Horizontal paral
 			// Shift coordinates horizontally in linear fasion
 			ParallaxCoord.x -= deltaCoordinates;
 			// Get depth value at current coordinates
-			CurrentDepthMapValue = tex2Dlod(SamplerzBufferN,float4(ParallaxCoord - DB_Offset,0,0)).x;
+			CurrentDepthMapValue = DepthEdge(ParallaxCoord - DB_Offset);
 			// Get depth of next layer
 			CurrentLayerDepth += LayerDepth;
 	}
 	#endif
 	// Parallax Occlusion Mapping
 	float2 PrevParallaxCoord = float2(ParallaxCoord.x + deltaCoordinates, ParallaxCoord.y);
-	float beforeDepthValue = tex2Dlod(SamplerzBufferN,float4( ParallaxCoord ,0,0)).x, afterDepthValue = CurrentDepthMapValue - CurrentLayerDepth;
+	float beforeDepthValue = DepthEdge(ParallaxCoord ), afterDepthValue = CurrentDepthMapValue - CurrentLayerDepth;
 		beforeDepthValue += LayerDepth - CurrentLayerDepth;
 	// Interpolate coordinates
 	float weight = afterDepthValue / (afterDepthValue - beforeDepthValue);

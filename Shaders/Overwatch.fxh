@@ -1,7 +1,7 @@
 ////----------------------------------------//
 ///SuperDepth3D Overwatch Automation Shader///
 //----------------------------------------////
-
+// Version 1.0
 //---------------------------------------OVERWATCH---------------------------------------//
 // If you are reading this stop. Go away and never look back. From this point on if you  //
 // still think it's is worth looking at this..... Then no one can save you or your soul. //
@@ -9,34 +9,21 @@
 // Ya that's it. JK                                                                      //
 // The name comes from this.                                                             //
 // https://en.wikipedia.org/wiki/Overwatch_(military_tactic)                             //
-// Since this File looks ahead and sends information the Main shader to prepair it self. //
+// Since this File looks ahead and sends information the Main shader to prepare it self. //
 //---------------------------------------------------------------------------------------//
-//Special Thanks to CeeJay.dk for code simplification and guidance.                      //
-//You can contact him here https://github.com/CeeJayDK                                   //
+// Special Thanks to CeeJay.dk for code simplification and guidance.                     //
+// You can contact him here https://github.com/CeeJayDK                                  //
 //----------------------------------------LICENSE----------------------------------------//
 // ===================================================================================== //
-// Overwatch is licenses under: Attribution-NoDerivatives 4.0 International              //
+// Overwatch is licenses under: Copyright (C) Depth3D - All Rights Reserved              //
 //                                                                                       //
-// You are free to:                                                                      //
-// Share - copy and redistribute the material in any medium or format                    //
-// for any purpose, even commercially.                                                   //
-// The licensor cannot revoke these freedoms as long as you follow the license terms.    //
-// Under the following terms:                                                            //
-// Attribution:                                                                          //
-// You must give appropriate credit, provide a link to the license, and indicate if      //
-// changes were made.                                                                    //
-// You may do so in any reasonable manner, but not in any way that suggests the licensor //
-// endorses you or your use.                                                             //
+// Unauthorized copying of this file, via any medium is strictly prohibited              //
+// Proprietary and confidential.                                                         //
 //                                                                                       //
-// NoDerivatives:                                                                        //
-// If you remix, transform, or build upon the material, you may not distribute the       //
-// modified material.                                                                    //
+// You are allowed to obviously download this and use this for your personal use.        //
+// Just don't redistribute this file unless I authorize it.                              //
 //                                                                                       //
-// No additional restrictions:                                                           //
-// You may not apply legal terms or technological measures that legally restrict others  //
-// from doing anything the license permits.                                              //
-//                                                                                       //
-// https://creativecommons.org/licenses/by-nd/4.0/                                       //
+// Written by Jose Negrete <UntouchableBlueSky@gmail.com>, December 2019                 //
 // ===================================================================================== //
 //--------------------------------------Code Start---------------------------------------//
 
@@ -60,11 +47,11 @@ static const int HVP_Y_D = 0;                           //Vertical Position
 static const int ZPD_Boundary_Type_D = 0;               //ZPD Boundary Type
 static const float ZPD_Boundary_Scaling_D = 0.5;        //ZPD Boundary Scaling
 static const float ZPD_Boundary_Fade_Time_D = 0.25;     //ZPD Boundary Fade Time
-static const float Weapon_Near_Depth_D = 0;             //Weapon Near Depth
-static const float ZPD_Weapon_Boundary_Adjust = 0;      //ZPD Weapon Boundary Adjust
-static const float NULL_A = 0;
-static const float NULL_B = 0;
-static const float NULL_C = 0;
+static const float Weapon_Near_Depth_D = 0.0;             //Weapon Near Depth
+static const float ZPD_Weapon_Boundary_Adjust = 0.0;      //ZPD Weapon Boundary Adjust
+static const float NULL_A = 0.0;
+static const float NULL_B = 0.0;
+static const float NULL_C = 0.0;
 
 //Special Toggles Defaults
 static const int REF = 0;                               //Resident Evil Fix
@@ -213,7 +200,7 @@ static const int HMT = 0;                               //HUD Mode Trigger
 	#define DA_Y 13.75
 	#define DB_Y 3
 	#define DB_W 39
-#elif (App == 0x16B8D61A )	//Unreal Gold with v227
+#elif (App == 0x16B8D61A)	//Unreal Gold with v227
 	#define DA_Y 17.5
 	#define DB_Y 1
 	#define DB_W 40
@@ -722,6 +709,57 @@ static const int HMT = 0;                               //HUD Mode Trigger
 	#define DB_Y 5
 	#define DB_W 22
 	#define DF_X 0.5
+#elif (App == 0xEA8E05B6) //Only If
+	#define DA_X 0.100
+	#define DB_Y 1
+	#define DE_X 1
+#elif (App == 0xFDE0387 ) //Stranger Odd Worlds
+	#define DA_X 0.100
+	#define DA_Y 7.5
+	#define DB_X 1
+	#define DB_Y 1
+	#define DE_X 2
+	#define DC_X 0.5
+	#define HM 1
+#elif (App == 0x242D82C4 ) //Okami HD
+	#define DA_X 0.200
+	#define DA_W 1
+	#define DA_Z 0.001
+	#define DB_Y 1
+	#define DE_X 2
+    #define DE_Y 0.125
+    #define DE_Z 0.375
+	#define DC_X 0.5
+	#define HM 1
+#elif (App == 0x75B36B20 ) //Eldritch
+	#define DA_Y 125.0
+	#define DA_X 0.05
+	#define DB_Y 4
+	#define DE_X 1
+	#define DB_Z 0.05
+#elif (App == 0x97CBF34C ) //Dementium 2
+	#define DA_Y 18.75
+	#define DA_X 0.04125
+	#define DB_Y 5
+	#define DB_W 51
+	#define DB_X 1
+	#define TW 1
+#elif (App == 0x5925FCC8 ) //Dusk
+	#define DA_Y 25.0
+	#define DA_X 0.05
+	#define DB_Y 5
+	#define DA_W 1
+	#define DB_X 1
+	#define DE_X 3
+	#define DE_Z 0.375
+#elif (App == 0xDDA80A38 )	//Deus Ex DX9
+	#define DA_X 0.04375
+	#define DA_Y 20
+	#define DB_Y 3
+	#define DB_W 23
+	#define DC_X 0.534
+	#define HM 1
+	#define DF_X 0.025
 #else
 	#define NP 1 //No Profile
 #endif

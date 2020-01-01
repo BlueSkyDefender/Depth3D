@@ -63,6 +63,7 @@ Inner Shader Setting:
     RB        Batman Arkham Knight                         DM 0       22.500                                           Yes 4                                     
               Batman Arkham Origins                        DM 0       18.750                                           Yes 4                                        
               Batman: Arkham City                          DM 0       18.750                                           Yes 4                                         
+    RB        Dementium 2                                  DM 0       18.750                               Yes         Yes 5
               Beware                                       DM 1       62.500                               Yes               
               BladeStorm Nightmare                         DM ?         ?                                          ?
     RB        Bioshock Remastred                           DM 0       7.5000    0.00600     WDM 53                     Yes 3   
@@ -215,6 +216,7 @@ Inner Shader Setting:
     RB        The Evil Within                              DM 0       28.750                                       
               The Evil Within 2                            DM 0       ?                                            
     RB        The Legend of Korra                          DM 0       10.000                                       
+              The Old City Leviathan                       DM 0       100.00    0.001000                               Yes 5
     RB        The Park                                     DM 1       12.500                                           Yes 1
     RB        The Surge                                    DM *       ?                                            ?     
     RB        The Vanishing of Ethan Carter Redux          DM 1       7.5000                                       
@@ -341,6 +343,9 @@ In older versions of Reshade you may incounter Depth Flickering.
 
 {Batman Arkham Knight} -Use ReShade ???
 Depth Buffer seems to drop off in some locations. As reported. This is a ReShade issue not a SuperDepth3D Issue.
+
+{Dementium 2} - Used ReShade 4.4.0
+You have to mess with the Depth Buffer options to get it to work. Not perfect. Kind of strange not all reshades work.
 
 {BoarderLands 2}
 Use a Controller for menus navigation or keyboard. 
