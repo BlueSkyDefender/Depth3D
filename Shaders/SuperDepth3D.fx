@@ -806,7 +806,7 @@ float3 Weapon_Profiles()//Tried Switch But, can't compile in some older versions
     else if(WP == 23)
         return float3(0.286,1500.0,7.0);     //WP 21 | Deus Ex rev
     else if(WP == 24)
-        return float3(0.35,50.0,7);          //WP 21 | Deus Ex
+        return float3(35.0,250.0,0);         //WP 21 | Deus Ex
     else if(WP == 25)
         return float3(0.625,350.0,0.785);    //WP 23 | Minecraft
     else if(WP == 26)
