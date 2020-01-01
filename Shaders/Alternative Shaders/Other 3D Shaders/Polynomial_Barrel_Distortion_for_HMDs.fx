@@ -391,7 +391,7 @@ sampler BackBuffer
 	};
 	
 ////////////////////////////////////////////////////Texture_Intercepter/////////////////////////////////////////////////////
-float4 Grid_Lines(in float2 texcoords : TEXCOORD0)
+float4 Grid_Lines(float2 texcoords)
 { 
     float4 Out;
     float2 UV = (texcoords - 0.5f) * 25.0f, xy = abs(frac(UV)); // adjust coords to visualize in a grid
@@ -401,7 +401,7 @@ float4 Grid_Lines(in float2 texcoords : TEXCOORD0)
 	return Out;	
 }	
 
-float4 Left(in float2 texcoord : TEXCOORD0)
+float4 Left(float2 texcoord)
 {
 	float HV;
 	if(Stereoscopic_Mode_Convert == 0 || Stereoscopic_Mode_Convert == 2) //SbS
@@ -422,7 +422,7 @@ float4 Left(in float2 texcoord : TEXCOORD0)
 }
 
 
-float4 Right(in float2 texcoord : TEXCOORD0)
+float4 Right(float2 texcoord)
 {
 	float HV;
 	if(Stereoscopic_Mode_Convert == 0 || Stereoscopic_Mode_Convert == 2) //SbS
@@ -442,7 +442,7 @@ float4 Right(in float2 texcoord : TEXCOORD0)
 		return Grid_Lines(texcoord);
 }
 ////////////////////////////////////////////////////Texture_Modifier/////////////////////////////////////////////////////
-float4 Cross_Marker(in float2 texcoord : TEXCOORD0) //Cross Marker inside Left Image
+float4 Cross_Marker(float2 texcoord) //Cross Marker inside Left Image
 {  
 	// Compute anti-aliased world-space grid lines
 	float2 grid = abs(frac(texcoord - 0.25) - 0.25) / fwidth(texcoord);
@@ -451,7 +451,7 @@ float4 Cross_Marker(in float2 texcoord : TEXCOORD0) //Cross Marker inside Left I
 	return float4(GLS.xxx, 1.0);	
 }
 
-float4 vignetteL(in float2 texcoord : TEXCOORD0)
+float4 vignetteL(float2 texcoord)
 {  
 	float4 base;
 	//Texture Rotation//
@@ -497,7 +497,7 @@ float4 vignetteL(in float2 texcoord : TEXCOORD0)
 	return base;    
 }
 
-float4 vignetteR(in float2 texcoord : TEXCOORD0)
+float4 vignetteR(float2 texcoord)
 {  
 float4 base;
 	
@@ -637,10 +637,7 @@ float4 PDR(float2 texcoord)		//Texture = texCR Right
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-#define lambda 3.0f
-#define epsilon 0.1f
-
-float4 PBD(float2 texcoord : TEXCOORD)
+float4 PBD(float2 texcoord)
 {	
 	float4 Out;
 	//For Cell HMDs
@@ -667,9 +664,8 @@ float LI(in float3 value)
 	return dot(value.rgb,float3(0.333, 0.333, 0.333)); 
 }
 
-float4 NFAA(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Target
-{
-	float4 NFAA;	
+void NFAA(float4 position : SV_Position, float2 texcoord : TEXCOORD, out float4 NFAA : SV_Target0)
+{	
 	float3 t, l, r, d;
     float2 UV = texcoord.xy, SW = pix, n;	
 	float nl, Mask; //Useing the AA samples for sharpen.
@@ -717,17 +713,17 @@ float4 NFAA(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Targ
 	}
 	
     float greyscale = dot(NFAA.rgb, float3(0.2125, 0.7154, 0.0721)); 
-    NFAA.rgb = lerp(greyscale, NFAA.rgb, NFAA.a * (Saturation + 1.0));       
+    NFAA.rgb = lerp(greyscale, NFAA.rgb, Saturation + 1.0);       
 
-  return float4(NFAA.rgb,Mask);
+  NFAA = float4(NFAA.rgb,Mask);
 }
 
-float4 USM(float4 position : SV_Position, float2 texcoord : TEXCOORD0) : SV_Target
+void USM(float4 position : SV_Position, float2 texcoord : TEXCOORD,out float4 result : SV_Target0)
 {
 	float SP = Sharpen_Power;	
 		
 	float2 tex_offset = pix; // Gets texel offset
-	float4 result =  tex2D(BackBuffer, float2(texcoord));
+	result =  tex2D(BackBuffer, float2(texcoord));
 	if(Sharpen_Power > 0)
 	{				   
 		   result += tex2D(BackBuffer, float2(texcoord + float2( 1, 0) * tex_offset));
@@ -744,8 +740,6 @@ float4 USM(float4 position : SV_Position, float2 texcoord : TEXCOORD0) : SV_Targ
 		result = tex2D(BackBuffer, texcoord) + ( tex2D(BackBuffer, texcoord) - result ) * SP;
 		result = lerp(tex2D(BackBuffer, texcoord) ,result,tex2D(BackBuffer, texcoord).w);
 	}
-	
-	return result;
 }
 
 
