@@ -752,7 +752,7 @@ static const int HMT = 0;                               //HUD Mode Trigger
 	#define DB_X 1
 	#define DE_X 3
 	#define DE_Z 0.375
-#elif (App == 0xDDA80A38 )	//Deus Ex DX9
+#elif (App == 0xDDA80A38 )	//Deus Ex Rev DX9
 	#define DA_X 0.04375
 	#define DA_Y 20
 	#define DB_Y 3
@@ -760,6 +760,14 @@ static const int HMT = 0;                               //HUD Mode Trigger
 	#define DC_X 0.534
 	#define HM 1
 	#define DF_X 0.025
+#elif (App == 0x1714C977)	//Deus Ex DX9
+	#define DA_X 0.05
+	#define DA_Y 125.0
+	#define DB_Y 3
+	#define DB_W 24
+	#define DC_X 1.0
+	#define HM 1
+	#define DF_X 0.05
 #else
 	#define NP 1 //No Profile
 #endif

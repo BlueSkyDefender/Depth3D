@@ -760,132 +760,131 @@ float Fade(float2 texcoord)
 	return PStoredfade + (Trigger_Fade - PStoredfade) * (1.0 - exp(-frametime/AA)); ///exp2 would be even slower
 }
 //////////////////////////////////////////////////////////Depth Map Alterations/////////////////////////////////////////////////////////////////////
-#define WP_Switch(x) else if(WP == x)
-float3 Weapon_Profiles()//Tried Switch But, can't compile in older versions of reshade.
+float3 Weapon_Profiles()//Tried Switch But, can't compile in some older versions of ReShade.
 {   if(WP == 2)
         return float3(0.425,5.0,1.125); 	 //WP 0  | ES: Oblivion #C753DADB
-    WP_Switch(3)
+    else if(WP == 3)
         return float3(0,0,0);                //WP 1  | Game
-    WP_Switch(4)
+    else if(WP == 4)
         return float3(0.625,37.5,7.25);      //WP 2  | BorderLands 2 #7B81CCAB
-    WP_Switch(5)
+    else if(WP == 5)
         return float3(0,0,0);                //WP 3  | Game
-    WP_Switch(6)
+    else if(WP == 6)
         return float3(0.253,28.75,98.5);     //WP 4  | Fallout 4 #2D950D30
-    WP_Switch(7)
+    else if(WP == 7)
         return float3(0.276,20.0,9.5625);    //WP 5  | Skyrim: SE #3950D04E
-    WP_Switch(8)
+    else if(WP == 8)
         return float3(0.338,20.0,9.25);      //WP 6  | DOOM 2016 #142EDFD6
-    WP_Switch(9)
+    else if(WP == 9)
         return float3(0.255,177.5,63.025);   //WP 7  | CoD:Black Ops #17232880 CoD:MW2 #9D77A7C4 CoD:MW3 #22EF526F
-    WP_Switch(10)
+    else if(WP == 10)
         return float3(0.254,100.0,0.9843);   //WP 8  | CoD:Black Ops II #D691718C
-    WP_Switch(11)
+    else if(WP == 11)
         return float3(0.254,203.125,0.98435);//WP 9  | CoD:Ghost #7448721B
-    WP_Switch(12)
+    else if(WP == 12)
         return float3(0.254,203.125,0.98433);//WP 10 | CoD:AW #23AB8876 CoD:MW Re #BF4D4A4e
-    WP_Switch(13)
+    else if(WP == 13)
         return float3(0.254,125.0,0.9843);   //WP 11 | CoD:IW #1544075
-    WP_Switch(14)
+    else if(WP == 14)
         return float3(0.255,200.0,63.0);     //WP 12 | CoD:WaW #697CDA52
-    WP_Switch(15)
+    else if(WP == 15)
         return float3(0.510,162.5,3.975);    //WP 13 | CoD #4383C12A CoD:UO #239E5522 CoD:2 #3591DE9C
-    WP_Switch(16)
+    else if(WP == 16)
         return float3(0.254,23.75,0.98425);  //WP 14 | CoD: Black Ops IIII #73FA91DC
-    WP_Switch(17)
+    else if(WP == 17)
         return float3(0.375,60.0,15.15625);  //WP 15 | Quake DarkPlaces #37BD797D
-    WP_Switch(18)
+    else if(WP == 18)
         return float3(0.7,14.375,2.5);       //WP 16 | Quake 2 XP #34F4B6C
-    WP_Switch(19)
+    else if(WP == 19)
         return float3(0.750,30.0,1.050);     //WP 17 | Quake 4 #ED7B83DE
-    WP_Switch(20)
+    else if(WP == 20)
         return float3(0,0,0);                //WP 18 | Game
-    WP_Switch(21)
+    else if(WP == 21)
         return float3(0.450,12.0,23.75);     //WP 19 | Metro Redux Games #886386A
-    WP_Switch(22)
+    else if(WP == 22)
         return float3(0.350,12.5,2.0);       //WP 20 | Soldier of Fortune
-    WP_Switch(23)
-        return float3(0.286,1500.0,7);       //WP 21 | Deus Ex
-    WP_Switch(24)
-        return float3(0,0,0);                //WP 22 | Game
-    WP_Switch(25)
+    else if(WP == 23)
+        return float3(0.286,1500.0,7.0);     //WP 21 | Deus Ex rev
+    else if(WP == 24)
+        return float3(0.35,50.0,7);          //WP 21 | Deus Ex
+    else if(WP == 25)
         return float3(0.625,350.0,0.785);    //WP 23 | Minecraft
-    WP_Switch(26)
+    else if(WP == 26)
         return float3(0.255,6.375,53.75);    //WP 24 | S.T.A.L.K.E.R: Games #F5C7AA92 #493B5C71
-    WP_Switch(27)
+    else if(WP == 27)
         return float3(0,0,0);                //WP 25 | Game
-    WP_Switch(28)
+    else if(WP == 28)
         return float3(0.750,30.0,1.025);     //WP 26 | Prey 2006 #DE2F0F4D
-    WP_Switch(29)
+    else if(WP == 29)
         return float3(0.2832,13.125,0.8725); //WP 27 | Prey 2017 High Settings and < #36976F6D
-    WP_Switch(30)
+    else if(WP == 30)
         return float3(0.2832,13.75,0.915625);//WP 28 | Prey 2017 Very High #36976F6D
-    WP_Switch(31)
+    else if(WP == 31)
         return float3(0.7,9.0,2.3625);       //WP 29 | Return to Castle Wolfenstine #BF757E3A
-    WP_Switch(32)
+    else if(WP == 32)
         return float3(0.4894,62.50,0.98875); //WP 30 | Wolfenstein #30030941
-    WP_Switch(33)
+    else if(WP == 33)
         return float3(1.0,93.75,0.81875);    //WP 31 | Wolfenstein: The New Order #C770832 / The Old Blood #3E42619F
-    WP_Switch(34)
+    else if(WP == 34)
         return float3(0,0,0);                //WP 32 | Wolfenstein II: The New Colossus / Cyberpilot
-    WP_Switch(35)
+    else if(WP == 35)
         return float3(0.278,37.50,9.1);      //WP 33 | Black Mesa #6FC1FF71
-    WP_Switch(36)
+    else if(WP == 36)
         return float3(0.420,4.75,1.0);       //WP 34 | Blood 2 #6D3CD99E
-    WP_Switch(37)
+    else if(WP == 37)
         return float3(0.500,4.75,0.75);      //WP 35 | Blood 2 Alt #6D3CD99E
-    WP_Switch(38)
+    else if(WP == 38)
         return float3(0.785,21.25,0.3875);   //WP 36 | SOMA #F22A9C7D
-    WP_Switch(39)
+    else if(WP == 39)
         return float3(0.444,20.0,1.1875);    //WP 37 | Cryostasis #6FB6410B
-    WP_Switch(40)
+    else if(WP == 40)
         return float3(0.286,80.0,7.0);       //WP 38 | Unreal Gold with v227 #16B8D61A
-    WP_Switch(41)
+    else if(WP == 41)
         return float3(0.280,15.5,9.1);       //WP 39 | Serious Sam Revolution #EB9EEB74/Serious Sam HD: The First Encounter /The Second Encounter /Serious Sam 2 #8238E9CA/ Serious Sam 3: BFE*
-    WP_Switch(42)
+    else if(WP == 42)
         return float3(0,0,0);                //WP 40 | Serious Sam 4: Planet Badass
-    WP_Switch(43)
+    else if(WP == 43)
         return float3(0,0,0);                //WP 41 | Game
-    WP_Switch(44)
+    else if(WP == 44)
         return float3(0.277,20.0,8.8);       //WP 42 | TitanFall 2 #308AEBEA
-    WP_Switch(45)
+    else if(WP == 45)
         return float3(0.7,16.250,0.300);     //WP 43 | Project Warlock #5FCFB1E5
-    WP_Switch(46)
+    else if(WP == 46)
         return float3(0.625,9.0,2.375);      //WP 44 | Kingpin Life of Crime #7DCCBBBD
-    WP_Switch(47)
+    else if(WP == 47)
         return float3(0.28,20.0,9.0);        //WP 45 | EuroTruckSim2 #9C5C946E
-    WP_Switch(48)
+    else if(WP == 48)
         return float3(0.458,10.5,1.105);     //WP 46 | F.E.A.R #B302EC7 & F.E.A.R 2: Project Origin #91D9EBAF
-    WP_Switch(49)
+    else if(WP == 49)
         return float3(1.5,37.5,0.99875);     //WP 47 | Condemned Criminal Origins
-    WP_Switch(50)
+    else if(WP == 50)
         return float3(2.0,16.25,0.09);       //WP 48 | Immortal Redneck CP alt 1.9375 #2C742D7C
-    WP_Switch(51)
+    else if(WP == 51)
         return float3(0.485,62.5,0.9625);    //WP 49 | Dementium 2
-    WP_Switch(52)
+    else if(WP == 52)
         return float3(0.489,68.75,1.02);     //WP 50 | NecroVisioN & NecroVisioN: Lost Company #663E66FE
-    WP_Switch(53)
+    else if(WP == 53)
         return float3(1.0,237.5,0.83625);    //WP 51 | Rage64 #AA6B948E
-    WP_Switch(54)
+    else if(WP == 54)
         return float3(0,0,0);                //WP 52 | Rage 2
-    WP_Switch(55)
+    else if(WP == 55)
         return float3(0.425,15.0,99.0);      //WP 53 | Bioshock Remastred #44BD41E1
-    WP_Switch(56)
+    else if(WP == 56)
         return float3(0.425,21.25,99.5);     //WP 54 | Bioshock 2 Remastred #7CF5A01
-    WP_Switch(57)
+    else if(WP == 57)
         return float3(0.425,5.25,1.0);       //WP 55 | No One Lives Forever
-    WP_Switch(58)
+    else if(WP == 58)
         return float3(0.519,31.25,8.875);    //WP 56 | No One Lives Forever 2
-    WP_Switch(59)
+    else if(WP == 59)
         return float3(0.5,8.0,0);            //WP 57 | Strife
-    WP_Switch(60)
+    else if(WP == 60)
         return float3(0.350,9.0,1.8);        //WP 58 | Gold Source
-    WP_Switch(61)
+    else if(WP == 61)
         return float3(1.825,13.75,0);        //WP 59 | No Man Sky FPS Mode
-    WP_Switch(62)
+    else if(WP == 62)
         return float3(1.962,5.5,0);          //WP 60 | Dying Light
-	else
-    	return float3(Weapon_Adjust.x,Weapon_Adjust.y,Weapon_Adjust.z);
+    else
+        return float3(Weapon_Adjust.x,Weapon_Adjust.y,Weapon_Adjust.z);
 }
 
 float2 WeaponDepth(float2 texcoord)
