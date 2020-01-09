@@ -14,7 +14,7 @@
  //* Have fun,																																										*//
  //* Jose Negrete AKA BlueSkyDefender																																				*//
  //*																																												*//
- //* http://reshade.me/forum/shader-presentation/2128-sidebyside-3d-depth-map-based-stereoscopic-shader																				*//	
+ //* http://reshade.me/forum/shader-presentation/2128-sidebyside-3d-depth-map-based-stereoscopic-shader																				*//
  //* ---------------------------------																																				*//
  //* Also thank you Zapal for your help with fixing a few things in this shader. 																									*//
  //* https://reshade.me/forum/shader-presentation/2128-3d-depth-map-based-stereoscopic-shader?start=900#21236																		*//
@@ -41,7 +41,7 @@ uniform int Interpupillary_Distance <
 	#endif
 	ui_min = -100; ui_max = 100;
 	ui_label = "Interpupillary Distance";
-	ui_tooltip = "Determines the distance between your eyes.\n" 
+	ui_tooltip = "Determines the distance between your eyes.\n"
 				 "In Monoscopic mode it's x offset calibration.\n"
 				 "Default is 0.";
 	ui_category = "Eye Focus Adjustment";
@@ -49,7 +49,7 @@ uniform int Interpupillary_Distance <
 
 uniform bool LD_IPD <
 	ui_label = "Lens Dependent IPD";
-	ui_tooltip = "Set Interpupillary Distance by Lens Postion instead of screen space postion.\n" 
+	ui_tooltip = "Set Interpupillary Distance by Lens Postion instead of screen space postion.\n"
 				 "This is for HMD that can't move the internal Displays with the Lenses.";
 	ui_category = "Eye Focus Adjustment";
 > = false;
@@ -103,7 +103,7 @@ uniform float2 Zoom_Aspect_Ratio <
 	#endif
 	ui_min = 0.5; ui_max = 2;
 	ui_label = "Lens Zoom & Aspect Ratio";
-	ui_tooltip = "Lens Zoom amd Aspect Ratio.\n" 
+	ui_tooltip = "Lens Zoom and Aspect Ratio.\n" 
 				 "Default is 1.0.";
 	ui_category = "Image Adjustment";
 > = float2(1.0,1.0);
@@ -116,7 +116,7 @@ uniform float Field_of_View <
 	#endif
 	ui_min = 0.0; ui_max = 0.250;
 	ui_label = "Field of View";
-	ui_tooltip = "Lets you adjust the FoV of the Image.\n" 
+	ui_tooltip = "Lets you adjust the FoV of the Image.\n"
 				 "Default is 0.0.";
 	ui_category = "Image Adjustment";
 > = 0;
@@ -271,7 +271,7 @@ float4x4 Done;
 		IVRPLR = float2(0,0);       //Independent Vertical Repositioning. Left & Right.
 		IHRPLR = float2(0,0);       //Independent Horizontal Repositioning. Left & Right.
 	}
-	
+
 	//Make your own Profile here.
 	if (HMD_Profiles == 2)
 	{
@@ -308,7 +308,7 @@ float4x4 Done;
 	{
 		Done = float4x4(float4(IPD,PC2.x,PC2.y,PC2.z),float4(PC1.x,PC1.y,PC1.z,FOV),float4(Z,AR,D.x,D.y),float4(IVRPLR.x,IVRPLR.y,IHRPLR.x,IHRPLR.y));
 	}
-	
+
 return Done;
 }
 
@@ -374,7 +374,7 @@ float2 IHRePosLR()
 #define pix float2(BUFFER_RCP_WIDTH, BUFFER_RCP_HEIGHT)
 #define TextureSize float2(BUFFER_WIDTH, BUFFER_HEIGHT)
 
-float fmod(float a, float b) 
+float fmod(float a, float b)
 {
 	float c = frac(abs(a / b)) * abs(b);
 	return a < 0 ? -c : c;
@@ -382,24 +382,24 @@ float fmod(float a, float b)
 
 texture BackBufferTex : COLOR;
 
-sampler BackBuffer 
-	{ 
+sampler BackBuffer
+	{
 		Texture = BackBufferTex;
 		AddressU = BORDER;
 		AddressV = BORDER;
 		AddressW = BORDER;
 	};
-	
+
 ////////////////////////////////////////////////////Texture_Intercepter/////////////////////////////////////////////////////
 float4 Grid_Lines(float2 texcoords)
-{ 
+{
     float4 Out;
     float2 UV = (texcoords - 0.5f) * 25.0f, xy = abs(frac(UV)); // adjust coords to visualize in a grid
     // Draw a black and white grid.
     Out = (xy.x > 0.9 || xy.y > 0.9) ? 1 : 0;
 
-	return Out;	
-}	
+	return Out;
+}
 
 float4 Left(float2 texcoord)
 {
@@ -408,15 +408,15 @@ float4 Left(float2 texcoord)
 	{
 		texcoord = float2(texcoord.x*0.5f,texcoord.y);
 		HV = texcoord.x;
-	}	
+	}
 	else if(Stereoscopic_Mode_Convert == 1 || Stereoscopic_Mode_Convert == 3) //TnB
-	{	
+	{
 		texcoord = float2(texcoord.x,texcoord.y*0.5f);
 		HV = texcoord.y;
 	}
-		
+
 	if (!Distortion_Aliment_Grid)
-		return HV > 0.5f ? 0 : tex2D(BackBuffer,texcoord);	
+		return HV > 0.5f ? 0 : tex2D(BackBuffer,texcoord);
 	else
 		return Grid_Lines(texcoord);
 }
@@ -427,39 +427,39 @@ float4 Right(float2 texcoord)
 	float HV;
 	if(Stereoscopic_Mode_Convert == 0 || Stereoscopic_Mode_Convert == 2) //SbS
 	{
-		texcoord = float2(texcoord.x*0.5f+0.5f,texcoord.y);	
+		texcoord = float2(texcoord.x*0.5f+0.5f,texcoord.y);
 		HV = texcoord.x;
 	}
 	else if(Stereoscopic_Mode_Convert == 1 || Stereoscopic_Mode_Convert == 3) //TnB
-	{	
+	{
 		texcoord = float2(texcoord.x,texcoord.y*0.5f+0.5f);
 		HV = texcoord.y;
 	}
-		
+
 	if (!Distortion_Aliment_Grid)
-		return HV > 0.5f ? tex2D(BackBuffer,texcoord) : 0;	
+		return HV > 0.5f ? tex2D(BackBuffer,texcoord) : 0;
 	else
 		return Grid_Lines(texcoord);
 }
 ////////////////////////////////////////////////////Texture_Modifier/////////////////////////////////////////////////////
 float4 Cross_Marker(float2 texcoord) //Cross Marker inside Left Image
-{  
+{
 	// Compute anti-aliased world-space grid lines
 	float2 grid = abs(frac(texcoord - 0.25) - 0.25) / fwidth(texcoord);
 	float lines = min(grid.x, grid.y) * 0.5;
-	float GLS = 1.0 - min(lines, 1.0);		
-	return float4(GLS.xxx, 1.0);	
+	float GLS = 1.0 - min(lines, 1.0);
+	return float4(GLS.xxx, 1.0);
 }
 
 float4 vignetteL(float2 texcoord)
-{  
+{
 	float4 base;
 	//Texture Rotation//
 	//Converts the specified value from radians to degrees.
 	float LD = radians(DEGREES().x);
 	//Texture Position
 	texcoord.y += IVRePosLR().x * pix.y;//Independent Vertical Repostion Left.
-	texcoord.x += IHRePosLR().x * pix.x;//Independent Horizontal Repostion Left.		
+	texcoord.x += IHRePosLR().x * pix.x;//Independent Horizontal Repostion Left.
 	//Left
 	float2 L_PivotPoint = float2(0.5,0.5);
     float2 L_Rotationtexcoord = texcoord;
@@ -470,37 +470,37 @@ float4 vignetteL(float2 texcoord)
 	//Texture Zoom & Aspect Ratio//
 	float X = Z_A().x;
 	float Y = Z_A().y * Z_A().x * 2;
-	float midW = (X - 1)*(BUFFER_WIDTH*0.5)*pix.x;	
-	float midH = (Y - 1)*(BUFFER_HEIGHT*0.5)*pix.y;	
-				
-	texcoord = float2((L_Rotationtexcoord.x*X)-midW,(L_Rotationtexcoord.y*Y)-midH);	
+	float midW = (X - 1)*(BUFFER_WIDTH*0.5)*pix.x;
+	float midH = (Y - 1)*(BUFFER_HEIGHT*0.5)*pix.y;
+
+	texcoord = float2((L_Rotationtexcoord.x*X)-midW,(L_Rotationtexcoord.y*Y)-midH);
 	//Field of View
-	float F = -F_o_V() + 1,HA = (F - 1)*(BUFFER_WIDTH*0.5)*pix.x;	
-	
-	texcoord.x = (texcoord.x*F)-HA;	
+	float F = -F_o_V() + 1,HA = (F - 1)*(BUFFER_WIDTH*0.5)*pix.x;
+
+	texcoord.x = (texcoord.x*F)-HA;
 	//Normal HMDs IPD
-	float IPDtexL = texcoord.x;	
+	float IPDtexL = texcoord.x;
 	if (!LD_IPD) // https://developers.google.com/vr/jump/rendering-ods-content.pdf Page 10
 		IPDtexL -= (IPDS()) * pix.x;// Left IPD
 	//Texture Adjustment End//
 
 	base = Left(float2(IPDtexL,texcoord.y));
-	   	
+
 	if( Image_Aliment_Marker )
 	base = Cross_Marker(texcoord) ? float4(1.0,1.0,0.0,1) : base; //Yellow
-	
+
 	texcoord = -texcoord * texcoord + texcoord;
-	
+
 	if( Vignette > 0)
 	base.rgb *= saturate(texcoord.x * texcoord.y * pow(12.5f-Vignette,3));
-		
-	return base;    
+
+	return base;
 }
 
 float4 vignetteR(float2 texcoord)
-{  
+{
 float4 base;
-	
+
 	//Texture Rotation//
 	//Converts the specified value from radians to degrees.
 	float RD = radians(DEGREES().y), IVRR = IVRePosLR().y * pix.y, IHRR = IHRePosLR().y * pix.x;
@@ -510,7 +510,7 @@ float4 base;
 		IHRR = IHRePosLR().x * pix.x;
 		RD = radians(DEGREES().x);
 	}
-	//Texture Position	
+	//Texture Position
 	texcoord.y += IVRR;//Independent Vertical Repostion Right.
 	texcoord.x += IHRR;//Independent Horizontal Repostion Right.
 	//Right
@@ -523,31 +523,31 @@ float4 base;
 	//Texture Zoom & Aspect Ratio//
 	float X = Z_A().x;
 	float Y = Z_A().y * Z_A().x * 2;
-	float midW = (X - 1)*(BUFFER_WIDTH*0.5)*pix.x;	
-	float midH = (Y - 1)*(BUFFER_HEIGHT*0.5)*pix.y;	
-				
+	float midW = (X - 1)*(BUFFER_WIDTH*0.5)*pix.x;
+	float midH = (Y - 1)*(BUFFER_HEIGHT*0.5)*pix.y;
+
 	texcoord = float2((R_Rotationtexcoord.x*X)-midW,(R_Rotationtexcoord.y*Y)-midH);
 	//Field of View
-	float F = -F_o_V() + 1,HA = (F - 1)*(BUFFER_WIDTH*0.5)*pix.x;	
-	
+	float F = -F_o_V() + 1,HA = (F - 1)*(BUFFER_WIDTH*0.5)*pix.x;
+
 	texcoord.x = (texcoord.x*F)-HA;
 	//Normal HMDs IPD
-	float IPDtexR = texcoord.x;	
+	float IPDtexR = texcoord.x;
 	if (!LD_IPD) // https://developers.google.com/vr/jump/rendering-ods-content.pdf Page 10
 		IPDtexR += (IPDS()) * pix.x;// Left IPD
 	//Texture Adjustment End//
-	
+
 	base = Right(float2(IPDtexR,texcoord.y));
-	
+
 	if( Image_Aliment_Marker )
 	base = Cross_Marker(texcoord) ? float4(1.0,1.0,0.0,1) : base; //Yellow
-	
+
 	texcoord = -texcoord * texcoord + texcoord;
-	
+
 	if( Vignette > 0)
 	base.rgb *= saturate(texcoord.x * texcoord.y * pow(12.5f-Vignette,3));
 
-	return base;    
+	return base;
 }
 
 ////////////////////////////////////////////////////Polynomial_Distortion/////////////////////////////////////////////////////
@@ -562,14 +562,14 @@ float2 D(float2 p, float k1, float k2) //Polynomial Lens Distortion Left & Right
 	float newRadius = (1.0 + k1 * r2 + k2 * r4);
 	p.x = p.x * newRadius;
 	p.y = p.y * newRadius;
-	float p1, p2;	
+	float p1, p2;
 	//p.x = p.x * newRadius + 2.0*p1*p.x*p.y + p2*(r2 + 2.0*p.x*p.x);
-    //p.y = p.y * newRadius + 2.0*p2*p.x*p.y + p1*(r2 + 2.0*p.y*p.y);	
+    //p.y = p.y * newRadius + 2.0*p2*p.x*p.y + p1*(r2 + 2.0*p.y*p.y);
 return p;
 }
 
 float4 PDL(float2 texcoord)		//Texture = texCL Left
-{	
+{
 	float4 color;
 	float2 uv_red, uv_green, uv_blue, sectorOrigin;
 	float4 color_red, color_green, color_blue;
@@ -577,11 +577,11 @@ float4 PDL(float2 texcoord)		//Texture = texCL Left
 	float K2_Red = P_C_B().x, K2_Green = P_C_B().y, K2_Blue = P_C_B().z;
 	// Radial distort around center
 	sectorOrigin = 0.5f;
-	
+
 	uv_red = D(texcoord.xy-sectorOrigin,K1_Red,K2_Red) + sectorOrigin;
 	uv_green = D(texcoord.xy-sectorOrigin,K1_Green,K2_Green) + sectorOrigin;
 	uv_blue = D(texcoord.xy-sectorOrigin,K1_Blue,K2_Blue) + sectorOrigin;
-	
+
 	color_red = vignetteL(uv_red).r;
 	color_green = vignetteL(uv_green).g;
 	color_blue = vignetteL(uv_blue).b;
@@ -594,15 +594,15 @@ float4 PDL(float2 texcoord)		//Texture = texCL Left
 	{
 		color = float4(0,0,0,1);
 	}
-		
+
 	if( Lens_Aliment_Marker )
 	color = Cross_Marker(texcoord) ? float4(0.0,1.0,0.0,1) : color; //Green
-	
-	return color;	
+
+	return color;
 }
-	
+
 float4 PDR(float2 texcoord)		//Texture = texCR Right
-{		
+{
 	float4 color;
 	float2 uv_red, uv_green, uv_blue, sectorOrigin;
 	float4 color_red, color_green, color_blue;
@@ -611,7 +611,7 @@ float4 PDR(float2 texcoord)		//Texture = texCR Right
 
 	// Radial distort around center
 	sectorOrigin = 0.5f;
-	
+
 	uv_red = D(texcoord.xy-sectorOrigin,K1_Red,K2_Red) + sectorOrigin;
 	uv_green = D(texcoord.xy-sectorOrigin,K1_Green,K2_Green) + sectorOrigin;
 	uv_blue = D(texcoord.xy-sectorOrigin,K1_Blue,K2_Blue) + sectorOrigin;
@@ -628,63 +628,63 @@ float4 PDR(float2 texcoord)		//Texture = texCR Right
 	{
 		color = float4(0,0,0,1);
 	}
-	
+
 	if( Lens_Aliment_Marker )
 	color = Cross_Marker(texcoord) ? float4(0.0,1.0,0.0,1) : color; //Green
-	
+
 	return color;
-		
+
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 float4 PBD(float2 texcoord)
-{	
+{
 	float4 Out;
 	//For Cell HMDs
 	float IPDtexL = texcoord.x, IPDtexR = texcoord.x;
- 
+
 	if (LD_IPD) // https://developers.google.com/vr/jump/rendering-ods-content.pdf Page 10
 	{
 		IPDtexL -= (IPDS() * 0.5) * pix.x;// Left IPD
 		IPDtexR += (IPDS() * 0.5) * pix.x;// Right IPD
 	}
-		
+
 	if( Stereoscopic_Mode_Convert == 0 || Stereoscopic_Mode_Convert == 1|| Stereoscopic_Mode_Convert == 5)
 		Out = texcoord.x < 0.5 ? PDL(float2(IPDtexL*2,texcoord.y)) : PDR(float2(IPDtexR*2-1,texcoord.y));
 	else if (Stereoscopic_Mode_Convert == 2 || Stereoscopic_Mode_Convert == 3 )
 		Out = texcoord.y < 0.5 ? PDL(float2(IPDtexL,texcoord.y*2)) : PDR(float2(IPDtexR,texcoord.y*2-1));
 	else if (Stereoscopic_Mode_Convert == 4 )
 		Out = PDL(float2(IPDtexL ,texcoord.y));
-		
+
 	return Out;
 }
 
 float LI(in float3 value)
-{	
-	return dot(value.rgb,float3(0.333, 0.333, 0.333)); 
+{
+	return dot(value.rgb,float3(0.333, 0.333, 0.333));
 }
 
 void NFAA(float4 position : SV_Position, float2 texcoord : TEXCOORD, out float4 NFAA : SV_Target0)
-{	
+{
 	float3 t, l, r, d;
-    float2 UV = texcoord.xy, SW = pix, n;	
+    float2 UV = texcoord.xy, SW = pix, n;
 	float nl, Mask; //Useing the AA samples for sharpen.
 	t = tex2D( BackBuffer, float2( UV.x , UV.y - SW.y ) ).rgb;
 	l = tex2D( BackBuffer, float2( UV.x - SW.x , UV.y ) ).rgb;
 	r = tex2D( BackBuffer, float2( UV.x + SW.x , UV.y ) ).rgb;
 	d = tex2D( BackBuffer, float2( UV.x , UV.y + SW.y ) ).rgb;
 	n = float2(LI(t) - LI(d), LI(r) - LI(l));
-	
+
 	nl = length(n);
 	Mask = nl * 0.5f;
-	
+
 	if (Mask > 0.025f)
 	Mask = 1-Mask;
 	else
 	Mask = 1;
-	
+
 	Mask = saturate(lerp(Mask,1,-6.25f));
-	
+
 	 if (NFAA_TOGGLE)
 	 {
 		if (nl < (1.0 / 16))
@@ -694,49 +694,49 @@ void NFAA(float4 position : SV_Position, float2 texcoord : TEXCOORD, out float4 
 		else
 		{
 		n *= pix / (nl * 0.5f);
-	 
+
 		float4   o = tex2D( BackBuffer, UV ),
 				t0 = tex2D( BackBuffer, UV + n * 0.5f) * 0.9f,
 				t1 = tex2D( BackBuffer, UV - n * 0.5f) * 0.9f,
 				t2 = tex2D( BackBuffer, UV + n) * 0.75f,
 				t3 = tex2D( BackBuffer, UV - n) * 0.75f;
-	 
+
 			NFAA = (o + t0 + t1 + t2 + t3) / 4.3f;
 		}
-			
+
 	NFAA = lerp(NFAA,tex2D( BackBuffer,UV), Mask );
-		
+
 	}
 	else
 	{
 		NFAA = tex2D( BackBuffer,UV);
 	}
-	
-    float greyscale = dot(NFAA.rgb, float3(0.2125, 0.7154, 0.0721)); 
-    NFAA.rgb = lerp(greyscale, NFAA.rgb, Saturation + 1.0);       
+
+    float greyscale = dot(NFAA.rgb, float3(0.2125, 0.7154, 0.0721));
+    NFAA.rgb = lerp(greyscale, NFAA.rgb, Saturation + 1.0);
 
   NFAA = float4(NFAA.rgb,Mask);
 }
 
 void USM(float4 position : SV_Position, float2 texcoord : TEXCOORD,out float4 result : SV_Target0)
 {
-	float SP = Sharpen_Power;	
-		
+	float SP = Sharpen_Power;
+
 	float2 tex_offset = pix; // Gets texel offset
 	result =  tex2D(BackBuffer, float2(texcoord));
 	if(Sharpen_Power > 0)
-	{				   
+	{
 		   result += tex2D(BackBuffer, float2(texcoord + float2( 1, 0) * tex_offset));
 		   result += tex2D(BackBuffer, float2(texcoord + float2(-1, 0) * tex_offset));
 		   result += tex2D(BackBuffer, float2(texcoord + float2( 0, 1) * tex_offset));
 		   result += tex2D(BackBuffer, float2(texcoord + float2( 0,-1) * tex_offset));
-		   tex_offset *= 0.75;		   
+		   tex_offset *= 0.75;
 		   result += tex2D(BackBuffer, float2(texcoord + float2( 1, 1) * tex_offset));
 		   result += tex2D(BackBuffer, float2(texcoord + float2(-1,-1) * tex_offset));
 		   result += tex2D(BackBuffer, float2(texcoord + float2( 1,-1) * tex_offset));
 		   result += tex2D(BackBuffer, float2(texcoord + float2(-1, 1) * tex_offset));
    		result /= 9;
-   		
+
 		result = tex2D(BackBuffer, texcoord) + ( tex2D(BackBuffer, texcoord) - result ) * SP;
 		result = lerp(tex2D(BackBuffer, texcoord) ,result,tex2D(BackBuffer, texcoord).w);
 	}
@@ -748,9 +748,9 @@ uniform float timer < source = "timer"; >;
 
 float4 Out(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Target
 {
-	float PosX = 0.5*BUFFER_WIDTH*pix.x,PosY = 0.5*BUFFER_HEIGHT*pix.y;	
+	float PosX = 0.5*BUFFER_WIDTH*pix.x,PosY = 0.5*BUFFER_HEIGHT*pix.y;
 	float4 Color = PBD(texcoord),Done,Website,D,E,P,T,H,Three,DD,Dot,I,N,F,O;
-	
+
 	if(timer <= 10000)
 	{
 	//DEPTH
@@ -759,14 +759,14 @@ float4 Out(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Targe
 	float4 OneD = all( abs(float2( texcoord.x -PosXD, texcoord.y-PosY)) < float2(0.0025,0.009));
 	float4 TwoD = all( abs(float2( texcoord.x -PosXD-offsetD, texcoord.y-PosY)) < float2(0.0025,0.007));
 	D = OneD-TwoD;
-	
+
 	//E
 	float PosXE = -0.028+PosX, offsetE = 0.0005;
 	float4 OneE = all( abs(float2( texcoord.x -PosXE, texcoord.y-PosY)) < float2(0.003,0.009));
 	float4 TwoE = all( abs(float2( texcoord.x -PosXE-offsetE, texcoord.y-PosY)) < float2(0.0025,0.007));
 	float4 ThreeE = all( abs(float2( texcoord.x -PosXE, texcoord.y-PosY)) < float2(0.003,0.001));
 	E = (OneE-TwoE)+ThreeE;
-	
+
 	//P
 	float PosXP = -0.0215+PosX, PosYP = -0.0025+PosY, offsetP = 0.001, offsetP1 = 0.002;
 	float4 OneP = all( abs(float2( texcoord.x -PosXP, texcoord.y-PosYP)) < float2(0.0025,0.009*0.682));
@@ -779,32 +779,32 @@ float4 Out(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Targe
 	float4 OneT = all( abs(float2( texcoord.x -PosXT, texcoord.y-PosYT)) < float2(0.003,0.001));
 	float4 TwoT = all( abs(float2( texcoord.x -PosXT, texcoord.y-PosY)) < float2(0.000625,0.009));
 	T = OneT+TwoT;
-	
+
 	//H
 	float PosXH = -0.0071+PosX;
 	float4 OneH = all( abs(float2( texcoord.x -PosXH, texcoord.y-PosY)) < float2(0.002,0.001));
 	float4 TwoH = all( abs(float2( texcoord.x -PosXH, texcoord.y-PosY)) < float2(0.002,0.009));
 	float4 ThreeH = all( abs(float2( texcoord.x -PosXH, texcoord.y-PosY)) < float2(0.003,0.009));
 	H = (OneH-TwoH)+ThreeH;
-	
+
 	//Three
 	float offsetFive = 0.001, PosX3 = -0.001+PosX;
 	float4 OneThree = all( abs(float2( texcoord.x -PosX3, texcoord.y-PosY)) < float2(0.002,0.009));
 	float4 TwoThree = all( abs(float2( texcoord.x -PosX3 - offsetFive, texcoord.y-PosY)) < float2(0.003,0.007));
 	float4 ThreeThree = all( abs(float2( texcoord.x -PosX3, texcoord.y-PosY)) < float2(0.002,0.001));
 	Three = (OneThree-TwoThree)+ThreeThree;
-	
+
 	//DD
-	float PosXDD = 0.006+PosX, offsetDD = 0.001;	
+	float PosXDD = 0.006+PosX, offsetDD = 0.001;
 	float4 OneDD = all( abs(float2( texcoord.x -PosXDD, texcoord.y-PosY)) < float2(0.0025,0.009));
 	float4 TwoDD = all( abs(float2( texcoord.x -PosXDD-offsetDD, texcoord.y-PosY)) < float2(0.0025,0.007));
 	DD = OneDD-TwoDD;
-	
+
 	//Dot
-	float PosXDot = 0.011+PosX, PosYDot = 0.008+PosY;		
+	float PosXDot = 0.011+PosX, PosYDot = 0.008+PosY;
 	float4 OneDot = all( abs(float2( texcoord.x -PosXDot, texcoord.y-PosYDot)) < float2(0.00075,0.0015));
 	Dot = OneDot;
-	
+
 	//INFO
 	//I
 	float PosXI = 0.0155+PosX, PosYI = 0.004+PosY, PosYII = 0.008+PosY;
@@ -812,29 +812,29 @@ float4 Out(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Targe
 	float4 TwoI = all( abs(float2( texcoord.x - PosXI, texcoord.y - PosYI)) < float2(0.000625,0.005));
 	float4 ThreeI = all( abs(float2( texcoord.x - PosXI, texcoord.y - PosYII)) < float2(0.003,0.001));
 	I = OneI+TwoI+ThreeI;
-	
+
 	//N
 	float PosXN = 0.0225+PosX, PosYN = 0.005+PosY,offsetN = -0.001;
 	float4 OneN = all( abs(float2( texcoord.x - PosXN, texcoord.y - PosYN)) < float2(0.002,0.004));
 	float4 TwoN = all( abs(float2( texcoord.x - PosXN, texcoord.y - PosYN - offsetN)) < float2(0.003,0.005));
 	N = OneN-TwoN;
-	
+
 	//F
 	float PosXF = 0.029+PosX, PosYF = 0.004+PosY, offsetF = 0.0005, offsetF1 = 0.001;
 	float4 OneF = all( abs(float2( texcoord.x -PosXF-offsetF, texcoord.y-PosYF-offsetF1)) < float2(0.002,0.004));
 	float4 TwoF = all( abs(float2( texcoord.x -PosXF, texcoord.y-PosYF)) < float2(0.0025,0.005));
 	float4 ThreeF = all( abs(float2( texcoord.x -PosXF, texcoord.y-PosYF)) < float2(0.0015,0.00075));
 	F = (OneF-TwoF)+ThreeF;
-	
+
 	//O
 	float PosXO = 0.035+PosX, PosYO = 0.004+PosY;
 	float4 OneO = all( abs(float2( texcoord.x -PosXO, texcoord.y-PosYO)) < float2(0.003,0.005));
 	float4 TwoO = all( abs(float2( texcoord.x -PosXO, texcoord.y-PosYO)) < float2(0.002,0.003));
 	O = OneO-TwoO;
 	}
-	
+
 	Website = D+E+P+T+H+Three+DD+Dot+I+N+F+O ? float4(1.0,1.0,1.0,1) : Color;
-	
+
 	if(timer >= 10000)
 	{
 	Done = Color;
@@ -863,7 +863,7 @@ technique Polynomial_Barrel_Distortion_P
 #else
 technique Polynomial_Barrel_Distortion_S
 #endif
-{	
+{
 			pass AA_Filter
 		{
 			VertexShader = PostProcessVS;
@@ -877,6 +877,6 @@ technique Polynomial_Barrel_Distortion_S
 			pass PBD
 		{
 			VertexShader = PostProcessVS;
-			PixelShader = Out;	
+			PixelShader = Out;
 		}
 }

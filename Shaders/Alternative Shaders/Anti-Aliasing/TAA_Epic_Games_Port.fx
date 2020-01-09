@@ -68,10 +68,21 @@ sampler PSBackBuffer
 	{
 		Texture = PastSingleBackBuffer;
 	};
-	
+//Total amount of frames since the game started.
+uniform uint framecount < source = "framecount"; >;	
 ///////////////////////////////////////////////////////////TAA/////////////////////////////////////////////////////////////////////	
 #define pix float2(BUFFER_RCP_WIDTH, BUFFER_RCP_HEIGHT)
 #define iResolution float2(BUFFER_WIDTH, BUFFER_HEIGHT)
+#define Alternate framecount % 2 == 0
+
+float4 BB_H(float2 TC)
+{
+	float Shift;
+	if(Alternate)
+		Shift = pix.x;
+	
+	return tex2D(BackBuffer, TC + float2(+Shift, 0.0));
+}
 
 // YUV-RGB conversion routine from Hyper3D
 float3 encodePalYuv(float3 rgb)
@@ -175,15 +186,14 @@ void Out(float4 position : SV_Position, float2 texcoord : TEXCOORD, out float4 c
 
 void Current_BackBuffer(float4 position : SV_Position, float2 texcoord : TEXCOORD, out float4 color : SV_Target)
 {
-	color = tex2D(BackBuffer,texcoord);
+	color = BB_H(texcoord);
 }
 
 void Past_BackBuffer(float4 position : SV_Position, float2 texcoord : TEXCOORD, out float4 PastSingle : SV_Target0, out float4 Past : SV_Target1)
 {
 	PastSingle = tex2D(CBackBuffer,texcoord);
-	Past = tex2D(BackBuffer,texcoord);
+	Past = BB_H(texcoord);
 }
-
 ///////////////////////////////////////////////////////////ReShade.fxh/////////////////////////////////////////////////////////////
 // Vertex shader generating a triangle covering the entire screen
 void PostProcessVS(in uint id : SV_VertexID, out float4 position : SV_Position, out float2 texcoord : TEXCOORD)
