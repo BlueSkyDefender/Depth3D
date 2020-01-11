@@ -47,8 +47,8 @@ static const int HVP_Y_D = 0;                           //Vertical Position
 static const int ZPD_Boundary_Type_D = 0;               //ZPD Boundary Type
 static const float ZPD_Boundary_Scaling_D = 0.5;        //ZPD Boundary Scaling
 static const float ZPD_Boundary_Fade_Time_D = 0.25;     //ZPD Boundary Fade Time
-static const float Weapon_Near_Depth_D = 0.0;             //Weapon Near Depth
-static const float ZPD_Weapon_Boundary_Adjust = 0.0;      //ZPD Weapon Boundary Adjust
+static const float Weapon_Near_Depth_D = 0.0;           //Weapon Near Depth
+static const float ZPD_Weapon_Boundary_Adjust = 0.0;    //ZPD Weapon Boundary Adjust
 static const float NULL_A = 0.0;
 static const float NULL_B = 0.0;
 static const float NULL_C = 0.0;
@@ -64,9 +64,9 @@ static const int BDF = 0;                               //Barrel Distortion Fix
 static const int HMT = 0;                               //HUD Mode Trigger
 
 //Special Handling
-#if exists "LEGOBatman.exe"							 //Lego Batman
+#if exists "LEGOBatman.exe"                             //Lego Batman
 	#define sApp 0xA100000
-#elif exists "LEGOBatman2.exe"						  //LEGO Batman 2
+#elif exists "LEGOBatman2.exe"                          //LEGO Batman 2
 	#define sApp 0xA100000
 #elif exists "GameComponentsOzzy_Win32Steam_Release.dll"//Batman BlackGate
 	#define sApp 0xA200000
@@ -76,18 +76,20 @@ static const int HMT = 0;                               //HUD Mode Trigger
 
 //Check for ReShade Version for 64bit game Bug.
 #if !defined(__RESHADE__) || __RESHADE__ < 43000
-	#if exists "ACU.exe"								 //Assassin's Creed Unity
+	#if exists "ACU.exe"                                  //Assassin's Creed Unity
 		#define App 0xA0762A98
-	#elif exists "BatmanAK.exe"						  //Batman Arkham Knight
+	#elif exists "BatmanAK.exe"                           //Batman Arkham Knight
 		#define App 0x4A2297E4
-	#elif exists "DOOMx64.exe"						   //DOOM 2016
+	#elif exists "DOOMx64.exe"                            //DOOM 2016
 		#define App 0x142EDFD6
-	#elif exists "RED-Win64-Shipping.exe"				//DragonBall Fighters Z
+	#elif exists "RED-Win64-Shipping.exe"                 //DragonBall Fighters Z
 		#define App 0x31BF8AF6
-	#elif exists "HellbladeGame-Win64-Shipping.exe" 	 //Hellblade Senua's Sacrifice
+	#elif exists "HellbladeGame-Win64-Shipping.exe"       //Hellblade Senua's Sacrifice
 		#define App 0xAAA18268
-	#elif exists "TheForest.exe"						 //The Forest
+	#elif exists "TheForest.exe"                          //The Forest
 		#define App 0xABAA2255
+	#elif exists "MonsterHunterWorld.exe"                 //Monster Hunter World
+		#define App 0xDB3A28BD
 	#else
 		#define App sApp
 	#endif
@@ -727,8 +729,8 @@ static const int HMT = 0;                               //HUD Mode Trigger
 	#define DA_Z 0.001
 	#define DB_Y 1
 	#define DE_X 2
-    #define DE_Y 0.125
-    #define DE_Z 0.375
+  #define DE_Y 0.125
+  #define DE_Z 0.375
 	#define DC_X 0.5
 	#define HM 1
 #elif (App == 0x75B36B20 ) //Eldritch
@@ -752,7 +754,7 @@ static const int HMT = 0;                               //HUD Mode Trigger
 	#define DB_X 1
 	#define DE_X 3
 	#define DE_Z 0.375
-#elif (App == 0xDDA80A38 )	//Deus Ex Rev DX9
+#elif (App == 0xDDA80A38 ) //Deus Ex Rev DX9
 	#define DA_X 0.04375
 	#define DA_Y 20
 	#define DB_Y 3
@@ -760,7 +762,7 @@ static const int HMT = 0;                               //HUD Mode Trigger
 	#define DC_X 0.534
 	#define HM 1
 	#define DF_X 0.025
-#elif (App == 0x1714C977)	//Deus Ex DX9
+#elif (App == 0x1714C977) //Deus Ex DX9
 	#define DA_X 0.05
 	#define DA_Y 125.0
 	#define DB_Y 3
@@ -768,6 +770,33 @@ static const int HMT = 0;                               //HUD Mode Trigger
 	#define DC_X 1.0
 	#define HM 1
 	#define DF_X 0.05
+#elif (App == 0x92583CDD ) //Legend of Dungeon
+	#define DA_Y 12.5
+	#define DA_Z 0.185
+	#define DA_X 0.075
+	#define DB_Y 4
+	#define DB_X 1
+#elif (App == 0xDB3A28BD ) //Monster Hunter World
+	#define DA_Y 17.5
+	#define DA_X 0.075
+	#define DA_W 1
+	#define DB_Y 5
+	#define DE_X 1
+	#define DE_Y 0.300
+	#define DE_Z 0.4375
+#elif (App == 0xC073C2BB ) //StreetFighter V
+	#define DA_Y 14.0
+	#define DA_X 0.250
+	#define DA_W 1
+	#define DB_Y 4
+    #define DB_Z 0.550
+	#define DE_X 1
+	#define DE_Y 0.375
+	#define DE_Z 0.375
+#elif (App == 0xCFB8DD02 ) //DIRT RALLY 2.0
+	#define DA_Y 11.25
+	#define DA_X 0.040
+    #define DE_W 0.350
 #else
 	#define NP 1 //No Profile
 #endif
@@ -825,7 +854,7 @@ static const int HMT = 0;                               //HUD Mode Trigger
 #ifndef DD_W
     #define DD_W HVP_Y_D
 #endif
-// X = [ZPD Boundary Type] Y = [ZPD Boundary Scaling] Z = [ZPD Boundary Fade Time] W = [Null]
+// X = [ZPD Boundary Type] Y = [ZPD Boundary Scaling] Z = [ZPD Boundary Fade Time] W = [Weapon NearDepth]
 #ifndef DE_X
     #define DE_X ZPD_Boundary_Type_D
 #endif
