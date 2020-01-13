@@ -1,7 +1,7 @@
 ////----------------------------------------//
 ///SuperDepth3D Overwatch Automation Shader///
 //----------------------------------------////
-// Version 1.0
+// Version 1.1
 //---------------------------------------OVERWATCH---------------------------------------//
 // If you are reading this stop. Go away and never look back. From this point on if you  //
 // still think it's is worth looking at this..... Then no one can save you or your soul. //
@@ -518,19 +518,19 @@ static const int HMT = 0;                               //HUD Mode Trigger
 	#define DA_Z 0.0001
 	#define DA_X 0.04
 	#define DB_Y 5
-#elif (App == 0xBF49B12E )	//Vampyr
+#elif (App == 0xBF49B12E )//Vampyr
 	#define DA_W 1
 	#define DA_Y 23.0
 	#define DA_X 0.05
 	#define DB_Y 5
-#elif (App == 0x85F0A0FF )	//LUST for Darkness
+#elif (App == 0x85F0A0FF ) //LUST for Darkness
 	#define DA_W 1
 	#define DB_X 1
 	#define DA_Y 13.75
 	#define DA_Z 0.001
 	#define DA_X 0.04
 	#define DB_Y 4
-	#define DB_Z 0.125 //Under Review
+	#define DB_Z 0.125
 	#define TW 1
 #elif (App == 0x706C8618 ) //Layer of Fear
 	#define DB_X 1
@@ -556,7 +556,7 @@ static const int HMT = 0;                               //HUD Mode Trigger
 	#define DA_X 0.0375
 	#define DB_Y 4
 	#define TW 1
-#elif (App == 0xABAA2255 )	//The Forest
+#elif (App == 0xABAA2255 ) //The Forest
 	#define DA_W 1
 	#define DB_X 1
 	#define DA_Y 7.5
@@ -789,14 +789,63 @@ static const int HMT = 0;                               //HUD Mode Trigger
 	#define DA_X 0.250
 	#define DA_W 1
 	#define DB_Y 4
-    #define DB_Z 0.550
+	#define DB_Z 0.550
 	#define DE_X 1
 	#define DE_Y 0.375
 	#define DE_Z 0.375
 #elif (App == 0xCFB8DD02 ) //DIRT RALLY 2.0
 	#define DA_Y 11.25
 	#define DA_X 0.040
-    #define DE_W 0.350
+	#define DE_W 0.350
+#elif (App == 0x2F55D5A3 || App == 0x4A5220AF ) //ShadowWarrior 2013 DX11 & DX9
+	#define DA_X 0.035
+	#define DB_Y 4
+	#define DE_X 4
+	#define DE_Z 0.375
+#elif (App == 0x56301DED ) //ShadowWarrior 2
+	#define DA_X 0.035
+	#define DA_W 1
+	#define DB_Y 4
+	#define DE_X 4
+	#define DE_Z 0.375
+#elif (App == 0x892CA092 ) //Farcry
+	#define DA_Y 7.0
+	#define DA_Z 0.000375
+	#define DB_Z 0.105
+	#define DA_X 0.055
+	#define DB_Y 4
+	#define DB_W 63
+	#define DF_X 0.13875
+#elif (App == 0x9140DBE0 ) //Farcry 2
+	#define DA_X 0.05
+	#define DB_Y 4
+	#define DB_W 64
+	#define DE_X 4
+	#define DE_Z 0.375
+	#define TW 1
+#elif (App == 0xA4B66433 ) //Farcry 3
+	#define DA_X 0.05
+	#define DB_Y 4
+	#define DE_X 4
+	#define DE_Z 0.375
+	#define DE_W 0.350
+	#define TW 1
+#elif (App == 0xC150B652 ) //Farcry 4
+	#define DA_Y 8.75
+	#define DA_W 1
+	#define DA_X 0.0375
+	#define DB_Y 4
+	#define DE_X 4
+	#define DE_Z 0.375
+	#define DE_W 0.360
+#elif (App == 0x2EB82B07 ) //Farcry Primal
+	#define DA_Y 8.75
+	#define DA_W 1
+	#define DA_X 0.0375
+	#define DB_Y 4
+	#define DE_X 4
+	#define DE_Z 0.375
+	#define DE_W 0.360
 #else
 	#define NP 1 //No Profile
 #endif

@@ -111,7 +111,8 @@ Inner Shader Setting:
               F.E.A.R                                      DM 0       8.7500                WDM 46                     Yes 3                              
               F.E.A.R 2                                    DM 0       8.7500                WDM 46                     Yes 3      
               F.E.A.R 3                                    DM 0       6.0000                                           Yes 4       
-              Fallout 4                                    DM 0       6.2500                WDM 4                      Yes 2                  
+              Fallout 4                                    DM 0       6.2500                WDM 4                      Yes 2
+    RB        FarCry 2                                     DM 0       7.5000                WDM 62                     Yes 4                                                         
     RB        FarCry 3                                     DM 0       7.5000                                       
               Fez                                          DM 0       10.000    0.97500                    Yes     
               Firewatch                                    DM 0       5.0000                               Yes     
@@ -512,8 +513,16 @@ The weapon Depth Buffer can be found on Option 1. But, can't be merged.....
 {Emily Wants To Play}
 Install reshade in to SteamLibrary\steamapps\common\Emily Wants To Play\Engine\Binaries\Win64
 
-{FarCry 3}
-Ingame setting MSAA 2X should be on to enable Depth Map in DX11.
+{FarCry 2} - ReShade 4.5.2
+Use DX9 for weapon in game. Only think I noticed wrong was the guys hair is missing from the DB. 
+You have to use DX9 because it draws the weapon correctly so you can have weapon hand depth.
+
+{FarCry 3} - ReShade 4.5.3
+Ingame setting MSAA 2X should be on to enable Depth Map in DX11. But, Don't use DX11.
+Use DX9 because the depth buffer more stable.
+
+In DX9 you may want to use MXAO and SMAA due to the lower quality AO and Alpha AA.
+But, Really use DX9.
 
 {Gold Source: Games} - ReShade 4.5.2
 When you install the opengl32.dll right click it and set it to read only.

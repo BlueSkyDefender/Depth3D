@@ -2,7 +2,7 @@
 ///**SuperDepth3D**///
 //----------------////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//* Depth Map Based 3D post-process shader v2.2.2
+//* Depth Map Based 3D post-process shader v2.2.3
 //* For Reshade 3.0+
 //* ---------------------------------
 //*
@@ -194,16 +194,7 @@ uniform float2 ZPD_Boundary_n_Fade <
 	ui_tooltip = "This selection menu gives extra boundary conditions to scale ZPD & lets you adjust Fade time.";
 	ui_category = "Divergence & Convergence";
 > = float2(DE_Y,DE_Z);
-#if Legacy_Mode
-uniform float2 Disocclusion_Adjust <
-	ui_type = "drag";
-	ui_min = 0.0; ui_max = 1.0;
-	ui_label = "·Disocclusion Adjust·";
-	ui_tooltip = "Automatic occlusion masking power, & Depth Based culling adjustments.\n"
-				"Default is ( 0.1f,0.25f)";
-	ui_category = "Occlusion Masking";
-> = float2( 0.1, 0.25);
-#else
+
 uniform int View_Mode <
 	ui_type = "combo";
 	ui_items = "View Mode Normal\0View Mode Alpha\0";
@@ -213,6 +204,15 @@ uniform int View_Mode <
 				 "Default is Normal";
 	ui_category = "Occlusion Masking";
 > = 0;
+#if Legacy_Mode
+uniform float2 Disocclusion_Adjust <
+	ui_type = "drag";
+	ui_min = 0.0; ui_max = 1.0;
+	ui_label = " Disocclusion Adjust";
+	ui_tooltip = "Automatic occlusion masking power, & Depth Based culling adjustments.\n"
+				"Default is ( 0.1f,0.25f)";
+	ui_category = "Occlusion Masking";
+> = float2( 0.1, 0.25);
 #endif
 uniform int Custom_Sidebars <
 	ui_type = "combo";
@@ -229,7 +229,7 @@ uniform float Depth_Edge_Mask <
 	ui_type = "slider";
 	#endif
 	ui_min = 0.0; ui_max = 1.0;
-	ui_label = "Edge Mask";
+	ui_label = " Edge Mask";
 	ui_tooltip = "Use this to adjust for articafts.\n"
 				 "Default is Zero, Off";
 	ui_category = "Occlusion Masking";
@@ -325,7 +325,7 @@ static const int2 Image_Position_Adjust = int2(DD_Z,DD_W);
 //Weapon Hand Adjust//
 uniform int WP <
 	ui_type = "combo";
-	ui_items = "Weapon Profile Off\0Custom WP\0WP 0\0WP 1\0WP 2\0WP 3\0WP 4\0WP 5\0WP 6\0WP 7\0WP 8\0WP 9\0WP 10\0WP 11\0WP 12\0WP 13\0WP 14\0WP 15\0WP 16\0WP 17\0WP 18\0WP 19\0WP 20\0WP 21\0WP 22\0WP 23\0WP 24\0WP 25\0WP 26\0WP 27\0WP 28\0WP 29\0WP 30\0WP 31\0WP 32\0WP 33\0WP 34\0WP 35\0WP 36\0WP 37\0WP 38\0WP 39\0WP 40\0WP 41\0WP 42\0WP 43\0WP 44\0WP 45\0WP 46\0WP 47\0WP 48\0WP 49\0WP 50\0WP 51\0WP 52\0WP 53\0WP 54\0WP 55\0WP 56\0WP 57\0WP 58\0WP 59\0WP 60\0";
+	ui_items = "WP Off\0Custom WP\0WP 0\0WP 1\0WP 2\0WP 3\0WP 4\0WP 5\0WP 6\0WP 7\0WP 8\0WP 9\0WP 10\0WP 11\0WP 12\0WP 13\0WP 14\0WP 15\0WP 16\0WP 17\0WP 18\0WP 19\0WP 20\0WP 21\0WP 22\0WP 23\0WP 24\0WP 25\0WP 26\0WP 27\0WP 28\0WP 29\0WP 30\0WP 31\0WP 32\0WP 33\0WP 34\0WP 35\0WP 36\0WP 37\0WP 38\0WP 39\0WP 40\0WP 41\0WP 42\0WP 43\0WP 44\0WP 45\0WP 46\0WP 47\0WP 48\0WP 49\0WP 50\0WP 51\0WP 52\0WP 53\0WP 54\0WP 55\0WP 56\0WP 57\0WP 58\0WP 59\0WP 60\0WP 61\0WP 62\0WP 63\0WP 64\0WP 65\0";
 	ui_label = "·Weapon Profiles·";
 	ui_tooltip = "Pick Weapon Profile for your game or make your own.";
 	ui_category = "Weapon Hand Adjust";
@@ -449,7 +449,7 @@ uniform bool Eye_Swap <
 uniform int Cursor_Type <
 	ui_type = "combo";
 	ui_items = "Off\0FPS\0ALL\0RTS\0";
-	ui_label = " Cursor Selection";
+	ui_label = "·Cursor Selection·";
 	ui_tooltip = "Choose the cursor type you like to use.\n"
 							 "Default is Zero.";
 	ui_category = "Cursor Adjustments";
@@ -883,6 +883,16 @@ float3 Weapon_Profiles()//Tried Switch But, can't compile in some older versions
         return float3(1.825,13.75,0);        //WP 59 | No Man Sky FPS Mode
     else if(WP == 62)
         return float3(1.962,5.5,0);          //WP 60 | Dying Light
+    else if(WP == 63)
+        return float3(0.287,180.0,9.0);      //WP 61 | Farcry
+    else if(WP == 64)
+        return float3(0.2503,55.0,1000.0);   //WP 62 | Farcry 2
+    else if(WP == 65)
+        return float3(0,0,0);                //WP 63 | Game
+    else if(WP == 66)
+        return float3(0,0,0);                //WP 64 | Game
+    else if(WP == 67)
+        return float3(0,0,0);                //WP 65 | Game
     else
         return float3(Weapon_Adjust.x,Weapon_Adjust.y,Weapon_Adjust.z);
 }
@@ -1077,15 +1087,24 @@ return Depth_Edge_Mask == 0 ? GetDB( texcoord.xy ) : lerp(0,GetDB( texcoord.xy )
 //////////////////////////////////////////////////////////Parallax Generation///////////////////////////////////////////////////////////////////////
 float2 Parallax(float Diverge, float2 Coordinates, float IO) // Horizontal parallax offset & Hole filling effect
 {   float2 ParallaxCoord = Coordinates;
-	float DepthLR = 1, LRDepth, Perf = 1, Z, MS = Diverge * pix.x, N , S[5] = {0.5,0.625,0.75,0.875,1.0};
+	float DepthLR = 1, DLR, LRDepth, Perf = 1, Z, MS = Diverge * pix.x, N , S[5] = {0.5,0.625,0.75,0.875,1.0};
 	#if Legacy_Mode
 	MS = -MS;
-	//ParallaxCoord.x += MS * 0.2;
-	[loop]
-	for ( int i = 0 ; i < 5; ++i )
-	{
-		N = S[i] * MS;
-		DepthLR = min(DepthLR, DepthEdge(float2(ParallaxCoord.x + N, ParallaxCoord.y,0,0)).x );
+	[loop]//ParallaxCoord.x += MS * 0.2;
+	for ( int i = 0 ; i <= 4; ++i )
+	{   N = S[i] * MS;
+		if(View_Mode == 1)
+		{   LRDepth = min(DepthLR, DepthEdge(float2(ParallaxCoord.x + N, ParallaxCoord.y)).x );
+			DLR = LRDepth;
+			LRDepth += min(DepthLR, DepthEdge(float2(ParallaxCoord.x + (N * 0.75f), ParallaxCoord.y)).x );
+			LRDepth += min(DepthLR, DepthEdge(float2(ParallaxCoord.x + (N * 0.500f), ParallaxCoord.y)).x );
+			LRDepth += min(DepthLR, DepthEdge(float2(ParallaxCoord.x + (N * 0.250f), ParallaxCoord.y)).x );
+			DepthLR = min(DepthLR,LRDepth / 4.0f);
+
+			DepthLR = lerp(DepthLR, DLR, 0.1875f);
+		}
+		else
+		DepthLR = min(DepthLR, DepthEdge(float2(ParallaxCoord.x + N, ParallaxCoord.y)).x );
 	}
 	//Reprojection Left and Right
 	ParallaxCoord = float2(Coordinates.x + MS * DepthLR, Coordinates.y);
