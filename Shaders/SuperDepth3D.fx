@@ -2,7 +2,7 @@
 ///**SuperDepth3D**///
 //----------------////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//* Depth Map Based 3D post-process shader v2.2.3
+//* Depth Map Based 3D post-process shader v2.2.4
 //* For Reshade 3.0+
 //* ---------------------------------
 //*
@@ -175,7 +175,7 @@ uniform int Auto_Balance_Ex <
 #endif
 uniform int ZPD_Boundary <
 	ui_type = "combo";
-	ui_items = "Off\0Normal A\0Normal B\0FPS A\0FPS B\0";
+	ui_items = "Off\0Normal\0Third Person\0FPS Weapon Center\0FPS Weapon Right\0";
 	ui_label = " ZPD Boundary Detection";
 	ui_tooltip = "This selection menu gives extra boundary conditions to ZPD.\n"
 				 			 "This treats your screen as a virtual wall.\n"
@@ -844,7 +844,7 @@ float3 Weapon_Profiles()//Tried Switch But, can't compile in some older versions
     else if(WP == 42)
         return float3(0,0,0);                //WP 40 | Serious Sam 4: Planet Badass
     else if(WP == 43)
-        return float3(0,0,0);                //WP 41 | Game
+        return float3(0.800,15.0,0.3);       //WP 41 | Sauerbraten 2
     else if(WP == 44)
         return float3(0.277,20.0,8.8);       //WP 42 | TitanFall 2 #308AEBEA
     else if(WP == 45)

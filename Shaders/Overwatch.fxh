@@ -846,6 +846,12 @@ static const int HMT = 0;                               //HUD Mode Trigger
 	#define DE_X 4
 	#define DE_Z 0.375
 	#define DE_W 0.360
+#elif (App == 0xE3AD2F05 ) //Sauervaraten
+	#define DA_Y 25.0
+	#define DA_X 0.05
+	#define DB_Y 5
+	#define DB_W 43
+	#define DF_X 0.150
 #else
 	#define NP 1 //No Profile
 #endif

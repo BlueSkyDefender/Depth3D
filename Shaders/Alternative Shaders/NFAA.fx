@@ -73,9 +73,19 @@ uniform float Mask_Adjust <
 
 uniform bool HFR_AA <
 	ui_label = "HFR AA";
-	ui_label = "This allows most monitors to assist in AA if your FPS is 60 or above.";
-	ui_category = "NFAA";
+	ui_label = "This allows most monitors to assist in AA if your FPS is 60 or above and Locked to your monitors refresh-rate.";
+	ui_category = "HFRAA";
 > = false;
+
+uniform float HFR_Adjust <
+	ui_type = "drag";
+	ui_min = 0.0; ui_max = 1.0;
+	ui_label = "Mask Adjustment";
+	ui_tooltip = "Use this to adjust the Mask.\n"
+				 "Default is 1.00";
+	ui_category = "HFRAA";
+> = 0.5;
+
 //Total amount of frames since the game started.
 uniform uint framecount < source = "framecount"; >;
 ////////////////////////////////////////////////////////////NFAA////////////////////////////////////////////////////////////////////
@@ -98,7 +108,11 @@ float LI(in float3 value)
 
 float4 GetBB(float2 texcoord : TEXCOORD)
 {
-	return tex2D(BackBuffer, texcoord);
+  float Shift;
+  if(Alternate && HFR_AA)
+    Shift = pix.x;
+
+	return tex2D(BackBuffer, texcoord + float2(Shift * saturate(HFR_Adjust),0.0));
 }
 
 float4 NFAA(float2 texcoord)
@@ -144,13 +158,11 @@ float4 NFAA(float2 texcoord)
 		Mask = 1;
 	// Super Evil Magic Number.
 	Mask = saturate(lerp(Mask,1,-1));
-  float Shift;
-  if(Alternate && HFR_AA)
-    Shift = pix.x;
+
 	// Final color
 	if(View_Mode == 0)
 	{
-		NFAA = lerp(NFAA,GetBB( texcoord.xy + float2(Shift,0.0) ), Mask );
+		NFAA = lerp(NFAA,GetBB( texcoord.xy), Mask );
 	}
 	else if(View_Mode == 1)
 	{
