@@ -41,7 +41,7 @@ uniform float Persistence <
 
 uniform bool HFR_AA <
 	ui_label = "HFR AA";
-	ui_label = "This allows most monitors to assist in AA if your FPS is 60 or above and Locked to your monitors refresh-rate.";
+	ui_tooltip = "This allows most monitors to assist in AA if your FPS is 60 or above and Locked to your monitors refresh-rate.";
 	ui_category = "HFRAA";
 > = false;
 

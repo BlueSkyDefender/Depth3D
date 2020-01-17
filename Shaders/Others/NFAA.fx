@@ -49,6 +49,15 @@ uniform int AA_Adjust <
 	ui_category = "NFAA";
 > = 16;
 
+uniform float Mask_Adjust <
+	ui_type = "drag";
+	ui_min = 0.0; ui_max = 1.0;
+	ui_label = "Mask Adjustment";
+	ui_tooltip = "Use this to adjust the Mask.\n"
+				 "Default is 1.00";
+	ui_category = "NFAA";
+> = 1.00;
+
 uniform int View_Mode <
 	ui_type = "combo";
 	ui_items = "NFAA\0Mask View\0Normals\0DLSS\0";
@@ -62,26 +71,17 @@ uniform int View_Mode <
 	ui_category = "NFAA";
 > = 0;
 
-uniform float Mask_Adjust <
-	ui_type = "drag";
-	ui_min = 0.0; ui_max = 2.0;
-	ui_label = "Mask Adjustment";
-	ui_tooltip = "Use this to adjust the Mask.\n"
-				 "Default is 1.00";
-	ui_category = "NFAA";
-> = 1.00;
-
 uniform bool HFR_AA <
 	ui_label = "HFR AA";
-	ui_label = "This allows most monitors to assist in AA if your FPS is 60 or above and Locked to your monitors refresh-rate.";
+	ui_tooltip = "This allows most monitors to assist in AA if your FPS is 60 or above and Locked to your monitors refresh-rate.";
 	ui_category = "HFRAA";
 > = false;
 
 uniform float HFR_Adjust <
 	ui_type = "drag";
 	ui_min = 0.0; ui_max = 1.0;
-	ui_label = "Mask Adjustment";
-	ui_tooltip = "Use this to adjust the Mask.\n"
+	ui_label = "HFR AA Adjustment";
+	ui_tooltip = "Use this to adjust HFR AA.\n"
 				 "Default is 1.00";
 	ui_category = "HFRAA";
 > = 0.5;
@@ -100,46 +100,42 @@ sampler BackBuffer
 	};
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//Luminosity Intensity
+//SD video
 float LI(in float3 value)
 {
-	return dot(value.rgb,float3(0.333, 0.333, 0.333));
+	return dot(value.rgb,float3(0.299, 0.587, 0.114));
 }
 
 float4 GetBB(float2 texcoord : TEXCOORD)
 {
-  float Shift;
-  if(Alternate && HFR_AA)
-    Shift = pix.x;
-
-	return tex2D(BackBuffer, texcoord + float2(Shift * saturate(HFR_Adjust),0.0));
+	return tex2D(BackBuffer, texcoord);
 }
 
 float4 NFAA(float2 texcoord)
-{
+{	float t, l, r, d, MA = Mask_Adjust;
+  if(View_Mode == 3)
+    MA = 5;
+	float2 UV = texcoord.xy, SW = pix * MA, n; // But, I don't think it's really needed.
 	float4 NFAA; // The Edge Seeking code can be adjusted to look for longer edges.
-	float2 UV = texcoord.xy, SW = pix, n; // But, I don't think it's really needed.
-	float t, l, r, d;
 	// Find Edges
 	t = LI(GetBB( float2( UV.x , UV.y - SW.y ) ).rgb);
 	d = LI(GetBB( float2( UV.x , UV.y + SW.y ) ).rgb);
 	l = LI(GetBB( float2( UV.x - SW.x , UV.y ) ).rgb);
 	r = LI(GetBB( float2( UV.x + SW.x , UV.y ) ).rgb);
-	n = float2(t - d,-(r - l));
+  n = float2(t - d,-(r - l));
 	// I should have made rep adjustable. But, I didn't see the need.
 	// Since my goal was to make this AA fast cheap and simple.
-    float nl = length(n), Rep = rcp(AA_Adjust);
-
+  float nl = length(n), Rep = rcp(AA_Adjust);
 	if(View_Mode == 3)
 		Rep = rcp(128);
-	// Seek aliasing and apply AA. Think of this as basicly blur control.
+	// Seek aliasing and apply AA. Think of this as basically blur control.
     if (nl < Rep)
     {
-		NFAA = GetBB(UV);
-	}
+		  NFAA = GetBB(UV);
+    }
     else
     {
-		n *= pix / (nl * 0.5);
+		  n *= pix / nl;
 
 	float4   o = GetBB( UV ),
 			t0 = GetBB( UV + float2(n.x, -n.y)  * 0.5) * 0.9,
@@ -150,8 +146,7 @@ float4 NFAA(float2 texcoord)
 		NFAA = (o + t0 + t1 + t2 + t3) / 4.3;
 	}
 	// Lets make that mask for a sharper image.
-	float Mask = nl*(2.5 * Mask_Adjust);
-
+	float Mask = nl * 5.0;
 	if (Mask > 0.025)
 		Mask = 1-Mask;
 	else
@@ -269,6 +264,15 @@ float4 Out(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Targe
 	else
 		return float4(Color,1.);
 }
+
+float4 PostFilter(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Target
+{ float Shift;
+  if(Alternate && HFR_AA)
+    Shift = pix.x;
+
+    return tex2D(BackBuffer, texcoord +  float2(Shift * saturate(HFR_Adjust),0.0));
+}
+	
 ///////////////////////////////////////////////////////////ReShade.fxh/////////////////////////////////////////////////////////////
 
 // Vertex shader generating a triangle covering the entire screen
@@ -287,4 +291,10 @@ technique Normal_Filter_Anti_Aliasing
 			VertexShader = PostProcessVS;
 			PixelShader = Out;
 		}
+			pass HFR_AA
+		{
+			VertexShader = PostProcessVS;
+			PixelShader = PostFilter;
+		}
+		
 }
