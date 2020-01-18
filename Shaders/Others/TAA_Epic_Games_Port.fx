@@ -4,8 +4,6 @@
 // Originally written by yvt for https://www.shadertoy.com/view/4tcXD2
 // Feel free to use this in your shader!
 
-
-
 uniform float Clamping_Adjust <
 	ui_type = "drag";
 	ui_min = 0; ui_max = 0.5;
@@ -23,21 +21,13 @@ uniform int Clamping <
 	ui_category = "TAA";
 > = 1;
 
-uniform int Past_Frame <
-	ui_type = "combo";
-	ui_items = "Default\0User Mode\0";
-	ui_label = "Past Frame";
-	ui_tooltip = "Select the Past Frame Blending.";
-	ui_category = "TAA";
-> = 0;
-
 uniform float Persistence <
 	ui_type = "drag";
 	ui_min = 0.0; ui_max = 1.00;
 	ui_label = "User Adjust";
 	ui_tooltip = "Increase persistence of the frames.";
 	ui_category = "TAA";
-> = 1.0;
+> = 0.5;
 
 uniform bool HFR_AA <
 	ui_label = "HFR AA";
@@ -124,13 +114,8 @@ float3 decodePalYuv(float3 ycc)
 
 float4 TAA(float2 texcoord)
 {   float Per = 1-Persistence;
-    float4 PastColor = tex2Dlod(PSBackBuffer,float4(texcoord,0,0) );//Past Back Buffer
-
-  if(Past_Frame == 1)
-  {
-    PastColor = tex2Dlod(PBackBuffer,float4(texcoord,0,0) );
-		PastColor = (1-Per) * tex2D(PSBackBuffer, texcoord) + Per * PastColor;
-	}
+    float4 PastColor = tex2Dlod(PBackBuffer,float4(texcoord,0,0) );//Past Back Buffer
+		   PastColor = (1-Per) * tex2D(BackBuffer, texcoord) + Per * PastColor;
 
     float3 antialiased = PastColor.xyz;
     float mixRate = min(PastColor.w, 0.5);
