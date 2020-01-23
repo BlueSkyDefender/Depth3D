@@ -524,6 +524,10 @@ Use DX9 because the depth buffer more stable.
 In DX9 you may want to use MXAO and SMAA due to the lower quality AO and Alpha AA.
 But, Really use DX9.
 
+{FarCry 5} - ReShade 4.4.2 - Because of EAC
+Other things to note you can set FPS Focus Depth if you have issues with aiming with your gun. 
+TAA causes shimmering.
+
 {Gold Source: Games} - ReShade 4.5.2
 When you install the opengl32.dll right click it and set it to read only.
 
@@ -556,10 +560,10 @@ vr_view_yoffset 4.0
 Stereo Example & values to try.
 vr_ipd        "0.3" "0.25" "0.2" "0.15" "0.1"
 vr_screendist "1.5" "1.25" "1.0" "0.75" "0.5"
-
-I use IPD 0.1875 and SD 0.85 So....... Do what looks good for you.
-
 top formula is IPD * 5 = SD you can try  4.5 or 5.5 instead of 5.
+Ignore this if your doing Side by Side Narrow.
+
+This game has a option for Side by Side Narrow I suggest you use this and set your Screen Distance to 0.5 and IPD 0.1-0.2
 
 {HomeFront the Revolution} - Thank you zig11727
 Path to Install E:\Steam\SteamApps\common\Homefront_The_Revolution\Bin64

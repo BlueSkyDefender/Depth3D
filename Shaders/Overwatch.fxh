@@ -90,6 +90,8 @@ static const int HMT = 0;                               //HUD Mode Trigger
 		#define App 0xABAA2255
 	#elif exists "MonsterHunterWorld.exe"                 //Monster Hunter World
 		#define App 0xDB3A28BD
+	#elif exists "FarCry5.exe"                 //Farcry 5
+		#define App 0xC150B805
 	#else
 		#define App sApp
 	#endif
@@ -846,12 +848,29 @@ static const int HMT = 0;                               //HUD Mode Trigger
 	#define DE_X 4
 	#define DE_Z 0.375
 	#define DE_W 0.360
+#elif (App == 0xC150B805 ) //Farcry 5
+	#define DA_Y 8.75
+	#define DA_W 1
+	#define DA_X 0.0375
+	#define DB_Y 4
+	#define DE_X 4
+	#define DE_Z 0.375
+	#define DE_W 0.360
 #elif (App == 0xE3AD2F05 ) //Sauervaraten
 	#define DA_Y 25.0
 	#define DA_X 0.05
 	#define DB_Y 5
 	#define DB_W 43
 	#define DF_X 0.150
+#elif (App == 0xF0F2CF6A ) //Dragon Ball Z: Kakarot
+	#define DA_W 1
+	#define DA_Y 24.0
+	#define DA_X 0.250
+	#define DB_Y 3
+	#define DE_X 1
+    #define DE_Y 0.375
+	#define DE_Z 0.400
+    #define DB_Z 0.500 //Yay I know
 #else
 	#define NP 1 //No Profile
 #endif

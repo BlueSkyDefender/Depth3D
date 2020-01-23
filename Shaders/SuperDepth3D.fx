@@ -228,7 +228,7 @@ uniform float Depth_Edge_Mask <
 	#else
 	ui_type = "slider";
 	#endif
-	ui_min = 0.0; ui_max = 1.0;
+	ui_min = -0.125; ui_max = 1.0;
 	ui_label = " Edge Mask";
 	ui_tooltip = "Use this to adjust for articafts.\n"
 				 "Default is Zero, Off";
@@ -1070,19 +1070,26 @@ float GetDB(float2 texcoord)
 	return tex2Dlod(SamplerzBufferN, float4(texcoord,0,0) ).x;
 }
 
-float DepthEdge(float2 texcoord)
-{   float2 SW = pix, n;// Find Edges
+float2 DepthEdge(float2 texcoord)
+{   float2 SW = pix, n, DB = GetDB( texcoord.xy );// Find Edges
 	float t = GetDB( float2( texcoord.x , texcoord.y - SW.y ) ),
 		  d = GetDB( float2( texcoord.x , texcoord.y + SW.y ) ),
 		  l = GetDB( float2( texcoord.x - SW.x , texcoord.y ) ),
 		  r = GetDB( float2( texcoord.x + SW.x , texcoord.y ) );
 	n = float2(t - d,-(r - l));
 	// Lets make that mask from Edges
-	float Mask = length(n)*Depth_Edge_Mask;
+	float Mask = length(n)*abs(Depth_Edge_Mask);
 		  Mask = Mask > 0 ? 1-Mask : 1;
 		  Mask = saturate(lerp(Mask,1,-1));// Super Evil Mix.
 	// Final Depth
-return Depth_Edge_Mask == 0 ? GetDB( texcoord.xy ) : lerp(0,GetDB( texcoord.xy ),Mask);
+	if(Depth_Edge_Mask > 0)
+		Mask = lerp(0,GetDB( texcoord.xy ),Mask);
+	else if(Depth_Edge_Mask < 0)
+		Mask = lerp(1,GetDB( texcoord.xy ),Mask);
+	else
+		Mask = GetDB( texcoord.xy );
+
+return Depth_Edge_Mask >= 0 ? float2(Mask,Mask) : float2(GetDB( texcoord.xy ),Mask);
 }
 //////////////////////////////////////////////////////////Parallax Generation///////////////////////////////////////////////////////////////////////
 float2 Parallax(float Diverge, float2 Coordinates, float IO) // Horizontal parallax offset & Hole filling effect
@@ -1116,7 +1123,7 @@ float2 Parallax(float Diverge, float2 Coordinates, float IO) // Horizontal paral
 	// Offset per step progress & Limit
 	float LayerDepth = rcp(Steps), TP = 0.03;
 	//Offsets listed here Max Seperation is 3% - 8% of screen space with Depth Offsets & Netto layer offset change based on MS.
-	float deltaCoordinates = MS * LayerDepth, CurrentDepthMapValue = DepthEdge(ParallaxCoord), CurrentLayerDepth = 0, DepthDifference;
+	float deltaCoordinates = MS * LayerDepth, CurrentDepthMapValue = DepthEdge(ParallaxCoord).x, CurrentLayerDepth = 0, DepthDifference;
 	float2 DB_Offset = float2(Diverge * TP, 0) * pix;
 
     if(View_Mode == 1)
@@ -1127,7 +1134,7 @@ float2 Parallax(float Diverge, float2 Coordinates, float IO) // Horizontal paral
 	{   // Shift coordinates horizontally in linear fasion
 	    ParallaxCoord.x -= deltaCoordinates;
 	    // Get depth value at current coordinates
-	    CurrentDepthMapValue = DepthEdge(float2(ParallaxCoord - DB_Offset));
+	    CurrentDepthMapValue = DepthEdge(float2(ParallaxCoord - DB_Offset)).x;
 	    // Get depth of next layer
 	    CurrentLayerDepth += LayerDepth;
 		continue;
@@ -1148,7 +1155,7 @@ float2 Parallax(float Diverge, float2 Coordinates, float IO) // Horizontal paral
 	#endif
 	// Parallax Occlusion Mapping
 	float2 PrevParallaxCoord = float2(ParallaxCoord.x + deltaCoordinates, ParallaxCoord.y);
-	float beforeDepthValue = DepthEdge(ParallaxCoord ), afterDepthValue = CurrentDepthMapValue - CurrentLayerDepth;
+	float beforeDepthValue = DepthEdge(ParallaxCoord ).y, afterDepthValue = CurrentDepthMapValue - CurrentLayerDepth;
 		beforeDepthValue += LayerDepth - CurrentLayerDepth;
 	// Interpolate coordinates
 	float weight = afterDepthValue / (afterDepthValue - beforeDepthValue);
