@@ -856,6 +856,7 @@ static const int HMT = 0;                               //HUD Mode Trigger
 	#define DE_X 4
 	#define DE_Z 0.375
 	#define DE_W 0.360
+	#define TW 1
 #elif (App == 0xE3AD2F05 ) //Sauervaraten
 	#define DA_Y 25.0
 	#define DA_X 0.05
@@ -868,9 +869,33 @@ static const int HMT = 0;                               //HUD Mode Trigger
 	#define DA_X 0.250
 	#define DB_Y 3
 	#define DE_X 1
-    #define DE_Y 0.375
+	#define DE_Y 0.375
 	#define DE_Z 0.400
-    #define DB_Z 0.500 //Yay I know
+	#define DB_Z 0.500 //Yay I know
+#elif (App == 0xFA2C0106 ) //Hat in Time
+	#define DA_X 0.125
+	#define DB_Y 4
+	#define DE_X 2
+	#define DE_Y 0.162
+	#define DE_Z 0.4375
+	#define TW 1
+#elif (App == 0xCD0E316F ) //Sonic Adventure DX Modded with BetterSADX
+	#define DA_Y 8.75
+	#define DA_X 0.1125
+	#define DB_Y 3
+	#define DE_X 2
+	#define DE_Y 0.375
+	#define DE_Z 0.4375
+	#define DB_Z 0.250
+	#define TW 1
+#elif (App == 0xF9B1845A ) //Rime
+	#define DA_W 1
+	#define DA_Y 15.0
+	#define DA_X 0.145
+	#define DB_Y 4
+	#define DE_X 1
+	#define DE_Y 0.299
+	#define DE_Z 0.400
 #else
 	#define NP 1 //No Profile
 #endif
