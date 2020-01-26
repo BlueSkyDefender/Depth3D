@@ -999,7 +999,7 @@ float2 Conv(float D,float2 texcoord)
     return float2(lerp(Convergence,D, ZP),lerp(W_Convergence,D,WZP));
 }
 
-float zBuffer(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0) : SV_Target
+float zBuffer(in float4 position : SV_Position, in float2 texcoord : TEXCOORD) : SV_Target
 {
 	float3 DM = tex2Dlod(SamplerDMVR,float4(texcoord,0,0)).xyz;
 
@@ -1020,7 +1020,7 @@ float zBuffer(in float4 position : SV_Position, in float2 texcoord : TEXCOORD0) 
 			if (D_A == D_B)
 				DM = 0.0625;
 		}
-	}	
+	}
 	#endif
 	return DM.y;
 }
@@ -1475,7 +1475,7 @@ float3 Out(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Targe
 		return Color;
 }
 ///////////////////////////////////////////////////////////////////Unsharp_Mask//////////////////////////////////////////////////////////////////////
-float3 USM(float4 position : SV_Position, float2 texcoord : TEXCOORD0) : SV_Target
+float3 USM(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Target
 {
 	float2 tex_offset = pix; // Gets texel offset
 	float3 result = tex2D(BackBuffer, texcoord).rgb;

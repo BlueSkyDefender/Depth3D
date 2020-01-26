@@ -959,9 +959,11 @@ In game max out all the settings and set your resolution you need. Apply setting
 Then set Video Driver : Default OpenGL to QeffectsGL (QFX)
 Apply settings and you should be good to go.
 
-{Sonic Adventure DX} BetterSADX Mod + ReShade 4.5.3 + DX8 to DX9
+{Sonic Adventure DX} BetterSADX Mod + ReShade 4.5.3 + DX8 to DX9 or DGVoodoo2
 So for Sonic Adventure DX you will need to download BetterSADX Mod.
 https://drive.google.com/file/d/1H2hip1zodIVjlS0BRWeu1Fv3JnnOw8VL/view
+
+Ignore this if you are using DXVoodoo2:
 Then you will also need DX8 to DX9 wrapper.
 https://github.com/crosire/d3d8to9/releases
 Last thing you will need to install ReShade as DX9
