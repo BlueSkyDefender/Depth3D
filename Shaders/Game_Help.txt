@@ -359,6 +359,11 @@ In the game settings you would need to dissable Real Time Reflections and use th
 
 https://reshade.me/forum/releases/3744-3-1?start=200#26443
 
+{Blood: Fresh Suppy}  - Used ReShade 4.5.3
+If your going to play this game make sure you do in opengl32 or Vulkan since they offer better depth buffers then DX11.
+
+I would just use Opengl32 for MSAA.
+
 {Blood Crossmatching}
 Get it here http://m210.duke4.net/index.php/files/viewdownload/3-eduke32/38-blood-crossmatching
 
@@ -494,6 +499,65 @@ If I am wiling to gues it's because it defaults from Opengl 4.6.0 to 4.3.0 under
 
 {Dragon Ball FightersZ} - Use ReShade 3.1.2
 Online 3D works aswell. You need to use ReShade 3.1.2 That is whitelisted under EAC.
+
+{Duke Nukem 3D} - Use ReShade ?.?.?
+So getting eduke32 working with Polymer HRP and Duke Nukem 3D.
+
+Prerequisites: Duke Nukem 3D: Atomic Edition or Duke Nukem 3D: 20th Anniversary World Tour
+Right now it's on sale at Humble Store.
+
+A. Folder needed either one or the other. Not Both. :p
+Duke Nukem 3D
+Duke Nukem 3D Twentieth Anniversary World Tour
+B. You would also need eduke32 The latest release. www.eduke32.com/
+Windows Download
+eduke32_latest.7z
+Extract, "B 2."
+C. Place the contents of eduke32_latest into, "A 1 or A 2."
+
+D. As for the High-Resolution Packs. Get them Here hrp.duke4.net/download.php
+Duke3D HRP v5.4 FULL SFX (986 MB) - Self-extracting archive with everything needed to play
+Duke3D PSX Highres Sounds v1.11 (7.3 MB)
+XXX Pack v1.33 - ;) Why not
+E. Extract the ZIP files you need from the packs on top. The files you need should be;
+duke3d_hrp.zip
+duke3d_music-sc55.zip
+duke3d_psx.zip
+duke3d_xxx.zip
+F. Place "E 1 - 4" into a folder called autoload.
+
+G. Place the autoload folder into, "A 1 or A 2."
+Now, go to the autoload folder and extract duke3d_hrp.zip
+Open the file go to duke3d_hrp\highres\sprites.def
+Now with a basic text editor edit line 5.
+Line 5 should look like this. //include highres/sprites/firstperson.def
+Save.
+
+
+H. Now go back and delete "E 1," aka duke3d_hrp.zip
+
+I. Repack the duke3d_hrp folder using zip. I used 7-Zip. Once you have a new duke3d_hrp.zip file you can delete the folder.
+
+J. Install Reshade 3.0.4 This is needed to use some lighting & shadows. But, if you don't care for lighting use the newest one.
+ReShade Repository - www.mediafire.com/folder/8ar1jhh1809cl/ReShade_Repository
+Install as OpenGL
+Place my 3D shader in the folder, "A 1 or A 2." Aka Duke Nukem 3D / Duke Nukem 3D Twentieth Anniversary World Tour
+K. Start eduke32.exe in the folder, "A 1 or A 2." Aka Duke Nukem 3D / Duke Nukem 3D Twentieth Anniversary World Tour
+Check Polymer, Enable "autoload" folder, and fullscreen if you like.
+Set Video mode and Input devices
+Click Start
+L. Once in game press ` and open console.
+Use Console Command r_pr_maxlightpasses "1"
+M. Now play the game.
+
+Things to note.
+The new version of Duke will have problems. forums.duke4.net/topic/8966-wip-world-to...mpatibility-stopgap/
+The reason we have to disable the polymer weapon hands. Is that when it's on the screen it removes the rest of the z-Buffer.
+The reason we have to use r_pr_maxlightpasses "1" is to correct a problem with the depth buffer when it set to high.
+Using r_pr_maxlightpasses "1" will make the game darker. But, it's ok.
+Mirrors in the game have problems avoid them.
+
+Other than that my brain thinks that shooting a 3D projectile from a 2D gun is amazing for some reason.
 
 {Duke Nukem 3D Twentieth Anniversary World Tour} - Use ReShade 3.4.1
 Game now works with the new DX11_BUFFER_DETECTION. You can set this also in ReShades DX11 Tab in game.
@@ -901,6 +965,8 @@ https://drive.google.com/file/d/1H2hip1zodIVjlS0BRWeu1Fv3JnnOw8VL/view
 Then you will also need DX8 to DX9 wrapper.
 https://github.com/crosire/d3d8to9/releases
 Last thing you will need to install ReShade as DX9
+
+Side Note Chaos will hurt your Eyes....... Since his trasparent body is not drawn in depth..... So he more evil then you think. That or go play My Roommate Sonic.
 
 {Shadow Tactics: Blades of the Shogun}
 Only way I was able to get this game to run on GOG is to enable the GOG Overlay. If you don't ReShade will crash.

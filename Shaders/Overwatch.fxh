@@ -896,6 +896,10 @@ static const int HMT = 0;                               //HUD Mode Trigger
 	#define DE_X 1
 	#define DE_Y 0.299
 	#define DE_Z 0.400
+#elif (App == 0x71170B42 ) //Blood: Fresh Suppy
+	#define DA_Y 250.0
+	#define DA_X 0.075
+	#define DB_Y 4
 #else
 	#define NP 1 //No Profile
 #endif
