@@ -551,14 +551,14 @@ sampler BackBufferCLAMP
 		AddressW = CLAMP;
 	};
 
-texture texDMN < pooled = true; > { Width = BUFFER_WIDTH ; Height = BUFFER_HEIGHT ; Format = RGBA16F; };
+texture texDMN { Width = BUFFER_WIDTH ; Height = BUFFER_HEIGHT ; Format = RGBA16F; };
 
 sampler SamplerDMN
 	{
 		Texture = texDMN;
 	};
 
-texture texzBufferN < pooled = true; > { Width = BUFFER_WIDTH ; Height = BUFFER_HEIGHT ; Format = RG16F; };
+texture texzBufferN { Width = BUFFER_WIDTH ; Height = BUFFER_HEIGHT ; Format = RG16F; };
 
 sampler SamplerzBufferN
 	{
@@ -1067,25 +1067,26 @@ float DB( float2 texcoord)
 //////////////////////////////////////////////////////////Depth Edge Trimming///////////////////////////////////////////////////////////////////////
 
 float2 zBuffer(in float4 position : SV_Position, in float2 texcoord : TEXCOORD) : SV_Target
-{   float2 SW = pix, n;// Find Edges
-	float t = DB( float2( texcoord.x , texcoord.y - SW.y ) ),
-		  d = DB( float2( texcoord.x , texcoord.y + SW.y ) ),
-		  l = DB( float2( texcoord.x - SW.x , texcoord.y ) ),
-		  r = DB( float2( texcoord.x + SW.x , texcoord.y ) );
-	n = float2(t - d,-(r - l));
-	// Lets make that mask from Edges
-	float Mask = length(n)*abs(Depth_Edge_Mask);
-		  Mask = Mask > 0 ? 1-Mask : 1;
-		  Mask = saturate(lerp(Mask,1,-1));// Super Evil Mix.
-	// Final Depth
-	if(Depth_Edge_Mask > 0)
-		Mask = lerp(0,DB( texcoord.xy ),Mask);
-	else if(Depth_Edge_Mask < 0)
-		Mask = lerp(1,DB( texcoord.xy ),Mask);
-	else
-		Mask = DB( texcoord.xy );
+{	float Mask = DB( texcoord.xy );
+	if(Depth_Edge_Mask > 0 || Depth_Edge_Mask < 0)
+	{
+		float t = DB( float2( texcoord.x , texcoord.y - pix.y ) ),
+			  d = DB( float2( texcoord.x , texcoord.y + pix.y ) ),
+			  l = DB( float2( texcoord.x - pix.x , texcoord.y ) ),
+			  r = DB( float2( texcoord.x + pix.x , texcoord.y ) );
+		float2 n = float2(t - d,-(r - l));
+		// Lets make that mask from Edges
+		Mask = length(n)*abs(Depth_Edge_Mask);
+		Mask = Mask > 0 ? 1-Mask : 1;
+		Mask = saturate(lerp(Mask,1,-1));// Super Evil Mix.
+		// Final Depth
+		if(Depth_Edge_Mask > 0)
+			Mask = lerp(0,DB( texcoord.xy ),Mask);
+		else if(Depth_Edge_Mask < 0)
+			Mask = lerp(1,DB( texcoord.xy ),Mask);
+	}	
 
-return Depth_Edge_Mask >= 0 ? float2(Mask,Mask) : float2(DB( texcoord.xy ),Mask);
+return Depth_Edge_Mask < 0 ? float2(DB( texcoord.xy ),Mask) : float2(Mask,Mask);
 }
 
 float2 GetDB(float2 texcoord)
