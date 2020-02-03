@@ -551,14 +551,14 @@ sampler BackBufferCLAMP
 		AddressW = CLAMP;
 	};
 
-texture texDMN  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA16F; };
+texture texDMN < pooled = true; > { Width = BUFFER_WIDTH ; Height = BUFFER_HEIGHT ; Format = RGBA16F; };
 
 sampler SamplerDMN
 	{
 		Texture = texDMN;
 	};
 
-texture texzBufferN  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = R16F; };
+texture texzBufferN < pooled = true; > { Width = BUFFER_WIDTH ; Height = BUFFER_HEIGHT ; Format = RG16F; };
 
 sampler SamplerzBufferN
 	{
@@ -1023,7 +1023,7 @@ float2 Conv(float D,float2 texcoord)
     return float2(lerp(Convergence,D, ZP),lerp(W_Convergence,D,WZP));
 }
 #define BlurSamples 6  //BlurSamples = # * 2
-float zBuffer(in float4 position : SV_Position, in float2 texcoord : TEXCOORD) : SV_Target
+float DB( float2 texcoord)
 {
 	float3 DM = tex2Dlod(SamplerDMN,float4(texcoord,0,0)).xyz;
 	#if Legacy_Mode
@@ -1065,17 +1065,13 @@ float zBuffer(in float4 position : SV_Position, in float2 texcoord : TEXCOORD) :
 	return DM.y;
 }
 //////////////////////////////////////////////////////////Depth Edge Trimming///////////////////////////////////////////////////////////////////////
-float GetDB(float2 texcoord)
-{
-	return tex2Dlod(SamplerzBufferN, float4(texcoord,0,0) ).x;
-}
 
-float2 DepthEdge(float2 texcoord)
-{   float2 SW = pix, n, DB = GetDB( texcoord.xy );// Find Edges
-	float t = GetDB( float2( texcoord.x , texcoord.y - SW.y ) ),
-		  d = GetDB( float2( texcoord.x , texcoord.y + SW.y ) ),
-		  l = GetDB( float2( texcoord.x - SW.x , texcoord.y ) ),
-		  r = GetDB( float2( texcoord.x + SW.x , texcoord.y ) );
+float2 zBuffer(in float4 position : SV_Position, in float2 texcoord : TEXCOORD) : SV_Target
+{   float2 SW = pix, n;// Find Edges
+	float t = DB( float2( texcoord.x , texcoord.y - SW.y ) ),
+		  d = DB( float2( texcoord.x , texcoord.y + SW.y ) ),
+		  l = DB( float2( texcoord.x - SW.x , texcoord.y ) ),
+		  r = DB( float2( texcoord.x + SW.x , texcoord.y ) );
 	n = float2(t - d,-(r - l));
 	// Lets make that mask from Edges
 	float Mask = length(n)*abs(Depth_Edge_Mask);
@@ -1083,14 +1079,20 @@ float2 DepthEdge(float2 texcoord)
 		  Mask = saturate(lerp(Mask,1,-1));// Super Evil Mix.
 	// Final Depth
 	if(Depth_Edge_Mask > 0)
-		Mask = lerp(0,GetDB( texcoord.xy ),Mask);
+		Mask = lerp(0,DB( texcoord.xy ),Mask);
 	else if(Depth_Edge_Mask < 0)
-		Mask = lerp(1,GetDB( texcoord.xy ),Mask);
+		Mask = lerp(1,DB( texcoord.xy ),Mask);
 	else
-		Mask = GetDB( texcoord.xy );
+		Mask = DB( texcoord.xy );
 
-return Depth_Edge_Mask >= 0 ? float2(Mask,Mask) : float2(GetDB( texcoord.xy ),Mask);
+return Depth_Edge_Mask >= 0 ? float2(Mask,Mask) : float2(DB( texcoord.xy ),Mask);
 }
+
+float2 GetDB(float2 texcoord)
+{
+	return tex2Dlod(SamplerzBufferN, float4(texcoord,0,0) ).xy;
+}
+
 //////////////////////////////////////////////////////////Parallax Generation///////////////////////////////////////////////////////////////////////
 float2 Parallax(float Diverge, float2 Coordinates, float IO) // Horizontal parallax offset & Hole filling effect
 {   float2 ParallaxCoord = Coordinates;
@@ -1101,17 +1103,17 @@ float2 Parallax(float Diverge, float2 Coordinates, float IO) // Horizontal paral
 	for ( int i = 0 ; i <= 4; ++i )
 	{   N = S[i] * MS;
 		if(View_Mode == 1)
-		{   LRDepth = min(DepthLR, DepthEdge(float2(ParallaxCoord.x + N, ParallaxCoord.y)).x );
+		{   LRDepth =  min(DepthLR, GetDB(float2(ParallaxCoord.x + N, ParallaxCoord.y)).x );
 			DLR = LRDepth;
-			LRDepth += min(DepthLR, DepthEdge(float2(ParallaxCoord.x + (N * 0.75f), ParallaxCoord.y)).x );
-			LRDepth += min(DepthLR, DepthEdge(float2(ParallaxCoord.x + (N * 0.500f), ParallaxCoord.y)).x );
-			LRDepth += min(DepthLR, DepthEdge(float2(ParallaxCoord.x + (N * 0.250f), ParallaxCoord.y)).x );
+			LRDepth += min(DepthLR, GetDB(float2(ParallaxCoord.x + (N * 0.75f), ParallaxCoord.y)).x );
+			LRDepth += min(DepthLR, GetDB(float2(ParallaxCoord.x + (N * 0.500f), ParallaxCoord.y)).x );
+			LRDepth += min(DepthLR, GetDB(float2(ParallaxCoord.x + (N * 0.250f), ParallaxCoord.y)).x );
 			DepthLR = min(DepthLR,LRDepth / 4.0f);
 
 			DepthLR = lerp(DepthLR, DLR, 0.1875f);
 		}
 		else
-		DepthLR = min(DepthLR, DepthEdge(float2(ParallaxCoord.x + N, ParallaxCoord.y)).x );
+		DepthLR = min(DepthLR, GetDB(float2(ParallaxCoord.x + N, ParallaxCoord.y)).x );
 	}
 	//Reprojection Left and Right
 	ParallaxCoord = float2(Coordinates.x + MS * DepthLR, Coordinates.y);
@@ -1123,7 +1125,7 @@ float2 Parallax(float Diverge, float2 Coordinates, float IO) // Horizontal paral
 	// Offset per step progress & Limit
 	float LayerDepth = rcp(Steps), TP = 0.03;
 	//Offsets listed here Max Seperation is 3% - 8% of screen space with Depth Offsets & Netto layer offset change based on MS.
-	float deltaCoordinates = MS * LayerDepth, CurrentDepthMapValue = DepthEdge(ParallaxCoord).x, CurrentLayerDepth = 0, DepthDifference;
+	float deltaCoordinates = MS * LayerDepth, CurrentDepthMapValue = GetDB(ParallaxCoord).x, CurrentLayerDepth = 0, DepthDifference;
 	float2 DB_Offset = float2(Diverge * TP, 0) * pix;
 
     if(View_Mode == 1)
@@ -1134,7 +1136,7 @@ float2 Parallax(float Diverge, float2 Coordinates, float IO) // Horizontal paral
 	{   // Shift coordinates horizontally in linear fasion
 	    ParallaxCoord.x -= deltaCoordinates;
 	    // Get depth value at current coordinates
-	    CurrentDepthMapValue = DepthEdge(float2(ParallaxCoord - DB_Offset)).x;
+	    CurrentDepthMapValue = GetDB(float2(ParallaxCoord - DB_Offset)).x;
 	    // Get depth of next layer
 	    CurrentLayerDepth += LayerDepth;
 		continue;
@@ -1148,14 +1150,14 @@ float2 Parallax(float Diverge, float2 Coordinates, float IO) // Horizontal paral
 			// Shift coordinates horizontally in linear fasion
 			ParallaxCoord.x -= deltaCoordinates;
 			// Get depth value at current coordinates
-			CurrentDepthMapValue = DepthEdge(ParallaxCoord - DB_Offset);
+			CurrentDepthMapValue = GetDB(ParallaxCoord - DB_Offset).x;
 			// Get depth of next layer
 			CurrentLayerDepth += LayerDepth;
 	}
 	#endif
 	// Parallax Occlusion Mapping
 	float2 PrevParallaxCoord = float2(ParallaxCoord.x + deltaCoordinates, ParallaxCoord.y);
-	float beforeDepthValue = DepthEdge(ParallaxCoord ).y, afterDepthValue = CurrentDepthMapValue - CurrentLayerDepth;
+	float beforeDepthValue = GetDB(ParallaxCoord ).y, afterDepthValue = CurrentDepthMapValue - CurrentLayerDepth;
 		beforeDepthValue += LayerDepth - CurrentLayerDepth;
 	// Interpolate coordinates
 	float weight = afterDepthValue / (afterDepthValue - beforeDepthValue);

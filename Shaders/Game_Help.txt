@@ -385,54 +385,53 @@ So I don't think this will get fixed anytime soon.
 
 {Blood 2} - ReShade 4.0.2
 You need DGVooDoo2 installed with the following settings and information.
-First Start DGVoodoo 2.55.4 Control Panel
-Config folder /Running instance click "Add" and guide it to your GOG Games "Blood 2," Folder.
--=General Tab=- 
+First Start DGVoodoo "2.62.3" Control Panel
+
+Right Click The dgVoodoo Logo and click on, "SHOW ALL SECTIONS OF THE CONFIGURATION."
+Now look for Config folder /Running instance click "Add" and guide it to your GOG Games "Blood 2," Folder.
+-=General=- 
 	+Output API: Best 
+	Apperance
+	⦿ Windowed [Unspecified]
 	-Keep Window Aspect
 	-Capture Mouse
 	+Center App Window
 -=DirectX=-
-	+Videocard: dgVoodoo Virtual 3D - VRAM 1024
+	+Videocard: dgVoodoo Virtual 3D - VRAM 2048
 	+Texture Filtering: Force Ani 16x
-	+Resolution: Unforced
+	+Resolution: Unforced or your Native Res
 	+Application Controlled FullScreen/windowed state
+	-Disable Alt-Enter to toggle screen state
 	+Bilinear Bit strecthing
 	+Fast Video Memory Access
 	+Apply Phong
 	+Antialiasing (MSAA): Off
+-=GeneralExt=-
+	+Borderless
+	+Always on top
+	+Free Mouse
+-=DirectXExt=-
+	Miscellaneous [Force 24 bit as minimum]▼
 Apply settings then hit OK.
 
-Navigate to the Folder and look for "dgVoodoo.conf," open it up with note pad.
-You want to look for "DirectXExt," section.
-[DirectXExt] 
-you want to change DepthBuffersBitDepth from appdriven to forcemin24bit
+One you are done with that go back to the dgVoodoo Folder and open the MS folder - x86. Copy D3DImm.dll, and DDraw.dll into your GOG Games "Blood 2," Folder. 
 
-DepthBuffersBitDepth                = appdriven
-TO
-DepthBuffersBitDepth                = forcemin24bit
+Now Install MY "Blood2 Patch for Depth 3D." http://www.mediafire.com/file/3mxvwci29qi0fqp/Blood2PatchDepth3D%2BMods.zip
 
-One you are done with that go back to the dgVoodoo Folder and open the MS folder. Copy D3DImm.dll, and DDraw.dll into your GOG Games "Blood 2," Folder. 
+Click on my included Bat files to start the game.
+Depth3D_Blood2_Nightmare_Start.bat
+or
+Depth3D_Blood2_Start.bat
 
-Start your game with the GoG app.
-Check Nightmares Add-on
-Click on Advanced..
-
-Check Box list:
-Disable DirectX6 commands
-Enable Optimized surfaces
-Enable Poly Gap Fixing
-Enable mipmap sharpening
-
-Click OK
-
-Click Launch Nightmares.
-
+// May not need this part.
 Windows 10 Issues Black Box only audio work around.
-You will have to click Launch Nightmares and click again a window before the game launches then alt-tab back to the the game.
+You will have to click My Bat file then click again on the black window before the game launches then alt-tab back to the the game.
 
 AMD White Texture work around. Find detailhi.cfg in the Blood 2 folder and set "MipmapOffset" to "1.000000"
 You will lose a lot of texture detail. I do not recommend playing like this.
+
+Now For Mods you will have click on the Bat files provided.
+//
 
 {Call of Duty: Modern Warfare 2019} - ReShade 4.4.2 [Some people had some luck with ReShade 4.2.]
 First of all please set the game's "Shadow Map Resolution to [Normal <>]." Also Make sure you turn off DOF and Motion Blur.
