@@ -115,7 +115,7 @@ static const int HMT = 0;                               //HUD Mode Trigger
 	#define DA_Y 6.25
 	#define DB_Y 2
 	#define DB_W 7
-#elif (App == 0x142EDFD6 || App == 0x2A0ECCC9 )	//DOOM 2016
+#elif (App == 0x142EDFD6 || App == 0x2A0ECCC9 || 0x8B0C2031 )	//DOOM 2016
 	#define DA_Y 20.0
 	#define DB_Y 3
 	#define DB_W 8
