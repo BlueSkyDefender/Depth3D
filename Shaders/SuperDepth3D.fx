@@ -9,7 +9,7 @@
 //* Original work was based on the shader code from
 //* CryTech 3 Dev http://www.slideshare.net/TiagoAlexSousa/secrets-of-cryengine-3-graphics-technology
 //* Also Fu-Bama a shader dev at the reshade forums https://reshade.me/forum/shader-presentation/5104-vr-universal-shader
-//* Also had to rework Philippe David http://graphics.cs.brown.edu/games/SteepParallax/index.html code to work with reshade. This is used for the parallax effect.
+//* Also had to rework Philippe David http://graphics.cs.brown.edu/games/SteepParallax/index.html code to work with ReShade. This is used for the parallax effect.
 //* This idea was taken from this shader here located at https://github.com/Fubaxiusz/fubax-shaders/blob/596d06958e156d59ab6cd8717db5f442e95b2e6b/Shaders/VR.fx#L395
 //* It's also based on Philippe David Steep Parallax mapping code. If I missed any information please contact me so I can make corrections.
 //*
@@ -774,7 +774,7 @@ float3 Weapon_Profiles()//Tried Switch But, can't compile in some older versions
     else if(WP == 7)
         return float3(0.276,20.0,9.5625);    //WP 5  | Skyrim: SE #3950D04E
     else if(WP == 8)
-        return float3(0.338,20.0,9.25);      //WP 6  | DOOM 2016 #142EDFD6
+        return float3(0.338,20.0,9.20);      //WP 6  | DOOM 2016 #142EDFD6
     else if(WP == 9)
         return float3(0.255,177.5,63.025);   //WP 7  | CoD:Black Ops #17232880 CoD:MW2 #9D77A7C4 CoD:MW3 #22EF526F
     else if(WP == 10)
@@ -1084,7 +1084,7 @@ float2 zBuffer(in float4 position : SV_Position, in float2 texcoord : TEXCOORD) 
 			Mask = lerp(0,DB( texcoord.xy ),Mask);
 		else if(Depth_Edge_Mask < 0)
 			Mask = lerp(1,DB( texcoord.xy ),Mask);
-	}	
+	}
 
 return Depth_Edge_Mask < 0 ? float2(DB( texcoord.xy ),Mask) : float2(Mask,Mask);
 }
