@@ -1,7 +1,7 @@
 ////----------------------------------------//
 ///SuperDepth3D Overwatch Automation Shader///
 //----------------------------------------////
-// Version 1.1
+// Version 1.2
 //---------------------------------------OVERWATCH---------------------------------------//
 // If you are reading this stop. Go away and never look back. From this point on if you  //
 // still think it's is worth looking at this..... Then no one can save you or your soul. //
@@ -90,7 +90,7 @@ static const int HMT = 0;                               //HUD Mode Trigger
 		#define App 0xABAA2255
 	#elif exists "MonsterHunterWorld.exe"                 //Monster Hunter World
 		#define App 0xDB3A28BD
-	#elif exists "FarCry5.exe"                 //Farcry 5
+	#elif exists "FarCry5.exe"                            //Farcry 5
 		#define App 0xC150B805
 	#else
 		#define App sApp
@@ -115,7 +115,7 @@ static const int HMT = 0;                               //HUD Mode Trigger
 	#define DA_Y 6.25
 	#define DB_Y 2
 	#define DB_W 7
-#elif (App == 0x142EDFD6 || App == 0x2A0ECCC9 || 0x8B0C2031 )	//DOOM 2016
+#elif (App == 0x142EDFD6 || App == 0x2A0ECCC9 || App == 0x8B0C2031 )	//DOOM 2016
 	#define DA_Y 20.0
 	#define DB_Y 3
 	#define DB_W 8
@@ -300,14 +300,14 @@ static const int HMT = 0;                               //HUD Mode Trigger
 	#define DA_Z 0.001
 	#define DA_X 0.150
 	#define DB_Y 5
-	#define DB_Z 0.305 //Under Review
+	#define DB_Z 0.305
 	#define DB_X 1
 	#define TW 1
 #elif (App == 0xE63BF4A4 )	//World of Warcraft DX12
 	#define DA_Y 7.5
 	#define DA_W 1
 	#define DB_Y 3
-	#define DB_Z 0.1375 //Under Review
+	#define DB_Z 0.1375
 	#define TW 1
 #elif (App == 0x5961D1CC )	//Requiem: Avenging Angel
 	#define DA_Y 37.5
@@ -900,6 +900,13 @@ static const int HMT = 0;                               //HUD Mode Trigger
 	#define DA_Y 250.0
 	#define DA_X 0.075
 	#define DB_Y 4
+#elif (App == 0x8F615A99 ) //Frostpunk
+	#define DA_Y 9.375
+	#define DA_X 0.250
+	#define DB_Y 4
+	#define DE_X 1
+	#define DE_Y 0.5
+	#define DE_Z 0.400
 #else
 	#define NP 1 //No Profile
 #endif
