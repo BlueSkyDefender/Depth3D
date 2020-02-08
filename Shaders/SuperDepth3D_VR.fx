@@ -440,10 +440,19 @@ uniform bool Theater_Mode <
 	ui_category = "Image Adjustment";
 > = false;
 
-uniform float Vignette <
+uniform float Blinders <
+	ui_type = "slider";
+	ui_min = 0.0; ui_max = 1.0;
+	ui_label = "·Blinders·";
+	ui_tooltip = "Lets you adjust blinders sensitivity.\n"
+				 "Default is Zero, Off.";
+	ui_category = "Image Effects";
+> = 0;
+
+uniform float Adjust_Vignette <
 	ui_type = "slider";
 	ui_min = 0; ui_max = 1;
-	ui_label = "·Vignette·";
+	ui_label = " Vignette";
 	ui_tooltip = "Soft edge effect around the image.";
 	ui_category = "Image Effects";
 > = 0.0;
@@ -510,6 +519,13 @@ sampler BackBuffer
 		AddressW = BORDER;
 	};
 
+sampler BackBufferCLAMP
+	{
+		Texture = BackBufferTex;
+		AddressU = CLAMP;
+		AddressV = CLAMP;
+		AddressW = CLAMP;
+	};
 
 
 texture texDMVR  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA16F; };
@@ -524,6 +540,9 @@ texture texzBufferVR  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = R
 sampler SamplerzBufferVR
 	{
 		Texture = texzBufferVR;
+		AddressU = MIRROR;
+		AddressV = MIRROR;
+		AddressW = MIRROR;
 	};
 
 #if UI_MASK
@@ -532,6 +551,26 @@ sampler SamplerMaskA { Texture = TexMaskA;};
 texture TexMaskB < source = "Mask_B.png"; > { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA8; };
 sampler SamplerMaskB { Texture = TexMaskB;};
 #endif
+////////////////////////////////////////////////////Stored BackBuffer Texture/////////////////////////////////////////////////////////////////
+texture TexStoreBB  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = R8; };
+
+sampler SamplerSBB
+	{
+		Texture = TexStoreBB;
+		AddressU = BORDER;
+		AddressV = BORDER;
+		AddressW = BORDER;
+	};
+
+texture texPBVR  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = R8; };
+
+sampler SamplerPBBVR
+	{
+		Texture = texPBVR;
+		AddressU = BORDER;
+		AddressV = BORDER;
+		AddressW = BORDER;
+	};	
 ///////////////////////////////////////////////////////Left Right Textures////////////////////////////////////////////////////////////////////
 texture LeftTex  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA8; };
 
@@ -559,6 +598,14 @@ sampler SamplerLumVR
 	{
 		Texture = texLumVR;
 	};
+
+texture texOtherVR {Width = 256*0.5; Height = 256*0.5; Format = R16F; MipLevels = 8;}; //Sample at 256x256/2 and a mip bias of 8 should be 1x1
+
+sampler SamplerOtherVR
+	{
+		Texture = texOtherVR;
+	};
+
 
 float2 Lum(float2 texcoord)
 	{   //Luminance
@@ -593,11 +640,13 @@ float3 PBD(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Targe
 return tex2D(BackBufferCLAMP,uv).rgb;
 }
 #endif
-///////////////////////////////////////////////////////////3D Image Adjustments/////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////3D Image Adjustments///////////////////////////////////////////////////////////////
 float4 CSB(float2 texcoords)
-{
+{   //Cal Basic Vignette
+	float2 TC = -texcoords * texcoords*32 + texcoords*32;
+	
 	if(!Depth_Map_View)
-		return tex2Dlod(BackBuffer,float4(texcoords,0,0));
+		return tex2Dlod(BackBuffer,float4(texcoords,0,0)) * smoothstep(0,Adjust_Vignette*27.0f,TC.x * TC.y);
 	else
 		return tex2D(SamplerzBufferVR,texcoords).xxxx;
 }
@@ -690,7 +739,7 @@ float Depth(float2 texcoord)
 }
 /////////////////////////////////////////////////////////Fade In and Out Toggle/////////////////////////////////////////////////////////////////////
 float Fade_in_out(float2 texcoord)
-{ float Trigger_Fade, AA = (1-Fade_Time_Adjust)*1000, PStoredfade = tex2D(SamplerLumVR,texcoord - 1).z;
+{ float Trigger_Fade, AA = (1-Fade_Time_Adjust)*1000, PStoredfade = tex2D(SamplerLumVR,0).z;
 	//Fade in toggle.
 	if(FPSDFIO == 1)
 		Trigger_Fade = Trigger_Fade_A;
@@ -732,9 +781,14 @@ float Fade(float2 texcoord)
 			}
 		}
 	}
-	float Trigger_Fade = Detect, AA = (1-(ZPD_Boundary_n_Fade.y*2.))*1000, PStoredfade = tex2Dlod(SamplerLumVR,float4(texcoord + 1,0,0)).z;
+	float Trigger_Fade = Detect, AA = (1-(ZPD_Boundary_n_Fade.y*2.))*1000, PStoredfade = tex2D(SamplerLumVR,1).z;
 	//Fade in toggle.
 	return PStoredfade + (Trigger_Fade - PStoredfade) * (1.0 - exp(-frametime/AA)); ///exp2 would be even slower
+}
+
+float Motion_Blinders(float2 texcoord)
+{   float Trigger_Fade = tex2Dlod(SamplerOtherVR,float4(texcoord,0,11)).x * lerp(0.0,25.0,Blinders), AA = (1-Fade_Time_Adjust)*1000, PStoredfade = tex2D(SamplerLumVR,float2(0,1)).z;
+	return PStoredfade + (Trigger_Fade - PStoredfade) * (1.0 - exp2(-frametime/AA)); ///exp2 would be even slower
 }
 //////////////////////////////////////////////////////////Depth Map Alterations/////////////////////////////////////////////////////////////////////
 float3 Weapon_Profiles()//Tried Switch But, can't compile in some older versions of ReShade.
@@ -929,10 +983,12 @@ float3 DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD)
 	if (WZPD_and_WND.y > 0)
 		R = lerp(ScaleND,R,smoothstep(0,0.25,ScaleND));
 
-		if(texcoord.x < pix.x * 2 && texcoord.y < pix.y * 2)
+		if(texcoord.x < pix.x * 2 && texcoord.y < pix.y * 2)//TL
 			R = Fade_in_out(texcoord);
-		if(1-texcoord.x < pix.x * 2 && 1-texcoord.y < pix.y * 2)
+		if(1-texcoord.x < pix.x * 2 && 1-texcoord.y < pix.y * 2)//BR
 			R = Fade(texcoord);
+		if(texcoord.x < pix.x * 2 && 1-texcoord.y < pix.y * 2)//BL
+			R = Motion_Blinders(texcoord);
 		//Alpha Don't work in DX9
 	return saturate(float3(R,G,B));
 }
@@ -1121,8 +1177,8 @@ float4 saturation(float4 C)
    return lerp(greyscale.xxxx, C, (Saturation + 1.0));
 }
 
-void LR_Out(float4 position : SV_Position, float2 texcoord : TEXCOORD, out float4 Left : SV_Target0, out float4 Right : SV_Target1)
-{
+void LR_Out(float4 position : SV_Position, float2 texcoord : TEXCOORD, out float4 Left : SV_Target0, out float4 Right : SV_Target1, out float StoreBB : SV_Target2)
+{   StoreBB = dot(tex2D(BackBufferCLAMP,texcoord).rgb,float3(0.2125, 0.7154, 0.0721));
 	//Field of View
 	float fov = FoV-(FoV*0.2), F = -fov + 1,HA = (F - 1)*(BUFFER_WIDTH*0.5)*pix.x;
 	//Field of View Application
@@ -1186,7 +1242,7 @@ float4 Circle(float4 C, float2 TC)
 	uv = float2((TC.x*C_A.x)-midHV.x,(TC.y*C_A.y)-midHV.y);
 
 	float borderA = 2.5; // 0.01
-	float borderB = Vignette*0.1; // 0.01
+	float borderB = 0.003;//Vignette*0.1; // 0.01
 	float circle_radius = 0.55; // 0.5
 	float4 circle_color = 0; // vec4(1.0, 1.0, 1.0, 1.0)
 	float2 circle_center = 0.5; // vec2(0.5, 0.5)
@@ -1201,20 +1257,24 @@ float4 Circle(float4 C, float2 TC)
 	return lerp(circle_color, C,t);
 }
 
-float3 VigneteL(float2 texcoord)
-{
-	float2 TC = -texcoord * texcoord*32 + texcoord*32;
-	float3 Left = tex2D(SamplerLeft,texcoord).rgb;
-		Left *= smoothstep(0,Vignette*27.0f,TC.x * TC.y);
-return Left;
+float Vignette(float2 TC)
+{   float CalculateV = lerp(1.0,0.25,smoothstep(0,1, Motion_Blinders(TC) ));
+	float2 IOVig = float2(CalculateV * 0.75,CalculateV),center = float2(0.5,0.5); // Position for the innter and Outer vignette + Magic number scaling
+	float distance = length(center-TC),Out = 0;
+	// Generate the Vignette with Clamp which go from outer Viggnet ring to inner vignette ring with smooth steps
+	if(Blinders > 0)
+		Out = 1-saturate((IOVig.x-distance) / (IOVig.y-IOVig.x));
+	return Out;
 }
 
-float3 VigneteR(float2 texcoord)
-{
-	float2 TC = -texcoord * texcoord*32 + texcoord*32;
-	float3 Left = tex2D(SamplerRight,texcoord).rgb;
-		Left *= smoothstep(0,Vignette*27.0f,TC.x * TC.y);
-return Left;
+float3 L(float2 texcoord)
+{   float3 Left = tex2D(SamplerLeft,texcoord).rgb;
+	return lerp(Left,0,Vignette(texcoord));
+}
+
+float3 R(float2 texcoord)
+{   float3 Right = tex2D(SamplerRight,texcoord).rgb;
+	return lerp(Right,0,Vignette(texcoord));
 }
 
 float2 BD(float2 p, float k1, float k2) //Polynomial Lens + Radial lens undistortion filtering Left & Right
@@ -1269,21 +1329,21 @@ float3 PS_calcLR(float2 texcoord)
 		uv_greenR = BD(TCR.xy,K1_Green,K2_Green);
 		uv_blueR = BD(TCR.xy,K1_Blue,K2_Blue);
 
-		color_redL = VigneteL(uv_redL).r;
-		color_greenL = VigneteL(uv_greenL).g;
-		color_blueL = VigneteL(uv_blueL).b;
+		color_redL = L(uv_redL).r;
+		color_greenL = L(uv_greenL).g;
+		color_blueL = L(uv_blueL).b;
 
-		color_redR = VigneteR(uv_redR).r;
-		color_greenR = VigneteR(uv_greenR).g;
-		color_blueR = VigneteR(uv_blueR).b;
+		color_redR = R(uv_redR).r;
+		color_greenR = R(uv_greenR).g;
+		color_blueR = R(uv_blueR).b;
 
 		Left = float4(color_redL.x, color_greenL.y, color_blueL.z, 1.0);
 		Right = float4(color_redR.x, color_greenR.y, color_blueR.z, 1.0);
 	}
 	else
 	{
-		Left = VigneteL(TCL).rgb;
-		Right = VigneteR(TCR).rgb;
+		Left = L(TCL).rgb;
+		Right = R(TCR).rgb;
 	}
 
 	if(Barrel_Distortion == 0)
@@ -1296,7 +1356,12 @@ float3 PS_calcLR(float2 texcoord)
 	return color.rgb;
 }
 /////////////////////////////////////////////////////////Average Luminance Textures/////////////////////////////////////////////////////////////////
-float3 Average_Luminance(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Target
+float Past_BufferVR(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Target
+{
+	return tex2D(SamplerSBB,texcoord).x;
+}
+
+void Average_Luminance(float4 position : SV_Position, float2 texcoord : TEXCOORD, out float3 AL : SV_Target0, out float Other : SV_Target1)
 {
 	float4 ABEA, ABEArray[6] = {
 		float4(0.0,1.0,0.0, 1.0),           //No Edit
@@ -1312,9 +1377,12 @@ float3 Average_Luminance(float4 position : SV_Position, float2 texcoord : TEXCOO
 	if(RE)
 	Average_Lum_Bottom = tex2D(SamplerDMVR,float2( 0.125 + texcoord.x * 0.750,0.95 + texcoord.y)).x;
 
-	float Storage = texcoord < 0.5 ? tex2D(SamplerDMVR,0).x : tex2D(SamplerDMVR,1).x;
-
-	return float3(Average_Lum_ZPD,Average_Lum_Bottom,Storage);
+	float Storage_A = texcoord.x < 0.5 ? tex2D(SamplerDMVR,float2(0,0)).x : tex2D(SamplerDMVR,float2(1,1)).x;
+	float Storage_B = texcoord.x < 0.5 ? tex2D(SamplerDMVR,float2(0,1)).x : 0;//tex2D(SamplerDMVR,float2(0,1)).x;
+	float Storage = texcoord.y < 0.5 ? Storage_A : Storage_B;
+	
+	AL = float3(Average_Lum_ZPD,Average_Lum_Bottom,Storage);
+	Other = length(tex2D(SamplerSBB,texcoord).x - tex2D(SamplerPBBVR,texcoord).x);//Motion_Detection
 }
 /////////////////////////////////////////////////////////////////////////Logo///////////////////////////////////////////////////////////////////////
 float3 Out(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Target
@@ -1538,6 +1606,7 @@ technique SuperDepth3D_VR
 		PixelShader = LR_Out;
 		RenderTarget0 = LeftTex;
 		RenderTarget1 = RightTex;
+		RenderTarget2 = TexStoreBB;
 	}
 		pass StereoOut
 	{
@@ -1553,6 +1622,13 @@ technique SuperDepth3D_VR
 	{
 		VertexShader = PostProcessVS;
 		PixelShader = Average_Luminance;
-		RenderTarget = texLumVR;
+		RenderTarget0 = texLumVR;
+		RenderTarget1 = texOtherVR;
+	}
+		pass PastBBVR
+	{
+		VertexShader = PostProcessVS;
+		PixelShader = Past_BufferVR;
+		RenderTarget = texPBVR;
 	}
 }
