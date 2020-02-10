@@ -98,7 +98,7 @@ uniform bool No_Depth_Map <
 	ui_label = "No Depth Map";
 	ui_tooltip = "If you have No Depth Buffer turn this On.";
 	ui_category = "Depth Buffer";
-> = false;
+> = true;
 
 uniform float Shade_Power <
 	#if Compatibility
@@ -273,8 +273,8 @@ float DepthCues(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_
 		result *= rcp(9);
 
 	// Formula for Image Pop = Original + (Original / Blurred).
-	float DC = BB(texcoord,0) / result;
-return saturate(lerp(1.0f,DC,Shade_Power));
+	//float DC = BB(texcoord,0) / result;
+return saturate(lerp(1.0f,BB(texcoord,0) / result,Shade_Power));
 }
 
 float3 ShaderOut_DC(float2 texcoord : TEXCOORD0)

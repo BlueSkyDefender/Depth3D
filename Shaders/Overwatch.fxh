@@ -76,21 +76,21 @@ static const int HMT = 0;                               //HUD Mode Trigger
 
 //Check for ReShade Version for 64bit game Bug.
 #if !defined(__RESHADE__) || __RESHADE__ < 43000
-	#if exists "ACU.exe"                                  //Assassin's Creed Unity
+	#if exists "ACU.exe"                                //Assassin's Creed Unity
 		#define App 0xA0762A98
-	#elif exists "BatmanAK.exe"                           //Batman Arkham Knight
+	#elif exists "BatmanAK.exe"                         //Batman Arkham Knight
 		#define App 0x4A2297E4
-	#elif exists "DOOMx64.exe"                            //DOOM 2016
+	#elif exists "DOOMx64.exe"                          //DOOM 2016
 		#define App 0x142EDFD6
-	#elif exists "RED-Win64-Shipping.exe"                 //DragonBall Fighters Z
+	#elif exists "RED-Win64-Shipping.exe"               //DragonBall Fighters Z
 		#define App 0x31BF8AF6
-	#elif exists "HellbladeGame-Win64-Shipping.exe"       //Hellblade Senua's Sacrifice
+	#elif exists "HellbladeGame-Win64-Shipping.exe"     //Hellblade Senua's Sacrifice
 		#define App 0xAAA18268
-	#elif exists "TheForest.exe"                          //The Forest
+	#elif exists "TheForest.exe"                        //The Forest
 		#define App 0xABAA2255
-	#elif exists "MonsterHunterWorld.exe"                 //Monster Hunter World
+	#elif exists "MonsterHunterWorld.exe"               //Monster Hunter World
 		#define App 0xDB3A28BD
-	#elif exists "FarCry5.exe"                            //Farcry 5
+	#elif exists "FarCry5.exe"                          //Farcry 5
 		#define App 0xC150B805
 	#else
 		#define App sApp
@@ -907,6 +907,16 @@ static const int HMT = 0;                               //HUD Mode Trigger
 	#define DE_X 1
 	#define DE_Y 0.5
 	#define DE_Z 0.400
+#elif (App == 0x29B47A0A ) //KingMaker
+    #define DB_X 1
+    #define DA_W 1
+	#define DA_Y 18.75
+    #define DA_Z 0.0075
+	#define DA_X 0.150
+	#define DB_Y 5
+	#define DE_X 1
+	#define DE_Y 0.5
+	#define DE_Z 0.300
 #else
 	#define NP 1 //No Profile
 #endif
