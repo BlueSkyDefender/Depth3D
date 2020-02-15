@@ -36,9 +36,8 @@
  //*
  //* https://github.com/BlueSkyDefender/Depth3D
  //*
- //* Have fun,
- //* Jose Negrete AKA BlueSkyDefender
- //*
+ //* Special thank you too "Jak0bW" j4712@web.de For Mouse Compatibility & Guidance.
+ //* Please feel free to message him for help and information
  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 uniform float Clamping_Adjust <
@@ -183,8 +182,11 @@ float4 TAA(float2 texcoord)
 
 void Out(float4 position : SV_Position, float2 texcoord : TEXCOORD, out float4 color : SV_Target)
 {
-	float PosX = 0.9525f*BUFFER_WIDTH*pix.x,PosY = 0.975f*BUFFER_HEIGHT*pix.y;
+	float PosX = 0.9525f*BUFFER_WIDTH*pix.x,PosY = 0.975f*BUFFER_HEIGHT*pix.y, Scale = 1;
 	float3 D,E,P,T,H,Three,DD,Dot,I,N,F,O;
+  float4 T_A_A = TAA(texcoord);
+  if(texcoord.x < pix.x * Scale && 1-texcoord.y < pix.y * Scale)
+    T_A_A = float4(0,1,1,1); //Jak0bW Suggestion for Mouse Jiggle Wiggle
 
 	[branch] if(timer <= 12500)
 	{
@@ -267,10 +269,10 @@ void Out(float4 position : SV_Position, float2 texcoord : TEXCOORD, out float4 c
 		float3 TwoO = all( abs(float2( texcoord.x -PosXO, texcoord.y-PosYO)) < float2(0.002,0.003));
 		O = OneO-TwoO;
 		//Website
-		color = float4(D+E+P+T+H+Three+DD+Dot+I+N+F+O,1.) ? 1-texcoord.y*50.0+48.35f : TAA(texcoord);
+		color = float4(D+E+P+T+H+Three+DD+Dot+I+N+F+O,1.) ? 1-texcoord.y*50.0+48.35f : T_A_A;
 	}
 	else
-		color = TAA(texcoord);
+		color = T_A_A;
 }
 
 void Current_BackBuffer(float4 position : SV_Position, float2 texcoord : TEXCOORD, out float4 color : SV_Target)
