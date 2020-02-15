@@ -104,7 +104,7 @@ uniform float timer < source = "timer"; >;
 ///////////////////////////////////////////////////////////TAA/////////////////////////////////////////////////////////////////////
 #define pix float2(BUFFER_RCP_WIDTH, BUFFER_RCP_HEIGHT)
 #define iResolution float2(BUFFER_WIDTH, BUFFER_HEIGHT)
-//#define Alternate framecount % 2 == 0
+#define Alternate framecount % 2 == 0
 
 float4 BB_H(float2 TC)
 {
@@ -182,11 +182,11 @@ float4 TAA(float2 texcoord)
 
 void Out(float4 position : SV_Position, float2 texcoord : TEXCOORD, out float4 color : SV_Target)
 {
-	float PosX = 0.9525f*BUFFER_WIDTH*pix.x,PosY = 0.975f*BUFFER_HEIGHT*pix.y, Scale = 1;
+	float PosX = 0.9525f*BUFFER_WIDTH*pix.x,PosY = 0.975f*BUFFER_HEIGHT*pix.y, Scale = 2;
 	float3 D,E,P,T,H,Three,DD,Dot,I,N,F,O;
   float4 T_A_A = TAA(texcoord);
   if(texcoord.x < pix.x * Scale && 1-texcoord.y < pix.y * Scale)
-    T_A_A = float4(0,1,1,1); //Jak0bW Suggestion for Mouse Jiggle Wiggle
+    T_A_A = Alternate ? 0 : 1; //Jak0bW Suggestion for Mouse Jiggle Wiggle
 
 	[branch] if(timer <= 12500)
 	{
