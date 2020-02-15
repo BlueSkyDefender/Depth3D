@@ -149,9 +149,9 @@ float4 TAA(float2 texcoord)
 	float3 minColor = encodePalYuv(tex2D(BackBuffer, texcoord + XYoffset[0]).rgb) - MB;
 	float3 maxColor = encodePalYuv(tex2D(BackBuffer, texcoord + XYoffset[0]).rgb) + MB;
 	for(int i = 1; i < 9; ++i)
-	{
-		minColor = min(minColor,encodePalYuv(tex2D(BackBuffer, texcoord + XYoffset[i]).rgb)) - MB;
-		maxColor = max(maxColor,encodePalYuv(tex2D(BackBuffer, texcoord + XYoffset[i]).rgb)) + MB;
+	{ //DX9 work around.
+		minColor = min(minColor,encodePalYuv(tex2Dlod(BackBuffer, float4(texcoord + XYoffset[i],0,0)).rgb)) - MB;
+		maxColor = max(maxColor,encodePalYuv(tex2Dlod(BackBuffer, float4(texcoord + XYoffset[i],0,0)).rgb)) + MB;
 	}
 	antialiased = encodePalYuv(antialiased);
 
@@ -177,6 +177,7 @@ float4 TAA(float2 texcoord)
 	if(Debug)
 		antialiased = mixRate;
 
+    //Need to check for DX9
     return float4(antialiased,mixRate);
 }
 
