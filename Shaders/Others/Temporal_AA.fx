@@ -66,7 +66,25 @@ uniform float Persistence <
 	ui_category = "TAA";
 > = 0.5;
 
-uniform bool Debug <
+uniform bool ColorDelta <
+	ui_label = "Use Delta Masking";
+	ui_category = "TAA";
+> = false;
+
+uniform float Delta_Power <
+	ui_type = "drag";
+	ui_min = 0; ui_max = 1.0;
+	ui_label = "Delta power";
+	ui_tooltip = "Extra Image clamping based on delta between.\n"
+				 "Default is 0.5.";
+	ui_category = "TAA";
+> = 0.5;
+
+//Depth Map//
+
+uniform int Debug <
+	ui_type = "combo";
+	ui_items = "Normal\0Debug One\0Debug Two\0";
 	ui_label = "Debug View";
 > = false;
 
@@ -173,9 +191,6 @@ float4 TAA(float2 texcoord)
 
     antialiased = decodePalYuv(antialiased);
 
-	if(Debug)
-		antialiased = mixRate;
-
     //Need to check for DX9
     return float4(antialiased,mixRate);
 }
@@ -184,7 +199,19 @@ void Out(float4 position : SV_Position, float2 texcoord : TEXCOORD, out float4 c
 {
 	float PosX = 0.9525f*BUFFER_WIDTH*pix.x,PosY = 0.975f*BUFFER_HEIGHT*pix.y, Scale = 2;
 	float3 D,E,P,T,H,Three,DD,Dot,I,N,F,O;
-  float4 T_A_A = TAA(texcoord);
+	float4 Color = BB_H(texcoord), M = (tex2D(CBackBuffer,texcoord).rgba - tex2D(PSBackBuffer,texcoord).rgba);
+  float Mask = 1;	
+
+  if(ColorDelta)
+  Mask = length(M) * (10*Delta_Power);	
+  
+  if(Debug == 1)
+  Color = TAA(texcoord).w;
+  if(Debug == 2)
+  Color = float4(1,0,0,1);
+  
+  float4 T_A_A = lerp(TAA(texcoord),Color,saturate(1-Mask));
+
   if(texcoord.x < pix.x * Scale && 1-texcoord.y < pix.y * Scale)
     T_A_A = Alternate ? 0 : 1; //Jak0bW Suggestion for Mouse Jiggle Wiggle
 
@@ -275,14 +302,14 @@ void Out(float4 position : SV_Position, float2 texcoord : TEXCOORD, out float4 c
 		color = T_A_A;
 }
 
-void Current_BackBuffer(float4 position : SV_Position, float2 texcoord : TEXCOORD, out float4 color : SV_Target)
+void Current_BackBuffer(float4 position : SV_Position, float2 texcoord : TEXCOORD, out float4 color : SV_Target0)
 {
 	color = BB_H(texcoord);
 }
 
-void Past_BackBuffer(float4 position : SV_Position, float2 texcoord : TEXCOORD, out float4 PastSingle : SV_Target0, out float4 Past : SV_Target1)
+void Past_BackBuffer(float4 position : SV_Position, float2 texcoord : TEXCOORD, out float4 PastSingleC : SV_Target0, out float4 Past : SV_Target1)
 {
-	PastSingle = tex2D(CBackBuffer,texcoord);
+	PastSingleC = tex2D(CBackBuffer,texcoord);
 	Past = BB_H(texcoord);
 }
 ///////////////////////////////////////////////////////////ReShade.fxh/////////////////////////////////////////////////////////////
