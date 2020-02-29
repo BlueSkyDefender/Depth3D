@@ -62,9 +62,9 @@ uniform float Persistence <
 	ui_min = 0.0; ui_max = 1.00;
 	ui_label = "User Adjust";
 	ui_tooltip = "Increase persistence of the frames this is really the Temporal Part.\n"
-				 "Default is 0.5. But, a value around 0.05 is recommended.";
+				 "Default is 0.25. But, a value around 0.05 is recommended.";
 	ui_category = "TAA";
-> = 0.5;
+> = 0.25;
 
 uniform bool ColorDelta <
 	ui_label = "Use Delta Masking";
@@ -76,9 +76,9 @@ uniform float Delta_Power <
 	ui_min = 0; ui_max = 1.0;
 	ui_label = "Delta power";
 	ui_tooltip = "Extra Image clamping based on delta between.\n"
-				 "Default is 0.5.";
+				 "Default is 0.25.";
 	ui_category = "TAA";
-> = 0.5;
+> = 0.25;
 
 //Depth Map//
 
@@ -200,15 +200,20 @@ void Out(float4 position : SV_Position, float2 texcoord : TEXCOORD, out float4 c
 	float PosX = 0.9525f*BUFFER_WIDTH*pix.x,PosY = 0.975f*BUFFER_HEIGHT*pix.y, Scale = 2;
 	float3 D,E,P,T,H,Three,DD,Dot,I,N,F,O;
 	float4 Color = BB_H(texcoord), M = (tex2D(CBackBuffer,texcoord).rgba - tex2D(PSBackBuffer,texcoord).rgba);
-  float Mask = 1;	
-
-  if(ColorDelta)
-  Mask = length(M) * (10*Delta_Power);	
-  
-  if(Debug == 1)
-  Color = TAA(texcoord).w;
-  if(Debug == 2)
-  Color = float4(1,0,0,1);
+	float Mask = 1;
+	
+	float4 Per = tex2Dlod(PBackBuffer,float4(texcoord,0,0) );//Past Back Buffer
+	
+	if(ColorDelta)
+	{ 
+		Per *= Delta_Power;
+		Mask = max(saturate(length(M) * 50.0),length(Per));	
+	}
+	
+	if(Debug == 1)
+	Color = TAA(texcoord).w;
+	if(Debug == 2)
+	Color = float4(1,0,0,1);
   
   float4 T_A_A = lerp(TAA(texcoord),Color,saturate(1-Mask));
 

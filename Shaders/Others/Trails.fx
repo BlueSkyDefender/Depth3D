@@ -49,9 +49,10 @@ uniform float3 Persistence <
 uniform float TQ <
 	ui_type = "drag";
 	ui_min = 0.0; ui_max = 1.0;
-	ui_label = "Trail Quality";
-	ui_tooltip = "Adjust Trail Quality";
-> = 0.5;
+	ui_label = "Trail Blur Quality";
+	ui_tooltip = "Adjust Trail Blur Quality.\n"
+				"Default is Zero.";
+> = 0.0;
 
 //uniform bool TrailsX2 <
 //	ui_label = "Trails X2";
@@ -81,11 +82,17 @@ uniform int Depth_Map <
 
 uniform float Depth_Map_Adjust <
 	ui_type = "slider";
-	ui_min = 0.125; ui_max = 1000.0; ui_step = 0.125;
+	ui_min = 0.0; ui_max = 1.0;
 	ui_label = "Depth Map Adjustment";
 	ui_tooltip = "Adjust the depth map and sharpness distance.";
 	ui_category = "Depth Buffer";
-> = 7.5;
+> = 0.0;
+
+uniform bool Hard_CutOff <
+	ui_label = "Hard CutOff";
+	ui_tooltip = "Depth Cutoff toggle this give a hard cutoff for depth isolation.";
+	ui_category = "Depth Buffer";
+> = 0;
 
 uniform bool Depth_Map_Flip <
 	ui_label = "Depth Map Flip";
@@ -107,10 +114,11 @@ uniform bool Depth_View <
 #else
 static const int Allow_Depth = 0;
 static const int Depth_Map = 0;
-static const float Depth_Map_Adjust = 7.5;
+static const float Depth_Map_Adjust = 250.0;
 static const int Depth_Map_Flip = 0;
 static const int Invert_Depth = 0;
 static const int Depth_View = 0;
+static const int Hard_CutOff = 0;
 #endif
 /////////////////////////////////////////////D3D Starts Here/////////////////////////////////////////////////////////////////
 texture DepthBufferTex : DEPTH;
@@ -135,7 +143,7 @@ sampler CBackBuffer
 	};
 
 
-texture PBB  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA8; MipLevels = 1;};
+texture PBB  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA8; MipLevels = 2;};
 
 sampler PBackBuffer
 	{
@@ -161,7 +169,7 @@ float Depth(in float2 texcoord : TEXCOORD0)
 
 	//Conversions to linear space.....
 	//Near & Far Adjustment
-	float Far = 1.0, Near = 0.125/Depth_Map_Adjust; //Division Depth Map Adjust - Near
+	float Far = 1.0, Near = 0.125/250.0; //Division Depth Map Adjust - Near
 
 	float2 Z = float2( zBuffer, 1-zBuffer );
 
@@ -175,7 +183,7 @@ float Depth(in float2 texcoord : TEXCOORD0)
 
 float3 T_Out(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Target
 {
-	float TQA = TQ, D = smoothstep(0,1,Depth(texcoord));
+	float TQA = TQ, D = Depth(texcoord);
 	if(PS2)
 		TQA = 0;
 		
@@ -189,6 +197,11 @@ float3 T_Out(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Tar
     #else
       float3 Per = 1-Persistence;
     #endif
+
+	D = smoothstep(0,Depth_Map_Adjust,D);
+	
+	if(Hard_CutOff)
+		D = step(0.5,D);
 
 	if(Invert_Depth)
 	D = 1-D;
@@ -241,7 +254,7 @@ void Past_BB(float4 position : SV_Position, float2 texcoord : TEXCOORD, out floa
 	};
 
 	float4 sum_A = tex2D(BackBuffer,texcoord), sum_B = 0;//tex2D(CBackBuffer,texcoord);
-	float TQA = TQ;
+
 	if(!PS2)
 	{
 			float Adjust = TQ*pix.x;
