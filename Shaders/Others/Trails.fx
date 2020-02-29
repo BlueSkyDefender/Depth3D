@@ -19,10 +19,10 @@
 //*
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#define PerColor 0 // Lets you adjust per Color Channel.Default 0 off
-#define AddDepth 0 // Lets this effect be affected by Depth..Default 0 off
+#define Per_Color_Channel 0 // Lets you adjust per Color Channel.Default 0 off
+#define Add_Depth_Effects 0 // Lets this effect be affected by Depth..Default 0 off
 
-#if !PerColor
+#if !Per_Color_Channel
 uniform float Persistence <
 	ui_type = "drag";
 	ui_min = 0.0; ui_max = 1.00;
@@ -53,12 +53,18 @@ uniform float TQ <
 	ui_tooltip = "Adjust Trail Quality";
 > = 0.5;
 
+//uniform bool TrailsX2 <
+//	ui_label = "Trails X2";
+//	ui_tooltip = "Two times the samples.\n"
+//				 "This disables Trail Quality.";
+//> = false;
+
 uniform bool PS2 <
 	ui_label = "PS2 Style Echo";
 	ui_tooltip = "This enables PS2 Style Echo in your game.\n"
 				 "This disables Trail Quality.";
 > = false;
-#if AddDepth
+#if Add_Depth_Effects
 uniform bool Allow_Depth <
 	ui_label = "Depth Map Toggle";
 	ui_tooltip = "This Alows Depth to be used in Trails.";
@@ -121,11 +127,26 @@ sampler BackBuffer
 		Texture = BackBufferTex;
 	};
 
-texture PBB  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA32F; MipLevels = 1;};
+texture CurrentBackBufferT  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA8;};
+
+sampler CBackBuffer
+	{
+		Texture = CurrentBackBufferT;
+	};
+
+
+texture PBB  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA8; MipLevels = 1;};
 
 sampler PBackBuffer
 	{
 		Texture = PBB;
+	};
+	
+texture PSBB  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA8;};
+
+sampler PSBackBuffer
+	{
+		Texture = PSBB;
 	};
 
 ///////////////////////////////////////////////////////////TAA/////////////////////////////////////////////////////////////////////
@@ -154,14 +175,15 @@ float Depth(in float2 texcoord : TEXCOORD0)
 
 float3 T_Out(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Target
 {
-	float TQA = TQ, D = Depth(texcoord);
+	float TQA = TQ, D = smoothstep(0,1,Depth(texcoord));
 	if(PS2)
-	TQA = 0;
+		TQA = 0;
 		
     float3 C = tex2D(BackBuffer, texcoord).rgb;
+	//float3 PS = tex2D(PSBackBuffer, texcoord).rgb;
 
     float3 P = tex2Dlod(PBackBuffer, float4(texcoord,0,TQA)).rgb;
-
+	
     #if !PerColor
       float Per = 1-Persistence;
     #else
@@ -171,16 +193,25 @@ float3 T_Out(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Tar
 	if(Invert_Depth)
 	D = 1-D;
 
-	if(Allow_Depth)
-    Per *= D;
-
     if(!PS2)
     {
-      P *= Per;
-      C = max( tex2D(BackBuffer, texcoord).rgb, P);
+		P *= Per;
+		C = max( tex2D(BackBuffer, texcoord).rgb, P);
+		//PS = max( tex2D(BackBuffer, texcoord).rgb, P);
     }
     else
-      C = (1-Per) * C + Per * P;
+    {
+		C = (1-Per) * C + Per * P;
+		//PS = (1-Per) * PS + Per * P;
+	}
+	
+	//if(TrailsX2)
+	//{
+	//	C = lerp(PS,C,0.5);
+	//}
+	
+	if(Allow_Depth)
+		C = lerp(C,tex2D(BackBuffer, texcoord).rgb,saturate(D));
 
 	if(Depth_View)
 		C = D;
@@ -188,7 +219,12 @@ float3 T_Out(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Tar
   return C;
 }
 
-void Past_BB(float4 position : SV_Position, float2 texcoord : TEXCOORD, out float4 Past : SV_Target)
+void Current_BackBuffer_T(float4 position : SV_Position, float2 texcoord : TEXCOORD, out float4 color : SV_Target0)
+{
+	color = tex2D(BackBuffer,texcoord);
+}
+
+void Past_BB(float4 position : SV_Position, float2 texcoord : TEXCOORD, out float4 Past : SV_Target0, out float4 PastSingle : SV_Target1)
 {   float2 samples[12] = {
 	float2(-0.326212, -0.405805),
 	float2(-0.840144, -0.073580),
@@ -204,20 +240,25 @@ void Past_BB(float4 position : SV_Position, float2 texcoord : TEXCOORD, out floa
 	float2(-0.791559, -0.597705)
 	};
 
-	float4 sum = tex2D(BackBuffer,texcoord);
+	float4 sum_A = tex2D(BackBuffer,texcoord), sum_B = 0;//tex2D(CBackBuffer,texcoord);
 	float TQA = TQ;
-	if(PS2)
+	if(!PS2)
 	{
-		float Adjust = TQ*pix.x;
-		for (int i = 0; i < 12; i++)
-		{
-			sum += tex2D(BackBuffer, texcoord + Adjust * samples[i]);
-		}
-	Past = sum * 0.07692307;
+			float Adjust = TQ*pix.x;
+			[loop]
+			for (int i = 0; i < 12; i++)
+			{
+				sum_A += tex2Dlod(BackBuffer, float4(texcoord + Adjust * samples[i],0,0));
+				//sum_B += tex2Dlod(CBackBuffer, float4(texcoord + Adjust * samples[i],0,0));
+			}
+		Past = sum_A * 0.07692307;
+		PastSingle = 0;//sum_B * 0.07692307;
 	}
 	else
-	Past = sum;
-
+	{
+		Past = sum_A;
+		PastSingle = 0;//sum_B * 0.07692307;
+	}
 }
 
 ///////////////////////////////////////////////////////////ReShade.fxh/////////////////////////////////////////////////////////////
@@ -230,6 +271,12 @@ void PostProcessVS(in uint id : SV_VertexID, out float4 position : SV_Position, 
 }
 technique Trails
 	{
+			pass CBB
+		{
+			VertexShader = PostProcessVS;
+			PixelShader = Current_BackBuffer_T;
+			RenderTarget = CurrentBackBufferT;
+		}
 			pass Trails
 		{
 			VertexShader = PostProcessVS;
@@ -239,7 +286,8 @@ technique Trails
 		{
 			VertexShader = PostProcessVS;
 			PixelShader = Past_BB;
-			RenderTarget = PBB;
+			RenderTarget0 = PBB;
+			RenderTarget1 = PSBB;
 
 		}
 	}
