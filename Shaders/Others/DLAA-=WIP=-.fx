@@ -3,72 +3,88 @@
  //--------////
 
  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
- //* Directionally localized antialiasing.
- //* For Reshade 3.0
- //* --------------------------
- //* This work is licensed under a Creative Commons Attribution 3.0 Unported License.
- //* So you are free to share, modify and adapt it for your needs, and even use it for commercial use.
- //* I would also love to hear about a project you are using it with.
- //* https://creativecommons.org/licenses/by/3.0/us/
+ //* Directionally localized antialiasing Plus.
+ //* For ReShade 3.0+
+ //*  ---------------------------------
+ //*                                                                           DLAA+
+ //* Due Diligence
+ //* Directionally Localized Anti-Aliasing (DLAA)
+ //* Original method by Dmitry Andreev
+ //* http://and.intercon.ru/releases/talks/dlaagdc2011/
+ //*
+ //* LICENSE
+ //* ============
+ //* Directionally Localized Anti-Aliasing Plus is licenses under: Attribution-NoDerivatives 4.0 International
+ //*
+ //* You are free to:
+ //* Share - copy and redistribute the material in any medium or format
+ //* for any purpose, even commercially.
+ //* The licensor cannot revoke these freedoms as long as you follow the license terms.
+ //* Under the following terms:
+ //* Attribution - You must give appropriate credit, provide a link to the license, and indicate if changes were made.
+ //* You may do so in any reasonable manner, but not in any way that suggests the licensor endorses you or your use.
+ //*
+ //* NoDerivatives - If you remix, transform, or build upon the material, you may not distribute the modified material.
+ //*
+ //* No additional restrictions - You may not apply legal terms or technological measures that legally restrict others from doing anything the license permits.
+ //*
+ //* https://creativecommons.org/licenses/by-nd/4.0/
  //*
  //* Have fun,
  //* Jose Negrete AKA BlueSkyDefender
  //*
- //* http://and.intercon.ru/releases/talks/dlaagdc2011/
- //* ---------------------------------
- //*
- //* Directionally Localized Anti-Aliasing (DLAA)
- //* Original method by Dmitry Andreev - Copyright (C) LucasArts 2010-2011
+ //* https://github.com/BlueSkyDefender/Depth3D
  //*
  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
- uniform float Short_Edge_Mask <
+ 
+uniform float Short_Edge_Mask <
  	ui_type = "drag";
  	ui_min = 0.0; ui_max = 1.0;
  	ui_label = "Short Edge AA";
  	ui_tooltip = "Use this to adjust the Long Edge AA.\n"
- 				 "Default is 0.2";
+ 				 "Default is 0.25";
  	ui_category = "DLAA";
- > = 0.5;
+ > = 0.25;
 
-uniform float Long_Edge_Mask <
+uniform float Error_Clamping <
 	ui_type = "drag";
 	ui_min = 0.0; ui_max = 1.0;
-	ui_label = "Long Edge AA";
-	ui_tooltip = "Use this to adjust the Long Edge AA.\n"
-				 "Default is 0.2";
+	ui_label = "Error Clamping";
+	ui_tooltip = "Use this to adjust little edge error clamping.\n"
+				 "Default is 0.25";
 	ui_category = "DLAA";
-> = 0.5;
+> = 0.125;
 
-uniform float Super_Long_Edge_Mask_H <
+uniform float Long_Edge_Mask_H <
 	ui_type = "drag";
-	ui_min = 1.0; ui_max = 10.0;
-	ui_label = "Super Long Edge H";
+	ui_min = 0.0; ui_max = 1.0;
+	ui_label = "Long Edge H";
 	ui_tooltip = "Use this to adjust the Super Long Edge AA.\n"
 				 "Default is 1.0";
 	ui_category = "DLAA Expanded";
-> = 1.0;
+> = 0.0;
 
-uniform float Super_Long_Edge_Mask_V <
+uniform float Long_Edge_Mask_V <
 	ui_type = "drag";
-	ui_min = 1.0; ui_max = 10.0;
-	ui_label = "Super Long Edge V";
+	ui_min = 0.0; ui_max = 1.0;
+	ui_label = "Long Edge V";
 	ui_tooltip = "Use this to adjust the Super Long Edge AA.\n"
 				 "Default is 1.0";
 	ui_category = "DLAA Expanded";
-> = 1.0;
+> = 0.0;
 
- uniform float Error_Clamping <
+uniform float Text_Preservation <
  	ui_type = "drag";
  	ui_min = 0.0; ui_max = 1.0;
- 	ui_label = "Error Clamping";
- 	ui_tooltip = "Use this to adjust little edge error clamping.\n"
- 				 "Default is 0.25";
- 	ui_category = "DLAA Debuging";
- > = 0.25;
+ 	ui_label = "Text Preservation";
+ 	ui_tooltip = "Use this to adjust Text Preservation Power.\n"
+ 				 "Default is 0.5";
+	ui_category = "DLAA Expanded";
+ > = 0.5;
 
 uniform int View_Mode <
 	ui_type = "combo";
-	ui_items = "DLAA Out\0Short Edge Mask\0Long Edge Mask\0";
+	ui_items = "DLAA\0DLAA Text Preservation\0Blue Short H/V AA Mask\0Red H & Green V Long Edge Mask\0Text Preservation Mask\0";
 	ui_label = "View Mode";
 	ui_tooltip = "This is used to select the normal view output or debug view.";
 	ui_category = "DLAA Debuging";
@@ -81,7 +97,8 @@ uniform uint framecount < source = "framecount"; >;
 #define pix float2(BUFFER_RCP_WIDTH, BUFFER_RCP_HEIGHT)
 #define lambda lerp(0,10,Short_Edge_Mask)
 #define epsilon lerp(0,0.5,Error_Clamping)
-
+#define Hoiz lerp(1,10,Long_Edge_Mask_H)
+#define Vert lerp(1,10,Long_Edge_Mask_V)
 texture BackBufferTex : COLOR;
 
 sampler BackBuffer
@@ -117,21 +134,53 @@ float LI(in float3 value)
 	//Slide 51 talk more about this.
 	return dot(value.rgb,float3(0.299, 0.587, 0.114));
 }
+//WIP
+float Text_Detection(float2 texcoord)
+{
+	float4 BC = tex2D(BackBuffer, texcoord);
+	//BC += tex2D(BackBuffer, texcoord + float2( TEST, TEST) * pix.xy);
+	//BC += tex2D(BackBuffer, texcoord + float2( TEST,-TEST) * pix.xy);
+	//BC += tex2D(BackBuffer, texcoord + float2(-TEST, TEST) * pix.xy);
+	//BC += tex2D(BackBuffer, texcoord + float2(-TEST, -TEST) * pix.xy);
+	//BC /= 4;
+	// Luma Threshold Thank you Adyss
+	BC.a    = LI(BC.rgb);//Luma
+	BC.rgb /= max(BC.a, 0.001);
+	BC.a    = max(0.0, BC.a - Text_Preservation);
+	BC.rgb *= BC.a;
+
+    return 1-dot(BC.rgb,BC.rgb);
+}
 
 float4 LP_H(float2 tc,float dx, float dy) //Load Pixel
 {
-float4 BB = tex2D(BackBuffer, tc + float2(dx, dy) * pix.xy);
-return BB;
+	float4 BB = tex2D(BackBuffer, tc + float2(dx, dy) * pix.xy);
+	return BB;
 }
+/* WIP Edge Detection
+float4 Luma_Edge(float2 texcoord)
+{
 
+    float4 center = LP(texcoord,  0,  0);
+    float4 left   = LP(texcoord, -0.5 ,  0);
+    float4 right  = LP(texcoord,  0.5,  0);
+    float4 top    = LP(texcoord,  0, -0.5);
+    float4 bottom = LP(texcoord,  0,  0.5);
+
+    float4 edges = 4.0 * abs((left + right + top + bottom) - 4.0 * center);
+    float  edgesLum = LI(edges.rgb);
+
+    return edgesLum;
+}
+*/
 float4 PreFilter_H(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Target //Loaded Pixel
 {
 
-    float4 center = LP_H(texcoord,  0,  0);
-    float4 left   = LP_H(texcoord, -0.5 ,  0);
-    float4 right  = LP_H(texcoord,  0.5,  0);
-    float4 top    = LP_H(texcoord,  0, -0.5);
-    float4 bottom = LP_H(texcoord,  0,  0.5);
+    float4 center = LP_H(texcoord, 0,   0);
+    float4 left   = LP_H(texcoord,-0.5, 0);
+    float4 right  = LP_H(texcoord, 0.5, 0);
+    float4 top    = LP_H(texcoord, 0,-0.5);
+    float4 bottom = LP_H(texcoord, 0, 0.5);
 
     float4 edges = 4.0 * abs((left + right + top + bottom) - 4.0 * center);
     float  edgesLum = LI(edges.rgb);
@@ -149,129 +198,84 @@ float4 SLP_H(float2 tc,float dx, float dy) //Load Pixel
 float4 DLAA_H(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Target //Loaded Pixel
 {
 	//Short Edge Filter http://and.intercon.ru/releases/talks/dlaagdc2011/slides/#slide43
-	float4 DLAA, DLAA_L, H, V, UDLR; //DLAA is the completed AA Result.
-  float SLE_H = 2 * Super_Long_Edge_Mask_H;
+	float4 DLAA, H, V, UDLR; //DLAA is the completed AA Result.
+	float SLE_H = 2 * Hoiz;
 	//5 bi-linear samples cross
 	float4 Center = SLP_H(texcoord, 0 , 0);
-	float4 Left   = SLP_H(texcoord,-1.25 , 0.0);
-	float4 Right  = SLP_H(texcoord, 1.25 , 0.0);
-	float4 Up     = SLP_H(texcoord, 0.0 ,-1.25);
-	float4 Down   = SLP_H(texcoord, 0.0 , 1.25);
-
-
-	//Combine horizontal and vertical blurs together
-	float4 combH		= 2.0 * ( Left + Right );
-	float4 combV		= 2.0 * ( Up + Down );
-
-	//Bi-directional anti-aliasing using HORIZONTAL & VERTICAL blur and horizontal edge detection
-	//Slide information triped me up here. Read slide 43.
-	//Edge detection
-	float4 CenterDiffH	= abs( combH - 4.0 * Center ) / 4.0;
-	float4 CenterDiffV	= abs( combV - 4.0 * Center ) / 4.0;
-
-	//Blur
-	float4 blurredH		= (combH + 2.0 * Center) / 6.0;
-	float4 blurredV		= (combV + 2.0 * Center) / 6.0;
-
-	//Edge detection
-	float LumH			= LI( CenterDiffH.rgb );
-	float LumV			= LI( CenterDiffV.rgb );
-
-	float LumHB = LI(blurredH.xyz);
-    float LumVB = LI(blurredV.xyz);
-
-	//t
-	float satAmountH 	= saturate( ( lambda * LumH - epsilon ) / LumVB );
-	float satAmountV 	= saturate( ( lambda * LumV - epsilon ) / LumHB );
-
-	//color = lerp(color,blur,sat(Edge/blur)
-	//Re-blend Short Edge Done
-	DLAA = lerp( Center, blurredH, satAmountV * 1.1 );
-	DLAA = lerp( DLAA,   blurredV, satAmountH * 0.5);
-
+	float4 Left   = SLP_H(texcoord,-1.5 , 0.0);
+	float4 Right  = SLP_H(texcoord, 1.5 , 0.0);
+	float4 Up     = SLP_H(texcoord, 0.0 ,-1.5);
+	float4 Down   = SLP_H(texcoord, 0.0 , 1.5);
+	DLAA = tex2D(BackBuffer, texcoord);
 	float4  HNeg, HNegA, HNegB, HNegC, HNegD, HNegE,
     			HPos, HPosA, HPosB, HPosC, HPosD, HPosE,
     			VNeg, VNegA, VNegB, VNegC,
     			VPos, VPosA, VPosB, VPosC;
 
-  // Long Edges
-  //16 bi-linear samples cross, added extra bi-linear samples in each direction.
-  HNeg    = Left;
-  HNegA   = SLP_H( texcoord, -3.5 , 0.0 );
-  HNegB   = SLP_H( texcoord, -5.5 , 0.0 );
-  HNegC   = SLP_H( texcoord, -7.0 , 0.0 );
+	// Long Edges
+	//16 bi-linear samples cross, added extra bi-linear samples in each direction.
+	HNeg    = Left;
+	HNegA   = SLP_H( texcoord, -3.5 , 0.0 );
+	HNegB   = SLP_H( texcoord, -5.5 , 0.0 );
+	HNegC   = SLP_H( texcoord, -7.0 , 0.0 );
+	
+	HPos    = Right;
+	HPosA   = SLP_H( texcoord,  3.5 , 0.0 );
+	HPosB   = SLP_H( texcoord,  5.5 , 0.0 );
+	HPosC   = SLP_H( texcoord,  7.0 , 0.0 );
+	
+	VNeg    = Up;
+	VNegA   = SLP_H( texcoord,  0.0,-3.5  );
+	VNegB   = SLP_H( texcoord,  0.0,-5.5  );
+	VNegC   = SLP_H( texcoord,  0.0,-7.0  );
+	
+	VPos    = Down;
+	VPosA   = SLP_H( texcoord,  0.0, 3.5  );
+	VPosB   = SLP_H( texcoord,  0.0, 5.5  );
+	VPosC   = SLP_H( texcoord,  0.0, 7.0  );
 
-  HPos    = Right;
-  HPosA   = SLP_H( texcoord,  3.5 , 0.0 );
-  HPosB   = SLP_H( texcoord,  5.5 , 0.0 );
-  HPosC   = SLP_H( texcoord,  7.0 , 0.0 );
-
-  VNeg    = Up;
-  VNegA   = SLP_H( texcoord,  0.0,-3.5  );
-  VNegB   = SLP_H( texcoord,  0.0,-5.5  );
-  VNegC   = SLP_H( texcoord,  0.0,-7.0  );
-
-  VPos    = Down;
-  VPosA   = SLP_H( texcoord,  0.0, 3.5  );
-  VPosB   = SLP_H( texcoord,  0.0, 5.5  );
-  VPosC   = SLP_H( texcoord,  0.0, 7.0  );
-
-  //Long Edge detection H & V
-  float4 AvgBlurH = ( HNeg + HNegA + HNegB + HNegC + HPos + HPosA + HPosB + HPosC ) / 8;
-  float4 AvgBlurV = ( VNeg + VNegA + VNegB + VNegC + VPos + VPosA + VPosB + VPosC ) / 8;
+	//Long Edge detection H & V
+	float4 AvgBlurH = ( HNeg + HNegA + HNegB + HNegC + HPos + HPosA + HPosB + HPosC ) / 8;
+	float4 AvgBlurV = ( VNeg + VNegA + VNegB + VNegC + VPos + VPosA + VPosB + VPosC ) / 8;
 	float EAH = saturate( AvgBlurH.a * SLE_H - 1.0 );
 	float EAV = saturate( AvgBlurV.a * 2.0 - 1.0 );
 
-  float longEdge_H = abs( EAH - EAV );
-
-  float Mask_H = longEdge_H > 1-Long_Edge_Mask;
+	float longEdge_H = abs( EAH - EAV );
 	
-	DLAA_L = DLAA;
+	float Mask_H = longEdge_H > 0;
 	
     if ( Mask_H )
     {
-      float4 up    = LP_H(texcoord, 0 ,-1);
-      float4 down  = LP_H(texcoord, 0 , 1);
-      //Merge for BlurSamples.
-      //Long Blur H
-      float LongBlurLumH = LI( AvgBlurH.rgb);
-
-      float centerLI = LI( Center.rgb );
-      float upLI     = LI( up.rgb );
-      float downLI   = LI( down.rgb );
-
-      float blurUp = saturate( 0.0 + ( LongBlurLumH - upLI    ) / (centerLI - upLI) );
-      float blurDown = saturate( 1.0 + ( LongBlurLumH - centerLI ) / (centerLI - downLI) );
-
-      UDLR = float4( 1, 1, blurUp, blurDown );
-
-      UDLR = UDLR == float4(0.0, 0.0, 0.0, 0.0) ? float4(1.0, 1.0, 1.0, 1.0) : UDLR;
-
-      H = lerp( up   , Center, UDLR.z );
-      H = lerp( down , H	 , UDLR.w );
-
-      //Reuse short samples and DLAA Long Edge Out.
-      DLAA_L = lerp( DLAA , H , EAH);
+		float4 up    = LP_H(texcoord, 0 ,-1);
+		float4 down  = LP_H(texcoord, 0 , 1);
+		//Merge for BlurSamples.
+		//Long Blur H
+		float LongBlurLumH = LI( AvgBlurH.rgb);
+		
+		float centerLI = LI( Center.rgb );
+		float upLI     = LI( up.rgb );
+		float downLI   = LI( down.rgb );
+		
+		float blurUp = saturate( 0.0 + ( LongBlurLumH - upLI    ) / (centerLI - upLI) );
+		float blurDown = saturate( 1.0 + ( LongBlurLumH - centerLI ) / (centerLI - downLI) );
+		
+		UDLR = float4( 1, 1, blurUp, blurDown );
+		
+		UDLR = UDLR == float4(0.0, 0.0, 0.0, 0.0) ? float4(1.0, 1.0, 1.0, 1.0) : UDLR;
+		
+		H = lerp( up   , Center, UDLR.z );
+		H = lerp( down , H	 , UDLR.w );
+		
+		DLAA = lerp( DLAA , H , EAH);
     }
-	
-	DLAA = lerp(DLAA, DLAA_L, 1 );
 
-	//if(View_Mode == 1)
-	//{
-	//	DLAA = lerp(DLAA,float4(1,1,0,1),abs(satAmountH-satAmountV) * 2);
-	//}
-	//else if (View_Mode == 2)
-	//{
-	//	DLAA = lerp(DLAA,float4(1,0,0,1),saturate(EAV));
-	//}
-
-	return DLAA;
+	return float4(DLAA.rgb,EAH);
 }
 
 float4 LP_V(float2 tc,float dx, float dy) //Load Pixel
 {
-float4 BB = tex2D(SamplerDLAA_H, tc + float2(dx, dy) * pix.xy);
-return BB;
+	float4 BB = tex2D(SamplerDLAA_H, tc + float2(dx, dy) * pix.xy);
+	return BB;
 }
 
 float4 PreFilter_V(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Target //Loaded Pixel
@@ -298,51 +302,22 @@ float4 SLP_V(float2 tc,float dx, float dy) //Load Pixel
 float4 DLAA_V(float2 texcoord)
 {
 	//Short Edge Filter http://and.intercon.ru/releases/talks/dlaagdc2011/slides/#slide43
-	float4 DLAA, DLAA_L, H, V, UDLR; //DLAA is the completed AA Result.
-  float SLE_V = 2 * Super_Long_Edge_Mask_V;
+	float4 DLAA, H, V, UDLR; //DLAA is the completed AA Result.
+	float SLE_V = 2 * Vert;
 	//5 bi-linear samples cross
 	float4 Center = SLP_V(texcoord, 0 , 0);
 	float4 Left   = SLP_V(texcoord,-1.25 , 0.0);
 	float4 Right  = SLP_V(texcoord, 1.25 , 0.0);
 	float4 Up     = SLP_V(texcoord, 0.0 ,-1.25);
 	float4 Down   = SLP_V(texcoord, 0.0 , 1.25);
-
-	//Combine horizontal and vertical blurs together
-	float4 combH		= 2.0 * ( Left + Right );
-	float4 combV		= 2.0 * ( Up + Down );
-
-	//Bi-directional anti-aliasing using HORIZONTAL & VERTICAL blur and horizontal edge detection
-	//Slide information triped me up here. Read slide 43.
-	//Edge detection
-	float4 CenterDiffH	= abs( combH - 4.0 * Center ) / 4.0;
-	float4 CenterDiffV	= abs( combV - 4.0 * Center ) / 4.0;
-
-	//Blur
-	float4 blurredH		= (combH + 2.0 * Center) / 6.0;
-	float4 blurredV		= (combV + 2.0 * Center) / 6.0;
-
-	//Edge detection
-	float LumH			= LI( CenterDiffH.rgb );
-	float LumV			= LI( CenterDiffV.rgb );
-
-	float LumHB = LI(blurredH.xyz);
-  float LumVB = LI(blurredV.xyz);
-
-	//t
-	float satAmountH 	= saturate( ( lambda * LumH - epsilon ) / LumVB );
-	float satAmountV 	= saturate( ( lambda * LumV - epsilon ) / LumHB );
-
-	//color = lerp(color,blur,sat(Edge/blur)
-	//Re-blend Short Edge Done
-	DLAA = lerp( Center, blurredH, satAmountV * 1.1 );
-	DLAA = lerp( DLAA,   blurredV, satAmountH * 0.5);
-
+    //Reuse Long Horizontal AA
+    DLAA = tex2D(SamplerDLAA_H, texcoord);
 	float4  HNeg, HNegA, HNegB, HNegC, HNegD, HNegE,
           HPos, HPosA, HPosB, HPosC, HPosD, HPosE,
           VNeg, VNegA, VNegB, VNegC,
           VPos, VPosA, VPosB, VPosC;
 
-	  // Long Edges
+	// Long Edges
     //16 bi-linear samples cross, added extra bi-linear samples in each direction.
     HNeg    = Left;
     HNegA   = SLP_V( texcoord, -3.5 , 0.0 );
@@ -372,10 +347,8 @@ float4 DLAA_V(float2 texcoord)
 
     float longEdge_V = abs( EAV - saturate( AvgBlurH.a * 2.0 - 1.0 ) );
 
-    float Mask_V = longEdge_V > 1-Long_Edge_Mask;
+    float Mask_V = longEdge_V > 0;
     
-	DLAA_L = DLAA;
-	
     if ( Mask_V )
     {
       float4 left  = LP_V(texcoord,-1 , 0);
@@ -400,17 +373,81 @@ float4 DLAA_V(float2 texcoord)
       V = lerp( right, V	 , UDLR.y );
 
       //Reuse short samples and DLAA Long Edge Out.
-      DLAA_L = lerp( DLAA , V , EAV);
+      DLAA = lerp( DLAA , V , EAV);
     }
-    
-	DLAA = lerp(DLAA, DLAA_L, 1 );
     	
-    return DLAA;
+    return float4(DLAA.rgb,EAV);
 }
+
+float4 SLP(float2 tc,float dx, float dy) //Load Pixel
+{//float4 BB = tex2D(BackBuffer,  tc + float2(dx, dy) * pix.xy);
+	float4 BB = DLAA_V( tc + float2(dx, dy) * pix.xy);
+	return BB;
+}
+
 
 float4 DLAA(float2 texcoord)
 {
-	return DLAA_V(texcoord);
+	//Short Edge Filter http://and.intercon.ru/releases/talks/dlaagdc2011/slides/#slide43
+	float4 DLAA; //DLAA is the completed AA Result.
+
+	//5 bi-linear samples cross
+	float4 Center = SLP(texcoord, 0 , 0);
+	float4 Left   = SLP(texcoord,-1.25 , 0.0);
+	float4 Right  = SLP(texcoord, 1.25 , 0.0);
+	float4 Up     = SLP(texcoord, 0.0 ,-1.25);
+	float4 Down   = SLP(texcoord, 0.0 , 1.25);
+	
+	//Combine horizontal and vertical blurs together
+	float4 combH		= 2.0 * ( Up + Down );
+	float4 combV		= 2.0 * ( Left + Right );
+	
+	//Bi-directional anti-aliasing using HORIZONTAL & VERTICAL blur and horizontal edge detection
+	//Slide information triped me up here. Read slide 43.
+	//Edge detection
+	float4 CenterDiffH	= abs( combH - 4.0 * Center ) / 4.0;
+	float4 CenterDiffV	= abs( combV - 4.0 * Center ) / 4.0;
+
+	//Blur
+	float4 blurredH		= (combH + 2.0 * Center) / 6.0;
+	float4 blurredV		= (combV + 2.0 * Center) / 6.0;
+
+	//Edge detection
+	float LumH			= LI( CenterDiffH.rgb );
+	float LumV			= LI( CenterDiffV.rgb );
+
+	float LumHB = LI(blurredH.xyz);
+    float LumVB = LI(blurredV.xyz);
+
+	//t
+	float satAmountH 	= saturate( ( lambda * LumH - epsilon ) / LumVB );
+	float satAmountV 	= saturate( ( lambda * LumV - epsilon ) / LumHB );
+
+	//color = lerp(color,blur,sat(Edge/blur)
+	//Re-blend Short Edge Done
+	DLAA = lerp( Center, blurredH, satAmountV * 0.5 );//* 1.1
+	DLAA = lerp( DLAA,   blurredV, satAmountH * 1.1 );// * 0.5
+	//NFAA Edge Mask will be added later WIP
+	//DLAA = lerp(tex2D(BackBuffer, texcoord),DLAA,saturate(satAmountV+satAmountH * 0.5));
+	
+	if(View_Mode == 1)
+	{
+		DLAA =  lerp(tex2D(BackBuffer, texcoord),DLAA,Text_Detection(texcoord));
+	}
+	else if (View_Mode == 2)
+	{
+		DLAA =  lerp(DLAA,1,float4(0,0,(satAmountV+satAmountH) * 0.5,1));
+	}
+	else if (View_Mode == 3)
+	{
+		DLAA =  lerp(DLAA,1,float4(tex2D(SamplerDLAA_H,texcoord).w,DLAA_V(texcoord).w,0,1));
+	}
+		else if (View_Mode == 4)
+	{
+		DLAA =  lerp(float4(1,1,0,1),DLAA,Text_Detection(texcoord));
+	}
+	
+	return DLAA;
 }
 
 uniform float timer < source = "timer"; >; //Please do not remove.
@@ -518,29 +555,29 @@ void PostProcessVS(in uint id : SV_VertexID, out float4 position : SV_Position, 
 }
 
 //*Rendering passes*//
-technique Directionally_Localized_Anti_Aliasing
+technique Directionally_Localized_Anti_Aliasing_Plus
 {
-			pass Pre_Filter_Hoizontal
-		{
-			VertexShader = PostProcessVS;
-			PixelShader = PreFilter_H;
-			RenderTarget = SLPtex_H;
-		}
-      pass Pre_Filter_Vertical
-    {
-      VertexShader = PostProcessVS;
-      PixelShader = DLAA_H;
-      RenderTarget = TexDLAA_H;
-    }
-      pass Pre_Filter_Vertical
-    {
-      VertexShader = PostProcessVS;
-      PixelShader = PreFilter_V;
-      RenderTarget = SLPtex_V;
-    }
-			pass DLAA
-		{
-			VertexShader = PostProcessVS;
-			PixelShader = Out;
-		}
+	pass Pre_Filter_Hoizontal
+	{
+		VertexShader = PostProcessVS;
+		PixelShader = PreFilter_H;
+		RenderTarget = SLPtex_H;
+	}
+	pass Pre_Filter_Vertical
+	{
+		VertexShader = PostProcessVS;
+		PixelShader = DLAA_H;
+		RenderTarget = TexDLAA_H;
+	}
+	pass Pre_Filter_Vertical
+	{
+		VertexShader = PostProcessVS;
+		PixelShader = PreFilter_V;
+		RenderTarget = SLPtex_V;
+	}
+	pass DLAA
+	{
+		VertexShader = PostProcessVS;
+		PixelShader = Out;
+	}
 }
