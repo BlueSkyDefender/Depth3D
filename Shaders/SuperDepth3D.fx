@@ -890,7 +890,7 @@ float3 Weapon_Profiles()//Tried Switch But, can't compile in some older versions
     else if(WP == 65)
         return float3(0,0,0);                //WP 63 | Game
     else if(WP == 66)
-        return float3(0,0,0);                //WP 64 | Game
+        return float3(0.2503,52.5,987.5);    //WP 64 | Singularity
     else if(WP == 67)
         return float3(0,0,0);                //WP 65 | Game
     else
@@ -979,12 +979,14 @@ float AutoZPDRange(float ZPD, float2 texcoord )
 float2 Conv(float D,float2 texcoord)
 {	float Z = ZPD, WZP = 0.5, ZP = 0.5, ALC = abs(Lum(texcoord).x), W_Convergence = WZPD_and_WND.x;
     //Screen Space Detector.
-	if (Weapon_ZPD_Boundary > 0)
+	if (abs(Weapon_ZPD_Boundary) > 0)
 	{   float WArray[8] = { 0.5, 0.5625, 0.625, 0.6875, 0.75, 0.8125, 0.875, 0.9375};
-		float WZDPArray[8] = { 1.0, 0.5, 0.75, 0.5, 0.625, 0.5, 0.55, 0.5};//SoF ZPD Weapon Map
+		float WZDPArray[8] = { 1.0, 0.5, 0.75, 0.5, 0.625, 0.5, 0.55, 0.5}, Distance_From_Bottom = 0.9375;//SoF ZPD Weapon Map
+		if(Weapon_ZPD_Boundary < 0)
+			Distance_From_Bottom = 0.95;
 		[unroll] //only really only need to check one point just above the center bottom and to the right.
 		for( int i = 0 ; i < 8; i++ )
-		{   float WZPDB = 1 - WZPD_and_WND.x / tex2Dlod(SamplerDMN,float4(float2(WArray[i],0.9375),0,0)).z;
+		{   float WZPDB = 1 - WZPD_and_WND.x / tex2Dlod(SamplerDMN,float4(float2(WArray[i],Distance_From_Bottom),0,0)).z;
 			if(WP == 22)//SoF
 				WZPDB = 1 - (WZPD_and_WND.x * WZDPArray[i]) / tex2Dlod(SamplerDMN,float4(float2(WArray[i],0.9375),0,0)).z;
 

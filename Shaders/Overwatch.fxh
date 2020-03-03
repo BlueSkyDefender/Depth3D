@@ -917,6 +917,14 @@ static const int HMT = 0;                               //HUD Mode Trigger
 	#define DE_X 1
 	#define DE_Y 0.5
 	#define DE_Z 0.300
+#elif (App == 0xBF70711C ) //Singularity
+	#define DA_Y 15.0
+	#define DA_X 0.0375
+	#define DB_W 66
+	#define DE_X 1
+	#define DE_Z 0.375
+	#define DF_X 0.175
+	#define TW 1
 #else
 	#define NP 1 //No Profile
 #endif

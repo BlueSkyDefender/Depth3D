@@ -200,6 +200,7 @@ Inner Shader Setting:
               Shadow Warrior Classic Redux                 DM 0       8.7500    1.00000                            
               Shadow Warrior 2                             DM 1       10.000                                       
               Silent Hill: Homecoming                      DM 0       12.500    0.11625                            
+    RB        Singularity                                  DM 0       15.000                WDM 66                     No  0 
               Sleeping Dogs: DE                            DM 0       7.0000                                       
               Sniper Elite 4                               DM 0       25.000                                       
     RB        Soldier of Fortune                           DM 0       17.5                  WDM 20                     Yes 5
@@ -974,6 +975,12 @@ Only way I was able to get this game to run on GOG is to enable the GOG Overlay.
 Seems like GOG Overlay is the only way this game will run....... So you know where to get it.
 
 Read the section for Dealing with mouse pointer issues. At the top. 
+
+{Singularity} - Used ReShade 4.5.4
+There is flickering when in menue I suggest you ignore it. In game there are some things that show only in Depth But not in game this will also cause problems.
+Weapon Hand May go away in flash backs. This also seem to happen at random in game.........
+
+This game not perfect. But, Hey it works mostly fine. Enjoy. 
 
 {StarWars Jedi Fallen Order} - Used ReShade 4.4.2
 Disable CA, FG, MB in the Visuals
