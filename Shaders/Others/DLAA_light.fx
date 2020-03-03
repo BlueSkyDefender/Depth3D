@@ -1,12 +1,12 @@
- ////-------------//
- ///**NFAA Fast**///
- //-------------////
+ ////--------------//
+ ///**DLAA Light**///
+ //--------------////
 
  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
- //* Normal Filter Anti Aliasing.
+ //* Directionally Localized Antialiasing Light.
  //* For ReShade 3.0+ & Freestyle
  //*  ---------------------------------
- //*                                                                          NFAA
+ //*                                                                          DLAA Light
  //* Due Diligence
  //* Based on port by b34r
  //* https://www.gamedev.net/forums/topic/580517-nfaa---a-post-process-anti-aliasing-filter-results-implementation-details/?page=2
@@ -14,7 +14,7 @@
  //*
  //* LICENSE
  //* ============
- //* Normal Filter Anti Aliasing is licenses under: Attribution-NoDerivatives 4.0 International
+ //* Directionally Localized Antialiasing Light is licenses under: Attribution-NoDerivatives 4.0 International
  //*
  //* You are free to:
  //* Share - copy and redistribute the material in any medium or format
@@ -40,14 +40,14 @@
  //*
  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-uniform int AA_Adjust <
-	ui_type = "drag";
-	ui_min = 1; ui_max = 32;
-	ui_label = "AA Power";
-	ui_tooltip = "Use this to adjust the AA power.\n"
-				 "Default is 16";
-	ui_category = "NFAA";
-> = 16;
+ uniform float Short_Edge_Mask <
+  	ui_type = "drag";
+  	ui_min = 0.0; ui_max = 1.0;
+  	ui_label = "Short Edge AA";
+  	ui_tooltip = "Use this to adjust the Long Edge AA.\n"
+  				 "Default is 0.25";
+  	ui_category = "DLAA";
+  > = 0.25;
 
 uniform float Mask_Adjust <
 	ui_type = "drag";
@@ -55,20 +55,18 @@ uniform float Mask_Adjust <
 	ui_label = "Mask Adjustment";
 	ui_tooltip = "Use this to adjust the Mask.\n"
 				 "Default is 1.00";
-	ui_category = "NFAA";
+	ui_category = "DLAA";
 > = 1.00;
 
 uniform int View_Mode <
 	ui_type = "combo";
-	ui_items = "NFAA\0Mask View\0Normals\0DLSS\0";
+	ui_items = "DLAA\0Mask View\0";
 	ui_label = "View Mode";
 	ui_tooltip = "This is used to select the normal view output or debug view.\n"
-				 "NFAA Masked gives you a sharper image with applyed Normals AA.\n"
+				 "DLAA Masked gives you a sharper image with applyed Normals AA.\n"
 				 "Masked View gives you a view of the edge detection.\n"
-				 "Normals gives you an view of the normals created.\n"
-				 "DLSS is NV_AI_DLSS Parody experiance.\n"
-				 "Default is NFAA.";
-	ui_category = "NFAA";
+				 "Default is DLAA.";
+	ui_category = "DLAA";
 > = 0;
 
 uniform bool HFR_AA <
@@ -91,6 +89,8 @@ uniform uint framecount < source = "framecount"; >;
 ////////////////////////////////////////////////////////////NFAA////////////////////////////////////////////////////////////////////
 #define Alternate framecount % 2 == 0
 #define pix float2(BUFFER_RCP_WIDTH, BUFFER_RCP_HEIGHT)
+#define lambda lerp(0,10,Short_Edge_Mask)
+#define epsilon 0.0
 
 texture BackBufferTex : COLOR;
 
@@ -111,64 +111,86 @@ float4 GetBB(float2 texcoord : TEXCOORD)
 	return tex2D(BackBuffer, texcoord);
 }
 
-float4 NFAA(float2 texcoord)
-{	float t, l, r, d, MA = Mask_Adjust;
+float4 SLP(float2 tc,float dx, float dy) //Load Pixel
+{ float4 BB = tex2D(BackBuffer,  tc + float2(dx, dy) * pix.xy);
+	return BB;
+}
+
+float4 DLAA(float2 texcoord)
+{	float t, l, r, d, n, MA = Mask_Adjust;
   if(View_Mode == 3)
     MA = 5;
-	float2 UV = texcoord.xy, SW = pix * MA, n; // But, I don't think it's really needed.
+	float2 UV = texcoord.xy, SW = pix * MA; // But, I don't think it's really needed.
 	float4 NFAA; // The Edge Seeking code can be adjusted to look for longer edges.
 	// Find Edges
 	t = LI(GetBB( float2( UV.x , UV.y - SW.y ) ).rgb);
 	d = LI(GetBB( float2( UV.x , UV.y + SW.y ) ).rgb);
 	l = LI(GetBB( float2( UV.x - SW.x , UV.y ) ).rgb);
 	r = LI(GetBB( float2( UV.x + SW.x , UV.y ) ).rgb);
-  n = float2(t - d,-(r - l));
-	// I should have made rep adjustable. But, I didn't see the need.
-	// Since my goal was to make this AA fast cheap and simple.
-  float nl = length(n), Rep = rcp(AA_Adjust);
-	if(View_Mode == 3)
-		Rep = rcp(128);
-	// Seek aliasing and apply AA. Think of this as basically blur control.
-    if (nl < Rep)
-    {
-		  NFAA = GetBB(UV);
-    }
-    else
-    {
-		  n *= pix / nl;
+	n = length(float2(t - d,-(r - l)));
 
-	float4   o = GetBB( UV ),
-			t0 = GetBB( UV + float2(n.x, -n.y)  * 0.5) * 0.9,
-			t1 = GetBB( UV - float2(n.x, -n.y)  * 0.5) * 0.9,
-			t2 = GetBB( UV + n * 0.9) * 0.75,
-			t3 = GetBB( UV - n * 0.9) * 0.75;
+  	//Short Edge Filter http://and.intercon.ru/releases/talks/dlaagdc2011/slides/#slide43
+  	float4 DLAA; //DLAA is the completed AA Result.
 
-		NFAA = (o + t0 + t1 + t2 + t3) / 4.3;
-	}
+  	//5 bi-linear samples cross
+  	float4 Center = SLP(texcoord, 0 , 0);
+  	float4 Left   = SLP(texcoord,-1.25 , 0.0);
+  	float4 Right  = SLP(texcoord, 1.25 , 0.0);
+  	float4 Up     = SLP(texcoord, 0.0 ,-1.25);
+  	float4 Down   = SLP(texcoord, 0.0 , 1.25);
+
+  	//Combine horizontal and vertical blurs together
+  	float4 combH	   = 2.0 * ( Up + Down );
+  	float4 combV	   = 2.0 * ( Left + Right );
+
+  	//Bi-directional anti-aliasing using HORIZONTAL & VERTICAL blur and horizontal edge detection
+  	//Slide information triped me up here. Read slide 43.
+  	//Edge detection
+  	float4 CenterDiffH = abs( combH - 4.0 * Center ) / 4.0;
+  	float4 CenterDiffV = abs( combV - 4.0 * Center ) / 4.0;
+
+  	//Blur
+  	float4 blurredH    = (combH + 2.0 * Center) / 6.0;
+  	float4 blurredV    = (combV + 2.0 * Center) / 6.0;
+
+  	//Edge detection
+  	float LumH         = LI( CenterDiffH.rgb );
+  	float LumV         = LI( CenterDiffV.rgb );
+
+  	float LumHB        = LI(blurredH.xyz);
+      float LumVB        = LI(blurredV.xyz);
+
+  	//t
+  	float satAmountH   = saturate( ( lambda * LumH - epsilon ) / LumVB );
+  	float satAmountV   = saturate( ( lambda * LumV - epsilon ) / LumHB );
+
+  	//color = lerp(color,blur,sat(Edge/blur)
+  	//Re-blend Short Edge Done
+  	DLAA = lerp( Center, blurredH, saturate(lerp(satAmountV ,1,-1)) );//* 1.1
+  	DLAA = lerp( DLAA,   blurredV, saturate(lerp(satAmountH ,1,-1)) );// * 0.5
+
 	// Lets make that mask for a sharper image.
-	float Mask = nl * 5.0;
-	if (Mask > 0.025)
+	float Mask = n * 5.0;
+	if (Mask > 0)
 		Mask = 1-Mask;
 	else
 		Mask = 1;
 	// Super Evil Magic Number.
 	Mask = saturate(lerp(Mask,1,-1));
 
+	Mask += 1-saturate(lerp(satAmountV + satAmountH,1,-1));
+
 	// Final color
 	if(View_Mode == 0)
 	{
-		NFAA = lerp(NFAA,GetBB( texcoord.xy), Mask );
+		DLAA = lerp(DLAA,GetBB( texcoord.xy), Mask * 0.5 );
 	}
 	else if(View_Mode == 1)
 	{
-		NFAA = Mask;
-	}
-	else if (View_Mode == 2)
-	{
-		NFAA = float3(-float2(-(r - l),-(t - d)) * 0.5 + 0.5,1);
+		DLAA = Mask  * 0.5 ;
 	}
 
-return NFAA;
+return DLAA;
 }
 
 uniform float timer < source = "timer"; >; //Please do not remove.
@@ -176,7 +198,7 @@ uniform float timer < source = "timer"; >; //Please do not remove.
 float4 Out(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Target
 {
 	float PosX = 0.9525f*BUFFER_WIDTH*pix.x,PosY = 0.975f*BUFFER_HEIGHT*pix.y;
-	float3 Color = NFAA(texcoord).rgb,D,E,P,T,H,Three,DD,Dot,I,N,F,O;
+	float3 Color = DLAA(texcoord).rgb,D,E,P,T,H,Three,DD,Dot,I,N,F,O;
 
 	[branch] if(timer <= 12500)
 	{
@@ -284,7 +306,7 @@ void PostProcessVS(in uint id : SV_VertexID, out float4 position : SV_Position, 
 }
 
 //*Rendering passes*//
-technique Normal_Filter_Anti_Aliasing
+technique DLAA_Light
 {
 			pass NFAA_Fast
 		{
