@@ -45,6 +45,9 @@
 	static const float DE_X = 0,DE_Y = 0.5, DE_Z = 0.25, DE_W = 0.0;
 	// DF_X = [Weapon ZPD Boundary] DF_Y = [Null_A] DF_Z = [Null_B] DF_W = [Null_C]
 	static const float DF_X = 0.0,DF_Y = 0.0, DF_Z = 0.0, DF_W = 0.0;
+	// WSM = [Weapon Setting Mode]
+	#define OW_Weapon_Profiles "WP Off\0Custom WP\0"
+	static const int WSM = 0;
 	//Triggers
 	static const int RE = 0, NC = 0, TW = 0, NP = 0, ID = 0, SP = 0, DC = 0, HM = 0;
 #endif
@@ -325,7 +328,7 @@ static const int2 Image_Position_Adjust = int2(DD_Z,DD_W);
 //Weapon Hand Adjust//
 uniform int WP <
 	ui_type = "combo";
-	ui_items = "WP Off\0Custom WP\0WP 0\0WP 1\0WP 2\0WP 3\0WP 4\0WP 5\0WP 6\0WP 7\0WP 8\0WP 9\0WP 10\0WP 11\0WP 12\0WP 13\0WP 14\0WP 15\0WP 16\0WP 17\0WP 18\0WP 19\0WP 20\0WP 21\0WP 22\0WP 23\0WP 24\0WP 25\0WP 26\0WP 27\0WP 28\0WP 29\0WP 30\0WP 31\0WP 32\0WP 33\0WP 34\0WP 35\0WP 36\0WP 37\0WP 38\0WP 39\0WP 40\0WP 41\0WP 42\0WP 43\0WP 44\0WP 45\0WP 46\0WP 47\0WP 48\0WP 49\0WP 50\0WP 51\0WP 52\0WP 53\0WP 54\0WP 55\0WP 56\0WP 57\0WP 58\0WP 59\0WP 60\0WP 61\0WP 62\0WP 63\0WP 64\0WP 65\0";
+	ui_items = OW_Weapon_Profiles;
 	ui_label = "·Weapon Profiles·";
 	ui_tooltip = "Pick Weapon Profile for your game or make your own.";
 	ui_category = "Weapon Hand Adjust";
@@ -735,8 +738,9 @@ float Fade(float2 texcoord)
 		float CDArray_B[7] = { 0.25 ,0.375, 0.4375, 0.5, 0.5625, 0.625, 0.75};
 		float CDArrayZPD[7] = { ZPD * 0.3, ZPD * 0.5, ZPD * 0.75, ZPD, ZPD * 0.75, ZPD * 0.5, ZPD * 0.3 };
 		//FPS
+		float Weapon_Mask = tex2Dlod(SamplerDMN,float4(texcoord,0,0)).y;
 		float CDArrayX[7] = { 0.125, 0.25, 0.375,0.5, 0.625, 0.75, FPS_M2};
-		float CDArrayY[7] = { 0.125, 0.1875, 0.25,0.3125, 0.375, 0.40625, 0.4375};
+		//float CDArrayY[7] = { 0.125, 0.1875, 0.25,0.3125, 0.375, 0.40625, 0.4375}; //under Review
 		//Screen Space Detector 7x7 Grid from between 0 to 1 and ZPD Detection becomes stronger as it gets closer to the Center.
 		[unroll]
 		for( int i = 0 ; i < 7; i++ )
@@ -748,8 +752,10 @@ float Fade(float2 texcoord)
 				else if(ZPD_Boundary == 2 )
 					CD = 1 - CDArrayZPD[i] / Depth( float2( CDArray_B[i], CDArray_B[j]) );
 				else if(ZPD_Boundary == 3 || ZPD_Boundary == 4)
-					CD = 1 - CDArrayZPD[i] / Depth( float2( CDArrayX[i], CDArrayY[j]) );
-
+				{
+					if(Weapon_Mask == 0) //Mask Out Weapon Hand
+						CD = 1 - CDArrayZPD[i] / Depth( float2( CDArrayX[i], CDArray_B[j]) );
+				}
 				if( CD < 0)
 					Detect = 1;
 			}
@@ -760,143 +766,6 @@ float Fade(float2 texcoord)
 	return PStoredfade + (Trigger_Fade - PStoredfade) * (1.0 - exp(-frametime/AA)); ///exp2 would be even slower
 }
 //////////////////////////////////////////////////////////Depth Map Alterations/////////////////////////////////////////////////////////////////////
-float3 Weapon_Profiles()//Tried Switch But, can't compile in some older versions of ReShade.
-{   if(WP == 2)
-        return float3(0.425,5.0,1.125); 	 //WP 0  | ES: Oblivion #C753DADB
-    else if(WP == 3)
-        return float3(0,0,0);                //WP 1  | Game
-    else if(WP == 4)
-        return float3(0.625,37.5,7.25);      //WP 2  | BorderLands 2 #7B81CCAB
-    else if(WP == 5)
-        return float3(0,0,0);                //WP 3  | Game
-    else if(WP == 6)
-        return float3(0.253,28.75,98.5);     //WP 4  | Fallout 4 #2D950D30
-    else if(WP == 7)
-        return float3(0.276,20.0,9.5625);    //WP 5  | Skyrim: SE #3950D04E
-    else if(WP == 8)
-        return float3(0.338,20.0,9.20);      //WP 6  | DOOM 2016 #142EDFD6
-    else if(WP == 9)
-        return float3(0.255,177.5,63.025);   //WP 7  | CoD:Black Ops #17232880 CoD:MW2 #9D77A7C4 CoD:MW3 #22EF526F
-    else if(WP == 10)
-        return float3(0.254,100.0,0.9843);   //WP 8  | CoD:Black Ops II #D691718C
-    else if(WP == 11)
-        return float3(0.254,203.125,0.98435);//WP 9  | CoD:Ghost #7448721B
-    else if(WP == 12)
-        return float3(0.254,203.125,0.98433);//WP 10 | CoD:AW #23AB8876 CoD:MW Re #BF4D4A4e
-    else if(WP == 13)
-        return float3(0.254,125.0,0.9843);   //WP 11 | CoD:IW #1544075
-    else if(WP == 14)
-        return float3(0.255,200.0,63.0);     //WP 12 | CoD:WaW #697CDA52
-    else if(WP == 15)
-        return float3(0.510,162.5,3.975);    //WP 13 | CoD #4383C12A CoD:UO #239E5522 CoD:2 #3591DE9C
-    else if(WP == 16)
-        return float3(0.254,23.75,0.98425);  //WP 14 | CoD: Black Ops IIII #73FA91DC
-    else if(WP == 17)
-        return float3(0.375,60.0,15.15625);  //WP 15 | Quake DarkPlaces #37BD797D
-    else if(WP == 18)
-        return float3(0.7,14.375,2.5);       //WP 16 | Quake 2 XP #34F4B6C
-    else if(WP == 19)
-        return float3(0.750,30.0,1.050);     //WP 17 | Quake 4 #ED7B83DE
-    else if(WP == 20)
-        return float3(0,0,0);                //WP 18 | Game
-    else if(WP == 21)
-        return float3(0.450,12.0,23.75);     //WP 19 | Metro Redux Games #886386A
-    else if(WP == 22)
-        return float3(0.350,12.5,2.0);       //WP 20 | Soldier of Fortune
-    else if(WP == 23)
-        return float3(0.286,1500.0,7.0);     //WP 21 | Deus Ex rev
-    else if(WP == 24)
-        return float3(35.0,250.0,0);         //WP 21 | Deus Ex
-    else if(WP == 25)
-        return float3(0.625,350.0,0.785);    //WP 23 | Minecraft
-    else if(WP == 26)
-        return float3(0.255,6.375,53.75);    //WP 24 | S.T.A.L.K.E.R: Games #F5C7AA92 #493B5C71
-    else if(WP == 27)
-        return float3(0,0,0);                //WP 25 | Game
-    else if(WP == 28)
-        return float3(0.750,30.0,1.025);     //WP 26 | Prey 2006 #DE2F0F4D
-    else if(WP == 29)
-        return float3(0.2832,13.125,0.8725); //WP 27 | Prey 2017 High Settings and < #36976F6D
-    else if(WP == 30)
-        return float3(0.2832,13.75,0.915625);//WP 28 | Prey 2017 Very High #36976F6D
-    else if(WP == 31)
-        return float3(0.7,9.0,2.3625);       //WP 29 | Return to Castle Wolfenstine #BF757E3A
-    else if(WP == 32)
-        return float3(0.4894,62.50,0.98875); //WP 30 | Wolfenstein #30030941
-    else if(WP == 33)
-        return float3(1.0,93.75,0.81875);    //WP 31 | Wolfenstein: The New Order #C770832 / The Old Blood #3E42619F
-    else if(WP == 34)
-        return float3(0,0,0);                //WP 32 | Wolfenstein II: The New Colossus / Cyberpilot
-    else if(WP == 35)
-        return float3(0.278,37.50,9.1);      //WP 33 | Black Mesa #6FC1FF71
-    else if(WP == 36)
-        return float3(0.420,4.75,1.0);       //WP 34 | Blood 2 #6D3CD99E
-    else if(WP == 37)
-        return float3(0.500,4.75,0.75);      //WP 35 | Blood 2 Alt #6D3CD99E
-    else if(WP == 38)
-        return float3(0.785,21.25,0.3875);   //WP 36 | SOMA #F22A9C7D
-    else if(WP == 39)
-        return float3(0.444,20.0,1.1875);    //WP 37 | Cryostasis #6FB6410B
-    else if(WP == 40)
-        return float3(0.286,80.0,7.0);       //WP 38 | Unreal Gold with v227 #16B8D61A
-    else if(WP == 41)
-        return float3(0.280,15.5,9.1);       //WP 39 | Serious Sam Revolution #EB9EEB74/Serious Sam HD: The First Encounter /The Second Encounter /Serious Sam 2 #8238E9CA/ Serious Sam 3: BFE*
-    else if(WP == 42)
-        return float3(0,0,0);                //WP 40 | Serious Sam 4: Planet Badass
-    else if(WP == 43)
-        return float3(0.800,15.0,0.3);       //WP 41 | Sauerbraten 2
-    else if(WP == 44)
-        return float3(0.277,20.0,8.8);       //WP 42 | TitanFall 2 #308AEBEA
-    else if(WP == 45)
-        return float3(0.7,16.250,0.300);     //WP 43 | Project Warlock #5FCFB1E5
-    else if(WP == 46)
-        return float3(0.625,9.0,2.375);      //WP 44 | Kingpin Life of Crime #7DCCBBBD
-    else if(WP == 47)
-        return float3(0.28,20.0,9.0);        //WP 45 | EuroTruckSim2 #9C5C946E
-    else if(WP == 48)
-        return float3(0.458,10.5,1.105);     //WP 46 | F.E.A.R #B302EC7 & F.E.A.R 2: Project Origin #91D9EBAF
-    else if(WP == 49)
-        return float3(1.5,37.5,0.99875);     //WP 47 | Condemned Criminal Origins
-    else if(WP == 50)
-        return float3(2.0,16.25,0.09);       //WP 48 | Immortal Redneck CP alt 1.9375 #2C742D7C
-    else if(WP == 51)
-        return float3(0.485,62.5,0.9625);    //WP 49 | Dementium 2
-    else if(WP == 52)
-        return float3(0.489,68.75,1.02);     //WP 50 | NecroVisioN & NecroVisioN: Lost Company #663E66FE
-    else if(WP == 53)
-        return float3(1.0,237.5,0.83625);    //WP 51 | Rage64 #AA6B948E
-    else if(WP == 54)
-        return float3(0,0,0);                //WP 52 | Rage 2
-    else if(WP == 55)
-        return float3(0.425,15.0,99.0);      //WP 53 | Bioshock Remastred #44BD41E1
-    else if(WP == 56)
-        return float3(0.425,21.25,99.5);     //WP 54 | Bioshock 2 Remastred #7CF5A01
-    else if(WP == 57)
-        return float3(0.425,5.25,1.0);       //WP 55 | No One Lives Forever
-    else if(WP == 58)
-        return float3(0.519,31.25,8.875);    //WP 56 | No One Lives Forever 2
-    else if(WP == 59)
-        return float3(0.5,8.0,0);            //WP 57 | Strife
-    else if(WP == 60)
-        return float3(0.350,9.0,1.8);        //WP 58 | Gold Source
-    else if(WP == 61)
-        return float3(1.825,13.75,0);        //WP 59 | No Man Sky FPS Mode
-    else if(WP == 62)
-        return float3(1.962,5.5,0);          //WP 60 | Dying Light
-    else if(WP == 63)
-        return float3(0.287,180.0,9.0);      //WP 61 | Farcry
-    else if(WP == 64)
-        return float3(0.2503,55.0,1000.0);   //WP 62 | Farcry 2
-    else if(WP == 65)
-        return float3(0,0,0);                //WP 63 | Game
-    else if(WP == 66)
-        return float3(0.2503,52.5,987.5);    //WP 64 | Singularity
-    else if(WP == 67)
-        return float3(0,0,0);                //WP 65 | Game
-    else
-        return float3(Weapon_Adjust.x,Weapon_Adjust.y,Weapon_Adjust.z);
-}
-
 float2 WeaponDepth(float2 texcoord)
 {
 	#if DB_Size_Postion || SP
@@ -905,8 +774,10 @@ float2 WeaponDepth(float2 texcoord)
 	texcoord = float2((texXY.x*Horizontal_and_Vertical.x)-midHV.x,(texXY.y*Horizontal_and_Vertical.y)-midHV.y);
 	#endif
 	//Weapon Setting//
-	float3 WA_XYZ = Weapon_Profiles();
-
+	float3 WA_XYZ = Weapon_Adjust;
+	#if WSM >= 1
+	WA_XYZ = Weapon_Profiles(WP, Weapon_Adjust);
+	#endif
 	if (Depth_Map_Flip)
 		texcoord.y =  1 - texcoord.y;
 	//Conversions to linear space.....
@@ -927,36 +798,36 @@ float2 WeaponDepth(float2 texcoord)
 
 float3 DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD) : SV_Target
 {
-		float4 DM = Depth(texcoord).xxxx;
-		float R, G, B, WD = WeaponDepth(texcoord).x, CoP = WeaponDepth(texcoord).y, CutOFFCal = (CoP/Depth_Map_Adjust) * 0.5; //Weapon Cutoff Calculation
-		CutOFFCal = step(DM.x,CutOFFCal);
+	float4 DM = Depth(texcoord).xxxx;
+	float R, G, B, WD = WeaponDepth(texcoord).x, CoP = WeaponDepth(texcoord).y, CutOFFCal = (CoP/Depth_Map_Adjust) * 0.5; //Weapon Cutoff Calculation
+	CutOFFCal = step(DM.x,CutOFFCal);
 
-		[branch] if (WP == 0)
-		{
-			DM.x = DM.x;
-		}
-		else
-		{
-			DM.x = lerp(DM.x,WD,CutOFFCal);
-			DM.y = lerp(0.0,WD,CutOFFCal);
-			DM.z = lerp(0.5,WD,CutOFFCal);
-		}
+	[branch] if (WP == 0)
+	{
+		DM.x = DM.x;
+	}
+	else
+	{
+		DM.x = lerp(DM.x,WD,CutOFFCal);
+		DM.y = lerp(0.0,WD,CutOFFCal);
+		DM.z = lerp(0.5,WD,CutOFFCal);
+	}
 
-		R = DM.x; //Mix Depth
-		G = DM.y > smoothstep(0,2.5,DM.w); //Weapon Mask
-		B = DM.z; //Weapon Hand
-		//A = DM.w; //Normal Depth
-		//Fade Storage
+	R = DM.x; //Mix Depth
+	G = DM.y > smoothstep(0,2.5,DM.w); //Weapon Mask
+	B = DM.z; //Weapon Hand
+	//A = DM.w; //Normal Depth
+	//Fade Storage
 	float ScaleND = lerp(R,1,smoothstep(-WZPD_and_WND.y,1,R));
 
 	if (WZPD_and_WND.y > 0)
 		R = lerp(ScaleND,R,smoothstep(0,0.25,ScaleND));
 
-		if(texcoord.x < pix.x * 2 && texcoord.y < pix.y * 2)
-			R = Fade_in_out(texcoord);
-		if(1-texcoord.x < pix.x * 2 && 1-texcoord.y < pix.y * 2)
-			R = Fade(texcoord);
-		//Alpha Don't work in DX9
+	if(texcoord.x < pix.x * 2 && texcoord.y < pix.y * 2)
+		R = Fade_in_out(texcoord);
+	if(1-texcoord.x < pix.x * 2 && 1-texcoord.y < pix.y * 2)
+		R = Fade(texcoord);
+	//Alpha Don't work in DX9
 	return saturate(float3(R,G,B));
 }
 
@@ -977,18 +848,24 @@ float AutoZPDRange(float ZPD, float2 texcoord )
 }
 #endif
 float2 Conv(float D,float2 texcoord)
-{	float Z = ZPD, WZP = 0.5, ZP = 0.5, ALC = abs(Lum(texcoord).x), W_Convergence = WZPD_and_WND.x;
+{	float Z = ZPD, WZP = 0.5, ZP = 0.5, ALC = abs(Lum(texcoord).x), W_Convergence = WZPD_and_WND.x, WZPDB, Distance_From_Bottom = 0.9375;
     //Screen Space Detector.
 	if (abs(Weapon_ZPD_Boundary) > 0)
 	{   float WArray[8] = { 0.5, 0.5625, 0.625, 0.6875, 0.75, 0.8125, 0.875, 0.9375};
-		float WZDPArray[8] = { 1.0, 0.5, 0.75, 0.5, 0.625, 0.5, 0.55, 0.5}, Distance_From_Bottom = 0.9375;//SoF ZPD Weapon Map
-		if(Weapon_ZPD_Boundary < 0)
-			Distance_From_Bottom = 0.95;
+		float MWArray[8] = { 0.4375, 0.46875, 0.5, 0.53125, 0.625, 0.75, 0.875, 0.9375};
+		float WZDPArray[8] = { 1.0, 0.5, 0.75, 0.5, 0.625, 0.5, 0.55, 0.5};//SoF ZPD Weapon Map
 		[unroll] //only really only need to check one point just above the center bottom and to the right.
 		for( int i = 0 ; i < 8; i++ )
-		{   float WZPDB = 1 - WZPD_and_WND.x / tex2Dlod(SamplerDMN,float4(float2(WArray[i],Distance_From_Bottom),0,0)).z;
+		{
 			if(WP == 22)//SoF
 				WZPDB = 1 - (WZPD_and_WND.x * WZDPArray[i]) / tex2Dlod(SamplerDMN,float4(float2(WArray[i],0.9375),0,0)).z;
+			else
+			{
+				if (Weapon_ZPD_Boundary < 0) //Code for Moving Weapon Hand stablity.
+					WZPDB = 1 - WZPD_and_WND.x / tex2Dlod(SamplerDMN,float4(float2(MWArray[i],Distance_From_Bottom),0,0)).z;
+				else //Normal
+					WZPDB = 1 - WZPD_and_WND.x / tex2Dlod(SamplerDMN,float4(float2(WArray[i],Distance_From_Bottom),0,0)).z;
+			}
 
 			if (WZPDB < -0.1)
 				W_Convergence *= 1.0-abs(Weapon_ZPD_Boundary);
@@ -1028,6 +905,12 @@ float2 Conv(float D,float2 texcoord)
 float DB( float2 texcoord)
 {
 	float3 DM = tex2Dlod(SamplerDMN,float4(texcoord,0,0)).xyz;
+	//Hide Temporal passthrough
+	if(texcoord.x < pix.x * 2 && texcoord.y < pix.y * 2)
+		DM = Depth(texcoord);
+	if(1-texcoord.x < pix.x * 2 && 1-texcoord.y < pix.y * 2)
+		DM = Depth(texcoord);
+
 	#if Legacy_Mode
 	    float total = BlurSamples, S = 5 * saturate(Disocclusion_Adjust.x);
 	    float3 D = DM * BlurSamples;
@@ -1069,7 +952,7 @@ float DB( float2 texcoord)
 //////////////////////////////////////////////////////////Depth Edge Trimming///////////////////////////////////////////////////////////////////////
 
 float2 zBuffer(in float4 position : SV_Position, in float2 texcoord : TEXCOORD) : SV_Target
-{	float Mask = DB( texcoord.xy );
+{   float Mask = DB( texcoord.xy );
 	if(Depth_Edge_Mask > 0 || Depth_Edge_Mask < 0)
 	{
 		float t = DB( float2( texcoord.x , texcoord.y - pix.y ) ),
@@ -1122,7 +1005,7 @@ float2 Parallax(float Diverge, float2 Coordinates, float IO) // Horizontal paral
 	ParallaxCoord = float2(Coordinates.x + MS * DepthLR, Coordinates.y);
 	#else
 	if(Performance_Mode)
-	Perf = .5;
+		Perf = .5;
 	//ParallaxSteps Calculations
 	float D = abs(Diverge), Cal_Steps = (D * Perf) + (D * 0.04), Steps = clamp(Cal_Steps,0,255);
 	// Offset per step progress & Limit
@@ -1443,7 +1326,6 @@ float3 Out(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Targe
 	float PosX = 0.9525f*BUFFER_WIDTH*pix.x,PosY = 0.975f*BUFFER_HEIGHT*pix.y, Text_Timer = 12500, BT = smoothstep(0,1,sin(timer*(3.75/1000)));
 	float D,E,P,T,H,Three,DD,Dot,I,N,F,O,R,EE,A,DDD,HH,EEE,L,PP,Help,NN,PPP,C,Not,No;
 	float3 Color = PS_calcLR(texcoord).rgb;
-
 	if(TW || NC || NP)
 		Text_Timer = 18750;
 

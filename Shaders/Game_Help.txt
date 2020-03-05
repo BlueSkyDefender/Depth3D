@@ -704,9 +704,17 @@ Also Use a Controller for game play.
 {Mass Effect Andromeda} - Thank you zig11727
 Install path \Program Files\Origin\Mass Effect Andromeda
 
-{Master Chief Collection: Halo} - 4.4.2
-Reach: Heavy issues with Weapon Hand. Please contact Devs to see if they can fix it. [https://www.halowaypoint.com/en-us/forums/85d779d52cfd46918b4f8b638f2e3c7b/topics/weapon-hand-issue-with-mcc-on-pc-with-reshade/4f0e0b7b-06b6-44b9-959e-0614586ffc64/posts]
+{Master Chief Collection: Halo} - 4.4.0
+Halo: Reach
+Heavy issues with Weapon Hand. Please contact Devs to see if they can fix it. [https://www.halowaypoint.com/en-us/forums/85d779d52cfd46918b4f8b638f2e3c7b/topics/weapon-hand-issue-with-mcc-on-pc-with-reshade/4f0e0b7b-06b6-44b9-959e-0614586ffc64/posts]
 [https://youtu.be/d6Ez7b8iabA]
+You Need to Set Near Depth to 0.34 for this game
+
+Halo: CE Anniversary
+There is a bug in new versions of ReShade so use 4.4.0 and Check [x] Use aspect ratio heuristics, [x] Copy depth buffers before clear operation, and [x] Copy depth buffers before stencil clear operaton too. 
+Then pick the correct buffer in your case.
+You Need to set Weapon Profile to the Current Game's Name
+You can Clear Near Depth and set it to 0.0.
 
 {MegaMan 2.5D Now in 3D} - ReShade 4.5.0 Xenos_2.3.2 Injector
 Install game and make sure in launches in fullscreen and native resolution.
@@ -976,11 +984,14 @@ Seems like GOG Overlay is the only way this game will run....... So you know whe
 
 Read the section for Dealing with mouse pointer issues. At the top. 
 
-{Singularity} - Used ReShade 4.5.4
+{Singularity} - Used ReShade 4.5.4 "Steam Version of Game" on Windows 10
 There is flickering when in menue I suggest you ignore it. In game there are some things that show only in Depth But not in game this will also cause problems.
 Weapon Hand May go away in flash backs. This also seem to happen at random in game.........
 
-This game not perfect. But, Hey it works mostly fine. Enjoy. 
+This game not perfect. But, Hey it works mostly fine. Enjoy. Make sure you enable "Copy Depth Buffer Before Clearing."
+Disable Distortion and DoF in game settings. Thank you.
+
+Some users reported other strange issues with non steam versions of the game.
 
 {StarWars Jedi Fallen Order} - Used ReShade 4.4.2
 Disable CA, FG, MB in the Visuals
