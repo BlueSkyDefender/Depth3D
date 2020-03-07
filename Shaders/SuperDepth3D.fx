@@ -2,7 +2,7 @@
 ///**SuperDepth3D**///
 //----------------////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//* Depth Map Based 3D post-process shader v2.2.4
+//* Depth Map Based 3D post-process shader v2.2.5
 //* For Reshade 3.0+
 //* ---------------------------------
 //*
@@ -61,7 +61,7 @@
 // RE Fix is used to fix the issue with Resident Evil's 2 Remake 1-Shot cutscenes.
 #define RE_Fix 0 //Default 0 is Off. One is On.
 
-// Change the Cancel Depth Key. Determines the Cancel Depth Toggle Key useing keycode info
+// Change the Cancel Depth Key. Determines the Cancel Depth Toggle Key using keycode info
 // The Key Code for Decimal Point is Number 110. Ex. for Numpad Decimal "." Cancel_Depth_Key 110
 #define Cancel_Depth_Key 0 // You can use http://keycode.info/ to figure out what key is what.
 
@@ -75,13 +75,13 @@
 // Also used to enable Image Position Adjust is used to move the Z-Buffer around.
 #define DB_Size_Postion 0 //Default 0 is Off. One is On.
 
-// HUD Mode is for Extra UI MASK and Basic HUD Adjustments. This is usefull for UI elements that are drawn in the Depth Buffer.
+// HUD Mode is for Extra UI MASK and Basic HUD Adjustments. This is useful for UI elements that are drawn in the Depth Buffer.
 // Such as the game Naruto Shippuden: Ultimate Ninja, TitanFall 2, and or Unreal Gold 277. That have this issue. This also allows for more advance users
 // Too Make there Own UI MASK if need be.
 // You need to turn this on to use UI Masking options Below.
 #define HUD_MODE 0 // Set this to 1 if basic HUD items are drawn in the depth buffer to be adjustable.
 
-// -=UI Mask Texture Mask Intercepter=- This is used to set Two UI Masks for any game. Keep this in mind when you enable UI_MASK.
+// -=UI Mask Texture Mask Interceptor=- This is used to set Two UI Masks for any game. Keep this in mind when you enable UI_MASK.
 // You Will have to create Three PNG Textures named DM_Mask_A.png & DM_Mask_B.png with transparency for this option.
 // They will also need to be the same resolution as what you have set for the game and the color black where the UI is.
 // This is needed for games like RTS since the UI will be set in depth. This corrects this issue.
@@ -96,7 +96,7 @@
 //                    |:::       |       |***       |
 //                    |:::_______|       |***_______|
 // So :::: are UI Elements in game. The *** is what the Mask needs to cover up.
-// The game part needs to be trasparent and the UI part needs to be black.
+// The game part needs to be transparent and the UI part needs to be black.
 
 // The Key Code for the mouse is 0-4 key 1 is right mouse button.
 #define Cursor_Lock_Key 4 // Set default on mouse 4
@@ -104,7 +104,7 @@
 #define Fade_Time_Adjust 0.5625 // From 0 to 1 is the Fade Time adjust for this mode. Default is 0.5625;
 
 //USER EDITABLE PREPROCESSOR FUNCTIONS END//
-#if !defined(__RESHADE__) || __RESHADE__ < 40000
+#if !defined(__RESHADE__) || __RESHADE__ < 43000
 	#define Compatibility 1
 #else
 	#define Compatibility 0
@@ -155,7 +155,7 @@ uniform float ZPD <
 	ui_label = " Zero Parallax Distance";
 	ui_tooltip = "ZPD controls the focus distance for the screen Pop-out effect also known as Convergence.\n"
 				"For FPS Games keeps this low Since you don't want your gun to pop out of screen.\n"
-				"This is controled by Convergence Mode.\n"
+				"This is controlled by Convergence Mode.\n"
 				"Default is 0.025, Zero is off.";
 	ui_category = "Divergence & Convergence";
 > = DA_X;
@@ -211,7 +211,7 @@ uniform int View_Mode <
 	ui_items = "View Mode Normal\0View Mode Alpha\0";
 	ui_label = "·View Mode·";
 	ui_tooltip = "Changes the way the shader fills in the occlude section in the image.\n"
-                 "Normal is default output and Alpha is used for higher ammounts of Semi-Transparent objects.\n"
+                 "Normal is default output and Alpha is used for higher amounts of Semi-Transparent objects.\n"
 				 "Default is Normal";
 	ui_category = "Occlusion Masking";
 > = 0;
@@ -241,7 +241,7 @@ uniform float Depth_Edge_Mask <
 	#endif
 	ui_min = -0.125; ui_max = 1.0;
 	ui_label = " Edge Mask";
-	ui_tooltip = "Use this to adjust for articafts.\n"
+	ui_tooltip = "Use this to adjust for artifacts.\n"
 				 "Default is Zero, Off";
 	ui_category = "Occlusion Masking";
 > = 0.0;
@@ -289,7 +289,7 @@ uniform float Auto_Depth_Adjust <
 	ui_type = "drag";
 	ui_min = 0.0; ui_max = 0.625;
 	ui_label = " Auto Depth Adjust";
-	ui_tooltip = "The Map Automaticly scales to outdoor and indoor areas.\n"
+	ui_tooltip = "The Map Automatically scales to outdoor and indoor areas.\n"
 				 "Default is 0.1f, Zero is off.";
 	ui_category = "Depth Map";
 > = DB_Z;
@@ -304,7 +304,7 @@ uniform int Depth_Map_View <
 // New Menu Detection Code WIP
 uniform bool Depth_Detection <
 	ui_label = " Depth Detection";
-	ui_tooltip = "Use this to dissable/enable in game Depth Detection.";
+	ui_tooltip = "Use this to disable/enable in game Depth Detection.";
 	ui_category = "Depth Map";
 > = false;
 
@@ -326,7 +326,7 @@ uniform int2 Image_Position_Adjust<
 	ui_type = "drag";
 	ui_min = -4096.0; ui_max = 4096.0;
 	ui_label = "Z Position";
-	ui_tooltip = "Adjust the Image Postion if it's off by a bit. Default is Zero.";
+	ui_tooltip = "Adjust the Image Position if it's off by a bit. Default is Zero.";
 	ui_category = "Depth Map";
 > = int2(DD_Z,DD_W);
 #else
@@ -347,7 +347,7 @@ uniform float3 Weapon_Adjust <
 	ui_min = 0.0; ui_max = 250.0;
 	ui_label = " Weapon Hand Adjust";
 	ui_tooltip = "Adjust Weapon depth map for your games.\n"
-				 "X, CutOff Point used to set a diffrent scale for first person hand apart from world scale.\n"
+				 "X, CutOff Point used to set a different scale for first person hand apart from world scale.\n"
 				 "Y, Precision is used to adjust the first person hand in world scale.\n"
 	             "Default is float2(X 0.0, Y 0.0, Z 0.0)";
 	ui_category = "Weapon Hand Adjust";
@@ -359,7 +359,7 @@ uniform float2 WZPD_and_WND <
 	ui_label = " Weapon ZPD and Near Depth";
 	ui_tooltip = "WZPD controls the focus distance for the screen Pop-out effect also known as Convergence for the weapon hand.\n"
 				"For FPS Games keeps this low Since you don't want your gun to pop out of screen.\n"
-				"This is controled by Convergence Mode.\n"
+				"This is controlled by Convergence Mode.\n"
 				"Default is (X 0.03, Y 0.0) & Zero is off.";
 	ui_category = "Weapon Hand Adjust";
 > = float2(0.03,DE_W);
@@ -381,7 +381,7 @@ uniform int2 Eye_Fade_Reduction_n_Power <
 	#endif
 	ui_min = 0; ui_max = 2;
 	ui_label = " Eye Selection & Fade Reduction";
-	ui_tooltip = "Fade Reduction decresses the depth ammount by a current percentage.\n"
+	ui_tooltip = "Fade Reduction decreases the depth amount by a current percentage.\n"
 							 "One is Right Eye only, Two is Left Eye Only, and Zero Both Eyes.\n"
 							 "Default is int( X 0 , Y 0 ).";
 	ui_category = "Weapon Hand Adjust";
@@ -401,7 +401,7 @@ uniform float2 HUD_Adjust <
 	ui_min = 0.0; ui_max = 1.0;
 	ui_label = "·HUD Mode·";
 	ui_tooltip = "Adjust HUD for your games.\n"
-				 "X, CutOff Point used to set a seperation point bettwen world scale and the HUD also used to turn HUD MODE On or Off.\n"
+				 "X, CutOff Point used to set a separation point between world scale and the HUD also used to turn HUD MODE On or Off.\n"
 				 "Y, Pushes or Pulls the HUD in or out of the screen if HUD MODE is on.\n"
 				 "This is only for UI elements that show up in the Depth Buffer.\n"
 	             "Default is float2(X 0.0, Y 0.5)";
@@ -421,7 +421,7 @@ uniform float2 Interlace_Anaglyph <
 	ui_type = "drag";
 	ui_min = 0.0; ui_max = 1.0;
 	ui_label = " Interlace & Anaglyph";
-	ui_tooltip = "Interlace Optimization is used to reduce alisesing in a Line or Column interlaced image. This has the side effect of softening the image.\n"
+	ui_tooltip = "Interlace Optimization is used to reduce aliasing in a Line or Column interlaced image. This has the side effect of softening the image.\n"
 	             "Anaglyph Desaturation allows for removing color from an anaglyph 3D image. Zero is Black & White, One is full color.\n"
 	             "Default for Interlace Optimization is 0.5 and for Anaglyph Desaturation is One.";
 	ui_category = "Stereoscopic Options";
@@ -510,12 +510,15 @@ uniform bool Mask_Cycle < source = "key"; keycode = Mask_Cycle_Key; toggle = tru
 uniform bool CLK < source = "mousebutton"; keycode = Cursor_Lock_Key; toggle = true; mode = "toggle";>;
 uniform bool Trigger_Fade_A < source = "mousebutton"; keycode = Fade_Key; toggle = true; mode = "toggle";>;
 uniform bool Trigger_Fade_B < source = "mousebutton"; keycode = Fade_Key;>;
-//uniform int ran < source = "random"; min = 0; max = 1; >;
 uniform float2 Mousecoords < source = "mousepoint"; > ;
 uniform float frametime < source = "frametime";>;
 uniform float timer < source = "timer"; >;
 
 static const float Auto_Balance_Clamp = 0.5; //This Clamps Auto Balance's max Distance.
+
+#if !Compatibility
+uniform bool DepthCheck < source = "bufready_depth"; >;
+#endif
 
 #define pix float2(BUFFER_RCP_WIDTH, BUFFER_RCP_HEIGHT)
 #define Per float2( (Perspective * pix.x) * 0.5, 0) //Per is Perspective
@@ -595,7 +598,7 @@ float2 Lum(float2 texcoord)
 	}
 ////////////////////////////////////////////////////Distortion Correction//////////////////////////////////////////////////////////////////////
 #if BD_Correction || DC
-float2 D(float2 p, float k1, float k2) //Lens + Radial lens undistortion filtering Left & Right
+float2 D(float2 p, float k1, float k2) //Lens + Radial lens undistort filtering Left & Right
 {	// Normalize the u,v coordinates in the range [-1;+1]
 	p = (2. * p - 1.);
 	// Calculate Zoom
@@ -783,7 +786,7 @@ float Fade(float2 texcoord)
 				{   GridXY = float2( CDArray_B[i], CDArray_B[j]);
 					CD = max(1 - CDArrayZPD[i] / tex2Dlod(SamplerDMN,float4( GridXY ,0,0)).y,1 - CDArrayZPD[i] / Depth( GridXY ));
 				}
-				
+
 				if (CD < 0)
 					Detect = 1;
 			}
@@ -804,7 +807,7 @@ float2 WeaponDepth(float2 texcoord)
 	//Weapon Setting//
 	float3 WA_XYZ = Weapon_Adjust;
 	#if WSM >= 1
-	WA_XYZ = Weapon_Profiles(WP, Weapon_Adjust);
+		WA_XYZ = Weapon_Profiles(WP, Weapon_Adjust);
 	#endif
 	if (Depth_Map_Flip)
 		texcoord.y =  1 - texcoord.y;
@@ -957,6 +960,10 @@ float DB( float2 texcoord)
 
 	DM.y = lerp(Conv(DM.x,texcoord).x, Conv(DM.z,texcoord).y, DM.y);
 
+	#if !Compatibility
+	if (!DepthCheck && Depth_Detection)
+		DM = 0.0625;
+	#else
 	if (Depth_Detection)
 	{ //Check Depth at 3 Point D_A Top_Center / Bottom_Center
 		float D_A = tex2Dlod(SamplerDMN,float4(float2(0.5,0.0),0,0)).x, D_B = tex2Dlod(SamplerDMN,float4(float2(0.0,1.0),0,0)).x;
@@ -967,6 +974,7 @@ float DB( float2 texcoord)
 				DM = 0.0625;
 		}
 	}
+	#endif
 
 	if (Cancel_Depth)
 		DM = 0.0625;

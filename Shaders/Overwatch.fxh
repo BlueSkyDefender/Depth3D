@@ -943,14 +943,14 @@ static const int HMT = 0;                               //HUD Mode Trigger
 	#define DA_X 0.03
 	#define DB_Y 4
 	#define DB_W 70
-#elif (App == 0xC3AF1228 ) //Spellforce
-	#define DA_Y 150.0
+#elif (App == 0xC3AF1228 || App == 0x95A994C8 ) //Spellforce
+	#define DA_Y 145.0
 	#define DA_Z 0.001
-    #define DB_Z 0.025
+    #define DB_Z 0.05
 	#define DA_X 0.05
 	#define DB_Y 3
     #define DE_X 1
-    #define DE_Y 0.2375
+    #define DE_Y 0.235
     #define DE_Z 0.375
     #define HM 1
     #define DC_X 0.5
