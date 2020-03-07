@@ -46,7 +46,7 @@
 	// DF_X = [Weapon ZPD Boundary] DF_Y = [Null_A] DF_Z = [Null_B] DF_W = [Null_C]
 	static const float DF_X = 0.0,DF_Y = 0.0, DF_Z = 0.0, DF_W = 0.0;
 	// WSM = [Weapon Setting Mode]
-	#define OW_Weapon_Profiles "WP Off\0Custom WP\0"
+	#define OW_WP "WP Off\0Custom WP\0"
 	static const int WSM = 0;
 	//Triggers
 	static const int RE = 0, NC = 0, TW = 0, NP = 0, ID = 0, SP = 0, DC = 0, HM = 0;
@@ -85,13 +85,13 @@
 // You Will have to create Three PNG Textures named DM_Mask_A.png & DM_Mask_B.png with transparency for this option.
 // They will also need to be the same resolution as what you have set for the game and the color black where the UI is.
 // This is needed for games like RTS since the UI will be set in depth. This corrects this issue.
-#if ((exists "DM_Mask_A.png") && (exists "DM_Mask_B.png"))
+#if ((exists "DM_Mask_A.png") || (exists "DM_Mask_B.png"))
 	#define UI_MASK 1
 #else
 	#define UI_MASK 0
 #endif
 // To cycle through the textures set a Key. The Key Code for "n" is Key Code Number 78.
-#define Mask_Cycle_Key 0 // You can use http://keycode.info/ to figure out what key is what.
+#define Set_Key_Code_Here 0 // You can use http://keycode.info/ to figure out what key is what.
 // Texture EX. Before |::::::::::| After |**********|
 //                    |:::       |       |***       |
 //                    |:::_______|       |***_______|
@@ -130,6 +130,14 @@
 	#define Max_Divergence 100.0
 #else
 	#define Max_Divergence 125.0
+#endif
+//New ReShade PreProcessor stuff
+#if UI_MASK
+	#ifndef Mask_Cycle_Key
+		#define Mask_Cycle_Key Set_Key_Code_Here
+	#endif
+#else
+	#define Mask_Cycle_Key Set_Key_Code_Here
 #endif
 //Divergence & Convergence//
 uniform float Divergence <
@@ -328,7 +336,7 @@ static const int2 Image_Position_Adjust = int2(DD_Z,DD_W);
 //Weapon Hand Adjust//
 uniform int WP <
 	ui_type = "combo";
-	ui_items = OW_Weapon_Profiles;
+	ui_items = OW_WP;
 	ui_label = "·Weapon Profiles·";
 	ui_tooltip = "Pick Weapon Profile for your game or make your own.";
 	ui_category = "Weapon Hand Adjust";
@@ -496,10 +504,9 @@ uniform float Zoom <
 static const float2 Colors_K1_K2 = float2(DC_Y,DC_Z);
 static const float Zoom = DC_W;
 #endif
-
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 uniform bool Cancel_Depth < source = "key"; keycode = Cancel_Depth_Key; toggle = true; mode = "toggle";>;
-uniform bool Mask_Cycle < source = "key"; keycode = Mask_Cycle_Key; toggle = true; >;
+uniform bool Mask_Cycle < source = "key"; keycode = Mask_Cycle_Key; toggle = true; mode = "toggle";>;
 uniform bool CLK < source = "mousebutton"; keycode = Cursor_Lock_Key; toggle = true; mode = "toggle";>;
 uniform bool Trigger_Fade_A < source = "mousebutton"; keycode = Fade_Key; toggle = true; mode = "toggle";>;
 uniform bool Trigger_Fade_B < source = "mousebutton"; keycode = Fade_Key;>;
@@ -569,9 +576,9 @@ sampler SamplerzBufferN
 	};
 
 #if UI_MASK
-texture TexMaskA < source = "Mask_A.png"; > { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA8; };
+texture TexMaskA < source = "DM_Mask_A.png"; > { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA8; };
 sampler SamplerMaskA { Texture = TexMaskA;};
-texture TexMaskB < source = "Mask_B.png"; > { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA8; };
+texture TexMaskB < source = "DM_Mask_B.png"; > { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA8; };
 sampler SamplerMaskB { Texture = TexMaskB;};
 #endif
 ////////////////////////////////////////////////////////Adapted Luminance/////////////////////////////////////////////////////////////////////
@@ -589,8 +596,7 @@ float2 Lum(float2 texcoord)
 ////////////////////////////////////////////////////Distortion Correction//////////////////////////////////////////////////////////////////////
 #if BD_Correction || DC
 float2 D(float2 p, float k1, float k2) //Lens + Radial lens undistortion filtering Left & Right
-{
-	// Normalize the u,v coordinates in the range [-1;+1]
+{	// Normalize the u,v coordinates in the range [-1;+1]
 	p = (2. * p - 1.);
 	// Calculate Zoom
 	p *= 1 + Zoom;
@@ -714,6 +720,18 @@ float Depth(float2 texcoord)
 		zBuffer = rcp(Z.y * C.y + C.x);
 	return saturate(zBuffer);
 }
+//////////////////////////////////////////////////////////////Depth HUD Alterations///////////////////////////////////////////////////////////////////////
+#if UI_MASK
+float HUD_Mask(float2 texcoord )
+{   float Mask_Tex;
+	    if (Mask_Cycle == 1)
+	        Mask_Tex = tex2Dlod(SamplerMaskB,float4(texcoord.xy,0,0)).a;
+	    else
+	        Mask_Tex = tex2Dlod(SamplerMaskA,float4(texcoord.xy,0,0)).a;
+
+	return saturate(Mask_Tex);
+}
+#endif
 /////////////////////////////////////////////////////////Fade In and Out Toggle/////////////////////////////////////////////////////////////////////
 float Fade_in_out(float2 texcoord)
 { float Trigger_Fade, AA = (1-Fade_Time_Adjust)*1000, PStoredfade = tex2D(SamplerLumN,texcoord - 1).z;
@@ -728,19 +746,13 @@ float Fade_in_out(float2 texcoord)
 
 float Fade(float2 texcoord)
 { //Check Depth
-	float CD, Detect, FPS_M2 = 0.875;
+	float CD, Detect;
 	if(ZPD_Boundary > 0)
-	{
-	if(ZPD_Boundary == 3)
-		FPS_M2 = 0.1875;
-		//Normal A & B
+	{   //Normal A & B for both
 		float CDArray_A[7] = { 0.125 ,0.25, 0.375,0.5, 0.625, 0.75, 0.875};
 		float CDArray_B[7] = { 0.25 ,0.375, 0.4375, 0.5, 0.5625, 0.625, 0.75};
 		float CDArrayZPD[7] = { ZPD * 0.3, ZPD * 0.5, ZPD * 0.75, ZPD, ZPD * 0.75, ZPD * 0.5, ZPD * 0.3 };
-		//FPS
-		float Weapon_Mask = tex2Dlod(SamplerDMN,float4(texcoord,0,0)).y;
-		float CDArrayX[7] = { 0.125, 0.25, 0.375,0.5, 0.625, 0.75, FPS_M2};
-		//float CDArrayY[7] = { 0.125, 0.1875, 0.25,0.3125, 0.375, 0.40625, 0.4375}; //under Review
+		float2 GridXY;
 		//Screen Space Detector 7x7 Grid from between 0 to 1 and ZPD Detection becomes stronger as it gets closer to the Center.
 		[unroll]
 		for( int i = 0 ; i < 7; i++ )
@@ -748,15 +760,31 @@ float Fade(float2 texcoord)
 			for( int j = 0 ; j < 7; j++ )
 			{
 				if(ZPD_Boundary == 1)
-					CD = 1 - CDArrayZPD[i] / Depth( float2( CDArray_A[i], CDArray_A[j]) );
-				else if(ZPD_Boundary == 2 )
-					CD = 1 - CDArrayZPD[i] / Depth( float2( CDArray_B[i], CDArray_B[j]) );
-				else if(ZPD_Boundary == 3 || ZPD_Boundary == 4)
-				{
-					if(Weapon_Mask == 0) //Mask Out Weapon Hand
-						CD = 1 - CDArrayZPD[i] / Depth( float2( CDArrayX[i], CDArray_B[j]) );
+				{   GridXY = float2( CDArray_A[i], CDArray_A[j]);
+					#if UI_MASK
+						CD = max(1 - CDArrayZPD[i] / HUD_Mask(GridXY),1 - CDArrayZPD[i] / Depth( GridXY ));
+					#else
+						CD = 1 - CDArrayZPD[i] / Depth( GridXY );
+					#endif
 				}
-				if( CD < 0)
+				else if(ZPD_Boundary == 2 )
+				{   GridXY = float2( CDArray_B[i], CDArray_B[j]);
+					#if UI_MASK
+						CD = max(1 - CDArrayZPD[i] / HUD_Mask(GridXY),1 - CDArrayZPD[i] / Depth( GridXY ));
+					#else
+						CD = 1 - CDArrayZPD[i] / Depth( GridXY );
+					#endif
+				}
+				else if(ZPD_Boundary == 3)
+				{   GridXY = float2( CDArray_A[i], CDArray_B[j]);
+					CD = max(1 - CDArrayZPD[i] / tex2Dlod(SamplerDMN,float4( GridXY ,0,0)).y,1 - CDArrayZPD[i] / Depth( GridXY ));
+				}
+				else
+				{   GridXY = float2( CDArray_B[i], CDArray_B[j]);
+					CD = max(1 - CDArrayZPD[i] / tex2Dlod(SamplerDMN,float4( GridXY ,0,0)).y,1 - CDArrayZPD[i] / Depth( GridXY ));
+				}
+				
+				if (CD < 0)
 					Detect = 1;
 			}
 		}
@@ -947,7 +975,11 @@ float DB( float2 texcoord)
 		DM.y = 1 - DM.y;
 	#endif
 
-	return DM.y;
+	#if UI_MASK
+		return lerp(DM.y,0,step(1.0-HUD_Mask(texcoord),0.5));
+	#else
+		return DM.y;
+	#endif
 }
 //////////////////////////////////////////////////////////Depth Edge Trimming///////////////////////////////////////////////////////////////////////
 
@@ -1073,10 +1105,10 @@ float3 HUD(float3 HUD, float2 texcoord )
 		HUD = COC > 0 ? tex2D(BackBufferCLAMP,texcoord).rgb : HUD;
 
 	#if UI_MASK
-	    [branch] if (Mask_Cycle == true)
-	        Mask_Tex = tex2D(SamplerMaskB,texcoord.xy).a;
+	    if (Mask_Cycle == 1)
+	        Mask_Tex = tex2Dlod(SamplerMaskB,float4(texcoord.xy,0,0)).a;
 	    else
-	        Mask_Tex = tex2D(SamplerMaskA,texcoord.xy).a;
+	        Mask_Tex = tex2Dlod(SamplerMaskA,float4(texcoord.xy,0,0)).a;
 
 		float MAC = step(1.0-Mask_Tex,0.5); //Mask Adjustment Calculation
 		//This code is for hud segregation.
@@ -1133,8 +1165,8 @@ float3 PS_calcLR(float2 texcoord)
 
 	#if HUD_MODE || HM
 	float HUD_Adjustment = ((0.5 - HUD_Adjust.y)*25.) * pix.x;
-	Left.rgb = HUD(Left.rgb,float2(TCL.x - HUD_Adjustment,TCL.y));
-	Right.rgb = HUD(Right.rgb,float2(TCR.x + HUD_Adjustment,TCR.y));
+	Left.rgb = HUD(Left.rgb,float2(TCL.x - HUD_Adjustment,TCL.y)).rgb;
+	Right.rgb = HUD(Right.rgb,float2(TCR.x + HUD_Adjustment,TCR.y)).rgb;
 	#endif
 
 	float2 gridxy, GXYArray[9] = {

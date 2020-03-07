@@ -208,6 +208,7 @@ Inner Shader Setting:
     RB        Sonic Adventure DX BetterSADX Mod            DM 0       8.75                                             Yes 3                                              
               Sonic Adventure 2                            DM 0       8.75                                       
               Souls Games                                  DM 0       ?                                            
+    RB        SpellForce Platinum                          DM 0       150.00    0.00100                                Yes 3
               Stacking                                     DM 0       7.5000    0.00025                                Yes 5                                       
     RB        StarWars Jedi Fallen Order                   DM 1       13.750
     RB        Stay Close                                   DM 1       10.000                                       
@@ -992,6 +993,29 @@ This game not perfect. But, Hey it works mostly fine. Enjoy. Make sure you enabl
 Disable Distortion and DoF in game settings. Thank you.
 
 Some users reported other strange issues with non steam versions of the game.
+
+{SpellForce Platinum} - Used ReShade 4.5.4 renamed the d3d9.dll to dx9x.dll
+
+Download the Hex Patcher here. 
+[https://www.mediafire.com/file/eq610kfh7vdbplt/SpellForceHPMod.zip/file]
+
+[Quick Guide] -= https://youtu.be/MRMCVc-rTTw =- [Video Guide]
+Place QuickPatcher.exe in the folder of the SpellForce.exe you want to Patch.
+Place the SpellForce.PAX in the same folder as QuickPatcher.exe
+Place Both Texture Files DM_Mask_A.png & DM_Mask_B.png into the same folder.
+
+1. Run QuickPatcher.exe and click on SpellForce.PAX
+2. Click on LOAD.
+3. Now Click on [Patch It!!]
+
+You can delete QuickPatch.exe and SpellForce.PAX once it's done patching.
+This program also makes a SpellForce.BAK file. This is a Back Up if you want to revert.
+
+Now Download and install reshade and rename it from d3d9.dll to dx9x.dll 
+Turn the game on and it should load ReShade after the intro.
+
+Thank you.
+
 
 {StarWars Jedi Fallen Order} - Used ReShade 4.4.2
 Disable CA, FG, MB in the Visuals
