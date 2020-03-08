@@ -990,7 +990,6 @@ float DB( float2 texcoord)
 	#endif
 }
 //////////////////////////////////////////////////////////Depth Edge Trimming///////////////////////////////////////////////////////////////////////
-
 float2 zBuffer(in float4 position : SV_Position, in float2 texcoord : TEXCOORD) : SV_Target
 {   float Mask = DB( texcoord.xy );
 	if(Depth_Edge_Mask > 0 || Depth_Edge_Mask < 0)
@@ -1213,12 +1212,7 @@ float3 PS_calcLR(float2 texcoord)
 		float4 cB = float4(RMA,1);
 
 		if (Stereoscopic_Mode == 5) // Anaglyph 3D Colors Red/Cyan
-		{
-			float4 LeftEyecolor = float4(1.0,0.0,0.0,1.0);
-			float4 RightEyecolor = float4(0.0,1.0,1.0,1.0);
-
-			color =  (cA*LeftEyecolor) + (cB*RightEyecolor);
-		}
+			color =  float4(cA.r,cB.g,cB.b,1.0);
 		else if (Stereoscopic_Mode == 6) // Anaglyph 3D Dubois Red/Cyan
 		{
 		float red = 0.437 * cA.r + 0.449 * cA.g + 0.164 * cA.b - 0.011 * cB.r - 0.032 * cB.g - 0.007 * cB.b;
@@ -1260,12 +1254,7 @@ float3 PS_calcLR(float2 texcoord)
 			color = image;
 		}
 		else if (Stereoscopic_Mode == 8) // Anaglyph 3D Green/Magenta
-		{
-			float4 LeftEyecolor = float4(0.0,1.0,0.0,1.0);
-			float4 RightEyecolor = float4(1.0,0.0,1.0,1.0);
-
-			color =  (cA*LeftEyecolor) + (cB*RightEyecolor);
-		}
+			color = float4(cB.r,cA.g,cB.b,1.0);
 		else if (Stereoscopic_Mode == 9) // Anaglyph 3D Dubois Green/Magenta
 		{
 
