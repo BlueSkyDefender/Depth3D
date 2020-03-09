@@ -44,10 +44,10 @@ Info Pending
 ### Depth3D VR
 **Companion App**<br />
 
-Installer Name: Depth3DVRCompanion.exe
-Installer Size: 28.9 MB
-https://mega.nz/#!CRgXAJjR!l3QQamJka4ODGjRLkHz0bS3ef5AgKm3cO2rVeDast08 
-This Free VR is basic way to view my stereoscopic shaders on your Oculus or OpenVR supported HeadSet.
+Installer Name: Depth3DVRCompanion.exe<br />
+Installer Size: 28.9 MB<br />
+https://mega.nz/#!CRgXAJjR!l3QQamJka4ODGjRLkHz0bS3ef5AgKm3cO2rVeDast08<br /> 
+This Free VR is basic way to view my stereoscopic shaders on your Oculus or OpenVR supported HeadSet.<br />
 This App Lets you play your Games or watch Movies on your VR HMD of choice. So it has more uses than intended. 
 
 ### Game Compatibility
