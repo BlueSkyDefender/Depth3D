@@ -42,7 +42,7 @@ Info Pending
 Info Pending
 
 ### Depth3D VR
-**Companion App**
+**Companion App**<br />
 
 Installer Name: Depth3DVRCompanion.exe
 Installer Size: 28.9 MB
