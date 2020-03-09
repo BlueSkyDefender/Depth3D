@@ -41,6 +41,15 @@ Info Pending
 **Flair**<br />
 Info Pending
 
+### Depth3D VR
+**Companion App**
+
+Installer Name: Depth3DVRCompanion.exe
+Installer Size: 28.9 MB
+https://mega.nz/#!CRgXAJjR!l3QQamJka4ODGjRLkHz0bS3ef5AgKm3cO2rVeDast08 
+This Free VR is basic way to view my stereoscopic shaders on your Oculus or OpenVR supported HeadSet.
+This App Lets you play your Games or watch Movies on your VR HMD of choice. So it has more uses than intended. 
+
 ### Game Compatibility
 **Game Compatibility Information**
 
@@ -53,7 +62,7 @@ like with games as .Hack//G.U.
 
 Also, Way many more games listed in Games_Help.txt
 
-Please read me ReadMeDepth3d.txt For Setting and More Information.
+Please read me ReadMeDepth3d.txt For Setting and More Information. "Needs to be Updated"
 
 **Want to leave me a message at the forums:** BlueSkyKnight<br />
 https://reshade.me/forum/shader-presentation/2128-sidebyside-3d-depth-map-based-stereoscopic-shader<br />
