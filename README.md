@@ -12,8 +12,14 @@ Because who wants razor-sharp clouds? Birds don't, so why should you.
 Depth Based Unsharp Mask intentional haloing. This will work with or without depth. On video, video games, and with still images.
 This will enhance Depth Effects that are already apart of the scene.
 
+**Temporal AA**<br />
+TAA is a Epic Games implementation of Temporal AA that seems the only real way of doing this in reshade with out motion vectors.
+
 **Trails**<br />
 This is an echoing based shader to add a trail to your image as you increase the image persistence. Mainly used for light painting.
+
+**DLAA**<br />
+A reworked port of Directionally Localized Antialiasing Light. Fun simple AA shader that can help with them jaggies .
 
 **NFAA**<br />
 A modded port of Normal Filter Anti Aliasing. With an interesting use case. Use this to assist SMAA or FXAA to catch all of them jaggies without blurring the screen.
@@ -40,6 +46,12 @@ Info Pending
 
 **Flair**<br />
 Info Pending
+
+**Particles**<br />
+Info Pending
+
+**Rain**<br />
+Super Basic Rain Shader.
 
 ### Depth3D VR
 **Companion App**<br />
