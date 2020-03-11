@@ -1085,7 +1085,7 @@ float3 Weapon_Profiles(float WP ,float3 Weapon_Adjust) //Tried Switch But, can't
     else if(WP == 3)
         return float3(0,0,0);                //WP 1  | Game
     else if(WP == 4)
-        return float3(0.625,37.5,7.25);      //WP 2  | BorderLands 2 #7B81CCAB
+        return float3(0.500,37.5,7.25);      //WP 2  | BorderLands 2 #7B81CCAB
     else if(WP == 5)
         return float3(0,0,0);                //WP 3  | Game
     else if(WP == 6)
