@@ -780,11 +780,11 @@ float Fade(float2 texcoord)
 				}
 				else if(ZPD_Boundary == 3)
 				{   GridXY = float2( CDArray_A[i], CDArray_B[j]);
-					CD = max(1 - CDArrayZPD[i] / tex2Dlod(SamplerDMN,float4( GridXY ,0,0)).y,1 - CDArrayZPD[i] / Depth( GridXY ));
+					CD = max(1 - CDArrayZPD[i] / saturate(tex2Dlod(SamplerDMN,float4( GridXY ,0,0)).y),1 - CDArrayZPD[i] / Depth( GridXY ));
 				}
 				else
 				{   GridXY = float2( CDArray_B[i], CDArray_B[j]);
-					CD = max(1 - CDArrayZPD[i] / tex2Dlod(SamplerDMN,float4( GridXY ,0,0)).y,1 - CDArrayZPD[i] / Depth( GridXY ));
+					CD = max(1 - CDArrayZPD[i] / saturate(tex2Dlod(SamplerDMN,float4( GridXY ,0,0)).y),1 - CDArrayZPD[i] / Depth( GridXY ));
 				}
 
 				if (CD < 0)

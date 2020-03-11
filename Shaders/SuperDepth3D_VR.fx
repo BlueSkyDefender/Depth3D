@@ -809,11 +809,11 @@ float Fade(float2 texcoord)
 				}
 				else if(ZPD_Boundary == 3)
 				{   GridXY = float2( CDArray_A[i], CDArray_B[j]);
-					CD = max(1 - CDArrayZPD[i] / tex2Dlod(SamplerDMVR,float4( GridXY ,0,0)).y,1 - CDArrayZPD[i] / Depth( GridXY ));
+					CD = max(1 - CDArrayZPD[i] / saturate(tex2Dlod(SamplerDMVR,float4( GridXY ,0,0)).y),1 - CDArrayZPD[i] / Depth( GridXY ));
 				}
 				else
 				{   GridXY = float2( CDArray_B[i], CDArray_B[j]);
-					CD = max(1 - CDArrayZPD[i] / tex2Dlod(SamplerDMVR,float4( GridXY ,0,0)).y,1 - CDArrayZPD[i] / Depth( GridXY ));
+					CD = max(1 - CDArrayZPD[i] / saturate(tex2Dlod(SamplerDMVR,float4( GridXY ,0,0)).y),1 - CDArrayZPD[i] / Depth( GridXY ));
 				}
 
 				if (CD < 0)
@@ -1315,7 +1315,6 @@ float3 Out(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Targe
 	float PosX = 0.9525f*BUFFER_WIDTH*pix.x,PosY = 0.975f*BUFFER_HEIGHT*pix.y, Text_Timer = 12500, BT = smoothstep(0,1,sin(timer*(3.75/1000)));
 	float D,E,P,T,H,Three,DD,Dot,I,N,F,O,R,EE,A,DDD,HH,EEE,L,PP,Help,NN,PPP,C,Not,No;
 	float3 Color = PS_calcLR(texcoord).rgb;
-
 	if(TW || NC || NP)
 		Text_Timer = 18750;
 

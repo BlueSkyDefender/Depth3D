@@ -105,10 +105,16 @@ static const int HMT = 0;                               //HUD Mode Trigger
 #if (App == 0xC753DADB )	//ES: Oblivion
 	#define DB_W 2
 	#define DB_Y 3
-#elif (App == 0x7B81CCAB )	//BorderLands 2
+#elif (App == 0x7B81CCAB || App == 0xFB9A99AB )	//BorderLands 2 & Pre-Sequel
     #define DA_Y 25.0
+    #define DA_Z 0.00025
+    #define DA_X 0.03625
 	#define DB_Y 2
-    #define DB_W 4.0
+    #define DB_W 4
+    #define DE_X 4
+    #define DE_Y 0.625
+    #define DE_Z 0.300
+    #define DF_X 0.225
 #elif (App == 0x2D950D30 )	//Fallout 4
 	#define DA_Y 6.25
 	#define DB_Y 2
@@ -1206,16 +1212,16 @@ float3 Weapon_Profiles(float WP ,float3 Weapon_Adjust) //Tried Switch But, can't
         return float3(0.2503,52.5,987.5);    //WP 64 | Singularity
     else if(WP == 67)
         return float3(0,0,0);                //WP 65 | Game
-		else if(WP == 68)
-		    return float3(0,0,0);                //WP 66 | Game
-		else if(WP == 69)
-				return float3(0,0,0);                //WP 67 | Game
-		else if(WP == 70)
-				return float3(0.251,5.6875,950.0);   //WP 68 | Mirror Edge
-		else if(WP == 71)
-				return float3(0,0,0);                //WP 69 | Game
-		else if(WP == 72)
-				return float3(0,0,0);                //WP 70 | Game
+	else if(WP == 68)
+	    return float3(0,0,0);                //WP 66 | Game
+	else if(WP == 69)
+		return float3(0,0,0);                //WP 67 | Game
+	else if(WP == 70)
+		return float3(0.251,5.6875,950.0);   //WP 68 | Mirror Edge
+	else if(WP == 71)
+		return float3(0,0,0);                //WP 69 | Game
+	else if(WP == 72)
+		return float3(0,0,0);                //WP 70 | Game
     else
         return Weapon_Adjust;
 }
