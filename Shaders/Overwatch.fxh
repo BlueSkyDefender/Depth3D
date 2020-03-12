@@ -114,7 +114,7 @@ static const int HMT = 0;                               //HUD Mode Trigger
     #define DE_X 4
     #define DE_Y 0.625
     #define DE_Z 0.300
-    #define DF_X 0.225
+    #define DF_X 0.300
 #elif (App == 0x2D950D30 )	//Fallout 4
 	#define DA_Y 6.25
 	#define DB_Y 2
@@ -960,6 +960,11 @@ static const int HMT = 0;                               //HUD Mode Trigger
     #define DE_Z 0.375
     #define HM 1
     #define DC_X 0.5
+ #elif (App == 0xD372612E ) //Raft
+	#define DA_W 1
+    #define DB_X 1
+	#define DA_X 0.03
+    #define DB_Y 4
 #else
 	#define NP 1 //No Profile
 #endif
@@ -1085,7 +1090,7 @@ float3 Weapon_Profiles(float WP ,float3 Weapon_Adjust) //Tried Switch But, can't
     else if(WP == 3)
         return float3(0,0,0);                //WP 1  | Game
     else if(WP == 4)
-        return float3(0.500,37.5,7.25);      //WP 2  | BorderLands 2 #7B81CCAB
+        return float3(0.500,32.5,7.15);      //WP 2  | BorderLands 2 #7B81CCAB
     else if(WP == 5)
         return float3(0,0,0);                //WP 3  | Game
     else if(WP == 6)
