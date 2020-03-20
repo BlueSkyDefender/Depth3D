@@ -960,11 +960,44 @@ static const int HMT = 0;                               //HUD Mode Trigger
     #define DE_Z 0.375
     #define HM 1
     #define DC_X 0.5
- #elif (App == 0xD372612E ) //Raft
+#elif (App == 0xD372612E ) //Raft
 	#define DA_W 1
-    #define DB_X 1
+	#define DB_X 1
 	#define DA_X 0.03
-    #define DB_Y 4
+	#define DB_Y 4
+#elif (App == 0xC06FE818 ) //BorderLands 3
+	#define DA_Y 18.0
+    #define DA_Z 0.0001375
+	#define DA_X 0.05
+    #define DB_Z 0.05
+	#define DA_W 1
+	#define DB_Y 4
+	#define DB_W 5
+	#define DE_X 4
+    #define DE_Y 0.6125
+    #define DE_Z 0.300
+    #define DF_X 0.0375
+#elif (App == 0x3C8DE8E8 ) //Metro Exodus
+	#define DA_Y 12.5 // What A mess
+	//#define DA_X 0.05
+    #define DA_Z 0.000375
+	#define DA_W 1
+	#define DB_Y 4
+	//#define DE_W 0.08	
+	#define DE_W 0.0275
+#elif (App == 0x7FC671B6 ) //Doom Eternal
+	#define DA_Y 50.0
+    #define DA_Z 0.00009375
+	#define DA_W 1
+	#define DB_Y 3
+    //#define DE_X 4
+    #define DE_Y 0.666	
+    #define DE_Z 0.666
+    #define DB_W 68
+    #define DE_W 0.09375
+    #define DA_X 0.03125
+	//#define DA_X 0.0375 //Alternet settings Not used.
+    //#define DE_W 0.125
 #else
 	#define NP 1 //No Profile
 #endif
@@ -1090,9 +1123,9 @@ float3 Weapon_Profiles(float WP ,float3 Weapon_Adjust) //Tried Switch But, can't
     else if(WP == 3)
         return float3(0,0,0);                //WP 1  | Game
     else if(WP == 4)
-        return float3(0.500,32.5,7.15);      //WP 2  | BorderLands 2 #7B81CCAB
+        return float3(0.5,32.5,7.15);        //WP 2  | BorderLands 2 #7B81CCAB
     else if(WP == 5)
-        return float3(0,0,0);                //WP 3  | Game
+        return float3(0.282,10.5,0.875);     //WP 3  | BorderLands 3
     else if(WP == 6)
         return float3(0.253,28.75,98.5);     //WP 4  | Fallout 4 #2D950D30
     else if(WP == 7)
@@ -1218,7 +1251,7 @@ float3 Weapon_Profiles(float WP ,float3 Weapon_Adjust) //Tried Switch But, can't
     else if(WP == 67)
         return float3(0,0,0);                //WP 65 | Game
 	else if(WP == 68)
-	    return float3(0,0,0);                //WP 66 | Game
+	    return float3(1.025,10.0,0.185);     //WP 66 | Doom Eternal
 	else if(WP == 69)
 		return float3(0,0,0);                //WP 67 | Game
 	else if(WP == 70)
