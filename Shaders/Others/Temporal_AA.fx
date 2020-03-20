@@ -39,6 +39,13 @@
  //* Special thank you too "Jak0bW" j4712@web.de For Mouse Compatibility & Guidance.
  //* Please feel free to message him for help and information
  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+#if exists "Overwatch.fxh"                                           //Overwatch Intercepter//
+	#include "Overwatch.fxh"
+#else //DA_W Depth_Linearization | DB_X Depth_Flip
+	static const float DA_W = 0.0, DB_X = 0;
+	#define NC 0
+	#define NP 0
+#endif
 
 uniform float Clamping_Adjust <
 	ui_type = "drag";
@@ -81,14 +88,51 @@ uniform float Delta_Power <
 > = 0.25;
 
 //Depth Map//
-
 uniform int Debug <
 	ui_type = "combo";
 	ui_items = "Normal\0Debug One\0Debug Two\0";
 	ui_label = "Debug View";
 > = false;
 
+uniform int Depth_Map <
+	ui_type = "combo";
+	ui_items = "Normal\0Reverse\0";
+	ui_label = "Custom Depth Map";
+	ui_tooltip = "Pick your Depth Map.";
+	ui_category = "Depth Buffer";
+> = DA_W;
+
+uniform float Depth_Map_Adjust <
+	#if Compatibility
+	ui_type = "drag";
+	#else
+	ui_type = "slider";
+	#endif
+	ui_min = 1.0; ui_max = 1000.0; ui_step = 0.125;
+	ui_label = "Depth Map Adjustment";
+	ui_tooltip = "Adjust the depth map and sharpness distance.";
+	ui_category = "Depth Buffer";
+> = 250.0;
+
+uniform bool Depth_Map_Flip <
+	ui_label = "Depth Map Flip";
+	ui_tooltip = "Flip the depth map if it is upside down.";
+	ui_category = "Depth Buffer";
+> = DB_X;
+
+uniform bool Use_Depth <
+	ui_label = "Use Depth Masking";
+	ui_category = "Depth Buffer";
+> = false;
+
 /////////////////////////////////////////////D3D Starts Here/////////////////////////////////////////////////////////////////
+texture DepthBufferTex : DEPTH;
+
+sampler DepthBuffer
+	{
+		Texture = DepthBufferTex;
+	};
+
 texture BackBufferTex : COLOR;
 
 sampler BackBuffer
@@ -123,6 +167,27 @@ uniform float timer < source = "timer"; >;
 #define pix float2(BUFFER_RCP_WIDTH, BUFFER_RCP_HEIGHT)
 #define iResolution float2(BUFFER_WIDTH, BUFFER_HEIGHT)
 #define Alternate framecount % 2 == 0
+
+float Depth(float2 texcoord)
+{
+	if (Depth_Map_Flip)
+		texcoord.y =  1 - texcoord.y;
+
+	float zBuffer = tex2D(DepthBuffer, texcoord).x; //Depth Buffer
+	//Conversions to linear space.....
+	//Near & Far Adjustment
+	float Far = 1.0, Near = 0.125/Depth_Map_Adjust; //Division Depth Map Adjust - Near
+
+	float2 Z = float2( zBuffer, 1-zBuffer );
+
+	if (Depth_Map == 0)//DM0. Normal
+		zBuffer = Far * Near / (Far + Z.x * (Near - Far));
+	else if (Depth_Map == 1)//DM1. Reverse
+		zBuffer = Far * Near / (Far + Z.y * (Near - Far));
+
+	return step(smoothstep(0,1,zBuffer),0.0005);
+}
+
 
 float4 BB_H(float2 TC)
 {
@@ -190,9 +255,13 @@ float4 TAA(float2 texcoord)
     mixRate = clamp(mixRate, 0.05, 0.5);
 
     antialiased = decodePalYuv(antialiased);
-
-    //Need to check for DX9
-    return float4(antialiased,mixRate);
+	
+	//Need to check for DX9
+	float4 Output = float4(antialiased,mixRate);
+    if(Use_Depth)
+    	Output = lerp(float4(antialiased,mixRate), tex2D(BackBuffer, texcoord), Depth(texcoord));
+        
+    return Output;
 }
 
 void Out(float4 position : SV_Position, float2 texcoord : TEXCOORD, out float4 color : SV_Target)
@@ -214,7 +283,7 @@ void Out(float4 position : SV_Position, float2 texcoord : TEXCOORD, out float4 c
 	Color = TAA(texcoord).w;
 	if(Debug == 2)
 	Color = float4(1,0,0,1);
-  
+   
   float4 T_A_A = lerp(TAA(texcoord),Color,saturate(1-Mask));
 
   if(texcoord.x < pix.x * Scale && 1-texcoord.y < pix.y * Scale)
