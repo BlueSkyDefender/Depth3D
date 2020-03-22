@@ -2,7 +2,7 @@
 ///**SuperDepth3D**///
 //----------------////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//* Depth Map Based 3D post-process shader v2.2.5
+//* Depth Map Based 3D post-process shader v2.2.6
 //* For Reshade 3.0+
 //* ---------------------------------
 //*
@@ -53,6 +53,7 @@
 #endif
 //USER EDITABLE PREPROCESSOR FUNCTIONS START//
 //This enables the older SuperDepth3D method of producing an 3D image. This is better for older systems that have an hard time running the new mode.
+//Also use this if you like the look of the old mode.
 #define Legacy_Mode 0 //Zero is off and One is On.
 
 // Zero Parallax Distance Balance Mode allows you to switch control from manual to automatic and vice versa.
@@ -215,16 +216,7 @@ uniform int View_Mode <
 				 "Default is Normal";
 	ui_category = "Occlusion Masking";
 > = 0;
-#if Legacy_Mode
-uniform float2 Disocclusion_Adjust <
-	ui_type = "drag";
-	ui_min = 0.0; ui_max = 1.0;
-	ui_label = " Disocclusion Adjust";
-	ui_tooltip = "Automatic occlusion masking power, & Depth Based culling adjustments.\n"
-				"Default is ( 0.1f,0.25f)";
-	ui_category = "Occlusion Masking";
-> = float2( 0.1, 0.25);
-#endif
+
 uniform int Custom_Sidebars <
 	ui_type = "combo";
 	ui_items = "Mirrored Edges\0Black Edges\0Stretched Edges\0";
@@ -904,6 +896,7 @@ float2 Conv(float D,float2 texcoord)
 	}
 
 	W_Convergence = 1 - W_Convergence / D;
+	float WD = D; //Needed to seperate Depth for the  Weapon Hand. It was causing problems with Auto Depth Range below.
 
 	#if RE_Fix || RE
 		Z = AutoZPDRange(Z,texcoord);
@@ -930,30 +923,18 @@ float2 Conv(float D,float2 texcoord)
 
 		ZP = min(ZP,Auto_Balance_Clamp);
 
-    return float2(lerp(Convergence,D, ZP),lerp(W_Convergence,D,WZP));
+    return float2(lerp(Convergence,D, ZP),lerp(W_Convergence,WD,WZP));
 }
-#define BlurSamples 6  //BlurSamples = # * 2
+
 float DB( float2 texcoord)
 {
+	// X = Mix Depth | Y = Weapon Mask | Z = Weapon Hand
 	float3 DM = tex2Dlod(SamplerDMN,float4(texcoord,0,0)).xyz;
 	//Hide Temporal passthrough
 	if(texcoord.x < pix.x * 2 && texcoord.y < pix.y * 2)
 		DM = Depth(texcoord);
 	if(1-texcoord.x < pix.x * 2 && 1-texcoord.y < pix.y * 2)
 		DM = Depth(texcoord);
-
-	#if Legacy_Mode
-	    float total = BlurSamples, S = 5 * saturate(Disocclusion_Adjust.x);
-	    float3 D = DM * BlurSamples;
-	    for ( int j = -BlurSamples; j <= BlurSamples; ++j)
-	    {
-	        float W = BlurSamples;
-					D += tex2Dlod(SamplerDMN,float4(texcoord + float2(pix.x * S,0) * j,0,0 ) ).xyz * W;
-	        total += W;
-	    }
-
-		DM = lerp(saturate(D / total),DM,step(saturate(Disocclusion_Adjust.y),DM));
-	#endif
 
 	if (WP == 0 || WZPD_and_WND.x <= 0)
 		DM.y = 0;
@@ -1021,11 +1002,11 @@ float2 GetDB(float2 texcoord)
 //////////////////////////////////////////////////////////Parallax Generation///////////////////////////////////////////////////////////////////////
 float2 Parallax(float Diverge, float2 Coordinates, float IO) // Horizontal parallax offset & Hole filling effect
 {   float2 ParallaxCoord = Coordinates;
-	float DepthLR = 1, DLR, LRDepth, Perf = 1, Z, MS = Diverge * pix.x, N , S[5] = {0.5,0.625,0.75,0.875,1.0};
+	float DepthLR = 1, DLR, LRDepth, Perf = 1, Z, MS = Diverge * pix.x, N , S[9] = {0.5,0.5625,0.625,0.6875,0.75,0.8125,0.875,0.9375,1.0};
 	#if Legacy_Mode
 	MS = -MS;
 	[loop]//ParallaxCoord.x += MS * 0.2;
-	for ( int i = 0 ; i <= 4; ++i )
+	for ( int i = 0 ; i <= 8; ++i )
 	{   N = S[i] * MS;
 		if(View_Mode == 1)
 		{   LRDepth =  min(DepthLR, GetDB(float2(ParallaxCoord.x + N, ParallaxCoord.y)).x );

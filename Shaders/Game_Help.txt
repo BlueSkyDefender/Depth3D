@@ -68,7 +68,7 @@ Inner Shader Setting:
               BladeStorm Nightmare                         DM ?         ?                                          ?
     RB        Bioshock Remastred                           DM 0       7.5000    0.00600     WDM 53                     Yes 3   
     RB        Bioshock 2 Remastred                         DM 0       7.5000    0.00600     WDM 54                     Yes 3                  
-              Black Mesa                                   DM 0       8.7500                WDM 33                     Yes 1      
+    RB        Black Mesa                                   DM 0       8.7500                WDM 33                     Yes 2      
     RB        BloodCM                                      DM 0       15.000                                                                          
     RB        Blood 2                                      DM 0       7.5000                WDM 34/35                  Yes 3         
     RB        BorderLands 2                                DM 0       20.000                WDM 2                      Yes 2                                
@@ -350,6 +350,13 @@ Depth Buffer seems to drop off in some locations. As reported. This is a ReShade
 
 {Dementium 2} - Used ReShade 4.4.0
 You have to mess with the Depth Buffer options to get it to work. Not perfect. Kind of strange not all reshades work.
+
+{Black Mesa} - Used ReShade 3.2.1 or Use latest with instructions below.
+So in newer versions of Reshade 4.4.0+ you need to set in game MSAA on. To do this open the console and enter the command
+mat_antialias 2
+
+This should allow reshade to grab the Depth buffer in game. On a side note you should install reshade in to the
+SteamLibrary\steamapps\common\Black Mesa\bin folder.
 
 {BoarderLands 2}
 Use a Controller for menus navigation or keyboard. 

@@ -1,7 +1,7 @@
 ////----------------------------------------//
 ///SuperDepth3D Overwatch Automation Shader///
 //----------------------------------------////
-// Version 1.2
+// Version 1.3
 //---------------------------------------OVERWATCH---------------------------------------//
 // If you are reading this stop. Go away and never look back. From this point on if you  //
 // still think it's is worth looking at this..... Then no one can save you or your soul. //
@@ -196,114 +196,117 @@ static const int HMT = 0;                               //HUD Mode Trigger
 	#define DB_Y 5
 	#define DA_Z 0.00125
 	#define DB_W 33
-#elif (App == 0x6FC1FF71 )	//Black Mesa
+#elif (App == 0x6FC1FF71 ) //Black Mesa
 	#define DA_Y 8.75
-	#define DB_Y 1
+	#define DA_Z 0.000125
+    #define DA_X 0.0325
+	#define DB_Y 2
 	#define DB_W 35
-#elif (App == 0x6D3CD99E )	//Blood 2
+	#define DB_Z 0.08625
+#elif (App == 0x6D3CD99E ) //Blood 2
 	#define DB_W 36
 	#define DB_Y 3
 	#define TW 1
-#elif (App == 0xF22A9C7D )	//SOMA
+#elif (App == 0xF22A9C7D ) //SOMA
 	#define DA_Y 10.0
 	#define DB_Y 5
 	#define DB_W 38
-#elif (App == 0x6FB6410B )	//Cryostasis
+#elif (App == 0x6FB6410B ) //Cryostasis
 	#define DA_Y 13.75
 	#define DB_Y 3
 	#define DB_W 39
-#elif (App == 0x16B8D61A)	//Unreal Gold with v227
+#elif (App == 0x16B8D61A) //Unreal Gold with v227
 	#define DA_Y 17.5
 	#define DB_Y 1
 	#define DB_W 40
 	#define DC_X 0.534
 	#define HM 1
-#elif (App == 0xEB9EEB74 || App == 0x8238E9CA )	//Serious Sam Revolution | Serious Sam 2
+#elif (App == 0xEB9EEB74 || App == 0x8238E9CA ) //Serious Sam Revolution | Serious Sam 2
 	#define DA_Z 0.1111
 	#define DB_W 41
-#elif (App == 0x308AEBEA )	//TitanFall 2
+#elif (App == 0x308AEBEA ) //TitanFall 2
 	#define DB_Y 4
 	#define DB_W 44
-#elif (App == 0x5FCFB1E5 )	//Project Warlock
+#elif (App == 0x5FCFB1E5 ) //Project Warlock
 	#define DA_Y 17.5
 	#define DB_Y 2
 	#define DA_W 1
 	#define DB_W 45
-#elif (App == 0x7DCCBBBD )	//Kingpin Life of Crime
+#elif (App == 0x7DCCBBBD ) //Kingpin Life of Crime
 	#define DA_Y 10.0
 	#define DB_Y 4
 	#define DB_W 46
 	#define TW 1
-#elif (App == 0x9C5C946E )	//EuroTruckSim2
+#elif (App == 0x9C5C946E ) //EuroTruckSim2
 	#define DB_W 47
-#elif (App == 0xB302EC7 || App == 0x91D9EBAF )	//F.E.A.R | F.E.A.R 2: Project Origin
+#elif (App == 0xB302EC7 || App == 0x91D9EBAF ) //F.E.A.R | F.E.A.R 2: Project Origin
 	#define DA_Y 8.75
 	#define DB_Y 3
 	#define DB_W 48
-#elif (App == 0x2C742D7C )	//Immortal Redneck CP alt 1.9375
+#elif (App == 0x2C742D7C ) //Immortal Redneck CP alt 1.9375
 	#define DA_Y 20.0
 	#define DB_Y 5
 	#define DB_W 50
-#elif (App == 0x663E66FE )	//NecroVisioN & NecroVisioN: Lost Company
+#elif (App == 0x663E66FE ) //NecroVisioN & NecroVisioN: Lost Company
 	#define DA_Y 10.0
 	#define DB_Y 2
 	#define DB_W 52
-#elif (App == 0xAA6B948E )	//Rage64
+#elif (App == 0xAA6B948E ) //Rage64
 	#define DA_Y 20.0
 	#define DB_Y 2
 	#define DB_W 53
-#elif (App == 0x44BD41E1 )	//Bioshock Remaster
+#elif (App == 0x44BD41E1 ) //Bioshock Remaster
 	#define DA_Z 0.001
 	#define DB_Y 3
 	#define DB_W 55
-#elif (App == 0x7CF5A01 )	//Bioshock 2 Remaster
+#elif (App == 0x7CF5A01 ) //Bioshock 2 Remaster
 	#define DA_Z 0.001
 	#define DB_W 56
 	#define DB_Y 3
 	#define DC_X 0.5034
 	#define HM 1
-#elif (App == 0x22BA110F )	//Turok: DH 2017
+#elif (App == 0x22BA110F ) //Turok: DH 2017
 	#define DA_X 0.002
 	#define DA_Y 250.0
-#elif (App == 0x5F1DBD3B )	//Turok2: SoE 2017
+#elif (App == 0x5F1DBD3B ) //Turok2: SoE 2017
 	#define DA_X 0.002
 	#define DA_Y 250.0
-#elif (App == 0x3FDD232A )	//FEZ
+#elif (App == 0x3FDD232A ) //FEZ
 	#define DA_X 0
 	#define DA_Z 0.9625
-#elif (App == 0x619964A3 )	//What Remains of Edith Finch
+#elif (App == 0x619964A3 ) //What Remains of Edith Finch
 	#define DA_Y 50.0
 	#define DA_Z 0.000025
 	#define DA_W 1
 	#define DB_Y 2
-#elif (App == 0x941D8A46 )	//Tomb Raider Anniversary :)
+#elif (App == 0x941D8A46 ) //Tomb Raider Anniversary :)
 	#define DA_Y 75.0
 	#define DA_Z 0.0206
 	#define DB_Y 2
-#elif (App == 0xF0100C34 )	//Two Worlds Epic Edition
+#elif (App == 0xF0100C34 ) //Two Worlds Epic Edition
 	#define DA_Y 43.75
 	#define DA_Z 0.07575
-#elif (App == 0xA4C82737 )	//Silent Hill: Homecoming
+#elif (App == 0xA4C82737 ) //Silent Hill: Homecoming
 	#define DA_Y 25.0
 	#define DA_X 0.0375
 	#define DA_Z 0.11625
 	#define DB_Y 4
 	#define DC_X 0.5
 	#define HM 1
-#elif (App == 0x61243AED )	//Shadow Warrior Classic source port
+#elif (App == 0x61243AED ) //Shadow Warrior Classic source port
 	#define DA_Y 10.0
 	#define DA_X 0.05
 	#define DA_Z 1.0
 	#define DB_Y 5
-#elif (App == 0x5AE8FA62 )	//Shadow Warrior Classic Redux
+#elif (App == 0x5AE8FA62 ) //Shadow Warrior Classic Redux
 	#define DA_Y 10.0
 	#define DA_X 0.05
 	#define DA_Z 1.0
 	#define DB_Y 5
-#elif (App == 0xFE54BF56 )	//No One Lives Forever and 2
+#elif (App == 0xFE54BF56 ) //No One Lives Forever and 2
 	#define DA_X 0.0375
 	#define TW 1
-#elif (App == 0x9E7AA0C4 )	//Shadow Tactics: Blades of the Shogun
+#elif (App == 0x9E7AA0C4 ) //Shadow Tactics: Blades of the Shogun
 	#define DA_Y 7.0
 	#define DA_Z 0.001
 	#define DA_X 0.150
@@ -311,116 +314,116 @@ static const int HMT = 0;                               //HUD Mode Trigger
 	#define DB_Z 0.305
 	#define DB_X 1
 	#define TW 1
-#elif (App == 0xE63BF4A4 )	//World of Warcraft DX12
+#elif (App == 0xE63BF4A4 ) //World of Warcraft DX12
 	#define DA_Y 7.5
 	#define DA_W 1
 	#define DB_Y 3
 	#define DB_Z 0.1375
 	#define TW 1
-#elif (App == 0x5961D1CC )	//Requiem: Avenging Angel
+#elif (App == 0x5961D1CC ) //Requiem: Avenging Angel
 	#define DA_Y 37.5
 	#define DA_X 0.0375
 	#define DA_Z 0.8
 	#define DC_X 0.501
 	#define HM 1
-#elif (App == 0x86D33094 )	//Rise of the TombRaider
+#elif (App == 0x86D33094 ) //Rise of the TombRaider
 	#define DA_X 0.075
 	#define DB_Y 3
 	#define DA_Y 25.0
 	#define DA_Z 0.02
-#elif (App == 0x60F436C6 )	//RESIDENT EVIL 2  BIOHAZARD RE2
+#elif (App == 0x60F436C6 ) //RESIDENT EVIL 2  BIOHAZARD RE2
 	#define DA_X 0.1375
 	#define DB_Y 3
-	#define DB_Z 0.015 //Under Review
+	#define DB_Z 0.015
 	#define DA_Y 51.25
 	#define DA_W 1
 	#define DA_Z 0.00015
 	#define RE 1
-#elif (App == 0xF0D4DB3D )	//Never Alone
+#elif (App == 0xF0D4DB3D ) //Never Alone
 	#define DA_X 0.1375
 	#define DB_Y 2
 	#define DA_Y 31.25
 	#define DA_Z 0.004
-#elif (App == 0x3EB1D73A )	//Magica 2
+#elif (App == 0x3EB1D73A ) //Magica 2
 	#define DA_X 0.2
 	#define DB_Y 5
 	#define DA_Y 27.5
 	#define DA_Z 0.007
-#elif (App == 0x6D35D4BE )	//Lara Croft and the Temple of Osiris
+#elif (App == 0x6D35D4BE ) //Lara Croft and the Temple of Osiris
 	#define DA_X 0.15
 	#define DB_Y 4
-	#define DB_Z 0.4 //Under Review
+	#define DB_Z 0.4
 	#define DA_Y 75.0
 	#define DA_Z 0.021
 	#define RE 1
-#elif (App == 0xAAA18268 )	//Hellblade
+#elif (App == 0xAAA18268 ) //Hellblade
 	#define DB_Y 1
 	#define DA_Y 25.0
 	#define DA_W 1
 	#define DA_Z 0.0005
 	#define DB_Z 0.25 //Under Review
-#elif (App == 0x287BBA4C || App == 0x59BFE7AC )	//Grim Dawn 64bit/32bit
+#elif (App == 0x287BBA4C || App == 0x59BFE7AC ) //Grim Dawn 64bit/32bit
 	#define DB_Y 2
 	#define DA_Y 125.0
 	#define DA_Z 0.003
-#elif (App == 0x8EAF7114 )	//Firewatch
+#elif (App == 0x8EAF7114 ) //Firewatch
 	#define DB_Y 3
 	#define DA_Y 5.0
 	#define DA_X 0.0375
 	#define DB_X 1
 	#define DA_W 1
-#elif (App == 0x6BDF0098 )	//Dungeons 2
+#elif (App == 0x6BDF0098 ) //Dungeons 2
 	#define DA_X 0.100
 	#define DB_Y 3
 	#define DA_Z 0.005
 	#define DB_X 1
-#elif (App == 0x56E482C9 )	//DreamFall Chapters
+#elif (App == 0x56E482C9 ) //DreamFall Chapters
 	#define DA_Y 10.0
 	#define DA_X 0.0375
 	#define DB_Y 2
 	#define DA_Z 0.001
 	#define DB_X 1
-#elif (App == 0x31BF8AF6 )	//DragonBall Fighters Z
+#elif (App == 0x31BF8AF6 ) //DragonBall Fighters Z
 	#define DA_Y 10.0
 	#define DA_W 1
 	#define DA_X 0.130
 	#define DB_Y 3
 	#define DB_Z 0.625 //I know, I know........
-#elif (App == 0x3F017CF )	//Call of Cthulhu
+#elif (App == 0x3F017CF ) //Call of Cthulhu
 	#define DA_W 1
 	#define DA_X 0.0375
 	#define DB_Y 3
-#elif (App == 0x874318FE || App == 0x7CBA2E8C || App == 0x69277DAF )	//Batman Arkham Asylum / City / Origins
+#elif (App == 0x874318FE || App == 0x7CBA2E8C || App == 0x69277DAF ) //Batman Arkham Asylum / City / Origins
 	#define DA_Y 18.75
 	#define DA_X 0.0375
 	#define DA_Z 0.00025
 	#define DB_Y 4
 	#define DB_Z 0.15
 	#define TW 1
-#elif (App == 0xA100000 )	//Lego Batman 1 & 2
+#elif (App == 0xA100000 ) //Lego Batman 1 & 2
 	#define DA_Y 27.5
 	#define DA_X 0.125
 	#define DA_Z 0.001
 	#define DB_Y 2
 	#define DB_Z 0.025
 	#define RE 1
-#elif (App == 0x5F2CA572 )	//Lego Batman 3
+#elif (App == 0x5F2CA572 ) //Lego Batman 3
 	#define DA_X 0.03
 	#define DA_Z 0.001
 	#define DB_Y 4
 	#define TW 1
-#elif (App == 0xA200000 )	//Batman BlackGate
+#elif (App == 0xA200000 ) //Batman BlackGate
 	#define DA_Y 12.5
 	#define DA_X 0.0375
 	#define DA_Z 0.00025
 	#define DB_Y 3
-#elif (App == 0xCB1CCDC )	//BATMAN TTS
+#elif (App == 0xCB1CCDC ) //BATMAN TTS
 	#define NC 1 //Not Compatible
-#elif (App == 0x4A2297E4 )	//Batman Arkham Knight
+#elif (App == 0x4A2297E4 ) //Batman Arkham Knight
 	#define DA_Y 22.500
 	#define DA_X 0.04375
 	#define DB_Y 4
-#elif (App == 0xE9A02687 )	//BattleTech
+#elif (App == 0xE9A02687 ) //BattleTech
 	#define DA_W 1
 	#define DB_X 1
 	#define DA_Y 75.0
@@ -428,52 +431,52 @@ static const int HMT = 0;                               //HUD Mode Trigger
 	#define DB_Y 1
 	#define RE 1
 	#define TW 1
-#elif (App == 0x1335BAB8 )	//BattleField 1
+#elif (App == 0x1335BAB8 ) //BattleField 1
 	#define DA_W 1
 	#define DA_Y 8.125
 	#define DA_X 0.04
 	#define DB_Y 5
 	#define RE 2
-#elif (App == 0xA0762A98 )	//Assassin's Creed Unity
+#elif (App == 0xA0762A98 ) //Assassin's Creed Unity
 	#define DA_W 1
 	#define DA_Y 20.0
 	#define DA_Z 0.00025
 	#define DA_X 0.04375
 	#define DB_Z 0.2
-#elif (App == 0xBF222C03 )	//Among The Sleep
+#elif (App == 0xBF222C03 ) //Among The Sleep
 	#define DA_X 0.05
 	#define DA_Y 15.0
 	#define DA_Z 0.0005
 	#define DB_Y 4
 	#define DB_X 1
 	#define ID 1
-#elif (App == 0xB75F3C89 )	//Amnesia: The Dark Descent
+#elif (App == 0xB75F3C89 ) //Amnesia: The Dark Descent
 	#define DA_X 0.05
 	#define DA_Y 45.0
 	#define DA_Z 0.0005
 	#define DB_Y 3
-#elif (App == 0x91FF5778 )	//Amnesia: Machine for Pigs
+#elif (App == 0x91FF5778 ) //Amnesia: Machine for Pigs
 	#define DA_X 0.05
 	#define DA_Y 45.0
 	#define DA_Z 0.0005
 	#define DB_Y 3
-#elif (App == 0x8B0F15E7 )	//Alan Wake
+#elif (App == 0x8B0F15E7 ) //Alan Wake
 	#define DA_X 0.03
 	#define DA_Y 32.5
 	#define DB_Y 1
 	#define TW 1
-#elif (App == 0xCFE885A2 )	//Alan Wake's American Nightmare
+#elif (App == 0xCFE885A2 ) //Alan Wake's American Nightmare
 	#define DA_X 0.03
 	#define DA_Y 32.5
 	#define DB_Y 1
 	#define TW 1
-#elif (App == 0x56D8243B )	//Agony Unrated
+#elif (App == 0x56D8243B ) //Agony Unrated
 	#define DA_W 1
 	#define DA_X 0.04375
 	#define DA_Y 43.75
 	#define DB_Y 5
 	#define TW 1
-#elif (App == 0x23D5135F )	//Alien Isolation
+#elif (App == 0x23D5135F ) //Alien Isolation
 	#define DA_X 0.040
 	#define DA_Y 18.00
 	#define DA_Z 0.0005
@@ -483,32 +486,32 @@ static const int HMT = 0;                               //HUD Mode Trigger
 	#define DC_Z 0.1
 	#define DC_W 0.022
 	#define TW 1
-#elif (App == 0x5839915F )	//35MM
+#elif (App == 0x5839915F ) //35MM
 	#define DA_Y 35.00
 	#define DB_X 1
 	#define DB_Y 2
 	#define TW 1
-#elif (App == 0x578862 )	//Condemned Criminal Origins
+#elif (App == 0x578862 ) //Condemned Criminal Origins
 	#define DA_Y 162.5
 	#define DA_Z 0.00025
 	#define DA_X 0.040
 	#define DB_Y 4
 	#define DB_W 49
 	#define TW 1
-#elif (App == 0xA67FA4BC )	//Outlast
+#elif (App == 0xA67FA4BC ) //Outlast
 	#define DA_Y 30.0
 	#define DA_Z 0.0004
 	#define DA_X 0.043750
 	#define DB_Y 5
 	#define TW 1
-#elif (App == 0xDCC7F877 )	//Outlast II
+#elif (App == 0xDCC7F877 ) //Outlast II
 	#define DA_W 1
 	#define DA_Y 50.0
 	#define DA_Z 0.0004
 	#define DA_X 0.056250
 	#define DB_Y 4
 	#define TW 1
-#elif (App == 0x60F43F45 )	//Resident Evil 7
+#elif (App == 0x60F43F45 ) //Resident Evil 7
 	#define DA_W 1
 	#define DA_Y 31.25
 	#define DA_Z 0.0002
@@ -518,17 +521,17 @@ static const int HMT = 0;                               //HUD Mode Trigger
 	#define DC_Y -0.24
 	#define DC_W 0.05
 	#define TW 1
-#elif (App == 0x1B8B9F54 )	//TheEvilWithin
+#elif (App == 0x1B8B9F54 ) //TheEvilWithin
 	#define DA_Y 40.0
 	#define DA_Z 0.0001
 	#define DA_X 0.1
 	#define DB_Y 4
-#elif (App == 0x7D9B7A37 )	//TheEvilWithin II
+#elif (App == 0x7D9B7A37 ) //TheEvilWithin II
 	#define DA_Y 30.0
 	#define DA_Z 0.0001
 	#define DA_X 0.04
 	#define DB_Y 5
-#elif (App == 0xBF49B12E )//Vampyr
+#elif (App == 0xBF49B12E ) //Vampyr
 	#define DA_W 1
 	#define DA_Y 23.0
 	#define DA_X 0.05
@@ -592,7 +595,7 @@ static const int HMT = 0;                               //HUD Mode Trigger
 	#define DA_X 0.065
 	#define DB_Y 4
 	#define DB_W 62
-#elif (App == 0x42C1A2B )	//CoD: WWII
+#elif (App == 0x42C1A2B ) //CoD: WWII
 	#define DA_X 0.04
 	#define DA_W 1
 	#define DB_Y 4
@@ -983,7 +986,7 @@ static const int HMT = 0;                               //HUD Mode Trigger
     #define DA_Z 0.000375
 	#define DA_W 1
 	#define DB_Y 4
-	//#define DE_W 0.08	
+	//#define DE_W 0.08
 	#define DE_W 0.0275
 #elif (App == 0x7FC671B6 ) //Doom Eternal
 	#define DA_Y 50.0
@@ -991,7 +994,7 @@ static const int HMT = 0;                               //HUD Mode Trigger
 	#define DA_W 1
 	#define DB_Y 3
     //#define DE_X 4
-    #define DE_Y 0.666	
+    #define DE_Y 0.666
     #define DE_Z 0.666
     #define DB_W 68
     #define DE_W 0.09375
