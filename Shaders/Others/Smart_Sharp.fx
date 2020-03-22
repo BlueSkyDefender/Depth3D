@@ -138,6 +138,15 @@ uniform float Sharpness <
 	ui_category = "Bilateral CAS";
 > = 0.625;
 
+uniform int B_Grounding <
+	ui_type = "combo";
+	ui_items = "Fine\0Medium\0Coarse\0";
+	ui_label = "Grounding Type";
+	ui_tooltip = "Like Coffee pick how rough do you want this shader to be.\n"
+				 "Gives more control of Bilateral Filtering.";
+	ui_category = "Bilateral CAS";
+> = 0;
+
 uniform bool CAM_IOB <
 	ui_label = "CAM Ignore Overbright";
 	ui_tooltip = "Instead of of allowing Overbright in the mask this allows sharpening of this area.\n"
@@ -158,14 +167,34 @@ uniform bool CA_Removal <
 	ui_category = "Bilateral CAS";
 > = false;
 
-uniform int B_Grounding <
-	ui_type = "combo";
-	ui_items = "Fine\0Medium\0Coarse\0";
-	ui_label = "Grounding Type";
-	ui_tooltip = "Like Coffee pick how rough do you want this shader to be.\n"
-				 "Gives more control of Bilateral Filtering.";
-	ui_category = "Bilateral Filtering";
-> = 0;
+uniform float GMD <
+	#if Compatibility
+	ui_type = "drag";
+	#else
+	ui_type = "slider";
+	#endif
+    ui_label = "General Motion Detection";
+    ui_min = 0.0; ui_max = 1.0;
+    ui_tooltip = "Increase the General Motion Detection power.\n"
+				 "This is used to boost Sharpening strength by the user selected ammount.\n"
+				 "Number Zero is default, Off.";
+	ui_category = "Motion Bilateral CAS";
+> = 0.0;
+
+uniform float MDSM <
+	#if Compatibility
+	ui_type = "drag";
+	#else
+	ui_type = "slider";
+	#endif
+    ui_label = "Sharpen Multiplier";
+    ui_min = 1.0; ui_max = 5.0;
+    ui_tooltip = "Motion Detection Sharpen Multiplier.\n"
+				 "This is the user set mutliplyer for how much you want to increase the base sharpen.\n"
+				 "A Sharpen Multiplier of 2 is two times the user set Sharpening Strength.\n"
+				 "Number 1 is default.";
+	ui_category = "Motion Bilateral CAS";
+> = 1.0;
 
 uniform int Debug_View <
 	ui_type = "combo";
@@ -219,7 +248,27 @@ sampler BackBuffer
 	{
 		Texture = BackBufferTex;
 	};
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+texture CurrentBBSSTex { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA8;};
 
+sampler CBBSS
+	{
+		Texture = CurrentBBSSTex;
+	};
+
+texture PastBBSSTex { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA8;};
+
+sampler PBBSS
+	{
+		Texture = PastBBSSTex;
+	};
+	
+texture DownSTex {Width = 256*0.5; Height = 256*0.5; Format = R8;  MipLevels = 8;};
+
+sampler DSM
+	{
+		Texture = DownSTex;
+	};
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 float Depth(in float2 texcoord : TEXCOORD0)
 {
@@ -335,10 +384,13 @@ float4 CAS(float2 texcoord)
 	}
 
 	//// Shaping amount of sharpening masked
-	float CAS_Mask = RGB_D;
+	float CAS_Mask = RGB_D, Sharp = Sharpness, MD = tex2Dlod(DSM,float4(texcoord,0,11)).x * lerp(0.0,25.0,GMD);
+
+	if(GMD > 0)
+		Sharp = Sharpness * lerp( 1,MDSM,saturate(MD));
 
 	if(CA_Mask_Boost)
-		CAS_Mask = lerp(CAS_Mask,CAS_Mask * CAS_Mask,saturate(Sharpness * 0.5));
+		CAS_Mask = lerp(CAS_Mask,CAS_Mask * CAS_Mask,saturate(Sharp * 0.5));
 
 	if(CA_Removal)
 		CAS_Mask = 1;
@@ -347,8 +399,14 @@ return saturate(float4(final_colour/Z,CAS_Mask));
 }
 
 float3 Sharpen_Out(float2 texcoord)
-{   float3 Done = tex2D(BackBuffer,texcoord).rgb;
-	return lerp(Done,Done+(Done - CAS(texcoord).rgb)*(Sharpness*3.1), CAS(texcoord).w * saturate(Sharpness)); //Sharpen Out
+{
+ float Sharp = Sharpness, MD = tex2Dlod(DSM,float4(texcoord,0,11)).x * lerp(0.0,25.0,GMD);
+
+	if(GMD > 0)
+		Sharp = Sharpness * lerp( 1,MDSM,saturate(MD));
+		
+    float3 Done = tex2D(BackBuffer,texcoord).rgb;
+	return lerp(Done,Done+(Done - CAS(texcoord).rgb)*(Sharp*3.1), CAS(texcoord).w * saturate(Sharp)); //Sharpen Out
 }
 
 
@@ -383,13 +441,29 @@ float3 ShaderOut(float2 texcoord : TEXCOORD0)
 
 	return Out;
 }
+
+float CBackBuffer_SS(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Target
+{
+	return dot(tex2D(BackBuffer,texcoord),0.333);
+}
+
+float PBackBuffer_SS(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Target
+{
+	return tex2D(CBBSS,texcoord).x;
+}
+
+float DownSampleMotion(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Target
+{
+	return abs(tex2D(CBBSS,texcoord).x - tex2D(PBBSS,texcoord).x);
+}
+
 ////////////////////////////////////////////////////////Logo/////////////////////////////////////////////////////////////////////////
 float3 Out(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Target
 {   //Overwatch integration
 	float PosX = 0.9525f*BUFFER_WIDTH*pix.x,PosY = 0.975f*BUFFER_HEIGHT*pix.y, Text_Timer = 12500, BT = smoothstep(0,1,sin(timer*(3.75/1000)));
 	float D,E,P,T,H,Three,DD,Dot,I,N,F,O,R,EE,A,DDD,HH,EEE,L,PP,NN,PPP,C,Not,No;
 	float3 Color = ShaderOut(texcoord).rgb;
-
+	//Color = tex2Dlod(DSM,float4(texcoord,0,11)).x * lerp(0.0,25.0,GMD);
 	if(NC || NP)
 		Text_Timer = 18750;
 
@@ -506,6 +580,24 @@ technique Smart_Sharp
 < ui_tooltip = "Suggestion : You Can Enable 'Performance Mode Checkbox,' in the lower bottom right of the ReShade's Main UI.\n"
 			   "             Do this once you set your Smart Sharp settings of course."; >
 {
+			pass PBB //Done this way to keep Freestyle comp.
+		{
+			VertexShader = PostProcessVS;
+			PixelShader = PBackBuffer_SS;
+			RenderTarget = PastBBSSTex;
+		}
+			pass CBB
+		{
+			VertexShader = PostProcessVS;
+			PixelShader = CBackBuffer_SS;
+			RenderTarget = CurrentBBSSTex;
+		}
+			pass Down_Sample_Motion
+		{
+			VertexShader = PostProcessVS;
+			PixelShader = DownSampleMotion;
+			RenderTarget = DownSTex;
+		}
 			pass UnsharpMask
 		{
 			VertexShader = PostProcessVS;
