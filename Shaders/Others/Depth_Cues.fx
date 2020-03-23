@@ -109,9 +109,9 @@ uniform float Shade_Power <
 	ui_min = 0.25; ui_max = 1.0;
 	ui_label = "Shade Power";
 	ui_tooltip = "Adjust the Shade Power This improves AO, Shadows, & Darker Areas in game.\n"
-				 "Number 0.625 is default.";
+				 "Number 0.5 is default.";
 	ui_category = "Depth Cues";
-> = 0.625;
+> = 0.5;
 
 uniform float Blur_Cues <
 	#if Compatibility
@@ -136,37 +136,26 @@ uniform float Spread <
 	ui_label = "Shade Fill";
 	ui_tooltip = "Adjust This to have the shade effect to fill in areas gives fakeAO effect.\n"
 				 "This is used for gap filling.\n"
-				 "Number 7.5 is default.";
+				 "Number 10.0 is default.";
 	ui_category = "Depth Cues";
-> = 12.5;
+> = 10.0;
 
 uniform bool Debug_View <
 	ui_label = "Depth Cues Debug";
 	ui_tooltip = "Depth Cues Debug output the shadeded output.";
 	ui_category = "Depth Cues";
 > = false;
-/*
-uniform bool Fake_AO <
-	ui_label = "Fake AO";
-	ui_tooltip = "Fake AO only works when you Have Depth Buffer Access.";
-	ui_category = "Fake AO";
-> = false;
 
-uniform float Fake_AO_Adjust <
-	#if Compatibility
-	ui_type = "drag";
-	#else
-	ui_type = "slider";
-	#endif
-	ui_min = 0.0; ui_max = 0.5;
-	ui_label = "Fake AO Adjustment";
-	ui_tooltip = "Adjust the depth map so Fake AO can work better.";
-	ui_category = "Fake AO";
-> = 0.1;
-*/
+//uniform bool Fake_AO <
+//	ui_label = "Fake AO";
+//	ui_tooltip = "Fake AO only works when you Have Depth Buffer Access.";
+//	ui_category = "Fake AO";
+//> = false;
+
 /////////////////////////////////////////////////////D3D Starts Here/////////////////////////////////////////////////////////////////
 #define pix float2(BUFFER_RCP_WIDTH, BUFFER_RCP_HEIGHT)
 #define BlurSamples 10 //BlurSamples = # * 2
+//#define Fake_AO_Adjust 0.001
 #define S_Power Spread * Multi
 #define M_Power Blur_Cues * Multi
 uniform float timer < source = "timer"; >;
@@ -228,12 +217,12 @@ float lum(float3 RGB)
 
 float BB(in float2 texcoord, float2 AD)
 {
-	/*
-	if(Fake_AO)
-		return 1-(1 - Fake_AO_Adjust/Depth(texcoord + AD).xxx);
-	else
-	*/
+	
+	//if(Fake_AO)
+	//	return lerp(1-(1 - Fake_AO_Adjust/Depth_DC(texcoord + AD).x) , lum(tex2Dlod(BackBuffer_DC, float4(texcoord + AD,0,0)).rgb) , 0.125);
+	//else
 		return lum(tex2Dlod(BackBuffer_DC, float4(texcoord + AD,0,0)).rgb);
+		
 }
 
 float H_Blur_DC(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Target
@@ -284,7 +273,7 @@ float3 ShaderOut_DC(float2 texcoord : TEXCOORD0)
 
 	if(No_Depth_Map)
 		DB = 0.0;
-
+		
 	Out.rgb = BBN * lerp(DCB,1., DB);
 
 	if (Debug_View)
@@ -402,7 +391,6 @@ float3 Out_DC(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Ta
 	else
 		return Color;
 }
-
 ///////////////////////////////////////////////////////////ReShade.fxh/////////////////////////////////////////////////////////////
 
 // Vertex shader generating a triangle covering the entire screen

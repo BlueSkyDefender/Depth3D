@@ -167,6 +167,15 @@ uniform bool CA_Removal <
 	ui_category = "Bilateral CAS";
 > = false;
 
+uniform int Local_Motion <
+	ui_type = "combo";
+	ui_items = "General Motion\0Local Motion\0";
+	ui_label = "View Mode";
+	ui_tooltip = "This is used to select between General Motion & Local Motion.\n"
+				 "Default is General Motion.";
+	ui_category = "Motion Bilateral CAS";
+> = 0;
+
 uniform float GMD <
 	#if Compatibility
 	ui_type = "drag";
@@ -188,9 +197,10 @@ uniform float MDSM <
 	ui_type = "slider";
 	#endif
     ui_label = "Sharpen Multiplier";
-    ui_min = 1.0; ui_max = 5.0;
+    ui_min = 1.0; ui_max = 10.0;
     ui_tooltip = "Motion Detection Sharpen Multiplier.\n"
 				 "This is the user set mutliplyer for how much you want to increase the base sharpen.\n"
+				 "A Multiplier of 5 should be fine at base sharpness, Try messing around with this.\n"
 				 "A Sharpen Multiplier of 2 is two times the user set Sharpening Strength.\n"
 				 "Number 1 is default.";
 	ui_category = "Motion Bilateral CAS";
@@ -198,7 +208,7 @@ uniform float MDSM <
 
 uniform int Debug_View <
 	ui_type = "combo";
-	ui_items = "Normal View\0Sharp Debug\0";
+	ui_items = "Normal View\0Sharp Debug\0Motion Debug\0";
 	ui_label = "View Mode";
 	ui_tooltip = "This is used to select the normal view output or debug view.\n"
 				 "Used to see what the shaderis changing in the image.\n"
@@ -269,6 +279,13 @@ sampler DSM
 	{
 		Texture = DownSTex;
 	};
+	
+texture LocalMotionTex { Width = 512; Height = 512; Format = R8;};
+
+sampler LMS
+	{
+		Texture = LocalMotionTex;
+	};
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 float Depth(in float2 texcoord : TEXCOORD0)
 {
@@ -324,6 +341,22 @@ else if(B_Grounding == 1)
 	return 1.25;
 else
 	return 1.0;
+}
+
+float Motion_Sharpen(float2 texcoord)
+{	float2 PS = pix * 5;
+	
+	float BlurMotion = tex2D(LMS,texcoord).x;
+	if(Local_Motion)
+	{
+		BlurMotion += tex2D(LMS,texcoord + float2(0,PS.y)).x;
+		BlurMotion += tex2D(LMS,texcoord + float2(PS.x,0)).x;
+		BlurMotion += tex2D(LMS,texcoord + float2(-PS.x,0)).x;
+		BlurMotion += tex2D(LMS,texcoord + float2(0,-PS.y)).x;
+		return (BlurMotion * 0.2) * 12.5; 
+	}
+	else
+		return tex2Dlod(DSM,float4(texcoord,0,11)).x * lerp(0.0,25.0,GMD);
 }
 
 float4 CAS(float2 texcoord)
@@ -384,9 +417,9 @@ float4 CAS(float2 texcoord)
 	}
 
 	//// Shaping amount of sharpening masked
-	float CAS_Mask = RGB_D, Sharp = Sharpness, MD = tex2Dlod(DSM,float4(texcoord,0,11)).x * lerp(0.0,25.0,GMD);
+	float CAS_Mask = RGB_D, Sharp = Sharpness, MD = Motion_Sharpen(texcoord);
 
-	if(GMD > 0)
+	if(GMD > 0 || Local_Motion)
 		Sharp = Sharpness * lerp( 1,MDSM,saturate(MD));
 
 	if(CA_Mask_Boost)
@@ -400,9 +433,9 @@ return saturate(float4(final_colour/Z,CAS_Mask));
 
 float3 Sharpen_Out(float2 texcoord)
 {
- float Sharp = Sharpness, MD = tex2Dlod(DSM,float4(texcoord,0,11)).x * lerp(0.0,25.0,GMD);
+ float Sharp = Sharpness, MD = Motion_Sharpen(texcoord);
 
-	if(GMD > 0)
+	if(GMD > 0 || Local_Motion)
 		Sharp = Sharpness * lerp( 1,MDSM,saturate(MD));
 		
     float3 Done = tex2D(BackBuffer,texcoord).rgb;
@@ -421,9 +454,9 @@ float3 ShaderOut(float2 texcoord : TEXCOORD0)
 		DBBL = 0.0;
 	}
 
-	if (!Debug_View)
+	if (Debug_View == 0)
 		Out.rgb = lerp(Sharpen, BB, DB);
-	else
+	else if(Debug_View == 1)
 	{
 		float3 Top_Left = lerp(float3(1.,1.,1.),CAS(float2(texcoord.x*2,texcoord.y*2)).www,1-DBTL);
 
@@ -438,6 +471,8 @@ float3 ShaderOut(float2 texcoord : TEXCOORD0)
 
 		Out = texcoord.y < 0.5 ? VA_Top : VA_Bottom;
 	}
+	else
+		Out = lerp( 0,MDSM,Motion_Sharpen(texcoord));
 
 	return Out;
 }
@@ -455,6 +490,11 @@ float PBackBuffer_SS(float4 position : SV_Position, float2 texcoord : TEXCOORD) 
 float DownSampleMotion(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Target
 {
 	return abs(tex2D(CBBSS,texcoord).x - tex2D(PBBSS,texcoord).x);
+}
+
+float LocalMotionSample(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Target
+{
+	return length(tex2D(CBBSS,texcoord).x - tex2D(PBBSS,texcoord).x);
 }
 
 ////////////////////////////////////////////////////////Logo/////////////////////////////////////////////////////////////////////////
@@ -597,6 +637,18 @@ technique Smart_Sharp
 			VertexShader = PostProcessVS;
 			PixelShader = DownSampleMotion;
 			RenderTarget = DownSTex;
+		}
+			pass Down_Sample_Motion
+		{
+			VertexShader = PostProcessVS;
+			PixelShader = DownSampleMotion;
+			RenderTarget = DownSTex;
+		}
+			pass Sample_Motion
+		{
+			VertexShader = PostProcessVS;
+			PixelShader = LocalMotionSample;
+			RenderTarget = LocalMotionTex;
 		}
 			pass UnsharpMask
 		{
