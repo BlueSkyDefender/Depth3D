@@ -922,10 +922,10 @@ static const int HMT = 0;                               //HUD Mode Trigger
 	#define DE_Y 0.5
 	#define DE_Z 0.400
 #elif (App == 0x29B47A0A ) //KingMaker
-    #define DB_X 1
-    #define DA_W 1
+	#define DB_X 1
+	#define DA_W 1
 	#define DA_Y 18.75
-    #define DA_Z 0.0075
+	#define DA_Z 0.0075
 	#define DA_X 0.150
 	#define DB_Y 5
 	#define DE_X 1
@@ -955,14 +955,14 @@ static const int HMT = 0;                               //HUD Mode Trigger
 #elif (App == 0xC3AF1228 || App == 0x95A994C8 ) //Spellforce
 	#define DA_Y 145.0
 	#define DA_Z 0.001
-    #define DB_Z 0.05
+	#define DB_Z 0.05
 	#define DA_X 0.05
 	#define DB_Y 3
-    #define DE_X 1
-    #define DE_Y 0.235
-    #define DE_Z 0.375
-    #define HM 1
-    #define DC_X 0.5
+	#define DE_X 1
+	#define DE_Y 0.235
+	#define DE_Z 0.375
+	#define HM 1
+	#define DC_X 0.5
 #elif (App == 0xD372612E ) //Raft
 	#define DA_W 1
 	#define DB_X 1
@@ -970,37 +970,48 @@ static const int HMT = 0;                               //HUD Mode Trigger
 	#define DB_Y 4
 #elif (App == 0xC06FE818 ) //BorderLands 3
 	#define DA_Y 18.0
-    #define DA_Z 0.0001375
+	#define DA_Z 0.0001375
 	#define DA_X 0.05
-    #define DB_Z 0.05
+	#define DB_Z 0.05
 	#define DA_W 1
 	#define DB_Y 4
 	#define DB_W 5
 	#define DE_X 4
-    #define DE_Y 0.6125
-    #define DE_Z 0.300
-    #define DF_X 0.0375
+	#define DE_Y 0.6125
+	#define DE_Z 0.300
+	#define DF_X 0.0375
 #elif (App == 0x3C8DE8E8 ) //Metro Exodus
 	#define DA_Y 12.5 // What A mess
 	//#define DA_X 0.05
-    #define DA_Z 0.000375
+	#define DA_Z 0.000375
 	#define DA_W 1
 	#define DB_Y 4
 	//#define DE_W 0.08
 	#define DE_W 0.0275
 #elif (App == 0x7FC671B6 ) //Doom Eternal
 	#define DA_Y 50.0
-    #define DA_Z 0.00009375
+	#define DA_Z 0.00009375
 	#define DA_W 1
 	#define DB_Y 3
-    //#define DE_X 4
-    #define DE_Y 0.666
-    #define DE_Z 0.666
-    #define DB_W 68
-    #define DE_W 0.09375
-    #define DA_X 0.03125
+	//#define DE_X 4
+	#define DE_Y 0.666
+	#define DE_Z 0.666
+	#define DB_W 68
+	#define DE_W 0.09375
+	#define DA_X 0.03125
 	//#define DA_X 0.0375 //Alternet settings Not used.
-    //#define DE_W 0.125
+	//#define DE_W 0.125
+#elif (App == 0x47F294E9 ) //Octopath Traveler
+	#define DA_Y 225.0
+	#define DA_Z 0.000375
+	#define DA_X 0.1175
+	#define DA_W 1
+	#define DB_Y 2
+	#define DE_X 1
+	#define DE_Y 0.5625
+	#define DE_Z 0.375
+	#define DE_Z 0.375
+	#define TW 1
 #else
 	#define NP 1 //No Profile
 #endif

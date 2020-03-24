@@ -168,6 +168,7 @@ Inner Shader Setting:
     RB        Nosferatu: The Wrath of Malachi              DM 0       62.500                                       
               Obscuritas                                   DM 0       20.000                                           Yes 5         
     RB        Observer                                     DM 1       10.000                                       
+    RB        Octopath Traveler                            DM 1       225.00    0.000375                               Yes 2 
     RB        Outlaws 1997                                 DM 0       30.000                                           Yes 5
     RB        Paratopic                                    DM 1       8.7500    0.00025                    Yes         Yes 3
     RB        Penumbra: Black Plague                       DM 0       7.5000                                       
@@ -842,6 +843,25 @@ r.MaxAnisotropy=16
 
 {Outlaws 1997} - ReShade 4.5.2 Vulkan
 Use NGlide in Vulkan mode.
+
+{Octopath Traveler} - ReShade 4.6.0
+Game runs fine issues with DoF and other effects.
+
+To Disable Depth of Field in Octopath Traveler
+
+Head over to C:\Users\UserName\Documents\My games\Octopath_Traveler\Config\WindowsNoEditor
+Open the “Engine.ini” file
+Add:
+[SystemSettings]
+r.DepthOfFieldQuality=0
+
+For Bloom Add:
+r.BloomQuality=0
+
+Save the file
+
+You can can also dissable corner shadows in game.
+You can also Try Depth Detection -Sky For this game.
 
 {Paratopic} - Reshade 4.5
 Need to select the right buffer from time to time and it seems to be a lower resolution. I suggest you play this game at 4k.

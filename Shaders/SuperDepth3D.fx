@@ -105,10 +105,16 @@
 #define Fade_Time_Adjust 0.5625 // From 0 to 1 is the Fade Time adjust for this mode. Default is 0.5625;
 
 //USER EDITABLE PREPROCESSOR FUNCTIONS END//
-#if !defined(__RESHADE__) || __RESHADE__ < 43000
+#if !defined(__RESHADE__) || __RESHADE__ < 40000
 	#define Compatibility 1
 #else
 	#define Compatibility 0
+#endif
+
+#if !defined(__RESHADE__) || __RESHADE__ < 43000
+	#define Compatibility_DD 1
+#else
+	#define Compatibility_DD 0
 #endif
 
 #if __VENDOR__ == 0x10DE //AMD = 0x1002 //Nv = 0x10DE //Intel = ???
@@ -293,12 +299,17 @@ uniform int Depth_Map_View <
 	ui_tooltip = "Display the Depth Map";
 	ui_category = "Depth Map";
 > = 0;
-// New Menu Detection Code WIP
-uniform bool Depth_Detection <
+uniform int Depth_Detection <
+	ui_type = "combo";
+#if Compatibility_DD
+	ui_items = "Off\0Depth Detection +Sky\0Depth Detection -Sky\0ReShade Depth Detection\0";
+#else
+	ui_items = "Off\0Depth Detection +Sky\0Depth Detection -Sky\0";
+#endif
 	ui_label = " Depth Detection";
 	ui_tooltip = "Use this to disable/enable in game Depth Detection.";
 	ui_category = "Depth Map";
-> = false;
+> = 0;
 
 uniform bool Depth_Map_Flip <
 	ui_label = " Depth Map Flip";
@@ -941,18 +952,45 @@ float DB( float2 texcoord)
 
 	DM.y = lerp(Conv(DM.x,texcoord).x, Conv(DM.z,texcoord).y, DM.y);
 
-	#if !Compatibility
-	if (!DepthCheck && Depth_Detection)
-		DM = 0.0625;
-	#else
-	if (Depth_Detection)
+	#if Compatibility_DD
+	if (Depth_Detection == 1 || Depth_Detection == 2)
 	{ //Check Depth at 3 Point D_A Top_Center / Bottom_Center
 		float D_A = tex2Dlod(SamplerDMN,float4(float2(0.5,0.0),0,0)).x, D_B = tex2Dlod(SamplerDMN,float4(float2(0.0,1.0),0,0)).x;
-
-		if (D_A != 1 && D_B != 1)
+		if(Depth_Detection == 2)
 		{
 			if (D_A == D_B)
 				DM = 0.0625;
+		}
+		else
+		{   //Ignores Sky
+			if (D_A != 1 && D_B != 1)
+			{
+				if (D_A == D_B)
+					DM = 0.0625;
+			}
+		}
+	}
+	else if (Depth_Detection == 3)
+	{
+		if (!DepthCheck)
+			DM = 0.0625;
+	}
+	#else
+	if (Depth_Detection == 1 || Depth_Detection == 2)
+	{ //Check Depth at 3 Point D_A Top_Center / Bottom_Center
+		float D_A = tex2Dlod(SamplerDMN,float4(float2(0.5,0.0),0,0)).x, D_B = tex2Dlod(SamplerDMN,float4(float2(0.0,1.0),0,0)).x;
+		if(Depth_Detection == 2)
+		{
+			if (D_A == D_B)
+				DM = 0.0625;
+		}
+		else
+		{   //Ignores Sky
+			if (D_A != 1 && D_B != 1)
+			{
+				if (D_A == D_B)
+					DM = 0.0625;
+			}
 		}
 	}
 	#endif
