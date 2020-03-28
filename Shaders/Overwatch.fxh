@@ -182,10 +182,12 @@ static const int HMT = 0;                               //HUD Mode Trigger
 #elif (App == 0xDE2F0F4D )	//Prey 2006
 	#define DB_W 28
 	#define DB_Y 3
-#elif (App == 0x36976F6D )	//Prey 2017 High Settings and <
+#elif (App == 0x36976F6D )	//Prey 2017
 	#define DA_Y 18.7
 	#define DB_W 29
 	#define DB_Y 2
+	#define WSM 3
+	#define OW_WP "Read Help & Change Me\0Custom WP\0Prey High Settings and <\0Prey 2017 Very High\0"
 	#define TW 1
 #elif (App == 0xBF757E3A )	//Return to Castle Wolfenstein
 	#define DA_Y 8.75
@@ -1010,8 +1012,74 @@ static const int HMT = 0;                               //HUD Mode Trigger
 	#define DE_X 1
 	#define DE_Y 0.5625
 	#define DE_Z 0.375
-	#define DE_Z 0.375
 	#define TW 1
+#elif (App == 0x21CB998 ) //.Hack//G.U.
+	#define DA_Y 22.5
+	#define DA_X 0.125
+	#define DB_Y 3
+	#define DE_X 1
+	#define DE_Y 0.500
+	#define DE_Z 0.3
+	#define TW 1
+#elif (App == 0x9CC5C8E0 ) //GTA V
+	#define DA_Y 18.75
+	#define DA_W 1
+	#define DA_X 0.0475
+	#define DB_Y 4
+	#define DE_X 1
+	#define DE_Y 0.325
+	#define DE_Z 0.375
+	#define DB_Z 0.05
+	#define TW 1
+#elif (App == 0x8CD23575 ) //Dark Souls: Remastered
+	#define DA_Y 50.0
+    #define DA_Z 0.001
+	#define DA_X 0.05625
+	#define DB_Y 2
+	#define DE_X 2
+	#define DE_Y 0.500
+	#define DE_Z 0.375
+	#define DE_W 0.0625
+#elif (App == 0x9E071BC0 ) //Dark Souls III
+	#define DA_Y 25.0
+	#define DA_Z 0.000125
+	#define DA_X 0.1
+	#define DB_Y 3
+	#define DE_X 2
+	#define DE_Y 0.250
+	#define DE_Z 0.4375
+	#define DE_W 0.225
+#elif (App == 0x5D4939C9 ) //Dark Souls II
+	#define DA_Y 22.5
+	#define DA_Z 0.00025
+	#define DA_X 0.110
+	#define DB_Y 3
+	#define DE_X 2
+	#define DE_Y 0.50
+	#define DE_Z 0.40
+	#define DE_W 0.1
+#elif (App == 0xCE5313C2 ) //BorderLands Enhanced
+	#define DA_Y 18.75
+	#define DA_Z 0.0005
+	#define DA_X 0.055
+	#define DB_Z 0.075
+	#define DB_Y 1
+	#define DB_W 3
+	#define DE_X 3
+	#define DE_Y 0.625
+	#define DE_Z 0.375
+    #define DE_W 0.3975
+	#define DF_X 0.250
+#elif (App == 0x2ECAAF29 ) //Half-Life 2
+	#define DA_Y 8.75
+	#define DA_X 0.04
+	#define DB_Z 0.115
+	#define DB_Y 3
+	#define DB_W 20
+	#define DE_X 4
+	#define DE_Y 0.5
+	#define DE_Z 0.375
+	#define DF_X 0.105
 #else
 	#define NP 1 //No Profile
 #endif
@@ -1133,13 +1201,13 @@ static const int HMT = 0;                               //HUD Mode Trigger
 #if WSM == 1
 float3 Weapon_Profiles(float WP ,float3 Weapon_Adjust) //Tried Switch But, can't compile in some older versions of ReShade.
 {   if(WP == 2)
-        return float3(0.425,5.0,1.125);      //WP 0  | ES: Oblivion #C753DADB
+        return float3(0.425,5.0,1.125);      //WP 0  | ES: Oblivion
     else if(WP == 3)
-        return float3(0,0,0);                //WP 1  | Game
+        return float3(0.276,16.25,9.2);      //WP 1  | BorderLands 
     else if(WP == 4)
-        return float3(0.5,32.5,7.15);        //WP 2  | BorderLands 2 #7B81CCAB
+        return float3(0.5,32.5,7.15);        //WP 2  | BorderLands 2
     else if(WP == 5)
-        return float3(0.282,10.5,0.875);     //WP 3  | BorderLands 3
+        return float3(0.284,10.5,0.8725);    //WP 3  | BorderLands 3
     else if(WP == 6)
         return float3(0.253,28.75,98.5);     //WP 4  | Fallout 4 #2D950D30
     else if(WP == 7)
@@ -1147,31 +1215,31 @@ float3 Weapon_Profiles(float WP ,float3 Weapon_Adjust) //Tried Switch But, can't
     else if(WP == 8)
         return float3(0.338,20.0,9.20);      //WP 6  | DOOM 2016 #142EDFD6
     else if(WP == 9)
-        return float3(0.255,177.5,63.025);   //WP 7  | CoD:Black Ops #17232880 CoD:MW2 #9D77A7C4 CoD:MW3 #22EF526F
+        return float3(0.255,177.5,63.025);   //WP 7  | CoD:Black Ops | CoD:MW2 | CoD:MW3
     else if(WP == 10)
-        return float3(0.254,100.0,0.9843);   //WP 8  | CoD:Black Ops II #D691718C
+        return float3(0.254,100.0,0.9843);   //WP 8  | CoD:Black Ops II
     else if(WP == 11)
-        return float3(0.254,203.125,0.98435);//WP 9  | CoD:Ghost #7448721B
+        return float3(0.254,203.125,0.98435);//WP 9  | CoD:Ghost
     else if(WP == 12)
-        return float3(0.254,203.125,0.98433);//WP 10 | CoD:AW #23AB8876 CoD:MW Re #BF4D4A4e
+        return float3(0.254,203.125,0.98433);//WP 10 | CoD:AW | CoD:MW Re
     else if(WP == 13)
-        return float3(0.254,125.0,0.9843);   //WP 11 | CoD:IW #1544075
+        return float3(0.254,125.0,0.9843);   //WP 11 | CoD:IW
     else if(WP == 14)
-        return float3(0.255,200.0,63.0);     //WP 12 | CoD:WaW #697CDA52
+        return float3(0.255,200.0,63.0);     //WP 12 | CoD:WaW
     else if(WP == 15)
-        return float3(0.510,162.5,3.975);    //WP 13 | CoD #4383C12A CoD:UO #239E5522 CoD:2 #3591DE9C
+        return float3(0.510,162.5,3.975);    //WP 13 | CoD | CoD:UO | CoD:2
     else if(WP == 16)
-        return float3(0.254,23.75,0.98425);  //WP 14 | CoD: Black Ops IIII #73FA91DC
+        return float3(0.254,23.75,0.98425);  //WP 14 | CoD: Black Ops IIII
     else if(WP == 17)
-        return float3(0.375,60.0,15.15625);  //WP 15 | Quake DarkPlaces #37BD797D
+        return float3(0.375,60.0,15.15625);  //WP 15 | Quake DarkPlaces
     else if(WP == 18)
-        return float3(0.7,14.375,2.5);       //WP 16 | Quake 2 XP #34F4B6C
+        return float3(0.7,14.375,2.5);       //WP 16 | Quake 2 XP
     else if(WP == 19)
-        return float3(0.750,30.0,1.050);     //WP 17 | Quake 4 #ED7B83DE
+        return float3(0.750,30.0,1.050);     //WP 17 | Quake 4
     else if(WP == 20)
-        return float3(0,0,0);                //WP 18 | Game
+        return float3(0.278,62.5,9.1);       //WP 18 | Half-Life 2
     else if(WP == 21)
-        return float3(0.450,12.0,23.75);     //WP 19 | Metro Redux Games #886386A
+        return float3(0.450,12.0,23.75);     //WP 19 | Metro Redux Games
     else if(WP == 22)
         return float3(0.350,12.5,2.0);       //WP 20 | Soldier of Fortune
     else if(WP == 23)
@@ -1181,19 +1249,19 @@ float3 Weapon_Profiles(float WP ,float3 Weapon_Adjust) //Tried Switch But, can't
     else if(WP == 25)
         return float3(0.625,350.0,0.785);    //WP 23 | Minecraft
     else if(WP == 26)
-        return float3(0.255,6.375,53.75);    //WP 24 | S.T.A.L.K.E.R: Games #F5C7AA92 #493B5C71
+        return float3(0.255,6.375,53.75);    //WP 24 | S.T.A.L.K.E.R: Games
     else if(WP == 27)
         return float3(0,0,0);                //WP 25 | Game
     else if(WP == 28)
-        return float3(0.750,30.0,1.025);     //WP 26 | Prey 2006 #DE2F0F4D
+        return float3(0.750,30.0,1.025);     //WP 26 | Prey 2006
     else if(WP == 29)
-        return float3(0.2832,13.125,0.8725); //WP 27 | Prey 2017 High Settings and < #36976F6D
+        return float3(0,0,0);                //WP 27 | Game
     else if(WP == 30)
-        return float3(0.2832,13.75,0.915625);//WP 28 | Prey 2017 Very High #36976F6D
+        return float3(0,0,0);                //WP 28 | Game
     else if(WP == 31)
-        return float3(0.7,9.0,2.3625);       //WP 29 | Return to Castle Wolfenstine #BF757E3A
+        return float3(0.7,9.0,2.3625);       //WP 29 | Return to Castle Wolfenstine
     else if(WP == 32)
-        return float3(0.4894,62.50,0.98875); //WP 30 | Wolfenstein #30030941
+        return float3(0.4894,62.50,0.98875); //WP 30 | Wolfenstein
     else if(WP == 33)
         return float3(1.0,93.75,0.81875);    //WP 31 | Wolfenstein: The New Order #C770832 / The Old Blood #3E42619F
     else if(WP == 34)
@@ -1291,7 +1359,16 @@ float3 Weapon_Profiles(float WP ,float3 Weapon_Adjust) // MCC
         return float3(0,0,0);                //WP 4  | Halo 3: ODST
     else if(WP == 7)
         return float3(0,0,0);                //WP 5  | Halo 4
-		else
-		    return Weapon_Adjust;
+	else
+		return Weapon_Adjust;
+}
+#elif WSM == 3
+float3 Weapon_Profiles(float WP ,float3 Weapon_Adjust) // Prey 2017
+{   if(WP == 2)
+        return float3(0.2832,13.125,0.8725); //WP 0 | Prey 2017 High Settings and <
+    else if(WP == 3)
+		return float3(0.2832,13.75,0.915625);//WP 1 | Prey 2017 Very High
+	else
+		return Weapon_Adjust;
 }
 #endif

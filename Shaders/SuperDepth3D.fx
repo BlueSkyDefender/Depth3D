@@ -292,13 +292,6 @@ uniform float Auto_Depth_Adjust <
 	ui_category = "Depth Map";
 > = DB_Z;
 
-uniform int Depth_Map_View <
-	ui_type = "combo";
-	ui_items = "Off\0Stero Depth View\0Normal Depth View\0";
-	ui_label = " Depth Map View";
-	ui_tooltip = "Display the Depth Map";
-	ui_category = "Depth Map";
-> = 0;
 uniform int Depth_Detection <
 	ui_type = "combo";
 #if Compatibility_DD
@@ -308,6 +301,14 @@ uniform int Depth_Detection <
 #endif
 	ui_label = " Depth Detection";
 	ui_tooltip = "Use this to disable/enable in game Depth Detection.";
+	ui_category = "Depth Map";
+> = 0;
+
+uniform int Depth_Map_View <
+	ui_type = "combo";
+	ui_items = "Off\0Stero Depth View\0Normal Depth View\0";
+	ui_label = " Depth Map View";
+	ui_tooltip = "Display the Depth Map";
 	ui_category = "Depth Map";
 > = 0;
 
