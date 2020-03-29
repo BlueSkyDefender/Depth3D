@@ -627,7 +627,19 @@ Can't see out windows issue. You have to switch the depth buffer to something el
 If CA issue really bothers you and you don't want to install any mods you can try the Legacy_Mode in shader set it from 0 to 1
 
 {Half-Life 2} - ReShade 4.5.4 Issues
-So In this game The newer reshades seems to have issues in this game. I hear 4.3.0 seems to be better in this game.
+So In this game The newer reshades seems to have more issues in this game. I hear 4.4.0 "seems" to be better in this game. But, Even with the extra options for source games it drops off in some points.
+https://cdn.discordapp.com/attachments/305472403977404416/693604937275408524/unknown.png - 4.4.0
+https://cdn.discordapp.com/attachments/305472403977404416/693652674427486248/unknown.png - 4.6.0
+You can select your own depth buffer or use auto preserve. Some users noted that auto preserve drops out more. But, seems pick the right depth buffer kind of ok.
+Make sure to turn off MSAA in game options.
+
+If you can't stand the flickering set this command in console r_3dsky 0
+This should stop the flickering at a cost of the backdrop.
+
+I say to just use the latest. You can also use mods like the MMOD with Half-Life 2: Update
+But, you still need to use r_3dsky 0
+
+DGVooDoo2 not working nor DXVK.
  
 {Hard Reset}
 Must Enable FSAA for depth buffer access.

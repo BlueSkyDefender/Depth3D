@@ -294,7 +294,7 @@ uniform float Auto_Depth_Adjust <
 
 uniform int Depth_Detection <
 	ui_type = "combo";
-#if Compatibility_DD
+#if !Compatibility_DD
 	ui_items = "Off\0Depth Detection +Sky\0Depth Detection -Sky\0ReShade Depth Detection\0";
 #else
 	ui_items = "Off\0Depth Detection +Sky\0Depth Detection -Sky\0";
@@ -953,7 +953,7 @@ float DB( float2 texcoord)
 
 	DM.y = lerp(Conv(DM.x,texcoord).x, Conv(DM.z,texcoord).y, DM.y);
 
-	#if Compatibility_DD
+	#if !Compatibility_DD
 	if (Depth_Detection == 1 || Depth_Detection == 2)
 	{ //Check Depth at 3 Point D_A Top_Center / Bottom_Center
 		float D_A = tex2Dlod(SamplerDMN,float4(float2(0.5,0.0),0,0)).x, D_B = tex2Dlod(SamplerDMN,float4(float2(0.0,1.0),0,0)).x;

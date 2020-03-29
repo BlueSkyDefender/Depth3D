@@ -973,7 +973,7 @@ static const int HMT = 0;                               //HUD Mode Trigger
 #elif (App == 0xC06FE818 ) //BorderLands 3
 	#define DA_Y 18.0
 	#define DA_Z 0.0001375
-	#define DA_X 0.05
+	#define DA_X 0.04
 	#define DB_Z 0.05
 	#define DA_W 1
 	#define DB_Y 4
@@ -1068,7 +1068,7 @@ static const int HMT = 0;                               //HUD Mode Trigger
 	#define DE_X 3
 	#define DE_Y 0.625
 	#define DE_Z 0.375
-    #define DE_W 0.3975
+	#define DE_W 0.3975
 	#define DF_X 0.250
 #elif (App == 0x2ECAAF29 ) //Half-Life 2
 	#define DA_Y 8.75
@@ -1080,6 +1080,7 @@ static const int HMT = 0;                               //HUD Mode Trigger
 	#define DE_Y 0.5
 	#define DE_Z 0.375
 	#define DF_X 0.105
+	#define TW 1
 #else
 	#define NP 1 //No Profile
 #endif
@@ -1203,7 +1204,7 @@ float3 Weapon_Profiles(float WP ,float3 Weapon_Adjust) //Tried Switch But, can't
 {   if(WP == 2)
         return float3(0.425,5.0,1.125);      //WP 0  | ES: Oblivion
     else if(WP == 3)
-        return float3(0.276,16.25,9.2);      //WP 1  | BorderLands 
+        return float3(0.276,16.25,9.2);      //WP 1  | BorderLands
     else if(WP == 4)
         return float3(0.5,32.5,7.15);        //WP 2  | BorderLands 2
     else if(WP == 5)
