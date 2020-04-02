@@ -968,7 +968,7 @@ static const int HMT = 0;                               //HUD Mode Trigger
 #elif (App == 0xD372612E ) //Raft
 	#define DA_W 1
 	#define DB_X 1
-	#define DA_X 0.03
+	#define DA_X 0.04375
 	#define DB_Y 4
 #elif (App == 0xC06FE818 ) //BorderLands 3
 	#define DA_Y 18.0
