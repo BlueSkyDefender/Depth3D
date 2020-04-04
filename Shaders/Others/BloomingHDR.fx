@@ -212,6 +212,34 @@ uniform float Saturate <
 	ui_category = "Image Adjustments";
 > = 1.0;
 
+uniform float Brightness <
+	#if Compatibility
+	ui_type = "drag";
+	#else
+	ui_type = "slider";
+	#endif
+	ui_min = 0.0; ui_max = 1.0;
+	ui_tooltip = "Brightness";
+	ui_category = "Image Adjustments";
+> = 0.0;
+
+uniform float Contrast <
+	#if Compatibility
+	ui_type = "drag";
+	#else
+	ui_type = "slider";
+	#endif
+	ui_min = 0.0; ui_max = 1.0;
+	ui_tooltip = "Contrast";
+	ui_category = "Image Adjustments";
+> = 0.0;
+
+uniform bool Dither <
+	ui_label = "Bloom Dither";
+	ui_tooltip = "Dither";
+	ui_category = "Image Adjustments";
+> = true;
+
 uniform int Debug_View <
 	ui_type = "combo";
 	ui_label = "Debug View";
@@ -220,12 +248,6 @@ uniform int Debug_View <
 	ui_category = "Debugging";
 	ui_category = "Debugging";
 > = 0;
-
-uniform bool Dither <
-	ui_label = "Dither";
-	ui_tooltip = "Dither";
-	ui_category = "Debugging";
-> = true;
 
 //Change Output
 #if In_UI_Samples
@@ -651,7 +673,7 @@ float4 HDROut(float2 texcoords : TEXCOORD0)
 		
 	float4 Out;
     float3 Color = tex2D(BackBuffer, texcoords).rgb;
-	
+		Color.rgb = Color.rgb + Brightness;  	
 	if(Dither)
 	{
 		acc.r += -dither_shift;
@@ -667,18 +689,17 @@ float4 HDROut(float2 texcoords : TEXCOORD0)
 	Color += acc * BI;
 	
 	float3 Store_Color = Color;
-	
-	float Setframes, SS =  smoothstep(0,1, tex2D(PSSBuffer,texcoords).x);
+
 	//Detect Motion on treshhold so we limit Adapt limit by half. Not realistic.... But, filmic ;) I kid I kid
 	if (Adapt_Rebound == 1)
-	{   // Lower the Motion Detection ammount here.
+	{   // Lower the Motion Detection ammount here. May make thisa adjustable later.
 		if (tex2D(PSSBuffer,texcoords).y > 0.5)
 			AL = max(Adapt_Limit * 0.5,AL);
 	}
 	//Tone map all the things
 	if(Auto_Exposure)
 	{   if (Adapt_Rebound == 1)
-			Ex *= lerp(max(Adapt_Limit,AL), AL, smoothstep(0,1, SS ));
+			Ex *= lerp(max(Adapt_Limit,AL), AL, smoothstep(0,1, tex2D(PSSBuffer,texcoords).x));
 		else
 			Ex *= AL;
 	}
@@ -699,6 +720,8 @@ float4 HDROut(float2 texcoords : TEXCOORD0)
 		Out = float4(pow(abs(acc),rcp(Gamma)), 1.);
 	else
 		Out = texcoords.y < 0.975 ? HeatMap(dot( HableTonemap(Color,Ex),Luma())):HeatMap(texcoords.x);
+
+	Out.rgb = (Out.rgb - 0.5) *(Contrast + 1.0) + 0.5;  
 
 	float intensity = float(dot(Out.rgb, Luma()));
 	Out.rgb = lerp(intensity, Out.rgb, Saturate);
