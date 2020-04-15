@@ -35,7 +35,7 @@ Overwatch will assist many of my shaders by setting the Depth Settings for you i
 Based Shaders and have some settings set for you. Less Hassle more FUN.
 
 If you enjoyed these shaders and like to donate you can do so at https://paypal.me/BlueSkyDefender
-Fundly is coming soon....
+This or https://www.buymeacoffee.com/BlueSkyDefender
 
 ### Highlighted Shaders Freestyle & Ansel
 **3DViewer**<br />
