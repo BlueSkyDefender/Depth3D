@@ -873,11 +873,11 @@ static const int HMT = 0;                               //HUD Mode Trigger
 	#define DE_Z 0.375
 	#define DE_W 0.360
 	#define TW 1
-#elif (App == 0xE3AD2F05 ) //Sauervaraten
+#elif (App == 0xE3AD2F05 ) //Sauerbraten
 	#define DA_Y 25.0
 	#define DA_X 0.05
 	#define DB_Y 5
-	#define DB_W 43
+	#define DB_W 73
 	#define DF_X 0.150
 #elif (App == 0xF0F2CF6A ) //Dragon Ball Z: Kakarot
 	#define DA_W 1
@@ -1081,6 +1081,18 @@ static const int HMT = 0;                               //HUD Mode Trigger
 	#define DE_Z 0.375
 	#define DF_X 0.105
 	#define TW 1
+#elif (App == 0x68EF1B4E ) //Serious Sam Fusion
+	#define DA_W 1
+	#define DA_X 0.075
+	#define DA_Y 10.0
+	#define DA_Z 0.1
+	#define DB_Y 1
+	#define DB_W 42
+	#define DE_X 4
+	#define DE_Y 0.5
+	#define DE_Z 0.375
+	#define DB_Z 0.150
+	#define TW 1
 #else
 	#define NP 1 //No Profile
 #endif
@@ -1282,9 +1294,9 @@ float3 Weapon_Profiles(float WP ,float3 Weapon_Adjust) //Tried Switch But, can't
     else if(WP == 41)
         return float3(0.280,15.5,9.1);       //WP 39 | Serious Sam Revolution #EB9EEB74/Serious Sam HD: The First Encounter /The Second Encounter /Serious Sam 2 #8238E9CA/ Serious Sam 3: BFE*
     else if(WP == 42)
-        return float3(0,0,0);                //WP 40 | Serious Sam 4: Planet Badass
+        return float3(0.3,17.5,0.902);       //WP 40 | Serious Sam Fusion
     else if(WP == 43)
-        return float3(0.800,15.0,0.3);       //WP 41 | Sauerbraten 2
+        return float3(0,0,0);                //WP 41 | Serious Sam 4: Planet Badass
     else if(WP == 44)
         return float3(0.277,20.0,8.8);       //WP 42 | TitanFall 2 #308AEBEA
     else if(WP == 45)
@@ -1343,6 +1355,17 @@ float3 Weapon_Profiles(float WP ,float3 Weapon_Adjust) //Tried Switch But, can't
 		return float3(0,0,0);                //WP 69 | Game
 	else if(WP == 72)
 		return float3(0,0,0);                //WP 70 | Game
+	else if(WP == 73)
+	    return float3(0.800,15.0,0.3);       //WP 71 | Sauerbraten 2
+	else if(WP == 74)
+		return float3(0,0,0);                //WP 72 | Game
+	else if(WP == 75)
+		return float3(0,0,0);                //WP 73 | Game
+	else if(WP == 76)
+		return float3(0,0,0);                //WP 74 | Game
+	else if(WP == 77)
+		return float3(0,0,0);                //WP 75 | Game
+
     else
         return Weapon_Adjust;
 }

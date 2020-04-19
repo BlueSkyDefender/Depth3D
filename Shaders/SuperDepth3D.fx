@@ -111,7 +111,7 @@
 	#define Compatibility 0
 #endif
 
-#if !defined(__RESHADE__) || __RESHADE__ < 43000
+#if __RESHADE__ >= 43000
 	#define Compatibility_DD 1
 #else
 	#define Compatibility_DD 0
