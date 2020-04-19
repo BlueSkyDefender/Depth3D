@@ -35,7 +35,7 @@ Overwatch will assist many of my shaders by setting the Depth Settings for you i
 Based Shaders and have some settings set for you. Less Hassle more FUN.
 
 If you enjoyed these shaders and like to donate you can do so at https://paypal.me/BlueSkyDefender
-Fundly is coming soon....
+This or https://www.buymeacoffee.com/BlueSkyDefender
 
 ### Highlighted Shaders Freestyle & Ansel
 **3DViewer**<br />
@@ -56,9 +56,9 @@ Super Basic Rain Shader.
 ### Depth3D VR
 **Companion App**<br />
 
-Installer Name: Depth3DVRCompanion.exe<br />
-Installer Size: 28.9 MB<br />
-https://mega.nz/#!nYZ1RSBS!PxtF0M3_AvXLRBjdHK8m_ewZ27dnVNw3JM9A1__Z8-Q<br /> 
+Installer Name: Depth3DVRCompanion_v1.6.exe<br />
+Installer Size: 28.96 MB<br />
+https://mega.nz/file/ndhCRCRB#N5tHCE4N4jB1s-DvCx77upgQfs_20bjyOVPXGmaGsnE<br /> 
 This Free VR App, is a basic way to view my stereoscopic shaders on your Oculus or OpenVR supported HMD.<br />
 This App Lets you play your Games or watch Movies on your VR HMD of choice. So it has more uses than intended. 
 
