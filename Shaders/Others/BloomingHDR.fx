@@ -28,7 +28,7 @@
 //
 // https://github.com/BlueSkyDefender/Depth3D
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-#if exists "Flare.fx"                                           //Flare Intercepter//
+#if exists "Flair.fx"                                           //Flare Intercepter//
 	#define Flare 1
 #else
 	#define Flare 0
