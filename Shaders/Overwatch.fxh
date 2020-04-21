@@ -1093,6 +1093,14 @@ static const int HMT = 0;                               //HUD Mode Trigger
 	#define DE_Z 0.375
 	#define DB_Z 0.150
 	#define TW 1
+#elif (App == 0xEACB4D0D ) //Final Fantasy XV Windows Edition
+	#define DA_X 0.0375
+	#define DA_Y 30.0
+	#define DB_Y 3
+	#define DE_X 2
+	#define DE_Y 0.5
+	#define DE_Z 0.375
+	#define TW 1
 #else
 	#define NP 1 //No Profile
 #endif
