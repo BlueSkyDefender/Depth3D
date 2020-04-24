@@ -1308,7 +1308,7 @@ float3 Weapon_Profiles(float WP ,float3 Weapon_Adjust) //Tried Switch But, can't
     else if(WP == 41)
         return float3(0.280,15.5,9.1);       //WP 39 | Serious Sam Revolution #EB9EEB74/Serious Sam HD: The First Encounter /The Second Encounter /Serious Sam 2 #8238E9CA/ Serious Sam 3: BFE*
     else if(WP == 42)
-        return float3(0.3,17.5,0.902);       //WP 40 | Serious Sam Fusion
+        return float3(0.3,17.5,0.9015);      //WP 40 | Serious Sam Fusion
     else if(WP == 43)
         return float3(0,0,0);                //WP 41 | Serious Sam 4: Planet Badass
     else if(WP == 44)
@@ -1359,27 +1359,26 @@ float3 Weapon_Profiles(float WP ,float3 Weapon_Adjust) //Tried Switch But, can't
         return float3(0.2503,52.5,987.5);    //WP 64 | Singularity
     else if(WP == 67)
         return float3(0,0,0);                //WP 65 | Game
-	else if(WP == 68)
-	    return float3(1.025,10.0,0.185);     //WP 66 | Doom Eternal
-	else if(WP == 69)
-		return float3(0,0,0);                //WP 67 | Game
-	else if(WP == 70)
-		return float3(0.251,5.6875,950.0);   //WP 68 | Mirror Edge
-	else if(WP == 71)
-		return float3(0,0,0);                //WP 69 | Game
-	else if(WP == 72)
-		return float3(0,0,0);                //WP 70 | Game
-	else if(WP == 73)
-	    return float3(0.800,15.0,0.3);       //WP 71 | Sauerbraten 2
-	else if(WP == 74)
-		return float3(0,0,0);                //WP 72 | Game
-	else if(WP == 75)
-		return float3(0,0,0);                //WP 73 | Game
-	else if(WP == 76)
-		return float3(0,0,0);                //WP 74 | Game
-	else if(WP == 77)
-		return float3(0,0,0);                //WP 75 | Game
-
+		else if(WP == 68)
+				return float3(1.025,10.0,0.185);     //WP 66 | Doom Eternal
+		else if(WP == 69)
+				return float3(0,0,0);                //WP 67 | Game
+		else if(WP == 70)
+				return float3(0.251,5.6875,950.0);   //WP 68 | Mirror Edge
+		else if(WP == 71)
+				return float3(0,0,0);                //WP 69 | Game
+		else if(WP == 72)
+				return float3(0,0,0);                //WP 70 | Game
+		else if(WP == 73)
+				return float3(0.800,15.0,0.3);       //WP 71 | Sauerbraten 2
+		else if(WP == 74)
+				return float3(0,0,0);                //WP 72 | Game
+		else if(WP == 75)
+				return float3(0,0,0);                //WP 73 | Game
+		else if(WP == 76)
+				return float3(0,0,0);                //WP 74 | Game
+		else if(WP == 77)
+				return float3(0,0,0);                //WP 75 | Game
     else
         return Weapon_Adjust;
 }
@@ -1405,8 +1404,8 @@ float3 Weapon_Profiles(float WP ,float3 Weapon_Adjust) // Prey 2017
 {   if(WP == 2)
         return float3(0.2832,13.125,0.8725); //WP 0 | Prey 2017 High Settings and <
     else if(WP == 3)
-		return float3(0.2832,13.75,0.915625);//WP 1 | Prey 2017 Very High
-	else
-		return Weapon_Adjust;
+				return float3(0.2832,13.75,0.915625);//WP 1 | Prey 2017 Very High
+		else
+				return Weapon_Adjust;
 }
 #endif
