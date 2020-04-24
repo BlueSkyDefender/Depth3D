@@ -209,10 +209,16 @@ static const int HMT = 0;                               //HUD Mode Trigger
 	#define DB_W 36
 	#define DB_Y 3
 	#define TW 1
-#elif (App == 0xF22A9C7D ) //SOMA
-	#define DA_Y 10.0
+#elif (App == 0xF22A9C7D || App == 0x5416A79D ) //SOMA
+	#define DA_Y 10.5
+	#define DA_Z 0.000375
+	#define DA_X 0.15
 	#define DB_Y 5
 	#define DB_W 38
+	#define DE_X 3
+	#define DE_Y 0.5
+	#define DE_Z 0.375
+	#define DF_X 0.25
 #elif (App == 0x6FB6410B ) //Cryostasis
 	#define DA_Y 13.75
 	#define DB_Y 3
