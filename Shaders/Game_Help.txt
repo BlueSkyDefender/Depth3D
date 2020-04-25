@@ -35,11 +35,10 @@ ReShade GUI Settings:
 [Custom Sidebars] - Edges selection for your screen output.
 
 Inner Shader Setting:
-[Depth Map Division] Depth_Map_Division -=Line 26=- For 4k Use 1.75 or 1.5. For 1440p Use 1.5 or 1.25. For 1080p use 1.
-[Max Depth] Depth_Max -=Line 29=- Determines the Max Depth amount, in ReShades GUI.
-[Cancel Depth Key] Cancel_Depth_Key -=Line 41=- Determines the Cancel Depth Toggle Key useing keycode info.
+[Max Depth] Depth_Max -=Line ??=- Determines the Max Depth amount, in ReShades GUI.
+[Cancel Depth Key] Cancel_Depth_Key -=Line ??=- Determines the Cancel Depth Toggle Key useing keycode info.
 [Horizontal & Vertical Depth Buffer Resize] Horizontal_and_Vertical -=Line 50=- For Horizontal & Vertical Depth Buffer Resize for non conforming BackBuffer.
-[Image Position Adjust] Image_Position_Adjust -=Line 53=- Image Position Adjust is used to move the Z-Buffer around.
+[Image Position Adjust] Image_Position_Adjust -=Line ??=- Image Position Adjust is used to move the Z-Buffer around.
 =================================================================================================================================
 -=:[Settings have to be change and adjusted for diffrent Resolutions, screen size, and screen types]:=-
 
@@ -208,7 +207,7 @@ Inner Shader Setting:
               Sleeping Dogs: DE                            DM 0       7.0000                                       
               Sniper Elite 4                               DM 0       25.000                                       
     RB        Soldier of Fortune                           DM 0       17.5                  WDM 20                     Yes 5
-              Soma                                         DM 0       10.000                WDM 36                     Yes 5 
+    RB        Soma                                         DM 0       10.500                WDM 36                     Yes 5 
     RB        Sonic Adventure DX BetterSADX Mod            DM 0       8.75                                             Yes 3                                              
               Sonic Adventure 2                            DM 0       8.75                                       
               Souls Games                                  DM 0       22.5                                            
@@ -977,6 +976,8 @@ Path to install \Steam\SteamApps\common\Redout\redout\Binaries
 Enable RE_Fix in shader "USER EDITABLE PREPROCESSOR FUNCTIONS."
 To do this open up the shader and set RE_Fix to 1.
 
+Should not need to do this anymore. Use Overwatch.fxh
+
 {Resident Evil 7}
 Make sure Render Mode is Normal.
 Also Scale should be 1 for 1:1.
@@ -1081,6 +1082,10 @@ Turn the game on and it should load ReShade after the intro.
 
 Thank you.
 
+{Soma} - Used ReShade 4.6.1
+So at one point AMD GPUs used to work with an older version of Game/Drivers. Now only Nv GPUs seem to only work.
+
+Weapon Hand Issues and Item cliping if Weapon Profile used.
 
 {StarWars Jedi Fallen Order} - Used ReShade 4.4.2
 Disable CA, FG, MB in the Visuals

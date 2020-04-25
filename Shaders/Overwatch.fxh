@@ -210,15 +210,17 @@ static const int HMT = 0;                               //HUD Mode Trigger
 	#define DB_Y 3
 	#define TW 1
 #elif (App == 0xF22A9C7D || App == 0x5416A79D ) //SOMA
-	#define DA_Y 10.5
-	#define DA_Z 0.000375
-	#define DA_X 0.15
+	#define DA_Y 17.5
+	#define DA_Z 0.0005
+	#define DA_X 0.1375
 	#define DB_Y 5
-	#define DB_W 38
+	//#define DB_W 38
+	#define DE_W 0.1875
 	#define DE_X 3
 	#define DE_Y 0.5
 	#define DE_Z 0.375
 	#define DF_X 0.25
+	#define TW 1
 #elif (App == 0x6FB6410B ) //Cryostasis
 	#define DA_Y 13.75
 	#define DB_Y 3
@@ -1300,7 +1302,7 @@ float3 Weapon_Profiles(float WP ,float3 Weapon_Adjust) //Tried Switch But, can't
     else if(WP == 37)
         return float3(0.500,4.75,0.75);      //WP 35 | Blood 2 Alt #6D3CD99E
     else if(WP == 38)
-        return float3(0.785,21.25,0.3875);   //WP 36 | SOMA #F22A9C7D
+      return float3(0.78,21.25,0.1875);      //WP 36 | SOMA #F22A9C7D
     else if(WP == 39)
         return float3(0.444,20.0,1.1875);    //WP 37 | Cryostasis #6FB6410B
     else if(WP == 40)
