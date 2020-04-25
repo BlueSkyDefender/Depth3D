@@ -232,6 +232,13 @@ static const int HMT = 0;                               //HUD Mode Trigger
 	#define DC_X 0.534
 	#define HM 1
 #elif (App == 0xEB9EEB74 || App == 0x8238E9CA ) //Serious Sam Revolution | Serious Sam 2
+	#define DA_X 0.075
+	#define DA_Y 10.0
+	#define DB_Y 1
+	#define DE_X 4
+	#define DE_Y 0.85
+	#define DE_Z 0.375
+	#define DB_Z 0.150
 	#define DA_Z 0.1111
 	#define DB_W 41
 #elif (App == 0x308AEBEA ) //TitanFall 2
