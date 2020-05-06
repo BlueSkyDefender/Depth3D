@@ -47,7 +47,7 @@
 #if exists "Overwatch.fxh"                                           //Overwatch Intercepter//
 	#include "Overwatch.fxh"
 #else //DA_W Depth_Linearization | DB_X Depth_Flip
-	static const float DA_W = 0.0, DB_X = 0;
+	static const float DA_W = 0.0, DB_X = 0, DD_X = 1,DD_Y = 1,DD_Z = 0,DD_W = 0;
 	#define NC 0
 	#define NP 0
 #endif
@@ -122,6 +122,22 @@ uniform float3 WeaponHandAdjust <
 	ui_category = "Depth Buffer";
 > = 0.0;
 
+uniform float2 Horizontal_and_Vertical <
+	ui_type = "drag";
+	ui_min = 0.125; ui_max = 2;
+	ui_label = "Z Horizontal & Vertical Size";
+	ui_tooltip = "Adjust Horizontal and Vertical Resize. Default is 1.0.";
+	ui_category = "Depth Buffer";
+> = float2(DD_X,DD_Y);
+
+uniform int2 Image_Position_Adjust<
+	ui_type = "drag";
+	ui_min = -4096.0; ui_max = 4096.0;
+	ui_label = "Z Position";
+	ui_tooltip = "Adjust the Image Position if it's off by a bit. Default is Zero.";
+	ui_category = "Depth Buffer";
+> = int2(DD_Z,DD_W);
+
 uniform bool Depth_Map_Flip <
 	ui_label = "Depth Map Flip";
 	ui_tooltip = "Flip the depth map if it is upside down.";
@@ -171,6 +187,10 @@ float DepthMap(float2 texcoord : TEXCOORD0)
 {
 	if (Depth_Map_Flip)
 		texcoord.y =  1 - texcoord.y;
+
+	float2 texXY = texcoord + Image_Position_Adjust * pix;
+	float2 midHV = (Horizontal_and_Vertical-1) * float2(BUFFER_WIDTH * 0.5,BUFFER_HEIGHT * 0.5) * pix;
+	texcoord = float2((texXY.x*Horizontal_and_Vertical.x)-midHV.x,(texXY.y*Horizontal_and_Vertical.y)-midHV.y);
 
 	float zBuffer = tex2D(ZBuffer, texcoord).x; //Depth Buffer
 
