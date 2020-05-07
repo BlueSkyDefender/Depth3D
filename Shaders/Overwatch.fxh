@@ -242,6 +242,8 @@ static const int HMT = 0;                               //HUD Mode Trigger
 	#define DA_Z 0.1111
 	#define DF_X 0.1125
 	#define DB_W 41
+	#define DC_X 0.5
+	#define HM 1
 #elif (App == 0x308AEBEA ) //TitanFall 2
 	#define DB_Y 4
 	#define DB_W 44
@@ -345,10 +347,21 @@ static const int HMT = 0;                               //HUD Mode Trigger
 	#define DC_X 0.501
 	#define HM 1
 #elif (App == 0x86D33094 ) //Rise of the TombRaider
-	#define DA_X 0.075
+	#define DA_X 0.0725
 	#define DB_Y 3
 	#define DA_Y 25.0
-	#define DA_Z 0.02
+	#define DA_Z 0.020
+	#define DE_X 2
+	#define DE_Y 0.375
+	#define DE_Z 0.375
+#elif (App == 0x19019D10 ) //TombRaider 2013
+	#define DA_X 0.0725
+	#define DB_Y 3
+	#define DA_Y 25.0
+	#define DA_Z 0.0200375
+	#define DE_X 2
+	#define DE_Y 0.375
+	#define DE_Z 0.375
 #elif (App == 0x60F436C6 ) //RESIDENT EVIL 2  BIOHAZARD RE2
 	#define DA_X 0.1375
 	#define DB_Y 3

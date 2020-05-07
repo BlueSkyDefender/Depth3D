@@ -1,1 +1,0 @@
-HDRish will not work untill reshade supports a way to activate window's HDR. But, It can still down convert content. But, Still kind of broken.This shader is WIP.

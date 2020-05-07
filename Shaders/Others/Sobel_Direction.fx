@@ -1,28 +1,21 @@
 
-uniform float2 X <
-	ui_type = "drag";
-	ui_min = 0; ui_max = 1;
-	ui_label = "X";
-	ui_tooltip = "X";
-> = float2(0,0);
-
 /////////////////////////////////////////////////////D3D Starts Here/////////////////////////////////////////////////////////////////
 #define pix float2(BUFFER_RCP_WIDTH, BUFFER_RCP_HEIGHT)
-static const float Pi = 3.1415926535; 
+static const float Pi = 3.1415926535;
 
 texture BackBufferTex : COLOR;
 
-sampler BackBuffer 
-	{ 
+sampler BackBuffer
+	{
 		Texture = BackBufferTex;
 	};
-	
+
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 float3 Out(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Target
 {
 
     float3 col;
-    
+
     /*** Sobel kernels ***/
     // Note: GLSL's mat3 is COLUMN-major ->  mat3[col][row]
     float3 sobelX[3] = {float3(-1.0, -2.0, -1.0),
@@ -30,19 +23,19 @@ float3 Out(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Targe
                        float3(1.0,  2.0,  1.0)};
     float3 sobelY[3] = {float3(-1.0,  0.0,  1.0),
                       float3( -2.0,  0.0, 2.0),
-                       float3(-1.0,  0.0,  1.0)};  
-    
+                       float3(-1.0,  0.0,  1.0)};
+
     float sumX = 0.0;	// x-axis change
     float sumY = 0.0;	// y-axis change
-    
+
     for(int i = -1; i <= 1; i++)
     {
         for(int j = -1; j <= 1; j++)
         {
             // texture coordinates should be between 0.0 and 1.0
-            float x = (texcoord.x + i * pix.x  );	
+            float x = (texcoord.x + i * pix.x  );
     		float y =  (texcoord.y + j * pix.y );
-            
+
             // Convolve kernels with image
             sumX += length(tex2D( BackBuffer, float2(x, y) ).xyz) * float(sobelX[1+i][1+j]);
             sumY += length(tex2D( BackBuffer, float2(x, y) ).xyz) * float(sobelY[1+i][1+j]);
@@ -72,10 +65,10 @@ void PostProcessVS(in uint id : SV_VertexID, out float4 position : SV_Position, 
 //*Rendering passes*//
 
 technique Sobel_Shader
-{			
-			pass UnsharpMask
+{
+			pass Sobel
 		{
 			VertexShader = PostProcessVS;
-			PixelShader = Out;	
+			PixelShader = Out;
 		}
 }
