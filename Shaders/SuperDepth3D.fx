@@ -146,6 +146,7 @@
 #else
 	#define Mask_Cycle_Key Set_Key_Code_Here
 #endif
+
 //Divergence & Convergence//
 uniform float Divergence <
 	ui_type = "drag";
@@ -727,6 +728,60 @@ float Depth(float2 texcoord)
 		zBuffer = rcp(Z.y * C.y + C.x);
 	return saturate(zBuffer);
 }
+
+float2 WeaponDepth(float2 texcoord)
+{
+	#if DB_Size_Postion || SP
+	float2 texXY = texcoord + Image_Position_Adjust * pix;
+	float2 midHV = (Horizontal_and_Vertical-1) * float2(BUFFER_WIDTH * 0.5,BUFFER_HEIGHT * 0.5) * pix;
+	texcoord = float2((texXY.x*Horizontal_and_Vertical.x)-midHV.x,(texXY.y*Horizontal_and_Vertical.y)-midHV.y);
+	#endif
+	//Weapon Setting//
+	float3 WA_XYZ = Weapon_Adjust;
+	#if WSM >= 1
+		WA_XYZ = Weapon_Profiles(WP, Weapon_Adjust);
+	#endif
+	if (Depth_Map_Flip)
+		texcoord.y =  1 - texcoord.y;
+	//Conversions to linear space.....
+	float zBufferWH = tex2Dlod(DepthBuffer, float4(texcoord,0,0)).x, Far = 1.0, Near = 0.125/WA_XYZ.y;  //Near & Far Adjustment
+
+	float2 Offsets = float2(1 + WA_XYZ.z,1 - WA_XYZ.z), Z = float2( zBufferWH, 1-zBufferWH );
+
+	if (WA_XYZ.z > 0)
+	Z = min( 1, float2( Z.x * Offsets.x , Z.y / Offsets.y  ));
+
+	[branch] if (Depth_Map == 0)//DM0. Normal
+		zBufferWH = Far * Near / (Far + Z.x * (Near - Far));
+	else if (Depth_Map == 1)//DM1. Reverse
+		zBufferWH = Far * Near / (Far + Z.y * (Near - Far));
+
+	return float2(saturate(zBufferWH), WA_XYZ.x);
+}
+
+float4 PrepDepth(float2 texcoord)
+{
+	float4 DM = Depth(texcoord).xxxx;
+	float R, G, B, A, WD = WeaponDepth(texcoord).x, CoP = WeaponDepth(texcoord).y, CutOFFCal = (CoP/Depth_Map_Adjust) * 0.5; //Weapon Cutoff Calculation
+	CutOFFCal = step(DM.x,CutOFFCal);
+
+	[branch] if (WP == 0)
+		DM.x = DM.x;
+	else
+	{
+		DM.x = lerp(DM.x,WD,CutOFFCal);
+		DM.y = lerp(0.0,WD,CutOFFCal);
+		DM.z = lerp(0.5,WD,CutOFFCal);
+	}
+
+	R = DM.x; //Mix Depth
+	G = DM.y > smoothstep(0,2.5,DM.w); //Weapon Mask
+	B = DM.z; //Weapon Hand
+	A = ZPD_Boundary == 3 || ZPD_Boundary == 4 ? max( G, R) : R; //Grid Depth
+	
+	return saturate(float4( R, G, B, A));
+}
+
 //////////////////////////////////////////////////////////////Depth HUD Alterations///////////////////////////////////////////////////////////////////////
 #if UI_MASK
 float HUD_Mask(float2 texcoord )
@@ -756,41 +811,26 @@ float Fade(float2 texcoord)
 	float CD, Detect;
 	if(ZPD_Boundary > 0)
 	{   //Normal A & B for both
-		float CDArray_A[7] = { 0.125 ,0.25, 0.375,0.5, 0.625, 0.75, 0.875};
-		float CDArray_B[7] = { 0.25 ,0.375, 0.4375, 0.5, 0.5625, 0.625, 0.75};
+		float CDArray_A[7] = { 0.125 ,0.25, 0.375,0.5, 0.625, 0.75, 0.875}, CDArray_B[7] = { 0.25 ,0.375, 0.4375, 0.5, 0.5625, 0.625, 0.75};
 		float CDArrayZPD[7] = { ZPD * 0.3, ZPD * 0.5, ZPD * 0.75, ZPD, ZPD * 0.75, ZPD * 0.5, ZPD * 0.3 };
 		float2 GridXY;
 		//Screen Space Detector 7x7 Grid from between 0 to 1 and ZPD Detection becomes stronger as it gets closer to the Center.
-		[unroll]
+		[loop]
 		for( int i = 0 ; i < 7; i++ )
 		{
 			for( int j = 0 ; j < 7; j++ )
 			{
 				if(ZPD_Boundary == 1)
-				{   GridXY = float2( CDArray_A[i], CDArray_A[j]);
-					#if UI_MASK
-						CD = max(1 - CDArrayZPD[i] / HUD_Mask(GridXY),1 - CDArrayZPD[i] / Depth( GridXY ));
-					#else
-						CD = 1 - CDArrayZPD[i] / Depth( GridXY );
-					#endif
-				}
-				else if(ZPD_Boundary == 2 )
-				{   GridXY = float2( CDArray_B[i], CDArray_B[j]);
-					#if UI_MASK
-						CD = max(1 - CDArrayZPD[i] / HUD_Mask(GridXY),1 - CDArrayZPD[i] / Depth( GridXY ));
-					#else
-						CD = 1 - CDArrayZPD[i] / Depth( GridXY );
-					#endif
-				}
+					GridXY = float2( CDArray_A[i], CDArray_A[j]);	
+				else if(ZPD_Boundary == 2 || ZPD_Boundary == 4)
+					GridXY = float2( CDArray_B[i], CDArray_B[j]);
 				else if(ZPD_Boundary == 3)
-				{   GridXY = float2( CDArray_A[i], CDArray_B[j]);
-					CD = max(1 - CDArrayZPD[i] / saturate(tex2Dlod(SamplerDMN,float4( GridXY ,0,0)).y),1 - CDArrayZPD[i] / Depth( GridXY ));
-				}
-				else
-				{   GridXY = float2( CDArray_B[i], CDArray_B[j]);
-					CD = max(1 - CDArrayZPD[i] / saturate(tex2Dlod(SamplerDMN,float4( GridXY ,0,0)).y),1 - CDArrayZPD[i] / Depth( GridXY ));
-				}
-
+					GridXY = float2( CDArray_A[i], CDArray_B[j]);				
+		
+				CD = 1 - CDArrayZPD[i] / PrepDepth( GridXY ).w;
+				#if UI_MASK
+					CD = max( 1 - CDArrayZPD[i] / HUD_Mask(GridXY), CD );
+				#endif				
 				if (CD < 0)
 					Detect = 1;
 			}
@@ -801,57 +841,12 @@ float Fade(float2 texcoord)
 	return PStoredfade + (Trigger_Fade - PStoredfade) * (1.0 - exp(-frametime/AA)); ///exp2 would be even slower
 }
 //////////////////////////////////////////////////////////Depth Map Alterations/////////////////////////////////////////////////////////////////////
-float2 WeaponDepth(float2 texcoord)
-{
-	#if DB_Size_Postion || SP
-	float2 texXY = texcoord + Image_Position_Adjust * pix;
-	float2 midHV = (Horizontal_and_Vertical-1) * float2(BUFFER_WIDTH * 0.5,BUFFER_HEIGHT * 0.5) * pix;
-	texcoord = float2((texXY.x*Horizontal_and_Vertical.x)-midHV.x,(texXY.y*Horizontal_and_Vertical.y)-midHV.y);
-	#endif
-	//Weapon Setting//
-	float3 WA_XYZ = Weapon_Adjust;
-	#if WSM >= 1
-		WA_XYZ = Weapon_Profiles(WP, Weapon_Adjust);
-	#endif
-	if (Depth_Map_Flip)
-		texcoord.y =  1 - texcoord.y;
-	//Conversions to linear space.....
-	float zBufferWH = tex2D(DepthBuffer, texcoord).x, Far = 1.0, Near = 0.125/WA_XYZ.y;  //Near & Far Adjustment
-
-	float2 Offsets = float2(1 + WA_XYZ.z,1 - WA_XYZ.z), Z = float2( zBufferWH, 1-zBufferWH );
-
-	if (WA_XYZ.z > 0)
-	Z = min( 1, float2( Z.x * Offsets.x , Z.y / Offsets.y  ));
-
-	[branch] if (Depth_Map == 0)//DM0. Normal
-		zBufferWH = Far * Near / (Far + Z.x * (Near - Far));
-	else if (Depth_Map == 1)//DM1. Reverse
-		zBufferWH = Far * Near / (Far + Z.y * (Near - Far));
-
-	return float2(saturate(zBufferWH), WA_XYZ.x);
-}
 
 float3 DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD) : SV_Target
 {
-	float4 DM = Depth(texcoord).xxxx;
-	float R, G, B, WD = WeaponDepth(texcoord).x, CoP = WeaponDepth(texcoord).y, CutOFFCal = (CoP/Depth_Map_Adjust) * 0.5; //Weapon Cutoff Calculation
-	CutOFFCal = step(DM.x,CutOFFCal);
+	float3 DM = PrepDepth(texcoord).rgb;
+	float R = DM.x, G = DM.y, B = DM.z;
 
-	[branch] if (WP == 0)
-	{
-		DM.x = DM.x;
-	}
-	else
-	{
-		DM.x = lerp(DM.x,WD,CutOFFCal);
-		DM.y = lerp(0.0,WD,CutOFFCal);
-		DM.z = lerp(0.5,WD,CutOFFCal);
-	}
-
-	R = DM.x; //Mix Depth
-	G = DM.y > smoothstep(0,2.5,DM.w); //Weapon Mask
-	B = DM.z; //Weapon Hand
-	//A = DM.w; //Normal Depth
 	//Fade Storage
 	float ScaleND = lerp(R,1,smoothstep(-WZPD_and_WND.y,1,R));
 
@@ -862,7 +857,7 @@ float3 DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD)
 		R = Fade_in_out(texcoord);
 	if(1-texcoord.x < pix.x * 2 && 1-texcoord.y < pix.y * 2)
 		R = Fade(texcoord);
-	//Alpha Don't work in DX9
+
 	return saturate(float3(R,G,B));
 }
 
@@ -1361,7 +1356,7 @@ float3 Average_Luminance(float4 position : SV_Position, float2 texcoord : TEXCOO
 	};
 	ABEA = ABEArray[Auto_Balance_Ex];
 
-	float Average_Lum_ZPD = Depth(float2(ABEA.x + texcoord.x * ABEA.y, ABEA.z + texcoord.y * ABEA.w)), Average_Lum_Bottom = Depth( texcoord );
+	float Average_Lum_ZPD = Depth(float2(ABEA.x + texcoord.x * ABEA.y, ABEA.z + texcoord.y * ABEA.w)).x, Average_Lum_Bottom = Depth( texcoord ).x;
 	if(RE)
 	Average_Lum_Bottom = tex2D(SamplerDMN,float2( 0.125 + texcoord.x * 0.750,0.95 + texcoord.y)).x;
 
@@ -1375,7 +1370,7 @@ float3 Out(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Targe
 	float PosX = 0.9525f*BUFFER_WIDTH*pix.x,PosY = 0.975f*BUFFER_HEIGHT*pix.y, Text_Timer = 12500, BT = smoothstep(0,1,sin(timer*(3.75/1000)));
 	float D,E,P,T,H,Three,DD,Dot,I,N,F,O,R,EE,A,DDD,HH,EEE,L,PP,Help,NN,PPP,C,Not,No;
 	float3 Color = PS_calcLR(texcoord).rgb;
-
+	//Color = PrepDepth( texcoord ).w;
 	if(TW || NC || NP)
 		Text_Timer = 18750;
 

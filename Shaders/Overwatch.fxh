@@ -346,15 +346,7 @@ static const int HMT = 0;                               //HUD Mode Trigger
 	#define DA_Z 0.8
 	#define DC_X 0.501
 	#define HM 1
-#elif (App == 0x86D33094 ) //Rise of the TombRaider
-	#define DA_X 0.0725
-	#define DB_Y 3
-	#define DA_Y 25.0
-	#define DA_Z 0.020
-	#define DE_X 2
-	#define DE_Y 0.375
-	#define DE_Z 0.375
-#elif (App == 0x19019D10 ) //TombRaider 2013
+#elif (App == 0x86D33094 || App == 0x19019D10 ) //Rise of the TombRaider | TombRaider 2013
 	#define DA_X 0.0725
 	#define DB_Y 3
 	#define DA_Y 25.0
@@ -470,10 +462,19 @@ static const int HMT = 0;                               //HUD Mode Trigger
 	#define RE 2
 #elif (App == 0xA0762A98 ) //Assassin's Creed Unity
 	#define DA_W 1
-	#define DA_Y 20.0
+	#define DA_Y 25.0
 	#define DA_Z 0.00025
 	#define DA_X 0.04375
 	#define DB_Z 0.2
+#elif (App == 0xC990B77C ) //Assassin's Origins
+	#define DA_W 1
+	#define DA_Y 50.0
+	#define DA_X 0.0475
+	#define DB_Y 1
+	#define DE_X 2
+	#define DE_Y 0.4
+	#define DE_Z 0.375
+	#define DB_Z 0.1
 #elif (App == 0xBF222C03 ) //Among The Sleep
 	#define DA_X 0.05
 	#define DA_Y 15.0
@@ -1008,7 +1009,7 @@ static const int HMT = 0;                               //HUD Mode Trigger
 	#define DB_Y 4
 	#define DB_W 5
 	#define DE_X 4
-	#define DE_Y 0.6125
+	#define DE_Y 0.425
 	#define DE_Z 0.300
 	#define DF_X 0.0375
 #elif (App == 0x3C8DE8E8 ) //Metro Exodus
@@ -1095,7 +1096,7 @@ static const int HMT = 0;                               //HUD Mode Trigger
 	#define DB_Y 1
 	#define DB_W 3
 	#define DE_X 3
-	#define DE_Y 0.625
+	#define DE_Y 0.425
 	#define DE_Z 0.375
 	#define DE_W 0.3975
 	#define DF_X 0.250

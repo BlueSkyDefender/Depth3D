@@ -20,14 +20,14 @@
  //*                                                    																															*//
  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-uniform int BlurAdjust <
+uniform float BlurAdjust <
 	ui_type = "drag";
-	ui_min = 1; ui_max =  10;
+	ui_min = 0; ui_max =  1;
 	ui_label = "Blur Adjust";
 	ui_tooltip = "Use this to adjust Nose Blur.\n"
 				 "Default is Five.";
 	ui_category = "Virtual Nose";
-> = 5;
+> = 0.5;
 
 uniform int Ambiance <
 	ui_type = "combo";
@@ -57,12 +57,12 @@ uniform float3 NoseWH <
 	#else
 	ui_type = "slider";
 	#endif
-	ui_min = -5.0; ui_max = 5.0;
+	ui_min = 0; ui_max = 1.0;
 	ui_label = "Adjust Nose";
-	ui_tooltip = "Adjust the Width and Height of the Virtual Nose
-				 "Default is float3(0,2.5,0).";
+	ui_tooltip = "Adjust the Width and Height of the Virtual Nose.\n"
+				 "Default is float3(0.625,0.375,0.125).";
 	ui_category = "Virtual Nose";
-> = float3(0,2.5,0);
+> = float3(0.625,0.375,0.125);
 
 //Human Skin Color//
 float3 HSC()
@@ -92,7 +92,10 @@ float3 HSC()
 #define pix float2(BUFFER_RCP_WIDTH, BUFFER_RCP_HEIGHT)
 #define TextureSize float2(BUFFER_WIDTH, BUFFER_HEIGHT)
 #define HumanColor float3( HSC().x/255, HSC().y/255, HSC().z/255)//RGB Conversion 0-1 range
-	
+#define NWidth lerp(-10,5,saturate(NoseWH.x)) 
+#define NHight lerp(-5,5,saturate(NoseWH.y)) 
+#define NSize lerp(-10,10,saturate(NoseWH.z)) 
+#define B_A lerp(1,11,saturate(BlurAdjust))
 texture BackBufferTex : COLOR;
 
 sampler BackBuffer 
@@ -122,7 +125,7 @@ sampler NMSampler
 	};
 		
 float4 AbianceBlur(float2 texcoord : TEXCOORD0)
-{
+{	//unneeded array I was having fun
 	float2 XYoffset[4] = { float2( 0, 1 ), float2( 0,-1 ), float2( 1, 0 ), float2(-1, 0) };
 	float4 Blur; 
 		   Blur += tex2D(ShadeSampler,texcoord + XYoffset[0] * 5 * pix);
@@ -137,11 +140,11 @@ float4 NoseCreation(float2 texcoord : TEXCOORD0)
 	texcoord.x -= 0.5*TextureSize.x*pix.x;
 	texcoord.y -= 0.5*TextureSize.y*pix.y;	
 	//Nose Height
-	texcoord.y += (-2.5+NoseWH.y) * 25.0f * pix.y;
+	texcoord.y += (-2.5+NHight) * 25.0f * pix.y;
 	//Nose Size
-	texcoord *= 1 + (5-NoseWH.z) * 0.05f;
+	texcoord *= 1 + (5-NSize) * 0.05f;  //unneeded extra math....... I got lazy
 	//Nose Width
-	texcoord.x *= 1 + (-NoseWH.x) * 0.10f;
+	texcoord.x *= 1 + (-NWidth) * 0.10f;
 	//Strange Bug if I remove the -0 it loses postion????	 
 	float2 XY_A = float2(0 - texcoord.x * 5.0f, 0.75f - texcoord.y);//Bridge
 	float dist_A = distance(XY_A.x,texcoord.x)+distance(XY_A.y,texcoord.y);
@@ -205,8 +208,8 @@ float4 NoseMask(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_
 
 float4 VNose(float2 texcoord : TEXCOORD0)
 {
-	int Blur_Boost = floor(BlurAdjust * 0.5);
-	float BA = BlurAdjust * 2.0f;
+	int Blur_Boost = floor(B_A * 0.5);
+	float BA = B_A * 2.0f;
 	float4 Blur, Out;
 	if(Human_Skin_Color < 0 || Human_Skin_Color > 0)
 	{	  

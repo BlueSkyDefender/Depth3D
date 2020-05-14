@@ -189,7 +189,7 @@ Inner Shader Setting:
     RB        Return To Castle Wolfenstine                 DM 0       8.7500                WDM 29                     Yes 2                                
     RB        Requiem: Avenging Angel                      DM 0       50.000    0.80000                            
               Rez Infinite                                 DM 1       20.000                                       
-              Rise of the Tomb Raider                      DM 0       25.000    0.02000                            
+    RB        Tomb Raider Games 2013+                      DM 0       25.000    0.02000                            
               Ryse: Son of Rome                            DM 0       7.5000                                       
               Scorn                                        DM 1       40.000                                       
               Serious Sam Revolution                       DM 0       7.5000    0.11110     WDM 39                
@@ -1015,7 +1015,7 @@ Click on 3DFX.exe Untill it starts..... Some thing wrong with this game. It star
 {Serious Sam Fusion} ReShade 4.6.1 - Needs Online Code Dissable for online play. DX12/Vulkan/DX11 all seem to work.
 In some maps you need to set Offset back to 0.0 so that you can have proper Depth. You would also need to set it back to 0.1 on other maps. Be mindfull of this.
 
-{Shadow of the Tomb Raider}
+{Shadow of the TombRaider}
 This game has it's own 3D Side by Side mode That renders around half and disabled some effects like AO. This mode has superior convergence/ZPD AKA Pop Out. 
 My suggestion is to play in native 3D Side by Side mode. But, Set the game resolution to 25% to 50% more and use MXAO as you AO in game.
 
@@ -1219,6 +1219,9 @@ Install ReShade into the Bin/x64_retail folder.
 In game settings:
 Adaptive Resolution FPS Target = 144
 Adaptive Supersampling = Enabled
+
+{Rise of the TombRaider | TombRaider 2013} - Use Reshade 4.6.1+
+You may need to manually enable copy depth buffers in the ReShade DX11 menu for the games listed here.
 
 {Turok: Dinosaur Hunter} - Use Reshade 3.4.1
 If you are useing an older build of reshade you have to turn off "Light Scatter," in Graphics Menu.
