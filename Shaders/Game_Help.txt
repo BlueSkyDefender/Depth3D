@@ -145,6 +145,7 @@ Inner Shader Setting:
     RB        LuciusII                                     DM 0       20.000                               Yes     
     RB        LUST for Darkness                            DM 1       13.750                               Yes         Yes 4
     RB        Mafia III                                    DM 1       6.2500                                       
+    RB        Mafia II Definitive Edition                  DM 0       37.500                                           Yes 4                                     
     RB        Mass Effect Andromeda                        DM 1       15.000                                       
     RB        Magicka 2                                    DM 0       13.750    0.01250                            
     RB        MegaMan 2.5D Now in 3D                       DM 0       8.7500    1005.00                                No  0   
@@ -736,6 +737,12 @@ Set Globla Settings to Medium. Turn off FXAA Every thing else can be maxed out.
 {LUST for Darkness} - Used Reshade 4.3
 You need to set DX11 Depth Texture Formant to D32FS8.
 Also select the first Buffer.
+
+{Mafia II Definitive Edition} - Used Reshade 4.6.1+
+A Delay Frame option was added to the shader as work around for the bluring issue casued by the delayed Depth buffer. Expect that one frame of latency.
+This should be around 16.6ms at 60fps and 8.325ms at 120fps good thing this game can run really well on modern hardware.
+
+You need to enable "Copy Depth Buffer Before Clear Operation," in side of ReShade to have a working depth buffer.
 
 {Mafia III} - Thank you zig11727
 Path to install \Steam\SteamApps\common\Mafia III

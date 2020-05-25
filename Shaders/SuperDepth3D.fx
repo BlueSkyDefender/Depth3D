@@ -49,7 +49,7 @@
 	#define OW_WP "WP Off\0Custom WP\0"
 	static const int WSM = 0;
 	//Triggers
-	static const int RE = 0, NC = 0, TW = 0, NP = 0, ID = 0, SP = 0, DC = 0, HM = 0;
+	static const int RE = 0, NC = 0, TW = 0, NP = 0, ID = 0, SP = 0, DC = 0, HM = 0, DF = 0;
 #endif
 //USER EDITABLE PREPROCESSOR FUNCTIONS START//
 //This enables the older SuperDepth3D method of producing an 3D image. This is better for older systems that have an hard time running the new mode.
@@ -103,6 +103,9 @@
 #define Cursor_Lock_Key 4 // Set default on mouse 4
 #define Fade_Key 1 // Set default on mouse 1
 #define Fade_Time_Adjust 0.5625 // From 0 to 1 is the Fade Time adjust for this mode. Default is 0.5625;
+// Delay Frame for instances the depth bufferis 1 frame behind useful for games that need "Copy Depth Buffer
+// Before Clear Operation," Is checked in the API Depth Buffer tab in ReShade.
+#define D_Frame 0 //This should be set to 0 most of the times this will cause latency by one frame.
 
 //USER EDITABLE PREPROCESSOR FUNCTIONS END//
 #if !defined(__RESHADE__) || __RESHADE__ < 40000
@@ -569,6 +572,21 @@ sampler BackBufferCLAMP
 		AddressW = CLAMP;
 	};
 
+#if D_Frame || DF
+texture texCF { Width = BUFFER_WIDTH ; Height = BUFFER_HEIGHT ; Format = RGBA8; };
+
+sampler SamplerCF
+	{
+		Texture = texCF;
+	};	
+
+texture texDF { Width = BUFFER_WIDTH ; Height = BUFFER_HEIGHT ; Format = RGBA8; };
+
+sampler SamplerDF
+	{
+		Texture = texDF;
+	};	
+#endif
 texture texDMN { Width = BUFFER_WIDTH ; Height = BUFFER_HEIGHT ; Format = RGBA16F; };
 
 sampler SamplerDMN
@@ -630,6 +648,31 @@ return tex2D(BackBufferCLAMP,uv).rgb;
 }
 #endif
 ///////////////////////////////////////////////////////////3D Image Adjustments/////////////////////////////////////////////////////////////////////
+
+#if D_Frame || DF
+float4 CurrentFrame(in float4 position : SV_Position, in float2 texcoords : TEXCOORD) : SV_Target
+{
+	if(Custom_Sidebars == 0)
+		return tex2Dlod(BackBufferMIRROR,float4(texcoords,0,0));
+	else if(Custom_Sidebars == 1)
+		return tex2Dlod(BackBufferBORDER,float4(texcoords,0,0));
+	else
+		return tex2Dlod(BackBufferCLAMP,float4(texcoords,0,0));
+}
+
+float4 DelayFrame(in float4 position : SV_Position, in float2 texcoords : TEXCOORD) : SV_Target
+{
+	return tex2Dlod(SamplerCF,float4(texcoords,0,0));
+}
+
+float4 CSB(float2 texcoords)
+{
+	if(Depth_Map_View == 0)
+		return tex2Dlod(SamplerDF,float4(texcoords,0,0));
+	else
+		return tex2D(SamplerzBufferN,texcoords).xxxx;
+}
+#else
 float4 CSB(float2 texcoords)
 {
 	if(Custom_Sidebars == 0 && Depth_Map_View == 0)
@@ -641,6 +684,7 @@ float4 CSB(float2 texcoords)
 	else
 		return tex2D(SamplerzBufferN,texcoords).xxxx;
 }
+#endif
 /////////////////////////////////////////////////////////////Cursor///////////////////////////////////////////////////////////////////////////
 float4 MouseCursor(float2 texcoord )
 {   float4 Out = CSB(texcoord),Color;
@@ -1539,6 +1583,20 @@ technique SuperDepth3D
 	{
 		VertexShader = PostProcessVS;
 		PixelShader = PBD;
+	}
+	#endif
+	#if D_Frame || DF
+		pass Delay_Frame
+	{
+		VertexShader = PostProcessVS;
+		PixelShader = DelayFrame;
+		RenderTarget = texDF;
+	}
+		pass Current_Frame
+	{
+		VertexShader = PostProcessVS;
+		PixelShader = CurrentFrame;
+		RenderTarget = texCF;
 	}
 	#endif
 		pass DepthBuffer

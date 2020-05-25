@@ -64,6 +64,7 @@ static const int IDF = 0;                               //Inverted Depth Fix
 static const int SPF = 0;                               //Size & Position Fix
 static const int BDF = 0;                               //Barrel Distortion Fix
 static const int HMT = 0;                               //HUD Mode Trigger
+static const int DFW = 0;                               //Delay Frame Workaround
 
 //Special Handling
 #if exists "LEGOBatman.exe"                             //Lego Batman
@@ -1131,6 +1132,16 @@ static const int HMT = 0;                               //HUD Mode Trigger
 	#define DE_Y 0.5
 	#define DE_Z 0.375
 	#define TW 1
+#elif (App == 0xAC4DF2C4 ) //Mafia II Definitive Edition
+	#define DA_X 0.05
+	#define DA_Y 37.5
+	#define DA_Z 0.0007
+	#define DB_Y 4
+	#define DE_X 1
+	#define DE_Y 0.5
+	#define DE_Z 0.375
+	#define DF 1
+	#define TW 1
 #else
 	#define NP 1 //No Profile
 #endif
@@ -1239,6 +1250,9 @@ static const int HMT = 0;                               //HUD Mode Trigger
 #endif
 #ifndef HM
     #define HM HMT //HUD Mode Trigger
+#endif
+#ifndef DF
+    #define DF DFW //Delay Frame Workaround
 #endif
 
 //Weapon Settings
