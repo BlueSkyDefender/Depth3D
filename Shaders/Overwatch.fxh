@@ -1142,6 +1142,102 @@ static const int DFW = 0;                               //Delay Frame Workaround
 	#define DE_Z 0.375
 	#define DF 1
 	#define TW 1
+#elif (App == 0xEA75DEDE ) //Lost Planet Colonies
+	#define DA_X 0.05
+	#define DA_Y 37.5
+	#define DB_Y 4
+	#define DE_X 2
+	#define DE_Y 0.5
+	#define DE_Z 0.375
+	#define TW 1
+#elif (App == 0xEFC486AF ) //Lost Planet 2 DX11
+	#define DA_X 0.04375
+	#define DA_Y 37.5
+	#define DA_Z 0.001
+	#define DB_Y 4
+	#define DE_X 2
+	#define DE_Y 0.5
+	#define DE_Z 0.375
+#elif (App == 0x97937D77 ) //Lost Planet 3 Dx9
+	#define DA_X 0.05
+	#define DA_Y 20.0
+	#define DA_Z 0.001
+	#define DB_Y 4
+	#define DE_X 2
+	#define DE_Y 0.5
+	#define DE_Z 0.375
+    #define DE_W 0.3875
+	#define TW 1
+#elif (App == 0x9896B9F5 ) //Old City: Leviathan
+	#define DA_X 0.025
+	#define DA_Y 100.0
+	#define DA_Z 0.003
+	#define DB_Y 5
+	#define DE_X 1
+	#define DE_Y 0.5
+	#define DE_Z 0.375
+    #define DB_Z 0.0275
+	#define TW 1
+#elif (App == 0xE4F6014F ) //Shovel Knight
+    #define DB_X 1
+	#define DA_X 0.035
+	#define DA_Y 22.5
+	#define DA_Z 0.483
+	#define TW 1
+#elif (App == 0x94EFD213 ) //Chex Quest HD
+    #define DA_W 1
+	#define DA_X 0.1
+	#define DA_Y 112.5
+	#define DA_Z 0.0000125
+	#define DB_Y 4
+	#define DE_X 3
+	#define DE_Y 0.5
+	#define DE_Z 0.375
+    #define DB_Z 0.125
+    #define DB_W 74	
+#elif (App == 0xF6F3C763 ) //WRATH
+	#define DA_X 0.0625
+	#define DA_Y 75.0
+	#define DA_Z 0.00005
+	#define DB_Y 4
+	#define DE_X 3
+	#define DE_Y 0.5
+	#define DE_Z 0.375
+    #define DB_Z 0.125
+    #define DB_W 29
+    #define DF_X 0.1
+#elif (App == 0xB05C57BC ) //HellBound
+    #define DA_W 1
+	#define DA_X 0.0325
+	#define DA_Y 25.0
+	#define DB_Y 5
+    #define DE_W 0.025
+#elif (App == 0x9FC060AE ) //STRIFE: Gold Edition
+	#define DA_X 0.0375
+	#define DA_Y 23.75
+	#define DA_Z 0.00025
+    #define DB_X 1
+	#define DB_Y 4
+#elif (App == 0x6DDCD106 ) //The Town of Light
+	#define DA_X 0.100
+	#define DA_Y 10.0
+    #define DB_X 1
+	#define DB_Y 4
+	#define DE_X 1
+	#define DE_Y 0.5
+	#define DE_Z 0.375
+#elif (App == 0x6367B705 ) //Transference
+    #define DA_W 1
+	#define DA_X 0.09375
+	#define DA_Y 111.0
+	#define DA_Z 0.00025
+    #define DB_X 1
+	#define DB_Y 4
+	#define DE_X 2
+	#define DE_Y 0.5
+	#define DE_Z 0.375
+	#define DB_Z 0.05
+    #define DE_W 0.05625
 #else
 	#define NP 1 //No Profile
 #endif
@@ -1257,7 +1353,7 @@ static const int DFW = 0;                               //Delay Frame Workaround
 
 //Weapon Settings
 #ifndef OW_WP
-    #define OW_WP "WP Off\0Custom WP\0WP 0\0WP 1\0WP 2\0WP 3\0WP 4\0WP 5\0WP 6\0WP 7\0WP 8\0WP 9\0WP 10\0WP 11\0WP 12\0WP 13\0WP 14\0WP 15\0WP 16\0WP 17\0WP 18\0WP 19\0WP 20\0WP 21\0WP 22\0WP 23\0WP 24\0WP 25\0WP 26\0WP 27\0WP 28\0WP 29\0WP 30\0WP 31\0WP 32\0WP 33\0WP 34\0WP 35\0WP 36\0WP 37\0WP 38\0WP 39\0WP 40\0WP 41\0WP 42\0WP 43\0WP 44\0WP 45\0WP 46\0WP 47\0WP 48\0WP 49\0WP 50\0WP 51\0WP 52\0WP 53\0WP 54\0WP 55\0WP 56\0WP 57\0WP 58\0WP 59\0WP 60\0WP 61\0WP 62\0WP 63\0WP 64\0WP 65\0WP 66\0WP 67\0WP 68\0WP 69\0WP 70\0"
+    #define OW_WP "WP Off\0Custom WP\0WP 0\0WP 1\0WP 2\0WP 3\0WP 4\0WP 5\0WP 6\0WP 7\0WP 8\0WP 9\0WP 10\0WP 11\0WP 12\0WP 13\0WP 14\0WP 15\0WP 16\0WP 17\0WP 18\0WP 19\0WP 20\0WP 21\0WP 22\0WP 23\0WP 24\0WP 25\0WP 26\0WP 27\0WP 28\0WP 29\0WP 30\0WP 31\0WP 32\0WP 33\0WP 34\0WP 35\0WP 36\0WP 37\0WP 38\0WP 39\0WP 40\0WP 41\0WP 42\0WP 43\0WP 44\0WP 45\0WP 46\0WP 47\0WP 48\0WP 49\0WP 50\0WP 51\0WP 52\0WP 53\0WP 54\0WP 55\0WP 56\0WP 57\0WP 58\0WP 59\0WP 60\0WP 61\0WP 62\0WP 63\0WP 64\0WP 65\0WP 66\0WP 67\0WP 68\0WP 69\0WP 70\0WP 71\0WP 72\0WP 73\0WP 74\0WP 75\0"
 #endif
 #ifndef WSM //One is Normal | Two is MCC | Three is Prey | Four is Blood 2
     #define WSM 1 //Weapon Setting Mode
@@ -1320,7 +1416,7 @@ float3 Weapon_Profiles(float WP ,float3 Weapon_Adjust) //Tried Switch But, can't
     else if(WP == 28)
         return float3(0.750,30.0,1.025);     //WP 26 | Prey 2006
     else if(WP == 29)
-        return float3(0,0,0);                //WP 27 | Game
+        return float3(0.266,30.0,14.0);      //WP 27 | Wrath
     else if(WP == 30)
         return float3(0,0,0);                //WP 28 | Game
     else if(WP == 31)
@@ -1410,7 +1506,7 @@ float3 Weapon_Profiles(float WP ,float3 Weapon_Adjust) //Tried Switch But, can't
 	else if(WP == 73)
 		return float3(0.800,15.0,0.3);       //WP 71 | Sauerbraten 2
 	else if(WP == 74)
-		return float3(0,0,0);                //WP 72 | Game
+		return float3(13.3,62.5,0.0);        //WP 72 | Chex Quest HD
 	else if(WP == 75)
 		return float3(0,0,0);                //WP 73 | Game
 	else if(WP == 76)

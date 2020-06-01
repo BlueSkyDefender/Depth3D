@@ -2,7 +2,7 @@
 ///**SuperDepth3D**///
 //----------------////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//* Depth Map Based 3D post-process shader v2.2.6
+//* Depth Map Based 3D post-process shader v2.3.0
 //* For Reshade 3.0+
 //* ---------------------------------
 //*
@@ -197,7 +197,7 @@ uniform int Auto_Balance_Ex <
 #endif
 uniform int ZPD_Boundary <
 	ui_type = "combo";
-	ui_items = "Off\0Normal\0Third Person\0FPS Weapon Center\0FPS Weapon Right\0";
+	ui_items = "Off\0Normal\0Third Person\0FPS Weapon Full\0FPS Narrow\0";
 	ui_label = " ZPD Boundary Detection";
 	ui_tooltip = "This selection menu gives extra boundary conditions to ZPD.\n"
 				 			 "This treats your screen as a virtual wall.\n"
@@ -241,7 +241,7 @@ uniform float Depth_Edge_Mask <
 	#else
 	ui_type = "slider";
 	#endif
-	ui_min = -0.125; ui_max = 1.0;
+	ui_min = -0.125; ui_max = 1.5;
 	ui_label = " Edge Mask";
 	ui_tooltip = "Use this to adjust for artifacts.\n"
 				 "Default is Zero, Off";
@@ -578,14 +578,14 @@ texture texCF { Width = BUFFER_WIDTH ; Height = BUFFER_HEIGHT ; Format = RGBA8; 
 sampler SamplerCF
 	{
 		Texture = texCF;
-	};	
+	};
 
 texture texDF { Width = BUFFER_WIDTH ; Height = BUFFER_HEIGHT ; Format = RGBA8; };
 
 sampler SamplerDF
 	{
 		Texture = texDF;
-	};	
+	};
 #endif
 texture texDMN { Width = BUFFER_WIDTH ; Height = BUFFER_HEIGHT ; Format = RGBA16F; };
 
@@ -822,7 +822,7 @@ float4 PrepDepth(float2 texcoord)
 	G = DM.y > smoothstep(0,2.5,DM.w); //Weapon Mask
 	B = DM.z; //Weapon Hand
 	A = ZPD_Boundary == 3 || ZPD_Boundary == 4 ? max( G, R) : R; //Grid Depth
-	
+
 	return saturate(float4( R, G, B, A));
 }
 
@@ -840,7 +840,7 @@ float HUD_Mask(float2 texcoord )
 #endif
 /////////////////////////////////////////////////////////Fade In and Out Toggle/////////////////////////////////////////////////////////////////////
 float Fade_in_out(float2 texcoord)
-{ float Trigger_Fade, AA = (1-Fade_Time_Adjust)*1000, PStoredfade = tex2D(SamplerLumN,texcoord - 1).z;
+{ float Trigger_Fade, AA = (1-Fade_Time_Adjust)*1000, PStoredfade = tex2D(SamplerLumN,float2(0.25,0.5)).z;
 	//Fade in toggle.
 	if(FPSDFIO == 1)
 		Trigger_Fade = Trigger_Fade_A;
@@ -856,31 +856,34 @@ float Fade(float2 texcoord)
 	if(ZPD_Boundary > 0)
 	{   //Normal A & B for both
 		float CDArray_A[7] = { 0.125 ,0.25, 0.375,0.5, 0.625, 0.75, 0.875}, CDArray_B[7] = { 0.25 ,0.375, 0.4375, 0.5, 0.5625, 0.625, 0.75};
-		float CDArrayZPD[7] = { ZPD * 0.3, ZPD * 0.5, ZPD * 0.75, ZPD, ZPD * 0.75, ZPD * 0.5, ZPD * 0.3 };
+		float CDArrayZPD[7] = { ZPD * 0.3, ZPD * 0.5, ZPD * 0.75, ZPD, ZPD * 0.0, ZPD * 0.0, ZPD * 0.3 };
 		float2 GridXY;
 		//Screen Space Detector 7x7 Grid from between 0 to 1 and ZPD Detection becomes stronger as it gets closer to the Center.
 		[loop]
 		for( int i = 0 ; i < 7; i++ )
 		{
 			for( int j = 0 ; j < 7; j++ )
-			{
+			{   
 				if(ZPD_Boundary == 1)
-					GridXY = float2( CDArray_A[i], CDArray_A[j]);	
+					GridXY = float2( CDArray_A[i], CDArray_A[j]);
 				else if(ZPD_Boundary == 2 || ZPD_Boundary == 4)
 					GridXY = float2( CDArray_B[i], CDArray_B[j]);
 				else if(ZPD_Boundary == 3)
-					GridXY = float2( CDArray_A[i], CDArray_B[j]);				
-		
-				CD = 1 - CDArrayZPD[i] / PrepDepth( GridXY ).w;
+					GridXY = float2( CDArray_A[i], CDArray_B[j]);
+				
+				float ZPD_Change = ZPD_Boundary == 3 || ZPD_Boundary == 4 ? 1 - PrepDepth(texcoord).y : 1 ;	
+				// CDArrayZPD[i] reads across prepDepth.......
+				CD = ZPD_Change - CDArrayZPD[i] / PrepDepth( GridXY ).w;
+				//CD /= 49;
 				#if UI_MASK
-					CD = max( 1 - CDArrayZPD[i] / HUD_Mask(GridXY), CD );
-				#endif				
-				if (CD < 0)
+					CD = max( ZPD_Change - CDArrayZPD[i] / HUD_Mask(GridXY), CD );
+				#endif
+				if (CD < 0.0)
 					Detect = 1;
 			}
 		}
 	}
-	float Trigger_Fade = Detect, AA = (1-(ZPD_Boundary_n_Fade.y*2.))*1000, PStoredfade = tex2Dlod(SamplerLumN,float4(texcoord + 1,0,0)).z;
+	float Trigger_Fade = Detect, AA = (1-(ZPD_Boundary_n_Fade.y*2.))*1000, PStoredfade = tex2Dlod(SamplerLumN,float4(float2(0.75,0.5),0,0)).z;
 	//Fade in toggle.
 	return PStoredfade + (Trigger_Fade - PStoredfade) * (1.0 - exp(-frametime/AA)); ///exp2 would be even slower
 }
@@ -961,7 +964,7 @@ float2 Conv(float D,float2 texcoord)
 		if(Auto_Balance_Ex > 0 )
 			ZP = saturate(ALC);
 	#endif
-		Z *= lerp( 1, ZPD_Boundary_n_Fade.x, smoothstep(0,1,tex2Dlod(SamplerLumN,float4(texcoord + 1,0,0)).z));
+		Z *= lerp( 1, ZPD_Boundary_n_Fade.x, smoothstep(0,1,tex2Dlod(SamplerLumN,float4(float2(0.75,0.5),0,0)).z));
 		float Convergence = 1 - Z / D;
 		if (ZPD == 0)
 			ZP = 1;
@@ -989,7 +992,7 @@ float DB( float2 texcoord)
 
 	if (WP == 0 || WZPD_and_WND.x <= 0)
 		DM.y = 0;
-
+	//Handle Convergence Here
 	DM.y = lerp(Conv(DM.x,texcoord).x, Conv(DM.z,texcoord).y, DM.y);
 
 	#if Compatibility_DD
@@ -1064,7 +1067,13 @@ float2 zBuffer(in float4 position : SV_Position, in float2 texcoord : TEXCOORD) 
 		Mask = saturate(lerp(Mask,1,-1));// Super Evil Mix.
 		// Final Depth
 		if(Depth_Edge_Mask > 0)
-			Mask = lerp(0,DB( texcoord.xy ),Mask);
+		{
+			float N = 0.5,F = 2,M = Mask, Z = (t + d + l + r) * 0.25;
+			float ZS = ( Z - N ) / ( F - N);
+			ZS += Z;
+			ZS *= 0.5;
+			Mask = lerp(ZS,DB( texcoord.xy ),Mask);
+		}
 		else if(Depth_Edge_Mask < 0)
 			Mask = lerp(1,DB( texcoord.xy ),Mask);
 	}
@@ -1414,7 +1423,7 @@ float3 Out(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Targe
 	float PosX = 0.9525f*BUFFER_WIDTH*pix.x,PosY = 0.975f*BUFFER_HEIGHT*pix.y, Text_Timer = 12500, BT = smoothstep(0,1,sin(timer*(3.75/1000)));
 	float D,E,P,T,H,Three,DD,Dot,I,N,F,O,R,EE,A,DDD,HH,EEE,L,PP,Help,NN,PPP,C,Not,No;
 	float3 Color = PS_calcLR(texcoord).rgb;
-	//Color = PrepDepth( texcoord ).w;
+	//Color =  max(PrepDepth( texcoord ).y,1 - ZPD / PrepDepth( texcoord ).w);
 	if(TW || NC || NP)
 		Text_Timer = 18750;
 
