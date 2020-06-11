@@ -1238,6 +1238,16 @@ static const int DFW = 0;                               //Delay Frame Workaround
 	#define DE_Z 0.375
 	#define DB_Z 0.05
     #define DE_W 0.05625
+#elif (App == 0x38ED56AE ) //Heavy Rain
+	#define DA_X 0.0325
+	#define DA_Y 50
+	//#define DA_Z 0.001
+	#define DB_Y 5
+	#define DE_X 1
+	#define DE_Y 0.5
+	#define DE_Z 0.375
+	#define DB_Z 0.0675
+	#define TW 1
 #else
 	#define NP 1 //No Profile
 #endif

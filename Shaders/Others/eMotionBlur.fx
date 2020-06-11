@@ -274,9 +274,10 @@ float3 MotionBlur(float2 texcoord)
     float2 uvoffsets = tex2Dlod(Motion_Info,float4(texcoord,0,0)).xy * D_S;
     //apply motion blur
     float3 sum, accumulation, weightsum;
+    [loop]
     for (float i = -blursamples; i <= blursamples; i++)
     {
-      float3 currsample = tex2D(BackBuffer, texcoord + (i * uvoffsets) * pix ).rgb;
+      float3 currsample = tex2Dlod(BackBuffer, float4(texcoord + (i * uvoffsets) * pix,0,0) ).rgb;
       accumulation += currsample * weight;
       weightsum += weight;
     }
