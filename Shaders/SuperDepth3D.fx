@@ -2,7 +2,7 @@
 ///**SuperDepth3D**///
 //----------------////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//* Depth Map Based 3D post-process shader v2.3.0
+//* Depth Map Based 3D post-process shader v2.3.1
 //* For Reshade 3.0+
 //* ---------------------------------
 //*
@@ -37,13 +37,13 @@
 	static const float DA_X = 0.025, DA_Y = 7.5, DA_Z = 0.0, DA_W = 0.0;
 	// DC_X = [Depth Flip] DC_Y = [Auto Balance] DC_Z = [Auto Depth] DC_W = [Weapon Hand]
 	static const float DB_X = 0, DB_Y = 0, DB_Z = 0.1, DB_W = 0.0;
-	// DC_X = [HUD] DC_Y = [Barrel Distortion K1] DC_Z = [Barrel Distortion K2] DC_W = [Barrel Distortion Zoom]
-	static const float DC_X = 0.0, DC_Y = 0, DC_Z = 0, DC_W = 0;
+	// DC_X = [Barrel Distortion K1] DC_Y = [Barrel Distortion K2] DC_Z = [Barrel Distortion K3] DC_W = [Barrel Distortion Zoom]
+	static const float DC_X = 0, DC_Y = 0, DC_Z = 0, DC_W = 0;
 	// DD_X = [Horizontal Size] DD_Y = [Vertical Size] DD_Z = [Horizontal Position] DD_W = [Vertical Position]
 	static const float DD_X = 1,DD_Y = 1, DD_Z = 0.0, DD_W = 0.0;
 	// DE_X = [ZPD Boundary Type] DE_Y = [ZPD Boundary Scaling] DE_Z = [ZPD Boundary Fade Time] DE_W = [Weapon Near Depth]
 	static const float DE_X = 0,DE_Y = 0.5, DE_Z = 0.25, DE_W = 0.0;
-	// DF_X = [Weapon ZPD Boundary] DF_Y = [Null_A] DF_Z = [Null_B] DF_W = [Null_C]
+	// DF_X = [Weapon ZPD Boundary] DF_Y = [Null_A] DF_Z = [Null_B] DF_W = [HUD]
 	static const float DF_X = 0.0,DF_Y = 0.0, DF_Z = 0.0, DF_W = 0.0;
 	// WSM = [Weapon Setting Mode]
 	#define OW_WP "WP Off\0Custom WP\0"
@@ -327,7 +327,7 @@ uniform float2 Horizontal_and_Vertical <
 	ui_min = 0.125; ui_max = 2;
 	ui_label = " Z Horizontal & Vertical Size";
 	ui_tooltip = "Adjust Horizontal and Vertical Resize. Default is 1.0.";
-	ui_category = "Depth Map";
+	ui_category = "Reposition Depth";
 > = float2(DD_X,DD_Y);
 
 uniform int2 Image_Position_Adjust<
@@ -335,9 +335,16 @@ uniform int2 Image_Position_Adjust<
 	ui_min = -4096.0; ui_max = 4096.0;
 	ui_label = "Z Position";
 	ui_tooltip = "Adjust the Image Position if it's off by a bit. Default is Zero.";
-	ui_category = "Depth Map";
+	ui_category = "Reposition Depth";
 > = int2(DD_Z,DD_W);
+
+uniform bool Alinement_View <
+	ui_label = " Alinement View";
+	ui_tooltip = "A Guide to help aline the Depth Buffer to the Image.";
+	ui_category = "Reposition Depth";
+> = false;
 #else
+static const bool Alinement_View = false;
 static const float2 Horizontal_and_Vertical = float2(DD_X,DD_Y);
 static const int2 Image_Position_Adjust = int2(DD_Z,DD_W);
 #endif
@@ -414,7 +421,7 @@ uniform float2 HUD_Adjust <
 				 "This is only for UI elements that show up in the Depth Buffer.\n"
 	             "Default is float2(X 0.0, Y 0.5)";
 	ui_category = "Heads-Up Display";
-> = float2(DC_X,0.5);
+> = float2(DF_W,0.5);
 #endif
 //Stereoscopic Options//
 uniform int Stereoscopic_Mode <
@@ -489,27 +496,44 @@ uniform bool Cursor_Lock <
 	ui_category = "Cursor Adjustments";
 > = false;
 #if BD_Correction
-uniform float2 Colors_K1_K2 <
+uniform int BD_Options <
+	ui_type = "combo";
+	ui_items = "On\0Off\0Guide\0";
+	ui_label = "·Distortion Options·";
+	ui_tooltip = "Use this to Turn Off, Turn On, & to use the BD Alinement Guide.\n"
+				 "Default is ON.";
+	ui_category = "Distortion Corrections";
+> = 0;
+uniform float3 Colors_K1_K2_K3 <
 	#if Compatibility
 	ui_type = "drag";
 	#else
 	ui_type = "slider";
 	#endif
-	ui_min = -1.0; ui_max = 1.0;
-	ui_tooltip = "Adjust the Distortion K1 & K2.\n"
+	ui_min = -2.0; ui_max = 2.0;
+	ui_tooltip = "Adjust the Distortion K1, K2, & K3.\n"
 				 "Default is 0.0";
-	ui_label = "·Distortion K1 & K2·";
-	ui_category = "Image Distortion Corrections";
-> = float2(DC_Y,DC_Z);
+	ui_label = " BD K1 K2 K3";
+	ui_category = "Distortion Corrections";
+> = float3(DC_X,DC_Y,DC_Z);
 
 uniform float Zoom <
 	ui_type = "drag";
 	ui_min = -0.5; ui_max = 0.5;
 	ui_label = " BD Zoom";
-	ui_category = "Image Distortion Corrections";
+	ui_category = "Distortion Corrections";
 > = DC_W;
 #else
-static const float2 Colors_K1_K2 = float2(DC_Y,DC_Z);
+	#if DC
+	uniform bool BD_Options <
+		ui_label = "·Toggle Barrel Distortion·";
+		ui_tooltip = "Use this if you modded the game to remove Barrel Distortion.";
+		ui_category = "Distortion Corrections";
+	> = !true;
+	#else
+		static const int BD_Options = 1;
+	#endif
+static const float3 Colors_K1_K2_K3 = float3(DC_X,DC_Y,DC_Z);
 static const float Zoom = DC_W;
 #endif
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -621,30 +645,23 @@ float2 Lum(float2 texcoord)
 	}
 ////////////////////////////////////////////////////Distortion Correction//////////////////////////////////////////////////////////////////////
 #if BD_Correction || DC
-float2 D(float2 p, float k1, float k2) //Lens + Radial lens undistort filtering Left & Right
-{	// Normalize the u,v coordinates in the range [-1;+1]
+float2 D(float2 p, float k1, float k2, float k3) //Lens + Radial lens undistort filtering Left & Right
+{   // Normalize the u,v coordinates in the range [-1;+1]
 	p = (2. * p - 1.);
 	// Calculate Zoom
 	p *= 1 + Zoom;
 	// Calculate l2 norm
 	float r2 = p.x*p.x + p.y*p.y;
-	float r4 = pow(r2,2.);
+	float r4 = r2 * r2;
+	float r6 = r4 * r2;
 	// Forward transform
-	float x2 = p.x * (1. + k1 * r2 + k2 * r4);
-	float y2 = p.y * (1. + k1 * r2 + k2 * r4);
+	float x2 = p.x * (1. + k1 * r2 + k2 * r4 + k3 * r6);
+	float y2 = p.y * (1. + k1 * r2 + k2 * r4 + k3 * r6);
 	// De-normalize to the original range
 	p.x = (x2 + 1.) * 1. * 0.5;
 	p.y = (y2 + 1.) * 1. * 0.5;
 
 return p;
-}
-
-float3 PBD(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Target
-{
-	float2 K1_K2 = Colors_K1_K2.xy * 0.1;
-	float2 uv = D(texcoord.xy,K1_K2.x,K1_K2.y);
-
-return tex2D(BackBufferCLAMP,uv).rgb;
 }
 #endif
 ///////////////////////////////////////////////////////////3D Image Adjustments/////////////////////////////////////////////////////////////////////
@@ -751,6 +768,13 @@ return Cursor ? Color : Out;
 //////////////////////////////////////////////////////////Depth Map Information/////////////////////////////////////////////////////////////////////
 float Depth(float2 texcoord)
 {
+	#if BD_Correction || DC
+	if(BD_Options == 0 || BD_Options == 2)
+	{
+		float3 K123 = Colors_K1_K2_K3 * 0.1;
+		texcoord = D(texcoord.xy,K123.x,K123.y,K123.z);
+	}
+	#endif
 	#if DB_Size_Postion || SP
 	float2 texXY = texcoord + Image_Position_Adjust * pix;
 	float2 midHV = (Horizontal_and_Vertical-1) * float2(BUFFER_WIDTH * 0.5,BUFFER_HEIGHT * 0.5) * pix;
@@ -863,15 +887,15 @@ float Fade(float2 texcoord)
 		for( int i = 0 ; i < 7; i++ )
 		{
 			for( int j = 0 ; j < 7; j++ )
-			{   
+			{
 				if(ZPD_Boundary == 1)
 					GridXY = float2( CDArray_A[i], CDArray_A[j]);
 				else if(ZPD_Boundary == 2 || ZPD_Boundary == 4)
 					GridXY = float2( CDArray_B[i], CDArray_B[j]);
 				else if(ZPD_Boundary == 3)
 					GridXY = float2( CDArray_A[i], CDArray_B[j]);
-				
-				float ZPD_Change = ZPD_Boundary == 3 || ZPD_Boundary == 4 ? 1 - PrepDepth(texcoord).y : 1 ;	
+
+				float ZPD_Change = ZPD_Boundary == 3 || ZPD_Boundary == 4 ? 1 - PrepDepth(texcoord).y : 1 ;
 				// CDArrayZPD[i] reads across prepDepth.......
 				CD = ZPD_Change - CDArrayZPD[i] / PrepDepth( GridXY ).w;
 				//CD /= 49;
@@ -1394,6 +1418,9 @@ float3 PS_calcLR(float2 texcoord)
 	if (Depth_Map_View == 2)
 		color.rgb = tex2D(SamplerzBufferN,TexCoords).xxx;
 
+	if (BD_Options == 2 || Alinement_View)
+		color.rgb = fmod(gridxy.y*0.5,1.0) ? tex2D(BackBufferBORDER,TexCoords).rgb : float3(0,tex2D(SamplerzBufferN,TexCoords).x,1);
+
 	return color.rgb;
 }
 /////////////////////////////////////////////////////////Average Luminance Textures/////////////////////////////////////////////////////////////////
@@ -1423,7 +1450,7 @@ float3 Out(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Targe
 	float PosX = 0.9525f*BUFFER_WIDTH*pix.x,PosY = 0.975f*BUFFER_HEIGHT*pix.y, Text_Timer = 12500, BT = smoothstep(0,1,sin(timer*(3.75/1000)));
 	float D,E,P,T,H,Three,DD,Dot,I,N,F,O,R,EE,A,DDD,HH,EEE,L,PP,Help,NN,PPP,C,Not,No;
 	float3 Color = PS_calcLR(texcoord).rgb;
-	//Color =  max(PrepDepth( texcoord ).y,1 - ZPD / PrepDepth( texcoord ).w);
+
 	if(TW || NC || NP)
 		Text_Timer = 18750;
 
@@ -1587,13 +1614,6 @@ technique SuperDepth3D
 < ui_tooltip = "Suggestion : You Can Enable 'Performance Mode Checkbox,' in the lower bottom right of the ReShade's Main UI.\n"
 			   			 "Do this once you set your 3D settings of course."; >
 {
-	#if BD_Correction || DC
-		pass Barrel_Distortion
-	{
-		VertexShader = PostProcessVS;
-		PixelShader = PBD;
-	}
-	#endif
 	#if D_Frame || DF
 		pass Delay_Frame
 	{

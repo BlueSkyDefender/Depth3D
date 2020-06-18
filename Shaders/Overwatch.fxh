@@ -1,7 +1,7 @@
 ////----------------------------------------//
 ///SuperDepth3D Overwatch Automation Shader///
 //----------------------------------------////
-// Version 1.3
+// Version 1.4
 //---------------------------------------OVERWATCH---------------------------------------//
 // If you are reading this stop. Go away and never look back. From this point on if you  //
 // still think it's is worth looking at this..... Then no one can save you or your soul. //
@@ -38,9 +38,9 @@ static const int Depth_Flip_D = 0;                      //Depth Flip
 static const int Auto_Balance_D = 0;                    //Auto Balance
 static const float Auto_Depth_D = 0.1;                  //Auto Depth Range
 static const int Weapon_Hand_D = 0;                     //Weapon Profile
-static const float HUDX_D = 0.0;                        //Heads Up Display Cut Off Point
 static const float BD_K1_D = 0.0;                       //Barrel Distortion K1
 static const float BD_K2_D = 0.0;                       //Barrel Distortion K2
+static const float BD_K3_D = 0.0;                       //Barrel Distortion K3
 static const float BD_Zoom_D = 0.0;                     //Barrel Distortion Zoom
 static const float HVS_X_D = 1.0;                       //Horizontal Size
 static const float HVS_Y_D = 1.0;                       //Vertical Size
@@ -53,7 +53,7 @@ static const float Weapon_Near_Depth_D = 0.0;           //Weapon Near Depth
 static const float ZPD_Weapon_Boundary_Adjust = 0.0;    //ZPD Weapon Boundary Adjust
 static const float NULL_A = 0.0;
 static const float NULL_B = 0.0;
-static const float NULL_C = 0.0;
+static const float HUDX_D = 0.0;                        //Heads Up Display Cut Off Point
 
 //Special Toggles Defaults
 static const int REF = 0;                               //Resident Evil Fix
@@ -230,7 +230,7 @@ static const int DFW = 0;                               //Delay Frame Workaround
 	#define DA_Y 17.5
 	#define DB_Y 1
 	#define DB_W 40
-	#define DC_X 0.534
+	#define DF_W 0.534
 	#define HM 1
 #elif (App == 0xEB9EEB74 || App == 0x8238E9CA ) //Serious Sam Revolution | Serious Sam 2
 	#define DA_X 0.075
@@ -243,7 +243,7 @@ static const int DFW = 0;                               //Delay Frame Workaround
 	#define DA_Z 0.1111
 	#define DF_X 0.1125
 	#define DB_W 41
-	#define DC_X 0.5
+	#define DF_W 0.5
 	#define HM 1
 #elif (App == 0x308AEBEA ) //TitanFall 2
 	#define DB_Y 4
@@ -284,7 +284,7 @@ static const int DFW = 0;                               //Delay Frame Workaround
 	#define DA_Z 0.001
 	#define DB_W 56
 	#define DB_Y 3
-	#define DC_X 0.5034
+	#define DF_W 0.5034
 	#define HM 1
 #elif (App == 0x22BA110F ) //Turok: DH 2017
 	#define DA_X 0.002
@@ -312,7 +312,7 @@ static const int DFW = 0;                               //Delay Frame Workaround
 	#define DA_X 0.0375
 	#define DA_Z 0.11625
 	#define DB_Y 4
-	#define DC_X 0.5
+	#define DF_W 0.5
 	#define HM 1
 #elif (App == 0x61243AED ) //Shadow Warrior Classic source port
 	#define DA_Y 10.0
@@ -345,7 +345,7 @@ static const int DFW = 0;                               //Delay Frame Workaround
 	#define DA_Y 37.5
 	#define DA_X 0.0375
 	#define DA_Z 0.8
-	#define DC_X 0.501
+	#define DF_W 0.501
 	#define HM 1
 #elif (App == 0x86D33094 || App == 0x19019D10 ) //Rise of the TombRaider | TombRaider 2013
 	#define DA_X 0.0725
@@ -510,14 +510,15 @@ static const int DFW = 0;                               //Delay Frame Workaround
 	#define DB_Y 5
 	#define TW 1
 #elif (App == 0x23D5135F ) //Alien Isolation
-	#define DA_X 0.040
-	#define DA_Y 18.00
+	#define DA_X 0.050
+	#define DA_Y 18.75
 	#define DA_Z 0.0005
 	#define DB_Y 4
+    #define DE_W 0.025
 	#define DC 1
-	#define DC_Y -0.22
-	#define DC_Z 0.1
-	#define DC_W 0.022
+	#define DC_X 0.22
+	#define DC_Y -0.1
+	#define DC_W -0.022
 	#define TW 1
 #elif (App == 0x5839915F ) //35MM
 	#define DA_Y 35.00
@@ -546,13 +547,18 @@ static const int DFW = 0;                               //Delay Frame Workaround
 	#define TW 1
 #elif (App == 0x60F43F45 ) //Resident Evil 7
 	#define DA_W 1
-	#define DA_Y 31.25
+	#define DA_Y 30.0
 	#define DA_Z 0.0002
-	#define DA_X 0.0375
+	#define DA_X 0.0625
 	#define DB_Y 3
+	#define DE_X 1
+	#define DE_Y 0.5
+	#define DE_Z 0.375
 	#define DC 1
-	#define DC_Y -0.24
-	#define DC_W 0.05
+	#define DC_X 0.24
+	#define DC_Y 0.1
+	#define DC_Z -0.024
+	#define DC_W -0.05
 	#define TW 1
 #elif (App == 0x1B8B9F54 ) //TheEvilWithin
 	#define DA_Y 40.0
@@ -614,7 +620,7 @@ static const int DFW = 0;                               //Delay Frame Workaround
 	#define DA_Z 0.250
 	#define DA_X 0.1
 	#define DB_Y 4
-	#define DC_X 0.580
+	#define DF_W 0.580
 	#define HM 1
 #elif (App == 0xE160AE14 ) //Spyro Reignited Trilogy
 	#define DA_W 1
@@ -770,7 +776,7 @@ static const int DFW = 0;                               //Delay Frame Workaround
 	#define DB_X 1
 	#define DB_Y 1
 	#define DE_X 2
-	#define DC_X 0.5
+	#define DF_W 0.5
 	#define HM 1
 #elif (App == 0x242D82C4 ) //Okami HD
 	#define DA_X 0.200
@@ -780,7 +786,7 @@ static const int DFW = 0;                               //Delay Frame Workaround
 	#define DE_X 2
   #define DE_Y 0.125
   #define DE_Z 0.375
-	#define DC_X 0.5
+	#define DF_W 0.5
 	#define HM 1
 #elif (App == 0x75B36B20 ) //Eldritch
 	#define DA_Y 125.0
@@ -808,7 +814,7 @@ static const int DFW = 0;                               //Delay Frame Workaround
 	#define DA_Y 20
 	#define DB_Y 3
 	#define DB_W 23
-	#define DC_X 0.534
+	#define DF_W 0.534
 	#define HM 1
 	#define DF_X 0.025
 #elif (App == 0x1714C977) //Deus Ex DX9
@@ -816,7 +822,7 @@ static const int DFW = 0;                               //Delay Frame Workaround
 	#define DA_Y 125.0
 	#define DB_Y 3
 	#define DB_W 24
-	#define DC_X 1.0
+	#define DF_W 1.0
 	#define HM 1
 	#define DF_X 0.05
 #elif (App == 0x92583CDD ) //Legend of Dungeon
@@ -995,7 +1001,7 @@ static const int DFW = 0;                               //Delay Frame Workaround
 	#define DE_Y 0.235
 	#define DE_Z 0.375
 	#define HM 1
-	#define DC_X 0.5
+	#define DF_W 0.5
 #elif (App == 0xD372612E ) //Raft
 	#define DA_W 1
 	#define DB_X 1
@@ -1194,7 +1200,7 @@ static const int DFW = 0;                               //Delay Frame Workaround
 	#define DE_Y 0.5
 	#define DE_Z 0.375
     #define DB_Z 0.125
-    #define DB_W 74	
+    #define DB_W 74
 #elif (App == 0xF6F3C763 ) //WRATH
 	#define DA_X 0.0625
 	#define DA_Y 75.0
@@ -1281,13 +1287,13 @@ static const int DFW = 0;                               //Delay Frame Workaround
 #endif
 // X = [HUD] Y = [Barrel Distortion K1] Z = [Barrel Distortion K2] W = [Barrel Distortion Zoom]
 #ifndef DC_X
-    #define DC_X HUDX_D
+    #define DC_X BD_K1_D
 #endif
 #ifndef DC_Y
-    #define DC_Y BD_K1_D
+    #define DC_Y BD_K2_D
 #endif
 #ifndef DC_Z
-    #define DC_Z BD_K2_D
+    #define DC_Z BD_K3_D
 #endif
 #ifndef DC_W
     #define DC_W BD_Zoom_D
@@ -1329,7 +1335,7 @@ static const int DFW = 0;                               //Delay Frame Workaround
     #define DF_Z NULL_B
 #endif
 #ifndef DF_W
-    #define DF_W NULL_C
+    #define DF_W HUDX_D
 #endif
 
 //Special Toggles
