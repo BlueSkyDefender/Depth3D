@@ -2,7 +2,7 @@
 ///**SuperDepth3D_VR**///
 //-------------------////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//* Depth Map Based 3D post-process shader v2.3.1
+//* Depth Map Based 3D post-process shader v2.3.2
 //* For Reshade 3.0+
 //* ---------------------------------
 //*
@@ -11,7 +11,9 @@
 //* Also Fu-Bama a shader dev at the reshade forums https://reshade.me/forum/shader-presentation/5104-vr-universal-shader
 //* Also had to rework Philippe David http://graphics.cs.brown.edu/games/SteepParallax/index.html code to work with ReShade. This is used for the parallax effect.
 //* This idea was taken from this shader here located at https://github.com/Fubaxiusz/fubax-shaders/blob/596d06958e156d59ab6cd8717db5f442e95b2e6b/Shaders/VR.fx#L395
-//* It's also based on Philippe David Steep Parallax mapping code. If I missed any information please contact me so I can make corrections.
+//* It's also based on Philippe David Steep Parallax mapping code.
+//* Text rendering code copied/pasted from https://www.shadertoy.com/view/4dtGD2 by Hamneggs
+//* If I missed any information please contact me so I can make corrections.
 //*
 //* LICENSE
 //* ============
@@ -33,6 +35,7 @@
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #if exists "Overwatch.fxh"                                           //Overwatch Interceptor//
 	#include "Overwatch.fxh"
+	#define OS 0
 #else// DA_X = [ZPD] DA_Y = [Depth Adjust] DA_Z = [Offset] DA_W = [Depth Linearization]
 	static const float DA_X = 0.025, DA_Y = 7.5, DA_Z = 0.0, DA_W = 0.0;
 	// DC_X = [Depth Flip] DC_Y = [Auto Balance] DC_Z = [Auto Depth] DC_W = [Weapon Hand]
@@ -43,13 +46,15 @@
 	static const float DD_X = 1,DD_Y = 1, DD_Z = 0.0, DD_W = 0.0;
 	// DE_X = [ZPD Boundary Type] DE_Y = [ZPD Boundary Scaling] DE_Z = [ZPD Boundary Fade Time] DE_W = [Weapon Near Depth]
 	static const float DE_X = 0,DE_Y = 0.5, DE_Z = 0.25, DE_W = 0.0;
-	// DF_X = [Weapon ZPD Boundary] DF_Y = [Null_A] DF_Z = [Null_B] DF_W = [HUD]
+	// DF_X = [Weapon ZPD Boundary] DF_Y = [Null_A] DF_Z = [Edge Masking] DF_W = [HUD]
 	static const float DF_X = 0.0,DF_Y = 0.0, DF_Z = 0.0, DF_W = 0.0;
 	// WSM = [Weapon Setting Mode]
 	#define OW_WP "WP Off\0Custom WP\0"
 	static const int WSM = 0;
 	//Triggers
-	static const int RE = 0, NC = 0, TW = 0, NP = 0, ID = 0, SP = 0, DC = 0, HM = 0, DF = 0;
+	static const int RE = 0, NC = 0, RH = 0, NP = 0, ID = 0, SP = 0, DC = 0, HM = 0, DF = 0, MI = 0, DS = 0, LB = 0, DA = 0;
+	//Overwatch.fxh State
+	#define OS 1
 #endif
 //USER EDITABLE PREPROCESSOR FUNCTIONS START//
 //This enables the older SuperDepth3D method of producing an 3D image. This is better for older systems that have an hard time running the new mode.
@@ -75,6 +80,9 @@
 // Horizontal & Vertical Depth Buffer Resize for non conforming DepthBuffer.
 // Also used to enable Image Position Adjust is used to move the Z-Buffer around.
 #define DB_Size_Postion 0 //Default 0 is Off. One is On.
+
+// Auto Letter Box Correction
+#define LB_Correction 0 //Default 0 is Off. One is On.
 
 // HUD Mode is for Extra UI MASK and Basic HUD Adjustments. This is useful for UI elements that are drawn in the Depth Buffer.
 // Such as the game Naruto Shippuden: Ultimate Ninja, TitanFall 2, and or Unreal Gold 277. That have this issue. This also allows for more advance users
@@ -103,10 +111,13 @@
 #define Cursor_Lock_Key 4 // Set default on mouse 4
 #define Fade_Key 1 // Set default on mouse 1
 #define Fade_Time_Adjust 0.5625 // From 0 to 1 is the Fade Time adjust for this mode. Default is 0.5625;
+
 // Delay Frame for instances the depth bufferis 1 frame behind useful for games that need "Copy Depth Buffer
 // Before Clear Operation," Is checked in the API Depth Buffer tab in ReShade.
 #define D_Frame 0 //This should be set to 0 most of the times this will cause latency by one frame.
 
+//Text Information Key Default F11
+#define Text_Info_Key 122
 //USER EDITABLE PREPROCESSOR FUNCTIONS END//
 #if !defined(__RESHADE__) || __RESHADE__ < 40000
 	#define Compatibility 1
@@ -232,7 +243,7 @@ uniform float Depth_Edge_Mask <
 	ui_tooltip = "Use this to adjust for artifacts.\n"
 				 "Default is Zero, Off";
 	ui_category = "Occlusion Masking";
-> = 0.0;
+> = DF_Z;
 
 uniform bool Performance_Mode <
 	ui_label = " Performance Mode";
@@ -543,6 +554,7 @@ uniform float Saturation <
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 uniform bool Cancel_Depth < source = "key"; keycode = Cancel_Depth_Key; toggle = true; mode = "toggle";>;
 uniform bool Mask_Cycle < source = "key"; keycode = Mask_Cycle_Key; toggle = true; >;
+uniform bool Text_Info < source = "key"; keycode = Text_Info_Key; toggle = true; mode = "toggle";>;
 uniform bool CLK < source = "mousebutton"; keycode = Cursor_Lock_Key; toggle = true; mode = "toggle";>;
 uniform bool Trigger_Fade_A < source = "mousebutton"; keycode = Fade_Key; toggle = true; mode = "toggle";>;
 uniform bool Trigger_Fade_B < source = "mousebutton"; keycode = Fade_Key;>;
@@ -746,6 +758,13 @@ float4 CSB(float2 texcoords)
 		return tex2D(SamplerzBufferVR,texcoords).xxxx;
 }
 #endif
+
+#if LB || LB_Correction
+float LBDetection()
+{
+	return CSB(float2(0.1,0.1)) == 0 && CSB(float2(0.9,0.9)) == 0 && CSB(float2(0.5,0.5)) > 0 ? 1.315 : 1;
+}
+#endif
 /////////////////////////////////////////////////////////////Cursor///////////////////////////////////////////////////////////////////////////
 float4 MouseCursor(float2 texcoord )
 {   float4 Out = CSB(texcoord),Color;
@@ -819,10 +838,15 @@ float Depth(float2 texcoord)
 		texcoord = D(texcoord.xy,K123.x,K123.y,K123.z);
 	}
 	#endif
-	#if DB_Size_Postion || SP
+	#if DB_Size_Postion || SP || LB || LB_Correction
 	float2 texXY = texcoord + Image_Position_Adjust * pix;
-	float2 midHV = (Horizontal_and_Vertical-1) * float2(BUFFER_WIDTH * 0.5,BUFFER_HEIGHT * 0.5) * pix;
-	texcoord = float2((texXY.x*Horizontal_and_Vertical.x)-midHV.x,(texXY.y*Horizontal_and_Vertical.y)-midHV.y);
+		#if LB || LB_Correction
+			float2 H_V = Horizontal_and_Vertical * float2(1,LBDetection());
+		#else
+			float2 H_V = Horizontal_and_Vertical;
+		#endif
+	float2 midHV = (H_V-1) * float2(BUFFER_WIDTH * 0.5,BUFFER_HEIGHT * 0.5) * pix;
+	texcoord = float2((texXY.x*H_V.x)-midHV.x,(texXY.y*H_V.y)-midHV.y);
 	#endif
 	if (Depth_Map_Flip)
 		texcoord.y =  1 - texcoord.y;
@@ -843,10 +867,22 @@ float Depth(float2 texcoord)
 
 float2 WeaponDepth(float2 texcoord)
 {
-	#if DB_Size_Postion || SP
+	#if BD_Correction || DC
+	if(BD_Options == 0 || BD_Options == 2)
+	{
+		float3 K123 = Colors_K1_K2_K3 * 0.1;
+		texcoord = D(texcoord.xy,K123.x,K123.y,K123.z);
+	}
+	#endif
+	#if DB_Size_Postion || SP || LB || LB_Correction
 	float2 texXY = texcoord + Image_Position_Adjust * pix;
-	float2 midHV = (Horizontal_and_Vertical-1) * float2(BUFFER_WIDTH * 0.5,BUFFER_HEIGHT * 0.5) * pix;
-	texcoord = float2((texXY.x*Horizontal_and_Vertical.x)-midHV.x,(texXY.y*Horizontal_and_Vertical.y)-midHV.y);
+		#if LB || LB_Correction
+			float2 H_V = Horizontal_and_Vertical * float2(1,LBDetection());
+		#else
+			float2 H_V = Horizontal_and_Vertical;
+		#endif
+	float2 midHV = (H_V-1) * float2(BUFFER_WIDTH * 0.5,BUFFER_HEIGHT * 0.5) * pix;
+	texcoord = float2((texXY.x*H_V.x)-midHV.x,(texXY.y*H_V.y)-midHV.y);
 	#endif
 	//Weapon Setting//
 	float3 WA_XYZ = Weapon_Adjust;
@@ -923,7 +959,8 @@ float Fade(float2 texcoord)
 	if(ZPD_Boundary > 0)
 	{   //Normal A & B for both
 		float CDArray_A[7] = { 0.125 ,0.25, 0.375,0.5, 0.625, 0.75, 0.875}, CDArray_B[7] = { 0.25 ,0.375, 0.4375, 0.5, 0.5625, 0.625, 0.75};
-		float CDArrayZPD[7] = { ZPD * 0.3, ZPD * 0.5, ZPD * 0.75, ZPD, ZPD * 0.0, ZPD * 0.0, ZPD * 0.3 };
+		float CDArrayZPD_A[7] = { ZPD * 0.625, ZPD * 0.75, ZPD * 0.875, ZPD, ZPD * 0.875, ZPD * 0.75, ZPD * 0.625 },
+			  CDArrayZPD_B[7] = { ZPD * 0.3, ZPD * 0.5, ZPD * 0.75, ZPD, ZPD * 0.75, ZPD * 0.5, ZPD * 0.3};
 		float2 GridXY;
 		//Screen Space Detector 7x7 Grid from between 0 to 1 and ZPD Detection becomes stronger as it gets closer to the Center.
 		[loop]
@@ -939,11 +976,12 @@ float Fade(float2 texcoord)
 					GridXY = float2( CDArray_A[i], CDArray_B[j]);
 
 				float ZPD_Change = ZPD_Boundary == 3 || ZPD_Boundary == 4 ? 1 - PrepDepth(texcoord).y : 1 ;
+				float ZPD_I = ZPD_Boundary == 2 || ZPD_Boundary == 4  ? CDArrayZPD_B[i] : CDArrayZPD_A[i] ;
 				// CDArrayZPD[i] reads across prepDepth.......
-				CD = ZPD_Change - CDArrayZPD[i] / PrepDepth( GridXY ).w;
+				CD = ZPD_Change - ZPD_I / PrepDepth( GridXY ).w;
 				//CD /= 49;
 				#if UI_MASK
-					CD = max( ZPD_Change - CDArrayZPD[i] / HUD_Mask(GridXY), CD );
+					CD = max( ZPD_Change - ZPD_I / HUD_Mask(GridXY), CD );
 				#endif
 				if (CD < 0.0)
 					Detect = 1;
@@ -1462,159 +1500,230 @@ void Average_Luminance(float4 position : SV_Position, float2 texcoord : TEXCOORD
 	AL = float3(Average_Lum_ZPD,Average_Lum_Bottom,Storage_One);
 	Other = float2(length(tex2D(SamplerSBB,texcoord).x - tex2D(SamplerPBBVR,texcoord).x),Storage_Two);//Motion_Detection
 }
-/////////////////////////////////////////////////////////////////////////Logo///////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////Logo////////////////////////////////////////////////////////////////////////////
+#define _f float // Text rendering code copied/pasted from https://www.shadertoy.com/view/4dtGD2 by Hamneggs
+static const _f CH_A    = _f(0x69f99), CH_B    = _f(0x79797), CH_C    = _f(0xe111e),
+				CH_D    = _f(0x79997), CH_E    = _f(0xf171f), CH_F    = _f(0xf1711),
+				CH_G    = _f(0xe1d96), CH_H    = _f(0x99f99), CH_I    = _f(0xf444f),
+				CH_J    = _f(0x88996), CH_K    = _f(0x95159), CH_L    = _f(0x1111f),
+				CH_M    = _f(0x9fd99), CH_N    = _f(0x9bd99), CH_O    = _f(0x69996),
+				CH_P    = _f(0x79971), CH_Q    = _f(0x69b5a), CH_R    = _f(0x79759),
+				CH_S    = _f(0xe1687), CH_T    = _f(0xf4444), CH_U    = _f(0x99996),
+				CH_V    = _f(0x999a4), CH_W    = _f(0x999f9), CH_X    = _f(0x99699),
+				CH_Y    = _f(0x99e8e), CH_Z    = _f(0xf843f), CH_0    = _f(0x6bd96),
+				CH_1    = _f(0x46444), CH_2    = _f(0x6942f), CH_3    = _f(0x69496),
+				CH_4    = _f(0x99f88), CH_5    = _f(0xf1687), CH_6    = _f(0x61796),
+				CH_7    = _f(0xf8421), CH_8    = _f(0x69696), CH_9    = _f(0x69e84),
+				CH_APST = _f(0x66400), CH_PI   = _f(0x0faa9), CH_UNDS = _f(0x0000f),
+				CH_HYPH = _f(0x00600), CH_TILD = _f(0x0a500), CH_PLUS = _f(0x02720),
+				CH_EQUL = _f(0x0f0f0), CH_SLSH = _f(0x08421), CH_EXCL = _f(0x33303),
+				CH_QUES = _f(0x69404), CH_COMM = _f(0x00032), CH_FSTP = _f(0x00002),
+				CH_QUOT = _f(0x55000), CH_BLNK = _f(0x00000), CH_COLN = _f(0x00202),
+				CH_LPAR = _f(0x42224), CH_RPAR = _f(0x24442);
+#define MAP_SIZE float2(4,5)
+#undef flt
+//returns the status of a bit in a bitmap. This is done value-wise, so the exact representation of the float doesn't really matter.
+float getBit( float map, float index )
+{   // Ooh -index takes out that divide :)
+    return fmod( floor( map * exp2(-index) ), 2.0 );
+}
+
+float drawChar( float Char, float2 pos, float2 size, float2 TC )
+{   // Subtract our position from the current TC so that we can know if we're inside the bounding box or not.
+    TC -= pos;
+    // Divide the screen space by the size, so our bounding box is 1x1.
+    TC /= size;
+    // Create a place to store the result & Branchless bounding box check.
+    float res = step(0.0,min(TC.x,TC.y)) - step(1.0,max(TC.x,TC.y));
+    // Go ahead and multiply the TC by the bitmap size so we can work in bitmap space coordinates.
+    TC *= MAP_SIZE;
+    // Get the appropriate bit and return it.
+    res*=getBit( Char, 4.0*floor(TC.y) + floor(TC.x) );
+    return saturate(res);
+}
+
 float3 Out(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Target
 {
-	float PosX = 0.9525f*BUFFER_WIDTH*pix.x,PosY = 0.975f*BUFFER_HEIGHT*pix.y, Text_Timer = 12500, BT = smoothstep(0,1,sin(timer*(3.75/1000)));
-	float D,E,P,T,H,Three,DD,Dot,I,N,F,O,R,EE,A,DDD,HH,EEE,L,PP,Help,NN,PPP,C,Not,No;
+	float2 TC = float2(texcoord.x,1-texcoord.y);
+	float Text_Timer = 20000, BT = smoothstep(0,1,sin(timer*(3.75/1000))), Size = 1.1, Depth3D, Read_Help, NoPro, NotCom, Major, Needs, Over, AA, Not, No, Help, Ma, Need, State, SetAA;
 	float3 Color = PS_calcLR(texcoord).rgb;
-	if(TW || NC || NP)
-		Text_Timer = 18750;
 
-	[branch] if(timer <= Text_Timer)
-	{ //DEPTH
-		//D
-		float PosXD = -0.035+PosX, offsetD = 0.001;
-		float OneD = all( abs(float2( texcoord.x -PosXD, texcoord.y-PosY)) < float2(0.0025,0.009));
-		float TwoD = all( abs(float2( texcoord.x -PosXD-offsetD, texcoord.y-PosY)) < float2(0.0025,0.007));
-		D = OneD-TwoD;
-		//E
-		float PosXE = -0.028+PosX, offsetE = 0.0005;
-		float OneE = all( abs(float2( texcoord.x -PosXE, texcoord.y-PosY)) < float2(0.003,0.009));
-		float TwoE = all( abs(float2( texcoord.x -PosXE-offsetE, texcoord.y-PosY)) < float2(0.0025,0.007));
-		float ThreeE = all( abs(float2( texcoord.x -PosXE, texcoord.y-PosY)) < float2(0.003,0.001));
-		E = (OneE-TwoE)+ThreeE;
-		//P
-		float PosXP = -0.0215+PosX, PosYP = -0.0025+PosY, offsetP = 0.001, offsetP1 = 0.002;
-		float OneP = all( abs(float2( texcoord.x -PosXP, texcoord.y-PosYP)) < float2(0.0025,0.009*0.775));
-		float TwoP = all( abs(float2( texcoord.x -PosXP-offsetP, texcoord.y-PosYP)) < float2(0.0025,0.007*0.680));
-		float ThreeP = all( abs(float2( texcoord.x -PosXP+offsetP1, texcoord.y-PosY)) < float2(0.0005,0.009));
-		P = (OneP-TwoP) + ThreeP;
-		//T
-		float PosXT = -0.014+PosX, PosYT = -0.008+PosY;
-		float OneT = all( abs(float2( texcoord.x -PosXT, texcoord.y-PosYT)) < float2(0.003,0.001));
-		float TwoT = all( abs(float2( texcoord.x -PosXT, texcoord.y-PosY)) < float2(0.000625,0.009));
-		T = OneT+TwoT;
-		//H
-		float PosXH = -0.0072+PosX;
-		float OneH = all( abs(float2( texcoord.x -PosXH, texcoord.y-PosY)) < float2(0.002,0.001));
-		float TwoH = all( abs(float2( texcoord.x -PosXH, texcoord.y-PosY)) < float2(0.002,0.009));
-		float ThreeH = all( abs(float2( texcoord.x -PosXH, texcoord.y-PosY)) < float2(0.00325,0.009));
-		H = (OneH-TwoH)+ThreeH;
-		//Three
-		float offsetFive = 0.001, PosX3 = -0.001+PosX;
-		float OneThree = all( abs(float2( texcoord.x -PosX3, texcoord.y-PosY)) < float2(0.002,0.009));
-		float TwoThree = all( abs(float2( texcoord.x -PosX3 - offsetFive, texcoord.y-PosY)) < float2(0.003,0.007));
-		float ThreeThree = all( abs(float2( texcoord.x -PosX3, texcoord.y-PosY)) < float2(0.002,0.001));
-		Three = (OneThree-TwoThree)+ThreeThree;
-		//DD
-		float PosXDD = 0.006+PosX, offsetDD = 0.001;
-		float OneDD = all( abs(float2( texcoord.x -PosXDD, texcoord.y-PosY)) < float2(0.0025,0.009));
-		float TwoDD = all( abs(float2( texcoord.x -PosXDD-offsetDD, texcoord.y-PosY)) < float2(0.0025,0.007));
-		DD = OneDD-TwoDD;
-		//Dot
-		float PosXDot = 0.011+PosX, PosYDot = 0.008+PosY;
-		float OneDot = all( abs(float2( texcoord.x -PosXDot, texcoord.y-PosYDot)) < float2(0.00075,0.0015));
-		Dot = OneDot;
-		//INFO
-		//I
-		float PosXI = 0.0155+PosX, PosYI = 0.004+PosY, PosYII = 0.008+PosY;
-		float OneI = all( abs(float2( texcoord.x - PosXI, texcoord.y - PosY)) < float2(0.003,0.001));
-		float TwoI = all( abs(float2( texcoord.x - PosXI, texcoord.y - PosYI)) < float2(0.000625,0.005));
-		float ThreeI = all( abs(float2( texcoord.x - PosXI, texcoord.y - PosYII)) < float2(0.003,0.001));
-		I = OneI+TwoI+ThreeI;
-		//N
-		float PosXN = 0.0225+PosX, PosYN = 0.005+PosY,offsetN = -0.001;
-		float OneN = all( abs(float2( texcoord.x - PosXN, texcoord.y - PosYN)) < float2(0.002,0.004));
-		float TwoN = all( abs(float2( texcoord.x - PosXN, texcoord.y - PosYN - offsetN)) < float2(0.003,0.005));
-		N = OneN-TwoN;
-		//F
-		float PosXF = 0.029+PosX, PosYF = 0.004+PosY, offsetF = 0.0005, offsetF1 = 0.001;
-		float OneF = all( abs(float2( texcoord.x -PosXF-offsetF, texcoord.y-PosYF-offsetF1)) < float2(0.002,0.004));
-		float TwoF = all( abs(float2( texcoord.x -PosXF, texcoord.y-PosYF)) < float2(0.0025,0.005));
-		float ThreeF = all( abs(float2( texcoord.x -PosXF, texcoord.y-PosYF)) < float2(0.0015,0.00075));
-		F = (OneF-TwoF)+ThreeF;
-		//O
-		float PosXO = 0.035+PosX, PosYO = 0.004+PosY;
-		float OneO = all( abs(float2( texcoord.x -PosXO, texcoord.y-PosYO)) < float2(0.003,0.005));
-		float TwoO = all( abs(float2( texcoord.x -PosXO, texcoord.y-PosYO)) < float2(0.002,0.003));
-		O = OneO-TwoO;
-		//Text Warnings
-		PosY -= 0.953;
-		//R
-		float PosXR = -0.480+PosX, PosYR = -0.0025+PosY, offsetR = 0.001, offsetR1 = 0.002,offsetR2 = -0.002,offsetR3 = 0.007;
-		float OneR = all( abs(float2( texcoord.x -PosXR, texcoord.y-PosYR)) < float2(0.0025,0.009*0.775));
-		float TwoR = all( abs(float2( texcoord.x -PosXR-offsetR, texcoord.y-PosYR)) < float2(0.0025,0.007*0.680));
-		float ThreeR = all( abs(float2( texcoord.x -PosXR+offsetR1, texcoord.y-PosY)) < float2(0.0005,0.009));
-		float FourR = all( abs(float2( texcoord.x -PosXR+offsetR2, texcoord.y-PosY-offsetR3)) < float2(0.0005,0.0020));
-		R = (OneR-TwoR) + ThreeR + FourR;
-		//EE
-		float PosXEE = -0.472+PosX, offsetEE = 0.0005;
-		float OneEE = all( abs(float2( texcoord.x -PosXEE, texcoord.y-PosY)) < float2(0.003,0.009));
-		float TwoEE = all( abs(float2( texcoord.x -PosXEE-offsetEE, texcoord.y-PosY)) < float2(0.0025,0.007));
-		float ThreeEE = all( abs(float2( texcoord.x -PosXEE, texcoord.y-PosY)) < float2(0.003,0.001));
-		EE = (OneEE-TwoEE)+ThreeEE;
-		//A
-		float PosXA = -0.465+PosX,PosYA = -0.008+PosY;
-		float OneA = all( abs(float2( texcoord.x -PosXA, texcoord.y-PosY)) < float2(0.002,0.001));
-		float TwoA = all( abs(float2( texcoord.x -PosXA, texcoord.y-PosY)) < float2(0.002,0.009));
-		float ThreeA = all( abs(float2( texcoord.x -PosXA, texcoord.y-PosY)) < float2(0.00325,0.009));
-		float FourA = all( abs(float2( texcoord.x -PosXA, texcoord.y-PosYA)) < float2(0.003,0.001));
-		A = (OneA-TwoA)+ThreeA+FourA;
-		//DDD
-		float PosXDDD = -0.458+PosX, offsetDDD = 0.001;
-		float OneDDD = all( abs(float2( texcoord.x -PosXDDD, texcoord.y-PosY)) < float2(0.0025,0.009));
-		float TwoDDD = all( abs(float2( texcoord.x -PosXDDD-offsetDDD, texcoord.y-PosY)) < float2(0.0025,0.007));
-		DDD = OneDDD-TwoDDD;
-		//HH
-		float PosXHH = -0.445+PosX;
-		float OneHH = all( abs(float2( texcoord.x -PosXHH, texcoord.y-PosY)) < float2(0.002,0.001));
-		float TwoHH = all( abs(float2( texcoord.x -PosXHH, texcoord.y-PosY)) < float2(0.0015,0.009));
-		float ThreeHH = all( abs(float2( texcoord.x -PosXHH, texcoord.y-PosY)) < float2(0.00325,0.009));
-		HH = (OneHH-TwoHH)+ThreeHH;
-		//EEE
-		float PosXEEE = -0.437+PosX, offsetEEE = 0.0005;
-		float OneEEE = all( abs(float2( texcoord.x -PosXEEE, texcoord.y-PosY)) < float2(0.003,0.009));
-		float TwoEEE = all( abs(float2( texcoord.x -PosXEEE-offsetEEE, texcoord.y-PosY)) < float2(0.0025,0.007));
-		float ThreeEEE = all( abs(float2( texcoord.x -PosXEEE, texcoord.y-PosY)) < float2(0.003,0.001));
-		EEE = (OneEEE-TwoEEE)+ThreeEEE;
-		//L
-		float PosXL = -0.429+PosX, PosYL = 0.008+PosY, OffsetL = -0.949+PosX,OffsetLA = -0.951+PosX;
-		float OneL = all( abs(float2( texcoord.x -PosXL+OffsetLA, texcoord.y-PosYL)) < float2(0.0025,0.001));
-		float TwoL = all( abs(float2( texcoord.x -PosXL+OffsetL, texcoord.y-PosY)) < float2(0.0008,0.009));
-		L = OneL+TwoL;
-		//PP
-		float PosXPP = -0.425+PosX, PosYPP = -0.0025+PosY, offsetPP = 0.001, offsetPP1 = 0.002;
-		float OnePP = all( abs(float2( texcoord.x -PosXPP, texcoord.y-PosYPP)) < float2(0.0025,0.009*0.775));
-		float TwoPP = all( abs(float2( texcoord.x -PosXPP-offsetPP, texcoord.y-PosYPP)) < float2(0.0025,0.007*0.680));
-		float ThreePP = all( abs(float2( texcoord.x -PosXPP+offsetPP1, texcoord.y-PosY)) < float2(0.0005,0.009));
-		PP = (OnePP-TwoPP) + ThreePP;
-		//No Profile / Not Compatible
-		PosY += 0.953;
-		PosX -= 0.483;
-		float PosXNN = -0.458+PosX, offsetNN = 0.0015;
-		float OneNN = all( abs(float2( texcoord.x -PosXNN, texcoord.y-PosY)) < float2(0.00325,0.009));
-		float TwoNN = all( abs(float2( texcoord.x -PosXNN, texcoord.y-PosY-offsetNN)) < float2(0.002,0.008));
-		NN = OneNN-TwoNN;
-		//PPP
-		float PosXPPP = -0.451+PosX, PosYPPP = -0.0025+PosY, offsetPPP = 0.001, offsetPPP1 = 0.002;
-		float OnePPP = all( abs(float2( texcoord.x -PosXPPP, texcoord.y-PosYPPP)) < float2(0.0025,0.009*0.775));
-		float TwoPPP = all( abs(float2( texcoord.x -PosXPPP-offsetPPP, texcoord.y-PosYPPP)) < float2(0.0025,0.007*0.680));
-		float ThreePPP = all( abs(float2( texcoord.x -PosXPPP+offsetPPP1, texcoord.y-PosY)) < float2(0.0005,0.009));
-		PPP = (OnePPP-TwoPPP) + ThreePPP;
-		//C
-		float PosXC = -0.450+PosX, offsetC = 0.001;
-		float OneC = all( abs(float2( texcoord.x -PosXC, texcoord.y-PosY)) < float2(0.0035,0.009));
-		float TwoC = all( abs(float2( texcoord.x -PosXC-offsetC, texcoord.y-PosY)) < float2(0.0025,0.007));
-		C = OneC-TwoC;
+	if(RH || NC || NP || MI || DS || OS || DA)
+		Text_Timer = 25000;
+
+	[branch] if(timer <= Text_Timer || Text_Info)
+	{ // Set a general character size...
+	    float2 charSize = float2(.00875, .0125) * Size;
+	    // Starting position.
+	    float2 charPos = float2( 0.009, 0.9725);
+		//Needs Copy Depth and/or Depth Selection
+		Needs += drawChar( CH_N, charPos, charSize, TC); charPos.x += .01 * Size;
+		Needs += drawChar( CH_E, charPos, charSize, TC); charPos.x += .01 * Size;
+		Needs += drawChar( CH_E, charPos, charSize, TC); charPos.x += .01 * Size;
+		Needs += drawChar( CH_D, charPos, charSize, TC); charPos.x += .01 * Size;
+		Needs += drawChar( CH_S, charPos, charSize, TC); charPos.x += .01 * Size;
+		Needs += drawChar( CH_BLNK, charPos, charSize, TC); charPos.x += .01 * Size;
+		Needs += drawChar( CH_C, charPos, charSize, TC); charPos.x += .01 * Size;
+		Needs += drawChar( CH_O, charPos, charSize, TC); charPos.x += .01 * Size;
+		Needs += drawChar( CH_P, charPos, charSize, TC); charPos.x += .01 * Size;
+		Needs += drawChar( CH_Y, charPos, charSize, TC); charPos.x += .01 * Size;
+		Needs += drawChar( CH_BLNK, charPos, charSize, TC); charPos.x += .01 * Size;
+		Needs += drawChar( CH_D, charPos, charSize, TC); charPos.x += .01 * Size;
+		Needs += drawChar( CH_E, charPos, charSize, TC); charPos.x += .01 * Size;
+		Needs += drawChar( CH_P, charPos, charSize, TC); charPos.x += .01 * Size;
+		Needs += drawChar( CH_T, charPos, charSize, TC); charPos.x += .01 * Size;
+		Needs += drawChar( CH_H, charPos, charSize, TC); charPos.x += .01 * Size;
+		Needs += drawChar( CH_BLNK, charPos, charSize, TC); charPos.x += .01 * Size;
+		Needs += drawChar( CH_A, charPos, charSize, TC); charPos.x += .01 * Size;
+		Needs += drawChar( CH_N, charPos, charSize, TC); charPos.x += .01 * Size;
+		Needs += drawChar( CH_D, charPos, charSize, TC); charPos.x += .01 * Size;
+		Needs += drawChar( CH_SLSH, charPos, charSize, TC); charPos.x += .01 * Size;
+		Needs += drawChar( CH_O, charPos, charSize, TC); charPos.x += .01 * Size;
+		Needs += drawChar( CH_R, charPos, charSize, TC); charPos.x += .01 * Size;
+		Needs += drawChar( CH_BLNK, charPos, charSize, TC); charPos.x += .01 * Size;
+		Needs += drawChar( CH_D, charPos, charSize, TC); charPos.x += .01 * Size;
+		Needs += drawChar( CH_E, charPos, charSize, TC); charPos.x += .01 * Size;
+		Needs += drawChar( CH_P, charPos, charSize, TC); charPos.x += .01 * Size;
+		Needs += drawChar( CH_T, charPos, charSize, TC); charPos.x += .01 * Size;
+		Needs += drawChar( CH_H, charPos, charSize, TC); charPos.x += .01 * Size;
+		Needs += drawChar( CH_BLNK, charPos, charSize, TC); charPos.x += .01 * Size;
+		Needs += drawChar( CH_S, charPos, charSize, TC); charPos.x += .01 * Size;
+		Needs += drawChar( CH_E, charPos, charSize, TC); charPos.x += .01 * Size;
+		Needs += drawChar( CH_L, charPos, charSize, TC); charPos.x += .01 * Size;
+		Needs += drawChar( CH_E, charPos, charSize, TC); charPos.x += .01 * Size;
+		Needs += drawChar( CH_C, charPos, charSize, TC); charPos.x += .01 * Size;
+		Needs += drawChar( CH_T, charPos, charSize, TC); charPos.x += .01 * Size;
+		Needs += drawChar( CH_I, charPos, charSize, TC); charPos.x += .01 * Size;
+		Needs += drawChar( CH_O, charPos, charSize, TC); charPos.x += .01 * Size;
+		Needs += drawChar( CH_N, charPos, charSize, TC);
+		//Disable TAA/MSAA
+		charPos = float2( 0.009, 0.955);
+		SetAA += drawChar( CH_D, charPos, charSize, TC); charPos.x += .01 * Size;
+		SetAA += drawChar( CH_I, charPos, charSize, TC); charPos.x += .01 * Size;
+		SetAA += drawChar( CH_S, charPos, charSize, TC); charPos.x += .01 * Size;
+		SetAA += drawChar( CH_A, charPos, charSize, TC); charPos.x += .01 * Size;
+		SetAA += drawChar( CH_B, charPos, charSize, TC); charPos.x += .01 * Size;
+		SetAA += drawChar( CH_L, charPos, charSize, TC); charPos.x += .01 * Size;
+		SetAA += drawChar( CH_E, charPos, charSize, TC); charPos.x += .01 * Size;
+		SetAA += drawChar( CH_BLNK, charPos, charSize, TC); charPos.x += .01 * Size;
+		SetAA += drawChar( CH_T, charPos, charSize, TC); charPos.x += .01 * Size;
+		SetAA += drawChar( CH_A, charPos, charSize, TC); charPos.x += .01 * Size;
+		SetAA += drawChar( CH_A, charPos, charSize, TC); charPos.x += .01 * Size;
+		SetAA += drawChar( CH_SLSH, charPos, charSize, TC); charPos.x += .01 * Size;
+		SetAA += drawChar( CH_M, charPos, charSize, TC); charPos.x += .01 * Size;
+		SetAA += drawChar( CH_S, charPos, charSize, TC); charPos.x += .01 * Size;
+		SetAA += drawChar( CH_A, charPos, charSize, TC); charPos.x += .01 * Size;
+		SetAA += drawChar( CH_A, charPos, charSize, TC);
+		//Read Help
+		charPos = float2( 0.894, 0.9725);
+		Read_Help += drawChar( CH_R, charPos, charSize, TC); charPos.x += .01 * Size;
+		Read_Help += drawChar( CH_E, charPos, charSize, TC); charPos.x += .01 * Size;
+		Read_Help += drawChar( CH_A, charPos, charSize, TC); charPos.x += .01 * Size;
+		Read_Help += drawChar( CH_D, charPos, charSize, TC); charPos.x += .01 * Size;
+		Read_Help += drawChar( CH_BLNK, charPos, charSize, TC); charPos.x += .01 * Size;
+		Read_Help += drawChar( CH_H, charPos, charSize, TC); charPos.x += .01 * Size;
+		Read_Help += drawChar( CH_E, charPos, charSize, TC); charPos.x += .01 * Size;
+		Read_Help += drawChar( CH_L, charPos, charSize, TC); charPos.x += .01 * Size;
+		Read_Help += drawChar( CH_P, charPos, charSize, TC);
+		//New Start
+		charPos = float2( 0.009, 0.018);
+		// No Profile
+		NoPro += drawChar( CH_N, charPos, charSize, TC); charPos.x += .01 * Size;
+		NoPro += drawChar( CH_O, charPos, charSize, TC); charPos.x += .01 * Size;
+		NoPro += drawChar( CH_BLNK, charPos, charSize, TC); charPos.x += .01 * Size;
+		NoPro += drawChar( CH_P, charPos, charSize, TC); charPos.x += .01 * Size;
+		NoPro += drawChar( CH_R, charPos, charSize, TC); charPos.x += .01 * Size;
+		NoPro += drawChar( CH_O, charPos, charSize, TC); charPos.x += .01 * Size;
+		NoPro += drawChar( CH_F, charPos, charSize, TC); charPos.x += .01 * Size;
+		NoPro += drawChar( CH_I, charPos, charSize, TC); charPos.x += .01 * Size;
+		NoPro += drawChar( CH_L, charPos, charSize, TC); charPos.x += .01 * Size;
+		NoPro += drawChar( CH_E, charPos, charSize, TC); charPos.x = 0.009;
+		//Not Compatible
+		NotCom += drawChar( CH_N, charPos, charSize, TC); charPos.x += .01 * Size;
+		NotCom += drawChar( CH_O, charPos, charSize, TC); charPos.x += .01 * Size;
+		NotCom += drawChar( CH_T, charPos, charSize, TC); charPos.x += .01 * Size;
+		NotCom += drawChar( CH_BLNK, charPos, charSize, TC); charPos.x += .01 * Size;
+		NotCom += drawChar( CH_C, charPos, charSize, TC); charPos.x += .01 * Size;
+		NotCom += drawChar( CH_O, charPos, charSize, TC); charPos.x += .01 * Size;
+		NotCom += drawChar( CH_P, charPos, charSize, TC); charPos.x += .01 * Size;
+		NotCom += drawChar( CH_A, charPos, charSize, TC); charPos.x += .01 * Size;
+		NotCom += drawChar( CH_T, charPos, charSize, TC); charPos.x += .01 * Size;
+		NotCom += drawChar( CH_I, charPos, charSize, TC); charPos.x += .01 * Size;
+		NotCom += drawChar( CH_B, charPos, charSize, TC); charPos.x += .01 * Size;
+		NotCom += drawChar( CH_L, charPos, charSize, TC); charPos.x += .01 * Size;
+		NotCom += drawChar( CH_E, charPos, charSize, TC); charPos.x = 0.009;
+		//Major Issues
+		Major += drawChar( CH_M, charPos, charSize, TC); charPos.x += .01 * Size;
+		Major += drawChar( CH_A, charPos, charSize, TC); charPos.x += .01 * Size;
+		Major += drawChar( CH_J, charPos, charSize, TC); charPos.x += .01 * Size;
+		Major += drawChar( CH_O, charPos, charSize, TC); charPos.x += .01 * Size;
+		Major += drawChar( CH_R, charPos, charSize, TC); charPos.x += .01 * Size;
+		Major += drawChar( CH_BLNK, charPos, charSize, TC); charPos.x += .01 * Size;
+		Major += drawChar( CH_I, charPos, charSize, TC); charPos.x += .01 * Size;
+		Major += drawChar( CH_S, charPos, charSize, TC); charPos.x += .01 * Size;
+		Major += drawChar( CH_S, charPos, charSize, TC); charPos.x += .01 * Size;
+		Major += drawChar( CH_U, charPos, charSize, TC); charPos.x += .01 * Size;
+		Major += drawChar( CH_E, charPos, charSize, TC); charPos.x += .01 * Size;
+		Major += drawChar( CH_S, charPos, charSize, TC); charPos.x = 0.009;
+		//Overwatch.fxh Missing
+		State += drawChar( CH_O, charPos, charSize, TC); charPos.x += .01 * Size;
+		State += drawChar( CH_V, charPos, charSize, TC); charPos.x += .01 * Size;
+		State += drawChar( CH_E, charPos, charSize, TC); charPos.x += .01 * Size;
+		State += drawChar( CH_R, charPos, charSize, TC); charPos.x += .01 * Size;
+		State += drawChar( CH_W, charPos, charSize, TC); charPos.x += .01 * Size;
+		State += drawChar( CH_A, charPos, charSize, TC); charPos.x += .01 * Size;
+		State += drawChar( CH_T, charPos, charSize, TC); charPos.x += .01 * Size;
+		State += drawChar( CH_C, charPos, charSize, TC); charPos.x += .01 * Size;
+		State += drawChar( CH_H, charPos, charSize, TC); charPos.x += .01 * Size;
+		State += drawChar( CH_FSTP, charPos, charSize, TC); charPos.x += .01 * Size;
+		State += drawChar( CH_F, charPos, charSize, TC); charPos.x += .01 * Size;
+		State += drawChar( CH_X, charPos, charSize, TC); charPos.x += .01 * Size;
+		State += drawChar( CH_H, charPos, charSize, TC); charPos.x += .01 * Size;
+		State += drawChar( CH_BLNK, charPos, charSize, TC); charPos.x += .01 * Size;
+		State += drawChar( CH_M, charPos, charSize, TC); charPos.x += .01 * Size;
+		State += drawChar( CH_I, charPos, charSize, TC); charPos.x += .01 * Size;
+		State += drawChar( CH_S, charPos, charSize, TC); charPos.x += .01 * Size;
+		State += drawChar( CH_S, charPos, charSize, TC); charPos.x += .01 * Size;
+		State += drawChar( CH_I, charPos, charSize, TC); charPos.x += .01 * Size;
+		State += drawChar( CH_N, charPos, charSize, TC); charPos.x += .01 * Size;
+		State += drawChar( CH_G, charPos, charSize, TC);
+	    //New Size
+	    float D3D_Size_A = 1.15,D3D_Size_B = 0.75;
+	    float2 charSize_A = float2(.00875, .0125) * D3D_Size_A, charSize_B = float2(.00875, .0125) * D3D_Size_B;
+	    //New Start Pos
+	    charPos = float2( 0.877, 0.018);
+		//Depth3D.Info Logo/Website
+	    Depth3D += drawChar( CH_D, charPos, charSize_A, TC); charPos.x += .01 * D3D_Size_A;
+	    Depth3D += drawChar( CH_E, charPos, charSize_A, TC); charPos.x += .01 * D3D_Size_A;
+	    Depth3D += drawChar( CH_P, charPos, charSize_A, TC); charPos.x += .01 * D3D_Size_A;
+	    Depth3D += drawChar( CH_T, charPos, charSize_A, TC); charPos.x += .01 * D3D_Size_A;
+	    Depth3D += drawChar( CH_H, charPos, charSize_A, TC); charPos.x += .01 * D3D_Size_A;
+	    Depth3D += drawChar( CH_3, charPos, charSize_A, TC); charPos.x += .01 * D3D_Size_A;
+	    Depth3D += drawChar( CH_D, charPos, charSize_A, TC); charPos.x += 0.008 * D3D_Size_A;
+	    Depth3D += drawChar( CH_FSTP, charPos, charSize_A, TC); charPos.x += 0.01 * D3D_Size_A;
+	    charPos = float2( 0.963, 0.018);
+	    Depth3D += drawChar( CH_I, charPos, charSize_B, TC); charPos.x += .01 * D3D_Size_B;
+	    Depth3D += drawChar( CH_N, charPos, charSize_B, TC); charPos.x += .01 * D3D_Size_B;
+	    Depth3D += drawChar( CH_F, charPos, charSize_B, TC); charPos.x += .01 * D3D_Size_B;
+    	Depth3D += drawChar( CH_O, charPos, charSize_B, TC);
+		//Text Information
+		if(DS)
+			Need = Needs;
+		if(RH)
+			Help = Read_Help;
+		if(DA)
+			AA = SetAA;
+		//Blinking Text Warnings
 		if(NP)
-		No = (NN + PPP) * BT; //Blinking Text
+			No = NoPro * BT;
 		if(NC)
-		Not = (NN + C) * BT; //Blinking Text
-		if(TW)
-			Help = (R+EE+A+DDD+HH+EEE+L+PP) * BT; //Blinking Text
+			Not = NotCom * BT;
+		if(MI)
+			Ma = Major * BT;
+		if(OS)
+			Over = State * BT;
 		//Website
-		return D+E+P+T+H+Three+DD+Dot+I+N+F+O+Help+No+Not ? (1-texcoord.y*50.0+48.85)*texcoord.y-0.500: Color;
+		return Depth3D+Help+No+Not+Ma+Need+Over+AA ? (1-texcoord.y*50.0+48.85)*texcoord.y-0.500: Color;
 	}
 	else
 		return Color;

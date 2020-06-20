@@ -1,7 +1,7 @@
 ////----------------------------------------//
 ///SuperDepth3D Overwatch Automation Shader///
 //----------------------------------------////
-// Version 1.4
+// Version 1.5
 //---------------------------------------OVERWATCH---------------------------------------//
 // If you are reading this stop. Go away and never look back. From this point on if you  //
 // still think it's is worth looking at this..... Then no one can save you or your soul. //
@@ -52,20 +52,23 @@ static const float ZPD_Boundary_Fade_Time_D = 0.25;     //ZPD Boundary Fade Time
 static const float Weapon_Near_Depth_D = 0.0;           //Weapon Near Depth
 static const float ZPD_Weapon_Boundary_Adjust = 0.0;    //ZPD Weapon Boundary Adjust
 static const float NULL_A = 0.0;
-static const float NULL_B = 0.0;
+static const float Edge_Masking = 0.0;                  //Edge Masking Adjust
 static const float HUDX_D = 0.0;                        //Heads Up Display Cut Off Point
 
 //Special Toggles Defaults
 static const int REF = 0;                               //Resident Evil Fix
 static const int NCW = 0;                               //Not Compatible Warning
-static const int FTW = 0;                               //Flashing Text Warning
+static const int RHW = 0;                               //Read Help Warning
 static const int NPW = 0;                               //No Profile Warning
 static const int IDF = 0;                               //Inverted Depth Fix
 static const int SPF = 0;                               //Size & Position Fix
 static const int BDF = 0;                               //Barrel Distortion Fix
 static const int HMT = 0;                               //HUD Mode Trigger
 static const int DFW = 0;                               //Delay Frame Workaround
-
+static const int MIW = 0;                               //Major Issues Warning
+static const int DSW = 0;                               //Depth Selection Warning
+static const int ALB = 0;                               //Auto Letter Box
+static const int DAA = 0;                                //Disable Anti-Aliasing
 //Special Handling
 #if exists "LEGOBatman.exe"                             //Lego Batman
 	#define sApp 0xA100000
@@ -157,7 +160,7 @@ static const int DFW = 0;                               //Delay Frame Workaround
 	#define DB_W 14
 #elif (App == 0x4383C12A || App == 0x239E5522 || App == 0x3591DE9C )	//CoD | CoD:UO | CoD:2
 	#define DB_W 15
-	#define TW 1
+	#define RH 1
 #elif (App == 0x73FA91DC )	//CoD: Black Ops IIII
 	#define DA_Y 22.5
 	#define DA_W 1
@@ -189,7 +192,7 @@ static const int DFW = 0;                               //Delay Frame Workaround
 	#define DB_Y 2
 	#define WSM 3
 	#define OW_WP "Read Help & Change Me\0Custom WP\0Prey High Settings and <\0Prey 2017 Very High\0"
-	#define TW 1
+	#define RH 1
 #elif (App == 0xBF757E3A )	//Return to Castle Wolfenstein
 	#define DA_Y 8.75
 	#define DB_Y 2
@@ -209,7 +212,7 @@ static const int DFW = 0;                               //Delay Frame Workaround
 #elif (App == 0x6D3CD99E ) //Blood 2
 	#define DB_W 36
 	#define DB_Y 3
-	#define TW 1
+	#define RH 1
 #elif (App == 0xF22A9C7D || App == 0x5416A79D ) //SOMA
 	#define DA_Y 17.5
 	#define DA_Z 0.0005
@@ -221,7 +224,7 @@ static const int DFW = 0;                               //Delay Frame Workaround
 	#define DE_Y 0.5
 	#define DE_Z 0.375
 	#define DF_X 0.25
-	#define TW 1
+	#define RH 1
 #elif (App == 0x6FB6410B ) //Cryostasis
 	#define DA_Y 13.75
 	#define DB_Y 3
@@ -257,7 +260,7 @@ static const int DFW = 0;                               //Delay Frame Workaround
 	#define DA_Y 10.0
 	#define DB_Y 4
 	#define DB_W 46
-	#define TW 1
+	#define RH 1
 #elif (App == 0x9C5C946E ) //EuroTruckSim2
 	#define DB_W 47
 #elif (App == 0xB302EC7 || App == 0x91D9EBAF ) //F.E.A.R | F.E.A.R 2: Project Origin
@@ -326,7 +329,7 @@ static const int DFW = 0;                               //Delay Frame Workaround
 	#define DB_Y 5
 #elif (App == 0xFE54BF56 ) //No One Lives Forever and 2
 	#define DA_X 0.0375
-	#define TW 1
+	#define RH 1
 #elif (App == 0x9E7AA0C4 ) //Shadow Tactics: Blades of the Shogun
 	#define DA_Y 7.0
 	#define DA_Z 0.001
@@ -334,13 +337,13 @@ static const int DFW = 0;                               //Delay Frame Workaround
 	#define DB_Y 5
 	#define DB_Z 0.305
 	#define DB_X 1
-	#define TW 1
+	#define RH 1
 #elif (App == 0xE63BF4A4 ) //World of Warcraft DX12
 	#define DA_Y 7.5
 	#define DA_W 1
 	#define DB_Y 3
 	#define DB_Z 0.1375
-	#define TW 1
+	#define RH 1
 #elif (App == 0x5961D1CC ) //Requiem: Avenging Angel
 	#define DA_Y 37.5
 	#define DA_X 0.0375
@@ -423,7 +426,7 @@ static const int DFW = 0;                               //Delay Frame Workaround
 	#define DA_Z 0.00025
 	#define DB_Y 4
 	#define DB_Z 0.15
-	#define TW 1
+	#define RH 1
 #elif (App == 0xA100000 ) //Lego Batman 1 & 2
 	#define DA_Y 27.5
 	#define DA_X 0.125
@@ -435,7 +438,7 @@ static const int DFW = 0;                               //Delay Frame Workaround
 	#define DA_X 0.03
 	#define DA_Z 0.001
 	#define DB_Y 4
-	#define TW 1
+	#define RH 1
 #elif (App == 0xA200000 ) //Batman BlackGate
 	#define DA_Y 12.5
 	#define DA_X 0.0375
@@ -454,7 +457,7 @@ static const int DFW = 0;                               //Delay Frame Workaround
 	#define DA_X 0.250
 	#define DB_Y 1
 	#define RE 1
-	#define TW 1
+	#define RH 1
 #elif (App == 0x1335BAB8 ) //BattleField 1
 	#define DA_W 1
 	#define DA_Y 8.125
@@ -497,18 +500,18 @@ static const int DFW = 0;                               //Delay Frame Workaround
 	#define DA_X 0.03
 	#define DA_Y 32.5
 	#define DB_Y 1
-	#define TW 1
+	#define RH 1
 #elif (App == 0xCFE885A2 ) //Alan Wake's American Nightmare
 	#define DA_X 0.03
 	#define DA_Y 32.5
 	#define DB_Y 1
-	#define TW 1
+	#define RH 1
 #elif (App == 0x56D8243B ) //Agony Unrated
 	#define DA_W 1
 	#define DA_X 0.04375
 	#define DA_Y 43.75
 	#define DB_Y 5
-	#define TW 1
+	#define RH 1
 #elif (App == 0x23D5135F ) //Alien Isolation
 	#define DA_X 0.050
 	#define DA_Y 18.75
@@ -519,32 +522,32 @@ static const int DFW = 0;                               //Delay Frame Workaround
 	#define DC_X 0.22
 	#define DC_Y -0.1
 	#define DC_W -0.022
-	#define TW 1
+	#define RH 1
 #elif (App == 0x5839915F ) //35MM
 	#define DA_Y 35.00
 	#define DB_X 1
 	#define DB_Y 2
-	#define TW 1
+	#define RH 1
 #elif (App == 0x578862 ) //Condemned Criminal Origins
 	#define DA_Y 162.5
 	#define DA_Z 0.00025
 	#define DA_X 0.040
 	#define DB_Y 4
 	#define DB_W 49
-	#define TW 1
+	#define RH 1
 #elif (App == 0xA67FA4BC ) //Outlast
 	#define DA_Y 30.0
 	#define DA_Z 0.0004
 	#define DA_X 0.043750
 	#define DB_Y 5
-	#define TW 1
+	#define RH 1
 #elif (App == 0xDCC7F877 ) //Outlast II
 	#define DA_W 1
 	#define DA_Y 50.0
 	#define DA_Z 0.0004
 	#define DA_X 0.056250
 	#define DB_Y 4
-	#define TW 1
+	#define RH 1
 #elif (App == 0x60F43F45 ) //Resident Evil 7
 	#define DA_W 1
 	#define DA_Y 30.0
@@ -559,7 +562,7 @@ static const int DFW = 0;                               //Delay Frame Workaround
 	#define DC_Y 0.1
 	#define DC_Z -0.024
 	#define DC_W -0.05
-	#define TW 1
+	#define RH 1
 #elif (App == 0x1B8B9F54 ) //TheEvilWithin
 	#define DA_Y 40.0
 	#define DA_Z 0.0001
@@ -583,19 +586,19 @@ static const int DFW = 0;                               //Delay Frame Workaround
 	#define DA_X 0.04
 	#define DB_Y 4
 	#define DB_Z 0.125
-	#define TW 1
+	#define RH 1
 #elif (App == 0x706C8618 ) //Layer of Fear
 	#define DB_X 1
 	#define DA_Y 17.50
 	#define DA_X 0.035
 	#define DB_Y 5
-	#define TW 1
+	#define RH 1
 #elif (App == 0x2F0BD376 ) //Minecraft
 	#define DA_Y 17.50
 	#define DA_X 0.0625
 	#define DB_W 25
 	#define DB_Y 3
-	#define TW 1
+	#define RH 1
 #elif (App == 0x84D341E3 ) //Little Nightmares
 	#define DA_W 1
 	#define DA_Y 33.75
@@ -607,14 +610,14 @@ static const int DFW = 0;                               //Delay Frame Workaround
 	#define DA_Y 21.5
 	#define DA_X 0.0375
 	#define DB_Y 4
-	#define TW 1
+	#define RH 1
 #elif (App == 0xABAA2255 ) //The Forest
 	#define DA_W 1
 	#define DB_X 1
 	#define DA_Y 7.5
 	#define DA_X 0.04375
 	#define DB_Y 3
-	#define TW 1
+	#define RH 1
 #elif (App == 0x67A4A23A ) //Crash Bandicoot N.Saine Trilogy
 	#define DA_Y 7.5
 	#define DA_Z 0.250
@@ -649,7 +652,7 @@ static const int DFW = 0;                               //Delay Frame Workaround
 	#define DE_Y 0.1875
 	#define DE_Z 0.475
 	#define DB_Z 0.375
-	#define TW 1
+	#define RH 1
 #elif (App == 0x88004DC9 || App == 0x1DDA9341) //Strange Brigade DX12 & Vulkan
 	#define DA_X 0.0625
 	#define DA_Y 20.0
@@ -658,7 +661,7 @@ static const int DFW = 0;                               //Delay Frame Workaround
 	#define DE_X 2
 	#define DE_Y 0.3
 	#define DE_Z 0.475
-	#define TW 1
+	#define RH 1
 #elif (App == 0xC0052CC4) //Halo The Master Chief Collection
 	#define DA_X 0.0375
 	#define DA_W 1
@@ -669,7 +672,7 @@ static const int DFW = 0;                               //Delay Frame Workaround
 	#define DE_Z 0.375
 	#define WSM 2
 	#define OW_WP "Read Help & Change Me\0Custom WP\0Halo: Reach\0Halo: CE Anniversary\0Halo 2: Anniversary\0Halo 3\0Halo 3: ODST\0Halo 4\0"
-	#define TW 1
+	#define RH 1
 #elif (App == 0x2AB9ECF9) //System ReShock
 	#define DA_X 0.05
 	#define DA_W 1
@@ -687,7 +690,7 @@ static const int DFW = 0;                               //Delay Frame Workaround
 	#define DA_Z 0.000125
 	#define DB_Y 5
 	#define DB_W 12
-	#define TW 1
+	#define RH 1
 #elif (App == 0xA640659C) //MegaMan 2.5D in 3D
 	#define DA_X 0.150
 	#define DA_Y 8.75
@@ -695,7 +698,7 @@ static const int DFW = 0;                               //Delay Frame Workaround
 	#define DE_X 1
 	#define DE_Y 0.275
 	#define DE_Z 0.375
-	#define TW 1
+	#define RH 1
 #elif (App == 0x49654776) //Paratopic
 	#define DA_X 0.05
 	#define DA_W 1
@@ -703,7 +706,7 @@ static const int DFW = 0;                               //Delay Frame Workaround
 	#define DA_Z 0.000250
 	#define DB_Y 3
 	#define DB_X 1
-	#define TW 1
+	#define RH 1
 #elif (App == 0xF7590C95) //Yume Nikki -Dream Diary-
 	#define DA_X 0.0625
 	#define DA_W 1
@@ -714,7 +717,8 @@ static const int DFW = 0;                               //Delay Frame Workaround
 	#define DE_X 1
 	#define DE_Y 0.35
 	#define DE_Z 0.25
-	#define TW 1
+	#define MI 1
+	#define RH 1
 #elif (App == 0x65F37CDF) //American Truck Simulator
 	#define DA_X 0.05375
 	#define DA_Y 15.0
@@ -727,12 +731,12 @@ static const int DFW = 0;                               //Delay Frame Workaround
 	#define DA_W 1
 	#define DA_Y 12.5
 	#define DB_Y 1
-	#define TW 1
+	#define RH 1
 #elif (App == 0xB7C22840) //Strife
 	#define DA_X 0.1
 	#define DA_Y 250.0
 	#define DB_W 59
-	#define TW 1
+	#define RH 1
 #elif (App == 0x21DC397E || App == 0x653AF1E1) //Gold Source
 	#define DA_X 0.045
 	#define DA_Y 21.25
@@ -748,7 +752,7 @@ static const int DFW = 0;                               //Delay Frame Workaround
   #define DE_X 1
 	#define DE_Y 0.375
 	#define DE_Z 0.4
-	#define TW 1
+	#define RH 1
 #elif (App == 0x1E9DCD00) //Witch it
 	#define DA_X 0.0475
 	#define DA_W 1
@@ -800,7 +804,7 @@ static const int DFW = 0;                               //Delay Frame Workaround
 	#define DB_Y 5
 	#define DB_W 51
 	#define DB_X 1
-	#define TW 1
+	#define RH 1
 #elif (App == 0x5925FCC8 ) //Dusk
 	#define DA_Y 25.0
 	#define DA_X 0.05
@@ -877,14 +881,14 @@ static const int DFW = 0;                               //Delay Frame Workaround
 	#define DB_W 64
 	#define DE_X 4
 	#define DE_Z 0.375
-	#define TW 1
+	#define RH 1
 #elif (App == 0xA4B66433 ) //Farcry 3
 	#define DA_X 0.05
 	#define DB_Y 4
 	#define DE_X 4
 	#define DE_Z 0.375
 	#define DE_W 0.350
-	#define TW 1
+	#define RH 1
 #elif (App == 0xC150B652 ) //Farcry 4
 	#define DA_Y 8.75
 	#define DA_W 1
@@ -909,7 +913,7 @@ static const int DFW = 0;                               //Delay Frame Workaround
 	#define DE_X 4
 	#define DE_Z 0.375
 	#define DE_W 0.360
-	#define TW 1
+	#define RH 1
 #elif (App == 0xE3AD2F05 ) //Sauerbraten
 	#define DA_Y 25.0
 	#define DA_X 0.05
@@ -931,7 +935,7 @@ static const int DFW = 0;                               //Delay Frame Workaround
 	#define DE_X 2
 	#define DE_Y 0.162
 	#define DE_Z 0.4375
-	#define TW 1
+	#define RH 1
 #elif (App == 0xCD0E316F ) //Sonic Adventure DX Modded with BetterSADX
 	#define DA_Y 8.75
 	#define DA_X 0.1125
@@ -940,7 +944,7 @@ static const int DFW = 0;                               //Delay Frame Workaround
 	#define DE_Y 0.375
 	#define DE_Z 0.4375
 	#define DB_Z 0.250
-	#define TW 1
+	#define RH 1
 #elif (App == 0xF9B1845A ) //Rime
 	#define DA_W 1
 	#define DA_Y 15.0
@@ -977,7 +981,7 @@ static const int DFW = 0;                               //Delay Frame Workaround
 	#define DE_X 1
 	#define DE_Z 0.375
 	#define DF_X 0.175
-	#define TW 1
+	#define RH 1
 #elif (App == 0x905631F2 ) //Crysis DX10 64bit
 	#define DA_X 0.0375
 	#define DB_Y 5
@@ -1019,7 +1023,8 @@ static const int DFW = 0;                               //Delay Frame Workaround
 	#define DE_Y 0.425
 	#define DE_Z 0.300
 	#define DF_X 0.0375
-#elif (App == 0x3C8DE8E8 ) //Metro Exodus
+	#define DA 1
+	#elif (App == 0x3C8DE8E8 ) //Metro Exodus
 	#define DA_Y 12.5 // What A mess
 	//#define DA_X 0.05
 	#define DA_Z 0.000375
@@ -1049,7 +1054,7 @@ static const int DFW = 0;                               //Delay Frame Workaround
 	#define DE_X 1
 	#define DE_Y 0.5625
 	#define DE_Z 0.375
-	#define TW 1
+	#define RH 1
 #elif (App == 0x21CB998 ) //.Hack//G.U.
 	#define DA_Y 22.5
 	#define DA_X 0.125
@@ -1057,7 +1062,7 @@ static const int DFW = 0;                               //Delay Frame Workaround
 	#define DE_X 1
 	#define DE_Y 0.500
 	#define DE_Z 0.3
-	#define TW 1
+	#define RH 1
 #elif (App == 0x9CC5C8E0 ) //GTA V
 	#define DA_Y 18.75
 	#define DA_W 1
@@ -1067,7 +1072,7 @@ static const int DFW = 0;                               //Delay Frame Workaround
 	#define DE_Y 0.325
 	#define DE_Z 0.375
 	#define DB_Z 0.05
-	#define TW 1
+	#define RH 1
 #elif (App == 0x8CD23575 ) //Dark Souls: Remastered
 	#define DA_Y 50.0
     #define DA_Z 0.001
@@ -1117,7 +1122,7 @@ static const int DFW = 0;                               //Delay Frame Workaround
 	#define DE_Y 0.5
 	#define DE_Z 0.375
 	#define DF_X 0.105
-	#define TW 1
+	#define RH 1
 #elif (App == 0x68EF1B4E ) //Serious Sam Fusion
 	#define DA_W 1
 	#define DA_X 0.075
@@ -1129,7 +1134,7 @@ static const int DFW = 0;                               //Delay Frame Workaround
 	#define DE_Y 0.5
 	#define DE_Z 0.375
 	#define DB_Z 0.150
-	#define TW 1
+	#define RH 1
 #elif (App == 0xEACB4D0D ) //Final Fantasy XV Windows Edition
 	#define DA_X 0.0375
 	#define DA_Y 30.0
@@ -1137,7 +1142,7 @@ static const int DFW = 0;                               //Delay Frame Workaround
 	#define DE_X 2
 	#define DE_Y 0.5
 	#define DE_Z 0.375
-	#define TW 1
+	#define RH 1
 #elif (App == 0xAC4DF2C4 ) //Mafia II Definitive Edition
 	#define DA_X 0.05
 	#define DA_Y 37.5
@@ -1147,7 +1152,7 @@ static const int DFW = 0;                               //Delay Frame Workaround
 	#define DE_Y 0.5
 	#define DE_Z 0.375
 	#define DF 1
-	#define TW 1
+	#define RH 1
 #elif (App == 0xEA75DEDE ) //Lost Planet Colonies
 	#define DA_X 0.05
 	#define DA_Y 37.5
@@ -1155,7 +1160,7 @@ static const int DFW = 0;                               //Delay Frame Workaround
 	#define DE_X 2
 	#define DE_Y 0.5
 	#define DE_Z 0.375
-	#define TW 1
+	#define RH 1
 #elif (App == 0xEFC486AF ) //Lost Planet 2 DX11
 	#define DA_X 0.04375
 	#define DA_Y 37.5
@@ -1173,7 +1178,7 @@ static const int DFW = 0;                               //Delay Frame Workaround
 	#define DE_Y 0.5
 	#define DE_Z 0.375
     #define DE_W 0.3875
-	#define TW 1
+	#define RH 1
 #elif (App == 0x9896B9F5 ) //Old City: Leviathan
 	#define DA_X 0.025
 	#define DA_Y 100.0
@@ -1183,13 +1188,13 @@ static const int DFW = 0;                               //Delay Frame Workaround
 	#define DE_Y 0.5
 	#define DE_Z 0.375
     #define DB_Z 0.0275
-	#define TW 1
+	#define RH 1
 #elif (App == 0xE4F6014F ) //Shovel Knight
     #define DB_X 1
 	#define DA_X 0.035
 	#define DA_Y 22.5
 	#define DA_Z 0.483
-	#define TW 1
+	#define RH 1
 #elif (App == 0x94EFD213 ) //Chex Quest HD
     #define DA_W 1
 	#define DA_X 0.1
@@ -1224,6 +1229,7 @@ static const int DFW = 0;                               //Delay Frame Workaround
 	#define DA_Z 0.00025
     #define DB_X 1
 	#define DB_Y 4
+	#define MI 1
 #elif (App == 0x6DDCD106 ) //The Town of Light
 	#define DA_X 0.100
 	#define DA_Y 10.0
@@ -1246,14 +1252,44 @@ static const int DFW = 0;                               //Delay Frame Workaround
     #define DE_W 0.05625
 #elif (App == 0x38ED56AE ) //Heavy Rain
 	#define DA_X 0.0325
-	#define DA_Y 50
+	#define DA_Y 50.0
 	//#define DA_Z 0.001
 	#define DB_Y 5
 	#define DE_X 1
 	#define DE_Y 0.5
 	#define DE_Z 0.375
 	#define DB_Z 0.0675
-	#define TW 1
+	#define MI 1
+#elif (App == 0x2F1ABF4A ) //Detroit Become Human
+	#define DA_W 1
+    #define DB_X 1
+	#define DA_X 0.0375
+	#define DA_Y 50.0
+	//#define DA_Z 0.001
+	#define DB_Y 4
+	#define DE_X 1
+	#define DE_Y 0.5
+	#define DE_Z 0.375
+#elif (App == 0x9DA6C947 ) //Beyond Two Souls
+	#define DA_X 0.05
+	#define DA_Y 25.0
+	#define DB_Y 4
+	#define DE_X 1
+	#define DE_Y 0.5
+	#define DE_Z 0.375
+    #define DF_Z 0.5
+	#define DS 1
+	#define LB 1
+#elif (App == 0x89351FC4 ) //3DSen Games
+	#define DA_W 1
+    #define DB_X 1
+	#define DA_X 0.1
+	#define DA_Y 375.0
+	#define DB_Y 5
+	#define DE_X 1
+	#define DE_Y 0.5
+	#define DE_Z 0.250
+	#define DF 1
 #else
 	#define NP 1 //No Profile
 #endif
@@ -1324,7 +1360,7 @@ static const int DFW = 0;                               //Delay Frame Workaround
 #ifndef DE_W
     #define DE_W Weapon_Near_Depth_D
 #endif
-// X = [ZPD Weapon Boundary] Y = [NULL_A] Z = [NULL_B] W = [NULL_C]
+// X = [ZPD Weapon Boundary] Y = [NULL_A] Z = [Edge Masking] W = [HUD]
 #ifndef DF_X
     #define DF_X ZPD_Weapon_Boundary_Adjust
 #endif
@@ -1332,7 +1368,7 @@ static const int DFW = 0;                               //Delay Frame Workaround
     #define DF_Y NULL_A
 #endif
 #ifndef DF_Z
-    #define DF_Z NULL_B
+    #define DF_Z Edge_Masking
 #endif
 #ifndef DF_W
     #define DF_W HUDX_D
@@ -1345,8 +1381,8 @@ static const int DFW = 0;                               //Delay Frame Workaround
 #ifndef NC
     #define NC NCW //Not Compatible Warning
 #endif
-#ifndef TW
-    #define TW FTW //Flashing Text Warning
+#ifndef RH
+    #define RH RHW //Flashing Text Warning
 #endif
 #ifndef NP
     #define NP NPW //No Profile Warning
@@ -1366,7 +1402,18 @@ static const int DFW = 0;                               //Delay Frame Workaround
 #ifndef DF
     #define DF DFW //Delay Frame Workaround
 #endif
-
+#ifndef MI
+    #define MI MIW //Major Issues Warning
+#endif
+#ifndef DS
+    #define DS DSW //Depth Selection Warning
+#endif
+#ifndef LB
+    #define LB ALB //Auto Letter Box
+#endif
+#ifndef DA
+    #define DA DAA //Disable Anti-Aliasing
+#endif
 //Weapon Settings
 #ifndef OW_WP
     #define OW_WP "WP Off\0Custom WP\0WP 0\0WP 1\0WP 2\0WP 3\0WP 4\0WP 5\0WP 6\0WP 7\0WP 8\0WP 9\0WP 10\0WP 11\0WP 12\0WP 13\0WP 14\0WP 15\0WP 16\0WP 17\0WP 18\0WP 19\0WP 20\0WP 21\0WP 22\0WP 23\0WP 24\0WP 25\0WP 26\0WP 27\0WP 28\0WP 29\0WP 30\0WP 31\0WP 32\0WP 33\0WP 34\0WP 35\0WP 36\0WP 37\0WP 38\0WP 39\0WP 40\0WP 41\0WP 42\0WP 43\0WP 44\0WP 45\0WP 46\0WP 47\0WP 48\0WP 49\0WP 50\0WP 51\0WP 52\0WP 53\0WP 54\0WP 55\0WP 56\0WP 57\0WP 58\0WP 59\0WP 60\0WP 61\0WP 62\0WP 63\0WP 64\0WP 65\0WP 66\0WP 67\0WP 68\0WP 69\0WP 70\0WP 71\0WP 72\0WP 73\0WP 74\0WP 75\0"
@@ -1377,185 +1424,188 @@ static const int DFW = 0;                               //Delay Frame Workaround
 
 #if WSM == 1
 float3 Weapon_Profiles(float WP ,float3 Weapon_Adjust) //Tried Switch But, can't compile in some older versions of ReShade.
-{   if(WP == 2)
-        return float3(0.425,5.0,1.125);      //WP 0  | ES: Oblivion
-    else if(WP == 3)
-        return float3(0.276,16.25,9.2);      //WP 1  | BorderLands
-    else if(WP == 4)
-        return float3(0.5,32.5,7.15);        //WP 2  | BorderLands 2
-    else if(WP == 5)
-        return float3(0.284,10.5,0.8725);    //WP 3  | BorderLands 3
-    else if(WP == 6)
-        return float3(0.253,28.75,98.5);     //WP 4  | Fallout 4 #2D950D30
-    else if(WP == 7)
-        return float3(0.276,20.0,9.5625);    //WP 5  | Skyrim: SE #3950D04E
-    else if(WP == 8)
-        return float3(0.338,20.0,9.20);      //WP 6  | DOOM 2016 #142EDFD6
-    else if(WP == 9)
-        return float3(0.255,177.5,63.025);   //WP 7  | CoD:Black Ops | CoD:MW2 | CoD:MW3
-    else if(WP == 10)
-        return float3(0.254,100.0,0.9843);   //WP 8  | CoD:Black Ops II
-    else if(WP == 11)
-        return float3(0.254,203.125,0.98435);//WP 9  | CoD:Ghost
-    else if(WP == 12)
-        return float3(0.254,203.125,0.98433);//WP 10 | CoD:AW | CoD:MW Re
-    else if(WP == 13)
-        return float3(0.254,125.0,0.9843);   //WP 11 | CoD:IW
-    else if(WP == 14)
-        return float3(0.255,200.0,63.0);     //WP 12 | CoD:WaW
-    else if(WP == 15)
-        return float3(0.510,162.5,3.975);    //WP 13 | CoD | CoD:UO | CoD:2
-    else if(WP == 16)
-        return float3(0.254,23.75,0.98425);  //WP 14 | CoD: Black Ops IIII
-    else if(WP == 17)
-        return float3(0.375,60.0,15.15625);  //WP 15 | Quake DarkPlaces
-    else if(WP == 18)
-        return float3(0.7,14.375,2.5);       //WP 16 | Quake 2 XP
-    else if(WP == 19)
-        return float3(0.750,30.0,1.050);     //WP 17 | Quake 4
-    else if(WP == 20)
-        return float3(0.278,62.5,9.1);       //WP 18 | Half-Life 2
-    else if(WP == 21)
-        return float3(0.450,12.0,23.75);     //WP 19 | Metro Redux Games
-    else if(WP == 22)
-        return float3(0.350,12.5,2.0);       //WP 20 | Soldier of Fortune
-    else if(WP == 23)
-        return float3(0.286,1500.0,7.0);     //WP 21 | Deus Ex rev
-    else if(WP == 24)
-        return float3(35.0,250.0,0);         //WP 21 | Deus Ex
-    else if(WP == 25)
-        return float3(0.625,350.0,0.785);    //WP 23 | Minecraft
-    else if(WP == 26)
-        return float3(0.255,6.375,53.75);    //WP 24 | S.T.A.L.K.E.R: Games
-    else if(WP == 27)
-        return float3(0,0,0);                //WP 25 | Game
-    else if(WP == 28)
-        return float3(0.750,30.0,1.025);     //WP 26 | Prey 2006
-    else if(WP == 29)
-        return float3(0.266,30.0,14.0);      //WP 27 | Wrath
-    else if(WP == 30)
-        return float3(0,0,0);                //WP 28 | Game
-    else if(WP == 31)
-        return float3(0.7,9.0,2.3625);       //WP 29 | Return to Castle Wolfenstine
-    else if(WP == 32)
-        return float3(0.4894,62.50,0.98875); //WP 30 | Wolfenstein
-    else if(WP == 33)
-        return float3(1.0,93.75,0.81875);    //WP 31 | Wolfenstein: The New Order #C770832 / The Old Blood #3E42619F
-    else if(WP == 34)
-        return float3(0,0,0);                //WP 32 | Wolfenstein II: The New Colossus / Cyberpilot
-    else if(WP == 35)
-        return float3(0.278,37.50,9.1);      //WP 33 | Black Mesa #6FC1FF71
-    else if(WP == 36)
-        return float3(0.420,4.75,1.0);       //WP 34 | Blood 2 #6D3CD99E
-    else if(WP == 37)
-        return float3(0.500,4.75,0.75);      //WP 35 | Blood 2 Alt #6D3CD99E
-    else if(WP == 38)
-      return float3(0.78,21.25,0.1875);      //WP 36 | SOMA #F22A9C7D
-    else if(WP == 39)
-        return float3(0.444,20.0,1.1875);    //WP 37 | Cryostasis #6FB6410B
-    else if(WP == 40)
-        return float3(0.286,80.0,7.0);       //WP 38 | Unreal Gold with v227 #16B8D61A
-    else if(WP == 41)
-        return float3(0.280,18.75,9.03);     //WP 39 | Serious Sam Revolution #EB9EEB74/Serious Sam HD: The First Encounter /The Second Encounter /Serious Sam 2 #8238E9CA/ Serious Sam 3: BFE*
-    else if(WP == 42)
-        return float3(0.3,17.5,0.9015);      //WP 40 | Serious Sam Fusion
-    else if(WP == 43)
-        return float3(0,0,0);                //WP 41 | Serious Sam 4: Planet Badass
-    else if(WP == 44)
-        return float3(0.277,20.0,8.8);       //WP 42 | TitanFall 2 #308AEBEA
-    else if(WP == 45)
-        return float3(0.7,16.250,0.300);     //WP 43 | Project Warlock #5FCFB1E5
-    else if(WP == 46)
-        return float3(0.625,9.0,2.375);      //WP 44 | Kingpin Life of Crime #7DCCBBBD
-    else if(WP == 47)
-        return float3(0.28,20.0,9.0);        //WP 45 | EuroTruckSim2 #9C5C946E
-    else if(WP == 48)
-        return float3(0.458,10.5,1.105);     //WP 46 | F.E.A.R #B302EC7 & F.E.A.R 2: Project Origin #91D9EBAF
-    else if(WP == 49)
-        return float3(1.5,37.5,0.99875);     //WP 47 | Condemned Criminal Origins
-    else if(WP == 50)
-        return float3(2.0,16.25,0.09);       //WP 48 | Immortal Redneck CP alt 1.9375 #2C742D7C
-    else if(WP == 51)
-        return float3(0.485,62.5,0.9625);    //WP 49 | Dementium 2
-    else if(WP == 52)
-        return float3(0.489,68.75,1.02);     //WP 50 | NecroVisioN & NecroVisioN: Lost Company #663E66FE
-    else if(WP == 53)
-        return float3(1.0,237.5,0.83625);    //WP 51 | Rage64 #AA6B948E
-    else if(WP == 54)
-        return float3(0,0,0);                //WP 52 | Rage 2
-    else if(WP == 55)
-        return float3(0.425,15.0,99.0);      //WP 53 | Bioshock Remastred #44BD41E1
-    else if(WP == 56)
-        return float3(0.425,21.25,99.5);     //WP 54 | Bioshock 2 Remastred #7CF5A01
-    else if(WP == 57)
-        return float3(0.425,5.25,1.0);       //WP 55 | No One Lives Forever
-    else if(WP == 58)
-        return float3(0.519,31.25,8.875);    //WP 56 | No One Lives Forever 2
-    else if(WP == 59)
-        return float3(0.5,8.0,0);            //WP 57 | Strife
-    else if(WP == 60)
-        return float3(0.350,9.0,1.8);        //WP 58 | Gold Source
-    else if(WP == 61)
-        return float3(1.825,13.75,0);        //WP 59 | No Man Sky FPS Mode
-    else if(WP == 62)
-        return float3(1.962,5.5,0);          //WP 60 | Dying Light
-    else if(WP == 63)
-        return float3(0.287,180.0,9.0);      //WP 61 | Farcry
-    else if(WP == 64)
-        return float3(0.2503,55.0,1000.0);   //WP 62 | Farcry 2
-    else if(WP == 65)
-        return float3(0,0,0);                //WP 65 | Game
-    else if(WP == 66)
-        return float3(0.2503,52.5,987.5);    //WP 64 | Singularity
-    else if(WP == 67)
-    	return float3(0,0,0);                //WP 65 | Game
-	else if(WP == 68)
-		return float3(1.025,10.0,0.185);     //WP 66 | Doom Eternal
-	else if(WP == 69)
-		return float3(0,0,0);                //WP 67 | Game
-	else if(WP == 70)
-		return float3(0.251,5.6875,950.0);   //WP 68 | Mirror Edge
-	else if(WP == 71)
-		return float3(0,0,0);                //WP 69 | Game
-	else if(WP == 72)
-		return float3(0,0,0);                //WP 70 | Game
-	else if(WP == 73)
-		return float3(0.800,15.0,0.3);       //WP 71 | Sauerbraten 2
-	else if(WP == 74)
-		return float3(13.3,62.5,0.0);        //WP 72 | Chex Quest HD
-	else if(WP == 75)
-		return float3(0,0,0);                //WP 73 | Game
-	else if(WP == 76)
-		return float3(0,0,0);                //WP 74 | Game
-	else if(WP == 77)
-		return float3(0,0,0);                //WP 75 | Game
-    else
-        return Weapon_Adjust;
+{   float3 Value = Weapon_Adjust;
+		if (WP == 2)
+        Value = float3(0.425,5.0,1.125);      //WP 0  | ES: Oblivion
+    if (WP == 3)
+        Value = float3(0.276,16.25,9.2);      //WP 1  | BorderLands
+    if (WP == 4)
+        Value = float3(0.5,32.5,7.15);        //WP 2  | BorderLands 2
+    if (WP == 5)
+        Value = float3(0.284,10.5,0.8725);    //WP 3  | BorderLands 3
+    if (WP == 6)
+        Value = float3(0.253,28.75,98.5);     //WP 4  | Fallout 4 #2D950D30
+    if (WP == 7)
+        Value = float3(0.276,20.0,9.5625);    //WP 5  | Skyrim: SE #3950D04E
+    if (WP == 8)
+        Value = float3(0.338,20.0,9.20);      //WP 6  | DOOM 2016 #142EDFD6
+    if (WP == 9)
+        Value = float3(0.255,177.5,63.025);   //WP 7  | CoD:Black Ops | CoD:MW2 | CoD:MW3
+    if (WP == 10)
+        Value = float3(0.254,100.0,0.9843);   //WP 8  | CoD:Black Ops II
+    if (WP == 11)
+        Value = float3(0.254,203.125,0.98435);//WP 9  | CoD:Ghost
+    if (WP == 12)
+        Value = float3(0.254,203.125,0.98433);//WP 10 | CoD:AW | CoD:MW Re
+    if (WP == 13)
+        Value = float3(0.254,125.0,0.9843);   //WP 11 | CoD:IW
+    if (WP == 14)
+        Value = float3(0.255,200.0,63.0);     //WP 12 | CoD:WaW
+    if (WP == 15)
+        Value = float3(0.510,162.5,3.975);    //WP 13 | CoD | CoD:UO | CoD:2
+    if (WP == 16)
+        Value = float3(0.254,23.75,0.98425);  //WP 14 | CoD: Black Ops IIII
+    if (WP == 17)
+        Value = float3(0.375,60.0,15.15625);  //WP 15 | Quake DarkPlaces
+    if (WP == 18)
+        Value = float3(0.7,14.375,2.5);       //WP 16 | Quake 2 XP
+    if (WP == 19)
+        Value = float3(0.750,30.0,1.050);     //WP 17 | Quake 4
+    if (WP == 20)
+        Value = float3(0.278,62.5,9.1);       //WP 18 | Half-Life 2
+    if (WP == 21)
+        Value = float3(0.450,12.0,23.75);     //WP 19 | Metro Redux Games
+    if (WP == 22)
+        Value = float3(0.350,12.5,2.0);       //WP 20 | Soldier of Fortune
+    if (WP == 23)
+        Value = float3(0.286,1500.0,7.0);     //WP 21 | Deus Ex rev
+    if (WP == 24)
+        Value = float3(35.0,250.0,0);         //WP 21 | Deus Ex
+    if (WP == 25)
+        Value = float3(0.625,350.0,0.785);    //WP 23 | Minecraft
+    if (WP == 26)
+        Value = float3(0.255,6.375,53.75);    //WP 24 | S.T.A.L.K.E.R: Games
+    if (WP == 27)
+        Value = float3(0,0,0);                //WP 25 | Game
+    if (WP == 28)
+        Value = float3(0.750,30.0,1.025);     //WP 26 | Prey 2006
+    if (WP == 29)
+        Value = float3(0.266,30.0,14.0);      //WP 27 | Wrath
+    if (WP == 30)
+        Value = float3(0,0,0);                //WP 28 | Game
+    if (WP == 31)
+        Value = float3(0.7,9.0,2.3625);       //WP 29 | Return to Castle Wolfenstine
+    if (WP == 32)
+        Value = float3(0.4894,62.50,0.98875); //WP 30 | Wolfenstein
+    if (WP == 33)
+        Value = float3(1.0,93.75,0.81875);    //WP 31 | Wolfenstein: The New Order #C770832 / The Old Blood #3E42619F
+    if (WP == 34)
+        Value = float3(0,0,0);                //WP 32 | Wolfenstein II: The New Colossus / Cyberpilot
+    if (WP == 35)
+        Value = float3(0.278,37.50,9.1);      //WP 33 | Black Mesa #6FC1FF71
+    if (WP == 36)
+        Value = float3(0.420,4.75,1.0);       //WP 34 | Blood 2 #6D3CD99E
+    if (WP == 37)
+        Value = float3(0.500,4.75,0.75);      //WP 35 | Blood 2 Alt #6D3CD99E
+    if (WP == 38)
+        Value = float3(0.78,21.25,0.1875);      //WP 36 | SOMA #F22A9C7D
+    if (WP == 39)
+        Value = float3(0.444,20.0,1.1875);    //WP 37 | Cryostasis #6FB6410B
+    if (WP == 40)
+        Value = float3(0.286,80.0,7.0);       //WP 38 | Unreal Gold with v227 #16B8D61A
+    if (WP == 41)
+        Value = float3(0.280,18.75,9.03);     //WP 39 | Serious Sam Revolution #EB9EEB74/Serious Sam HD: The First Encounter /The Second Encounter /Serious Sam 2 #8238E9CA/ Serious Sam 3: BFE*
+    if (WP == 42)
+        Value = float3(0.3,17.5,0.9015);      //WP 40 | Serious Sam Fusion
+    if (WP == 43)
+        Value = float3(0,0,0);                //WP 41 | Serious Sam 4: Planet Badass
+    if (WP == 44)
+        Value = float3(0.277,20.0,8.8);       //WP 42 | TitanFall 2 #308AEBEA
+    if (WP == 45)
+        Value = float3(0.7,16.250,0.300);     //WP 43 | Project Warlock #5FCFB1E5
+    if (WP == 46)
+        Value = float3(0.625,9.0,2.375);      //WP 44 | Kingpin Life of Crime #7DCCBBBD
+    if (WP == 47)
+        Value = float3(0.28,20.0,9.0);        //WP 45 | EuroTruckSim2 #9C5C946E
+    if (WP == 48)
+        Value = float3(0.458,10.5,1.105);     //WP 46 | F.E.A.R #B302EC7 & F.E.A.R 2: Project Origin #91D9EBAF
+    if (WP == 49)
+        Value = float3(1.5,37.5,0.99875);     //WP 47 | Condemned Criminal Origins
+    if (WP == 50)
+        Value = float3(2.0,16.25,0.09);       //WP 48 | Immortal Redneck CP alt 1.9375 #2C742D7C
+    if (WP == 51)
+        Value = float3(0.485,62.5,0.9625);    //WP 49 | Dementium 2
+    if (WP == 52)
+        Value = float3(0.489,68.75,1.02);     //WP 50 | NecroVisioN & NecroVisioN: Lost Company #663E66FE
+    if (WP == 53)
+        Value = float3(1.0,237.5,0.83625);    //WP 51 | Rage64 #AA6B948E
+    if (WP == 54)
+        Value = float3(0,0,0);                //WP 52 | Rage 2
+    if (WP == 55)
+        Value = float3(0.425,15.0,99.0);      //WP 53 | Bioshock Remastred #44BD41E1
+    if (WP == 56)
+        Value = float3(0.425,21.25,99.5);     //WP 54 | Bioshock 2 Remastred #7CF5A01
+    if (WP == 57)
+        Value = float3(0.425,5.25,1.0);       //WP 55 | No One Lives Forever
+    if (WP == 58)
+        Value = float3(0.519,31.25,8.875);    //WP 56 | No One Lives Forever 2
+    if (WP == 59)
+        Value = float3(0.5,8.0,0);            //WP 57 | Strife
+    if (WP == 60)
+        Value = float3(0.350,9.0,1.8);        //WP 58 | Gold Source
+    if (WP == 61) //Unity Limit if using else if
+        Value = float3(1.825,13.75,0);        //WP 59 | No Man Sky FPS Mode
+    if (WP == 62)
+        Value = float3(1.962,5.5,0);          //WP 60 | Dying Light
+    if (WP == 63)
+        Value = float3(0.287,180.0,9.0);      //WP 61 | Farcry
+    if (WP == 64)
+        Value = float3(0.2503,55.0,1000.0);   //WP 62 | Farcry 2
+    if (WP == 65)
+        Value = float3(0,0,0);                //WP 65 | Game
+    if (WP == 66)
+        Value = float3(0.2503,52.5,987.5);    //WP 64 | Singularity
+    if (WP == 67)
+        Value = float3(0,0,0);                //WP 65 | Game
+    if (WP == 68)
+        Value = float3(1.025,10.0,0.185);     //WP 66 | Doom Eternal
+    if (WP == 69)
+        Value = float3(0,0,0);                //WP 67 | Game
+    if (WP == 70)
+        Value = float3(0.251,5.6875,950.0);   //WP 68 | Mirror Edge
+    if (WP == 71)
+        Value = float3(0,0,0);                //WP 69 | Game
+    if (WP == 72)
+        Value = float3(0,0,0);                //WP 70 | Game
+    if (WP == 73)
+        Value = float3(0.800,15.0,0.3);       //WP 71 | Sauerbraten 2
+    if (WP == 74)
+        Value = float3(13.3,62.5,0.0);        //WP 72 | Chex Quest HD
+    if (WP == 75)
+        Value = float3(0,0,0);                //WP 73 | Game
+    if (WP == 76)
+        Value = float3(0,0,0);                //WP 74 | Game
+    if (WP == 77)
+        Value = float3(0,0,0);                //WP 75 | Game
+
+		return Value;
 }
 #elif WSM == 2
 float3 Weapon_Profiles(float WP ,float3 Weapon_Adjust) // MCC
-{   if(WP == 2)
-        return float3(0,0,0);                //WP 0  | Halo: Reach
-    else if(WP == 3)
-        return float3(1.5,26.25,0.2);        //WP 1  | Halo: CE Anniversary
-    else if(WP == 4)
-        return float3(0,0,0);                //WP 2  | Halo 2: Anniversary
-    else if(WP == 5)
-        return float3(0,0,0);                //WP 3  | Halo 3
-    else if(WP == 6)
-        return float3(0,0,0);                //WP 4  | Halo 3: ODST
-    else if(WP == 7)
-        return float3(0,0,0);                //WP 5  | Halo 4
-	else
-		return Weapon_Adjust;
+{   float3 Value = Weapon_Adjust;
+		if (WP == 2)
+        Value = float3(0,0,0);                //WP 0  | Halo: Reach
+    if (WP == 3)
+        Value = float3(1.5,26.25,0.2);        //WP 1  | Halo: CE Anniversary
+    if (WP == 4)
+        Value = float3(0,0,0);                //WP 2  | Halo 2: Anniversary
+    if (WP == 5)
+        Value = float3(0,0,0);                //WP 3  | Halo 3
+    if (WP == 6)
+        Value = float3(0,0,0);                //WP 4  | Halo 3: ODST
+    if (WP == 7)
+        Value = float3(0,0,0);                //WP 5  | Halo 4
+
+		return Value;
 }
 #elif WSM == 3
 float3 Weapon_Profiles(float WP ,float3 Weapon_Adjust) // Prey 2017
-{   if(WP == 2)
-        return float3(0.2832,13.125,0.8725); //WP 0 | Prey 2017 High Settings and <
-    else if(WP == 3)
-				return float3(0.2832,13.75,0.915625);//WP 1 | Prey 2017 Very High
-		else
-				return Weapon_Adjust;
+{   float3 Value = Weapon_Adjust;
+		if (WP == 2)
+        Value = float3(0.2832,13.125,0.8725); //WP 0 | Prey 2017 High Settings and <
+    if (WP == 3)
+				Value = float3(0.2832,13.75,0.915625);//WP 1 | Prey 2017 Very High
+
+		return Value;
 }
 #endif
