@@ -1022,7 +1022,7 @@ static const int DAA = 0;                                //Disable Anti-Aliasing
 	#define DE_X 4
 	#define DE_Y 0.425
 	#define DE_Z 0.300
-	#define DF_X 0.0375
+	#define DF_X 0.085
 	#define DA 1
 	#elif (App == 0x3C8DE8E8 ) //Metro Exodus
 	#define DA_Y 12.5 // What A mess

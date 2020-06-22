@@ -626,7 +626,7 @@ sampler SamplerDMVR
 		Texture = texDMVR;
 	};
 
-texture texzBufferVR  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = R16F; };
+texture texzBufferVR  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RG16F; };
 
 sampler SamplerzBufferVR
 	{
@@ -953,6 +953,14 @@ float Fade_in_out(float2 texcoord)
 	return PStoredfade + (Trigger_Fade - PStoredfade) * (1.0 - exp(-frametime/AA)); ///exp2 would be even slower
 }
 
+float MaskW(float2 texcoord)
+{
+	float2 texXY = texcoord + 10 * pix,H_V = 0.990;
+	float2 midHV = (H_V-1) * float2(BUFFER_WIDTH * 0.5,BUFFER_HEIGHT * 0.5) * pix;
+	texcoord = float2((texXY.x*H_V.x)-midHV.x,(texXY.y*H_V.y)-midHV.y);
+	return PrepDepth(texcoord).w;
+}
+
 float Fade(float2 texcoord)
 { //Check Depth
 	float CD, Detect;
@@ -975,15 +983,21 @@ float Fade(float2 texcoord)
 				else if(ZPD_Boundary == 3)
 					GridXY = float2( CDArray_A[i], CDArray_B[j]);
 
-				float ZPD_Change = ZPD_Boundary == 3 || ZPD_Boundary == 4 ? 1 - PrepDepth(texcoord).y : 1 ;
 				float ZPD_I = ZPD_Boundary == 2 || ZPD_Boundary == 4  ? CDArrayZPD_B[i] : CDArrayZPD_A[i] ;
+
+				if(ZPD_Boundary == 3 || ZPD_Boundary == 4)
+				{
+					if ( MaskW(GridXY) == 1 )
+						ZPD_I = 0;
+				}
+
 				// CDArrayZPD[i] reads across prepDepth.......
-				CD = ZPD_Change - ZPD_I / PrepDepth( GridXY ).w;
-				//CD /= 49;
+				CD = 1 - ZPD_I / PrepDepth(GridXY).w;
+
 				#if UI_MASK
-					CD = max( ZPD_Change - ZPD_I / HUD_Mask(GridXY), CD );
+					CD = max( 1 - ZPD_I / HUD_Mask(GridXY), CD );
 				#endif
-				if (CD < 0.0)
+				if (CD < 0.0)//may lower this to like -0.1
 					Detect = 1;
 			}
 		}
