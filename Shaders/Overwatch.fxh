@@ -68,7 +68,8 @@ static const int DFW = 0;                               //Delay Frame Workaround
 static const int MIW = 0;                               //Major Issues Warning
 static const int DSW = 0;                               //Depth Selection Warning
 static const int ALB = 0;                               //Auto Letter Box
-static const int DAA = 0;                                //Disable Anti-Aliasing
+static const int DAA = 0;                               //Disable Anti-Aliasing
+static const int NWW = 0;                               //Network Warning
 //Special Handling
 #if exists "LEGOBatman.exe"                             //Lego Batman
 	#define sApp 0xA100000
@@ -110,15 +111,16 @@ static const int DAA = 0;                                //Disable Anti-Aliasing
 	#define DB_W 2
 	#define DB_Y 3
 #elif (App == 0x7B81CCAB || App == 0xFB9A99AB )	//BorderLands 2 & Pre-Sequel
-    #define DA_Y 25.0
-    #define DA_Z 0.00025
-    #define DA_X 0.03625
+	#define DA_Y 25.0
+	#define DA_Z 0.00025
+	#define DA_X 0.03625
 	#define DB_Y 2
-    #define DB_W 4
-    #define DE_X 4
-    #define DE_Y 0.625
-    #define DE_Z 0.300
-    #define DF_X 0.300
+	#define DB_W 4
+	#define DE_X 4
+	#define DE_Y 0.625
+	#define DE_Z 0.300
+	#define DF_X 0.300
+	#define NW 1
 #elif (App == 0x2D950D30 )	//Fallout 4
 	#define DA_Y 6.25
 	#define DB_Y 2
@@ -205,7 +207,7 @@ static const int DAA = 0;                                //Disable Anti-Aliasing
 #elif (App == 0x6FC1FF71 ) //Black Mesa
 	#define DA_Y 8.75
 	#define DA_Z 0.000125
-    #define DA_X 0.0325
+	#define DA_X 0.0325
 	#define DB_Y 2
 	#define DB_W 35
 	#define DB_Z 0.08625
@@ -343,6 +345,7 @@ static const int DAA = 0;                                //Disable Anti-Aliasing
 	#define DA_W 1
 	#define DB_Y 3
 	#define DB_Z 0.1375
+	#define NW 1
 	#define RH 1
 #elif (App == 0x5961D1CC ) //Requiem: Avenging Angel
 	#define DA_Y 37.5
@@ -843,6 +846,7 @@ static const int DAA = 0;                                //Disable Anti-Aliasing
 	#define DE_X 1
 	#define DE_Y 0.300
 	#define DE_Z 0.4375
+	#define NW 1
 #elif (App == 0xC073C2BB ) //StreetFighter V
 	#define DA_Y 14.0
 	#define DA_X 0.250
@@ -867,6 +871,7 @@ static const int DAA = 0;                                //Disable Anti-Aliasing
 	#define DB_Y 4
 	#define DE_X 4
 	#define DE_Z 0.375
+	#define NW 1
 #elif (App == 0x892CA092 ) //Farcry
 	#define DA_Y 7.0
 	#define DA_Z 0.000375
@@ -1011,6 +1016,7 @@ static const int DAA = 0;                                //Disable Anti-Aliasing
 	#define DB_X 1
 	#define DA_X 0.04375
 	#define DB_Y 4
+	#define NW 1
 #elif (App == 0xC06FE818 ) //BorderLands 3
 	#define DA_Y 18.0
 	#define DA_Z 0.0001375
@@ -1023,6 +1029,7 @@ static const int DAA = 0;                                //Disable Anti-Aliasing
 	#define DE_Y 0.425
 	#define DE_Z 0.300
 	#define DF_X 0.085
+	#define NW 1
 	#define DA 1
 	#elif (App == 0x3C8DE8E8 ) //Metro Exodus
 	#define DA_Y 12.5 // What A mess
@@ -1075,7 +1082,7 @@ static const int DAA = 0;                                //Disable Anti-Aliasing
 	#define RH 1
 #elif (App == 0x8CD23575 ) //Dark Souls: Remastered
 	#define DA_Y 50.0
-    #define DA_Z 0.001
+	#define DA_Z 0.001
 	#define DA_X 0.05625
 	#define DB_Y 2
 	#define DE_X 2
@@ -1112,6 +1119,7 @@ static const int DAA = 0;                                //Disable Anti-Aliasing
 	#define DE_Z 0.375
 	#define DE_W 0.3975
 	#define DF_X 0.250
+	#define NW 1
 #elif (App == 0x2ECAAF29 ) //Half-Life 2
 	#define DA_Y 8.75
 	#define DA_X 0.04
@@ -1134,6 +1142,7 @@ static const int DAA = 0;                                //Disable Anti-Aliasing
 	#define DE_Y 0.5
 	#define DE_Z 0.375
 	#define DB_Z 0.150
+	#define NW 1
 	#define RH 1
 #elif (App == 0xEACB4D0D ) //Final Fantasy XV Windows Edition
 	#define DA_X 0.0375
@@ -1177,7 +1186,7 @@ static const int DAA = 0;                                //Disable Anti-Aliasing
 	#define DE_X 2
 	#define DE_Y 0.5
 	#define DE_Z 0.375
-    #define DE_W 0.3875
+  #define DE_W 0.3875
 	#define RH 1
 #elif (App == 0x9896B9F5 ) //Old City: Leviathan
 	#define DA_X 0.025
@@ -1187,7 +1196,7 @@ static const int DAA = 0;                                //Disable Anti-Aliasing
 	#define DE_X 1
 	#define DE_Y 0.5
 	#define DE_Z 0.375
-    #define DB_Z 0.0275
+	#define DB_Z 0.0275
 	#define RH 1
 #elif (App == 0xE4F6014F ) //Shovel Knight
     #define DB_X 1
@@ -1196,7 +1205,7 @@ static const int DAA = 0;                                //Disable Anti-Aliasing
 	#define DA_Z 0.483
 	#define RH 1
 #elif (App == 0x94EFD213 ) //Chex Quest HD
-    #define DA_W 1
+	#define DA_W 1
 	#define DA_X 0.1
 	#define DA_Y 112.5
 	#define DA_Z 0.0000125
@@ -1204,8 +1213,8 @@ static const int DAA = 0;                                //Disable Anti-Aliasing
 	#define DE_X 3
 	#define DE_Y 0.5
 	#define DE_Z 0.375
-    #define DB_Z 0.125
-    #define DB_W 74
+	#define DB_Z 0.125
+	#define DB_W 74
 #elif (App == 0xF6F3C763 ) //WRATH
 	#define DA_X 0.0625
 	#define DA_Y 75.0
@@ -1214,15 +1223,15 @@ static const int DAA = 0;                                //Disable Anti-Aliasing
 	#define DE_X 3
 	#define DE_Y 0.5
 	#define DE_Z 0.375
-    #define DB_Z 0.125
-    #define DB_W 29
-    #define DF_X 0.1
+	#define DB_Z 0.125
+	#define DB_W 29
+	#define DF_X 0.1
 #elif (App == 0xB05C57BC ) //HellBound
-    #define DA_W 1
+	#define DA_W 1
 	#define DA_X 0.0325
 	#define DA_Y 25.0
 	#define DB_Y 5
-    #define DE_W 0.025
+	#define DE_W 0.025
 #elif (App == 0x9FC060AE ) //STRIFE: Gold Edition
 	#define DA_X 0.0375
 	#define DA_Y 23.75
@@ -1233,23 +1242,23 @@ static const int DAA = 0;                                //Disable Anti-Aliasing
 #elif (App == 0x6DDCD106 ) //The Town of Light
 	#define DA_X 0.100
 	#define DA_Y 10.0
-    #define DB_X 1
+	#define DB_X 1
 	#define DB_Y 4
 	#define DE_X 1
 	#define DE_Y 0.5
 	#define DE_Z 0.375
 #elif (App == 0x6367B705 ) //Transference
-    #define DA_W 1
+	#define DA_W 1
 	#define DA_X 0.09375
 	#define DA_Y 111.0
 	#define DA_Z 0.00025
-    #define DB_X 1
+	#define DB_X 1
 	#define DB_Y 4
 	#define DE_X 2
 	#define DE_Y 0.5
 	#define DE_Z 0.375
 	#define DB_Z 0.05
-    #define DE_W 0.05625
+	#define DE_W 0.05625
 #elif (App == 0x38ED56AE ) //Heavy Rain
 	#define DA_X 0.0325
 	#define DA_Y 50.0
@@ -1262,7 +1271,7 @@ static const int DAA = 0;                                //Disable Anti-Aliasing
 	#define MI 1
 #elif (App == 0x2F1ABF4A ) //Detroit Become Human
 	#define DA_W 1
-    #define DB_X 1
+	#define DB_X 1
 	#define DA_X 0.0375
 	#define DA_Y 50.0
 	//#define DA_Z 0.001
@@ -1277,12 +1286,12 @@ static const int DAA = 0;                                //Disable Anti-Aliasing
 	#define DE_X 1
 	#define DE_Y 0.5
 	#define DE_Z 0.375
-    #define DF_Z 0.5
+	#define DF_Z 0.5
 	#define DS 1
 	#define LB 1
 #elif (App == 0x89351FC4 ) //3DSen Games
 	#define DA_W 1
-    #define DB_X 1
+	#define DB_X 1
 	#define DA_X 0.1
 	#define DA_Y 375.0
 	#define DB_Y 5
@@ -1290,6 +1299,15 @@ static const int DAA = 0;                                //Disable Anti-Aliasing
 	#define DE_Y 0.5
 	#define DE_Z 0.250
 	#define DF 1
+#elif (App == 0xF55F26A1 ) //Tekken 7
+	#define DA_W 1
+	#define DA_Y 100.0
+	#define DA_Z 0.0001
+	#define DB_Y 1
+	#define DE_X 1
+	#define DE_Y 0.5
+	#define DE_Z 0.375
+	#define DA 1	
 #else
 	#define NP 1 //No Profile
 #endif
@@ -1414,6 +1432,9 @@ static const int DAA = 0;                                //Disable Anti-Aliasing
 #ifndef DA
     #define DA DAA //Disable Anti-Aliasing
 #endif
+#ifndef NW
+    #define NW NWW //Network Warning
+#endif
 //Weapon Settings
 #ifndef OW_WP
     #define OW_WP "WP Off\0Custom WP\0WP 0\0WP 1\0WP 2\0WP 3\0WP 4\0WP 5\0WP 6\0WP 7\0WP 8\0WP 9\0WP 10\0WP 11\0WP 12\0WP 13\0WP 14\0WP 15\0WP 16\0WP 17\0WP 18\0WP 19\0WP 20\0WP 21\0WP 22\0WP 23\0WP 24\0WP 25\0WP 26\0WP 27\0WP 28\0WP 29\0WP 30\0WP 31\0WP 32\0WP 33\0WP 34\0WP 35\0WP 36\0WP 37\0WP 38\0WP 39\0WP 40\0WP 41\0WP 42\0WP 43\0WP 44\0WP 45\0WP 46\0WP 47\0WP 48\0WP 49\0WP 50\0WP 51\0WP 52\0WP 53\0WP 54\0WP 55\0WP 56\0WP 57\0WP 58\0WP 59\0WP 60\0WP 61\0WP 62\0WP 63\0WP 64\0WP 65\0WP 66\0WP 67\0WP 68\0WP 69\0WP 70\0WP 71\0WP 72\0WP 73\0WP 74\0WP 75\0"
@@ -1498,7 +1519,7 @@ float3 Weapon_Profiles(float WP ,float3 Weapon_Adjust) //Tried Switch But, can't
     if (WP == 37)
         Value = float3(0.500,4.75,0.75);      //WP 35 | Blood 2 Alt #6D3CD99E
     if (WP == 38)
-        Value = float3(0.78,21.25,0.1875);      //WP 36 | SOMA #F22A9C7D
+        Value = float3(0.78,21.25,0.1875);    //WP 36 | SOMA #F22A9C7D
     if (WP == 39)
         Value = float3(0.444,20.0,1.1875);    //WP 37 | Cryostasis #6FB6410B
     if (WP == 40)

@@ -52,7 +52,7 @@
 	#define OW_WP "WP Off\0Custom WP\0"
 	static const int WSM = 0;
 	//Triggers
-	static const int RE = 0, NC = 0, RH = 0, NP = 0, ID = 0, SP = 0, DC = 0, HM = 0, DF = 0, MI = 0, DS = 0, LB = 0, DA = 0;
+	static const int RE = 0, NC = 0, RH = 0, NP = 0, ID = 0, SP = 0, DC = 0, HM = 0, DF = 0, MI = 0, DS = 0, LB = 0, DA = 0, NW = 0;
 	//Overwatch.fxh State
 	#define OS 1
 #endif
@@ -1559,17 +1559,17 @@ float drawChar( float Char, float2 pos, float2 size, float2 TC )
 float3 Out(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Target
 {
 	float2 TC = float2(texcoord.x,1-texcoord.y);
-	float Text_Timer = 20000, BT = smoothstep(0,1,sin(timer*(3.75/1000))), Size = 1.1, Depth3D, Read_Help, NoPro, NotCom, Major, Needs, Over, AA, Not, No, Help, Ma, Need, State, SetAA;
+	float Text_Timer = 25000, BT = smoothstep(0,1,sin(timer*(3.75/1000))), Size = 1.1, Depth3D, Read_Help, NoPro, NotCom, Major, Needs, Net, Over, AA, Not, No, Help, Ma, Need, State, SetAA, Work;
 	float3 Color = PS_calcLR(texcoord).rgb;
 
-	if(RH || NC || NP || MI || DS || OS || DA)
-		Text_Timer = 25000;
+	if(RH || NC || NP || MI || DS || OS || DA || NW)
+		Text_Timer = 30000;
 
 	[branch] if(timer <= Text_Timer || Text_Info)
 	{ // Set a general character size...
-	    float2 charSize = float2(.00875, .0125) * Size;
-	    // Starting position.
-	    float2 charPos = float2( 0.009, 0.9725);
+		float2 charSize = float2(.00875, .0125) * Size;
+		// Starting position.
+		float2 charPos = float2( 0.009, 0.9725);
 		//Needs Copy Depth and/or Depth Selection
 		Needs += drawChar( CH_N, charPos, charSize, TC); charPos.x += .01 * Size;
 		Needs += drawChar( CH_E, charPos, charSize, TC); charPos.x += .01 * Size;
@@ -1610,8 +1610,39 @@ float3 Out(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Targe
 		Needs += drawChar( CH_I, charPos, charSize, TC); charPos.x += .01 * Size;
 		Needs += drawChar( CH_O, charPos, charSize, TC); charPos.x += .01 * Size;
 		Needs += drawChar( CH_N, charPos, charSize, TC);
-		//Disable TAA/MSAA
+		//Network Play Needs Modded DLL
 		charPos = float2( 0.009, 0.955);
+		Work += drawChar( CH_N, charPos, charSize, TC); charPos.x += .01 * Size;
+		Work += drawChar( CH_E, charPos, charSize, TC); charPos.x += .01 * Size;
+		Work += drawChar( CH_T, charPos, charSize, TC); charPos.x += .01 * Size;
+		Work += drawChar( CH_W, charPos, charSize, TC); charPos.x += .01 * Size;
+		Work += drawChar( CH_O, charPos, charSize, TC); charPos.x += .01 * Size;
+		Work += drawChar( CH_R, charPos, charSize, TC); charPos.x += .01 * Size;
+		Work += drawChar( CH_K, charPos, charSize, TC); charPos.x += .01 * Size;
+		Work += drawChar( CH_BLNK, charPos, charSize, TC); charPos.x += .01 * Size;
+		Work += drawChar( CH_P, charPos, charSize, TC); charPos.x += .01 * Size;
+		Work += drawChar( CH_L, charPos, charSize, TC); charPos.x += .01 * Size;
+		Work += drawChar( CH_A, charPos, charSize, TC); charPos.x += .01 * Size;
+		Work += drawChar( CH_Y, charPos, charSize, TC); charPos.x += .01 * Size;
+		Work += drawChar( CH_BLNK, charPos, charSize, TC); charPos.x += .01 * Size;
+		Work += drawChar( CH_N, charPos, charSize, TC); charPos.x += .01 * Size;
+		Work += drawChar( CH_E, charPos, charSize, TC); charPos.x += .01 * Size;
+		Work += drawChar( CH_E, charPos, charSize, TC); charPos.x += .01 * Size;
+		Work += drawChar( CH_D, charPos, charSize, TC); charPos.x += .01 * Size;
+		Work += drawChar( CH_S, charPos, charSize, TC); charPos.x += .01 * Size;
+		Work += drawChar( CH_BLNK, charPos, charSize, TC); charPos.x += .01 * Size;
+		Work += drawChar( CH_M, charPos, charSize, TC); charPos.x += .01 * Size;
+		Work += drawChar( CH_O, charPos, charSize, TC); charPos.x += .01 * Size;
+		Work += drawChar( CH_D, charPos, charSize, TC); charPos.x += .01 * Size;
+		Work += drawChar( CH_D, charPos, charSize, TC); charPos.x += .01 * Size;
+		Work += drawChar( CH_E, charPos, charSize, TC); charPos.x += .01 * Size;
+		Work += drawChar( CH_D, charPos, charSize, TC); charPos.x += .01 * Size;
+		Work += drawChar( CH_BLNK, charPos, charSize, TC); charPos.x += .01 * Size;
+		Work += drawChar( CH_D, charPos, charSize, TC); charPos.x += .01 * Size;
+		Work += drawChar( CH_L, charPos, charSize, TC); charPos.x += .01 * Size;
+		Work += drawChar( CH_L, charPos, charSize, TC);
+		//Disable TAA/MSAA
+		charPos = float2( 0.009, 0.9375);
 		SetAA += drawChar( CH_D, charPos, charSize, TC); charPos.x += .01 * Size;
 		SetAA += drawChar( CH_I, charPos, charSize, TC); charPos.x += .01 * Size;
 		SetAA += drawChar( CH_S, charPos, charSize, TC); charPos.x += .01 * Size;
@@ -1701,30 +1732,32 @@ float3 Out(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Targe
 		State += drawChar( CH_I, charPos, charSize, TC); charPos.x += .01 * Size;
 		State += drawChar( CH_N, charPos, charSize, TC); charPos.x += .01 * Size;
 		State += drawChar( CH_G, charPos, charSize, TC);
-	    //New Size
-	    float D3D_Size_A = 1.15,D3D_Size_B = 0.75;
-	    float2 charSize_A = float2(.00875, .0125) * D3D_Size_A, charSize_B = float2(.00875, .0125) * D3D_Size_B;
-	    //New Start Pos
-	    charPos = float2( 0.877, 0.018);
+		//New Size
+		float D3D_Size_A = 1.15,D3D_Size_B = 0.75;
+		float2 charSize_A = float2(.00875, .0125) * D3D_Size_A, charSize_B = float2(.00875, .0125) * D3D_Size_B;
+		//New Start Pos
+		charPos = float2( 0.877, 0.018);
 		//Depth3D.Info Logo/Website
-	    Depth3D += drawChar( CH_D, charPos, charSize_A, TC); charPos.x += .01 * D3D_Size_A;
-	    Depth3D += drawChar( CH_E, charPos, charSize_A, TC); charPos.x += .01 * D3D_Size_A;
-	    Depth3D += drawChar( CH_P, charPos, charSize_A, TC); charPos.x += .01 * D3D_Size_A;
-	    Depth3D += drawChar( CH_T, charPos, charSize_A, TC); charPos.x += .01 * D3D_Size_A;
-	    Depth3D += drawChar( CH_H, charPos, charSize_A, TC); charPos.x += .01 * D3D_Size_A;
-	    Depth3D += drawChar( CH_3, charPos, charSize_A, TC); charPos.x += .01 * D3D_Size_A;
-	    Depth3D += drawChar( CH_D, charPos, charSize_A, TC); charPos.x += 0.008 * D3D_Size_A;
-	    Depth3D += drawChar( CH_FSTP, charPos, charSize_A, TC); charPos.x += 0.01 * D3D_Size_A;
-	    charPos = float2( 0.963, 0.018);
-	    Depth3D += drawChar( CH_I, charPos, charSize_B, TC); charPos.x += .01 * D3D_Size_B;
-	    Depth3D += drawChar( CH_N, charPos, charSize_B, TC); charPos.x += .01 * D3D_Size_B;
-	    Depth3D += drawChar( CH_F, charPos, charSize_B, TC); charPos.x += .01 * D3D_Size_B;
-    	Depth3D += drawChar( CH_O, charPos, charSize_B, TC);
+		Depth3D += drawChar( CH_D, charPos, charSize_A, TC); charPos.x += .01 * D3D_Size_A;
+		Depth3D += drawChar( CH_E, charPos, charSize_A, TC); charPos.x += .01 * D3D_Size_A;
+		Depth3D += drawChar( CH_P, charPos, charSize_A, TC); charPos.x += .01 * D3D_Size_A;
+		Depth3D += drawChar( CH_T, charPos, charSize_A, TC); charPos.x += .01 * D3D_Size_A;
+		Depth3D += drawChar( CH_H, charPos, charSize_A, TC); charPos.x += .01 * D3D_Size_A;
+		Depth3D += drawChar( CH_3, charPos, charSize_A, TC); charPos.x += .01 * D3D_Size_A;
+		Depth3D += drawChar( CH_D, charPos, charSize_A, TC); charPos.x += 0.008 * D3D_Size_A;
+		Depth3D += drawChar( CH_FSTP, charPos, charSize_A, TC); charPos.x += 0.01 * D3D_Size_A;
+		charPos = float2( 0.963, 0.018);
+		Depth3D += drawChar( CH_I, charPos, charSize_B, TC); charPos.x += .01 * D3D_Size_B;
+		Depth3D += drawChar( CH_N, charPos, charSize_B, TC); charPos.x += .01 * D3D_Size_B;
+		Depth3D += drawChar( CH_F, charPos, charSize_B, TC); charPos.x += .01 * D3D_Size_B;
+		Depth3D += drawChar( CH_O, charPos, charSize_B, TC);
 		//Text Information
 		if(DS)
 			Need = Needs;
 		if(RH)
 			Help = Read_Help;
+		if(NW)
+			Net = Work;
 		if(DA)
 			AA = SetAA;
 		//Blinking Text Warnings
