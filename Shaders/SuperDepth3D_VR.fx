@@ -52,7 +52,7 @@
 	#define OW_WP "WP Off\0Custom WP\0"
 	static const int WSM = 0;
 	//Triggers
-	static const int RE = 0, NC = 0, RH = 0, NP = 0, ID = 0, SP = 0, DC = 0, HM = 0, DF = 0, MI = 0, DS = 0, LB = 0, DA = 0, NW = 0;
+	static const int RE = 0, NC = 0, RH = 0, NP = 0, ID = 0, SP = 0, DC = 0, HM = 0, DF = 0, NF = 0, DS = 0, LB = 0, DA = 0, NW = 0;
 	//Overwatch.fxh State
 	#define OS 1
 #endif
@@ -1559,10 +1559,10 @@ float drawChar( float Char, float2 pos, float2 size, float2 TC )
 float3 Out(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Target
 {
 	float2 TC = float2(texcoord.x,1-texcoord.y);
-	float Text_Timer = 25000, BT = smoothstep(0,1,sin(timer*(3.75/1000))), Size = 1.1, Depth3D, Read_Help, NoPro, NotCom, Major, Needs, Net, Over, AA, Not, No, Help, Ma, Need, State, SetAA, Work;
+	float Text_Timer = 25000, BT = smoothstep(0,1,sin(timer*(3.75/1000))), Size = 1.1, Depth3D, Read_Help, NoPro, NotCom, Mod, Needs, Net, Over, AA, Not, No, Help, Fix, Need, State, SetAA, Work;
 	float3 Color = PS_calcLR(texcoord).rgb;
 
-	if(RH || NC || NP || MI || DS || OS || DA || NW)
+	if(RH || NC || NP || NF || DS || OS || DA || NW)
 		Text_Timer = 30000;
 
 	[branch] if(timer <= Text_Timer || Text_Info)
@@ -1658,6 +1658,9 @@ float3 Out(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Targe
 		SetAA += drawChar( CH_M, charPos, charSize, TC); charPos.x += .01 * Size;
 		SetAA += drawChar( CH_S, charPos, charSize, TC); charPos.x += .01 * Size;
 		SetAA += drawChar( CH_A, charPos, charSize, TC); charPos.x += .01 * Size;
+		SetAA += drawChar( CH_A, charPos, charSize, TC); charPos.x += .01 * Size;
+		SetAA += drawChar( CH_SLSH, charPos, charSize, TC); charPos.x += .01 * Size;
+		SetAA += drawChar( CH_A, charPos, charSize, TC); charPos.x += .01 * Size;
 		SetAA += drawChar( CH_A, charPos, charSize, TC);
 		//Read Help
 		charPos = float2( 0.894, 0.9725);
@@ -1697,19 +1700,20 @@ float3 Out(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Targe
 		NotCom += drawChar( CH_B, charPos, charSize, TC); charPos.x += .01 * Size;
 		NotCom += drawChar( CH_L, charPos, charSize, TC); charPos.x += .01 * Size;
 		NotCom += drawChar( CH_E, charPos, charSize, TC); charPos.x = 0.009;
-		//Major Issues
-		Major += drawChar( CH_M, charPos, charSize, TC); charPos.x += .01 * Size;
-		Major += drawChar( CH_A, charPos, charSize, TC); charPos.x += .01 * Size;
-		Major += drawChar( CH_J, charPos, charSize, TC); charPos.x += .01 * Size;
-		Major += drawChar( CH_O, charPos, charSize, TC); charPos.x += .01 * Size;
-		Major += drawChar( CH_R, charPos, charSize, TC); charPos.x += .01 * Size;
-		Major += drawChar( CH_BLNK, charPos, charSize, TC); charPos.x += .01 * Size;
-		Major += drawChar( CH_I, charPos, charSize, TC); charPos.x += .01 * Size;
-		Major += drawChar( CH_S, charPos, charSize, TC); charPos.x += .01 * Size;
-		Major += drawChar( CH_S, charPos, charSize, TC); charPos.x += .01 * Size;
-		Major += drawChar( CH_U, charPos, charSize, TC); charPos.x += .01 * Size;
-		Major += drawChar( CH_E, charPos, charSize, TC); charPos.x += .01 * Size;
-		Major += drawChar( CH_S, charPos, charSize, TC); charPos.x = 0.009;
+		//Needs Fix/Mod
+		Mod += drawChar( CH_N, charPos, charSize, TC); charPos.x += .01 * Size;
+		Mod += drawChar( CH_E, charPos, charSize, TC); charPos.x += .01 * Size;
+		Mod += drawChar( CH_E, charPos, charSize, TC); charPos.x += .01 * Size;
+		Mod += drawChar( CH_D, charPos, charSize, TC); charPos.x += .01 * Size;
+		Mod += drawChar( CH_S, charPos, charSize, TC); charPos.x += .01 * Size;
+		Mod += drawChar( CH_BLNK, charPos, charSize, TC); charPos.x += .01 * Size;
+		Mod += drawChar( CH_F, charPos, charSize, TC); charPos.x += .01 * Size;
+		Mod += drawChar( CH_I, charPos, charSize, TC); charPos.x += .01 * Size;
+		Mod += drawChar( CH_X, charPos, charSize, TC); charPos.x += .01 * Size;
+		Mod += drawChar( CH_SLSH, charPos, charSize, TC); charPos.x += .01 * Size;
+		Mod += drawChar( CH_M, charPos, charSize, TC); charPos.x += .01 * Size;
+		Mod += drawChar( CH_O, charPos, charSize, TC); charPos.x += .01 * Size;
+		Mod += drawChar( CH_D, charPos, charSize, TC); charPos.x = 0.009;
 		//Overwatch.fxh Missing
 		State += drawChar( CH_O, charPos, charSize, TC); charPos.x += .01 * Size;
 		State += drawChar( CH_V, charPos, charSize, TC); charPos.x += .01 * Size;
@@ -1765,12 +1769,12 @@ float3 Out(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Targe
 			No = NoPro * BT;
 		if(NC)
 			Not = NotCom * BT;
-		if(MI)
-			Ma = Major * BT;
+		if(NF)
+			Fix = Mod * BT;
 		if(OS)
 			Over = State * BT;
 		//Website
-		return Depth3D+Help+No+Not+Ma+Need+Over+AA ? (1-texcoord.y*50.0+48.85)*texcoord.y-0.500: Color;
+		return Depth3D+Help+No+Not+Fix+Need+Over+AA ? (1-texcoord.y*50.0+48.85)*texcoord.y-0.500: Color;
 	}
 	else
 		return Color;

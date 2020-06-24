@@ -57,19 +57,24 @@ static const float HUDX_D = 0.0;                        //Heads Up Display Cut O
 
 //Special Toggles Defaults
 static const int REF = 0;                               //Resident Evil Fix
-static const int NCW = 0;                               //Not Compatible Warning
-static const int RHW = 0;                               //Read Help Warning
-static const int NPW = 0;                               //No Profile Warning
+static const int HMT = 0;                               //HUD Mode Trigger
 static const int IDF = 0;                               //Inverted Depth Fix
 static const int SPF = 0;                               //Size & Position Fix
 static const int BDF = 0;                               //Barrel Distortion Fix
-static const int HMT = 0;                               //HUD Mode Trigger
 static const int DFW = 0;                               //Delay Frame Workaround
-static const int MIW = 0;                               //Major Issues Warning
-static const int DSW = 0;                               //Depth Selection Warning
 static const int ALB = 0;                               //Auto Letter Box
+
+//Special Toggles Generic
+static const int RHW = 0;                               //Read Help
+
+//Special Toggles Warnings
+static const int NCW = 0;                               //Not Compatible Warning
+static const int NPW = 0;                               //No Profile Warning
+static const int NFM = 0;                               //Needs Fix/Mod
+static const int DSW = 0;                               //Depth Selection Warning
 static const int DAA = 0;                               //Disable Anti-Aliasing
 static const int NWW = 0;                               //Network Warning
+
 //Special Handling
 #if exists "LEGOBatman.exe"                             //Lego Batman
 	#define sApp 0xA100000
@@ -214,6 +219,7 @@ static const int NWW = 0;                               //Network Warning
 #elif (App == 0x6D3CD99E ) //Blood 2
 	#define DB_W 36
 	#define DB_Y 3
+	#define NF 1
 	#define RH 1
 #elif (App == 0xF22A9C7D || App == 0x5416A79D ) //SOMA
 	#define DA_Y 17.5
@@ -520,7 +526,7 @@ static const int NWW = 0;                               //Network Warning
 	#define DA_Y 18.75
 	#define DA_Z 0.0005
 	#define DB_Y 4
-    #define DE_W 0.025
+	#define DE_W 0.025
 	#define DC 1
 	#define DC_X 0.22
 	#define DC_Y -0.1
@@ -720,7 +726,7 @@ static const int NWW = 0;                               //Network Warning
 	#define DE_X 1
 	#define DE_Y 0.35
 	#define DE_Z 0.25
-	#define MI 1
+	#define NC 1
 	#define RH 1
 #elif (App == 0x65F37CDF) //American Truck Simulator
 	#define DA_X 0.05375
@@ -1070,6 +1076,7 @@ static const int NWW = 0;                               //Network Warning
 	#define DE_Y 0.500
 	#define DE_Z 0.3
 	#define RH 1
+	#define NF 1
 #elif (App == 0x9CC5C8E0 ) //GTA V
 	#define DA_Y 18.75
 	#define DA_W 1
@@ -1238,7 +1245,7 @@ static const int NWW = 0;                               //Network Warning
 	#define DA_Z 0.00025
     #define DB_X 1
 	#define DB_Y 4
-	#define MI 1
+	#define NC 1
 #elif (App == 0x6DDCD106 ) //The Town of Light
 	#define DA_X 0.100
 	#define DA_Y 10.0
@@ -1268,7 +1275,7 @@ static const int NWW = 0;                               //Network Warning
 	#define DE_Y 0.5
 	#define DE_Z 0.375
 	#define DB_Z 0.0675
-	#define MI 1
+	#define NC 1
 #elif (App == 0x2F1ABF4A ) //Detroit Become Human
 	#define DA_W 1
 	#define DB_X 1
@@ -1307,7 +1314,61 @@ static const int NWW = 0;                               //Network Warning
 	#define DE_X 1
 	#define DE_Y 0.5
 	#define DE_Z 0.375
-	#define DA 1	
+    #define DE_W 0.440
+	#define DA 1
+#elif (App == 0x9BD7A4FD ) //Starwars Battle Front II
+	#define DA_W 1
+	#define DA_X 0.05
+	#define DA_Y 10.0
+	#define DB_Y 3
+	#define DE_X 2
+	#define DE_Y 0.5
+	#define DE_Z 0.375
+	#define DE_W 0.075
+#elif (App == 0x14E41902 ) //jsHexen II
+	#define NC 1
+#elif (App == 0x12C96DB0 ) //Hexen 2 Hammer of Thyrion
+	#define NC 1
+#elif (App == 0x54A39BDC ) //Hexen 2 FTEQW 64
+	#define DA_X 0.06
+	#define DA_Y 30.0
+	#define DA_Z 0.0003
+	#define DB_Y 4
+	#define DB_W 75
+#elif (App == 0x6281C1AC ) //DarkSiders Warmastered Edition
+	#define DA_X 0.05
+	#define DA_Y 30.0
+	#define DB_Y 3
+	#define DE_X 2
+	#define DE_Y 0.5
+	#define DE_Z 0.375
+#elif (App == 0x763E5FA5 ) //DarkSiders 2 Depthinitve Edition
+	#define DA_X 0.05
+	#define DA_Y 15.0
+	#define DB_Y 3
+	#define DE_X 1
+	#define DE_Y 0.65
+	#define DE_Z 0.375
+	#define DB_Z 0.025
+    //#define DE_W 0.4375
+#elif (App == 0x7F1A5568 ) //DarkSiders III
+	#define DA_W 1
+	#define DA_X 0.05
+	#define DA_Y 62.5
+	#define DA_Z 0.000125
+	#define DB_Y 5
+	#define DE_X 1
+	#define DE_Y 0.250
+	#define DE_Z 0.4
+	#define DE_W 0.450
+#elif (App == 0x837F12C9 ) //QuantumBreak
+	#define DA_X 0.0375
+	#define DA_Y 20.0
+	#define DA_Z 0.000125
+	#define DB_Y 1
+	//#define DE_X 1
+	//#define DE_Y 0.625
+	//#define DE_Z 0.375
 #else
 	#define NP 1 //No Profile
 #endif
@@ -1420,8 +1481,8 @@ static const int NWW = 0;                               //Network Warning
 #ifndef DF
     #define DF DFW //Delay Frame Workaround
 #endif
-#ifndef MI
-    #define MI MIW //Major Issues Warning
+#ifndef NF
+    #define NF NFM //Needs Fix and/or Modding
 #endif
 #ifndef DS
     #define DS DSW //Depth Selection Warning
@@ -1593,7 +1654,7 @@ float3 Weapon_Profiles(float WP ,float3 Weapon_Adjust) //Tried Switch But, can't
     if (WP == 74)
         Value = float3(13.3,62.5,0.0);        //WP 72 | Chex Quest HD
     if (WP == 75)
-        Value = float3(0,0,0);                //WP 73 | Game
+        Value = float3(0.75,112.5,0.5);       //WP 73 | Hexen 2
     if (WP == 76)
         Value = float3(0,0,0);                //WP 74 | Game
     if (WP == 77)
