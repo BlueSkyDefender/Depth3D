@@ -1,7 +1,7 @@
 ### **Post-Process shaders for ReShade, Freestyle, & Ansel**
 ### Highlighted Shaders ReShade 
 **SuperDepth3D & SuperDepth3D VR**<br />
-This Shader allows for Depth Map Based 3D like What Nvidia does with Compatibility Mode 3D and Kind of what TriDef Does with Power 3D. 
+This Shader allows for Depth Map Based 3D like What Nvidia does with Compatibility Mode 3D and what TriDef's does with Power 3D. 
 With many more options than regular Depth3D. Depth3D is my shader that helps introduce users to the world of 3D. SuperDepth3D allows much more control and support for different devices.
 
 **Smart Sharp**<br />
