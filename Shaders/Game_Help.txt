@@ -1,306 +1,8 @@
 ﻿#SuperDepth3D 2.0.0
 _________________________________________________________________________________________________________________________________
 -=:[Settings have to be change and adjusted for diffrent Resolutions, screen size, and screen types]:=-
-
-Here is a quick and dirty game list of working Depth Maps. They are only suggestions. You can use any setting that works for you.
-
-User Settings
-https://docs.google.com/spreadsheets/d/18ujpY-97V_YuXpQUh-7bOomE4D5nUGwp3XppfU_0N2k/edit?usp=sharing
-
----------------------------------------------------------------------------------------------------------------------------------
-Game List updates for Reshade 4.0
-_________________________________________________________________________________________________________________________________
-ReShade GUI Settings:
-[Depth_Map] - Linearization selection for the zBuffer.
-[Depth Map Adjustment] - Use what you think looks good. You don't have to use my adjustment. But, my settings are good place to start.
-[Offsets] - Use this if for a nonconforming zBuffer Linearization.
-[Divergence] - Determines the amount of Image Warping and Separation.
-[ZPD] - Zero Parallax Distance controls the focus distance for the screen Pop-out effect also known as Convergence.
-[Auto Depth Range] - The Map Automaticly scales to outdoor and indoor areas.
-[Balance] - Balance between ZPD Depth and Scene Depth and works with ZPD option above.
-[Disocclusion Selection] - This is to select the z-Buffer bluring option for low level occlusion masking.
-[Disocclusion Power Adjust] - Automatic occlusion masking power adjust.
-[Perspective] - Determines the perspective point.
-[Depth Map View] - Display the Depth Map. Use this for Debuging.
-[HUD & Weapon Profile] - Pick your HUD or Weapon Profile for your game or make your own.
-[Weapon Adjust] - Adjust weapon depth map for FPS Hand & also HUD Mode. Used with the option above.
-[Stereoscopic Mode] - Stereoscopic 3D display output selection.
-[Interlace Optimization] - Interlace Optimization Is used to reduce alisesing in a Line or Column interlaced image.
-[Scaling Support] - Dynamic Super Resolution , Virtual Super Resolution, downscaling, or Upscaling support for Line Interlaced, Column Interlaced, & Checkerboard 3D displays.
-[Anaglyph Colors] - Select colors for your 3D anaglyph glasses.
-[Anaglyph Desaturation] - Adjust anaglyph desaturation, Zero is Black & White, One is full color.
-[View Mode] - Change the way the shader warps the output to the screen. The Higer you go the more performce will be needed.
-[Swap Eyes] - L/R to R/L image swaping.
-[Cross Cursor Adjust] - Pick your own cross cursor color & Size.
-[Custom Sidebars] - Edges selection for your screen output.
-
-Inner Shader Setting:
-[Max Depth] Depth_Max -=Line ??=- Determines the Max Depth amount, in ReShades GUI.
-[Cancel Depth Key] Cancel_Depth_Key -=Line ??=- Determines the Cancel Depth Toggle Key useing keycode info.
-[Horizontal & Vertical Depth Buffer Resize] Horizontal_and_Vertical -=Line 50=- For Horizontal & Vertical Depth Buffer Resize for non conforming BackBuffer.
-[Image Position Adjust] Image_Position_Adjust -=Line ??=- Image Position Adjust is used to move the Z-Buffer around.
 =================================================================================================================================
--=:[Settings have to be change and adjusted for diffrent Resolutions, screen size, and screen types]:=-
-
-                                                       [- - - - - - - - - - - -=: Recommended Settings :=- - - - - - - - - - - -]
-[Read Below] [Game List]                               [Depth Map] [Adjustment] [Offset] [Weapon DM] [Depth Flip] [Auto Balance]
-    RB        35MM                                         DM 0       35.000                               Yes         Yes 2
-    RB        .Hack//G.U.                                  DM 0       22.500                                           Yes 3                                               
-              ABZU                                         DM 1       50.000                                                        
-              Agony                                        DM 1       43.750                                           Yes 5                                       
-    RB        Alan Wake                                    DM 0       32.500                                           Yes 1 
-    RB        Alan Wake's American Nightmare               DM 0       32.500                                           Yes 1 
-    RB        Alien Isolation                              DM 0       25.000                                           
-    RB        Amnesia: Machine for Pigs                    DM 0       45.000    0.0005                                 Yes 4                                         
-    RB        Amnesia: The Dark Descent                    DM 0       45.000    0.0005                                 Yes 4                                 
-              Among The Sleep                              DM 0       37.500                               Yes     
-              Assassin Creed Unity                         DM 1       20.000                                       
-              Bayonetta                                    DM 0       15.000                                       
-    RB        Battlefield One                              DM 1       8.1250                                           Yes 5                  
-    RB        BattleTech                                   DM 1       75.000                                           Yes 1                  
-    RB        Batman Arkham Asylum                         DM 0       18.750                                           Yes 4
-    RB        Batman Arkham Knight                         DM 0       22.500                                           Yes 4                                     
-              Batman Arkham Origins                        DM 0       18.750                                           Yes 4                                        
-              Batman: Arkham City                          DM 0       18.750                                           Yes 4                                         
-    RB        Dementium 2                                  DM 0       18.750                               Yes         Yes 5
-              Beware                                       DM 1       62.500                               Yes               
-              BladeStorm Nightmare                         DM ?         ?                                          ?
-    RB        Bioshock Remastred                           DM 0       7.5000    0.00600     WDM 53                     Yes 3   
-    RB        Bioshock 2 Remastred                         DM 0       7.5000    0.00600     WDM 54                     Yes 3                  
-    RB        Black Mesa                                   DM 0       8.7500                WDM 33                     Yes 2      
-    RB        BloodCM                                      DM 0       15.000                                                                          
-    RB        Blood 2                                      DM 0       7.5000                WDM 34/35                  Yes 3         
-    RB        BorderLands 2                                DM 0       20.000                WDM 2                      Yes 2                                
-              Call of Chthulhu                             DM 1       7.5000                                           Yes 3   
-    RB        Call of Duty: Advance Warfare                DM 1       13.750                WDM 10                     Yes 2                                       
-    RB        Call of Duty: Black Ops                      DM 0       12.500                WDM 7                      Yes 3               
-    RB        Call of Duty: Black Ops 2                    DM 1       13.750                WDM 8                      Yes 2
-    RB        Call of Duty: Black Ops 4                    DM 1       22.50                 WDM 14                    ?             
-    RB        Call of Duty: Ghost                          DM 1       13.750                WDM 9                      Yes 2            
-    RB        Call of Duty: Infinite Warfare               DM 1       13.750                WDM 11                     Yes 2
-    RB        Call of Duty: Modern Warfare 2019            DM 0       37.500                WDM 10                     Yes 2
-    RB        Call of Duty: Modern Warfare 3               DM 0       12.500                WDM 7                      Yes 3
-              Call of Duty: World at War                   DM 0       12.500                WDM 12                     Yes 3          
-              Casltevania: Lord of Shadows - UE            DM 0       7.5000                                                
-              Castle of Illusion Micky Mouse               DM 0       12.500                                       ???????????
-    RB        Condemned Criminal Origins                   DM 0       167.50    0.00025     WDM 47                     Yes 4
-              Crash Bandicoot™ N. Sane Trilogy             DM 0        ????     ?????                              ???????????                         
-              Cryostasis                                   DM 0       13.750                *WDM 37                    Yes 3                                 
-    RB        DOOM 2016                                    DM 0       20.000                *WDM 6                     Yes 3               
-              DarkSiders Warmastred Edition                DM 0       22.500                                       
-              Dead Effect                                  DM ?       6.2500                                       ?      
-              Dead Island                                  DM 0       5.0000                                                         
-    RB        Dead Rising 3                                DM 0       12.500                                       
-    RB        Deadly Premonition:The Directors's Cut       DM 0       25.000                                       
-              DeadPool Game                                DM 0       12.500                                       
-              Dementium 2                                  DM 0       15.000                                           Yes 3              
-              Dragon Age Inquisition                       DM 0       3.2500                                       
-    RB        Dragon Ball FightersZ                        DM 1       7.5000                                       
-              Dragon Ball Xenoverse                        DM 0       8.7500                                       
-              Dragons Dogma: Dark Arisen                   DM 0       8.7500                                       
-              DreamFall Chapters                           DM 0       12.500                               Yes     
-    RB        Duke Nukem 3D 20th Anniversary World Tour    DM 0       7.5000                                       
-              Dungeons 2                                   DM 0       3.5000    0.00500                    Yes      
-    RB        Dungeon Nightmares II                        DM 0       17.500                               Yes     
-    RB        Dusk/Dusk World                              DM 1       20.000                               Yes     
-              Dying Light                                  DM 1       22.500                                       
-    RB        Emily Wants To Play                          DM 1       25.000                                                          
-              Euro/American Truck Simulator                DM 0       15.000    0.00500     WDM 45         Yes         Yes 2
-              Everybody's Gone to the Rapture              DM 0       1.5000                                       
-              F.E.A.R                                      DM 0       8.7500                WDM 46                     Yes 3                              
-              F.E.A.R 2                                    DM 0       8.7500                WDM 46                     Yes 3      
-              F.E.A.R 3                                    DM 0       6.0000                                           Yes 4       
-              Fallout 4                                    DM 0       6.2500                WDM 4                      Yes 2
-    RB        FarCry 2                                     DM 0       7.5000                WDM 62                     Yes 4                                                         
-    RB        FarCry 3                                     DM 0       7.5000                                       
-              Fez                                          DM 0       10.000    0.97500                    Yes     
-              Firewatch                                    DM 0       5.0000                               Yes     
-    RB        Final Fantasy XV Windows Edition             DM 0       30.000                                           Yes 3
-    RB        Grim Dawn                                    DM 0       7.5000    0.00400                                        
-    RB        GTA V                                        DM 1       9.3750                                           Yes 5                          
-    RB        Gold Source                                  DM 0       21.250    0.000300                               Yes 3 
-              Gone Home                                    DM 0       5.0000                               Yes     
-    RB        Half-Life 2                                  DM 0       8.7500                                           Yes 3
-    RB        Hard Reset                                   DM 0       8.1250                                      
-              Hellblade: Senua's Sacrifice                 DM 1       22.500    0.00100                                Yes 5         
-              HellDiver                                    DM 0       50.000    0.00100                                     
-              Hellpoint                                    DM 1       5.0000                               Yes     
-    RB        Hitman: Absolution                           DM 0       17.500                                     
-    RB        Hitman 2016                                  DM ?         ?                                  ?       ?                                     
-    RB        Homefront The Revolution                     DM ?         ?                                  ?       ?                                     
-    RB        Immortal Redneck                             DM 1       20.000    0.00025     WDM 48         Yes         Yes 5                                      
-              Just Cause 3                                 DM 1       10.000                                       
-    RB        KHOLAT                                       DM 1       10.000                                       
-    RB        Kingpin: Life of Crime                       DM 0       10.000                WDM 44                     Yes 4    
-              Lara Croft & Temple of Osiris                DM 0       75.000    0.021                                  Yes 4
-    RB        Layers of Fear                               DM 0       17.500                               Yes     
-              LEGO Batman                                  DM 0
-              LEGO Batman 2                                DM 0
-    RB        LEGO Batman 3                                DM 0
-              Life is Strange: Before the Storm            DM 1       150.00                               Yes     
-              Lifeless Planet                              DM 0       17.500                               Yes     
-    RB        Little Nightmares                            DM 1       33.750    0.00150                                Yes 5
-              Lords of The Fallen                          DM 0       14.750                                       
-              Lost in Vivo                                 DM 0       8.7500                               Yes         Yes 4         
-    RB        Lost Planet: Extreme Colonies                DM 0       37.500                                           Yes 4
-    RB        Lost Planet3                                 DM 0       37.500                                           Yes 4
-    RB        LuciusII                                     DM 0       20.000                               Yes     
-    RB        LUST for Darkness                            DM 1       13.750                               Yes         Yes 4
-    RB        Mafia III                                    DM 1       6.2500                                       
-    RB        Mafia II Definitive Edition                  DM 0       37.500                                           Yes 4                                     
-    RB        Mass Effect Andromeda                        DM 1       15.000                                       
-    RB        Magicka 2                                    DM 0       13.750    0.01250                            
-    RB        MegaMan 2.5D Now in 3D                       DM 0       8.7500    1005.00                                No  0   
-    RB        Metal Gear Rising                            DM 0       13.750                                       
-    RB        Metro 2033 Redux                             DM 0       12.500                WDM 19                     Yes 2                        
-    RB        Metro Last Light Redux                       DM 0       12.500                WDM 19                     Yes 2                              
-    RB        Middle-earth: Shadow of Mordor               DM 1       25.000                                       
-    RB        Minecraft Java                               DM 0       17.500                WDM 23                     No  0           
-              Mirror's Edge Catalyst                       DM 1       13.750                                       
-    RB        Monster Hunter World                         DM 1       13.750                                       
-              Mordheim: City of the Damned                 DM 0       12.500                               Yes     
-    RB        Naruto Shippuden UNS3 Full Blurst HD         DM 0       36.250                                       
-    RB        NecroVisioN                                  DM 0       10.000                WDM 50                     Yes 2         
-    RB        NecroVisioN: Lost Company                    DM 0       10.000                WDM 50                     Yes 2         
-              Need For Speed Rivals                        ?            ?                                          ?
-              Need for Speed Most Wanted                   ?            ?                                          ?
-              NieRAutomata                                 DM 0       20.000                                       
-              Never Alone (Kisima Ingitchuna)              DM 0       25.000    0.00500                            
-    RB        No One Lives Forever                         DM 0       7.5000                WDM 55                     Yes 4
-    RB        No One Lives Forever 2                       DM 0       7.5000                WDM 56                     No  0
-    RB        No Man Sky                                   DM 1       72.500                                           Yes 5 
-    RB        Nosferatu: The Wrath of Malachi              DM 0       62.500                                       
-              Obscuritas                                   DM 0       20.000                                           Yes 5         
-    RB        Observer                                     DM 1       10.000                                       
-    RB        Octopath Traveler                            DM 1       225.00    0.000375                               Yes 2 
-    RB        Outlaws 1997                                 DM 0       30.000                                           Yes 5
-    RB        Paratopic                                    DM 1       8.7500    0.00025                    Yes         Yes 3
-    RB        Penumbra: Black Plague                       DM 0       7.5000                                       
-    RB        Phantasmal                                   DM 0       7.5000                               Yes     
-    RB        Prey 2006                                    DM 0       7.5000                WDM 26                     Yes 3               
-    RB        Prey 2017                                    DM 1       18.750                WDM 27/28                  Yes 2                        
-              Project Warlock                              DM 1       17.500    0.001       WDM 43                     Yes 2          
-    RB        Quake Epsilon                                DM 0       15.000                WDM 15                     Yes 2         
-              Quake 2 XP                                   DM 0       7.5000                WDM 16                     No  0     
-    RB        Quake 4                                      DM 0       15.000                WDM 17                     Yes 5      
-              Quantum Break                                DM 0       9.0000                                       
-    RB        Rage64                                       DM 0       20.000                WDM 51                     Yes 2          
-    RB        Redout                                       DM ?         ?                                          ?      
-              Remembrance                                  DM 1       7.5000                               Yes     
-    RB        RESIDENT EVIL 2  BIOHAZARD RE2 Remake        DM 1       51.250    0.00015                                Yes 3
-    RB        Resident Evil 7                              DM 1       22.500                                       
-    RB        Return To Castle Wolfenstine                 DM 0       8.7500                WDM 29                     Yes 2                                
-    RB        Requiem: Avenging Angel                      DM 0       50.000    0.80000                            
-              Rez Infinite                                 DM 1       20.000                                       
-    RB        Tomb Raider Games 2013+                      DM 0       25.000    0.02000                            
-              Ryse: Son of Rome                            DM 0       7.5000                                       
-              Scorn                                        DM 1       40.000                                       
-              Serious Sam Revolution                       DM 0       7.5000    0.11110     WDM 39                
-              Serious Sam Fusion                           DM 1       10.000    0.1or0.0    WDM 40                     Yes 1                 
-    RB        S.T.A.L.K.E.R:CS Complete Mod                DM 0       10.000                WDM 24                     Yes 4        
-    RB        S.T.A.L.K.E.R:CoP Complete Mod               DM 0       10.000                WDM 24                     Yes 4       
-    RB        S.T.A.L.K.E.R:SoC Complete Mod               DM 0       10.000                WDM 24                     Yes 4       
-    RB        Shadow of the Tomb Raider                    DM 1       17.500                                       
-    RB        Shadow Tactics: Blades of the Shogun         DM 0       5.5000    0.00100                    Yes                 
-    RB        Shadow Warrior Classic Source Port           DM 0       10.000    1.00000                            
-              Shadow Warrior Classic Redux                 DM 0       8.7500    1.00000                            
-              Shadow Warrior 2                             DM 1       10.000                                       
-              Silent Hill: Homecoming                      DM 0       12.500    0.11625                            
-    RB        Singularity                                  DM 0       15.000                WDM 66                     No  0 
-              Sleeping Dogs: DE                            DM 0       7.0000                                       
-              Sniper Elite 4                               DM 0       25.000                                       
-    RB        Soldier of Fortune                           DM 0       17.5                  WDM 20                     Yes 5
-    RB        Soma                                         DM 0       10.500                WDM 36                     Yes 5 
-    RB        Sonic Adventure DX BetterSADX Mod            DM 0       8.75                                             Yes 3                                              
-              Sonic Adventure 2                            DM 0       8.75                                       
-              Souls Games                                  DM 0       22.5                                            
-    RB        SpellForce Platinum                          DM 0       150.00    0.00100                                Yes 3
-              Stacking                                     DM 0       7.5000    0.00025                                Yes 5                                       
-    RB        StarWars Jedi Fallen Order                   DM 1       13.750
-    RB        Stay Close                                   DM 1       10.000                                       
-    RB        Strange Brigade                              DM 0       20.000    0.00050                                Yes 5 
-    RB        Strife: Veteran Edition                      DM 0       250.00                WDM 57                     No  0 
-              Tales of Zestiria                            DM 0       7.5000                                       
-    RB        The Forest                                   DM 1       7.5000                                           Yes 2                                      
-              The Elder Scrolls V: SE                      DM 0       6.2500                WDM 5                      Yes 2          
-    RB        The Evil Within                              DM 0       28.750                                       
-              The Evil Within 2                            DM 0       ?                                            
-    RB        The Legend of Korra                          DM 0       10.000                                       
-              The Old City Leviathan                       DM 0       100.00    0.003000                               Yes 5
-    RB        The Park                                     DM 1       12.500                                           Yes 1
-    RB        The Surge                                    DM *       ?                                            ?     
-    RB        The Vanishing of Ethan Carter Redux          DM 1       7.5000                                       
-    RB        The Void                                     DM 0       7.5000                                       
-    RB        Through The Woods!                           DM 1       7.5000                               Yes     
-    RB        Titanfall 2                                  DM 0       7.5000                WDM 42                     Yes 4          
-              Tomb Raider: Anniversary                     DM 0       20.000    0.02070                            
-              Total War: Warhammer                         DM 0       2.6250                                       
-    RB        Turok: Dinosaur Hunter                       DM 0       250.00                                           Yes 2          
-              Turok 2: Seeds of Evil                       DM 0       250.00                                           Yes 2         
-              Two Worlds EE                                DM 0       7.5000    0.07500                                                   
-    RB        Unreal Gold with v227                        DM 0       17.500                WDM 38                     Yes 1              
-              Warhammer: 40,000 Space Marine               DM 0       7.5000                                           Yes 2    
-              Warhammer: End Times - Vermintide            DM 0       8.7500                                           Yes 1
-              Warhammer: Vermintide 2                      DM 0       8.7500                                           Yes 1         
-    RB        Watch Dogs 2                                 DM 1       7.5000                                       
-              We Where Here Too                            DM 1       42.500                                           Yes 1              
-              What Remains of Edith Finch                  DM 1       52.500    0.000025                               Yes 2                         
-              Witch it                                     DM 1       47.500                                           Yes 5
-              Witcher 3                                    DM 1       7.5000                                       
-              Wolfenstein                                  DM 0       7.5000                WDM 30                     Yes 2          
-    RB        Wolfenstein: The New Order                   DM 0       25.000    0.00125     WDM 31                     Yes 5              
-    RB        Wolfenstein: The Old Blood                   DM 0       25.000    0.00125     WDM 31                     Yes 5              
-    RB        Yooka-Laylee                                 DM 0       6.8750                               Yes     
-              Ziggurat                                     DM 0       7.5000                                       
-              Zombie Army Trilogy                          DM 0       12.500                                       
-                                
-[RB][Emulator][Special Depth Map Game List]            [Depth Map] [Adjustment] [Offset] [Weapon DM] [Depth Flip] [Auto Balance]
-       CEMU    Mariokart 8                                 ????        ???                               Yes      ?
-       CEMU    Super Mario 3D World                        ????        ???                               Yes      ?
- RB    CEMU    The Legend of Zelda: Breath of the Wild     DM0         25       0.000                    Yes           Yes 3 
-_________________________________________________________________________________________________________________________________
--=:[Settings have to be change and adjusted for diffrent Resolutions, screen size, and screen types]:=-
----------------------------------------------------------------------------------------------------------------------------------
-More Info
-
-You can also try different depth maps for other games your self by changing Depth Map number From 0-2. 
-You *may* want to disable AA in game. You can always enable SMAA in reshade for AA or play at 4k with no AA. 
-Turn Off DOF in all games if possible. Unless you want to know how it feels to be neer sighted. Turn On SSAO or HABO They help a lot.
-Motion Blur Off
-
-Also Keep in mind if you don't like the depth map I made. You can always adjust your own.
-
--=:[Mouse Pointer]:=-
----------------------------------------------------------------------------------------------------------------------------------
-I can alter the size of your Mouse Pointer by going here.
-http://www.rw-designer.com/cursor-set/smalldot
-
-More info: First, you would need to enable the CrossCursor in Depth3D
-
-Now from here the only thing I can think about is using a program called YoloMouse and Modifying/Adding a custom tiny little cursor.
-You Can Get it here.
-pandateemo.github.io/YoloMouse/
-You have to make a Tiny Little Mouse Cursor So It's Not Distracting. You can even make multiple for different units. 
-Like a Little X, a little Dot, or a little crosshair.
-You can make it with www.rw-designer.com/online-cursor-editor
-image 1
-https://cdn.discordapp.com/attachments/458063532567691284/574848158731862020/unknown.png
-Once you make it, rename it to one of the built-in cur files for Yolo Mouse. ex: "1.cur"
-image 2
-https://cdn.discordapp.com/attachments/458063532567691284/574849534945919007/unknown.png
-This will NOT solve your problem 100%, But it will mitigate it.
-
-I hope this helps.
-_________________________________________________________________________________________________________________________________
-Special Versions of Reshade
-
-My shader was also tested with SpecialK moded Reshade.
-As for a guide to use SpecialK Follow this link.
-https://steamcommunity.com/sharedfiles/filedetails/?id=933337066
-
-.................................................................................................................................
-Read Below Section
-
+Read Help Section
 =================================================================================================================================
 {35MM} - Used ReShade 4.0+
 Depth Buffer may hang for a sec if you move your view to fast. Hope ReShade 4.4 fixes this.
@@ -337,6 +39,12 @@ The real fix is to apply a perspective correction on the Z-Buffer. But, that is 
 Issue with ReShade 4.0.0+ If you install ReShade as opengl32.dll you have to rename it to dxgi.dll in the game folder. Windows 10 Issue it seems.
 
 Also Make sure to disable the insanity post process effect. It messes with the 3D in the game.
+
+{Bard's Tale 4} - Use ReShade 4.7.0
+Anoying issue if you read any notice in game you have to set you Depth Adjust ammount form 20 to 200-250 I use 225. If this issue was not there this would had been a
+easy game to play. It seems to get stuck like this so not bad bad..... only one time bad. :D
+
+Anyways I advise you set it back to 20 if your going to turn off the game and set it to 200-250 once you encounter a Notice is game. Well please enjoy.
 
 {Battlefield One} - Used ReShade 4.0.2
 Added alternet settings mode to my shader. This can be done with the newly added Alternet Depth Buffer Adjust Toggle PREPROCESSOR FUNCTIONS. This is in Shader.
@@ -1343,3 +1051,17 @@ Also Keep in mind if you don't like the depth map I made. You can alawys make yo
 
 For older versions of reshade.
 https://www.mediafire.com/folder/8ar1jhh1809cl/ReShade_Repository
+
+Here is a quick and dirty game list of working Depth Maps. They are only suggestions. You can use any setting that works for you.
+User Settings
+https://docs.google.com/spreadsheets/d/18ujpY-97V_YuXpQUh-7bOomE4D5nUGwp3XppfU_0N2k/edit?usp=sharing <----- I don't maintain this.
+
+Also Keep in mind if you don't like the depth map I made. You can always adjust your own and not use Overwatch.fxh
+
+Special Versions of Reshade
+
+My shader was also tested with SpecialK moded Reshade.
+As for a guide to use SpecialK Follow this link.
+https://steamcommunity.com/sharedfiles/filedetails/?id=933337066
+
+.................................................................................................................................

@@ -52,7 +52,7 @@
 	#define OW_WP "WP Off\0Custom WP\0"
 	static const int WSM = 0;
 	//Triggers
-	static const int RE = 0, NC = 0, RH = 0, NP = 0, ID = 0, SP = 0, DC = 0, HM = 0, DF = 0, NF = 0, DS = 0, LB = 0, DA = 0, NW = 0;
+	static const int RE = 0, NC = 0, RH = 0, NP = 0, ID = 0, SP = 0, DC = 0, HM = 0, DF = 0, NF = 0, DS = 0, LB = 0, DA = 0, NW = 0, PE = 0;
 	//Overwatch.fxh State
 	#define OS 1
 #endif
@@ -1559,10 +1559,10 @@ float drawChar( float Char, float2 pos, float2 size, float2 TC )
 float3 Out(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Target
 {
 	float2 TC = float2(texcoord.x,1-texcoord.y);
-	float Text_Timer = 25000, BT = smoothstep(0,1,sin(timer*(3.75/1000))), Size = 1.1, Depth3D, Read_Help, NoPro, NotCom, Mod, Needs, Net, Over, AA, Not, No, Help, Fix, Need, State, SetAA, Work;
+	float Text_Timer = 25000, BT = smoothstep(0,1,sin(timer*(3.75/1000))), Size = 1.1, Depth3D, Read_Help, Post, Effect, NoPro, NotCom, Mod, Needs, Net, Over, AA, Not, No, Help, Fix, Need, State, SetAA, Work;
 	float3 Color = PS_calcLR(texcoord).rgb;
 
-	if(RH || NC || NP || NF || DS || OS || DA || NW)
+	if(RH || NC || NP || NF || PE || DS || OS || DA || NW)
 		Text_Timer = 30000;
 
 	[branch] if(timer <= Text_Timer || Text_Info)
@@ -1641,8 +1641,33 @@ float3 Out(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Targe
 		Work += drawChar( CH_D, charPos, charSize, TC); charPos.x += .01 * Size;
 		Work += drawChar( CH_L, charPos, charSize, TC); charPos.x += .01 * Size;
 		Work += drawChar( CH_L, charPos, charSize, TC);
-		//Disable TAA/MSAA
+		//Disable CA/MB/Dof/Grain
 		charPos = float2( 0.009, 0.9375);
+		Effect += drawChar( CH_D, charPos, charSize, TC); charPos.x += .01 * Size;
+		Effect += drawChar( CH_I, charPos, charSize, TC); charPos.x += .01 * Size;
+		Effect += drawChar( CH_S, charPos, charSize, TC); charPos.x += .01 * Size;
+		Effect += drawChar( CH_A, charPos, charSize, TC); charPos.x += .01 * Size;
+		Effect += drawChar( CH_B, charPos, charSize, TC); charPos.x += .01 * Size;
+		Effect += drawChar( CH_L, charPos, charSize, TC); charPos.x += .01 * Size;
+		Effect += drawChar( CH_E, charPos, charSize, TC); charPos.x += .01 * Size;
+		Effect += drawChar( CH_BLNK, charPos, charSize, TC); charPos.x += .01 * Size;
+		Effect += drawChar( CH_C, charPos, charSize, TC); charPos.x += .01 * Size;
+		Effect += drawChar( CH_A, charPos, charSize, TC); charPos.x += .01 * Size;
+		Effect += drawChar( CH_SLSH, charPos, charSize, TC); charPos.x += .01 * Size;
+		Effect += drawChar( CH_M, charPos, charSize, TC); charPos.x += .01 * Size;
+		Effect += drawChar( CH_B, charPos, charSize, TC); charPos.x += .01 * Size;
+		Effect += drawChar( CH_SLSH, charPos, charSize, TC); charPos.x += .01 * Size;
+		Effect += drawChar( CH_D, charPos, charSize, TC); charPos.x += .01 * Size;
+		Effect += drawChar( CH_O, charPos, charSize, TC); charPos.x += .01 * Size;
+		Effect += drawChar( CH_F, charPos, charSize, TC); charPos.x += .01 * Size;
+		Effect += drawChar( CH_SLSH, charPos, charSize, TC); charPos.x += .01 * Size;
+		Effect += drawChar( CH_G, charPos, charSize, TC); charPos.x += .01 * Size;
+		Effect += drawChar( CH_R, charPos, charSize, TC); charPos.x += .01 * Size;
+		Effect += drawChar( CH_A, charPos, charSize, TC); charPos.x += .01 * Size;
+		Effect += drawChar( CH_I, charPos, charSize, TC); charPos.x += .01 * Size;
+		Effect += drawChar( CH_N, charPos, charSize, TC);
+		//Disable TAA/MSAA/AA
+		charPos = float2( 0.009, 0.920);
 		SetAA += drawChar( CH_D, charPos, charSize, TC); charPos.x += .01 * Size;
 		SetAA += drawChar( CH_I, charPos, charSize, TC); charPos.x += .01 * Size;
 		SetAA += drawChar( CH_S, charPos, charSize, TC); charPos.x += .01 * Size;
@@ -1762,6 +1787,8 @@ float3 Out(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Targe
 			Help = Read_Help;
 		if(NW)
 			Net = Work;
+		if(PE)
+			Post = Effect;
 		if(DA)
 			AA = SetAA;
 		//Blinking Text Warnings
@@ -1774,7 +1801,7 @@ float3 Out(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Targe
 		if(OS)
 			Over = State * BT;
 		//Website
-		return Depth3D+Help+No+Not+Fix+Need+Over+AA ? (1-texcoord.y*50.0+48.85)*texcoord.y-0.500: Color;
+		return Depth3D+Help+Post+No+Not+Fix+Need+Over+AA ? (1-texcoord.y*50.0+48.85)*texcoord.y-0.500: Color;
 	}
 	else
 		return Color;

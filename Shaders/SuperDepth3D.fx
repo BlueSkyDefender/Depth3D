@@ -52,7 +52,7 @@
 	#define OW_WP "WP Off\0Custom WP\0"
 	static const int WSM = 0;
 	//Triggers
-	static const int RE = 0, NC = 0, RH = 0, NP = 0, ID = 0, SP = 0, DC = 0, HM = 0, DF = 0, NF = 0, DS = 0, LB = 0, DA = 0, NW = 0;
+	static const int RE = 0, NC = 0, RH = 0, NP = 0, ID = 0, SP = 0, DC = 0, HM = 0, DF = 0, NF = 0, DS = 0, LB = 0, DA = 0, NW = 0, PE = 0;
 	//Overwatch.fxh State
 	#define OS 1
 #endif
@@ -209,7 +209,7 @@ uniform int Auto_Balance_Ex <
 #endif
 uniform int ZPD_Boundary <
 	ui_type = "combo";
-	ui_items = "Off\0Normal\0Third Person\0FPS Weapon Full\0FPS Narrow\0";
+	ui_items = "Off\0Normal\0Third Person\0FPS Full\0FPS Narrow\0";
 	ui_label = " ZPD Boundary Detection";
 	ui_tooltip = "This selection menu gives extra boundary conditions to ZPD.\n"
 				 			 "This treats your screen as a virtual wall.\n"
@@ -255,7 +255,7 @@ uniform float Depth_Edge_Mask <
 	#endif
 	ui_min = -0.125; ui_max = 1.5;
 	ui_label = " Edge Mask";
-	ui_tooltip = "Use this to adjust for artifacts.\n"
+	ui_tooltip = "Use this to adjust for artifacts from a lower resolution Depth Buffer.\n"
 				 "Default is Zero, Off";
 	ui_category = "Occlusion Masking";
 > = DF_Z;
@@ -303,7 +303,7 @@ uniform float Auto_Depth_Adjust <
 	ui_type = "drag";
 	ui_min = 0.0; ui_max = 0.625;
 	ui_label = " Auto Depth Adjust";
-	ui_tooltip = "The Map Automatically scales to outdoor and indoor areas.\n"
+	ui_tooltip = "Automatically scales depth so it fights out of game menu pop out.\n"
 				 "Default is 0.1f, Zero is off.";
 	ui_category = "Depth Map";
 > = DB_Z;
@@ -311,9 +311,9 @@ uniform float Auto_Depth_Adjust <
 uniform int Depth_Detection <
 	ui_type = "combo";
 #if Compatibility_DD
-	ui_items = "Off\0Depth Detection +Sky\0Depth Detection -Sky\0ReShade Depth Detection\0";
+	ui_items = "Off\0Detection +Sky\0Detection -Sky\0ReShade's Detection\0";
 #else
-	ui_items = "Off\0Depth Detection +Sky\0Depth Detection -Sky\0";
+	ui_items = "Off\0Detection +Sky\0Detection -Sky\0";
 #endif
 	ui_label = " Depth Detection";
 	ui_tooltip = "Use this to disable/enable in game Depth Detection.";
@@ -337,7 +337,7 @@ uniform bool Depth_Map_Flip <
 uniform float2 Horizontal_and_Vertical <
 	ui_type = "drag";
 	ui_min = 0.125; ui_max = 2;
-	ui_label = "·Z Horizontal & Vertical Size·";
+	ui_label = "·Z Horizontal & Vertical·";
 	ui_tooltip = "Adjust Horizontal and Vertical Resize. Default is 1.0.";
 	ui_category = "Reposition Depth";
 > = float2(DD_X,DD_Y);
@@ -376,6 +376,7 @@ uniform float3 Weapon_Adjust <
 	ui_tooltip = "Adjust Weapon depth map for your games.\n"
 				 "X, CutOff Point used to set a different scale for first person hand apart from world scale.\n"
 				 "Y, Precision is used to adjust the first person hand in world scale.\n"
+				 "Z, Tuning is used to fine tune the precision adjustment above.\n"
 	             "Default is float2(X 0.0, Y 0.0, Z 0.0)";
 	ui_category = "Weapon Hand Adjust";
 > = float3(0.0,0.0,0.0);
@@ -393,7 +394,7 @@ uniform float2 WZPD_and_WND <
 
 uniform int FPSDFIO <
 	ui_type = "combo";
-	ui_items = "Off\0Press\0Hold Down\0";
+	ui_items = "Off\0Press\0Hold\0";
 	ui_label = " FPS Focus Depth";
 	ui_tooltip = "This lets the shader handle real time depth reduction for aiming down your sights.\n"
 				 "This may induce Eye Strain so take this as an Warning.";
@@ -417,7 +418,7 @@ uniform int2 Eye_Fade_Reduction_n_Power <
 uniform float Weapon_ZPD_Boundary <
 	ui_type = "slider";
 	ui_min = 0.0; ui_max = 0.5;
-	ui_label = " Weapon Screen Boundary Detection";
+	ui_label = " Weapon Boundary Detection";
 	ui_tooltip = "This selection menu gives extra boundary conditions to WZPD.";
 	ui_category = "Weapon Hand Adjust";
 > = DF_X;
@@ -457,7 +458,7 @@ uniform float2 Interlace_Anaglyph <
 uniform int Scaling_Support <
 	ui_type = "combo";
 	ui_items = "SR Native\0SR 2160p A\0SR 2160p B\0SR 1080p A\0SR 1080p B\0SR 1050p A\0SR 1050p B\0SR 720p A\0SR 720p B\0";
-	ui_label = " Scaling Support";
+	ui_label = " Downscaling Support";
 	ui_tooltip = "Dynamic Super Resolution scaling support for Line Interlaced, Column Interlaced, & Checkerboard 3D displays.\n"
 				 "Set this to your native Screen Resolution A or B, DSR Smoothing must be set to 0%.\n"
 				 "This does not work with a hardware ware scaling done by VSR.\n"
@@ -523,16 +524,18 @@ uniform float3 Colors_K1_K2_K3 <
 	ui_type = "slider";
 	#endif
 	ui_min = -2.0; ui_max = 2.0;
-	ui_tooltip = "Adjust the Distortion K1, K2, & K3.\n"
+	ui_tooltip = "Adjust Distortions K1, K2, & K3.\n"
 				 "Default is 0.0";
-	ui_label = " BD K1 K2 K3";
+	ui_label = " Barrel Distortion K1 K2 K3 ";
 	ui_category = "Distortion Corrections";
 > = float3(DC_X,DC_Y,DC_Z);
 
 uniform float Zoom <
 	ui_type = "drag";
 	ui_min = -0.5; ui_max = 0.5;
-	ui_label = " BD Zoom";
+	ui_label = " Barrel Distortion Zoom";
+	ui_tooltip = "Adjust Distortions Zoom.\n"
+				 			 "Default is 0.0";
 	ui_category = "Distortion Corrections";
 > = DC_W;
 #else
@@ -1541,10 +1544,10 @@ float drawChar( float Char, float2 pos, float2 size, float2 TC )
 float3 Out(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Target
 {
 	float2 TC = float2(texcoord.x,1-texcoord.y);
-	float Text_Timer = 25000, BT = smoothstep(0,1,sin(timer*(3.75/1000))), Size = 1.1, Depth3D, Read_Help, NoPro, NotCom, Mod, Needs, Net, Over, AA, Not, No, Help, Fix, Need, State, SetAA, Work;
+	float Text_Timer = 25000, BT = smoothstep(0,1,sin(timer*(3.75/1000))), Size = 1.1, Depth3D, Read_Help, Post, Effect, NoPro, NotCom, Mod, Needs, Net, Over, AA, Not, No, Help, Fix, Need, State, SetAA, Work;
 	float3 Color = PS_calcLR(texcoord).rgb;
 
-	if(RH || NC || NP || NF || DS || OS || DA || NW)
+	if(RH || NC || NP || NF || PE || DS || OS || DA || NW)
 		Text_Timer = 30000;
 
 	[branch] if(timer <= Text_Timer || Text_Info)
@@ -1623,8 +1626,33 @@ float3 Out(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Targe
 		Work += drawChar( CH_D, charPos, charSize, TC); charPos.x += .01 * Size;
 		Work += drawChar( CH_L, charPos, charSize, TC); charPos.x += .01 * Size;
 		Work += drawChar( CH_L, charPos, charSize, TC);
-		//Disable TAA/MSAA
+		//Disable CA/MB/Dof/Grain
 		charPos = float2( 0.009, 0.9375);
+		Effect += drawChar( CH_D, charPos, charSize, TC); charPos.x += .01 * Size;
+		Effect += drawChar( CH_I, charPos, charSize, TC); charPos.x += .01 * Size;
+		Effect += drawChar( CH_S, charPos, charSize, TC); charPos.x += .01 * Size;
+		Effect += drawChar( CH_A, charPos, charSize, TC); charPos.x += .01 * Size;
+		Effect += drawChar( CH_B, charPos, charSize, TC); charPos.x += .01 * Size;
+		Effect += drawChar( CH_L, charPos, charSize, TC); charPos.x += .01 * Size;
+		Effect += drawChar( CH_E, charPos, charSize, TC); charPos.x += .01 * Size;
+		Effect += drawChar( CH_BLNK, charPos, charSize, TC); charPos.x += .01 * Size;
+		Effect += drawChar( CH_C, charPos, charSize, TC); charPos.x += .01 * Size;
+		Effect += drawChar( CH_A, charPos, charSize, TC); charPos.x += .01 * Size;
+		Effect += drawChar( CH_SLSH, charPos, charSize, TC); charPos.x += .01 * Size;
+		Effect += drawChar( CH_M, charPos, charSize, TC); charPos.x += .01 * Size;
+		Effect += drawChar( CH_B, charPos, charSize, TC); charPos.x += .01 * Size;
+		Effect += drawChar( CH_SLSH, charPos, charSize, TC); charPos.x += .01 * Size;
+		Effect += drawChar( CH_D, charPos, charSize, TC); charPos.x += .01 * Size;
+		Effect += drawChar( CH_O, charPos, charSize, TC); charPos.x += .01 * Size;
+		Effect += drawChar( CH_F, charPos, charSize, TC); charPos.x += .01 * Size;
+		Effect += drawChar( CH_SLSH, charPos, charSize, TC); charPos.x += .01 * Size;
+		Effect += drawChar( CH_G, charPos, charSize, TC); charPos.x += .01 * Size;
+		Effect += drawChar( CH_R, charPos, charSize, TC); charPos.x += .01 * Size;
+		Effect += drawChar( CH_A, charPos, charSize, TC); charPos.x += .01 * Size;
+		Effect += drawChar( CH_I, charPos, charSize, TC); charPos.x += .01 * Size;
+		Effect += drawChar( CH_N, charPos, charSize, TC);
+		//Disable TAA/MSAA/AA
+		charPos = float2( 0.009, 0.920);
 		SetAA += drawChar( CH_D, charPos, charSize, TC); charPos.x += .01 * Size;
 		SetAA += drawChar( CH_I, charPos, charSize, TC); charPos.x += .01 * Size;
 		SetAA += drawChar( CH_S, charPos, charSize, TC); charPos.x += .01 * Size;
@@ -1744,6 +1772,8 @@ float3 Out(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Targe
 			Help = Read_Help;
 		if(NW)
 			Net = Work;
+		if(PE)
+			Post = Effect;
 		if(DA)
 			AA = SetAA;
 		//Blinking Text Warnings
@@ -1756,7 +1786,7 @@ float3 Out(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Targe
 		if(OS)
 			Over = State * BT;
 		//Website
-		return Depth3D+Help+No+Not+Fix+Need+Over+AA ? (1-texcoord.y*50.0+48.85)*texcoord.y-0.500: Color;
+		return Depth3D+Help+Post+No+Not+Fix+Need+Over+AA ? (1-texcoord.y*50.0+48.85)*texcoord.y-0.500: Color;
 	}
 	else
 		return Color;

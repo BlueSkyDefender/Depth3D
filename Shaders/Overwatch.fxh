@@ -65,7 +65,7 @@ static const int DFW = 0;                               //Delay Frame Workaround
 static const int ALB = 0;                               //Auto Letter Box
 
 //Special Toggles Generic
-static const int RHW = 0;                               //Read Help
+static const int RHW = 0;                               //Read Help Warning
 
 //Special Toggles Warnings
 static const int NCW = 0;                               //Not Compatible Warning
@@ -74,6 +74,7 @@ static const int NFM = 0;                               //Needs Fix/Mod
 static const int DSW = 0;                               //Depth Selection Warning
 static const int DAA = 0;                               //Disable Anti-Aliasing
 static const int NWW = 0;                               //Network Warning
+static const int PEW = 0;                               //Disable Post Effect Warning
 
 //Special Handling
 #if exists "LEGOBatman.exe"                             //Lego Batman
@@ -662,6 +663,7 @@ static const int NWW = 0;                               //Network Warning
 	#define DE_Z 0.475
 	#define DB_Z 0.375
 	#define RH 1
+  #define NF 1
 #elif (App == 0x88004DC9 || App == 0x1DDA9341) //Strange Brigade DX12 & Vulkan
 	#define DA_X 0.0625
 	#define DA_Y 20.0
@@ -1087,6 +1089,8 @@ static const int NWW = 0;                               //Network Warning
 	#define DE_Z 0.375
 	#define DB_Z 0.05
 	#define RH 1
+	#define PE 1
+	#define NF 1
 #elif (App == 0x8CD23575 ) //Dark Souls: Remastered
 	#define DA_Y 50.0
 	#define DA_Z 0.001
@@ -1206,7 +1210,7 @@ static const int NWW = 0;                               //Network Warning
 	#define DB_Z 0.0275
 	#define RH 1
 #elif (App == 0xE4F6014F ) //Shovel Knight
-    #define DB_X 1
+	#define DB_X 1
 	#define DA_X 0.035
 	#define DA_Y 22.5
 	#define DA_Z 0.483
@@ -1243,7 +1247,7 @@ static const int NWW = 0;                               //Network Warning
 	#define DA_X 0.0375
 	#define DA_Y 23.75
 	#define DA_Z 0.00025
-    #define DB_X 1
+  #define DB_X 1
 	#define DB_Y 4
 	#define NC 1
 #elif (App == 0x6DDCD106 ) //The Town of Light
@@ -1350,7 +1354,6 @@ static const int NWW = 0;                               //Network Warning
 	#define DE_Y 0.65
 	#define DE_Z 0.375
 	#define DB_Z 0.025
-    //#define DE_W 0.4375
 #elif (App == 0x7F1A5568 ) //DarkSiders III
 	#define DA_W 1
 	#define DA_X 0.05
@@ -1369,6 +1372,98 @@ static const int NWW = 0;                               //Network Warning
 	//#define DE_X 1
 	//#define DE_Y 0.625
 	//#define DE_Z 0.375
+#elif (App == 0xB4C116F7 ) //Nioh
+	#define DA_W 1
+	#define DA_X 0.1
+	#define DA_Y 162.5
+	#define DA_Z 0.000125
+	#define DB_Z 0.200
+	#define DB_Y 1
+	#define DE_X 1
+	#define DE_Y 0.5
+	#define DE_Z 0.4
+	#define DE_W 0.05
+#elif (App == 0xD30783B6 ) //X-Com
+	#define DA_X 0.03
+	#define DA_Y 200.0
+	#define DA_Z 0.000125
+	#define DB_Z 0.050
+	#define DB_Y 3
+	#define DE_X 1
+	#define DE_Y 0.5
+	#define DE_Z 0.375
+	#define DE_W 0.025
+	#define DS 1
+#elif (App == 0xBF53A67A ) //The Bureau: XCOM Declassified
+	#define DA_X 0.04375
+	#define DA_Y 29.0
+	#define DA_Z 0.0003
+	#define DB_Y 2
+	#define DE_X 2
+	#define DE_Y 0.5
+	#define DE_Z 0.375
+	#define DS 1
+#elif (App == 0x1764D88A ) //X-Com 2
+	#define DA_X 0.24
+	#define DA_Y 29.0
+	#define DA_Z 0.0001
+	#define DB_Z 0.130
+	#define DB_Y 3
+	#define DE_X 2
+	#define DE_Y 0.25
+	#define DE_Z 0.375
+	#define DE_W 0.075
+#elif (App == 0xC60A845F ) //My Friend Pedro
+    #define DB_X 1
+    #define DA_W 1
+	#define DA_X 0.075
+	#define DA_Y 50.0
+	#define DA_Z 0.000375
+	#define DB_Y 4
+	#define DB_Z 0.13
+#elif (App == 0xD45ACB4B ) //Murdered Soul Suspect
+	#define DA_X 0.05
+	#define DA_Y 37.5
+	#define DA_Z 0.001
+	#define DB_Y 1
+	#define DE_X 1
+	#define DE_Y 0.5
+	#define DE_Z 0.375
+	#define DS 1
+#elif (App == 0x4FF5CF63 ) //Lords of the Fallen
+	#define DA_X 0.049
+	#define DA_Y 70.0
+	#define DA_Z 0.001
+	#define DB_Y 2
+	#define DE_X 1
+	#define DE_Y 0.5
+	#define DE_Z 0.375
+	#define DE_W 0.415
+	#define PE 1
+#elif (App == 0xD0AA19 ) //The Bards Tale 4
+	#define DA_W 1
+	#define DA_X 0.0375
+	#define DA_Y 20.0
+	#define DB_Y 3
+	#define DE_X 1
+	#define DE_Y 0.5
+	#define DE_Z 0.375
+	#define DA 1
+	#define PE 1
+	#define RH 1
+#elif (App == 0x54D4EAFA) //Sekiro Shadows Die Twice
+	#define DA_W 1
+	#define DA_X 0.0625
+	#define DA_Y 59.375
+	#define DA_Z 0.000375
+	#define DB_Z 0.125
+	#define DB_Y 1
+	#define DE_X 2
+	#define DE_Y 0.5
+	#define DE_Z 0.375
+   // #define DF_Z -0.125
+	#define DA 1
+	#define PE 1
 #else
 	#define NP 1 //No Profile
 #endif
@@ -1461,7 +1556,7 @@ static const int NWW = 0;                               //Network Warning
     #define NC NCW //Not Compatible Warning
 #endif
 #ifndef RH
-    #define RH RHW //Flashing Text Warning
+    #define RH RHW //Read Help Warning
 #endif
 #ifndef NP
     #define NP NPW //No Profile Warning
@@ -1495,6 +1590,9 @@ static const int NWW = 0;                               //Network Warning
 #endif
 #ifndef NW
     #define NW NWW //Network Warning
+#endif
+#ifndef PE
+    #define PE PEW //Disable Post Effect Warning
 #endif
 //Weapon Settings
 #ifndef OW_WP
