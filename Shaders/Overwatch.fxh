@@ -128,9 +128,18 @@ static const int PEW = 0;                               //Disable Post Effect Wa
 	#define DF_X 0.300
 	#define NW 1
 #elif (App == 0x2D950D30 )	//Fallout 4
-	#define DA_Y 6.25
-	#define DB_Y 2
+	#define DA_Y 25.0
+	#define DB_Y 5
+	#define DE_X 3
+	#define DE_Y 0.5
+	#define DE_Z 0.375
 	#define DB_W 6
+	#define DF_X 0.05
+	#define DA 1
+	//#define DF 1 
+	//#define DS 1
+	#define RH 1
+	#define NF 1
 #elif (App == 0x3950D04E )	//Skyrim: SE
 	#define DA_Y 6.25
 	#define DB_Y 2
@@ -1451,7 +1460,7 @@ static const int PEW = 0;                               //Disable Post Effect Wa
 	#define DA 1
 	#define PE 1
 	#define RH 1
-#elif (App == 0x54D4EAFA) //Sekiro Shadows Die Twice
+#elif (App == 0x54D4EAFA ) //Sekiro Shadows Die Twice
 	#define DA_W 1
 	#define DA_X 0.0625
 	#define DA_Y 59.375
@@ -1464,6 +1473,13 @@ static const int PEW = 0;                               //Disable Post Effect Wa
    // #define DF_Z -0.125
 	#define DA 1
 	#define PE 1
+#elif (App == 0x36ECE27F ) //Supraland
+	#define DA_W 1
+	#define DA_Y 22.5
+	#define DB_Y 2
+	#define DE_X 2
+	#define DE_Y 0.8
+	#define DE_Z 0.375
 #else
 	#define NP 1 //No Profile
 #endif
@@ -1614,7 +1630,7 @@ float3 Weapon_Profiles(float WP ,float3 Weapon_Adjust) //Tried Switch But, can't
     if (WP == 5)
         Value = float3(0.284,10.5,0.8725);    //WP 3  | BorderLands 3
     if (WP == 6)
-        Value = float3(0.253,28.75,98.5);     //WP 4  | Fallout 4 #2D950D30
+        Value = float3(0.253,44.0,96.25);     //WP 4  | Fallout 4 #2D950D30
     if (WP == 7)
         Value = float3(0.276,20.0,9.5625);    //WP 5  | Skyrim: SE #3950D04E
     if (WP == 8)

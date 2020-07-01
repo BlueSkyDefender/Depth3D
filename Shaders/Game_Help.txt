@@ -300,6 +300,29 @@ The weapon Depth Buffer can be found on Option 1. But, can't be merged.....
 {Emily Wants To Play}
 Install reshade in to SteamLibrary\steamapps\common\Emily Wants To Play\Engine\Binaries\Win64
 
+{Fallout 4} - Use ReShase 4.7.0
+
+Major Note: Copy Depth Buffer Before Clearing needs to be set when you enter the Mech. This also needs to be dissabled when you exit it. Delay Frame don't help here because when
+inside the Mech the Depth and BackBuffer are in sync. So best to just switch it in game. I also can't tell if your in the Mech or not.
+
+Fix for Mouse Lag in Fallout 4:
+
+Go to C:\Users\yourusername\Documents\My Games\Fallout4. Open Fallout4Prefs.ini and then change the following parameters:
+
+iPresentInterval=1
+to
+iPresentInterval=0
+
+Also change:
+
+bForceIgnoreSmoothness=0
+to
+bForceIgnoreSmoothness=1
+
+To be sure, you should also change the iPresentInterval in Fallout4.ini.
+
+Now In games set FOV to something like "fov 90 90" You need to do this each time you start the game or set it in the config file.
+
 {FarCry 2} - ReShade 4.5.2
 Use DX9 for weapon in game. Only think I noticed wrong was the guys hair is missing from the DB. 
 You have to use DX9 because it draws the weapon correctly so you can have weapon hand depth.

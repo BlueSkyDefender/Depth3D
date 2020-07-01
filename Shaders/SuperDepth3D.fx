@@ -957,7 +957,7 @@ float Fade(float2 texcoord)
 				#if UI_MASK
 					CD = max( 1 - ZPD_I / HUD_Mask(GridXY), CD );
 				#endif
-				if (CD < 0.0)//may lower this to like -0.1
+				if ( CD < 0.0 )//may lower this to like -0.1
 					Detect = 1;
 			}
 		}
