@@ -727,11 +727,6 @@ return p;
 #if D_Frame || DF
 float4 CurrentFrame(in float4 position : SV_Position, in float2 texcoords : TEXCOORD) : SV_Target
 {
-	if(Custom_Sidebars == 0)
-		return tex2Dlod(BackBufferMIRROR,float4(texcoords,0,0));
-	else if(Custom_Sidebars == 1)
-		return tex2Dlod(BackBufferBORDER,float4(texcoords,0,0));
-	else
 		return tex2Dlod(BackBufferCLAMP,float4(texcoords,0,0));
 }
 
@@ -745,7 +740,7 @@ float4 CSB(float2 texcoords)
 	if(Depth_Map_View == 0)
 		return tex2Dlod(SamplerDF,float4(texcoords,0,0));
 	else
-		return tex2D(SamplerzBufferN,texcoords).xxxx;
+		return tex2D(SamplerzBufferVR,texcoords).xxxx;
 }
 #else
 float4 CSB(float2 texcoords)
