@@ -305,7 +305,25 @@ Install reshade in to SteamLibrary\steamapps\common\Emily Wants To Play\Engine\B
 Major Note: Copy Depth Buffer Before Clearing needs to be set when you enter the Mech. This also needs to be dissabled when you exit it. Delay Frame don't help here because when
 inside the Mech the Depth and BackBuffer are in sync. So best to just switch it in game. I also can't tell if your in the Mech or not.
 
+Go to C:\Users\yourusername\Documents\My Games\Fallout4. Open Fallout4Prefs.ini and then change the following parameters:
+
+//from
+[Imagespace] 
+Disable DoF
+bDoDepthOfField=1
+bScreenSpaceBokeh=1
+
+//to
+[Imagespace] 
+bDoDepthOfField=0
+bScreenSpaceBokeh=0
+
 Fix for Mouse Lag in Fallout 4:
+Go to C:\Users\[name]\Documents\My Games\Fallout4\ Fallout4.ini / Fallout4Prefs.ini and steamapps\common\Fallout 4\Fallout4\Fallout4Prefs.ini under [Controls] add:
+
+bMouseAcceleration=0
+
+Warning This next one can make your game unstable. Only do this if you can't handle the mouse lag.
 
 Go to C:\Users\yourusername\Documents\My Games\Fallout4. Open Fallout4Prefs.ini and then change the following parameters:
 
@@ -313,15 +331,11 @@ iPresentInterval=1
 to
 iPresentInterval=0
 
-Also change:
-
-bForceIgnoreSmoothness=0
-to
-bForceIgnoreSmoothness=1
-
 To be sure, you should also change the iPresentInterval in Fallout4.ini.
 
-Now In games set FOV to something like "fov 90 90" You need to do this each time you start the game or set it in the config file.
+Now In games set FOV to something like "fov 90 95" You need to do this each time you start the game or set it in the config file.
+
+A other problem is the Weapon Hand Size it's so big..... If you have a mod for this message me.
 
 {FarCry 2} - ReShade 4.5.2
 Use DX9 for weapon in game. Only think I noticed wrong was the guys hair is missing from the DB. 

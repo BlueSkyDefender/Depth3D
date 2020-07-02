@@ -1630,7 +1630,7 @@ float3 Weapon_Profiles(float WP ,float3 Weapon_Adjust) //Tried Switch But, can't
     if (WP == 5)
         Value = float3(0.284,10.5,0.8725);    //WP 3  | BorderLands 3
     if (WP == 6)
-        Value = float3(0.253,44.0,96.25);     //WP 4  | Fallout 4 #2D950D30
+        Value = float3(0.253,25.0,93.0);      //WP 4  | Fallout 4 #2D950D30
     if (WP == 7)
         Value = float3(0.276,20.0,9.5625);    //WP 5  | Skyrim: SE #3950D04E
     if (WP == 8)
