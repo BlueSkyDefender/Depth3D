@@ -336,19 +336,19 @@ uniform bool Depth_Map_Flip <
 #if DB_Size_Postion
 uniform float2 Horizontal_and_Vertical <
 	ui_type = "drag";
-	ui_min = 0.125; ui_max = 2;
-	ui_label = "·Z Horizontal & Vertical·";
+	ui_min = 0.0; ui_max = 2;
+	ui_label = "·Horizontal & Vertical Size·";
 	ui_tooltip = "Adjust Horizontal and Vertical Resize. Default is 1.0.";
 	ui_category = "Reposition Depth";
 > = float2(DD_X,DD_Y);
 
-uniform int2 Image_Position_Adjust<
+uniform float2 Image_Position_Adjust<
 	ui_type = "drag";
-	ui_min = -4096.0; ui_max = 4096.0;
-	ui_label = " Z Position";
+	ui_min = -1.0; ui_max = 1.0;
+	ui_label = " Horizontal & Vertical Position";
 	ui_tooltip = "Adjust the Image Position if it's off by a bit. Default is Zero.";
 	ui_category = "Reposition Depth";
-> = int2(DD_Z,DD_W);
+> = float2(DD_Z,DD_W);
 
 uniform bool Alinement_View <
 	ui_label = " Alinement View";
@@ -358,7 +358,7 @@ uniform bool Alinement_View <
 #else
 static const bool Alinement_View = false;
 static const float2 Horizontal_and_Vertical = float2(DD_X,DD_Y);
-static const int2 Image_Position_Adjust = int2(DD_Z,DD_W);
+static const float2 Image_Position_Adjust = float2(DD_Z,DD_W);
 #endif
 //Weapon Hand Adjust//
 uniform int WP <
@@ -734,7 +734,7 @@ float4 MouseCursor(float2 texcoord )
 		{
 			float CCA = 0.005, CCB = 0.00025, CCC = 0.25, CCD = 0.00125, Arrow_Size_A = 0.7, Arrow_Size_B = 1.3, Arrow_Size_C = 4.0;//scaling
 			float2 MousecoordsXY = Mousecoords * pix, center = texcoord, Screen_Ratio = float2(1.75,1.0), Size_Color = float2(1+Cursor_SC.x,Cursor_SC.y);
-			float THICC = (1.5+Size_Color.x) * CCB, Size = Size_Color.x * CCA, Size_Cubed = (Size_Color.x*Size_Color.x) * CCD;
+			float THICC = (2.0+Size_Color.x) * CCB, Size = Size_Color.x * CCA, Size_Cubed = (Size_Color.x*Size_Color.x) * CCD;
 
 			if (Cursor_Lock && !CLK)
 			MousecoordsXY = float2(0.5,0.5);
@@ -799,14 +799,14 @@ float Depth(float2 texcoord)
 	}
 	#endif
 	#if DB_Size_Postion || SP || LB || LB_Correction
-	float2 texXY = texcoord + Image_Position_Adjust * pix;
+		texcoord.xy += float2(-Image_Position_Adjust.x,Image_Position_Adjust.y)*0.5;
 		#if LB || LB_Correction
 			float2 H_V = Horizontal_and_Vertical * float2(1,LBDetection());
 		#else
 			float2 H_V = Horizontal_and_Vertical;
 		#endif
 	float2 midHV = (H_V-1) * float2(BUFFER_WIDTH * 0.5,BUFFER_HEIGHT * 0.5) * pix;
-	texcoord = float2((texXY.x*H_V.x)-midHV.x,(texXY.y*H_V.y)-midHV.y);
+	texcoord = float2((texcoord.x*H_V.x)-midHV.x,(texcoord.y*H_V.y)-midHV.y);
 	#endif
 	if (Depth_Map_Flip)
 		texcoord.y =  1 - texcoord.y;
@@ -835,14 +835,14 @@ float2 WeaponDepth(float2 texcoord)
 	}
 	#endif
 	#if DB_Size_Postion || SP || LB || LB_Correction
-	float2 texXY = texcoord + Image_Position_Adjust * pix;
+		texcoord.xy += float2(-Image_Position_Adjust.x,Image_Position_Adjust.y)*0.5;
 		#if LB || LB_Correction
 			float2 H_V = Horizontal_and_Vertical * float2(1,LBDetection());
 		#else
 			float2 H_V = Horizontal_and_Vertical;
 		#endif
 	float2 midHV = (H_V-1) * float2(BUFFER_WIDTH * 0.5,BUFFER_HEIGHT * 0.5) * pix;
-	texcoord = float2((texXY.x*H_V.x)-midHV.x,(texXY.y*H_V.y)-midHV.y);
+	texcoord = float2((texcoord.x*H_V.x)-midHV.x,(texcoord.y*H_V.y)-midHV.y);
 	#endif
 	//Weapon Setting//
 	float3 WA_XYZ = Weapon_Adjust;
@@ -968,7 +968,7 @@ float Fade(float2 texcoord)
 }
 //////////////////////////////////////////////////////////Depth Map Alterations/////////////////////////////////////////////////////////////////////
 
-float3 DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD) : SV_Target
+float3 DepthMap(in float4 position : SV_Position,in float2 texcoord : TEXCOORD) : SV_Target
 {
 	float3 DM = PrepDepth(texcoord).rgb;
 	float R = DM.x, G = DM.y, B = DM.z;
@@ -1786,7 +1786,7 @@ float3 Out(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Targe
 		if(OS)
 			Over = State * BT;
 		//Website
-		return Depth3D+Help+Post+No+Not+Fix+Need+Over+AA ? (1-texcoord.y*50.0+48.85)*texcoord.y-0.500: Color;
+		return Depth3D+Help+Post+No+Not+Net+Fix+Need+Over+AA ? (1-texcoord.y*50.0+48.85)*texcoord.y-0.500: Color;
 	}
 	else
 		return Color;

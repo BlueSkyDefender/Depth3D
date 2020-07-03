@@ -324,18 +324,21 @@ Go to C:\Users\[name]\Documents\My Games\Fallout4\ Fallout4.ini / Fallout4Prefs.
 bMouseAcceleration=0
 
 Warning This next one can make your game unstable. Only do this if you can't handle the mouse lag.
-
+\/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/
 Go to C:\Users\yourusername\Documents\My Games\Fallout4. Open Fallout4Prefs.ini and then change the following parameters:
-
+//from
 iPresentInterval=1
-to
+//to
 iPresentInterval=0
+/\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\
+Warning This next one can make your game unstable. Only do this if you can't handle the mouse lag.
 
 To be sure, you should also change the iPresentInterval in Fallout4.ini.
 
 Now In games set FOV to something like "fov 90 95" You need to do this each time you start the game or set it in the config file.
 
-A other problem is the Weapon Hand Size it's so big..... If you have a mod for this message me.
+A other problem is the Weapon Hand Size it's so big..... I recommend your favorite Lowered Weapons Mod. I use
+https://www.nexusmods.com/fallout4/mods/20093
 
 {FarCry 2} - ReShade 4.5.2
 Use DX9 for weapon in game. Only think I noticed wrong was the guys hair is missing from the DB. 
@@ -986,6 +989,16 @@ You may need to manually enable copy depth buffers in the ReShade DX11 menu for 
 
 {Turok: Dinosaur Hunter} - Use Reshade 3.4.1
 If you are useing an older build of reshade you have to turn off "Light Scatter," in Graphics Menu.
+
+{Vanquish} - ReShade 4.7.0
+Use DGVoodoo2 for this game to convert dx9 to dx11.
+
+Settings used in DGVooddoo2 are "Resolution" Set your resolution here and not in game due to a bug that comes up if you set your res in game.
+Set MSAA to Off and VRAM to Max 2048MB. Optional you can dissable the DGVoodoo Logom if you like.
+
+This is done so you don't have to scale the depth buffer your self.
+
+You can download DGVoodoo2 here http://dege.freeweb.hu/dgVoodoo2/dgVoodoo2.html
 
 {Unreal Gold}
 Use v227 patch. Use the DX9 render. Install Rehsade 3.0 to System folder select DX9.
