@@ -478,6 +478,23 @@ Issues with depth buffer when Black Bars are on screen.
 Depth Buffer may not show in main menu.
 You need to set your Depth Buffer to preserve in th DX 11 tab.
 
+{Life is Strange} - Used ReShade 4.7.0
+
+Disable DoF and CA
+
+Documents>My Games>Life is Strange>LifeIsStrangeGame>Config
+
+Go to the Life is Strange folder in your documents.
+Open the "LifeIsStrangeGame" folder.
+Open the "Config" folder.
+Open the "LifeIsStrangeEngine.ini" settings file using notepad.
+
+Find the line that reads "bDNEAllowChromaticAberration=True"
+and
+Find the line that reads "bAllowDNEDOF=True"
+
+Change the "True" to "False" and save.
+
 {Little Nightmares} - Used ReShade 4.3
 In setting set Post Processing to low ore Med.
 
@@ -994,7 +1011,7 @@ If you are useing an older build of reshade you have to turn off "Light Scatter,
 Use DGVoodoo2 for this game to convert dx9 to dx11.
 
 Settings used in DGVooddoo2 are "Resolution" Set your resolution here and not in game due to a bug that comes up if you set your res in game.
-Set MSAA to Off and VRAM to Max 2048MB. Optional you can dissable the DGVoodoo Logom if you like.
+Set MSAA to Off and VRAM to Max 2048MB. Optional you can disable the DGVoodoo Logo if you like.
 
 This is done so you don't have to scale the depth buffer your self.
 

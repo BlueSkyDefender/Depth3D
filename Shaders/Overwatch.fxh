@@ -1485,6 +1485,17 @@ static const int PEW = 0;                               //Disable Post Effect Wa
 	#define RH 1
 	#define NF 1
 	#define PE 1
+#elif (App == 0xA1214CD1 ) //Life is Strange
+	#define DA_X 0.125
+	#define DA_Y 8.0
+	#define DA_Z 0.0005
+	#define DB_Y 4
+	#define DE_X 1
+	#define DE_Y 0.5
+	#define DE_Z 0.375
+	#define PE 1
+	#define DS 1
+	#define DA 1
 #else
 	#define NP 1 //No Profile
 #endif
