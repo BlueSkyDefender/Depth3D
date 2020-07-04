@@ -1464,6 +1464,15 @@ static const int PEW = 0;                               //Disable Post Effect Wa
    // #define DF_Z -0.125
 	#define DA 1
 	#define PE 1
+#elif (App == 0x36ECE27F ) //Supraland
+	#define DA_W 1
+	#define DA_Y 22.5
+	#define DB_Y 2
+	#define DE_X 2
+	#define DE_Y 0.8
+	#define DE_Z 0.375
+	#define PE 1
+	#define DA 1
 #elif (App == 0x3604DCE6 ) //Remnant: From the Ashes
 	#define DA_W 1
 	#define DA_X 0.07
