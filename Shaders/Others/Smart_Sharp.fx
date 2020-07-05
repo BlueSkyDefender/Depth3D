@@ -84,6 +84,9 @@
 // Default is off.
 #define M_Quality 0 //Manual Quality Shader Defaults to 2 when set to off.
 
+//Use this to enable motion Sharpen option also reduces perf a bit more
+#define Motion_Sharpen 0
+
 // It is best to run Smart Sharp after tonemapping.
 
 #if !defined(__RESHADE__) || __RESHADE__ < 40000
@@ -162,11 +165,13 @@ uniform bool CA_Mask_Boost <
 
 uniform bool CA_Removal <
 	ui_label = "CAM Removal";
-	ui_tooltip = "This removes Contrast Adaptive Masking part of the shader.\n"
+	ui_tooltip = "This removes the extra Contrast Adaptive Masking part of the shader.\n"
+				 "Keep in mind This filter already has a level of Contrast Masking.\n"
 				 "This is for people who like the Raw look of Bilateral Sharpen.";
 	ui_category = "Bilateral CAS";
 > = false;
 
+#if Motion_Sharpen
 uniform int Local_Motion <
 	ui_type = "combo";
 	ui_items = "General Motion\0Local Motion\0";
@@ -205,19 +210,24 @@ uniform float MDSM <
 				 "Number 1 is default.";
 	ui_category = "Motion Bilateral CAS";
 > = 1.0;
+#else
+static const int Local_Motion = 0;
+static const float GMD = 0.0;
+static const float MDSM = 0.0;
+#endif
 
-uniform int Debug_View <
-	ui_type = "combo";
-	ui_items = "Normal View\0Sharp Debug\0Motion Debug\0";
-	ui_label = "View Mode";
-	ui_tooltip = "This is used to select the normal view output or debug view.\n"
+uniform bool Debug_View <
+	ui_label = "Debug View";
+	ui_tooltip = "This is used to select the debug view.\n"
 				 "Used to see what the shaderis changing in the image.\n"
-				 "Normal gives you the normal out put of this shader.\n"
-				 "Sharp is the full Debug for Smart sharp.\n"
-				 "Depth Cues is the Shaded output.\n"
+				 "Top Left is CAS Mask.\n"
+				 "Top Right is Depth.\n"
+				 "Center is Motion Mask.\n"
+				 "Bottom Left is Depth Masking.\n"
+				 "Bottom Right is Unsharp Mask.\n"
 				 "Default is Normal View.";
 	ui_category = "Debug";
-> = 0;
+> = false;
 
 #define Quality 2
 
@@ -259,6 +269,7 @@ sampler BackBuffer
 		Texture = BackBufferTex;
 	};
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+#if Motion_Sharpen
 texture CurrentBBSSTex { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA8;};
 
 sampler CBBSS
@@ -273,26 +284,20 @@ sampler PBBSS
 		Texture = PastBBSSTex;
 	};
 	
-texture DownSTex {Width = 256*0.5; Height = 256*0.5; Format = R8;  MipLevels = 8;};
+texture DownSTex {Width = 256; Height = 256; Format = R8;  MipLevels = 9;};
 
 sampler DSM
 	{
 		Texture = DownSTex;
 	};
-	
-texture LocalMotionTex { Width = 512; Height = 512; Format = R8;};
-
-sampler LMS
-	{
-		Texture = LocalMotionTex;
-	};
+#endif
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 float Depth(in float2 texcoord : TEXCOORD0)
 {
 	if (Depth_Map_Flip)
 		texcoord.y =  1 - texcoord.y;
 
-	float zBuffer = tex2D(DepthBuffer, texcoord).x; //Depth Buffer
+	float zBuffer = tex2Dlod(DepthBuffer, float4(texcoord,0,0)).x; //Depth Buffer
 
 	//Conversions to linear space.....
 	//Near & Far Adjustment
@@ -343,39 +348,47 @@ else
 	return 1.0;
 }
 
-float Motion_Sharpen(float2 texcoord)
-{	float2 PS = pix * 5;
-	
-	float BlurMotion = tex2D(LMS,texcoord).x;
+float MotionSharpen(float2 texcoord)
+{
+#if Motion_Sharpen
+	float2 PS = pix * 5.0;
+	float BlurMotion = tex2D(DSM,texcoord).x;
 	if(Local_Motion)
 	{
-		BlurMotion += tex2D(LMS,texcoord + float2(0,PS.y)).x;
-		BlurMotion += tex2D(LMS,texcoord + float2(PS.x,0)).x;
-		BlurMotion += tex2D(LMS,texcoord + float2(-PS.x,0)).x;
-		BlurMotion += tex2D(LMS,texcoord + float2(0,-PS.y)).x;
+		BlurMotion += tex2D(DSM,texcoord + float2(0,PS.y)).x;
+		BlurMotion += tex2D(DSM,texcoord + float2(PS.x,0)).x;
+		BlurMotion += tex2D(DSM,texcoord + float2(-PS.x,0)).x;
+		BlurMotion += tex2D(DSM,texcoord + float2(0,-PS.y)).x;
 		return (BlurMotion * 0.2) * 12.5; 
 	}
 	else
 		return tex2Dlod(DSM,float4(texcoord,0,11)).x * lerp(0.0,25.0,GMD);
+#else
+	return 0;
+#endif
 }
 
 float4 CAS(float2 texcoord)
 {
+    float Up, Left, Center, Right, Down, mnRGB, mxRGB;
+    
 	// fetch a Cross neighborhood around the pixel 'C',
 	//         Up
 	//
 	//  Left(Center)Right
 	//
 	//        Down
-    float Up = LI(BB(texcoord, float2( 0,-pix.y)));
-    float Left = LI(BB(texcoord, float2(-pix.x, 0)));
-    float Center = LI(BB(texcoord, 0));
-    float Right = LI(BB(texcoord, float2( pix.x, 0)));
-    float Down = LI(BB(texcoord, float2( 0, pix.y)));
-
-    float mnRGB = Min3( Min3(Left, Center, Right), Up, Down);
-    float mxRGB = Max3( Max3(Left, Center, Right), Up, Down);
-
+	if(!CA_Removal)
+	{ 
+	    Up = LI(BB(texcoord, float2( 0,-pix.y)));
+	    Left = LI(BB(texcoord, float2(-pix.x, 0)));
+	    Center = LI(BB(texcoord, 0));
+	    Right = LI(BB(texcoord, float2( pix.x, 0)));
+		Down = LI(BB(texcoord, float2( 0, pix.y)));
+	
+	    mnRGB = Min3( Min3(Left, Center, Right), Up, Down);
+	    mxRGB = Max3( Max3(Left, Center, Right), Up, Down);
+	}    
     // Smooth minimum distance to signal limit divided by smooth max.
     float rcpMRGB = rcp(mxRGB), RGB_D = saturate(min(mnRGB, 1.0 - mxRGB) * rcpMRGB);
 
@@ -408,7 +421,7 @@ float4 CAS(float2 texcoord)
 	for (int i=-kSize; i <= kSize; ++i)
 	{
 			for (int j=-kSize; j <= kSize; ++j)
-			{
+			{  
 				cc = BB(texcoord.xy, float2(i,j) * RPC_WS * rcp(kSize) );
 				factor = normpdf3(cc-c, BSIGMA);
 				Z += factor;
@@ -417,7 +430,7 @@ float4 CAS(float2 texcoord)
 	}
 
 	//// Shaping amount of sharpening masked
-	float CAS_Mask = RGB_D, Sharp = Sharpness, MD = Motion_Sharpen(texcoord);
+	float CAS_Mask = RGB_D, Sharp = Sharpness, MD = MotionSharpen(texcoord);
 
 	if(GMD > 0 || Local_Motion)
 		Sharp = Sharpness * lerp( 1,MDSM,saturate(MD));
@@ -433,7 +446,7 @@ return saturate(float4(final_colour/Z,CAS_Mask));
 
 float3 Sharpen_Out(float2 texcoord)
 {
- float Sharp = Sharpness, MD = Motion_Sharpen(texcoord);
+ float Sharp = Sharpness, MD = MotionSharpen(texcoord);
 
 	if(GMD > 0 || Local_Motion)
 		Sharp = Sharpness * lerp( 1,MDSM,saturate(MD));
@@ -456,7 +469,7 @@ float3 ShaderOut(float2 texcoord : TEXCOORD0)
 
 	if (Debug_View == 0)
 		Out.rgb = lerp(Sharpen, BB, DB);
-	else if(Debug_View == 1)
+	else
 	{
 		float3 Top_Left = lerp(float3(1.,1.,1.),CAS(float2(texcoord.x*2,texcoord.y*2)).www,1-DBTL);
 
@@ -470,13 +483,15 @@ float3 ShaderOut(float2 texcoord : TEXCOORD0)
 		float3 VA_Bottom = texcoord.x < 0.5 ? Bottom_Left : Bottom_Right ;
 
 		Out = texcoord.y < 0.5 ? VA_Top : VA_Bottom;
+		#if Motion_Sharpen
+		if(texcoord.y < 0.666 && texcoord.y > 0.333 && texcoord.x < 0.666 && texcoord.x > 0.333)
+		Out = lerp( 0,MDSM,MotionSharpen(texcoord * 3 - 1.0));
+		#endif
 	}
-	else
-		Out = lerp( 0,MDSM,Motion_Sharpen(texcoord));
 
 	return Out;
 }
-
+#if Motion_Sharpen
 float CBackBuffer_SS(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Target
 {
 	return dot(tex2D(BackBuffer,texcoord),0.333);
@@ -487,16 +502,11 @@ float PBackBuffer_SS(float4 position : SV_Position, float2 texcoord : TEXCOORD) 
 	return tex2D(CBBSS,texcoord).x;
 }
 
-float DownSampleMotion(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Target
-{
-	return abs(tex2D(CBBSS,texcoord).x - tex2D(PBBSS,texcoord).x);
+float2 DownSampleMotion(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Target
+{	float Motion = abs(tex2D(CBBSS,texcoord).x - tex2D(PBBSS,texcoord).x);
+	return Motion;
 }
-
-float LocalMotionSample(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Target
-{
-	return length(tex2D(CBBSS,texcoord).x - tex2D(PBBSS,texcoord).x);
-}
-
+#endif
 ////////////////////////////////////////////////////////Logo/////////////////////////////////////////////////////////////////////////
 float3 Out(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Target
 {   //Overwatch integration
@@ -620,6 +630,7 @@ technique Smart_Sharp
 < ui_tooltip = "Suggestion : You Can Enable 'Performance Mode Checkbox,' in the lower bottom right of the ReShade's Main UI.\n"
 			   "             Do this once you set your Smart Sharp settings of course."; >
 {
+		#if Motion_Sharpen
 			pass PBB //Done this way to keep Freestyle comp.
 		{
 			VertexShader = PostProcessVS;
@@ -638,18 +649,7 @@ technique Smart_Sharp
 			PixelShader = DownSampleMotion;
 			RenderTarget = DownSTex;
 		}
-			pass Down_Sample_Motion
-		{
-			VertexShader = PostProcessVS;
-			PixelShader = DownSampleMotion;
-			RenderTarget = DownSTex;
-		}
-			pass Sample_Motion
-		{
-			VertexShader = PostProcessVS;
-			PixelShader = LocalMotionSample;
-			RenderTarget = LocalMotionTex;
-		}
+		#endif
 			pass UnsharpMask
 		{
 			VertexShader = PostProcessVS;

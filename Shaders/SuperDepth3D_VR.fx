@@ -1023,7 +1023,9 @@ float3 DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD)
 		R = Fade_in_out(texcoord);
 	if(1-texcoord.x < pix.x * 2 && 1-texcoord.y < pix.y * 2)
 		R = Fade(texcoord);
-
+	if(texcoord.x < pix.x * 2 && 1-texcoord.y < pix.y * 2)//BL
+		R = Motion_Blinders(texcoord);
+			
 	return saturate(float3(R,G,B));
 }
 

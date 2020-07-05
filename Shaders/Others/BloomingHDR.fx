@@ -98,7 +98,6 @@ uniform int Auto_Bloom <
 	ui_category = "Bloom Adjustments";
 > = 0;
 
-
 uniform float CBT_Adjust <
 
 	#if Compatibility
@@ -150,36 +149,9 @@ uniform float Bloom_Spread <
 	ui_label = "Primary Bloom Spread";
 	ui_tooltip = "Adjust to spread out the primary Bloom.\n"
 				 "This is used for spreading Bloom.\n"
-				 "Number 50.0 is default.";
+				 "Number 100.0 is default.";
 	ui_category = "Bloom Adjustments";
-> = 125.0;
-
-uniform int Petal_Ammount <
-	#if Compatibility
-	ui_type = "drag";
-	#else
-	ui_type = "slider";
-	#endif
-	ui_min = 3; ui_max = 9;
-	ui_label = "Bloom Petals";
-	ui_tooltip = "Used to adjust the ammount of petals used in this bloom.\n"
-				 "Number 5 is default.";
-	ui_category = "Bloom Adjustments";
-> = 5;
-
-uniform float Petal_Power <
-	#if Compatibility
-	ui_type = "drag";
-	#else
-	ui_type = "slider";
-	#endif
-	ui_min = 0.0; ui_max = 1.0;
-	ui_label = "Petal Definition & Bloom Boost";
-	ui_tooltip = "This is used for adjusting Petal Definiton.\n"
-				 "If you want Yuge Bloom Sizes override this.\n"
-				 "Number 0.5 is default.";
-	ui_category = "Bloom Adjustments";
-> = 0.5;
+> = 100.0;
 
 uniform int Tonemappers <
 	ui_type = "combo";
@@ -244,6 +216,23 @@ uniform bool Auto_Exposure <
 	ui_category = "Tonemapper Adjustments";
 > = 0;
 
+uniform float HDR_BP <
+	ui_type = "drag";
+	ui_min = 0.0; ui_max = 1.0;
+	ui_label = "Extract HDR Bright Point";
+	ui_tooltip = "Use this to set the color based brightness threshold for what is and what isn't allowed.\n"
+				"Number 0.5 is default.";
+	ui_category = "HDR";
+> = 0.5;
+
+uniform float HDR_BPP <
+	ui_type = "drag";
+	ui_min = 0.0; ui_max = 2.0;
+	ui_label = "HDR Bright Point Power";
+	ui_tooltip = "Adjustment The amount brightness allowed in the final image.\n"
+				"Number 1.0 is default.";
+	ui_category = "HDR";
+> = 1.0;
 
 uniform float Adapt_Adjust <
 	ui_type = "drag";
@@ -283,7 +272,7 @@ uniform int Debug_View <
 /////////////////////////////////////////////////////D3D Starts Here/////////////////////////////////////////////////////////////////
 #define pix float2(BUFFER_RCP_WIDTH, BUFFER_RCP_HEIGHT)
 #define BloomSpread Bloom_Spread * rcp(Bloom_Max)
-#define PP BloomSpread * lerp(5.0,20.0, Petal_Power)
+#define PP lerp(0.0,1.0, Petal_Power)
 #define Sat lerp(0,10,Saturation.x)
 
 uniform float timer < source = "timer"; >;
@@ -618,8 +607,7 @@ float2 Auto_Luma()
 }
 
 float4 Color_GS(float4 BC)
-{
-           // Luma Threshold Thank you Adyss
+{   // Luma Threshold Thank you Adyss
 	float GS = Luma(BC.rgb), Saturate_A = Sat, Saturate_B = saturate(Saturation.y), AL = Auto_Luma().x;//Luma and more
           BC.rgb /= max(GS, 0.001);
           BC.a    = max(0.0, GS - CBT_Adjust);
@@ -641,43 +629,11 @@ void PS_CurrentInfo(float4 pos : SV_Position, float2 texcoords : TEXCOORD, out f
 	Color = Color_GS(tex2D(BackBuffer, texcoords));
 }
 
-float4 BloomBlur(sampler2D Sample, float2 texcoords, float Size_A, int BA , float Mip)
-{ 
-	//This code was  based on the code here https://xorshaders.weebly.com/tutorials/blur-shaders-5-part-2
-	// Can be used for Flairs
-	const float sigma   = 10.0;             // Gaussian sigma
-    const float Pi = 3.14159265359;
-    const float Tau = Pi * 2.0;
-	//RADIAL GAUSSIAN BLUR
-    int Directions = BA; // BLUR DIRECTIONS (Default 16 - More is better but slower) 4 6 8 12 16
-    float norm, Quality = float(sigma * 0.3); //More is better but slower
-
-    float2 Radius_A = Size_A * pix.xy; // BLUR SIZE (Radius)
-    // Pixel colour
-    float4 Color = tex2D( Sample, texcoords);
-    
-    [loop] // Blur calculations
-    for( float d=0.0; d<Tau; d+=Tau/Directions)
-    {
-		for(float i=rcp(Quality); i<=1.0; i+=rcp(Quality))
-        {
-        	float coeff = exp(-0.5 * d * d * i / (sigma * sigma));
-			Color += tex2Dlod( Sample, float4(texcoords+float2(cos(d),sin(d))*Radius_A*i,0,Mip)).rgba * coeff;
-			norm += coeff;		
-        }
-    }
-    
-    // Output to screen
-    Color *= rcp(norm);
-    
-return Color;                               
-}
-
-float4 GemsBlur(sampler2D Sample, float2 texcoords, float Size_A, int Dir)
+float4 GemsBlur(sampler2D Sample, float2 texcoords, float Size, int Dir)
 { 
 const float sigma   = 10.0;             // Gaussian sigma
 const int   support = int(sigma * 3.0); // int(sigma * 3.0) truncation
-float2 SA = Size_A * pix;
+float2 S = Size * pix;
 	float4 acc;                      // accumulator
 	float norm;
 	[loop]
@@ -685,7 +641,7 @@ float2 SA = Size_A * pix;
 	{
 		float2 D = Dir ? float2(0,hv) : float2(hv,0);
 		float coeff = exp(-0.5 * hv * hv / (sigma * sigma));
-		acc += tex2Dlod(Sample, float4(texcoords + D * SA,0, min(lerp(0,1,BloomSpread),abs(hv)) )).rgba * coeff;
+		acc += tex2Dlod(Sample, float4(texcoords + D * S,0, min(lerp(0,1,BloomSpread),abs(hv)) )).rgba * coeff;
 		norm += coeff;
 	}
 	
@@ -695,24 +651,36 @@ float2 SA = Size_A * pix;
 
 void Blur_HV0(in float4 position : SV_Position, in float2 texcoords : TEXCOORD, out float4 color : SV_Target0)
 {
-	float S0 = BloomSpread * PP;
+	float S0 = BloomSpread * 10.0;
 		
-	color = GemsBlur(SamplerCBB, texcoords ,S0, 0).rgba;
+	color = GemsBlur(SamplerCBB, texcoords, S0, 0).rgba;
 }
 
 void CombBlur_HV1(in float4 position : SV_Position, in float2 texcoords : TEXCOORD, out float4 color : SV_Target0 )
 {
-	float S0 = BloomSpread * PP;
+	float S0 = BloomSpread * 10.0;
  
 	color = GemsBlur(SamplerBlur_HV0, texcoords, S0, 1).rgba;
  }
 
-
 float4 Final_Bloom(float2 texcoords)
-{
-	float TM = Bloom_Spread.x * rcp(Bloom_Max*0.5), S0 = BloomSpread * 100.0;
- 
-	 return BloomBlur(SamplerBlur_HV1,texcoords,S0, Petal_Ammount , TM).rgba;
+{ 
+		float2 S = Bloom_Spread * pix;
+
+		float M_Cues = 1;
+		float4 result = tex2Dlod(SamplerBlur_HV1,float4(texcoords,0,M_Cues));
+		result += tex2Dlod(SamplerBlur_HV1,float4(texcoords + float2( 1, 0) * S ,0,M_Cues));
+		result += tex2Dlod(SamplerBlur_HV1,float4(texcoords + float2( 0, 1) * S ,0,M_Cues));
+		result += tex2Dlod(SamplerBlur_HV1,float4(texcoords + float2(-1, 0) * S ,0,M_Cues));
+		result += tex2Dlod(SamplerBlur_HV1,float4(texcoords + float2( 0,-1) * S ,0,M_Cues));
+		S *= 0.666;
+		result += tex2Dlod(SamplerBlur_HV1,float4(texcoords + float2( 1, 1) * S ,0,M_Cues));
+		result += tex2Dlod(SamplerBlur_HV1,float4(texcoords + float2(-1,-1) * S ,0,M_Cues));
+		result += tex2Dlod(SamplerBlur_HV1,float4(texcoords + float2(-1, 1) * S ,0,M_Cues));
+		result += tex2Dlod(SamplerBlur_HV1,float4(texcoords + float2( 1,-1) * S ,0,M_Cues));
+		result *= rcp(9);
+
+	 return result;
 }
 
 
@@ -770,7 +738,22 @@ float Scale(float val,float max,float min) //Scale to 0 - 1
 { 
 	return (val - min) / (max - min); 
 }
-	
+
+float ExtractHDR_WP(float2 texcoords)
+{
+	//float GS = Luma(tex2D(BackBuffer,texcoords).rgb);
+	//	  GS = max(0.0, GS - HDR_WP);
+    //return GS;
+    float4 BC = tex2D(BackBuffer,texcoords).rgba;
+    	float GS = Luma(BC.rgb);
+              BC.rgb /= max(GS, 0.001);
+          BC.a    = max(0.0, GS - HDR_BP);
+          BC.rgb *= BC.a;
+          
+          return Luma(BC.rgb);
+}
+
+
 float4 HDROut(float2 texcoords : TEXCOORD0)
 {
 	float AL = Auto_Luma().y, Ex;
@@ -796,6 +779,8 @@ float4 HDROut(float2 texcoords : TEXCOORD0)
 	// Do inital de-gamma of the game image to ensure we're operating in the correct colour range.
 	if( Gamma > 1. )
 		Color = pow(abs(Color),Gamma);
+	//HDR Map
+	Color += ExtractHDR_WP( texcoords ) * HDR_BPP;
 	
 	//Bloom should be applied before Tonemapping as otherwise all high ranges will be lost.
 	Color += lerp( 0.0, (( Bloom - 0 ) / ( BI_Brightness - 0)), saturate(NC));
@@ -844,7 +829,7 @@ float4 HDROut(float2 texcoords : TEXCOORD0)
 	if (Debug_View == 0)
 		Out = float4(Color, 1.);
 	else if(Debug_View == 1)
-		Out = float4(pow(( abs(Bloom) - 0 ) / ( BI_Brightness - 0),rcp(Gamma)), 1.);
+		Out = float4(pow(( Bloom - 0 ) / ( BI_Brightness - 0),rcp(Gamma)), 1.);
 	else
 		Out = texcoords.y < 0.975 ? HeatMap(Luma( Color )): HeatMap(texcoords.x);
 	
