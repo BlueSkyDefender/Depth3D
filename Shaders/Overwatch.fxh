@@ -1505,6 +1505,17 @@ static const int PEW = 0;                               //Disable Post Effect Wa
 	#define PE 1
 	#define DS 1
 	#define DA 1
+#elif (App == 0x913AD2D ) //SpaceHulk DeathWing Enhanced Edition
+	#define DA_W 1
+	#define DA_X 0.05
+	#define DA_Y 7.5
+	#define DB_Y 4
+	#define DE_X 1
+	#define DE_Y 0.5
+	#define DE_Z 0.375
+    #define DE_W 0.065
+	#define PE 1
+	#define NW 1
 #else
 	#define NP 1 //No Profile
 #endif

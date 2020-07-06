@@ -401,19 +401,20 @@ uniform int FPSDFIO <
 	ui_category = "Weapon Hand Adjust";
 > = 0;
 
-uniform int2 Eye_Fade_Reduction_n_Power <
+uniform int3 Eye_Fade_Reduction_n_Power <
 	#if Compatibility
 	ui_type = "drag";
 	#else
 	ui_type = "slider";
 	#endif
 	ui_min = 0; ui_max = 2;
-	ui_label = " Eye Selection & Fade Reduction";
-	ui_tooltip = "Fade Reduction decreases the depth amount by a current percentage.\n"
-							 "One is Right Eye only, Two is Left Eye Only, and Zero Both Eyes.\n"
-							 "Default is int( X 0 , Y 0 ).";
+	ui_label = " Eye Fade Options";
+	ui_tooltip ="X, Eye Selection: One is Right Eye only, Two is Left Eye Only, and Zero Both Eyes.\n"
+				"Y, Fade Reduction: Decreases the depth amount by a current percentage.\n"
+				"Z, Fade Speed: Decreases or Incresses how fast it changes.\n"
+				"Default is X[ 0 ] Y[ 0 ] Z[ 1 ].";
 	ui_category = "Weapon Hand Adjust";
-> = int2(0,0);
+> = int3(0,0,0);
 
 uniform float Weapon_ZPD_Boundary <
 	ui_type = "slider";
@@ -903,14 +904,18 @@ float HUD_Mask(float2 texcoord )
 #endif
 /////////////////////////////////////////////////////////Fade In and Out Toggle/////////////////////////////////////////////////////////////////////
 float Fade_in_out(float2 texcoord)
-{ float Trigger_Fade, AA = (1-Fade_Time_Adjust)*1000, PStoredfade = tex2D(SamplerLumN,float2(0.25,0.5)).z;
+{ float Trigger_Fade, AA = Fade_Time_Adjust, PStoredfade = tex2D(SamplerLumN,float2(0.25,0.5)).z;	
+	if(Eye_Fade_Reduction_n_Power.z == 0)
+		AA *= 0.5;
+	else if(Eye_Fade_Reduction_n_Power.z == 2)
+		AA *= 1.5;
 	//Fade in toggle.
 	if(FPSDFIO == 1)
 		Trigger_Fade = Trigger_Fade_A;
 	else if(FPSDFIO == 2)
 		Trigger_Fade = Trigger_Fade_B;
 
-	return PStoredfade + (Trigger_Fade - PStoredfade) * (1.0 - exp(-frametime/AA)); ///exp2 would be even slower
+	return PStoredfade + (Trigger_Fade - PStoredfade) * (1.0 - exp(-frametime/((1-AA)*1000))); ///exp2 would be even slower
 }
 
 float MaskW(float2 texcoord)
@@ -1595,7 +1600,7 @@ float3 Out(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Targe
 		Needs += drawChar( CH_I, charPos, charSize, TC); charPos.x += .01 * Size;
 		Needs += drawChar( CH_O, charPos, charSize, TC); charPos.x += .01 * Size;
 		Needs += drawChar( CH_N, charPos, charSize, TC);
-		//Network Play Needs Modded DLL
+		//Network Play May Need Modded DLL
 		charPos = float2( 0.009, 0.955);
 		Work += drawChar( CH_N, charPos, charSize, TC); charPos.x += .01 * Size;
 		Work += drawChar( CH_E, charPos, charSize, TC); charPos.x += .01 * Size;
@@ -1610,11 +1615,14 @@ float3 Out(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Targe
 		Work += drawChar( CH_A, charPos, charSize, TC); charPos.x += .01 * Size;
 		Work += drawChar( CH_Y, charPos, charSize, TC); charPos.x += .01 * Size;
 		Work += drawChar( CH_BLNK, charPos, charSize, TC); charPos.x += .01 * Size;
+		Work += drawChar( CH_M, charPos, charSize, TC); charPos.x += .01 * Size;
+		Work += drawChar( CH_A, charPos, charSize, TC); charPos.x += .01 * Size;
+		Work += drawChar( CH_Y, charPos, charSize, TC); charPos.x += .01 * Size;
+		Work += drawChar( CH_BLNK, charPos, charSize, TC); charPos.x += .01 * Size;
 		Work += drawChar( CH_N, charPos, charSize, TC); charPos.x += .01 * Size;
 		Work += drawChar( CH_E, charPos, charSize, TC); charPos.x += .01 * Size;
 		Work += drawChar( CH_E, charPos, charSize, TC); charPos.x += .01 * Size;
 		Work += drawChar( CH_D, charPos, charSize, TC); charPos.x += .01 * Size;
-		Work += drawChar( CH_S, charPos, charSize, TC); charPos.x += .01 * Size;
 		Work += drawChar( CH_BLNK, charPos, charSize, TC); charPos.x += .01 * Size;
 		Work += drawChar( CH_M, charPos, charSize, TC); charPos.x += .01 * Size;
 		Work += drawChar( CH_O, charPos, charSize, TC); charPos.x += .01 * Size;
@@ -1747,10 +1755,10 @@ float3 Out(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Targe
 		State += drawChar( CH_N, charPos, charSize, TC); charPos.x += .01 * Size;
 		State += drawChar( CH_G, charPos, charSize, TC);
 		//New Size
-		float D3D_Size_A = 1.15,D3D_Size_B = 0.75;
+		float D3D_Size_A = 1.375,D3D_Size_B = 0.75;
 		float2 charSize_A = float2(.00875, .0125) * D3D_Size_A, charSize_B = float2(.00875, .0125) * D3D_Size_B;
 		//New Start Pos
-		charPos = float2( 0.877, 0.018);
+		charPos = float2( 0.862, 0.018);
 		//Depth3D.Info Logo/Website
 		Depth3D += drawChar( CH_D, charPos, charSize_A, TC); charPos.x += .01 * D3D_Size_A;
 		Depth3D += drawChar( CH_E, charPos, charSize_A, TC); charPos.x += .01 * D3D_Size_A;
