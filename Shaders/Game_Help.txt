@@ -525,6 +525,24 @@ Path to install \Steam\SteamApps\common\Mafia III
 Rename the opengl.dll to dxgi.dll
 Also Use a Controller for game play.
 
+{The Dark Pictures Anthology Man of Medan} - ReShade 4.7.0
+Game runs fine issues with DoF and/or other effects.
+
+To Disable Depth of Field in Man of Medan
+
+Head over to C:\Users\UserName\AppData\Local\ManOfMedan\Saved\Config\WindowsNoEditor
+Open the “Engine.ini” file
+Add:
+[SystemSettings]
+r.DepthOfFieldQuality=0
+
+For Bloom Add:
+r.BloomQuality=0
+
+Save the file
+
+Now there is one more issue I could not fix was the On screen action button may be hard to read sometimes....... Good luck with that.
+
 {Mass Effect Andromeda} - Thank you zig11727
 Install path \Program Files\Origin\Mass Effect Andromeda
 

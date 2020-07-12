@@ -52,7 +52,7 @@
 	#define OW_WP "WP Off\0Custom WP\0"
 	static const int WSM = 0;
 	//Triggers
-	static const int RE = 0, NC = 0, RH = 0, NP = 0, ID = 0, SP = 0, DC = 0, HM = 0, DF = 0, NF = 0, DS = 0, LB = 0, DA = 0, NW = 0, PE = 0;
+	static const int RE = 0, NC = 0, RH = 0, NP = 0, ID = 0, SP = 0, DC = 0, HM = 0, DF = 0, NF = 0, DS = 0, LBCC = 0, LBCM = 0, DA = 0, NW = 0, PE = 0;
 	//Overwatch.fxh State
 	#define OS 1
 #endif
@@ -81,8 +81,9 @@
 // Also used to enable Image Position Adjust is used to move the Z-Buffer around.
 #define DB_Size_Postion 0 //Default 0 is Off. One is On.
 
-// Auto Letter Box Correction
+// Auto Letter Box Correction & Masking
 #define LB_Correction 0 //Default 0 is Off. One is On.
+#define LetterBox_Masking 0 //Default 0 is Off. One is On.
 
 // HUD Mode is for Extra UI MASK and Basic HUD Adjustments. This is useful for UI elements that are drawn in the Depth Buffer.
 // Such as the game Naruto Shippuden: Ultimate Ninja, TitanFall 2, and or Unreal Gold 277. That have this issue. This also allows for more advance users
@@ -303,7 +304,7 @@ uniform bool Depth_Detection <
 	ui_label = " Depth Detection";
 	ui_tooltip = "Use this to dissable/enable in game Depth Detection.";
 	ui_category = "Depth Map";
-> = true;
+> = false;
 
 uniform bool Depth_Map_Flip <
 	ui_label = " Depth Map Flip";
@@ -759,7 +760,7 @@ float4 CSB(float2 texcoords)
 }
 #endif
 
-#if LB || LB_Correction
+#if LBC || LB_Correction
 float LBDetection()
 {
 	return CSB(float2(0.1,0.1)) == 0 && CSB(float2(0.9,0.9)) == 0 && CSB(float2(0.5,0.5)) > 0 ? 1.315 : 1;
@@ -838,9 +839,9 @@ float Depth(float2 texcoord)
 		texcoord = D(texcoord.xy,K123.x,K123.y,K123.z);
 	}
 	#endif
-	#if DB_Size_Postion || SP || LB || LB_Correction
+	#if DB_Size_Postion || SP || LBC || LB_Correction
 		texcoord.xy += float2(-Image_Position_Adjust.x,Image_Position_Adjust.y)*0.5;
-		#if LB || LB_Correction
+		#if LBC || LB_Correction
 			float2 H_V = Horizontal_and_Vertical * float2(1,LBDetection());
 		#else
 			float2 H_V = Horizontal_and_Vertical;
@@ -874,9 +875,9 @@ float2 WeaponDepth(float2 texcoord)
 		texcoord = D(texcoord.xy,K123.x,K123.y,K123.z);
 	}
 	#endif
-	#if DB_Size_Postion || SP || LB || LB_Correction
+	#if DB_Size_Postion || SP || LBC || LB_Correction
 		texcoord.xy += float2(-Image_Position_Adjust.x,Image_Position_Adjust.y)*0.5;
-		#if LB || LB_Correction
+		#if LBC || LB_Correction
 			float2 H_V = Horizontal_and_Vertical * float2(1,LBDetection());
 		#else
 			float2 H_V = Horizontal_and_Vertical;
@@ -1176,10 +1177,13 @@ float DB( float2 texcoord)
 	#endif
 
 	#if UI_MASK
-		return lerp(DM.y,0,step(1.0-HUD_Mask(texcoord),0.5));
-	#else
-		return DM.y;
+		DM.y = lerp(DM.y,0,step(1.0-HUD_Mask(texcoord),0.5));
 	#endif
+
+	if(LBM || LetterBox_Masking)
+		DM.y = texcoord.y > 0.120 && texcoord.y < 0.879 ? DM.y : 0.0125;
+
+	return DM.y;
 }
 //////////////////////////////////////////////////////////Depth Edge Trimming///////////////////////////////////////////////////////////////////////
 float2 zBuffer(in float4 position : SV_Position, in float2 texcoord : TEXCOORD) : SV_Target

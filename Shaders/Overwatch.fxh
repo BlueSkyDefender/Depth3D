@@ -63,6 +63,7 @@ static const int SPF = 0;                               //Size & Position Fix
 static const int BDF = 0;                               //Barrel Distortion Fix
 static const int DFW = 0;                               //Delay Frame Workaround
 static const int ALB = 0;                               //Auto Letter Box
+static const int LBD = 0;                               //Letter Box Depth
 
 //Special Toggles Generic
 static const int RHW = 0;                               //Read Help Warning
@@ -1299,7 +1300,7 @@ static const int PEW = 0;                               //Disable Post Effect Wa
 	#define DE_Z 0.375
 	#define DF_Z 0.5
 	#define DS 1
-	#define LB 1
+	#define LBC 1
 #elif (App == 0x89351FC4 ) //3DSen Games
 	#define DA_W 1
 	#define DB_X 1
@@ -1513,9 +1514,23 @@ static const int PEW = 0;                               //Disable Post Effect Wa
 	#define DE_X 1
 	#define DE_Y 0.5
 	#define DE_Z 0.375
-    #define DE_W 0.065
+	#define DE_W 0.065
 	#define PE 1
 	#define NW 1
+#elif (App == 0xEB5CDE17 ) //Man Of Medan
+	#define DA_W 1
+	#define DA_X 0.04375
+	#define DA_Y 20.0
+	#define DB_Z 0.3
+	#define DB_Y 4
+	#define DE_X 1
+	#define DE_Y 0.300
+	#define DE_Z 0.300
+	#define LBM 1
+	#define RH 1
+	#define NW 1
+	#define SP 1
+	#define DD_W -0.240
 #else
 	#define NP 1 //No Profile
 #endif
@@ -1634,8 +1649,11 @@ static const int PEW = 0;                               //Disable Post Effect Wa
 #ifndef DS
     #define DS DSW //Depth Selection Warning
 #endif
-#ifndef LB
-    #define LB ALB //Auto Letter Box
+#ifndef LBC
+    #define LBC ALB //Auto Letter Box
+#endif
+#ifndef LBM
+    #define LBM LBD //Auto Letter Box
 #endif
 #ifndef DA
     #define DA DAA //Disable Anti-Aliasing
