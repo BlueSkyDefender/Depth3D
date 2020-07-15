@@ -52,7 +52,7 @@
 	#define OW_WP "WP Off\0Custom WP\0"
 	static const int WSM = 0;
 	//Triggers
-	static const int RE = 0, NC = 0, RH = 0, NP = 0, ID = 0, SP = 0, DC = 0, HM = 0, DF = 0, NF = 0, DS = 0, LBCC = 0, LBCM = 0, DA = 0, NW = 0, PE = 0;
+	static const int RE = 0, NC = 0, RH = 0, NP = 0, ID = 0, SP = 0, DC = 0, HM = 0, DF = 0, NF = 0, DS = 0, LBC = 0, LBM = 0, DA = 0, NW = 0, PE = 0, WW = 0;
 	//Overwatch.fxh State
 	#define OS 1
 #endif
@@ -83,7 +83,7 @@
 
 // Auto Letter Box Correction & Masking
 #define LB_Correction 0 //Default 0 is Off. One is On.
-#define LetterBox_Masking 0 //Default 0 is Off. One is On.
+#define LetterBox_Masking 0 //Default 0 is Off. One is On and two is Auto.
 
 // HUD Mode is for Extra UI MASK and Basic HUD Adjustments. This is useful for UI elements that are drawn in the Depth Buffer.
 // Such as the game Naruto Shippuden: Ultimate Ninja, TitanFall 2, and or Unreal Gold 277. That have this issue. This also allows for more advance users
@@ -760,10 +760,10 @@ float4 CSB(float2 texcoords)
 }
 #endif
 
-#if LBC || LB_Correction
+#if LBC || LBM || LB_Correction || LetterBox_Masking
 float LBDetection()
-{
-	return CSB(float2(0.1,0.1)) == 0 && CSB(float2(0.9,0.9)) == 0 && CSB(float2(0.5,0.5)) > 0 ? 1.315 : 1;
+{   //0.120 0.879
+	return CSB(float2(0.5,0.1)) == 0 && CSB(float2(0.9,0.9)) == 0 && CSB(float2(0.5,0.5)) > 0 ? 1 : 0;
 }
 #endif
 /////////////////////////////////////////////////////////////Cursor///////////////////////////////////////////////////////////////////////////
@@ -842,7 +842,7 @@ float Depth(float2 texcoord)
 	#if DB_Size_Postion || SP || LBC || LB_Correction
 		texcoord.xy += float2(-Image_Position_Adjust.x,Image_Position_Adjust.y)*0.5;
 		#if LBC || LB_Correction
-			float2 H_V = Horizontal_and_Vertical * float2(1,LBDetection());
+			float2 H_V = Horizontal_and_Vertical * float2(1,LBDetection() ? 1.315 : 1 );
 		#else
 			float2 H_V = Horizontal_and_Vertical;
 		#endif
@@ -878,7 +878,7 @@ float2 WeaponDepth(float2 texcoord)
 	#if DB_Size_Postion || SP || LBC || LB_Correction
 		texcoord.xy += float2(-Image_Position_Adjust.x,Image_Position_Adjust.y)*0.5;
 		#if LBC || LB_Correction
-			float2 H_V = Horizontal_and_Vertical * float2(1,LBDetection());
+			float2 H_V = Horizontal_and_Vertical * float2(1,LBDetection() ? 1.315 : 1 );
 		#else
 			float2 H_V = Horizontal_and_Vertical;
 		#endif
@@ -1181,7 +1181,15 @@ float DB( float2 texcoord)
 	#endif
 
 	if(LBM || LetterBox_Masking)
-		DM.y = texcoord.y > 0.120 && texcoord.y < 0.879 ? DM.y : 0.0125;
+	{
+		float storeDM = DM.y;
+
+		DM.y = texcoord.y > 0.120 && texcoord.y < 0.879 ? storeDM : 0.0125;
+	#if LetterBox_Masking
+		if(LBM == 2 && !LBDetection())
+			DM.y = storeDM;
+	#endif
+	}
 
 	return DM.y;
 }
@@ -1569,10 +1577,10 @@ float drawChar( float Char, float2 pos, float2 size, float2 TC )
 float3 Out(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Target
 {
 	float2 TC = float2(texcoord.x,1-texcoord.y);
-	float Text_Timer = 25000, BT = smoothstep(0,1,sin(timer*(3.75/1000))), Size = 1.1, Depth3D, Read_Help, Post, Effect, NoPro, NotCom, Mod, Needs, Net, Over, AA, Not, No, Help, Fix, Need, State, SetAA, Work;
+	float Text_Timer = 25000, BT = smoothstep(0,1,sin(timer*(3.75/1000))), Size = 1.1, Depth3D, Read_Help, Post, Effect, NoPro, NotCom, Mod, Needs, Net, Over, Set, AA, Not, No, Help, Fix, Need, State, SetAA, SetWP, Work;
 	float3 Color = PS_calcLR(texcoord).rgb;
 
-	if(RH || NC || NP || NF || PE || DS || OS || DA || NW)
+	if(RH || NC || NP || NF || PE || DS || OS || DA || NW || WW)
 		Text_Timer = 30000;
 
 	[branch] if(timer <= Text_Timer || Text_Info)
@@ -1700,6 +1708,26 @@ float3 Out(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Targe
 		SetAA += drawChar( CH_SLSH, charPos, charSize, TC); charPos.x += .01 * Size;
 		SetAA += drawChar( CH_A, charPos, charSize, TC); charPos.x += .01 * Size;
 		SetAA += drawChar( CH_A, charPos, charSize, TC);
+		//Set Weapon Profile
+		charPos = float2( 0.009, 0.9025);
+		SetWP += drawChar( CH_S, charPos, charSize, TC); charPos.x += .01 * Size;
+		SetWP += drawChar( CH_E, charPos, charSize, TC); charPos.x += .01 * Size;
+		SetWP += drawChar( CH_T, charPos, charSize, TC); charPos.x += .01 * Size;
+		SetWP += drawChar( CH_BLNK, charPos, charSize, TC); charPos.x += .01 * Size;
+		SetWP += drawChar( CH_W, charPos, charSize, TC); charPos.x += .01 * Size;
+		SetWP += drawChar( CH_E, charPos, charSize, TC); charPos.x += .01 * Size;
+		SetWP += drawChar( CH_A, charPos, charSize, TC); charPos.x += .01 * Size;
+		SetWP += drawChar( CH_P, charPos, charSize, TC); charPos.x += .01 * Size;
+		SetWP += drawChar( CH_O, charPos, charSize, TC); charPos.x += .01 * Size;
+		SetWP += drawChar( CH_N, charPos, charSize, TC); charPos.x += .01 * Size;
+		SetWP += drawChar( CH_BLNK, charPos, charSize, TC); charPos.x += .01 * Size;
+		SetWP += drawChar( CH_P, charPos, charSize, TC); charPos.x += .01 * Size;
+		SetWP += drawChar( CH_R, charPos, charSize, TC); charPos.x += .01 * Size;
+		SetWP += drawChar( CH_O, charPos, charSize, TC); charPos.x += .01 * Size;
+		SetWP += drawChar( CH_F, charPos, charSize, TC); charPos.x += .01 * Size;
+		SetWP += drawChar( CH_I, charPos, charSize, TC); charPos.x += .01 * Size;
+		SetWP += drawChar( CH_L, charPos, charSize, TC); charPos.x += .01 * Size;
+		SetWP += drawChar( CH_E, charPos, charSize, TC);
 		//Read Help
 		charPos = float2( 0.894, 0.9725);
 		Read_Help += drawChar( CH_R, charPos, charSize, TC); charPos.x += .01 * Size;
@@ -1802,6 +1830,8 @@ float3 Out(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Targe
 			Net = Work;
 		if(PE)
 			Post = Effect;
+		if(WW)
+			Set = SetWP;
 		if(DA)
 			AA = SetAA;
 		//Blinking Text Warnings
@@ -1814,7 +1844,7 @@ float3 Out(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Targe
 		if(OS)
 			Over = State * BT;
 		//Website
-		return Depth3D+Help+Post+No+Not+Net+Fix+Need+Over+AA ? (1-texcoord.y*50.0+48.85)*texcoord.y-0.500: Color;
+		return Depth3D+Help+Post+No+Not+Net+Fix+Need+Over+AA+Set ? (1-texcoord.y*50.0+48.85)*texcoord.y-0.500: Color;
 	}
 	else
 		return Color;

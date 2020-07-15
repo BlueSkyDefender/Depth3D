@@ -76,6 +76,7 @@ static const int DSW = 0;                               //Depth Selection Warnin
 static const int DAA = 0;                               //Disable Anti-Aliasing
 static const int NWW = 0;                               //Network Warning
 static const int PEW = 0;                               //Disable Post Effect Warning
+static const int WPW = 0;                               //Weapon Profile Warning
 
 //Special Handling
 #if exists "LEGOBatman.exe"                             //Lego Batman
@@ -196,12 +197,18 @@ static const int PEW = 0;                               //Disable Post Effect Wa
 	#define DB_W 28
 	#define DB_Y 3
 #elif (App == 0x36976F6D )	//Prey 2017
-	#define DA_Y 18.7
-	#define DB_W 29
-	#define DB_Y 2
+	#define DA_W 1
+	#define DA_X 0.0475
+	#define DA_Y 20.0
+	#define DB_Y 5
+	#define DE_X 3
+	#define DE_Y 0.5
+	#define DE_Z 0.300
 	#define WSM 3
 	#define OW_WP "Read Help & Change Me\0Custom WP\0Prey High Settings and <\0Prey 2017 Very High\0"
 	#define RH 1
+	#define PE 1
+	#define WW 1
 #elif (App == 0xBF757E3A )	//Return to Castle Wolfenstein
 	#define DA_Y 8.75
 	#define DB_Y 2
@@ -1531,6 +1538,25 @@ static const int PEW = 0;                               //Disable Post Effect Wa
 	#define NW 1
 	#define SP 1
 	#define DD_W -0.240
+#elif (App == 0x62454263 ) //Red Dead Redemption 2 
+	#define DA_W 1
+	#define DA_X 0.05
+	#define DA_Y 50.0
+	#define DB_Y 4
+	#define DE_X 1
+	#define DE_Y 0.5
+	#define DE_Z 0.375
+	#define PE 1
+    #define DA 1
+	#define LBM 2
+#elif (App == 0xB5AE6CBA ) //Rage 2
+	#define DA_W 1
+	#define DA_X 0.04
+	#define DA_Y 125.0
+	#define DB_Y 2
+	#define DE_W 0.06
+	#define PE 1
+    #define DA 1
 #else
 	#define NP 1 //No Profile
 #endif
@@ -1663,6 +1689,9 @@ static const int PEW = 0;                               //Disable Post Effect Wa
 #endif
 #ifndef PE
     #define PE PEW //Disable Post Effect Warning
+#endif
+#ifndef WW
+    #define WW WPW //Weapon Profile Warning
 #endif
 //Weapon Settings
 #ifndef OW_WP
@@ -1851,11 +1880,11 @@ float3 Weapon_Profiles(float WP ,float3 Weapon_Adjust) // MCC
 #elif WSM == 3
 float3 Weapon_Profiles(float WP ,float3 Weapon_Adjust) // Prey 2017
 {   float3 Value = Weapon_Adjust;
-		if (WP == 2)
-        Value = float3(0.2832,13.125,0.8725); //WP 0 | Prey 2017 High Settings and <
-    if (WP == 3)
-				Value = float3(0.2832,13.75,0.915625);//WP 1 | Prey 2017 Very High
-
-		return Value;
+	if (WP == 2)
+		Value = float3(0.2832,31.25,0.8775); //WP 0 | Prey 2017 High Settings and <
+	if (WP == 3)
+		Value = float3(0.2832,31.25,0.91875);//WP 1 | Prey 2017 Very High
+	
+	return Value;
 }
 #endif
