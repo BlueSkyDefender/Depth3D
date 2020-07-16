@@ -204,7 +204,7 @@ static const int WPW = 0;                               //Weapon Profile Warning
 	#define DE_X 3
 	#define DE_Y 0.5
 	#define DE_Z 0.300
-    #define DF_Y 0.100
+    #define DF_Y 0.05
 	#define WSM 3
 	#define OW_WP "Read Help & Change Me\0Custom WP\0Prey High Settings and <\0Prey 2017 Very High\0"
 	#define RH 1
@@ -1539,7 +1539,7 @@ static const int WPW = 0;                               //Weapon Profile Warning
 	#define NW 1
 	#define SP 1
 	#define DD_W -0.240
-#elif (App == 0x62454263 ) //Red Dead Redemption 2 
+#elif (App == 0x62454263 ) //Red Dead Redemption 2
 	#define DA_W 1
 	#define DA_X 0.05
 	#define DA_Y 50.0
@@ -1895,7 +1895,7 @@ float3 Weapon_Profiles(float WP ,float3 Weapon_Adjust) // Prey 2017
 		Value = float3(0.2832,31.25,0.8775); //WP 0 | Prey 2017 High Settings and <
 	if (WP == 3)
 		Value = float3(0.2832,31.25,0.91875);//WP 1 | Prey 2017 Very High
-	
+
 	return Value;
 }
 #endif
