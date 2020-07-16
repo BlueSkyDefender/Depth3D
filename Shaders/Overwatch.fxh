@@ -51,7 +51,7 @@ static const float ZPD_Boundary_Scaling_D = 0.5;        //ZPD Boundary Scaling
 static const float ZPD_Boundary_Fade_Time_D = 0.25;     //ZPD Boundary Fade Time
 static const float Weapon_Near_Depth_D = 0.0;           //Weapon Near Depth
 static const float ZPD_Weapon_Boundary_Adjust = 0.0;    //ZPD Weapon Boundary Adjust
-static const float NULL_A = 0.0;
+static const float Separation = 0.0;                    //ZPD Separation
 static const float Edge_Masking = 0.0;                  //Edge Masking Adjust
 static const float HUDX_D = 0.0;                        //Heads Up Display Cut Off Point
 
@@ -198,12 +198,13 @@ static const int WPW = 0;                               //Weapon Profile Warning
 	#define DB_Y 3
 #elif (App == 0x36976F6D )	//Prey 2017
 	#define DA_W 1
-	#define DA_X 0.0475
-	#define DA_Y 20.0
-	#define DB_Y 5
+	#define DA_X 0.04625
+	#define DA_Y 21.25
+	#define DB_Y 2
 	#define DE_X 3
 	#define DE_Y 0.5
 	#define DE_Z 0.300
+    #define DF_Y 0.100
 	#define WSM 3
 	#define OW_WP "Read Help & Change Me\0Custom WP\0Prey High Settings and <\0Prey 2017 Very High\0"
 	#define RH 1
@@ -1557,6 +1558,16 @@ static const int WPW = 0;                               //Weapon Profile Warning
 	#define DE_W 0.06
 	#define PE 1
     #define DA 1
+#elif (App == 0x8CEACA5C ) //Dead Island
+	#define DA_X 0.0475
+	#define DA_Y 8.75
+	#define DB_Y 2
+    #define DF_Y 0.0875
+#elif (App == 0xCDD5E6CF ) //Legend of Grimrock
+	#define DA_X 0.120
+    #define DF_Y 0.135
+	#define DA_Y 12.5
+	#define DB_Y 3
 #else
 	#define NP 1 //No Profile
 #endif
@@ -1627,12 +1638,12 @@ static const int WPW = 0;                               //Weapon Profile Warning
 #ifndef DE_W
     #define DE_W Weapon_Near_Depth_D
 #endif
-// X = [ZPD Weapon Boundary] Y = [NULL_A] Z = [Edge Masking] W = [HUD]
+// X = [ZPD Weapon Boundary] Y = [Separation] Z = [Edge Masking] W = [HUD]
 #ifndef DF_X
     #define DF_X ZPD_Weapon_Boundary_Adjust
 #endif
 #ifndef DF_Y
-    #define DF_Y NULL_A
+    #define DF_Y Separation
 #endif
 #ifndef DF_Z
     #define DF_Z Edge_Masking

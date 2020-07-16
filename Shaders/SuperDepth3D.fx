@@ -43,11 +43,11 @@
 	// DC_X = [Barrel Distortion K1] DC_Y = [Barrel Distortion K2] DC_Z = [Barrel Distortion K3] DC_W = [Barrel Distortion Zoom]
 	static const float DC_X = 0, DC_Y = 0, DC_Z = 0, DC_W = 0;
 	// DD_X = [Horizontal Size] DD_Y = [Vertical Size] DD_Z = [Horizontal Position] DD_W = [Vertical Position]
-	static const float DD_X = 1,DD_Y = 1, DD_Z = 0.0, DD_W = 0.0;
+	static const float DD_X = 1, DD_Y = 1, DD_Z = 0.0, DD_W = 0.0;
 	// DE_X = [ZPD Boundary Type] DE_Y = [ZPD Boundary Scaling] DE_Z = [ZPD Boundary Fade Time] DE_W = [Weapon Near Depth]
-	static const float DE_X = 0,DE_Y = 0.5, DE_Z = 0.25, DE_W = 0.0;
-	// DF_X = [Weapon ZPD Boundary] DF_Y = [Null_A] DF_Z = [Edge Masking] DF_W = [HUD]
-	static const float DF_X = 0.0,DF_Y = 0.0, DF_Z = 0.0, DF_W = 0.0;
+	static const float DE_X = 0, DE_Y = 0.5, DE_Z = 0.25, DE_W = 0.0;
+	// DF_X = [Weapon ZPD Boundary] DF_Y = [Separation] DF_Z = [Edge Masking] DF_W = [HUD]
+	static const float DF_X = 0.0, DF_Y = 0.0, DF_Z = 0.0, DF_W = 0.0;
 	// WSM = [Weapon Setting Mode]
 	#define OW_WP "WP Off\0Custom WP\0"
 	static const int WSM = 0;
@@ -173,16 +173,17 @@ uniform float Divergence <
 	ui_category = "Divergence & Convergence";
 > = 25.0;
 
-uniform float ZPD <
+uniform float2 ZPD_Separation <
 	ui_type = "drag";
 	ui_min = 0.0; ui_max = 0.250;
-	ui_label = " Zero Parallax Distance";
-	ui_tooltip = "ZPD controls the focus distance for the screen Pop-out effect also known as Convergence.\n"
+	ui_label = " ZPD & Sepration";
+	ui_tooltip = "Zero Parallax Distance controls the focus distance for the screen Pop-out effect also known as Convergence.\n"
+				"Separation is a way to increase the intensity of Divergence without a performance cost.\n"	
 				"For FPS Games keeps this low Since you don't want your gun to pop out of screen.\n"
-				"This is controlled by Convergence Mode.\n"
 				"Default is 0.025, Zero is off.";
 	ui_category = "Divergence & Convergence";
-> = DA_X;
+> = float2(DA_X,DF_Y);
+
 #if Balance_Mode
 uniform float ZPD_Balance <
 	ui_type = "drag";
@@ -933,8 +934,8 @@ float Fade(float2 texcoord)
 	if(ZPD_Boundary > 0)
 	{   //Normal A & B for both
 		float CDArray_A[7] = { 0.125 ,0.25, 0.375,0.5, 0.625, 0.75, 0.875}, CDArray_B[7] = { 0.25 ,0.375, 0.4375, 0.5, 0.5625, 0.625, 0.75};
-		float CDArrayZPD_A[7] = { ZPD * 0.625, ZPD * 0.75, ZPD * 0.875, ZPD, ZPD * 0.875, ZPD * 0.75, ZPD * 0.625 },
-			  CDArrayZPD_B[7] = { ZPD * 0.3, ZPD * 0.5, ZPD * 0.75, ZPD, ZPD * 0.75, ZPD * 0.5, ZPD * 0.3};
+		float CDArrayZPD_A[7] = { ZPD_Separation.x * 0.625, ZPD_Separation.x * 0.75, ZPD_Separation.x * 0.875, ZPD_Separation.x, ZPD_Separation.x * 0.875, ZPD_Separation.x * 0.75, ZPD_Separation.x * 0.625 },
+			  CDArrayZPD_B[7] = { ZPD_Separation.x * 0.3, ZPD_Separation.x * 0.5, ZPD_Separation.x * 0.75, ZPD_Separation.x, ZPD_Separation.x * 0.75, ZPD_Separation.x * 0.5, ZPD_Separation.x * 0.3};
 		float2 GridXY;
 		//Screen Space Detector 7x7 Grid from between 0 to 1 and ZPD Detection becomes stronger as it gets closer to the Center.
 		[loop]
@@ -956,7 +957,6 @@ float Fade(float2 texcoord)
 					if ( MaskW(GridXY) == 1 )
 						ZPD_I = 0;
 				}
-
 				// CDArrayZPD[i] reads across prepDepth.......
 				CD = 1 - ZPD_I / PrepDepth(GridXY).w;
 
@@ -1010,7 +1010,7 @@ float AutoZPDRange(float ZPD, float2 texcoord )
 }
 #endif
 float2 Conv(float D,float2 texcoord)
-{	float Z = ZPD, WZP = 0.5, ZP = 0.5, ALC = abs(Lum(texcoord).x), W_Convergence = WZPD_and_WND.x, WZPDB, Distance_From_Bottom = 0.9375;
+{	float Z = ZPD_Separation.x, WZP = 0.5, ZP = 0.5, ALC = abs(Lum(texcoord).x), W_Convergence = WZPD_and_WND.x, WZPDB, Distance_From_Bottom = 0.9375;
     //Screen Space Detector.
 	if (abs(Weapon_ZPD_Boundary) > 0)
 	{   float WArray[8] = { 0.5, 0.5625, 0.625, 0.6875, 0.75, 0.8125, 0.875, 0.9375};
@@ -1051,7 +1051,7 @@ float2 Conv(float D,float2 texcoord)
 	#endif
 		Z *= lerp( 1, ZPD_Boundary_n_Fade.x, smoothstep(0,1,tex2Dlod(SamplerLumN,float4(float2(0.75,0.5),0,0)).z));
 		float Convergence = 1 - Z / D;
-		if (ZPD == 0)
+		if (ZPD_Separation.x == 0)
 			ZP = 1;
 
 		if (WZPD_and_WND.x <= 0)
@@ -1062,7 +1062,8 @@ float2 Conv(float D,float2 texcoord)
 
 		ZP = min(ZP,Auto_Balance_Clamp);
 
-    return float2(lerp(Convergence,D, ZP),lerp(W_Convergence,WD,WZP));
+		float Separation = lerp(1.0,5.0,ZPD_Separation.y);
+    return float2(lerp(Separation * Convergence,D, ZP),lerp(W_Convergence,WD,WZP));
 }
 
 float DB( float2 texcoord)
@@ -1814,7 +1815,7 @@ float3 Out(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Targe
 			Net = Work;
 		if(PE)
 			Post = Effect;
-		if(WW)	
+		if(WW)
 			Set = SetWP;
 		if(DA)
 			AA = SetAA;
