@@ -23,11 +23,20 @@
 uniform float BlurAdjust <
 	ui_type = "drag";
 	ui_min = 0; ui_max =  1;
-	ui_label = "Blur Adjust";
+	ui_label = "Edge Blur Adjust";
 	ui_tooltip = "Use this to adjust Nose Blur.\n"
-				 "Default is Five.";
+				 "Default is 0.5.";
 	ui_category = "Virtual Nose";
 > = 0.5;
+
+uniform float Transparency <
+	ui_type = "drag";
+	ui_min = 0; ui_max =  1;
+	ui_label = "Nose Transparency";
+	ui_tooltip = "Use this to adjust transparency.\n"
+				 "Default is One.";
+	ui_category = "Virtual Nose";
+> = 1.0;
 
 uniform int Ambiance <
 	ui_type = "combo";
@@ -222,15 +231,21 @@ float4 VNose(float2 texcoord : TEXCOORD0)
 		   Blur += tex2Dlod(NMSampler,float4( texcoord + float2( 1, 0) * (BA * 0.25) * pix,0,Blur_Boost));
 		   Blur += tex2Dlod(NMSampler,float4( texcoord + float2(-1, 0) * (BA * 0.25) * pix,0,Blur_Boost));
 		   Blur /= 8;
-		float NM = tex2D(NMSampler,texcoord).w;  
-		Out = NM ? Blur : tex2D(BackBuffer,texcoord);
+		float NM = tex2D(NMSampler,texcoord).w;
+		//Dumb AA
+		NM += tex2D(NMSampler,texcoord + float2(-pix.x, 0)).w;
+		NM += tex2D(NMSampler,texcoord + float2( pix.x, 0)).w;
+  	  NM += tex2D(NMSampler,texcoord + float2( 0, pix.y)).w;
+		NM += tex2D(NMSampler,texcoord + float2( 0,-pix.y)).w;
+	  
+		Out = lerp(tex2D(BackBuffer,texcoord), Blur, NM / 5);
 	}
 	else
 	{
 		Out = tex2D(BackBuffer,texcoord);
 	}	
 	
-	return Out;
+	return lerp(Out,tex2D(BackBuffer,texcoord),1-Transparency);
 }
 
 float4 VRLeft(float2 texcoord : TEXCOORD0)
