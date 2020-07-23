@@ -533,15 +533,16 @@ static const int WPW = 0;                               //Weapon Profile Warning
 	#define RH 1
 #elif (App == 0x23D5135F ) //Alien Isolation
 	#define DA_X 0.050
-	#define DA_Y 18.75
-	#define DA_Z 0.0005
+	#define DA_Y 25.0
+	#define DA_Z 0.000625
 	#define DB_Y 4
-	#define DE_W 0.025
+	#define DE_W 0.03
 	#define DC 1
 	#define DC_X 0.22
 	#define DC_Y -0.1
 	#define DC_W -0.022
 	#define RH 1
+	#define PE 1
 #elif (App == 0x5839915F ) //35MM
 	#define DA_Y 35.00
 	#define DB_X 1
@@ -1327,7 +1328,7 @@ static const int WPW = 0;                               //Weapon Profile Warning
 	#define DE_X 1
 	#define DE_Y 0.5
 	#define DE_Z 0.375
-    #define DE_W 0.440
+	#define DE_W 0.440
 	#define DA 1
 #elif (App == 0x9BD7A4FD ) //Starwars Battle Front II
 	#define DA_W 1
@@ -1423,8 +1424,8 @@ static const int WPW = 0;                               //Weapon Profile Warning
 	#define DE_Z 0.375
 	#define DE_W 0.075
 #elif (App == 0xC60A845F ) //My Friend Pedro
-    #define DB_X 1
-    #define DA_W 1
+	#define DB_X 1
+	#define DA_W 1
 	#define DA_X 0.075
 	#define DA_Y 50.0
 	#define DA_Z 0.000375
@@ -1486,7 +1487,7 @@ static const int WPW = 0;                               //Weapon Profile Warning
 	#define DA_W 1
 	#define DA_X 0.07
 	#define DA_Y 15.0
-	#define DB_Y 5
+	#define DB_Y 1
 	#define DE_X 1
 	#define DE_Y 0.5
 	#define DE_Z 0.375
@@ -1548,7 +1549,7 @@ static const int WPW = 0;                               //Weapon Profile Warning
 	#define DE_Y 0.5
 	#define DE_Z 0.375
 	#define PE 1
-    #define DA 1
+	#define DA 1
 	#define LBM 2
 #elif (App == 0xB5AE6CBA ) //Rage 2
 	#define DA_W 1
@@ -1557,17 +1558,50 @@ static const int WPW = 0;                               //Weapon Profile Warning
 	#define DB_Y 2
 	#define DE_W 0.06
 	#define PE 1
-    #define DA 1
+	#define DA 1
 #elif (App == 0x8CEACA5C ) //Dead Island
 	#define DA_X 0.0475
 	#define DA_Y 8.75
 	#define DB_Y 2
-    #define DF_Y 0.0875
+	#define DF_Y 0.0875
 #elif (App == 0xCDD5E6CF ) //Legend of Grimrock
 	#define DA_X 0.120
-    #define DF_Y 0.135
+	#define DF_Y 0.135
 	#define DA_Y 12.5
 	#define DB_Y 3
+#elif (App == 0x7C0F0E77 ) //Soulcaliber VI
+	#define DA_W 1
+	#define DA_X 0.070
+	#define DA_Y 70.0
+	#define DB_Y 5
+	#define DE_X 1
+	#define DE_Y 0.300
+	#define DE_Z 0.375
+	#define PE 1
+	#define NW 1
+#elif (App == 0x424052D0 ) //Talos Principle
+	#define DA_W 1
+	#define DA_X 0.10
+	#define DF_Y 0.05
+	#define DA_Y 20.5
+	#define DA_Z 0.100
+	#define DB_Z 0.200
+	#define DB_Y 1
+	#define DE_X 1
+	#define DE_Y 0.5
+	#define DE_Z 0.375
+	#define DB_W 65
+	#define DA 1
+#elif (App == 0x6EC76A83 ) //Watch Dogs 2
+	#define DA_W 1
+	#define DA_X 0.070
+	#define DA_Y 12.0
+	#define DB_Y 1
+	#define DE_X 2
+	#define DE_Y 0.500
+	#define DE_Z 0.375
+	#define PE 1
+	#define DA 1
 #else
 	#define NP 1 //No Profile
 #endif
@@ -1842,7 +1876,7 @@ float3 Weapon_Profiles(float WP ,float3 Weapon_Adjust) //Tried Switch But, can't
     if (WP == 64)
         Value = float3(0.2503,55.0,1000.0);   //WP 62 | Farcry 2
     if (WP == 65)
-        Value = float3(0,0,0);                //WP 65 | Game
+        Value = float3(0.279,100.0,0.905);    //WP 63 | Talos Principle
     if (WP == 66)
         Value = float3(0.2503,52.5,987.5);    //WP 64 | Singularity
     if (WP == 67)

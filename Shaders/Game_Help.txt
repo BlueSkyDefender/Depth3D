@@ -31,9 +31,23 @@ I suggest you use alpha mode in SuperDepth3D for this game and Alan Wake's Ameri
 You will not need to do this for the sequel. Make sure you turn off this injector for any other game. 
 Please note most AV's will detect this as threat.
 
-{Alien Isolation} - Used ReShade 4.3.0
-Issue with Depth Buffer sizing work around is to resize it SuperDepth3D. But it will still not be 100% right. Legacy mode works well to mask this issue.
-The real fix is to apply a perspective correction on the Z-Buffer. But, that is too much work for only one game. Looks Ok right now.
+{Alien Isolation} - Used ReShade 4.7.0
+The Shade corrects for the Distortion that the game causes.
+
+This can be dissabled if you use the https://github.com/aliasIsolation/aliasIsolation/releases if you set CA to 0.000
+But, If you use this to TAA mod you can't disable motion blur. This is a issue. Anyways dissable the distortion correction at the bottom of the shader.
+
+Motion sickness can happen if you use the TAA mod with motion blur.
+
+Also to remove EyeBall all Lens Flares
+
+Go to the DATA folder of the game.
+Delete or rename the LENS_FLARE*.bin files.
+
+or
+
+That removes only the Sun Flare.
+https://www.nexusmods.com/alienisolation/mods/1
 
 {Amnesia: Games} - Used ReShade 4.1.0
 Issue with ReShade 4.0.0+ If you install ReShade as opengl32.dll you have to rename it to dxgi.dll in the game folder. Windows 10 Issue it seems.
