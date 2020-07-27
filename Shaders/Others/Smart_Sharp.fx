@@ -84,6 +84,9 @@
 // Default is off.
 #define M_Quality 0 //Manual Quality Shader Defaults to 2 when set to off.
 
+//Zero is Fast, a ''Optimized'' Bilateral Filtering approach wink wink and One is a Acuurate. Acuurate is the correct way of doing Bilateral filtering.
+#define B_Accuracy 0 //Bilateral Accuracy
+
 //Use this to enable motion Sharpen option also reduces perf a bit more
 #define Motion_Sharpen 0
 
@@ -146,16 +149,16 @@ uniform int B_Grounding <
 	ui_items = "Fine\0Medium\0Coarse\0";
 	ui_label = "Grounding Type";
 	ui_tooltip = "Like Coffee pick how rough do you want this shader to be.\n"
-				 "Gives more control of Bilateral Filtering.";
+				 "Let me have fun with names and tooltips.......";
 	ui_category = "Bilateral CAS";
 > = 0;
 
 uniform bool CAM_IOB <
 	ui_label = "CAM Ignore Overbright";
 	ui_tooltip = "Instead of of allowing Overbright in the mask this allows sharpening of this area.\n"
-				 "I think it's more accurate to turn this on.";
+				 "I think it's more accurate to leave this on.";
 	ui_category = "Bilateral CAS";
-> = false;
+> = true;
 
 uniform bool CA_Mask_Boost <
 	ui_label = "CAM Boost";
@@ -167,7 +170,8 @@ uniform bool CA_Removal <
 	ui_label = "CAM Removal";
 	ui_tooltip = "This removes the extra Contrast Adaptive Masking part of the shader.\n"
 				 "Keep in mind This filter already has a level of Contrast Masking.\n"
-				 "This is for people who like the Raw look of Bilateral Sharpen.";
+				 "This is for people who like the Raw look of Bilateral Sharpen.\n"
+				 "Noise reduction from the Bilateral Filter applies automatically.";
 	ui_category = "Bilateral CAS";
 > = false;
 
@@ -215,17 +219,18 @@ static const int Local_Motion = 0;
 static const float GMD = 0.0;
 static const float MDSM = 0.0;
 #endif
-
-uniform bool Debug_View <
+uniform int Debug_View <
+	ui_type = "combo";
+	ui_items = "Normal\0Sharpen View\0Depth Masking\0CAS Mask\0";
 	ui_label = "Debug View";
-	ui_tooltip = "This is used to select the debug view.\n"
-				 "Used to see what the shaderis changing in the image.\n"
-				 "Top Left is CAS Mask.\n"
-				 "Top Right is Depth.\n"
-				 "Center is Motion Mask.\n"
-				 "Bottom Left is Depth Masking.\n"
-				 "Bottom Right is Unsharp Mask.\n"
-				 "Default is Normal View.";
+	ui_tooltip = "Like Coffee pick how rough do you want this shader to be.\n"
+				 "Let me have fun with names and tooltips.......";
+	ui_category = "Debug";
+> = 0;
+
+uniform bool F_DeNoise <
+	ui_label = "Force DeNoise";
+	ui_tooltip = "This Forces Internal DeNoise to a active state.";
 	ui_category = "Debug";
 > = false;
 
@@ -239,7 +244,7 @@ uniform bool Debug_View <
 #define pix float2(BUFFER_RCP_WIDTH, BUFFER_RCP_HEIGHT)
 uniform float timer < source = "timer"; >;
 
-#define SIGMA 10
+#define SIGMA 15
 #define BSIGMA 0.25
 
 #if Quality == 1
@@ -267,6 +272,7 @@ texture BackBufferTex : COLOR;
 sampler BackBuffer
 	{
 		Texture = BackBufferTex;
+		SRGBTexture = true;
 	};
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #if Motion_Sharpen
@@ -321,6 +327,11 @@ float Min3(float x, float y, float z)
 float Max3(float x, float y, float z)
 {
     return max(x, max(y, z));
+}
+
+float normpdf(in float x, in float sigma)
+{
+	return 0.39894*exp(-0.5*x*x/(sigma*sigma))/sigma;
 }
 
 float normpdf3(in float3 v, in float sigma)
@@ -398,32 +409,28 @@ float4 CAS(float2 texcoord)
 	//Bilateral Filter//                                                Q1         Q2       Q3        Q4
 	const int kSize = MSIZE * 0.5; // Default M-size is Quality 2 so [MSIZE 3] [MSIZE 5] [MSIZE 7] [MSIZE 9] / 2.
 
-//													1			2			3			4				5			6			7			8				7			6			5				4			3			2			1
-//Full Kernal Size would be 15 as shown here (0.031225216, 0.03332227	1, 0.035206333, 0.036826804, 0.038138565, 0.039104044, 0.039695028, 0.039894000, 0.039695028, 0.039104044, 0.038138565, 0.036826804, 0.035206333, 0.033322271, 0.031225216)
-#if Quality == 1
-	float weight[MSIZE] = {0.031225216, 0.039894000, 0.031225216}; // by 3
-#endif
-#if Quality == 2
-	float weight[MSIZE] = {0.031225216, 0.036826804, 0.039894000, 0.036826804, 0.031225216};  // by 5
-#endif
-#if Quality == 3
-	float weight[MSIZE] = {0.031225216, 0.035206333, 0.039104044, 0.039894000, 0.039104044, 0.035206333, 0.031225216};   // by 7
-#endif
-#if Quality == 4
-	float weight[MSIZE] = {0.031225216, 0.035206333, 0.038138565, 0.039695028, 0.039894000, 0.039695028, 0.038138565, 0.035206333, 0.031225216};  // by 9
-#endif
-
 	float3 final_colour, c = BB(texcoord.xy,0), cc;
 	float2 RPC_WS = pix * GT();
-	float Z, factor;
-
+	float bZ = rcp(normpdf(0.0, BSIGMA)), Z, factor;
+	#if B_Accuracy
+	float kernal[MSIZE];
+	[unroll]
+	for (int o = 0; o <= kSize; ++o)
+	{
+		kernal[kSize+o] = kernal[kSize-o] = normpdf(o, SIGMA);
+	}
+	#endif	
 	[loop]
 	for (int i=-kSize; i <= kSize; ++i)
 	{
 			for (int j=-kSize; j <= kSize; ++j)
 			{  
 				cc = BB(texcoord.xy, float2(i,j) * RPC_WS * rcp(kSize) );
-				factor = normpdf3(cc-c, BSIGMA);
+				#if B_Accuracy
+					factor = normpdf3(cc-c, BSIGMA) * bZ * kernal[kSize+j] * kernal[kSize+i];
+				#else
+					factor = normpdf3(cc-c, BSIGMA);
+				#endif	
 				Z += factor;
 				final_colour += factor * cc;
 			}
@@ -444,50 +451,54 @@ float4 CAS(float2 texcoord)
 return saturate(float4(final_colour/Z,CAS_Mask));
 }
 
-float3 Sharpen_Out(float2 texcoord)
+float4 Sharpen_Out(float2 texcoord)
 {
- float Sharp = Sharpness, MD = MotionSharpen(texcoord);
+ float Noise, Sharp = Sharpness, MD = MotionSharpen(texcoord);
 
 	if(GMD > 0 || Local_Motion)
 		Sharp = Sharpness * lerp( 1,MDSM,saturate(MD));
 		
     float3 Done = tex2D(BackBuffer,texcoord).rgb;
-	return lerp(Done,Done+(Done - CAS(texcoord).rgb)*(Sharp*3.1), CAS(texcoord).w * saturate(Sharp)); //Sharpen Out
+    if(CA_Removal || Debug_View || Debug_View == 4 || F_DeNoise)
+    {   //Noise reduction for pure Bilateral Sharp WIP
+    	Done /= CAS(texcoord).rgb;
+    	Noise = min( Min3(Done.r,Done.g,Done.b) * 2 - 1,2-Max3(Done.r,Done.g,Done.b));
+    	Done = lerp(CAS(texcoord).rgb,tex2D(BackBuffer,texcoord).rgb,saturate(Noise));
+    }
+    
+    if(Debug_View || Debug_View == 4)
+		return float4((Done - CAS(texcoord).rgb)*(Sharp*3.1),saturate(Noise)); //Sharpen Debug and Noise
+	else
+		return float4(lerp(Done,Done+(Done - CAS(texcoord).rgb)*(Sharp*3.1), CAS(texcoord).w * saturate(Sharp)),1.0); //Sharpen Out
 }
 
 
 float3 ShaderOut(float2 texcoord : TEXCOORD0)
 {
 	float3 Out, Luma, Sharpen = Sharpen_Out(texcoord).rgb,BB = tex2D(BackBuffer,texcoord).rgb;
-	float DB = Depth(texcoord).r,DBTL = Depth(float2(texcoord.x*2,texcoord.y*2)).r, DBBL = Depth(float2(texcoord.x*2,texcoord.y*2-1)).r;
+	float DB = Depth(texcoord).r;
 
 	if(No_Depth_Map)
-	{
 		DB = 0.0;
-		DBBL = 0.0;
-	}
 
 	if (Debug_View == 0)
 		Out.rgb = lerp(Sharpen, BB, DB);
-	else
+	else if (Debug_View == 1)
+		Out.rgb = Sharpen_Out(texcoord).rgb;
+	else if (Debug_View == 2)
+		Out.rgb = lerp(float3(1., 0., 1.),tex2D(BackBuffer,float2(texcoord.x,texcoord.y)).rgb,DB);
+	else if (Debug_View == 3)
+		Out.rgb = lerp(1.0,CAS(float2(texcoord.x,texcoord.y)).www,1-DB);
+	else if (Debug_View == 4)
+		Out.rgb = Sharpen_Out(texcoord).w;
+		
+	#if Motion_Sharpen
+	if (Debug_View >= 1)
 	{
-		float3 Top_Left = lerp(float3(1.,1.,1.),CAS(float2(texcoord.x*2,texcoord.y*2)).www,1-DBTL);
-
-		float3 Top_Right =  Depth(float2(texcoord.x*2-1,texcoord.y*2)).rrr;
-
-		float3 Bottom_Left = lerp(float3(1., 0., 1.),tex2D(BackBuffer,float2(texcoord.x*2,texcoord.y*2-1)).rgb,DBBL);
-
-		float3 Bottom_Right = CAS(float2(texcoord.x*2-1,texcoord.y*2-1)).rgb;
-
-		float3 VA_Top = texcoord.x < 0.5 ? Top_Left : Top_Right ;
-		float3 VA_Bottom = texcoord.x < 0.5 ? Bottom_Left : Bottom_Right ;
-
-		Out = texcoord.y < 0.5 ? VA_Top : VA_Bottom;
-		#if Motion_Sharpen
 		if(texcoord.y < 0.666 && texcoord.y > 0.333 && texcoord.x < 0.666 && texcoord.x > 0.333)
-		Out = lerp( 0,MDSM,MotionSharpen(texcoord * 3 - 1.0));
-		#endif
+			Out = lerp( 0,MDSM,MotionSharpen(texcoord * 3 - 1.0));
 	}
+	#endif
 
 	return Out;
 }
@@ -630,7 +641,7 @@ technique Smart_Sharp
 < ui_tooltip = "Suggestion : You Can Enable 'Performance Mode Checkbox,' in the lower bottom right of the ReShade's Main UI.\n"
 			   "             Do this once you set your Smart Sharp settings of course."; >
 {
-		#if Motion_Sharpen
+		#if Motion_Sharpen // Motion Sharpen makes this shader slower.
 			pass PBB //Done this way to keep Freestyle comp.
 		{
 			VertexShader = PostProcessVS;
@@ -654,5 +665,6 @@ technique Smart_Sharp
 		{
 			VertexShader = PostProcessVS;
 			PixelShader = Out;
+			SRGBWriteEnable = true;
 		}
 }
