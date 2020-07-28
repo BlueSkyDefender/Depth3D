@@ -179,7 +179,7 @@ uniform float2 ZPD_Separation <
 	ui_min = 0.0; ui_max = 0.250;
 	ui_label = " ZPD & Sepration";
 	ui_tooltip = "Zero Parallax Distance controls the focus distance for the screen Pop-out effect also known as Convergence.\n"
-				"Separation is a way to increase the intensity of Divergence without a performance cost.\n"	
+				"Separation is a way to increase the intensity of Divergence without a performance cost.\n"
 				"For FPS Games keeps this low Since you don't want your gun to pop out of screen.\n"
 				"Default is 0.025, Zero is off.";
 	ui_category = "Divergence & Convergence";
@@ -830,6 +830,17 @@ float4 MouseCursor(float2 texcoord )
 return Cursor ? Color : Out;
 }
 //////////////////////////////////////////////////////////Depth Map Information/////////////////////////////////////////////////////////////////////
+float DMA() //Small List of internal Multi Game Depth Adjustments.
+{ float DMA = Depth_Map_Adjust;
+	#if (__APPLICATION__ == 0xC0052CC4) //Halo The Master Chief Collection
+	if( WP == 4) // Change on weapon selection.
+		DMA *= 0.25;
+	else if( WP == 5)
+		DMA *= 0.8875;
+	#endif
+	return DMA;
+}
+
 float Depth(float2 texcoord)
 {
 	#if BD_Correction || DC
@@ -852,7 +863,7 @@ float Depth(float2 texcoord)
 	if (Depth_Map_Flip)
 		texcoord.y =  1 - texcoord.y;
 	//Conversions to linear space.....
-	float zBuffer = tex2Dlod(DepthBuffer, float4(texcoord,0,0)).x, Far = 1., Near = 0.125/Depth_Map_Adjust; //Near & Far Adjustment
+	float zBuffer = tex2Dlod(DepthBuffer, float4(texcoord,0,0)).x, Far = 1., Near = 0.125/DMA(); //Near & Far Adjustment
 
 	float2 C = float2( Far / Near, 1. - Far / Near ), Offsets = float2(1 + Offset,1 - Offset), Z = float2( zBuffer, 1-zBuffer );
 
@@ -911,7 +922,7 @@ float2 WeaponDepth(float2 texcoord)
 float4 PrepDepth(float2 texcoord)
 {
 	float4 DM = Depth(texcoord).xxxx;
-	float R, G, B, A, WD = WeaponDepth(texcoord).x, CoP = WeaponDepth(texcoord).y, CutOFFCal = (CoP/Depth_Map_Adjust) * 0.5; //Weapon Cutoff Calculation
+	float R, G, B, A, WD = WeaponDepth(texcoord).x, CoP = WeaponDepth(texcoord).y, CutOFFCal = (CoP/DMA()) * 0.5; //Weapon Cutoff Calculation
 	CutOFFCal = step(DM.x,CutOFFCal);
 
 	[branch] if (WP == 0)
@@ -1107,7 +1118,7 @@ float2 Conv(float D,float2 texcoord)
 			WZP = 1;
 
 		ZP = min(ZP,Auto_Balance_Clamp);
-		
+
 		float Separation = lerp(1.0,5.0,ZPD_Separation.y);
     return float2(lerp(Separation * Convergence,D, ZP),lerp(W_Convergence,WD,WZP));
 }
@@ -1299,7 +1310,7 @@ float2 Parallax(float Diverge, float2 Coordinates) // Horizontal parallax offset
 #if HUD_MODE || HM
 float3 HUD(float3 HUD, float2 texcoord )
 {
-	float Mask_Tex, CutOFFCal = ((HUD_Adjust.x * 0.5)/Depth_Map_Adjust) * 0.5, COC = step(Depth(texcoord).x,CutOFFCal); //HUD Cutoff Calculation
+	float Mask_Tex, CutOFFCal = ((HUD_Adjust.x * 0.5)/DMA()) * 0.5, COC = step(Depth(texcoord).x,CutOFFCal); //HUD Cutoff Calculation
 	//This code is for hud segregation.
 	if (HUD_Adjust.x > 0)
 		HUD = COC > 0 ? tex2D(BackBufferCLAMP,texcoord).rgb : HUD;

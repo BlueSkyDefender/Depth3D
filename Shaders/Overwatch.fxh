@@ -684,7 +684,7 @@ static const int WPW = 0;                               //Weapon Profile Warning
 	#define DE_Z 0.475
 	#define RH 1
 #elif (App == 0xC0052CC4) //Halo The Master Chief Collection
-	#define DA_X 0.0375
+	#define DA_X 0.037
 	#define DA_W 1
 	#define DA_Y 75.0
 	#define DB_Y 5
@@ -1907,14 +1907,14 @@ float3 Weapon_Profiles(float WP ,float3 Weapon_Adjust) //Tried Switch But, can't
 #elif WSM == 2
 float3 Weapon_Profiles(float WP ,float3 Weapon_Adjust) // MCC
 {   float3 Value = Weapon_Adjust;
-		if (WP == 2)
+	if (WP == 2)
         Value = float3(0,0,0);                //WP 0  | Halo: Reach
     if (WP == 3)
         Value = float3(1.5,26.25,0.2);        //WP 1  | Halo: CE Anniversary
     if (WP == 4)
-        Value = float3(0,0,0);                //WP 2  | Halo 2: Anniversary
+        Value = float3(0.615,70.0,0.3955);    //WP 2  | Halo 2: Anniversary
     if (WP == 5)
-        Value = float3(0,0,0);                //WP 3  | Halo 3
+        Value = float3(5.750,24.0,0);         //WP 3  | Halo 3
     if (WP == 6)
         Value = float3(0,0,0);                //WP 4  | Halo 3: ODST
     if (WP == 7)
