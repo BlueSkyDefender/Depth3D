@@ -24,18 +24,20 @@
 //* Uncharted2 Tone Mapper by Hable John
 //* https://www.slideshare.net/ozlael/hable-john-uncharted2-hdr-lighting
 //* ACES Cinematic Tonemapping by Krzysztof Narkowicz and one by Stephen Hill
-//* http://www.oscars.org/science-technology/sci-tech-projects/aces
+//* https://github.com/TheRealMJP/BakingLab/blob/master/BakingLab/ACES.hlsl
 //* https://knarkowicz.wordpress.com/2016/01/06/aces-filmic-tone-mapping-curve/
 //* Timothy Lottes Tone mapper and iformation from this site.
 //* https://bartwronski.com/2016/09/01/dynamic-range-and-evs/
 //* https://www.shadertoy.com/view/XljBRK
+//* Generate Gold Noise image Based on this implamentation
+//* https://www.shadertoy.com/view/wtsSW4
 //*
 //* Since it was already witten out nicely was ported from. FidelityFX LPM was it self was not ported.
 //* https://github.com/GPUOpen-Effects/FidelityFX-LPM
 //* Most of the code is LICENSED this way.
 //* https://github.com/GPUOpen-Effects/FidelityFX-LPM/blob/4a1442bf7405d0f703f7cf9c0bfe47a7559cc69b/sample/src/DX12/LPMSample.h#L3-L18
 //*
-//* The rest of the code bellow is under it's own license.  
+//* The rest of the code bellow is under it's own license.
 //* If I missed any please tell me.
 //*
 //* LICENSE
@@ -74,13 +76,19 @@
 	#define Flare_B 0
 #endif
 
+// Change this to set the partial resolution of the bloom buffer.
+#define Set_Res 0.25 //0.25 should be the lowest you should Go and 1.0 is the Highest you can go.
+
 // Max Bloom ammount.
 #define Bloom_Max 250
 
-//Do not Use. 
-//Use for real HDR. 
-#define HDR_Toggle 0 //For HDR10 10:10:10:2 use maybe 0.18/25.0 to start. Should only work with Thimothy 
-//Do not Use. 
+// Change this to set enable SRGB mode.
+#define SRGB 0
+
+//Do not Use.
+//Use for real HDR.
+#define HDR_Toggle 0 //For HDR10 10:10:10:2 use maybe 0.18/25.0 to start. Should only work with Thimothy
+//Do not Use.
 
 #if !defined(__RESHADE__) || __RESHADE__ < 40000
 	#define Compatibility 1
@@ -124,7 +132,7 @@ uniform float2 Bloom_Intensity<
 	ui_tooltip = "Use this to set Bloom Intensity and Overall Bloom Opacity for your content.\n"
 				"Number 0.5 is default.";
 	ui_category = "Bloom Adjustments";
-> = float2(0.5,0.5);
+> = float2(0.5,0.25);
 
 uniform float2 Saturation <
 	#if Compatibility
@@ -145,21 +153,30 @@ uniform float Bloom_Spread <
 	#else
 	ui_type = "slider";
 	#endif
-	ui_min = 10.0; ui_max = Bloom_Max; ui_step = 0.25;
+	ui_min = 5.0; ui_max = Bloom_Max; ui_step = 0.25;
 	ui_label = "Primary Bloom Spread";
 	ui_tooltip = "Adjust to spread out the primary Bloom.\n"
 				 "This is used for spreading Bloom.\n"
-				 "Number 100.0 is default.";
+				 "Number 50.0 is default.";
 	ui_category = "Bloom Adjustments";
-> = 100.0;
+> = 50.0;
+
+uniform float Dither_Bloom <
+ ui_type = "slider";
+ ui_min = 0.0; ui_max = 1.0;
+ ui_label = "Bloom Dither";
+ ui_tooltip = "Adjustment The amount Dither on bloom to reduce banding.\n"
+       "Number 0.25 is default.";
+ ui_category = "Bloom Adjustments";
+> = 0.25;
 
 uniform int Tonemappers <
 	ui_type = "combo";
 	ui_label = "Tonemappers";
 	ui_tooltip = "Changes how color get used for the other effects.\n";
-	ui_items = "Timothy\0Hable's filmic\0DX11DSK\0ACESFilm\0White Luma Reinhard\0None\0";
+	ui_items = "Timothy\0ACESFitted\0";
 	ui_category = "Tonemapper Adjustments";
-> = 1;
+> = 0;
 
 uniform float WP <
 	ui_type = "drag";
@@ -167,7 +184,7 @@ uniform float WP <
 	ui_label = "Linear White Point Value";
 	ui_category = "Tonemapper Adjustments";
 > = 1.0;
-        
+
 uniform float Exp <
 	ui_type = "drag";
 	ui_min = -4.0; ui_max = 4.00;
@@ -212,27 +229,26 @@ uniform bool Auto_Exposure <
 	ui_label = "Auto Exposure";
 	ui_tooltip = "This will enable the shader to adjust Exposure automaticly.\n"
 				 "This is based off Prod80's Port of a Exposure algorithm by.\n"
-				 "Padraic Hennessy, MJP and David Neubelt."; 
+				 "Padraic Hennessy, MJP and David Neubelt.";
 	ui_category = "Tonemapper Adjustments";
 > = 0;
+
+uniform int Inv_Tonemappers <
+	ui_type = "combo";
+	ui_label = "Extract HDR Information";
+	ui_tooltip = "Changes how color get used for the other effects.\n";
+	ui_items = "Off\0[Low] Luma\0[Med] Color\0[High] Max Color Brightness\0";
+	ui_category = "HDR";
+> = 1;
 
 uniform float HDR_BP <
 	ui_type = "drag";
 	ui_min = 0.0; ui_max = 1.0;
-	ui_label = "Extract HDR Bright Point";
-	ui_tooltip = "Use this to set the color based brightness threshold for what is and what isn't allowed.\n"
+	ui_label = "HDR Power";
+	ui_tooltip = "Use adjsut the HDR Power, You can override this value and set it to like 1.5 or something.\n"
 				"Number 0.5 is default.";
 	ui_category = "HDR";
 > = 0.5;
-
-uniform float HDR_BPP <
-	ui_type = "drag";
-	ui_min = 0.0; ui_max = 2.0;
-	ui_label = "HDR Bright Point Power";
-	ui_tooltip = "Adjustment The amount brightness allowed in the final image.\n"
-				"Number 1.0 is default.";
-	ui_category = "HDR";
-> = 1.0;
 
 uniform float Adapt_Adjust <
 	ui_type = "drag";
@@ -274,6 +290,9 @@ uniform int Debug_View <
 #define BloomSpread Bloom_Spread * rcp(Bloom_Max)
 #define PP lerp(0.0,1.0, Petal_Power)
 #define Sat lerp(0,10,Saturation.x)
+#define PHI 1.61803398874989484820459 * 00000.1 // Golden Ratio
+#define PI 3.14159265358979323846264 * 00000.1 // PI
+#define SQ2 1.41421356237309504880169 * 10000.0 // Square Root of Two
 
 uniform float timer < source = "timer"; >;
 
@@ -289,6 +308,9 @@ texture BackBufferTex : COLOR;
 sampler BackBuffer
 	{
 		Texture = BackBufferTex;
+		#if SRGB
+		SRGBTexture = true;
+		#endif
 	};
 
 texture texCurrent { Width = BUFFER_WIDTH * 0.5; Height = BUFFER_HEIGHT * 0.5; Format = RGBA8; MipLevels = 8;};
@@ -298,18 +320,18 @@ sampler SamplerCBB
 		Texture = texCurrent;
 	};
 
-texture texMBlur_HV0 { Width = BUFFER_WIDTH * 0.25; Height = BUFFER_HEIGHT * 0.25; Format = RGBA16F; MipLevels = 8;};
+texture texMBlur_HVA <pooled = true;>  { Width = BUFFER_WIDTH * Set_Res; Height = BUFFER_HEIGHT * 0.375; Format = RGBA16F; MipLevels = 8;};
 
 sampler SamplerBlur_HV0
 	{
-		Texture = texMBlur_HV0;
+		Texture = texMBlur_HVA;
 	};
 
-texture texMBlur_HV1 { Width = BUFFER_WIDTH * 0.25; Height = BUFFER_HEIGHT * 0.25; Format = RGBA16F; MipLevels = 8;};
+texture texMBlur_HVB <pooled = true;>  { Width = BUFFER_WIDTH * 0.375; Height = BUFFER_HEIGHT * Set_Res; Format = RGBA16F; MipLevels = 8;};
 
 sampler SamplerBlur_HV1
 	{
-		Texture = texMBlur_HV1;
+		Texture = texMBlur_HVB;
 	};
 
 #if Flare_A
@@ -361,6 +383,11 @@ float3 ApplyPQ(float3 color)
     return color;
 }
 
+//float3 ApplyscRGBScale(float3 color, float minLuminancePerNits, float maxLuminancePerNits)
+//{
+//    color.xyz = (color.xyz * (maxLuminancePerNits - minLuminancePerNits)) + float3(minLuminancePerNits, minLuminancePerNits, minLuminancePerNits);
+//    return color;
+//}
 
 float Log2Exposure( in float avgLuminance, in float GreyValue )
     {
@@ -417,7 +444,21 @@ float PS_Temporal_Adaptation(float4 pos : SV_Position, float2 texcoord : TEXCOOR
 	float EA = Eye_Adaptation ? PL + (L - PL) * (1.0 - exp(-frametime/AA)) : L;
 	return EA;
 }
+//----------------------------------Inverse ToneMappers--------------------------------------------
+float max3(float x, float y, float z)
+{
+    return max(x, max(y, z));
+}
 
+void inv_Tonemappers(float4 color,inout float3 TL,inout float3 RH, inout float3 RHL)
+{
+	//Timothy Lottes fast_reversible
+	TL = color.rgb * rcp((1.0 + max(color.w,0.001)) - max3(color.r, color.g, color.b));
+	//Reinhard
+	RH = color.rgb * rcp(max((1.0 + color.w) - color.rgb,0.001));
+	//Luma Reinhard
+	RHL = color.rgb * rcp(max((1.0 + lerp(-0.5,0,color.w) ) - Luma(color.rgb),0.001));
+}
 //---------------------------------------ToneMappers-----------------------------------------------
 // General tonemapping operator, build 'b' term.
 float ColToneB(float hdrMax, float contrast, float shoulder, float midIn, float midOut)
@@ -455,7 +496,7 @@ float3 TimothyTonemapper(float3 color, float EX)
     float c = ColToneC(hdrMax, contrast, shoulder, midIn, midOut);
 	//Tone map all the things. But, first start with exposure.
 	color *= EX;
-	
+
     #define EPS 1e-6f
     float peak = max(color.r, max(color.g, color.b));
     peak = max(EPS, peak);
@@ -481,84 +522,6 @@ float3 TimothyTonemapper(float3 color, float EX)
     return color;
 }
 
-float3 HableTonemap(float3 color, float EX) // Habble
-{   float A = 0.15;
-	float B = 0.50;
-	float C = 0.10;
-	float D = 0.20;
-	float E = 0.02;
-	float F = 0.30;
-	float W = WP;
-	//Tone map all the things. But, first start with exposure.
-	color *= EX;
-	color = ((color * (A * color + C * B) + D * E) / (color * (A * color + B) + D * F)) - E / F;
-	float white = ((W * (A * W + C * B) + D * E) / (W * (A * W + B) + D * F)) - E / F;
-	color /= white;
-	return color;
-}
-
-float3 DX11DSK(float3 color, float EX)
-{
-    float  MIDDLE_GRAY = 0.72;
-    float  LUM_WHITE = WP;
-
-	//Tone map all the things. But, first start with exposure.
-	color *= EX;
-
-    color.rgb *= MIDDLE_GRAY;
-    color.rgb *= (1.0f + color/LUM_WHITE);
-    color.rgb /= (1.0f + color);
-
-    return color;
-}
-
-// https://knarkowicz.wordpress.com/2016/01/06/aces-filmic-tone-mapping-curve/
-/* Not Used
-float3 ACESFilmRec2020( float3 color, float EX)
-{
-    float a = 15.8f;
-    float b = 2.12f;
-    float c = 1.2f;
-    float d = 5.92f;
-    float e = 1.9f;
-    float W = lerp(0,2,WP);//Poor Hack for adjusting ACES White point.
-    //Tone map all the things. But, first start with exposure.
-	color *= EX;
-    color = (color*(a*color + b)) / (color*(c*color + d) + e);
-    float white = (W*(a*W + b)) / (W*(c*W + d) + e);
-	color /= white;    
-    return color;
-}
-*/
-float3 ACESFilm(float3 color, float EX)
-{
-    float a = 2.51f;
-    float b = 0.03f;
-    float c = 2.43f;
-    float d = 0.59f;
-    float e = 0.14f;
-    float W = lerp(0,2,WP);//Poor Hack for adjusting ACES White point.
-    //Tone map all the things. But, first start with exposure.
-	color *= EX;
-    color = saturate((color*(a*color + b)) / (color*(c*color + d) + e));
-    float white = (W*(a*W + b)) / (W*(c*W + d) + e);
-	color /= white;    
-    return color;
-}
-// whitePreservingLumaBasedReinhardToneMapping
-float3 WPLBR(float3 color, float EX)
-{
-    float white = WP;
-    
-    //Tone map all the things. But, first start with exposure.
-	color *= EX;
-    
-    float luma = Luma(color);
-    float toneMappedLuma = luma * (1. + luma / (white*white)) / (1. + luma);
-    color *= toneMappedLuma / luma;
-    return color;
-}
-
 // sRGB => XYZ => D65_2_D60 => AP1 => RRT_SAT
 static const float3x3 ACESInputMat =
 float3x3( float3(0.59719, 0.35458, 0.04823),
@@ -577,28 +540,17 @@ float3 RRTAndODTFit(float3 v)
     float3 b = v * (0.983729f * v + 0.4329510f) + 0.238081f;
     return a / b;
 }
-/*
-//Luminance only fit
-float3 ACESFitted(float3 color, float EX)
-{    float W = WP;//Poor Hack for adjusting ACES White point.
-    //Tone map all the things. But, first start with exposure.
+
+float3 ACESFitted( float3 color, float EX)
+{
 	color *= EX;
-	
-    color = mul(ACESInputMat, color);
-
-    // Apply RRT and ODT
+    color = mul(ACESInputMat,color);
     color = RRTAndODTFit(color);
+    color = mul(ACESOutputMat,color);
 
-    color = mul(ACESOutputMat, color);
-    
-	color /= RRTAndODTFit(W);  
-	
-    // Clamp to [0, 1]
-    color = saturate(color);
-
-    return color;
+    return  color/WP;
 }
-*/
+
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 float2 Auto_Luma()
@@ -615,10 +567,10 @@ float4 Color_GS(float4 BC)
 		  //Bloom Saturation
 		  if(Auto_Bloom == 2 || Auto_Bloom == 4) //Desaturate
 		  	Saturate_A *= lerp(0.0 + Saturate_B,1,AL);
-		  	
+
 		  if(Auto_Bloom == 3 || Auto_Bloom == 5) //Saturate
 		  	Saturate_A *= lerp(2.0 - Saturate_B,1,AL);
-	
+
 		  BC.rgb  = lerp(BC.a, BC.rgb, min(10,Saturate_A));
 
     return saturate(float4(BC.rgb,GS));
@@ -630,41 +582,42 @@ void PS_CurrentInfo(float4 pos : SV_Position, float2 texcoords : TEXCOORD, out f
 }
 
 float4 GemsBlur(sampler2D Sample, float2 texcoords, float Size, int Dir)
-{ 
+{
 const float sigma   = 10.0;             // Gaussian sigma
-const int   support = int(sigma * 3.0); // int(sigma * 3.0) truncation
+const int   support = int(lerp(5,sigma,BloomSpread) * 3.0); // int(sigma * 3.0) truncation
 float2 S = Size * pix;
 	float4 acc;                      // accumulator
 	float norm;
+
 	[loop]
-	for (int hv = -support; hv <= support; hv++) 
+	for (int HV = -support; HV <= support; HV++)
 	{
-		float2 D = Dir ? float2(0,hv) : float2(hv,0);
-		float coeff = exp(-0.5 * hv * hv / (sigma * sigma));
-		acc += tex2Dlod(Sample, float4(texcoords + D * S,0, min(lerp(0,1,BloomSpread),abs(hv)) )).rgba * coeff;
+		float2 D = Dir ? float2(0,HV) : float2(HV,0);
+		float coeff = exp(-0.5 * HV * HV / (sigma * sigma));
+		acc += tex2Dlod(Sample, float4(texcoords + D * S,0, min(lerp(0,1,BloomSpread),abs(HV)) )).rgba * coeff;
 		norm += coeff;
 	}
-	
-	acc *= rcp(norm);	
+	acc *= rcp(norm);
+
 	return acc;
 }
 
 void Blur_HV0(in float4 position : SV_Position, in float2 texcoords : TEXCOORD, out float4 color : SV_Target0)
 {
 	float S0 = BloomSpread * 10.0;
-		
+
 	color = GemsBlur(SamplerCBB, texcoords, S0, 0).rgba;
 }
 
 void CombBlur_HV1(in float4 position : SV_Position, in float2 texcoords : TEXCOORD, out float4 color : SV_Target0 )
 {
 	float S0 = BloomSpread * 10.0;
- 
+
 	color = GemsBlur(SamplerBlur_HV0, texcoords, S0, 1).rgba;
  }
 
 float4 Final_Bloom(float2 texcoords)
-{ 
+{
 		float2 S = Bloom_Spread * pix;
 
 		float M_Cues = 1;
@@ -687,15 +640,15 @@ float4 Final_Bloom(float2 texcoords)
 float3 Green_Blue( float interpolant )
 {
 	if( interpolant < 0.5 )
-		return float3(0.0, 1.0, 2.0 * interpolant); 
+		return float3(0.0, 1.0, 2.0 * interpolant);
 	else
-		return float3(0.0, 2.0 - 2.0 * interpolant, 1.0 );  
+		return float3(0.0, 2.0 - 2.0 * interpolant, 1.0 );
 }
 
 float3 Red_Green( float interpolant )
 {
 	if( interpolant < 0.5 )
-		return float3(1.0, 2.0 * interpolant, 0.0); 
+		return float3(1.0, 2.0 * interpolant, 0.0);
 	else
 		return float3(2.0 - 2.0 * interpolant, 1.0, 0.0 );
 }
@@ -710,7 +663,7 @@ float3 FHeat( float interpolant )
     }
     else
     {
-     	float remappedSecondHalf = 2.0 - 2.0 * invertedInterpolant; 
+     	float remappedSecondHalf = 2.0 - 2.0 * invertedInterpolant;
         return Red_Green( remappedSecondHalf );
     }
 }
@@ -729,63 +682,66 @@ float3 HeatMap( float interpolant )
 	}
 	else
 	{
-		float lastSegmentInterpolant = 6.0 * interpolant - 5.0; 
+		float lastSegmentInterpolant = 6.0 * interpolant - 5.0;
 		return ( 1.0 - lastSegmentInterpolant ) * float3(1.0, 0.0, 0.0) + lastSegmentInterpolant * float3(1.0, 1.0, 1.0);
 	}
 }
 
 float Scale(float val,float max,float min) //Scale to 0 - 1
-{ 
-	return (val - min) / (max - min); 
-}
-
-float ExtractHDR_WP(float2 texcoords)
 {
-	//float GS = Luma(tex2D(BackBuffer,texcoords).rgb);
-	//	  GS = max(0.0, GS - HDR_WP);
-    //return GS;
-    float4 BC = tex2D(BackBuffer,texcoords).rgba;
-    	float GS = Luma(BC.rgb);
-              BC.rgb /= max(GS, 0.001);
-          BC.a    = max(0.0, GS - HDR_BP);
-          BC.rgb *= BC.a;
-          
-          return Luma(BC.rgb);
+	return (val - min) / (max - min);
 }
 
+void GN(inout float Noise,float2 TC,float seed)
+{
+    Noise = frac(tan(distance(TC*((seed+10)+PHI), float2(PHI, PI)))*SQ2);
+}
 
 float4 HDROut(float2 texcoords : TEXCOORD0)
-{
+{   float4 Out;
+	float2 TC = 10 * texcoords.xy - 5;
 	float AL = Auto_Luma().y, Ex;
-	
+
 	if(Auto_Exposure == 1)
 		Ex = Exp;
 	else
 		Ex = lerp(0,2.5,Scale(Exp, 4, -4));
-	
+
 	float BI_Brightness = lerp(1,0.001,Bloom_Intensity.x), NC = Bloom_Intensity.y;
 
 	if(Auto_Bloom == 1 || Auto_Bloom == 4 || Auto_Bloom == 5)
 		NC *= max(0.25,Auto_Luma().x);
 
-	float3 Bloom = Final_Bloom( texcoords ).rgb;
-	
-	float4 Out;
-    float3 Color = tex2D(BackBuffer, texcoords).rgb;
+	float3 Noise, Bloom = Final_Bloom( texcoords ).rgb,iFast, iReinhard, iReinhardLuma, Color = tex2D(BackBuffer, texcoords).rgb;
 
-	if(Tonemappers >= 1)	 
+	// Goldern Noise RGB Dither
+	GN( Noise.r, TC, 1 );
+	GN( Noise.g, TC, 2 );
+	GN( Noise.b, TC, 3 );
+	float3 SS  = smoothstep( 0.0, 0.1, Bloom );
+		   SS *= lerp(0.0,0.1,saturate(Dither_Bloom));
+		Bloom.rgb = saturate( Bloom.rgb + Noise * SS );
+
+	if(Tonemappers >= 1)
    	Color = lerp(Luma(Color),Color,Saturate);
 
 	// Do inital de-gamma of the game image to ensure we're operating in the correct colour range.
 	if( Gamma > 1. )
 		Color = pow(abs(Color),Gamma);
+	//Evil bad Negitive colors be gone by the wind of dev....
+	Color = max(0,Color);
+
 	//HDR Map
-	Color += ExtractHDR_WP( texcoords ) * HDR_BPP;
-	
-	//Bloom should be applied before Tonemapping as otherwise all high ranges will be lost.
+	inv_Tonemappers(float4(Color,1-HDR_BP), iFast, iReinhard, iReinhardLuma);
+	if(Inv_Tonemappers == 1)
+		Color = iReinhardLuma;
+	else if(Inv_Tonemappers == 2)
+		Color = iReinhard;
+	else if(Inv_Tonemappers == 3)
+		Color = iFast;
+
+	//Bloom should be applied before Tonemapping as otherwise all high ranges will be lost. Also can used as "resolve." But, I don't do this.
 	Color += lerp( 0.0, (( Bloom - 0 ) / ( BI_Brightness - 0)), saturate(NC));
-	
-	float3 Store_Color = Color;
 
 	//Tone map all the things
 	//Using the optimized tonemapper by Jim Hejl and Richard Burgess-Dawson 0.148 for the GreyValue works for me. https://imgflip.com/i/oos2z But, I will alow for this to be adjusted.
@@ -793,38 +749,32 @@ float4 HDROut(float2 texcoords : TEXCOORD0)
 		Ex = CalcExposedColor(AL,Ex,GreyValue);
 	else
 		Ex = Ex;
-	
+
 	if(Tonemappers == 0)
 		Color = TimothyTonemapper(Color,Ex);
 	else if (Tonemappers == 1)
-		Color = HableTonemap(Color,Ex);	
-	else if (Tonemappers == 2)
-		Color = DX11DSK(Color,Ex);
-	else if (Tonemappers == 3)
-		Color = ACESFilm(Color,Ex);	
-	else if (Tonemappers == 4)
-		Color = WPLBR(Color,Ex);	
-	else
-		Color = Color * Ex;	
-		
+		Color = ACESFitted(Color,Ex);
+
 	#if Flare_A
 		Color += tex2D(SamplerFlare, texcoords).rgb;
 	#endif
-	
+
 	#if Flare_B
 		Color += tex2D(SamplerLensFlare, texcoords).rgb;
 	#endif
-	
-	// Do the post-tonemapping gamma correction
-	//if( Gamma > 1. )
-		Color = pow(abs(Color),rcp(2.2));
-
-	if(Tonemappers >= 1)
-		Color = (Color - 0.5) * (Contrast) + 0.5; 
 
 	#if HDR_Toggle
+	// Do ST2084 curve
 	Color = ApplyPQ(Color);
-	#endif	
+	#else
+	// Do the post-tonemapping gamma correction
+	if( Gamma > 1. )
+		Color = pow(abs(Color),rcp(2.2));
+	#endif
+
+
+	if(Tonemappers >= 1)
+		Color = (Color - 0.5) * (Contrast) + 0.5;
 
 	if (Debug_View == 0)
 		Out = float4(Color, 1.);
@@ -832,10 +782,10 @@ float4 HDROut(float2 texcoords : TEXCOORD0)
 		Out = float4(pow(( Bloom - 0 ) / ( BI_Brightness - 0),rcp(Gamma)), 1.);
 	else
 		Out = texcoords.y < 0.975 ? HeatMap(Luma( Color )): HeatMap(texcoords.x);
-	
+
 	return float4(Out.rgb,1.0);
 }
-    
+
 float PS_StoreInfo(float4 pos : SV_Position, float2 texcoord : TEXCOORD) : SV_Target
 {
     return tex2D(SamplerTA,texcoord).x;
@@ -846,7 +796,7 @@ float4 Out(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Targe
 {
 	float PosX = 0.9525f*BUFFER_WIDTH*pix.x,PosY = 0.975f*BUFFER_HEIGHT*pix.y;
 	float3 Color = HDROut(texcoord).rgb,D,E,P,T,H,Three,DD,Dot,I,N,F,O;
-	//Color = saturate(smoothstep(0,1,1-tex2D(SamplerTA,0.0).x)); 
+	//Color = saturate(smoothstep(0,1,1-tex2D(SamplerTA,0.0).x));
 	[branch] if(timer <= 12500)
 	{
 		//DEPTH
@@ -963,13 +913,13 @@ technique Blooming_HDR
 	{
 		VertexShader = PostProcessVS;
 		PixelShader = Blur_HV0;
-		RenderTarget0 = texMBlur_HV0;
+		RenderTarget0 = texMBlur_HVA;
 	}
 		pass MIP_Blur_HV_Two
 	{
 		VertexShader = PostProcessVS;
 		PixelShader = CombBlur_HV1;
-		RenderTarget0 = texMBlur_HV1;
+		RenderTarget0 = texMBlur_HVB;
 	}
 		pass Downsampler
     {
@@ -987,6 +937,9 @@ technique Blooming_HDR
 	{
 		VertexShader = PostProcessVS;
 		PixelShader = Out;
+		#if SRGB
+		SRGBWriteEnable = true;
+		#endif
 	}
 
 }
