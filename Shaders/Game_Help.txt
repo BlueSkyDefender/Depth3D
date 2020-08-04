@@ -228,6 +228,47 @@ Now open the DPfix095.zip Directly from http://blog.metaclassofnil.com/wp-conten
 
 Install the contents of that folder in to Deadly Premonition Folder where you changed Reshade's d3d9.dll to dxgi.dll. Edit the DPfix.ini too what ever REZ you want. Then start the game.
 
+{Destroy All Humans!} - ReShade 4.7.0
+Game runs fine issues with DoF and/or other effects.
+
+To Disable Depth of Field in DAH!
+
+Head over to C:\Users\UserName\AppData\Local\DH\Saved\Config\WindowsNoEditor
+Open the “Engine.ini” file
+Add:
+[SystemSettings]
+r.DepthOfFieldQuality=0
+r.MotionBlur.Max=0
+r.MotionBlurQuality=0
+r.DefaultFeature.MotionBlur=0
+
+For Bloom Add:
+r.BloomQuality=0
+
+Save the file Set it to read only. I recommend you set your setting in games first befor all of this.
+
+Now I also say you should use a FOV mod. You can use this game.
+
+https://community.pcgamingwiki.com/files/file/1948-destroy-all-humans-fov-changer/
+
+I also recommend you use View Mode set to Alpha. Because of all the Foliage.
+
+{Devil May Cry 5} - ReShade 4.7.0
+Some Issues in game since you can't use most, fixes with out running in "DX12." There is not much you can do.
+
+Go to <path-to-game>
+Open dmc5config.ini
+
+In here you can change
+
+DepthOfFiledEnable=true 
+to 
+DepthOfFiledEnable=false
+
+you can also try to set Fov=90
+
+Save your changes. Not sure it works.
+
 {DOOM - 2016}
 Issues with AMD hardware. No depth buffer.
 
@@ -784,6 +825,12 @@ Rage 64 was tested only.
 
 {Redout} - Thank you zig11727
 Path to install \Steam\SteamApps\common\Redout\redout\Binaries
+
+{RESIDENT EVIL HD BIOHAZARD HD}
+The DepthBuffer issues force you to play in 4:3. Because, in 16:9 mode The depth buffer will never match the BackBuffer. Some issues with Clipping by the game is totaly playable.
+
+Should not need to do this. But, you may want to mod this game anyways.
+https://www.pcgamingwiki.com/wiki/Resident_Evil_HD_Remaster#Essential_improvements
 
 {RESIDENT EVIL 2  BIOHAZARD RE2 Remake}
 Enable RE_Fix in shader "USER EDITABLE PREPROCESSOR FUNCTIONS."

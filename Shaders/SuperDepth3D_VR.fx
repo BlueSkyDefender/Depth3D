@@ -2,7 +2,7 @@
 ///**SuperDepth3D_VR**///
 //-------------------////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//* Depth Map Based 3D post-process shader v2.3.2
+//* Depth Map Based 3D post-process shader v2.3.3
 //* For Reshade 3.0+
 //* ---------------------------------
 //*
@@ -48,6 +48,8 @@
 	static const float DE_X = 0, DE_Y = 0.5, DE_Z = 0.25, DE_W = 0.0;
 	// DF_X = [Weapon ZPD Boundary] DF_Y = [Separation] DF_Z = [Edge Masking] DF_W = [HUD]
 	static const float DF_X = 0.0, DF_Y = 0.0, DF_Z = 0.0, DF_W = 0.0;
+	// DG_X = [Null] DG_Y = [Null] DG_Z = [Null] DG_W = [Check Depth Limit]
+	static const float DG_X = 0.0, DG_Y = 0.0, DG_Z = 0.0, DG_W = 0.0;
 	// WSM = [Weapon Setting Mode]
 	#define OW_WP "WP Off\0Custom WP\0"
 	static const int WSM = 0;
@@ -83,7 +85,7 @@
 
 // Auto Letter Box Correction & Masking
 #define LB_Correction 0 //Default 0 is Off. One is On.
-#define LetterBox_Masking 0 //Default 0 is Off. One is On and two is Auto.
+#define LetterBox_Masking 0 //[Zero is Off] [One is Hoz] [Two is Auto Hoz] [Three is Vert] [Four is Auto Vert]
 
 // HUD Mode is for Extra UI MASK and Basic HUD Adjustments. This is useful for UI elements that are drawn in the Depth Buffer.
 // Such as the game Naruto Shippuden: Ultimate Ninja, TitanFall 2, and or Unreal Gold 277. That have this issue. This also allows for more advance users
@@ -763,7 +765,10 @@ float4 CSB(float2 texcoords)
 #if LBC || LBM || LB_Correction || LetterBox_Masking
 float LBDetection()
 {   //0.120 0.879
-	return CSB(float2(0.5,0.1)) == 0 && CSB(float2(0.9,0.9)) == 0 && CSB(float2(0.5,0.5)) > 0 ? 1 : 0;
+	if ( LetterBox_Masking >= 3 )
+		return CSB(float2(0.1,0.5)) == 0 && CSB(float2(0.9,0.5)) == 0 && CSB(float2(0.5,0.5)) > 0 ? 1 : 0;
+	else
+		return CSB(float2(0.5,0.1)) == 0 && CSB(float2(0.9,0.9)) == 0 && CSB(float2(0.5,0.5)) > 0 ? 1 : 0;
 }
 #endif
 /////////////////////////////////////////////////////////////Cursor///////////////////////////////////////////////////////////////////////////
@@ -1013,7 +1018,7 @@ float Fade(float2 texcoord)
 				#if UI_MASK
 					CD = max( 1 - ZPD_I / HUD_Mask(GridXY), CD );
 				#endif
-				if (CD < 0.0)//may lower this to like -0.1
+				if (CD < -DG_W)//may lower this to like -0.1
 					Detect = 1;
 			}
 		}
@@ -1195,10 +1200,12 @@ float DB( float2 texcoord)
 	if(LBM || LetterBox_Masking)
 	{
 		float storeDM = DM.y;
-
+	if ( LBM >= 3 || LetterBox_Masking >= 3 )
+		DM.y = texcoord.x > 0.125 && texcoord.x < 0.875 ? storeDM : 0.0125;//DM.y = texcoord.x > 0.051 && texcoord.x < 0.949 ? storeDM : 0.0125;
+	else
 		DM.y = texcoord.y > 0.120 && texcoord.y < 0.879 ? storeDM : 0.0125;
 	#if LetterBox_Masking
-		if(LBM == 2 && !LBDetection())
+		if((LBM == 2 || LBM == 4 || LetterBox_Masking == 2 || LetterBox_Masking == 4) && !LBDetection())
 			DM.y = storeDM;
 	#endif
 	}
@@ -1510,6 +1517,9 @@ float3 PS_calcLR(float2 texcoord)
 	color = texcoord.x < 0.5 ? Circle(Left,float2(texcoord.x*2,texcoord.y)) : Circle(Right,float2(texcoord.x*2-1,texcoord.y));
 	else if(Barrel_Distortion == 2)
 	color = texcoord.x < 0.5 ? Left : Right;
+
+	if (BD_Options == 2 || Alinement_View)
+		color.rgb = dot(0.5-tex2D(BackBuffer,texcoord).rgb,0.333) / float3(1,tex2D(SamplerzBufferVR,texcoord).x,1);
 
 	return color.rgb;
 }

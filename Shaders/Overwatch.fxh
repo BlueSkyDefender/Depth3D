@@ -1,7 +1,7 @@
 ////----------------------------------------//
 ///SuperDepth3D Overwatch Automation Shader///
 //----------------------------------------////
-// Version 1.5
+// Version 1.6
 //---------------------------------------OVERWATCH---------------------------------------//
 // If you are reading this stop. Go away and never look back. From this point on if you  //
 // still think it's is worth looking at this..... Then no one can save you or your soul. //
@@ -54,6 +54,10 @@ static const float ZPD_Weapon_Boundary_Adjust = 0.0;    //ZPD Weapon Boundary Ad
 static const float Separation = 0.0;                    //ZPD Separation
 static const float Edge_Masking = 0.0;                  //Edge Masking Adjust
 static const float HUDX_D = 0.0;                        //Heads Up Display Cut Off Point
+static const float Null_X = 0.0;                        //
+static const float Null_Y = 0.0;                        //
+static const float Null_Z = 0.0;                        //
+static const float Check_Depth_Limit = 0.0;             //Check Depth Limit
 
 //Special Toggles Defaults
 static const int REF = 0;                               //Resident Evil Fix
@@ -673,7 +677,7 @@ static const int WPW = 0;                               //Weapon Profile Warning
 	#define DE_Z 0.475
 	#define DB_Z 0.375
 	#define RH 1
-  #define NF 1
+	#define NF 1
 #elif (App == 0x88004DC9 || App == 0x1DDA9341) //Strange Brigade DX12 & Vulkan
 	#define DA_X 0.0625
 	#define DA_Y 20.0
@@ -779,7 +783,7 @@ static const int WPW = 0;                               //Weapon Profile Warning
 	#define DA_W 1
 	#define DA_Y 47.5
 	#define DB_Y 5
-  #define DE_W 0.325
+	#define DE_W 0.325
 #elif (App == 0x6B58D180) //Outlaws
 	#define DA_X 0.14375
 	#define DA_Y 30
@@ -1165,6 +1169,7 @@ static const int WPW = 0;                               //Weapon Profile Warning
 	#define DB_Z 0.150
 	#define NW 1
 	#define RH 1
+	#define PE 1
 #elif (App == 0xEACB4D0D ) //Final Fantasy XV Windows Edition
 	#define DA_X 0.0375
 	#define DA_Y 30.0
@@ -1602,6 +1607,86 @@ static const int WPW = 0;                               //Weapon Profile Warning
 	#define DE_Z 0.375
 	#define PE 1
 	#define DA 1
+#elif (App == 0xD9691F81 ) //Destroy All Humans!
+	#define DA_W 1
+	#define DA_X 0.050
+	#define DA_Y 66.0
+	#define DB_Y 4
+	#define DE_X 1
+	#define DE_Y 0.500
+	#define DE_Z 0.375
+	#define DF_Y 0.025
+	#define NF 1
+	#define PE 1
+	#define RH 1
+#elif (App == 0x9C5C8E4D ) //INSIDE
+	#define DA_X 0.050
+	#define DB_Y 3
+	#define DE_X 1
+	#define DE_Y 0.500
+	#define DE_Z 0.375
+	#define DC 1
+	#define DC_X 0.6
+	#define DC_Y -0.4
+	#define DC_Z 0.087
+	#define DC_W -0.03
+	#define DB_X 1
+#elif (App == 0xABADF9C2 ) //Sonic Robo Blast 2
+	#define DA_X 0.1
+	#define DA_Y 27.5
+	#define DB_Z 0.155
+	#define DB_Y 2
+	#define DF_Y 0.1
+#elif (App == 0x3867F04A ) //Castle of Illusion
+	#define DA_X 0.1
+	#define DA_Y 40.0
+	#define DA_Z 0.0005
+	#define DB_Y 1
+	#define DF_Y 0.01
+	#define DA 1
+#elif (App == 0x76CD4369 ) //Resident Evil
+	#define DA_X 0.06875
+	#define DA_Y 24.0
+	#define DA_Z 0.00025
+	#define DB_Y 2
+	#define DE_X 2
+	#define DE_Y 0.500
+	#define DE_Z 0.375
+	#define DF_Y 0.024
+	#define DA 1
+	#define SP 1
+	#define DD_X 1.333
+	#define DD_Y 0.933
+	#define LBM 4
+	#define DS 1
+	#define RH 1
+#elif (App == 0x1AB66F8F ) //Dawn Of War III
+	#define DA_X 0.125
+	#define DA_Y 25.0
+	#define DB_Z 0.125
+	#define DA_Z 0.002
+	#define DB_Y 4
+	#define DE_X 2
+	#define DE_Y 0.200
+	#define DE_Z 0.375
+	#define DF_Y 0.250
+	#define DA 1
+#elif (App == 0xD86799B9 ) //Devil May Cry 5
+	#define DA_W 1
+	#define DA_X 0.0375
+	#define DA_Y 40.0
+	#define DB_Y 3
+	#define DE_X 1
+	#define DE_Y 0.300
+	#define DE_Z 0.350
+	#define DG_W 0.277 //0.5625 //I Think Erroring on the safe side is needed here.
+	#define DC 1
+	#define DC_X 0.025
+	#define DC_Y 0.025
+	#define DC_W -0.012
+	#define DF_Y 0.02375
+	#define PE 1
+	#define RH 1
 #else
 	#define NP 1 //No Profile
 #endif
@@ -1685,6 +1770,19 @@ static const int WPW = 0;                               //Weapon Profile Warning
 #ifndef DF_W
     #define DF_W HUDX_D
 #endif
+// X = [Null] Y = [Null] Z = [Null] W = [Check Depth Limit]
+#ifndef DG_X
+    #define DG_X Null_X
+#endif
+#ifndef DG_Y
+    #define DG_Y Null_Y
+#endif
+#ifndef DG_Z
+    #define DG_Z Null_Z
+#endif
+#ifndef DG_W
+	#define DG_W Check_Depth_Limit
+#endif
 
 //Special Toggles
 #ifndef RE
@@ -1724,7 +1822,7 @@ static const int WPW = 0;                               //Weapon Profile Warning
     #define LBC ALB //Auto Letter Box
 #endif
 #ifndef LBM
-    #define LBM LBD //Auto Letter Box
+    #define LBM LBD //Letter Box Depth
 #endif
 #ifndef DA
     #define DA DAA //Disable Anti-Aliasing
