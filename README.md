@@ -25,7 +25,7 @@ A reworked port of Directionally Localized Antialiasing Light. Fun simple AA sha
 A modded port of Normal Filter Anti Aliasing. With an interesting use case. Use this to assist SMAA or FXAA to catch all of them jaggies without blurring the screen.
 
 **Blooming HDR**<br />
-A Basic High Bloom low Perf Fake HDR shader that allows for automatic functions to help setting it up in-game. WIP
+A Basic High Bloom mid Perf HDR shader that allows for automatic functions to help setting it up in-game.
 
 And many more in the works.
 
