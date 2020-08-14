@@ -81,6 +81,7 @@ static const int DAA = 0;                               //Disable Anti-Aliasing
 static const int NWW = 0;                               //Network Warning
 static const int PEW = 0;                               //Disable Post Effect Warning
 static const int WPW = 0;                               //Weapon Profile Warning
+static const int FOV = 0;                               //Set Game FoV
 
 //Special Handling
 #if exists "LEGOBatman.exe"                             //Lego Batman
@@ -134,9 +135,13 @@ static const int WPW = 0;                               //Weapon Profile Warning
 	#define DF_X 0.300
 	#define NW 1
 #elif (App == 0x2D950D30 )	//Fallout 4
-	#define DA_Y 6.25
-	#define DB_Y 2
+	#define DA_X 0.0375
+	#define DA_Y 7.8
+	#define DB_Y 3
 	#define DB_W 6
+	#define DF_Y 0.012
+	#define FV 1
+	#define RH 1
 #elif (App == 0x3950D04E )	//Skyrim: SE
 	#define DA_Y 6.25
 	#define DB_Y 2
@@ -1262,7 +1267,7 @@ static const int WPW = 0;                               //Weapon Profile Warning
 	#define DA_X 0.0375
 	#define DA_Y 23.75
 	#define DA_Z 0.00025
-  #define DB_X 1
+	#define DB_X 1
 	#define DB_Y 4
 	#define NC 1
 #elif (App == 0x6DDCD106 ) //The Town of Light
@@ -1548,7 +1553,8 @@ static const int WPW = 0;                               //Weapon Profile Warning
 #elif (App == 0x62454263 ) //Red Dead Redemption 2
 	#define DA_W 1
 	#define DA_X 0.05
-	#define DA_Y 50.0
+	#define DF_Y 0.0475
+	#define DA_Y 47.5
 	#define DB_Y 4
 	#define DE_X 1
 	#define DE_Y 0.5
@@ -1687,6 +1693,47 @@ static const int WPW = 0;                               //Weapon Profile Warning
 	#define DF_Y 0.02375
 	#define PE 1
 	#define RH 1
+#elif (App == 0x5BC45541 ) //Contrast
+	#define DA_X 0.075
+	#define DA_Y 20.0
+	#define DB_Y 1
+	#define DE_X 1
+	#define DE_Y 0.500
+	#define DE_Z 0.375
+	#define DF_Y 0.051
+#elif (App == 0xEA61D579 ) //The Citadel 186
+    #define DA_W 1
+	#define DA_X 0.035
+	#define DA_Y 18.6
+	#define DB_Y 4
+	#define DF_Y 0.05625
+	#define SP 1
+	#define DD_Y 0.675
+	#define DD_W -0.4815
+	#define DB_W 72
+#elif (App == 0x5C0EBBE9 ) //A Plague Tale Innocence
+    #define DA_W 1
+	#define DA_X 0.05
+	#define DA_Y 33.75
+	#define DB_Y 3
+	#define DE_X 2
+	#define DE_Y 0.500
+	#define DE_Z 0.375
+	#define PE 1
+	#define RH 1
+	#define NF 1
+    #define DS 1
+#elif (App == 0xB2B11A3C ) //Catherine with a K
+	#define DA_X 0.05
+	#define DF_Y 0.0125
+	#define DA_Y 50.0
+	#define DB_Y 3
+	#define DE_X 1
+	#define DE_Y 0.500
+	#define DE_Z 0.375
+	#define DG_W 0.4375	
+	#define PE 1
+	#define DA 1
 #else
 	#define NP 1 //No Profile
 #endif
@@ -1836,6 +1883,9 @@ static const int WPW = 0;                               //Weapon Profile Warning
 #ifndef WW
     #define WW WPW //Weapon Profile Warning
 #endif
+#ifndef FV
+    #define FV FOV //Set Game FoV
+#endif
 //Weapon Settings
 #ifndef OW_WP
     #define OW_WP "WP Off\0Custom WP\0WP 0\0WP 1\0WP 2\0WP 3\0WP 4\0WP 5\0WP 6\0WP 7\0WP 8\0WP 9\0WP 10\0WP 11\0WP 12\0WP 13\0WP 14\0WP 15\0WP 16\0WP 17\0WP 18\0WP 19\0WP 20\0WP 21\0WP 22\0WP 23\0WP 24\0WP 25\0WP 26\0WP 27\0WP 28\0WP 29\0WP 30\0WP 31\0WP 32\0WP 33\0WP 34\0WP 35\0WP 36\0WP 37\0WP 38\0WP 39\0WP 40\0WP 41\0WP 42\0WP 43\0WP 44\0WP 45\0WP 46\0WP 47\0WP 48\0WP 49\0WP 50\0WP 51\0WP 52\0WP 53\0WP 54\0WP 55\0WP 56\0WP 57\0WP 58\0WP 59\0WP 60\0WP 61\0WP 62\0WP 63\0WP 64\0WP 65\0WP 66\0WP 67\0WP 68\0WP 69\0WP 70\0WP 71\0WP 72\0WP 73\0WP 74\0WP 75\0"
@@ -1856,7 +1906,7 @@ float3 Weapon_Profiles(float WP ,float3 Weapon_Adjust) //Tried Switch But, can't
     if (WP == 5)
         Value = float3(0.284,10.5,0.8725);    //WP 3  | BorderLands 3
     if (WP == 6)
-        Value = float3(0.253,28.75,98.5);     //WP 4  | Fallout 4 #2D950D30
+        Value = float3(0.253,39.0,98.125);    //WP 4  | Fallout 4 #2D950D30
     if (WP == 7)
         Value = float3(0.276,20.0,9.5625);    //WP 5  | Skyrim: SE #3950D04E
     if (WP == 8)
@@ -1988,7 +2038,7 @@ float3 Weapon_Profiles(float WP ,float3 Weapon_Adjust) //Tried Switch But, can't
     if (WP == 71)
         Value = float3(0,0,0);                //WP 69 | Game
     if (WP == 72)
-        Value = float3(0,0,0);                //WP 70 | Game
+        Value = float3(0.430,6.250,0.100);    //WP 70 | Game
     if (WP == 73)
         Value = float3(0.800,15.0,0.3);       //WP 71 | Sauerbraten 2
     if (WP == 74)

@@ -1,4 +1,4 @@
-﻿#SuperDepth3D 2.0.0
+﻿#SuperDepth3D 2.0.0+                                Search for the Game's Name
 _________________________________________________________________________________________________________________________________
 -=:[Settings have to be change and adjusted for diffrent Resolutions, screen size, and screen types]:=-
 =================================================================================================================================
@@ -10,6 +10,29 @@ Depth Buffer may hang for a sec if you move your view to fast. Hope ReShade 4.4 
 {.Hack//G.U.} - Used ReShade 3.0.8
 Once you install Reshade. Install this fix that allows for depth buffer access. This fix uses 3DMigoto to dissable a shader that was blocking acess to the depth buffer.
 http://www.mediafire.com/file/d5ep3qlsnbbbmvl/dotHack%20GU%20fix%20for%20Depth3D.zip
+
+{A Plague Tale: Innocence} - Used ReShade 4.7.0
+So we are going to remove some post effects that effect the 3D Image in a negitive way.
+
+Befor everything please launch the game and set your settings and exit the game. Then locate ENGINESETTINGS below.
+
+The Config file is located at.
+User\Documents\My Games\A Plague Tale Innocence\
+
+Open the ENGINESETTINGS file with a text editor and look for following options.
+
+DOF
+  Enabled 1 Change the value from 1 to 0
+MotionBlur
+  Enabled 1 Change the value from 1 to 0
+PostProcess
+  Fringe 1 Change the value from 1 to 0
+  LensDistortion 1 Change the value from 1 to 0
+  FilmGrain 1 Change the value from 1 to 0
+
+You can also change a few other things like Bloom and Vignette. But, it's up to you.
+
+Save the file. You may want to set to read only.
 
 {Alan Wake} - With Reshade versions up to 4.5.1 you would need the Xenos_2.3.2 Injector. ReShade 4.5.2 Work 
 Install game and before you launch it put -noblur in your set lunch options. -steam
@@ -1183,8 +1206,6 @@ Game Crashes if you leave r_drawvgui 0 when you die. Don't know how to fix this.
 {Shadow warrior(2013)}
  DM 5        2.5-5.0
 Depth Buffer only in DX9 so launch it in Shadow Warrior XP and turn on FSAAX2 in game.
-
-Try useing TriDef Power3D in DX11 Mode.
 
 {Yume Nikki -Dream Diary-} - ReShade 4.4
 ReShade Has a hard time picking the best Depth Buffer......... Sometimes you can't get the best Depth Buffer.

@@ -54,7 +54,7 @@
 	#define OW_WP "WP Off\0Custom WP\0"
 	static const int WSM = 0;
 	//Triggers
-	static const int RE = 0, NC = 0, RH = 0, NP = 0, ID = 0, SP = 0, DC = 0, HM = 0, DF = 0, NF = 0, DS = 0, LBC = 0, LBM = 0, DA = 0, NW = 0, PE = 0, WW = 0;
+	static const int RE = 0, NC = 0, RH = 0, NP = 0, ID = 0, SP = 0, DC = 0, HM = 0, DF = 0, NF = 0, DS = 0, LBC = 0, LBM = 0, DA = 0, NW = 0, PE = 0, WW = 0, FV = 0;
 	//Overwatch.fxh State
 	#define OS 1
 #endif
@@ -766,9 +766,9 @@ float4 CSB(float2 texcoords)
 float LBDetection()
 {   //0.120 0.879
 	if ( LetterBox_Masking >= 3 )
-		return CSB(float2(0.1,0.5)) == 0 && CSB(float2(0.9,0.5)) == 0 && CSB(float2(0.5,0.5)) > 0 ? 1 : 0;
-	else
-		return CSB(float2(0.5,0.1)) == 0 && CSB(float2(0.9,0.9)) == 0 && CSB(float2(0.5,0.5)) > 0 ? 1 : 0;
+		return (CSB(float2(0.1,0.5)) == 0) && (CSB(float2(0.9,0.5)) == 0) && (CSB(float2(0.5,0.5)) > 0) ? 1 : 0;
+	else     //Center_Top                 //Bottom_Left                //Center
+		return (CSB(float2(0.5,0.1)) == 0) && (CSB(float2(0.1,0.9)) == 0) && (CSB(float2(0.5,0.5)) > 0) ? 1 : 0;
 }
 #endif
 /////////////////////////////////////////////////////////////Cursor///////////////////////////////////////////////////////////////////////////
@@ -1204,7 +1204,8 @@ float DB( float2 texcoord)
 		DM.y = texcoord.x > 0.125 && texcoord.x < 0.875 ? storeDM : 0.0125;//DM.y = texcoord.x > 0.051 && texcoord.x < 0.949 ? storeDM : 0.0125;
 	else
 		DM.y = texcoord.y > 0.120 && texcoord.y < 0.879 ? storeDM : 0.0125;
-	#if LetterBox_Masking
+	
+	#if LBM || LetterBox_Masking
 		if((LBM == 2 || LBM == 4 || LetterBox_Masking == 2 || LetterBox_Masking == 4) && !LBDetection())
 			DM.y = storeDM;
 	#endif
@@ -1599,10 +1600,10 @@ float drawChar( float Char, float2 pos, float2 size, float2 TC )
 float3 Out(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Target
 {
 	float2 TC = float2(texcoord.x,1-texcoord.y);
-	float Text_Timer = 25000, BT = smoothstep(0,1,sin(timer*(3.75/1000))), Size = 1.1, Depth3D, Read_Help, Post, Effect, NoPro, NotCom, Mod, Needs, Net, Over, Set, AA, Not, No, Help, Fix, Need, State, SetAA, SetWP, Work;
+	float Text_Timer = 25000, BT = smoothstep(0,1,sin(timer*(3.75/1000))), Size = 1.1, Depth3D, Read_Help, SetFoV, FoV,Post, Effect, NoPro, NotCom, Mod, Needs, Net, Over, Set, AA, Not, No, Help, Fix, Need, State, SetAA, SetWP, Work;
 	float3 Color = PS_calcLR(texcoord).rgb;
 
-	if(RH || NC || NP || NF || PE || DS || OS || DA || NW || WW)
+	if(RH || NC || NP || NF || PE || DS || OS || DA || NW || WW || FV)
 		Text_Timer = 30000;
 
 	[branch] if(timer <= Text_Timer || Text_Info)
@@ -1750,6 +1751,15 @@ float3 Out(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Targe
 		SetWP += drawChar( CH_I, charPos, charSize, TC); charPos.x += .01 * Size;
 		SetWP += drawChar( CH_L, charPos, charSize, TC); charPos.x += .01 * Size;
 		SetWP += drawChar( CH_E, charPos, charSize, TC);
+		//Set FoV
+		charPos = float2( 0.009, 0.885);
+		SetFoV += drawChar( CH_S, charPos, charSize, TC); charPos.x += .01 * Size;
+		SetFoV += drawChar( CH_E, charPos, charSize, TC); charPos.x += .01 * Size;
+		SetFoV += drawChar( CH_T, charPos, charSize, TC); charPos.x += .01 * Size;
+		SetFoV += drawChar( CH_BLNK, charPos, charSize, TC); charPos.x += .01 * Size;
+		SetFoV += drawChar( CH_F, charPos, charSize, TC); charPos.x += .01 * Size;
+		SetFoV += drawChar( CH_O, charPos, charSize, TC); charPos.x += .01 * Size;
+		SetFoV += drawChar( CH_V, charPos, charSize, TC);
 		//Read Help
 		charPos = float2( 0.894, 0.9725);
 		Read_Help += drawChar( CH_R, charPos, charSize, TC); charPos.x += .01 * Size;
@@ -1856,6 +1866,8 @@ float3 Out(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Targe
 			Set = SetWP;
 		if(DA)
 			AA = SetAA;
+		if(FV)
+			FoV = SetFoV;
 		//Blinking Text Warnings
 		if(NP)
 			No = NoPro * BT;
@@ -1866,7 +1878,7 @@ float3 Out(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Targe
 		if(OS)
 			Over = State * BT;
 		//Website
-		return Depth3D+Help+Post+No+Not+Net+Fix+Need+Over+AA+Set ? (1-texcoord.y*50.0+48.85)*texcoord.y-0.500: Color;
+		return Depth3D+Help+Post+No+Not+Net+Fix+Need+Over+AA+Set+FoV ? (1-texcoord.y*50.0+48.85)*texcoord.y-0.500: Color;
 	}
 	else
 		return Color;
