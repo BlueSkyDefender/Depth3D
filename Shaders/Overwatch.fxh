@@ -1553,9 +1553,9 @@ static const int FOV = 0;                               //Set Game FoV
 #elif (App == 0x62454263 ) //Red Dead Redemption 2
 	#define DA_W 1
 	#define DA_X 0.05
-	#define DF_Y 0.0475
-	#define DA_Y 47.5
-	#define DB_Y 4
+	#define DF_Y 0.11875
+	#define DA_Y 35.5
+	#define DB_Y 2
 	#define DE_X 1
 	#define DE_Y 0.5
 	#define DE_Z 0.375
@@ -2038,7 +2038,7 @@ float3 Weapon_Profiles(float WP ,float3 Weapon_Adjust) //Tried Switch But, can't
     if (WP == 71)
         Value = float3(0,0,0);                //WP 69 | Game
     if (WP == 72)
-        Value = float3(0.430,6.250,0.100);    //WP 70 | Game
+        Value = float3(0.430,6.250,0.100);    //WP 70 | The Citadel 186
     if (WP == 73)
         Value = float3(0.800,15.0,0.3);       //WP 71 | Sauerbraten 2
     if (WP == 74)
