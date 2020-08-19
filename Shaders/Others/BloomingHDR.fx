@@ -754,13 +754,13 @@ float4 HDROut(float2 texcoords : TEXCOORD0)
 		Color = TimothyTonemapper(Color,Ex);
 	else if (Tonemappers == 1)
 		Color = ACESFitted(Color,Ex);
-
+  //removed for now because of bug.
 	#if Flare_A
-		Color += tex2D(SamplerFlare, texcoords).rgb;
+		//Color += tex2D(SamplerFlare, texcoords).rgb;
 	#endif
 
 	#if Flare_B
-		Color += tex2D(SamplerLensFlare, texcoords).rgb;
+		//Color += tex2D(SamplerLensFlare, texcoords).rgb;
 	#endif
 
 	#if HDR_Toggle
