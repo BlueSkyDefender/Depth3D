@@ -1,7 +1,7 @@
 ////----------------------------------------//
 ///SuperDepth3D Overwatch Automation Shader///
 //----------------------------------------////
-// Version 1.6
+// Version 1.7
 //---------------------------------------OVERWATCH---------------------------------------//
 // If you are reading this stop. Go away and never look back. From this point on if you  //
 // still think it's is worth looking at this..... Then no one can save you or your soul. //
@@ -120,7 +120,11 @@ static const int FOV = 0;                               //Set Game FoV
 #endif
 
 //Game Hashes//
-#if (App == 0xC753DADB )	//ES: Oblivion
+#if (App == 0xC19572DDF || App == 0xFBEE8027 ) //PCSX2 | CEMU
+	#define RH 1
+	#define SP 2
+	#define HM 1
+#elif (App == 0xC753DADB )	//ES: Oblivion
 	#define DB_W 2
 	#define DB_Y 3
 #elif (App == 0x7B81CCAB || App == 0xFB9A99AB )	//BorderLands 2 & Pre-Sequel
@@ -323,8 +327,9 @@ static const int FOV = 0;                               //Set Game FoV
 	#define DA_X 0.002
 	#define DA_Y 250.0
 #elif (App == 0x3FDD232A ) //FEZ
-	#define DA_X 0
-	#define DA_Z 0.9625
+	#define DA_X 0.2125
+	#define DB_Y 4
+	#define DA_Z -0.901
 #elif (App == 0x619964A3 ) //What Remains of Edith Finch
 	#define DA_Y 50.0
 	#define DA_Z 0.000025
@@ -622,11 +627,15 @@ static const int FOV = 0;                               //Set Game FoV
 	#define DA_X 0.035
 	#define DB_Y 5
 	#define RH 1
-#elif (App == 0x2F0BD376 ) //Minecraft
-	#define DA_Y 17.50
+#elif (App == 0x2F0BD376 ) //Minecraft / BuildGDX
+	#define DA_Y 22.5
 	#define DA_X 0.0625
 	#define DB_W 25
 	#define DB_Y 3
+	#define DE_X 4
+	#define DE_Y 0.500
+	#define DE_Z 0.375
+	#define DF_Y 0.005
 	#define RH 1
 #elif (App == 0x84D341E3 ) //Little Nightmares
 	#define DA_W 1
@@ -724,7 +733,7 @@ static const int FOV = 0;                               //Set Game FoV
 #elif (App == 0xA640659C) //MegaMan 2.5D in 3D
 	#define DA_X 0.150
 	#define DA_Y 8.75
-	#define DA_Z 1005.0
+	#define DA_Z -1005.0
 	#define DE_X 1
 	#define DE_Y 0.275
 	#define DE_Z 0.375
@@ -989,6 +998,7 @@ static const int FOV = 0;                               //Set Game FoV
 	#define DA_Y 250.0
 	#define DA_X 0.075
 	#define DB_Y 4
+  #define DS 1
 #elif (App == 0x8F615A99 ) //Frostpunk
 	#define DA_Y 9.375
 	#define DA_X 0.250
@@ -1712,7 +1722,7 @@ static const int FOV = 0;                               //Set Game FoV
 	#define DD_W -0.4815
 	#define DB_W 72
 #elif (App == 0x5C0EBBE9 ) //A Plague Tale Innocence
-    #define DA_W 1
+	#define DA_W 1
 	#define DA_X 0.05
 	#define DA_Y 33.75
 	#define DB_Y 3
@@ -1722,7 +1732,7 @@ static const int FOV = 0;                               //Set Game FoV
 	#define PE 1
 	#define RH 1
 	#define NF 1
-    #define DS 1
+	#define DS 1
 #elif (App == 0xB2B11A3C ) //Catherine with a K
 	#define DA_X 0.05
 	#define DF_Y 0.0125
@@ -1731,8 +1741,18 @@ static const int FOV = 0;                               //Set Game FoV
 	#define DE_X 1
 	#define DE_Y 0.500
 	#define DE_Z 0.375
-	#define DG_W 0.4375	
+	#define DG_W 0.4375
 	#define PE 1
+	#define DA 1
+#elif (App == 0x7ABE98F0 ) //Samurai Jack
+	#define DA_W 1
+	#define DA_X 0.1375
+	#define DF_Y 0.0125
+	#define DA_Y 20.0
+	#define DB_Y 5
+	#define DE_X 2
+	#define DE_Y 0.500
+	#define DE_Z 0.375
 	#define DA 1
 #else
 	#define NP 1 //No Profile

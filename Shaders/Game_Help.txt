@@ -1,7 +1,7 @@
 ﻿#SuperDepth3D 2.0.0+                                Search for the Game's Name
 _________________________________________________________________________________________________________________________________
 -=:[Settings have to be change and adjusted for diffrent Resolutions, screen size, and screen types]:=-
-=================================================================================================================================
+.................................................................................................................................
 Read Help Section
 =================================================================================================================================
 {35MM} - Used ReShade 4.0+
@@ -34,20 +34,9 @@ You can also change a few other things like Bloom and Vignette. But, it's up to 
 
 Save the file. You may want to set to read only.
 
-{Alan Wake} - With Reshade versions up to 4.5.1 you would need the Xenos_2.3.2 Injector. ReShade 4.5.2 Work 
+{Alan Wake} - With Reshade versions up to 4.5.1 you would need the Xenos_2.3.2 Injector. ReShade 4.7.0+ Works with out it.
 Install game and before you launch it put -noblur in your set lunch options. -steam
 Set you settings in game and notice the locked MSAA.Just leave it at 2x, Save your settings and turn off the game.
-
-Download https://github.com/DarthTon/Xenos/releases and the latest version of reshade.
-
-Create a folder and extract Xenos 2.3.2 you only really need the Xenos.exe 32 bit program and also extract ReShade 32bit d3d9.dll in to the same folder
-as Xenos. Place SuperDepth3D with Overwatch.fxh in this folder and start Xenos.exe.
-
-Click on Manual Launch radio button.
-Click on Add and select the d3d9.dll.
-Click on Select and find the AlanWake.exe
-
-Now click Inject. Then launch your game like normal.
 
 I suggest you use alpha mode in SuperDepth3D for this game and Alan Wake's American Nightmare.
 
@@ -192,6 +181,20 @@ You will lose a lot of texture detail. I do not recommend playing like this.
 
 Now For Mods you will have click on the Bat files provided.
 //
+
+{BuildGDX}  - Used ReShade 4.7.0 + Xenos to inject.
+Download https://github.com/DarthTon/Xenos/releases and the latest version of reshade.
+
+Create a folder and extract Xenos 2.3.2 you only really need the Xenos.exe 64 bit program and also extract ReShade 64bit ReShade64.dll in to the same folder
+as Xenos. Place SuperDepth3D with Overwatch.fxh in this folder and start Xenos.exe.
+
+Click on Manual Launch radio button.
+Click on Add and select the ReShade64.dll.
+Click on Select and find the BuildGDX.exe
+
+Now click Inject. Then launch your game like normal.
+
+BloodGDX... Set Depth Offset to 0.990 ot 1.000 you can also increase Seperation 0.005 to 0.105
 
 {Call of Duty: Modern Warfare 2019} - ReShade 4.4.2 [Some people had some luck with ReShade 4.2.]
 First of all please set the game's "Shadow Map Resolution to [Normal <>]." Also Make sure you turn off DOF and Motion Blur.
@@ -488,23 +491,19 @@ stuck with a low resolution depth buffer.
 {Hedon} - ReShade None
 This game has build in 3D Options.
 
-GZDoom Does not draw Sprites in the Depth Buffer So you have to use in game 3D options.
+GZ Does not draw Sprites in the Depth Buffer So you have to use in game 3D options.
 Adjust them in the Options. Then fine tune them with. 
 
 vr_mode "#"
 vr_swap false
+//following don't to seem to work anymore.
 vr_weapon_height 0.0
 vr_weapondist 0.6
 vr_sprite_scale 0.4 //weapon size
 vr_view_yoffset 4.0
 
 Stereo Example & values to try.
-vr_ipd        "0.3" "0.25" "0.2" "0.15" "0.1"
-vr_screendist "1.5" "1.25" "1.0" "0.75" "0.5"
-top formula is IPD * 5 = SD you can try  4.5 or 5.5 instead of 5.
-Ignore this if your doing Side by Side Narrow.
-
-This game has a option for Side by Side Narrow I suggest you use this and set your Screen Distance to 0.5 and IPD 0.1-0.2
+For More information look at the mini guide below for GZDOOM.
 
 {HomeFront the Revolution} - Thank you zig11727
 Path to Install E:\Steam\SteamApps\common\Homefront_The_Revolution\Bin64
@@ -671,13 +670,13 @@ Borderless Full Screen will not work Window mode will not Work.
 So if you want to Play at a lower resolution, then set your windows resolution lower then run the game in full screen and set your scaling to 100%. 
 Anything Lower or Higher then 100% will not work.
 
-{Minecraft} -Used Reshade 4.3 with Network Check disabled. 
+{Minecraft} - Used Reshade 4.3/4.4 with Network Check disabled. 
 Don't Ask my for newtwork check disabled builds of ReShade.
 
 I used Minecraft with Optifine https://optifine.net/downloads
 In game go to Options > Video Settings > Shaders  Make sure you select Internal or the shader pack you want. I didn't test anything past Internal.
 
-I recommend you use View Mode Alpha + Perfromance Mode and Performance Mode in ReShade as well.
+I recommend you use View Mode Alpha + Performance Mode and Performance Mode in ReShade as well.
 
 {Monster Hunter World}
 Main settings for this game need to be set as follows. 
@@ -811,22 +810,6 @@ Path to install \Steam\steamapps\common\Prey\Binaries\Danielle\x64\Release
 Object Detail Setting seems to change the Near Depth by a small amount. When you have Object Detail set to Very High.
 
 I also notice a problem with starting the game with reshade 3.0.7. I used reshade 3.0.4.
-
-{Quake} - DarkPlaces Quake 1 mod
-For geometry stereo open the console and use the commands listed here.
-r_stereo_horizontal "1" SbS
-r_stereo_vertical "1" TnB
-Now after that to adjust the viewmodle use
-cl_viewmodel_scale "2" 1-3
-For separation of eyes in the world (try negative values too)
-r_stereo_separation	"4"
-
-Also please use DarkPlaces "build 20140513" from here. https://icculus.org/twilight/darkplaces/download.html
-
-{Quake Epsilon} - DarkPlaces Quake 1 mod
-Install Reshade as OpenGl or use above setting for geometry 3D.
-
-Also please use DarkPlaces "build 20140513" from here. https://icculus.org/twilight/darkplaces/download.html
 
 {Quake 4}
 Use Reshade 3.0.4 and good luck. BTW it really does work just hard to enter any settings.....
@@ -1180,9 +1163,54 @@ ExtendedDepthBufferDetection=1
 DepthBufferClearingNumber=0
 
 Game was tested with Max setting.
-
--=Problem Games=-
 _________________________________________________________________________________________________________________________________
+-=Native 3D Games=-
+=================================================================================================================================
+{GZDoom} No ReShade 3D
+In console Type in "VR_MODE 1-14" and you can set fov with "FOV #"
+Notable Options
+VR_MODE 12 Line Interlaced
+VR_MODE 11 Top and Bottom
+VR_MODE 4 Side By Side Full
+VR_MODE 3 Side By Side Half
+VR_MODE 0 Off 
+VR_IPD 0.62
+VR_SCREENDIST 0.8
+VR_HUNITS_PER_METER 41
+
+Setting I use now.
+VR_IPD 0.100-0.150
+VR_SCREENDIST 0.525-0.550
+VR_HUNITS_PER_METER 40-50
+//Now I was not able to set the setting here
+vr_weapon_height 0.0
+vr_weapondist 0.6
+vr_sprite_scale 0.4 //weapon size
+vr_view_yoffset 4.0
+//cvarlist for your game settings
+Other Usefull things for this Game is
+GL_LENS 0 or false
+gl_multisample 0
+gl_ssao 0 < If you want to use ReShade Depth with missing sprites.
+
+{Quake} - DarkPlaces Quake 1 mod
+For geometry stereo open the console and use the commands listed here.
+r_stereo_horizontal "1" SbS
+r_stereo_vertical "1" TnB
+Now after that to adjust the viewmodle use
+cl_viewmodel_scale "2" 1-3
+For separation of eyes in the world (try negative values too)
+r_stereo_separation	"4"
+
+Also please use DarkPlaces "build 20140513" from here. https://icculus.org/twilight/darkplaces/download.html
+
+{Quake Epsilon} - DarkPlaces Quake 1 mod
+Install Reshade as OpenGl or use above setting for geometry 3D.
+
+Also please use DarkPlaces "build 20140513" from here. https://icculus.org/twilight/darkplaces/download.html
+_________________________________________________________________________________________________________________________________
+-=Problem Games=-
+=================================================================================================================================
 {Dead Space} - retested 10/21/2019
 Games Depth Buffer does not show till after the elevator part at the start. Depth Buffer also goes away when interacting with some objects and when you get video feeds.
 I suggest useing TriDef. For this game.
@@ -1223,12 +1251,9 @@ Here is a quick and dirty game list of working Depth Maps. They are only suggest
 User Settings
 https://docs.google.com/spreadsheets/d/18ujpY-97V_YuXpQUh-7bOomE4D5nUGwp3XppfU_0N2k/edit?usp=sharing <----- I don't maintain this.
 
-Also Keep in mind if you don't like the depth map I made. You can always adjust your own and not use Overwatch.fxh
-
 Special Versions of Reshade
 
 My shader was also tested with SpecialK moded Reshade.
 As for a guide to use SpecialK Follow this link.
 https://steamcommunity.com/sharedfiles/filedetails/?id=933337066
-
-.................................................................................................................................
+_________________________________________________________________________________________________________________________________

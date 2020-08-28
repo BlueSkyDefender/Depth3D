@@ -2,7 +2,7 @@
 ///**SuperDepth3D_VR**///
 //-------------------////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//* Depth Map Based 3D post-process shader v2.3.3
+//* Depth Map Based 3D post-process shader v2.3.4
 //* For Reshade 3.0+
 //* ---------------------------------
 //*
@@ -278,7 +278,7 @@ uniform float Depth_Map_Adjust <
 
 uniform float Offset <
 	ui_type = "drag";
-	ui_min = 0.0; ui_max = 1.0;
+	ui_min = -1.0; ui_max = 1.0;
 	ui_label = " Depth Map Offset";
 	ui_tooltip = "Depth Map Offset is for non conforming ZBuffer.\n"
 				 "It,s rare if you need to use this in any game.\n"
@@ -313,7 +313,7 @@ uniform bool Depth_Map_Flip <
 	ui_tooltip = "Flip the depth map if it is upside down.";
 	ui_category = "Depth Map";
 > = DB_X;
-#if DB_Size_Postion
+#if DB_Size_Postion || SP == 2
 uniform float2 Horizontal_and_Vertical <
 	ui_type = "drag";
 	ui_min = 0.0; ui_max = 2;
@@ -868,12 +868,12 @@ float Depth(float2 texcoord)
 	if (Depth_Map_Flip)
 		texcoord.y =  1 - texcoord.y;
 	//Conversions to linear space.....
-	float zBuffer = tex2Dlod(DepthBuffer, float4(texcoord,0,0)).x, Far = 1., Near = 0.125/DMA(); //Near & Far Adjustment
+	float zBuffer = tex2Dlod(DepthBuffer, float4(texcoord,0,0)).x, Far = 1.0, Near = 0.125/DMA(); //Near & Far Adjustment
+	//Man Why can't depth buffers Just Be Normal
+	float2 C = float2( Far / Near, 1.0 - Far / Near ), Z = Offset < 0 ? min( 1.0, zBuffer * ( 1.0 + abs(Offset) ) ) : float2( zBuffer, 1.0 - zBuffer );
 
-	float2 C = float2( Far / Near, 1. - Far / Near ), Offsets = float2(1 + Offset,1 - Offset), Z = float2( zBuffer, 1-zBuffer );
-
-	if (Offset > 0)
-		Z = min( 1., float2( Z.x * Offsets.x , Z.y / Offsets.y  ));
+	if(Offset > 0 || Offset < 0)
+		Z = Offset < 0 ? float2( Z.x, 1.0 - Z.y ) : min( 1.0, float2( Z.x * (1.0 + Offset) , Z.y / (1.0 - Offset) ) );
 	//MAD - RCP
 	if (Depth_Map == 0) //DM0 Normal
 		zBuffer = rcp(Z.x * C.y + C.x);
@@ -940,7 +940,7 @@ float4 PrepDepth(float2 texcoord)
 	}
 
 	R = DM.x; //Mix Depth
-	G = DM.y > smoothstep(0,2.5,DM.w); //Weapon Mask
+	G = DM.y > saturate(smoothstep(0,2.5,DM.w)); //Weapon Mask
 	B = DM.z; //Weapon Hand
 	A = ZPD_Boundary == 3 || ZPD_Boundary == 4 ? max( G, R) : R; //Grid Depth
 
@@ -1204,7 +1204,7 @@ float DB( float2 texcoord)
 		DM.y = texcoord.x > 0.125 && texcoord.x < 0.875 ? storeDM : 0.0125;//DM.y = texcoord.x > 0.051 && texcoord.x < 0.949 ? storeDM : 0.0125;
 	else
 		DM.y = texcoord.y > 0.120 && texcoord.y < 0.879 ? storeDM : 0.0125;
-	
+
 	#if LBM || LetterBox_Masking
 		if((LBM == 2 || LBM == 4 || LetterBox_Masking == 2 || LetterBox_Masking == 4) && !LBDetection())
 			DM.y = storeDM;
