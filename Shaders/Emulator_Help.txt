@@ -1,14 +1,25 @@
-#SuperDepth3D 2.3.4+                                Search for the Game's Name for Basic Settings
+#SuperDepth3D 2.3.4+                      Search for the Game's Name for Basic Settings
 _____________________________________________________________________________________________________________________________________________
              -=:[Settings have to be change and adjusted for diffrent Resolutions, screen size, and screen types]:=-
 ---------------------------------------------------------------------------------------------------------------------------------------------
-[Emulators & Settings]
+[CI] = Compatablity Info [MI] = Major Issues [NC] = Not Compatible [SI] = Some Issues                           
 .............................................................................................................................................
-[PCSX2]
-[Game List]          [Depth] [Adjust] [ZPD & Sepration] [NearDepth] [Offset] [Flip] [Balance & Boundary] [HUD X] [Horz & Vert] [H&V Position]
-Fatal Frame            DM0    200.0    0.050                0.0     -20000.0  Yes       3      Normal     0.500   1.000,0.438   0.000,-1.282
-                         
-[CEMU]                   
-[Game List]          [Depth] [Adjust] [ZPD & Sepration] [NearDepth] [Offset] [Flip] [Balance & Boundary] [HUD X] [Horz & Vert] [H&V Position]
-Legend of Zelda: BOTW  DM0     30.0    0.125  0.0625       0.075     0.000    No        3      Normal     0.000   0.000,0.000   0.000,0.000
+[PCSX2] 
+=============================================================================================================================================
+{Fatal Frame} - Can't See Ghost fix and other issue listed here https://wiki.pcsx2.net/Fatal_Frame
+[CI] [Depth] [Adjust] [ZPD & Sepration] [NearDepth] [Offset] [Flip] [Balance & Boundary] [HUD X] [Horz & Vert] [H&V Position] [View Mode]
+ SI    DM1    200.0    0.050                0.0     -20000.0  Yes       3      Normal     0.500   1.000,0.438   0.000,-1.282    Normal
 
+{Silent Hill: Origins} - Open SuperDepth3D and enable Legacy Mode on line 64. Is needed to mask MOST heavy ghosting. Enable cheats in PCSX2 and
+place the noise patch in cheats folder. Then in game look for Extra Options. http://www.mediafire.com/file/xqoe9ccad2bzget/SilentHillOrigins.zip 
+https://wiki.pcsx2.net/Silent_Hill:_Origins
+[CI] [Depth] [Adjust] [ZPD & Sepration] [NearDepth] [Offset] [Flip] [Balance & Boundary] [HUD X] [Horz & Vert] [H&V Position] [View Mode]
+ MI    DM1    125.0    0.050                0.0     -20000.0  Yes       3      Normal     1.650   0.800,0.876   0.249,-0.144     Alpha
+                                                                                                  1.000,0.871   0.000,-0.145                 
+[CEMU]
+=============================================================================================================================================                   
+{The Legend of Zelda™: Breath of the Wild}
+
+[CI] [Depth] [Adjust] [ZPD & Sepration] [NearDepth] [Offset] [Flip] [Balance & Boundary] [HUD X] [Horz & Vert] [H&V Position] [View Mode]
+ SI    DM0     30.0    0.125  0.0625       0.075     0.000    No        3      Normal     0.000   0.000,0.000   0.000,0.000    You Pick
+_____________________________________________________________________________________________________________________________________________
