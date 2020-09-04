@@ -1,7 +1,7 @@
 ////----------------------------------------//
 ///SuperDepth3D Overwatch Automation Shader///
 //----------------------------------------////
-// Version 1.7
+// Version 1.8
 //---------------------------------------OVERWATCH---------------------------------------//
 // If you are reading this stop. Go away and never look back. From this point on if you  //
 // still think it's is worth looking at this..... Then no one can save you or your soul. //
@@ -71,6 +71,7 @@ static const int LBD = 0;                               //Letter Box Depth
 
 //Special Toggles Generic
 static const int RHW = 0;                               //Read Help Warning
+static const int EDW = 0;                               //Emulator Detected Warning
 
 //Special Toggles Warnings
 static const int NCW = 0;                               //Not Compatible Warning
@@ -124,6 +125,8 @@ static const int FOV = 0;                               //Set Game FoV
 	#define RH 1
 	#define SP 2
 	#define HM 1
+	#define DS 1
+	#define ED 1
 #elif (App == 0xC753DADB )	//ES: Oblivion
 	#define DB_W 2
 	#define DB_Y 3
@@ -1754,6 +1757,44 @@ static const int FOV = 0;                               //Set Game FoV
 	#define DE_Y 0.500
 	#define DE_Z 0.375
 	#define DA 1
+#elif (App == 0xC4B4435F ) //Night Cry
+	#define DA_X 0.06  //ZPD
+	#define DF_Y 0.025 //Separation
+	#define DA_Y 50.0  //Depth
+	#define DB_X 1
+	#define DB_Y 3
+	#define DE_X 1
+	#define DE_Y 0.500
+	#define DE_Z 0.375
+#elif (App == 0x49F7B9C0 ) //Control DX12
+	#define DA_X 0.05625
+	#define DF_Y 0.05625
+	#define DA_Y 18.75
+	#define DB_Y 3
+	#define DE_X 1
+	#define DE_Y 0.500
+	#define DE_Z 0.375
+	#define PE 1
+	#define DA 1
+#elif (App == 0x5A7B540A ) //We Where Here Too
+	#define DA_W 1
+	#define DB_X 1
+	#define DA_X 0.05625
+	#define DA_Y 42.5
+	#define DB_Y 1
+	#define NW 1
+#elif (App == 0x75930301 ) //Void Bastards
+	#define DA_W 1
+	#define DB_X 1
+	#define DF_Y 0.02625
+	#define DA_X 0.0875
+	#define DA_Y 56.25
+	#define DB_Y 2
+	#define DE_X 1
+	#define DE_Y 0.625
+	#define DE_Z 0.375
+	#define DS 1
+	#define RH 1
 #else
 	#define NP 1 //No Profile
 #endif
@@ -1860,6 +1901,9 @@ static const int FOV = 0;                               //Set Game FoV
 #endif
 #ifndef RH
     #define RH RHW //Read Help Warning
+#endif
+#ifndef ED
+    #define ED EDW //Emulator Detected Warning
 #endif
 #ifndef NP
     #define NP NPW //No Profile Warning

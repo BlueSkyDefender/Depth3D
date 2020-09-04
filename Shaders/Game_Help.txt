@@ -1102,6 +1102,10 @@ This is done so you don't have to scale the depth buffer your self.
 
 You can download DGVoodoo2 here http://dege.freeweb.hu/dgVoodoo2/dgVoodoo2.html
 
+{Void Bastards} - ReShade 4.7.0
+Issues with MSAA and Weapon Hand not Showing up in the Depth Buffer.
+You have to set the game to the lowest graphics settings to disable MSAA.
+
 {Unreal Gold}
 Use v227 patch. Use the DX9 render. Install Rehsade 3.0 to System folder select DX9.
 In Unreal Set your res and the go to advance settings.
