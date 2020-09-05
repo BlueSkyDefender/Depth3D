@@ -195,7 +195,7 @@ static const int FOV = 0;                               //Set Game FoV
 	#define DA_Y 15.0
 	#define DB_Y 2
 	#define DB_W 17
-#elif (App == 0x37BD797D )	//Quake 2 XP
+#elif (App == 0x34F4B6C )	//Quake 2 XP
 	#define DB_Y 2
 	#define DB_W 18
 #elif (App == 0xED7B83DE )	//Quake 4 #ED7B83DE
@@ -1715,7 +1715,7 @@ static const int FOV = 0;                               //Set Game FoV
 	#define DE_Z 0.375
 	#define DF_Y 0.051
 #elif (App == 0xEA61D579 ) //The Citadel 186
-    #define DA_W 1
+	#define DA_W 1
 	#define DA_X 0.035
 	#define DA_Y 18.6
 	#define DB_Y 4
@@ -1782,6 +1782,20 @@ static const int FOV = 0;                               //Set Game FoV
 	#define DA_X 0.05625
 	#define DA_Y 42.5
 	#define DB_Y 1
+	#define NW 1
+#elif (App == 0x6AB553A ) //We Where here Together
+	#define DA_W 1
+	#define DB_X 1
+	#define DF_Y 0.05625
+	#define DA_X 0.05625
+	#define DA_Y 56.25
+	#define DB_Y 3
+	#define DE_X 3
+	#define DE_Y 0.500
+	#define DE_Z 0.375
+	#define DB_W 30
+	#define FV 1
+	#define DA 1
 	#define NW 1
 #elif (App == 0x75930301 ) //Void Bastards
 	#define DA_W 1
@@ -2018,7 +2032,7 @@ float3 Weapon_Profiles(float WP ,float3 Weapon_Adjust) //Tried Switch But, can't
     if (WP == 29)
         Value = float3(0.266,30.0,14.0);      //WP 27 | Wrath
     if (WP == 30)
-        Value = float3(0,0,0);                //WP 28 | Game
+        Value = float3(3.625,20.0,0);         //WP 28 | We Where Here Together
     if (WP == 31)
         Value = float3(0.7,9.0,2.3625);       //WP 29 | Return to Castle Wolfenstine
     if (WP == 32)
