@@ -811,6 +811,20 @@ Object Detail Setting seems to change the Near Depth by a small amount. When you
 
 I also notice a problem with starting the game with reshade 3.0.7. I used reshade 3.0.4.
 
+{Quake 2 XP} - ReShade 4.7.0 + Xenos_2.3.2 Injector
+Install game and make sure in launches in fullscreen and native resolution.
+
+Download https://github.com/DarthTon/Xenos/releases and the latest version of reshade.
+
+Create a folder and extract Xenos 2.3.2 you only really need the Xenos.exe 32 bit program and also extract ReShade 32bit opengl32.dll/ReShade32.dll in to the same folder
+as Xenos. Place SuperDepth3D with Overwatch.fxh in this folder and start Xenos.exe.
+
+Click on Manual Launch radio button.
+Click on Add and select the opengl32.dll/ReShade32.dll
+Click on Select and find the quake2xp.exe
+
+Now click Inject. Then launch your game like normal.
+
 {Quake 4}
 Use Reshade 3.0.4 and good luck. BTW it really does work just hard to enter any settings.....
 
