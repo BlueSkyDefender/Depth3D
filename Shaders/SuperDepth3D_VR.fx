@@ -12,7 +12,7 @@
 //* Also had to rework Philippe David http://graphics.cs.brown.edu/games/SteepParallax/index.html code to work with ReShade. This is used for the parallax effect.
 //* This idea was taken from this shader here located at https://github.com/Fubaxiusz/fubax-shaders/blob/596d06958e156d59ab6cd8717db5f442e95b2e6b/Shaders/VR.fx#L395
 //* It's also based on Philippe David Steep Parallax mapping code.
-//* Text rendering code copied/pasted from https://www.shadertoy.com/view/4dtGD2 by Hamneggs
+//* Text rendering code Ported from https://www.shadertoy.com/view/4dtGD2 by Hamneggs for ReShadeFX
 //* If I missed any information please contact me so I can make corrections.
 //*
 //* LICENSE
@@ -54,7 +54,7 @@
 	#define OW_WP "WP Off\0Custom WP\0"
 	static const int WSM = 0;
 	//Triggers
-	static const int RE, NC, RH, NP, ID, SP, DC, HM, DF, NF, DS, LBC, LBM, DA, NW, PE, WW, FV, ED;
+	static const int RE = 0, NC = 0, RH = 0, NP = 0, ID = 0, SP = 0, DC = 0, HM = 0, DF = 0, NF = 0, DS = 0, LBC = 0, LBM = 0, DA = 0, NW = 0, PE = 0, WW = 0, FV = 0, ED = 0;
 	//Overwatch.fxh State
 	#define OS 1
 #endif

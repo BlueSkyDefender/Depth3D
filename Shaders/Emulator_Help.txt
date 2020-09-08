@@ -78,6 +78,30 @@ https://wiki.pcsx2.net/Siren <- Seems to be a issue with fog.
 [CI] [Depth] [Adjust] [ZPD & Sepration] [NearDepth] [Offset] [Flip] [Balance & Boundary] [HUD X] [Horz & Vert] [H&V Position] [View Mode]
  NC   
 
+{Metal Gear Solid 2} - Open SuperDepth3D and enable Legacy Mode on line 64. Radar Off is the best IMO SkipDraw 3,3 or 3,4 and set Boundary to Normal.
+Radar One & Radar Two set SkipDraw to [4,4] , [4,5] or the values above and set Boundary to Third person. But, don't use Radar One or Two to many issues.
+https://wiki.pcsx2.net/Metal_Gear_Solid_2:_Sons_of_Liberty / https://wiki.pcsx2.net/Metal_Gear_Solid_2:_Substance <- Seems to be a Windows Version Too.
+[CI] [Depth] [Adjust] [ZPD & Sepration] [NearDepth] [Offset] [Flip] [Balance & Boundary] [HUD X] [Horz & Vert] [H&V Position] [View Mode]
+ SI    DM1    235.0    0.050   0.050        0.0     -200.00   Yes       4       Normal    0.800   1.000,0.876   0.000,-0.144     Alpha
+
+{Metal Gear Solid 3} - Optional too open SuperDepth3D and enable Legacy Mode on line 64. Since bluring seems not too strong. Make sure you follow the
+Fixes listed in the links below. Because of this you need Hardware Hacks Enabled.
+https://wiki.pcsx2.net/Metal_Gear_Solid_3:_Snake_Eater / https://wiki.pcsx2.net/Metal_Gear_Solid_3:_Subsistence
+[CI] [Depth] [Adjust] [ZPD & Sepration] [NearDepth] [Offset] [Flip] [Balance & Boundary] [HUD X] [Horz & Vert] [H&V Position] [View Mode]
+ SI    DM1    30000.   0.050   0.0375       0.0    0.0000025  Yes       4       Normal    130.0   1.000,0.876   0.000,-0.144   Try Them
+
+{Gran Turismo 3: A-Spec} - You need to use GSDX 3D Stereo build here. Too many issues with ReShade. I didn't test GSDX 3D so keep this in mind.
+https://forums.pcsx2.net/Thread-Gsdx-3D-Stereoscopy-Patch?pid=522990#pid522990 & https://github.com/pcsx2/pcsx2/issues/1461
+https://wiki.pcsx2.net/Gran_Turismo_3:_A-Spec
+[CI] [Depth] [Adjust] [ZPD & Sepration] [NearDepth] [Offset] [Flip] [Balance & Boundary] [HUD X] [Horz & Vert] [H&V Position] [View Mode]
+ NC    DM1    100.0    0.050   0.050        0.0     -200.00   Yes       4       Normal    0.800   1.000,0.876   0.000,-0.144     Alpha
+
+{Gran Turismo 4} - I didn't test GSDX 3D so keep this in mind. ReShade and or GSDX kind of works with Enable HW Hacks with many issues.
+https://forums.pcsx2.net/Thread-Gsdx-3D-Stereoscopy-Patch?pid=522990#pid522990 & https://github.com/pcsx2/pcsx2/issues/1461
+https://wiki.pcsx2.net/Gran_Turismo_4 <- Need to read.
+[CI] [Depth] [Adjust] [ZPD & Sepration] [NearDepth] [Offset] [Flip] [Balance & Boundary] [HUD X] [Horz & Vert] [H&V Position] [View Mode]
+ MI    DM1    100.0    0.050   0.050        0.0     -200.00   Yes       4       Normal    0.800   1.000,0.876   0.000,-0.144     Alpha
+    
 [CEMU]
 =============================================================================================================================================                   
 {The Legend of Zelda™: Breath of the Wild}
