@@ -147,18 +147,25 @@
 #else
 	#define Mask_Cycle_Key Set_Key_Code_Here
 #endif
+
 uniform int Content <
  ui_type = "combo";
  ui_items = "NoDepth\0Reserved\0Still\0CGI\0Game\0Movie\0Signage\0";
  ui_label = "·Content Type·";
  ui_tooltip = "Content Type for WOWvx.";
- 	ui_category = "Divergence & Convergence";
+ 	ui_category = "WoWvx Settings";
 > = 0;
 
+uniform bool Signage_Flip <
+	ui_label = " Signage Position";
+	ui_tooltip = "Set Signage Upper Left or Bottom Left.";
+	ui_category = "WoWvx Settings";
+> = false;
+	
 uniform int Perspective <
 	ui_type = "drag";
 	ui_min = -100; ui_max = 100;
-	ui_label = " Perspective Slider";
+	ui_label = "·Perspective Slider·";
 	ui_tooltip = "Determines the perspective point of the two images this shader produces.\n"
 				 "For an HMD, use Polynomial Barrel Distortion shader to adjust for IPD.\n"
 				 "Do not use this perspective adjustment slider to adjust for IPD.\n"
@@ -483,6 +490,7 @@ uniform bool DepthCheck < source = "bufready_depth"; >;
 #endif
 
 #define pix float2(BUFFER_RCP_WIDTH, BUFFER_RCP_HEIGHT)
+#define Res float2(BUFFER_WIDTH, BUFFER_HEIGHT)
 #define Per float2( (Perspective * pix.x) * 0.5, 0) //Per is Perspective
 #define AI Interlace_Anaglyph.x * 0.5 //Optimization for line interlaced Adjustment.
 
@@ -1086,153 +1094,154 @@ float2 GetDB(float2 texcoord)
 }
 
 ///////////////////////////////////////////////////////////2D + Depth + Signage///////////////////////////////////////////////////////////////////////
-float3 PS_calcLR(float2 position,float2 texcoord)
+float3 PS_calcLR(float2 texcoord)
 {//WoWvx Code
+float2 ScreenPos = Signage_Flip ? texcoord.xy * Res : float2(texcoord.x,1-texcoord.y) * Res;
 float3 Color;
  //BLOCK ONE
- float A = all(abs(float2(0.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
- float B = all(abs(float2(2.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
- float C = all(abs(float2(4.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
- float D = all(abs(float2(6.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
- float E = all(abs(float2(14.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
- float F = all(abs(float2(32.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
- float G = all(abs(float2(34.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
- float H = all(abs(float2(36.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
- float I = all(abs(float2(38.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
- float J = all(abs(float2(40.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
- float K = all(abs(float2(42.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
- float L = all(abs(float2(44.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
- float M = all(abs(float2(46.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
- float N = all(abs(float2(48.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
+ float A = all(abs(float2(0.5,BUFFER_HEIGHT)-ScreenPos.xy) < float2(0.5,1));
+ float B = all(abs(float2(2.5,BUFFER_HEIGHT)-ScreenPos.xy) < float2(0.5,1));
+ float C = all(abs(float2(4.5,BUFFER_HEIGHT)-ScreenPos.xy) < float2(0.5,1));
+ float D = all(abs(float2(6.5,BUFFER_HEIGHT)-ScreenPos.xy) < float2(0.5,1));
+ float E = all(abs(float2(14.5,BUFFER_HEIGHT)-ScreenPos.xy) < float2(0.5,1));
+ float F = all(abs(float2(32.5,BUFFER_HEIGHT)-ScreenPos.xy) < float2(0.5,1));
+ float G = all(abs(float2(34.5,BUFFER_HEIGHT)-ScreenPos.xy) < float2(0.5,1));
+ float H = all(abs(float2(36.5,BUFFER_HEIGHT)-ScreenPos.xy) < float2(0.5,1));
+ float I = all(abs(float2(38.5,BUFFER_HEIGHT)-ScreenPos.xy) < float2(0.5,1));
+ float J = all(abs(float2(40.5,BUFFER_HEIGHT)-ScreenPos.xy) < float2(0.5,1));
+ float K = all(abs(float2(42.5,BUFFER_HEIGHT)-ScreenPos.xy) < float2(0.5,1));
+ float L = all(abs(float2(44.5,BUFFER_HEIGHT)-ScreenPos.xy) < float2(0.5,1));
+ float M = all(abs(float2(46.5,BUFFER_HEIGHT)-ScreenPos.xy) < float2(0.5,1));
+ float N = all(abs(float2(48.5,BUFFER_HEIGHT)-ScreenPos.xy) < float2(0.5,1));
  float BlockOne = A+B+C+D+E+F+G+H+I+J+K+L+M+N;
 
  //NO DEPTH
- float NDA = all(abs(float2(96.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
- float NDB = all(abs(float2(98.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
- float NDC = all(abs(float2(102.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
- float NDD = all(abs(float2(108.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
- float NDE = all(abs(float2(110.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
- float NDF = all(abs(float2(114.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
- float NDG = all(abs(float2(118.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
- float NDH = all(abs(float2(124.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
- float NDI = all(abs(float2(126.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
- float NDJ = all(abs(float2(128.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
- float NDK = all(abs(float2(138.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
- float NDL = all(abs(float2(152.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
- float NDM = all(abs(float2(154.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
+ float NDA = all(abs(float2(96.5,BUFFER_HEIGHT)-ScreenPos.xy) < float2(0.5,1));
+ float NDB = all(abs(float2(98.5,BUFFER_HEIGHT)-ScreenPos.xy) < float2(0.5,1));
+ float NDC = all(abs(float2(102.5,BUFFER_HEIGHT)-ScreenPos.xy) < float2(0.5,1));
+ float NDD = all(abs(float2(108.5,BUFFER_HEIGHT)-ScreenPos.xy) < float2(0.5,1));
+ float NDE = all(abs(float2(110.5,BUFFER_HEIGHT)-ScreenPos.xy) < float2(0.5,1));
+ float NDF = all(abs(float2(114.5,BUFFER_HEIGHT)-ScreenPos.xy) < float2(0.5,1));
+ float NDG = all(abs(float2(118.5,BUFFER_HEIGHT)-ScreenPos.xy) < float2(0.5,1));
+ float NDH = all(abs(float2(124.5,BUFFER_HEIGHT)-ScreenPos.xy) < float2(0.5,1));
+ float NDI = all(abs(float2(126.5,BUFFER_HEIGHT)-ScreenPos.xy) < float2(0.5,1));
+ float NDJ = all(abs(float2(128.5,BUFFER_HEIGHT)-ScreenPos.xy) < float2(0.5,1));
+ float NDK = all(abs(float2(138.5,BUFFER_HEIGHT)-ScreenPos.xy) < float2(0.5,1));
+ float NDL = all(abs(float2(152.5,BUFFER_HEIGHT)-ScreenPos.xy) < float2(0.5,1));
+ float NDM = all(abs(float2(154.5,BUFFER_HEIGHT)-ScreenPos.xy) < float2(0.5,1));
  float NoDepth = NDA+NDB+NDC+NDD+NDE+NDF+NDG+NDH+NDI+NDJ+NDK+NDL+NDM;
 
  //RESERVED
- float RA = all(abs(float2(26.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
- float RB = all(abs(float2(28.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
- float RC = all(abs(float2(98.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
- float RD = all(abs(float2(100.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
- float RE = all(abs(float2(110.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
- float RF = all(abs(float2(112.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
- float RG = all(abs(float2(116.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
- float RH = all(abs(float2(118.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
- float RI = all(abs(float2(120.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
- float RJ = all(abs(float2(122.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
- float RK = all(abs(float2(126.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
- float RL = all(abs(float2(128.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
- float RM = all(abs(float2(130.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
- float RN = all(abs(float2(136.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
- float RO = all(abs(float2(144.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
- float RP = all(abs(float2(150.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
- float RQ = all(abs(float2(154.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
- float RR = all(abs(float2(158.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
+ float RA = all(abs(float2(26.5,BUFFER_HEIGHT)-ScreenPos.xy) < float2(0.5,1));
+ float RB = all(abs(float2(28.5,BUFFER_HEIGHT)-ScreenPos.xy) < float2(0.5,1));
+ float RC = all(abs(float2(98.5,BUFFER_HEIGHT)-ScreenPos.xy) < float2(0.5,1));
+ float RD = all(abs(float2(100.5,BUFFER_HEIGHT)-ScreenPos.xy) < float2(0.5,1));
+ float RE = all(abs(float2(110.5,BUFFER_HEIGHT)-ScreenPos.xy) < float2(0.5,1));
+ float RF = all(abs(float2(112.5,BUFFER_HEIGHT)-ScreenPos.xy) < float2(0.5,1));
+ float RG = all(abs(float2(116.5,BUFFER_HEIGHT)-ScreenPos.xy) < float2(0.5,1));
+ float RH = all(abs(float2(118.5,BUFFER_HEIGHT)-ScreenPos.xy) < float2(0.5,1));
+ float RI = all(abs(float2(120.5,BUFFER_HEIGHT)-ScreenPos.xy) < float2(0.5,1));
+ float RJ = all(abs(float2(122.5,BUFFER_HEIGHT)-ScreenPos.xy) < float2(0.5,1));
+ float RK = all(abs(float2(126.5,BUFFER_HEIGHT)-ScreenPos.xy) < float2(0.5,1));
+ float RL = all(abs(float2(128.5,BUFFER_HEIGHT)-ScreenPos.xy) < float2(0.5,1));
+ float RM = all(abs(float2(130.5,BUFFER_HEIGHT)-ScreenPos.xy) < float2(0.5,1));
+ float RN = all(abs(float2(136.5,BUFFER_HEIGHT)-ScreenPos.xy) < float2(0.5,1));
+ float RO = all(abs(float2(144.5,BUFFER_HEIGHT)-ScreenPos.xy) < float2(0.5,1));
+ float RP = all(abs(float2(150.5,BUFFER_HEIGHT)-ScreenPos.xy) < float2(0.5,1));
+ float RQ = all(abs(float2(154.5,BUFFER_HEIGHT)-ScreenPos.xy) < float2(0.5,1));
+ float RR = all(abs(float2(158.5,BUFFER_HEIGHT)-ScreenPos.xy) < float2(0.5,1));
  float Reserved = RA+RB+RC+RD+RE+RF+RG+RH+RI+RJ+RK+RL+RM+RN+RO+RP+RQ+RR;
 
  //STILL
- float SA = all(abs(float2(26.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
- float SB = all(abs(float2(30.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
- float SC = all(abs(float2(96.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
- float SD = all(abs(float2(100.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
- float SE = all(abs(float2(102.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
- float SF = all(abs(float2(104.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
- float SG = all(abs(float2(108.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
- float SH = all(abs(float2(112.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
- float SI = all(abs(float2(116.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
- float SJ = all(abs(float2(120.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
- float SK = all(abs(float2(124.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
- float SL = all(abs(float2(130.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
- float SM = all(abs(float2(132.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
- float SN = all(abs(float2(156.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
+ float SA = all(abs(float2(26.5,BUFFER_HEIGHT)-ScreenPos.xy) < float2(0.5,1));
+ float SB = all(abs(float2(30.5,BUFFER_HEIGHT)-ScreenPos.xy) < float2(0.5,1));
+ float SC = all(abs(float2(96.5,BUFFER_HEIGHT)-ScreenPos.xy) < float2(0.5,1));
+ float SD = all(abs(float2(100.5,BUFFER_HEIGHT)-ScreenPos.xy) < float2(0.5,1));
+ float SE = all(abs(float2(102.5,BUFFER_HEIGHT)-ScreenPos.xy) < float2(0.5,1));
+ float SF = all(abs(float2(104.5,BUFFER_HEIGHT)-ScreenPos.xy) < float2(0.5,1));
+ float SG = all(abs(float2(108.5,BUFFER_HEIGHT)-ScreenPos.xy) < float2(0.5,1));
+ float SH = all(abs(float2(112.5,BUFFER_HEIGHT)-ScreenPos.xy) < float2(0.5,1));
+ float SI = all(abs(float2(116.5,BUFFER_HEIGHT)-ScreenPos.xy) < float2(0.5,1));
+ float SJ = all(abs(float2(120.5,BUFFER_HEIGHT)-ScreenPos.xy) < float2(0.5,1));
+ float SK = all(abs(float2(124.5,BUFFER_HEIGHT)-ScreenPos.xy) < float2(0.5,1));
+ float SL = all(abs(float2(130.5,BUFFER_HEIGHT)-ScreenPos.xy) < float2(0.5,1));
+ float SM = all(abs(float2(132.5,BUFFER_HEIGHT)-ScreenPos.xy) < float2(0.5,1));
+ float SN = all(abs(float2(156.5,BUFFER_HEIGHT)-ScreenPos.xy) < float2(0.5,1));
  float Still = SA+SB+SC+SD+SE+SF+SG+SH+SI+SJ+SK+SL+SM+SN;
 
  //CGI
- float CA = all(abs(float2(26.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
- float CB = all(abs(float2(96.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
- float CC = all(abs(float2(98.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
- float CD = all(abs(float2(100.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
- float CE = all(abs(float2(102.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
- float CF = all(abs(float2(108.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
- float CG = all(abs(float2(110.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
- float CH = all(abs(float2(112.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
- float CI = all(abs(float2(116.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
- float CJ = all(abs(float2(122.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
- float CK = all(abs(float2(124.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
- float CL = all(abs(float2(126.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
- float CM = all(abs(float2(138.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
- float CN = all(abs(float2(140.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
- float CO = all(abs(float2(142.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
- float CP = all(abs(float2(144.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
- float CQ = all(abs(float2(152.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
- float CR = all(abs(float2(154.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
- float CS = all(abs(float2(156.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
- float CT = all(abs(float2(158.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
+ float CA = all(abs(float2(26.5,BUFFER_HEIGHT)-ScreenPos.xy) < float2(0.5,1));
+ float CB = all(abs(float2(96.5,BUFFER_HEIGHT)-ScreenPos.xy) < float2(0.5,1));
+ float CC = all(abs(float2(98.5,BUFFER_HEIGHT)-ScreenPos.xy) < float2(0.5,1));
+ float CD = all(abs(float2(100.5,BUFFER_HEIGHT)-ScreenPos.xy) < float2(0.5,1));
+ float CE = all(abs(float2(102.5,BUFFER_HEIGHT)-ScreenPos.xy) < float2(0.5,1));
+ float CF = all(abs(float2(108.5,BUFFER_HEIGHT)-ScreenPos.xy) < float2(0.5,1));
+ float CG = all(abs(float2(110.5,BUFFER_HEIGHT)-ScreenPos.xy) < float2(0.5,1));
+ float CH = all(abs(float2(112.5,BUFFER_HEIGHT)-ScreenPos.xy) < float2(0.5,1));
+ float CI = all(abs(float2(116.5,BUFFER_HEIGHT)-ScreenPos.xy) < float2(0.5,1));
+ float CJ = all(abs(float2(122.5,BUFFER_HEIGHT)-ScreenPos.xy) < float2(0.5,1));
+ float CK = all(abs(float2(124.5,BUFFER_HEIGHT)-ScreenPos.xy) < float2(0.5,1));
+ float CL = all(abs(float2(126.5,BUFFER_HEIGHT)-ScreenPos.xy) < float2(0.5,1));
+ float CM = all(abs(float2(138.5,BUFFER_HEIGHT)-ScreenPos.xy) < float2(0.5,1));
+ float CN = all(abs(float2(140.5,BUFFER_HEIGHT)-ScreenPos.xy) < float2(0.5,1));
+ float CO = all(abs(float2(142.5,BUFFER_HEIGHT)-ScreenPos.xy) < float2(0.5,1));
+ float CP = all(abs(float2(144.5,BUFFER_HEIGHT)-ScreenPos.xy) < float2(0.5,1));
+ float CQ = all(abs(float2(152.5,BUFFER_HEIGHT)-ScreenPos.xy) < float2(0.5,1));
+ float CR = all(abs(float2(154.5,BUFFER_HEIGHT)-ScreenPos.xy) < float2(0.5,1));
+ float CS = all(abs(float2(156.5,BUFFER_HEIGHT)-ScreenPos.xy) < float2(0.5,1));
+ float CT = all(abs(float2(158.5,BUFFER_HEIGHT)-ScreenPos.xy) < float2(0.5,1));
  float CGI = CA+CB+CC+CD+CE+CF+CG+CH+CI+CJ+CK+CL+CM+CN+CO+CP+CQ+CR+CS+CT;
 
  //GAME
- float GA = all(abs(float2(28.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
- float GB = all(abs(float2(30.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
- float GC = all(abs(float2(104.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
- float GD = all(abs(float2(114.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
- float GE = all(abs(float2(122.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
- float GF = all(abs(float2(132.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
- float GG = all(abs(float2(136.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
- float GH = all(abs(float2(138.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
- float GI = all(abs(float2(144.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
- float GJ = all(abs(float2(150.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
- float GK = all(abs(float2(152.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
- float GL = all(abs(float2(156.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
- float GM = all(abs(float2(158.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
+ float GA = all(abs(float2(28.5,BUFFER_HEIGHT)-ScreenPos.xy) < float2(0.5,1));
+ float GB = all(abs(float2(30.5,BUFFER_HEIGHT)-ScreenPos.xy) < float2(0.5,1));
+ float GC = all(abs(float2(104.5,BUFFER_HEIGHT)-ScreenPos.xy) < float2(0.5,1));
+ float GD = all(abs(float2(114.5,BUFFER_HEIGHT)-ScreenPos.xy) < float2(0.5,1));
+ float GE = all(abs(float2(122.5,BUFFER_HEIGHT)-ScreenPos.xy) < float2(0.5,1));
+ float GF = all(abs(float2(132.5,BUFFER_HEIGHT)-ScreenPos.xy) < float2(0.5,1));
+ float GG = all(abs(float2(136.5,BUFFER_HEIGHT)-ScreenPos.xy) < float2(0.5,1));
+ float GH = all(abs(float2(138.5,BUFFER_HEIGHT)-ScreenPos.xy) < float2(0.5,1));
+ float GI = all(abs(float2(144.5,BUFFER_HEIGHT)-ScreenPos.xy) < float2(0.5,1));
+ float GJ = all(abs(float2(150.5,BUFFER_HEIGHT)-ScreenPos.xy) < float2(0.5,1));
+ float GK = all(abs(float2(152.5,BUFFER_HEIGHT)-ScreenPos.xy) < float2(0.5,1));
+ float GL = all(abs(float2(156.5,BUFFER_HEIGHT)-ScreenPos.xy) < float2(0.5,1));
+ float GM = all(abs(float2(158.5,BUFFER_HEIGHT)-ScreenPos.xy) < float2(0.5,1));
  float Game = GA+GB+GB+GC+GD+GE+GF+GG+GH+GI+GJ+GK+GL+GM;
 
  //MOVIE
- float MA = all(abs(float2(28.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
- float MB = all(abs(float2(98.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
- float MC = all(abs(float2(110.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
- float MD = all(abs(float2(114.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
- float ME = all(abs(float2(120.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
- float MF = all(abs(float2(126.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
- float MG = all(abs(float2(130.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
- float MH = all(abs(float2(136.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
- float MI = all(abs(float2(140.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
- float MJ = all(abs(float2(142.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
- float MK = all(abs(float2(150.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
- float ML = all(abs(float2(154.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
- float MM = all(abs(float2(156.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
+ float MA = all(abs(float2(28.5,BUFFER_HEIGHT)-ScreenPos.xy) < float2(0.5,1));
+ float MB = all(abs(float2(98.5,BUFFER_HEIGHT)-ScreenPos.xy) < float2(0.5,1));
+ float MC = all(abs(float2(110.5,BUFFER_HEIGHT)-ScreenPos.xy) < float2(0.5,1));
+ float MD = all(abs(float2(114.5,BUFFER_HEIGHT)-ScreenPos.xy) < float2(0.5,1));
+ float ME = all(abs(float2(120.5,BUFFER_HEIGHT)-ScreenPos.xy) < float2(0.5,1));
+ float MF = all(abs(float2(126.5,BUFFER_HEIGHT)-ScreenPos.xy) < float2(0.5,1));
+ float MG = all(abs(float2(130.5,BUFFER_HEIGHT)-ScreenPos.xy) < float2(0.5,1));
+ float MH = all(abs(float2(136.5,BUFFER_HEIGHT)-ScreenPos.xy) < float2(0.5,1));
+ float MI = all(abs(float2(140.5,BUFFER_HEIGHT)-ScreenPos.xy) < float2(0.5,1));
+ float MJ = all(abs(float2(142.5,BUFFER_HEIGHT)-ScreenPos.xy) < float2(0.5,1));
+ float MK = all(abs(float2(150.5,BUFFER_HEIGHT)-ScreenPos.xy) < float2(0.5,1));
+ float ML = all(abs(float2(154.5,BUFFER_HEIGHT)-ScreenPos.xy) < float2(0.5,1));
+ float MM = all(abs(float2(156.5,BUFFER_HEIGHT)-ScreenPos.xy) < float2(0.5,1));
  float Movie = MA+MB+MC+MD+ME+MF+MG+MH+MI+MJ+MK+ML+MM;
 
  //SIGNAGE
- float SSA = all(abs(float2(30.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
- float SSB = all(abs(float2(96.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
- float SSC = all(abs(float2(102.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
- float SSD = all(abs(float2(104.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
- float SSE = all(abs(float2(108.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
- float SSF = all(abs(float2(114.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
- float SSG = all(abs(float2(118.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
- float SSH = all(abs(float2(120.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
- float SSI = all(abs(float2(122.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
- float SSJ = all(abs(float2(124.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
- float SSK = all(abs(float2(128.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
- float SSL = all(abs(float2(130.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
- float SSM = all(abs(float2(132.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
- float SSN = all(abs(float2(140.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
- float SSO = all(abs(float2(142.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
- float SSP = all(abs(float2(144.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
- float SSQ = all(abs(float2(158.5,BUFFER_HEIGHT)-position.xy) < float2(0.5,1));
+ float SSA = all(abs(float2(30.5,BUFFER_HEIGHT)-ScreenPos.xy) < float2(0.5,1));
+ float SSB = all(abs(float2(96.5,BUFFER_HEIGHT)-ScreenPos.xy) < float2(0.5,1));
+ float SSC = all(abs(float2(102.5,BUFFER_HEIGHT)-ScreenPos.xy) < float2(0.5,1));
+ float SSD = all(abs(float2(104.5,BUFFER_HEIGHT)-ScreenPos.xy) < float2(0.5,1));
+ float SSE = all(abs(float2(108.5,BUFFER_HEIGHT)-ScreenPos.xy) < float2(0.5,1));
+ float SSF = all(abs(float2(114.5,BUFFER_HEIGHT)-ScreenPos.xy) < float2(0.5,1));
+ float SSG = all(abs(float2(118.5,BUFFER_HEIGHT)-ScreenPos.xy) < float2(0.5,1));
+ float SSH = all(abs(float2(120.5,BUFFER_HEIGHT)-ScreenPos.xy) < float2(0.5,1));
+ float SSI = all(abs(float2(122.5,BUFFER_HEIGHT)-ScreenPos.xy) < float2(0.5,1));
+ float SSJ = all(abs(float2(124.5,BUFFER_HEIGHT)-ScreenPos.xy) < float2(0.5,1));
+ float SSK = all(abs(float2(128.5,BUFFER_HEIGHT)-ScreenPos.xy) < float2(0.5,1));
+ float SSL = all(abs(float2(130.5,BUFFER_HEIGHT)-ScreenPos.xy) < float2(0.5,1));
+ float SSM = all(abs(float2(132.5,BUFFER_HEIGHT)-ScreenPos.xy) < float2(0.5,1));
+ float SSN = all(abs(float2(140.5,BUFFER_HEIGHT)-ScreenPos.xy) < float2(0.5,1));
+ float SSO = all(abs(float2(142.5,BUFFER_HEIGHT)-ScreenPos.xy) < float2(0.5,1));
+ float SSP = all(abs(float2(144.5,BUFFER_HEIGHT)-ScreenPos.xy) < float2(0.5,1));
+ float SSQ = all(abs(float2(158.5,BUFFER_HEIGHT)-ScreenPos.xy) < float2(0.5,1));
  float Signage = SSA+SSB+SSC+SSD+SSE+SSF+SSG+SSH+SSI+SSJ+SSK+SSL+SSM+SSN+SSO+SSP+SSQ;
 
  float Content_Type;
@@ -1254,7 +1263,7 @@ float3 Color;
 
  Color = texcoord.x < 0.5 ? MouseCursor(float2(texcoord.x*2 + Perspective * pix.x,texcoord.y)).rgb : GetDB(float2(texcoord.x*2-1 - Perspective * pix.x,texcoord.y)).x;
 
- float3 BACK = all(abs(float2(80,BUFFER_HEIGHT)-position.xy) < float2(80,1)) ? 0 : Color;
+ float3 BACK = all(abs(float2(80,BUFFER_HEIGHT)-ScreenPos.xy) < float2(80,1) ) ? 0 : Color;
 
  return BlockOne + Content_Type ? float3(0,0,1) : BACK;
 }
@@ -1325,7 +1334,7 @@ float3 Out(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Targe
 {
 	float2 TC = float2(texcoord.x,1-texcoord.y);
 	float Text_Timer = 25000, BT = smoothstep(0,1,sin(timer*(3.75/1000))), Size = 1.1, Depth3D, Read_Help, Supported, SetFoV, FoV, Post, Effect, NoPro, NotCom, Mod, Needs, Net, Over, Set, AA, Emu, Not, No, Help, Fix, Need, State, SetAA, SetWP, Work;
-	float3 Color = PS_calcLR(position.xy,texcoord).rgb;
+	float3 Color = PS_calcLR(texcoord).rgb;
 
 	if(RH || NC || NP || NF || PE || DS || OS || DA || NW || WW || FV || ED)
 		Text_Timer = 30000;
