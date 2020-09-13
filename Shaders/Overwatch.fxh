@@ -674,10 +674,15 @@ static const int FOV = 0;                               //Set Game FoV
 	#define DB_Y 3
 #elif (App == 0x5833F81C ) //Dying Light
 	#define DA_W 1
-	#define DA_Y 21.25
-	#define DA_X 0.065
+	#define DF_Y 0.05125
+	#define DA_X 0.06
+	#define DA_Y 17.5
 	#define DB_Y 4
-	#define DB_W 62
+	#define NW 1
+	#define PE 1
+    #define FV 1
+    #define DE_W 0.160
+	//#define DB_W 62
 #elif (App == 0x42C1A2B ) //CoD: WWII
 	#define DA_X 0.04
 	#define DA_W 1
@@ -2096,7 +2101,7 @@ float3 Weapon_Profiles(float WP ,float3 Weapon_Adjust) //Tried Switch But, can't
     if (WP == 61) //Unity Limit if using else if
         Value = float3(1.825,13.75,0);        //WP 59 | No Man Sky FPS Mode
     if (WP == 62)
-        Value = float3(1.962,5.5,0);          //WP 60 | Dying Light
+        Value = float3(1.953,5.25,0);          //WP 60 | Dying Light
     if (WP == 63)
         Value = float3(0.287,180.0,9.0);      //WP 61 | Farcry
     if (WP == 64)
