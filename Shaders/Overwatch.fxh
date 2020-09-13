@@ -674,7 +674,7 @@ static const int FOV = 0;                               //Set Game FoV
 	#define DB_Y 3
 #elif (App == 0x5833F81C ) //Dying Light
 	#define DA_W 1
-	#define DF_Y 0.05125
+	#define DF_Y 0.0475
 	#define DA_X 0.06
 	#define DA_Y 17.5
 	#define DB_Y 4
