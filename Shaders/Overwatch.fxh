@@ -675,13 +675,13 @@ static const int FOV = 0;                               //Set Game FoV
 #elif (App == 0x5833F81C ) //Dying Light
 	#define DA_W 1
 	#define DF_Y 0.0475
-	#define DA_X 0.06
+	#define DA_X 0.05
 	#define DA_Y 17.5
 	#define DB_Y 4
 	#define NW 1
 	#define PE 1
     #define FV 1
-    #define DE_W 0.160
+    #define DE_W 0.125
 	//#define DB_W 62
 #elif (App == 0x42C1A2B ) //CoD: WWII
 	#define DA_X 0.04

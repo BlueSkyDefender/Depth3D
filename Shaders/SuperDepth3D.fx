@@ -444,7 +444,7 @@ uniform float2 HUD_Adjust <
 //Stereoscopic Options//
 uniform int Stereoscopic_Mode <
 	ui_type = "combo";
-	ui_items = "Side by Side\0Top and Bottom\0Line Interlaced\0Column Interlaced\0Checkerboard 3D\0Anaglyph 3D Red/Cyan\0Anaglyph 3D Red/Cyan Dubois\0Anaglyph 3D Red/Cyan Anachrome\0Anaglyph 3D Green/Magenta\0Anaglyph 3D Green/Magenta Dubois\0Anaglyph 3D Green/Magenta Triochrome\0Anaglyph 3D Blue/Amber ColorCode\0";
+	ui_items = "Side by Side\0Top and Bottom\0Line Interlaced\0Column Interlaced\0Checkerboard 3D\0Autostereoscopic\0Anaglyph 3D Red/Cyan\0Anaglyph 3D Red/Cyan Dubois\0Anaglyph 3D Red/Cyan Anachrome\0Anaglyph 3D Green/Magenta\0Anaglyph 3D Green/Magenta Dubois\0Anaglyph 3D Green/Magenta Triochrome\0Anaglyph 3D Blue/Amber ColorCode\0";
 	ui_label = "·3D Display Modes·";
 	ui_tooltip = "Stereoscopic 3D display output selection.";
 	ui_category = "Stereoscopic Options";
@@ -1308,10 +1308,43 @@ float3 HUD(float3 HUD, float2 texcoord )
 	return HUD;
 }
 #endif
+
+float2 LensePitch(float2 TC)
+{
+	//Texture Rotation//
+	/*    
+	Sacchan calculator http://z800.yokinihakarae.com/html5test/sachiicalc02.html
+	Number of horizontal dots: 3840
+	Number of vertical dots: 2160
+	Sreen Size in inch: 27.9
+	DPI obtained from resolution / inch : 157.9144924790178
+	
+	Answer from the DPI of the LCD panel :
+	pitch = 12.683894978234363 Sacchan coefficient 12.45
+	pitch = 12.633159398321425 Sacchan coefficient 12.5
+	pitch = 12.582828085977514 Sacchan coefficient 12.55
+	pitch = 12.532896228493478 Sacchan coefficient 12.6
+	pitch = 12.483359089250419 Sacchan coefficient 12.65
+	pitch = 12.434212006221875 Sacchan coefficient 12.7
+	pitch = 12.3854503905112   Sacchan coefficient 12.75
+	*/
+	//Ended up using the Sacchan cofficient here as Degrees 12.55 CW......
+	float Degrees = radians(12.55);//Converts the specified value from radians to degrees.
+	
+	float2 PivotPoint = 0.5;
+	float2 Rotationtexcoord = TC;
+	float sin_factor = sin(Degrees);
+	float cos_factor = cos(Degrees);
+	Rotationtexcoord = mul(Rotationtexcoord - PivotPoint, float2x2(float2(cos_factor, -sin_factor), float2(sin_factor, cos_factor)));
+	Rotationtexcoord += PivotPoint + PivotPoint;
+	
+	return Rotationtexcoord.xy;
+}
+
 ///////////////////////////////////////////////////////////Stereo Calculation///////////////////////////////////////////////////////////////////////
 float3 PS_calcLR(float2 texcoord)
 {
-	float2 TCL, TCR, TexCoords = texcoord;
+	float2 TCL, TCR, TexCoords = texcoord, TC = texcoord;
 
 	[branch] if (Stereoscopic_Mode == 0)
 	{
@@ -1359,31 +1392,42 @@ float3 PS_calcLR(float2 texcoord)
 	Left.rgb = HUD(Left.rgb,float2(TCL.x - HUD_Adjustment,TCL.y)).rgb;
 	Right.rgb = HUD(Right.rgb,float2(TCR.x + HUD_Adjustment,TCR.y)).rgb;
 	#endif
-
+	float LPI = Stereoscopic_Mode == 5 ? 1.268 : 1.0;
+		TC = Stereoscopic_Mode == 5 ? LensePitch(TC * LPI) : TC;
 	float2 gridxy, GXYArray[9] = {
-		float2(TexCoords.x * BUFFER_WIDTH, TexCoords.y * BUFFER_HEIGHT), //Native
-		float2(TexCoords.x * 3840.0, TexCoords.y * 2160.0),
-		float2(TexCoords.x * 3841.0, TexCoords.y * 2161.0),
-		float2(TexCoords.x * 1920.0, TexCoords.y * 1080.0),
-		float2(TexCoords.x * 1921.0, TexCoords.y * 1081.0),
-		float2(TexCoords.x * 1680.0, TexCoords.y * 1050.0),
-		float2(TexCoords.x * 1681.0, TexCoords.y * 1051.0),
-		float2(TexCoords.x * 1280.0, TexCoords.y * 720.0),
-		float2(TexCoords.x * 1281.0, TexCoords.y * 721.0)
+		float2(TC.x * BUFFER_WIDTH, TC.y * BUFFER_HEIGHT), //Native
+		float2(TC.x * 3840.0, TC.y * 2160.0),
+		float2(TC.x * 3841.0, TC.y * 2161.0),
+		float2(TC.x * 1920.0, TC.y * 1080.0),
+		float2(TC.x * 1921.0, TC.y * 1081.0),
+		float2(TC.x * 1680.0, TC.y * 1050.0),
+		float2(TC.x * 1681.0, TC.y * 1051.0),
+		float2(TC.x * 1280.0, TC.y * 720.0),
+		float2(TC.x * 1281.0, TC.y * 721.0)
 	};
+			
 	gridxy = floor(GXYArray[Scaling_Support]);
-
+	
+	const int Images = 4;
+    float3 Colors[Images] = { //4 = 1.268
+    float3(Left.x , Right.y, Right.z), // L | R | R 
+    float3(Left.x , Left.y , Right.z), // L | L | R
+    float3(Right.x, Left.y , Left.z ), // R | L | L 
+    float3(Right.x, Right.y, Left.z )};// R | R | L
+    
 	if(Stereoscopic_Mode == 0)
 		color = TexCoords.x < 0.5 ? Left : Right;
 	else if(Stereoscopic_Mode == 1)
 		color = TexCoords.y < 0.5 ? Left : Right;
 	else if(Stereoscopic_Mode == 2)
-		color = fmod(gridxy.y,2.0) ? Right : Left;
+		color = fmod(gridxy.y,2) ? Right : Left;
 	else if(Stereoscopic_Mode == 3)
-		color = fmod(gridxy.x,2.0) ? Right : Left;
+		color = fmod(gridxy.x,2) ? Right : Left;
 	else if(Stereoscopic_Mode == 4)
-		color = fmod(gridxy.x+gridxy.y,2.0) ? Right : Left;
-	else if(Stereoscopic_Mode >= 5)
+		color = fmod(gridxy.x+gridxy.y,2) ? Right : Left;
+	else if(Stereoscopic_Mode == 5)
+		color = Colors[int(fmod( gridxy.x,Images))];
+	else if(Stereoscopic_Mode >= 6)
 	{
 		float Contrast = 1.0, DeGhost = 0.06, LOne, ROne;
 		float3 HalfLA = dot(Left.rgb,float3(0.299, 0.587, 0.114)), HalfRA = dot(Right.rgb,float3(0.299, 0.587, 0.114));
@@ -1395,11 +1439,11 @@ float3 PS_calcLR(float2 texcoord)
 		float4 cA = float4(LMA,1);
 		float4 cB = float4(RMA,1);
 
-		if (Stereoscopic_Mode == 5) // Anaglyph 3D Colors Red/Cyan
+		if (Stereoscopic_Mode == 6) // Anaglyph 3D Colors Red/Cyan
 			color =  float4(cA.r,cB.g,cB.b,1.0);
-		else if (Stereoscopic_Mode == 6) // Anaglyph 3D Dubois Red/Cyan
+		else if (Stereoscopic_Mode == 7) // Anaglyph 3D Dubois Red/Cyan
 		{
-		float red = 0.437 * cA.r + 0.449 * cA.g + 0.164 * cA.b - 0.011 * cB.r - 0.032 * cB.g - 0.007 * cB.b;
+			float red = 0.437 * cA.r + 0.449 * cA.g + 0.164 * cA.b - 0.011 * cB.r - 0.032 * cB.g - 0.007 * cB.b;
 
 			if (red > 1) { red = 1; }   if (red < 0) { red = 0; }
 
@@ -1413,7 +1457,7 @@ float3 PS_calcLR(float2 texcoord)
 
 			color = float4(red, green, blue, 0);
 		}
-		else if (Stereoscopic_Mode == 7) // Anaglyph 3D Deghosted Red/Cyan Code From http://iaian7.com/quartz/AnaglyphCompositing & vectorform.com by John Einselen
+		else if (Stereoscopic_Mode == 8) // Anaglyph 3D Deghosted Red/Cyan Code From http://iaian7.com/quartz/AnaglyphCompositing & vectorform.com by John Einselen
 		{
 			LOne = contrast*0.45;
 			ROne = contrast;
@@ -1437,9 +1481,9 @@ float3 PS_calcLR(float2 texcoord)
 			image.b = (accum.b+(accum.r*(DeGhost*-0.25))+(accum.g*(DeGhost*-0.25))+(accum.b*(DeGhost*0.5)));
 			color = image;
 		}
-		else if (Stereoscopic_Mode == 8) // Anaglyph 3D Green/Magenta
+		else if (Stereoscopic_Mode == 9) // Anaglyph 3D Green/Magenta
 			color = float4(cB.r,cA.g,cB.b,1.0);
-		else if (Stereoscopic_Mode == 9) // Anaglyph 3D Dubois Green/Magenta
+		else if (Stereoscopic_Mode == 10) // Anaglyph 3D Dubois Green/Magenta
 		{
 
 			float red = -0.062 * cA.r -0.158 * cA.g -0.039 * cA.b + 0.529 * cB.r + 0.705 * cB.g + 0.024 * cB.b;
@@ -1456,7 +1500,7 @@ float3 PS_calcLR(float2 texcoord)
 
 			color = float4(red, green, blue, 0);
 		}
-		else if (Stereoscopic_Mode == 10)// Anaglyph 3D Deghosted Green/Magenta Code From http://iaian7.com/quartz/AnaglyphCompositing & vectorform.com by John Einselen
+		else if (Stereoscopic_Mode == 11)// Anaglyph 3D Deghosted Green/Magenta Code From http://iaian7.com/quartz/AnaglyphCompositing & vectorform.com by John Einselen
 		{
 			LOne = contrast*0.45;
 			ROne = contrast*0.8;
@@ -1480,7 +1524,7 @@ float3 PS_calcLR(float2 texcoord)
 			image.b = accum.b+(accum.r*(DeGhost*-0.25))+(accum.g*(DeGhost*-0.25))+(accum.b*(DeGhost*0.5));
 			color = image;
 		}
-		else if (Stereoscopic_Mode == 11) // Anaglyph 3D Blue/Amber Code From http://iaian7.com/quartz/AnaglyphCompositing & vectorform.com by John Einselen
+		else if (Stereoscopic_Mode == 12) // Anaglyph 3D Blue/Amber Code From http://iaian7.com/quartz/AnaglyphCompositing & vectorform.com by John Einselen
 		{
 			LOne = contrast*0.45;
 			ROne = contrast;
