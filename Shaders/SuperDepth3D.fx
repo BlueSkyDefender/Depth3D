@@ -1393,7 +1393,7 @@ float3 PS_calcLR(float2 texcoord)
 	Right.rgb = HUD(Right.rgb,float2(TCR.x + HUD_Adjustment,TCR.y)).rgb;
 	#endif
 	float LPI = Stereoscopic_Mode == 5 ? 1.268 : 1.0;
-		TC = Stereoscopic_Mode == 5 ? LensePitch(TC * LPI) : TC;
+		TC = Stereoscopic_Mode == 5 ? LensePitch((TC * LPI) * (1-Interlace_Anaglyph.x * pix)) : TC;
 	float2 gridxy, GXYArray[9] = {
 		float2(TC.x * BUFFER_WIDTH, TC.y * BUFFER_HEIGHT), //Native
 		float2(TC.x * 3840.0, TC.y * 2160.0),
