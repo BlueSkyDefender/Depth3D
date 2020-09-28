@@ -1329,7 +1329,7 @@ float2 LensePitch(float2 TC)
 	pitch = 12.3854503905112   Sacchan coefficient 12.75
 	*/
 	//Ended up using the Sacchan cofficient here as Degrees 12.55 CW......
-	float Degrees = radians(12.55);//Converts the specified value from radians to degrees.
+	float Degrees = radians(12.56);//Converts the specified value from radians to degrees.
 	
 	float2 PivotPoint = 0.5;
 	float2 Rotationtexcoord = TC;
@@ -1393,7 +1393,7 @@ float3 PS_calcLR(float2 texcoord)
 	Right.rgb = HUD(Right.rgb,float2(TCR.x + HUD_Adjustment,TCR.y)).rgb;
 	#endif
 	float LPI = Stereoscopic_Mode == 5 ? 1.268 : 1.0;
-		TC = Stereoscopic_Mode == 5 ? LensePitch((TC * LPI) * (1-Interlace_Anaglyph.x * pix)) : TC;
+		TC = Stereoscopic_Mode == 5 ? LensePitch((TC * LPI) * float2(1-Interlace_Anaglyph.x * pix.x,1)) : TC;
 	float2 gridxy, GXYArray[9] = {
 		float2(TC.x * BUFFER_WIDTH, TC.y * BUFFER_HEIGHT), //Native
 		float2(TC.x * 3840.0, TC.y * 2160.0),
@@ -1407,13 +1407,13 @@ float3 PS_calcLR(float2 texcoord)
 	};
 			
 	gridxy = floor(GXYArray[Scaling_Support]);
-	
+	float DG = 0.950;
 	const int Images = 4;
     float3 Colors[Images] = { //4 = 1.268
-    float3(Left.x , Right.y, Right.z), // L | R | R 
-    float3(Left.x , Left.y , Right.z), // L | L | R
-    float3(Right.x, Left.y , Left.z ), // R | L | L 
-    float3(Right.x, Right.y, Left.z )};// R | R | L
+    float3(Left.x , Right.y * DG, Right.z), 			// L | R | R 
+    float3(Left.x * DG, Left.y , Right.z * DG), // L | L | R
+    float3(Right.x, Left.y * DG , Left.z ), // R | L | L 
+    float3(Right.x * DG, Right.y, Left.z * DG )};// R | R | L
     
 	if(Stereoscopic_Mode == 0)
 		color = TexCoords.x < 0.5 ? Left : Right;
