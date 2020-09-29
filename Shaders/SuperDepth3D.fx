@@ -456,7 +456,7 @@ uniform float3 Interlace_Anaglyph_Calibrate <
 	ui_label = " Interlace, Anaglyph & Calibration";
 	ui_tooltip = "Interlace Optimization is used to reduce aliasing in a Line or Column interlaced image. This has the side effect of softening the image.\n"
 	             "Anaglyph Desaturation allows for removing color from an anaglyph 3D image. Zero is Black & White, One is full color.\n"
-	    		 "Tobii Calibration for adjusting the Eye Tracking offset with Tobii, FreePie app, and Script.\n"         
+	    		 "Tobii Calibration for adjusting the Eye Tracking offset with Tobii, FreePie app, and Script.\n"
 				 "Default for Interlace Optimization is 0.5 and for Anaglyph Desaturation is One.";
 	ui_category = "Stereoscopic Options";
 > = float3(0.5,1.0,0.5);
@@ -565,7 +565,7 @@ uniform bool CLK < source = "mousebutton"; keycode = Cursor_Lock_Key; toggle = t
 uniform bool Trigger_Fade_A < source = "mousebutton"; keycode = Fade_Key; toggle = true; mode = "toggle";>;
 uniform bool Trigger_Fade_B < source = "mousebutton"; keycode = Fade_Key;>;
 uniform float3 motion[2] < source = "freepie"; index = 0; >;
-//. motion[0] is yaw, pitch, roll and motion[1] is x, y,z.	
+//. motion[0] is yaw, pitch, roll and motion[1] is x, y,z.
 uniform float2 Mousecoords < source = "mousepoint"; > ;
 uniform float frametime < source = "frametime";>;
 uniform float timer < source = "timer"; >;
@@ -1317,13 +1317,13 @@ float3 HUD(float3 HUD, float2 texcoord )
 float2 LensePitch(float2 TC)
 {
 	//Texture Rotation//
-	/*    
+	/*
 	Sacchan calculator http://z800.yokinihakarae.com/html5test/sachiicalc02.html
 	Number of horizontal dots: 3840
 	Number of vertical dots: 2160
 	Sreen Size in inch: 27.9
 	DPI obtained from resolution / inch : 157.9144924790178
-	
+
 	Answer from the DPI of the LCD panel :
 	pitch = 12.683894978234363 Sacchan coefficient 12.45
 	pitch = 12.633159398321425 Sacchan coefficient 12.5
@@ -1334,15 +1334,15 @@ float2 LensePitch(float2 TC)
 	pitch = 12.3854503905112   Sacchan coefficient 12.75
 	*/
 	//Ended up using the Sacchan cofficient here as Degrees 12.55 CW......
-	float Degrees = radians(12.56);//Converts the specified value from radians to degrees.
-	
+	float Degrees = radians(12.5625);//Converts the specified value from radians to degrees.
+
 	float2 PivotPoint = 0.5;
 	float2 Rotationtexcoord = TC;
 	float sin_factor = sin(Degrees);
 	float cos_factor = cos(Degrees);
 	Rotationtexcoord = mul(Rotationtexcoord - PivotPoint, float2x2(float2(cos_factor, -sin_factor), float2(sin_factor, cos_factor)));
 	Rotationtexcoord += PivotPoint + PivotPoint;
-	
+
 	return Rotationtexcoord.xy;
 }
 ///////////////////////////////////////////////////////////Stereo Calculation///////////////////////////////////////////////////////////////////////
@@ -1411,16 +1411,16 @@ float3 PS_calcLR(float2 texcoord)
 		float2(TC.x * 1280.0, TC.y * 720.0),
 		float2(TC.x * 1281.0, TC.y * 721.0)
 	};
-			
+
 	gridxy = floor(GXYArray[Scaling_Support]);
 	float DG = 0.950;
 	const int Images = 4;
     float3 Colors[Images] = { //4 = 1.268
-    float3(Right.x     , Left.y * DG , Left.z      ), // R | L | L 
+    float3(Right.x     , Left.y * DG , Left.z      ), // R | L | L
     float3(Right.x * DG, Right.y     , Left.z * DG ), // R | R | L
-    float3(Left.x      , Right.y * DG, Right.z     ), // L | R | R 
+    float3(Left.x      , Right.y * DG, Right.z     ), // L | R | R
     float3(Left.x * DG , Left.y      , Right.z * DG)};// L | L | R
-    
+
 	if(Stereoscopic_Mode == 0)
 		color = TexCoords.x < 0.5 ? Left : Right;
 	else if(Stereoscopic_Mode == 1)
