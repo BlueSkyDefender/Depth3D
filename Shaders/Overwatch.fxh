@@ -1179,7 +1179,7 @@ static const int FOV = 0;                               //Set Game FoV
 	#define DE_Z 0.375
 	#define DF_X 0.105
 	#define RH 1
-#elif (App == 0x68EF1B4E ) //Serious Sam Fusion
+#elif (App == 0x68EF1B4E || App == 0xC103D998 ) //Serious Sam Fusion | Serious Sam 4: Planet Badass
 	#define DA_W 1
 	#define DA_X 0.075
 	#define DA_Y 10.0
@@ -2063,7 +2063,7 @@ float3 Weapon_Profiles(float WP ,float3 Weapon_Adjust) //Tried Switch But, can't
     if (WP == 42)
         Value = float3(0.3,17.5,0.9015);      //WP 40 | Serious Sam Fusion
     if (WP == 43)
-        Value = float3(0,0,0);                //WP 41 | Serious Sam 4: Planet Badass
+        Value = float3(0,0,0);                //WP 41 | Game
     if (WP == 44)
         Value = float3(0.277,20.0,8.8);       //WP 42 | TitanFall 2 #308AEBEA
     if (WP == 45)
