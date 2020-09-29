@@ -450,15 +450,16 @@ uniform int Stereoscopic_Mode <
 	ui_category = "Stereoscopic Options";
 > = 0;
 
-uniform float2 Interlace_Anaglyph <
+uniform float3 Interlace_Anaglyph_Calibrate <
 	ui_type = "drag";
 	ui_min = 0.0; ui_max = 1.0;
-	ui_label = " Interlace & Anaglyph";
+	ui_label = " Interlace, Anaglyph & Calibration";
 	ui_tooltip = "Interlace Optimization is used to reduce aliasing in a Line or Column interlaced image. This has the side effect of softening the image.\n"
 	             "Anaglyph Desaturation allows for removing color from an anaglyph 3D image. Zero is Black & White, One is full color.\n"
-	             "Default for Interlace Optimization is 0.5 and for Anaglyph Desaturation is One.";
+	    		 "Tobii Calibration for adjusting the Eye Tracking offset with Tobii, FreePie app, and Script.\n"         
+				 "Default for Interlace Optimization is 0.5 and for Anaglyph Desaturation is One.";
 	ui_category = "Stereoscopic Options";
-> = float2(0.5,1.0);
+> = float3(0.5,1.0,0.5);
 #if Ven
 uniform int Scaling_Support <
 	ui_type = "combo";
@@ -563,9 +564,13 @@ uniform bool Text_Info < source = "key"; keycode = Text_Info_Key; toggle = true;
 uniform bool CLK < source = "mousebutton"; keycode = Cursor_Lock_Key; toggle = true; mode = "toggle";>;
 uniform bool Trigger_Fade_A < source = "mousebutton"; keycode = Fade_Key; toggle = true; mode = "toggle";>;
 uniform bool Trigger_Fade_B < source = "mousebutton"; keycode = Fade_Key;>;
+uniform float3 motion[2] < source = "freepie"; index = 0; >;
+//. motion[0] is yaw, pitch, roll and motion[1] is x, y,z.	
 uniform float2 Mousecoords < source = "mousepoint"; > ;
 uniform float frametime < source = "frametime";>;
 uniform float timer < source = "timer"; >;
+float3 FP_IO_Rot(){return motion[0];}
+float3 FP_IO_Pos(){return motion[1];}
 
 static const float Auto_Balance_Clamp = 0.5; //This Clamps Auto Balance's max Distance.
 
@@ -575,7 +580,7 @@ uniform bool DepthCheck < source = "bufready_depth"; >;
 
 #define pix float2(BUFFER_RCP_WIDTH, BUFFER_RCP_HEIGHT)
 #define Per float2( (Perspective * pix.x) * 0.5, 0) //Per is Perspective
-#define AI Interlace_Anaglyph.x * 0.5 //Optimization for line interlaced Adjustment.
+#define AI Interlace_Anaglyph_Calibrate.x * 0.5 //Optimization for line interlaced Adjustment.
 
 float fmod(float a, float b)
 {
@@ -1340,7 +1345,6 @@ float2 LensePitch(float2 TC)
 	
 	return Rotationtexcoord.xy;
 }
-
 ///////////////////////////////////////////////////////////Stereo Calculation///////////////////////////////////////////////////////////////////////
 float3 PS_calcLR(float2 texcoord)
 {
@@ -1393,7 +1397,9 @@ float3 PS_calcLR(float2 texcoord)
 	Right.rgb = HUD(Right.rgb,float2(TCR.x + HUD_Adjustment,TCR.y)).rgb;
 	#endif
 	float LPI = Stereoscopic_Mode == 5 ? 1.268 : 1.0;
-		TC = Stereoscopic_Mode == 5 ? LensePitch((TC * LPI) * float2(1-Interlace_Anaglyph.x * pix.x,1)) : TC;
+	// -4 to 4 is the scale 0 is center.
+	TC += float2((FP_IO_Pos().y+lerp(0,2,saturate(Interlace_Anaglyph_Calibrate.z))) * pix.x,1);
+		TC = Stereoscopic_Mode == 5 ? LensePitch(TC * LPI) : TC;
 	float2 gridxy, GXYArray[9] = {
 		float2(TC.x * BUFFER_WIDTH, TC.y * BUFFER_HEIGHT), //Native
 		float2(TC.x * 3840.0, TC.y * 2160.0),
@@ -1410,10 +1416,10 @@ float3 PS_calcLR(float2 texcoord)
 	float DG = 0.950;
 	const int Images = 4;
     float3 Colors[Images] = { //4 = 1.268
-    float3(Left.x , Right.y * DG, Right.z), 			// L | R | R 
-    float3(Left.x * DG, Left.y , Right.z * DG), // L | L | R
-    float3(Right.x, Left.y * DG , Left.z ), // R | L | L 
-    float3(Right.x * DG, Right.y, Left.z * DG )};// R | R | L
+    float3(Right.x     , Left.y * DG , Left.z      ), // R | L | L 
+    float3(Right.x * DG, Right.y     , Left.z * DG ), // R | R | L
+    float3(Left.x      , Right.y * DG, Right.z     ), // L | R | R 
+    float3(Left.x * DG , Left.y      , Right.z * DG)};// L | L | R
     
 	if(Stereoscopic_Mode == 0)
 		color = TexCoords.x < 0.5 ? Left : Right;
@@ -1431,7 +1437,7 @@ float3 PS_calcLR(float2 texcoord)
 	{
 		float Contrast = 1.0, DeGhost = 0.06, LOne, ROne;
 		float3 HalfLA = dot(Left.rgb,float3(0.299, 0.587, 0.114)), HalfRA = dot(Right.rgb,float3(0.299, 0.587, 0.114));
-		float3 LMA = lerp(HalfLA,Left.rgb,Interlace_Anaglyph.y), RMA = lerp(HalfRA,Right.rgb,Interlace_Anaglyph.y);
+		float3 LMA = lerp(HalfLA,Left.rgb,Interlace_Anaglyph_Calibrate.y), RMA = lerp(HalfRA,Right.rgb,Interlace_Anaglyph_Calibrate.y);
 
 		float contrast = (Contrast*0.5)+0.5;
 
