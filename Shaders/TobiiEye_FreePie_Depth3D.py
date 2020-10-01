@@ -25,8 +25,8 @@ def map_tobii(n):
 		#y = tobiiEyeX.averageEyePositionInMmY
 		#z = tobiiEyeX.averageEyePositionInMmZ
 		x = tobiiEyeX.averageEyePositionNormalizedX * MC - Center
-		#y = tobiiEyeX.averageEyePositionNormalizedY
-		#z = tobiiEyeX.averageEyePositionNormalizedZ
+		y = tobiiEyeX.averageEyePositionNormalizedY * MC - Center
+		z = round(tobiiEyeX.averageEyePositionNormalizedZ * MC)
 		#x = tobiiEyeX.normalizedCenterDeltaX
 		#y = tobiiEyeX.normalizedCenterDeltaY
 		#x = tobiiEyeX.gazePointInPixelsX
@@ -35,22 +35,22 @@ def map_tobii(n):
 		#yaw = 0
 		#roll = 0
 		x = 0
-		#y = 0
-		#z = 0
+		y = 0
+		z = 0
 
 	#freePieIO[0].yaw = 0
 	#freePieIO[0].pitch = 0
 	#freePieIO[0].roll = 0
 	freePieIO[0].x = x
-	#freePieIO[0].y = y
-	#freePieIO[0].z = z
+	freePieIO[0].y = y
+	freePieIO[0].z = z
 
 	#diagnostics.watch(enabled)
 	#diagnostics.watch(yaw)
 	#diagnostics.watch(roll)
    	diagnostics.watch(x)
-	#diagnostics.watch(y)
-	#diagnostics.watch(z)
+	diagnostics.watch(y)
+	diagnostics.watch(z)
 
 #Tobii update function
 def update():

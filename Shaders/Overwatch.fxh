@@ -1168,7 +1168,7 @@ static const int FOV = 0;                               //Set Game FoV
 	#define DE_W 0.3975
 	#define DF_X 0.250
 	#define NW 1
-#elif (App == 0x2ECAAF29 ) //Half-Life 2
+#elif (App == 0x2ECAAF29 || App == 0xE19E4830 || App == 0xE19E4830  ) //Half-Life 2 | Left 4 Dead 2
 	#define DA_Y 8.75
 	#define DA_X 0.04
 	#define DB_Z 0.115

@@ -2,7 +2,7 @@
 ///**SuperDepth3D**///
 //----------------////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//* Depth Map Based 3D post-process shader v2.3.5
+//* Depth Map Based 3D post-process shader v2.4.0
 //* For Reshade 3.0+
 //* ---------------------------------
 //*
@@ -133,6 +133,16 @@
 	#define Compatibility_DD 1
 #else
 	#define Compatibility_DD 0
+#endif
+//FreePie Compatibility
+#if __RESHADE__ >= 40600
+	#if __RESHADE__ > 40700
+		#define Compatibility_FP 2
+	#else
+		#define Compatibility_FP 1
+	#endif
+#else
+	#define Compatibility_FP 0
 #endif
 
 #if __VENDOR__ == 0x10DE //AMD = 0x1002 //Nv = 0x10DE //Intel = ???
@@ -564,13 +574,27 @@ uniform bool Text_Info < source = "key"; keycode = Text_Info_Key; toggle = true;
 uniform bool CLK < source = "mousebutton"; keycode = Cursor_Lock_Key; toggle = true; mode = "toggle";>;
 uniform bool Trigger_Fade_A < source = "mousebutton"; keycode = Fade_Key; toggle = true; mode = "toggle";>;
 uniform bool Trigger_Fade_B < source = "mousebutton"; keycode = Fade_Key;>;
-uniform float3 motion[2] < source = "freepie"; index = 0; >;
-//. motion[0] is yaw, pitch, roll and motion[1] is x, y,z.
 uniform float2 Mousecoords < source = "mousepoint"; > ;
 uniform float frametime < source = "frametime";>;
 uniform float timer < source = "timer"; >;
-float3 FP_IO_Rot(){return motion[0];}
-float3 FP_IO_Pos(){return motion[1];}
+#if Compatibility_FP
+uniform float3 motion[2] < source = "freepie"; index = 0; >;
+//. motion[0] is yaw, pitch, roll and motion[1] is x, y, z.
+//float3 FP_IO_Rot(){return motion[0];}
+float3 FP_IO_Pos()
+{
+#if Compatibility_FP == 1
+	#warning "Autostereoscopic enhanced features need ReShade 4.8.0 and above."
+	return motion[1].yyy;
+#elif Compatibility_FP == 2
+	return motion[1];
+#endif 
+}
+#else
+//float3 FP_IO_Rot(){return 0;}
+float3 FP_IO_Pos(){return 0;}
+#warning "Autostereoscopic Need ReShade 4.6.0 and above."
+#endif
 
 static const float Auto_Balance_Clamp = 0.5; //This Clamps Auto Balance's max Distance.
 
@@ -1398,7 +1422,7 @@ float3 PS_calcLR(float2 texcoord)
 	#endif
 	float LPI = Stereoscopic_Mode == 5 ? 1.268 : 1.0;
 	// -4 to 4 is the scale 0 is center.
-	TC += float2((FP_IO_Pos().y+lerp(0,2,saturate(Interlace_Anaglyph_Calibrate.z))) * pix.x,1);
+	TC += float2(((FP_IO_Pos().x * 1.225)+lerp(0,2,saturate(Interlace_Anaglyph_Calibrate.z))) * pix.x,1);
 		TC = Stereoscopic_Mode == 5 ? LensePitch(TC * LPI) : TC;
 	float2 gridxy, GXYArray[9] = {
 		float2(TC.x * BUFFER_WIDTH, TC.y * BUFFER_HEIGHT), //Native
@@ -1631,14 +1655,14 @@ float drawChar( float Char, float2 pos, float2 size, float2 TC )
 float3 Out(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Target
 {
 	float2 TC = float2(texcoord.x,1-texcoord.y);
-	float Text_Timer = 25000, BT = smoothstep(0,1,sin(timer*(3.75/1000))), Size = 1.1, Depth3D, Read_Help, Supported, SetFoV, FoV, Post, Effect, NoPro, NotCom, Mod, Needs, Net, Over, Set, AA, Emu, Not, No, Help, Fix, Need, State, SetAA, SetWP, Work;
+	float Text_Timer = 25000, BT = smoothstep(0,1,sin(timer*(3.75/1000))), Size = 1.1, Depth3D, Read_Help, Supported, ET, ETC, ETTF, ETTC, SetFoV, FoV, Post, Effect, NoPro, NotCom, Mod, Needs, Net, Over, Set, AA, Emu, Not, No, Help, Fix, Need, State, SetAA, SetWP, Work;
 	float3 Color = PS_calcLR(texcoord).rgb;
 
 	if(RH || NC || NP || NF || PE || DS || OS || DA || NW || WW || FV || ED)
 		Text_Timer = 30000;
 
 	[branch] if(timer <= Text_Timer || Text_Info)
-	{ // Set a general character size...
+	{   // Set a general character size...
 		float2 charSize = float2(.00875, .0125) * Size;
 		// Starting position.
 		float2 charPos = float2( 0.009, 0.9725);
@@ -1913,6 +1937,50 @@ float3 Out(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Targe
 		Depth3D += drawChar( CH_N, charPos, charSize_B, TC); charPos.x += .01 * D3D_Size_B;
 		Depth3D += drawChar( CH_F, charPos, charSize_B, TC); charPos.x += .01 * D3D_Size_B;
 		Depth3D += drawChar( CH_O, charPos, charSize_B, TC);
+		if(Stereoscopic_Mode == 5)
+		{
+		//Auto Stereo Help
+		charPos = float2( 0.4575, 0.49375);
+		//Centered
+		ETC += drawChar( CH_C, charPos, charSize, TC); charPos.x += .01 * Size;
+		ETC += drawChar( CH_E, charPos, charSize, TC); charPos.x += .01 * Size;
+		ETC += drawChar( CH_N, charPos, charSize, TC); charPos.x += .01 * Size;
+		ETC += drawChar( CH_T, charPos, charSize, TC); charPos.x += .01 * Size;
+		ETC += drawChar( CH_E, charPos, charSize, TC); charPos.x += .01 * Size;
+		ETC += drawChar( CH_R, charPos, charSize, TC); charPos.x += .01 * Size;
+		ETC += drawChar( CH_E, charPos, charSize, TC); charPos.x += .01 * Size;
+		ETC += drawChar( CH_D, charPos, charSize, TC); charPos.x;
+		//Too Far
+		ETTF += drawChar( CH_T, charPos, charSize, TC); charPos.x += .01 * Size;
+		ETTF += drawChar( CH_O, charPos, charSize, TC); charPos.x += .01 * Size;
+		ETTF += drawChar( CH_O, charPos, charSize, TC); charPos.x += .01 * Size;
+		ETTF += drawChar( CH_BLNK, charPos, charSize, TC); charPos.x += .01 * Size;
+		ETTF += drawChar( CH_F, charPos, charSize, TC); charPos.x += .01 * Size;
+		ETTF += drawChar( CH_A, charPos, charSize, TC); charPos.x += .01 * Size;
+		ETTF += drawChar( CH_R, charPos, charSize, TC); charPos.x;
+		//Too Close
+		ETTC += drawChar( CH_T, charPos, charSize, TC); charPos.x += .01 * Size;
+		ETTC += drawChar( CH_O, charPos, charSize, TC); charPos.x += .01 * Size;
+		ETTC += drawChar( CH_O, charPos, charSize, TC); charPos.x += .01 * Size;
+		ETTC += drawChar( CH_BLNK, charPos, charSize, TC); charPos.x += .01 * Size;
+		ETTC += drawChar( CH_C, charPos, charSize, TC); charPos.x += .01 * Size;
+		ETTC += drawChar( CH_L, charPos, charSize, TC); charPos.x += .01 * Size;
+		ETTC += drawChar( CH_O, charPos, charSize, TC); charPos.x += .01 * Size;
+		ETTC += drawChar( CH_S, charPos, charSize, TC); charPos.x += .01 * Size;	
+		ETTC += drawChar( CH_E, charPos, charSize, TC); charPos.x;
+		//Eye Tracking for Auto Stereo
+		#if Compatibility_FP
+			if(FP_IO_Pos().x <= 0.5 && FP_IO_Pos().x >= -0.5)
+				ET = ETC;
+		#elif Compatibility_FP == 2
+			if(FP_IO_Pos().x <= 0.5 && FP_IO_Pos().x >= -0.5)
+				ET = ETC;
+			if(FP_IO_Pos().z > 5)
+				ET = ETTF;
+			if(FP_IO_Pos().z < 4)
+				ET = ETTC;
+		#endif		
+		}
 		//Text Information
 		if(DS)
 			Need = Needs;
@@ -1940,7 +2008,7 @@ float3 Out(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Targe
 		if(OS)
 			Over = State * BT;
 		//Website
-		return Depth3D+Help+Post+No+Not+Net+Fix+Need+Over+AA+Set+FoV+Emu ? (1-texcoord.y*50.0+48.85)*texcoord.y-0.500: Color;
+		return Depth3D+Help+Post+No+Not+Net+Fix+Need+Over+AA+Set+FoV+Emu+ET ? (1-texcoord.y*50.0+48.85)*texcoord.y-0.500: Color;
 	}
 	else
 		return Color;

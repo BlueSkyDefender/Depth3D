@@ -1249,6 +1249,8 @@ bind 2 "r_drawvgui 0"
 Once in game press 2 and you should have acess to a Depth Map.
 Game Crashes if you leave r_drawvgui 0 when you die. Don't know how to fix this.
 
+{Left 4 Dead 2} -Game Depth Buffer is unstable-
+
 {Shadow warrior(2013)}
  DM 5        2.5-5.0
 Depth Buffer only in DX9 so launch it in Shadow Warrior XP and turn on FSAAX2 in game.
