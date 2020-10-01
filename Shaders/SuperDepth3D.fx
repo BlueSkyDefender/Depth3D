@@ -588,7 +588,7 @@ float3 FP_IO_Pos()
 	return motion[1].yyy;
 #elif Compatibility_FP == 2
 	return motion[1];
-#endif 
+#endif
 }
 #else
 //float3 FP_IO_Rot(){return 0;}
@@ -1951,6 +1951,7 @@ float3 Out(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Targe
 		ETC += drawChar( CH_E, charPos, charSize, TC); charPos.x += .01 * Size;
 		ETC += drawChar( CH_D, charPos, charSize, TC); charPos.x;
 		//Too Far
+		charPos = float2( 0.4575, 0.49375);
 		ETTF += drawChar( CH_T, charPos, charSize, TC); charPos.x += .01 * Size;
 		ETTF += drawChar( CH_O, charPos, charSize, TC); charPos.x += .01 * Size;
 		ETTF += drawChar( CH_O, charPos, charSize, TC); charPos.x += .01 * Size;
@@ -1959,6 +1960,7 @@ float3 Out(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Targe
 		ETTF += drawChar( CH_A, charPos, charSize, TC); charPos.x += .01 * Size;
 		ETTF += drawChar( CH_R, charPos, charSize, TC); charPos.x;
 		//Too Close
+		charPos = float2( 0.445, 0.49375);
 		ETTC += drawChar( CH_T, charPos, charSize, TC); charPos.x += .01 * Size;
 		ETTC += drawChar( CH_O, charPos, charSize, TC); charPos.x += .01 * Size;
 		ETTC += drawChar( CH_O, charPos, charSize, TC); charPos.x += .01 * Size;
@@ -1966,7 +1968,7 @@ float3 Out(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Targe
 		ETTC += drawChar( CH_C, charPos, charSize, TC); charPos.x += .01 * Size;
 		ETTC += drawChar( CH_L, charPos, charSize, TC); charPos.x += .01 * Size;
 		ETTC += drawChar( CH_O, charPos, charSize, TC); charPos.x += .01 * Size;
-		ETTC += drawChar( CH_S, charPos, charSize, TC); charPos.x += .01 * Size;	
+		ETTC += drawChar( CH_S, charPos, charSize, TC); charPos.x += .01 * Size;
 		ETTC += drawChar( CH_E, charPos, charSize, TC); charPos.x;
 		//Eye Tracking for Auto Stereo
 		#if Compatibility_FP
@@ -1979,7 +1981,7 @@ float3 Out(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Targe
 				ET = ETTF;
 			if(FP_IO_Pos().z < 4)
 				ET = ETTC;
-		#endif		
+		#endif
 		}
 		//Text Information
 		if(DS)
