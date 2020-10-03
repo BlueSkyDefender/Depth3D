@@ -122,6 +122,10 @@
 //Text Information Key Default Menu Key
 #define Text_Info_Key 93
 
+//This is to enable manual control over the Lens angle in degrees uses this to set the angle below for "Set_Degrees"
+#define Lenticular_Degrees 0
+#define Set_Degrees 12.5620 //This is set to my default and may/will not work for your screen.
+
 //USER EDITABLE PREPROCESSOR FUNCTIONS END//
 #if !defined(__RESHADE__) || __RESHADE__ < 40000
 	#define Compatibility 1
@@ -174,7 +178,6 @@
 #else
 	#define Mask_Cycle_Key Set_Key_Code_Here
 #endif
-
 //Divergence & Convergence//
 uniform float Divergence <
 	ui_type = "drag";
@@ -470,6 +473,19 @@ uniform float3 Interlace_Anaglyph_Calibrate <
 				 "Default for Interlace Optimization is 0.5 and for Anaglyph Desaturation is One.";
 	ui_category = "Stereoscopic Options";
 > = float3(0.5,1.0,0.5);
+#if Set_Lenticular_Degrees
+uniform float Lens_Angle <
+	ui_type = "drag";
+	ui_min = 0.0; ui_max = 90.0;
+	ui_label = " Lens Angle";
+	ui_tooltip = "Determines Angle of your lens in Degrees.\n"
+				 "This is for AutoStereo Displays.\n"
+				 "Default is Zero.";
+	ui_category = "Stereoscopic Options";
+> = 0;
+#else
+static const float Lens_Angle = Set_Degrees;
+#endif
 #if Ven
 uniform int Scaling_Support <
 	ui_type = "combo";
@@ -1358,7 +1374,7 @@ float2 LensePitch(float2 TC)
 	pitch = 12.3854503905112   Sacchan coefficient 12.75
 	*/
 	//Ended up using the Sacchan cofficient here as Degrees 12.55 CW......
-	float Degrees = radians(12.5625);//Converts the specified value from radians to degrees.
+	float Degrees = radians(Lens_Angle);//Converts the specified value from radians to degrees.
 
 	float2 PivotPoint = 0.5;
 	float2 Rotationtexcoord = TC;
@@ -1422,7 +1438,7 @@ float3 PS_calcLR(float2 texcoord)
 	#endif
 	float LPI = Stereoscopic_Mode == 5 ? 1.268 : 1.0;
 	// -4 to 4 is the scale 0 is center.
-	TC += float2(((FP_IO_Pos().x * 1.225)+lerp(0,2,saturate(Interlace_Anaglyph_Calibrate.z))) * pix.x,1);
+	TC += float2(((FP_IO_Pos().x * 1.225)+lerp(0,4,saturate(Interlace_Anaglyph_Calibrate.z))) * pix.x,1);
 		TC = Stereoscopic_Mode == 5 ? LensePitch(TC * LPI) : TC;
 	float2 gridxy, GXYArray[9] = {
 		float2(TC.x * BUFFER_WIDTH, TC.y * BUFFER_HEIGHT), //Native
@@ -1440,10 +1456,10 @@ float3 PS_calcLR(float2 texcoord)
 	float DG = 0.950;
 	const int Images = 4;
     float3 Colors[Images] = { //4 = 1.268
-    float3(Right.x     , Left.y * DG , Left.z      ), // R | L | L
-    float3(Right.x * DG, Right.y     , Left.z * DG ), // R | R | L
     float3(Left.x      , Right.y * DG, Right.z     ), // L | R | R
-    float3(Left.x * DG , Left.y      , Right.z * DG)};// L | L | R
+    float3(Left.x * DG , Left.y      , Right.z * DG), // L | L | R
+    float3(Right.x     , Left.y * DG , Left.z      ), // R | L | L
+    float3(Right.x * DG, Right.y     , Left.z * DG )};// R | R | L
 
 	if(Stereoscopic_Mode == 0)
 		color = TexCoords.x < 0.5 ? Left : Right;
