@@ -811,6 +811,19 @@ Object Detail Setting seems to change the Near Depth by a small amount. When you
 
 I also notice a problem with starting the game with reshade 3.0.7. I used reshade 3.0.4.
 
+There is a issue with sys_spec option in the games own game.cfg 
+
+I recommend you set your setting in game
+
+Then open the game.cfg and find "sys_spec" and set too
+
+from
+sys_spec = 0
+too
+//sys_spec = 0
+
+then set the file it to read only.
+
 {Quake 2 XP} - ReShade 4.7.0 + Xenos_2.3.2 Injector
 Install game and make sure in launches in fullscreen and native resolution.
 

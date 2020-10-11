@@ -124,7 +124,7 @@
 
 //This is to enable manual control over the Lens angle in degrees uses this to set the angle below for "Set_Degrees"
 #define Lenticular_Degrees 0
-#define Set_Degrees 12.5620 //This is set to my default and may/will not work for your screen.
+#define Set_Degrees 12.5625 //This is set to my default and may/will not work for your screen.
 
 //USER EDITABLE PREPROCESSOR FUNCTIONS END//
 #if !defined(__RESHADE__) || __RESHADE__ < 40000
@@ -178,6 +178,7 @@
 #else
 	#define Mask_Cycle_Key Set_Key_Code_Here
 #endif
+
 //Divergence & Convergence//
 uniform float Divergence <
 	ui_type = "drag";
@@ -473,7 +474,7 @@ uniform float3 Interlace_Anaglyph_Calibrate <
 				 "Default for Interlace Optimization is 0.5 and for Anaglyph Desaturation is One.";
 	ui_category = "Stereoscopic Options";
 > = float3(0.5,1.0,0.5);
-#if Set_Lenticular_Degrees
+#if Lenticular_Degrees
 uniform float Lens_Angle <
 	ui_type = "drag";
 	ui_min = 0.0; ui_max = 90.0;
@@ -482,7 +483,7 @@ uniform float Lens_Angle <
 				 "This is for AutoStereo Displays.\n"
 				 "Default is Zero.";
 	ui_category = "Stereoscopic Options";
-> = 0;
+> = Set_Degrees;
 #else
 static const float Lens_Angle = Set_Degrees;
 #endif
@@ -595,13 +596,13 @@ uniform float frametime < source = "frametime";>;
 uniform float timer < source = "timer"; >;
 #if Compatibility_FP
 uniform float3 motion[2] < source = "freepie"; index = 0; >;
-//. motion[0] is yaw, pitch, roll and motion[1] is x, y, z.
+//. motion[0] is yaw, pitch, roll and motion[1] is x, y, z. In ReShade 4.8+ in ReShade 4.7 it is x = y / y = z
 //float3 FP_IO_Rot(){return motion[0];}
 float3 FP_IO_Pos()
 {
 #if Compatibility_FP == 1
 	#warning "Autostereoscopic enhanced features need ReShade 4.8.0 and above."
-	return motion[1].yyy;
+	return motion[1].yzz;
 #elif Compatibility_FP == 2
 	return motion[1];
 #endif
@@ -1408,11 +1409,9 @@ float3 PS_calcLR(float2 texcoord)
 
 	TCL += Per;
 	TCR -= Per;
-
-	float D = Divergence;
-	if (Eye_Swap)
-		D = -Divergence;
-
+		
+	float D = Eye_Swap ? -Divergence : Divergence;
+		
 	float FadeIO = smoothstep(0,1,1-Fade_in_out(texcoord).x), FD = D, FD_Adjust = 0.1;
 
 	if( Eye_Fade_Reduction_n_Power.y == 1)
@@ -1429,17 +1428,33 @@ float3 PS_calcLR(float2 texcoord)
 	else if( Eye_Fade_Reduction_n_Power.x == 2)
 			DLR = float2(FD,D);
 
-	float4 image = 1, accum, color, Left = MouseCursor(Parallax(-DLR.x, TCL, AI)), Right = MouseCursor(Parallax(DLR.y, TCR, -AI));
+	float4 image = 1, accum, color, L, R, Left = MouseCursor(Parallax(-DLR.x, TCL, AI)), Right = MouseCursor(Parallax(DLR.y, TCR, -AI));
 
 	#if HUD_MODE || HM
 	float HUD_Adjustment = ((0.5 - HUD_Adjust.y)*25.) * pix.x;
 	Left.rgb = HUD(Left.rgb,float2(TCL.x - HUD_Adjustment,TCL.y)).rgb;
 	Right.rgb = HUD(Right.rgb,float2(TCR.x + HUD_Adjustment,TCR.y)).rgb;
 	#endif
-	float LPI = Stereoscopic_Mode == 5 ? 1.268 : 1.0;
+	//Auto Stereo Section C adjusting for eye tracking and distance. This also the point of where pitch, rotation, and other information is used. 
+	float Dist = Stereoscopic_Mode == 5 ? int(FP_IO_Pos().z) : 0, Distance_Ladder = 0.0;//This is the Distance calulation for adjusting the pitch based on what Tobii eye traker gives me.                                                          
+	//Adjust for distance from screen here.
+	if (Dist == 2)
+		Distance_Ladder = 2;	
+	if (Dist == 3)
+		Distance_Ladder = 1.5; // Swap	
+	if (Dist == 4)	
+		Distance_Ladder = 1.0;	
+	if (Dist == 5 || Dist == 6)	
+		Distance_Ladder = 0.5; // Swap	
+	if (Dist == 7)	
+		Distance_Ladder = 0.0;
+
+	float IAC = saturate(Interlace_Anaglyph_Calibrate.z), LPI = Stereoscopic_Mode == 5 ? 1.267 + (Distance_Ladder * 0.001) : 1.0;//1.268
 	// -4 to 4 is the scale 0 is center.
-	TC += float2(((FP_IO_Pos().x * 1.225)+lerp(0,4,saturate(Interlace_Anaglyph_Calibrate.z))) * pix.x,1);
-		TC = Stereoscopic_Mode == 5 ? LensePitch(TC * LPI) : TC;
+	TC += float2( ( FP_IO_Pos().x * 1.225 + lerp(0,4,IAC) ) * pix.x, 0.0);//0.0001????
+	
+	TC = Stereoscopic_Mode == 5 ? LensePitch(TC) * LPI : TC;
+	
 	float2 gridxy, GXYArray[9] = {
 		float2(TC.x * BUFFER_WIDTH, TC.y * BUFFER_HEIGHT), //Native
 		float2(TC.x * 3840.0, TC.y * 2160.0),
@@ -1453,31 +1468,43 @@ float3 PS_calcLR(float2 texcoord)
 	};
 
 	gridxy = floor(GXYArray[Scaling_Support]);
-	float DG = 0.950;
+	float DG = 0.950, Swap_Eye = Dist== 3 || Dist == 5 || Dist == 6 ? 1 : 0;
 	const int Images = 4;
-    float3 Colors[Images] = { //4 = 1.268
-    float3(Left.x      , Right.y * DG, Right.z     ), // L | R | R
-    float3(Left.x * DG , Left.y      , Right.z * DG), // L | L | R
-    float3(Right.x     , Left.y * DG , Left.z      ), // R | L | L
-    float3(Right.x * DG, Right.y     , Left.z * DG )};// R | R | L
+		
+	if (Swap_Eye)
+	{
+		L = Right;
+		R = Left;
+	}
+	else
+	{
+		L = Left;
+		R = Right;
+	}
+	
+	float3 Colors[Images] = {
+	    float3(L.x     , R.y * DG, R.z     ), // L | R | R
+	    float3(L.x * DG, L.y     , R.z * DG), // L | L | R
+	    float3(R.x     , L.y * DG, L.z     ), // R | L | L
+	    float3(R.x * DG, R.y     , L.z * DG)};// R | R | L
 
 	if(Stereoscopic_Mode == 0)
-		color = TexCoords.x < 0.5 ? Left : Right;
+		color = TexCoords.x < 0.5 ? L : R;
 	else if(Stereoscopic_Mode == 1)
-		color = TexCoords.y < 0.5 ? Left : Right;
+		color = TexCoords.y < 0.5 ? L : R;
 	else if(Stereoscopic_Mode == 2)
-		color = fmod(gridxy.y,2) ? Right : Left;
+		color = fmod(gridxy.y,2) ? R : L;
 	else if(Stereoscopic_Mode == 3)
-		color = fmod(gridxy.x,2) ? Right : Left;
+		color = fmod(gridxy.x,2) ? R : L;
 	else if(Stereoscopic_Mode == 4)
-		color = fmod(gridxy.x+gridxy.y,2) ? Right : Left;
+		color = fmod(gridxy.x+gridxy.y,2) ? R : L;
 	else if(Stereoscopic_Mode == 5)
-		color = Colors[int(fmod( gridxy.x,Images))];
+		color = Colors[int(fmod(gridxy.x,Images))];
 	else if(Stereoscopic_Mode >= 6)
 	{
 		float Contrast = 1.0, DeGhost = 0.06, LOne, ROne;
-		float3 HalfLA = dot(Left.rgb,float3(0.299, 0.587, 0.114)), HalfRA = dot(Right.rgb,float3(0.299, 0.587, 0.114));
-		float3 LMA = lerp(HalfLA,Left.rgb,Interlace_Anaglyph_Calibrate.y), RMA = lerp(HalfRA,Right.rgb,Interlace_Anaglyph_Calibrate.y);
+		float3 HalfLA = dot(L.rgb,float3(0.299, 0.587, 0.114)), HalfRA = dot(R.rgb,float3(0.299, 0.587, 0.114));
+		float3 LMA = lerp(HalfLA,L.rgb,Interlace_Anaglyph_Calibrate.y), RMA = lerp(HalfRA,R.rgb,Interlace_Anaglyph_Calibrate.y);
 
 		float contrast = (Contrast*0.5)+0.5;
 
@@ -1957,15 +1984,16 @@ float3 Out(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Targe
 		{
 		//Auto Stereo Help
 		charPos = float2( 0.4575, 0.49375);
-		//Centered
+		//calibrate
 		ETC += drawChar( CH_C, charPos, charSize, TC); charPos.x += .01 * Size;
-		ETC += drawChar( CH_E, charPos, charSize, TC); charPos.x += .01 * Size;
-		ETC += drawChar( CH_N, charPos, charSize, TC); charPos.x += .01 * Size;
-		ETC += drawChar( CH_T, charPos, charSize, TC); charPos.x += .01 * Size;
-		ETC += drawChar( CH_E, charPos, charSize, TC); charPos.x += .01 * Size;
+		ETC += drawChar( CH_A, charPos, charSize, TC); charPos.x += .01 * Size;
+		ETC += drawChar( CH_L, charPos, charSize, TC); charPos.x += .01 * Size;
+		ETC += drawChar( CH_I, charPos, charSize, TC); charPos.x += .01 * Size;
+		ETC += drawChar( CH_B, charPos, charSize, TC); charPos.x += .01 * Size;
 		ETC += drawChar( CH_R, charPos, charSize, TC); charPos.x += .01 * Size;
-		ETC += drawChar( CH_E, charPos, charSize, TC); charPos.x += .01 * Size;
-		ETC += drawChar( CH_D, charPos, charSize, TC); charPos.x;
+		ETC += drawChar( CH_A, charPos, charSize, TC); charPos.x += .01 * Size;
+		ETC += drawChar( CH_T, charPos, charSize, TC); charPos.x += .01 * Size;
+		ETC += drawChar( CH_E, charPos, charSize, TC); charPos.x;
 		//Too Far
 		charPos = float2( 0.4575, 0.49375);
 		ETTF += drawChar( CH_T, charPos, charSize, TC); charPos.x += .01 * Size;

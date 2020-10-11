@@ -60,6 +60,19 @@ uniform int Human_Skin_Color <
 	ui_category = "Virtual Nose";
 > = 0;
 
+uniform float separate <
+	#if Compatibility
+	ui_type = "drag";
+	#else
+	ui_type = "slider";
+	#endif
+	ui_min = 0; ui_max =  0.25;
+	ui_label = "Separate Nose";
+	ui_tooltip = "Use this to split the Nose apart.\n"
+				 "Default is 0.0.";
+	ui_category = "Virtual Nose";
+> = 0.0;
+
 uniform float3 NoseWH <
 	#if Compatibility
 	ui_type = "drag";
@@ -123,11 +136,21 @@ sampler ShadeSampler
 		MipFilter = LINEAR;
 	};
 	
-texture texNM { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA8; MipLevels = 3;};
+texture texNMR { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA8; MipLevels = 3;};
 
-sampler NMSampler
+sampler NMRSampler
 	{
-		Texture = texNM;
+		Texture = texNMR;
+		MinFilter = LINEAR;
+		MagFilter = LINEAR;
+		MipFilter = LINEAR;
+	};
+
+texture texNML { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA8; MipLevels = 3;};
+
+sampler NMLSampler
+	{
+		Texture = texNML;
 		MinFilter = LINEAR;
 		MagFilter = LINEAR;
 		MipFilter = LINEAR;
@@ -188,9 +211,10 @@ float4 NoseColor(float2 texcoord : TEXCOORD0)
 	return Nose;
 }
 
-float4 NoseMask(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Target
-{
-	float4 Out;		
+float4 NoseMaskRight(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Target
+{	
+	texcoord.x -= separate;
+	float4 Out = tex2D(BackBuffer,float2(texcoord.x + separate,texcoord.y)).rgba;		
 	float NC_A = NoseCreation(texcoord).x, NC_B = NoseCreation(texcoord).y, NC_C = NoseCreation(texcoord).z, NC_D = NoseCreation(texcoord).w, M;
 		
 		if(NC_A < 1 || NC_B < 1)
@@ -202,48 +226,68 @@ float4 NoseMask(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_
 				else if(Ambiance == 2)
 					Out.rgb = NoseColor(texcoord).rgb * AbianceBlur(texcoord).rgb;
 			}
+			
+		if(NC_C < 1 || NC_D < 1)
+			M = 1;
 		else
-			{
-				Out.rgb = tex2D(BackBuffer,texcoord).rgb;	
+			M = 0;
+
+	return float4(Out.rgb,texcoord.x < 0.5 ? 0 : M);
+}
+
+float4 NoseMaskLeft(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Target
+{	
+	texcoord.x += separate;
+	float4 Out = tex2D(BackBuffer,float2(texcoord.x - separate,texcoord.y)).rgba;		
+	float NC_A = NoseCreation(texcoord).x, NC_B = NoseCreation(texcoord).y, NC_C = NoseCreation(texcoord).z, NC_D = NoseCreation(texcoord).w, M;
+		
+		if(NC_A < 1 || NC_B < 1)
+			{	
+				if(Ambiance == 0)
+					Out.rgb = NoseColor(texcoord).rgb;
+				else if(Ambiance == 1)
+					Out.rgb = NoseColor(texcoord).rgb * dot(AbianceBlur(texcoord).rgb, float3(0.299, 0.587, 0.114));
+				else if(Ambiance == 2)
+					Out.rgb = NoseColor(texcoord).rgb * AbianceBlur(texcoord).rgb;
 			}
 			
 		if(NC_C < 1 || NC_D < 1)
 			M = 1;
 		else
 			M = 0;
-		
-	return float4(Out.rgb,M);
+
+	return float4(Out.rgb,texcoord.x < 0.5 ? M : 0);
 }
 
+float4 MergeNose(float2 TC,int BB)
+{
+	return TC.x < 0.5 ? tex2Dlod(NMLSampler,float4(TC,0,BB)) : tex2Dlod(NMRSampler,float4(TC,0,BB));
+}
 float4 VNose(float2 texcoord : TEXCOORD0)
 {
 	int Blur_Boost = floor(B_A * 0.5);
 	float BA = B_A * 2.0f;
-	float4 Blur, Out;
+	float4 Blur, Out = tex2D(BackBuffer,texcoord);;
 	if(Human_Skin_Color < 0 || Human_Skin_Color > 0)
 	{	  
-		   Blur += tex2Dlod(NMSampler,float4( texcoord + float2( 1, 0) * BA * pix,0,Blur_Boost));
-		   Blur += tex2Dlod(NMSampler,float4( texcoord + float2(-1, 0) * BA * pix,0,Blur_Boost));
-		   Blur += tex2Dlod(NMSampler,float4( texcoord + float2( 1, 0) * (BA * 0.75) * pix,0,Blur_Boost));
-		   Blur += tex2Dlod(NMSampler,float4( texcoord + float2(-1, 0) * (BA * 0.75) * pix,0,Blur_Boost));
-		   Blur += tex2Dlod(NMSampler,float4( texcoord + float2( 1, 0) * (BA * 0.50) * pix,0,Blur_Boost));
-		   Blur += tex2Dlod(NMSampler,float4( texcoord + float2(-1, 0) * (BA * 0.50) * pix,0,Blur_Boost));
-		   Blur += tex2Dlod(NMSampler,float4( texcoord + float2( 1, 0) * (BA * 0.25) * pix,0,Blur_Boost));
-		   Blur += tex2Dlod(NMSampler,float4( texcoord + float2(-1, 0) * (BA * 0.25) * pix,0,Blur_Boost));
+		   Blur += MergeNose(texcoord + float2( 1, 0) * BA * pix,Blur_Boost);
+		   Blur += MergeNose(texcoord + float2(-1, 0) * BA * pix,Blur_Boost);
+		   Blur += MergeNose(texcoord + float2( 1, 0) * (BA * 0.75) * pix,Blur_Boost);
+		   Blur += MergeNose(texcoord + float2(-1, 0) * (BA * 0.75) * pix,Blur_Boost);
+		   Blur += MergeNose(texcoord + float2( 1, 0) * (BA * 0.50) * pix,Blur_Boost);
+		   Blur += MergeNose(texcoord + float2(-1, 0) * (BA * 0.50) * pix,Blur_Boost);
+		   Blur += MergeNose(texcoord + float2( 1, 0) * (BA * 0.25) * pix,Blur_Boost);
+		   Blur += MergeNose(texcoord + float2(-1, 0) * (BA * 0.25) * pix,Blur_Boost);
 		   Blur /= 8;
-		float NM = tex2D(NMSampler,texcoord).w;
+		float NM = MergeNose(texcoord,0).w;
 		//Dumb AA
-		NM += tex2D(NMSampler,texcoord + float2(-pix.x, 0)).w;
-		NM += tex2D(NMSampler,texcoord + float2( pix.x, 0)).w;
-  	  NM += tex2D(NMSampler,texcoord + float2( 0, pix.y)).w;
-		NM += tex2D(NMSampler,texcoord + float2( 0,-pix.y)).w;
+		NM += MergeNose(texcoord + float2(-pix.x, 0),0).w;
+		NM += MergeNose(texcoord + float2( pix.x, 0),0).w;
+  	  NM += MergeNose(texcoord + float2( 0, pix.y),0).w;
+		NM += MergeNose(texcoord + float2( 0,-pix.y),0).w;
 	  
 		Out = lerp(tex2D(BackBuffer,texcoord), Blur, NM / 5);
 	}
-	else
-	{
-		Out = tex2D(BackBuffer,texcoord);
-	}	
 	
 	return lerp(Out,tex2D(BackBuffer,texcoord),1-Transparency);
 }
@@ -387,11 +431,17 @@ technique Virtual_Nose
 			PixelShader = Shade;
 			RenderTarget = texShade;
 		}
-			pass Nose_Mask
+			pass Nose_Mask_Right
 		{
 			VertexShader = PostProcessVS;
-			PixelShader = NoseMask;
-			RenderTarget = texNM;
+			PixelShader = NoseMaskRight;
+			RenderTarget = texNMR;
+		}
+			pass Nose_Mask_Left
+		{
+			VertexShader = PostProcessVS;
+			PixelShader = NoseMaskLeft;
+			RenderTarget = texNML;
 		}
 			pass PBD
 		{
