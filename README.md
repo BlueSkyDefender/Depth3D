@@ -11,9 +11,6 @@ More in the works.
 Overwatch will assist many of my shaders by setting the Depth Settings for you in select games. To be honest this is the reason donations help me, help you. With every donation this allows Overwatch to grow. This makes it easier to just load it alongside my Depth
 Based Shaders and have some settings set for you. Less Hassle more FUN.
 
-If you enjoyed these shaders and like to donate you can do so at https://paypal.me/BlueSkyDefender
-This or https://www.buymeacoffee.com/BlueSkyDefender
-
 ### Highlighted Shaders Freestyle & Ansel
 **3DViewer**<br />
 This Shader allows for Depth Map Based 3D. With more user control to adjust the image too how they want. Compatible with 3DTV's 3DMonitors & VR HMDs. Made with Freestyle & Ansel in mind.
@@ -25,7 +22,7 @@ A fast Simple way to enhance the look of your image. Needs to be added.
 A multi anamorphic like lens flare shader. It lets you add......... "Flair........" to your images....... get it?
 
 **Particles**<br />
-Lets you  add particles to the image to mimic dust or fire flys with local isolation of color and bright objects.
+Lets you add particles to the image to mimic dust or fire flys with local isolation of color and bright objects.
 
 ### Depth3D VR
 **Companion App**<br />
@@ -50,9 +47,16 @@ Also, Way many more games listed in Games_Help.txt
 
 Please read me ReadMeDepth3d.txt For Setting and More Information. "Needs to be Updated"
 
-**Want to leave me a message at the forums:** BlueSkyKnight<br />
+### Contact & Donation Links
+
+**Want to leave me a message at the forums?:** BlueSkyKnight<br />
 https://reshade.me/forum/shader-presentation/2128-sidebyside-3d-depth-map-based-stereoscopic-shader<br />
-**Want to leave me a message:** BlueSkyDefender<br />
+
+**Want to leave me a message?:** BlueSkyDefender<br />
 Also my steam page https://steamcommunity.com/id/BlueSkyDefender<br />
-**Want to leave me a message or talk to me:** BlueSkyDefender<br />
+
+**Want to leave me a message or talk to me?:** BlueSkyDefender<br />
 Discord Server https://discord.gg/W2f7YhX<br />
+
+**Want to dontate?:**
+If you enjoyed these shaders and like to donate you can do so at https://paypal.me/BlueSkyDefender or https://www.buymeacoffee.com/BlueSkyDefender
