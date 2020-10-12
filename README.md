@@ -4,30 +4,7 @@
 This Shader allows for Depth Map Based 3D like What Nvidia does with Compatibility Mode 3D and what TriDef's does with Power 3D. 
 With many more options than regular Depth3D. Depth3D is my shader that helps introduce users to the world of 3D. SuperDepth3D allows much more control and support for different devices.
 
-**Smart Sharp**<br />
-A Smart Bilateral Sharpening filer that uses depth to gradually phase out it's effect to keep very distant objects from becoming sharp.
-Because who wants razor-sharp clouds? Birds don't, so why should you.
-
-**Depth Cues**<br />
-Depth Based Unsharp Mask intentional haloing. This will work with or without depth. On video, video games, and with still images.
-This will enhance Depth Effects that are already apart of the scene.
-
-**Temporal AA**<br />
-TAA is a Epic Games implementation of Temporal AA that seems the only real way of doing this in reshade with out motion vectors.
-
-**Trails**<br />
-This is an echoing based shader to add a trail to your image as you increase the image persistence. Mainly used for light painting.
-
-**DLAA**<br />
-A reworked port of Directionally Localized Antialiasing Light. Fun simple AA shader that can help with them jaggies .
-
-**NFAA**<br />
-A modded port of Normal Filter Anti Aliasing. With an interesting use case. Use this to assist SMAA or FXAA to catch all of them jaggies without blurring the screen.
-
-**Blooming HDR**<br />
-A Basic High Bloom mid Perf HDR shader that allows for automatic functions to help setting it up in-game.
-
-And many more in the works.
+More in the works.
 
 ### Shader Assistant
 **Overwatch.fxh**<br />
@@ -41,17 +18,14 @@ This or https://www.buymeacoffee.com/BlueSkyDefender
 **3DViewer**<br />
 This Shader allows for Depth Map Based 3D. With more user control to adjust the image too how they want. Compatible with 3DTV's 3DMonitors & VR HMDs. Made with Freestyle & Ansel in mind.
 
-**Enhance**<br />
-Info Pending
+**Enhance**<br /> 
+A fast Simple way to enhance the look of your image. Needs to be added.
 
 **Flair**<br />
-Info Pending
+A multi anamorphic like lens flare shader. It lets you add......... "Flair........" to your images....... get it?
 
 **Particles**<br />
-Info Pending
-
-**Rain**<br />
-Super Basic Rain Shader.
+Lets you  add particles to the image to mimic dust or fire flys with local isolation of color and bright objects.
 
 ### Depth3D VR
 **Companion App**<br />
