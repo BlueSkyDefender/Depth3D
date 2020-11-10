@@ -1368,9 +1368,21 @@ static const int FOV = 0;                               //Set Game FoV
 	#define DE_Z 0.375
 	#define DE_W 0.075
 #elif (App == 0x14E41902 ) //jsHexen II
-	#define NC 1
+	#define RH 1
+	#define NF 1
+	#define DA_X 0.06
+	#define DA_Y 17.5
+	#define DA_Z 0.0003
+	#define DB_Y 4
+	#define DB_W 22
 #elif (App == 0x12C96DB0 ) //Hexen 2 Hammer of Thyrion
-	#define NC 1
+	#define RH 1
+	#define NF 1
+	#define DA_X 0.06
+	#define DA_Y 17.5
+	#define DA_Z 0.0003
+	#define DB_Y 4
+	#define DB_W 22
 #elif (App == 0x54A39BDC ) //Hexen 2 FTEQW 64
 	#define DA_X 0.06
 	#define DA_Y 30.0

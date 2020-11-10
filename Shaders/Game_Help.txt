@@ -505,6 +505,17 @@ vr_view_yoffset 4.0
 Stereo Example & values to try.
 For More information look at the mini guide below for GZDOOM.
 
+{Hexen 2} - Hammer of Thyrion & jsHexen II
+Open the games Config.cfg file in the data1 folder.
+Find gl_ztrick
+
+From gl_ztrick "1"
+to   gl_ztrick "0"
+
+The depth buffer should stop flickering in ReShade 4.8.3
+
+Hexen 2 FTEQW 64 should work already.
+
 {HomeFront the Revolution} - Thank you zig11727
 Path to Install E:\Steam\SteamApps\common\Homefront_The_Revolution\Bin64
 Works Don't know the settings.
