@@ -4,7 +4,7 @@
 This Shader allows for Depth Map Based 3D like What Nvidia does with Compatibility Mode 3D and what TriDef's does with Power 3D. 
 With many more options than regular Depth3D. Depth3D is my shader that helps introduce users to the world of 3D. SuperDepth3D allows much more control and support for different devices.
 
-More in the works.
+More in the works at the [AstrayFX](https://blueskydefender.github.io/AstrayFX/) repository. This is shader content that falls outside of Stereo 3D....
 
 ### Shader Assistant
 **Overwatch.fxh**<br />
