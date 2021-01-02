@@ -19,35 +19,37 @@ def map_tobii(n):
 	MC = Center * 2
 
 	if (IsLooking): #and enabled):
-		#yaw = rotobiiEyeX.yaw
-		#roll = tobiiEyeX.roll
+		yaw = tobiiEyeX.yaw
+		#pitch = tobiiEyeX.pitch #Note this does not work with TobiiEye c4 and not a option in FreePie. But, the TobiiEye v5 should have pitch now so expect this to be added in later.
+		roll = tobiiEyeX.roll
+		x = tobiiEyeX.averageEyePositionNormalizedX * MC - Center
+		y = tobiiEyeX.averageEyePositionNormalizedY * MC - Center
 		#x = tobiiEyeX.averageEyePositionInMmX
 		#y = tobiiEyeX.averageEyePositionInMmY
 		#z = tobiiEyeX.averageEyePositionInMmZ
-		x = tobiiEyeX.averageEyePositionNormalizedX * MC - Center
-		y = tobiiEyeX.averageEyePositionNormalizedY * MC - Center
-		z = round(tobiiEyeX.averageEyePositionNormalizedZ * MC)
 		#x = tobiiEyeX.normalizedCenterDeltaX
 		#y = tobiiEyeX.normalizedCenterDeltaY
 		#x = tobiiEyeX.gazePointInPixelsX
 		#y = tobiiEyeX.gazePointInPixelsY
+		z = round(tobiiEyeX.averageEyePositionNormalizedZ * MC)
    	else :
-		#yaw = 0
-		#roll = 0
+		yaw = 0
+		#pitch = 0
+		roll = 0
 		x = 0
 		y = 0
 		z = 0
 
-	#freePieIO[0].yaw = 0
-	#freePieIO[0].pitch = 0
-	#freePieIO[0].roll = 0
+	freePieIO[0].yaw = 0
+	freePieIO[0].pitch = 0
+	freePieIO[0].roll = 0
 	freePieIO[0].x = x
 	freePieIO[0].y = y
 	freePieIO[0].z = z
 
-	#diagnostics.watch(enabled)
-	#diagnostics.watch(yaw)
-	#diagnostics.watch(roll)
+	diagnostics.watch(yaw)
+	#diagnostics.watch(pitch)
+	diagnostics.watch(roll)
    	diagnostics.watch(x)
 	diagnostics.watch(y)
 	diagnostics.watch(z)
