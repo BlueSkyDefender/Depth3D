@@ -1409,9 +1409,9 @@ float3 PS_calcLR(float2 texcoord)
 
 	TCL += Per;
 	TCR -= Per;
-		
+
 	float D = Eye_Swap ? -Divergence : Divergence;
-		
+
 	float FadeIO = smoothstep(0,1,1-Fade_in_out(texcoord).x), FD = D, FD_Adjust = 0.1;
 
 	if( Eye_Fade_Reduction_n_Power.y == 1)
@@ -1435,26 +1435,26 @@ float3 PS_calcLR(float2 texcoord)
 	Left.rgb = HUD(Left.rgb,float2(TCL.x - HUD_Adjustment,TCL.y)).rgb;
 	Right.rgb = HUD(Right.rgb,float2(TCR.x + HUD_Adjustment,TCR.y)).rgb;
 	#endif
-	//Auto Stereo Section C adjusting for eye tracking and distance. This also the point of where pitch, rotation, and other information is used. 
-	float Dist = Stereoscopic_Mode == 5 ? int(FP_IO_Pos().z) : 0, Distance_Ladder = 0.0;//This is the Distance calulation for adjusting the pitch based on what Tobii eye traker gives me.                                                          
+	//Auto Stereo Section C adjusting for eye tracking and distance. This also the point of where pitch, rotation, and other information is used.
+	float Dist = Stereoscopic_Mode == 5 ? int(FP_IO_Pos().z) : 0, Distance_Ladder = 0.0;//This is the Distance calulation for adjusting the pitch based on what Tobii eye traker gives me.
 	//Adjust for distance from screen here.
 	if (Dist == 2)
-		Distance_Ladder = 2;	
+		Distance_Ladder = 2;
 	if (Dist == 3)
-		Distance_Ladder = 1.5; // Swap	
-	if (Dist == 4)	
-		Distance_Ladder = 1.0;	
-	if (Dist == 5 || Dist == 6)	
-		Distance_Ladder = 0.5; // Swap	
-	if (Dist == 7)	
+		Distance_Ladder = 1.5; // Swap
+	if (Dist == 4)
+		Distance_Ladder = 1.0;
+	if (Dist == 5 || Dist == 6)
+		Distance_Ladder = 0.5; // Swap
+	if (Dist == 7)
 		Distance_Ladder = 0.0;
 
 	float IAC = saturate(Interlace_Anaglyph_Calibrate.z), LPI = Stereoscopic_Mode == 5 ? 1.267 + (Distance_Ladder * 0.001) : 1.0;//1.268
 	// -4 to 4 is the scale 0 is center.
 	TC += float2( ( FP_IO_Pos().x * 1.225 + lerp(0,4,IAC) ) * pix.x, 0.0);//0.0001????
-	
+
 	TC = Stereoscopic_Mode == 5 ? LensePitch(TC) * LPI : TC;
-	
+
 	float2 gridxy, GXYArray[9] = {
 		float2(TC.x * BUFFER_WIDTH, TC.y * BUFFER_HEIGHT), //Native
 		float2(TC.x * 3840.0, TC.y * 2160.0),
@@ -1470,7 +1470,7 @@ float3 PS_calcLR(float2 texcoord)
 	gridxy = floor(GXYArray[Scaling_Support]);
 	float DG = 0.950, Swap_Eye = Dist== 3 || Dist == 5 || Dist == 6 ? 1 : 0;
 	const int Images = 4;
-		
+
 	if (Swap_Eye)
 	{
 		L = Right;
@@ -1481,7 +1481,7 @@ float3 PS_calcLR(float2 texcoord)
 		L = Left;
 		R = Right;
 	}
-	
+
 	float3 Colors[Images] = {
 	    float3(L.x     , R.y * DG, R.z     ), // L | R | R
 	    float3(L.x * DG, L.y     , R.z * DG), // L | L | R
@@ -1499,7 +1499,7 @@ float3 PS_calcLR(float2 texcoord)
 	else if(Stereoscopic_Mode == 4)
 		color = fmod(gridxy.x+gridxy.y,2) ? R : L;
 	else if(Stereoscopic_Mode == 5)
-		color = Colors[int(fmod(gridxy.x,Images))];
+		color = float4(Colors[int(fmod(gridxy.x,Images))],1.0);
 	else if(Stereoscopic_Mode >= 6)
 	{
 		float Contrast = 1.0, DeGhost = 0.06, LOne, ROne;
