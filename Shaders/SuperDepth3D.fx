@@ -1471,16 +1471,7 @@ float3 PS_calcLR(float2 texcoord)
 	float DG = 0.950, Swap_Eye = Dist== 3 || Dist == 5 || Dist == 6 ? 1 : 0;
 	const int Images = 4;
 
-	if (Swap_Eye)
-	{
-		L = Right;
-		R = Left;
-	}
-	else
-	{
-		L = Left;
-		R = Right;
-	}
+	if (Swap_Eye) { L = Right; R = Left; } else	{ L = Left; R = Right; }
 
 	float3 Colors[Images] = {
 	    float3(L.x     , R.y * DG, R.z     ), // L | R | R

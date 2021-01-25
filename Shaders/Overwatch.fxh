@@ -703,7 +703,7 @@ static const int FOV = 0;                               //Set Game FoV
 #elif (App == 0x88004DC9 || App == 0x1DDA9341) //Strange Brigade DX12 & Vulkan
 	#define DA_X 0.0625
 	#define DA_Y 20.0
-	#define DA_Z 0.0005
+	#define DA_Z 0.0001
 	#define DB_Y 5
 	#define DE_X 2
 	#define DE_Y 0.3

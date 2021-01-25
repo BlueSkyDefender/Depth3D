@@ -1,8 +1,8 @@
-////-------------------//
-///**SuperDepth3D_VR**///
-//-------------------////
+////--------------------//
+///**SuperDepth3D_VR+**///
+//--------------------////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//* Depth Map Based 3D post-process shader v2.3.5
+//* Depth Map Based 3D post-process shader v2.3.6
 //* For Reshade 3.0+
 //* ---------------------------------
 //*
@@ -153,6 +153,11 @@
 #else
 	#define Mask_Cycle_Key Set_Key_Code_Here
 #endif
+
+#ifndef Super3D_Mode //This mode is for Super3D Mode for close to full Res images per I using Channel Compression
+	#define Super3D_Mode 0
+#endif
+#define SuperDepth Super3D_Mode
 
 uniform int IPD <
 	#if Compatibility
@@ -483,6 +488,7 @@ static const float3 Colors_K1_K2_K3 = float3(DC_X,DC_Y,DC_Z);
 static const float Zoom = DC_W;
 #endif
 
+#if !SuperDepth
 uniform int Barrel_Distortion <
 	ui_type = "combo";
 	ui_items = "Off\0Blinders A\0Blinders B\0";
@@ -525,7 +531,13 @@ uniform bool Theater_Mode <
 	ui_tooltip = "Sets the VR Shader in to Theater mode.";
 	ui_category = "Image Adjustment";
 > = false;
-
+#else
+static const int Barrel_Distortion = 0;
+static const float FoV = 0;
+static const float3 Polynomial_Colors_K1 = float3(0.22, 0.22, 0.22);
+static const float3 Polynomial_Colors_K2 = float3(0.24, 0.24, 0.24);
+static const int Theater_Mode = 0;
+#endif
 uniform float Blinders <
 	ui_type = "slider";
 	ui_min = 0.0; ui_max = 1.0;
@@ -585,6 +597,24 @@ float fmod(float a, float b)
 {
 	float c = frac(abs(a / b)) * abs(b);
 	return a < 0 ? -c : c;
+}
+///////////////////////////////////////////////////////////Conversions/////////////////////////////////////////////////////////////
+float3 RGBtoYCbCr(float3 rgb)
+{   float C[1];//The Chronicles of Riddick: Assault on Dark Athena FIX I don't know why it works.......
+	float Y  =  .299 * rgb.x + .587 * rgb.y + .114 * rgb.z; // Luminance
+	float Cb = -.169 * rgb.x - .331 * rgb.y + .500 * rgb.z; // Chrominance Blue
+	float Cr =  .500 * rgb.x - .419 * rgb.y - .081 * rgb.z; // Chrominance Red
+	return float3(Y,Cb + 128./255.,Cr + 128./255.);
+}
+
+float3 YCbCrtoRGB(float3 ycc)
+{
+	float3 c = ycc - float3(0., 128./255., 128./255.);
+
+	float R = c.x + 1.400 * c.z;
+	float G = c.x - 0.343 * c.y - 0.711 * c.z;
+	float B = c.x + 1.765 * c.y;
+	return float3(R,G,B);
 }
 ///////////////////////////////////////////////////////////////3D Starts Here/////////////////////////////////////////////////////////////////
 texture DepthBufferTex : DEPTH;
@@ -1300,7 +1330,7 @@ float2 Parallax(float Diverge, float2 Coordinates) // Horizontal parallax offset
 	// Parallax Occlusion Mapping
 	float2 PrevParallaxCoord = float2(ParallaxCoord.x + deltaCoordinates, ParallaxCoord.y);
 	float beforeDepthValue = GetDB(ParallaxCoord ).y, afterDepthValue = CurrentDepthMapValue - CurrentLayerDepth;
-		beforeDepthValue += LayerDepth - CurrentLayerDepth;
+		beforeDepthValue += LayerDepth + CurrentLayerDepth;
 	// Interpolate coordinates
 	float weight = afterDepthValue / (afterDepthValue - beforeDepthValue);
 		ParallaxCoord = PrevParallaxCoord * weight + ParallaxCoord * (1. - weight);
@@ -1387,8 +1417,8 @@ void LR_Out(float4 position : SV_Position, float2 texcoord : TEXCOORD, out float
 			DLR = float2(FD,D);
 
 	//Left & Right Parallax for Stereo Vision
-	Left = saturation( MouseCursor( Parallax(-DLR.x, TCL)) ); //Stereoscopic 3D using Reprojection Left
-	Right = saturation( MouseCursor( Parallax( DLR.y, TCR)) );//Stereoscopic 3D using Reprojection Right
+	Left = saturation( float4(MouseCursor( Parallax(-DLR.x, TCL)).rgb,1.0) ); //Stereoscopic 3D using Reprojection Left
+	Right =saturation( float4(MouseCursor( Parallax( DLR.y, TCR)).rgb,1.0) );//Stereoscopic 3D using Reprojection Right
 
 	#if HUD_MODE || HM
 	float HUD_Adjustment = ((0.5 - HUD_Adjust.y)*25.) * pix.x;
@@ -1479,6 +1509,16 @@ float2 BD(float2 p, float k1, float k2) //Polynomial Lens + Radial lens undistor
 
 return p;
 }
+
+float3 YCbCrLeft(float2 texcoord)
+{
+	return RGBtoYCbCr(L(texcoord));
+}
+
+float3 YCbCrRight(float2 texcoord)
+{
+	return RGBtoYCbCr(R(texcoord));
+}
 ///////////////////////////////////////////////////////////Stereo Distortion Out///////////////////////////////////////////////////////////////////////
 float3 PS_calcLR(float2 texcoord)
 {
@@ -1486,39 +1526,59 @@ float3 PS_calcLR(float2 texcoord)
 	float4 color, Left, Right, color_redL, color_greenL, color_blueL, color_redR, color_greenR, color_blueR;
 	float K1_Red = Polynomial_Colors_K1.x, K1_Green = Polynomial_Colors_K1.y, K1_Blue = Polynomial_Colors_K1.z;
 	float K2_Red = Polynomial_Colors_K2.x, K2_Green = Polynomial_Colors_K2.y, K2_Blue = Polynomial_Colors_K2.z;
-	if(Barrel_Distortion == 1 || Barrel_Distortion == 2)
+	float Y_Left, Y_Right, CbCr_Left, CbCr_Right, CbCr;
+
+	if(Barrel_Distortion == 0 || SuperDepth == 1)
+	{   if(!SuperDepth)
+		{   //Had to change float4 to float3.... Error only shows under linux.
+			Left.rgb = L(TCL).rgb;
+			Right.rgb = R(TCR).rgb;
+		}
+		else
+		{
+			Y_Left = YCbCrLeft(texcoord).x;
+			Y_Right = YCbCrRight(texcoord).x;
+
+			CbCr_Left = texcoord.x < 0.5 ? YCbCrLeft(texcoord * 2).y : YCbCrLeft(texcoord * 2 - float2(1,0)).z;
+			CbCr_Right = texcoord.x < 0.5 ? YCbCrRight(texcoord * 2 - float2(0,1)).y : YCbCrRight(texcoord * 2 - 1 ).z;
+
+			CbCr = texcoord.y < 0.5 ? CbCr_Left : CbCr_Right;
+		}
+	}
+	else
 	{
 		uv_redL = BD(TCL.xy,K1_Red,K2_Red);
 		uv_greenL = BD(TCL.xy,K1_Green,K2_Green);
 		uv_blueL = BD(TCL.xy,K1_Blue,K2_Blue);
 
-		uv_redR = BD(TCR.xy,K1_Red,K2_Red);
-		uv_greenR = BD(TCR.xy,K1_Green,K2_Green);
-		uv_blueR = BD(TCR.xy,K1_Blue,K2_Blue);
-
 		color_redL = L(uv_redL).r;
 		color_greenL = L(uv_greenL).g;
 		color_blueL = L(uv_blueL).b;
+
+		Left = float4(color_redL.x, color_greenL.y, color_blueL.z, 1.0);
+
+		uv_redR = BD(TCR.xy,K1_Red,K2_Red);
+		uv_greenR = BD(TCR.xy,K1_Green,K2_Green);
+		uv_blueR = BD(TCR.xy,K1_Blue,K2_Blue);
 
 		color_redR = R(uv_redR).r;
 		color_greenR = R(uv_greenR).g;
 		color_blueR = R(uv_blueR).b;
 
-		Left = float4(color_redL.x, color_greenL.y, color_blueL.z, 1.0);
 		Right = float4(color_redR.x, color_greenR.y, color_blueR.z, 1.0);
 	}
-	else
-	{   //Had to change float4 to float3.... Error only shows under linux.
-		Left.rgb = L(TCL).rgb;
-		Right.rgb = R(TCR).rgb;
-	}
 
-	if(Barrel_Distortion == 0)
-	color = texcoord.x < 0.5 ? Left : Right;
-	else if(Barrel_Distortion == 1)
-	color = texcoord.x < 0.5 ? Circle(Left,float2(texcoord.x*2,texcoord.y)) : Circle(Right,float2(texcoord.x*2-1,texcoord.y));
-	else if(Barrel_Distortion == 2)
-	color = texcoord.x < 0.5 ? Left : Right;
+	if(!SuperDepth)
+	{
+		if(Barrel_Distortion == 1)
+			color = texcoord.x < 0.5 ? Circle(Left,float2(texcoord.x*2,texcoord.y)) : Circle(Right,float2(texcoord.x*2-1,texcoord.y));
+		else
+			color = texcoord.x < 0.5 ? Left : Right;
+	}
+	else
+	{
+			color.rgb = float3(Y_Left,Y_Right,CbCr);
+	}
 
 	if (BD_Options == 2 || Alinement_View)
 		color.rgb = dot(0.5-tex2D(BackBuffer,texcoord).rgb,0.333) / float3(1,tex2D(SamplerzBufferVR,texcoord).x,1);
