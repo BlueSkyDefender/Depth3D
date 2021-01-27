@@ -2,7 +2,7 @@
 ///**SuperDepth3D_VR+**///
 //--------------------////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//* Depth Map Based 3D post-process shader v2.3.6
+//* Depth Map Based 3D post-process shader v2.3.7
 //* For Reshade 3.0+
 //* ---------------------------------
 //*
@@ -134,7 +134,18 @@
 #else
 	#define Compatibility_DD 0
 #endif
-
+//DX9 0x9000 and OpenGL
+#if __RENDERER__ >= 0x9000 || __RENDERER__ >= 0x10000
+	#define RenderLimitations 0
+#else
+	#define RenderLimitations 1
+#endif
+//DX12 Check
+#if __RENDERER__ >= 0xc000
+	#define DXTwelve 1
+#else
+	#define DXTwelve 0
+#endif
 //Resolution Scaling because I can't tell your monitor size. Each level is 25 more then it should be.
 #if (BUFFER_HEIGHT <= 1080)
 	#define Max_Divergence 50.0
@@ -154,10 +165,24 @@
 	#define Mask_Cycle_Key Set_Key_Code_Here
 #endif
 
-#ifndef Super3D_Mode //This mode is for Super3D Mode for close to full Res images per I using Channel Compression
+#ifndef Super3D_Mode //This preprocessor is for Super3D Mode for really close to full Res images per I using Channel Compression
 	#define Super3D_Mode 0
 #endif
 #define SuperDepth Super3D_Mode
+
+#ifndef HelixVision_Mode //This preprocessor is for HelixVision Mode that creates a Double Sized texture on the Horizontal axis.
+	#define HelixVision_Mode 0
+#endif
+
+#if RenderLimitations && (BUFFER_WIDTH * 2) > 4096
+	#define HelixVision 0
+		#warning "Will NOT work on DirectX 9.0c and OpenGL at current resolution."
+#else //#error "Will NOT work on DirectX 9.0c and OpenGL."
+	#define HelixVision HelixVision_Mode
+	#if DXTwelve
+		#warning "DirectX 12 not supported in the HelixVision app."
+	#endif
+#endif
 
 uniform int IPD <
 	#if Compatibility
@@ -488,7 +513,7 @@ static const float3 Colors_K1_K2_K3 = float3(DC_X,DC_Y,DC_Z);
 static const float Zoom = DC_W;
 #endif
 
-#if !SuperDepth
+#if !SuperDepth && !HelixVision
 uniform int Barrel_Distortion <
 	ui_type = "combo";
 	ui_items = "Off\0Blinders A\0Blinders B\0";
@@ -599,22 +624,12 @@ float fmod(float a, float b)
 	return a < 0 ? -c : c;
 }
 ///////////////////////////////////////////////////////////Conversions/////////////////////////////////////////////////////////////
-float3 RGBtoYCbCr(float3 rgb)
+float3 RGBtoYCbCr(float3 rgb) // For Super3D a new Stereo3D output.
 {   float C[1];//The Chronicles of Riddick: Assault on Dark Athena FIX I don't know why it works.......
 	float Y  =  .299 * rgb.x + .587 * rgb.y + .114 * rgb.z; // Luminance
 	float Cb = -.169 * rgb.x - .331 * rgb.y + .500 * rgb.z; // Chrominance Blue
 	float Cr =  .500 * rgb.x - .419 * rgb.y - .081 * rgb.z; // Chrominance Red
 	return float3(Y,Cb + 128./255.,Cr + 128./255.);
-}
-
-float3 YCbCrtoRGB(float3 ycc)
-{
-	float3 c = ycc - float3(0., 128./255., 128./255.);
-
-	float R = c.x + 1.400 * c.z;
-	float G = c.x - 0.343 * c.y - 0.711 * c.z;
-	float B = c.x + 1.765 * c.y;
-	return float3(R,G,B);
 }
 ///////////////////////////////////////////////////////////////3D Starts Here/////////////////////////////////////////////////////////////////
 texture DepthBufferTex : DEPTH;
@@ -702,7 +717,24 @@ sampler SamplerPBBVR
 		AddressW = BORDER;
 	};
 ///////////////////////////////////////////////////////Left Right Textures////////////////////////////////////////////////////////////////////
-texture LeftTex  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA8; };
+#if __RESHADE__ >= 40400
+	#define RGBA RGB10A2
+#else
+	#define RGBA RGBA16
+#endif
+
+#if HelixVision
+texture DoubleTex  { Width = BUFFER_WIDTH * 2; Height = BUFFER_HEIGHT; Format = RGBA; };//HDR Consideration
+
+sampler SamplerDouble
+	{
+		Texture = DoubleTex;
+		AddressU = BORDER;
+		AddressV = BORDER;
+		AddressW = BORDER;
+	};
+#else
+texture LeftTex  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA; };//HDR Consideration
 
 sampler SamplerLeft
 	{
@@ -712,7 +744,7 @@ sampler SamplerLeft
 		AddressW = BORDER;
 	};
 
-texture RightTex  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA8; };
+texture RightTex  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA; };//HDR Consideration
 
 sampler SamplerRight
 	{
@@ -721,6 +753,7 @@ sampler SamplerRight
 		AddressV = BORDER;
 		AddressW = BORDER;
 	};
+#endif
 ////////////////////////////////////////////////////////Adapted Luminance/////////////////////////////////////////////////////////////////////
 texture texLumVR {Width = 256*0.5; Height = 256*0.5; Format = RGBA16F; MipLevels = 8;}; //Sample at 256x256/2 and a mip bias of 8 should be 1x1
 
@@ -1065,7 +1098,7 @@ float Motion_Blinders(float2 texcoord)
 }
 //////////////////////////////////////////////////////////Depth Map Alterations/////////////////////////////////////////////////////////////////////
 
-float3 DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD) : SV_Target
+void DepthMap(float4 position : SV_Position, float2 texcoord : TEXCOORD, out float3 VRDepth : SV_Target0, out float4 StoreBB : SV_Target1)
 {
 	float3 DM = PrepDepth(texcoord).rgb;
 	float R = DM.x, G = DM.y, B = DM.z;
@@ -1083,7 +1116,8 @@ float3 DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD)
 	if(texcoord.x < pix.x * 2 && 1-texcoord.y < pix.y * 2)//BL
 		R = Motion_Blinders(texcoord);
 
-	return saturate(float3(R,G,B));
+	VRDepth = saturate(float3(R,G,B));
+	StoreBB = dot(tex2D(BackBufferCLAMP,texcoord).rgb,float3(0.2125, 0.7154, 0.0721));
 }
 
 float AutoDepthRange(float d, float2 texcoord )
@@ -1374,8 +1408,12 @@ float4 saturation(float4 C)
    return lerp(greyscale.xxxx, C, (Saturation + 1.0));
 }
 
-void LR_Out(float4 position : SV_Position, float2 texcoord : TEXCOORD, out float4 Left : SV_Target0, out float4 Right : SV_Target1, out float StoreBB : SV_Target2)
-{   StoreBB = dot(tex2D(BackBufferCLAMP,texcoord).rgb,float3(0.2125, 0.7154, 0.0721));
+#if HelixVision
+void LR_Out(float4 position : SV_Position, float2 texcoord : TEXCOORD, out float4 Double : SV_Target0)
+#else
+void LR_Out(float4 position : SV_Position, float2 texcoord : TEXCOORD, out float4 Left : SV_Target0, out float4 Right : SV_Target1)//, out float StoreBB : SV_Target2)
+#endif
+{   float2 StoreTC = texcoord; //StoreBB = dot(tex2D(BackBufferCLAMP,texcoord).rgb,float3(0.2125, 0.7154, 0.0721));
 	//Field of View
 	float fov = FoV-(FoV*0.2), F = -fov + 1,HA = (F - 1)*(BUFFER_WIDTH*0.5)*pix.x;
 	//Field of View Application
@@ -1415,15 +1453,26 @@ void LR_Out(float4 position : SV_Position, float2 texcoord : TEXCOORD, out float
 			DLR = float2(D,FD);
 	else if( Eye_Fade_Reduction_n_Power.x == 2)
 			DLR = float2(FD,D);
-
-	//Left & Right Parallax for Stereo Vision
+//Left & Right Parallax for Stereo Vision
+#if HelixVision
+	Double = StoreTC.x < 0.5 ? saturation( float4(MouseCursor( Parallax(-DLR.x, float2(TCL.x * 2,TCL.y))).rgb,1.0) ): saturation( float4(MouseCursor( Parallax( DLR.y, float2(TCR.x  * 2 - 1,TCR.y))).rgb,1.0) ); //Stereoscopic 3D using Reprojection Left & Right
+#else
 	Left = saturation( float4(MouseCursor( Parallax(-DLR.x, TCL)).rgb,1.0) ); //Stereoscopic 3D using Reprojection Left
 	Right =saturation( float4(MouseCursor( Parallax( DLR.y, TCR)).rgb,1.0) );//Stereoscopic 3D using Reprojection Right
+#endif
+
 
 	#if HUD_MODE || HM
 	float HUD_Adjustment = ((0.5 - HUD_Adjust.y)*25.) * pix.x;
-	Left.rgb = HUD(Left.rgb,float2(TCL.x - HUD_Adjustment,TCL.y));
-	Right.rgb = HUD(Right.rgb,float2(TCR.x + HUD_Adjustment,TCR.y));
+		#if HelixVision
+			if(StoreTC.x < 0.5)
+			Double.rgb = HUD(Left.rgb,float2((TCL.x * 2) - HUD_Adjustment,TCL.y));
+			else
+			Double.rgb = HUD(Right.rgb,float2((TCR.x  * 2 - 1) + HUD_Adjustment,TCR.y));
+		#else
+			Left.rgb = HUD(Left.rgb,float2(TCL.x - HUD_Adjustment,TCL.y));
+			Right.rgb = HUD(Right.rgb,float2(TCR.x + HUD_Adjustment,TCR.y));
+		#endif
 	#endif
 }
 ///////////////////////////////////////////////////////////Barrel Distortion///////////////////////////////////////////////////////////////////////
@@ -1463,14 +1512,24 @@ float Vignette(float2 TC)
 		Out = 1-saturate((IOVig.x-distance) / (IOVig.y-IOVig.x));
 	return Out;
 }
-
+//SamplerDouble
 float3 L(float2 texcoord)
-{   float3 Left = tex2D(SamplerLeft,texcoord).rgb;
+{
+	#if HelixVision
+	float3 Left;
+	#else
+	float3 Left = tex2D(SamplerLeft,texcoord).rgb;
+	#endif
 	return lerp(Left,0,Vignette(texcoord));
 }
 
 float3 R(float2 texcoord)
-{   float3 Right = tex2D(SamplerRight,texcoord).rgb;
+{
+	#if HelixVision
+	float3 Right;
+	#else
+	float3 Right = tex2D(SamplerRight,texcoord).rgb;
+	#endif
 	return lerp(Right,0,Vignette(texcoord));
 }
 
@@ -1509,7 +1568,7 @@ float2 BD(float2 p, float k1, float k2) //Polynomial Lens + Radial lens undistor
 
 return p;
 }
-
+// For Super3D a new Stereo3D output Left and Right Image compression
 float3 YCbCrLeft(float2 texcoord)
 {
 	return RGBtoYCbCr(L(texcoord));
@@ -1531,10 +1590,18 @@ float3 PS_calcLR(float2 texcoord)
 	if(Barrel_Distortion == 0 || SuperDepth == 1)
 	{   if(!SuperDepth)
 		{   //Had to change float4 to float3.... Error only shows under linux.
-			Left.rgb = L(TCL).rgb;
-			Right.rgb = R(TCR).rgb;
+			if(HelixVision)
+			{
+				Left.rgb = tex2D(BackBufferCLAMP,texcoord).rgb;
+				//Right.rgb = R(float2(texcoord.x - 1,texcoord.y)).rgb;
+			}
+			else
+			{
+				Left.rgb = L(TCL).rgb;
+				Right.rgb = R(TCR).rgb;
+			}
 		}
-		else
+		else // For Super3D a new Stereo3D output.
 		{
 			Y_Left = YCbCrLeft(texcoord).x;
 			Y_Right = YCbCrRight(texcoord).x;
@@ -1573,7 +1640,7 @@ float3 PS_calcLR(float2 texcoord)
 		if(Barrel_Distortion == 1)
 			color = texcoord.x < 0.5 ? Circle(Left,float2(texcoord.x*2,texcoord.y)) : Circle(Right,float2(texcoord.x*2-1,texcoord.y));
 		else
-			color = texcoord.x < 0.5 ? Left : Right;
+			color =  HelixVision ? Left : texcoord.x < 0.5 ? Left : Right;
 	}
 	else
 	{
@@ -2038,7 +2105,8 @@ technique SuperDepth3D_VR
 	{
 		VertexShader = PostProcessVS;
 		PixelShader = DepthMap;
-		RenderTarget = texDMVR;
+		RenderTarget0 = texDMVR;
+		RenderTarget1 = TexStoreBB;
 	}
 		pass zbufferVR
 	{
@@ -2046,13 +2114,16 @@ technique SuperDepth3D_VR
 		PixelShader = zBuffer;
 		RenderTarget = texzBufferVR;
 	}
-		pass LRtoBD
+		pass StereoBuffers
 	{
 		VertexShader = PostProcessVS;
 		PixelShader = LR_Out;
+		#if HelixVision
+		RenderTarget0 = DoubleTex;
+		#else
 		RenderTarget0 = LeftTex;
 		RenderTarget1 = RightTex;
-		RenderTarget2 = TexStoreBB;
+		#endif
 	}
 		pass StereoOut
 	{
