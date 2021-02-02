@@ -183,7 +183,7 @@
 		#warning "DirectX 12 not supported in the HelixVision app."
 	#endif
 #endif
-
+#if !SuperDepth && !HelixVision
 uniform int IPD <
 	#if Compatibility
 	ui_type = "drag";
@@ -196,7 +196,9 @@ uniform int IPD <
 				 "Default is 0.";
 	ui_category = "Eye Focus Adjustment";
 > = 0;
-
+#else
+static const int IPD = 0;
+#endif
 //Divergence & Convergence//
 uniform float Divergence <
 	ui_type = "drag";
@@ -1364,7 +1366,7 @@ float2 Parallax(float Diverge, float2 Coordinates) // Horizontal parallax offset
 	// Parallax Occlusion Mapping
 	float2 PrevParallaxCoord = float2(ParallaxCoord.x + deltaCoordinates, ParallaxCoord.y);
 	float beforeDepthValue = GetDB(ParallaxCoord ).y, afterDepthValue = CurrentDepthMapValue - CurrentLayerDepth;
-		beforeDepthValue += LayerDepth + CurrentLayerDepth;
+		beforeDepthValue += LayerDepth - CurrentLayerDepth;
 	// Interpolate coordinates
 	float weight = afterDepthValue / (afterDepthValue - beforeDepthValue);
 		ParallaxCoord = PrevParallaxCoord * weight + ParallaxCoord * (1. - weight);
@@ -1724,12 +1726,21 @@ float drawChar( float Char, float2 pos, float2 size, float2 TC )
     res*=getBit( Char, 4.0*floor(TC.y) + floor(TC.x) );
     return saturate(res);
 }
-
+#define Res float2(BUFFER_WIDTH, BUFFER_HEIGHT)
 float3 Out(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Target
 {
 	float2 TC = float2(texcoord.x,1-texcoord.y);
 	float Text_Timer = 25000, BT = smoothstep(0,1,sin(timer*(3.75/1000))), Size = 1.1, Depth3D, Read_Help, Supported, SetFoV, FoV, Post, Effect, NoPro, NotCom, Mod, Needs, Net, Over, Set, AA, Emu, Not, No, Help, Fix, Need, State, SetAA, SetWP, Work;
 	float3 Color = PS_calcLR(texcoord).rgb;
+
+	float2 ScreenPos = float2(1-texcoord.x,1-texcoord.y) * Res;
+	float Debug_Y = 1;// Set this higher so you can see it when Debugging
+	if(all(abs(float2(0.0,BUFFER_HEIGHT)-ScreenPos.xy) < float2(1.0,Debug_Y)))
+		Color = float3(0,0,0);
+	if(all(abs(float2(2.5,BUFFER_HEIGHT)-ScreenPos.xy) < float2(1.0,Debug_Y)))
+		Color = !SuperDepth ? float3(1,0,0) : float3(0,0,1);//RGBW / R = SBS-3D / G = ?????? / B = Super3D / W = ??????
+	if(all(abs(float2(5.0,BUFFER_HEIGHT)-ScreenPos.xy) < float2(1.0,Debug_Y)))
+		Color = float3(0,0,0);
 
 	if(RH || NC || NP || NF || PE || DS || OS || DA || NW || WW || FV || ED)
 		Text_Timer = 30000;
