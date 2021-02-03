@@ -199,6 +199,7 @@ uniform int IPD <
 #else
 static const int IPD = 0;
 #endif
+
 //Divergence & Convergence//
 uniform float Divergence <
 	ui_type = "drag";
@@ -599,6 +600,7 @@ uniform float Saturation <
 	ui_tooltip = "Lets you saturate image, basically adds more color.";
 	ui_category = "Image Effects";
 > = 0;
+
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 uniform bool Cancel_Depth < source = "key"; keycode = Cancel_Depth_Key; toggle = true; mode = "toggle";>;
 uniform bool Mask_Cycle < source = "key"; keycode = Mask_Cycle_Key; toggle = true; >;
@@ -606,6 +608,7 @@ uniform bool Text_Info < source = "key"; keycode = Text_Info_Key; toggle = true;
 uniform bool CLK < source = "mousebutton"; keycode = Cursor_Lock_Key; toggle = true; mode = "toggle";>;
 uniform bool Trigger_Fade_A < source = "mousebutton"; keycode = Fade_Key; toggle = true; mode = "toggle";>;
 uniform bool Trigger_Fade_B < source = "mousebutton"; keycode = Fade_Key;>;
+uniform bool overlay_open < source = "overlay_open"; >; 
 uniform float2 Mousecoords < source = "mousepoint"; > ;
 uniform float frametime < source = "frametime";>;
 uniform float timer < source = "timer"; >;
@@ -619,6 +622,7 @@ uniform bool DepthCheck < source = "bufready_depth"; >;
 #define pix float2(BUFFER_RCP_WIDTH, BUFFER_RCP_HEIGHT)
 #define Interpupillary_Distance IPD * pix.x
 #define AI Interlace_Anaglyph.x * 0.5 //Optimization for line interlaced Adjustment.
+#define Res float2(BUFFER_WIDTH, BUFFER_HEIGHT)
 
 float fmod(float a, float b)
 {
@@ -1726,22 +1730,24 @@ float drawChar( float Char, float2 pos, float2 size, float2 TC )
     res*=getBit( Char, 4.0*floor(TC.y) + floor(TC.x) );
     return saturate(res);
 }
-#define Res float2(BUFFER_WIDTH, BUFFER_HEIGHT)
+
 float3 Out(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Target
 {
 	float2 TC = float2(texcoord.x,1-texcoord.y);
-	float Text_Timer = 25000, BT = smoothstep(0,1,sin(timer*(3.75/1000))), Size = 1.1, Depth3D, Read_Help, Supported, SetFoV, FoV, Post, Effect, NoPro, NotCom, Mod, Needs, Net, Over, Set, AA, Emu, Not, No, Help, Fix, Need, State, SetAA, SetWP, Work;
-	float3 Color = PS_calcLR(texcoord).rgb;
-
-	float2 ScreenPos = float2(1-texcoord.x,1-texcoord.y) * Res;
+	float Menu_Open = overlay_open ? 1 : 0 , Text_Timer = 25000, BT = smoothstep(0,1,sin(timer*(3.75/1000))), Size = 1.1, Depth3D, Read_Help, Supported, SetFoV, FoV, Post, Effect, NoPro, NotCom, Mod, Needs, Net, Over, Set, AA, Emu, Not, No, Help, Fix, Need, State, SetAA, SetWP, Work;
+	float3 Color = PS_calcLR(texcoord).rgb, SBS_3D = float3(1,0,0), Super3D = float3(0,0,1);
+	//RGBW / R = SBS-3D / G = ?????? / B = Super3D / W = ??????	
+	float3 Format = !SuperDepth ? SBS_3D : Super3D;
+	//Ok so I have to invert the pattern because for some reason the unity app I made can only read Integers values from ReShade.....
+	float2 ScreenPos = float2(1-texcoord.x,1-texcoord.y) * Res;//This Bugg was waisted a entire day. But, this is the workaround for that.
 	float Debug_Y = 1;// Set this higher so you can see it when Debugging
 	if(all(abs(float2(0.0,BUFFER_HEIGHT)-ScreenPos.xy) < float2(1.0,Debug_Y)))
-		Color = float3(0,0,0);
+		Color = Menu_Open ? Format : 0;
 	if(all(abs(float2(2.5,BUFFER_HEIGHT)-ScreenPos.xy) < float2(1.0,Debug_Y)))
-		Color = !SuperDepth ? float3(1,0,0) : float3(0,0,1);//RGBW / R = SBS-3D / G = ?????? / B = Super3D / W = ??????
+		Color = Menu_Open ? 0 : Format;
 	if(all(abs(float2(5.0,BUFFER_HEIGHT)-ScreenPos.xy) < float2(1.0,Debug_Y)))
-		Color = float3(0,0,0);
-
+		Color = Menu_Open ? Format : 0;
+	//Now off to Unity to write the capturing of this information.
 	if(RH || NC || NP || NF || PE || DS || OS || DA || NW || WW || FV || ED)
 		Text_Timer = 30000;
 
