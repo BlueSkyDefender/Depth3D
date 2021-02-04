@@ -38,7 +38,6 @@ Requirements: Steam's OpenVR | GPU supporting DX11+ | .NET Framework 4.0 Recomme
 MD5: BACD195C225BB91E23029B70FAD24633<br /> 
 
 No support for Laptops with Hybrid systems. Though there are workarounds as users noted.  
-This App Lets you play your Games or watch Movies on your VR HMD of choice. So it has more uses than intended. 
 
 ### Game Compatibility
 **Game Compatibility Information**
