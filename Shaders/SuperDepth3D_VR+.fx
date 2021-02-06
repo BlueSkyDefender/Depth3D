@@ -2,7 +2,7 @@
 ///**SuperDepth3D_VR+**///
 //--------------------////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//* Depth Map Based 3D post-process shader v2.3.7
+//* Depth Map Based 3D post-process shader v2.3.8
 //* For Reshade 3.0+
 //* ---------------------------------
 //*
@@ -136,9 +136,9 @@
 #endif
 //DX9 0x9000 and OpenGL
 #if __RENDERER__ >= 0x9000 || __RENDERER__ >= 0x10000
-	#define RenderLimitations 0
-#else
 	#define RenderLimitations 1
+#else
+	#define RenderLimitations 0
 #endif
 //DX12 Check
 #if __RENDERER__ >= 0xc000
@@ -585,7 +585,7 @@ uniform float Adjust_Vignette <
 
 uniform float Sharpen_Power <
 	ui_type = "slider";
-	ui_min = 0.0; ui_max = 2.0;
+	ui_min = 0.0; ui_max = 2.5;
 	ui_label = " Sharpen Power";
 	ui_tooltip = "Adjust this on clear up the image the game, movie picture & etc.\n"
 				 "This has basic contrast awareness and it will try too\n"
@@ -2099,11 +2099,6 @@ technique SuperDepth3D_VR
 < ui_tooltip = "Suggestion : Please enable 'Performance Mode Checkbox,' in the lower bottom right of the ReShade's Main UI.\n"
 			   "             Do this once you set your 3D settings of course."; >
 {
-		pass UnSharpMask_Filter
-	{
-		VertexShader = PostProcessVS;
-		PixelShader = USM;
-	}
 	#if D_Frame || DF
 		pass Delay_Frame
 	{
@@ -2146,6 +2141,11 @@ technique SuperDepth3D_VR
 	{
 		VertexShader = PostProcessVS;
 		PixelShader = Out;
+	}
+		pass UnSharpMask_Filter
+	{
+		VertexShader = PostProcessVS;
+		PixelShader = USM;
 	}
 		pass AverageLuminance
 	{
