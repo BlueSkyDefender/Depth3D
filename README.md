@@ -29,7 +29,7 @@ Lets you add particles to the image to mimic dust or fire flys with local isolat
 
 This Free VR App, is a basic way to view my stereoscopic shaders on your OpenVR supported HMD.<br />
 
-Installer Name: Depth3DVRCompanion_v1.7.exe<br /> 
+Installer Name: Depth3DVRCompanion_v1.8.exe<br /> 
 Installer Size: 22.11 MB<br /> 
 [Depth3D Companion App 1.8 Mega Download](https://mega.nz/file/fQhzVCJS#G6P2qTp0B3b2kGeRJz12t-Xa1JSaTlaTkCaJ2Ds_W60)<br /> 
 Uninstaller: Yes<br /> 
