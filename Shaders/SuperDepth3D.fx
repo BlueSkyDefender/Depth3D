@@ -1389,7 +1389,7 @@ float2 LensePitch(float2 TC)
 ///////////////////////////////////////////////////////////Stereo Calculation///////////////////////////////////////////////////////////////////////
 float3 PS_calcLR(float2 texcoord)
 {
-	float2 TCL, TCR, TCL_H, TCR_H, TexCoords = texcoord, TC = texcoord;
+	float2 TCL, TCR, TCL_T, TCR_T, TexCoords = texcoord, TC = texcoord;
 
 	[branch] if (Stereoscopic_Mode == 0)
 	{
@@ -1404,9 +1404,9 @@ float3 PS_calcLR(float2 texcoord)
 	else if(Stereoscopic_Mode == 6)
 	{
 		TCL = float2(texcoord.x*2,texcoord.y*2);
-		TCL_H = float2(texcoord.x*2-1,texcoord.y*2);
+		TCL_T = float2(texcoord.x*2-1,texcoord.y*2);
 		TCR = float2(texcoord.x*2-1,texcoord.y*2-1);
-		TCR_H = float2(texcoord.x*2,texcoord.y*2-1);
+		TCR_T = float2(texcoord.x*2,texcoord.y*2-1);
 	}
 	else
 	{
@@ -1435,14 +1435,14 @@ float3 PS_calcLR(float2 texcoord)
 	else if( Eye_Fade_Reduction_n_Power.x == 2)
 			DLR = float2(FD,D);
 
-	float4 image = 1, accum, color, Left_H, Right_H, L, R, 
+	float4 image = 1, accum, color, Left_T, Right_T, L, R, 
 		   Left = MouseCursor(Parallax(-DLR.x, TCL, AI)), 
 		   Right= MouseCursor(Parallax(DLR.y, TCR, -AI));
 		   
 	if(Stereoscopic_Mode == 6)
 	{
-		Left_H = MouseCursor(Parallax(-DLR.x * 0.5, TCL_H, AI));
-		Right_H= MouseCursor(Parallax(DLR.y * 0.5, TCR_H, -AI));
+		Left_T = MouseCursor(Parallax(-DLR.x * 0.33333333, TCL_T, AI));
+		Right_T= MouseCursor(Parallax(DLR.y * 0.33333333, TCR_T, -AI));
 	}
 		
 	#if HUD_MODE || HM
@@ -1451,8 +1451,8 @@ float3 PS_calcLR(float2 texcoord)
 	Right.rgb = HUD(Right.rgb,float2(TCR.x + HUD_Adjustment,TCR.y)).rgb;
 	if(Stereoscopic_Mode == 6)
 	{
-		Left_H.rgb = HUD(Left_H.rgb,float2(TCL_H.x - HUD_Adjustment,TCL_H.y)).rgb;
-		Right_H.rgb = HUD(Right_H.rgb,float2(TCR_H.x + HUD_Adjustment,TCR_H.y)).rgb;
+		Left_T.rgb = HUD(Left_T.rgb,float2(TCL_T.x - HUD_Adjustment,TCL_T.y)).rgb;
+		Right_T.rgb = HUD(Right_T.rgb,float2(TCR_T.x + HUD_Adjustment,TCR_T.y)).rgb;
 	}
 	#endif
 	//Auto Stereo Section C adjusting for eye tracking and distance. This also the point of where pitch, rotation, and other information is used.
@@ -1512,7 +1512,7 @@ float3 PS_calcLR(float2 texcoord)
 	else if(Stereoscopic_Mode == 5)
 		color = float4(Colors[int(fmod(gridxy.x,Images))],1.0);
 	else if(Stereoscopic_Mode == 6)
-		color = TexCoords.y < 0.5 ? TexCoords.x < 0.5 ? Left : Left_H : TexCoords.x < 0.5 ? Right_H : Right;
+		color = TexCoords.y < 0.5 ? TexCoords.x < 0.5 ? Left : Left_T : TexCoords.x < 0.5 ? Right_T : Right;
 	else if(Stereoscopic_Mode >= 7)
 	{
 		float Contrast = 1.0, DeGhost = 0.06, LOne, ROne;
