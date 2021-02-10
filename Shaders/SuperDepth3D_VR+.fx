@@ -135,7 +135,7 @@
 	#define Compatibility_DD 0
 #endif
 //DX9 0x9000 and OpenGL
-#if __RENDERER__ >= 0x9000 || __RENDERER__ >= 0x10000
+#if __RENDERER__ == 0x9000 || __RENDERER__ >= 0x10000
 	#define RenderLimitations 1
 #else
 	#define RenderLimitations 0
@@ -173,16 +173,21 @@
 #ifndef HelixVision_Mode //This preprocessor is for HelixVision Mode that creates a Double Sized texture on the Horizontal axis.
 	#define HelixVision_Mode 0
 #endif
-
-#if RenderLimitations && (BUFFER_WIDTH * 2) > 4096
-	#define HelixVision 0
-		#warning "Will NOT work on DirectX 9.0c and OpenGL at current resolution."
-#else //#error "Will NOT work on DirectX 9.0c and OpenGL."
+#define RenderBufferWidth (BUFFER_WIDTH * 2) > 4096
+#if RenderLimitations
+	#if RenderBufferWidth
+		#define HelixVision 0
+		#warning "Will NOT work on DirectX 9.0c and OpenGL at current resolution. To Support this consider the Super3D Format for your application." //#error "Will NOT work on DirectX 9.0c and OpenGL."
+	#else
+		#define HelixVision HelixVision_Mode
+	#endif
+#else
 	#define HelixVision HelixVision_Mode
 	#if DXTwelve
-		#warning "DirectX 12 not supported in the HelixVision app."
+		#warning "DirectX 12 not supported in the HelixVision app, But, if added should work."
 	#endif
 #endif
+
 #if !SuperDepth && !HelixVision
 uniform int IPD <
 	#if Compatibility
@@ -608,7 +613,7 @@ uniform bool Text_Info < source = "key"; keycode = Text_Info_Key; toggle = true;
 uniform bool CLK < source = "mousebutton"; keycode = Cursor_Lock_Key; toggle = true; mode = "toggle";>;
 uniform bool Trigger_Fade_A < source = "mousebutton"; keycode = Fade_Key; toggle = true; mode = "toggle";>;
 uniform bool Trigger_Fade_B < source = "mousebutton"; keycode = Fade_Key;>;
-uniform bool overlay_open < source = "overlay_open"; >; 
+uniform bool overlay_open < source = "overlay_open"; >;
 uniform float2 Mousecoords < source = "mousepoint"; > ;
 uniform float frametime < source = "frametime";>;
 uniform float timer < source = "timer"; >;
@@ -824,9 +829,9 @@ float4 CSB(float2 texcoords)
 float4 CSB(float2 texcoords)
 {   //Cal Basic Vignette
 	float2 TC = -texcoords * texcoords*32 + texcoords*32;
-
+	float WTF_Fable = 0.00000000000000001;
 	if(!Depth_Map_View)
-		return tex2Dlod(BackBuffer,float4(texcoords,0,0)) * smoothstep(0,Adjust_Vignette*27.0f,TC.x * TC.y);
+		return tex2Dlod(BackBuffer,float4(texcoords,0,0)) * smoothstep(WTF_Fable,(WTF_Fable+Adjust_Vignette)*27.0f,TC.x * TC.y) ;
 	else
 		return tex2D(SamplerzBufferVR,texcoords).xxxx;
 }
@@ -1522,9 +1527,9 @@ float Vignette(float2 TC)
 float3 L(float2 texcoord)
 {
 	#if HelixVision
-	float3 Left;
+		float3 Left;
 	#else
-	float3 Left = tex2D(SamplerLeft,texcoord).rgb;
+		float3 Left = tex2D(SamplerLeft,texcoord).rgb;
 	#endif
 	return lerp(Left,0,Vignette(texcoord));
 }
@@ -1532,9 +1537,9 @@ float3 L(float2 texcoord)
 float3 R(float2 texcoord)
 {
 	#if HelixVision
-	float3 Right;
+		float3 Right;
 	#else
-	float3 Right = tex2D(SamplerRight,texcoord).rgb;
+		float3 Right = tex2D(SamplerRight,texcoord).rgb;
 	#endif
 	return lerp(Right,0,Vignette(texcoord));
 }
@@ -1736,7 +1741,7 @@ float3 Out(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Targe
 	float2 TC = float2(texcoord.x,1-texcoord.y);
 	float Menu_Open = overlay_open ? 1 : 0 , Text_Timer = 25000, BT = smoothstep(0,1,sin(timer*(3.75/1000))), Size = 1.1, Depth3D, Read_Help, Supported, SetFoV, FoV, Post, Effect, NoPro, NotCom, Mod, Needs, Net, Over, Set, AA, Emu, Not, No, Help, Fix, Need, State, SetAA, SetWP, Work;
 	float3 Color = PS_calcLR(texcoord).rgb, SBS_3D = float3(1,0,0), Super3D = float3(0,0,1);
-	//RGBW / R = SBS-3D / G = ?????? / B = Super3D / W = ??????	
+	//RGBW / R = SBS-3D / G = ?????? / B = Super3D / W = ??????
 	float3 Format = !SuperDepth ? SBS_3D : Super3D;
 	//Ok so I have to invert the pattern because for some reason the unity app I made can only read Integers values from ReShade.....
 	float2 ScreenPos = float2(1-texcoord.x,1-texcoord.y) * Res;//This Bugg was waisted a entire day. But, this is the workaround for that.
