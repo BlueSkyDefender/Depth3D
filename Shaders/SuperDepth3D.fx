@@ -2,7 +2,7 @@
 ///**SuperDepth3D**///
 //----------------////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//* Depth Map Based 3D post-process shader v2.4.0
+//* Depth Map Based 3D post-process shader v2.5.0
 //* For Reshade 3.0+
 //* ---------------------------------
 //*
@@ -458,7 +458,7 @@ uniform float2 HUD_Adjust <
 //Stereoscopic Options//
 uniform int Stereoscopic_Mode <
 	ui_type = "combo";
-	ui_items = "Side by Side\0Top and Bottom\0Line Interlaced\0Column Interlaced\0Checkerboard 3D\0Autostereoscopic\0Anaglyph 3D Red/Cyan\0Anaglyph 3D Red/Cyan Dubois\0Anaglyph 3D Red/Cyan Anachrome\0Anaglyph 3D Green/Magenta\0Anaglyph 3D Green/Magenta Dubois\0Anaglyph 3D Green/Magenta Triochrome\0Anaglyph 3D Blue/Amber ColorCode\0";
+	ui_items = "Side by Side\0Top and Bottom\0Line Interlaced\0Column Interlaced\0Checkerboard 3D\0Autostereoscopic\0Quad Lightfield 2x2\0Anaglyph 3D Red/Cyan\0Anaglyph 3D Red/Cyan Dubois\0Anaglyph 3D Red/Cyan Anachrome\0Anaglyph 3D Green/Magenta\0Anaglyph 3D Green/Magenta Dubois\0Anaglyph 3D Green/Magenta Triochrome\0Anaglyph 3D Blue/Amber ColorCode\0";
 	ui_label = "·3D Display Modes·";
 	ui_tooltip = "Stereoscopic 3D display output selection.";
 	ui_category = "Stereoscopic Options";
@@ -1389,7 +1389,7 @@ float2 LensePitch(float2 TC)
 ///////////////////////////////////////////////////////////Stereo Calculation///////////////////////////////////////////////////////////////////////
 float3 PS_calcLR(float2 texcoord)
 {
-	float2 TCL, TCR, TexCoords = texcoord, TC = texcoord;
+	float2 TCL, TCR, TCL_H, TCR_H, TexCoords = texcoord, TC = texcoord;
 
 	[branch] if (Stereoscopic_Mode == 0)
 	{
@@ -1400,6 +1400,13 @@ float3 PS_calcLR(float2 texcoord)
 	{
 		TCL = float2(texcoord.x,texcoord.y*2);
 		TCR = float2(texcoord.x,texcoord.y*2-1);
+	}
+	else if(Stereoscopic_Mode == 6)
+	{
+		TCL = float2(texcoord.x*2,texcoord.y*2);
+		TCL_H = float2(texcoord.x*2-1,texcoord.y*2);
+		TCR = float2(texcoord.x*2-1,texcoord.y*2-1);
+		TCR_H = float2(texcoord.x*2,texcoord.y*2-1);
 	}
 	else
 	{
@@ -1428,12 +1435,25 @@ float3 PS_calcLR(float2 texcoord)
 	else if( Eye_Fade_Reduction_n_Power.x == 2)
 			DLR = float2(FD,D);
 
-	float4 image = 1, accum, color, L, R, Left = MouseCursor(Parallax(-DLR.x, TCL, AI)), Right = MouseCursor(Parallax(DLR.y, TCR, -AI));
-
+	float4 image = 1, accum, color, Left_H, Right_H, L, R, 
+		   Left = MouseCursor(Parallax(-DLR.x, TCL, AI)), 
+		   Right= MouseCursor(Parallax(DLR.y, TCR, -AI));
+		   
+	if(Stereoscopic_Mode == 6)
+	{
+		Left_H = MouseCursor(Parallax(-DLR.x * 0.5, TCL_H, AI));
+		Right_H= MouseCursor(Parallax(DLR.y * 0.5, TCR_H, -AI));
+	}
+		
 	#if HUD_MODE || HM
 	float HUD_Adjustment = ((0.5 - HUD_Adjust.y)*25.) * pix.x;
 	Left.rgb = HUD(Left.rgb,float2(TCL.x - HUD_Adjustment,TCL.y)).rgb;
 	Right.rgb = HUD(Right.rgb,float2(TCR.x + HUD_Adjustment,TCR.y)).rgb;
+	if(Stereoscopic_Mode == 6)
+	{
+		Left_H.rgb = HUD(Left_H.rgb,float2(TCL_H.x - HUD_Adjustment,TCL_H.y)).rgb;
+		Right_H.rgb = HUD(Right_H.rgb,float2(TCR_H.x + HUD_Adjustment,TCR_H.y)).rgb;
+	}
 	#endif
 	//Auto Stereo Section C adjusting for eye tracking and distance. This also the point of where pitch, rotation, and other information is used.
 	float Dist = Stereoscopic_Mode == 5 ? int(FP_IO_Pos().z) : 0, Distance_Ladder = 0.0;//This is the Distance calulation for adjusting the pitch based on what Tobii eye traker gives me.
@@ -1491,7 +1511,9 @@ float3 PS_calcLR(float2 texcoord)
 		color = fmod(gridxy.x+gridxy.y,2) ? R : L;
 	else if(Stereoscopic_Mode == 5)
 		color = float4(Colors[int(fmod(gridxy.x,Images))],1.0);
-	else if(Stereoscopic_Mode >= 6)
+	else if(Stereoscopic_Mode == 6)
+		color = TexCoords.y < 0.5 ? TexCoords.x < 0.5 ? Left : Left_H : TexCoords.x < 0.5 ? Right_H : Right;
+	else if(Stereoscopic_Mode >= 7)
 	{
 		float Contrast = 1.0, DeGhost = 0.06, LOne, ROne;
 		float3 HalfLA = dot(L.rgb,float3(0.299, 0.587, 0.114)), HalfRA = dot(R.rgb,float3(0.299, 0.587, 0.114));
@@ -1503,9 +1525,9 @@ float3 PS_calcLR(float2 texcoord)
 		float4 cA = float4(LMA,1);
 		float4 cB = float4(RMA,1);
 
-		if (Stereoscopic_Mode == 6) // Anaglyph 3D Colors Red/Cyan
+		if (Stereoscopic_Mode == 7) // Anaglyph 3D Colors Red/Cyan
 			color =  float4(cA.r,cB.g,cB.b,1.0);
-		else if (Stereoscopic_Mode == 7) // Anaglyph 3D Dubois Red/Cyan
+		else if (Stereoscopic_Mode == 8) // Anaglyph 3D Dubois Red/Cyan
 		{
 			float red = 0.437 * cA.r + 0.449 * cA.g + 0.164 * cA.b - 0.011 * cB.r - 0.032 * cB.g - 0.007 * cB.b;
 
@@ -1521,7 +1543,7 @@ float3 PS_calcLR(float2 texcoord)
 
 			color = float4(red, green, blue, 0);
 		}
-		else if (Stereoscopic_Mode == 8) // Anaglyph 3D Deghosted Red/Cyan Code From http://iaian7.com/quartz/AnaglyphCompositing & vectorform.com by John Einselen
+		else if (Stereoscopic_Mode == 9) // Anaglyph 3D Deghosted Red/Cyan Code From http://iaian7.com/quartz/AnaglyphCompositing & vectorform.com by John Einselen
 		{
 			LOne = contrast*0.45;
 			ROne = contrast;
@@ -1545,9 +1567,9 @@ float3 PS_calcLR(float2 texcoord)
 			image.b = (accum.b+(accum.r*(DeGhost*-0.25))+(accum.g*(DeGhost*-0.25))+(accum.b*(DeGhost*0.5)));
 			color = image;
 		}
-		else if (Stereoscopic_Mode == 9) // Anaglyph 3D Green/Magenta
+		else if (Stereoscopic_Mode == 10) // Anaglyph 3D Green/Magenta
 			color = float4(cB.r,cA.g,cB.b,1.0);
-		else if (Stereoscopic_Mode == 10) // Anaglyph 3D Dubois Green/Magenta
+		else if (Stereoscopic_Mode == 11) // Anaglyph 3D Dubois Green/Magenta
 		{
 
 			float red = -0.062 * cA.r -0.158 * cA.g -0.039 * cA.b + 0.529 * cB.r + 0.705 * cB.g + 0.024 * cB.b;
@@ -1564,7 +1586,7 @@ float3 PS_calcLR(float2 texcoord)
 
 			color = float4(red, green, blue, 0);
 		}
-		else if (Stereoscopic_Mode == 11)// Anaglyph 3D Deghosted Green/Magenta Code From http://iaian7.com/quartz/AnaglyphCompositing & vectorform.com by John Einselen
+		else if (Stereoscopic_Mode == 12)// Anaglyph 3D Deghosted Green/Magenta Code From http://iaian7.com/quartz/AnaglyphCompositing & vectorform.com by John Einselen
 		{
 			LOne = contrast*0.45;
 			ROne = contrast*0.8;
@@ -1588,7 +1610,7 @@ float3 PS_calcLR(float2 texcoord)
 			image.b = accum.b+(accum.r*(DeGhost*-0.25))+(accum.g*(DeGhost*-0.25))+(accum.b*(DeGhost*0.5));
 			color = image;
 		}
-		else if (Stereoscopic_Mode == 12) // Anaglyph 3D Blue/Amber Code From http://iaian7.com/quartz/AnaglyphCompositing & vectorform.com by John Einselen
+		else if (Stereoscopic_Mode == 13) // Anaglyph 3D Blue/Amber Code From http://iaian7.com/quartz/AnaglyphCompositing & vectorform.com by John Einselen
 		{
 			LOne = contrast*0.45;
 			ROne = contrast;
