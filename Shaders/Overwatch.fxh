@@ -1,7 +1,7 @@
 ////----------------------------------------//
 ///SuperDepth3D Overwatch Automation Shader///
 //----------------------------------------////
-// Version 1.8
+// Version 1.9
 //---------------------------------------OVERWATCH---------------------------------------//
 // If you are reading this stop. Go away and never look back. From this point on if you  //
 // still think it's is worth looking at this..... Then no one can save you or your soul. //
@@ -49,14 +49,14 @@ static const float HVP_Y_D = 0;                         //Vertical Position
 static const int ZPD_Boundary_Type_D = 0;               //ZPD Boundary Type
 static const float ZPD_Boundary_Scaling_D = 0.5;        //ZPD Boundary Scaling
 static const float ZPD_Boundary_Fade_Time_D = 0.25;     //ZPD Boundary Fade Time
-static const float Weapon_Near_Depth_D = 0.0;           //Weapon Near Depth
+static const float Weapon_Near_Depth_Max_D = 0.0;       //Weapon Near Depth              Max
 static const float ZPD_Weapon_Boundary_Adjust = 0.0;    //ZPD Weapon Boundary Adjust
 static const float Separation = 0.0;                    //ZPD Separation
 static const float Edge_Masking = 0.0;                  //Edge Masking Adjust
 static const float HUDX_D = 0.0;                        //Heads Up Display Cut Off Point
 static const float Null_X = 0.0;                        //
 static const float Null_Y = 0.0;                        //
-static const float Null_Z = 0.0;                        //
+static const float Weapon_Near_Depth_Min_D = 0.0;       //Weapon Near Depth              Min
 static const float Check_Depth_Limit = 0.0;             //Check Depth Limit
 
 //Special Toggles Defaults
@@ -681,7 +681,8 @@ static const int FOV = 0;                               //Set Game FoV
 	#define NW 1
 	#define PE 1
     #define FV 1
-    #define DE_W 0.125
+    #define DG_Z 0.070 //Min
+    #define DE_W 0.100 //Max
 	//#define DB_W 62
 #elif (App == 0x42C1A2B ) //CoD: WWII
 	#define DA_X 0.04
@@ -1826,6 +1827,36 @@ static const int FOV = 0;                               //Set Game FoV
 	#define DE_Z 0.375
 	#define DS 1
 	#define RH 1
+#elif (App == 0xDF3F2AB6 ) //Cloud Punk
+	#define DA_W 1
+	#define DB_X 1
+	#define DF_Y 0.1
+	#define DA_X 0.0325
+	#define DA_Y 72.5
+	#define DB_Y 4
+	#define DE_X 1
+	#define DE_Y 0.500
+	#define DE_Z 0.375
+	#define DS 1
+	#define RH 1
+  #define NF 1
+#elif (App == 0x4551A746 ) //The Swapper
+	#define DB_X 1
+	#define DF_Y 0.025
+	#define DA_X 0.0425
+	#define DA_Y 62.5
+	#define DB_Y 1
+	#define DE_X 1
+	#define DE_Y 0.500
+	#define DE_Z 0.375
+	#define DF_Z 1.0
+	#define DD_X 0.800
+	#define DD_Y 0.705
+	#define DD_Z 0.250
+	#define DD_W 0.4125
+	#define SP 1
+	#define DS 1
+	#define RH 1
 #else
 	#define NP 1 //No Profile
 #endif
@@ -1883,7 +1914,7 @@ static const int FOV = 0;                               //Set Game FoV
 #ifndef DD_W
     #define DD_W HVP_Y_D
 #endif
-// X = [ZPD Boundary Type] Y = [ZPD Boundary Scaling] Z = [ZPD Boundary Fade Time] W = [Weapon NearDepth]
+// X = [ZPD Boundary Type] Y = [ZPD Boundary Scaling] Z = [ZPD Boundary Fade Time] W = [Weapon NearDepth Max]
 #ifndef DE_X
     #define DE_X ZPD_Boundary_Type_D
 #endif
@@ -1894,7 +1925,7 @@ static const int FOV = 0;                               //Set Game FoV
     #define DE_Z ZPD_Boundary_Fade_Time_D
 #endif
 #ifndef DE_W
-    #define DE_W Weapon_Near_Depth_D
+    #define DE_W Weapon_Near_Depth_Max_D
 #endif
 // X = [ZPD Weapon Boundary] Y = [Separation] Z = [Edge Masking] W = [HUD]
 #ifndef DF_X
@@ -1909,7 +1940,7 @@ static const int FOV = 0;                               //Set Game FoV
 #ifndef DF_W
     #define DF_W HUDX_D
 #endif
-// X = [Null] Y = [Null] Z = [Null] W = [Check Depth Limit]
+// X = [Null] Y = [Null] Z = [Weapon NearDepth Min] W = [Check Depth Limit]
 #ifndef DG_X
     #define DG_X Null_X
 #endif
@@ -1917,7 +1948,7 @@ static const int FOV = 0;                               //Set Game FoV
     #define DG_Y Null_Y
 #endif
 #ifndef DG_Z
-    #define DG_Z Null_Z
+    #define DG_Z Weapon_Near_Depth_Min_D
 #endif
 #ifndef DG_W
 	#define DG_W Check_Depth_Limit

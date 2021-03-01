@@ -2,7 +2,7 @@
 ///**SuperDepth3D**///
 //----------------////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//* Depth Map Based 3D post-process shader v2.5.0
+//* Depth Map Based 3D post-process shader v2.5.1
 //* For Reshade 3.0+
 //* ---------------------------------
 //*
@@ -44,11 +44,11 @@
 	static const float DC_X = 0, DC_Y = 0, DC_Z = 0, DC_W = 0;
 	// DD_X = [Horizontal Size] DD_Y = [Vertical Size] DD_Z = [Horizontal Position] DD_W = [Vertical Position]
 	static const float DD_X = 1, DD_Y = 1, DD_Z = 0.0, DD_W = 0.0;
-	// DE_X = [ZPD Boundary Type] DE_Y = [ZPD Boundary Scaling] DE_Z = [ZPD Boundary Fade Time] DE_W = [Weapon Near Depth]
+	// DE_X = [ZPD Boundary Type] DE_Y = [ZPD Boundary Scaling] DE_Z = [ZPD Boundary Fade Time] DE_W = [Weapon Near Depth Max]
 	static const float DE_X = 0, DE_Y = 0.5, DE_Z = 0.25, DE_W = 0.0;
 	// DF_X = [Weapon ZPD Boundary] DF_Y = [Separation] DF_Z = [Edge Masking] DF_W = [HUD]
 	static const float DF_X = 0.0, DF_Y = 0.0, DF_Z = 0.0, DF_W = 0.0;
-	// DG_X = [Null] DG_Y = [Null] DG_Z = [Null] DG_W = [Check Depth Limit]
+	// DG_X = [Null] DG_Y = [Null] DG_Z = [Weapon Near Depth Min] DG_W = [Check Depth Limit]
 	static const float DG_X = 0.0, DG_Y = 0.0, DG_Z = 0.0, DG_W = 0.0;
 	// WSM = [Weapon Setting Mode]
 	#define OW_WP "WP Off\0Custom WP\0"
@@ -81,7 +81,7 @@
 
 // Horizontal & Vertical Depth Buffer Resize for non conforming DepthBuffer.
 // Also used to enable Image Position Adjust is used to move the Z-Buffer around.
-#define DB_Size_Postion 0 //Default 0 is Off. One is On.
+#define DB_Size_Position 0 //Default 0 is Off. One is On.
 
 // Auto Letter Box Correction & Masking
 #define LB_Correction 0 //Default 0 is Off. One is On.
@@ -351,7 +351,7 @@ uniform bool Depth_Map_Flip <
 	ui_tooltip = "Flip the depth map if it is upside down.";
 	ui_category = "Depth Map";
 > = DB_X;
-#if DB_Size_Postion || SP == 2
+#if DB_Size_Position || SP == 2
 uniform float2 Horizontal_and_Vertical <
 	ui_type = "drag";
 	ui_min = 0.0; ui_max = 2;
@@ -399,16 +399,17 @@ uniform float3 Weapon_Adjust <
 	ui_category = "Weapon Hand Adjust";
 > = float3(0.0,0.0,0.0);
 
-uniform float2 WZPD_and_WND <
+uniform float3 WZPD_and_WND <
 	ui_type = "drag";
 	ui_min = 0.0; ui_max = 0.5;
-	ui_label = " Weapon ZPD and Near Depth";
+	ui_label = " Weapon ZPD, Min, and Max";
 	ui_tooltip = "WZPD controls the focus distance for the screen Pop-out effect also known as Convergence for the weapon hand.\n"
-				"For FPS Games keeps this low Since you don't want your gun to pop out of screen.\n"
-				"This is controlled by Convergence Mode.\n"
-				"Default is (X 0.03, Y 0.0) & Zero is off.";
+				"Weapon ZPD Is for setting a Weapon Profile Convergence, so you should most of the time leave this Default.\n"
+				"Weapon Min is used to adjust min weapon hand of the weapon hand when looking at the world near you.\n"
+				"Weapon Max is used to adjust max weapon hand when looking out at a distance.\n"
+				"Default is (ZPD X 0.03, Min Y 0.0, Max Z 0.0) & Zero is off.";
 	ui_category = "Weapon Hand Adjust";
-> = float2(0.03,DE_W);
+> = float3(0.03,DG_Z,DE_W);
 
 uniform int FPSDFIO <
 	ui_type = "combo";
@@ -685,7 +686,11 @@ sampler SamplerDMN
 		Texture = texDMN;
 	};
 
-texture texzBufferN { Width = BUFFER_WIDTH ; Height = BUFFER_HEIGHT ; Format = RG16F; };
+texture texzBufferN { Width = BUFFER_WIDTH ; Height = BUFFER_HEIGHT ; Format = RG16F; 
+#if DB_Size_Position
+	 MipLevels = 10; 
+#endif
+					};
 
 sampler SamplerzBufferN
 	{
@@ -863,7 +868,7 @@ float Depth(float2 texcoord)
 		texcoord = D(texcoord.xy,K123.x,K123.y,K123.z);
 	}
 	#endif
-	#if DB_Size_Postion || SP || LBC || LB_Correction
+	#if DB_Size_Position || SP || LBC || LB_Correction
 		texcoord.xy += float2(-Image_Position_Adjust.x,Image_Position_Adjust.y)*0.5;
 		#if LBC || LB_Correction
 			float2 H_V = Horizontal_and_Vertical * float2(1,LBDetection() ? 1.315 : 1 );
@@ -899,7 +904,7 @@ float2 WeaponDepth(float2 texcoord)
 		texcoord = D(texcoord.xy,K123.x,K123.y,K123.z);
 	}
 	#endif
-	#if DB_Size_Postion || SP || LBC || LB_Correction
+	#if DB_Size_Position || SP || LBC || LB_Correction
 		texcoord.xy += float2(-Image_Position_Adjust.x,Image_Position_Adjust.y)*0.5;
 		#if LBC || LB_Correction
 			float2 H_V = Horizontal_and_Vertical * float2(1,LBDetection() ? 1.315 : 1);
@@ -1039,10 +1044,10 @@ float Fade(float2 texcoord)
 float3 DepthMap(in float4 position : SV_Position,in float2 texcoord : TEXCOORD) : SV_Target
 {
 	float3 DM = PrepDepth(texcoord).rgb;
-	float R = DM.x, G = DM.y, B = DM.z;
+	float R = DM.x, G = DM.y, B = DM.z, Auto_Scale =  WZPD_and_WND.y > 0.0 ? smoothstep(0,1,Depth(0.5f).x) : 1;
 
 	//Fade Storage
-	float ScaleND = lerp(R,1,smoothstep(-WZPD_and_WND.y,1,R));
+	float ScaleND = lerp(R,1,smoothstep(min(-WZPD_and_WND.y,-WZPD_and_WND.z * Auto_Scale),1,R));
 
 	if (WZPD_and_WND.y > 0)
 		R = lerp(ScaleND,R,smoothstep(0,0.25,ScaleND));
@@ -1435,16 +1440,16 @@ float3 PS_calcLR(float2 texcoord)
 	else if( Eye_Fade_Reduction_n_Power.x == 2)
 			DLR = float2(FD,D);
 
-	float4 image = 1, accum, color, Left_T, Right_T, L, R, 
-		   Left = MouseCursor(Parallax(-DLR.x, TCL, AI)), 
+	float4 image = 1, accum, color, Left_T, Right_T, L, R,
+		   Left = MouseCursor(Parallax(-DLR.x, TCL, AI)),
 		   Right= MouseCursor(Parallax(DLR.y, TCR, -AI));
-		   
+
 	if(Stereoscopic_Mode == 6)
 	{
 		Left_T = MouseCursor(Parallax(-DLR.x * 0.33333333, TCL_T, AI));
 		Right_T= MouseCursor(Parallax(DLR.y * 0.33333333, TCR_T, -AI));
 	}
-		
+
 	#if HUD_MODE || HM
 	float HUD_Adjustment = ((0.5 - HUD_Adjust.y)*25.) * pix.x;
 	Left.rgb = HUD(Left.rgb,float2(TCL.x - HUD_Adjustment,TCL.y)).rgb;
@@ -1639,9 +1644,16 @@ float3 PS_calcLR(float2 texcoord)
 
 	if (Depth_Map_View == 2)
 		color.rgb = tex2D(SamplerzBufferN,TexCoords).xxx;
+	 
+	float Alinement_Depth = tex2Dlod(SamplerzBufferN,float4(TexCoords,0,0)).x, Depth = Alinement_Depth; 
+	Alinement_Depth = Alinement_View ? 
+	( Alinement_Depth + tex2Dlod(SamplerzBufferN,float4(TexCoords + float2( pix.x * 2,0),0,1)).x +
+	  				  tex2Dlod(SamplerzBufferN,float4(TexCoords + float2(-pix.x * 2,0),0,2)).x + 
+			  		  tex2Dlod(SamplerzBufferN,float4(TexCoords + float2(0, pix.y * 2),0,3)).x + 
+			  		  tex2Dlod(SamplerzBufferN,float4(TexCoords + float2(0,-pix.y * 2),0,4)).x ) * 0.2 : Alinement_Depth;
 
 	if (BD_Options == 2 || Alinement_View)
-		color.rgb = dot(0.5-tex2D(BackBufferBORDER,TexCoords).rgb,0.333) / float3(1,tex2D(SamplerzBufferN,TexCoords).x,1);
+		color.rgb = dot(tex2D(BackBufferBORDER,TexCoords).rgb,0.333) * float3((Depth/Alinement_Depth> 0.998),1,(Depth/Alinement_Depth > 0.998));
 
 	return color.rgb;
 }

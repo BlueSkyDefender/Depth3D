@@ -2,8 +2,8 @@
 ///**SuperDepth3D_VR+**///
 //--------------------////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//* Depth Map Based 3D post-process shader v2.3.8
-//* For Reshade 3.0+
+//* Depth Map Based 3D post-process shader v2.4.0
+//* For Reshade 3.0+ I think...
 //* ---------------------------------
 //*
 //* Original work was based on the shader code from
@@ -44,11 +44,11 @@
 	static const float DC_X = 0, DC_Y = 0, DC_Z = 0, DC_W = 0;
 	// DD_X = [Horizontal Size] DD_Y = [Vertical Size] DD_Z = [Horizontal Position] DD_W = [Vertical Position]
 	static const float DD_X = 1, DD_Y = 1, DD_Z = 0.0, DD_W = 0.0;
-	// DE_X = [ZPD Boundary Type] DE_Y = [ZPD Boundary Scaling] DE_Z = [ZPD Boundary Fade Time] DE_W = [Weapon Near Depth]
+	// DE_X = [ZPD Boundary Type] DE_Y = [ZPD Boundary Scaling] DE_Z = [ZPD Boundary Fade Time] DE_W = [Weapon Near Depth Max]
 	static const float DE_X = 0, DE_Y = 0.5, DE_Z = 0.25, DE_W = 0.0;
 	// DF_X = [Weapon ZPD Boundary] DF_Y = [Separation] DF_Z = [Edge Masking] DF_W = [HUD]
 	static const float DF_X = 0.0, DF_Y = 0.0, DF_Z = 0.0, DF_W = 0.0;
-	// DG_X = [Null] DG_Y = [Null] DG_Z = [Null] DG_W = [Check Depth Limit]
+	// DG_X = [Null] DG_Y = [Null] DG_Z = [Weapon Near Depth Min] DG_W = [Check Depth Limit]
 	static const float DG_X = 0.0, DG_Y = 0.0, DG_Z = 0.0, DG_W = 0.0;
 	// WSM = [Weapon Setting Mode]
 	#define OW_WP "WP Off\0Custom WP\0"
@@ -187,6 +187,11 @@
 		#warning "DirectX 12 not supported in the HelixVision app, But, if added should work."
 	#endif
 #endif
+
+//uniform float TEST <
+//	ui_type = "drag";
+//	ui_min = 0.0; ui_max = 1.0;
+//> = 0.0;
 
 #if !SuperDepth && !HelixVision
 uniform int IPD <
@@ -399,16 +404,17 @@ uniform float3 Weapon_Adjust <
 	ui_category = "Weapon Hand Adjust";
 > = float3(0.0,0.0,0.0);
 
-uniform float2 WZPD_and_WND <
+uniform float3 WZPD_and_WND <
 	ui_type = "drag";
 	ui_min = 0.0; ui_max = 0.5;
-	ui_label = " Weapon ZPD and Near Depth";
+	ui_label = " Weapon ZPD, Min, and Max";
 	ui_tooltip = "WZPD controls the focus distance for the screen Pop-out effect also known as Convergence for the weapon hand.\n"
-				"For FPS Games keeps this low Since you don't want your gun to pop out of screen.\n"
-				"This is controled by Convergence Mode.\n"
-				"Default is (X 0.03, Y 0.0) & Zero is off.";
+				"Weapon ZPD Is for setting a Weapon Profile Convergence, so you should most of the time leave this Default.\n"
+				"Weapon Min is used to adjust min weapon hand of the weapon hand when looking at the world near you.\n"
+				"Weapon Max is used to adjust max weapon hand when looking out at a distance.\n"
+				"Default is (ZPD X 0.03, Min Y 0.0, Max Z 0.0) & Zero is off.";
 	ui_category = "Weapon Hand Adjust";
-> = float2(0.03,DE_W);
+> = float3(0.03,DG_Z,DE_W);
 
 uniform int FPSDFIO <
 	ui_type = "combo";
@@ -728,14 +734,14 @@ sampler SamplerPBBVR
 		AddressW = BORDER;
 	};
 ///////////////////////////////////////////////////////Left Right Textures////////////////////////////////////////////////////////////////////
-#if __RESHADE__ >= 40400
+#if BUFFER_COLOR_BIT_DEPTH == 10 //This PreProcessor is not a bool it really is 8 or 10.
 	#define RGBA RGB10A2
 #else
-	#define RGBA RGBA16
+	#define RGBA RGBA8
 #endif
 
 #if HelixVision
-texture DoubleTex  { Width = BUFFER_WIDTH * 2; Height = BUFFER_HEIGHT; Format = RGBA; };//HDR Consideration
+texture DoubleTex  { Width = BUFFER_WIDTH * 2; Height = BUFFER_HEIGHT; Format = RGBA; };
 
 sampler SamplerDouble
 	{
@@ -745,7 +751,7 @@ sampler SamplerDouble
 		AddressW = BORDER;
 	};
 #else
-texture LeftTex  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA; };//HDR Consideration
+texture LeftTex  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA; };
 
 sampler SamplerLeft
 	{
@@ -755,7 +761,7 @@ sampler SamplerLeft
 		AddressW = BORDER;
 	};
 
-texture RightTex  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA; };//HDR Consideration
+texture RightTex  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA; };
 
 sampler SamplerRight
 	{
@@ -829,11 +835,11 @@ float4 CSB(float2 texcoords)
 float4 CSB(float2 texcoords)
 {   //Cal Basic Vignette
 	float2 TC = -texcoords * texcoords*32 + texcoords*32;
-	float WTF_Fable = 0.00000000000000001;
+	float WTF_Fable = 0.00000000000001;
 	if(!Depth_Map_View)
 		return tex2Dlod(BackBuffer,float4(texcoords,0,0)) * smoothstep(WTF_Fable,(WTF_Fable+Adjust_Vignette)*27.0f,TC.x * TC.y) ;
 	else
-		return tex2D(SamplerzBufferVR,texcoords).xxxx;
+		return tex2Dlod(SamplerzBufferVR,float4(texcoords,0,0)).xxxx;
 }
 #endif
 
@@ -1112,10 +1118,10 @@ float Motion_Blinders(float2 texcoord)
 void DepthMap(float4 position : SV_Position, float2 texcoord : TEXCOORD, out float3 VRDepth : SV_Target0, out float4 StoreBB : SV_Target1)
 {
 	float3 DM = PrepDepth(texcoord).rgb;
-	float R = DM.x, G = DM.y, B = DM.z;
+	float R = DM.x, G = DM.y, B = DM.z, Auto_Scale =  WZPD_and_WND.y > 0.0 ? smoothstep(0,1,Depth(0.5f).x) : 1;
 
 	//Fade Storage
-	float ScaleND = lerp(R,1,smoothstep(-WZPD_and_WND.y,1,R));
+	float ScaleND = lerp(R,1,smoothstep(min(-WZPD_and_WND.y,-WZPD_and_WND.z * Auto_Scale),1,R));
 
 	if (WZPD_and_WND.y > 0)
 		R = lerp(ScaleND,R,smoothstep(0,0.25,ScaleND));
@@ -1592,7 +1598,7 @@ float3 YCbCrRight(float2 texcoord)
 ///////////////////////////////////////////////////////////Stereo Distortion Out///////////////////////////////////////////////////////////////////////
 float3 PS_calcLR(float2 texcoord)
 {
-	float2 TCL = float2(texcoord.x * 2,texcoord.y), TCR = float2(texcoord.x * 2 - 1,texcoord.y), uv_redL, uv_greenL, uv_blueL, uv_redR, uv_greenR, uv_blueR;
+	float2 gridxy = floor(float2(texcoord.x * BUFFER_WIDTH, texcoord.y * BUFFER_HEIGHT)), TCL = float2(texcoord.x * 2,texcoord.y), TCR = float2(texcoord.x * 2 - 1,texcoord.y), uv_redL, uv_greenL, uv_blueL, uv_redR, uv_greenR, uv_blueR;
 	float4 color, Left, Right, color_redL, color_greenL, color_blueL, color_redR, color_greenR, color_blueR;
 	float K1_Red = Polynomial_Colors_K1.x, K1_Green = Polynomial_Colors_K1.y, K1_Blue = Polynomial_Colors_K1.z;
 	float K2_Red = Polynomial_Colors_K2.x, K2_Green = Polynomial_Colors_K2.y, K2_Blue = Polynomial_Colors_K2.z;
@@ -1645,17 +1651,23 @@ float3 PS_calcLR(float2 texcoord)
 
 		Right = float4(color_redR.x, color_greenR.y, color_blueR.z, 1.0);
 	}
-
-	if(!SuperDepth)
+	if(!overlay_open)
 	{
-		if(Barrel_Distortion == 1)
-			color = texcoord.x < 0.5 ? Circle(Left,float2(texcoord.x*2,texcoord.y)) : Circle(Right,float2(texcoord.x*2-1,texcoord.y));
+		if(!SuperDepth)
+		{
+			if(Barrel_Distortion == 1)
+				color = texcoord.x < 0.5 ? Circle(Left,float2(texcoord.x*2,texcoord.y)) : Circle(Right,float2(texcoord.x*2-1,texcoord.y));
+			else
+				color =  HelixVision ? Left : texcoord.x < 0.5 ? Left : Right;
+		}
 		else
-			color =  HelixVision ? Left : texcoord.x < 0.5 ? Left : Right;
+		{
+				color.rgb = float3(Y_Left,Y_Right,CbCr);
+		}
 	}
 	else
 	{
-			color.rgb = float3(Y_Left,Y_Right,CbCr);
+		color.rgb = HelixVision ? Left.rgb : fmod(gridxy.x+gridxy.y,2) ? R(texcoord) : L(texcoord);
 	}
 
 	if (BD_Options == 2 || Alinement_View)
@@ -1745,10 +1757,10 @@ float3 Out(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Targe
 	float3 Format = !SuperDepth ? SBS_3D : Super3D;
 	//Ok so I have to invert the pattern because for some reason the unity app I made can only read Integers values from ReShade.....
 	float2 ScreenPos = float2(1-texcoord.x,1-texcoord.y) * Res;//This Bugg was waisted a entire day. But, this is the workaround for that.
-	float Debug_Y = 1;// Set this higher so you can see it when Debugging
-	if(all(abs(float2(0.0,BUFFER_HEIGHT)-ScreenPos.xy) < float2(1.0,Debug_Y)))
+	float Debug_Y = 1.0;// Set this higher so you can see it when Debugging
+	if(all(abs(float2(1.0,BUFFER_HEIGHT)-ScreenPos.xy) < float2(1.0,Debug_Y)))
 		Color = Menu_Open ? Format : 0;
-	if(all(abs(float2(2.5,BUFFER_HEIGHT)-ScreenPos.xy) < float2(1.0,Debug_Y)))
+	if(all(abs(float2(3.0,BUFFER_HEIGHT)-ScreenPos.xy) < float2(1.0,Debug_Y)))
 		Color = Menu_Open ? 0 : Format;
 	if(all(abs(float2(5.0,BUFFER_HEIGHT)-ScreenPos.xy) < float2(1.0,Debug_Y)))
 		Color = Menu_Open ? Format : 0;
@@ -2067,10 +2079,10 @@ float3 Out(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Targe
 ///////////////////////////////////////////////////////////////////Unsharp_Mask//////////////////////////////////////////////////////////////////////
 
 float3 USM(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Target
-{
+{   float Sharp_This = overlay_open ? 0 : Sharpen_Power;
 	float2 tex_offset = pix; // Gets texel offset
 	float3 result = tex2D(BackBuffer, texcoord).rgb;
-	if(Sharpen_Power > 0)
+	if(Sharp_This > 0)
 	{
 		   result += tex2D(BackBuffer, float2(texcoord + float2( 1, 0) * tex_offset)).rgb;
 		   result += tex2D(BackBuffer, float2(texcoord + float2(-1, 0) * tex_offset)).rgb;
@@ -2084,7 +2096,7 @@ float3 USM(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Targe
    		result *= rcp(9);
 		//High Contrast Mask
 		float CA = 0.375f * 25.0f, HCM = saturate(dot(( tex2D(BackBuffer, texcoord).rgb - result.rgb ) , float3(0.333, 0.333, 0.333) * CA) );
-		result = tex2D(BackBuffer, texcoord).rgb + ( tex2D(BackBuffer, texcoord).rgb - result ) * Sharpen_Power;
+		result = tex2D(BackBuffer, texcoord).rgb + ( tex2D(BackBuffer, texcoord).rgb - result ) * Sharp_This;
 		//Contrast Aware
 		result = lerp(result, tex2D(BackBuffer, texcoord).rgb, HCM);
 	}

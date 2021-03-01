@@ -8,7 +8,7 @@ Read Help Section
 Depth Buffer may hang for a sec if you move your view to fast. Hope ReShade 4.4 fixes this.
 
 {.Hack//G.U.} - Used ReShade 3.0.8
-Once you install Reshade. Install this fix that allows for depth buffer access. This fix uses 3DMigoto to dissable a shader that was blocking acess to the depth buffer.
+Once you install Reshade. Install this fix that allows for depth buffer access. This fix uses 3DMigoto to disable a shader that was blocking acess to the depth buffer.
 http://www.mediafire.com/file/d5ep3qlsnbbbmvl/dotHack%20GU%20fix%20for%20Depth3D.zip
 
 {A Plague Tale: Innocence} - Used ReShade 4.7.0
@@ -232,6 +232,10 @@ Use an AMD Card to play this game in 3D.
 Render Resolution Native.
 Turn off AA.
 Don't use in game Supersampling
+
+{Cloud Punk} - Used ReShade 4.9
+Once you install Reshade. Install this fix that allows for depth buffer access. This fix uses 3DMigoto to disable a shader that was blocking acess to the depth buffer.
+http://www.mediafire.com/file/25qdu9lurxfucg2/Cloudpunk_fix_for_Depth3D.zip
 
 {Condemned Criminal Origins} - Used ReShade 4.4
 Issues with Depth it will stop after scripted events try to use the newest option at the bottom of depth buffer compatablity for DX9.
@@ -612,24 +616,6 @@ Path to install \Steam\SteamApps\common\Mafia III
 {Magicka 2} 
 Rename the opengl.dll to dxgi.dll
 Also Use a Controller for game play.
-
-{The Dark Pictures Anthology Man of Medan} - ReShade 4.7.0
-Game runs fine issues with DoF and/or other effects.
-
-To Disable Depth of Field in Man of Medan
-
-Head over to C:\Users\UserName\AppData\Local\ManOfMedan\Saved\Config\WindowsNoEditor
-Open the “Engine.ini” file
-Add:
-[SystemSettings]
-r.DepthOfFieldQuality=0
-
-For Bloom Add:
-r.BloomQuality=0
-
-Save the file
-
-Now there is one more issue I could not fix was the On screen action button may be hard to read sometimes....... Good luck with that.
 
 {Mass Effect Andromeda} - Thank you zig11727
 Install path \Program Files\Origin\Mass Effect Andromeda
@@ -1049,6 +1035,24 @@ Has a depth map that fluctuates for some reason.
 
 Now in Windows 10 Creators update you want to disable Compatilbility Mode and you still need to use Reshade 3.0.2.
 
+{The Dark Pictures Anthology Man of Medan} - ReShade 4.7.0
+Game runs fine issues with DoF and/or other effects.
+
+To Disable Depth of Field in Man of Medan
+
+Head over to C:\Users\UserName\AppData\Local\ManOfMedan\Saved\Config\WindowsNoEditor
+Open the “Engine.ini” file
+Add:
+[SystemSettings]
+r.DepthOfFieldQuality=0
+
+For Bloom Add:
+r.BloomQuality=0
+
+Save the file
+
+Now there is one more issue I could not fix was the On screen action button may be hard to read sometimes....... Good luck with that.
+
 {The Forest} - Used ReShade 4.3
 Depth Buffer Hides some times Need to look for it in the DX11 Tab. Keep a low Divergence lower then normal in this game.
 Also something to note. Depth Buffer is lost sometimes out in open waters. I find that setting Depth Settings as bellow help.
@@ -1106,6 +1110,12 @@ controls mainly depth of field effects. But, may not work you have to test this.
 
 {The Surge} - Thank you zig11727
 Install Directory \SteamLibrary\steamapps\common\The Surge\bin
+
+{The Swapper} - ReShade 4.9 as opengl32
+So issues with the game with needing the user to select the correct depth buffer in the API Tab. But, also it will be needing alignment and resizing. 
+This is done with overwatch.fxh. But, maybe you can do it better. The other issue is with depth in  dark areas of the cave, the dev didn't place a primitive there. 
+So this means the dark areas where there should be a wall, instead it will be set to Max depth. It looks like it was an optimization................. 
+But, because of this it will cause eye strain.
 
 {The Vanishing of Ethan Carter Redux}
 May Have an issue with the Title screen. Ignore this. In game it fine.
