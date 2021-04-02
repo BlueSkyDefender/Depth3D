@@ -2,7 +2,7 @@
 ///**SuperDepth3D_VR+**///
 //--------------------////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//* Depth Map Based 3D post-process shader v2.4.0
+//* Depth Map Based 3D post-process shader v2.4.1
 //* For Reshade 3.0+ I think...
 //* ---------------------------------
 //*
@@ -188,7 +188,7 @@
 	#endif
 #endif
 
-//uniform float TEST <
+//uniform float2 TEST <
 //	ui_type = "drag";
 //	ui_min = 0.0; ui_max = 1.0;
 //> = 0.0;
@@ -577,6 +577,7 @@ static const float3 Polynomial_Colors_K1 = float3(0.22, 0.22, 0.22);
 static const float3 Polynomial_Colors_K2 = float3(0.24, 0.24, 0.24);
 static const int Theater_Mode = 0;
 #endif
+
 uniform float Blinders <
 	ui_type = "slider";
 	ui_min = 0.0; ui_max = 1.0;
@@ -596,11 +597,11 @@ uniform float Adjust_Vignette <
 
 uniform float Sharpen_Power <
 	ui_type = "slider";
-	ui_min = 0.0; ui_max = 2.5;
-	ui_label = " Sharpen Power";
-	ui_tooltip = "Adjust this on clear up the image the game, movie picture & etc.\n"
-				 "This has basic contrast awareness and it will try too\n"
-				 "not sharpen High Contrast areas in image.";
+	ui_min = 0.0; ui_max = 5.0;
+	ui_label = " SmartSharp";
+	ui_tooltip = "Adjust this to clear up the image the game, movie picture & etc.\n"
+				 "This is Smart Sharp Jr code based on the Main Smart Sharp shader.\n"
+				 "It can be pushed more and looks better then the basic USM.";
 	ui_category = "Image Effects";
 > = 0;
 
@@ -647,6 +648,15 @@ float3 RGBtoYCbCr(float3 rgb) // For Super3D a new Stereo3D output.
 	float Cb = -.169 * rgb.x - .331 * rgb.y + .500 * rgb.z; // Chrominance Blue
 	float Cr =  .500 * rgb.x - .419 * rgb.y - .081 * rgb.z; // Chrominance Red
 	return float3(Y,Cb + 128./255.,Cr + 128./255.);
+}
+
+float3 YCbCrtoRGB(float3 ycc)
+{
+	float3 c = ycc - float3(0., 128./255., 128./255.);
+	float R = c.x + 1.400 * c.z;
+	float G = c.x - 0.343 * c.y - 0.711 * c.z;
+	float B = c.x + 1.765 * c.y;
+	return float3(R,G,B);
 }
 ///////////////////////////////////////////////////////////////3D Starts Here/////////////////////////////////////////////////////////////////
 texture DepthBufferTex : DEPTH;
@@ -751,7 +761,7 @@ sampler SamplerDouble
 		AddressW = BORDER;
 	};
 #else
-texture LeftTex  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA; };
+texture LeftTex  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGB10A2; };
 
 sampler SamplerLeft
 	{
@@ -761,7 +771,7 @@ sampler SamplerLeft
 		AddressW = BORDER;
 	};
 
-texture RightTex  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA; };
+texture RightTex  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGB10A2; };
 
 sampler SamplerRight
 	{
@@ -1471,26 +1481,26 @@ void LR_Out(float4 position : SV_Position, float2 texcoord : TEXCOORD, out float
 	else if( Eye_Fade_Reduction_n_Power.x == 2)
 			DLR = float2(FD,D);
 //Left & Right Parallax for Stereo Vision
-#if HelixVision
-	Double = StoreTC.x < 0.5 ? saturation( float4(MouseCursor( Parallax(-DLR.x, float2(TCL.x * 2,TCL.y))).rgb,1.0) ): saturation( float4(MouseCursor( Parallax( DLR.y, float2(TCR.x  * 2 - 1,TCR.y))).rgb,1.0) ); //Stereoscopic 3D using Reprojection Left & Right
-#else
-	Left = saturation( float4(MouseCursor( Parallax(-DLR.x, TCL)).rgb,1.0) ); //Stereoscopic 3D using Reprojection Left
-	Right =saturation( float4(MouseCursor( Parallax( DLR.y, TCR)).rgb,1.0) );//Stereoscopic 3D using Reprojection Right
+#if HUD_MODE || HM
+	float HUD_Adjustment = ((0.5 - HUD_Adjust.y)*25.) * pix.x;
 #endif
 
-
+#if HelixVision
+	float4 L = saturation( float4(MouseCursor( Parallax(-DLR.x, float2(TCL.x * 2,TCL.y))).rgb,1.0) ),
+		   R = saturation( float4(MouseCursor( Parallax( DLR.y, float2(TCR.x  * 2 - 1,TCR.y))).rgb,1.0) );
 	#if HUD_MODE || HM
-	float HUD_Adjustment = ((0.5 - HUD_Adjust.y)*25.) * pix.x;
-		#if HelixVision
-			if(StoreTC.x < 0.5)
-			Double.rgb = HUD(Left.rgb,float2((TCL.x * 2) - HUD_Adjustment,TCL.y));
-			else
-			Double.rgb = HUD(Right.rgb,float2((TCR.x  * 2 - 1) + HUD_Adjustment,TCR.y));
-		#else
-			Left.rgb = HUD(Left.rgb,float2(TCL.x - HUD_Adjustment,TCL.y));
-			Right.rgb = HUD(Right.rgb,float2(TCR.x + HUD_Adjustment,TCR.y));
-		#endif
+		L.rgb = HUD(L.rgb,float2((TCL.x * 2) - HUD_Adjustment,TCL.y));
+		R.rgb = HUD(R.rgb,float2((TCR.x  * 2 - 1) + HUD_Adjustment,TCR.y));
 	#endif
+	Double = StoreTC.x < 0.5 ? L : R; //Stereoscopic 3D using Reprojection Left & Right
+#else
+	Left =  saturation(float4(MouseCursor( Parallax(-DLR.x, TCL)).rgb,1.0)) ; //Stereoscopic 3D using Reprojection Left
+	Right = saturation(float4(MouseCursor( Parallax( DLR.y, TCR)).rgb,1.0)) ;//Stereoscopic 3D using Reprojection Right
+	#if HUD_MODE || HM
+		Left.rgb = HUD(Left.rgb,float2(TCL.x - HUD_Adjustment,TCL.y));
+		Right.rgb = HUD(Right.rgb,float2(TCR.x + HUD_Adjustment,TCR.y));
+	#endif
+#endif
 }
 ///////////////////////////////////////////////////////////Barrel Distortion///////////////////////////////////////////////////////////////////////
 float4 Circle(float4 C, float2 TC)
@@ -2076,32 +2086,62 @@ float3 Out(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Targe
 	else
 		return Color;
 }
-///////////////////////////////////////////////////////////////////Unsharp_Mask//////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////SmartSharp Jr.//////////////////////////////////////////////////////////////////////
+#define SIGMA 0.25
+#define MSIZE 3
 
-float3 USM(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Target
-{   float Sharp_This = overlay_open ? 0 : Sharpen_Power;
+float normpdf3(in float3 v, in float sigma)
+{
+	return 0.39894*exp(-0.5*dot(v,v)/(sigma*sigma))/sigma;
+}
+
+float LI(float3 RGB)
+{
+	return dot(RGB,float3(0.2126, 0.7152, 0.0722));
+}
+
+float3 SmartSharp(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Target
+{   float Sharp_This = overlay_open ? 0 : Sharpen_Power,mx, mn;
 	float2 tex_offset = pix; // Gets texel offset
-	float3 result = tex2D(BackBuffer, texcoord).rgb;
+	float3 c = tex2D(BackBuffer, texcoord).rgb;
 	if(Sharp_This > 0)
 	{
-		   result += tex2D(BackBuffer, float2(texcoord + float2( 1, 0) * tex_offset)).rgb;
-		   result += tex2D(BackBuffer, float2(texcoord + float2(-1, 0) * tex_offset)).rgb;
-		   result += tex2D(BackBuffer, float2(texcoord + float2( 0, 1) * tex_offset)).rgb;
-		   result += tex2D(BackBuffer, float2(texcoord + float2( 0,-1) * tex_offset)).rgb;
-		   tex_offset *= 0.75;
-		   result += tex2D(BackBuffer, float2(texcoord + float2( 1, 1) * tex_offset)).rgb;
-		   result += tex2D(BackBuffer, float2(texcoord + float2(-1,-1) * tex_offset)).rgb;
-		   result += tex2D(BackBuffer, float2(texcoord + float2( 1,-1) * tex_offset)).rgb;
-		   result += tex2D(BackBuffer, float2(texcoord + float2(-1, 1) * tex_offset)).rgb;
-   		result *= rcp(9);
-		//High Contrast Mask
-		float CA = 0.375f * 25.0f, HCM = saturate(dot(( tex2D(BackBuffer, texcoord).rgb - result.rgb ) , float3(0.333, 0.333, 0.333) * CA) );
-		result = tex2D(BackBuffer, texcoord).rgb + ( tex2D(BackBuffer, texcoord).rgb - result ) * Sharp_This;
-		//Contrast Aware
-		result = lerp(result, tex2D(BackBuffer, texcoord).rgb, HCM);
+		//Bilateral Filter//                                                Q1         Q2       Q3        Q4
+	const int kSize = MSIZE * 0.5; // Default M-size is Quality 2 so [MSIZE 3] [MSIZE 5] [MSIZE 7] [MSIZE 9] / 2.
+
+	float3 final_color, cc;
+	float2 RPC_WS = pix * 1.5;
+	float Z, factor;
+
+	[loop]
+	for (int i=-kSize; i <= kSize; ++i)
+	{
+		for (int j=-kSize; j <= kSize; ++j)
+		{
+			cc = tex2D(BackBuffer, texcoord.xy + float2(i,j) * RPC_WS * rcp(kSize * 2.0f)).rgb;
+			factor = normpdf3(cc-c, SIGMA);
+			Z += factor;
+			final_color += factor * cc;
+		}
 	}
 
-	return result;
+	final_color = saturate(final_color/Z);
+
+	mn = min( min( LI(c), LI(final_color)), LI(cc));
+	mx = max( max( LI(c), LI(final_color)), LI(cc));
+
+   // Smooth minimum distance to signal limit divided by smooth max.
+    float rcpM = rcp(mx), CAS_Mask;// = saturate(min(mn, 1.0 - mx) * rcpM);
+
+	// Shaping amount of sharpening masked
+	CAS_Mask = saturate(min(mn, 2.0 - mx) * rcpM);
+
+	float3 Sharp_Out = c + (c - final_color) * Sharp_This;
+	//Consideration for Super3D mode
+	c = SuperDepth ? lerp(c,float3(Sharp_Out.rg,c.b),CAS_Mask) : lerp(c,Sharp_Out,CAS_Mask);
+	}
+
+	return c;
 }
 ///////////////////////////////////////////////////////////////////ReShade.fxh//////////////////////////////////////////////////////////////////////
 void PostProcessVS(in uint id : SV_VertexID, out float4 position : SV_Position, out float2 texcoord : TEXCOORD)
@@ -2159,10 +2199,10 @@ technique SuperDepth3D_VR
 		VertexShader = PostProcessVS;
 		PixelShader = Out;
 	}
-		pass UnSharpMask_Filter
+		pass USMOut
 	{
 		VertexShader = PostProcessVS;
-		PixelShader = USM;
+		PixelShader = SmartSharp;
 	}
 		pass AverageLuminance
 	{
