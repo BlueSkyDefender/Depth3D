@@ -31,13 +31,13 @@ This Free VR App, is a basic way to view my stereoscopic shaders on your OpenVR 
 
 Installer Name: Depth3DXRCompanion_v1.9.5.exe<br /> 
 Installer Size: 36.8 MB<br /> 
-[Depth3D VR Companion App 1.9.5 Mega Download](https://mega.nz/file/OQRA1R7L#4rsIEDoTxbQ50jOH0q4SoXt8df_sAqG7F12mas3-_vE)<br /> 
+[Depth3D VR Companion App 1.9.5 Mega Download](https://mega.nz/file/XdY0QRTC#JbmMWFPKjglj9rTfrz7rTqdT39kgqFcWDWV440ldG28)<br /> 
 Uninstaller: Yes<br /> 
 Supported OS: Windows 8.1, or 10.<br /> 
 Requirements: Steam's OpenXR | GPU supporting DX11+ | .NET Framework 4.0 <br />
 Recommended System Specs are what is needed to run the game and then some.<br />
 Resolution & AR: 720p - 4K & 16:9 / 24:9<br />
-SHA1: 88C9E5026E9164ECB5F4A1E8E703BD1FA3C33D21<br /> 
+SHA1: B895C1DC30F24345DEE88BCF11709534F52D9168 <br /> 
 
 No support for Laptops with Hybrid systems. Though there are workarounds as users noted.  
 
