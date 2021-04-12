@@ -243,6 +243,23 @@ Also Dissable FSAA (FSAA OFF) or was it turn it on I forget.
 This is bug in game that drops fps in to the single diglets...... you need a pokemon that strong againts ground types.
 I kid I kid I don't know how to fix this issue try pc gaming wiki when fps drops in the the single digits.
 
+{Chronicle of Riddick Assault on Dark Athena} - Used ReShade 4.9.1 
+So this game causes strange issues in many shaders. Also has low perf even with my 1080ti. Have no Idea whats going on.
+
+To get the depth buffer you have to enable MSAA 2X or more. Then select the proper Depth in the API tab. 
+The game is very unoptimized with anti-aliasing on like really bad....
+
+Big Issue is that it seems to detoggle it self sometimes and in cutscenes Depth don't aline like it should. Maybe I will look in to some sort of fix later for the cutscenes.
+But, for now try this. https://www.pcgamingwiki.com/wiki/The_Chronicles_of_Riddick:_Assault_on_Dark_Athena#Widescreen_resolution
+
+Also, Try the other fixes listed on that web page.
+
+Other then that gameplay seems fine. This profile may need some tuning later. Good luck.
+
+Oh wait One more thing it seems like Threaded optimization needs to be turned off for this game in the NVIDIA Control Panel. I didn't test AMD GPUs.
+
+Man this game needs a ReMaster and redone in a diffrent API.......
+
 {DeadRising 3}
 Use Native scailing I think it's called in game as Full.
 I also suggest useing the 60FPS and 80FOV Fix for this game.
@@ -971,6 +988,18 @@ Now Download and install reshade and rename it from d3d9.dll to dx9x.dll
 Turn the game on and it should load ReShade after the intro.
 
 Thank you.
+
+{Spooky's House of Jump Scares} - Used ReShade 4.9.1
+Needs DX8 to DX9 converter and DX 9 ReShade DLL.
+
+Once in Game navigate to Settings at the start page and go down to Fix Resolution and it should boot into ReShade.
+
+Since Overwatch has a profile go to the api tab in ReShade. Here you uncheck
+[ ] Use Aspect Ratio Heuristics
+and check
+[ ] Copy Depth buffer before clearing operations
+
+For more information go here https://github.com/BlueSkyDefender/Depth3D/wiki/Shader-DepthMap
 
 {Soma} - Used ReShade 4.6.1
 So at one point AMD GPUs used to work with an older version of Game/Drivers. Now only Nv GPUs seem to only work.

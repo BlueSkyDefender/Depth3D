@@ -629,7 +629,24 @@ float fmod(float a, float b)
 	float c = frac(abs(a / b)) * abs(b);
 	return a < 0 ? -c : c;
 }
-///////////////////////////////////////////////////////////////3D Starts Here/////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////Conversions/////////////////////////////////////////////////////////////
+float3 RGBtoYCbCr(float3 rgb) // For Super3D a new Stereo3D output.
+{   float A[1];//The Chronicles of Riddick: Assault on Dark Athena FIX I don't know why it works.......
+	float Y  =  .299 * rgb.x + .587 * rgb.y + .114 * rgb.z; // Luminance
+	float Cb = -.169 * rgb.x - .331 * rgb.y + .500 * rgb.z; // Chrominance Blue
+	float Cr =  .500 * rgb.x - .419 * rgb.y - .081 * rgb.z; // Chrominance Red
+	return float3(Y,Cb + 128./255.,Cr + 128./255.);
+}//Code Not used for anything...
+// WTF Basicly I am adding code in to my shader that does nothing..... so it can run in this game WTF
+float3 YCbCrtoRGB(float3 ycc)
+{ 
+	float3 c = ycc - float3(0., 128./255., 128./255.);
+	float R = c.x + 1.400 * c.z;
+	float G = c.x - 0.343 * c.y - 0.711 * c.z;
+	float B = c.x + 1.765 * c.y;
+	return float3(R,G,B);
+}
+///////////////////////////////////////////////////////////////3D Starts Here///////////////////////////////////////////////////////////
 texture DepthBufferTex : DEPTH;
 sampler DepthBuffer
 	{
@@ -978,7 +995,8 @@ float Fade_in_out(float2 texcoord)
 		AA *= 0.5;
 	else if(Eye_Fade_Reduction_n_Power.z == 2)
 		AA *= 1.5;
-	//Fade in toggle.
+	//Fade in toggle. 
+	float B[1];
 	if(FPSDFIO == 1)
 		Trigger_Fade = Trigger_Fade_A;
 	else if(FPSDFIO == 2)
@@ -992,7 +1010,7 @@ float MaskW(float2 texcoord)
 	float2 texXY = texcoord + 10 * pix,H_V = 0.990;
 	float2 midHV = (H_V-1) * float2(BUFFER_WIDTH * 0.5,BUFFER_HEIGHT * 0.5) * pix;
 	texcoord = float2((texXY.x*H_V.x)-midHV.x,(texXY.y*H_V.y)-midHV.y);
-	return PrepDepth(texcoord).w;
+	return PrepDepth(texcoord.xy).w;
 }
 
 float Fade(float2 texcoord)
@@ -1619,6 +1637,7 @@ float3 PS_calcLR(float2 texcoord)
 		{
 			LOne = contrast*0.45;
 			ROne = contrast;
+			float D[1];//The Chronicles of Riddick: Assault on Dark Athena FIX I don't know why it works.......
 			DeGhost *= 0.275;
 
 			accum = saturate(cA*float4(ROne,0.0,1.0-ROne,1.0));

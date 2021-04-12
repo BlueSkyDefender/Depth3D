@@ -643,7 +643,7 @@ float fmod(float a, float b)
 }
 ///////////////////////////////////////////////////////////Conversions/////////////////////////////////////////////////////////////
 float3 RGBtoYCbCr(float3 rgb) // For Super3D a new Stereo3D output.
-{   float C[1];//The Chronicles of Riddick: Assault on Dark Athena FIX I don't know why it works.......
+{   float A[1];//The Chronicles of Riddick: Assault on Dark Athena FIX I don't know why it works.......
 	float Y  =  .299 * rgb.x + .587 * rgb.y + .114 * rgb.z; // Luminance
 	float Cb = -.169 * rgb.x - .331 * rgb.y + .500 * rgb.z; // Chrominance Blue
 	float Cr =  .500 * rgb.x - .419 * rgb.y - .081 * rgb.z; // Chrominance Red
@@ -651,13 +651,21 @@ float3 RGBtoYCbCr(float3 rgb) // For Super3D a new Stereo3D output.
 }
 
 float3 YCbCrtoRGB(float3 ycc)
-{
+{ 
 	float3 c = ycc - float3(0., 128./255., 128./255.);
 	float R = c.x + 1.400 * c.z;
 	float G = c.x - 0.343 * c.y - 0.711 * c.z;
 	float B = c.x + 1.765 * c.y;
 	return float3(R,G,B);
 }
+#if SuperDepth //The Chronicles of Riddick: Assault on Dark Athena FIX I don't know why it works.......
+float3 youknow(float2 Idontknow)
+{
+	float whatisgoing;
+	float3 on;
+	return  whatisgoing+on;
+}
+#endif
 ///////////////////////////////////////////////////////////////3D Starts Here/////////////////////////////////////////////////////////////////
 texture DepthBufferTex : DEPTH;
 sampler DepthBuffer
@@ -1073,10 +1081,13 @@ float MaskW(float2 texcoord)
 	return PrepDepth(texcoord).w;
 }
 
-float Fade(float2 texcoord)
-{ //Check Depth
+float Fade(float2 texcoord)//Check Depth
+{   
+	#if !SuperDepth
+	float B[1];//The Chronicles of Riddick: Assault on Dark Athena FIX I don't know why it works.......
+	#endif
 	float CD, Detect;
-	if(ZPD_Boundary > 0)
+	if(ZPD_Boundary > 0) 
 	{   //Normal A & B for both
 		float CDArray_A[7] = { 0.125 ,0.25, 0.375,0.5, 0.625, 0.75, 0.875}, CDArray_B[7] = { 0.25 ,0.375, 0.4375, 0.5, 0.5625, 0.625, 0.75};
 		float CDArrayZPD_A[7] = { ZPD_Separation.x * 0.625, ZPD_Separation.x * 0.75, ZPD_Separation.x * 0.875, ZPD_Separation.x, ZPD_Separation.x * 0.875, ZPD_Separation.x * 0.75, ZPD_Separation.x * 0.625 },

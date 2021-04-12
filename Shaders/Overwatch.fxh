@@ -1,7 +1,7 @@
 ////----------------------------------------//
 ///SuperDepth3D Overwatch Automation Shader///
 //----------------------------------------////
-// Version 1.9.1
+// Version 1.9.2
 //---------------------------------------OVERWATCH---------------------------------------//
 // If you are reading this stop. Go away and never look back. From this point on if you  //
 // still think it's is worth looking at this..... Then no one can save you or your soul. //
@@ -641,12 +641,15 @@ static const int FOV = 0;                               //Set Game FoV
 	#define DE_Z 0.375
 	#define DF_Y 0.005
 	#define RH 1
-#elif (App == 0x84D341E3 ) //Little Nightmares
+#elif (App == 0x84D341E3 || App == 0x15A08799) //Little Nightmares & Little Nightmares II
 	#define DA_W 1
 	#define DA_Y 33.75
 	#define DA_X 0.25
+	#define DF_Y 0.125
 	#define DA_Z 0.0015
 	#define DB_Y 5
+    #define DA_Y 0.325
+	#define PE 1
 #elif (App == 0xC0AC5174 ) //Observer
 	#define DA_W 1
 	#define DA_Y 21.5
@@ -1091,14 +1094,17 @@ static const int FOV = 0;                               //Set Game FoV
 	#define DA_Z 0.00009375
 	#define DA_W 1
 	#define DB_Y 3
-	//#define DE_X 4
-	#define DE_Y 0.666
-	#define DE_Z 0.666
+	#define DE_X 4
+	#define DE_Y 0.550
+	#define DE_Z 0.333
 	#define DB_W 68
-	#define DE_W 0.09375
+	//#define DG_Z 0.080 //Min
+    #define DE_W 0.125 //Max
+	//#define DE_W 0.09375
 	#define DA_X 0.03125
+	#define DF_Y 0.03125
 	//#define DA_X 0.0375 //Alternet settings Not used.
-	//#define DE_W 0.125
+	#define PE 1
 #elif (App == 0x47F294E9 ) //Octopath Traveler
 	#define DA_Y 225.0
 	#define DA_Z 0.000375
@@ -1131,23 +1137,30 @@ static const int FOV = 0;                               //Set Game FoV
 	#define PE 1
 	#define NF 1
 #elif (App == 0x8CD23575 ) //Dark Souls: Remastered
-	#define DA_Y 50.0
-	#define DA_Z 0.001
+	#define DA_Y 75.0
+	//#define DA_Z 0.001
 	#define DA_X 0.05625
+	#define DF_Y 0.05
 	#define DB_Y 2
 	#define DE_X 2
-	#define DE_Y 0.500
+	#define DE_Y 0.250
 	#define DE_Z 0.375
-	#define DE_W 0.0625
+	//#define DE_W 0.0625
+	#define PE 1
+	#define FV 1
 #elif (App == 0x9E071BC0 ) //Dark Souls III
 	#define DA_Y 25.0
 	#define DA_Z 0.000125
 	#define DA_X 0.1
+	#define DF_Y 0.05625
 	#define DB_Y 3
 	#define DE_X 2
-	#define DE_Y 0.250
+	#define DE_Y 0.5000
 	#define DE_Z 0.4375
-	#define DE_W 0.225
+	#define DG_Z 0.1125 //Min
+	//#define DE_W 0.225
+	#define PE 1
+	#define FV 1
 #elif (App == 0x5D4939C9 ) //Dark Souls II
 	#define DA_Y 22.5
 	#define DA_Z 0.00025
@@ -1157,6 +1170,18 @@ static const int FOV = 0;                               //Set Game FoV
 	#define DE_Y 0.50
 	#define DE_Z 0.40
 	#define DE_W 0.1
+#elif (App == 0xFB111509 ) //Dark Souls II Scholar of the First Sin
+	#define DA_Y 68.75
+	#define DA_X 0.05
+	#define DF_Y 0.05
+	#define DB_Y 2
+	#define DE_X 2
+	#define DE_Y 0.250
+	#define DE_Z 0.375
+	#define DG_Z 0.025 //Min
+  //#define DE_W 0.125 //Max
+	#define PE 1
+	#define FV 1
 #elif (App == 0xCE5313C2 ) //BorderLands Enhanced
 	#define DA_Y 18.75
 	#define DA_Z 0.0005
@@ -1840,7 +1865,7 @@ static const int FOV = 0;                               //Set Game FoV
 	#define DE_Z 0.375
 	#define DS 1
 	#define RH 1
-  #define NF 1
+	#define NF 1
 #elif (App == 0x4551A746 ) //The Swapper
 	#define DB_X 1
 	#define DF_Y 0.025
@@ -1858,6 +1883,262 @@ static const int FOV = 0;                               //Set Game FoV
 	#define SP 1
 	#define DS 1
 	#define RH 1
+#elif (App == 0xE0B7AF16 ) //Horizon Chase Turbo
+	#define DA_W 1
+	#define DA_Y 12.5
+	#define DA_X 0.175
+	#define DF_Y 0.0625
+	#define DB_Y 1
+	#define DA_Z -0.125
+	#define DE_X 1
+	#define DE_Y 0.500
+	#define DE_Z 0.375
+	#define DS 1
+#elif (App == 0xCF0046B7 ) //SpecOps The Line
+	#define DA_Y 15.0
+	#define DA_X 0.05
+	#define DF_Y 0.01
+	#define DB_Y 4
+	#define DA_Z -0.00125
+	#define DE_X 1
+	#define DE_Y 0.500
+	#define DE_Z 0.375
+	#define DS 1
+	#define PE 1
+	#define FV 1
+#elif (App == 0x6C433D70 ) //Q.U.B.E 2
+	#define DA_W 1
+	#define DA_Y 75.0
+	#define DA_X 0.05625
+	#define DF_Y 0.01
+	#define DB_Y 2
+	#define DB_Z 0.05625
+	#define DA_Z 0.00025
+	#define DE_X 3
+	#define DE_Y 0.450
+	#define DE_Z 0.375
+	#define PE 1
+	#define FV 1
+	#define DB_W 77
+#elif (App == 0xD87951C4 ) //Horizon Zero Dawn
+	//#define DA_W 1
+	#define DA_Y 12.5
+	#define DA_X 0.05
+	//#define DF_Y 0.01
+	#define DB_Y 2
+	#define DB_Z 0.05
+	#define DA_Z 0.0005
+	#define DE_X 2
+	#define DE_Y 0.3
+	#define DE_Z 0.375
+	#define PE 1
+	#define FV 1
+#elif (App == 0xF1BFCA91 ) //ELEX
+	//#define DA_W 1
+	//#define DA_Y 12.5
+	#define DA_X 0.1
+	//#define DF_Y 0.1
+	#define DB_Y 2
+	//#define DB_Z 0.1
+	//#define DA_Z 0.0005
+	#define DE_X 2
+	#define DE_Y 0.500
+	#define DE_Z 0.300
+	#define PE 1
+	#define DS 1
+#elif (App == 0x2E63D83A ) //Kingdom Come Diliverance
+	#define DA_W 1
+	#define DA_Y 25.0
+	#define DA_X 0.060
+	//#define DF_Y 0.1
+	#define DB_Y 1
+	//#define DB_Z 0.1
+	//#define DA_Z 0.0005
+	#define DE_X 1
+	#define DE_Y 0.500
+	#define DE_Z 0.300
+	#define PE 1
+	#define FV 1
+#elif (App == 0xF9341C1 ) //Valheim
+	#define DA_W 1
+    #define DB_X 1
+	#define DA_Y 12.5
+	#define DA_X 0.05
+	//#define DF_Y 0.1
+	#define DB_Y 2
+	#define DB_Z 0.125
+	//#define DA_Z 0.0005
+	#define DE_X 2
+	#define DE_Y 0.500
+	#define DE_Z 0.300
+	#define PE 1
+	#define DA 1
+#elif (App == 0x8C8F544C ) //Witcher 3
+	#define DA_W 1
+    //#define DB_X 1
+	#define DA_Y 12.5
+	#define DA_X 0.075
+	//#define DF_Y 0.1
+	#define DB_Y 4
+	//#define DB_Z 0.125
+	//#define DA_Z 0.0005
+	#define DE_X 2
+	#define DE_Y 0.500
+	#define DE_Z 0.300
+	#define PE 1
+	#define DA 1
+#elif (App == 0xA05A15C4 ) //Spooky's House of Jump Scares
+	//#define DA_W 1
+    //#define DB_X 1
+	//#define DA_Y 12.5
+	#define DA_X 0.150
+	//#define DF_Y 0.1
+	#define DB_Y 1
+	//#define DB_Z 0.125
+	//#define DA_Z 0.0005
+	#define DE_X 1
+	//#define DE_Y 0.500
+	//#define DE_Z 0.300
+	#define DS 1
+	#define RH 1
+	#define NF 1
+	#define SP 1
+	#define DD_X 0.625
+	#define DD_Y 0.700
+	#define DD_Z 0.600
+	#define DD_W -0.425
+#elif (App == 0x483A8BD9 ) //Song of Horror
+	#define DA_W 1
+    //#define DB_X 1
+	#define DA_Y 112.5
+	#define DA_X 0.1125
+	#define DF_Y 0.1
+	#define DB_Y 4
+	//#define DB_Z 0.125
+	//#define DA_Z 0.0005
+	#define DE_X 2
+	//#define DE_Y 0.500
+	//#define DE_Z 0.300
+	#define PE 1
+	#define FV 1
+    #define DA 1
+	//#define DS 1
+	//#define RH 1
+	//#define NF 1
+	//#define SP 1
+	//#define DD_X 0.625
+	//#define DD_Y 0.700
+	//#define DD_Z 0.600
+	//#define DD_W -0.425
+#elif (App == 0xB43B3B36 ) //Bendy and the Ink Machine
+	#define DA_W 1
+    #define DB_X 1
+	#define DA_Y 12.5
+	#define DA_X 0.120
+	#define DF_Y 0.025
+	#define DB_Y 1
+	//#define DB_Z 0.125
+	//#define DA_Z 0.0005
+	#define DE_X 1
+	//#define DE_Y 0.500
+	#define DE_Z 0.300
+	#define PE 1
+	#define FV 1
+    //#define DA 1
+	#define DS 1
+	//#define RH 1
+	//#define NF 1
+	//#define SP 1
+	//#define DD_X 0.625
+	//#define DD_Y 0.700
+	//#define DD_Z 0.600
+	//#define DD_W -0.425
+#elif (App == 0xEFB2EF28 ) //Remothered: Tormented Fathers
+	#define DA_W 1
+	//#define DB_X 1
+	#define DA_Y 50.0
+	#define DA_X 0.125
+	#define DF_Y 0.050
+	#define DB_Y 3
+	//#define DB_Z 0.125
+	#define DA_Z -1.250
+	#define DE_X 2
+	#define DE_Y 0.250
+	#define DE_Z 0.375
+	#define PE 1
+	#define FV 1
+	//#define DA 1
+	//#define DS 1
+	//#define RH 1
+	//#define NF 1
+	//#define SP 1
+	//#define DD_X 0.625
+	//#define DD_Y 0.700
+	//#define DD_Z 0.600
+	//#define DD_W -0.425
+#elif (App == 0x2EFA1BAF ) //Betrayer
+	//#define DA_W 1
+	#define DA_Y 15.0
+	#define DA_X 0.05
+	//#define DF_Y 0.01
+	#define DB_Y 4
+	//#define DB_Z 0.05625
+	//#define DA_Z 0.00025
+	#define DE_X 3
+	//#define DE_Y 0.450
+	#define DE_Z 0.375
+	#define PE 1
+	#define FV 1
+	#define DB_W 67
+#elif (App == 0x75CE6926 ) //Chronicle of Riddick Assault on Dark Athena
+	//#define DA_W 1
+	//#define DA_Y 15.0
+	#define DA_X 0.1325
+	//#define DF_Y 0.01
+	#define DB_Y 1
+	//#define DB_Z 0.05625
+	//#define DA_Z 0.00025
+	#define DE_X 2
+	//#define DE_Y 0.450
+	//#define DE_Z 0.375
+	#define PE 1
+	#define DS 1
+	#define RH 1
+#elif (App == 0xAA5644F9 ) //Need For Speed Heat
+	#define DA_W 1
+	#define DA_Y 12.5
+	#define DA_X 0.1
+	#define DF_Y 0.1
+	#define DB_Y 4
+	//#define DB_Z 0.1
+	//#define DA_Z 0.00025
+	//#define DE_X 2
+	//#define DE_Y 0.450
+	//#define DE_Z 0.375
+	#define PE 1
+#elif (App == 0xBD8B2F39 ) //Assassin's Creed Odyssey
+	#define DA_W 1
+	//#define DB_X 1
+	#define DA_Y 30.0
+	#define DA_X 0.050
+	#define DF_Y 0.030
+	#define DB_Y 4
+	//#define DB_Z 0.125
+	#define DA_Z -1.000
+	#define DE_X 2
+	//#define DE_Y 0.250
+	#define DE_Z 0.375
+	#define PE 1
+	#define FV 1
+	//#define DA 1
+	//#define DS 1
+	//#define RH 1
+	//#define NF 1
+	//#define SP 1
+	//#define DD_X 0.625
+	//#define DD_Y 0.700
+	//#define DD_Z 0.600
+	//#define DD_W -0.425
 #else
 	#define NP 1 //No Profile
 #endif
@@ -2145,7 +2426,7 @@ float3 Weapon_Profiles(float WP ,float3 Weapon_Adjust) //Tried Switch But, can't
     if (WP == 61) //Unity Limit if using else if
         Value = float3(1.825,13.75,0);        //WP 59 | No Man Sky FPS Mode
     if (WP == 62)
-        Value = float3(1.953,5.25,0);          //WP 60 | Dying Light
+        Value = float3(1.953,5.25,0);         //WP 60 | Dying Light
     if (WP == 63)
         Value = float3(0.287,180.0,9.0);      //WP 61 | Farcry
     if (WP == 64)
@@ -2155,9 +2436,9 @@ float3 Weapon_Profiles(float WP ,float3 Weapon_Adjust) //Tried Switch But, can't
     if (WP == 66)
         Value = float3(0.2503,52.5,987.5);    //WP 64 | Singularity
     if (WP == 67)
-        Value = float3(0,0,0);                //WP 65 | Game
+        Value = float3(0.251,12.5,925.0);     //WP 65 | Betrayer
     if (WP == 68)
-        Value = float3(1.025,10.0,0.185);     //WP 66 | Doom Eternal
+        Value = float3(1.025,16.0,0.185);     //WP 66 | Doom Eternal
     if (WP == 69)
         Value = float3(0,0,0);                //WP 67 | Game
     if (WP == 70)
@@ -2175,7 +2456,7 @@ float3 Weapon_Profiles(float WP ,float3 Weapon_Adjust) //Tried Switch But, can't
     if (WP == 76)
         Value = float3(0,0,0);                //WP 74 | Game
     if (WP == 77)
-        Value = float3(0,0,0);                //WP 75 | Game
+        Value = float3(1.553,16.875,0.0);     //WP 75 | Q.U.B.E 2
 
 		return Value;
 }
