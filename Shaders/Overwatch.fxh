@@ -2139,6 +2139,11 @@ static const int FOV = 0;                               //Set Game FoV
 	//#define DD_Y 0.700
 	//#define DD_Z 0.600
 	//#define DD_W -0.425
+#elif (App == 0x3D00A2BC ) //SM64 us f3dx2e
+	#define DA_Y 12.5
+	#define DA_X 0.050
+	#define DB_Y 4
+	#define DE_X 2
 #else
 	#define NP 1 //No Profile
 #endif

@@ -567,7 +567,7 @@ uniform float3 Polynomial_Colors_K2 <
 
 uniform bool Theater_Mode <
 	ui_label = " Theater Mode";
-	ui_tooltip = "Sets the VR Shader in to Theater mode.";
+	ui_tooltip = "Sets the VR Shader into Theater mode.";
 	ui_category = "Image Adjustment";
 > = false;
 #else
@@ -613,6 +613,16 @@ uniform float Saturation <
 	ui_category = "Image Effects";
 > = 0;
 
+#if !SuperDepth && !HelixVision
+	uniform bool NCAOC < // Non Companion App Overlay Compatibility
+	ui_label = " Alternative Overlay Mode";
+	ui_tooltip = "Sets the VR Shader to Non Companion App Overlay Compatibility.\n"
+				 "This lets the overlay work in other Desktop Mirroring software.";
+	ui_category = "Extra Options";
+> = false;
+#else
+	static const int NCAOC = 0;
+#endif
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 uniform bool Cancel_Depth < source = "key"; keycode = Cancel_Depth_Key; toggle = true; mode = "toggle";>;
 uniform bool Mask_Cycle < source = "key"; keycode = Mask_Cycle_Key; toggle = true; >;
@@ -651,7 +661,7 @@ float3 RGBtoYCbCr(float3 rgb) // For Super3D a new Stereo3D output.
 }
 
 float3 YCbCrtoRGB(float3 ycc)
-{ 
+{
 	float3 c = ycc - float3(0., 128./255., 128./255.);
 	float R = c.x + 1.400 * c.z;
 	float G = c.x - 0.343 * c.y - 0.711 * c.z;
@@ -1082,12 +1092,12 @@ float MaskW(float2 texcoord)
 }
 
 float Fade(float2 texcoord)//Check Depth
-{   
+{
 	#if !SuperDepth
 	float B[1];//The Chronicles of Riddick: Assault on Dark Athena FIX I don't know why it works.......
 	#endif
 	float CD, Detect;
-	if(ZPD_Boundary > 0) 
+	if(ZPD_Boundary > 0)
 	{   //Normal A & B for both
 		float CDArray_A[7] = { 0.125 ,0.25, 0.375,0.5, 0.625, 0.75, 0.875}, CDArray_B[7] = { 0.25 ,0.375, 0.4375, 0.5, 0.5625, 0.625, 0.75};
 		float CDArrayZPD_A[7] = { ZPD_Separation.x * 0.625, ZPD_Separation.x * 0.75, ZPD_Separation.x * 0.875, ZPD_Separation.x, ZPD_Separation.x * 0.875, ZPD_Separation.x * 0.75, ZPD_Separation.x * 0.625 },
@@ -1672,23 +1682,24 @@ float3 PS_calcLR(float2 texcoord)
 
 		Right = float4(color_redR.x, color_greenR.y, color_blueR.z, 1.0);
 	}
-	if(!overlay_open)
+
+	if(!overlay_open || NCAOC)
 	{
 		if(!SuperDepth)
 		{
-			if(Barrel_Distortion == 1)
+			if(Barrel_Distortion == 1) // Side by Side for VR
 				color = texcoord.x < 0.5 ? Circle(Left,float2(texcoord.x*2,texcoord.y)) : Circle(Right,float2(texcoord.x*2-1,texcoord.y));
-			else
+			else//Helix Vison Mode
 				color =  HelixVision ? Left : texcoord.x < 0.5 ? Left : Right;
 		}
 		else
-		{
-				color.rgb = float3(Y_Left,Y_Right,CbCr);
+		{	// Super3D Mode
+			color.rgb = float3(Y_Left,Y_Right,CbCr);
 		}
 	}
 	else
 	{
-		color.rgb = HelixVision ? Left.rgb : fmod(gridxy.x+gridxy.y,2) ? R(texcoord) : L(texcoord);
+			color.rgb = HelixVision ? Left.rgb : fmod(gridxy.x+gridxy.y,2) ? R(texcoord) : L(texcoord);
 	}
 
 	if (BD_Options == 2 || Alinement_View)
@@ -2092,7 +2103,8 @@ float3 Out(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Targe
 		if(OS)
 			Over = State * BT;
 		//Website
-		return Depth3D+Help+Post+No+Not+Net+Fix+Need+Over+AA+Set+FoV+Emu ? (1-texcoord.y*50.0+48.85)*texcoord.y-0.500: Color;
+		float3 WebInfo = Depth3D+Help+Post+No+Not+Net+Fix+Need+Over+AA+Set+FoV+Emu;
+		return (SuperDepth ? float3(WebInfo.rg,0) : WebInfo) ? (1-texcoord.y*50.0+48.85)*texcoord.y-0.500 : Color;
 	}
 	else
 		return Color;
@@ -2210,11 +2222,13 @@ technique SuperDepth3D_VR
 		VertexShader = PostProcessVS;
 		PixelShader = Out;
 	}
+	#if !HelixVision
 		pass USMOut
 	{
 		VertexShader = PostProcessVS;
 		PixelShader = SmartSharp;
 	}
+	#endif
 		pass AverageLuminance
 	{
 		VertexShader = PostProcessVS;
@@ -2229,3 +2243,15 @@ technique SuperDepth3D_VR
 		RenderTarget = texPBVR;
 	}
 }
+#if HelixVision
+technique SmartSharp_jr
+< ui_tooltip = "Move this either before or after the VR shader depending on what you think looks better .\n"
+			   "             This only shows in HelixVision Mode."; >
+{
+	pass USMOut
+	{
+		VertexShader = PostProcessVS;
+		PixelShader = SmartSharp;
+	}
+}
+#endif
