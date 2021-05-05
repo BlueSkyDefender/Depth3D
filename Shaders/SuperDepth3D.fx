@@ -2,7 +2,7 @@
 ///**SuperDepth3D**///
 //----------------////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//* Depth Map Based 3D post-process shader v2.5.1
+//* Depth Map Based 3D post-process shader v2.5.2
 //* For Reshade 3.0+
 //* ---------------------------------
 //*
@@ -54,7 +54,7 @@
 	#define OW_WP "WP Off\0Custom WP\0"
 	static const int WSM = 0;
 	//Triggers
-	static const int RE = 0, NC = 0, RH = 0, NP = 0, ID = 0, SP = 0, DC = 0, HM = 0, DF = 0, NF = 0, DS = 0, LBC = 0, LBM = 0, DA = 0, NW = 0, PE = 0, WW = 0, FV = 0, ED = 0;
+	static const int RE = 0, NC = 0, RH = 0, NP = 0, ID = 0, SP = 0, DC = 0, HM = 0, DF = 0, NF = 0, DS = 0, LBC = 0, LBM = 0, DA = 0, NW = 0, PE = 0, WW = 0, FV = 0, ED = 0, SDT = 0;
 	//Overwatch.fxh State
 	#define OS 1
 #endif
@@ -86,6 +86,9 @@
 // Auto Letter Box Correction & Masking
 #define LB_Correction 0 //Default 0 is Off. One is On.
 #define LetterBox_Masking 0 //[Zero is Off] [One is Hoz] [Two is Auto Hoz] [Three is Vert] [Four is Auto Vert]
+
+// Specialized Depth Triggers
+#define SD_Trigger 0 //Default is off. One is Mode A other Modes not added yet.
 
 // HUD Mode is for Extra UI MASK and Basic HUD Adjustments. This is useful for UI elements that are drawn in the Depth Buffer.
 // Such as the game Naruto Shippuden: Ultimate Ninja, TitanFall 2, and or Unreal Gold 277. That have this issue. This also allows for more advance users
@@ -639,7 +642,7 @@ float3 RGBtoYCbCr(float3 rgb) // For Super3D a new Stereo3D output.
 }//Code Not used for anything...
 // WTF Basicly I am adding code in to my shader that does nothing..... so it can run in this game WTF
 float3 YCbCrtoRGB(float3 ycc)
-{ 
+{
 	float3 c = ycc - float3(0., 128./255., 128./255.);
 	float R = c.x + 1.400 * c.z;
 	float G = c.x - 0.343 * c.y - 0.711 * c.z;
@@ -702,10 +705,14 @@ sampler SamplerDMN
 	{
 		Texture = texDMN;
 	};
-
-texture texzBufferN { Width = BUFFER_WIDTH ; Height = BUFFER_HEIGHT ; Format = RG16F; 
+	#if SDT || SD_Trigger
+		#define RGBA_Sixteen RGBA16F
+	#else
+		#define RGBA_Sixteen RG16F
+	#endif
+texture texzBufferN { Width = BUFFER_WIDTH ; Height = BUFFER_HEIGHT ; Format = RGBA_Sixteen;
 #if DB_Size_Position
-	 MipLevels = 10; 
+	 MipLevels = 10;
 #endif
 					};
 
@@ -801,6 +808,21 @@ float LBDetection()
 		return (CSB(float2(0.5,0.1)) == 0) && (CSB(float2(0.1,0.9)) == 0) && (CSB(float2(0.5,0.5)) > 0) ? 1 : 0;
 }
 #endif
+
+#if SDT || SD_Trigger
+float TargetedDepth(float2 TC)
+{
+	return smoothstep(0,1,tex2Dlod(SamplerzBufferVR,float4(TC,0,0)).z);
+}
+
+float SDTriggers()//Specialized Depth Triggers
+{   float Threshold = 0.001;//Both this and the options below may need to be adjusted. A Value lower then 7.5 will break this.!?!?!?!
+	if ( SD_Trigger == 1 || SDT == 1)//Top _ Left                             //Center_Left                             //Botto_Left
+		return (TargetedDepth(float2(0.95,0.25)) >= Threshold ) && (TargetedDepth(float2(0.95,0.5)) >= Threshold) && (TargetedDepth(float2(0.95,0.75)) >= Threshold) ? 0 : 1;
+	else
+		return 0;
+}
+#endif
 /////////////////////////////////////////////////////////////Cursor///////////////////////////////////////////////////////////////////////////
 float4 MouseCursor(float2 texcoord )
 {   float4 Out = CSB(texcoord),Color;
@@ -876,7 +898,7 @@ float DMA() //Small List of internal Multi Game Depth Adjustments.
 	return DMA;
 }
 
-float Depth(float2 texcoord)
+float2 TC_SP(float2 texcoord)
 {
 	#if BD_Correction || DC
 	if(BD_Options == 0 || BD_Options == 2)
@@ -885,8 +907,16 @@ float Depth(float2 texcoord)
 		texcoord = D(texcoord.xy,K123.x,K123.y,K123.z);
 	}
 	#endif
-	#if DB_Size_Position || SP || LBC || LB_Correction
-		texcoord.xy += float2(-Image_Position_Adjust.x,Image_Position_Adjust.y)*0.5;
+	#if DB_Size_Position || SP || LBC || LB_Correction || SDT || SD_Trigger
+
+		#if SDT || SD_Trigger
+			float2 X_Y = float2(Image_Position_Adjust.x,Image_Position_Adjust.y) + float2(SDTriggers() ? -0.190 : 0 , 0);
+		#else
+			float2 X_Y = float2(Image_Position_Adjust.x,Image_Position_Adjust.y);
+		#endif
+
+	texcoord.xy += float2(-X_Y.x,X_Y.y)*0.5;
+
 		#if LBC || LB_Correction
 			float2 H_V = Horizontal_and_Vertical * float2(1,LBDetection() ? 1.315 : 1 );
 		#else
@@ -895,9 +925,11 @@ float Depth(float2 texcoord)
 	float2 midHV = (H_V-1) * float2(BUFFER_WIDTH * 0.5,BUFFER_HEIGHT * 0.5) * pix;
 	texcoord = float2((texcoord.x*H_V.x)-midHV.x,(texcoord.y*H_V.y)-midHV.y);
 	#endif
-	if (Depth_Map_Flip)
-		texcoord.y =  1 - texcoord.y;
-	//Conversions to linear space.....
+	return texcoord;
+}
+
+float Depth(float2 texcoord)
+{	//Conversions to linear space.....
 	float zBuffer = tex2Dlod(DepthBuffer, float4(texcoord,0,0)).x, Far = 1.0, Near = 0.125/DMA(); //Near & Far Adjustment
 	//Man Why can't depth buffers Just Be Normal
 	float2 C = float2( Far / Near, 1.0 - Far / Near ), Z = Offset < 0 ? min( 1.0, zBuffer * ( 1.0 + abs(Offset) ) ) : float2( zBuffer, 1.0 - zBuffer );
@@ -913,25 +945,7 @@ float Depth(float2 texcoord)
 }
 
 float2 WeaponDepth(float2 texcoord)
-{
-	#if BD_Correction || DC
-	if(BD_Options == 0 || BD_Options == 2)
-	{
-		float3 K123 = Colors_K1_K2_K3 * 0.1;
-		texcoord = D(texcoord.xy,K123.x,K123.y,K123.z);
-	}
-	#endif
-	#if DB_Size_Position || SP || LBC || LB_Correction
-		texcoord.xy += float2(-Image_Position_Adjust.x,Image_Position_Adjust.y)*0.5;
-		#if LBC || LB_Correction
-			float2 H_V = Horizontal_and_Vertical * float2(1,LBDetection() ? 1.315 : 1);
-		#else
-			float2 H_V = Horizontal_and_Vertical;
-		#endif
-	float2 midHV = (H_V-1) * float2(BUFFER_WIDTH * 0.5,BUFFER_HEIGHT * 0.5) * pix;
-	texcoord = float2((texcoord.x*H_V.x)-midHV.x,(texcoord.y*H_V.y)-midHV.y);
-	#endif
-	//Weapon Setting//
+{	//Weapon Setting//
 	float3 WA_XYZ = Weapon_Adjust;
 	#if WSM >= 1
 		WA_XYZ = Weapon_Profiles(WP, Weapon_Adjust);
@@ -953,11 +967,13 @@ float2 WeaponDepth(float2 texcoord)
 
 	return float2(saturate(zBufferWH), WA_XYZ.x);
 }
-
-float4 PrepDepth(float2 texcoord)
+//3x2 and 2x3 not supported on older ReShade versions. I had to use 3x3. Old Values for 3x2
+float3x3 PrepDepth(float2 texcoord)
 {
-	float4 DM = Depth(texcoord).xxxx;
-	float R, G, B, A, WD = WeaponDepth(texcoord).x, CoP = WeaponDepth(texcoord).y, CutOFFCal = (CoP/DMA()) * 0.5; //Weapon Cutoff Calculation
+	if (Depth_Map_Flip)
+		texcoord.y =  1 - texcoord.y;
+	float4 DM = Depth(TC_SP(texcoord)).xxxx;
+	float R, G, B, A, WD = WeaponDepth(TC_SP(texcoord)).x, CoP = WeaponDepth(TC_SP(texcoord)).y, CutOFFCal = (CoP/DMA()) * 0.5; //Weapon Cutoff Calculation
 	CutOFFCal = step(DM.x,CutOFFCal);
 
 	[branch] if (WP == 0)
@@ -973,8 +989,8 @@ float4 PrepDepth(float2 texcoord)
 	G = DM.y > saturate(smoothstep(0,2.5,DM.w)); //Weapon Mask
 	B = DM.z; //Weapon Hand
 	A = ZPD_Boundary == 3 || ZPD_Boundary == 4 ? max( G, R) : R; //Grid Depth
-
-	return saturate(float4( R, G, B, A));
+	//[0][0] = R | [0][1] = G | [0][2] = B //[1][0] = A | [1][1] = D | [1][2] = DM // [2][0] = Null | [2][1] = Null | [2][2] = Null
+	return float3x3( saturate(float3(R, G, B)) , saturate(float3(A,Depth(texcoord).x,DM.w)) , float3(0,0,0) );
 }
 //////////////////////////////////////////////////////////////Depth HUD Alterations///////////////////////////////////////////////////////////////////////
 #if UI_MASK
@@ -995,7 +1011,7 @@ float Fade_in_out(float2 texcoord)
 		AA *= 0.5;
 	else if(Eye_Fade_Reduction_n_Power.z == 2)
 		AA *= 1.5;
-	//Fade in toggle. 
+	//Fade in toggle.
 	float B[1];
 	if(FPSDFIO == 1)
 		Trigger_Fade = Trigger_Fade_A;
@@ -1010,7 +1026,7 @@ float MaskW(float2 texcoord)
 	float2 texXY = texcoord + 10 * pix,H_V = 0.990;
 	float2 midHV = (H_V-1) * float2(BUFFER_WIDTH * 0.5,BUFFER_HEIGHT * 0.5) * pix;
 	texcoord = float2((texXY.x*H_V.x)-midHV.x,(texXY.y*H_V.y)-midHV.y);
-	return PrepDepth(texcoord.xy).w;
+	return PrepDepth(texcoord.xy)[1][0];
 }
 
 float Fade(float2 texcoord)
@@ -1043,7 +1059,7 @@ float Fade(float2 texcoord)
 						ZPD_I = 0;
 				}
 				// CDArrayZPD[i] reads across prepDepth.......
-				CD = 1 - ZPD_I / PrepDepth(GridXY).w;
+				CD = 1 - ZPD_I / PrepDepth(GridXY)[1][0];
 
 				#if UI_MASK
 					CD = max( 1 - ZPD_I / HUD_Mask(GridXY), CD );
@@ -1059,9 +1075,9 @@ float Fade(float2 texcoord)
 }
 //////////////////////////////////////////////////////////Depth Map Alterations/////////////////////////////////////////////////////////////////////
 
-float3 DepthMap(in float4 position : SV_Position,in float2 texcoord : TEXCOORD) : SV_Target
+float4 DepthMap(in float4 position : SV_Position,in float2 texcoord : TEXCOORD) : SV_Target
 {
-	float3 DM = PrepDepth(texcoord).rgb;
+	float4 DM = float4(PrepDepth(texcoord)[0][0],PrepDepth(texcoord)[0][1],PrepDepth(texcoord)[0][2],PrepDepth(texcoord)[1][1]);
 	float R = DM.x, G = DM.y, B = DM.z, Auto_Scale =  WZPD_and_WND.y > 0.0 ? smoothstep(0,1,Depth(0.5f).x) : 1;
 
 	//Fade Storage
@@ -1075,7 +1091,7 @@ float3 DepthMap(in float4 position : SV_Position,in float2 texcoord : TEXCOORD) 
 	if(1-texcoord.x < pix.x * 2 && 1-texcoord.y < pix.y * 2)
 		R = Fade(texcoord);
 
-	return saturate(float3(R,G,B));
+	return saturate(float4(R,G,B,DM.w));
 }
 
 float AutoDepthRange(float d, float2 texcoord )
@@ -1151,15 +1167,15 @@ float2 Conv(float D,float2 texcoord)
     return float2(lerp(Separation * Convergence,D, ZP),lerp(W_Convergence,WD,WZP));
 }
 
-float DB( float2 texcoord)
+float2 DB( float2 texcoord)
 {
-	// X = Mix Depth | Y = Weapon Mask | Z = Weapon Hand
-	float3 DM = tex2Dlod(SamplerDMN,float4(texcoord,0,0)).xyz;
+	// X = Mix Depth | Y = Weapon Mask | Z = Weapon Hand | W = Normal Depth
+	float4 DM = tex2Dlod(SamplerDMN,float4(texcoord,0,0));
 	//Hide Temporal passthrough
 	if(texcoord.x < pix.x * 2 && texcoord.y < pix.y * 2)
-		DM = Depth(texcoord);
+		DM = PrepDepth(texcoord)[0][0];//untested
 	if(1-texcoord.x < pix.x * 2 && 1-texcoord.y < pix.y * 2)
-		DM = Depth(texcoord);
+		DM = PrepDepth(texcoord)[0][0];//untested
 
 	if (WP == 0 || WZPD_and_WND.x <= 0)
 		DM.y = 0;
@@ -1234,17 +1250,17 @@ float DB( float2 texcoord)
 	#endif
 	}
 
-	return DM.y;
+	return float2(DM.y,DM.w);
 }
 //////////////////////////////////////////////////////////Depth Edge Trimming///////////////////////////////////////////////////////////////////////
-float2 zBuffer(in float4 position : SV_Position, in float2 texcoord : TEXCOORD) : SV_Target
-{   float Mask = DB( texcoord.xy );
+float3 zBuffer(in float4 position : SV_Position, in float2 texcoord : TEXCOORD) : SV_Target
+{   float Mask = DB( texcoord.xy ).x;
 	if(Depth_Edge_Mask > 0 || Depth_Edge_Mask < 0)
 	{
-		float t = DB( float2( texcoord.x , texcoord.y - pix.y ) ),
-			  d = DB( float2( texcoord.x , texcoord.y + pix.y ) ),
-			  l = DB( float2( texcoord.x - pix.x , texcoord.y ) ),
-			  r = DB( float2( texcoord.x + pix.x , texcoord.y ) );
+		float t = DB( float2( texcoord.x , texcoord.y - pix.y ) ).x,
+				  d = DB( float2( texcoord.x , texcoord.y + pix.y ) ).x,
+				  l = DB( float2( texcoord.x - pix.x , texcoord.y ) ).x,
+				  r = DB( float2( texcoord.x + pix.x , texcoord.y ) ).x;
 		float2 n = float2(t - d,-(r - l));
 		// Lets make that mask from Edges
 		Mask = length(n)*abs(Depth_Edge_Mask);
@@ -1253,17 +1269,17 @@ float2 zBuffer(in float4 position : SV_Position, in float2 texcoord : TEXCOORD) 
 		// Final Depth
 		if(Depth_Edge_Mask > 0)
 		{
-			float N = 0.5,F = 2,M = Mask, Z = (t + d + l + r) * 0.25;
-			float ZS = ( Z - N ) / ( F - N);
-			ZS += Z;
-			ZS *= 0.5;
-			Mask = lerp(ZS,DB( texcoord.xy ),Mask);
+				float N = 0.5,F = 2,M = Mask, Z = (t + d + l + r) * 0.25;
+				float ZS = ( Z - N ) / ( F - N);
+				ZS += Z;
+				ZS *= 0.5;
+				Mask = lerp(ZS,DB( texcoord.xy ).x,Mask);
 		}
 		else if(Depth_Edge_Mask < 0)
-			Mask = lerp(1,DB( texcoord.xy ),Mask);
+			Mask = lerp(1,DB( texcoord.xy ).x,Mask);
 	}
 
-return Depth_Edge_Mask < 0 ? float2(DB( texcoord.xy ),Mask) : float2(Mask,Mask);
+return float3(Depth_Edge_Mask < 0 ? float2(DB( texcoord.xy ).x,Mask) : float2(Mask,Mask), DB( texcoord.xy ).y);
 }
 
 float2 GetDB(float2 texcoord)
@@ -1663,12 +1679,12 @@ float3 PS_calcLR(float2 texcoord)
 
 	if (Depth_Map_View == 2)
 		color.rgb = tex2D(SamplerzBufferN,TexCoords).xxx;
-	 
-	float Alinement_Depth = tex2Dlod(SamplerzBufferN,float4(TexCoords,0,0)).x, Depth = Alinement_Depth; 
-	Alinement_Depth = Alinement_View ? 
+
+	float Alinement_Depth = tex2Dlod(SamplerzBufferN,float4(TexCoords,0,0)).x, Depth = Alinement_Depth;
+	Alinement_Depth = Alinement_View ?
 	( Alinement_Depth + tex2Dlod(SamplerzBufferN,float4(TexCoords + float2( pix.x * 2,0),0,1)).x +
-	  				  tex2Dlod(SamplerzBufferN,float4(TexCoords + float2(-pix.x * 2,0),0,2)).x + 
-			  		  tex2Dlod(SamplerzBufferN,float4(TexCoords + float2(0, pix.y * 2),0,3)).x + 
+	  				  tex2Dlod(SamplerzBufferN,float4(TexCoords + float2(-pix.x * 2,0),0,2)).x +
+			  		  tex2Dlod(SamplerzBufferN,float4(TexCoords + float2(0, pix.y * 2),0,3)).x +
 			  		  tex2Dlod(SamplerzBufferN,float4(TexCoords + float2(0,-pix.y * 2),0,4)).x ) * 0.2 : Alinement_Depth;
 
 	if (BD_Options == 2 || Alinement_View)
@@ -1689,7 +1705,7 @@ float3 Average_Luminance(float4 position : SV_Position, float2 texcoord : TEXCOO
 	};
 	ABEA = ABEArray[Auto_Balance_Ex];
 
-	float Average_Lum_ZPD = Depth(float2(ABEA.x + texcoord.x * ABEA.y, ABEA.z + texcoord.y * ABEA.w)).x, Average_Lum_Bottom = Depth( texcoord ).x;
+	float Average_Lum_ZPD = PrepDepth(float2(ABEA.x + texcoord.x * ABEA.y, ABEA.z + texcoord.y * ABEA.w))[0][0], Average_Lum_Bottom = PrepDepth( texcoord )[0][0];
 	if(RE)
 	Average_Lum_Bottom = tex2D(SamplerDMN,float2( 0.125 + texcoord.x * 0.750,0.95 + texcoord.y)).x;
 

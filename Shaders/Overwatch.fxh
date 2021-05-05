@@ -1,7 +1,7 @@
 ////----------------------------------------//
 ///SuperDepth3D Overwatch Automation Shader///
 //----------------------------------------////
-// Version 1.9.2
+// Version 1.9.3
 //---------------------------------------OVERWATCH---------------------------------------//
 // If you are reading this stop. Go away and never look back. From this point on if you  //
 // still think it's is worth looking at this..... Then no one can save you or your soul. //
@@ -68,6 +68,7 @@ static const int BDF = 0;                               //Barrel Distortion Fix
 static const int DFW = 0;                               //Delay Frame Workaround
 static const int ALB = 0;                               //Auto Letter Box
 static const int LBD = 0;                               //Letter Box Depth
+static const int STD = 0;                               //Specialized Depth Trigger
 
 //Special Toggles Generic
 static const int RHW = 0;                               //Read Help Warning
@@ -2144,6 +2145,62 @@ static const int FOV = 0;                               //Set Game FoV
 	#define DA_X 0.050
 	#define DB_Y 4
 	#define DE_X 2
+#elif (App == 0x892FCE80 ) //Star Trek EliteForce II
+	#define DA_Y 30.0
+	#define DA_X 0.100
+	#define DB_Z 0.250
+	#define DB_Y 1
+	#define DE_X 3
+	#define DE_Z 0.375
+	#define DB_W 76
+#elif (App == 0xC54A173B ) //Dead or Alive 6
+	#define DA_W 1
+	#define DA_Y 60.0
+	#define DA_X 0.06
+	#define DB_Y 5
+	#define RH 1
+	#define NW 1
+	#define NF 1
+#elif (App == 0x934DC835 || App == 0xD063D305 || App == 0xE29F2D4 ) //Dead Rising | Dead Rising 2 | Dead Rising 2 Off The Record
+	#define DA_Y 25.0
+	#define DA_X 0.125
+	#define DB_Y 5
+	#define DE_X 1
+	#define DE_Z 0.375
+	#define NW 1
+#elif (App == 0xF28EC9C2 || App == 0xF28EC143 ) //Dead Rising 3 | Dead Rising 4
+	#define DA_Y 20.0
+	#define DA_X 0.1
+	#define DB_Y 5
+	#define DE_X 2
+	#define DE_Z 0.375
+	#define RH 1
+	#define NW 1
+	#define NF 1
+#elif (App == 0xC402F6B8 ) //Iron Harvest
+	#define DA_W 1
+	#define DA_Y 125.0
+	#define DA_Z 0.0015
+	#define DA_X 0.250
+	#define DB_Y 3
+	#define DE_X 1
+	#define DE_Y 0.1
+	#define DE_Z 0.4
+	#define PE 1
+	#define NW 1
+	#define DA 1
+#elif (App == 0xA867FE21 ) //Senran Kagura Peach Ball
+	#define DA_Y 72.5
+	#define DA_Z -0.0011
+	#define DA_X 0.200
+	#define DF_Y 0.200
+	#define DB_Y 2
+	#define DE_X 2
+	#define DE_Y 0.075
+	#define DE_Z 0.375
+	#define SDT 1
+	#define HM 1
+	#define DF_W 0.5
 #else
 	#define NP 1 //No Profile
 #endif
@@ -2284,6 +2341,9 @@ static const int FOV = 0;                               //Set Game FoV
 #ifndef LBM
     #define LBM LBD //Letter Box Depth
 #endif
+#ifndef SDT
+    #define SDT STD //Specialized Depth Trigger
+#endif
 #ifndef DA
     #define DA DAA //Disable Anti-Aliasing
 #endif
@@ -2319,11 +2379,11 @@ float3 Weapon_Profiles(float WP ,float3 Weapon_Adjust) //Tried Switch But, can't
     if (WP == 5)
         Value = float3(0.284,10.5,0.8725);    //WP 3  | BorderLands 3
     if (WP == 6)
-        Value = float3(0.253,39.0,98.125);    //WP 4  | Fallout 4 #2D950D30
+        Value = float3(0.253,39.0,98.125);    //WP 4  | Fallout 4
     if (WP == 7)
-        Value = float3(0.276,20.0,9.5625);    //WP 5  | Skyrim: SE #3950D04E
+        Value = float3(0.276,20.0,9.5625);    //WP 5  | Skyrim: SE
     if (WP == 8)
-        Value = float3(0.338,20.0,9.20);      //WP 6  | DOOM 2016 #142EDFD6
+        Value = float3(0.338,20.0,9.20);      //WP 6  | DOOM 2016
     if (WP == 9)
         Value = float3(0.255,177.5,63.025);   //WP 7  | CoD:Black Ops | CoD:MW2 | CoD:MW3
     if (WP == 10)
@@ -2377,17 +2437,17 @@ float3 Weapon_Profiles(float WP ,float3 Weapon_Adjust) //Tried Switch But, can't
     if (WP == 34)
         Value = float3(0,0,0);                //WP 32 | Wolfenstein II: The New Colossus / Cyberpilot
     if (WP == 35)
-        Value = float3(0.278,37.50,9.1);      //WP 33 | Black Mesa #6FC1FF71
+        Value = float3(0.278,37.50,9.1);      //WP 33 | Black Mesa
     if (WP == 36)
-        Value = float3(0.420,4.75,1.0);       //WP 34 | Blood 2 #6D3CD99E
+        Value = float3(0.420,4.75,1.0);       //WP 34 | Blood 2
     if (WP == 37)
-        Value = float3(0.500,4.75,0.75);      //WP 35 | Blood 2 Alt #6D3CD99E
+        Value = float3(0.500,4.75,0.75);      //WP 35 | Blood 2 Alt
     if (WP == 38)
-        Value = float3(0.78,21.25,0.1875);    //WP 36 | SOMA #F22A9C7D
+        Value = float3(0.78,21.25,0.1875);    //WP 36 | SOMA
     if (WP == 39)
-        Value = float3(0.444,20.0,1.1875);    //WP 37 | Cryostasis #6FB6410B
+        Value = float3(0.444,20.0,1.1875);    //WP 37 | Cryostasis
     if (WP == 40)
-        Value = float3(0.286,80.0,7.0);       //WP 38 | Unreal Gold with v227 #16B8D61A
+        Value = float3(0.286,80.0,7.0);       //WP 38 | Unreal Gold with v227
     if (WP == 41)
         Value = float3(0.280,18.75,9.03);     //WP 39 | Serious Sam Revolution #EB9EEB74/Serious Sam HD: The First Encounter /The Second Encounter /Serious Sam 2 #8238E9CA/ Serious Sam 3: BFE*
     if (WP == 42)
@@ -2395,19 +2455,19 @@ float3 Weapon_Profiles(float WP ,float3 Weapon_Adjust) //Tried Switch But, can't
     if (WP == 43)
         Value = float3(0,0,0);                //WP 41 | Game
     if (WP == 44)
-        Value = float3(0.277,20.0,8.8);       //WP 42 | TitanFall 2 #308AEBEA
+        Value = float3(0.277,20.0,8.8);       //WP 42 | TitanFall 2
     if (WP == 45)
-        Value = float3(0.7,16.250,0.300);     //WP 43 | Project Warlock #5FCFB1E5
+        Value = float3(0.7,16.250,0.300);     //WP 43 | Project Warlock
     if (WP == 46)
-        Value = float3(0.625,9.0,2.375);      //WP 44 | Kingpin Life of Crime #7DCCBBBD
+        Value = float3(0.625,9.0,2.375);      //WP 44 | Kingpin Life of Crime
     if (WP == 47)
-        Value = float3(0.28,20.0,9.0);        //WP 45 | EuroTruckSim2 #9C5C946E
+        Value = float3(0.28,20.0,9.0);        //WP 45 | EuroTruckSim2
     if (WP == 48)
         Value = float3(0.458,10.5,1.105);     //WP 46 | F.E.A.R #B302EC7 & F.E.A.R 2: Project Origin #91D9EBAF
     if (WP == 49)
         Value = float3(1.5,37.5,0.99875);     //WP 47 | Condemned Criminal Origins
     if (WP == 50)
-        Value = float3(2.0,16.25,0.09);       //WP 48 | Immortal Redneck CP alt 1.9375 #2C742D7C
+        Value = float3(2.0,16.25,0.09);       //WP 48 | Immortal Redneck CP alt 1.9375
     if (WP == 51)
         Value = float3(0.485,62.5,0.9625);    //WP 49 | Dementium 2
     if (WP == 52)
@@ -2459,7 +2519,7 @@ float3 Weapon_Profiles(float WP ,float3 Weapon_Adjust) //Tried Switch But, can't
     if (WP == 75)
         Value = float3(0.75,112.5,0.5);       //WP 73 | Hexen 2
     if (WP == 76)
-        Value = float3(0,0,0);                //WP 74 | Game
+        Value = float3(0.350,17.5,2.050);     //WP 74 | Star Trek EliteForce II
     if (WP == 77)
         Value = float3(1.553,16.875,0.0);     //WP 75 | Q.U.B.E 2
 

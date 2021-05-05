@@ -34,7 +34,7 @@ You can also change a few other things like Bloom and Vignette. But, it's up to 
 
 Save the file. You may want to set to read only.
 
-{Alan Wake} - With Reshade versions up to 4.5.1 you would need the Xenos_2.3.2 Injector. ReShade 4.7.0+ Works with out it.
+{Alan Wake} - ReShade 4.7.0+ Works.
 Install game and before you launch it put -noblur in your set lunch options. -steam
 Set you settings in game and notice the locked MSAA.Just leave it at 2x, Save your settings and turn off the game.
 
@@ -260,9 +260,28 @@ Oh wait One more thing it seems like Threaded optimization needs to be turned of
 
 Man this game needs a ReMaster and redone in a diffrent API.......
 
+{Dead or Alive 6} - ReShade 4.9.1
+To use ReShade in this game you need to use a Injector that was written for UWP Games.
+
+First Download this and then create a folder and drop the following files into the folder. 
+https://reshade.me/downloads/inject64.exe
+
+Then download ReShade installer ReShade_Setup.exe from ReShade_Setup.zip extract the files
+ReShade64.dll
+ReShade64.json
+
+Next grab SuperDepth3D.fx or SuperDepth3D_VR+.fx with Overwatch.fxh and place everything in
+this your created folder.
+
+Now hold Left Control + Left Shift and right click and select "Open PowerShell window here."
+
+Now the easy part Drag "inject64.exe" into the blue window. and Type DOA6.exe and hit enter.
+
+Now Just start the game.
+
 {DeadRising 3}
 Use Native scailing I think it's called in game as Full.
-I also suggest useing the 60FPS and 80FOV Fix for this game.
+I also suggest useing the 60FPS and 70-80 FOV Fix for this game.
 
 https://pcgamingwiki.com/wiki/Dead_Rising_3
 
@@ -1005,6 +1024,22 @@ For more information go here https://github.com/BlueSkyDefender/Depth3D/wiki/Sha
 So at one point AMD GPUs used to work with an older version of Game/Drivers. Now only Nv GPUs seem to only work.
 
 Weapon Hand Issues and Item cliping if Weapon Profile used.
+
+{Star Trek: Elite Force II} - Uses ReShade 4.9.1
+ReShade as Install as opengl.
+
+Next steps listed in WSGF
+https://www.wsgf.org/dr/star-trek-elite-force-ii
+
+INI Edit the Resolution: Go to --> ...\Elite2\base\"your Username".cfg
+
+Add these lines under the Cvars section:
+
+seta in_mouse "-1"
+seta r_customwidth "2560"
+seta r_customheight "1440"
+seta userFov "110"
+seta r_mode "-1"
 
 {StarWars Jedi Fallen Order} - Used ReShade 4.4.2
 Disable CA, FG, MB in the Visuals
