@@ -663,14 +663,6 @@ float3 RGBtoYCbCr(float3 rgb) // For Super3D a new Stereo3D output.
 	return float3(Y,Cb + 128./255.,Cr + 128./255.);
 }
 
-float3 YCbCrtoRGB(float3 ycc)
-{
-	float3 c = ycc - float3(0., 128./255., 128./255.);
-	float R = c.x + 1.400 * c.z;
-	float G = c.x - 0.343 * c.y - 0.711 * c.z;
-	float B = c.x + 1.765 * c.y;
-	return float3(R,G,B);
-}
 #if SuperDepth //The Chronicles of Riddick: Assault on Dark Athena FIX I don't know why it works.......
 float3 youknow(float2 Idontknow)
 {
@@ -905,8 +897,7 @@ float SDTriggers()//Specialized Depth Triggers
 /////////////////////////////////////////////////////////////Cursor///////////////////////////////////////////////////////////////////////////
 float4 MouseCursor(float2 texcoord )
 {   float4 Out = CSB(texcoord),Color;
-		float A = 0.959375, B = 1-A;
-		float Cursor;
+		float A = 0.959375, B = 1-A, Cursor;
 		if(Cursor_Type > 0)
 		{
 			float CCA = 0.005, CCB = 0.00025, CCC = 0.25, CCD = 0.00125, Arrow_Size_A = 0.7, Arrow_Size_B = 1.3, Arrow_Size_C = 4.0;//scaling
@@ -918,25 +909,27 @@ float4 MouseCursor(float2 texcoord )
 			if (Cursor_Type == 3)
 			Screen_Ratio = float2(1.6,1.0);
 
-			float S_dist_fromHorizontal = abs((center.x - (Size* Arrow_Size_B) / Screen_Ratio.x) - MousecoordsXY.x) * Screen_Ratio.x, dist_fromHorizontal = abs(center.x - MousecoordsXY.x) * Screen_Ratio.x ;
-			float S_dist_fromVertical = abs((center.y - (Size* Arrow_Size_B)) - MousecoordsXY.y), dist_fromVertical = abs(center.y - MousecoordsXY.y);
+			float4 Dist_from_Hori_Vert = float4( abs((center.x - (Size* Arrow_Size_B) / Screen_Ratio.x) - MousecoordsXY.x) * Screen_Ratio.x, // S_dist_fromHorizontal
+												 abs(center.x - MousecoordsXY.x) * Screen_Ratio.x, 										  // dist_fromHorizontal
+												 abs((center.y - (Size* Arrow_Size_B)) - MousecoordsXY.y),								   // S_dist_fromVertical
+												 abs(center.y - MousecoordsXY.y));														   // dist_fromVertical
 
 			//Cross Cursor
-			float B = min(max(THICC - dist_fromHorizontal,0),max(Size-dist_fromVertical,0)), A = min(max(THICC - dist_fromVertical,0),max(Size-dist_fromHorizontal,0));
+			float B = min(max(THICC - Dist_from_Hori_Vert.y,0),max(Size-Dist_from_Hori_Vert.w,0)), A = min(max(THICC - Dist_from_Hori_Vert.w,0),max(Size-Dist_from_Hori_Vert.y,0));
 			float CC = A+B; //Cross Cursor
 
 			//Solid Square Cursor
-			float SSC = min(max(Size_Cubed - dist_fromHorizontal,0),max(Size_Cubed-dist_fromVertical,0)); //Solid Square Cursor
+			float SSC = min(max(Size_Cubed - Dist_from_Hori_Vert.y,0),max(Size_Cubed-Dist_from_Hori_Vert.w,0)); //Solid Square Cursor
 
 			if (Cursor_Type == 3)
 			{
-				dist_fromHorizontal = abs((center.x - Size / Screen_Ratio.x) - MousecoordsXY.x) * Screen_Ratio.x ;
-				dist_fromVertical = abs(center.y - Size - MousecoordsXY.y);
+				Dist_from_Hori_Vert.y = abs((center.x - Size / Screen_Ratio.x) - MousecoordsXY.x) * Screen_Ratio.x ;
+				Dist_from_Hori_Vert.w = abs(center.y - Size - MousecoordsXY.y);
 			}
 			//Cursor
-			float C = all(min(max(Size - dist_fromHorizontal,0),max(Size-dist_fromVertical,0)));//removing the line below removes the square.
-				  C -= all(min(max(Size - dist_fromHorizontal * Arrow_Size_C,0),max(Size - dist_fromVertical * Arrow_Size_C,0)));//Need to add this to fix a - bool issue in openGL
-				  C -= all(min(max((Size * Arrow_Size_A) - S_dist_fromHorizontal,0),max((Size * Arrow_Size_A)-S_dist_fromVertical,0)));
+			float C = all(min(max(Size - Dist_from_Hori_Vert.y,0),max(Size - Dist_from_Hori_Vert.w,0)));//removing the line below removes the square.
+				  C -= all(min(max(Size - Dist_from_Hori_Vert.y * Arrow_Size_C,0),max(Size - Dist_from_Hori_Vert.w * Arrow_Size_C,0)));//Need to add this to fix a - bool issue in openGL
+				  C -= all(min(max((Size * Arrow_Size_A) - Dist_from_Hori_Vert.x,0),max((Size * Arrow_Size_A)-Dist_from_Hori_Vert.z,0)));			// Cursor Array //
 			// Cursor Array //
 			if(Cursor_Type == 1)
 				Cursor = CC;
@@ -1108,20 +1101,23 @@ float Fade_in_out(float2 texcoord)
 }
 
 float MaskW(float2 texcoord)
-{
-	float2 texXY = texcoord + 10 * pix,H_V = 0.990;
-	float2 midHV = (H_V-1) * float2(BUFFER_WIDTH * 0.5,BUFFER_HEIGHT * 0.5) * pix;
-	texcoord = float2((texXY.x*H_V.x)-midHV.x,(texXY.y*H_V.y)-midHV.y);
-	return PrepDepth(texcoord)[1][0];
+{   
+	#define Hozi_Vert float2(0.990,0.999) //The Chronicles of Riddick: Assault on Dark Athena FIX I don't know why it works.......
+	float2 texXY = texcoord + 10 * pix;
+	float2 midHV = (Hozi_Vert-1) * float2(BUFFER_WIDTH * 0.5,BUFFER_HEIGHT * 0.5) * pix;
+	texcoord = float2((texXY.x*Hozi_Vert.x)-midHV.x,(texXY.y*Hozi_Vert.y)-midHV.y);
+	return PrepDepth(texcoord.xy)[1][0];
 }
+
+float Z_Boundary(){return ZPD_Boundary ;};
 
 float Fade(float2 texcoord)//Check Depth
 {
-	#if !SuperDepth
-	float B[1];//The Chronicles of Riddick: Assault on Dark Athena FIX I don't know why it works.......
-	#endif
 	float CD, Detect;
-	if(ZPD_Boundary > 0)
+	//So this spacing allows for.........
+	//The Chronicles of Riddick: Assault on Dark Athena.
+	//Too Work............................................. WTF
+	if(Z_Boundary() > 0)
 	{   //Normal A & B for both
 		float CDArray_A[7] = { 0.125 ,0.25, 0.375,0.5, 0.625, 0.75, 0.875}, CDArray_B[7] = { 0.25 ,0.375, 0.4375, 0.5, 0.5625, 0.625, 0.75};
 		float CDArrayZPD_A[7] = { ZPD_Separation.x * 0.625, ZPD_Separation.x * 0.75, ZPD_Separation.x * 0.875, ZPD_Separation.x, ZPD_Separation.x * 0.875, ZPD_Separation.x * 0.75, ZPD_Separation.x * 0.625 },
@@ -1352,14 +1348,14 @@ float2 DB( float2 texcoord)
 }
 //////////////////////////////////////////////////////////Depth Edge Trimming///////////////////////////////////////////////////////////////////////
 float3 zBuffer(in float4 position : SV_Position, in float2 texcoord : TEXCOORD) : SV_Target
-{   float Mask = DB( texcoord.xy ).x;
+{   float2 Depth_Buffer = DB( texcoord.xy ); float Mask = Depth_Buffer.x;  
 	if(Depth_Edge_Mask > 0 || Depth_Edge_Mask < 0)
 	{
-		float t = DB( float2( texcoord.x , texcoord.y - pix.y ) ).x,
-				  d = DB( float2( texcoord.x , texcoord.y + pix.y ) ).x,
-				  l = DB( float2( texcoord.x - pix.x , texcoord.y ) ).x,
-				  r = DB( float2( texcoord.x + pix.x , texcoord.y ) ).x;
-		float2 n = float2(t - d,-(r - l));
+		float4 tdlr = float4(DB( float2( texcoord.x , texcoord.y - pix.y ) ).x,
+				  		   DB( float2( texcoord.x , texcoord.y + pix.y ) ).x,
+				  		   DB( float2( texcoord.x - pix.x , texcoord.y ) ).x,
+				  		   DB( float2( texcoord.x + pix.x , texcoord.y ) ).x);
+		float2 n = float2(tdlr.x - tdlr.y,-(tdlr.w - tdlr.z));
 		// Lets make that mask from Edges
 		Mask = length(n)*abs(Depth_Edge_Mask);
 		Mask = Mask > 0 ? 1-Mask : 1;
@@ -1367,17 +1363,18 @@ float3 zBuffer(in float4 position : SV_Position, in float2 texcoord : TEXCOORD) 
 		// Final Depth
 		if(Depth_Edge_Mask > 0)
 		{
-				float N = 0.5,F = 2,M = Mask, Z = (t + d + l + r) * 0.25;
+		
+				float N = 0.5,F = 2,M = Mask, Z = (tdlr.x + tdlr.y + tdlr.z + tdlr.w) * 0.25;		
 				float ZS = ( Z - N ) / ( F - N);
 				ZS += Z;
 				ZS *= 0.5;
-				Mask = lerp(ZS,DB( texcoord.xy ).x,Mask);
+				Mask = lerp(ZS,Depth_Buffer.x,Mask);
 		}
 		else if(Depth_Edge_Mask < 0)
-			Mask = lerp(1,DB( texcoord.xy ).x,Mask);
+			Mask = lerp(1,Depth_Buffer.x,Mask);
 	}
 
-return float3(Depth_Edge_Mask < 0 ? float2(DB( texcoord.xy ).x,Mask) : float2(Mask,Mask), DB( texcoord.xy ).y);
+	return float3(Depth_Edge_Mask < 0 ? float2(Depth_Buffer.x,Mask) : float2(Mask,Mask), Depth_Buffer.y);
 }
 
 float2 GetDB(float2 texcoord)
@@ -2164,7 +2161,7 @@ float3 SmartSharp(float4 position : SV_Position, float2 texcoord : TEXCOORD) : S
 	{
 		for (int j=-kSize; j <= kSize; ++j)
 		{
-			cc = tex2D(BackBuffer, texcoord.xy + float2(i,j) * RPC_WS * rcp(kSize * 2.0f)).rgb;
+			cc = tex2Dlod(BackBuffer, float4(texcoord.xy + float2(i,j) * RPC_WS * rcp(kSize * 2.0f),0,0)).rgb;
 			factor = normpdf3(cc-c, SIGMA);
 			Z += factor;
 			final_color += factor * cc;
