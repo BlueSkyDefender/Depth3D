@@ -1,7 +1,7 @@
 ////----------------------------------------//
 ///SuperDepth3D Overwatch Automation Shader///
 //----------------------------------------////
-// Version 1.9.3
+// Version 1.9.4
 //---------------------------------------OVERWATCH---------------------------------------//
 // If you are reading this stop. Go away and never look back. From this point on if you  //
 // still think it's is worth looking at this..... Then no one can save you or your soul. //
@@ -648,8 +648,8 @@ static const int FOV = 0;                               //Set Game FoV
 	#define DA_X 0.25
 	#define DF_Y 0.125
 	#define DA_Z 0.0015
-	#define DB_Y 5
-    #define DA_Y 0.325
+	#define DB_Y 5 				//ZPD Boundary Scaling
+  #define DB_Z 0.325		//Auto Depth Adjust
 	#define PE 1
 #elif (App == 0xC0AC5174 ) //Observer
 	#define DA_W 1

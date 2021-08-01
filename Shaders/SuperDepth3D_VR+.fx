@@ -767,6 +767,12 @@ sampler SamplerPBBVR
 	#define RGBA RGBA8
 #endif
 
+#if Compatibility_DD
+#define RGBAC RGB10A2
+#else
+#define RGBAC RGBA8
+#endif
+
 #if HelixVision
 texture DoubleTex  { Width = BUFFER_WIDTH * 2; Height = BUFFER_HEIGHT; Format = RGBA; };
 
@@ -778,7 +784,7 @@ sampler SamplerDouble
 		AddressW = BORDER;
 	};
 #else
-texture LeftTex  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGB10A2; };
+texture LeftTex  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBAC; };
 
 sampler SamplerLeft
 	{
@@ -788,7 +794,7 @@ sampler SamplerLeft
 		AddressW = BORDER;
 	};
 
-texture RightTex  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGB10A2; };
+texture RightTex  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBAC; };
 
 sampler SamplerRight
 	{
@@ -1101,7 +1107,7 @@ float Fade_in_out(float2 texcoord)
 }
 
 float MaskW(float2 texcoord)
-{   
+{
 	#define Hozi_Vert float2(0.990,0.999) //The Chronicles of Riddick: Assault on Dark Athena FIX I don't know why it works.......
 	float2 texXY = texcoord + 10 * pix;
 	float2 midHV = (Hozi_Vert-1) * float2(BUFFER_WIDTH * 0.5,BUFFER_HEIGHT * 0.5) * pix;
@@ -1348,7 +1354,7 @@ float2 DB( float2 texcoord)
 }
 //////////////////////////////////////////////////////////Depth Edge Trimming///////////////////////////////////////////////////////////////////////
 float3 zBuffer(in float4 position : SV_Position, in float2 texcoord : TEXCOORD) : SV_Target
-{   float2 Depth_Buffer = DB( texcoord.xy ); float Mask = Depth_Buffer.x;  
+{   float2 Depth_Buffer = DB( texcoord.xy ); float Mask = Depth_Buffer.x;
 	if(Depth_Edge_Mask > 0 || Depth_Edge_Mask < 0)
 	{
 		float4 tdlr = float4(DB( float2( texcoord.x , texcoord.y - pix.y ) ).x,
@@ -1363,8 +1369,8 @@ float3 zBuffer(in float4 position : SV_Position, in float2 texcoord : TEXCOORD) 
 		// Final Depth
 		if(Depth_Edge_Mask > 0)
 		{
-		
-				float N = 0.5,F = 2,M = Mask, Z = (tdlr.x + tdlr.y + tdlr.z + tdlr.w) * 0.25;		
+
+				float N = 0.5,F = 2,M = Mask, Z = (tdlr.x + tdlr.y + tdlr.z + tdlr.w) * 0.25;
 				float ZS = ( Z - N ) / ( F - N);
 				ZS += Z;
 				ZS *= 0.5;
