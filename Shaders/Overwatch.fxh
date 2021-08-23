@@ -1628,7 +1628,13 @@ static const int FOV = 0;                               //Set Game FoV
 	#define DE_W 0.06
 	#define PE 1
 	#define DA 1
-#elif (App == 0x8CEACA5C || 0xBE9001DC ) //Dead Island
+#elif (App == 0x8CEACA5C ) //Dead Island
+	#define DA_X 0.0475
+	#define DA_Y 8.75
+	#define DB_Y 2
+	#define DF_Y 0.0875
+#elif (App == 0xBE9001DC ) //Dead Island DE
+  #define DA_W 1
 	#define DA_X 0.0475
 	#define DA_Y 8.75
 	#define DB_Y 2
