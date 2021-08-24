@@ -2,7 +2,7 @@
 ///**SuperDepth3D_VR+**///
 //--------------------////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//* Depth Map Based 3D post-process shader v2.4.2
+//* Depth Map Based 3D post-process shader v2.4.3
 //* For Reshade 4.4+ I think...
 //* ---------------------------------
 //*
@@ -597,7 +597,7 @@ uniform float Adjust_Vignette <
 	ui_tooltip = "Soft edge effect around the image.";
 	ui_category = "Image Effects";
 > = 0.0;
-
+#if !HelixVision //Removed because HelixVision_Mode Has Built in sharpening.
 uniform float Sharpen_Power <
 	ui_type = "slider";
 	ui_min = 0.0; ui_max = 5.0;
@@ -607,7 +607,9 @@ uniform float Sharpen_Power <
 				 "It can be pushed more and looks better then the basic USM.";
 	ui_category = "Image Effects";
 > = 0;
-
+#else
+static const float Sharpen_Power = 0;
+#endif
 uniform float Saturation <
 	ui_type = "slider";
 	ui_min = 0; ui_max = 1;
@@ -2237,7 +2239,7 @@ technique SuperDepth3D_VR
 		VertexShader = PostProcessVS;
 		PixelShader = LR_Out;
 		#if HelixVision
-		RenderTarget0 = DoubleTex;
+		RenderTarget0 = DoubleTex;//Can run into DX9 size Limitations
 		#else
 		RenderTarget0 = LeftTex;
 		RenderTarget1 = RightTex;
@@ -2248,7 +2250,7 @@ technique SuperDepth3D_VR
 		VertexShader = PostProcessVS;
 		PixelShader = Out;
 	}
-	#if !HelixVision
+	#if !HelixVision //Removed because HelixVision_Mode Has Built in sharpening.
 		pass USMOut
 	{
 		VertexShader = PostProcessVS;
@@ -2269,15 +2271,3 @@ technique SuperDepth3D_VR
 		RenderTarget = texPBVR;
 	}
 }
-#if HelixVision
-technique SmartSharp_jr
-< ui_tooltip = "Move this either before or after the VR shader depending on what you think looks better .\n"
-			   "             This only shows in HelixVision Mode."; >
-{
-	pass USMOut
-	{
-		VertexShader = PostProcessVS;
-		PixelShader = SmartSharp;
-	}
-}
-#endif
