@@ -2208,7 +2208,7 @@ static const int FOV = 0;                               //Set Game FoV
 	#define HM 1
 	#define DF_W 0.5
 #elif (App == 0x1BDC0C4C ) //Quake Enhanced Edition
-	#define DA_X 0.1
+	#define DA_X 0.1125
 	#define DB_Y 1
 	#define DE_X 3
 	#define DE_Y 0.5
