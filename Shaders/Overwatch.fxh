@@ -1926,7 +1926,7 @@ static const int FOV = 0;                               //Set Game FoV
 	#define DE_Z 0.375
 	#define PE 1
 	#define FV 1
-	#define DB_W 77
+	#define DB_W 69
 #elif (App == 0xD87951C4 ) //Horizon Zero Dawn
 	//#define DA_W 1
 	#define DA_Y 12.5
@@ -2100,7 +2100,8 @@ static const int FOV = 0;                               //Set Game FoV
 #elif (App == 0x75CE6926 ) //Chronicle of Riddick Assault on Dark Athena
 	//#define DA_W 1
 	//#define DA_Y 15.0
-	#define DA_X 0.1325
+	//#define DA_X 0.1325
+	#define DA_X 0.0666
 	//#define DF_Y 0.01
 	#define DB_Y 1
 	//#define DB_Z 0.05625
@@ -2376,7 +2377,7 @@ static const int FOV = 0;                               //Set Game FoV
 #endif
 //Weapon Settings
 #ifndef OW_WP
-    #define OW_WP "WP Off\0Custom WP\0WP 0\0WP 1\0WP 2\0WP 3\0WP 4\0WP 5\0WP 6\0WP 7\0WP 8\0WP 9\0WP 10\0WP 11\0WP 12\0WP 13\0WP 14\0WP 15\0WP 16\0WP 17\0WP 18\0WP 19\0WP 20\0WP 21\0WP 22\0WP 23\0WP 24\0WP 25\0WP 26\0WP 27\0WP 28\0WP 29\0WP 30\0WP 31\0WP 32\0WP 33\0WP 34\0WP 35\0WP 36\0WP 37\0WP 38\0WP 39\0WP 40\0WP 41\0WP 42\0WP 43\0WP 44\0WP 45\0WP 46\0WP 47\0WP 48\0WP 49\0WP 50\0WP 51\0WP 52\0WP 53\0WP 54\0WP 55\0WP 56\0WP 57\0WP 58\0WP 59\0WP 60\0WP 61\0WP 62\0WP 63\0WP 64\0WP 65\0WP 66\0WP 67\0WP 68\0WP 69\0WP 70\0WP 71\0WP 72\0WP 73\0WP 74\0WP 75\0"
+    #define OW_WP "WP Off\0Custom WP\0WP 0\0WP 1\0WP 2\0WP 3\0WP 4\0WP 5\0WP 6\0WP 7\0WP 8\0WP 9\0WP 10\0WP 11\0WP 12\0WP 13\0WP 14\0WP 15\0WP 16\0WP 17\0WP 18\0WP 19\0WP 20\0WP 21\0WP 22\0WP 23\0WP 24\0WP 25\0WP 26\0WP 27\0WP 28\0WP 29\0WP 30\0WP 31\0WP 32\0WP 33\0WP 34\0WP 35\0WP 36\0WP 37\0WP 38\0WP 39\0WP 40\0WP 41\0WP 42\0WP 43\0WP 44\0WP 45\0WP 46\0WP 47\0WP 48\0WP 49\0WP 50\0WP 51\0WP 52\0WP 53\0WP 54\0WP 55\0WP 56\0WP 57\0WP 58\0WP 59\0WP 60\0WP 61\0WP 62\0WP 63\0WP 64\0WP 65\0WP 66\0WP 67\0WP 68\0WP 69\0WP 70\0WP 71\0WP 72\0WP 73\0WP 74\0"
 #endif
 #ifndef WSM //One is Normal | Two is MCC | Three is Prey | Four is Blood 2
     #define WSM 1 //Weapon Setting Mode
@@ -2384,161 +2385,159 @@ static const int FOV = 0;                               //Set Game FoV
 
 #if WSM == 1
 float3 Weapon_Profiles(float WP ,float3 Weapon_Adjust) //Tried Switch But, can't compile in some older versions of ReShade.
-{   float3 Value = Weapon_Adjust;
-		if (WP == 2)
-        Value = float3(0.425,5.0,1.125);      //WP 0  | ES: Oblivion
+{
+	if (WP == 2)
+        Weapon_Adjust = float3(0.425,5.0,1.125);      //WP 0  | ES: Oblivion
     if (WP == 3)
-        Value = float3(0.276,16.25,9.2);      //WP 1  | BorderLands
+        Weapon_Adjust = float3(0.276,16.25,9.2);      //WP 1  | BorderLands
     if (WP == 4)
-        Value = float3(0.5,32.5,7.15);        //WP 2  | BorderLands 2
+        Weapon_Adjust = float3(0.5,32.5,7.15);        //WP 2  | BorderLands 2
     if (WP == 5)
-        Value = float3(0.284,10.5,0.8725);    //WP 3  | BorderLands 3
+        Weapon_Adjust = float3(0.284,10.5,0.8725);    //WP 3  | BorderLands 3
     if (WP == 6)
-        Value = float3(0.253,39.0,98.125);    //WP 4  | Fallout 4
+        Weapon_Adjust = float3(0.253,39.0,98.125);    //WP 4  | Fallout 4
     if (WP == 7)
-        Value = float3(0.276,20.0,9.5625);    //WP 5  | Skyrim: SE
+        Weapon_Adjust = float3(0.276,20.0,9.5625);    //WP 5  | Skyrim: SE
     if (WP == 8)
-        Value = float3(0.338,20.0,9.20);      //WP 6  | DOOM 2016
+        Weapon_Adjust = float3(0.338,20.0,9.20);      //WP 6  | DOOM 2016
     if (WP == 9)
-        Value = float3(0.255,177.5,63.025);   //WP 7  | CoD:Black Ops | CoD:MW2 | CoD:MW3
+        Weapon_Adjust = float3(0.255,177.5,63.025);   //WP 7  | CoD:Black Ops | CoD:MW2 | CoD:MW3
     if (WP == 10)
-        Value = float3(0.254,100.0,0.9843);   //WP 8  | CoD:Black Ops II
+        Weapon_Adjust = float3(0.254,100.0,0.9843);   //WP 8  | CoD:Black Ops II
     if (WP == 11)
-        Value = float3(0.254,203.125,0.98435);//WP 9  | CoD:Ghost
+        Weapon_Adjust = float3(0.254,203.125,0.98435);//WP 9  | CoD:Ghost
     if (WP == 12)
-        Value = float3(0.254,203.125,0.98433);//WP 10 | CoD:AW | CoD:MW Re
+        Weapon_Adjust = float3(0.254,203.125,0.98433);//WP 10 | CoD:AW | CoD:MW Re
     if (WP == 13)
-        Value = float3(0.254,125.0,0.9843);   //WP 11 | CoD:IW
+        Weapon_Adjust = float3(0.254,125.0,0.9843);   //WP 11 | CoD:IW
     if (WP == 14)
-        Value = float3(0.255,200.0,63.0);     //WP 12 | CoD:WaW
+        Weapon_Adjust = float3(0.255,200.0,63.0);     //WP 12 | CoD:WaW
     if (WP == 15)
-        Value = float3(0.510,162.5,3.975);    //WP 13 | CoD | CoD:UO | CoD:2
+        Weapon_Adjust = float3(0.510,162.5,3.975);    //WP 13 | CoD | CoD:UO | CoD:2
     if (WP == 16)
-        Value = float3(0.254,23.75,0.98425);  //WP 14 | CoD: Black Ops IIII
+        Weapon_Adjust = float3(0.254,23.75,0.98425);  //WP 14 | CoD: Black Ops IIII
     if (WP == 17)
-        Value = float3(0.375,60.0,15.15625);  //WP 15 | Quake DarkPlaces
+        Weapon_Adjust = float3(0.375,60.0,15.15625);  //WP 15 | Quake DarkPlaces
     if (WP == 18)
-        Value = float3(0.7,14.375,2.5);       //WP 16 | Quake 2 XP
+        Weapon_Adjust = float3(0.7,14.375,2.5);       //WP 16 | Quake 2 XP
     if (WP == 19)
-        Value = float3(0.750,30.0,1.050);     //WP 17 | Quake 4
+        Weapon_Adjust = float3(0.750,30.0,1.050);     //WP 17 | Quake 4
     if (WP == 20)
-        Value = float3(0.278,62.5,9.1);       //WP 18 | Half-Life 2
+        Weapon_Adjust = float3(0.278,62.5,9.1);       //WP 18 | Half-Life 2
     if (WP == 21)
-        Value = float3(0.450,12.0,23.75);     //WP 19 | Metro Redux Games
+        Weapon_Adjust = float3(0.450,12.0,23.75);     //WP 19 | Metro Redux Games
     if (WP == 22)
-        Value = float3(0.350,12.5,2.0);       //WP 20 | Soldier of Fortune
+        Weapon_Adjust = float3(0.350,12.5,2.0);       //WP 20 | Soldier of Fortune
     if (WP == 23)
-        Value = float3(0.286,1500.0,7.0);     //WP 21 | Deus Ex rev
+        Weapon_Adjust = float3(0.286,1500.0,7.0);     //WP 21 | Deus Ex rev
     if (WP == 24)
-        Value = float3(35.0,250.0,0);         //WP 21 | Deus Ex
+        Weapon_Adjust = float3(35.0,250.0,0);         //WP 21 | Deus Ex
     if (WP == 25)
-        Value = float3(0.625,350.0,0.785);    //WP 23 | Minecraft
+        Weapon_Adjust = float3(0.625,350.0,0.785);    //WP 23 | Minecraft
     if (WP == 26)
-        Value = float3(0.255,6.375,53.75);    //WP 24 | S.T.A.L.K.E.R: Games
+        Weapon_Adjust = float3(0.255,6.375,53.75);    //WP 24 | S.T.A.L.K.E.R: Games
     if (WP == 27)
-        Value = float3(0,0,0);                //WP 25 | Game
+        Weapon_Adjust = float3(0,0,0);                //WP 25 | Game
     if (WP == 28)
-        Value = float3(0.750,30.0,1.025);     //WP 26 | Prey 2006
+        Weapon_Adjust = float3(0.750,30.0,1.025);     //WP 26 | Prey 2006
     if (WP == 29)
-        Value = float3(0.266,30.0,14.0);      //WP 27 | Wrath
+        Weapon_Adjust = float3(0.266,30.0,14.0);      //WP 27 | Wrath
     if (WP == 30)
-        Value = float3(3.625,20.0,0);         //WP 28 | We Where Here Together
+        Weapon_Adjust = float3(3.625,20.0,0);         //WP 28 | We Where Here Together
     if (WP == 31)
-        Value = float3(0.7,9.0,2.3625);       //WP 29 | Return to Castle Wolfenstine
+        Weapon_Adjust = float3(0.7,9.0,2.3625);       //WP 29 | Return to Castle Wolfenstine
     if (WP == 32)
-        Value = float3(0.4894,62.50,0.98875); //WP 30 | Wolfenstein
+        Weapon_Adjust = float3(0.4894,62.50,0.98875); //WP 30 | Wolfenstein
     if (WP == 33)
-        Value = float3(1.0,93.75,0.81875);    //WP 31 | Wolfenstein: The New Order #C770832 / The Old Blood #3E42619F
+        Weapon_Adjust = float3(1.0,93.75,0.81875);    //WP 31 | Wolfenstein: The New Order #C770832 / The Old Blood #3E42619F
     if (WP == 34)
-        Value = float3(0,0,0);                //WP 32 | Wolfenstein II: The New Colossus / Cyberpilot
+        Weapon_Adjust = float3(0,0,0);                //WP 32 | Wolfenstein II: The New Colossus / Cyberpilot
     if (WP == 35)
-        Value = float3(0.278,37.50,9.1);      //WP 33 | Black Mesa
+        Weapon_Adjust = float3(0.278,37.50,9.1);      //WP 33 | Black Mesa
     if (WP == 36)
-        Value = float3(0.420,4.75,1.0);       //WP 34 | Blood 2
+        Weapon_Adjust = float3(0.420,4.75,1.0);       //WP 34 | Blood 2
     if (WP == 37)
-        Value = float3(0.500,4.75,0.75);      //WP 35 | Blood 2 Alt
+        Weapon_Adjust = float3(0.500,4.75,0.75);      //WP 35 | Blood 2 Alt
     if (WP == 38)
-        Value = float3(0.78,21.25,0.1875);    //WP 36 | SOMA
+        Weapon_Adjust = float3(0.78,21.25,0.1875);    //WP 36 | SOMA
     if (WP == 39)
-        Value = float3(0.444,20.0,1.1875);    //WP 37 | Cryostasis
+        Weapon_Adjust = float3(0.444,20.0,1.1875);    //WP 37 | Cryostasis
     if (WP == 40)
-        Value = float3(0.286,80.0,7.0);       //WP 38 | Unreal Gold with v227
+        Weapon_Adjust = float3(0.286,80.0,7.0);       //WP 38 | Unreal Gold with v227
     if (WP == 41)
-        Value = float3(0.280,18.75,9.03);     //WP 39 | Serious Sam Revolution #EB9EEB74/Serious Sam HD: The First Encounter /The Second Encounter /Serious Sam 2 #8238E9CA/ Serious Sam 3: BFE*
+        Weapon_Adjust = float3(0.280,18.75,9.03);     //WP 39 | Serious Sam Revolution #EB9EEB74/Serious Sam HD: The First Encounter /The Second Encounter /Serious Sam 2 #8238E9CA/ Serious Sam 3: BFE*
     if (WP == 42)
-        Value = float3(0.3,17.5,0.9015);      //WP 40 | Serious Sam Fusion
+        Weapon_Adjust = float3(0.3,17.5,0.9015);      //WP 40 | Serious Sam Fusion
     if (WP == 43)
-        Value = float3(0,0,0);                //WP 41 | Game
+        Weapon_Adjust = float3(0,0,0);                //WP 41 | Game
     if (WP == 44)
-        Value = float3(0.277,20.0,8.8);       //WP 42 | TitanFall 2
+        Weapon_Adjust = float3(0.277,20.0,8.8);       //WP 42 | TitanFall 2
     if (WP == 45)
-        Value = float3(0.7,16.250,0.300);     //WP 43 | Project Warlock
+        Weapon_Adjust = float3(0.7,16.250,0.300);     //WP 43 | Project Warlock
     if (WP == 46)
-        Value = float3(0.625,9.0,2.375);      //WP 44 | Kingpin Life of Crime
+        Weapon_Adjust = float3(0.625,9.0,2.375);      //WP 44 | Kingpin Life of Crime
     if (WP == 47)
-        Value = float3(0.28,20.0,9.0);        //WP 45 | EuroTruckSim2
+        Weapon_Adjust = float3(0.28,20.0,9.0);        //WP 45 | EuroTruckSim2
     if (WP == 48)
-        Value = float3(0.458,10.5,1.105);     //WP 46 | F.E.A.R #B302EC7 & F.E.A.R 2: Project Origin #91D9EBAF
+        Weapon_Adjust = float3(0.458,10.5,1.105);     //WP 46 | F.E.A.R #B302EC7 & F.E.A.R 2: Project Origin #91D9EBAF
     if (WP == 49)
-        Value = float3(1.5,37.5,0.99875);     //WP 47 | Condemned Criminal Origins
+        Weapon_Adjust = float3(1.5,37.5,0.99875);     //WP 47 | Condemned Criminal Origins
     if (WP == 50)
-        Value = float3(2.0,16.25,0.09);       //WP 48 | Immortal Redneck CP alt 1.9375
+        Weapon_Adjust = float3(2.0,16.25,0.09);       //WP 48 | Immortal Redneck CP alt 1.9375
     if (WP == 51)
-        Value = float3(0.485,62.5,0.9625);    //WP 49 | Dementium 2
+        Weapon_Adjust = float3(0.485,62.5,0.9625);    //WP 49 | Dementium 2
     if (WP == 52)
-        Value = float3(0.489,68.75,1.02);     //WP 50 | NecroVisioN & NecroVisioN: Lost Company #663E66FE
+        Weapon_Adjust = float3(0.489,68.75,1.02);     //WP 50 | NecroVisioN & NecroVisioN: Lost Company #663E66FE
     if (WP == 53)
-        Value = float3(1.0,237.5,0.83625);    //WP 51 | Rage64 #AA6B948E
+        Weapon_Adjust = float3(1.0,237.5,0.83625);    //WP 51 | Rage64 #AA6B948E
     if (WP == 54)
-        Value = float3(0,0,0);                //WP 52 | Rage 2
+        Weapon_Adjust = float3(0,0,0);                //WP 52 | Rage 2
     if (WP == 55)
-        Value = float3(0.425,15.0,99.0);      //WP 53 | Bioshock Remastred #44BD41E1
+        Weapon_Adjust = float3(0.425,15.0,99.0);      //WP 53 | Bioshock Remastred #44BD41E1
     if (WP == 56)
-        Value = float3(0.425,21.25,99.5);     //WP 54 | Bioshock 2 Remastred #7CF5A01
+        Weapon_Adjust = float3(0.425,21.25,99.5);     //WP 54 | Bioshock 2 Remastred #7CF5A01
     if (WP == 57)
-        Value = float3(0.425,5.25,1.0);       //WP 55 | No One Lives Forever
+        Weapon_Adjust = float3(0.425,5.25,1.0);       //WP 55 | No One Lives Forever
     if (WP == 58)
-        Value = float3(0.519,31.25,8.875);    //WP 56 | No One Lives Forever 2
+        Weapon_Adjust = float3(0.519,31.25,8.875);    //WP 56 | No One Lives Forever 2
     if (WP == 59)
-        Value = float3(0.5,8.0,0);            //WP 57 | Strife
+        Weapon_Adjust = float3(0.5,8.0,0);            //WP 57 | Strife
     if (WP == 60)
-        Value = float3(0.350,9.0,1.8);        //WP 58 | Gold Source
+        Weapon_Adjust = float3(0.350,9.0,1.8);        //WP 58 | Gold Source
     if (WP == 61) //Unity Limit if using else if
-        Value = float3(1.825,13.75,0);        //WP 59 | No Man Sky FPS Mode
+        Weapon_Adjust = float3(1.825,13.75,0);        //WP 59 | No Man Sky FPS Mode
     if (WP == 62)
-        Value = float3(1.953,5.25,0);         //WP 60 | Dying Light
+        Weapon_Adjust = float3(1.953,5.25,0);         //WP 60 | Dying Light
     if (WP == 63)
-        Value = float3(0.287,180.0,9.0);      //WP 61 | Farcry
+        Weapon_Adjust = float3(0.287,180.0,9.0);      //WP 61 | Farcry
     if (WP == 64)
-        Value = float3(0.2503,55.0,1000.0);   //WP 62 | Farcry 2
+        Weapon_Adjust = float3(0.2503,55.0,1000.0);   //WP 62 | Farcry 2
     if (WP == 65)
-        Value = float3(0.279,100.0,0.905);    //WP 63 | Talos Principle
+        Weapon_Adjust = float3(0.279,100.0,0.905);    //WP 63 | Talos Principle
     if (WP == 66)
-        Value = float3(0.2503,52.5,987.5);    //WP 64 | Singularity
+        Weapon_Adjust = float3(0.2503,52.5,987.5);    //WP 64 | Singularity
     if (WP == 67)
-        Value = float3(0.251,12.5,925.0);     //WP 65 | Betrayer
+        Weapon_Adjust = float3(0.251,12.5,925.0);     //WP 65 | Betrayer
     if (WP == 68)
-        Value = float3(1.025,16.0,0.185);     //WP 66 | Doom Eternal
+        Weapon_Adjust = float3(1.025,16.0,0.185);     //WP 66 | Doom Eternal
     if (WP == 69)
-        Value = float3(0,0,0);                //WP 67 | Game
+        Weapon_Adjust = float3(1.553,16.875,0.0);     //WP 67 | Q.U.B.E 2
     if (WP == 70)
-        Value = float3(0.251,5.6875,950.0);   //WP 68 | Mirror Edge
+        Weapon_Adjust = float3(0.251,5.6875,950.0);   //WP 68 | Mirror Edge
     if (WP == 71)
-        Value = float3(0.370,10.0,1.85);      //WP 69 | Quake Enhanced Edition
+        Weapon_Adjust = float3(0.370,10.0,1.85);      //WP 69 | Quake Enhanced Edition
     if (WP == 72)
-        Value = float3(0.430,6.250,0.100);    //WP 70 | The Citadel 186
+        Weapon_Adjust = float3(0.430,6.250,0.100);    //WP 70 | The Citadel 186
     if (WP == 73)
-        Value = float3(0.800,15.0,0.3);       //WP 71 | Sauerbraten 2
+        Weapon_Adjust = float3(0.800,15.0,0.3);       //WP 71 | Sauerbraten 2
     if (WP == 74)
-        Value = float3(13.3,62.5,0.0);        //WP 72 | Chex Quest HD
+        Weapon_Adjust = float3(13.3,62.5,0.0);        //WP 72 | Chex Quest HD
     if (WP == 75)
-        Value = float3(0.75,112.5,0.5);       //WP 73 | Hexen 2
-    if (WP == 76)
-        Value = float3(0.350,17.5,2.050);     //WP 74 | Star Trek EliteForce II
-    if (WP == 77)
-        Value = float3(1.553,16.875,0.0);     //WP 75 | Q.U.B.E 2
+        Weapon_Adjust = float3(0.75,112.5,0.5);       //WP 73 | Hexen 2
+    if (WP == 76) //DX 9 Temp Registers Limit
+        Weapon_Adjust = float3(0.350,17.5,2.050);     //WP 74 | Star Trek EliteForce II
 
-		return Value;
+		return Weapon_Adjust;
 }
 #elif WSM == 2
 float3 Weapon_Profiles(float WP ,float3 Weapon_Adjust) // MCC

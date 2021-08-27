@@ -634,7 +634,7 @@ float fmod(float a, float b)
 }
 ///////////////////////////////////////////////////////////Conversions/////////////////////////////////////////////////////////////
 float3 RGBtoYCbCr(float3 rgb) // For Super3D a new Stereo3D output.
-{   float A[1];//The Chronicles of Riddick: Assault on Dark Athena FIX I don't know why it works.......
+{   float TCoRF[1];//The Chronicles of Riddick: Assault on Dark Athena FIX I don't know why it works.......
 	float Y  =  .299 * rgb.x + .587 * rgb.y + .114 * rgb.z; // Luminance
 	float Cb = -.169 * rgb.x - .331 * rgb.y + .500 * rgb.z; // Chrominance Blue
 	float Cr =  .500 * rgb.x - .419 * rgb.y - .081 * rgb.z; // Chrominance Red
@@ -817,7 +817,7 @@ float SDTriggers()//Specialized Depth Triggers
 /////////////////////////////////////////////////////////////Cursor///////////////////////////////////////////////////////////////////////////
 float4 MouseCursor(float2 texcoord )
 {   float4 Out = CSB(texcoord),Color;
-		float A = 0.959375, B = 1-A;
+		float A = 0.959375, TCoRF = 1-A;
 		float Cursor;
 		if(Cursor_Type > 0)
 		{
@@ -998,13 +998,12 @@ float HUD_Mask(float2 texcoord )
 #endif
 /////////////////////////////////////////////////////////Fade In and Out Toggle/////////////////////////////////////////////////////////////////////
 float Fade_in_out(float2 texcoord)
-{ float Trigger_Fade, AA = Fade_Time_Adjust, PStoredfade = tex2D(SamplerLumN,float2(0.25,0.5)).z;
+{ float TCoRF[1], Trigger_Fade, AA = Fade_Time_Adjust, PStoredfade = tex2D(SamplerLumN,float2(0.25,0.5)).z;
 	if(Eye_Fade_Reduction_n_Power.z == 0)
 		AA *= 0.5;
 	else if(Eye_Fade_Reduction_n_Power.z == 2)
 		AA *= 1.5;
 	//Fade in toggle.
-	float B[1];
 	if(FPSDFIO == 1)
 		Trigger_Fade = Trigger_Fade_A;
 	else if(FPSDFIO == 2)

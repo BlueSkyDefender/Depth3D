@@ -658,7 +658,7 @@ float fmod(float a, float b)
 }
 ///////////////////////////////////////////////////////////Conversions/////////////////////////////////////////////////////////////
 float3 RGBtoYCbCr(float3 rgb) // For Super3D a new Stereo3D output.
-{   float A[1];//The Chronicles of Riddick: Assault on Dark Athena FIX I don't know why it works.......
+{   float TCoRF[1];//The Chronicles of Riddick: Assault on Dark Athena FIX I don't know why it works.......
 	float Y  =  .299 * rgb.x + .587 * rgb.y + .114 * rgb.z; // Luminance
 	float Cb = -.169 * rgb.x - .331 * rgb.y + .500 * rgb.z; // Chrominance Blue
 	float Cr =  .500 * rgb.x - .419 * rgb.y - .081 * rgb.z; // Chrominance Red
@@ -905,7 +905,7 @@ float SDTriggers()//Specialized Depth Triggers
 /////////////////////////////////////////////////////////////Cursor///////////////////////////////////////////////////////////////////////////
 float4 MouseCursor(float2 texcoord )
 {   float4 Out = CSB(texcoord),Color;
-		float A = 0.959375, B = 1-A, Cursor;
+		float A = 0.959375, TCoRF = 1-A, Cursor;
 		if(Cursor_Type > 0)
 		{
 			float CCA = 0.005, CCB = 0.00025, CCC = 0.25, CCD = 0.00125, Arrow_Size_A = 0.7, Arrow_Size_B = 1.3, Arrow_Size_C = 4.0;//scaling
