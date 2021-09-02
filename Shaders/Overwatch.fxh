@@ -1,7 +1,7 @@
 ////----------------------------------------//
 ///SuperDepth3D Overwatch Automation Shader///
 //----------------------------------------////
-// Version 1.9.5
+// Version 1.9.6
 //---------------------------------------OVERWATCH---------------------------------------//
 // If you are reading this stop. Go away and never look back. From this point on if you  //
 // still think it's is worth looking at this..... Then no one can save you or your soul. //
@@ -2209,7 +2209,8 @@ static const int FOV = 0;                               //Set Game FoV
 	#define HM 1
 	#define DF_W 0.5
 #elif (App == 0x1BDC0C4C ) //Quake Enhanced Edition
-	#define DA_X 0.1125
+	#define DA_X 0.07
+	#define DA_Y 13.0
 	#define DB_Y 1
 	#define DE_X 3
 	#define DE_Y 0.5
@@ -2217,6 +2218,14 @@ static const int FOV = 0;                               //Set Game FoV
 	#define NW 1
 	#define PE 1
 	#define DB_W 71
+	#define DF_X 0.250
+#elif (App == 0xB3729F40 ) //Rocket League Steam
+	#define DA_Y 50.0
+	#define DA_X 0.100
+	#define DB_Y 5
+	#define DS 1
+	#define NW 1
+	#define PE 1
 #else
 	#define NP 1 //No Profile
 #endif
@@ -2525,7 +2534,7 @@ float3 Weapon_Profiles(float WP ,float3 Weapon_Adjust) //Tried Switch But, can't
     if (WP == 70)
         Weapon_Adjust = float3(0.251,5.6875,950.0);   //WP 68 | Mirror Edge
     if (WP == 71)
-        Weapon_Adjust = float3(0.370,10.0,1.85);      //WP 69 | Quake Enhanced Edition
+        Weapon_Adjust = float3(0.345,10.125,1.825);   //WP 69 | Quake Enhanced Edition
     if (WP == 72)
         Weapon_Adjust = float3(0.430,6.250,0.100);    //WP 70 | The Citadel 186
     if (WP == 73)
