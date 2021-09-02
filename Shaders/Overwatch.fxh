@@ -2226,6 +2226,18 @@ static const int FOV = 0;                               //Set Game FoV
 	#define DS 1
 	#define NW 1
 	#define PE 1
+#elif (App == 0x1BB6E62A ) //AMIN EVIL RTX
+    #define DA_W 1
+	#define DA_X 0.07
+	#define DA_Y 12.5
+	#define DA_Z 0.000125
+	#define DB_Y 5
+	#define DE_X 3
+	#define DE_Y 0.5
+	#define DE_Z 0.45
+	#define PE 1
+	#define DA 1
+	#define DB_W 27
 #else
 	#define NP 1 //No Profile
 #endif
@@ -2446,7 +2458,7 @@ float3 Weapon_Profiles(float WP ,float3 Weapon_Adjust) //Tried Switch But, can't
     if (WP == 26)
         Weapon_Adjust = float3(0.255,6.375,53.75);    //WP 24 | S.T.A.L.K.E.R: Games
     if (WP == 27)
-        Weapon_Adjust = float3(0,0,0);                //WP 25 | Game
+        Weapon_Adjust = float3(0.450,8.0,0.400);      //WP 25 | AMID EVIL RTX
     if (WP == 28)
         Weapon_Adjust = float3(0.750,30.0,1.025);     //WP 26 | Prey 2006
     if (WP == 29)
@@ -2460,7 +2472,7 @@ float3 Weapon_Profiles(float WP ,float3 Weapon_Adjust) //Tried Switch But, can't
     if (WP == 33)
         Weapon_Adjust = float3(1.0,93.75,0.81875);    //WP 31 | Wolfenstein: The New Order #C770832 / The Old Blood #3E42619F
     if (WP == 34)
-        Weapon_Adjust = float3(0,0,0);                //WP 32 | Wolfenstein II: The New Colossus / Cyberpilot
+        Weapon_Adjust = float3(0,0,0);                //WP 32 | Game
     if (WP == 35)
         Weapon_Adjust = float3(0.278,37.50,9.1);      //WP 33 | Black Mesa
     if (WP == 36)
@@ -2500,7 +2512,7 @@ float3 Weapon_Profiles(float WP ,float3 Weapon_Adjust) //Tried Switch But, can't
     if (WP == 53)
         Weapon_Adjust = float3(1.0,237.5,0.83625);    //WP 51 | Rage64 #AA6B948E
     if (WP == 54)
-        Weapon_Adjust = float3(0,0,0);                //WP 52 | Rage 2
+        Weapon_Adjust = float3(0,0,0);                //WP 52 | Game
     if (WP == 55)
         Weapon_Adjust = float3(0.425,15.0,99.0);      //WP 53 | Bioshock Remastred #44BD41E1
     if (WP == 56)
