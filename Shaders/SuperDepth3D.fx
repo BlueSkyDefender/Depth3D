@@ -2,7 +2,7 @@
 ///**SuperDepth3D**///
 //----------------////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//* Depth Map Based 3D post-process shader v2.5.2
+//* Depth Map Based 3D post-process shader v2.5.3
 //* For Reshade 3.0+
 //* ---------------------------------
 //*
@@ -648,6 +648,10 @@ sampler DepthBuffer
 		AddressU = BORDER;
 		AddressV = BORDER;
 		AddressW = BORDER;
+		//Used Point for games like AMID Evil that don't have a proper Filtering.
+		MagFilter = POINT;
+		MinFilter = POINT;
+		MipFilter = POINT;
 	};
 
 texture BackBufferTex : COLOR;
@@ -1891,7 +1895,7 @@ float3 Out(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Targe
 		Effect += drawChar( CH_A, charPos, charSize, TC); charPos.x += .01 * Size;
 		Effect += drawChar( CH_I, charPos, charSize, TC); charPos.x += .01 * Size;
 		Effect += drawChar( CH_N, charPos, charSize, TC);
-		//Disable TAA/MSAA/AA
+		//Disable Or Set TAA/MSAA/AA/DLSS
 		charPos = float2( 0.009, 0.9025);
 		SetAA += drawChar( CH_D, charPos, charSize, TC); charPos.x += .01 * Size;
 		SetAA += drawChar( CH_I, charPos, charSize, TC); charPos.x += .01 * Size;
@@ -1900,6 +1904,13 @@ float3 Out(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Targe
 		SetAA += drawChar( CH_B, charPos, charSize, TC); charPos.x += .01 * Size;
 		SetAA += drawChar( CH_L, charPos, charSize, TC); charPos.x += .01 * Size;
 		SetAA += drawChar( CH_E, charPos, charSize, TC); charPos.x += .01 * Size;
+		SetAA += drawChar( CH_BLNK, charPos, charSize, TC); charPos.x += .01 * Size;
+		SetAA += drawChar( CH_O, charPos, charSize, TC); charPos.x += .01 * Size;
+		SetAA += drawChar( CH_R, charPos, charSize, TC); charPos.x += .01 * Size;		
+		SetAA += drawChar( CH_BLNK, charPos, charSize, TC); charPos.x += .01 * Size;
+		SetAA += drawChar( CH_S, charPos, charSize, TC); charPos.x += .01 * Size;
+		SetAA += drawChar( CH_E, charPos, charSize, TC); charPos.x += .01 * Size;
+		SetAA += drawChar( CH_T, charPos, charSize, TC); charPos.x += .01 * Size;	
 		SetAA += drawChar( CH_BLNK, charPos, charSize, TC); charPos.x += .01 * Size;
 		SetAA += drawChar( CH_T, charPos, charSize, TC); charPos.x += .01 * Size;
 		SetAA += drawChar( CH_A, charPos, charSize, TC); charPos.x += .01 * Size;
@@ -1911,7 +1922,12 @@ float3 Out(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Targe
 		SetAA += drawChar( CH_A, charPos, charSize, TC); charPos.x += .01 * Size;
 		SetAA += drawChar( CH_SLSH, charPos, charSize, TC); charPos.x += .01 * Size;
 		SetAA += drawChar( CH_A, charPos, charSize, TC); charPos.x += .01 * Size;
-		SetAA += drawChar( CH_A, charPos, charSize, TC);
+		SetAA += drawChar( CH_A, charPos, charSize, TC); charPos.x += .01 * Size;
+		SetAA += drawChar( CH_SLSH, charPos, charSize, TC); charPos.x += .01 * Size;
+		SetAA += drawChar( CH_D, charPos, charSize, TC); charPos.x += .01 * Size;
+		SetAA += drawChar( CH_L, charPos, charSize, TC); charPos.x += .01 * Size;
+		SetAA += drawChar( CH_S, charPos, charSize, TC); charPos.x += .01 * Size;
+		SetAA += drawChar( CH_S, charPos, charSize, TC);
 		//Set Weapon Profile
 		charPos = float2( 0.009, 0.885);
 		SetWP += drawChar( CH_S, charPos, charSize, TC); charPos.x += .01 * Size;

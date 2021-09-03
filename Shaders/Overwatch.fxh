@@ -2458,7 +2458,7 @@ float3 Weapon_Profiles(float WP ,float3 Weapon_Adjust) //Tried Switch But, can't
     if (WP == 26)
         Weapon_Adjust = float3(0.255,6.375,53.75);    //WP 24 | S.T.A.L.K.E.R: Games
     if (WP == 27)
-        Weapon_Adjust = float3(0.450,8.0,0.400);      //WP 25 | AMID EVIL RTX
+        Weapon_Adjust = float3(0.450,5.5625,0.0);     //WP 25 | AMID EVIL RTX
     if (WP == 28)
         Weapon_Adjust = float3(0.750,30.0,1.025);     //WP 26 | Prey 2006
     if (WP == 29)
