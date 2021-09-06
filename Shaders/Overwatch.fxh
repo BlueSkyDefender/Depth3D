@@ -1,7 +1,7 @@
 ////----------------------------------------//
 ///SuperDepth3D Overwatch Automation Shader///
 //----------------------------------------////
-// Version 1.9.6
+// Version 1.9.7
 //---------------------------------------OVERWATCH---------------------------------------//
 // If you are reading this stop. Go away and never look back. From this point on if you  //
 // still think it's is worth looking at this..... Then no one can save you or your soul. //
@@ -2227,7 +2227,7 @@ static const int FOV = 0;                               //Set Game FoV
 	#define NW 1
 	#define PE 1
 #elif (App == 0x1BB6E62A ) //AMIN EVIL RTX
-    #define DA_W 1
+	#define DA_W 1
 	#define DA_X 0.07
 	#define DA_Y 12.5
 	#define DA_Z 0.000125
@@ -2238,6 +2238,72 @@ static const int FOV = 0;                               //Set Game FoV
 	#define PE 1
 	#define DA 1
 	#define DB_W 27
+#elif (App == 0xFBC55DDE ) //Tormented Shouls Demo - Add to real game if Application ID is given.
+	#define DA_W 1
+	#define DA_Y 15.0
+	#define DA_Z 0.00125
+	#define DA_X 0.06125
+	#define DB_X 1
+	#define DB_Y 2
+	#define DE_X 2
+	//#define DG_Z 0.288 // This works. But, may be a bit overboard. Use this if users complain about edge pop out issues. I don't think it's needed.
+	#define PE 1
+#elif (App == 0x920D5D88 ) //Graven
+	#define DA_W 1
+	#define DA_X 0.1
+	#define DA_Y 50.0
+	#define DA_Z 0.00005
+	#define DB_Y 5
+	#define DE_X 3
+	#define DE_Y 0.5
+	#define DE_Z 0.375
+	#define PE 1
+	#define DA 1
+	//#define DB_W 54 //Graven WP Not used Due to Clipping on world. Even if it looks good. Maybe Give people the option???
+	#define DG_Z 0.125
+#elif (App == 0x6B2D15D6 ) //Rec Room Non VR
+	#define DA_W 1
+	#define DA_Y 11.25
+	//#define DA_Z 0.00125
+	#define DA_X 0.100
+    #define DF_Y 0.108
+	#define DB_X 1
+	#define DB_Y 5
+	#define DE_X 1
+	#define DE_Y 0.6
+	#define DE_Z 0.375
+    #define DG_Z 0.075
+    #define NW 1
+    #define DS 1
+#elif (App == 0xD0F69E54 ) //Yooka-Laylee
+	#define DA_Y 13.0
+	#define DA_Z 0.001
+	#define DA_X 0.09125
+    #define DF_Y 0.00625
+	#define DB_X 1
+	#define DB_Y 4
+	#define DE_X 2
+	#define DE_Y 0.3
+	//#define DE_Z 0.375
+#elif (App == 0x755C7E43 ) //Yooka-Laylee and the Impossible Lair
+	#define DA_W 1
+	#define DA_Y 80.0
+	#define DA_Z 0.00025
+	#define DA_X 0.0725
+    #define DF_Y 0.010
+	#define DB_X 1
+	#define DB_Y 4
+	#define DE_X 2
+	#define DE_Y 0.225
+#elif (App == 0x9FAEA815 ) //Amnesia Rebirth
+	#define DA_Y 15.0
+	#define DA_Z 0.0002
+	#define DA_X 0.100
+    //#define DF_Y 0.005
+	#define DB_Y 4
+	#define DE_X 1
+	#define DE_Y 0.525
+	#define DE_Z 0.400
 #else
 	#define NP 1 //No Profile
 #endif
@@ -2510,13 +2576,13 @@ float3 Weapon_Profiles(float WP ,float3 Weapon_Adjust) //Tried Switch But, can't
     if (WP == 52)
         Weapon_Adjust = float3(0.489,68.75,1.02);     //WP 50 | NecroVisioN & NecroVisioN: Lost Company #663E66FE
     if (WP == 53)
-        Weapon_Adjust = float3(1.0,237.5,0.83625);    //WP 51 | Rage64 #AA6B948E
+        Weapon_Adjust = float3(1.0,237.5,0.83625);    //WP 51 | Rage64
     if (WP == 54)
-        Weapon_Adjust = float3(0,0,0);                //WP 52 | Game
+        Weapon_Adjust = float3(13.870,50.0,0.0);      //WP 52 | Graven
     if (WP == 55)
-        Weapon_Adjust = float3(0.425,15.0,99.0);      //WP 53 | Bioshock Remastred #44BD41E1
+        Weapon_Adjust = float3(0.425,15.0,99.0);      //WP 53 | Bioshock Remastred
     if (WP == 56)
-        Weapon_Adjust = float3(0.425,21.25,99.5);     //WP 54 | Bioshock 2 Remastred #7CF5A01
+        Weapon_Adjust = float3(0.425,21.25,99.5);     //WP 54 | Bioshock 2 Remastred
     if (WP == 57)
         Weapon_Adjust = float3(0.425,5.25,1.0);       //WP 55 | No One Lives Forever
     if (WP == 58)
