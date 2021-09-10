@@ -2,12 +2,11 @@
 ///**SuperDepth3D**///
 //----------------////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//* Depth Map Based 3D post-process shader v2.5.3
+//* Depth Map Based 3D post-process shader v2.5.5
 //* For Reshade 3.0+
 //* ---------------------------------
 //*
 //* Original work was based on the shader code from
-//* CryTech 3 Dev http://www.slideshare.net/TiagoAlexSousa/secrets-of-cryengine-3-graphics-technology
 //* Also Fu-Bama a shader dev at the reshade forums https://reshade.me/forum/shader-presentation/5104-vr-universal-shader
 //* Also had to rework Philippe David http://graphics.cs.brown.edu/games/SteepParallax/index.html code to work with ReShade. This is used for the parallax effect.
 //* This idea was taken from this shader here located at https://github.com/Fubaxiusz/fubax-shaders/blob/596d06958e156d59ab6cd8717db5f442e95b2e6b/Shaders/VR.fx#L395
@@ -48,20 +47,17 @@
 	static const float DE_X = 0, DE_Y = 0.5, DE_Z = 0.25, DE_W = 0.0;
 	// DF_X = [Weapon ZPD Boundary] DF_Y = [Separation] DF_Z = [Edge Masking] DF_W = [HUD]
 	static const float DF_X = 0.0, DF_Y = 0.0, DF_Z = 0.0, DF_W = 0.0;
-	// DG_X = [Null] DG_Y = [Null] DG_Z = [Weapon Near Depth Min] DG_W = [Check Depth Limit]
-	static const float DG_X = 0.0, DG_Y = 0.0, DG_Z = 0.0, DG_W = 0.0;
+	// DG_X = [ZPD Balance] DG_Y = [Null] DG_Z = [Weapon Near Depth Min] DG_W = [Check Depth Limit]
+	static const float DG_X = 0.5, DG_Y = 0.0, DG_Z = 0.0, DG_W = 0.0;
 	// WSM = [Weapon Setting Mode]
 	#define OW_WP "WP Off\0Custom WP\0"
 	static const int WSM = 0;
 	//Triggers
-	static const int RE = 0, NC = 0, RH = 0, NP = 0, ID = 0, SP = 0, DC = 0, HM = 0, DF = 0, NF = 0, DS = 0, LBC = 0, LBM = 0, DA = 0, NW = 0, PE = 0, WW = 0, FV = 0, ED = 0, SDT = 0;
+	static const int RE = 0, NC = 0, RH = 0, NP = 0, ID = 0, SP = 0, DC = 0, HM = 0, DF = 0, NF = 0, DS = 0, BM = 0, LBC = 0, LBM = 0, DA = 0, NW = 0, PE = 0, WW = 0, FV = 0, ED = 0, SDT = 0;
 	//Overwatch.fxh State
 	#define OS 1
 #endif
 //USER EDITABLE PREPROCESSOR FUNCTIONS START//
-//This enables the older SuperDepth3D method of producing an 3D image. This is better for older systems that have an hard time running the new mode.
-//Also use this if you like the look of the old mode.
-#define Legacy_Mode 0 //Zero is off and One is On.
 
 // Zero Parallax Distance Balance Mode allows you to switch control from manual to automatic and vice versa.
 #define Balance_Mode 0 //Default 0 is Automatic. One is Manual.
@@ -164,15 +160,17 @@
 	#define Rend 0
 #endif
 //Resolution Scaling because I can't tell your monitor size. Each level is 25 more then it should be.
-#if (BUFFER_HEIGHT <= 1080)
+#if (BUFFER_HEIGHT <= 720)
+	#define Max_Divergence 25.0
+#elif (BUFFER_HEIGHT <= 1080)
 	#define Max_Divergence 50.0
 #elif (BUFFER_HEIGHT <= 1440)
 	#define Max_Divergence 75.0
 #elif (BUFFER_HEIGHT <= 2160)
 	#define Max_Divergence 100.0
 #else
-	#define Max_Divergence 125.0
-#endif
+	#define Max_Divergence 125.0//Wow Must be the future and 8K Plus is normal now. If you are hear use AI infilling...... Future person.
+#endif                          //With love <3 Jose Negrete.
 //New ReShade PreProcessor stuff
 #if UI_MASK
 	#ifndef Mask_Cycle_Key
@@ -181,7 +179,7 @@
 #else
 	#define Mask_Cycle_Key Set_Key_Code_Here
 #endif
-
+//uniform float2 TEST < ui_type = "drag"; ui_min = 0; ui_max = 1; > = 1.0;
 //Divergence & Convergence//
 uniform float Divergence <
 	ui_type = "drag";
@@ -203,7 +201,7 @@ uniform float2 ZPD_Separation <
 	ui_category = "Divergence & Convergence";
 > = float2(DA_X,DF_Y);
 
-#if Balance_Mode
+#if Balance_Mode || BM
 uniform float ZPD_Balance <
 	ui_type = "drag";
 	ui_min = 0.0; ui_max = 1.0;
@@ -211,7 +209,7 @@ uniform float ZPD_Balance <
 	ui_tooltip = "Zero Parallax Distance balances between ZPD Depth and Scene Depth.\n"
 				"Default is Zero is full Convergence and One is Full Depth.";
 	ui_category = "Divergence & Convergence";
-> = 0.5;
+> = DG_X;
 
 static const int Auto_Balance_Ex = 0;
 #else
@@ -230,7 +228,7 @@ uniform int Auto_Balance_Ex <
 #endif
 uniform int ZPD_Boundary <
 	ui_type = "combo";
-	ui_items = "Off\0Normal\0Third Person\0FPS Full\0FPS Narrow\0";
+	ui_items = "BD0 Off\0BD1 Full\0BD2 Narrow\0BD3 FPS Center\0BD04 FPS Right\0";
 	ui_label = " ZPD Boundary Detection";
 	ui_tooltip = "This selection menu gives extra boundary conditions to ZPD.\n"
 				 			 "This treats your screen as a virtual wall.\n"
@@ -252,7 +250,7 @@ uniform float2 ZPD_Boundary_n_Fade <
 
 uniform int View_Mode <
 	ui_type = "combo";
-	ui_items = "View Mode Normal\0View Mode Alpha\0";
+	ui_items = "VM0 Normal\0VM1 Normal               Performant\0VM2 Alpha CB\0VM3 Alpha CB             Performant\0VM4 Reiteration Adaptive\0VM5 Reiteration Adaptive Performant\0";
 	ui_label = "·View Mode·";
 	ui_tooltip = "Changes the way the shader fills in the occlude section in the image.\n"
                  "Normal is default output and Alpha is used for higher amounts of Semi-Transparent objects.\n"
@@ -280,16 +278,7 @@ uniform float Depth_Edge_Mask <
 				 "Default is Zero, Off";
 	ui_category = "Occlusion Masking";
 > = DF_Z;
-#if !Legacy_Mode
-uniform bool Performance_Mode <
-	ui_label = " Performance Mode";
-	ui_tooltip = "Performance Mode Lowers Occlusion Quality Processing so that there is a small boost to FPS.\n"
-				 "Please enable the 'Performance Mode Checkbox,' in ReShade's GUI.\n"
-				 "It's located in the lower bottom right of the ReShade's Main UI.\n"
-				 "Default is False.";
-	ui_category = "Occlusion Masking";
-> = false;
-#endif
+
 uniform int Depth_Map <
 	ui_type = "combo";
 	ui_items = "DM0 Normal\0DM1 Reversed\0";
@@ -339,8 +328,11 @@ uniform int Depth_Detection <
 	ui_label = " Depth Detection";
 	ui_tooltip = "Use this to disable/enable in game Depth Detection.";
 	ui_category = "Depth Map";
+#if Compatibility_DD
+> = 3;
+#else
 > = 0;
-
+#endif
 uniform int Depth_Map_View <
 	ui_type = "combo";
 	ui_items = "Off\0Stereo Depth View\0Normal Depth View\0";
@@ -1140,7 +1132,7 @@ float2 Conv(float D,float2 texcoord)
 		if (Auto_Depth_Adjust > 0)
 			D = AutoDepthRange(D,texcoord);
 
-	#if Balance_Mode
+	#if Balance_Mode || BM
 			ZP = saturate(ZPD_Balance);
 	#else
 		if(Auto_Balance_Ex > 0 )
@@ -1287,40 +1279,39 @@ float2 GetDB(float2 texcoord)
 
 //////////////////////////////////////////////////////////Parallax Generation///////////////////////////////////////////////////////////////////////
 float2 Parallax(float Diverge, float2 Coordinates, float IO) // Horizontal parallax offset & Hole filling effect
-{   float2 ParallaxCoord = Coordinates;
-	float DepthLR = 1, DLR, LRDepth, Perf = 1, Z, MS = Diverge * pix.x, N , S[9] = {0.5,0.5625,0.625,0.6875,0.75,0.8125,0.875,0.9375,1.0};
-	#if Legacy_Mode
-	MS = -MS;
-	[loop]//ParallaxCoord.x += MS * 0.2;
-	for ( int i = 0 ; i <= 8; ++i )
-	{   N = S[i] * MS;
-		if(View_Mode == 1)
-		{   LRDepth =  min(DepthLR, GetDB(float2(ParallaxCoord.x + N, ParallaxCoord.y)).x );
-			DLR = LRDepth;
-			LRDepth += min(DepthLR, GetDB(float2(ParallaxCoord.x + (N * 0.75f), ParallaxCoord.y)).x );
-			LRDepth += min(DepthLR, GetDB(float2(ParallaxCoord.x + (N * 0.500f), ParallaxCoord.y)).x );
-			LRDepth += min(DepthLR, GetDB(float2(ParallaxCoord.x + (N * 0.250f), ParallaxCoord.y)).x );
-			DepthLR = min(DepthLR,LRDepth / 4.0f);
-
-			DepthLR = lerp(DepthLR, DLR, 0.1875f);
-		}
+{   float View_Num = View_Mode == 5 ? 1 : 0, Perf = View_Mode >= 4 ? 1.670 : 1.375, MS = Diverge * pix.x, VM_Adjust = 1.0, GetDepth = smoothstep(0,1,tex2D(SamplerzBufferN,Coordinates).x).x,Near_Far_CB_Size = GetDepth >= 0.5 ? 1.0 : 0.5;
+	float2 ParallaxCoord = Coordinates, CBxy = floor( float2(Coordinates.x * BUFFER_WIDTH, Coordinates.y * BUFFER_HEIGHT) * Near_Far_CB_Size );
+	//Would Use Switch.... But, Still trying to back compat.... ////Perf = 0.960; //Perf = 0.460;
+	if(View_Mode == 0)
+		Perf = 1.670;
+	if(View_Mode == 1)
+		Perf = 0.670;
+	if(View_Mode == 2)
+		Perf *= fmod(CBxy.x+CBxy.y,2)  ? 1.0 : 0.5;
+	if(View_Mode == 3)
+		Perf *= fmod(CBxy.x+CBxy.y,2)  ? 0.5 : 0.25;		
+	if(View_Mode >= 4)//Heavy May add a Performant Mode Later.....
+	{		
+		if(GetDepth >= 0.99)
+			Perf = 5.375;
+		else if(GetDepth >= 0.875)
+			Perf = 3.375 - View_Num; // Perf = 4.375;// else if(GetDepth >= 0.6)
+		else if(GetDepth >= 0.375)
+			Perf = 2.375 - View_Num;
 		else
-		DepthLR = min(DepthLR, GetDB(float2(ParallaxCoord.x + N, ParallaxCoord.y)).x );
-	}
-	//Reprojection Left and Right
-	ParallaxCoord = float2(Coordinates.x + MS * DepthLR, Coordinates.y);
-	#else
-	if(Performance_Mode)
-		Perf = .5;
+			Perf = 1.375;
+		
+		Perf *= fmod(CBxy.x+CBxy.y,2)  ? 1.0 : 0.5;
+	}	
 	//ParallaxSteps Calculations
-	float D = abs(Diverge), Cal_Steps = (D * Perf) + (D * 0.04), Steps = clamp(Cal_Steps,0,255);
+	float D = abs(Diverge), Cal_Steps = (D * Perf) + (D * 0.04), Steps = clamp( Cal_Steps, 0, 256 );
 	// Offset per step progress & Limit
-	float LayerDepth = rcp(Steps), TP = 0.03;
+	float LayerDepth = rcp(Steps), TP = 0.030;
 	//Offsets listed here Max Seperation is 3% - 8% of screen space with Depth Offsets & Netto layer offset change based on MS.
 	float deltaCoordinates = MS * LayerDepth, CurrentDepthMapValue = GetDB(ParallaxCoord).x, CurrentLayerDepth = 0, DepthDifference;
-	float2 DB_Offset = float2(Diverge * TP, 0) * pix;
+	float2 DB_Offset = float2(Diverge * TP, 0) * pix, Store_DB_Offset = DB_Offset;
 
-    if(View_Mode == 1)
+    if( View_Mode >= 4)
     	DB_Offset = 0;
 	#if !Compatibility
 	[loop] //Steep parallax mapping
@@ -1350,18 +1341,18 @@ float2 Parallax(float Diverge, float2 Coordinates, float IO) // Horizontal paral
 	// Parallax Occlusion Mapping
 	float2 PrevParallaxCoord = float2(ParallaxCoord.x + deltaCoordinates, ParallaxCoord.y);
 	float beforeDepthValue = GetDB(ParallaxCoord ).y, afterDepthValue = CurrentDepthMapValue - CurrentLayerDepth;
-		beforeDepthValue += LayerDepth - CurrentLayerDepth;
+		  beforeDepthValue += LayerDepth - CurrentLayerDepth;
 	// Interpolate coordinates
 	float weight = afterDepthValue / (afterDepthValue - beforeDepthValue);
-		ParallaxCoord = PrevParallaxCoord * weight + ParallaxCoord * (1. - weight);
+		  ParallaxCoord = PrevParallaxCoord * weight + ParallaxCoord * (1.0 - weight);
 	//This is to limit artifacts.
-	if(View_Mode == 0)
-		ParallaxCoord += DB_Offset * 0.5;
+	if(View_Mode == 0 || View_Mode == 1 || View_Mode >= 4)
+		ParallaxCoord += Store_DB_Offset * VM_Adjust;
 	// Apply gap masking
 	DepthDifference = (afterDepthValue-beforeDepthValue) * MS;
-	if(View_Mode == 1)
-		ParallaxCoord.x -= DepthDifference;
-	#endif
+	if(View_Mode == 2 || View_Mode == 3 )
+		ParallaxCoord.x -= DepthDifference * 0.5;
+
 	if(Stereoscopic_Mode == 2)
 		ParallaxCoord.y += IO * pix.y; //Optimization for line interlaced.
 	else if(Stereoscopic_Mode == 3)
@@ -1906,11 +1897,11 @@ float3 Out(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Targe
 		SetAA += drawChar( CH_E, charPos, charSize, TC); charPos.x += .01 * Size;
 		SetAA += drawChar( CH_BLNK, charPos, charSize, TC); charPos.x += .01 * Size;
 		SetAA += drawChar( CH_O, charPos, charSize, TC); charPos.x += .01 * Size;
-		SetAA += drawChar( CH_R, charPos, charSize, TC); charPos.x += .01 * Size;		
+		SetAA += drawChar( CH_R, charPos, charSize, TC); charPos.x += .01 * Size;
 		SetAA += drawChar( CH_BLNK, charPos, charSize, TC); charPos.x += .01 * Size;
 		SetAA += drawChar( CH_S, charPos, charSize, TC); charPos.x += .01 * Size;
 		SetAA += drawChar( CH_E, charPos, charSize, TC); charPos.x += .01 * Size;
-		SetAA += drawChar( CH_T, charPos, charSize, TC); charPos.x += .01 * Size;	
+		SetAA += drawChar( CH_T, charPos, charSize, TC); charPos.x += .01 * Size;
 		SetAA += drawChar( CH_BLNK, charPos, charSize, TC); charPos.x += .01 * Size;
 		SetAA += drawChar( CH_T, charPos, charSize, TC); charPos.x += .01 * Size;
 		SetAA += drawChar( CH_A, charPos, charSize, TC); charPos.x += .01 * Size;

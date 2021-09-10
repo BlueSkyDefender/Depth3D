@@ -1181,6 +1181,28 @@ This is done with overwatch.fxh. But, maybe you can do it better. The other issu
 So this means the dark areas where there should be a wall, instead it will be set to Max depth. It looks like it was an optimization................. 
 But, because of this it will cause eye strain.
 
+{The Suicide of Rachel Foster} - ReShade 4.9.1
+Game runs fine issues with DoF and/or other effects.
+
+To Disable PostProcessing effects in TSoRF
+
+Head over to C:\Users\UserName\AppData\Local\Daedalic Entertainment GmbH\Saved\Config\WindowsNoEditor
+Open the “Engine.ini” file
+
+So on here at the bottom.
+
+Add:
+[SystemSettings]
+r.DepthOfFieldQuality=0
+r.MotionBlur.Max=0
+r.MotionBlurQuality=0
+r.DefaultFeature.MotionBlur=0
+r.SceneColorFringeQuality=0
+
+Save the file and set it to Read Only. 
+
+Keep in mind if you change your setting in game you need to restart so that this INI can remove the problem Post Effects.
+
 {The Vanishing of Ethan Carter Redux}
 May Have an issue with the Title screen. Ignore this. In game it fine.
 Instal Dll too D:\SteamLibrary\steamapps\common\The Vanishing of Ethan Carter Redux\EthanCarter\Binaries\Win64

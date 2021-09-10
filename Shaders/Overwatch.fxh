@@ -1,7 +1,7 @@
 ////----------------------------------------//
 ///SuperDepth3D Overwatch Automation Shader///
 //----------------------------------------////
-// Version 1.9.7
+// Version 1.9.9
 //---------------------------------------OVERWATCH---------------------------------------//
 // If you are reading this stop. Go away and never look back. From this point on if you  //
 // still think it's is worth looking at this..... Then no one can save you or your soul. //
@@ -54,7 +54,7 @@ static const float ZPD_Weapon_Boundary_Adjust = 0.0;    //ZPD Weapon Boundary Ad
 static const float Separation = 0.0;                    //ZPD Separation
 static const float Edge_Masking = 0.0;                  //Edge Masking Adjust
 static const float HUDX_D = 0.0;                        //Heads Up Display Cut Off Point
-static const float Null_X = 0.0;                        //
+static const float Manual_ZPD_Balance = 0.5;            //Manual Balance Mode Adjustment
 static const float Null_Y = 0.0;                        //
 static const float Weapon_Near_Depth_Min_D = 0.0;       //Weapon Near Depth              Min
 static const float Check_Depth_Limit = 0.0;             //Check Depth Limit
@@ -69,7 +69,7 @@ static const int DFW = 0;                               //Delay Frame Workaround
 static const int ALB = 0;                               //Auto Letter Box
 static const int LBD = 0;                               //Letter Box Depth
 static const int STD = 0;                               //Specialized Depth Trigger
-
+static const int BMT = 0;                               //Balance Mode Toggle
 //Special Toggles Generic
 static const int RHW = 0;                               //Read Help Warning
 static const int EDW = 0;                               //Emulator Detected Warning
@@ -223,7 +223,7 @@ static const int FOV = 0;                               //Set Game FoV
 	#define DE_Y 0.5
 	#define DE_Z 0.300
     #define DF_Y 0.05
-	#define WSM 3
+	#define WSM 4
 	#define OW_WP "Read Help & Change Me\0Custom WP\0Prey High Settings and <\0Prey 2017 Very High\0"
 	#define RH 1
 	#define PE 1
@@ -648,15 +648,24 @@ static const int FOV = 0;                               //Set Game FoV
 	#define DA_X 0.25
 	#define DF_Y 0.125
 	#define DA_Z 0.0015
-	#define DB_Y 5 				//ZPD Boundary Scaling
-  #define DB_Z 0.325		//Auto Depth Adjust
+	#define DB_Y 5 		//ZPD Boundary Scaling
+	#define DB_Z 0.325	//Auto Depth Adjust
 	#define PE 1
 #elif (App == 0xC0AC5174 ) //Observer
 	#define DA_W 1
-	#define DA_Y 21.5
-	#define DA_X 0.0375
-	#define DB_Y 4
+	#define DA_Y 20.0
+	#define DA_X 0.05
+	#define DF_Y 0.01
+	#define DA_Z 0.0005
+	#define DB_Y 5 //Fall Back
+	#define DE_X 2
+	#define DE_Y 0.275
+	#define DE_Z 0.400
+	#define DG_W 0.1875 // Slight adjustment to the ZPD Boundary
+	#define BM 1 // Had to use this mode since Auto Mode was not cutting it.
+	#define DG_X 0.1
 	#define RH 1
+	#define PE 1
 #elif (App == 0xABAA2255 ) //The Forest
 	#define DA_W 1
 	#define DB_X 1
@@ -723,7 +732,7 @@ static const int FOV = 0;                               //Set Game FoV
 	#define DE_X 3
 	#define DE_Y 0.375
 	#define DE_Z 0.375
-	#define WSM 2
+	#define WSM 3
 	#define OW_WP "Read Help & Change Me\0Custom WP\0Halo: Reach\0Halo: CE Anniversary\0Halo 2: Anniversary\0Halo 3\0Halo 3: ODST\0Halo 4\0"
 	#define RH 1
 #elif (App == 0x2AB9ECF9) //System ReShock
@@ -2266,20 +2275,20 @@ static const int FOV = 0;                               //Set Game FoV
 	#define DA_Y 11.25
 	//#define DA_Z 0.00125
 	#define DA_X 0.100
-    #define DF_Y 0.108
+	#define DF_Y 0.108
 	#define DB_X 1
 	#define DB_Y 5
 	#define DE_X 1
 	#define DE_Y 0.6
 	#define DE_Z 0.375
-    #define DG_Z 0.075
-    #define NW 1
-    #define DS 1
+	#define DG_Z 0.075
+	#define NW 1
+	#define DS 1
 #elif (App == 0xD0F69E54 ) //Yooka-Laylee
 	#define DA_Y 13.0
 	#define DA_Z 0.001
 	#define DA_X 0.09125
-    #define DF_Y 0.00625
+	#define DF_Y 0.00625
 	#define DB_X 1
 	#define DB_Y 4
 	#define DE_X 2
@@ -2290,7 +2299,7 @@ static const int FOV = 0;                               //Set Game FoV
 	#define DA_Y 80.0
 	#define DA_Z 0.00025
 	#define DA_X 0.0725
-    #define DF_Y 0.010
+	#define DF_Y 0.010
 	#define DB_X 1
 	#define DB_Y 4
 	#define DE_X 2
@@ -2299,11 +2308,74 @@ static const int FOV = 0;                               //Set Game FoV
 	#define DA_Y 15.0
 	#define DA_Z 0.0002
 	#define DA_X 0.100
-    //#define DF_Y 0.005
+	//#define DF_Y 0.005
 	#define DB_Y 4
 	#define DE_X 1
 	#define DE_Y 0.525
 	#define DE_Z 0.400
+#elif (App == 0x491EA19E ) //Cyberpunk 2077
+	#define DA_W 1
+	#define DA_Y 70.0
+	#define DA_Z 0.00010
+	#define DA_X 0.050
+	#define DB_Z 0.150
+	#define DF_Y 0.05125
+	#define DB_Y 2 //?? Auto Mode didn't work well in this game.
+	#define DE_X 3
+	#define DE_Y 0.500
+	#define DE_Z 0.400
+	#define DB_W 34
+	#define DF_X 0.20
+	#define DG_W 0.15
+	#define BM 1
+	#define DG_X 0.1375
+	#define PE 1
+#elif (App == 0xB53B8500 ) //DEATH STRANDING
+	#define DA_W 1
+	#define DA_Y 20.0
+	#define DA_Z 0.000375
+	#define DA_X 0.066
+	//#define DB_Z 0.125
+	#define DF_Y 0.01
+	#define DB_Y 4
+	#define DE_X 2
+	#define DE_Y 0.375
+	//#define DE_Z 0.375
+	#define DG_Z 0.425
+	#define DG_W 0.375 //Allow some popout
+	#define PE 1
+	#define DA 1
+#elif (App == 0x87AC1510 ) //Ghostrunner
+	#define DA_W 1
+	#define DA_Y 250.0
+	#define DA_Z 0.0000025 // Magic
+	#define DA_X 0.0401
+	#define DF_Y 0.001     // Magic
+	#define DB_Z 0.045
+	#define DB_Y 1
+	#define DE_X 3
+	#define DE_Y 0.750
+	#define DE_Z 0.375
+	#define DB_W 43
+	#define DF_X 0.05
+	#define PE 1
+	#define DA 1
+#elif (App == 0x11E6C55E ) //The Suicide of Rachel Foster
+	#define DA_W 1
+	#define DA_Y 45.0
+	//#define DA_Z 0.0000025 // Magic
+	#define DA_X 0.03025
+	//#define DF_Y 0.001     // Magic
+	#define DB_Z 0.050
+	#define DB_Y 5
+	#define DE_X 1
+	#define DE_Y 0.5
+	#define DE_Z 0.375
+	#define DG_Z 0.449
+	#define DG_W 0.725 //Allow much popout "Please don't abuse this."
+	#define PE 1
+	#define DA 1
+	#define RH 1
 #else
 	#define NP 1 //No Profile
 #endif
@@ -2387,9 +2459,9 @@ static const int FOV = 0;                               //Set Game FoV
 #ifndef DF_W
     #define DF_W HUDX_D
 #endif
-// X = [Null] Y = [Null] Z = [Weapon NearDepth Min] W = [Check Depth Limit]
+// X = [ZPD Balance] Y = [Null] Z = [Weapon NearDepth Min] W = [Check Depth Limit]
 #ifndef DG_X
-    #define DG_X Null_X
+    #define DG_X Manual_ZPD_Balance
 #endif
 #ifndef DG_Y
     #define DG_Y Null_Y
@@ -2462,18 +2534,20 @@ static const int FOV = 0;                               //Set Game FoV
 #ifndef FV
     #define FV FOV //Set Game FoV
 #endif
-//Weapon Settings
-#ifndef OW_WP
+#ifndef BM
+    #define BM BMT //Balance Mode Toggle
+#endif
+//Weapon Settings "Use #define WSM 1 or 2"
+#ifndef OW_WP     //This is used if OW_WP is not called in the Above Profile
     #define OW_WP "WP Off\0Custom WP\0WP 0\0WP 1\0WP 2\0WP 3\0WP 4\0WP 5\0WP 6\0WP 7\0WP 8\0WP 9\0WP 10\0WP 11\0WP 12\0WP 13\0WP 14\0WP 15\0WP 16\0WP 17\0WP 18\0WP 19\0WP 20\0WP 21\0WP 22\0WP 23\0WP 24\0WP 25\0WP 26\0WP 27\0WP 28\0WP 29\0WP 30\0WP 31\0WP 32\0WP 33\0WP 34\0WP 35\0WP 36\0WP 37\0WP 38\0WP 39\0WP 40\0WP 41\0WP 42\0WP 43\0WP 44\0WP 45\0WP 46\0WP 47\0WP 48\0WP 49\0WP 50\0WP 51\0WP 52\0WP 53\0WP 54\0WP 55\0WP 56\0WP 57\0WP 58\0WP 59\0WP 60\0WP 61\0WP 62\0WP 63\0WP 64\0WP 65\0WP 66\0WP 67\0WP 68\0WP 69\0WP 70\0WP 71\0WP 72\0WP 73\0WP 74\0"
 #endif
-#ifndef WSM //One is Normal | Two is MCC | Three is Prey | Four is Blood 2
+#ifndef WSM //One is Profiles List A | Two is Profiles List B | Three is MCC | Four is Prey | Five is Blood 2 WIP
     #define WSM 1 //Weapon Setting Mode
 #endif
 
 #if WSM == 1
 float3 Weapon_Profiles(float WP ,float3 Weapon_Adjust) //Tried Switch But, can't compile in some older versions of ReShade.
-{
-	if (WP == 2)
+{	  if (WP == 2)
         Weapon_Adjust = float3(0.425,5.0,1.125);      //WP 0  | ES: Oblivion
     if (WP == 3)
         Weapon_Adjust = float3(0.276,16.25,9.2);      //WP 1  | BorderLands
@@ -2538,7 +2612,7 @@ float3 Weapon_Profiles(float WP ,float3 Weapon_Adjust) //Tried Switch But, can't
     if (WP == 33)
         Weapon_Adjust = float3(1.0,93.75,0.81875);    //WP 31 | Wolfenstein: The New Order #C770832 / The Old Blood #3E42619F
     if (WP == 34)
-        Weapon_Adjust = float3(0,0,0);                //WP 32 | Game
+        Weapon_Adjust = float3(1.150,55.0,0.9);       //WP 32 | Cyberpunk 2077
     if (WP == 35)
         Weapon_Adjust = float3(0.278,37.50,9.1);      //WP 33 | Black Mesa
     if (WP == 36)
@@ -2556,7 +2630,7 @@ float3 Weapon_Profiles(float WP ,float3 Weapon_Adjust) //Tried Switch But, can't
     if (WP == 42)
         Weapon_Adjust = float3(0.3,17.5,0.9015);      //WP 40 | Serious Sam Fusion
     if (WP == 43)
-        Weapon_Adjust = float3(0,0,0);                //WP 41 | Game
+        Weapon_Adjust = float3(1.2,12.5,0.3);         //WP 41 | GhostRunner DX12
     if (WP == 44)
         Weapon_Adjust = float3(0.277,20.0,8.8);       //WP 42 | TitanFall 2
     if (WP == 45)
@@ -2627,31 +2701,186 @@ float3 Weapon_Profiles(float WP ,float3 Weapon_Adjust) //Tried Switch But, can't
 		return Weapon_Adjust;
 }
 #elif WSM == 2
-float3 Weapon_Profiles(float WP ,float3 Weapon_Adjust) // MCC
-{   float3 Value = Weapon_Adjust;
-	if (WP == 2)
-        Value = float3(0,0,0);                //WP 0  | Halo: Reach
+float3 Weapon_Profiles(float WP ,float3 Weapon_Adjust) //Could reduce from 76 to 57 to save on compiling time.
+{	  if (WP == 2)
+        Weapon_Adjust = float3(0.0,0.0,0.0);          //WP 0  | Game
     if (WP == 3)
-        Value = float3(1.5,26.25,0.2);        //WP 1  | Halo: CE Anniversary
+        Weapon_Adjust = float3(0.0,0.0,0.0);          //WP 1  | Game
     if (WP == 4)
-        Value = float3(0.615,70.0,0.3955);    //WP 2  | Halo 2: Anniversary
+        Weapon_Adjust = float3(0.0,0.0,0.0);          //WP 2  | Game
     if (WP == 5)
-        Value = float3(5.750,24.0,0);         //WP 3  | Halo 3
+        Weapon_Adjust = float3(0.0,0.0,0.0);          //WP 3  | Game
     if (WP == 6)
-        Value = float3(0,0,0);                //WP 4  | Halo 3: ODST
+        Weapon_Adjust = float3(0.0,0.0,0.0);          //WP 4  | Game
     if (WP == 7)
-        Value = float3(0,0,0);                //WP 5  | Halo 4
+        Weapon_Adjust = float3(0.0,0.0,0.0);          //WP 5  | Game
+    if (WP == 8)
+        Weapon_Adjust = float3(0.0,0.0,0.0);          //WP 6  | Game
+    if (WP == 9)
+        Weapon_Adjust = float3(0.0,0.0,0.0);          //WP 7  | Game
+    if (WP == 10)
+        Weapon_Adjust = float3(0.0,0.0,0.0);          //WP 8  | Game
+    if (WP == 11)
+        Weapon_Adjust = float3(0.0,0.0,0.0);          //WP 9  | Game
+    if (WP == 12)
+        Weapon_Adjust = float3(0.0,0.0,0.0);          //WP 10 | Game
+    if (WP == 13)
+        Weapon_Adjust = float3(0.0,0.0,0.0);          //WP 11 | Game
+    if (WP == 14)
+        Weapon_Adjust = float3(0.0,0.0,0.0);          //WP 12 | Game
+    if (WP == 15)
+        Weapon_Adjust = float3(0.0,0.0,0.0);          //WP 13 | Game
+    if (WP == 16)
+        Weapon_Adjust = float3(0.0,0.0,0.0);          //WP 14 | Game
+    if (WP == 17)
+        Weapon_Adjust = float3(0.0,0.0,0.0);          //WP 15 | Game
+    if (WP == 18)
+        Weapon_Adjust = float3(0.0,0.0,0.0);          //WP 16 | Game
+    if (WP == 19)
+        Weapon_Adjust = float3(0.0,0.0,0.0);          //WP 17 | Game
+    if (WP == 20)
+        Weapon_Adjust = float3(0.0,0.0,0.0);          //WP 18 | Game
+    if (WP == 21)
+        Weapon_Adjust = float3(0.0,0.0,0.0);          //WP 19 | Game
+    if (WP == 22)
+        Weapon_Adjust = float3(0.0,0.0,0.0);          //WP 20 | Game
+    if (WP == 23)
+        Weapon_Adjust = float3(0.0,0.0,0.0);          //WP 21 | Game
+    if (WP == 24)
+        Weapon_Adjust = float3(0.0,0.0,0.0);          //WP 21 | Game
+    if (WP == 25)
+        Weapon_Adjust = float3(0.0,0.0,0.0);          //WP 23 | Game
+    if (WP == 26)
+        Weapon_Adjust = float3(0.0,0.0,0.0);          //WP 24 | Game
+    if (WP == 27)
+        Weapon_Adjust = float3(0.0,0.0,0.0);          //WP 25 | Game
+    if (WP == 28)
+        Weapon_Adjust = float3(0.0,0.0,0.0);          //WP 26 | Game
+    if (WP == 29)
+        Weapon_Adjust = float3(0.0,0.0,0.0);          //WP 27 | Game
+    if (WP == 30)
+        Weapon_Adjust = float3(0.0,0.0,0.0);          //WP 28 | Game
+    if (WP == 31)
+        Weapon_Adjust = float3(0.0,0.0,0.0);          //WP 29 | Game
+    if (WP == 32)
+        Weapon_Adjust = float3(0.0,0.0,0.0);          //WP 30 | Game
+    if (WP == 33)
+        Weapon_Adjust = float3(0.0,0.0,0.0);          //WP 31 | Game
+    if (WP == 34)
+        Weapon_Adjust = float3(0.0,0.0,0.0);          //WP 32 | Game
+    if (WP == 35)
+        Weapon_Adjust = float3(0.0,0.0,0.0);          //WP 33 | Game
+    if (WP == 36)
+        Weapon_Adjust = float3(0.0,0.0,0.0);          //WP 34 | Game
+    if (WP == 37)
+        Weapon_Adjust = float3(0.0,0.0,0.0);          //WP 35 | Game
+    if (WP == 38)
+        Weapon_Adjust = float3(0.0,0.0,0.0);          //WP 36 | Game
+    if (WP == 39)
+        Weapon_Adjust = float3(0.0,0.0,0.0);          //WP 37 | Game
+    if (WP == 40)
+        Weapon_Adjust = float3(0.0,0.0,0.0);          //WP 38 | Game
+    if (WP == 41)
+        Weapon_Adjust = float3(0.0,0.0,0.0);          //WP 39 | Game
+    if (WP == 42)
+        Weapon_Adjust = float3(0.0,0.0,0.0);          //WP 40 | Game
+    if (WP == 43)
+        Weapon_Adjust = float3(0.0,0.0,0.0);          //WP 41 | Game
+    if (WP == 44)
+        Weapon_Adjust = float3(0.0,0.0,0.0);          //WP 42 | Game
+    if (WP == 45)
+        Weapon_Adjust = float3(0.0,0.0,0.0);          //WP 43 | Game
+    if (WP == 46)
+        Weapon_Adjust = float3(0.0,0.0,0.0);          //WP 44 | Game
+    if (WP == 47)
+        Weapon_Adjust = float3(0.0,0.0,0.0);          //WP 45 | Game
+    if (WP == 48)
+        Weapon_Adjust = float3(0.0,0.0,0.0);          //WP 46 | Game
+    if (WP == 49)
+        Weapon_Adjust = float3(0.0,0.0,0.0);          //WP 47 | Game
+    if (WP == 50)
+        Weapon_Adjust = float3(0.0,0.0,0.0);          //WP 48 | Game
+    if (WP == 51)
+        Weapon_Adjust = float3(0.0,0.0,0.0);          //WP 49 | Game
+    if (WP == 52)
+        Weapon_Adjust = float3(0.0,0.0,0.0);          //WP 50 | Game
+    if (WP == 53)
+        Weapon_Adjust = float3(0.0,0.0,0.0);          //WP 51 | Game
+    if (WP == 54)
+        Weapon_Adjust = float3(0.0,0.0,0.0);          //WP 52 | Game
+    if (WP == 55)
+        Weapon_Adjust = float3(0.0,0.0,0.0);          //WP 53 | Game
+    if (WP == 56)
+        Weapon_Adjust = float3(0.0,0.0,0.0);          //WP 54 | Game
+    if (WP == 57)
+        Weapon_Adjust = float3(0.0,0.0,0.0);          //WP 55 | Game
+    if (WP == 58)
+        Weapon_Adjust = float3(0.0,0.0,0.0);          //WP 56 | Game
+    if (WP == 59)
+        Weapon_Adjust = float3(0.0,0.0,0.0);          //WP 57 | Game
+    if (WP == 60)
+        Weapon_Adjust = float3(0.0,0.0,0.0);          //WP 58 | Game
+    if (WP == 61) //Unity Limit if using else if
+        Weapon_Adjust = float3(0.0,0.0,0.0);          //WP 59 | Game
+    if (WP == 62)
+        Weapon_Adjust = float3(0.0,0.0,0.0);          //WP 60 | Game
+    if (WP == 63)
+        Weapon_Adjust = float3(0.0,0.0,0.0);          //WP 61 | Game
+    if (WP == 64)
+        Weapon_Adjust = float3(0.0,0.0,0.0);          //WP 62 | Game
+    if (WP == 65)
+        Weapon_Adjust = float3(0.0,0.0,0.0);          //WP 63 | Game
+    if (WP == 66)
+        Weapon_Adjust = float3(0.0,0.0,0.0);          //WP 64 | Game
+    if (WP == 67)
+        Weapon_Adjust = float3(0.0,0.0,0.0);          //WP 65 | Game
+    if (WP == 68)
+        Weapon_Adjust = float3(0.0,0.0,0.0);          //WP 66 | Game
+    if (WP == 69)
+        Weapon_Adjust = float3(0.0,0.0,0.0);          //WP 67 | Game
+    if (WP == 70)
+        Weapon_Adjust = float3(0.0,0.0,0.0);          //WP 68 | Game
+    if (WP == 71)
+        Weapon_Adjust = float3(0.0,0.0,0.0);          //WP 69 | Game
+    if (WP == 72)
+        Weapon_Adjust = float3(0.0,0.0,0.0);          //WP 70 | Game
+    if (WP == 73)
+        Weapon_Adjust = float3(0.0,0.0,0.0);          //WP 71 | Game
+    if (WP == 74)
+        Weapon_Adjust = float3(0.0,0.0,0.0);          //WP 72 | Game
+    if (WP == 75)
+        Weapon_Adjust = float3(0.0,0.0,0.0);          //WP 73 | Game
+    if (WP == 76) //DX 9 Temp Registers Limit
+        Weapon_Adjust = float3(0.0,0.0,0.0);          //WP 74 | Game
 
-		return Value;
+		return Weapon_Adjust;
 }
 #elif WSM == 3
-float3 Weapon_Profiles(float WP ,float3 Weapon_Adjust) // Prey 2017
-{   float3 Value = Weapon_Adjust;
+float3 Weapon_Profiles(float WP ,float3 Weapon_Adjust) // MCC
+{
 	if (WP == 2)
-		Value = float3(0.2832,31.25,0.8775); //WP 0 | Prey 2017 High Settings and <
-	if (WP == 3)
-		Value = float3(0.2832,31.25,0.91875);//WP 1 | Prey 2017 Very High
+        Weapon_Adjust = float3(0,0,0);                //WP 0  | Halo: Reach
+    if (WP == 3)
+        Weapon_Adjust = float3(1.5,26.25,0.2);        //WP 1  | Halo: CE Anniversary
+    if (WP == 4)
+        Weapon_Adjust = float3(0.615,70.0,0.3955);    //WP 2  | Halo 2: Anniversary
+    if (WP == 5)
+        Weapon_Adjust = float3(5.750,24.0,0);         //WP 3  | Halo 3
+    if (WP == 6)
+        Weapon_Adjust = float3(0,0,0);                //WP 4  | Halo 3: ODST
+    if (WP == 7)
+        Weapon_Adjust = float3(0,0,0);                //WP 5  | Halo 4
 
-	return Value;
+		return Weapon_Adjust;
+}
+#elif WSM == 4
+float3 Weapon_Profiles(float WP ,float3 Weapon_Adjust) // Prey 2017
+{
+	if (WP == 2)
+		Weapon_Adjust = float3(0.2832,31.25,0.8775); //WP 0 | Prey 2017 High Settings and <
+	if (WP == 3)
+		Weapon_Adjust = float3(0.2832,31.25,0.91875);//WP 1 | Prey 2017 Very High
+
+	return Weapon_Adjust;
 }
 #endif
