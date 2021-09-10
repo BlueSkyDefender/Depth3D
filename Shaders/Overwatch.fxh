@@ -1,7 +1,7 @@
 ////----------------------------------------//
 ///SuperDepth3D Overwatch Automation Shader///
 //----------------------------------------////
-// Version 1.9.9
+// Version 2.0.0
 //---------------------------------------OVERWATCH---------------------------------------//
 // If you are reading this stop. Go away and never look back. From this point on if you  //
 // still think it's is worth looking at this..... Then no one can save you or your soul. //
@@ -2362,20 +2362,22 @@ static const int FOV = 0;                               //Set Game FoV
 	#define DA 1
 #elif (App == 0x11E6C55E ) //The Suicide of Rachel Foster
 	#define DA_W 1
-	#define DA_Y 45.0
+	#define DA_Y 35.0
 	//#define DA_Z 0.0000025 // Magic
-	#define DA_X 0.03025
+	#define DA_X 0.030
 	//#define DF_Y 0.001     // Magic
 	#define DB_Z 0.050
 	#define DB_Y 5
-	#define DE_X 1
-	#define DE_Y 0.5
-	#define DE_Z 0.375
+	#define DE_X 4
+	#define DE_Y 0.250
+	#define DE_Z 0.425
 	#define DG_Z 0.449
-	#define DG_W 0.725 //Allow much popout "Please don't abuse this."
+	#define DG_W 0.37 //Allow much popout "Please don't abuse this."
 	#define PE 1
 	#define DA 1
 	#define RH 1
+	#define WSM 2
+	#define DB_W 2
 #else
 	#define NP 1 //No Profile
 #endif
@@ -2547,7 +2549,7 @@ static const int FOV = 0;                               //Set Game FoV
 
 #if WSM == 1
 float3 Weapon_Profiles(float WP ,float3 Weapon_Adjust) //Tried Switch But, can't compile in some older versions of ReShade.
-{	  if (WP == 2)
+{   if (WP == 2)
         Weapon_Adjust = float3(0.425,5.0,1.125);      //WP 0  | ES: Oblivion
     if (WP == 3)
         Weapon_Adjust = float3(0.276,16.25,9.2);      //WP 1  | BorderLands
@@ -2702,8 +2704,8 @@ float3 Weapon_Profiles(float WP ,float3 Weapon_Adjust) //Tried Switch But, can't
 }
 #elif WSM == 2
 float3 Weapon_Profiles(float WP ,float3 Weapon_Adjust) //Could reduce from 76 to 57 to save on compiling time.
-{	  if (WP == 2)
-        Weapon_Adjust = float3(0.0,0.0,0.0);          //WP 0  | Game
+{   if (WP == 2)
+        Weapon_Adjust = float3(0.6,6.5,0.0);          //WP 0  | The Suicide of Rachel Foster
     if (WP == 3)
         Weapon_Adjust = float3(0.0,0.0,0.0);          //WP 1  | Game
     if (WP == 4)
