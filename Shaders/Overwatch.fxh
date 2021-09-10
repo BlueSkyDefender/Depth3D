@@ -1,7 +1,7 @@
 ////----------------------------------------//
 ///SuperDepth3D Overwatch Automation Shader///
 //----------------------------------------////
-// Version 2.0.0
+// Version 2.0.1
 //---------------------------------------OVERWATCH---------------------------------------//
 // If you are reading this stop. Go away and never look back. From this point on if you  //
 // still think it's is worth looking at this..... Then no one can save you or your soul. //
@@ -2334,7 +2334,7 @@ static const int FOV = 0;                               //Set Game FoV
 	#define DA_W 1
 	#define DA_Y 20.0
 	#define DA_Z 0.000375
-	#define DA_X 0.066
+	#define DA_X 0.055
 	//#define DB_Z 0.125
 	#define DF_Y 0.01
 	#define DB_Y 4
@@ -2342,7 +2342,7 @@ static const int FOV = 0;                               //Set Game FoV
 	#define DE_Y 0.375
 	//#define DE_Z 0.375
 	#define DG_Z 0.425
-	#define DG_W 0.375 //Allow some popout
+	#define DG_W 0.3 //Allow some popout
 	#define PE 1
 	#define DA 1
 #elif (App == 0x87AC1510 ) //Ghostrunner
