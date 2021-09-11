@@ -2363,9 +2363,8 @@ static const int FOV = 0;                               //Set Game FoV
 #elif (App == 0x11E6C55E ) //The Suicide of Rachel Foster
 	#define DA_W 1
 	#define DA_Y 35.0
-	//#define DA_Z 0.0000025 // Magic
 	#define DA_X 0.030
-	//#define DF_Y 0.001     // Magic
+	#define DF_Y 0.020
 	#define DB_Z 0.050
 	#define DB_Y 5
 	#define DE_X 4
