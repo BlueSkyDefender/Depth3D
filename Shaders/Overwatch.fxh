@@ -2367,7 +2367,7 @@ static const int FOV = 0;                               //Set Game FoV
 	#define DF_Y 0.020
 	#define DB_Z 0.050
 	#define DB_Y 5
-	#define DE_X 4
+	#define DE_X 3
 	#define DE_Y 0.250
 	#define DE_Z 0.425
 	#define DG_Z 0.449
