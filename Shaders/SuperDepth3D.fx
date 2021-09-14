@@ -179,7 +179,7 @@
 #else
 	#define Mask_Cycle_Key Set_Key_Code_Here
 #endif
-//uniform float2 TEST < ui_type = "drag"; ui_min = 0; ui_max = 1; > = 1.0;
+//uniform float2 TEST < ui_type = "drag"; ui_min = 0; ui_max = 5; > = 1.0;
 //Divergence & Convergence//
 uniform float Divergence <
 	ui_type = "drag";
@@ -250,13 +250,22 @@ uniform float2 ZPD_Boundary_n_Fade <
 
 uniform int View_Mode <
 	ui_type = "combo";
-	ui_items = "VM0 Normal\0VM1 Normal               Performant\0VM2 Alpha CB\0VM3 Alpha CB             Performant\0VM4 Reiteration Adaptive\0VM5 Reiteration Adaptive Performant\0";
+	ui_items = "VM0 Normal   +\0VM1 Normal   ++\0VM2 Normal   +++\0VM3 Alpha    +\0VM4 Alpha    ++\0VM5 Alpha    +++\0VM6 Adaptive +\0VM7 Adaptive ++\0VM8 Adaptive +++\0";
 	ui_label = "·View Mode·";
-	ui_tooltip = "Changes the way the shader fills in the occlude section in the image.\n"
-                 "Normal is default output and Alpha is used for higher amounts of Semi-Transparent objects.\n"
-				 "Default is Normal";
+	ui_tooltip = "Changes the way the shader fills in the occlude sections in the image.\n"
+		 		"\n"
+				 "Performance Legend: + is Low | ++ is Medium | +++ is High.\n"
+				 "\n"
+                 "Normal   | is the default output used for most games with it's streched look.\n"
+                 "Alpha    | is used for higher amounts of Semi-Transparent objects like foliage.\n"
+                 "Adaptive | is a scene adapting infilling that uses disruptive reiterative sampling.\n"
+                 "\n"
+                 "Warning: Adaptive View Mode's performace cost is high in out door scenes.\n"
+                 "         Also Make sure you turn on Performance Mode before you close this menu.\n"
+                 "\n"
+				 "Default is Normal Medium.";
 	ui_category = "Occlusion Masking";
-> = 0;
+> = 1;
 
 uniform int Custom_Sidebars <
 	ui_type = "combo";
@@ -1279,38 +1288,45 @@ float2 GetDB(float2 texcoord)
 
 //////////////////////////////////////////////////////////Parallax Generation///////////////////////////////////////////////////////////////////////
 float2 Parallax(float Diverge, float2 Coordinates, float IO) // Horizontal parallax offset & Hole filling effect
-{   float Perf = 1.670, MS = Diverge * pix.x, VM_Adjust = 1.0, GetDepth = smoothstep(0,1,tex2D(SamplerzBufferN,Coordinates).x).x,Near_Far_CB_Size = GetDepth >= 0.5 ? 1.0 : 0.5;
+{   float Perf = 0.670, MS = Diverge * pix.x, GetDepth = smoothstep(0,1,tex2D(SamplerzBufferN,Coordinates).x).x,Near_Far_CB_Size = GetDepth >= 0.5 ? 1.0 : 0.5, VM_Adjust = View_Mode >= 3 ? 0.0 : 0.04;
 	float2 ParallaxCoord = Coordinates, CBxy = floor( float2(Coordinates.x * BUFFER_WIDTH, Coordinates.y * BUFFER_HEIGHT) * Near_Far_CB_Size );
-	static const float2 View_Num = View_Mode == 5 ? float2(1,0.295) : 0;
+	static const float2 View_Num = View_Mode == 6 || View_Mode == 7 ? float2(1,0.295) : 0;
 	//Would Use Switch.... But, Still trying to back compat.... ////Perf = 0.960; //Perf = 0.460;
 	if(View_Mode == 1)
-		Perf = 0.670;
+		Perf = 1.375;
 	if(View_Mode == 2)
 		Perf = 1.670;
 	if(View_Mode == 3)
-		Perf = 1.375;		
-	if(View_Mode >= 4)//Heavy May add a Performant Mode Later.....
+		Perf = 0.8125;
+	if(View_Mode == 4)
+		Perf = 1.21875;
+	if(View_Mode == 5)
+		Perf = 1.625;		
+	if(View_Mode >= 6)//This has a high perf cost.
 	{		
-		if(GetDepth >= 0.99)
-			Perf = (5.375 + View_Num.y);
+		if(GetDepth >= 0.999)
+			Perf = 5.375;
 		else if(GetDepth >= 0.875)
-			Perf = (3.375 + View_Num.y) - View_Num.x; // Perf = 4.375;// else if(GetDepth >= 0.6)
+			Perf = (3.375 + View_Num.y) - View_Num.x;
 		else if(GetDepth >= 0.375)
 			Perf = (2.375 + View_Num.y) - View_Num.x;
 		else
 			Perf = (1.375 + View_Num.y);
-		
-		Perf *= fmod(CBxy.x+CBxy.y,2)  ? 1.0 : 0.5;
-	}	
+			
+		if(View_Mode == 6)
+			Perf *= fmod(CBxy.x+CBxy.y,2) ? 0.5 : 0.125;
+		else
+			Perf *= fmod(CBxy.x+CBxy.y,2) ? 1.0 : 0.25;
+	}
 	//ParallaxSteps Calculations
-	float D = abs(Diverge), Cal_Steps = (D * Perf) + (D * 0.04), Steps = clamp( Cal_Steps, 0, 256 );
+	float D = abs(Diverge), Cal_Steps = (D * Perf) + (D * VM_Adjust), Steps = clamp( Cal_Steps, 0, 256 );
 	// Offset per step progress & Limit
 	float LayerDepth = rcp(Steps), TP = 0.030;
 	//Offsets listed here Max Seperation is 3% - 8% of screen space with Depth Offsets & Netto layer offset change based on MS.
-	float deltaCoordinates = MS * LayerDepth, CurrentDepthMapValue = GetDB(ParallaxCoord).x, CurrentLayerDepth = 0, DepthDifference;
+	float deltaCoordinates = MS * LayerDepth, CurrentDepthMapValue = GetDB(ParallaxCoord).x, CurrentLayerDepth = 0;
 	float2 DB_Offset = float2(Diverge * TP, 0) * pix, Store_DB_Offset = DB_Offset;
 
-    if( View_Mode >= 2)
+    if( View_Mode >= 3)
     	DB_Offset = 0;
 	#if !Compatibility
 	[loop] //Steep parallax mapping
@@ -1327,30 +1343,29 @@ float2 Parallax(float Diverge, float2 Coordinates, float IO) // Horizontal paral
 	[loop] //Steep parallax mapping
 	for ( int i = 0; i < Steps; i++ )
 	{   // Doing it this way should stop crashes in older version of reshade, I hope.
-			if(CurrentDepthMapValue < CurrentLayerDepth)
-				break; // Once we hit the limit Stop Exit Loop.
-			// Shift coordinates horizontally in linear fasion
-			ParallaxCoord.x -= deltaCoordinates;
-			// Get depth value at current coordinates
-			CurrentDepthMapValue = GetDB(ParallaxCoord - DB_Offset).x;
-			// Get depth of next layer
-			CurrentLayerDepth += LayerDepth;
+		if(CurrentDepthMapValue < CurrentLayerDepth)
+			break; // Once we hit the limit Stop Exit Loop.
+		// Shift coordinates horizontally in linear fasion
+		ParallaxCoord.x -= deltaCoordinates;
+		// Get depth value at current coordinates
+		CurrentDepthMapValue = GetDB(ParallaxCoord - DB_Offset).x;
+		// Get depth of next layer
+		CurrentLayerDepth += LayerDepth;
 	}
 	#endif
 	// Parallax Occlusion Mapping
 	float2 PrevParallaxCoord = float2(ParallaxCoord.x + deltaCoordinates, ParallaxCoord.y);
 	float beforeDepthValue = GetDB(ParallaxCoord ).y, afterDepthValue = CurrentDepthMapValue - CurrentLayerDepth;
-		  beforeDepthValue += View_Mode <= 1 ? abs(LayerDepth - CurrentLayerDepth) : LayerDepth - CurrentLayerDepth;
+		  beforeDepthValue += View_Mode <= 2 ? abs(LayerDepth - CurrentLayerDepth) : LayerDepth - CurrentLayerDepth;
 	// Interpolate coordinates
 	float weight = abs(afterDepthValue / (afterDepthValue - beforeDepthValue));
 		  ParallaxCoord = PrevParallaxCoord * weight + ParallaxCoord * (1.0 - weight);
 	//This is to limit artifacts.
-	if(View_Mode == 0 || View_Mode == 1 || View_Mode >= 4)
-		ParallaxCoord += Store_DB_Offset * VM_Adjust;
+	if(View_Mode <= 2 || View_Mode >= 3)
+		ParallaxCoord += Store_DB_Offset;
 	// Apply gap masking
-	DepthDifference = (afterDepthValue-beforeDepthValue) * MS;
-	if(View_Mode == 2 || View_Mode == 3 )
-		ParallaxCoord.x -= DepthDifference;
+	if(View_Mode == 3 || View_Mode == 4  || View_Mode == 5)
+		ParallaxCoord.x -= (afterDepthValue-beforeDepthValue) * MS;
 
 	if(Stereoscopic_Mode == 2)
 		ParallaxCoord.y += IO * pix.y; //Optimization for line interlaced.

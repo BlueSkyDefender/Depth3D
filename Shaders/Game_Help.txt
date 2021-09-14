@@ -237,6 +237,27 @@ Don't use in game Supersampling
 Once you install Reshade. Install this fix that allows for depth buffer access. This fix uses 3DMigoto to disable a shader that was blocking acess to the depth buffer.
 http://www.mediafire.com/file/25qdu9lurxfucg2/Cloudpunk_fix_for_Depth3D.zip
 
+{Conarium} - ReShade 4.9.1
+Game runs with issues when mental Distortion effects are active. Can't remove them. Other then this it's ok......
+
+To Disable PostProcessing effects in TSoRF
+
+Head over to C:\Users\UserName\AppData\Local\Conarium\Saved\Config\WindowsNoEditor
+Open the “Engine.ini” file
+
+So on here at the bottom.
+
+Add:
+[SystemSettings]
+r.DepthOfFieldQuality=0
+r.MotionBlur.Max=0
+r.MotionBlurQuality=0
+r.DefaultFeature.MotionBlur=0
+r.SceneColorFringeQuality=0
+
+Save the file and set it to Read Only. 
+
+Keep in mind if you change your setting in game you need to restart so that this INI can remove the problem Post Effects.
 {Condemned Criminal Origins} - Used ReShade 4.4
 Issues with Depth it will stop after scripted events try to use the newest option at the bottom of depth buffer compatablity for DX9.
 Also Dissable FSAA (FSAA OFF) or was it turn it on I forget.
@@ -764,6 +785,8 @@ Start the game with no more film grain!
 Geometry 3D may be done with TriDef Try It.
 
 {Observer} - Used ReShade 4.3
+Take your Meds.........
+
 In the folder: C:\Users\"Sys_user_name"\AppData\Local\TheObserver\Saved\Config\WindowsNoEditor 
 Open up the Scalability.ini file and paste this:
 
@@ -1186,7 +1209,7 @@ Game runs fine issues with DoF and/or other effects.
 
 To Disable PostProcessing effects in TSoRF
 
-Head over to C:\Users\UserName\AppData\Local\Daedalic Entertainment GmbH\Saved\Config\WindowsNoEditor
+Head over to C:\Users\UserName\AppData\Local\Daedalic Entertainment GmbH\The Suicide of Rachel Foster\Saved\Config\WindowsNoEditor
 Open the “Engine.ini” file
 
 So on here at the bottom.

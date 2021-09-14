@@ -1,7 +1,7 @@
 ////----------------------------------------//
 ///SuperDepth3D Overwatch Automation Shader///
 //----------------------------------------////
-// Version 2.0.1
+// Version 2.0.2
 //---------------------------------------OVERWATCH---------------------------------------//
 // If you are reading this stop. Go away and never look back. From this point on if you  //
 // still think it's is worth looking at this..... Then no one can save you or your soul. //
@@ -245,8 +245,15 @@ static const int FOV = 0;                               //Set Game FoV
 	#define DB_W 35
 	#define DB_Z 0.08625
 #elif (App == 0x6D3CD99E ) //Blood 2
-	#define DB_W 36
-	#define DB_Y 3
+	#define DA_X 0.105
+	#define DB_Y 2
+	#define DE_X 3
+	//#define DE_Y 0.50
+	#define DE_Z 0.475
+	#define WSM 5
+	#define DB_W 2
+	#define OW_WP "Read Help & Change Me\0Custom WP\0Blood 2 All Weapons\0Blood 2 Bonus Weapons\0Blood 2 Former\0"
+	#define WW 1
 	#define NF 1
 	#define RH 1
 #elif (App == 0xF22A9C7D || App == 0x5416A79D ) //SOMA
@@ -2377,6 +2384,37 @@ static const int FOV = 0;                               //Set Game FoV
 	#define RH 1
 	#define WSM 2
 	#define DB_W 2
+#elif (App == 0xFC960068 ) //Devolverland Expo
+	#define DA_W 1
+	#define DA_Y 30.0
+	#define DA_X 0.050
+	#define DB_Z 0.050
+	#define DB_Y 5
+	#define DE_X 3
+	#define DE_Y 0.50
+	#define DE_Z 0.375
+	#define WSM 2
+	#define DB_W 3
+	#define PE 1
+	#define DA 1
+#elif (App == 0x59DA13F1 ) //Conarium
+	#define DA_W 1
+	#define DA_Y 18.75
+	#define DA_X 0.0875
+	#define DF_Y 0.0328125
+	#define DB_Z 0.075
+	#define DB_Y 3
+	#define DE_X 3
+	#define DE_Y 0.525
+	#define DE_Z 0.400
+	#define DG_Z 0.305
+	#define DG_W 0.0875 //Allow much popout "Please don't abuse this."
+	#define PE 1
+	#define DA 1
+	#define RH 1
+	#define WSM 2
+	#define DB_W 4
+    #define DF_X 0.150
 #else
 	#define NP 1 //No Profile
 #endif
@@ -2542,7 +2580,7 @@ static const int FOV = 0;                               //Set Game FoV
 #ifndef OW_WP     //This is used if OW_WP is not called in the Above Profile
     #define OW_WP "WP Off\0Custom WP\0WP 0\0WP 1\0WP 2\0WP 3\0WP 4\0WP 5\0WP 6\0WP 7\0WP 8\0WP 9\0WP 10\0WP 11\0WP 12\0WP 13\0WP 14\0WP 15\0WP 16\0WP 17\0WP 18\0WP 19\0WP 20\0WP 21\0WP 22\0WP 23\0WP 24\0WP 25\0WP 26\0WP 27\0WP 28\0WP 29\0WP 30\0WP 31\0WP 32\0WP 33\0WP 34\0WP 35\0WP 36\0WP 37\0WP 38\0WP 39\0WP 40\0WP 41\0WP 42\0WP 43\0WP 44\0WP 45\0WP 46\0WP 47\0WP 48\0WP 49\0WP 50\0WP 51\0WP 52\0WP 53\0WP 54\0WP 55\0WP 56\0WP 57\0WP 58\0WP 59\0WP 60\0WP 61\0WP 62\0WP 63\0WP 64\0WP 65\0WP 66\0WP 67\0WP 68\0WP 69\0WP 70\0WP 71\0WP 72\0WP 73\0WP 74\0"
 #endif
-#ifndef WSM //One is Profiles List A | Two is Profiles List B | Three is MCC | Four is Prey | Five is Blood 2 WIP
+#ifndef WSM //One is Profiles List A | Two is Profiles List B | Three is MCC | Four is Prey | Five is Blood 2
     #define WSM 1 //Weapon Setting Mode
 #endif
 
@@ -2617,9 +2655,9 @@ float3 Weapon_Profiles(float WP ,float3 Weapon_Adjust) //Tried Switch But, can't
     if (WP == 35)
         Weapon_Adjust = float3(0.278,37.50,9.1);      //WP 33 | Black Mesa
     if (WP == 36)
-        Weapon_Adjust = float3(0.420,4.75,1.0);       //WP 34 | Blood 2
+        Weapon_Adjust = float3(0.0,0.0,0.0);          //WP 34 | Game
     if (WP == 37)
-        Weapon_Adjust = float3(0.500,4.75,0.75);      //WP 35 | Blood 2 Alt
+        Weapon_Adjust = float3(0.0,0.0,0.0);          //WP 35 | Game
     if (WP == 38)
         Weapon_Adjust = float3(0.78,21.25,0.1875);    //WP 36 | SOMA
     if (WP == 39)
@@ -2706,9 +2744,9 @@ float3 Weapon_Profiles(float WP ,float3 Weapon_Adjust) //Could reduce from 76 to
 {   if (WP == 2)
         Weapon_Adjust = float3(0.6,6.5,0.0);          //WP 0  | The Suicide of Rachel Foster
     if (WP == 3)
-        Weapon_Adjust = float3(0.0,0.0,0.0);          //WP 1  | Game
+        Weapon_Adjust = float3(1.653,17.5,0.0);       //WP 1  | Devolverland Expo
     if (WP == 4)
-        Weapon_Adjust = float3(0.0,0.0,0.0);          //WP 2  | Game
+        Weapon_Adjust = float3(1.489,16.875,0.0);     //WP 2  | Conarium
     if (WP == 5)
         Weapon_Adjust = float3(0.0,0.0,0.0);          //WP 3  | Game
     if (WP == 6)
@@ -2881,6 +2919,18 @@ float3 Weapon_Profiles(float WP ,float3 Weapon_Adjust) // Prey 2017
 		Weapon_Adjust = float3(0.2832,31.25,0.8775); //WP 0 | Prey 2017 High Settings and <
 	if (WP == 3)
 		Weapon_Adjust = float3(0.2832,31.25,0.91875);//WP 1 | Prey 2017 Very High
+
+	return Weapon_Adjust;
+}
+#elif WSM == 5
+float3 Weapon_Profiles(float WP ,float3 Weapon_Adjust) // Blood 2
+{
+    if (WP == 2)
+        Weapon_Adjust = float3(0.4213,5.0,0.5);        //WP 0 | Blood 2 All Weapons
+    if (WP == 3)
+        Weapon_Adjust = float3(0.484,5.0,0.5);         //WP 1 | Blood 2 Bonus weapons
+    if (WP == 4)
+        Weapon_Adjust = float3(0.4213,5.0,0.8);        //WP 2 | Blood 2 Former
 
 	return Weapon_Adjust;
 }
