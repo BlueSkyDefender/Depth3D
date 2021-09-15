@@ -2,7 +2,7 @@
 ///**SuperDepth3D_VR+**///
 //--------------------////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//* Depth Map Based 3D post-process shader v2.4.7
+//* Depth Map Based 3D post-process shader v2.4.8
 //* For Reshade 4.4+ I think...
 //* ---------------------------------
 //*
@@ -145,6 +145,12 @@
 #else
 	#define DXTwelve 0
 #endif
+//DX9 Check
+#if __RENDERER__ == 0x9000
+	#define DX9 1
+#else
+	#define DX9 0
+#endif
 //Resolution Scaling because I can't tell your monitor size. Each level is 25 more then it should be.
 #if (BUFFER_HEIGHT <= 1080)
 	#define Max_Divergence 50.0
@@ -267,7 +273,11 @@ uniform float2 ZPD_Boundary_n_Fade <
 
 uniform int View_Mode <
 	ui_type = "combo";
+	#if !DX9
 	ui_items = "VM0 Normal   +\0VM1 Normal   ++\0VM2 Normal   +++\0VM3 Alpha    +\0VM4 Alpha    ++\0VM5 Alpha    +++\0VM6 Adaptive +\0VM7 Adaptive ++\0VM8 Adaptive +++\0";
+	#else
+	ui_items = "VM0 Normal   +\0VM1 Normal   ++\0VM2 Normal   +++\0VM3 Alpha    +\0VM4 Alpha    ++\0VM5 Alpha    +++\0";
+	#endif
 	ui_label = "·View Mode·";
 	ui_tooltip = "Changes the way the shader fills in the occlude sections in the image.\n"
 		 		"\n"
@@ -275,14 +285,19 @@ uniform int View_Mode <
 				 "\n"
                  "Normal   | is the default output used for most games with it's streched look.\n"
                  "Alpha    | is used for higher amounts of Semi-Transparent objects like foliage.\n"
+                 #if !DX9
                  "Adaptive | is a scene adapting infilling that uses disruptive reiterative sampling.\n"
                  "\n"
                  "Warning: Adaptive View Mode's performace cost is high in out door scenes.\n"
                  "         Also Make sure you turn on Performance Mode before you close this menu.\n"
+                 #else
+                 "\n"
+                 "Warning: Adaptive View Mode's does not work on DX9, please use a wrapper to switch to a other API.\n"
+				 #endif
                  "\n"
 				 "Default is Normal Medium.";
 	ui_category = "Occlusion Masking";
-> = 0;
+> = 1;
 
 uniform float Depth_Edge_Mask <
 	#if Compatibility
@@ -1365,6 +1380,7 @@ float2 Parallax(float Diverge, float2 Coordinates) // Horizontal parallax offset
 		Perf = 1.21875;
 	if(View_Mode == 5)
 		Perf = 1.625;
+	#if !DX9
 	if(View_Mode >= 6)//This has a high perf cost.
 	{
 		if(GetDepth >= 0.999)
@@ -1381,6 +1397,7 @@ float2 Parallax(float Diverge, float2 Coordinates) // Horizontal parallax offset
 		else
 			Perf *= fmod(CBxy.x+CBxy.y,2) ? 1.0 : 0.25;
 	}
+	#endif
 	//ParallaxSteps Calculations
 	float D = abs(Diverge), Cal_Steps = (D * Perf) + (D * VM_Adjust), Steps = clamp( Cal_Steps, 0, 256 );
 	// Offset per step progress & Limit
