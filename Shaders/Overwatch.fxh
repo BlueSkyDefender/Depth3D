@@ -1,7 +1,7 @@
 ////----------------------------------------//
 ///SuperDepth3D Overwatch Automation Shader///
 //----------------------------------------////
-// Version 2.0.3
+// Version 2.0.4
 //---------------------------------------OVERWATCH---------------------------------------//
 // If you are reading this stop. Go away and never look back. From this point on if you  //
 // still think it's is worth looking at this..... Then no one can save you or your soul. //
@@ -2311,6 +2311,7 @@ static const int FOV = 0;                               //Set Game FoV
 	#define DB_Y 4
 	#define DE_X 2
 	#define DE_Y 0.225
+	#define DG_Z 0.41125
 #elif (App == 0x9FAEA815 ) //Amnesia Rebirth
 	#define DA_Y 15.0
 	#define DA_Z 0.0002
@@ -2341,7 +2342,7 @@ static const int FOV = 0;                               //Set Game FoV
 	#define DA_W 1
 	#define DA_Y 20.0
 	#define DA_Z 0.000375
-	#define DA_X 0.055
+	#define DA_X 0.05
 	//#define DB_Z 0.125
 	#define DF_Y 0.01
 	#define DB_Y 4
@@ -2424,8 +2425,23 @@ static const int FOV = 0;                               //Set Game FoV
 	#define DG_Z 0.360
 	#define BM 1
 	#define DG_X 0.1375
-  #define DS 1
-  #define FV 1
+	#define DS 1
+	#define FV 1
+#elif (App == 0x289ABD5C ) //World Rally Championship 10
+	#define DA_W 1
+	#define DA_Y 20.5
+	//#define DA_Z 0.000075
+	#define DA_X 0.1375
+	#define DF_Y 0.03
+	#define DB_Y 4
+	#define DE_X 1
+	#define DE_Y 0.055
+	#define DE_Z 0.4875
+	#define WSM 2
+	#define DB_W 5
+	#define DF_X 0.125
+	#define PE 1
+	#define DA 1
 #else
 	#define NP 1 //No Profile
 #endif
@@ -2759,7 +2775,7 @@ float3 Weapon_Profiles(float WP ,float3 Weapon_Adjust) //Could reduce from 76 to
     if (WP == 4)
         Weapon_Adjust = float3(1.489,16.875,0.0);     //WP 2  | Conarium
     if (WP == 5)
-        Weapon_Adjust = float3(0.0,0.0,0.0);          //WP 3  | Game
+        Weapon_Adjust = float3(0.270,25.0,0.951);     //WP 3  | WRC 10
     if (WP == 6)
         Weapon_Adjust = float3(0.0,0.0,0.0);          //WP 4  | Game
     if (WP == 7)

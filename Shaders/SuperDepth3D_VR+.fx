@@ -2,7 +2,7 @@
 ///**SuperDepth3D_VR+**///
 //--------------------////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//* Depth Map Based 3D post-process shader v2.4.8
+//* Depth Map Based 3D post-process shader v2.4.9
 //* For Reshade 4.4+ I think...
 //* ---------------------------------
 //*
@@ -1403,7 +1403,7 @@ float2 Parallax(float Diverge, float2 Coordinates) // Horizontal parallax offset
 	// Offset per step progress & Limit
 	float LayerDepth = rcp(Steps), TP = 0.030;
 	//Offsets listed here Max Seperation is 3% - 8% of screen space with Depth Offsets & Netto layer offset change based on MS.
-	float deltaCoordinates = MS * LayerDepth, CurrentDepthMapValue = GetDB(ParallaxCoord).x, CurrentLayerDepth = 0, DepthDifference;
+	float deltaCoordinates = MS * LayerDepth, CurrentDepthMapValue = GetDB(ParallaxCoord).x, CurrentLayerDepth = 0.0f;
 	float2 DB_Offset = float2(Diverge * TP, 0) * pix, Store_DB_Offset = DB_Offset;
 
     if( View_Mode >= 3)
@@ -1421,10 +1421,10 @@ float2 Parallax(float Diverge, float2 Coordinates) // Horizontal parallax offset
 	// Parallax Occlusion Mapping
 	float2 PrevParallaxCoord = float2(ParallaxCoord.x + deltaCoordinates, ParallaxCoord.y);
 	float beforeDepthValue = GetDB(ParallaxCoord ).y, afterDepthValue = CurrentDepthMapValue - CurrentLayerDepth;
-		  beforeDepthValue += View_Mode <= 2 ? abs(LayerDepth - CurrentLayerDepth) : LayerDepth - CurrentLayerDepth;
+		  beforeDepthValue += LayerDepth - CurrentLayerDepth;
 	// Interpolate coordinates
-	float weight = abs(afterDepthValue / (afterDepthValue - beforeDepthValue));
-		  ParallaxCoord = PrevParallaxCoord * weight + ParallaxCoord * (1.0 - weight);
+	float weight = afterDepthValue / (afterDepthValue - beforeDepthValue);
+		  ParallaxCoord = PrevParallaxCoord * max(0.0f, weight) + ParallaxCoord * min(1.0f, 1.0f - weight);
 	//This is to limit artifacts.
 	if(View_Mode <= 2 || View_Mode >= 3)
 		ParallaxCoord += Store_DB_Offset;
