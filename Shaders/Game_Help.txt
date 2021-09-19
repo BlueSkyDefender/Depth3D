@@ -134,7 +134,7 @@ So I don't think this will get fixed anytime soon.
 
 {Blood 2} [Reshade: 4.0.2]
 You need DGVooDoo2 installed with the following settings and information:
-First Start DGVoodoo "2.62.3" Control Panel
+First Start DGVoodoo "2.62.3" Control Panel.
 
 Right click the dgVoodoo logo and click on "SHOW ALL SECTIONS OF THE CONFIGURATION."
 Now look for Config folder /Running instance, click "Add" and guide it to your GOG Games "Blood 2" folder.
