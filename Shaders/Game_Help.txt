@@ -1,25 +1,24 @@
-﻿#SuperDepth3D 2.0.0+                                Search for the Game's Name
+﻿﻿#SuperDepth3D 2.0.0+                                Search for the Game's Name
 _________________________________________________________________________________________________________________________________
--=:[Settings have to be change and adjusted for diffrent Resolutions, screen size, and screen types]:=-
+-=:[Settings have to be changed and adjusted for diffrent resolutions, screen sizes, and screen types]:=-
 .................................................................................................................................
 Read Help Section
 =================================================================================================================================
-{35MM} - Used ReShade 4.0+
-Depth Buffer may hang for a sec if you move your view to fast. Hope ReShade 4.4 fixes this.
+{35MM} [Reshade: 4.0]
+Depth Buffer may hang for a second if you move your view too fast. Hope ReShade 4.4 fixes this.
 
-{.Hack//G.U.} - Used ReShade 3.0.8
-Once you install Reshade. Install this fix that allows for depth buffer access. This fix uses 3DMigoto to disable a shader that was blocking acess to the depth buffer.
+{.Hack//G.U.} [Reshade: 3.0.8]
+Once you install Reshade, install this fix that allows for depth buffer access. This fix uses 3DMigoto to disable a shader that was blocking acess to the depth buffer.
 http://www.mediafire.com/file/d5ep3qlsnbbbmvl/dotHack%20GU%20fix%20for%20Depth3D.zip
 
-{A Plague Tale: Innocence} - Used ReShade 4.7.0
-So we are going to remove some post effects that effect the 3D Image in a negitive way.
+{A Plague Tale: Innocence} [Reshade: 4.7.0]
+So we are going to remove some post-process effects that affect the 3D Image in a negative way.
 
-Befor everything please launch the game and set your settings and exit the game. Then locate ENGINESETTINGS below.
+Befor everything, please launch the game and set your settings then exit the game, then locate ENGINESETTINGS below.
 
-The Config file is located at.
-User\Documents\My Games\A Plague Tale Innocence\
+The Config file is located at: [User]\Documents\My Games\A Plague Tale Innocence\
 
-Open the ENGINESETTINGS file with a text editor and look for following options.
+Open the ENGINESETTINGS file with a text editor and set following options:
 
 DOF
   Enabled 1 Change the value from 1 to 0
@@ -30,24 +29,24 @@ PostProcess
   LensDistortion 1 Change the value from 1 to 0
   FilmGrain 1 Change the value from 1 to 0
 
-You can also change a few other things like Bloom and Vignette. But, it's up to you.
+You can also change a few other things like Bloom and Vignette, but it's up to you.
 
-Save the file. You may want to set to read only.
+Save the file. You may want to set the permission to read-only.
 
-{Alan Wake} - ReShade 4.7.0+ Works.
-Install game and before you launch it put -noblur in your set lunch options. -steam
-Set you settings in game and notice the locked MSAA.Just leave it at 2x, Save your settings and turn off the game.
+{Alan Wake} [Reshade: 4.7.0]
+Install game and before you launch it add -noblur to your launch options.
+Set you settings in game and notice the locked MSAA. Just leave it at 2x. Save your settings and close the game.
 
 I suggest you use alpha mode in SuperDepth3D for this game and Alan Wake's American Nightmare.
 
 You will not need to do this for the sequel. Make sure you turn off this injector for any other game. 
-Please note most AV's will detect this as threat.
+Please note most AV's will detect this as a threat.
 
-{Alien Isolation} - Used ReShade 4.7.0
-The Shade corrects for the Distortion that the game causes.
+{Alien Isolation} [Reshade: 4.7.0]
+The shader corrects for the Distortion that the game causes.
 
 This can be dissabled if you use the https://github.com/aliasIsolation/aliasIsolation/releases if you set CA to 0.000
-But, If you use this to TAA mod you can't disable motion blur. This is a issue. Anyways dissable the distortion correction at the bottom of the shader.
+But, If you use this TAA mod you can't disable motion blur. This is an issue. Anyways, dissable the distortion correction at the bottom of the shader.
 
 Motion sickness can happen if you use the TAA mod with motion blur.
 
@@ -61,45 +60,45 @@ or
 That removes only the Sun Flare.
 https://www.nexusmods.com/alienisolation/mods/1
 
-{Amnesia: Games} - Used ReShade 4.1.0
+{Amnesia: Games} [Reshade: 4.1.0]
 Issue with ReShade 4.0.0+ If you install ReShade as opengl32.dll you have to rename it to dxgi.dll in the game folder. Windows 10 Issue it seems.
 
 Also Make sure to disable the insanity post process effect. It messes with the 3D in the game.
 
-{Bard's Tale 4} - Use ReShade 4.7.0
-Anoying issue if you read any notice in game you have to set you Depth Adjust ammount form 20 to 200-250 I use 225. If this issue was not there this would had been a
-easy game to play. It seems to get stuck like this so not bad bad..... only one time bad. :D
+{Bard's Tale 4} [Reshade: 4.7.0]
+Annoying issue if you read any notice in game you have to set your Depth Adjust ammount from 20 to 200-250 (I use 225). If this issue was not there this would had been an
+easy game to play. It seems to get stuck like this so not bad bad..... only one time bad :D
 
-Anyways I advise you set it back to 20 if your going to turn off the game and set it to 200-250 once you encounter a Notice is game. Well please enjoy.
+Anyways I advise you to set it back to 20 if you're going to turn off the game and set it to 200-250 once you encounter a Notice in game. Well, please enjoy.
 
-{Battlefield One} - Used ReShade 4.0.2
-Added alternet settings mode to my shader. This can be done with the newly added Alternet Depth Buffer Adjust Toggle PREPROCESSOR FUNCTIONS. This is in Shader.
+{Battlefield One} [Reshade: 4.0.2]
+Added alternate settings mode to my shader. This can be done with the newly added Alternate Depth Buffer Adjust Toggle PREPROCESSOR FUNCTIONS. This is in Shader.
 Ex. FPS mode will be around 7.50. But, For Tank mode you want to use around 20.0.
 
 Please Note:
-If you run AMD and have a 2nd GPU in your system like a Nvidia Card. ReShade will Crash this game on start up.
+If you run AMD and have a 2nd GPU in your system like an Nvidia Card. Reshade will crash this game on start up.
 
 {BattleTech}
-Read the section for Dealing with mouse pointer issues. At the top. 
+Read the section for Dealing with mouse pointer issues, at the top. 
 
-{Batman Arkham Asylum} -Use ReShade 4.4.0+
-In older versions of Reshade you may incounter Depth Flickering.
+{Batman Arkham Asylum} [Reshade: 4.4.0]
+In older versions of Reshade you may encounter Depth Flickering.
 
-{Batman Arkham Knight} -Use ReShade ???
-Depth Buffer seems to drop off in some locations. As reported. This is a ReShade issue not a SuperDepth3D Issue.
+{Batman Arkham Knight}
+Depth Buffer seems to drop off in some locations. As reported, this is a Reshade issue not a SuperDepth3D Issue.
 
-{Dementium 2} - Used ReShade 4.4.0
-You have to mess with the Depth Buffer options to get it to work. Not perfect. Kind of strange not all reshades work.
+{Dementium 2} [Reshade: 4.4.0]
+You have to mess with the Depth Buffer options to get it to work. Not perfect. Kind of strange not all Reshade filters work.
 
-{Black Mesa} - Used ReShade 3.2.1 or Use latest with instructions below.
-So in newer versions of Reshade 4.4.0+ you need to set in game MSAA on. To do this open the console and enter the command
+{Black Mesa} [Reshade: 3.2.1]
+So in newer versions of Reshade 4.4.0+ you need to set in-game MSAA to on. To do this, open the console and enter the command:
 mat_antialias 2
 
-This should allow reshade to grab the Depth buffer in game. On a side note you should install reshade in to the
+This should allow Reshade to grab the Depth buffer in game. On a side note you should install Reshade in to the
 SteamLibrary\steamapps\common\Black Mesa\bin folder.
 
 {BoarderLands 2}
-Use a Controller for menus navigation or keyboard. 
+Use a controller or keyboard for menu navigation.
 Mouse and keyboard is good for gameplay. 
 Use Cross_Cursor for navigation with mouse.
 
@@ -108,39 +107,40 @@ In the game settings you would need to dissable Real Time Reflections and use th
 
 https://reshade.me/forum/releases/3744-3-1?start=200#26443
 
-{Blood: Fresh Suppy}  - Used ReShade 4.5.3
-If your going to play this game make sure you do in opengl32 or Vulkan since they offer better depth buffers then DX11.
+{Blood: Fresh Suppy} [Reshade: 4.5.3]
+If you're going to play this game make sure you do in Opengl32 or Vulkan since they offer better depth buffers than DX11.
 
 I would just use Opengl32 for MSAA.
 
 {Blood Crossmatching}
 Get it here http://m210.duke4.net/index.php/files/viewdownload/3-eduke32/38-blood-crossmatching
 
-Install Reshade 3.0.4 This is needed to use some lighting & shadows. But, if you don't care for lighting use the newest one.
+Install Reshade 3.0.4. This is needed to use some lighting & shadows. But, if you don't care for lighting use the newest one.
 Install as Direct 3D 10+ so you don't delete opengl32.dll. 
-This or install opengl and override opengl32.dll and used a bloom shader from Reshade.
+This or install opengl and override opengl32.dll and use a bloom shader from Reshade.
 Install to \BloodCM\distr
 
-Once that is done now you can install. High-Resolution Textures Pack for BloodCM game.
+Once that is done you can now install High-Resolution Textures Pack for BloodCM game.
 https://sourceforge.net/projects/bloodcmhrp/
 
-Put xhrp_05fix.zip and zip archives in \BloodCM\autoload folder and check "Enable autoload folder" checkbox in eduke32 setup window. If you don't want to use the textures just disable them in-game that way you can still have the 3D models.
+Put xhrp_05fix.zip and zip archives in \BloodCM\autoload folder and check "Enable autoload folder" checkbox in eduke32 setup window. 
+If you don't want to use the textures just disable them in-game, that way you can still have the 3D models.
 
 Now the last thing is to start the game and set your settings.
 
 To help fix the depth buffer with lighting & shadows use Console command r_pr_maxlightpasses "1".
-This will limit the amount lights processed per surface. Seems to be a hard bug to fix in eduke32.
+This will limit the amount of lights processed per surface. Seems to be a hard bug to fix in eduke32.
 So I don't think this will get fixed anytime soon.
 
-{Blood 2} - ReShade 4.0.2
-You need DGVooDoo2 installed with the following settings and information.
+{Blood 2} [Reshade: 4.0.2]
+You need DGVooDoo2 installed with the following settings and information:
 First Start DGVoodoo "2.62.3" Control Panel
 
-Right Click The dgVoodoo Logo and click on, "SHOW ALL SECTIONS OF THE CONFIGURATION."
-Now look for Config folder /Running instance click "Add" and guide it to your GOG Games "Blood 2," Folder.
+Right click the dgVoodoo logo and click on "SHOW ALL SECTIONS OF THE CONFIGURATION."
+Now look for Config folder /Running instance, click "Add" and guide it to your GOG Games "Blood 2" folder.
 -=General=- 
 	+Output API: Best 
-	Apperance
+	Appearance
 	⦿ Windowed [Unspecified]
 	-Keep Window Aspect
 	-Capture Mouse
@@ -163,54 +163,53 @@ Now look for Config folder /Running instance click "Add" and guide it to your GO
 	Miscellaneous [Force 24 bit as minimum]▼
 Apply settings then hit OK.
 
-One you are done with that go back to the dgVoodoo Folder and open the MS folder - x86. Copy D3DImm.dll, and DDraw.dll into your GOG Games "Blood 2," Folder. 
+Once you are done with that, go back to the dgVoodoo folder and open the MS folder - x86. Copy D3DImm.dll and DDraw.dll into your GOG Games "Blood 2" folder. 
 
-Now Install MY "Blood2 Patch for Depth 3D." http://www.mediafire.com/file/3mxvwci29qi0fqp/Blood2PatchDepth3D%2BMods.zip
+Now Install my "Blood2 Patch for Depth 3D." http://www.mediafire.com/file/3mxvwci29qi0fqp/Blood2PatchDepth3D%2BMods.zip
 
-Click on my included Bat files to start the game.
+Click on my included .bat files to start the game.
 Depth3D_Blood2_Nightmare_Start.bat
 or
 Depth3D_Blood2_Start.bat
 
 // May not need this part.
-Windows 10 Issues Black Box only audio work around.
-You will have to click My Bat file then click again on the black window before the game launches then alt-tab back to the the game.
+Windows 10 issues black box only audio workaround.
+You will have to click my .bat file then click again on the black window before the game launches, then alt-tab back to the the game.
 
-AMD White Texture work around. Find detailhi.cfg in the Blood 2 folder and set "MipmapOffset" to "1.000000"
+AMD White Texture work around. Find detailhi.cfg in the Blood 2 folder and set MipmapOffset to 1.000000
 You will lose a lot of texture detail. I do not recommend playing like this.
 
 Now For Mods you will have click on the Bat files provided.
-//
 
-{BuildGDX}  - Used ReShade 4.7.0 + Xenos to inject.
-Download https://github.com/DarthTon/Xenos/releases and the latest version of reshade.
+{BuildGDX}  [Reshade: 4.7.0, note: used Xenos to inject]
+Download https://github.com/DarthTon/Xenos/releases and the latest version of Reshade.
 
-Create a folder and extract Xenos 2.3.2 you only really need the Xenos.exe 64 bit program and also extract ReShade 64bit ReShade64.dll in to the same folder
+Create a folder and extract Xenos 2.3.2. You only really need the Xenos.exe 64 bit program and also extract Reshade 64bit ReShade64.dll into the same folder
 as Xenos. Place SuperDepth3D with Overwatch.fxh in this folder and start Xenos.exe.
 
 Click on Manual Launch radio button.
 Click on Add and select the ReShade64.dll.
-Click on Select and find the BuildGDX.exe
+Click on Select and find the BuildGDX.exe.
 
-Now click Inject. Then launch your game like normal.
+Now click Inject, then launch your game like normal.
 
-BloodGDX... Set Depth Offset to 0.990 ot 1.000 you can also increase Seperation 0.005 to 0.105
+BloodGDX... Set Depth Offset to 0.990 ot 1.000. You can also increase Seperation from 0.005 to 0.105
 
-{Call of Duty: Modern Warfare 2019} - ReShade 4.4.2 [Some people had some luck with ReShade 4.2.]
-First of all please set the game's "Shadow Map Resolution to [Normal <>]." Also Make sure you turn off DOF and Motion Blur.
+{Call of Duty: Modern Warfare 2019} [Reshade: 4.4.2]
+First of all please set the game's Shadow Map Resolution to Normal. Also, make sure you turn off DOF and Motion Blur.
 
-Next follow this yourtube Video to set ReShade Depth Buffer Settings.
+Next, follow this YouTube video to set Reshade Depth Buffer Settings.
 https://youtu.be/JzkgHkXRMCg
 
 You have to reset setting in the depth buffer tab and then set it to D16 and restart your game and follow the strange ritual again. 
 
 Your game may and most likely will crash when you uncheck the 2nd option.
 
-Also no real way to fix the 1frame delay due to issue in this game.
+Also no real way to fix the 1-frame delay due to issues in this game.
 
 {Call of Duty: Modern Warfare 3}
 Set Image Quality to Native.
-You can also use DGVoodoo 2.6 to make the game DX11 and grab a better depth buffer maybe.
+You can also use DGVoodoo 2.6 to make the game DX11 and grab a better depth buffer, maybe.
 
 {Call of Duty: Advance Warfare}
 Render Resolution Native.
