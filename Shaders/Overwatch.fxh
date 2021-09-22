@@ -1,7 +1,7 @@
 ////----------------------------------------//
 ///SuperDepth3D Overwatch Automation Shader///
 //----------------------------------------////
-// Version 2.0.4
+// Version 2.0.5
 //---------------------------------------OVERWATCH---------------------------------------//
 // If you are reading this stop. Go away and never look back. From this point on if you  //
 // still think it's is worth looking at this..... Then no one can save you or your soul. //
@@ -52,7 +52,7 @@ static const float ZPD_Boundary_Fade_Time_D = 0.25;     //ZPD Boundary Fade Time
 static const float Weapon_Near_Depth_Max_D = 0.0;       //Weapon Near Depth              Max
 static const float ZPD_Weapon_Boundary_Adjust = 0.0;    //ZPD Weapon Boundary Adjust
 static const float Separation = 0.0;                    //ZPD Separation
-static const float Edge_Masking = 0.0;                  //Edge Masking Adjust
+static const float Null_Z = 0.0;                        //
 static const float HUDX_D = 0.0;                        //Heads Up Display Cut Off Point
 static const float Manual_ZPD_Balance = 0.5;            //Manual Balance Mode Adjustment
 static const float Null_Y = 0.0;                        //
@@ -134,7 +134,7 @@ static const int FOV = 0;                               //Set Game FoV
 #elif (App == 0x7B81CCAB || App == 0xFB9A99AB )	//BorderLands 2 & Pre-Sequel
 	#define DA_Y 25.0
 	#define DA_Z 0.00025
-	#define DA_X 0.03625
+	#define DA_X 0.03750
 	#define DB_Y 2
 	#define DB_W 4
 	#define DE_X 4
@@ -143,11 +143,14 @@ static const int FOV = 0;                               //Set Game FoV
 	#define DF_X 0.300
 	#define NW 1
 #elif (App == 0x2D950D30 )	//Fallout 4
-	#define DA_X 0.0375
-	#define DA_Y 7.8
+	#define DA_X 0.05
+	//#define DA_Y 7.8
 	#define DB_Y 3
 	#define DB_W 6
 	#define DF_Y 0.012
+	#define DE_X 3
+	#define DE_Y 0.750
+	#define DE_Z 0.375
 	#define FV 1
 	#define RH 1
 #elif (App == 0x3950D04E )	//Skyrim: SE
@@ -1379,7 +1382,7 @@ static const int FOV = 0;                               //Set Game FoV
 	#define DE_X 1
 	#define DE_Y 0.5
 	#define DE_Z 0.375
-	#define DF_Z 0.5
+	//#define DF_Z 0.5
 	#define DS 1
 	#define LBC 1
 #elif (App == 0x89351FC4 ) //3DSen Games
@@ -1575,7 +1578,7 @@ static const int FOV = 0;                               //Set Game FoV
 	#define DE_X 1
 	#define DE_Y 0.5
 	#define DE_Z 0.375
-	#define DF_Z -0.125
+	//#define DF_Z -0.125
 	#define NW 1
 	#define PE 1
 #elif (App == 0x621202BC ) //Vanquish DGVoodoo2
@@ -1898,7 +1901,7 @@ static const int FOV = 0;                               //Set Game FoV
 	#define DE_X 1
 	#define DE_Y 0.500
 	#define DE_Z 0.375
-	#define DF_Z 1.0
+	//#define DF_Z 1.0
 	#define DD_X 0.800
 	#define DD_Y 0.705
 	#define DD_Z 0.250
@@ -2512,7 +2515,7 @@ static const int FOV = 0;                               //Set Game FoV
 #ifndef DE_W
     #define DE_W Weapon_Near_Depth_Max_D
 #endif
-// X = [ZPD Weapon Boundary] Y = [Separation] Z = [Edge Masking] W = [HUD]
+// X = [ZPD Weapon Boundary] Y = [Separation] Z = [Null] W = [HUD]
 #ifndef DF_X
     #define DF_X ZPD_Weapon_Boundary_Adjust
 #endif
@@ -2520,7 +2523,7 @@ static const int FOV = 0;                               //Set Game FoV
     #define DF_Y Separation
 #endif
 #ifndef DF_Z
-    #define DF_Z Edge_Masking
+    #define DF_Z Null_Z
 #endif
 #ifndef DF_W
     #define DF_W HUDX_D
@@ -2622,7 +2625,7 @@ float3 Weapon_Profiles(float WP ,float3 Weapon_Adjust) //Tried Switch But, can't
     if (WP == 5)
         Weapon_Adjust = float3(0.284,10.5,0.8725);    //WP 3  | BorderLands 3
     if (WP == 6)
-        Weapon_Adjust = float3(0.253,39.0,98.125);    //WP 4  | Fallout 4
+        Weapon_Adjust = float3(0.253,39.0,97.5);      //WP 4  | Fallout 4
     if (WP == 7)
         Weapon_Adjust = float3(0.276,20.0,9.5625);    //WP 5  | Skyrim: SE
     if (WP == 8)
