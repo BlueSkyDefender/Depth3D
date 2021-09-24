@@ -1,7 +1,7 @@
 ////----------------------------------------//
 ///SuperDepth3D Overwatch Automation Shader///
 //----------------------------------------////
-// Version 2.0.5
+// Version 2.0.6
 //---------------------------------------OVERWATCH---------------------------------------//
 // If you are reading this stop. Go away and never look back. From this point on if you  //
 // still think it's is worth looking at this..... Then no one can save you or your soul. //
@@ -153,6 +153,7 @@ static const int FOV = 0;                               //Set Game FoV
 	#define DE_Z 0.375
 	#define FV 1
 	#define RH 1
+	#define DS 1
 #elif (App == 0x3950D04E )	//Skyrim: SE
 	#define DA_Y 6.25
 	#define DB_Y 2
@@ -1282,18 +1283,19 @@ static const int FOV = 0;                               //Set Game FoV
 	#define DE_X 2
 	#define DE_Y 0.5
 	#define DE_Z 0.375
-  #define DE_W 0.3875
+	//#define DE_W 0.3875
 	#define RH 1
 #elif (App == 0x9896B9F5 ) //Old City: Leviathan
-	#define DA_X 0.025
-	#define DA_Y 100.0
-	#define DA_Z 0.003
-	#define DB_Y 5
+	#define DA_X 0.030
+	#define DA_Y 82.5
+	#define DA_Z 0.0015
+	#define DB_Y 4
 	#define DE_X 1
-	#define DE_Y 0.5
+	//#define DE_Y 0.250
 	#define DE_Z 0.375
-	#define DB_Z 0.0275
-	#define RH 1
+	#define DB_Z 0.075
+	//#define DG_Z 0.5
+	#define DS 1
 #elif (App == 0xE4F6014F ) //Shovel Knight
 	#define DB_X 1
 	#define DA_X 0.035
@@ -1312,14 +1314,14 @@ static const int FOV = 0;                               //Set Game FoV
 	#define DB_Z 0.125
 	#define DB_W 74
 #elif (App == 0xF6F3C763 ) //WRATH
-	#define DA_X 0.0625
+	#define DA_X 0.065
 	#define DA_Y 75.0
 	#define DA_Z 0.00005
-	#define DB_Y 4
+	#define DB_Y 2
 	#define DE_X 3
 	#define DE_Y 0.5
 	#define DE_Z 0.375
-	#define DB_Z 0.125
+	#define DB_Z 0.090
 	#define DB_W 29
 	#define DF_X 0.1
 #elif (App == 0xB05C57BC ) //HellBound
@@ -1376,13 +1378,16 @@ static const int FOV = 0;                               //Set Game FoV
 	#define DE_Y 0.5
 	#define DE_Z 0.375
 #elif (App == 0x9DA6C947 ) //Beyond Two Souls
-	#define DA_X 0.05
-	#define DA_Y 25.0
-	#define DB_Y 4
+	#define DA_X 0.0625
+    #define DF_Y 0.0275
+	#define DA_Y 20.00
+	#define DB_Y 3
 	#define DE_X 1
-	#define DE_Y 0.5
+	//#define DE_Y 0.5
 	#define DE_Z 0.375
-	//#define DF_Z 0.5
+	#define DG_W 0.175
+	//#define BM 1
+	//#define DG_X 0.1375
 	#define DS 1
 	#define LBC 1
 #elif (App == 0x89351FC4 ) //3DSen Games
@@ -1550,13 +1555,15 @@ static const int FOV = 0;                               //Set Game FoV
 	#define RH 1
 #elif (App == 0x54D4EAFA) //Sekiro Shadows Die Twice
 	#define DA_W 1
-	#define DA_X 0.0625
-	#define DA_Y 59.375
+	//#define DA_X 0.0625
+	#define DA_X 0.10
+	//#define DA_Y 59.375
+	#define DA_Y 30.0
 	#define DA_Z 0.000375
-	#define DB_Z 0.125
+	//#define DB_Z 0.125
 	#define DB_Y 1
 	#define DE_X 2
-	#define DE_Y 0.5
+	#define DE_Y 0.275
 	#define DE_Z 0.375
    // #define DF_Z -0.125
 	#define DA 1
@@ -1573,12 +1580,15 @@ static const int FOV = 0;                               //Set Game FoV
 #elif (App == 0x3604DCE6 ) //Remnant: From the Ashes
 	#define DA_W 1
 	#define DA_X 0.07
-	#define DA_Y 15.0
-	#define DB_Y 1
+	//#define DF_Y 0.038
+	#define DA_Y 15.5
+	#define DB_Y 2
 	#define DE_X 1
 	#define DE_Y 0.5
 	#define DE_Z 0.375
 	//#define DF_Z -0.125
+	//#define BM 1
+	//#define DG_X 0.1
 	#define NW 1
 	#define PE 1
 #elif (App == 0x621202BC ) //Vanquish DGVoodoo2
@@ -1893,20 +1903,21 @@ static const int FOV = 0;                               //Set Game FoV
 	#define RH 1
 	#define NF 1
 #elif (App == 0x4551A746 ) //The Swapper
-	#define DB_X 1
-	#define DF_Y 0.025
-	#define DA_X 0.0425
-	#define DA_Y 62.5
-	#define DB_Y 1
+	//#define DB_X 1
+	#define DF_Y 0.0125
+	#define DA_X 0.05
+	#define DA_Y 99.0
+	#define DA_Z -0.010
+	#define DB_Y 4
 	#define DE_X 1
 	#define DE_Y 0.500
 	#define DE_Z 0.375
 	//#define DF_Z 1.0
-	#define DD_X 0.800
-	#define DD_Y 0.705
-	#define DD_Z 0.250
-	#define DD_W 0.4125
-	#define SP 1
+	//#define DD_X 0.800
+	//#define DD_Y 0.705
+	//#define DD_Z 0.250
+	//#define DD_W 0.4125
+	//#define SP 1
 	#define DS 1
 	#define RH 1
 #elif (App == 0xE0B7AF16 ) //Horizon Chase Turbo

@@ -2,7 +2,7 @@
 ///**SuperDepth3D**///
 //----------------////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//* Depth Map Based 3D post-process shader v2.6.0
+//* Depth Map Based 3D post-process shader v2.6.1
 //* For Reshade 3.0+
 //* ---------------------------------
 //*
@@ -284,6 +284,19 @@ uniform int Custom_Sidebars <
 	ui_category = "Occlusion Masking";
 > = 1;
 
+uniform float Max_Depth <
+	#if Compatibility
+	ui_type = "drag";
+	#else
+	ui_type = "slider";
+	#endif
+	ui_min = 0.5; ui_max = 1.0;
+	ui_label = " Max Depth";
+	ui_tooltip = "Max Depth lets you clamp the max depth range of your scene.\n"
+				 "So it's not hard on your eyes looking off in to the distance .\n"
+				 "Default and starts at One and it's Off.";
+	ui_category = "Occlusion Masking";
+> = 1.0;
 /* //Luma Based Variable Rate Shading
 uniform bool L_VRS <
 	ui_label = " Variable Rate Shading";
@@ -292,7 +305,8 @@ uniform bool L_VRS <
 				 "It's located in the lower bottom right of the ReShade's Main UI.\n"
 				 "Default is False.";
 	ui_category = "Occlusion Masking";
-> = false; */
+> = false;
+*/
 uniform int Depth_Map <
 	ui_type = "combo";
 	ui_items = "DM0 Normal\0DM1 Reversed\0";
@@ -706,12 +720,8 @@ sampler SamplerDMN
 	{
 		Texture = texDMN;
 	};
-#if SDT || SD_Trigger
-	#define RGBA_Sixteen RGBA16F
-#else
-	#define RGBA_Sixteen RG16F
-#endif
-texture texzBufferN { Width = BUFFER_WIDTH ; Height = BUFFER_HEIGHT ; Format = RGBA_Sixteen;
+
+texture texzBufferN { Width = BUFFER_WIDTH ; Height = BUFFER_HEIGHT ; Format = RG16F;
 #if DB_Size_Position
 	 MipLevels = 10;
 #endif
@@ -813,7 +823,7 @@ float LBDetection()
 #if SDT || SD_Trigger
 float TargetedDepth(float2 TC)
 {
-	return smoothstep(0,1,tex2Dlod(SamplerzBufferVR,float4(TC,0,0)).z);
+	return smoothstep(0,1,tex2Dlod(SamplerzBufferN,float4(TC,0,0)).y);
 }
 
 float SDTriggers()//Specialized Depth Triggers
@@ -827,8 +837,7 @@ float SDTriggers()//Specialized Depth Triggers
 /////////////////////////////////////////////////////////////Cursor///////////////////////////////////////////////////////////////////////////
 float4 MouseCursor(float2 texcoord )
 {   float4 Out = CSB(texcoord),Color;
-		float A = 0.959375, TCoRF = 1-A;
-		float Cursor;
+		float A = 0.959375, TCoRF = 1-A, Cursor;
 		if(Cursor_Type > 0)
 		{
 			float CCA = 0.005, CCB = 0.00025, CCC = 0.25, CCD = 0.00125, Arrow_Size_A = 0.7, Arrow_Size_B = 1.3, Arrow_Size_C = 4.0;//scaling
@@ -992,7 +1001,7 @@ float3x3 PrepDepth(float2 texcoord)
 	B = DM.z; //Weapon Hand
 	A = ZPD_Boundary == 3 || ZPD_Boundary == 4 ? max( G, R) : R; //Grid Depth
 	//[0][0] = R | [0][1] = G | [0][2] = B //[1][0] = A | [1][1] = D | [1][2] = DM // [2][0] = Null | [2][1] = Null | [2][2] = Null
-	return float3x3( saturate(float3(R, G, B)) , saturate(float3(A,Depth(texcoord).x,DM.w)) , float3(0,0,0) );
+	return float3x3( saturate(float3(R, G, B)) , saturate(float3(A,Depth( SDT || SD_Trigger ? texcoord : TC_SP(texcoord) ).x,DM.w)) , float3(0,0,0) );
 }
 //////////////////////////////////////////////////////////////Depth HUD Alterations///////////////////////////////////////////////////////////////////////
 #if UI_MASK
@@ -1071,7 +1080,7 @@ float Fade(float2 texcoord)
 float4 DepthMap(in float4 position : SV_Position,in float2 texcoord : TEXCOORD) : SV_Target
 {
 	float4 DM = float4(PrepDepth(texcoord)[0][0],PrepDepth(texcoord)[0][1],PrepDepth(texcoord)[0][2],PrepDepth(texcoord)[1][1]);
-	float R = DM.x, G = DM.y, B = DM.z, Auto_Scale =  WZPD_and_WND.y > 0.0 ? smoothstep(0,1,Depth(0.5f).x) : 1;
+	float R = DM.x, G = DM.y, B = DM.z, Auto_Scale =  WZPD_and_WND.y > 0.0 ? smoothstep(0,1,PrepDepth(0.5f)[0][0]) : 1;
 
 	//Fade Storage
 	float ScaleND = lerp(R,1,smoothstep(min(-WZPD_and_WND.y,-WZPD_and_WND.z * Auto_Scale),1,R));
@@ -1159,7 +1168,7 @@ float2 Conv(float D,float2 texcoord)
 		ZP = min(ZP,Auto_Balance_Clamp);
 
 		float Separation = lerp(1.0,5.0,ZPD_Separation.y);
-    return float2(lerp(Separation * Convergence,D, ZP),lerp(W_Convergence,WD,WZP));
+    return float2(lerp(Separation * Convergence,min(saturate(Max_Depth),D), ZP),lerp(W_Convergence,WD,WZP));
 }
 
 float2 DB( float2 texcoord)
@@ -1252,21 +1261,21 @@ float2 DB( float2 texcoord)
 	return float2(DM.y,DM.w);
 }
 ////////////////////////////////////////////////////Depth & Special Depth Triggers//////////////////////////////////////////////////////////////////
-float3 zBuffer(in float4 position : SV_Position, in float2 texcoord : TEXCOORD) : SV_Target
+float2 zBuffer(in float4 position : SV_Position, in float2 texcoord : TEXCOORD) : SV_Target
 {
-	return DB( texcoord.xy ).xxy;
+	return DB( texcoord.xy ).xy;//Apply Depth Buffer AA Later??? Maybe...
 }
 
 float2 GetDB(float2 texcoord, float Mips)
 {
-	return tex2Dlod(SamplerzBufferN, float4(texcoord,0, Mips) ).xy;
+	return tex2Dlod(SamplerzBufferN, float4(texcoord,0, Mips) ).xx;
 }
 
 //////////////////////////////////////////////////////////Parallax Generation///////////////////////////////////////////////////////////////////////
 float2 Parallax(float Diverge, float2 Coordinates, float IO) // Horizontal parallax offset & Hole filling effect
 {   float Perf = 0.670, MS = Diverge * pix.x, GetDepth = smoothstep(0,1,GetDB(Coordinates, 0).x),Near_Far_CB_Size = GetDepth >= 0.5 ? 1.0 : 0.5, VM_Adjust = View_Mode >= 3 ? 0.0 : 0.04;
 	float2 ParallaxCoord = Coordinates, CBxy = floor( float2(Coordinates.x * BUFFER_WIDTH, Coordinates.y * BUFFER_HEIGHT) * Near_Far_CB_Size );
-	static const float2 View_Num = View_Mode == 6 || View_Mode == 7 ? float2(1,0.295) : 0;
+	float2 View_Num = View_Mode == 6 || View_Mode == 7 ? float2(1,0.295) : 0;
 	//Would Use Switch.... But, Still trying to back compat.... ////Perf = 0.960; //Perf = 0.460;
 	if(View_Mode == 1)
 		Perf = 1.375;
@@ -1345,7 +1354,7 @@ float2 Parallax(float Diverge, float2 Coordinates, float IO) // Horizontal paral
 	float2 PrevParallaxCoord = float2(ParallaxCoord.x + deltaCoordinates, ParallaxCoord.y);
 	float beforeDepthValue = Get_DB_ZDP, afterDepthValue = CurrentDepthMapValue - CurrentLayerDepth;
 	float Diffrance = Weapon_Mask ? abs(LayerDepth - CurrentLayerDepth) : LayerDepth - CurrentLayerDepth;
-		  beforeDepthValue += WP > 0 ? Diffrance : LayerDepth - CurrentLayerDepth;
+		  beforeDepthValue += WP > 0 && View_Mode >= 3 ? Diffrance : LayerDepth - CurrentLayerDepth;
 	// Interpolate coordinates
 	float weight = afterDepthValue / (afterDepthValue - beforeDepthValue);
 		  ParallaxCoord = PrevParallaxCoord * max(0.0f, weight) + ParallaxCoord * min(1.0f, 1.0f - weight);
@@ -1364,13 +1373,13 @@ float2 Parallax(float Diverge, float2 Coordinates, float IO) // Horizontal paral
 #if HUD_MODE || HM
 float3 HUD(float3 HUD, float2 texcoord )
 {
-	float Mask_Tex, CutOFFCal = ((HUD_Adjust.x * 0.5)/DMA()) * 0.5, COC = step(Depth(texcoord).x,CutOFFCal); //HUD Cutoff Calculation
+	float Mask_Tex, CutOFFCal = ((HUD_Adjust.x * 0.5)/DMA()) * 0.5, COC = step(PrepDepth(texcoord)[1][2],CutOFFCal); //HUD Cutoff Calculation
 	//This code is for hud segregation.
 	if (HUD_Adjust.x > 0)
 		HUD = COC > 0 ? tex2D(BackBufferCLAMP,texcoord).rgb : HUD;
 
 	#if UI_MASK
-	    if (Mask_Cycle == 1)
+	    if (Mask_Cycle == true)
 	        Mask_Tex = tex2Dlod(SamplerMaskB,float4(texcoord.xy,0,0)).a;
 	    else
 	        Mask_Tex = tex2Dlod(SamplerMaskA,float4(texcoord.xy,0,0)).a;
