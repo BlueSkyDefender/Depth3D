@@ -2,7 +2,7 @@
 ///**SuperDepth3D**///
 //----------------////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//* Depth Map Based 3D post-process shader v2.6.1
+//* Depth Map Based 3D post-process shader v2.6.2
 //* For Reshade 3.0+
 //* ---------------------------------
 //*
@@ -1273,36 +1273,31 @@ float2 GetDB(float2 texcoord, float Mips)
 
 //////////////////////////////////////////////////////////Parallax Generation///////////////////////////////////////////////////////////////////////
 float2 Parallax(float Diverge, float2 Coordinates, float IO) // Horizontal parallax offset & Hole filling effect
-{   float Perf = 0.670, MS = Diverge * pix.x, GetDepth = smoothstep(0,1,GetDB(Coordinates, 0).x),Near_Far_CB_Size = GetDepth >= 0.5 ? 1.0 : 0.5, VM_Adjust = View_Mode >= 3 ? 0.0 : 0.04;
+{   float Perf = 0.6125, MS = Diverge * pix.x, GetDepth = smoothstep(0,1,GetDB(Coordinates, 0).x),Near_Far_CB_Size = GetDepth >= 0.5 ? 1.0 : 0.5, VM_Adjust = View_Mode >= 3 ? 0.0 : 0.04;
 	float2 ParallaxCoord = Coordinates, CBxy = floor( float2(Coordinates.x * BUFFER_WIDTH, Coordinates.y * BUFFER_HEIGHT) * Near_Far_CB_Size );
-	float2 View_Num = View_Mode == 6 || View_Mode == 7 ? float2(1,0.295) : 0;
-	//Would Use Switch.... But, Still trying to back compat.... ////Perf = 0.960; //Perf = 0.460;
-	if(View_Mode == 1)
-		Perf = 1.375;
-	if(View_Mode == 2)
-		Perf = 1.670;
-	if(View_Mode == 3)
-		Perf = 0.8125;
-	if(View_Mode == 4)
-		Perf = 1.21875;
-	if(View_Mode == 5)
-		Perf = 1.625;
+	//Would Use Switch.... But, Still trying to back compat.... ////Perf = 0.960; //Perf = 0.460;// Perf = 1.375;// Perf = 1.21875;// Perf = 1.625; // Perf = 0.8125;
+	if(View_Mode == 1 || View_Mode == 4)
+		Perf = 1.225;
+	if(View_Mode == 2 || View_Mode == 5)
+		Perf = 1.425;
 	#if !DX9
 	if(View_Mode >= 6)//This has a high perf cost.
 	{
 		if(GetDepth >= 0.999)
-			Perf = 5.375;
+			Perf = 3.375;
 		else if(GetDepth >= 0.875)
-			Perf = (3.375 + View_Num.y) - View_Num.x;
+			Perf = 2.375;
 		else if(GetDepth >= 0.375)
-			Perf = (2.375 + View_Num.y) - View_Num.x;
+			Perf = 1.425;
 		else
-			Perf = (1.375 + View_Num.y);
+			Perf = 0.6125;
 
 		if(View_Mode == 6)
 			Perf *= fmod(CBxy.x+CBxy.y,2) ? 0.5 : 0.125;
+		else if(View_Mode == 7)
+			Perf *= fmod(CBxy.x+CBxy.y,2) ? 0.75 : 0.25;
 		else
-			Perf *= fmod(CBxy.x+CBxy.y,2) ? 1.0 : 0.25;
+			Perf *= fmod(CBxy.x+CBxy.y,2) ? 1.0 : 0.5;
 	}
 	#endif
 	/* float Cut_Out = step( 0.999, GetDepth), Luma_Adptive = lerp(0.5,1.0,smoothstep(0,1,tex2Dlod(SamplerDMN,float4(Coordinates,0,5)).w * 0.5f) );
@@ -1316,7 +1311,7 @@ float2 Parallax(float Diverge, float2 Coordinates, float IO) // Horizontal paral
 	float deltaCoordinates = MS * LayerDepth, CurrentDepthMapValue = GetDB(ParallaxCoord, 0).x, CurrentLayerDepth = 0.0f;
 	float2 DB_Offset = float2(Diverge * TP, 0) * pix, Store_DB_Offset = DB_Offset;
 
-    if( View_Mode >= 3 )
+    if( View_Mode >= 6 )
     	DB_Offset = 0;
 	#if !Compatibility
 	[loop] //Steep parallax mapping
@@ -1346,21 +1341,21 @@ float2 Parallax(float Diverge, float2 Coordinates, float IO) // Horizontal paral
 	//Anti-Weapon Hand Fighting
 	float Weapon_Mask = tex2Dlod(SamplerDMN,float4(Coordinates,0,0)).y, ZFighting_Mask = 1.0-(1.0-tex2Dlod(SamplerDMN,float4(Coordinates,0,5.4)).y - Weapon_Mask);
 		  ZFighting_Mask = ZFighting_Mask * (1.0-Weapon_Mask);
-		  Weapon_Mask = (Weapon_Mask - tex2Dlod(SamplerDMN,float4(Coordinates,0,3.1)).y) * Weapon_Mask;
-
+		  //Weapon_Mask = (Weapon_Mask - tex2Dlod(SamplerDMN,float4(Coordinates,0,3.1)).y) * Weapon_Mask;
 	float Get_DB = GetDB(ParallaxCoord , 0).y, Get_DB_ZDP = WP > 0 ? lerp(Get_DB, abs(Get_DB), ZFighting_Mask) : Get_DB;
-
 	// Parallax Occlusion Mapping
 	float2 PrevParallaxCoord = float2(ParallaxCoord.x + deltaCoordinates, ParallaxCoord.y);
 	float beforeDepthValue = Get_DB_ZDP, afterDepthValue = CurrentDepthMapValue - CurrentLayerDepth;
-	float Diffrance = Weapon_Mask ? abs(LayerDepth - CurrentLayerDepth) : LayerDepth - CurrentLayerDepth;
-		  beforeDepthValue += WP > 0 && View_Mode >= 3 ? Diffrance : LayerDepth - CurrentLayerDepth;
+		  beforeDepthValue += LayerDepth - CurrentLayerDepth;
 	// Interpolate coordinates
-	float weight = afterDepthValue / (afterDepthValue - beforeDepthValue);
+	float weight = afterDepthValue / min(-0.003,afterDepthValue - beforeDepthValue);
 		  ParallaxCoord = PrevParallaxCoord * max(0.0f, weight) + ParallaxCoord * min(1.0f, 1.0f - weight);
 	//This is to limit artifacts.
-	if( View_Mode >= 3 )
+	if( View_Mode >= 6 )
 		ParallaxCoord += Store_DB_Offset;
+	// Apply gap masking
+	if( View_Mode >= 3 && View_Mode <= 5)
+		ParallaxCoord.x += abs(afterDepthValue-beforeDepthValue) * MS * 0.125f;
 
 	if(Stereoscopic_Mode == 2)
 		ParallaxCoord.y += IO * pix.y; //Optimization for line interlaced.

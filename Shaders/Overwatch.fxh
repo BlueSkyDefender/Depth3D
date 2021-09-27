@@ -1127,7 +1127,7 @@ static const int FOV = 0;                               //Set Game FoV
 	//#define DA_X 0.0375 //Alternet settings Not used.
 	#define PE 1
 #elif (App == 0x47F294E9 ) //Octopath Traveler
-	#define DA_Y 225.0
+	#define DA_Y 250.0
 	#define DA_Z 0.000375
 	#define DA_X 0.1175
 	#define DA_W 1
@@ -1135,6 +1135,7 @@ static const int FOV = 0;                               //Set Game FoV
 	#define DE_X 1
 	#define DE_Y 0.5625
 	#define DE_Z 0.375
+	#define DG_W 0.2125
 	#define RH 1
 #elif (App == 0x21CB998 ) //.Hack//G.U.
 	#define DA_Y 22.5
@@ -2456,6 +2457,24 @@ static const int FOV = 0;                               //Set Game FoV
 	#define DF_X 0.125
 	#define PE 1
 	#define DA 1
+#elif (App == 0xBCCAD1AE || App == 0x3D2B24D7 ) //Project Cars | Project Cars 2
+	#define DA_Y 7.0
+	//#define DA_Z 0.000075
+	#define DA_X 0.16875
+	//#define DF_Y 0.01
+	//#define DB_Y 4
+	#define DE_X 1
+	#define DE_Y 0.375
+	#define DE_Z 0.400
+    #define DG_Z 0.125 //0.125//0.3125
+    #define DE_W 0.275//0.275//0.35625
+    #define DG_W 0.20 // Needed for old car.
+    #define BM 1
+	#define DG_X 0.165
+	#define PE 1
+	#define DA 1
+	#define DS 1
+	#define NW 1
 #else
 	#define NP 1 //No Profile
 #endif
