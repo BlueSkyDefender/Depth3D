@@ -1,7 +1,7 @@
 ////----------------------------------------//
 ///SuperDepth3D Overwatch Automation Shader///
 //----------------------------------------////
-// Version 2.0.6
+// Version 2.0.7
 //---------------------------------------OVERWATCH---------------------------------------//
 // If you are reading this stop. Go away and never look back. From this point on if you  //
 // still think it's is worth looking at this..... Then no one can save you or your soul. //
@@ -2338,20 +2338,20 @@ static const int FOV = 0;                               //Set Game FoV
 	#define DE_Z 0.400
 #elif (App == 0x491EA19E ) //Cyberpunk 2077
 	#define DA_W 1
-	#define DA_Y 70.0
-	#define DA_Z 0.00010
-	#define DA_X 0.050
+	#define DA_Y 72.5
+	#define DA_Z -0.00010
+	#define DA_X 0.05125
 	#define DB_Z 0.150
-	#define DF_Y 0.05125
+	#define DF_Y 0.05
 	#define DB_Y 2 //?? Auto Mode didn't work well in this game.
 	#define DE_X 3
 	#define DE_Y 0.500
-	#define DE_Z 0.400
+	#define DE_Z 0.4375
 	#define DB_W 34
 	#define DF_X 0.20
-	#define DG_W 0.15
+	#define DG_W 0.08
 	#define BM 1
-	#define DG_X 0.1375
+	#define DG_X 0.130
 	#define PE 1
 #elif (App == 0xB53B8500 ) //DEATH STRANDING
 	#define DA_W 1
@@ -2466,15 +2466,53 @@ static const int FOV = 0;                               //Set Game FoV
 	#define DE_X 1
 	#define DE_Y 0.375
 	#define DE_Z 0.400
-    #define DG_Z 0.125 //0.125//0.3125
-    #define DE_W 0.275//0.275//0.35625
-    #define DG_W 0.20 // Needed for old car.
-    #define BM 1
+	#define DG_Z 0.125 //0.125//0.3125
+	#define DE_W 0.275//0.275//0.35625
+	#define DG_W 0.20 // Needed for old car.
+	#define BM 1
 	#define DG_X 0.165
 	#define PE 1
 	#define DA 1
 	#define DS 1
 	#define NW 1
+#elif (App == 0x98C69E31 || App == 0xA8778B7D ) // F1 2019 | F1 2020 DX12
+	#define DA_W 1
+	#define DG_W 0.25
+	#define DA_Y 14.5
+	#define DA_X 0.07
+	#define DB_Y 5
+	#define DE_X 2
+	#define DE_Z 0.400
+	#define DG_Z 0.400
+	#define PE 1
+	#define NW 1
+#elif (App == 0x164EF6B5 ) //Grid 2019
+	#define DA_W 1
+	#define DA_Y 11.5
+	#define DA_X 0.15875
+	#define DE_X 1
+	//#define DE_Y 0.50
+	#define DE_Z 0.400
+	//#define DG_Z 0.125 
+	//#define DE_W 0.275
+	#define DG_W 0.25
+	#define BM 1
+	#define DG_X 0.1625
+	#define PE 1
+	#define DA 1
+	//#define DS 1
+	#define NW 1
+#elif (App == 0x54568EA ) //Assetto Corsa
+	#define DA_X 0.05
+	#define DB_Y 4
+	#define DE_X 1
+	#define DE_Y 0.750
+	#define DE_Z 0.375
+	#define DG_W 0.2
+	#define PE 1
+	#define DA 1
+	#define NW 1
+    #define FV 1
 #else
 	#define NP 1 //No Profile
 #endif
