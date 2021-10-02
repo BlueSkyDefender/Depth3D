@@ -1,7 +1,7 @@
 ////----------------------------------------//
 ///SuperDepth3D Overwatch Automation Shader///
 //----------------------------------------////
-// Version 2.0.7
+// Version 2.0.8
 //---------------------------------------OVERWATCH---------------------------------------//
 // If you are reading this stop. Go away and never look back. From this point on if you  //
 // still think it's is worth looking at this..... Then no one can save you or your soul. //
@@ -311,9 +311,19 @@ static const int FOV = 0;                               //Set Game FoV
 #elif (App == 0x9C5C946E ) //EuroTruckSim2
 	#define DB_W 47
 #elif (App == 0xB302EC7 || App == 0x91D9EBAF ) //F.E.A.R | F.E.A.R 2: Project Origin
-	#define DA_Y 8.75
-	#define DB_Y 3
+	#define DA_X 0.110
+	#define DA_Y 12.0
+	#define DA_Z 0.00025
+	#define DB_Y 5
+	#define DE_X 3
+	//#define DE_Y 0.625
+	#define DE_Z 0.375
+	//#define DG_W 0.25
 	#define DB_W 48
+	//#define DF_X 0.225
+	#define DS 1 //?
+	#define FV 1
+	#define RH 1	
 #elif (App == 0x2C742D7C ) //Immortal Redneck CP alt 1.9375
 	#define DA_Y 20.0
 	#define DB_Y 5
@@ -1795,16 +1805,19 @@ static const int FOV = 0;                               //Set Game FoV
 	#define DE_Y 0.500
 	#define DE_Z 0.375
 	#define DF_Y 0.051
-#elif (App == 0xEA61D579 ) //The Citadel 186
+#elif (App == 0xEA61D579 || App == 0xCFCF902B ) //The Citadel
 	#define DA_W 1
 	#define DA_X 0.035
 	#define DA_Y 18.6
 	#define DB_Y 4
 	#define DF_Y 0.05625
 	#define SP 1
-	#define DD_Y 0.675
-	#define DD_W -0.4815
+	//#define DD_Y 0.675
+	//#define DD_W -0.4815
+	#define DD_Y 0.9
+	#define DD_W -0.111
 	#define DB_W 72
+	#define DS 1
 #elif (App == 0x5C0EBBE9 ) //A Plague Tale Innocence
 	#define DA_W 1
 	#define DA_X 0.05
@@ -2493,7 +2506,7 @@ static const int FOV = 0;                               //Set Game FoV
 	#define DE_X 1
 	//#define DE_Y 0.50
 	#define DE_Z 0.400
-	//#define DG_Z 0.125 
+	//#define DG_Z 0.125
 	//#define DE_W 0.275
 	#define DG_W 0.25
 	#define BM 1
@@ -2512,7 +2525,36 @@ static const int FOV = 0;                               //Set Game FoV
 	#define PE 1
 	#define DA 1
 	#define NW 1
-    #define FV 1
+	#define FV 1
+#elif (App == 0x7658447E ) //Dagon*
+	#define DA_W 1
+	#define DB_X 1
+	#define DA_X 0.0625
+	#define DA_Y 11.5
+	#define DA_Z 0.00025
+	#define DB_Y 5
+	#define DE_X 1
+	#define DE_Y 0.625
+	#define DE_Z 0.375
+	#define DB_Z 0
+	#define DG_W 0.25
+	#define DS 1
+	#define PE 1
+#elif (App == 0xC57720A6 ) //Crysis 2 DX11 1.9
+	#define DA_X 0.07
+	//#define DA_Y 11.5
+	#define DA_Z 0.00025
+	#define DB_Y 2
+	#define DE_X 3
+	//#define DE_Y 0.625
+	//#define DE_Z 0.375
+	//#define DG_W 0.25
+	#define WSM 2
+	#define DB_W 7
+	#define DF_X 0.225
+	#define DS 1 //?
+	#define PE 1
+	#define RH 1	
 #else
 	#define NP 1 //No Profile
 #endif
@@ -2777,7 +2819,7 @@ float3 Weapon_Profiles(float WP ,float3 Weapon_Adjust) //Tried Switch But, can't
     if (WP == 47)
         Weapon_Adjust = float3(0.28,20.0,9.0);        //WP 45 | EuroTruckSim2
     if (WP == 48)
-        Weapon_Adjust = float3(0.458,10.5,1.105);     //WP 46 | F.E.A.R #B302EC7 & F.E.A.R 2: Project Origin #91D9EBAF
+        Weapon_Adjust = float3(0.460,12.5,1.0);       //WP 46 | F.E.A.R #B302EC7 & F.E.A.R 2: Project Origin #91D9EBAF
     if (WP == 49)
         Weapon_Adjust = float3(1.5,37.5,0.99875);     //WP 47 | Condemned Criminal Origins
     if (WP == 50)
@@ -2850,7 +2892,7 @@ float3 Weapon_Profiles(float WP ,float3 Weapon_Adjust) //Could reduce from 76 to
     if (WP == 6)
         Weapon_Adjust = float3(0.0,0.0,0.0);          //WP 4  | Game
     if (WP == 7)
-        Weapon_Adjust = float3(0.0,0.0,0.0);          //WP 5  | Game
+        Weapon_Adjust = float3(0.275,11.0,10.0);      //WP 5  | Crysis 2 DX11 1.9
     if (WP == 8)
         Weapon_Adjust = float3(0.0,0.0,0.0);          //WP 6  | Game
     if (WP == 9)

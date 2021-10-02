@@ -232,6 +232,24 @@ Render Resolution Native.
 Turn off AA.
 Don't use in game Supersampling
 
+{Chronicle of Riddick Assault on Dark Athena} - Used ReShade 4.9.1 
+So this game causes strange issues in many shaders. Also has low perf even with my 1080ti. Have no Idea whats going on.
+
+To get the depth buffer you have to enable MSAA 2X or more. Then select the proper Depth in the API tab. 
+The game is very unoptimized with anti-aliasing on like really bad....
+
+Big Issue is that it seems to detoggle it self sometimes and in cutscenes Depth don't aline like it should. Maybe I will look in to some sort of fix later for the cutscenes.
+But, for now try this. https://www.pcgamingwiki.com/wiki/The_Chronicles_of_Riddick:_Assault_on_Dark_Athena#Widescreen_resolution
+
+Also, Try the other fixes listed on that web page.
+
+Other then that gameplay seems fine. This profile may need some tuning later. Good luck.
+
+Oh wait One more thing it seems like Threaded optimization needs to be turned off for this game in the NVIDIA Control Panel. I didn't test AMD GPUs.
+
+Man this game needs a ReMaster and redone in a diffrent API.......
+
+
 {Cloud Punk} - Used ReShade 4.9
 Once you install Reshade. Install this fix that allows for depth buffer access. This fix uses 3DMigoto to disable a shader that was blocking acess to the depth buffer.
 http://www.mediafire.com/file/25qdu9lurxfucg2/Cloudpunk_fix_for_Depth3D.zip
@@ -263,22 +281,15 @@ Also Dissable FSAA (FSAA OFF) or was it turn it on I forget.
 This is bug in game that drops fps in to the single diglets...... you need a pokemon that strong againts ground types.
 I kid I kid I don't know how to fix this issue try pc gaming wiki when fps drops in the the single digits.
 
-{Chronicle of Riddick Assault on Dark Athena} - Used ReShade 4.9.1 
-So this game causes strange issues in many shaders. Also has low perf even with my 1080ti. Have no Idea whats going on.
+{Crysis 2} - ReShade 4.9.1
 
-To get the depth buffer you have to enable MSAA 2X or more. Then select the proper Depth in the API tab. 
-The game is very unoptimized with anti-aliasing on like really bad....
+Go to your
 
-Big Issue is that it seems to detoggle it self sometimes and in cutscenes Depth don't aline like it should. Maybe I will look in to some sort of fix later for the cutscenes.
-But, for now try this. https://www.pcgamingwiki.com/wiki/The_Chronicles_of_Riddick:_Assault_on_Dark_Athena#Widescreen_resolution
+Drive:\Your Games Folder\Crysis 2
 
-Also, Try the other fixes listed on that web page.
+look for the system.cfg then drop the autoexec.cfg next to it and you are done.
 
-Other then that gameplay seems fine. This profile may need some tuning later. Good luck.
-
-Oh wait One more thing it seems like Threaded optimization needs to be turned off for this game in the NVIDIA Control Panel. I didn't test AMD GPUs.
-
-Man this game needs a ReMaster and redone in a diffrent API.......
+https://www.mediafire.com/file/fcchg1270vccfwz/Crysis_2.zip/file
 
 {Dead or Alive 6} - ReShade 4.9.1
 To use ReShade in this game you need to use a Injector that was written for UWP Games.
@@ -440,6 +451,17 @@ The weapon Depth Buffer can be found on Option 1. But, can't be merged.....
 
 {Emily Wants To Play}
 Install reshade in to SteamLibrary\steamapps\common\Emily Wants To Play\Engine\Binaries\Win64
+
+{F.E.A.R} - Use ReShase 4.9.1
+Low frame rate issue was noticed use 
+
+Download the DirectInput FPS Fix. https://community.pcgamingwiki.com/files/file/789-directinput-fps-fix/
+
+Extract into <path-to-game> for the main campaign.
+
+For the expansion packs extract it into <path-to-game>\FEARXP and <path-to-game>\FEARXP2.
+
+For more information go to https://www.pcgamingwiki.com/wiki/F.E.A.R.#
 
 {Fallout 4} - Use ReShase 4.7.0
 
