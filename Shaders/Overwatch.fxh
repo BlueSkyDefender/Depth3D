@@ -1,7 +1,7 @@
 ////----------------------------------------//
 ///SuperDepth3D Overwatch Automation Shader///
 //----------------------------------------////
-// Version 2.0.8
+// Version 2.1.0
 //---------------------------------------OVERWATCH---------------------------------------//
 // If you are reading this stop. Go away and never look back. From this point on if you  //
 // still think it's is worth looking at this..... Then no one can save you or your soul. //
@@ -323,7 +323,7 @@ static const int FOV = 0;                               //Set Game FoV
 	//#define DF_X 0.225
 	#define DS 1 //?
 	#define FV 1
-	#define RH 1	
+	#define RH 1
 #elif (App == 0x2C742D7C ) //Immortal Redneck CP alt 1.9375
 	#define DA_Y 20.0
 	#define DB_Y 5
@@ -572,11 +572,16 @@ static const int FOV = 0;                               //Set Game FoV
 	#define DB_Y 5
 	#define RH 1
 #elif (App == 0x23D5135F ) //Alien Isolation
-	#define DA_X 0.050
-	#define DA_Y 25.0
-	#define DA_Z 0.000625
-	#define DB_Y 4
-	#define DE_W 0.03
+	#define DA_X 0.07
+    #define DF_Y 0.0125
+	#define DA_Y 22.5 // or 23.0
+	#define DA_Z 0.0005
+	#define DB_Y 2 
+	#define DE_X 2
+	#define DE_Y 0.7
+	#define DE_Z 0.375
+	#define DG_Z 0.0325
+	#define DE_W 0.1
 	#define DC 1
 	#define DC_X 0.22
 	#define DC_Y -0.1
@@ -1039,9 +1044,13 @@ static const int FOV = 0;                               //Set Game FoV
 	#define DE_Y 0.299
 	#define DE_Z 0.400
 #elif (App == 0x71170B42 ) //Blood: Fresh Suppy
-	#define DA_Y 250.0
-	#define DA_X 0.075
+	#define DA_Y 212.5
+	#define DA_X 0.175
 	#define DB_Y 4
+	#define DE_X 1
+	#define DE_Y 0.375
+	#define DE_Z 0.375
+	#define DG_W 0.25
   #define DS 1
 #elif (App == 0x8F615A99 ) //Frostpunk
 	#define DA_Y 9.375
@@ -2320,14 +2329,15 @@ static const int FOV = 0;                               //Set Game FoV
 	#define NW 1
 	#define DS 1
 #elif (App == 0xD0F69E54 ) //Yooka-Laylee
-	#define DA_Y 13.0
+	#define DA_Y 12.75
 	#define DA_Z 0.001
 	#define DA_X 0.09125
 	#define DF_Y 0.00625
 	#define DB_X 1
 	#define DB_Y 4
 	#define DE_X 2
-	#define DE_Y 0.3
+	#define DE_Y 0.325
+	#define DG_W 0.25 //allowed popout
 	//#define DE_Z 0.375
 #elif (App == 0x755C7E43 ) //Yooka-Laylee and the Impossible Lair
 	#define DA_W 1
@@ -2383,17 +2393,19 @@ static const int FOV = 0;                               //Set Game FoV
 	#define DA 1
 #elif (App == 0x87AC1510 ) //Ghostrunner
 	#define DA_W 1
-	#define DA_Y 250.0
+	#define DA_Y 245.0
 	#define DA_Z 0.0000025 // Magic
-	#define DA_X 0.0401
+	#define DA_X 0.0451
 	#define DF_Y 0.001     // Magic
-	#define DB_Z 0.045
+	#define DB_Z 0.05
 	#define DB_Y 1
+	#define BM 1
+	#define DG_X 0.1825
 	#define DE_X 3
-	#define DE_Y 0.750
-	#define DE_Z 0.375
+	#define DE_Y 0.650
+	#define DE_Z 0.400
 	#define DB_W 43
-	#define DF_X 0.05
+	#define DF_X 0.1
 	#define PE 1
 	#define DA 1
 #elif (App == 0x11E6C55E ) //The Suicide of Rachel Foster
@@ -2554,7 +2566,7 @@ static const int FOV = 0;                               //Set Game FoV
 	#define DF_X 0.225
 	#define DS 1 //?
 	#define PE 1
-	#define RH 1	
+	#define RH 1
 #else
 	#define NP 1 //No Profile
 #endif
