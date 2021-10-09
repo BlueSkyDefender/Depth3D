@@ -2,7 +2,7 @@
 ///**SuperDepth3D**///
 //----------------////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//* Depth Map Based 3D post-process shader v2.6.3
+//* Depth Map Based 3D post-process shader v2.6.4
 //* For Reshade 3.0+
 //* ---------------------------------
 //*
@@ -1049,7 +1049,7 @@ float Fade(float2 texcoord)
 				if(ZPD_Boundary == 1)
 					GridXY = float2( CDArray_A[i], CDArray_A[j]);
 				else if(ZPD_Boundary == 2 || ZPD_Boundary == 4)
-					GridXY = float2( CDArray_B[i], CDArray_B[j]);
+					GridXY = float2( CDArray_B[i], CDArray_A[j]);
 				else if(ZPD_Boundary == 3)
 					GridXY = float2( CDArray_A[i], CDArray_B[j]);
 
@@ -1189,7 +1189,7 @@ float2 DB( float2 texcoord)
 	DM.z = DM.y;
 	DM.y += lerp(DM.y,DM.x,DM.w);
 	DM.y *= 0.5f;
-	DM.y = lerp(DM.y,DM.z,0.5f);
+	DM.y = lerp(DM.y,DM.z,0.6875f);
 	#if Compatibility_DD
 	if (Depth_Detection == 1 || Depth_Detection == 2)
 	{ //Check Depth at 3 Point D_A Top_Center / Bottom_Center
@@ -1281,7 +1281,7 @@ float2 Parallax(float Diverge, float2 Coordinates, float IO) // Horizontal paral
 		Perf = 1.225;
 	if( View_Mode == 2 || View_Mode == 5 )
 		Perf = 1.425;
-	//if( View_Mode >= 3 )	
+	//if( View_Mode >= 3 )
 		//Perf *= smoothstep(0,1,Noise(Coordinates) * GetDepth + 0.5);
 	#if !DX9
 	if(View_Mode >= 6)//This has a high perf cost.
@@ -1352,7 +1352,7 @@ float2 Parallax(float Diverge, float2 Coordinates, float IO) // Horizontal paral
 		  ParallaxCoord = PrevParallaxCoord * max(0.0f, weight) + ParallaxCoord * min(1.0f, 1.0f - weight);
 	//This is to limit artifacts.
 	if( View_Mode >= 3 )
-		ParallaxCoord += Store_DB_Offset * 0.75f;
+		ParallaxCoord += Store_DB_Offset;
 	// Apply gap masking
 	if( View_Mode <= 2)
 		ParallaxCoord.x -= depthDiffrence * MS * 0.0625;

@@ -714,9 +714,10 @@ static const int FOV = 0;                               //Set Game FoV
 	#define DB_Y 3
 #elif (App == 0x5833F81C ) //Dying Light
 	#define DA_W 1
-	#define DF_Y 0.0475
+	#define DF_Y 0.045
 	#define DA_X 0.05
 	#define DA_Y 17.5
+	#define DA_Z -0.5
 	#define DB_Y 4
 	#define NW 1
 	#define PE 1
@@ -2022,14 +2023,14 @@ static const int FOV = 0;                               //Set Game FoV
 #elif (App == 0xF9341C1 ) //Valheim
 	#define DA_W 1
     #define DB_X 1
-	#define DA_Y 12.5
-	#define DA_X 0.05
+	#define DA_Y 13.75
+	#define DA_X 0.051
 	//#define DF_Y 0.1
 	#define DB_Y 2
 	#define DB_Z 0.125
-	//#define DA_Z 0.0005
+	#define DA_Z 0.001
 	#define DE_X 2
-	#define DE_Y 0.500
+	#define DE_Y 0.300
 	#define DE_Z 0.300
 	#define PE 1
 	#define DA 1
