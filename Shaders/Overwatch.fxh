@@ -2568,6 +2568,20 @@ static const int FOV = 0;                               //Set Game FoV
 	#define DS 1 //?
 	#define PE 1
 	#define RH 1
+#elif (App == 0xDB778A3B ) //Portal 2
+	#define DA_X 0.05
+	#define DA_Y 20.5
+	#define DA_Z 0.001
+    #define DB_Z 0.105
+	#define DB_Y 3
+	#define DE_X 3
+	#define DE_Y 0.7
+	#define DE_Z 0.375
+	#define DG_W 0.125
+	#define DB_W 36
+    #define DG_Z 0.430
+	#define DS 1
+	#define PE 1
 #else
 	#define NP 1 //No Profile
 #endif
@@ -2808,7 +2822,7 @@ float3 Weapon_Profiles(float WP ,float3 Weapon_Adjust) //Tried Switch But, can't
     if (WP == 35)
         Weapon_Adjust = float3(0.278,37.50,9.1);      //WP 33 | Black Mesa
     if (WP == 36)
-        Weapon_Adjust = float3(0.0,0.0,0.0);          //WP 34 | Game
+        Weapon_Adjust = float3(0.277,105.0,8.8625);   //WP 34 | Portal 2
     if (WP == 37)
         Weapon_Adjust = float3(0.0,0.0,0.0);          //WP 35 | Game
     if (WP == 38)
@@ -2872,7 +2886,7 @@ float3 Weapon_Profiles(float WP ,float3 Weapon_Adjust) //Tried Switch But, can't
     if (WP == 67)
         Weapon_Adjust = float3(0.251,12.5,925.0);     //WP 65 | Betrayer
     if (WP == 68)
-        Weapon_Adjust = float3(1.025,16.0,0.185);     //WP 66 | Doom Eternal
+        Weapon_Adjust = float3(1.035,16.0,0.185);     //WP 66 | Doom Eternal
     if (WP == 69)
         Weapon_Adjust = float3(1.553,16.875,0.0);     //WP 67 | Q.U.B.E 2
     if (WP == 70)
