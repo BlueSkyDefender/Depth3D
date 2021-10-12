@@ -1,7 +1,7 @@
 ////----------------------------------------//
 ///SuperDepth3D Overwatch Automation Shader///
 //----------------------------------------////
-// Version 2.1.0
+// Version 2.1.1
 //---------------------------------------OVERWATCH---------------------------------------//
 // If you are reading this stop. Go away and never look back. From this point on if you  //
 // still think it's is worth looking at this..... Then no one can save you or your soul. //
@@ -2582,6 +2582,33 @@ static const int FOV = 0;                               //Set Game FoV
     #define DG_Z 0.430
 	#define DS 1
 	#define PE 1
+#elif (App == 0x194A6354 ) //The Medium
+    #define DA_W 1
+	#define DA_X 0.125
+    #define DF_Y 0.0225
+	#define DA_Y 55.0
+	#define DA_Z -0.025 // This can be still adjusted.
+    #define DB_Z 0.145
+	#define DB_Y 2
+	#define DE_X 1
+	#define DE_Y 0.375
+	#define DE_Z 0.375
+	#define DG_W 0.6125
+	#define PE 1	
+#elif (App == 0xD829EFC1 ) //Ride 4
+	#define DA_W 1
+	#define DA_Y 16.25
+	#define DA_X 0.13
+	#define DE_X 2
+	#define DE_Y 0.16875
+	#define DE_Z 0.4875
+	//#define DG_Z 0.125 //Near
+	//#define DE_W 0.275 //Max
+	#define DG_W 0.7
+	#define BM 1
+	#define DG_X 0.165
+	#define PE 1
+	#define NW 1
 #else
 	#define NP 1 //No Profile
 #endif

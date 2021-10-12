@@ -2,7 +2,7 @@
 ///**SuperDepth3D**///
 //----------------////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//* Depth Map Based 3D post-process shader v2.6.4
+//* Depth Map Based 3D post-process shader v2.6.5
 //* For Reshade 3.0+
 //* ---------------------------------
 //*
@@ -251,30 +251,28 @@ uniform float2 ZPD_Boundary_n_Fade <
 uniform int View_Mode <
 	ui_type = "combo";
 	#if !DX9
-	ui_items = "VM0 Normal   +\0VM1 Normal   ++\0VM2 Normal   +++\0VM3 Alpha    +\0VM4 Alpha    ++\0VM5 Alpha    +++\0VM6 Adaptive +\0VM7 Adaptive ++\0VM8 Adaptive +++\0";
+	ui_items = "VM0 Normal\0VM1 Alpha\0VM2 Reiteration\0VM3 Adaptive\0";
 	#else
-	ui_items = "VM0 Normal   +\0VM1 Normal   ++\0VM2 Normal   +++\0VM3 Alpha    +\0VM4 Alpha    ++\0VM5 Alpha    +++\0";
+	ui_items = "VM0 Normal\0VM3 Alpha\0VM2 Reiteration\0";
 	#endif
 	ui_label = "·View Mode·";
 	ui_tooltip = "Changes the way the shader fills in the occlude sections in the image.\n"
-		 		"\n"
-				 "Performance Legend: + is Low | ++ is Medium | +++ is High.\n"
-				 "\n"
-                 "Normal   | is the default output used for most games with it's streched look.\n"
-                 "Alpha    | is used for higher amounts of Semi-Transparent objects like foliage.\n"
-                 #if !DX9
-                 "Adaptive | is a scene adapting infilling that uses disruptive reiterative sampling.\n"
-                 "\n"
-                 "Warning: Adaptive View Mode's performace cost is high in out door scenes.\n"
-                 "         Also Make sure you turn on Performance Mode before you close this menu.\n"
-                 #else
-                 "\n"
-                 "Warning: Adaptive View Mode's does not work on DX9, please use a wrapper to switch to a other API.\n"
-				 #endif
-                 "\n"
-				 "Default is Normal Medium.";
-	ui_category = "Occlusion Masking";
-> = 1;
+				"Normal      | is the default output used for most games with it's streched look.\n"
+				"Alpha       | is used for higher amounts of Semi-Transparent objects like foliage.\n"
+				"Reiteration | Same thing as Alpha but with brakeage points.\n"
+				#if !DX9
+				"Adaptive    | is a scene adapting infilling that uses disruptive reiterative sampling.\n"
+				"\n"
+				"Warning: Adaptive View Mode's performace cost is high in out door scenes.\n"
+				"         Also Make sure you turn on Performance Mode before you close this menu.\n"
+				#else
+				"\n"
+				"Warning: Adaptive View Mode's does not work on DX9, please use a wrapper to switch to a other API.\n"
+				#endif
+				"\n"
+				"Default is Normal Medium.";
+ui_category = "Occlusion Masking";
+> = 0;
 
 uniform int Custom_Sidebars <
 	ui_type = "combo";
@@ -297,6 +295,16 @@ uniform float Max_Depth <
 				 "Default and starts at One and it's Off.";
 	ui_category = "Occlusion Masking";
 > = 1.0;
+
+uniform bool Performance_Mode <
+	ui_label = " Performance Mode";
+	ui_tooltip = "Performance Mode Lowers Occlusion Quality Processing so that there is a small boost to FPS.\n"
+				 "Please enable the 'Performance Mode Checkbox,' in ReShade's GUI.\n"
+				 "It's located in the lower bottom right of the ReShade's Main UI.\n"
+				 "Default is False.";
+	ui_category = "Occlusion Masking";
+> = false;
+
 /* //Luma Based Variable Rate Shading
 uniform bool L_VRS <
 	ui_label = " Variable Rate Shading";
@@ -1274,31 +1282,27 @@ float2 GetDB(float2 texcoord, float Mips)
 //float Noise(float2 TC) { return frac(sin(dot(TC.st, float2(12.9898,78.233)))* 43758.5453123);}
 //////////////////////////////////////////////////////////Parallax Generation///////////////////////////////////////////////////////////////////////
 float2 Parallax(float Diverge, float2 Coordinates, float IO) // Horizontal parallax offset & Hole filling effect
-{   float Perf = 0.6125, MS = Diverge * pix.x, GetDepth = smoothstep(0,1,GetDB(Coordinates, 0).x),Near_Far_CB_Size = GetDepth >= 0.5 ? 1.0 : 0.5, VM_Adj_A = View_Mode >= 3 ? 0.0 : 0.04, VM_Adj_B = View_Mode == 6 ? 0.25 : 1.0;
+{   float Perf = Performance_Mode ? 0.715f : 1.225, MS = Diverge * pix.x, GetDepth = smoothstep(0,1,GetDB(Coordinates, 0).x),Near_Far_CB_Size = GetDepth >= 0.5 ? 1.0 : 0.5, VM_Adj_A = View_Mode >= 1 ? 0.0 : 0.04;
 	float2 ParallaxCoord = Coordinates, CBxy = floor( float2(Coordinates.x * BUFFER_WIDTH, Coordinates.y * BUFFER_HEIGHT) * Near_Far_CB_Size );
-	//Would Use Switch.... But, Still trying to back compat.... ////Perf = 0.960; //Perf = 0.460;// Perf = 1.375;// Perf = 1.21875;// Perf = 1.625; // Perf = 0.8125;
-	if( View_Mode == 1 || View_Mode == 4 )
-		Perf = 1.225;
-	if( View_Mode == 2 || View_Mode == 5 )
-		Perf = 1.425;
-	//if( View_Mode >= 3 )
-		//Perf *= smoothstep(0,1,Noise(Coordinates) * GetDepth + 0.5);
+	//Would Use Switch....
+	if( View_Mode == 1)//0.505/0.6125/0.715
+		Perf = Performance_Mode ? 1.0 :1.029;
+	if( View_Mode == 2)
+		Perf = Performance_Mode ? 0.679: 1.425;
 	#if !DX9
-	if(View_Mode >= 6)//This has a high perf cost.
+	if(View_Mode >= 3)//This has a high perf cost.
 	{
 		if( GetDepth >= 0.999 )
-			Perf = 3.375;
-		else if( GetDepth >= 0.875 && View_Mode != 6 && View_Mode != 7)
-			Perf = 2.375;
-		else if( GetDepth >= 0.375 && View_Mode != 6 )
-			Perf = 1.425;
+			Perf = 2.752;
+		else if( GetDepth >= 0.875)
+			Perf = 0.679;
 		else
-			Perf = 0.6125;
+			Perf = 1.0;
 
-			Perf *= fmod(CBxy.x*VM_Adj_B+CBxy.y*VM_Adj_B,2) ? 1.0 : 0.5;
+			Perf *= fmod(CBxy.x+CBxy.y,2) ? 1.0 : 0.5;
 	}
 	#endif
-	/* float Cut_Out = step( 0.999, GetDepth), Luma_Adptive = lerp(0.5,1.0,smoothstep(0,1,tex2Dlod(SamplerDMN,float4(Coordinates,0,5)).w * 0.5f) );
+	/* float Cut_Out = step( 0.999, GetDepth), Luma_Adptive = lerp(0.5,1.0,smoothstep(0,1,tex2Dlod(SamplerDMSL,float4(Coordinates,0,5)).w * 0.5f) );
 	if(L_VRS)
 		Perf *= lerp(Luma_Adptive, 0.5, Cut_Out); */
 	//ParallaxSteps Calculations
@@ -1309,7 +1313,7 @@ float2 Parallax(float Diverge, float2 Coordinates, float IO) // Horizontal paral
 	float deltaCoordinates = MS * LayerDepth, CurrentDepthMapValue = GetDB(ParallaxCoord, 0).x, CurrentLayerDepth = 0.0f;
 	float2 DB_Offset = float2(Diverge * TP, 0) * pix, Store_DB_Offset = DB_Offset;
 
-    if( View_Mode >= 3 )
+    if( View_Mode >= 1 )
     	DB_Offset = 0;
 	#if !Compatibility
 	[loop] //Steep parallax mapping
@@ -1339,7 +1343,6 @@ float2 Parallax(float Diverge, float2 Coordinates, float IO) // Horizontal paral
 	//Anti-Weapon Hand Fighting
 	float Weapon_Mask = tex2Dlod(SamplerDMN,float4(Coordinates,0,0)).y, ZFighting_Mask = 1.0-(1.0-tex2Dlod(SamplerDMN,float4(Coordinates,0,5.4)).y - Weapon_Mask);
 		  ZFighting_Mask = ZFighting_Mask * (1.0-Weapon_Mask);
-		  //Weapon_Mask = (Weapon_Mask - tex2Dlod(SamplerDMN,float4(Coordinates,0,3.1)).y) * Weapon_Mask;
 	float Get_DB = GetDB(ParallaxCoord , 0).y, Get_DB_ZDP = WP > 0 ? lerp(Get_DB, abs(Get_DB), ZFighting_Mask) : Get_DB;
 	// Parallax Occlusion Mapping
 	float2 PrevParallaxCoord = float2(ParallaxCoord.x + deltaCoordinates, ParallaxCoord.y);
@@ -1351,7 +1354,7 @@ float2 Parallax(float Diverge, float2 Coordinates, float IO) // Horizontal paral
 	float weight = afterDepthValue / min(-0.003,depthDiffrence);
 		  ParallaxCoord = PrevParallaxCoord * max(0.0f, weight) + ParallaxCoord * min(1.0f, 1.0f - weight);
 	//This is to limit artifacts.
-	if( View_Mode >= 3 )
+	if( View_Mode >= 1 )
 		ParallaxCoord += Store_DB_Offset;
 	// Apply gap masking
 	if( View_Mode <= 2)
