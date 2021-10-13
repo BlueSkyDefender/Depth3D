@@ -1945,7 +1945,7 @@ static const int FOV = 0;                               //Set Game FoV
 	//#define SP 1
 	#define DS 1
 	#define RH 1
-#elif (App == 0xE0B7AF16 ) //Horizon Chase Turbo
+#elif ( App == 0xE0B7AF16 || App == 0xB84E12B6 ) //Horizon Chase Turbo
 	#define DA_W 1
 	#define DA_Y 12.5
 	#define DA_X 0.175
