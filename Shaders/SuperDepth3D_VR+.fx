@@ -315,14 +315,16 @@ uniform float Max_Depth <
 	ui_category = "Occlusion Masking";
 > = 1.0;
 
-uniform bool Performance_Mode <
+uniform int Performance_Level <
+	ui_type = "combo";
+	ui_items = "Low\0Med\0High\0";
 	ui_label = " Performance Mode";
-	ui_tooltip = "Performance Mode Lowers Occlusion Quality Processing so that there is a small boost to FPS.\n"
+	ui_tooltip = "Performance Mode Lowers or Raises Occlusion Quality Processing so that there is a performance is adjustable.\n"
 				 "Please enable the 'Performance Mode Checkbox,' in ReShade's GUI.\n"
 				 "It's located in the lower bottom right of the ReShade's Main UI.\n"
 				 "Default is False.";
 	ui_category = "Occlusion Masking";
-> = true;
+> = 0;
 /*
 //Luma Based Variable Rate Shading
 uniform bool L_VRS <
@@ -1343,15 +1345,17 @@ float2 GetDB(float2 texcoord, float Mips)
 {
 	return tex2Dlod(SamplerzBufferVR, float4(texcoord,0,Mips) ).xx;
 }
+//Perf Level selection left one open for one more view mode.
+static const float4 Performance_LvL[3] = { float4( 0.715, 0.5, 0.679, 0 ), float4( 1.225, 1.0, 1.425, 0), float4( 1.425, 1.02, 2.752, 0 ) };
 //////////////////////////////////////////////////////////Parallax Generation///////////////////////////////////////////////////////////////////////
 float2 Parallax(float Diverge, float2 Coordinates) // Horizontal parallax offset & Hole filling effect
-{   float Perf = Performance_Mode ? 0.715f : 1.225, MS = Diverge * pix.x, GetDepth = smoothstep(0,1,GetDB(Coordinates, 0).x),Near_Far_CB_Size = GetDepth >= 0.5 ? 1.0 : 0.5, VM_Adj_A = View_Mode >= 1 ? 0.0 : 0.04;
+{   float Perf = Performance_LvL[Performance_Level].x, MS = Diverge * pix.x, GetDepth = smoothstep(0,1,GetDB(Coordinates, 0).x),Near_Far_CB_Size = GetDepth >= 0.5 ? 1.0 : 0.5, VM_Adj_A = View_Mode >= 1 ? 0.0 : 0.04;
 	float2 ParallaxCoord = Coordinates, CBxy = floor( float2(Coordinates.x * BUFFER_WIDTH, Coordinates.y * BUFFER_HEIGHT) * Near_Far_CB_Size );
 	//Would Use Switch....
 	if( View_Mode == 1)//0.505/0.6125/0.715
-		Perf = Performance_Mode ? 1.0 :1.029;
+		Perf = Performance_LvL[Performance_Level].y;
 	if( View_Mode == 2)
-		Perf = Performance_Mode ? 0.679: 1.425;
+		Perf = Performance_LvL[Performance_Level].z;
 	#if !DX9
 	if(View_Mode >= 3)//This has a high perf cost.
 	{
