@@ -159,10 +159,20 @@ static const int FOV = 0;                               //Set Game FoV
 	#define DB_Y 2
 	#define DB_W 7
 #elif (App == 0x142EDFD6 || App == 0x2A0ECCC9 || App == 0x8B0C2031 )	//DOOM 2016
-	#define DA_Y 20.0
-	#define DA_X 0.03125
-	#define DB_Y 3
+	#define DA_Y 23.125
+	#define DA_Z -0.00010
+	#define DA_X 0.071
+	#define DB_Z 0.1125
+	#define DF_Y 0.01875
+	#define DB_Y 1 //Auto Mode Works But this game is better locked.
+	#define DE_X 3
+	#define DE_Y 0.500
+	#define DE_Z 0.4375
 	#define DB_W 8
+    #define DG_Z 0.001
+	#define BM 1
+	#define DG_X 0.145
+	#define PE 1
 #elif (App == 0x17232880 || App == 0x9D77A7C4 || App == 0x22EF526F )	//CoD:Black Ops | CoD:MW2 |CoD:MW3
 	#define DA_Y 12.5
 	#define DB_Y 3
@@ -2794,7 +2804,7 @@ float3 Weapon_Profiles(float WP ,float3 Weapon_Adjust) //Tried Switch But, can't
     if (WP == 7)
         Weapon_Adjust = float3(0.276,20.0,9.5625);    //WP 5  | Skyrim: SE
     if (WP == 8)
-        Weapon_Adjust = float3(0.338,20.0,9.20);      //WP 6  | DOOM 2016
+        Weapon_Adjust = float3(0.338,21.0,9.1375);      //WP 6  | DOOM 2016
     if (WP == 9)
         Weapon_Adjust = float3(0.255,177.5,63.025);   //WP 7  | CoD:Black Ops | CoD:MW2 | CoD:MW3
     if (WP == 10)
