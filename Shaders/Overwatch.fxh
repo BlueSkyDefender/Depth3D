@@ -2624,6 +2624,19 @@ static const int FOV = 0;                               //Set Game FoV
 	#define DG_X 0.165
 	#define PE 1
 	#define NW 1
+#elif (App == 0x19D0F410 ) //Zombie Army Trilogy
+	#define DA_Y 12.25
+	#define DA_X 0.17
+	#define DA_Z -0.00025
+	#define DB_Y 5
+	#define DE_X 1
+	#define DE_Y 0.375
+	#define DE_Z 0.375
+	#define DG_W 0.7
+	//#define BM 1
+	//#define DG_X 0.165
+	#define PE 1
+	#define NW 1
 #else
 	#define NP 1 //No Profile
 #endif
