@@ -1278,7 +1278,8 @@ float2 zBuffer(in float4 position : SV_Position, in float2 texcoord : TEXCOORD) 
 
 float2 GetDB(float2 texcoord, float Mips)
 {
-	return tex2Dlod(SamplerzBufferN, float4(texcoord,0, Mips) ).xx;
+	float Scale_Depth = tex2Dlod(SamplerzBufferN, float4(texcoord,0, Mips) ).x;
+	return Scale_Depth;//lerp(Scale_Depth,-Scale_Depth,-ZPD_Separation.x); // Save for AI
 }
 //Perf Level selection left one open for one more view mode.
 static const float4 Performance_LvL[3] = { float4( 0.715, 0.5, 0.679, 0 ), float4( 1.225, 1.0, 1.425, 0), float4( 1.425, 1.02, 2.752, 0 ) };

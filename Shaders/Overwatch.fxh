@@ -1,7 +1,7 @@
 ////----------------------------------------//
 ///SuperDepth3D Overwatch Automation Shader///
 //----------------------------------------////
-// Version 2.1.2
+// Version 2.1.3
 //---------------------------------------OVERWATCH---------------------------------------//
 // If you are reading this stop. Go away and never look back. From this point on if you  //
 // still think it's is worth looking at this..... Then no one can save you or your soul. //
@@ -1061,6 +1061,8 @@ static const int FOV = 0;                               //Set Game FoV
 #elif (App == 0x71170B42 ) //Blood: Fresh Suppy
 	#define DA_Y 212.5
 	#define DA_X 0.175
+	#define BM 1
+	#define DG_X 0.275
 	#define DB_Y 4
 	#define DE_X 1
 	#define DE_Y 0.375
