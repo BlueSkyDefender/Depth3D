@@ -2,7 +2,7 @@
 ///**SuperDepth3D**///
 //----------------////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//* Depth Map Based 3D post-process shader v2.6.6
+//* Depth Map Based 3D post-process shader v2.6.7
 //* For Reshade 3.0+
 //* ---------------------------------
 //*
@@ -251,15 +251,16 @@ uniform float2 ZPD_Boundary_n_Fade <
 uniform int View_Mode <
 	ui_type = "combo";
 	#if !DX9
-	ui_items = "VM0 Normal\0VM1 Alpha\0VM2 Reiteration\0VM3 Adaptive\0";
+	ui_items = "VM0 Normal\0VM1 Alpha\0VM2 Reiteration\0VM3 FlashBack\0VM4 Adaptive\0";
 	#else
-	ui_items = "VM0 Normal\0VM3 Alpha\0VM2 Reiteration\0";
+	ui_items = "VM0 Normal\0VM3 Alpha\0VM2 Reiteration\0VM3 FlashBack\0";
 	#endif
 	ui_label = "·View Mode·";
 	ui_tooltip = "Changes the way the shader fills in the occlude sections in the image.\n"
 				"Normal      | is the default output used for most games with it's streched look.\n"
 				"Alpha       | is used for higher amounts of Semi-Transparent objects like foliage.\n"
 				"Reiteration | Same thing as Alpha but with brakeage points.\n"
+				"FlashBack   | Same option as SuperDepth3D 2.0.5 Alpha.\n"
 				#if !DX9
 				"Adaptive    | is a scene adapting infilling that uses disruptive reiterative sampling.\n"
 				"\n"
@@ -1282,18 +1283,21 @@ float2 GetDB(float2 texcoord, float Mips)
 	return Scale_Depth;//lerp(Scale_Depth,-Scale_Depth,-ZPD_Separation.x); // Save for AI
 }
 //Perf Level selection left one open for one more view mode.
-static const float4 Performance_LvL[3] = { float4( 0.715, 0.5, 0.679, 0 ), float4( 1.225, 1.0, 1.425, 0), float4( 1.425, 1.02, 2.752, 0 ) };
+static const float4 Performance_LvL[3] = { float4( 0.715, 0.5, 0.679, 0.0 ), float4( 1.225, 1.0, 1.425, 0.0), float4( 1.425, 1.02, 2.752, 0.0 ) };
 //////////////////////////////////////////////////////////Parallax Generation///////////////////////////////////////////////////////////////////////
 float2 Parallax(float Diverge, float2 Coordinates, float IO) // Horizontal parallax offset & Hole filling effect
-{   float Perf = Performance_LvL[Performance_Level].x, MS = Diverge * pix.x, GetDepth = smoothstep(0,1,GetDB(Coordinates, 0).x),Near_Far_CB_Size = GetDepth >= 0.5 ? 1.0 : 0.5, VM_Adj_A = View_Mode >= 1 ? 0.0 : 0.04;
+{   float Perf = Performance_LvL[Performance_Level].x, MS = Diverge * pix.x, GetDepth = smoothstep(0,1,GetDB(Coordinates, 0).x),
+				 Near_Far_CB_Size = GetDepth >= 0.5 ? 1.0 : 0.5, VM_Adj_A = View_Mode >= 1 && View_Mode != 3 ? 0.0 : 0.04;
 	float2 ParallaxCoord = Coordinates, CBxy = floor( float2(Coordinates.x * BUFFER_WIDTH, Coordinates.y * BUFFER_HEIGHT) * Near_Far_CB_Size );
 	//Would Use Switch....
 	if( View_Mode == 1)//0.505/0.6125/0.715
 		Perf = Performance_LvL[Performance_Level].y;
 	if( View_Mode == 2)
 		Perf = Performance_LvL[Performance_Level].z;
+	if( View_Mode == 3)
+		Perf = Performance_LvL[Performance_Level].y;
 	#if !DX9
-	if(View_Mode >= 3)//This has a high perf cost.
+	if(View_Mode >= 4)//This has a high perf cost.
 	{
 		if( GetDepth >= 0.999 )
 			Perf = 2.752;
@@ -1357,11 +1361,11 @@ float2 Parallax(float Diverge, float2 Coordinates, float IO) // Horizontal paral
 	float weight = afterDepthValue / min(-0.003,depthDiffrence);
 		  ParallaxCoord = PrevParallaxCoord * max(0.0f, weight) + ParallaxCoord * min(1.0f, 1.0f - weight);
 	//This is to limit artifacts.
-	if( View_Mode >= 2 )
+	if( View_Mode >= 2 && View_Mode != 3 )
 		ParallaxCoord += Store_DB_Offset * 0.1;
 	// Apply gap masking
 	if( View_Mode >= 2 || View_Mode == 0)
-		ParallaxCoord.x -= depthDiffrence * MS * VM_Switch * Switch_Depth;
+		ParallaxCoord.x -= View_Mode == 3 ? depthDiffrence * MS : depthDiffrence * MS * VM_Switch * Switch_Depth;
 
 	if(Stereoscopic_Mode == 2)
 		ParallaxCoord.y += IO * pix.y; //Optimization for line interlaced.
