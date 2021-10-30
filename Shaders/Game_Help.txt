@@ -207,6 +207,11 @@ Your game may and most likely will crash when you uncheck the 2nd option.
 
 Also no real way to fix the 1-frame delay due to issues in this game.
 
+4.7.0 Fixes the Issues but then they break again in 4.9.1
+
+Use ReShade 4.7.0. DXR works with a strange Box on the top left and it goes away if you use DLSS. But, it's a lower quality Depth Buffer.
+Have Fun.
+
 {Call of Duty: Modern Warfare 3}
 Set Image Quality to Native.
 You can also use DGVoodoo 2.6 to make the game DX11 and grab a better depth buffer, maybe.

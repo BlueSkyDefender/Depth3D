@@ -1,7 +1,7 @@
 ////----------------------------------------//
 ///SuperDepth3D Overwatch Automation Shader///
 //----------------------------------------////
-// Version 2.1.3
+// Version 2.1.4
 //---------------------------------------OVERWATCH---------------------------------------//
 // If you are reading this stop. Go away and never look back. From this point on if you  //
 // still think it's is worth looking at this..... Then no one can save you or your soul. //
@@ -2183,7 +2183,7 @@ static const int FOV = 0;                               //Set Game FoV
 	#define PE 1
 	#define DS 1
 	#define RH 1
-#elif (App == 0xAA5644F9 ) //Need For Speed Heat
+#elif (App == 0xAA5644F9 || App == 0x1981FECC ) //Need For Speed: Heat | Payback
 	#define DA_W 1
 	#define DA_Y 12.5
 	#define DA_X 0.1
@@ -2195,6 +2195,7 @@ static const int FOV = 0;                               //Set Game FoV
 	//#define DE_Y 0.450
 	//#define DE_Z 0.375
 	#define PE 1
+	#define DA 1
 #elif (App == 0xBD8B2F39 ) //Assassin's Creed Odyssey
 	#define DA_W 1
 	//#define DB_X 1
@@ -2627,8 +2628,8 @@ static const int FOV = 0;                               //Set Game FoV
 	#define PE 1
 	#define NW 1
 #elif (App == 0x19D0F410 ) //Zombie Army Trilogy
-	#define DA_Y 12.25
-	#define DA_X 0.17
+	#define DA_Y 12.5
+	#define DA_X 0.155
 	#define DA_Z -0.00025
 	#define DB_Y 5
 	#define DE_X 1
