@@ -1,7 +1,7 @@
 ////----------------------------------------//
 ///SuperDepth3D Overwatch Automation Shader///
 //----------------------------------------////
-// Version 2.1.4
+// Version 2.1.5
 //---------------------------------------OVERWATCH---------------------------------------//
 // If you are reading this stop. Go away and never look back. From this point on if you  //
 // still think it's is worth looking at this..... Then no one can save you or your soul. //
@@ -758,6 +758,7 @@ static const int FOV = 0;                               //Set Game FoV
 	#define NF 1
 #elif (App == 0x88004DC9 || App == 0x1DDA9341) //Strange Brigade DX12 & Vulkan
 	#define DA_X 0.0625
+	#define DF_Y 0.02
 	#define DA_Y 20.0
 	#define DA_Z 0.0001
 	#define DB_Y 5
@@ -1592,11 +1593,11 @@ static const int FOV = 0;                               //Set Game FoV
 	#define RH 1
 #elif (App == 0x54D4EAFA) //Sekiro Shadows Die Twice
 	#define DA_W 1
-	//#define DA_X 0.0625
+    #define DF_Y 0.025
 	#define DA_X 0.10
-	//#define DA_Y 59.375
-	#define DA_Y 30.0
-	#define DA_Z 0.000375
+	#define DA_Y 31.25
+	#define DA_Z -0.0525
+	#define DG_W 0.25 //Pop out
 	//#define DB_Z 0.125
 	#define DB_Y 1
 	#define DE_X 2
@@ -1847,8 +1848,9 @@ static const int FOV = 0;                               //Set Game FoV
 	#define DS 1
 #elif (App == 0x5C0EBBE9 ) //A Plague Tale Innocence
 	#define DA_W 1
-	#define DA_X 0.05
-	#define DA_Y 33.75
+	#define DA_X 0.050
+    #define DF_Y 0.025
+	#define DA_Y 33.00
 	#define DB_Y 3
 	#define DE_X 2
 	#define DE_Y 0.500
@@ -2056,6 +2058,7 @@ static const int FOV = 0;                               //Set Game FoV
     //#define DB_X 1
 	#define DA_Y 12.5
 	#define DA_X 0.075
+	#define DF_Y 0.0125
 	//#define DF_Y 0.1
 	#define DB_Y 4
 	//#define DB_Z 0.125
@@ -2198,27 +2201,18 @@ static const int FOV = 0;                               //Set Game FoV
 	#define DA 1
 #elif (App == 0xBD8B2F39 ) //Assassin's Creed Odyssey
 	#define DA_W 1
-	//#define DB_X 1
 	#define DA_Y 30.0
-	#define DA_X 0.050
-	#define DF_Y 0.030
+	#define DA_X 0.05
+	#define DF_Y 0.025
 	#define DB_Y 4
 	//#define DB_Z 0.125
-	#define DA_Z -1.000
+	#define DA_Z -0.3
 	#define DE_X 2
-	//#define DE_Y 0.250
+	#define DE_Y 0.250
 	#define DE_Z 0.375
+	#define DG_W 0.4 //Pop out allowed
 	#define PE 1
 	#define FV 1
-	//#define DA 1
-	//#define DS 1
-	//#define RH 1
-	//#define NF 1
-	//#define SP 1
-	//#define DD_X 0.625
-	//#define DD_Y 0.700
-	//#define DD_Z 0.600
-	//#define DD_W -0.425
 #elif (App == 0x3D00A2BC ) //SM64 us f3dx2e
 	#define DA_Y 12.5
 	#define DA_X 0.050

@@ -61,7 +61,7 @@ def update():
 if starting:
 	#enabled = True
 	system.setThreadTiming(TimingTypes.HighresSystemTimer)
-	system.threadExecutionInterval = 2
+	system.threadExecutionInterval = 0
 	tobiiEyeX.update += update
 
 #toggleA = keyboard.getPressed(Key.X)
