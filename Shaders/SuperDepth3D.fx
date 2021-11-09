@@ -159,8 +159,7 @@
 #else
 	#define DX9 0
 #endif
-//Resolution Scaling because I can't tell your monitor size. Each level is 25 more then it should be.
-//Resolution Scaling because I can't tell your monitor size. Each level is 25 more then it should be.
+//Resolution Scaling because I can't tell your monitor size.
 #if (BUFFER_HEIGHT <= 720)
 	#define Max_Divergence 25.0
 	#define Set_Divergence 12.5	

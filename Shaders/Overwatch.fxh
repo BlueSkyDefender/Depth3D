@@ -1891,7 +1891,7 @@ static const int FOV = 0;                               //Set Game FoV
 	#define DE_Z 0.375
 #elif (App == 0x49F7B9C0 ) //Control DX12
 	#define DA_X 0.05625
-	#define DF_Y 0.05625
+	#define DF_Y 0.0625
 	#define DA_Y 18.75
 	#define DB_Y 3
 	#define DE_X 1

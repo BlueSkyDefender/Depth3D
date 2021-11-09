@@ -2,7 +2,7 @@
 ///**SuperDepth3D_VR+**///
 //--------------------////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//* Depth Map Based 3D post-process shader v2.5.8
+//* Depth Map Based 3D post-process shader v2.5.9
 //* For Reshade 4.4+ I think...
 //* ---------------------------------
 //*
@@ -151,16 +151,23 @@
 #else
 	#define DX9 0
 #endif
-//Resolution Scaling because I can't tell your monitor size. Each level is 25 more then it should be.
-#if (BUFFER_HEIGHT <= 1080)
+//Resolution Scaling because I can't tell your monitor size.
+#if (BUFFER_HEIGHT <= 720)
+	#define Max_Divergence 25.0
+	#define Set_Divergence 12.5	
+#elif (BUFFER_HEIGHT <= 1080)
 	#define Max_Divergence 50.0
+	#define Set_Divergence 25.0
 #elif (BUFFER_HEIGHT <= 1440)
 	#define Max_Divergence 75.0
+	#define Set_Divergence 37.5
 #elif (BUFFER_HEIGHT <= 2160)
 	#define Max_Divergence 100.0
+	#define Set_Divergence 50.0
 #else
-	#define Max_Divergence 125.0
-#endif
+	#define Max_Divergence 125.0//Wow Must be the future and 8K Plus is normal now. If you are hear use AI infilling...... Future person.
+	#define Set_Divergence 62.5
+#endif                          //With love <3 Jose Negrete..
 //New ReShade PreProcessor stuff
 #if UI_MASK
 	#ifndef Mask_Cycle_Key
@@ -224,7 +231,7 @@ uniform float Divergence <
 	ui_tooltip = "Divergence increases differences between the left and right retinal images and allows you to experience depth.\n"
 				 "The process of deriving binocular depth information is called stereopsis.";
 	ui_category = "Divergence & Convergence";
-> = 25;
+> = Set_Divergence;
 
 uniform float2 ZPD_Separation <
 	ui_type = "drag";
@@ -1406,12 +1413,12 @@ float2 Parallax(float Diverge, float2 Coordinates) // Horizontal parallax offset
 	float beforeDepthValue = Get_DB_ZDP, afterDepthValue = CurrentDepthMapValue - CurrentLayerDepth;
 		  beforeDepthValue += LayerDepth - CurrentLayerDepth;
 	// Depth Diffrence for Gap masking and depth scaling in Normal Mode.
-	float depthDiffrence = afterDepthValue-beforeDepthValue, VM_Switch = View_Mode == 2 ? 0.9 : 0.0625, Switch_Depth = View_Mode == 0 ? 1-GetDepth : 1;
+	float depthDiffrence = afterDepthValue-beforeDepthValue, VM_Switch = View_Mode == 2 ? 0.9 : 0.0625, Switch_Depth = View_Mode == 0 ? 1-GetDepth : 1, Perf_Adjust = Performance_Level == 2 ? 0.75 : 0.5;
 	// Interpolate coordinates
 	float weight = afterDepthValue / min(-0.003,depthDiffrence);
 		  ParallaxCoord = PrevParallaxCoord * max(0.0f, weight) + ParallaxCoord * min(1.0f, 1.0f - weight);
 	//This is to limit artifacts.
-		ParallaxCoord += Store_DB_Offset * 0.5;
+		ParallaxCoord += Store_DB_Offset * Perf_Adjust;
 	// Apply gap masking
 	if( View_Mode >= 2 || View_Mode == 0)
 		ParallaxCoord.x -= View_Mode == 3 ? depthDiffrence * MS : depthDiffrence * MS * VM_Switch * Switch_Depth;
