@@ -1504,14 +1504,6 @@ static const int FOV = 0;                               //Set Game FoV
 	#define DE_Y 0.250
 	#define DE_Z 0.4
 	#define DE_W 0.450
-#elif (App == 0x837F12C9 ) //QuantumBreak
-	#define DA_X 0.0375
-	#define DA_Y 20.0
-	#define DA_Z 0.000125
-	#define DB_Y 1
-	//#define DE_X 1
-	//#define DE_Y 0.625
-	//#define DE_Z 0.375
 #elif (App == 0xB4C116F7 ) //Nioh
 	#define DA_W 1
 	#define DA_X 0.1
@@ -1889,7 +1881,7 @@ static const int FOV = 0;                               //Set Game FoV
 	#define DE_X 1
 	#define DE_Y 0.500
 	#define DE_Z 0.375
-#elif (App == 0x49F7B9C0 ) //Control DX12
+#elif (App == 0x49F7B9C0 || App == 0x837F12C9 ) //Control DX12 | QuantumBreak DX11
 	#define DA_X 0.05625
 	#define DF_Y 0.0625
 	#define DA_Y 18.75

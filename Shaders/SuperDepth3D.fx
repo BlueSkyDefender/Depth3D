@@ -1322,10 +1322,10 @@ float2 Parallax(float Diverge, float2 Coordinates, float IO) // Horizontal paral
 	//ParallaxSteps Calculations
 	float D = abs(Diverge), Cal_Steps = (D * Perf) + (D * VM_Adj_A), Steps = clamp( Cal_Steps, 0, 256 );//Foveated Rendering Point on attack 16-256 limit samples.
 	// Offset per step progress & Limit
-	float LayerDepth = rcp(Steps), TP = 0.03;
+	float LayerDepth = rcp(Steps), TP = 0.02;
 	//Offsets listed here Max Seperation is 3% - 8% of screen space with Depth Offsets & Netto layer offset change based on MS.
 	float deltaCoordinates = MS * LayerDepth, CurrentDepthMapValue = GetDB(ParallaxCoord, 0).x, CurrentLayerDepth = 0.0f;
-	float2 DB_Offset = float2(Diverge * TP, 0) * pix, Store_DB_Offset = DB_Offset;
+	float2 DB_Offset = float2(lerp(Diverge * TP,MS,0.5f), 0) * pix, Store_DB_Offset = DB_Offset;
 
     if( View_Mode >= 1 )
     	DB_Offset = 0;
