@@ -715,7 +715,8 @@ static const int FOV = 0;                               //Set Game FoV
 	#define RH 1
 #elif (App == 0x67A4A23A ) //Crash Bandicoot N.Saine Trilogy
 	#define DA_Y 7.5
-	#define DA_Z 0.250
+    #define DF_Y 0.0625
+	#define DA_Z -0.250
 	#define DA_X 0.1
 	#define DB_Y 4
 	#define DF_W 0.580
