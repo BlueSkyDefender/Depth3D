@@ -1497,14 +1497,15 @@ static const int FOV = 0;                               //Set Game FoV
 	#define DB_Z 0.025
 #elif (App == 0x7F1A5568 ) //DarkSiders III
 	#define DA_W 1
-	#define DA_X 0.05
-	#define DA_Y 62.5
-	#define DA_Z 0.000125
-	#define DB_Y 5
+	#define DA_X 0.0625
+	#define DA_Y 50.0
+	#define DA_Z 0.0001
+	#define DB_Y 4
 	#define DE_X 1
 	#define DE_Y 0.250
 	#define DE_Z 0.4
-	#define DE_W 0.450
+	#define DG_Z 0.450
+	#define DG_W 0.125
 #elif (App == 0xB4C116F7 ) //Nioh
 	#define DA_W 1
 	#define DA_X 0.1
