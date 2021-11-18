@@ -2,7 +2,7 @@
 ///**SuperDepth3D**///
 //----------------////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//* Depth Map Based 3D post-process shader v2.7.3
+//* Depth Map Based 3D post-process shader v2.7.4
 //* For Reshade 3.0+
 //* ---------------------------------
 //*
@@ -256,14 +256,15 @@ uniform float2 ZPD_Boundary_n_Fade <
 uniform int View_Mode <
 	ui_type = "combo";
 	#if !DX9
-	ui_items = "VM0 Normal\0VM1 Alpha\0VM2 Reiteration\0VM3 Adaptive\0";
+	ui_items = "VM0 Normal Alpha \0VM1 Normal Beta \0VM2 FlashBack \0VM3 Reiteration \0VM4 Adaptive \0";
 	#else
-	ui_items = "VM0 Normal\0VM1 Alpha\0VM2 Reiteration\0";
+	ui_items = "VM0 Normal Alpha \0VM1 Normal Beta \0VM2 FlashBack \0VM3 Reiteration  \0";
 	#endif
 	ui_label = "·View Mode·";
 	ui_tooltip = "Changes the way the shader fills in the occlude sections in the image.\n"
-				"Normal      | is the default output used for most games with it's streched look.\n"
-				"Alpha       | is used for higher amounts of Semi-Transparent objects like foliage.\n"
+				"Normal Alpha| is the default output used for most games with it's streched look and image preservation.\n"
+				"Normal Beta | Same as above but should work better in games with TAA,FSR,and or DLSS.\n"
+				"FlashBack   | is used for higher amounts of Semi-Transparent objects like foliage.\n"
 				"Reiteration | Same thing as Alpha but with brakeage points.\n"
 				#if !DX9
 				"Adaptive    | is a scene adapting infilling that uses disruptive reiterative sampling.\n"
@@ -1302,25 +1303,26 @@ float2 GetDB(float2 texcoord, float Mips)
 	}
 	return float2(Scale_Depth,Mask);//lerp(Scale_Depth,-Scale_Depth,-ZPD_Separation.x); // Save for AI
 }
-//Perf Level selection left one open for one more view mode.
+//Perf Level selection
 #define Normal_View 0.025
 static const float4 Performance_LvL[3] = { float4( 0.5, 0.5, 0.679, 0.0 ), float4( 1.0, 1.0, 1.425, 0.0), float4( 1.5, 1.5, 2.752, 0.0 ) };
-static const float4 Performance_Adj[3] = { float4( 0.0, 0.527, 0.0, 0.0 ), float4( 0.0, 0.04, 0.0, 0.0), float4( 0.0, 0.557, 0.0, 0.0 ) }; //X0.5 | 0.0 |-0.5 
+static const float4 Performance_Adj[3] = { float4( 0.0, 0.527, 0.0, 0.0 ), float4( 0.0, 0.04, 0.0, 0.0), float4( 0.0, 0.557, 0.0, 0.0 ) }; 
 //////////////////////////////////////////////////////////Parallax Generation///////////////////////////////////////////////////////////////////////
 float2 Parallax(float Diverge, float2 Coordinates, float IO) // Horizontal parallax offset & Hole filling effect
 {   float Perf = Performance_LvL[Performance_Level].x, MS = Diverge * pix.x, GetDepth = smoothstep(0,1,GetDB(Coordinates, 1).x),
 				 Near_Far_CB_Size =  View_Mode == 3 ? 1.0 : GetDepth >= 0.5 ? 1.0 : 0.5, VM_Adj = Performance_Adj[Performance_Level].x,
-				 Offset_Adjust[5] = { -Normal_View, 0.5, 0.5, 0.5, 0.0};
+				 Offset_Adjust[5] = { -Normal_View, 0.5, 0.5, 0.5, 0.5}, Depth_TP = lerp(0.03,0.04,GetDepth), 
+				 Texcoord_Offset[5] = { Normal_View, 0.04, 0.04, 0.04, Depth_TP};
 	float2 ParallaxCoord = Coordinates, CBxy = floor( float2(Coordinates.x * BUFFER_WIDTH, Coordinates.y * BUFFER_HEIGHT) * Near_Far_CB_Size );
 	//Would Use Switch....
-	if( View_Mode == 1)
+	if( View_Mode == 2)
 	{
 		VM_Adj = Performance_Adj[Performance_Level].y;
 		Perf = Performance_LvL[Performance_Level].y;
 	}
-	if( View_Mode == 2)
-		Perf = Performance_LvL[Performance_Level].z;
 	if( View_Mode == 3)
+		Perf = Performance_LvL[Performance_Level].z;
+	if( View_Mode == 4)
 	{
 		if( GetDepth >= 0.999 )
 		{
@@ -1346,12 +1348,12 @@ float2 Parallax(float Diverge, float2 Coordinates, float IO) // Horizontal paral
 	//ParallaxSteps Calculations
 	float D = abs(Diverge), Cal_Steps = (D * Perf) + (D * VM_Adj), Steps = clamp( Cal_Steps, 0, 256 );//Foveated Rendering Point on attack 16-256 limit samples.
 	// Offset per step progress & Limit
-	float LayerDepth = rcp(Steps), TP = View_Mode == 0 ? Normal_View : lerp(0.03,0.04,GetDepth);//0.035
+	float LayerDepth = rcp(Steps), TP = Texcoord_Offset[View_Mode];
 	//Offsets listed here Max Seperation is 3% - 8% of screen space with Depth Offsets & Netto layer offset change based on MS.
 	float deltaCoordinates = MS * LayerDepth, CurrentDepthMapValue = GetDB(ParallaxCoord, 0).x, CurrentLayerDepth = 0.0f;
 	float2 DB_Offset = float2(Diverge * TP, 0) * pix, Store_DB_Offset = DB_Offset;
 
-    if( View_Mode > 0 )
+    if( View_Mode > 1 )
     	DB_Offset = 0;
 	#if !Compatibility
 	[loop] //Steep parallax mapping
@@ -1387,7 +1389,7 @@ float2 Parallax(float Diverge, float2 Coordinates, float IO) // Horizontal paral
 	float beforeDepthValue = Get_DB_ZDP, afterDepthValue = CurrentDepthMapValue - CurrentLayerDepth;
 		  beforeDepthValue += LayerDepth - CurrentLayerDepth;
 	// Depth Diffrence for Gap masking and depth scaling in Normal Mode.
-	float depthDiffrence = afterDepthValue-beforeDepthValue, VM_Switch = View_Mode == 0 ? 0.025 : 1.0;
+	float depthDiffrence = afterDepthValue-beforeDepthValue, VM_Switch = View_Mode == 0 || View_Mode == 1 ? 0.025 : 1.0;
 	// Interpolate coordinates
 	float weight = afterDepthValue / min(-0.003,depthDiffrence);
 		  ParallaxCoord = PrevParallaxCoord * weight + ParallaxCoord * (1.0f - weight);
