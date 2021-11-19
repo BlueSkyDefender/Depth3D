@@ -262,8 +262,8 @@ uniform int View_Mode <
 	#endif
 	ui_label = "·View Mode·";
 	ui_tooltip = "Changes the way the shader fills in the occlude sections in the image.\n"
-				"Normal Alpha| is the default output used for most games with it's streched look and image preservation.\n"
-				"Normal Beta | Same as above but should work better in games with TAA,FSR,and or DLSS.\n"
+					 "Normal Alpha| Same as below but,it eats away at the image. This should work better in games with TAA,FSR,and or DLSS.\n"
+					 "Normal Beta | Normal output used for most games with it's streched look and image preservation.\n"
 				"FlashBack   | is used for higher amounts of Semi-Transparent objects like foliage.\n"
 				"Reiteration | Same thing as Alpha but with brakeage points.\n"
 				#if !DX9
@@ -1311,8 +1311,8 @@ static const float4 Performance_Adj[3] = { float4( 0.0, 0.527, 0.0, 0.0 ), float
 float2 Parallax(float Diverge, float2 Coordinates, float IO) // Horizontal parallax offset & Hole filling effect
 {   float Perf = Performance_LvL[Performance_Level].x, MS = Diverge * pix.x, GetDepth = smoothstep(0,1,GetDB(Coordinates, 1).x),
 				 Near_Far_CB_Size =  View_Mode == 3 ? 1.0 : GetDepth >= 0.5 ? 1.0 : 0.5, VM_Adj = Performance_Adj[Performance_Level].x,
-				 Offset_Adjust[5] = { -Normal_View, 0.5, 0.5, 0.5, 0.5}, Depth_TP = lerp(0.03,0.04,GetDepth), 
-				 Texcoord_Offset[5] = { Normal_View, 0.04, 0.04, 0.04, Depth_TP};
+				 Offset_Adjust[5] = { 0.5,-Normal_View, 0.5, 0.5, 0.5}, Depth_TP = lerp(0.03,0.04,GetDepth), 
+				 Texcoord_Offset[5] = { 0.04, Normal_View, 0.04, 0.04, Depth_TP};
 	float2 ParallaxCoord = Coordinates, CBxy = floor( float2(Coordinates.x * BUFFER_WIDTH, Coordinates.y * BUFFER_HEIGHT) * Near_Far_CB_Size );
 	//Would Use Switch....
 	if( View_Mode == 2)
