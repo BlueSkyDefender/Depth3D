@@ -1441,6 +1441,7 @@ static const int FOV = 0;                               //Set Game FoV
 	#define DF 1
 #elif (App == 0xF55F26A1 ) //Tekken 7
 	#define DA_W 1
+    #define DF_Y 0.025
 	#define DA_Y 100.0
 	#define DA_Z 0.0001
 	#define DB_Y 1

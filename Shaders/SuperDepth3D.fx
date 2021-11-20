@@ -2,7 +2,7 @@
 ///**SuperDepth3D**///
 //----------------////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//* Depth Map Based 3D post-process shader v2.7.4
+//* Depth Map Based 3D post-process shader v2.7.5
 //* For Reshade 3.0+
 //* ---------------------------------
 //*
@@ -188,7 +188,7 @@
 //Divergence & Convergence//
 uniform float Divergence <
 	ui_type = "drag";
-	ui_min = 10.0; ui_max = Max_Divergence; ui_step = 0.5;
+	ui_min = 1.0; ui_max = Max_Divergence; ui_step = 0.5;
 	ui_label = "·Divergence Slider·";
 	ui_tooltip = "Divergence increases differences between the left and right retinal images and allows you to experience depth.\n"
 				 "The process of deriving binocular depth information is called stereopsis.";
@@ -1304,7 +1304,7 @@ float2 GetDB(float2 texcoord, float Mips)
 	return float2(Scale_Depth,Mask);//lerp(Scale_Depth,-Scale_Depth,-ZPD_Separation.x); // Save for AI
 }
 //Perf Level selection
-#define Normal_View 0.025
+#define Normal_View 0.0375
 static const float4 Performance_LvL[3] = { float4( 0.5, 0.5, 0.679, 0.0 ), float4( 1.0, 1.0, 1.425, 0.0), float4( 1.5, 1.5, 2.752, 0.0 ) };
 static const float4 Performance_Adj[3] = { float4( 0.0, 0.527, 0.0, 0.0 ), float4( 0.0, 0.04, 0.0, 0.0), float4( 0.0, 0.557, 0.0, 0.0 ) }; 
 //////////////////////////////////////////////////////////Parallax Generation///////////////////////////////////////////////////////////////////////
@@ -1312,7 +1312,7 @@ float2 Parallax(float Diverge, float2 Coordinates, float IO) // Horizontal paral
 {   float Perf = Performance_LvL[Performance_Level].x, MS = Diverge * pix.x, GetDepth = smoothstep(0,1,GetDB(Coordinates, 1).x),
 				 Near_Far_CB_Size =  View_Mode == 3 ? 1.0 : GetDepth >= 0.5 ? 1.0 : 0.5, VM_Adj = Performance_Adj[Performance_Level].x,
 				 Offset_Adjust[5] = { 0.5,-Normal_View, 0.5, 0.5, 0.5}, Depth_TP = lerp(0.03,0.04,GetDepth), 
-				 Texcoord_Offset[5] = { 0.04, Normal_View, 0.04, 0.04, Depth_TP};
+				 Texcoord_Offset[5] = { 0.04, Normal_View * 2, 0.04, 0.04, Depth_TP};
 	float2 ParallaxCoord = Coordinates, CBxy = floor( float2(Coordinates.x * BUFFER_WIDTH, Coordinates.y * BUFFER_HEIGHT) * Near_Far_CB_Size );
 	//Would Use Switch....
 	if( View_Mode == 2)
@@ -1389,7 +1389,7 @@ float2 Parallax(float Diverge, float2 Coordinates, float IO) // Horizontal paral
 	float beforeDepthValue = Get_DB_ZDP, afterDepthValue = CurrentDepthMapValue - CurrentLayerDepth;
 		  beforeDepthValue += LayerDepth - CurrentLayerDepth;
 	// Depth Diffrence for Gap masking and depth scaling in Normal Mode.
-	float depthDiffrence = afterDepthValue-beforeDepthValue, VM_Switch = View_Mode == 0 || View_Mode == 1 ? 0.025 : 1.0;
+	float depthDiffrence = afterDepthValue-beforeDepthValue, VM_Switch = View_Mode == 0 || View_Mode == 1 ? 0.03 : 1.0;
 	// Interpolate coordinates
 	float weight = afterDepthValue / min(-0.003,depthDiffrence);
 		  ParallaxCoord = PrevParallaxCoord * weight + ParallaxCoord * (1.0f - weight);
