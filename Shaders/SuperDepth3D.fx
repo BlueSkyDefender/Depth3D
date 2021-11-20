@@ -1304,7 +1304,7 @@ float2 GetDB(float2 texcoord, float Mips)
 	return float2(Scale_Depth,Mask);//lerp(Scale_Depth,-Scale_Depth,-ZPD_Separation.x); // Save for AI
 }
 //Perf Level selection
-#define Normal_View 0.0375
+#define Normal_View 0.03
 static const float4 Performance_LvL[3] = { float4( 0.5, 0.5, 0.679, 0.0 ), float4( 1.0, 1.0, 1.425, 0.0), float4( 1.5, 1.5, 2.752, 0.0 ) };
 static const float4 Performance_Adj[3] = { float4( 0.0, 0.527, 0.0, 0.0 ), float4( 0.0, 0.04, 0.0, 0.0), float4( 0.0, 0.557, 0.0, 0.0 ) }; 
 //////////////////////////////////////////////////////////Parallax Generation///////////////////////////////////////////////////////////////////////

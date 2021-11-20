@@ -1246,14 +1246,15 @@ static const int FOV = 0;                               //Set Game FoV
 	#define DA_Y 18.75
 	#define DA_Z 0.0005
 	#define DA_X 0.055
+	#define DF_Y 0.02
 	#define DB_Z 0.075
 	#define DB_Y 1
 	#define DB_W 3
 	#define DE_X 3
 	#define DE_Y 0.425
 	#define DE_Z 0.375
-	#define DE_W 0.3975
-	#define DF_X 0.250
+	#define DG_Z 0.3975
+	#define DF_X 0.225
 	#define NW 1
 #elif (App == 0x2ECAAF29 || App == 0xE19E4830 || App == 0xE19E4830  ) //Half-Life 2 | Left 4 Dead 2
 	#define DA_Y 8.75
@@ -2803,7 +2804,7 @@ float3 Weapon_Profiles(float WP ,float3 Weapon_Adjust) //Tried Switch But, can't
 {   if (WP == 2)
         Weapon_Adjust = float3(0.425,5.0,1.125);      //WP 0  | ES: Oblivion
     if (WP == 3)
-        Weapon_Adjust = float3(0.276,16.25,9.2);      //WP 1  | BorderLands
+        Weapon_Adjust = float3(0.276,16.25,9.15);      //WP 1  | BorderLands
     if (WP == 4)
         Weapon_Adjust = float3(0.5,32.5,7.15);        //WP 2  | BorderLands 2
     if (WP == 5)
