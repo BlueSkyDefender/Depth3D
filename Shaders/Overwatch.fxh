@@ -1,7 +1,7 @@
 ////----------------------------------------//
 ///SuperDepth3D Overwatch Automation Shader///
 //----------------------------------------////
-// Version 2.1.5
+// Version 2.1.6
 //---------------------------------------OVERWATCH---------------------------------------//
 // If you are reading this stop. Go away and never look back. From this point on if you  //
 // still think it's is worth looking at this..... Then no one can save you or your soul. //
@@ -1104,11 +1104,16 @@ static const int FOV = 0;                               //Set Game FoV
 	#define DE_Z 0.375
 	#define DF_X -0.175
 #elif (App == 0x6061750E ) //Mirror's Edge
-	#define DA_Y 12.0
-	#define DA_Z 0.001
-	#define DA_X 0.03
-	#define DB_Y 4
+	#define DA_Y 12.25
+	#define DF_Y 0.020
+	#define DA_X 0.040
+	#define DB_Y 5
+    #define DB_Z 0.01
+	#define DE_X 1
+	#define DE_Y 0.50
+	#define DE_Z 0.375
 	#define DB_W 70
+	#define DS 1
 #elif (App == 0xC3AF1228 || App == 0x95A994C8 ) //Spellforce
 	#define DA_Y 145.0
 	#define DA_Z 0.001

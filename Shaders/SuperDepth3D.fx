@@ -2,7 +2,7 @@
 ///**SuperDepth3D**///
 //----------------////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//* Depth Map Based 3D post-process shader v2.7.5
+//* Depth Map Based 3D post-process shader v2.7.6
 //* For Reshade 3.0+
 //* ---------------------------------
 //*
@@ -153,12 +153,6 @@
 #else
 	#define Ven 0
 #endif
-//DX9 Check
-#if __RENDERER__ == 0x9000
-	#define DX9 1
-#else
-	#define DX9 0
-#endif
 //Resolution Scaling because I can't tell your monitor size.
 #if (BUFFER_HEIGHT <= 720)
 	#define Max_Divergence 25.0
@@ -255,28 +249,21 @@ uniform float2 ZPD_Boundary_n_Fade <
 
 uniform int View_Mode <
 	ui_type = "combo";
-	#if !DX9
-	ui_items = "VM0 Normal Alpha \0VM1 Normal Beta \0VM2 FlashBack \0VM3 Reiteration \0VM4 Adaptive \0";
-	#else
-	ui_items = "VM0 Normal Alpha \0VM1 Normal Beta \0VM2 FlashBack \0VM3 Reiteration  \0";
-	#endif
+
+	ui_items = "VM0 Normal Alpha \0VM1 Normal Beta \0VM2 FlashBack \0VM3 Reiteration \0VM4 Stamped \0VM5 Adaptive \0";
+
 	ui_label = "·View Mode·";
 	ui_tooltip = "Changes the way the shader fills in the occlude sections in the image.\n"
-					 "Normal Alpha| Same as below but,it eats away at the image. This should work better in games with TAA,FSR,and or DLSS.\n"
-					 "Normal Beta | Normal output used for most games with it's streched look and image preservation.\n"
+				"Normal Alpha| Same as below but,it eats away at the image. This should work better in games with TAA, FSR,and or DLSS.\n"
+			    "Normal Beta | Normal output used for most games with it's streched look and image preservation.\n"
 				"FlashBack   | is used for higher amounts of Semi-Transparent objects like foliage.\n"
-				"Reiteration | Same thing as Alpha but with brakeage points.\n"
-				#if !DX9
+				"Reiteration | Same thing as Stamped but with brakeage points.\n"
+				"Stamped     | Stamps out a transparent area on the occluded area.\n"
 				"Adaptive    | is a scene adapting infilling that uses disruptive reiterative sampling.\n"
 				"\n"
-				"Warning: Adaptive View Mode's performace cost is high in out door scenes.\n"
-				"         Also Make sure you turn on Performance Mode before you close this menu.\n"
-				#else
+				"Warning: Also Make sure you turn on Performance Mode before you close this menu.\n"
 				"\n"
-				"Warning: Adaptive View Mode's does not work on DX9, please use a wrapper to switch to a other API.\n"
-				#endif
-				"\n"
-				"Default is Normal Medium.";
+				"Default is Normal Alpha.";
 ui_category = "Occlusion Masking";
 > = 0;
 
@@ -1305,14 +1292,14 @@ float2 GetDB(float2 texcoord, float Mips)
 }
 //Perf Level selection
 #define Normal_View 0.03
-static const float4 Performance_LvL[3] = { float4( 0.5, 0.5, 0.679, 0.0 ), float4( 1.0, 1.0, 1.425, 0.0), float4( 1.5, 1.5, 2.752, 0.0 ) };
+static const float4 Performance_LvL[3] = { float4( 0.5, 0.5, 0.679, 0.5 ), float4( 1.0, 1.0, 1.425, 1.0), float4( 1.5, 1.5, 2.752, 1.021 ) };
 static const float4 Performance_Adj[3] = { float4( 0.0, 0.527, 0.0, 0.0 ), float4( 0.0, 0.04, 0.0, 0.0), float4( 0.0, 0.557, 0.0, 0.0 ) }; 
 //////////////////////////////////////////////////////////Parallax Generation///////////////////////////////////////////////////////////////////////
 float2 Parallax(float Diverge, float2 Coordinates, float IO) // Horizontal parallax offset & Hole filling effect
 {   float Perf = Performance_LvL[Performance_Level].x, MS = Diverge * pix.x, GetDepth = smoothstep(0,1,GetDB(Coordinates, 1).x),
 				 Near_Far_CB_Size =  View_Mode == 3 ? 1.0 : GetDepth >= 0.5 ? 1.0 : 0.5, VM_Adj = Performance_Adj[Performance_Level].x,
-				 Offset_Adjust[5] = { 0.5,-Normal_View, 0.5, 0.5, 0.5}, Depth_TP = lerp(0.03,0.04,GetDepth), 
-				 Texcoord_Offset[5] = { 0.04, Normal_View * 2, 0.04, 0.04, Depth_TP};
+				 Offset_Adjust[6] = { 0.5,-Normal_View, 0.5, 0.5, 0.5, 0.5}, Depth_TP = lerp(0.03,0.04,GetDepth), 
+				 Texcoord_Offset[6] = { 0.04, Normal_View * 2, 0.04, 0.04, 0.04, Depth_TP};
 	float2 ParallaxCoord = Coordinates, CBxy = floor( float2(Coordinates.x * BUFFER_WIDTH, Coordinates.y * BUFFER_HEIGHT) * Near_Far_CB_Size );
 	//Would Use Switch....
 	if( View_Mode == 2)
@@ -1323,6 +1310,8 @@ float2 Parallax(float Diverge, float2 Coordinates, float IO) // Horizontal paral
 	if( View_Mode == 3)
 		Perf = Performance_LvL[Performance_Level].z;
 	if( View_Mode == 4)
+		Perf = Performance_LvL[Performance_Level].w;
+	if( View_Mode == 5)
 	{
 		if( GetDepth >= 0.999 )
 		{
@@ -1339,7 +1328,7 @@ float2 Parallax(float Diverge, float2 Coordinates, float IO) // Horizontal paral
 			VM_Adj = fmod(CBxy.x+CBxy.y,2) ? 0.0 : 0.04;
 			Perf = fmod(CBxy.x+CBxy.y,2) ? 0.679 : 1.0;
 		}
-	} //VM_Adj = 0.04; Perf = fmod(CBxy.x+CBxy.y,2) ? 0.679 : 1.02 ; //Droped View Mode settins	
+	} 
 	/*
 	float Cut_Out = step( 0.999, GetDepth), Luma_Adptive = lerp(0.5,1.0,smoothstep(0,1,tex2Dlod(SamplerDMSL,float4(Coordinates,0,5)).w * 0.5f) );
 	if(L_VRS)
