@@ -2,7 +2,7 @@
 ///**SuperDepth3D**///
 //----------------////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//* Depth Map Based 3D post-process shader v2.7.6
+//* Depth Map Based 3D post-process shader v2.7.7
 //* For Reshade 3.0+
 //* ---------------------------------
 //*
@@ -250,12 +250,12 @@ uniform float2 ZPD_Boundary_n_Fade <
 uniform int View_Mode <
 	ui_type = "combo";
 
-	ui_items = "VM0 Normal Alpha \0VM1 Normal Beta \0VM2 FlashBack \0VM3 Reiteration \0VM4 Stamped \0VM5 Adaptive \0";
+	ui_items = "VM0 Normal \0VM1 Preserved  \0VM2 FlashBack \0VM3 Reiteration \0VM4 Stamped \0VM5 Adaptive \0";
 
 	ui_label = "·View Mode·";
 	ui_tooltip = "Changes the way the shader fills in the occlude sections in the image.\n"
-				"Normal Alpha| Same as below but,it eats away at the image. This should work better in games with TAA, FSR,and or DLSS.\n"
-			    "Normal Beta | Normal output used for most games with it's streched look and image preservation.\n"
+				"Normal      | Same as below but,it eats away at the image. This should work better in games with TAA, FSR,and or DLSS.\n"
+			    "Preserved   | Like Normal output used for most games with it's streched look and image preservation.\n"
 				"FlashBack   | is used for higher amounts of Semi-Transparent objects like foliage.\n"
 				"Reiteration | Same thing as Stamped but with brakeage points.\n"
 				"Stamped     | Stamps out a transparent area on the occluded area.\n"
@@ -1291,51 +1291,39 @@ float2 GetDB(float2 texcoord, float Mips)
 	return float2(Scale_Depth,Mask);//lerp(Scale_Depth,-Scale_Depth,-ZPD_Separation.x); // Save for AI
 }
 //Perf Level selection
-#define Normal_View 0.03
+#define Normal_View 0.035
 static const float4 Performance_LvL[3] = { float4( 0.5, 0.5, 0.679, 0.5 ), float4( 1.0, 1.0, 1.425, 1.0), float4( 1.5, 1.5, 2.752, 1.021 ) };
-static const float4 Performance_Adj[3] = { float4( 0.0, 0.527, 0.0, 0.0 ), float4( 0.0, 0.04, 0.0, 0.0), float4( 0.0, 0.557, 0.0, 0.0 ) }; 
 //////////////////////////////////////////////////////////Parallax Generation///////////////////////////////////////////////////////////////////////
 float2 Parallax(float Diverge, float2 Coordinates, float IO) // Horizontal parallax offset & Hole filling effect
-{   float Perf = Performance_LvL[Performance_Level].x, MS = Diverge * pix.x, GetDepth = smoothstep(0,1,GetDB(Coordinates, 1).x),
-				 Near_Far_CB_Size =  View_Mode == 3 ? 1.0 : GetDepth >= 0.5 ? 1.0 : 0.5, VM_Adj = Performance_Adj[Performance_Level].x,
-				 Offset_Adjust[6] = { 0.5,-Normal_View, 0.5, 0.5, 0.5, 0.5}, Depth_TP = lerp(0.03,0.04,GetDepth), 
-				 Texcoord_Offset[6] = { 0.04, Normal_View * 2, 0.04, 0.04, 0.04, Depth_TP};
-	float2 ParallaxCoord = Coordinates, CBxy = floor( float2(Coordinates.x * BUFFER_WIDTH, Coordinates.y * BUFFER_HEIGHT) * Near_Far_CB_Size );
+{   float MS = Diverge * pix.x, GetDepth = smoothstep(0,1,GetDB(Coordinates, 1).x),
+				 Depth_TP = lerp(0.03,0.04,GetDepth),
+				 Offset_Adjust[6] = { 0.25,-Normal_View, 0.75, 0.75, 0.75, 0.75}, 
+				 Texcoord_Offset[6] = { 0.035, Normal_View, 0.035, 0.035, 0.035, Depth_TP};
+	float2 ParallaxCoord = Coordinates, CBxy = floor( float2(Coordinates.x * BUFFER_WIDTH, Coordinates.y * BUFFER_HEIGHT)),
+		   Perf = float2( Performance_LvL[Performance_Level].x, 0.0) ;
 	//Would Use Switch....
 	if( View_Mode == 2)
-	{
-		VM_Adj = Performance_Adj[Performance_Level].y;
-		Perf = Performance_LvL[Performance_Level].y;
-	}
+		Perf = float2( Performance_LvL[Performance_Level].y, 0.04 );
 	if( View_Mode == 3)
-		Perf = Performance_LvL[Performance_Level].z;
+		Perf = float2( Performance_LvL[Performance_Level].z , 0.0 );
 	if( View_Mode == 4)
-		Perf = Performance_LvL[Performance_Level].w;
+		Perf = float2( Performance_LvL[Performance_Level].w , 0.0 );
 	if( View_Mode == 5)
 	{
-		if( GetDepth >= 0.999 )
-		{
-			VM_Adj = fmod(CBxy.x+CBxy.y,2) ? 0.0 : 0.527;
-			Perf = fmod(CBxy.x+CBxy.y,2) ? 0.679 : 0.5;
-		}
+		if( GetDepth >= 0.999 ) //Needs to be tested
+			Perf = fmod(CBxy.x+CBxy.y,2) ? float2(0.679 , 0.0) : float2( 0.5, 0.527);
 		else if( GetDepth >= 0.875)
-		{
-			VM_Adj = fmod(CBxy.x+CBxy.y,2) ? 0.557 : 0.0;
-			Perf = fmod(CBxy.x+CBxy.y,2) ? 1.02 : 0.679;
-		}
+			Perf = fmod(CBxy.x+CBxy.y,2) ? float2(1.02 , 0.557) : float2( 0.679, 0.0);
 		else
-		{
-			VM_Adj = fmod(CBxy.x+CBxy.y,2) ? 0.0 : 0.04;
-			Perf = fmod(CBxy.x+CBxy.y,2) ? 0.679 : 1.0;
-		}
+			Perf = fmod(CBxy.x+CBxy.y,2) ? float2(0.679 , 0.0) : float2( 1.0, 0.04);
 	} 
 	/*
-	float Cut_Out = step( 0.999, GetDepth), Luma_Adptive = lerp(0.5,1.0,smoothstep(0,1,tex2Dlod(SamplerDMSL,float4(Coordinates,0,5)).w * 0.5f) );
+	float Cut_Out = step( 0.999, GetDepth), Luma_Adptive = lerp(0.5,1.0,smoothstep(0,1,tex2Dlod(SamplerDMN,float4(Coordinates,0,5)).w * 0.5f) );
 	if(L_VRS)
 		Perf *= lerp(Luma_Adptive, 0.5, Cut_Out); 
 	*/
 	//ParallaxSteps Calculations
-	float D = abs(Diverge), Cal_Steps = (D * Perf) + (D * VM_Adj), Steps = clamp( Cal_Steps, 0, 256 );//Foveated Rendering Point on attack 16-256 limit samples.
+	float D = abs(Diverge), Cal_Steps = (D * Perf.x) + (D * Perf.y), Steps = clamp( Cal_Steps, 0, 256 );//Foveated Rendering Point on attack 16-256 limit samples.
 	// Offset per step progress & Limit
 	float LayerDepth = rcp(Steps), TP = Texcoord_Offset[View_Mode];
 	//Offsets listed here Max Seperation is 3% - 8% of screen space with Depth Offsets & Netto layer offset change based on MS.
@@ -1344,7 +1332,7 @@ float2 Parallax(float Diverge, float2 Coordinates, float IO) // Horizontal paral
 
     if( View_Mode > 1 )
     	DB_Offset = 0;
-	#if !Compatibility
+
 	[loop] //Steep parallax mapping
 	while ( CurrentDepthMapValue > CurrentLayerDepth )
 	{   // Shift coordinates horizontally in linear fasion
@@ -1355,20 +1343,6 @@ float2 Parallax(float Diverge, float2 Coordinates, float IO) // Horizontal paral
 	    CurrentLayerDepth += LayerDepth;
 		continue;
 	}
-	#else
-	[loop] //Steep parallax mapping
-	for ( int i = 0; i < Steps; i++ )
-	{   // Doing it this way should stop crashes in older version of reshade, I hope.
-		if(CurrentDepthMapValue < CurrentLayerDepth )
-			break; // Once we hit the limit Stop Exit Loop.
-		// Shift coordinates horizontally in linear fasion
-		ParallaxCoord.x -= deltaCoordinates;
-		// Get depth value at current coordinates
-		CurrentDepthMapValue = GetDB(ParallaxCoord - DB_Offset, 0).x;
-		// Get depth of next layer
-		CurrentLayerDepth += LayerDepth;
-	}
-	#endif
 	//Anti-Weapon Hand Fighting
 	float Weapon_Mask = tex2Dlod(SamplerDMN,float4(Coordinates,0,0)).y, ZFighting_Mask = 1.0-(1.0-tex2Dlod(SamplerDMN,float4(Coordinates,0,5.4)).y - Weapon_Mask);
 		  ZFighting_Mask = ZFighting_Mask * (1.0-Weapon_Mask);
@@ -1378,14 +1352,17 @@ float2 Parallax(float Diverge, float2 Coordinates, float IO) // Horizontal paral
 	float beforeDepthValue = Get_DB_ZDP, afterDepthValue = CurrentDepthMapValue - CurrentLayerDepth;
 		  beforeDepthValue += LayerDepth - CurrentLayerDepth;
 	// Depth Diffrence for Gap masking and depth scaling in Normal Mode.
-	float depthDiffrence = afterDepthValue-beforeDepthValue, VM_Switch = View_Mode == 0 || View_Mode == 1 ? 0.03 : 1.0;
+	float depthDiffrence = afterDepthValue-beforeDepthValue;
 	// Interpolate coordinates
 	float weight = afterDepthValue / min(-0.003,depthDiffrence);
 		  ParallaxCoord = PrevParallaxCoord * weight + ParallaxCoord * (1.0f - weight);
 	//This is to limit artifacts.
 		ParallaxCoord += Store_DB_Offset * Offset_Adjust[View_Mode];
-	// Apply gap masking
-		ParallaxCoord.x -= depthDiffrence * MS * VM_Switch;
+	// Apply gap masking+
+	if(Diverge < 0)
+		ParallaxCoord.x += depthDiffrence * 2.5 * pix.x;
+	else
+		ParallaxCoord.x -= depthDiffrence * 2.5 * pix.x;
 
 	if(Stereoscopic_Mode == 2)
 		ParallaxCoord.y += IO * pix.y; //Optimization for line interlaced.
