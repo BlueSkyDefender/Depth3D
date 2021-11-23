@@ -1,7 +1,7 @@
 ////----------------------------------------//
 ///SuperDepth3D Overwatch Automation Shader///
 //----------------------------------------////
-// Version 2.1.6
+// Version 2.1.8
 //---------------------------------------OVERWATCH---------------------------------------//
 // If you are reading this stop. Go away and never look back. From this point on if you  //
 // still think it's is worth looking at this..... Then no one can save you or your soul. //
@@ -2635,6 +2635,31 @@ static const int FOV = 0;                               //Set Game FoV
 	//#define DG_X 0.165
 	#define PE 1
 	#define NW 1
+#elif (App == 0x8842D13 ) //Genshin Impact
+	#define DA_W 1
+    #define DB_X 1
+	#define DA_Y 9.375
+	#define DA_X 0.1
+	#define DA_Z -0.01
+	#define DB_Y 5
+	#define DE_X 1
+	//#define DE_Y 0.4375
+	#define DE_Z 0.375
+	#define DF_Y 0.01
+	#define DG_W 0.1
+	#define NW 1
+#elif (App == 0xEEAF4DE ) //Guardians of the galaxy
+    #define DA_W 1
+	#define DA_Y 54.0
+	#define DA_X 0.05
+	#define DB_Y 1
+	#define DB_Z 0.1125
+	#define DE_X 1
+	#define DE_Y 0.375
+	#define DE_Z 0.400
+	#define DF_Y 0.0375
+	#define DG_W 0.2
+	#define DA 1
 #else
 	#define NP 1 //No Profile
 #endif

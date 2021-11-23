@@ -2,7 +2,7 @@
 ///**SuperDepth3D**///
 //----------------////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//* Depth Map Based 3D post-process shader v2.7.7
+//* Depth Map Based 3D post-process shader v2.7.8
 //* For Reshade 3.0+
 //* ---------------------------------
 //*
@@ -291,12 +291,12 @@ uniform float Max_Depth <
 
 uniform int Performance_Level <
 	ui_type = "combo";
-	ui_items = "Low\0Med\0High\0";
+	ui_items = "Performant\0Normal\0Work in Progress\0";
 	ui_label = " Performance Mode";
 	ui_tooltip = "Performance Mode Lowers or Raises Occlusion Quality Processing so that there is a performance is adjustable.\n"
 				 "Please enable the 'Performance Mode Checkbox,' in ReShade's GUI.\n"
 				 "It's located in the lower bottom right of the ReShade's Main UI.\n"
-				 "Default is False.";
+				 "Default is Normal.";
 	ui_category = "Occlusion Masking";
 > = 1;
 
@@ -1291,31 +1291,31 @@ float2 GetDB(float2 texcoord, float Mips)
 	return float2(Scale_Depth,Mask);//lerp(Scale_Depth,-Scale_Depth,-ZPD_Separation.x); // Save for AI
 }
 //Perf Level selection
-#define Normal_View 0.035
-static const float4 Performance_LvL[3] = { float4( 0.5, 0.5, 0.679, 0.5 ), float4( 1.0, 1.0, 1.425, 1.0), float4( 1.5, 1.5, 2.752, 1.021 ) };
+#define Normal_View 0.0375
+static const float4 Performance_LvL[3] = { float4( 0.5, 0.5, 0.679, 0.5 ), float4( 1.0, 1.0, 1.425, 1.0), float4( 1.0, 1.0, 1.425, 1.0) };
 //////////////////////////////////////////////////////////Parallax Generation///////////////////////////////////////////////////////////////////////
 float2 Parallax(float Diverge, float2 Coordinates, float IO) // Horizontal parallax offset & Hole filling effect
 {   float MS = Diverge * pix.x, GetDepth = smoothstep(0,1,GetDB(Coordinates, 1).x),
 				 Depth_TP = lerp(0.03,0.04,GetDepth),
-				 Offset_Adjust[6] = { 0.25,-Normal_View, 0.75, 0.75, 0.75, 0.75}, 
-				 Texcoord_Offset[6] = { 0.035, Normal_View, 0.035, 0.035, 0.035, Depth_TP};
+				 Offset_Adjust[6] = { lerp(0.25, 0.5,GetDepth),-Normal_View, 1.0, 1.0, 1.0, 1.0 }, 
+				 Texcoord_Offset[6] = { 0.0375, Normal_View, 0.0375, 0.0375, 0.0375, Depth_TP };
 	float2 ParallaxCoord = Coordinates, CBxy = floor( float2(Coordinates.x * BUFFER_WIDTH, Coordinates.y * BUFFER_HEIGHT)),
 		   Perf = float2( Performance_LvL[Performance_Level].x, 0.0) ;
 	//Would Use Switch....
 	if( View_Mode == 2)
-		Perf = float2( Performance_LvL[Performance_Level].y, 0.04 );
+		Perf = float2( Performance_LvL[Performance_Level].y, Performance_Level == 0 ? 0.176 : 0.028 );
 	if( View_Mode == 3)
-		Perf = float2( Performance_LvL[Performance_Level].z , 0.0 );
+		Perf = float2( Performance_LvL[Performance_Level].z , Performance_Level == 0 ? 0.0 : 0.270 );
 	if( View_Mode == 4)
-		Perf = float2( Performance_LvL[Performance_Level].w , 0.0 );
+		Perf = float2( Performance_LvL[Performance_Level].w , Performance_Level == 0 ? 0.001 : 0.002 );
 	if( View_Mode == 5)
 	{
-		if( GetDepth >= 0.999 ) //Needs to be tested
-			Perf = fmod(CBxy.x+CBxy.y,2) ? float2(0.679 , 0.0) : float2( 0.5, 0.527);
+		if( GetDepth >= 0.999 )
+			Perf = fmod(CBxy.x+CBxy.y,2) ? float2(0.678 , 0.0) : float2( 0.5, 0.526);
 		else if( GetDepth >= 0.875)
-			Perf = fmod(CBxy.x+CBxy.y,2) ? float2(1.02 , 0.557) : float2( 0.679, 0.0);
+			Perf = fmod(CBxy.x+CBxy.y,2) ? float2(1.00 , 0.019) : float2( 0.678, 0.0);
 		else
-			Perf = fmod(CBxy.x+CBxy.y,2) ? float2(0.679 , 0.0) : float2( 1.0, 0.04);
+			Perf = fmod(CBxy.x+CBxy.y,2) ? float2(0.678 , 0.0) : float2( 0.5, 0.176);
 	} 
 	/*
 	float Cut_Out = step( 0.999, GetDepth), Luma_Adptive = lerp(0.5,1.0,smoothstep(0,1,tex2Dlod(SamplerDMN,float4(Coordinates,0,5)).w * 0.5f) );
@@ -1360,9 +1360,9 @@ float2 Parallax(float Diverge, float2 Coordinates, float IO) // Horizontal paral
 		ParallaxCoord += Store_DB_Offset * Offset_Adjust[View_Mode];
 	// Apply gap masking+
 	if(Diverge < 0)
-		ParallaxCoord.x += depthDiffrence * 2.5 * pix.x;
+		ParallaxCoord.x += depthDiffrence * 2.0 * pix.x;
 	else
-		ParallaxCoord.x -= depthDiffrence * 2.5 * pix.x;
+		ParallaxCoord.x -= depthDiffrence * 2.0 * pix.x;
 
 	if(Stereoscopic_Mode == 2)
 		ParallaxCoord.y += IO * pix.y; //Optimization for line interlaced.
