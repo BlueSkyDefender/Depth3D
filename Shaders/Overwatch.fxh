@@ -1,7 +1,7 @@
 ////----------------------------------------//
 ///SuperDepth3D Overwatch Automation Shader///
 //----------------------------------------////
-// Version 2.1.8
+// Version 2.1.6
 //---------------------------------------OVERWATCH---------------------------------------//
 // If you are reading this stop. Go away and never look back. From this point on if you  //
 // still think it's is worth looking at this..... Then no one can save you or your soul. //
@@ -2653,7 +2653,7 @@ static const int FOV = 0;                               //Set Game FoV
 	#define DA_Y 54.0
 	#define DA_X 0.05
 	#define DB_Y 1
-	#define DB_Z 0.1125
+	#define DB_Z 0.12
 	#define DE_X 1
 	#define DE_Y 0.375
 	#define DE_Z 0.400

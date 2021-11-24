@@ -249,13 +249,10 @@ uniform float2 ZPD_Boundary_n_Fade <
 
 uniform int View_Mode <
 	ui_type = "combo";
-
-	ui_items = "VM0 Normal \0VM1 Preserved  \0VM2 FlashBack \0VM3 Reiteration \0VM4 Stamped \0VM5 Adaptive \0";
-
+	ui_items = "VM0 Normal \0VM1 FlashBack \0VM2 Reiteration \0VM3 Stamped \0VM4 Adaptive \0";
 	ui_label = "·View Mode·";
 	ui_tooltip = "Changes the way the shader fills in the occlude sections in the image.\n"
-				"Normal      | Same as below but,it eats away at the image. This should work better in games with TAA, FSR,and or DLSS.\n"
-			    "Preserved   | Like Normal output used for most games with it's streched look and image preservation.\n"
+				"Normal      | Normal output used for most games with it's streched look.\n"
 				"FlashBack   | is used for higher amounts of Semi-Transparent objects like foliage.\n"
 				"Reiteration | Same thing as Stamped but with brakeage points.\n"
 				"Stamped     | Stamps out a transparent area on the occluded area.\n"
@@ -263,7 +260,7 @@ uniform int View_Mode <
 				"\n"
 				"Warning: Also Make sure you turn on Performance Mode before you close this menu.\n"
 				"\n"
-				"Default is Normal Alpha.";
+				"Default is Normal.";
 ui_category = "Occlusion Masking";
 > = 0;
 
@@ -291,7 +288,7 @@ uniform float Max_Depth <
 
 uniform int Performance_Level <
 	ui_type = "combo";
-	ui_items = "Performant\0Normal\0Work in Progress\0";
+	ui_items = "Performant\0Normal\0";
 	ui_label = " Performance Mode";
 	ui_tooltip = "Performance Mode Lowers or Raises Occlusion Quality Processing so that there is a performance is adjustable.\n"
 				 "Please enable the 'Performance Mode Checkbox,' in ReShade's GUI.\n"
@@ -299,7 +296,16 @@ uniform int Performance_Level <
 				 "Default is Normal.";
 	ui_category = "Occlusion Masking";
 > = 1;
-
+/*
+uniform bool Preserve_Details <
+	ui_label = " Compatibility Mode";
+	ui_tooltip = "Not all games need a high offset for infilling.\n"
+				 "This option lets you limit it quickly with a simple toggle.\n"
+				 "With this on it should work better in games with TAA, FSR,and or DLSS.\n"
+				 "Default is False.";
+	ui_category = "Occlusion Masking";
+> = false;
+*/
 /* //Luma Based Variable Rate Shading
 uniform bool L_VRS <
 	ui_label = " Variable Rate Shading";
@@ -1291,24 +1297,24 @@ float2 GetDB(float2 texcoord, float Mips)
 	return float2(Scale_Depth,Mask);//lerp(Scale_Depth,-Scale_Depth,-ZPD_Separation.x); // Save for AI
 }
 //Perf Level selection
-#define Normal_View 0.0375
-static const float4 Performance_LvL[3] = { float4( 0.5, 0.5, 0.679, 0.5 ), float4( 1.0, 1.0, 1.425, 1.0), float4( 1.0, 1.0, 1.425, 1.0) };
+static const float4 Performance_LvL[2] = { float4( 0.5, 0.5, 0.679, 0.5 ), float4( 1.0, 1.0, 1.425, 1.0) };
 //////////////////////////////////////////////////////////Parallax Generation///////////////////////////////////////////////////////////////////////
 float2 Parallax(float Diverge, float2 Coordinates, float IO) // Horizontal parallax offset & Hole filling effect
-{   float MS = Diverge * pix.x, GetDepth = smoothstep(0,1,GetDB(Coordinates, 1).x),
-				 Depth_TP = lerp(0.03,0.04,GetDepth),
-				 Offset_Adjust[6] = { lerp(0.25, 0.5,GetDepth),-Normal_View, 1.0, 1.0, 1.0, 1.0 }, 
-				 Texcoord_Offset[6] = { 0.0375, Normal_View, 0.0375, 0.0375, 0.0375, Depth_TP };
+{   float MS = Diverge * pix.x, GetDepth = smoothstep(0,1,GetDB(Coordinates, 1).x), //P_D = Preserve_Details == 0,
+			   //Details_A = P_D ? 0.0 : 0.5, Details_B = P_D ? 0.5 : 1.0,
+			   //Details_A = P_D ? 0.0 : lerp(0.625,0.0,GetDepth), Details_B = P_D ? 0.5 : lerp(1.0,0.5,GetDepth),
+			   Details_A = lerp(0.625,0.0,GetDepth), Details_B = lerp(1.0,0.5,GetDepth),
+			   Offset_Adjust[5] = { Details_A , Details_B, Details_B, Details_B, Details_B };
 	float2 ParallaxCoord = Coordinates, CBxy = floor( float2(Coordinates.x * BUFFER_WIDTH, Coordinates.y * BUFFER_HEIGHT)),
 		   Perf = float2( Performance_LvL[Performance_Level].x, 0.0) ;
 	//Would Use Switch....
-	if( View_Mode == 2)
+	if( View_Mode == 1)
 		Perf = float2( Performance_LvL[Performance_Level].y, Performance_Level == 0 ? 0.176 : 0.028 );
-	if( View_Mode == 3)
+	if( View_Mode == 2)
 		Perf = float2( Performance_LvL[Performance_Level].z , Performance_Level == 0 ? 0.0 : 0.270 );
-	if( View_Mode == 4)
+	if( View_Mode == 3)
 		Perf = float2( Performance_LvL[Performance_Level].w , Performance_Level == 0 ? 0.001 : 0.002 );
-	if( View_Mode == 5)
+	if( View_Mode == 4)
 	{
 		if( GetDepth >= 0.999 )
 			Perf = fmod(CBxy.x+CBxy.y,2) ? float2(0.678 , 0.0) : float2( 0.5, 0.526);
@@ -1325,12 +1331,12 @@ float2 Parallax(float Diverge, float2 Coordinates, float IO) // Horizontal paral
 	//ParallaxSteps Calculations
 	float D = abs(Diverge), Cal_Steps = (D * Perf.x) + (D * Perf.y), Steps = clamp( Cal_Steps, 0, 256 );//Foveated Rendering Point on attack 16-256 limit samples.
 	// Offset per step progress & Limit
-	float LayerDepth = rcp(Steps), TP = Texcoord_Offset[View_Mode];
+	float LayerDepth = rcp(Steps), TP = 0.03;
 	//Offsets listed here Max Seperation is 3% - 8% of screen space with Depth Offsets & Netto layer offset change based on MS.
 	float deltaCoordinates = MS * LayerDepth, CurrentDepthMapValue = GetDB(ParallaxCoord, 0).x, CurrentLayerDepth = 0.0f;
 	float2 DB_Offset = float2(Diverge * TP, 0) * pix, Store_DB_Offset = DB_Offset;
 
-    if( View_Mode > 1 )
+    if( View_Mode > 0 )
     	DB_Offset = 0;
 
 	[loop] //Steep parallax mapping
