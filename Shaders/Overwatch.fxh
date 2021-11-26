@@ -1,7 +1,7 @@
 ////----------------------------------------//
 ///SuperDepth3D Overwatch Automation Shader///
 //----------------------------------------////
-// Version 2.1.6
+// Version 2.1.7
 //---------------------------------------OVERWATCH---------------------------------------//
 // If you are reading this stop. Go away and never look back. From this point on if you  //
 // still think it's is worth looking at this..... Then no one can save you or your soul. //
@@ -2660,6 +2660,20 @@ static const int FOV = 0;                               //Set Game FoV
 	#define DF_Y 0.0375
 	#define DG_W 0.2
 	#define DA 1
+	#define PE 1
+#elif (App == 0x967BB1CC ) //HROT
+	#define DA_X 0.055
+	#define DF_Y 0.025
+	#define DA_Y 150.0
+	#define DB_Z 0.0875
+	#define DB_Y 2
+	#define DE_X 3
+	#define DE_Y 0.550
+	#define DE_Z 0.375
+	#define WSM 2 //Weapon Settings Mode
+	#define DB_W 11
+	#define DS 1 
+	#define PE 1
 #else
 	#define NP 1 //No Profile
 #endif
@@ -2844,7 +2858,7 @@ float3 Weapon_Profiles(float WP ,float3 Weapon_Adjust) //Tried Switch But, can't
     if (WP == 7)
         Weapon_Adjust = float3(0.276,20.0,9.5625);    //WP 5  | Skyrim: SE
     if (WP == 8)
-        Weapon_Adjust = float3(0.338,21.0,9.1375);      //WP 6  | DOOM 2016
+        Weapon_Adjust = float3(0.338,21.0,9.1375);    //WP 6  | DOOM 2016
     if (WP == 9)
         Weapon_Adjust = float3(0.255,177.5,63.025);   //WP 7  | CoD:Black Ops | CoD:MW2 | CoD:MW3
     if (WP == 10)
@@ -3005,7 +3019,7 @@ float3 Weapon_Profiles(float WP ,float3 Weapon_Adjust) //Could reduce from 76 to
     if (WP == 10)
         Weapon_Adjust = float3(0.0,0.0,0.0);          //WP 8  | Game
     if (WP == 11)
-        Weapon_Adjust = float3(0.0,0.0,0.0);          //WP 9  | Game
+        Weapon_Adjust = float3(4.100,25.0,0.0);       //WP 9  | HROT
     if (WP == 12)
         Weapon_Adjust = float3(0.0,0.0,0.0);          //WP 10 | Game
     if (WP == 13)
