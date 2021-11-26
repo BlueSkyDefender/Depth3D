@@ -2043,15 +2043,16 @@ static const int FOV = 0;                               //Set Game FoV
 #elif (App == 0xF9341C1 ) //Valheim
 	#define DA_W 1
     #define DB_X 1
-	#define DA_Y 13.75
-	#define DA_X 0.051
-	//#define DF_Y 0.1
+	#define DA_Y 10.0
+	#define DA_X 0.05125
+	#define DF_Y 0.005
 	#define DB_Y 2
-	#define DB_Z 0.125
+	//#define DB_Z 0.125
 	#define DA_Z 0.001
 	#define DE_X 2
-	#define DE_Y 0.300
-	#define DE_Z 0.300
+	#define DE_Y 0.500
+	#define DE_Z 0.375
+	#define DG_W 0.15
 	#define PE 1
 	#define DA 1
 #elif (App == 0x8C8F544C ) //Witcher 3
