@@ -1037,12 +1037,14 @@ static const int FOV = 0;                               //Set Game FoV
 	#define DE_Z 0.400
 	#define DB_Z 0.500 //Yay I know
 #elif (App == 0xFA2C0106 ) //Hat in Time
-	#define DA_X 0.125
+	#define DA_X 0.250
 	#define DB_Y 4
-	#define DE_X 2
-	#define DE_Y 0.162
+	#define DE_X 1
 	#define DE_Z 0.4375
+    #define DF_Y 0.045
+    #define DG_Z 0.075
 	#define RH 1
+	#define DS 1
 #elif (App == 0xCD0E316F ) //Sonic Adventure DX Modded with BetterSADX
 	#define DA_Y 8.75
 	#define DA_X 0.1125
