@@ -2691,7 +2691,7 @@ static const int FOV = 0;                               //Set Game FoV
 	#define DA 1
 #elif (App == 0x88C50B03 ) //League of Legends
 	#define DA_X 0.2
-	#define DF_Y 0.15
+	#define DF_Y 0.2
 	#define DA_Y 12.5
     #define DA_Z 0.004
 	#define DB_Z 0.175
