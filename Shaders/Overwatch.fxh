@@ -643,10 +643,14 @@ static const int FOV = 0;                               //Set Game FoV
 	#define DC_W -0.05
 	#define RH 1
 #elif (App == 0x1B8B9F54 ) //TheEvilWithin
-	#define DA_Y 40.0
-	#define DA_Z 0.0001
+	#define DA_Y 37.5
+	#define DA_Z 0.000125
 	#define DA_X 0.1
+    #define DF_Y 0.0475
 	#define DB_Y 4
+	#define DE_X 1
+	#define DE_Y 0.500
+	#define DE_Z 0.375
 #elif (App == 0x7D9B7A37 ) //TheEvilWithin II
 	#define DA_Y 30.0
 	#define DA_Z 0.0001
