@@ -2,7 +2,7 @@
 ///**SuperDepth3D**///
 //----------------////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//* Depth Map Based 3D post-process shader v2.7.8
+//* Depth Map Based 3D post-process shader v2.8.0
 //* For Reshade 3.0+
 //* ---------------------------------
 //*
@@ -296,16 +296,15 @@ uniform int Performance_Level <
 				 "Default is Normal.";
 	ui_category = "Occlusion Masking";
 > = 1;
-/*
-uniform bool Preserve_Details <
+
+uniform bool Compatibility_Mode <
 	ui_label = " Compatibility Mode";
 	ui_tooltip = "Not all games need a high offset for infilling.\n"
-				 "This option lets you limit it quickly with a simple toggle.\n"
+				 "This option lets you increase this offset to limit artifacts.\n"
 				 "With this on it should work better in games with TAA, FSR,and or DLSS.\n"
-				 "Default is False.";
+				 "Default is Off.";
 	ui_category = "Occlusion Masking";
 > = false;
-*/
 /* //Luma Based Variable Rate Shading
 uniform bool L_VRS <
 	ui_label = " Variable Rate Shading";
@@ -1332,38 +1331,41 @@ float2 Parallax(float Diverge, float2 Coordinates, float IO) // Horizontal paral
 	float D = abs(Diverge), Cal_Steps = (D * Perf.x) + (D * Perf.y), Steps = clamp( Cal_Steps, 0, 256 );//Foveated Rendering Point on attack 16-256 limit samples.
 	// Offset per step progress & Limit
 	float LayerDepth = rcp(Steps), TP = 0.03;
+	if(Diverge < 0)
+		D = -Max_Divergence;
+	else
+		D = Max_Divergence;
 	//Offsets listed here Max Seperation is 3% - 8% of screen space with Depth Offsets & Netto layer offset change based on MS.
-	float deltaCoordinates = MS * LayerDepth, CurrentDepthMapValue = GetDB(ParallaxCoord, 0).x, CurrentLayerDepth = 0.0f;
-	float2 DB_Offset = float2(Diverge * TP, 0) * pix, Store_DB_Offset = DB_Offset;
-
-    if( View_Mode > 0 )
-    	DB_Offset = 0;
+	float deltaCoordinates = MS * LayerDepth, CurrentDepthMapValue = GetDB(ParallaxCoord, 0).x, CurrentLayerDepth = 0.0f,
+		  Offset_Switch = View_Mode > 0 ? ( Compatibility_Mode ? 0.5 : 0.0 ) : (Compatibility_Mode ? 1.75 : 1.0 ) ;
+	float2 DB_Offset = float2(D * TP, 0) * pix, DB_Offset_Switch = View_Mode > 0 ? DB_Offset * Offset_Switch : 0;
 
 	[loop] //Steep parallax mapping
 	while ( CurrentDepthMapValue > CurrentLayerDepth )
 	{   // Shift coordinates horizontally in linear fasion
 	    ParallaxCoord.x -= deltaCoordinates;
 	    // Get depth value at current coordinates
-	    CurrentDepthMapValue = GetDB(float2(ParallaxCoord - DB_Offset), 0).x;
+	    CurrentDepthMapValue = GetDB(float2(ParallaxCoord - DB_Offset * Offset_Switch), 0).x;
 	    // Get depth of next layer
 	    CurrentLayerDepth += LayerDepth;
 		continue;
 	}
+	
 	//Anti-Weapon Hand Fighting
 	float Weapon_Mask = tex2Dlod(SamplerDMN,float4(Coordinates,0,0)).y, ZFighting_Mask = 1.0-(1.0-tex2Dlod(SamplerDMN,float4(Coordinates,0,5.4)).y - Weapon_Mask);
 		  ZFighting_Mask = ZFighting_Mask * (1.0-Weapon_Mask);
-	float Get_DB = GetDB(ParallaxCoord , 0).y, Get_DB_ZDP = WP > 0 ? lerp(Get_DB, abs(Get_DB), ZFighting_Mask) : Get_DB;
+	float Get_DB = GetDB(ParallaxCoord - DB_Offset_Switch, 0).y, Get_DB_ZDP = WP > 0 ? lerp(Get_DB, abs(Get_DB), ZFighting_Mask) : Get_DB;
 	// Parallax Occlusion Mapping
 	float2 PrevParallaxCoord = float2(ParallaxCoord.x + deltaCoordinates, ParallaxCoord.y);
 	float beforeDepthValue = Get_DB_ZDP, afterDepthValue = CurrentDepthMapValue - CurrentLayerDepth;
 		  beforeDepthValue += LayerDepth - CurrentLayerDepth;
 	// Depth Diffrence for Gap masking and depth scaling in Normal Mode.
-	float depthDiffrence = afterDepthValue-beforeDepthValue;
+	float depthDiffrence = afterDepthValue - beforeDepthValue;
 	// Interpolate coordinates
 	float weight = afterDepthValue / min(-0.003,depthDiffrence);
-		  ParallaxCoord = PrevParallaxCoord * weight + ParallaxCoord * (1.0f - weight);
+		  ParallaxCoord.x = PrevParallaxCoord.x * weight + ParallaxCoord.x * (1.0f - weight);
 	//This is to limit artifacts.
-		ParallaxCoord += Store_DB_Offset * Offset_Adjust[View_Mode];
+		ParallaxCoord.x += DB_Offset.x * Offset_Adjust[View_Mode];
 	// Apply gap masking+
 	if(Diverge < 0)
 		ParallaxCoord.x += depthDiffrence * 2.0 * pix.x;
