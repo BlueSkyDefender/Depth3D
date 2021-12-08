@@ -2,7 +2,7 @@
 ///**SuperDepth3D_VR+**///
 //--------------------////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//* Depth Map Based 3D post-process shader v2.6.3
+//* Depth Map Based 3D post-process shader v2.7.1
 //* For Reshade 4.4+ I think...
 //* ---------------------------------
 //*
@@ -34,7 +34,7 @@
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #if exists "Overwatch.fxh"                                           //Overwatch Interceptor//
 	#include "Overwatch.fxh"
-	#define OS 0
+	#define OSW 0
 #else// DA_X = [ZPD] DA_Y = [Depth Adjust] DA_Z = [Offset] DA_W = [Depth Linearization]
 	static const float DA_X = 0.025, DA_Y = 7.5, DA_Z = 0.0, DA_W = 0.0;
 	// DC_X = [Depth Flip] DC_Y = [Auto Balance] DC_Z = [Auto Depth] DC_W = [Weapon Hand]
@@ -45,17 +45,21 @@
 	static const float DD_X = 1, DD_Y = 1, DD_Z = 0.0, DD_W = 0.0;
 	// DE_X = [ZPD Boundary Type] DE_Y = [ZPD Boundary Scaling] DE_Z = [ZPD Boundary Fade Time] DE_W = [Weapon Near Depth Max]
 	static const float DE_X = 0, DE_Y = 0.5, DE_Z = 0.25, DE_W = 0.0;
-	// DF_X = [Weapon ZPD Boundary] DF_Y = [Separation] DF_Z = [Null] DF_W = [HUD]
-	static const float DF_X = 0.0, DF_Y = 0.0, DF_Z = 0.0, DF_W = 0.0;
-	// DG_X = [ZPD Balance] DG_Y = [Null] DG_Z = [Weapon Near Depth Min] DG_W = [Check Depth Limit]
-	static const float DG_X = 0.5, DG_Y = 0.0, DG_Z = 0.0, DG_W = 0.0;
+	// DF_X = [Weapon ZPD Boundary] DF_Y = [Separation] DF_Z = [ZPD Balance] DF_W = [HUD]
+	static const float DF_X = 0.0, DF_Y = 0.0, DF_Z = 0.5, DF_W = 0.0;
+	// DG_X = [Special Depth X] DG_Y = [Special Depth Y] DG_Z = [Weapon Near Depth Min] DG_W = [Check Depth Limit]
+	static const float DG_X = 0.0, DG_Y = 0.0, DG_Z = 0.0, DG_W = 0.0;
+	// DH_X = [LBC Size Offset X] DH_Y = [LBC Size Offset Y] DH_Z = [LBC Pos Offset X] DH_W = [LBC Pos Offset X]
+	static const float DH_X = 1.0, DH_Y = 1.0, DH_Z = 0.0, DH_W = 0.0;
+	// DI_X = [LBM Offset X] DI_Y = [LBM Offset Y] DI_Z = [Null Z] DI_W = [Null W]
+	static const float DI_X = 0.0, DI_Y = 0.0, DI_Z = 0.0, DI_W = 0.0;		
 	// WSM = [Weapon Setting Mode]
 	#define OW_WP "WP Off\0Custom WP\0"
 	static const int WSM = 0;
 	//Triggers
-	static const int RE = 0, NC = 0, RH = 0, NP = 0, ID = 0, SP = 0, DC = 0, HM = 0, DF = 0, NF = 0, DS = 0, BM = 0, LBC = 0, LBM = 0, DA = 0, NW = 0, PE = 0, WW = 0, FV = 0, ED = 0, SDT = 0;
+	static const int REF = 0, NCW = 0, RHW = 0, NPW = 0, IDF = 0, SPF = 0, BDF = 0, HMT = 0, DFW = 0, NFM = 0, DSW = 0, BMT = 0, LBC = 0, LBM = 0, DAA = 0, NDW = 0, PEW = 0, WPW = 0, FOV = 0, EDW = 0, SDT = 0;
 	//Overwatch.fxh State
-	#define OS 1
+	#define OSW 1
 #endif
 //USER EDITABLE PREPROCESSOR FUNCTIONS START//
 
@@ -79,9 +83,10 @@
 // Also used to enable Image Position Adjust is used to move the Z-Buffer around.
 #define DB_Size_Position 0 //Default 0 is Off. One is On.
 
-// Auto Letter Box Correction & Masking
-#define LB_Correction 0 //Default 0 is Off. One is On.
-#define LetterBox_Masking 0 //[Zero is Off] [One is Hoz] [Two is Auto Hoz] [Three is Vert] [Four is Auto Vert]
+// Auto Letter Box Correction
+#define LB_Correction 0 //[Zero is Off] [One is Auto Hoz] [Two is Auto Vert]
+// Auto Letter Box Masking
+#define LetterBox_Masking 0 //[Zero is Off] [One is Auto Hoz] [Two is Auto Vert]
 
 // Specialized Depth Triggers
 #define SD_Trigger 0 //Default is off. One is Mode A other Modes not added yet.
@@ -243,7 +248,7 @@ uniform float2 ZPD_Separation <
 				"Default is 0.025, Zero is off.";
 	ui_category = "Divergence & Convergence";
 > = float2(DA_X,DF_Y);
-#if Balance_Mode || BM
+#if Balance_Mode || BMT
 uniform float ZPD_Balance <
 	ui_type = "drag";
 	ui_min = 0.0; ui_max = 1.0;
@@ -251,7 +256,7 @@ uniform float ZPD_Balance <
 	ui_tooltip = "Zero Parallax Distance balances between ZPD Depth and Scene Depth.\n"
 				"Default is Zero is full Convergence and One is Full Depth.";
 	ui_category = "Divergence & Convergence";
-> = DG_X;
+> = DE_X;
 
 static const int Auto_Balance_Ex = 0;
 #else
@@ -284,29 +289,28 @@ uniform float2 ZPD_Boundary_n_Fade <
 
 uniform int View_Mode <
 	ui_type = "combo";
-	#if !DX9
-	ui_items = "VM0 Normal\0VM1 Alpha\0VM2 Reiteration\0VM3 Adaptive\0";
-	#else
-	ui_items = "VM0 Normal\0VM1 Alpha\0VM2 Reiteration\0";
-	#endif
+	ui_items = "VM0 Normal \0VM1 FlashBack \0VM2 Reiteration \0VM3 Stamped \0VM4 Adaptive \0";
 	ui_label = "·View Mode·";
 	ui_tooltip = "Changes the way the shader fills in the occlude sections in the image.\n"
-				"Normal      | is the default output used for most games with it's streched look.\n"
-				"Alpha       | is used for higher amounts of Semi-Transparent objects like foliage.\n"
-				"Reiteration | Same thing as Alpha but with brakeage points.\n"
-				#if !DX9
+				"Normal      | Normal output used for most games with it's streched look.\n"
+				"FlashBack   | is used for higher amounts of Semi-Transparent objects like foliage.\n"
+				"Reiteration | Same thing as Stamped but with brakeage points.\n"
+				"Stamped     | Stamps out a transparent area on the occluded area.\n"
 				"Adaptive    | is a scene adapting infilling that uses disruptive reiterative sampling.\n"
 				"\n"
-				"Warning: Adaptive View Mode's performace cost is high in out door scenes.\n"
-				"         Also Make sure you turn on Performance Mode before you close this menu.\n"
-				#else
+				"Warning: Also Make sure you turn on Performance Mode before you close this menu.\n"
 				"\n"
-				"Warning: Adaptive View Mode's does not work on DX9, please use a wrapper to switch to a other API.\n"
-				#endif
-				"\n"
-				"Default is Normal Medium.";
+				"Default is Normal.";
 ui_category = "Occlusion Masking";
 > = 0;
+
+uniform int Custom_Sidebars <
+	ui_type = "combo";
+	ui_items = "Mirrored Edges\0Black Edges\0Stretched Edges\0";
+	ui_label = " Edge Handling";
+	ui_tooltip = "Edges selection for your screen output.";
+	ui_category = "Occlusion Masking";
+> = 1;
 
 uniform float Max_Depth <
 	#if Compatibility
@@ -324,25 +328,24 @@ uniform float Max_Depth <
 
 uniform int Performance_Level <
 	ui_type = "combo";
-	ui_items = "Low\0Med\0High\0";
+	ui_items = "Performant\0Normal\0";
 	ui_label = " Performance Mode";
 	ui_tooltip = "Performance Mode Lowers or Raises Occlusion Quality Processing so that there is a performance is adjustable.\n"
 				 "Please enable the 'Performance Mode Checkbox,' in ReShade's GUI.\n"
 				 "It's located in the lower bottom right of the ReShade's Main UI.\n"
-				 "Default is False.";
+				 "Default is Normal.";
 	ui_category = "Occlusion Masking";
-> = 0;
-/*
-//Luma Based Variable Rate Shading
-uniform bool L_VRS <
-	ui_label = " Variable Rate Shading";
-	ui_tooltip = "Luma Based Variable Rate Shading reallocation occlusion samples at varying rates across the 3D image so save Performance.\n"
-				 "Please enable the 'Performance Mode Checkbox,' in ReShade's GUI.\n"
-				 "It's located in the lower bottom right of the ReShade's Main UI.\n"
-				 "Default is False.";
+> = 1;
+
+uniform bool Compatibility_Mode <
+	ui_label = " Compatibility Mode";
+	ui_tooltip = "Not all games need a high offset for infilling.\n"
+				 "This option lets you increase this offset to limit artifacts.\n"
+				 "With this on it should work better in games with TAA, FSR,and or DLSS.\n"
+				 "Default is Off.";
 	ui_category = "Occlusion Masking";
 > = false;
-*/
+
 uniform int Depth_Map <
 	ui_type = "combo";
 	ui_items = "DM0 Normal\0DM1 Reversed\0";
@@ -399,7 +402,7 @@ uniform bool Depth_Map_Flip <
 	ui_tooltip = "Flip the depth map if it is upside down.";
 	ui_category = "Depth Map";
 > = DB_X;
-#if DB_Size_Position || SP == 2
+#if DB_Size_Position || SPF == 2 || LB_Correction
 uniform float2 Horizontal_and_Vertical <
 	ui_type = "drag";
 	ui_min = 0.0; ui_max = 2;
@@ -416,6 +419,30 @@ uniform float2 Image_Position_Adjust<
 	ui_category = "Reposition Depth";
 > = float2(DD_Z,DD_W);
 
+#if LB_Correction
+uniform float2 H_V_Offset <
+	ui_type = "drag";
+	ui_min = 0.0; ui_max = 2;
+	ui_label = " Horizontal & Vertical Size Offset";
+	ui_tooltip = "Adjust Horizontal and Vertical Resize Offset for Letter Box Correction. Default is 1.0.";
+	ui_category = "Reposition Depth";
+> = float2(1.0,1.0);
+
+uniform float2 Image_Pos_Offset <
+	ui_type = "drag";
+	ui_min = 0.0; ui_max = 2;
+	ui_label = " Horizontal & Vertical Position Offset";
+	ui_tooltip = "Adjust the Image Position if it's off by a bit for Letter Box Correction. Default is Zero.";
+	ui_category = "Reposition Depth";
+> = float2(0.0,0.0);
+
+uniform bool LB_Correction_Switch <
+	ui_label = " Letter Box Correction Toggle";
+	ui_tooltip = "Use this to turn off and on the correction when LetterBox Detection is active.";
+	ui_category = "Reposition Depth";
+> = true;
+#endif
+
 uniform bool Alinement_View <
 	ui_label = " Alinement View";
 	ui_tooltip = "A Guide to help aline the Depth Buffer to the Image.";
@@ -425,6 +452,10 @@ uniform bool Alinement_View <
 static const bool Alinement_View = false;
 static const float2 Horizontal_and_Vertical = float2(DD_X,DD_Y);
 static const float2 Image_Position_Adjust = float2(DD_Z,DD_W);
+
+static const bool LB_Correction_Switch = true;
+static const float2 H_V_Offset = float2(DH_X,DH_Y);
+static const float2 Image_Pos_Offset  = float2(DH_Z,DH_W);
 #endif
 //Weapon Hand Adjust//
 uniform int WP <
@@ -489,7 +520,7 @@ uniform float Weapon_ZPD_Boundary <
 	ui_tooltip = "This selection menu gives extra boundary conditions to WZPD.";
 	ui_category = "Weapon Hand Adjust";
 > = DF_X;
-#if HUD_MODE || HM
+#if HUD_MODE || HMT
 //Heads-Up Display
 uniform float2 HUD_Adjust <
 	ui_type = "drag";
@@ -556,7 +587,7 @@ uniform float Zoom <
 	ui_category = "Distortion Corrections";
 > = DC_W;
 #else
-	#if DC
+	#if BDF
 	uniform bool BD_Options <
 		ui_label = "·Toggle Barrel Distortion·";
 		ui_tooltip = "Use this if you modded the game to remove Barrel Distortion.";
@@ -743,7 +774,7 @@ sampler BackBufferCLAMP
 		AddressV = CLAMP;
 		AddressW = CLAMP;
 	};
-#if D_Frame || DF
+#if D_Frame || DFW
 texture texCF { Width = BUFFER_WIDTH ; Height = BUFFER_HEIGHT ; Format = RGBA8; };
 
 sampler SamplerCF
@@ -856,7 +887,7 @@ float2 Lum(float2 texcoord)
 		return saturate(tex2Dlod(SamplerLumVR,float4(texcoord,0,11)).xy);//Average Luminance Texture Sample
 	}
 ////////////////////////////////////////////////////Distortion Correction//////////////////////////////////////////////////////////////////////
-#if BD_Correction || DC
+#if BD_Correction || BDF
 float2 D(float2 p, float k1, float k2, float k3) //Lens + Radial lens undistort filtering Left & Right
 {   // Normalize the u,v coordinates in the range [-1;+1]
 	p = (2. * p - 1.);
@@ -877,7 +908,7 @@ return p;
 }
 #endif
 ///////////////////////////////////////////////////////////3D Image Adjustments/////////////////////////////////////////////////////////////////////
-#if D_Frame || DF
+#if D_Frame || DFW
 float4 CurrentFrame(in float4 position : SV_Position, in float2 texcoords : TEXCOORD) : SV_Target
 {
 		return tex2Dlod(BackBufferCLAMP,float4(texcoords,0,0));
@@ -908,15 +939,15 @@ float4 CSB(float2 texcoords)
 #endif
 
 #if LBC || LBM || LB_Correction || LetterBox_Masking
-float LBDetection()
-{   //0.120 0.879
-	if ( LetterBox_Masking >= 3 )
-		return (CSB(float2(0.1,0.5)) == 0) && (CSB(float2(0.9,0.5)) == 0) && (CSB(float2(0.5,0.5)) > 0) ? 1 : 0;
-	else     //Center_Top                 //Bottom_Left                //Center
-		return (CSB(float2(0.5,0.1)) == 0) && (CSB(float2(0.1,0.9)) == 0) && (CSB(float2(0.5,0.5)) > 0) ? 1 : 0;
-}
-#endif
+float LBDetection()//Active RGB Detection
+{   float Center = dot(0.333,CSB(float2(0.5,0.5))) > 0; //0.120 0.879
 
+	if ( LetterBox_Masking == 2 || LB_Correction == 2 || LBC == 2 || LBM == 2 )
+		return (CSB(float2(0.1,0.5)) == 0) && (CSB(float2(0.9,0.5)) == 0) && Center ? 1 : 0; //Vert
+	else       //Left_Center                  //Right_Center
+		return (CSB(float2(0.5,0.1)) == 0) && (CSB(float2(0.1,0.9)) == 0) && Center ? 1 : 0; //Hoz
+}			  //Center_Top                   //Bottom_Left
+#endif
 #if SDT || SD_Trigger
 float TargetedDepth(float2 TC)
 {
@@ -1009,25 +1040,29 @@ float DMA() //Small List of internal Multi Game Depth Adjustments.
 
 float2 TC_SP(float2 texcoord)
 {
-	#if BD_Correction || DC
+	#if BD_Correction || BDF
 	if(BD_Options == 0 || BD_Options == 2)
 	{
 		float3 K123 = Colors_K1_K2_K3 * 0.1;
 		texcoord = D(texcoord.xy,K123.x,K123.y,K123.z);
 	}
 	#endif
-	#if DB_Size_Position || SP || LBC || LB_Correction || SDT || SD_Trigger
+	#if DB_Size_Position || SPF || LBC || LB_Correction || SDT || SD_Trigger
 
 		#if SDT || SD_Trigger
-			float2 X_Y = float2(Image_Position_Adjust.x,Image_Position_Adjust.y) + float2(SDTriggers() ? -0.190 : 0 , 0);
+			float2 X_Y = float2(Image_Position_Adjust.x,Image_Position_Adjust.y) + (SDTriggers() ? float2( DG_X , DG_Y) : 0.0);
 		#else
-			float2 X_Y = float2(Image_Position_Adjust.x,Image_Position_Adjust.y);
+			#if LBC || LB_Correction
+				float2 X_Y = Image_Position_Adjust + (LBDetection() && LB_Correction_Switch ? Image_Pos_Offset : 0.0f );
+			#else
+				float2 X_Y = float2(Image_Position_Adjust.x,Image_Position_Adjust.y);
+			#endif
 		#endif
 
 	texcoord.xy += float2(-X_Y.x,X_Y.y)*0.5;
 
 		#if LBC || LB_Correction
-			float2 H_V = Horizontal_and_Vertical * float2(1,LBDetection() ? 1.315 : 1 );
+			float2 H_V = Horizontal_and_Vertical * (LBDetection() && LB_Correction_Switch ? H_V_Offset : 1.0f );
 		#else
 			float2 H_V = Horizontal_and_Vertical;
 		#endif
@@ -1218,16 +1253,16 @@ float4 DepthMap(in float4 position : SV_Position,in float2 texcoord : TEXCOORD) 
 
 float AutoDepthRange(float d, float2 texcoord )
 { float LumAdjust_ADR = smoothstep(-0.0175,Auto_Depth_Adjust,Lum(texcoord).y);
-	if (RE)
+	if (REF)
 		LumAdjust_ADR = smoothstep(-0.0175,Auto_Depth_Adjust,Lum(texcoord).x);
 
     return min(1,( d - 0 ) / ( LumAdjust_ADR - 0));
 }
-#if RE_Fix || RE
+#if RE_Fix || REF
 float AutoZPDRange(float ZPD, float2 texcoord )
 {   //Adjusted to only effect really intense differences.
 	float LumAdjust_AZDPR = smoothstep(-0.0175,0.1875,Lum(texcoord).y);
-	if(RE_Fix == 2 || RE == 2)
+	if(RE_Fix == 2 || REF == 2)
 		LumAdjust_AZDPR = smoothstep(0,0.075,Lum(texcoord).y);
     return saturate(LumAdjust_AZDPR * ZPD);
 }
@@ -1260,13 +1295,13 @@ float2 Conv(float D,float2 texcoord)
 	W_Convergence = 1 - W_Convergence / D;
 	float WD = D; //Needed to seperate Depth for the  Weapon Hand. It was causing problems with Auto Depth Range below.
 
-	#if RE_Fix || RE
+	#if RE_Fix || REF
 		Z = AutoZPDRange(Z,texcoord);
 	#endif
 		if (Auto_Depth_Adjust > 0)
 			D = AutoDepthRange(D,texcoord);
 
-	#if Balance_Mode || BM
+	#if Balance_Mode || BMT
 			ZP = saturate(ZPD_Balance);
 	#else
 		if(Auto_Balance_Ex > 0 )
@@ -1318,7 +1353,7 @@ float2 DB( float2 texcoord)
 	if (Cancel_Depth)
 		DM = 0.0625;
 
-	#if Invert_Depth || ID
+	#if Invert_Depth || IDF
 		DM.y = 1 - DM.y;
 	#endif
 
@@ -1329,13 +1364,11 @@ float2 DB( float2 texcoord)
 	if(LBM || LetterBox_Masking)
 	{
 		float storeDM = DM.y;
-	if ( LBM >= 3 || LetterBox_Masking >= 3 )
-		DM.y = texcoord.x > 0.125 && texcoord.x < 0.875 ? storeDM : 0.0125;//DM.y = texcoord.x > 0.051 && texcoord.x < 0.949 ? storeDM : 0.0125;
-	else
-		DM.y = texcoord.y > 0.120 && texcoord.y < 0.879 ? storeDM : 0.0125;
+		
+		DM.y = texcoord.y > DI_Y && texcoord.y < DI_X ? storeDM : 0.0125;
 
 	#if LBM || LetterBox_Masking
-		if((LBM == 2 || LBM == 4 || LetterBox_Masking == 2 || LetterBox_Masking == 4) && !LBDetection())
+		if((LBM >= 1 || LetterBox_Masking >= 1) && !LBDetection())
 			DM.y = storeDM;
 	#endif
 	}
@@ -1353,90 +1386,91 @@ float2 GetDB(float2 texcoord, float Mips)
 	float Scale_Depth = tex2Dlod(SamplerzBufferVR, float4(texcoord,0, Mips) ).x;
 	return Scale_Depth;//lerp(Scale_Depth,-Scale_Depth,-ZPD_Separation.x); //Save for AI Shader
 }
-//Perf Level selection left one open for one more view mode.
-#define Normal_View 0.025
-static const float4 Performance_LvL[3] = { float4( 0.5, 0.5, 0.679, 0.0 ), float4( 1.0, 1.0, 1.425, 0.0), float4( 1.5, 1.5, 2.752, 0.0 ) };
-static const float4 Performance_Adj[3] = { float4( 0.0, 0.527, 0.0, 0.0 ), float4( 0.0, 0.04, 0.0, 0.0), float4( 0.0, 0.557, 0.0, 0.0 ) }; //X0.5 | 0.0 |-0.5 
+//Perf Level selection
+#define Depth_Boost 1.0
+static const float4 Performance_LvL[2] = { float4( 0.5, 0.5, 0.679, 0.5 ), float4( 1.0, 1.0, 1.425, 1.0) };
 //////////////////////////////////////////////////////////Parallax Generation///////////////////////////////////////////////////////////////////////
 float2 Parallax(float Diverge, float2 Coordinates) // Horizontal parallax offset & Hole filling effect
-{   float Perf = Performance_LvL[Performance_Level].x, MS = Diverge * pix.x, GetDepth = smoothstep(0,1,GetDB(Coordinates, 1).x),
-				 Near_Far_CB_Size =  View_Mode == 3 ? 1.0 : GetDepth >= 0.5 ? 1.0 : 0.5, VM_Adj = Performance_Adj[Performance_Level].x,
-				 Offset_Adjust[5] = { -Normal_View, 0.5, 0.5, 0.5, 0.0};
-	float2 ParallaxCoord = Coordinates, CBxy = floor( float2(Coordinates.x * BUFFER_WIDTH, Coordinates.y * BUFFER_HEIGHT) * Near_Far_CB_Size );
+{   float MS = Diverge * pix.x, GetDepth = smoothstep(0,1,GetDB(Coordinates, 1).x), //P_D = Preserve_Details == 0,
+			   //Details_A = P_D ? 0.0 : 0.5, Details_B = P_D ? 0.5 : 1.0,
+			   //Details_A = P_D ? 0.0 : lerp(0.625,0.0,GetDepth), Details_B = P_D ? 0.5 : lerp(1.0,0.5,GetDepth),
+			   Details_A = lerp(0.625,0.0,GetDepth), Details_B = lerp(1.0,0.5,GetDepth),
+			   Offset_Adjust[5] = { Details_A , Details_B, Details_B, Details_B, Details_B };
+	float2 ParallaxCoord = Coordinates, CBxy = floor( float2(Coordinates.x * BUFFER_WIDTH, Coordinates.y * BUFFER_HEIGHT)),
+		   Perf = float2( Performance_LvL[Performance_Level].x, 0.0) ;
 	//Would Use Switch....
 	if( View_Mode == 1)
-	{
-		VM_Adj = Performance_Adj[Performance_Level].y;
-		Perf = Performance_LvL[Performance_Level].y;
-	}
+		Perf = float2( Performance_LvL[Performance_Level].y, Performance_Level == 0 ? 0.176 : 0.028 );
 	if( View_Mode == 2)
-		Perf = Performance_LvL[Performance_Level].z;
+		Perf = float2( Performance_LvL[Performance_Level].z , Performance_Level == 0 ? 0.0 : 0.270 );
 	if( View_Mode == 3)
+		Perf = float2( Performance_LvL[Performance_Level].w , Performance_Level == 0 ? 0.001 : 0.002 );
+	if( View_Mode == 4)
 	{
 		if( GetDepth >= 0.999 )
-		{
-			VM_Adj = fmod(CBxy.x+CBxy.y,2) ? 0.0 : 0.527;
-			Perf = fmod(CBxy.x+CBxy.y,2) ? 0.679 : 0.5;
-		}
+			Perf = fmod(CBxy.x+CBxy.y,2) ? float2(0.678 , 0.0) : float2( 0.5, 0.526);
 		else if( GetDepth >= 0.875)
-		{
-			VM_Adj = fmod(CBxy.x+CBxy.y,2) ? 0.557 : 0.0;
-			Perf = fmod(CBxy.x+CBxy.y,2) ? 1.02 : 0.679;
-		}
+			Perf = fmod(CBxy.x+CBxy.y,2) ? float2(1.00 , 0.019) : float2( 0.678, 0.0);
 		else
-		{
-			VM_Adj = fmod(CBxy.x+CBxy.y,2) ? 0.0 : 0.04;
-			Perf = fmod(CBxy.x+CBxy.y,2) ? 0.679 : 1.0;
-		}
-	} //VM_Adj = 0.04; Perf = fmod(CBxy.x+CBxy.y,2) ? 0.679 : 1.02 ; //Droped View Mode settins	
-	/*
-	float Cut_Out = step( 0.999, GetDepth), Luma_Adptive = lerp(0.5,1.0,smoothstep(0,1,tex2Dlod(SamplerDMSL,float4(Coordinates,0,5)).w * 0.5f) );
-	if(L_VRS)
-		Perf *= lerp(Luma_Adptive, 0.5, Cut_Out); 
-	*/
+			Perf = fmod(CBxy.x+CBxy.y,2) ? float2(0.678 , 0.0) : float2( 0.5, 0.176);
+	}
+	
+	if( View_Mode > 0) 
+		Perf.x *= Depth_Boost;
+		
+	//Luma Based VRS
+	float Luma_Adptive = max(0.0, tex2Dlod(SamplerDMVR,float4(Coordinates,0,5)).w ) > 0.15;
+		Perf.x *= lerp(0.5,1.0,Luma_Adptive); 
 	//ParallaxSteps Calculations
-	float D = abs(Diverge), Cal_Steps = (D * Perf) + (D * VM_Adj), Steps = clamp( Cal_Steps, 0, 256 );//Foveated Rendering Point on attack 16-256 limit samples.
+	float D = abs(Diverge), Cal_Steps = (D * Perf.x) + (D * Perf.y), Steps = clamp( Cal_Steps, 0, 256 );//Foveated Rendering Point on attack 16-256 limit samples.
 	// Offset per step progress & Limit
-	float LayerDepth = rcp(Steps), TP = View_Mode == 0 ? Normal_View : lerp(0.03,0.04,GetDepth);//0.035
+	float LayerDepth = rcp(Steps), TP = 0.03;
+	if(Diverge < 0)
+		D = -Max_Divergence;
+	else
+		D = Max_Divergence;
 	//Offsets listed here Max Seperation is 3% - 8% of screen space with Depth Offsets & Netto layer offset change based on MS.
-	float deltaCoordinates = MS * LayerDepth, CurrentDepthMapValue = GetDB(ParallaxCoord, 0).x, CurrentLayerDepth = 0.0f;
-	float2 DB_Offset = float2(Diverge * TP, 0) * pix, Store_DB_Offset = DB_Offset;
-
-    if( View_Mode >= 1 )
-    	DB_Offset = 0;
+	float deltaCoordinates = MS * LayerDepth, CurrentDepthMapValue = GetDB(ParallaxCoord, 0).x, CurrentLayerDepth = 0.0f,
+		  Offset_Switch = View_Mode > 0 ? ( Compatibility_Mode ? 0.5 : 0.0 ) : (Compatibility_Mode ? 1.75 : 1.0 ) ;
+	float2 DB_Offset = float2(D * TP, 0) * pix, DB_Offset_Switch = View_Mode > 0 ? DB_Offset * Offset_Switch : 0;
 
 	[loop] //Steep parallax mapping
 	while ( CurrentDepthMapValue > CurrentLayerDepth )
 	{   // Shift coordinates horizontally in linear fasion
-	    ParallaxCoord.x -= deltaCoordinates;
+	    ParallaxCoord.x -= deltaCoordinates * Depth_Boost;
 	    // Get depth value at current coordinates
-	    CurrentDepthMapValue = GetDB(float2(ParallaxCoord - DB_Offset), 0).x;
+	    CurrentDepthMapValue = GetDB(float2(ParallaxCoord - DB_Offset * Offset_Switch), 0).x;
 	    // Get depth of next layer
 	    CurrentLayerDepth += LayerDepth;
 		continue;
 	}
+	
 	//Anti-Weapon Hand Fighting
 	float Weapon_Mask = tex2Dlod(SamplerDMVR,float4(Coordinates,0,0)).y, ZFighting_Mask = 1.0-(1.0-tex2Dlod(SamplerDMVR,float4(Coordinates,0,5.4)).y - Weapon_Mask);
 		  ZFighting_Mask = ZFighting_Mask * (1.0-Weapon_Mask);
-	float Get_DB = GetDB(ParallaxCoord , 0).y, Get_DB_ZDP = WP > 0 ? lerp(Get_DB, abs(Get_DB), ZFighting_Mask) : Get_DB;
+	float Get_DB = GetDB(ParallaxCoord - DB_Offset_Switch, 0).y, Get_DB_ZDP = WP > 0 ? lerp(Get_DB, abs(Get_DB), ZFighting_Mask) : Get_DB;
 	// Parallax Occlusion Mapping
-	float2 PrevParallaxCoord = float2(ParallaxCoord.x + deltaCoordinates, ParallaxCoord.y);
+	float2 PrevParallaxCoord = float2(ParallaxCoord.x + deltaCoordinates * Depth_Boost, ParallaxCoord.y);
 	float beforeDepthValue = Get_DB_ZDP, afterDepthValue = CurrentDepthMapValue - CurrentLayerDepth;
 		  beforeDepthValue += LayerDepth - CurrentLayerDepth;
 	// Depth Diffrence for Gap masking and depth scaling in Normal Mode.
-	float depthDiffrence = afterDepthValue-beforeDepthValue, VM_Switch = View_Mode == 0 ? 0.025 : 1.0;
+	float depthDiffrence = afterDepthValue - beforeDepthValue;
 	// Interpolate coordinates
 	float weight = afterDepthValue / min(-0.003,depthDiffrence);
-		  ParallaxCoord = PrevParallaxCoord * weight + ParallaxCoord * (1.0f - weight);
+		  ParallaxCoord.x = PrevParallaxCoord.x * weight + ParallaxCoord.x * (1.0f - weight);
 	//This is to limit artifacts.
-		ParallaxCoord += Store_DB_Offset * Offset_Adjust[View_Mode];
-	// Apply gap masking
-		ParallaxCoord.x -= depthDiffrence * MS * VM_Switch;
+		ParallaxCoord.x += DB_Offset.x * Offset_Adjust[View_Mode];
+	// Apply gap masking+
+	if(Diverge < 0)
+		ParallaxCoord.x += depthDiffrence * 2.0 * pix.x;
+	else
+		ParallaxCoord.x -= depthDiffrence * 2.0 * pix.x;
+
 
 	return ParallaxCoord;
 }
 //////////////////////////////////////////////////////////////HUD Alterations///////////////////////////////////////////////////////////////////////
-#if HUD_MODE || HM
+#if HUD_MODE || HMT
 float3 HUD(float3 HUD, float2 texcoord )
 {
 	float Mask_Tex, CutOFFCal = ((HUD_Adjust.x * 0.5)/DMA()) * 0.5, COC = step(PrepDepth(texcoord)[1][2],CutOFFCal); //HUD Cutoff Calculation
@@ -1510,14 +1544,14 @@ void LR_Out(float4 position : SV_Position, float2 texcoord : TEXCOORD, out float
 	else if( Eye_Fade_Reduction_n_Power.x == 2)
 			DLR = float2(FD,D);
 //Left & Right Parallax for Stereo Vision
-#if HUD_MODE || HM
+#if HUD_MODE || HMT
 	float HUD_Adjustment = ((0.5 - HUD_Adjust.y)*25.) * pix.x;
 #endif
 
 #if HelixVision
 	float4 L = saturation( float4(MouseCursor( Parallax(-DLR.x, float2(TCL.x * 2,TCL.y))).rgb,1.0) ),
 		   R = saturation( float4(MouseCursor( Parallax( DLR.y, float2(TCR.x  * 2 - 1,TCR.y))).rgb,1.0) );
-	#if HUD_MODE || HM
+	#if HUD_MODE || HMT
 		L.rgb = HUD(L.rgb,float2((TCL.x * 2) - HUD_Adjustment,TCL.y));
 		R.rgb = HUD(R.rgb,float2((TCR.x  * 2 - 1) + HUD_Adjustment,TCR.y));
 	#endif
@@ -1525,7 +1559,7 @@ void LR_Out(float4 position : SV_Position, float2 texcoord : TEXCOORD, out float
 #else
 	Left =  saturation(float4(MouseCursor( Parallax(-DLR.x, TCL)).rgb,1.0)) ; //Stereoscopic 3D using Reprojection Left
 	Right = saturation(float4(MouseCursor( Parallax( DLR.y, TCR)).rgb,1.0)) ;//Stereoscopic 3D using Reprojection Right
-	#if HUD_MODE || HM
+	#if HUD_MODE || HMT
 		Left.rgb = HUD(Left.rgb,float2(TCL.x - HUD_Adjustment,TCL.y));
 		Right.rgb = HUD(Right.rgb,float2(TCR.x + HUD_Adjustment,TCR.y));
 	#endif
@@ -1734,7 +1768,7 @@ void Average_Luminance(float4 position : SV_Position, float2 texcoord : TEXCOORD
 	ABEA = ABEArray[Auto_Balance_Ex];
 
 	float Average_Lum_ZPD = PrepDepth(float2(ABEA.x + texcoord.x * ABEA.y, ABEA.z + texcoord.y * ABEA.w))[0][0], Average_Lum_Bottom = PrepDepth( texcoord )[0][0];
-	if(RE)
+	if(REF)
 	Average_Lum_Bottom = tex2D(SamplerDMVR,float2( 0.125 + texcoord.x * 0.750,0.95 + texcoord.y)).x;
 	// SamplerDMVR 0 is Weapon State storage and SamplerDMVR 1 is Boundy State storage
 	float Storage_One = texcoord.x < 0.5 ?  tex2D(SamplerDMVR,0).x : tex2D(SamplerDMVR,1).x;
@@ -1801,7 +1835,7 @@ float3 Out(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Targe
 	if(all(abs(float2(5.0,BUFFER_HEIGHT)-ScreenPos.xy) < float2(1.0,Debug_Y)))
 		Color = Menu_Open ? Format : 0;
 	//Now off to Unity to write the capturing of this information.
-	if(RH || NC || NP || NF || PE || DS || OS || DA || NW || WW || FV || ED)
+	if(RHW || NCW || NPW || NFM || PEW || DSW || OSW || DAA || NDW || WPW || FOV || EDW)
 		Text_Timer = 30000;
 
 	[branch] if(timer <= Text_Timer || Text_Info)
@@ -2093,30 +2127,30 @@ float3 Out(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Targe
 		Depth3D += drawChar( CH_F, charPos, charSize_B, TC); charPos.x += .01 * D3D_Size_B;
 		Depth3D += drawChar( CH_O, charPos, charSize_B, TC);
 		//Text Information
-		if(DS)
+		if(DSW)
 			Need = Needs;
-		if(RH)
+		if(RHW)
 			Help = Read_Help;
-		if(NW)
+		if(NDW)
 			Net = Work;
-		if(PE)
+		if(PEW)
 			Post = Effect;
-		if(WW)
+		if(WPW)
 			Set = SetWP;
-		if(DA)
+		if(DAA)
 			AA = SetAA;
-		if(FV)
+		if(FOV)
 			FoV = SetFoV;
-		if(ED)
+		if(EDW)
 			Emu = Supported;
 		//Blinking Text Warnings
-		if(NP)
+		if(NPW)
 			No = NoPro * BT;
-		if(NC)
+		if(NCW)
 			Not = NotCom * BT;
-		if(NF)
+		if(NFM)
 			Fix = Mod * BT;
-		if(OS)
+		if(OSW)
 			Over = State * BT;
 		//Website
 		float3 WebInfo = Depth3D+Help+Post+No+Not+Net+Fix+Need+Over+AA+Set+FoV+Emu;
@@ -2195,7 +2229,7 @@ technique SuperDepth3D_VR
 < ui_tooltip = "Suggestion : Please enable 'Performance Mode Checkbox,' in the lower bottom right of the ReShade's Main UI.\n"
 			   "             Do this once you set your 3D settings of course."; >
 {
-	#if D_Frame || DF
+	#if D_Frame || DFW
 		pass Delay_Frame
 	{
 		VertexShader = PostProcessVS;

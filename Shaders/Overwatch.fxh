@@ -1,7 +1,7 @@
 ////----------------------------------------//
 ///SuperDepth3D Overwatch Automation Shader///
 //----------------------------------------////
-// Version 2.1.8
+// Version 2.2.0
 //---------------------------------------OVERWATCH---------------------------------------//
 // If you are reading this stop. Go away and never look back. From this point on if you  //
 // still think it's is worth looking at this..... Then no one can save you or your soul. //
@@ -27,63 +27,87 @@
 // ===================================================================================== //
 //--------------------------------------Code Start---------------------------------------//
 
-//Weapon Setting are at the bottom of this file.
+//SuperDepth3D Defaults                                 [Names]                                         [Key]
+static const float ZPD_D = 0.025;                       //ZPD                                           | DA_X
+static const float Depth_Adjust_D = 7.5;                //Depth Adjust                                  | DA_Y
+static const float Offset_D = 0.0;                      //Offset                                        | DA_Z
+static const int Depth_Linearization_D = 0;             //Linearization                                 | DA_W
 
-//SuperDepth3D Defaults
-static const float ZPD_D = 0.025;                       //ZPD
-static const float Depth_Adjust_D = 7.5;                //Depth Adjust
-static const float Offset_D = 0.0;                      //Offset
-static const int Depth_Linearization_D = 0;             //Linearization
-static const int Depth_Flip_D = 0;                      //Depth Flip
-static const int Auto_Balance_D = 0;                    //Auto Balance
-static const float Auto_Depth_D = 0.1;                  //Auto Depth Range
-static const int Weapon_Hand_D = 0;                     //Weapon Profile
-static const float BD_K1_D = 0.0;                       //Barrel Distortion K1
-static const float BD_K2_D = 0.0;                       //Barrel Distortion K2
-static const float BD_K3_D = 0.0;                       //Barrel Distortion K3
-static const float BD_Zoom_D = 0.0;                     //Barrel Distortion Zoom
-static const float HVS_X_D = 1.0;                       //Horizontal Size
-static const float HVS_Y_D = 1.0;                       //Vertical Size
-static const float HVP_X_D = 0;                         //Horizontal Position
-static const float HVP_Y_D = 0;                         //Vertical Position
-static const int ZPD_Boundary_Type_D = 0;               //ZPD Boundary Type
-static const float ZPD_Boundary_Scaling_D = 0.5;        //ZPD Boundary Scaling
-static const float ZPD_Boundary_Fade_Time_D = 0.25;     //ZPD Boundary Fade Time
-static const float Weapon_Near_Depth_Max_D = 0.0;       //Weapon Near Depth              Max
-static const float ZPD_Weapon_Boundary_Adjust = 0.0;    //ZPD Weapon Boundary Adjust
-static const float Separation = 0.0;                    //ZPD Separation
-static const float Null_Z = 0.0;                        //
-static const float HUDX_D = 0.0;                        //Heads Up Display Cut Off Point
-static const float Manual_ZPD_Balance = 0.5;            //Manual Balance Mode Adjustment
-static const float Null_Y = 0.0;                        //
-static const float Weapon_Near_Depth_Min_D = 0.0;       //Weapon Near Depth              Min
-static const float Check_Depth_Limit = 0.0;             //Check Depth Limit
+static const int Depth_Flip_D = 0;                      //Depth Flip                                    | DB_X
+static const int Auto_Balance_D = 0;                    //Auto Balance                                  | DB_Y
+static const float Auto_Depth_D = 0.1;                  //Auto Depth Range                              | DB_Z
+static const int Weapon_Hand_D = 0;                     //Weapon Profile                                | DB_W
+
+//Barrel Distortion Fix
+static const int Barrel_Distortion_Fix_D = 0;           // 0 | 1 : Off | On                             | BDF
+static const float BD_K1_D = 0.0;                       //Barrel Distortion K1                          | DC_X
+static const float BD_K2_D = 0.0;                       //Barrel Distortion K2                          | DC_Y
+static const float BD_K3_D = 0.0;                       //Barrel Distortion K3                          | DC_Z
+static const float BD_Zoom_D = 0.0;                     //Barrel Distortion Zoom                        | DC_W
+
+//Size & Position Fix
+static const int Size_Position_Fix_D = 0;               // 0 | 1 : Off | On                             | SPF
+static const float HVS_X_D = 1.0;                       //Horizontal Size                               | DD_X
+static const float HVS_Y_D = 1.0;                       //Vertical Size                                 | DD_Y
+static const float HVP_X_D = 0;                         //Horizontal Position                           | DD_Z
+static const float HVP_Y_D = 0;                         //Vertical Position                             | DD_W
+
+static const int ZPD_Boundary_Type_D = 0;               //ZPD Boundary Type                             | DE_X
+static const float ZPD_Boundary_Scaling_D = 0.5;        //ZPD Boundary Scaling                          | DE_Y 
+static const float ZPD_Boundary_Fade_Time_D = 0.25;     //ZPD Boundary Fade Time                        | DE_Z
+static const float Weapon_Near_Depth_Max_D = 0.0;       //Weapon Near Depth                     Max     | DE_W
+
+//Balance Mode Toggle
+static const int Balance_Mode_Toggle_D = 0;             // 0 | 1 : Off | On                             | BMT
+static const float ZPD_Weapon_Boundary_Adjust_D = 0.0;  //ZPD Weapon Boundary Adjust                    | DF_X
+static const float Separation_D = 0.0;                  //ZPD Separation                                | DF_Y
+static const float Manual_ZPD_Balance_D = 0.0;          //Manual Balance Mode Adjustment                | DF_Z
+static const float HUDX_D = 0.0;                        //Heads Up Display Cut Off Point                | DF_W
+
+//Specialized Depth Trigger
+static const int Specialized_Depth_Trigger_D = 0;       // 0 | 1                                        | SDT
+static const float SDC_Offset_X_D = 0.0;                //Special Depth Correction Offset X             | DG_X
+static const float SDC_Offset_Y_D = 0.0;                //Special Depth Correction Offset Y             | DG_Y
+static const float Weapon_Near_Depth_Min_D = 0.0;       //Weapon Near Depth                     Min     | DG_Z
+static const float Check_Depth_Limit_D = 0.0;           //Check Depth Limit                             | DG_W
+
+//Auto Letter Box Correction
+static const int Auto_Letter_Box_Correction_D = 0;      // 0 | 1 | 2 : Off | Hoz | Vert                 | LBC
+static const float LB_Depth_Size_Offset_X_D = 1.0;      //Letter Box Depth Size Correction Offset X     | DH_X
+static const float LB_Depth_Size_Offset_Y_D = 1.0;      //Letter Box Depth Size Correction Offset Y     | DH_Y
+static const float LB_Depth_Pos_Offset_X_D = 0.0;       //Letter Box Depth Position Correction Offset X | DH_Z
+static const float LB_Depth_Pos_Offset_Y_D = 0.0;       //Letter Box Depth Position Correction Offset Y | DH_W
+
+//Auto Letter Box Masking
+static const int Auto_Letter_Box_Masking_D = 0;         // 0 | 1 | 2 : Off | Hoz | Vert                 | LBM                                                                               
+static const float LB_Masking_Offset_X_D = 1.0;         //LetterBox Masking Offset X                    | DI_X
+static const float LB_Masking_Offset_Y_D = 1.0;         //LetterBox Masking Offset Y                    | DI_Y
+static const float Null_Z = 0.0;                        //Null                                          | DI_Z
+static const float Null_W = 0.0;                        //Null                                          | DI_W
 
 //Special Toggles Defaults
-static const int REF = 0;                               //Resident Evil Fix
-static const int HMT = 0;                               //HUD Mode Trigger
-static const int IDF = 0;                               //Inverted Depth Fix
-static const int SPF = 0;                               //Size & Position Fix
-static const int BDF = 0;                               //Barrel Distortion Fix
-static const int DFW = 0;                               //Delay Frame Workaround
-static const int ALB = 0;                               //Auto Letter Box
-static const int LBD = 0;                               //Letter Box Depth
-static const int STD = 0;                               //Specialized Depth Trigger
-static const int BMT = 0;                               //Balance Mode Toggle
-//Special Toggles Generic
-static const int RHW = 0;                               //Read Help Warning
-static const int EDW = 0;                               //Emulator Detected Warning
+static const int Resident_Evil_Fix_D = 0;               //Resident Evil Fix                             | REF
+static const int HUD_Mode_Trigger_D = 0;                //HUD Mode Trigger                              | HMT
+static const int Inverted_Depth_Fix_D = 0;              //Inverted Depth Fix                            | IDF 
+static const int Delay_Frame_Workaround_D = 0;          //Delay Frame Workaround                        | DFW
 
 //Special Toggles Warnings
-static const int NCW = 0;                               //Not Compatible Warning
-static const int NPW = 0;                               //No Profile Warning
-static const int NFM = 0;                               //Needs Fix/Mod
-static const int DSW = 0;                               //Depth Selection Warning
-static const int DAA = 0;                               //Disable Anti-Aliasing
-static const int NWW = 0;                               //Network Warning
-static const int PEW = 0;                               //Disable Post Effect Warning
-static const int WPW = 0;                               //Weapon Profile Warning
-static const int FOV = 0;                               //Set Game FoV
+static const int No_Profile_Warning_D = 0;              //No Profile Warning                            | NPW
+static const int Needs_Fix_Mod_D = 0;                   //Needs Fix/Mod                                 | NFM
+static const int Depth_Selection_Warning_D = 0;         //Depth Selection Warning                       | DSW
+static const int Disable_Anti_Aliasing_D = 0;           //Disable Anti-Aliasing                         | DAA
+static const int Network_Warning_D = 0;                 //Network Warning                               | NDW
+static const int Disable_Post_Effects_Warning_D = 0;    //Disable Post Effects Warning                  | PEW
+static const int Weapon_Profile_Warning_D = 0;          //Weapon Profile Warning                        | WPW
+static const int Set_Game_FoV_D = 0;                    //Set Game FoV                                  | FOV 
+
+//Special Toggles Generic
+static const int Read_Help_Warning_D = 0;               //Read Help Warning                             | RHW
+static const int Emulator_Detected_Warning_D = 0;       //Emulator Detected Warning                     | EDW
+static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning                        | NCW
+
+//Weapon Setting are at the bottom of this file.
+static const int Weapon_Setting_Mode_D = 1;             //Weapon Setting Mode                           | WSM
 
 //Special Handling
 #if exists "LEGOBatman.exe"                             //Lego Batman
@@ -123,11 +147,11 @@ static const int FOV = 0;                               //Set Game FoV
 
 //Game Hashes//
 #if (App == 0xC19572DDF || App == 0xFBEE8027 ) //PCSX2 | CEMU
-	#define RH 1
-	#define SP 2
-	#define HM 1
-	#define DS 1
-	#define ED 1
+	#define RHW 1
+	#define SPF 2
+	#define HMT 1
+	#define DSW 1
+	#define EDW 1
 #elif (App == 0xC753DADB )	//ES: Oblivion
 	#define DB_W 2
 	#define DB_Y 3
@@ -141,7 +165,7 @@ static const int FOV = 0;                               //Set Game FoV
 	#define DE_Y 0.625
 	#define DE_Z 0.300
 	#define DF_X 0.300
-	#define NW 1
+	#define NDW 1
 #elif (App == 0x2D950D30 )	//Fallout 4
 	#define DA_X 0.05
 	//#define DA_Y 7.8
@@ -151,9 +175,9 @@ static const int FOV = 0;                               //Set Game FoV
 	#define DE_X 3
 	#define DE_Y 0.750
 	#define DE_Z 0.375
-	#define FV 1
-	#define RH 1
-	#define DS 1
+	#define FOV 1
+	#define RHW 1
+	#define DSW 1
 #elif (App == 0x3950D04E )	//Skyrim: SE
 	#define DA_Y 6.25
 	#define DB_Y 2
@@ -170,9 +194,9 @@ static const int FOV = 0;                               //Set Game FoV
 	#define DE_Z 0.4375
 	#define DB_W 8
     #define DG_Z 0.001
-	#define BM 1
-	#define DG_X 0.145
-	#define PE 1
+	#define BMT 1
+	#define DF_Z 0.145
+	#define PEW 1
 #elif (App == 0x17232880 || App == 0x9D77A7C4 || App == 0x22EF526F )	//CoD:Black Ops | CoD:MW2 |CoD:MW3
 	#define DA_Y 12.5
 	#define DB_Y 3
@@ -202,7 +226,7 @@ static const int FOV = 0;                               //Set Game FoV
 	#define DB_W 14
 #elif (App == 0x4383C12A || App == 0x239E5522 || App == 0x3591DE9C )	//CoD | CoD:UO | CoD:2
 	#define DB_W 15
-	#define RH 1
+	#define RHW 1
 #elif (App == 0x73FA91DC )	//CoD: Black Ops IIII
 	#define DA_Y 22.5
 	#define DA_W 1
@@ -239,9 +263,9 @@ static const int FOV = 0;                               //Set Game FoV
     #define DF_Y 0.05
 	#define WSM 4
 	#define OW_WP "Read Help & Change Me\0Custom WP\0Prey High Settings and <\0Prey 2017 Very High\0"
-	#define RH 1
-	#define PE 1
-	#define WW 1
+	#define RHW 1
+	#define PEW 1
+	#define WPW 1
 #elif (App == 0xBF757E3A )	//Return to Castle Wolfenstein
 	#define DA_Y 8.75
 	#define DB_Y 2
@@ -267,15 +291,15 @@ static const int FOV = 0;                               //Set Game FoV
 	#define WSM 5
 	#define DB_W 2
 	#define OW_WP "Read Help & Change Me\0Custom WP\0Blood 2 All Weapons\0Blood 2 Bonus Weapons\0Blood 2 Former\0"
-	#define WW 1
-	#define NF 1
-	#define RH 1
+	#define WPW 1
+	#define NFM 1
+	#define RHW 1
 #elif (App == 0xF22A9C7D || App == 0x5416A79D ) //SOMA
 	#define DA_Y 23.125 //21.25 //25.0
 	#define DA_X 0.1025 //0.110 //0.095
 	#define DB_Y 5
-	#define BM 1
-	#define DG_X 0.15625
+	#define BMT 1
+	#define DF_Z 0.15625
 	#define DA_Z -0.00025
 	#define DG_W 0.1
 	#define DB_W 38
@@ -284,8 +308,8 @@ static const int FOV = 0;                               //Set Game FoV
 	#define DE_Y 0.5
 	#define DE_Z 0.375
 	#define DF_X 0.25
-	#define FV 1
-	#define RH 1
+	#define FOV 1
+	#define RHW 1
 #elif (App == 0x6FB6410B ) //Cryostasis
 	#define DA_Y 13.75
 	#define DB_Y 3
@@ -295,7 +319,7 @@ static const int FOV = 0;                               //Set Game FoV
 	#define DB_Y 1
 	#define DB_W 40
 	#define DF_W 0.534
-	#define HM 1
+	#define HMT 1
 #elif (App == 0xEB9EEB74 || App == 0x8238E9CA ) //Serious Sam Revolution | Serious Sam 2
 	#define DA_X 0.075
 	#define DA_Y 10.0
@@ -308,7 +332,7 @@ static const int FOV = 0;                               //Set Game FoV
 	#define DF_X 0.1125
 	#define DB_W 41
 	#define DF_W 0.5
-	#define HM 1
+	#define HMT 1
 #elif (App == 0x308AEBEA ) //TitanFall 2
 	#define DB_Y 4
 	#define DB_W 44
@@ -321,7 +345,7 @@ static const int FOV = 0;                               //Set Game FoV
 	#define DA_Y 10.0
 	#define DB_Y 4
 	#define DB_W 46
-	#define RH 1
+	#define RHW 1
 #elif (App == 0x9C5C946E ) //EuroTruckSim2
 	#define DB_W 47
 #elif (App == 0xB302EC7 || App == 0x91D9EBAF ) //F.E.A.R | F.E.A.R 2: Project Origin
@@ -335,9 +359,9 @@ static const int FOV = 0;                               //Set Game FoV
 	//#define DG_W 0.25
 	#define DB_W 48
 	//#define DF_X 0.225
-	#define DS 1 //?
-	#define FV 1
-	#define RH 1
+	#define DSW 1 //?
+	#define FOV 1
+	#define RHW 1
 #elif (App == 0x2C742D7C ) //Immortal Redneck CP alt 1.9375
 	#define DA_Y 20.0
 	#define DB_Y 5
@@ -359,7 +383,7 @@ static const int FOV = 0;                               //Set Game FoV
 	#define DB_W 56
 	#define DB_Y 3
 	#define DF_W 0.5034
-	#define HM 1
+	#define HMT 1
 #elif (App == 0x22BA110F ) //Turok: DH 2017
 	#define DA_X 0.002
 	#define DA_Y 250.0
@@ -388,7 +412,7 @@ static const int FOV = 0;                               //Set Game FoV
 	#define DA_Z 0.11625
 	#define DB_Y 4
 	#define DF_W 0.5
-	#define HM 1
+	#define HMT 1
 #elif (App == 0x61243AED ) //Shadow Warrior Classic source port
 	#define DA_Y 10.0
 	#define DA_X 0.05
@@ -401,7 +425,7 @@ static const int FOV = 0;                               //Set Game FoV
 	#define DB_Y 5
 #elif (App == 0xFE54BF56 ) //No One Lives Forever and 2
 	#define DA_X 0.0375
-	#define RH 1
+	#define RHW 1
 #elif (App == 0x9E7AA0C4 ) //Shadow Tactics: Blades of the Shogun
 	#define DA_Y 7.0
 	#define DA_Z 0.001
@@ -409,20 +433,20 @@ static const int FOV = 0;                               //Set Game FoV
 	#define DB_Y 5
 	#define DB_Z 0.305
 	#define DB_X 1
-	#define RH 1
+	#define RHW 1
 #elif (App == 0xE63BF4A4 ) //World of Warcraft DX12
 	#define DA_Y 7.5
 	#define DA_W 1
 	#define DB_Y 3
 	#define DB_Z 0.1375
-	#define NW 1
-	#define RH 1
+	#define NDW 1
+	#define RHW 1
 #elif (App == 0x5961D1CC ) //Requiem: Avenging Angel
 	#define DA_Y 37.5
 	#define DA_X 0.0375
 	#define DA_Z 0.8
 	#define DF_W 0.501
-	#define HM 1
+	#define HMT 1
 #elif (App == 0x86D33094 || App == 0x19019D10 ) //Rise of the TombRaider | TombRaider 2013
 	#define DA_X 0.0725
 	#define DB_Y 3
@@ -438,7 +462,7 @@ static const int FOV = 0;                               //Set Game FoV
 	#define DA_Y 51.25
 	#define DA_W 1
 	#define DA_Z 0.00015
-	#define RE 1
+	#define REF 1
 #elif (App == 0xF0D4DB3D ) //Never Alone
 	#define DA_X 0.1375
 	#define DB_Y 2
@@ -455,7 +479,7 @@ static const int FOV = 0;                               //Set Game FoV
 	#define DB_Z 0.4
 	#define DA_Y 75.0
 	#define DA_Z 0.021
-	#define RE 1
+	#define REF 1
 #elif (App == 0xAAA18268 ) //Hellblade
 	#define DB_Y 1
 	#define DA_Y 25.0
@@ -499,26 +523,26 @@ static const int FOV = 0;                               //Set Game FoV
 	#define DA_Z 0.00025
 	#define DB_Y 4
 	#define DB_Z 0.15
-	#define RH 1
+	#define RHW 1
 #elif (App == 0xA100000 ) //Lego Batman 1 & 2
 	#define DA_Y 27.5
 	#define DA_X 0.125
 	#define DA_Z 0.001
 	#define DB_Y 2
 	#define DB_Z 0.025
-	#define RE 1
+	#define REF 1
 #elif (App == 0x5F2CA572 ) //Lego Batman 3
 	#define DA_X 0.03
 	#define DA_Z 0.001
 	#define DB_Y 4
-	#define RH 1
+	#define RHW 1
 #elif (App == 0xA200000 ) //Batman BlackGate
 	#define DA_Y 12.5
 	#define DA_X 0.0375
 	#define DA_Z 0.00025
 	#define DB_Y 3
 #elif (App == 0xCB1CCDC ) //BATMAN TTS
-	#define NC 1 //Not Compatible
+	#define NCW 1 //Not Compatible
 #elif (App == 0x4A2297E4 ) //Batman Arkham Knight
 	#define DA_Y 22.500
 	#define DA_X 0.04375
@@ -529,14 +553,14 @@ static const int FOV = 0;                               //Set Game FoV
 	#define DA_Y 75.0
 	#define DA_X 0.250
 	#define DB_Y 1
-	#define RE 1
-	#define RH 1
+	#define REF 1
+	#define RHW 1
 #elif (App == 0x1335BAB8 ) //BattleField 1
 	#define DA_W 1
 	#define DA_Y 8.125
 	#define DA_X 0.04
 	#define DB_Y 5
-	#define RE 2
+	#define REF 2
 #elif (App == 0xA0762A98 ) //Assassin's Creed Unity
 	#define DA_W 1
 	#define DA_Y 25.0
@@ -558,7 +582,7 @@ static const int FOV = 0;                               //Set Game FoV
 	#define DA_Z 0.0005
 	#define DB_Y 4
 	#define DB_X 1
-	#define ID 1
+	#define IDF 1
 #elif (App == 0xB75F3C89 ) //Amnesia: The Dark Descent
 	#define DA_X 0.05
 	#define DA_Y 45.0
@@ -573,18 +597,18 @@ static const int FOV = 0;                               //Set Game FoV
 	#define DA_X 0.03
 	#define DA_Y 32.5
 	#define DB_Y 1
-	#define RH 1
+	#define RHW 1
 #elif (App == 0xCFE885A2 ) //Alan Wake's American Nightmare
 	#define DA_X 0.03
 	#define DA_Y 32.5
 	#define DB_Y 1
-	#define RH 1
+	#define RHW 1
 #elif (App == 0x56D8243B ) //Agony Unrated
 	#define DA_W 1
 	#define DA_X 0.04375
 	#define DA_Y 43.75
 	#define DB_Y 5
-	#define RH 1
+	#define RHW 1
 #elif (App == 0x23D5135F ) //Alien Isolation
 	#define DA_X 0.07
     #define DF_Y 0.0125
@@ -596,37 +620,37 @@ static const int FOV = 0;                               //Set Game FoV
 	#define DE_Z 0.375
 	#define DG_Z 0.0325
 	#define DE_W 0.1
-	#define DC 1
+	#define BDF 1
 	#define DC_X 0.22
 	#define DC_Y -0.1
 	#define DC_W -0.022
-	#define RH 1
-	#define PE 1
+	#define RHW 1
+	#define PEW 1
 #elif (App == 0x5839915F ) //35MM
 	#define DA_Y 35.00
 	#define DB_X 1
 	#define DB_Y 2
-	#define RH 1
+	#define RHW 1
 #elif (App == 0x578862 ) //Condemned Criminal Origins
 	#define DA_Y 162.5
 	#define DA_Z 0.00025
 	#define DA_X 0.040
 	#define DB_Y 4
 	#define DB_W 49
-	#define RH 1
+	#define RHW 1
 #elif (App == 0xA67FA4BC ) //Outlast
 	#define DA_Y 30.0
 	#define DA_Z 0.0004
 	#define DA_X 0.043750
 	#define DB_Y 5
-	#define RH 1
+	#define RHW 1
 #elif (App == 0xDCC7F877 ) //Outlast II
 	#define DA_W 1
 	#define DA_Y 50.0
 	#define DA_Z 0.0004
 	#define DA_X 0.056250
 	#define DB_Y 4
-	#define RH 1
+	#define RHW 1
 #elif (App == 0x60F43F45 ) //Resident Evil 7
 	#define DA_W 1
 	#define DA_Y 30.0
@@ -636,12 +660,12 @@ static const int FOV = 0;                               //Set Game FoV
 	#define DE_X 1
 	#define DE_Y 0.5
 	#define DE_Z 0.375
-	#define DC 1
+	#define BDF 1
 	#define DC_X 0.24
 	#define DC_Y 0.1
 	#define DC_Z -0.024
 	#define DC_W -0.05
-	#define RH 1
+	#define RHW 1
 #elif (App == 0x1B8B9F54 ) //TheEvilWithin
 	#define DA_Y 37.5
 	#define DA_Z 0.000125
@@ -669,13 +693,13 @@ static const int FOV = 0;                               //Set Game FoV
 	#define DA_X 0.04
 	#define DB_Y 4
 	#define DB_Z 0.125
-	#define RH 1
+	#define RHW 1
 #elif (App == 0x706C8618 ) //Layer of Fear
 	#define DB_X 1
 	#define DA_Y 17.50
 	#define DA_X 0.035
 	#define DB_Y 5
-	#define RH 1
+	#define RHW 1
 #elif (App == 0x2F0BD376 ) //Minecraft / BuildGDX
 	#define DA_Y 22.5
 	#define DA_X 0.0625
@@ -685,7 +709,7 @@ static const int FOV = 0;                               //Set Game FoV
 	#define DE_Y 0.500
 	#define DE_Z 0.375
 	#define DF_Y 0.005
-	#define RH 1
+	#define RHW 1
 #elif (App == 0x84D341E3 || App == 0x15A08799) //Little Nightmares & Little Nightmares II
 	#define DA_W 1
 	#define DA_Y 33.75
@@ -694,7 +718,7 @@ static const int FOV = 0;                               //Set Game FoV
 	#define DA_Z 0.0015
 	#define DB_Y 5 		//ZPD Boundary Scaling
 	#define DB_Z 0.325	//Auto Depth Adjust
-	#define PE 1
+	#define PEW 1
 #elif (App == 0xC0AC5174 ) //Observer
 	#define DA_W 1
 	#define DA_Y 20.0
@@ -706,17 +730,17 @@ static const int FOV = 0;                               //Set Game FoV
 	#define DE_Y 0.275
 	#define DE_Z 0.400
 	#define DG_W 0.1875 // Slight adjustment to the ZPD Boundary
-	#define BM 1 // Had to use this mode since Auto Mode was not cutting it.
-	#define DG_X 0.1
-	#define RH 1
-	#define PE 1
+	#define BMT 1 // Had to use this mode since Auto Mode was not cutting it.
+	#define DF_Z 0.1
+	#define RHW 1
+	#define PEW 1
 #elif (App == 0xABAA2255 ) //The Forest
 	#define DA_W 1
 	#define DB_X 1
 	#define DA_Y 7.5
 	#define DA_X 0.04375
 	#define DB_Y 3
-	#define RH 1
+	#define RHW 1
 #elif (App == 0x67A4A23A ) //Crash Bandicoot N.Saine Trilogy
 	#define DA_Y 7.5
     #define DF_Y 0.0625
@@ -724,7 +748,7 @@ static const int FOV = 0;                               //Set Game FoV
 	#define DA_X 0.1
 	#define DB_Y 4
 	#define DF_W 0.580
-	#define HM 1
+	#define HMT 1
 #elif (App == 0xE160AE14 ) //Spyro Reignited Trilogy
 	#define DA_W 1
 	#define DA_Y 12.5
@@ -738,9 +762,9 @@ static const int FOV = 0;                               //Set Game FoV
 	#define DA_Y 17.5
 	#define DA_Z -0.5
 	#define DB_Y 4
-	#define NW 1
-	#define PE 1
-    #define FV 1
+	#define NDW 1
+	#define PEW 1
+    #define FOV 1
     #define DG_Z 0.070 //Min
     #define DE_W 0.100 //Max
 	//#define DB_W 62
@@ -759,8 +783,8 @@ static const int FOV = 0;                               //Set Game FoV
 	#define DE_Y 0.1875
 	#define DE_Z 0.475
 	#define DB_Z 0.375
-	#define RH 1
-	#define NF 1
+	#define RHW 1
+	#define NFM 1
 #elif (App == 0x88004DC9 || App == 0x1DDA9341) //Strange Brigade DX12 & Vulkan
 	#define DA_X 0.0625
 	#define DF_Y 0.02
@@ -770,7 +794,7 @@ static const int FOV = 0;                               //Set Game FoV
 	#define DE_X 2
 	#define DE_Y 0.3
 	#define DE_Z 0.475
-	#define RH 1
+	#define RHW 1
 #elif (App == 0xC0052CC4) //Halo The Master Chief Collection
 	#define DA_X 0.037
 	#define DA_W 1
@@ -781,7 +805,8 @@ static const int FOV = 0;                               //Set Game FoV
 	#define DE_Z 0.375
 	#define WSM 3
 	#define OW_WP "Read Help & Change Me\0Custom WP\0Halo: Reach\0Halo: CE Anniversary\0Halo 2: Anniversary\0Halo 3\0Halo 3: ODST\0Halo 4\0"
-	#define RH 1
+	#define RHW 1
+	#define WPW 1
 #elif (App == 0x2AB9ECF9) //System ReShock
 	#define DA_X 0.05
 	#define DA_W 1
@@ -799,7 +824,7 @@ static const int FOV = 0;                               //Set Game FoV
 	#define DA_Z 0.000125
 	#define DB_Y 5
 	#define DB_W 12
-	#define RH 1
+	#define RHW 1
 #elif (App == 0xA640659C) //MegaMan 2.5D in 3D
 	#define DA_X 0.150
 	#define DA_Y 8.75
@@ -807,7 +832,7 @@ static const int FOV = 0;                               //Set Game FoV
 	#define DE_X 1
 	#define DE_Y 0.275
 	#define DE_Z 0.375
-	#define RH 1
+	#define RHW 1
 #elif (App == 0x49654776) //Paratopic
 	#define DA_X 0.05
 	#define DA_W 1
@@ -815,7 +840,7 @@ static const int FOV = 0;                               //Set Game FoV
 	#define DA_Z 0.000250
 	#define DB_Y 3
 	#define DB_X 1
-	#define RH 1
+	#define RHW 1
 #elif (App == 0xF7590C95) //Yume Nikki -Dream Diary-
 	#define DA_X 0.0625
 	#define DA_W 1
@@ -826,8 +851,8 @@ static const int FOV = 0;                               //Set Game FoV
 	#define DE_X 1
 	#define DE_Y 0.35
 	#define DE_Z 0.25
-	#define NC 1
-	#define RH 1
+	#define NCW 1
+	#define RHW 1
 #elif (App == 0x65F37CDF) //American Truck Simulator
 	#define DA_X 0.05375
 	#define DA_Y 15.0
@@ -840,12 +865,12 @@ static const int FOV = 0;                               //Set Game FoV
 	#define DA_W 1
 	#define DA_Y 12.5
 	#define DB_Y 1
-	#define RH 1
+	#define RHW 1
 #elif (App == 0xB7C22840) //Strife
 	#define DA_X 0.1
 	#define DA_Y 250.0
 	#define DB_W 59
-	#define RH 1
+	#define RHW 1
 #elif (App == 0x21DC397E || App == 0x653AF1E1) //Gold Source
 	#define DA_X 0.045
 	#define DA_Y 21.25
@@ -857,11 +882,11 @@ static const int FOV = 0;                               //Set Game FoV
 	#define DA_W 1
 	#define DA_Y 72.5
 	#define DB_Y 5
-  #define DB_Z 0.0
-  #define DE_X 1
+	#define DB_Z 0.0
+	#define DE_X 1
 	#define DE_Y 0.375
 	#define DE_Z 0.4
-	#define RH 1
+	#define RHW 1
 #elif (App == 0x1E9DCD00) //Witch it
 	#define DA_X 0.0475
 	#define DA_W 1
@@ -890,17 +915,17 @@ static const int FOV = 0;                               //Set Game FoV
 	#define DB_Y 1
 	#define DE_X 2
 	#define DF_W 0.5
-	#define HM 1
+	#define HMT 1
 #elif (App == 0x242D82C4 ) //Okami HD
 	#define DA_X 0.200
 	#define DA_W 1
 	#define DA_Z 0.001
 	#define DB_Y 1
 	#define DE_X 2
-  #define DE_Y 0.125
-  #define DE_Z 0.375
+	#define DE_Y 0.125
+	#define DE_Z 0.375
 	#define DF_W 0.5
-	#define HM 1
+	#define HMT 1
 #elif (App == 0x75B36B20 ) //Eldritch
 	#define DA_Y 125.0
 	#define DA_X 0.05
@@ -913,7 +938,7 @@ static const int FOV = 0;                               //Set Game FoV
 	#define DB_Y 5
 	#define DB_W 51
 	#define DB_X 1
-	#define RH 1
+	#define RHW 1
 #elif (App == 0x5925FCC8 ) //Dusk
 	#define DA_Y 25.0
 	#define DA_X 0.05
@@ -928,7 +953,7 @@ static const int FOV = 0;                               //Set Game FoV
 	#define DB_Y 3
 	#define DB_W 23
 	#define DF_W 0.534
-	#define HM 1
+	#define HMT 1
 	#define DF_X 0.025
 #elif (App == 0x1714C977) //Deus Ex DX9
 	#define DA_X 0.05
@@ -936,7 +961,7 @@ static const int FOV = 0;                               //Set Game FoV
 	#define DB_Y 3
 	#define DB_W 24
 	#define DF_W 1.0
-	#define HM 1
+	#define HMT 1
 	#define DF_X 0.05
 #elif (App == 0x92583CDD ) //Legend of Dungeon
 	#define DA_Y 12.5
@@ -952,7 +977,7 @@ static const int FOV = 0;                               //Set Game FoV
 	#define DE_X 1
 	#define DE_Y 0.300
 	#define DE_Z 0.4375
-	#define NW 1
+	#define NDW 1
 #elif (App == 0xC073C2BB ) //StreetFighter V
 	#define DA_Y 14.0
 	#define DA_X 0.250
@@ -977,7 +1002,7 @@ static const int FOV = 0;                               //Set Game FoV
 	#define DB_Y 4
 	#define DE_X 4
 	#define DE_Z 0.375
-	#define NW 1
+	#define NDW 1
 #elif (App == 0x892CA092 ) //Farcry
 	#define DA_Y 7.0
 	#define DA_Z 0.000375
@@ -992,14 +1017,14 @@ static const int FOV = 0;                               //Set Game FoV
 	#define DB_W 64
 	#define DE_X 4
 	#define DE_Z 0.375
-	#define RH 1
+	#define RHW 1
 #elif (App == 0xA4B66433 ) //Farcry 3
 	#define DA_X 0.05
 	#define DB_Y 4
 	#define DE_X 4
 	#define DE_Z 0.375
 	#define DE_W 0.350
-	#define RH 1
+	#define RHW 1
 #elif (App == 0xC150B652 ) //Farcry 4
 	#define DA_Y 8.75
 	#define DA_W 1
@@ -1024,7 +1049,7 @@ static const int FOV = 0;                               //Set Game FoV
 	#define DE_X 4
 	#define DE_Z 0.375
 	#define DE_W 0.360
-	#define RH 1
+	#define RHW 1
 #elif (App == 0xE3AD2F05 ) //Sauerbraten
 	#define DA_Y 25.0
 	#define DA_X 0.05
@@ -1047,8 +1072,8 @@ static const int FOV = 0;                               //Set Game FoV
 	#define DE_Z 0.4375
     #define DF_Y 0.045
     #define DG_Z 0.075
-	#define RH 1
-	#define DS 1
+	#define RHW 1
+	#define DSW 1
 #elif (App == 0xCD0E316F ) //Sonic Adventure DX Modded with BetterSADX
 	#define DA_Y 8.75
 	#define DA_X 0.1125
@@ -1057,7 +1082,7 @@ static const int FOV = 0;                               //Set Game FoV
 	#define DE_Y 0.375
 	#define DE_Z 0.4375
 	#define DB_Z 0.250
-	#define RH 1
+	#define RHW 1
 #elif (App == 0xF9B1845A ) //Rime
 	#define DA_W 1
 	#define DA_Y 15.0
@@ -1069,14 +1094,14 @@ static const int FOV = 0;                               //Set Game FoV
 #elif (App == 0x71170B42 ) //Blood: Fresh Suppy
 	#define DA_Y 212.5
 	#define DA_X 0.175
-	#define BM 1
-	#define DG_X 0.275
+	#define BMT 1
+	#define DF_Z 0.275
 	#define DB_Y 4
 	#define DE_X 1
 	#define DE_Y 0.375
 	#define DE_Z 0.375
 	#define DG_W 0.25
-  #define DS 1
+	#define DSW 1
 #elif (App == 0x8F615A99 ) //Frostpunk
 	#define DA_Y 9.375
 	#define DA_X 0.250
@@ -1101,7 +1126,7 @@ static const int FOV = 0;                               //Set Game FoV
 	#define DE_X 1
 	#define DE_Z 0.375
 	#define DF_X 0.175
-	#define RH 1
+	#define RHW 1
 #elif (App == 0x905631F2 ) //Crysis DX10 64bit
 	#define DA_X 0.0375
 	#define DB_Y 5
@@ -1119,7 +1144,7 @@ static const int FOV = 0;                               //Set Game FoV
 	#define DE_Y 0.50
 	#define DE_Z 0.375
 	#define DB_W 70
-	#define DS 1
+	#define DSW 1
 #elif (App == 0xC3AF1228 || App == 0x95A994C8 ) //Spellforce
 	#define DA_Y 145.0
 	#define DA_Z 0.001
@@ -1129,14 +1154,14 @@ static const int FOV = 0;                               //Set Game FoV
 	#define DE_X 1
 	#define DE_Y 0.235
 	#define DE_Z 0.375
-	#define HM 1
+	#define HMT 1
 	#define DF_W 0.5
 #elif (App == 0xD372612E ) //Raft
 	#define DA_W 1
 	#define DB_X 1
 	#define DA_X 0.04375
 	#define DB_Y 4
-	#define NW 1
+	#define NDW 1
 #elif (App == 0xC06FE818 ) //BorderLands 3
 	#define DA_Y 18.0
 	#define DA_Z 0.0001375
@@ -1149,8 +1174,8 @@ static const int FOV = 0;                               //Set Game FoV
 	#define DE_Y 0.425
 	#define DE_Z 0.300
 	#define DF_X 0.085
-	#define NW 1
-	#define DA 1
+	#define NDW 1
+	#define DAA 1
 	#elif (App == 0x3C8DE8E8 ) //Metro Exodus
 	#define DA_Y 12.5 // What A mess
 	//#define DA_X 0.05
@@ -1174,7 +1199,7 @@ static const int FOV = 0;                               //Set Game FoV
 	#define DA_X 0.03125
 	#define DF_Y 0.03125
 	//#define DA_X 0.0375 //Alternet settings Not used.
-	#define PE 1
+	#define PEW 1
 #elif (App == 0x47F294E9 ) //Octopath Traveler
 	#define DA_Y 250.0
 	#define DA_Z 0.000375
@@ -1185,7 +1210,7 @@ static const int FOV = 0;                               //Set Game FoV
 	#define DE_Y 0.5625
 	#define DE_Z 0.375
 	#define DG_W 0.2125
-	#define RH 1
+	#define RHW 1
 #elif (App == 0x21CB998 ) //.Hack//G.U.
 	#define DA_Y 22.5
 	#define DA_X 0.125
@@ -1193,8 +1218,8 @@ static const int FOV = 0;                               //Set Game FoV
 	#define DE_X 1
 	#define DE_Y 0.500
 	#define DE_Z 0.3
-	#define RH 1
-	#define NF 1
+	#define RHW 1
+	#define NFM 1
 #elif (App == 0x9CC5C8E0 ) //GTA V
 	#define DA_Y 18.75
 	#define DA_W 1
@@ -1204,9 +1229,9 @@ static const int FOV = 0;                               //Set Game FoV
 	#define DE_Y 0.325
 	#define DE_Z 0.375
 	#define DB_Z 0.05
-	#define RH 1
-	#define PE 1
-	#define NF 1
+	#define RHW 1
+	#define PEW 1
+	#define NFM 1
 #elif (App == 0x8CD23575 ) //Dark Souls: Remastered
 	#define DA_Y 75.0
 	//#define DA_Z 0.001
@@ -1217,8 +1242,8 @@ static const int FOV = 0;                               //Set Game FoV
 	#define DE_Y 0.250
 	#define DE_Z 0.375
 	//#define DE_W 0.0625
-	#define PE 1
-	#define FV 1
+	#define PEW 1
+	#define FOV 1
 #elif (App == 0x9E071BC0 ) //Dark Souls III
 	#define DA_Y 25.0
 	#define DA_Z 0.000125
@@ -1230,8 +1255,8 @@ static const int FOV = 0;                               //Set Game FoV
 	#define DE_Z 0.4375
 	#define DG_Z 0.1125 //Min
 	//#define DE_W 0.225
-	#define PE 1
-	#define FV 1
+	#define PEW 1
+	#define FOV 1
 #elif (App == 0x5D4939C9 ) //Dark Souls II
 	#define DA_Y 22.5
 	#define DA_Z 0.00025
@@ -1251,8 +1276,8 @@ static const int FOV = 0;                               //Set Game FoV
 	#define DE_Z 0.375
 	#define DG_Z 0.025 //Min
   //#define DE_W 0.125 //Max
-	#define PE 1
-	#define FV 1
+	#define PEW 1
+	#define FOV 1
 #elif (App == 0xCE5313C2 ) //BorderLands Enhanced
 	#define DA_Y 18.75
 	#define DA_Z 0.0005
@@ -1266,7 +1291,7 @@ static const int FOV = 0;                               //Set Game FoV
 	#define DE_Z 0.375
 	#define DG_Z 0.3975
 	#define DF_X 0.225
-	#define NW 1
+	#define NDW 1
 #elif (App == 0x2ECAAF29 || App == 0xE19E4830 || App == 0xE19E4830  ) //Half-Life 2 | Left 4 Dead 2
 	#define DA_Y 8.75
 	#define DA_X 0.04
@@ -1277,7 +1302,7 @@ static const int FOV = 0;                               //Set Game FoV
 	#define DE_Y 0.5
 	#define DE_Z 0.375
 	#define DF_X 0.105
-	#define RH 1
+	#define RHW 1
 #elif (App == 0x68EF1B4E || App == 0xC103D998 ) //Serious Sam Fusion | Serious Sam 4: Planet Badass
 	#define DA_W 1
 	#define DA_X 0.075
@@ -1289,9 +1314,9 @@ static const int FOV = 0;                               //Set Game FoV
 	#define DE_Y 0.5
 	#define DE_Z 0.375
 	#define DB_Z 0.150
-	#define NW 1
-	#define RH 1
-	#define PE 1
+	#define NDW 1
+	#define RHW 1
+	#define PEW 1
 #elif (App == 0xEACB4D0D ) //Final Fantasy XV Windows Edition
 	#define DA_X 0.0375
 	#define DA_Y 30.0
@@ -1299,7 +1324,7 @@ static const int FOV = 0;                               //Set Game FoV
 	#define DE_X 2
 	#define DE_Y 0.5
 	#define DE_Z 0.375
-	#define RH 1
+	#define RHW 1
 #elif (App == 0xAC4DF2C4 ) //Mafia II Definitive Edition
 	#define DA_X 0.05
 	#define DA_Y 37.5
@@ -1308,8 +1333,8 @@ static const int FOV = 0;                               //Set Game FoV
 	#define DE_X 1
 	#define DE_Y 0.5
 	#define DE_Z 0.375
-	#define DF 1
-	#define RH 1
+	#define DFW 1
+	#define RHW 1
 #elif (App == 0xEA75DEDE ) //Lost Planet Colonies
 	#define DA_X 0.05
 	#define DA_Y 37.5
@@ -1317,7 +1342,7 @@ static const int FOV = 0;                               //Set Game FoV
 	#define DE_X 2
 	#define DE_Y 0.5
 	#define DE_Z 0.375
-	#define RH 1
+	#define RHW 1
 #elif (App == 0xEFC486AF ) //Lost Planet 2 DX11
 	#define DA_X 0.04375
 	#define DA_Y 37.5
@@ -1335,7 +1360,7 @@ static const int FOV = 0;                               //Set Game FoV
 	#define DE_Y 0.5
 	#define DE_Z 0.375
 	//#define DE_W 0.3875
-	#define RH 1
+	#define RHW 1
 #elif (App == 0x9896B9F5 ) //Old City: Leviathan
 	#define DA_X 0.030
 	#define DA_Y 82.5
@@ -1346,13 +1371,13 @@ static const int FOV = 0;                               //Set Game FoV
 	#define DE_Z 0.375
 	#define DB_Z 0.075
 	//#define DG_Z 0.5
-	#define DS 1
+	#define DSW 1
 #elif (App == 0xE4F6014F ) //Shovel Knight
 	#define DB_X 1
 	#define DA_X 0.035
 	#define DA_Y 22.5
 	#define DA_Z 0.483
-	#define RH 1
+	#define RHW 1
 #elif (App == 0x94EFD213 ) //Chex Quest HD
 	#define DA_W 1
 	#define DA_X 0.1
@@ -1387,7 +1412,7 @@ static const int FOV = 0;                               //Set Game FoV
 	#define DA_Z 0.00025
 	#define DB_X 1
 	#define DB_Y 4
-	#define NC 1
+	#define NCW 1
 #elif (App == 0x6DDCD106 ) //The Town of Light
 	#define DA_X 0.100
 	#define DA_Y 10.0
@@ -1417,7 +1442,7 @@ static const int FOV = 0;                               //Set Game FoV
 	#define DE_Y 0.5
 	#define DE_Z 0.375
 	#define DB_Z 0.0675
-	#define NC 1
+	#define NCW 1
 #elif (App == 0x2F1ABF4A ) //Detroit Become Human
 	#define DA_W 1
 	#define DB_X 1
@@ -1437,10 +1462,12 @@ static const int FOV = 0;                               //Set Game FoV
 	//#define DE_Y 0.5
 	#define DE_Z 0.375
 	#define DG_W 0.175
-	//#define BM 1
-	//#define DG_X 0.1375
-	#define DS 1
-	#define LBC 1
+	//#define BMT 1
+	//#define DF_Z 0.1375
+	#define DSW 1
+	#define LBC 1 //Letter Box Correction With X & Y
+    #define DH_X 1.0
+    #define DH_Y 1.315
 #elif (App == 0x89351FC4 ) //3DSen Games
 	#define DA_W 1
 	#define DB_X 1
@@ -1450,7 +1477,7 @@ static const int FOV = 0;                               //Set Game FoV
 	#define DE_X 1
 	#define DE_Y 0.5
 	#define DE_Z 0.250
-	#define DF 1
+	#define DFW 1
 #elif (App == 0xF55F26A1 ) //Tekken 7
 	#define DA_W 1
     #define DF_Y 0.025
@@ -1461,7 +1488,7 @@ static const int FOV = 0;                               //Set Game FoV
 	#define DE_Y 0.5
 	#define DE_Z 0.375
 	#define DE_W 0.440
-	#define DA 1
+	#define DAA 1
 #elif (App == 0x9BD7A4FD ) //Starwars Battle Front II
 	#define DA_W 1
 	#define DA_X 0.05
@@ -1472,16 +1499,16 @@ static const int FOV = 0;                               //Set Game FoV
 	#define DE_Z 0.375
 	#define DE_W 0.075
 #elif (App == 0x14E41902 ) //jsHexen II
-	#define RH 1
-	#define NF 1
+	#define RHW 1
+	#define NFM 1
 	#define DA_X 0.06
 	#define DA_Y 17.5
 	#define DA_Z 0.0003
 	#define DB_Y 4
 	#define DB_W 22
 #elif (App == 0x12C96DB0 ) //Hexen 2 Hammer of Thyrion
-	#define RH 1
-	#define NF 1
+	#define RHW 1
+	#define NFM 1
 	#define DA_X 0.06
 	#define DA_Y 17.5
 	#define DA_Z 0.0003
@@ -1540,7 +1567,7 @@ static const int FOV = 0;                               //Set Game FoV
 	#define DE_Y 0.5
 	#define DE_Z 0.375
 	#define DE_W 0.025
-	#define DS 1
+	#define DSW 1
 #elif (App == 0xBF53A67A ) //The Bureau: XCOM Declassified
 	#define DA_X 0.04375
 	#define DA_Y 29.0
@@ -1549,7 +1576,7 @@ static const int FOV = 0;                               //Set Game FoV
 	#define DE_X 2
 	#define DE_Y 0.5
 	#define DE_Z 0.375
-	#define DS 1
+	#define DSW 1
 #elif (App == 0x1764D88A ) //X-Com 2
 	#define DA_X 0.24
 	#define DA_Y 29.0
@@ -1576,7 +1603,7 @@ static const int FOV = 0;                               //Set Game FoV
 	#define DE_X 1
 	#define DE_Y 0.5
 	#define DE_Z 0.375
-	#define DS 1
+	#define DSW 1
 #elif (App == 0x4FF5CF63 ) //Lords of the Fallen
 	#define DA_X 0.049
 	#define DA_Y 70.0
@@ -1586,7 +1613,7 @@ static const int FOV = 0;                               //Set Game FoV
 	#define DE_Y 0.5
 	#define DE_Z 0.375
 	#define DE_W 0.415
-	#define PE 1
+	#define PEW 1
 #elif (App == 0xD0AA19 ) //The Bards Tale 4
 	#define DA_W 1
 	#define DA_X 0.0375
@@ -1595,9 +1622,9 @@ static const int FOV = 0;                               //Set Game FoV
 	#define DE_X 1
 	#define DE_Y 0.5
 	#define DE_Z 0.375
-	#define DA 1
-	#define PE 1
-	#define RH 1
+	#define DAA 1
+	#define PEW 1
+	#define RHW 1
 #elif (App == 0x54D4EAFA) //Sekiro Shadows Die Twice
 	#define DA_W 1
     #define DF_Y 0.025
@@ -1611,8 +1638,8 @@ static const int FOV = 0;                               //Set Game FoV
 	#define DE_Y 0.275
 	#define DE_Z 0.375
    // #define DF_Z -0.125
-	#define DA 1
-	#define PE 1
+	#define DAA 1
+	#define PEW 1
 #elif (App == 0x36ECE27F ) //Supraland
 	#define DA_W 1
 	#define DA_Y 22.5
@@ -1620,8 +1647,8 @@ static const int FOV = 0;                               //Set Game FoV
 	#define DE_X 2
 	#define DE_Y 0.8
 	#define DE_Z 0.375
-	#define PE 1
-	#define DA 1
+	#define PEW 1
+	#define DAA 1
 #elif (App == 0x3604DCE6 ) //Remnant: From the Ashes
 	#define DA_W 1
 	#define DA_X 0.07
@@ -1634,10 +1661,13 @@ static const int FOV = 0;                               //Set Game FoV
 	#define DA_Z -0.050
 	//#define DG_W 0.25
 	//#define DF_Z -0.125
-	//#define BM 1
-	//#define DG_X 0.1
-	#define NW 1
-	#define PE 1
+	//#define BMT 1
+	//#define DF_Z 0.1
+	#define NDW 1
+	#define PEW 1
+	#define LBC 2  //Letter Box Correction Offsets With X & Y
+	#define DH_Z 0.256
+	#define DH_W 0.0
 #elif (App == 0x621202BC ) //Vanquish DGVoodoo2
 	#define DA_X 0.05
 	#define DA_Y 15.0
@@ -1645,9 +1675,9 @@ static const int FOV = 0;                               //Set Game FoV
 	#define DE_X 1
 	#define DE_Y 0.5
 	#define DE_Z 0.375
-	#define RH 1
-	#define NF 1
-	#define PE 1
+	#define RHW 1
+	#define NFM 1
+	#define PEW 1
 #elif (App == 0xA1214CD1 ) //Life is Strange
 	#define DA_X 0.125
 	#define DA_Y 8.0
@@ -1656,9 +1686,9 @@ static const int FOV = 0;                               //Set Game FoV
 	#define DE_X 1
 	#define DE_Y 0.5
 	#define DE_Z 0.375
-	#define PE 1
-	#define DS 1
-	#define DA 1
+	#define PEW 1
+	#define DSW 1
+	#define DAA 1
 #elif (App == 0x913AD2D ) //SpaceHulk DeathWing Enhanced Edition
 	#define DA_W 1
 	#define DA_X 0.05
@@ -1668,22 +1698,25 @@ static const int FOV = 0;                               //Set Game FoV
 	#define DE_Y 0.5
 	#define DE_Z 0.375
 	#define DE_W 0.065
-	#define PE 1
-	#define NW 1
+	#define PEW 1
+	#define NDW 1
 #elif (App == 0xEB5CDE17 ) //Man Of Medan
 	#define DA_W 1
 	#define DA_X 0.04375
 	#define DA_Y 20.0
 	#define DB_Z 0.3
+	#define DF_Y 0.010
 	#define DB_Y 4
 	#define DE_X 1
 	#define DE_Y 0.300
 	#define DE_Z 0.300
-	#define LBM 1
-	#define RH 1
-	#define NW 1
-	#define SP 1
+	#define RHW 1
+	#define NDW 1
+	#define SPF 1
 	#define DD_W -0.240
+	#define LBM 1
+	#define DI_X 0.879
+	#define DI_Y 0.120
 #elif (App == 0x62454263 ) //Red Dead Redemption 2
 	#define DA_W 1
 	#define DA_X 0.05
@@ -1693,17 +1726,19 @@ static const int FOV = 0;                               //Set Game FoV
 	#define DE_X 1
 	#define DE_Y 0.5
 	#define DE_Z 0.375
-	#define PE 1
-	#define DA 1
-	#define LBM 2
+	#define PEW 1
+	#define DAA 1
+	#define LBM 1
+	#define DI_X 0.879
+	#define DI_Y 0.120
 #elif (App == 0xB5AE6CBA ) //Rage 2
 	#define DA_W 1
 	#define DA_X 0.04
 	#define DA_Y 125.0
 	#define DB_Y 2
 	#define DE_W 0.06
-	#define PE 1
-	#define DA 1
+	#define PEW 1
+	#define DAA 1
 #elif (App == 0x8CEACA5C ) //Dead Island
 	#define DA_X 0.0475
 	#define DA_Y 8.75
@@ -1728,8 +1763,8 @@ static const int FOV = 0;                               //Set Game FoV
 	#define DE_X 1
 	#define DE_Y 0.300
 	#define DE_Z 0.375
-	#define PE 1
-	#define NW 1
+	#define PEW 1
+	#define NDW 1
 #elif (App == 0x424052D0 ) //Talos Principle
 	#define DA_W 1
 	#define DA_X 0.10
@@ -1742,7 +1777,7 @@ static const int FOV = 0;                               //Set Game FoV
 	#define DE_Y 0.5
 	#define DE_Z 0.375
 	#define DB_W 65
-	#define DA 1
+	#define DAA 1
 #elif (App == 0x6EC76A83 ) //Watch Dogs 2
 	#define DA_W 1
 	#define DA_X 0.070
@@ -1751,8 +1786,8 @@ static const int FOV = 0;                               //Set Game FoV
 	#define DE_X 2
 	#define DE_Y 0.500
 	#define DE_Z 0.375
-	#define PE 1
-	#define DA 1
+	#define PEW 1
+	#define DAA 1
 #elif (App == 0xD9691F81 ) //Destroy All Humans!
 	#define DA_W 1
 	#define DA_X 0.050
@@ -1762,16 +1797,16 @@ static const int FOV = 0;                               //Set Game FoV
 	#define DE_Y 0.500
 	#define DE_Z 0.375
 	#define DF_Y 0.025
-	#define NF 1
-	#define PE 1
-	#define RH 1
+	#define NFM 1
+	#define PEW 1
+	#define RHW 1
 #elif (App == 0x9C5C8E4D ) //INSIDE
 	#define DA_X 0.050
 	#define DB_Y 3
 	#define DE_X 1
 	#define DE_Y 0.500
 	#define DE_Z 0.375
-	#define DC 1
+	#define BDF 1
 	#define DC_X 0.6
 	#define DC_Y -0.4
 	#define DC_Z 0.087
@@ -1789,7 +1824,7 @@ static const int FOV = 0;                               //Set Game FoV
 	#define DA_Z 0.0005
 	#define DB_Y 1
 	#define DF_Y 0.01
-	#define DA 1
+	#define DAA 1
 #elif (App == 0x76CD4369 ) //Resident Evil
 	#define DA_X 0.06875
 	#define DA_Y 24.0
@@ -1799,13 +1834,15 @@ static const int FOV = 0;                               //Set Game FoV
 	#define DE_Y 0.500
 	#define DE_Z 0.375
 	#define DF_Y 0.024
-	#define DA 1
-	#define SP 1
+	#define DAA 1
+	#define SPF 1
 	#define DD_X 1.333
 	#define DD_Y 0.933
-	#define LBM 4
-	#define DS 1
-	#define RH 1
+	#define DSW 1
+	#define RHW 1
+	#define LBM 1
+	#define DI_X 0.879
+	#define DI_Y 0.125
 #elif (App == 0x1AB66F8F ) //Dawn Of War III
 	#define DA_X 0.125
 	#define DA_Y 25.0
@@ -1816,7 +1853,7 @@ static const int FOV = 0;                               //Set Game FoV
 	#define DE_Y 0.200
 	#define DE_Z 0.375
 	#define DF_Y 0.250
-	#define DA 1
+	#define DAA 1
 #elif (App == 0xD86799B9 ) //Devil May Cry 5
 	#define DA_W 1
 	#define DA_X 0.0375
@@ -1826,13 +1863,13 @@ static const int FOV = 0;                               //Set Game FoV
 	#define DE_Y 0.300
 	#define DE_Z 0.350
 	#define DG_W 0.277 //0.5625 //I Think Erroring on the safe side is needed here.
-	#define DC 1
+	#define BDF 1
 	#define DC_X 0.025
 	#define DC_Y 0.025
 	#define DC_W -0.012
 	#define DF_Y 0.02375
-	#define PE 1
-	#define RH 1
+	#define PEW 1
+	#define RHW 1
 #elif (App == 0x5BC45541 ) //Contrast
 	#define DA_X 0.075
 	#define DA_Y 20.0
@@ -1847,13 +1884,13 @@ static const int FOV = 0;                               //Set Game FoV
 	#define DA_Y 18.6
 	#define DB_Y 4
 	#define DF_Y 0.05625
-	#define SP 1
+	#define SPF 1
 	//#define DD_Y 0.675
 	//#define DD_W -0.4815
 	#define DD_Y 0.9
 	#define DD_W -0.111
 	#define DB_W 72
-	#define DS 1
+	#define DSW 1
 #elif (App == 0x5C0EBBE9 ) //A Plague Tale Innocence
 	#define DA_W 1
 	#define DA_X 0.050
@@ -1863,10 +1900,10 @@ static const int FOV = 0;                               //Set Game FoV
 	#define DE_X 2
 	#define DE_Y 0.500
 	#define DE_Z 0.375
-	#define PE 1
-	#define RH 1
-	#define NF 1
-	#define DS 1
+	#define PEW 1
+	#define RHW 1
+	#define NFM 1
+	#define DSW 1
 #elif (App == 0xB2B11A3C ) //Catherine with a K
 	#define DA_X 0.05
 	#define DF_Y 0.0125
@@ -1876,8 +1913,8 @@ static const int FOV = 0;                               //Set Game FoV
 	#define DE_Y 0.500
 	#define DE_Z 0.375
 	#define DG_W 0.4375
-	#define PE 1
-	#define DA 1
+	#define PEW 1
+	#define DAA 1
 #elif (App == 0x7ABE98F0 ) //Samurai Jack
 	#define DA_W 1
 	#define DA_X 0.1375
@@ -1887,7 +1924,7 @@ static const int FOV = 0;                               //Set Game FoV
 	#define DE_X 2
 	#define DE_Y 0.500
 	#define DE_Z 0.375
-	#define DA 1
+	#define DAA 1
 #elif (App == 0xC4B4435F ) //Night Cry
 	#define DA_X 0.06  //ZPD
 	#define DF_Y 0.025 //Separation
@@ -1905,15 +1942,15 @@ static const int FOV = 0;                               //Set Game FoV
 	#define DE_X 1
 	#define DE_Y 0.500
 	#define DE_Z 0.375
-	#define PE 1
-	#define DA 1
+	#define PEW 1
+	#define DAA 1
 #elif (App == 0x5A7B540A ) //We Where Here Too
 	#define DA_W 1
 	#define DB_X 1
 	#define DA_X 0.05625
 	#define DA_Y 42.5
 	#define DB_Y 1
-	#define NW 1
+	#define NDW 1
 #elif (App == 0x6AB553A ) //We Where here Together
 	#define DA_W 1
 	#define DB_X 1
@@ -1925,9 +1962,9 @@ static const int FOV = 0;                               //Set Game FoV
 	#define DE_Y 0.500
 	#define DE_Z 0.375
 	#define DB_W 30
-	#define FV 1
-	#define DA 1
-	#define NW 1
+	#define FOV 1
+	#define DAA 1
+	#define NDW 1
 #elif (App == 0x75930301 ) //Void Bastards
 	#define DA_W 1
 	#define DB_X 1
@@ -1938,8 +1975,8 @@ static const int FOV = 0;                               //Set Game FoV
 	#define DE_X 1
 	#define DE_Y 0.625
 	#define DE_Z 0.375
-	#define DS 1
-	#define RH 1
+	#define DSW 1
+	#define RHW 1
 #elif (App == 0xDF3F2AB6 ) //Cloud Punk
 	#define DA_W 1
 	#define DB_X 1
@@ -1950,9 +1987,9 @@ static const int FOV = 0;                               //Set Game FoV
 	#define DE_X 1
 	#define DE_Y 0.500
 	#define DE_Z 0.375
-	#define DS 1
-	#define RH 1
-	#define NF 1
+	#define DSW 1
+	#define RHW 1
+	#define NFM 1
 #elif (App == 0x4551A746 ) //The Swapper
 	//#define DB_X 1
 	#define DF_Y 0.0125
@@ -1968,9 +2005,9 @@ static const int FOV = 0;                               //Set Game FoV
 	//#define DD_Y 0.705
 	//#define DD_Z 0.250
 	//#define DD_W 0.4125
-	//#define SP 1
-	#define DS 1
-	#define RH 1
+	//#define SPF 1
+	#define DSW 1
+	#define RHW 1
 #elif ( App == 0xE0B7AF16 || App == 0xB84E12B6 ) //Horizon Chase Turbo
 	#define DA_W 1
 	#define DA_Y 12.5
@@ -1981,7 +2018,7 @@ static const int FOV = 0;                               //Set Game FoV
 	#define DE_X 1
 	#define DE_Y 0.500
 	#define DE_Z 0.375
-	#define DS 1
+	#define DSW 1
 #elif (App == 0xCF0046B7 ) //SpecOps The Line
 	#define DA_Y 15.0
 	#define DA_X 0.05
@@ -1991,9 +2028,9 @@ static const int FOV = 0;                               //Set Game FoV
 	#define DE_X 1
 	#define DE_Y 0.500
 	#define DE_Z 0.375
-	#define DS 1
-	#define PE 1
-	#define FV 1
+	#define DSW 1
+	#define PEW 1
+	#define FOV 1
 #elif (App == 0x6C433D70 ) //Q.U.B.E 2
 	#define DA_W 1
 	#define DA_Y 75.0
@@ -2005,8 +2042,8 @@ static const int FOV = 0;                               //Set Game FoV
 	#define DE_X 3
 	#define DE_Y 0.450
 	#define DE_Z 0.375
-	#define PE 1
-	#define FV 1
+	#define PEW 1
+	#define FOV 1
 	#define DB_W 69
 #elif (App == 0xD87951C4 ) //Horizon Zero Dawn
 	//#define DA_W 1
@@ -2019,8 +2056,8 @@ static const int FOV = 0;                               //Set Game FoV
 	#define DE_X 2
 	#define DE_Y 0.3
 	#define DE_Z 0.375
-	#define PE 1
-	#define FV 1
+	#define PEW 1
+	#define FOV 1
 #elif (App == 0xF1BFCA91 ) //ELEX
 	//#define DA_W 1
 	//#define DA_Y 12.5
@@ -2032,8 +2069,8 @@ static const int FOV = 0;                               //Set Game FoV
 	#define DE_X 2
 	#define DE_Y 0.500
 	#define DE_Z 0.300
-	#define PE 1
-	#define DS 1
+	#define PEW 1
+	#define DSW 1
 #elif (App == 0x2E63D83A ) //Kingdom Come Diliverance
 	#define DA_W 1
 	#define DA_Y 25.0
@@ -2045,8 +2082,8 @@ static const int FOV = 0;                               //Set Game FoV
 	#define DE_X 1
 	#define DE_Y 0.500
 	#define DE_Z 0.300
-	#define PE 1
-	#define FV 1
+	#define PEW 1
+	#define FOV 1
 #elif (App == 0xF9341C1 ) //Valheim
 	#define DA_W 1
     #define DB_X 1
@@ -2060,8 +2097,8 @@ static const int FOV = 0;                               //Set Game FoV
 	#define DE_Y 0.500
 	#define DE_Z 0.375
 	#define DG_W 0.15
-	#define PE 1
-	#define DA 1
+	#define PEW 1
+	#define DAA 1
 #elif (App == 0x8C8F544C ) //Witcher 3
 	#define DA_W 1
     //#define DB_X 1
@@ -2075,8 +2112,8 @@ static const int FOV = 0;                               //Set Game FoV
 	#define DE_X 2
 	#define DE_Y 0.500
 	#define DE_Z 0.300
-	#define PE 1
-	#define DA 1
+	#define PEW 1
+	#define DAA 1
 #elif (App == 0xA05A15C4 ) //Spooky's House of Jump Scares
 	//#define DA_W 1
     //#define DB_X 1
@@ -2089,10 +2126,10 @@ static const int FOV = 0;                               //Set Game FoV
 	#define DE_X 1
 	//#define DE_Y 0.500
 	//#define DE_Z 0.300
-	#define DS 1
-	#define RH 1
-	#define NF 1
-	#define SP 1
+	#define DSW 1
+	#define RHW 1
+	#define NFM 1
+	#define SPF 1
 	#define DD_X 0.625
 	#define DD_Y 0.700
 	#define DD_Z 0.600
@@ -2109,13 +2146,13 @@ static const int FOV = 0;                               //Set Game FoV
 	#define DE_X 2
 	//#define DE_Y 0.500
 	//#define DE_Z 0.300
-	#define PE 1
-	#define FV 1
-    #define DA 1
-	//#define DS 1
-	//#define RH 1
-	//#define NF 1
-	//#define SP 1
+	#define PEW 1
+	#define FOV 1
+    #define DAA 1
+	//#define DSW 1
+	//#define RHW 1
+	//#define NFM 1
+	//#define SPF 1
 	//#define DD_X 0.625
 	//#define DD_Y 0.700
 	//#define DD_Z 0.600
@@ -2132,13 +2169,13 @@ static const int FOV = 0;                               //Set Game FoV
 	#define DE_X 1
 	//#define DE_Y 0.500
 	#define DE_Z 0.300
-	#define PE 1
-	#define FV 1
-    //#define DA 1
-	#define DS 1
-	//#define RH 1
-	//#define NF 1
-	//#define SP 1
+	#define PEW 1
+	#define FOV 1
+    //#define DAA 1
+	#define DSW 1
+	//#define RHW 1
+	//#define NFM 1
+	//#define SPF 1
 	//#define DD_X 0.625
 	//#define DD_Y 0.700
 	//#define DD_Z 0.600
@@ -2155,13 +2192,13 @@ static const int FOV = 0;                               //Set Game FoV
 	#define DE_X 2
 	#define DE_Y 0.250
 	#define DE_Z 0.375
-	#define PE 1
-	#define FV 1
-	//#define DA 1
-	//#define DS 1
-	//#define RH 1
-	//#define NF 1
-	//#define SP 1
+	#define PEW 1
+	#define FOV 1
+	//#define DAA 1
+	//#define DSW 1
+	//#define RHW 1
+	//#define NFM 1
+	//#define SPF 1
 	//#define DD_X 0.625
 	//#define DD_Y 0.700
 	//#define DD_Z 0.600
@@ -2177,8 +2214,8 @@ static const int FOV = 0;                               //Set Game FoV
 	#define DE_X 3
 	//#define DE_Y 0.450
 	#define DE_Z 0.375
-	#define PE 1
-	#define FV 1
+	#define PEW 1
+	#define FOV 1
 	#define DB_W 67
 #elif (App == 0x75CE6926 ) //Chronicle of Riddick Assault on Dark Athena
 	//#define DA_W 1
@@ -2192,9 +2229,9 @@ static const int FOV = 0;                               //Set Game FoV
 	#define DE_X 2
 	//#define DE_Y 0.450
 	//#define DE_Z 0.375
-	#define PE 1
-	#define DS 1
-	#define RH 1
+	#define PEW 1
+	#define DSW 1
+	#define RHW 1
 #elif (App == 0xAA5644F9 || App == 0x1981FECC ) //Need For Speed: Heat | Payback
 	#define DA_W 1
 	#define DA_Y 12.5
@@ -2206,8 +2243,8 @@ static const int FOV = 0;                               //Set Game FoV
 	//#define DE_X 2
 	//#define DE_Y 0.450
 	//#define DE_Z 0.375
-	#define PE 1
-	#define DA 1
+	#define PEW 1
+	#define DAA 1
 #elif (App == 0xBD8B2F39 ) //Assassin's Creed Odyssey
 	#define DA_W 1
 	#define DA_Y 30.0
@@ -2220,8 +2257,8 @@ static const int FOV = 0;                               //Set Game FoV
 	#define DE_Y 0.250
 	#define DE_Z 0.375
 	#define DG_W 0.4 //Pop out allowed
-	#define PE 1
-	#define FV 1
+	#define PEW 1
+	#define FOV 1
 #elif (App == 0x3D00A2BC ) //SM64 us f3dx2e
 	#define DA_Y 12.5
 	#define DA_X 0.050
@@ -2240,25 +2277,25 @@ static const int FOV = 0;                               //Set Game FoV
 	#define DA_Y 60.0
 	#define DA_X 0.06
 	#define DB_Y 5
-	#define RH 1
-	#define NW 1
-	#define NF 1
+	#define RHW 1
+	#define NDW 1
+	#define NFM 1
 #elif (App == 0x934DC835 || App == 0xD063D305 || App == 0xE29F2D4 ) //Dead Rising | Dead Rising 2 | Dead Rising 2 Off The Record
 	#define DA_Y 25.0
 	#define DA_X 0.125
 	#define DB_Y 5
 	#define DE_X 1
 	#define DE_Z 0.375
-	#define NW 1
+	#define NDW 1
 #elif (App == 0xF28EC9C2 || App == 0xF28EC143 ) //Dead Rising 3 | Dead Rising 4
 	#define DA_Y 20.0
 	#define DA_X 0.1
 	#define DB_Y 5
 	#define DE_X 2
 	#define DE_Z 0.375
-	#define RH 1
-	#define NW 1
-	#define NF 1
+	#define RHW 1
+	#define NDW 1
+	#define NFM 1
 #elif (App == 0xC402F6B8 ) //Iron Harvest
 	#define DA_W 1
 	#define DA_Y 125.0
@@ -2268,9 +2305,9 @@ static const int FOV = 0;                               //Set Game FoV
 	#define DE_X 1
 	#define DE_Y 0.1
 	#define DE_Z 0.4
-	#define PE 1
-	#define NW 1
-	#define DA 1
+	#define PEW 1
+	#define NDW 1
+	#define DAA 1
 #elif (App == 0xA867FE21 ) //Senran Kagura Peach Ball
 	#define DA_Y 72.5
 	#define DA_Z -0.0011
@@ -2280,9 +2317,11 @@ static const int FOV = 0;                               //Set Game FoV
 	#define DE_X 2
 	#define DE_Y 0.075
 	#define DE_Z 0.375
-	#define SDT 1
-	#define HM 1
+	#define HMT 1
 	#define DF_W 0.5
+	#define SDT 1 //Spcial Depth Trigger With X & Y Offsets
+    #define DG_X -0.190
+    #define DG_Y 0.0 
 #elif (App == 0x1BDC0C4C ) //Quake Enhanced Edition
 	#define DA_X 0.07
 	#define DA_Y 13.0
@@ -2290,17 +2329,17 @@ static const int FOV = 0;                               //Set Game FoV
 	#define DE_X 3
 	#define DE_Y 0.5
 	#define DE_Z 0.375
-	#define NW 1
-	#define PE 1
+	#define NDW 1
+	#define PEW 1
 	#define DB_W 71
 	#define DF_X 0.250
 #elif (App == 0xB3729F40 ) //Rocket League Steam
 	#define DA_Y 50.0
 	#define DA_X 0.100
 	#define DB_Y 5
-	#define DS 1
-	#define NW 1
-	#define PE 1
+	#define DSW 1
+	#define NDW 1
+	#define PEW 1
 #elif (App == 0x1BB6E62A ) //AMIN EVIL RTX
 	#define DA_W 1
 	#define DA_X 0.07
@@ -2310,8 +2349,8 @@ static const int FOV = 0;                               //Set Game FoV
 	#define DE_X 3
 	#define DE_Y 0.5
 	#define DE_Z 0.45
-	#define PE 1
-	#define DA 1
+	#define PEW 1
+	#define DAA 1
 	#define DB_W 27
 #elif (App == 0xFBC55DDE ) //Tormented Shouls Demo - Add to real game if Application ID is given.
 	#define DA_W 1
@@ -2322,7 +2361,7 @@ static const int FOV = 0;                               //Set Game FoV
 	#define DB_Y 2
 	#define DE_X 2
 	//#define DG_Z 0.288 // This works. But, may be a bit overboard. Use this if users complain about edge pop out issues. I don't think it's needed.
-	#define PE 1
+	#define PEW 1
 #elif (App == 0x920D5D88 ) //Graven
 	#define DA_W 1
 	#define DA_X 0.1
@@ -2332,8 +2371,8 @@ static const int FOV = 0;                               //Set Game FoV
 	#define DE_X 3
 	#define DE_Y 0.5
 	#define DE_Z 0.375
-	#define PE 1
-	#define DA 1
+	#define PEW 1
+	#define DAA 1
 	//#define DB_W 54 //Graven WP Not used Due to Clipping on world. Even if it looks good. Maybe Give people the option???
 	#define DG_Z 0.125
 #elif (App == 0x6B2D15D6 ) //Rec Room Non VR
@@ -2348,8 +2387,8 @@ static const int FOV = 0;                               //Set Game FoV
 	#define DE_Y 0.6
 	#define DE_Z 0.375
 	#define DG_Z 0.075
-	#define NW 1
-	#define DS 1
+	#define NDW 1
+	#define DSW 1
 #elif (App == 0xD0F69E54 ) //Yooka-Laylee
 	#define DA_Y 12.75
 	#define DA_Z 0.001
@@ -2395,9 +2434,9 @@ static const int FOV = 0;                               //Set Game FoV
 	#define DB_W 34
 	#define DF_X 0.20
 	#define DG_W 0.08
-	#define BM 1
-	#define DG_X 0.130
-	#define PE 1
+	#define BMT 1
+	#define DF_Z 0.130
+	#define PEW 1
 #elif (App == 0xB53B8500 ) //DEATH STRANDING
 	#define DA_W 1
 	#define DA_Y 20.0
@@ -2411,8 +2450,8 @@ static const int FOV = 0;                               //Set Game FoV
 	//#define DE_Z 0.375
 	#define DG_Z 0.425
 	#define DG_W 0.3 //Allow some popout
-	#define PE 1
-	#define DA 1
+	#define PEW 1
+	#define DAA 1
 #elif (App == 0x87AC1510 ) //Ghostrunner
 	#define DA_W 1
 	#define DA_Y 245.0
@@ -2421,15 +2460,15 @@ static const int FOV = 0;                               //Set Game FoV
 	#define DF_Y 0.047
 	#define DB_Z 0.0625
 	#define DB_Y 1
-	#define BM 1
-	#define DG_X 0.180
+	#define BMT 1
+	#define DF_Z 0.180
 	#define DE_X 3
 	#define DE_Y 0.650
 	#define DE_Z 0.400
 	#define DB_W 43
 	#define DF_X 0.1
-	#define PE 1
-	#define DA 1
+	#define PEW 1
+	#define DAA 1
 #elif (App == 0x11E6C55E ) //The Suicide of Rachel Foster
 	#define DA_W 1
 	#define DA_Y 35.0
@@ -2442,9 +2481,9 @@ static const int FOV = 0;                               //Set Game FoV
 	#define DE_Z 0.425
 	#define DG_Z 0.449
 	#define DG_W 0.37 //Allow much popout "Please don't abuse this."
-	#define PE 1
-	#define DA 1
-	#define RH 1
+	#define PEW 1
+	#define DAA 1
+	#define RHW 1
 	#define WSM 2
 	#define DB_W 2
 #elif (App == 0xFC960068 ) //Devolverland Expo
@@ -2458,8 +2497,8 @@ static const int FOV = 0;                               //Set Game FoV
 	#define DE_Z 0.375
 	#define WSM 2
 	#define DB_W 3
-	#define PE 1
-	#define DA 1
+	#define PEW 1
+	#define DAA 1
 #elif (App == 0x59DA13F1 ) //Conarium
 	#define DA_W 1
 	#define DA_Y 18.75
@@ -2472,9 +2511,9 @@ static const int FOV = 0;                               //Set Game FoV
 	#define DE_Z 0.400
 	#define DG_Z 0.305
 	#define DG_W 0.0875 //Allow much popout "Please don't abuse this."
-	#define PE 1
-	#define DA 1
-	#define RH 1
+	#define PEW 1
+	#define DAA 1
+	#define RHW 1
 	#define WSM 2
 	#define DB_W 4
 	#define DF_X 0.150
@@ -2485,10 +2524,10 @@ static const int FOV = 0;                               //Set Game FoV
 	#define DE_Y 0.5
 	#define DE_Z 0.375
 	#define DG_Z 0.360
-	#define BM 1
-	#define DG_X 0.1375
-	#define DS 1
-	#define FV 1
+	#define BMT 1
+	#define DF_Z 0.1375
+	#define DSW 1
+	#define FOV 1
 #elif (App == 0x289ABD5C ) //World Rally Championship 10
 	#define DA_W 1
 	#define DA_Y 20.5
@@ -2502,8 +2541,8 @@ static const int FOV = 0;                               //Set Game FoV
 	#define WSM 2
 	#define DB_W 5
 	#define DF_X 0.125
-	#define PE 1
-	#define DA 1
+	#define PEW 1
+	#define DAA 1
 #elif (App == 0xBCCAD1AE || App == 0x3D2B24D7 ) //Project Cars | Project Cars 2
 	#define DA_Y 7.0
 	//#define DA_Z 0.000075
@@ -2516,12 +2555,12 @@ static const int FOV = 0;                               //Set Game FoV
 	#define DG_Z 0.125 //0.125//0.3125
 	#define DE_W 0.275//0.275//0.35625
 	#define DG_W 0.20 // Needed for old car.
-	#define BM 1
-	#define DG_X 0.165
-	#define PE 1
-	#define DA 1
-	#define DS 1
-	#define NW 1
+	#define BMT 1
+	#define DF_Z 0.165
+	#define PEW 1
+	#define DAA 1
+	#define DSW 1
+	#define NDW 1
 #elif (App == 0x98C69E31 || App == 0xA8778B7D ) // F1 2019 | F1 2020 DX12
 	#define DA_W 1
 	#define DG_W 0.25
@@ -2531,8 +2570,8 @@ static const int FOV = 0;                               //Set Game FoV
 	#define DE_X 2
 	#define DE_Z 0.400
 	#define DG_Z 0.400
-	#define PE 1
-	#define NW 1
+	#define PEW 1
+	#define NDW 1
 #elif (App == 0x164EF6B5 ) //Grid 2019
 	#define DA_W 1
 	#define DA_Y 11.5
@@ -2543,12 +2582,12 @@ static const int FOV = 0;                               //Set Game FoV
 	//#define DG_Z 0.125
 	//#define DE_W 0.275
 	#define DG_W 0.25
-	#define BM 1
-	#define DG_X 0.1625
-	#define PE 1
-	#define DA 1
-	//#define DS 1
-	#define NW 1
+	#define BMT 1
+	#define DF_Z 0.1625
+	#define PEW 1
+	#define DAA 1
+	//#define DSW 1
+	#define NDW 1
 #elif (App == 0x54568EA ) //Assetto Corsa
 	#define DA_X 0.05
 	#define DB_Y 4
@@ -2556,10 +2595,10 @@ static const int FOV = 0;                               //Set Game FoV
 	#define DE_Y 0.750
 	#define DE_Z 0.375
 	#define DG_W 0.2
-	#define PE 1
-	#define DA 1
-	#define NW 1
-	#define FV 1
+	#define PEW 1
+	#define DAA 1
+	#define NDW 1
+	#define FOV 1
 #elif (App == 0x7658447E ) //Dagon*
 	#define DA_W 1
 	#define DB_X 1
@@ -2572,8 +2611,8 @@ static const int FOV = 0;                               //Set Game FoV
 	#define DE_Z 0.375
 	#define DB_Z 0
 	#define DG_W 0.25
-	#define DS 1
-	#define PE 1
+	#define DSW 1
+	#define PEW 1
 #elif (App == 0xC57720A6 ) //Crysis 2 DX11 1.9
 	#define DA_X 0.07
 	//#define DA_Y 11.5
@@ -2586,9 +2625,9 @@ static const int FOV = 0;                               //Set Game FoV
 	#define WSM 2
 	#define DB_W 7
 	#define DF_X 0.225
-	#define DS 1 //?
-	#define PE 1
-	#define RH 1
+	#define DSW 1 //?
+	#define PEW 1
+	#define RHW 1
 #elif (App == 0xDB778A3B ) //Portal 2
 	#define DA_X 0.05
 	#define DA_Y 20.5
@@ -2601,8 +2640,8 @@ static const int FOV = 0;                               //Set Game FoV
 	#define DG_W 0.125
 	#define DB_W 36
     #define DG_Z 0.430
-	#define DS 1
-	#define PE 1
+	#define DSW 1
+	#define PEW 1
 #elif (App == 0x194A6354 ) //The Medium
     #define DA_W 1
 	#define DA_X 0.125
@@ -2615,7 +2654,7 @@ static const int FOV = 0;                               //Set Game FoV
 	#define DE_Y 0.375
 	#define DE_Z 0.375
 	#define DG_W 0.6125
-	#define PE 1	
+	#define PEW 1	
 #elif (App == 0xD829EFC1 ) //Ride 4
 	#define DA_W 1
 	#define DA_Y 16.25
@@ -2626,10 +2665,10 @@ static const int FOV = 0;                               //Set Game FoV
 	//#define DG_Z 0.125 //Near
 	//#define DE_W 0.275 //Max
 	#define DG_W 0.7
-	#define BM 1
-	#define DG_X 0.165
-	#define PE 1
-	#define NW 1
+	#define BMT 1
+	#define DF_Z 0.165
+	#define PEW 1
+	#define NDW 1
 #elif (App == 0x19D0F410 ) //Zombie Army Trilogy
 	#define DA_Y 12.5
 	#define DA_X 0.155
@@ -2639,10 +2678,10 @@ static const int FOV = 0;                               //Set Game FoV
 	#define DE_Y 0.375
 	#define DE_Z 0.375
 	#define DG_W 0.7
-	//#define BM 1
-	//#define DG_X 0.165
-	#define PE 1
-	#define NW 1
+	//#define BMT 1
+	//#define DF_Z 0.165
+	#define PEW 1
+	#define NDW 1
 #elif (App == 0x8842D13 ) //Genshin Impact
 	#define DA_W 1
     #define DB_X 1
@@ -2655,7 +2694,7 @@ static const int FOV = 0;                               //Set Game FoV
 	#define DE_Z 0.375
 	#define DF_Y 0.01
 	#define DG_W 0.1
-	#define NW 1
+	#define NDW 1
 #elif (App == 0xEEAF4DE ) //Guardians of the galaxy
     #define DA_W 1
 	#define DA_Y 54.0
@@ -2667,8 +2706,8 @@ static const int FOV = 0;                               //Set Game FoV
 	#define DE_Z 0.400
 	#define DF_Y 0.0375
 	#define DG_W 0.2
-	#define DA 1
-	#define PE 1
+	#define DAA 1
+	#define PEW 1
 #elif (App == 0x967BB1CC ) //HROT
 	#define DA_X 0.055
 	#define DF_Y 0.025
@@ -2680,8 +2719,8 @@ static const int FOV = 0;                               //Set Game FoV
 	#define DE_Z 0.375
 	#define WSM 2 //Weapon Settings Mode
 	#define DB_W 11
-	#define DS 1 
-	#define PE 1
+	#define DSW 1 
+	#define PEW 1
 #elif (App == 0x11763BB7 ) //FATAL Frame Maiden of the Black Water.... Too Damn spooky....
 	#define DA_X 0.0825
 	#define DF_Y 0.04125
@@ -2691,8 +2730,8 @@ static const int FOV = 0;                               //Set Game FoV
 	#define DE_X 1
 	#define DE_Y 0.250
 	#define DE_Z 0.375
-	#define PE 1
-	#define DA 1
+	#define PEW 1
+	#define DAA 1
 #elif (App == 0x88C50B03 ) //League of Legends
 	#define DA_X 0.2
 	#define DF_Y 0.2
@@ -2704,10 +2743,10 @@ static const int FOV = 0;                               //Set Game FoV
 	#define DE_Y 0.60
 	#define DE_Z 0.375
 	#define DG_W 0.1 //Allow some popout
-	#define PE 1
-	#define DA 1
+	#define PEW 1
+	#define DAA 1
 #else
-	#define NP 1 //No Profile
+	#define NPW 1 //No Profile
 #endif
 //Change Output
 //#ifndef checks whether the given token has been #defined earlier in the file or in an included file
@@ -2724,6 +2763,7 @@ static const int FOV = 0;                               //Set Game FoV
 #ifndef DA_W
     #define DA_W Depth_Linearization_D
 #endif
+
 // X = [Depth Flip] Y = [Auto Balance] Z = [Auto Depth] W = [Weapon Hand]
 #ifndef DB_X
     #define DB_X Depth_Flip_D
@@ -2737,6 +2777,7 @@ static const int FOV = 0;                               //Set Game FoV
 #ifndef DB_W
     #define DB_W Weapon_Hand_D
 #endif
+
 // X = [HUD] Y = [Barrel Distortion K1] Z = [Barrel Distortion K2] W = [Barrel Distortion Zoom]
 #ifndef DC_X
     #define DC_X BD_K1_D
@@ -2750,6 +2791,7 @@ static const int FOV = 0;                               //Set Game FoV
 #ifndef DC_W
     #define DC_W BD_Zoom_D
 #endif
+
 // X = [Horizontal Size] Y = [Vertical Size] Z = [Horizontal Position] W = [Vertical Position]
 #ifndef DD_X
     #define DD_X HVS_X_D
@@ -2763,6 +2805,7 @@ static const int FOV = 0;                               //Set Game FoV
 #ifndef DD_W
     #define DD_W HVP_Y_D
 #endif
+
 // X = [ZPD Boundary Type] Y = [ZPD Boundary Scaling] Z = [ZPD Boundary Fade Time] W = [Weapon NearDepth Max]
 #ifndef DE_X
     #define DE_X ZPD_Boundary_Type_D
@@ -2776,103 +2819,136 @@ static const int FOV = 0;                               //Set Game FoV
 #ifndef DE_W
     #define DE_W Weapon_Near_Depth_Max_D
 #endif
-// X = [ZPD Weapon Boundary] Y = [Separation] Z = [Null] W = [HUD]
+
+// X = [ZPD Weapon Boundary] Y = [Separation] Z = [ZPD Balance] W = [HUD]
 #ifndef DF_X
-    #define DF_X ZPD_Weapon_Boundary_Adjust
+    #define DF_X ZPD_Weapon_Boundary_Adjust_D
 #endif
 #ifndef DF_Y
-    #define DF_Y Separation
+    #define DF_Y Separation_D
 #endif
 #ifndef DF_Z
-    #define DF_Z Null_Z
+    #define DF_Z Manual_ZPD_Balance_D
 #endif
 #ifndef DF_W
     #define DF_W HUDX_D
 #endif
-// X = [ZPD Balance] Y = [Null] Z = [Weapon NearDepth Min] W = [Check Depth Limit]
+
+// X = [Special Depth Correction X] Y = [Special Depth Correction Y] Z = [Weapon NearDepth Min] W = [Check Depth Limit]
 #ifndef DG_X
-    #define DG_X Manual_ZPD_Balance
+    #define DG_X SDC_Offset_X_D
 #endif
 #ifndef DG_Y
-    #define DG_Y Null_Y
+    #define DG_Y SDC_Offset_Y_D
 #endif
 #ifndef DG_Z
     #define DG_Z Weapon_Near_Depth_Min_D
 #endif
 #ifndef DG_W
-	#define DG_W Check_Depth_Limit
+	#define DG_W Check_Depth_Limit_D
+#endif
+
+// X = [LBD Size Correction Offset X] Y = [LBD Size Correction Offset Y] Z = [LBD Pos Correction Offset X] W = [LBD Pos Correction Offset Y]
+#ifndef DH_X
+    #define DH_X LB_Depth_Size_Offset_X_D
+#endif
+#ifndef DH_Y
+    #define DH_Y LB_Depth_Size_Offset_Y_D
+#endif
+#ifndef DH_Z
+    #define DH_Z LB_Depth_Pos_Offset_X_D
+#endif
+#ifndef DH_W
+	#define DH_W LB_Depth_Pos_Offset_Y_D
+#endif
+
+// X = [LBM Offset X] Y = [LBM Offset Y] Z = [Null_Z] W = [Null_W]
+#ifndef DI_X
+    #define DI_X LB_Masking_Offset_X_D
+#endif
+#ifndef DI_Y
+    #define DI_Y LB_Masking_Offset_Y_D
+#endif
+#ifndef DI_Z
+    #define DI_Z Null_Z
+#endif
+#ifndef DI_W
+	#define DI_W Null_W
 #endif
 
 //Special Toggles
-#ifndef RE
-    #define RE REF //Resident Evil Fix
+#ifndef REF
+    #define REF Resident_Evil_Fix_D            //Resident Evil Fix
 #endif
-#ifndef NC
-    #define NC NCW //Not Compatible Warning
+#ifndef IDF
+    #define IDF Inverted_Depth_Fix_D           //Inverted Depth Fix
 #endif
-#ifndef RH
-    #define RH RHW //Read Help Warning
+#ifndef SPF
+    #define SPF Size_Position_Fix_D            //Size & Position Fix
 #endif
-#ifndef ED
-    #define ED EDW //Emulator Detected Warning
+#ifndef BDF
+    #define BDF Barrel_Distortion_Fix_D        //Barrel Distortion Fix
 #endif
-#ifndef NP
-    #define NP NPW //No Profile Warning
+#ifndef HMT
+    #define HMT HUD_Mode_Trigger_D             //HUD Mode Trigger
 #endif
-#ifndef ID
-    #define NI IDF //Inverted Depth Fix
-#endif
-#ifndef SP
-    #define SP SPF //Size & Position Fix
-#endif
-#ifndef DC
-    #define DC BDF //Barrel Distortion Fix
-#endif
-#ifndef HM
-    #define HM HMT //HUD Mode Trigger
-#endif
-#ifndef DF
-    #define DF DFW //Delay Frame Workaround
-#endif
-#ifndef NF
-    #define NF NFM //Needs Fix and/or Modding
-#endif
-#ifndef DS
-    #define DS DSW //Depth Selection Warning
+#ifndef DFW
+    #define DFW Delay_Frame_Workaround_D       //Delay Frame Workaround
 #endif
 #ifndef LBC
-    #define LBC ALB //Auto Letter Box
+    #define LBC Auto_Letter_Box_Correction_D   //Auto Letter Box Correction
 #endif
 #ifndef LBM
-    #define LBM LBD //Letter Box Depth
+    #define LBM Auto_Letter_Box_Masking_D      //Auto Letter Box Depth Masking
 #endif
 #ifndef SDT
-    #define SDT STD //Specialized Depth Trigger
+    #define SDT Specialized_Depth_Trigger_D    //Specialized Depth Trigger
 #endif
-#ifndef DA
-    #define DA DAA //Disable Anti-Aliasing
+#ifndef BMT
+    #define BMT Balance_Mode_Toggle_D          //Balance Mode Toggle
 #endif
-#ifndef NW
-    #define NW NWW //Network Warning
+
+#ifndef NPW
+    #define NPW No_Profile_Warning_D           //No Profile Warning
 #endif
-#ifndef PE
-    #define PE PEW //Disable Post Effect Warning
+#ifndef NFM
+    #define NFM Needs_Fix_Mod_D                //Needs Fix and/or Modding
 #endif
-#ifndef WW
-    #define WW WPW //Weapon Profile Warning
+#ifndef DSW
+    #define DSW Depth_Selection_Warning_D      //Depth Selection Warning
 #endif
-#ifndef FV
-    #define FV FOV //Set Game FoV
+#ifndef DAA
+    #define DAA Disable_Anti_Aliasing_D        //Disable Anti-Aliasing
 #endif
-#ifndef BM
-    #define BM BMT //Balance Mode Toggle
+#ifndef NDW
+    #define NDW Network_Warning_D              //Network Detection Warning
 #endif
+#ifndef PEW
+    #define PEW Disable_Post_Effects_Warning_D //Disable Post Effect Warning
+#endif
+#ifndef WPW
+    #define WPW Weapon_Profile_Warning_D       //Weapon Profile Warning
+#endif
+#ifndef FOV
+    #define FOV Set_Game_FoV_D                 //Set Game FoV
+#endif
+
+#ifndef RHW
+    #define RHW Read_Help_Warning_D            //Read Help Warning
+#endif
+#ifndef EDW
+    #define EDW Emulator_Detected_Warning_D    //Emulator Detected Warning
+#endif
+#ifndef NCW
+    #define NCW Not_Compatible_Warning_D       //Not Compatible Warning
+#endif
+
 //Weapon Settings "Use #define WSM 1 or 2"
 #ifndef OW_WP     //This is used if OW_WP is not called in the Above Profile
     #define OW_WP "WP Off\0Custom WP\0WP 0\0WP 1\0WP 2\0WP 3\0WP 4\0WP 5\0WP 6\0WP 7\0WP 8\0WP 9\0WP 10\0WP 11\0WP 12\0WP 13\0WP 14\0WP 15\0WP 16\0WP 17\0WP 18\0WP 19\0WP 20\0WP 21\0WP 22\0WP 23\0WP 24\0WP 25\0WP 26\0WP 27\0WP 28\0WP 29\0WP 30\0WP 31\0WP 32\0WP 33\0WP 34\0WP 35\0WP 36\0WP 37\0WP 38\0WP 39\0WP 40\0WP 41\0WP 42\0WP 43\0WP 44\0WP 45\0WP 46\0WP 47\0WP 48\0WP 49\0WP 50\0WP 51\0WP 52\0WP 53\0WP 54\0WP 55\0WP 56\0WP 57\0WP 58\0WP 59\0WP 60\0WP 61\0WP 62\0WP 63\0WP 64\0WP 65\0WP 66\0WP 67\0WP 68\0WP 69\0WP 70\0WP 71\0WP 72\0WP 73\0WP 74\0"
 #endif
 #ifndef WSM //One is Profiles List A | Two is Profiles List B | Three is MCC | Four is Prey | Five is Blood 2
-    #define WSM 1 //Weapon Setting Mode
+    #define WSM Weapon_Setting_Mode_D //Weapon Setting Mode
 #endif
 
 #if WSM == 1
