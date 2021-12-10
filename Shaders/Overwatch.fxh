@@ -1,7 +1,7 @@
 ////----------------------------------------//
 ///SuperDepth3D Overwatch Automation Shader///
 //----------------------------------------////
-// Version 2.2.0
+// Version 2.2.1
 //---------------------------------------OVERWATCH---------------------------------------//
 // If you are reading this stop. Go away and never look back. From this point on if you  //
 // still think it's is worth looking at this..... Then no one can save you or your soul. //
@@ -61,7 +61,7 @@ static const float Weapon_Near_Depth_Max_D = 0.0;       //Weapon Near Depth     
 static const int Balance_Mode_Toggle_D = 0;             // 0 | 1 : Off | On                             | BMT
 static const float ZPD_Weapon_Boundary_Adjust_D = 0.0;  //ZPD Weapon Boundary Adjust                    | DF_X
 static const float Separation_D = 0.0;                  //ZPD Separation                                | DF_Y
-static const float Manual_ZPD_Balance_D = 0.0;          //Manual Balance Mode Adjustment                | DF_Z
+static const float Manual_ZPD_Balance_D = 0.5;          //Manual Balance Mode Adjustment                | DF_Z
 static const float HUDX_D = 0.0;                        //Heads Up Display Cut Off Point                | DF_W
 
 //Specialized Depth Trigger
@@ -2745,6 +2745,17 @@ static const int Weapon_Setting_Mode_D = 1;             //Weapon Setting Mode   
 	#define DG_W 0.1 //Allow some popout
 	#define PEW 1
 	#define DAA 1
+#elif (App == 0x808ABB25 ) //BioShock Infinite 
+	#define DA_X 0.05 // or 0.0525
+	//#define DF_Y 0.025
+	#define DA_Y 13.75
+    #define DA_Z -0.00125
+    #define DG_Z 0.05
+    #define BMT 1
+	//#define DF_Z 0.5
+    #define DB_Z 0.075
+	#define DSW 1
+    #define FOV 1
 #else
 	#define NPW 1 //No Profile
 #endif
