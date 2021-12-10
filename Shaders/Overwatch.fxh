@@ -2756,6 +2756,20 @@ static const int Weapon_Setting_Mode_D = 1;             //Weapon Setting Mode   
     #define DB_Z 0.075
 	#define DSW 1
     #define FOV 1
+#elif (App == 0x22CA259A ) //Kena Bridge of Spirits
+	#define DA_X 0.225
+    #define DF_Y 0.025
+	//#define DA_Y 20.00
+	#define DB_Y 5
+	#define DE_X 1
+	#define DE_Y 0.400
+	#define DE_Z 0.375
+	#define DG_W 0.275
+	#define DSW 1
+	#define LBC 1 //Letter Box Correction With X & Y
+    #define DH_Z 0.0
+    #define DH_W -0.05
+    #define PEW 1
 #else
 	#define NPW 1 //No Profile
 #endif
