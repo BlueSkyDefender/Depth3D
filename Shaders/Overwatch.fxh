@@ -2757,6 +2757,7 @@ static const int Weapon_Setting_Mode_D = 1;             //Weapon Setting Mode   
 	#define DSW 1
     #define FOV 1
 #elif (App == 0x22CA259A ) //Kena Bridge of Spirits
+    #define DA_W 1
 	#define DA_X 0.225
     #define DF_Y 0.025
 	//#define DA_Y 20.00
