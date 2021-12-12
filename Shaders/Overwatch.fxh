@@ -1,7 +1,7 @@
 ////----------------------------------------//
 ///SuperDepth3D Overwatch Automation Shader///
 //----------------------------------------////
-// Version 2.2.1
+// Version 2.2.2
 //---------------------------------------OVERWATCH---------------------------------------//
 // If you are reading this stop. Go away and never look back. From this point on if you  //
 // still think it's is worth looking at this..... Then no one can save you or your soul. //
@@ -2771,6 +2771,39 @@ static const int Weapon_Setting_Mode_D = 1;             //Weapon Setting Mode   
     #define DH_Z 0.0
     #define DH_W -0.05
     #define PEW 1
+#elif (App == 0x1551DBDA ) //The Fogotten City
+    #define DA_W 1
+	#define DA_X 0.05//0.09
+	#define DF_Y 0.015//0.0425
+	#define DA_Z 0.000375
+	#define DA_Y 16.25 //8.75
+    #define DB_Z 0.2
+	#define DB_Y 2
+	#define DE_X 1
+	#define DE_Y 0.315
+	#define DE_Z 0.375
+	#define DG_W 0.875 //0.9 if 0.1 zdp
+	#define DG_Z 0.015
+    #define PEW 1
+    #define FOV 1
+#elif (App == 0xD698BDD3 ) //Call of Juarez Gunslinger** [Steam]
+    #define DA_X 0.045
+    #define DF_Y 0.025
+    #define DA_Y 12.5
+    #define DB_Y 3
+    #define DB_Z 0.175 
+    //#define DA_Z -0.000125
+    //#define BDF  1 //This didn't seem needed anymore for the steam version.
+    //#define DC_X 0.22
+    //#define DC_Y -0.37
+    //#define DC_Z 0.16
+    #define SPF 1 //This offset is still the same. Wonder what changed here.
+    //#define DD_X 1
+    #define DD_Y 1.067
+    #define DG_Z 0.080 //Min
+    #define DE_W 0.100 //Max
+    #define PEW 1
+    //#define FOV 1
 #else
 	#define NPW 1 //No Profile
 #endif
