@@ -2804,6 +2804,16 @@ static const int Weapon_Setting_Mode_D = 1;             //Weapon Setting Mode   
     #define DE_W 0.100 //Max
     #define PEW 1
     //#define FOV 1
+#elif (App == 0xA4F3EEC3 ) //Godfall
+    #define DA_W 1
+    #define DA_X 0.050
+    #define DA_Z -0.025
+    #define DA_Y 35.0
+	#define DB_Y 2
+	#define DE_X 1
+	//#define DE_Y 0.5
+	#define DE_Z 0.375
+	#define PEW 1    
 #else
 	#define NPW 1 //No Profile
 #endif
