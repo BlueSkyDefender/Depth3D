@@ -1,7 +1,7 @@
 ////----------------------------------------//
 ///SuperDepth3D Overwatch Automation Shader///
 //----------------------------------------////
-// Version 2.2.2
+// Version 2.2.3
 //---------------------------------------OVERWATCH---------------------------------------//
 // If you are reading this stop. Go away and never look back. From this point on if you  //
 // still think it's is worth looking at this..... Then no one can save you or your soul. //
@@ -2817,7 +2817,7 @@ static const int Weapon_Setting_Mode_D = 1;             //Weapon Setting Mode   
     #define NDW 1    
 #elif (App == 0x2B22A265 ) //Immortals Fenyx Rising
     #define DA_W 1
-    #define DA_X 0.2
+    #define DA_X 0.20
     #define DA_Z -0.15
     #define DA_Y 16.25
 	#define DB_Y 3
@@ -2828,6 +2828,19 @@ static const int Weapon_Setting_Mode_D = 1;             //Weapon Setting Mode   
 	#define DSW 1
 	#define PEW 1
     #define NDW 1
+#elif (App == 0xBCF34171 ) //Raji An Ancoent Epic
+    #define DA_W 1
+    #define DA_X 0.175
+    #define DF_Y 0.05    
+    #define DA_Z -0.1
+    #define DA_Y 32.5
+	#define DB_Y 5
+	#define DE_X 2
+	#define DE_Y 0.300
+	#define DE_Z 0.375
+    //#define DB_Z 0.250
+	#define DG_W 0.15
+	#define PEW 1
 #else
 	#define NPW 1 //No Profile
 #endif
