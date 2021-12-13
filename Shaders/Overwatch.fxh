@@ -2813,7 +2813,21 @@ static const int Weapon_Setting_Mode_D = 1;             //Weapon Setting Mode   
 	#define DE_X 1
 	//#define DE_Y 0.5
 	#define DE_Z 0.375
-	#define PEW 1    
+	#define PEW 1
+    #define NDW 1    
+#elif (App == 0x2B22A265 ) //Immortals Fenyx Rising
+    #define DA_W 1
+    #define DA_X 0.2
+    #define DA_Z -0.15
+    #define DA_Y 16.25
+	#define DB_Y 3
+	#define DE_X 1
+	#define DE_Y 0.375
+	#define DE_Z 0.375
+    #define DB_Z 0.250
+	#define DSW 1
+	#define PEW 1
+    #define NDW 1
 #else
 	#define NPW 1 //No Profile
 #endif
