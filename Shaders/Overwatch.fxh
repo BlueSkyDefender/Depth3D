@@ -107,7 +107,6 @@ static const int Emulator_Detected_Warning_D = 0;       //Emulator Detected Warn
 static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning                        | NCW
 
 //Weapon Setting are at the bottom of this file.
-static const int Weapon_Setting_Mode_D = 1;             //Weapon Setting Mode                           | WSM
 
 //Special Handling
 #if exists "LEGOBatman.exe"                             //Lego Batman
@@ -2352,7 +2351,7 @@ static const int Weapon_Setting_Mode_D = 1;             //Weapon Setting Mode   
 	#define PEW 1
 	#define DAA 1
 	#define DB_W 27
-#elif (App == 0xFBC55DDE ) //Tormented Shouls Demo - Add to real game if Application ID is given.
+#elif (App == 0xFBC55DDE ) //Tormented Shouls & Demo 
 	#define DA_W 1
 	#define DA_Y 15.0
 	#define DA_Z 0.00125
@@ -3044,7 +3043,7 @@ static const int Weapon_Setting_Mode_D = 1;             //Weapon Setting Mode   
     #define OW_WP "WP Off\0Custom WP\0WP 0\0WP 1\0WP 2\0WP 3\0WP 4\0WP 5\0WP 6\0WP 7\0WP 8\0WP 9\0WP 10\0WP 11\0WP 12\0WP 13\0WP 14\0WP 15\0WP 16\0WP 17\0WP 18\0WP 19\0WP 20\0WP 21\0WP 22\0WP 23\0WP 24\0WP 25\0WP 26\0WP 27\0WP 28\0WP 29\0WP 30\0WP 31\0WP 32\0WP 33\0WP 34\0WP 35\0WP 36\0WP 37\0WP 38\0WP 39\0WP 40\0WP 41\0WP 42\0WP 43\0WP 44\0WP 45\0WP 46\0WP 47\0WP 48\0WP 49\0WP 50\0WP 51\0WP 52\0WP 53\0WP 54\0WP 55\0WP 56\0WP 57\0WP 58\0WP 59\0WP 60\0WP 61\0WP 62\0WP 63\0WP 64\0WP 65\0WP 66\0WP 67\0WP 68\0WP 69\0WP 70\0WP 71\0WP 72\0WP 73\0WP 74\0"
 #endif
 #ifndef WSM //One is Profiles List A | Two is Profiles List B | Three is MCC | Four is Prey | Five is Blood 2
-    #define WSM Weapon_Setting_Mode_D //Weapon Setting Mode
+    #define WSM 1 //Weapon Setting Mode
 #endif
 
 #if WSM == 1
