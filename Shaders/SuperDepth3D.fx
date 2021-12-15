@@ -2,7 +2,7 @@
 ///**SuperDepth3D**///
 //----------------////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//* Depth Map Based 3D post-process shader v2.8.1
+//* Depth Map Based 3D post-process shader v2.8.2
 //* For Reshade 3.0+
 //* ---------------------------------
 //*
@@ -1006,8 +1006,6 @@ float2 WeaponDepth(float2 texcoord)
 	#if WSM >= 1
 		WA_XYZ = Weapon_Profiles(WP, Weapon_Adjust);
 	#endif
-	if (Depth_Map_Flip)
-		texcoord.y =  1 - texcoord.y;
 	//Conversions to linear space.....
 	float zBufferWH = tex2Dlod(DepthBuffer, float4(texcoord,0,0)).x, Far = 1.0, Near = 0.125/WA_XYZ.y;  //Near & Far Adjustment
 

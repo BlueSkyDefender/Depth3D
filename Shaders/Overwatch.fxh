@@ -1,7 +1,7 @@
 ////----------------------------------------//
 ///SuperDepth3D Overwatch Automation Shader///
 //----------------------------------------////
-// Version 2.2.3
+// Version 2.2.4
 //---------------------------------------OVERWATCH---------------------------------------//
 // If you are reading this stop. Go away and never look back. From this point on if you  //
 // still think it's is worth looking at this..... Then no one can save you or your soul. //
@@ -346,7 +346,13 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DB_W 46
 	#define RHW 1
 #elif (App == 0x9C5C946E ) //EuroTruckSim2
+    #define DB_X 1
+	#define DA_X 0.06
+    #define DF_Y 0.05
+	#define DA_Y 7.0
+	#define DA_Z -0.007
 	#define DB_W 47
+	#define DB_Y 3 //1 or 5
 #elif (App == 0xB302EC7 || App == 0x91D9EBAF ) //F.E.A.R | F.E.A.R 2: Project Origin
 	#define DA_X 0.110
 	#define DA_Y 12.0
@@ -2351,7 +2357,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define PEW 1
 	#define DAA 1
 	#define DB_W 27
-#elif (App == 0xFBC55DDE ) //Tormented Shouls & Demo 
+#elif (App == 0xFBC55DDE || App == 0x836AD72D ) //Tormented Shouls & Demo 
 	#define DA_W 1
 	#define DA_Y 15.0
 	#define DA_Z 0.00125
