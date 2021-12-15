@@ -2,7 +2,7 @@
 ///**SuperDepth3D_VR+**///
 //--------------------////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//* Depth Map Based 3D post-process shader v2.7.2
+//* Depth Map Based 3D post-process shader v2.7.3
 //* For Reshade 4.4+ I think...
 //* ---------------------------------
 //*
@@ -271,7 +271,7 @@ uniform int Auto_Balance_Ex <
 #endif
 uniform int ZPD_Boundary <
 	ui_type = "combo";
-	ui_items = "BD0 Off\0BD1 Full\0BD2 Narrow\0BD3 FPS Center\0BD04 FPS Right\0";
+	ui_items = "BD0 Off\0BD1 Full\0BD2 Narrow\0BD3 Wide\0BD4 FPS Center\0BD5 FPS Right\0";
 	ui_label = " ZPD Boundary Detection";
 	ui_tooltip = "This selection menu gives extra boundary conditions to ZPD.\n"
 				 			 "This treats your screen as a virtual wall.\n"
@@ -1105,7 +1105,7 @@ float2 WeaponDepth(float2 texcoord)
 		WA_XYZ = Weapon_Profiles(WP, Weapon_Adjust);
 	#endif
 	//Conversions to linear space.....
-	float zBufferWH = tex2Dlod(DepthBuffer, float4(texcoord,0,0)).x, Far = 1.0, Near = 0.125/WA_XYZ.y;  //Near & Far Adjustment
+	float zBufferWH = tex2Dlod(DepthBuffer, float4(texcoord,0,0)).x, Far = 1.0, Near = 0.125/(0.00000001 + WA_XYZ.y);  //Near & Far Adjustment
 
 	float2 Offsets = float2(1 + WA_XYZ.z,1 - WA_XYZ.z), Z = float2( zBufferWH, 1-zBufferWH );
 
@@ -1140,7 +1140,7 @@ float3x3 PrepDepth(float2 texcoord)//[0][0] = R | [0][1] = G | [1][0] = B //[1][
 	R = DM.x; //Mix Depth
 	G = DM.y > saturate(smoothstep(0,2.5,DM.w)); //Weapon Mask
 	B = DM.z; //Weapon Hand
-	A = ZPD_Boundary == 3 || ZPD_Boundary == 4 ? max( G, R) : R; //Grid Depth
+	A = ZPD_Boundary >= 4 ? max( G, R) : R; //Grid Depth
 	//[0][0] = R | [0][1] = G | [0][2] = B //[1][0] = A | [1][1] = D | [1][2] = DM // [2][0] = Null | [2][1] = Null | [2][2] = Null
 	return float3x3( saturate(float3(R, G, B)) , saturate(float3(A,Depth(SDT || SD_Trigger ? texcoord : TC_SP(texcoord)).x,DM.w)) , float3(0,0,0) );
 }
@@ -1174,34 +1174,36 @@ float Fade_in_out(float2 texcoord)
 
 float Z_Boundary(){return ZPD_Boundary ;};
 
-float Fade(float2 texcoord)//Check Depth
-{
+float Fade(float2 texcoord)
+{   //Check Depth
 	float CD, Detect;
-	//So this spacing allows for.........
-	//The Chronicles of Riddick: Assault on Dark Athena.
-	//Too Work............................................. WTF
-	if(Z_Boundary() > 0)
+	if(ZPD_Boundary > 0)
 	{   //Normal A & B for both
-		float CDArray_A[7] = { 0.125 ,0.25, 0.375,0.5, 0.625, 0.75, 0.875}, CDArray_B[7] = { 0.25 ,0.375, 0.4375, 0.5, 0.5625, 0.625, 0.75};
+		float CDArray_A[7] = { 0.125, 0.25, 0.375, 0.5, 0.625, 0.75, 0.875}, CDArray_B[7] = { 0.25, 0.375, 0.4375, 0.5, 0.5625, 0.625, 0.75}, CDArray_C[4] = { 0.875, 0.75, 0.5, 0.25};
 		float CDArrayZPD_A[7] = { ZPD_Separation.x * 0.625, ZPD_Separation.x * 0.75, ZPD_Separation.x * 0.875, ZPD_Separation.x, ZPD_Separation.x * 0.875, ZPD_Separation.x * 0.75, ZPD_Separation.x * 0.625 },
-			  CDArrayZPD_B[7] = { ZPD_Separation.x * 0.3, ZPD_Separation.x * 0.5, ZPD_Separation.x * 0.75, ZPD_Separation.x, ZPD_Separation.x * 0.75, ZPD_Separation.x * 0.5, ZPD_Separation.x * 0.3};
-		float2 GridXY;
+			  CDArrayZPD_B[7] = { ZPD_Separation.x * 0.3, ZPD_Separation.x * 0.5, ZPD_Separation.x * 0.75, ZPD_Separation.x, ZPD_Separation.x * 0.75, ZPD_Separation.x * 0.5, ZPD_Separation.x * 0.3},
+ 			 CDArrayZPD_C[12] = { ZPD_Separation.x * 0.5, ZPD_Separation.x * 0.625, ZPD_Separation.x * 0.75, ZPD_Separation.x * 0.875, ZPD_Separation.x * 0.9375, 
+								   ZPD_Separation.x, ZPD_Separation.x, 
+								   ZPD_Separation.x * 0.9375, ZPD_Separation.x * 0.875, ZPD_Separation.x * 0.75, ZPD_Separation.x * 0.625, ZPD_Separation.x * 0.5 };	
 		//Screen Space Detector 7x7 Grid from between 0 to 1 and ZPD Detection becomes stronger as it gets closer to the Center.
+		float2 GridXY; int2 iXY = ZPD_Boundary == 3 ? int2( 12, 4) : int2( 7, 7) ;
 		[loop]
-		for( int i = 0 ; i < 7; i++ )
-		{
-			for( int j = 0 ; j < 7; j++ )
+		for( int iX = 0 ; iX < iXY.x; iX++ )
+		{   [loop]
+			for( int iY = 0 ; iY < iXY.y; iY++ )
 			{
 				if(ZPD_Boundary == 1)
-					GridXY = float2( CDArray_A[i], CDArray_A[j]);
-				else if(ZPD_Boundary == 2 || ZPD_Boundary == 4)
-					GridXY = float2( CDArray_B[i], CDArray_A[j]);
+					GridXY = float2( CDArray_A[iX], CDArray_A[iY]);
+				else if(ZPD_Boundary == 2 || ZPD_Boundary == 5)
+					GridXY = float2( CDArray_B[iX], CDArray_A[iY]);
 				else if(ZPD_Boundary == 3)
-					GridXY = float2( CDArray_A[i], CDArray_B[j]);
+					GridXY = float2( (iX + 1) * rcp(iXY.x + 2), CDArray_C[iY]);	
+				else if(ZPD_Boundary == 4)
+					GridXY = float2( CDArray_A[iX], CDArray_B[iY]);
+				
+				float ZPD_I = ZPD_Boundary == 3 ?  CDArrayZPD_C[iX] : (ZPD_Boundary == 2 || ZPD_Boundary == 5  ? CDArrayZPD_B[iX] : CDArrayZPD_A[iX]);
 
-				float ZPD_I = ZPD_Boundary == 2 || ZPD_Boundary == 4  ? CDArrayZPD_B[i] : CDArrayZPD_A[i] ;
-
-				if(ZPD_Boundary == 3 || ZPD_Boundary == 4)
+				if(ZPD_Boundary >= 4)
 				{
 					if ( PrepDepth(GridXY)[1][0] == 1 )
 						ZPD_I = 0;

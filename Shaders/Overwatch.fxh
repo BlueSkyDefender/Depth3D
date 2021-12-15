@@ -160,7 +160,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DA_X 0.03750
 	#define DB_Y 2
 	#define DB_W 4
-	#define DE_X 4
+	#define DE_X 5
 	#define DE_Y 0.625
 	#define DE_Z 0.300
 	#define DF_X 0.300
@@ -171,7 +171,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DB_Y 3
 	#define DB_W 6
 	#define DF_Y 0.012
-	#define DE_X 3
+	#define DE_X 4
 	#define DE_Y 0.750
 	#define DE_Z 0.375
 	#define FOV 1
@@ -188,7 +188,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DB_Z 0.1125
 	#define DF_Y 0.01875
 	#define DB_Y 1 //Auto Mode Works But this game is better locked.
-	#define DE_X 3
+	#define DE_X 4
 	#define DE_Y 0.500
 	#define DE_Z 0.4375
 	#define DB_W 8
@@ -256,7 +256,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DA_X 0.04625
 	#define DA_Y 21.25
 	#define DB_Y 2
-	#define DE_X 3
+	#define DE_X 4
 	#define DE_Y 0.5
 	#define DE_Z 0.300
     #define DF_Y 0.05
@@ -284,7 +284,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 #elif (App == 0x6D3CD99E ) //Blood 2
 	#define DA_X 0.105
 	#define DB_Y 2
-	#define DE_X 3
+	#define DE_X 4
 	//#define DE_Y 0.50
 	#define DE_Z 0.475
 	#define WSM 5
@@ -303,7 +303,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DG_W 0.1
 	#define DB_W 38
 	#define DG_Z 0.341
-	#define DE_X 3
+	#define DE_X 4
 	#define DE_Y 0.5
 	#define DE_Z 0.375
 	#define DF_X 0.25
@@ -323,7 +323,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DA_X 0.075
 	#define DA_Y 10.0
 	#define DB_Y 1
-	#define DE_X 4
+	#define DE_X 5
 	#define DE_Y 0.85
 	#define DE_Z 0.375
 	#define DB_Z 0.150
@@ -358,7 +358,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DA_Y 12.0
 	#define DA_Z 0.00025
 	#define DB_Y 5
-	#define DE_X 3
+	#define DE_X 4
 	//#define DE_Y 0.625
 	#define DE_Z 0.375
 	//#define DG_W 0.25
@@ -710,7 +710,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DA_X 0.0625
 	#define DB_W 25
 	#define DB_Y 3
-	#define DE_X 4
+	#define DE_X 5
 	#define DE_Y 0.500
 	#define DE_Z 0.375
 	#define DF_Y 0.005
@@ -805,7 +805,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DA_W 1
 	#define DA_Y 75.0
 	#define DB_Y 5
-	#define DE_X 3
+	#define DE_X 4
 	#define DE_Y 0.375
 	#define DE_Z 0.375
 	#define WSM 3
@@ -818,7 +818,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DA_Y 11.25
 	#define DA_Z 0.00125
 	#define DB_Y 4
-	#define DE_X 4
+	#define DE_X 5
 	#define DE_Y 0.4375
 	#define DE_Z 0.375
 	#define DE_W 0.055
@@ -950,7 +950,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DB_Y 5
 	#define DA_W 1
 	#define DB_X 1
-	#define DE_X 3
+	#define DE_X 4
 	#define DE_Z 0.375
 #elif (App == 0xDDA80A38 ) //Deus Ex Rev DX9
 	#define DA_X 0.04375
@@ -999,13 +999,13 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 #elif (App == 0x2F55D5A3 || App == 0x4A5220AF ) //ShadowWarrior 2013 DX11 & DX9
 	#define DA_X 0.035
 	#define DB_Y 4
-	#define DE_X 4
+	#define DE_X 5
 	#define DE_Z 0.375
 #elif (App == 0x56301DED ) //ShadowWarrior 2
 	#define DA_X 0.035
 	#define DA_W 1
 	#define DB_Y 4
-	#define DE_X 4
+	#define DE_X 5
 	#define DE_Z 0.375
 	#define NDW 1
 #elif (App == 0x892CA092 ) //Farcry
@@ -1020,13 +1020,13 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DA_X 0.05
 	#define DB_Y 4
 	#define DB_W 64
-	#define DE_X 4
+	#define DE_X 5
 	#define DE_Z 0.375
 	#define RHW 1
 #elif (App == 0xA4B66433 ) //Farcry 3
 	#define DA_X 0.05
 	#define DB_Y 4
-	#define DE_X 4
+	#define DE_X 5
 	#define DE_Z 0.375
 	#define DE_W 0.350
 	#define RHW 1
@@ -1035,7 +1035,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DA_W 1
 	#define DA_X 0.0375
 	#define DB_Y 4
-	#define DE_X 4
+	#define DE_X 5
 	#define DE_Z 0.375
 	#define DE_W 0.360
 #elif (App == 0x2EB82B07 ) //Farcry Primal
@@ -1043,7 +1043,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DA_W 1
 	#define DA_X 0.0375
 	#define DB_Y 4
-	#define DE_X 4
+	#define DE_X 5
 	#define DE_Z 0.375
 	#define DE_W 0.360
 #elif (App == 0xC150B805 ) //Farcry 5
@@ -1051,7 +1051,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DA_W 1
 	#define DA_X 0.0375
 	#define DB_Y 4
-	#define DE_X 4
+	#define DE_X 5
 	#define DE_Z 0.375
 	#define DE_W 0.360
 	#define RHW 1
@@ -1136,7 +1136,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DA_X 0.0375
 	#define DB_Y 5
 	#define DB_W 44
-	#define DE_X 3
+	#define DE_X 4
 	#define DE_Z 0.375
 	#define DF_X -0.175
 #elif (App == 0x6061750E ) //Mirror's Edge
@@ -1175,7 +1175,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DA_W 1
 	#define DB_Y 4
 	#define DB_W 5
-	#define DE_X 4
+	#define DE_X 5
 	#define DE_Y 0.425
 	#define DE_Z 0.300
 	#define DF_X 0.085
@@ -1194,7 +1194,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DA_Z 0.00009375
 	#define DA_W 1
 	#define DB_Y 3
-	#define DE_X 4
+	#define DE_X 5
 	#define DE_Y 0.550
 	#define DE_Z 0.333
 	#define DB_W 68
@@ -1291,7 +1291,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DB_Z 0.075
 	#define DB_Y 1
 	#define DB_W 3
-	#define DE_X 3
+	#define DE_X 4
 	#define DE_Y 0.425
 	#define DE_Z 0.375
 	#define DG_Z 0.3975
@@ -1303,7 +1303,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DB_Z 0.115
 	#define DB_Y 3
 	#define DB_W 20
-	#define DE_X 4
+	#define DE_X 5
 	#define DE_Y 0.5
 	#define DE_Z 0.375
 	#define DF_X 0.105
@@ -1315,7 +1315,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DA_Z 0.1
 	#define DB_Y 1
 	#define DB_W 42
-	#define DE_X 4
+	#define DE_X 5
 	#define DE_Y 0.5
 	#define DE_Z 0.375
 	#define DB_Z 0.150
@@ -1389,7 +1389,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DA_Y 112.5
 	#define DA_Z 0.0000125
 	#define DB_Y 4
-	#define DE_X 3
+	#define DE_X 4
 	#define DE_Y 0.5
 	#define DE_Z 0.375
 	#define DB_Z 0.125
@@ -1399,7 +1399,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DA_Y 75.0
 	#define DA_Z 0.00005
 	#define DB_Y 2
-	#define DE_X 3
+	#define DE_X 4
 	#define DE_Y 0.5
 	#define DE_Z 0.375
 	#define DB_Z 0.090
@@ -1963,7 +1963,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DA_X 0.05625
 	#define DA_Y 56.25
 	#define DB_Y 3
-	#define DE_X 3
+	#define DE_X 4
 	#define DE_Y 0.500
 	#define DE_Z 0.375
 	#define DB_W 30
@@ -2044,7 +2044,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DB_Y 2
 	#define DB_Z 0.05625
 	#define DA_Z 0.00025
-	#define DE_X 3
+	#define DE_X 4
 	#define DE_Y 0.450
 	#define DE_Z 0.375
 	#define PEW 1
@@ -2216,7 +2216,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DB_Y 4
 	//#define DB_Z 0.05625
 	//#define DA_Z 0.00025
-	#define DE_X 3
+	#define DE_X 4
 	//#define DE_Y 0.450
 	#define DE_Z 0.375
 	#define PEW 1
@@ -2274,7 +2274,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DA_X 0.100
 	#define DB_Z 0.250
 	#define DB_Y 1
-	#define DE_X 3
+	#define DE_X 4
 	#define DE_Z 0.375
 	#define DB_W 76
 #elif (App == 0xC54A173B ) //Dead or Alive 6
@@ -2331,7 +2331,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DA_X 0.07
 	#define DA_Y 13.0
 	#define DB_Y 1
-	#define DE_X 3
+	#define DE_X 4
 	#define DE_Y 0.5
 	#define DE_Z 0.375
 	#define NDW 1
@@ -2351,7 +2351,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DA_Y 12.5
 	#define DA_Z 0.000125
 	#define DB_Y 5
-	#define DE_X 3
+	#define DE_X 4
 	#define DE_Y 0.5
 	#define DE_Z 0.45
 	#define PEW 1
@@ -2373,7 +2373,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DA_Y 50.0
 	#define DA_Z 0.00005
 	#define DB_Y 5
-	#define DE_X 3
+	#define DE_X 4
 	#define DE_Y 0.5
 	#define DE_Z 0.375
 	#define PEW 1
@@ -2433,7 +2433,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DB_Z 0.150
 	#define DF_Y 0.05
 	#define DB_Y 2 //?? Auto Mode didn't work well in this game.
-	#define DE_X 3
+	#define DE_X 4
 	#define DE_Y 0.500
 	#define DE_Z 0.4375
 	#define DB_W 34
@@ -2467,7 +2467,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DB_Y 1
 	#define BMT 1
 	#define DF_Z 0.180
-	#define DE_X 3
+	#define DE_X 4
 	#define DE_Y 0.650
 	#define DE_Z 0.400
 	#define DB_W 43
@@ -2481,7 +2481,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DF_Y 0.020
 	#define DB_Z 0.050
 	#define DB_Y 5
-	#define DE_X 3
+	#define DE_X 4
 	#define DE_Y 0.250
 	#define DE_Z 0.425
 	#define DG_Z 0.449
@@ -2497,7 +2497,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DA_X 0.050
 	#define DB_Z 0.050
 	#define DB_Y 5
-	#define DE_X 3
+	#define DE_X 4
 	#define DE_Y 0.50
 	#define DE_Z 0.375
 	#define WSM 2
@@ -2511,7 +2511,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DF_Y 0.0328125
 	#define DB_Z 0.075
 	#define DB_Y 3
-	#define DE_X 3
+	#define DE_X 4
 	#define DE_Y 0.525
 	#define DE_Z 0.400
 	#define DG_Z 0.305
@@ -2623,7 +2623,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	//#define DA_Y 11.5
 	#define DA_Z 0.00025
 	#define DB_Y 2
-	#define DE_X 3
+	#define DE_X 4
 	//#define DE_Y 0.625
 	//#define DE_Z 0.375
 	//#define DG_W 0.25
@@ -2639,7 +2639,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DA_Z 0.001
     #define DB_Z 0.105
 	#define DB_Y 3
-	#define DE_X 3
+	#define DE_X 4
 	#define DE_Y 0.7
 	#define DE_Z 0.375
 	#define DG_W 0.125
@@ -2719,7 +2719,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DA_Y 150.0
 	#define DB_Z 0.0875
 	#define DB_Y 2
-	#define DE_X 3
+	#define DE_X 4
 	#define DE_Y 0.550
 	#define DE_Z 0.375
 	#define WSM 2 //Weapon Settings Mode
@@ -2846,6 +2846,32 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DB_Z 0.250
 	#define DG_W 0.15
 	#define PEW 1
+#elif (App == 0xED560119 ) //DarkSiders Genisis
+    #define DA_W 1
+    #define DA_X 0.075
+	#define DF_Y 0.03
+    #define DA_Y 102.5
+    #define DA_Z -1.0  
+	#define DB_Y 3
+	#define DE_X 3
+	#define DE_Y 0.400
+	#define DE_Z 0.300
+	#define DG_W 0.125
+    #define DG_Z 0.375
+	#define NDW 1
+#elif (App == 0x921BC951 ) //SpongeBob SquarePants: Battle for Bikini Bottom - Rehydrated
+    #define DA_W 1
+    #define DA_X 0.120
+	#define DF_Y 0.05
+    #define DA_Y 22.0
+    #define DA_Z 0.000120  
+	#define DB_Y 3
+	#define DE_X 1
+	#define DE_Y 0.400
+	#define DE_Z 0.375
+	#define DG_W 0.120
+    #define DG_Z 0.35
+	#define NDW 1
 #else
 	#define NPW 1 //No Profile
 #endif
