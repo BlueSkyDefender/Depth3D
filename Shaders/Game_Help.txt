@@ -533,6 +533,22 @@ You can also run the game in window mode then alt tab with the reshade menu open
 {Gold Source: Games} - ReShade 4.5.2
 When you install the opengl32.dll right click it and set it to read only.
 
+{Gothic 1 & 2} - ReShade 5.0.0 WIP
+Looks like the steam Versions came pre modded.
+
+For
+Gothic 1.08k_mod 
+Use with Kirides Gothic GD3D11 v17.7 Dev11/Fix2 Mod.
+Launch with GothicStarter.exe
+
+For
+Gothic 2: Night of the Raven 
+Use with with Kirides Gothic 2 GD3D11 v17.7 Dev11/Fix2 Mod
+Launch with GothicStarter.exe
+
+The link is for both.
+https://github.com/kirides/GD3D11/releases/tag/v17.7-dev11
+
 {Grim Dawn}
 For this game I say you should use the FlashBack shader. Since it gives a better sence of Depth for this type of game. You also need to select the right Depth Buffer so that it does
 not go blank when you interact with people. This should be under the DX11 Tab in the newest ReShade. 

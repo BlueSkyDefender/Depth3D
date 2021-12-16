@@ -2900,7 +2900,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	//#define DE_Z 0.375
 	#define PEW 1
 	#define DAA 1
-#elif (App == 0xA34503F1 ) //Gothic 1.08k_mod with Kirides GD3D11 v17.7 Mod
+#elif (App == 0xA34503F1 || App == 0xE0CAB4F3 ) //[Gothic 1.08k_mod - Gothic 2: Night of the Raven] with Kirides GD3D11 v17.7 Dev11/Fix2 Mod
 	#define DA_Y 25.0
     #define DA_X 0.05
     #define DF_Y 0.0125
@@ -2910,6 +2910,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DE_Z 0.375
     #define DG_Z 0.411
 	#define NDW 1
+	#define RHW 1
 #else
 	#define NPW 1 //No Profile
 #endif
