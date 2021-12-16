@@ -336,10 +336,17 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DB_Y 4
 	#define DB_W 44
 #elif (App == 0x5FCFB1E5 ) //Project Warlock
-	#define DA_Y 17.5
-	#define DB_Y 2
 	#define DA_W 1
+	#define DA_X 0.0475
+    #define DF_Y 0.02375
+	#define DA_Y 52.5
+    #define DB_X 1
+	#define DB_Y 1
+	#define DE_X 4
+	//#define DE_Y 0.500
+	#define DE_Z 0.400
 	#define DB_W 45
+	#define DSW 1
 #elif (App == 0x7DCCBBBD ) //Kingpin Life of Crime
 	#define DA_Y 10.0
 	#define DB_Y 4
@@ -2872,6 +2879,15 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DG_W 0.120
     #define DG_Z 0.35
 	#define NDW 1
+#elif (App == 0xEDC64E2B ) // The Patheless**
+	#define DA_W 1
+	#define DA_Y 75.0
+    #define DF_Y 0.025
+	#define DB_Y 5
+	#define DE_X 1
+	#define DE_Y 0.300
+	#define DE_Z 0.375
+	#define PEW 1
 #else
 	#define NPW 1 //No Profile
 #endif
@@ -3167,7 +3183,7 @@ float3 Weapon_Profiles(float WP ,float3 Weapon_Adjust) //Tried Switch But, can't
     if (WP == 44)
         Weapon_Adjust = float3(0.277,20.0,8.8);       //WP 42 | TitanFall 2
     if (WP == 45)
-        Weapon_Adjust = float3(0.7,16.250,0.300);     //WP 43 | Project Warlock
+        Weapon_Adjust = float3(1.300,17.50,0.0);      //WP 43 | Project Warlock
     if (WP == 46)
         Weapon_Adjust = float3(0.625,9.0,2.375);      //WP 44 | Kingpin Life of Crime
     if (WP == 47)
