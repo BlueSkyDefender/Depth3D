@@ -2880,15 +2880,36 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DG_W 0.120
     #define DG_Z 0.35
 	#define NDW 1
-#elif (App == 0xEDC64E2B ) // The Patheless**
+#elif (App == 0xEDC64E2B ) //The Patheless**
 	#define DA_W 1
 	#define DA_Y 75.0
+    #define DA_X 0.025
     #define DF_Y 0.025
 	#define DB_Y 5
 	#define DE_X 1
 	#define DE_Y 0.300
 	#define DE_Z 0.375
 	#define PEW 1
+#elif (App == 0xFC113D8A ) //PsychoNauts 2
+	#define DA_W 1
+	#define DA_Y 10.0
+    #define DA_X 0.25
+	#define DB_Y 5
+	//#define DE_X 1
+	//#define DE_Y 0.300
+	//#define DE_Z 0.375
+	#define PEW 1
+	#define DAA 1
+#elif (App == 0xA34503F1 ) //Gothic 1.08k_mod with Kirides GD3D11 v17.7 Mod
+	#define DA_Y 25.0
+    #define DA_X 0.05
+    #define DF_Y 0.0125
+	#define DB_Y 3
+	#define DE_X 1
+	#define DE_Y 0.375
+	#define DE_Z 0.375
+    #define DG_Z 0.411
+	#define NDW 1
 #else
 	#define NPW 1 //No Profile
 #endif
