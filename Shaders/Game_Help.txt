@@ -548,6 +548,8 @@ Place the mod in the System Folder.
 
 Launch with GothicStarter.exe
 
+Make sure Copy Depth is selected in the API Tab/GenericDepth addon.
+
 The link is for both.
 https://github.com/kirides/GD3D11/releases/tag/v17.7-dev11
 
