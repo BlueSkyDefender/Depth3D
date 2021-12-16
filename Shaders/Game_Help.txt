@@ -539,11 +539,13 @@ Looks like the steam Versions came pre modded.
 For
 Gothic 1.08k_mod 
 Use with Kirides Gothic GD3D11 v17.7 Dev11/Fix2 Mod.
-Launch with GothicStarter.exe
 
 For
 Gothic 2: Night of the Raven 
 Use with with Kirides Gothic 2 GD3D11 v17.7 Dev11/Fix2 Mod
+
+Place the mod in the System Folder.
+
 Launch with GothicStarter.exe
 
 The link is for both.
