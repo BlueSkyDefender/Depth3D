@@ -2911,6 +2911,25 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define DG_Z 0.411
 	#define NDW 1
 	#define RHW 1
+    #define NFM 1
+#elif (App == 0x509F5AD3 ) //Mortal Shell
+	#define DA_W 1
+	#define DA_X 0.225
+	//#define DF_Y 0.025
+	#define DA_Y 15.0
+	//#define DA_Z -0.5
+    #define DB_Z 0.320
+	#define DB_Y 5
+	#define DE_X 1
+	#define DE_Y 0.45
+	#define DE_Z 0.375
+    #define DG_Z 0.375
+	//#define NDW 1
+	#define PEW 1
+	#define DAA 1
+	#define LBC 2  //Letter Box Correction Offsets With X & Y
+	#define DH_Z 0.255
+	#define DH_W 0.0
 #else
 	#define NPW 1 //No Profile
 #endif
