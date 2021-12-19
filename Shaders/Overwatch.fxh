@@ -1,7 +1,7 @@
 ////----------------------------------------//
 ///SuperDepth3D Overwatch Automation Shader///
 //----------------------------------------////
-// Version 2.2.4
+// Version 2.2.5
 //---------------------------------------OVERWATCH---------------------------------------//
 // If you are reading this stop. Go away and never look back. From this point on if you  //
 // still think it's is worth looking at this..... Then no one can save you or your soul. //
@@ -2900,7 +2900,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	//#define DE_Z 0.375
 	#define PEW 1
 	#define DAA 1
-#elif (App == 0xA34503F1 || App == 0xE0CAB4F3 ) //[Gothic 1.08k_mod - Gothic 2: Night of the Raven] with Kirides GD3D11 v17.7 Dev11/Fix2 Mod
+#elif (App == 0xA34503F1 || App == 0xE0CAB4F3 ) //[Gothic 1.08k_mod - Gothic 2: Night of the Raven] with Kirides GD3D11 Mod
 	#define DA_Y 25.0
     #define DA_X 0.05
     #define DF_Y 0.0125
@@ -2930,6 +2930,22 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define LBC 2  //Letter Box Correction Offsets With X & Y
 	#define DH_Z 0.255
 	#define DH_W 0.0
+#elif (App == 0x3C982FAC ) //Forza Horizon 4  
+    #define DA_W 1
+    #define DA_X 0.1225
+	//#define DF_Y 0.05
+    //#define DA_Y 10
+    #define DB_Z 0.25
+    //#define DA_Z 0.000120  
+	#define DB_Y 4
+	#define DE_X 1
+	#define DE_Y 0.500
+	#define DE_Z 0.375
+	#define DG_W 0.25
+    //#define DG_Z 0.35
+	#define NDW 1
+	#define PEW 1
+	#define DAA 1
 #else
 	#define NPW 1 //No Profile
 #endif
