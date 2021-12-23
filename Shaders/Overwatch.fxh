@@ -2960,6 +2960,20 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DG_W 0.125
     #define DG_Z 0.06
 	#define PEW 1
+#elif (App == 0x19237E38 ) //The Witness
+    #define DA_W 1
+    #define DA_X 0.2
+	//#define DF_Y 0.025
+    #define DA_Y 15.0
+    //#define DB_Z 0.100
+    //#define DA_Z -0.125  
+	#define DB_Y 4
+	#define DE_X 1
+	//#define DE_Y 0.5
+	#define DE_Z 0.375
+	#define DG_W 0.125
+    //#define DG_Z 0.06
+	#define DAA 1
 #else
 	#define NPW 1 //No Profile
 #endif
