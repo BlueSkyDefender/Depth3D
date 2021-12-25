@@ -2,7 +2,7 @@
 ///**SuperDepth3D_VR+**///
 //--------------------////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//* Depth Map Based 3D post-process shader v2.7.4
+//* Depth Map Based 3D post-process shader v2.7.5
 //* For Reshade 4.4+ I think...
 //* ---------------------------------
 //*
@@ -1402,7 +1402,7 @@ float2 Parallax(float Diverge, float2 Coordinates) // Horizontal parallax offset
 		   Perf = float2( Performance_LvL[Performance_Level].x, 0.0) ;
 	//Would Use Switch....
 	if( View_Mode == 1)
-		Perf = float2( Performance_LvL[Performance_Level].y, Performance_Level == 0 ? 0.176 : 0.028 );
+		Perf = float2( Performance_LvL[Performance_Level].y, Performance_Level == 0 ? 0.02 : 0.04 );
 	if( View_Mode == 2)
 		Perf = float2( Performance_LvL[Performance_Level].z , Performance_Level == 0 ? 0.0 : 0.270 );
 	if( View_Mode == 3)
@@ -1414,7 +1414,7 @@ float2 Parallax(float Diverge, float2 Coordinates) // Horizontal parallax offset
 		else if( GetDepth >= 0.875)
 			Perf = fmod(CBxy.x+CBxy.y,2) ? float2(1.00 , 0.019) : float2( 0.678, 0.0);
 		else
-			Perf = fmod(CBxy.x+CBxy.y,2) ? float2(0.678 , 0.0) : float2( 0.5, 0.176);
+			Perf = fmod(CBxy.x+CBxy.y,2) ? float2(0.678 , 0.0) : float2( 0.5, 0.04);
 	}
 	
 	if( View_Mode > 0) 
@@ -1422,9 +1422,9 @@ float2 Parallax(float Diverge, float2 Coordinates) // Horizontal parallax offset
 		
 	//Luma Based VRS
 	float Luma_Adptive = max(0.0, tex2Dlod(SamplerDMVR,float4(Coordinates,0,5)).w ) > 0.15;
-		Perf.x *= lerp(0.5,1.0,Luma_Adptive); 
+		Perf.x *= lerp(0.498,View_Mode > 0 ? 0.75 : 1.0,Luma_Adptive); 
 	//ParallaxSteps Calculations
-	float D = abs(Diverge), Cal_Steps = (D * Perf.x) + (D * Perf.y), Steps = clamp( Cal_Steps, 0, 256 );//Foveated Rendering Point on attack 16-256 limit samples.
+	float D = abs(Diverge), Cal_Steps = (D * Perf.x) + (D * Perf.y), Steps = clamp( Cal_Steps, 16, 128 );//Foveated Rendering Point on attack 16-256 limit samples.
 	// Offset per step progress & Limit
 	float LayerDepth = rcp(Steps), TP = 0.03;
 	if(Diverge < 0)
@@ -1447,12 +1447,12 @@ float2 Parallax(float Diverge, float2 Coordinates) // Horizontal parallax offset
 		continue;
 	}
 	
+	float2 PrevParallaxCoord = float2(ParallaxCoord.x + deltaCoordinates, ParallaxCoord.y);	
 	//Anti-Weapon Hand Fighting
 	float Weapon_Mask = tex2Dlod(SamplerDMVR,float4(Coordinates,0,0)).y, ZFighting_Mask = 1.0-(1.0-tex2Dlod(SamplerDMVR,float4(Coordinates,0,5.4)).y - Weapon_Mask);
 		  ZFighting_Mask = ZFighting_Mask * (1.0-Weapon_Mask);
-	float Get_DB = GetDB(ParallaxCoord - DB_Offset_Switch, 0).y, Get_DB_ZDP = WP > 0 ? lerp(Get_DB, abs(Get_DB), ZFighting_Mask) : Get_DB;
+	float Get_DB = GetDB((View_Mode > 0 ? ParallaxCoord : PrevParallaxCoord) - DB_Offset_Switch, 0).y, Get_DB_ZDP = WP > 0 ? lerp(Get_DB, abs(Get_DB), ZFighting_Mask) : Get_DB;
 	// Parallax Occlusion Mapping
-	float2 PrevParallaxCoord = float2(ParallaxCoord.x + deltaCoordinates * Depth_Boost, ParallaxCoord.y);
 	float beforeDepthValue = Get_DB_ZDP, afterDepthValue = CurrentDepthMapValue - CurrentLayerDepth;
 		  beforeDepthValue += LayerDepth - CurrentLayerDepth;
 	// Depth Diffrence for Gap masking and depth scaling in Normal Mode.
@@ -1462,11 +1462,11 @@ float2 Parallax(float Diverge, float2 Coordinates) // Horizontal parallax offset
 		  ParallaxCoord.x = PrevParallaxCoord.x * weight + ParallaxCoord.x * (1.0f - weight);
 	//This is to limit artifacts.
 		ParallaxCoord.x += DB_Offset.x * Offset_Adjust[View_Mode];
-	// Apply gap masking
+	// Apply gap masking+
 	if(Diverge < 0)
-		ParallaxCoord.x += depthDiffrence * pix.x;
+		ParallaxCoord.x += depthDiffrence * 1.5 * pix.x;
 	else
-		ParallaxCoord.x -= depthDiffrence * pix.x;
+		ParallaxCoord.x -= depthDiffrence * 1.5 * pix.x;
 
 
 	return ParallaxCoord;
