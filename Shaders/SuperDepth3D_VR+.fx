@@ -2,7 +2,7 @@
 ///**SuperDepth3D_VR+**///
 //--------------------////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//* Depth Map Based 3D post-process shader v2.7.5
+//* Depth Map Based 3D post-process shader v2.7.6
 //* For Reshade 4.4+ I think...
 //* ---------------------------------
 //*
@@ -1389,7 +1389,6 @@ float2 GetDB(float2 texcoord, float Mips)
 	return Scale_Depth;//lerp(Scale_Depth,-Scale_Depth,-ZPD_Separation.x); //Save for AI Shader
 }
 //Perf Level selection
-#define Depth_Boost 1.0
 static const float4 Performance_LvL[2] = { float4( 0.5, 0.5, 0.679, 0.5 ), float4( 1.0, 1.0, 1.425, 1.0) };
 //////////////////////////////////////////////////////////Parallax Generation///////////////////////////////////////////////////////////////////////
 float2 Parallax(float Diverge, float2 Coordinates) // Horizontal parallax offset & Hole filling effect
@@ -1415,11 +1414,7 @@ float2 Parallax(float Diverge, float2 Coordinates) // Horizontal parallax offset
 			Perf = fmod(CBxy.x+CBxy.y,2) ? float2(1.00 , 0.019) : float2( 0.678, 0.0);
 		else
 			Perf = fmod(CBxy.x+CBxy.y,2) ? float2(0.678 , 0.0) : float2( 0.5, 0.04);
-	}
-	
-	if( View_Mode > 0) 
-		Perf.x *= Depth_Boost;
-		
+	}		
 	//Luma Based VRS
 	float Luma_Adptive = max(0.0, tex2Dlod(SamplerDMVR,float4(Coordinates,0,5)).w ) > 0.15;
 		Perf.x *= lerp(0.498,View_Mode > 0 ? 0.75 : 1.0,Luma_Adptive); 
@@ -1439,7 +1434,7 @@ float2 Parallax(float Diverge, float2 Coordinates) // Horizontal parallax offset
 	[loop] //Steep parallax mapping
 	while ( CurrentDepthMapValue > CurrentLayerDepth )
 	{   // Shift coordinates horizontally in linear fasion
-	    ParallaxCoord.x -= deltaCoordinates * Depth_Boost;
+	    ParallaxCoord.x -= deltaCoordinates;
 	    // Get depth value at current coordinates
 	    CurrentDepthMapValue = GetDB(float2(ParallaxCoord - DB_Offset * Offset_Switch), 0).x;
 	    // Get depth of next layer
@@ -1458,7 +1453,7 @@ float2 Parallax(float Diverge, float2 Coordinates) // Horizontal parallax offset
 	// Depth Diffrence for Gap masking and depth scaling in Normal Mode.
 	float depthDiffrence = afterDepthValue - beforeDepthValue;
 	// Interpolate coordinates
-	float weight = afterDepthValue / min(-0.003,depthDiffrence);
+	float weight = afterDepthValue / min(-0.01,depthDiffrence);
 		  ParallaxCoord.x = PrevParallaxCoord.x * weight + ParallaxCoord.x * (1.0f - weight);
 	//This is to limit artifacts.
 		ParallaxCoord.x += DB_Offset.x * Offset_Adjust[View_Mode];

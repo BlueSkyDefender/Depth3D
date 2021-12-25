@@ -2,7 +2,7 @@
 ///**SuperDepth3D**///
 //----------------////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//* Depth Map Based 3D post-process shader v2.8.5
+//* Depth Map Based 3D post-process shader v2.8.6
 //* For Reshade 3.0+
 //* ---------------------------------
 //*
@@ -1386,7 +1386,7 @@ float2 Parallax(float Diverge, float2 Coordinates, float IO) // Horizontal paral
 	// Depth Diffrence for Gap masking and depth scaling in Normal Mode.
 	float depthDiffrence = afterDepthValue - beforeDepthValue;
 	// Interpolate coordinates
-	float weight = afterDepthValue / min(-0.003,depthDiffrence);
+	float weight = afterDepthValue / min(-0.01,depthDiffrence);
 		  ParallaxCoord.x = PrevParallaxCoord.x * weight + ParallaxCoord.x * (1.0f - weight);
 	//This is to limit artifacts.
 		ParallaxCoord.x += DB_Offset.x * Offset_Adjust[View_Mode];
