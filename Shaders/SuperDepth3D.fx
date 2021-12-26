@@ -2,7 +2,7 @@
 ///**SuperDepth3D**///
 //----------------////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//* Depth Map Based 3D post-process shader v2.8.6
+//* Depth Map Based 3D post-process shader v2.8.7
 //* For Reshade 3.0+
 //* ---------------------------------
 //*
@@ -1349,7 +1349,7 @@ float2 Parallax(float Diverge, float2 Coordinates, float IO) // Horizontal paral
 	//Luma Based VRS
 	float Luma_Adptive = max(0.0, tex2Dlod(SamplerDMN,float4(Coordinates,0,5)).w ) > 0.15;
 	if( L_VRS )
-		Perf.x *= lerp(0.498,View_Mode > 0 ? 0.75 : 1.0,Luma_Adptive); 
+		Perf.x *= lerp( 0.498f, View_Mode > 0 ? 1.0f : 0.75f, Luma_Adptive); 
 
 	//ParallaxSteps Calculations
 	float D = abs(Diverge), Cal_Steps = (D * Perf.x) + (D * Perf.y), Steps = clamp( Cal_Steps, 20, 200 );//Foveated Rendering Point on attack 16-256 limit samples.
