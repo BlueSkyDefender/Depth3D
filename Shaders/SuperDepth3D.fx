@@ -1319,6 +1319,7 @@ float2 GetDB(float2 texcoord, float Mips)
 	return tex2Dlod(SamplerzBufferN, float4(texcoord,0, Mips) ).x;
 }
 //Perf Level selection
+#define Depth_Boost 1.100
 static const float4 Performance_LvL[2] = { float4( 0.5, 0.5, 0.679, 0.5 ), float4( 1.0, 1.0, 1.425, 1.0) };
 //////////////////////////////////////////////////////////Parallax Generation///////////////////////////////////////////////////////////////////////
 float2 Parallax(float Diverge, float2 Coordinates, float IO) // Horizontal parallax offset & Hole filling effect
@@ -1345,7 +1346,9 @@ float2 Parallax(float Diverge, float2 Coordinates, float IO) // Horizontal paral
 		else
 			Perf = fmod(CBxy.x+CBxy.y,2) ? float2(0.678 , 0.0) : float2( 0.5, 0.04);
 	}
-			
+	
+	if( View_Mode > 0) 
+		Perf.x *= Depth_Boost;
 	//Luma Based VRS
 	float Luma_Adptive = max(0.0, tex2Dlod(SamplerDMN,float4(Coordinates,0,5)).w ) > 0.15;
 	if( L_VRS )
@@ -1367,7 +1370,7 @@ float2 Parallax(float Diverge, float2 Coordinates, float IO) // Horizontal paral
 	[loop] //Steep parallax mapping
 	while ( CurrentDepthMapValue > CurrentLayerDepth )
 	{   // Shift coordinates horizontally in linear fasion
-	    ParallaxCoord.x -= deltaCoordinates;
+	    ParallaxCoord.x -= deltaCoordinates * Depth_Boost;
 	    // Get depth value at current coordinates
 	    CurrentDepthMapValue = GetDB(float2(ParallaxCoord - DB_Offset * Offset_Switch), 0).x;
 	    // Get depth of next layer
@@ -1375,7 +1378,7 @@ float2 Parallax(float Diverge, float2 Coordinates, float IO) // Horizontal paral
 		continue;
 	}
 	
-	float2 PrevParallaxCoord = float2(ParallaxCoord.x + deltaCoordinates, ParallaxCoord.y);	
+	float2 PrevParallaxCoord = float2(ParallaxCoord.x + deltaCoordinates * Depth_Boost, ParallaxCoord.y);	
 	//Anti-Weapon Hand Fighting
 	float Weapon_Mask = tex2Dlod(SamplerDMN,float4(Coordinates,0,0)).y, ZFighting_Mask = 1.0-(1.0-tex2Dlod(SamplerDMN,float4(Coordinates,0,5.4)).y - Weapon_Mask);
 		  ZFighting_Mask = ZFighting_Mask * (1.0-Weapon_Mask);
