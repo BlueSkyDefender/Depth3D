@@ -2,7 +2,7 @@
 ///**SuperDepth3D_VR+**///
 //--------------------////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//* Depth Map Based 3D post-process shader v2.7.7
+//* Depth Map Based 3D post-process shader v2.7.8
 //* For Reshade 4.4+ I think...
 //* ---------------------------------
 //*
@@ -1420,8 +1420,8 @@ float2 Parallax(float Diverge, float2 Coordinates) // Horizontal parallax offset
 	if( View_Mode > 0) 
 		Perf.x *= Depth_Boost;		
 	//Luma Based VRS
-	float Luma_Adptive = max(0.0, tex2Dlod(SamplerDMVR,float4(Coordinates,0,5)).w ) > 0.15;
-		  Perf.x *= lerp( 0.498f, View_Mode > 0 ? 1.0f : 0.75f, Luma_Adptive); 
+	float Luma_Adptive = max(0.0, tex2Dlod(SamplerDMVR,float4(Coordinates,0,5)).w ) > 0.15, LA_Out = lerp( 0.498f, View_Mode > 0 ? 1.0f : 0.75f, Luma_Adptive);
+		  Perf.x *= lerp( 1.0, LA_Out, saturate(GetDepth * 4.0)); 
 	//ParallaxSteps Calculations
 	float D = abs(Diverge), Cal_Steps = (D * Perf.x) + (D * Perf.y), Steps = clamp( Cal_Steps, 16, 128 );//Foveated Rendering Point on attack 16-256 limit samples.
 	// Offset per step progress & Limit
