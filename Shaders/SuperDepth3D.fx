@@ -2,7 +2,7 @@
 ///**SuperDepth3D**///
 //----------------////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//* Depth Map Based 3D post-process shader v2.8.8
+//* Depth Map Based 3D post-process shader v2.8.9
 //* For Reshade 3.0+
 //* ---------------------------------
 //*
@@ -1319,7 +1319,7 @@ float2 GetDB(float2 texcoord, float Mips)
 	return tex2Dlod(SamplerzBufferN, float4(texcoord,0, Mips) ).x;
 }
 //Perf Level selection
-#define Depth_Boost 1.100
+#define Depth_Boost 1.010
 static const float4 Performance_LvL[2] = { float4( 0.5, 0.5, 0.679, 0.5 ), float4( 1.0, 1.0, 1.425, 1.0) };
 //////////////////////////////////////////////////////////Parallax Generation///////////////////////////////////////////////////////////////////////
 float2 Parallax(float Diverge, float2 Coordinates, float IO) // Horizontal parallax offset & Hole filling effect
