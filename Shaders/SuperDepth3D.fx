@@ -2,7 +2,7 @@
 ///**SuperDepth3D**///
 //----------------////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//* Depth Map Based 3D post-process shader v2.8.9
+//* Depth Map Based 3D post-process shader v2.9.0
 //* For Reshade 3.0+
 //* ---------------------------------
 //*
@@ -1097,7 +1097,7 @@ float Fade(float2 texcoord)
 				else if(ZPD_Boundary == 2 || ZPD_Boundary == 5)
 					GridXY = float2( CDArray_B[iX], CDArray_A[iY]);
 				else if(ZPD_Boundary == 3)
-					GridXY = float2( (iX + 1) * rcp(iXY.x + 2), CDArray_C[iY]);	
+					GridXY = float2( (iX + 1) * rcp(iXY.x + 2),CDArray_C[min(3,iY)]);
 				else if(ZPD_Boundary == 4)
 					GridXY = float2( CDArray_A[iX], CDArray_B[iY]);
 				
@@ -1381,7 +1381,7 @@ float2 Parallax(float Diverge, float2 Coordinates, float IO) // Horizontal paral
 	//Anti-Weapon Hand Fighting
 	float Weapon_Mask = tex2Dlod(SamplerDMN,float4(Coordinates,0,0)).y, ZFighting_Mask = 1.0-(1.0-tex2Dlod(SamplerDMN,float4(Coordinates,0,5.4)).y - Weapon_Mask);
 		  ZFighting_Mask = ZFighting_Mask * (1.0-Weapon_Mask);
-	float Get_DB = GetDB((View_Mode > 0 ? ParallaxCoord : PrevParallaxCoord) - DB_Offset_Switch, 0).y, Get_DB_ZDP = WP > 0 ? lerp(Get_DB, abs(Get_DB), ZFighting_Mask) : Get_DB;
+	float Get_DB = GetDB((View_Mode > 0 ? ParallaxCoord : lerp(ParallaxCoord, PrevParallaxCoord, 0.5) ) - DB_Offset_Switch, 0).y, Get_DB_ZDP = WP > 0 ? lerp(Get_DB, abs(Get_DB), ZFighting_Mask) : Get_DB;
 	// Parallax Occlusion Mapping
 	float beforeDepthValue = Get_DB_ZDP, afterDepthValue = CurrentDepthMapValue - CurrentLayerDepth;
 		  beforeDepthValue += LayerDepth - CurrentLayerDepth;
