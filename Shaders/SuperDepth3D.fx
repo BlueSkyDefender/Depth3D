@@ -2,7 +2,7 @@
 ///**SuperDepth3D**///
 //----------------////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//* Depth Map Based 3D post-process shader v2.9.3
+//* Depth Map Based 3D post-process shader v2.9.5
 //* For Reshade 3.0+
 //* ---------------------------------
 //*
@@ -183,7 +183,7 @@
 #else
 	#define Mask_Cycle_Key Set_Key_Code_Here
 #endif
-//uniform float TEST < ui_type = "drag"; ui_min = 0; ui_max = 1; > = 1.0;
+//uniform float TEST < ui_type = "drag"; ui_min = 0; ui_max = 4; > = 1.0;
 //Divergence & Convergence//
 uniform float Divergence <
 	ui_type = "drag";
@@ -1320,38 +1320,38 @@ float2 GetDB(float2 texcoord, float Mips)
 }
 //Perf Level selection
 #define Depth_Boost 1.01
-static const float4 Performance_LvL[2] = { float4( 0.5, 0.5, 0.679, 0.5 ), float4( 1.0, 1.0, 1.425, 1.0) };
+static const float4 Performance_LvL[2] = { float4( 0.5, 0.5125, 0.679, 0.5 ), float4( 1.0, 1.025, 1.425, 1.0) };
 //////////////////////////////////////////////////////////Parallax Generation///////////////////////////////////////////////////////////////////////
 float2 Parallax(float Diverge, float2 Coordinates, float IO) // Horizontal parallax offset & Hole filling effect
 {   float MS = Diverge * pix.x, GetDepth = smoothstep(0,1,GetDB(Coordinates, 0).x),
-			   Details = View_Mode > 0 ? (Compatibility_Mode ? 1.0 : 0.625) : 0.5;
-	float2 ParallaxCoord = Coordinates, CBxy = floor( float2(Coordinates.x * BUFFER_WIDTH, Coordinates.y * BUFFER_HEIGHT)),
-		   Perf = float2( Performance_LvL[Performance_Level].x, 0.0) ;
+			   Details = View_Mode > 0 ? (Compatibility_Mode ? 1.0 : 0.625) : 0.5,
+			   Perf = Performance_LvL[Performance_Level].x;
+	float2 ParallaxCoord = Coordinates, CBxy = floor( float2(Coordinates.x * BUFFER_WIDTH, Coordinates.y * BUFFER_HEIGHT));
 	//Would Use Switch....
 	if( View_Mode == 1)
-		Perf = float2( Performance_LvL[Performance_Level].y, Performance_Level == 0 ? 0.014 : 0.028 );
+		Perf = Performance_LvL[Performance_Level].y;
 	if( View_Mode == 2)
-		Perf = float2( Performance_LvL[Performance_Level].z , 0.0 );
+		Perf = Performance_LvL[Performance_Level].z;
 	if( View_Mode == 3)
-		Perf = float2( Performance_LvL[Performance_Level].w , 0.0 );
+		Perf = Performance_LvL[Performance_Level].w;
 	if( View_Mode == 4)
 	{
 		if( GetDepth >= 0.999 )
-			Perf = fmod(CBxy.x+CBxy.y,2) ? float2(0.679 , 0.0) : float2( 0.5, 0.526);
+			Perf = fmod(CBxy.x+CBxy.y,2) ? 0.679 : 0.5;
 		else if( GetDepth >= 0.875)
-			Perf = fmod(CBxy.x+CBxy.y,2) ? float2(1.00 , 0.028) : float2( 0.679, 0.0);
+			Perf = fmod(CBxy.x+CBxy.y,2) ? 1.025 : 0.679;
 		else
-			Perf = fmod(CBxy.x+CBxy.y,2) ? float2(0.679 , 0.0) : float2( 0.5, 0.014);
+			Perf = fmod(CBxy.x+CBxy.y,2) ? 0.679 : 0.5;
 	}
 	
 	if( View_Mode > 0) 
-		Perf.x *= Depth_Boost;
+		Perf *= Depth_Boost;
 	//Luma Based VRS
 	float Luma_Adptive = max(0.0, tex2Dlod(SamplerDMN,float4(Coordinates,0,5)).w ) > 0.15, LA_Out = lerp( 0.498f, View_Mode > 0 ? 1.0f : 0.75f, Luma_Adptive);
 	if( L_VRS )
-		Perf.x *= lerp( 1.0, LA_Out, saturate(GetDepth * 4.0));  
+		Perf *= lerp( 1.0, LA_Out, saturate(GetDepth * 4.0));  
 	//ParallaxSteps Calculations
-	float D = abs(Diverge), Cal_Steps = (D * Perf.x) + (D * Perf.y), Steps = clamp( Cal_Steps, 20, 200 );//Foveated Rendering Point on attack 16-256 limit samples.
+	float D = abs(Diverge), Cal_Steps = D * Perf, Steps = clamp( Cal_Steps, 20, 200 );//Foveated Rendering Point on attack 16-256 limit samples.
 	// Offset per step progress & Limit
 	float LayerDepth = rcp(Steps), TP = Compatibility_Mode ? 0.048 : 0.024;
 		  D = Diverge < 0 ? -75 : 75;
