@@ -1,7 +1,7 @@
 ////----------------------------------------//
 ///SuperDepth3D Overwatch Automation Shader///
 //----------------------------------------////
-// Version 2.2.5
+// Version 2.2.6
 //---------------------------------------OVERWATCH---------------------------------------//
 // If you are reading this stop. Go away and never look back. From this point on if you  //
 // still think it's is worth looking at this..... Then no one can save you or your soul. //
@@ -2892,9 +2892,16 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define PEW 1
 #elif (App == 0xFC113D8A ) //PsychoNauts 2
 	#define DA_W 1
-	#define DA_Y 10.0
+	#define DA_Y 11.5
     #define DA_X 0.25
+    #define DF_Y 0.0625
 	#define DB_Y 5
+	#define DE_X 1
+	#define DE_Y 0.525
+	#define DE_Z 0.300
+	#define LBC 2  //Letter Box Correction Offsets With X & Y
+	#define DH_Z 0.255
+	#define DH_W 0.0
 	//#define DE_X 1
 	//#define DE_Y 0.300
 	//#define DE_Z 0.375
@@ -2988,6 +2995,19 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DG_W 0.125
     #define HMT 1
 	#define PEW 1
+#elif (App == 0x4F255CDB ) //Mortal Kombat 11 DX11** Note needs dx12
+    #define DA_W 1
+    #define DA_Y 22.5  //adjusted
+    //#define DA_Z 0.004 //This was the issue
+    #define DB_Y 2 //adjusted
+    #define DA_X 0.125 //adjusted
+    #define DF_Y 0.140 //adjusted
+    #define DE_X 1
+    #define DE_Y 0.300 //adjusted
+    #define DE_Z 0.400
+	#define DG_W 0.300 //Added as a buffer to allow little bit of popout.
+    #define DB_Z 0.300 //Added To counteract issues with close to cam animations.
+	#define PEW 1 
 #else
 	#define NPW 1 //No Profile
 #endif
