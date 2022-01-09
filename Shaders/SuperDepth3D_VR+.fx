@@ -1403,7 +1403,7 @@ void zBuffer(in float4 position : SV_Position, in float2 texcoord : TEXCOORD, ou
 {	
 	float2 Set_Depth = DB( texcoord.xy ).xy;
 	Point_Out = Set_Depth.xy; 
-	Linear_Out = Set_Depth.y;	
+	Linear_Out = Set_Depth.x;	
 }
 
 float GetDB(float2 texcoord)

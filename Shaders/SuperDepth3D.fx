@@ -1173,7 +1173,7 @@ float AutoDepthRange(float d, float2 texcoord )
 }
 
 float2 Conv(float D,float2 texcoord)
-{	float Z = ZPD_Separation.x, WZP = 0.5, ZP = 0.5, ALC = abs(Lum(texcoord).x), W_Convergence = WZPD_and_WND.x, WZPDB, Distance_From_Bottom = 0.9375, ZPD_Boundary =  ZPD_Boundary_n_Fade.x;
+{	float Z = ZPD_Separation.x, WZP = 0.5, ZP = 0.5, ALC = abs(Lum(texcoord).x), W_Convergence = WZPD_and_WND.x, WZPDB, Distance_From_Bottom = 0.9375, ZPD_Boundary = ZPD_Boundary_n_Fade.x;
     //Screen Space Detector.
 	if (abs(Weapon_ZPD_Boundary) > 0)
 	{   float WArray[8] = { 0.5, 0.5625, 0.625, 0.6875, 0.75, 0.8125, 0.875, 0.9375},
@@ -1331,7 +1331,7 @@ void zBuffer(in float4 position : SV_Position, in float2 texcoord : TEXCOORD, ou
 {	
 	float2 Set_Depth = DB( texcoord.xy ).xy;
 	Point_Out = Set_Depth.xy; 
-	Linear_Out = Set_Depth.y;	
+	Linear_Out = Set_Depth.x;	
 }
 
 float GetDB(float2 texcoord)
