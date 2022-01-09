@@ -2,7 +2,7 @@
 ///**SuperDepth3D**///
 //----------------////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//* Depth Map Based 3D post-process shader v2.9.6
+//* Depth Map Based 3D post-process shader v2.9.7
 //* For Reshade 3.0+
 //* ---------------------------------
 //*
@@ -1334,14 +1334,14 @@ void zBuffer(in float4 position : SV_Position, in float2 texcoord : TEXCOORD, ou
 	Linear_Out = Set_Depth.x;	
 }
 
-float GetDB(float2 texcoord)
+float2 GetDB(float2 texcoord)
 {
-	float DepthBuffer_LP = tex2Dlod(SamplerzBufferN_P, float4(texcoord,0, 0) ).x;
+	float2 DepthBuffer_LP = float2(tex2Dlod(SamplerzBufferN_L, float4(texcoord,0, 0) ).x,tex2Dlod(SamplerzBufferN_P, float4(texcoord,0, 0) ).x);
 	
-	if(View_Mode > 0)	
-		DepthBuffer_LP = tex2Dlod(SamplerzBufferN_L, float4(texcoord,0, 0) ).x;
+	if(View_Mode == 0 || View_Mode == 3)	
+		DepthBuffer_LP.x = DepthBuffer_LP.y;
 		
-	return DepthBuffer_LP;
+	return DepthBuffer_LP.xy;
 }
 //Perf Level selection
 static const float4 Performance_LvL[2] = { float4( 0.5, 0.5125, 0.679, 0.5 ), float4( 1.0, 1.025, 1.425, 1.0) };
@@ -1375,10 +1375,10 @@ float2 Parallax(float Diverge, float2 Coordinates, float IO) // Horizontal paral
 	//ParallaxSteps Calculations
 	float D = abs(Diverge), Cal_Steps = D * Perf, Steps = clamp( Cal_Steps, Performance_Level ? 20 : lerp(20,D,saturate(GetDepth) > 0.9 ), 200 );//Foveated Rendering Point of attack 16-256 limit samples.
 	// Offset per step progress & Limit
-	float LayerDepth = rcp(Steps), TP = Compatibility_Mode ? 0.06 : 0.03;
+	float LayerDepth = rcp(Steps), TP = Compatibility_Mode ? 0.05 : 0.025;
 		  D = Diverge < 0 ? -75 : 75;
 	//Offsets listed here Max Seperation is 3% - 8% of screen space with Depth Offsets & Netto layer offset change based on MS.
-	float deltaCoordinates = MS * LayerDepth, CurrentDepthMapValue = GetDB(ParallaxCoord).x, CurrentLayerDepth = 0.0f,
+	float deltaCoordinates = MS * LayerDepth, CurrentDepthMapValue = GetDB(ParallaxCoord).y, CurrentLayerDepth = 0.0f,
 		  Offset_Switch = View_Mode > 0 ? 0.0 : 1.0, DB_Offset = D * TP * pix.x;
 
 	[loop] //Steep parallax mapping
@@ -1396,7 +1396,7 @@ float2 Parallax(float Diverge, float2 Coordinates, float IO) // Horizontal paral
 	//Anti-Weapon Hand Fighting
 	float Weapon_Mask = tex2Dlod(SamplerDMN,float4(Coordinates,0,0)).y, ZFighting_Mask = 1.0-(1.0-tex2Dlod(SamplerLumN,float4(Coordinates,0,1.400)).w - Weapon_Mask);
 		  ZFighting_Mask = ZFighting_Mask * (1.0-Weapon_Mask);
-	float Get_DB = GetDB(float2( (View_Mode > 0 ? ParallaxCoord.x : lerp(ParallaxCoord.x, lerp(ParallaxCoord.x,PrevParallaxCoord.x,0.5), saturate(GetDepth * 5.0))), PrevParallaxCoord.y ) ), Get_DB_ZDP = WP > 0 ? lerp(Get_DB, abs(Get_DB), ZFighting_Mask) : Get_DB;
+	float Get_DB = GetDB(float2( (View_Mode > 0 ? ParallaxCoord.x : lerp(ParallaxCoord.x, lerp(ParallaxCoord.x,PrevParallaxCoord.x,0.5), saturate(GetDepth * 5.0))), PrevParallaxCoord.y ) ).y, Get_DB_ZDP = WP > 0 ? lerp(Get_DB, abs(Get_DB), ZFighting_Mask) : Get_DB;
 	// Parallax Occlusion Mapping
 	float beforeDepthValue = Get_DB_ZDP, afterDepthValue = CurrentDepthMapValue - CurrentLayerDepth;
 		  beforeDepthValue += LayerDepth - CurrentLayerDepth;
@@ -1736,11 +1736,11 @@ float3 PS_calcLR(float2 texcoord)
 	const float DBPower = 1.0, Con = 11, weight[11] = { 0.0,0.010,-0.010,0.020,-0.020,0.030,-0.030,0.040,-0.040,0.050,-0.050 };
 	if(Alinement_View)
 	{
-		float2 dir = 0.5 - texcoord; 
+		float2 dir = 0.5 - TexCoords; 
 		[loop]
 		for (int i = 0; i < 11; i++)
 		{
-			DepthBlur += tex2Dlod(SamplerzBufferN_L,float4(texcoord + dir * weight[i] * DBPower,0,2) ).x;
+			DepthBlur += tex2Dlod(SamplerzBufferN_L,float4(TexCoords + dir * weight[i] * DBPower,0,2) ).x;
 		}
 		
 		Alinement_Depth = ( Alinement_Depth + DepthBlur ) * 0.08333;
