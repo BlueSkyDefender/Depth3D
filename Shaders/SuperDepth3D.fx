@@ -2,7 +2,7 @@
 ///**SuperDepth3D**///
 //----------------////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//* Depth Map Based 3D post-process shader v2.9.5
+//* Depth Map Based 3D post-process shader v2.9.6
 //* For Reshade 3.0+
 //* ---------------------------------
 //*
@@ -51,7 +51,7 @@
 	static const float DG_X = 0.0, DG_Y = 0.0, DG_Z = 0.0, DG_W = 0.0;
 	// DH_X = [LBC Size Offset X] DH_Y = [LBC Size Offset Y] DH_Z = [LBC Pos Offset X] DH_W = [LBC Pos Offset X]
 	static const float DH_X = 1.0, DH_Y = 1.0, DH_Z = 0.0, DH_W = 0.0;
-	// DI_X = [LBM Offset X] DI_Y = [LBM Offset Y] DI_Z = [Null Z] DI_W = [Null W]
+	// DI_X = [LBM Offset X] DI_Y = [LBM Offset Y] DI_Z = [Null Z] DI_W = [REF Check Depth Limit]
 	static const float DI_X = 0.0, DI_Y = 0.0, DI_Z = 0.0, DI_W = 0.0;		
 	// WSM = [Weapon Setting Mode]
 	#define OW_WP "WP Off\0Custom WP\0"
@@ -67,7 +67,7 @@
 #define Balance_Mode 0 //Default 0 is Automatic. One is Manual.
 
 // RE Fix is used to fix the issue with Resident Evil's 2 Remake 1-Shot cutscenes.
-#define RE_Fix 0 //Default 0 is Off. One is On.
+#define RE_Fix 0 //Default 0 is Off. One is High and Ten is Low        1-10
 
 // Change the Cancel Depth Key. Determines the Cancel Depth Toggle Key using keycode info
 // The Key Code for Decimal Point is Number 110. Ex. for Numpad Decimal "." Cancel_Depth_Key 110
@@ -755,21 +755,30 @@ sampler SamplerDF
 		Texture = texDF;
 	};
 #endif
-texture texDMN { Width = BUFFER_WIDTH ; Height = BUFFER_HEIGHT; Format = RGBA16F;  MipLevels = 6;};
+texture texDMN { Width = BUFFER_WIDTH ; Height = BUFFER_HEIGHT; Format = RGBA16F; };
 
 sampler SamplerDMN
 	{
 		Texture = texDMN;
 	};
 
-texture texzBufferN { Width = BUFFER_WIDTH ; Height = BUFFER_HEIGHT ; Format = RG16F;
-	 MipLevels = 10;
-					};
+texture texzBufferN_P { Width = BUFFER_WIDTH ; Height = BUFFER_HEIGHT ; Format = RG16F; };
 
-sampler SamplerzBufferN
+sampler SamplerzBufferN_P
 	{
-		Texture = texzBufferN;
+		Texture = texzBufferN_P;
+		MagFilter = POINT;
+		MinFilter = POINT;
+		MipFilter = POINT;
 	};
+
+texture texzBufferN_L { Width = BUFFER_WIDTH ; Height = BUFFER_HEIGHT ; Format = R16F; MipLevels = 2; };
+
+sampler SamplerzBufferN_L
+	{
+		Texture = texzBufferN_L;
+	};
+
 
 #if UI_MASK
 texture TexMaskA < source = "DM_Mask_A.png"; > { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA8; };
@@ -777,8 +786,9 @@ sampler SamplerMaskA { Texture = TexMaskA;};
 texture TexMaskB < source = "DM_Mask_B.png"; > { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA8; };
 sampler SamplerMaskB { Texture = TexMaskB;};
 #endif
+#define Scale_Buffer 160 / BUFFER_WIDTH
 ////////////////////////////////////////////////////////Adapted Luminance/////////////////////////////////////////////////////////////////////
-texture texLumN {Width = 256*0.5; Height = 256*0.5; Format = RGBA16F; MipLevels = 8;}; //Sample at 256x256/2 and a mip bias of 8 should be 1x1
+texture texLumN {Width = BUFFER_WIDTH * Scale_Buffer; Height = BUFFER_HEIGHT * Scale_Buffer; Format = RGBA16F; MipLevels = 8;};
 
 sampler SamplerLumN
 	{
@@ -789,6 +799,7 @@ float2 Lum(float2 texcoord)
 	{   //Luminance
 		return saturate(tex2Dlod(SamplerLumN,float4(texcoord,0,11)).xy);//Average Luminance Texture Sample
 	}
+	
 ////////////////////////////////////////////////////Distortion Correction//////////////////////////////////////////////////////////////////////
 #if BD_Correction || BDF
 float2 D(float2 p, float k1, float k2, float k3) //Lens + Radial lens undistort filtering Left & Right
@@ -833,7 +844,7 @@ float4 CSB(float2 texcoords)
 	if(Depth_Map_View == 0)
 		return tex2Dlod(SamplerDF,float4(texcoords,0,0));
 	else
-		return tex2D(SamplerzBufferN,texcoords).xxxx;
+		return tex2D(SamplerzBufferN_P,texcoords).xxxx;
 }
 #else
 float4 CSB(float2 texcoords)
@@ -845,7 +856,7 @@ float4 CSB(float2 texcoords)
 	else if(Custom_Sidebars == 2 && Depth_Map_View == 0)
 		return tex2Dlod(BackBufferCLAMP,float4(texcoords,0,0));
 	else
-		return tex2Dlod(SamplerzBufferN,float4(texcoords,0,0)).x;
+		return tex2Dlod(SamplerzBufferN_P,float4(texcoords,0,0)).x;
 }
 #endif
 
@@ -864,7 +875,7 @@ float LBDetection()//Active RGB Detection
 #if SDT || SD_Trigger
 float TargetedDepth(float2 TC)
 {
-	return smoothstep(0,1,tex2Dlod(SamplerzBufferN,float4(TC,0,0)).y);
+	return smoothstep(0,1,tex2Dlod(SamplerzBufferN_P,float4(TC,0,0)).y);
 }
 
 float SDTriggers()//Specialized Depth Triggers
@@ -1060,7 +1071,7 @@ float HUD_Mask(float2 texcoord )
 #endif
 /////////////////////////////////////////////////////////Fade In and Out Toggle/////////////////////////////////////////////////////////////////////
 float Fade_in_out(float2 texcoord)
-{ float TCoRF[1], Trigger_Fade, AA = Fade_Time_Adjust, PStoredfade = tex2D(SamplerLumN,float2(0.25,0.5)).z;
+{ float TCoRF[1], Trigger_Fade, AA = Fade_Time_Adjust, PStoredfade = tex2D(SamplerLumN,float2(0,0.125)).z;
 	if(Eye_Fade_Reduction_n_Power.z == 0)
 		AA *= 0.5;
 	else if(Eye_Fade_Reduction_n_Power.z == 2)
@@ -1074,9 +1085,9 @@ float Fade_in_out(float2 texcoord)
 	return PStoredfade + (Trigger_Fade - PStoredfade) * (1.0 - exp(-frametime/((1-AA)*1000))); ///exp2 would be even slower
 }
 
-float Fade(float2 texcoord)
+float2 Fade(float2 texcoord) // Maybe make it float2 and pass the 2nd switch to swap it with grater strength onlu if it's beyond -1.0
 {   //Check Depth
-	float CD, Detect;
+	float CD, Detect, Detect_Out_of_Range;
 	if(ZPD_Boundary > 0)
 	{   //Normal A & B for both
 		float CDArray_A[7] = { 0.125, 0.25, 0.375, 0.5, 0.625, 0.75, 0.875}, CDArray_B[7] = { 0.25, 0.375, 0.4375, 0.5, 0.5625, 0.625, 0.75}, CDArray_C[4] = { 0.875, 0.75, 0.5, 0.25};
@@ -1116,12 +1127,19 @@ float Fade(float2 texcoord)
 				#endif
 				if ( CD < -DG_W )//may lower this to like -0.1
 					Detect = 1;
+				//Used if Depth Buffer is way out of range.
+				if(REF || RE_Fix)
+				{
+				if ( CD < -DI_W )
+					Detect_Out_of_Range = 1;
+				}
 			}
 		}
 	}
-	float Trigger_Fade = Detect, AA = (1-(ZPD_Boundary_n_Fade.y*2.))*1000, PStoredfade = tex2Dlod(SamplerLumN,float4(float2(0.75,0.5),0,0)).z;
+	float Trigger_Fade_A = Detect, Trigger_Fade_B = Detect_Out_of_Range, AA = (1-(ZPD_Boundary_n_Fade.y*2.))*1000, 
+		  PStoredfade_A = tex2D(SamplerLumN,float2(0, 0.375)).z, PStoredfade_B = tex2D(SamplerLumN,float2(0, 0.625)).z;
 	//Fade in toggle.
-	return PStoredfade + (Trigger_Fade - PStoredfade) * (1.0 - exp(-frametime/AA)); ///exp2 would be even slower
+	return float2( PStoredfade_A + (Trigger_Fade_A - PStoredfade_A) * (1.0 - exp(-frametime/AA)), PStoredfade_B + (Trigger_Fade_B - PStoredfade_B) * (1.0 - exp(-frametime/AA)) ); ///exp2 would be even slower
 }
 //////////////////////////////////////////////////////////Depth Map Alterations/////////////////////////////////////////////////////////////////////
 
@@ -1136,10 +1154,12 @@ float4 DepthMap(in float4 position : SV_Position,in float2 texcoord : TEXCOORD) 
 	if (WZPD_and_WND.y > 0)
 		R = lerp(ScaleND,R,smoothstep(0,0.25,ScaleND));
 
-	if(texcoord.x < pix.x * 2 && texcoord.y < pix.y * 2)
+	if(texcoord.x < pix.x * 2 && texcoord.y < pix.y * 2)//TL
 		R = Fade_in_out(texcoord);
-	if(1-texcoord.x < pix.x * 2 && 1-texcoord.y < pix.y * 2)
-		R = Fade(texcoord);
+	if(1-texcoord.x < pix.x * 2 && 1-texcoord.y < pix.y * 2)//BR
+		R = Fade(texcoord).x;
+	if(texcoord.x < pix.x * 2 && 1-texcoord.y < pix.y * 2)//BL
+		R = Fade(texcoord).y;
 	//Luma Map
 	float3 Color = tex2D(BackBufferCLAMP,texcoord ).rgb;
 		   Color.x = max(Color.r, max(Color.g, Color.b)); 
@@ -1149,27 +1169,16 @@ float4 DepthMap(in float4 position : SV_Position,in float2 texcoord : TEXCOORD) 
 
 float AutoDepthRange(float d, float2 texcoord )
 { float LumAdjust_ADR = smoothstep(-0.0175,Auto_Depth_Adjust,Lum(texcoord).y);
-	if (REF)
-		LumAdjust_ADR = smoothstep(-0.0175,Auto_Depth_Adjust,Lum(texcoord).x);
-
     return min(1,( d - 0 ) / ( LumAdjust_ADR - 0));
 }
-#if RE_Fix || REF
-float AutoZPDRange(float ZPD, float2 texcoord )
-{   //Adjusted to only effect really intense differences.
-	float LumAdjust_AZDPR = smoothstep(-0.0175,0.1875,Lum(texcoord).y);
-	if(RE_Fix == 2 || REF == 2)
-		LumAdjust_AZDPR = smoothstep(0,0.075,Lum(texcoord).y);
-    return saturate(LumAdjust_AZDPR * ZPD);
-}
-#endif
+
 float2 Conv(float D,float2 texcoord)
-{	float Z = ZPD_Separation.x, WZP = 0.5, ZP = 0.5, ALC = abs(Lum(texcoord).x), W_Convergence = WZPD_and_WND.x, WZPDB, Distance_From_Bottom = 0.9375;
+{	float Z = ZPD_Separation.x, WZP = 0.5, ZP = 0.5, ALC = abs(Lum(texcoord).x), W_Convergence = WZPD_and_WND.x, WZPDB, Distance_From_Bottom = 0.9375, ZPD_Boundary =  ZPD_Boundary_n_Fade.x;
     //Screen Space Detector.
 	if (abs(Weapon_ZPD_Boundary) > 0)
-	{   float WArray[8] = { 0.5, 0.5625, 0.625, 0.6875, 0.75, 0.8125, 0.875, 0.9375};
-		float MWArray[8] = { 0.4375, 0.46875, 0.5, 0.53125, 0.625, 0.75, 0.875, 0.9375};
-		float WZDPArray[8] = { 1.0, 0.5, 0.75, 0.5, 0.625, 0.5, 0.55, 0.5};//SoF ZPD Weapon Map
+	{   float WArray[8] = { 0.5, 0.5625, 0.625, 0.6875, 0.75, 0.8125, 0.875, 0.9375},
+			  MWArray[8] = { 0.4375, 0.46875, 0.5, 0.53125, 0.625, 0.75, 0.875, 0.9375},
+			  WZDPArray[8] = { 1.0, 0.5, 0.75, 0.5, 0.625, 0.5, 0.55, 0.5};//SoF ZPD Weapon Map
 		[unroll] //only really only need to check one point just above the center bottom and to the right.
 		for( int i = 0 ; i < 8; i++ )
 		{
@@ -1191,9 +1200,6 @@ float2 Conv(float D,float2 texcoord)
 	W_Convergence = 1 - W_Convergence / D;
 	float WD = D; //Needed to seperate Depth for the  Weapon Hand. It was causing problems with Auto Depth Range below.
 
-	#if RE_Fix || REF
-		Z = AutoZPDRange(Z,texcoord);
-	#endif
 		if (Auto_Depth_Adjust > 0)
 			D = AutoDepthRange(D,texcoord);
 
@@ -1203,7 +1209,17 @@ float2 Conv(float D,float2 texcoord)
 		if(Auto_Balance_Ex > 0 )
 			ZP = saturate(ALC);
 	#endif
-		Z *= lerp( 1, ZPD_Boundary_n_Fade.x, smoothstep(0,1,tex2Dlod(SamplerLumN,float4(float2(0.75,0.5),0,0)).z));
+		float DOoR = smoothstep(0,1,tex2D(SamplerLumN,float2(0, 0.625)).z), ZDP_Array[11] = { 0.0, 0.0125, 0.025, 0.0375, 0.04375, 0.05, 0.0625, 0.075, 0.0875, 0.09375, 0.1};
+		
+		if(REF || RE_Fix)
+		{
+			if(RE_Fix)
+				ZPD_Boundary = lerp(ZPD_Boundary,ZDP_Array[RE_Fix],DOoR);
+			else
+				ZPD_Boundary = lerp(ZPD_Boundary,ZDP_Array[REF],DOoR);
+		}
+
+		Z *= lerp( 1, ZPD_Boundary, smoothstep(0,1,tex2D(SamplerLumN,float2(0, 0.375)).z));
 		float Convergence = 1 - Z / D;
 		if (ZPD_Separation.x == 0)
 			ZP = 1;
@@ -1228,6 +1244,8 @@ float2 DB( float2 texcoord)
 	if(texcoord.x < pix.x * 2 && texcoord.y < pix.y * 2)
 		DM = PrepDepth(texcoord)[0][0];
 	if(1-texcoord.x < pix.x * 2 && 1-texcoord.y < pix.y * 2)
+		DM = PrepDepth(texcoord)[0][0];
+	if(texcoord.x < pix.x * 2 && 1-texcoord.y < pix.y * 2)
 		DM = PrepDepth(texcoord)[0][0];
 
 	if (WP == 0 || WZPD_and_WND.x <= 0)
@@ -1309,22 +1327,28 @@ float2 DB( float2 texcoord)
 }
 #define Depth_Edge_Mask 0 //WIP
 ////////////////////////////////////////////////////Depth & Special Depth Triggers//////////////////////////////////////////////////////////////////
-float2 zBuffer(in float4 position : SV_Position, in float2 texcoord : TEXCOORD) : SV_Target
-{
-	return DB( texcoord.xy ).xy;//Apply Depth Buffer AA Later??? Maybe...
+void zBuffer(in float4 position : SV_Position, in float2 texcoord : TEXCOORD, out float2 Point_Out : SV_Target0 , out float Linear_Out : SV_Target1)
+{	
+	float2 Set_Depth = DB( texcoord.xy ).xy;
+	Point_Out = Set_Depth.xy; 
+	Linear_Out = Set_Depth.y;	
 }
 
-float2 GetDB(float2 texcoord, float Mips)
+float GetDB(float2 texcoord)
 {
-	return tex2Dlod(SamplerzBufferN, float4(texcoord,0, Mips) ).x;
+	float DepthBuffer_LP = tex2Dlod(SamplerzBufferN_P, float4(texcoord,0, 0) ).x;
+	
+	if(View_Mode > 0)	
+		DepthBuffer_LP = tex2Dlod(SamplerzBufferN_L, float4(texcoord,0, 0) ).x;
+		
+	return DepthBuffer_LP;
 }
 //Perf Level selection
-#define Depth_Boost 1.01
 static const float4 Performance_LvL[2] = { float4( 0.5, 0.5125, 0.679, 0.5 ), float4( 1.0, 1.025, 1.425, 1.0) };
 //////////////////////////////////////////////////////////Parallax Generation///////////////////////////////////////////////////////////////////////
 float2 Parallax(float Diverge, float2 Coordinates, float IO) // Horizontal parallax offset & Hole filling effect
-{   float MS = Diverge * pix.x, GetDepth = smoothstep(0,1,GetDB(Coordinates, 0).x),
-			   Details = View_Mode > 0 ? (Compatibility_Mode ? 1.0 : 0.625) : 0.5,
+{   float MS = Diverge * pix.x, GetDepth = smoothstep(0,1,GetDB(Coordinates).x),
+			   Details = View_Mode > 0 ?  0.625 : 0.5,
 			   Perf = Performance_LvL[Performance_Level].x;
 	float2 ParallaxCoord = Coordinates, CBxy = floor( float2(Coordinates.x * BUFFER_WIDTH, Coordinates.y * BUFFER_HEIGHT));
 	//Would Use Switch....
@@ -1344,52 +1368,52 @@ float2 Parallax(float Diverge, float2 Coordinates, float IO) // Horizontal paral
 			Perf = fmod(CBxy.x+CBxy.y,2) ? 0.679 : 0.5;
 	}
 	
-	if( View_Mode > 0) 
-		Perf *= Depth_Boost;
 	//Luma Based VRS
-	float Luma_Adptive = max(0.0, tex2Dlod(SamplerDMN,float4(Coordinates,0,5)).w ) > 0.15, LA_Out = lerp( 0.498f, View_Mode > 0 ? 1.0f : 0.75f, Luma_Adptive);
+	float LA_Out = lerp( 0.5f, View_Mode > 0 ? 1.0f : 0.75f, saturate(GetDepth));
 	if( L_VRS )
 		Perf *= lerp( 1.0, LA_Out, saturate(GetDepth * 4.0));  
 	//ParallaxSteps Calculations
-	float D = abs(Diverge), Cal_Steps = D * Perf, Steps = clamp( Cal_Steps, 20, 200 );//Foveated Rendering Point on attack 16-256 limit samples.
+	float D = abs(Diverge), Cal_Steps = D * Perf, Steps = clamp( Cal_Steps, Performance_Level ? 20 : lerp(20,D,saturate(GetDepth) > 0.9 ), 200 );//Foveated Rendering Point of attack 16-256 limit samples.
 	// Offset per step progress & Limit
-	float LayerDepth = rcp(Steps), TP = Compatibility_Mode ? 0.048 : 0.024;
+	float LayerDepth = rcp(Steps), TP = Compatibility_Mode ? 0.06 : 0.03;
 		  D = Diverge < 0 ? -75 : 75;
 	//Offsets listed here Max Seperation is 3% - 8% of screen space with Depth Offsets & Netto layer offset change based on MS.
-	float deltaCoordinates = MS * LayerDepth, CurrentDepthMapValue = GetDB(ParallaxCoord, 0).x, CurrentLayerDepth = 0.0f,
+	float deltaCoordinates = MS * LayerDepth, CurrentDepthMapValue = GetDB(ParallaxCoord).x, CurrentLayerDepth = 0.0f,
 		  Offset_Switch = View_Mode > 0 ? 0.0 : 1.0, DB_Offset = D * TP * pix.x;
 
 	[loop] //Steep parallax mapping
 	while ( CurrentDepthMapValue > CurrentLayerDepth )
 	{   // Shift coordinates horizontally in linear fasion
-	    ParallaxCoord.x -= deltaCoordinates * Depth_Boost;
+	    ParallaxCoord.x -= deltaCoordinates;
 	    // Get depth value at current coordinates
-	    CurrentDepthMapValue = GetDB(float2(ParallaxCoord.x - (DB_Offset * Offset_Switch),ParallaxCoord.y), 0).x;
+	    CurrentDepthMapValue = GetDB(float2(ParallaxCoord.x - (DB_Offset * Offset_Switch),ParallaxCoord.y) ).x;
 	    // Get depth of next layer
 	    CurrentLayerDepth += LayerDepth;
 		continue;
 	}
 	
-	float2 PrevParallaxCoord = float2(ParallaxCoord.x + deltaCoordinates * Depth_Boost, ParallaxCoord.y);	
+	float2 PrevParallaxCoord = float2(ParallaxCoord.x + deltaCoordinates, ParallaxCoord.y);	
 	//Anti-Weapon Hand Fighting
-	float Weapon_Mask = tex2Dlod(SamplerDMN,float4(Coordinates,0,0)).y, ZFighting_Mask = 1.0-(1.0-tex2Dlod(SamplerDMN,float4(Coordinates,0,5.4)).y - Weapon_Mask);
+	float Weapon_Mask = tex2Dlod(SamplerDMN,float4(Coordinates,0,0)).y, ZFighting_Mask = 1.0-(1.0-tex2Dlod(SamplerLumN,float4(Coordinates,0,1.400)).w - Weapon_Mask);
 		  ZFighting_Mask = ZFighting_Mask * (1.0-Weapon_Mask);
-	float Get_DB = GetDB(float2( (View_Mode > 0 ? ParallaxCoord.x : lerp(ParallaxCoord.x, lerp(ParallaxCoord.x,PrevParallaxCoord.x,0.5), saturate(GetDepth * 5.0))), PrevParallaxCoord.y ) , 0).y, Get_DB_ZDP = WP > 0 ? lerp(Get_DB, abs(Get_DB), ZFighting_Mask) : Get_DB;
+	float Get_DB = GetDB(float2( (View_Mode > 0 ? ParallaxCoord.x : lerp(ParallaxCoord.x, lerp(ParallaxCoord.x,PrevParallaxCoord.x,0.5), saturate(GetDepth * 5.0))), PrevParallaxCoord.y ) ), Get_DB_ZDP = WP > 0 ? lerp(Get_DB, abs(Get_DB), ZFighting_Mask) : Get_DB;
 	// Parallax Occlusion Mapping
 	float beforeDepthValue = Get_DB_ZDP, afterDepthValue = CurrentDepthMapValue - CurrentLayerDepth;
 		  beforeDepthValue += LayerDepth - CurrentLayerDepth;
 	// Depth Diffrence for Gap masking and depth scaling in Normal Mode.
-	float DepthDiffrence = afterDepthValue - beforeDepthValue, DD_Map = abs(DepthDiffrence) > 0.053;
+	float DepthDiffrence = afterDepthValue - beforeDepthValue, DD_Map = abs(DepthDiffrence) > 0.053, DDD = abs(beforeDepthValue - CurrentDepthMapValue);
 	// Interpolate coordinates
 	float weight = afterDepthValue / min(-0.01,DepthDiffrence);
-		  ParallaxCoord.x = PrevParallaxCoord.x * weight + ParallaxCoord.x * (1.0f - weight);
+		ParallaxCoord.x = PrevParallaxCoord.x * weight + ParallaxCoord.x * (1.0f - weight);
+
 	//This is to limit artifacts.
 		ParallaxCoord.x += DB_Offset.x * Details;
+
 	// Apply gap masking+
 		if(Diverge < 0)
-			ParallaxCoord.x += lerp( 0, DepthDiffrence * 1.5, DD_Map) * pix.x;
+			ParallaxCoord.x -= lerp( 0, DDD * 2.5, DD_Map) * pix.x;
 		else
-			ParallaxCoord.x -= lerp( 0, DepthDiffrence * 1.5, DD_Map) * pix.x;	
+			ParallaxCoord.x += lerp( 0, DDD * 2.5, DD_Map) * pix.x;	
 	
 	if(Stereoscopic_Mode == 2)
 		ParallaxCoord.y += IO * pix.y; //Optimization for line interlaced.
@@ -1705,14 +1729,22 @@ float3 PS_calcLR(float2 texcoord)
 	}
 
 	if (Depth_Map_View == 2)
-		color.rgb = tex2D(SamplerzBufferN,TexCoords).xxx;
-
-	float Alinement_Depth = tex2Dlod(SamplerzBufferN,float4(TexCoords,0,0)).x, Depth = Alinement_Depth;
-	Alinement_Depth = Alinement_View ?
-	( Alinement_Depth + tex2Dlod(SamplerzBufferN,float4(TexCoords + float2( pix.x * 2,0),0,1)).x +
-	  				  tex2Dlod(SamplerzBufferN,float4(TexCoords + float2(-pix.x * 2,0),0,2)).x +
-			  		  tex2Dlod(SamplerzBufferN,float4(TexCoords + float2(0, pix.y * 2),0,3)).x +
-			  		  tex2Dlod(SamplerzBufferN,float4(TexCoords + float2(0,-pix.y * 2),0,4)).x ) * 0.2 : Alinement_Depth;
+		color.rgb = tex2D(SamplerzBufferN_P,TexCoords).xxx;
+	
+	
+	float DepthBlur, Alinement_Depth = tex2Dlod(SamplerzBufferN_P,float4(TexCoords,0,0)).x, Depth = Alinement_Depth;
+	const float DBPower = 1.0, Con = 11, weight[11] = { 0.0,0.010,-0.010,0.020,-0.020,0.030,-0.030,0.040,-0.040,0.050,-0.050 };
+	if(Alinement_View)
+	{
+		float2 dir = 0.5 - texcoord; 
+		[loop]
+		for (int i = 0; i < 11; i++)
+		{
+			DepthBlur += tex2Dlod(SamplerzBufferN_L,float4(texcoord + dir * weight[i] * DBPower,0,2) ).x;
+		}
+		
+		Alinement_Depth = ( Alinement_Depth + DepthBlur ) * 0.08333;
+	}
 
 	if (BD_Options == 2 || Alinement_View)
 		color.rgb = dot(tex2D(BackBufferBORDER,TexCoords).rgb,0.333) * float3((Depth/Alinement_Depth> 0.998),1,(Depth/Alinement_Depth > 0.998));
@@ -1720,7 +1752,7 @@ float3 PS_calcLR(float2 texcoord)
 	return color.rgb;
 }
 /////////////////////////////////////////////////////////Average Luminance Textures/////////////////////////////////////////////////////////////////
-float3 Average_Luminance(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Target
+float4 Average_Luminance(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Target
 {
 	float4 ABEA, ABEArray[6] = {
 		float4(0.0,1.0,0.0, 1.0),           //No Edit
@@ -1733,12 +1765,17 @@ float3 Average_Luminance(float4 position : SV_Position, float2 texcoord : TEXCOO
 	ABEA = ABEArray[Auto_Balance_Ex];
 
 	float Average_Lum_ZPD = PrepDepth(float2(ABEA.x + texcoord.x * ABEA.y, ABEA.z + texcoord.y * ABEA.w))[0][0], Average_Lum_Bottom = PrepDepth( texcoord )[0][0];
-	if(REF)
-	Average_Lum_Bottom = tex2D(SamplerDMN,float2( 0.125 + texcoord.x * 0.750,0.95 + texcoord.y)).x;
 
-	float Storage = texcoord < 0.5 ? tex2D(SamplerDMN,0).x : tex2D(SamplerDMN,1).x;
+	int Num_of_Values = 4; //4 total array values that map to the textures width.
+	float Storage__Array[4] = { tex2D(SamplerDMN,0).x, // 0.125
+                                tex2D(SamplerDMN,1).x, // 0.375
+                                tex2D(SamplerDMN,int2(0,1)).x,//0.625
+                                0.0};//0.875
 
-	return float3(Average_Lum_ZPD,Average_Lum_Bottom,Storage);
+	//Set a avr size for the Number of lines needed in texture storage.
+	float Grid = floor(texcoord.y * BUFFER_HEIGHT * BUFFER_RCP_HEIGHT * Num_of_Values);
+
+	return float4(Average_Lum_ZPD,Average_Lum_Bottom,Storage__Array[int(fmod(Grid,Num_of_Values))],tex2Dlod(SamplerDMN,float4(texcoord,0,0)).y);
 }
 ////////////////////////////////////////////////////////////////////Logo////////////////////////////////////////////////////////////////////////////
 #define _f float // Text rendering code copied/pasted from https://www.shadertoy.com/view/4dtGD2 by Hamneggs
@@ -1786,8 +1823,8 @@ float3 Out(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Targe
 {
 	float2 TC = float2(texcoord.x,1-texcoord.y);
 	float Text_Timer = 25000, BT = smoothstep(0,1,sin(timer*(3.75/1000))), Size = 1.1, Depth3D, Read_Help, Supported, ET, ETC, ETTF, ETTC, SetFoV, FoV, Post, Effect, NoPro, NotCom, Mod, Needs, Net, Over, Set, AA, Emu, Not, No, Help, Fix, Need, State, SetAA, SetWP, Work;
-	float3 Color = PS_calcLR(texcoord).rgb; //Color = LBDetection();
-
+	float3 Color = PS_calcLR(texcoord).rgb; //Color = tex2D(SamplerLumN,texcoord).z;
+		  
 	if(RHW || NCW || NPW || NFM || PEW || DSW || OSW || DAA || NDW || WPW || FOV || EDW)
 		Text_Timer = 30000;
 
@@ -2201,7 +2238,8 @@ technique SuperDepth3D
 	{
 		VertexShader = PostProcessVS;
 		PixelShader = zBuffer;
-		RenderTarget = texzBufferN;
+		RenderTarget0 = texzBufferN_P;
+		RenderTarget1 = texzBufferN_L;
 	}
 		pass StereoOut
 	{

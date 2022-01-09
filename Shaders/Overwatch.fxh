@@ -1,7 +1,7 @@
 ////----------------------------------------//
 ///SuperDepth3D Overwatch Automation Shader///
 //----------------------------------------////
-// Version 2.2.6
+// Version 2.2.7
 //---------------------------------------OVERWATCH---------------------------------------//
 // If you are reading this stop. Go away and never look back. From this point on if you  //
 // still think it's is worth looking at this..... Then no one can save you or your soul. //
@@ -83,7 +83,7 @@ static const int Auto_Letter_Box_Masking_D = 0;         // 0 | 1 | 2 : Off | Hoz
 static const float LB_Masking_Offset_X_D = 1.0;         //LetterBox Masking Offset X                    | DI_X
 static const float LB_Masking_Offset_Y_D = 1.0;         //LetterBox Masking Offset Y                    | DI_Y
 static const float Null_Z = 0.0;                        //Null                                          | DI_Z
-static const float Null_W = 0.0;                        //Null                                          | DI_W
+static const float REF_Check_Depth_Limit_D = 0.0;       //Resident Evil Fix Check Depth Limit           | DI_W
 
 //Special Toggles Defaults
 static const int Resident_Evil_Fix_D = 0;               //Resident Evil Fix                             | REF
@@ -470,12 +470,20 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DE_Z 0.375
 #elif (App == 0x60F436C6 ) //RESIDENT EVIL 2  BIOHAZARD RE2
 	#define DA_X 0.1375
+	#define DF_Y 0.025
 	#define DB_Y 3
 	#define DB_Z 0.015
-	#define DA_Y 51.25
+	#define DA_Y 50
+    #define DA_Z -0.625
 	#define DA_W 1
-	#define DA_Z 0.00015
-	#define REF 1
+	#define DE_X 1 //REF only works now with this. Since this system works in tandom.
+	#define DE_Y 0.275
+	#define DE_Z 0.4375
+	#define REF 2 //Fix can go from 1 - 10 and 10 is low 1 is High
+	#define DI_W 3.75 //Adjustment for REF
+    #define DG_W 0.2
+    #define PEW 1
+    #define DAA 1    
 #elif (App == 0xF0D4DB3D ) //Never Alone
 	#define DA_X 0.1375
 	#define DB_Y 2
@@ -2336,16 +2344,18 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define DG_X -0.190
     #define DG_Y 0.0 
 #elif (App == 0x1BDC0C4C ) //Quake Enhanced Edition
-	#define DA_X 0.07
-	#define DA_Y 13.0
-	#define DB_Y 1
+	#define DA_X 0.075 //0.07
+	#define DA_Y 14.0 //13.0
+	//#define DB_Y 1
 	#define DE_X 4
-	#define DE_Y 0.5
+	#define DE_Y 0.325 //0.4375
 	#define DE_Z 0.375
 	#define NDW 1
 	#define PEW 1
 	#define DB_W 71
 	#define DF_X 0.250
+	#define BMT 1
+	#define DF_Z 0.225
 #elif (App == 0xB3729F40 ) //Rocket League Steam
 	#define DA_Y 50.0
 	#define DA_X 0.100
@@ -3125,7 +3135,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DH_W LB_Depth_Pos_Offset_Y_D
 #endif
 
-// X = [LBM Offset X] Y = [LBM Offset Y] Z = [Null_Z] W = [Null_W]
+// X = [LBM Offset X] Y = [LBM Offset Y] Z = [Null_Z] W = [REF Check Depth Limit]
 #ifndef DI_X
     #define DI_X LB_Masking_Offset_X_D
 #endif
@@ -3136,7 +3146,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define DI_Z Null_Z
 #endif
 #ifndef DI_W
-	#define DI_W Null_W
+	#define DI_W REF_Check_Depth_Limit_D
 #endif
 
 //Special Toggles
