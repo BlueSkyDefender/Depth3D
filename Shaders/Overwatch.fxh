@@ -674,19 +674,25 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define RHW 1
 #elif (App == 0x60F43F45 ) //Resident Evil 7
 	#define DA_W 1
-	#define DA_Y 30.0
-	#define DA_Z 0.0002
-	#define DA_X 0.0625
+	#define DA_Y 19.0
+	#define DA_Z 0.0004
+	#define DA_X 0.0725
+    #define DF_Y 0.075
 	#define DB_Y 3
 	#define DE_X 1
-	#define DE_Y 0.5
-	#define DE_Z 0.375
+	#define DE_Y 0.375
+	#define DE_Z 0.400
+	#define DG_W 0.75 //Only Detect stuff past the screen.
+    #define DG_Z 0.0425//Min
+    #define DE_W 0.150 //Max	
 	#define BDF 1
-	#define DC_X 0.24
+	#define DC_X 0.25
 	#define DC_Y 0.1
-	#define DC_Z -0.024
-	#define DC_W -0.05
+	#define DC_Z -0.0625
+	#define DC_W -0.049
 	#define RHW 1
+	#define PEW 1
+	#define DAA 1
 #elif (App == 0x1B8B9F54 ) //TheEvilWithin
 	#define DA_Y 37.5
 	#define DA_Z 0.000125
@@ -778,16 +784,16 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DB_Y 3
 #elif (App == 0x5833F81C ) //Dying Light
 	#define DA_W 1
-	#define DF_Y 0.045
+	#define DF_Y 0.05
 	#define DA_X 0.05
-	#define DA_Y 17.5
-	#define DA_Z -0.5
+	//#define DA_Y 7.75
+	#define DA_Z 0.000125
 	#define DB_Y 4
 	#define NDW 1
 	#define PEW 1
     #define FOV 1
-    #define DG_Z 0.070 //Min
-    #define DE_W 0.100 //Max
+    #define DG_Z 0.040 //Min
+    #define DE_W 0.050 //Max
 	//#define DB_W 62
 #elif (App == 0x42C1A2B ) //CoD: WWII
 	#define DA_X 0.04

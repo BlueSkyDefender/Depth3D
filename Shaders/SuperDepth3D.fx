@@ -2,7 +2,7 @@
 ///**SuperDepth3D**///
 //----------------////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//* Depth Map Based 3D post-process shader v2.9.7
+//* Depth Map Based 3D post-process shader v2.9.8
 //* For Reshade 3.0+
 //* ---------------------------------
 //*
@@ -183,7 +183,7 @@
 #else
 	#define Mask_Cycle_Key Set_Key_Code_Here
 #endif
-//uniform float TEST < ui_type = "drag"; ui_min = 0; ui_max = 4; > = 1.0;
+//uniform float2 TEST < ui_type = "drag"; ui_min = 0; ui_max = 2; > = 1.0;
 //Divergence & Convergence//
 uniform float Divergence <
 	ui_type = "drag";
@@ -1071,7 +1071,7 @@ float HUD_Mask(float2 texcoord )
 #endif
 /////////////////////////////////////////////////////////Fade In and Out Toggle/////////////////////////////////////////////////////////////////////
 float Fade_in_out(float2 texcoord)
-{ float TCoRF[1], Trigger_Fade, AA = Fade_Time_Adjust, PStoredfade = tex2D(SamplerLumN,float2(0,0.125)).z;
+{ float TCoRF[1], Trigger_Fade, AA = Fade_Time_Adjust, PStoredfade = tex2D(SamplerLumN,float2(0,0.083)).z;
 	if(Eye_Fade_Reduction_n_Power.z == 0)
 		AA *= 0.5;
 	else if(Eye_Fade_Reduction_n_Power.z == 2)
@@ -1137,19 +1137,24 @@ float2 Fade(float2 texcoord) // Maybe make it float2 and pass the 2nd switch to 
 		}
 	}
 	float Trigger_Fade_A = Detect, Trigger_Fade_B = Detect_Out_of_Range, AA = (1-(ZPD_Boundary_n_Fade.y*2.))*1000, 
-		  PStoredfade_A = tex2D(SamplerLumN,float2(0, 0.375)).z, PStoredfade_B = tex2D(SamplerLumN,float2(0, 0.625)).z;
+		  PStoredfade_A = tex2D(SamplerLumN,float2(0, 0.250)).z, PStoredfade_B = tex2D(SamplerLumN,float2(0, 0.416)).z;
 	//Fade in toggle.
 	return float2( PStoredfade_A + (Trigger_Fade_A - PStoredfade_A) * (1.0 - exp(-frametime/AA)), PStoredfade_B + (Trigger_Fade_B - PStoredfade_B) * (1.0 - exp(-frametime/AA)) ); ///exp2 would be even slower
 }
+#define FadeSpeed_AW 0.3
+float AltWeapon_Fade()
+{
+	float  ExAd = (1-(FadeSpeed_AW * 2.0))*1000, Current =  min(0.75f,smoothstep(0,0.25f,PrepDepth(0.5f)[0][0])), Past = tex2D(SamplerLumN,float2(0,0.750)).z;
+	return Past + (Current - Past) * (1.0 - exp(-frametime/ExAd));
+}
 //////////////////////////////////////////////////////////Depth Map Alterations/////////////////////////////////////////////////////////////////////
-
 float4 DepthMap(in float4 position : SV_Position,in float2 texcoord : TEXCOORD) : SV_Target
 {
 	float4 DM = float4(PrepDepth(texcoord)[0][0],PrepDepth(texcoord)[0][1],PrepDepth(texcoord)[0][2],PrepDepth(texcoord)[1][1]);
-	float R = DM.x, G = DM.y, B = DM.z, Auto_Scale =  WZPD_and_WND.y > 0.0 ? smoothstep(0,1,PrepDepth(0.5f)[0][0]) : 1;
+	float R = DM.x, G = DM.y, B = DM.z, Auto_Scale =  WZPD_and_WND.y > 0.0 ? tex2D(SamplerLumN,float2(0,0.750)).z : 1;
 
 	//Fade Storage
-	float ScaleND = lerp(R,1,smoothstep(min(-WZPD_and_WND.y,-WZPD_and_WND.z * Auto_Scale),1,R));
+	float ScaleND = saturate(lerp(R,1.0,smoothstep(min(-WZPD_and_WND.y,-WZPD_and_WND.z * Auto_Scale),1.0,R)));
 
 	if (WZPD_and_WND.y > 0)
 		R = lerp(ScaleND,R,smoothstep(0,0.25,ScaleND));
@@ -1209,7 +1214,7 @@ float2 Conv(float D,float2 texcoord)
 		if(Auto_Balance_Ex > 0 )
 			ZP = saturate(ALC);
 	#endif
-		float DOoR = smoothstep(0,1,tex2D(SamplerLumN,float2(0, 0.625)).z), ZDP_Array[11] = { 0.0, 0.0125, 0.025, 0.0375, 0.04375, 0.05, 0.0625, 0.075, 0.0875, 0.09375, 0.1};
+		float DOoR = smoothstep(0,1,tex2D(SamplerLumN,float2(0, 0.416)).z), ZDP_Array[11] = { 0.0, 0.0125, 0.025, 0.0375, 0.04375, 0.05, 0.0625, 0.075, 0.0875, 0.09375, 0.1};
 		
 		if(REF || RE_Fix)
 		{
@@ -1219,7 +1224,7 @@ float2 Conv(float D,float2 texcoord)
 				ZPD_Boundary = lerp(ZPD_Boundary,ZDP_Array[REF],DOoR);
 		}
 
-		Z *= lerp( 1, ZPD_Boundary, smoothstep(0,1,tex2D(SamplerLumN,float2(0, 0.375)).z));
+		Z *= lerp( 1, ZPD_Boundary, smoothstep(0,1,tex2D(SamplerLumN,float2(0, 0.250)).z));
 		float Convergence = 1 - Z / D;
 		if (ZPD_Separation.x == 0)
 			ZP = 1;
@@ -1328,8 +1333,12 @@ float2 DB( float2 texcoord)
 #define Depth_Edge_Mask 0 //WIP
 ////////////////////////////////////////////////////Depth & Special Depth Triggers//////////////////////////////////////////////////////////////////
 void zBuffer(in float4 position : SV_Position, in float2 texcoord : TEXCOORD, out float2 Point_Out : SV_Target0 , out float Linear_Out : SV_Target1)
-{	
+{
 	float2 Set_Depth = DB( texcoord.xy ).xy;
+
+	if(1-texcoord.x < pix.x * 2 && 1-texcoord.y < pix.y * 2)
+		Set_Depth.y = AltWeapon_Fade();
+		
 	Point_Out = Set_Depth.xy; 
 	Linear_Out = Set_Depth.x;	
 }
@@ -1734,7 +1743,7 @@ float3 PS_calcLR(float2 texcoord)
 	
 	float DepthBlur, Alinement_Depth = tex2Dlod(SamplerzBufferN_P,float4(TexCoords,0,0)).x, Depth = Alinement_Depth;
 	const float DBPower = 1.0, Con = 11, weight[11] = { 0.0,0.010,-0.010,0.020,-0.020,0.030,-0.030,0.040,-0.040,0.050,-0.050 };
-	if(Alinement_View)
+	if(BD_Options == 2 || Alinement_View)
 	{
 		float2 dir = 0.5 - TexCoords; 
 		[loop]
@@ -1766,11 +1775,13 @@ float4 Average_Luminance(float4 position : SV_Position, float2 texcoord : TEXCOO
 
 	float Average_Lum_ZPD = PrepDepth(float2(ABEA.x + texcoord.x * ABEA.y, ABEA.z + texcoord.y * ABEA.w))[0][0], Average_Lum_Bottom = PrepDepth( texcoord )[0][0];
 
-	int Num_of_Values = 4; //4 total array values that map to the textures width.
-	float Storage__Array[4] = { tex2D(SamplerDMN,0).x, // 0.125
-                                tex2D(SamplerDMN,1).x, // 0.375
-                                tex2D(SamplerDMN,int2(0,1)).x,//0.625
-                                0.0};//0.875
+	const int Num_of_Values = 6; //6 total array values that map to the textures width.
+	float Storage__Array[Num_of_Values] = { tex2D(SamplerDMN,0).x, //0.125 //0.083
+                                tex2D(SamplerDMN,1).x,             //0.375 //0.250
+                                tex2D(SamplerDMN,int2(0,1)).x,     //0.625 //0.416
+                                1.0,                               //0.875 //0.583
+								tex2D(SamplerzBufferN_P,1).y,      //????? //0.750
+								1.0};                              //????? //0.916
 
 	//Set a avr size for the Number of lines needed in texture storage.
 	float Grid = floor(texcoord.y * BUFFER_HEIGHT * BUFFER_RCP_HEIGHT * Num_of_Values);
@@ -1823,7 +1834,7 @@ float3 Out(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Targe
 {
 	float2 TC = float2(texcoord.x,1-texcoord.y);
 	float Text_Timer = 25000, BT = smoothstep(0,1,sin(timer*(3.75/1000))), Size = 1.1, Depth3D, Read_Help, Supported, ET, ETC, ETTF, ETTC, SetFoV, FoV, Post, Effect, NoPro, NotCom, Mod, Needs, Net, Over, Set, AA, Emu, Not, No, Help, Fix, Need, State, SetAA, SetWP, Work;
-	float3 Color = PS_calcLR(texcoord).rgb; //Color = tex2D(SamplerLumN,texcoord).z;
+	float3 Color = PS_calcLR(texcoord).rgb; //Color = texcoord.y > TEST ? 1.0 : tex2D(SamplerLumN,texcoord).z;
 		  
 	if(RHW || NCW || NPW || NFM || PEW || DSW || OSW || DAA || NDW || WPW || FOV || EDW)
 		Text_Timer = 30000;

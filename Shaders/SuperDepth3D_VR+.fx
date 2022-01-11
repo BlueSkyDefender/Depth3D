@@ -2,7 +2,7 @@
 ///**SuperDepth3D_VR+**///
 //--------------------////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//* Depth Map Based 3D post-process shader v2.8.6
+//* Depth Map Based 3D post-process shader v2.8.8
 //* For Reshade 4.4+ I think...
 //* ---------------------------------
 //*
@@ -1172,7 +1172,7 @@ float HUD_Mask(float2 texcoord )
 #endif
 /////////////////////////////////////////////////////////Fade In and Out Toggle/////////////////////////////////////////////////////////////////////
 float Fade_in_out(float2 texcoord)
-{ float TCoRF[1], Trigger_Fade, AA = Fade_Time_Adjust, PStoredfade = tex2D(SamplerLumVR,float2(0,0.125)).z;
+{ float TCoRF[1], Trigger_Fade, AA = Fade_Time_Adjust, PStoredfade = tex2D(SamplerLumVR,float2(0,0.083)).z;
 	if(Eye_Fade_Reduction_n_Power.z == 0)
 		AA *= 0.5;
 	else if(Eye_Fade_Reduction_n_Power.z == 2)
@@ -1238,24 +1238,30 @@ float2 Fade(float2 texcoord) // Maybe make it float2 and pass the 2nd switch to 
 		}
 	}
 	float Trigger_Fade_A = Detect, Trigger_Fade_B = Detect_Out_of_Range, AA = (1-(ZPD_Boundary_n_Fade.y*2.))*1000, 
-		  PStoredfade_A = tex2D(SamplerLumVR,float2(0, 0.375)).z, PStoredfade_B = tex2D(SamplerLumVR,float2(0, 0.625)).z;
+		  PStoredfade_A = tex2D(SamplerLumVR,float2(0, 0.250)).z, PStoredfade_B = tex2D(SamplerLumVR,float2(0, 0.416)).z;
 	//Fade in toggle.
 	return float2( PStoredfade_A + (Trigger_Fade_A - PStoredfade_A) * (1.0 - exp(-frametime/AA)), PStoredfade_B + (Trigger_Fade_B - PStoredfade_B) * (1.0 - exp(-frametime/AA)) ); ///exp2 would be even slower
 }
 
 float Motion_Blinders(float2 texcoord)
-{   float Trigger_Fade = tex2Dlod(SamplerOtherVR,float4(texcoord,0,11)).x * lerp(0.0,25.0,Blinders), AA = (1-Fade_Time_Adjust)*1000, PStoredfade = tex2D(SamplerLumVR,float2(0,0.875)).z;
+{   float Trigger_Fade = tex2Dlod(SamplerOtherVR,float4(texcoord,0,11)).x * lerp(0.0,25.0,Blinders), AA = (1-Fade_Time_Adjust)*1000, PStoredfade = tex2D(SamplerLumVR,float2(0,0.583)).z;
 	return PStoredfade + (Trigger_Fade - PStoredfade) * (1.0 - exp2(-frametime/AA)); ///exp2 would be even slower
+}
+#define FadeSpeed_AW 0.3
+float AltWeapon_Fade()
+{
+	float  ExAd = (1-(FadeSpeed_AW * 2.0))*1000, Current =  min(0.75f,smoothstep(0,0.25f,PrepDepth(0.5f)[0][0])), Past = tex2D(SamplerLumVR,float2(0,0.750)).z;
+	return Past + (Current - Past) * (1.0 - exp(-frametime/ExAd));
 }
 //////////////////////////////////////////////////////////Depth Map Alterations/////////////////////////////////////////////////////////////////////
 
 float4 DepthMap(in float4 position : SV_Position,in float2 texcoord : TEXCOORD) : SV_Target
 {
 	float4 DM = float4(PrepDepth(texcoord)[0][0],PrepDepth(texcoord)[0][1],PrepDepth(texcoord)[0][2],PrepDepth(texcoord)[1][1]);
-	float R = DM.x, G = DM.y, B = DM.z, Auto_Scale =  WZPD_and_WND.y > 0.0 ? smoothstep(0,1,PrepDepth(0.5f)[0][0]) : 1;
+	float R = DM.x, G = DM.y, B = DM.z, Auto_Scale =  WZPD_and_WND.y > 0.0 ? tex2D(SamplerLumVR,float2(0,0.750)).z : 1;
 
 	//Fade Storage
-	float ScaleND = lerp(R,1,smoothstep(min(-WZPD_and_WND.y,-WZPD_and_WND.z * Auto_Scale),1,R));
+	float ScaleND = saturate(lerp(R,1,smoothstep(min(-WZPD_and_WND.y,-WZPD_and_WND.z * Auto_Scale),1,R)));
 
 	if (WZPD_and_WND.y > 0)
 		R = lerp(ScaleND,R,smoothstep(0,0.25,ScaleND));
@@ -1316,7 +1322,7 @@ float2 Conv(float D,float2 texcoord)
 		if(Auto_Balance_Ex > 0 )
 			ZP = saturate(ALC);
 	#endif
-		float DOoR = smoothstep(0,1,tex2D(SamplerLumVR,float2(0, 0.625)).z), ZDP_Array[11] = { 0.0, 0.0125, 0.025, 0.0375, 0.04375, 0.05, 0.0625, 0.075, 0.0875, 0.09375, 0.1};
+		float DOoR = smoothstep(0,1,tex2D(SamplerLumVR,float2(0, 0.416)).z), ZDP_Array[11] = { 0.0, 0.0125, 0.025, 0.0375, 0.04375, 0.05, 0.0625, 0.075, 0.0875, 0.09375, 0.1};
 		
 		if(REF || RE_Fix)
 		{
@@ -1326,7 +1332,7 @@ float2 Conv(float D,float2 texcoord)
 				ZPD_Boundary = lerp(ZPD_Boundary,ZDP_Array[REF],DOoR);
 		}
 
-		Z *= lerp( 1, ZPD_Boundary, smoothstep(0,1,tex2D(SamplerLumVR,float2(0, 0.375)).z));
+		Z *= lerp( 1, ZPD_Boundary, smoothstep(0,1,tex2D(SamplerLumVR,float2(0, 0.250)).z));
 		float Convergence = 1 - Z / D;
 		if (ZPD_Separation.x == 0)
 			ZP = 1;
@@ -1402,6 +1408,10 @@ float2 DB( float2 texcoord)
 void zBuffer(in float4 position : SV_Position, in float2 texcoord : TEXCOORD, out float2 Point_Out : SV_Target0 , out float Linear_Out : SV_Target1)
 {	
 	float2 Set_Depth = DB( texcoord.xy ).xy;
+
+	if(1-texcoord.x < pix.x * 2 && 1-texcoord.y < pix.y * 2)
+		Set_Depth.y = AltWeapon_Fade();
+		
 	Point_Out = Set_Depth.xy; 
 	Linear_Out = Set_Depth.x;	
 }
@@ -1784,11 +1794,13 @@ void Average_Luminance(float4 position : SV_Position, float2 texcoord : TEXCOORD
 
 	float Average_Lum_ZPD = PrepDepth(float2(ABEA.x + texcoord.x * ABEA.y, ABEA.z + texcoord.y * ABEA.w))[0][0], Average_Lum_Bottom = PrepDepth( texcoord )[0][0];
 	// SamplerDMVR 0 is Weapon State storage and SamplerDMVR 1 is Boundy State storage	
-	int Num_of_Values = 4; //4 total array values that map to the textures width.
-	float Storage__Array[4] = { tex2D(SamplerDMVR,0).x, // 0.125
-                                tex2D(SamplerDMVR,1).x, // 0.375
-                                tex2D(SamplerDMVR,int2(0,1)).x,//0.625
-                                tex2D(SamplerDMVR,int2(1,0)).x};//0.875
+	const int Num_of_Values = 6; //6 total array values that map to the textures width.
+	float Storage__Array[Num_of_Values] = { tex2D(SamplerDMVR,0).x,        //0.083
+                                			tex2D(SamplerDMVR,1).x,        //0.250
+                               				tex2D(SamplerDMVR,int2(0,1)).x,//0.416
+                                			tex2D(SamplerDMVR,int2(1,0)).x,//0.583
+											tex2D(SamplerzBufferVR_P,1).y, //0.75
+											0.0};                          //0.916
 	//Set a avr size for the Number of lines needed in texture storage.
 	float Grid = floor(texcoord.y * BUFFER_HEIGHT * BUFFER_RCP_HEIGHT * Num_of_Values);	
 	
