@@ -51,8 +51,8 @@
 	static const float DG_X = 0.0, DG_Y = 0.0, DG_Z = 0.0, DG_W = 0.0;
 	// DH_X = [LBC Size Offset X] DH_Y = [LBC Size Offset Y] DH_Z = [LBC Pos Offset X] DH_W = [LBC Pos Offset X]
 	static const float DH_X = 1.0, DH_Y = 1.0, DH_Z = 0.0, DH_W = 0.0;
-	// DI_X = [LBM Offset X] DI_Y = [LBM Offset Y] DI_Z = [Null Z] DI_W = [REF Check Depth Limit]
-	static const float DI_X = 0.0, DI_Y = 0.0, DI_Z = 0.0, DI_W = 0.0;
+	// DI_X = [LBM Offset X] DI_Y = [LBM Offset Y] DI_Z = [Weapon Near Depth Trim] DI_W = [REF Check Depth Limit]
+	static const float DI_X = 0.0, DI_Y = 0.0, DI_Z = 0.25, DI_W = 0.0;		
 	// WSM = [Weapon Setting Mode]
 	#define OW_WP "WP Off\0Custom WP\0"
 	static const int WSM = 0;
@@ -155,6 +155,12 @@
 	#define DX9 1
 #else
 	#define DX9 0
+#endif
+//Flip Depth for OpenGL and Reshade 5.0 since older Profiles Need this.
+#if __RESHADE__ >= 50000 && __RENDERER__ >= 0x10000 && __RENDERER__ <= 0x20000
+	#define Flip_Opengl_Depth 1
+#else
+	#define Flip_Opengl_Depth 0
 #endif
 //Resolution Scaling because I can't tell your monitor size.
 #if (BUFFER_HEIGHT <= 720)
@@ -1135,8 +1141,9 @@ float2 WeaponDepth(float2 texcoord)
 }
 //3x2 and 2x3 not supported on older ReShade versions. I had to use 3x3. Old Values for 3x2
 float3x3 PrepDepth(float2 texcoord)//[0][0] = R | [0][1] = G | [1][0] = B //[1][1] = A | [2][0] = D | [2][1] = DM
-{
-	if (Depth_Map_Flip)
+{   int Flip_Depth = Flip_Opengl_Depth ? !Depth_Map_Flip : Depth_Map_Flip;
+
+	if (Flip_Depth)
 		texcoord.y =  1 - texcoord.y;
 	float4 DM = Depth(TC_SP(texcoord)).xxxx;
 	float R, G, B, A, WD = WeaponDepth(TC_SP(texcoord)).x, CoP = WeaponDepth(TC_SP(texcoord)).y, CutOFFCal = (CoP/DMA()) * 0.5; //Weapon Cutoff Calculation
@@ -1261,10 +1268,10 @@ float4 DepthMap(in float4 position : SV_Position,in float2 texcoord : TEXCOORD) 
 	float R = DM.x, G = DM.y, B = DM.z, Auto_Scale =  WZPD_and_WND.y > 0.0 ? tex2D(SamplerLumVR,float2(0,0.750)).z : 1;
 
 	//Fade Storage
-	float ScaleND = saturate(lerp(R,1,smoothstep(min(-WZPD_and_WND.y,-WZPD_and_WND.z * Auto_Scale),1,R)));
+	float ScaleND = saturate(lerp(R,1.0f,smoothstep(min(-WZPD_and_WND.y,-WZPD_and_WND.z * Auto_Scale),1.0f,R)));
 
 	if (WZPD_and_WND.y > 0)
-		R = lerp(ScaleND,R,smoothstep(0,0.25,ScaleND));
+		R = saturate(lerp(ScaleND,R,smoothstep(0,DI_Z,ScaleND)));
 
 	if(texcoord.x < pix.x * 2 && texcoord.y < pix.y * 2)//TL
 		R = Fade_in_out(texcoord);

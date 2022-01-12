@@ -1,7 +1,7 @@
 ////----------------------------------------//
 ///SuperDepth3D Overwatch Automation Shader///
 //----------------------------------------////
-// Version 2.2.7
+// Version 2.2.8
 //---------------------------------------OVERWATCH---------------------------------------//
 // If you are reading this stop. Go away and never look back. From this point on if you  //
 // still think it's is worth looking at this..... Then no one can save you or your soul. //
@@ -82,7 +82,7 @@ static const float LB_Depth_Pos_Offset_Y_D = 0.0;       //Letter Box Depth Posit
 static const int Auto_Letter_Box_Masking_D = 0;         // 0 | 1 | 2 : Off | Hoz | Vert                 | LBM                                                                               
 static const float LB_Masking_Offset_X_D = 1.0;         //LetterBox Masking Offset X                    | DI_X
 static const float LB_Masking_Offset_Y_D = 1.0;         //LetterBox Masking Offset Y                    | DI_Y
-static const float Null_Z = 0.0;                        //Null                                          | DI_Z
+static const float Weapon_Near_Depth_Trim_D = 0.25;     //Weapon Near Depth                     Trim    | DI_Z
 static const float REF_Check_Depth_Limit_D = 0.0;       //Resident Evil Fix Check Depth Limit           | DI_W
 
 //Special Toggles Defaults
@@ -296,6 +296,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 #elif (App == 0xF22A9C7D || App == 0x5416A79D ) //SOMA
 	#define DA_Y 23.125 //21.25 //25.0
 	#define DA_X 0.1025 //0.110 //0.095
+    #define DF_Y 0.056
 	#define DB_Y 5
 	#define BMT 1
 	#define DF_Z 0.15625
@@ -676,15 +677,16 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DA_W 1
 	#define DA_Y 19.0
 	#define DA_Z 0.0004
-	#define DA_X 0.0725
-    #define DF_Y 0.075
-	#define DB_Y 3
-	#define DE_X 1
+	#define DA_X 0.075
+    #define DF_Y 0.1
+	#define DB_Y 1
+	#define DE_X 2
 	#define DE_Y 0.375
 	#define DE_Z 0.400
-	#define DG_W 0.75 //Only Detect stuff past the screen.
+	#define DG_W 0.725 //Only Detect stuff past the screen.
     #define DG_Z 0.0425//Min
-    #define DE_W 0.150 //Max	
+    #define DE_W 0.150 //Max
+    #define DI_Z 0.180 //Trim	
 	#define BDF 1
 	#define DC_X 0.25
 	#define DC_Y 0.1
@@ -3027,6 +3029,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 #else
 	#define NPW 1 //No Profile
 #endif
+
 //Change Output
 //#ifndef checks whether the given token has been #defined earlier in the file or in an included file
 // X = [ZPD] Y = [Depth Adjust] Z = [Offset] W = [Depth Linearization]
@@ -3141,7 +3144,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DH_W LB_Depth_Pos_Offset_Y_D
 #endif
 
-// X = [LBM Offset X] Y = [LBM Offset Y] Z = [Null_Z] W = [REF Check Depth Limit]
+// X = [LBM Offset X] Y = [LBM Offset Y] Z = [Weapon Near Depth Trim] W = [REF Check Depth Limit]
 #ifndef DI_X
     #define DI_X LB_Masking_Offset_X_D
 #endif
@@ -3149,7 +3152,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define DI_Y LB_Masking_Offset_Y_D
 #endif
 #ifndef DI_Z
-    #define DI_Z Null_Z
+    #define DI_Z Weapon_Near_Depth_Trim_D
 #endif
 #ifndef DI_W
 	#define DI_W REF_Check_Depth_Limit_D
