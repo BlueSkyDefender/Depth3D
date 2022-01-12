@@ -1681,7 +1681,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 #elif (App == 0x3604DCE6 ) //Remnant: From the Ashes
 	#define DA_W 1
 	#define DA_X 0.07
-	//#define DF_Y 0.038
+	#define DF_Y 0.032
 	#define DA_Y 16.25
 	#define DB_Y 2
 	#define DE_X 2
