@@ -296,7 +296,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 #elif (App == 0xF22A9C7D || App == 0x5416A79D ) //SOMA
 	#define DA_Y 23.125 //21.25 //25.0
 	#define DA_X 0.1025 //0.110 //0.095
-    #define DF_Y 0.056
+    #define DF_Y 0.025
 	#define DB_Y 5
 	#define BMT 1
 	#define DF_Z 0.15625
