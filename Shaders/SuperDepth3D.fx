@@ -2,7 +2,7 @@
 ///**SuperDepth3D**///
 //----------------////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//* Depth Map Based 3D post-process shader v2.9.8
+//* Depth Map Based 3D post-process shader v2.9.9
 //* For Reshade 3.0+
 //* ---------------------------------
 //*
@@ -190,7 +190,7 @@
 #else
 	#define Mask_Cycle_Key Set_Key_Code_Here
 #endif
-//uniform float2 TEST < ui_type = "drag"; ui_min = 0; ui_max = 2; > = 1.0;
+//uniform float TEST < ui_type = "drag"; ui_min = 0; ui_max = 2; > = 1.0;
 //Divergence & Convergence//
 uniform float Divergence <
 	ui_type = "drag";
@@ -1269,7 +1269,7 @@ float2 DB( float2 texcoord)
 	DM.z = DM.y;
 	DM.y += lerp(DM.y,DM.x,DM.w);
 	DM.y *= 0.5f;
-	DM.y = lerp(DM.y,DM.z,0.6875f);
+	DM.y = lerp(DM.y,DM.z,0.9375f);
 	#if Compatibility_DD
 	if (Depth_Detection == 1 || Depth_Detection == 2)
 	{ //Check Depth at 3 Point D_A Top_Center / Bottom_Center

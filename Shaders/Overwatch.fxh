@@ -1,7 +1,7 @@
 ////----------------------------------------//
 ///SuperDepth3D Overwatch Automation Shader///
 //----------------------------------------////
-// Version 2.2.8
+// Version 2.2.9
 //---------------------------------------OVERWATCH---------------------------------------//
 // If you are reading this stop. Go away and never look back. From this point on if you  //
 // still think it's is worth looking at this..... Then no one can save you or your soul. //
@@ -502,12 +502,22 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DA_Y 75.0
 	#define DA_Z 0.021
 	#define REF 1
-#elif (App == 0xAAA18268 ) //Hellblade
-	#define DB_Y 1
-	#define DA_Y 25.0
-	#define DA_W 1
-	#define DA_Z 0.0005
-	#define DB_Z 0.25 //Under Review
+#elif (App == 0xAAA18268 ) //Hellblade **
+    #define DA_W 1
+    #define DA_Y 23.5
+    #define DA_X 0.050
+    #define DF_Y 0.075
+    #define DB_Y 3
+    #define DE_X 1 
+    #define DE_Y 0.375
+    #define DE_Z 0.300
+    #define DG_W 0.375 //Detection was moved back.
+    #define DG_Z 0.050 //Min  New system from RE7 was used
+    #define DI_Z 0.0625 //Trim New system from RE7 was used
+    #define BMT 1      //Disables Auto ZPD
+	#define DF_Z 0.0625//Sets Manual Mode power.
+	#define PEW 1
+	#define DAA 1
 #elif (App == 0x287BBA4C || App == 0x59BFE7AC ) //Grim Dawn 64bit/32bit
 	#define DB_Y 2
 	#define DA_Y 125.0

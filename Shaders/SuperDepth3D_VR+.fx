@@ -2,7 +2,7 @@
 ///**SuperDepth3D_VR+**///
 //--------------------////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//* Depth Map Based 3D post-process shader v2.8.8
+//* Depth Map Based 3D post-process shader v2.8.9
 //* For Reshade 4.4+ I think...
 //* ---------------------------------
 //*
@@ -1378,7 +1378,7 @@ float2 DB( float2 texcoord)
 	DM.z = DM.y;
 	DM.y += lerp(DM.y,DM.x,DM.w);
 	DM.y *= 0.5f;
-	DM.y = lerp(DM.y,DM.z,0.6875f);
+	DM.y = lerp(DM.y,DM.z,0.9375f);
 
 	if (Depth_Detection == 1)
 	{
