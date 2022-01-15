@@ -294,18 +294,18 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define NFM 1
 	#define RHW 1
 #elif (App == 0xF22A9C7D || App == 0x5416A79D ) //SOMA
-	#define DA_Y 23.125 //21.25 //25.0
-	#define DA_X 0.1025 //0.110 //0.095
-    #define DF_Y 0.025
+	#define DA_Y 35.00 //23.125 //21.25 //25.0
+	#define DA_X 0.075 //0.1025 //0.110 //0.095
+    #define DF_Y 0.055
 	#define DB_Y 5
 	#define BMT 1
 	#define DF_Z 0.15625
-	#define DA_Z -0.00025
+	#define DA_Z -0.000125
 	#define DG_W 0.1
 	#define DB_W 38
 	#define DG_Z 0.341
 	#define DE_X 4
-	#define DE_Y 0.5
+	//#define DE_Y 0.375
 	#define DE_Z 0.375
 	#define DF_X 0.25
 	#define FOV 1
