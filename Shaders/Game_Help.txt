@@ -4,14 +4,14 @@ ________________________________________________________________________________
 .................................................................................................................................
 Read Help Section
 =================================================================================================================================
-{35MM} [Reshade: 4.0]
+{35MM} [Reshade 4.0]
 Depth Buffer may hang for a second if you move your view too fast. Hope ReShade 4.4 fixes this.
 
-{.Hack//G.U.} [Reshade: 3.0.8]
+{.Hack//G.U.} [Reshade 3.0.8]
 Once you install Reshade, install this fix that allows for depth buffer access. This fix uses 3DMigoto to disable a shader that was blocking acess to the depth buffer.
 http://www.mediafire.com/file/d5ep3qlsnbbbmvl/dotHack%20GU%20fix%20for%20Depth3D.zip
 
-{A Plague Tale: Innocence} [Reshade: 4.7.0]
+{A Plague Tale: Innocence} [Reshade 4.7.0]
 So we are going to remove some post-process effects that affect the 3D Image in a negative way.
 
 Befor everything, please launch the game and set your settings then exit the game, then locate ENGINESETTINGS below.
@@ -33,7 +33,7 @@ You can also change a few other things like Bloom and Vignette, but it's up to y
 
 Save the file. You may want to set the permission to read-only.
 
-{Alan Wake} [Reshade: 4.7.0]
+{Alan Wake} [Reshade 4.7.0]
 Install game and before you launch it add -noblur to your launch options.
 Set you settings in game and notice the locked MSAA. Just leave it at 2x. Save your settings and close the game.
 
@@ -42,7 +42,7 @@ I suggest you use alpha mode in SuperDepth3D for this game and Alan Wake's Ameri
 You will not need to do this for the sequel. Make sure you turn off this injector for any other game. 
 Please note most AV's will detect this as a threat.
 
-{Alien Isolation} [Reshade: 4.7.0]
+{Alien Isolation} [Reshade 4.7.0]
 The shader corrects for the Distortion that the game causes.
 
 This can be dissabled if you use the https://github.com/aliasIsolation/aliasIsolation/releases if you set CA to 0.000
@@ -60,18 +60,18 @@ or
 That removes only the Sun Flare.
 https://www.nexusmods.com/alienisolation/mods/1
 
-{Amnesia: Games} [Reshade: 4.1.0]
+{Amnesia: Games} [Reshade 4.1.0]
 Issue with ReShade 4.0.0+ If you install ReShade as opengl32.dll you have to rename it to dxgi.dll in the game folder. Windows 10 Issue it seems.
 
 Also Make sure to disable the insanity post process effect. It messes with the 3D in the game.
 
-{Bard's Tale 4} [Reshade: 4.7.0]
+{Bard's Tale 4} [Reshade 4.7.0]
 Annoying issue if you read any notice in game you have to set your Depth Adjust ammount from 20 to 200-250 (I use 225). If this issue was not there this would had been an
 easy game to play. It seems to get stuck like this so not bad bad..... only one time bad :D
 
 Anyways I advise you to set it back to 20 if you're going to turn off the game and set it to 200-250 once you encounter a Notice in game. Well, please enjoy.
 
-{Battlefield One} [Reshade: 4.0.2]
+{Battlefield One} [Reshade 4.0.2]
 Added alternate settings mode to my shader. This can be done with the newly added Alternate Depth Buffer Adjust Toggle PREPROCESSOR FUNCTIONS. This is in Shader.
 Ex. FPS mode will be around 7.50. But, For Tank mode you want to use around 20.0.
 
@@ -81,16 +81,16 @@ If you run AMD and have a 2nd GPU in your system like an Nvidia Card. Reshade wi
 {BattleTech}
 Read the section for Dealing with mouse pointer issues, at the top. 
 
-{Batman Arkham Asylum} [Reshade: 4.4.0]
+{Batman Arkham Asylum} [Reshade 4.4.0]
 In older versions of Reshade you may encounter Depth Flickering.
 
 {Batman Arkham Knight}
 Depth Buffer seems to drop off in some locations. As reported, this is a Reshade issue not a SuperDepth3D Issue.
 
-{Dementium 2} [Reshade: 4.4.0]
+{Dementium 2} [Reshade 4.4.0]
 You have to mess with the Depth Buffer options to get it to work. Not perfect. Kind of strange not all Reshade filters work.
 
-{Black Mesa} [Reshade: 3.2.1]
+{Black Mesa} [Reshade 3.2.1]
 So in newer versions of Reshade 4.4.0+ you need to set in-game MSAA to on. To do this, open the console and enter the command:
 mat_antialias 2
 
@@ -107,7 +107,7 @@ In the game settings you would need to dissable Real Time Reflections and use th
 
 https://reshade.me/forum/releases/3744-3-1?start=200#26443
 
-{Blood: Fresh Suppy} [Reshade: 4.5.3]
+{Blood: Fresh Suppy} [Reshade 4.5.3]
 If you're going to play this game make sure you do in Opengl32 or Vulkan since they offer better depth buffers than DX11.
 
 I would just use Opengl32 for MSAA.
@@ -132,7 +132,7 @@ To help fix the depth buffer with lighting & shadows use Console command r_pr_ma
 This will limit the amount of lights processed per surface. Seems to be a hard bug to fix in eduke32.
 So I don't think this will get fixed anytime soon.
 
-{Blood 2} [Reshade: 4.0.2]
+{Blood 2} [Reshade 4.0.2]
 You need DGVooDoo2 installed with the following settings and information:
 First Start DGVoodoo "2.62.3" Control Panel.
 
@@ -181,7 +181,7 @@ You will lose a lot of texture detail. I do not recommend playing like this.
 
 Now For Mods you will have click on the Bat files provided.
 
-{BuildGDX}  [Reshade: 4.7.0, note: used Xenos to inject]
+{BuildGDX}  [Reshade 4.7.0, note: used Xenos to inject]
 Download https://github.com/DarthTon/Xenos/releases and the latest version of Reshade.
 
 Create a folder and extract Xenos 2.3.2. You only really need the Xenos.exe 64 bit program and also extract Reshade 64bit ReShade64.dll into the same folder
@@ -195,7 +195,7 @@ Now click Inject, then launch your game like normal.
 
 BloodGDX... Set Depth Offset to 0.990 ot 1.000. You can also increase Seperation from 0.005 to 0.105
 
-{Call of Duty: Modern Warfare 2019} [Reshade: 4.4.2]
+{Call of Duty: Modern Warfare 2019} [Reshade 4.4.2]
 First of all please set the game's Shadow Map Resolution to Normal. Also, make sure you turn off DOF and Motion Blur.
 
 Next, follow this YouTube video to set Reshade Depth Buffer Settings.
@@ -237,7 +237,7 @@ Render Resolution Native.
 Turn off AA.
 Don't use in game Supersampling
 
-{Chronicle of Riddick Assault on Dark Athena} - Used ReShade 4.9.1 
+{Chronicle of Riddick Assault on Dark Athena} [Reshade 4.9.1]
 So this game causes strange issues in many shaders. Also has low perf even with my 1080ti. Have no Idea whats going on.
 
 To get the depth buffer you have to enable MSAA 2X or more. Then select the proper Depth in the API tab. 
@@ -255,11 +255,11 @@ Oh wait One more thing it seems like Threaded optimization needs to be turned of
 Man this game needs a ReMaster and redone in a diffrent API.......
 
 
-{Cloud Punk} - Used ReShade 4.9
+{Cloud Punk} [Reshade 4.9]
 Once you install Reshade. Install this fix that allows for depth buffer access. This fix uses 3DMigoto to disable a shader that was blocking acess to the depth buffer.
 http://www.mediafire.com/file/25qdu9lurxfucg2/Cloudpunk_fix_for_Depth3D.zip
 
-{Conarium} - ReShade 4.9.1
+{Conarium} [Reshade 4.9.1]
 Game runs with issues when mental Distortion effects are active. Can't remove them. Other then this it's ok......
 
 To Disable PostProcessing effects in TSoRF
@@ -286,7 +286,7 @@ Also Dissable FSAA (FSAA OFF) or was it turn it on I forget.
 This is bug in game that drops fps in to the single diglets...... you need a pokemon that strong againts ground types.
 I kid I kid I don't know how to fix this issue try pc gaming wiki when fps drops in the the single digits.
 
-{Crysis 2} - ReShade 4.9.1
+{Crysis 2} [Reshade 4.9.1]
 
 Go to your
 
@@ -296,7 +296,7 @@ look for the system.cfg then drop the autoexec.cfg next to it and you are done.
 
 https://www.mediafire.com/file/fcchg1270vccfwz/Crysis_2.zip/file
 
-{Dead or Alive 6} - ReShade 4.9.1
+{Dead or Alive 6} [Reshade 4.9.1]
 To use ReShade in this game you need to use a Injector that was written for UWP Games.
 
 First Download this and then create a folder and drop the following files into the folder. 
@@ -330,7 +330,7 @@ Now open the DPfix095.zip Directly from http://blog.metaclassofnil.com/wp-conten
 
 Install the contents of that folder in to Deadly Premonition Folder where you changed Reshade's d3d9.dll to dxgi.dll. Edit the DPfix.ini too what ever REZ you want. Then start the game.
 
-{Destroy All Humans!} - ReShade 4.7.0
+{Destroy All Humans!} [Reshade 4.7.0]
 Game runs fine issues with DoF and/or other effects.
 
 To Disable Depth of Field in DAH!
@@ -355,7 +355,7 @@ https://community.pcgamingwiki.com/files/file/1948-destroy-all-humans-fov-change
 
 I also recommend you use View Mode set to Alpha. Because of all the Foliage.
 
-{Devil May Cry 5} - ReShade 4.7.0
+{Devil May Cry 5} [Reshade 4.7.0]
 Some Issues in game since you can't use most, fixes with out running in "DX12." There is not much you can do.
 
 Go to <path-to-game>
@@ -376,10 +376,10 @@ Issues with AMD hardware. No depth buffer.
 
 If I am wiling to gues it's because it defaults from Opengl 4.6.0 to 4.3.0 under AMD. Guess you should use a Nv Card for this game. If you know of a way to fix this tell me.
 
-{Dragon Ball FightersZ} - Use ReShade 3.1.2
+{Dragon Ball FightersZ} [Reshade 3.1.2]
 Online 3D works aswell. You need to use ReShade 3.1.2 That is whitelisted under EAC.
 
-{Duke Nukem 3D} - Use ReShade ?.?.?
+{Duke Nukem 3D}
 So getting eduke32 working with Polymer HRP and Duke Nukem 3D.
 
 Prerequisites: Duke Nukem 3D: Atomic Edition or Duke Nukem 3D: 20th Anniversary World Tour
@@ -449,7 +449,7 @@ DepthBufferClearingNumber=3
 {Dungeon Nightmares II}
 Highest Setting is "Good" Any thing Lower will work and thing above will not work. Make sure to set your res to native.
 
-{Dusk/Dusk World} - Reshade 3.4.0
+{Dusk/Dusk World} [Reshade 3.4.0]
 In Reshade you need to set the Depth Buffer D32FS8 and Copy Before Clearing. Select Option 4 for World space. Keep in mind your weapond will not be Drawn in this Depth Buffer.
 The weapon Depth Buffer can be found on Option 1. But, can't be merged.....
 
@@ -457,7 +457,7 @@ The weapon Depth Buffer can be found on Option 1. But, can't be merged.....
 {Emily Wants To Play}
 Install reshade in to SteamLibrary\steamapps\common\Emily Wants To Play\Engine\Binaries\Win64
 
-{F.E.A.R} - Use ReShase 4.9.1
+{F.E.A.R} [Reshade 4.9.1]
 Low frame rate issue was noticed use 
 
 Download the DirectInput FPS Fix. https://community.pcgamingwiki.com/files/file/789-directinput-fps-fix/
@@ -468,7 +468,7 @@ For the expansion packs extract it into <path-to-game>\FEARXP and <path-to-game>
 
 For more information go to https://www.pcgamingwiki.com/wiki/F.E.A.R.#
 
-{Fallout 4} - Use ReShase 4.7.0
+{Fallout 4} [Reshade 4.7.0]
 
 Major Note: Copy Depth Buffer Before Clearing needs to be set when you enter the Mech. This also needs to be dissabled when you exit it. Delay Frame don't help here because when
 inside the Mech the Depth and BackBuffer are in sync. So best to just switch it in game. I also can't tell if your in the Mech or not.
@@ -508,32 +508,33 @@ Now In games set FOV to something like "fov 90 95" You need to do this each time
 A other problem is the Weapon Hand Size it's so big..... I recommend your favorite Lowered Weapons Mod. I use
 https://www.nexusmods.com/fallout4/mods/20093
 
-{FarCry 2} - ReShade 4.5.2
+{FarCry 2} [Reshade 4.5.2]
 Use DX9 for weapon in game. Only think I noticed wrong was the guys hair is missing from the DB. 
 You have to use DX9 because it draws the weapon correctly so you can have weapon hand depth.
 
-{FarCry 3} - ReShade 4.5.3
+{FarCry 3} [Reshade 4.5.3]
 Ingame setting MSAA 2X should be on to enable Depth Map in DX11. But, Don't use DX11.
 Use DX9 because the depth buffer more stable.
 
 In DX9 you may want to use MXAO and SMAA due to the lower quality AO and Alpha AA.
 But, Really use DX9.
 
-{FarCry 5} - ReShade 4.4.2 - Because of EAC
+{FarCry 5} [Reshade 4.4.2]
+Reshade version chosen due to EAC
 Other things to note you can set FPS Focus Depth if you have issues with aiming with your gun. 
 TAA causes shimmering.
 
-{Final Fantasy XV Windows Edition} - ReShade 4.6.1
+{Final Fantasy XV Windows Edition} [Reshade 4.6.1]
 Problems with getting to the ReShade console.
 
 You can use Ctrl + Tab then tab to the box you want and hit Spacebar. Then use arrow keys to get to the sharder you want and hit enter. Then do this again for the settings.....
 
 You can also run the game in window mode then alt tab with the reshade menu open. Then Click out side then click back in to the game on top of the ReShade menu. Then close it and switch the game back to Fullscreen mode.
 
-{Gold Source: Games} - ReShade 4.5.2
+{Gold Source: Games} [Reshade 4.5.2]
 When you install the opengl32.dll right click it and set it to read only.
 
-{Gothic 1 & 2 AKA Gold} - ReShade 5.0.0 WIP
+{Gothic 1 & 2 AKA Gold} [Reshade 5.0.0-preview]
 Looks like the Steam versions came pre modded. But, you still need a external mod to convert DX8 to DX11 Links are below.
 
 For
@@ -557,7 +558,7 @@ https://github.com/kirides/GD3D11/releases/tag/v17.7-dev20
 For this game I say you should use the FlashBack shader. Since it gives a better sence of Depth for this type of game. You also need to select the right Depth Buffer so that it does
 not go blank when you interact with people. This should be under the DX11 Tab in the newest ReShade. 
 
-{GTA 5} - ReShade 4.5.4+
+{GTA 5} [Reshade ReShade 4.5.4+]
 Rename the dxgi.dll too d3d11.dll for DX11 mode or just install it as d3d9.dll.
 If the game is crashing in fullscreen. Switch over to Window or Borderless window mode.
 
@@ -573,7 +574,7 @@ Can't see out windows issue. You have to switch the depth buffer to something el
 
 If CA issue really bothers you and you don't want to install any mods you can try the Legacy_Mode in shader set it from 0 to 1
 
-{Half-Life 2} - ReShade 4.5.4 Issues
+{Half-Life 2} [Reshade 4.5.4]
 So In this game The newer reshades seems to have more issues in this game. I hear 4.4.0 "seems" to be better in this game. But, Even with the extra options for source games it drops off in some points.
 https://cdn.discordapp.com/attachments/305472403977404416/693604937275408524/unknown.png - 4.4.0
 https://cdn.discordapp.com/attachments/305472403977404416/693652674427486248/unknown.png - 4.6.0
@@ -591,11 +592,11 @@ DGVooDoo2 not working nor DXVK.
 {Hard Reset}
 Must Enable FSAA for depth buffer access.
 
-{Hat in Time} - ReShade 4.5.3
+{Hat in Time} [Reshade 4.5.3]
 I suggest leaving MLAA and dissable DOF and any other blurs and distortions in game settings. It uses DX9 and make sure you set reshade depth buffer to copy. If you don't you will be
 stuck with a low resolution depth buffer. 
 
-{Hedon} - ReShade None
+{Hedon}
 This game has build in 3D Options.
 
 GZ Does not draw Sprites in the Depth Buffer So you have to use in game 3D options.
@@ -623,18 +624,20 @@ The depth buffer should stop flickering in ReShade 4.8.3
 
 Hexen 2 FTEQW 64 should work already.
 
-{HomeFront the Revolution} - Thank you zig11727
+{HomeFront the Revolution} 
+- Thank you zig11727
 Path to Install E:\Steam\SteamApps\common\Homefront_The_Revolution\Bin64
 Works Don't know the settings.
 
-{Hitman: Absolution} - Used Reshade 3.0.8
+{Hitman: Absolution} [Reshade 3.0.8]
 Change the Reflections to Medium. Any higher then this will mess with the Depth Map. Seems like a in game bug.
 
-{Hitman 2016} - Thank you zig11727
+{Hitman 2016} 
+- Thank you zig11727
 Install to \Steam\SteamApps\common\Hitman\Retail
 Works Don't know the settings.
 
-{Immortal Redneck} - Used Reshade 4.0.2
+{Immortal Redneck} [Reshade 4.0.2]
 If you have depth buffer detection problems you can use the setting below as a starting point.
 [DX11_BUFFER_DETECTION]
 DepthBufferRetrievalMode=1
@@ -673,7 +676,7 @@ Issues with depth buffer when Black Bars are on screen.
 Depth Buffer may not show in main menu.
 You need to set your Depth Buffer to preserve in th DX 11 tab.
 
-{Life is Strange} - Used ReShade 4.7.0
+{Life is Strange} [Reshade 4.7.0]
 
 Disable DoF and CA
 
@@ -693,37 +696,40 @@ Change the "True" to "False" and save.
 {Little Nightmares} - Used ReShade 4.3
 In setting set Post Processing to low ore Med.
 
-{Lost Planet: Extreme Colonies} - Used ReShade 4.6.1 and DgVoodoo2 for Dx9
+{Lost Planet: Extreme Colonies} [Reshade 4.6.1] 
+Used DgVoodoo2 for Dx9
 Make sure to launch your game and set it up with ReShade dxgi.dll and use DgVoodoo2 to convert DX9 to DX11.
 This is done so you have less problems when running this game with ReShade.
 
-{Lost Planet 3} - Used ReShade 4.6.1
+{Lost Planet 3} [Reshade 4.6.1]
 May need to alt-tab to get a better depth buffer at native rez. Also make sure you use Copy Depth funtion under the DX9 Tab
 
 {LuciusII}
 Set Globla Settings to Medium. Turn off FXAA Every thing else can be maxed out.
 
-{LUST for Darkness} - Used Reshade 4.3
+{LUST for Darkness} [Reshade 4.3]
 You need to set DX11 Depth Texture Formant to D32FS8.
 Also select the first Buffer.
 
-{Mafia II Definitive Edition} - Used Reshade 4.6.1+
+{Mafia II Definitive Edition} [Reshade 4.6.1+]
 A Delay Frame option was added to the shader as work around for the bluring issue casued by the delayed Depth buffer. Expect that one frame of latency.
 This should be around 16.6ms at 60fps and 8.325ms at 120fps good thing this game can run really well on modern hardware.
 
 You need to enable "Copy Depth Buffer Before Clear Operation," in side of ReShade to have a working depth buffer.
 
-{Mafia III} - Thank you zig11727
+{Mafia III} 
+- Thank you zig11727
 Path to install \Steam\SteamApps\common\Mafia III
 
 {Magicka 2} 
 Rename the opengl.dll to dxgi.dll
 Also Use a Controller for game play.
 
-{Mass Effect Andromeda} - Thank you zig11727
+{Mass Effect Andromeda} 
+- Thank you zig11727
 Install path \Program Files\Origin\Mass Effect Andromeda
 
-{Master Chief Collection: Halo} - 4.4.0
+{Master Chief Collection: Halo} [Reshade 4.4.0]
 Halo: Reach
 Heavy issues with Weapon Hand. Please contact Devs to see if they can fix it. [https://www.halowaypoint.com/en-us/forums/85d779d52cfd46918b4f8b638f2e3c7b/topics/weapon-hand-issue-with-mcc-on-pc-with-reshade/4f0e0b7b-06b6-44b9-959e-0614586ffc64/posts]
 [https://youtu.be/d6Ez7b8iabA]
@@ -735,7 +741,7 @@ Then pick the correct buffer in your case.
 You Need to set Weapon Profile to the Current Game's Name
 You can Clear Near Depth and set it to 0.0.
 
-{MegaMan 2.5D Now in 3D} - ReShade 4.5.0 Xenos_2.3.2 Injector
+{MegaMan 2.5D Now in 3D} [Reshade 4.5.0, Xenos_2.3.2 Injector]
 Install game and make sure in launches in fullscreen and native resolution.
 
 Download https://github.com/DarthTon/Xenos/releases and the latest version of reshade.
@@ -770,7 +776,7 @@ Borderless Full Screen will not work Window mode will not Work.
 So if you want to Play at a lower resolution, then set your windows resolution lower then run the game in full screen and set your scaling to 100%. 
 Anything Lower or Higher then 100% will not work.
 
-{Minecraft} - Used Reshade 4.3/4.4 with Network Check disabled. 
+{Minecraft} [Reshade 4.3/4.4 with Network Check disabled]
 Don't Ask my for newtwork check disabled builds of ReShade.
 
 I used Minecraft with Optifine https://optifine.net/downloads
@@ -789,12 +795,12 @@ Needs a way to disable dissable DoF.
 {Naruto Shippuden UNS3 Full Blurst}
 Ignore the warnings click play.
 
-{NecroVision: Games} - Use ReShade ReShade 3.3.2
+{NecroVision: Games} [Reshade 3.3.2]
 I was unable to get the newest version of ReShade to work with this title. A link for older versions of reshade at the end of this doc.
 
 Carefull try not to alt-tab game may hang.
 
-{No One Lives Forever and 2} - Reshade 4.4+
+{No One Lives Forever and 2} [Reshade 4.4+]
 For No One Lives Forever an DX7 game you will need to use DGVoodoo2 for it to work, With ReShade.
 
 For No One Lives Forever 2 an DX8 game you will need to use DGVoodoo2 or DX8toDX9 converter for it to work, With ReShade.
@@ -802,7 +808,7 @@ For No One Lives Forever 2 an DX8 game you will need to use DGVoodoo2 or DX8toDX
 Know Issues. With AMD Cards Main Menu Selections are unreadable in No One Lives Forever 2 with DGVoodoo2, use an Nv Card or the DX8toDX9 Converter.
 Know Issues. With AMD Cards in No One Lives Forever White modles and artifacts. I was told you can use DGVoodoo 55.4.1. Don't knowif it will help. You can also use a NvCard.
 
-{No Man Sky: Next} - ReShade 4.5.2 Vulkan
+{No Man Sky: Next} [Reshade 4.5.2 Vulkan]
 You need to start the game with out ReShade and set the game to Borderless Window mode.
 You will also need to install this mode specifictly to remove CA.
 https://www.nexusmods.com/nomanssky/mods/619?tab=description
@@ -830,7 +836,7 @@ Start the game with no more film grain!
 
 Geometry 3D may be done with TriDef Try It.
 
-{Observer} - Used ReShade 4.3
+{Observer} [Reshade 4.3]
 Take your Meds.........
 
 In the folder: C:\Users\"Sys_user_name"\AppData\Local\TheObserver\Saved\Config\WindowsNoEditor 
@@ -853,10 +859,10 @@ r.SceneColorFringeQuality=0
 r.DepthOfFieldQuality=0
 r.MaxAnisotropy=16
 
-{Outlaws 1997} - ReShade 4.5.2 Vulkan
+{Outlaws 1997} [Reshade 4.5.2 Vulkan]
 Use NGlide in Vulkan mode.
 
-{Octopath Traveler} - ReShade 4.6.0
+{Octopath Traveler} [Reshade 4.6.0]
 Game runs fine issues with DoF and other effects.
 
 To Disable Depth of Field in Octopath Traveler
@@ -875,7 +881,7 @@ Save the file
 You can can also dissable corner shadows in game.
 You can also Try Depth Detection -Sky For this game.
 
-{Paratopic} - Reshade 4.5
+{Paratopic} [Reshade 4.5]
 Need to select the right buffer from time to time and it seems to be a lower resolution. I suggest you play this game at 4k.
 
 {Phantasmal}
@@ -886,13 +892,13 @@ From here press Alt+Enter.
 Then hit escape and set your resoution and settings to ultra dissable motion blur. 
 Set your settings and now press shift+f2 for reshade and set your settings for Depth3D.
 
-{Penumbra: Black Plague} - Use reshade 3.0.4.
+{Penumbra: Black Plague} [Reshade 3.0.4]
 Go here
 C:\Users\...\Documents\Penumbra\settings.cfg
 Open the settings and set your res. 
 <Screen Width="3840" Height="2160" FullScreen="true" Vsync="true" />
 
-{Prey 2006} - Using Reshade 3.1.0 
+{Prey 2006} [Reshade 3.1.0]
 
 Credit goes to Devil Master User on ReShades Forums
 
@@ -926,7 +932,7 @@ too
 
 then set the file it to read only.
 
-{Quake 2 XP} - ReShade 4.7.0 + Xenos_2.3.2 Injector
+{Quake 2 XP} [Reshade 4.7.0, Xenos_2.3.2 Injector]
 Install game and make sure in launches in fullscreen and native resolution.
 
 Download https://github.com/DarthTon/Xenos/releases and the latest version of reshade.
@@ -958,7 +964,8 @@ Start the game with out Reshade Set your game resolution First Turn off AA.
 Exit, Then use reshade and set your setting you want then launch your game. You can not change your resolution once in game This sill remove the depth map.
 Rage 64 was tested only.
 
-{Redout} - Thank you zig11727
+{Redout} 
+- Thank you zig11727
 Path to install \Steam\SteamApps\common\Redout\redout\Binaries
 
 {RESIDENT EVIL HD BIOHAZARD HD}
@@ -1007,7 +1014,8 @@ http://www.zeus-software.com/downloads/nglide
 
 Click on 3DFX.exe Untill it starts..... Some thing wrong with this game. It starts after around 6-10 time I try.
 
-{Serious Sam Fusion} ReShade 4.6.1 - Needs Online Code Dissable for online play. DX12/Vulkan/DX11 all seem to work.
+{Serious Sam Fusion} [Reshade 4.6.1]
+- Needs Online Code Disabled for online play. DX12/Vulkan/DX11 all seem to work.
 In some maps you need to set Offset back to 0.0 so that you can have proper Depth. You would also need to set it back to 0.1 on other maps. Be mindfull of this.
 
 {Shadow of the TombRaider}
@@ -1021,7 +1029,7 @@ You Don't want a mini Lara Croft In your skull do you?
 
 SLI scaling Is good in this game. Almost full scaling on both cards. If you want to brute force FPS.
 
-{Soldier of Fortune} - ReShade 4.5.2
+{Soldier of Fortune} [Reshade 4.5.2]
 Download and use the SoF Plus patch. Then Delete QeffectsGL.dll and rename ReShade opengl32.dll to QeffectsGL.dll.
 Get it here https://sof1.megalag.org/sofplus/
 
@@ -1029,7 +1037,7 @@ In game max out all the settings and set your resolution you need. Apply setting
 Then set Video Driver : Default OpenGL to QeffectsGL (QFX)
 Apply settings and you should be good to go.
 
-{Sonic Adventure DX} BetterSADX Mod + ReShade 4.5.3 + DX8 to DX9 or DGVoodoo2
+{Sonic Adventure DX} [BetterSADX Mod, Reshade 4.5.3, DX8 to DX9 or DGVoodoo2]
 So for Sonic Adventure DX you will need to download BetterSADX Mod.
 https://drive.google.com/file/d/1H2hip1zodIVjlS0BRWeu1Fv3JnnOw8VL/view
 
@@ -1046,7 +1054,7 @@ Seems like GOG Overlay is the only way this game will run....... So you know whe
 
 Read the section for Dealing with mouse pointer issues. At the top. 
 
-{Singularity} - Used ReShade 4.5.4 "Steam Version of Game" on Windows 10
+{Singularity} [Reshade 4.5.4 "Steam Version of Game" on Windows 10]
 There is flickering when in menue I suggest you ignore it. In game there are some things that show only in Depth But not in game this will also cause problems.
 Weapon Hand May go away in flash backs. This also seem to happen at random in game.........
 
@@ -1055,7 +1063,7 @@ Disable Distortion and DoF in game settings. Thank you.
 
 Some users reported other strange issues with non steam versions of the game.
 
-{SpellForce Platinum} - Used ReShade 4.5.4 renamed the d3d9.dll to dx9x.dll
+{SpellForce Platinum} [Reshade 4.5.4 renamed the d3d9.dll to dx9x.dll]
 
 Download the Hex Patcher here. 
 [https://www.mediafire.com/file/eq610kfh7vdbplt/SpellForceHPMod.zip/file]
@@ -1077,7 +1085,7 @@ Turn the game on and it should load ReShade after the intro.
 
 Thank you.
 
-{Spooky's House of Jump Scares} - Used ReShade 4.9.1
+{Spooky's House of Jump Scares} [Reshade 4.9.1]
 Needs DX8 to DX9 converter and DX 9 ReShade DLL.
 
 Once in Game navigate to Settings at the start page and go down to Fix Resolution and it should boot into ReShade.
@@ -1089,12 +1097,12 @@ and check
 
 For more information go here https://github.com/BlueSkyDefender/Depth3D/wiki/Shader-DepthMap
 
-{Soma} - Used ReShade 4.6.1
+{Soma} [Reshade 4.6.1]
 So at one point AMD GPUs used to work with an older version of Game/Drivers. Now only Nv GPUs seem to only work.
 
 Weapon Hand Issues and Item cliping if Weapon Profile used.
 
-{Star Trek: Elite Force II} - Uses ReShade 4.9.1
+{Star Trek: Elite Force II} [Reshade ReShade 4.9.1]
 ReShade as Install as opengl.
 
 Next steps listed in WSGF
@@ -1110,7 +1118,7 @@ seta r_customheight "1440"
 seta userFov "110"
 seta r_mode "-1"
 
-{StarWars Jedi Fallen Order} - Used ReShade 4.4.2
+{StarWars Jedi Fallen Order} [Reshade 4.4.2]
 Disable CA, FG, MB in the Visuals
 
 Also You dont' have to dissable AA. But, you can Disable DoF.
@@ -1130,10 +1138,10 @@ Now Place the "pakchunk99-Mods_CustomMod_P.pak" file to your Fallen Order\SwGame
 {Stay Close}
 Install reshade in too Steam\steamapps\common\Stay Close\Migrate\Binaries\Win64
 
-{Strange Brigade} - Used ReShade 4.4.2 and 4.4.2+
+{Strange Brigade} [Reshade 4.4.2 and 4.4.2+]
 You Need to reload the shader in game to grab the Depth Buffer??? Ya I don't know why this happens. But, Once loaded it should work.
 
-{Strife: Veteran Edition} - ReShade 4.5.2
+{Strife: Veteran Edition} [Reshade 4.5.2]
 Make sure you set Sprite Cliping to OFF.
 
 The Sky Renders strange Ignore it.
@@ -1142,7 +1150,7 @@ If you can get Vulkan working the experinace in this game is much better.
 
 {S.T.A.L.K.E.R.: Games} -  I suggest windows 7 or Windows 10 Anniversary.
 
-Call of Pripyat; 
+{Call of Pripyat}
 ..\S.T.A.L.K.E.R. Call of Pripyat\bin\xrEngine.exe 
 First Start the Game with out modding and set the settings.
 Please install the Complete Mods since I did all my testing with this mod.
@@ -1154,21 +1162,21 @@ You should not need Compatilbility Mode.
 
 Now in Windows 10 Creators update you want to disable Compatilbility Mode.
 
-Clear Sky;
+{Clear Sky}
 ..\S.T.A.L.K.E.R. Clear Sky\bin\xrEngine.exe 
 Run in Compatilbility Mode Windows 7 and DPI scaling. First Start the Game with out modding and set the settings. First load should take a long time.
 After that it should not take too long any more.
 
 Now in Windows 10 Creators update you want to disable Compatilbility Mode.
 
-Shadow of Chernobyl; - use reshade 3.0.2
+{Shadow of Chernobyl} [Reshade 3.0.2]
 ..\S.T.A.L.K.E.R. Shadow of Chernobyl\bin\XR_3DA.exe 
 Run in Compatilbility Mode Windows 7 and DPI scaling. First Start the Game with out modding and set the settings.
 Has a depth map that fluctuates for some reason.
 
 Now in Windows 10 Creators update you want to disable Compatilbility Mode and you still need to use Reshade 3.0.2.
 
-{The Dark Pictures Anthology Man of Medan} - ReShade 4.7.0
+{The Dark Pictures Anthology Man of Medan} [Reshade 4.7.0]
 Game runs fine issues with DoF and/or other effects.
 
 To Disable Depth of Field in Man of Medan
@@ -1186,7 +1194,7 @@ Save the file
 
 Now there is one more issue I could not fix was the On screen action button may be hard to read sometimes....... Good luck with that.
 
-{The Forest} - Used ReShade 4.3
+{The Forest} [Reshade 4.3]
 Depth Buffer Hides some times Need to look for it in the DX11 Tab. Keep a low Divergence lower then normal in this game.
 Also something to note. Depth Buffer is lost sometimes out in open waters. I find that setting Depth Settings as bellow help.
 
@@ -1214,7 +1222,8 @@ If you want 4K in this res locked game you SpecialK build of Reshade.
 Guide Here.
 https://steamcommunity.com/sharedfiles/filedetails/?id=933337066
 
-{The Legend of Zelda: Breath of the Wild} - Note:  I will not show you how to set up the emulator or the Rom. This part on you. But, If you love the game buy it on console.
+{The Legend of Zelda: Breath of the Wild} 
+- Note:  I will not show you how to set up the emulator or the Rom. This part on you. But, If you love the game buy it on console.
 First set up the shader as the above settings then.
 
 ReShade it self has issues when you enter a menu to change your weapon/clothes/Stuff. 
@@ -1236,21 +1245,22 @@ Do Not Ask me for this version & Yes you should be able to finnish the game with
 
 You will also need to use a resolution graphics pack form here. https://slashiee.github.io/cemu_graphic_packs/ (Older Version 2)
 
-{The Park} - ReShade 4.4.2
+{The Park} [Reshade 4.4.2]
 This Has Some Depth Buffer issues in cutscenes. Also you need to find a way to disable the depth of field
 The good is that, Unreal 4 engine games do indeed have DepthOfField line in SystemSettings section of UDKSystemSettings.ini. That can 
 controls mainly depth of field effects. But, may not work you have to test this.
 
-{The Surge} - Thank you zig11727
+{The Surge} 
+- Thank you zig11727
 Install Directory \SteamLibrary\steamapps\common\The Surge\bin
 
-{The Swapper} - ReShade 4.9 as opengl32
+{The Swapper} [Reshade 4.9 as opengl32]
 So issues with the game with needing the user to select the correct depth buffer in the API Tab. But, also it will be needing alignment and resizing. 
 This is done with overwatch.fxh. But, maybe you can do it better. The other issue is with depth in  dark areas of the cave, the dev didn't place a primitive there. 
 So this means the dark areas where there should be a wall, instead it will be set to Max depth. It looks like it was an optimization................. 
 But, because of this it will cause eye strain.
 
-{The Suicide of Rachel Foster} - ReShade 4.9.1
+{The Suicide of Rachel Foster} [Reshade 4.9.1]
 Game runs fine issues with DoF and/or other effects.
 
 To Disable PostProcessing effects in TSoRF
@@ -1276,26 +1286,26 @@ Keep in mind if you change your setting in game you need to restart so that this
 May Have an issue with the Title screen. Ignore this. In game it fine.
 Instal Dll too D:\SteamLibrary\steamapps\common\The Vanishing of Ethan Carter Redux\EthanCarter\Binaries\Win64
 
-{The Void} - Use Reshade 3.0.3
+{The Void} [Reshade 3.0.3]
 You may need to install the other things in the game folder for the game to run such as DX9 runtime and AdbeRdr810_en_US. Also the PhysX run time if you are on AMD. I know, I know...... But, this was the only way I got it to run in windows 10 on AMD Hardware.
 
-{Through The Woods} - Use Reshade 3.4.1
+{Through The Woods} [Reshade 3.4.1]
 In game Set your Res to Native screen Res.
 
-{Titanfall 2} - Used Reshade 4.0.2
+{Titanfall 2} [Reshade 4.0.2]
 Install ReShade into the Bin/x64_retail folder. 
 
 In game settings:
 Adaptive Resolution FPS Target = 144
 Adaptive Supersampling = Enabled
 
-{Rise of the TombRaider | TombRaider 2013} - Use Reshade 4.6.1+
+{Rise of the TombRaider | TombRaider 2013} [Reshade 4.6.1+]
 You may need to manually enable copy depth buffers in the ReShade DX11 menu for the games listed here.
 
-{Turok: Dinosaur Hunter} - Use Reshade 3.4.1
+{Turok: Dinosaur Hunter} [Reshade 3.4.1]
 If you are useing an older build of reshade you have to turn off "Light Scatter," in Graphics Menu.
 
-{Vanquish} - ReShade 4.7.0
+{Vanquish} [Reshade 4.7.0]
 Use DGVoodoo2 for this game to convert dx9 to dx11.
 
 Settings used in DGVooddoo2 are "Resolution" Set your resolution here and not in game due to a bug that comes up if you set your res in game.
@@ -1305,7 +1315,7 @@ This is done so you don't have to scale the depth buffer your self.
 
 You can download DGVoodoo2 here http://dege.freeweb.hu/dgVoodoo2/dgVoodoo2.html
 
-{Void Bastards} - ReShade 4.7.0
+{Void Bastards} [Reshade 4.7.0]
 Issues with MSAA and Weapon Hand not Showing up in the Depth Buffer.
 You have to set the game to the lowest graphics settings to disable MSAA.
 
@@ -1314,21 +1324,22 @@ Use v227 patch. Use the DX9 render. Install Rehsade 3.0 to System folder select 
 In Unreal Set your res and the go to advance settings.
 Turn Off AA and go back in to the game. Start a game.
 
-{Watch Dogs 2} or use the white listed reshade version.
+{Watch Dogs 2} 
+or use the white listed reshade version.
 Go to the WatchDog2.exe and use compatibility mode.
 Set it too Windows 8.
 Install reshade and use dxgi.dll
 Ok befor you launch use this command.
 -eac_launcher <---- as the start up command.
 
-{World of Warcraft} - DX12 Reshade 4.4 Network check disables dll. 
+{World of Warcraft} [Reshade 4.4 with DX12 and Network check disabled dll] 
 First Do not ask me for this DLL. You have to find it on your own or make your own. Don't ask me for this.
 
 Now I suggest you use use The Mouse Pointer Guide above and to make a Custom UI mask for SuperDepth3D and bind it to the key you want. You can Make a total of 2 UI masks.
 
 Other thing I suggest is to dissable Outlines Highlighting in WoW.
 
-{Wolfenstine: Games} - working in Reshade 4.1.1
+{Wolfenstine: Games} [Reshade 4.1.1]
 [Set Launch Options](+r_multisamples "0" +vt_maxaniso "16")
 This game must be started at the lower Resoution 1600x1200 Windowed, Then Switch to 1920x1080 Fullscreen Windowed. 
 Befor you exit switch it back to 1600x1200 Windowed.
@@ -1361,7 +1372,7 @@ Update 7.23.2019 When testing with AMD cards the depth buffer seems to not be ac
 Read Here you will need patch 1.2 and 1snd.
 http://pcgamingwiki.com/wiki/You_Are_Empty
 
-{Yooka-Laylee} - Use ReShade 3.4.1
+{Yooka-Laylee} [Reshade 3.4.1]
 Game now works with the new DX11_BUFFER_DETECTION. You can set this also in ReShades DX11 Tab in game.
 [DX11_BUFFER_DETECTION]
 DepthBufferRetrievalMode=0
@@ -1373,7 +1384,7 @@ Game was tested with Max setting.
 _________________________________________________________________________________________________________________________________
 -=Native 3D Games=-
 =================================================================================================================================
-{GZDoom} No ReShade 3D
+{GZDoom} [No ReShade 3D]
 In console Type in "VR_MODE 1-14" and you can set fov with "FOV #"
 Notable Options
 VR_MODE 12 Line Interlaced
@@ -1400,7 +1411,7 @@ GL_LENS 0 or false
 gl_multisample 0
 gl_ssao 0 < If you want to use ReShade Depth with missing sprites.
 
-{Quake} - DarkPlaces Quake 1 mod
+{Quake} [DarkPlaces Quake 1 mod]
 For geometry stereo open the console and use the commands listed here.
 r_stereo_horizontal "1" SbS
 r_stereo_vertical "1" TnB
@@ -1411,14 +1422,14 @@ r_stereo_separation	"4"
 
 Also please use DarkPlaces "build 20140513" from here. https://icculus.org/twilight/darkplaces/download.html
 
-{Quake Epsilon} - DarkPlaces Quake 1 mod
+{Quake Epsilon} [DarkPlaces Quake 1 mod]
 Install Reshade as OpenGl or use above setting for geometry 3D.
 
 Also please use DarkPlaces "build 20140513" from here. https://icculus.org/twilight/darkplaces/download.html
 _________________________________________________________________________________________________________________________________
 -=Problem Games=-
 =================================================================================================================================
-{Dead Space} - retested 10/21/2019
+{Dead Space} [retested 10/21/2019]
 Games Depth Buffer does not show till after the elevator part at the start. Depth Buffer also goes away when interacting with some objects and when you get video feeds.
 I suggest useing TriDef. For this game.
 
@@ -1438,16 +1449,16 @@ bind 2 "r_drawvgui 0"
 Once in game press 2 and you should have acess to a Depth Map.
 Game Crashes if you leave r_drawvgui 0 when you die. Don't know how to fix this.
 
-{Left 4 Dead 2} -Game Depth Buffer is unstable-
+{Left 4 Dead 2} [Game Depth Buffer is unstable]
 
 {Shadow warrior(2013)}
  DM 5        2.5-5.0
 Depth Buffer only in DX9 so launch it in Shadow Warrior XP and turn on FSAAX2 in game.
 
-{Yume Nikki -Dream Diary-} - ReShade 4.4
+{Yume Nikki -Dream Diary-} [Reshade 4.4]
 ReShade Has a hard time picking the best Depth Buffer......... Sometimes you can't get the best Depth Buffer.
 
-{Zombi} -Depth map Pops in and out-
+{Zombi} [Depth map Pops in and out]
 This Problem seems to happen when looking at one direction. Don't know why it happens. 
 But, I suggest useing a othere 3D application like Tridef or Nvidia 3D Vision.
 _________________________________________________________________________________________________________________________________
