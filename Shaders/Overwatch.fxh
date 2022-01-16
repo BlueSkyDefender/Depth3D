@@ -1,7 +1,7 @@
 ////----------------------------------------//
 ///SuperDepth3D Overwatch Automation Shader///
 //----------------------------------------////
-// Version 2.2.9
+// Version 2.3.0
 //---------------------------------------OVERWATCH---------------------------------------//
 // If you are reading this stop. Go away and never look back. From this point on if you  //
 // still think it's is worth looking at this..... Then no one can save you or your soul. //
@@ -3044,6 +3044,21 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define DE_Z 0.375
 	#define PEW 1
 	#define DSW 1  
+#elif (App == 0xC7A1F6B8 ) //NieR Replicant ver.1.22474487139
+    #define DA_X 0.1375
+    #define DF_Y 0.012
+    #define DA_Y 25.0    
+    //#define DB_Z 0.125
+    #define DB_Y 3
+    #define DE_X 1
+    #define DE_Y 0.400
+    #define DE_Z 0.375
+    #define DG_Z 0.01
+    #define DI_Z 0.225
+	#define BMT 1
+	#define DF_Z 0.2125
+	#define DG_W 0.1375
+	#define DAA 1  
 #else
 	#define NPW 1 //No Profile
 #endif
@@ -3117,7 +3132,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define DE_Z ZPD_Boundary_Fade_Time_D
 #endif
 #ifndef DE_W
-    #define DE_W Weapon_Near_Depth_Max_D
+    #define DE_W Weapon_Near_Depth_Max_D         //Max
 #endif
 
 // X = [ZPD Weapon Boundary] Y = [Separation] Z = [ZPD Balance] W = [HUD]
@@ -3142,7 +3157,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define DG_Y SDC_Offset_Y_D
 #endif
 #ifndef DG_Z
-    #define DG_Z Weapon_Near_Depth_Min_D
+    #define DG_Z Weapon_Near_Depth_Min_D         //Min
 #endif
 #ifndef DG_W
 	#define DG_W Check_Depth_Limit_D
@@ -3170,8 +3185,8 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define DI_Y LB_Masking_Offset_Y_D
 #endif
 #ifndef DI_Z
-    #define DI_Z Weapon_Near_Depth_Trim_D
-#endif
+    #define DI_Z Weapon_Near_Depth_Trim_D      //Trim
+#endif 
 #ifndef DI_W
 	#define DI_W REF_Check_Depth_Limit_D
 #endif
