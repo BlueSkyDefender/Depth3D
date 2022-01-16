@@ -3036,6 +3036,14 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DG_W 0.300 //Added as a buffer to allow little bit of popout.
     #define DB_Z 0.300 //Added To counteract issues with close to cam animations.
 	#define PEW 1 
+#elif (App == 0xA80D9183 ) //LEGO Marvel Super Heros
+    #define DA_X 0.175
+    #define DF_Y 0.025
+    #define DE_X 5
+    #define DE_Y 0.500
+    #define DE_Z 0.375
+	#define PEW 1
+	#define DSW 1  
 #else
 	#define NPW 1 //No Profile
 #endif
