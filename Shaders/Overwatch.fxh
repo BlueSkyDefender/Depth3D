@@ -1,7 +1,7 @@
 ////----------------------------------------//
 ///SuperDepth3D Overwatch Automation Shader///
 //----------------------------------------////
-// Version 2.3.0
+// Version 2.3.1
 //---------------------------------------OVERWATCH---------------------------------------//
 // If you are reading this stop. Go away and never look back. From this point on if you  //
 // still think it's is worth looking at this..... Then no one can save you or your soul. //
@@ -1616,16 +1616,17 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DE_Y 0.5
 	#define DE_Z 0.375
 	#define DSW 1
-#elif (App == 0x1764D88A ) //X-Com 2
-	#define DA_X 0.24
-	#define DA_Y 29.0
-	#define DA_Z 0.0001
+#elif (App == 0x1764D88A || App == 0x18D54C6A ) //X-Com 2
+	#define DA_X 0.20
+	#define DF_Y 0.102
+	#define DA_Y 28.0
 	#define DB_Z 0.130
-	#define DB_Y 3
+	#define DB_Y 1
 	#define DE_X 2
-	#define DE_Y 0.25
+	#define DE_Y 0.3
 	#define DE_Z 0.375
-	#define DE_W 0.075
+	#define DG_Z 0.070
+    #define DI_Z 0.125
 #elif (App == 0xC60A845F ) //My Friend Pedro
 	#define DB_X 1
 	#define DA_W 1
@@ -2813,106 +2814,106 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define DH_W -0.05
     #define PEW 1
 #elif (App == 0x1551DBDA ) //The Fogotten City
-    #define DA_W 1
+	#define DA_W 1
 	#define DA_X 0.05//0.09
 	#define DF_Y 0.015//0.0425
 	#define DA_Z 0.000375
 	#define DA_Y 16.25 //8.75
-    #define DB_Z 0.2
+	#define DB_Z 0.2
 	#define DB_Y 2
 	#define DE_X 1
 	#define DE_Y 0.315
 	#define DE_Z 0.375
 	#define DG_W 0.875 //0.9 if 0.1 zdp
 	#define DG_Z 0.015
-    #define PEW 1
-    #define FOV 1
+	#define PEW 1
+	#define FOV 1
 #elif (App == 0xD698BDD3 ) //Call of Juarez Gunslinger** [Steam]
-    #define DA_X 0.045
-    #define DF_Y 0.025
-    #define DA_Y 12.5
-    #define DB_Y 3
-    #define DB_Z 0.175 
-    //#define DA_Z -0.000125
-    //#define BDF  1 //This didn't seem needed anymore for the steam version.
-    //#define DC_X 0.22
-    //#define DC_Y -0.37
-    //#define DC_Z 0.16
-    #define SPF 1 //This offset is still the same. Wonder what changed here.
-    //#define DD_X 1
-    #define DD_Y 1.067
-    #define DG_Z 0.080 //Min
-    #define DE_W 0.100 //Max
-    #define PEW 1
-    //#define FOV 1
+	#define DA_X 0.045
+	#define DF_Y 0.025
+	#define DA_Y 12.5
+	#define DB_Y 3
+	#define DB_Z 0.175 
+	//#define DA_Z -0.000125
+	//#define BDF  1 //This didn't seem needed anymore for the steam version.
+	//#define DC_X 0.22
+	//#define DC_Y -0.37
+	//#define DC_Z 0.16
+	#define SPF 1 //This offset is still the same. Wonder what changed here.
+	//#define DD_X 1
+	#define DD_Y 1.067
+	#define DG_Z 0.080 //Min
+	#define DE_W 0.100 //Max
+	#define PEW 1
+	//#define FOV 1
 #elif (App == 0xA4F3EEC3 ) //Godfall
-    #define DA_W 1
-    #define DA_X 0.050
-    #define DA_Z -0.025
-    #define DA_Y 35.0
+	#define DA_W 1
+	#define DA_X 0.050
+	#define DA_Z -0.025
+	#define DA_Y 35.0
 	#define DB_Y 2
 	#define DE_X 1
 	//#define DE_Y 0.5
 	#define DE_Z 0.375
 	#define PEW 1
-    #define NDW 1    
+	#define NDW 1    
 #elif (App == 0x2B22A265 ) //Immortals Fenyx Rising
-    #define DA_W 1
-    #define DA_X 0.20
-    #define DA_Z -0.15
-    #define DA_Y 16.25
+	#define DA_W 1
+	#define DA_X 0.20
+	#define DA_Z -0.15
+	#define DA_Y 16.25
 	#define DB_Y 3
 	#define DE_X 1
 	#define DE_Y 0.375
 	#define DE_Z 0.375
-    #define DB_Z 0.250
+	#define DB_Z 0.250
 	#define DSW 1
 	#define PEW 1
-    #define NDW 1
+	#define NDW 1
 #elif (App == 0xBCF34171 ) //Raji An Ancoent Epic
-    #define DA_W 1
-    #define DA_X 0.175
-    #define DF_Y 0.05    
-    #define DA_Z -0.1
-    #define DA_Y 32.5
+	#define DA_W 1
+	#define DA_X 0.175
+	#define DF_Y 0.05    
+	#define DA_Z -0.1
+	#define DA_Y 32.5
 	#define DB_Y 5
 	#define DE_X 2
 	#define DE_Y 0.300
 	#define DE_Z 0.375
-    //#define DB_Z 0.250
+	//#define DB_Z 0.250
 	#define DG_W 0.15
 	#define PEW 1
 #elif (App == 0xED560119 ) //DarkSiders Genisis
-    #define DA_W 1
-    #define DA_X 0.075
+	#define DA_W 1
+	#define DA_X 0.075
 	#define DF_Y 0.03
-    #define DA_Y 102.5
-    #define DA_Z -1.0  
+	#define DA_Y 102.5
+	#define DA_Z -1.0  
 	#define DB_Y 3
 	#define DE_X 3
 	#define DE_Y 0.400
 	#define DE_Z 0.300
 	#define DG_W 0.125
-    #define DG_Z 0.375
+	#define DG_Z 0.375
 	#define NDW 1
 #elif (App == 0x921BC951 ) //SpongeBob SquarePants: Battle for Bikini Bottom - Rehydrated
-    #define DA_W 1
-    #define DA_X 0.120
+	#define DA_W 1
+	#define DA_X 0.120
 	#define DF_Y 0.05
-    #define DA_Y 22.0
-    #define DA_Z 0.000120  
+	#define DA_Y 22.0
+	#define DA_Z 0.000120  
 	#define DB_Y 3
 	#define DE_X 1
 	#define DE_Y 0.400
 	#define DE_Z 0.375
 	#define DG_W 0.120
-    #define DG_Z 0.35
+	#define DG_Z 0.35
 	#define NDW 1
 #elif (App == 0xEDC64E2B ) //The Patheless**
 	#define DA_W 1
 	#define DA_Y 75.0
-    #define DA_X 0.025
-    #define DF_Y 0.025
+	#define DA_X 0.025
+	#define DF_Y 0.025
 	#define DB_Y 5
 	#define DE_X 1
 	#define DE_Y 0.300
@@ -2921,8 +2922,8 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 #elif (App == 0xFC113D8A ) //PsychoNauts 2
 	#define DA_W 1
 	#define DA_Y 11.5
-    #define DA_X 0.25
-    #define DF_Y 0.0625
+	#define DA_X 0.25
+	#define DF_Y 0.0625
 	#define DB_Y 5
 	#define DE_X 1
 	#define DE_Y 0.525
@@ -2937,28 +2938,28 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DAA 1
 #elif (App == 0xA34503F1 || App == 0xE0CAB4F3 ) //[Gothic 1.08k_mod - Gothic 2: Night of the Raven] with Kirides GD3D11 Mod
 	#define DA_Y 25.0
-    #define DA_X 0.05
-    #define DF_Y 0.0125
+	#define DA_X 0.05
+	#define DF_Y 0.0125
 	#define DB_Y 3
 	#define DE_X 1
 	#define DE_Y 0.375
 	#define DE_Z 0.375
-    #define DG_Z 0.411
+	#define DG_Z 0.411
 	#define NDW 1
 	#define RHW 1
-    #define NFM 1
+	#define NFM 1
 #elif (App == 0x509F5AD3 ) //Mortal Shell
 	#define DA_W 1
 	#define DA_X 0.225
 	//#define DF_Y 0.025
 	#define DA_Y 15.0
 	//#define DA_Z -0.5
-    #define DB_Z 0.320
+	#define DB_Z 0.320
 	#define DB_Y 5
 	#define DE_X 1
 	#define DE_Y 0.45
 	#define DE_Z 0.375
-    #define DG_Z 0.375
+	#define DG_Z 0.375
 	//#define NDW 1
 	#define PEW 1
 	#define DAA 1
@@ -2966,99 +2967,132 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DH_Z 0.255
 	#define DH_W 0.0
 #elif (App == 0x3C982FAC ) //Forza Horizon 4  
-    #define DA_W 1
-    #define DA_X 0.1225
+	#define DA_W 1
+	#define DA_X 0.1225
 	//#define DF_Y 0.05
-    //#define DA_Y 10
-    #define DB_Z 0.25
-    //#define DA_Z 0.000120  
+	//#define DA_Y 10
+	#define DB_Z 0.25
+	//#define DA_Z 0.000120  
 	#define DB_Y 4
 	#define DE_X 1
 	#define DE_Y 0.500
 	#define DE_Z 0.375
 	#define DG_W 0.25
-    //#define DG_Z 0.35
+	//#define DG_Z 0.35
 	#define NDW 1
 	#define PEW 1
 	#define DAA 1
 #elif (App == 0x3303C19A ) //Mafia Definitive Edition
-    #define DA_W 1
-    #define DA_X 0.175
+	#define DA_W 1
+	#define DA_X 0.175
 	#define DF_Y 0.025
-    #define DA_Y 10.0
-    #define DB_Z 0.125
-    #define DA_Z -0.125  
+	#define DA_Y 10.0
+	#define DB_Z 0.125
+	#define DA_Z -0.125  
 	#define DB_Y 5
 	#define DE_X 1
 	#define DE_Y 0.325
 	#define DE_Z 0.375
 	#define DG_W 0.125
-    #define DG_Z 0.06
+	#define DG_Z 0.06
 	#define PEW 1
 #elif (App == 0x19237E38 ) //The Witness
-    #define DA_W 1
-    #define DA_X 0.2
+	#define DA_W 1
+	#define DA_X 0.2
 	#define DF_Y 0.02
-    #define DA_Y 15.0
-    //#define DB_Z 0.100
-    //#define DA_Z -0.125  
+	#define DA_Y 15.0
+	//#define DB_Z 0.100
+	//#define DA_Z -0.125  
 	#define DB_Y 4
 	#define DE_X 1
 	//#define DE_Y 0.5
 	#define DE_Z 0.375
 	#define DG_W 0.3
-    //#define DG_Z 0.06
+	//#define DG_Z 0.06
 	#define DAA 1
 #elif (App == 0x9255C26F ) //Crash Bandicoot 4 It's About Time**
-    #define DA_W 1
-    #define DA_Y 10.0
-    #define DB_Y 4
-    #define DA_Z -0.125
-    #define DA_X 0.125
-    #define DE_X 1
-    //#define DE_Y 0.500
-    #define DE_Z 0.250
-    #define DF_Y 0.0625
-    #define DF_W 0.580
+	#define DA_W 1
+	#define DA_Y 10.0
+	#define DB_Y 4
+	#define DA_Z -0.125
+	#define DA_X 0.125
+	#define DE_X 1
+	//#define DE_Y 0.500
+	#define DE_Z 0.250
+	#define DF_Y 0.0625
+	#define DF_W 0.580
 	#define DG_W 0.125
-    #define HMT 1
+	#define HMT 1
 	#define PEW 1
 #elif (App == 0x4F255CDB ) //Mortal Kombat 11 DX11** Note needs dx12
-    #define DA_W 1
-    #define DA_Y 22.5  //adjusted
-    //#define DA_Z 0.004 //This was the issue
-    #define DB_Y 2 //adjusted
-    #define DA_X 0.125 //adjusted
-    #define DF_Y 0.140 //adjusted
-    #define DE_X 1
-    #define DE_Y 0.300 //adjusted
-    #define DE_Z 0.400
+	#define DA_W 1
+	#define DA_Y 22.5  //adjusted
+	//#define DA_Z 0.004 //This was the issue
+	#define DB_Y 2 //adjusted
+	#define DA_X 0.125 //adjusted
+	#define DF_Y 0.140 //adjusted
+	#define DE_X 1
+	#define DE_Y 0.300 //adjusted
+	#define DE_Z 0.400
 	#define DG_W 0.300 //Added as a buffer to allow little bit of popout.
-    #define DB_Z 0.300 //Added To counteract issues with close to cam animations.
+	#define DB_Z 0.300 //Added To counteract issues with close to cam animations.
 	#define PEW 1 
 #elif (App == 0xA80D9183 ) //LEGO Marvel Super Heros
-    #define DA_X 0.175
-    #define DF_Y 0.025
-    #define DE_X 5
-    #define DE_Y 0.500
-    #define DE_Z 0.375
+	#define DA_X 0.175
+	#define DF_Y 0.025
+	#define DE_X 5
+	#define DE_Y 0.500
+	#define DE_Z 0.375
 	#define PEW 1
 	#define DSW 1  
 #elif (App == 0xC7A1F6B8 ) //NieR Replicant ver.1.22474487139
-    #define DA_X 0.1375
-    #define DF_Y 0.012
-    #define DA_Y 25.0    
-    //#define DB_Z 0.125
-    #define DB_Y 3
-    #define DE_X 1
-    #define DE_Y 0.400
-    #define DE_Z 0.375
-    #define DG_Z 0.01
-    #define DI_Z 0.225
+	#define DA_X 0.1375
+	#define DF_Y 0.012
+	#define DA_Y 25.0    
+	//#define DB_Z 0.125
+	#define DB_Y 3
+	#define DE_X 1
+	#define DE_Y 0.400
+	#define DE_Z 0.375
+	#define DG_Z 0.01
+	#define DI_Z 0.225
 	#define BMT 1
 	#define DF_Z 0.2125
 	#define DG_W 0.1375
 	#define DAA 1  
+#elif (App == 0xDE4C92BB ) //Halo Infinite
+	#define DA_W 1
+	#define DA_X 0.1
+	#define DF_Y 0.01
+	#define DA_Y 62.5    
+	//#define DB_Z 0.125
+	#define DB_Y 1
+	#define DE_X 5
+	#define DE_Y 0.5
+	#define DE_Z 0.4
+	//#define DG_Z 0.01
+	//#define DI_Z 0.225
+	#define BMT 1
+	#define DF_Z 0.125
+	#define DG_W -0.1
+	#define WSM 2 //Weapon Settings Mode
+	#define DB_W 19//Weapon Selection
+	#define DF_X 0.13
+	#define DG_Z 0.07
+	#define DI_Z 0.125
+	//#define DAA 1  
+#elif (App == 0x312862CF ) //Aliens: Fireteam Elite*
+	#define DA_W 1
+	#define DA_X 0.080
+	#define DF_Y 0.025
+	#define DA_Y 25.0
+	#define DA_Z -0.025
+	#define DB_Y 5
+	#define DE_X 1
+	#define DE_Y 0.375
+	#define DE_Z 0.375
+	#define DG_W 0.250
+	#define PEW 1
 #else
 	#define NPW 1 //No Profile
 #endif
@@ -3132,7 +3166,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define DE_Z ZPD_Boundary_Fade_Time_D
 #endif
 #ifndef DE_W
-    #define DE_W Weapon_Near_Depth_Max_D         //Max
+    #define DE_W Weapon_Near_Depth_Max_D          //Max
 #endif
 
 // X = [ZPD Weapon Boundary] Y = [Separation] Z = [ZPD Balance] W = [HUD]
@@ -3185,7 +3219,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define DI_Y LB_Masking_Offset_Y_D
 #endif
 #ifndef DI_Z
-    #define DI_Z Weapon_Near_Depth_Trim_D      //Trim
+    #define DI_Z Weapon_Near_Depth_Trim_D       //Trim
 #endif 
 #ifndef DI_W
 	#define DI_W REF_Check_Depth_Limit_D
@@ -3458,7 +3492,7 @@ float3 Weapon_Profiles(float WP ,float3 Weapon_Adjust) //Could reduce from 76 to
     if (WP == 18)
         Weapon_Adjust = float3(0.0,0.0,0.0);          //WP 16 | Game
     if (WP == 19)
-        Weapon_Adjust = float3(0.0,0.0,0.0);          //WP 17 | Game
+        Weapon_Adjust = float3(1.600,117.5,0.13);     //WP 17 | Halo Infinite
     if (WP == 20)
         Weapon_Adjust = float3(0.0,0.0,0.0);          //WP 18 | Game
     if (WP == 21)
