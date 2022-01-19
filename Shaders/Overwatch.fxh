@@ -3080,19 +3080,24 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DF_X 0.13
 	#define DG_Z 0.07
 	#define DI_Z 0.125
-	//#define DAA 1  
-#elif (App == 0x312862CF ) //Aliens: Fireteam Elite*
+	#define NDW 1  
+#elif (App == 0x312862CF ) //Aliens: Fireteam Elite**
 	#define DA_W 1
-	#define DA_X 0.080
+	#define DA_X 0.125  //Adjusted
 	#define DF_Y 0.025
-	#define DA_Y 25.0
-	#define DA_Z -0.025
-	#define DB_Y 5
+	#define DA_Y 15.00
+	#define DA_Z -0.0125
+	#define DB_Y 5      //Not Good enough for this game.
 	#define DE_X 1
 	#define DE_Y 0.375
-	#define DE_Z 0.375
+	#define DE_Z 0.400 //adjusted to make it react faster.
 	#define DG_W 0.250
+	#define DG_Z 0.07  //Added to fix super close to cam issues.
+	#define DI_Z 0.10  //The cutoff for above value.
+	#define BMT 1      //Added to override auto depth
+	#define DF_Z 0.125 //Locked adjusted value.
 	#define PEW 1
+	#define NDW 1  
 #else
 	#define NPW 1 //No Profile
 #endif
