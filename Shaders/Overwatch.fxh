@@ -3097,7 +3097,21 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define BMT 1      //Added to override auto depth
 	#define DF_Z 0.125 //Locked adjusted value.
 	#define PEW 1
-	#define NDW 1  
+	#define NDW 1
+#elif (App == 0x98746774 ) //God of War
+	#define DA_W 1
+	#define DA_X 0.175
+	#define DF_Y 0.01
+	#define DA_Y 8.75
+	#define DB_Z 0.250
+	#define DB_Y 1
+	#define DE_X 1
+	#define DE_Y 0.475
+	#define DE_Z 0.300
+	#define DG_W 0.125
+	#define DG_Z 0.0375  
+	#define DI_Z 0.10  
+	#define PEW 1   
 #else
 	#define NPW 1 //No Profile
 #endif
