@@ -3100,8 +3100,8 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define NDW 1
 #elif (App == 0x98746774 ) //God of War
 	#define DA_W 1
-	#define DA_X 0.14
-	#define DF_Y 0.125
+	#define DA_X 0.15
+	#define DF_Y 0.12
 	#define DA_Y 7.75
 	//#define DB_Z 0.250
 	#define DB_Y 5
