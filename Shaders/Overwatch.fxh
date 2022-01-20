@@ -1,7 +1,7 @@
 ////----------------------------------------//
 ///SuperDepth3D Overwatch Automation Shader///
 //----------------------------------------////
-// Version 2.3.1
+// Version 2.3.2
 //---------------------------------------OVERWATCH---------------------------------------//
 // If you are reading this stop. Go away and never look back. From this point on if you  //
 // still think it's is worth looking at this..... Then no one can save you or your soul. //
@@ -3100,19 +3100,19 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define NDW 1
 #elif (App == 0x98746774 ) //God of War
 	#define DA_W 1
-	#define DA_X 0.15
-	#define DF_Y 0.12
-	#define DA_Y 7.75
+	#define DA_X 0.14
+	#define DF_Y 0.075
+	//#define DA_Y 7.
 	//#define DB_Z 0.250
 	#define DB_Y 5
 	#define DE_X 1
 	#define DE_Y 0.475
 	#define DE_Z 0.300
-	#define DG_W 0.125
+	#define DG_W 0.150
 	#define DG_Z 0.0375  
 	#define DI_Z 0.10  
-	#define BMT 1      //Added to override auto depth
-	#define DF_Z 0.125 //Locked adjusted value.
+	#define BMT 1    
+	#define DF_Z 0.140
 	#define PEW 1   
 #else
 	#define NPW 1 //No Profile
