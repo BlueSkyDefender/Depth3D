@@ -602,12 +602,15 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 #elif (App == 0xC990B77C ) //Assassin's Origins
 	#define DA_W 1
 	#define DA_Y 50.0
-	#define DA_X 0.0475
+	#define DA_X 0.050
 	#define DB_Y 1
 	#define DE_X 2
-	#define DE_Y 0.4
+	#define DE_Y 0.375
 	#define DE_Z 0.375
 	#define DB_Z 0.1
+	#define DF_Y 0.005  
+	#define BMT 1    
+	#define DF_Z 0.130
 #elif (App == 0xBF222C03 ) //Among The Sleep
 	#define DA_X 0.05
 	#define DA_Y 15.0
