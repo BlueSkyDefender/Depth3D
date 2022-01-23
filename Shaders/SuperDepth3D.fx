@@ -2,7 +2,7 @@
 ///**SuperDepth3D**///
 //----------------////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//* Depth Map Based 3D post-process shader v2.9.9
+//* Depth Map Based 3D post-process shader v3.0.0
 //* For Reshade 3.0+
 //* ---------------------------------
 //*
@@ -265,7 +265,7 @@ uniform int View_Mode <
 	ui_label = "·View Mode·";
 	ui_tooltip = "Changes the way the shader fills in the occlude sections in the image.\n"
 				"Normal      | Normal output used for most games with it's streched look.\n"
-				"FlashBack   | is used for higher amounts of Semi-Transparent objects like foliage.\n"
+				"FlashBack       | Used for higher amounts of Semi-Transparent objects like foliage.\n"
 				"Reiteration | Same thing as Stamped but with brakeage points.\n"
 				"Stamped     | Stamps out a transparent area on the occluded area.\n"
 				"Adaptive    | is a scene adapting infilling that uses disruptive reiterative sampling.\n"
@@ -308,24 +308,36 @@ uniform int Performance_Level <
 				 "Default is Normal.";
 	ui_category = "Occlusion Masking";
 > = 1;
-
-uniform bool Compatibility_Mode <
+/* Needs to be worked on I need to make it smarter.
+uniform int Compatibility_Mode <
 	ui_label = " Compatibility Mode";
+	#if Compatibility
+	ui_type = "drag";
+	#else
+	ui_type = "slider";
+	#endif
+	ui_min = -4; ui_max = 4;
 	ui_tooltip = "Not all games need a high offset for infilling.\n"
-				 "This option lets you increase this offset to limit artifacts.\n"
-				 "With this on it should work better in games with TAA, FSR,and or DLSS.\n"
+				 "This option lets you increase this offset in both directions to limit artifacts.\n"
+				 "With this on it should work better in games with TAA, FSR,and or DLSS sometimes.\n"
 				 "Default is Off.";
 	ui_category = "Occlusion Masking";
-> = false;
- //Luma Based Variable Rate Shading
-uniform bool L_VRS <
-	ui_label = " Variable Rate Shading";
-	ui_tooltip = "Luma Based Variable Rate Shading reallocation occlusion samples at varying rates across the 3D image so save Performance.\n"
-				 "Please enable the 'Performance Mode Checkbox,' in ReShade's GUI.\n"
-				 "It's located in the lower bottom right of the ReShade's Main UI.\n"
-				 "Default is False.";
+> = 0;
+*/
+uniform float DLSS_FSR_Offset <
+	#if Compatibility
+	ui_type = "drag";
+	#else
+	ui_type = "slider";
+	#endif
+	ui_min = 0.0; ui_max = 4.0;
+	ui_label = " Upscailer Offset";
+	ui_tooltip = "This Offset is for non conforming ZBuffer Postion witch is normaly 1 pixel wide.\n"
+				 "This issue only happens sometimes when using things like DLSS or FSR.\n"
+				 "This does not solve for TAA artifacts like Jittering or smearing.\n"
+				 "Default and starts at Zero and it's Off. With a max offset of 4pixels Wide.";
 	ui_category = "Occlusion Masking";
-> = false;
+> = 0;
 
 uniform int Depth_Map <
 	ui_type = "combo";
@@ -1045,6 +1057,17 @@ float3x3 PrepDepth(float2 texcoord)
 
 	if (Flip_Depth)
 		texcoord.y =  1 - texcoord.y;
+	
+	//Texture Zoom & Aspect Ratio//
+	//float X = TEST.x;
+	//float Y = TEST.y * TEST.x * 2;
+	//float midW = (X - 1)*(BUFFER_WIDTH*0.5)*pix.x;	
+	//float midH = (Y - 1)*(BUFFER_HEIGHT*0.5)*pix.y;	
+				
+	//texcoord = float2((texcoord.x*X)-midW,(texcoord.y*Y)-midH);	
+	
+	texcoord.xy -= DLSS_FSR_Offset.x * pix;
+	
 	float4 DM = Depth(TC_SP(texcoord)).xxxx;
 	float R, G, B, A, WD = WeaponDepth(TC_SP(texcoord)).x, CoP = WeaponDepth(TC_SP(texcoord)).y, CutOFFCal = (CoP/DMA()) * 0.5; //Weapon Cutoff Calculation
 	CutOFFCal = step(DM.x,CutOFFCal);
@@ -1342,13 +1365,41 @@ float2 DB( float2 texcoord)
 ////////////////////////////////////////////////////Depth & Special Depth Triggers//////////////////////////////////////////////////////////////////
 void zBuffer(in float4 position : SV_Position, in float2 texcoord : TEXCOORD, out float2 Point_Out : SV_Target0 , out float Linear_Out : SV_Target1)
 {
-	float2 Set_Depth = DB( texcoord.xy ).xy;
+	float3 Set_Depth = float3(DB( texcoord.xy ).xy,0); // float Mask = Set_Depth.x;
+	/* Don't work anymore
+	if(Depth_Edge_Mask > 0 || Depth_Edge_Mask < 0)
+	{
+		float2 lr = float2(  DB( float2( texcoord.x - pix.x , texcoord.y ) ).x, DB( float2( texcoord.x + pix.x , texcoord.y ) ).x);
+		float n = -(lr.y - lr.x);
+		// Lets make that mask from Edges
+		Mask = length(n) * abs(Depth_Edge_Mask);
+		Mask = Mask > 0 ? 1-Mask : 1;
+		Mask = saturate(lerp(Mask,1,-1));
+		// Final Depth
+		if(Depth_Edge_Mask > 0)
+		{
+			float N = 0.5,F = 2,M = Mask, Z = (lr.x + lr.y) * 0.5,
+			ZS = ( Z - N ) / ( F - N);
+			ZS += Z;
+			ZS *= 0.5;
+			Mask = lerp(ZS,Set_Depth.x,Mask);
+		}
+		
+		if(Depth_Edge_Mask < 0)
+			Mask = lerp(1,Set_Depth.x,Mask);
+	}
+	
+	if(View_Mode == 0 || View_Mode == 3)	
+		Set_Depth.xz = float2(Mask,Mask);	
+	else
+		Set_Depth.xz = Depth_Edge_Mask < 0 ? float2(Set_Depth.x,Mask) : float2(Mask,Mask);
+	*/
 
 	if(1-texcoord.x < pix.x * 2 && 1-texcoord.y < pix.y * 2)
 		Set_Depth.y = AltWeapon_Fade();
-		
+	
 	Point_Out = Set_Depth.xy; 
-	Linear_Out = Set_Depth.x;	
+	Linear_Out = Set_Depth.x;//is z when above code is on.	
 }
 
 float2 GetDB(float2 texcoord)
@@ -1360,42 +1411,38 @@ float2 GetDB(float2 texcoord)
 		
 	return DepthBuffer_LP.xy;
 }
-//Perf Level selection
-static const float4 Performance_LvL[2] = { float4( 0.5, 0.5125, 0.679, 0.5 ), float4( 1.0, 1.025, 1.425, 1.0) };
+//Perf Level selection                             X    Y      Z      W              X    Y      Z      W
+static const float4 Performance_LvL[2] = { float4( 0.5, 0.5095, 0.679, 0.5 ), float4( 1.0, 1.019, 1.425, 1.0) };
 //////////////////////////////////////////////////////////Parallax Generation///////////////////////////////////////////////////////////////////////
 float2 Parallax(float Diverge, float2 Coordinates, float IO) // Horizontal parallax offset & Hole filling effect
-{   float MS = Diverge * pix.x, GetDepth = smoothstep(0,1,GetDB(Coordinates).x),
-			   Details = View_Mode > 0 ?  0.625 : 0.5,
+{   float MS = Diverge * pix.x, GetDepth = smoothstep(0,1,tex2Dlod(SamplerzBufferN_P, float4(Coordinates,0, 0) ).y),// CM_Clamp = clamp(abs(Compatibility_Mode),0,4),
+			   Details = 0.5,//CM_Power[5] = { 0.0, 0.5, 1.0, 1.5, 2.0}, NS_CM = Compatibility_Mode < 0 ? -CM_Power[(int)CM_Clamp] : CM_Power[(int)CM_Clamp] ,
 			   Perf = Performance_LvL[Performance_Level].x;
 	float2 ParallaxCoord = Coordinates, CBxy = floor( float2(Coordinates.x * BUFFER_WIDTH, Coordinates.y * BUFFER_HEIGHT));
 	//Would Use Switch....
 	if( View_Mode == 1)
-		Perf = Performance_LvL[Performance_Level].y;
+		Perf = fmod(CBxy.x*CBxy.y,2) ? Performance_LvL[Performance_Level].y : 0.5f;
 	if( View_Mode == 2)
 		Perf = Performance_LvL[Performance_Level].z;
 	if( View_Mode == 3)
-		Perf = Performance_LvL[Performance_Level].w;
+		Perf = Performance_LvL[Performance_Level].x;
 	if( View_Mode == 4)
 	{
 		if( GetDepth >= 0.999 )
-			Perf = fmod(CBxy.x+CBxy.y,2) ? 0.679 : 0.5;
+			Perf = fmod(CBxy.x+CBxy.y,2) ? 0.5 : 1.025;
 		else if( GetDepth >= 0.875)
-			Perf = fmod(CBxy.x+CBxy.y,2) ? 1.025 : 0.679;
+			Perf = fmod(CBxy.x+CBxy.y,2) ? 1.02 : 0.5;
 		else
-			Perf = fmod(CBxy.x+CBxy.y,2) ? 0.679 : 0.5;
+			Perf = fmod(CBxy.x+CBxy.y,2) ? 0.5 : 1.025;
 	}
 	
-	//Luma Based VRS
-	float LA_Out = lerp( 0.5f, View_Mode > 0 ? 1.0f : 0.75f, saturate(GetDepth));
-	if( L_VRS )
-		Perf *= lerp( 1.0, LA_Out, saturate(GetDepth * 4.0));  
 	//ParallaxSteps Calculations
-	float D = abs(Diverge), Cal_Steps = D * Perf, Steps = clamp( Cal_Steps, Performance_Level ? 20 : lerp(20,D,saturate(GetDepth) > 0.9 ), 200 );//Foveated Rendering Point of attack 16-256 limit samples.
+	float D = abs(Diverge), Cal_Steps = D * Perf, Steps = clamp( Cal_Steps, Performance_Level ? 20 : lerp(20,D,saturate(GetDepth > 0.998) ), 200 );//Foveated Rendering Point of attack 16-256 limit samples.
 	// Offset per step progress & Limit
-	float LayerDepth = rcp(Steps), TP = Compatibility_Mode ? 0.05 : 0.025;
+	float LayerDepth = rcp(Steps), TP = 0.0275;
 		  D = Diverge < 0 ? -75 : 75;
 	//Offsets listed here Max Seperation is 3% - 8% of screen space with Depth Offsets & Netto layer offset change based on MS.
-	float deltaCoordinates = MS * LayerDepth, CurrentDepthMapValue = GetDB(ParallaxCoord).y, CurrentLayerDepth = 0.0f,
+	float deltaCoordinates = MS * LayerDepth, CurrentDepthMapValue = GetDB(ParallaxCoord).x, CurrentLayerDepth = 0.0f,
 		  Offset_Switch = View_Mode > 0 ? 0.0 : 1.0, DB_Offset = D * TP * pix.x;
 
 	[loop] //Steep parallax mapping
@@ -1418,20 +1465,22 @@ float2 Parallax(float Diverge, float2 Coordinates, float IO) // Horizontal paral
 	float beforeDepthValue = Get_DB_ZDP, afterDepthValue = CurrentDepthMapValue - CurrentLayerDepth;
 		  beforeDepthValue += LayerDepth - CurrentLayerDepth;
 	// Depth Diffrence for Gap masking and depth scaling in Normal Mode.
-	float DepthDiffrence = afterDepthValue - beforeDepthValue, DD_Map = abs(DepthDiffrence) > 0.053, DDD = abs(beforeDepthValue - CurrentDepthMapValue);
-	// Interpolate coordinates
-	float weight = afterDepthValue / min(-0.01,DepthDiffrence);
-		ParallaxCoord.x = PrevParallaxCoord.x * weight + ParallaxCoord.x * (1.0f - weight);
+	float DepthDiffrence = afterDepthValue - beforeDepthValue;
+	float weight = afterDepthValue / min(-0.01,DepthDiffrence);  
+	
+	if(Diverge < 0)
+		ParallaxCoord.x = PrevParallaxCoord.x * weight + ParallaxCoord.x * (1 + (pix.x * -0.5) - weight);
+	else
+		ParallaxCoord.x = PrevParallaxCoord.x * weight + ParallaxCoord.x * (1 + (pix.x * 0.5) - weight);
 
 	//This is to limit artifacts.
 		ParallaxCoord.x += DB_Offset.x * Details;
+		
+	if(Diverge < 0)
+		ParallaxCoord.x += DepthDiffrence * 1.5 * pix.x;
+	else
+		ParallaxCoord.x -= DepthDiffrence * 1.5 * pix.x;
 
-	// Apply gap masking+
-		if(Diverge < 0)
-			ParallaxCoord.x -= lerp( 0, DDD * 2.5, DD_Map) * pix.x;
-		else
-			ParallaxCoord.x += lerp( 0, DDD * 2.5, DD_Map) * pix.x;	
-	
 	if(Stereoscopic_Mode == 2)
 		ParallaxCoord.y += IO * pix.y; //Optimization for line interlaced.
 	else if(Stereoscopic_Mode == 3)
@@ -1842,7 +1891,7 @@ float3 Out(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Targe
 {
 	float2 TC = float2(texcoord.x,1-texcoord.y);
 	float Text_Timer = 25000, BT = smoothstep(0,1,sin(timer*(3.75/1000))), Size = 1.1, Depth3D, Read_Help, Supported, ET, ETC, ETTF, ETTC, SetFoV, FoV, Post, Effect, NoPro, NotCom, Mod, Needs, Net, Over, Set, AA, Emu, Not, No, Help, Fix, Need, State, SetAA, SetWP, Work;
-	float3 Color = PS_calcLR(texcoord).rgb; //Color = texcoord.y > 0.5 ?  Lum(texcoord).y : tex2D(SamplerLumN,texcoord / Scale_AD).y;
+	float3 Color = PS_calcLR(texcoord).rgb; //Color = tex2Dlod(SamplerzBufferN_L, float4(texcoord,0, 0) ).y;
 		  
 	if(RHW || NCW || NPW || NFM || PEW || DSW || OSW || DAA || NDW || WPW || FOV || EDW)
 		Text_Timer = 30000;

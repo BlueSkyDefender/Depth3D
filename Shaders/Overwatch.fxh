@@ -1272,15 +1272,19 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define PEW 1
 	#define NFM 1
 #elif (App == 0x8CD23575 ) //Dark Souls: Remastered
-	#define DA_Y 75.0
-	//#define DA_Z 0.001
-	#define DA_X 0.05625
-	#define DF_Y 0.05
+	#define DA_Y 68.75
+	#define DA_Z -0.001
+	#define DA_X 0.072
+	#define DF_Y 0.1
 	#define DB_Y 2
 	#define DE_X 2
-	#define DE_Y 0.250
+	#define DE_Y 0.350
 	#define DE_Z 0.375
-	//#define DE_W 0.0625
+	#define DG_W 0.0625
+	#define DG_Z 0.075  
+	#define DI_Z 0.100
+	#define BMT 1    
+	#define DF_Z 0.125
 	#define PEW 1
 	#define FOV 1
 #elif (App == 0x9E071BC0 ) //Dark Souls III
