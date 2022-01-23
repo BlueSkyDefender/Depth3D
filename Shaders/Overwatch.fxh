@@ -1315,15 +1315,17 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DE_Z 0.40
 	#define DE_W 0.1
 #elif (App == 0xFB111509 ) //Dark Souls II Scholar of the First Sin
-	#define DA_Y 68.75
-	#define DA_X 0.05
-	#define DF_Y 0.05
-	#define DB_Y 2
-	#define DE_X 2
-	#define DE_Y 0.250
-	#define DE_Z 0.375
-	#define DG_Z 0.025 //Min
-  //#define DE_W 0.125 //Max
+	#define DA_Y 46.5
+	#define DA_X 0.045
+	#define DF_Y 0.0425
+	#define DB_Y 3
+	#define DE_X 1
+	#define DE_Y 0.550
+	#define DE_Z 0.350
+	#define DG_W 0.127 //Pop out
+	#define DG_Z 0.050 //Min
+	#define DI_Z 0.100 //Trim
+	#define DAA 1
 	#define PEW 1
 	#define FOV 1
 #elif (App == 0xCE5313C2 ) //BorderLands Enhanced
