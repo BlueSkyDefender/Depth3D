@@ -611,6 +611,8 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DF_Y 0.005  
 	#define BMT 1    
 	#define DF_Z 0.130
+	#define DG_Z 0.07  
+	#define DI_Z 0.120
 #elif (App == 0xBF222C03 ) //Among The Sleep
 	#define DA_X 0.05
 	#define DA_Y 15.0
