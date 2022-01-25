@@ -2,7 +2,7 @@
 ///**SuperDepth3D**///
 //----------------////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//* Depth Map Based 3D post-process shader v3.0.0
+//* Depth Map Based 3D post-process shader v3.0.1
 //* For Reshade 3.0+
 //* ---------------------------------
 //*
@@ -52,7 +52,9 @@
 	// DH_X = [LBC Size Offset X] DH_Y = [LBC Size Offset Y] DH_Z = [LBC Pos Offset X] DH_W = [LBC Pos Offset X]
 	static const float DH_X = 1.0, DH_Y = 1.0, DH_Z = 0.0, DH_W = 0.0;
 	// DI_X = [LBM Offset X] DI_Y = [LBM Offset Y] DI_Z = [Weapon Near Depth Trim] DI_W = [REF Check Depth Limit]
-	static const float DI_X = 0.0, DI_Y = 0.0, DI_Z = 0.25, DI_W = 0.0;		
+	static const float DI_X = 0.0, DI_Y = 0.0, DI_Z = 0.25, DI_W = 0.0;
+	// DJ_X = [NULL X] DJ_Y = [NULL Y] DJ_Z = [NULL Z] DJ_W = [Check Depth Limit Weapon]
+	static const float DJ_X = 0.0, DJ_Y = 0.0, DJ_Z = 0.25, DJ_W = -0.100;		
 	// WSM = [Weapon Setting Mode]
 	#define OW_WP "WP Off\0Custom WP\0"
 	static const int WSM = 0;
@@ -190,7 +192,7 @@
 #else
 	#define Mask_Cycle_Key Set_Key_Code_Here
 #endif
-//uniform float TEST < ui_type = "drag"; ui_min = 0; ui_max = 2; > = 1.0;
+//uniform float TEST < ui_type = "drag"; ui_min = -1; ui_max = 1; > = 1.0;
 //Divergence & Convergence//
 uniform float Divergence <
 	ui_type = "drag";
@@ -1218,7 +1220,7 @@ float2 Conv(float D,float2 texcoord)
 		[unroll] //only really only need to check one point just above the center bottom and to the right.
 		for( int i = 0 ; i < 8; i++ )
 		{
-			if(WP == 22 || WP == 4)//SoF & BL 2
+			if((WP == 22 || WP == 4) && WSM == 1)//SoF & BL 2
 				WZPDB = 1 - (WZPD_and_WND.x * WZDPArray[i]) / tex2Dlod(SamplerDMN,float4(float2(WArray[i],0.9375),0,0)).z;
 			else
 			{
@@ -1228,7 +1230,7 @@ float2 Conv(float D,float2 texcoord)
 					WZPDB = 1 - WZPD_and_WND.x / tex2Dlod(SamplerDMN,float4(float2(WArray[i],Distance_From_Bottom),0,0)).z;
 			}
 
-			if (WZPDB < -0.1)
+			if (WZPDB < -DJ_W) // Default -0.1
 				W_Convergence *= 1.0-abs(Weapon_ZPD_Boundary);
 		}
 	}

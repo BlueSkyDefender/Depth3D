@@ -1,7 +1,7 @@
 ////----------------------------------------//
 ///SuperDepth3D Overwatch Automation Shader///
 //----------------------------------------////
-// Version 2.3.2
+// Version 2.3.4
 //---------------------------------------OVERWATCH---------------------------------------//
 // If you are reading this stop. Go away and never look back. From this point on if you  //
 // still think it's is worth looking at this..... Then no one can save you or your soul. //
@@ -85,6 +85,12 @@ static const float LB_Masking_Offset_Y_D = 1.0;         //LetterBox Masking Offs
 static const float Weapon_Near_Depth_Trim_D = 0.25;     //Weapon Near Depth                     Trim    | DI_Z
 static const float REF_Check_Depth_Limit_D = 0.0;       //Resident Evil Fix Check Depth Limit           | DI_W
 
+static const float NULL_X_D = 0.0;                      //Null X                                        | DJ_X
+static const float NULL_Y_D = 0.0;                      //Null Y                                        | DJ_Y
+static const float NULL_Z_D = 0.0;                      //Null Z                                        | DJ_Z
+static const float Check_Depth_Limit_Weapon_D = -0.100; //Check Depth Limit Weapon                      | DJ_W
+
+
 //Special Toggles Defaults
 static const int Resident_Evil_Fix_D = 0;               //Resident Evil Fix                             | REF
 static const int HUD_Mode_Trigger_D = 0;                //HUD Mode Trigger                              | HMT
@@ -167,13 +173,16 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define NDW 1
 #elif (App == 0x2D950D30 )	//Fallout 4
 	#define DA_X 0.05
-	//#define DA_Y 7.8
-	#define DB_Y 3
-	#define DB_W 6
 	#define DF_Y 0.012
+	#define DA_Y 10.5
+//	#define DB_Y 3
 	#define DE_X 4
-	#define DE_Y 0.750
+	//#define DE_Y 0.500
 	#define DE_Z 0.375
+	#define DG_W -0.0875 //Neg Pop out
+	#define BMT 1    
+	#define DF_Z 0.012
+	#define DB_W 6
 	#define FOV 1
 	#define RHW 1
 	#define DSW 1
@@ -3124,7 +3133,24 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DI_Z 0.10  
 	#define BMT 1    
 	#define DF_Z 0.140
-	#define PEW 1   
+	#define PEW 1
+#elif (App == 0x1A2B216E ) //Crysis Remastered
+	#define DA_W 1
+	#define DA_X 0.050
+	#define DF_Y 0.01
+	#define DA_Y 11.25
+	//#define DB_Z 0.100
+	//#define DB_Y 5
+	#define DE_X 4
+	#define DE_Y 0.500
+	#define DE_Z 0.300
+	#define BMT 1    
+	#define DF_Z 0.125
+	#define WSM 2 //Weapon Settings Mode
+	#define DB_W 12
+    #define DF_X 0.350 
+	#define DJ_W 0.330
+	#define PEW 1  
 #else
 	#define NPW 1 //No Profile
 #endif
@@ -3255,6 +3281,20 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 #endif 
 #ifndef DI_W
 	#define DI_W REF_Check_Depth_Limit_D
+#endif
+
+// X = [NULL X] Y = [NULL Y] Z = [NULL Z] W = [Check Depth Limit Weapon]
+#ifndef DJ_X
+    #define DJ_X NULL_X_D
+#endif
+#ifndef DJ_Y
+    #define DJ_Y NULL_Y_D
+#endif
+#ifndef DJ_Z
+    #define DJ_Z NULL_Z_D
+#endif 
+#ifndef DJ_W
+	#define DJ_W Check_Depth_Limit_Weapon_D
 #endif
 
 //Special Toggles
@@ -3510,7 +3550,7 @@ float3 Weapon_Profiles(float WP ,float3 Weapon_Adjust) //Could reduce from 76 to
     if (WP == 11)
         Weapon_Adjust = float3(4.100,25.0,0.0);       //WP 9  | HROT
     if (WP == 12)
-        Weapon_Adjust = float3(0.0,0.0,0.0);          //WP 10 | Game
+        Weapon_Adjust = float3(0.284,25.0,0.8745);    //WP 10 | Crysis Remastered
     if (WP == 13)
         Weapon_Adjust = float3(0.0,0.0,0.0);          //WP 11 | Game
     if (WP == 14)

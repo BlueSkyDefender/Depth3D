@@ -2,7 +2,7 @@
 ///**SuperDepth3D_VR+**///
 //--------------------////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//* Depth Map Based 3D post-process shader v2.9.0
+//* Depth Map Based 3D post-process shader v2.9.1
 //* For Reshade 4.4+ I think...
 //* ---------------------------------
 //*
@@ -53,6 +53,8 @@
 	static const float DH_X = 1.0, DH_Y = 1.0, DH_Z = 0.0, DH_W = 0.0;
 	// DI_X = [LBM Offset X] DI_Y = [LBM Offset Y] DI_Z = [Weapon Near Depth Trim] DI_W = [REF Check Depth Limit]
 	static const float DI_X = 0.0, DI_Y = 0.0, DI_Z = 0.25, DI_W = 0.0;		
+	// DJ_X = [NULL X] DJ_Y = [NULL Y] DJ_Z = [NULL Z] DJ_W = [Check Depth Limit Weapon]
+	static const float DJ_X = 0.0, DJ_Y = 0.0, DJ_Z = 0.25, DJ_W = -0.100;	
 	// WSM = [Weapon Setting Mode]
 	#define OW_WP "WP Off\0Custom WP\0"
 	static const int WSM = 0;
@@ -262,7 +264,7 @@ uniform float ZPD_Balance <
 	ui_tooltip = "Zero Parallax Distance balances between ZPD Depth and Scene Depth.\n"
 				"Default is Zero is full Convergence and One is Full Depth.";
 	ui_category = "Divergence & Convergence";
-> = DE_X;
+> = DF_Z;
 
 static const int Auto_Balance_Ex = 0;
 #else
@@ -1336,7 +1338,7 @@ float2 Conv(float D,float2 texcoord)
 		[unroll] //only really only need to check one point just above the center bottom and to the right.
 		for( int i = 0 ; i < 8; i++ )
 		{
-			if(WP == 22 || WP == 4)//SoF & BL 2
+			if((WP == 22 || WP == 4) && WSM == 1)//SoF & BL 2
 				WZPDB = 1 - (WZPD_and_WND.x * WZDPArray[i]) / tex2Dlod(SamplerDMVR,float4(float2(WArray[i],0.9375),0,0)).z;
 			else
 			{
@@ -1346,7 +1348,7 @@ float2 Conv(float D,float2 texcoord)
 					WZPDB = 1 - WZPD_and_WND.x / tex2Dlod(SamplerDMVR,float4(float2(WArray[i],Distance_From_Bottom),0,0)).z;
 			}
 
-			if (WZPDB < -0.1)
+			if (WZPDB < -DJ_W) // Default -0.1
 				W_Convergence *= 1.0-abs(Weapon_ZPD_Boundary);
 		}
 	}
