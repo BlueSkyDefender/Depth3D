@@ -3150,7 +3150,24 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DB_W 12
     #define DF_X 0.350 
 	#define DJ_W 0.330
-	#define PEW 1  
+	#define PEW 1
+#elif (App == 0x130E0740 ) //Crysis 2 Remastered
+	#define DA_X 0.050
+	#define DF_Y 0.01
+	#define DA_Y 13.75
+	//#define DB_Z 0.100
+	//#define DB_Y 5
+	#define DE_X 4
+	#define DE_Y 0.375
+	#define DE_Z 0.375
+	#define BMT 1    
+	#define DF_Z 0.1375
+	#define WSM 2 //Weapon Settings Mode
+	#define DB_W 13
+    #define DF_X 0.300 
+	#define DJ_W 0.330
+	#define PEW 1 
+	#define DAA 1 
 #else
 	#define NPW 1 //No Profile
 #endif
@@ -3552,7 +3569,7 @@ float3 Weapon_Profiles(float WP ,float3 Weapon_Adjust) //Could reduce from 76 to
     if (WP == 12)
         Weapon_Adjust = float3(0.284,25.0,0.8745);    //WP 10 | Crysis Remastered
     if (WP == 13)
-        Weapon_Adjust = float3(0.0,0.0,0.0);          //WP 11 | Game
+        Weapon_Adjust = float3(0.284,15.0,7.200);     //WP 11 | Crysis 2 Remastered
     if (WP == 14)
         Weapon_Adjust = float3(0.0,0.0,0.0);          //WP 12 | Game
     if (WP == 15)
