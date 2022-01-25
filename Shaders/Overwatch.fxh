@@ -3153,7 +3153,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define PEW 1
 #elif (App == 0x130E0740 ) //Crysis 2 Remastered
 	#define DA_X 0.050
-	#define DF_Y 0.01
+	#define DF_Y 0.005
 	#define DA_Y 13.75
 	//#define DB_Z 0.100
 	//#define DB_Y 5
@@ -3166,6 +3166,23 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DB_W 13
     #define DF_X 0.300 
 	#define DJ_W 0.330
+	#define PEW 1 
+	#define DAA 1
+#elif (App == 0x2EFB1B0B ) //Crysis 3 Remastered
+	#define DA_X 0.050
+	#define DF_Y 0.005
+	#define DA_Y 13.75
+	//#define DB_Z 0.100
+	//#define DB_Y 5
+	#define DE_X 4
+	#define DE_Y 0.375
+	#define DE_Z 0.375
+	#define BMT 1    
+	#define DF_Z 0.180
+	#define WSM 2 //Weapon Settings Mode
+	#define DB_W 14
+    #define DF_X 0.250 
+	#define DJ_W 0.300
 	#define PEW 1 
 	#define DAA 1 
 #elif (App == 0x16848B0F ) // HITMAN 3**
