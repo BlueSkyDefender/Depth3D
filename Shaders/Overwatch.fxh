@@ -3082,24 +3082,24 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DAA 1  
 #elif (App == 0xDE4C92BB ) //Halo Infinite
 	#define DA_W 1
-	#define DA_X 0.1
-	#define DF_Y 0.01
-	#define DA_Y 62.5    
+	#define DA_X 0.075
+	#define DF_Y 0.0175
+	#define DA_Y 90.0  
 	//#define DB_Z 0.125
 	#define DB_Y 1
-	#define DE_X 5
-	#define DE_Y 0.5
+	#define DE_X 4
+	#define DE_Y 0.475
 	#define DE_Z 0.4
 	//#define DG_Z 0.01
 	//#define DI_Z 0.225
 	#define BMT 1
-	#define DF_Z 0.125
-	#define DG_W -0.1
+	#define DF_Z 0.130
+	#define DG_W -0.075
 	#define WSM 2 //Weapon Settings Mode
 	#define DB_W 19//Weapon Selection
 	#define DF_X 0.13
-	#define DG_Z 0.07
-	#define DI_Z 0.125
+	#define DG_Z 0.06
+	#define DI_Z 0.070
 	#define NDW 1  
 #elif (App == 0x312862CF ) //Aliens: Fireteam Elite**
 	#define DA_W 1
@@ -3597,7 +3597,7 @@ float3 Weapon_Profiles(float WP ,float3 Weapon_Adjust) //Could reduce from 76 to
     if (WP == 13)
         Weapon_Adjust = float3(0.284,15.0,7.200);     //WP 11 | Crysis 2 Remastered
     if (WP == 14)
-        Weapon_Adjust = float3(0.0,0.0,0.0);          //WP 12 | Game
+        Weapon_Adjust = float3(0.284,12.5,10.625);    //WP 12 | Crysis 3 Remastered
     if (WP == 15)
         Weapon_Adjust = float3(0.0,0.0,0.0);          //WP 13 | Game
     if (WP == 16)
@@ -3607,7 +3607,7 @@ float3 Weapon_Profiles(float WP ,float3 Weapon_Adjust) //Could reduce from 76 to
     if (WP == 18)
         Weapon_Adjust = float3(0.0,0.0,0.0);          //WP 16 | Game
     if (WP == 19)
-        Weapon_Adjust = float3(1.600,117.5,0.13);     //WP 17 | Halo Infinite
+        Weapon_Adjust = float3(1.550,117.5,0.125);    //WP 17 | Halo Infinite
     if (WP == 20)
         Weapon_Adjust = float3(0.0,0.0,0.0);          //WP 18 | Game
     if (WP == 21)
