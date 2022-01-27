@@ -3194,6 +3194,15 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define DE_Y 0.4375
     #define DE_Z 0.300
 	#define PEW 1
+#elif (App == 0xB5F52BDD ) // Abzu
+    #define DA_W 1
+    #define DA_X 0.100
+    #define DF_Y 0.015
+	#define DA_Y 18.75    
+    #define DB_Y 5
+    #define DE_X 1
+    //#define DE_Y 0.500
+    #define DE_Z 0.300
 #else
 	#define NPW 1 //No Profile
 #endif
