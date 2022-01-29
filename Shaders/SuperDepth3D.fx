@@ -2,7 +2,7 @@
 ///**SuperDepth3D**///
 //----------------////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//* Depth Map Based 3D post-process shader v3.0.1
+//* Depth Map Based 3D post-process shader v3.0.2
 //* For Reshade 3.0+
 //* ---------------------------------
 //*
@@ -263,11 +263,11 @@ uniform float2 ZPD_Boundary_n_Fade <
 
 uniform int View_Mode <
 	ui_type = "combo";
-	ui_items = "VM0 Normal \0VM1 FlashBack \0VM2 Reiteration \0VM3 Stamped \0VM4 Adaptive \0";
+	ui_items = "VM0 Normal \0VM1 Mixed \0VM2 Reiteration \0VM3 Stamped \0VM4 Adaptive \0";
 	ui_label = "·View Mode·";
 	ui_tooltip = "Changes the way the shader fills in the occlude sections in the image.\n"
 				"Normal      | Normal output used for most games with it's streched look.\n"
-				"FlashBack       | Used for higher amounts of Semi-Transparent objects like foliage.\n"
+				"Mixed       | Used for higher amounts of Semi-Transparent objects like foliage.\n"
 				"Reiteration | Same thing as Stamped but with brakeage points.\n"
 				"Stamped     | Stamps out a transparent area on the occluded area.\n"
 				"Adaptive    | is a scene adapting infilling that uses disruptive reiterative sampling.\n"
@@ -1363,40 +1363,12 @@ float2 DB( float2 texcoord)
 
 	return float2(DM.y,DM.w);
 }
-#define Depth_Edge_Mask 0 //WIP
+
 ////////////////////////////////////////////////////Depth & Special Depth Triggers//////////////////////////////////////////////////////////////////
 void zBuffer(in float4 position : SV_Position, in float2 texcoord : TEXCOORD, out float2 Point_Out : SV_Target0 , out float Linear_Out : SV_Target1)
 {
-	float3 Set_Depth = float3(DB( texcoord.xy ).xy,0); // float Mask = Set_Depth.x;
-	/* Don't work anymore
-	if(Depth_Edge_Mask > 0 || Depth_Edge_Mask < 0)
-	{
-		float2 lr = float2(  DB( float2( texcoord.x - pix.x , texcoord.y ) ).x, DB( float2( texcoord.x + pix.x , texcoord.y ) ).x);
-		float n = -(lr.y - lr.x);
-		// Lets make that mask from Edges
-		Mask = length(n) * abs(Depth_Edge_Mask);
-		Mask = Mask > 0 ? 1-Mask : 1;
-		Mask = saturate(lerp(Mask,1,-1));
-		// Final Depth
-		if(Depth_Edge_Mask > 0)
-		{
-			float N = 0.5,F = 2,M = Mask, Z = (lr.x + lr.y) * 0.5,
-			ZS = ( Z - N ) / ( F - N);
-			ZS += Z;
-			ZS *= 0.5;
-			Mask = lerp(ZS,Set_Depth.x,Mask);
-		}
-		
-		if(Depth_Edge_Mask < 0)
-			Mask = lerp(1,Set_Depth.x,Mask);
-	}
+	float2 Set_Depth = DB( texcoord.xy ).xy;
 	
-	if(View_Mode == 0 || View_Mode == 3)	
-		Set_Depth.xz = float2(Mask,Mask);	
-	else
-		Set_Depth.xz = Depth_Edge_Mask < 0 ? float2(Set_Depth.x,Mask) : float2(Mask,Mask);
-	*/
-
 	if(1-texcoord.x < pix.x * 2 && 1-texcoord.y < pix.y * 2)
 		Set_Depth.y = AltWeapon_Fade();
 	
@@ -1413,6 +1385,18 @@ float2 GetDB(float2 texcoord)
 		
 	return DepthBuffer_LP.xy;
 }
+/*
+float C_Mask(float2 texcoord)
+{ //tex2Dlod(SamplerDMN,float4(texcoord,0,0)).w
+	float FormatEdge = smoothstep(0,1,tex2Dlod(SamplerzBufferN_L, float4(texcoord,0, 0) ).x);//PrepDepth(texcoord)[1][1];
+	float dx = ddx(FormatEdge),dy = ddy(FormatEdge), MASK = (dx - dy);
+	float DX = sqrt(dx*dx), DY = sqrt(dy*dy);
+	
+	float2 CDHV = float2(lerp(DX,0,DY) , lerp(DY,0,DX)) > 0.01;
+	float CombDXY = abs(CDHV.x-CDHV.y);//Can control power here.
+	return length(CDHV) - CombDXY;////float3(CDHV,0) - CombDXY;//Debug; 
+}
+*/
 //Perf Level selection                             X    Y      Z      W              X    Y      Z      W
 static const float4 Performance_LvL[2] = { float4( 0.5, 0.5095, 0.679, 0.5 ), float4( 1.0, 1.019, 1.425, 1.0) };
 //////////////////////////////////////////////////////////Parallax Generation///////////////////////////////////////////////////////////////////////
@@ -1423,7 +1407,7 @@ float2 Parallax(float Diverge, float2 Coordinates, float IO) // Horizontal paral
 	float2 ParallaxCoord = Coordinates, CBxy = floor( float2(Coordinates.x * BUFFER_WIDTH, Coordinates.y * BUFFER_HEIGHT));
 	//Would Use Switch....
 	if( View_Mode == 1)
-		Perf = fmod(CBxy.x*CBxy.y,2) ? Performance_LvL[Performance_Level].y : 0.5f;
+		Perf = fmod(CBxy.x*CBxy.y,2) ? Performance_LvL[Performance_Level].z : fmod(CBxy.x+CBxy.y,2) ? 1.020f : 1.025f;
 	if( View_Mode == 2)
 		Perf = Performance_LvL[Performance_Level].z;
 	if( View_Mode == 3)
@@ -1441,48 +1425,51 @@ float2 Parallax(float Diverge, float2 Coordinates, float IO) // Horizontal paral
 	//ParallaxSteps Calculations
 	float D = abs(Diverge), Cal_Steps = D * Perf, Steps = clamp( Cal_Steps, Performance_Level ? 20 : lerp(20,D,saturate(GetDepth > 0.998) ), 200 );//Foveated Rendering Point of attack 16-256 limit samples.
 	// Offset per step progress & Limit
-	float LayerDepth = rcp(Steps), TP = 0.0275;
+	float LayerDepth = rcp(Steps), TP = View_Mode > 0 ? 0.05 : 0.025;
 		  D = Diverge < 0 ? -75 : 75;
+
 	//Offsets listed here Max Seperation is 3% - 8% of screen space with Depth Offsets & Netto layer offset change based on MS.
 	float deltaCoordinates = MS * LayerDepth, CurrentDepthMapValue = GetDB(ParallaxCoord).x, CurrentLayerDepth = 0.0f,
 		  Offset_Switch = View_Mode > 0 ? 0.0 : 1.0, DB_Offset = D * TP * pix.x;
-
+		  
 	[loop] //Steep parallax mapping
 	while ( CurrentDepthMapValue > CurrentLayerDepth )
 	{   // Shift coordinates horizontally in linear fasion
-	    ParallaxCoord.x -= deltaCoordinates;
+	    ParallaxCoord.x -= deltaCoordinates; 
 	    // Get depth value at current coordinates
-	    CurrentDepthMapValue = GetDB(float2(ParallaxCoord.x - (DB_Offset * Offset_Switch),ParallaxCoord.y) ).x;
+	    CurrentDepthMapValue = GetDB(float2(ParallaxCoord.x - (DB_Offset * 2 * Offset_Switch),ParallaxCoord.y) ).x;
 	    // Get depth of next layer
 	    CurrentLayerDepth += LayerDepth;
 		continue;
 	}
-	
+ 
 	float2 PrevParallaxCoord = float2(ParallaxCoord.x + deltaCoordinates, ParallaxCoord.y);	
 	//Anti-Weapon Hand Fighting
 	float Weapon_Mask = tex2Dlod(SamplerDMN,float4(Coordinates,0,0)).y, ZFighting_Mask = 1.0-(1.0-tex2Dlod(SamplerLumN,float4(Coordinates,0,1.400)).w - Weapon_Mask);
 		  ZFighting_Mask = ZFighting_Mask * (1.0-Weapon_Mask);
-	float Get_DB = GetDB(float2( (View_Mode > 0 ? ParallaxCoord.x : lerp(ParallaxCoord.x, lerp(ParallaxCoord.x,PrevParallaxCoord.x,0.5), saturate(GetDepth * 5.0))), PrevParallaxCoord.y ) ).y, Get_DB_ZDP = WP > 0 ? lerp(Get_DB, abs(Get_DB), ZFighting_Mask) : Get_DB;
+		  float PCoord = (View_Mode > 0 ? ParallaxCoord.x : lerp(ParallaxCoord.x, lerp(ParallaxCoord.x,PrevParallaxCoord.x,0.5), saturate(GetDepth * 5.0)));
+	float Get_DB = GetDB(float2( PCoord, PrevParallaxCoord.y ) ).y, Get_DB_ZDP = WP > 0 ? lerp(Get_DB, abs(Get_DB), ZFighting_Mask) : Get_DB;
 	// Parallax Occlusion Mapping
 	float beforeDepthValue = Get_DB_ZDP, afterDepthValue = CurrentDepthMapValue - CurrentLayerDepth;
 		  beforeDepthValue += LayerDepth - CurrentLayerDepth;
 	// Depth Diffrence for Gap masking and depth scaling in Normal Mode.
 	float DepthDiffrence = afterDepthValue - beforeDepthValue;
-	float weight = afterDepthValue / min(-0.01,DepthDiffrence);  
-	
-	if(Diverge < 0)
-		ParallaxCoord.x = PrevParallaxCoord.x * weight + ParallaxCoord.x * (1 + (pix.x * -0.5) - weight);
-	else
-		ParallaxCoord.x = PrevParallaxCoord.x * weight + ParallaxCoord.x * (1 + (pix.x * 0.5) - weight);
+	float weight = afterDepthValue / min(-0.0125,DepthDiffrence);  
+
+		ParallaxCoord.x = PrevParallaxCoord.x * abs(weight) + ParallaxCoord.x * (1 - weight);
 
 	//This is to limit artifacts.
+	if(View_Mode > 0)
+	{
 		ParallaxCoord.x += DB_Offset.x * Details;
 		
 	if(Diverge < 0)
 		ParallaxCoord.x += DepthDiffrence * 1.5 * pix.x;
 	else
 		ParallaxCoord.x -= DepthDiffrence * 1.5 * pix.x;
+	}
 
+	
 	if(Stereoscopic_Mode == 2)
 		ParallaxCoord.y += IO * pix.y; //Optimization for line interlaced.
 	else if(Stereoscopic_Mode == 3)

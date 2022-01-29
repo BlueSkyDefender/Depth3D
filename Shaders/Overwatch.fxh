@@ -1995,8 +1995,8 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DE_Y 0.500
 	#define DE_Z 0.375
 #elif (App == 0x49F7B9C0 || App == 0x837F12C9 ) //Control DX12 | QuantumBreak DX11
-	#define DA_X 0.05625
-	#define DF_Y 0.0625
+	#define DA_X 0.05125
+	#define DF_Y 0.06125
 	#define DA_Y 18.75
 	#define DB_Y 3
 	#define DE_X 1
@@ -2172,6 +2172,8 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DE_X 2
 	#define DE_Y 0.500
 	#define DE_Z 0.300
+	#define BMT 1
+	#define DF_Z 0.1625
 	#define PEW 1
 	#define DAA 1
 #elif (App == 0xA05A15C4 ) //Spooky's House of Jump Scares
