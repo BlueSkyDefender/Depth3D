@@ -1711,18 +1711,20 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DAA 1
 #elif (App == 0x3604DCE6 ) //Remnant: From the Ashes
 	#define DA_W 1
-	#define DA_X 0.07
-	#define DF_Y 0.032
-	#define DA_Y 16.25
+	#define DA_X 0.060
+	#define DF_Y 0.05
+	#define DA_Y 19.0
 	#define DB_Y 2
 	#define DE_X 2
-	#define DE_Y 0.450
+	//#define DE_Y 0.450
 	#define DE_Z 0.375
-	#define DA_Z -0.050
+	#define DA_Z 0.000125 //-0.0375 //-0.050
 	//#define DG_W 0.25
 	//#define DF_Z -0.125
-	//#define BMT 1
-	//#define DF_Z 0.1
+	#define DG_Z 0.020  //Added to fix super close to cam issues.
+	#define DI_Z 0.125  //and cutoff for cam
+	#define BMT 1
+	#define DF_Z 0.1375
 	#define NDW 1
 	#define PEW 1
 	#define LBC 2  //Letter Box Correction Offsets With X & Y
