@@ -2763,15 +2763,19 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define NDW 1
 #elif (App == 0xEEAF4DE ) //Guardians of the galaxy
     #define DA_W 1
-	#define DA_Y 54.0
+	#define DA_Y 52.0
 	#define DA_X 0.05
-	#define DB_Y 1
-	#define DB_Z 0.12
-	#define DE_X 1
-	#define DE_Y 0.375
-	#define DE_Z 0.400
 	#define DF_Y 0.0375
-	#define DG_W 0.2
+	#define DB_Z 0.110
+	#define DB_Y 2
+	#define DE_X 1
+	#define DE_Y 0.420
+	#define DE_Z 0.400
+	#define DG_W 0.1625//Pop
+	#define DG_Z 0.025 //0.040
+	#define DI_Z 0.030
+	//#define BMT 1
+	//#define DF_Z 0.165
 	#define DAA 1
 	#define PEW 1
 #elif (App == 0x967BB1CC ) //HROT
