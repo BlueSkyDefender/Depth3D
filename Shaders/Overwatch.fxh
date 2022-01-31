@@ -312,11 +312,13 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DA_Z -0.000125
 	#define DG_W 0.1
 	#define DB_W 38
-	#define DG_Z 0.341
+	#define DG_Z 0.350 //0.130
+	//#define DI_Z 0.130
 	#define DE_X 4
 	//#define DE_Y 0.375
 	#define DE_Z 0.375
 	#define DF_X 0.25
+	#define DJ_W 0.4125 //TEMP
 	#define FOV 1
 	#define RHW 1
 #elif (App == 0x6FB6410B ) //Cryostasis
@@ -3507,7 +3509,7 @@ float3 Weapon_Profiles(float WP ,float3 Weapon_Adjust) //Tried Switch But, can't
     if (WP == 37)
         Weapon_Adjust = float3(0.0,0.0,0.0);          //WP 35 | Game
     if (WP == 38)
-        Weapon_Adjust = float3(0.78,21.25,0.1875);    //WP 36 | SOMA
+        Weapon_Adjust = float3(0.78,20.0,0.180);      //WP 36 | SOMA
     if (WP == 39)
         Weapon_Adjust = float3(0.444,20.0,1.1875);    //WP 37 | Cryostasis
     if (WP == 40)
