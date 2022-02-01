@@ -2,7 +2,7 @@
 ///**SuperDepth3D**///
 //----------------////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//* Depth Map Based 3D post-process shader v3.0.2
+//* Depth Map Based 3D post-process shader v3.0.3
 //* For Reshade 3.0+
 //* ---------------------------------
 //*
@@ -1174,10 +1174,16 @@ float2 Fade(float2 texcoord) // Maybe make it float2 and pass the 2nd switch to 
 	//Fade in toggle.
 	return float2( PStoredfade_A + (Trigger_Fade_A - PStoredfade_A) * (1.0 - exp(-frametime/AA)), PStoredfade_B + (Trigger_Fade_B - PStoredfade_B) * (1.0 - exp(-frametime/AA)) ); ///exp2 would be even slower
 }
-#define FadeSpeed_AW 0.3
+#define FadeSpeed_AW 0.25
 float AltWeapon_Fade()
 {
 	float  ExAd = (1-(FadeSpeed_AW * 2.0))*1000, Current =  min(0.75f,smoothstep(0,0.25f,PrepDepth(0.5f)[0][0])), Past = tex2D(SamplerLumN,float2(0,0.750)).z;
+	return Past + (Current - Past) * (1.0 - exp(-frametime/ExAd));
+}
+
+float Weapon_ZPD_Fade(float Weapon_Con)
+{
+	float  ExAd = (1-(FadeSpeed_AW * 2.0))*1000, Current =  Weapon_Con, Past = tex2D(SamplerLumN,float2(0,0.916)).z;
 	return Past + (Current - Past) * (1.0 - exp(-frametime/ExAd));
 }
 //////////////////////////////////////////////////////////Depth Map Alterations/////////////////////////////////////////////////////////////////////
@@ -1210,8 +1216,8 @@ float AutoDepthRange(float d, float2 texcoord )
     return min(1,( d - 0 ) / ( LumAdjust_ADR - 0));
 }
 
-float2 Conv(float D,float2 texcoord)
-{	float Z = ZPD_Separation.x, WZP = 0.5, ZP = 0.5, ALC = abs(Lum(texcoord).x), W_Convergence = WZPD_and_WND.x, WZPDB, Distance_From_Bottom = 0.9375, ZPD_Boundary = ZPD_Boundary_n_Fade.x;
+float3 Conv(float2 MD_WHD,float2 texcoord)
+{	float D = MD_WHD.x, Z = ZPD_Separation.x, WZP = 0.5, ZP = 0.5, ALC = abs(Lum(texcoord).x), W_Convergence = WZPD_and_WND.x, WZPDB, Distance_From_Bottom = 0.9375, ZPD_Boundary = ZPD_Boundary_n_Fade.x, Store_WC;
     //Screen Space Detector.
 	if (abs(Weapon_ZPD_Boundary) > 0)
 	{   float WArray[8] = { 0.5, 0.5625, 0.625, 0.6875, 0.75, 0.8125, 0.875, 0.9375},
@@ -1234,9 +1240,11 @@ float2 Conv(float D,float2 texcoord)
 				W_Convergence *= 1.0-abs(Weapon_ZPD_Boundary);
 		}
 	}
-
-	W_Convergence = 1 - W_Convergence / D;
-	float WD = D; //Needed to seperate Depth for the  Weapon Hand. It was causing problems with Auto Depth Range below.
+	//Store Weapon Convergence for Smoothing.
+	Store_WC = W_Convergence;
+	
+	W_Convergence = 1 - tex2D(SamplerLumN,float2(0,0.916)).z / MD_WHD.y;// 1-W_Convergence/D
+	float WD = MD_WHD.y; //Needed to seperate Depth for the  Weapon Hand. It was causing problems with Auto Depth Range below.
 
 		if (Auto_Depth_Adjust > 0)
 			D = AutoDepthRange(D,texcoord);
@@ -1247,7 +1255,7 @@ float2 Conv(float D,float2 texcoord)
 		if(Auto_Balance_Ex > 0 )
 			ZP = saturate(ALC);
 	#endif
-		float DOoR = smoothstep(0,1,tex2D(SamplerLumN,float2(0, 0.416)).z), ZDP_Array[11] = { 0.0, 0.0125, 0.025, 0.0375, 0.04375, 0.05, 0.0625, 0.075, 0.0875, 0.09375, 0.1};
+		float DOoR = smoothstep(0,1,tex2D(SamplerLumN,float2(0, 0.416)).z), ZDP_Array[16] = { 0.0, 0.0125, 0.025, 0.0375, 0.04375, 0.05, 0.0625, 0.075, 0.0875, 0.09375, 0.1, 0.125, 0.150, 0.175, 0.20, 0.225};
 		
 		if(REF || RE_Fix)
 		{
@@ -1271,10 +1279,10 @@ float2 Conv(float D,float2 texcoord)
 		ZP = min(ZP,Auto_Balance_Clamp);
 
 		float Separation = lerp(1.0,5.0,ZPD_Separation.y);
-    return float2(lerp(Separation * Convergence,min(saturate(Max_Depth),D), ZP),lerp(W_Convergence,WD,WZP));
+    return float3( lerp(Separation * Convergence,min(saturate(Max_Depth),D), ZP), lerp(W_Convergence,WD,WZP), Store_WC);
 }
 
-float2 DB( float2 texcoord)
+float3 DB( float2 texcoord)
 {
 	// X = Mix Depth | Y = Weapon Mask | Z = Weapon Hand | W = Normal Depth
 	float4 DM = float4(tex2Dlod(SamplerDMN,float4(texcoord,0,0)).xyz,PrepDepth(texcoord)[1][1]);
@@ -1289,7 +1297,8 @@ float2 DB( float2 texcoord)
 	if (WP == 0 || WZPD_and_WND.x <= 0)
 		DM.y = 0;
 	//Handle Convergence Here
-	DM.y = lerp(Conv(DM.x,texcoord).x, Conv(DM.z,texcoord).y, DM.y);
+	float3 HandleConvergence = Conv(DM.xz,texcoord).xyz;	
+	DM.y = lerp( HandleConvergence.x, HandleConvergence.y, DM.y);
 	//Better mixing for eye Comfort
 	DM.z = DM.y;
 	DM.y += lerp(DM.y,DM.x,DM.w);
@@ -1361,16 +1370,18 @@ float2 DB( float2 texcoord)
 	#endif
 	}
 
-	return float2(DM.y,DM.w);
+	return float3(DM.y,DM.w,HandleConvergence.z);
 }
 
 ////////////////////////////////////////////////////Depth & Special Depth Triggers//////////////////////////////////////////////////////////////////
 void zBuffer(in float4 position : SV_Position, in float2 texcoord : TEXCOORD, out float2 Point_Out : SV_Target0 , out float Linear_Out : SV_Target1)
 {
-	float2 Set_Depth = DB( texcoord.xy ).xy;
+	float3 Set_Depth = DB( texcoord.xy ).xyz;
 	
-	if(1-texcoord.x < pix.x * 2 && 1-texcoord.y < pix.y * 2)
+	if(1-texcoord.x < pix.x * 2 && 1-texcoord.y < pix.y * 2) //BR
 		Set_Depth.y = AltWeapon_Fade();
+	if(  texcoord.x < pix.x * 2 && 1-texcoord.y < pix.y * 2) //BL
+		Set_Depth.y = Weapon_ZPD_Fade(Set_Depth.z);
 	
 	Point_Out = Set_Depth.xy; 
 	Linear_Out = Set_Depth.x;//is z when above code is on.	
@@ -1822,12 +1833,12 @@ float4 Average_Luminance(float4 position : SV_Position, float2 texcoord : TEXCOO
 	float Average_Lum_ZPD = PrepDepth(float2(ABEA.x + texcoord.x * ABEA.y, ABEA.z + texcoord.y * ABEA.w))[0][0], Average_Lum_Bottom = PrepDepth( texcoord )[0][0];
 
 	const int Num_of_Values = 6; //6 total array values that map to the textures width.
-	float Storage__Array[Num_of_Values] = { tex2D(SamplerDMN,0).x, //0.125 //0.083
-                                tex2D(SamplerDMN,1).x,             //0.375 //0.250
-                                tex2D(SamplerDMN,int2(0,1)).x,     //0.625 //0.416
-                                1.0,                               //0.875 //0.583
-								tex2D(SamplerzBufferN_P,1).y,      //????? //0.750
-								1.0};                              //????? //0.916
+	float Storage__Array[Num_of_Values] = { tex2D(SamplerDMN,0).x,    //0.083
+                                tex2D(SamplerDMN,1).x,                //0.250
+                                tex2D(SamplerDMN,int2(0,1)).x,        //0.416
+                                1.0,                                  //0.583
+								tex2D(SamplerzBufferN_P,1).y,         //0.750
+								tex2D(SamplerzBufferN_P,int2(0,1)).y};//0.916
 
 	//Set a avr size for the Number of lines needed in texture storage.
 	float Grid = floor(texcoord.y * BUFFER_HEIGHT * BUFFER_RCP_HEIGHT * Num_of_Values);
@@ -1880,7 +1891,7 @@ float3 Out(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Targe
 {
 	float2 TC = float2(texcoord.x,1-texcoord.y);
 	float Text_Timer = 25000, BT = smoothstep(0,1,sin(timer*(3.75/1000))), Size = 1.1, Depth3D, Read_Help, Supported, ET, ETC, ETTF, ETTC, SetFoV, FoV, Post, Effect, NoPro, NotCom, Mod, Needs, Net, Over, Set, AA, Emu, Not, No, Help, Fix, Need, State, SetAA, SetWP, Work;
-	float3 Color = PS_calcLR(texcoord).rgb; //Color = tex2Dlod(SamplerzBufferN_L, float4(texcoord,0, 0) ).y;
+	float3 Color = PS_calcLR(texcoord).rgb; //Color = tex2D(SamplerLumN,texcoord).z;
 		  
 	if(RHW || NCW || NPW || NFM || PEW || DSW || OSW || DAA || NDW || WPW || FOV || EDW)
 		Text_Timer = 30000;

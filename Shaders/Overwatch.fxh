@@ -318,7 +318,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	//#define DE_Y 0.375
 	#define DE_Z 0.375
 	#define DF_X 0.25
-	#define DJ_W 0.4125 //TEMP
+	#define DJ_W 0.40 //TEMP
 	#define FOV 1
 	#define RHW 1
 #elif (App == 0x6FB6410B ) //Cryostasis
@@ -2167,17 +2167,20 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DA_W 1
     //#define DB_X 1
 	#define DA_Y 12.5
-	#define DA_X 0.075
+	#define DA_X 0.0620
 	#define DF_Y 0.0125
 	//#define DF_Y 0.1
 	#define DB_Y 4
 	//#define DB_Z 0.125
 	//#define DA_Z 0.0005
-	#define DE_X 2
-	#define DE_Y 0.500
-	#define DE_Z 0.300
+	#define DE_X 1
+	//#define DE_Y 0.500
+	#define DE_Z 0.375
+	#define DG_W 0.25 //Pop out allowed
 	#define BMT 1
 	#define DF_Z 0.1625
+	#define REF 15    //Fix can go from 1 - 15 and 15 is low 1 is High
+	#define DI_W 1.7  //Adjustment for REF
 	#define PEW 1
 	#define DAA 1
 #elif (App == 0xA05A15C4 ) //Spooky's House of Jump Scares
