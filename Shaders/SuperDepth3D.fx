@@ -2,7 +2,7 @@
 ///**SuperDepth3D**///
 //----------------////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//* Depth Map Based 3D post-process shader v3.0.3
+//* Depth Map Based 3D post-process shader v3.0.4
 //* For Reshade 3.0+
 //* ---------------------------------
 //*
@@ -192,7 +192,7 @@
 #else
 	#define Mask_Cycle_Key Set_Key_Code_Here
 #endif
-//uniform float TEST < ui_type = "drag"; ui_min = -1; ui_max = 1; > = 1.0;
+//uniform float2 TEST < ui_type = "drag"; ui_min = -1; ui_max = 1; > = 1.0;
 //Divergence & Convergence//
 uniform float Divergence <
 	ui_type = "drag";
@@ -472,7 +472,7 @@ uniform int WP <
 	ui_category = "Weapon Hand Adjust";
 > = DB_W;
 
-uniform float3 Weapon_Adjust <
+uniform float4 Weapon_Adjust <
 	ui_type = "drag";
 	ui_min = 0.0; ui_max = 250.0;
 	ui_label = " Weapon Hand Adjust";
@@ -480,9 +480,10 @@ uniform float3 Weapon_Adjust <
 				 "X, CutOff Point used to set a different scale for first person hand apart from world scale.\n"
 				 "Y, Precision is used to adjust the first person hand in world scale.\n"
 				 "Z, Tuning is used to fine tune the precision adjustment above.\n"
-	             "Default is float2(X 0.0, Y 0.0, Z 0.0)";
+				 "W, Scale is used to compress or rescale the weapon.\n"
+	             "Default is float2(X 0.0, Y 0.0, Z 0.0, W 1.0)";
 	ui_category = "Weapon Hand Adjust";
-> = float3(0.0,0.0,0.0);
+> = float4(0.0,0.0,0.0,0.0);
 
 uniform float3 WZPD_and_WND <
 	ui_type = "drag";
@@ -1031,19 +1032,27 @@ float Depth(float2 texcoord)
 		zBuffer = rcp(Z.y * C.y + C.x);
 	return saturate(zBuffer);
 }
-
-float2 WeaponDepth(float2 texcoord)
-{	//Weapon Setting//
-	float3 WA_XYZ = Weapon_Adjust;
+//Weapon Setting//
+float4 WA_XYZW()
+{
+	float4 WeaponSettings_XYZW = Weapon_Adjust;
 	#if WSM >= 1
-		WA_XYZ = Weapon_Profiles(WP, Weapon_Adjust);
+		WeaponSettings_XYZW = Weapon_Profiles(WP, Weapon_Adjust);
 	#endif
-	//Conversions to linear space.....
-	float zBufferWH = tex2Dlod(DepthBuffer, float4(texcoord,0,0)).x, Far = 1.0, Near = 0.125/(0.00000001 + WA_XYZ.y);  //Near & Far Adjustment
+	//"X, CutOff Point used to set a different scale for first person hand apart from world scale.\n"
+	//"Y, Precision is used to adjust the first person hand in world scale.\n"
+	//"Z, Tuning is used to fine tune the precision adjustment above.\n"
+	//"W, Scale is used to compress or rescale the weapon.\n"	
+	return float4(WeaponSettings_XYZW.xyz,-WeaponSettings_XYZW.w + 1);
+}
+//Weapon Depth Buffer//
+float2 WeaponDepth(float2 texcoord)
+{   //Conversions to linear space.....
+	float zBufferWH = tex2Dlod(DepthBuffer, float4(texcoord,0,0)).x, Far = 1.0, Near = 0.125/(0.00000001 + WA_XYZW().y);  //Near & Far Adjustment
 
-	float2 Offsets = float2(1 + WA_XYZ.z,1 - WA_XYZ.z), Z = float2( zBufferWH, 1-zBufferWH );
+	float2 Offsets = float2(1 + WA_XYZW().z,1 - WA_XYZW().z), Z = float2( zBufferWH, 1-zBufferWH );
 
-	if (WA_XYZ.z > 0)
+	if (WA_XYZW().z > 0)
 	Z = min( 1, float2( Z.x * Offsets.x , Z.y / Offsets.y  ));
 
 	[branch] if (Depth_Map == 0)//DM0. Normal
@@ -1051,7 +1060,7 @@ float2 WeaponDepth(float2 texcoord)
 	else if (Depth_Map == 1)//DM1. Reverse
 		zBufferWH = Far * Near / (Far + Z.y * (Near - Far));
 
-	return float2(saturate(zBufferWH), WA_XYZ.x);
+	return float2(saturate(zBufferWH), WA_XYZW().x);
 }
 //3x2 and 2x3 not supported on older ReShade versions. I had to use 3x3. Old Values for 3x2
 float3x3 PrepDepth(float2 texcoord)
@@ -1110,9 +1119,9 @@ float Fade_in_out(float2 texcoord)
 	else if(Eye_Fade_Reduction_n_Power.z == 2)
 		AA *= 1.5;
 	//Fade in toggle.
-	if(FPSDFIO == 1)
+	if(FPSDFIO == 1 )//|| FPSDFIO == 3 )
 		Trigger_Fade = Trigger_Fade_A;
-	else if(FPSDFIO == 2)
+	else if(FPSDFIO == 2)// || FPSDFIO == 4 )
 		Trigger_Fade = Trigger_Fade_B;
 
 	return PStoredfade + (Trigger_Fade - PStoredfade) * (1.0 - exp(-frametime/((1-AA)*1000))); ///exp2 would be even slower
@@ -1298,7 +1307,7 @@ float3 DB( float2 texcoord)
 		DM.y = 0;
 	//Handle Convergence Here
 	float3 HandleConvergence = Conv(DM.xz,texcoord).xyz;	
-	DM.y = lerp( HandleConvergence.x, HandleConvergence.y, DM.y);
+	DM.y = lerp( HandleConvergence.x, HandleConvergence.y * WA_XYZW().w, DM.y);
 	//Better mixing for eye Comfort
 	DM.z = DM.y;
 	DM.y += lerp(DM.y,DM.x,DM.w);
@@ -1542,6 +1551,15 @@ float2 LensePitch(float2 TC)
 
 	return Rotationtexcoord.xy;
 }
+/*
+float StereoViewMask( float2 coord )
+{
+    //Calculate Gradient distance to edge
+    float edge = length((coord*2.0-1.0) * float2(0.0 + 2.25, 1.0));
+    //Compute vignette gradient and intensity
+    return saturate(smoothstep(0.499,0.5,edge)); 
+}
+*/
 ///////////////////////////////////////////////////////////Stereo Calculation///////////////////////////////////////////////////////////////////////
 float3 PS_calcLR(float2 texcoord)
 {
@@ -1582,8 +1600,10 @@ float3 PS_calcLR(float2 texcoord)
 	else if( Eye_Fade_Reduction_n_Power.y == 2)
 		FD_Adjust = 0.3;
 
-	if (FPSDFIO == 1 || FPSDFIO == 2)
+	if (FPSDFIO >= 1)
 		FD = lerp(FD * FD_Adjust,FD,FadeIO);
+		//if(FPSDFIO >= 1)
+			//FD = lerp(FD,D,StereoViewMask(TexCoords));
 
 	float2 DLR = float2(FD,FD);
 	if( Eye_Fade_Reduction_n_Power.x == 1)
@@ -1891,7 +1911,7 @@ float3 Out(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Targe
 {
 	float2 TC = float2(texcoord.x,1-texcoord.y);
 	float Text_Timer = 25000, BT = smoothstep(0,1,sin(timer*(3.75/1000))), Size = 1.1, Depth3D, Read_Help, Supported, ET, ETC, ETTF, ETTC, SetFoV, FoV, Post, Effect, NoPro, NotCom, Mod, Needs, Net, Over, Set, AA, Emu, Not, No, Help, Fix, Need, State, SetAA, SetWP, Work;
-	float3 Color = PS_calcLR(texcoord).rgb; //Color = tex2D(SamplerLumN,texcoord).z;
+	float3 Color = PS_calcLR(texcoord).rgb; //Color = StereoViewMask( texcoord.x );//Color = tex2D(SamplerLumN,texcoord).z;
 		  
 	if(RHW || NCW || NPW || NFM || PEW || DSW || OSW || DAA || NDW || WPW || FOV || EDW)
 		Text_Timer = 30000;

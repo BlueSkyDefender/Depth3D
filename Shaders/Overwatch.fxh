@@ -1,7 +1,7 @@
 ////----------------------------------------//
 ///SuperDepth3D Overwatch Automation Shader///
 //----------------------------------------////
-// Version 2.3.4
+// Version 2.3.5
 //---------------------------------------OVERWATCH---------------------------------------//
 // If you are reading this stop. Go away and never look back. From this point on if you  //
 // still think it's is worth looking at this..... Then no one can save you or your soul. //
@@ -3216,6 +3216,20 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define DE_X 1
     //#define DE_Y 0.500
     #define DE_Z 0.300
+#elif (App == 0x2D1A3028 ) //Bright Memory: Infinite*
+    #define DA_W 1
+    #define DA_X 0.160
+    #define DF_Y 0.1375
+    #define DA_Y 70.0
+    #define DB_Z 0.250
+    #define DE_X 4
+    #define DE_Y 0.500
+    #define DE_Z 0.375
+    #define DG_W -0.20 //disallow some popout
+	#define BMT 1    
+	#define DF_Z 0.1375
+	#define WSM 2 //Weapon Settings Mode
+	#define DB_W 24//Weapon Selection
 #else
 	#define NPW 1 //No Profile
 #endif
@@ -3438,313 +3452,313 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 #endif
 
 #if WSM == 1
-float3 Weapon_Profiles(float WP ,float3 Weapon_Adjust) //Tried Switch But, can't compile in some older versions of ReShade.
+float4 Weapon_Profiles(float WP ,float4 Weapon_Adjust) //Tried Switch But, can't compile in some older versions of ReShade.
 {   if (WP == 2)
-        Weapon_Adjust = float3(0.425,5.0,1.125);      //WP 0  | ES: Oblivion
+        Weapon_Adjust = float4(0.425,5.0,1.125,0.0);      //WP 0  | ES: Oblivion
     if (WP == 3)
-        Weapon_Adjust = float3(0.276,16.25,9.15);      //WP 1  | BorderLands
+        Weapon_Adjust = float4(0.276,16.25,9.15,0.0);      //WP 1  | BorderLands
     if (WP == 4)
-        Weapon_Adjust = float3(0.5,32.5,7.15);        //WP 2  | BorderLands 2
+        Weapon_Adjust = float4(0.5,32.5,7.15,0.0);        //WP 2  | BorderLands 2
     if (WP == 5)
-        Weapon_Adjust = float3(0.284,10.5,0.8725);    //WP 3  | BorderLands 3
+        Weapon_Adjust = float4(0.284,10.5,0.8725,0.0);    //WP 3  | BorderLands 3
     if (WP == 6)
-        Weapon_Adjust = float3(0.253,39.0,97.5);      //WP 4  | Fallout 4
+        Weapon_Adjust = float4(0.253,39.0,97.5,0.0);      //WP 4  | Fallout 4
     if (WP == 7)
-        Weapon_Adjust = float3(0.276,20.0,9.5625);    //WP 5  | Skyrim: SE
+        Weapon_Adjust = float4(0.276,20.0,9.5625,0.0);    //WP 5  | Skyrim: SE
     if (WP == 8)
-        Weapon_Adjust = float3(0.338,21.0,9.1375);    //WP 6  | DOOM 2016
+        Weapon_Adjust = float4(0.338,21.0,9.1375,0.0);    //WP 6  | DOOM 2016
     if (WP == 9)
-        Weapon_Adjust = float3(0.255,177.5,63.025);   //WP 7  | CoD:Black Ops | CoD:MW2 | CoD:MW3
+        Weapon_Adjust = float4(0.255,177.5,63.025,0.0);   //WP 7  | CoD:Black Ops | CoD:MW2 | CoD:MW3
     if (WP == 10)
-        Weapon_Adjust = float3(0.254,100.0,0.9843);   //WP 8  | CoD:Black Ops II
+        Weapon_Adjust = float4(0.254,100.0,0.9843,0.0);   //WP 8  | CoD:Black Ops II
     if (WP == 11)
-        Weapon_Adjust = float3(0.254,203.125,0.98435);//WP 9  | CoD:Ghost
+        Weapon_Adjust = float4(0.254,203.125,0.98435,0.0);//WP 9  | CoD:Ghost
     if (WP == 12)
-        Weapon_Adjust = float3(0.254,203.125,0.98433);//WP 10 | CoD:AW | CoD:MW Re
+        Weapon_Adjust = float4(0.254,203.125,0.98433,0.0);//WP 10 | CoD:AW | CoD:MW Re
     if (WP == 13)
-        Weapon_Adjust = float3(0.254,125.0,0.9843);   //WP 11 | CoD:IW
+        Weapon_Adjust = float4(0.254,125.0,0.9843,0.0);   //WP 11 | CoD:IW
     if (WP == 14)
-        Weapon_Adjust = float3(0.255,200.0,63.0);     //WP 12 | CoD:WaW
+        Weapon_Adjust = float4(0.255,200.0,63.0,0.0);     //WP 12 | CoD:WaW
     if (WP == 15)
-        Weapon_Adjust = float3(0.510,162.5,3.975);    //WP 13 | CoD | CoD:UO | CoD:2
+        Weapon_Adjust = float4(0.510,162.5,3.975,0.0);    //WP 13 | CoD | CoD:UO | CoD:2
     if (WP == 16)
-        Weapon_Adjust = float3(0.254,23.75,0.98425);  //WP 14 | CoD: Black Ops IIII
+        Weapon_Adjust = float4(0.254,23.75,0.98425,0.0);  //WP 14 | CoD: Black Ops IIII
     if (WP == 17)
-        Weapon_Adjust = float3(0.375,60.0,15.15625);  //WP 15 | Quake DarkPlaces
+        Weapon_Adjust = float4(0.375,60.0,15.15625,0.0);  //WP 15 | Quake DarkPlaces
     if (WP == 18)
-        Weapon_Adjust = float3(0.7,14.375,2.5);       //WP 16 | Quake 2 XP
+        Weapon_Adjust = float4(0.7,14.375,2.5,0.0);       //WP 16 | Quake 2 XP
     if (WP == 19)
-        Weapon_Adjust = float3(0.750,30.0,1.050);     //WP 17 | Quake 4
+        Weapon_Adjust = float4(0.750,30.0,1.050,0.0);     //WP 17 | Quake 4
     if (WP == 20)
-        Weapon_Adjust = float3(0.278,62.5,9.1);       //WP 18 | Half-Life 2
+        Weapon_Adjust = float4(0.278,62.5,9.1,0.0);       //WP 18 | Half-Life 2
     if (WP == 21)
-        Weapon_Adjust = float3(0.450,12.0,23.75);     //WP 19 | Metro Redux Games
+        Weapon_Adjust = float4(0.450,12.0,23.75,0.0);     //WP 19 | Metro Redux Games
     if (WP == 22)
-        Weapon_Adjust = float3(0.350,12.5,2.0);       //WP 20 | Soldier of Fortune
+        Weapon_Adjust = float4(0.350,12.5,2.0,0.0);       //WP 20 | Soldier of Fortune
     if (WP == 23)
-        Weapon_Adjust = float3(0.286,1500.0,7.0);     //WP 21 | Deus Ex rev
+        Weapon_Adjust = float4(0.286,1500.0,7.0,0.0);     //WP 21 | Deus Ex rev
     if (WP == 24)
-        Weapon_Adjust = float3(35.0,250.0,0);         //WP 21 | Deus Ex
+        Weapon_Adjust = float4(35.0,250.0,0,0.0);         //WP 21 | Deus Ex
     if (WP == 25)
-        Weapon_Adjust = float3(0.625,350.0,0.785);    //WP 23 | Minecraft
+        Weapon_Adjust = float4(0.625,350.0,0.785,0.0);    //WP 23 | Minecraft
     if (WP == 26)
-        Weapon_Adjust = float3(0.255,6.375,53.75);    //WP 24 | S.T.A.L.K.E.R: Games
+        Weapon_Adjust = float4(0.255,6.375,53.75,0.0);    //WP 24 | S.T.A.L.K.E.R: Games
     if (WP == 27)
-        Weapon_Adjust = float3(0.450,5.5625,0.0);     //WP 25 | AMID EVIL RTX
+        Weapon_Adjust = float4(0.450,5.5625,0.0,0.0);     //WP 25 | AMID EVIL RTX
     if (WP == 28)
-        Weapon_Adjust = float3(0.750,30.0,1.025);     //WP 26 | Prey 2006
+        Weapon_Adjust = float4(0.750,30.0,1.025,0.0);     //WP 26 | Prey 2006
     if (WP == 29)
-        Weapon_Adjust = float3(0.266,30.0,14.0);      //WP 27 | Wrath
+        Weapon_Adjust = float4(0.266,30.0,14.0,0.0);      //WP 27 | Wrath
     if (WP == 30)
-        Weapon_Adjust = float3(3.625,20.0,0);         //WP 28 | We Where Here Together
+        Weapon_Adjust = float4(3.625,20.0,0,0.0);         //WP 28 | We Where Here Together
     if (WP == 31)
-        Weapon_Adjust = float3(0.7,9.0,2.3625);       //WP 29 | Return to Castle Wolfenstine
+        Weapon_Adjust = float4(0.7,9.0,2.3625,0.0);       //WP 29 | Return to Castle Wolfenstine
     if (WP == 32)
-        Weapon_Adjust = float3(0.4894,62.50,0.98875); //WP 30 | Wolfenstein
+        Weapon_Adjust = float4(0.4894,62.50,0.98875,0.0); //WP 30 | Wolfenstein
     if (WP == 33)
-        Weapon_Adjust = float3(1.0,93.75,0.81875);    //WP 31 | Wolfenstein: The New Order #C770832 / The Old Blood #3E42619F
+        Weapon_Adjust = float4(1.0,93.75,0.81875,0.0);    //WP 31 | Wolfenstein: The New Order #C770832 / The Old Blood #3E42619F
     if (WP == 34)
-        Weapon_Adjust = float3(1.150,55.0,0.9);       //WP 32 | Cyberpunk 2077
+        Weapon_Adjust = float4(1.150,55.0,0.9,0.0);       //WP 32 | Cyberpunk 2077
     if (WP == 35)
-        Weapon_Adjust = float3(0.278,37.50,9.1);      //WP 33 | Black Mesa
+        Weapon_Adjust = float4(0.278,37.50,9.1,0.0);      //WP 33 | Black Mesa
     if (WP == 36)
-        Weapon_Adjust = float3(0.277,105.0,8.8625);   //WP 34 | Portal 2
+        Weapon_Adjust = float4(0.277,105.0,8.8625,0.0);   //WP 34 | Portal 2
     if (WP == 37)
-        Weapon_Adjust = float3(0.0,0.0,0.0);          //WP 35 | Game
+        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 35 | Game
     if (WP == 38)
-        Weapon_Adjust = float3(0.78,20.0,0.180);      //WP 36 | SOMA
+        Weapon_Adjust = float4(0.78,20.0,0.180,0.0);      //WP 36 | SOMA
     if (WP == 39)
-        Weapon_Adjust = float3(0.444,20.0,1.1875);    //WP 37 | Cryostasis
+        Weapon_Adjust = float4(0.444,20.0,1.1875,0.0);    //WP 37 | Cryostasis
     if (WP == 40)
-        Weapon_Adjust = float3(0.286,80.0,7.0);       //WP 38 | Unreal Gold with v227
+        Weapon_Adjust = float4(0.286,80.0,7.0,0.0);       //WP 38 | Unreal Gold with v227
     if (WP == 41)
-        Weapon_Adjust = float3(0.280,18.75,9.03);     //WP 39 | Serious Sam Revolution #EB9EEB74/Serious Sam HD: The First Encounter /The Second Encounter /Serious Sam 2 #8238E9CA/ Serious Sam 3: BFE*
+        Weapon_Adjust = float4(0.280,18.75,9.03,0.0);     //WP 39 | Serious Sam Revolution #EB9EEB74/Serious Sam HD: The First Encounter /The Second Encounter /Serious Sam 2 #8238E9CA/ Serious Sam 3: BFE*
     if (WP == 42)
-        Weapon_Adjust = float3(0.3,17.5,0.9015);      //WP 40 | Serious Sam Fusion
+        Weapon_Adjust = float4(0.3,17.5,0.9015,0.0);      //WP 40 | Serious Sam Fusion
     if (WP == 43)
-        Weapon_Adjust = float3(1.2,12.5,0.3);         //WP 41 | GhostRunner DX12
+        Weapon_Adjust = float4(1.2,12.5,0.3,0.0);         //WP 41 | GhostRunner DX12
     if (WP == 44)
-        Weapon_Adjust = float3(0.277,20.0,8.8);       //WP 42 | TitanFall 2
+        Weapon_Adjust = float4(0.277,20.0,8.8,0.0);       //WP 42 | TitanFall 2
     if (WP == 45)
-        Weapon_Adjust = float3(1.300,17.50,0.0);      //WP 43 | Project Warlock
+        Weapon_Adjust = float4(1.300,17.50,0.0,0.0);      //WP 43 | Project Warlock
     if (WP == 46)
-        Weapon_Adjust = float3(0.625,9.0,2.375);      //WP 44 | Kingpin Life of Crime
+        Weapon_Adjust = float4(0.625,9.0,2.375,0.0);      //WP 44 | Kingpin Life of Crime
     if (WP == 47)
-        Weapon_Adjust = float3(0.28,20.0,9.0);        //WP 45 | EuroTruckSim2
+        Weapon_Adjust = float4(0.28,20.0,9.0,0.0);        //WP 45 | EuroTruckSim2
     if (WP == 48)
-        Weapon_Adjust = float3(0.460,12.5,1.0);       //WP 46 | F.E.A.R #B302EC7 & F.E.A.R 2: Project Origin #91D9EBAF
+        Weapon_Adjust = float4(0.460,12.5,1.0,0.0);       //WP 46 | F.E.A.R #B302EC7 & F.E.A.R 2: Project Origin #91D9EBAF
     if (WP == 49)
-        Weapon_Adjust = float3(1.5,37.5,0.99875);     //WP 47 | Condemned Criminal Origins
+        Weapon_Adjust = float4(1.5,37.5,0.99875,0.0);     //WP 47 | Condemned Criminal Origins
     if (WP == 50)
-        Weapon_Adjust = float3(2.0,16.25,0.09);       //WP 48 | Immortal Redneck CP alt 1.9375
+        Weapon_Adjust = float4(2.0,16.25,0.09,0.0);       //WP 48 | Immortal Redneck CP alt 1.9375
     if (WP == 51)
-        Weapon_Adjust = float3(0.485,62.5,0.9625);    //WP 49 | Dementium 2
+        Weapon_Adjust = float4(0.485,62.5,0.9625,0.0);    //WP 49 | Dementium 2
     if (WP == 52)
-        Weapon_Adjust = float3(0.489,68.75,1.02);     //WP 50 | NecroVisioN & NecroVisioN: Lost Company #663E66FE
+        Weapon_Adjust = float4(0.489,68.75,1.02,0.0);     //WP 50 | NecroVisioN & NecroVisioN: Lost Company #663E66FE
     if (WP == 53)
-        Weapon_Adjust = float3(1.0,237.5,0.83625);    //WP 51 | Rage64
+        Weapon_Adjust = float4(1.0,237.5,0.83625,0.0);    //WP 51 | Rage64
     if (WP == 54)
-        Weapon_Adjust = float3(13.870,50.0,0.0);      //WP 52 | Graven
+        Weapon_Adjust = float4(13.870,50.0,0.0,0.0);      //WP 52 | Graven
     if (WP == 55)
-        Weapon_Adjust = float3(0.425,15.0,99.0);      //WP 53 | Bioshock Remastred
+        Weapon_Adjust = float4(0.425,15.0,99.0,0.0);      //WP 53 | Bioshock Remastred
     if (WP == 56)
-        Weapon_Adjust = float3(0.425,21.25,99.5);     //WP 54 | Bioshock 2 Remastred
+        Weapon_Adjust = float4(0.425,21.25,99.5,0.0);     //WP 54 | Bioshock 2 Remastred
     if (WP == 57)
-        Weapon_Adjust = float3(0.425,5.25,1.0);       //WP 55 | No One Lives Forever
+        Weapon_Adjust = float4(0.425,5.25,1.0,0.0);       //WP 55 | No One Lives Forever
     if (WP == 58)
-        Weapon_Adjust = float3(0.519,31.25,8.875);    //WP 56 | No One Lives Forever 2
+        Weapon_Adjust = float4(0.519,31.25,8.875,0.0);    //WP 56 | No One Lives Forever 2
     if (WP == 59)
-        Weapon_Adjust = float3(0.5,8.0,0);            //WP 57 | Strife
+        Weapon_Adjust = float4(0.5,8.0,0,0.0);            //WP 57 | Strife
     if (WP == 60)
-        Weapon_Adjust = float3(0.350,9.0,1.8);        //WP 58 | Gold Source
+        Weapon_Adjust = float4(0.350,9.0,1.8,0.0);        //WP 58 | Gold Source
     if (WP == 61) //Unity Limit if using else if
-        Weapon_Adjust = float3(1.825,13.75,0);        //WP 59 | No Man Sky FPS Mode
+        Weapon_Adjust = float4(1.825,13.75,0,0.0);        //WP 59 | No Man Sky FPS Mode
     if (WP == 62)
-        Weapon_Adjust = float3(1.953,5.25,0);         //WP 60 | Dying Light
+        Weapon_Adjust = float4(1.953,5.25,0,0.0);         //WP 60 | Dying Light
     if (WP == 63)
-        Weapon_Adjust = float3(0.287,180.0,9.0);      //WP 61 | Farcry
+        Weapon_Adjust = float4(0.287,180.0,9.0,0.0);      //WP 61 | Farcry
     if (WP == 64)
-        Weapon_Adjust = float3(0.2503,55.0,1000.0);   //WP 62 | Farcry 2
+        Weapon_Adjust = float4(0.2503,55.0,1000.0,0.0);   //WP 62 | Farcry 2
     if (WP == 65)
-        Weapon_Adjust = float3(0.279,100.0,0.905);    //WP 63 | Talos Principle
+        Weapon_Adjust = float4(0.279,100.0,0.905,0.0);    //WP 63 | Talos Principle
     if (WP == 66)
-        Weapon_Adjust = float3(0.2503,52.5,987.5);    //WP 64 | Singularity
+        Weapon_Adjust = float4(0.2503,52.5,987.5,0.0);    //WP 64 | Singularity
     if (WP == 67)
-        Weapon_Adjust = float3(0.251,12.5,925.0);     //WP 65 | Betrayer
+        Weapon_Adjust = float4(0.251,12.5,925.0,0.0);     //WP 65 | Betrayer
     if (WP == 68)
-        Weapon_Adjust = float3(1.035,16.0,0.185);     //WP 66 | Doom Eternal
+        Weapon_Adjust = float4(1.035,16.0,0.185,0.0);     //WP 66 | Doom Eternal
     if (WP == 69)
-        Weapon_Adjust = float3(1.553,16.875,0.0);     //WP 67 | Q.U.B.E 2
+        Weapon_Adjust = float4(1.553,16.875,0.0,0.0);     //WP 67 | Q.U.B.E 2
     if (WP == 70)
-        Weapon_Adjust = float3(0.251,5.6875,950.0);   //WP 68 | Mirror Edge
+        Weapon_Adjust = float4(0.251,5.6875,950.0,0.0);   //WP 68 | Mirror Edge
     if (WP == 71)
-        Weapon_Adjust = float3(0.345,10.125,1.825);   //WP 69 | Quake Enhanced Edition
+        Weapon_Adjust = float4(0.345,10.125,1.825,0.0);   //WP 69 | Quake Enhanced Edition
     if (WP == 72)
-        Weapon_Adjust = float3(0.430,6.250,0.100);    //WP 70 | The Citadel 186
+        Weapon_Adjust = float4(0.430,6.250,0.100,0.0);    //WP 70 | The Citadel 186
     if (WP == 73)
-        Weapon_Adjust = float3(0.800,15.0,0.3);       //WP 71 | Sauerbraten 2
+        Weapon_Adjust = float4(0.800,15.0,0.3,0.0);       //WP 71 | Sauerbraten 2
     if (WP == 74)
-        Weapon_Adjust = float3(13.3,62.5,0.0);        //WP 72 | Chex Quest HD
+        Weapon_Adjust = float4(13.3,62.5,0.0,0.0);        //WP 72 | Chex Quest HD
     if (WP == 75)
-        Weapon_Adjust = float3(0.75,112.5,0.5);       //WP 73 | Hexen 2
+        Weapon_Adjust = float4(0.75,112.5,0.5,0.0);       //WP 73 | Hexen 2
     if (WP == 76) //DX 9 Temp Registers Limit
-        Weapon_Adjust = float3(0.350,17.5,2.050);     //WP 74 | Star Trek EliteForce II
-
+        Weapon_Adjust = float4(0.350,17.5,2.050,0.0);     //WP 74 | Star Trek EliteForce II
+	//Do Not Add more Profiles
 		return Weapon_Adjust;
 }
 #elif WSM == 2
-float3 Weapon_Profiles(float WP ,float3 Weapon_Adjust) //Could reduce from 76 to 57 to save on compiling time.
+float4 Weapon_Profiles(float WP ,float4 Weapon_Adjust) //Could reduce from 76 to 57 to save on compiling time.
 {   if (WP == 2)
-        Weapon_Adjust = float3(0.6,6.5,0.0);          //WP 0  | The Suicide of Rachel Foster
+        Weapon_Adjust = float4(0.6,6.5,0.0,0.0);          //WP 0  | The Suicide of Rachel Foster
     if (WP == 3)
-        Weapon_Adjust = float3(1.653,17.5,0.0);       //WP 1  | Devolverland Expo
+        Weapon_Adjust = float4(1.653,17.5,0.0,0.0);       //WP 1  | Devolverland Expo
     if (WP == 4)
-        Weapon_Adjust = float3(1.489,16.875,0.0);     //WP 2  | Conarium
+        Weapon_Adjust = float4(1.489,16.875,0.0,0.0);     //WP 2  | Conarium
     if (WP == 5)
-        Weapon_Adjust = float3(0.270,25.0,0.951);     //WP 3  | WRC 10
+        Weapon_Adjust = float4(0.270,25.0,0.951,0.0);     //WP 3  | WRC 10
     if (WP == 6)
-        Weapon_Adjust = float3(0.0,0.0,0.0);          //WP 4  | Game
+        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 4  | Game
     if (WP == 7)
-        Weapon_Adjust = float3(0.275,11.0,10.0);      //WP 5  | Crysis 2 DX11 1.9
+        Weapon_Adjust = float4(0.275,11.0,10.0,0.0);      //WP 5  | Crysis 2 DX11 1.9
     if (WP == 8)
-        Weapon_Adjust = float3(0.0,0.0,0.0);          //WP 6  | Game
+        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 6  | Game
     if (WP == 9)
-        Weapon_Adjust = float3(0.0,0.0,0.0);          //WP 7  | Game
+        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 7  | Game
     if (WP == 10)
-        Weapon_Adjust = float3(0.0,0.0,0.0);          //WP 8  | Game
+        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 8  | Game
     if (WP == 11)
-        Weapon_Adjust = float3(4.100,25.0,0.0);       //WP 9  | HROT
+        Weapon_Adjust = float4(4.100,25.0,0.0,0.0);       //WP 9  | HROT
     if (WP == 12)
-        Weapon_Adjust = float3(0.284,25.0,0.8745);    //WP 10 | Crysis Remastered
+        Weapon_Adjust = float4(0.284,25.0,0.8745,0.0);    //WP 10 | Crysis Remastered
     if (WP == 13)
-        Weapon_Adjust = float3(0.284,15.0,7.200);     //WP 11 | Crysis 2 Remastered
+        Weapon_Adjust = float4(0.284,15.0,7.200,0.0);     //WP 11 | Crysis 2 Remastered
     if (WP == 14)
-        Weapon_Adjust = float3(0.284,12.5,10.625);    //WP 12 | Crysis 3 Remastered
+        Weapon_Adjust = float4(0.284,12.5,10.625,0.0);    //WP 12 | Crysis 3 Remastered
     if (WP == 15)
-        Weapon_Adjust = float3(0.0,0.0,0.0);          //WP 13 | Game
+        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 13 | Game
     if (WP == 16)
-        Weapon_Adjust = float3(0.0,0.0,0.0);          //WP 14 | Game
+        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 14 | Game
     if (WP == 17)
-        Weapon_Adjust = float3(0.0,0.0,0.0);          //WP 15 | Game
+        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 15 | Game
     if (WP == 18)
-        Weapon_Adjust = float3(0.0,0.0,0.0);          //WP 16 | Game
+        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 16 | Game
     if (WP == 19)
-        Weapon_Adjust = float3(1.550,117.5,0.125);    //WP 17 | Halo Infinite
+        Weapon_Adjust = float4(1.550,117.5,0.125,0.0);    //WP 17 | Halo Infinite
     if (WP == 20)
-        Weapon_Adjust = float3(0.0,0.0,0.0);          //WP 18 | Game
+        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 18 | Game
     if (WP == 21)
-        Weapon_Adjust = float3(0.0,0.0,0.0);          //WP 19 | Game
+        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 19 | Game
     if (WP == 22)
-        Weapon_Adjust = float3(0.0,0.0,0.0);          //WP 20 | Game
+        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 20 | Game
     if (WP == 23)
-        Weapon_Adjust = float3(0.0,0.0,0.0);          //WP 21 | Game
+        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 21 | Game
     if (WP == 24)
-        Weapon_Adjust = float3(0.0,0.0,0.0);          //WP 21 | Game
+        Weapon_Adjust = float4(15.500,75.0,0.0,0.025);    //WP 22 | Bright Memory: infinite
     if (WP == 25)
-        Weapon_Adjust = float3(0.0,0.0,0.0);          //WP 23 | Game
+        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 23 | Game
     if (WP == 26)
-        Weapon_Adjust = float3(0.0,0.0,0.0);          //WP 24 | Game
+        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 24 | Game
     if (WP == 27)
-        Weapon_Adjust = float3(0.0,0.0,0.0);          //WP 25 | Game
+        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 25 | Game
     if (WP == 28)
-        Weapon_Adjust = float3(0.0,0.0,0.0);          //WP 26 | Game
+        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 26 | Game
     if (WP == 29)
-        Weapon_Adjust = float3(0.0,0.0,0.0);          //WP 27 | Game
+        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 27 | Game
     if (WP == 30)
-        Weapon_Adjust = float3(0.0,0.0,0.0);          //WP 28 | Game
+        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 28 | Game
     if (WP == 31)
-        Weapon_Adjust = float3(0.0,0.0,0.0);          //WP 29 | Game
+        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 29 | Game
     if (WP == 32)
-        Weapon_Adjust = float3(0.0,0.0,0.0);          //WP 30 | Game
+        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 30 | Game
     if (WP == 33)
-        Weapon_Adjust = float3(0.0,0.0,0.0);          //WP 31 | Game
+        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 31 | Game
     if (WP == 34)
-        Weapon_Adjust = float3(0.0,0.0,0.0);          //WP 32 | Game
+        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 32 | Game
     if (WP == 35)
-        Weapon_Adjust = float3(0.0,0.0,0.0);          //WP 33 | Game
+        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 33 | Game
     if (WP == 36)
-        Weapon_Adjust = float3(0.0,0.0,0.0);          //WP 34 | Game
+        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 34 | Game
     if (WP == 37)
-        Weapon_Adjust = float3(0.0,0.0,0.0);          //WP 35 | Game
+        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 35 | Game
     if (WP == 38)
-        Weapon_Adjust = float3(0.0,0.0,0.0);          //WP 36 | Game
+        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 36 | Game
     if (WP == 39)
-        Weapon_Adjust = float3(0.0,0.0,0.0);          //WP 37 | Game
+        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 37 | Game
     if (WP == 40)
-        Weapon_Adjust = float3(0.0,0.0,0.0);          //WP 38 | Game
+        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 38 | Game
     if (WP == 41)
-        Weapon_Adjust = float3(0.0,0.0,0.0);          //WP 39 | Game
+        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 39 | Game
     if (WP == 42)
-        Weapon_Adjust = float3(0.0,0.0,0.0);          //WP 40 | Game
+        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 40 | Game
     if (WP == 43)
-        Weapon_Adjust = float3(0.0,0.0,0.0);          //WP 41 | Game
+        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 41 | Game
     if (WP == 44)
-        Weapon_Adjust = float3(0.0,0.0,0.0);          //WP 42 | Game
+        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 42 | Game
     if (WP == 45)
-        Weapon_Adjust = float3(0.0,0.0,0.0);          //WP 43 | Game
+        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 43 | Game
     if (WP == 46)
-        Weapon_Adjust = float3(0.0,0.0,0.0);          //WP 44 | Game
+        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 44 | Game
     if (WP == 47)
-        Weapon_Adjust = float3(0.0,0.0,0.0);          //WP 45 | Game
+        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 45 | Game
     if (WP == 48)
-        Weapon_Adjust = float3(0.0,0.0,0.0);          //WP 46 | Game
+        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 46 | Game
     if (WP == 49)
-        Weapon_Adjust = float3(0.0,0.0,0.0);          //WP 47 | Game
+        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 47 | Game
     if (WP == 50)
-        Weapon_Adjust = float3(0.0,0.0,0.0);          //WP 48 | Game
+        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 48 | Game
     if (WP == 51)
-        Weapon_Adjust = float3(0.0,0.0,0.0);          //WP 49 | Game
+        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 49 | Game
     if (WP == 52)
-        Weapon_Adjust = float3(0.0,0.0,0.0);          //WP 50 | Game
+        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 50 | Game
     if (WP == 53)
-        Weapon_Adjust = float3(0.0,0.0,0.0);          //WP 51 | Game
+        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 51 | Game
     if (WP == 54)
-        Weapon_Adjust = float3(0.0,0.0,0.0);          //WP 52 | Game
+        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 52 | Game
     if (WP == 55)
-        Weapon_Adjust = float3(0.0,0.0,0.0);          //WP 53 | Game
+        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 53 | Game
     if (WP == 56)
-        Weapon_Adjust = float3(0.0,0.0,0.0);          //WP 54 | Game
+        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 54 | Game
     if (WP == 57)
-        Weapon_Adjust = float3(0.0,0.0,0.0);          //WP 55 | Game
+        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 55 | Game
     if (WP == 58)
-        Weapon_Adjust = float3(0.0,0.0,0.0);          //WP 56 | Game
+        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 56 | Game
     if (WP == 59)
-        Weapon_Adjust = float3(0.0,0.0,0.0);          //WP 57 | Game
+        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 57 | Game
     if (WP == 60)
-        Weapon_Adjust = float3(0.0,0.0,0.0);          //WP 58 | Game
+        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 58 | Game
     if (WP == 61) //Unity Limit if using else if
-        Weapon_Adjust = float3(0.0,0.0,0.0);          //WP 59 | Game
+        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 59 | Game
     if (WP == 62)
-        Weapon_Adjust = float3(0.0,0.0,0.0);          //WP 60 | Game
+        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 60 | Game
     if (WP == 63)
-        Weapon_Adjust = float3(0.0,0.0,0.0);          //WP 61 | Game
+        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 61 | Game
     if (WP == 64)
-        Weapon_Adjust = float3(0.0,0.0,0.0);          //WP 62 | Game
+        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 62 | Game
     if (WP == 65)
-        Weapon_Adjust = float3(0.0,0.0,0.0);          //WP 63 | Game
+        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 63 | Game
     if (WP == 66)
-        Weapon_Adjust = float3(0.0,0.0,0.0);          //WP 64 | Game
+        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 64 | Game
     if (WP == 67)
-        Weapon_Adjust = float3(0.0,0.0,0.0);          //WP 65 | Game
+        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 65 | Game
     if (WP == 68)
-        Weapon_Adjust = float3(0.0,0.0,0.0);          //WP 66 | Game
+        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 66 | Game
     if (WP == 69)
-        Weapon_Adjust = float3(0.0,0.0,0.0);          //WP 67 | Game
+        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 67 | Game
     if (WP == 70)
-        Weapon_Adjust = float3(0.0,0.0,0.0);          //WP 68 | Game
+        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 68 | Game
     if (WP == 71)
-        Weapon_Adjust = float3(0.0,0.0,0.0);          //WP 69 | Game
+        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 69 | Game
     if (WP == 72)
-        Weapon_Adjust = float3(0.0,0.0,0.0);          //WP 70 | Game
+        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 70 | Game
     if (WP == 73)
-        Weapon_Adjust = float3(0.0,0.0,0.0);          //WP 71 | Game
+        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 71 | Game
     if (WP == 74)
-        Weapon_Adjust = float3(0.0,0.0,0.0);          //WP 72 | Game
+        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 72 | Game
     if (WP == 75)
-        Weapon_Adjust = float3(0.0,0.0,0.0);          //WP 73 | Game
+        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 73 | Game
     if (WP == 76) //DX 9 Temp Registers Limit
-        Weapon_Adjust = float3(0.0,0.0,0.0);          //WP 74 | Game
-
+        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 74 | Game
+	//Do Not Add more Profiles
 		return Weapon_Adjust;
 }
 #elif WSM == 3

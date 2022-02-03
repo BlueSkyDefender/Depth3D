@@ -2,7 +2,7 @@
 ///**SuperDepth3D_VR+**///
 //--------------------////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//* Depth Map Based 3D post-process shader v2.9.3
+//* Depth Map Based 3D post-process shader v2.9.4
 //* For Reshade 4.4+ I think...
 //* ---------------------------------
 //*
@@ -505,16 +505,17 @@ uniform int WP <
 	ui_category = "Weapon Hand Adjust";
 > = DB_W;
 
-uniform float3 Weapon_Adjust <
+uniform float4 Weapon_Adjust <
 	ui_type = "drag";
 	ui_min = 0.0; ui_max = 250.0;
 	ui_label = " Weapon Hand Adjust";
 	ui_tooltip = "Adjust Weapon depth map for your games.\n"
 				 "X, CutOff Point used to set a different scale for first person hand apart from world scale.\n"
 				 "Y, Precision is used to adjust the first person hand in world scale.\n"
-	             "Default is float2(X 0.0, Y 0.0, Z 0.0)";
+				 "W, Scale is used to compress or rescale the weapon.\n"
+	             "Default is float2(X 0.0, Y 0.0, Z 0.0, W 0.0)";
 	ui_category = "Weapon Hand Adjust";
-> = float3(0.0,0.0,0.0);
+> = float4(0.0,0.0,0.0,0.0);
 
 uniform float3 WZPD_and_WND <
 	ui_type = "drag";
@@ -1149,20 +1150,27 @@ float Depth(float2 texcoord)
 		zBuffer = rcp(Z.y * C.y + C.x);
 	return saturate(zBuffer);
 }
-
-float2 WeaponDepth(float2 texcoord)
+//Weapon Setting//
+float4 WA_XYZW()
 {
-	//Weapon Setting//
-	float3 WA_XYZ = Weapon_Adjust;
+	float4 WeaponSettings_XYZW = Weapon_Adjust;
 	#if WSM >= 1
-		WA_XYZ = Weapon_Profiles(WP, Weapon_Adjust);
+		WeaponSettings_XYZW = Weapon_Profiles(WP, Weapon_Adjust);
 	#endif
-	//Conversions to linear space.....
-	float zBufferWH = tex2Dlod(DepthBuffer, float4(texcoord,0,0)).x, Far = 1.0, Near = 0.125/(0.00000001 + WA_XYZ.y);  //Near & Far Adjustment
+	//"X, CutOff Point used to set a different scale for first person hand apart from world scale.\n"
+	//"Y, Precision is used to adjust the first person hand in world scale.\n"
+	//"Z, Tuning is used to fine tune the precision adjustment above.\n"
+	//"W, Scale is used to compress or rescale the weapon.\n"	
+	return float4(WeaponSettings_XYZW.xyz,-WeaponSettings_XYZW.w + 1);
+}
+//Weapon Depth Buffer//
+float2 WeaponDepth(float2 texcoord)
+{   //Conversions to linear space.....
+	float zBufferWH = tex2Dlod(DepthBuffer, float4(texcoord,0,0)).x, Far = 1.0, Near = 0.125/(0.00000001 + WA_XYZW().y);  //Near & Far Adjustment
 
-	float2 Offsets = float2(1 + WA_XYZ.z,1 - WA_XYZ.z), Z = float2( zBufferWH, 1-zBufferWH );
+	float2 Offsets = float2(1 + WA_XYZW().z,1 - WA_XYZW().z), Z = float2( zBufferWH, 1-zBufferWH );
 
-	if (WA_XYZ.z > 0)
+	if (WA_XYZW().z > 0)
 	Z = min( 1, float2( Z.x * Offsets.x , Z.y / Offsets.y  ));
 
 	[branch] if (Depth_Map == 0)//DM0. Normal
@@ -1170,7 +1178,7 @@ float2 WeaponDepth(float2 texcoord)
 	else if (Depth_Map == 1)//DM1. Reverse
 		zBufferWH = Far * Near / (Far + Z.y * (Near - Far));
 
-	return float2(saturate(zBufferWH), WA_XYZ.x);
+	return float2(saturate(zBufferWH), WA_XYZW().x);
 }
 //3x2 and 2x3 not supported on older ReShade versions. I had to use 3x3. Old Values for 3x2
 float3x3 PrepDepth(float2 texcoord)//[0][0] = R | [0][1] = G | [1][0] = B //[1][1] = A | [2][0] = D | [2][1] = DM
@@ -1418,7 +1426,7 @@ float3 DB( float2 texcoord)
 		DM.y = 0;
 	//Handle Convergence Here
 	float3 HandleConvergence = Conv(DM.xz,texcoord).xyz;	
-	DM.y = lerp( HandleConvergence.x, HandleConvergence.y, DM.y);
+	DM.y = lerp( HandleConvergence.x, HandleConvergence.y * WA_XYZW().w, DM.y);
 	//Better mixing for eye Comfort
 	DM.z = DM.y;
 	DM.y += lerp(DM.y,DM.x,DM.w);
