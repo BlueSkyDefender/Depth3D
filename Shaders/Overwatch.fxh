@@ -1715,7 +1715,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DA_W 1
 	#define DA_X 0.060
 	#define DF_Y 0.05
-	#define DA_Y 19.0
+	#define DA_Y 19.375
 	#define DB_Y 2
 	#define DE_X 2
 	//#define DE_Y 0.450
@@ -1723,7 +1723,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DA_Z 0.000125 //-0.0375 //-0.050
 	//#define DG_W 0.25
 	//#define DF_Z -0.125
-	#define DG_Z 0.020  //Added to fix super close to cam issues.
+	#define DG_Z 0.0175  //Added to fix super close to cam issues.
 	#define DI_Z 0.125  //and cutoff for cam
 	#define BMT 1
 	#define DF_Z 0.1375
