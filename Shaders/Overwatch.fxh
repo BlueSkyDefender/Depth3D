@@ -90,6 +90,11 @@ static const float NULL_Y_D = 0.0;                      //Null Y                
 static const float NULL_Z_D = 0.0;                      //Null Z                                        | DJ_Z
 static const float Check_Depth_Limit_Weapon_D = -0.100; //Check Depth Limit Weapon                      | DJ_W
 
+//FPS Focus
+static const int FPS_Focus_Method_D = 0;                //FPS Focus Method: Off | Switch | Hold         | DK_X
+static const int EFO_Eye_Selection_D = 0;               //Eye Eye Selection: Both | Right Eye | Left Eye| DK_Y
+static const int EFO_Fade_Selection_D = 0;              //Eye Fade Options: 0.1% | 0.2% | 0.3%          | DK_Z
+static const int EFO_Fade_Speed_Selection_D = 0;        //Eye Fade Speed Options: +0% | +50% | +100%    | DK_W
 
 //Special Toggles Defaults
 static const int Resident_Evil_Fix_D = 0;               //Resident Evil Fix                             | REF
@@ -3232,18 +3237,21 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DB_W 24//Weapon Selection
 #elif (App == 0x2ECE874 ) //Roblox Games
     #define DA_W 1
-    #define DA_X 0.0705
+    #define DA_X 0.050//0.044//0.071
     #define DF_Y 0.025
-    #define DA_Y 40.00
-    //#define DE_X 4
-    //#define DE_Y 0.500
-    //#define DE_Z 0.375
-    //#define DG_W -0.20 //disallow some popout
+    #define DA_Y 57.5 //70.0 //35.0 //37.5
+    #define DE_X 1
+    #define DE_Y 0.500
+    #define DE_Z 0.4375
+    #define DG_W 1.5
 	#define BMT 1    
-	#define DF_Z 0.165
-	#define DG_Z 0.0625 //Min
-	//#define DE_W 0.100 //Max
-    #define DI_Z 0.2125
+	#define DF_Z 0.180 
+	#define DG_Z 0.075 //0.0625 //Min
+    #define DI_Z 0.200 //0.180 //0.175 //0.2125
+    //#define DK_X 2 //FPS Focus Method
+    #define DK_Y 0 //Eye Eye Selection
+    #define DK_Z 2 //Eye Fade Selection
+    #define DK_W 1 //Eye Fade Speed Selection
 #else
 	#define NPW 1 //No Profile
 #endif
@@ -3389,6 +3397,21 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 #ifndef DJ_W
 	#define DJ_W Check_Depth_Limit_Weapon_D
 #endif
+
+// X = [FPS Focus Method] Y = [Eye Eye Selection] Z = [Eye Fade Selection] W = [Eye Fade Speed Selection]
+#ifndef DK_X
+    #define DK_X FPS_Focus_Method_D
+#endif
+#ifndef DK_Y
+    #define DK_Y EFO_Eye_Selection_D
+#endif
+#ifndef DK_Z
+    #define DK_Z EFO_Fade_Selection_D
+#endif 
+#ifndef DK_W
+	#define DK_W EFO_Fade_Speed_Selection_D
+#endif
+
 
 //Special Toggles
 #ifndef REF

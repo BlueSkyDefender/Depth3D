@@ -2,7 +2,7 @@
 ///**SuperDepth3D**///
 //----------------////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//* Depth Map Based 3D post-process shader v3.0.4
+//* Depth Map Based 3D post-process shader v3.0.5
 //* For Reshade 3.0+
 //* ---------------------------------
 //*
@@ -54,7 +54,9 @@
 	// DI_X = [LBM Offset X] DI_Y = [LBM Offset Y] DI_Z = [Weapon Near Depth Trim] DI_W = [REF Check Depth Limit]
 	static const float DI_X = 0.0, DI_Y = 0.0, DI_Z = 0.25, DI_W = 0.0;
 	// DJ_X = [NULL X] DJ_Y = [NULL Y] DJ_Z = [NULL Z] DJ_W = [Check Depth Limit Weapon]
-	static const float DJ_X = 0.0, DJ_Y = 0.0, DJ_Z = 0.25, DJ_W = -0.100;		
+	static const float DJ_X = 0.0, DJ_Y = 0.0, DJ_Z = 0.25, DJ_W = -0.100;	
+	// DK_X = [FPS Focus Method] DK_Y = [Eye Eye Selection] DK_Z = [Eye Fade Selection] DK_W = [Eye Fade Speed Selection]	
+	static const float DK_X = 0, DK_Y = 0.0, DK_Z = 0, DK_W = 0;	
 	// WSM = [Weapon Setting Mode]
 	#define OW_WP "WP Off\0Custom WP\0"
 	static const int WSM = 0;
@@ -504,7 +506,7 @@ uniform int FPSDFIO <
 	ui_tooltip = "This lets the shader handle real time depth reduction for aiming down your sights.\n"
 				 "This may induce Eye Strain so take this as an Warning.";
 	ui_category = "Weapon Hand Adjust";
-> = 0;
+> = DK_X;
 
 uniform int3 Eye_Fade_Reduction_n_Power <
 	#if Compatibility
@@ -519,7 +521,7 @@ uniform int3 Eye_Fade_Reduction_n_Power <
 				"Z, Fade Speed: Decreases or Incresses how fast it changes.\n"
 				"Default is X[ 0 ] Y[ 0 ] Z[ 1 ].";
 	ui_category = "Weapon Hand Adjust";
-> = int3(0,0,0);
+> = int3(DK_Y,DK_Z,DK_W);
 
 uniform float Weapon_ZPD_Boundary <
 	ui_type = "slider";
