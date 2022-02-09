@@ -3230,6 +3230,20 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DF_Z 0.1375
 	#define WSM 2 //Weapon Settings Mode
 	#define DB_W 24//Weapon Selection
+#elif (App == 0x2ECE874 ) //Roblox Games
+    #define DA_W 1
+    #define DA_X 0.0705
+    #define DF_Y 0.025
+    #define DA_Y 40.00
+    //#define DE_X 4
+    //#define DE_Y 0.500
+    //#define DE_Z 0.375
+    //#define DG_W -0.20 //disallow some popout
+	#define BMT 1    
+	#define DF_Z 0.165
+	#define DG_Z 0.0625 //Min
+	//#define DE_W 0.100 //Max
+    #define DI_Z 0.2125
 #else
 	#define NPW 1 //No Profile
 #endif
