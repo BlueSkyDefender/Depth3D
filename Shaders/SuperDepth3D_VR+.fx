@@ -281,7 +281,7 @@ uniform int Auto_Balance_Ex <
 #endif
 uniform int ZPD_Boundary <
 	ui_type = "combo";
-	ui_items = "BD0 Off\0BD1 Full\0BD2 Narrow\0BD3 Wide\0BD4 FPS Center\0BD5 FPS Right\0";
+	ui_items = "BD0 Off\0BD1 Full\0BD2 Narrow\0BD3 Wide\0BD4 FPS Center\0BD5 FPS Narrow\0BD6 FPS Edge\0";
 	ui_label = " ZPD Boundary Detection";
 	ui_tooltip = "This selection menu gives extra boundary conditions to ZPD.\n"
 				 			 "This treats your screen as a virtual wall.\n"
@@ -1243,9 +1243,10 @@ float2 Fade(float2 texcoord) // Maybe make it float2 and pass the 2nd switch to 
 {   //Check Depth
 	float CD, Detect, Detect_Out_of_Range;
 	if(ZPD_Boundary > 0)
-	{   //Normal A & B for both
+	{   float4 Switch_Array = ZPD_Boundary == 6 ? float4(0.825,0.850,0.875,0.900) : float4(1.0,0.875,0.75,0.625);
+		//Normal A & B for both	
 		float CDArray_A[7] = { 0.125, 0.25, 0.375, 0.5, 0.625, 0.75, 0.875}, CDArray_B[7] = { 0.25, 0.375, 0.4375, 0.5, 0.5625, 0.625, 0.75}, CDArray_C[4] = { 0.875, 0.75, 0.5, 0.25};
-		float CDArrayZPD_A[7] = { ZPD_Separation.x * 0.625, ZPD_Separation.x * 0.75, ZPD_Separation.x * 0.875, ZPD_Separation.x, ZPD_Separation.x * 0.875, ZPD_Separation.x * 0.75, ZPD_Separation.x * 0.625 },
+		float CDArrayZPD_A[7] = { ZPD_Separation.x * Switch_Array.w, ZPD_Separation.x * Switch_Array.z, ZPD_Separation.x * Switch_Array.y, ZPD_Separation.x * Switch_Array.x, ZPD_Separation.x * Switch_Array.y, ZPD_Separation.x * Switch_Array.z, ZPD_Separation.x * Switch_Array.w },
 			  CDArrayZPD_B[7] = { ZPD_Separation.x * 0.3, ZPD_Separation.x * 0.5, ZPD_Separation.x * 0.75, ZPD_Separation.x, ZPD_Separation.x * 0.75, ZPD_Separation.x * 0.5, ZPD_Separation.x * 0.3},
  			 CDArrayZPD_C[12] = { ZPD_Separation.x * 0.5, ZPD_Separation.x * 0.625, ZPD_Separation.x * 0.75, ZPD_Separation.x * 0.875, ZPD_Separation.x * 0.9375, 
 								   ZPD_Separation.x, ZPD_Separation.x, 
@@ -1257,7 +1258,7 @@ float2 Fade(float2 texcoord) // Maybe make it float2 and pass the 2nd switch to 
 		{   [loop]
 			for( int iY = 0 ; iY < iXY.y; iY++ )
 			{
-				if(ZPD_Boundary == 1)
+				if(ZPD_Boundary == 1 || ZPD_Boundary == 6)
 					GridXY = float2( CDArray_A[iX], CDArray_A[iY]);
 				else if(ZPD_Boundary == 2 || ZPD_Boundary == 5)
 					GridXY = float2( CDArray_B[iX], CDArray_A[iY]);

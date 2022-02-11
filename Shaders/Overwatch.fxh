@@ -1,7 +1,7 @@
 ////----------------------------------------//
 ///SuperDepth3D Overwatch Automation Shader///
 //----------------------------------------////
-// Version 2.3.5
+// Version 2.3.6
 //---------------------------------------OVERWATCH---------------------------------------//
 // If you are reading this stop. Go away and never look back. From this point on if you  //
 // still think it's is worth looking at this..... Then no one can save you or your soul. //
@@ -192,8 +192,19 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define RHW 1
 	#define DSW 1
 #elif (App == 0x3950D04E )	//Skyrim: SE
-	#define DA_Y 6.25
-	#define DB_Y 2
+	#define DA_Y 13.75 //12.5 - 17.5
+	#define DA_Z -0.000375
+	#define DA_X 0.0480
+	#define DB_Z 0.1125
+	#define DF_Y 0.0525 //0.0575 //0.0465
+	#define DB_Y 2 //Auto Mode Works But this game is better locked.
+	#define DE_X 6
+	#define DE_Y 0.375
+	#define DE_Z 0.4375
+	#define DG_Z 0.025 //Min
+    #define DI_Z 0.025 //Trim
+	#define BMT 1
+	#define DF_Z 0.13
 	#define DB_W 7
 #elif (App == 0x142EDFD6 || App == 0x2A0ECCC9 || App == 0x8B0C2031 )	//DOOM 2016
 	#define DA_Y 23.125
@@ -797,9 +808,17 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 #elif (App == 0xABAA2255 ) //The Forest
 	#define DA_W 1
 	#define DB_X 1
-	#define DA_Y 7.5
-	#define DA_X 0.04375
+	#define DA_X 0.038//0.0525//0.0525//0.04 //0.040 //0.038 //0.04375
+    #define DF_Y 0.0075
+	#define DA_Y 17.5 //10.5  //10.5  //15.5 //17.5  //20.5  //7.5 
+    #define DA_Z 0.00075
 	#define DB_Y 3
+    #define DG_Z 0.091 //Min
+    //#define DE_W 0.1625 //Max
+    #define DI_Z 0.1625 //0.200 //Trim
+	#define BMT 1
+	#define DF_Z 0.1375
+	//#define DB_W 62
 	#define RHW 1
 #elif (App == 0x67A4A23A ) //Crash Bandicoot N.Saine Trilogy
 	#define DA_Y 7.5
@@ -817,16 +836,22 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DB_Y 3
 #elif (App == 0x5833F81C ) //Dying Light
 	#define DA_W 1
-	#define DF_Y 0.05
-	#define DA_X 0.05
-	//#define DA_Y 7.75
-	#define DA_Z 0.000125
+	#define DA_X 0.042 //0.0375//0.036
+	#define DF_Y 0.05125  //0.0525	
+	#define DA_Y 9.375 //10.0//12.5
+	#define DA_Z -0.175//-0.200 //-0.375 //-0.05
 	#define DB_Y 4
+	#define DE_X 2
+	#define DE_Y 0.825
+	//#define DE_Z 0.25
 	#define NDW 1
 	#define PEW 1
     #define FOV 1
-    #define DG_Z 0.040 //Min
-    #define DE_W 0.050 //Max
+    #define DG_Z 0.090 //0.0875//0.080 //Min
+    #define DE_W 0.105 //Max
+    #define DI_Z 0.200 //Trim
+	#define BMT 1
+	#define DF_Z 0.14375
 	//#define DB_W 62
 #elif (App == 0x42C1A2B ) //CoD: WWII
 	#define DA_X 0.04
@@ -1795,6 +1820,10 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DE_X 1
 	#define DE_Y 0.5
 	#define DE_Z 0.375
+	#define BMT 1
+	#define DF_Z 0.1525
+	#define DG_Z 0.0375 //Min
+    #define DI_Z 0.070 //Trim
 	#define PEW 1
 	#define DAA 1
 	#define LBM 1
@@ -3493,7 +3522,7 @@ float4 Weapon_Profiles(float WP ,float4 Weapon_Adjust) //Tried Switch But, can't
 {   if (WP == 2)
         Weapon_Adjust = float4(0.425,5.0,1.125,0.0);      //WP 0  | ES: Oblivion
     if (WP == 3)
-        Weapon_Adjust = float4(0.276,16.25,9.15,0.0);      //WP 1  | BorderLands
+        Weapon_Adjust = float4(0.276,16.25,9.15,0.0);     //WP 1  | BorderLands
     if (WP == 4)
         Weapon_Adjust = float4(0.5,32.5,7.15,0.0);        //WP 2  | BorderLands 2
     if (WP == 5)
@@ -3501,7 +3530,7 @@ float4 Weapon_Profiles(float WP ,float4 Weapon_Adjust) //Tried Switch But, can't
     if (WP == 6)
         Weapon_Adjust = float4(0.253,39.0,97.5,0.0);      //WP 4  | Fallout 4
     if (WP == 7)
-        Weapon_Adjust = float4(0.276,20.0,9.5625,0.0);    //WP 5  | Skyrim: SE
+        Weapon_Adjust = float4(0.276,22.0,9.50,0.200);    //WP 5  | Skyrim: SE
     if (WP == 8)
         Weapon_Adjust = float4(0.338,21.0,9.1375,0.0);    //WP 6  | DOOM 2016
     if (WP == 9)
