@@ -308,13 +308,20 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DB_Y 5
 	#define DA_Z 0.00125
 	#define DB_W 33
-#elif (App == 0x6FC1FF71 ) //Black Mesa
-	#define DA_Y 8.75
+#elif (App == 0x6FC1FF71 ) //Black Mesa**
+	#define DA_Y 10.0
 	#define DA_Z 0.000125
-	#define DA_X 0.0325
-	#define DB_Y 2
-	#define DB_W 35
+	#define DA_X 0.0400
+    #define DF_Y 0.0125
+	//#define DB_Y 2
 	#define DB_Z 0.08625
+    #define DE_X 5
+    #define DE_Y 0.625
+    #define DE_Z 0.375
+    #define DG_W -0.225 //Pop out
+	#define DB_W 35
+	#define BMT 1
+	#define DF_Z 0.1375
 #elif (App == 0x6D3CD99E ) //Blood 2
 	#define DA_X 0.105
 	#define DB_Y 2
@@ -3279,6 +3286,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DF_Z 0.1375
 	#define WSM 2 //Weapon Settings Mode
 	#define DB_W 24//Weapon Selection
+	#define PEW 1
 #elif (App == 0x2ECE874 ) //Roblox Games
     #define DA_W 1
     #define DA_X 0.050//0.044//0.071
@@ -3601,7 +3609,7 @@ float4 Weapon_Profiles(float WP ,float4 Weapon_Adjust) //Tried Switch But, can't
     if (WP == 34)
         Weapon_Adjust = float4(1.150,55.0,0.9,0.0);       //WP 32 | Cyberpunk 2077
     if (WP == 35)
-        Weapon_Adjust = float4(0.278,37.50,9.1,0.0);      //WP 33 | Black Mesa
+        Weapon_Adjust = float4(0.278,43.75,9.0,0.0);      //WP 33 | Black Mesa
     if (WP == 36)
         Weapon_Adjust = float4(0.277,105.0,8.8625,0.0);   //WP 34 | Portal 2
     if (WP == 37)
