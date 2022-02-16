@@ -163,8 +163,17 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DSW 1
 	#define EDW 1
 #elif (App == 0xC753DADB )	//ES: Oblivion
-	#define DB_W 2
-	#define DB_Y 3
+    #define DA_X 0.0605
+    #define DF_Y 0.025
+    #define DA_Y 12.50
+    //#define DE_X 1
+    //#define DE_Y 0.8125
+    //#define DE_Z 0.375	
+	#define BMT 1    
+	#define DF_Z 0.125 
+	#define DG_Z 0.130//Min
+    #define DI_Z 0.250//0.160//Trim
+	#define FOV 1
 #elif (App == 0x7B81CCAB || App == 0xFB9A99AB )	//BorderLands 2 & Pre-Sequel
 	#define DA_Y 25.0
 	#define DA_Z 0.00025
@@ -828,12 +837,18 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DB_Y 4
 	#define DF_W 0.580
 	#define HMT 1
-#elif (App == 0xE160AE14 ) //Spyro Reignited Trilogy
-	#define DA_W 1
-	#define DA_Y 12.5
-	#define DA_Z 0.0001
-	#define DA_X 0.05625
-	#define DB_Y 3
+#elif (App == 0xE160AE14 ) //Spyro Reignited Trilogy**
+    #define DA_W 1
+    #define DA_Y 12.5
+    #define DA_Z -0.25
+    #define DA_X 0.105
+    #define DF_Y 0.050
+    #define DB_Y 4
+    #define DE_X 2
+    #define DE_Y 0.500
+    #define DE_Z 0.375
+    //#define DG_Z 0.050 //0.100 //Min
+    //#define DI_Z 0.125 //0.250 //Trim
 #elif (App == 0x5833F81C ) //Dying Light
 	#define DA_W 1
 	#define DA_X 0.042 //0.0375//0.036
