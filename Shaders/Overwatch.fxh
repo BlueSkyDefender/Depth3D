@@ -363,19 +363,27 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DB_W 40
 	#define DF_W 0.534
 	#define HMT 1
-#elif (App == 0xEB9EEB74 || App == 0x8238E9CA ) //Serious Sam Revolution | Serious Sam 2
-	#define DA_X 0.075
+#elif (App == 0x68EF1B4E || App == 0xC103D998 || App == 0xFAB47970 ) //Serious Sam Fusion | Serious Sam 4: Planet Badass | Serious Sam Siberian Mayhem
+	#define DA_W 1
+	#define DA_X 0.080 //0.0875
+	#define DF_Y 0.0125
 	#define DA_Y 10.0
+	#define DA_Z 0.1
 	#define DB_Y 1
+	#define DB_W 42
+    #define DF_X 0.3
+    #define DJ_W 1.0
 	#define DE_X 5
-	#define DE_Y 0.85
+	#define DE_Y 0.5
 	#define DE_Z 0.375
 	#define DB_Z 0.150
-	#define DA_Z 0.1111
-	#define DF_X 0.1125
-	#define DB_W 41
-	#define DF_W 0.5
-	#define HMT 1
+	#define BMT 1    
+	#define DF_Z 0.200 //0.170
+	#define DG_Z 0.075 //Min
+    #define DI_Z 0.125//Trim
+	#define NDW 1
+	#define RHW 1
+	#define PEW 1
 #elif (App == 0x308AEBEA ) //TitanFall 2
 	#define DB_Y 4
 	#define DB_W 44
@@ -805,6 +813,24 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DA_Z 0.0015
 	#define DB_Y 5 		//ZPD Boundary Scaling
 	#define DB_Z 0.325	//Auto Depth Adjust
+	#define PEW 1
+#elif (App == 0xC282C520 ) //Observer System Redux
+	#define DA_W 1
+	#define DA_Y 13.5
+	#define DA_X 0.05
+	#define DF_Y 0.2375
+	#define DA_Z -0.005
+	#define DB_Z 0.0325
+	#define DB_Y 5
+	#define DE_X 1
+	#define DE_Y 0.500
+	#define DE_Z 0.400
+	#define DG_W 0.100 // Slight adjustment to the ZPD Boundary
+	#define BMT 1 // Had to use this mode since Auto Mode was not cutting it.
+	#define DF_Z 0.1625
+    #define DG_Z 0.05 //Min
+    #define DI_Z 0.07 //Trim
+	#define RHW 1
 	#define PEW 1
 #elif (App == 0xC0AC5174 ) //Observer
 	#define DA_W 1
@@ -3623,7 +3649,7 @@ float4 Weapon_Profiles(float WP ,float4 Weapon_Adjust) //Tried Switch But, can't
     if (WP == 41)
         Weapon_Adjust = float4(0.280,18.75,9.03,0.0);     //WP 39 | Serious Sam Revolution #EB9EEB74/Serious Sam HD: The First Encounter /The Second Encounter /Serious Sam 2 #8238E9CA/ Serious Sam 3: BFE*
     if (WP == 42)
-        Weapon_Adjust = float4(0.3,17.5,0.9015,0.0);      //WP 40 | Serious Sam Fusion
+        Weapon_Adjust = float4(0.3,17.0,0.901,0.0125);    //WP 40 | Serious Sam Fusion
     if (WP == 43)
         Weapon_Adjust = float4(1.2,12.5,0.3,0.0);         //WP 41 | GhostRunner DX12
     if (WP == 44)
