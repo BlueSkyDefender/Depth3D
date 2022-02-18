@@ -3732,7 +3732,7 @@ float4 Weapon_Profiles(float WP ,float4 Weapon_Adjust) //Could reduce from 76 to
     if (WP == 18)
         Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 16 | Game
     if (WP == 19)
-        Weapon_Adjust = float4(1.550,117.5,0.125,0.0);    //WP 17 | Halo Infinite
+        Weapon_Adjust = float4(1.550,117.5,0.125,0.125);  //WP 17 | Halo Infinite
     if (WP == 20)
         Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 18 | Game
     if (WP == 21)
