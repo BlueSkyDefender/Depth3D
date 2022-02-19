@@ -834,17 +834,20 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define PEW 1
 #elif (App == 0xC0AC5174 ) //Observer
 	#define DA_W 1
-	#define DA_Y 20.0
+	#define DA_Y 13.5
 	#define DA_X 0.05
-	#define DF_Y 0.01
-	#define DA_Z 0.0005
-	#define DB_Y 5 //Fall Back
-	#define DE_X 2
-	#define DE_Y 0.275
+	#define DF_Y 0.180
+	#define DA_Z -0.005
+	#define DB_Z 0.0325
+	#define DB_Y 5
+	#define DE_X 1
+	#define DE_Y 0.500
 	#define DE_Z 0.400
-	#define DG_W 0.1875 // Slight adjustment to the ZPD Boundary
+	#define DG_W 0.100 // Slight adjustment to the ZPD Boundary
 	#define BMT 1 // Had to use this mode since Auto Mode was not cutting it.
-	#define DF_Z 0.1
+	#define DF_Z 0.1625
+    #define DG_Z 0.05 //Min
+    #define DI_Z 0.07 //Trim
 	#define RHW 1
 	#define PEW 1
 #elif (App == 0xABAA2255 ) //The Forest
@@ -1442,20 +1445,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DE_Z 0.375
 	#define DF_X 0.105
 	#define RHW 1
-#elif (App == 0x68EF1B4E || App == 0xC103D998 ) //Serious Sam Fusion | Serious Sam 4: Planet Badass
-	#define DA_W 1
-	#define DA_X 0.075
-	#define DA_Y 10.0
-	#define DA_Z 0.1
-	#define DB_Y 1
-	#define DB_W 42
-	#define DE_X 5
-	#define DE_Y 0.5
-	#define DE_Z 0.375
-	#define DB_Z 0.150
-	#define NDW 1
-	#define RHW 1
-	#define PEW 1
 #elif (App == 0xEACB4D0D ) //Final Fantasy XV Windows Edition
 	#define DA_X 0.0375
 	#define DA_Y 30.0
