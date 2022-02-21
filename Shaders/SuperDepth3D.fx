@@ -893,10 +893,10 @@ float SLLTresh(float2 TCLocations, float MipLevel)
 float LBDetection()//Active RGB Detection
 {   float MipLevel = 6,Center = SLLTresh(float2(0.5,0.5), 8) > 0, Top_Left = SLLTresh(float2(0.1,0.1), MipLevel) == 0, Bottom_Left = SLLTresh(float2(0.1,0.9), MipLevel) == 0;
 	if ( LetterBox_Masking == 2 || LB_Correction == 2 || LBC == 2 || LBM == 2 )
-		return Bottom_Left && (SLLTresh(float2(0.1,0.5), MipLevel) == 0 ) && (SLLTresh(float2(0.9,0.5), MipLevel) == 0 ) && Center ? 1 : 0; //Vert
-	else                      //Left_Center                                  //Right_Center
-		return Bottom_Left && (SLLTresh(float2(0.5,0.1), MipLevel) == 0 ) && (SLLTresh(float2(0.1,0.9), MipLevel) == 0 ) && Center ? 1 : 0; //Hoz
-}			                 //Center_Top                                   //Bottom_Left
+		return Top_Left && (SLLTresh(float2(0.1,0.5), MipLevel) == 0 ) && (SLLTresh(float2(0.9,0.5), MipLevel) == 0 ) && Center ? 1 : 0; //Vert
+	else                   //Left_Center                                  //Right_Center
+		return Top_Left && (SLLTresh(float2(0.5,0.1), MipLevel) == 0 ) && (SLLTresh(float2(0.1,0.9), MipLevel) == 0 ) && Center ? 1 : 0; //Hoz
+}			              //Center_Top                                   //Bottom_Left
 #endif
 
 #if SDT || SD_Trigger

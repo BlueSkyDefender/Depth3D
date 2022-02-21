@@ -365,7 +365,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define HMT 1
 #elif (App == 0x68EF1B4E || App == 0xC103D998 || App == 0xFAB47970 ) //Serious Sam Fusion | Serious Sam 4: Planet Badass | Serious Sam Siberian Mayhem
 	#define DA_W 1
-	#define DA_X 0.080 //0.0875
+	#define DA_X 0.0825 //0.0875
 	#define DF_Y 0.0125
 	#define DA_Y 10.0
 	#define DA_Z 0.1
@@ -378,12 +378,15 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DE_Z 0.375
 	#define DB_Z 0.150
 	#define BMT 1    
-	#define DF_Z 0.200 //0.170
+	#define DF_Z 0.190 //0.170
 	#define DG_Z 0.075 //Min
     #define DI_Z 0.125//Trim
 	#define NDW 1
 	#define RHW 1
 	#define PEW 1
+	#define LBC 2  //Letter Box Correction Offsets With X & Y
+	#define DH_Z 0.256
+	#define DH_W 0.0
 #elif (App == 0x308AEBEA ) //TitanFall 2
 	#define DB_Y 4
 	#define DB_W 44
