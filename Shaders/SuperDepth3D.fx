@@ -2,7 +2,7 @@
 ///**SuperDepth3D**///
 //----------------////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//* Depth Map Based 3D post-process shader v3.0.5
+//* Depth Map Based 3D post-process shader v3.0.6
 //* For Reshade 3.0+
 //* ---------------------------------
 //*
@@ -796,7 +796,7 @@ sampler SamplerzBufferN_P
 		MipFilter = POINT;
 	};
 
-texture texzBufferN_L { Width = BUFFER_WIDTH ; Height = BUFFER_HEIGHT ; Format = R16F; MipLevels = 2; };
+texture texzBufferN_L { Width = BUFFER_WIDTH ; Height = BUFFER_HEIGHT ; Format = RG16F; MipLevels = 8; };
 
 sampler SamplerzBufferN_L
 	{
@@ -885,15 +885,18 @@ float4 CSB(float2 texcoords)
 #endif
 
 #if LBC || LBM || LB_Correction || LetterBox_Masking
+float SLLTresh(float2 TCLocations, float MipLevel)
+{ 
+	return tex2Dlod(SamplerzBufferN_L,float4(TCLocations,0, MipLevel)).y;
+}
+
 float LBDetection()//Active RGB Detection
-{   float Center = dot(0.333,CSB(float2(0.5,0.5))) > 0; //0.120 0.879
-
+{   float MipLevel = 6,Center = SLLTresh(float2(0.5,0.5), 8) > 0, Top_Left = SLLTresh(float2(0.1,0.1), MipLevel) == 0, Bottom_Left = SLLTresh(float2(0.1,0.9), MipLevel) == 0;
 	if ( LetterBox_Masking == 2 || LB_Correction == 2 || LBC == 2 || LBM == 2 )
-		return (CSB(float2(0.1,0.5)) == 0) && (CSB(float2(0.9,0.5)) == 0) && Center ? 1 : 0; //Vert
-	else       //Left_Center                  //Right_Center
-		return (CSB(float2(0.5,0.1)) == 0) && (CSB(float2(0.1,0.9)) == 0) && Center ? 1 : 0; //Hoz
-}			  //Center_Top                   //Bottom_Left
-
+		return Bottom_Left && (SLLTresh(float2(0.1,0.5), MipLevel) == 0 ) && (SLLTresh(float2(0.9,0.5), MipLevel) == 0 ) && Center ? 1 : 0; //Vert
+	else                      //Left_Center                                  //Right_Center
+		return Bottom_Left && (SLLTresh(float2(0.5,0.1), MipLevel) == 0 ) && (SLLTresh(float2(0.1,0.9), MipLevel) == 0 ) && Center ? 1 : 0; //Hoz
+}			                 //Center_Top                                   //Bottom_Left
 #endif
 
 #if SDT || SD_Trigger
@@ -1216,11 +1219,8 @@ float4 DepthMap(in float4 position : SV_Position,in float2 texcoord : TEXCOORD) 
 		R = Fade(texcoord).x;
 	if(texcoord.x < pix.x * 2 && 1-texcoord.y < pix.y * 2)//BL
 		R = Fade(texcoord).y;
-	//Luma Map
-	float3 Color = tex2D(BackBufferCLAMP,texcoord ).rgb;
-		   Color.x = max(Color.r, max(Color.g, Color.b)); 
-	
-	return saturate(float4(R,G,B,Color.x));
+
+	return saturate(float4(R,G,B,1));
 }
 
 float AutoDepthRange(float d, float2 texcoord )
@@ -1386,7 +1386,7 @@ float3 DB( float2 texcoord)
 }
 
 ////////////////////////////////////////////////////Depth & Special Depth Triggers//////////////////////////////////////////////////////////////////
-void zBuffer(in float4 position : SV_Position, in float2 texcoord : TEXCOORD, out float2 Point_Out : SV_Target0 , out float Linear_Out : SV_Target1)
+void zBuffer(in float4 position : SV_Position, in float2 texcoord : TEXCOORD, out float2 Point_Out : SV_Target0 , out float2 Linear_Out : SV_Target1)
 {
 	float3 Set_Depth = DB( texcoord.xy ).xyz;
 	
@@ -1394,9 +1394,13 @@ void zBuffer(in float4 position : SV_Position, in float2 texcoord : TEXCOORD, ou
 		Set_Depth.y = AltWeapon_Fade();
 	if(  texcoord.x < pix.x * 2 && 1-texcoord.y < pix.y * 2) //BL
 		Set_Depth.y = Weapon_ZPD_Fade(Set_Depth.z);
+
+	//Luma Map
+	float3 Color = tex2D(BackBufferCLAMP,texcoord ).rgb;
+		   Color.x = max(Color.r, max(Color.g, Color.b)); 
 	
 	Point_Out = Set_Depth.xy; 
-	Linear_Out = Set_Depth.x;//is z when above code is on.	
+	Linear_Out = float2(Set_Depth.x,Color.x);//is z when above code is on.	
 }
 
 float2 GetDB(float2 texcoord)

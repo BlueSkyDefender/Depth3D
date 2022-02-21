@@ -761,6 +761,23 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define RHW 1
 	#define PEW 1
 	#define DAA 1
+#elif (App == 0x60F440F8 ) //Resident Evil Village
+	#define DA_W 1
+	#define DA_Y 36.0  //19.0
+	#define DA_Z -0.65 //0.0004
+	#define DA_X 0.071 //0.075
+    #define DF_Y 0.1
+	#define DB_Y 1
+	#define DE_X 2
+	#define DE_Y 0.375
+	#define DE_Z 0.400
+	#define DG_W 0.725 //Only Detect stuff past the screen.
+    #define DG_Z 0.040//Min
+    //#define DE_W 0.100 //Max
+    #define DI_Z 0.1375 //Trim	
+	#define RHW 1
+	#define PEW 1
+	#define DAA 1
 #elif (App == 0x1B8B9F54 ) //TheEvilWithin
 	#define DA_Y 37.5
 	#define DA_Z 0.000125
