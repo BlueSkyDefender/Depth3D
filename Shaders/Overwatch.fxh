@@ -1,7 +1,7 @@
 ////----------------------------------------//
 ///SuperDepth3D Overwatch Automation Shader///
 //----------------------------------------////
-// Version 2.3.6
+// Version 2.3.7
 //---------------------------------------OVERWATCH---------------------------------------//
 // If you are reading this stop. Go away and never look back. From this point on if you  //
 // still think it's is worth looking at this..... Then no one can save you or your soul. //
@@ -3339,6 +3339,24 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define DK_Y 0 //Eye Eye Selection
     #define DK_Z 2 //Eye Fade Selection
     #define DK_W 1 //Eye Fade Speed Selection
+#elif (App == 0x3C98315F ) //Forza Horizon 5  
+	//#define DA_W 1
+	#define DA_X 0.2
+	//#define DF_Y 0.05
+	#define DA_Y 11.0 //7.75 //10.0 //12.5
+	#define DB_Z 0.225
+	#define DA_Z -0.00025  
+	#define DB_Y 4
+	#define DE_X 1
+	#define DE_Y 0.250
+	#define DE_Z 0.475
+	#define DG_W 0.375 //Allow popout
+    #define DG_Z 0.025
+	#define BMT 1    
+	#define DF_Z 0.120 
+	#define NDW 1
+	#define PEW 1
+	#define DAA 1
 #else
 	#define NPW 1 //No Profile
 #endif
