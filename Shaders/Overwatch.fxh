@@ -2012,17 +2012,22 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 #elif (App == 0xD86799B9 ) //Devil May Cry 5
 	#define DA_W 1
 	#define DA_X 0.0375
-	#define DA_Y 40.0
+	#define DA_Y 38.25//40.0
+ //   #define DA_Z -0.375
 	#define DB_Y 3
 	#define DE_X 1
-	#define DE_Y 0.300
-	#define DE_Z 0.350
-	#define DG_W 0.277 //0.5625 //I Think Erroring on the safe side is needed here.
+	#define DE_Y 0.375
+	#define DE_Z 0.375
+	#define DG_W 0.125
 	#define BDF 1
 	#define DC_X 0.025
 	#define DC_Y 0.025
 	#define DC_W -0.012
 	#define DF_Y 0.02375
+	#define BMT 1    
+	#define DF_Z 0.125 //0.100 //0.1125 
+	#define DG_Z 0.0325//0.0275//Min
+    #define DI_Z 0.0625//Trim
 	#define PEW 1
 	#define RHW 1
 #elif (App == 0x5BC45541 ) //Contrast
