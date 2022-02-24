@@ -2,7 +2,7 @@
 ///**SuperDepth3D**///
 //----------------////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//* Depth Map Based 3D post-process shader v3.0.6
+//* Depth Map Based 3D post-process shader v3.0.7
 //* For Reshade 3.0+
 //* ---------------------------------
 //*
@@ -37,7 +37,7 @@
 	#define OSW 0
 #else// DA_X = [ZPD] DA_Y = [Depth Adjust] DA_Z = [Offset] DA_W = [Depth Linearization]
 	static const float DA_X = 0.025, DA_Y = 7.5, DA_Z = 0.0, DA_W = 0.0;
-	// DC_X = [Depth Flip] DC_Y = [Auto Balance] DC_Z = [Auto Depth] DC_W = [Weapon Hand]
+	// DB_X = [Depth Flip] DB_Y = [Auto Balance] DB_Z = [Auto Depth] DB_W = [Weapon Hand]
 	static const float DB_X = 0, DB_Y = 0, DB_Z = 0.1, DB_W = 0.0;
 	// DC_X = [Barrel Distortion K1] DC_Y = [Barrel Distortion K2] DC_Z = [Barrel Distortion K3] DC_W = [Barrel Distortion Zoom]
 	static const float DC_X = 0, DC_Y = 0, DC_Z = 0, DC_W = 0;
@@ -891,12 +891,12 @@ float SLLTresh(float2 TCLocations, float MipLevel)
 }
 
 float LBDetection()//Active RGB Detection
-{   float MipLevel = 6,Center = SLLTresh(float2(0.5,0.5), 8) > 0, Top_Left = SLLTresh(float2(0.1,0.1), MipLevel) == 0, Bottom_Left = SLLTresh(float2(0.1,0.9), MipLevel) == 0;
+{   float MipLevel = 5,Center = SLLTresh(float2(0.5,0.5), 8) > 0, Top_Left = SLLTresh(float2(0.1,0.1), MipLevel) == 0;
 	if ( LetterBox_Masking == 2 || LB_Correction == 2 || LBC == 2 || LBM == 2 )
 		return Top_Left && (SLLTresh(float2(0.1,0.5), MipLevel) == 0 ) && (SLLTresh(float2(0.9,0.5), MipLevel) == 0 ) && Center ? 1 : 0; //Vert
 	else                   //Left_Center                                  //Right_Center
-		return Top_Left && (SLLTresh(float2(0.5,0.1), MipLevel) == 0 ) && (SLLTresh(float2(0.1,0.9), MipLevel) == 0 ) && Center ? 1 : 0; //Hoz
-}			              //Center_Top                                   //Bottom_Left
+		return Top_Left && (SLLTresh(float2(0.5,0.9), MipLevel) == 0 ) && Center ? 1 : 0; //Hoz
+}			              //Bottom_Center
 #endif
 
 #if SDT || SD_Trigger
@@ -1101,8 +1101,10 @@ float3x3 PrepDepth(float2 texcoord)
 	G = DM.y > saturate(smoothstep(0,2.5,DM.w)); //Weapon Mask
 	B = DM.z; //Weapon Hand
 	A = ZPD_Boundary >= 4 ? max( G, R) : R; //Grid Depth
-	//[0][0] = R | [0][1] = G | [0][2] = B //[1][0] = A | [1][1] = D | [1][2] = DM // [2][0] = Null | [2][1] = Null | [2][2] = Null
-	return float3x3( saturate(float3(R, G, B)) , saturate(float3(A,Depth( SDT || SD_Trigger ? texcoord : TC_SP(texcoord) ).x,DM.w)) , float3(0,0,0) );
+
+	return float3x3( saturate(float3(R, G, B)), 	                                                      //[0][0] = R | [0][1] = G | [0][2] = B
+					 saturate(float3(A, Depth( SDT || SD_Trigger ? texcoord : TC_SP(texcoord) ).x, DM.w)),//[1][0] = A | [1][1] = D | [1][2] = DM
+							  float3(0,0,0) );                                                            //[2][0] = 0 | [2][1] = 0 | [2][2] = 0
 }
 //////////////////////////////////////////////////////////////Depth HUD Alterations///////////////////////////////////////////////////////////////////////
 #if UI_MASK
@@ -1297,7 +1299,7 @@ float3 Conv(float2 MD_WHD,float2 texcoord)
 float3 DB( float2 texcoord)
 {
 	// X = Mix Depth | Y = Weapon Mask | Z = Weapon Hand | W = Normal Depth
-	float4 DM = float4(tex2Dlod(SamplerDMN,float4(texcoord,0,0)).xyz,PrepDepth(texcoord)[1][1]);
+	float4 DM = float4(tex2Dlod(SamplerDMN,float4(texcoord,0,0)).xyz,PrepDepth(TC_SP(texcoord))[1][1]);
 	//Hide Temporal passthrough
 	if(texcoord.x < pix.x * 2 && texcoord.y < pix.y * 2)
 		DM = PrepDepth(texcoord)[0][0];
@@ -1382,7 +1384,7 @@ float3 DB( float2 texcoord)
 	#endif
 	}
 
-	return float3(DM.y,DM.w,HandleConvergence.z);
+	return float3(DM.y,PrepDepth(texcoord)[1][1],HandleConvergence.z);
 }
 
 ////////////////////////////////////////////////////Depth & Special Depth Triggers//////////////////////////////////////////////////////////////////

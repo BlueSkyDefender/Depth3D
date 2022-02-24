@@ -3362,6 +3362,24 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define NDW 1
 	#define PEW 1
 	#define DAA 1
+#elif (App == 0x4698602A ) // It takes two*
+    #define DA_W 1
+    #define DA_Y 25.0 //Needs to be stronger since we zoom out a lot
+    #define DA_X 0.0625
+    #define DF_Y 0.130//This was set too high. I noticed in you profiles you like to use this a lot. Try to keep it lower then what you set it too. Eye Strain can be caused by this.   
+    //#define DB_Y 4  //This option getting phased out and replaced with BMT: Balance Mode for 3D profile creation in most instances.
+    #define DE_X 1
+    #define DE_Y 0.250
+    #define DE_Z 0.4375
+    #define DG_W 0.350 //Allow popout   
+	#define BMT 1     //BMT 1 needs DF_Z set to a value from 0.0-0.250
+	#define DF_Z 0.120 
+	#define DG_Z 0.060//Min
+    #define DI_Z 0.200//Trim
+    #define LBC 1     //Letter Box Correction
+	#define DH_Z 0.0  //Pos offset X    
+	#define DH_W -0.25//Pos offset Y    
+	#define DAA 1
 #else
 	#define NPW 1 //No Profile
 #endif
