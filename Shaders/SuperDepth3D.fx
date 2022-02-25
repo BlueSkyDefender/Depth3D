@@ -487,7 +487,7 @@ uniform float4 Weapon_Adjust <
 	ui_category = "Weapon Hand Adjust";
 > = float4(0.0,0.0,0.0,0.0);
 
-uniform float3 WZPD_and_WND <
+uniform float4 WZPD_and_WND <
 	ui_type = "drag";
 	ui_min = 0.0; ui_max = 0.5;
 	ui_label = " Weapon ZPD, Min, and Max";
@@ -495,9 +495,9 @@ uniform float3 WZPD_and_WND <
 				"Weapon ZPD Is for setting a Weapon Profile Convergence, so you should most of the time leave this Default.\n"
 				"Weapon Min is used to adjust min weapon hand of the weapon hand when looking at the world near you.\n"
 				"Weapon Max is used to adjust max weapon hand when looking out at a distance.\n"
-				"Default is (ZPD X 0.03, Min Y 0.0, Max Z 0.0) & Zero is off.";
+				"Default is (ZPD X 0.03, Min Y 0.0, Max Z 0.0, Trim Z 0.250 ) & Zero is off.";
 	ui_category = "Weapon Hand Adjust";
-> = float3(0.03,DG_Z,DE_W);
+> = float4(0.03,DG_Z,DE_W,DI_Z);
 
 uniform float Weapon_ZPD_Boundary <
 	ui_type = "slider";
@@ -1215,7 +1215,7 @@ float4 DepthMap(in float4 position : SV_Position,in float2 texcoord : TEXCOORD) 
 	float ScaleND = saturate(lerp(R,1.0f,smoothstep(min(-WZPD_and_WND.y,-WZPD_and_WND.z * Auto_Scale),1.0f,R)));
 
 	if (WZPD_and_WND.y > 0)
-		R = saturate(lerp(ScaleND,R,smoothstep(0,DI_Z,ScaleND)));
+		R = saturate(lerp(ScaleND,R,smoothstep(0,WZPD_and_WND.w,ScaleND)));
 
 	if(texcoord.x < pix.x * 2 && texcoord.y < pix.y * 2)//TL
 		R = Fade_in_out(texcoord);

@@ -1319,9 +1319,10 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DB_Y 4
 	#define NDW 1
 #elif (App == 0xC06FE818 ) //BorderLands 3
-	#define DA_Y 18.0
+	#define DA_Y 16.5
 	#define DA_Z 0.0001375
-	#define DA_X 0.04
+	#define DA_X 0.0425
+	#define DF_Y 0.0425
 	#define DB_Z 0.05
 	#define DA_W 1
 	#define DB_Y 4
@@ -1329,7 +1330,12 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DE_X 5
 	#define DE_Y 0.425
 	#define DE_Z 0.300
+	#define DG_W 0.210   //Pop out
 	#define DF_X 0.085
+	#define BMT 1    
+	#define DF_Z 0.170
+	#define DG_Z 0.075   //Min
+	#define DI_Z 0.18125 //Trim
 	#define NDW 1
 	#define DAA 1
 	#elif (App == 0x3C8DE8E8 ) //Metro Exodus
