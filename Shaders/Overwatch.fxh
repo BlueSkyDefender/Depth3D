@@ -3387,7 +3387,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DH_W -0.25//Pos offset Y
 	#define NDW 1  
 	#define DAA 1
-#elif (App == 0x822AF64D) //The Outer Worlds**
+#elif (App == 0x822AF64D ) //The Outer Worlds**
     #define DA_W 1
     #define DA_X 0.050
     #define DF_Y 0.040
@@ -3411,7 +3411,17 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DJ_W 0.125
     #define DK_W 2 //Set speed
     #define PEW 1  
-    #define FOV 1 
+    #define FOV 1
+#elif (App == 0x3B03D773 ) //HardReset Redux
+    #define DA_X 0.0625
+    #define DF_Y 0.0425
+    #define DA_Y 11.0
+    #define HMT 1
+	#define DF_W 0.5
+	#define BMT 1    
+	#define DF_Z 0.100 
+	#define DG_Z 0.075 //Min
+    #define DI_Z 0.225 //Trim
 #else
 	#define NPW 1 //No Profile
 #endif
