@@ -499,30 +499,6 @@ uniform float3 WZPD_and_WND <
 	ui_category = "Weapon Hand Adjust";
 > = float3(0.03,DG_Z,DE_W);
 
-uniform int FPSDFIO <
-	ui_type = "combo";
-	ui_items = "Off\0Press\0Hold\0";
-	ui_label = " FPS Focus Depth";
-	ui_tooltip = "This lets the shader handle real time depth reduction for aiming down your sights.\n"
-				 "This may induce Eye Strain so take this as an Warning.";
-	ui_category = "Weapon Hand Adjust";
-> = DK_X;
-
-uniform int3 Eye_Fade_Reduction_n_Power <
-	#if Compatibility
-	ui_type = "drag";
-	#else
-	ui_type = "slider";
-	#endif
-	ui_min = 0; ui_max = 2;
-	ui_label = " Eye Fade Options";
-	ui_tooltip ="X, Eye Selection: One is Right Eye only, Two is Left Eye Only, and Zero Both Eyes.\n"
-				"Y, Fade Reduction: Decreases the depth amount by a current percentage.\n"
-				"Z, Fade Speed: Decreases or Incresses how fast it changes.\n"
-				"Default is X[ 0 ] Y[ 0 ] Z[ 1 ].";
-	ui_category = "Weapon Hand Adjust";
-> = int3(DK_Y,DK_Z,DK_W);
-
 uniform float Weapon_ZPD_Boundary <
 	ui_type = "slider";
 	ui_min = 0.0; ui_max = 0.5;
@@ -606,6 +582,27 @@ uniform bool Eye_Swap <
 	ui_tooltip = "L/R to R/L.";
 	ui_category = "Stereoscopic Options";
 > = false;
+
+uniform int FPSDFIO <
+	ui_type = "combo";
+	ui_items = "Off\0Press\0Hold\0";
+	ui_label = "·FPS Focus Depth·";
+	ui_tooltip = "This lets the shader handle real time depth reduction for aiming down your sights.\n"
+				"This may induce Eye Strain so take this as an Warning.";
+	ui_category = "FPS Focus";
+> = DK_X;
+
+uniform int3 Eye_Fade_Reduction_n_Power <
+	ui_type = "slider";
+	ui_min = 0; ui_max = 2;
+	ui_label = " Eye Fade Options";
+	ui_tooltip ="X, Eye Selection: One is Right Eye only, Two is Left Eye Only, and Zero Both Eyes.\n"
+				"Y, Fade Reduction: Decreases the depth amount by a current percentage.\n"
+				"Z, Fade Speed: Decreases or Incresses how fast it changes.\n"
+				"Default is X[ 0 ] Y[ 0 ] Z[ 1 ].";
+	ui_category = "FPS Focus";
+> = int3(DK_Y,DK_Z,DK_W);
+
 //Cursor Adjustments
 uniform int Cursor_Type <
 	ui_type = "combo";
@@ -616,14 +613,14 @@ uniform int Cursor_Type <
 	ui_category = "Cursor Adjustments";
 > = 0;
 
-uniform int2 Cursor_SC <
+uniform int3 Cursor_SC <
 	ui_type = "drag";
 	ui_min = 0; ui_max = 10;
 	ui_label = " Cursor Adjustments";
 	ui_tooltip = "This controlls the Size & Color.\n"
-							 "Defaults are ( X 1, Y 2 ).";
+							 "Defaults are ( X 1, Y 0, Z 0).";
 	ui_category = "Cursor Adjustments";
-> = int2(1,0);
+> = int3(1,0,0);
 
 uniform bool Cursor_Lock <
 	ui_label = " Cursor Lock";
@@ -711,6 +708,13 @@ uniform bool DepthCheck < source = "bufready_depth"; >;
 #define pix float2(BUFFER_RCP_WIDTH, BUFFER_RCP_HEIGHT)
 #define Per float2( (Perspective * pix.x) * 0.5, 0) //Per is Perspective
 #define AI Interlace_Anaglyph_Calibrate.x * 0.5 //Optimization for line interlaced Adjustment.
+#define ARatio (BUFFER_WIDTH / BUFFER_HEIGHT)
+
+
+float Scale(float val,float max,float min) //Scale to 0 - 1
+{
+	return (val - min) / (max - min);
+}
 
 float fmod(float a, float b)
 {
@@ -920,13 +924,11 @@ float4 MouseCursor(float2 texcoord )
 		if(Cursor_Type > 0)
 		{
 			float CCA = 0.005, CCB = 0.00025, CCC = 0.25, CCD = 0.00125, Arrow_Size_A = 0.7, Arrow_Size_B = 1.3, Arrow_Size_C = 4.0;//scaling
-			float2 MousecoordsXY = Mousecoords * pix, center = texcoord, Screen_Ratio = float2(1.75,1.0), Size_Color = float2(1+Cursor_SC.x,Cursor_SC.y);
+			float2 MousecoordsXY = Mousecoords * pix, center = texcoord, Screen_Ratio = float2(ARatio,1.0), Size_Color = float2(1+Cursor_SC.x,Cursor_SC.y);
 			float THICC = (2.0+Size_Color.x) * CCB, Size = Size_Color.x * CCA, Size_Cubed = (Size_Color.x*Size_Color.x) * CCD;
 
 			if (Cursor_Lock && !CLK)
-			MousecoordsXY = float2(0.5,0.5);
-			if (Cursor_Type == 3)
-			Screen_Ratio = float2(1.6,1.0);
+			MousecoordsXY = float2(0.5,lerp(0.5,0.5725,Scale(Cursor_SC.z,10,0) ));
 
 			float4 Dist_from_Hori_Vert = float4( abs((center.x - (Size* Arrow_Size_B) / Screen_Ratio.x) - MousecoordsXY.x) * Screen_Ratio.x, // S_dist_fromHorizontal
 												 abs(center.x - MousecoordsXY.x) * Screen_Ratio.x, 										  // dist_fromHorizontal
@@ -1299,7 +1301,7 @@ float3 Conv(float2 MD_WHD,float2 texcoord)
 float3 DB( float2 texcoord)
 {
 	// X = Mix Depth | Y = Weapon Mask | Z = Weapon Hand | W = Normal Depth
-	float4 DM = float4(tex2Dlod(SamplerDMN,float4(texcoord,0,0)).xyz,PrepDepth(TC_SP(texcoord))[1][1]);
+	float4 DM = float4(tex2Dlod(SamplerDMN,float4(texcoord,0,0)).xyz,PrepDepth( SDT || SD_Trigger ? TC_SP(texcoord) :  texcoord )[1][1]);
 	//Hide Temporal passthrough
 	if(texcoord.x < pix.x * 2 && texcoord.y < pix.y * 2)
 		DM = PrepDepth(texcoord)[0][0];
@@ -1611,8 +1613,6 @@ float3 PS_calcLR(float2 texcoord)
 
 	if (FPSDFIO >= 1)
 		FD = lerp(FD * FD_Adjust,FD,FadeIO);
-		//if(FPSDFIO >= 1)
-			//FD = lerp(FD,D,StereoViewMask(TexCoords));
 
 	float2 DLR = float2(FD,FD);
 	if( Eye_Fade_Reduction_n_Power.x == 1)

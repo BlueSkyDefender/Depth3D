@@ -1,7 +1,7 @@
 ////----------------------------------------//
 ///SuperDepth3D Overwatch Automation Shader///
 //----------------------------------------////
-// Version 2.3.7
+// Version 2.3.8
 //---------------------------------------OVERWATCH---------------------------------------//
 // If you are reading this stop. Go away and never look back. From this point on if you  //
 // still think it's is worth looking at this..... Then no one can save you or your soul. //
@@ -3362,10 +3362,10 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define NDW 1
 	#define PEW 1
 	#define DAA 1
-#elif (App == 0x4698602A ) // It takes two*
+#elif (App == 0x4698602A ) // It takes two* WIP
     #define DA_W 1
-    #define DA_Y 25.0 //Needs to be stronger since we zoom out a lot
-    #define DA_X 0.0625
+    #define DA_Y 36.25 //Needs to be stronger since we zoom out a lot
+    #define DA_X 0.060
     #define DF_Y 0.130//This was set too high. I noticed in you profiles you like to use this a lot. Try to keep it lower then what you set it too. Eye Strain can be caused by this.   
     //#define DB_Y 4  //This option getting phased out and replaced with BMT: Balance Mode for 3D profile creation in most instances.
     #define DE_X 1
@@ -3378,8 +3378,34 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define DI_Z 0.200//Trim
     #define LBC 1     //Letter Box Correction
 	#define DH_Z 0.0  //Pos offset X    
-	#define DH_W -0.25//Pos offset Y    
+	#define DH_W -0.25//Pos offset Y
+	#define NDW 1  
 	#define DAA 1
+#elif (App == 0x822AF64D) //The Outer Worlds**
+    #define DA_W 1
+    #define DA_X 0.050
+    #define DF_Y 0.040
+	#define DA_Z -0.0375//0.0000375  
+    #define DA_Y 50.0
+    #define DB_Z 0.075
+    #define DB_Y 5
+    #define DE_X 6
+    #define DE_Y 0.500
+    #define DE_Z 0.375  //This value needs to be low cause you climb ladders like in F.E.A.R, so it jitters like crazy with fast updates when moving
+    #define DG_W -0.150 //Disallow popout 
+    //#define DK_X 2
+    #define BMT 1     //BMT 1 needs DF_Z set to a value from 0.0-0.250
+	#define DF_Z 0.123 
+	#define DG_Z 0.070//Min
+    #define DE_W 0.170
+    #define DI_Z 0.070//Trim
+    #define WSM 2
+    #define DB_W 6
+    #define DF_X 0.250 
+	#define DJ_W 0.125
+    #define DK_W 2 //Set speed
+    #define PEW 1  
+    #define FOV 1 
 #else
 	#define NPW 1 //No Profile
 #endif
@@ -3782,7 +3808,7 @@ float4 Weapon_Profiles(float WP ,float4 Weapon_Adjust) //Could reduce from 76 to
     if (WP == 5)
         Weapon_Adjust = float4(0.270,25.0,0.951,0.0);     //WP 3  | WRC 10
     if (WP == 6)
-        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 4  | Game
+        Weapon_Adjust = float4(0.850,50.0,0.9990125,0.0); //WP 4  | The Outer Worlds
     if (WP == 7)
         Weapon_Adjust = float4(0.275,11.0,10.0,0.0);      //WP 5  | Crysis 2 DX11 1.9
     if (WP == 8)
