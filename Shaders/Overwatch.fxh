@@ -1,7 +1,7 @@
 ////----------------------------------------//
 ///SuperDepth3D Overwatch Automation Shader///
 //----------------------------------------////
-// Version 2.3.8
+// Version 2.3.9
 //---------------------------------------OVERWATCH---------------------------------------//
 // If you are reading this stop. Go away and never look back. From this point on if you  //
 // still think it's is worth looking at this..... Then no one can save you or your soul. //
@@ -3439,6 +3439,24 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DG_Z 0.07  
 	#define DI_Z 0.120
     #define PEW 1 
+#elif (App == 0xB4403655 ) //Elden Ring
+	#define DA_W 1
+    #define DA_X 0.123
+    #define DF_Y 0.0275
+	#define DA_Y 22.5
+    #define DA_Z -0.300
+	#define DE_X 1
+	#define DE_Y 0.500
+	#define DE_Z 0.375
+    #define DG_W -0.050 //Disallow popout  
+	#define BMT 1    
+	#define DF_Z 0.150
+	#define DG_Z 0.025//Min
+    #define LBC 2     //Letter Box Correction
+    #define DH_X 1.340
+    #define PEW 1 
+    #define DAA 1
+    #define DSW 1
 #else
 	#define NPW 1 //No Profile
 #endif
