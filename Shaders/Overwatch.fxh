@@ -3422,6 +3422,23 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DF_Z 0.100 
 	#define DG_Z 0.075 //Min
     #define DI_Z 0.225 //Trim
+#elif (App == 0x51C8FDAA ) //Assassin's Valhalla
+	#define DA_W 1
+	#define DA_Y 50.0
+    #define DA_Z -0.250
+	#define DA_X 0.045
+	#define DB_Y 1
+	#define DE_X 1
+	#define DE_Y 0.375
+	#define DE_Z 0.375
+	#define DB_Z 0.1
+	#define DF_Y 0.0025 
+    //#define DG_W -0.100 //Disallow popout  
+	#define BMT 1    
+	#define DF_Z 0.130
+	#define DG_Z 0.07  
+	#define DI_Z 0.120
+    #define PEW 1 
 #else
 	#define NPW 1 //No Profile
 #endif
