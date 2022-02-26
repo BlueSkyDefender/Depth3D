@@ -1033,7 +1033,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DA_Y 32.0//21.25
 	#define DA_Z 0.0003
 	#define DB_Y 3
-	#define DE_X 4
+	#define DE_X 7
 	#define DE_Y 0.500
 	#define DE_Z 0.375
 	#define DG_W -0.1375
@@ -1160,11 +1160,15 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DE_X 5
 	#define DE_Z 0.375
 #elif (App == 0x56301DED ) //ShadowWarrior 2
-	#define DA_X 0.035
 	#define DA_W 1
-	#define DB_Y 4
-	#define DE_X 5
-	#define DE_Z 0.375
+	#define DA_X 0.045
+    #define DF_Y 0.025
+	#define DA_Y 12.5
+	#define BMT 1    
+	#define DF_Z 0.1
+	#define DG_Z 0.09  
+	#define DI_Z 0.170
+	#define DSW 1
 	#define NDW 1
 #elif (App == 0x892CA092 ) //Farcry
 	#define DA_Y 7.0
@@ -1474,7 +1478,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DB_Z 0.115
 	#define DB_Y 3
 	#define DB_W 20
-	#define DE_X 4
+	#define DE_X 7
 	#define DE_Y 0.5
 	#define DE_Z 0.375
 	#define DF_X 0.105
@@ -3469,6 +3473,17 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define PEW 1 
     #define DAA 1
     #define DSW 1
+#elif (App == 0xC5A76A71 ) //The Turing Test
+	#define DA_W 1
+    #define DA_X 0.045
+    #define DF_Y 0.045
+	#define DA_Y 37.5
+    #define DA_Z 0.0015
+	#define BMT 1    
+	#define DF_Z 0.110
+	#define DG_Z 0.0875//Min
+	#define DE_W 0.160 //Max
+    #define DI_Z 0.150 //Trim
 #else
 	#define NPW 1 //No Profile
 #endif
