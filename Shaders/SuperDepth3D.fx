@@ -2,7 +2,7 @@
 ///**SuperDepth3D**///
 //----------------////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//* Depth Map Based 3D post-process shader v3.0.7
+//* Depth Map Based 3D post-process shader v3.0.8
 //* For Reshade 3.0+
 //* ---------------------------------
 //*
@@ -490,7 +490,7 @@ uniform float4 Weapon_Adjust <
 uniform float4 WZPD_and_WND <
 	ui_type = "drag";
 	ui_min = 0.0; ui_max = 0.5;
-	ui_label = " Weapon ZPD, Min, and Max";
+	ui_label = " Weapon ZPD, Min, Max, & Trim";
 	ui_tooltip = "WZPD controls the focus distance for the screen Pop-out effect also known as Convergence for the weapon hand.\n"
 				"Weapon ZPD Is for setting a Weapon Profile Convergence, so you should most of the time leave this Default.\n"
 				"Weapon Min is used to adjust min weapon hand of the weapon hand when looking at the world near you.\n"
@@ -1223,8 +1223,10 @@ float4 DepthMap(in float4 position : SV_Position,in float2 texcoord : TEXCOORD) 
 		R = Fade(texcoord).x;
 	if(texcoord.x < pix.x * 2 && 1-texcoord.y < pix.y * 2)//BL
 		R = Fade(texcoord).y;
-
-	return saturate(float4(R,G,B,1));
+	
+	float Luma_Map = dot(0.333, tex2D(BackBufferCLAMP,texcoord).rgb);
+	
+	return saturate(float4(R,G,B,Luma_Map));
 }
 
 float AutoDepthRange(float d, float2 texcoord )
