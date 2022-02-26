@@ -68,7 +68,7 @@
 //USER EDITABLE PREPROCESSOR FUNCTIONS START//
 
 // Zero Parallax Distance Balance Mode allows you to switch control from manual to automatic and vice versa.
-#define Balance_Mode 0 //Default 0 is Automatic. One is Manual.
+#define Balance_Mode 1 //Default 0 is Automatic. One is Manual.
 
 // RE Fix is used to fix the issue with Resident Evil's 2 Remake 1-Shot cutscenes.
 #define RE_Fix 0 //Default 0 is Off. One is High and Ten is Low        1-10
@@ -243,7 +243,7 @@ uniform int Auto_Balance_Ex <
 #endif
 uniform int ZPD_Boundary <
 	ui_type = "combo";
-	ui_items = "BD0 Off\0BD1 Full\0BD2 Narrow\0BD3 Wide\0BD4 FPS Center\0BD5 FPS Narrow\0BD6 FPS Edge\0";
+	ui_items = "BD0 Off\0BD1 Full\0BD2 Narrow\0BD3 Wide\0BD4 FPS Center\0BD5 FPS Narrow\0BD6 FPS Edge\0BD7 FPS Mixed\0";
 	ui_label = " ZPD Boundary Detection";
 	ui_tooltip = "This selection menu gives extra boundary conditions to ZPD.\n"
 				 			 "This treats your screen as a virtual wall.\n"
@@ -1155,7 +1155,7 @@ float2 Fade(float2 texcoord) // Maybe make it float2 and pass the 2nd switch to 
 		{   [loop]
 			for( int iY = 0 ; iY < iXY.y; iY++ )
 			{
-				if(ZPD_Boundary == 1 || ZPD_Boundary == 6)
+				if(ZPD_Boundary == 1 || ZPD_Boundary == 6 || ZPD_Boundary == 7)
 					GridXY = float2( CDArray_A[iX], CDArray_A[iY]);
 				else if(ZPD_Boundary == 2 || ZPD_Boundary == 5)
 					GridXY = float2( CDArray_B[iX], CDArray_A[iY]);

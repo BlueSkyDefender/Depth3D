@@ -2,7 +2,7 @@
 ///**SuperDepth3D_VR+**///
 //--------------------////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//* Depth Map Based 3D post-process shader v2.9.6
+//* Depth Map Based 3D post-process shader v2.9.7
 //* For Reshade 4.4+ I think...
 //* ---------------------------------
 //*
@@ -281,7 +281,7 @@ uniform int Auto_Balance_Ex <
 #endif
 uniform int ZPD_Boundary <
 	ui_type = "combo";
-	ui_items = "BD0 Off\0BD1 Full\0BD2 Narrow\0BD3 Wide\0BD4 FPS Center\0BD5 FPS Narrow\0BD6 FPS Edge\0";
+	ui_items = "BD0 Off\0BD1 Full\0BD2 Narrow\0BD3 Wide\0BD4 FPS Center\0BD5 FPS Narrow\0BD6 FPS Edge\0BD7 FPS Mix\0";
 	ui_label = " ZPD Boundary Detection";
 	ui_tooltip = "This selection menu gives extra boundary conditions to ZPD.\n"
 				 			 "This treats your screen as a virtual wall.\n"
@@ -1272,7 +1272,7 @@ float2 Fade(float2 texcoord) // Maybe make it float2 and pass the 2nd switch to 
 		{   [loop]
 			for( int iY = 0 ; iY < iXY.y; iY++ )
 			{
-				if(ZPD_Boundary == 1 || ZPD_Boundary == 6)
+				if(ZPD_Boundary == 1 || ZPD_Boundary == 6 || ZPD_Boundary == 7)
 					GridXY = float2( CDArray_A[iX], CDArray_A[iY]);
 				else if(ZPD_Boundary == 2 || ZPD_Boundary == 5)
 					GridXY = float2( CDArray_B[iX], CDArray_A[iY]);
