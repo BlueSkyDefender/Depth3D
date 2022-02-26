@@ -1029,9 +1029,16 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define RHW 1
 #elif (App == 0x21DC397E || App == 0x653AF1E1) //Gold Source
 	#define DA_X 0.045
-	#define DA_Y 21.25
+    #define DF_Y 0.125
+	#define DA_Y 32.0//21.25
 	#define DA_Z 0.0003
 	#define DB_Y 3
+	#define DE_X 4
+	#define DE_Y 0.500
+	#define DE_Z 0.375
+	#define DG_W -0.1375
+	#define BMT 1    
+	#define DF_Z 0.123 
 	#define DB_W 60
 #elif (App == 0xC2E621A5) //No Man Sky
 	#define DA_X 0.04375
@@ -3817,7 +3824,7 @@ float4 Weapon_Profiles(float WP ,float4 Weapon_Adjust) //Tried Switch But, can't
     if (WP == 59)
         Weapon_Adjust = float4(0.5,8.0,0,0.0);            //WP 57 | Strife
     if (WP == 60)
-        Weapon_Adjust = float4(0.350,9.0,1.8,0.0);        //WP 58 | Gold Source
+        Weapon_Adjust = float4(0.350,11.50,2.0,0.0);      //WP 58 | Gold Source
     if (WP == 61) //Unity Limit if using else if
         Weapon_Adjust = float4(1.825,13.75,0,0.0);        //WP 59 | No Man Sky FPS Mode
     if (WP == 62)

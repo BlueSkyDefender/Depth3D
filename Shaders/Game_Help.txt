@@ -531,8 +531,15 @@ You can use Ctrl + Tab then tab to the box you want and hit Spacebar. Then use a
 
 You can also run the game in window mode then alt tab with the reshade menu open. Then Click out side then click back in to the game on top of the ReShade menu. Then close it and switch the game back to Fullscreen mode.
 
-{Gold Source: Games} [Reshade 4.5.2]
+{Gold Source: Games} [Reshade 5.0.2]
 When you install the opengl32.dll right click it and set it to read only.
+You will also need to launch the game with this launch command.
+
+-nomsaa
+
+Other things that may be wanted is to set. 
+
+default_fov 105
 
 {Gothic 1 & 2 AKA Gold} [Reshade 5.0.0-preview]
 Looks like the Steam versions came pre modded. But, you still need a external mod to convert DX8 to DX11 Links are below.
