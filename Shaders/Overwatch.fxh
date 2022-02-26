@@ -1461,15 +1461,20 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DF_X 0.225
 	#define NDW 1
 #elif (App == 0x2ECAAF29 || App == 0xE19E4830 || App == 0xE19E4830  ) //Half-Life 2 | Left 4 Dead 2
-	#define DA_Y 8.75
-	#define DA_X 0.04
+	#define DA_Y 15.0
+	#define DA_X 0.045
+    #define DF_Y 0.020
 	#define DB_Z 0.115
 	#define DB_Y 3
 	#define DB_W 20
-	#define DE_X 5
+	#define DE_X 4
 	#define DE_Y 0.5
 	#define DE_Z 0.375
 	#define DF_X 0.105
+	#define DJ_W 0.175
+	#define BMT 1
+	#define DF_Z 0.105
+	#define DSW 1
 	#define RHW 1
 #elif (App == 0xEACB4D0D ) //Final Fantasy XV Windows Edition
 	#define DA_X 0.0375
@@ -3732,7 +3737,7 @@ float4 Weapon_Profiles(float WP ,float4 Weapon_Adjust) //Tried Switch But, can't
     if (WP == 19)
         Weapon_Adjust = float4(0.750,30.0,1.050,0.0);     //WP 17 | Quake 4
     if (WP == 20)
-        Weapon_Adjust = float4(0.278,62.5,9.1,0.0);       //WP 18 | Half-Life 2
+        Weapon_Adjust = float4(0.278,90.0,9.1,0.050);     //WP 18 | Half-Life 2
     if (WP == 21)
         Weapon_Adjust = float4(0.450,12.0,23.75,0.0);     //WP 19 | Metro Redux Games
     if (WP == 22)
