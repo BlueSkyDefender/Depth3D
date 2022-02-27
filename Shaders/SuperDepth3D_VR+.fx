@@ -2,7 +2,7 @@
 ///**SuperDepth3D_VR+**///
 //--------------------////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//* Depth Map Based 3D post-process shader v2.9.7
+//* Depth Map Based 3D post-process shader v3.0.0
 //* For Reshade 4.4+ I think...
 //* ---------------------------------
 //*
@@ -1421,8 +1421,7 @@ float3 Conv(float2 MD_WHD,float2 texcoord)
 
 		ZP = min(ZP,Auto_Balance_Clamp);
 
-		float Separation = lerp(1.0,5.0,ZPD_Separation.y);
-    return float3( lerp(Separation * Convergence,min(saturate(Max_Depth),D), ZP), lerp(W_Convergence,WD,WZP), Store_WC);
+    return float3( lerp( Convergence,min(saturate(Max_Depth),D), ZP), lerp(W_Convergence,WD,WZP), Store_WC);
 }
 
 float3 DB( float2 texcoord)
@@ -1506,14 +1505,15 @@ float2 GetDB(float2 texcoord)
 	if(View_Mode == 0 || View_Mode == 3)
 		DepthBuffer_LP = tex2Dlod(SamplerzBufferVR_L, float4(texcoord,0, 0) ).x;
 		
-	return DepthBuffer_LP; //lerp(Scale_Depth,-Scale_Depth,-ZPD_Separation.x); //Save for AI Shader
+	float Separation = lerp(1.0,5.0,ZPD_Separation.y); 	
+	return Separation * DepthBuffer_LP.xy; //lerp(Scale_Depth,-Scale_Depth,-ZPD_Separation.x); //Save for AI Shader
 }
 //Perf Level selection                             X    Y      Z      W              X    Y      Z      W
 static const float4 Performance_LvL[2] = { float4( 0.5, 0.5095, 0.679, 0.5 ), float4( 1.0, 1.019, 1.425, 1.0) };
 //////////////////////////////////////////////////////////Parallax Generation///////////////////////////////////////////////////////////////////////
 float2 Parallax(float Diverge, float2 Coordinates) // Horizontal parallax offset & Hole filling effect
 {   float MS = Diverge * pix.x, GetDepth = smoothstep(0,1,tex2Dlod(SamplerzBufferVR_P, float4(Coordinates,0, 0) ).y),// CM_Clamp = clamp(abs(Compatibility_Mode),0,4),
-			   Details = 0.5,//CM_Power[5] = { 0.0, 0.5, 1.0, 1.5, 2.0}, NS_CM = Compatibility_Mode < 0 ? -CM_Power[(int)CM_Clamp] : CM_Power[(int)CM_Clamp] ,
+			   Details = 0.375,//CM_Power[5] = { 0.0, 0.5, 1.0, 1.5, 2.0}, NS_CM = Compatibility_Mode < 0 ? -CM_Power[(int)CM_Clamp] : CM_Power[(int)CM_Clamp] ,
 			   Perf = Performance_LvL[Performance_Level].x;
 	float2 ParallaxCoord = Coordinates, CBxy = floor( float2(Coordinates.x * BUFFER_WIDTH, Coordinates.y * BUFFER_HEIGHT));
 	//Would Use Switch....
