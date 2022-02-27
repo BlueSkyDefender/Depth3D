@@ -2,7 +2,7 @@
 ///**SuperDepth3D**///
 //----------------////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//* Depth Map Based 3D post-process shader v3.0.8
+//* Depth Map Based 3D post-process shader v3.1.0
 //* For Reshade 3.0+
 //* ---------------------------------
 //*
@@ -68,7 +68,7 @@
 //USER EDITABLE PREPROCESSOR FUNCTIONS START//
 
 // Zero Parallax Distance Balance Mode allows you to switch control from manual to automatic and vice versa.
-#define Balance_Mode 0 //Default 0 is Automatic. One is Manual.
+#define Balance_Mode 1 //Default 0 is Automatic. One is Manual.
 
 // RE Fix is used to fix the issue with Resident Evil's 2 Remake 1-Shot cutscenes.
 #define RE_Fix 0 //Default 0 is Off. One is High and Ten is Low        1-10
@@ -194,7 +194,7 @@
 #else
 	#define Mask_Cycle_Key Set_Key_Code_Here
 #endif
-//uniform float TEST < ui_type = "drag"; ui_min = -1; ui_max = 1; > = 1.0;
+//uniform float2 TEST < ui_type = "drag"; ui_min = -1; ui_max = 1; > = 1.0;
 //Divergence & Convergence//
 uniform float Divergence <
 	ui_type = "drag";
@@ -1296,8 +1296,7 @@ float3 Conv(float2 MD_WHD,float2 texcoord)
 
 		ZP = min(ZP,Auto_Balance_Clamp);
 
-		float Separation = lerp(1.0,5.0,ZPD_Separation.y);
-    return float3( lerp(Separation * Convergence,min(saturate(Max_Depth),D), ZP), lerp(W_Convergence,WD,WZP), Store_WC);
+   return float3( lerp(Convergence,min(saturate(Max_Depth),D), ZP), lerp(W_Convergence,WD,WZP), Store_WC);
 }
 
 float3 DB( float2 texcoord)
@@ -1415,8 +1414,9 @@ float2 GetDB(float2 texcoord)
 	
 	if(View_Mode == 0 || View_Mode == 3)	
 		DepthBuffer_LP.x = DepthBuffer_LP.y;
-		
-	return DepthBuffer_LP.xy;
+
+	float Separation = lerp(1.0,5.0,ZPD_Separation.y); 	
+	return Separation * DepthBuffer_LP.xy;
 }
 /*
 float C_Mask(float2 texcoord)
