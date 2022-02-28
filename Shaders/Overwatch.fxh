@@ -558,18 +558,18 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define REF 1
 #elif (App == 0xAAA18268 ) //Hellblade **
     #define DA_W 1
-    #define DA_Y 23.5
+    #define DA_Y 20
     #define DA_X 0.050
-    #define DF_Y 0.075
+    #define DF_Y 0.070
     #define DB_Y 3
     #define DE_X 1 
     #define DE_Y 0.375
     #define DE_Z 0.300
     #define DG_W 0.375 //Detection was moved back.
     #define DG_Z 0.050 //Min  New system from RE7 was used
-    #define DI_Z 0.0625 //Trim New system from RE7 was used
+    #define DI_Z 0.0625//Trim New system from RE7 was used
     #define BMT 1      //Disables Auto ZPD
-	#define DF_Z 0.0625//Sets Manual Mode power.
+	#define DF_Z 0.060 //Sets Manual Mode power.
 	#define PEW 1
 	#define DAA 1
 #elif (App == 0x287BBA4C || App == 0x59BFE7AC ) //Grim Dawn 64bit/32bit
