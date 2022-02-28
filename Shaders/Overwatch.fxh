@@ -3074,19 +3074,24 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define PEW 1
 #elif (App == 0xFC113D8A ) //PsychoNauts 2
 	#define DA_W 1
-	#define DA_Y 11.5
-	#define DA_X 0.25
-	#define DF_Y 0.0625
-	#define DB_Y 5
+	#define DA_Y 25.0
+	#define DA_X 0.1
+	#define DF_Y 0.07
+	#define DA_Z 0.001//-0.02
+	//#define DB_Y 5
 	#define DE_X 1
-	#define DE_Y 0.525
-	#define DE_Z 0.300
+	//#define DE_Y 0.525
+	#define DE_Z 0.375
+	#define REF 6    //Fix can go from 1 - 15 and 15 is low 1 is High
+	#define DI_W 2.0 //1.75 //Adjustment for REF
+	#define BMT 1    
+	#define DF_Z 0.100
+	#define DG_Z 0.075//Min
+	//#define DE_W 0.160 //Max
+    #define DI_Z 0.20 //Trim
 	#define LBC 2  //Letter Box Correction Offsets With X & Y
 	#define DH_Z 0.255
 	#define DH_W 0.0
-	//#define DE_X 1
-	//#define DE_Y 0.300
-	//#define DE_Z 0.375
 	#define PEW 1
 	#define DAA 1
 #elif (App == 0xA34503F1 || App == 0xE0CAB4F3 ) //[Gothic 1.08k_mod - Gothic 2: Night of the Raven] with Kirides GD3D11 Mod

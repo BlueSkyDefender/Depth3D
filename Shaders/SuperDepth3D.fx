@@ -2,7 +2,7 @@
 ///**SuperDepth3D**///
 //----------------////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//* Depth Map Based 3D post-process shader v3.1.0
+//* Depth Map Based 3D post-process shader v3.1.1
 //* For Reshade 3.0+
 //* ---------------------------------
 //*
@@ -1458,7 +1458,7 @@ float2 Parallax(float Diverge, float2 Coordinates, float IO) // Horizontal paral
 	//ParallaxSteps Calculations
 	float D = abs(Diverge), Cal_Steps = D * Perf, Steps = clamp( Cal_Steps, Performance_Level ? 20 : lerp(20,D,saturate(GetDepth > 0.998) ), 200 );//Foveated Rendering Point of attack 16-256 limit samples.
 	// Offset per step progress & Limit
-	float LayerDepth = rcp(Steps), TP = View_Mode > 0 ? 0.05 : 0.025;
+	float LayerDepth = rcp(Steps), TP = View_Mode > 0 ? 0.05 : 0.01666;
 		  D = Diverge < 0 ? -75 : 75;
 
 	//Offsets listed here Max Seperation is 3% - 8% of screen space with Depth Offsets & Netto layer offset change based on MS.
@@ -1493,15 +1493,12 @@ float2 Parallax(float Diverge, float2 Coordinates, float IO) // Horizontal paral
 
 	//This is to limit artifacts.
 	if(View_Mode > 0)
-	{
 		ParallaxCoord.x += DB_Offset.x * Details;
 		
 	if(Diverge < 0)
-		ParallaxCoord.x += DepthDiffrence * 1.5 * pix.x;
+		ParallaxCoord.x += DepthDiffrence * 2.5 * pix.x;
 	else
-		ParallaxCoord.x -= DepthDiffrence * 1.5 * pix.x;
-	}
-
+		ParallaxCoord.x -= DepthDiffrence * 2.5 * pix.x;
 	
 	if(Stereoscopic_Mode == 2)
 		ParallaxCoord.y += IO * pix.y; //Optimization for line interlaced.
