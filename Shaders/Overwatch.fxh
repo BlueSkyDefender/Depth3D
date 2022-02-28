@@ -781,16 +781,20 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define RHW 1
 	#define PEW 1
 	#define DAA 1
-#elif (App == 0x1B8B9F54 ) //TheEvilWithin
-	#define DA_Y 37.5
+#elif (App == 0x1B8B9F54 ) //The Evil Within
+	#define DA_Y 62.5 //45.0
 	#define DA_Z 0.000125
-	#define DA_X 0.1
-    #define DF_Y 0.0475
-	#define DB_Y 4
-	#define DE_X 1
-	#define DE_Y 0.500
+	#define DA_X 0.075 //0.100
+    #define DF_Y 0.075 
+	//#define DB_Y 4
+	#define DE_X 3
+	#define DE_Y 0.350
 	#define DE_Z 0.375
-#elif (App == 0x7D9B7A37 ) //TheEvilWithin II
+	#define BMT 1 // Had to use this mode since Auto Mode was not cutting it.
+	#define DF_Z 0.100
+    #define DG_Z 0.050 //Min
+    #define DI_Z 0.100 //Trim
+#elif (App == 0x7D9B7A37 ) //The Evil Within II
 	#define DA_Y 30.0
 	#define DA_Z 0.0001
 	#define DA_X 0.04
