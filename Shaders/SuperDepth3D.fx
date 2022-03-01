@@ -2,7 +2,7 @@
 ///**SuperDepth3D**///
 //----------------////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//* Depth Map Based 3D post-process shader v3.1.3
+//* Depth Map Based 3D post-process shader v3.1.4
 //* For Reshade 3.0+
 //* ---------------------------------
 //*
@@ -68,7 +68,7 @@
 //USER EDITABLE PREPROCESSOR FUNCTIONS START//
 
 // Zero Parallax Distance Balance Mode allows you to switch control from manual to automatic and vice versa.
-#define Balance_Mode 1 //Default 0 is Automatic. One is Manual.
+#define Balance_Mode 0 //Default 0 is Automatic. One is Manual.
 
 // RE Fix is used to fix the issue with Resident Evil's 2 Remake 1-Shot cutscenes.
 #define RE_Fix 0 //Default 0 is Off. One is High and Ten is Low        1-10
@@ -321,7 +321,7 @@ uniform int Compatibility_Mode <
 				 "This option lets you increase this offset in both directions to limit artifacts.\n"
 				 "With this on it should work better in games with TAA, FSR,and or DLSS sometimes.\n"
 				 "Default is Off.";
-	ui_category = "Occlusion Masking";
+	ui_category = "Compatibility Options";
 > = 0;
 
 uniform float DLSS_FSR_Offset <
@@ -336,7 +336,7 @@ uniform float DLSS_FSR_Offset <
 				 "This issue only happens sometimes when using things like DLSS or FSR.\n"
 				 "This does not solve for TAA artifacts like Jittering or smearing.\n"
 				 "Default and starts at Zero and it's Off. With a max offset of 4pixels Wide.";
-	ui_category = "Occlusion Masking";
+	ui_category = "Compatibility Options";
 > = 0;
 
 uniform int Depth_Map <
@@ -1415,20 +1415,20 @@ float2 GetDB(float2 texcoord)
 	return Separation * DepthBuffer_LP.xy;
 }
 /*
-float C_Mask(float2 texcoord)
+float C_Mask(float SampleBuffer)
 { //tex2Dlod(SamplerDMN,float4(texcoord,0,0)).w
-	float FormatEdge = smoothstep(0,1,tex2Dlod(SamplerzBufferN_L, float4(texcoord,0, 0) ).x);//PrepDepth(texcoord)[1][1];
+	float FormatEdge = smoothstep(0,1,SampleBuffer);//PrepDepth(texcoord)[1][1];
 	float dx = ddx(FormatEdge),dy = ddy(FormatEdge), MASK = (dx - dy);
 	float DX = sqrt(dx*dx), DY = sqrt(dy*dy);
 	
 	float2 CDHV = float2(lerp(DX,0,DY) , lerp(DY,0,DX)) > 0.01;
 	float CombDXY = abs(CDHV.x-CDHV.y);//Can control power here.
-	return length(CDHV) - CombDXY;////float3(CDHV,0) - CombDXY;//Debug; 
+	return saturate(length(CDHV) - CombDXY);////float3(CDHV,0) - CombDXY;//Debug; 
 }
 */
 //Perf Level selection                             X    Y      Z      W              X    Y      Z      W
 static const float4 Performance_LvL[2] = { float4( 0.5, 0.5095, 0.679, 0.5 ), float4( 1.0, 1.019, 1.425, 1.0) };
-static const float2 Compatibility_Power[4] = { float2( 0.375, 0.03 ), float2( 0.625, 0.0333 ), float2( 0.8125, 0.04 ),  float2( 1.0, 0.05 ) };
+static const float2 Compatibility_Power[4] = { float2( 0.375, 0.0334 ), float2( 0.625, 0.0375 ), float2( 0.8125, 0.045 ),  float2( 1.0, 0.05 ) };
 //////////////////////////////////////////////////////////Parallax Generation///////////////////////////////////////////////////////////////////////
 float2 Parallax(float Diverge, float2 Coordinates, float IO) // Horizontal parallax offset & Hole filling effect
 {   float MS = Diverge * pix.x, GetDepth = smoothstep(0,1,tex2Dlod(SamplerzBufferN_P, float4(Coordinates,0, 0) ).y),// CM_Clamp = clamp(abs(Compatibility_Mode),0,4),
@@ -1483,9 +1483,14 @@ float2 Parallax(float Diverge, float2 Coordinates, float IO) // Horizontal paral
 	float beforeDepthValue = Get_DB_ZDP, afterDepthValue = CurrentDepthMapValue - CurrentLayerDepth;
 		  beforeDepthValue += LayerDepth - CurrentLayerDepth;
 	// Depth Diffrence for Gap masking and depth scaling in Normal Mode.
-	float DepthDiffrence = afterDepthValue - beforeDepthValue;
-	float weight = afterDepthValue / min(-0.0125,DepthDiffrence);  
-	
+	float DepthDiffrence = afterDepthValue - beforeDepthValue, DD_Map = abs(DepthDiffrence) > 0.053;
+	float weight = afterDepthValue / min(-0.0125,DepthDiffrence);
+
+	if(Diverge < 0)
+		weight = lerp(weight,weight * Coordinates.x * 2.0,DD_Map);  
+	else
+		weight = lerp(weight,weight * (1-Coordinates.x) * 2.0,DD_Map);  
+
 		ParallaxCoord.x = PrevParallaxCoord.x * weight + ParallaxCoord.x * (1 - weight);
 	//This is to limit artifacts.
 	ParallaxCoord.x += DB_Offset.x * Details;
@@ -1916,7 +1921,7 @@ float3 Out(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Targe
 {
 	float2 TC = float2(texcoord.x,1-texcoord.y);
 	float Text_Timer = 25000, BT = smoothstep(0,1,sin(timer*(3.75/1000))), Size = 1.1, Depth3D, Read_Help, Supported, ET, ETC, ETTF, ETTC, SetFoV, FoV, Post, Effect, NoPro, NotCom, Mod, Needs, Net, Over, Set, AA, Emu, Not, No, Help, Fix, Need, State, SetAA, SetWP, Work;
-	float3 Color = PS_calcLR(texcoord).rgb; //Color = StereoViewMask( texcoord.x );//Color = tex2D(SamplerLumN,texcoord).z;
+	float3 Color = PS_calcLR(texcoord).rgb; //Color = C_Mask(texcoord);
 		  
 	if(RHW || NCW || NPW || NFM || PEW || DSW || OSW || DAA || NDW || WPW || FOV || EDW)
 		Text_Timer = 30000;

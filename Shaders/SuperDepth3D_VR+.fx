@@ -2,7 +2,7 @@
 ///**SuperDepth3D_VR+**///
 //--------------------////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//* Depth Map Based 3D post-process shader v3.0.1
+//* Depth Map Based 3D post-process shader v3.0.2
 //* For Reshade 4.4+ I think...
 //* ---------------------------------
 //*
@@ -347,22 +347,17 @@ uniform int Performance_Level <
 	ui_category = "Occlusion Masking";
 > = 1;
 
-/* Needs to be worked on I need to make it smarter.
 uniform int Compatibility_Mode <
+	ui_type = "combo";
+	ui_items = "Off\0Low\0Medium\0High\0"; //Smart needs to be added later
 	ui_label = " Compatibility Mode";
-	#if Compatibility
-	ui_type = "drag";
-	#else
-	ui_type = "slider";
-	#endif
-	ui_min = -4; ui_max = 4;
 	ui_tooltip = "Not all games need a high offset for infilling.\n"
 				 "This option lets you increase this offset in both directions to limit artifacts.\n"
 				 "With this on it should work better in games with TAA, FSR,and or DLSS sometimes.\n"
 				 "Default is Off.";
-	ui_category = "Occlusion Masking";
+	ui_category = "Compatibility Options";
 > = 0;
-*/
+
 uniform float DLSS_FSR_Offset <
 	#if Compatibility
 	ui_type = "drag";
@@ -375,18 +370,9 @@ uniform float DLSS_FSR_Offset <
 				 "This issue only happens sometimes when using things like DLSS or FSR.\n"
 				 "This does not solve for TAA artifacts like Jittering or smearing.\n"
 				 "Default and starts at Zero and it's Off. With a max offset of 4pixels Wide.";
-	ui_category = "Occlusion Masking";
+	ui_category = "Compatibility Options";
 > = 0;
-/* Stored
-uniform bool Compatibility_Mode <
-	ui_label = " Compatibility Mode";
-	ui_tooltip = "Not all games need a high offset for infilling.\n"
-				 "This option lets you increase this offset to limit artifacts.\n"
-				 "With this on it should work better in games with TAA, FSR,and or DLSS.\n"
-				 "Default is Off.";
-	ui_category = "Occlusion Masking";
-> = false;
-*/
+
 uniform int Depth_Map <
 	ui_type = "combo";
 	ui_items = "DM0 Normal\0DM1 Reversed\0";
@@ -1510,10 +1496,11 @@ float2 GetDB(float2 texcoord)
 }
 //Perf Level selection                             X    Y      Z      W              X    Y      Z      W
 static const float4 Performance_LvL[2] = { float4( 0.5, 0.5095, 0.679, 0.5 ), float4( 1.0, 1.019, 1.425, 1.0) };
+static const float2 Compatibility_Power[4] = { float2( 0.375, 0.0334 ), float2( 0.625, 0.0375 ), float2( 0.8125, 0.045 ),  float2( 1.0, 0.05 ) };
 //////////////////////////////////////////////////////////Parallax Generation///////////////////////////////////////////////////////////////////////
 float2 Parallax(float Diverge, float2 Coordinates) // Horizontal parallax offset & Hole filling effect
 {   float MS = Diverge * pix.x, GetDepth = smoothstep(0,1,tex2Dlod(SamplerzBufferVR_P, float4(Coordinates,0, 0) ).y),// CM_Clamp = clamp(abs(Compatibility_Mode),0,4),
-			   Details = 0.375,//CM_Power[5] = { 0.0, 0.5, 1.0, 1.5, 2.0}, NS_CM = Compatibility_Mode < 0 ? -CM_Power[(int)CM_Clamp] : CM_Power[(int)CM_Clamp] ,
+			   Details = View_Mode > 0 ? Compatibility_Power[Compatibility_Mode].x : 0,//CM_Power[5] = { 0.0, 0.5, 1.0, 1.5, 2.0}, NS_CM = Compatibility_Mode < 0 ? -CM_Power[(int)CM_Clamp] : CM_Power[(int)CM_Clamp] ,
 			   Perf = Performance_LvL[Performance_Level].x;
 	float2 ParallaxCoord = Coordinates, CBxy = floor( float2(Coordinates.x * BUFFER_WIDTH, Coordinates.y * BUFFER_HEIGHT));
 	//Would Use Switch....
@@ -1534,9 +1521,9 @@ float2 Parallax(float Diverge, float2 Coordinates) // Horizontal parallax offset
 	}
 	
 	//ParallaxSteps Calculations
-	float D = abs(Diverge), Cal_Steps = D * Perf, Steps = clamp( Cal_Steps, Performance_Level ? 20 : lerp(20,D,saturate(GetDepth > 0.998) ), 200 );//Foveated Rendering Point of attack 16-256 limit samples.
+	float D = abs(Diverge), Cal_Steps = D * Perf, Steps = clamp( Cal_Steps, Performance_Level ? 16 : lerp(16,D,saturate(GetDepth > 0.998) ), 200 );//Foveated Rendering Point of attack 16-256 limit samples.
 	// Offset per step progress & Limit
-	float LayerDepth = rcp(Steps), TP = View_Mode > 0 ? 0.05 : 0.01666;
+	float LayerDepth = rcp(Steps), TP = Compatibility_Power[Compatibility_Mode].y;
 		  D = Diverge < 0 ? -75 : 75;
 
 	//Offsets listed here Max Seperation is 3% - 8% of screen space with Depth Offsets & Netto layer offset change based on MS.
@@ -1548,13 +1535,13 @@ float2 Parallax(float Diverge, float2 Coordinates) // Horizontal parallax offset
 	{   // Shift coordinates horizontally in linear fasion
 	    ParallaxCoord.x -= deltaCoordinates; 
 	    // Get depth value at current coordinates
-	    CurrentDepthMapValue = GetDB(float2(ParallaxCoord.x - (DB_Offset * 2 * Offset_Switch),ParallaxCoord.y) ).x;
+	    CurrentDepthMapValue = GetDB(float2(ParallaxCoord.x - (DB_Offset * Offset_Switch),ParallaxCoord.y) ).x;
 	    // Get depth of next layer
 	    CurrentLayerDepth += LayerDepth;
 		continue;
 	}
  
-	float2 PrevParallaxCoord = float2(ParallaxCoord.x + deltaCoordinates, ParallaxCoord.y);	
+	float2 PrevParallaxCoord = float2(ParallaxCoord.x + deltaCoordinates, ParallaxCoord.y);
 	//Anti-Weapon Hand Fighting
 	float Weapon_Mask = tex2Dlod(SamplerDMVR,float4(Coordinates,0,0)).y, ZFighting_Mask = 1.0-(1.0-tex2Dlod(SamplerLumVR,float4(Coordinates,0,1.400)).w - Weapon_Mask);
 		  ZFighting_Mask = ZFighting_Mask * (1.0-Weapon_Mask);
@@ -1564,19 +1551,24 @@ float2 Parallax(float Diverge, float2 Coordinates) // Horizontal parallax offset
 	float beforeDepthValue = Get_DB_ZDP, afterDepthValue = CurrentDepthMapValue - CurrentLayerDepth;
 		  beforeDepthValue += LayerDepth - CurrentLayerDepth;
 	// Depth Diffrence for Gap masking and depth scaling in Normal Mode.
-	float DepthDiffrence = afterDepthValue - beforeDepthValue;
-	float weight = afterDepthValue / min(-0.0125,DepthDiffrence);  
+	float DepthDiffrence = afterDepthValue - beforeDepthValue, DD_Map = abs(DepthDiffrence) > 0.053;
+	float weight = afterDepthValue / min(-0.0125,DepthDiffrence);
 
-		ParallaxCoord.x = PrevParallaxCoord.x * abs(weight) + ParallaxCoord.x * (1 - weight);
-
-	//This is to limit artifacts.
-	if(View_Mode > 0)
-		ParallaxCoord.x += DB_Offset.x * Details;
-		
 	if(Diverge < 0)
-		ParallaxCoord.x += DepthDiffrence * 2.5 * pix.x;
+		weight = lerp(weight,weight * Coordinates.x * 2.0,DD_Map);  
 	else
-		ParallaxCoord.x -= DepthDiffrence * 2.5 * pix.x;
+		weight = lerp(weight,weight * (1-Coordinates.x) * 2.0,DD_Map);  
+
+		ParallaxCoord.x = PrevParallaxCoord.x * weight + ParallaxCoord.x * (1 - weight);
+	//This is to limit artifacts.
+	ParallaxCoord.x += DB_Offset.x * Details;
+	if( View_Mode == 0 )
+	{
+		if(Diverge < 0)
+			ParallaxCoord.x += DepthDiffrence * 2.5 * pix.x;
+		else
+			ParallaxCoord.x -= DepthDiffrence * 2.5 * pix.x;
+	}
 	
 	return ParallaxCoord;
 }
