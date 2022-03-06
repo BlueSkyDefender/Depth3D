@@ -3,7 +3,7 @@
  //------------////
  
  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
- //* Stereo Input Converter 1.1                           																														*//
+ //* Stereo Input Converter 1.2                           																														*//
  //* For Reshade 3.0																																								*//
  //* --------------------------																																						*//
  //* This work is licensed under a Creative Commons Attribution 3.0 Unported License.																								*//
@@ -485,6 +485,18 @@ void PostProcessVS(in uint id : SV_VertexID, out float4 position : SV_Position, 
 //*Rendering passes*//
 technique To_Else
 {		
+			pass PBB
+		{
+			VertexShader = PostProcessVS;
+			PixelShader = Past_BackBuffer;
+			RenderTarget = PastSingleBackBuffer;
+		}
+			pass CBB
+		{
+			VertexShader = PostProcessVS;
+			PixelShader = Current_BackBuffer;
+			RenderTarget = Current_BackBuffer_Tex;
+		}
 			pass StereoInput
 		{
 			VertexShader = PostProcessVS;
@@ -496,12 +508,5 @@ technique To_Else
 		{
 			VertexShader = PostProcessVS;
 			PixelShader = Out;	
-		}
-			pass PBB
-		{
-			VertexShader = PostProcessVS;
-			PixelShader = Past_BackBuffer;
-			RenderTarget = PastSingleBackBuffer;
-		}
-		
+		}		
 }
