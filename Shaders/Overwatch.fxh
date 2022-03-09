@@ -1336,8 +1336,8 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 #elif (App == 0xC06FE818 ) //BorderLands 3
 	#define DA_Y 16.5
 	#define DA_Z 0.0001375
-	#define DA_X 0.0425
-	#define DF_Y 0.0425
+	#define DA_X 0.0415
+	#define DF_Y 0.04
 	#define DB_Z 0.05
 	#define DA_W 1
 	#define DB_Y 4
@@ -1350,7 +1350,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define BMT 1    
 	#define DF_Z 0.170
 	#define DG_Z 0.075   //Min
-	#define DI_Z 0.18125 //Trim
+	#define DI_Z 0.185 //Trim
 	#define NDW 1
 	#define DAA 1
 	#elif (App == 0x3C8DE8E8 ) //Metro Exodus
@@ -1410,7 +1410,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define PEW 1
 	#define NFM 1
 #elif (App == 0x8CD23575 ) //Dark Souls: Remastered
-	#define DA_Y 68.75
+	#define DA_Y 68.0
 	#define DA_Z -0.001
 	#define DA_X 0.072
 	#define DF_Y 0.1
