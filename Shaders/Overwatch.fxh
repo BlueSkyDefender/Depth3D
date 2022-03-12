@@ -3521,7 +3521,21 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DG_Z 0.070//Min
     #define DI_Z 0.070 //Trim
 //    #define SPF 1
-//    #define DD_Z 0.007   
+//    #define DD_Z 0.007 
+#elif (App == 0xD360643 ) //BeamNG
+	#define DA_W 1
+    #define DA_X 0.2
+    #define DF_Y 0.01375
+	#define DA_Y 8.75
+    //#define DA_Z 0.0015
+    #define DE_X 1
+	#define DE_Y 0.3
+	#define DE_Z 0.4
+	#define BMT 1    
+	#define DF_Z 0.1375
+	#define DG_Z 0.050//Min
+//	#define DE_W 0.160 //Max
+    #define DI_Z 0.100 //Trim  
 #else
 	#define NPW 1 //No Profile
 #endif
