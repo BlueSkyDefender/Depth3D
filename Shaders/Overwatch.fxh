@@ -87,7 +87,7 @@ static const float REF_Check_Depth_Limit_D = 0.0;       //Resident Evil Fix Chec
 
 static const float NULL_X_D = 0.0;                      //Null X                                        | DJ_X
 static const float NULL_Y_D = 0.0;                      //Null Y                                        | DJ_Y
-static const float NULL_Z_D = 0.0;                      //Null Z                                        | DJ_Z
+static const float Near_Depth_Trim_Smooth_Mode_D = 0.25;//Trim for Smooth Mode                  Trim SM | DJ_Z
 static const float Check_Depth_Limit_Weapon_D = -0.100; //Check Depth Limit Weapon                      | DJ_W
 
 //FPS Focus
@@ -3535,7 +3535,24 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DF_Z 0.1375
 	#define DG_Z 0.050//Min
 //	#define DE_W 0.160 //Max
-    #define DI_Z 0.100 //Trim  
+    #define DI_Z 0.100 //Trim
+//    #define DD_Z 0.007 
+#elif (App == 0x28900EB9 ) //Planet Zoo
+	#define DA_W 1
+    #define DA_X 0.1
+    #define DF_Y 0.025
+	#define DA_Y 77.5
+    //#define DA_Z 0.0001
+    #define DB_Z 0.250
+    #define DE_X 1
+	#define DE_Y 0.325
+	#define DE_Z 0.350
+	#define BMT 1    
+	#define DF_Z 0.130
+	#define DG_Z 0.100//Min
+//	#define DE_W 0.0 //Max
+    #define DI_Z 0.100 //Trim
+    #define DJ_Z 0.100 //Trim SM < change this if you want to set Smooth Mode trim Higher or lower then DI_Z Near Depth Trim. Since it defaults to 0.250
 #else
 	#define NPW 1 //No Profile
 #endif
@@ -3668,7 +3685,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DI_W REF_Check_Depth_Limit_D
 #endif
 
-// X = [NULL X] Y = [NULL Y] Z = [NULL Z] W = [Check Depth Limit Weapon]
+// X = [NULL X] Y = [NULL Y] Z = [Smooth Mode Trim] W = [Check Depth Limit Weapon]
 #ifndef DJ_X
     #define DJ_X NULL_X_D
 #endif
@@ -3676,7 +3693,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define DJ_Y NULL_Y_D
 #endif
 #ifndef DJ_Z
-    #define DJ_Z NULL_Z_D
+    #define DJ_Z Near_Depth_Trim_Smooth_Mode_D  //Trim SM
 #endif 
 #ifndef DJ_W
 	#define DJ_W Check_Depth_Limit_Weapon_D
