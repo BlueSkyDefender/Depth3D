@@ -2935,13 +2935,15 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define PEW 1
 #elif (App == 0x11763BB7 ) //FATAL Frame Maiden of the Black Water.... Too Damn spooky....
 	#define DA_X 0.0825
-	#define DF_Y 0.04125
+	#define DF_Y 0.040
 	#define DA_Y 16.25
 	#define DB_Z 0.275
 	#define DB_Y 4
 	#define DE_X 1
 	#define DE_Y 0.250
 	#define DE_Z 0.375
+	#define BMT 1
+	#define DF_Z 0.150
 	#define PEW 1
 	#define DAA 1
 #elif (App == 0x88C50B03 ) //League of Legends
