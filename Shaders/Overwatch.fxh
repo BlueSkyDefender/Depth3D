@@ -3351,13 +3351,18 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define PEW 1
 #elif (App == 0xB5F52BDD ) // Abzu
     #define DA_W 1
-    #define DA_X 0.100
-    #define DF_Y 0.015
-	#define DA_Y 18.75    
+    #define DA_X 0.075
+    #define DF_Y 0.010
+	#define DA_Y 20.00    
     #define DB_Y 5
     #define DE_X 1
     //#define DE_Y 0.500
     #define DE_Z 0.300
+	#define BMT 1    
+	#define DF_Z 0.150 
+	#define DG_Z 0.100//Min
+    #define DI_Z 0.125 //Trim
+    #define DJ_Z 0.125 //Trim SM 
 #elif (App == 0x2D1A3028 ) //Bright Memory: Infinite*
     #define DA_W 1
     #define DA_X 0.160
