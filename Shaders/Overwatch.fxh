@@ -1,7 +1,7 @@
 ////----------------------------------------//
 ///SuperDepth3D Overwatch Automation Shader///
 //----------------------------------------////
-// Version 2.4.0
+// Version 2.4.1
 //---------------------------------------OVERWATCH---------------------------------------//
 // If you are reading this stop. Go away and never look back. From this point on if you  //
 // still think it's is worth looking at this..... Then no one can save you or your soul. //
@@ -3553,6 +3553,33 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 //	#define DE_W 0.0 //Max
     #define DI_Z 0.100 //Trim
     #define DJ_Z 0.100 //Trim SM < change this if you want to set Smooth Mode trim Higher or lower then DI_Z Near Depth Trim. Since it defaults to 0.250
+#elif (App == 0x6EA7BBB ) //Tales from Borderlands
+    #define DA_X 0.075
+    #define DF_Y 0.005
+	#define DA_Y 25.0
+    #define DA_Z 0.0005
+    //#define DB_Z 0.250
+    #define DE_X 1
+	#define DE_Y 0.400
+	#define DE_Z 0.375
+	#define BMT 1    
+	#define DF_Z 0.1
+	#define DG_Z 0.100//Min
+//	#define DE_W 0.0 //Max
+    #define DI_Z 0.125 //Trim
+    #define DJ_Z 0.125 //Trim SM 
+#elif (App == 0x8FDE4FCF ) //Ni No Kuni II: Revenant Kingdom**
+    #define DA_X 0.075
+    #define DF_Y 0.050 //0.058
+    #define DA_Y 12.25
+    #define DA_Z 0.0005
+    #define DB_Y 2
+    #define DE_X 1
+    #define DE_Y 0.375
+    #define DE_Z 0.400
+	#define BMT 1    
+	#define DF_Z 0.1375
+    #define PEW 1
 #else
 	#define NPW 1 //No Profile
 #endif
