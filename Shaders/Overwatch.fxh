@@ -376,7 +376,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DB_W 40
 	#define DF_W 0.534
 	#define HMT 1
-#elif (App == 0x68EF1B4E || App == 0xC103D998 || App == 0xFAB47970 ) //Serious Sam Fusion | Serious Sam 4: Planet Badass | Serious Sam Siberian Mayhem
+#elif (App == 0x68EF1B4E || App == 0xC103D998 || App == 0xFAB47970 || App == 0x539E792B ) //Serious Sam Fusion | Serious Sam 4: Planet Badass | Serious Sam Siberian Mayhem/Unrestricted
 	#define DA_W 1
 	#define DA_X 0.0825 //0.0875
 	#define DF_Y 0.0125
@@ -384,8 +384,8 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DA_Z 0.1
 	#define DB_Y 1
 	#define DB_W 42
-    #define DF_X 0.3
-    #define DJ_W 1.0
+    #define DF_X 0.25
+    #define DJ_W 0.6
 	#define DE_X 5
 	#define DE_Y 0.5
 	#define DE_Z 0.375
@@ -3906,7 +3906,7 @@ float4 Weapon_Profiles(float WP ,float4 Weapon_Adjust) //Tried Switch But, can't
     if (WP == 41)
         Weapon_Adjust = float4(0.280,18.75,9.03,0.0);     //WP 39 | Serious Sam Revolution #EB9EEB74/Serious Sam HD: The First Encounter /The Second Encounter /Serious Sam 2 #8238E9CA/ Serious Sam 3: BFE*
     if (WP == 42)
-        Weapon_Adjust = float4(0.3,17.0,0.901,0.0125);    //WP 40 | Serious Sam Fusion
+        Weapon_Adjust = float4(0.3,12.5,0.901,0.0);      //WP 40 | Serious Sam Fusion
     if (WP == 43)
         Weapon_Adjust = float4(1.2,12.5,0.3,0.0);         //WP 41 | GhostRunner DX12
     if (WP == 44)
