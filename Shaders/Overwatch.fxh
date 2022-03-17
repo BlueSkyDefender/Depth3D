@@ -2966,14 +2966,16 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define PEW 1
 	#define DAA 1
 #elif (App == 0x808ABB25 ) //BioShock Infinite 
-	#define DA_X 0.05 // or 0.0525
-	//#define DF_Y 0.025
-	#define DA_Y 13.75
+	#define DA_X 0.060 // or 0.0525
+    #define DF_Y 0.050
+	#define DA_Y 12.50
     #define DA_Z -0.00125
-    #define DG_Z 0.05
-    #define BMT 1
-	//#define DF_Z 0.5
     #define DB_Z 0.075
+    #define BMT 1
+	#define DF_Z 0.400
+    #define DG_Z 0.075 //Min
+    #define DI_Z 0.300 //Trim
+    #define DJ_Z 0.300 //Trim SM 
 	#define DSW 1
     #define FOV 1
 #elif (App == 0x22CA259A ) //Kena Bridge of Spirits
