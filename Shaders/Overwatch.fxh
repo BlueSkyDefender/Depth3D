@@ -1058,14 +1058,20 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DF_Z 0.123 
 	#define DB_W 60
 #elif (App == 0xC2E621A5) //No Man Sky
-	#define DA_X 0.04375
+	#define DA_X 0.045
+    #define DF_Y 0.010
 	#define DA_W 1
-	#define DA_Y 72.5
+	#define DA_Y 70.0
 	#define DB_Y 5
-	#define DB_Z 0.0
-	#define DE_X 1
-	#define DE_Y 0.375
-	#define DE_Z 0.4
+	#define DE_X 3
+	#define DE_Y 0.5
+	#define DE_Z 0.375
+	#define BMT 1    
+	#define DF_Z 0.125
+	#define DG_Z 0.070//Min
+//	#define DE_W 0.0 //Max
+    #define DI_Z 0.100 //Trim
+    #define DJ_Z 0.100 //Trim SM 
 	#define RHW 1
 #elif (App == 0x1E9DCD00) //Witch it
 	#define DA_X 0.0475
