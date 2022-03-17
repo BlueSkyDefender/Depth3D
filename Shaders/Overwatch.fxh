@@ -2966,7 +2966,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define PEW 1
 	#define DAA 1
 #elif (App == 0x808ABB25 ) //BioShock Infinite 
-	#define DA_X 0.060 // or 0.0525
+	#define DA_X 0.050 // or 0.0525
     //#define DF_Y 0.050
 	#define DA_Y 12.50
     #define DA_Z -0.00125
