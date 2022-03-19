@@ -3608,6 +3608,8 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 //	#define DE_W 0.0 //Max
     #define DI_Z 0.300 //Trim
     #define DJ_Z 0.300 //Trim SM
+    #define NDW 1
+    #define PEW 1
 #else
 	#define NPW 1 //No Profile
 #endif
