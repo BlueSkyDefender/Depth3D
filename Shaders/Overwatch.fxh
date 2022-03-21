@@ -3638,7 +3638,23 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define PEW 1
     #define FOV 1
 	#define RHW 1
-    #define NFM 1   
+    #define NFM 1
+#elif (App == 0xBCFD90CA ) //FFVII Remake Intergrade 
+	#define DA_W 1
+	#define DA_X 0.100
+	#define DF_Y 0.065	
+	#define DA_Y 20.0 //15
+    //#define DA_Z 0.00025 //-1.0
+	#define DE_X 1
+	#define DE_Y 0.325
+	#define DE_Z 0.400
+    #define DG_Z 0.002 //Min
+    //#define DE_W 0.105 //Max
+    #define DI_Z 0.200 //Trim
+    #define DJ_Z 0.200 //Trim SM
+	#define BMT 1
+	#define DF_Z 0.125 //0.1875
+    #define DG_W 0.100 //Pop
 #else
 	#define NPW 1 //No Profile
 #endif
