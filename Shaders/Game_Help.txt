@@ -453,6 +453,25 @@ Highest Setting is "Good" Any thing Lower will work and thing above will not wor
 In Reshade you need to set the Depth Buffer D32FS8 and Copy Before Clearing. Select Option 4 for World space. Keep in mind your weapond will not be Drawn in this Depth Buffer.
 The weapon Depth Buffer can be found on Option 1. But, can't be merged.....
 
+{Dying Light 2} [Reshade 5.0.2] - SteamLibrary\steamapps\common\Dying Light 2\ph\work\bin\x64
+The shader applys a anti-Barrel Distortion by Default. You have to disable this once you follow the following steps.
+
+Download the mod from https://www.nexusmods.com/dyinglight2/mods/31?tab=files&file_id=1043
+This Mod was made by shawnikaros
+
+Your need the Files data4 and Data6.
+data4 is to disable Barrel Lens Distortion and DoF.
+Data6 is to disable Chromatic Aberration.
+
+you can also download the files from here as back up if the above link does not work.
+https://www.mediafire.com/file/8lsyeiwhj8nlrwu/Dying_Light_2_Mod_Depth3D.zip/file
+
+Navigate to SteamLibrary\steamapps\common\Dying Light 2\ph\source
+Drop the folowing Files data4 and Data6 into this folder. 
+
+Start the game and in ReShade/Depth3D options got to the bottom of the shader setting.
+
+Once here then disable The Barrel Distortion fix in the shader because this mod fixes it better.
 
 {Emily Wants To Play}
 Install reshade in to SteamLibrary\steamapps\common\Emily Wants To Play\Engine\Binaries\Win64

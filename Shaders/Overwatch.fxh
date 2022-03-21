@@ -940,6 +940,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define DI_Z 0.200 //Trim
 	#define BMT 1
 	#define DF_Z 0.14375
+	#define WSM 2 //Weapon Settings Mode
 	//#define DB_W 62
 #elif (App == 0x42C1A2B ) //CoD: WWII
 	#define DA_X 0.04
@@ -3610,6 +3611,34 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define DJ_Z 0.300 //Trim SM
     #define FOV 1
     #define PEW 1
+#elif (App == 0x45C250C6 ) //Dying Light 2
+	#define DA_W 1
+	#define DA_X 0.0425
+	#define DF_Y 0.05125  //0.0525	
+	#define DA_Y 10.0
+	#define DA_Z -0.200
+	#define DB_Y 4
+	#define DE_X 2
+	#define DE_Y 0.825
+	//#define DE_Z 0.25
+    #define DG_Z 0.090 //0.0875//0.080 //Min
+    #define DE_W 0.105 //Max
+    #define DI_Z 0.150 //0.215 //Trim
+    #define DJ_Z 0.200 //Trim SM
+	#define BMT 1
+	#define DF_Z 0.200
+	#define WSM 2 //Weapon Settings Mode
+	//#define DB_W 63
+	#define BDF 1    //Barrel Distortion Fix k1 k2 k3 and Zoom
+	#define DC_X 0.00
+	#define DC_Y 0.150
+	#define DC_Z -0.030
+	#define DC_W -0.0200
+	#define NDW 1
+	#define PEW 1
+    #define FOV 1
+	#define RHW 1
+    #define NFM 1   
 #else
 	#define NPW 1 //No Profile
 #endif
@@ -3969,7 +3998,7 @@ float4 Weapon_Profiles(float WP ,float4 Weapon_Adjust) //Tried Switch But, can't
     if (WP == 61) //Unity Limit if using else if
         Weapon_Adjust = float4(1.825,13.75,0,0.0);        //WP 59 | No Man Sky FPS Mode
     if (WP == 62)
-        Weapon_Adjust = float4(1.953,5.25,0,0.0);         //WP 60 | Dying Light
+        Weapon_Adjust = float4(0.0,0.0,0,0.0);            //WP 60 | Game
     if (WP == 63)
         Weapon_Adjust = float4(0.287,180.0,9.0,0.0);      //WP 61 | Farcry
     if (WP == 64)
@@ -4124,9 +4153,9 @@ float4 Weapon_Profiles(float WP ,float4 Weapon_Adjust) //Could reduce from 76 to
     if (WP == 61) //Unity Limit if using else if
         Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 59 | Game
     if (WP == 62)
-        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 60 | Game
+        Weapon_Adjust = float4(1.960,5.25,0,0.0);         //WP 60 | Dying Light
     if (WP == 63)
-        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 61 | Game
+        Weapon_Adjust = float4(2.196,1.750,0.0,0.0);      //WP 61 | Dying Light 2
     if (WP == 64)
         Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 62 | Game
     if (WP == 65)
