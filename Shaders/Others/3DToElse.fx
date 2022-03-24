@@ -251,7 +251,7 @@ float4 toElse(float2 texcoord)
 {
 	float4 image = 1, cL, cR, L, R, Out, accum;
 	float2 TCL, TCR, StoreTC = texcoord;
-	float P = Perspective * pix.x;
+	float P = 0;//Perspective * pix.x;
 
 	if (Stereoscopic_Mode == 0)
 		{

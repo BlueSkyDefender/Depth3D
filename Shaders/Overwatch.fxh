@@ -1,7 +1,7 @@
 ////----------------------------------------//
 ///SuperDepth3D Overwatch Automation Shader///
 //----------------------------------------////
-// Version 2.4.1
+// Version 2.4.2
 //---------------------------------------OVERWATCH---------------------------------------//
 // If you are reading this stop. Go away and never look back. From this point on if you  //
 // still think it's is worth looking at this..... Then no one can save you or your soul. //
@@ -697,16 +697,22 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DA_Y 45.0
 	#define DA_Z 0.0005
 	#define DB_Y 3
-#elif (App == 0x8B0F15E7 ) //Alan Wake
-	#define DA_X 0.03
-	#define DA_Y 32.5
+#elif (App == 0x8B0F15E7 || App == 0xCFE885A2 || App == 0xCADE8051 ) //Alan Wake | Alan Wake's American Nightmare | Alan Wake Remaster
+	#define DA_X 0.04375
+	#define DF_Y 0.01	
+	#define DA_Y 25.0
+   //#define DA_Z 0.00025 //-1.0
 	#define DB_Y 1
+	#define DE_X 1
+	//#define DE_Y 0.325
+	#define DE_Z 0.375
+	#define BMT 1
+	#define DF_Z 0.125
+    //#define DG_W 0.100 //Pop
+    #define DG_Z 0.002 //Min
 	#define RHW 1
-#elif (App == 0xCFE885A2 ) //Alan Wake's American Nightmare
-	#define DA_X 0.03
-	#define DA_Y 32.5
-	#define DB_Y 1
-	#define RHW 1
+	#define PEW 1
+	#define DAA 1
 #elif (App == 0x56D8243B ) //Agony Unrated
 	#define DA_W 1
 	#define DA_X 0.04375
@@ -3655,6 +3661,30 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define BMT 1
 	#define DF_Z 0.125 //0.1875
     #define DG_W 0.100 //Pop
+#elif (App == 0xC150B2EC ) //FarCry 6 
+	#define DA_W 1
+	#define DA_X 0.045
+	#define DF_Y 0.050	
+	#define DA_Y 16.0
+    //#define DA_Z 0.0002
+	#define DE_X 1
+	#define DE_Y 0.500
+	#define DE_Z 0.400
+    #define DG_Z 0.077 //Min
+    //#define DE_W 0.105 //Max
+    #define DI_Z 0.175 //Trim
+    #define DJ_Z 0.200 //Trim SM
+	#define BMT 1
+	#define DF_Z 0.130
+    #define DG_W 0.550 //Pop
+	#define REF 4 //2 //Fix can go from 1 - 15 and 15 is low 1 is High
+	#define DI_W 2.5 //Adjustment for REF    
+	#define DK_X 2 //FPS Hold 
+	#define DK_Y 0 //FPS Both Eyes
+	#define DK_Z 2 //FPS 0.3%
+	#define DK_W 2 //FPS Speed 100%
+	#define PEW 1
+	#define NDW 1
 #else
 	#define NPW 1 //No Profile
 #endif
