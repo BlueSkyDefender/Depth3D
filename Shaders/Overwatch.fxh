@@ -1788,14 +1788,16 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DE_Z 0.375
 	#define DG_Z 0.070
     #define DI_Z 0.125
-#elif (App == 0xC60A845F ) //My Friend Pedro
-	#define DB_X 1
-	#define DA_W 1
-	#define DA_X 0.075
-	#define DA_Y 50.0
-	#define DA_Z 0.000375
-	#define DB_Y 4
-	#define DB_Z 0.13
+#elif (App == 0xC60A845F ) //My Friend Pedro**
+    #define DB_X 1
+    #define DA_W 1
+    #define DA_X 0.075
+    #define DF_Y 0.030
+    #define DA_Y 50.0
+    #define DA_Z 0.000375
+    #define DB_Z 0.13
+    #define BMT 1
+    #define DF_Z 0.10
 #elif (App == 0xD45ACB4B ) //Murdered Soul Suspect
 	#define DA_X 0.05
 	#define DA_Y 37.5
@@ -3685,6 +3687,17 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DK_W 2 //FPS Speed 100%
 	#define PEW 1
 	#define NDW 1
+#elif (App == 0xF844D5C3 ) //Tony Hawk's Pro Skater 1+2** 
+    #define DA_W 1
+    #define DA_X 0.1125
+    #define DF_Y 0.0125 
+    #define DA_Y 150.0
+    #define DE_X 1
+    #define DE_Y 0.500
+    #define DE_Z 0.400
+    #define BMT 1    
+    #define DF_Z 0.125 //Try to keep this in the lower end. The profile is really Good!!!!!
+    #define FOV 1
 #else
 	#define NPW 1 //No Profile
 #endif
