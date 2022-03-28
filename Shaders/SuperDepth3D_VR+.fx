@@ -2,7 +2,7 @@
 ///**SuperDepth3D_VR+**///
 //--------------------////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//* Depth Map Based 3D post-process shader v3.1.5
+//* Depth Map Based 3D post-process shader v3.1.6
 //* For Reshade 4.4+ I think...
 //* ---------------------------------
 //*
@@ -546,19 +546,24 @@ uniform float2 HUD_Adjust <
 
 uniform int FPSDFIO <
 	ui_type = "combo";
-	ui_items = "Off\0Press\0Hold Down\0";
-	ui_label = " FPS Focus Depth";
+	ui_items = "Off\0Press\0Hold\0";
+	ui_label = "·FPS Focus Depth·";
 	ui_tooltip = "This lets the shader handle real time depth reduction for aiming down your sights.\n"
-				 "This may induce Eye Strain so take this as an Warning.";
+				"This may induce Eye Strain so take this as an Warning.";
 	ui_category = "FPS Focus";
 > = DK_X;
 
+uniform int Focus_Reduction_Type <
+	ui_type = "combo";
+	ui_items = "World\0Weapon\0Mix\0";
+	ui_label = " Focus Type";
+	ui_tooltip = "This lets the shader handle real time depth reduction for aiming down your sights.\n"
+				"This may induce Eye Strain so take this as an Warning.";
+	ui_category = "FPS Focus";
+> = 0;
+
 uniform int3 Eye_Fade_Reduction_n_Power <
-	#if Compatibility
-	ui_type = "drag";
-	#else
 	ui_type = "slider";
-	#endif
 	ui_min = 0; ui_max = 2;
 	ui_label = " Eye Fade Options";
 	ui_tooltip ="X, Eye Selection: One is Right Eye only, Two is Left Eye Only, and Zero Both Eyes.\n"
@@ -1431,9 +1436,19 @@ float3 DB( float2 texcoord)
 		
 	if (WP == 0 || WZPD_and_WND.x <= 0)
 		DM.y = 0;
+		
+	float FadeIO = smoothstep(0,1,1-Fade_in_out(texcoord).x), FD_Adjust = Focus_Reduction_Type == 2 ? 0.125 : 0.1625;	
+
+	if( Eye_Fade_Reduction_n_Power.y == 1)
+		FD_Adjust = 0.25;
+	else if( Eye_Fade_Reduction_n_Power.y == 2)
+		FD_Adjust = 0.30;
+
 	//Handle Convergence Here
-	float3 HandleConvergence = Conv(DM.xz,texcoord).xyz;	
-	DM.y = lerp( HandleConvergence.x, HandleConvergence.y * WA_XYZW().w, DM.y);
+	float3 HandleConvergence = Conv(DM.xz,texcoord).xyz;
+		   HandleConvergence.y *= WA_XYZW().w;
+		   HandleConvergence.y = lerp(HandleConvergence.y + FD_Adjust, HandleConvergence.y, FadeIO);
+	DM.y = lerp( HandleConvergence.x, HandleConvergence.y, DM.y);
 	//Better mixing for eye Comfort
 	DM.z = DM.y;
 	DM.y += lerp(DM.y,DM.x,DM.w);
@@ -1648,14 +1663,17 @@ void LR_Out(float4 position : SV_Position, float2 texcoord : TEXCOORD, out float
 
 	float D = Divergence;
 
-	float FadeIO = smoothstep(0,1,1-Fade_in_out(texcoord).x), FD = D, FD_Adjust = 0.1;
+	float FadeIO = smoothstep(0,1,1-Fade_in_out(texcoord).x), FD = D, FD_Adjust = Focus_Reduction_Type == 2 ? 0.5 : 0.1;
 
 	if( Eye_Fade_Reduction_n_Power.y == 1)
-		FD_Adjust = 0.2;
+		FD_Adjust = Focus_Reduction_Type == 2 ? 0.625 : 0.2;
 	else if( Eye_Fade_Reduction_n_Power.y == 2)
-		FD_Adjust = 0.3;
+		FD_Adjust = Focus_Reduction_Type == 2 ? 0.75 : 0.3;
 
-	if (FPSDFIO == 1 || FPSDFIO == 2)
+	if(Focus_Reduction_Type == 1)
+		FD_Adjust = 1.0;		
+
+	if (FPSDFIO >= 1)
 		FD = lerp(FD * FD_Adjust,FD,FadeIO);
 
 	float2 DLR = float2(FD,FD);
@@ -1663,6 +1681,7 @@ void LR_Out(float4 position : SV_Position, float2 texcoord : TEXCOORD, out float
 			DLR = float2(D,FD);
 	else if( Eye_Fade_Reduction_n_Power.x == 2)
 			DLR = float2(FD,D);
+			
 //Left & Right Parallax for Stereo Vision
 #if HUD_MODE || HMT
 	float HUD_Adjustment = ((0.5 - HUD_Adjust.y)*25.) * pix.x;
