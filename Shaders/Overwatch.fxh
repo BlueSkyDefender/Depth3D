@@ -2982,7 +2982,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define DB_Z 0.075
     #define BMT 1
 	#define DF_Z 0.400
-    #define DG_Z 0.075 //Min
+    #define DG_Z 0.100 //Min
     #define DI_Z 0.300 //Trim
     #define DJ_Z 0.300 //Trim SM 
 	#define DSW 1
@@ -3698,6 +3698,18 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define BMT 1    
     #define DF_Z 0.125 //Try to keep this in the lower end. The profile is really Good!!!!!
     #define FOV 1
+#elif (App == 0x42BC6574 ) //Sleeping Doggs: Definitinve Edition**
+    #define DA_X 0.075
+    #define DF_Y 0.0025 
+    #define DA_Y 7.25
+    #define DE_X 1
+    #define DE_Y 0.500
+    #define DE_Z 0.400
+    #define BMT 1    
+    #define DF_Z 0.138 //This had to be adjusted
+	#define LBC 2  //Letter Box Correction Offsets With X & Y
+	#define DH_X 1.345
+	#define PEW 1
 #else
 	#define NPW 1 //No Profile
 #endif
