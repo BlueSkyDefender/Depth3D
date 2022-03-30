@@ -2694,16 +2694,22 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DAA 1
 #elif (App == 0x11E6C55E ) //The Suicide of Rachel Foster
 	#define DA_W 1
-	#define DA_Y 35.0
-	#define DA_X 0.030
-	#define DF_Y 0.020
+	//#define DA_X 0.030
+	#define DF_Y 0.025
+	#define DA_Y 25.0 //25.0
+	#define DA_Z -0.25
 	#define DB_Z 0.050
-	#define DB_Y 5
+	//#define DB_Y 5
 	#define DE_X 4
-	#define DE_Y 0.250
+	#define DE_Y 0.500
 	#define DE_Z 0.425
-	#define DG_Z 0.449
-	#define DG_W 0.37 //Allow much popout "Please don't abuse this."
+    #define DG_Z 0.050 //Min
+    //#define DE_W 0.105 //Max
+    #define DI_Z 0.025 //Trim
+    #define DJ_Z 0.025 //Trim SM
+	#define DG_W 0.365 //Allow much popout "Please don't abuse this."
+    #define BMT 1    
+    #define DF_Z 0.130 //This had to be adjusted
 	#define PEW 1
 	#define DAA 1
 	#define RHW 1
@@ -4104,7 +4110,7 @@ float4 Weapon_Profiles(float WP ,float4 Weapon_Adjust) //Tried Switch But, can't
 #elif WSM == 2
 float4 Weapon_Profiles(float WP ,float4 Weapon_Adjust) //Could reduce from 76 to 57 to save on compiling time.
 {   if (WP == 2)
-        Weapon_Adjust = float4(0.6,6.5,0.0,0.0);          //WP 0  | The Suicide of Rachel Foster
+        Weapon_Adjust = float4(0.600,6.5,0.0,0.0);          //WP 0  | The Suicide of Rachel Foster
     if (WP == 3)
         Weapon_Adjust = float4(1.653,17.5,0.0,0.0);       //WP 1  | Devolverland Expo
     if (WP == 4)
