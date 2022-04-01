@@ -3612,17 +3612,17 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define PEW 1
 #elif (App == 0xFA6649D4 ) //Shadow Warror 3
 	#define DA_W 1
-    #define DA_X 0.0525
-    #define DF_Y 0.01
-	#define DA_Y 22.0
-    #define DA_Z 0.000125
+    #define DA_X 0.075
+    #define DF_Y 0.005
+	#define DA_Y 40.0
+    //#define DA_Z 0.000125
     //#define DB_Z 0.250
 	#define BMT 1    
-	#define DF_Z 0.5
-	#define DG_Z 0.030//Min
+	#define DF_Z 0.1375
+	#define DG_Z 0.160//Min
 //	#define DE_W 0.0 //Max
     #define DI_Z 0.300 //Trim
-    #define DJ_Z 0.300 //Trim SM
+    #define DJ_Z 0.325 //Trim SM
     #define FOV 1
     #define PEW 1
 #elif (App == 0x45C250C6 ) //Dying Light 2
