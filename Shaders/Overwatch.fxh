@@ -3495,7 +3495,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 #elif (App == 0x51C8FDAA ) //Assassin's Valhalla
 	#define DA_W 1
 	#define DA_Y 50.0
-    #define DA_Z -0.250
+    #define DA_Z -0.125
 	#define DA_X 0.045
 	#define DB_Y 1
 	#define DE_X 1
