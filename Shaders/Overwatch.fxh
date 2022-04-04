@@ -3609,7 +3609,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 #elif (App == 0xFA6649D4 ) //Shadow Warrior 3
 	#define DA_W 1
     #define DA_X 0.070
-    #define DF_Y 0.005
+    #define DF_Y 0.007
 	#define DA_Y 40.0
     #define DA_Z 0.0001
     //#define DB_Z 0.250
