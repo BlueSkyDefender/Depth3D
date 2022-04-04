@@ -87,7 +87,7 @@ static const float REF_Check_Depth_Limit_D = 0.0;       //Resident Evil Fix Chec
 
 static const float NULL_X_D = 0.0;                      //Null X                                        | DJ_X
 static const float NULL_Y_D = 0.0;                      //Null Y                                        | DJ_Y
-static const float Near_Depth_Trim_Smooth_Mode_D = 0.25;//Trim for Smooth Mode                  Trim SM | DJ_Z
+static const float NULL_Z_D = 0.0;                      //Null Z                                        | DJ_Z
 static const float Check_Depth_Limit_Weapon_D = -0.100; //Check Depth Limit Weapon                      | DJ_W
 
 //FPS Focus
@@ -1078,7 +1078,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DG_Z 0.070//Min
 //	#define DE_W 0.0 //Max
     #define DI_Z 0.100 //Trim
-    #define DJ_Z 0.100 //Trim SM 
 	#define RHW 1
 #elif (App == 0x1E9DCD00) //Witch it
 	#define DA_X 0.0475
@@ -2151,13 +2150,15 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DE_Y 0.500
 	#define DE_Z 0.375
 #elif (App == 0x49F7B9C0 || App == 0x837F12C9 ) //Control DX12 | QuantumBreak DX11
-	#define DA_X 0.05125
-	#define DF_Y 0.06125
-	#define DA_Y 18.75
+	#define DA_X 0.051
+	#define DF_Y 0.051
+	#define DA_Y 17.5
 	#define DB_Y 3
 	#define DE_X 1
 	#define DE_Y 0.500
 	#define DE_Z 0.375
+	#define BMT 1
+	#define DF_Z 0.150
 	#define PEW 1
 	#define DAA 1
 #elif (App == 0x5A7B540A ) //We Where Here Too
@@ -2613,15 +2614,17 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define NDW 1
 	#define DSW 1
 #elif (App == 0xD0F69E54 ) //Yooka-Laylee
-	#define DA_Y 12.75
+	#define DA_Y 12.50
 	#define DA_Z 0.001
-	#define DA_X 0.09125
-	#define DF_Y 0.00625
+	#define DA_X 0.091
+	#define DF_Y 0.005
 	#define DB_X 1
 	#define DB_Y 4
 	#define DE_X 2
 	#define DE_Y 0.325
-	#define DG_W 0.25 //allowed popout
+    #define BMT 1    
+    #define DF_Z 0.150
+	#define DG_W 0.15 //allowed popout
 	//#define DE_Z 0.375
 #elif (App == 0x755C7E43 ) //Yooka-Laylee and the Impossible Lair
 	#define DA_W 1
@@ -2695,7 +2698,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 #elif (App == 0x11E6C55E ) //The Suicide of Rachel Foster
 	#define DA_W 1
 	//#define DA_X 0.030
-	#define DF_Y 0.025
+	#define DF_Y 0.020
 	#define DA_Y 25.0 //25.0
 	#define DA_Z -0.25
 	#define DB_Z 0.050
@@ -2706,7 +2709,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define DG_Z 0.050 //Min
     //#define DE_W 0.105 //Max
     #define DI_Z 0.025 //Trim
-    #define DJ_Z 0.025 //Trim SM
 	#define DG_W 0.365 //Allow much popout "Please don't abuse this."
     #define BMT 1    
     #define DF_Z 0.130 //This had to be adjusted
@@ -2982,7 +2984,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DAA 1
 #elif (App == 0x808ABB25 ) //BioShock Infinite 
 	#define DA_X 0.050 // or 0.0525
-    //#define DF_Y 0.050
+    #define DF_Y 0.035 // 0.050
 	#define DA_Y 12.50
     #define DA_Z -0.00125
     #define DB_Z 0.075
@@ -2990,7 +2992,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DF_Z 0.400
     #define DG_Z 0.100 //Min
     #define DI_Z 0.300 //Trim
-    #define DJ_Z 0.300 //Trim SM 
 	#define DSW 1
     #define FOV 1
 #elif (App == 0x22CA259A ) //Kena Bridge of Spirits
@@ -3301,9 +3302,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 #elif (App == 0x98746774 ) //God of War
 	#define DA_W 1
 	#define DA_X 0.14
-	#define DF_Y 0.075
-	//#define DA_Y 7.
-	//#define DB_Z 0.250
+	#define DF_Y 0.070
 	#define DB_Y 5
 	#define DE_X 1
 	#define DE_Y 0.475
@@ -3387,7 +3386,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DF_Z 0.150 
 	#define DG_Z 0.100//Min
     #define DI_Z 0.125 //Trim
-    #define DJ_Z 0.125 //Trim SM 
 #elif (App == 0x2D1A3028 ) //Bright Memory: Infinite*
     #define DA_W 1
     #define DA_X 0.160
@@ -3582,7 +3580,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DG_Z 0.100//Min
 //	#define DE_W 0.0 //Max
     #define DI_Z 0.100 //Trim
-    #define DJ_Z 0.100 //Trim SM < change this if you want to set Smooth Mode trim Higher or lower then DI_Z Near Depth Trim. Since it defaults to 0.250
 #elif (App == 0x6EA7BBB ) //Tales from Borderlands
     #define DA_X 0.075
     #define DF_Y 0.005
@@ -3597,7 +3594,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DG_Z 0.100//Min
 //	#define DE_W 0.0 //Max
     #define DI_Z 0.125 //Trim
-    #define DJ_Z 0.125 //Trim SM 
 #elif (App == 0x8FDE4FCF ) //Ni No Kuni II: Revenant Kingdom**
     #define DA_X 0.075
     #define DF_Y 0.050 //0.058
@@ -3622,7 +3618,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DG_Z 0.160//Min
 //	#define DE_W 0.0 //Max
     #define DI_Z 0.300 //Trim
-    #define DJ_Z 0.325 //Trim SM
     #define FOV 1
     #define PEW 1
 #elif (App == 0x45C250C6 ) //Dying Light 2
@@ -3638,7 +3633,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define DG_Z 0.090 //0.0875//0.080 //Min
     #define DE_W 0.105 //Max
     #define DI_Z 0.150 //0.215 //Trim
-    #define DJ_Z 0.200 //Trim SM
 	#define BMT 1
 	#define DF_Z 0.200
 	#define WSM 2 //Weapon Settings Mode
@@ -3665,7 +3659,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define DG_Z 0.002 //Min
     //#define DE_W 0.105 //Max
     #define DI_Z 0.200 //Trim
-    #define DJ_Z 0.200 //Trim SM
 	#define BMT 1
 	#define DF_Z 0.125 //0.1875
     #define DG_W 0.100 //Pop
@@ -3681,7 +3674,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define DG_Z 0.077 //Min
     //#define DE_W 0.105 //Max
     #define DI_Z 0.175 //Trim
-    #define DJ_Z 0.200 //Trim SM
 	#define BMT 1
 	#define DF_Z 0.130
     #define DG_W 0.550 //Pop
@@ -3848,7 +3840,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DI_W REF_Check_Depth_Limit_D
 #endif
 
-// X = [NULL X] Y = [NULL Y] Z = [Smooth Mode Trim] W = [Check Depth Limit Weapon]
+// X = [NULL X] Y = [NULL Y] Z = [NULL Z] W = [Check Depth Limit Weapon]
 #ifndef DJ_X
     #define DJ_X NULL_X_D
 #endif
@@ -3856,7 +3848,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define DJ_Y NULL_Y_D
 #endif
 #ifndef DJ_Z
-    #define DJ_Z Near_Depth_Trim_Smooth_Mode_D  //Trim SM
+    #define DJ_Z NULL_Z_D
 #endif 
 #ifndef DJ_W
 	#define DJ_W Check_Depth_Limit_Weapon_D
