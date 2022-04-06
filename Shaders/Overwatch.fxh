@@ -3038,8 +3038,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define SPF 1 //This offset is still the same. Wonder what changed here.
 	//#define DD_X 1
 	#define DD_Y 1.067
-	#define DG_Z 0.080 //Min
-	#define DE_W 0.100 //Max
+	#define DG_Z 0.09375 //Min
 	#define PEW 1
 	//#define FOV 1
 #elif (App == 0xA4F3EEC3 ) //Godfall
