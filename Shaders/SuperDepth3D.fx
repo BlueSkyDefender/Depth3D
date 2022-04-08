@@ -2,7 +2,7 @@
 ///**SuperDepth3D**///
 //----------------////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//* Depth Map Based 3D post-process shader v3.1.6
+//* Depth Map Based 3D post-process shader v3.1.7
 //* For Reshade 3.0+
 //* ---------------------------------
 //*
@@ -183,7 +183,7 @@
 	#define Max_Divergence 100.0
 	#define Set_Divergence 50.0
 #else
-	#define Max_Divergence 125.0//Wow Must be the future and 8K Plus is normal now. If you are hear use AI infilling...... Future person.
+	#define Max_Divergence 125.0//Wow Must be the future and 8K Plus is normal now. If you are here use AI infilling...... Future person.
 	#define Set_Divergence 62.5
 #endif                          //With love <3 Jose Negrete..
 //New ReShade PreProcessor stuff
@@ -680,6 +680,13 @@ uniform float Zoom <
 static const float3 Colors_K1_K2_K3 = float3(DC_X,DC_Y,DC_Z);
 static const float Zoom = DC_W;
 #endif
+uniform bool Vert_3D_Pinball <
+	ui_label = "·Swap 3D Axis·";
+	ui_tooltip = "Use this to swap the axis that the Parallax is generated.\n"
+				 "Useful for 3D Pinball Games, You may have to swap eyes.\n"
+				 "Default is Off.";
+	ui_category = "Miscellaneous Options";
+> = false;
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 uniform bool Cancel_Depth < source = "key"; keycode = Cancel_Depth_Key; toggle = true; mode = "toggle";>;
 uniform bool Mask_Cycle < source = "key"; keycode = Mask_Cycle_Key; toggle = true; mode = "toggle";>;
@@ -1429,15 +1436,10 @@ void Mod_Z(in float4 position : SV_Position, in float2 texcoord : TEXCOORD, out 
 }
 
 float3 GetDB(float2 texcoord)
-{	/*
-	float PDepth = PrepDepth(texcoord)[1][1];
-		  PDepth += PrepDepth(texcoord + float2(pix.x,pix.y) * 5)[1][1];
-		  PDepth += PrepDepth(texcoord + float2(-pix.x,pix.y) * 5)[1][1];
-		  PDepth += PrepDepth(texcoord + float2(pix.x,-pix.y) * 5)[1][1];
-		  PDepth += PrepDepth(texcoord + float2(-pix.x,-pix.y) * 5)[1][1];
-		  PDepth /= 5;
-		  PDepth = (PrepDepth(texcoord)[1][1]/PDepth) > 0.998;
-	*/
+{  
+	if(Vert_3D_Pinball)	
+		texcoord.xy = texcoord.yx;
+		
 	float MIP_LvL = View_Mode == 1 ? 6 : 0, Seper_Am = View_Mode == 5 ? 50.0 : 6.0, 
 		Depth_Blur = tex2Dlod(SamplerzBufferN_P, float4(texcoord,0, MIP_LvL) ).y;
 		if(View_Mode == 1 || View_Mode == 5)
@@ -1659,9 +1661,18 @@ float3 PS_calcLR(float2 texcoord)
 	else if( Eye_Fade_Reduction_n_Power.x == 2)
 			DLR = float2(FD,D);
 
-	float4 image = 1, accum, color, Left_T, Right_T, L, R,
-		   Left = MouseCursor(Parallax(-DLR.x, TCL, AI)),
-		   Right= MouseCursor(Parallax(DLR.y, TCR, -AI));
+	float4 image = 1, accum, color, Left_T, Right_T, L, R, Left, Right;
+		
+	if(Vert_3D_Pinball)
+	{
+		Left = MouseCursor(Parallax(-DLR.x, TCL.yx, AI).yx);
+		Right= MouseCursor(Parallax(DLR.y, TCR.yx, -AI).yx);
+	}
+	else
+	{
+		Left = MouseCursor(Parallax(-DLR.x, TCL, AI));
+		Right= MouseCursor(Parallax(DLR.y, TCR, -AI));
+	}
 
 	if(Stereoscopic_Mode == 6)
 	{
