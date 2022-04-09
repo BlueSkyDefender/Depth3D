@@ -3707,6 +3707,14 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define LBC 2  //Letter Box Correction Offsets With X & Y
 	#define DH_X 1.345
 	#define PEW 1
+#elif (App == 0x72632818 ) //Matrix Demo UE 5
+    #define DA_W 1
+    #define DA_X 0.025
+    #define DF_Y 0.005 
+    #define DA_Y 47.5
+    #define BMT 1    
+    #define DF_Z 0.0275
+	#define PEW 1
 #else
 	#define NPW 1 //No Profile
 #endif
