@@ -3740,6 +3740,23 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define BMT 1    
     #define DF_Z 0.125
 	#define PEW 1
+#elif (App == 0xAB93A702 ) //Nightmare Reaper
+    #define DA_W 1
+    #define DA_X 0.050
+    #define DF_Y 0.020
+    #define DA_Y 24.0
+    //#define DA_Z 0.0
+    #define DE_X 4
+    #define DE_Y 0.500
+    #define DE_Z 0.375
+    #define BMT 1    
+    #define DF_Z 0.125
+    #define WSM 2
+    #define DB_W 30
+	#define DG_Z 0.0300//Min
+//	#define DE_W 0.0 //Max
+    #define DI_Z 0.0525 //Trim
+	#define PEW 1
 #else
 	#define NPW 1 //No Profile
 #endif
@@ -4190,7 +4207,7 @@ float4 Weapon_Profiles(float WP ,float4 Weapon_Adjust) //Could reduce from 76 to
     if (WP == 29)
         Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 27 | Game
     if (WP == 30)
-        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 28 | Game
+        Weapon_Adjust = float4(0.725,7.75,0.0,0.0);       //WP 28 | Nightmare Reaper
     if (WP == 31)
         Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 29 | Game
     if (WP == 32)
