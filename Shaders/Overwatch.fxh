@@ -3713,7 +3713,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define DF_Y 0.005 
     #define DA_Y 47.5
     #define BMT 1    
-    #define DF_Z 0.0275
+    #define DF_Z 0.030
 	#define PEW 1
 #elif (App == 0xCBE94135 ) //Anno: Mutationem
     #define DA_W 1
@@ -3724,6 +3724,18 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DA_Z -0.025
     #define DE_X 1
     #define DE_Y 0.250
+    #define DE_Z 0.375
+    #define BMT 1    
+    #define DF_Z 0.125
+	#define PEW 1
+#elif (App == 0x98E46BDC ) //Forgive Me Father
+    #define DA_W 1
+    #define DA_X 0.1875
+    #define DF_Y 0.0125
+    #define DA_Y 250.0
+    #define DA_Z -1.0
+    #define DE_X 1
+    #define DE_Y 0.750
     #define DE_Z 0.375
     #define BMT 1    
     #define DF_Z 0.125
