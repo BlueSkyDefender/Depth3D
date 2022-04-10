@@ -1,7 +1,7 @@
 ////----------------------------------------//
 ///SuperDepth3D Overwatch Automation Shader///
 //----------------------------------------////
-// Version 2.4.2
+// Version 2.4.3
 //---------------------------------------OVERWATCH---------------------------------------//
 // If you are reading this stop. Go away and never look back. From this point on if you  //
 // still think it's is worth looking at this..... Then no one can save you or your soul. //
@@ -3714,6 +3714,19 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define DA_Y 47.5
     #define BMT 1    
     #define DF_Z 0.0275
+	#define PEW 1
+#elif (App == 0xCBE94135 ) //Anno: Mutationem
+    #define DA_W 1
+    #define DB_X 1
+    #define DA_X 0.0375
+    #define DF_Y 0.01375
+    #define DA_Y 37.5
+    //#define DA_Z -0.025
+    #define DE_X 1
+    #define DE_Y 0.250
+    #define DE_Z 0.375
+    #define BMT 1    
+    #define DF_Z 0.125
 	#define PEW 1
 #else
 	#define NPW 1 //No Profile
