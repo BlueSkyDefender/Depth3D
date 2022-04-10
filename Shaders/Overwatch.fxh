@@ -3757,6 +3757,21 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 //	#define DE_W 0.0 //Max
     #define DI_Z 0.0525 //Trim
 	#define PEW 1
+#elif (App == 0xBE557C30 ) //Golden Light
+    #define DA_W 1
+    #define DB_X 1
+    #define DA_X 0.100
+    #define DF_Y 0.0125
+    #define DA_Y 187.5
+    #define DB_Z 0.200
+    //#define DA_Z 0.0
+    #define DE_X 1
+    #define DE_Y 0.500
+    #define DE_Z 0.375
+    #define BMT 1    
+    #define DF_Z 0.125
+    #define DG_W 0.125 //Pop
+	#define PEW 1
 #else
 	#define NPW 1 //No Profile
 #endif
