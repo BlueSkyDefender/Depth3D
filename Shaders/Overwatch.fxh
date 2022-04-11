@@ -1,7 +1,7 @@
 ////----------------------------------------//
 ///SuperDepth3D Overwatch Automation Shader///
 //----------------------------------------////
-// Version 2.4.3
+// Version 2.4.4
 //---------------------------------------OVERWATCH---------------------------------------//
 // If you are reading this stop. Go away and never look back. From this point on if you  //
 // still think it's is worth looking at this..... Then no one can save you or your soul. //
@@ -3772,6 +3772,48 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define DF_Z 0.125
     #define DG_W 0.125 //Pop
 	#define PEW 1
+#elif (App == 0x70858D6 ) //PowerSlave Exhumed
+    #define DA_X 0.250
+    #define DF_Y 0.0125
+    #define DA_Y 300.0
+    #define BMT 1    
+    #define DF_Z 0.500
+    #define WSM 2
+    #define DB_W 31
+#elif (App == 0xB7097475 ) //God Damn The Garden
+    #define DA_W 1
+    #define DB_X 1
+    #define DA_X 0.045
+    #define DF_Y 0.045
+    #define DA_Y 45.0
+    //#define DA_Z 0.0
+    //#define DE_X 4
+    //#define DE_Y 0.500
+    //#define DE_Z 0.375
+    #define BMT 1    
+    #define DF_Z 0.1375
+	#define DG_Z 0.110//Min
+	//#define DE_W 0.0 //Max
+    #define DI_Z 0.160 //Trim
+	#define PEW 1
+	#define DSW 1
+#elif (App == 0x3E2F4D65 ) //Inscryption
+    #define DA_W 1
+    #define DB_X 1
+    #define DA_X 0.045
+    #define DF_Y 0.045
+    #define DA_Y 17.0
+    //#define DA_Z 0.0
+    //#define DE_X 4
+    //#define DE_Y 0.500
+    //#define DE_Z 0.375
+    #define BMT 1    
+    #define DF_Z 0.125
+	//#define DG_Z 0.110//Min
+	//#define DE_W 0.0 //Max
+    //#define DI_Z 0.160 //Trim
+	#define PEW 1
+	#define DSW 1
 #else
 	#define NPW 1 //No Profile
 #endif
@@ -4224,7 +4266,7 @@ float4 Weapon_Profiles(float WP ,float4 Weapon_Adjust) //Could reduce from 76 to
     if (WP == 30)
         Weapon_Adjust = float4(0.725,7.75,0.0,0.0);       //WP 28 | Nightmare Reaper
     if (WP == 31)
-        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 29 | Game
+        Weapon_Adjust = float4(0.5,7.0,0.0,0.0);          //WP 29 | Powerslave Exhumed
     if (WP == 32)
         Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 30 | Game
     if (WP == 33)
