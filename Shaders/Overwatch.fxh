@@ -3263,7 +3263,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 #elif (App == 0xDE4C92BB ) //Halo Infinite
 	#define DA_W 1
 	#define DA_X 0.075
-	#define DF_Y 0.0175
+	#define DF_Y 0.018
 	#define DA_Y 90.0  
 	//#define DB_Z 0.125
 	#define DB_Y 1
@@ -3273,7 +3273,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	//#define DG_Z 0.01
 	//#define DI_Z 0.225
 	#define BMT 1
-	#define DF_Z 0.130
+	#define DF_Z 0.117
 	#define DG_W -0.075
 	#define WSM 2 //Weapon Settings Mode
 	#define DB_W 19//Weapon Selection
