@@ -3808,7 +3808,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DE_Y 0.500
     //#define DE_Z 0.375
     #define BMT 1    
-    #define DF_Z 0.125
+    #define DF_Z 0.110
 	//#define DG_Z 0.110//Min
 	//#define DE_W 0.0 //Max
     //#define DI_Z 0.160 //Trim
