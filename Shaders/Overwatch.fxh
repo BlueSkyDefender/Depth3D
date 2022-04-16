@@ -3842,7 +3842,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DE_Y 0.425
 	#define DE_Z 0.300
 	#define DG_W 0.210 //Pop out
-	#define DF_X 0.085
 	#define BMT 1    
 	#define DF_Z 0.175
 	#define DG_Z 0.0375//Min
@@ -3862,7 +3861,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DE_Y 0.500
 	#define DE_Z 0.375
 	#define DG_W 0.125 //Pop out
-	#define DF_X 0.085
 	#define BMT 1    
 	#define DF_Z 0.100
 	#define DG_Z 0.050 //Min
@@ -3871,6 +3869,23 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define SMS 1      //SM Toggle Separation
 	#define DL_X 0.625 //SM Tune
 	#define DL_W 0.525 //SM Perspective	
+#elif ( App == 0x1C2203BC ) //TUNIC
+    #define DA_W 1
+    #define DB_X 1
+	#define DA_Y 2.5
+	#define DA_X 0.060
+	#define DF_Y 0.160
+	#define DE_X 1
+	#define DE_Y 0.500
+	#define DE_Z 0.375
+	#define DG_W 0.125 //Pop out
+	#define BMT 1    
+	#define DF_Z 0.100
+	#define DSW 1
+	#define PEW 1
+	#define SMS 1      //SM Toggle Separation
+	#define DL_X 0.5625//SM Tune
+	#define DL_W 0.500 //SM Perspective	
 #else
 	#define NPW 1 //No Profile
 #endif
