@@ -3838,7 +3838,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DB_Z 0.050
 	#define DA_W 1
 	#define DB_Y 4
-	#define DB_W 5
 	#define DE_X 5
 	#define DE_Y 0.425
 	#define DE_Z 0.300
@@ -3853,6 +3852,24 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define SMS 1 //SM Toggle Separation
 	#define DL_X 0.500 //SM Tune
 	#define DL_Z 0.125 //SM Local Smooth
+	#define DL_W 0.525 //SM Perspective	
+#elif ( App == 0x4F4E231E ) //Hob
+	#define DA_Y 20.0
+	#define DA_X 0.040
+	#define DF_Y 0.040
+	#define DB_Y 4
+	#define DE_X 1
+	#define DE_Y 0.500
+	#define DE_Z 0.375
+	#define DG_W 0.125 //Pop out
+	#define DF_X 0.085
+	#define BMT 1    
+	#define DF_Z 0.100
+	#define DG_Z 0.050 //Min
+	#define DI_Z 0.070 //Trim
+	#define DAA 1
+	#define SMS 1      //SM Toggle Separation
+	#define DL_X 0.625 //SM Tune
 	#define DL_W 0.525 //SM Perspective	
 #else
 	#define NPW 1 //No Profile
