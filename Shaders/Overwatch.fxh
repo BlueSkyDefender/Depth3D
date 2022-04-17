@@ -3885,7 +3885,21 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define PEW 1
 	#define SMS 1      //SM Toggle Separation
 	#define DL_X 0.5625//SM Tune
-	#define DL_W 0.500 //SM Perspective	
+	#define DL_W 0.500 //SM Perspective
+#elif ( App == 0x42F66404 ) //Bayonetta
+	#define DA_Y 40.0
+	#define DA_X 0.037
+	#define DF_Y 0.0125
+	#define DE_X 1
+	#define DE_Y 0.500
+	#define DE_Z 0.375
+	#define BMT 1    
+	#define DF_Z 0.125
+	#define PEW 1
+	#define SMS 0      //SM Toggle Separation
+	#define DL_X 0.500 //SM Tune
+	#define DL_Z 0.050 //SM Local Smooth
+	#define DL_W 0.525 //SM Perspective
 #else
 	#define NPW 1 //No Profile
 #endif
