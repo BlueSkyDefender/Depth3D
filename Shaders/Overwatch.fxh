@@ -3946,6 +3946,24 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DL_Z 0.300 //SM Local Smooth
 	#define DL_W 0.525 //SM Perspective
 	#define PEW 1
+#elif (App == 0xF4901178 ) //The Surge 2
+    #define DA_W 1 
+    #define DA_X 0.125
+    #define DF_Y 0.0125
+    #define DA_Y 27.5
+    #define DE_X 1
+    #define DE_Y 0.375
+    #define DE_Z 0.375
+    #define BMT 1    
+    #define DF_Z 0.1375 //0.125 //0.150
+	#define DG_Z 0.100 //Min
+	//#define DE_W 0.0 //Max
+    #define DI_Z 0.150 //Trim
+	#define SMS 1      //SM Toggle Separation
+	#define DL_X 0.535 //SM Tune
+	#define DL_Z 0.250 //SM Local Smooth ???
+	#define DL_W 0.550 //SM Perspective
+	#define PEW 1
 #else
 	#define NPW 1 //No Profile
 #endif
