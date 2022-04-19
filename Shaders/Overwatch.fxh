@@ -1,7 +1,7 @@
 ////----------------------------------------//
 ///SuperDepth3D Overwatch Automation Shader///
 //----------------------------------------////
-// Version 2.4.5
+// Version 2.4.6
 //---------------------------------------OVERWATCH---------------------------------------//
 // If you are reading this stop. Go away and never look back. From this point on if you  //
 // still think it's is worth looking at this..... Then no one can save you or your soul. //
@@ -3188,7 +3188,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DH_Z 0.255
 	#define DH_W 0.0
 #elif (App == 0x3C982FAC ) //Forza Horizon 4  
-	#define DA_W 1
+	//#define DA_W 1
 	#define DA_X 0.1225
 	//#define DF_Y 0.05
 	//#define DA_Y 10
@@ -3301,6 +3301,11 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DF_X 0.13
 	#define DG_Z 0.06
 	#define DI_Z 0.070
+	#define SMS 1      //SM Toggle Separation
+	#define DL_X 0.54375 //SM Tune
+	#define DL_Y 4 //SM Tune Weapon
+	//#define DL_Z 0.500 //SM Local Smooth
+	#define DL_W 0.550 //SM Perspective
 	#define NDW 1  
 #elif (App == 0x312862CF ) //Aliens: Fireteam Elite**
 	#define DA_W 1
