@@ -1,7 +1,7 @@
 ////----------------------------------------//
 ///SuperDepth3D Overwatch Automation Shader///
 //----------------------------------------////
-// Version 2.4.6
+// Version 2.5.0
 //---------------------------------------OVERWATCH---------------------------------------//
 // If you are reading this stop. Go away and never look back. From this point on if you  //
 // still think it's is worth looking at this..... Then no one can save you or your soul. //
@@ -314,7 +314,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DE_Y 0.5
 	#define DE_Z 0.300
     #define DF_Y 0.05
-	#define WSM 4
+	#define WSM 7
 	#define OW_WP "Read Help & Change Me\0Custom WP\0Prey High Settings and <\0Prey 2017 Very High\0"
 	#define RHW 1
 	#define PEW 1
@@ -352,7 +352,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	//#define DE_Y 0.50
 	#define DE_Z 0.475
 	#define WSM 5
-	#define DB_W 2
+	#define DB_W 8
 	#define OW_WP "Read Help & Change Me\0Custom WP\0Blood 2 All Weapons\0Blood 2 Bonus Weapons\0Blood 2 Former\0"
 	#define WPW 1
 	#define NFM 1
@@ -464,16 +464,19 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 #elif (App == 0xAA6B948E ) //Rage64
 	#define DA_Y 20.0
 	#define DB_Y 2
-	#define DB_W 53
+	#define WSM 3
+	#define DB_W 2
 #elif (App == 0x44BD41E1 ) //Bioshock Remaster
 	#define DA_Z 0.001
 	#define DB_Y 3
-	#define DB_W 55
+	#define WSM 3
+	#define DB_W 4
 #elif (App == 0x7CF5A01 ) //Bioshock 2 Remaster
 	#define DA_Z 0.001
-	#define DB_W 56
 	#define DB_Y 3
 	#define DF_W 0.5034
+	#define WSM 3
+	#define DB_W 5
 	#define HMT 1
 #elif (App == 0x22BA110F ) //Turok: DH 2017
 	#define DA_X 0.002
@@ -516,6 +519,9 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DB_Y 5
 #elif (App == 0xFE54BF56 ) //No One Lives Forever and 2
 	#define DA_X 0.0375
+	#define WSM 9
+	#define OW_WP "Read Help & Change Me\0Custom WP\0No One Lives Forever\0No One Lives Forever 2\0"
+	#define WPW 1
 	#define RHW 1
 #elif (App == 0x9E7AA0C4 ) //Shadow Tactics: Blades of the Shogun
 	#define DA_Y 7.0
@@ -963,7 +969,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define BMT 1
 	#define DF_Z 0.14375
 	#define WSM 2 //Weapon Settings Mode
-	//#define DB_W 62
+	//#define DB_W 51
 #elif (App == 0x42C1A2B ) //CoD: WWII
 	#define DA_X 0.04
 	#define DA_W 1
@@ -999,7 +1005,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DE_X 4
 	#define DE_Y 0.375
 	#define DE_Z 0.375
-	#define WSM 3
+	#define WSM 6
 	#define OW_WP "Read Help & Change Me\0Custom WP\0Halo: Reach\0Halo: CE Anniversary\0Halo 2: Anniversary\0Halo 3\0Halo 3: ODST\0Halo 4\0"
 	#define RHW 1
 	#define WPW 1
@@ -1065,7 +1071,8 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 #elif (App == 0xB7C22840) //Strife
 	#define DA_X 0.1
 	#define DA_Y 250.0
-	#define DB_W 59
+	#define WSM 3
+	#define DB_W 8
 	#define RHW 1
 #elif (App == 0x21DC397E || App == 0x653AF1E1) //Gold Source
 	#define DA_X 0.045
@@ -1079,7 +1086,8 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DG_W -0.1375
 	#define BMT 1    
 	#define DF_Z 0.123 
-	#define DB_W 60
+	#define WSM 3
+	#define DB_W 9
 #elif (App == 0xC2E621A5) //No Man Sky
 	#define DA_X 0.045
     #define DF_Y 0.010
@@ -1094,6 +1102,8 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DG_Z 0.070//Min
 //	#define DE_W 0.0 //Max
     #define DI_Z 0.100 //Trim
+	#define WSM 3
+	#define DB_W 10
 	#define RHW 1
 #elif (App == 0x1E9DCD00) //Witch it
 	#define DA_X 0.0475
@@ -1221,14 +1231,16 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DB_Z 0.105
 	#define DA_X 0.055
 	#define DB_Y 4
-	#define DB_W 63
+	#define WSM 3
+	#define DB_W 12
 	#define DF_X 0.13875
 #elif (App == 0x9140DBE0 ) //Farcry 2
 	#define DA_X 0.05
 	#define DB_Y 4
-	#define DB_W 64
 	#define DE_X 5
 	#define DE_Z 0.375
+	#define WSM 3
+	#define DB_W 13
 	#define RHW 1
 #elif (App == 0xA4B66433 ) //Farcry 3
 	#define DA_X 0.05
@@ -1266,8 +1278,9 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DA_Y 25.0
 	#define DA_X 0.05
 	#define DB_Y 5
-	#define DB_W 73
 	#define DF_X 0.150
+	#define WSM 3
+	#define DB_W 22
 #elif (App == 0xF0F2CF6A ) //Dragon Ball Z: Kakarot
 	#define DA_W 1
 	#define DA_Y 24.0
@@ -1334,10 +1347,11 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 #elif (App == 0xBF70711C ) //Singularity
 	#define DA_Y 15.0
 	#define DA_X 0.0375
-	#define DB_W 66
 	#define DE_X 1
 	#define DE_Z 0.375
 	#define DF_X 0.175
+	#define WSM 3
+	#define DB_W 15
 	#define RHW 1
 #elif (App == 0x905631F2 ) //Crysis DX10 64bit
 	#define DA_X 0.0375
@@ -1355,7 +1369,8 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DE_X 1
 	#define DE_Y 0.50
 	#define DE_Z 0.375
-	#define DB_W 70
+	#define WSM 3
+	#define DB_W 19
 	#define DSW 1
 #elif (App == 0xC3AF1228 || App == 0x95A994C8 ) //Spellforce
 	#define DA_Y 145.0
@@ -1410,13 +1425,14 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DE_X 5
 	#define DE_Y 0.550
 	#define DE_Z 0.333
-	#define DB_W 68
 	//#define DG_Z 0.080 //Min
     #define DE_W 0.125 //Max
 	//#define DE_W 0.09375
 	#define DA_X 0.03125
 	#define DF_Y 0.03125
 	//#define DA_X 0.0375 //Alternet settings Not used.
+	#define WSM 3
+	#define DB_W 17
 	#define PEW 1
 #elif (App == 0x47F294E9 ) //Octopath Traveler
 	#define DA_Y 250.0
@@ -1603,7 +1619,8 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DE_Y 0.5
 	#define DE_Z 0.375
 	#define DB_Z 0.125
-	#define DB_W 74
+	#define WSM 3
+	#define DB_W 23
 #elif (App == 0xF6F3C763 ) //WRATH
 	#define DA_X 0.065
 	#define DA_Y 75.0
@@ -1734,7 +1751,8 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DA_Y 30.0
 	#define DA_Z 0.0003
 	#define DB_Y 4
-	#define DB_W 75
+	#define WSM 3
+	#define DB_W 24 //???
 #elif (App == 0x6281C1AC ) //DarkSiders Warmastered Edition
 	#define DA_X 0.05
 	#define DA_Y 30.0
@@ -2002,7 +2020,8 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DE_X 1
 	#define DE_Y 0.5
 	#define DE_Z 0.375
-	#define DB_W 65
+	#define WSM 3
+	#define DB_W 14
 	#define DAA 1
 #elif (App == 0x6EC76A83 ) //Watch Dogs 2
 	#define DA_W 1
@@ -2120,7 +2139,8 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	//#define DD_W -0.4815
 	#define DD_Y 0.9
 	#define DD_W -0.111
-	#define DB_W 72
+	#define WSM 3
+	#define DB_W 21
 	#define DSW 1
 #elif (App == 0x5C0EBBE9 ) //A Plague Tale Innocence
 	#define DA_W 1
@@ -2277,7 +2297,8 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DE_Z 0.375
 	#define PEW 1
 	#define FOV 1
-	#define DB_W 69
+	#define WSM 3
+	#define DB_W 18
 #elif (App == 0xD87951C4 ) //Horizon Zero Dawn
 	//#define DA_W 1
 	#define DA_Y 12.5
@@ -2454,7 +2475,8 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DE_Z 0.375
 	#define PEW 1
 	#define FOV 1
-	#define DB_W 67
+	#define WSM 3
+	#define DB_W 16
 #elif (App == 0x75CE6926 ) //Chronicle of Riddick Assault on Dark Athena
 	//#define DA_W 1
 	//#define DA_Y 15.0
@@ -2509,7 +2531,8 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DB_Y 1
 	#define DE_X 4
 	#define DE_Z 0.375
-	#define DB_W 76
+	#define WSM 3
+	#define DB_W 25
 #elif (App == 0xC54A173B ) //Dead or Alive 6
 	#define DA_W 1
 	#define DA_Y 60.0
@@ -2569,10 +2592,11 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DE_Z 0.375
 	#define NDW 1
 	#define PEW 1
-	#define DB_W 71
 	#define DF_X 0.250
 	#define BMT 1
 	#define DF_Z 0.225
+	#define WSM 3
+	#define DB_W 20
 #elif (App == 0xB3729F40 ) //Rocket League Steam
 	#define DA_Y 50.0
 	#define DA_X 0.100
@@ -2613,7 +2637,8 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DE_Z 0.375
 	#define PEW 1
 	#define DAA 1
-	//#define DB_W 54 //Graven WP Not used Due to Clipping on world. Even if it looks good. Maybe Give people the option???
+	#define WSM 3
+	//#define DB_W 3 //Graven WP Not used Due to Clipping on world. Even if it looks good. Maybe Give people the option???
 	#define DG_Z 0.125
 #elif (App == 0x6B2D15D6 ) //Rec Room Non VR
 	#define DA_W 1
@@ -3662,7 +3687,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define BMT 1
 	#define DF_Z 0.200
 	#define WSM 2 //Weapon Settings Mode
-	//#define DB_W 63
+	//#define DB_W 52
 	#define BDF 1    //Barrel Distortion Fix k1 k2 k3 and Zoom
 	#define DC_X 0.00
 	#define DC_Y 0.150
@@ -3949,13 +3974,13 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 #elif (App == 0xF4901178 ) //The Surge 2
     #define DA_W 1 
     #define DA_X 0.125
-    #define DF_Y 0.0125
-    #define DA_Y 27.5
+    #define DF_Y 0.0225
+    #define DA_Y 25.00
     #define DE_X 1
     #define DE_Y 0.375
     #define DE_Z 0.375
     #define BMT 1    
-    #define DF_Z 0.1375 //0.125 //0.150
+    #define DF_Z 0.125 //0.125 //0.150
 	#define DG_Z 0.100 //Min
 	//#define DE_W 0.0 //Max
     #define DI_Z 0.150 //Trim
@@ -4207,12 +4232,12 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 #ifndef NCW
     #define NCW Not_Compatible_Warning_D       //Not Compatible Warning
 #endif
-
-//Weapon Settings "Use #define WSM 1 or 2"
+//Weapon Settings "Use #define WSM | 2 | 3 | 4 | 5 | One is default"
+//Expanded Settings "Use #define WSM 6+ if Games have Multi Weapon Profiles."
 #ifndef OW_WP     //This is used if OW_WP is not called in the Above Profile
-    #define OW_WP "WP Off\0Custom WP\0WP 0\0WP 1\0WP 2\0WP 3\0WP 4\0WP 5\0WP 6\0WP 7\0WP 8\0WP 9\0WP 10\0WP 11\0WP 12\0WP 13\0WP 14\0WP 15\0WP 16\0WP 17\0WP 18\0WP 19\0WP 20\0WP 21\0WP 22\0WP 23\0WP 24\0WP 25\0WP 26\0WP 27\0WP 28\0WP 29\0WP 30\0WP 31\0WP 32\0WP 33\0WP 34\0WP 35\0WP 36\0WP 37\0WP 38\0WP 39\0WP 40\0WP 41\0WP 42\0WP 43\0WP 44\0WP 45\0WP 46\0WP 47\0WP 48\0WP 49\0WP 50\0WP 51\0WP 52\0WP 53\0WP 54\0WP 55\0WP 56\0WP 57\0WP 58\0WP 59\0WP 60\0WP 61\0WP 62\0WP 63\0WP 64\0WP 65\0WP 66\0WP 67\0WP 68\0WP 69\0WP 70\0WP 71\0WP 72\0WP 73\0WP 74\0"
+    #define OW_WP "WP Off\0Custom WP\0WP 0\0WP 1\0WP 2\0WP 3\0WP 4\0WP 5\0WP 6\0WP 7\0WP 8\0WP 9\0WP 10\0WP 11\0WP 12\0WP 13\0WP 14\0WP 15\0WP 16\0WP 17\0WP 18\0WP 19\0WP 20\0WP 21\0WP 22\0WP 23\0WP 24\0WP 25\0WP 26\0WP 27\0WP 28\0WP 29\0WP 30\0WP 31\0WP 32\0WP 33\0WP 34\0WP 35\0WP 36\0WP 37\0WP 38\0WP 39\0WP 40\0WP 41\0WP 42\0WP 43\0WP 44\0WP 45\0WP 46\0WP 47\0WP 48\0WP 49\0WP 50\0"
 #endif
-#ifndef WSM //One is Profiles List A | Two is Profiles List B | Three is MCC | Four is Prey | Five is Blood 2
+#ifndef WSM //Profiles List One | Profiles List Two | Profiles List Three | Profiles List Four | Profiles List Five | Six is MCC | Seven is Prey | Eight is Blood 2 | Nine No One Lives Forever |
     #define WSM 1 //Weapon Setting Mode
 #endif
 
@@ -4320,61 +4345,16 @@ float4 Weapon_Profiles(float WP ,float4 Weapon_Adjust) //Tried Switch But, can't
         Weapon_Adjust = float4(0.485,62.5,0.9625,0.0);    //WP 49 | Dementium 2
     if (WP == 52)
         Weapon_Adjust = float4(0.489,68.75,1.02,0.0);     //WP 50 | NecroVisioN & NecroVisioN: Lost Company #663E66FE
-    if (WP == 53)
-        Weapon_Adjust = float4(1.0,237.5,0.83625,0.0);    //WP 51 | Rage64
-    if (WP == 54)
-        Weapon_Adjust = float4(13.870,50.0,0.0,0.0);      //WP 52 | Graven
-    if (WP == 55)
-        Weapon_Adjust = float4(0.425,15.0,99.0,0.0);      //WP 53 | Bioshock Remastred
-    if (WP == 56)
-        Weapon_Adjust = float4(0.425,21.25,99.5,0.0);     //WP 54 | Bioshock 2 Remastred
-    if (WP == 57)
-        Weapon_Adjust = float4(0.425,5.25,1.0,0.0);       //WP 55 | No One Lives Forever
-    if (WP == 58)
-        Weapon_Adjust = float4(0.519,31.25,8.875,0.0);    //WP 56 | No One Lives Forever 2
-    if (WP == 59)
-        Weapon_Adjust = float4(0.5,8.0,0,0.0);            //WP 57 | Strife
-    if (WP == 60)
-        Weapon_Adjust = float4(0.350,11.50,2.0,0.0);      //WP 58 | Gold Source
-    if (WP == 61) //Unity Limit if using else if
-        Weapon_Adjust = float4(1.825,13.75,0,0.0);        //WP 59 | No Man Sky FPS Mode
-    if (WP == 62)
-        Weapon_Adjust = float4(0.0,0.0,0,0.0);            //WP 60 | Game
-    if (WP == 63)
-        Weapon_Adjust = float4(0.287,180.0,9.0,0.0);      //WP 61 | Farcry
-    if (WP == 64)
-        Weapon_Adjust = float4(0.2503,55.0,1000.0,0.0);   //WP 62 | Farcry 2
-    if (WP == 65)
-        Weapon_Adjust = float4(0.279,100.0,0.905,0.0);    //WP 63 | Talos Principle
-    if (WP == 66)
-        Weapon_Adjust = float4(0.2503,52.5,987.5,0.0);    //WP 64 | Singularity
-    if (WP == 67)
-        Weapon_Adjust = float4(0.251,12.5,925.0,0.0);     //WP 65 | Betrayer
-    if (WP == 68)
-        Weapon_Adjust = float4(1.035,16.0,0.185,0.0);     //WP 66 | Doom Eternal
-    if (WP == 69)
-        Weapon_Adjust = float4(1.553,16.875,0.0,0.0);     //WP 67 | Q.U.B.E 2
-    if (WP == 70)
-        Weapon_Adjust = float4(0.251,5.6875,950.0,0.0);   //WP 68 | Mirror Edge
-    if (WP == 71)
-        Weapon_Adjust = float4(0.345,10.125,1.825,0.0);   //WP 69 | Quake Enhanced Edition
-    if (WP == 72)
-        Weapon_Adjust = float4(0.430,6.250,0.100,0.0);    //WP 70 | The Citadel 186
-    if (WP == 73)
-        Weapon_Adjust = float4(0.800,15.0,0.3,0.0);       //WP 71 | Sauerbraten 2
-    if (WP == 74)
-        Weapon_Adjust = float4(13.3,62.5,0.0,0.0);        //WP 72 | Chex Quest HD
-    if (WP == 75)
-        Weapon_Adjust = float4(0.75,112.5,0.5,0.0);       //WP 73 | Hexen 2
-    if (WP == 76) //DX 9 Temp Registers Limit
-        Weapon_Adjust = float4(0.350,17.5,2.050,0.0);     //WP 74 | Star Trek EliteForce II
 	//Do Not Add more Profiles
+	//61 Profiles is Unity's Limit if using else if
+	//76 Profiles reaches DX 9's Temp Registers Limit 
+	//Will be cliping it off at 52 so 50 Profiles will be the limit so that I have more room to grow and faster compile time. 
 		return Weapon_Adjust;
 }
 #elif WSM == 2
 float4 Weapon_Profiles(float WP ,float4 Weapon_Adjust) //Could reduce from 76 to 57 to save on compiling time.
 {   if (WP == 2)
-        Weapon_Adjust = float4(0.600,6.5,0.0,0.0);          //WP 0  | The Suicide of Rachel Foster
+        Weapon_Adjust = float4(0.600,6.5,0.0,0.0);        //WP 0  | The Suicide of Rachel Foster
     if (WP == 3)
         Weapon_Adjust = float4(1.653,17.5,0.0,0.0);       //WP 1  | Devolverland Expo
     if (WP == 4)
@@ -4472,98 +4452,394 @@ float4 Weapon_Profiles(float WP ,float4 Weapon_Adjust) //Could reduce from 76 to
     if (WP == 50)
         Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 48 | Game
     if (WP == 51)
-        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 49 | Game
-    if (WP == 52)
-        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 50 | Game
-    if (WP == 53)
-        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 51 | Game
-    if (WP == 54)
-        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 52 | Game
-    if (WP == 55)
-        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 53 | Game
-    if (WP == 56)
-        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 54 | Game
-    if (WP == 57)
-        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 55 | Game
-    if (WP == 58)
-        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 56 | Game
-    if (WP == 59)
-        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 57 | Game
-    if (WP == 60)
-        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 58 | Game
-    if (WP == 61) //Unity Limit if using else if
-        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 59 | Game
-    if (WP == 62)
         Weapon_Adjust = float4(1.960,5.25,0,0.0);         //WP 60 | Dying Light
-    if (WP == 63)
+    if (WP == 52)
         Weapon_Adjust = float4(2.196,1.750,0.0,0.0);      //WP 61 | Dying Light 2
-    if (WP == 64)
-        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 62 | Game
-    if (WP == 65)
-        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 63 | Game
-    if (WP == 66)
-        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 64 | Game
-    if (WP == 67)
-        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 65 | Game
-    if (WP == 68)
-        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 66 | Game
-    if (WP == 69)
-        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 67 | Game
-    if (WP == 70)
-        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 68 | Game
-    if (WP == 71)
-        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 69 | Game
-    if (WP == 72)
-        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 70 | Game
-    if (WP == 73)
-        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 71 | Game
-    if (WP == 74)
-        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 72 | Game
-    if (WP == 75)
-        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 73 | Game
-    if (WP == 76) //DX 9 Temp Registers Limit
-        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 74 | Game
 	//Do Not Add more Profiles
+	//61 Profiles is Unity's Limit if using else if
+	//76 Profiles reaches DX 9's Temp Registers Limit 
+	//Will be cliping it off at 52 so 50 Profiles will be the limit so that I have more room to grow and faster compile time. 
 		return Weapon_Adjust;
 }
 #elif WSM == 3
-float3 Weapon_Profiles(float WP ,float3 Weapon_Adjust) // MCC
-{
-	if (WP == 2)
-        Weapon_Adjust = float3(0,0,0);                //WP 0  | Halo: Reach
+float4 Weapon_Profiles(float WP ,float4 Weapon_Adjust)
+{   if (WP == 2)
+        Weapon_Adjust = float4(1.0,237.5,0.83625,0.0);    //WP 0 | Rage64
     if (WP == 3)
-        Weapon_Adjust = float3(1.5,26.25,0.2);        //WP 1  | Halo: CE Anniversary
+        Weapon_Adjust = float4(13.870,50.0,0.0,0.0);      //WP 1 | Graven
     if (WP == 4)
-        Weapon_Adjust = float3(0.615,70.0,0.3955);    //WP 2  | Halo 2: Anniversary
+        Weapon_Adjust = float4(0.425,15.0,99.0,0.0);      //WP 2 | Bioshock Remastred
     if (WP == 5)
-        Weapon_Adjust = float3(5.750,24.0,0);         //WP 3  | Halo 3
+        Weapon_Adjust = float4(0.425,21.25,99.5,0.0);     //WP 3 | Bioshock 2 Remastred
     if (WP == 6)
-        Weapon_Adjust = float3(0,0,0);                //WP 4  | Halo 3: ODST
+        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 4 | Game
     if (WP == 7)
-        Weapon_Adjust = float3(0,0,0);                //WP 5  | Halo 4
-
+        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 5 | Game
+    if (WP == 8)
+        Weapon_Adjust = float4(0.5,8.0,0,0.0);            //WP 6 | Strife
+    if (WP == 9)
+        Weapon_Adjust = float4(0.350,11.50,2.0,0.0);      //WP 7 | Gold Source
+    if (WP == 10) 
+        Weapon_Adjust = float4(1.825,13.75,0,0.0);        //WP 8 | No Man Sky FPS Mode
+    if (WP == 11)
+        Weapon_Adjust = float4(0.0,0.0,0,0.0);            //WP 9 | Game
+    if (WP == 12)
+        Weapon_Adjust = float4(0.287,180.0,9.0,0.0);      //WP 10 | Farcry
+    if (WP == 13)
+        Weapon_Adjust = float4(0.2503,55.0,1000.0,0.0);   //WP 11 | Farcry 2
+    if (WP == 14)
+        Weapon_Adjust = float4(0.279,100.0,0.905,0.0);    //WP 12 | Talos Principle
+    if (WP == 15)
+        Weapon_Adjust = float4(0.2503,52.5,987.5,0.0);    //WP 13 | Singularity
+    if (WP == 16)
+        Weapon_Adjust = float4(0.251,12.5,925.0,0.0);     //WP 14 | Betrayer
+    if (WP == 17)
+        Weapon_Adjust = float4(1.035,16.0,0.185,0.0);     //WP 15 | Doom Eternal
+    if (WP == 18)
+        Weapon_Adjust = float4(1.553,16.875,0.0,0.0);     //WP 16 | Q.U.B.E 2
+    if (WP == 19)
+        Weapon_Adjust = float4(0.251,5.6875,950.0,0.0);   //WP 17 | Mirror Edge
+    if (WP == 20)
+        Weapon_Adjust = float4(0.345,10.125,1.825,0.0);   //WP 18 | Quake Enhanced Edition
+    if (WP == 21)
+        Weapon_Adjust = float4(0.430,6.250,0.100,0.0);    //WP 19 | The Citadel 186
+    if (WP == 22)
+        Weapon_Adjust = float4(0.800,15.0,0.3,0.0);       //WP 20 | Sauerbraten 2
+    if (WP == 23)
+        Weapon_Adjust = float4(13.3,62.5,0.0,0.0);        //WP 21 | Chex Quest HD
+    if (WP == 24)
+        Weapon_Adjust = float4(0.75,112.5,0.5,0.0);       //WP 22 | Hexen 2
+    if (WP == 25)
+        Weapon_Adjust = float4(0.350,17.5,2.050,0.0);     //WP 23 | Star Trek EliteForce II
+    if (WP == 26)
+        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 24 | Game
+    if (WP == 27)
+        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 25 | Game
+    if (WP == 28)
+        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 26 | Game
+    if (WP == 29)
+        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 27 | Game
+    if (WP == 30)
+        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 28 | Game
+    if (WP == 31)
+        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 29 | Game
+    if (WP == 32)
+        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 30 | Game
+    if (WP == 33)
+        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 31 | Game
+    if (WP == 34)
+        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 32 | Game
+    if (WP == 35)
+        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 33 | Game
+    if (WP == 36)
+        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 34 | Game
+    if (WP == 37)
+        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 35 | Game
+    if (WP == 38)
+        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 36 | Game
+    if (WP == 39)
+        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 37 | Game
+    if (WP == 40)
+        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 38 | Game
+    if (WP == 41)
+        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 39 | Game
+    if (WP == 42)
+        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 40 | Game
+    if (WP == 43)
+        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 41 | Game
+    if (WP == 44)
+        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 42 | Game
+    if (WP == 45)
+        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 43 | Game
+    if (WP == 46)
+        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 44 | Game
+    if (WP == 47)
+        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 45 | Game
+    if (WP == 48)
+        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 46 | Game
+    if (WP == 49)
+        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 47 | Game
+    if (WP == 50)
+        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 48 | Game
+    if (WP == 51)
+        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 49 | Game
+    if (WP == 52)
+        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 50 | Game
+	//Do Not Add more Profiles
+	//61 Profiles is Unity's Limit if using else if
+	//76 Profiles reaches DX 9's Temp Registers Limit 
+	//Will be cliping it off at 52 so 50 Profiles will be the limit so that I have more room to grow and faster compile time. 
 		return Weapon_Adjust;
 }
 #elif WSM == 4
+float4 Weapon_Profiles(float WP ,float4 Weapon_Adjust)
+{   if (WP == 2)
+        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 0  | Game
+    if (WP == 3)
+        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 1  | Game
+    if (WP == 4)
+        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 2  | Game
+    if (WP == 5)
+        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 3  | Game
+    if (WP == 6)
+        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 4  | Game
+    if (WP == 7)
+        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 5  | Game
+    if (WP == 8)
+        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 6  | Game
+    if (WP == 9)
+        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 7  | Game
+    if (WP == 10)
+        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 8  | Game
+    if (WP == 11)
+        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 9  | Game
+    if (WP == 12)
+        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 10 | Game
+    if (WP == 13)
+        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 11 | Game
+    if (WP == 14)
+        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 12 | Game
+    if (WP == 15)
+        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 13 | Game
+    if (WP == 16)
+        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 14 | Game
+    if (WP == 17)
+        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 15 | Game
+    if (WP == 18)
+        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 16 | Game
+    if (WP == 19)
+        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 17 | Game
+    if (WP == 20)
+        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 18 | Game
+    if (WP == 21)
+        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 19 | Game
+    if (WP == 22)
+        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 20 | Game
+    if (WP == 23)
+        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 21 | Game
+    if (WP == 24)
+        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 22 | Game
+    if (WP == 25)
+        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 23 | Game
+    if (WP == 26)
+        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 24 | Game
+    if (WP == 27)
+        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 25 | Game
+    if (WP == 28)
+        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 26 | Game
+    if (WP == 29)
+        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 27 | Game
+    if (WP == 30)
+        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 28 | Game
+    if (WP == 31)
+        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 29 | Game
+    if (WP == 32)
+        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 30 | Game
+    if (WP == 33)
+        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 31 | Game
+    if (WP == 34)
+        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 32 | Game
+    if (WP == 35)
+        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 33 | Game
+    if (WP == 36)
+        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 34 | Game
+    if (WP == 37)
+        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 35 | Game
+    if (WP == 38)
+        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 36 | Game
+    if (WP == 39)
+        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 37 | Game
+    if (WP == 40)
+        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 38 | Game
+    if (WP == 41)
+        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 39 | Game
+    if (WP == 42)
+        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 40 | Game
+    if (WP == 43)
+        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 41 | Game
+    if (WP == 44)
+        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 42 | Game
+    if (WP == 45)
+        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 43 | Game
+    if (WP == 46)
+        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 44 | Game
+    if (WP == 47)
+        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 45 | Game
+    if (WP == 48)
+        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 46 | Game
+    if (WP == 49)
+        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 47 | Game
+    if (WP == 50)
+        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 48 | Game
+    if (WP == 51)
+        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 60 | Game
+    if (WP == 52)
+        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 61 | Game
+	//Do Not Add more Profiles
+	//61 Profiles is Unity's Limit if using else if
+	//76 Profiles reaches DX 9's Temp Registers Limit 
+	//Will be cliping it off at 52 so 50 Profiles will be the limit so that I have more room to grow and faster compile time. 
+		return Weapon_Adjust;
+}
+#elif WSM == 5
+float4 Weapon_Profiles(float WP ,float4 Weapon_Adjust)
+{   if (WP == 2)
+        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 0  | Game
+    if (WP == 3)
+        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 1  | Game
+    if (WP == 4)
+        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 2  | Game
+    if (WP == 5)
+        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 3  | Game
+    if (WP == 6)
+        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 4  | Game
+    if (WP == 7)
+        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 5  | Game
+    if (WP == 8)
+        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 6  | Game
+    if (WP == 9)
+        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 7  | Game
+    if (WP == 10)
+        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 8  | Game
+    if (WP == 11)
+        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 9  | Game
+    if (WP == 12)
+        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 10 | Game
+    if (WP == 13)
+        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 11 | Game
+    if (WP == 14)
+        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 12 | Game
+    if (WP == 15)
+        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 13 | Game
+    if (WP == 16)
+        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 14 | Game
+    if (WP == 17)
+        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 15 | Game
+    if (WP == 18)
+        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 16 | Game
+    if (WP == 19)
+        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 17 | Game
+    if (WP == 20)
+        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 18 | Game
+    if (WP == 21)
+        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 19 | Game
+    if (WP == 22)
+        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 20 | Game
+    if (WP == 23)
+        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 21 | Game
+    if (WP == 24)
+        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 22 | Game
+    if (WP == 25)
+        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 23 | Game
+    if (WP == 26)
+        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 24 | Game
+    if (WP == 27)
+        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 25 | Game
+    if (WP == 28)
+        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 26 | Game
+    if (WP == 29)
+        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 27 | Game
+    if (WP == 30)
+        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 28 | Game
+    if (WP == 31)
+        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 29 | Game
+    if (WP == 32)
+        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 30 | Game
+    if (WP == 33)
+        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 31 | Game
+    if (WP == 34)
+        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 32 | Game
+    if (WP == 35)
+        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 33 | Game
+    if (WP == 36)
+        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 34 | Game
+    if (WP == 37)
+        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 35 | Game
+    if (WP == 38)
+        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 36 | Game
+    if (WP == 39)
+        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 37 | Game
+    if (WP == 40)
+        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 38 | Game
+    if (WP == 41)
+        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 39 | Game
+    if (WP == 42)
+        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 40 | Game
+    if (WP == 43)
+        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 41 | Game
+    if (WP == 44)
+        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 42 | Game
+    if (WP == 45)
+        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 43 | Game
+    if (WP == 46)
+        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 44 | Game
+    if (WP == 47)
+        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 45 | Game
+    if (WP == 48)
+        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 46 | Game
+    if (WP == 49)
+        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 47 | Game
+    if (WP == 50)
+        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 48 | Game
+    if (WP == 51)
+        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 60 | Game
+    if (WP == 52)
+        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 61 | Game
+	//Do Not Add more Profiles
+	//61 Profiles is Unity's Limit if using else if
+	//76 Profiles reaches DX 9's Temp Registers Limit 
+	//Will be cliping it off at 52 so 50 Profiles will be the limit so that I have more room to grow and faster compile time. 
+		return Weapon_Adjust;
+}
+#elif WSM == 6
+float3 Weapon_Profiles(float WP ,float3 Weapon_Adjust) // MCC
+{
+	if (WP == 2)
+        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 0  | Halo: Reach
+    if (WP == 3)
+        Weapon_Adjust = float4(1.5,26.25,0.2,0.0);        //WP 1  | Halo: CE Anniversary
+    if (WP == 4)
+        Weapon_Adjust = float4(0.615,70.0,0.3955,0.0);    //WP 2  | Halo 2: Anniversary
+    if (WP == 5)
+        Weapon_Adjust = float4(5.750,24.0,0,0.0);         //WP 3  | Halo 3
+    if (WP == 6)
+        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 4  | Halo 3: ODST
+    if (WP == 7)
+        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 5  | Halo 4
+
+		return Weapon_Adjust;
+}
+#elif WSM == 7
 float3 Weapon_Profiles(float WP ,float3 Weapon_Adjust) // Prey 2017
 {
 	if (WP == 2)
-		Weapon_Adjust = float3(0.2832,31.25,0.8775); //WP 0 | Prey 2017 High Settings and <
+		Weapon_Adjust = float4(0.2832,31.25,0.8775,0.0);   //WP 0 | Prey 2017 High Settings and <
 	if (WP == 3)
-		Weapon_Adjust = float3(0.2832,31.25,0.91875);//WP 1 | Prey 2017 Very High
+		Weapon_Adjust = float4(0.2832,31.25,0.91875,0.0);  //WP 1 | Prey 2017 Very High
 
 	return Weapon_Adjust;
 }
-#elif WSM == 5
+#elif WSM == 8
 float3 Weapon_Profiles(float WP ,float3 Weapon_Adjust) // Blood 2
 {
     if (WP == 2)
-        Weapon_Adjust = float3(0.4213,5.0,0.5);        //WP 0 | Blood 2 All Weapons
+        Weapon_Adjust = float4(0.4213,5.0,0.5,0.0);        //WP 0 | Blood 2 All Weapons
     if (WP == 3)
-        Weapon_Adjust = float3(0.484,5.0,0.5);         //WP 1 | Blood 2 Bonus weapons
+        Weapon_Adjust = float4(0.484,5.0,0.5,0.0);         //WP 1 | Blood 2 Bonus weapons
     if (WP == 4)
-        Weapon_Adjust = float3(0.4213,5.0,0.8);        //WP 2 | Blood 2 Former
+        Weapon_Adjust = float4(0.4213,5.0,0.8,0.0);        //WP 2 | Blood 2 Former
 
 	return Weapon_Adjust;
 }
+#elif WSM == 9
+float3 Weapon_Profiles(float WP ,float3 Weapon_Adjust) // No One Lives Forever
+{
+    if (WP == 2)
+        Weapon_Adjust = float4(0.425,5.25,1.0,0.0);       //WP 4 | No One Lives Forever
+    if (WP == 3)
+        Weapon_Adjust = float4(0.519,31.25,8.875,0.0);    //WP 5 | No One Lives Forever 2
+
+	return Weapon_Adjust;
+}
+//Can expand here for games with multi weapon profiles.
 #endif
