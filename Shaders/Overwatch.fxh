@@ -3544,7 +3544,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 #elif (App == 0x51C8FDAA ) //Assassin's Valhalla
 	#define DA_W 1
 	#define DA_Y 50.0
-    #define DA_Z -0.125
+    #define DA_Z -0.05
 	#define DA_X 0.045
 	#define DB_Y 1
 	#define DE_X 1
@@ -3554,9 +3554,13 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DF_Y 0.0025 
     //#define DG_W -0.100 //Disallow popout  
 	#define BMT 1    
-	#define DF_Z 0.130
+	#define DF_Z 0.1375
 	#define DG_Z 0.07  
 	#define DI_Z 0.120
+	#define SMS 0      //SM Toggle Separation
+	#define DL_X 0.4125//SM Tune
+	//#define DL_Z 0.250 //SM Local Smooth ???
+	#define DL_W 0.5350//SM Perspective
     #define PEW 1 
 #elif (App == 0xB4403655 ) //Elden Ring
 	#define DA_W 1
