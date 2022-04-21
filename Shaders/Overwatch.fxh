@@ -77,9 +77,10 @@ static const float LB_Depth_Size_Offset_X_D = 1.0;      //Letter Box Depth Size 
 static const float LB_Depth_Size_Offset_Y_D = 1.0;      //Letter Box Depth Size Correction Offset Y     | DH_Y
 static const float LB_Depth_Pos_Offset_X_D = 0.0;       //Letter Box Depth Position Correction Offset X | DH_Z
 static const float LB_Depth_Pos_Offset_Y_D = 0.0;       //Letter Box Depth Position Correction Offset Y | DH_W
-
+//Letter Box Sensitivity
+static const int LB_Sensitivity_D = 0;                  // 0 | 1 : Off / On                             | LBS 
 //Auto Letter Box Masking
-static const int Auto_Letter_Box_Masking_D = 0;         // 0 | 1 | 2 : Off | Hoz | Vert                 | LBM                                                                               
+static const int Auto_Letter_Box_Masking_D = 0;         // 0 | 1 | 2 : Off | Hoz | Vert                 | LBM                                                                         
 static const float LB_Masking_Offset_X_D = 1.0;         //LetterBox Masking Offset X                    | DI_X
 static const float LB_Masking_Offset_Y_D = 1.0;         //LetterBox Masking Offset Y                    | DI_Y
 static const float Weapon_Near_Depth_Trim_D = 0.25;     //Weapon Near Depth                     Trim    | DI_Z
@@ -2101,24 +2102,29 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DAA 1
 #elif (App == 0xD86799B9 ) //Devil May Cry 5
 	#define DA_W 1
-	#define DA_X 0.0375
-	#define DA_Y 38.25//40.0
+	#define DA_X 0.0625
+	#define DF_Y 0.020
+	#define DA_Y 20.00
  //   #define DA_Z -0.375
 	#define DB_Y 3
 	#define DE_X 1
 	#define DE_Y 0.375
 	#define DE_Z 0.375
 	#define DG_W 0.125
+	#define BMT 1    
+	#define DF_Z 0.1111 //0.100 //0.125 
+	#define DG_Z 0.0325//0.0275//Min
+    #define DI_Z 0.0625//Trim
+	#define SMS 1      //SM Toggle Separation
+	#define DL_X 0.500 //SM Tune
+	#define DL_Z 0.625 //SM Local Smooth
+	#define DL_W 0.525 //SM Perspective
 	#define BDF 1
 	#define DC_X 0.025
 	#define DC_Y 0.025
 	#define DC_W -0.012
-	#define DF_Y 0.02375
-	#define BMT 1    
-	#define DF_Z 0.125 //0.100 //0.1125 
-	#define DG_Z 0.0325//0.0275//Min
-    #define DI_Z 0.0625//Trim
 	#define PEW 1
+	#define DSW 1
 	#define RHW 1
 #elif (App == 0x5BC45541 ) //Contrast
 	#define DA_X 0.075
@@ -3776,13 +3782,17 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define DB_X 1
     #define DA_X 0.0375
     #define DF_Y 0.01375
-    #define DA_Y 37.5
+    #define DA_Y 36.25
     //#define DA_Z -0.025
-    #define DE_X 1
+    #define DE_X 2
     #define DE_Y 0.250
     #define DE_Z 0.375
     #define BMT 1    
-    #define DF_Z 0.125
+    #define DF_Z 0.100
+	#define SMS 1      //SM Toggle Separation
+	#define DL_X 0.525 //SM Tune
+	#define DL_Z 1.0 //SM Local Smooth ???
+	#define DL_W 0.525 //SM Perspective
 	#define PEW 1
 #elif (App == 0x98E46BDC ) //Forgive Me Father
     #define DA_W 1
@@ -4012,6 +4022,31 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	//#define DL_Z 0.250 //SM Local Smooth ???
 	#define DL_W 0.525 //SM Perspective
 	#define PEW 1
+#elif (App == 0x132AB11B ) //Wolfenstine Youngblood 
+    #define DA_X 0.041
+    #define DF_Y 0.1125
+    #define DA_Y 15.0
+    #define DA_Z -0.0005
+    #define DE_X 2
+    #define DE_Y 0.500
+    #define DE_Z 0.375
+	//#fine DG_W 0.325 //Pop out
+    #define BMT 1    
+    #define DF_Z 0.1125
+	#define DG_Z 0.070 //Min
+	//#define DE_W 0.0 //Max
+    #define DI_Z 0.225 //Trim
+	#define SMS 0      //SM Toggle Separation
+	#define DL_X 0.525 //SM Tune
+	#define DL_Z 1.0   //SM Local Smooth
+	#define DL_W 0.525 //SM Perspective
+    #define LBC 1      //Letter Box Correction
+    #define LBS 1      //Letter Box Sensitivity
+	#define DH_Z 0.0   //Pos offset X    
+	#define DH_W -0.240//Pos offset Y
+	#define PEW 1
+	#define NDW 1
+	#define DAA 1
 #else
 	#define NPW 1 //No Profile
 #endif
@@ -4207,6 +4242,9 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 #endif
 #ifndef LBC
     #define LBC Auto_Letter_Box_Correction_D   //Auto Letter Box Correction
+#endif
+#ifndef LBS
+    #define LBS LB_Sensitivity_D               //Letter Box Sensitivity
 #endif
 #ifndef LBM
     #define LBM Auto_Letter_Box_Masking_D      //Auto Letter Box Depth Masking

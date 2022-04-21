@@ -2,7 +2,7 @@
 ///**SuperDepth3D**///
 //----------------////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//* Depth Map Based 3D post-process shader v3.1.7
+//* Depth Map Based 3D post-process shader v3.1.8
 //* For Reshade 3.0+
 //* ---------------------------------
 //*
@@ -61,7 +61,7 @@
 	#define OW_WP "WP Off\0Custom WP\0"
 	static const int WSM = 0;
 	//Triggers
-	static const int REF = 0, NCW = 0, RHW = 0, NPW = 0, IDF = 0, SPF = 0, BDF = 0, HMT = 0, DFW = 0, NFM = 0, DSW = 0, BMT = 0, LBC = 0, LBM = 0, DAA = 0, NDW = 0, PEW = 0, WPW = 0, FOV = 0, EDW = 0, SDT = 0;
+	static const int REF = 0, NCW = 0, RHW = 0, NPW = 0, IDF = 0, SPF = 0, BDF = 0, HMT = 0, DFW = 0, NFM = 0, DSW = 0, BMT = 0, LBC = 0, LBS = 0, LBM = 0, DAA = 0, NDW = 0, PEW = 0, WPW = 0, FOV = 0, EDW = 0, SDT = 0;
 	//Overwatch.fxh State
 	#define OSW 1
 #endif
@@ -194,7 +194,7 @@
 #else
 	#define Mask_Cycle_Key Set_Key_Code_Here
 #endif
-//uniform float TEST < ui_type = "drag"; ui_min = 0; ui_max = 6; > = 1.0;
+//uniform float TEST < ui_type = "drag"; ui_min = 0; ui_max = 1; > = 1.0;
 //Divergence & Convergence//
 uniform float Divergence <
 	ui_type = "drag";
@@ -906,17 +906,26 @@ float4 CSB(float2 texcoords)
 #endif
 
 #if LBC || LBM || LB_Correction || LetterBox_Masking
+int LBSensitivity( float inVal )
+{
+	#if LBS
+		return inVal < 0.005; //Less Sensitive
+	#else
+		return inVal == 0; //Sensitive
+	#endif
+}
+
 float SLLTresh(float2 TCLocations, float MipLevel)
 { 
 	return tex2Dlod(SamplerzBufferN_L,float4(TCLocations,0, MipLevel)).y;
 }
 
 float LBDetection()//Active RGB Detection
-{   float MipLevel = 5,Center = SLLTresh(float2(0.5,0.5), 8) > 0, Top_Left = SLLTresh(float2(0.1,0.1), MipLevel) == 0;
+{   float MipLevel = 5,Center = SLLTresh(float2(0.5,0.5), 8) > 0, Top_Left = LBSensitivity(SLLTresh(float2(0.1,0.1), MipLevel));
 	if ( LetterBox_Masking == 2 || LB_Correction == 2 || LBC == 2 || LBM == 2 )
-		return Top_Left && (SLLTresh(float2(0.1,0.5), MipLevel) == 0 ) && (SLLTresh(float2(0.9,0.5), MipLevel) == 0 ) && Center ? 1 : 0; //Vert
+		return Top_Left && LBSensitivity(SLLTresh(float2(0.1,0.5), MipLevel)) && LBSensitivity(SLLTresh(float2(0.9,0.5), MipLevel)) && Center ? 1 : 0; //Vert
 	else                   //Left_Center                                  //Right_Center
-		return Top_Left && (SLLTresh(float2(0.5,0.9), MipLevel) == 0 ) && Center ? 1 : 0; //Hoz
+		return Top_Left && LBSensitivity(SLLTresh(float2(0.5,0.9), MipLevel)) && Center ? 1 : 0; //Hoz
 }			              //Bottom_Center
 #endif
 
@@ -1970,7 +1979,7 @@ float3 Out(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Targe
 {
 	float2 TC = float2(texcoord.x,1-texcoord.y);
 	float Text_Timer = 25000, BT = smoothstep(0,1,sin(timer*(3.75/1000))), Size = 1.1, Depth3D, Read_Help, Supported, ET, ETC, ETTF, ETTC, SetFoV, FoV, Post, Effect, NoPro, NotCom, Mod, Needs, Net, Over, Set, AA, Emu, Not, No, Help, Fix, Need, State, SetAA, SetWP, Work;
-	float3 Color = PS_calcLR(texcoord).rgb; //Color = BlurZ(SamplerzBufferN,texcoord);
+	float3 Color = PS_calcLR(texcoord).rgb; //Color = texcoord.x+texcoord.y > 1 ? Color : LBDetection();
 		  
 	if(RHW || NCW || NPW || NFM || PEW || DSW || OSW || DAA || NDW || WPW || FOV || EDW)
 		Text_Timer = 30000;

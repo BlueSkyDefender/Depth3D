@@ -2,7 +2,7 @@
 ///**SuperDepth3D_VR+**///
 //--------------------////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//* Depth Map Based 3D post-process shader v3.1.6
+//* Depth Map Based 3D post-process shader v3.1.7
 //* For Reshade 4.4+ I think...
 //* ---------------------------------
 //*
@@ -61,7 +61,7 @@
 	#define OW_WP "WP Off\0Custom WP\0"
 	static const int WSM = 0;
 	//Triggers
-	static const int REF = 0, NCW = 0, RHW = 0, NPW = 0, IDF = 0, SPF = 0, BDF = 0, HMT = 0, DFW = 0, NFM = 0, DSW = 0, BMT = 0, LBC = 0, LBM = 0, DAA = 0, NDW = 0, PEW = 0, WPW = 0, FOV = 0, EDW = 0, SDT = 0;
+	static const int REF = 0, NCW = 0, RHW = 0, NPW = 0, IDF = 0, SPF = 0, BDF = 0, HMT = 0, DFW = 0, NFM = 0, DSW = 0, BMT = 0, LBC = 0, LBS = 0, LBM = 0, DAA = 0, NDW = 0, PEW = 0, WPW = 0, FOV = 0, EDW = 0, SDT = 0;
 	//Overwatch.fxh State
 	#define OSW 1
 #endif
@@ -999,18 +999,27 @@ float4 CSB(float2 texcoords)
 #endif
 
 #if LBC || LBM || LB_Correction || LetterBox_Masking
+int LBSensitivity( float inVal )
+{
+	#if LBS
+		return inVal < 0.005; //Less Sensitive
+	#else
+		return inVal == 0; //Sensitive
+	#endif
+}
+
 float SLLTresh(float2 TCLocations, float MipLevel)
 { 
 	return tex2Dlod(SamplerzBufferVR_L,float4(TCLocations,0, MipLevel)).y;
 }
 
 float LBDetection()//Active RGB Detection
-{   float MipLevel = 5,Center = SLLTresh(float2(0.5,0.5), 8) > 0, Top_Left = SLLTresh(float2(0.1,0.1), MipLevel) == 0;
+{   float MipLevel = 5,Center = SLLTresh(float2(0.5,0.5), 8) > 0, Top_Left = LBSensitivity(SLLTresh(float2(0.1,0.1), MipLevel));
 	if ( LetterBox_Masking == 2 || LB_Correction == 2 || LBC == 2 || LBM == 2 )
-		return Top_Left && (SLLTresh(float2(0.1,0.5), MipLevel) == 0 ) && (SLLTresh(float2(0.9,0.5), MipLevel) == 0 ) && Center ? 1 : 0; //Vert
+		return Top_Left && LBSensitivity(SLLTresh(float2(0.1,0.5), MipLevel)) && LBSensitivity(SLLTresh(float2(0.9,0.5), MipLevel)) && Center ? 1 : 0; //Vert
 	else                   //Left_Center                                  //Right_Center
-		return Top_Left && (SLLTresh(float2(0.5,0.9), MipLevel) == 0 ) && Center ? 1 : 0; //Hoz
-}			              //Bottom_Center
+		return Top_Left && LBSensitivity(SLLTresh(float2(0.5,0.9), MipLevel)) && Center ? 1 : 0; //Hoz
+}	
 #endif
 
 #if SDT || SD_Trigger
