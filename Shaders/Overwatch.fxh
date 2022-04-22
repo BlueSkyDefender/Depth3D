@@ -186,12 +186,17 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DA_Y 25.0
 	#define DA_Z 0.00025
 	#define DA_X 0.03750
-	#define DB_Y 2
+	#define DB_Y 2 //Note This would require Lagacy Mode Once the trasition is made.
 	#define DB_W 4
 	#define DE_X 5
 	#define DE_Y 0.625
 	#define DE_Z 0.300
 	#define DF_X 0.300
+	#define SMS 1      //SM Toggle Separation
+	#define DL_X 0.600 //SM Tune
+	#define DL_Y 2 //SM Weapon Smooth
+	//#define DL_Z 0.0 //SM Local Smooth
+	#define DL_W 0.525 //SM Perspective
 	#define NDW 1
 #elif (App == 0x2D950D30 )	//Fallout 4
 	#define DA_X 0.05
@@ -342,10 +347,11 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define DG_W -0.225 //Pop out
 	#define DB_W 35
 	#define BMT 1
-	#define SMS 0 //SM Toggle Separation
 	#define DF_Z 0.1375
-	#define DL_X 0.5125 //0.560 //SM Tune
-	#define DL_W 0.5 //SM Perspective	
+	#define SMS 0     //SM Toggle Separation
+	#define DL_X 0.625//SM Tune //0.5125 //0.560 
+	#define DL_Y 2    //SM Weapon Tune 
+	#define DL_W 0.500//SM Perspective	
 #elif (App == 0x6D3CD99E ) //Blood 2
 	#define DA_X 0.105
 	#define DB_Y 2
@@ -3981,7 +3987,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	//#define DE_W 0.0 //Max
     #define DI_Z 0.0625 //Trim
 	#define SMS 1      //SM Toggle Separation
-	#define DL_X 0.500 //SM Tune
+	#define DL_X 0.750 //SM Tune
 	#define DL_Z 0.300 //SM Local Smooth
 	#define DL_W 0.525 //SM Perspective
 	#define PEW 1
