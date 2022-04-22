@@ -3412,8 +3412,8 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DAA 1
 #elif (App == 0x2EFB1B0B ) //Crysis 3 Remastered
 	#define DA_X 0.050
-	#define DF_Y 0.005
-	#define DA_Y 13.75
+	#define DF_Y 0.0025
+	#define DA_Y 13.625
 	//#define DB_Z 0.100
 	//#define DB_Y 5
 	#define DE_X 4
@@ -3425,6 +3425,11 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DB_W 14
     #define DF_X 0.250 
 	#define DJ_W 0.300
+	#define SMS 0      //SM Toggle Separation
+	#define DL_X 0.530 //SM Tune
+	#define DL_Y 1     //SM Weapon Tune
+	#define DL_Z 1.0   //SM Local Smooth
+	#define DL_W 0.550 //SM Perspective
 	#define PEW 1 
 	#define DAA 1 
 #elif (App == 0x16848B0F ) // HITMAN 3**
@@ -4445,7 +4450,7 @@ float4 Weapon_Profiles(float WP ,float4 Weapon_Adjust) //Could reduce from 76 to
     if (WP == 13)
         Weapon_Adjust = float4(0.284,15.0,7.200,0.0);     //WP 11 | Crysis 2 Remastered
     if (WP == 14)
-        Weapon_Adjust = float4(0.284,12.5,10.625,0.0);    //WP 12 | Crysis 3 Remastered
+        Weapon_Adjust = float4(0.284,12.5,10.375,0.250);  //WP 12 | Crysis 3 Remastered
     if (WP == 15)
         Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 13 | Game
     if (WP == 16)
