@@ -1360,13 +1360,19 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define WSM 3
 	#define DB_W 15
 	#define RHW 1
-#elif (App == 0x905631F2 ) //Crysis DX10 64bit
-	#define DA_X 0.0375
-	#define DB_Y 5
+#elif (App == 0x905631F2 || App == 0x76F4DCB0 ) //Crysis DX10 32bit / 64bit
+    #define DA_X 0.0375
+    #define DF_Y 0.120
+    #define DA_Y 7.0
+    //#define DA_Z -0.0005
+    #define DE_X 4
+    #define DE_Y 0.500
+    #define DE_Z 0.375
+	//#fine DG_W 0.325 //Pop out
+    #define BMT 1    
+    #define DF_Z 0.110
 	#define DB_W 44
-	#define DE_X 4
-	#define DE_Z 0.375
-	#define DF_X -0.175
+	#define DF_X 0.3625
 #elif (App == 0x6061750E ) //Mirror's Edge
 	#define DA_Y 12.25
 	#define DF_Y 0.020
@@ -4058,6 +4064,23 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define PEW 1
 	#define NDW 1
 	#define DAA 1
+#elif (App == 0xE44B25B ) //Injustice 2
+    #define DA_X 0.100
+    #define DF_Y 0.0125
+    #define DA_Y 15.00
+    #define DE_X 1
+    #define DE_Y 0.500
+    #define DE_Z 0.375
+    #define BMT 1    
+    #define DF_Z 0.125
+	//#define DG_Z 0.100 //Min
+	//#define DE_W 0.0 //Max
+    //#define DI_Z 0.150 //Trim
+	#define SMS 0      //SM Toggle Separation
+	#define DL_X 0.750 //SM Tune
+	#define DL_Z 0.500 //SM Local Smooth ???
+	#define DL_W 0.250 //SM Perspective
+	#define PEW 1
 #else
 	#define NPW 1 //No Profile
 #endif
