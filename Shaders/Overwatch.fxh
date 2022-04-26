@@ -195,7 +195,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define SMS 0      //SM Toggle Separation
 	#define DL_X 0.600 //SM Tune
 	#define DL_Y 2 //SM Weapon Smooth
-	//#define DL_Z 0.0 //SM Local Smooth
+	#define DL_Z 0.75 //SM Local Smooth
 	#define DL_W 0.050 //SM Perspective
 	#define NDW 1
 #elif (App == 0x2D950D30 )	//Fallout 4
@@ -1798,7 +1798,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define DI_Z 0.250 //Trim
 	#define SMS 1      //SM Toggle Separation
 	#define DL_X 0.5125//SM Tune
-	#define DL_Z 0.0000//SM Local Smooth ???
+	#define DL_Z 0.0   //SM Local Smooth ???
 	#define DL_W 0.0   //SM Perspective
 #elif (App == 0xB4C116F7 ) //Nioh
 	#define DA_W 1
@@ -2632,9 +2632,9 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define PEW 1
 #elif (App == 0x1BB6E62A ) //AMID EVIL RTX
 	#define DA_W 1
-	#define DA_X 0.07
+	#define DA_X 0.05
     #define DF_Y 0.0125
-	#define DA_Y 12.5
+	#define DA_Y 15.0
 	//#define DA_Z 0.000125
 	#define DB_Y 5
 	#define DE_X 4
@@ -2643,10 +2643,10 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define BMT 1    
 	#define DF_Z 0.1125
 	#define SMS 0      //SM Toggle Separation
-	#define DL_X 0.875 //SM Tune
+	#define DL_X 0.870 //SM Tune
 	#define DL_Y 0     //SM Weapon Tune
 	#define DL_Z 0.500 //SM Local Smooth
-	#define DL_W 0.100 //SM Perspective
+	#define DL_W 0.050 //SM Perspective
 	#define PEW 1
 	#define DAA 1
 	#define DB_W 27
@@ -4416,7 +4416,7 @@ float4 Weapon_Profiles(float WP ,float4 Weapon_Adjust) //Tried Switch But, can't
     if (WP == 26)
         Weapon_Adjust = float4(0.255,6.375,53.75,0.0);    //WP 24 | S.T.A.L.K.E.R: Games
     if (WP == 27)
-        Weapon_Adjust = float4(0.450,5.5625,0.0,0.0);     //WP 25 | AMID EVIL RTX
+        Weapon_Adjust = float4(0.400,5.5625,0.0,0.0);     //WP 25 | AMID EVIL RTX
     if (WP == 28)
         Weapon_Adjust = float4(0.750,30.0,1.025,0.0);     //WP 26 | Prey 2006
     if (WP == 29)
