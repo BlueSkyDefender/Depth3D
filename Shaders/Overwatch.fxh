@@ -1,7 +1,7 @@
 ////----------------------------------------//
 ///SuperDepth3D Overwatch Automation Shader///
 //----------------------------------------////
-// Version 2.5.1
+// Version 2.5.4
 //---------------------------------------OVERWATCH---------------------------------------//
 // If you are reading this stop. Go away and never look back. From this point on if you  //
 // still think it's is worth looking at this..... Then no one can save you or your soul. //
@@ -98,11 +98,11 @@ static const int EFO_Fade_Selection_D = 0;              //Eye Fade Options: 0.1%
 static const int EFO_Fade_Speed_Selection_D = 0;        //Eye Fade Speed Options: +0% | +50% | +100%    | DK_W
 
 //SM Values
-static const int SM_Toggle_Sparation_D = 1;             // 0 | 1                                        | SMS
+static const int SM_Toggle_Sparation_D = 1;             // 0 | 1 | 2 | 3                                | SMS
 static const float SM_Tune_D = 0.5;                     //SM Tune                                       | DL_X
 static const int SM_Weapon_D = 8;                       //SM Weapon                                     | DL_Y
 static const float SM_Local_Smoothing_D = 0.0;          //SM Local Smoothing                            | DL_Z
-static const float SM_Perspective_D  = 0.5;             //SM Perspective                                | DL_W
+static const float SM_Perspective_D  = 0.05;            //SM Perspective                                | DL_W
 
 //Special Toggles Defaults
 static const int Resident_Evil_Fix_D = 0;               //Resident Evil Fix                             | REF
@@ -192,7 +192,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DE_Y 0.625
 	#define DE_Z 0.300
 	#define DF_X 0.300
-	#define SMS 1      //SM Toggle Separation
+	#define SMS 0      //SM Toggle Separation
 	#define DL_X 0.600 //SM Tune
 	#define DL_Y 2 //SM Weapon Smooth
 	//#define DL_Z 0.0 //SM Local Smooth
@@ -348,8 +348,8 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DB_W 35
 	#define BMT 1
 	#define DF_Z 0.1375
-	#define SMS 0     //SM Toggle Separation
-	#define DL_X 0.625//SM Tune //0.5125 //0.560 
+	#define SMS 1     //SM Toggle Separation
+	#define DL_X 0.6375//SM Tune //0.5125 //0.560 
 	#define DL_Y 2    //SM Weapon Tune 
 	#define DL_W 0.0  //SM Perspective	
 #elif (App == 0x6D3CD99E ) //Blood 2
@@ -822,7 +822,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define DG_Z 0.040//Min
     //#define DE_W 0.100 //Max
     #define DI_Z 0.1375 //Trim
-	#define SMS 0      //SM Toggle Separation
+	#define SMS 3      //SM Toggle Separation
 	#define DL_X 0.600 //SM Tune
 	//#define DL_Z 0.050 //SM Local Smooth
 	#define DL_W 0.050 //SM Perspective	
@@ -1790,8 +1790,16 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DE_X 1
 	#define DE_Y 0.250
 	#define DE_Z 0.4
-	#define DG_Z 0.450
 	#define DG_W 0.125
+    #define BMT 1    
+    #define DF_Z 0.125
+	#define DG_Z 0.450 //Min
+	//#define DE_W 0.0 //Max
+    #define DI_Z 0.250 //Trim
+	#define SMS 1      //SM Toggle Separation
+	#define DL_X 0.5125//SM Tune
+	#define DL_Z 0.0000//SM Local Smooth ???
+	#define DL_W 0.0   //SM Perspective
 #elif (App == 0xB4C116F7 ) //Nioh
 	#define DA_W 1
 	#define DA_X 0.1
@@ -2127,7 +2135,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DF_Z 0.1111 //0.100 //0.125 
 	#define DG_Z 0.0325//0.0275//Min
     #define DI_Z 0.0625//Trim
-	#define SMS 1      //SM Toggle Separation
+	#define SMS 0      //SM Toggle Separation
 	#define DL_X 0.500 //SM Tune
 	#define DL_Z 0.625 //SM Local Smooth
 	#define DL_W 0.050 //SM Perspective
@@ -2634,7 +2642,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DE_Z 0.45
 	#define BMT 1    
 	#define DF_Z 0.1125
-	#define SMS 1      //SM Toggle Separation
+	#define SMS 0      //SM Toggle Separation
 	#define DL_X 0.875 //SM Tune
 	#define DL_Y 0     //SM Weapon Tune
 	#define DL_Z 0.500 //SM Local Smooth
@@ -3011,7 +3019,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define REF 11    //Fix can go from 1 - 15 and 15 is low 1 is High
 	#define DI_W 2.75 //3.25 //Adjustment for REF
 	#define SMS 0 //SM Toggle Separation
-	#define DL_X 0.4375 //0.325 //SM Tune
+	#define DL_X 0.500 //0.325 //SM Tune
 	#define DL_W 0.050 //SM Perspective
 	#define DAA 1
 	#define PEW 1
@@ -3162,6 +3170,12 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DE_Z 0.300
 	#define DG_W 0.125
 	#define DG_Z 0.375
+	#define BMT 1    
+	#define DF_Z 0.125
+	#define SMS 1      //SM Toggle Separation
+	#define DL_X 0.750 //SM Tune
+	#define DL_Z 0.500 //SM Local Smooth
+	#define DL_W 0.050 //SM Perspective
 	#define NDW 1
 #elif (App == 0x921BC951 ) //SpongeBob SquarePants: Battle for Bikini Bottom - Rehydrated
 	#define DA_W 1
@@ -3352,7 +3366,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DF_X 0.13
 	#define DG_Z 0.06
 	#define DI_Z 0.070
-	#define SMS 1      //SM Toggle Separation
+	#define SMS 0      //SM Toggle Separation
 	#define DL_X 0.640 //SM Tune
 	#define DL_Y 4 //SM Tune Weapon
 	//#define DL_Z 0.500 //SM Local Smooth
@@ -3388,7 +3402,11 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DI_Z 0.10  
 	#define BMT 1    
 	#define DF_Z 0.140
-	#define DL_W 0.050 //SM Perspective
+	#define SMS 1      //SM Toggle Separation
+	#define DL_X 0.500 //SM Tune
+	//#define DL_Y 0     //SM Weapon Tune
+	#define DL_Z 0.000 //SM Local Smooth
+	#define DL_W 0.100 //SM Perspective
 	#define PEW 1
 #elif (App == 0x1A2B216E ) //Crysis Remastered
 	#define DA_W 1
@@ -3425,9 +3443,9 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define PEW 1 
 	#define DAA 1
 #elif (App == 0x2EFB1B0B ) //Crysis 3 Remastered
-	#define DA_X 0.050
-	#define DF_Y 0.0025
-	#define DA_Y 13.625
+	#define DA_X 0.0375
+	#define DF_Y 0.0040
+	#define DA_Y 17.5
 	//#define DB_Z 0.100
 	//#define DB_Y 5
 	#define DE_X 4
@@ -3437,13 +3455,13 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DF_Z 0.180
 	#define WSM 2 //Weapon Settings Mode
 	#define DB_W 14
-    #define DF_X 0.250 
+    #define DF_X 0.225 
 	#define DJ_W 0.300
-	#define SMS 0      //SM Toggle Separation
-	#define DL_X 0.530 //SM Tune
-	#define DL_Y 1     //SM Weapon Tune
-	#define DL_Z 1.0   //SM Local Smooth
-	#define DL_W 0.100 //SM Perspective
+	#define SMS 3      //SM Toggle Separation
+	#define DL_X 0.45 //SM Tune
+	#define DL_Y 0     //SM Weapon Tune
+	#define DL_Z 0.80  //SM Local Smooth
+	#define DL_W 0.07  //SM Perspective
 	#define PEW 1 
 	#define DAA 1 
 #elif (App == 0x16848B0F ) // HITMAN 3**
@@ -3588,10 +3606,10 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DF_Z 0.1375
 	#define DG_Z 0.07  
 	#define DI_Z 0.120
-	#define SMS 0      //SM Toggle Separation
-	#define DL_X 0.4125//SM Tune
-	//#define DL_Z 0.250 //SM Local Smooth ???
-	#define DL_W 0.070 //SM Perspective
+	#define SMS 1      //SM Toggle Separation
+	#define DL_X 0.500 //SM Tune
+	#define DL_Z 0.500 //SM Local Smooth ???
+	#define DL_W 0.050 //SM Perspective
     #define PEW 1 
 #elif (App == 0xB4403655 ) //Elden Ring
 	#define DA_W 1
@@ -3814,9 +3832,9 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define DE_Z 0.375
     #define BMT 1    
     #define DF_Z 0.100
-	#define SMS 1      //SM Toggle Separation
-	#define DL_X 0.525 //SM Tune
-	#define DL_Z 1.000 //SM Local Smooth ???
+	#define SMS 2      //SM Toggle Separation
+	#define DL_X 0.600 //SM Tune
+	#define DL_Z 0.500 //SM Local Smooth ???
 	#define DL_W 0.050 //SM Perspective
 	#define PEW 1
 #elif (App == 0x98E46BDC ) //Forgive Me Father
@@ -3921,11 +3939,12 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DF_Z 0.175
 	#define DG_Z 0.0375//Min
 	#define DI_Z 0.250 //Trim
+	#define DB_W 5
 	#define NDW 1
 	#define DAA 1
-	#define SMS 1 //SM Toggle Separation
-	#define DL_X 0.500 //SM Tune
-	#define DL_Z 0.125 //SM Local Smooth
+	#define SMS 0 //SM Toggle Separation
+	#define DL_X 0.600 //SM Tune
+	#define DL_Z 0.500 //0.125 //SM Local Smooth
 	#define DL_W 0.050 //SM Perspective	
 #elif ( App == 0x4F4E231E ) //Hob
 	#define DA_Y 20.0
@@ -3941,7 +3960,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DG_Z 0.050 //Min
 	#define DI_Z 0.070 //Trim
 	#define DAA 1
-	#define SMS 1      //SM Toggle Separation
+	#define SMS 0      //SM Toggle Separation
 	#define DL_X 0.625 //SM Tune
 	#define DL_W 0.050 //SM Perspective	
 #elif ( App == 0x1C2203BC ) //TUNIC
@@ -3958,11 +3977,11 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DF_Z 0.100
 	#define DSW 1
 	#define PEW 1
-	#define SMS 1      //SM Toggle Separation
+	#define SMS 0      //SM Toggle Separation
 	#define DL_X 0.5625//SM Tune
 	#define DL_W 0.000 //SM Perspective
 #elif ( App == 0x42F66404 ) //Bayonetta
-	#define DA_Y 40.0
+	#define DA_Y 39.0
 	#define DA_X 0.037
 	#define DF_Y 0.0125
 	#define DE_X 1
@@ -3971,10 +3990,10 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define BMT 1    
 	#define DF_Z 0.125
 	#define PEW 1
-	#define SMS 0      //SM Toggle Separation
-	#define DL_X 0.500 //SM Tune
-	#define DL_Z 0.050 //SM Local Smooth
-	#define DL_W 0.05 //SM Perspective
+	#define SMS 1      //SM Toggle Separation
+	#define DL_X 0.725 //SM Tune
+	#define DL_Z 0.500 //SM Local Smooth
+	#define DL_W 0.050 //SM Perspective
 #elif ( App == 0x8CF29E7A ) //Maneater
     #define DA_W 1
 	#define DA_Y 75.0
@@ -3986,9 +4005,9 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define BMT 1    
 	#define DF_Z 0.500
 	#define PEW 1
-	#define SMS 0      //SM Toggle Separation
-	#define DL_X 0.500 //SM Tune
-	#define DL_Z 0.050 //SM Local Smooth
+	#define SMS 1      //SM Toggle Separation
+	#define DL_X 0.600 //SM Tune
+	#define DL_Z 1.000 //SM Local Smooth
 	#define DL_W 0.050 //SM Perspective
     #define LBC 1      //Letter Box Correction
 	#define DH_Z 0.0   //Pos offset X    
@@ -4006,9 +4025,9 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	//#define DE_W 0.0 //Max
     #define DI_Z 0.0625 //Trim
 	#define SMS 1      //SM Toggle Separation
-	#define DL_X 0.750 //SM Tune
+	#define DL_X 0.625 //SM Tune
 	#define DL_Z 0.300 //SM Local Smooth
-	#define DL_W 0.525 //SM Perspective
+	#define DL_W 0.100 //SM Perspective
 	#define PEW 1
 #elif (App == 0xF4901178 ) //The Surge 2
     #define DA_W 1 
@@ -4023,16 +4042,16 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DG_Z 0.100 //Min
 	//#define DE_W 0.0 //Max
     #define DI_Z 0.150 //Trim
-	#define SMS 1      //SM Toggle Separation
-	#define DL_X 0.535 //SM Tune
-	#define DL_Z 0.250 //SM Local Smooth ???
+	#define SMS 2      //SM Toggle Separation
+	#define DL_X 0.600 //SM Tune
+	#define DL_Z 0.400 //SM Local Smooth
 	#define DL_W 0.100 //SM Perspective
 	#define PEW 1
 #elif (App == 0xBAC3D546 ) //Wolfenstine New Colossus II 
     #define DA_X 0.0404
     #define DF_Y 0.1125
     #define DA_Y 15.0
-    #define DA_Z -0.0005
+    //#define DA_Z -0.0005
     #define DE_X 2
     #define DE_Y 0.500
     #define DE_Z 0.375
@@ -4042,27 +4061,27 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DG_Z 0.070 //Min
 	//#define DE_W 0.0 //Max
     #define DI_Z 0.225 //Trim
-	#define SMS 0      //SM Toggle Separation
-	#define DL_X 0.525 //SM Tune
+	#define SMS 2      //SM Toggle Separation
+	#define DL_X 0.625 //SM Tune
 	//#define DL_Z 0.250 //SM Local Smooth ???
 	#define DL_W 0.05 //SM Perspective
 	#define PEW 1
 #elif (App == 0x132AB11B ) //Wolfenstine Youngblood 
-    #define DA_X 0.041
-    #define DF_Y 0.1125
-    #define DA_Y 15.0
-    #define DA_Z -0.0005
+    #define DA_X 0.040
+    #define DF_Y 0.116
+    #define DA_Y 15.5
+    //#define DA_Z -0.0005
     #define DE_X 2
     #define DE_Y 0.500
     #define DE_Z 0.375
 	//#fine DG_W 0.325 //Pop out
     #define BMT 1    
-    #define DF_Z 0.1125
+    #define DF_Z 0.116
 	#define DG_Z 0.070 //Min
 	//#define DE_W 0.0 //Max
     #define DI_Z 0.225 //Trim
-	#define SMS 0      //SM Toggle Separation
-	#define DL_X 0.525 //SM Tune
+	#define SMS 2      //SM Toggle Separation
+	#define DL_X 0.75 //SM Tune
 	#define DL_Z 1.0   //SM Local Smooth
 	#define DL_W 0.050 //SM Perspective
     #define LBC 1      //Letter Box Correction
@@ -4084,7 +4103,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	//#define DG_Z 0.100 //Min
 	//#define DE_W 0.0 //Max
     //#define DI_Z 0.150 //Trim
-	#define SMS 0      //SM Toggle Separation
+	#define SMS 2      //SM Toggle Separation
 	#define DL_X 0.750 //SM Tune
 	#define DL_Z 0.500 //SM Local Smooth ???
 	#define DL_W 0.050 //SM Perspective
@@ -4481,7 +4500,7 @@ float4 Weapon_Profiles(float WP ,float4 Weapon_Adjust) //Could reduce from 76 to
     if (WP == 13)
         Weapon_Adjust = float4(0.284,15.0,7.200,0.0);     //WP 11 | Crysis 2 Remastered
     if (WP == 14)
-        Weapon_Adjust = float4(0.284,12.5,10.375,0.250);  //WP 12 | Crysis 3 Remastered
+        Weapon_Adjust = float4(0.284,12.5,10.4375,0.125); //WP 12 | Crysis 3 Remastered
     if (WP == 15)
         Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 13 | Game
     if (WP == 16)
