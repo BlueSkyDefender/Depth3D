@@ -3716,15 +3716,19 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define DI_Z 0.125 //Trim
 #elif (App == 0x8FDE4FCF ) //Ni No Kuni II: Revenant Kingdom**
     #define DA_X 0.075
-    #define DF_Y 0.050 //0.058
-    #define DA_Y 12.25
-    #define DA_Z 0.0005
+    #define DF_Y 0.050
+    #define DA_Y 12.50
+    //#define DA_Z 0.0005
     #define DB_Y 2
     #define DE_X 1
     #define DE_Y 0.375
     #define DE_Z 0.400
 	#define BMT 1    
-	#define DF_Z 0.1375
+	#define DF_Z 0.125
+	#define SMS 0      //SM Toggle Separation
+	#define DL_X 0.600 //SM Tune
+	#define DL_Z 1.000 //SM Local Smooth
+	#define DL_W 0.000 //SM Perspective
     #define PEW 1
 #elif (App == 0xFA6649D4 ) //Shadow Warrior 3
 	#define DA_W 1
