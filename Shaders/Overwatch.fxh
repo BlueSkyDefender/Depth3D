@@ -949,14 +949,20 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define DA_W 1
     #define DA_Y 12.5
     #define DA_Z -0.25
-    #define DA_X 0.105
-    #define DF_Y 0.050
+    #define DA_X 0.100
+    #define DF_Y 0.040
     #define DB_Y 4
     #define DE_X 2
     #define DE_Y 0.500
     #define DE_Z 0.375
-    //#define DG_Z 0.050 //0.100 //Min
-    //#define DI_Z 0.125 //0.250 //Trim
+    #define DG_Z 0.150 //0.050 //0.100 //Min
+    #define DI_Z 0.150 //0.125 //0.250 //Trim
+    #define BMT 1
+	#define DF_Z 0.300
+	#define SMS 1      //SM Toggle Separation
+	#define DL_X 0.625 //SM Tune
+	#define DL_Z 1.000 //SM Local Smooth
+	#define DL_W 0.100 //SM Perspective
 #elif (App == 0x5833F81C ) //Dying Light
 	#define DA_W 1
 	#define DA_X 0.042 //0.0375//0.036
@@ -3486,20 +3492,26 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DF_Z 0.150 
 	#define DG_Z 0.100//Min
     #define DI_Z 0.125 //Trim
-#elif (App == 0x2D1A3028 ) //Bright Memory: Infinite*
+#elif (App == 0x2D1A3028 ) //Bright Memory: Infinite**
     #define DA_W 1
-    #define DA_X 0.160
-    #define DF_Y 0.1375
-    #define DA_Y 70.0
+    #define DA_X 0.130 //0.125 //0.140 
+    #define DF_Y 0.100
+    #define DA_Y 53.00  //55.00 //52.5
     #define DB_Z 0.250
-    #define DE_X 4
-    #define DE_Y 0.500
+    #define DE_X 2
+    #define DE_Y 0.750 //.0500 
     #define DE_Z 0.375
-    #define DG_W -0.20 //disallow some popout
+    #define DG_W 1.25 //disallow some popout
 	#define BMT 1    
-	#define DF_Z 0.1375
-	#define WSM 2 //Weapon Settings Mode
-	#define DB_W 24//Weapon Selection
+	#define DF_Z 0.130
+	//#define WSM 2 //Weapon Settings Mode
+	//#define DB_W 24//Weapon Selection
+	#define DG_Z 0.2125//Min //0.200 //0.225
+    #define DI_Z 0.750 //Trim
+	#define SMS 2      //SM Toggle Separation
+	#define DL_X 0.500 //SM Tune
+	#define DL_Z 0.750 //SM Local Smooth
+	#define DL_W 0.050 //SM Perspective
 	#define PEW 1
 #elif (App == 0x2ECE874 ) //Roblox Games
     #define DA_W 1
@@ -4520,7 +4532,7 @@ float4 Weapon_Profiles(float WP ,float4 Weapon_Adjust) //Could reduce from 76 to
     if (WP == 23)
         Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 21 | Game
     if (WP == 24)
-        Weapon_Adjust = float4(15.500,75.0,0.0,0.025);    //WP 22 | Bright Memory: infinite
+        Weapon_Adjust = float4(15.500,60.0,0.0,0.075);    //WP 22 | Bright Memory: infinite
     if (WP == 25)
         Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 23 | Game
     if (WP == 26)
