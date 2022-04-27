@@ -606,6 +606,10 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define DI_Z 0.0625//Trim New system from RE7 was used
     #define BMT 1      //Disables Auto ZPD
 	#define DF_Z 0.060 //Sets Manual Mode power.
+	#define SMS 1      //SM Toggle Separation
+	#define DL_X 0.500 //SM Tune
+	#define DL_Z 0.000 //SM Local Smooth ???
+	#define DL_W 0.050 //SM Perspective
 	#define PEW 1
 	#define DAA 1
 #elif (App == 0x287BBA4C || App == 0x59BFE7AC ) //Grim Dawn 64bit/32bit
