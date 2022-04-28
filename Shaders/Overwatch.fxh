@@ -2804,12 +2804,20 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DB_Z 0.0625
 	#define DB_Y 1
 	#define BMT 1
-	#define DF_Z 0.180
+	#define DF_Z 0.115
 	#define DE_X 4
 	#define DE_Y 0.650
 	#define DE_Z 0.400
 	#define DB_W 43
 	#define DF_X 0.1
+	#define DG_Z 0.100 //Min
+	//#define DE_W 0.0 //Max
+    #define DI_Z 0.100 //Trim
+	#define SMS 1      //SM Toggle Separation
+	#define DL_X 0.810 //SM Tune
+	#define DL_Y 0     //SM Weapon Tune
+	#define DL_Z 0.0   //SM Local Smooth
+	#define DL_W 0.050 //SM Perspective
 	#define PEW 1
 	#define DAA 1
 #elif (App == 0x11E6C55E ) //The Suicide of Rachel Foster
@@ -4506,9 +4514,9 @@ float4 Weapon_Profiles(float WP ,float4 Weapon_Adjust) //Tried Switch But, can't
     if (WP == 41)
         Weapon_Adjust = float4(0.280,18.75,9.03,0.0);     //WP 39 | Serious Sam Revolution #EB9EEB74/Serious Sam HD: The First Encounter /The Second Encounter /Serious Sam 2 #8238E9CA/ Serious Sam 3: BFE*
     if (WP == 42)
-        Weapon_Adjust = float4(0.3,12.5,0.901,0.0);      //WP 40 | Serious Sam Fusion
+        Weapon_Adjust = float4(0.3,12.5,0.901,0.0);       //WP 40 | Serious Sam Fusion
     if (WP == 43)
-        Weapon_Adjust = float4(1.2,12.5,0.3,0.0);         //WP 41 | GhostRunner DX12
+        Weapon_Adjust = float4(1.2,12.5,0.3,0.05);        //WP 41 | GhostRunner DX12
     if (WP == 44)
         Weapon_Adjust = float4(0.277,20.0,8.8,0.0);       //WP 42 | TitanFall 2
     if (WP == 45)
