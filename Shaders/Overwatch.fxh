@@ -883,12 +883,18 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define RHW 1
 #elif (App == 0x84D341E3 || App == 0x15A08799) //Little Nightmares & Little Nightmares II
 	#define DA_W 1
-	#define DA_Y 33.75
-	#define DA_X 0.25
+	#define DA_Y 32.5
+	#define DA_X 0.225
 	#define DF_Y 0.125
-	#define DA_Z 0.0015
+	//#define DA_Z 0.0015
 	#define DB_Y 5 		//ZPD Boundary Scaling
 	#define DB_Z 0.325	//Auto Depth Adjust
+	#define BMT 1 // Had to use this mode since Auto Mode was not cutting it.
+	#define DF_Z 0.225
+	#define SMS 2      //SM Toggle Separation
+	#define DL_X 0.700 //SM Tune
+	#define DL_Z 0.000 //SM Local Smooth
+	#define DL_W 0.000 //SM Perspective
 	#define PEW 1
 #elif (App == 0xC282C520 ) //Observer System Redux
 	#define DA_W 1
@@ -4137,7 +4143,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DI_Z 0.150 //Trim
 	#define SMS 2      //SM Toggle Separation
 	#define DL_X 0.750 //SM Tune
-	#define DL_Z 0.500 //SM Local Smooth ???
+	#define DL_Z 0.500 //SM Local Smooth
 	#define DL_W 0.050 //SM Perspective
 	#define PEW 1
 #else
