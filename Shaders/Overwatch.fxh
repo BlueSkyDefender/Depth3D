@@ -2548,7 +2548,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define RHW 1
 #elif (App == 0xAA5644F9 || App == 0x1981FECC ) //Need For Speed: Heat | Payback
 	#define DA_W 1
-	#define DA_Y 12.5
+	#define DA_Y 10.0
 	#define DA_X 0.1
 	#define DF_Y 0.1
 	#define DB_Y 4
@@ -2557,6 +2557,15 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	//#define DE_X 2
 	//#define DE_Y 0.450
 	//#define DE_Z 0.375
+    #define BMT 1    
+    #define DF_Z 0.125
+	//#define DG_Z 0.100 //Min
+	//#define DE_W 0.0 //Max
+    //#define DI_Z 0.150 //Trim
+	#define SMS 1      //SM Toggle Separation
+	#define DL_X 0.750 //SM Tune
+	#define DL_Z 0.750 //SM Local Smooth
+	#define DL_W 0.050 //SM Perspective
 	#define PEW 1
 	#define DAA 1
 #elif (App == 0xBD8B2F39 ) //Assassin's Creed Odyssey
