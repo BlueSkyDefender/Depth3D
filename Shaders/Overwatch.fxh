@@ -1236,10 +1236,18 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DA_X 0.045
     #define DF_Y 0.025
 	#define DA_Y 12.5
+	#define DE_X 2
+	#define DE_Y 0.375
+	#define DE_Z 0.4375
+	#define DG_W 0.6 //Pop out
 	#define BMT 1    
 	#define DF_Z 0.1
 	#define DG_Z 0.09  
 	#define DI_Z 0.170
+	#define SMS 1      //SM Toggle Separation
+	#define DL_X 0.610 //SM Tune
+	#define DL_Z 1.000 //SM Local Smooth
+	#define DL_W 0.050 //SM Perspective
 	#define DSW 1
 	#define NDW 1
 #elif (App == 0x892CA092 ) //Farcry
