@@ -288,7 +288,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DA_Y 15.0
 	#define DB_W 19
 #elif (App == 0x886386A )	//Metro Redux Games
-	#define DA_Y 11.25 // 12.5
+	#define DA_Y 10.50 //11.0 // 12.5
 	#define DA_X 0.05
     #define DF_Y 0.05 //0.03
     #define DB_Z 0.125
@@ -303,6 +303,11 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DB_W 21
     #define DF_X 0.250 
 	#define DJ_W 0.250
+	#define SMS 2      //SM Toggle Separation
+	#define DL_X 0.550 //SM Tune
+	#define DL_Y 8     //SM Weapon Tune
+	#define DL_Z 1.000 //SM Local Smooth
+	#define DL_W 0.050 //SM Perspective
 	#define FOV 1
 #elif (App == 0xF5C7AA92 || App == 0x493B5C71 )	//S.T.A.L.K.E.R: Games
 	#define DA_Y 10.0
@@ -4459,7 +4464,7 @@ float4 Weapon_Profiles(float WP ,float4 Weapon_Adjust) //Tried Switch But, can't
     if (WP == 20)
         Weapon_Adjust = float4(0.278,90.0,9.1,0.050);     //WP 18 | Half-Life 2
     if (WP == 21)
-        Weapon_Adjust = float4(0.450,12.0,23.750,0.050);  //WP 19 | Metro Redux Games
+        Weapon_Adjust = float4(0.400,12.0,23.750,0.025);  //WP 19 | Metro Redux Games
     if (WP == 22)
         Weapon_Adjust = float4(0.350,12.5,2.0,0.0);       //WP 20 | Soldier of Fortune
     if (WP == 23)
