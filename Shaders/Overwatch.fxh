@@ -3760,6 +3760,10 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DG_Z 0.160//Min
 //	#define DE_W 0.0 //Max
     #define DI_Z 0.300 //Trim
+	#define SMS 1      //SM Toggle Separation
+	#define DL_X 0.700 //SM Tune
+	#define DL_Z 0.700 //SM Local Smooth
+	#define DL_W 0.025 //SM Perspective
     #define FOV 1
     #define PEW 1
 #elif (App == 0x45C250C6 ) //Dying Light 2
