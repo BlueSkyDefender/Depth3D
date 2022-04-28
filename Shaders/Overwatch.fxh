@@ -980,13 +980,13 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DL_W 0.100 //SM Perspective
 #elif (App == 0x5833F81C ) //Dying Light
 	#define DA_W 1
-	#define DA_X 0.042 //0.0375//0.036
-	#define DF_Y 0.05125  //0.0525	
-	#define DA_Y 9.375 //10.0//12.5
-	#define DA_Z -0.175//-0.200 //-0.375 //-0.05
+	#define DA_X 0.040 //0.0375//0.036
+	#define DF_Y 0.0375//0.050 //0.0525	
+	#define DA_Y 11.00 //10.0//12.5
+	//#define DA_Z -0.175//-0.200 //-0.375 //-0.05
 	#define DB_Y 4
 	#define DE_X 2
-	#define DE_Y 0.825
+	#define DE_Y 0.625
 	//#define DE_Z 0.25
 	#define NDW 1
 	#define PEW 1
@@ -995,7 +995,11 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define DE_W 0.105 //Max
     #define DI_Z 0.200 //Trim
 	#define BMT 1
-	#define DF_Z 0.14375
+	#define DF_Z 0.1375
+	#define SMS 1      //SM Toggle Separation
+	#define DL_X 0.600 //SM Tune
+	#define DL_Z 1.000 //SM Local Smooth
+	#define DL_W 0.050 //SM Perspective
 	#define WSM 2 //Weapon Settings Mode
 	//#define DB_W 51
 #elif (App == 0x42C1A2B ) //CoD: WWII
