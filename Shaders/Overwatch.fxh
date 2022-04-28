@@ -2685,7 +2685,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define BMT 1    
 	#define DF_Z 0.1125
 	#define SMS 0      //SM Toggle Separation
-	#define DL_X 0.870 //SM Tune
+	#define DL_X 0.825 //SM Tune
 	#define DL_Y 0     //SM Weapon Tune
 	#define DL_Z 0.500 //SM Local Smooth
 	#define DL_W 0.050 //SM Perspective
