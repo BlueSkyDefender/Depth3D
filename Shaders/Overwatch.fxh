@@ -3100,6 +3100,10 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DF_Z 0.400
     #define DG_Z 0.100 //Min
     #define DI_Z 0.300 //Trim
+	#define SMS 0      //SM Toggle Separation
+	#define DL_X 0.700 //SM Tune
+	#define DL_Z 0.750 //SM Local Smooth
+	#define DL_W 0.050 //SM Perspective
 	#define DSW 1
     #define FOV 1
 #elif (App == 0x22CA259A ) //Kena Bridge of Spirits
