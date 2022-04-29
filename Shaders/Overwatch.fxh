@@ -1959,11 +1959,15 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DI_Z 0.125  //and cutoff for cam
 	#define BMT 1
 	#define DF_Z 0.1375
-	#define NDW 1
-	#define PEW 1
 	#define LBC 2  //Letter Box Correction Offsets With X & Y
 	#define DH_Z 0.256
 	#define DH_W 0.0
+	#define SMS 2      //SM Toggle Separation
+	#define DL_X 0.450 //SM Tune
+	#define DL_Z 1.000 //SM Local Smooth
+	#define DL_W 0.050 //SM Perspective
+	#define NDW 1
+	#define PEW 1
 #elif (App == 0x621202BC ) //Vanquish DGVoodoo2
 	#define DA_X 0.05
 	#define DA_Y 15.0
