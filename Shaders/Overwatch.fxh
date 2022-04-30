@@ -305,7 +305,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DJ_W 0.250
 	#define SMS 2      //SM Toggle Separation
 	#define DL_X 0.550 //SM Tune
-	#define DL_Y 8     //SM Weapon Tune
+	#define DL_Y 1     //SM Weapon Tune
 	#define DL_Z 1.000 //SM Local Smooth
 	#define DL_W 0.050 //SM Perspective
 	#define FOV 1
@@ -355,7 +355,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DF_Z 0.1375
 	#define SMS 1     //SM Toggle Separation
 	#define DL_X 0.6375//SM Tune //0.5125 //0.560 
-	#define DL_Y 2    //SM Weapon Tune 
+	#define DL_Y 1    //SM Weapon Tune 
 	#define DL_W 0.0  //SM Perspective	
 #elif (App == 0x6D3CD99E ) //Blood 2
 	#define DA_X 0.105
@@ -3410,9 +3410,9 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DAA 1  
 #elif (App == 0xDE4C92BB ) //Halo Infinite
 	#define DA_W 1
-	#define DA_X 0.075
-	#define DF_Y 0.018
-	#define DA_Y 90.0  
+	#define DA_X 0.07 //0.06 //0.075
+	#define DF_Y 0.02 //0.018
+	#define DA_Y 80.0 //90.0  
 	//#define DB_Z 0.125
 	#define DB_Y 1
 	#define DE_X 4
@@ -3421,16 +3421,17 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	//#define DG_Z 0.01
 	//#define DI_Z 0.225
 	#define BMT 1
-	#define DF_Z 0.117
+	#define DF_Z 0.110
 	#define DG_W -0.075
 	#define WSM 2 //Weapon Settings Mode
 	#define DB_W 19//Weapon Selection
 	#define DF_X 0.13
+	#define DJ_W 0.7 //1.0
 	#define DG_Z 0.06
 	#define DI_Z 0.070
 	#define SMS 0      //SM Toggle Separation
 	#define DL_X 0.640 //SM Tune
-	#define DL_Y 4 //SM Tune Weapon
+	#define DL_Y 2 //SM Tune Weapon
 	//#define DL_Z 0.500 //SM Local Smooth
 	#define DL_W 0.100   //SM Perspective
 	#define NDW 1  
@@ -3521,7 +3522,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DJ_W 0.300
 	#define SMS 3      //SM Toggle Separation
 	#define DL_X 0.45 //SM Tune
-	#define DL_Y 0     //SM Weapon Tune
+	#define DL_Y 1     //SM Weapon Tune
 	#define DL_Z 0.80  //SM Local Smooth
 	#define DL_W 0.07  //SM Perspective
 	#define PEW 1 
@@ -4508,7 +4509,7 @@ float4 Weapon_Profiles(float WP ,float4 Weapon_Adjust) //Tried Switch But, can't
     if (WP == 34)
         Weapon_Adjust = float4(1.150,55.0,0.9,0.0);       //WP 32 | Cyberpunk 2077
     if (WP == 35)
-        Weapon_Adjust = float4(0.278,43.75,9.0,0.0);      //WP 33 | Black Mesa
+        Weapon_Adjust = float4(0.278,42.50,9.0,0.0);      //WP 33 | Black Mesa
     if (WP == 36)
         Weapon_Adjust = float4(0.277,105.0,8.8625,0.0);   //WP 34 | Portal 2
     if (WP == 37)
@@ -4586,7 +4587,7 @@ float4 Weapon_Profiles(float WP ,float4 Weapon_Adjust) //Could reduce from 76 to
     if (WP == 18)
         Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 16 | Game
     if (WP == 19)
-        Weapon_Adjust = float4(1.550,117.5,0.125,0.125);  //WP 17 | Halo Infinite
+        Weapon_Adjust = float4(1.550,100.0,0.130,0.130);  //WP 17 | Halo Infinite //float4(1.550,117.5,0.125,0.125);
     if (WP == 20)
         Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 18 | Game
     if (WP == 21)
