@@ -100,9 +100,14 @@ static const int EFO_Fade_Speed_Selection_D = 0;        //Eye Fade Speed Options
 //SM Values
 static const int SM_Toggle_Sparation_D = 1;             // 0 | 1 | 2 | 3                                | SMS
 static const float SM_Tune_D = 0.5;                     //SM Tune                                       | DL_X
-static const int SM_Weapon_D = 8;                       //SM Weapon                                     | DL_Y
+static const int SM_Weapon_D = 1;                       //SM Weapon                                     | DL_Y
 static const float SM_Local_Smoothing_D = 0.0;          //SM Local Smoothing                            | DL_Z
 static const float SM_Perspective_D  = 0.05;            //SM Perspective                                | DL_W
+//SM HQ Values
+static const int HQ_Tune_D = 4;                         //HQ Tune                                       | DM_X
+static const int HQ_Boost_D = 4;                        //HQ Boost                                      | DM_Y
+static const int HQ_Smooth_D = 1;                       //HQ Smooth                                     | DM_Z
+static const float NULL_W_D = 0.0;                      //Null W                                        | DM_W
 
 //Special Toggles Defaults
 static const int Resident_Evil_Fix_D = 0;               //Resident Evil Fix                             | REF
@@ -2424,20 +2429,27 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DA_W 1
     //#define DB_X 1
 	#define DA_Y 12.5
-	#define DA_X 0.0620
+	#define DA_X 0.0600
 	#define DF_Y 0.0125
 	//#define DF_Y 0.1
 	#define DB_Y 4
 	//#define DB_Z 0.125
 	//#define DA_Z 0.0005
 	#define DE_X 1
-	//#define DE_Y 0.500
+	#define DE_Y 0.450
 	#define DE_Z 0.375
-	#define DG_W 0.25 //Pop out allowed
+	#define DG_W 0.25  //Pop out allowed
 	#define BMT 1
-	#define DF_Z 0.1625
-	#define REF 15    //Fix can go from 1 - 15 and 15 is low 1 is High
-	#define DI_W 1.7  //Adjustment for REF
+	#define DF_Z 0.150
+	#define REF 15     //Fix can go from 1 - 15 and 15 is low 1 is High
+	#define DI_W 1.7   //Adjustment for REF
+	#define SMS 1      //SM Toggle Separation
+	#define DL_X 0.675 //SM Tune
+	#define DL_Z 0.000 //SM Local Smooth
+	#define DL_W 0.050 //SM Perspective
+	#define DM_X 8     //HQ Tune
+	#define DM_Y 2     //HQ Boost
+	#define DM_Z 1     //HQ Perspective
 	#define PEW 1
 	#define DAA 1
 #elif (App == 0xA05A15C4 ) //Spooky's House of Jump Scares
@@ -4344,7 +4356,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 #ifndef DK_W
 	#define DK_W EFO_Fade_Speed_Selection_D
 #endif
-
+///////////////////////////////////////////////////////////////////////////////////////////////////////////
 // X = [SM Tune] Y = [SM Weapon] Z = [SM Local Smoothing] W = [SM Perspective]
 #ifndef DL_X
     #define DL_X SM_Tune_D
@@ -4359,6 +4371,20 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DL_W SM_Perspective_D
 #endif
 
+// X = [HQ Tune] Y = [HQ Boost] Z = [HQ Smooth] W = [NULL W]
+#ifndef DM_X
+    #define DM_X HQ_Tune_D
+#endif
+#ifndef DM_Y
+    #define DM_Y HQ_Boost_D
+#endif
+#ifndef DM_Z
+    #define DM_Z HQ_Smooth_D
+#endif 
+#ifndef DM_W
+	#define DM_W NULL_W_D
+#endif
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //Special Toggles
 #ifndef REF
     #define REF Resident_Evil_Fix_D            //Resident Evil Fix
