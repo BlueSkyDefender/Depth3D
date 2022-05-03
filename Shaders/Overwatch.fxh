@@ -3842,9 +3842,9 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define NFM 1
 #elif (App == 0xBCFD90CA ) //FFVII Remake Intergrade 
 	#define DA_W 1
-	#define DA_X 0.100
-	#define DF_Y 0.065	
-	#define DA_Y 20.0 //15
+	#define DA_X 0.090
+	#define DF_Y 0.050	
+	#define DA_Y 21.0 //15
     //#define DA_Z 0.00025 //-1.0
 	#define DE_X 1
 	#define DE_Y 0.325
@@ -3853,8 +3853,15 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DE_W 0.105 //Max
     #define DI_Z 0.200 //Trim
 	#define BMT 1
-	#define DF_Z 0.125 //0.1875
+	#define DF_Z 0.1125 //0.1875
     #define DG_W 0.100 //Pop
+	#define SMS 2      //SM Toggle Separation
+	#define DL_X 0.550 //SM Tune
+	#define DL_Z 0.000 //SM Local Smooth
+	#define DL_W 0.000 //SM Perspective
+	#define DM_X 10    //HQ Tune
+	#define DM_Y 2     //HQ Boost
+	#define DM_Z 2     //HQ Smooth
 #elif (App == 0xC150B2EC ) //FarCry 6 
 	#define DA_W 1
 	#define DA_X 0.045
