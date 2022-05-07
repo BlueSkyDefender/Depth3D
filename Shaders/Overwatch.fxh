@@ -3134,18 +3134,21 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DAA 1
 #elif (App == 0x808ABB25 ) //BioShock Infinite 
 	#define DA_X 0.050 // or 0.0525
-    #define DF_Y 0.035 // 0.050
+    #define DF_Y 0.050 // 0.050
 	#define DA_Y 12.50
     #define DA_Z -0.00125
     #define DB_Z 0.075
     #define BMT 1
-	#define DF_Z 0.400
-    #define DG_Z 0.100 //Min
+	#define DF_Z 0.3375
+    #define DG_Z 0.090 //Min
     #define DI_Z 0.300 //Trim
-	#define SMS 0      //SM Toggle Separation
-	#define DL_X 0.700 //SM Tune
+	#define SMS 3      //SM Toggle Separation
+	#define DL_X 0.800 //SM Tune
 	#define DL_Z 0.750 //SM Local Smooth
 	#define DL_W 0.050 //SM Perspective
+	#define DM_X 8     //HQ Tune
+	#define DM_Y 4     //HQ Boost
+	#define DM_Z 3     //HQ Smooth
 	#define DSW 1
     #define FOV 1
 #elif (App == 0x22CA259A ) //Kena Bridge of Spirits
