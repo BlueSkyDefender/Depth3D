@@ -541,12 +541,23 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define WPW 1
 	#define RHW 1
 #elif (App == 0x9E7AA0C4 ) //Shadow Tactics: Blades of the Shogun
-	#define DA_Y 7.0
-	#define DA_Z 0.001
 	#define DA_X 0.150
+	#define DF_Y 0.050
+	#define DA_Y 7.0
+	#define DA_Z 0.0005
 	#define DB_Y 5
 	#define DB_Z 0.305
 	#define DB_X 1
+	#define BMT 1
+	#define DF_Z 0.125 //0.1875
+    //#define DG_W 0.100 //Pop
+	#define SMS 1      //SM Toggle Separation
+	#define DL_X 0.825 //SM Tune
+	#define DL_Z 0.000 //SM Local Smooth
+	#define DL_W 0.000 //SM Perspective
+	#define DM_X 12    //HQ Tune
+	#define DM_Y 4     //HQ Boost
+	#define DM_Z 1     //HQ Smooth
 	#define RHW 1
 #elif (App == 0xE63BF4A4 ) //World of Warcraft DX12
 	#define DA_Y 7.5
@@ -2720,7 +2731,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DB_X 1
 	#define DB_Y 2
 	#define DE_X 2
-	//#define DG_Z 0.288 // This works. But, may be a bit overboard. Use this if users complain about edge pop out issues. I don't think it's needed.
+//#define DG_Z 0.288 // This works. But, may be a bit overboard. Use this if users complain about edge pop out issues. I don't think it's needed.
 	#define PEW 1
 #elif (App == 0x920D5D88 ) //Graven
 	#define DA_W 1
@@ -4207,6 +4218,30 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DL_Z 0.500 //SM Local Smooth
 	#define DL_W 0.050 //SM Perspective
 	#define PEW 1
+#elif (App == 0xE1D149FD ) //Max Payne 3 
+	//#define DA_W 1
+	#define DA_X 0.125
+	#define DF_Y 0.050	
+	#define DA_Y 25.0 //15
+    //#define DA_Z 0.00025 //-1.0
+	#define DE_X 1
+	#define DE_Y 0.500
+	#define DE_Z 0.375
+    //#define DG_Z 0.002 //Min
+    //#define DE_W 0.105 //Max
+    //#define DI_Z 0.200 //Trim
+	#define BMT 1
+	#define DF_Z 0.125 //0.1875
+    //#define DG_W 0.100 //Pop
+	#define SMS 2      //SM Toggle Separation
+	#define DL_X 0.800 //SM Tune
+	#define DL_Z 0.000 //SM Local Smooth
+	#define DL_W 0.050 //SM Perspective
+	#define DM_X 5     //HQ Tune
+	#define DM_Y 4     //HQ Boost
+	#define DM_Z 3     //HQ Smooth
+	#define PEW 1
+	#define DAA 1
 #else
 	#define NPW 1 //No Profile
 #endif
