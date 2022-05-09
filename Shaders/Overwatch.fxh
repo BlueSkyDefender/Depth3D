@@ -1,7 +1,7 @@
 ////----------------------------------------//
 ///SuperDepth3D Overwatch Automation Shader///
 //----------------------------------------////
-// Version 2.5.4
+// Version 2.5.5
 //---------------------------------------OVERWATCH---------------------------------------//
 // If you are reading this stop. Go away and never look back. From this point on if you  //
 // still think it's is worth looking at this..... Then no one can save you or your soul. //
@@ -106,7 +106,7 @@ static const float SM_Perspective_D  = 0.05;            //SM Perspective        
 //SM HQ Values
 static const int HQ_Tune_D = 4;                         //HQ Tune                                       | DM_X
 static const int HQ_Boost_D = 4;                        //HQ Boost                                      | DM_Y
-static const int HQ_Smooth_D = 1;                       //HQ Smooth                                     | DM_Z
+static const int HQ_Smooth_D = 1;                       //HQ Smooth 0 - 6                               | DM_Z
 static const float NULL_W_D = 0.0;                      //Null W                                        | DM_W
 
 //Special Toggles Defaults
@@ -3171,7 +3171,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DL_W 0.050 //SM Perspective
 	#define DM_X 8     //HQ Tune
 	#define DM_Y 4     //HQ Boost
-	#define DM_Z 3     //HQ Smooth
+	#define DM_Z 4     //HQ Smooth
 	#define DSW 1
     #define FOV 1
 #elif (App == 0x22CA259A ) //Kena Bridge of Spirits
@@ -4251,9 +4251,32 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DL_W 0.050 //SM Perspective
 	#define DM_X 5     //HQ Tune
 	#define DM_Y 4     //HQ Boost
-	#define DM_Z 3     //HQ Smooth
+	#define DM_Z 4     //HQ Smooth
 	#define PEW 1
 	#define DAA 1
+#elif (App == 0x1CF7A476 ) //Sable
+	#define DA_W 1
+	#define DA_X 0.045
+	#define DF_Y 0.045	
+	#define DA_Y 25.0 //15
+    //#define DA_Z 0.00025 //-1.0
+	#define DE_X 1
+	#define DE_Y 0.500
+	#define DE_Z 0.375
+    #define DG_Z 0.001 //Min
+    //#define DE_W 0.105 //Max
+    #define DI_Z 0.250 //Trim
+	#define BMT 1
+	#define DF_Z 0.12
+    //#define DG_W 0.100 //Pop
+	#define SMS 2      //SM Toggle Separation
+	#define DL_X 0.900 //SM Tune
+	#define DL_Z 0.000 //SM Local Smooth
+	#define DL_W 0.050 //SM Perspective
+	#define DM_X 10    //HQ Tune
+	#define DM_Y 0     //HQ Boost
+	#define DM_Z 3     //HQ Smooth
+	#define PEW 1
 #else
 	#define NPW 1 //No Profile
 #endif
