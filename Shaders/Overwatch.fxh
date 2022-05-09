@@ -2684,18 +2684,30 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define DG_Y 0.0 
 #elif (App == 0x1BDC0C4C ) //Quake Enhanced Edition
 	#define DA_X 0.075 //0.07
-	#define DA_Y 14.0 //13.0
+    #define DF_Y 0.045
+	#define DA_Y 12.375 //14.0 //13.0
+    #define DA_Z-0.0015
+	#define DB_Z 0.125
 	//#define DB_Y 1
-	#define DE_X 4
-	#define DE_Y 0.325 //0.4375
+	#define DE_X 6
+	#define DE_Y 0.500//0.350 //0.4375
 	#define DE_Z 0.375
+	#define DG_W -0.125 //disallowed popout
+	#define BMT 1
+	#define DF_Z 0.1125
 	#define NDW 1
 	#define PEW 1
-	#define DF_X 0.250
-	#define BMT 1
-	#define DF_Z 0.225
+	#define DF_X 0.1625 //0.250
+	#define DJ_W 0.0
 	#define WSM 3
 	#define DB_W 20
+	#define SMS 3      //SM Toggle Separation
+	#define DL_X 0.900 //SM Tune
+	#define DL_Z 0.000 //SM Local Smooth
+	#define DL_W 0.050 //SM Perspective
+	#define DM_X 4     //HQ Tune
+	#define DM_Y 4     //HQ Boost
+	#define DM_Z 2     //HQ Smooth
 #elif (App == 0xB3729F40 ) //Rocket League Steam
 	#define DA_Y 50.0
 	#define DA_X 0.100
@@ -4770,7 +4782,7 @@ float4 Weapon_Profiles(float WP ,float4 Weapon_Adjust)
     if (WP == 19)
         Weapon_Adjust = float4(0.251,5.6875,950.0,0.0);   //WP 17 | Mirror Edge
     if (WP == 20)
-        Weapon_Adjust = float4(0.345,10.125,1.825,0.0);   //WP 18 | Quake Enhanced Edition
+        Weapon_Adjust = float4(0.345,10.25,1.800,0.0);    //WP 18 | Quake Enhanced Edition
     if (WP == 21)
         Weapon_Adjust = float4(0.430,6.250,0.100,0.0);    //WP 19 | The Citadel 186
     if (WP == 22)
