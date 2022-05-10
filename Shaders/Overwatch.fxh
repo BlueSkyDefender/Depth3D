@@ -4279,16 +4279,16 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define PEW 1
 #elif (App == 0xC72BE846 ) //We Happy Few
 	#define DA_W 1
-	#define DA_X 0.175
-	#define DF_Y 0.040	
-	#define DA_Y 38.75 //40.00 //37.5
+	#define DA_X 0.125 //0.140 //0.150 //0.175
+	#define DF_Y 0.045	
+	#define DA_Y 7.5 //38.75
     //#define DA_Z -0.05 //-0.075 //0.00025
 	#define DE_X 1
-	#define DE_Y 0.520
+	#define DE_Y 0.520//0.520
 	#define DE_Z 0.375
-    #define DG_Z 0.175 //Min
+    #define DG_Z 0.100//0.175 //Min
     //#define DE_W 0.105 //Max
-    #define DI_Z 0.250 //Trim
+    #define DI_Z 0.1625 //Trim
 	#define BMT 1
 	#define DF_Z 0.125
     //#define DG_W 0.100 //Pop
