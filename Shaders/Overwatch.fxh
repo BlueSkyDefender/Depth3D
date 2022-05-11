@@ -4311,6 +4311,30 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DM_Y 4     //HQ Boost
 	#define DM_Z 2     //HQ Smooth
 	#define PEW 1
+#elif (App == 0x8F36286E ) //Deliver Us The Moon
+	#define DA_W 1
+	#define DA_X 0.050
+	#define DF_Y 0.035 //0.075	
+	#define DA_Y 70.0
+    //#define DA_Z -0.05 
+	#define DE_X 2
+	#define DE_Y 0.50
+	#define DE_Z 0.375
+    #define DG_Z 0.200//0.175 //Min
+    //#define DE_W 0.105 //Max
+    #define DI_Z 0.200 //Trim
+	#define BMT 1
+	#define DF_Z 0.14
+    //#define DG_W 0.100 //Pop
+	//#define SMS 3      //SM Toggle Separation
+	//#define DL_X 0.900 //SM Tune
+	//#define DL_Z 0.000 //SM Local Smooth
+	//#define DL_W 0.000 //SM Perspective
+	//#define DM_X 6    //HQ Tune
+	//#define DM_Y 4     //HQ Boost
+	//#define DM_Z 2     //HQ Smooth
+	#define DAA 1
+	#define PEW 1
 #else
 	#define NPW 1 //No Profile
 #endif
