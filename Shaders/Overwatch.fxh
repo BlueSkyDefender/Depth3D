@@ -3896,9 +3896,9 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DL_X 0.550 //SM Tune
 	#define DL_Z 0.000 //SM Local Smooth
 	#define DL_W 0.000 //SM Perspective
-	#define DM_X 10    //HQ Tune
-	#define DM_Y 2     //HQ Boost
-	#define DM_Z 2     //HQ Smooth
+	#define DM_X 6    //HQ Tune
+	#define DM_Y 0     //HQ Boost
+	#define DM_Z 6     //HQ Smooth
 #elif (App == 0xC150B2EC ) //FarCry 6 
 	#define DA_W 1
 	#define DA_X 0.045
