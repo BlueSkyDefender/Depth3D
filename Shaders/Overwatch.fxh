@@ -1,7 +1,7 @@
 ////----------------------------------------//
 ///SuperDepth3D Overwatch Automation Shader///
 //----------------------------------------////
-// Version 2.5.5
+// Version 2.5.6
 //---------------------------------------OVERWATCH---------------------------------------//
 // If you are reading this stop. Go away and never look back. From this point on if you  //
 // still think it's is worth looking at this..... Then no one can save you or your soul. //
@@ -107,7 +107,7 @@ static const float SM_Perspective_D  = 0.05;            //SM Perspective        
 static const int HQ_Tune_D = 4;                         //HQ Tune                                       | DM_X
 static const int HQ_Boost_D = 4;                        //HQ Boost                                      | DM_Y
 static const int HQ_Smooth_D = 1;                       //HQ Smooth 0 - 6                               | DM_Z
-static const float NULL_W_D = 0.0;                      //Null W                                        | DM_W
+static const float HQ_Trim_D = 0.0;                     //HQ Trim 0.0 - 0.5                             | DM_W
 
 //Special Toggles Defaults
 static const int Resident_Evil_Fix_D = 0;               //Resident Evil Fix                             | REF
@@ -2129,6 +2129,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DM_X 8     //HQ Tune
 	#define DM_Y 2     //HQ Boost
 	#define DM_Z 1     //HQ Smooth
+	#define DM_W 0.375 //HQ Trim
 	#define REF 3      //Fix can go from 1 - 15 and 15 is low 1 is High
 	#define DI_W 2.5   //Adjustment for REF
 	#define NFM 1
@@ -2280,8 +2281,8 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DE_Y 0.500
 	#define DE_Z 0.375
 #elif (App == 0x49F7B9C0 || App == 0x837F12C9 ) //Control DX12 | QuantumBreak DX11
-	#define DA_X 0.051
-	#define DF_Y 0.051
+	#define DA_X 0.05
+	#define DF_Y 0.05
 	#define DA_Y 17.5
 	#define DB_Y 3
 	#define DE_X 1
@@ -2289,6 +2290,14 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DE_Z 0.375
 	#define BMT 1
 	#define DF_Z 0.150
+    #define SMS 1      //SM Toggle Separation
+	#define DL_X 0.550 //SM Tune
+	#define DL_Z 1.000 //SM Local Smooth
+	#define DL_W 0.050 //SM Perspective
+	#define DM_X 8     //HQ Tune
+	#define DM_Y 4     //HQ Boost
+	#define DM_Z 6     //HQ Smooth
+	#define DM_W 0.500 //HQ Trim
 	#define PEW 1
 	#define DAA 1
 #elif (App == 0x5A7B540A ) //We Where Here Too
@@ -3696,6 +3705,14 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define DF_X 0.250 
 	#define DJ_W 0.125
     #define DK_W 2 //Set speed
+	#define SMS 1      //SM Toggle Separation
+	#define DL_X 0.600 //SM Tune
+    #define DL_Y 1     //SM Weapon Smooth
+	#define DL_Z 0.000 //SM Local Smooth
+	#define DL_W 0.050 //SM Perspective
+	#define DM_X 5    //HQ Tune
+	#define DM_Y 4     //HQ Boost
+	#define DM_Z 6     //HQ Smooth
     #define PEW 1  
     #define FOV 1
 #elif (App == 0x3B03D773 ) //HardReset Redux
@@ -4070,12 +4087,12 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DG_W 0.210 //Pop out
 	#define BMT 1    
 	#define DF_Z 0.175
-	#define DG_Z 0.0375//Min
+	#define DG_Z 0.040//Min
 	#define DI_Z 0.250 //Trim
 	#define DB_W 5
 	#define NDW 1
 	#define DAA 1
-	#define SMS 0 //SM Toggle Separation
+	#define SMS 1 //SM Toggle Separation
 	#define DL_X 0.600 //SM Tune
 	#define DL_Z 0.500 //0.125 //SM Local Smooth
 	#define DL_W 0.050 //SM Perspective	
@@ -4532,7 +4549,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DL_W SM_Perspective_D
 #endif
 
-// X = [HQ Tune] Y = [HQ Boost] Z = [HQ Smooth] W = [NULL W]
+// X = [HQ Tune] Y = [HQ Boost] Z = [HQ Smooth] W = [HQ Trim]
 #ifndef DM_X
     #define DM_X HQ_Tune_D
 #endif
@@ -4543,7 +4560,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define DM_Z HQ_Smooth_D
 #endif 
 #ifndef DM_W
-	#define DM_W NULL_W_D
+	#define DM_W HQ_Trim_D 
 #endif
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //Special Toggles
@@ -4748,7 +4765,7 @@ float4 Weapon_Profiles(float WP ,float4 Weapon_Adjust) //Could reduce from 76 to
     if (WP == 5)
         Weapon_Adjust = float4(0.270,25.0,0.951,0.0);     //WP 3  | WRC 10
     if (WP == 6)
-        Weapon_Adjust = float4(0.850,42.5,0.9990125,0.0); //WP 4  | The Outer Worlds
+        Weapon_Adjust = float4(0.850,32.5,0.99901,0.150); //WP 4  | The Outer Worlds
     if (WP == 7)
         Weapon_Adjust = float4(0.275,11.0,10.0,0.0);      //WP 5  | Crysis 2 DX11 1.9
     if (WP == 8)
