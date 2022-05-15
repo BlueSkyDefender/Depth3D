@@ -3211,16 +3211,26 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define DA_W 1
 	#define DA_X 0.225
     #define DF_Y 0.025
-	//#define DA_Y 20.00
+	#define DA_Y 7.25
 	#define DB_Y 5
 	#define DE_X 1
 	#define DE_Y 0.400
 	#define DE_Z 0.375
-	#define DG_W 0.275
-	#define DSW 1
+	#define DG_W 0.2
 	#define LBC 1 //Letter Box Correction With X & Y
     #define DH_Z 0.0
     #define DH_W -0.05
+    #define BMT 1
+	#define DF_Z 0.25
+	#define SMS 1      //SM Toggle Separation
+	#define DL_X 0.500 //SM Tune
+	#define DL_Z 1.000 //SM Local Smooth
+	#define DL_W 0.050 //SM Perspective
+	#define DM_X 12    //HQ Tune
+	#define DM_Y 8     //HQ Boost
+	#define DM_Z 6     //HQ Smooth
+	#define DM_W 0.500 //HQ Trim
+	#define DSW 1
     #define PEW 1
 #elif (App == 0x1551DBDA ) //The Fogotten City
 	#define DA_W 1
