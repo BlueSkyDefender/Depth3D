@@ -1238,11 +1238,24 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 #elif (App == 0xDB3A28BD ) //Monster Hunter World
 	#define DA_Y 17.5
 	#define DA_X 0.075
+	#define DF_Y 0.010
 	#define DA_W 1
 	#define DB_Y 5
 	#define DE_X 1
 	#define DE_Y 0.300
 	#define DE_Z 0.4375
+	#define BMT 1
+	#define DF_Z 0.130
+    #define SMS 2     //SM Toggle Separation
+	#define DL_X 0.550 //SM Tune
+	#define DL_Z 1.000 //SM Local Smooth
+	#define DL_W 0.050 //SM Perspective
+	#define DM_X 8     //HQ Tune
+	#define DM_Y 4     //HQ Boost
+	#define DM_Z 4     //HQ Smooth
+	#define DM_W 0.000 //HQ Trim
+	#define PEW 1
+	#define DAA 1
 	#define NDW 1
 #elif (App == 0xC073C2BB ) //StreetFighter V
 	#define DA_Y 14.0
