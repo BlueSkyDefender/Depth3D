@@ -2087,19 +2087,32 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DE_Z 0.375
 	#define PEW 1
 	#define NDW 1
-#elif (App == 0x424052D0 ) //Talos Principle
+#elif (App == 0x424052D0 || App == 0xF23A4A0B ) //Talos Principle
 	#define DA_W 1
-	#define DA_X 0.10
-	#define DF_Y 0.05
-	#define DA_Y 20.5
+	#define DA_X 0.050
+	#define DF_Y 0.065
+	#define DA_Y 22.5
 	#define DA_Z 0.100
 	#define DB_Z 0.200
 	#define DB_Y 1
-	#define DE_X 1
+	#define DE_X 4
 	#define DE_Y 0.5
 	#define DE_Z 0.375
+    #define BMT 1    
+    #define DF_Z 0.125
+    #define SMS 3      //SM Toggle Separation
+	#define DL_X 0.550 //SM Tune
+	#define DL_Y 6     //SM Weapon Tune
+	#define DL_Z 0.000 //SM Local Smooth
+	#define DL_W 0.025 //SM Perspective
+	#define DM_X 8     //HQ Tune
+	#define DM_Y 4     //HQ Boost
+	#define DM_Z 2     //HQ Smooth
+	#define DM_W 0.25  //HQ Trim
 	#define WSM 3
 	#define DB_W 14
+    #define HMT 1
+	#define DF_W 0.506
 	#define DAA 1
 #elif (App == 0x6EC76A83 ) //Watch Dogs 2
 	#define DA_W 1
