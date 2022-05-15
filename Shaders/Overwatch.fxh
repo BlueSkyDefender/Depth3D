@@ -1,7 +1,7 @@
 ////----------------------------------------//
 ///SuperDepth3D Overwatch Automation Shader///
 //----------------------------------------////
-// Version 2.5.6
+// Version 2.5.7
 //---------------------------------------OVERWATCH---------------------------------------//
 // If you are reading this stop. Go away and never look back. From this point on if you  //
 // still think it's is worth looking at this..... Then no one can save you or your soul. //
@@ -92,6 +92,7 @@ static const float NULL_Z_D = 0.0;                      //Null Z                
 static const float Check_Depth_Limit_Weapon_D = -0.100; //Check Depth Limit Weapon                      | DJ_W
 
 //FPS Focus
+static const int FPS_Focus_Type_D = 0;                  //FPS Focus Type: World | Weapon | Mix          | FPS
 static const int FPS_Focus_Method_D = 0;                //FPS Focus Method: Off | Switch | Hold         | DK_X
 static const int EFO_Eye_Selection_D = 0;               //Eye Eye Selection: Both | Right Eye | Left Eye| DK_Y
 static const int EFO_Fade_Selection_D = 0;              //Eye Fade Options: 0.1% | 0.2% | 0.3%          | DK_Z
@@ -3738,11 +3739,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DG_Z 0.070//Min
     #define DE_W 0.170
     #define DI_Z 0.070//Trim
-    #define WSM 2
-    #define DB_W 6
-    #define DF_X 0.250 
 	#define DJ_W 0.125
-    #define DK_W 2 //Set speed
 	#define SMS 1      //SM Toggle Separation
 	#define DL_X 0.600 //SM Tune
     #define DL_Y 1     //SM Weapon Smooth
@@ -3751,6 +3748,14 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DM_X 5    //HQ Tune
 	#define DM_Y 4     //HQ Boost
 	#define DM_Z 6     //HQ Smooth
+    #define WSM 2
+    #define DB_W 6
+    #define DF_X 0.250 
+    #define FPS 1
+    #define DK_X 2 //FPS Focus
+    #define DK_Y 0
+    #define DK_Z 0
+    #define DK_W 2 //Set speed
     #define PEW 1  
     #define FOV 1
 #elif (App == 0x3B03D773 ) //HardReset Redux
@@ -4654,6 +4659,9 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 #endif
 #ifndef BMT
     #define BMT Balance_Mode_Toggle_D          //Balance Mode Toggle
+#endif
+#ifndef FPS
+    #define FPS FPS_Focus_Type_D               //FPS Focus Type
 #endif
 #ifndef SMS
     #define SMS SM_Toggle_Sparation_D          //Smooth Mode Toggle Sparation
