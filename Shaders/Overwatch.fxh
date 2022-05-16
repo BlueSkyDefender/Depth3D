@@ -1034,6 +1034,14 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DE_Y 0.1875
 	#define DE_Z 0.475
 	#define DB_Z 0.375
+	#define BMT 1
+	#define DF_Z 0.125
+	#define SMS 1      //SM Toggle Separation
+	#define DL_X 0.650 //SM Tune
+	#define DL_W 0.050 //SM Perspective
+	#define DM_X 4    //HQ Tune
+	#define DM_Y 4     //HQ Boost
+	#define DM_Z 1     //HQ Smooth
 	#define RHW 1
 	#define NFM 1
 #elif (App == 0x88004DC9 || App == 0x1DDA9341) //Strange Brigade DX12 & Vulkan
@@ -4432,10 +4440,10 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DL_X 0.600 //SM Tune
 	#define DL_Z 0.000 //SM Local Smooth
 	#define DL_W 0.050 //SM Perspective
-	#define DM_X 12     //HQ Tune
+	#define DM_X 12    //HQ Tune
 	#define DM_Y 4     //HQ Boost
 	#define DM_Z 2     //HQ Smooth
-	#define DM_W 0.600 //HQ Trim
+	#define DM_W 0.000 //HQ Trim
 	#define PEW 1
 	#define DAA 1
 #else
