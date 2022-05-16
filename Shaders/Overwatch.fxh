@@ -1873,19 +1873,33 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define DI_Z 0.250 //Trim
 	#define SMS 1      //SM Toggle Separation
 	#define DL_X 0.5125//SM Tune
-	#define DL_Z 0.0   //SM Local Smooth ???
 	#define DL_W 0.0   //SM Perspective
 #elif (App == 0xB4C116F7 ) //Nioh
 	#define DA_W 1
-	#define DA_X 0.1
-	#define DA_Y 162.5
-	#define DA_Z 0.000125
-	#define DB_Z 0.200
+	#define DA_X 0.100 // 0.050//0.0375
+    #define DF_Y 0.080
+	#define DA_Y 170.0 //245.0
+	//#define DA_Z 0.000125
+	#define DB_Z 0.100
 	#define DB_Y 1
 	#define DE_X 1
 	#define DE_Y 0.5
 	#define DE_Z 0.4
-	#define DE_W 0.05
+	#define DG_W 0.25 //Pop out
+    #define BMT 1    
+    #define DF_Z 0.1125
+	#define REF 15      //Fix can go from 1 - 15 and 15 is low 1 is High
+	#define DI_W 2.5   //Adjustment for REF
+	#define DG_Z 0.025 //Min
+	//#define DE_W 0.0 //Max
+    #define DI_Z 0.050 //Trim
+	#define SMS 3      //SM Toggle Separation
+	#define DL_X 0.600 //SM Tune
+	#define DL_W 0.05  //SM Perspective
+	#define DM_X 5     //HQ Tune
+	#define DM_Y 4     //HQ Boost
+	#define DM_Z 5     //HQ Smooth
+	#define DM_W 0.000 //HQ Trim
 #elif (App == 0xD30783B6 ) //X-Com
 	#define DA_X 0.03
 	#define DA_Y 200.0
