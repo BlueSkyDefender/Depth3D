@@ -4467,7 +4467,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DF_Z 0.125
     #define SMS 2     //SM Toggle Separation
 	#define DL_X 0.600 //SM Tune
-	#define DL_Z 0.000 //SM Local Smooth
 	#define DL_W 0.050 //SM Perspective
 	#define DM_X 12    //HQ Tune
 	#define DM_Y 4     //HQ Boost
@@ -4475,6 +4474,26 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DM_W 0.000 //HQ Trim
 	#define PEW 1
 	#define DAA 1
+#elif (App == 0x50027232 ) //Yakuza0
+	#define DA_X 0.075
+	#define DF_Y 0.050
+	#define DA_Y 11.0
+	#define DB_Y 3
+	#define DE_X 1
+	#define DE_Y 0.4375
+	#define DE_Z 0.375
+    //#define DG_W 0.100 //Pop
+	#define BMT 1
+	#define DF_Z 0.100
+    #define SMS 3     //SM Toggle Separation
+	#define DL_X 0.750 //SM Tune
+	#define DL_W 0.025 //SM Perspective
+	#define DM_X 6     //HQ Tune
+	#define DM_Y 4     //HQ Boost
+	#define DM_Z 5     //HQ Smooth
+	//#define DM_W 0.000 //HQ Trim
+	#define PEW 1
+	#define NDW 1
 #else
 	#define NPW 1 //No Profile
 #endif
