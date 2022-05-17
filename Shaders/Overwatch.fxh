@@ -1361,13 +1361,28 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DB_W 22
 #elif (App == 0xF0F2CF6A ) //Dragon Ball Z: Kakarot
 	#define DA_W 1
-	#define DA_Y 24.0
-	#define DA_X 0.250
+	#define DA_Y 55.0
+	#define DA_X 0.09
+	#define DF_Y 0.03
 	#define DB_Y 3
 	#define DE_X 1
 	#define DE_Y 0.375
-	#define DE_Z 0.400
-	#define DB_Z 0.500 //Yay I know
+	#define DE_Z 0.375
+	#define DB_Z 0.200 //Yay I know
+    //#define DG_W -0.85 //Pop out
+	#define REF 9      //Fix can go from 1 - 15 and 15 is low 1 is High
+	#define DI_W 3     //Adjustment for REF
+	#define DG_Z 0.060 //Min
+	#define DI_Z 0.060 //Trim
+	#define BMT 1
+	#define DF_Z 0.130
+    #define SMS 2     //SM Toggle Separation
+	#define DL_X 0.525 //SM Tune
+	#define DL_W 0.025 //SM Perspective
+	#define DM_X 8    //HQ Tune
+	#define DM_Y 4     //HQ Boost
+	#define DM_Z 2     //HQ Smooth
+	//#define DM_W 0.050 //HQ Trim
 #elif (App == 0xFA2C0106 ) //Hat in Time
 	#define DA_X 0.250
 	#define DB_Y 4
