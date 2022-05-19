@@ -2523,7 +2523,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 #elif (App == 0x8C8F544C ) //Witcher 3
 	#define DA_W 1
     //#define DB_X 1
-	#define DA_Y 12.5
+	#define DA_Y 11.0 // 10.5
 	#define DA_X 0.0600
 	#define DF_Y 0.0125
 	//#define DF_Y 0.1
@@ -2532,19 +2532,18 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	//#define DA_Z 0.0005
 	#define DE_X 1
 	#define DE_Y 0.450
-	#define DE_Z 0.375
-	#define DG_W 0.25  //Pop out allowed
+	#define DE_Z 0.400
+	#define DG_W -0.2  //Pop out allowed
 	#define BMT 1
 	#define DF_Z 0.150
 	#define REF 15     //Fix can go from 1 - 15 and 15 is low 1 is High
 	#define DI_W 1.7   //Adjustment for REF
 	#define SMS 1      //SM Toggle Separation
 	#define DL_X 0.675 //SM Tune
-	#define DL_Z 0.000 //SM Local Smooth
 	#define DL_W 0.050 //SM Perspective
 	#define DM_X 8     //HQ Tune
 	#define DM_Y 2     //HQ Boost
-	#define DM_Z 1     //HQ Perspective
+	#define DM_Z 3     //HQ Smooth
 	#define PEW 1
 	#define DAA 1
 #elif (App == 0xA05A15C4 ) //Spooky's House of Jump Scares
