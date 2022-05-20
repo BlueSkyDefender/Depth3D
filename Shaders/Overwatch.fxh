@@ -2530,7 +2530,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DB_Y 4
 	//#define DB_Z 0.125
 	//#define DA_Z 0.0005
-	#define DE_X 1
+	#define DE_X 3
 	#define DE_Y 0.450
 	#define DE_Z 0.400
 	#define DG_W -0.2  //Pop out allowed
@@ -2539,7 +2539,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define REF 15     //Fix can go from 1 - 15 and 15 is low 1 is High
 	#define DI_W 1.7   //Adjustment for REF
 	#define SMS 1      //SM Toggle Separation
-	#define DL_X 0.675 //SM Tune
+	#define DL_X 0.600 //SM Tune
 	#define DL_W 0.050 //SM Perspective
 	#define DM_X 8     //HQ Tune
 	#define DM_Y 2     //HQ Boost
