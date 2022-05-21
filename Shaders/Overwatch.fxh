@@ -4498,25 +4498,50 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 #elif (App == 0xBB2E4EFB ) //MassEffect
 	#define DA_X 0.050
 	#define DF_Y 0.0375
-	#define DA_Y 15.0
+	#define DA_Y 14.0
 	#define DB_Y 3
 	#define DE_X 1
-	#define DE_Y 0.500
-	#define DE_Z 0.375
+	#define DE_Y 0.4400
+	#define DE_Z 0.4375
     //#define DG_W 0.100 //Pop
     #define REF 14 //Fix can go from 1 - 15 and 15 is low 1 is High
-	#define DI_W 1.75 //Adjustment for REF
+	#define DI_W 1.25 //Adjustment for REF
 	#define BMT 1
 	#define DF_Z 0.1375
     #define SMS 1     //SM Toggle Separation
-	#define DL_X 0.900 //SM Tune
+	#define DL_X 0.800 //SM Tune
+	//#define DL_W 0.025 //SM Perspective
+	#define DM_X 6     //HQ Tune
+	#define DM_Y 8     //HQ Boost
+	#define DM_Z 4     //HQ Smooth
+	#define DM_W 0.000 //HQ Trim
+	#define PEW 1
+    #define DSW 1
+    #define FOV 1
+#elif (App == 0xBB2E50AE ) //MassEffect 2
+	#define DA_X 0.050
+	#define DF_Y 0.0375
+	#define DA_Y 12.5
+	#define DB_Y 3
+	#define DE_X 1
+	#define DE_Y 0.475
+	#define DE_Z 0.400
+    //#define DG_W 0.100 //Pop
+    #define REF 14 //Fix can go from 1 - 15 and 15 is low 1 is High
+	#define DI_W 1.25 //Adjustment for REF
+	#define BMT 1
+	#define DF_Z 0.1375
+    #define SMS 1     //SM Toggle Separation
+	#define DL_X 0.800 //SM Tune
 	//#define DL_W 0.025 //SM Perspective
 	#define DM_X 7     //HQ Tune
 	#define DM_Y 8     //HQ Boost
 	#define DM_Z 4     //HQ Smooth
-	//#define DM_W 0.000 //HQ Trim
+	#define DM_W 0.000 //HQ Trim
 	#define PEW 1
-#elif (App == 0xBB2E50AE ) //MassEffect 2
+    #define DSW 1
+    #define FOV 1
+#elif (App == 0xBB2E5261 ) //MassEffect 3
 	#define DA_X 0.050
 	#define DF_Y 0.0375
 	#define DA_Y 13.0
@@ -4530,13 +4555,15 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define BMT 1
 	#define DF_Z 0.1375
     #define SMS 1     //SM Toggle Separation
-	#define DL_X 0.850 //SM Tune
+	#define DL_X 0.75 //SM Tune
 	//#define DL_W 0.025 //SM Perspective
-	#define DM_X 8     //HQ Tune
+	#define DM_X 4     //HQ Tune
 	#define DM_Y 8     //HQ Boost
 	#define DM_Z 4     //HQ Smooth
 	#define DM_W 0.000 //HQ Trim
 	#define PEW 1
+    #define DSW 1
+    #define FOV 1
 #else
 	#define NPW 1 //No Profile
 #endif
