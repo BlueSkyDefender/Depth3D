@@ -1,7 +1,7 @@
 ////----------------------------------------//
 ///SuperDepth3D Overwatch Automation Shader///
 //----------------------------------------////
-// Version 2.5.7
+// Version 2.6.0
 //---------------------------------------OVERWATCH---------------------------------------//
 // If you are reading this stop. Go away and never look back. From this point on if you  //
 // still think it's is worth looking at this..... Then no one can save you or your soul. //
@@ -61,7 +61,7 @@ static const float Weapon_Near_Depth_Max_D = 0.0;       //Weapon Near Depth     
 static const int Balance_Mode_Toggle_D = 0;             // 0 | 1 : Off | On                             | BMT
 static const float ZPD_Weapon_Boundary_Adjust_D = 0.0;  //ZPD Weapon Boundary Adjust                    | DF_X
 static const float Separation_D = 0.0;                  //ZPD Separation                                | DF_Y
-static const float Manual_ZPD_Balance_D = 0.5;          //Manual Balance Mode Adjustment                | DF_Z
+static const float Manual_ZPD_Balance_D = 0.15;         //Manual Balance Mode Adjustment                | DF_Z
 static const float HUDX_D = 0.0;                        //Heads Up Display Cut Off Point                | DF_W
 
 //Specialized Depth Trigger
@@ -86,9 +86,11 @@ static const float LB_Masking_Offset_Y_D = 1.0;         //LetterBox Masking Offs
 static const float Weapon_Near_Depth_Trim_D = 0.25;     //Weapon Near Depth                     Trim    | DI_Z
 static const float REF_Check_Depth_Limit_D = 0.0;       //Resident Evil Fix Check Depth Limit           | DI_W
 
+//Leftover Values
+static const int Alternate_Frame_Detection_ZPD_D = 0;   //Alternate Frame Detection ZPD 0 | 1 : Off / On| ADP
 static const float NULL_X_D = 0.0;                      //Null X                                        | DJ_X
-static const float NULL_Y_D = 0.0;                      //Null Y                                        | DJ_Y
-static const float NULL_Z_D = 0.0;                      //Null Z                                        | DJ_Z
+static const float3 Menu_Detection_Type_D = 0;          //Menu Detection Type                           | DJ_Y
+static const float3 Match_Threshold_D = 0.0;            //Match Threshold                               | DJ_Z
 static const float Check_Depth_Limit_Weapon_D = -0.100; //Check Depth Limit Weapon                      | DJ_W
 
 //FPS Focus
@@ -102,13 +104,20 @@ static const int EFO_Fade_Speed_Selection_D = 0;        //Eye Fade Speed Options
 static const int SM_Toggle_Sparation_D = 1;             // 0 | 1 | 2 | 3                                | SMS
 static const float SM_Tune_D = 0.5;                     //SM Tune                                       | DL_X
 static const int SM_Weapon_D = 1;                       //SM Weapon                                     | DL_Y
-static const float SM_Local_Smoothing_D = 0.0;          //SM Local Smoothing                            | DL_Z
+static const float SM_Local_Smoothing_D = 0.0;          //SM Local Smoothing                            | DL_Z // Marked for removal
 static const float SM_Perspective_D  = 0.05;            //SM Perspective                                | DL_W
 //SM HQ Values
 static const int HQ_Tune_D = 4;                         //HQ Tune                                       | DM_X
 static const int HQ_Boost_D = 4;                        //HQ Boost                                      | DM_Y
 static const int HQ_Smooth_D = 1;                       //HQ Smooth 0 - 6                               | DM_Z
 static const float HQ_Trim_D = 0.0;                     //HQ Trim 0.0 - 0.5                             | DM_W
+
+//Simple Menu Detection
+static const int Menu_Detection_Direction_D = 0;        // Off 0 | 1 | 2 | 3 | 4                        | MDD
+static const float4 Pos_XY_XY_AB_D = 0;                 //Position A XY B XY                            | DN_X
+static const float4 Pos_XY_XY_CD_D = 0;                 //Position C XY D XY                            | DN_Y
+static const float4 Pos_XY_XY_EF_D = 0;                 //Position E XY F XY                            | DN_Z
+static const float4 Menu_Size_Adjust_D = 0;             //Menu Size Main ABC | D | E | F                | DN_W
 
 //Special Toggles Defaults
 static const int Resident_Evil_Fix_D = 0;               //Resident Evil Fix                             | REF
@@ -4063,10 +4072,13 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define DE_Z 0.375
     #define BMT 1    
     #define DF_Z 0.100
-	#define SMS 2      //SM Toggle Separation
+    #define SMS 0      //SM Toggle Separation
 	#define DL_X 0.600 //SM Tune
-	#define DL_Z 0.500 //SM Local Smooth ???
-	#define DL_W 0.050 //SM Perspective
+	//#define DL_W 0.050 //SM Perspective
+	#define DM_X 10    //HQ Tune
+	#define DM_Y 2     //HQ Boost
+	#define DM_Z 3     //HQ Smooth
+	#define DM_W 0.500 //HQ Trim
 	#define PEW 1
 #elif (App == 0x98E46BDC ) //Forgive Me Father
     #define DA_W 1
@@ -4564,6 +4576,125 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define PEW 1
     #define DSW 1
     #define FOV 1
+#elif (App == 0xDA130F0B ) //Poppy PlayTime Ch. 1
+	#define DA_W 1
+	#define DA_X 0.051
+	#define DF_Y 0.031
+	#define DA_Y 125.0
+	#define DB_Y 3
+	#define DE_X 1
+	#define DE_Y 0.500
+	#define DE_Z 0.250
+    //#define DG_W -0.500 //Pop
+    #define REF 15 //Fix can go from 1 - 15 and 15 is low 1 is High
+	#define DI_W 1.75 //Adjustment for REF
+	#define BMT 1
+	#define DF_Z 0.065
+    #define SMS 2      //SM Toggle Separation
+	#define DL_X 0.775 //SM Tune
+	#define DL_Y 1     //SM Weapon Tune
+	//#define DL_W 0.00 //SM Perspective
+	#define DM_X 1     //HQ Tune
+	#define DM_Y 8     //HQ Boost
+	#define DM_Z 6     //HQ Smooth
+	//#define DM_W 0.000 //HQ Trim
+	#define PEW 1
+    #define FOV 1
+    #define WSM 2
+    #define DB_W 16
+    #define AFD 1
+    #define MDD 1 //Set Menu Detection & Direction    //Off 0 | 1 | 2 | 3 | 4      
+    #define DN_X float4( 0.050, 0.900,  0.2150, 0.8888) //Pos A = XY White & B = ZW Black 
+    #define DN_Y float4( 0.133, 0.240,  0.3725, 0.0400) //Pos C = XY White & D = ZW Match
+    #define DN_Z float4( 0.545, 0.533,  0.405, 0.3620) //Pos E = XY Match & F = ZW Match
+	#define DN_W float4( 0.267, 0.375, 0.554, 0.542 ) //Size = Menu [ABC] D E F
+    #define DJ_Y float3( 3, 0, 3);                    //Menu Detection Type   
+    #define DJ_Z float3( 2.6, 3.0, 3.0);              //Set Match Tresh   
+#elif (App == 0xFD4C916D ) //Poppy PlayTime Ch. 2
+	#define DA_W 1
+	#define DA_X 0.051
+	#define DF_Y 0.031
+	#define DA_Y 125.0
+	#define DB_Y 3
+	#define DE_X 1
+	#define DE_Y 0.500
+	#define DE_Z 0.250
+    //#define DG_W -0.500 //Pop
+    #define REF 15 //Fix can go from 1 - 15 and 15 is low 1 is High
+	#define DI_W 1.75 //Adjustment for REF
+	#define BMT 1
+	#define DF_Z 0.065
+    #define SMS 2      //SM Toggle Separation
+	#define DL_X 0.775 //SM Tune
+	#define DL_Y 1     //SM Weapon Tune
+	//#define DL_W 0.00 //SM Perspective
+	#define DM_X 1     //HQ Tune
+	#define DM_Y 8     //HQ Boost
+	#define DM_Z 6     //HQ Smooth
+	//#define DM_W 0.000 //HQ Trim
+	#define PEW 1
+    #define FOV 1
+    #define WSM 2
+    #define DB_W 16
+    #define AFD 1
+    #define MDD 1 //Set Menu Detection & Direction     //Off 0 | 1 | 2 | 3 | 4      
+    #define DN_X float4( 0.0230, 0.0650,  0.114, 0.201) //Pos A = XY Black & B = ZW Other 
+    #define DN_Y float4( 0.2000, 0.8888,  0.545, 0.533) //Pos C = XY Black & D = ZW Match
+    #define DN_Z float4( 0.5160, 0.0430,  0.0, 0.0)     //Pos E = XY Match & F = ZW Match
+	#define DN_W float4( 0.266, 0.571, 0.542, 0.0 )    //Size = Menu [ABC] D E F
+    #define DJ_Y float3( 0, 1.8, 0);                   //Menu Detection Type   
+    #define DJ_Z float3( 3, 2.3, 1000);                //Set Match Tresh 
+#elif (App == 0x2E105B97 ) //Chorus
+	#define DA_W 1
+	#define DA_X 0.050
+	#define DF_Y 0.020
+	#define DA_Y 17.5
+	#define DB_Y 3
+	#define DE_X 1
+	#define DE_Y 0.500
+	#define DE_Z 0.4375
+    //#define DG_W 0.100 //Pop
+	#define BMT 1
+	#define DF_Z 0.150
+    #define SMS 1     //SM Toggle Separation
+	#define DL_X 0.525//SM Tune
+	//#define DL_W 0.000 //SM Perspective
+	#define DM_X 2     //HQ Tune
+	#define DM_Y 1     //HQ Boost
+	#define DM_Z 5     //HQ Smooth
+	//#define DM_W 0.000 //HQ Trim
+    #define MDD 1 //Set Menu Detection & Direction    //Off 0 | 1 | 2 | 3 | 4      
+    #define DN_X float4( 0.500, 0.995,  0.052, 0.919) //Pos A = XY Black & B = ZW Other 
+    #define DN_Y float4( 0.084, 0.9652,  0.0, 0.0)     //Pos C = XY Black & D = ZW Match
+    #define DN_Z float4( 0.0, 0.0,  0.0, 0.0)         //Pos E = XY Match & F = ZW Match
+	#define DN_W float4( 0.999, 0.0, 0.0, 0.0 )         //Size = Menu [ABC] D E F
+    #define DJ_Y float3( 0.0, 1.5, 0.0);              //Menu Detection Type   
+    #define DJ_Z float3( 1000, 1000, 1000);           //Set Match Tresh 
+	#define PEW 1
+	#define DAA 1
+#elif (App == 0x54BD1D74 ) //Biomutant
+	#define DA_W 1
+	#define DA_X 0.050
+	#define DF_Y 0.010
+	#define DA_Y 17.5
+	#define DB_Y 3
+	#define DE_X 1
+	#define DE_Y 0.500
+	#define DE_Z 0.375
+    #define DG_W -0.30 //Neg-Pop
+    #define DG_Z 0.150 //Min
+    //#define DE_W 0.105 //Max
+    #define DI_Z 0.200 //Trim
+	#define BMT 1
+	#define DF_Z 0.130
+    #define SMS 3      //SM Toggle Separation
+	#define DL_X 0.700 //SM Tune
+	#define DL_W 0.025 //SM Perspective
+	#define DM_X 8     //HQ Tune
+	#define DM_Y 6     //HQ Boost
+	#define DM_Z 5     //HQ Smooth
+	#define DM_W 0.800 //HQ Trim
+	#define PEW 1	
 #else
 	#define NPW 1 //No Profile
 #endif
@@ -4696,15 +4827,15 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DI_W REF_Check_Depth_Limit_D
 #endif
 
-// X = [NULL X] Y = [NULL Y] Z = [NULL Z] W = [Check Depth Limit Weapon]
+// X = [NULL X] Y = [Menu Detection Type] Z = [Match Threshold] W = [Check Depth Limit Weapon]
 #ifndef DJ_X
     #define DJ_X NULL_X_D
 #endif
 #ifndef DJ_Y
-    #define DJ_Y NULL_Y_D
+    #define DJ_Y Menu_Detection_Type_D
 #endif
 #ifndef DJ_Z
-    #define DJ_Z NULL_Z_D
+    #define DJ_Z Match_Threshold_D
 #endif 
 #ifndef DJ_W
 	#define DJ_W Check_Depth_Limit_Weapon_D
@@ -4752,6 +4883,20 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DM_W HQ_Trim_D 
 #endif
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// X = [Position A & B] Y = [Position C & D] Z = [Position E & F] W = [Menu Size Main]
+#ifndef DN_X
+    #define DN_X Pos_XY_XY_AB_D
+#endif
+#ifndef DN_Y
+    #define DN_Y Pos_XY_XY_CD_D
+#endif
+#ifndef DN_Z
+    #define DN_Z Pos_XY_XY_EF_D
+#endif 
+#ifndef DN_W
+	#define DN_W Menu_Size_Adjust_D 
+#endif
+
 //Special Toggles
 #ifndef REF
     #define REF Resident_Evil_Fix_D            //Resident Evil Fix
@@ -4791,6 +4936,12 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 #endif
 #ifndef SMS
     #define SMS SM_Toggle_Sparation_D          //Smooth Mode Toggle Sparation
+#endif
+#ifndef MDD
+    #define MDD Menu_Detection_Direction_D     //Menu Detection & Direction
+#endif
+#ifndef AFD
+    #define AFD Alternate_Frame_Detection_ZPD_D//Alternate Frame Detection for ZPD
 #endif
 
 #ifndef NPW
@@ -4977,7 +5128,7 @@ float4 Weapon_Profiles(float WP ,float4 Weapon_Adjust) //Could reduce from 76 to
     if (WP == 15)
         Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 13 | Game
     if (WP == 16)
-        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 14 | Game
+        Weapon_Adjust = float4(0.750,10.250,0.1125,0.0);  //WP 14 | Poppy Playtime
     if (WP == 17)
         Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 15 | Game
     if (WP == 18)

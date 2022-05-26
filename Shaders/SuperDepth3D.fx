@@ -2,7 +2,7 @@
 ///**SuperDepth3D**///
 //----------------////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//* Depth Map Based 3D post-process shader v3.1.8
+//* Depth Map Based 3D post-process shader v3.2.0
 //* For Reshade 3.0+
 //* ---------------------------------
 //*
@@ -37,7 +37,7 @@
 	#define OSW 0
 #else// DA_X = [ZPD] DA_Y = [Depth Adjust] DA_Z = [Offset] DA_W = [Depth Linearization]
 	static const float DA_X = 0.025, DA_Y = 7.5, DA_Z = 0.0, DA_W = 0.0;
-	// DB_X = [Depth Flip] DB_Y = [Auto Balance] DB_Z = [Auto Depth] DB_W = [Weapon Hand]
+	// DC_X = [Depth Flip] DC_Y = [Auto Balance] DC_Z = [Auto Depth] DC_W = [Weapon Hand]
 	static const float DB_X = 0, DB_Y = 0, DB_Z = 0.1, DB_W = 0.0;
 	// DC_X = [Barrel Distortion K1] DC_Y = [Barrel Distortion K2] DC_Z = [Barrel Distortion K3] DC_W = [Barrel Distortion Zoom]
 	static const float DC_X = 0, DC_Y = 0, DC_Z = 0, DC_W = 0;
@@ -53,15 +53,17 @@
 	static const float DH_X = 1.0, DH_Y = 1.0, DH_Z = 0.0, DH_W = 0.0;
 	// DI_X = [LBM Offset X] DI_Y = [LBM Offset Y] DI_Z = [Weapon Near Depth Trim] DI_W = [REF Check Depth Limit]
 	static const float DI_X = 0.0, DI_Y = 0.0, DI_Z = 0.25, DI_W = 0.0;
-	// DJ_X = [NULL X] DJ_Y = [NULL Y] DJ_Z = [NULL Z] DJ_W = [Check Depth Limit Weapon]
-	static const float DJ_X = 0.0, DJ_Y = 0.0, DJ_Z = 0.25, DJ_W = -0.100;	
+	// DJ_X = [NULL X] DJ_Y = [Menu Detection Type] DJ_Z = [Match Threshold] DJ_W = [Check Depth Limit Weapon]
+	static const float DJ_X = 0.0, DJ_Y = 0.0, DJ_Z = 0.0, DJ_W = -0.100;
 	// DK_X = [FPS Focus Method] DK_Y = [Eye Eye Selection] DK_Z = [Eye Fade Selection] DK_W = [Eye Fade Speed Selection]	
 	static const float DK_X = 0, DK_Y = 0.0, DK_Z = 0, DK_W = 0;	
+	// DM_X = [Position A & B] DN_Y = [Position C & D] DM_Z = [Position E & F] DN_W = [Menu Size Main]	
+	static const float4 DN_X = 0.0, DN_Y = 0.0, DN_Z = 0.0, DN_W = 0.0;
 	// WSM = [Weapon Setting Mode]
 	#define OW_WP "WP Off\0Custom WP\0"
 	static const int WSM = 0;
 	//Triggers
-	static const int REF = 0, NCW = 0, RHW = 0, NPW = 0, IDF = 0, SPF = 0, BDF = 0, HMT = 0, DFW = 0, NFM = 0, DSW = 0, BMT = 0, LBC = 0, LBS = 0, LBM = 0, DAA = 0, NDW = 0, PEW = 0, WPW = 0, FOV = 0, EDW = 0, SDT = 0;
+	static const int AFD = 0, MDD = 0, FPS = 1, SMS = 1, REF = 0, NCW = 0, RHW = 0, NPW = 0, IDF = 0, SPF = 0, BDF = 0, HMT = 0, DFW = 0, NFM = 0, DSW = 0, BMT = 0, LBC = 0, LBS = 0, LBM = 0, DAA = 0, NDW = 0, PEW = 0, WPW = 0, FOV = 0, EDW = 0, SDT = 0;
 	//Overwatch.fxh State
 	#define OSW 1
 #endif
@@ -122,6 +124,22 @@
 #define Cursor_Lock_Key 4 // Set default on mouse 4
 #define Fade_Key 1 // Set default on mouse 1
 #define Fade_Time_Adjust 0.5625 // From 0 to 1 is the Fade Time adjust for this mode. Default is 0.5625;
+
+//Menu Masking 
+//The First value is Menu Masking This can be set from 0 Off to 1 2 3 4 and each value from 1-4 is a direction The first direction is LEFT to Right and so on.
+//This Need many values for positions of specific pixel locations for at least 2 White and 1 Black to detect if an menu is open.
+//The next 3 Positions need to be a Detection match with an match treshold. 
+//Then you can set  Menu Size for at least 3 diffrent Menus that open.
+//I don't expect any one to be able to use this fuction. But, It going to be used by Overwatch for some games. The first game is Poppy Playtime Chapter 1.
+#define Menu_Masking 0 //Set from 0 Off to 1 > 2 < 3 ^ 4 \/ Directions
+
+static const float4 POS_XYZW[3] = { float4( 0.0, 0.0,   0.0, 0.0), //Pos A = XY Menu_Type X & B = ZW Menu_Type Y 
+									float4( 0.0, 0.0,   0.0, 0.0), //Pos C = XY Menu_Type Z & D = ZW Match
+									float4( 0.0, 0.0,   0.0, 0.0)};//Pos E = XY Match & F = ZW Match
+
+static const float4 Set_Menu_Size = float4( 0.0, 0.0, 0.0, 0.0 );  //Size = Menu [ABC] D E F
+static const float3 Menu_Type = float3(3, 0, 3); //Default [ A White | B Black | C White] But, it can be anything. 
+static const float3 Set_Match_Threshold =float3( 0.0, 0.0, 0.0 );  //Set Match Threshold for D E F
 
 // Delay Frame for instances the depth bufferis 1 frame behind useful for games that need "Copy Depth Buffer
 // Before Clear Operation," Is checked in the API Depth Buffer tab in ReShade.
@@ -208,7 +226,7 @@ uniform float Divergence <
 uniform float2 ZPD_Separation <
 	ui_type = "drag";
 	ui_min = 0.0; ui_max = 0.250;
-	ui_label = " ZPD & Sepration";
+	ui_label = " ZPD & Separation";
 	ui_tooltip = "Zero Parallax Distance controls the focus distance for the screen Pop-out effect also known as Convergence.\n"
 				"Separation is a way to increase the intensity of Divergence without a performance cost.\n"
 				"For FPS Games keeps this low Since you don't want your gun to pop out of screen.\n"
@@ -336,7 +354,7 @@ uniform float DLSS_FSR_Offset <
 	ui_type = "slider";
 	#endif
 	ui_min = 0.0; ui_max = 4.0;
-	ui_label = " Upscailer Offset";
+	ui_label = " Upscaler Offset";
 	ui_tooltip = "This Offset is for non conforming ZBuffer Postion witch is normaly 1 pixel wide.\n"
 				 "This issue only happens sometimes when using things like DLSS or FSR.\n"
 				 "This does not solve for TAA artifacts like Jittering or smearing.\n"
@@ -696,6 +714,7 @@ uniform bool Trigger_Fade_A < source = "mousebutton"; keycode = Fade_Key; toggle
 uniform bool Trigger_Fade_B < source = "mousebutton"; keycode = Fade_Key;>;
 uniform float2 Mousecoords < source = "mousepoint"; > ;
 uniform float frametime < source = "frametime";>;
+uniform bool Alternate < source = "framecount";>;     // Alternate Even Odd frames
 uniform float timer < source = "timer"; >;
 #if Compatibility_FP
 uniform float3 motion[2] < source = "freepie"; index = 0; >;
@@ -943,6 +962,54 @@ float SDTriggers()//Specialized Depth Triggers
 		return 0;
 }
 #endif
+
+#if MDD || Menu_Masking
+float3 C_Tresh(float2 TCLocations)//Color Tresh
+{ 
+	return tex2Dlod(BackBufferCLAMP,float4(TCLocations,0, 0)).rgb;
+}
+
+float RN_Value(float i)
+{
+	return round(i * 10.0f) * 0.1f;
+}
+
+float FN_Value(float i)
+{
+	return floor(i * 10.0f) * 0.1f;
+}
+
+bool Check_Color(float2 Pos_IN, float C_Value)
+{	float3 RGB_IN = C_Tresh(Pos_IN);
+	return RN_Value(RGB_IN.r + RGB_IN.g + RGB_IN.b) == C_Value ? 1 : 0;
+}
+
+int Color_Likelyhood(float2 Pos_IN, float C_Value, int Switcher)
+{	float3 RGB_IN = C_Tresh(Pos_IN);
+	return FN_Value(RGB_IN.r) + FN_Value(RGB_IN.g) + FN_Value(RGB_IN.b) == C_Value ? Switcher : 0;
+}
+
+float Menu_Size()//Active RGB Detection
+{ 
+		#if Menu_Masking
+		float2 Pos_A = POS_XYZW[0].xy, Pos_B = POS_XYZW[0].zw, Pos_C = POS_XYZW[1].xy,
+			   Pos_D = POS_XYZW[1].zw, Pos_E = POS_XYZW[2].xy, Pos_F = POS_XYZW[2].zw;
+		float Menu_Size_Selection[5] = { 0.0, Set_Menu_Size.x, Set_Menu_Size.y, Set_Menu_Size.z, Set_Menu_Size.w };
+		float3 MT_Values = Menu_Type;
+		float3 SMT_Values = Set_Match_Threshold;
+		#elif MDD
+		float2 Pos_A = DN_X.xy, Pos_B = DN_X.zw, Pos_C = DN_Y.xy,
+			   Pos_D = DN_Y.zw, Pos_E = DN_Z.xy, Pos_F = DN_Z.zw;
+		float Menu_Size_Selection[5] = { 0.0, DN_W.x, DN_W.y, DN_W.z, DN_W.w };
+		float3 MT_Values = DJ_Y;
+		float3 SMT_Values = DJ_Z;
+		#endif		
+		float Menu_Detection = Check_Color(Pos_A, MT_Values.x) && Check_Color(Pos_B, MT_Values.y) && Check_Color(Pos_C, MT_Values.z),
+			  Menu_Change = Menu_Detection + Color_Likelyhood(Pos_D, SMT_Values.x , 1) + Color_Likelyhood(Pos_E, SMT_Values.y , 2) + Color_Likelyhood(Pos_F, SMT_Values.z, 3);
+
+	return Menu_Detection > 0 ? Menu_Size_Selection[clamp((int)Menu_Change,0,4)] : 0;
+}	
+#endif
 /////////////////////////////////////////////////////////////Cursor///////////////////////////////////////////////////////////////////////////
 float4 MouseCursor(float2 texcoord )
 {   float4 Out = CSB(texcoord),Color;
@@ -1176,7 +1243,8 @@ float2 Fade(float2 texcoord) // Maybe make it float2 and pass the 2nd switch to 
 								   ZPD_Separation.x, ZPD_Separation.x, 
 								   ZPD_Separation.x * 0.9375, ZPD_Separation.x * 0.875, ZPD_Separation.x * 0.75, ZPD_Separation.x * 0.625, ZPD_Separation.x * 0.5 };	
 		//Screen Space Detector 7x7 Grid from between 0 to 1 and ZPD Detection becomes stronger as it gets closer to the Center.
-		float2 GridXY; int2 iXY = ZPD_Boundary == 3 ? int2( 12, 4) : int2( 7, 7) ;
+		float Double_Per_Frame = AFD ? Alternate ? 1 : 2 : 1;
+		float2 GridXY; int2 iXY = ( ZPD_Boundary == 3 ? int2( 12, 4) : int2( 7, 7) ) * Double_Per_Frame;
 		[loop]
 		for( int iX = 0 ; iX < iXY.x; iX++ )
 		{   [loop]
@@ -1381,6 +1449,21 @@ float3 DB_Comb( float2 texcoord)
 		if (!DepthCheck)
 			DM = 0.0625;
 	}
+
+	#if MDD || Menu_Masking	
+		float MSDT = Menu_Size(), Direction = texcoord.x < MSDT;
+
+		#if (MDD  == 2 || Menu_Masking == 2)		
+			Direction = texcoord.x > MSDT;
+		#elif (MDD  == 3 || Menu_Masking == 3)		
+			Direction = texcoord.y < MSDT;
+		#elif (MDD  == 4 || Menu_Masking == 4)
+			Direction = texcoord.y > MSDT;
+		#endif
+		if( MSDT > 0)
+			DM = Direction ? 0.0625 : DM;
+	#endif	
+	
 	#else
 	if (Depth_Detection == 1 || Depth_Detection == 2)
 	{ //Check Depth at 3 Point D_A Top_Center / Bottom_Center
