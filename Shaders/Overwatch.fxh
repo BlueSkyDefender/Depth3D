@@ -4355,7 +4355,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define PEW 1
 #elif (App == 0xE1D149FD ) //Max Payne 3 
 	//#define DA_W 1
-	#define DA_X 0.125
+	#define DA_X 0.115
 	#define DF_Y 0.050	
 	#define DA_Y 25.0 //15
     //#define DA_Z 0.00025 //-1.0
@@ -4366,14 +4366,13 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DE_W 0.105 //Max
     //#define DI_Z 0.200 //Trim
 	#define BMT 1
-	#define DF_Z 0.125 //0.1875
+	#define DF_Z 0.130
     //#define DG_W 0.100 //Pop
 	#define SMS 2      //SM Toggle Separation
-	#define DL_X 0.800 //SM Tune
-	#define DL_Z 0.000 //SM Local Smooth
+	#define DL_X 0.750 //SM Tune
 	#define DL_W 0.050 //SM Perspective
-	#define DM_X 5     //HQ Tune
-	#define DM_Y 4     //HQ Boost
+	#define DM_X 6     //HQ Tune
+	#define DM_Y 2     //HQ Boost
 	#define DM_Z 4     //HQ Smooth
 	#define PEW 1
 	#define DAA 1
