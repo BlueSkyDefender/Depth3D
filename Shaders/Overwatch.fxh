@@ -3597,19 +3597,21 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DF_Y 0.070
 	#define DB_Y 5
 	#define DE_X 1
-	#define DE_Y 0.475
+	#define DE_Y 0.450
 	#define DE_Z 0.300
-	#define DG_W 0.150
+	#define DG_W -0.150
 	#define DG_Z 0.0375  
-	#define DI_Z 0.10  
+	#define DI_Z 0.10
+	#define REF 15 //2 //Fix can go from 1 - 15 and 15 is low 1 is High
+	#define DI_W 1.0 //Adjustment for REF    
 	#define BMT 1    
 	#define DF_Z 0.140
-	#define SMS 1      //SM Toggle Separation
-	#define DL_X 0.375 //SM Tune
+	#define SMS 2      //SM Toggle Separation
+	#define DL_X 0.400 //SM Tune
 	//#define DL_Y 0   //SM Weapon Tune
 	#define DL_W 0.05  //SM Perspective
 	#define DM_X 12    //HQ Tune
-	#define DM_Y 8     //HQ Boost
+	#define DM_Y 4     //HQ Boost
 	#define DM_Z 6     //HQ Smooth
 	//#define DM_W 0.000 //HQ Trim
 	#define PEW 1
@@ -3702,7 +3704,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define DE_X 2
     #define DE_Y 0.750 //.0500 
     #define DE_Z 0.375
-    #define DG_W 1.25 //disallow some popout
+    #define DG_W 1.25 //popout
 	#define BMT 1    
 	#define DF_Z 0.130
 	//#define WSM 2 //Weapon Settings Mode
