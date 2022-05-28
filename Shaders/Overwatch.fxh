@@ -198,20 +198,26 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define DI_Z 0.250//0.160//Trim
 	#define FOV 1
 #elif (App == 0x7B81CCAB || App == 0xFB9A99AB )	//BorderLands 2 & Pre-Sequel
-	#define DA_Y 25.0
-	#define DA_Z 0.00025
-	#define DA_X 0.03750
+	#define DA_Y 24.0
+	//#define DA_Z 0.00025
+	#define DA_X 0.035
+	#define DF_Y 0.005
 	#define DB_Y 2 //Note This would require Lagacy Mode Once the trasition is made.
 	#define DB_W 4
 	#define DE_X 5
 	#define DE_Y 0.625
 	#define DE_Z 0.300
 	#define DF_X 0.300
-	#define SMS 0      //SM Toggle Separation
-	#define DL_X 0.600 //SM Tune
+	#define BMT 1
+	#define DF_Z 0.175
+    #define SMS 0      //SM Toggle Separation
+	#define DL_X 0.575 //SM Tune
 	#define DL_Y 2 //SM Weapon Smooth
-	#define DL_Z 0.75 //SM Local Smooth
 	#define DL_W 0.050 //SM Perspective
+	#define DM_X 4     //HQ Tune
+	#define DM_Y 4     //HQ Boost
+	#define DM_Z 4     //HQ Smooth
+	#define DM_W 0.035 //HQ Trim
 	#define NDW 1
 #elif (App == 0x2D950D30 )	//Fallout 4
 	#define DA_X 0.05
@@ -1512,12 +1518,11 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DG_W 0.210   //Pop out
 	#define DF_X 0.085
 	#define BMT 1    
-	#define DF_Z 0.170
+	#define DF_Z 0.160
 	#define DG_Z 0.075   //Min
 	#define DI_Z 0.185 //Trim
 	#define SMS 1 //SM Toggle Separation
 	#define DL_X 0.5625//SM Tune
-	#define DL_Z 0.250 //SM Local Smooth
 	#define DL_W 0.050 //SM Perspective
 	#define NDW 1
 	#define DAA 1
@@ -2818,12 +2823,15 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DE_Y 0.5
 	#define DE_Z 0.45
 	#define BMT 1    
-	#define DF_Z 0.1125
+	#define DF_Z 0.100
 	#define SMS 0      //SM Toggle Separation
 	#define DL_X 0.825 //SM Tune
-	#define DL_Y 0     //SM Weapon Tune
-	#define DL_Z 0.500 //SM Local Smooth
+	#define DL_Y 1     //SM Weapon Tune
 	#define DL_W 0.050 //SM Perspective
+	#define DM_X 8     //HQ Tune
+	#define DM_Y 4     //HQ Boost
+	#define DM_Z 1     //HQ Smooth
+	//#define DM_W 0.000 //HQ Trim
 	#define PEW 1
 	#define DAA 1
 	#define DB_W 27
