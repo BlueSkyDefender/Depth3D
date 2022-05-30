@@ -4293,8 +4293,11 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define DI_Z 0.0625 //Trim
 	#define SMS 1      //SM Toggle Separation
 	#define DL_X 0.625 //SM Tune
-	#define DL_Z 0.300 //SM Local Smooth
-	#define DL_W 0.100 //SM Perspective
+	#define DL_W 0.050 //SM Perspective
+	#define DM_X 4     //HQ Tune
+	#define DM_Y 4     //HQ Boost
+	#define DM_Z 3     //HQ Smooth
+	#define DM_W 0.000 //HQ Trim
 	#define PEW 1
 #elif (App == 0xF4901178 ) //The Surge 2
     #define DA_W 1 
