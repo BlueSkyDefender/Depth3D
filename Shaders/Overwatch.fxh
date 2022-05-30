@@ -2697,7 +2697,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DI_Z 0.150 //Trim
 	#define SMS 1      //SM Toggle Separation
 	#define DL_X 0.750 //SM Tune
-	#define DL_Z 0.750 //SM Local Smooth
 	#define DL_W 0.050 //SM Perspective
 	#define PEW 1
 	#define DAA 1
@@ -4378,7 +4377,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DI_Z 0.150 //Trim
 	#define SMS 2      //SM Toggle Separation
 	#define DL_X 0.750 //SM Tune
-	#define DL_Z 0.500 //SM Local Smooth
 	#define DL_W 0.050 //SM Perspective
 	#define PEW 1
 #elif (App == 0xE1D149FD ) //Max Payne 3 
