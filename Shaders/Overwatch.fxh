@@ -3371,20 +3371,23 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DA_W 1
 	#define DA_X 0.075
 	#define DF_Y 0.03
-	#define DA_Y 102.5
-	#define DA_Z -1.0  
+	#define DA_Y 150.0
 	#define DB_Y 3
 	#define DE_X 3
 	#define DE_Y 0.400
-	#define DE_Z 0.300
-	#define DG_W 0.125
+	#define DE_Z 0.375
+    #define AFD 1
+	#define DG_W -0.125
 	#define DG_Z 0.375
 	#define BMT 1    
-	#define DF_Z 0.125
-	#define SMS 1      //SM Toggle Separation
+	#define DF_Z 0.100
+    #define SMS 3      //SM Toggle Separation
 	#define DL_X 0.750 //SM Tune
-	#define DL_Z 0.500 //SM Local Smooth
-	#define DL_W 0.050 //SM Perspective
+	#define DL_W 0.025 //SM Perspective
+	#define DM_X 5     //HQ Tune
+	#define DM_Y 4     //HQ Boost
+	#define DM_Z 1     //HQ Smooth
+	//#define DM_W 0.800 //HQ Trim
 	#define NDW 1
 #elif (App == 0x921BC951 ) //SpongeBob SquarePants: Battle for Bikini Bottom - Rehydrated
 	#define DA_W 1
