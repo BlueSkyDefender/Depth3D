@@ -3831,23 +3831,26 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 #elif (App == 0x51C8FDAA ) //Assassin's Valhalla
 	#define DA_W 1
 	#define DA_Y 50.0
-    #define DA_Z -0.05
+    #define DA_Z -0.03
 	#define DA_X 0.045
 	#define DB_Y 1
 	#define DE_X 1
 	#define DE_Y 0.375
 	#define DE_Z 0.375
 	#define DB_Z 0.1
-	#define DF_Y 0.0025 
+	#define DF_Y 0.020 
     //#define DG_W -0.100 //Disallow popout  
 	#define BMT 1    
-	#define DF_Z 0.1375
+	#define DF_Z 0.12
 	#define DG_Z 0.07  
-	#define DI_Z 0.120
-	#define SMS 1      //SM Toggle Separation
+	#define DI_Z 0.125
+	#define SMS 2      //SM Toggle Separation
 	#define DL_X 0.500 //SM Tune
-	#define DL_Z 0.500 //SM Local Smooth ???
-	#define DL_W 0.050 //SM Perspective
+	#define DL_W 0.025 //SM Perspective
+	#define DM_X 9     //HQ Tune
+	#define DM_Y 4     //HQ Boost
+	#define DM_Z 5     //HQ Smooth
+	#define DM_W 0.000 //HQ Trim
     #define PEW 1 
 #elif (App == 0xB4403655 ) //Elden Ring
 	#define DA_W 1
@@ -3955,19 +3958,22 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 #elif (App == 0xFA6649D4 ) //Shadow Warrior 3
 	#define DA_W 1
     #define DA_X 0.070
-    #define DF_Y 0.007
+    #define DF_Y 0.0075
 	#define DA_Y 40.0
     #define DA_Z 0.0001
     //#define DB_Z 0.250
 	#define BMT 1    
-	#define DF_Z 0.1375
-	#define DG_Z 0.160//Min
+	#define DF_Z 0.135
+	#define DG_Z 0.170 //Min
 //	#define DE_W 0.0 //Max
-    #define DI_Z 0.300 //Trim
-	#define SMS 1      //SM Toggle Separation
-	#define DL_X 0.700 //SM Tune
-	#define DL_Z 0.700 //SM Local Smooth
+    #define DI_Z 0.3375//Trim
+	#define SMS 2      //SM Toggle Separation
+	#define DL_X 0.675 //SM Tune
 	#define DL_W 0.025 //SM Perspective
+	#define DM_X 5     //HQ Tune
+	#define DM_Y 4     //HQ Boost
+	#define DM_Z 2     //HQ Smooth
+	#define DM_W 0.000 //HQ Trim
     #define FOV 1
     #define PEW 1
 #elif (App == 0x45C250C6 ) //Dying Light 2
