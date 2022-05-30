@@ -4303,7 +4303,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define DA_W 1 
     #define DA_X 0.125
     #define DF_Y 0.0225
-    #define DA_Y 25.00
+    #define DA_Y 35.00
     #define DE_X 1
     #define DE_Y 0.375
     #define DE_Z 0.375
@@ -4314,8 +4314,11 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define DI_Z 0.150 //Trim
 	#define SMS 2      //SM Toggle Separation
 	#define DL_X 0.600 //SM Tune
-	#define DL_Z 0.400 //SM Local Smooth
 	#define DL_W 0.100 //SM Perspective
+	#define DM_X 4     //HQ Tune
+	#define DM_Y 4     //HQ Boost
+	#define DM_Z 3     //HQ Smooth
+	#define DM_W 0.000 //HQ Trim
 	#define PEW 1
 #elif (App == 0xBAC3D546 ) //Wolfenstine New Colossus II 
     #define DA_X 0.0404
