@@ -212,6 +212,10 @@ static const float3 Set_Match_Threshold =float3( 0.0, 0.0, 0.0 );  //Set Match T
 #else
 	#define Mask_Cycle_Key Set_Key_Code_Here
 #endif
+//This preprocessor is for Interlaced Reconstruction of Line Interlaced for Top and Bottom and Column Interlaced for Side by Side.
+#ifndef Interlaced_Reconstruction_Mode
+	#define Interlaced_Reconstruction_Mode 0
+#endif
 //uniform float TEST < ui_type = "drag"; ui_min = 0; ui_max = 1; > = 1.0;
 //Divergence & Convergence//
 uniform float Divergence <
@@ -655,6 +659,13 @@ uniform bool Cursor_Lock <
 	ui_tooltip = "Screen Cursor to Screen Crosshair Lock.";
 	ui_category = "Cursor Adjustments";
 > = false;
+
+uniform bool Toggle_Cursor <
+	ui_label = " Cursor Toggle";
+	ui_tooltip = "Turns Screen Cursor Off and On with out cycling once set to the type above.";
+	ui_category = "Cursor Adjustments";
+> = true;
+
 #if BD_Correction
 uniform int BD_Options <
 	ui_type = "combo";
@@ -743,9 +754,9 @@ uniform bool DepthCheck < source = "bufready_depth"; >;
 
 #define pix float2(BUFFER_RCP_WIDTH, BUFFER_RCP_HEIGHT)
 #define Per float2( (Perspective * pix.x) * 0.5, 0) //Per is Perspective
+#define texsize int2(BUFFER_WIDTH, BUFFER_HEIGHT)
 #define AI Interlace_Anaglyph_Calibrate.x * 0.5 //Optimization for line interlaced Adjustment.
-#define ARatio (BUFFER_WIDTH / BUFFER_HEIGHT)
-
+#define ARatio texsize.x / texsize.y
 
 float Scale(float val,float max,float min) //Scale to 0 - 1
 {
@@ -842,8 +853,20 @@ sampler SamplerzBufferN_L
 	{
 		Texture = texzBufferN_L;
 	};
+#if Interlaced_Reconstruction_Mode
+texture texSD_IR_L { Width = BUFFER_WIDTH ; Height = BUFFER_HEIGHT ; Format = RGB10A2;};
 
+sampler Sampler_SD_IR_L
+	{
+		Texture = texSD_IR_L;
+	};
+texture texSD_IR_R { Width = BUFFER_WIDTH ; Height = BUFFER_HEIGHT ; Format = RGB10A2;};
 
+sampler Sampler_SD_IR_R
+	{
+		Texture = texSD_IR_R;
+	};
+#endif
 #if UI_MASK
 texture TexMaskA < source = "DM_Mask_A.png"; > { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA8; };
 sampler SamplerMaskA { Texture = TexMaskA;};
@@ -1011,45 +1034,43 @@ float Menu_Size()//Active RGB Detection
 }	
 #endif
 /////////////////////////////////////////////////////////////Cursor///////////////////////////////////////////////////////////////////////////
+float CCBox(float2 TC, float2 b) 
+{
+	TC = abs(TC)-b;
+    return length(max(TC,0.0)) + min(max(TC.x,TC.y),0.0);
+}
+
+float CCCross(float2 TC, float2 size) 
+{
+    return min(CCBox(TC, float2( size.x, size.y / 9)), 
+			   CCBox( TC, float2( size.x / 9, size.y)));
+}
+
+float CCCursor(float2 TC, float2 size) 
+{
+    return CCBox(TC-size, size ) * CCBox(TC-size * 1.25, size * 0.5) * CCBox(TC-size * 1.25, size * 0.750);
+}
+
 float4 MouseCursor(float2 texcoord )
 {   float4 Out = CSB(texcoord),Color;
-		float A = 0.959375, TCoRF = 1-A, Cursor;
+		float Cursor;
 		if(Cursor_Type > 0)
 		{
-			float CCA = 0.005, CCB = 0.00025, CCC = 0.25, CCD = 0.00125, Arrow_Size_A = 0.7, Arrow_Size_B = 1.3, Arrow_Size_C = 4.0;//scaling
-			float2 MousecoordsXY = Mousecoords * pix, center = texcoord, Screen_Ratio = float2(ARatio,1.0), Size_Color = float2(1+Cursor_SC.x,Cursor_SC.y);
-			float THICC = (2.0+Size_Color.x) * CCB, Size = Size_Color.x * CCA, Size_Cubed = (Size_Color.x*Size_Color.x) * CCD;
+			float CCScale = lerp(0.005,0.025,Scale(Cursor_SC.x,10,0));//scaling
+			float2 MousecoordsXY = texcoord - (Mousecoords * pix), Scale_Cursor = float2(CCScale,CCScale* ARatio);
 
 			if (Cursor_Lock && !CLK)
-			MousecoordsXY = float2(0.5,lerp(0.5,0.5725,Scale(Cursor_SC.z,10,0) ));
+			MousecoordsXY = texcoord - float2(0.5,lerp(0.5,0.5725,Scale(Cursor_SC.z,10,0) ));
 
-			float4 Dist_from_Hori_Vert = float4( abs((center.x - (Size* Arrow_Size_B) / Screen_Ratio.x) - MousecoordsXY.x) * Screen_Ratio.x, // S_dist_fromHorizontal
-												 abs(center.x - MousecoordsXY.x) * Screen_Ratio.x, 										  // dist_fromHorizontal
-												 abs((center.y - (Size* Arrow_Size_B)) - MousecoordsXY.y),								   // S_dist_fromVertical
-												 abs(center.y - MousecoordsXY.y));														   // dist_fromVertical
-
-			//Cross Cursor
-			float B = min(max(THICC - Dist_from_Hori_Vert.y,0),max(Size-Dist_from_Hori_Vert.w,0)), A = min(max(THICC - Dist_from_Hori_Vert.w,0),max(Size-Dist_from_Hori_Vert.y,0));
-			float CC = A+B; //Cross Cursor
-
-			//Solid Square Cursor
-			float SSC = min(max(Size_Cubed - Dist_from_Hori_Vert.y,0),max(Size_Cubed-Dist_from_Hori_Vert.w,0)); //Solid Square Cursor
-
-			if (Cursor_Type == 3)
+			if(Toggle_Cursor)
 			{
-				Dist_from_Hori_Vert.y = abs((center.x - Size / Screen_Ratio.x) - MousecoordsXY.x) * Screen_Ratio.x ;
-				Dist_from_Hori_Vert.w = abs(center.y - Size - MousecoordsXY.y);
-			}
-			//Cursor
-			float C = all(min(max(Size - Dist_from_Hori_Vert.y,0),max(Size - Dist_from_Hori_Vert.w,0)));//removing the line below removes the square.
-				  C -= all(min(max(Size - Dist_from_Hori_Vert.y * Arrow_Size_C,0),max(Size - Dist_from_Hori_Vert.w * Arrow_Size_C,0)));//Need to add this to fix a - bool issue in openGL
-				  C -= all(min(max((Size * Arrow_Size_A) - Dist_from_Hori_Vert.x,0),max((Size * Arrow_Size_A)-Dist_from_Hori_Vert.z,0)));			// Cursor Array //
 			if(Cursor_Type == 1)
-				Cursor = CC;
+				Cursor = smoothstep( 0.0, 2 / pix.y, -CCCross( MousecoordsXY.xy, Scale_Cursor  * 0.75 ) ) ;
 			else if (Cursor_Type == 2)
-				Cursor = SSC;
+				Cursor = smoothstep( 0.0, 2 / pix.y, -CCBox( MousecoordsXY.xy, Scale_Cursor * 0.25 ) ) ;
 			else if (Cursor_Type == 3)
-				Cursor = C;
+				Cursor = smoothstep( 0.0, 2 / pix.y, -CCCursor( MousecoordsXY.xy, Scale_Cursor  * 0.5  ) ) ;
+			}
 
 			// Cursor Color Array //
 			float3 CCArray[11] = {
@@ -1630,11 +1651,17 @@ float2 Parallax(float Diverge, float2 Coordinates, float IO) // Horizontal paral
 		else
 			ParallaxCoord.x -= lerp(DepthDiffrence * 2.5, DepthDiffrence * (View_Mode == 1 ? 4.0 : 3.0), DD_Map) * pix.x;
 	}	
-	
+#if Interlaced_Reconstruction_Mode
+	if(Stereoscopic_Mode == 2 || Stereoscopic_Mode == 1)
+		ParallaxCoord.y += IO * pix.y; //Optimization for line interlaced.
+	else if(Stereoscopic_Mode == 3 || Stereoscopic_Mode == 0)
+		ParallaxCoord.x += IO * pix.x; //Optimization for column interlaced.
+#else	
 	if(Stereoscopic_Mode == 2)
 		ParallaxCoord.y += IO * pix.y; //Optimization for line interlaced.
 	else if(Stereoscopic_Mode == 3)
 		ParallaxCoord.x += IO * pix.x; //Optimization for column interlaced.
+#endif
 
 	return ParallaxCoord;
 }
@@ -1706,12 +1733,12 @@ float3 PS_calcLR(float2 texcoord)
 {
 	float2 TCL, TCR, TCL_T, TCR_T, TexCoords = texcoord, TC = texcoord;
 
-	[branch] if (Stereoscopic_Mode == 0)
+	[branch] if (Stereoscopic_Mode == 0 && Interlaced_Reconstruction_Mode != 1)
 	{
 		TCL = float2(texcoord.x*2,texcoord.y);
 		TCR = float2(texcoord.x*2-1,texcoord.y);
 	}
-	else if(Stereoscopic_Mode == 1)
+	else if(Stereoscopic_Mode == 1  && Interlaced_Reconstruction_Mode != 1)
 	{
 		TCL = float2(texcoord.x,texcoord.y*2);
 		TCR = float2(texcoord.x,texcoord.y*2-1);
@@ -1825,11 +1852,18 @@ float3 PS_calcLR(float2 texcoord)
 	    float3(L.x * DG, L.y     , R.z * DG), // L | L | R
 	    float3(R.x     , L.y * DG, L.z     ), // R | L | L
 	    float3(R.x * DG, R.y     , L.z * DG)};// R | R | L
-
+#if Interlaced_Reconstruction_Mode
+	float IL_Pattern = Stereoscopic_Mode ? floor(TC.y*texsize.y) : floor(TC.x*texsize.x);
+	if(Stereoscopic_Mode == 0)
+		color = fmod(IL_Pattern,2) ? R : L;
+	else if(Stereoscopic_Mode == 1)
+		color = fmod(IL_Pattern,2) ? R : L;
+#else
 	if(Stereoscopic_Mode == 0)
 		color = TexCoords.x < 0.5 ? L : R;
 	else if(Stereoscopic_Mode == 1)
 		color = TexCoords.y < 0.5 ? L : R;
+#endif
 	else if(Stereoscopic_Mode == 2)
 		color = fmod(gridxy.y,2) ? R : L;
 	else if(Stereoscopic_Mode == 3)
@@ -2434,6 +2468,73 @@ float3 Out(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Targe
 	else
 		return Color;
 }
+#if Interlaced_Reconstruction_Mode
+//Unilinear Left / Right
+float4 U_LR(in float2 texcoord,in int Switcher)
+{
+		float IL_Pattern = Stereoscopic_Mode ? floor(texcoord.y*texsize.y) : floor(texcoord.x*texsize.x);
+	if(Switcher == 1)
+		return fmod(IL_Pattern,2) ? 0 : tex2Dlod(BackBufferBORDER, float4(texcoord,0,0) ) ;
+	else	
+		return fmod(IL_Pattern,2) ? tex2Dlod(BackBufferBORDER, float4(texcoord,0,0) ) : 0 ;
+}
+
+float4 Uni_LR(in float2 texcoord,in int Switcher )
+{
+   float4 tl,tr,bl;
+   if(Stereoscopic_Mode == 0)
+   {
+    	  tl = U_LR(texcoord, Switcher),
+		  tr = U_LR(texcoord + float2(-pix.x, 0.0), Switcher),
+		  bl = U_LR(texcoord + float2( pix.x, 0.0), Switcher);
+   }
+   if(Stereoscopic_Mode == 1)
+   {
+		  tl = U_LR(texcoord, Switcher),
+		  tr = U_LR(texcoord + float2(0.0,-pix.y), Switcher),
+		  bl = U_LR(texcoord + float2(0.0, pix.y), Switcher);
+   }		  
+
+   float2 f = frac( texcoord * texsize );
+   float4 tA = lerp( tl, tr, f.x );
+   float4 tB = lerp( tl, bl, f.x );
+   float4 done = lerp( tA, tB, f.y ) * 2.0;//2.0 Gamma correction.
+   return done;
+}
+
+void Interlaced_Reconstructed(float4 position : SV_Position, float2 texcoord : TEXCOORD, out float3 Left : SV_Target0 , out float3 Right : SV_Target1)
+{
+
+	Left =  Uni_LR(texcoord, 0).rgb;
+	Right = Uni_LR(texcoord, 1).rgb;
+}
+
+float4 IR_Out(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Target
+{
+	float2 TCL,TCR;
+	[branch] if (Stereoscopic_Mode == 0)
+	{
+		TCL = float2(texcoord.x*2,texcoord.y);
+		TCR = float2(texcoord.x*2-1,texcoord.y);
+	}
+	else if(Stereoscopic_Mode == 1)
+	{
+		TCL = float2(texcoord.x,texcoord.y*2);
+		TCR = float2(texcoord.x,texcoord.y*2-1);
+	}
+	
+	float4 color, Left =  tex2Dlod(Sampler_SD_IR_L, float4(TCL,0,0) ), Right = tex2Dlod(Sampler_SD_IR_R, float4(TCR,0,0) );
+
+	if(Stereoscopic_Mode == 0)
+		color = texcoord.x < 0.5 ? Left : Right;
+	else if(Stereoscopic_Mode == 1)
+		color = texcoord.y < 0.5 ? Left : Right;
+	else
+		color = tex2Dlod(BackBufferBORDER, float4(texcoord,0,0) );
+		
+return color;
+}
+#endif
 ///////////////////////////////////////////////////////////////////ReShade.fxh//////////////////////////////////////////////////////////////////////
 void PostProcessVS(in uint id : SV_VertexID, out float4 position : SV_Position, out float2 texcoord : TEXCOORD)
 {// Vertex shader generating a triangle covering the entire screen
@@ -2485,6 +2586,20 @@ technique SuperDepth3D
 		VertexShader = PostProcessVS;
 		PixelShader = Out;
 	}
+	#if Interlaced_Reconstruction_Mode
+		pass Interlaced_Reconstruction
+	{
+		VertexShader = PostProcessVS;
+		PixelShader = Interlaced_Reconstructed;
+		RenderTarget0 = texSD_IR_L;
+		RenderTarget1 = texSD_IR_R;
+	}
+		pass IRStereoOut
+	{
+		VertexShader = PostProcessVS;
+		PixelShader = IR_Out;
+	}
+	#endif
 	#if D_Frame || DFW
 		pass AverageLuminance
 	{

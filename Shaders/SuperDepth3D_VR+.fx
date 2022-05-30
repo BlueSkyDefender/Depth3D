@@ -615,6 +615,13 @@ uniform bool Cursor_Lock <
 	ui_tooltip = "Screen Cursor to Screen Crosshair Lock.";
 	ui_category = "Cursor Adjustments";
 > = false;
+
+uniform bool Toggle_Cursor <
+	ui_label = " Cursor Toggle";
+	ui_tooltip = "Turns Screen Cursor Off and On with out cycling once set to the type above.";
+	ui_category = "Cursor Adjustments";
+> = true;
+
 #if BD_Correction
 uniform int BD_Options <
 	ui_type = "combo";
@@ -777,9 +784,8 @@ uniform bool DepthCheck < source = "bufready_depth"; >;
 #define pix float2(BUFFER_RCP_WIDTH, BUFFER_RCP_HEIGHT)
 #define Interpupillary_Distance IPD * pix.x
 #define AI Interlace_Anaglyph.x * 0.5 //Optimization for line interlaced Adjustment.
-#define Res float2(BUFFER_WIDTH, BUFFER_HEIGHT)
-#define ARatio (BUFFER_WIDTH / BUFFER_HEIGHT)
-
+#define Res int2(BUFFER_WIDTH, BUFFER_HEIGHT)
+#define ARatio Res.x / Res.y
 
 float Scale(float val,float max,float min) //Scale to 0 - 1
 {
@@ -1104,48 +1110,45 @@ float Menu_Size()//Active RGB Detection
 }		
 #endif
 /////////////////////////////////////////////////////////////Cursor///////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////Cursor///////////////////////////////////////////////////////////////////////////
+float CCBox(float2 TC, float2 b) 
+{
+	TC = abs(TC)-b;
+    return length(max(TC,0.0)) + min(max(TC.x,TC.y),0.0);
+}
+
+float CCCross(float2 TC, float2 size) 
+{
+    return min(CCBox(TC, float2( size.x, size.y / 9)), 
+			   CCBox( TC, float2( size.x / 9, size.y)));
+}
+
+float CCCursor(float2 TC, float2 size) 
+{
+    return CCBox(TC-size, size ) * CCBox(TC-size * 1.25, size * 0.5) * CCBox(TC-size * 1.25, size * 0.750);
+}
+
 float4 MouseCursor(float2 texcoord )
 {   float4 Out = CSB(texcoord),Color;
-		float A = 0.959375, TCoRF = 1-A, Cursor;
+		float Cursor;
 		if(Cursor_Type > 0)
 		{
-			float CCA = 0.005, CCB = 0.00025, CCC = 0.25, CCD = 0.00125, Arrow_Size_A = 0.7, Arrow_Size_B = 1.3, Arrow_Size_C = 4.0;//scaling
-			float2 MousecoordsXY = Mousecoords * pix, center = texcoord, Screen_Ratio = float2(ARatio,1.0), Size_Color = float2(1+Cursor_SC.x,Cursor_SC.y);
-			float THICC = (2.0+Size_Color.x) * CCB, Size = Size_Color.x * CCA, Size_Cubed = (Size_Color.x*Size_Color.x) * CCD;
+			float CCScale = lerp(0.005,0.025,Scale(Cursor_SC.x,10,0));//scaling
+			float2 MousecoordsXY = texcoord - (Mousecoords * pix), Scale_Cursor = float2(CCScale,CCScale* ARatio);
 
 			if (Cursor_Lock && !CLK)
-			MousecoordsXY = float2(0.5,lerp(0.5,0.5725,Scale(Cursor_SC.z,10,0) ));
-
-			float4 Dist_from_Hori_Vert = float4( abs((center.x - (Size* Arrow_Size_B) / Screen_Ratio.x) - MousecoordsXY.x) * Screen_Ratio.x, // S_dist_fromHorizontal
-												 abs(center.x - MousecoordsXY.x) * Screen_Ratio.x, 										  // dist_fromHorizontal
-												 abs((center.y - (Size* Arrow_Size_B)) - MousecoordsXY.y),								   // S_dist_fromVertical
-												 abs(center.y - MousecoordsXY.y));														   // dist_fromVertical
-
-
-			//Cross Cursor
-			float B = min(max(THICC - Dist_from_Hori_Vert.y,0),max(Size-Dist_from_Hori_Vert.w,0)), A = min(max(THICC - Dist_from_Hori_Vert.w,0),max(Size-Dist_from_Hori_Vert.y,0));
-			float CC = A+B; //Cross Cursor
-
-			//Solid Square Cursor
-			float SSC = min(max(Size_Cubed - Dist_from_Hori_Vert.y,0),max(Size_Cubed-Dist_from_Hori_Vert.w,0)); //Solid Square Cursor
-
-			if (Cursor_Type == 3)
+			MousecoordsXY = texcoord - float2(0.5,lerp(0.5,0.5725,Scale(Cursor_SC.z,10,0) ));
+			
+			if(Toggle_Cursor)
 			{
-				Dist_from_Hori_Vert.y = abs((center.x - Size / Screen_Ratio.x) - MousecoordsXY.x) * Screen_Ratio.x ;
-				Dist_from_Hori_Vert.w = abs(center.y - Size - MousecoordsXY.y);
-			}
-			//Cursor
-			float C = all(min(max(Size - Dist_from_Hori_Vert.y,0),max(Size - Dist_from_Hori_Vert.w,0)));//removing the line below removes the square.
-				  C -= all(min(max(Size - Dist_from_Hori_Vert.y * Arrow_Size_C,0),max(Size - Dist_from_Hori_Vert.w * Arrow_Size_C,0)));//Need to add this to fix a - bool issue in openGL
-				  C -= all(min(max((Size * Arrow_Size_A) - Dist_from_Hori_Vert.x,0),max((Size * Arrow_Size_A)-Dist_from_Hori_Vert.z,0)));			// Cursor Array //
-			// Cursor Array //
 			if(Cursor_Type == 1)
-				Cursor = CC;
+				Cursor = smoothstep( 0.0, 2 / pix.y, -CCCross( MousecoordsXY.xy, Scale_Cursor  * 0.75 ) ) ;
 			else if (Cursor_Type == 2)
-				Cursor = SSC;
+				Cursor = smoothstep( 0.0, 2 / pix.y, -CCBox( MousecoordsXY.xy, Scale_Cursor * 0.25 ) ) ;
 			else if (Cursor_Type == 3)
-				Cursor = C;
-
+				Cursor = smoothstep( 0.0, 2 / pix.y, -CCCursor( MousecoordsXY.xy, Scale_Cursor  * 0.5  ) ) ;
+			}
+			
 			// Cursor Color Array //
 			float3 CCArray[11] = {
 			float3(1,1,1),//White
