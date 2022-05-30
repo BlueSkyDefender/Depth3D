@@ -4203,10 +4203,13 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DB_W 5
 	#define NDW 1
 	#define DAA 1
-	#define SMS 1 //SM Toggle Separation
+    #define SMS 1      //SM Toggle Separation
 	#define DL_X 0.600 //SM Tune
-	#define DL_Z 0.500 //0.125 //SM Local Smooth
-	#define DL_W 0.050 //SM Perspective	
+	#define DL_W 0.050 //SM Perspective
+	#define DM_X 4     //HQ Tune
+	#define DM_Y 0     //HQ Boost
+	#define DM_Z 3     //HQ Smooth
+	#define DM_W 0.350 //HQ Trim	
 #elif ( App == 0x4F4E231E ) //Hob
 	#define DA_Y 20.0
 	#define DA_X 0.040
