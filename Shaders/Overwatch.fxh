@@ -4703,6 +4703,22 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DM_Z 5     //HQ Smooth
 	#define DM_W 0.800 //HQ Trim
 	#define PEW 1	
+#elif (App == 0x49B4730A ) //Dead or Alive  Xtream Venus Vacation
+	#define DA_W 1
+	#define DA_X 0.050
+	#define DF_Y 0.030
+	#define DA_Y 12.5
+	#define DB_Y 3
+	#define DE_X 1
+	#define DE_Y 0.500
+	#define DE_Z 0.375
+    #define DG_W 0.125 //Pop
+    //#define DG_Z 0.150 //Min
+    //#define DE_W 0.105 //Max
+    //#define DI_Z 0.200 //Trim
+	#define BMT 1
+	#define DF_Z 0.125
+	#define PEW 1	
 #else
 	#define NPW 1 //No Profile
 #endif
