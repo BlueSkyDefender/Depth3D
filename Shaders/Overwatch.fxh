@@ -2912,17 +2912,19 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define PEW 1
 #elif (App == 0xB53B8500 ) //DEATH STRANDING
 	#define DA_W 1
-	#define DA_Y 20.0
+	#define DA_Y 17.5
 	#define DA_Z 0.000375
 	#define DA_X 0.05
 	//#define DB_Z 0.125
 	#define DF_Y 0.01
 	#define DB_Y 4
-	#define DE_X 2
+	#define DE_X 1
 	#define DE_Y 0.375
 	//#define DE_Z 0.375
 	#define DG_Z 0.425
-	#define DG_W 0.3 //Allow some popout
+	//#define DG_W 0.3 //Allow some popout
+	#define BMT 1
+	#define DF_Z 0.1125
 	#define PEW 1
 	#define DAA 1
 #elif (App == 0x87AC1510 ) //Ghostrunner
