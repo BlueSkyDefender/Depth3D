@@ -705,9 +705,27 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 #elif (App == 0xCB1CCDC ) //BATMAN TTS
 	#define NCW 1 //Not Compatible
 #elif (App == 0x4A2297E4 ) //Batman Arkham Knight
-	#define DA_Y 22.500
-	#define DA_X 0.04375
-	#define DB_Y 4
+	#define DA_X 0.045
+	#define DF_Y 0.0075
+	#define DA_Y 22.5
+	#define DE_X 1
+	#define DE_Y 0.500
+	#define DE_Z 0.375
+    //#define DG_W -0.30 //Neg-Pop
+    //#define DG_Z 0.150 //Min
+    //#define DE_W 0.105 //Max
+    //#define DI_Z 0.200 //Trim
+	#define BMT 1
+	#define DF_Z 0.150
+    #define SMS 1      //SM Toggle Separation
+	#define DL_X 0.600 //SM Tune
+	#define DL_W 0.000 //SM Perspective
+	#define DM_X 6     //HQ Tune
+	#define DM_Y 3     //HQ Boost
+	#define DM_Z 1     //HQ Smooth
+	//#define DM_W 0.800 //HQ Trim
+    #define HQT 1
+	#define PEW 1	
 #elif (App == 0xE9A02687 ) //BattleTech
 	#define DA_W 1
 	#define DB_X 1
