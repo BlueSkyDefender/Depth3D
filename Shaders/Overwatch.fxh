@@ -218,7 +218,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DM_X 4     //HQ Tune
 	#define DM_Y 4     //HQ Boost
 	#define DM_Z 4     //HQ Smooth
-	#define DM_W 0.035 //HQ Trim
+	#define DM_W 0.070 //HQ Trim
 	#define NDW 1
 #elif (App == 0x2D950D30 )	//Fallout 4
 	#define DA_X 0.05
@@ -2211,7 +2211,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DM_X 8     //HQ Tune
 	#define DM_Y 4     //HQ Boost
 	#define DM_Z 2     //HQ Smooth
-	#define DM_W 0.25  //HQ Trim
+	#define DM_W 0.50  //HQ Trim
 	#define WSM 3
 	#define DB_W 14
     #define HMT 1
@@ -2244,9 +2244,10 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DM_X 8     //HQ Tune
 	#define DM_Y 2     //HQ Boost
 	#define DM_Z 1     //HQ Smooth
-	#define DM_W 0.375 //HQ Trim
+	#define DM_W 0.750 //HQ Trim
 	#define REF 3      //Fix can go from 1 - 15 and 15 is low 1 is High
 	#define DI_W 2.5   //Adjustment for REF
+	#define HQT 1
 	#define NFM 1
 	#define PEW 1
 	#define RHW 1
@@ -2410,7 +2411,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DM_X 8     //HQ Tune
 	#define DM_Y 4     //HQ Boost
 	#define DM_Z 6     //HQ Smooth
-	#define DM_W 0.500 //HQ Trim
+	#define DM_W 1.0 //HQ Trim
 	#define PEW 1
 	#define DAA 1
 #elif (App == 0x5A7B540A ) //We Where Here Too
@@ -3328,7 +3329,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DM_X 12    //HQ Tune
 	#define DM_Y 6     //HQ Boost
 	#define DM_Z 4     //HQ Smooth
-	#define DM_W 0.500 //HQ Trim
+	#define DM_W 1.0 //HQ Trim
 	#define DSW 1
     #define PEW 1
 #elif (App == 0x1551DBDA ) //The Fogotten City
@@ -4129,7 +4130,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DM_X 10    //HQ Tune
 	#define DM_Y 2     //HQ Boost
 	#define DM_Z 3     //HQ Smooth
-	#define DM_W 0.500 //HQ Trim
+	#define DM_W 1.0 //HQ Trim
 	#define PEW 1
 #elif (App == 0x98E46BDC ) //Forgive Me Father
     #define DA_W 1
@@ -4242,7 +4243,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DM_X 4     //HQ Tune
 	#define DM_Y 0     //HQ Boost
 	#define DM_Z 3     //HQ Smooth
-	#define DM_W 0.350 //HQ Trim	
+	//#define DM_W 0.700 //HQ Trim	
 #elif ( App == 0x4F4E231E ) //Hob
 	#define DA_Y 20.0
 	#define DA_X 0.040
@@ -4295,7 +4296,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DM_X 4     //HQ Tune
 	#define DM_Y 4     //HQ Boost
 	#define DM_Z 2     //HQ Smooth
-	#define DM_W 0.100 //HQ Trim
+	#define DM_W 0.200 //HQ Trim
 #elif ( App == 0x8CF29E7A ) //Maneater
     #define DA_W 1
 	#define DA_Y 75.0
@@ -4749,7 +4750,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DM_X 8     //HQ Tune
 	#define DM_Y 6     //HQ Boost
 	#define DM_Z 5     //HQ Smooth
-	#define DM_W 0.800 //HQ Trim
+	#define DM_W 1.000 //HQ Trim
 	#define PEW 1	
 #elif (App == 0x49B4730A ) //Dead or Alive  Xtream Venus Vacation
 	#define DA_W 1
