@@ -1302,9 +1302,35 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DE_Y 0.375
 	#define DE_Z 0.375
 #elif (App == 0xCFB8DD02 ) //DIRT RALLY 2.0
-	#define DA_Y 11.25
-	#define DA_X 0.040
-	#define DE_W 0.350
+	#define DA_X 0.025
+	#define DF_Y 0.025
+	#define DA_Y 15.0
+	#define DE_X 1
+	#define DE_Y 0.725
+	#define DE_Z 0.375
+    //#define DG_W 0.125 //Pop
+	#define DG_Z 0.0225 //Min
+    //#define DE_W 0.105 //Max
+    #define DI_Z 0.0625//Trim
+	#define BMT 1
+	#define DF_Z 0.060
+    #define SMS 3      //SM Toggle Separation
+	#define DL_X 0.625 //SM Tune
+	#define DL_W 0.050 //SM Perspective
+	#define DM_X 4     //HQ Tune
+	#define DM_Y 4     //HQ Boost
+	#define DM_Z 1     //HQ Smooth
+	//#define DM_W 0.000 //HQ Trim
+    #define HQT 1
+    #define MDD 1 //Set Menu Detection & Direction    //Off 0 | 1 | 2 | 3 | 4      
+    #define DN_X float4( 0.069 , 0.085,  0.9143, 0.930) //Pos A = XY RED & B = ZW White 
+    #define DN_Y float4( 0.0734, 0.066,  0.0  , 0.0  ) //Pos C = XY RED & D = ZW Match
+    #define DN_Z float4( 0.0   , 0.0  ,  0.0  , 0.0  ) //Pos E = XY Match & F = ZW Match
+	#define DN_W float4( 1.0 , 0.0  ,  0.0  , 0.0  ) //Size = Menu [ABC] D E F
+    #define DJ_Y float3( 1.2, 2.9, 1.2);              //Menu Detection Type   
+    #define DJ_Z float3( 1000, 1000, 1000);           //Set Match Tresh 
+    #define PEW 1
+	#define DAA 1
 #elif (App == 0x2F55D5A3 || App == 0x4A5220AF ) //ShadowWarrior 2013 DX11 & DX9
 	#define DA_X 0.035
 	#define DB_Y 4
@@ -1484,8 +1510,10 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	//#fine DG_W 0.325 //Pop out
     #define BMT 1    
     #define DF_Z 0.110
-	#define DB_W 44
+	#define DB_W 37
 	#define DF_X 0.3625
+	#define PEW 1
+	//#define DSW 1
 #elif (App == 0x6061750E ) //Mirror's Edge
 	#define DA_Y 12.25
 	#define DF_Y 0.020
@@ -5107,7 +5135,7 @@ float4 Weapon_Profiles(float WP ,float4 Weapon_Adjust) //Tried Switch But, can't
     if (WP == 36)
         Weapon_Adjust = float4(0.277,105.0,8.8625,0.0);   //WP 34 | Portal 2
     if (WP == 37)
-        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 35 | Game
+        Weapon_Adjust = float4(0.277,15.0,8.8,0.0);       //WP 35 | Crysis Mod
     if (WP == 38)
         Weapon_Adjust = float4(0.78,20.0,0.180,0.0);      //WP 36 | SOMA
     if (WP == 39)
