@@ -3759,9 +3759,10 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DL_X 0.500 //SM Tune
 	#define DL_W 0.050 //SM Perspective
 	#define DM_X 7     //HQ Tune
-	#define DM_Y 4     //HQ Boost
+	#define DM_Y 6     //HQ Boost
 	#define DM_Z 2     //HQ Smooth
 	#define DM_W 0.000 //HQ Trim
+	#define HQT 1
 	#define PEW 1
 #elif (App == 0x2ECE874 ) //Roblox Games
     #define DA_W 1
