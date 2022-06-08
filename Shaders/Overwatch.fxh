@@ -1,7 +1,7 @@
 ////----------------------------------------//
 ///SuperDepth3D Overwatch Automation Shader///
 //----------------------------------------////
-// Version 2.6.2
+// Version 2.6.3
 //---------------------------------------OVERWATCH---------------------------------------//
 // If you are reading this stop. Go away and never look back. From this point on if you  //
 // still think it's is worth looking at this..... Then no one can save you or your soul. //
@@ -103,7 +103,7 @@ static const int EFO_Fade_Speed_Selection_D = 0;        //Eye Fade Speed Options
 //SM Values
 static const int SM_Toggle_Sparation_D = 1;             // 0 | 1 | 2 | 3                                | SMS
 static const float SM_Tune_D = 0.5;                     //SM Tune                                       | DL_X
-static const int SM_Weapon_D = 1;                       //SM Weapon                                     | DL_Y
+static const float Null_Y_D = 1;                        //Null Y                                        | DL_Y
 static const float HQ_Text_Detection_D = 0.0;           //SM Text Detection [0 | 1 | 2 | 3]             | DL_Z
 static const float SM_Perspective_D  = 0.05;            //SM Perspective                                | DL_W
 //SM HQ Values
@@ -211,14 +211,14 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DF_X 0.300
 	#define BMT 1
 	#define DF_Z 0.175
-    #define SMS 0      //SM Toggle Separation
+    #define SMS 1      //SM Toggle Separation
 	#define DL_X 0.575 //SM Tune
-	#define DL_Y 2 //SM Weapon Smooth
 	#define DL_W 0.050 //SM Perspective
 	#define DM_X 4     //HQ Tune
 	#define DM_Y 4     //HQ Boost
-	#define DM_Z 4     //HQ Smooth
+	#define DM_Z 3     //HQ Smooth
 	#define DM_W 0.070 //HQ Trim
+	#define HQT 1
 	#define NDW 1
 #elif (App == 0x2D950D30 )	//Fallout 4
 	#define DA_X 0.05
@@ -327,7 +327,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DJ_W 0.250
 	#define SMS 2      //SM Toggle Separation
 	#define DL_X 0.550 //SM Tune
-	#define DL_Y 1     //SM Weapon Tune
 	#define DL_W 0.050 //SM Perspective
 	#define FOV 1
 #elif (App == 0xF5C7AA92 || App == 0x493B5C71 )	//S.T.A.L.K.E.R: Games
@@ -376,7 +375,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DF_Z 0.1375
 	#define SMS 1     //SM Toggle Separation
 	#define DL_X 0.6375//SM Tune //0.5125 //0.560 
-	#define DL_Y 1    //SM Weapon Tune 
 	#define DL_W 0.0  //SM Perspective	
 #elif (App == 0x6D3CD99E ) //Blood 2
 	#define DA_X 0.105
@@ -2206,7 +2204,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define DF_Z 0.125
     #define SMS 3      //SM Toggle Separation
 	#define DL_X 0.550 //SM Tune
-	#define DL_Y 6     //SM Weapon Tune
 	#define DL_W 0.025 //SM Perspective
 	#define DM_X 8     //HQ Tune
 	#define DM_Y 4     //HQ Boost
@@ -2860,7 +2857,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DF_Z 0.100
 	#define SMS 0      //SM Toggle Separation
 	#define DL_X 0.825 //SM Tune
-	#define DL_Y 1     //SM Weapon Tune
 	#define DL_W 0.050 //SM Perspective
 	#define DM_X 8     //HQ Tune
 	#define DM_Y 4     //HQ Boost
@@ -2994,7 +2990,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define DI_Z 0.100 //Trim
 	#define SMS 1      //SM Toggle Separation
 	#define DL_X 0.810 //SM Tune
-	#define DL_Y 0     //SM Weapon Tune
 	#define DL_W 0.050 //SM Perspective
 	#define PEW 1
 	#define DAA 1
@@ -3615,7 +3610,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DI_Z 0.070
 	#define SMS 0      //SM Toggle Separation
 	#define DL_X 0.640 //SM Tune
-	#define DL_Y 2 //SM Tune Weapon
 	#define DL_W 0.100   //SM Perspective
 	#define NDW 1  
 #elif (App == 0x312862CF ) //Aliens: Fireteam Elite**
@@ -3652,7 +3646,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DF_Z 0.140
 	#define SMS 2      //SM Toggle Separation
 	#define DL_X 0.400 //SM Tune
-	//#define DL_Y 0   //SM Weapon Tune
 	#define DL_W 0.05  //SM Perspective
 	#define DM_X 12    //HQ Tune
 	#define DM_Y 4     //HQ Boost
@@ -3710,7 +3703,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DJ_W 0.300
 	#define SMS 2      //SM Toggle Separation
 	#define DL_X 0.700 //SM Tune
-	#define DL_Y 1     //SM Weapon Tune
 	#define DL_W 0.05  //SM Perspective
 	#define DM_X 0     //HQ Tune
 	#define DM_Y 4     //HQ Boost
@@ -3839,7 +3831,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DJ_W 0.125
 	#define SMS 1      //SM Toggle Separation
 	#define DL_X 0.600 //SM Tune
-    #define DL_Y 1     //SM Weapon Smooth
 	#define DL_W 0.050 //SM Perspective
 	#define DM_X 5    //HQ Tune
 	#define DM_Y 4     //HQ Boost
@@ -4650,7 +4641,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DF_Z 0.065
     #define SMS 2      //SM Toggle Separation
 	#define DL_X 0.775 //SM Tune
-	#define DL_Y 1     //SM Weapon Tune
 	//#define DL_W 0.00 //SM Perspective
 	#define DM_X 1     //HQ Tune
 	#define DM_Y 8     //HQ Boost
@@ -4684,7 +4674,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DF_Z 0.065
     #define SMS 2      //SM Toggle Separation
 	#define DL_X 0.775 //SM Tune
-	#define DL_Y 1     //SM Weapon Tune
 	//#define DL_W 0.00 //SM Perspective
 	#define DM_X 1     //HQ Tune
 	#define DM_Y 8     //HQ Boost
@@ -4929,12 +4918,12 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DK_W EFO_Fade_Speed_Selection_D
 #endif
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
-// X = [SM Tune] Y = [SM Weapon] Z = [HQ Text Detection] W = [SM Perspective]
+// X = [SM Tune] Y = [Null Y] Z = [HQ Text Detection] W = [SM Perspective]
 #ifndef DL_X
     #define DL_X SM_Tune_D
 #endif
 #ifndef DL_Y
-    #define DL_Y SM_Weapon_D
+    #define DL_Y Null_Y_D
 #endif
 #ifndef DL_Z
     #define DL_Z HQ_Text_Detection_D
