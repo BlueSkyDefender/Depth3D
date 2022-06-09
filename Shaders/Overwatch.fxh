@@ -607,6 +607,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define REF 2 //Fix can go from 1 - 10 and 10 is low 1 is High
 	#define DI_W 3.75 //Adjustment for REF
     #define DG_W 0.2
+    #define HQT 1  
     #define PEW 1
     #define DAA 1    
 #elif (App == 0xF0D4DB3D ) //Never Alone
@@ -2053,13 +2054,29 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
    // #define DF_Z -0.125
 	#define DAA 1
 	#define PEW 1
-#elif (App == 0x36ECE27F ) //Supraland
+#elif (App == 0x36ECE27F || App == 0x33D49788 ) //Supraland & Six Inches Under
 	#define DA_W 1
-	#define DA_Y 22.5
-	#define DB_Y 2
-	#define DE_X 2
-	#define DE_Y 0.8
+	#define DA_X 0.0375
+	#define DF_Y 0.005
+	#define DA_Y 15.0
+	//#define DB_Y 3
+	#define DE_X 1
+	#define DE_Y 0.500
 	#define DE_Z 0.375
+    //#define DG_W -0.30 //Neg-Pop
+    #define DG_Z 0.0625 //Min
+    //#define DE_W 0.105 //Max
+    #define DI_Z 0.125 //Trim
+	#define BMT 1
+	#define DF_Z 0.150
+    #define SMS 2      //SM Toggle Separation
+	#define DL_X 0.650 //SM Tune
+	#define DL_W 0.000 //SM Perspective
+	#define DM_X 4     //HQ Tune
+	#define DM_Y 4     //HQ Boost
+	#define DM_Z 1     //HQ Smooth
+	#define DM_W 0.000 //HQ Trim
+	#define HQT 1
 	#define PEW 1
 	#define DAA 1
 #elif (App == 0x3604DCE6 ) //Remnant: From the Ashes
