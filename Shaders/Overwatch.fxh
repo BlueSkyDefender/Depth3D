@@ -602,11 +602,11 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define DA_Z -0.625
 	#define DA_W 1
 	#define DE_X 1 //REF only works now with this. Since this system works in tandom.
-	#define DE_Y 0.275
+	#define DE_Y 0.300
 	#define DE_Z 0.4375
 	#define REF 2 //Fix can go from 1 - 10 and 10 is low 1 is High
 	#define DI_W 3.75 //Adjustment for REF
-    #define DG_W 0.2
+    //#define DG_W 0.375//Pop
     #define HQT 1  
     #define PEW 1
     #define DAA 1    
@@ -2968,7 +2968,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DF_X 0.20
 	#define DG_W 0.08
 	#define BMT 1
-	#define DF_Z 0.130
+	#define DF_Z 0.0375
 	#define PEW 1
 #elif (App == 0xB53B8500 ) //DEATH STRANDING
 	#define DA_W 1
@@ -4253,6 +4253,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DM_Y 0     //HQ Boost
 	#define DM_Z 3     //HQ Smooth
 	//#define DM_W 0.700 //HQ Trim	
+	#define HQT 1
 #elif ( App == 0x4F4E231E ) //Hob
 	#define DA_Y 20.0
 	#define DA_X 0.040
