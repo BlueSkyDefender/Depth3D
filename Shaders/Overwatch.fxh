@@ -1,7 +1,7 @@
 ////----------------------------------------//
 ///SuperDepth3D Overwatch Automation Shader///
 //----------------------------------------////
-// Version 2.6.3
+// Version 2.6.4
 //---------------------------------------OVERWATCH---------------------------------------//
 // If you are reading this stop. Go away and never look back. From this point on if you  //
 // still think it's is worth looking at this..... Then no one can save you or your soul. //
@@ -80,7 +80,9 @@ static const float LB_Depth_Pos_Offset_Y_D = 0.0;       //Letter Box Depth Posit
 //Letter Box Sensitivity
 static const int LB_Sensitivity_D = 0;                  // 0 | 1 : Off / On                             | LBS 
 //Auto Letter Box Masking
-static const int Auto_Letter_Box_Masking_D = 0;         // 0 | 1 | 2 : Off | Hoz | Vert                 | LBM                                                                         
+static const int Auto_Letter_Box_Masking_D = 0;         // 0 | 1 | 2 : Off | Hoz | Vert                 | LBM 
+//Letter Box Reposition 
+static const int Letter_Box_Reposition_D = 0;           // 0 | 1 : Default | Alt                        | LBR                                                                              
 static const float LB_Masking_Offset_X_D = 1.0;         //LetterBox Masking Offset X                    | DI_X
 static const float LB_Masking_Offset_Y_D = 1.0;         //LetterBox Masking Offset Y                    | DI_Y
 static const float Weapon_Near_Depth_Trim_D = 0.25;     //Weapon Near Depth                     Trim    | DI_Z
@@ -4805,18 +4807,20 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DA_W 1
 	#define DA_X 0.075
 	#define DF_Y 0.050
-	#define DA_Y 42.5
-    #define DA_Z -1.0
+	#define DA_Y 70.0 //75.00 //42.5
+    #define DA_Z -0.1875 //-0.250//-1.0
 //	#define DB_Y 3
 	#define DE_X 1
-	#define DE_Y 0.500
+	#define DE_Y 0.400
 	#define DE_Z 0.375
-    #define DG_W -0.125 //Pop
+    #define DG_W -0.150 //Pop
+    //#define REF 15 //Fix can go from 1 - 15 and 15 is low 1 is High
+	//#define DI_W 0.5 //Adjustment for REF //Lowest I seen it. Default Low is 1.0
     #define DG_Z 0.125 //Min
     //#define DE_W 0.105 //Max
-    #define DI_Z 0.150 //Trim
+    #define DI_Z 0.125 //Trim
 	#define BMT 1
-	#define DF_Z 0.05
+	#define DF_Z 0.0375//0.05
     #define SMS 2      //SM Toggle Separation
 	#define DL_X 0.700 //SM Tune
 	#define DL_W 0.000 //SM Perspective
@@ -4826,6 +4830,8 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	//#define DM_W 0.000 //HQ Trim
 	//#define DL_Z 0     //HQ Text
     #define LBC 1     //Letter Box Correction
+    #define LBS 1     //Letter Box Sensitvity
+    #define LBR 1     //Letter Box Reposition    
 	#define DH_Z 0.0  //Pos offset X    
 	#define DH_W -0.244//Pos offset Y
 	#define HQT 1
@@ -5081,6 +5087,9 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 #ifndef HQT
     #define HQT HQ_Mode_Toggle_D               //High Quality Mode Toggle
 #endif
+#ifndef LBR
+    #define LBR Letter_Box_Reposition_D        //Letter Box Reposition
+#endif 
 
 #ifndef NPW
     #define NPW No_Profile_Warning_D           //No Profile Warning
