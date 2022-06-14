@@ -3803,10 +3803,25 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DE_X 1
 	#define DE_Y 0.250
 	#define DE_Z 0.475
-	#define DG_W 0.375 //Allow popout
+	//#define DG_W 0.375 //Allow popout
     #define DG_Z 0.025
 	#define BMT 1    
-	#define DF_Z 0.120 
+	#define DF_Z 0.120
+	#define SMS 12      //SM Toggle Separation
+	#define DL_X 0.800 //SM Tune
+	#define DL_W 0.000 //SM Perspective
+	#define DM_X 4     //HQ Tune
+	#define DM_Y 2     //HQ Boost
+	#define DM_Z 1     //HQ Smooth
+	//#define DM_W 0.000 //HQ Trim
+	#define HQT 1
+    #define MDD 1 //Set Menu Detection & Direction    //Off 0 | 1 | 2 | 3 | 4      
+    #define DN_X float4( 0.042, 0.039,  0.210, 0.0575) //Pos A = XY White & B = ZW Dark 
+    #define DN_Y float4( 0.210, 0.0725,  0.0, 0.0)     //Pos C = XY White & D = ZW Match
+    #define DN_Z float4( 0.0, 0.0,  0.0, 0.0)         //Pos E = XY Match & F = ZW Match
+	#define DN_W float4( 1.0, 0.0, 0.0, 0.0 )         //Size = Menu [ABC] D E F
+    #define DJ_Y float3( 2.8, 0.5, 2.9);              //Menu Detection Type   
+    #define DJ_Z float3( 1000, 1000, 1000);           //Set Match Tresh 
 	#define NDW 1
 	#define PEW 1
 	#define DAA 1
