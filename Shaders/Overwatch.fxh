@@ -3514,17 +3514,60 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DH_W 0.0
 #elif (App == 0x3C982FAC ) //Forza Horizon 4  
 	//#define DA_W 1
-	#define DA_X 0.1225
+	#define DA_X 0.1
 	//#define DF_Y 0.05
-	//#define DA_Y 10
-	#define DB_Z 0.25
-	//#define DA_Z 0.000120  
+	#define DA_Y 7.5
+	#define DB_Z 0.250
+	//#define DA_Z -0.00025  
 	#define DB_Y 4
 	#define DE_X 1
 	#define DE_Y 0.500
 	#define DE_Z 0.375
-	#define DG_W 0.25
-	//#define DG_Z 0.35
+	//#define DG_W 0.375 //Allow popout
+    //#define DG_Z 0.025
+	#define BMT 1    
+	#define DF_Z 0.125
+	#define SMS 1      //SM Toggle Separation
+	#define DL_X 0.750 //SM Tune
+	#define DL_W 0.000 //SM Perspective
+	#define DM_X 1     //HQ Tune
+	#define DM_Y 3     //HQ Boost
+	#define DM_Z 4     //HQ Smooth
+	#define DM_W 1.000 //HQ Trim
+	#define HQT 1
+	#define NDW 1
+	#define PEW 1
+	#define DAA 1
+#elif (App == 0x3C98315F ) //Forza Horizon 5  
+	//#define DA_W 1
+	#define DA_X 0.2
+	//#define DF_Y 0.05
+	#define DA_Y 11.0 //7.75 //10.0 //12.5
+	#define DB_Z 0.225
+	#define DA_Z -0.00025  
+	#define DB_Y 4
+	#define DE_X 1
+	#define DE_Y 0.250
+	#define DE_Z 0.475
+	//#define DG_W 0.375 //Allow popout
+    #define DG_Z 0.025
+	#define BMT 1    
+	#define DF_Z 0.120
+	#define SMS 1      //SM Toggle Separation
+	#define DL_X 0.800 //SM Tune
+	#define DL_W 0.000 //SM Perspective
+	#define DM_X 4     //HQ Tune
+	#define DM_Y 2     //HQ Boost
+	#define DM_Z 1     //HQ Smooth
+	//#define DM_W 0.000 //HQ Trim
+	#define HQT 1
+    #define MDD 1 //Set Menu Detection & Direction    //Off 0 | 1 | 2 | 3 | 4      
+    #define DN_X float4( 0.042, 0.039,  0.210, 0.0575) //Pos A = XY White & B = ZW Dark 
+    #define DN_Y float4( 0.210, 0.0725,  0.0, 0.0)     //Pos C = XY White & D = ZW Match
+    #define DN_Z float4( 0.0, 0.0,  0.0, 0.0)         //Pos E = XY Match & F = ZW Match
+	#define DN_W float4( 1.0, 0.0, 0.0, 0.0 )         //Size = Menu [ABC] D E F
+    #define DJ_Y float3( 2.8, 0.5, 2.9);              //Menu Detection Type   
+    #define DJ_Z float3( 1000, 1000, 1000);           //Set Match Tresh 
 	#define NDW 1
 	#define PEW 1
 	#define DAA 1
@@ -3792,39 +3835,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define DK_Y 0 //Eye Eye Selection
     #define DK_Z 2 //Eye Fade Selection
     #define DK_W 1 //Eye Fade Speed Selection
-#elif (App == 0x3C98315F ) //Forza Horizon 5  
-	//#define DA_W 1
-	#define DA_X 0.2
-	//#define DF_Y 0.05
-	#define DA_Y 11.0 //7.75 //10.0 //12.5
-	#define DB_Z 0.225
-	#define DA_Z -0.00025  
-	#define DB_Y 4
-	#define DE_X 1
-	#define DE_Y 0.250
-	#define DE_Z 0.475
-	//#define DG_W 0.375 //Allow popout
-    #define DG_Z 0.025
-	#define BMT 1    
-	#define DF_Z 0.120
-	#define SMS 12      //SM Toggle Separation
-	#define DL_X 0.800 //SM Tune
-	#define DL_W 0.000 //SM Perspective
-	#define DM_X 4     //HQ Tune
-	#define DM_Y 2     //HQ Boost
-	#define DM_Z 1     //HQ Smooth
-	//#define DM_W 0.000 //HQ Trim
-	#define HQT 1
-    #define MDD 1 //Set Menu Detection & Direction    //Off 0 | 1 | 2 | 3 | 4      
-    #define DN_X float4( 0.042, 0.039,  0.210, 0.0575) //Pos A = XY White & B = ZW Dark 
-    #define DN_Y float4( 0.210, 0.0725,  0.0, 0.0)     //Pos C = XY White & D = ZW Match
-    #define DN_Z float4( 0.0, 0.0,  0.0, 0.0)         //Pos E = XY Match & F = ZW Match
-	#define DN_W float4( 1.0, 0.0, 0.0, 0.0 )         //Size = Menu [ABC] D E F
-    #define DJ_Y float3( 2.8, 0.5, 2.9);              //Menu Detection Type   
-    #define DJ_Z float3( 1000, 1000, 1000);           //Set Match Tresh 
-	#define NDW 1
-	#define PEW 1
-	#define DAA 1
 #elif (App == 0x4698602A ) // It takes two* WIP
     #define DA_W 1
     #define DA_Y 36.25 //Needs to be stronger since we zoom out a lot
