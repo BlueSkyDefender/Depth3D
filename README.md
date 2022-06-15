@@ -66,5 +66,5 @@ Also my steam page https://steamcommunity.com/id/BlueSkyDefender<br />
 **Want to leave me a message or talk to me?:** BlueSkyDefender<br />
 Discord Server https://discord.gg/W2f7YhX<br />
 
-**Want to dontate?:**
+**Want to donate?:**
 If you enjoyed these shaders and like to donate you can do so at https://www.buymeacoffee.com/BlueSkyDefender
