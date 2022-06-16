@@ -2072,7 +2072,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define BMT 1
 	#define DF_Z 0.150
     #define SMS 2      //SM Toggle Separation
-	#define DL_X 0.650 //SM Tune
+	#define DL_X 0.700 //SM Tune
 	#define DL_W 0.000 //SM Perspective
 	#define DM_X 4     //HQ Tune
 	#define DM_Y 4     //HQ Boost
