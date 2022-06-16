@@ -2553,9 +2553,11 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DB_Y 2
 	//#define DB_Z 0.1
 	//#define DA_Z 0.0005
-	#define DE_X 2
+	#define DE_X 1
 	#define DE_Y 0.500
 	#define DE_Z 0.300
+	#define BMT 1
+	#define DF_Z 0.100
 	#define PEW 1
 	#define DSW 1
 #elif (App == 0x2E63D83A ) //Kingdom Come Diliverance
@@ -3707,12 +3709,13 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define BMT 1    
 	#define DF_Z 0.140
 	#define SMS 2      //SM Toggle Separation
-	#define DL_X 0.400 //SM Tune
+	#define DL_X 0.650 //SM Tune
 	#define DL_W 0.05  //SM Perspective
 	#define DM_X 12    //HQ Tune
 	#define DM_Y 4     //HQ Boost
 	#define DM_Z 6     //HQ Smooth
 	//#define DM_W 0.000 //HQ Trim
+	#HQT 1
 	#define PEW 1
 #elif (App == 0x1A2B216E ) //Crysis Remastered
 	#define DA_W 1
