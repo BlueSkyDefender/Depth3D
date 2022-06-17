@@ -1,7 +1,7 @@
 ////----------------------------------------//
 ///SuperDepth3D Overwatch Automation Shader///
 //----------------------------------------////
-// Version 2.6.5
+// Version 2.6.6
 //---------------------------------------OVERWATCH---------------------------------------//
 // If you are reading this stop. Go away and never look back. From this point on if you  //
 // still think it's is worth looking at this..... Then no one can save you or your soul. //
@@ -109,6 +109,7 @@ static const float Null_Y_D = 1;                        //Null Y                
 static const float HQ_Text_Detection_D = 0.0;           //SM Text Detection [0 | 1 | 2 | 3]             | DL_Z
 static const float SM_Perspective_D  = 0.05;            //SM Perspective                                | DL_W
 //SM HQ Values
+static const int SM_PillarBox_Detection_D = 0;          // 0 | 1 | 2                                    | SMP
 static const int HQ_Mode_Toggle_D = 0;                  // 0 | 1 |                                      | HQT
 static const int HQ_Tune_D = 4;                         //HQ Tune                                       | DM_X
 static const int HQ_Boost_D = 4;                        //HQ Boost                                      | DM_Y
@@ -2791,11 +2792,29 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define NDW 1
 	#define NFM 1
 #elif (App == 0x934DC835 || App == 0xD063D305 || App == 0xE29F2D4 ) //Dead Rising | Dead Rising 2 | Dead Rising 2 Off The Record
-	#define DA_Y 25.0
-	#define DA_X 0.125
-	#define DB_Y 5
+	#define DA_X 0.050
+	#define DF_Y 0.025
+	#define DA_Y 12.5
 	#define DE_X 1
-	#define DE_Z 0.375
+	#define DE_Y 0.500
+	#define DE_Z 0.3875
+	#define DG_W -0.05//disallowed popout
+	#define REF 10    //Fix can go from 1 - 15 and 15 is low 1 is High
+	#define DI_W 1.5  //Adjustment for REF
+    #define DG_Z 0.050 //Min
+    //#define DE_W 0.105 //Max
+    #define DI_Z 0.150 //Trim
+	#define BMT 1
+	#define DF_Z 0.125
+    #define SMS 2      //SM Toggle Separation
+	#define DL_X 0.825 //SM Tune
+	#define DL_W 0.000 //SM Perspective
+	#define DM_X 2     //HQ Tune
+	#define DM_Y 4     //HQ Boost
+	#define DM_Z 3     //HQ Smooth
+	#define DM_W 0.000 //HQ Trim
+	#define HQT 1
+	#define PEW 1
 	#define NDW 1
 #elif (App == 0xF28EC9C2 || App == 0xF28EC143 ) //Dead Rising 3 | Dead Rising 4
 	#define DA_Y 20.0
@@ -3546,7 +3565,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	//#define DF_Y 0.05
 	#define DA_Y 11.0 //7.75 //10.0 //12.5
 	#define DB_Z 0.225
-	#define DA_Z -0.00025  
+	//#define DA_Z -0.00025  
 	#define DB_Y 4
 	#define DE_X 1
 	#define DE_Y 0.250
@@ -3554,22 +3573,23 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	//#define DG_W 0.375 //Allow popout
     #define DG_Z 0.025
 	#define BMT 1    
-	#define DF_Z 0.120
+	#define DF_Z 0.1125
 	#define SMS 1      //SM Toggle Separation
 	#define DL_X 0.800 //SM Tune
 	#define DL_W 0.000 //SM Perspective
-	#define DM_X 4     //HQ Tune
+	#define DM_X 6     //HQ Tune
 	#define DM_Y 2     //HQ Boost
-	#define DM_Z 1     //HQ Smooth
-	//#define DM_W 0.000 //HQ Trim
+	#define DM_Z 3     //HQ Smooth
+	#define DM_W 0.55  //HQ Trim
+	#define SMP 1      //SM Pillerbox Smoothing
 	#define HQT 1
-    #define MDD 1 //Set Menu Detection & Direction    //Off 0 | 1 | 2 | 3 | 4      
-    #define DN_X float4( 0.042, 0.039,  0.210, 0.0575) //Pos A = XY White & B = ZW Dark 
-    #define DN_Y float4( 0.210, 0.0725,  0.0, 0.0)     //Pos C = XY White & D = ZW Match
-    #define DN_Z float4( 0.0, 0.0,  0.0, 0.0)         //Pos E = XY Match & F = ZW Match
-	#define DN_W float4( 1.0, 0.0, 0.0, 0.0 )         //Size = Menu [ABC] D E F
-    #define DJ_Y float3( 2.8, 0.5, 2.9);              //Menu Detection Type   
-    #define DJ_Z float3( 1000, 1000, 1000);           //Set Match Tresh 
+//    #define MDD 1 //Set Menu Detection & Direction    //Off 0 | 1 | 2 | 3 | 4      
+//    #define DN_X float4( 0.042, 0.039,  0.210, 0.0575) //Pos A = XY White & B = ZW Dark 
+//    #define DN_Y float4( 0.210, 0.0725,  0.0, 0.0)     //Pos C = XY White & D = ZW Match
+//    #define DN_Z float4( 0.0, 0.0,  0.0, 0.0)         //Pos E = XY Match & F = ZW Match
+//	#define DN_W float4( 1.0, 0.0, 0.0, 0.0 )         //Size = Menu [ABC] D E F
+//    #define DJ_Y float3( 2.8, 0.5, 2.9);              //Menu Detection Type   
+//    #define DJ_Z float3( 1000, 1000, 1000);           //Set Match Tresh 
 	#define NDW 1
 	#define PEW 1
 	#define DAA 1
@@ -3709,13 +3729,13 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define BMT 1    
 	#define DF_Z 0.140
 	#define SMS 2      //SM Toggle Separation
-	#define DL_X 0.650 //SM Tune
+	#define DL_X 0.400 //SM Tune
 	#define DL_W 0.05  //SM Perspective
 	#define DM_X 12    //HQ Tune
 	#define DM_Y 4     //HQ Boost
 	#define DM_Z 6     //HQ Smooth
 	//#define DM_W 0.000 //HQ Trim
-	#HQT 1
+	#define HQT 1
 	#define PEW 1
 #elif (App == 0x1A2B216E ) //Crysis Remastered
 	#define DA_W 1
@@ -5125,7 +5145,11 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 #ifndef LBR
     #define LBR Letter_Box_Reposition_D        //Letter Box Reposition
 #endif 
+#ifndef SMP
+    #define SMP SM_PillarBox_Detection_D       //PillarBox Detection & Smoothing
+#endif 
 
+//SuperDepth3D Warning System
 #ifndef NPW
     #define NPW No_Profile_Warning_D           //No Profile Warning
 #endif
