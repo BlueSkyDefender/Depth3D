@@ -4883,13 +4883,13 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DH_Z 0.0  //Pos offset X    
 	#define DH_W -0.244//Pos offset Y
 	#define HQT 1
-    #define MDD 1 //Set Menu Detection & Direction    //Off 0 | 1 | 2 | 3 | 4      
-    #define DN_X float4( 0.3311, 0.705,  0.333, 0.800) //Pos A = XY Yellow & B = ZW Dark 
-    #define DN_Y float4( 0.6689, 0.800,  0.0  , 0.0  ) //Pos C = XY Yellow & D = ZW Match
-    #define DN_Z float4( 0.0   , 0.0  ,  0.0  , 0.0  ) //Pos E = XY Match & F = ZW Match
-	#define DN_W float4( 1.0 , 0.0  ,  0.0  , 0.0  ) //Size = Menu [ABC] D E F
-    #define DJ_Y float3( 1.7, 0.0, 1.7);              //Menu Detection Type   
-    #define DJ_Z float3( 1000, 1000, 1000);           //Set Match Tresh 
+    //#define MDD 1 //Set Menu Detection & Direction    //Off 0 | 1 | 2 | 3 | 4      
+    //#define DN_X float4( 0.331, 0.705,  0.333, 0.800) //Pos A = XY Yellow & B = ZW Dark 
+    //#define DN_Y float4( 0.669, 0.800,  0.0  , 0.0  ) //Pos C = XY Yellow & D = ZW Match
+    //#define DN_Z float4( 0.0  , 0.0  ,  0.0  , 0.0  ) //Pos E = XY Match & F = ZW Match
+	//#define DN_W float4( 1.0  , 0.0  ,  0.0  , 0.0  ) //Size = Menu [ABC] D E F
+    //#define DJ_Y float3( 1.6, 0.0, 1.6);              //Menu Detection Type   
+    //#define DJ_Z float3( 1000, 1000, 1000);           //Set Match Tresh 
 	#define PEW 1	
 #else
 	#define NPW 1 //No Profile
