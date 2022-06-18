@@ -1,7 +1,7 @@
 ////----------------------------------------//
 ///SuperDepth3D Overwatch Automation Shader///
 //----------------------------------------////
-// Version 2.6.6
+// Version 2.6.7
 //---------------------------------------OVERWATCH---------------------------------------//
 // If you are reading this stop. Go away and never look back. From this point on if you  //
 // still think it's is worth looking at this..... Then no one can save you or your soul. //
@@ -32,7 +32,6 @@ static const float ZPD_D = 0.025;                       //ZPD                   
 static const float Depth_Adjust_D = 7.5;                //Depth Adjust                                  | DA_Y
 static const float Offset_D = 0.0;                      //Offset                                        | DA_Z
 static const int Depth_Linearization_D = 0;             //Linearization                                 | DA_W
-
 static const int Depth_Flip_D = 0;                      //Depth Flip                                    | DB_X
 static const int Auto_Balance_D = 0;                    //Auto Balance                                  | DB_Y
 static const float Auto_Depth_D = 0.1;                  //Auto Depth Range                              | DB_Z
@@ -52,23 +51,21 @@ static const float HVS_Y_D = 1.0;                       //Vertical Size         
 static const float HVP_X_D = 0;                         //Horizontal Position                           | DD_Z
 static const float HVP_Y_D = 0;                         //Vertical Position                             | DD_W
 
+//ZPD Boundary Adjustment
 static const int ZPD_Boundary_Type_D = 0;               //ZPD Boundary Type                             | DE_X
 static const float ZPD_Boundary_Scaling_D = 0.5;        //ZPD Boundary Scaling                          | DE_Y 
 static const float ZPD_Boundary_Fade_Time_D = 0.25;     //ZPD Boundary Fade Time                        | DE_Z
-static const float Weapon_Near_Depth_Max_D = 0.0;       //Weapon Near Depth                     Max     | DE_W
 
 //Balance Mode Toggle
 static const int Balance_Mode_Toggle_D = 0;             // 0 | 1 : Off | On                             | BMT
 static const float ZPD_Weapon_Boundary_Adjust_D = 0.0;  //ZPD Weapon Boundary Adjust                    | DF_X
 static const float Separation_D = 0.0;                  //ZPD Separation                                | DF_Y
 static const float Manual_ZPD_Balance_D = 0.15;         //Manual Balance Mode Adjustment                | DF_Z
-static const float HUDX_D = 0.0;                        //Heads Up Display Cut Off Point                | DF_W
 
 //Specialized Depth Trigger
 static const int Specialized_Depth_Trigger_D = 0;       // 0 | 1                                        | SDT
 static const float SDC_Offset_X_D = 0.0;                //Special Depth Correction Offset X             | DG_X
 static const float SDC_Offset_Y_D = 0.0;                //Special Depth Correction Offset Y             | DG_Y
-static const float Weapon_Near_Depth_Min_D = 0.0;       //Weapon Near Depth                     Min     | DG_Z
 static const float Check_Depth_Limit_D = 0.0;           //Check Depth Limit                             | DG_W
 
 //Auto Letter Box Correction
@@ -77,16 +74,22 @@ static const float LB_Depth_Size_Offset_X_D = 1.0;      //Letter Box Depth Size 
 static const float LB_Depth_Size_Offset_Y_D = 1.0;      //Letter Box Depth Size Correction Offset Y     | DH_Y
 static const float LB_Depth_Pos_Offset_X_D = 0.0;       //Letter Box Depth Position Correction Offset X | DH_Z
 static const float LB_Depth_Pos_Offset_Y_D = 0.0;       //Letter Box Depth Position Correction Offset Y | DH_W
+
 //Letter Box Sensitivity
 static const int LB_Sensitivity_D = 0;                  // 0 | 1 : Off / On                             | LBS 
+
 //Auto Letter Box Masking
 static const int Auto_Letter_Box_Masking_D = 0;         // 0 | 1 | 2 : Off | Hoz | Vert                 | LBM 
+
 //Letter Box Reposition 
 static const int Letter_Box_Reposition_D = 0;           // 0 | 1 : Default | Alt                        | LBR                                                                              
 static const float LB_Masking_Offset_X_D = 1.0;         //LetterBox Masking Offset X                    | DI_X
 static const float LB_Masking_Offset_Y_D = 1.0;         //LetterBox Masking Offset Y                    | DI_Y
+
+//Weapon / World Near Depth Adjustments
+static const float Weapon_Near_Depth_Max_D = 0.0;       //Weapon Near Depth                     Max     | DE_W
+static const float Weapon_Near_Depth_Min_D = 0.0;       //Weapon Near Depth                     Min     | DG_Z
 static const float Weapon_Near_Depth_Trim_D = 0.25;     //Weapon Near Depth                     Trim    | DI_Z
-static const float REF_Check_Depth_Limit_D = 0.0;       //Resident Evil Fix Check Depth Limit           | DI_W
 
 //Leftover Values
 static const int Alternate_Frame_Detection_ZPD_D = 0;   //Alternate Frame Detection ZPD 0 | 1 : Off / On| ADP
@@ -108,6 +111,7 @@ static const float SM_Tune_D = 0.5;                     //SM Tune               
 static const float Null_Y_D = 1;                        //Null Y                                        | DL_Y
 static const float HQ_Text_Detection_D = 0.0;           //SM Text Detection [0 | 1 | 2 | 3]             | DL_Z
 static const float SM_Perspective_D  = 0.05;            //SM Perspective                                | DL_W
+
 //SM HQ Values
 static const int SM_PillarBox_Detection_D = 0;          // 0 | 1 | 2                                    | SMP
 static const int HQ_Mode_Toggle_D = 0;                  // 0 | 1 |                                      | HQT
@@ -116,19 +120,31 @@ static const int HQ_Boost_D = 4;                        //HQ Boost              
 static const int HQ_Smooth_D = 1;                       //HQ Smooth 0 - 6                               | DM_Z
 static const float HQ_Trim_D = 0.0;                     //HQ Trim 0.0 - 0.5                             | DM_W
 
-//Simple Menu Detection
+//Menu Detection
 static const int Menu_Detection_Direction_D = 0;        // Off 0 | 1 | 2 | 3 | 4                        | MDD
-static const float4 Pos_XY_XY_AB_D = 0;                 //Position A XY B XY                            | DN_X
-static const float4 Pos_XY_XY_CD_D = 0;                 //Position C XY D XY                            | DN_Y
-static const float4 Pos_XY_XY_EF_D = 0;                 //Position E XY F XY                            | DN_Z
+static const float4 Pos_XY_XY_A_B_D = 0;                //Position A XY B XY                            | DN_X
+static const float4 Pos_XY_XY_C_D_D = 0;                //Position C XY D XY                            | DN_Y
+static const float4 Pos_XY_XY_E_F_D = 0;                //Position E XY F XY                            | DN_Z
 static const float4 Menu_Size_Adjust_D = 0;             //Menu Size Main ABC | D | E | F                | DN_W
 
-//Special Toggles Defaults
+//Simple Menu Detection
+static const int Multi_Menu_Detection_D = 0;            // Off 0 | 1                                    | MMD
+static const float4 Pos_XY_XY_AA_D = 0;                 //Position A XY A XY                            | DO_X
+static const float4 Pos_XY_XY_AB_D = 0;                 //Position A XY B XY                            | DO_Y
+static const float4 Pos_XY_XY_BB_D = 0;                 //Position B XY B XY                            | DO_Z
+static const float4 Simple_Menu_Tresh_D = 0;            //Simple Manu Tresh For A & B                   | DO_Z
+
+//Special Toggles
 static const int Resident_Evil_Fix_D = 0;               //Resident Evil Fix                             | REF
+static const float REF_Check_Depth_Limit_D = 0.0;       //Resident Evil Fix Check Depth Limit           | DI_W
+
 static const int HUD_Mode_Trigger_D = 0;                //HUD Mode Trigger                              | HMT
+static const float HUDX_D = 0.0;                        //Heads Up Display Cut Off Point                | DF_W
+
+//Special Toggles Defaults
 static const int Inverted_Depth_Fix_D = 0;              //Inverted Depth Fix                            | IDF 
 static const int Delay_Frame_Workaround_D = 0;          //Delay Frame Workaround                        | DFW
-
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //Special Toggles Warnings
 static const int No_Profile_Warning_D = 0;              //No Profile Warning                            | NPW
 static const int Needs_Fix_Mod_D = 0;                   //Needs Fix/Mod                                 | NFM
@@ -4891,6 +4907,46 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DJ_Y float3( 1.6, 0.0, 1.6);              //Menu Detection Type   
     //#define DJ_Z float3( 1000, 1000, 1000);           //Set Match Tresh 
 	#define PEW 1	
+#elif (App == 0x982FFA35 ) //GhostWire
+	#define DA_W 1
+	#define DA_X 0.0375
+	#define DF_Y 0.0375
+	#define DA_Y 37.5
+    #define DB_Z 0.1125 
+//	#define DB_Y 3
+	#define DE_X 2
+	#define DE_Y 0.500
+	#define DE_Z 0.375
+    //#define DG_W 0.9 //Pop
+    #define DG_Z 0.115 //Min
+    //#define DE_W 0.105 //Max
+    #define DI_Z 0.115 //Trim
+	#define BMT 1
+	#define DF_Z 0.05
+    #define SMS 2      //SM Toggle Separation
+	#define DL_X 0.800 //SM Tune
+	#define DL_W 0.050 //SM Perspective
+	#define DM_X 6     //HQ Tune
+	#define DM_Y 2     //HQ Boost
+	#define DM_Z 4    //HQ Smooth
+	#define DM_W 0.1625 //HQ Trim
+	//#define DL_Z 0     //HQ Text
+	#define HQT 1
+    #define MDD 1 //Set Menu Detection & Direction    //Off 0 | 1 | 2 | 3 | 4      
+    #define DN_X float4( 0.900, 0.066,  0.900, 0.970) //Pos A = XY White & B = ZW Dark 
+    #define DN_Y float4( 0.010, 0.970,  0.0  , 0.0  ) //Pos C = XY White & D = ZW Match
+    #define DN_Z float4( 0.0  , 0.0  ,  0.0  , 0.0  ) //Pos E = XY Match & F = ZW Match
+	#define DN_W float4( 1.0  , 0.0  ,  0.0  , 0.0  ) //Size = Menu [ABC] D E F
+    #define DJ_Y float3( 3.0, 0.0, 1.7);              //Menu Detection Type   
+    #define DJ_Z float3( 1000, 1000, 1000);           //Set Match Tresh 1000 is off
+    #define MMD 1 //Set Multi Menu Detection              //Off / On
+    #define DO_X float4( 0.99  , 0.03  ,  0.045 , 0.070  ) //Pos A1 = XY Color & A2 = ZW Black 
+    #define DO_Y float4( 0.0466, 0.875 ,  0.0633, 0.064  ) //Pos A3 = XY Color & B1 = ZW Color
+    #define DO_Z float4( 0.409 , 0.08  ,  0.9   , 0.09825) //Pos B2 = XY Black & B3 = ZW Color
+	#define DO_W float4( 1.7   , 3.0   ,  3.0   , 2.9    ) //Tresh Hold for Color A1 & A3 and Color B1 & B3 
+	#define WSM 2
+	#define DB_W 39
+	#define PEW 1
 #else
 	#define NPW 1 //No Profile
 #endif
@@ -5081,16 +5137,30 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // X = [Position A & B] Y = [Position C & D] Z = [Position E & F] W = [Menu Size Main]
 #ifndef DN_X
-    #define DN_X Pos_XY_XY_AB_D
+    #define DN_X Pos_XY_XY_A_B_D
 #endif
 #ifndef DN_Y
-    #define DN_Y Pos_XY_XY_CD_D
+    #define DN_Y Pos_XY_XY_C_D_D
 #endif
 #ifndef DN_Z
-    #define DN_Z Pos_XY_XY_EF_D
+    #define DN_Z Pos_XY_XY_E_F_D
 #endif 
 #ifndef DN_W
 	#define DN_W Menu_Size_Adjust_D 
+#endif
+
+// X = [Position A & B] Y = [Position C & D] Z = [Position E & F] W = [Menu Size Main]
+#ifndef DO_X
+    #define DO_X Pos_XY_XY_AA_D
+#endif
+#ifndef DO_Y
+    #define DO_Y Pos_XY_XY_AB_D
+#endif
+#ifndef DO_Z
+    #define DO_Z Pos_XY_XY_BB_D
+#endif 
+#ifndef DO_W
+	#define DO_W Simple_Menu_Tresh_D
 #endif
 
 //Special Toggles
@@ -5147,6 +5217,9 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 #endif 
 #ifndef SMP
     #define SMP SM_PillarBox_Detection_D       //PillarBox Detection & Smoothing
+#endif 
+#ifndef MMD
+    #define MMD Multi_Menu_Detection_D        //Multi Menu Detection
 #endif 
 
 //SuperDepth3D Warning System
@@ -5380,7 +5453,7 @@ float4 Weapon_Profiles(float WP ,float4 Weapon_Adjust) //Could reduce from 76 to
     if (WP == 38)
         Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 36 | Game
     if (WP == 39)
-        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 37 | Game
+        Weapon_Adjust = float4(0.7,7.5,0.25,0.0);         //WP 37 | GhostWire
     if (WP == 40)
         Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 38 | Game
     if (WP == 41)
