@@ -4907,7 +4907,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DJ_Y float3( 1.6, 0.0, 1.6);              //Menu Detection Type   
     //#define DJ_Z float3( 1000, 1000, 1000);           //Set Match Tresh 
 	#define PEW 1	
-#elif (App == 0x982FFA35 ) //GhostWire
+#elif (App == 0x982FFA35 ) //Ghostwire: Tokyo
 	#define DA_W 1
 	#define DA_X 0.0375
 	#define DF_Y 0.0375
@@ -4947,6 +4947,28 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define WSM 2
 	#define DB_W 39
 	#define PEW 1
+#elif (App == 0xE26CF45E ) //Daemon X Machina
+	#define DA_W 1
+	#define DA_X 0.060
+	#define DF_Y 0.060
+	#define DA_Y 20.0
+    #define DB_Z 0.1125 
+//	#define DB_Y 3
+	#define DE_X 3
+	#define DE_Y 0.500
+	#define DE_Z 0.375
+    //#define DG_W -0.25 //Pop
+	#define BMT 1
+	#define DF_Z 0.125
+    #define SMS 2      //SM Toggle Separation
+	#define DL_X 0.900 //SM Tune
+	#define DL_W 0.000 //SM Perspective
+	#define DM_X 1     //HQ Tune
+	#define DM_Y 4     //HQ Boost
+	#define DM_Z 4     //HQ Smooth
+	#define DM_W 0.0   //HQ Trim
+	//#define DL_Z 0     //HQ Text
+	#define HQT 1
 #else
 	#define NPW 1 //No Profile
 #endif
@@ -5453,7 +5475,7 @@ float4 Weapon_Profiles(float WP ,float4 Weapon_Adjust) //Could reduce from 76 to
     if (WP == 38)
         Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 36 | Game
     if (WP == 39)
-        Weapon_Adjust = float4(0.7,7.5,0.25,0.0);         //WP 37 | GhostWire
+        Weapon_Adjust = float4(0.7,7.5,0.25,0.0);         //WP 37 | Ghostwire: Tokyo
     if (WP == 40)
         Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 38 | Game
     if (WP == 41)
