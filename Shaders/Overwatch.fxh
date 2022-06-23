@@ -3820,6 +3820,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DF_Z 0.150 
 	#define DG_Z 0.100//Min
     #define DI_Z 0.125 //Trim
+	#define HQT 1    
 #elif (App == 0x2D1A3028 ) //Bright Memory: Infinite**
     #define DA_W 1
     #define DA_X 0.130 //0.125 //0.140 
