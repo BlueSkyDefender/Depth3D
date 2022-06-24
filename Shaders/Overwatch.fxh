@@ -4931,6 +4931,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DM_W 0.0   //HQ Trim
 	//#define DL_Z 0     //HQ Text
 	#define HQT 1
+	#define PEW 1
 #elif (App == 0xBE672B63 ) //Grounded
 	#define DA_W 1
 	#define DA_X 0.025
@@ -4987,6 +4988,44 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define DO_Y float4( 0.841 , 0.072 ,  0.0    , 0.0     ) //Pos A3 = XY Color & B1 = ZW Color
     #define DO_Z float4( 0.0   , 0.0   ,  0.0    , 0.0     ) //Pos B2 = XY Black & B3 = ZW Color
 	#define DO_W float4( 29.0  , 28.0  ,  10000  , 1000    ) //Tresh Hold for Color A1 & A3 and Color B1 & B3 
+	#define PEW 1
+#elif (App == 0x7D66C321 ) //Lego Starwars Skywalker Saga
+	#define DA_W 0
+	#define DA_X 0.0375
+	#define DF_Y 0.0375
+	#define DA_Y 12.5
+	#define DE_X 1
+	#define DE_Y 0.500
+	#define DE_Z 0.375
+	#define DG_W -.25 //Less Pop
+    //#define DG_Z 0.0875 //Min
+    //#define DE_W 0.105 //Max
+    //#define DI_Z 0.100 //Trim
+	#define BMT 1
+	#define DF_Z 0.125
+	#define BDF 1    //Barrel Distortion Fix k1 k2 k3 and Zoom
+	#define DC_X 0.375
+	#define DC_Y 0.0
+	#define DC_Z 0.0
+	#define DC_W -0.058
+    #define SMS 2      //SM Toggle Separation
+	#define DL_X 0.725 //SM Tune
+	#define DL_W 0.000 //SM Perspective
+	#define DM_X 3     //HQ Tune
+	#define DM_Z 3     //HQ Smooth
+	#define DM_W 0.0   //HQ Trim
+	#define DL_Z 1     //HQ Text
+	#define HQT 1
+    #define MDD 1 //Set Menu Detection & Direction    //Off 0 | 1 | 2 | 3 | 4      
+    #define DN_X float4( 0.307 , 0.167,  0.304, 0.835 ) //Pos A = XY White & B = ZW Dark 
+    #define DN_Y float4( 0.7525, 0.125,  0.0  , 0.0   ) //Pos C = XY White & D = ZW Match
+    #define DN_Z float4( 0.0   , 0.0  ,  0.0  , 0.0   ) //Pos E = XY Match & F = ZW Match
+	#define DN_W float4( 1.0   , 0.0  ,  0.0  , 0.0   ) //Size = Menu [ABC] D E F
+    #define DJ_Y float3( 30.0  , 28.0  , 30.0);              //Menu Detection Type   
+    #define DJ_Z float3( 1000  , 1000 , 1000);
+	//#define LBR 1
+	//#define SMP 1      //SM Pillerbox Smoothing
+	#define PEW 1
 #else
 	#define NPW 1 //No Profile
 #endif
