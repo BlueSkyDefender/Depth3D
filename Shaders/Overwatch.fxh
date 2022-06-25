@@ -4896,7 +4896,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	//#define DL_Z 0     //HQ Text
 	#define HQT 1
     #define MDD 1 //Set Menu Detection & Direction    //Off 0 | 1 | 2 | 3 | 4      
-    #define DN_X float4( 0.900, 0.066,  0.900, 0.970) //Pos A = XY White & B = ZW Dark 
+    #define DN_X float4( 0.900, 0.066,  0.010, 0.810) //Pos A = XY White & B = ZW Dark 
     #define DN_Y float4( 0.010, 0.970,  0.0  , 0.0  ) //Pos C = XY White & D = ZW Match
     #define DN_Z float4( 0.0  , 0.0  ,  0.0  , 0.0  ) //Pos E = XY Match & F = ZW Match
 	#define DN_W float4( 1.0  , 0.0  ,  0.0  , 0.0  ) //Size = Menu [ABC] D E F
