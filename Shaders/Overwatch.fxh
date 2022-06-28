@@ -128,11 +128,16 @@ static const float4 Pos_XY_XY_E_F_D = 0;                //Position E XY F XY    
 static const float4 Menu_Size_Adjust_D = 0;             //Menu Size Main ABC | D | E | F                | DN_W
 
 //Simple Menu Detection
-static const int Multi_Menu_Detection_D = 0;            // Off 0 | 1                                    | MMD
+static const int Multi_Menu_Detection_D = 0;            // Off 0 | 1 | 2                                | MMD
 static const float4 Pos_XY_XY_AA_D = 0;                 //Position A XY A XY                            | DO_X
 static const float4 Pos_XY_XY_AB_D = 0;                 //Position A XY B XY                            | DO_Y
 static const float4 Pos_XY_XY_BB_D = 0;                 //Position B XY B XY                            | DO_Z
-static const float4 Simple_Menu_Tresh_D = 0;            //Simple Manu Tresh For A & B                   | DO_Z
+static const float4 Simple_Menu_Tresh_AB_D = 0;         //Simple Manu Tresh For A & B                   | DO_Z
+
+static const float4 Pos_XY_XY_CC_D = 0;                 //Position C XY C XY                            | DP_X
+static const float4 Pos_XY_XY_CD_D = 0;                 //Position C XY D XY                            | DP_Y
+static const float4 Pos_XY_XY_DD_D = 0;                 //Position D XY D XY                            | DP_Z
+static const float4 Simple_Menu_Tresh_CD_D = 0;         //Simple Manu Tresh For C & D                   | DP_Z
 
 //Special Toggles
 static const int Resident_Evil_Fix_D = 0;               //Resident Evil Fix                             | REF
@@ -3951,19 +3956,37 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define PEW 1 
 #elif (App == 0xB4403655 ) //Elden Ring
 	#define DA_W 1
-    #define DA_X 0.123
+    #define DA_X 0.121
     #define DF_Y 0.025
 	#define DA_Y 30.00
     //#define DA_Z -0.300
 	#define DE_X 1
-	#define DE_Y 0.500
+	#define DE_Y 0.450
 	#define DE_Z 0.375
-    #define DG_W -0.050 //Disallow popout  
+    //#define DG_W -0.050 //Disallow popout  
 	#define BMT 1    
 	#define DF_Z 0.125
 	#define DG_Z 0.025//Min
     #define LBC 2     //Letter Box Correction
     #define DH_X 1.340
+	#define REF 15 //2 //Fix can go from 1 - 15 and 15 is low 1 is High
+	#define DI_W 2.75 //Adjustment for REF
+//    #define MDD 1 //Set Menu Detection & Direction    //Off 0 | 1 | 2 | 3 | 4      
+//    #define DN_X float4( 0.870 , 0.500,  0.9605, 0.894) //Pos A = XY White & B = ZW Dark 
+//    #define DN_Y float4( 0.942 , 0.095,  0.0  , 0.0   ) //Pos C = XY White & D = ZW Match
+//    #define DN_Z float4( 0.0   , 0.0  ,  0.0  , 0.0   ) //Pos E = XY Match & F = ZW Match
+//	#define DN_W float4( 1.0   , 0.0  ,  0.0  , 0.0   ) //Size = Menu [ABC] D E F
+//    #define DJ_Y float3( 0.0   , 1.0 ,  22.0);              //Menu Detection Type   
+//    #define DJ_Z float3( 1000  , 1000 , 1000);
+    #define MMD 2 //Set Multi Menu Detection              //Off / On / Plus
+    #define DO_X float4( 0.09215, 0.058,  0.050 , 0.955  ) //Pos A1 = XY Color & A2 = ZW Black 
+    #define DO_Y float4( 0.935 , 0.0915,  0.0662, 0.050  ) //Pos A3 = XY Color & B1 = ZW Color
+    #define DO_Z float4( 0.072 , 0.954 ,  0.345 , 0.180  ) //Pos B2 = XY Black & B3 = ZW Color
+	#define DO_W float4( 20.0 , 5.0 ,  23.0  , 4.0    ) //Tresh Hold for Color A1 & A3 and Color B1 & B3 
+    #define DP_X float4( 0.099 , 0.055,  0.0725 , 0.954  ) //Pos C1 = XY Color & C2 = ZW Black 
+    #define DP_Y float4( 0.345 , 0.180,  0.1276 , 0.055  ) //Pos C3 = XY Color & D1 = ZW Color
+    #define DP_Z float4( 0.0725, 0.954 ,  0.345 , 0.180  ) //Pos D2 = XY Black & D3 = ZW Color
+	#define DP_W float4( 20.0  , 4.0 ,  20.0  , 4.0 ) //Tresh Hold for Color A1 & A3 and Color B1 & B3 
     #define PEW 1 
     #define DAA 1
     #define DSW 1
@@ -5026,6 +5049,41 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	//#define LBR 1
 	//#define SMP 1      //SM Pillerbox Smoothing
 	#define PEW 1
+#elif (App == 0xF110883F ) //Yakuza Like a Dragon
+	#define DA_W 1
+	#define DA_X 0.1125
+	#define DF_Y 0.0125
+	#define DA_Y 15.25
+	#define DE_X 1
+	#define DE_Y 0.500
+	#define DE_Z 0.375
+	//#define DG_W -.25 //Less Pop
+    #define REF 15 //Fix can go from 1 - 15 and 15 is low 1 is High
+	#define DI_W 1.75 //Adjustment for REF
+    #define DG_Z 0.030 //Min
+    //#define DE_W 0.105 //Max
+    #define DI_Z 0.250 //Trim
+	#define BMT 1
+	#define DF_Z 0.000
+    #define SMS 1      //SM Toggle Separation
+	#define DL_X 0.700 //SM Tune
+	#define DL_W 0.1 //SM Perspective
+	#define DM_X 4     //HQ Tune
+	#define DM_Z 5     //HQ Smooth
+	#define DM_W 0.175 //HQ Trim
+	#define DL_Z 1     //HQ Text
+	#define HQT 1
+    #define MMD 2 //Set Multi Menu Detection              //Off / On
+    #define DO_X float4( 0.190 , 0.031 ,  0.388  , 0.947   ) //Pos A1 = XY Color & A2 = ZW Black 
+    #define DO_Y float4( 0.0275, 0.036 ,  0.752  , 0.025   ) //Pos A3 = XY Color & B1 = ZW Color
+    #define DO_Z float4( 0.880 , 0.947 ,  0.9351 , 0.050   ) //Pos B2 = XY Black & B3 = ZW Color
+	#define DO_W float4( 30.0  , 29.0  ,  29.0   , 30.0    ) //Tresh Hold for Color A1 & A3 and Color 
+	#define DP_X float4( 0.759 , 0.028 ,  0.938  , 0.097   ) //Pos C1 = XY Color & C2 = ZW Black 
+    #define DP_Y float4( 0.9411, 0.0456,  0.9346 , 0.0485  ) //Pos C3 = XY Color & D1 = ZW Color
+    #define DP_Z float4( 0.924 , 0.092 ,  0.752  , 0.025   ) //Pos D2 = XY Black & D3 = ZW Color
+	#define DP_W float4( 29.0  , 30.0  ,  30.0   , 29.0    ) //Tresh Hold for Color A1 & A3 and Color 
+	#define DAA 1
+	#define PEW 1
 #else
 	#define NPW 1 //No Profile
 #endif
@@ -5228,7 +5286,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DN_W Menu_Size_Adjust_D 
 #endif
 
-// X = [Position A & B] Y = [Position C & D] Z = [Position E & F] W = [Menu Size Main]
+// X = [Position A & A] Y = [Position A & B] Z = [Position B & B] W = [AB Menu Tresholds]
 #ifndef DO_X
     #define DO_X Pos_XY_XY_AA_D
 #endif
@@ -5239,7 +5297,21 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define DO_Z Pos_XY_XY_BB_D
 #endif 
 #ifndef DO_W
-	#define DO_W Simple_Menu_Tresh_D
+	#define DO_W Simple_Menu_Tresh_AB_D
+#endif
+
+// X = [Position C & C] Y = [Position C & D] Z = [Position D & D] W = [CD Menu Tresholds]
+#ifndef DP_X
+    #define DP_X Pos_XY_XY_CC_D
+#endif
+#ifndef DP_Y
+    #define DP_Y Pos_XY_XY_CD_D
+#endif
+#ifndef DP_Z
+    #define DP_Z Pos_XY_XY_DD_D
+#endif 
+#ifndef DP_W
+	#define DP_W Simple_Menu_Tresh_CD_D
 #endif
 
 //Special Toggles
