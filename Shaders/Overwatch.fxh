@@ -1,7 +1,7 @@
 ////----------------------------------------//
 ///SuperDepth3D Overwatch Automation Shader///
 //----------------------------------------////
-// Version 2.6.8
+// Version 2.6.9
 //---------------------------------------OVERWATCH---------------------------------------//
 // If you are reading this stop. Go away and never look back. From this point on if you  //
 // still think it's is worth looking at this..... Then no one can save you or your soul. //
@@ -94,7 +94,7 @@ static const float Weapon_Near_Depth_Trim_D = 0.25;     //Weapon Near Depth     
 //Leftover Values
 static const int Alternate_Frame_Detection_ZPD_D = 0;   //Alternate Frame Detection ZPD 0 | 1 : Off / On| ADP
 static const float NULL_X_D = 0.0;                      //Null X                                        | DJ_X
-static const float3 Menu_Detection_Type_D = 0;          //Menu Detection Type                           | DJ_Y
+static const float4 Menu_Detection_Type_D = 0;          //Menu Detection Type                           | DJ_Y
 static const float3 Match_Threshold_D = 0.0;            //Match Threshold                               | DJ_Z
 static const float Check_Depth_Limit_Weapon_D = -0.100; //Check Depth Limit Weapon                      | DJ_W
 
@@ -1344,7 +1344,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define DN_Y float4( 0.0734, 0.066,  0.0  , 0.0  ) //Pos C = XY RED & D = ZW Match
     #define DN_Z float4( 0.0   , 0.0  ,  0.0  , 0.0  ) //Pos E = XY Match & F = ZW Match
 	#define DN_W float4( 1.0 , 0.0  ,  0.0  , 0.0  ) //Size = Menu [ABC] D E F
-    #define DJ_Y float3( 12., 29., 12.);              //Menu Detection Type   
+    #define DJ_Y float4( 12., 29., 12., 1000.0);              //Menu Detection Type   
     #define DJ_Z float3( 1000, 1000, 1000);           //Set Match Tresh 
     #define PEW 1
 	#define DAA 1
@@ -3444,7 +3444,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define DN_Y float4( 0.1975, 0.610,  0.0  , 0.0  ) //Pos C = XY White & D = ZW Match
     #define DN_Z float4( 0.0  , 0.0  ,  0.0  , 0.0  ) //Pos E = XY Match & F = ZW Match
 	#define DN_W float4( 1.0  , 0.0  ,  0.0  , 0.0  ) //Size = Menu [ABC] D E F
-    #define DJ_Y float3( 21., 21., 21.);              //Menu Detection Type   
+    #define DJ_Y float4( 21., 21., 21., 1000.0);              //Menu Detection Type   
     #define DJ_Z float3( 1000, 1000, 1000);           //Set Match Tresh 1000 is off
 	#define BMT 1
 	#define DF_Z 0.1
@@ -3976,7 +3976,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 //    #define DN_Y float4( 0.942 , 0.095,  0.0  , 0.0   ) //Pos C = XY White & D = ZW Match
 //    #define DN_Z float4( 0.0   , 0.0  ,  0.0  , 0.0   ) //Pos E = XY Match & F = ZW Match
 //	#define DN_W float4( 1.0   , 0.0  ,  0.0  , 0.0   ) //Size = Menu [ABC] D E F
-//    #define DJ_Y float3( 0.0   , 1.0 ,  22.0);              //Menu Detection Type   
+//    #define DJ_Y float4( 0.0   , 1.0 ,  22.0, 1000.00);              //Menu Detection Type   
 //    #define DJ_Z float3( 1000  , 1000 , 1000);
     #define MMD 2 //Set Multi Menu Detection              //Off / On / Plus
     #define DO_X float4( 0.09215, 0.058,  0.050 , 0.955  ) //Pos A1 = XY Color & A2 = ZW Black 
@@ -4732,7 +4732,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define DN_Y float4( 0.133, 0.240,  0.3725, 0.0400) //Pos C = XY White & D = ZW Match
     #define DN_Z float4( 0.545, 0.533,  0.405, 0.3620) //Pos E = XY Match & F = ZW Match
 	#define DN_W float4( 0.267, 0.375, 0.554, 0.542 ) //Size = Menu [ABC] D E F
-    #define DJ_Y float3( 30., 0.0, 30.);                    //Menu Detection Type   
+    #define DJ_Y float4( 30., 0.0, 30., 1000.0);                    //Menu Detection Type   
     #define DJ_Z float3( 26.0, 30.0, 30.0);              //Set Match Tresh   
 #elif (App == 0xFD4C916D ) //Poppy PlayTime Ch. 2
 	#define DA_W 1
@@ -4764,7 +4764,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define DN_Y float4( 0.2000, 0.8888,  0.545, 0.533) //Pos C = XY Black & D = ZW Match
     #define DN_Z float4( 0.5160, 0.0430,  0.0, 0.0)     //Pos E = XY Match & F = ZW Match
 	#define DN_W float4( 0.266, 0.571, 0.542, 0.0 )    //Size = Menu [ABC] D E F
-    #define DJ_Y float3( 0, 18.0, 0);                   //Menu Detection Type   
+    #define DJ_Y float4( 0, 18.0, 0, 1000);                   //Menu Detection Type   
     #define DJ_Z float3( 30., 23., 1000);                //Set Match Tresh 
 #elif (App == 0x2E105B97 ) //Chorus
 	#define DA_W 1
@@ -4789,7 +4789,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define DN_Y float4( 0.084, 0.9652,  0.0, 0.0)     //Pos C = XY Black & D = ZW Match
     #define DN_Z float4( 0.0, 0.0,  0.0, 0.0)         //Pos E = XY Match & F = ZW Match
 	#define DN_W float4( 0.999, 0.0, 0.0, 0.0 )         //Size = Menu [ABC] D E F
-    #define DJ_Y float3( 0.0, 15.0, 0.0);              //Menu Detection Type   
+    #define DJ_Y float4( 0.0, 15.0, 0.0, 1000.0);              //Menu Detection Type   
     #define DJ_Z float3( 1000, 1000, 1000);           //Set Match Tresh 
 	#define PEW 1
 	#define DAA 1
@@ -4891,7 +4891,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DN_Y float4( 0.669, 0.800,  0.0  , 0.0  ) //Pos C = XY Yellow & D = ZW Match
     //#define DN_Z float4( 0.0  , 0.0  ,  0.0  , 0.0  ) //Pos E = XY Match & F = ZW Match
 	//#define DN_W float4( 1.0  , 0.0  ,  0.0  , 0.0  ) //Size = Menu [ABC] D E F
-    //#define DJ_Y float3( 16.0, 0.0, 16.0);              //Menu Detection Type   
+    //#define DJ_Y float4( 16.0, 0.0, 16.0, 1000.);              //Menu Detection Type   
     //#define DJ_Z float3( 1000, 1000, 1000);           //Set Match Tresh 
 	#define PEW 1	
 #elif (App == 0x982FFA35 ) //Ghostwire: Tokyo
@@ -4923,7 +4923,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define DN_Y float4( 0.010, 0.970,  0.0  , 0.0  ) //Pos C = XY White & D = ZW Match
     #define DN_Z float4( 0.0  , 0.0  ,  0.0  , 0.0  ) //Pos E = XY Match & F = ZW Match
 	#define DN_W float4( 1.0  , 0.0  ,  0.0  , 0.0  ) //Size = Menu [ABC] D E F
-    #define DJ_Y float3( 30.0 , 0.0, 17.0);              //Menu Detection Type   
+    #define DJ_Y float4( 30.0 , 0.0, 17.0, 1000);              //Menu Detection Type   
     #define DJ_Z float3( 1000, 1000, 1000);           //Set Match Tresh 1000 is off
     #define MMD 1 //Set Multi Menu Detection              //Off / On
     #define DO_X float4( 0.99  , 0.03  ,  0.045 , 0.070  ) //Pos A1 = XY Color & A2 = ZW Black 
@@ -5044,7 +5044,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define DN_Y float4( 0.7525, 0.125,  0.0  , 0.0   ) //Pos C = XY White & D = ZW Match
     #define DN_Z float4( 0.0   , 0.0  ,  0.0  , 0.0   ) //Pos E = XY Match & F = ZW Match
 	#define DN_W float4( 1.0   , 0.0  ,  0.0  , 0.0   ) //Size = Menu [ABC] D E F
-    #define DJ_Y float3( 30.0  , 28.0  , 30.0);              //Menu Detection Type   
+    #define DJ_Y float4( 30.0  , 28.0  , 30.0, 1000.0);              //Menu Detection Type   
     #define DJ_Z float3( 1000  , 1000 , 1000);
 	//#define LBR 1
 	//#define SMP 1      //SM Pillerbox Smoothing
@@ -5084,6 +5084,45 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DP_W float4( 29.0  , 30.0  ,  30.0   , 29.0    ) //Tresh Hold for Color A1 & A3 and Color 
 	#define DAA 1
 	#define PEW 1
+#elif (App == 0xFF64489D ) //Five Night's At Freddy's: Security Breach
+	#define DA_W 1
+	#define DA_X 0.03
+	#define DF_Y 0.015
+	#define DA_Y 27.5
+	#define DB_Z 0.050
+	#define DE_X 1
+	#define DE_Y 0.500
+	#define DE_Z 0.375
+	#define DG_W 0.150 //Pop
+    #define REF 15 //Fix can go from 1 - 15 and 15 is low 1 is High
+	#define DI_W 2.0 //Adjustment for REF
+    #define DG_Z 0.07 //Min
+    //#define DE_W 0.105 //Max
+    #define DI_Z 0.05 //Trim
+	#define BMT 1
+	#define DF_Z 0.0375
+    #define SMS 3      //SM Toggle Separation
+	#define DL_X 0.775 //SM Tune
+	#define DL_W 0.05 //SM Perspective
+	#define DM_X 3     //HQ Tune
+	#define DM_Z 3     //HQ Smooth
+	//#define DM_W 0.175 //HQ Trim
+	//#define DL_Z 1     //HQ Text
+	#define HQT 1
+    #define MDD 1 //Set Menu Detection & Direction    //Off 0 | 1 | 2 | 3 | 4      
+    #define DN_X float4( 0.200, 0.095,  0.500, 0.1375) //Pos A = XY White & B = ZW Dark 
+    #define DN_Y float4( 0.799, 0.097,  0.0  , 0.0   ) //Pos C = XY White & D = ZW Match
+    #define DN_Z float4( 0.0  , 0.0  ,  0.0  , 0.0   ) //Pos E = XY Match & F = ZW Match
+	#define DN_W float4( 1.0  , 0.0  ,  0.0  , 0.0   ) //Size = Menu [ABC] D E F
+    #define DJ_Y float4( 19.0 , 5.0, 19.0, 30.0);           //Menu Detection Type   
+    #define DJ_Z float3( 1000, 1000, 1000);           //Set Match Tresh 1000 is off
+	#define WSM 2
+	#define DB_W 48
+    #define MMD 1 //Set Multi Menu Detection              //Off / On
+    #define DO_X float4( 0.113 , 0.113 ,  0.800  , 0.150   ) //Pos A1 = XY Color & A2 = ZW Black 
+    #define DO_Y float4( 0.4125, 0.113 ,  0.0    , 0.0     ) //Pos A3 = XY Color & B1 = ZW Color
+    #define DO_Z float4( 0.0   , 0.0   ,  0.0    , 0.0     ) //Pos B2 = XY Black & B3 = ZW Color
+	#define DO_W float4( 30.0  , 30.0  ,  1000.0 , 1000.0  ) //Tresh Hold for Color A1 & A3 and Color 
 #else
 	#define NPW 1 //No Profile
 #endif
@@ -5622,7 +5661,7 @@ float4 Weapon_Profiles(float WP ,float4 Weapon_Adjust) //Could reduce from 76 to
     if (WP == 47)
         Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 45 | Game
     if (WP == 48)
-        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 46 | Game
+        Weapon_Adjust = float4(0.300,4.25,0.825,0.0);     //WP 46 | Five Night's At Freddy's: Security Breach
     if (WP == 49)
         Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 47 | Game
     if (WP == 50)
