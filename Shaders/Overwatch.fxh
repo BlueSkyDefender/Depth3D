@@ -116,7 +116,7 @@ static const float SM_Perspective_D  = 0.05;            //SM Perspective        
 static const int SM_PillarBox_Detection_D = 0;          // 0 | 1 | 2                                    | SMP
 static const int HQ_Mode_Toggle_D = 0;                  // 0 | 1 |                                      | HQT
 static const int HQ_Tune_D = 4;                         //HQ Tune                                       | DM_X
-static const int NULL_YY_D = 0;                         //Null Y                                        | DM_Y
+static const int HQ_VRS_D = 1;                          //HQ Variable Rate Shading                      | DM_Y
 static const int HQ_Smooth_D = 1;                       //HQ Smooth 0 - 6                               | DM_Z
 static const float HQ_Trim_D = 0.0;                     //HQ Trim 0.0 - 0.5                             | DM_W
 
@@ -4229,19 +4229,35 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 #elif (App == 0xAB93A702 ) //Nightmare Reaper
     #define DA_W 1
     #define DA_X 0.050
-    #define DF_Y 0.020
+    #define DF_Y 0.025
     #define DA_Y 24.0
     //#define DA_Z 0.0
     #define DE_X 4
     #define DE_Y 0.500
     #define DE_Z 0.375
+    #define DG_W -0.1125//Pop
     #define BMT 1    
     #define DF_Z 0.125
-    #define WSM 2
-    #define DB_W 30
 	#define DG_Z 0.0300//Min
 //	#define DE_W 0.0 //Max
-    #define DI_Z 0.0525 //Trim
+    #define DI_Z 0.0525//Trim
+    #define SMS 3      //SM Toggle Separation
+	#define DL_X 0.900 //SM Tune
+	#define DL_W 0.000 //SM Perspective
+	#define DM_X 0     //HQ Tune
+	#define DM_Z 1     //HQ Smooth
+	//#define DM_W 0.175 //HQ Trim
+	//#define DL_Z 1     //HQ Text
+    #define DM_Y 0
+    #define HQT 1
+    #define MMD 1 //Set Multi Menu Detection              //Off / On
+    #define DO_X float4( 0.24  , 0.0375,  0.5   , 0.74   ) //Pos A1 = XY Color & A2 = ZW Black 
+    #define DO_Y float4( 0.76  , 0.775 ,  0.0   , 0.0    ) //Pos A3 = XY Color & B1 = ZW Color
+    #define DO_Z float4( 0.0   , 0.0   ,  0.0   , 0.0    ) //Pos B2 = XY Black & B3 = ZW Color
+	#define DO_W float4( 28.0  , 28.0  ,  1000.0, 1000.0 ) //Tresh Hold for Color A1 & A3 and Color B1 & B3 
+	#define AFD 1
+    #define WSM 2
+    #define DB_W 30
 	#define PEW 1
 #elif (App == 0xBE557C30 ) //Golden Light
     #define DA_W 1
@@ -5297,12 +5313,12 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DL_W SM_Perspective_D
 #endif
 
-// X = [HQ Tune] Y = [Null Y] Z = [HQ Smooth] W = [HQ Trim]
+// X = [HQ Tune] Y = [HQ VRS] Z = [HQ Smooth] W = [HQ Trim]
 #ifndef DM_X
     #define DM_X HQ_Tune_D
 #endif
 #ifndef DM_Y
-    #define DM_Y NULL_YY_D
+    #define DM_Y HQ_VRS_D
 #endif
 #ifndef DM_Z
     #define DM_Z HQ_Smooth_D
@@ -5625,7 +5641,7 @@ float4 Weapon_Profiles(float WP ,float4 Weapon_Adjust) //Could reduce from 76 to
     if (WP == 29)
         Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 27 | Game
     if (WP == 30)
-        Weapon_Adjust = float4(0.725,7.75,0.0,0.0);       //WP 28 | Nightmare Reaper
+        Weapon_Adjust = float4(1.025,7.75,0.0,0.0);       //WP 28 | Nightmare Reaper
     if (WP == 31)
         Weapon_Adjust = float4(0.5,7.0,0.0,0.0);          //WP 29 | Powerslave Exhumed
     if (WP == 32)
