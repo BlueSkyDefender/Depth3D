@@ -1562,7 +1562,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 #elif (App == 0xC06FE818 ) //BorderLands 3
 	#define DA_Y 15.5
 	#define DA_Z 0.0001375
-	#define DA_X 0.035
+	#define DA_X 0.0375
 	#define DF_Y 0.041
 	#define DB_Z 0.05
 	#define DA_W 1
@@ -1575,10 +1575,10 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DF_X 0.085
 	#define BMT 1    
 	#define DF_Z 0.150
-	#define DG_Z 0.06125//Min
+	#define DG_Z 0.065 //Min
 	#define DI_Z 0.160 //Trim
 	#define SMS 2 //SM Toggle Separation
-	#define DL_X 0.800//SM Tune
+	#define DL_X 0.75 //SM Tune
 	#define DL_W 0.000 //SM Perspective
 	#define DM_X 4     //HQ Tune
 	#define DM_Z 1     //HQ Smooth
