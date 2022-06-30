@@ -1560,9 +1560,9 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DB_Y 4
 	#define NDW 1
 #elif (App == 0xC06FE818 ) //BorderLands 3
-	#define DA_Y 16.25
+	#define DA_Y 15.5
 	#define DA_Z 0.0001375
-	#define DA_X 0.0415
+	#define DA_X 0.035
 	#define DF_Y 0.041
 	#define DB_Z 0.05
 	#define DA_W 1
@@ -1574,12 +1574,18 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DG_W 0.210   //Pop out
 	#define DF_X 0.085
 	#define BMT 1    
-	#define DF_Z 0.160
-	#define DG_Z 0.075   //Min
-	#define DI_Z 0.185 //Trim
-	#define SMS 1 //SM Toggle Separation
-	#define DL_X 0.5625//SM Tune
-	#define DL_W 0.050 //SM Perspective
+	#define DF_Z 0.150
+	#define DG_Z 0.06125//Min
+	#define DI_Z 0.160 //Trim
+	#define SMS 2 //SM Toggle Separation
+	#define DL_X 0.800//SM Tune
+	#define DL_W 0.000 //SM Perspective
+	#define DM_X 4     //HQ Tune
+	#define DM_Z 1     //HQ Smooth
+	//#define DM_W 0.175 //HQ Trim
+	//#define DL_Z 1     //HQ Text
+    #define DM_Y 0
+    #define HQT 1
 	#define NDW 1
 	#define DAA 1
 #elif (App == 0x3C8DE8E8 ) //Metro Exodus
