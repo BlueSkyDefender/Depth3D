@@ -1339,13 +1339,11 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DM_Z 1     //HQ Smooth
 	//#define DM_W 0.000 //HQ Trim
     #define HQT 1
-    #define MDD 1 //Set Menu Detection & Direction    //Off 0 | 1 | 2 | 3 | 4      
-    #define DN_X float4( 0.069 , 0.085,  0.9143, 0.930) //Pos A = XY RED & B = ZW White 
-    #define DN_Y float4( 0.0734, 0.066,  0.0  , 0.0  ) //Pos C = XY RED & D = ZW Match
-    #define DN_Z float4( 0.0   , 0.0  ,  0.0  , 0.0  ) //Pos E = XY Match & F = ZW Match
-	#define DN_W float4( 1.0 , 0.0  ,  0.0  , 0.0  ) //Size = Menu [ABC] D E F
-    #define DJ_Y float4( 12., 29., 12., 1000.0);              //Menu Detection Type   
-    #define DJ_Z float3( 1000, 1000, 1000);           //Set Match Tresh 
+    #define MMD 1 //Set Multi Menu Detection                 //Off / On
+    #define DO_X float4( 0.069 , 0.085 ,  0.887  , 0.9185  ) //Pos A1 = XY Color & A2 = ZW Black 
+    #define DO_Y float4( 0.0734, 0.066 ,  0.069  , 0.085   ) //Pos A3 = XY Color & B1 = ZW Color
+    #define DO_Z float4( 0.8855, 0.921 ,  0.0734 , 0.066   ) //Pos B2 = XY Black & B3 = ZW Color
+	#define DO_W float4( 13.0  , 13.0  ,  13.0   , 13.0    ) //Tresh Hold for Color A1 & A3 and Color B1 & B3 
     #define PEW 1
 	#define DAA 1
 #elif (App == 0x2F55D5A3 || App == 0x4A5220AF ) //ShadowWarrior 2013 DX11 & DX9
@@ -2988,20 +2986,28 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DE_Z 0.400
 #elif (App == 0x491EA19E ) //Cyberpunk 2077
 	#define DA_W 1
-	#define DA_Y 72.5
-	#define DA_Z -0.00010
-	#define DA_X 0.05125
+	#define DA_Y 73.75
+	//#define DA_Z -0.00010
+	#define DA_X 0.05
 	#define DB_Z 0.150
 	#define DF_Y 0.05
-	#define DB_Y 2 //?? Auto Mode didn't work well in this game.
-	#define DE_X 4
+	#define DE_X 7
 	#define DE_Y 0.500
-	#define DE_Z 0.4375
+	#define DE_Z 0.375
+    #define AFD 1
 	#define DB_W 34
 	#define DF_X 0.20
-	#define DG_W 0.08
+	//#define DG_W 0.08
 	#define BMT 1
-	#define DF_Z 0.0375
+	#define DF_Z 0.04
+    #define SMS 0      //SM Toggle Separation
+	#define DL_X 0.725  //SM Tune
+	#define DL_W 0.00 //SM Perspective
+	#define DM_X 4     //HQ Tune
+	#define DM_Z 3     //HQ Smooth
+	//#define DM_W 0.175 //HQ Trim
+	//#define DL_Z 1     //HQ Text
+	#define HQT 1 
 	#define PEW 1
 #elif (App == 0xB53B8500 ) //DEATH STRANDING
 	#define DA_W 1
@@ -3934,9 +3940,17 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define HMT 1
 	#define DF_W 0.5
 	#define BMT 1    
-	#define DF_Z 0.100 
+	#define DF_Z 0.050 
 	#define DG_Z 0.075 //Min
     #define DI_Z 0.225 //Trim
+    #define SMS 2      //SM Toggle Separation
+	#define DL_X 0.550 //SM Tune
+	#define DL_W 0.000 //SM Perspective
+	#define DM_X 4     //HQ Tune
+	#define DM_Z 1     //HQ Smooth
+	//#define DM_W 0.175 //HQ Trim
+	//#define DL_Z 1     //HQ Text
+	#define HQT 1
 #elif (App == 0x51C8FDAA ) //Assassin's Valhalla
 	#define DA_W 1
 	#define DA_Y 50.0
