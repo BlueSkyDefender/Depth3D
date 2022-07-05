@@ -3940,7 +3940,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define HMT 1
 	#define DF_W 0.5
 	#define BMT 1    
-	#define DF_Z 0.050 
+	#define DF_Z 0.075 
 	#define DG_Z 0.075 //Min
     #define DI_Z 0.225 //Trim
     #define SMS 2      //SM Toggle Separation
