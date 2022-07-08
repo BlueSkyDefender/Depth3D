@@ -2,7 +2,7 @@
 	///**SuperDepth3D_VR+**///
 	//--------------------////
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	//* Depth Map Based 3D post-process shader v3.2.2
+	//* Depth Map Based 3D post-process shader v3.2.4
 	//* For Reshade 4.4+ I think...
 	//* ---------------------------------
 	//*
@@ -69,14 +69,11 @@ namespace SuperDepth3DVR
 		#define OW_WP "WP Off\0Custom WP\0"
 		static const int WSM = 0;
 		//Triggers
-		static const int MMD = 0, SMP = 0, LBR = 0, HQT = 0, AFD = 0, MDD = 0, FPS = 1, SMS = 1, REF = 0, NCW = 0, RHW = 0, NPW = 0, IDF = 0, SPF = 0, BDF = 0, HMT = 0, DFW = 0, NFM = 0, DSW = 0, BMT = 0, LBC = 0, LBS = 0, LBM = 0, DAA = 0, NDW = 0, PEW = 0, WPW = 0, FOV = 0, EDW = 0, SDT = 0;
+		static const int MMD = 0, SMP = 0, LBR = 0, HQT = 0, AFD = 0, MDD = 0, FPS = 1, SMS = 1, REF = 0, NCW = 0, RHW = 0, NPW = 0, IDF = 0, SPF = 0, BDF = 0, HMT = 0, DFW = 0, NFM = 0, DSW = 0, LBC = 0, LBS = 0, LBM = 0, DAA = 0, NDW = 0, PEW = 0, WPW = 0, FOV = 0, EDW = 0, SDT = 0;
 		//Overwatch.fxh State
 		#define OSW 1
 	#endif
 	//USER EDITABLE PREPROCESSOR FUNCTIONS START//
-	
-	// Zero Parallax Distance Balance Mode allows you to switch control from manual to automatic and vice versa.
-	#define Balance_Mode 1 //Default 0 is Automatic. One is Manual.
 	
 	// RE Fix is used to fix the issue with Resident Evil's 2 Remake 1-Shot cutscenes.
 	#define RE_Fix 0 //Default 0 is Off. One is High and Ten is Low        1-15
@@ -281,7 +278,7 @@ namespace SuperDepth3DVR
 					"Default is 0.025, Zero is off.";
 		ui_category = "Divergence & Convergence";
 	> = float2(DA_X,DF_Y);
-	#if Balance_Mode || BMT
+	
 	uniform float ZPD_Balance <
 		ui_type = "drag";
 		ui_min = 0.0; ui_max = 1.0;
@@ -291,17 +288,16 @@ namespace SuperDepth3DVR
 		ui_category = "Divergence & Convergence";
 	> = DF_Z;
 	
-	static const int Auto_Balance_Ex = 0;
-	#else
 	uniform int Auto_Balance_Ex <
-		ui_type = "slider";
-		ui_min = 0; ui_max = 5;
-		ui_label = " Auto Balance";
+		ui_type = "combo";
+		ui_items = "Off\0Left\0Center\0Right\0Center Wide\0Left Wide\0Right Wide\0";
+//		ui_items = "Off\0Left\0Center\0Right\0Center Wide\0Left Wide\0Right Wide\0Eye Tracker\0Eye Tracker Alt\0";
+		ui_label = " ZPD Auto Balance";
 		ui_tooltip = "Automatically Balance between ZPD Depth and Scene Depth.\n"
 					 "Default is Off.";
 		ui_category = "Divergence & Convergence";
-	> = DB_Y;
-	#endif
+	> = 2;
+	
 	uniform int ZPD_Boundary <
 		ui_type = "combo";
 		ui_items = "BD0 Off\0BD1 Full\0BD2 Narrow\0BD3 Wide\0BD4 FPS Center\0BD5 FPS Narrow\0BD6 FPS Edge\0BD7 FPS Mix\0";
@@ -549,13 +545,14 @@ namespace SuperDepth3DVR
 	uniform float4 WZPD_and_WND <
 		ui_type = "drag";
 		ui_min = 0.0; ui_max = 0.5;
-		ui_label = " Weapon ZPD, Min, Max, & Trim";
+		ui_label = " Weapon ZPD, Min, Auto, & Trim";
 		ui_tooltip = "WZPD controls the focus distance for the screen Pop-out effect also known as Convergence for the weapon hand.\n"
 					"Weapon ZPD Is for setting a Weapon Profile Convergence, so you should most of the time leave this Default.\n"
 					"Weapon Min is used to adjust min weapon hand of the weapon hand when looking at the world near you.\n"
-					"Weapon Max is used to adjust max weapon hand when looking out at a distance.\n"
-					"Default is (ZPD X 0.03, Min Y 0.0, Max Z 0.0, Trim Z 0.250 ) & Zero is off.";
-		ui_category = "Weapon Hand Adjust";
+					"Weapon Auto is used to auto adjust trimming when looking at a object or out to distance.\n"
+					"Weapon Trim is used cutout a location in the depth buffer so that Min and Auto can use.\n"
+					"Default is (ZPD X 0.03, Min Y 0.0, Auto Z 0.0, Trim Z 0.250 ) & Zero is off.";
+		ui_category = "Weapon Hand Adjust";	
 	> = float4(0.03,DG_Z,DE_W,DI_Z);
 	
 	uniform float Weapon_ZPD_Boundary <
@@ -1461,7 +1458,7 @@ namespace SuperDepth3DVR
 	{   float Trigger_Fade = tex2Dlod(SamplerOtherVR,float4(texcoord,0,11)).x * lerp(0.0,25.0,Blinders), AA = (1-Fade_Time_Adjust)*1000, PStoredfade = tex2D(SamplerLumVR,float2(0,0.583)).z;
 		return PStoredfade + (Trigger_Fade - PStoredfade) * (1.0 - exp2(-frametime/AA)); ///exp2 would be even slower
 	}
-	#define FadeSpeed_AW 0.25
+	#define FadeSpeed_AW 0.375
 	float AltWeapon_Fade()
 	{
 		float  ExAd = (1-(FadeSpeed_AW * 2.0))*1000, Current =  min(0.75f,smoothstep(0,0.25f,PrepDepth(0.5f)[0][0])), Past = tex2D(SamplerLumVR,float2(0,0.750)).z;
@@ -1474,17 +1471,34 @@ namespace SuperDepth3DVR
 		return Past + (Current - Past) * (1.0 - exp(-frametime/ExAd));
 	}
 	//////////////////////////////////////////////////////////Depth Map Alterations/////////////////////////////////////////////////////////////////////
-	
+		float2 Auto_Balance_Selection()
+	{
+			float4 XYArray[9] = { float4 ( 0.0  , 0.0, 0.0  , 0.0),        //Off                  0
+								  float4 ( 0.25 , 0.5, 0.0  , 0.0),        //Left                 1
+								  float4 ( 0.5  , 0.5, 0.0  , 0.0),        //Center               2
+								  float4 ( 0.75 , 0.5, 0.0  , 0.0),        //Right                3
+								  float4 ( 0.375, 0.5, 0.625, 0.5),        //Center Wide          4
+								  float4 ( 0.25 , 0.5, 0.375, 0.5),        //Left Wide            5
+								  float4 ( 0.75 , 0.5, 0.625, 0.5),        //Right Wide           6
+								  float4 (0,0,0.0,0.0), //Eye Tracker     7
+								  float4 (0,0,0.0,0.0)};//Eye Tracker Alt 8
+			
+		float AB_EX = lerp(Depth(XYArray[Auto_Balance_Ex].xy) , Depth(XYArray[Auto_Balance_Ex].zw), Auto_Balance_Ex > 3 && Auto_Balance_Ex < 7 ? 0.5 : 0 );
+		return float2(Auto_Balance_Ex > 0 ? saturate(lerp(AB_EX * 2 , Lum(float2(0.5,0.5)).y , 0.25) ) : 1, saturate(lerp( Depth( float2(0.5,0.5) ) * 2 , Lum(float2(0.5,0.5)).y , 0.25) ) ) ;
+	}
+
 	float4 DepthMap(in float4 position : SV_Position,in float2 texcoord : TEXCOORD) : SV_Target
 	{
 		float4 DM = float4(PrepDepth(texcoord)[0][0],PrepDepth(texcoord)[0][1],PrepDepth(texcoord)[0][2],PrepDepth(texcoord)[1][1]);
-		float R = DM.x, G = DM.y, B = DM.z, Auto_Scale =  WZPD_and_WND.y > 0.0 ? tex2D(SamplerLumVR,float2(0,0.750)).z : 1;
-	
+		float R = DM.x, G = DM.y, B = DM.z, Auto_Scale = WZPD_and_WND.z > 0 ? lerp(lerp(1.0,0.625,saturate(WZPD_and_WND.z * 2)),1.0,lerp(Auto_Balance_Selection().y , smoothstep(0,0.5,tex2D(SamplerLumVR,float2(0,0.750)).z), 0.5)) : 1;
+		float2 Min_Trim = float2(WZPD_and_WND.y, WZPD_and_WND.w * Auto_Scale);
+		//Weapon Hand Reduction
+		//Min_Trim = float2((Min_Trim.x * 2 + Min_Trim.x) * 0.5, min( 0.3, (Min_Trim.y * 2.5 + Min_Trim.y) * 0.5) );
 		//Fade Storage
-		float ScaleND = saturate(lerp(R,1.0f,smoothstep(min(-WZPD_and_WND.y,-WZPD_and_WND.z * Auto_Scale),1.0f,R)));
+		float ScaleND = saturate(lerp(R,1.0f,smoothstep(min(-Min_Trim.x,0),1.0f,R)));
 	
-		if (WZPD_and_WND.y > 0)
-			R = saturate(lerp(ScaleND,R,smoothstep(0,WZPD_and_WND.w,ScaleND)));
+		if (Min_Trim.x > 0)
+			R = saturate(lerp(ScaleND,R,smoothstep(0,Min_Trim.y,ScaleND)));
 	
 		if(texcoord.x < pix.x * 2 && texcoord.y < pix.y * 2)//TL
 			R = Fade_in_out(texcoord);
@@ -1506,7 +1520,7 @@ namespace SuperDepth3DVR
 	}
 	
 	float3 Conv(float2 MD_WHD,float2 texcoord)
-	{	float D = MD_WHD.x, Z = ZPD_Separation.x, WZP = 0.5, ZP = 0.5, ALC = abs(Lum(texcoord).x), W_Convergence = WZPD_and_WND.x, WZPDB, Distance_From_Bottom = 0.9375, ZPD_Boundary = ZPD_Boundary_n_Fade.x, Store_WC;
+	{	float D = MD_WHD.x, Z = ZPD_Separation.x, WZP = 0.5, ZP = 0.5, W_Convergence = WZPD_and_WND.x, WZPDB, Distance_From_Bottom = 0.9375, ZPD_Boundary = ZPD_Boundary_n_Fade.x, Store_WC;
 	    //Screen Space Detector.
 		if (abs(Weapon_ZPD_Boundary) > 0)
 		{   float WArray[8] = { 0.5, 0.5625, 0.625, 0.6875, 0.75, 0.8125, 0.875, 0.9375};
@@ -1538,12 +1552,8 @@ namespace SuperDepth3DVR
 			if (Auto_Depth_Adjust > 0)
 				D = AutoDepthRange(D,texcoord);
 	
-		#if Balance_Mode || BMT
-				ZP = saturate(ZPD_Balance);
-		#else
-			if(Auto_Balance_Ex > 0 )
-				ZP = saturate(ALC);
-		#endif
+				ZP = saturate( ZPD_Balance * max(0.5,Auto_Balance_Selection().x));
+
 			float DOoR = smoothstep(0,1,tex2D(SamplerLumVR,float2(0, 0.416)).z), ZDP_Array[16] = { 0.0, 0.0125, 0.025, 0.0375, 0.04375, 0.05, 0.0625, 0.075, 0.0875, 0.09375, 0.1, 0.125, 0.150, 0.175, 0.20, 0.225};
 			
 			if(REF || RE_Fix)
@@ -1560,9 +1570,6 @@ namespace SuperDepth3DVR
 				ZP = 1;
 	
 			if (WZPD_and_WND.x <= 0)
-				WZP = 1;
-	
-			if (ALC <= 0.025)
 				WZP = 1;
 	
 			ZP = min(ZP,Auto_Balance_Clamp);
@@ -2084,18 +2091,8 @@ namespace SuperDepth3DVR
 	}
 	
 	void Average_Luminance(float4 position : SV_Position, float2 texcoord : TEXCOORD, out float4 AL : SV_Target0, out float Other : SV_Target1)
-	{
-		float4 ABEA, ABEArray[6] = {
-			float4(0.0,1.0,0.0, 1.0),           //No Edit
-			float4(0.0,1.0,0.0, 0.750),         //Upper Extra Wide
-			float4(0.0,1.0,0.0, 0.5),           //Upper Wide
-			float4(0.0,1.0, 0.15625, 0.46875),  //Upper Short
-			float4(0.375, 0.250, 0.4375, 0.125),//Center Small
-			float4(0.375, 0.250, 0.0, 1.0)      //Center Long
-		};
-		ABEA = ABEArray[Auto_Balance_Ex];
-	
-		float Average_Lum_ZPD = PrepDepth(float2(ABEA.x + texcoord.x * ABEA.y, ABEA.z + texcoord.y * ABEA.w))[0][0], Average_Lum_Bottom = PrepDepth( texcoord )[0][0];
+	{	
+		float Average_Lum_Bottom = PrepDepth( texcoord )[0][0];
 		// SamplerDMVR 0 is Weapon State storage and SamplerDMVR 1 is Boundy State storage	
 		const int Num_of_Values = 6; //6 total array values that map to the textures width.
 		float Storage__Array[Num_of_Values] = { tex2D(SamplerDMVR,0).x,                //0.083
@@ -2107,7 +2104,7 @@ namespace SuperDepth3DVR
 		//Set a avr size for the Number of lines needed in texture storage.
 		float Grid = floor(texcoord.y * BUFFER_HEIGHT * BUFFER_RCP_HEIGHT * Num_of_Values);	
 		
-		AL = float4(Average_Lum_ZPD,Average_Lum_Bottom,Storage__Array[int(fmod(Grid,Num_of_Values))],tex2Dlod(SamplerDMVR,float4(texcoord,0,0)).y);
+		AL = float4(0,Average_Lum_Bottom,Storage__Array[int(fmod(Grid,Num_of_Values))],tex2Dlod(SamplerDMVR,float4(texcoord,0,0)).y);
 		Other = length(tex2D(SamplerDMVR,texcoord).w - tex2D(SamplerPBBVR,texcoord).x);//Motion_Detection
 	}
 	////////////////////////////////////////////////////////////////////Logo////////////////////////////////////////////////////////////////////////////

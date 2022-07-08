@@ -272,6 +272,8 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define DI_Z 0.025 //Trim
 	#define BMT 1
 	#define DF_Z 0.13
+	#define HQT 1
+	#define DM_Y 0
 	#define DB_W 7
 #elif (App == 0x142EDFD6 || App == 0x2A0ECCC9 || App == 0x8B0C2031 )	//DOOM 2016
 	#define DA_Y 23.125
