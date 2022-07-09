@@ -1,7 +1,7 @@
 ////----------------------------------------//
 ///SuperDepth3D Overwatch Automation Shader///
 //----------------------------------------////
-// Version 2.7.0
+// Version 2.7.1
 //---------------------------------------OVERWATCH---------------------------------------//
 // If you are reading this stop. Go away and never look back. From this point on if you  //
 // still think it's is worth looking at this..... Then no one can save you or your soul. //
@@ -116,7 +116,7 @@ static const float SM_Perspective_D  = 0.05;            //SM Perspective        
 static const int SM_PillarBox_Detection_D = 0;          // 0 | 1 | 2                                    | SMP
 static const int HQ_Mode_Toggle_D = 0;                  // 0 | 1 |                                      | HQT
 static const int HQ_Tune_D = 4;                         //HQ Tune                                       | DM_X
-static const int HQ_VRS_D = 1;                          //HQ Variable Rate Shading                      | DM_Y
+static const int HQ_VRS_D = 1;                          //HQ Variable Rate Shading Off|Auto|High|Med|Low| DM_Y
 static const int HQ_Smooth_D = 1;                       //HQ Smooth 0 - 6                               | DM_Z
 static const float HQ_Trim_D = 0.0;                     //HQ Trim 0.0 - 0.5                             | DM_W
 
@@ -273,7 +273,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define BMT 1
 	#define DF_Z 0.13
 	#define HQT 1
-	#define DM_Y 0
 	#define DB_W 7
 #elif (App == 0x142EDFD6 || App == 0x2A0ECCC9 || App == 0x8B0C2031 )	//DOOM 2016
 	#define DA_Y 23.125
@@ -1581,7 +1580,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DM_Z 1     //HQ Smooth
 	//#define DM_W 0.175 //HQ Trim
 	//#define DL_Z 1     //HQ Text
-    #define DM_Y 0
     #define HQT 1
 	#define NDW 1
 	#define DAA 1
@@ -4249,7 +4247,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define DM_Z 1     //HQ Smooth
     //#define DM_W 0.175 //HQ Trim
     //#define DL_Z 1     //HQ Text
-    #define DM_Y 0
     #define HQT 1
     #define MMD 1 //Set Multi Menu Detection              //Off / On
     #define DO_X float4( 0.24  , 0.0375,  0.5   , 0.74   ) //Pos A1 = XY Color & A2 = ZW Black 
@@ -5099,7 +5096,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define SMS 3      //SM Toggle Separation
 	#define DL_X 0.775 //SM Tune
 	#define DL_W 0.05 //SM Perspective
-	#define DM_X 3     //HQ Tune
+	#define DM_X 1     //HQ Tune
 	#define DM_Z 3     //HQ Smooth
 	//#define DM_W 0.175 //HQ Trim
 	//#define DL_Z 1     //HQ Text
@@ -5118,6 +5115,32 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define DO_Y float4( 0.4125, 0.113 ,  0.0    , 0.0     ) //Pos A3 = XY Color & B1 = ZW Color
     #define DO_Z float4( 0.0   , 0.0   ,  0.0    , 0.0     ) //Pos B2 = XY Black & B3 = ZW Color
 	#define DO_W float4( 30.0  , 30.0  ,  1000.0 , 1000.0  ) //Tresh Hold for Color A1 & A3 and Color 
+    #define AFD 1
+#elif (App == 0x6A2A62D5 ) //Days Gone
+	#define DA_W 1
+	#define DA_X 0.075
+	#define DF_Y 0.00
+	#define DA_Y 15.5
+	//#define DB_Z 0.050
+	#define DE_X 1
+	#define DE_Y 0.500
+	#define DE_Z 0.375
+	//#define DG_W 0.150 //Pop
+    //#define REF 15 //Fix can go from 1 - 15 and 15 is low 1 is High
+	//#define DI_W 2.0 //Adjustment for REF
+    //#define DG_Z 0.07 //Min
+    //#define DI_Z 0.05 //Trim
+	#define BMT 1
+	#define DF_Z 0.150
+    #define SMS 0      //SM Toggle Separation
+	#define DL_X 0.825 //SM Tune
+	#define DL_W 0.00  //SM Perspective
+	#define DM_X 6     //HQ Tune
+	#define DM_Z 4     //HQ Smooth
+	//#define DM_W 0.175 //HQ Trim
+	//#define DL_Z 1     //HQ Text
+	#define HQT 1
+	//#define DM_Y 1     //HQ VRS Off|Auto|High|Med|Low|Lower
 #else
 	#define NPW 1 //No Profile
 #endif
