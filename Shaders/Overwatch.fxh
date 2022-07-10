@@ -5141,6 +5141,49 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	//#define DL_Z 1     //HQ Text
 	#define HQT 1
 	//#define DM_Y 1     //HQ VRS Off|Auto|High|Med|Low|Lower
+#elif (App == 0xF44ABA48 ) //Blacksad
+	#define DA_W 1
+	#define DA_X 0.050
+	#define DF_Y 0.015
+	#define DA_Y 12.5
+	//#define DB_Z 0.050
+	#define DE_X 1
+	#define DE_Y 0.4375
+	#define DE_Z 0.375
+	#define DG_W -0.10 //Pop
+    #define REF 15 //Fix can go from 1 - 15 and 15 is low 1 is High
+	#define DI_W 2.0 //Adjustment for REF
+    #define DG_Z 0.025 //Min
+    #define DI_Z 0.080//Trim
+	#define BMT 1
+	#define DF_Z 0.1
+    #define SMS 3      //SM Toggle Separation
+	#define DL_X 0.825 //SM Tune
+	#define DL_W 0.00 //SM Perspective
+	#define DM_X 5     //HQ Tune
+	#define DM_Z 5     //HQ Smooth
+	//#define DM_W 0.175 //HQ Trim
+	//#define DL_Z 1     //HQ Text
+	#define HQT 1
+	/*
+    #define MDD 1 //Set Menu Detection & Direction    //Off 0 | 1 | 2 | 3 | 4      
+    #define DN_X float4( 0.200, 0.095,  0.500, 0.1375) //Pos A = XY White & B = ZW Dark 
+    #define DN_Y float4( 0.799, 0.097,  0.0  , 0.0   ) //Pos C = XY White & D = ZW Match
+    #define DN_Z float4( 0.0  , 0.0  ,  0.0  , 0.0   ) //Pos E = XY Match & F = ZW Match
+	#define DN_W float4( 1.0  , 0.0  ,  0.0  , 0.0   ) //Size = Menu [ABC] D E F
+    #define DJ_Y float4( 19.0 , 5.0, 19.0, 30.0);           //Menu Detection Type   
+    #define DJ_Z float3( 1000, 1000, 1000);           //Set Match Tresh 1000 is off
+	*/
+    #define MMD 2 //Set Multi Menu Detection              //Off / On
+    #define DO_X float4( 0.402 , 0.069 ,  0.500  , 0.125   ) //Pos A1 = XY Color & A2 = ZW Black 
+    #define DO_Y float4( 0.598 , 0.081 ,  0.424  , 0.069   ) //Pos A3 = XY Color & B1 = ZW Color
+    #define DO_Z float4( 0.500 , 0.125 ,  0.577  , 0.094   ) //Pos B2 = XY Black & B3 = ZW Color
+	#define DO_W float4( 18.0  , 18.0  ,  18.0   , 18.0    ) //Tresh Hold for Color A1 & A3 and Color 
+	#define DP_X float4( 0.462 , 0.069 ,  0.500  , 0.125   ) //Pos C1 = XY Color & C2 = ZW Black 
+    #define DP_Y float4( 0.5365, 0.094 ,  0.439  , 0.069   ) //Pos C3 = XY Color & D1 = ZW Color
+    #define DP_Z float4( 0.500 , 0.125 ,  0.560  , 0.094   ) //Pos D2 = XY Black & D3 = ZW Color
+	#define DP_W float4( 18.0  , 18.0  ,  18.0   ,  18.0   ) //Tresh Hold for Color A1 & A3 and Color 
+	#define DM_Y 5     //HQ VRS Off|Auto|High|Med|Low|Lower
 #else
 	#define NPW 1 //No Profile
 #endif
