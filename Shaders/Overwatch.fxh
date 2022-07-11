@@ -5184,6 +5184,39 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define DP_Z float4( 0.500 , 0.125 ,  0.560  , 0.094   ) //Pos D2 = XY Black & D3 = ZW Color
 	#define DP_W float4( 18.0  , 18.0  ,  18.0   ,  18.0   ) //Tresh Hold for Color A1 & A3 and Color 
 	#define DM_Y 5     //HQ VRS Off|Auto|High|Med|Low|Lower
+	#define PEW 1
+#elif (App == 0x86E2D98B ) //Mordhau
+	#define DA_W 1
+	#define DA_X 0.050
+	#define DF_Y 0.0025
+	#define DA_Y 25.0
+	//#define DB_Z 0.050
+	#define DE_X 1
+	#define DE_Y 0.500
+	#define DE_Z 0.375
+	#define DG_W 0.250 //Pop
+    //#define REF 15 //Fix can go from 1 - 15 and 15 is low 1 is High
+	//#define DI_W 2.0 //Adjustment for REF
+    #define DG_Z 0.045 //Min
+    #define DI_Z 0.125 //Trim
+	#define BMT 1
+	#define DF_Z 0.150
+    #define SMS 3      //SM Toggle Separation
+	#define DL_X 0.75 //SM Tune
+	#define DL_W 0.00 //SM Perspective
+	#define DM_X 0     //HQ Tune
+	#define DM_Z 4     //HQ Smooth
+	//#define DM_W 0.175 //HQ Trim
+	//#define DL_Z 1     //HQ Text
+	#define HQT 1
+    #define MDD 1 //Set Menu Detection & Direction     //Off 0 | 1 | 2 | 3 | 4      
+    #define DN_X float4( 0.193, 0.041,  0.580, 0.042 ) //Pos A = XY White & B = ZW Dark 
+    #define DN_Y float4( 0.964, 0.019,  0.0  , 0.0   ) //Pos C = XY White & D = ZW Match
+    #define DN_Z float4( 0.0  , 0.0  ,  0.0  , 0.0   ) //Pos E = XY Match & F = ZW Match
+	#define DN_W float4( 1.0  , 0.0  ,  0.0  , 0.0   ) //Size = Menu [ABC] D E F
+    #define DJ_Y float4( 20.0 , 2.0, 20.0, 18.0);    //Menu Detection Type W is based on Pos A as a Extra Just incase value
+    #define DJ_Z float3( 1000, 1000, 1000);            //Set Match Tresh 1000 is off
+	#define DM_Y 3     //HQ VRS Off|Auto|High|Med|Low|Lower
 #else
 	#define NPW 1 //No Profile
 #endif
