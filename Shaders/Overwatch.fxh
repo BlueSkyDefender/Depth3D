@@ -1465,14 +1465,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DE_Z 0.4375
 	#define DB_Z 0.250
 	#define RHW 1
-#elif (App == 0xF9B1845A ) //Rime
-	#define DA_W 1
-	#define DA_Y 15.0
-	#define DA_X 0.145
-	#define DB_Y 4
-	#define DE_X 1
-	#define DE_Y 0.299
-	#define DE_Z 0.400
 #elif (App == 0x71170B42 ) //Blood: Fresh Suppy
 	#define DA_Y 212.5
 	#define DA_X 0.175
@@ -5217,6 +5209,28 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define DJ_Y float4( 20.0 , 2.0, 20.0, 18.0);    //Menu Detection Type W is based on Pos A as a Extra Just incase value
     #define DJ_Z float3( 1000, 1000, 1000);            //Set Match Tresh 1000 is off
 	#define DM_Y 3     //HQ VRS Off|Auto|High|Med|Low|Lower
+#elif (App == 0xF9B1845A ) //RiME
+	#define DA_W 1
+	#define DA_Y 15.0
+	#define DA_X 0.145
+	#define DF_Y 0.015
+	#define DE_X 2
+	#define DE_Y 0.350
+	#define DE_Z 0.375
+    #define REF 10 //Fix can go from 1 - 15 and 15 is low 1 is High
+	#define DI_W 2.0 //Adjustment for REF
+    #define DG_Z 0.150 //Min
+    #define DI_Z 0.400 //Trim
+	#define BMT 1
+	#define DF_Z 0.150
+    #define SMS 3      //SM Toggle Separation
+	#define DL_X 0.850 //SM Tune
+	#define DL_W 0.00  //SM Perspective
+	#define DM_X 4     //HQ Tune
+	#define DM_Z 5     //HQ Smooth
+	//#define DM_W 0.175 //HQ Trim
+	//#define DL_Z 1     //HQ Text
+	#define HQT 1
 #else
 	#define NPW 1 //No Profile
 #endif
