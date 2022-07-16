@@ -2,7 +2,7 @@
 	///**SuperDepth3D_VR+**///
 	//--------------------////
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	//* Depth Map Based 3D post-process shader v3.2.4
+	//* Depth Map Based 3D post-process shader v3.2.5
 	//* For Reshade 4.4+ I think...
 	//* ---------------------------------
 	//*
@@ -62,9 +62,13 @@ namespace SuperDepth3DVR
 		// DN_X = [Position A & B] DN_Y = [Position C & D] DM_Z = [Position E & F] DN_W = [Menu Size Main]	
 		static const float DN_X = 0.0, DN_Y = 0.0, DN_Z = 0.0, DN_W = 0.0;
 		// DO_X = [Position A & A] DO_Y = [Position A & B] DO_Z = [Position B & B] DO_W = [AB Menu Tresh]	
-		static const float DO_X = 0.0, DO_Y = 0.0, DO_Z = 0.0, DO_W = 0.0;
+		static const float DO_X = 0.0, DO_Y = 0.0, DO_Z = 0.0, DO_W = 1000.0;
 		// DP_X = [Position C & C] DP_Y = [Position C & D] DP_Z = [Position D & D] DP_W = [CD Menu Tresh]	
-		static const float DP_X = 0.0, DP_Y = 0.0, DP_Z = 0.0, DP_W = 0.0;
+		static const float DP_X = 0.0, DP_Y = 0.0, DP_Z = 0.0, DP_W = 1000.0;
+		// DQ_X = [Position E & E] DQ_Y = [Position E & F] DQ_Z = [Position F & F] DQ_W = [EF Menu Tresh]	
+		static const float DQ_X = 0.0, DQ_Y = 0.0, DQ_Z = 0.0, DQ_W = 1000.0;
+		// DR_X = [Position G & G] DR_Y = [Position G & H] DR_Z = [Position H & H] DR_W = [GH Menu Tresh]	
+		static const float DR_X = 0.0, DR_Y = 0.0, DR_Z = 0.0, DR_W = 1000.0;
 		// WSM = [Weapon Setting Mode]
 		#define OW_WP "WP Off\0Custom WP\0"
 		static const int WSM = 0;
@@ -730,10 +734,31 @@ namespace SuperDepth3DVR
 	static const int Theater_Mode = 0;
 	#endif
 	
+	uniform int Color_Correction <
+		ui_type = "combo";
+		ui_items = "Off\0On\0";
+		ui_label = "·Color Correction·";
+		ui_tooltip = "Partial Luma Preserved Color Correction.\n"
+					"Removes Tint and or Color Cast in an automatic way while enhancing contrast.n\"
+					"This works by sampling the image and creating a min and max color map and adjusting the image accordingly.\n"
+					"Default is Off.";
+		ui_category = "Image Effects";
+	> = 0;
+
+	uniform float Correction_Strength <
+		ui_type = "slider";
+		ui_min = 0.0; ui_max = 1.0; ui_step = 0.01;
+		ui_label = " Correction Factor";
+		ui_tooltip = "This gives full control over Color Correction Factor.\n"
+					"It can make dark areas brighter, Try to leave this on low to preserve atmosphere.\n"
+					"Default is 0.0f, Low.";
+		ui_category = "Image Effects";
+	> = 0.0;
+	
 	uniform float Blinders <
 		ui_type = "slider";
 		ui_min = 0.0; ui_max = 1.0;
-		ui_label = "·Blinders·";
+		ui_label = " Blinders";
 		ui_tooltip = "Lets you adjust blinders sensitivity.\n"
 					 "Default is Zero, Off.";
 		ui_category = "Image Effects";
@@ -989,18 +1014,60 @@ namespace SuperDepth3DVR
 			Texture = texLumVR;
 		};
 	
-	texture texOtherVR {Width = BUFFER_WIDTH * Scale_Buffer; Height = BUFFER_HEIGHT * Scale_Buffer; Format = R16F; MipLevels = 8;};
+	texture2D texMinMaxRGB { Width = 2; Height = 1; Format = RGBA16f; };
+	sampler2D samplerMinMaxRGB
+	{ 
+		Texture = texMinMaxRGB;
+		MagFilter = POINT;
+		MinFilter = POINT;
+		MipFilter = POINT;
+	};
 	
-	sampler SamplerOtherVR
+	texture2D texMinMaxRGBLastFrame { Width = BUFFER_WIDTH * Scale_Buffer; Height = BUFFER_HEIGHT * Scale_Buffer; Format = RGBA16f; };
+	sampler2D samplerMinMaxRGBLastFrame 
+	{
+		 Texture = texMinMaxRGBLastFrame;
+		 MagFilter = POINT;
+		 MinFilter = POINT;
+		 MipFilter = POINT;
+	};
+
+	void MinMaxRGB(float4 vpos : SV_Position, float2 texcoord : TexCoord, out float4 minmaxRGB : SV_Target0)
+	{
+		float3 color, minRGB = 1.0, maxRGB = 0.0;
+		int RTMM_STEPS = BUFFER_WIDTH/15;
+		if(Color_Correction)
+		{ 
+		// Cycle through backbuffer and get the min/max values
+		for(int y = 0; y < BUFFER_HEIGHT; y+= RTMM_STEPS) 
 		{
-			Texture = texOtherVR;
-		};
-	
+			for(int x = 0; x < BUFFER_WIDTH; x+= RTMM_STEPS) 
+			{
+				color = tex2Dfetch(BackBufferCLAMP, uint2(x, y)).rgb;
+
+				maxRGB.rgb = lerp(maxRGB.rgb, color.rgb, step(maxRGB.rgb, color.rgb));
+				minRGB.rgb = lerp(minRGB.rgb, color.rgb, step(color.rgb, minRGB.rgb));
+			}
+		}
+
+		float factor = saturate(0.1 * frametime * 0.01);
+
+		float avgMax       = dot( maxRGB.xyz, 0.333333f ) * lerp(3,1,Correction_Strength);
+
+		minRGB.rgb = lerp(tex2D(samplerMinMaxRGBLastFrame, float2(0.25, 0)).rgb, minRGB.rgb, factor);
+		maxRGB.rgb = lerp(tex2D(samplerMinMaxRGBLastFrame, float2(0.75, 0)).rgb, maxRGB.rgb * ( 1.0f - avgMax ) + avgMax, factor);
+
+		minmaxRGB.rgb = saturate(texcoord.x < 0.5 ? minRGB.rgb : maxRGB.rgb);
+		minmaxRGB.a = 1.0;
+		}
+		else
+		minmaxRGB = 0;
+	}
 	
 	float2 Lum(float2 texcoord)
-		{   //Luminance
+	{   //Luminance
 			return saturate(tex2Dlod(SamplerLumVR,float4(texcoord,0,11)).xy);//Average Luminance Texture Sample
-		}
+	}
 	////////////////////////////////////////////////////Distortion Correction//////////////////////////////////////////////////////////////////////
 	#if BD_Correction || BDF
 	float2 D(float2 p, float k1, float k2, float k3) //Lens + Radial lens undistort filtering Left & Right
@@ -1145,6 +1212,15 @@ namespace SuperDepth3DVR
 					   Check_Color(DP_X.xy, DP_W.x) && Check_Color_Max(DP_X.zw, 1.0) && Check_Color( DP_Y.xy, DP_W.y),
 					   Check_Color(DP_Y.zw, DP_W.z) && Check_Color_Max(DP_Z.xy, 1.0) && Check_Color( DP_Z.zw, DP_W.w) );
 	}
+		#if MMD == 3 || MMD == 4
+		float4 Simple_Menu_Detection_EX()//Active RGB Detection Extended
+		{ 
+			return float4( Check_Color(DQ_X.xy, DQ_W.x) && Check_Color_Max(DQ_X.zw, 1.0) && Check_Color( DQ_Y.xy, DQ_W.y),
+						   Check_Color(DQ_Y.zw, DQ_W.z) && Check_Color_Max(DQ_Z.xy, 1.0) && Check_Color( DQ_Z.zw, DQ_W.w),
+					   	Check_Color(DR_X.xy, DR_W.x) && Check_Color_Max(DR_X.zw, 1.0) && Check_Color( DR_Y.xy, DR_W.y),
+					   	Check_Color(DR_Y.zw, DR_W.z) && Check_Color_Max(DR_Z.xy, 1.0) && Check_Color( DR_Z.zw, DR_W.w) );
+		}
+		#endif
 	#endif
 	/////////////////////////////////////////////////////////////Cursor///////////////////////////////////////////////////////////////////////////
 	float4 EdgeMask(float4 color, float2 texcoords, float Adjust_Value)
@@ -1232,6 +1308,12 @@ namespace SuperDepth3DVR
 				Color.rgb = CCArray[CSTT];
 			}
 			
+			float3 minRGB = tex2D(samplerMinMaxRGB, float2(0.25,0.0)).rgb;
+			float3 maxRGB = tex2D(samplerMinMaxRGB, float2(0.75,0.0)).rgb;
+			
+			if(Color_Correction)
+				Out.rgb = saturate( (Out.rgb - minRGB) / (maxRGB-minRGB) );
+		
 			Out = Cursor ? Color.rgb : Out.rgb;
 	
 			return Out;
@@ -1455,7 +1537,7 @@ namespace SuperDepth3DVR
 	}
 	
 	float Motion_Blinders(float2 texcoord)
-	{   float Trigger_Fade = tex2Dlod(SamplerOtherVR,float4(texcoord,0,11)).x * lerp(0.0,25.0,Blinders), AA = (1-Fade_Time_Adjust)*1000, PStoredfade = tex2D(SamplerLumVR,float2(0,0.583)).z;
+	{   float Trigger_Fade = tex2Dlod(SamplerLumVR,float4(texcoord,0,11)).x * lerp(0.0,25.0,Blinders), AA = (1-Fade_Time_Adjust)*1000, PStoredfade = tex2D(SamplerLumVR,float2(0,0.583)).z;
 		return PStoredfade + (Trigger_Fade - PStoredfade) * (1.0 - exp2(-frametime/AA)); ///exp2 would be even slower
 	}
 	#define FadeSpeed_AW 0.375
@@ -1654,6 +1736,16 @@ namespace SuperDepth3DVR
 				DM = 0.0625;
 			if( Simple_Menu_Detection().w == 1)
 				DM = 0.0625;
+			#if MMD == 3 || MMD == 4
+			if( Simple_Menu_Detection_EX().x == 1)
+				DM = 0.0625;
+			if( Simple_Menu_Detection_EX().y == 1)
+				DM = 0.0625;
+			if( Simple_Menu_Detection_EX().z == 1)
+				DM = 0.0625;
+			if( Simple_Menu_Detection_EX().w == 1)
+				DM = 0.0625;
+			#endif
 		}
 		#endif	
 		
@@ -2090,7 +2182,7 @@ namespace SuperDepth3DVR
 		return tex2D(SamplerDMVR,texcoord).w;
 	}
 	
-	void Average_Luminance(float4 position : SV_Position, float2 texcoord : TEXCOORD, out float4 AL : SV_Target0, out float Other : SV_Target1)
+	void Average_Luminance(float4 position : SV_Position, float2 texcoord : TEXCOORD, out float4 AL : SV_Target0, out float4 Other : SV_Target1)
 	{	
 		float Average_Lum_Bottom = PrepDepth( texcoord )[0][0];
 		// SamplerDMVR 0 is Weapon State storage and SamplerDMVR 1 is Boundy State storage	
@@ -2103,9 +2195,9 @@ namespace SuperDepth3DVR
 												tex2D(SamplerzBufferVR_P,int2(0,1)).y};//0.916
 		//Set a avr size for the Number of lines needed in texture storage.
 		float Grid = floor(texcoord.y * BUFFER_HEIGHT * BUFFER_RCP_HEIGHT * Num_of_Values);	
-		
-		AL = float4(0,Average_Lum_Bottom,Storage__Array[int(fmod(Grid,Num_of_Values))],tex2Dlod(SamplerDMVR,float4(texcoord,0,0)).y);
-		Other = length(tex2D(SamplerDMVR,texcoord).w - tex2D(SamplerPBBVR,texcoord).x);//Motion_Detection
+		//Motion_Detection
+		AL = float4(length(tex2D(SamplerDMVR,texcoord).w - tex2D(SamplerPBBVR,texcoord).x),Average_Lum_Bottom,Storage__Array[int(fmod(Grid,Num_of_Values))],tex2Dlod(SamplerDMVR,float4(texcoord,0,0)).y);
+		Other = float4(tex2D(samplerMinMaxRGB, texcoord).rgb,1);
 	}
 	////////////////////////////////////////////////////////////////////Logo////////////////////////////////////////////////////////////////////////////
 	#define _f float // Text rendering code copied/pasted from https://www.shadertoy.com/view/4dtGD2 by Hamneggs
@@ -2587,6 +2679,12 @@ namespace SuperDepth3DVR
 			RenderTarget0 = texzBufferVR_P;
 			RenderTarget1 = texzBufferVR_L;
 		}
+			pass Color_Correction
+		{
+			VertexShader = PostProcessVS;
+			PixelShader = MinMaxRGB;
+			RenderTarget = texMinMaxRGB;
+		}
 			pass StereoBuffers
 		{
 			VertexShader = PostProcessVS;
@@ -2615,7 +2713,7 @@ namespace SuperDepth3DVR
 			VertexShader = PostProcessVS;
 			PixelShader = Average_Luminance;
 			RenderTarget0 = texLumVR;
-			RenderTarget1 = texOtherVR;
+			RenderTarget1 = texMinMaxRGBLastFrame;
 		}
 			pass PastBBVR
 		{

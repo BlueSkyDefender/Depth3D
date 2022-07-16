@@ -1,7 +1,7 @@
 ////----------------------------------------//
 ///SuperDepth3D Overwatch Automation Shader///
 //----------------------------------------////
-// Version 2.7.1
+// Version 2.7.2
 //---------------------------------------OVERWATCH---------------------------------------//
 // If you are reading this stop. Go away and never look back. From this point on if you  //
 // still think it's is worth looking at this..... Then no one can save you or your soul. //
@@ -128,16 +128,26 @@ static const float4 Pos_XY_XY_E_F_D = 0;                //Position E XY F XY    
 static const float4 Menu_Size_Adjust_D = 0;             //Menu Size Main ABC | D | E | F                | DN_W
 
 //Simple Menu Detection
-static const int Multi_Menu_Detection_D = 0;            // Off 0 | 1 | 2                                | MMD
+static const int Multi_Menu_Detection_D = 0;            // Off 0 | 1 | 2 | 3                            | MMD
 static const float4 Pos_XY_XY_AA_D = 0;                 //Position A XY A XY                            | DO_X
 static const float4 Pos_XY_XY_AB_D = 0;                 //Position A XY B XY                            | DO_Y
 static const float4 Pos_XY_XY_BB_D = 0;                 //Position B XY B XY                            | DO_Z
-static const float4 Simple_Menu_Tresh_AB_D = 0;         //Simple Manu Tresh For A & B                   | DO_Z
+static const float4 Simple_Menu_Tresh_AB_D = 1000;      //Simple Manu Tresh For A & B                   | DO_Z
 
 static const float4 Pos_XY_XY_CC_D = 0;                 //Position C XY C XY                            | DP_X
 static const float4 Pos_XY_XY_CD_D = 0;                 //Position C XY D XY                            | DP_Y
 static const float4 Pos_XY_XY_DD_D = 0;                 //Position D XY D XY                            | DP_Z
-static const float4 Simple_Menu_Tresh_CD_D = 0;         //Simple Manu Tresh For C & D                   | DP_Z
+static const float4 Simple_Menu_Tresh_CD_D = 1000;      //Simple Manu Tresh For C & D                   | DP_Z
+
+static const float4 Pos_XY_XY_EE_D = 0;                 //Position E XY E XY                            | DQ_X
+static const float4 Pos_XY_XY_EF_D = 0;                 //Position E XY F XY                            | DQ_Y
+static const float4 Pos_XY_XY_FF_D = 0;                 //Position F XY F XY                            | DQ_Z
+static const float4 Simple_Menu_Tresh_EF_D = 1000;      //Simple Manu Tresh For E & F                   | DQ_Z
+
+static const float4 Pos_XY_XY_GG_D = 0;                 //Position G XY G XY                            | DR_X
+static const float4 Pos_XY_XY_GH_D = 0;                 //Position G XY H XY                            | DR_Y
+static const float4 Pos_XY_XY_HH_D = 0;                 //Position H XY H XY                            | DR_Z
+static const float4 Simple_Menu_Tresh_GH_D = 1000;      //Simple Manu Tresh For G & H                   | DR_Z
 
 //Special Toggles
 static const int Resident_Evil_Fix_D = 0;               //Resident Evil Fix                             | REF
@@ -5231,6 +5241,46 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	//#define DM_W 0.175 //HQ Trim
 	//#define DL_Z 1     //HQ Text
 	#define HQT 1
+#elif (App == 0x1FEFF4DD ) //The Forest???
+	#define DA_W 1
+	#define DA_Y 475.0//650.0
+	#define DA_X 0.1000
+	#define DF_Y 0.1175
+	#define DE_X 1
+	#define DE_Y 0.500
+	#define DE_Z 0.325
+    #define REF 15 //Fix can go from 1 - 15 and 15 is low 1 is High
+	#define DI_W 0.75 //Adjustment for REF
+    #define DG_Z 0.075 //Min
+    #define DI_Z 0.200//0.175 //Trim
+	#define BMT 1
+	#define DF_Z 0.125
+    #define SMS 3      //SM Toggle Separation
+	#define DL_X 0.875 //SM Tune
+	#define DL_W 0.00  //SM Perspective
+	#define DM_X 0     //HQ Tune
+	#define DM_Z 2     //HQ Smooth
+	//#define DM_W 0.175 //HQ Trim
+	//#define DL_Z 1     //HQ Text
+	#define HQT 1
+    #define MMD 3 //Set Multi Menu Detection             //Off / On
+    #define DO_X float4( 0.664 , 0.110 ,  0.5  , 0.2215) //Pos A1 = XY Color & A2 = ZW Black 
+    #define DO_Y float4( 0.452 , 0.1685,  0.5111, 0.0261)//Pos A3 = XY Color & B1 = ZW Color
+    #define DO_Z float4( 0.893 , 0.870 ,  0.888, 0.861 ) //Pos B2 = XY Black & B3 = ZW Color
+	#define DO_W float4( 27.0  , 30.0  ,  25.0 , 30.0  ) //Tresh Hold for Color A & B and Color
+	#define DP_X float4( 0.2775, 0.030 ,  0.500, 0.10  ) //Pos C1 = XY Color & C2 = ZW Black 
+    #define DP_Y float4( 0.193 , 0.240 ,  0.4873, 0.0266)//Pos C3 = XY Color & D1 = ZW Color
+    #define DP_Z float4( 0.893 , 0.870 ,  0.888, 0.861 ) //Pos D2 = XY Black & D3 = ZW Color
+	#define DP_W float4( 30.0  , 27.0  ,  25.0 , 30.0  ) //Tresh Hold for Color C & D and Color 
+	#define DQ_X float4( 0.4942, 0.0164,  0.893, 0.870 ) //Pos E1 = XY Color & E2 = ZW Black 
+    #define DQ_Y float4( 0.888 , 0.861 ,  0.4942, 0.017) //Pos E3 = XY Color & F1 = ZW Color
+    #define DQ_Z float4( 0.893, 0.870  ,  0.888 , 0.861) //Pos F2 = XY Black & F3 = ZW Color
+	#define DQ_W float4( 25.0  , 30.0  ,  25.0  , 30.0 ) //Tresh Hold for Color E & F and Color
+	#define DR_X float4( 0.493 , 0.0164,  0.1   , 0.5  ) //Pos G1 = XY Color & G2 = ZW Black 
+    #define DR_Y float4( 0.039 , 0.862 ,  0.5337, 0.018)//Pos G3 = XY Color & H1 = ZW Color
+    #define DR_Z float4( 0.1   , 0.5   ,  0.039 , 0.862 ) //Pos H2 = XY Black & H3 = ZW Color
+	#define DR_W float4( 25.0  , 30.0  ,  25.0  , 30.0  ) //Tresh Hold for Color G & H and Color 
+	#define PEW 1
 #else
 	#define NPW 1 //No Profile
 #endif
@@ -5459,6 +5509,34 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 #endif 
 #ifndef DP_W
 	#define DP_W Simple_Menu_Tresh_CD_D
+#endif
+
+// X = [Position E & E] Y = [Position E & F] Z = [Position F & F] W = [EF Menu Tresholds]
+#ifndef DQ_X
+    #define DQ_X Pos_XY_XY_EE_D
+#endif
+#ifndef DQ_Y
+    #define DQ_Y Pos_XY_XY_EF_D
+#endif
+#ifndef DQ_Z
+    #define DQ_Z Pos_XY_XY_FF_D
+#endif 
+#ifndef DQ_W
+	#define DQ_W Simple_Menu_Tresh_EF_D
+#endif
+
+// X = [Position G & G] Y = [Position G & H] Z = [Position H & H] W = [GH Menu Tresholds]
+#ifndef DR_X
+    #define DR_X Pos_XY_XY_GG_D
+#endif
+#ifndef DR_Y
+    #define DR_Y Pos_XY_XY_GH_D
+#endif
+#ifndef DR_Z
+    #define DR_Z Pos_XY_XY_HH_D
+#endif 
+#ifndef DR_W
+	#define DR_W Simple_Menu_Tresh_GH_D
 #endif
 
 //Special Toggles

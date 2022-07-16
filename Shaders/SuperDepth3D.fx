@@ -2,7 +2,7 @@
 	///**SuperDepth3D**///
 	//----------------////
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	//* Depth Map Based 3D post-process shader v3.2.5
+	//* Depth Map Based 3D post-process shader v3.2.6
 	//* For Reshade 3.0+
 	//* ---------------------------------
 	//*
@@ -62,9 +62,13 @@ namespace SuperDepth3D
 		// DN_X = [Position A & B] DN_Y = [Position C & D] DM_Z = [Position E & F] DN_W = [Menu Size Main]	
 		static const float DN_X = 0.0, DN_Y = 0.0, DN_Z = 0.0, DN_W = 0.0;
 		// DO_X = [Position A & A] DO_Y = [Position A & B] DO_Z = [Position B & B] DO_W = [AB Menu Tresh]	
-		static const float DO_X = 0.0, DO_Y = 0.0, DO_Z = 0.0, DO_W = 0.0;
+		static const float DO_X = 0.0, DO_Y = 0.0, DO_Z = 0.0, DO_W = 1000.0;
 		// DP_X = [Position C & C] DP_Y = [Position C & D] DP_Z = [Position D & D] DP_W = [CD Menu Tresh]	
-		static const float DP_X = 0.0, DP_Y = 0.0, DP_Z = 0.0, DP_W = 0.0;
+		static const float DP_X = 0.0, DP_Y = 0.0, DP_Z = 0.0, DP_W = 1000.0;
+		// DQ_X = [Position E & E] DQ_Y = [Position E & F] DQ_Z = [Position F & F] DQ_W = [EF Menu Tresh]	
+		static const float DQ_X = 0.0, DQ_Y = 0.0, DQ_Z = 0.0, DQ_W = 1000.0;
+		// DR_X = [Position G & G] DR_Y = [Position G & H] DR_Z = [Position H & H] DR_W = [GH Menu Tresh]	
+		static const float DR_X = 0.0, DR_Y = 0.0, DR_Z = 0.0, DR_W = 1000.0;
 		// WSM = [Weapon Setting Mode]
 		#define OW_WP "WP Off\0Custom WP\0"
 		static const int WSM = 0;
@@ -207,6 +211,9 @@ namespace SuperDepth3D
 		#define Mask_Cycle_Key Set_Key_Code_Here
 	#endif
 	//This preprocessor is for Interlaced Reconstruction of Line Interlaced for Top and Bottom and Column Interlaced for Side by Side.
+	#ifndef Color_Correction_Mode
+		#define Color_Correction_Mode 0
+	#endif
 	#ifndef Reconstruction_Mode
 		#define Reconstruction_Mode 0
 	#endif
@@ -310,6 +317,7 @@ namespace SuperDepth3D
 					 "Default is 50.0%.";
 		ui_category = "Occlusion Masking";
 	> = 0.5;
+	
 	#if !Inficolor_3D_Emulator	
 	uniform float Max_Depth <
 		#if Compatibility
@@ -801,8 +809,35 @@ namespace SuperDepth3D
 	static const float3 Colors_K1_K2_K3 = float3(DC_X,DC_Y,DC_Z);
 	static const float Zoom = DC_W;
 	#endif
+	#if Color_Correction_Mode
+	uniform int Color_Correction <
+		ui_type = "combo";
+		ui_items = "Off\0On\0";
+		ui_label = "·Color Correction·";
+		ui_tooltip = "Partial Luma Preserved Color Correction.\n"
+					"Removes Tint and or Color Cast in an automatic way while enhancing contrast.n\"
+					"This works by sampling the image and creating a min and max color map and adjusting the image accordingly.\n"
+					"Default is Off.";
+		ui_category = "Miscellaneous Options";
+	> = 0;
+
+	uniform float Correction_Strength <
+		ui_type = "slider";
+		ui_min = 0.0; ui_max = 1.0; ui_step = 0.01;
+		ui_label = " Correction Factor";
+		ui_tooltip = "This gives full control over Color Correction Factor.\n"
+					"It can make dark areas brighter, Try to leave this on low to preserve atmosphere.\n"
+					"Default is 0.0f, Low.";
+		ui_category = "Miscellaneous Options";
+	> = 0.0;
+	#endif
+
 	uniform bool Vert_3D_Pinball <
-		ui_label = "·Swap 3D Axis·";
+	#if Color_Correction_Mode
+		ui_label = "Swap 3D Axis";
+	#else
+		ui_label = "·Swap 3D Axis·";	
+	#endif
 		ui_tooltip = "Use this to swap the axis that the Parallax is generated.\n"
 					 "Useful for 3D Pinball Games, You may have to swap eyes.\n"
 					 "Default is Off.";
@@ -1003,12 +1038,61 @@ namespace SuperDepth3D
 		{
 			Texture = texLumN;
 		};
-		
-	float2 Lum(float2 texcoord)
+	#if Color_Correction_Mode		
+	texture2D texMinMaxRGB { Width = 2; Height = 1; Format = RGBA16f; };
+	sampler2D samplerMinMaxRGB
+	{ 
+		Texture = texMinMaxRGB;
+		MagFilter = POINT;
+		MinFilter = POINT;
+		MipFilter = POINT;
+	};
+	
+	texture2D texMinMaxRGBLastFrame { Width = BUFFER_WIDTH * Scale_Buffer; Height = BUFFER_HEIGHT * Scale_Buffer; Format = RGBA16f; };
+	sampler2D samplerMinMaxRGBLastFrame 
+	{
+		 Texture = texMinMaxRGBLastFrame;
+		 MagFilter = POINT;
+		 MinFilter = POINT;
+		 MipFilter = POINT;
+	};
+
+	void MinMaxRGB(float4 vpos : SV_Position, float2 texcoord : TexCoord, out float4 minmaxRGB : SV_Target0)
+	{
+		float3 color, minRGB = 1.0, maxRGB = 0.0;
+		int RTMM_STEPS = BUFFER_WIDTH/15;
+		if(Color_Correction)
 		{ 
-			return saturate(tex2Dlod(SamplerLumN,float4(texcoord,0,11)).xy);//Average Depth Brightnes Texture Sample
+		// Cycle through backbuffer and get the min/max values
+		for(int y = 0; y < BUFFER_HEIGHT; y+= RTMM_STEPS) 
+		{
+			for(int x = 0; x < BUFFER_WIDTH; x+= RTMM_STEPS) 
+			{
+				color = tex2Dfetch(BackBufferCLAMP, uint2(x, y)).rgb;
+
+				maxRGB.rgb = lerp(maxRGB.rgb, color.rgb, step(maxRGB.rgb, color.rgb));
+				minRGB.rgb = lerp(minRGB.rgb, color.rgb, step(color.rgb, minRGB.rgb));
+			}
 		}
-		
+
+		float factor = saturate(0.1 * frametime * 0.01);
+
+		float avgMax       = dot( maxRGB.xyz, 0.333333f ) * lerp(3,1,Correction_Strength);
+
+		minRGB.rgb = lerp(tex2D(samplerMinMaxRGBLastFrame, float2(0.25, 0)).rgb, minRGB.rgb, factor);
+		maxRGB.rgb = lerp(tex2D(samplerMinMaxRGBLastFrame, float2(0.75, 0)).rgb, maxRGB.rgb * ( 1.0f - avgMax ) + avgMax, factor);
+
+		minmaxRGB.rgb = saturate(texcoord.x < 0.5 ? minRGB.rgb : maxRGB.rgb);
+		minmaxRGB.a = 1.0;
+		}
+		else
+		minmaxRGB = 0;
+	}
+	#endif
+	float2 Lum(float2 texcoord)
+	{ 
+		return saturate(tex2Dlod(SamplerLumN,float4(texcoord,0,11)).xy);//Average Depth Brightnes Texture Sample
+	}		
 	////////////////////////////////////////////////////Distortion Correction//////////////////////////////////////////////////////////////////////
 	#if BD_Correction || BDF
 	float2 D(float2 p, float k1, float k2, float k3) //Lens + Radial lens undistort filtering Left & Right
@@ -1161,6 +1245,15 @@ namespace SuperDepth3D
 					   Check_Color(DP_X.xy, DP_W.x) && Check_Color_Max(DP_X.zw, 1.0) && Check_Color( DP_Y.xy, DP_W.y),
 					   Check_Color(DP_Y.zw, DP_W.z) && Check_Color_Max(DP_Z.xy, 1.0) && Check_Color( DP_Z.zw, DP_W.w) );
 	}
+		#if MMD == 3 || MMD == 4
+		float4 Simple_Menu_Detection_EX()//Active RGB Detection Extended
+		{ 
+			return float4( Check_Color(DQ_X.xy, DQ_W.x) && Check_Color_Max(DQ_X.zw, 1.0) && Check_Color( DQ_Y.xy, DQ_W.y),
+						   Check_Color(DQ_Y.zw, DQ_W.z) && Check_Color_Max(DQ_Z.xy, 1.0) && Check_Color( DQ_Z.zw, DQ_W.w),
+					   	Check_Color(DR_X.xy, DR_W.x) && Check_Color_Max(DR_X.zw, 1.0) && Check_Color( DR_Y.xy, DR_W.y),
+					   	Check_Color(DR_Y.zw, DR_W.z) && Check_Color_Max(DR_Z.xy, 1.0) && Check_Color( DR_Z.zw, DR_W.w) );
+		}
+		#endif
 	#endif
 	/////////////////////////////////////////////////////////////Cursor///////////////////////////////////////////////////////////////////////////
 	float4 EdgeMask(float4 color, float2 texcoords, float Adjust_Value)
@@ -1249,6 +1342,12 @@ namespace SuperDepth3D
 				int CSTT = clamp(Cursor_SC.y,0,10);
 				Color.rgb = CCArray[CSTT];
 			}
+		#if Color_Correction_Mode
+			float3 minRGB = tex2D(samplerMinMaxRGB, float2(0.25,0.0)).rgb;
+			float3 maxRGB = tex2D(samplerMinMaxRGB, float2(0.75,0.0)).rgb;
+			if(Color_Correction)
+			Out.rgb = saturate( (Out.rgb - minRGB) / (maxRGB-minRGB) );
+		#endif	
 			
 			Out = Cursor ? Color.rgb : Out.rgb;
 		#if Inficolor_3D_Emulator
@@ -1672,6 +1771,16 @@ namespace SuperDepth3D
 				DM = 0.0625;
 			if( Simple_Menu_Detection().w == 1)
 				DM = 0.0625;
+			#if MMD == 3 || MMD == 4
+			if( Simple_Menu_Detection_EX().x == 1)
+				DM = 0.0625;
+			if( Simple_Menu_Detection_EX().y == 1)
+				DM = 0.0625;
+			if( Simple_Menu_Detection_EX().z == 1)
+				DM = 0.0625;
+			if( Simple_Menu_Detection_EX().w == 1)
+				DM = 0.0625;
+			#endif
 		}
 		#endif	
 		
@@ -2094,7 +2203,7 @@ namespace SuperDepth3D
 	}
 	///////////////////////////////////////////////////////////Stereo Calculation///////////////////////////////////////////////////////////////////////
 	#if Reconstruction_Mode
-	void CB_Reconstruction(float4 position : SV_Position, float2 texcoord : TEXCOORD, out float4 Left : SV_Target0, out float4 Right : SV_Target1)
+	void CB_Reconstruction(float4 position : SV_Position, float2 texcoord : TEXCOORD, out float3 Left : SV_Target0, out float3 Right : SV_Target1)
 	#else
 	float3 PS_calcLR(float2 texcoord)
 	#endif
@@ -2305,7 +2414,11 @@ namespace SuperDepth3D
 	#endif
 	}
 	///////////////////////////////////////////////////////Average & Information Textures///////////////////////////////////////////////////////////////
-	float4 Average_Luminance(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Target
+	#if Color_Correction_Mode
+	void Average_Info(float4 position : SV_Position, float2 texcoord : TEXCOORD, out  float4 Average : SV_Target0, out  float4 Color_Correction : SV_Target1)
+	#else
+	void Average_Info(float4 position : SV_Position, float2 texcoord : TEXCOORD, out  float4 Average : SV_Target0)	
+	#endif
 	{	
 		float Average_ZPD = PrepDepth( texcoord )[0][0];
 	
@@ -2320,7 +2433,11 @@ namespace SuperDepth3D
 		//Set a avr size for the Number of lines needed in texture storage.
 		float Grid = floor(texcoord.y * BUFFER_HEIGHT * BUFFER_RCP_HEIGHT * Num_of_Values);
 	
-		return float4(0,Average_ZPD,Storage__Array[int(fmod(Grid,Num_of_Values))],tex2Dlod(SamplerDMN,float4(texcoord,0,0)).y);
+		Average = float4(0,Average_ZPD,Storage__Array[int(fmod(Grid,Num_of_Values))],tex2Dlod(SamplerDMN,float4(texcoord,0,0)).y);
+		
+		#if Color_Correction_Mode
+			Color_Correction = tex2D(samplerMinMaxRGB, texcoord);
+		#endif
 	}
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	#if Reconstruction_Mode
@@ -2827,11 +2944,14 @@ namespace SuperDepth3D
 			RenderTarget = texCF;
 		}
 		#else
-			pass AverageLuminance
+			pass Average_Information
 		{
 			VertexShader = PostProcessVS;
-			PixelShader = Average_Luminance;
-			RenderTarget = texLumN;
+			PixelShader = Average_Info;
+			RenderTarget0 = texLumN;
+			#if Color_Correction_Mode
+			RenderTarget1 = texMinMaxRGBLastFrame;
+			#endif
 		}
 		#endif
 			pass DepthBuffer
@@ -2847,6 +2967,14 @@ namespace SuperDepth3D
 			RenderTarget0 = texzBufferN_P;
 			RenderTarget1 = texzBufferN_L;
 		}
+		#if Color_Correction_Mode
+			pass Color_Correction
+		{
+			VertexShader = PostProcessVS;
+			PixelShader = MinMaxRGB;
+			RenderTarget = texMinMaxRGB;
+		}
+		#endif
 		#if Reconstruction_Mode
 			pass Muti_Mode_Reconstruction
 		{
@@ -2862,11 +2990,14 @@ namespace SuperDepth3D
 			PixelShader = Out;
 		}
 		#if D_Frame || DFW
-			pass AverageLuminance
+			pass Average_Information
 		{
 			VertexShader = PostProcessVS;
-			PixelShader = Average_Luminance;
-			RenderTarget = texLumN;
+			PixelShader = Average_Info;
+			RenderTarget0 = texLumN;
+			#if Color_Correction_Mode
+			RenderTarget1 = texMinMaxRGBLastFrame;
+			#endif
 		}
 		#endif
 	}
