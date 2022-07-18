@@ -5241,7 +5241,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	//#define DM_W 0.175 //HQ Trim
 	//#define DL_Z 1     //HQ Text
 	#define HQT 1
-#elif (App == 0x1FEFF4DD ) //The Forest???
+#elif (App == 0x1FEFF4DD ) //Someday Youll Return
 	#define DA_W 1
 	#define DA_Y 475.0//650.0
 	#define DA_X 0.1000
@@ -5281,6 +5281,36 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define DR_Z float4( 0.1   , 0.5   ,  0.039 , 0.862 ) //Pos H2 = XY Black & H3 = ZW Color
 	#define DR_W float4( 25.0  , 30.0  ,  25.0  , 30.0  ) //Tresh Hold for Color G & H and Color 
 	#define PEW 1
+#elif (App == 0xB928FC0C ) //House Of Ashes
+	#define DA_W 1
+	#define DA_X 0.04375
+	#define DA_Y 20.0
+	#define DB_Z 0.3
+	#define DF_Y 0.010
+	#define DB_Y 4
+	#define DE_X 1
+	#define DE_Y 0.300
+	#define DE_Z 0.300
+	#define DG_W 0.100 //Pop
+	#define BMT 1
+	#define DF_Z 0.125
+    #define DG_Z 0.075 //Min
+    #define DI_Z 0.100//0.175 //Trim
+    #define SMS 3      //SM Toggle Separation
+	#define DL_X 0.85  //SM Tune
+	#define DL_W 0.0   //SM Perspective
+	#define DM_X 8     //HQ Tune
+	#define DM_Z 3     //HQ Smooth
+	//#define DM_W 0.175 //HQ Trim
+	//#define DL_Z 1     //HQ Text
+	#define HQT 1
+	#define RHW 1
+	#define NDW 1
+	#define SPF 1
+	#define DD_W -0.2435 //-0.240
+	#define LBM 1
+	#define DI_X 0.879
+	#define DI_Y 0.120
 #else
 	#define NPW 1 //No Profile
 #endif

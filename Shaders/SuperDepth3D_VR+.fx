@@ -2,7 +2,7 @@
 	///**SuperDepth3D_VR+**///
 	//--------------------////
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	//* Depth Map Based 3D post-process shader v3.2.5
+	//* Depth Map Based 3D post-process shader v3.2.6
 	//* For Reshade 4.4+ I think...
 	//* ---------------------------------
 	//*
@@ -874,9 +874,9 @@ namespace SuperDepth3DVR
 	sampler DepthBuffer
 		{
 			Texture = DepthBufferTex;
-			AddressU = CLAMP;
-			AddressV = CLAMP;
-			AddressW = CLAMP;
+			AddressU = BORDER;
+			AddressV = BORDER;
+			AddressW = BORDER;
 			//Used Point for games like AMID Evil that don't have a proper Filtering.
 			MagFilter = POINT;
 			MinFilter = POINT;
@@ -1044,7 +1044,10 @@ namespace SuperDepth3DVR
 			for(int x = 0; x < BUFFER_WIDTH; x+= RTMM_STEPS) 
 			{
 				color = tex2Dfetch(BackBufferCLAMP, uint2(x, y)).rgb;
-
+				
+				if(color.r <= 0.01 && color.g <= 0.01 && color.b <= 0.01)
+					color = tex2Dlod(BackBufferCLAMP, float4(texcoord,0,0)).rgb;
+					
 				maxRGB.rgb = lerp(maxRGB.rgb, color.rgb, step(maxRGB.rgb, color.rgb));
 				minRGB.rgb = lerp(minRGB.rgb, color.rgb, step(color.rgb, minRGB.rgb));
 			}
