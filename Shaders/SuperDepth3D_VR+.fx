@@ -2,7 +2,7 @@
 	///**SuperDepth3D_VR+**///
 	//--------------------////
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	//* Depth Map Based 3D post-process shader v3.2.6
+	//* Depth Map Based 3D post-process shader v3.2.7
 	//* For Reshade 4.4+ I think...
 	//* ---------------------------------
 	//*
@@ -792,6 +792,12 @@ namespace SuperDepth3DVR
 		ui_category = "Image Effects";
 	> = 0;
 	
+	uniform bool Toggle_Deband <
+		ui_label = " Deband Toggle";
+		ui_tooltip = "Turns on automatic Depth Aware Deband this is used to reduce or remove the color banding in the image.";
+		ui_category = "Image Effects";
+	> = true;
+	
 	#if !SuperDepth && !HelixVision
 		uniform bool NCAOC < // Non Companion App Overlay Compatibility
 		ui_label = " Alternative Overlay Mode";
@@ -1035,13 +1041,12 @@ namespace SuperDepth3DVR
 	void MinMaxRGB(float4 vpos : SV_Position, float2 texcoord : TexCoord, out float4 minmaxRGB : SV_Target0)
 	{
 		float3 color, minRGB = 1.0, maxRGB = 0.0;
-		int RTMM_STEPS = BUFFER_WIDTH/15;
+		int2 SIZE_STEPS = Res/15;
 		if(Color_Correction)
 		{ 
-		// Cycle through backbuffer and get the min/max values
-		for(int y = 0; y < BUFFER_HEIGHT; y+= RTMM_STEPS) 
+		for(int y = 0; y <= Res.y; y+= SIZE_STEPS.y) 
 		{
-			for(int x = 0; x < BUFFER_WIDTH; x+= RTMM_STEPS) 
+			for(int x = 0; x <= Res.x; x+= SIZE_STEPS.x) 
 			{
 				color = tex2Dfetch(BackBufferCLAMP, uint2(x, y)).rgb;
 				
@@ -1055,7 +1060,7 @@ namespace SuperDepth3DVR
 
 		float factor = saturate(0.1 * frametime * 0.01);
 
-		float avgMax       = dot( maxRGB.xyz, 0.333333f ) * lerp(3,1,Correction_Strength);
+		float avgMax = dot( maxRGB.xyz, 0.333333f ) * lerp(3,1,Correction_Strength);
 
 		minRGB.rgb = lerp(tex2D(samplerMinMaxRGBLastFrame, float2(0.25, 0)).rgb, minRGB.rgb, factor);
 		maxRGB.rgb = lerp(tex2D(samplerMinMaxRGBLastFrame, float2(0.75, 0)).rgb, maxRGB.rgb * ( 1.0f - avgMax ) + avgMax, factor);
@@ -1157,8 +1162,8 @@ namespace SuperDepth3DVR
 	{   float Threshold = 0.001;//Both this and the options below may need to be adjusted. A Value lower then 7.5 will break this.!?!?!?!
 		if ( SD_Trigger == 1 || SDT == 1)//Top _ Left                             //Center_Left                             //Botto_Left
 			return (TargetedDepth(float2(0.95,0.25)) >= Threshold ) && (TargetedDepth(float2(0.95,0.5)) >= Threshold) && (TargetedDepth(float2(0.95,0.75)) >= Threshold) ? 0 : 1;
-		else
-			return 0;
+		else																	  //Center				
+			return (TargetedDepth(float2(0.5,0.1)) >= 1 ) && (TargetedDepth(float2(0.5,0.5)) < 1) && (TargetedDepth(float2(0.5,0.9)) >= 1) ? 0 : 1;
 	}
 	#endif
 	
@@ -1268,7 +1273,7 @@ namespace SuperDepth3DVR
 	    return   CCBox(Rotationtexcoord, size ) *  CCBox(Rotationtexcoord, size * 0.6 ) ;
 	}
 	
-	float4 MouseCursor(float2 texcoord )
+	float4 MouseCursor(float2 texcoord, float2 pos)
 	{   float4 Out = CSB(texcoord),Color, Exp_Darks, Exp_Brights;
 			float Cursor;
 			if(Cursor_Type > 0)
@@ -1310,6 +1315,30 @@ namespace SuperDepth3DVR
 				int CSTT = clamp(Cursor_SC.y,0,10);
 				Color.rgb = CCArray[CSTT];
 			}
+
+			if(Toggle_Deband)
+			{
+				//Code I asked Marty McFly | Pascal for and he let me have.
+				const float SEARCH_RADIUS = 1, Depth_Sample = tex2Dlod(SamplerzBufferVR_P,float4(texcoord,0,0)).x < 0.98;
+				const float2 magicdot = float2(0.75487766624669276, 0.569840290998);
+				const float3 magicadd = float3(0, 0.025, 0.0125) * dot(magicdot, 1);
+				float3 dither = frac(dot(pos.xy, magicdot) + magicadd);
+				
+				//LinerSampleDepth
+				float LinerSampleDepth = rcp( exp2( BUFFER_COLOR_BIT_DEPTH ) - 1.0);
+				
+				float2 shift;
+				sincos(6.283 * 30.694 * dither.x, shift.x, shift.y);
+				shift = shift * dither.x - 0.5;
+				
+				texcoord.xy = texcoord.xy + lerp(0,37.5 * pix,SEARCH_RADIUS);
+				
+				float3 scatter =  CSB(texcoord + shift * lerp(0,pix * 75,SEARCH_RADIUS)).rgb;
+				float3 diff = Depth_Sample ? abs(Out.rgb - scatter) : all(Out.rgb - scatter); 
+					   diff.x = max(max(diff.x, diff.y), diff.z) ;
+				
+				Out.rgb = lerp(Out.rgb, scatter, diff.x <= LinerSampleDepth);
+			}
 			
 			float3 minRGB = tex2D(samplerMinMaxRGB, float2(0.25,0.0)).rgb;
 			float3 maxRGB = tex2D(samplerMinMaxRGB, float2(0.75,0.0)).rgb;
@@ -1333,8 +1362,9 @@ namespace SuperDepth3DVR
 		return DMA;
 	}
 	
-	float2 TC_SP(float2 texcoord)
+	float4 TC_SP(float2 texcoord)
 	{
+		float2 H_V_A, H_V_B, X_Y_A, X_Y_B, S_texcoord = texcoord;
 		#if BD_Correction || BDF
 		if(BD_Options == 0 || BD_Options == 2)
 		{
@@ -1342,29 +1372,43 @@ namespace SuperDepth3DVR
 			texcoord = D(texcoord.xy,K123.x,K123.y,K123.z);
 		}
 		#endif
+		
 		#if DB_Size_Position || SPF || LBC || LB_Correction || SDT || SD_Trigger
-	
+		
 			#if SDT || SD_Trigger
-				float2 X_Y = float2(Image_Position_Adjust.x,Image_Position_Adjust.y) + (SDTriggers() ? float2( DG_X , DG_Y) : 0.0);
-			#else
-				#if LBC || LB_Correction
-					float2 X_Y = Image_Position_Adjust + (LBDetection() && LB_Correction_Switch ? Image_Pos_Offset : 0.0f );
-				#else
-					float2 X_Y = float2(Image_Position_Adjust.x,Image_Position_Adjust.y);
-				#endif
+				X_Y_A = float2(Image_Position_Adjust.x,Image_Position_Adjust.y) + (SDTriggers() ? float2( DG_X , DG_Y) : 0.0);
 			#endif
-	
-		texcoord.xy += float2(-X_Y.x,X_Y.y)*0.5;
-	
+
 			#if LBC || LB_Correction
-				float2 H_V = Horizontal_and_Vertical * (LBDetection() && LB_Correction_Switch ? H_V_Offset : 1.0f );
+				X_Y_A = Image_Position_Adjust + (LBDetection() && LB_Correction_Switch ? Image_Pos_Offset : 0.0f );
+				X_Y_B = Image_Position_Adjust + Image_Pos_Offset;
+					if((SDT == 2 || SD_Trigger == 2) && SDTriggers() && LBDetection())
+					   X_Y_A = float2(Image_Position_Adjust.x,Image_Position_Adjust.y); 
+			#else
+				X_Y_A = float2(Image_Position_Adjust.x,Image_Position_Adjust.y);
+			#endif
+
+
+	
+		texcoord.xy += float2(-X_Y_A.x,X_Y_A.y)*0.5;
+		S_texcoord.xy += float2(-X_Y_B.x,X_Y_B.y)*0.5;
+		
+			#if LBC || LB_Correction
+				H_V_A = Horizontal_and_Vertical * (LBDetection() && LB_Correction_Switch ? H_V_Offset : 1.0f );
+				H_V_B = Horizontal_and_Vertical * H_V_Offset;
+					if((SDT == 2 || SD_Trigger == 2) && SDTriggers() && LBDetection())
+						H_V_A = Horizontal_and_Vertical;	
 			#else
 				float2 H_V = Horizontal_and_Vertical;
 			#endif
-		float2 midHV = (H_V-1) * float2(BUFFER_WIDTH * 0.5,BUFFER_HEIGHT * 0.5) * pix;
-		texcoord = float2((texcoord.x*H_V.x)-midHV.x,(texcoord.y*H_V.y)-midHV.y);
+			
+		float2 midHV_A = (H_V_A-1) * float2(BUFFER_WIDTH * 0.5,BUFFER_HEIGHT * 0.5) * pix;
+		texcoord = float2((texcoord.x*H_V_A.x)-midHV_A.x,(texcoord.y*H_V_A.y)-midHV_A.y);
+
+		float2 midHV_B = (H_V_B-1) * float2(BUFFER_WIDTH * 0.5,BUFFER_HEIGHT * 0.5) * pix;
+		S_texcoord = float2((S_texcoord.x*H_V_B.x)-midHV_B.x,(S_texcoord.y*H_V_B.y)-midHV_B.y);
 		#endif
-		return texcoord;
+		return float4(texcoord,S_texcoord);
 	}
 	/* Not needed Yet may add it in later. If I feel like it.
 	float Log_DB(float DB)
@@ -1430,8 +1474,8 @@ namespace SuperDepth3DVR
 	
 		texcoord.xy -= DLSS_FSR_Offset.x * pix;
 	
-		float4 DM = Depth(TC_SP(texcoord)).xxxx;
-		float R, G, B, A, WD = WeaponDepth(TC_SP(texcoord)).x, CoP = WeaponDepth(TC_SP(texcoord)).y, CutOFFCal = (CoP/DMA()) * 0.5; //Weapon Cutoff Calculation
+		float4 DM = Depth(TC_SP(texcoord).xy).xxxx;
+		float R, G, B, A, WD = WeaponDepth(TC_SP(texcoord).xy).x, CoP = WeaponDepth(TC_SP(texcoord).xy).y, CutOFFCal = (CoP/DMA()) * 0.5; //Weapon Cutoff Calculation
 		CutOFFCal = step(DM.x,CutOFFCal);
 	
 		[branch] if (WP == 0)
@@ -1449,7 +1493,7 @@ namespace SuperDepth3DVR
 		A = ZPD_Boundary >= 4 ? max( G, R) : R; //Grid Depth
 	
 		return float3x3( saturate(float3(R, G, B)) , 													   //[0][0] = R | [0][1] = G | [0][2] = B
-						 saturate(float3(A,Depth(SDT || SD_Trigger ? texcoord : TC_SP(texcoord)).x,DM.w)) , //[1][0] = A | [1][1] = D | [1][2] = DM 
+						 saturate(float3(A,Depth( SDT == 1 || SD_Trigger == 1 ? texcoord : TC_SP(texcoord).xy).x,DM.w)) , //[1][0] = A | [1][1] = D | [1][2] = DM 
 								  float3(0,0,0) );														  //[2][0] = Null | [2][1] = Null | [2][2] = Null
 	}
 	//////////////////////////////////////////////////////////////Depth HUD Alterations///////////////////////////////////////////////////////////////////////
@@ -1665,7 +1709,7 @@ namespace SuperDepth3DVR
 	float3 DB( float2 texcoord)
 	{
 		// X = Mix Depth | Y = Weapon Mask | Z = Weapon Hand | W = Normal Depth
-		float4 DM = float4(tex2Dlod(SamplerDMVR,float4(texcoord,0,0)).xyz,PrepDepth( SDT || SD_Trigger ? TC_SP(texcoord) :  texcoord )[1][1]);
+		float4 DM = float4(tex2Dlod(SamplerDMVR,float4(texcoord,0,0)).xyz,PrepDepth( SDT == 1 || SD_Trigger == 1 ? TC_SP(texcoord).xy : texcoord )[1][1]);
 		//Hide Temporal passthrough
 		if(texcoord.x < pix.x * 2 && texcoord.y < pix.y * 2)
 			DM = PrepDepth(texcoord)[0][0];
@@ -1775,7 +1819,7 @@ namespace SuperDepth3DVR
 		#endif
 		}
 	
-		return float3(DM.y,PrepDepth(texcoord)[1][1],HandleConvergence.z);
+		return float3(DM.y,PrepDepth( SDT == 2 || SD_Trigger == 2 ? TC_SP(texcoord).zw : texcoord)[1][1],HandleConvergence.z);
 	}
 	////////////////////////////////////////////////////Depth & Special Depth Triggers//////////////////////////////////////////////////////////////////
 	void zBuffer(in float4 position : SV_Position, in float2 texcoord : TEXCOORD, out float2 Point_Out : SV_Target0 , out float2 Linear_Out : SV_Target1)
@@ -1979,16 +2023,16 @@ namespace SuperDepth3DVR
 	#endif
 	
 	#if HelixVision
-		float4 L = saturation( float4(MouseCursor( Parallax(-DLR.x, float2(TCL.x * 2,TCL.y))).rgb,1.0) ),
-			   R = saturation( float4(MouseCursor( Parallax( DLR.y, float2(TCR.x  * 2 - 1,TCR.y))).rgb,1.0) );
+		float4 L = saturation( float4(MouseCursor( Parallax(-DLR.x, float2(TCL.x * 2,TCL.y)), position.xy).rgb,1.0) ),
+			   R = saturation( float4(MouseCursor( Parallax( DLR.y, float2(TCR.x  * 2 - 1,TCR.y)), position.xy).rgb,1.0) );
 		#if HUD_MODE || HMT
 			L.rgb = HUD(L.rgb,float2((TCL.x * 2) - HUD_Adjustment,TCL.y));
 			R.rgb = HUD(R.rgb,float2((TCR.x  * 2 - 1) + HUD_Adjustment,TCR.y));
 		#endif
 		Double = StoreTC.x < 0.5 ? L : R; //Stereoscopic 3D using Reprojection Left & Right
 	#else
-		Left =  saturation(float4(MouseCursor( Parallax(-DLR.x, TCL)).rgb,1.0)) ; //Stereoscopic 3D using Reprojection Left
-		Right = saturation(float4(MouseCursor( Parallax( DLR.y, TCR)).rgb,1.0)) ;//Stereoscopic 3D using Reprojection Right
+		Left =  saturation(float4(MouseCursor( Parallax(-DLR.x, TCL), position.xy).rgb,1.0) ) ; //Stereoscopic 3D using Reprojection Left
+		Right = saturation(float4(MouseCursor( Parallax( DLR.y, TCR), position.xy).rgb,1.0) ) ;//Stereoscopic 3D using Reprojection Right
 		#if HUD_MODE || HMT
 			Left.rgb = HUD(Left.rgb,float2(TCL.x - HUD_Adjustment,TCL.y));
 			Right.rgb = HUD(Right.rgb,float2(TCR.x + HUD_Adjustment,TCR.y));

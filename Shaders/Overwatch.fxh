@@ -1,7 +1,7 @@
 ////----------------------------------------//
 ///SuperDepth3D Overwatch Automation Shader///
 //----------------------------------------////
-// Version 2.7.2
+// Version 2.7.3
 //---------------------------------------OVERWATCH---------------------------------------//
 // If you are reading this stop. Go away and never look back. From this point on if you  //
 // still think it's is worth looking at this..... Then no one can save you or your soul. //
@@ -5337,6 +5337,41 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define SMP 1      //SM Pillerbox Smoothing
 	#define HQT 1
 	#define NDW 1
+	#define PEW 1
+	#define DAA 1
+#elif (App == 0x5663B8FC ) //Stray
+	#define DA_W 1
+	#define DA_X 0.110
+	#define DF_Y 0.015
+	#define DA_Y 100.0
+	#define DB_Z 0.25
+	//#define DB_Y 1
+	#define DE_X 3
+	#define DE_Y 0.450
+	#define DE_Z 0.375
+	#define DG_W 0.100 //Pop
+	#define BMT 1
+	#define DF_Z 0.0375
+    #define REF 10 //Fix can go from 1 - 15 and 15 is low 1 is High
+	#define DI_W 2.0 //Adjustment for REF
+    #define DG_Z 0.030 //Min
+    #define DI_Z 0.100 //Trim
+    #define SMS 1      //SM Toggle Separation
+	#define DL_X 0.9   //SM Tune
+	#define DL_W 0.0   //SM Perspective
+	#define DM_X 7     //HQ Tune
+	#define DM_Z 2     //HQ Smooth
+	//#define DM_W 0.175 //HQ Trim
+	//#define DL_Z 1     //HQ Text
+	#define HQT 1
+	//#define SMP 1      //SM Pillerbox Smoothing
+	//#define SPF 1	
+    #define LBC 1     //Letter Box Correction
+	#define DH_Z 0.0  //Pos offset X    
+	#define DH_W -0.2595//Pos offset Y
+	#define SDT 2 //Spcial Depth Trigger With X & Y Offsets
+    //#define DG_X 0.0
+    //#define DG_Y 0.0 
 	#define PEW 1
 	#define DAA 1
 #else
