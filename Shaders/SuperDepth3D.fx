@@ -2,7 +2,7 @@
 	///**SuperDepth3D**///
 	//----------------////
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	//* Depth Map Based 3D post-process shader v3.2.8
+	//* Depth Map Based 3D post-process shader v3.2.9
 	//* For Reshade 3.0+
 	//* ---------------------------------
 	//*
@@ -2374,9 +2374,9 @@ namespace SuperDepth3D
 		float4 Shift_LR = Vert_3D_Pinball ? Pattern_Type ? float4(-DLR.x,TCL.yx,AI) : float4(DLR.y, TCR.yx, -AI) : Pattern_Type ? float4(-DLR.x,TCL,AI) : float4(DLR.y, TCR, -AI);
 	
 			if(Vert_3D_Pinball)
-				Left_Right = MouseCursor(Parallax(Shift_LR.x,Shift_LR.yz,Shift_LR.w).yx).rgb;		
+				Left_Right = MouseCursor(Parallax(Shift_LR.x,Shift_LR.yz,Shift_LR.w).yx, position.xy ).rgb;		
 			else
-				Left_Right = MouseCursor(Parallax(Shift_LR.x,Shift_LR.yz,Shift_LR.w)).rgb;	
+				Left_Right = MouseCursor(Parallax(Shift_LR.x,Shift_LR.yz,Shift_LR.w), position.xy ).rgb;	
 		#else
 		float3 CB_Pattern = float3( floor(TexCoords.y*texsize.y) + floor(TexCoords.x*texsize.x), floor(TexCoords.x*texsize.x), floor(TexCoords.y*texsize.y));
 		float Pattern_Type = fmod(CB_Pattern.x,2); //CB

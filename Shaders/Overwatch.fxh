@@ -5364,6 +5364,11 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	//#define DM_W 0.175 //HQ Trim
 	//#define DL_Z 1     //HQ Text
 	#define HQT 1
+    #define MMD 1 //Set Multi Menu Detection             //Off / On
+    #define DO_X float4( 0.133 , 0.290 , 0.800 , 0.290  ) //Pos A1 = XY Color & A2 = ZW Black 
+    #define DO_Y float4( 0.704 , 0.290 , 0.0  , 0.0  ) //Pos A3 = XY Color & B1 = ZW Color
+    #define DO_Z float4( 0.0  , 0.0  , 0.0  , 0.0  ) //Pos B2 = XY Black & B3 = ZW Color
+	#define DO_W float4( 30.0  , 30.0  , 1000.0 , 1000.0  ) //Tresh Hold for Color A & B and Color
 	//#define SMP 1      //SM Pillerbox Smoothing
 	//#define SPF 1	
     #define LBC 1     //Letter Box Correction
