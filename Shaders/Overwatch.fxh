@@ -3360,10 +3360,11 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DF_Z 0.25
 	#define SMS 1      //SM Toggle Separation
 	#define DL_X 0.625 //SM Tune
-	#define DL_W 0.025 //SM Perspective
-	#define DM_X 12    //HQ Tune
-	#define DM_Z 4     //HQ Smooth
-	#define DM_W 1.0 //HQ Trim
+	#define DL_W 0.000 //SM Perspective
+	#define DM_X 4    //HQ Tune
+	#define DM_Z 5     //HQ Smooth
+	#define DM_W 0.0 //HQ Trim
+	#define HQT 1
 	#define DSW 1
     #define PEW 1
 #elif (App == 0x1551DBDA ) //The Fogotten City
@@ -3736,10 +3737,10 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define BMT 1    
 	#define DF_Z 0.140
 	#define SMS 2      //SM Toggle Separation
-	#define DL_X 0.400 //SM Tune
+	#define DL_X 0.500 //SM Tune
 	#define DL_W 0.05  //SM Perspective
 	#define DM_X 12    //HQ Tune
-	#define DM_Z 6     //HQ Smooth
+	#define DM_Z 5     //HQ Smooth
 	//#define DM_W 0.000 //HQ Trim
 	#define HQT 1
 	#define PEW 1
