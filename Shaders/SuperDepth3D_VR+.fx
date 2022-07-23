@@ -2,7 +2,7 @@
 	///**SuperDepth3D_VR+**///
 	//--------------------////
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	//* Depth Map Based 3D post-process shader v3.2.7
+	//* Depth Map Based 3D post-process shader v3.3.0
 	//* For Reshade 4.4+ I think...
 	//* ---------------------------------
 	//*
@@ -336,6 +336,20 @@ namespace SuperDepth3DVR
 					"\n"
 					"Default is Normal.";
 	ui_category = "Occlusion Masking";
+	> = 0;
+
+	uniform int View_Mode_Warping <
+		#if Compatibility
+		ui_type = "drag";
+		#else
+		ui_type = "slider";
+		#endif
+		ui_min = 0.0; ui_max = 5.0;
+		ui_label = " Halo Reduction";
+		ui_tooltip = "This warps the depth in some View Modes to hide or minimize the Halo in Most Games.\n"
+					 "With this on it should Hide the Halo a little better depending the View Mode it works on.\n"
+					 "Default is 0 Off.";
+		ui_category = "Occlusion Masking";
 	> = 0;
 	
 	uniform int Custom_Sidebars <
@@ -1149,6 +1163,11 @@ namespace SuperDepth3DVR
 			return Top_Left && LBSensitivity(SLLTresh(float2(0.1,0.5), MipLevel)) && LBSensitivity(SLLTresh(float2(0.9,0.5), MipLevel)) && Center ? 1 : 0; //Vert
 		else                   //Left_Center                                  //Right_Center
 			return Top_Left && LBSensitivity(SLLTresh(float2(0.5,0.9), MipLevel)) && Center ? 1 : 0; //Hoz
+	}
+	#else
+	float LBDetection()//Stand in for not crashing when not in use
+	{	
+		return 0;
 	}	
 	#endif
 	
@@ -1164,6 +1183,11 @@ namespace SuperDepth3DVR
 			return (TargetedDepth(float2(0.95,0.25)) >= Threshold ) && (TargetedDepth(float2(0.95,0.5)) >= Threshold) && (TargetedDepth(float2(0.95,0.75)) >= Threshold) ? 0 : 1;
 		else																	  //Center				
 			return (TargetedDepth(float2(0.5,0.1)) >= 1 ) && (TargetedDepth(float2(0.5,0.5)) < 1) && (TargetedDepth(float2(0.5,0.9)) >= 1) ? 0 : 1;
+	}
+	#else
+	float SDTriggers()//Stand in for not crashing when not in use
+	{	
+		return 0;
 	}
 	#endif
 	
@@ -1838,12 +1862,12 @@ namespace SuperDepth3DVR
 		Point_Out = Set_Depth.xy; 
 		Linear_Out = float2(Set_Depth.x,Color.x);//is z when above code is on.	
 	}
-	
+		
 	float3 GetDB(float2 texcoord)
 	{
-		float MIP_LvL = View_Mode == 1 ? 0.0 : 0, Depth_Blur = tex2Dlod(SamplerzBufferVR_P, float4(texcoord,0, MIP_LvL) ).y;
+		float Depth_Blur = View_Mode_Warping > 0 ? min(tex2Dlod(SamplerzBufferVR_L, float4( texcoord, 0, clamp(View_Mode_Warping,0,5) ) ).x,tex2Dlod(SamplerzBufferVR_L, float4( texcoord, 0, 0) ).x) : tex2Dlod(SamplerzBufferVR_L, float4( texcoord, 0, 0) ).x;
 	
-		float3 DepthBuffer_LP = float3(tex2Dlod(SamplerzBufferVR_L, float4( texcoord, 0, 0) ).x,tex2Dlod(SamplerzBufferVR_P, float4( texcoord, 0, 0) ).x, Depth_Blur );
+		float3 DepthBuffer_LP = float3(Depth_Blur,tex2Dlod(SamplerzBufferVR_P, float4( texcoord, 0, 0) ).x, tex2Dlod(SamplerzBufferVR_P, float4(texcoord,0, 0) ).y );
 		
 		if(View_Mode == 0 || View_Mode == 3)	
 			DepthBuffer_LP.x = DepthBuffer_LP.y;

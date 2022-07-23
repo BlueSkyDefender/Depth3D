@@ -2,7 +2,7 @@
 	///**SuperDepth3D**///
 	//----------------////
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	//* Depth Map Based 3D post-process shader v3.2.9
+	//* Depth Map Based 3D post-process shader v3.3.0
 	//* For Reshade 3.0+
 	//* ---------------------------------
 	//*
@@ -303,7 +303,21 @@ namespace SuperDepth3D
 					"Default is Normal.";
 	ui_category = "Occlusion Masking";
 	> = 0;
-	
+
+	uniform int View_Mode_Warping <
+		#if Compatibility
+		ui_type = "drag";
+		#else
+		ui_type = "slider";
+		#endif
+		ui_min = 0; ui_max = 5;
+		ui_label = " Halo Reduction";
+		ui_tooltip = "This warps the depth in some View Modes to hide or minimize the Halo in Most Games.\n"
+					 "With this on it should Hide the Halo a little better depending the View Mode it works on.\n"
+					 "Default is 0 Off.";
+		ui_category = "Occlusion Masking";
+	> = 0;
+		
 	uniform int Custom_Sidebars <
 		ui_type = "combo";
 		ui_items = "Mirrored Edges\0Black Edges\0Stretched Edges\0";
@@ -348,7 +362,7 @@ namespace SuperDepth3D
 					 "Default is Normal.";
 		ui_category = "Occlusion Masking";
 	> = 1;
-	
+		
 	uniform float Compatibility_Power <
 		#if Compatibility
 		ui_type = "drag";
@@ -1186,6 +1200,11 @@ namespace SuperDepth3D
 		else                   //Left_Center                                  //Right_Center
 			return Top_Left && LBSensitivity(SLLTresh(float2(0.5,0.9), MipLevel)) && Center ? 1 : 0; //Hoz
 	}			              //Bottom_Center
+	#else
+	float LBDetection()//Stand in for not crashing when not in use
+	{	
+		return 0;
+	}	
 	#endif
 	
 	#if SDT || SD_Trigger
@@ -1200,6 +1219,11 @@ namespace SuperDepth3D
 			return (TargetedDepth(float2(0.95,0.25)) >= Threshold ) && (TargetedDepth(float2(0.95,0.5)) >= Threshold) && (TargetedDepth(float2(0.95,0.75)) >= Threshold) ? 0 : 1;
 		else																	  //Center				
 			return (TargetedDepth(float2(0.5,0.1)) >= 1 ) && (TargetedDepth(float2(0.5,0.5)) < 1) && (TargetedDepth(float2(0.5,0.9)) >= 1) ? 0 : 1;
+	}
+	#else
+	float SDTriggers()//Stand in for not crashing when not in use
+	{	
+		return 0;
 	}
 	#endif
 	
@@ -1877,7 +1901,7 @@ namespace SuperDepth3D
 		Point_Out = Set_Depth.xy; 
 		Linear_Out = float2(Set_Depth.x,Color.x);//is z when above code is on.	
 	}
-	
+		
 	float3 GetDB(float2 texcoord)
 	{
 		#if Reconstruction_Mode  
@@ -1888,11 +1912,11 @@ namespace SuperDepth3D
 			texcoord.xy = texcoord.yx;
 		#endif
 
-		float Depth_Blur = tex2Dlod(SamplerzBufferN_P, float4(texcoord,0, 0) ).y;
+		float Depth_Blur = View_Mode_Warping > 0 ? min(tex2Dlod(SamplerzBufferN_L, float4( texcoord, 0, clamp(View_Mode_Warping,0,5) ) ).x,tex2Dlod(SamplerzBufferN_L, float4( texcoord, 0, 0) ).x) : tex2Dlod(SamplerzBufferN_L, float4( texcoord, 0, 0) ).x;
 	
-		float2 DS_LP = float2(tex2Dlod(SamplerzBufferN_L, float4( texcoord, 0, 0) ).x,tex2Dlod(SamplerzBufferN_P, float4( texcoord, 0, 0) ).x);
+		float2 DS_LP = float2(Depth_Blur,tex2Dlod(SamplerzBufferN_P, float4( texcoord, 0, 0) ).x);
 	
-		float3 DepthBuffer_LP = float3(DS_LP.x,DS_LP.y, Depth_Blur );
+		float3 DepthBuffer_LP = float3(DS_LP.x,DS_LP.y, tex2Dlod(SamplerzBufferN_P, float4(texcoord,0, 0) ).y );
 		
 		if(View_Mode == 0 || View_Mode == 3)	
 			DepthBuffer_LP.x = DepthBuffer_LP.y;

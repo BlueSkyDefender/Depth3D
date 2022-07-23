@@ -3345,9 +3345,9 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define FOV 1
 #elif (App == 0x22CA259A ) //Kena Bridge of Spirits
     #define DA_W 1
-	#define DA_X 0.225
-    #define DF_Y 0.025
-	#define DA_Y 7.25
+	#define DA_X 0.125//0.225
+    #define DF_Y 0.0125
+	#define DA_Y 14.0//13.75//7.25
 	#define DB_Y 5
 	#define DE_X 1
 	#define DE_Y 0.400
@@ -3357,7 +3357,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define DH_Z 0.0
     #define DH_W -0.05
     #define BMT 1
-	#define DF_Z 0.25
+	#define DF_Z 0.300
 	#define SMS 1      //SM Toggle Separation
 	#define DL_X 0.625 //SM Tune
 	#define DL_W 0.000 //SM Perspective
