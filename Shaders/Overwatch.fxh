@@ -2899,6 +2899,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DM_X 8     //HQ Tune
 	#define DM_Z 1     //HQ Smooth
 	//#define DM_W 0.000 //HQ Trim
+	#define HQT 1
 	#define PEW 1
 	#define DAA 1
 	#define DB_W 27
