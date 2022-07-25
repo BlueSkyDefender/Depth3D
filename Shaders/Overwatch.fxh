@@ -475,9 +475,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define LBC 2  //Letter Box Correction Offsets With X & Y
 	#define DH_Z 0.256
 	#define DH_W 0.0
-#elif (App == 0x308AEBEA ) //TitanFall 2
-	#define DB_Y 4
-	#define DB_W 44
 #elif (App == 0x5FCFB1E5 ) //Project Warlock
 	#define DA_W 1
 	#define DA_X 0.0475
@@ -5381,6 +5378,41 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DG_Y 0.0 
 	#define PEW 1
 	#define DAA 1
+#elif (App == 0x308AEBEA ) //TitanFall 2
+	//#define DA_W 1
+	#define DA_X 0.040
+	//#define DF_Y 0.015
+	#define DA_Y 10.0
+	#define DB_Z 0.100
+	//#define DB_Y 1
+	#define DE_X 4
+	#define DE_Y 0.500
+	#define DE_Z 0.4375
+	//#define DG_W 0.100 //Pop
+    #define DG_Z 0.03 //Min
+    #define DI_Z 0.150 //Trim
+	#define BMT 1
+	#define DF_Z 0.075
+    #define SMS 0      //SM Toggle Separation
+	#define DL_X 0.700 //SM Tune
+	#define DL_W 0.0   //SM Perspective
+	#define DM_X 0     //HQ Tune
+	#define DM_Z 0     //HQ Smooth
+	#define DM_W 0.25 //HQ Trim
+	#define DL_Z 2     //HQ Text
+	#define HQT 1
+	#define DB_Y 4
+	#define DB_W 44
+    #define DF_X 0.35
+	#define DJ_W 0.25
+	#define FPS  2
+	#define DK_X 2
+	#define DK_Y 0
+	#define DK_Z 0
+	#define DK_W 2
+	#define PEW 1
+	#define DAA 1
+	#define FOV 1
 #else
 	#define NPW 1 //No Profile
 #endif
@@ -5829,7 +5861,7 @@ float4 Weapon_Profiles(float WP ,float4 Weapon_Adjust) //Tried Switch But, can't
     if (WP == 43)
         Weapon_Adjust = float4(1.2,12.5,0.3,0.05);        //WP 41 | GhostRunner DX12
     if (WP == 44)
-        Weapon_Adjust = float4(0.277,20.0,8.8,0.0);       //WP 42 | TitanFall 2
+        Weapon_Adjust = float4(0.278,20.0,8.8,0.0);       //WP 42 | TitanFall 2
     if (WP == 45)
         Weapon_Adjust = float4(1.300,17.50,0.0,0.0);      //WP 43 | Project Warlock
     if (WP == 46)
