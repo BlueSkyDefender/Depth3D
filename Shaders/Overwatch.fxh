@@ -102,8 +102,8 @@ static const float Check_Depth_Limit_Weapon_D = -0.100; //Check Depth Limit Weap
 static const int FPS_Focus_Type_D = 0;                  //FPS Focus Type: World | Weapon | Mix          | FPS
 static const int FPS_Focus_Method_D = 0;                //FPS Focus Method: Off | Switch | Hold         | DK_X
 static const int EFO_Eye_Selection_D = 0;               //Eye Eye Selection: Both | Right Eye | Left Eye| DK_Y
-static const int EFO_Fade_Selection_D = 0;              //Eye Fade Options: 0.1% | 0.2% | 0.3%          | DK_Z
-static const int EFO_Fade_Speed_Selection_D = 0;        //Eye Fade Speed Options: +0% | +50% | +100%    | DK_W
+static const int EFO_Fade_Selection_D = 0;              //Eye Fade Options: 0.1% | 0.2% | 0.3% | 0.4%   | DK_Z
+static const int EFO_Fade_Speed_Selection_D = 1;        //Eye Fade Speed Options: 0% | 50% | 100% | 150%| DK_W
 
 //SM Values
 static const int SM_Toggle_Sparation_D = 1;             // 0 | 1 | 2 | 3                                | SMS
@@ -4514,6 +4514,11 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define LBS 1      //Letter Box Sensitivity
 	#define DH_Z 0.0   //Pos offset X    
 	#define DH_W -0.240//Pos offset Y
+	#define FPS  0
+	#define DK_X 2
+	#define DK_Y 0
+	#define DK_Z 3
+	#define DK_W 1
 	#define PEW 1
 	#define NDW 1
 	#define DAA 1

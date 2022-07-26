@@ -2,7 +2,7 @@
 	///**SuperDepth3D_VR+**///
 	//--------------------////
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	//* Depth Map Based 3D post-process shader v3.3.0
+	//* Depth Map Based 3D post-process shader v3.3.w
 	//* For Reshade 4.4+ I think...
 	//* ---------------------------------
 	//*
@@ -58,7 +58,7 @@ namespace SuperDepth3DVR
 		// DJ_X = [NULL X] DJ_Y = [Menu Detection Type] DJ_Z = [Match Threshold] DJ_W = [Check Depth Limit Weapon]
 		static const float DJ_X = 0.0, DJ_Y = 0.0, DJ_Z = 0.0, DJ_W = -0.100;
 		// DK_X = [FPS Focus Method] DK_Y = [Eye Eye Selection] DK_Z = [Eye Fade Selection] DK_W = [Eye Fade Speed Selection]	
-		static const float DK_X = 0, DK_Y = 0.0, DK_Z = 0, DK_W = 0;	
+		static const float DK_X = 0, DK_Y = 0.0, DK_Z = 0, DK_W = 1;	
 		// DN_X = [Position A & B] DN_Y = [Position C & D] DM_Z = [Position E & F] DN_W = [Menu Size Main]	
 		static const float DN_X = 0.0, DN_Y = 0.0, DN_Z = 0.0, DN_W = 0.0;
 		// DO_X = [Position A & A] DO_Y = [Position A & B] DO_Z = [Position B & B] DO_W = [AB Menu Tresh]	
@@ -613,16 +613,24 @@ namespace SuperDepth3DVR
 		ui_category = "FPS Focus";
 	> = FPS;
 	
-	uniform int3 Eye_Fade_Reduction_n_Power <
-		ui_type = "slider";
-		ui_min = 0; ui_max = 2;
-		ui_label = " Eye Fade Options";
-		ui_tooltip ="X, Eye Selection: One is Right Eye only, Two is Left Eye Only, and Zero Both Eyes.\n"
-					"Y, Fade Reduction: Decreases the depth amount by a current percentage.\n"
-					"Z, Fade Speed: Decreases or Incresses how fast it changes.\n"
-					"Default is X[ 0 ] Y[ 0 ] Z[ 1 ].";
+	uniform int Eye_Fade_Selection <
+		ui_type = "combo";
+		ui_items = "Both\0Right Only\0Left Only\0";
+		ui_label = " Eye Selection";
+		ui_tooltip ="Eye Selection: One is Right Eye only, Two is Left Eye Only, and Zero Both Eyes.\n"
+					"Default is Both.";
 		ui_category = "FPS Focus";
-	> = int3(DK_Y,DK_Z,DK_W);
+	> = DK_Y;
+	
+	uniform int2 Eye_Fade_Reduction_n_Power <
+		ui_type = "slider";
+		ui_min = 0; ui_max = 3;
+		ui_label = " Eye Fade Options";
+		ui_tooltip ="X, Fade Reduction: Decreases the depth amount by a current percentage.\n"
+					"Y, Fade Speed: Decreases or Incresses how fast it changes.\n"
+					"Default is X[ 0 ] Y[ 1 ].";
+		ui_category = "FPS Focus";
+	> = int2(DK_Z,DK_W);
 	
 	//Cursor Adjustments
 	uniform int Cursor_Type <
@@ -1535,10 +1543,12 @@ namespace SuperDepth3DVR
 	/////////////////////////////////////////////////////////Fade In and Out Toggle/////////////////////////////////////////////////////////////////////
 	float Fade_in_out(float2 texcoord)
 	{ float TCoRF[1], Trigger_Fade, AA = Fade_Time_Adjust, PStoredfade = tex2D(SamplerLumVR,float2(0,0.083)).z;
-		if(Eye_Fade_Reduction_n_Power.z == 0)
+		if(Eye_Fade_Reduction_n_Power.y == 0)
 			AA *= 0.5;
-		else if(Eye_Fade_Reduction_n_Power.z == 2)
+		if(Eye_Fade_Reduction_n_Power.y == 2)
 			AA *= 1.5;
+		if(Eye_Fade_Reduction_n_Power.y == 3)
+			AA *= 2.0;
 		//Fade in toggle.
 		if(FPSDFIO == 1)
 			Trigger_Fade = Trigger_Fade_A;
@@ -1617,10 +1627,10 @@ namespace SuperDepth3DVR
 		float  ExAd = (1-(FadeSpeed_AW * 2.0))*1000, Current =  min(0.75f,smoothstep(0,0.25f,PrepDepth(0.5f)[0][0])), Past = tex2D(SamplerLumVR,float2(0,0.750)).z;
 		return Past + (Current - Past) * (1.0 - exp(-frametime/ExAd));
 	}
-	
+	#define FadeSpeed_AF 0.4375
 	float Weapon_ZPD_Fade(float Weapon_Con)
 	{
-		float  ExAd = (1-(FadeSpeed_AW * 2.0))*1000, Current =  Weapon_Con, Past = tex2D(SamplerLumVR,float2(0,0.916)).z;
+		float  ExAd = (1-(FadeSpeed_AF * 2.0))*1000, Current =  Weapon_Con, Past = tex2D(SamplerLumVR,float2(0,0.916)).z;
 		return Past + (Current - Past) * (1.0 - exp(-frametime/ExAd));
 	}
 	//////////////////////////////////////////////////////////Depth Map Alterations/////////////////////////////////////////////////////////////////////
@@ -1747,12 +1757,14 @@ namespace SuperDepth3DVR
 		if (WP == 0 || WZPD_and_WND.x <= 0)
 			DM.y = 0;
 			
-		float FadeIO = smoothstep(0,1,1-Fade_in_out(texcoord).x), FD_Adjust = Focus_Reduction_Type == 2 ? 0.125 : 0.1625;	
+		float FadeIO = Focus_Reduction_Type == 0 ? 1 : smoothstep(0,1,1-Fade_in_out(texcoord).x), FD_Adjust = 0.125;	
 	
-		if( Eye_Fade_Reduction_n_Power.y == 1)
-			FD_Adjust = 0.25;
-		else if( Eye_Fade_Reduction_n_Power.y == 2)
+		if( Eye_Fade_Reduction_n_Power.x == 1)
+			FD_Adjust = 0.20;
+		if( Eye_Fade_Reduction_n_Power.x == 2)
 			FD_Adjust = 0.30;
+		if( Eye_Fade_Reduction_n_Power.x == 3)
+			FD_Adjust = 0.40;
 	
 		//Handle Convergence Here
 		float3 HandleConvergence = Conv(DM.xz,texcoord).xyz;
@@ -2022,12 +2034,14 @@ namespace SuperDepth3DVR
 	
 		float D =  Min_Divergence();
 	
-		float FadeIO = smoothstep(0,1,1-Fade_in_out(texcoord).x), FD = D, FD_Adjust = Focus_Reduction_Type == 2 ? 0.5 : 0.1;
+		float FadeIO = Focus_Reduction_Type == 1 ? 1 : smoothstep(0,1,1-Fade_in_out(texcoord).x), FD = D, FD_Adjust = Focus_Reduction_Type == 2 ? 0.5 : 0.1;
 	
-		if( Eye_Fade_Reduction_n_Power.y == 1)
+		if( Eye_Fade_Reduction_n_Power.x == 1)
 			FD_Adjust = Focus_Reduction_Type == 2 ? 0.625 : 0.2;
-		else if( Eye_Fade_Reduction_n_Power.y == 2)
+		if( Eye_Fade_Reduction_n_Power.x == 2)
 			FD_Adjust = Focus_Reduction_Type == 2 ? 0.75 : 0.3;
+		if( Eye_Fade_Reduction_n_Power.x == 3)
+			FD_Adjust = Focus_Reduction_Type == 2 ? 0.875 : 0.4;	
 	
 		if(Focus_Reduction_Type == 1)
 			FD_Adjust = 1.0;		
@@ -2036,9 +2050,9 @@ namespace SuperDepth3DVR
 			FD = lerp(FD * FD_Adjust,FD,FadeIO);
 	
 		float2 DLR = float2(FD,FD);
-		if( Eye_Fade_Reduction_n_Power.x == 1)
+		if( Eye_Fade_Selection == 1)
 				DLR = float2(D,FD);
-		else if( Eye_Fade_Reduction_n_Power.x == 2)
+		else if( Eye_Fade_Selection == 2)
 				DLR = float2(FD,D);
 				
 	//Left & Right Parallax for Stereo Vision
