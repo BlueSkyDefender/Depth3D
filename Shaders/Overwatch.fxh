@@ -3925,7 +3925,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define DI_Z 0.070//Trim
 	#define DJ_W 0.125
 	#define SMS 1      //SM Toggle Separation
-	#define DL_X 0.600 //SM Tune
+	#define DL_X 0.625 //SM Tune
 	#define DL_W 0.050 //SM Perspective
 	#define DM_X 5    //HQ Tune
 	#define DM_Z 6     //HQ Smooth
@@ -3936,7 +3936,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define FPS 2
     #define DK_X 2 //FPS Focus
     #define DK_Y 0
-    #define DK_Z 2
+    #define DK_Z 1
     #define DK_W 2 //Set speed
     #define PEW 1  
     #define FOV 1
