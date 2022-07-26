@@ -1,7 +1,7 @@
 ////----------------------------------------//
 ///SuperDepth3D Overwatch Automation Shader///
 //----------------------------------------////
-// Version 2.7.4
+// Version 2.7.5
 //---------------------------------------OVERWATCH---------------------------------------//
 // If you are reading this stop. Go away and never look back. From this point on if you  //
 // still think it's is worth looking at this..... Then no one can save you or your soul. //
@@ -4209,6 +4209,14 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define DE_Z 0.400
     #define BMT 1    
     #define DF_Z 0.138 //This had to be adjusted
+    #define SMS 1      //SM Toggle Separation
+	#define DL_X 0.600 //SM Tune
+	#define DL_W 0.0   //SM Perspective
+	#define DM_X 4     //HQ Tune
+	#define DM_Z 1     //HQ Smooth
+	#define DM_W 0.0   //HQ Trim
+	#define DL_Z 0     //HQ Text
+	#define HQT 1
 	#define LBC 2  //Letter Box Correction Offsets With X & Y
 	#define DH_X 1.345
 	#define PEW 1
