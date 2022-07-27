@@ -4086,6 +4086,14 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DG_Z 0.100//Min
 //	#define DE_W 0.0 //Max
     #define DI_Z 0.125 //Trim
+    #define SMS 1      //SM Toggle Separation
+	#define DL_X 0.600 //SM Tune
+	#define DL_W 0.0   //SM Perspective
+	#define DM_X 4     //HQ Tune
+	#define DM_Z 1     //HQ Smooth
+	#define DM_W 0.0   //HQ Trim
+	#define DL_Z 0     //HQ Text
+	#define HQT 1
 #elif (App == 0x8FDE4FCF ) //Ni No Kuni II: Revenant Kingdom**
     #define DA_X 0.075
     #define DF_Y 0.050
