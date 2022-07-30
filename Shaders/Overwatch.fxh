@@ -5498,6 +5498,33 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DL_Z 0     //HQ Text
 	#define HQT 1
 	#define PEW 1
+#elif (App == 0xDC9A4971 ) //Furi
+	#define DA_W 1
+	#define DA_X 0.050
+	#define DF_Y 0.005
+	#define DA_Y 250.0
+	#define DB_Z 0.100
+    #define DB_X 1
+	//#define DB_Y 1
+	#define DE_X 1
+	#define DE_Y 0.4375
+	#define DE_Z 0.4375
+//	#define DG_W -0.100 //Pop
+    #define REF 15 //Fix can go from 1 - 15 and 15 is low 1 is High
+	#define DI_W 1.25 //Adjustment for REF
+    //#define DG_Z 0.03 //Min
+    //#define DI_Z 0.150 //Trim
+	#define BMT 1
+	#define DF_Z 0.100
+    #define SMS 2      //SM Toggle Separation
+	#define DL_X 0.750 //SM Tune
+	#define DL_W 0.0   //SM Perspective
+	#define DM_X 4     //HQ Tune
+	#define DM_Z 1     //HQ Smooth
+	#define DM_W 0.0   //HQ Trim
+	#define DL_Z 0     //HQ Text
+	#define HQT 1	
+	#define PEW 1
 #else
 	#define NPW 1 //No Profile
 #endif
