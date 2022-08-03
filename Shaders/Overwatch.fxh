@@ -1,7 +1,7 @@
 ////----------------------------------------//
 ///SuperDepth3D Overwatch Automation Shader///
 //----------------------------------------////
-// Version 2.7.5
+// Version 2.7.6
 //---------------------------------------OVERWATCH---------------------------------------//
 // If you are reading this stop. Go away and never look back. From this point on if you  //
 // still think it's is worth looking at this..... Then no one can save you or your soul. //
@@ -159,6 +159,7 @@ static const float HUDX_D = 0.0;                        //Heads Up Display Cut O
 //Special Toggles Defaults
 static const int Inverted_Depth_Fix_D = 0;              //Inverted Depth Fix                            | IDF 
 static const int Delay_Frame_Workaround_D = 0;          //Delay Frame Workaround                        | DFW
+static const int Set_PopOut_D = 0;                      //Set Popout & Weapon Min                       | SPO
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //Special Toggles Warnings
 static const int No_Profile_Warning_D = 0;              //No Profile Warning                            | NPW
@@ -1106,15 +1107,26 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DE_Z 0.475
 	#define RHW 1
 #elif (App == 0xC0052CC4) //Halo The Master Chief Collection
-	#define DA_X 0.037
+	#define DA_X 0.0375
+	#define DF_Y 0.030
 	#define DA_W 1
-	#define DA_Y 75.0
-	#define DB_Y 5
+	#define DA_Y 70.0 //65.0 //75.0
+//	#define DB_Z 0.150
+//	#define DB_Y 5
 	#define DE_X 4
-	#define DE_Y 0.375
-	#define DE_Z 0.375
+	#define DE_Y 0.500 //0.375
+	#define DE_Z 0.400
+    #define DG_Z 0.125 //Min
+    //#define DE_W 0.105 //Max
+    #define DI_Z 0.1375//Trim
+    #define DG_W 2.500 //Pop
+    #define HMT 1
+	#define DF_W 0.5
+	#define BMT 1
+	#define DF_Z 0.100
 	#define WSM 6
-	#define OW_WP "Read Help & Change Me\0Custom WP\0Halo: Reach\0Halo: CE Anniversary\0Halo 2: Anniversary\0Halo 3\0Halo 3: ODST\0Halo 4\0"
+	#define SPO 1
+	#define OW_WP "Read Help & Change Me\0Custom WP\0Halo: Reach\0Halo: CE Anniversary\0Halo 2: Anniversary\0Halo 3 & Halo 3: ODST\0Halo 3 & Halo 3: ODST Alternet\0Halo 4\0Halo 4 Alternet\0"
 	#define RHW 1
 	#define WPW 1
 #elif (App == 0x2AB9ECF9) //System ReShock
@@ -5839,7 +5851,10 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define SMP SM_PillarBox_Detection_D       //PillarBox Detection & Smoothing
 #endif 
 #ifndef MMD
-    #define MMD Multi_Menu_Detection_D        //Multi Menu Detection
+    #define MMD Multi_Menu_Detection_D         //Multi Menu Detection
+#endif 
+#ifndef SPO
+    #define SPO Set_PopOut_D                   //Set Popout & Weapon Min
 #endif 
 
 //SuperDepth3D Warning System
@@ -5887,6 +5902,11 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 #endif
 
 #if WSM == 1
+float DMA_Overwatch(float WP, float DMA_Adjust)
+{
+	return DMA_Adjust;
+}
+
 float4 Weapon_Profiles(float WP ,float4 Weapon_Adjust) //Tried Switch But, can't compile in some older versions of ReShade.
 {   if (WP == 2)
         Weapon_Adjust = float4(0.425,5.0,1.125,0.0);      //WP 0  | ES: Oblivion
@@ -5997,6 +6017,11 @@ float4 Weapon_Profiles(float WP ,float4 Weapon_Adjust) //Tried Switch But, can't
 		return Weapon_Adjust;
 }
 #elif WSM == 2
+float DMA_Overwatch(float WP, float DMA_Adjust)
+{
+	return DMA_Adjust;
+}
+
 float4 Weapon_Profiles(float WP ,float4 Weapon_Adjust) //Could reduce from 76 to 57 to save on compiling time.
 {   if (WP == 2)
         Weapon_Adjust = float4(0.600,6.5,0.0,0.0);        //WP 0  | The Suicide of Rachel Foster
@@ -6107,6 +6132,11 @@ float4 Weapon_Profiles(float WP ,float4 Weapon_Adjust) //Could reduce from 76 to
 		return Weapon_Adjust;
 }
 #elif WSM == 3
+float DMA_Overwatch(float WP, float DMA_Adjust)
+{
+	return DMA_Adjust;
+}
+
 float4 Weapon_Profiles(float WP ,float4 Weapon_Adjust)
 {   if (WP == 2)
         Weapon_Adjust = float4(1.0,237.5,0.83625,0.0);    //WP 0 | Rage64
@@ -6217,6 +6247,11 @@ float4 Weapon_Profiles(float WP ,float4 Weapon_Adjust)
 		return Weapon_Adjust;
 }
 #elif WSM == 4
+float DMA_Overwatch(float WP, float DMA_Adjust)
+{
+	return DMA_Adjust;
+}
+
 float4 Weapon_Profiles(float WP ,float4 Weapon_Adjust)
 {   if (WP == 2)
         Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 0  | Game
@@ -6327,6 +6362,11 @@ float4 Weapon_Profiles(float WP ,float4 Weapon_Adjust)
 		return Weapon_Adjust;
 }
 #elif WSM == 5
+float DMA_Overwatch(float WP, float DMA_Adjust)
+{
+	return DMA_Adjust;
+}
+
 float4 Weapon_Profiles(float WP ,float4 Weapon_Adjust)
 {   if (WP == 2)
         Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 0  | Game
@@ -6437,25 +6477,52 @@ float4 Weapon_Profiles(float WP ,float4 Weapon_Adjust)
 		return Weapon_Adjust;
 }
 #elif WSM == 6
-float3 Weapon_Profiles(float WP ,float3 Weapon_Adjust) // MCC
+float DMA_Overwatch(float WP, float DMA_Adjust) // MCC
+{
+	if( WP == 4) // Change on weapon selection.
+		DMA_Adjust *= 0.325;
+	if( WP == 5 ||  WP == 6 ||  WP == 7)
+		DMA_Adjust *= 1.25;
+	return DMA_Adjust;
+}
+	#if SPO
+	float2 Set_Popout(float WP, float Adjust_Value_Pop, int Set_Weapon_Min ) // MCC
+	{
+		float2 Set_Values = float2(Adjust_Value_Pop, Set_Weapon_Min );
+		if ( WP == 2 || WP == 5 )
+	        Set_Values *= float2(1.0,1.0);      //Halo: Reach | Halo 3 & ODST
+	    if ( WP == 3 || WP == 4 || WP == 6 || WP == 7 || WP == 8 )
+	        Set_Values *= float2(-0.05,0.0);      //Halo: CE Anniversary | Halo 2: Anniversary | Alt Halo 3 & ODST | Halo 4 & Alt	        
+		return Set_Values;
+	}
+	#endif
+	
+float4 Weapon_Profiles(float WP ,float4 Weapon_Adjust) // MCC
 {
 	if (WP == 2)
         Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 0  | Halo: Reach
     if (WP == 3)
         Weapon_Adjust = float4(1.5,26.25,0.2,0.0);        //WP 1  | Halo: CE Anniversary
     if (WP == 4)
-        Weapon_Adjust = float4(0.615,70.0,0.3955,0.0);    //WP 2  | Halo 2: Anniversary
+        Weapon_Adjust = float4(0.615,10.0,0.3925,0.05);   //WP 2  | Halo 2: Anniversary
     if (WP == 5)
-        Weapon_Adjust = float4(5.750,24.0,0,0.0);         //WP 3  | Halo 3
+        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 3  | Halo 3 & ODST
     if (WP == 6)
-        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 4  | Halo 3: ODST
+        Weapon_Adjust = float4(7.540,17.5,0,0.010);       //WP 4  | Alt Halo 3 & ODST
     if (WP == 7)
-        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 5  | Halo 4
+        Weapon_Adjust = float4(1.535,17.5,0.125,0.0);     //WP 5  | Halo 4
+    if (WP == 8)
+        Weapon_Adjust = float4(1.535,25.0,0.1425,0.0);    //WP 5  | Alt Halo 4
 
 		return Weapon_Adjust;
 }
 #elif WSM == 7
-float3 Weapon_Profiles(float WP ,float3 Weapon_Adjust) // Prey 2017
+float DMA_Overwatch(float WP, float DMA_Adjust)
+{
+	return DMA_Adjust;
+}
+
+float4 Weapon_Profiles(float WP ,float4 Weapon_Adjust) // Prey 2017
 {
 	if (WP == 2)
 		Weapon_Adjust = float4(0.2832,31.25,0.8775,0.0);   //WP 0 | Prey 2017 High Settings and <
@@ -6465,7 +6532,12 @@ float3 Weapon_Profiles(float WP ,float3 Weapon_Adjust) // Prey 2017
 	return Weapon_Adjust;
 }
 #elif WSM == 8
-float3 Weapon_Profiles(float WP ,float3 Weapon_Adjust) // Blood 2
+float DMA_Overwatch(float WP, float DMA_Adjust)
+{
+	return DMA_Adjust;
+}
+
+float4 Weapon_Profiles(float WP ,float4 Weapon_Adjust) // Blood 2
 {
     if (WP == 2)
         Weapon_Adjust = float4(0.4213,5.0,0.5,0.0);        //WP 0 | Blood 2 All Weapons
@@ -6477,7 +6549,12 @@ float3 Weapon_Profiles(float WP ,float3 Weapon_Adjust) // Blood 2
 	return Weapon_Adjust;
 }
 #elif WSM == 9
-float3 Weapon_Profiles(float WP ,float3 Weapon_Adjust) // No One Lives Forever
+float DMA_Overwatch(float WP, float DMA_Adjust)
+{
+	return DMA_Adjust;
+}
+
+float4 Weapon_Profiles(float WP ,float4 Weapon_Adjust) // No One Lives Forever
 {
     if (WP == 2)
         Weapon_Adjust = float4(0.425,5.25,1.0,0.0);       //WP 4 | No One Lives Forever

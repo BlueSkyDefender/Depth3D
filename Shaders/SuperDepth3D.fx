@@ -2,7 +2,7 @@
 	///**SuperDepth3D**///
 	//----------------////
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	//* Depth Map Based 3D post-process shader v3.3.2
+	//* Depth Map Based 3D post-process shader v3.3.3
 	//* For Reshade 3.0+
 	//* ---------------------------------
 	//*
@@ -73,7 +73,7 @@ namespace SuperDepth3D
 		#define OW_WP "WP Off\0Custom WP\0"
 		static const int WSM = 0;
 		//Triggers
-		static const int MMD = 0, SMP = 0, LBR = 0, HQT = 0, AFD = 0, MDD = 0, FPS = 1, SMS = 1, REF = 0, NCW = 0, RHW = 0, NPW = 0, IDF = 0, SPF = 0, BDF = 0, HMT = 0, DFW = 0, NFM = 0, DSW = 0, BMT = 0, LBC = 0, LBS = 0, LBM = 0, DAA = 0, NDW = 0, PEW = 0, WPW = 0, FOV = 0, EDW = 0, SDT = 0;
+		static const int SPO = 0, MMD = 0, SMP = 0, LBR = 0, HQT = 0, AFD = 0, MDD = 0, FPS = 1, SMS = 1, REF = 0, NCW = 0, RHW = 0, NPW = 0, IDF = 0, SPF = 0, BDF = 0, HMT = 0, DFW = 0, NFM = 0, DSW = 0, BMT = 0, LBC = 0, LBS = 0, LBM = 0, DAA = 0, NDW = 0, PEW = 0, WPW = 0, FOV = 0, EDW = 0, SDT = 0;
 		//Overwatch.fxh State
 		#define OSW 1
 	#endif
@@ -314,9 +314,9 @@ namespace SuperDepth3D
 		ui_label = " Halo Reduction";
 		ui_tooltip = "This warps the depth in some View Modes to hide or minimize the Halo in Most Games.\n"
 					 "With this on it should Hide the Halo a little better depending the View Mode it works on.\n"
-					 "Default is 0 Off.";
+					 "Default is 3 and Zero is Off.";
 		ui_category = "Occlusion Masking";
-	> = 0;
+	> = 3;
 		
 	uniform int Custom_Sidebars <
 		ui_type = "combo";
@@ -920,6 +920,14 @@ namespace SuperDepth3D
 		return lerp( 1.0, Max_Divergence, Scale(Min_Div,100.0,1.0));
 	}
 	
+	float2 Set_Pop_Min()
+	{
+		#if SPO
+		return Set_Popout( WP, DG_W , WZPD_and_WND.y);
+		#else
+		return float2( DG_W, WZPD_and_WND.y );
+		#endif
+	}
 
 	float Perspective_Switch()
 	{   float I_3D_E = (Min_Divergence() * lerp(1.0,2.0,Focus_Inficolor));
@@ -1426,16 +1434,16 @@ namespace SuperDepth3D
 	    #endif
 			return Out;
 	}
+	
 	//////////////////////////////////////////////////////////Depth Map Information/////////////////////////////////////////////////////////////////////
+
 	float DMA() //Small List of internal Multi Game Depth Adjustments.
-	{ float DMA = Depth_Map_Adjust;
-		#if (__APPLICATION__ == 0xC0052CC4) //Halo The Master Chief Collection
-		if( WP == 4) // Change on weapon selection.
-			DMA *= 0.25;
-		else if( WP == 5)
-			DMA *= 0.8875;
+	{ 
+		#if !OSW 
+		return DMA_Overwatch( WP, Depth_Map_Adjust);
+		#else
+		return Depth_Map_Adjust;
 		#endif
-		return DMA;
 	}
 	
 	float4 TC_SP(float2 texcoord)
@@ -1644,7 +1652,7 @@ namespace SuperDepth3D
 					#if UI_MASK
 						CD = max( 1 - ZPD_I / HUD_Mask(GridXY), CD );
 					#endif
-					if ( CD < -DG_W )//may lower this to like -0.1
+					if ( CD < -Set_Pop_Min().x )//may lower this to like -0.1
 						Detect = 1;
 					//Used if Depth Buffer is way out of range.
 					if(REF || RE_Fix)
@@ -1694,7 +1702,7 @@ namespace SuperDepth3D
 	{
 		float4 DM = float4(PrepDepth(texcoord)[0][0],PrepDepth(texcoord)[0][1],PrepDepth(texcoord)[0][2],PrepDepth(texcoord)[1][1]);
 		float R = DM.x, G = DM.y, B = DM.z, Auto_Scale = WZPD_and_WND.z > 0 ? lerp(lerp(1.0,0.625,saturate(WZPD_and_WND.z * 2)),1.0,lerp(Auto_Balance_Selection().y , smoothstep(0,0.5,tex2D(SamplerLumN,float2(0,0.750)).z), 0.5)) : 1;
-		float2 Min_Trim = float2(WZPD_and_WND.y,Inficolor_3D_Emulator ? WZPD_and_WND.w : WZPD_and_WND.w * Auto_Scale);
+		float2 Min_Trim = float2(Set_Pop_Min().y,Inficolor_3D_Emulator ? WZPD_and_WND.w : WZPD_and_WND.w * Auto_Scale);
 		if(Inficolor_3D_Emulator && Inficolor_Near_Reduction)
 			Min_Trim = float2((Min_Trim.x * 2 + Min_Trim.x) * 0.5, min( 0.3, (Min_Trim.y * 2.5 + Min_Trim.y) * 0.5) );
 		//Fade Storage
