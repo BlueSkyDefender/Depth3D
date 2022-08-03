@@ -4426,8 +4426,8 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define DA_W 1
     #define DB_X 1
 	#define DA_Y 2.5
-	#define DA_X 0.060
-	#define DF_Y 0.160
+	#define DA_X 0.055
+	#define DF_Y 0.150
 	#define DE_X 1
 	#define DE_Y 0.500
 	#define DE_Z 0.375
@@ -4436,9 +4436,14 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DF_Z 0.100
 	#define DSW 1
 	#define PEW 1
-	#define SMS 0      //SM Toggle Separation
-	#define DL_X 0.5625//SM Tune
-	#define DL_W 0.000 //SM Perspective
+    #define SMS 1      //SM Toggle Separation
+	#define DL_X 0.700 //SM Tune
+	#define DL_W 0.0   //SM Perspective
+	#define DM_X 4     //HQ Tune
+	#define DM_Z 7     //HQ Smooth
+	//#define DM_W 0.175 //HQ Trim
+	//#define DL_Z 1     //HQ Text
+	#define HQT 1
 #elif ( App == 0x42F66404 ) //Bayonetta
 	#define DA_Y 39.0
 	#define DA_X 0.037
