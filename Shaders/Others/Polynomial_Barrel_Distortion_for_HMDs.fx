@@ -18,8 +18,7 @@
  //* ---------------------------------																																				*//
  //* Also thank you Zapal for your help with fixing a few things in this shader. 																									*//
  //* https://reshade.me/forum/shader-presentation/2128-3d-depth-map-based-stereoscopic-shader?start=900#21236																		*//
- //* 																																												*//
- //* 																																												*//
+ //* 																																												*//																																											*//
  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // Determines Primary and Secondary Shader Toggle. This is used if you want pair this shader up with a other one of the same type.
@@ -33,6 +32,13 @@
 	#define Compatibility 0
 #endif
 
+#ifndef Enable_AA_Filter
+	#define Enable_AA_Filter 0
+#endif
+#ifndef Enable_Sharpen_Filter
+	#define Enable_Sharpen_Filter 0
+#endif
+		
 uniform int Interpupillary_Distance <
 	#if Compatibility
 	ui_type = "drag";
@@ -164,6 +170,19 @@ uniform int2 Independent_Horizontal_Repositioning <
 	ui_category = "Image Repositioning";
 > = int2(0,0);
 
+uniform float Tilt_Control <
+	#if Compatibility
+	ui_type = "drag";
+	#else
+	ui_type = "slider";
+	#endif
+	ui_min = -0.5; ui_max = 0.5;
+	ui_label = "Keytone Horizontal & Vertical";
+	ui_tooltip = "Shift Horizontal & Vertical Angle to apply the Keystone correction.\n"
+				 "Default is Zero";
+	ui_category = "Image Repositioning";
+> = 0.0;
+
 uniform bool Tied_H_V <
 	ui_label = "Tied Horiz & Vert Repositioning";
 	ui_tooltip = "Lets you control the Horizontal and Vertical with the first value only.\n"
@@ -194,26 +213,27 @@ uniform float Saturation <
 	ui_tooltip = "Lets you saturate image, Basicly add more color.";
 	ui_category = "Image Effects";
 > = 0;
-
-uniform float Sharpen_Power <
-	#if Compatibility
-	ui_type = "drag";
-	#else
-	ui_type = "slider";
+	#if Enable_Sharpen_Filter
+	uniform float Sharpen_Power <
+		#if Compatibility
+		ui_type = "drag";
+		#else
+		ui_type = "slider";
+		#endif
+		ui_min = 0.0; ui_max = 2.0;
+		ui_label = "Sharpen Power";
+		ui_tooltip = "Adjust this on clear up the image the game, movie piture & ect.";
+		ui_category = "Image Effects";
+	> = 0;
 	#endif
-	ui_min = 0.0; ui_max = 2.0;
-	ui_label = "Sharpen Power";
-	ui_tooltip = "Adjust this on clear up the image the game, movie piture & ect.";
-	ui_category = "Image Effects";
-> = 0;
-
-uniform bool NFAA_TOGGLE <
-	ui_label = "NFAA";
-	ui_tooltip = "The Adds Normal Filter Anti-Aliasing to the Image before processing.\n"
-				 "Default is off.";
-	ui_category = "Image Effects";
-> = false;
-
+	#if Enable_AA_Filter
+	uniform bool NFAA_TOGGLE <
+		ui_label = "NFAA";
+		ui_tooltip = "The Adds Normal Filter Anti-Aliasing to the Image before processing.\n"
+					 "Default is off.";
+		ui_category = "Image Effects";
+	> = false;
+	#endif
 uniform bool Lens_Aliment_Marker <
 	ui_label = "Lens Aliment Marker";
 	ui_tooltip = "Use to this green Cross Marker for lens aliment.";
@@ -451,22 +471,52 @@ float4 Cross_Marker(float2 texcoord) //Cross Marker inside Left Image
 	return float4(GLS.xxx, 1.0);
 }
 
+float2 rotate(float2 TC, float2 center, float rotate) 
+{
+    float s = sin(rotate);
+    float c = cos(rotate);
+    TC = mul(TC-center,float2x2(c, s, -s, c));
+    return TC + center;
+        
+}
+
+float2 KeyStoneLight(float2 TC, float2 center, float Tilt_X, float Tilt_Y) 
+{
+    // Tilt Y
+    float2 Direction = float2(TC.x, 0.0);
+    float2 Alpha_0 = float2(0.0, -1.0), 
+		   Beta_0 = Direction - Alpha_0,
+		   Gamma_0 = rotate(float2(-1.0, 0.0), float2(center.x, 0.0), Tilt_Y),
+		   Delta_0 = rotate(float2( 1.0, 0.0), float2(center.x, 0.0), Tilt_Y) - Gamma_0;
+    // Intersection point
+    float IP = ( (Gamma_0.y + 1.0) * Delta_0.x - Gamma_0.x * Delta_0.y ) / (Delta_0.x*Beta_0.y-Delta_0.y*Beta_0.x);
+    // Plane position
+    float xP = IP * Beta_0.x, yP = IP * TC.y;
+    // Tilt X
+    	   Direction = float2(yP, 0.0);
+    float2 Beta_1 = Direction - Alpha_0, 
+		   Gamma_1 = rotate(float2(-1.0, 0.0), float2(center.y, 0.0), Tilt_X), 
+		   Delta_1 = rotate(float2( 1.0, 0.0), float2(center.y, 0.0), Tilt_X) - Gamma_1;
+    // calculate intersection point
+    float v = ( (Gamma_1.y + 1.0) * Delta_1.x - Gamma_1.x * Delta_1.y ) / (Delta_1.x*Beta_1.y-Delta_1.y*Beta_1.x);
+    // Plane position
+    return float2(v * xP, v * Beta_1.x );
+}
+
 float4 vignetteL(float2 texcoord)
 {
 	float4 base;
 	//Texture Rotation//
 	//Converts the specified value from radians to degrees.
 	float LD = radians(DEGREES().x);
+	//Tilt Left				
+	float2 Left_Tilt_Start = float2(Tilt_Control.x > 0 ? 0.0 : 1.0,0.5), Left_Tilt = float2(0.0, Tilt_Control.x);
+	texcoord = KeyStoneLight(texcoord * 2 - 1, Left_Tilt_Start * 2 - 1, Left_Tilt.x, Left_Tilt.y) * 0.5 + 0.5;
 	//Texture Position
 	texcoord.y += IVRePosLR().x * pix.y;//Independent Vertical Repostion Left.
 	texcoord.x += IHRePosLR().x * pix.x;//Independent Horizontal Repostion Left.
 	//Left
-	float2 L_PivotPoint = float2(0.5,0.5);
-    float2 L_Rotationtexcoord = texcoord;
-    float L_sin_factor = sin(LD);
-    float L_cos_factor = cos(LD);
-    L_Rotationtexcoord = mul(L_Rotationtexcoord - L_PivotPoint, float2x2(float2(L_cos_factor, L_sin_factor), float2(-L_sin_factor, L_cos_factor)));
-	L_Rotationtexcoord += L_PivotPoint;
+    float2 L_Rotationtexcoord = rotate(texcoord,float2(0.5,0.5), LD);
 	//Texture Zoom & Aspect Ratio//
 	float X = Z_A().x;
 	float Y = Z_A().y * Z_A().x * 2;
@@ -510,16 +560,15 @@ float4 base;
 		IHRR = IHRePosLR().x * pix.x;
 		RD = radians(DEGREES().x);
 	}
+	//Tilt Right				
+	float2 Right_Tilt_Start = float2(Tilt_Control.x > 0 ? 1.0 : 0.0,0.5), Right_Tilt = float2(0.0, -Tilt_Control.x);
+	texcoord = KeyStoneLight(texcoord * 2 - 1, Right_Tilt_Start * 2 - 1, Right_Tilt.x, Right_Tilt.y) * 0.5 + 0.5;
+	
 	//Texture Position
 	texcoord.y += IVRR;//Independent Vertical Repostion Right.
 	texcoord.x += IHRR;//Independent Horizontal Repostion Right.
 	//Right
-	float2 R_PivotPoint = float2(0.5,0.5);
-    float2 R_Rotationtexcoord = texcoord;
-    float R_sin_factor = sin(RD);
-    float R_cos_factor = cos(RD);
-    R_Rotationtexcoord = mul(R_Rotationtexcoord - R_PivotPoint, float2x2(float2(R_cos_factor, R_sin_factor), float2(-R_sin_factor, R_cos_factor)));
-	R_Rotationtexcoord += R_PivotPoint;
+    float2 R_Rotationtexcoord = rotate(texcoord,float2(0.5,0.5), RD);
 	//Texture Zoom & Aspect Ratio//
 	float X = Z_A().x;
 	float Y = Z_A().y * Z_A().x * 2;
@@ -658,90 +707,91 @@ float4 PBD(float2 texcoord)
 
 	return Out;
 }
-
-float LI(in float3 value)
-{
-	return dot(value.rgb,float3(0.333, 0.333, 0.333));
-}
-
-void NFAA(float4 position : SV_Position, float2 texcoord : TEXCOORD, out float4 NFAA : SV_Target0)
-{
-	float3 t, l, r, d;
-    float2 UV = texcoord.xy, SW = pix, n;
-	float nl, Mask; //Useing the AA samples for sharpen.
-	t = tex2D( BackBuffer, float2( UV.x , UV.y - SW.y ) ).rgb;
-	l = tex2D( BackBuffer, float2( UV.x - SW.x , UV.y ) ).rgb;
-	r = tex2D( BackBuffer, float2( UV.x + SW.x , UV.y ) ).rgb;
-	d = tex2D( BackBuffer, float2( UV.x , UV.y + SW.y ) ).rgb;
-	n = float2(LI(t) - LI(d), LI(r) - LI(l));
-
-	nl = length(n);
-	Mask = nl * 0.5f;
-
-	if (Mask > 0.025f)
-	Mask = 1-Mask;
-	else
-	Mask = 1;
-
-	Mask = saturate(lerp(Mask,1,-6.25f));
-
-	 if (NFAA_TOGGLE)
-	 {
-		if (nl < (1.0 / 16))
-		{
-			NFAA = tex2D(BackBuffer,UV);
+	#if Enable_AA_Filter
+	float LI(in float3 value)
+	{
+		return dot(value.rgb,float3(0.333, 0.333, 0.333));
+	}
+	
+	void NFAA(float4 position : SV_Position, float2 texcoord : TEXCOORD, out float4 NFAA : SV_Target0)
+	{
+		float3 t, l, r, d;
+	    float2 UV = texcoord.xy, SW = pix, n;
+		float nl, Mask; //Useing the AA samples for sharpen.
+		t = tex2D( BackBuffer, float2( UV.x , UV.y - SW.y ) ).rgb;
+		l = tex2D( BackBuffer, float2( UV.x - SW.x , UV.y ) ).rgb;
+		r = tex2D( BackBuffer, float2( UV.x + SW.x , UV.y ) ).rgb;
+		d = tex2D( BackBuffer, float2( UV.x , UV.y + SW.y ) ).rgb;
+		n = float2(LI(t) - LI(d), LI(r) - LI(l));
+	
+		nl = length(n);
+		Mask = nl * 0.5f;
+	
+		if (Mask > 0.025f)
+		Mask = 1-Mask;
+		else
+		Mask = 1;
+	
+		Mask = saturate(lerp(Mask,1,-6.25f));
+	
+		 if (NFAA_TOGGLE)
+		 {
+			if (nl < (1.0 / 16))
+			{
+				NFAA = tex2D(BackBuffer,UV);
+			}
+			else
+			{
+			n *= pix / (nl * 0.5f);
+	
+			float4   o = tex2D( BackBuffer, UV ),
+					t0 = tex2D( BackBuffer, UV + n * 0.5f) * 0.9f,
+					t1 = tex2D( BackBuffer, UV - n * 0.5f) * 0.9f,
+					t2 = tex2D( BackBuffer, UV + n) * 0.75f,
+					t3 = tex2D( BackBuffer, UV - n) * 0.75f;
+	
+				NFAA = (o + t0 + t1 + t2 + t3) / 4.3f;
+			}
+	
+		NFAA = lerp(NFAA,tex2D( BackBuffer,UV), Mask );
+	
 		}
 		else
 		{
-		n *= pix / (nl * 0.5f);
-
-		float4   o = tex2D( BackBuffer, UV ),
-				t0 = tex2D( BackBuffer, UV + n * 0.5f) * 0.9f,
-				t1 = tex2D( BackBuffer, UV - n * 0.5f) * 0.9f,
-				t2 = tex2D( BackBuffer, UV + n) * 0.75f,
-				t3 = tex2D( BackBuffer, UV - n) * 0.75f;
-
-			NFAA = (o + t0 + t1 + t2 + t3) / 4.3f;
+			NFAA = tex2D( BackBuffer,UV);
 		}
-
-	NFAA = lerp(NFAA,tex2D( BackBuffer,UV), Mask );
-
+	
+	    float greyscale = dot(NFAA.rgb, float3(0.2125, 0.7154, 0.0721));
+	    NFAA.rgb = lerp(greyscale, NFAA.rgb, Saturation + 1.0);
+	
+	  NFAA = float4(NFAA.rgb,Mask);
 	}
-	else
+	#endif
+	#if Enable_Sharpen_Filter	
+	void USM(float4 position : SV_Position, float2 texcoord : TEXCOORD,out float4 result : SV_Target0)
 	{
-		NFAA = tex2D( BackBuffer,UV);
+		float SP = Sharpen_Power;
+	
+		float2 tex_offset = pix; // Gets texel offset
+		result =  tex2D(BackBuffer, float2(texcoord));
+		if(Sharpen_Power > 0)
+		{
+			   result += tex2D(BackBuffer, float2(texcoord + float2( 1, 0) * tex_offset));
+			   result += tex2D(BackBuffer, float2(texcoord + float2(-1, 0) * tex_offset));
+			   result += tex2D(BackBuffer, float2(texcoord + float2( 0, 1) * tex_offset));
+			   result += tex2D(BackBuffer, float2(texcoord + float2( 0,-1) * tex_offset));
+			   tex_offset *= 0.75;
+			   result += tex2D(BackBuffer, float2(texcoord + float2( 1, 1) * tex_offset));
+			   result += tex2D(BackBuffer, float2(texcoord + float2(-1,-1) * tex_offset));
+			   result += tex2D(BackBuffer, float2(texcoord + float2( 1,-1) * tex_offset));
+			   result += tex2D(BackBuffer, float2(texcoord + float2(-1, 1) * tex_offset));
+	   		result /= 9;
+	
+			result = tex2D(BackBuffer, texcoord) + ( tex2D(BackBuffer, texcoord) - result ) * SP;
+			result = lerp(tex2D(BackBuffer, texcoord) ,result,tex2D(BackBuffer, texcoord).w);
+		}
 	}
-
-    float greyscale = dot(NFAA.rgb, float3(0.2125, 0.7154, 0.0721));
-    NFAA.rgb = lerp(greyscale, NFAA.rgb, Saturation + 1.0);
-
-  NFAA = float4(NFAA.rgb,Mask);
-}
-
-void USM(float4 position : SV_Position, float2 texcoord : TEXCOORD,out float4 result : SV_Target0)
-{
-	float SP = Sharpen_Power;
-
-	float2 tex_offset = pix; // Gets texel offset
-	result =  tex2D(BackBuffer, float2(texcoord));
-	if(Sharpen_Power > 0)
-	{
-		   result += tex2D(BackBuffer, float2(texcoord + float2( 1, 0) * tex_offset));
-		   result += tex2D(BackBuffer, float2(texcoord + float2(-1, 0) * tex_offset));
-		   result += tex2D(BackBuffer, float2(texcoord + float2( 0, 1) * tex_offset));
-		   result += tex2D(BackBuffer, float2(texcoord + float2( 0,-1) * tex_offset));
-		   tex_offset *= 0.75;
-		   result += tex2D(BackBuffer, float2(texcoord + float2( 1, 1) * tex_offset));
-		   result += tex2D(BackBuffer, float2(texcoord + float2(-1,-1) * tex_offset));
-		   result += tex2D(BackBuffer, float2(texcoord + float2( 1,-1) * tex_offset));
-		   result += tex2D(BackBuffer, float2(texcoord + float2(-1, 1) * tex_offset));
-   		result /= 9;
-
-		result = tex2D(BackBuffer, texcoord) + ( tex2D(BackBuffer, texcoord) - result ) * SP;
-		result = lerp(tex2D(BackBuffer, texcoord) ,result,tex2D(BackBuffer, texcoord).w);
-	}
-}
-
+	#endif
 
 ////////////////////////////////////////////////////////Logo/////////////////////////////////////////////////////////////////////////
 uniform float timer < source = "timer"; >;
@@ -864,16 +914,20 @@ technique Polynomial_Barrel_Distortion_P
 technique Polynomial_Barrel_Distortion_S
 #endif
 {
+	#if Enable_AA_Filter
 			pass AA_Filter
 		{
 			VertexShader = PostProcessVS;
 			PixelShader = NFAA;
 		}
+	#endif
+	#if Enable_Sharpen_Filter
 			pass UnSharpMask_Filter
 		{
 			VertexShader = PostProcessVS;
 			PixelShader = USM;
 		}
+	#endif
 			pass PBD
 		{
 			VertexShader = PostProcessVS;
