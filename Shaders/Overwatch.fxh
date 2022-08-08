@@ -3625,9 +3625,9 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DAA 1
 #elif (App == 0x3C98315F ) //Forza Horizon 5  
 	//#define DA_W 1
-	#define DA_X 0.2
+	#define DA_X 0.175 //0.2 // 0.150
 	//#define DF_Y 0.05
-	#define DA_Y 11.0 //7.75 //10.0 //12.5
+	#define DA_Y 12.0  //11.0 // 15.0
 	#define DB_Z 0.225
 	//#define DA_Z -0.00025  
 	#define DB_Y 4
@@ -3635,9 +3635,10 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DE_Y 0.250
 	#define DE_Z 0.475
 	//#define DG_W 0.375 //Allow popout
-    #define DG_Z 0.025
+	#define DG_Z 0.150 //0.025 //Min
+    #define DI_Z 0.125 //0.250 //Trim
 	#define BMT 1    
-	#define DF_Z 0.1125
+	#define DF_Z 0.111
 	#define SMS 1      //SM Toggle Separation
 	#define DL_X 0.800 //SM Tune
 	#define DL_W 0.000 //SM Perspective
@@ -3646,6 +3647,8 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DM_W 0.55  //HQ Trim
 	#define SMP 1      //SM Pillerbox Smoothing
 	#define HQT 1
+    #define HMT 1
+	#define DF_W 0.625
 	#define NDW 1
 	#define PEW 1
 	#define DAA 1
@@ -5541,6 +5544,38 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DM_W 0.0   //HQ Trim
 	#define DL_Z 0     //HQ Text
 	#define HQT 1	
+	#define PEW 1
+#elif (App == 0x9113C0D ) //Necromunda Hired Gun
+	#define DA_W 1
+	#define DA_X 0.025//0.0125
+	#define DF_Y 0.00125
+	#define DA_Y 25.0
+	#define DB_Z 0.100
+    //#define DB_X 1
+	//#define DB_Y 1
+	#define DE_X 3
+	#define DE_Y 0.500
+	#define DE_Z 0.375
+	#define DG_W -0.100 //Pop
+    //#define REF 15 //Fix can go from 1 - 15 and 15 is low 1 is High
+	//#define DI_W 1.25 //Adjustment for REF
+    #define DG_Z 0.050//Min
+    #define DI_Z 0.070 //Trim
+	#define BMT 1
+	#define DF_Z 0.250
+    #define SMS 1      //SM Toggle Separation
+	#define DL_X 0.550 //SM Tune
+	#define DL_W 0.025 //SM Perspective
+	#define DM_X 4     //HQ Tune
+	#define DM_Z 1     //HQ Smooth
+	#define DM_W 0.0   //HQ Trim
+	#define DL_Z 0     //HQ Text
+	#define HQT 1
+	#define FPS  0
+	#define DK_X 2
+	#define DK_Y 0
+	#define DK_Z 1
+	#define DK_W 3
 	#define PEW 1
 #else
 	#define NPW 1 //No Profile
