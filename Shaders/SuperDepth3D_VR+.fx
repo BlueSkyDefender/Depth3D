@@ -2,7 +2,7 @@
 	///**SuperDepth3D_VR+**///
 	//--------------------////
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	//* Depth Map Based 3D post-process shader v3.3.3
+	//* Depth Map Based 3D post-process shader v3.3.5
 	//* For Reshade 4.4+ I think...
 	//* ---------------------------------
 	//*
@@ -348,9 +348,9 @@ namespace SuperDepth3DVR
 		ui_label = " Halo Reduction";
 		ui_tooltip = "This warps the depth in some View Modes to hide or minimize the Halo in Most Games.\n"
 					 "With this on it should Hide the Halo a little better depending the View Mode it works on.\n"
-					 "Default is 0 Off.";
+					 "Default is 3 and Zero is Off.";
 		ui_category = "Occlusion Masking";
-	> = 0;
+	> = 3;
 	
 	uniform int Custom_Sidebars <
 		ui_type = "combo";
@@ -385,14 +385,15 @@ namespace SuperDepth3DVR
 	
 	uniform int Performance_Level <
 		ui_type = "combo";
-		ui_items = "Performant\0Normal\0";
+		ui_items = "Performant\0Normal\0Performant + Foveated Rendering\0Normal + Foveated Rendering\0";
 		ui_label = " Performance Mode";
 		ui_tooltip = "Performance Mode Lowers or Raises Occlusion Quality Processing so that there is a performance is adjustable.\n"
+					 "Foveated Rendering focuses the quality of the samples used to the enter of the screen where you look the most.\n"
 					 "Please enable the 'Performance Mode Checkbox,' in ReShade's GUI.\n"
 					 "It's located in the lower bottom right of the ReShade's Main UI.\n"
 					 "Default is Normal.";
 		ui_category = "Occlusion Masking";
-	> = 1;
+	> = 0;
 	
 	uniform float Compatibility_Power <
 		#if Compatibility
@@ -595,27 +596,28 @@ namespace SuperDepth3DVR
 	> = float2(DF_W,0.5);
 	#endif
 	
-	uniform int FPSDFIO <
-		ui_type = "combo";
-		ui_items = "Off\0Press\0Hold\0";
-		ui_label = "·FPS Focus Depth·";
-		ui_tooltip = "This lets the shader handle real time depth reduction for aiming down your sights.\n"
-					"This may induce Eye Strain so take this as an Warning.";
-		ui_category = "FPS Focus";
-	> = DK_X;
-	
 	uniform int Focus_Reduction_Type <
 		ui_type = "combo";
 		ui_items = "World\0Weapon\0Mix\0";
-		ui_label = " Focus Type";
+		ui_label = "·Focus Type·";
 		ui_tooltip = "This lets the shader handle real time depth reduction for aiming down your sights.\n"
 					"This may induce Eye Strain so take this as an Warning.";
 		ui_category = "FPS Focus";
 	> = FPS;
 	
+	uniform int FPSDFIO <
+		ui_type = "combo";
+		ui_items = "Off\0Press\0Hold\0";
+		ui_label = " Activation Type";
+		ui_tooltip = "This lets the shader handle real time depth reduction for aiming down your sights.\n"
+					"This may induce Eye Strain so take this as an Warning.";
+		ui_category = "FPS Focus";
+	> = DK_X;
+
 	uniform int Eye_Fade_Selection <
 		ui_type = "combo";
 		ui_items = "Both\0Right Only\0Left Only\0";
+		ui_min = 0; ui_max = 2;
 		ui_label = " Eye Selection";
 		ui_tooltip ="Eye Selection: One is Right Eye only, Two is Left Eye Only, and Zero Both Eyes.\n"
 					"Default is Both.";
@@ -624,13 +626,14 @@ namespace SuperDepth3DVR
 	
 	uniform int2 Eye_Fade_Reduction_n_Power <
 		ui_type = "slider";
-		ui_min = 0; ui_max = 3;
+		ui_min = 0; ui_max = 4;
 		ui_label = " Eye Fade Options";
 		ui_tooltip ="X, Fade Reduction: Decreases the depth amount by a current percentage.\n"
 					"Y, Fade Speed: Decreases or Incresses how fast it changes.\n"
 					"Default is X[ 0 ] Y[ 1 ].";
 		ui_category = "FPS Focus";
 	> = int2(DK_Z,DK_W);
+
 	
 	//Cursor Adjustments
 	uniform int Cursor_Type <
@@ -888,6 +891,13 @@ namespace SuperDepth3DVR
 	float FN_Value(float i)
 	{
 		return floor(i * 10.0f);// * 0.1f;
+	}
+	
+	float Vin_Pattern(float2 TC, float2 V_Power)
+	{	//Focuse away from center
+		TC *= (1.0 - TC.yx); 
+	    float Vin = TC.x*TC.y * V_Power.x, Use_Depth = 1;// step(PrepDepth( texcoord.xy )[0][0] + 0.30, 0.375);
+	    return 1-saturate(pow(abs(Vin),V_Power.y));	
 	}
 	///////////////////////////////////////////////////////////Conversions/////////////////////////////////////////////////////////////
 	float3 RGBtoYCbCr(float3 rgb) // For Super3D a new Stereo3D output.
@@ -1551,11 +1561,13 @@ namespace SuperDepth3DVR
 	float Fade_in_out(float2 texcoord)
 	{ float TCoRF[1], Trigger_Fade, AA = Fade_Time_Adjust, PStoredfade = tex2D(SamplerLumVR,float2(0,0.083)).z;
 		if(Eye_Fade_Reduction_n_Power.y == 0)
-			AA *= 0.5;
+			AA *= 0.75;
 		if(Eye_Fade_Reduction_n_Power.y == 2)
-			AA *= 1.5;
+			AA *= 1.25;
 		if(Eye_Fade_Reduction_n_Power.y == 3)
-			AA *= 2.0;
+			AA *= 1.375;
+		if(Eye_Fade_Reduction_n_Power.y == 4)
+			AA *= 1.5;
 		//Fade in toggle.
 		if(FPSDFIO == 1)
 			Trigger_Fade = Trigger_Fade_A;
@@ -1769,9 +1781,11 @@ namespace SuperDepth3DVR
 		if( Eye_Fade_Reduction_n_Power.x == 1)
 			FD_Adjust = 0.20;
 		if( Eye_Fade_Reduction_n_Power.x == 2)
-			FD_Adjust = 0.30;
+			FD_Adjust = 0.25;
 		if( Eye_Fade_Reduction_n_Power.x == 3)
-			FD_Adjust = 0.40;
+			FD_Adjust = 0.30;
+		if( Eye_Fade_Reduction_n_Power.x == 4)
+			FD_Adjust = 0.35;
 	
 		//Handle Convergence Here
 		float3 HandleConvergence = Conv(DM.xz,texcoord).xyz;
@@ -1899,15 +1913,15 @@ namespace SuperDepth3DVR
 	//////////////////////////////////////////////////////////Parallax Generation///////////////////////////////////////////////////////////////////////
 	float2 Parallax(float Diverge, float2 Coordinates) // Horizontal parallax offset & Hole filling effect
 	{   
-		float  MS = Diverge * pix.x;   
+		float  MS = Diverge * pix.x; int Perf_LvL = fmod(Performance_Level,2);      
 		float2 ParallaxCoord = Coordinates, CBxy = floor( float2(Coordinates.x * BUFFER_WIDTH, Coordinates.y * BUFFER_HEIGHT));
 		float GetDepth = smoothstep(0,1, GetDB(Coordinates).z ),
-				   Perf = Performance_LvL[Performance_Level].x;
+				   Perf = Performance_LvL[Perf_LvL].x;
 		//Would Use Switch....
 		if( View_Mode == 2)
-			Perf = Performance_LvL[Performance_Level].z;
+			Perf = Performance_LvL[Perf_LvL].z;
 		if( View_Mode == 3)
-			Perf = Performance_LvL[Performance_Level].x;
+			Perf = Performance_LvL[Perf_LvL].x;
 		if( View_Mode == 4)
 		{
 			if( GetDepth >= 0.999 )
@@ -1926,9 +1940,8 @@ namespace SuperDepth3DVR
 			else
 				Perf = fmod(CBxy.x+CBxy.y,2) ? 1.020: 1.021;
 		}
-		
-		//ParallaxSteps Calculations /lerp(37.5,100,GetDepth)
-		float MinTwenty = 20, D = abs(Diverge), Cal_Steps = D * Perf, Steps = clamp( Cal_Steps, Performance_Level ? MinTwenty : lerp( MinTwenty, min( MinTwenty, D), GetDepth >= 0.999 ), 100 );//Foveated Rendering Point of attack 16-256 limit samples.
+		//ParallaxSteps Calculations
+		float MinSixteen = 16, D = abs(Diverge), Cal_Steps = D * Perf, Steps = clamp( Cal_Steps, Perf_LvL ? MinSixteen : lerp( MinSixteen, min( MinSixteen, D), GetDepth >= 0.999 ), Performance_Level > 1 ? lerp(100,MinSixteen,saturate(Vin_Pattern(Coordinates, float2(20.0,2.5)))) : 100 );//Foveated Rendering Point of attack 16-256 limit samples.
 		// Offset per step progress & Limit
 		float LayerDepth = rcp(Steps), TP = lerp(0.025, 0.05,Compatibility_Power);
 			  D = Diverge < 0 ? -75 : 75;
@@ -1986,6 +1999,7 @@ namespace SuperDepth3DVR
 	#if HUD_MODE || HMT
 	float3 HUD(float3 HUD, float2 texcoord )
 	{
+		float3 StoredHUD = HUD;
 		float Mask_Tex, CutOFFCal = ((HUD_Adjust.x * 0.5)/DMA()) * 0.5, COC = step(PrepDepth(texcoord)[1][2],CutOFFCal); //HUD Cutoff Calculation
 		//This code is for hud segregation.
 		if (HUD_Adjust.x > 0)
@@ -2001,7 +2015,7 @@ namespace SuperDepth3DVR
 			//This code is for hud segregation.
 			HUD = MAC > 0 ? tex2D(BackBufferCLAMP,texcoord).rgb : HUD;
 		#endif
-		return HUD;
+		return  texcoord.x < 0.001 || 1-texcoord.x < 0.001 ? StoredHUD : HUD;
 	}
 	#endif
 	///////////////////////////////////////////////////////////Stereo Calculation///////////////////////////////////////////////////////////////////////
@@ -2041,15 +2055,17 @@ namespace SuperDepth3DVR
 	
 		float D =  Min_Divergence();
 	
-		float FadeIO = Focus_Reduction_Type == 1 ? 1 : smoothstep(0,1,1-Fade_in_out(texcoord).x), FD = D, FD_Adjust = Focus_Reduction_Type == 2 ? 0.5 : 0.1;
+		float FadeIO = Focus_Reduction_Type == 1 ? 1 : smoothstep(0,1,1-Fade_in_out(texcoord).x), FD = D, FD_Adjust = Focus_Reduction_Type == 2 ? 0.4375 : 0.1;
 	
 		if( Eye_Fade_Reduction_n_Power.x == 1)
-			FD_Adjust = Focus_Reduction_Type == 2 ? 0.625 : 0.2;
+			FD_Adjust = Focus_Reduction_Type == 2 ? 0.500 : 0.2;
 		if( Eye_Fade_Reduction_n_Power.x == 2)
-			FD_Adjust = Focus_Reduction_Type == 2 ? 0.75 : 0.3;
+			FD_Adjust = Focus_Reduction_Type == 2 ? 0.625 : 0.3;
 		if( Eye_Fade_Reduction_n_Power.x == 3)
-			FD_Adjust = Focus_Reduction_Type == 2 ? 0.875 : 0.4;	
-	
+			FD_Adjust = Focus_Reduction_Type == 2 ? 0.750 : 0.4;	
+		if( Eye_Fade_Reduction_n_Power.x == 4)
+			FD_Adjust = Focus_Reduction_Type == 2 ? 0.875 : 0.5;
+			
 		if(Focus_Reduction_Type == 1)
 			FD_Adjust = 1.0;		
 	

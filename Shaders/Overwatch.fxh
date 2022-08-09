@@ -1,7 +1,7 @@
 ////----------------------------------------//
 ///SuperDepth3D Overwatch Automation Shader///
 //----------------------------------------////
-// Version 2.7.6
+// Version 2.7.7
 //---------------------------------------OVERWATCH---------------------------------------//
 // If you are reading this stop. Go away and never look back. From this point on if you  //
 // still think it's is worth looking at this..... Then no one can save you or your soul. //
@@ -5547,24 +5547,24 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define PEW 1
 #elif (App == 0x9113C0D ) //Necromunda Hired Gun
 	#define DA_W 1
-	#define DA_X 0.025//0.0125
-	#define DF_Y 0.00125
-	#define DA_Y 25.0
+	#define DA_X 0.020//0.025//0.0125
+	#define DF_Y 0.020
+	#define DA_Y 26.0
 	#define DB_Z 0.100
     //#define DB_X 1
 	//#define DB_Y 1
 	#define DE_X 3
-	#define DE_Y 0.500
+	#define DE_Y 0.690
 	#define DE_Z 0.375
 	#define DG_W -0.100 //Pop
     //#define REF 15 //Fix can go from 1 - 15 and 15 is low 1 is High
 	//#define DI_W 1.25 //Adjustment for REF
-    #define DG_Z 0.050//Min
-    #define DI_Z 0.070 //Trim
+    #define DG_Z 0.065 //Min
+    #define DI_Z 0.050 //Trim
 	#define BMT 1
-	#define DF_Z 0.250
+	#define DF_Z 0.08
     #define SMS 1      //SM Toggle Separation
-	#define DL_X 0.550 //SM Tune
+	#define DL_X 0.600 //SM Tune
 	#define DL_W 0.025 //SM Perspective
 	#define DM_X 4     //HQ Tune
 	#define DM_Z 1     //HQ Smooth
