@@ -424,14 +424,22 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define NFM 1
 	#define RHW 1
 #elif (App == 0xF22A9C7D || App == 0x5416A79D ) //SOMA
-	#define DA_Y 35.00 //23.125 //21.25 //25.0
-	#define DA_X 0.075 //0.1025 //0.110 //0.095
-    #define DF_Y 0.055
+	#define DA_Y 27.5 //30.0 //25.5
+	#define DA_X 0.075
+    #define DF_Y 0.050
 	#define DB_Y 5
 	#define BMT 1
-	#define DF_Z 0.15625
+	#define DF_Z 0.05
 	#define DA_Z -0.000125
 	#define DG_W 0.1
+    #define SMS 1      //SM Toggle Separation
+	#define DL_X 0.750 //SM Tune
+	#define DL_W 0.025 //SM Perspective
+	#define DM_X 6     //HQ Tune
+	#define DM_Z 2     //HQ Smooth
+	#define DM_W 0.0   //HQ Trim
+	#define DL_Z 0     //HQ Text
+	#define HQT 1
 	#define DB_W 38
 	#define DG_Z 0.350 //0.130
 	//#define DI_Z 0.130
