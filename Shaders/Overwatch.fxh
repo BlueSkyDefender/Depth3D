@@ -5585,6 +5585,39 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DK_Z 1
 	#define DK_W 3
 	#define PEW 1
+#elif (App == 0xE1A4C79C ) //Generation Zero
+	#define DA_W 1
+    //#define DB_X 1
+	#define DA_X 0.050
+	#define DF_Y 0.005
+	#define DA_Y 52.5
+	#define DB_Z 0.100
+	#define DB_Y 1
+	#define DE_X 1
+	#define DE_Y 0.500
+	#define DE_Z 0.375
+	#define DG_W -0.100 //Pop
+    //#define REF 15 //Fix can go from 1 - 15 and 15 is low 1 is High
+	//#define DI_W 1.25 //Adjustment for REF
+    #define DG_Z 0.050 //Min
+    #define DI_Z 0.100 //Trim
+	#define BMT 1
+	#define DF_Z 0.175
+    #define SMS 3      //SM Toggle Separation
+	#define DL_X 0.825 //SM Tune
+	#define DL_W 0.000 //SM Perspective
+	#define DM_X 0     //HQ Tune
+	#define DM_Z 0     //HQ Smooth
+	#define DM_W 0.0   //HQ Trim
+	#define DL_Z 0     //HQ Text
+	#define HQT 1
+	#define FPS  0
+	#define DK_X 2
+	#define DK_Y 0
+	#define DK_Z 2
+	#define DK_W 3
+	#define PEW 1
+	#define FOV 1
 #else
 	#define NPW 1 //No Profile
 #endif
