@@ -2,7 +2,7 @@
 	///**SuperDepth3D_VR+**///
 	//--------------------////
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	//* Depth Map Based 3D post-process shader v3.3.5
+	//* Depth Map Based 3D post-process shader v3.3.6
 	//* For Reshade 4.4+ I think...
 	//* ---------------------------------
 	//*
@@ -638,7 +638,7 @@ namespace SuperDepth3DVR
 	//Cursor Adjustments
 	uniform int Cursor_Type <
 		ui_type = "combo";
-		ui_items = "Off\0Retical\0Diamond\0Dot\0Cross\0Cusor\0";
+		ui_items = "Off\0Reticle\0Diamond\0Dot\0Cross\0Cursor\0";
 		ui_label = "·Cursor Selection·";
 		ui_tooltip = "Choose the cursor type you like to use.\n"
 								 "Default is Zero.";
@@ -1448,7 +1448,7 @@ namespace SuperDepth3DVR
 					if((SDT == 2 || SD_Trigger == 2) && SDTriggers() && LBDetection())
 						H_V_A = Horizontal_and_Vertical;	
 			#else
-				float2 H_V = Horizontal_and_Vertical;
+				H_V_A = Horizontal_and_Vertical;
 			#endif
 			
 		float2 midHV_A = (H_V_A-1) * float2(BUFFER_WIDTH * 0.5,BUFFER_HEIGHT * 0.5) * pix;
