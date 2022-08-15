@@ -2,7 +2,7 @@
 	///**SuperDepth3D**///
 	//----------------////
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	//* Depth Map Based 3D post-process shader v3.3.6
+	//* Depth Map Based 3D post-process shader v3.3.7
 	//* For Reshade 3.0+
 	//* ---------------------------------
 	//*
@@ -1108,7 +1108,7 @@ namespace SuperDepth3D
 		{
 			for(int x = 0; x <= texsize.x; x+= SIZE_STEPS.x) 
 			{
-				color = tex2Dfetch(BackBufferCLAMP, uint2(x, y)).rgb;
+				color = tex2Dfetch(BackBufferCLAMP, uint4(x, y,0,0) ).rgb;
 				
 				if(color.r <= 0.01 && color.g <= 0.01 && color.b <= 0.01)
 					color = tex2Dlod(BackBufferCLAMP, float4(texcoord,0,0)).rgb;
@@ -1765,7 +1765,7 @@ namespace SuperDepth3D
 			if (Auto_Depth_Adjust > 0)
 				D = AutoDepthRange(D,texcoord);
 
-				ZP = saturate(ZPD_Balance * max(0.5,Auto_Balance_Selection().x));
+				ZP = saturate( ZPD_Balance * max(0.5, Auto_Balance_Selection().x));
 				
 			float DOoR = smoothstep(0,1,tex2D(SamplerLumN,float2(0, 0.416)).z), ZDP_Array[16] = { 0.0, 0.0125, 0.025, 0.0375, 0.04375, 0.05, 0.0625, 0.075, 0.0875, 0.09375, 0.1, 0.125, 0.150, 0.175, 0.20, 0.225};
 			
@@ -1987,7 +1987,7 @@ namespace SuperDepth3D
 				Perf = fmod(CBxy.x+CBxy.y,2) ? 1.020: 1.021;
 		}
 		//ParallaxSteps Calculations
-		float MinSixteen = 16, D = abs(Diverge), Cal_Steps = D * Perf, Steps = clamp( Cal_Steps, Perf_LvL ? MinSixteen : lerp( MinSixteen, min( MinSixteen, D), GetDepth >= 0.999 ), Performance_Level > 1 ? lerp(100,MinSixteen,saturate(Vin_Pattern(Coordinates, float2(20.0,2.5)))) : 100 );//Foveated Rendering Point of attack 16-256 limit samples.
+		float MinNum = lerp(50, 20, saturate(GetDepth * 15)), D = abs(Diverge), Cal_Steps = D * Perf, Steps = clamp( Cal_Steps, Perf_LvL ? MinNum : lerp( MinNum, min( MinNum, D), GetDepth >= 0.999 ), Performance_Level > 1 ? lerp(100,MinNum,saturate(Vin_Pattern(Coordinates, float2(20.0,2.5)))) : 100 );//Foveated Rendering Point of attack 16-256 limit samples.
 		// Offset per step progress & Limit
 		float LayerDepth = rcp(Steps), TP = lerp(0.025, 0.05,Compatibility_Power);
 			  D = Diverge < 0 ? -75 : 75;

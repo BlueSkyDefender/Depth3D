@@ -2,7 +2,7 @@
 	///**SuperDepth3D_VR+**///
 	//--------------------////
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	//* Depth Map Based 3D post-process shader v3.3.6
+	//* Depth Map Based 3D post-process shader v3.3.7
 	//* For Reshade 4.4+ I think...
 	//* ---------------------------------
 	//*
@@ -1089,7 +1089,7 @@ namespace SuperDepth3DVR
 		{
 			for(int x = 0; x <= Res.x; x+= SIZE_STEPS.x) 
 			{
-				color = tex2Dfetch(BackBufferCLAMP, uint2(x, y)).rgb;
+				color = tex2Dfetch(BackBufferCLAMP, uint4(x, y,0,0)).rgb;
 				
 				if(color.r <= 0.01 && color.g <= 0.01 && color.b <= 0.01)
 					color = tex2Dlod(BackBufferCLAMP, float4(texcoord,0,0)).rgb;
@@ -1734,7 +1734,7 @@ namespace SuperDepth3DVR
 			if (Auto_Depth_Adjust > 0)
 				D = AutoDepthRange(D,texcoord);
 	
-				ZP = saturate( ZPD_Balance * max(0.5,Auto_Balance_Selection().x));
+				ZP = saturate( ZPD_Balance * max(0.5, Auto_Balance_Selection().x));
 
 			float DOoR = smoothstep(0,1,tex2D(SamplerLumVR,float2(0, 0.416)).z), ZDP_Array[16] = { 0.0, 0.0125, 0.025, 0.0375, 0.04375, 0.05, 0.0625, 0.075, 0.0875, 0.09375, 0.1, 0.125, 0.150, 0.175, 0.20, 0.225};
 			
@@ -1941,7 +1941,7 @@ namespace SuperDepth3DVR
 				Perf = fmod(CBxy.x+CBxy.y,2) ? 1.020: 1.021;
 		}
 		//ParallaxSteps Calculations
-		float MinSixteen = 16, D = abs(Diverge), Cal_Steps = D * Perf, Steps = clamp( Cal_Steps, Perf_LvL ? MinSixteen : lerp( MinSixteen, min( MinSixteen, D), GetDepth >= 0.999 ), Performance_Level > 1 ? lerp(100,MinSixteen,saturate(Vin_Pattern(Coordinates, float2(20.0,2.5)))) : 100 );//Foveated Rendering Point of attack 16-256 limit samples.
+		float MinNum = lerp(50, 20, saturate(GetDepth * 15)), D = abs(Diverge), Cal_Steps = D * Perf, Steps = clamp( Cal_Steps, Perf_LvL ? MinNum : lerp( MinNum, min( MinNum, D), GetDepth >= 0.999 ), Performance_Level > 1 ? lerp(100,MinNum,saturate(Vin_Pattern(Coordinates, float2(20.0,2.5)))) : 100 );//Foveated Rendering Point of attack 16-256 limit samples.
 		// Offset per step progress & Limit
 		float LayerDepth = rcp(Steps), TP = lerp(0.025, 0.05,Compatibility_Power);
 			  D = Diverge < 0 ? -75 : 75;
@@ -2292,7 +2292,7 @@ namespace SuperDepth3DVR
 	
 	void Average_Luminance(float4 position : SV_Position, float2 texcoord : TEXCOORD, out float4 AL : SV_Target0, out float4 Other : SV_Target1)
 	{	
-		float Average_Lum_Bottom = PrepDepth( texcoord )[0][0];
+		float Average_ZPD = PrepDepth( texcoord )[0][0];
 		// SamplerDMVR 0 is Weapon State storage and SamplerDMVR 1 is Boundy State storage	
 		const int Num_of_Values = 6; //6 total array values that map to the textures width.
 		float Storage__Array[Num_of_Values] = { tex2D(SamplerDMVR,0).x,                //0.083
@@ -2304,7 +2304,7 @@ namespace SuperDepth3DVR
 		//Set a avr size for the Number of lines needed in texture storage.
 		float Grid = floor(texcoord.y * BUFFER_HEIGHT * BUFFER_RCP_HEIGHT * Num_of_Values);	
 		//Motion_Detection
-		AL = float4(length(tex2D(SamplerDMVR,texcoord).w - tex2D(SamplerPBBVR,texcoord).x),Average_Lum_Bottom,Storage__Array[int(fmod(Grid,Num_of_Values))],tex2Dlod(SamplerDMVR,float4(texcoord,0,0)).y);
+		AL = float4(length(tex2D(SamplerDMVR,texcoord).w - tex2D(SamplerPBBVR,texcoord).x),Average_ZPD,Storage__Array[int(fmod(Grid,Num_of_Values))],tex2Dlod(SamplerDMVR,float4(texcoord,0,0)).y);
 		Other = float4(tex2D(samplerMinMaxRGB, texcoord).rgb,1);
 	}
 	////////////////////////////////////////////////////////////////////Logo////////////////////////////////////////////////////////////////////////////
