@@ -5656,36 +5656,60 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DB_X 1
 	#define DA_X 0.030
 	//#define DF_Y 0.030
-	#define DA_Y 30.00
+	#define DA_Y 27.5 //30.00
+    #define DA_Z -0.1875
 	#define DB_Z 0.100
 	//#define DB_Y 1
-	#define DE_X 1
+	#define DE_X 3
 	#define DE_Y 0.500
 	#define DE_Z 0.375
 	//#define DG_W -0.100 //Pop
     //#define REF 15 //Fix can go from 1 - 15 and 15 is low 1 is High
 	//#define DI_W 1.25 //Adjustment for REF
-    //#define DG_Z 0.075 //Min
-    //#define DI_Z 0.150 //Trim
+    #define DG_Z 0.025 //Min
+    #define DI_Z 0.050 //Trim
 	#define BMT 1
-	#define DF_Z 0.150
-	/*
+	#define DF_Z 0.100
+    #define SMS 0      //SM Toggle Separation
+	#define DL_X 0.8625//SM Tune
+	#define DL_W 0.000 //SM Perspective
+	#define DM_X 1     //HQ Tune
+	#define DM_Z 1     //HQ Smooth
+	#define DM_W 0.0   //HQ Trim
+	#define DL_Z 0     //HQ Text
+	#define HQT 1
+	#define PEW 1
+	#define DAA 1
+    #define DSW 1	
+#elif (App == 0xCFFBDDE6 ) //Call of the Sea
+	#define DA_W 1
+    //#define DB_X 1
+	#define DA_X 0.0375
+	#define DF_Y 0.020
+	#define DA_Y 22.5 //30.00
+    #define DA_Z -0.125
+	#define DB_Z 0.050
+	//#define DB_Y 1
+	//#define DE_X 3
+	//#define DE_Y 0.500
+	//#define DE_Z 0.375
+	//#define DG_W -0.100 //Pop
+    //#define REF 15 //Fix can go from 1 - 15 and 15 is low 1 is High
+	//#define DI_W 1.25 //Adjustment for REF
+    #define DG_Z 0.100 //Min
+    #define DI_Z 0.100 //Trim
+	#define BMT 1
+	#define DF_Z 0.1375
     #define SMS 2      //SM Toggle Separation
-	#define DL_X 0.750 //SM Tune
-	#define DL_W 0.100 //SM Perspective
-	#define DM_X 0     //HQ Tune
+	#define DL_X 0.925 //SM Tune
+	#define DL_W 0.000 //SM Perspective
+	#define DM_X 4     //HQ Tune
 	#define DM_Z 0     //HQ Smooth
 	#define DM_W 0.0   //HQ Trim
 	#define DL_Z 0     //HQ Text
 	#define HQT 1
-    #define MMD 1 //Set Multi Menu Detection             //Off / On
-    #define DO_X float4( 0.0805, 0.051 , 0.900 , 0.051  ) //Pos A1 = XY Color & A2 = ZW Black 
-    #define DO_Y float4( 0.408 , 0.051 , 0.0  , 0.0  ) //Pos A3 = XY Color & B1 = ZW Color
-    #define DO_Z float4( 0.0  , 0.0  , 0.0  , 0.0  ) //Pos B2 = XY Black & B3 = ZW Color
-	#define DO_W float4( 30.0  , 30.0  , 1000.0 , 1000.0  ) //Tresh Hold for Color A & B and Color
-	*/
 	#define PEW 1
-	#define DAA 1
+    #define DSW 1
 #else
 	#define NPW 1 //No Profile
 #endif
