@@ -108,7 +108,7 @@ static const int EFO_Fade_Speed_Selection_D = 1;        //Eye Fade Speed Options
 //SM Values
 static const int SM_Toggle_Sparation_D = 1;             // 0 | 1 | 2 | 3                                | SMS
 static const float SM_Tune_D = 0.5;                     //SM Tune                                       | DL_X
-static const float Null_Y_D = 1;                        //Null Y                                        | DL_Y
+static const float De_Artifact_D = 0;                   //De-Artifact                                   | DL_Y
 static const float HQ_Text_Detection_D = 0.0;           //SM Text Detection [0 | 1 | 2 | 3]             | DL_Z
 static const float SM_Perspective_D  = 0.05;            //SM Perspective                                | DL_W
 
@@ -5710,6 +5710,49 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define HQT 1
 	#define PEW 1
     #define DSW 1
+#elif (App == 0x78DF0627 ) //The Sinking City
+	#define DA_W 1
+    //#define DB_X 1
+	#define DA_X 0.050
+	#define DF_Y 0.025
+	#define DA_Y 10.00
+    #define DA_Z -0.10
+	//#define DB_Z 0.050
+	//#define DB_Y 1
+	#define DE_X 1
+	#define DE_Y 0.500
+	#define DE_Z 0.375
+	//#define DG_W -0.100 //Pop
+    #define REF 15 //Fix can go from 1 - 15 and 15 is low 1 is High
+	#define DI_W 1.25 //Adjustment for REF
+    //#define DG_Z 0.100 //Min
+    //#define DI_Z 0.100 //Trim
+	#define BMT 1
+	#define DF_Z 0.15
+    #define SMS 2      //SM Toggle Separation
+	#define DL_X 0.875 //SM Tune
+	#define DL_W 0.000 //SM Perspective
+	#define DM_X 4     //HQ Tune
+	#define DM_Z 0     //HQ Smooth
+	#define DM_W 0.0   //HQ Trim
+	#define DL_Z 0     //HQ Text
+    #define DM_Y 3     //HQ VRS
+    #define DL_Y 1     //De-Artifact
+	#define HQT 1
+    #define MMD 3 //Set Multi Menu Detection             //Off / On
+    #define DO_X float4( 0.190 , 0.061 , 0.190 , 0.050  ) //Pos A1 = XY Color & A2 = ZW Black 
+    #define DO_Y float4( 0.810 , 0.061 , 0.190 , 0.061  ) //Pos A3 = XY Color & B1 = ZW Color
+    #define DO_Z float4( 0.183 , 0.050 , 0.810 , 0.061  ) //Pos B2 = XY Black & B3 = ZW Color
+	#define DO_W float4( 30.0  , 30.0  , 30.0  , 30.0  ) //Tresh Hold for Color A & B and Color
+	#define DP_X float4( 0.433 , 0.347 ,  0.500  , 0.20 ) //Pos C1 = XY Color & C2 = ZW Black 
+    #define DP_Y float4( 0.567 , 0.347 ,  0.464  , 0.243) //Pos C3 = XY Color & D1 = ZW Color
+    #define DP_Z float4( 0.500 , 0.310 ,  0.540  , 0.243) //Pos D2 = XY Black & D3 = ZW Color
+	#define DP_W float4( 30.0  , 30.0  ,  30.0   ,  30.0) //Tresh Hold for Color A1 & A3 and Color 
+	#define DQ_X float4( 0.428 , 0.240 ,  0.500  , 0.310) //Pos E1 = XY Color & E2 = ZW Black 
+    #define DQ_Y float4( 0.564 , 0.240 ,  0.437  , 0.235) //Pos E3 = XY Color & F1 = ZW Color
+    #define DQ_Z float4( 0.500 , 0.310 ,  0.555  , 0.235) //Pos F2 = XY Black & F3 = ZW Color
+	#define DQ_W float4( 30.0  , 30.0  , 30.0    , 30.0 ) //Tresh Hold for Color E & F and Color
+	#define PEW 1
 #else
 	#define NPW 1 //No Profile
 #endif
@@ -5870,12 +5913,12 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DK_W EFO_Fade_Speed_Selection_D
 #endif
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
-// X = [SM Tune] Y = [Null Y] Z = [HQ Text Detection] W = [SM Perspective]
+// X = [SM Tune] Y = [De-Artifact] Z = [HQ Text Detection] W = [SM Perspective]
 #ifndef DL_X
     #define DL_X SM_Tune_D
 #endif
 #ifndef DL_Y
-    #define DL_Y Null_Y_D
+    #define DL_Y De_Artifact_D
 #endif
 #ifndef DL_Z
     #define DL_Z HQ_Text_Detection_D
