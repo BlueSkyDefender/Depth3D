@@ -691,10 +691,25 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DA_Z 0.003
 #elif (App == 0x8EAF7114 ) //Firewatch
 	#define DB_Y 3
-	#define DA_Y 5.0
+	#define DA_Y 5.5
 	#define DA_X 0.0375
 	#define DB_X 1
 	#define DA_W 1
+	#define DE_X 1
+	#define DE_Y 0.500
+	#define DE_Z 0.375
+	#define BMT 1
+	#define DF_Z 0.15
+    #define SMS 0      //SM Toggle Separation
+	#define DL_X 0.925 //SM Tune
+	#define DL_W 0.000 //SM Perspective
+	#define DM_X 2     //HQ Tune
+	#define DM_Z 1     //HQ Smooth
+	#define DM_W 0.0   //HQ Trim
+	#define DL_Z 0     //HQ Text
+    //#define DM_Y 3     //HQ VRS
+    //#define DL_Y 1     //De-Artifact
+	#define HQT 1
 #elif (App == 0x6BDF0098 ) //Dungeons 2
 	#define DA_X 0.100
 	#define DB_Y 3
