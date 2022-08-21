@@ -3097,24 +3097,34 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 #elif (App == 0x11E6C55E ) //The Suicide of Rachel Foster
 	#define DA_W 1
 	//#define DA_X 0.030
-	#define DF_Y 0.020
-	#define DA_Y 25.0 //25.0
-	#define DA_Z -0.25
+	#define DF_Y 0.04375
+	#define DA_Y 6.50
+	#define DA_Z -1.75
 	#define DB_Z 0.050
 	//#define DB_Y 5
-	#define DE_X 4
-	#define DE_Y 0.500
+	#define DE_X 2
+	#define DE_Y 0.750
 	#define DE_Z 0.425
     #define DG_Z 0.050 //Min
-    #define DI_Z 0.025 //Trim
-	#define DG_W 0.365 //Allow much popout "Please don't abuse this."
+    #define DI_Z 0.050 //Trim
+	//#define DG_W 0.125 //Allow much popout "Please don't abuse this."
     #define BMT 1    
     #define DF_Z 0.130 //This had to be adjusted
+    //#define AFD 1
+    #define SMS 2      //SM Toggle Separation
+	#define DL_X 0.925 //SM Tune
+	#define DL_W 0.100 //SM Perspective
+	#define DM_X 0     //HQ Tune
+	#define DM_Z 1     //HQ Smooth
+	#define DM_W 0.0   //HQ Trim
+	#define DL_Z 0     //HQ Text
+	#define HQT 1    
 	#define PEW 1
 	#define DAA 1
 	#define RHW 1
-	#define WSM 2
-	#define DB_W 2
+	#define FOV 1
+	//#define WSM 2
+	//#define DB_W 2
 #elif (App == 0xFC960068 ) //Devolverland Expo
 	#define DA_W 1
 	#define DA_Y 30.0
@@ -3977,10 +3987,10 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define DI_Z 0.070//Trim
 	#define DJ_W 0.125
 	#define SMS 1      //SM Toggle Separation
-	#define DL_X 0.625 //SM Tune
+	#define DL_X 0.700 //SM Tune
 	#define DL_W 0.050 //SM Perspective
-	#define DM_X 5    //HQ Tune
-	#define DM_Z 6     //HQ Smooth
+	#define DM_X 4    //HQ Tune
+	#define DM_Z 4     //HQ Smooth
 	#define HQT 1	
     #define WSM 2
     #define DB_W 6
@@ -5768,6 +5778,45 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define DQ_Z float4( 0.500 , 0.310 ,  0.555  , 0.235) //Pos F2 = XY Black & F3 = ZW Color
 	#define DQ_W float4( 30.0  , 30.0  , 30.0    , 30.0 ) //Tresh Hold for Color E & F and Color
 	#define PEW 1
+#elif (App == 0x293886C5 ) //The Last Camp fire
+	//#define DA_W 1
+    //#define DB_X 1
+	#define DA_X 0.040
+	#define DF_Y 0.030
+	#define DA_Y 37.50
+    //#define DA_Z -0.10
+	#define DB_Z 0.050
+	//#define DB_Y 1
+	#define DE_X 3
+	#define DE_Y 0.375
+	#define DE_Z 0.375
+	#define DG_W -0.100 //Pop
+    #define REF 15 //Fix can go from 1 - 15 and 15 is low 1 is High
+	#define DI_W 1.0 //Adjustment for REF
+    #define DG_Z 0.055 //Min
+    #define DI_Z 0.075 //Trim
+	#define BMT 1
+	#define DF_Z 0.10
+    #define SMS 1      //SM Toggle Separation
+	#define DL_X 0.725 //SM Tune
+	#define DL_W 0.000 //SM Perspective
+	#define DM_X 4     //HQ Tune
+	#define DM_Z 1     //HQ Smooth
+	#define DM_W 0.0   //HQ Trim
+	#define DL_Z 0     //HQ Text
+    //#define DM_Y 3     //HQ VRS
+    //#define DL_Y 1     //De-Artifact
+	#define HQT 3
+    #define MMD 2 //Set Multi Menu Detection             //Off / On
+    #define DO_X float4( 0.040 , 0.0325, 0.995 , 0.005  ) //Pos A1 = XY Color & A2 = ZW Black 
+    #define DO_Y float4( 0.030 , 0.090 , 0.294 , 0.365  ) //Pos A3 = XY Color & B1 = ZW Color
+    #define DO_Z float4( 0.5 , 0.5 , 0.704 , 0.365  )     //Pos B2 = XY Black & B3 = ZW Color
+	#define DO_W float4( 30.0  , 30.0  , 30.0  , 30.0  ) //Tresh Hold for Color A & B and Color
+	#define DP_X float4( 0.45 , 0.45 ,  0.625  , 0.250) //Pos C1 = XY Color & C2 = ZW Black 
+    #define DP_Y float4( 0.550 , 0.485 ,  0.0  , 0.0) //Pos C3 = XY Color & D1 = ZW Color
+    #define DP_Z float4( 0.625 , 0.250 ,  0.0  , 0.0) //Pos D2 = XY Black & D3 = ZW Color
+	#define DP_W float4( 30.0  , 30.0  ,  1000.0   , 1000.0) //Tresh Hold for Color A1 & A3 and Color
+    #define DSW 1
 #else
 	#define NPW 1 //No Profile
 #endif
