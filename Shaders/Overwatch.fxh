@@ -5761,7 +5761,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DM_Z 0     //HQ Smooth
 	#define DM_W 0.0   //HQ Trim
 	#define DL_Z 0     //HQ Text
-    #define DM_Y 3     //HQ VRS
+    //#define DM_Y 3     //HQ VRS
     #define DL_Y 1     //De-Artifact
 	#define HQT 1
     #define MMD 3 //Set Multi Menu Detection             //Off / On
