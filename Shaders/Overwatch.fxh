@@ -5806,7 +5806,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DL_Z 0     //HQ Text
     //#define DM_Y 3     //HQ VRS
     //#define DL_Y 1     //De-Artifact
-	#define HQT 3
+	#define HQT 1
     #define MMD 2 //Set Multi Menu Detection             //Off / On
     #define DO_X float4( 0.040 , 0.0325, 0.995 , 0.005  ) //Pos A1 = XY Color & A2 = ZW Black 
     #define DO_Y float4( 0.030 , 0.090 , 0.294 , 0.365  ) //Pos A3 = XY Color & B1 = ZW Color
@@ -5817,6 +5817,35 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define DP_Z float4( 0.625 , 0.250 ,  0.0  , 0.0) //Pos D2 = XY Black & D3 = ZW Color
 	#define DP_W float4( 30.0  , 30.0  ,  1000.0   , 1000.0) //Tresh Hold for Color A1 & A3 and Color
     #define DSW 1
+#elif (App == 0xF82EA3E3 ) //In Sound Mind
+	#define DA_W 1
+    #define DB_X 1
+	#define DA_X 0.020
+	#define DF_Y 0.0375
+	#define DA_Y 225.5
+    #define DA_Z -0.175
+	#define DB_Z 0.050
+	//#define DB_Y 1
+	#define DE_X 2
+	#define DE_Y 0.500
+	#define DE_Z 0.375
+	//#define DG_W -0.100 //Pop
+    //#define REF 15 //Fix can go from 1 - 15 and 15 is low 1 is High
+	//#define DI_W 1.0 //Adjustment for REF
+    #define DG_Z 0.070 //Min
+    #define DI_Z 0.060 //Trim
+	#define BMT 1
+	#define DF_Z 0.1
+    #define SMS 2      //SM Toggle Separation
+	#define DL_X 0.7375 //SM Tune
+	#define DL_W 0.000 //SM Perspective
+	#define DM_X 4     //HQ Tune
+	#define DM_Z 1     //HQ Smooth
+	#define DM_W 0.0   //HQ Trim
+	#define DL_Z 0     //HQ Text
+    //#define DM_Y 3     //HQ VRS
+    //#define DL_Y 1     //De-Artifact
+	#define HQT 1
 #else
 	#define NPW 1 //No Profile
 #endif
