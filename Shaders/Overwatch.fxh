@@ -1,7 +1,7 @@
 ////----------------------------------------//
 ///SuperDepth3D Overwatch Automation Shader///
 //----------------------------------------////
-// Version 2.7.7
+// Version 2.7.8
 //---------------------------------------OVERWATCH---------------------------------------//
 // If you are reading this stop. Go away and never look back. From this point on if you  //
 // still think it's is worth looking at this..... Then no one can save you or your soul. //
@@ -3657,7 +3657,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define PEW 1
 	#define DAA 1
 #elif (App == 0x3C98315F ) //Forza Horizon 5  
-	//#define DA_W 1
+	#define DA_W 1
 	#define DA_X 0.175 //0.2 // 0.150
 	//#define DF_Y 0.05
 	#define DA_Y 12.0  //11.0 // 15.0
@@ -3673,7 +3673,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define BMT 1    
 	#define DF_Z 0.111
 	#define SMS 1      //SM Toggle Separation
-	#define DL_X 0.800 //SM Tune
+	#define DL_X 0.950 //SM Tune
 	#define DL_W 0.000 //SM Perspective
 	#define DM_X 6     //HQ Tune
 	#define DM_Z 3     //HQ Smooth
