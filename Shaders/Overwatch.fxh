@@ -3632,7 +3632,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DH_Z 0.255
 	#define DH_W 0.0
 #elif (App == 0x3C982FAC ) //Forza Horizon 4  
-	//#define DA_W 1
+	#define DA_W 1
 	#define DA_X 0.1
 	//#define DF_Y 0.05
 	#define DA_Y 7.5
@@ -3650,8 +3650,8 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DL_X 0.750 //SM Tune
 	#define DL_W 0.000 //SM Perspective
 	#define DM_X 1     //HQ Tune
-	#define DM_Z 4     //HQ Smooth
-	#define DM_W 1.000 //HQ Trim
+	#define DM_Z 1     //HQ Smooth
+	#define DM_W 0.000 //HQ Trim
 	#define HQT 1
 	#define NDW 1
 	#define PEW 1
