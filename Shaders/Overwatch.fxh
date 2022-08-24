@@ -5894,6 +5894,41 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define HQT 1
 	#define FOV 1
 	#define PEW 1
+#elif (App == 0x22B98797 ) //The Cult of Lamb
+	#define DA_W 1
+    #define DB_X 1
+	#define DA_X 0.050
+	#define DF_Y 0.015
+	#define DA_Y 625.0
+    #define DA_Z -0.25
+	#define DB_Z 0.1666
+	//#define DB_Y 1
+	//#define DE_X 2
+	//#define DE_Y 0.500
+	//#define DE_Z 0.4375
+	//#define DG_W 0.250 //Pop
+    //#define REF 15 //Fix can go from 1 - 15 and 15 is low 1 is High
+	//#define DI_W 1.0 //Adjustment for REF
+    //#define DG_Z 0.100 //Min
+    //#define DI_Z 0.050 //Trim
+	#define BMT 1
+	#define DF_Z 0.050
+    #define MMD 1 //Set Multi Menu Detection             //Off / On
+    #define DO_X float4( 0.1245, 0.800 , 0.125 , 0.241  ) //Pos A1 = XY Color & A2 = ZW Black 
+    #define DO_Y float4( 0.964 , 0.752 , 0.220 , 0.165  ) //Pos A3 = XY Color & B1 = ZW Color
+    #define DO_Z float4( 0.500 , 0.090 , 0.471 , 0.085  ) //Pos B2 = XY Black & B3 = ZW Color
+	#define DO_W float4( 30.0  , 30.0  , 27.0, 28.0 ) //Tresh Hold for Color A & B and Color
+    #define SMS 2      //SM Toggle Separation
+	#define DL_X 0.75  //SM Tune
+	#define DL_W 0.05 //SM Perspective
+	#define DM_X 0     //HQ Tune
+	#define DM_Z 1     //HQ Smooth
+	#define DM_W 0.0   //HQ Trim
+	#define DL_Z 0     //HQ Text
+    //#define DM_Y 3     //HQ VRS
+    //#define DL_Y 1     //De-Artifact 0.1245
+	#define HQT 1
+	#define PEW 1
 #else
 	#define NPW 1 //No Profile
 #endif
