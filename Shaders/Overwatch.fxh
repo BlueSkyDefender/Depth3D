@@ -1,7 +1,7 @@
 ////----------------------------------------//
 ///SuperDepth3D Overwatch Automation Shader///
 //----------------------------------------////
-// Version 2.7.8
+// Version 2.7.9
 //---------------------------------------OVERWATCH---------------------------------------//
 // If you are reading this stop. Go away and never look back. From this point on if you  //
 // still think it's is worth looking at this..... Then no one can save you or your soul. //
@@ -93,7 +93,7 @@ static const float Weapon_Near_Depth_Trim_D = 0.25;     //Weapon Near Depth     
 
 //Leftover Values
 static const int Alternate_Frame_Detection_ZPD_D = 0;   //Alternate Frame Detection ZPD 0 | 1 : Off / On| ADP
-static const float NULL_X_D = 0.0;                      //Null X                                        | DJ_X
+static const float Range_Smoothing_D = 0;               //Range Smoothing                               | DJ_X
 static const float4 Menu_Detection_Type_D = 0;          //Menu Detection Type                           | DJ_Y
 static const float3 Match_Threshold_D = 0.0;            //Match Threshold                               | DJ_Z
 static const float Check_Depth_Limit_Weapon_D = -0.100; //Check Depth Limit Weapon                      | DJ_W
@@ -5929,6 +5929,138 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DL_Y 1     //De-Artifact 0.1245
 	#define HQT 1
 	#define PEW 1
+#elif (App == 0xC1D068CF ) //Chernobylite
+	#define DA_W 1
+    //#define DB_X 1
+	#define DA_X 0.050
+	#define DF_Y 0.0125
+	#define DA_Y 170.0
+    //#define DA_Z -0.25
+	#define DB_Z 0.100
+	//#define DB_Y 1
+	#define DE_X 6//4
+	#define DE_Y 0.500
+	#define DE_Z 0.375
+	//#define DG_W 0.250 //Pop
+    //#define REF 15 //Fix can go from 1 - 15 and 15 is low 1 is High
+	//#define DI_W 1.0 //Adjustment for REF
+    #define DG_Z 0.025 //Min
+    #define DI_Z 0.150 //Trim
+	#define BMT 1
+	#define DF_Z 0.120
+	#define WSM 2
+	#define DB_W 10
+	#define DF_X 0.3	
+	#define DJ_W 0.150
+	#define FPS  0
+	#define DK_X 2
+	#define DK_Y 0
+	#define DK_Z 4
+	#define DK_W 2
+    #define SMS 0      //SM Toggle Separation
+	#define DL_X 0.90  //SM Tune
+	#define DL_W 0.05  //SM Perspective
+	#define DM_X 4     //HQ Tune
+	#define DM_Z 1     //HQ Smooth
+	#define DM_W 0.0   //HQ Trim
+	#define DL_Z 0     //HQ Text
+    //#define DM_Y 3     //HQ VRS
+    //#define DL_Y 1     //De-Artifact 0.1245
+	#define HQT 1
+	#define DJ_X 1     //Range Smoothing
+	#define PEW 1
+#elif (App == 0x3C4B9E1A ) //Hot Wheels Unleashed
+	#define DA_W 1
+    //#define DB_X 1
+	#define DA_X 0.0375
+	#define DF_Y 0.0
+	#define DA_Y 126.25
+    //#define DA_Z -0.25
+	#define DB_Z 0.100
+	//#define DB_Y 1
+	#define DE_X 1//4
+	#define DE_Y 0.750
+	#define DE_Z 0.375
+	//#define DG_W 0.250 //Pop
+    //#define REF 15 //Fix can go from 1 - 15 and 15 is low 1 is High
+	//#define DI_W 1.0 //Adjustment for REF
+    //#define DG_Z 0.025 //Min
+    //#define DI_Z 0.150 //Trim
+	#define BMT 1
+	#define DF_Z 0.1125
+//	#define WSM 2
+//	#define DB_W 10
+//	#define DF_X 0.3	
+//	#define DJ_W 0.150
+//	#define FPS  0
+//	#define DK_X 2
+//	#define DK_Y 0
+//	#define DK_Z 4
+//	#define DK_W 2
+    #define SMS 0      //SM Toggle Separation
+	#define DL_X 0.90  //SM Tune
+	#define DL_W 0.00  //SM Perspective
+	#define DM_X 4     //HQ Tune
+	#define DM_Z 1     //HQ Smooth
+	#define DM_W 0.0   //HQ Trim
+	#define DL_Z 0     //HQ Text
+    //#define DM_Y 3     //HQ VRS
+    //#define DL_Y 1     //De-Artifact 0.1245
+	#define HQT 1
+/*
+    #define MDD 1 //Set Menu Detection & Direction     //Off 0 | 1 | 2 | 3 | 4      
+    #define DN_X float4( 0.928, 0.890,  0.9525, 0.881)  //Pos A = XY White & B = ZW White 
+    #define DN_Y float4( 0.938, 0.938,  0.0, 0.0)       //Pos C = XY Light & D = ZW Match
+    #define DN_Z float4( 0.0, 0.0,  0.0, 0.0)            //Pos E = XY Match & F = ZW Match
+	#define DN_W float4( 1.0, 0.0 , 0.0, 0.0 )          //Size = Menu [ABC] D E F
+    #define DJ_Y float4( 30, 30.0, 24.0, 17.0);            //Menu Detection Type for A, B, & C. The Last Value is ???   
+    #define DJ_Z float3( 1000., 1000., 1000);                //Set Match Tresh 
+*/
+    #define MMD 1 //Set Multi Menu Detection             //Off / On
+    #define DO_X float4( 0.184 , 0.616 , 1.000 , 1.000  ) //Pos A1 = XY Color & A2 = ZW Black 
+    #define DO_Y float4( 0.9525, 0.881 , 0.184 , 0.616  ) //Pos A3 = XY Color & B1 = ZW Color
+    #define DO_Z float4( 1.000 , 0.877 , 0.9525, 0.881  ) //Pos B2 = XY Black & B3 = ZW Color
+	#define DO_W float4( 30.0  , 30.0  , 30.0, 30.0 )   //Tresh Hold for Color A & B and Color
+	#define PEW 1
+	#define DSW 1
+#elif (App == 0x2EA57CA ) //KHOLAT
+	#define DA_W 1
+    //#define DB_X 1
+	#define DA_X 0.175
+	#define DF_Y 0.0
+	#define DA_Y 10.00
+    #define DA_Z -0.10
+	#define DB_Z 0.150
+	//#define DB_Y 1
+	#define DE_X 4
+	#define DE_Y 0.500
+	#define DE_Z 0.375
+	//#define DG_W 0.250 //Pop
+    #define REF 15 //Fix can go from 1 - 15 and 15 is low 1 is High
+	#define DI_W 1.5 //Adjustment for REF
+    //#define DG_Z 0.025 //Min
+    //#define DI_Z 0.150 //Trim
+	#define BMT 1
+	#define DF_Z 0.110
+	#define WSM 2
+	#define DB_W 27
+//	#define DF_X 0.3	
+//	#define DJ_W 0.150
+//	#define FPS  0
+//	#define DK_X 2
+//	#define DK_Y 0
+//	#define DK_Z 4
+//	#define DK_W 2
+    #define SMS 0      //SM Toggle Separation
+	#define DL_X 1.00  //SM Tune
+	#define DL_W 0.00  //SM Perspective
+	#define DM_X 4     //HQ Tune
+	#define DM_Z 1     //HQ Smooth
+	#define DM_W 0.0   //HQ Trim
+	#define DL_Z 0     //HQ Text
+    //#define DM_Y 3     //HQ VRS
+    //#define DL_Y 1     //De-Artifact 0.1245
+	#define HQT 1
 #else
 	#define NPW 1 //No Profile
 #endif
@@ -6063,7 +6195,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 
 // X = [NULL X] Y = [Menu Detection Type] Z = [Match Threshold] W = [Check Depth Limit Weapon]
 #ifndef DJ_X
-    #define DJ_X NULL_X_D
+    #define DJ_X Range_Smoothing_D
 #endif
 #ifndef DJ_Y
     #define DJ_Y Menu_Detection_Type_D
@@ -6432,7 +6564,7 @@ float4 Weapon_Profiles(float WP ,float4 Weapon_Adjust) //Could reduce from 76 to
     if (WP == 9)
         Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 7  | Game
     if (WP == 10)
-        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 8  | Game
+        Weapon_Adjust = float4(6.450,25.0,0.0,0.125);     //WP 8  | Chernobylite
     if (WP == 11)
         Weapon_Adjust = float4(4.100,25.0,0.0,0.0);       //WP 9  | HROT
     if (WP == 12)
@@ -6466,7 +6598,7 @@ float4 Weapon_Profiles(float WP ,float4 Weapon_Adjust) //Could reduce from 76 to
     if (WP == 26)
         Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 24 | Game
     if (WP == 27)
-        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 25 | Game
+        Weapon_Adjust = float4(1.325,10.0,0.0,0.0);       //WP 25 | KHOLAT
     if (WP == 28)
         Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 26 | Game
     if (WP == 29)
