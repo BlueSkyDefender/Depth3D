@@ -699,6 +699,31 @@ Depth Buffer - to the one with 0 Draw Calls
 
 Helps to look at a lamp or light to get that buffer to stand still. You will know what I mean.
 
+
+{Layers of Fear 2} - Used ReShade 5.3.
+You will need to edit the Scalability.ini Located in the WindowsNoEditor Folder to disable to Post Processing effect.
+C:\Users\yourusername\AppData\Local\LOF2\Saved\Config\WindowsNoEditor\Scalability.ini 
+
+You need to copy and paste this below into the Scalability.ini 
+
+[PostProcessQuality@3]
+r.SceneColorFringeQuality=0
+r.SceneColorFringe.Max=0
+r.DepthOfFieldQuality=0
+
+You need to set video quality settings on HIGH or CUSTOM as well.
+Save and then make the file read-only.
+
+or
+
+In the folder: C:\Users\yourusername\AppData\Local\LOF2\Saved\Config\WindowsNoEditor\ 
+Open up the Engine.ini file and paste this:
+[SystemSettings]
+r.SceneColorFringeQuality=0
+r.DepthOfFieldQuality=0
+r.MaxAnisotropy=16
+
+
 {LEGO Batman 3}
 Issues with depth buffer when Black Bars are on screen.
 Depth Buffer may not show in main menu.

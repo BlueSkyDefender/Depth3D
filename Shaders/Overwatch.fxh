@@ -6067,6 +6067,52 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DM_Y 3     //HQ VRS
     //#define DL_Y 1     //De-Artifact 0.1245
 	#define HQT 1
+#elif (App == 0x245071FD ) //Fasion Police Squad
+	#define DA_W 1
+    #define DB_X 1
+	#define DA_X 0.0375
+	#define DF_Y 0.0375
+	#define DA_Y 22.25
+    #define DA_Z -0.0375
+	#define DB_Z 0.0375
+	//#define DB_Y 1
+	#define DE_X 3
+	#define DE_Y 0.400
+	#define DE_Z 0.375
+	#define BMT 1
+	#define DF_Z 0.04375
+    #define NCW 1
+    #define DSW 1
+#elif (App == 0x595C738E ) //Layers of Fear 2
+	#define DA_W 1
+    //#define DB_X 1
+	#define DA_X 0.035
+	#define DF_Y 0.045
+	#define DA_Y 25.0
+    //#define DA_Z -0.025
+	#define DB_Z 0.030
+	//#define DB_Y 1
+	#define DE_X 1
+	#define DE_Y 0.500
+	#define DE_Z 0.375
+	#define DG_W -0.250 //Pop
+    #define REF 12 //Fix can go from 1 - 15 and 15 is low 1 is High
+	#define DI_W 1.5 //Adjustment for REF
+    #define DG_Z 0.025 //Min
+    #define DI_Z 0.050 //Trim
+	#define BMT 1
+	#define DF_Z 0.025
+    #define SMS 2      //SM Toggle Separation
+	#define DL_X 0.850 //SM Tune
+	#define DL_W 0.050  //SM Perspective
+	#define DM_X 0     //HQ Tune
+	#define DM_Z 0     //HQ Smooth
+	#define DM_W 0.0   //HQ Trim
+    //#define DM_Y 3     //HQ VRS
+    //#define DL_Y 1     //De-Artifact 0.1245
+	#define HQT 1
+    #define AFD 0
+    #define PEW 1
 #else
 	#define NPW 1 //No Profile
 #endif
