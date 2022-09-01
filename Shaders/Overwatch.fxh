@@ -2474,20 +2474,27 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DE_Z 0.375
 #elif (App == 0x49F7B9C0 ) //Control DX12
 	#define DA_X 0.05
-	#define DF_Y 0.05
+	#define DF_Y 0.025
 	#define DA_Y 17.5
 	#define DB_Y 3
 	#define DE_X 1
 	#define DE_Y 0.500
 	#define DE_Z 0.375
+	#define DG_W -0.1  //Pop out allowed
+    #define REF 16 //Fix can go from 1 - 16 and 16 is low 1 is High
+	#define DI_W 1.0 //Adjustment for REF
+    #define DG_Z 0.025 //Min
+    #define DI_Z 0.050 //Trim
 	#define BMT 1
-	#define DF_Z 0.150
-    #define SMS 1      //SM Toggle Separation
-	#define DL_X 0.550 //SM Tune
+	#define DF_Z 0.125
+    #define SMS 2      //SM Toggle Separation
+	#define DL_X 0.850 //SM Tune
 	#define DL_W 0.050 //SM Perspective
-	#define DM_X 8     //HQ Tune
-	#define DM_Z 6     //HQ Smooth
-	#define DM_W 1.0 //HQ Trim
+	#define DM_X 0     //HQ Tune
+	#define DM_Z 2     //HQ Smooth
+	#define DM_W 0.0 //HQ Trim
+	#define HQT 1
+	#define DL_Y 0.45
 	#define PEW 1
 	#define DAA 1
 #elif (App == 0x5A7B540A ) //We Where Here Too
@@ -5762,7 +5769,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DM_W 0.0   //HQ Trim
 	#define DL_Z 0     //HQ Text
     //#define DM_Y 3     //HQ VRS
-    #define DL_Y 1     //De-Artifact
+    #define DL_Y 0.8     //De-Artifact
 	#define HQT 1
     #define MMD 3 //Set Multi Menu Detection             //Off / On
     #define DO_X float4( 0.190 , 0.061 , 0.190 , 0.050  ) //Pos A1 = XY Color & A2 = ZW Black 
