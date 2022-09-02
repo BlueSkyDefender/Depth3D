@@ -2,7 +2,7 @@
 	///**SuperDepth3D_VR+**///
 	//--------------------////
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	//* Depth Map Based 3D post-process shader v3.3.7
+	//* Depth Map Based 3D post-process shader v3.3.8
 	//* For Reshade 4.4+ I think...
 	//* ---------------------------------
 	//*
@@ -55,10 +55,12 @@ namespace SuperDepth3DVR
 		static const float DH_X = 1.0, DH_Y = 1.0, DH_Z = 0.0, DH_W = 0.0;
 		// DI_X = [LBM Offset X] DI_Y = [LBM Offset Y] DI_Z = [Weapon Near Depth Trim] DI_W = [REF Check Depth Limit]
 		static const float DI_X = 0.0, DI_Y = 0.0, DI_Z = 0.25, DI_W = 0.0;
-		// DJ_X = [NULL X] DJ_Y = [Menu Detection Type] DJ_Z = [Match Threshold] DJ_W = [Check Depth Limit Weapon]
-		static const float DJ_X = 0.0, DJ_Y = 0.0, DJ_Z = 0.0, DJ_W = -0.100;
+		// DJ_X = [Range Smoothing] DJ_Y = [Menu Detection Type] DJ_Z = [Match Threshold] DJ_W = [Check Depth Limit Weapon]
+		static const float DJ_X = 0, DJ_Y = 0.0, DJ_Z = 0.0, DJ_W = -0.100;
 		// DK_X = [FPS Focus Method] DK_Y = [Eye Eye Selection] DK_Z = [Eye Fade Selection] DK_W = [Eye Fade Speed Selection]	
-		static const float DK_X = 0, DK_Y = 0.0, DK_Z = 0, DK_W = 1;	
+		static const float DK_X = 0, DK_Y = 0.0, DK_Z = 0, DK_W = 1;
+		// DL_X = [Not Used Here] DL_Y = [De-Artifact] DL_Z = [Null] DL_W = [Not Used Here]
+		static const float DL_X = 0.5, DL_Y = 0, DL_Z = 0, DL_W = 0.05;		
 		// DN_X = [Position A & B] DN_Y = [Position C & D] DM_Z = [Position E & F] DN_W = [Menu Size Main]	
 		static const float DN_X = 0.0, DN_Y = 0.0, DN_Z = 0.0, DN_W = 0.0;
 		// DO_X = [Position A & A] DO_Y = [Position A & B] DO_Z = [Position B & B] DO_W = [AB Menu Tresh]	
@@ -334,9 +336,9 @@ namespace SuperDepth3DVR
 					"\n"
 					"Warning: Also Make sure you turn on Performance Mode before you close this menu.\n"
 					"\n"
-					"Default is Normal.";
+					"Default is Alpha.";
 	ui_category = "Occlusion Masking";
-	> = 0;
+	> = 1;
 
 	uniform int View_Mode_Warping <
 		#if Compatibility
@@ -351,7 +353,7 @@ namespace SuperDepth3DVR
 					 "Default is 3 and Zero is Off.";
 		ui_category = "Occlusion Masking";
 	> = 3;
-	
+
 	uniform int Custom_Sidebars <
 		ui_type = "combo";
 		ui_items = "Mirrored Edges\0Black Edges\0Stretched Edges\0";
@@ -395,6 +397,16 @@ namespace SuperDepth3DVR
 		ui_category = "Occlusion Masking";
 	> = 0;
 	
+	uniform float Range_Blend <
+		ui_type = "slider";
+		ui_min = 0; ui_max = 1;
+		ui_label = " Range Smoothing";
+		ui_tooltip = "This blends Two Depth Buffer at a distance to fill in missing information that is needed to compleat a image.\n"
+					 "With this on it should help with tress and other foliage that needs to be reconstructed by Temporal Methods.\n"
+					 "Default is Zero, Off.";
+		ui_category = "Occlusion Masking";
+	> = DJ_X;	
+		
 	uniform float Compatibility_Power <
 		#if Compatibility
 		ui_type = "drag";
@@ -406,24 +418,37 @@ namespace SuperDepth3DVR
 		ui_tooltip = "Not all games need a high offset for infilling.\n"
 					 "This option lets you increase this offset in both directions to limit artifacts.\n"
 					 "With this on it should work better in games with TAA, FSR,and or DLSS sometimes.\n"
-					 "Default is 0.625.";
+					 "Default is 0.25.";
 		ui_category = "Compatibility Options";
-	> = 0.625;
-	
-	uniform float DLSS_FSR_Offset <
+	> = 0.25;
+
+	uniform float De_Artifacting <
 		#if Compatibility
 		ui_type = "drag";
 		#else
 		ui_type = "slider";
 		#endif
-		ui_min = 0.0; ui_max = 4.0;
-		ui_label = " Upscailer Offset";
+		ui_min = 0; ui_max = 1;
+		ui_label = " De-Artifacting";
+		ui_tooltip = "This when the image does not match the depth buffer causing artifacts.\n"
+					 "Use this on fur, hair, and other things that can cause artifacts at a high cost.\n"
+					 "I find a value of 0.5 is good enough in most cases.\n"
+					 "Default is Zero and it's Off.";
+		ui_category = "Compatibility Options";
+	> = DL_Y;		
+	
+	uniform float2 DLSS_FSR_Offset <
+		ui_type = "slider";
+		ui_min = 0.0; ui_max = 5.0;
+		ui_label = " Upscailer Offset XY";
 		ui_tooltip = "This Offset is for non conforming ZBuffer Postion witch is normaly 1 pixel wide.\n"
 					 "This issue only happens sometimes when using things like DLSS or FSR.\n"
 					 "This does not solve for TAA artifacts like Jittering or smearing.\n"
-					 "Default and starts at Zero and it's Off. With a max offset of 4pixels Wide.";
+					 "Default and starts at Zero and it's Off. With a max offset of 5pixels Wide.";
 		ui_category = "Compatibility Options";
+		ui_category_closed = true;
 	> = 0;
+	
 	
 	uniform int Depth_Map <
 		ui_type = "combo";
@@ -869,9 +894,9 @@ namespace SuperDepth3DVR
 		return a < 0 ? -c : c;
 	}
 	
-	float Min_Divergence() // and set scale
-	{   float Min_Div = max(1.0, Divergence);
-		return lerp( 1.0, Max_Divergence, Scale(Min_Div,100.0,1.0));
+	float2 Min_Divergence() // and set scale
+	{   float Min_Div = max(1.0, Divergence), D_Scale = saturate(Scale(Min_Div,100.0,1.0));
+		return float2(lerp( 1.0, Max_Divergence, D_Scale), D_Scale);
 	}
 	
 		float2 Set_Pop_Min()
@@ -992,6 +1017,14 @@ namespace SuperDepth3DVR
 			AddressV = MIRROR;
 			AddressW = MIRROR;
 		};
+		
+	texture texzBufferBlurVR < pooled = true; > { Width = BUFFER_WIDTH / 2.0 ; Height = BUFFER_HEIGHT / 2.0; Format = R16F; MipLevels = 6; };
+	
+	sampler SamplerzBuffer_BlurVR
+		{
+			Texture = texzBufferBlurVR;
+		};
+		
 	#if UI_MASK
 	texture TexMaskA < source = "DM_Mask_A.png"; > { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA8; };
 	sampler SamplerMaskA { Texture = TexMaskA;};
@@ -1521,7 +1554,7 @@ namespace SuperDepth3DVR
 		if (Flip_Depth)
 			texcoord.y =  1 - texcoord.y;
 	
-		texcoord.xy -= DLSS_FSR_Offset.x * pix;
+		texcoord.xy -= DLSS_FSR_Offset.xy * pix;
 	
 		float4 DM = Depth(TC_SP(texcoord).xy).xxxx;
 		float R, G, B, A, WD = WeaponDepth(TC_SP(texcoord).xy).x, CoP = WeaponDepth(TC_SP(texcoord).xy).y, CutOFFCal = (CoP/DMA()) * 0.5; //Weapon Cutoff Calculation
@@ -1736,7 +1769,7 @@ namespace SuperDepth3DVR
 	
 				ZP = saturate( ZPD_Balance * max(0.5, Auto_Balance_Selection().x));
 
-			float DOoR = smoothstep(0,1,tex2D(SamplerLumVR,float2(0, 0.416)).z), ZDP_Array[16] = { 0.0, 0.0125, 0.025, 0.0375, 0.04375, 0.05, 0.0625, 0.075, 0.0875, 0.09375, 0.1, 0.125, 0.150, 0.175, 0.20, 0.225};
+			float DOoR = smoothstep(0,1,tex2D(SamplerLumVR,float2(0, 0.416)).z), ZDP_Array[17] = { 0.0, 0.0125, 0.025, 0.0375, 0.04375, 0.05, 0.0625, 0.075, 0.0875, 0.09375, 0.1, 0.125, 0.150, 0.175, 0.20, 0.225, 0.250};
 			
 			if(REF || RE_Fix)
 			{
@@ -1895,13 +1928,28 @@ namespace SuperDepth3DVR
 		Point_Out = Set_Depth.xy; 
 		Linear_Out = float2(Set_Depth.x,Color.x);//is z when above code is on.	
 	}
+	static const float Blur_Adjust = 3.0;
 		
+	void zBuffer_Blur(in float4 position : SV_Position, in float2 texcoord : TEXCOORD, out float2 Blur_Out : SV_Target0)
+	{   
+		float simple_Blur = tex2Dlod(SamplerzBufferVR_L,float4(texcoord,0, 2.0)).x;
+		simple_Blur += tex2Dlod(SamplerzBufferVR_L,float4(texcoord + float2( pix.x * Blur_Adjust * 2, pix.y),0, 2.0)).x;
+		simple_Blur += tex2Dlod(SamplerzBufferVR_L,float4(texcoord + float2( pix.x * Blur_Adjust   , pix.y),0, 2.0)).x;
+		simple_Blur += tex2Dlod(SamplerzBufferVR_L,float4(texcoord + float2(-pix.x * Blur_Adjust   , pix.y),0, 2.0)).x;
+		simple_Blur += tex2Dlod(SamplerzBufferVR_L,float4(texcoord + float2(-pix.x * Blur_Adjust * 2, pix.y),0, 2.0)).x;
+		
+		Blur_Out = min(1,simple_Blur * 0.2);
+	}		
 	float3 GetDB(float2 texcoord)
 	{
 		float Depth_Blur = View_Mode_Warping > 0 ? min(tex2Dlod(SamplerzBufferVR_L, float4( texcoord, 0, clamp(View_Mode_Warping,0,5) ) ).x,tex2Dlod(SamplerzBufferVR_L, float4( texcoord, 0, 0) ).x) : tex2Dlod(SamplerzBufferVR_L, float4( texcoord, 0, 0) ).x;
 	
 		float3 DepthBuffer_LP = float3(Depth_Blur,tex2Dlod(SamplerzBufferVR_P, float4( texcoord, 0, 0) ).x, tex2Dlod(SamplerzBufferVR_P, float4(texcoord,0, 0) ).y );
 		
+		float Min_Blend = tex2Dlod(SamplerzBuffer_BlurVR, float4( texcoord, 0, 0) ).x;// min(tex2Dlod(SamplerzBufferVR_L, float4( texcoord, 0, 3.5) ).x,tex2Dlod(SamplerzBufferVR_L, float4( texcoord, 0, 2.5 ) ).x) ;
+		if( Range_Blend > 0)
+			   DepthBuffer_LP.xy = lerp(DepthBuffer_LP.xy,  Min_Blend ,(smoothstep(0.5,1.0, Min_Blend) *  Min_Divergence().y) * saturate(Range_Blend));
+			   
 		if(View_Mode == 0 || View_Mode == 3)	
 			DepthBuffer_LP.x = DepthBuffer_LP.y;
 			
@@ -1941,7 +1989,7 @@ namespace SuperDepth3DVR
 				Perf = fmod(CBxy.x+CBxy.y,2) ? 1.020: 1.021;
 		}
 		//ParallaxSteps Calculations
-		float MinNum = lerp(50, 20, saturate(GetDepth * 15)), D = abs(Diverge), Cal_Steps = D * Perf, Steps = clamp( Cal_Steps, Perf_LvL ? MinNum : lerp( MinNum, min( MinNum, D), GetDepth >= 0.999 ), Performance_Level > 1 ? lerp(100,MinNum,saturate(Vin_Pattern(Coordinates, float2(20.0,2.5)))) : 100 );//Foveated Rendering Point of attack 16-256 limit samples.
+		float MinNum = 25, D = abs(Diverge), Cal_Steps = D * Perf, Steps = clamp( Cal_Steps, Perf_LvL ? MinNum : lerp( MinNum, min( MinNum, D), GetDepth >= 0.999 ), Performance_Level > 1 ? lerp(100,50,saturate(Vin_Pattern(Coordinates, float2(15.0,2.5)))) : 100 );//Foveated Rendering Point of attack 16-256 limit samples.
 		// Offset per step progress & Limit
 		float LayerDepth = rcp(Steps), TP = lerp(0.025, 0.05,Compatibility_Power);
 			  D = Diverge < 0 ? -75 : 75;
@@ -1955,7 +2003,10 @@ namespace SuperDepth3DVR
 		{   // Shift coordinates horizontally in linear fasion
 		    ParallaxCoord.x -= deltaCoordinates; 
 		    // Get depth value at current coordinates
-		    CurrentDepthMapValue = GetDB( ParallaxCoord ).x;
+		 	if(De_Artifacting > 0)
+			    CurrentDepthMapValue = min(GetDB( ParallaxCoord ).x ,GetDB( ParallaxCoord - float2(MS * lerp(0,0.125,saturate(De_Artifacting)),0)).x);
+		    else
+		    	CurrentDepthMapValue = GetDB( ParallaxCoord ).x;
 		    // Get depth of next layer
 		    CurrentLayerDepth += LayerDepth;
 			continue;
@@ -2053,7 +2104,7 @@ namespace SuperDepth3DVR
 		TCL.x -= Interpupillary_Distance*0.5f;
 		TCR.x += Interpupillary_Distance*0.5f;
 	
-		float D =  Min_Divergence();
+		float D =  Min_Divergence().x;
 	
 		float FadeIO = Focus_Reduction_Type == 1 ? 1 : smoothstep(0,1,1-Fade_in_out(texcoord).x), FD = D, FD_Adjust = Focus_Reduction_Type == 2 ? 0.4375 : 0.1;
 	
@@ -2786,6 +2837,12 @@ namespace SuperDepth3DVR
 			PixelShader = zBuffer;
 			RenderTarget0 = texzBufferVR_P;
 			RenderTarget1 = texzBufferVR_L;
+		}
+			pass Blur_DepthBuffer
+		{
+			VertexShader = PostProcessVS;
+			PixelShader = zBuffer_Blur;
+			RenderTarget = texzBufferBlurVR;
 		}
 			pass Color_Correction
 		{
