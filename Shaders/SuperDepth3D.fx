@@ -2,7 +2,7 @@
 	///**SuperDepth3D**///
 	//----------------////
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	//* Depth Map Based 3D post-process shader v3.3.8
+	//* Depth Map Based 3D post-process shader v3.3.9
 	//* For Reshade 3.0+
 	//* ---------------------------------
 	//*
@@ -2707,12 +2707,12 @@ namespace SuperDepth3D
 			float2 charSize = float2(.00875, .0125) * Size;
 			// Starting position.
 			float2 charPos = float2( 0.009, 0.9725);
-			//Needs Copy Depth and/or Depth Selection
-			Needs += drawChar( CH_N, charPos, charSize, TC); charPos.x += .01 * Size;
+			//Check Copy Depth or Depth Selection
+			Needs += drawChar( CH_C, charPos, charSize, TC); charPos.x += .01 * Size;
+			Needs += drawChar( CH_H, charPos, charSize, TC); charPos.x += .01 * Size;
 			Needs += drawChar( CH_E, charPos, charSize, TC); charPos.x += .01 * Size;
-			Needs += drawChar( CH_E, charPos, charSize, TC); charPos.x += .01 * Size;
-			Needs += drawChar( CH_D, charPos, charSize, TC); charPos.x += .01 * Size;
-			Needs += drawChar( CH_S, charPos, charSize, TC); charPos.x += .01 * Size;
+			Needs += drawChar( CH_C, charPos, charSize, TC); charPos.x += .01 * Size;
+			Needs += drawChar( CH_K, charPos, charSize, TC); charPos.x += .01 * Size;
 			Needs += drawChar( CH_BLNK, charPos, charSize, TC); charPos.x += .01 * Size;
 			Needs += drawChar( CH_C, charPos, charSize, TC); charPos.x += .01 * Size;
 			Needs += drawChar( CH_O, charPos, charSize, TC); charPos.x += .01 * Size;
@@ -2725,10 +2725,6 @@ namespace SuperDepth3D
 			Needs += drawChar( CH_T, charPos, charSize, TC); charPos.x += .01 * Size;
 			Needs += drawChar( CH_H, charPos, charSize, TC); charPos.x += .01 * Size;
 			Needs += drawChar( CH_BLNK, charPos, charSize, TC); charPos.x += .01 * Size;
-			Needs += drawChar( CH_A, charPos, charSize, TC); charPos.x += .01 * Size;
-			Needs += drawChar( CH_N, charPos, charSize, TC); charPos.x += .01 * Size;
-			Needs += drawChar( CH_D, charPos, charSize, TC); charPos.x += .01 * Size;
-			Needs += drawChar( CH_SLSH, charPos, charSize, TC); charPos.x += .01 * Size;
 			Needs += drawChar( CH_O, charPos, charSize, TC); charPos.x += .01 * Size;
 			Needs += drawChar( CH_R, charPos, charSize, TC); charPos.x += .01 * Size;
 			Needs += drawChar( CH_BLNK, charPos, charSize, TC); charPos.x += .01 * Size;
@@ -2747,7 +2743,7 @@ namespace SuperDepth3D
 			Needs += drawChar( CH_I, charPos, charSize, TC); charPos.x += .01 * Size;
 			Needs += drawChar( CH_O, charPos, charSize, TC); charPos.x += .01 * Size;
 			Needs += drawChar( CH_N, charPos, charSize, TC);
-			//Network Play May Need Modded DLL
+			//Net Play
 			charPos = float2( 0.009, 0.955);
 			Work += drawChar( CH_N, charPos, charSize, TC); charPos.x += .01 * Size;
 			Work += drawChar( CH_E, charPos, charSize, TC); charPos.x += .01 * Size;
@@ -2761,55 +2757,9 @@ namespace SuperDepth3D
 			Work += drawChar( CH_L, charPos, charSize, TC); charPos.x += .01 * Size;
 			Work += drawChar( CH_A, charPos, charSize, TC); charPos.x += .01 * Size;
 			Work += drawChar( CH_Y, charPos, charSize, TC); charPos.x += .01 * Size;
-			Work += drawChar( CH_BLNK, charPos, charSize, TC); charPos.x += .01 * Size;
-			Work += drawChar( CH_M, charPos, charSize, TC); charPos.x += .01 * Size;
-			Work += drawChar( CH_A, charPos, charSize, TC); charPos.x += .01 * Size;
-			Work += drawChar( CH_Y, charPos, charSize, TC); charPos.x += .01 * Size;
-			Work += drawChar( CH_BLNK, charPos, charSize, TC); charPos.x += .01 * Size;
-			Work += drawChar( CH_N, charPos, charSize, TC); charPos.x += .01 * Size;
-			Work += drawChar( CH_E, charPos, charSize, TC); charPos.x += .01 * Size;
-			Work += drawChar( CH_E, charPos, charSize, TC); charPos.x += .01 * Size;
-			Work += drawChar( CH_D, charPos, charSize, TC); charPos.x += .01 * Size;
-			Work += drawChar( CH_BLNK, charPos, charSize, TC); charPos.x += .01 * Size;
-			Work += drawChar( CH_M, charPos, charSize, TC); charPos.x += .01 * Size;
-			Work += drawChar( CH_O, charPos, charSize, TC); charPos.x += .01 * Size;
-			Work += drawChar( CH_D, charPos, charSize, TC); charPos.x += .01 * Size;
-			Work += drawChar( CH_D, charPos, charSize, TC); charPos.x += .01 * Size;
-			Work += drawChar( CH_E, charPos, charSize, TC); charPos.x += .01 * Size;
-			Work += drawChar( CH_D, charPos, charSize, TC); charPos.x += .01 * Size;
-			Work += drawChar( CH_BLNK, charPos, charSize, TC); charPos.x += .01 * Size;
-			Work += drawChar( CH_D, charPos, charSize, TC); charPos.x += .01 * Size;
-			Work += drawChar( CH_L, charPos, charSize, TC); charPos.x += .01 * Size;
-			Work += drawChar( CH_L, charPos, charSize, TC);
-			//Supported Emulator Detected
-			charPos = float2( 0.009, 0.9375);
-			Supported += drawChar( CH_S, charPos, charSize, TC); charPos.x += .01 * Size;
-			Supported += drawChar( CH_U, charPos, charSize, TC); charPos.x += .01 * Size;
-			Supported += drawChar( CH_P, charPos, charSize, TC); charPos.x += .01 * Size;
-			Supported += drawChar( CH_P, charPos, charSize, TC); charPos.x += .01 * Size;
-			Supported += drawChar( CH_O, charPos, charSize, TC); charPos.x += .01 * Size;
-			Supported += drawChar( CH_R, charPos, charSize, TC); charPos.x += .01 * Size;
-			Supported += drawChar( CH_T, charPos, charSize, TC); charPos.x += .01 * Size;
-			Supported += drawChar( CH_E, charPos, charSize, TC); charPos.x += .01 * Size;
-			Supported += drawChar( CH_D, charPos, charSize, TC); charPos.x += .01 * Size;
-			Supported += drawChar( CH_BLNK, charPos, charSize, TC); charPos.x += .01 * Size;
-			Supported += drawChar( CH_E, charPos, charSize, TC); charPos.x += .01 * Size;
-			Supported += drawChar( CH_M, charPos, charSize, TC); charPos.x += .01 * Size;
-			Supported += drawChar( CH_U, charPos, charSize, TC); charPos.x += .01 * Size;
-			Supported += drawChar( CH_L, charPos, charSize, TC); charPos.x += .01 * Size;
-			Supported += drawChar( CH_A, charPos, charSize, TC); charPos.x += .01 * Size;
-			Supported += drawChar( CH_T, charPos, charSize, TC); charPos.x += .01 * Size;
-			Supported += drawChar( CH_O, charPos, charSize, TC); charPos.x += .01 * Size;
-			Supported += drawChar( CH_R, charPos, charSize, TC); charPos.x += .01 * Size;
-			Supported += drawChar( CH_BLNK, charPos, charSize, TC); charPos.x += .01 * Size;
-			Supported += drawChar( CH_D, charPos, charSize, TC); charPos.x += .01 * Size;
-			Supported += drawChar( CH_E, charPos, charSize, TC); charPos.x += .01 * Size;
-			Supported += drawChar( CH_T, charPos, charSize, TC); charPos.x += .01 * Size;
-			Supported += drawChar( CH_E, charPos, charSize, TC); charPos.x += .01 * Size;
-			Supported += drawChar( CH_C, charPos, charSize, TC); charPos.x += .01 * Size;
-			Supported += drawChar( CH_T, charPos, charSize, TC); charPos.x += .01 * Size;
-			Supported += drawChar( CH_E, charPos, charSize, TC); charPos.x += .01 * Size;
-			Supported += drawChar( CH_D, charPos, charSize, TC);
+			//Supported Emulator Detected - Removed
+			//charPos = float2( 0.009, 0.9375);
+
 			//Disable CA/MB/Dof/Grain
 			charPos = float2( 0.009, 0.920);
 			Effect += drawChar( CH_D, charPos, charSize, TC); charPos.x += .01 * Size;
@@ -2835,22 +2785,13 @@ namespace SuperDepth3D
 			Effect += drawChar( CH_A, charPos, charSize, TC); charPos.x += .01 * Size;
 			Effect += drawChar( CH_I, charPos, charSize, TC); charPos.x += .01 * Size;
 			Effect += drawChar( CH_N, charPos, charSize, TC);
-			//Disable Or Set TAA/MSAA/AA/DLSS
+			//Check TAA/MSAA/DLSS
 			charPos = float2( 0.009, 0.9025);
-			SetAA += drawChar( CH_D, charPos, charSize, TC); charPos.x += .01 * Size;
-			SetAA += drawChar( CH_I, charPos, charSize, TC); charPos.x += .01 * Size;
-			SetAA += drawChar( CH_S, charPos, charSize, TC); charPos.x += .01 * Size;
-			SetAA += drawChar( CH_A, charPos, charSize, TC); charPos.x += .01 * Size;
-			SetAA += drawChar( CH_B, charPos, charSize, TC); charPos.x += .01 * Size;
-			SetAA += drawChar( CH_L, charPos, charSize, TC); charPos.x += .01 * Size;
+			SetAA += drawChar( CH_C, charPos, charSize, TC); charPos.x += .01 * Size;
+			SetAA += drawChar( CH_H, charPos, charSize, TC); charPos.x += .01 * Size;
 			SetAA += drawChar( CH_E, charPos, charSize, TC); charPos.x += .01 * Size;
-			SetAA += drawChar( CH_BLNK, charPos, charSize, TC); charPos.x += .01 * Size;
-			SetAA += drawChar( CH_O, charPos, charSize, TC); charPos.x += .01 * Size;
-			SetAA += drawChar( CH_R, charPos, charSize, TC); charPos.x += .01 * Size;
-			SetAA += drawChar( CH_BLNK, charPos, charSize, TC); charPos.x += .01 * Size;
-			SetAA += drawChar( CH_S, charPos, charSize, TC); charPos.x += .01 * Size;
-			SetAA += drawChar( CH_E, charPos, charSize, TC); charPos.x += .01 * Size;
-			SetAA += drawChar( CH_T, charPos, charSize, TC); charPos.x += .01 * Size;
+			SetAA += drawChar( CH_C, charPos, charSize, TC); charPos.x += .01 * Size;
+			SetAA += drawChar( CH_K, charPos, charSize, TC); charPos.x += .01 * Size;
 			SetAA += drawChar( CH_BLNK, charPos, charSize, TC); charPos.x += .01 * Size;
 			SetAA += drawChar( CH_T, charPos, charSize, TC); charPos.x += .01 * Size;
 			SetAA += drawChar( CH_A, charPos, charSize, TC); charPos.x += .01 * Size;
@@ -2861,14 +2802,11 @@ namespace SuperDepth3D
 			SetAA += drawChar( CH_A, charPos, charSize, TC); charPos.x += .01 * Size;
 			SetAA += drawChar( CH_A, charPos, charSize, TC); charPos.x += .01 * Size;
 			SetAA += drawChar( CH_SLSH, charPos, charSize, TC); charPos.x += .01 * Size;
-			SetAA += drawChar( CH_A, charPos, charSize, TC); charPos.x += .01 * Size;
-			SetAA += drawChar( CH_A, charPos, charSize, TC); charPos.x += .01 * Size;
-			SetAA += drawChar( CH_SLSH, charPos, charSize, TC); charPos.x += .01 * Size;
 			SetAA += drawChar( CH_D, charPos, charSize, TC); charPos.x += .01 * Size;
 			SetAA += drawChar( CH_L, charPos, charSize, TC); charPos.x += .01 * Size;
 			SetAA += drawChar( CH_S, charPos, charSize, TC); charPos.x += .01 * Size;
 			SetAA += drawChar( CH_S, charPos, charSize, TC);
-			//Set Weapon Profile
+			//Set Weapon
 			charPos = float2( 0.009, 0.885);
 			SetWP += drawChar( CH_S, charPos, charSize, TC); charPos.x += .01 * Size;
 			SetWP += drawChar( CH_E, charPos, charSize, TC); charPos.x += .01 * Size;
@@ -2880,14 +2818,6 @@ namespace SuperDepth3D
 			SetWP += drawChar( CH_P, charPos, charSize, TC); charPos.x += .01 * Size;
 			SetWP += drawChar( CH_O, charPos, charSize, TC); charPos.x += .01 * Size;
 			SetWP += drawChar( CH_N, charPos, charSize, TC); charPos.x += .01 * Size;
-			SetWP += drawChar( CH_BLNK, charPos, charSize, TC); charPos.x += .01 * Size;
-			SetWP += drawChar( CH_P, charPos, charSize, TC); charPos.x += .01 * Size;
-			SetWP += drawChar( CH_R, charPos, charSize, TC); charPos.x += .01 * Size;
-			SetWP += drawChar( CH_O, charPos, charSize, TC); charPos.x += .01 * Size;
-			SetWP += drawChar( CH_F, charPos, charSize, TC); charPos.x += .01 * Size;
-			SetWP += drawChar( CH_I, charPos, charSize, TC); charPos.x += .01 * Size;
-			SetWP += drawChar( CH_L, charPos, charSize, TC); charPos.x += .01 * Size;
-			SetWP += drawChar( CH_E, charPos, charSize, TC);
 			//Set FoV
 			charPos = float2( 0.009, 0.8675);
 			SetFoV += drawChar( CH_S, charPos, charSize, TC); charPos.x += .01 * Size;
@@ -2921,11 +2851,9 @@ namespace SuperDepth3D
 			NoPro += drawChar( CH_I, charPos, charSize, TC); charPos.x += .01 * Size;
 			NoPro += drawChar( CH_L, charPos, charSize, TC); charPos.x += .01 * Size;
 			NoPro += drawChar( CH_E, charPos, charSize, TC); charPos.x = 0.009;
-			//Not Compatible
+			//Incompatible
+			NotCom += drawChar( CH_I, charPos, charSize, TC); charPos.x += .01 * Size;
 			NotCom += drawChar( CH_N, charPos, charSize, TC); charPos.x += .01 * Size;
-			NotCom += drawChar( CH_O, charPos, charSize, TC); charPos.x += .01 * Size;
-			NotCom += drawChar( CH_T, charPos, charSize, TC); charPos.x += .01 * Size;
-			NotCom += drawChar( CH_BLNK, charPos, charSize, TC); charPos.x += .01 * Size;
 			NotCom += drawChar( CH_C, charPos, charSize, TC); charPos.x += .01 * Size;
 			NotCom += drawChar( CH_O, charPos, charSize, TC); charPos.x += .01 * Size;
 			NotCom += drawChar( CH_P, charPos, charSize, TC); charPos.x += .01 * Size;
@@ -2935,17 +2863,13 @@ namespace SuperDepth3D
 			NotCom += drawChar( CH_B, charPos, charSize, TC); charPos.x += .01 * Size;
 			NotCom += drawChar( CH_L, charPos, charSize, TC); charPos.x += .01 * Size;
 			NotCom += drawChar( CH_E, charPos, charSize, TC); charPos.x = 0.009;
-			//Needs Fix/Mod
+			//Needs Mod
 			Mod += drawChar( CH_N, charPos, charSize, TC); charPos.x += .01 * Size;
 			Mod += drawChar( CH_E, charPos, charSize, TC); charPos.x += .01 * Size;
 			Mod += drawChar( CH_E, charPos, charSize, TC); charPos.x += .01 * Size;
 			Mod += drawChar( CH_D, charPos, charSize, TC); charPos.x += .01 * Size;
 			Mod += drawChar( CH_S, charPos, charSize, TC); charPos.x += .01 * Size;
 			Mod += drawChar( CH_BLNK, charPos, charSize, TC); charPos.x += .01 * Size;
-			Mod += drawChar( CH_F, charPos, charSize, TC); charPos.x += .01 * Size;
-			Mod += drawChar( CH_I, charPos, charSize, TC); charPos.x += .01 * Size;
-			Mod += drawChar( CH_X, charPos, charSize, TC); charPos.x += .01 * Size;
-			Mod += drawChar( CH_SLSH, charPos, charSize, TC); charPos.x += .01 * Size;
 			Mod += drawChar( CH_M, charPos, charSize, TC); charPos.x += .01 * Size;
 			Mod += drawChar( CH_O, charPos, charSize, TC); charPos.x += .01 * Size;
 			Mod += drawChar( CH_D, charPos, charSize, TC); charPos.x = 0.009;
@@ -2990,53 +2914,7 @@ namespace SuperDepth3D
 			Depth3D += drawChar( CH_N, charPos, charSize_B, TC); charPos.x += .01 * D3D_Size_B;
 			Depth3D += drawChar( CH_F, charPos, charSize_B, TC); charPos.x += .01 * D3D_Size_B;
 			Depth3D += drawChar( CH_O, charPos, charSize_B, TC);
-			if(Stereoscopic_Mode == 5)
-			{
-			//Auto Stereo Help
-			charPos = float2( 0.4575, 0.49375);
-			//calibrate
-			ETC += drawChar( CH_C, charPos, charSize, TC); charPos.x += .01 * Size;
-			ETC += drawChar( CH_A, charPos, charSize, TC); charPos.x += .01 * Size;
-			ETC += drawChar( CH_L, charPos, charSize, TC); charPos.x += .01 * Size;
-			ETC += drawChar( CH_I, charPos, charSize, TC); charPos.x += .01 * Size;
-			ETC += drawChar( CH_B, charPos, charSize, TC); charPos.x += .01 * Size;
-			ETC += drawChar( CH_R, charPos, charSize, TC); charPos.x += .01 * Size;
-			ETC += drawChar( CH_A, charPos, charSize, TC); charPos.x += .01 * Size;
-			ETC += drawChar( CH_T, charPos, charSize, TC); charPos.x += .01 * Size;
-			ETC += drawChar( CH_E, charPos, charSize, TC); charPos.x;
-			//Too Far
-			charPos = float2( 0.4575, 0.49375);
-			ETTF += drawChar( CH_T, charPos, charSize, TC); charPos.x += .01 * Size;
-			ETTF += drawChar( CH_O, charPos, charSize, TC); charPos.x += .01 * Size;
-			ETTF += drawChar( CH_O, charPos, charSize, TC); charPos.x += .01 * Size;
-			ETTF += drawChar( CH_BLNK, charPos, charSize, TC); charPos.x += .01 * Size;
-			ETTF += drawChar( CH_F, charPos, charSize, TC); charPos.x += .01 * Size;
-			ETTF += drawChar( CH_A, charPos, charSize, TC); charPos.x += .01 * Size;
-			ETTF += drawChar( CH_R, charPos, charSize, TC); charPos.x;
-			//Too Close
-			charPos = float2( 0.445, 0.49375);
-			ETTC += drawChar( CH_T, charPos, charSize, TC); charPos.x += .01 * Size;
-			ETTC += drawChar( CH_O, charPos, charSize, TC); charPos.x += .01 * Size;
-			ETTC += drawChar( CH_O, charPos, charSize, TC); charPos.x += .01 * Size;
-			ETTC += drawChar( CH_BLNK, charPos, charSize, TC); charPos.x += .01 * Size;
-			ETTC += drawChar( CH_C, charPos, charSize, TC); charPos.x += .01 * Size;
-			ETTC += drawChar( CH_L, charPos, charSize, TC); charPos.x += .01 * Size;
-			ETTC += drawChar( CH_O, charPos, charSize, TC); charPos.x += .01 * Size;
-			ETTC += drawChar( CH_S, charPos, charSize, TC); charPos.x += .01 * Size;
-			ETTC += drawChar( CH_E, charPos, charSize, TC); charPos.x;
-			//Eye Tracking for Auto Stereo
-			#if Compatibility_FP
-				if(FP_IO_Pos().x <= 0.5 && FP_IO_Pos().x >= -0.5)
-					ET = ETC;
-			#elif Compatibility_FP == 2
-				if(FP_IO_Pos().x <= 0.5 && FP_IO_Pos().x >= -0.5)
-					ET = ETC;
-				if(FP_IO_Pos().z > 5)
-					ET = ETTF;
-				if(FP_IO_Pos().z < 4)
-					ET = ETTC;
-			#endif
-			}
+
 			//Text Information
 			if(DSW)
 				Need = Needs;
@@ -3132,6 +3010,7 @@ namespace SuperDepth3D
 			RenderTarget = texMinMaxRGB;
 		}
 		#endif
+
 		#if Reconstruction_Mode
 			pass Muti_Mode_Reconstruction
 		{
@@ -3141,6 +3020,7 @@ namespace SuperDepth3D
 			RenderTarget1 = texSD_CB_R;
 		}
 		#endif
+		
 			pass StereoOut
 		{
 			VertexShader = PostProcessVS;
