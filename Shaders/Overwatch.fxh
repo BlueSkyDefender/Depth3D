@@ -4308,21 +4308,22 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 #elif (App == 0xCBE94135 ) //Anno: Mutationem
     #define DA_W 1
     #define DB_X 1
-    #define DA_X 0.0375
-    #define DF_Y 0.01375
-    #define DA_Y 36.25
+    #define DA_X 0.025
+    #define DF_Y 0.010
+    #define DA_Y 35
     //#define DA_Z -0.025
     #define DE_X 2
-    #define DE_Y 0.250
+    #define DE_Y 0.375
     #define DE_Z 0.375
     #define BMT 1    
     #define DF_Z 0.100
-    #define SMS 0      //SM Toggle Separation
-	#define DL_X 0.600 //SM Tune
+    #define SMS 1      //SM Toggle Separation
+	#define DL_X 0.800 //SM Tune
 	//#define DL_W 0.050 //SM Perspective
-	#define DM_X 10    //HQ Tune
-	#define DM_Z 3     //HQ Smooth
-	#define DM_W 1.0 //HQ Trim
+	#define DM_X 4    //HQ Tune
+	#define DM_Z 0     //HQ Smooth
+	#define DM_W 0.0 //HQ Trim
+	#define HQT 1 	
 	#define PEW 1
 #elif (App == 0x98E46BDC ) //Forgive Me Father
     #define DA_W 1
