@@ -1,7 +1,7 @@
 ////----------------------------------------//
 ///SuperDepth3D Overwatch Automation Shader///
 //----------------------------------------////
-// Version 2.7.9
+// Version 2.8.0
 //---------------------------------------OVERWATCH---------------------------------------//
 // If you are reading this stop. Go away and never look back. From this point on if you  //
 // still think it's is worth looking at this..... Then no one can save you or your soul. //
@@ -251,7 +251,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DL_W 0.050 //SM Perspective
 	#define DM_X 4     //HQ Tune
 	#define DM_Z 3     //HQ Smooth
-	#define DM_W 0.070 //HQ Trim
 	#define HQT 1
 	#define NDW 1
 #elif (App == 0x2D950D30 )	//Fallout 4
@@ -437,8 +436,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DL_W 0.025 //SM Perspective
 	#define DM_X 6     //HQ Tune
 	#define DM_Z 2     //HQ Smooth
-	#define DM_W 0.0   //HQ Trim
-	#define DL_Z 0     //HQ Text
 	#define HQT 1
 	#define DB_W 38
 	#define DG_Z 0.350 //0.130
@@ -705,8 +702,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DL_W 0.000 //SM Perspective
 	#define DM_X 2     //HQ Tune
 	#define DM_Z 1     //HQ Smooth
-	#define DM_W 0.0   //HQ Trim
-	#define DL_Z 0     //HQ Text
     //#define DM_Y 3     //HQ VRS
     //#define DL_Y 1     //De-Artifact
 	#define HQT 1
@@ -774,7 +769,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DL_W 0.000 //SM Perspective
 	#define DM_X 6     //HQ Tune
 	#define DM_Z 1     //HQ Smooth
-	//#define DM_W 0.800 //HQ Trim
     #define HQT 1
 	#define PEW 1	
 #elif (App == 0xE9A02687 ) //BattleTech
@@ -1346,7 +1340,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DL_W 0.050 //SM Perspective
 	#define DM_X 8     //HQ Tune
 	#define DM_Z 4     //HQ Smooth
-	#define DM_W 0.000 //HQ Trim
 	#define PEW 1
 	#define DAA 1
 	#define NDW 1
@@ -1376,7 +1369,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DL_W 0.050 //SM Perspective
 	#define DM_X 4     //HQ Tune
 	#define DM_Z 1     //HQ Smooth
-	//#define DM_W 0.000 //HQ Trim
     #define HQT 1
     #define MMD 1 //Set Multi Menu Detection                 //Off / On
     #define DO_X float4( 0.069 , 0.085 ,  0.887  , 0.9185  ) //Pos A1 = XY Color & A2 = ZW Black 
@@ -1486,8 +1478,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DL_W 0.025 //SM Perspective
 	#define DM_X 8    //HQ Tune
 	#define DM_Z 2     //HQ Smooth
-	#define DL_Z 1     //HQ TextDetection
-	//#define DM_W 0.050 //HQ Trim
 	#define HQT 1      // Enable HQ Mode
 #elif (App == 0xFA2C0106 ) //Hat in Time
 	#define DA_X 0.250
@@ -1612,8 +1602,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DL_W 0.000 //SM Perspective
 	#define DM_X 4     //HQ Tune
 	#define DM_Z 1     //HQ Smooth
-	//#define DM_W 0.175 //HQ Trim
-	//#define DL_Z 1     //HQ Text
     #define HQT 1
 	#define NDW 1
 	#define DAA 1
@@ -2010,7 +1998,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DL_X 0.600 //SM Tune
 	#define DL_W 0.05  //SM Perspective
 	#define DM_Z 5     //HQ Smooth
-	#define DM_W 0.000 //HQ Trim
 #elif (App == 0x2419B0BF ) //Nioh 2
 	#define DA_W 1
 	#define DA_X 0.075
@@ -2033,7 +2020,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DL_X 0.650 //SM Tune
 	#define DL_W 0.100 //SM Perspective
 	#define DM_Z 1     //HQ Smooth
-	#define DM_W 0.000 //HQ Trim
 	#define HQT 1 	
 #elif (App == 0xD30783B6 ) //X-Com
 	#define DA_X 0.03
@@ -2140,7 +2126,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DL_W 0.000 //SM Perspective
 	#define DM_X 4     //HQ Tune
 	#define DM_Z 1     //HQ Smooth
-	#define DM_W 0.000 //HQ Trim
 	#define HQT 1
 	#define PEW 1
 	#define DAA 1
@@ -2277,7 +2262,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DF_Y 0.065
 	#define DA_Y 22.5
 	#define DA_Z 0.100
-	#define DB_Z 0.200
+	#define DB_Z 0.075
 	#define DB_Y 1
 	#define DE_X 4
 	#define DE_Y 0.5
@@ -2285,11 +2270,11 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define BMT 1    
     #define DF_Z 0.125
     #define SMS 3      //SM Toggle Separation
-	#define DL_X 0.550 //SM Tune
+	#define DL_X 0.800 //SM Tune
 	#define DL_W 0.025 //SM Perspective
 	#define DM_X 8     //HQ Tune
-	#define DM_Z 2     //HQ Smooth
-	#define DM_W 0.50  //HQ Trim
+	#define DM_Z 0     //HQ Smooth
+    #define HQT 1
 	#define WSM 3
 	#define DB_W 14
     #define HMT 1
@@ -2307,21 +2292,23 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DAA 1
 #elif (App == 0xD9691F81 ) //Destroy All Humans!
 	#define DA_W 1
-	#define DA_X 0.075 //0.050
-	#define DF_Y 0.0125
+	#define DA_X 0.070 //0.050
+	#define DF_Y 0.015
 	#define DA_Y 32.5  //60.0
+    #define DA_Z -0.075
 	#define DB_Y 4
 	#define DE_X 1
-	#define DE_Y 0.500
+	#define DE_Y 0.375
 	#define DE_Z 0.375
+	#define DG_W -0.1125  //Pop out allowed
     #define BMT 1    
     #define DF_Z 0.125
     #define SMS 3      //SM Toggle Separation
-	#define DL_X 0.550 //SM Tune
+	#define DL_X 0.700 //SM Tune // 0.550
 	#define DL_W 0.025 //SM Perspective
-	#define DM_X 8     //HQ Tune
-	#define DM_Z 1     //HQ Smooth
-	#define DM_W 0.750 //HQ Trim
+	#define DM_X 6     //HQ Tune
+	#define DM_Z 8     //HQ Smooth
+    #define DL_Y 0.375 //De-Artifact
 	#define REF 3      //Fix can go from 1 - 15 and 15 is low 1 is High
 	#define DI_W 2.5   //Adjustment for REF
 	#define HQT 1
@@ -2492,7 +2479,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DL_W 0.050 //SM Perspective
 	#define DM_X 0     //HQ Tune
 	#define DM_Z 2     //HQ Smooth
-	#define DM_W 0.0 //HQ Trim
 	#define HQT 1
 	#define DL_Y 0.45
 	#define PEW 1
@@ -2677,7 +2663,8 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DL_X 0.600 //SM Tune
 	#define DL_W 0.050 //SM Perspective
 	#define DM_X 8     //HQ Tune
-	#define DM_Z 3     //HQ Smooth
+	#define DM_Z 6     //HQ Smooth
+	#define HQT 1
 	#define PEW 1
 	#define DAA 1
 #elif (App == 0xA05A15C4 ) //Spooky's House of Jump Scares
@@ -2874,7 +2861,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DL_W 0.000 //SM Perspective
 	#define DM_X 2     //HQ Tune
 	#define DM_Z 3     //HQ Smooth
-	#define DM_W 0.000 //HQ Trim
 	#define HQT 1
 	#define PEW 1
 	#define NDW 1
@@ -2961,7 +2947,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DL_W 0.050 //SM Perspective
 	#define DM_X 8     //HQ Tune
 	#define DM_Z 1     //HQ Smooth
-	//#define DM_W 0.000 //HQ Trim
 	#define HQT 1
 	#define PEW 1
 	#define DAA 1
@@ -3058,8 +3043,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DL_W 0.00 //SM Perspective
 	#define DM_X 4     //HQ Tune
 	#define DM_Z 3     //HQ Smooth
-	//#define DM_W 0.175 //HQ Trim
-	//#define DL_Z 1     //HQ Text
 	#define HQT 1 
 	#define PEW 1
 #elif (App == 0xB53B8500 ) //DEATH STRANDING
@@ -3123,8 +3106,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DL_W 0.100 //SM Perspective
 	#define DM_X 0     //HQ Tune
 	#define DM_Z 1     //HQ Smooth
-	#define DM_W 0.0   //HQ Trim
-	#define DL_Z 0     //HQ Text
 	#define HQT 1    
 	#define PEW 1
 	#define DAA 1
@@ -3437,7 +3418,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DL_W 0.000 //SM Perspective
 	#define DM_X 4    //HQ Tune
 	#define DM_Z 5     //HQ Smooth
-	#define DM_W 0.0 //HQ Trim
 	#define HQT 1
 	#define DSW 1
     #define PEW 1
@@ -3505,8 +3485,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DL_W 0.000 //SM Perspective
 	#define DM_X 4     //HQ Tune
 	#define DM_Z 0     //HQ Smooth
-	//#define DM_W 0.25   //HQ Trim
-	//#define DL_Z 0     //HQ Text
 	#define HQT 1
 	#define DSW 1
 	#define PEW 1
@@ -3539,8 +3517,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DL_W 0.000 //SM Perspective
 	#define DM_X 6     //HQ Tune
 	#define DM_Z 6     //HQ Smooth
-	#define DM_W 0.25   //HQ Trim
-	//#define DL_Z 0     //HQ Text
 	#define HQT 1
 	#define PEW 1
 #elif (App == 0xED560119 ) //DarkSiders Genisis
@@ -3562,7 +3538,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DL_W 0.025 //SM Perspective
 	#define DM_X 5     //HQ Tune
 	#define DM_Z 1     //HQ Smooth
-	//#define DM_W 0.800 //HQ Trim
 	#define NDW 1
 #elif (App == 0x921BC951 ) //SpongeBob SquarePants: Battle for Bikini Bottom - Rehydrated
 	#define DA_W 1
@@ -3658,7 +3633,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DL_W 0.000 //SM Perspective
 	#define DM_X 1     //HQ Tune
 	#define DM_Z 1     //HQ Smooth
-	#define DM_W 0.000 //HQ Trim
 	#define HQT 1
 	#define NDW 1
 	#define PEW 1
@@ -3684,7 +3658,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DL_W 0.000 //SM Perspective
 	#define DM_X 6     //HQ Tune
 	#define DM_Z 1     //HQ Smooth
-	#define DM_W 0.55  //HQ Trim
 	#define SMP 1      //SM Pillerbox Smoothing
 	#define HQT 1
     #define HMT 1
@@ -3832,7 +3805,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DL_W 0.05  //SM Perspective
 	#define DM_X 12    //HQ Tune
 	#define DM_Z 5     //HQ Smooth
-	//#define DM_W 0.000 //HQ Trim
 	#define HQT 1
 	#define PEW 1
 #elif (App == 0x1A2B216E ) //Crysis Remastered
@@ -3935,7 +3907,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DL_W 0.050 //SM Perspective
 	#define DM_X 7     //HQ Tune
 	#define DM_Z 2     //HQ Smooth
-	#define DM_W 0.000 //HQ Trim
 	#define HQT 1
 	#define PEW 1
 #elif (App == 0x2ECE874 ) //Roblox Games
@@ -4024,8 +3995,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DL_W 0.000 //SM Perspective
 	#define DM_X 4     //HQ Tune
 	#define DM_Z 1     //HQ Smooth
-	//#define DM_W 0.175 //HQ Trim
-	//#define DL_Z 1     //HQ Text
 	#define HQT 1
 #elif (App == 0x51C8FDAA ) //Assassin's Valhalla
 	#define DA_W 1
@@ -4048,7 +4017,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DL_W 0.025 //SM Perspective
 	#define DM_X 9     //HQ Tune
 	#define DM_Z 5     //HQ Smooth
-	#define DM_W 0.000 //HQ Trim
     #define PEW 1 
 #elif (App == 0xB4403655 ) //Elden Ring
 	#define DA_W 1
@@ -4160,8 +4128,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DL_W 0.0   //SM Perspective
 	#define DM_X 4     //HQ Tune
 	#define DM_Z 1     //HQ Smooth
-	#define DM_W 0.0   //HQ Trim
-	#define DL_Z 0     //HQ Text
 	#define HQT 1
 #elif (App == 0x8FDE4FCF ) //Ni No Kuni II: Revenant Kingdom**
     #define DA_X 0.075
@@ -4195,7 +4161,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DL_W 0.025 //SM Perspective
 	#define DM_X 5     //HQ Tune
 	#define DM_Z 2     //HQ Smooth
-	#define DM_W 0.000 //HQ Trim
     #define FOV 1
     #define PEW 1
 #elif (App == 0x45C250C6 ) //Dying Light 2
@@ -4291,8 +4256,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DL_W 0.0   //SM Perspective
 	#define DM_X 4     //HQ Tune
 	#define DM_Z 1     //HQ Smooth
-	#define DM_W 0.0   //HQ Trim
-	#define DL_Z 0     //HQ Text
 	#define HQT 1
 	#define LBC 2  //Letter Box Correction Offsets With X & Y
 	#define DH_X 1.345
@@ -4318,11 +4281,10 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define BMT 1    
     #define DF_Z 0.100
     #define SMS 1      //SM Toggle Separation
-	#define DL_X 0.800 //SM Tune
+	#define DL_X 0.875 //SM Tune
 	//#define DL_W 0.050 //SM Perspective
 	#define DM_X 4    //HQ Tune
-	#define DM_Z 0     //HQ Smooth
-	#define DM_W 0.0 //HQ Trim
+	#define DM_Z 8     //HQ Smooth
 	#define HQT 1 	
 	#define PEW 1
 #elif (App == 0x98E46BDC ) //Forgive Me Father
@@ -4356,8 +4318,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define DL_W 0.000 //SM Perspective
     #define DM_X 0     //HQ Tune
     #define DM_Z 1     //HQ Smooth
-    //#define DM_W 0.175 //HQ Trim
-    //#define DL_Z 1     //HQ Text
     #define HQT 1
     #define MMD 1 //Set Multi Menu Detection              //Off / On
     #define DO_X float4( 0.24  , 0.0375,  0.5   , 0.74   ) //Pos A1 = XY Color & A2 = ZW Black 
@@ -4447,7 +4407,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DL_W 0.050 //SM Perspective
 	#define DM_X 4     //HQ Tune
 	#define DM_Z 3     //HQ Smooth
-	//#define DM_W 0.700 //HQ Trim	
 	#define HQT 1
 #elif ( App == 0x4F4E231E ) //Hob
 	#define DA_Y 20.0
@@ -4485,8 +4444,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DL_W 0.0   //SM Perspective
 	#define DM_X 4     //HQ Tune
 	#define DM_Z 7     //HQ Smooth
-	//#define DM_W 0.175 //HQ Trim
-	//#define DL_Z 1     //HQ Text
 	#define HQT 1
 #elif ( App == 0x42F66404 ) //Bayonetta
 	#define DA_Y 39.0
@@ -4505,7 +4462,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DL_W 0.050 //SM Perspective
 	#define DM_X 4     //HQ Tune
 	#define DM_Z 2     //HQ Smooth
-	#define DM_W 0.200 //HQ Trim
 #elif ( App == 0x8CF29E7A ) //Maneater
     #define DA_W 1
 	#define DA_Y 75.0
@@ -4539,7 +4495,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DL_W 0.050 //SM Perspective
 	#define DM_X 4     //HQ Tune
 	#define DM_Z 3     //HQ Smooth
-	#define DM_W 0.000 //HQ Trim
 	#define PEW 1
 #elif (App == 0xF4901178 ) //The Surge 2
     #define DA_W 1 
@@ -4558,7 +4513,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DL_W 0.100 //SM Perspective
 	#define DM_X 4     //HQ Tune
 	#define DM_Z 3     //HQ Smooth
-	#define DM_W 0.000 //HQ Trim
 	#define PEW 1
 #elif (App == 0xBAC3D546 ) //Wolfenstine New Colossus II 
     #define DA_X 0.0404
@@ -4737,7 +4691,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DL_W 0.050 //SM Perspective
 	#define DM_X 12    //HQ Tune
 	#define DM_Z 2     //HQ Smooth
-	#define DM_W 0.000 //HQ Trim
 	#define PEW 1
 	#define DAA 1
 #elif (App == 0x50027232 ) //Yakuza0
@@ -4756,7 +4709,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DL_W 0.025 //SM Perspective
 	#define DM_X 6     //HQ Tune
 	#define DM_Z 5     //HQ Smooth
-	//#define DM_W 0.000 //HQ Trim
 	#define PEW 1
 	#define NDW 1
 #elif (App == 0xBB2E4EFB ) //MassEffect
@@ -4777,7 +4729,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	//#define DL_W 0.025 //SM Perspective
 	#define DM_X 6     //HQ Tune
 	#define DM_Z 4     //HQ Smooth
-	#define DM_W 0.000 //HQ Trim
 	#define PEW 1
     #define DSW 1
     #define FOV 1
@@ -4799,7 +4750,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	//#define DL_W 0.025 //SM Perspective
 	#define DM_X 7     //HQ Tune
 	#define DM_Z 4     //HQ Smooth
-	#define DM_W 0.000 //HQ Trim
 	#define PEW 1
     #define DSW 1
     #define FOV 1
@@ -4821,7 +4771,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	//#define DL_W 0.025 //SM Perspective
 	#define DM_X 4     //HQ Tune
 	#define DM_Z 4     //HQ Smooth
-	#define DM_W 0.000 //HQ Trim
 	#define PEW 1
     #define DSW 1
     #define FOV 1
@@ -4844,7 +4793,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	//#define DL_W 0.00 //SM Perspective
 	#define DM_X 1     //HQ Tune
 	#define DM_Z 6     //HQ Smooth
-	//#define DM_W 0.000 //HQ Trim
 	#define PEW 1
     #define FOV 1
     #define WSM 2
@@ -4876,7 +4824,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	//#define DL_W 0.00 //SM Perspective
 	#define DM_X 1     //HQ Tune
 	#define DM_Z 6     //HQ Smooth
-	//#define DM_W 0.000 //HQ Trim
 	#define PEW 1
     #define FOV 1
     #define WSM 2
@@ -4891,9 +4838,10 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define DJ_Z float3( 30., 23., 1000);                //Set Match Tresh 
 #elif (App == 0x2E105B97 ) //Chorus
 	#define DA_W 1
-	#define DA_X 0.050
+	#define DA_X 0.0125//0.025//0.050
 	#define DF_Y 0.020
-	#define DA_Y 17.5
+	#define DA_Y 60.00//30.0  //Changed because it's a space game and having 3D pop more in the distance is a good thing.
+	#define DB_Z 0.050
 	#define DB_Y 3
 	#define DE_X 1
 	#define DE_Y 0.500
@@ -4902,11 +4850,11 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define BMT 1
 	#define DF_Z 0.150
     #define SMS 1     //SM Toggle Separation
-	#define DL_X 0.525//SM Tune
+	#define DL_X 0.700//SM Tune
 	//#define DL_W 0.000 //SM Perspective
 	#define DM_X 2     //HQ Tune
 	#define DM_Z 5     //HQ Smooth
-	//#define DM_W 0.000 //HQ Trim
+	#define HQT 1      //HQ Mode
     #define MDD 1 //Set Menu Detection & Direction    //Off 0 | 1 | 2 | 3 | 4      
     #define DN_X float4( 0.500, 0.995,  0.052, 0.919) //Pos A = XY Black & B = ZW Other 
     #define DN_Y float4( 0.084, 0.9652,  0.0, 0.0)     //Pos C = XY Black & D = ZW Match
@@ -4926,16 +4874,17 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DE_Y 0.500
 	#define DE_Z 0.375
     #define DG_W -0.30 //Neg-Pop
-    #define DG_Z 0.150 //Min
-    #define DI_Z 0.200 //Trim
+    #define DG_Z 0.025 //Min
+    #define DI_Z 0.100 //Trim
 	#define BMT 1
 	#define DF_Z 0.130
     #define SMS 3      //SM Toggle Separation
-	#define DL_X 0.700 //SM Tune
-	#define DL_W 0.025 //SM Perspective
-	#define DM_X 8     //HQ Tune
-	#define DM_Z 5     //HQ Smooth
-	#define DM_W 1.000 //HQ Trim
+	#define DL_X 0.900 //SM Tune
+	//#define DL_W 0.025 //SM Perspective
+	#define DM_X 0     //HQ Tune
+	#define DM_Z 1     //HQ Smooth
+    #define DL_Y 0.500    //De-Artifact Works well here because of the Fur
+	#define HQT 1	
 	#define PEW 1	
 #elif (App == 0x49B4730A ) //Dead or Alive  Xtream Venus Vacation
 	#define DA_W 1
@@ -4971,8 +4920,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DL_W 0.000 //SM Perspective
 	#define DM_X 4     //HQ Tune
 	#define DM_Z 1     //HQ Smooth
-	//#define DM_W 0.000 //HQ Trim
-	#define DL_Z 2     //HQ Text
 	#define HQT 1
 	#define PEW 1	
 #elif (App == 0x8B814438 ) //The Ascent
@@ -4997,8 +4944,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DL_W 0.000 //SM Perspective
 	#define DM_X 6     //HQ Tune
 	#define DM_Z 4    //HQ Smooth
-	//#define DM_W 0.000 //HQ Trim
-	//#define DL_Z 0     //HQ Text
     #define LBC 1     //Letter Box Correction
     #define LBS 1     //Letter Box Sensitvity
     #define LBR 1     //Letter Box Reposition    
@@ -5033,8 +4978,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DL_W 0.050 //SM Perspective
 	#define DM_X 6     //HQ Tune
 	#define DM_Z 4    //HQ Smooth
-	#define DM_W 0.1625 //HQ Trim
-	//#define DL_Z 0     //HQ Text
 	#define HQT 1
     #define MDD 1 //Set Menu Detection & Direction    //Off 0 | 1 | 2 | 3 | 4      
     #define DN_X float4( 0.900, 0.066,  0.010, 0.810) //Pos A = XY White & B = ZW Dark 
@@ -5069,8 +5012,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DL_W 0.000 //SM Perspective
 	#define DM_X 1     //HQ Tune
 	#define DM_Z 4     //HQ Smooth
-	#define DM_W 0.0   //HQ Trim
-	//#define DL_Z 0     //HQ Text
 	#define HQT 1
 	#define PEW 1
 #elif (App == 0xBE672B63 ) //Grounded
@@ -5093,8 +5034,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DL_W 0.000 //SM Perspective
 	#define DM_X 4     //HQ Tune
 	#define DM_Z 1     //HQ Smooth
-	//#define DM_W 0.0   //HQ Trim
-	#define DL_Z 1     //HQ Text
 	#define HQT 1
     #define MMD 1 //Set Multi Menu Detection              //Off / On
     #define DO_X float4( 0.7935, 0.05  ,  0.7158, 0.070  ) //Pos A1 = XY Color & A2 = ZW Black 
@@ -5105,22 +5044,24 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DA_W 1
 	#define DA_X 0.025
 	#define DF_Y 0.015
-	#define DA_Y 37.5
+	#define DA_Y 30.0
+    #define DA_Z -0.075
 	#define DE_X 1
-	#define DE_Y 0.500
+	#define DE_Y 0.4500
 	#define DE_Z 0.375
 	//#define DG_W 2.5 //Pop
+    #define REF 15 //Fix can go from 1 - 15 and 15 is low 1 is High
+	#define DI_W 2.0 //Adjustment for REF
     //#define DG_Z 0.0875 //Min
     //#define DI_Z 0.100 //Trim
 	#define BMT 1
 	#define DF_Z 0.125
     #define SMS 3      //SM Toggle Separation
-	#define DL_X 0.550 //SM Tune
+	#define DL_X 0.650 //SM Tune
 	#define DL_W 0.000 //SM Perspective
 	#define DM_X 4     //HQ Tune
-	#define DM_Z 4     //HQ Smooth
-	#define DM_W 0.5   //HQ Trim
-	//#define DL_Z 1     //HQ Text
+	#define DM_Z 1     //HQ Smooth
+    //#define DL_Y 0.125 //De-Artifact
 	#define HQT 1
     #define MMD 1 //Set Multi Menu Detection              //Off / On
     #define DO_X float4( 0.157 , 0.088 ,  0.90555, 0.9295  ) //Pos A1 = XY Color & A2 = ZW Black 
@@ -5151,8 +5092,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DL_W 0.000 //SM Perspective
 	#define DM_X 3     //HQ Tune
 	#define DM_Z 3     //HQ Smooth
-	#define DM_W 0.0   //HQ Trim
-	#define DL_Z 1     //HQ Text
 	#define HQT 1
     #define MDD 1 //Set Menu Detection & Direction    //Off 0 | 1 | 2 | 3 | 4      
     #define DN_X float4( 0.307 , 0.167,  0.304, 0.835 ) //Pos A = XY White & B = ZW Dark 
@@ -5184,8 +5123,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DL_W 0.1 //SM Perspective
 	#define DM_X 4     //HQ Tune
 	#define DM_Z 5     //HQ Smooth
-	#define DM_W 0.175 //HQ Trim
-	#define DL_Z 1     //HQ Text
 	#define HQT 1
     #define MMD 2 //Set Multi Menu Detection              //Off / On
     #define DO_X float4( 0.190 , 0.031 ,  0.388  , 0.947   ) //Pos A1 = XY Color & A2 = ZW Black 
@@ -5219,8 +5156,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DL_W 0.05 //SM Perspective
 	#define DM_X 1     //HQ Tune
 	#define DM_Z 3     //HQ Smooth
-	//#define DM_W 0.175 //HQ Trim
-	//#define DL_Z 1     //HQ Text
 	#define HQT 1
     #define MDD 1 //Set Menu Detection & Direction    //Off 0 | 1 | 2 | 3 | 4      
     #define DN_X float4( 0.200, 0.095,  0.500, 0.1375) //Pos A = XY White & B = ZW Dark 
@@ -5258,8 +5193,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DL_W 0.00  //SM Perspective
 	#define DM_X 6     //HQ Tune
 	#define DM_Z 4     //HQ Smooth
-	//#define DM_W 0.175 //HQ Trim
-	//#define DL_Z 1     //HQ Text
 	#define HQT 1
 	//#define DM_Y 1     //HQ VRS Off|Auto|High|Med|Low|Lower
 #elif (App == 0xF44ABA48 ) //Blacksad
@@ -5283,8 +5216,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DL_W 0.00 //SM Perspective
 	#define DM_X 5     //HQ Tune
 	#define DM_Z 5     //HQ Smooth
-	//#define DM_W 0.175 //HQ Trim
-	//#define DL_Z 1     //HQ Text
 	#define HQT 1
 	/*
     #define MDD 1 //Set Menu Detection & Direction    //Off 0 | 1 | 2 | 3 | 4      
@@ -5327,8 +5258,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DL_W 0.00 //SM Perspective
 	#define DM_X 0     //HQ Tune
 	#define DM_Z 4     //HQ Smooth
-	//#define DM_W 0.175 //HQ Trim
-	//#define DL_Z 1     //HQ Text
 	#define HQT 1
     #define MDD 1 //Set Menu Detection & Direction     //Off 0 | 1 | 2 | 3 | 4      
     #define DN_X float4( 0.193, 0.041,  0.580, 0.042 ) //Pos A = XY White & B = ZW Dark 
@@ -5357,8 +5286,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DL_W 0.00  //SM Perspective
 	#define DM_X 4     //HQ Tune
 	#define DM_Z 5     //HQ Smooth
-	//#define DM_W 0.175 //HQ Trim
-	//#define DL_Z 1     //HQ Text
 	#define HQT 1
 #elif (App == 0x1FEFF4DD ) //Someday Youll Return
 	#define DA_W 1
@@ -5379,8 +5306,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DL_W 0.00  //SM Perspective
 	#define DM_X 0     //HQ Tune
 	#define DM_Z 2     //HQ Smooth
-	//#define DM_W 0.175 //HQ Trim
-	//#define DL_Z 1     //HQ Text
 	#define HQT 1
     #define MMD 3 //Set Multi Menu Detection             //Off / On
     #define DO_X float4( 0.664 , 0.110 ,  0.5  , 0.2215) //Pos A1 = XY Color & A2 = ZW Black 
@@ -5420,8 +5345,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DL_W 0.0   //SM Perspective
 	#define DM_X 8     //HQ Tune
 	#define DM_Z 3     //HQ Smooth
-	//#define DM_W 0.175 //HQ Trim
-	//#define DL_Z 1     //HQ Text
 	#define HQT 1
 	#define RHW 1
 	#define NDW 1
@@ -5452,7 +5375,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DL_W 0.000 //SM Perspective
 	#define DM_X 5     //HQ Tune
 	#define DM_Z 1     //HQ Smooth
-	//#define DM_W 0.000 //HQ Trim
 	#define SMP 1      //SM Pillerbox Smoothing
 	#define HQT 1
 	#define NDW 1
@@ -5480,8 +5402,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DL_W 0.0   //SM Perspective
 	#define DM_X 7     //HQ Tune
 	#define DM_Z 2     //HQ Smooth
-	//#define DM_W 0.175 //HQ Trim
-	//#define DL_Z 1     //HQ Text
 	#define HQT 1
     #define MMD 1 //Set Multi Menu Detection             //Off / On
     #define DO_X float4( 0.133 , 0.290 , 0.800 , 0.290  ) //Pos A1 = XY Color & A2 = ZW Black 
@@ -5518,8 +5438,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DL_W 0.0   //SM Perspective
 	#define DM_X 0     //HQ Tune
 	#define DM_Z 0     //HQ Smooth
-	#define DM_W 0.25 //HQ Trim
-	#define DL_Z 2     //HQ Text
 	#define HQT 1
 	#define DB_Y 4
 	#define DB_W 44
@@ -5555,8 +5473,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DL_W 0.0   //SM Perspective
 	#define DM_X 4     //HQ Tune
 	#define DM_Z 1     //HQ Smooth
-	#define DM_W 0.0   //HQ Trim
-	#define DL_Z 0     //HQ Text
 	#define HQT 1
 	#define PEW 1
 #elif (App == 0xDC9A4971 ) //Furi
@@ -5582,8 +5498,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DL_W 0.0   //SM Perspective
 	#define DM_X 4     //HQ Tune
 	#define DM_Z 1     //HQ Smooth
-	#define DM_W 0.0   //HQ Trim
-	#define DL_Z 0     //HQ Text
 	#define HQT 1	
 	#define PEW 1
 #elif (App == 0x9113C0D ) //Necromunda Hired Gun
@@ -5609,8 +5523,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DL_W 0.025 //SM Perspective
 	#define DM_X 4     //HQ Tune
 	#define DM_Z 1     //HQ Smooth
-	#define DM_W 0.0   //HQ Trim
-	#define DL_Z 0     //HQ Text
 	#define HQT 1
 	#define FPS  0
 	#define DK_X 2
@@ -5641,8 +5553,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DL_W 0.000 //SM Perspective
 	#define DM_X 0     //HQ Tune
 	#define DM_Z 0     //HQ Smooth
-	#define DM_W 0.0   //HQ Trim
-	#define DL_Z 0     //HQ Text
 	#define HQT 1
 	#define FPS  0
 	#define DK_X 2
@@ -5674,8 +5584,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DL_W 0.100 //SM Perspective
 	#define DM_X 0     //HQ Tune
 	#define DM_Z 0     //HQ Smooth
-	#define DM_W 0.0   //HQ Trim
-	#define DL_Z 0     //HQ Text
 	#define HQT 1
     #define MMD 1 //Set Multi Menu Detection             //Off / On
     #define DO_X float4( 0.0805, 0.051 , 0.900 , 0.051  ) //Pos A1 = XY Color & A2 = ZW Black 
@@ -5708,8 +5616,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DL_W 0.000 //SM Perspective
 	#define DM_X 1     //HQ Tune
 	#define DM_Z 1     //HQ Smooth
-	#define DM_W 0.0   //HQ Trim
-	#define DL_Z 0     //HQ Text
 	#define HQT 1
 	#define PEW 1
 	#define DAA 1
@@ -5738,8 +5644,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DL_W 0.000 //SM Perspective
 	#define DM_X 4     //HQ Tune
 	#define DM_Z 0     //HQ Smooth
-	#define DM_W 0.0   //HQ Trim
-	#define DL_Z 0     //HQ Text
 	#define HQT 1
 	#define PEW 1
     #define DSW 1
@@ -5767,8 +5671,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DL_W 0.000 //SM Perspective
 	#define DM_X 4     //HQ Tune
 	#define DM_Z 0     //HQ Smooth
-	#define DM_W 0.0   //HQ Trim
-	#define DL_Z 0     //HQ Text
     //#define DM_Y 3     //HQ VRS
     #define DL_Y 0.8     //De-Artifact
 	#define HQT 1
@@ -5810,8 +5712,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DL_W 0.000 //SM Perspective
 	#define DM_X 4     //HQ Tune
 	#define DM_Z 1     //HQ Smooth
-	#define DM_W 0.0   //HQ Trim
-	#define DL_Z 0     //HQ Text
     //#define DM_Y 3     //HQ VRS
     //#define DL_Y 1     //De-Artifact
 	#define HQT 1
@@ -5849,8 +5749,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DL_W 0.000 //SM Perspective
 	#define DM_X 4     //HQ Tune
 	#define DM_Z 1     //HQ Smooth
-	#define DM_W 0.0   //HQ Trim
-	#define DL_Z 0     //HQ Text
     //#define DM_Y 3     //HQ VRS
     //#define DL_Y 1     //De-Artifact
 	#define HQT 1
@@ -5901,8 +5799,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DL_W 0.025 //SM Perspective
 	#define DM_X 1     //HQ Tune
 	#define DM_Z 1     //HQ Smooth
-	#define DM_W 0.0   //HQ Trim
-	#define DL_Z 0     //HQ Text
     //#define DM_Y 3     //HQ VRS
     //#define DL_Y 1     //De-Artifact
 	#define HQT 1
@@ -5937,8 +5833,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DL_W 0.05 //SM Perspective
 	#define DM_X 0     //HQ Tune
 	#define DM_Z 1     //HQ Smooth
-	#define DM_W 0.0   //HQ Trim
-	#define DL_Z 0     //HQ Text
     //#define DM_Y 3     //HQ VRS
     //#define DL_Y 1     //De-Artifact 0.1245
 	#define HQT 1
@@ -5971,13 +5865,11 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DK_Y 0
 	#define DK_Z 4
 	#define DK_W 2
-    #define SMS 0      //SM Toggle Separation
+    #define SMS 1      //SM Toggle Separation
 	#define DL_X 0.90  //SM Tune
 	#define DL_W 0.05  //SM Perspective
 	#define DM_X 4     //HQ Tune
-	#define DM_Z 1     //HQ Smooth
-	#define DM_W 0.0   //HQ Trim
-	#define DL_Z 0     //HQ Text
+	#define DM_Z 4     //HQ Smooth
     //#define DM_Y 3     //HQ VRS
     //#define DL_Y 1     //De-Artifact 0.1245
 	#define HQT 1
@@ -6016,8 +5908,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DL_W 0.00  //SM Perspective
 	#define DM_X 4     //HQ Tune
 	#define DM_Z 1     //HQ Smooth
-	#define DM_W 0.0   //HQ Trim
-	#define DL_Z 0     //HQ Text
     //#define DM_Y 3     //HQ VRS
     //#define DL_Y 1     //De-Artifact 0.1245
 	#define HQT 1
@@ -6070,8 +5960,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DL_W 0.00  //SM Perspective
 	#define DM_X 4     //HQ Tune
 	#define DM_Z 1     //HQ Smooth
-	#define DM_W 0.0   //HQ Trim
-	#define DL_Z 0     //HQ Text
     //#define DM_Y 3     //HQ VRS
     //#define DL_Y 1     //De-Artifact 0.1245
 	#define HQT 1
@@ -6115,11 +6003,38 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DL_W 0.050  //SM Perspective
 	#define DM_X 0     //HQ Tune
 	#define DM_Z 0     //HQ Smooth
-	#define DM_W 0.0   //HQ Trim
     //#define DM_Y 3     //HQ VRS
     //#define DL_Y 1     //De-Artifact 0.1245
 	#define HQT 1
     #define AFD 0
+    #define PEW 1
+#elif (App == 0x8B76620B ) //Saints Row: Gat out of Hell
+	//#define DA_W 0
+    //#define DB_X 0
+	#define DA_X 0.025
+	#define DF_Y 0.025
+	#define DA_Y 52.5
+    //#define DA_Z -0.025
+	#define DB_Z 0.1
+	//#define DB_Y 1
+	#define DE_X 1
+	#define DE_Y 0.500
+	#define DE_Z 0.375
+	//#define DG_W -0.250 //Pop
+    #define REF 15 //Fix can go from 1 - 15 and 15 is low 1 is High
+	#define DI_W 1.5 //Adjustment for REF
+    #define DG_Z 0.025 //Min
+    #define DI_Z 0.050 //Trim
+	#define BMT 1
+	#define DF_Z 0.125
+    #define SMS 3      //SM Toggle Separation
+	#define DL_X 0.875 //SM Tune
+	//#define DL_W 0.050  //SM Perspective
+	#define DM_X 3     //HQ Tune
+	#define DM_Z 4     //HQ Smooth
+    //#define DM_Y 3     //HQ VRS
+    #define DL_Y 0.375    //De-Artifact 0.1245
+	#define HQT 1
     #define PEW 1
 #else
 	#define NPW 1 //No Profile
