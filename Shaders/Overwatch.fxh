@@ -114,7 +114,7 @@ static const float SM_Perspective_D  = 0.05;            //SM Perspective        
 
 //SM HQ Values
 static const int SM_PillarBox_Detection_D = 0;          // 0 | 1 | 2                                    | SMP
-static const int HQ_Mode_Toggle_D = 0;                  // 0 | 1 |                                      | HQT
+static const int HQ_Mode_Toggle_D = 1;                  // 0 | 1 |                                      | HQT
 static const int HQ_Tune_D = 4;                         //HQ Tune                                       | DM_X
 static const int HQ_VRS_D = 1;                          //HQ Variable Rate Shading Off|Auto|High|Med|Low| DM_Y
 static const int HQ_Smooth_D = 1;                       //HQ Smooth 0 - 6                               | DM_Z
@@ -152,6 +152,7 @@ static const float4 Simple_Menu_Tresh_GH_D = 1000;      //Simple Manu Tresh For 
 //Special Toggles
 static const int Resident_Evil_Fix_D = 0;               //Resident Evil Fix                             | REF
 static const float REF_Check_Depth_Limit_D = 0.0;       //Resident Evil Fix Check Depth Limit           | DI_W
+static const float Filter_Mode_Modifire01_D = 0.0;      //Filter Mode Modifier                          | FMM
 
 static const int HUD_Mode_Trigger_D = 0;                //HUD Mode Trigger                              | HMT
 static const float HUDX_D = 0.0;                        //Heads Up Display Cut Off Point                | DF_W
@@ -2933,7 +2934,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 #elif (App == 0x1BB6E62A ) //AMID EVIL RTX
 	#define DA_W 1
 	#define DA_X 0.05
-    #define DF_Y 0.0125
+    #define DF_Y 0.015
 	#define DA_Y 15.0
 	//#define DA_Z 0.000125
 	#define DB_Y 5
@@ -2941,13 +2942,14 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DE_Y 0.5
 	#define DE_Z 0.45
 	#define BMT 1    
-	#define DF_Z 0.100
-	#define SMS 0      //SM Toggle Separation
+	#define DF_Z 0.070
+	#define SMS 2      //SM Toggle Separation
 	#define DL_X 0.825 //SM Tune
 	#define DL_W 0.050 //SM Perspective
 	#define DM_X 8     //HQ Tune
 	#define DM_Z 1     //HQ Smooth
 	#define HQT 1
+	#define FMM 1
 	#define PEW 1
 	#define DAA 1
 	#define DB_W 27
@@ -3805,6 +3807,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DL_W 0.05  //SM Perspective
 	#define DM_X 12    //HQ Tune
 	#define DM_Z 5     //HQ Smooth
+	#define DJ_X 0.85  //Range Smoothing
 	#define HQT 1
 	#define PEW 1
 #elif (App == 0x1A2B216E ) //Crysis Remastered
@@ -5855,7 +5858,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define DG_Z 0.025 //Min
     #define DI_Z 0.150 //Trim
 	#define BMT 1
-	#define DF_Z 0.120
+	#define DF_Z 0.100
 	#define WSM 2
 	#define DB_W 10
 	#define DF_X 0.3	
@@ -5873,7 +5876,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DM_Y 3     //HQ VRS
     //#define DL_Y 1     //De-Artifact 0.1245
 	#define HQT 1
-	#define DJ_X 1     //Range Smoothing
+	#define DJ_X 0.875     //Range Smoothing
 	#define PEW 1
 #elif (App == 0x3C4B9E1A ) //Hot Wheels Unleashed
 	#define DA_W 1
@@ -6008,7 +6011,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define HQT 1
     #define AFD 0
     #define PEW 1
-#elif (App == 0x8B76620B ) //Saints Row: Gat out of Hell
+#elif (App == 0x8B76620B || App == 0xBA505034 ) //Saints Row: Gat out of Hell | Saints Row The Third 
 	//#define DA_W 0
     //#define DB_X 0
 	#define DA_X 0.025
@@ -6030,8 +6033,8 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define SMS 3      //SM Toggle Separation
 	#define DL_X 0.875 //SM Tune
 	//#define DL_W 0.050  //SM Perspective
-	#define DM_X 3     //HQ Tune
-	#define DM_Z 4     //HQ Smooth
+	#define DM_X 4     //HQ Tune
+	#define DM_Z 3     //HQ Smooth
     //#define DM_Y 3     //HQ VRS
     #define DL_Y 0.375    //De-Artifact 0.1245
 	#define HQT 1
@@ -6354,6 +6357,9 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 #endif 
 #ifndef SPO
     #define SPO Set_PopOut_D                   //Set Popout & Weapon Min
+#endif 
+#ifndef FMM
+    #define FMM Filter_Mode_Modifire_D         //Filter Mode Modifier n
 #endif 
 
 //SuperDepth3D Warning System
