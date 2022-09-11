@@ -5655,8 +5655,8 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DA_W 1
     //#define DB_X 1
 	#define DA_X 0.050
-	#define DF_Y 0.025
-	#define DA_Y 10.00
+	#define DF_Y 0.026
+	#define DA_Y 15.00
     #define DA_Z -0.10
 	//#define DB_Z 0.050
 	//#define DB_Y 1
@@ -5671,10 +5671,10 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define BMT 1
 	#define DF_Z 0.15
     #define SMS 2      //SM Toggle Separation
-	#define DL_X 0.875 //SM Tune
+	#define DL_X 0.900 //SM Tune
 	#define DL_W 0.000 //SM Perspective
 	#define DM_X 4     //HQ Tune
-	#define DM_Z 0     //HQ Smooth
+	#define DM_Z 1     //HQ Smooth
     //#define DM_Y 3     //HQ VRS
     #define DL_Y 0.8     //De-Artifact
 	#define HQT 1
