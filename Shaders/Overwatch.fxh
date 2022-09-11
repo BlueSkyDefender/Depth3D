@@ -1,7 +1,7 @@
 ////----------------------------------------//
 ///SuperDepth3D Overwatch Automation Shader///
 //----------------------------------------////
-// Version 2.8.0
+// Version 2.8.1
 //---------------------------------------OVERWATCH---------------------------------------//
 // If you are reading this stop. Go away and never look back. From this point on if you  //
 // still think it's is worth looking at this..... Then no one can save you or your soul. //
@@ -6040,6 +6040,45 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define DL_Y 0.375    //De-Artifact 0.1245
 	#define HQT 1
     #define PEW 1
+#elif (App == 0xD7199355 ) //Scathe
+	//#define DA_W 0
+    //#define DB_X 0
+	#define DA_X 0.025
+	#define DF_Y 0.015
+	#define DA_Y 200.0
+    #define DA_Z -0.025
+	#define DB_Z 0.035
+	//#define DB_Y 1
+	#define DE_X 4
+	#define DE_Y 0.500
+	#define DE_Z 0.400
+	//#define DG_W -0.250 //Pop
+    #define REF 15 //Fix can go from 1 - 15 and 15 is low 1 is High
+	#define DI_W 2.0 //Adjustment for REF
+    //#define DG_Z 0.025 //Min
+    //#define DI_Z 0.050 //Trim
+	#define BMT 1
+	#define DF_Z 0.025
+    //#define SMS 3      //SM Toggle Separation
+	//#define DL_X 0.875 //SM Tune
+	//#define DL_W 0.050  //SM Perspective
+	//#define DM_X 4     //HQ Tune
+	//#define DM_Z 3     //HQ Smooth
+    //#define DM_Y 3     //HQ VRS
+    //#define DL_Y 0.375    //De-Artifact 0.1245
+    #define MMD 2 //Set Multi Menu Detection             //Off / On
+    #define DO_X float4( 0.100 , 0.150 , 0.055 , 0.375  ) //Pos A1 = XY Color & A2 = ZW Black 
+    #define DO_Y float4( 0.745 , 0.681 , 0.143 , 0.367  ) //Pos A3 = XY Color & B1 = ZW Color
+    #define DO_Z float4( 0.975 , 0.975 , 0.1375, 0.807  ) //Pos B2 = XY Black & B3 = ZW Color
+	#define DO_W float4( 30.0  , 30.0  , 30.0, 30.0 )   //Tresh Hold for Color A & B and Color
+	#define DP_X float4( 0.075 , 0.150 ,  0.235  , 0.840) //Pos C1 = XY Color & C2 = ZW Black 
+    #define DP_Y float4( 0.350 , 0.241 ,  0.736  , 0.575) //Pos C3 = XY Color & D1 = ZW Color
+    #define DP_Z float4( 0.060 , 0.380 ,  0.286  , 0.195) //Pos D2 = XY Black & D3 = ZW Color
+	#define DP_W float4( 30.0  , 30.0  ,  30.0   , 14.0) //Tresh Hold for Color A1 & A3 and Color
+	#define WSM 2
+	#define DB_W 29
+	#define HQT 1
+    #define PEW 1
 #else
 	#define NPW 1 //No Profile
 #endif
@@ -6584,7 +6623,7 @@ float4 Weapon_Profiles(float WP ,float4 Weapon_Adjust) //Could reduce from 76 to
     if (WP == 28)
         Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 26 | Game
     if (WP == 29)
-        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 27 | Game
+        Weapon_Adjust = float4(1.7,12.25,0.0,0.0);        //WP 27 | Scathe
     if (WP == 30)
         Weapon_Adjust = float4(1.025,7.75,0.0,0.0);       //WP 28 | Nightmare Reaper
     if (WP == 31)
