@@ -912,22 +912,34 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DAA 1
 #elif (App == 0x60F440F8 ) //Resident Evil Village
 	#define DA_W 1
-	#define DA_Y 50.0 //36.0  //19.0
+	#define DA_Y 80.0//65.0//50.0
 	//#define DA_Z 0.0004 //-0.65
-	#define DA_X 0.070 //0.071 //0.075
-    #define DF_Y 0.100
+	#define DA_X 0.050//0.075
+    #define DF_Y 0.075
 	#define DB_Y 1
 	#define DE_X 3
 	#define DE_Y 0.375
-	#define DE_Z 0.400
+	#define DE_Z 0.375
 	#define BMT 1    
-	#define DF_Z 0.275 //0.300 //0.250 //0.500
-	#define DG_W 0.725 //Only Detect stuff past the screen.
-    #define DG_Z 0.040//Min
-    #define DI_Z 0.1375 //Trim
-	#define SMS 3      //SM Toggle Separation
-	#define DL_X 0.600 //SM Tune
-	#define DL_W 0.050 //SM Perspective	
+	#define DF_Z 0.125
+	#define DG_W 0.425 //0.725 //Only Detect stuff past the screen.
+    #define DG_Z 0.040 //Min
+    #define DI_Z 0.125 //0.1375 //Trim
+    #define SMS 3      //SM Toggle Separation
+	#define DL_X 0.85 //SM Tune
+	//#define DL_W 0.050  //SM Perspective
+	#define DM_X 4     //HQ Tune
+	#define DM_Z 2     //HQ Smooth
+    //#define DM_Y 3     //HQ VRS
+    //#define DL_Y 0.375    //De-Artifact 0.1245	
+	#define DJ_X 0.75     //Range Smoothing
+    #define MDD 1 //Set Menu Detection & Direction     //Off 0 | 1 | 2 | 3 | 4      
+    #define DN_X float4( 0.404, 0.346,  0.000, 0.575)  //Pos A = XY White & B = ZW White 
+    #define DN_Y float4( 0.5491, 0.4225,  0.0, 0.0)       //Pos C = XY Light & D = ZW Match
+    #define DN_Z float4( 0.0, 0.0,  0.0, 0.0)            //Pos E = XY Match & F = ZW Match
+	#define DN_W float4( 1.0, 0.0 , 0.0, 0.0 )          //Size = Menu [ABC] D E F
+    #define DJ_Y float4( 27.0, 1.0, 22.0,1000.0);            //Menu Detection Type for A, B, & C. The Last Value is ???   
+    #define DJ_Z float3( 1000., 1000., 1000);                //Set Match Tresh 
 	#define RHW 1
 	#define PEW 1
 	#define DAA 1
@@ -4007,25 +4019,28 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define HQT 1
 #elif (App == 0x51C8FDAA ) //Assassin's Valhalla
 	#define DA_W 1
-	#define DA_Y 50.0
-    #define DA_Z -0.03
+	#define DA_Y 45.0
+    #define DA_Z -0.045
 	#define DA_X 0.045
 	#define DB_Y 1
 	#define DE_X 1
-	#define DE_Y 0.375
+	#define DE_Y 0.500
 	#define DE_Z 0.375
 	#define DB_Z 0.1
-	#define DF_Y 0.020 
+	#define DF_Y 0.015
+    #define REF 15 //Fix can go from 1 - 15 and 15 is low 1 is High
+	#define DI_W 2.0 //Adjustment for REF 
     //#define DG_W -0.100 //Disallow popout  
 	#define BMT 1    
-	#define DF_Z 0.12
-	#define DG_Z 0.07  
+	#define DF_Z 0.05
+	#define DG_Z 0.04  
 	#define DI_Z 0.125
-	#define SMS 2      //SM Toggle Separation
-	#define DL_X 0.500 //SM Tune
-	#define DL_W 0.025 //SM Perspective
-	#define DM_X 9     //HQ Tune
+	#define SMS 3      //SM Toggle Separation
+	#define DL_X 0.725 //SM Tune
+	//#define DL_W 0.025 //SM Perspective
+	#define DM_X 4     //HQ Tune
 	#define DM_Z 5     //HQ Smooth
+	#define DJ_X 0.5   //Range Smoothing
     #define PEW 1 
 #elif (App == 0xB4403655 ) //Elden Ring
 	#define DA_W 1
@@ -4493,17 +4508,24 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define DF_Y 0.05
     #define DA_Y 20.0
     #define DE_X 1
-    #define DE_Y 0.500
+    #define DE_Y 0.450
     #define DE_Z 0.375
     #define BMT 1    
-    #define DF_Z 0.125
-	#define DG_Z 0.0625//Min
-    #define DI_Z 0.0625 //Trim
+    #define DF_Z 0.1
+	#define DG_Z 0.03//Min
+    #define DI_Z 0.06 //Trim
 	#define SMS 1      //SM Toggle Separation
-	#define DL_X 0.625 //SM Tune
-	#define DL_W 0.050 //SM Perspective
+	#define DL_X 0.650 //SM Tune
+	//#define DL_W 0.050 //SM Perspective
 	#define DM_X 4     //HQ Tune
 	#define DM_Z 3     //HQ Smooth
+    #define MDD 1 //Set Menu Detection & Direction     //Off 0 | 1 | 2 | 3 | 4      
+    #define DN_X float4( 0.150, 0.240,  0.250, 0.925)  //Pos A = XY White & B = ZW Black 
+    #define DN_Y float4( 0.296, 0.865,  0.0, 0.0)      //Pos C = XY White & D = ZW Match
+    #define DN_Z float4( 0.0, 0.0,  0.0, 0.0)          //Pos E = XY Match & F = ZW Match
+	#define DN_W float4( 0.297, 0.0 , 0.0, 0.0 )         //Size = Menu [ABC] D E F
+    #define DJ_Y float4( 30.0, 2.0, 29.0, 1000.0);            //Menu Detection Type for A, B, & C. The Last Value is ???   
+    #define DJ_Z float3( 1000., 1000., 1000);                //Set Match Tresh 
 	#define PEW 1
 #elif (App == 0xF4901178 ) //The Surge 2
     #define DA_W 1 
@@ -4524,21 +4546,28 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DM_Z 3     //HQ Smooth
 	#define PEW 1
 #elif (App == 0xBAC3D546 ) //Wolfenstine New Colossus II 
-    #define DA_X 0.0404
-    #define DF_Y 0.1125
-    #define DA_Y 15.0
+    #define DA_X 0.040
+    #define DF_Y 0.116
+    #define DA_Y 15.5
     //#define DA_Z -0.0005
     #define DE_X 2
     #define DE_Y 0.500
     #define DE_Z 0.375
 	#define DG_W 0.325 //Pop out
     #define BMT 1    
-    #define DF_Z 0.100
+    #define DF_Z 0.116
 	#define DG_Z 0.070 //Min
     #define DI_Z 0.225 //Trim
 	#define SMS 2      //SM Toggle Separation
-	#define DL_X 0.625 //SM Tune
-	#define DL_W 0.05 //SM Perspective
+	#define DL_X 0.75 //SM Tune
+	#define DL_W 0.050 //SM Perspective
+	//#define DM_X 4     //HQ Tune
+	#define DM_Z 3     //HQ Smooth
+	#define FPS  0
+	#define DK_X 2
+	#define DK_Y 0
+	#define DK_Z 3
+	#define DK_W 1
 	#define PEW 1
 #elif (App == 0x132AB11B ) //Wolfenstine Youngblood 
     #define DA_X 0.040
@@ -4556,6 +4585,8 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define SMS 2      //SM Toggle Separation
 	#define DL_X 0.75 //SM Tune
 	#define DL_W 0.050 //SM Perspective
+	//#define DM_X 4     //HQ Tune
+	#define DM_Z 3     //HQ Smooth
     #define LBC 1      //Letter Box Correction
     #define LBS 1      //Letter Box Sensitivity
 	#define DH_Z 0.0   //Pos offset X    
@@ -6083,6 +6114,33 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define WSM 2
 	#define DB_W 29
 	#define HQT 1
+    #define PEW 1
+#elif (App == 0x6A327F2C ) //Snake Pass
+	#define DA_W 1
+    //#define DB_X 0
+	#define DA_X 0.025
+	#define DF_Y 0.010
+	#define DA_Y 250.0
+    #define DA_Z -0.0125
+	#define DB_Z 0.050
+	//#define DB_Y 1
+	#define DE_X 1
+	#define DE_Y 0.500
+	#define DE_Z 0.375
+	//#define DG_W -0.250 //Pop
+    #define REF 11 //Fix can go from 1 - 15 and 15 is low 1 is High
+	#define DI_W 2.0 //Adjustment for REF
+    #define DG_Z 0.035 //Min
+    #define DI_Z 0.050 //Trim
+	#define BMT 1
+	#define DF_Z 0.100
+    #define SMS 1      //SM Toggle Separation
+	#define DL_X 0.95 //SM Tune
+	//#define DL_W 0.050  //SM Perspective
+	#define DM_X 4     //HQ Tune
+	#define DM_Z 1     //HQ Smooth
+    //#define DM_Y 3     //HQ VRS
+    //#define DL_Y 0.375    //De-Artifact 0.1245
     #define PEW 1
 #else
 	#define NPW 1 //No Profile
