@@ -825,9 +825,9 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DA_Z 0.0005
 	#define DB_Y 3
 #elif (App == 0x8B0F15E7 || App == 0xCFE885A2 || App == 0xCADE8051 ) //Alan Wake | Alan Wake's American Nightmare | Alan Wake Remaster
-	#define DA_X 0.04375
+	#define DA_X 0.04
 	#define DF_Y 0.01	
-	#define DA_Y 25.0
+	#define DA_Y 27.5
    //#define DA_Z 0.00025 //-1.0
 	#define DB_Y 1
 	#define DE_X 1
@@ -837,6 +837,13 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DF_Z 0.125
     //#define DG_W 0.100 //Pop
     #define DG_Z 0.002 //Min
+    #define SMS 2      //SM Toggle Separation
+	#define DL_X 0.75 //SM Tune
+	//#define DL_W 0.050  //SM Perspective
+	#define DM_X 4     //HQ Tune
+	#define DM_Z 2     //HQ Smooth
+    //#define DM_Y 3     //HQ VRS
+    //#define DL_Y 0.375    //De-Artifact 0.1245
 	#define RHW 1
 	#define PEW 1
 	#define DAA 1
