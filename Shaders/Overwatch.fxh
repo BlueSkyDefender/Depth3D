@@ -3101,25 +3101,25 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DAA 1
 #elif (App == 0x11E6C55E ) //The Suicide of Rachel Foster
 	#define DA_W 1
-	//#define DA_X 0.030
-	#define DF_Y 0.04375
-	#define DA_Y 6.50
-	#define DA_Z -1.75
-	#define DB_Z 0.050
+	#define DA_X 0.0125
+	#define DF_Y 0.045
+	#define DA_Y 35.0//6.50
+	#define DA_Z -0.250//-1.75
+	#define DB_Z 0.025
 	//#define DB_Y 5
 	#define DE_X 2
 	#define DE_Y 0.750
 	#define DE_Z 0.425
-    #define DG_Z 0.050 //Min
-    #define DI_Z 0.050 //Trim
+    #define DG_Z 0.060 //Min
+    #define DI_Z 0.045 //Trim
 	//#define DG_W 0.125 //Allow much popout "Please don't abuse this."
     #define BMT 1    
     #define DF_Z 0.130 //This had to be adjusted
     //#define AFD 1
     #define SMS 2      //SM Toggle Separation
 	#define DL_X 0.925 //SM Tune
-	#define DL_W 0.100 //SM Perspective
-	#define DM_X 0     //HQ Tune
+	#define DL_W 0.050 //SM Perspective
+	#define DM_X 4     //HQ Tune
 	#define DM_Z 1     //HQ Smooth
 	#define HQT 1    
 	#define PEW 1
