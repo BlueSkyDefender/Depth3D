@@ -1,7 +1,7 @@
 ////----------------------------------------//
 ///SuperDepth3D Overwatch Automation Shader///
 //----------------------------------------////
-// Version 2.8.2
+// Version 2.8.3
 //---------------------------------------OVERWATCH---------------------------------------//
 // If you are reading this stop. Go away and never look back. From this point on if you  //
 // still think it's is worth looking at this..... Then no one can save you or your soul. //
@@ -149,9 +149,10 @@ static const float4 Pos_XY_XY_GH_D = 0;                 //Position G XY H XY    
 static const float4 Pos_XY_XY_HH_D = 0;                 //Position H XY H XY                            | DR_Z
 static const float4 Simple_Menu_Tresh_GH_D = 1000;      //Simple Manu Tresh For G & H                   | DR_Z
 
-//Special Toggles
-static const int Resident_Evil_Fix_D = 0;               //Resident Evil Fix                             | REF
-static const float REF_Check_Depth_Limit_D = 0.0;       //Resident Evil Fix Check Depth Limit           | DI_W
+//Special Toggles 
+static const int Resident_Evil_Fix_D = 0;               //Resident Evil Fix [Getting Phased Out]        | REF [Getting Phased Out]
+static const float Over_Intrusion_Fix_D = 0.0;          //Over Intrusion Fix                            | OIF
+static const float OIF_Check_Depth_Limit_D = 0.0;       //Over Intrusion Check Depth Limit              | DI_W
 static const float Filter_Mode_Modifire01_D = 0.0;      //Filter Mode Modifier                          | FMM
 
 static const int HUD_Mode_Trigger_D = 0;                //HUD Mode Trigger                              | HMT
@@ -642,7 +643,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DE_X 1 //REF only works now with this. Since this system works in tandom.
 	#define DE_Y 0.300
 	#define DE_Z 0.4375
-	#define REF 2 //Fix can go from 1 - 10 and 10 is low 1 is High
+	#define OIF 0.025 //Fix enables if Value is > 0.0
 	#define DI_W 3.75 //Adjustment for REF
     //#define DG_W 0.375//Pop
     #define HQT 1  
@@ -664,7 +665,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DB_Z 0.4
 	#define DA_Y 75.0
 	#define DA_Z 0.021
-	#define REF 1
+	#define OIF 0.0125 //Fix enables if Value is > 0.0
 #elif (App == 0xAAA18268 ) //Hellblade **
     #define DA_W 1
     #define DA_Y 20
@@ -741,7 +742,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DA_Z 0.001
 	#define DB_Y 2
 	#define DB_Z 0.025
-	#define REF 1
+	#define OIF 0.0125 //Fix enables if Value is > 0.0
 #elif (App == 0x5F2CA572 ) //Lego Batman 3
 	#define DA_X 0.03
 	#define DA_Z 0.001
@@ -779,14 +780,14 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DA_Y 75.0
 	#define DA_X 0.250
 	#define DB_Y 1
-	#define REF 1
+	#define OIF 0.0125 //Fix enables if Value is > 0.0
 	#define RHW 1
 #elif (App == 0x1335BAB8 ) //BattleField 1
 	#define DA_W 1
 	#define DA_Y 8.125
 	#define DA_X 0.04
 	#define DB_Y 5
-	#define REF 2
+	#define OIF 0.025 //Fix enables if Value is > 0.0
 #elif (App == 0xA0762A98 ) //Assassin's Creed Unity
 	#define DA_W 1
 	#define DA_Y 25.0
@@ -1481,7 +1482,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DE_Z 0.375
 	#define DB_Z 0.200 //Yay I know
     //#define DG_W -0.85 //Pop out
-	#define REF 9      //Fix can go from 1 - 15 and 15 is low 1 is High
+	#define OIF 0.09375     //Fix enables if Value is > 0.0
 	#define DI_W 3     //Adjustment for REF
 	#define DG_Z 0.060 //Min
 	#define DI_Z 0.060 //Trim
@@ -2004,7 +2005,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DG_W 0.25 //Pop out
     #define BMT 1    
     #define DF_Z 0.1125
-	#define REF 15      //Fix can go from 1 - 15 and 15 is low 1 is High
+	#define OIF 0.225      //Fix enables if Value is > 0.0
 	#define DI_W 2.5   //Adjustment for REF
 	#define DG_Z 0.025 //Min
     #define DI_Z 0.050 //Trim
@@ -2026,7 +2027,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DG_W 0.25 //Pop out
     #define BMT 1    
     #define DF_Z 0.1125
-	#define REF 15      //Fix can go from 1 - 15 and 15 is low 1 is High
+	#define OIF 0.225      //Fix enables if Value is > 0.0
 	#define DI_W 2.5   //Adjustment for REF
 	#define DG_Z 0.100 //Min
     #define DI_Z 0.1625//Trim
@@ -2323,7 +2324,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DM_X 6     //HQ Tune
 	#define DM_Z 8     //HQ Smooth
     #define DL_Y 0.375 //De-Artifact
-	#define REF 3      //Fix can go from 1 - 15 and 15 is low 1 is High
+	#define OIF 0.0375 //Fix enables if Value is > 0.0
 	#define DI_W 2.5   //Adjustment for REF
 	#define HQT 1
 	#define NFM 1
@@ -2482,7 +2483,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DE_Y 0.500
 	#define DE_Z 0.375
 	#define DG_W -0.1  //Pop out allowed
-    #define REF 16 //Fix can go from 1 - 16 and 16 is low 1 is High
+    #define OIF 0.250 //Fix enables if Value is > 0.0
 	#define DI_W 1.0 //Adjustment for REF
     #define DG_Z 0.025 //Min
     #define DI_Z 0.050 //Trim
@@ -2671,7 +2672,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DG_W -0.2  //Pop out allowed
 	#define BMT 1
 	#define DF_Z 0.150
-	#define REF 15     //Fix can go from 1 - 15 and 15 is low 1 is High
+	#define OIF 0.225  //Fix enables if Value is > 0.0
 	#define DI_W 1.7   //Adjustment for REF
 	#define SMS 1      //SM Toggle Separation
 	#define DL_X 0.600 //SM Tune
@@ -2864,7 +2865,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DE_Y 0.500
 	#define DE_Z 0.3875
 	#define DG_W -0.05//disallowed popout
-	#define REF 10    //Fix can go from 1 - 15 and 15 is low 1 is High
+	#define OIF 0.1    //Fix enables if Value is > 0.0
 	#define DI_W 1.5  //Adjustment for REF
     #define DG_Z 0.050 //Min
     #define DI_Z 0.150 //Trim
@@ -3350,7 +3351,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DI_Z 0.030
 	#define BMT 1
 	#define DF_Z 0.155
-	#define REF 11    //Fix can go from 1 - 15 and 15 is low 1 is High
+	#define OIF 0.125    //Fix enables if Value is > 0.0
 	#define DI_W 2.75 //3.25 //Adjustment for REF
 	#define SMS 0 //SM Toggle Separation
 	#define DL_X 0.500 //0.325 //SM Tune
@@ -3516,7 +3517,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DE_Z 0.375
 	//#define DB_Z 0.250
 	#define DG_W -0.125//0.15 //Disallow Pop
-	#define REF 1    //Fix can go from 1 - 15 and 15 is low 1 is High
+	#define OIF 0.0125    //Fix enables if Value is > 0.0
 	#define DI_W 2.0 //1.75 //Adjustment for REF
     #define MDD 1 //Set Menu Detection & Direction    //Off 0 | 1 | 2 | 3 | 4      
     #define DN_X float4( 0.8025, 0.610,  0.501, 0.0925) //Pos A = XY White & B = ZW Dark 
@@ -3587,7 +3588,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DE_X 1
 	//#define DE_Y 0.525
 	#define DE_Z 0.375
-	#define REF 6    //Fix can go from 1 - 15 and 15 is low 1 is High
+	#define OIF 0.0625    //Fix enables if Value is > 0.0
 	#define DI_W 2.0 //1.75 //Adjustment for REF
 	#define BMT 1    
 	#define DF_Z 0.100
@@ -3811,7 +3812,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DG_W -0.150
 	#define DG_Z 0.0375  
 	#define DI_Z 0.10
-	#define REF 15 //2 //Fix can go from 1 - 15 and 15 is low 1 is High
+	#define OIF 0.225 //Fix enables if Value is > 0.0
 	#define DI_W 1.0 //Adjustment for REF    
 	#define BMT 1    
 	#define DF_Z 0.140
@@ -4028,7 +4029,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DE_Z 0.375
 	#define DB_Z 0.1
 	#define DF_Y 0.015
-    #define REF 15 //Fix can go from 1 - 15 and 15 is low 1 is High
+    #define OIF 0.225 //Fix enables if Value is > 0.0
 	#define DI_W 2.0 //Adjustment for REF 
     //#define DG_W -0.100 //Disallow popout  
 	#define BMT 1    
@@ -4057,7 +4058,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DG_Z 0.025//Min
     #define LBC 2     //Letter Box Correction
     #define DH_X 1.340
-	#define REF 15 //2 //Fix can go from 1 - 15 and 15 is low 1 is High
+	#define OIF 0.225 //Fix enables if Value is > 0.0, 0.0125, 0.025, 0.0375, 0.04375, 0.05, 0.0625, 0.075, 0.0875, 0.09375, 0.1, 0.125, 0.150, 0.175, 0.20, 0.225, 0.250
 	#define DI_W 2.75 //Adjustment for REF
 //    #define MDD 1 //Set Menu Detection & Direction    //Off 0 | 1 | 2 | 3 | 4      
 //    #define DN_X float4( 0.870 , 0.500,  0.9605, 0.894) //Pos A = XY White & B = ZW Dark 
@@ -4279,7 +4280,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define BMT 1
 	#define DF_Z 0.130
     #define DG_W 0.550 //Pop
-	#define REF 4 //2 //Fix can go from 1 - 15 and 15 is low 1 is High
+	#define OIF 0.04375 //Fix enables if Value is > 0.0
 	#define DI_W 2.5 //Adjustment for REF    
 	#define DK_X 2 //FPS Hold 
 	#define DK_Y 0 //FPS Both Eyes
@@ -4509,7 +4510,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DE_Y 0.500
 	#define DE_Z 0.375
 	//#define DG_W 0.2500 //Pop out
-    #define REF 15 //Fix can go from 1 - 15 and 15 is low 1 is High
+    #define OIF 0.225 //Fix enables if Value is > 0.0
 	#define DI_W 1.5 //Adjustment for REF
 	#define BMT 1    
 	#define DF_Z 0.1275
@@ -4793,7 +4794,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DE_Y 0.4400
 	#define DE_Z 0.4375
     //#define DG_W 0.100 //Pop
-    #define REF 14 //Fix can go from 1 - 15 and 15 is low 1 is High
+    #define OIF 0.20 //Fix enables if Value is > 0.0
 	#define DI_W 1.25 //Adjustment for REF
 	#define BMT 1
 	#define DF_Z 0.1375
@@ -4814,7 +4815,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DE_Y 0.475
 	#define DE_Z 0.400
     //#define DG_W 0.100 //Pop
-    #define REF 14 //Fix can go from 1 - 15 and 15 is low 1 is High
+    #define OIF 0.20 //Fix enables if Value is > 0.0
 	#define DI_W 1.25 //Adjustment for REF
 	#define BMT 1
 	#define DF_Z 0.1375
@@ -4835,7 +4836,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DE_Y 0.500
 	#define DE_Z 0.375
     //#define DG_W 0.100 //Pop
-    #define REF 14 //Fix can go from 1 - 15 and 15 is low 1 is High
+    #define OIF 0.20 //Fix enables if Value is > 0.0
 	#define DI_W 1.25 //Adjustment for REF
 	#define BMT 1
 	#define DF_Z 0.1375
@@ -4857,7 +4858,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DE_Y 0.500
 	#define DE_Z 0.250
     //#define DG_W -0.500 //Pop
-    #define REF 15 //Fix can go from 1 - 15 and 15 is low 1 is High
+    #define OIF 0.225 //Fix enables if Value is > 0.0
 	#define DI_W 1.75 //Adjustment for REF
 	#define BMT 1
 	#define DF_Z 0.065
@@ -4888,7 +4889,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DE_Y 0.500
 	#define DE_Z 0.250
     //#define DG_W -0.500 //Pop
-    #define REF 15 //Fix can go from 1 - 15 and 15 is low 1 is High
+    #define OIF 0.225 //Fix enables if Value is > 0.0
 	#define DI_W 1.75 //Adjustment for REF
 	#define BMT 1
 	#define DF_Z 0.065
@@ -5006,7 +5007,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DE_Y 0.400
 	#define DE_Z 0.375
     #define DG_W -0.150 //Pop
-    //#define REF 15 //Fix can go from 1 - 15 and 15 is low 1 is High
+    //#define OIF 0.225 //Fix enables if Value is > 0.0
 	//#define DI_W 0.5 //Adjustment for REF //Lowest I seen it. Default Low is 1.0
     #define DG_Z 0.125 //Min
     #define DI_Z 0.125 //Trim
@@ -5123,7 +5124,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DE_Y 0.4500
 	#define DE_Z 0.375
 	//#define DG_W 2.5 //Pop
-    #define REF 15 //Fix can go from 1 - 15 and 15 is low 1 is High
+    #define OIF 0.225 //Fix enables if Value is > 0.0
 	#define DI_W 2.0 //Adjustment for REF
     //#define DG_Z 0.0875 //Min
     //#define DI_Z 0.100 //Trim
@@ -5185,7 +5186,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DE_Y 0.500
 	#define DE_Z 0.375
 	//#define DG_W -.25 //Less Pop
-    #define REF 15 //Fix can go from 1 - 15 and 15 is low 1 is High
+    #define OIF 0.225 //Fix enables if Value is > 0.0
 	#define DI_W 1.75 //Adjustment for REF
     #define DG_Z 0.030 //Min
     #define DI_Z 0.250 //Trim
@@ -5218,7 +5219,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DE_Y 0.500
 	#define DE_Z 0.375
 	#define DG_W 0.150 //Pop
-    #define REF 15 //Fix can go from 1 - 15 and 15 is low 1 is High
+    #define OIF 0.225 //Fix enables if Value is > 0.0
 	#define DI_W 2.0 //Adjustment for REF
     #define DG_Z 0.07 //Min
     #define DI_Z 0.05 //Trim
@@ -5255,7 +5256,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DE_Y 0.500
 	#define DE_Z 0.375
 	//#define DG_W 0.150 //Pop
-    //#define REF 15 //Fix can go from 1 - 15 and 15 is low 1 is High
+    //#define OIF 0.225 //Fix enables if Value is > 0.0
 	//#define DI_W 2.0 //Adjustment for REF
     //#define DG_Z 0.07 //Min
     //#define DI_Z 0.05 //Trim
@@ -5278,7 +5279,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DE_Y 0.4375
 	#define DE_Z 0.375
 	#define DG_W -0.10 //Pop
-    #define REF 15 //Fix can go from 1 - 15 and 15 is low 1 is High
+    #define OIF 0.225 //Fix enables if Value is > 0.0, 0.0125, 0.025, 0.0375, 0.04375, 0.05, 0.0625, 0.075, 0.0875, 0.09375, 0.1, 0.125, 0.150, 0.175, 0.20, 0.225, 0.250
 	#define DI_W 2.0 //Adjustment for REF
     #define DG_Z 0.025 //Min
     #define DI_Z 0.080//Trim
@@ -5320,7 +5321,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DE_Y 0.500
 	#define DE_Z 0.375
 	#define DG_W 0.250 //Pop
-    //#define REF 15 //Fix can go from 1 - 15 and 15 is low 1 is High
+    //#define OIF 0.225 //Fix enables if Value is > 0.0
 	//#define DI_W 2.0 //Adjustment for REF
     #define DG_Z 0.045 //Min
     #define DI_Z 0.125 //Trim
@@ -5348,7 +5349,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DE_X 2
 	#define DE_Y 0.350
 	#define DE_Z 0.375
-    #define REF 10 //Fix can go from 1 - 15 and 15 is low 1 is High
+    #define OIF 0.1 //Fix enables if Value is > 0.0
 	#define DI_W 2.0 //Adjustment for REF
     #define DG_Z 0.150 //Min
     #define DI_Z 0.400 //Trim
@@ -5368,7 +5369,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DE_X 1
 	#define DE_Y 0.500
 	#define DE_Z 0.325
-    #define REF 15 //Fix can go from 1 - 15 and 15 is low 1 is High
+    #define OIF 0.225 //Fix enables if Value is > 0.0
 	#define DI_W 0.75 //Adjustment for REF
     #define DG_Z 0.075 //Min
     #define DI_Z 0.200//0.175 //Trim
@@ -5437,7 +5438,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DE_Y 0.500
 	#define DE_Z 0.475
 	//#define DG_W 0.375 //Allow popout
-    #define REF 13 //Fix can go from 1 - 15 and 15 is low 1 is High
+    #define OIF 0.175 //Fix enables if Value is > 0.0
 	#define DI_W 0.75 //Adjustment for REF
     #define DG_Z 0.025 //Min
     #define DI_Z 0.125 //Trim
@@ -5466,7 +5467,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DG_W 0.100 //Pop
 	#define BMT 1
 	#define DF_Z 0.0375
-    #define REF 10 //Fix can go from 1 - 15 and 15 is low 1 is High
+    #define OIF 0.1 //Fix enables if Value is > 0.0
 	#define DI_W 2.0 //Adjustment for REF
     #define DG_Z 0.030 //Min
     #define DI_Z 0.100 //Trim
@@ -5535,7 +5536,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DE_Y 0.500
 	#define DE_Z 0.375
 	//#define DG_W 0.100 //Pop
-    #define REF 14 //Fix can go from 1 - 15 and 15 is low 1 is High
+    #define OIF 0.20 //Fix enables if Value is > 0.0
 	#define DI_W 1.5 //Adjustment for REF
     //#define DG_Z 0.03 //Min
     //#define DI_Z 0.150 //Trim
@@ -5560,7 +5561,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DE_Y 0.4375
 	#define DE_Z 0.4375
 //	#define DG_W -0.100 //Pop
-    #define REF 15 //Fix can go from 1 - 15 and 15 is low 1 is High
+    #define OIF 0.225 //Fix enables if Value is > 0.0
 	#define DI_W 1.25 //Adjustment for REF
     //#define DG_Z 0.03 //Min
     //#define DI_Z 0.150 //Trim
@@ -5585,7 +5586,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DE_Y 0.690
 	#define DE_Z 0.375
 	#define DG_W -0.100 //Pop
-    //#define REF 15 //Fix can go from 1 - 15 and 15 is low 1 is High
+    //#define OIF 0.225 //Fix enables if Value is > 0.0
 	//#define DI_W 1.25 //Adjustment for REF
     #define DG_Z 0.065 //Min
     #define DI_Z 0.050 //Trim
@@ -5615,7 +5616,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DE_Y 0.500
 	#define DE_Z 0.375
 	#define DG_W -0.100 //Pop
-    //#define REF 15 //Fix can go from 1 - 15 and 15 is low 1 is High
+    //#define OIF 0.225 //Fix enables if Value is > 0.0
 	//#define DI_W 1.25 //Adjustment for REF
     #define DG_Z 0.050 //Min
     #define DI_Z 0.100 //Trim
@@ -5646,7 +5647,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	//#define DE_Y 0.500
 	//#define DE_Z 0.375
 	//#define DG_W -0.100 //Pop
-    //#define REF 15 //Fix can go from 1 - 15 and 15 is low 1 is High
+    //#define OIF 0.225 //Fix enables if Value is > 0.0
 	//#define DI_W 1.25 //Adjustment for REF
     #define DG_Z 0.075 //Min
     #define DI_Z 0.150 //Trim
@@ -5678,7 +5679,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DE_Y 0.500
 	#define DE_Z 0.375
 	//#define DG_W -0.100 //Pop
-    //#define REF 15 //Fix can go from 1 - 15 and 15 is low 1 is High
+    //#define OIF 0.225 //Fix enables if Value is > 0.0
 	//#define DI_W 1.25 //Adjustment for REF
     #define DG_Z 0.025 //Min
     #define DI_Z 0.050 //Trim
@@ -5706,7 +5707,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	//#define DE_Y 0.500
 	//#define DE_Z 0.375
 	//#define DG_W -0.100 //Pop
-    //#define REF 15 //Fix can go from 1 - 15 and 15 is low 1 is High
+    //#define OIF 0.225 //Fix enables if Value is > 0.0
 	//#define DI_W 1.25 //Adjustment for REF
     #define DG_Z 0.100 //Min
     #define DI_Z 0.100 //Trim
@@ -5733,7 +5734,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DE_Y 0.500
 	#define DE_Z 0.375
 	//#define DG_W -0.100 //Pop
-    #define REF 15 //Fix can go from 1 - 15 and 15 is low 1 is High
+    #define OIF 0.225 //Fix enables if Value is > 0.0
 	#define DI_W 1.25 //Adjustment for REF
     //#define DG_Z 0.100 //Min
     //#define DI_Z 0.100 //Trim
@@ -5774,7 +5775,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DE_Y 0.375
 	#define DE_Z 0.375
 	#define DG_W -0.100 //Pop
-    #define REF 15 //Fix can go from 1 - 15 and 15 is low 1 is High
+    #define OIF 0.225 //Fix enables if Value is > 0.0
 	#define DI_W 1.0 //Adjustment for REF
     #define DG_Z 0.055 //Min
     #define DI_Z 0.075 //Trim
@@ -5811,7 +5812,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DE_Y 0.500
 	#define DE_Z 0.375
 	//#define DG_W -0.100 //Pop
-    //#define REF 15 //Fix can go from 1 - 15 and 15 is low 1 is High
+    //#define OIF 0.225 //Fix enables if Value is > 0.0
 	//#define DI_W 1.0 //Adjustment for REF
     #define DG_Z 0.070 //Min
     #define DI_Z 0.060 //Trim
@@ -5838,7 +5839,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DE_Y 0.500
 	#define DE_Z 0.4375
 	#define DG_W 0.300 //Pop
-    #define REF 15 //Fix can go from 1 - 15 and 15 is low 1 is High
+    #define OIF 0.225 //Fix enables if Value is > 0.0
 	#define DI_W 4.5 //Adjustment for REF
     #define DG_Z 0.105 //Min
     #define DI_Z 0.050 //Trim
@@ -5890,7 +5891,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	//#define DE_Y 0.500
 	//#define DE_Z 0.4375
 	//#define DG_W 0.250 //Pop
-    //#define REF 15 //Fix can go from 1 - 15 and 15 is low 1 is High
+    //#define OIF 0.225 //Fix enables if Value is > 0.0
 	//#define DI_W 1.0 //Adjustment for REF
     //#define DG_Z 0.100 //Min
     //#define DI_Z 0.050 //Trim
@@ -5923,7 +5924,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DE_Y 0.500
 	#define DE_Z 0.375
 	//#define DG_W 0.250 //Pop
-    //#define REF 15 //Fix can go from 1 - 15 and 15 is low 1 is High
+    //#define OIF 0.225 //Fix enables if Value is > 0.0,
 	//#define DI_W 1.0 //Adjustment for REF
     #define DG_Z 0.025 //Min
     #define DI_Z 0.150 //Trim
@@ -5961,7 +5962,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DE_Y 0.750
 	#define DE_Z 0.375
 	//#define DG_W 0.250 //Pop
-    //#define REF 15 //Fix can go from 1 - 15 and 15 is low 1 is High
+    //#define OIF 0.225 //Fix enables if Value is > 0.0
 	//#define DI_W 1.0 //Adjustment for REF
     //#define DG_Z 0.025 //Min
     //#define DI_Z 0.150 //Trim
@@ -6013,7 +6014,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DE_Y 0.500
 	#define DE_Z 0.375
 	//#define DG_W 0.250 //Pop
-    #define REF 15 //Fix can go from 1 - 15 and 15 is low 1 is High
+    #define OIF 0.225 //Fix enables if Value is > 0.0
 	#define DI_W 1.5 //Adjustment for REF
     //#define DG_Z 0.025 //Min
     //#define DI_Z 0.150 //Trim
@@ -6065,7 +6066,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DE_Y 0.500
 	#define DE_Z 0.375
 	#define DG_W -0.250 //Pop
-    #define REF 12 //Fix can go from 1 - 15 and 15 is low 1 is High
+    #define OIF 0.150 //Fix enables if Value is > 0.0
 	#define DI_W 1.5 //Adjustment for REF
     #define DG_Z 0.025 //Min
     #define DI_Z 0.050 //Trim
@@ -6094,7 +6095,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DE_Y 0.500
 	#define DE_Z 0.375
 	//#define DG_W -0.250 //Pop
-    #define REF 15 //Fix can go from 1 - 15 and 15 is low 1 is High
+    #define OIF 0.225 //Fix enables if Value is > 0.0
 	#define DI_W 1.5 //Adjustment for REF
     #define DG_Z 0.025 //Min
     #define DI_Z 0.050 //Trim
@@ -6122,7 +6123,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DE_Y 0.500
 	#define DE_Z 0.400
 	//#define DG_W -0.250 //Pop
-    #define REF 15 //Fix can go from 1 - 15 and 15 is low 1 is High
+    #define OIF 0.225 //Fix enables if Value is > 0.0
 	#define DI_W 2.0 //Adjustment for REF
     //#define DG_Z 0.025 //Min
     //#define DI_Z 0.050 //Trim
@@ -6161,7 +6162,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DE_Y 0.500
 	#define DE_Z 0.375
 	//#define DG_W -0.250 //Pop
-    #define REF 11 //Fix can go from 1 - 15 and 15 is low 1 is High
+    #define OIF 0.125 //Fix enables if Value is > 0.0
 	#define DI_W 2.0 //Adjustment for REF
     #define DG_Z 0.035 //Min
     #define DI_Z 0.050 //Trim
@@ -6188,7 +6189,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	//#define DE_Y 0.500
 	//#define DE_Z 0.400
 	//#define DG_W -0.250 //Pop
-    //#define REF 15 //Fix can go from 1 - 15 and 15 is low 1 is High
+    //#define OIF 0.225 //Fix enables if Value is > 0.0
 	//#define DI_W 2.0 //Adjustment for REF
     #define DG_Z 0.150 //Min
     #define DI_Z 0.150 //Trim
@@ -6220,7 +6221,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DE_Y 0.750
 	#define DE_Z 0.375
 	//#define DG_W -0.10 //Pop
-    //#define REF 16 //Fix can go from 1 - 15 and 15 is low 1 is High
+    //#define OIF 0.250 //Fix enables if Value is > 0.0
 	//#define DI_W 0.75 //Adjustment for REF
     #define DG_Z 0.045 //Min
     #define DI_Z 0.035 //Trim
@@ -6250,6 +6251,156 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define DP_Y float4( 0.600 , 0.470 , 0.500 , 0.010  ) //Pos C3 = XY Color & D1 = ZW Color
     #define DP_Z float4( 0.500 , 0.990 , 0.670 , 0.440  ) //Pos D2 = XY Black & D3 = ZW Color
 	#define DP_W float4( 27.00 , 29.0,  0.0, 26.0) //Tresh Hold for Color A1 & A3 and Color
+    #define PEW 1
+#elif (App == 0x4DE39E70 ) //Industria
+	#define DA_W 1
+    //#define DB_X 0
+	#define DA_X 0.025
+	#define DF_Y 0.010
+	#define DA_Y 48.75
+    //#define DA_Z -0.025
+	#define DB_Z 0.025
+	//#define DB_Y 1
+	#define DE_X 4
+	#define DE_Y 0.375
+	#define DE_Z 0.375
+	//#define DG_W -0.100 //Pop
+    //#define OIF 0.225 //Fix enables if Value is > 0.0
+	//#define DI_W 2.0 //Adjustment for REF
+    //#define DG_Z 0.025 //Min
+    //#define DI_Z 0.050 //Trim
+	#define BMT 1
+	#define DF_Z 0.0375
+    #define SMS 1      //SM Toggle Separation
+	#define DL_X 0.950 //SM Tune
+	//#define DL_W 0.050 //SM Perspective
+	#define DM_X 4     //HQ Tune
+	#define DM_Z 3     //HQ Smooth
+    //#define DM_Y 3     //HQ VRS
+    //#define DL_Y 0.375    //De-Artifact 0.1245
+    #define MDD 1 //Set Menu Detection & Direction     //Off 0 | 1 | 2 | 3 | 4      
+    #define DN_X float4( 0.195, 0.195,  0.956, 0.8945)  //Pos A = XY White & B = ZW White 
+    #define DN_Y float4( 0.485, 0.890,  0.0, 0.0)       //Pos C = XY Light & D = ZW Match
+    #define DN_Z float4( 0.0, 0.0,  0.0, 0.0)            //Pos E = XY Match & F = ZW Match
+	#define DN_W float4( 1.0, 0.0 , 0.0, 0.0 )          //Size = Menu [ABC] D E F
+    #define DJ_Y float4( 26, 26.0, 26.0, 13.0);            //Menu Detection Type for A, B, & C. The Last Value is ???   
+    #define DJ_Z float3( 1000., 1000., 1000);                //Set Match Tresh 
+    /*
+    #define MMD 2 //Set Multi Menu Detection             //Off / On
+    #define DO_X float4( 0.100 , 0.150 , 0.055 , 0.375  ) //Pos A1 = XY Color & A2 = ZW Black 
+    #define DO_Y float4( 0.745 , 0.681 , 0.143 , 0.367  ) //Pos A3 = XY Color & B1 = ZW Color
+    #define DO_Z float4( 0.975 , 0.975 , 0.1375, 0.807  ) //Pos B2 = XY Black & B3 = ZW Color
+	#define DO_W float4( 30.0  , 30.0  , 30.0, 30.0 )   //Tresh Hold for Color A & B and Color
+	#define DP_X float4( 0.075 , 0.150 ,  0.235  , 0.840) //Pos C1 = XY Color & C2 = ZW Black 
+    #define DP_Y float4( 0.350 , 0.241 ,  0.736  , 0.575) //Pos C3 = XY Color & D1 = ZW Color
+    #define DP_Z float4( 0.060 , 0.380 ,  0.286  , 0.195) //Pos D2 = XY Black & D3 = ZW Color
+	#define DP_W float4( 30.0  , 30.0  ,  30.0   , 14.0) //Tresh Hold for Color A1 & A3 and Color
+	*/
+	#define WSM 2
+	#define DB_W 26
+	#define FPS  2
+	#define DK_X 2
+	#define DK_Y 0
+	#define DK_Z 1
+	#define DK_W 2
+    #define PEW 1
+#elif (App == 0xD1B82FBF ) //Descenders
+	#define DA_W 1
+    //#define DB_X 0
+	#define DA_X 0.025
+	#define DF_Y 0.010
+	#define DA_Y 37.5
+    //#define DA_Z -0.025
+	#define DB_Z 0.100
+	//#define DB_Y 1
+	#define DE_X 3
+	#define DE_Y 0.500
+	#define DE_Z 0.375
+	//#define DG_W -0.100 //Pop
+    //#define OIF 0.225 //Fix enables if Value is > 0.0
+	//#define DI_W 2.0 //Adjustment for REF
+    //#define DG_Z 0.025 //Min
+    //#define DI_Z 0.050 //Trim
+	#define BMT 1
+	#define DF_Z 0.100
+    #define SMS 1      //SM Toggle Separation
+	#define DL_X 0.950 //SM Tune
+	//#define DL_W 0.050 //SM Perspective
+	#define DM_X 4     //HQ Tune
+	#define DM_Z 3     //HQ Smooth
+    //#define DM_Y 3     //HQ VRS
+    //#define DL_Y 0.375    //De-Artifact 0.1245
+    #define MDD 1 //Set Menu Detection & Direction     //Off 0 | 1 | 2 | 3 | 4      
+    #define DN_X float4( 0.123, 0.086,  0.0333, 0.893 )  //Pos A = XY White & B = ZW White 
+    #define DN_Y float4( 0.479, 0.120,  0.0, 0.0)       //Pos C = XY Light & D = ZW Match
+    #define DN_Z float4( 0.0, 0.0,  0.0, 0.0)            //Pos E = XY Match & F = ZW Match
+	#define DN_W float4( 1.0, 0.0 , 0.0, 0.0 )          //Size = Menu [ABC] D E F
+    #define DJ_Y float4( 30, 10.0, 30.0, 1000.0);            //Menu Detection Type for A, B, & C. The Last Value is ???   
+    #define DJ_Z float3( 1000., 1000., 1000);                //Set Match Tresh     
+    #define MMD 2 //Set Multi Menu Detection             //Off / On
+    #define DO_X float4( 0.519 , 0.340 , 0.500 , 0.010  ) //Pos A1 = XY Color & A2 = ZW Black 
+    #define DO_Y float4( 0.520 , 0.880 , 0.452 , 0.378  ) //Pos A3 = XY Color & B1 = ZW Color
+    #define DO_Z float4( 0.500 , 0.010 , 0.520 , 0.880  ) //Pos B2 = XY Black & B3 = ZW Color
+	#define DO_W float4( 26.0  , 7.00  , 28.0, 5.0 )   //Tresh Hold for Color A & B and Color
+	#define DP_X float4( 0.320 , 0.526 ,  0.255  , 0.490) //Pos C1 = XY Color & C2 = ZW Black 
+    #define DP_Y float4( 0.490 , 0.666 ,  0.380  , 0.400) //Pos C3 = XY Color & D1 = ZW Color
+    #define DP_Z float4( 0.064 , 0.774 ,  0.5689 , 0.400) //Pos D2 = XY Black & D3 = ZW Color
+	#define DP_W float4( 30.0  , 19.0  ,  24.0   , 24.0 ) //Tresh Hold for Color A1 & A3 and Color
+	#define WSM 2
+	#define DB_W 26
+	#define FPS  2
+	#define DK_X 2
+	#define DK_Y 0
+	#define DK_Z 1
+	#define DK_W 2
+    #define PEW 1
+#elif (App == 0x7E3EA11D ) //EastShade
+	#define DA_W 1
+    #define DB_X 1
+	#define DA_X 0.025
+	#define DF_Y 0.025
+	#define DA_Y 25
+    //#define DA_Z -0.025
+	#define DB_Z 0.025
+	//#define DB_Y 1
+	#define DE_X 1
+	#define DE_Y 0.500
+	#define DE_Z 0.400
+	#define DG_W 0.125 //Pop
+    #define OIF 0.3 //Fix enables if Value is > 0.0
+	#define DI_W 1.5 //Adjustment for REF
+    //#define DG_Z 0.025 //Min
+    //#define DI_Z 0.045 //Trim
+	#define BMT 1
+	#define DF_Z 0.05
+    #define SMS 2      //SM Toggle Separation
+	#define DL_X 0.850 //SM Tune
+	//#define DL_W 0.050 //SM Perspective
+	#define DM_X 4     //HQ Tune
+	#define DM_Z 3     //HQ Smooth
+    //#define DM_Y 3     //HQ VRS
+    //#define DL_Y 0.375    //De-Artifact 0.1245
+	#define DJ_X 0.150     //Range Smoothing
+    /*
+    #define MDD 1 //Set Menu Detection & Direction     //Off 0 | 1 | 2 | 3 | 4      
+    #define DN_X float4( 0.195, 0.195,  0.956, 0.8945)  //Pos A = XY White & B = ZW White 
+    #define DN_Y float4( 0.485, 0.890,  0.0, 0.0)       //Pos C = XY Light & D = ZW Match
+    #define DN_Z float4( 0.0, 0.0,  0.0, 0.0)            //Pos E = XY Match & F = ZW Match
+	#define DN_W float4( 1.0, 0.0 , 0.0, 0.0 )          //Size = Menu [ABC] D E F
+    #define DJ_Y float4( 26, 26.0, 26.0, 13.0);            //Menu Detection Type for A, B, & C. The Last Value is ???   
+    #define DJ_Z float3( 1000., 1000., 1000);                //Set Match Tresh 
+	*/
+    /*
+    #define MMD 2 //Set Multi Menu Detection             //Off / On
+    #define DO_X float4( 0.100 , 0.150 , 0.055 , 0.375  ) //Pos A1 = XY Color & A2 = ZW Black 
+    #define DO_Y float4( 0.745 , 0.681 , 0.143 , 0.367  ) //Pos A3 = XY Color & B1 = ZW Color
+    #define DO_Z float4( 0.975 , 0.975 , 0.1375, 0.807  ) //Pos B2 = XY Black & B3 = ZW Color
+	#define DO_W float4( 30.0  , 30.0  , 30.0, 30.0 )   //Tresh Hold for Color A & B and Color
+	#define DP_X float4( 0.075 , 0.150 ,  0.235  , 0.840) //Pos C1 = XY Color & C2 = ZW Black 
+    #define DP_Y float4( 0.350 , 0.241 ,  0.736  , 0.575) //Pos C3 = XY Color & D1 = ZW Color
+    #define DP_Z float4( 0.060 , 0.380 ,  0.286  , 0.195) //Pos D2 = XY Black & D3 = ZW Color
+	#define DP_W float4( 30.0  , 30.0  ,  30.0   , 14.0) //Tresh Hold for Color A1 & A3 and Color
+	*/
     #define PEW 1
 #else
 	#define NPW 1 //No Profile
@@ -6369,7 +6520,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DH_W LB_Depth_Pos_Offset_Y_D
 #endif
 
-// X = [LBM Offset X] Y = [LBM Offset Y] Z = [Weapon Near Depth Trim] W = [REF Check Depth Limit]
+// X = [LBM Offset X] Y = [LBM Offset Y] Z = [Weapon Near Depth Trim] W = [OIF Check Depth Limit]
 #ifndef DI_X
     #define DI_X LB_Masking_Offset_X_D
 #endif
@@ -6380,7 +6531,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define DI_Z Weapon_Near_Depth_Trim_D       //Trim
 #endif 
 #ifndef DI_W
-	#define DI_W REF_Check_Depth_Limit_D
+	#define DI_W OIF_Check_Depth_Limit_D
 #endif
 
 // X = [NULL X] Y = [Menu Detection Type] Z = [Match Threshold] W = [Check Depth Limit Weapon]
@@ -6510,6 +6661,9 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 #endif
 
 //Special Toggles
+#ifndef OIF
+    #define OIF Over_Intrusion_Fix_D           //Over Intrusion Fix  
+#endif
 #ifndef REF
     #define REF Resident_Evil_Fix_D            //Resident Evil Fix
 #endif
@@ -6571,7 +6725,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define SPO Set_PopOut_D                   //Set Popout & Weapon Min
 #endif 
 #ifndef FMM
-    #define FMM Filter_Mode_Modifire_D         //Filter Mode Modifier n
+    #define FMM Filter_Mode_Modifire_D         //Filter Mode Modifier N
 #endif 
 
 //SuperDepth3D Warning System
@@ -6789,7 +6943,7 @@ float4 Weapon_Profiles(float WP ,float4 Weapon_Adjust) //Could reduce from 76 to
     if (WP == 25)
         Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 23 | Game
     if (WP == 26)
-        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 24 | Game
+        Weapon_Adjust = float4(0.725,5.0,0.3,0.050);      //WP 24 | Industria
     if (WP == 27)
         Weapon_Adjust = float4(1.325,10.0,0.0,0.0);       //WP 25 | KHOLAT
     if (WP == 28)

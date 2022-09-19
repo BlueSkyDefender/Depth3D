@@ -2,7 +2,7 @@
 	///**SuperDepth3D_VR+**///
 	//--------------------////
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	//* Depth Map Based 3D post-process shader v3.3.8
+	//* Depth Map Based 3D post-process shader v3.4.0
 	//* For Reshade 4.4+ I think...
 	//* ---------------------------------
 	//*
@@ -53,7 +53,7 @@ namespace SuperDepth3DVR
 		static const float DG_X = 0.0, DG_Y = 0.0, DG_Z = 0.0, DG_W = 0.0;
 		// DH_X = [LBC Size Offset X] DH_Y = [LBC Size Offset Y] DH_Z = [LBC Pos Offset X] DH_W = [LBC Pos Offset X]
 		static const float DH_X = 1.0, DH_Y = 1.0, DH_Z = 0.0, DH_W = 0.0;
-		// DI_X = [LBM Offset X] DI_Y = [LBM Offset Y] DI_Z = [Weapon Near Depth Trim] DI_W = [REF Check Depth Limit]
+		// DI_X = [LBM Offset X] DI_Y = [LBM Offset Y] DI_Z = [Weapon Near Depth Trim] DI_W = [OIF Check Depth Limit]
 		static const float DI_X = 0.0, DI_Y = 0.0, DI_Z = 0.25, DI_W = 0.0;
 		// DJ_X = [Range Smoothing] DJ_Y = [Menu Detection Type] DJ_Z = [Match Threshold] DJ_W = [Check Depth Limit Weapon]
 		static const float DJ_X = 0, DJ_Y = 0.0, DJ_Z = 0.0, DJ_W = -0.100;
@@ -75,7 +75,7 @@ namespace SuperDepth3DVR
 		#define OW_WP "WP Off\0Custom WP\0"
 		static const int WSM = 0;
 		//Triggers
-		static const int SPO = 0, MMD = 0, SMP = 0, LBR = 0, HQT = 0, AFD = 0, MDD = 0, FPS = 1, SMS = 1, REF = 0, NCW = 0, RHW = 0, NPW = 0, IDF = 0, SPF = 0, BDF = 0, HMT = 0, DFW = 0, NFM = 0, DSW = 0, LBC = 0, LBS = 0, LBM = 0, DAA = 0, NDW = 0, PEW = 0, WPW = 0, FOV = 0, EDW = 0, SDT = 0;
+		static const int SPO = 0, MMD = 0, SMP = 0, LBR = 0, HQT = 0, AFD = 0, MDD = 0, FPS = 1, SMS = 1, OIF = 0, NCW = 0, RHW = 0, NPW = 0, IDF = 0, SPF = 0, BDF = 0, HMT = 0, DFW = 0, NFM = 0, DSW = 0, LBC = 0, LBS = 0, LBM = 0, DAA = 0, NDW = 0, PEW = 0, WPW = 0, FOV = 0, EDW = 0, SDT = 0;
 		//Overwatch.fxh State
 		#define OSW 1
 	#endif
@@ -883,6 +883,12 @@ namespace SuperDepth3DVR
 	#define Res int2(BUFFER_WIDTH, BUFFER_HEIGHT)
 	#define ARatio Res.x / Res.y
 	
+	float2 RE_Set()
+	{	
+		int REF_Trigger = RE_Fix > 0 || OIF > 0;
+		return float2(REF_Trigger, RE_Fix > 0 ? RE_Fix : OIF ); 
+	}
+	
 	float Scale(float val,float max,float min) //Scale to 0 - 1
 	{
 		return (val - min) / (max - min);
@@ -1655,7 +1661,7 @@ namespace SuperDepth3DVR
 					if ( CD < -Set_Pop_Min().x )//may lower this to like -0.1
 						Detect = 1;
 					//Used if Depth Buffer is way out of range.
-					if(REF || RE_Fix)
+					if(RE_Set().x)
 					{
 					if ( CD < -DI_W )
 						Detect_Out_of_Range = 1;
@@ -1769,15 +1775,11 @@ namespace SuperDepth3DVR
 	
 				ZP = saturate( ZPD_Balance * max(0.5, Auto_Balance_Selection().x));
 
-			float DOoR = smoothstep(0,1,tex2D(SamplerLumVR,float2(0, 0.416)).z), ZDP_Array[17] = { 0.0, 0.0125, 0.025, 0.0375, 0.04375, 0.05, 0.0625, 0.075, 0.0875, 0.09375, 0.1, 0.125, 0.150, 0.175, 0.20, 0.225, 0.250};
+			float DOoR = smoothstep(0,1,tex2D(SamplerLumVR,float2(0, 0.416)).z);//, ZDP_Array[17] = { 0.0, 0.0125, 0.025, 0.0375, 0.04375, 0.05, 0.0625, 0.075, 0.0875, 0.09375, 0.1, 0.125, 0.150, 0.175, 0.20, 0.225, 0.250};
 			
-			if(REF || RE_Fix)
-			{
-				if(RE_Fix)
-					ZPD_Boundary = lerp(ZPD_Boundary,ZDP_Array[RE_Fix],DOoR);
-				else
-					ZPD_Boundary = lerp(ZPD_Boundary,ZDP_Array[REF],DOoR);
-			}
+			if(RE_Set().x)
+				ZPD_Boundary = lerp(ZPD_Boundary,RE_Set().y,DOoR);
+
 	
 			Z *= lerp( 1, ZPD_Boundary, smoothstep(0,1,tex2D(SamplerLumVR,float2(0, 0.250)).z));
 			float Convergence = 1 - Z / D;
