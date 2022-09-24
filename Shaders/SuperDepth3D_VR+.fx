@@ -2,7 +2,7 @@
 	///**SuperDepth3D_VR+**///
 	//--------------------////
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	//* Depth Map Based 3D post-process shader v3.4.0
+	//* Depth Map Based 3D post-process shader v3.4.1
 	//* For Reshade 4.4+ I think...
 	//* ---------------------------------
 	//*
@@ -1899,17 +1899,12 @@ namespace SuperDepth3DVR
 			DM.y = lerp(DM.y,0,step(1.0-HUD_Mask(texcoord),0.5));
 		#endif
 	
-		if(LBM || LetterBox_Masking)
-		{
-			float storeDM = DM.y;
-			
-			DM.y = texcoord.y > DI_Y && texcoord.y < DI_X ? storeDM : 0.0125;
-	
 		#if LBM || LetterBox_Masking
-			if((LBM >= 1 || LetterBox_Masking >= 1) && !LBDetection())
-				DM.y = storeDM;
+			float LB_Detection = tex2D(samplerMinMaxRGBLastFrame,float2(0.5,0.5)).w,LB_Masked = texcoord.y > DI_Y && texcoord.y < DI_X ? DM.y : 0.0125;
+			
+			if(LB_Detection)
+				DM.y = LB_Masked;	
 		#endif
-		}
 	
 		return float3(DM.y,PrepDepth( SDT == 2 || SD_Trigger == 2 ? TC_SP(texcoord).zw : texcoord)[1][1],HandleConvergence.z);
 	}
@@ -2358,7 +2353,7 @@ namespace SuperDepth3DVR
 		float Grid = floor(texcoord.y * BUFFER_HEIGHT * BUFFER_RCP_HEIGHT * Num_of_Values);	
 		//Motion_Detection
 		AL = float4(length(tex2D(SamplerDMVR,texcoord).w - tex2D(SamplerPBBVR,texcoord).x),Average_ZPD,Storage__Array[int(fmod(Grid,Num_of_Values))],tex2Dlod(SamplerDMVR,float4(texcoord,0,0)).y);
-		Other = float4(tex2D(samplerMinMaxRGB, texcoord).rgb,1);
+		Other = float4(tex2D(samplerMinMaxRGB, texcoord).rgb,LBDetection());
 	}
 	////////////////////////////////////////////////////////////////////Logo////////////////////////////////////////////////////////////////////////////
 	#define _f float // Text rendering code copied/pasted from https://www.shadertoy.com/view/4dtGD2 by Hamneggs

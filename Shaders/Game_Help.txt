@@ -985,6 +985,15 @@ too
 
 then set the file it to read only.
 
+{Prodeus} [Reshade 5.4.0+]
+A Depth Selection Needs to be done here along with Copy Depth Clear Operations and CopyDepth Fullscreen Draw Calls.
+
+The Depth Selection is [Clear 1] for native res.
+
+Other things to note:
+
+Best to use Minimal Hud and as always "try" to disable most Post effects.
+
 {Quake 2 XP} [Reshade 4.7.0, Xenos_2.3.2 Injector]
 Install game and make sure in launches in fullscreen and native resolution.
 
