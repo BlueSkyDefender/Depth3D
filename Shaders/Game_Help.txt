@@ -355,6 +355,19 @@ https://community.pcgamingwiki.com/files/file/1948-destroy-all-humans-fov-change
 
 I also recommend you use View Mode set to Alpha. Because of all the Foliage.
 
+{Detroit: Become Human} [ReShade 5.4.2]
+To Disable DoF
+
+Modify the game executable to disable depth of field
+
+    Open <path-to-game>\DetroitBecomeHuman.exe in a hex editor (e.g. HxD).
+    Search for 41 C7 83 40 01 00 00 31 00 00 as hex.
+    Replace it with 7F C7 83 40 01 00 00 31 00 00
+    Save the changes.
+
+https://www.pcgamingwiki.com/wiki/Detroit:_Become_Human#Depth_of_field
+https://mh-nexus.de/en/hxd/
+
 {Devil May Cry 5} [Reshade 4.7.0]
 Some Issues in game since you can't use most, fixes with out running in "DX12." There is not much you can do.
 
@@ -1266,7 +1279,7 @@ Depth Buffer: 0x00000000082ED0FD8 like the 4th one down.
 
 ReShade works when playing this game with friends online. So enjoy.
 
-{The Evil With In}
+{The Evil Within}
 Game too big for screen DPI scaling. 
 To fix this go to where the program is installed and find the EXE
 
@@ -1278,6 +1291,8 @@ Check Disable Display Scaling On High DPI Settings
 This should fix it. For more look up this problem on google.
 
 I would say also use an FOV fix. Like the one found at http://www.flawlesswidescreen.org/#Download.
+
+You also have to disable Letterboxing in the settings.
 
 {The Legend of Korra}
 If you want 4K in this res locked game you SpecialK build of Reshade.
@@ -1376,6 +1391,28 @@ Set MSAA to Off and VRAM to Max 2048MB. Optional you can disable the DGVoodoo Lo
 This is done so you don't have to scale the depth buffer your self.
 
 You can download DGVoodoo2 here http://dege.freeweb.hu/dgVoodoo2/dgVoodoo2.html
+{Visage} [ReShade 5.4.2]
+Game runs fine issues with DoF and/or other effects.
+
+To Disable Depth of Field in Visage
+
+Head over to C:\Users\UserName\AppData\Local\Visage\Saved\Config\WinGDK
+Open the “Engine.ini” file
+Add:
+[SystemSettings]
+r.DepthOfFieldQuality=0
+r.MotionBlur.Max=0
+r.MotionBlurQuality=0
+r.DefaultFeature.MotionBlur=0
+
+For Bloom Add:
+r.BloomQuality=0
+
+Save the file Set it to read only. I recommend you set your setting in games first befor all of this.
+
+Now I also say you should use a FOV mod. You can use this game.
+
+https://www.pcgamingwiki.com/wiki/Visage#Field_of_view_.28FOV.29
 
 {Void Bastards} [Reshade 4.7.0]
 Issues with MSAA and Weapon Hand not Showing up in the Depth Buffer.
