@@ -6135,29 +6135,29 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define HQT 1
     #define PEW 1
 #elif (App == 0xD7199355 ) //Scathe
-	//#define DA_W 0
+	#define DA_W 1
     //#define DB_X 0
 	#define DA_X 0.025
 	#define DF_Y 0.015
-	#define DA_Y 200.0
+	#define DA_Y 250.0
     #define DA_Z -0.025
 	#define DB_Z 0.035
 	//#define DB_Y 1
 	#define DE_X 4
 	#define DE_Y 0.500
 	#define DE_Z 0.400
-	//#define DG_W -0.250 //Pop
+	#define DG_W -0.05 //Pop
     #define OIF 0.225 //Fix enables if Value is > 0.0
-	#define DI_W 2.0 //Adjustment for REF
+	#define DI_W 1.25 //Adjustment for REF
     //#define DG_Z 0.025 //Min
     //#define DI_Z 0.050 //Trim
 	#define BMT 1
-	#define DF_Z 0.025
-    //#define SMS 3      //SM Toggle Separation
-	//#define DL_X 0.875 //SM Tune
+	#define DF_Z 0.05 //0.025
+    #define SMS 3      //SM Toggle Separation
+	#define DL_X 0.95 //SM Tune
 	//#define DL_W 0.050  //SM Perspective
-	//#define DM_X 4     //HQ Tune
-	//#define DM_Z 3     //HQ Smooth
+	#define DM_X 4     //HQ Tune
+	#define DM_Z 3     //HQ Smooth
     //#define DM_Y 3     //HQ VRS
     //#define DL_Y 0.375    //De-Artifact 0.1245
     #define MMD 2 //Set Multi Menu Detection             //Off / On
