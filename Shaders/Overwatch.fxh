@@ -6205,7 +6205,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DB_X 0
 	#define DA_X 0.0375
 	#define DF_Y 0.0375
-	#define DA_Y 30.0
+	#define DA_Y 32.5
     //#define DA_Z -0.025
 	//#define DB_Z 0.1
 	//#define DB_Y 1
