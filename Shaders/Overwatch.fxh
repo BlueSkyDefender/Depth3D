@@ -1,7 +1,7 @@
 ////----------------------------------------//
 ///SuperDepth3D Overwatch Automation Shader///
 //----------------------------------------////
-// Version 2.8.3
+// Version 2.8.4
 //---------------------------------------OVERWATCH---------------------------------------//
 // If you are reading this stop. Go away and never look back. From this point on if you  //
 // still think it's is worth looking at this..... Then no one can save you or your soul. //
@@ -6429,8 +6429,8 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DI_Z 0.045 //Trim
 	#define BMT 1
 	#define DF_Z 0.0325
-    #define SMS 1      //SM Toggle Separation
-	#define DL_X 0.750 //SM Tune
+    #define SMS 2      //SM Toggle Separation
+	#define DL_X 0.5625 //SM Tune
 	//#define DL_W 0.050 //SM Perspective
 	#define DM_X 4     //HQ Tune
 	#define DM_Z 2     //HQ Smooth
@@ -6492,8 +6492,8 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DA_W 1
     #define DB_X 1
 	#define DA_X 0.050
-	//#define DF_Y 0.010
-	#define DA_Y 155.5//200.0
+	#define DF_Y 0.0125
+	#define DA_Y 150 //200.0
     //#define DA_Z -0.025
 	#define DB_Z 0.100
 	//#define DB_Y 1
@@ -6507,7 +6507,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define DI_Z 0.1425 //0.160 //0.170 //Trim
 	#define BMT 1
 	#define DF_Z 0.125
-    #define SMS 1      //SM Toggle Separation
+    #define SMS 3      //SM Toggle Separation
 	#define DL_X 0.725 //SM Tune
 	#define DL_W 0.050 //SM Perspective
 	#define DM_X 4     //HQ Tune
@@ -6541,25 +6541,26 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	//#define DJ_W 0.150
     #define PEW 1
     #define DAA 1
-#elif (App == 0x5F1E44D ) //SniperElite 5 
+#elif (App == 0x5F1E44D || App == 0x2784E9D ) //SniperElite 5 
 	#define DA_W 1
-    #define DA_X 0.05
-    #define DF_Y 0.04
-    #define DA_Y 20.0
+    #define DA_X 0.05 //0.075
+    #define DF_Y 0.0375
+    #define DA_Y 25.0 //30.0 //20.0
     #define DE_X 1
     #define DE_Y 0.450
     #define DE_Z 0.450
-    #define OIF 0.25 //Fix enables if Value is > 0.0
+    #define OIF 0.125 //Fix enables if Value is > 0.0
 	#define DI_W 1.0 //Adjustment for REF
     #define BMT 1    
-    #define DF_Z 0.1
+    #define DF_Z 0.025
 	#define DG_Z 0.03//Min
     #define DI_Z 0.06 //Trim
-	#define SMS 1      //SM Toggle Separation
-	#define DL_X 0.750 //SM Tune
+	#define SMS 3      //SM Toggle Separation
+	#define DL_X 0.725 //SM Tune
 	//#define DL_W 0.050 //SM Perspective
 	#define DM_X 4     //HQ Tune
 	#define DM_Z 3     //HQ Smooth
+    #define DL_Y 0.25    //De-Artifact
 	/*
     #define MDD 1 //Set Menu Detection & Direction     //Off 0 | 1 | 2 | 3 | 4      
     #define DN_X float4( 0.150, 0.240,  0.250, 0.925)  //Pos A = XY White & B = ZW Black 
