@@ -6413,8 +6413,8 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 #elif (App == 0xCC08DA8C ) //The Vanishing of Ethan Carter Redux
 	#define DA_W 1
     //#define DB_X 1
-	#define DA_X 0.1375
-	#define DF_Y 0.010
+	#define DA_X 0.125 //0.135
+	#define DF_Y 0.005
 	#define DA_Y 10.0//11.25
     //#define DA_Z -0.025
 	#define DB_Z 0.025
@@ -6428,10 +6428,10 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DG_Z 0.001 //Min
     //#define DI_Z 0.045 //Trim
 	#define BMT 1
-	#define DF_Z 0.025
+	#define DF_Z 0.0325
     #define SMS 1      //SM Toggle Separation
-	#define DL_X 0.725 //SM Tune
-	#define DL_W 0.050 //SM Perspective
+	#define DL_X 0.750 //SM Tune
+	//#define DL_W 0.050 //SM Perspective
 	#define DM_X 4     //HQ Tune
 	#define DM_Z 2     //HQ Smooth
     //#define DM_Y 3     //HQ VRS
