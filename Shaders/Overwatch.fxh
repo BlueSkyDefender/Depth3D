@@ -6331,7 +6331,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define PEW 1
 #elif (App == 0xD1B82FBF ) //Descenders
 	#define DA_W 1
-    //#define DB_X 0
+    #define DB_X 1
 	#define DA_X 0.025
 	#define DF_Y 0.010
 	#define DA_Y 37.5
@@ -6371,7 +6371,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define DP_Y float4( 0.490 , 0.666 ,  0.380  , 0.400) //Pos C3 = XY Color & D1 = ZW Color
     #define DP_Z float4( 0.064 , 0.774 ,  0.5689 , 0.400) //Pos D2 = XY Black & D3 = ZW Color
 	#define DP_W float4( 30.0  , 19.0  ,  24.0   , 24.0 ) //Tresh Hold for Color A1 & A3 and Color
-	#define DQ_X float4( 0.356 , 0.632 ,  0.990  , 0.990) //Pos C1 = XY Color & C2 = ZW Black 
+	#define DQ_X float4( 0.356 , 0.632 ,  1.0  , 1.0) //Pos C1 = XY Color & C2 = ZW Black 
     #define DQ_Y float4( 0.500 , 0.829 ,  0.000  , 0.000) //Pos C3 = XY Color & D1 = ZW Color
     #define DQ_Z float4( 0.000 , 0.000 ,  0.000  , 0.000) //Pos D2 = XY Black & D3 = ZW Color
 	#define DQ_W float4( 30.0  , 30.0  , 1000.0  , 1000.0) //Tresh Hold for Color A1 & A3 and Color
