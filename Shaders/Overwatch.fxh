@@ -6597,7 +6597,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	//#define DM_X 4     //HQ Tune
 	//#define DM_Z 2     //HQ Smooth
     //#define DM_Y 3     //HQ VRS
-    //#define DL_Y 0.375    //De-Artifact 0.1245
+    #define DL_Y 0.375    //De-Artifact 0.1245
 	//#define DJ_X 0.150     //Range Smoothing
     /*
     #define MDD 1 //Set Menu Detection & Direction     //Off 0 | 1 | 2 | 3 | 4      
