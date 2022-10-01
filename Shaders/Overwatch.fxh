@@ -6173,6 +6173,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DB_W 29
 	#define HQT 1
     #define PEW 1
+    #define DSW 1
 #elif (App == 0x6A327F2C ) //Snake Pass
 	#define DA_W 1
     //#define DB_X 0
