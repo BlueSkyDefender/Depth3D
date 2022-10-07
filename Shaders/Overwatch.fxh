@@ -1,7 +1,7 @@
 ////----------------------------------------//
 ///SuperDepth3D Overwatch Automation Shader///
 //----------------------------------------////
-// Version 2.8.4
+// Version 2.8.5
 //---------------------------------------OVERWATCH---------------------------------------//
 // If you are reading this stop. Go away and never look back. From this point on if you  //
 // still think it's is worth looking at this..... Then no one can save you or your soul. //
@@ -862,13 +862,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DA_Y 35.00
 	#define DB_X 1
 	#define DB_Y 2
-	#define RHW 1
-#elif (App == 0x578862 ) //Condemned Criminal Origins
-	#define DA_Y 162.5
-	#define DA_Z 0.00025
-	#define DA_X 0.040
-	#define DB_Y 4
-	#define DB_W 49
 	#define RHW 1
 #elif (App == 0xA67FA4BC ) //Outlast
 	#define DA_Y 30.0
@@ -6853,6 +6846,81 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	*/
     #define PEW 1
     #define RHW 1
+#elif (App == 0x578862 ) //Condemned Criminal Origins
+	//#define DA_W 1
+    //#define DB_X 1
+	#define DA_X 0.03
+	#define DF_Y 0.0125
+	#define DA_Y 200.0 //162.5
+	//#define DA_Z -0.00015
+	#define DB_Z 0.050
+	//#define DB_Y 1
+	#define DE_X 7
+	#define DE_Y 0.500
+	#define DE_Z 0.375
+	////#define DG_W 0.200 //Pop
+    #define OIF 0.15 //Fix enables if Value is > 0.0
+	#define DI_W 1.5 //Adjustment for REF
+   // #define DG_Z 0//0.05 //Min
+    //#define DE_W 0.275 //Auto
+    //#define DI_Z 0.05 //Trim
+	#define BMT 1
+	#define DF_Z 0.05
+	#define DB_W 49
+	#define DSW 1
+	#define RHW 1
+	#define FOV 1
+	#define PEW 1
+	#define NFM 1
+  #elif (App == 0x7EF1B86E ) //Marvel's Avengers
+	#define DA_W 1
+    //#define DB_X 1
+	#define DA_X 0.025
+	#define DF_Y 0.0025
+	#define DA_Y 150.00 //27.0
+    #define DA_Z 0.000125
+	//#define DB_Z 0.025
+	//#define DB_Y 1
+	#define DE_X 1
+	#define DE_Y 0.500
+	#define DE_Z 0.375
+	#define DG_W -0.100 //NegPop
+    #define OIF 0.300 //Fix enables if Value is > 0.0
+	#define DI_W 1.00 //Adjustment for REF
+    //#define DG_Z 0 //Min
+    //#define DE_W 0.275 //Auto
+    //#define DI_Z 0.05 //Trim
+	#define BMT 1
+	#define DF_Z 0.15
+    //#define SMS 3      //SM Toggle Separation
+	//#define DL_X 0.950 //SM Tune
+	////#define DL_W 0.050 //SM Perspective
+	//#define DM_X 4     //HQ Tune
+	//#define DM_Z 3     //HQ Smooth
+    //#define DM_Y 3     //HQ VRS
+    //#define DL_Y 0.375    //De-Artifact 0.1245
+	//#define DJ_X 0.150     //Range Smoothing
+    /*
+    #define MDD 1 //Set Menu Detection & Direction     //Off 0 | 1 | 2 | 3 | 4      
+    #define DN_X float4( 0.400 , 0.275, 0.600 , 0.722)  //Pos A = XY White & B = ZW White 
+    #define DN_Y float4( 0.4822, 0.312,  0.0, 0.0)       //Pos C = XY Light & D = ZW Match
+    #define DN_Z float4( 0.0, 0.0,  0.0, 0.0)            //Pos E = XY Match & F = ZW Match
+	#define DN_W float4( 1.0, 0.0 , 0.0, 0.0 )          //Size = Menu [ABC] D E F
+    #define DJ_Y float4( 30.0, 30.0, 6.0, 5.0);            //Menu Detection Type for A, B, & C. The Last Value is a Shift amount for C. 
+    #define DJ_Z float3( 1000., 1000., 1000);                //Set Match Tresh 
+	*/
+	/*	
+    #define MMD 1 //Set Multi Menu Detection             //Off / On
+    #define DO_X float4( 0.415 , 0.882 , 0.250  , 0.882  ) //Pos A1 = XY Color & A2 = ZW Black 
+    #define DO_Y float4( 0.55  , 0.882 , 0.000 , 0.000  ) //Pos A3 = XY Color & B1 = ZW Color
+    #define DO_Z float4( 0.000 , 0.000 , 0.000, 0.000  ) //Pos B2 = XY Black & B3 = ZW Color
+	#define DO_W float4( 30.0  , 30.0  , 1000.0, 1000.0 )   //Tresh Hold for Color A & B and Color
+	#define DP_X float4( 0.075 , 0.150 ,  0.235  , 0.840) //Pos C1 = XY Color & C2 = ZW Black 
+    #define DP_Y float4( 0.350 , 0.241 ,  0.736  , 0.575) //Pos C3 = XY Color & D1 = ZW Color
+    #define DP_Z float4( 0.060 , 0.380 ,  0.286  , 0.195) //Pos D2 = XY Black & D3 = ZW Color
+	#define DP_W float4( 30.0  , 30.0  ,  30.0   , 14.0) //Tresh Hold for Color A1 & A3 and Color
+	*/
+    #define PEW 1
 #else
 	#define NPW 1 //No Profile
 #endif
@@ -7325,11 +7393,11 @@ float4 Weapon_Profiles(float WP ,float4 Weapon_Adjust) //Tried Switch But, can't
     if (WP == 48)
         Weapon_Adjust = float4(0.460,12.5,1.0,0.0);       //WP 46 | F.E.A.R #B302EC7 & F.E.A.R 2: Project Origin #91D9EBAF
     if (WP == 49)
-        Weapon_Adjust = float4(1.5,37.5,0.99875,0.0);     //WP 47 | Condemned Criminal Origins
+        Weapon_Adjust = float4(1.5,30.0,0.950,0.050);     //WP 47 | Condemned Criminal Origins //float4(1.5,37.5,0.99875,0.0); 
     if (WP == 50)
         Weapon_Adjust = float4(2.0,16.25,0.09,0.0);       //WP 48 | Immortal Redneck CP alt 1.9375
     if (WP == 51)
-        Weapon_Adjust = float4(0.485,62.5,0.9625,0.0);    //WP 49 | Dementium 2
+        Weapon_Adjust = float4(0.485,62.5,0.9625,0.25);   //WP 49 | Dementium 2
     if (WP == 52)
         Weapon_Adjust = float4(0.489,68.75,1.02,0.0);     //WP 50 | NecroVisioN & NecroVisioN: Lost Company #663E66FE
 	//Do Not Add more Profiles

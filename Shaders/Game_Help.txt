@@ -280,11 +280,23 @@ r.SceneColorFringeQuality=0
 Save the file and set it to Read Only. 
 
 Keep in mind if you change your setting in game you need to restart so that this INI can remove the problem Post Effects.
-{Condemned Criminal Origins} - Used ReShade 4.4
-Issues with Depth it will stop after scripted events try to use the newest option at the bottom of depth buffer compatablity for DX9.
-Also Dissable FSAA (FSAA OFF) or was it turn it on I forget.
-This is bug in game that drops fps in to the single diglets...... you need a pokemon that strong againts ground types.
-I kid I kid I don't know how to fix this issue try pc gaming wiki when fps drops in the the single digits.
+
+{Condemned Criminal Origins} - Used ReShade 5.4.2+
+Disable FSAA (FSAA OFF) or was it turn it on I forget.
+
+Fix Low Frame Rate
+
+To fix this issue just download the dinput8.dll and drop it into the game folder.
+https://community.pcgamingwiki.com/files/file/789-directinput-fps-fix/
+
+Set a Higher FOV
+
+Go to the installation folder.
+Edit autoexec.cfg with Notepad.
+Add "FovY" "XX" at the end where XX is the desired vertical FOV.
+
+https://www.pcgamingwiki.com/wiki/Condemned:_Criminal_Origins#Low_frame_rate
+https://www.pcgamingwiki.com/wiki/Condemned:_Criminal_Origins#Field_of_view_.28FOV.29
 
 {Crysis 2} [Reshade 4.9.1]
 
@@ -807,19 +819,17 @@ Then pick the correct buffer in your case.
 You Need to set Weapon Profile to the Current Game's Name
 You can Clear Near Depth and set it to 0.0.
 
-{MegaMan 2.5D Now in 3D} [Reshade 4.5.0, Xenos_2.3.2 Injector]
+{MegaMan 2.5D Now in 3D} [Reshade 4.5.0, ReShade inject]
 Install game and make sure in launches in fullscreen and native resolution.
 
-Download https://github.com/DarthTon/Xenos/releases and the latest version of reshade.
+Download https://reshade.me/downloads/inject32.exe and the latest version of reshade.
 
-Create a folder and extract Xenos 2.3.2 you only really need the Xenos.exe 32 bit program and also extract ReShade 32bit dxgi.dll in to the same folder
-as Xenos. Place SuperDepth3D with Overwatch.fxh in this folder and start Xenos.exe.
+Create a folder and extract ReShade 32 bit Dlls and also extract place the inject32.exe. 
+Place SuperDepth3D with Overwatch.fxh in this folder.
 
-Click on Manual Launch radio button.
-Click on Add and select the dxgi.dll.
-Click on Select and find the MM25DGame.exe
+Open a command prompt and Type inject.exe "MM25DGame.exe" Then Run it.
 
-Now click Inject. Then launch your game like normal.
+Then launch your game like normal.
 
 Keep in mind if you alt-tab or lose this window you will lose depth.
 
@@ -1321,6 +1331,9 @@ So if you want to play in 3D use CEMU 1.12.0d It's the latest one I know so far 
 Do Not Ask me for this version & Yes you should be able to finnish the game with this version of cemu.
 
 You will also need to use a resolution graphics pack form here. https://slashiee.github.io/cemu_graphic_packs/ (Older Version 2)
+
+{The Mortuary Assistant} [Reshade 5.4.0]
+Rename ReShade's dxgi.dll to d3d11.dll
 
 {The Park} [Reshade 4.4.2]
 This Has Some Depth Buffer issues in cutscenes. Also you need to find a way to disable the depth of field

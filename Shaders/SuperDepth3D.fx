@@ -2,7 +2,7 @@
 	///**SuperDepth3D**///
 	//----------------////
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	//* Depth Map Based 3D post-process shader v3.4.1
+	//* Depth Map Based 3D post-process shader v3.4.2
 	//* For Reshade 3.0+
 	//* ---------------------------------
 	//*
@@ -1109,6 +1109,8 @@ namespace SuperDepth3D
 	texture TexMaskB < source = "DM_Mask_B.png"; > { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA8; };
 	sampler SamplerMaskB { Texture = TexMaskB;};
 	#endif
+	texture Info_Tex < pooled = true; >  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = R8; };
+	sampler SamplerInfo { Texture = Info_Tex;};
 	#define Scale_Buffer 160 / BUFFER_WIDTH
 	////////////////////////////////////////////////////////Adapted Luminance/////////////////////////////////////////////////////////////////////
 	texture texLumN {Width = BUFFER_WIDTH * Scale_Buffer; Height = BUFFER_HEIGHT * Scale_Buffer; Format = RGBA16F; MipLevels = 8;};
@@ -1581,7 +1583,7 @@ namespace SuperDepth3D
 	
 		return float2(saturate(zBufferWH), WA_XYZW().x);
 	}
-	//3x2 and 2x3 not supported on older ReShade versions. I had to use 3x3. Old Values for 3x2
+	//3x2 and 2x3 not Emu on older ReShade versions. I had to use 3x3. Old Values for 3x2
 	float3x3 PrepDepth(float2 texcoord)
 	{   int Flip_Depth = Flip_Opengl_Depth ? !Depth_Map_Flip : Depth_Map_Flip;
 	
@@ -2647,33 +2649,37 @@ namespace SuperDepth3D
 					CH_QUES = _f(0x69404), CH_COMM = _f(0x00032), CH_FSTP = _f(0x00002),
 					CH_QUOT = _f(0x55000), CH_BLNK = _f(0x00000), CH_COLN = _f(0x00202),
 					CH_LPAR = _f(0x42224), CH_RPAR = _f(0x24442);
-	#define MAP_SIZE float2(4,5)
-	#undef flt
+
 	//returns the status of a bit in a bitmap. This is done value-wise, so the exact representation of the float doesn't really matter.
 	float getBit( float map, float index )
 	{   // Ooh -index takes out that divide :)
 	    return fmod( floor( map * exp2(-index) ), 2.0 );
 	}
 	
-	float drawChar( float Char, float2 pos, float2 size, float2 TC )
-	{   // Subtract our position from the current TC so that we can know if we're inside the bounding box or not.
-	    TC -= pos;
+	float drawChar( float Char,inout float2 posXY, float2 charsize, float2 TC, float shift)
+	{	
+		posXY.x += shift;  
+		// Subtract our position from the current TC so that we can know if we're inside the bounding box or not.
+	    TC -= posXY;
 	    // Divide the screen space by the size, so our bounding box is 1x1.
-	    TC /= size;
+	    TC /= charsize;
 	    // Create a place to store the result & Branchless bounding box check.
 	    float res = step(0.0,min(TC.x,TC.y)) - step(1.0,max(TC.x,TC.y));
 	    // Go ahead and multiply the TC by the bitmap size so we can work in bitmap space coordinates.
-	    TC *= MAP_SIZE;
+	    TC *= float2(4,5);//Map Size
 	    // Get the appropriate bit and return it.
 	    res*=getBit( Char, 4.0*floor(TC.y) + floor(TC.x) );
 	    return saturate(res);
 	}
 	
+	#if (RHW || NCW || NPW || NFM || PEW || DSW || OSW || DAA || NDW || WPW || FOV || EDW)
+		#define Text_Timer 30000
+	#else
+		#defiine Text_Timer 25000
+	#endif
+	
 	float3 Out(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Target
-	{   float3 Color;
-		float2 TC = float2(texcoord.x,1-texcoord.y);
-		float Text_Timer = 25000, BT = smoothstep(0,1,sin(timer*(3.75/1000))), Size = 1.1, Depth3D, Read_Help, Supported, ET, ETC, ETTF, ETTC, SetFoV, FoV, Post, Effect, NoPro, NotCom, Mod, Needs, Net, Over, Set, AA, Emu, Not, No, Help, Fix, Need, State, SetAA, SetWP, Work;
-
+	{   float4 Color = tex2D(SamplerInfo,texcoord).x;
 		#if Reconstruction_Mode
 		float2 TCL, TCR;
 		[branch] if (Stereoscopic_Mode == 0 && !Inficolor_3D_Emulator )
@@ -2692,264 +2698,283 @@ namespace SuperDepth3D
 			TCR = float2(texcoord.x,texcoord.y);
 		}	
 
-		Color = Stereo_Convert( texcoord, differentialBlend(TCL, 0, Reconstruction_Type), differentialBlend(TCR, 1, Reconstruction_Type) ).rgb;	  	
+		Color.rgb = Stereo_Convert( texcoord, differentialBlend(TCL, 0, Reconstruction_Type), differentialBlend(TCR, 1, Reconstruction_Type) ).rgb;	  	
 		#else
-		Color = PS_calcLR(texcoord, position.xy).rgb; //Color = texcoord.x+texcoord.y > 1 ? Color : LBDetection();
+		Color.rgb = PS_calcLR(texcoord, position.xy).rgb; //Color = texcoord.x+texcoord.y > 1 ? Color : LBDetection();
 		#endif
-		if(RHW || NCW || NPW || NFM || PEW || DSW || OSW || DAA || NDW || WPW || FOV || EDW)
-			Text_Timer = 30000;
-	
-		[branch] if(timer <= Text_Timer || Text_Info)
-		{   // Set a general character size...
-			float2 charSize = float2(.00875, .0125) * Size;
-			// Starting position.
-			float2 charPos = float2( 0.009, 0.9725);
-			//Check Copy Depth or Depth Selection
-			Needs += drawChar( CH_C, charPos, charSize, TC); charPos.x += .01 * Size;
-			Needs += drawChar( CH_H, charPos, charSize, TC); charPos.x += .01 * Size;
-			Needs += drawChar( CH_E, charPos, charSize, TC); charPos.x += .01 * Size;
-			Needs += drawChar( CH_C, charPos, charSize, TC); charPos.x += .01 * Size;
-			Needs += drawChar( CH_K, charPos, charSize, TC); charPos.x += .01 * Size;
-			Needs += drawChar( CH_BLNK, charPos, charSize, TC); charPos.x += .01 * Size;
-			Needs += drawChar( CH_C, charPos, charSize, TC); charPos.x += .01 * Size;
-			Needs += drawChar( CH_O, charPos, charSize, TC); charPos.x += .01 * Size;
-			Needs += drawChar( CH_P, charPos, charSize, TC); charPos.x += .01 * Size;
-			Needs += drawChar( CH_Y, charPos, charSize, TC); charPos.x += .01 * Size;
-			Needs += drawChar( CH_BLNK, charPos, charSize, TC); charPos.x += .01 * Size;
-			Needs += drawChar( CH_D, charPos, charSize, TC); charPos.x += .01 * Size;
-			Needs += drawChar( CH_E, charPos, charSize, TC); charPos.x += .01 * Size;
-			Needs += drawChar( CH_P, charPos, charSize, TC); charPos.x += .01 * Size;
-			Needs += drawChar( CH_T, charPos, charSize, TC); charPos.x += .01 * Size;
-			Needs += drawChar( CH_H, charPos, charSize, TC); charPos.x += .01 * Size;
-			Needs += drawChar( CH_BLNK, charPos, charSize, TC); charPos.x += .01 * Size;
-			Needs += drawChar( CH_O, charPos, charSize, TC); charPos.x += .01 * Size;
-			Needs += drawChar( CH_R, charPos, charSize, TC); charPos.x += .01 * Size;
-			Needs += drawChar( CH_BLNK, charPos, charSize, TC); charPos.x += .01 * Size;
-			Needs += drawChar( CH_D, charPos, charSize, TC); charPos.x += .01 * Size;
-			Needs += drawChar( CH_E, charPos, charSize, TC); charPos.x += .01 * Size;
-			Needs += drawChar( CH_P, charPos, charSize, TC); charPos.x += .01 * Size;
-			Needs += drawChar( CH_T, charPos, charSize, TC); charPos.x += .01 * Size;
-			Needs += drawChar( CH_H, charPos, charSize, TC); charPos.x += .01 * Size;
-			Needs += drawChar( CH_BLNK, charPos, charSize, TC); charPos.x += .01 * Size;
-			Needs += drawChar( CH_S, charPos, charSize, TC); charPos.x += .01 * Size;
-			Needs += drawChar( CH_E, charPos, charSize, TC); charPos.x += .01 * Size;
-			Needs += drawChar( CH_L, charPos, charSize, TC); charPos.x += .01 * Size;
-			Needs += drawChar( CH_E, charPos, charSize, TC); charPos.x += .01 * Size;
-			Needs += drawChar( CH_C, charPos, charSize, TC); charPos.x += .01 * Size;
-			Needs += drawChar( CH_T, charPos, charSize, TC); charPos.x += .01 * Size;
-			Needs += drawChar( CH_I, charPos, charSize, TC); charPos.x += .01 * Size;
-			Needs += drawChar( CH_O, charPos, charSize, TC); charPos.x += .01 * Size;
-			Needs += drawChar( CH_N, charPos, charSize, TC);
-			//Net Play
-			charPos = float2( 0.009, 0.955);
-			Work += drawChar( CH_N, charPos, charSize, TC); charPos.x += .01 * Size;
-			Work += drawChar( CH_E, charPos, charSize, TC); charPos.x += .01 * Size;
-			Work += drawChar( CH_T, charPos, charSize, TC); charPos.x += .01 * Size;
-			Work += drawChar( CH_W, charPos, charSize, TC); charPos.x += .01 * Size;
-			Work += drawChar( CH_O, charPos, charSize, TC); charPos.x += .01 * Size;
-			Work += drawChar( CH_R, charPos, charSize, TC); charPos.x += .01 * Size;
-			Work += drawChar( CH_K, charPos, charSize, TC); charPos.x += .01 * Size;
-			Work += drawChar( CH_BLNK, charPos, charSize, TC); charPos.x += .01 * Size;
-			Work += drawChar( CH_P, charPos, charSize, TC); charPos.x += .01 * Size;
-			Work += drawChar( CH_L, charPos, charSize, TC); charPos.x += .01 * Size;
-			Work += drawChar( CH_A, charPos, charSize, TC); charPos.x += .01 * Size;
-			Work += drawChar( CH_Y, charPos, charSize, TC); charPos.x += .01 * Size;
-			//Supported Emulator Detected - Removed
-			//charPos = float2( 0.009, 0.9375);
-
-			//Disable CA/MB/Dof/Grain
-			charPos = float2( 0.009, 0.920);
-			Effect += drawChar( CH_D, charPos, charSize, TC); charPos.x += .01 * Size;
-			Effect += drawChar( CH_I, charPos, charSize, TC); charPos.x += .01 * Size;
-			Effect += drawChar( CH_S, charPos, charSize, TC); charPos.x += .01 * Size;
-			Effect += drawChar( CH_A, charPos, charSize, TC); charPos.x += .01 * Size;
-			Effect += drawChar( CH_B, charPos, charSize, TC); charPos.x += .01 * Size;
-			Effect += drawChar( CH_L, charPos, charSize, TC); charPos.x += .01 * Size;
-			Effect += drawChar( CH_E, charPos, charSize, TC); charPos.x += .01 * Size;
-			Effect += drawChar( CH_BLNK, charPos, charSize, TC); charPos.x += .01 * Size;
-			Effect += drawChar( CH_C, charPos, charSize, TC); charPos.x += .01 * Size;
-			Effect += drawChar( CH_A, charPos, charSize, TC); charPos.x += .01 * Size;
-			Effect += drawChar( CH_SLSH, charPos, charSize, TC); charPos.x += .01 * Size;
-			Effect += drawChar( CH_M, charPos, charSize, TC); charPos.x += .01 * Size;
-			Effect += drawChar( CH_B, charPos, charSize, TC); charPos.x += .01 * Size;
-			Effect += drawChar( CH_SLSH, charPos, charSize, TC); charPos.x += .01 * Size;
-			Effect += drawChar( CH_D, charPos, charSize, TC); charPos.x += .01 * Size;
-			Effect += drawChar( CH_O, charPos, charSize, TC); charPos.x += .01 * Size;
-			Effect += drawChar( CH_F, charPos, charSize, TC); charPos.x += .01 * Size;
-			Effect += drawChar( CH_SLSH, charPos, charSize, TC); charPos.x += .01 * Size;
-			Effect += drawChar( CH_G, charPos, charSize, TC); charPos.x += .01 * Size;
-			Effect += drawChar( CH_R, charPos, charSize, TC); charPos.x += .01 * Size;
-			Effect += drawChar( CH_A, charPos, charSize, TC); charPos.x += .01 * Size;
-			Effect += drawChar( CH_I, charPos, charSize, TC); charPos.x += .01 * Size;
-			Effect += drawChar( CH_N, charPos, charSize, TC);
-			//Check TAA/MSAA/DLSS
-			charPos = float2( 0.009, 0.9025);
-			SetAA += drawChar( CH_C, charPos, charSize, TC); charPos.x += .01 * Size;
-			SetAA += drawChar( CH_H, charPos, charSize, TC); charPos.x += .01 * Size;
-			SetAA += drawChar( CH_E, charPos, charSize, TC); charPos.x += .01 * Size;
-			SetAA += drawChar( CH_C, charPos, charSize, TC); charPos.x += .01 * Size;
-			SetAA += drawChar( CH_K, charPos, charSize, TC); charPos.x += .01 * Size;
-			SetAA += drawChar( CH_BLNK, charPos, charSize, TC); charPos.x += .01 * Size;
-			SetAA += drawChar( CH_T, charPos, charSize, TC); charPos.x += .01 * Size;
-			SetAA += drawChar( CH_A, charPos, charSize, TC); charPos.x += .01 * Size;
-			SetAA += drawChar( CH_A, charPos, charSize, TC); charPos.x += .01 * Size;
-			SetAA += drawChar( CH_SLSH, charPos, charSize, TC); charPos.x += .01 * Size;
-			SetAA += drawChar( CH_M, charPos, charSize, TC); charPos.x += .01 * Size;
-			SetAA += drawChar( CH_S, charPos, charSize, TC); charPos.x += .01 * Size;
-			SetAA += drawChar( CH_A, charPos, charSize, TC); charPos.x += .01 * Size;
-			SetAA += drawChar( CH_A, charPos, charSize, TC); charPos.x += .01 * Size;
-			SetAA += drawChar( CH_SLSH, charPos, charSize, TC); charPos.x += .01 * Size;
-			SetAA += drawChar( CH_D, charPos, charSize, TC); charPos.x += .01 * Size;
-			SetAA += drawChar( CH_L, charPos, charSize, TC); charPos.x += .01 * Size;
-			SetAA += drawChar( CH_S, charPos, charSize, TC); charPos.x += .01 * Size;
-			SetAA += drawChar( CH_S, charPos, charSize, TC);
-			//Set Weapon
-			charPos = float2( 0.009, 0.885);
-			SetWP += drawChar( CH_S, charPos, charSize, TC); charPos.x += .01 * Size;
-			SetWP += drawChar( CH_E, charPos, charSize, TC); charPos.x += .01 * Size;
-			SetWP += drawChar( CH_T, charPos, charSize, TC); charPos.x += .01 * Size;
-			SetWP += drawChar( CH_BLNK, charPos, charSize, TC); charPos.x += .01 * Size;
-			SetWP += drawChar( CH_W, charPos, charSize, TC); charPos.x += .01 * Size;
-			SetWP += drawChar( CH_E, charPos, charSize, TC); charPos.x += .01 * Size;
-			SetWP += drawChar( CH_A, charPos, charSize, TC); charPos.x += .01 * Size;
-			SetWP += drawChar( CH_P, charPos, charSize, TC); charPos.x += .01 * Size;
-			SetWP += drawChar( CH_O, charPos, charSize, TC); charPos.x += .01 * Size;
-			SetWP += drawChar( CH_N, charPos, charSize, TC); charPos.x += .01 * Size;
-			//Set FoV
-			charPos = float2( 0.009, 0.8675);
-			SetFoV += drawChar( CH_S, charPos, charSize, TC); charPos.x += .01 * Size;
-			SetFoV += drawChar( CH_E, charPos, charSize, TC); charPos.x += .01 * Size;
-			SetFoV += drawChar( CH_T, charPos, charSize, TC); charPos.x += .01 * Size;
-			SetFoV += drawChar( CH_BLNK, charPos, charSize, TC); charPos.x += .01 * Size;
-			SetFoV += drawChar( CH_F, charPos, charSize, TC); charPos.x += .01 * Size;
-			SetFoV += drawChar( CH_O, charPos, charSize, TC); charPos.x += .01 * Size;
-			SetFoV += drawChar( CH_V, charPos, charSize, TC);
-			//Read Help
-			charPos = float2( 0.894, 0.9725);
-			Read_Help += drawChar( CH_R, charPos, charSize, TC); charPos.x += .01 * Size;
-			Read_Help += drawChar( CH_E, charPos, charSize, TC); charPos.x += .01 * Size;
-			Read_Help += drawChar( CH_A, charPos, charSize, TC); charPos.x += .01 * Size;
-			Read_Help += drawChar( CH_D, charPos, charSize, TC); charPos.x += .01 * Size;
-			Read_Help += drawChar( CH_BLNK, charPos, charSize, TC); charPos.x += .01 * Size;
-			Read_Help += drawChar( CH_H, charPos, charSize, TC); charPos.x += .01 * Size;
-			Read_Help += drawChar( CH_E, charPos, charSize, TC); charPos.x += .01 * Size;
-			Read_Help += drawChar( CH_L, charPos, charSize, TC); charPos.x += .01 * Size;
-			Read_Help += drawChar( CH_P, charPos, charSize, TC);
-			//New Start
-			charPos = float2( 0.009, 0.018);
-			// No Profile
-			NoPro += drawChar( CH_N, charPos, charSize, TC); charPos.x += .01 * Size;
-			NoPro += drawChar( CH_O, charPos, charSize, TC); charPos.x += .01 * Size;
-			NoPro += drawChar( CH_BLNK, charPos, charSize, TC); charPos.x += .01 * Size;
-			NoPro += drawChar( CH_P, charPos, charSize, TC); charPos.x += .01 * Size;
-			NoPro += drawChar( CH_R, charPos, charSize, TC); charPos.x += .01 * Size;
-			NoPro += drawChar( CH_O, charPos, charSize, TC); charPos.x += .01 * Size;
-			NoPro += drawChar( CH_F, charPos, charSize, TC); charPos.x += .01 * Size;
-			NoPro += drawChar( CH_I, charPos, charSize, TC); charPos.x += .01 * Size;
-			NoPro += drawChar( CH_L, charPos, charSize, TC); charPos.x += .01 * Size;
-			NoPro += drawChar( CH_E, charPos, charSize, TC); charPos.x = 0.009;
-			//Incompatible
-			NotCom += drawChar( CH_I, charPos, charSize, TC); charPos.x += .01 * Size;
-			NotCom += drawChar( CH_N, charPos, charSize, TC); charPos.x += .01 * Size;
-			NotCom += drawChar( CH_C, charPos, charSize, TC); charPos.x += .01 * Size;
-			NotCom += drawChar( CH_O, charPos, charSize, TC); charPos.x += .01 * Size;
-			NotCom += drawChar( CH_P, charPos, charSize, TC); charPos.x += .01 * Size;
-			NotCom += drawChar( CH_A, charPos, charSize, TC); charPos.x += .01 * Size;
-			NotCom += drawChar( CH_T, charPos, charSize, TC); charPos.x += .01 * Size;
-			NotCom += drawChar( CH_I, charPos, charSize, TC); charPos.x += .01 * Size;
-			NotCom += drawChar( CH_B, charPos, charSize, TC); charPos.x += .01 * Size;
-			NotCom += drawChar( CH_L, charPos, charSize, TC); charPos.x += .01 * Size;
-			NotCom += drawChar( CH_E, charPos, charSize, TC); charPos.x = 0.009;
-			//Needs Mod
-			Mod += drawChar( CH_N, charPos, charSize, TC); charPos.x += .01 * Size;
-			Mod += drawChar( CH_E, charPos, charSize, TC); charPos.x += .01 * Size;
-			Mod += drawChar( CH_E, charPos, charSize, TC); charPos.x += .01 * Size;
-			Mod += drawChar( CH_D, charPos, charSize, TC); charPos.x += .01 * Size;
-			Mod += drawChar( CH_S, charPos, charSize, TC); charPos.x += .01 * Size;
-			Mod += drawChar( CH_BLNK, charPos, charSize, TC); charPos.x += .01 * Size;
-			Mod += drawChar( CH_M, charPos, charSize, TC); charPos.x += .01 * Size;
-			Mod += drawChar( CH_O, charPos, charSize, TC); charPos.x += .01 * Size;
-			Mod += drawChar( CH_D, charPos, charSize, TC); charPos.x = 0.009;
-			//Overwatch.fxh Missing
-			State += drawChar( CH_O, charPos, charSize, TC); charPos.x += .01 * Size;
-			State += drawChar( CH_V, charPos, charSize, TC); charPos.x += .01 * Size;
-			State += drawChar( CH_E, charPos, charSize, TC); charPos.x += .01 * Size;
-			State += drawChar( CH_R, charPos, charSize, TC); charPos.x += .01 * Size;
-			State += drawChar( CH_W, charPos, charSize, TC); charPos.x += .01 * Size;
-			State += drawChar( CH_A, charPos, charSize, TC); charPos.x += .01 * Size;
-			State += drawChar( CH_T, charPos, charSize, TC); charPos.x += .01 * Size;
-			State += drawChar( CH_C, charPos, charSize, TC); charPos.x += .01 * Size;
-			State += drawChar( CH_H, charPos, charSize, TC); charPos.x += .01 * Size;
-			State += drawChar( CH_FSTP, charPos, charSize, TC); charPos.x += .01 * Size;
-			State += drawChar( CH_F, charPos, charSize, TC); charPos.x += .01 * Size;
-			State += drawChar( CH_X, charPos, charSize, TC); charPos.x += .01 * Size;
-			State += drawChar( CH_H, charPos, charSize, TC); charPos.x += .01 * Size;
-			State += drawChar( CH_BLNK, charPos, charSize, TC); charPos.x += .01 * Size;
-			State += drawChar( CH_M, charPos, charSize, TC); charPos.x += .01 * Size;
-			State += drawChar( CH_I, charPos, charSize, TC); charPos.x += .01 * Size;
-			State += drawChar( CH_S, charPos, charSize, TC); charPos.x += .01 * Size;
-			State += drawChar( CH_S, charPos, charSize, TC); charPos.x += .01 * Size;
-			State += drawChar( CH_I, charPos, charSize, TC); charPos.x += .01 * Size;
-			State += drawChar( CH_N, charPos, charSize, TC); charPos.x += .01 * Size;
-			State += drawChar( CH_G, charPos, charSize, TC);
-			//New Size
-			float D3D_Size_A = 1.375,D3D_Size_B = 0.75;
-			float2 charSize_A = float2(.00875, .0125) * D3D_Size_A, charSize_B = float2(.00875, .0125) * D3D_Size_B;
-			//New Start Pos
-			charPos = float2( 0.862, 0.018);
-			//Depth3D.Info Logo/Website
-			Depth3D += drawChar( CH_D, charPos, charSize_A, TC); charPos.x += .01 * D3D_Size_A;
-			Depth3D += drawChar( CH_E, charPos, charSize_A, TC); charPos.x += .01 * D3D_Size_A;
-			Depth3D += drawChar( CH_P, charPos, charSize_A, TC); charPos.x += .01 * D3D_Size_A;
-			Depth3D += drawChar( CH_T, charPos, charSize_A, TC); charPos.x += .01 * D3D_Size_A;
-			Depth3D += drawChar( CH_H, charPos, charSize_A, TC); charPos.x += .01 * D3D_Size_A;
-			Depth3D += drawChar( CH_3, charPos, charSize_A, TC); charPos.x += .01 * D3D_Size_A;
-			Depth3D += drawChar( CH_D, charPos, charSize_A, TC); charPos.x += 0.008 * D3D_Size_A;
-			Depth3D += drawChar( CH_FSTP, charPos, charSize_A, TC); charPos.x += 0.01 * D3D_Size_A;
-			charPos = float2( 0.963, 0.018);
-			Depth3D += drawChar( CH_I, charPos, charSize_B, TC); charPos.x += .01 * D3D_Size_B;
-			Depth3D += drawChar( CH_N, charPos, charSize_B, TC); charPos.x += .01 * D3D_Size_B;
-			Depth3D += drawChar( CH_F, charPos, charSize_B, TC); charPos.x += .01 * D3D_Size_B;
-			Depth3D += drawChar( CH_O, charPos, charSize_B, TC);
-
-			//Text Information
-			if(DSW)
-				Need = Needs;
-			if(RHW)
-				Help = Read_Help;
-			if(NDW)
-				Net = Work;
-			if(PEW)
-				Post = Effect;
-			if(WPW)
-				Set = SetWP;
-			if(DAA)
-				AA = SetAA;
-			if(FOV)
-				FoV = SetFoV;
-			if(EDW)
-				Emu = Supported;
-			//Blinking Text Warnings
-			if(NPW)
-				No = NoPro * BT;
-			if(NCW)
-				Not = NotCom * BT;
-			if(NFM)
-				Fix = Mod * BT;
-			if(OSW)
-				Over = State * BT;
-			//Website
-			return Depth3D+Help+Post+No+Not+Net+Fix+Need+Over+AA+Set+FoV+Emu+ET ? (1-texcoord.y*50.0+48.85)*texcoord.y-0.500: Color;
-		}
-		else
-			return Color;
+		return timer <= Text_Timer || Text_Info ? Color.rgb + Color.w : Color.rgb;
 	}
+		
+	float3 InfoOut(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Target
+	{   float3 Color;
+		float2 TC = float2(texcoord.x,1-texcoord.y);
+		float BT = smoothstep(0,1,sin(timer*(3.75/1000))), Size = 1.1, Depth3D, Read_Help, Emu, SetFoV, PostEffects, NoPro, NotCom, ModFix, Needs, Network, OW_State, SetAA, SetWP;
+		//Text Information
+		float2 charSize = float2(.00875, .0125) * Size;// Set a general character size...
+		// Starting position.
+		float2 charPos = float2( 0.009, 0.9725);
+		float2 Shift_Adjust = float2( 0.01, 0.009) * Size;
+		//Check Depth/Add-on Options		
+		#if DSW
+			Needs += drawChar( CH_C, charPos.xy, charSize, TC, 0 );
+			Needs += drawChar( CH_H, charPos.xy, charSize, TC, Shift_Adjust.x );
+			Needs += drawChar( CH_E, charPos.xy, charSize, TC, Shift_Adjust.x ); 
+			Needs += drawChar( CH_C, charPos.xy, charSize, TC, Shift_Adjust.x );
+			Needs += drawChar( CH_K, charPos.xy, charSize, TC, Shift_Adjust.x );
+			Needs += drawChar( CH_BLNK, charPos.xy, charSize, TC, Shift_Adjust.x ); 
+			Needs += drawChar( CH_D, charPos.xy, charSize, TC, Shift_Adjust.x ); 
+			Needs += drawChar( CH_E, charPos.xy, charSize, TC, Shift_Adjust.x ); 
+			Needs += drawChar( CH_P, charPos.xy, charSize, TC, Shift_Adjust.x ); 
+			Needs += drawChar( CH_T, charPos.xy, charSize, TC, Shift_Adjust.x ); //DX9 limit
+			Needs += drawChar( CH_H, charPos.xy, charSize, TC, Shift_Adjust.x ); 
+			Needs += drawChar( CH_SLSH, charPos.xy, charSize, TC, Shift_Adjust.x ); 
+			Needs += drawChar( CH_A, charPos.xy, charSize, TC, Shift_Adjust.x ); 
+			Needs += drawChar( CH_D, charPos.xy, charSize, TC, Shift_Adjust.x ); 
+			Needs += drawChar( CH_D, charPos.xy, charSize, TC, Shift_Adjust.x ); 
+			Needs += drawChar( CH_UNDS, charPos.xy, charSize, TC, Shift_Adjust.x ); 
+			Needs += drawChar( CH_O, charPos.xy, charSize, TC, Shift_Adjust.x ); 
+			Needs += drawChar( CH_N, charPos.xy, charSize, TC, Shift_Adjust.x ); 
+			Needs += drawChar( CH_BLNK, charPos.xy, charSize, TC, Shift_Adjust.x ); 
+			Needs += drawChar( CH_O, charPos.xy, charSize, TC, Shift_Adjust.x ); 
+			Needs += drawChar( CH_P, charPos.xy, charSize, TC, Shift_Adjust.x ); 
+			Needs += drawChar( CH_T, charPos.xy, charSize, TC, Shift_Adjust.x ); 
+			Needs += drawChar( CH_I, charPos.xy, charSize, TC, Shift_Adjust.x ); //DX9  whith no Web info
+			Needs += drawChar( CH_O, charPos.xy, charSize, TC, Shift_Adjust.x );
+			Needs += drawChar( CH_N, charPos.xy, charSize, TC, Shift_Adjust.x );
+			Needs += drawChar( CH_S, charPos.xy, charSize, TC, Shift_Adjust.x );		
+		#endif
+		//Net Play		
+		#if NDW
+			charPos = float2( 0.009, 0.955);
+			Network += drawChar( CH_N, charPos.xy, charSize, TC, 0 );
+			Network += drawChar( CH_E, charPos.xy, charSize, TC, Shift_Adjust.x );
+			Network += drawChar( CH_T, charPos.xy, charSize, TC, Shift_Adjust.x );
+			Network += drawChar( CH_BLNK, charPos.xy, charSize, TC, Shift_Adjust.x );
+			Network += drawChar( CH_P, charPos.xy, charSize, TC, Shift_Adjust.x );
+			Network += drawChar( CH_L, charPos.xy, charSize, TC, Shift_Adjust.x );
+			Network += drawChar( CH_A, charPos.xy, charSize, TC, Shift_Adjust.x );
+			Network += drawChar( CH_Y, charPos.xy, charSize, TC, Shift_Adjust.x );
+		#endif
+		//Emulator Detected
+		#if (EDW)
+			charPos = float2( 0.009, 0.9375);
+			Emu += drawChar( CH_E, charPos.xy, charSize, TC, 0 );
+			Emu += drawChar( CH_M, charPos.xy, charSize, TC, Shift_Adjust.x );
+			Emu += drawChar( CH_U, charPos.xy, charSize, TC, Shift_Adjust.x );
+			Emu += drawChar( CH_L, charPos.xy, charSize, TC, Shift_Adjust.x );
+			Emu += drawChar( CH_A, charPos.xy, charSize, TC, Shift_Adjust.x );
+			Emu += drawChar( CH_T, charPos.xy, charSize, TC, Shift_Adjust.x );
+			Emu += drawChar( CH_O, charPos.xy, charSize, TC, Shift_Adjust.x );
+			Emu += drawChar( CH_R, charPos.xy, charSize, TC, Shift_Adjust.x );
+			Emu += drawChar( CH_BLNK, charPos.xy, charSize, TC, Shift_Adjust.x );
+			Emu += drawChar( CH_D, charPos.xy, charSize, TC, Shift_Adjust.x );
+			Emu += drawChar( CH_E, charPos.xy, charSize, TC, Shift_Adjust.x );
+			Emu += drawChar( CH_T, charPos.xy, charSize, TC, Shift_Adjust.x );
+			Emu += drawChar( CH_E, charPos.xy, charSize, TC, Shift_Adjust.x );
+			Emu += drawChar( CH_C, charPos.xy, charSize, TC, Shift_Adjust.x );
+			Emu += drawChar( CH_T, charPos.xy, charSize, TC, Shift_Adjust.x );
+			Emu += drawChar( CH_E, charPos.xy, charSize, TC, Shift_Adjust.x );
+			Emu += drawChar( CH_D, charPos.xy, charSize, TC, Shift_Adjust.x );
+		#endif
+		//Disable CA/MB/Dof/Grain		
+		#if PEW
+			charPos = float2( 0.009, 0.920);
+			PostEffects += drawChar( CH_D, charPos.xy, charSize, TC, 0 );
+			PostEffects += drawChar( CH_I, charPos.xy, charSize, TC, Shift_Adjust.x );
+			PostEffects += drawChar( CH_S, charPos.xy, charSize, TC, Shift_Adjust.x );
+			PostEffects += drawChar( CH_A, charPos.xy, charSize, TC, Shift_Adjust.x );
+			PostEffects += drawChar( CH_B, charPos.xy, charSize, TC, Shift_Adjust.x );
+			PostEffects += drawChar( CH_L, charPos.xy, charSize, TC, Shift_Adjust.x );
+			PostEffects += drawChar( CH_E, charPos.xy, charSize, TC, Shift_Adjust.x );
+			PostEffects += drawChar( CH_BLNK, charPos.xy, charSize, TC, Shift_Adjust.x );
+			PostEffects += drawChar( CH_C, charPos.xy, charSize, TC, Shift_Adjust.x );
+			PostEffects += drawChar( CH_A, charPos.xy, charSize, TC, Shift_Adjust.x );
+			PostEffects += drawChar( CH_SLSH, charPos.xy, charSize, TC, Shift_Adjust.x );
+			PostEffects += drawChar( CH_M, charPos.xy, charSize, TC, Shift_Adjust.x );
+			PostEffects += drawChar( CH_B, charPos.xy, charSize, TC, Shift_Adjust.x );
+			PostEffects += drawChar( CH_SLSH, charPos.xy, charSize, TC, Shift_Adjust.x );
+			PostEffects += drawChar( CH_D, charPos.xy, charSize, TC, Shift_Adjust.x );
+			PostEffects += drawChar( CH_O, charPos.xy, charSize, TC, Shift_Adjust.x );
+			PostEffects += drawChar( CH_F, charPos.xy, charSize, TC, Shift_Adjust.x );
+			PostEffects += drawChar( CH_SLSH, charPos.xy, charSize, TC, Shift_Adjust.x );
+			PostEffects += drawChar( CH_G, charPos.xy, charSize, TC, Shift_Adjust.x );
+			PostEffects += drawChar( CH_R, charPos.xy, charSize, TC, Shift_Adjust.x );
+			PostEffects += drawChar( CH_A, charPos.xy, charSize, TC, Shift_Adjust.x );
+			PostEffects += drawChar( CH_I, charPos.xy, charSize, TC, Shift_Adjust.x );
+			PostEffects += drawChar( CH_N, charPos.xy, charSize, TC, Shift_Adjust.x );
+		#endif
+		//Check TAA/MSAA/SS		
+		#if DAA
+			charPos = float2( 0.009, 0.9025);
+			SetAA += drawChar( CH_C, charPos.xy, charSize, TC, 0 ); 
+			SetAA += drawChar( CH_H, charPos.xy, charSize, TC, Shift_Adjust.x ); 
+			SetAA += drawChar( CH_E, charPos.xy, charSize, TC, Shift_Adjust.x ); 
+			SetAA += drawChar( CH_C, charPos.xy, charSize, TC, Shift_Adjust.x ); 
+			SetAA += drawChar( CH_K, charPos.xy, charSize, TC, Shift_Adjust.x ); 
+			SetAA += drawChar( CH_BLNK, charPos.xy, charSize, TC, Shift_Adjust.x ); 
+			SetAA += drawChar( CH_T, charPos.xy, charSize, TC, Shift_Adjust.x ); 
+			SetAA += drawChar( CH_A, charPos.xy, charSize, TC, Shift_Adjust.x ); 
+			SetAA += drawChar( CH_A, charPos.xy, charSize, TC, Shift_Adjust.x ); 
+			SetAA += drawChar( CH_SLSH, charPos.xy, charSize, TC, Shift_Adjust.x ); 
+			SetAA += drawChar( CH_M, charPos.xy, charSize, TC, Shift_Adjust.x ); 
+			SetAA += drawChar( CH_S, charPos.xy, charSize, TC, Shift_Adjust.x ); 
+			SetAA += drawChar( CH_A, charPos.xy, charSize, TC, Shift_Adjust.x ); 
+			SetAA += drawChar( CH_A, charPos.xy, charSize, TC, Shift_Adjust.x ); 
+			SetAA += drawChar( CH_SLSH, charPos.xy, charSize, TC, Shift_Adjust.x ); 
+			SetAA += drawChar( CH_S, charPos.xy, charSize, TC, Shift_Adjust.x ); 
+			SetAA += drawChar( CH_S, charPos.xy, charSize, TC, Shift_Adjust.x );
+		#endif
+		//Set Weapon		
+		#if WPW
+			charPos = float2( 0.009, 0.885);
+			SetWP += drawChar( CH_S, charPos.xy, charSize, TC, 0 ); 
+			SetWP += drawChar( CH_E, charPos.xy, charSize, TC, Shift_Adjust.x ); 
+			SetWP += drawChar( CH_T, charPos.xy, charSize, TC, Shift_Adjust.x ); 
+			SetWP += drawChar( CH_BLNK, charPos.xy, charSize, TC, Shift_Adjust.x ); 
+			SetWP += drawChar( CH_W, charPos.xy, charSize, TC, Shift_Adjust.x ); 
+			SetWP += drawChar( CH_E, charPos.xy, charSize, TC, Shift_Adjust.x ); 
+			SetWP += drawChar( CH_A, charPos.xy, charSize, TC, Shift_Adjust.x ); 
+			SetWP += drawChar( CH_P, charPos.xy, charSize, TC, Shift_Adjust.x ); 
+			SetWP += drawChar( CH_O, charPos.xy, charSize, TC, Shift_Adjust.x ); 
+			SetWP += drawChar( CH_N, charPos.xy, charSize, TC, Shift_Adjust.x );
+		#endif
+		//Set FoV		
+		#if FOV
+			charPos = float2( 0.009, 0.8675);
+			SetFoV += drawChar( CH_S, charPos.xy, charSize, TC, 0 );
+			SetFoV += drawChar( CH_E, charPos.xy, charSize, TC, Shift_Adjust.x );
+			SetFoV += drawChar( CH_T, charPos.xy, charSize, TC, Shift_Adjust.x );
+			SetFoV += drawChar( CH_BLNK, charPos.xy, charSize, TC, Shift_Adjust.x );
+			SetFoV += drawChar( CH_F, charPos.xy, charSize, TC, Shift_Adjust.x );
+			SetFoV += drawChar( CH_O, charPos.xy, charSize, TC, Shift_Adjust.x );
+			SetFoV += drawChar( CH_V, charPos.xy, charSize, TC, Shift_Adjust.x );
+		#endif
+		//Read Help		
+		#if RHW
+			charPos = float2( 0.894, 0.9725);
+			Read_Help += drawChar( CH_R, charPos.xy, charSize, TC, 0 );
+			Read_Help += drawChar( CH_E, charPos.xy, charSize, TC, Shift_Adjust.x );
+			Read_Help += drawChar( CH_A, charPos.xy, charSize, TC, Shift_Adjust.x );
+			Read_Help += drawChar( CH_D, charPos.xy, charSize, TC, Shift_Adjust.x );
+			Read_Help += drawChar( CH_BLNK, charPos.xy, charSize, TC, Shift_Adjust.x );
+			Read_Help += drawChar( CH_H, charPos.xy, charSize, TC, Shift_Adjust.x );
+			Read_Help += drawChar( CH_E, charPos.xy, charSize, TC, Shift_Adjust.x );
+			Read_Help += drawChar( CH_L, charPos.xy, charSize, TC, Shift_Adjust.x );
+			Read_Help += drawChar( CH_P, charPos.xy, charSize, TC, Shift_Adjust.x );
+		#endif
+		//Text Warnings
+		charPos = float2( 0.009, 0.018);
+		//No Profile
+		#if NPW
+			NoPro += drawChar( CH_N, charPos.xy, charSize, TC, 0 );
+			NoPro += drawChar( CH_O, charPos.xy, charSize, TC, Shift_Adjust.x );
+			NoPro += drawChar( CH_BLNK, charPos.xy, charSize, TC, Shift_Adjust.x );
+			NoPro += drawChar( CH_P, charPos.xy, charSize, TC, Shift_Adjust.x );
+			NoPro += drawChar( CH_R, charPos.xy, charSize, TC, Shift_Adjust.x );
+			NoPro += drawChar( CH_O, charPos.xy, charSize, TC, Shift_Adjust.x );
+			NoPro += drawChar( CH_F, charPos.xy, charSize, TC, Shift_Adjust.x );
+			NoPro += drawChar( CH_I, charPos.xy, charSize, TC, Shift_Adjust.x );
+			NoPro += drawChar( CH_L, charPos.xy, charSize, TC, Shift_Adjust.x );
+			NoPro += drawChar( CH_E, charPos.xy, charSize, TC, Shift_Adjust.x );
+		#endif
+		//Incompatible		
+		#if NCW
+			NotCom += drawChar( CH_I, charPos.xy, charSize, TC, 0 ); 
+			NotCom += drawChar( CH_N, charPos.xy, charSize, TC, Shift_Adjust.x );
+			NotCom += drawChar( CH_C, charPos.xy, charSize, TC, Shift_Adjust.x );
+			NotCom += drawChar( CH_O, charPos.xy, charSize, TC, Shift_Adjust.x );
+			NotCom += drawChar( CH_P, charPos.xy, charSize, TC, Shift_Adjust.x );
+			NotCom += drawChar( CH_A, charPos.xy, charSize, TC, Shift_Adjust.x );
+			NotCom += drawChar( CH_T, charPos.xy, charSize, TC, Shift_Adjust.x );
+			NotCom += drawChar( CH_I, charPos.xy, charSize, TC, Shift_Adjust.x );
+			NotCom += drawChar( CH_B, charPos.xy, charSize, TC, Shift_Adjust.x );
+			NotCom += drawChar( CH_L, charPos.xy, charSize, TC, Shift_Adjust.x );
+			NotCom += drawChar( CH_E, charPos.xy, charSize, TC, Shift_Adjust.x );
+		#endif
+		//Needs Mod		
+		#if NFM
+			ModFix += drawChar( CH_N, charPos.xy, charSize, TC, 0 );
+			ModFix += drawChar( CH_E, charPos.xy, charSize, TC, Shift_Adjust.x );
+			ModFix += drawChar( CH_E, charPos.xy, charSize, TC, Shift_Adjust.x );
+			ModFix += drawChar( CH_D, charPos.xy, charSize, TC, Shift_Adjust.x );
+			ModFix += drawChar( CH_S, charPos.xy, charSize, TC, Shift_Adjust.x );
+			ModFix += drawChar( CH_BLNK, charPos.xy, charSize, TC, Shift_Adjust.x );
+			ModFix += drawChar( CH_M, charPos.xy, charSize, TC, Shift_Adjust.x );
+			ModFix += drawChar( CH_O, charPos.xy, charSize, TC, Shift_Adjust.x );
+			ModFix += drawChar( CH_D, charPos.xy, charSize, TC, Shift_Adjust.y );
+		#endif
+		//Overwatch.fxh Missing
+		#if OSW
+			OW_State += drawChar( CH_O, charPos.xy, charSize, TC, 0 );
+			OW_State += drawChar( CH_V, charPos.xy, charSize, TC, Shift_Adjust.x );
+			OW_State += drawChar( CH_E, charPos.xy, charSize, TC, Shift_Adjust.x );
+			OW_State += drawChar( CH_R, charPos.xy, charSize, TC, Shift_Adjust.x );
+			OW_State += drawChar( CH_W, charPos.xy, charSize, TC, Shift_Adjust.x );
+			OW_State += drawChar( CH_A, charPos.xy, charSize, TC, Shift_Adjust.x );
+			OW_State += drawChar( CH_T, charPos.xy, charSize, TC, Shift_Adjust.x );
+			OW_State += drawChar( CH_C, charPos.xy, charSize, TC, Shift_Adjust.x );
+			OW_State += drawChar( CH_H, charPos.xy, charSize, TC, Shift_Adjust.x );
+			OW_State += drawChar( CH_FSTP, charPos.xy, charSize, TC, Shift_Adjust.x );
+			OW_State += drawChar( CH_F, charPos.xy, charSize, TC, Shift_Adjust.x );
+			OW_State += drawChar( CH_X, charPos.xy, charSize, TC, Shift_Adjust.x );
+			OW_State += drawChar( CH_H, charPos.xy, charSize, TC, Shift_Adjust.x );
+			OW_State += drawChar( CH_BLNK, charPos.xy, charSize, TC, Shift_Adjust.x );
+			OW_State += drawChar( CH_M, charPos.xy, charSize, TC, Shift_Adjust.x );
+			OW_State += drawChar( CH_I, charPos.xy, charSize, TC, Shift_Adjust.x );
+			OW_State += drawChar( CH_S, charPos.xy, charSize, TC, Shift_Adjust.x );
+			OW_State += drawChar( CH_S, charPos.xy, charSize, TC, Shift_Adjust.x );
+			OW_State += drawChar( CH_I, charPos.xy, charSize, TC, Shift_Adjust.x );
+			OW_State += drawChar( CH_N, charPos.xy, charSize, TC, Shift_Adjust.x );
+			OW_State += drawChar( CH_G, charPos.xy, charSize, TC, Shift_Adjust.x );
+		#endif
+		//New Size
+		float D3D_Size_A = 1.375,D3D_Size_B = 0.75;
+		float2 charSize_A = float2(.00875, .0125) * D3D_Size_A, charSize_B = float2(.00875, .0125) * D3D_Size_B;
+		//New Start Pos
+		charPos = float2( 0.862, 0.018);
+		Shift_Adjust = float2( 0.01, 0.008) * D3D_Size_A;
+		//Depth3D.Info Logo/Website
+		Depth3D += drawChar( CH_D, charPos.xy, charSize_A, TC, 0);
+		Depth3D += drawChar( CH_E, charPos.xy, charSize_A, TC, Shift_Adjust.x ); 
+		Depth3D += drawChar( CH_P, charPos.xy, charSize_A, TC, Shift_Adjust.x ); 
+		Depth3D += drawChar( CH_T, charPos.xy, charSize_A, TC, Shift_Adjust.x ); 
+		Depth3D += drawChar( CH_H, charPos.xy, charSize_A, TC, Shift_Adjust.x ); 
+		Depth3D += drawChar( CH_3, charPos.xy, charSize_A, TC, Shift_Adjust.x ); 
+		Depth3D += drawChar( CH_D, charPos.xy, charSize_A, TC, Shift_Adjust.y ); 
+		Depth3D += drawChar( CH_FSTP, charPos.xy, charSize_A, TC, Shift_Adjust.y );
+		charPos = float2( 0.960, 0.018);
+		Shift_Adjust = float2( 0.01, 0.008) * D3D_Size_B;
+		Depth3D += drawChar( CH_I, charPos.xy, charSize_B, TC, 0); 
+		Depth3D += drawChar( CH_N, charPos.xy, charSize_B, TC, Shift_Adjust.x ); 
+		Depth3D += drawChar( CH_F, charPos.xy, charSize_B, TC, Shift_Adjust.x );
+		Depth3D += drawChar( CH_O, charPos.xy, charSize_B, TC, Shift_Adjust.x );
+
+		//Website
+		return Depth3D+Read_Help+PostEffects+NoPro+NotCom+Network+ModFix+Needs+OW_State+SetAA+SetWP+SetFoV+Emu ? (1-texcoord.y*50.0+48.85)*texcoord.y-0.500: 0;
+	}	
+	
 	///////////////////////////////////////////////////////////////////ReShade.fxh//////////////////////////////////////////////////////////////////////
 	void PostProcessVS(in uint id : SV_VertexID, out float4 position : SV_Position, out float2 texcoord : TEXCOORD)
 	{// Vertex shader generating a triangle covering the entire screen
 		texcoord.x = (id == 2) ? 2.0 : 0.0;
 		texcoord.y = (id == 1) ? 2.0 : 0.0;
 		position = float4(texcoord * float2(2.0, -2.0) + float2(-1.0, 1.0), 0.0, 1.0);
+	}
+
+	technique Information
+	< ui_label = "Information";
+	//toggle = Text_Info_Key;
+	 hidden = true; 
+	 enabled = true;
+	 timeout = 1;
+	 ui_tooltip = "Help Technique."; >
+	{
+			pass Help
+		{
+			VertexShader = PostProcessVS;
+			PixelShader = InfoOut;
+			RenderTarget = Info_Tex;
+		}
 	}
 	
 	technique SuperDepth3D
