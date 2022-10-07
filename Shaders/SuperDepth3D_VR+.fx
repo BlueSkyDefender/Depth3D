@@ -2405,7 +2405,7 @@ namespace SuperDepth3DVR
 	#if (RHW || NCW || NPW || NFM || PEW || DSW || OSW || DAA || NDW || WPW || FOV || EDW)
 		#define Text_Timer 30000
 	#else
-		#defiine Text_Timer 25000
+		#define Text_Timer 25000
 	#endif
 	
 	float3 Out(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Target
