@@ -2,7 +2,7 @@
 	///**SuperDepth3D**///
 	//----------------////
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	//* Depth Map Based 3D post-process shader v3.4.2
+	//* Depth Map Based 3D post-process shader v3.4.3
 	//* For Reshade 3.0+
 	//* ---------------------------------
 	//*
@@ -75,7 +75,7 @@ namespace SuperDepth3D
 		#define OW_WP "WP Off\0Custom WP\0"
 		static const int WSM = 0;
 		//Triggers
-		static const int SPO = 0, MMD = 0, SMP = 0, LBR = 0, HQT = 0, AFD = 0, MDD = 0, FPS = 1, SMS = 1, OIF = 0, NCW = 0, RHW = 0, NPW = 0, IDF = 0, SPF = 0, BDF = 0, HMT = 0, DFW = 0, NFM = 0, DSW = 0, BMT = 0, LBC = 0, LBS = 0, LBM = 0, DAA = 0, NDW = 0, PEW = 0, WPW = 0, FOV = 0, EDW = 0, SDT = 0;
+		static const int FTM = 0, SPO = 0, MMD = 0, SMP = 0, LBR = 0, HQT = 0, AFD = 0, MDD = 0, FPS = 1, SMS = 1, OIF = 0, NCW = 0, RHW = 0, NPW = 0, IDF = 0, SPF = 0, BDF = 0, HMT = 0, DFW = 0, NFM = 0, DSW = 0, BMT = 0, LBC = 0, LBS = 0, LBM = 0, DAA = 0, NDW = 0, PEW = 0, WPW = 0, FOV = 0, EDW = 0, SDT = 0;
 		//Overwatch.fxh State
 		#define OSW 1
 	#endif
@@ -156,7 +156,10 @@ namespace SuperDepth3D
 	
 	//Text Information Key Default Menu Key
 	#define Text_Info_Key 93
-		
+	
+	//Fast Trigger Mode
+	#define Fast_Trigger_Mode FTM //To override or activate this set it to 0 or 1 This only works if Overwatch tells the shader to do it or not.
+	
 	//USER EDITABLE PREPROCESSOR FUNCTIONS END//
 	#if !defined(__RESHADE__) || __RESHADE__ < 40000
 		#define Compatibility 1
@@ -1654,6 +1657,11 @@ namespace SuperDepth3D
 		return PStoredfade + (Trigger_Fade - PStoredfade) * (1.0 - exp(-frametime/((1-AA)*1000))); ///exp2 would be even slower
 	}
 	
+	float Auto_Adjust_Cal(float Val)
+	{
+		return (1-(Val*2.))*1000;
+	}
+	
 	float2 Fade(float2 texcoord) // Maybe make it float2 and pass the 2nd switch to swap it with grater strength onlu if it's beyond -1.0
 	{   //Check Depth
 		float CD, Detect, Detect_Out_of_Range;
@@ -1701,16 +1709,17 @@ namespace SuperDepth3D
 					//Used if Depth Buffer is way out of range.
 					if(RE_Set().x)
 					{
-					if ( CD < -DI_W )
-						Detect_Out_of_Range = 1;
+						if ( CD < -DI_W )
+							Detect_Out_of_Range = 1;
 					}
 				}
 			}
 		}
-		float Trigger_Fade_A = Detect, Trigger_Fade_B = Detect_Out_of_Range, AA = (1-(ZPD_Boundary_n_Fade.y*2.))*1000, 
+		float ZPD_BnF = Auto_Adjust_Cal(Fast_Trigger_Mode && Detect_Out_of_Range ? 0.5 : ZPD_Boundary_n_Fade.y);
+		float Trigger_Fade_A = Detect, Trigger_Fade_B = Detect_Out_of_Range, AA = Auto_Adjust_Cal(ZPD_Boundary_n_Fade.y), 
 			  PStoredfade_A = tex2D(SamplerLumN,float2(0, 0.250)).z, PStoredfade_B = tex2D(SamplerLumN,float2(0, 0.416)).z;
 		//Fade in toggle.
-		return float2( PStoredfade_A + (Trigger_Fade_A - PStoredfade_A) * (1.0 - exp(-frametime/AA)), PStoredfade_B + (Trigger_Fade_B - PStoredfade_B) * (1.0 - exp(-frametime/AA)) ); ///exp2 would be even slower
+		return float2( PStoredfade_A + (Trigger_Fade_A - PStoredfade_A) * (1.0 - exp(-frametime/AA )), PStoredfade_B + (Trigger_Fade_B - PStoredfade_B) * (1.0 - exp(-frametime/ZPD_BnF)) ); ///exp2 would be even slower
 	}
 	#define FadeSpeed_AW 0.375
 	float AltWeapon_Fade()
@@ -1807,13 +1816,15 @@ namespace SuperDepth3D
 
 				ZP = saturate( ZPD_Balance * max(0.5, Auto_Balance_Selection().x));
 				
-			float DOoR = smoothstep(0,1,tex2D(SamplerLumN,float2(0, 0.416)).z);//, ZDP_Array[17] = { 0.0, 0.0125, 0.025, 0.0375, 0.04375, 0.05, 0.0625, 0.075, 0.0875, 0.09375, 0.1, 0.125, 0.150, 0.175, 0.20, 0.225, 0.250};
-			
+			float DOoR_A = smoothstep(0,1,tex2D(SamplerLumN,float2(0, 0.416)).z);//RE_Set().y = ,ZDP_Array[17] = { 0.0, 0.0125, 0.025, 0.0375, 0.04375, 0.05, 0.0625, 0.075, 0.0875, 0.09375, 0.1, 0.125, 0.150, 0.175, 0.20, 0.225, 0.250};
+			float DOoR_B = smoothstep(0,1,tex2D(SamplerLumN,float2(0, 0.250)).z);
 			if(RE_Set().x)
-					ZPD_Boundary = lerp(ZPD_Boundary,RE_Set().y,DOoR);
-
-	
-			Z *= lerp( 1, ZPD_Boundary, smoothstep(0,1,tex2D(SamplerLumN,float2(0, 0.250)).z));
+				ZPD_Boundary = lerp(ZPD_Boundary, RE_Set().y, DOoR_A);
+			if(Fast_Trigger_Mode)
+				DOoR_B = saturate(DOoR_A+DOoR_B);
+			
+			Z *= lerp( 1, ZPD_Boundary, DOoR_B);
+			
 			float Convergence = 1 - Z / D;
 			if (ZPD_Separation.x == 0)
 				ZP = 1;
@@ -2573,11 +2584,11 @@ namespace SuperDepth3D
 		float Average_ZPD = PrepDepth( texcoord )[0][0];
 	
 		const int Num_of_Values = 6; //6 total array values that map to the textures width.
-		float Storage__Array[Num_of_Values] = { tex2D(SamplerDMN,0).x,    //0.083
-	                                tex2D(SamplerDMN,1).x,                //0.250
-	                                tex2D(SamplerDMN,int2(0,1)).x,        //0.416
-	                                1.0,                                  //0.583
-									tex2D(SamplerzBufferN_P,1).y,         //0.750
+		float Storage__Array[Num_of_Values] = { tex2D(SamplerDMN,0).x,    //0.083 //tl
+	                                tex2D(SamplerDMN,1).x,                //0.250 //br
+	                                tex2D(SamplerDMN,int2(0,1)).x,        //0.416 //bl
+	                                1.0,                                  //0.583 //empthy
+									tex2D(SamplerzBufferN_P,1).y,         //0.750 
 									tex2D(SamplerzBufferN_P,int2(0,1)).y};//0.916
 	
 		//Set a avr size for the Number of lines needed in texture storage.
