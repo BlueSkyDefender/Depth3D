@@ -2,7 +2,7 @@
 	///**SuperDepth3D**///
 	//----------------////
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	//* Depth Map Based 3D post-process shader v3.4.3
+	//* Depth Map Based 3D post-process shader v3.4.4
 	//* For Reshade 3.0+
 	//* ---------------------------------
 	//*
@@ -75,7 +75,7 @@ namespace SuperDepth3D
 		#define OW_WP "WP Off\0Custom WP\0"
 		static const int WSM = 0;
 		//Triggers
-		static const int FTM = 0, SPO = 0, MMD = 0, SMP = 0, LBR = 0, HQT = 0, AFD = 0, MDD = 0, FPS = 1, SMS = 1, OIF = 0, NCW = 0, RHW = 0, NPW = 0, IDF = 0, SPF = 0, BDF = 0, HMT = 0, DFW = 0, NFM = 0, DSW = 0, BMT = 0, LBC = 0, LBS = 0, LBM = 0, DAA = 0, NDW = 0, PEW = 0, WPW = 0, FOV = 0, EDW = 0, SDT = 0;
+		static const int NVK = 0, NDG = 0, FTM = 0, SPO = 0, MMD = 0, SMP = 0, LBR = 0, HQT = 0, AFD = 0, MDD = 0, FPS = 1, SMS = 1, OIF = 0, NCW = 0, RHW = 0, NPW = 0, IDF = 0, SPF = 0, BDF = 0, HMT = 0, DFW = 0, NFM = 0, DSW = 0, BMT = 0, LBC = 0, LBS = 0, LBM = 0, DAA = 0, NDW = 0, PEW = 0, WPW = 0, FOV = 0, EDW = 0, SDT = 0;
 		//Overwatch.fxh State
 		#define OSW 1
 	#endif
@@ -195,6 +195,19 @@ namespace SuperDepth3D
 	#else
 		#define Ven 0
 	#endif
+	 //Vulkan: 0x20000
+	#if __RENDERER__ >= 0x20000 //Is Vulkan
+		#define ISVK 1
+	#else
+		#define ISVK 0
+	#endif
+	
+	#if __RENDERER__ >= 0xc000 //Is DX12
+		#define ISDX 1
+	#else
+		#define ISDX 0
+	#endif
+	
 	//Resolution Scaling because I can't tell your monitor size.
 	#if (BUFFER_HEIGHT <= 720)
 		#define Max_Divergence 25.0
@@ -2645,9 +2658,9 @@ namespace SuperDepth3D
 	static const _f CH_A    = _f(0x69f99), CH_B    = _f(0x79797), CH_C    = _f(0xe111e),
 					CH_D    = _f(0x79997), CH_E    = _f(0xf171f), CH_F    = _f(0xf1711),
 					CH_G    = _f(0xe1d96), CH_H    = _f(0x99f99), CH_I    = _f(0xf444f),
-					CH_J    = _f(0x88996), CH_K    = _f(0x95159), CH_L    = _f(0x1111f),
-					CH_M    = _f(0x9fd99), CH_N    = _f(0x9bd99), CH_O    = _f(0x69996),
-					CH_P    = _f(0x79971), CH_Q    = _f(0x69b5a), CH_R    = _f(0x79759),
+					CH_J    = _f(0x88996), CH_K    = _f(0x95359), CH_L    = _f(0x1111f),
+					CH_M    = _f(0x9fb99), CH_N    = _f(0x9bd99), CH_O    = _f(0x69996),
+					CH_P    = _f(0x79711), CH_Q    = _f(0x69b5a), CH_R    = _f(0x79759),
 					CH_S    = _f(0xe1687), CH_T    = _f(0xf4444), CH_U    = _f(0x99996),
 					CH_V    = _f(0x999a4), CH_W    = _f(0x999f9), CH_X    = _f(0x99699),
 					CH_Y    = _f(0x99e8e), CH_Z    = _f(0xf843f), CH_0    = _f(0x6bd96),
@@ -2719,13 +2732,13 @@ namespace SuperDepth3D
 	float3 InfoOut(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Target
 	{   float3 Color;
 		float2 TC = float2(texcoord.x,1-texcoord.y);
-		float BT = smoothstep(0,1,sin(timer*(3.75/1000))), Size = 1.1, Depth3D, Read_Help, Emu, SetFoV, PostEffects, NoPro, NotCom, ModFix, Needs, Network, OW_State, SetAA, SetWP;
+		float BT = smoothstep(0,1,sin(timer*(3.75/1000))), Size = 1.1, Depth3D, Read_Help, Emu, SetFoV, PostEffects, NoPro, NotCom, ModFix, Needs, Network, OW_State, SetAA, SetWP, DGDX, DXVK;
 		//Text Information
 		float2 charSize = float2(.00875, .0125) * Size;// Set a general character size...
 		// Starting position.
 		float2 charPos = float2( 0.009, 0.9725);
 		float2 Shift_Adjust = float2( 0.01, 0.009) * Size;
-		//Check Depth/Add-on Options		
+		//Check Depth/Add-on Options: Copy Depth Clear/Frame
 		#if DSW
 			Needs += drawChar( CH_C, charPos.xy, charSize, TC, 0 );
 			Needs += drawChar( CH_H, charPos.xy, charSize, TC, Shift_Adjust.x );
@@ -2736,7 +2749,7 @@ namespace SuperDepth3D
 			Needs += drawChar( CH_D, charPos.xy, charSize, TC, Shift_Adjust.x ); 
 			Needs += drawChar( CH_E, charPos.xy, charSize, TC, Shift_Adjust.x ); 
 			Needs += drawChar( CH_P, charPos.xy, charSize, TC, Shift_Adjust.x ); 
-			Needs += drawChar( CH_T, charPos.xy, charSize, TC, Shift_Adjust.x ); //DX9 limit
+			Needs += drawChar( CH_T, charPos.xy, charSize, TC, Shift_Adjust.x );
 			Needs += drawChar( CH_H, charPos.xy, charSize, TC, Shift_Adjust.x ); 
 			Needs += drawChar( CH_SLSH, charPos.xy, charSize, TC, Shift_Adjust.x ); 
 			Needs += drawChar( CH_A, charPos.xy, charSize, TC, Shift_Adjust.x ); 
@@ -2749,23 +2762,48 @@ namespace SuperDepth3D
 			Needs += drawChar( CH_O, charPos.xy, charSize, TC, Shift_Adjust.x ); 
 			Needs += drawChar( CH_P, charPos.xy, charSize, TC, Shift_Adjust.x ); 
 			Needs += drawChar( CH_T, charPos.xy, charSize, TC, Shift_Adjust.x ); 
-			Needs += drawChar( CH_I, charPos.xy, charSize, TC, Shift_Adjust.x ); //DX9  whith no Web info
+			Needs += drawChar( CH_I, charPos.xy, charSize, TC, Shift_Adjust.x );
 			Needs += drawChar( CH_O, charPos.xy, charSize, TC, Shift_Adjust.x );
 			Needs += drawChar( CH_N, charPos.xy, charSize, TC, Shift_Adjust.x );
-			Needs += drawChar( CH_S, charPos.xy, charSize, TC, Shift_Adjust.x );		
+			Needs += drawChar( CH_S, charPos.xy, charSize, TC, Shift_Adjust.x );	
+			Needs += drawChar( CH_COLN, charPos.xy, charSize, TC, Shift_Adjust.x );
+			Needs += drawChar( CH_BLNK, charPos.xy, charSize, TC, Shift_Adjust.x );
+			Needs += drawChar( CH_C, charPos.xy, charSize, TC, Shift_Adjust.x );
+			Needs += drawChar( CH_O, charPos.xy, charSize, TC, Shift_Adjust.x );
+			Needs += drawChar( CH_P, charPos.xy, charSize, TC, Shift_Adjust.x ); 
+			Needs += drawChar( CH_Y, charPos.xy, charSize, TC, Shift_Adjust.x ); 
+			Needs += drawChar( CH_BLNK, charPos.xy, charSize, TC, Shift_Adjust.x ); 
+			Needs += drawChar( CH_D, charPos.xy, charSize, TC, Shift_Adjust.x ); 
+			Needs += drawChar( CH_E, charPos.xy, charSize, TC, Shift_Adjust.x ); 
+			Needs += drawChar( CH_P, charPos.xy, charSize, TC, Shift_Adjust.x ); 
+			Needs += drawChar( CH_T, charPos.xy, charSize, TC, Shift_Adjust.x );
+			Needs += drawChar( CH_H, charPos.xy, charSize, TC, Shift_Adjust.x );
+			Needs += drawChar( CH_BLNK, charPos.xy, charSize, TC, Shift_Adjust.x );  	
+			Needs += drawChar( CH_C, charPos.xy, charSize, TC, Shift_Adjust.x ); 
+			Needs += drawChar( CH_L, charPos.xy, charSize, TC, Shift_Adjust.x ); 
+			Needs += drawChar( CH_E, charPos.xy, charSize, TC, Shift_Adjust.x ); 
+			Needs += drawChar( CH_A, charPos.xy, charSize, TC, Shift_Adjust.x );
+			Needs += drawChar( CH_R, charPos.xy, charSize, TC, Shift_Adjust.x );
+			Needs += drawChar( CH_SLSH, charPos.xy, charSize, TC, Shift_Adjust.x ); 
+			Needs += drawChar( CH_F, charPos.xy, charSize, TC, Shift_Adjust.x ); 
+			Needs += drawChar( CH_R, charPos.xy, charSize, TC, Shift_Adjust.x ); 
+			Needs += drawChar( CH_A, charPos.xy, charSize, TC, Shift_Adjust.x ); 
+			Needs += drawChar( CH_M, charPos.xy, charSize, TC, Shift_Adjust.x );
+			Needs += drawChar( CH_E, charPos.xy, charSize, TC, Shift_Adjust.x );
 		#endif
-		//Net Play		
-		#if NDW
+		/* Empthy		
+		#if DSO
 			charPos = float2( 0.009, 0.955);
-			Network += drawChar( CH_N, charPos.xy, charSize, TC, 0 );
-			Network += drawChar( CH_E, charPos.xy, charSize, TC, Shift_Adjust.x );
-			Network += drawChar( CH_T, charPos.xy, charSize, TC, Shift_Adjust.x );
-			Network += drawChar( CH_BLNK, charPos.xy, charSize, TC, Shift_Adjust.x );
-			Network += drawChar( CH_P, charPos.xy, charSize, TC, Shift_Adjust.x );
-			Network += drawChar( CH_L, charPos.xy, charSize, TC, Shift_Adjust.x );
-			Network += drawChar( CH_A, charPos.xy, charSize, TC, Shift_Adjust.x );
-			Network += drawChar( CH_Y, charPos.xy, charSize, TC, Shift_Adjust.x );
+			//Network += drawChar( CH_N, charPos.xy, charSize, TC, 0 );
+			//Network += drawChar( CH_E, charPos.xy, charSize, TC, Shift_Adjust.x );
+			//Network += drawChar( CH_T, charPos.xy, charSize, TC, Shift_Adjust.x );
+			//Network += drawChar( CH_BLNK, charPos.xy, charSize, TC, Shift_Adjust.x );
+			//Network += drawChar( CH_P, charPos.xy, charSize, TC, Shift_Adjust.x );
+			//Network += drawChar( CH_L, charPos.xy, charSize, TC, Shift_Adjust.x );
+			//Network += drawChar( CH_A, charPos.xy, charSize, TC, Shift_Adjust.x );
+			//Network += drawChar( CH_Y, charPos.xy, charSize, TC, Shift_Adjust.x );
 		#endif
+		*/
 		//Emulator Detected
 		#if (EDW)
 			charPos = float2( 0.009, 0.9375);
@@ -2849,9 +2887,21 @@ namespace SuperDepth3D
 			SetWP += drawChar( CH_O, charPos.xy, charSize, TC, Shift_Adjust.x ); 
 			SetWP += drawChar( CH_N, charPos.xy, charSize, TC, Shift_Adjust.x );
 		#endif
+		//Net Play		
+		#if NDW
+			charPos = float2( 0.009, 0.8675);
+			Network += drawChar( CH_N, charPos.xy, charSize, TC, 0 );
+			Network += drawChar( CH_E, charPos.xy, charSize, TC, Shift_Adjust.x );
+			Network += drawChar( CH_T, charPos.xy, charSize, TC, Shift_Adjust.x );
+			Network += drawChar( CH_BLNK, charPos.xy, charSize, TC, Shift_Adjust.x );
+			Network += drawChar( CH_P, charPos.xy, charSize, TC, Shift_Adjust.x );
+			Network += drawChar( CH_L, charPos.xy, charSize, TC, Shift_Adjust.x );
+			Network += drawChar( CH_A, charPos.xy, charSize, TC, Shift_Adjust.x );
+			Network += drawChar( CH_Y, charPos.xy, charSize, TC, Shift_Adjust.x );
+		#endif
 		//Set FoV		
 		#if FOV
-			charPos = float2( 0.009, 0.8675);
+			charPos = float2( 0.009, 0.850);
 			SetFoV += drawChar( CH_S, charPos.xy, charSize, TC, 0 );
 			SetFoV += drawChar( CH_E, charPos.xy, charSize, TC, Shift_Adjust.x );
 			SetFoV += drawChar( CH_T, charPos.xy, charSize, TC, Shift_Adjust.x );
@@ -2894,6 +2944,7 @@ namespace SuperDepth3D
 			NotCom += drawChar( CH_N, charPos.xy, charSize, TC, Shift_Adjust.x );
 			NotCom += drawChar( CH_C, charPos.xy, charSize, TC, Shift_Adjust.x );
 			NotCom += drawChar( CH_O, charPos.xy, charSize, TC, Shift_Adjust.x );
+			NotCom += drawChar( CH_M, charPos.xy, charSize, TC, Shift_Adjust.x );
 			NotCom += drawChar( CH_P, charPos.xy, charSize, TC, Shift_Adjust.x );
 			NotCom += drawChar( CH_A, charPos.xy, charSize, TC, Shift_Adjust.x );
 			NotCom += drawChar( CH_T, charPos.xy, charSize, TC, Shift_Adjust.x );
@@ -2913,6 +2964,37 @@ namespace SuperDepth3D
 			ModFix += drawChar( CH_M, charPos.xy, charSize, TC, Shift_Adjust.x );
 			ModFix += drawChar( CH_O, charPos.xy, charSize, TC, Shift_Adjust.x );
 			ModFix += drawChar( CH_D, charPos.xy, charSize, TC, Shift_Adjust.y );
+		#endif
+		//Need DXVK
+		#if NVK && !ISVK
+			DXVK += drawChar( CH_N, charPos.xy, charSize, TC, 0 );
+			DXVK += drawChar( CH_E, charPos.xy, charSize, TC, Shift_Adjust.x );
+			DXVK += drawChar( CH_E, charPos.xy, charSize, TC, Shift_Adjust.x );
+			DXVK += drawChar( CH_D, charPos.xy, charSize, TC, Shift_Adjust.x );
+			DXVK += drawChar( CH_S, charPos.xy, charSize, TC, Shift_Adjust.x );
+			DXVK += drawChar( CH_BLNK, charPos.xy, charSize, TC, Shift_Adjust.x );
+			DXVK += drawChar( CH_D, charPos.xy, charSize, TC, Shift_Adjust.x );
+			DXVK += drawChar( CH_X, charPos.xy, charSize, TC, Shift_Adjust.x );
+			DXVK += drawChar( CH_V, charPos.xy, charSize, TC, Shift_Adjust.x );
+			DXVK += drawChar( CH_K, charPos.xy, charSize, TC, Shift_Adjust.x );
+		#endif
+		//Use DGVOODOO2
+		#if NDG && !ISDX
+			DGDX += drawChar( CH_N, charPos.xy, charSize, TC, 0 ); 
+			DGDX += drawChar( CH_E, charPos.xy, charSize, TC, Shift_Adjust.x );
+			DGDX += drawChar( CH_E, charPos.xy, charSize, TC, Shift_Adjust.x );
+			DGDX += drawChar( CH_D, charPos.xy, charSize, TC, Shift_Adjust.x );
+			DGDX += drawChar( CH_S, charPos.xy, charSize, TC, Shift_Adjust.x );
+			DGDX += drawChar( CH_BLNK, charPos.xy, charSize, TC, Shift_Adjust.x );
+			DGDX += drawChar( CH_D, charPos.xy, charSize, TC, Shift_Adjust.x );
+			DGDX += drawChar( CH_G, charPos.xy, charSize, TC, Shift_Adjust.x );
+			DGDX += drawChar( CH_V, charPos.xy, charSize, TC, Shift_Adjust.x );
+			DGDX += drawChar( CH_O, charPos.xy, charSize, TC, Shift_Adjust.x );
+			DGDX += drawChar( CH_O, charPos.xy, charSize, TC, Shift_Adjust.x );
+			DGDX += drawChar( CH_D, charPos.xy, charSize, TC, Shift_Adjust.x );
+			DGDX += drawChar( CH_O, charPos.xy, charSize, TC, Shift_Adjust.x );
+			DGDX += drawChar( CH_O, charPos.xy, charSize, TC, Shift_Adjust.x );
+			DGDX += drawChar( CH_2, charPos.xy, charSize, TC, Shift_Adjust.x );
 		#endif
 		//Overwatch.fxh Missing
 		#if OSW
@@ -2961,7 +3043,7 @@ namespace SuperDepth3D
 		Depth3D += drawChar( CH_O, charPos.xy, charSize_B, TC, Shift_Adjust.x );
 
 		//Website
-		return Depth3D+Read_Help+PostEffects+NoPro+NotCom+Network+ModFix+Needs+OW_State+SetAA+SetWP+SetFoV+Emu ? (1-texcoord.y*50.0+48.85)*texcoord.y-0.500: 0;
+		return Depth3D+Read_Help+PostEffects+NoPro+NotCom+Network+ModFix+Needs+OW_State+SetAA+SetWP+SetFoV+Emu+DGDX+DXVK ? (1-texcoord.y*50.0+48.85)*texcoord.y-0.500: 0;
 	}	
 	
 	///////////////////////////////////////////////////////////////////ReShade.fxh//////////////////////////////////////////////////////////////////////

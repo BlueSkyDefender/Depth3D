@@ -1541,9 +1541,9 @@ Also please use DarkPlaces "build 20140513" from here. https://icculus.org/twili
 _________________________________________________________________________________________________________________________________
 -=Problem Games=-
 =================================================================================================================================
-{Dead Space} [retested 10/21/2019]
-Games Depth Buffer does not show till after the elevator part at the start. Depth Buffer also goes away when interacting with some objects and when you get video feeds.
-I suggest useing TriDef. For this game.
+{Dead Space} [retested 10/09/2022]
+This game works now if you use DXVK and use both Copy Clear and Copy Frame in Depth Add-on Api in reshade under vulkan.
+I still suggest useing TriDef. For this game or wait for the remake.
 
 {Monstrum}
 Start the game in OpenGL or DX3D mode. Game seems to change Depth Buffer now after update. I suggest useing TriDef.
