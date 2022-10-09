@@ -1541,9 +1541,13 @@ Also please use DarkPlaces "build 20140513" from here. https://icculus.org/twili
 _________________________________________________________________________________________________________________________________
 -=Problem Games=-
 =================================================================================================================================
-{Dead Space} [retested 10/09/2022]
-This game works now if you use DXVK and use both Copy Clear and Copy Frame in Depth Add-on Api in reshade under vulkan.
-I still suggest useing TriDef. For this game or wait for the remake.
+{Dead Space} [ReShade 5.4.2 tested 10/09/2022]
+This game works now if you use DXVK and use both Copy Clear and Copy Frame in the Depth Add-on Api in reshade under vulkan.
+I still suggest using TriDef for this game or wait for the remake. Since Depth is still unstable.
+
+{Dead Space 2} [ReShade 5.4.2 tested 10/09/2022]
+This game works now if you use DXVK and use both Copy Clear in the Depth Add-on Api in reshade under vulkan.
+I still suggest using TriDef for this game. Since Depth is still unstable.
 
 {Monstrum}
 Start the game in OpenGL or DX3D mode. Game seems to change Depth Buffer now after update. I suggest useing TriDef.
@@ -1578,10 +1582,6 @@ Also Keep in mind if you don't like the depth map I made. You can alawys make yo
 
 For older versions of reshade.
 https://www.mediafire.com/folder/8ar1jhh1809cl/ReShade_Repository
-
-Here is a quick and dirty game list of working Depth Maps. They are only suggestions. You can use any setting that works for you.
-User Settings
-https://docs.google.com/spreadsheets/d/18ujpY-97V_YuXpQUh-7bOomE4D5nUGwp3XppfU_0N2k/edit?usp=sharing <----- I don't maintain this.
 
 Special Versions of Reshade
 

@@ -6974,12 +6974,12 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DP_W float4( 30.0  , 30.0  ,  30.0   , 14.0) //Tresh Hold for Color A1 & A3 and Color
 	*/
     #define NDW 1
-   #elif (App == 0xC6A81FC5 ) //DeadSpace 2008
+   #elif (App == 0xC6A81FC5 ) //Dead Space 2008
 	//#define DA_W 1
     //#define DB_X 1
-	#define DA_X 0.0325
+	#define DA_X 0.025
 	#define DF_Y 0.015
-	#define DA_Y 55.0
+	#define DA_Y 45.0
 	//#define DA_Z -0.0005
 	#define DB_Z 0.025
 	//#define DB_Y 1
@@ -6999,6 +6999,58 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define FOV 1
 	#define PEW 1
 	#define NVK 1
+   #elif ( App == 0x620316A3 ) //Dead Space 2
+	//#define DA_W 1
+    //#define DB_X 1
+	#define DA_X 0.025
+	#define DF_Y 0.0125
+	#define DA_Y 45.0
+	//#define DA_Z -0.0005
+	#define DB_Z 0.025
+	//#define DB_Y 1
+	#define DE_X 1
+	#define DE_Y 0.450
+	#define DE_Z 0.375
+	//#define DG_W -0.100 //Pop
+    #define OIF 0.175 //Fix enables if Value is > 0.0
+	#define DI_W 2.0 //Adjustment for REF
+   // #define DG_Z 0//0.05 //Min
+    //#define DE_W 0.275 //Auto
+    //#define DI_Z 0.05 //Trim
+	#define BMT 1
+	#define DF_Z 0.075
+	#define DSW 1
+	#define RHW 1
+	#define FOV 1
+	#define PEW 1
+	#define NVK 1
+	#define NDW 1
+   #elif ( App == 0x61031510 ) //Dead Space 3
+	//#define DA_W 1
+    //#define DB_X 1
+	#define DA_X 0.025
+	#define DF_Y 0.005
+	#define DA_Y 45.0
+	#define DA_Z 0.001
+	#define DB_Z 0.025
+	//#define DB_Y 1
+	#define DE_X 1
+	#define DE_Y 0.450
+	#define DE_Z 0.375
+	//#define DG_W 0.100 //Pop
+    #define OIF 0.175 //Fix enables if Value is > 0.0
+	#define DI_W 1.00 //Adjustment for REF
+   // #define DG_Z 0//0.05 //Min
+    //#define DE_W 0.275 //Auto
+    //#define DI_Z 0.05 //Trim
+	#define BMT 1
+	#define DF_Z 0.05
+	#define DSW 1
+	#define RHW 1
+	#define FOV 1
+	#define PEW 1
+	#define NVK 1
+	#define NDW 1
 #else
 	#define NPW 1 //No Profile
 #endif
