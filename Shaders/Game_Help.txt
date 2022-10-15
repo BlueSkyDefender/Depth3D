@@ -1115,15 +1115,19 @@ r.Tonemapper.Quality=3
 r.MaxAnisotropy=16
 
 For the optional But, recommened Add-On use: ShaderToggler
-Get it from here: https://github.com/FransBouma/ShaderToggler
-
+Download the 64bit version of the Shader Toggler and place it next to the ReShade dll in the same folder where the Game's own exe is.
 The shader you are targeting is only the outline shader used to show you the actionalble target.
 
-Youtube Guide
+Add-on: 
+https://github.com/FransBouma/ShaderToggler
+
+Youtube Guide:
 https://youtu.be/HlQaTKc6N_c
 
-Downloable Fix
+Downloable Fix:
 https://www.mediafire.com/file/59vm5a5ar1vl820/ShaderToggler.ini/file
+
+Drop this ini next to the add-on and in game press ctrl + 1
 
 {Serious Sam Fusion} [Reshade 4.6.1]
 - Needs Online Code Disabled for online play. DX12/Vulkan/DX11 all seem to work.
