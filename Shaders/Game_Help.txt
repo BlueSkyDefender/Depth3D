@@ -1099,6 +1099,32 @@ http://www.zeus-software.com/downloads/nglide
 
 Click on 3DFX.exe Untill it starts..... Some thing wrong with this game. It starts after around 6-10 time I try.
 
+{Scorn} [Reshade 5.4.2 Add-on] Add-On used ShaderToggler
+You will need to edit the Engine.ini In 
+folder: C:\Users\yourusername\AppData\Local\Scorn\Saved\Config\WindowsNoEditor
+
+Open up the Engine.ini file and paste this:
+
+[SystemSettings]
+r.DepthOfFieldQuality=0
+r.MotionBlur.Max=0
+r.MotionBlurQuality=0
+r.DefaultFeature.MotionBlur=0
+r.SceneColorFringeQuality=0
+r.Tonemapper.Quality=3
+r.MaxAnisotropy=16
+
+For the optional But, recommened Add-On use: ShaderToggler
+Get it from here: https://github.com/FransBouma/ShaderToggler
+
+The shader you are targeting is only the outline shader used to show you the actionalble target.
+
+Youtube Guide
+https://youtu.be/HlQaTKc6N_c
+
+Downloable Fix
+https://www.mediafire.com/file/59vm5a5ar1vl820/ShaderToggler.ini/file
+
 {Serious Sam Fusion} [Reshade 4.6.1]
 - Needs Online Code Disabled for online play. DX12/Vulkan/DX11 all seem to work.
 In some maps you need to set Offset back to 0.0 so that you can have proper Depth. You would also need to set it back to 0.1 on other maps. Be mindfull of this.
