@@ -1114,9 +1114,9 @@ r.SceneColorFringeQuality=0
 r.Tonemapper.Quality=3
 r.MaxAnisotropy=16
 
-For the optional But, recommened Add-On use: ShaderToggler
+For the optional But, recommended Add-On use: ShaderToggler
 Download the 64bit version of the Shader Toggler and place it next to the ReShade dll in the same folder where the Game's own exe is.
-The shader you are targeting is only the outline shader used to show you the actionalble target.
+The shader you are targeting is only the outline shader used to show you the actionable target.
 
 Add-on: 
 https://github.com/FransBouma/ShaderToggler
