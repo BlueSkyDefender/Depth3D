@@ -1250,19 +1250,24 @@ or Download
 2. http://www.mediafire.com/file/w0n67mo5aitaomm/pakchunk99-Mods_CustomMod_P.pak/file
 Now Place the "pakchunk99-Mods_CustomMod_P.pak" file to your Fallen Order\SwGame\Content\Paks\ folder
 
-{STAR WARS™ Jedi Knight Dark Forces II Remastered  2.0.1} [ReShade 5.2.1] + jkgfxmod
+{STAR WARS™ Jedi Knight Dark Forces II & Mysteries of the Sith Remastered} [ReShade 5.2.1] + jkgfxmod
 Things you need to run this game properly.
 
-Download Needed
-1. Jedi Knight Remastered 2.0.1.exe
+Download Needed for Jedi Knight Remastered 2.0.1
 https://www.moddb.com/mods/jedi-knight-remastered/downloads/jedi-knight-remastered-20
-2. Older Version of ReShade
+
+Download Needed for Jedi Knight Mysteries of the Sith Remastered 2.0.1
+https://www.moddb.com/mods/jedi-knight-remastered/downloads/jedi-knight-mysteries-of-the-sith-remastered-20
+
+Older Version of ReShade
 https://reshade.me/downloads/ReShade_Setup_5.2.1.exe or https://reshade.me/downloads/ReShade_Setup_5.2.1_Addon.exe
 
-Run the Jedi Knight Remastered 2.0.1.exe and install it to the game you have:
-GoG - C:\Program Files (x86)\GOG Galaxy\Games\Star Wars Jedi Knight - Dark Forces 2
-Steam - C:\Program Files (x86)\Steam\steamapps\common\Star Wars Jedi Knight
-CD - C:\Program Files (x86)\Lucasarts\Jedi Knight
+Run the Jedi Knight Remastered 2.0.1.exe or Star Wars Jedi Knight Mysteries of the Sith Remastered 2.0.1.exe and install it to the game you have:
+GoG - C:\Program Files\GOG Galaxy\Games\Star Wars Jedi Knight - Dark Forces 2
+Steam - C:\Program Files\Steam\steamapps\common\Star Wars Jedi Knight
+CD - C:\Program Files\Lucasarts\Jedi Knight
+
+Same thing for Jedi Knight Mysteries of the Sith Just look for the correct folder.
 
 Replace the files and go to your desktop and open up the shortcut called Configuation. 
 Replace the following infomation with this. Use notepad.
@@ -1284,8 +1289,8 @@ Replace the following infomation with this. Use notepad.
     "vram_texture_preload_size": 1024
 }
 
-Things of note: Please set resolution too your current native screen res.
-command replace JKR-fov115.EXE with any of the bottom ones in the list below
+Command replace JKR-fov115.EXE with any of the bottom ones in the list below for Jedi Knight Dark Forces II
+
 JKR-fovno.EXE
 JKR-fov95.EXE
 JKR-fov100.EXE
@@ -1293,8 +1298,18 @@ JKR-fov110.EXE
 JKR-fov115.EXE
 JKR-fov120.EXE
 
+For Jedi Knight Mysteries of the Sith Remastered yor have access to fewer options. when it comes to fov from the mod.
+
+JKMR-NoFov.exe
+JKMR-mipmap.exe
+JKMR-FOV100.exe
+JKMR-FOV120.exe
+
 Once that is done close editor. Run ReShade installer and install reshade with OpenGL with my Depth3D Repo.
-You should select inject.exe. Then run the game. 
+You should select inject.exe. 
+
+Things of note: Please set resolution too your current native screen res. like the one set in the config file.
+Then you can run the game. 
 
 In game click on setup. Then click on Display.
 

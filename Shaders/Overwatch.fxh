@@ -7200,7 +7200,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define FOV 1
     #define PEW 1
     #define RHW 1
-#elif (App == 0xC174C775 || App == 0x770EDAC8 || App == 0x8B88341D || App == 0x86882C3E || App == 0x8585EC14 || App == 0x8285E75B || App == 0xF78D5B4F ) //Jedi Knight Remastered: Star Wars Jedi Knight: Dark Forces II
+#elif (App == 0xC174C775 || App == 0x770EDAC8 || App == 0x8B88341D || App == 0x86882C3E || App == 0x8585EC14 || App == 0x8285E75B || App == 0xF78D5B4F || App == 0x6C4A332E || App == 0x9D49A4D6 || App == 0x31447DA4 || App == 0x93D2EEC8 ) //Jedi Knight Remastered: Star Wars Jedi Knight: Dark Forces II | 
 	//#define DA_W 1
     //#define DB_X 1
 	#define DA_X 0.020 //0.0150
