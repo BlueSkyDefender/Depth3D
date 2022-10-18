@@ -2,7 +2,7 @@
 	///**SuperDepth3D**///
 	//----------------////
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	//* Depth Map Based 3D post-process shader v3.4.4
+	//* Depth Map Based 3D post-process shader v3.4.6
 	//* For Reshade 3.0+
 	//* ---------------------------------
 	//*
@@ -47,7 +47,7 @@ namespace SuperDepth3D
 		static const float DD_X = 1, DD_Y = 1, DD_Z = 0.0, DD_W = 0.0;
 		// DE_X = [ZPD Boundary Type] DE_Y = [ZPD Boundary Scaling] DE_Z = [ZPD Boundary Fade Time] DE_W = [Weapon Near Depth Max]
 		static const float DE_X = 0, DE_Y = 0.5, DE_Z = 0.25, DE_W = 0.0;
-		// DF_X = [Weapon ZPD Boundary] DF_Y = [Separation] DF_Z = [ZPD Balance] DF_W = [HUD]
+		// DF_X = [Weapon ZPD Boundary] DF_Y = [Separation] DF_Z = [ZPD Balance] DF_W = [Weapon Edge & Weapon Scale]
 		static const float DF_X = 0.0, DF_Y = 0.0, DF_Z = 0.15, DF_W = 0.0;
 		// DG_X = [Special Depth X] DG_Y = [Special Depth Y] DG_Z = [Weapon Near Depth Min] DG_W = [Check Depth Limit]
 		static const float DG_X = 0.0, DG_Y = 0.0, DG_Z = 0.0, DG_W = 0.0;
@@ -75,7 +75,7 @@ namespace SuperDepth3D
 		#define OW_WP "WP Off\0Custom WP\0"
 		static const int WSM = 0;
 		//Triggers
-		static const int NVK = 0, NDG = 0, FTM = 0, SPO = 0, MMD = 0, SMP = 0, LBR = 0, HQT = 0, AFD = 0, MDD = 0, FPS = 1, SMS = 1, OIF = 0, NCW = 0, RHW = 0, NPW = 0, IDF = 0, SPF = 0, BDF = 0, HMT = 0, DFW = 0, NFM = 0, DSW = 0, BMT = 0, LBC = 0, LBS = 0, LBM = 0, DAA = 0, NDW = 0, PEW = 0, WPW = 0, FOV = 0, EDW = 0, SDT = 0;
+		static const int NVK = 0, NDG = 0, FTM = 0, SPO = 0, MMD = 0, SMP = 0, LBR = 0, HQT = 0, AFD = 0, MDD = 0, FPS = 1, SMS = 1, OIF = 0, NCW = 0, RHW = 0, NPW = 0, IDF = 0, SPF = 0, BDF = 0, HMT = 0, HMC = 0, DFW = 0, NFM = 0, DSW = 0, BMT = 0, LBC = 0, LBS = 0, LBM = 0, DAA = 0, NDW = 0, PEW = 0, WPW = 0, FOV = 0, EDW = 0, SDT = 0;
 		//Overwatch.fxh State
 		#define OSW 1
 	#endif
@@ -370,19 +370,8 @@ namespace SuperDepth3D
 	#else
 		static const int Max_Depth = 1;
 	#endif
-	uniform int Performance_Level <
-		ui_type = "combo";
-		ui_items = "Performant\0Normal\0Performant + Foveated Rendering\0Normal + Foveated Rendering\0";
-		ui_label = " Performance Mode";
-		ui_tooltip = "Performance Mode Lowers or Raises Occlusion Quality Processing so that there is a performance is adjustable.\n"
-					 "Foveated Rendering focuses the quality of the samples used to the enter of the screen where you look the most.\n"
-					 "Please enable the 'Performance Mode Checkbox,' in ReShade's GUI.\n"
-					 "It's located in the lower bottom right of the ReShade's Main UI.\n"
-					 "Default is Normal.";
-		ui_category = "Occlusion Masking";
-	> = 1;
-
-	uniform float Range_Blend <
+	
+		uniform float Range_Blend <
 		ui_type = "slider";
 		ui_min = 0; ui_max = 1;
 		ui_label = " Range Smoothing";
@@ -390,7 +379,27 @@ namespace SuperDepth3D
 					 "With this on it should help with tress and other foliage that needs to be reconstructed by Temporal Methods.\n"
 					 "Default is Zero, Off.";
 		ui_category = "Occlusion Masking";
-	> = DJ_X;	
+	> = DJ_X;		
+	
+	uniform int Performance_Level <
+		ui_type = "combo";
+		ui_items = "Performant\0Normal\0Performant + VRS\0Normal + VRS\0";
+		ui_label = " Performance Mode";
+		ui_tooltip = "Performance Mode Lowers or Raises Occlusion Quality Processing so that there is a performance is adjustable.\n"
+					 "Varable Rate Shading focuses the quality of the samples in lighter areas of the screen.\n"
+					 "Please enable the 'Performance Mode Checkbox,' in ReShade's GUI.\n"
+					 "It's located in the lower bottom right of the ReShade's Main UI.\n"
+					 "Default is Normal.";
+		ui_category = "Occlusion Masking";
+	> = 1;
+	
+	uniform int Switch_VRS <
+		ui_type = "combo";
+		ui_items = "Auto\0High\0Med\0Low\0Veary Low\0";
+		ui_label = " VRS Performance";
+		ui_tooltip = "Use this to disable/enable High Quality Varable Rate Shading.";
+		ui_category = "Occlusion Masking";
+	> = 0;	
 		
 	uniform float Compatibility_Power <
 		#if Compatibility
@@ -405,7 +414,7 @@ namespace SuperDepth3D
 					 "With this on it should work better in games with TAA, FSR,and or DLSS sometimes.\n"
 					 "Default is 0.25.";
 		ui_category = "Compatibility Options";
-	> = 0.25;
+	> = 0.0;
 	
 	uniform float2 DLSS_FSR_Offset <
 		#if Compatibility
@@ -589,6 +598,14 @@ namespace SuperDepth3D
 		ui_category = "Weapon Hand Adjust";	
 	> = float4(0.03,DG_Z,DE_W,DI_Z);
 	
+	uniform float2 Weapon_Depth_Edge <
+		ui_type = "drag";
+		ui_min = 0.0; ui_max = 1.0;
+		ui_label = " Screen Edge Adjust & Near Scale";
+		ui_tooltip = "This Tool is to help with screen Edge adjustments and Weapon Hand scaling near the screen";
+		ui_category = "Weapon Hand Adjust";	
+	> = DF_W;
+	
 	uniform float Weapon_ZPD_Boundary <
 		ui_type = "slider";
 		ui_min = 0.0; ui_max = 0.5;
@@ -745,7 +762,7 @@ namespace SuperDepth3D
 	static const int Inficolor_Near_Reduction = 0;
 	
 	uniform int Perspective <
-		ui_type = "drag";
+		ui_type = "slider";
 		ui_min = -100; ui_max = 100;
 		ui_label = " Perspective Slider";
 		ui_tooltip = "Determines the perspective point of the two images this shader produces.\n"
@@ -953,6 +970,30 @@ namespace SuperDepth3D
 	uniform bool DepthCheck < source = "bufready_depth"; >;
 	#endif
 
+	//Resolution Scaling so that auto anti cross talk works.
+	#define Comb_Size BUFFER_HEIGHT + BUFFER_WIDTH
+	#if ( Comb_Size <= 3360)
+		#if ( Comb_Size <= 1400)
+			#if (Set_Depth_Res >= 2 )
+				#define Max_Mips 8
+			#else
+				#define Max_Mips 9
+			#endif
+		#else
+			#if (Set_Depth_Res >= 2 )
+				#define Max_Mips 10
+			#else
+				#define Max_Mips 11
+			#endif
+		#endif
+	#else
+		#if (Set_Depth_Res >= 2 )
+			#define Max_Mips 11
+		#else
+			#define Max_Mips 12
+		#endif
+	#endif
+
 	float2 RE_Set()
 	{	
 		int REF_Trigger = RE_Fix > 0 || OIF > 0;
@@ -965,7 +1006,7 @@ namespace SuperDepth3D
 	}
 	
 	float2 Min_Divergence() // and set scale
-	{   float Min_Div = max(1.0, Divergence), D_Scale = saturate(Scale(Min_Div,100.0,1.0));
+	{   float Min_Div = max(1.0, Divergence), D_Scale = min(1.25,Scale(Min_Div,100.0,1.0));
 		return float2(lerp( 1.0, Max_Divergence, D_Scale), D_Scale);
 	}
 	
@@ -978,9 +1019,18 @@ namespace SuperDepth3D
 		#endif
 	}
 
+	float fmod(float a, float b)
+	{
+		float c = frac(abs(a / b)) * abs(b);
+		return a < 0 ? -c : c;
+	}
+	
+	//#define E_O_Switch fmod(abs(Perspective),2)
+	
 	float Perspective_Switch()
-	{   float I_3D_E = (Min_Divergence().x * lerp(1.0,2.0,Focus_Inficolor));
-		return Inficolor_3D_Emulator ? Eye_Swap ? I_3D_E : -I_3D_E : Perspective ; 
+	{   float I_3D_E = (Min_Divergence().x * lerp(1.0,2.0,Focus_Inficolor)); //This is to fix strange offset issue don't know why it need to be offset by one pixel to work.???
+		//float PER_Switch = Stereoscopic_Mode == 0 || Stereoscopic_Mode == 5 ?  E_O_Switch ? Perspective : Perspective + 1 :  E_O_Switch ? Perspective + 1 : Perspective;
+		return Inficolor_3D_Emulator ? Eye_Swap ? I_3D_E : -I_3D_E : Perspective;
 	}
 
 	#define pix float2(BUFFER_RCP_WIDTH, BUFFER_RCP_HEIGHT)
@@ -988,13 +1038,7 @@ namespace SuperDepth3D
 	#define texsize int2(BUFFER_WIDTH, BUFFER_HEIGHT)
 	#define AI Interlace_Anaglyph_Calibrate.x * 0.5 //Optimization for line interlaced Adjustment.
 	#define ARatio texsize.x / texsize.y
-		
-	float fmod(float a, float b)
-	{
-		float c = frac(abs(a / b)) * abs(b);
-		return a < 0 ? -c : c;
-	}
-		
+				
 	float RN_Value(float i)
 	{
 		return round(i * 10.0f);// * 0.1f;
@@ -1080,7 +1124,7 @@ namespace SuperDepth3D
 			Texture = texDMN;
 		};
 	
-	texture texzBufferN_P { Width = BUFFER_WIDTH ; Height = BUFFER_HEIGHT ; Format = RG16F; MipLevels = 6; };
+	texture texzBufferN_P { Width = BUFFER_WIDTH ; Height = BUFFER_HEIGHT ; Format = RG16F; MipLevels = Max_Mips; };
 	
 	sampler SamplerzBufferN_P
 		{
@@ -1373,6 +1417,28 @@ namespace SuperDepth3D
 			  EdgeMask = clamp((BaseVal-Dist) / (BaseVal-Adjust_Value),0.125,1); 
 	    return color * EdgeMask;    
 	}
+/*	
+	#define FLT_EPSILON  1.192092896e-07 // smallest such that Value + FLT_EPSILON != Value		
+	float DepthEdge(float Mod_Depth, float Depth, float2 texcoords, float Adjust_Value, float Masker,float LR_Masker)
+	{   Adjust_Value -= FLT_EPSILON;
+		float2 center = float2(0.5,texcoords.y); // Direction of effect.   
+		float BaseVal = 1.0,
+			  Dist  = distance( center, texcoords ) * 2.0, 
+			  EdgeMask = saturate((BaseVal-Dist) / (BaseVal-Adjust_Value)); 
+			  Masker = lerp(LR_Masker,max(Masker,LR_Masker),EdgeMask);
+	    return lerp(Depth,Mod_Depth, lerp(EdgeMask,Masker,0.5) );    
+	}
+*/	
+	#define FLT_EPSILON  1.192092896e-07 // smallest such that Value + FLT_EPSILON != Value		
+	float DepthEdge(float Mod_Depth, float Depth, float2 texcoords, float Adjust_Value )
+	{   Adjust_Value -= FLT_EPSILON;
+		float2 center = float2(0.5,texcoords.y); // Direction of effect.   
+		float BaseVal = 1.0,
+			  Dist  = distance( center, texcoords ) * 2.0, 
+			  EdgeMask = saturate((BaseVal-Dist) / (BaseVal-Adjust_Value)),
+			  Set_Weapon_Scale_Near = -Weapon_Depth_Edge.y; 
+	    return lerp(Depth,(Mod_Depth - Set_Weapon_Scale_Near) / (1 + Set_Weapon_Scale_Near), EdgeMask );    
+	}
 	
 	float CCBox(float2 TC, float2 size) 
 	{
@@ -1628,6 +1694,8 @@ namespace SuperDepth3D
 			DM.y = lerp(0.0,WD,CutOFFCal);
 			DM.z = lerp(0.5,WD,CutOFFCal);
 		}
+		
+		float Weapon_Masker = lerp(0.0,WD,CutOFFCal);
 	
 		R = DM.x; //Mix Depth
 		G = DM.y > saturate(smoothstep(0,2.5,DM.w)); //Weapon Mask
@@ -1636,7 +1704,7 @@ namespace SuperDepth3D
 	
 		return float3x3( saturate(float3(R, G, B)), 	                                                      //[0][0] = R | [0][1] = G | [0][2] = B
 						 saturate(float3(A, Depth( SDT == 1 || SD_Trigger == 1 ? texcoord : TC_SP(texcoord).xy).x, DM.w)),//[1][0] = A | [1][1] = D | [1][2] = DM
-								  float3(0,0,0) );                                                            //[2][0] = 0 | [2][1] = 0 | [2][2] = 0
+								  float3(Weapon_Masker > saturate(smoothstep(0,2.5,DM.w)),0,0) );                         //[2][0] = 0 | [2][1] = 0 | [2][2] = 0
 	}
 	//////////////////////////////////////////////////////////////Depth HUD Alterations///////////////////////////////////////////////////////////////////////
 	#if UI_MASK
@@ -1773,10 +1841,14 @@ namespace SuperDepth3D
 			Min_Trim = float2((Min_Trim.x * 2 + Min_Trim.x) * 0.5, min( 0.3, (Min_Trim.y * 2.5 + Min_Trim.y) * 0.5) );
 		//Fade Storage
 		float ScaleND = saturate(lerp(R,1.0f,smoothstep(min(-Min_Trim.x,0),1.0f,R)));
-	
+		float Edge_Adj = 0.5;
+		
 		if (Min_Trim.x > 0)
 			R = saturate(lerp(ScaleND,R,smoothstep(0,Min_Trim.y,ScaleND)));
-	
+			//R = DepthEdge( R, DM.x, texcoord, 0.550, PrepDepth(texcoord)[2][0], tex2Dlod(SamplerzBuffer_BlurN,float4(texcoord,0,6)).y);	
+		if ( Weapon_Depth_Edge.x > 0)//1.0 needs to be adjusted when doing far scaling
+			R = lerp(DepthEdge(R, DM.x, texcoord, 1-Weapon_Depth_Edge.x),DM.x,smoothstep(0,1.0,DM.x));
+		
 		if(texcoord.x < pix.x * 2 && texcoord.y < pix.y * 2)//TL
 			R = Fade_in_out(texcoord);
 		if(1-texcoord.x < pix.x * 2 && 1-texcoord.y < pix.y * 2)//BR
@@ -1966,11 +2038,16 @@ namespace SuperDepth3D
 		
 		return float3(DM.y,PrepDepth( SDT == 2 || SD_Trigger == 2 ? TC_SP(texcoord).zw : texcoord)[1][1],HandleConvergence.z);
 	}
+	#define Adapt_Adjust 0.7 //[0 - 1]
 	////////////////////////////////////////////////////Depth & Special Depth Triggers//////////////////////////////////////////////////////////////////
 	void Mod_Z(in float4 position : SV_Position, in float2 texcoord : TEXCOORD, out float2 Point_Out : SV_Target0 , out float2 Linear_Out : SV_Target1)
-	{	
-		float3 Set_Depth = DB_Comb( texcoord.xy ).xyz;
+	{   //Temporal adaptation https://knarkowicz.wordpress.com/2016/01/09/automatic-exposure/
+		float  ExAd = (1-Adapt_Adjust)*1250, Lum = tex2Dlod(SamplerDMN,float4(texcoord,0,12)).w, PastLum = tex2D(SamplerLumN,float2(0,0.583)).z;
 	
+		float3 Set_Depth = DB_Comb( texcoord.xy ).xyz;
+		
+		if(texcoord.x < pix.x * 2 && texcoord.y < pix.y * 2) //TL
+			Set_Depth.y = PastLum + (Lum - PastLum) * (1.0 - exp(-frametime/ExAd));	
 		if(1-texcoord.x < pix.x * 2 && 1-texcoord.y < pix.y * 2) //BR
 			Set_Depth.y = AltWeapon_Fade();
 		if(  texcoord.x < pix.x * 2 && 1-texcoord.y < pix.y * 2) //BL
@@ -1986,15 +2063,15 @@ namespace SuperDepth3D
 	
 	static const float Blur_Adjust = 3.0;
 		
-	void zBuffer_Blur(in float4 position : SV_Position, in float2 texcoord : TEXCOORD, out float2 Blur_Out : SV_Target0)
+	void zBuffer_Blur(in float4 position : SV_Position, in float2 texcoord : TEXCOORD, out float Blur_Out : SV_Target0)
 	{   
 		float simple_Blur = tex2Dlod(SamplerzBufferN_L,float4(texcoord,0, 2.0)).x;
 		simple_Blur += tex2Dlod(SamplerzBufferN_L,float4(texcoord + float2( pix.x * Blur_Adjust * 2, pix.y),0, 2.0)).x;
 		simple_Blur += tex2Dlod(SamplerzBufferN_L,float4(texcoord + float2( pix.x * Blur_Adjust   , pix.y),0, 2.0)).x;
 		simple_Blur += tex2Dlod(SamplerzBufferN_L,float4(texcoord + float2(-pix.x * Blur_Adjust   , pix.y),0, 2.0)).x;
 		simple_Blur += tex2Dlod(SamplerzBufferN_L,float4(texcoord + float2(-pix.x * Blur_Adjust * 2, pix.y),0, 2.0)).x;
-		
-		Blur_Out = min(1,simple_Blur * 0.2);
+
+		Blur_Out = float2(min(1,simple_Blur * 0.2),PrepDepth(texcoord)[2][0]);
 	}
 	
 	float3 GetDB(float2 texcoord)
@@ -2006,8 +2083,8 @@ namespace SuperDepth3D
 		if(Vert_3D_Pinball && Stereoscopic_Mode != 5)	
 			texcoord.xy = texcoord.yx;
 		#endif
-
-		float Depth_Blur = View_Mode_Warping > 0 ? min(tex2Dlod(SamplerzBufferN_L, float4( texcoord, 0, clamp(View_Mode_Warping,0,5) ) ).x,tex2Dlod(SamplerzBufferN_L, float4( texcoord, 0, 0) ).x) : tex2Dlod(SamplerzBufferN_L, float4( texcoord, 0, 0) ).x;
+		float VMW = View_Mode == 1 ? View_Mode_Warping : clamp(View_Mode_Warping,0, View_Mode == 5 ? 2 : 1);
+		float Depth_Blur = View_Mode_Warping > 0 ? min(tex2Dlod(SamplerzBufferN_L, float4( texcoord, 0, clamp(VMW,0,5) ) ).x,tex2Dlod(SamplerzBufferN_L, float4( texcoord, 0, 0) ).x) : tex2Dlod(SamplerzBufferN_L, float4( texcoord, 0, 0) ).x;
 	
 		float2 DS_LP = float2(Depth_Blur,tex2Dlod(SamplerzBufferN_P, float4( texcoord, 0, 0) ).x);
 	
@@ -2025,14 +2102,15 @@ namespace SuperDepth3D
 		#endif
 		return float3(Separation * DepthBuffer_LP.xy, DepthBuffer_LP.z);
 	}
-	//Perf Level selection                             X    Y      Z      W              X    Y      Z      W
+	//Perf Level selection & Array access               X    Y      Z      W              X    Y      Z      W
 	static const float4 Performance_LvL[2] = { float4( 0.5, 0.5095, 0.679, 0.5 ), float4( 1.0, 1.019, 1.425, 1.0) };
+	static const float  VRS_Array[5] = { 0.5, 0.5, 0.25, 0.125 , 0.0625 };
 	//////////////////////////////////////////////////////////Parallax Generation///////////////////////////////////////////////////////////////////////
 	float2 Parallax(float Diverge, float2 Coordinates, float IO) // Horizontal parallax offset & Hole filling effect
-	{   
-	    float  MS = Diverge * pix.x; int Perf_LvL = fmod(Performance_Level,2);   
+	{
+	    float  MS = Diverge * pix.x; int Perf_LvL = fmod(Performance_Level,2);  
 		float2 ParallaxCoord = Coordinates, CBxy = floor( float2(Coordinates.x * BUFFER_WIDTH, Coordinates.y * BUFFER_HEIGHT));
-		float GetDepth = smoothstep(0,1, GetDB(Coordinates).z ),
+		float GetDepth = smoothstep(0,1, GetDB(Coordinates).z ), CB_Done = fmod(CBxy.x+CBxy.y,2),
 				   Perf = Performance_LvL[Perf_LvL].x;
 		//Would Use Switch....
 		if( View_Mode == 2)
@@ -2042,45 +2120,51 @@ namespace SuperDepth3D
 		if( View_Mode == 4)
 		{
 			if( GetDepth >= 0.999 )
-				Perf = fmod(CBxy.x+CBxy.y,2) ? 0.5 : 1.000;
+				Perf = CB_Done ? 0.5 : 1.000;
 			else
-				Perf = fmod(CBxy.x+CBxy.y,2) ? 1.020: 1.040;
+				Perf = CB_Done ? 1.020: 1.040;
 			
 			Perf = lerp(Perf,1.425f,0.5);
 		}
-		if( View_Mode == 5)
+		if( View_Mode == 5) // Will be reworked
 		{
 			if( GetDepth >= 0.999 )
-				Perf = fmod(CBxy.x+CBxy.y,2) ? 1.016: 1.017;
+				Perf = CB_Done ? 1.016: 1.017;
 			else if( GetDepth >= 0.875)
-				Perf = fmod(CBxy.x+CBxy.y,2) ? 1.018: 1.019;
+				Perf = CB_Done ? 1.018: 1.019;
 			else
-				Perf = fmod(CBxy.x+CBxy.y,2) ? 1.020: 1.021;
-		}
+				Perf = CB_Done ? 1.020: 1.021;
+		}				
+		//Luma Based VRS
+		float Auto_Adptive = Switch_VRS == 0 ? lerp(0.05,1.0,smoothstep(0.00000001f, 0.375, tex2D(SamplerzBufferN_P,0).y ) ) : 1,
+			  Luma_Adptive = smoothstep(0.0,saturate(VRS_Array[Switch_VRS] * Auto_Adptive), tex2Dlod(SamplerDMN,float4(Coordinates,0,9)).w);
+		if( Perf_LvL > 1 )
+			Perf *= saturate(Luma_Adptive * 0.5 + 0.5  );	
 		//ParallaxSteps Calculations
-		float MinNum = 25, D = abs(Diverge), Cal_Steps = D * Perf, Steps = clamp( Cal_Steps, Perf_LvL ? MinNum : lerp( MinNum, min( MinNum, D), GetDepth >= 0.999 ), Performance_Level > 1 ? lerp(100,50,saturate(Vin_Pattern(Coordinates, float2(15.0,2.5)))) : 100 );//Foveated Rendering Point of attack 16-256 limit samples.
-		// Offset per step progress & Limit
+		float MinNum = 20, D = abs(Diverge), Cal_Steps = D * Perf, Steps = clamp( Cal_Steps, Perf_LvL ? MinNum : lerp( MinNum, min( MinNum, D), GetDepth >= 0.999 ), 100 );//Foveated Rendering Point of attack 16-256 limit samples.
+		//float MinNum = 20, D = abs(Diverge), Cal_Steps = D * Perf, Steps = clamp( Cal_Steps, Performance_Level ? MinNum : lerp( MinNum, min( MinNum, D), GetDepth >= 0.999 ), lerp(100,View_Mode == 6 ? lerp(50, 20, saturate(GetDepth * 15)) : 50,saturate(Vin_Pattern(Coordinates, float2(15.0,2.5)))) );
 		float LayerDepth = rcp(Steps), TP = lerp(0.025, 0.05,Compatibility_Power);
 			  D = Diverge < 0 ? -75 : 75;
 	
 		//Offsets listed here Max Seperation is 3% - 8% of screen space with Depth Offsets & Netto layer offset change based on MS.
-		float deltaCoordinates = MS * LayerDepth, CurrentDepthMapValue = GetDB( ParallaxCoord).x, CurrentLayerDepth = 0.0f,
+		float deltaCoordinates = MS * LayerDepth, CurrentDepthMapValue = min(1,GetDB( ParallaxCoord).x), CurrentLayerDepth = 0.0f,
 			  DB_Offset = D * TP * pix.x, VM_Switch = View_Mode == 1 ? 0.125 : 1;
 			  
 		[loop] //Steep parallax mapping
 		while ( CurrentDepthMapValue > CurrentLayerDepth )
-		{   // Shift coordinates horizontally in linear fasion
+		{   
+			// Shift coordinates horizontally in linear fasion
 		    ParallaxCoord.x -= deltaCoordinates; 
 		    // Get depth value at current coordinates
 		    if(De_Artifacting > 0)
-			    CurrentDepthMapValue = min(GetDB( ParallaxCoord ).x ,GetDB( ParallaxCoord - float2(MS * lerp(0,0.125,saturate(De_Artifacting)),0)).x);
+		    	CurrentDepthMapValue = min(GetDB( ParallaxCoord ).x, GetDB( ParallaxCoord - float2(MS * lerp(0,0.125,saturate(De_Artifacting)),0)).x);
 		    else
 		    	CurrentDepthMapValue = GetDB( ParallaxCoord ).x;
 		    // Get depth of next layer
 		    CurrentLayerDepth += LayerDepth;
 			continue;
 		}
-		
+
 		if( View_Mode <= 1 )	
 	   	ParallaxCoord.x += DB_Offset * VM_Switch;
 	    
@@ -2088,9 +2172,9 @@ namespace SuperDepth3D
 		//Anti-Weapon Hand Fighting
 		float Weapon_Mask = tex2Dlod(SamplerDMN,float4(Coordinates,0,0)).y, ZFighting_Mask = 1.0-(1.0-tex2Dlod(SamplerLumN,float4(Coordinates,0,1.400)).w - Weapon_Mask);
 			  ZFighting_Mask = ZFighting_Mask * (1.0-Weapon_Mask);
-		float2 PCoord = float2(View_Mode <= 1 || View_Mode == 6 ? PrevParallaxCoord.x : ParallaxCoord.x, PrevParallaxCoord.y ) ;
-			   PCoord.x -= (View_Mode == 1 ? 0.008  : 0.004 ) * MS;
-		float Get_DB = View_Mode == 1 ? GetDB( PCoord ).x : GetDB( PCoord ).y, 
+		float2 PCoord = float2(View_Mode <= 1 ? PrevParallaxCoord.x : ParallaxCoord.x, PrevParallaxCoord.y ) ;
+			   PCoord.x -= 0.004 * MS;
+		float Get_DB = GetDB( PCoord ).x, 
 			  Get_DB_ZDP = WP > 0 ? lerp(Get_DB, abs(Get_DB), ZFighting_Mask) : Get_DB;
 		// Parallax Occlusion Mapping
 		float beforeDepthValue = Get_DB_ZDP, afterDepthValue = CurrentDepthMapValue - CurrentLayerDepth;
@@ -2112,18 +2196,12 @@ namespace SuperDepth3D
 		if( View_Mode > 0 )
 			ParallaxCoord.x += DB_Offset;
 		
-		if( View_Mode <= 1)
+		if( View_Mode <= 1 )
 		{
 			if(Diverge < 0)
-			{
-				ParallaxCoord.x -= lerp(0.5, 0.0, Depth_Adjusted.y) * pix.x;
-				ParallaxCoord.x += DepthDiffrence * 2.5 * pix.x;
-			}
+				ParallaxCoord.x += DepthDiffrence * 5.0 * pix.x;
 			else
-			{
-				ParallaxCoord.x += lerp(0.5, 0.0, Depth_Adjusted.y) * pix.x;
-				ParallaxCoord.x -= DepthDiffrence * 2.5 * pix.x;
-			}
+				ParallaxCoord.x -= DepthDiffrence * 5.0 * pix.x;
 		}		
 	
 	#if Reconstruction_Mode
@@ -2195,7 +2273,7 @@ namespace SuperDepth3D
 		#if Reconstruction_Mode
 		if(Stereoscopic_Mode == 0)
 			color = texcoord.x < 0.5 ? L : R;
-		else if(Stereoscopic_Mode == 1)
+		if(Stereoscopic_Mode == 1)
 			color = texcoord.y < 0.5 ? L : R;
 		#endif
 		#if Inficolor_3D_Emulator
@@ -2381,34 +2459,28 @@ namespace SuperDepth3D
 	float3 PS_calcLR(float2 texcoord, float2 position)
 	#endif
 	{   float2 Persp = Per;
-		float2 TCL, TCR, TCL_T, TCR_T, TexCoords = texcoord;
-		#if Reconstruction_Mode || Inficolor_3D_Emulator
-			TCL = float2(texcoord.x,texcoord.y);
-			TCR = float2(texcoord.x,texcoord.y);
-		#else
+		float2 TCL = texcoord, TCR = texcoord, TCL_T = texcoord, TCR_T = texcoord, TexCoords = texcoord;
+		TCL += Persp; TCR -= Persp; TCL_T += Persp; TCR_T -= Persp;
+		#if !Reconstruction_Mode || !Inficolor_3D_Emulator
 		[branch] if (Stereoscopic_Mode == 0)
 		{
-			TCL = float2(texcoord.x*2,texcoord.y);
-			TCR = float2(texcoord.x*2-1,texcoord.y);
+			TCL.x = TCL.x*2;
+			TCR.x = TCR.x*2-1;
 		}
 		else if(Stereoscopic_Mode == 1)
 		{
-			TCL = float2(texcoord.x,texcoord.y*2);
-			TCR = float2(texcoord.x,texcoord.y*2-1);
+			TCL.y = TCL.y*2;
+			TCR.y = TCR.y*2-1;
 		}
 		else if(Stereoscopic_Mode == 5)
 		{
-			TCL = float2(texcoord.x*2,texcoord.y*2);
-			TCL_T = float2(texcoord.x*2-1,texcoord.y*2);
-			TCR = float2(texcoord.x*2-1,texcoord.y*2-1);
-			TCR_T = float2(texcoord.x*2,texcoord.y*2-1);
+			TCL = float2(TCL.x*2,TCL.y*2);
+			TCL_T = float2(TCL_T.x*2-1,TCL_T.y*2);
+			TCR = float2(TCR.x*2-1,TCR.y*2-1);
+			TCR_T = float2(TCR_T.x*2,TCR_T.y*2-1);
 		}
-		else
-		{
-			TCL = float2(texcoord.x,texcoord.y);
-			TCR = float2(texcoord.x,texcoord.y);
-		}
-		#endif	
+		#endif
+	
 		#if Inficolor_3D_Emulator
 		if (Depth_Detection == 1)
 		{
@@ -2457,9 +2529,6 @@ namespace SuperDepth3D
 		if(Inficolor_Auto_Focus)
 			Persp *= lerp(0.75,1.0, smoothstep(0,0.5,tex2D(SamplerLumN,float2(0,0.750)).z));
 		#endif
-
-		TCL += Persp;
-		TCR -= Persp;
 	
 		float D = Eye_Swap ? -Min_Divergence().x : Min_Divergence().x;
 	
@@ -2600,7 +2669,7 @@ namespace SuperDepth3D
 		float Storage__Array[Num_of_Values] = { tex2D(SamplerDMN,0).x,    //0.083 //tl
 	                                tex2D(SamplerDMN,1).x,                //0.250 //br
 	                                tex2D(SamplerDMN,int2(0,1)).x,        //0.416 //bl
-	                                1.0,                                  //0.583 //empthy
+	                                tex2D(SamplerzBufferN_P,0).y,         //0.583
 									tex2D(SamplerzBufferN_P,1).y,         //0.750 
 									tex2D(SamplerzBufferN_P,int2(0,1)).y};//0.916
 	
@@ -2705,27 +2774,23 @@ namespace SuperDepth3D
 	float3 Out(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Target
 	{   float4 Color = tex2D(SamplerInfo,texcoord).x;
 		#if Reconstruction_Mode
-		float2 TCL, TCR;
-		[branch] if (Stereoscopic_Mode == 0 && !Inficolor_3D_Emulator )
+		float2 TCL = texcoord, TCR = texcoord;
+		if (Stereoscopic_Mode == 0 && !Inficolor_3D_Emulator )
 		{
-			TCL = float2(texcoord.x*2,texcoord.y);
-			TCR = float2(texcoord.x*2-1,texcoord.y);
+			TCL.x = TCL.x*2;
+			TCR.x = TCR.x*2-1;
 		}
-		else if(Stereoscopic_Mode == 1 && !Inficolor_3D_Emulator )
+		if(Stereoscopic_Mode == 1 && !Inficolor_3D_Emulator )
 		{
-			TCL = float2(texcoord.x,texcoord.y*2);
-			TCR = float2(texcoord.x,texcoord.y*2-1);
-		}
-		else
-		{
-			TCL = float2(texcoord.x,texcoord.y);
-			TCR = float2(texcoord.x,texcoord.y);
+			TCL.y = TCL.y*2;
+			TCR.y = TCR.y*2-1;
 		}	
 
 		Color.rgb = Stereo_Convert( texcoord, differentialBlend(TCL, 0, Reconstruction_Type), differentialBlend(TCR, 1, Reconstruction_Type) ).rgb;	  	
 		#else
 		Color.rgb = PS_calcLR(texcoord, position.xy).rgb; //Color = texcoord.x+texcoord.y > 1 ? Color : LBDetection();
 		#endif
+	
 		return timer <= Text_Timer || Text_Info ? Color.rgb + Color.w : Color.rgb;
 	}
 		

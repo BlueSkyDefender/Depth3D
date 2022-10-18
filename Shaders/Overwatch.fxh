@@ -1,7 +1,7 @@
 ////----------------------------------------//
 ///SuperDepth3D Overwatch Automation Shader///
 //----------------------------------------////
-// Version 2.8.8
+// Version 2.8.9
 //---------------------------------------OVERWATCH---------------------------------------//
 // If you are reading this stop. Go away and never look back. From this point on if you  //
 // still think it's is worth looking at this..... Then no one can save you or your soul. //
@@ -88,6 +88,7 @@ static const float LB_Masking_Offset_Y_D = 1.0;         //LetterBox Masking Offs
 
 //Weapon / World Near Depth Adjustments
 static const float Weapon_Near_Depth_Max_D = 0.0;       //Weapon Near Depth                     Max     | DE_W
+static const float2 Weapon_Edge_Correction_D = 0.0;     //Weapon Edge Correction & Weapon Near Scale    | DF_W
 static const float Weapon_Near_Depth_Min_D = 0.0;       //Weapon Near Depth                     Min     | DG_Z
 static const float Weapon_Near_Depth_Trim_D = 0.25;     //Weapon Near Depth                     Trim    | DI_Z
 
@@ -109,7 +110,7 @@ static const int EFO_Fade_Speed_Selection_D = 1;        //Eye Fade Speed Options
 static const int SM_Toggle_Sparation_D = 1;             // 0 | 1 | 2 | 3                                | SMS
 static const float SM_Tune_D = 0.5;                     //SM Tune                                       | DL_X
 static const float De_Artifact_D = 0;                   //De-Artifact                                   | DL_Y
-static const float HQ_Text_Detection_D = 0.0;           //SM Text Detection [0 | 1 | 2 | 3]             | DL_Z
+static const float NULL_Z_D = 0.0;                      //NULL                                          | DL_Z
 static const float SM_Perspective_D  = 0.05;            //SM Perspective                                | DL_W
 
 //SM HQ Values
@@ -157,7 +158,7 @@ static const float OIF_Check_Depth_Limit_D = 0.0;       //Over Intrusion Check D
 static const float Filter_Mode_Modifire01_D = 0.0;      //Filter Mode Modifier                          | FMM
 
 static const int HUD_Mode_Trigger_D = 0;                //HUD Mode Trigger                              | HMT
-static const float HUDX_D = 0.0;                        //Heads Up Display Cut Off Point                | DF_W
+static const float HUDX_D = 0.0;                        //Heads Up Display Cut Off Point                | HMC
 
 //Special Toggles Defaults
 static const int Inverted_Depth_Fix_D = 0;              //Inverted Depth Fix                            | IDF 
@@ -461,7 +462,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DA_Y 17.5
 	#define DB_Y 1
 	#define DB_W 40
-	#define DF_W 0.534
+	#define HMC 0.534
 	#define HMT 1
 #elif (App == 0x68EF1B4E || App == 0xC103D998 || App == 0xFAB47970 || App == 0x539E792B ) //Serious Sam Fusion | Serious Sam 4: Planet Badass | Serious Sam Siberian Mayhem/Unrestricted
 	#define DA_W 1
@@ -548,7 +549,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 #elif (App == 0x7CF5A01 ) //Bioshock 2 Remaster
 	#define DA_Z 0.001
 	#define DB_Y 3
-	#define DF_W 0.5034
+	#define HMC 0.5034
 	#define WSM 3
 	#define DB_W 5
 	#define HMT 1
@@ -579,7 +580,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DA_X 0.0375
 	#define DA_Z 0.11625
 	#define DB_Y 4
-	#define DF_W 0.5
+	#define HMC 0.5
 	#define HMT 1
 #elif (App == 0x61243AED ) //Shadow Warrior Classic source port
 	#define DA_Y 10.0
@@ -625,7 +626,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DA_Y 37.5
 	#define DA_X 0.0375
 	#define DA_Z 0.8
-	#define DF_W 0.501
+	#define HMC 0.501
 	#define HMT 1
 #elif (App == 0x86D33094 || App == 0x19019D10 ) //Rise of the TombRaider | TombRaider 2013
 	#define DA_X 0.0725
@@ -1086,7 +1087,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DA_Z -0.250
 	#define DA_X 0.1
 	#define DB_Y 4
-	#define DF_W 0.580
+	#define HMC 0.580
 	#define HMT 1
 #elif (App == 0xE160AE14 ) //Spyro Reignited Trilogy**
     #define DA_W 1
@@ -1177,7 +1178,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define DI_Z 0.1375//Trim
     #define DG_W 2.500 //Pop
     #define HMT 1
-	#define DF_W 0.5
+	#define HMC 0.5
 	#define BMT 1
 	#define DF_Z 0.100
 	#define WSM 6
@@ -1308,7 +1309,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DB_X 1
 	#define DB_Y 1
 	#define DE_X 2
-	#define DF_W 0.5
+	#define HMC 0.5
 	#define HMT 1
 #elif (App == 0x242D82C4 ) //Okami HD
 	#define DA_X 0.200
@@ -1318,7 +1319,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DE_X 2
 	#define DE_Y 0.125
 	#define DE_Z 0.375
-	#define DF_W 0.5
+	#define HMC 0.5
 	#define HMT 1
 #elif (App == 0x75B36B20 ) //Eldritch
 	#define DA_Y 125.0
@@ -1346,7 +1347,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DA_Y 20
 	#define DB_Y 3
 	#define DB_W 23
-	#define DF_W 0.534
+	#define HMC 0.534
 	#define HMT 1
 	#define DF_X 0.025
 #elif (App == 0x1714C977) //Deus Ex DX9
@@ -1354,7 +1355,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DA_Y 125.0
 	#define DB_Y 3
 	#define DB_W 24
-	#define DF_W 1.0
+	#define HMC 1.0
 	#define HMT 1
 	#define DF_X 0.05
 #elif (App == 0x92583CDD ) //Legend of Dungeon
@@ -1610,7 +1611,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DE_Y 0.235
 	#define DE_Z 0.375
 	#define HMT 1
-	#define DF_W 0.5
+	#define HMC 0.5
 #elif (App == 0xD372612E ) //Raft
 	#define DA_W 1
 	#define DB_X 1
@@ -2213,7 +2214,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DG_Z 0.065//Min
     #define DI_Z 0.250 //Trim
 	#define HMT 1
-	#define DF_W 0.503
+	#define HMC 0.503
 	#define PEW 1
 	#define NDW 1
 #elif (App == 0xEB5CDE17 ) //Man Of Medan
@@ -2307,7 +2308,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define WSM 3
 	#define DB_W 14
     #define HMT 1
-	#define DF_W 0.506
+	#define HMC 0.506
 	#define DAA 1
 #elif (App == 0x6EC76A83 ) //Watch Dogs 2
 	#define DA_W 1
@@ -2924,7 +2925,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DE_Y 0.075
 	#define DE_Z 0.375
 	#define HMT 1
-	#define DF_W 0.5
+	#define HMC 0.5
 	#define SDT 1 //Spcial Depth Trigger With X & Y Offsets
     #define DG_X -0.190
     #define DG_Y 0.0 
@@ -3691,7 +3692,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define SMP 1      //SM Pillerbox Smoothing
 	#define HQT 1
     #define HMT 1
-	#define DF_W 0.625
+	#define HMC 0.625
 	#define NDW 1
 	#define PEW 1
 	#define DAA 1
@@ -3733,7 +3734,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	//#define DE_Y 0.500
 	#define DE_Z 0.250
 	#define DF_Y 0.0625
-	#define DF_W 0.580
+	#define HMC 0.580
 	#define DG_W 0.125
 	#define HMT 1
 	#define PEW 1
@@ -4021,7 +4022,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define DF_Y 0.0425
     #define DA_Y 11.0
     #define HMT 1
-	#define DF_W 0.5
+	#define HMC 0.5
 	#define BMT 1    
 	#define DF_Z 0.075 
 	#define DG_Z 0.075 //Min
@@ -6711,7 +6712,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DP_W float4( 30.0  , 30.0  ,  30.0   , 14.0) //Tresh Hold for Color A1 & A3 and Color
 	*/
     #define HMT 1
-    #define DF_W 0.505
+    #define HMC 0.505
     #define PEW 1
 #elif (App == 0xB1DA26D3 ) //Sea of Thieves
 	#define DA_W 1
@@ -7199,6 +7200,32 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define FOV 1
     #define PEW 1
     #define RHW 1
+#elif (App == 0xC174C775 || App == 0x770EDAC8 || App == 0x8B88341D || App == 0x86882C3E || App == 0x8585EC14 || App == 0x8285E75B || App == 0xF78D5B4F ) //Jedi Knight Remastered: Star Wars Jedi Knight: Dark Forces II
+	//#define DA_W 1
+    //#define DB_X 1
+	#define DA_X 0.020 //0.0150
+	#define DF_Y 0.005
+	#define DA_Y 27.5//30.5
+    #define DA_Z -1.0
+	#define DB_Z 0.025
+	//#define DB_Y 1
+	#define DE_X 1
+	#define DE_Y 0.850
+	#define DE_Z 0.375
+	//#define DG_W 2.0 //PoP
+    //#define OIF 0.250 //Fix enables if Value is > 0.0
+	//#define DI_W 2.5
+	//#define FTM 1
+    #define DG_Z 0.030//0.050//0.050//Min
+    //#define DE_W 0.25 //Auto
+    #define DI_Z 0.030//0.055//0.075//Trim
+    #define DF_W float2(0.250,0.008)  //Edge & Scale
+	#define BMT 1
+	#define DF_Z 0.050
+    #define FOV 1
+    #define DSW 1
+    #define RHW 1
+    #define NFM 1
 #else
 	#define NPW 1 //No Profile
 #endif
@@ -7275,7 +7302,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define DE_W Weapon_Near_Depth_Max_D          //Max
 #endif
 
-// X = [ZPD Weapon Boundary] Y = [Separation] Z = [ZPD Balance] W = [HUD]
+// X = [ZPD Weapon Boundary] Y = [Separation] Z = [ZPD Balance] W = [Weapon Edge Correction]
 #ifndef DF_X
     #define DF_X ZPD_Weapon_Boundary_Adjust_D
 #endif
@@ -7286,7 +7313,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define DF_Z Manual_ZPD_Balance_D
 #endif
 #ifndef DF_W
-    #define DF_W HUDX_D
+    #define DF_W Weapon_Edge_Correction_D
 #endif
 
 // X = [Special Depth Correction X] Y = [Special Depth Correction Y] Z = [Weapon NearDepth Min] W = [Check Depth Limit]
@@ -7331,7 +7358,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DI_W OIF_Check_Depth_Limit_D
 #endif
 
-// X = [NULL X] Y = [Menu Detection Type] Z = [Match Threshold] W = [Check Depth Limit Weapon]
+// X = [Range Smoothing X] Y = [Menu Detection Type] Z = [Match Threshold] W = [Check Depth Limit Weapon]
 #ifndef DJ_X
     #define DJ_X Range_Smoothing_D
 #endif
@@ -7359,7 +7386,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DK_W EFO_Fade_Speed_Selection_D
 #endif
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
-// X = [SM Tune] Y = [De-Artifact] Z = [HQ Text Detection] W = [SM Perspective]
+// X = [SM Tune] Y = [De-Artifact] Z = [NULL] W = [SM Perspective]
 #ifndef DL_X
     #define DL_X SM_Tune_D
 #endif
@@ -7367,7 +7394,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define DL_Y De_Artifact_D
 #endif
 #ifndef DL_Z
-    #define DL_Z HQ_Text_Detection_D
+    #define DL_Z NULL_Z_D
 #endif 
 #ifndef DL_W
 	#define DL_W SM_Perspective_D
@@ -7479,6 +7506,10 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 #ifndef HMT
     #define HMT HUD_Mode_Trigger_D             //HUD Mode Trigger
 #endif
+#ifndef HMC
+    #define HMC HUDX_D                         //HUD Mode Cut-Off 
+#endif
+
 #ifndef DFW
     #define DFW Delay_Frame_Workaround_D       //Delay Frame Workaround
 #endif

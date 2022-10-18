@@ -1249,7 +1249,67 @@ Now Motion Blur still not fully disable. This next step can be done of of two wa
 or Download
 2. http://www.mediafire.com/file/w0n67mo5aitaomm/pakchunk99-Mods_CustomMod_P.pak/file
 Now Place the "pakchunk99-Mods_CustomMod_P.pak" file to your Fallen Order\SwGame\Content\Paks\ folder
-            
+
+{STAR WARS™ Jedi Knight Dark Forces II Remastered  2.0.1} [ReShade 5.2.1] + jkgfxmod
+Things you need to run this game properly.
+
+Download Needed
+1. Jedi Knight Remastered 2.0.1.exe
+https://www.moddb.com/mods/jedi-knight-remastered/downloads/jedi-knight-remastered-20
+2. Older Version of ReShade
+https://reshade.me/downloads/ReShade_Setup_5.2.1.exe or https://reshade.me/downloads/ReShade_Setup_5.2.1_Addon.exe
+
+Run the Jedi Knight Remastered 2.0.1.exe and install it to the game you have:
+GoG - C:\Program Files (x86)\GOG Galaxy\Games\Star Wars Jedi Knight - Dark Forces 2
+Steam - C:\Program Files (x86)\Steam\steamapps\common\Star Wars Jedi Knight
+CD - C:\Program Files (x86)\Lucasarts\Jedi Knight
+
+Replace the files and go to your desktop and open up the shortcut called Configuation. 
+Replace the following infomation with this. Use notepad.
+
+{
+    "resolution": [ 2560, 1440 ],
+    "fullscreen": true,
+    "correct_game_aspect_ratio": false,
+    "correct_menu_aspect_ratio": true,
+    "hud_scale": 1.0,
+    "max_anisotropy": 2.0,
+    "enable_bloom": true,
+    "enable_ssao": true,
+    "enable_parallax": true,
+    "enable_texture_filtering": true,
+    "enable_posterized_lighting": false,
+    "enable_vsync": false,
+    "command": "JKR-fov115.EXE",
+    "vram_texture_preload_size": 1024
+}
+
+Things of note: Please set resolution too your current native screen res.
+command replace JKR-fov115.EXE with any of the bottom ones in the list below
+JKR-fovno.EXE
+JKR-fov95.EXE
+JKR-fov100.EXE
+JKR-fov110.EXE
+JKR-fov115.EXE
+JKR-fov120.EXE
+
+Once that is done close editor. Run ReShade installer and install reshade with OpenGL with my Depth3D Repo.
+You should select inject.exe. Then run the game. 
+
+In game click on setup. Then click on Display.
+
+Check     [X] Enable 3D Acceleration
+UnCheck [  ]Backbuffer in System Memory
+Set View Size to one away from max
+[===========================/\==]
+Min              Press OK                 MAX   
+
+Just Start SuperDepth3D and Start the game. Adjust the shader for your screen.
+Make sure to set Copy Depth Buffer Setting in the Add-On Tab.
+
+YouTube Video Guide:
+https://youtu.be/f_BSTovmuos
+
 {Stay Close}
 Install reshade in too Steam\steamapps\common\Stay Close\Migrate\Binaries\Win64
 

@@ -2,7 +2,7 @@
 	///**SuperDepth3D_VR+**///
 	//--------------------////
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	//* Depth Map Based 3D post-process shader v3.4.4
+	//* Depth Map Based 3D post-process shader v3.4.6
 	//* For Reshade 4.4+ I think...
 	//* ---------------------------------
 	//*
@@ -47,7 +47,7 @@ namespace SuperDepth3DVR
 		static const float DD_X = 1, DD_Y = 1, DD_Z = 0.0, DD_W = 0.0;
 		// DE_X = [ZPD Boundary Type] DE_Y = [ZPD Boundary Scaling] DE_Z = [ZPD Boundary Fade Time] DE_W = [Weapon Near Depth Max]
 		static const float DE_X = 0, DE_Y = 0.5, DE_Z = 0.25, DE_W = 0.0;
-		// DF_X = [Weapon ZPD Boundary] DF_Y = [Separation] DF_Z = [ZPD Balance] DF_W = [HUD]
+		// DF_X = [Weapon ZPD Boundary] DF_Y = [Separation] DF_Z = [ZPD Balance] DF_W = [Weapon Edge & Weapon Scale]
 		static const float DF_X = 0.0, DF_Y = 0.0, DF_Z = 0.5, DF_W = 0.0;
 		// DG_X = [Special Depth X] DG_Y = [Special Depth Y] DG_Z = [Weapon Near Depth Min] DG_W = [Check Depth Limit]
 		static const float DG_X = 0.0, DG_Y = 0.0, DG_Z = 0.0, DG_W = 0.0;
@@ -75,7 +75,7 @@ namespace SuperDepth3DVR
 		#define OW_WP "WP Off\0Custom WP\0"
 		static const int WSM = 0;
 		//Triggers
-		static const int NVK = 0, NDG = 0, FTM = 0, SPO = 0, MMD = 0, SMP = 0, LBR = 0, HQT = 0, AFD = 0, MDD = 0, FPS = 1, SMS = 1, OIF = 0, NCW = 0, RHW = 0, NPW = 0, IDF = 0, SPF = 0, BDF = 0, HMT = 0, DFW = 0, NFM = 0, DSW = 0, LBC = 0, LBS = 0, LBM = 0, DAA = 0, NDW = 0, PEW = 0, WPW = 0, FOV = 0, EDW = 0, SDT = 0;
+		static const int NVK = 0, NDG = 0, FTM = 0, SPO = 0, MMD = 0, SMP = 0, LBR = 0, HQT = 0, AFD = 0, MDD = 0, FPS = 1, SMS = 1, OIF = 0, NCW = 0, RHW = 0, NPW = 0, IDF = 0, SPF = 0, BDF = 0, HMT = 0, HMC = 0, DFW = 0, NFM = 0, DSW = 0, LBC = 0, LBS = 0, LBM = 0, DAA = 0, NDW = 0, PEW = 0, WPW = 0, FOV = 0, EDW = 0, SDT = 0;
 		//Overwatch.fxh State
 		#define OSW 1
 	#endif
@@ -395,7 +395,17 @@ namespace SuperDepth3DVR
 					 "Default and starts at One and it's Off.";
 		ui_category = "Occlusion Masking";
 	> = 1.0;
-	
+		
+	uniform float Range_Blend <
+		ui_type = "slider";
+		ui_min = 0; ui_max = 1;
+		ui_label = " Range Smoothing";
+		ui_tooltip = "This blends Two Depth Buffer at a distance to fill in missing information that is needed to compleat a image.\n"
+					 "With this on it should help with tress and other foliage that needs to be reconstructed by Temporal Methods.\n"
+					 "Default is Zero, Off.";
+		ui_category = "Occlusion Masking";
+	> = DJ_X;	
+
 	uniform int Performance_Level <
 		ui_type = "combo";
 		ui_items = "Performant\0Normal\0Performant + Foveated Rendering\0Normal + Foveated Rendering\0";
@@ -406,18 +416,8 @@ namespace SuperDepth3DVR
 					 "It's located in the lower bottom right of the ReShade's Main UI.\n"
 					 "Default is Normal.";
 		ui_category = "Occlusion Masking";
-	> = 0;
+	> = 0;	
 	
-	uniform float Range_Blend <
-		ui_type = "slider";
-		ui_min = 0; ui_max = 1;
-		ui_label = " Range Smoothing";
-		ui_tooltip = "This blends Two Depth Buffer at a distance to fill in missing information that is needed to compleat a image.\n"
-					 "With this on it should help with tress and other foliage that needs to be reconstructed by Temporal Methods.\n"
-					 "Default is Zero, Off.";
-		ui_category = "Occlusion Masking";
-	> = DJ_X;	
-		
 	uniform float Compatibility_Power <
 		#if Compatibility
 		ui_type = "drag";
@@ -609,6 +609,14 @@ namespace SuperDepth3DVR
 					"Default is (ZPD X 0.03, Min Y 0.0, Auto Z 0.0, Trim Z 0.250 ) & Zero is off.";
 		ui_category = "Weapon Hand Adjust";	
 	> = float4(0.03,DG_Z,DE_W,DI_Z);
+	
+	uniform float2 Weapon_Depth_Edge <
+		ui_type = "drag";
+		ui_min = 0.0; ui_max = 1.0;
+		ui_label = " Screen Edge Adjust & Near Scale";
+		ui_tooltip = "This Tool is to help with screen Edge adjustments and Weapon Hand scaling near the screen";
+		ui_category = "Weapon Hand Adjust";	
+	> = DF_W;
 	
 	uniform float Weapon_ZPD_Boundary <
 		ui_type = "slider";
@@ -912,7 +920,7 @@ namespace SuperDepth3DVR
 	}
 	
 	float2 Min_Divergence() // and set scale
-	{   float Min_Div = max(1.0, Divergence), D_Scale = saturate(Scale(Min_Div,100.0,1.0));
+	{   float Min_Div = max(1.0, Divergence), D_Scale = min(1.25,Scale(Min_Div,100.0,1.0));
 		return float2(lerp( 1.0, Max_Divergence, D_Scale), D_Scale);
 	}
 	
@@ -1344,7 +1352,18 @@ namespace SuperDepth3DVR
 			  EdgeMask = clamp((BaseVal-Dist) / (BaseVal-Adjust_Value),0.125,1); 
 	    return color * EdgeMask;    
 	}
-	
+
+	#define FLT_EPSILON  1.192092896e-07 // smallest such that Value + FLT_EPSILON != Value		
+	float DepthEdge(float Mod_Depth, float Depth, float2 texcoords, float Adjust_Value )
+	{   Adjust_Value -= FLT_EPSILON;
+		float2 center = float2(0.5,texcoords.y); // Direction of effect.   
+		float BaseVal = 1.0,
+			  Dist  = distance( center, texcoords ) * 2.0, 
+			  EdgeMask = saturate((BaseVal-Dist) / (BaseVal-Adjust_Value)),
+			  Set_Weapon_Scale_Near = -Weapon_Depth_Edge.y; 
+	    return lerp(Depth,(Mod_Depth - Set_Weapon_Scale_Near) / (1 + Set_Weapon_Scale_Near), EdgeMask );    
+	}
+
 	float CCBox(float2 TC, float2 size) 
 	{
 		TC = abs(TC)-size;
@@ -1735,13 +1754,15 @@ namespace SuperDepth3DVR
 		float4 DM = float4(PrepDepth(texcoord)[0][0],PrepDepth(texcoord)[0][1],PrepDepth(texcoord)[0][2],PrepDepth(texcoord)[1][1]);
 		float R = DM.x, G = DM.y, B = DM.z, Auto_Scale = WZPD_and_WND.z > 0 ? lerp(lerp(1.0,0.625,saturate(WZPD_and_WND.z * 2)),1.0,lerp(Auto_Balance_Selection().y , smoothstep(0,0.5,tex2D(SamplerLumVR,float2(0,0.750)).z), 0.5)) : 1;
 		float2 Min_Trim = float2(Set_Pop_Min().y, WZPD_and_WND.w * Auto_Scale);
-		//Weapon Hand Reduction
-		//Min_Trim = float2((Min_Trim.x * 2 + Min_Trim.x) * 0.5, min( 0.3, (Min_Trim.y * 2.5 + Min_Trim.y) * 0.5) );
+
 		//Fade Storage
 		float ScaleND = saturate(lerp(R,1.0f,smoothstep(min(-Min_Trim.x,0),1.0f,R)));
 	
 		if (Min_Trim.x > 0)
 			R = saturate(lerp(ScaleND,R,smoothstep(0,Min_Trim.y,ScaleND)));
+			
+		if ( Weapon_Depth_Edge.x > 0)//1.0 needs to be adjusted when doing far scaling
+			R = lerp(DepthEdge(R, DM.x, texcoord, 1-Weapon_Depth_Edge.x),DM.x,smoothstep(0,1.0,DM.x));
 	
 		if(texcoord.x < pix.x * 2 && texcoord.y < pix.y * 2)//TL
 			R = Fade_in_out(texcoord);
@@ -1965,7 +1986,8 @@ namespace SuperDepth3DVR
 	}		
 	float3 GetDB(float2 texcoord)
 	{
-		float Depth_Blur = View_Mode_Warping > 0 ? min(tex2Dlod(SamplerzBufferVR_L, float4( texcoord, 0, clamp(View_Mode_Warping,0,5) ) ).x,tex2Dlod(SamplerzBufferVR_L, float4( texcoord, 0, 0) ).x) : tex2Dlod(SamplerzBufferVR_L, float4( texcoord, 0, 0) ).x;
+		float VMW = View_Mode == 1 ? View_Mode_Warping : clamp(View_Mode_Warping,0, View_Mode == 5 ? 2 : 1);
+		float Depth_Blur = View_Mode_Warping > 0 ? min(tex2Dlod(SamplerzBufferVR_L, float4( texcoord, 0, clamp(VMW,0,5) ) ).x,tex2Dlod(SamplerzBufferVR_L, float4( texcoord, 0, 0) ).x) : tex2Dlod(SamplerzBufferVR_L, float4( texcoord, 0, 0) ).x;
 	
 		float3 DepthBuffer_LP = float3(Depth_Blur,tex2Dlod(SamplerzBufferVR_P, float4( texcoord, 0, 0) ).x, tex2Dlod(SamplerzBufferVR_P, float4(texcoord,0, 0) ).y );
 		
@@ -1986,7 +2008,7 @@ namespace SuperDepth3DVR
 	{   
 		float  MS = Diverge * pix.x; int Perf_LvL = fmod(Performance_Level,2);      
 		float2 ParallaxCoord = Coordinates, CBxy = floor( float2(Coordinates.x * BUFFER_WIDTH, Coordinates.y * BUFFER_HEIGHT));
-		float GetDepth = smoothstep(0,1, GetDB(Coordinates).z ),
+		float GetDepth = smoothstep(0,1, GetDB(Coordinates).z ), CB_Done = fmod(CBxy.x+CBxy.y,2),
 				   Perf = Performance_LvL[Perf_LvL].x;
 		//Would Use Switch....
 		if( View_Mode == 2)
@@ -1996,20 +2018,20 @@ namespace SuperDepth3DVR
 		if( View_Mode == 4)
 		{
 			if( GetDepth >= 0.999 )
-				Perf = fmod(CBxy.x+CBxy.y,2) ? 0.5 : 1.000;
+				Perf = CB_Done ? 0.5 : 1.000;
 			else
-				Perf = fmod(CBxy.x+CBxy.y,2) ? 1.020: 1.040;
+				Perf = CB_Done ? 1.020: 1.040;
 			
 			Perf = lerp(Perf,1.425f,0.5);
 		}
 		if( View_Mode == 5)
 		{
 			if( GetDepth >= 0.999 )
-				Perf = fmod(CBxy.x+CBxy.y,2) ? 1.016: 1.017;
+				Perf = CB_Done ? 1.016: 1.017;
 			else if( GetDepth >= 0.875)
-				Perf = fmod(CBxy.x+CBxy.y,2) ? 1.018: 1.019;
+				Perf = CB_Done ? 1.018: 1.019;
 			else
-				Perf = fmod(CBxy.x+CBxy.y,2) ? 1.020: 1.021;
+				Perf = CB_Done ? 1.020: 1.021;
 		}
 		//ParallaxSteps Calculations
 		float MinNum = 25, D = abs(Diverge), Cal_Steps = D * Perf, Steps = clamp( Cal_Steps, Perf_LvL ? MinNum : lerp( MinNum, min( MinNum, D), GetDepth >= 0.999 ), Performance_Level > 1 ? lerp(100,50,saturate(Vin_Pattern(Coordinates, float2(15.0,2.5)))) : 100 );//Foveated Rendering Point of attack 16-256 limit samples.
@@ -2043,8 +2065,8 @@ namespace SuperDepth3DVR
 		float Weapon_Mask = tex2Dlod(SamplerDMVR,float4(Coordinates,0,0)).y, ZFighting_Mask = 1.0-(1.0-tex2Dlod(SamplerLumVR,float4(Coordinates,0,1.400)).w - Weapon_Mask);
 			  ZFighting_Mask = ZFighting_Mask * (1.0-Weapon_Mask);
 		float2 PCoord = float2(View_Mode <= 1 ? PrevParallaxCoord.x : ParallaxCoord.x, PrevParallaxCoord.y ) ;
-			   PCoord.x -= (View_Mode == 1 ? 0.0075  : 0.0025 ) * MS;
-		float Get_DB = View_Mode == 1 ? GetDB( PCoord ).x : GetDB( PCoord ).y, 
+			   PCoord.x -= 0.0025 * MS;
+		float Get_DB = GetDB( PCoord ).x, 
 			  Get_DB_ZDP = WP > 0 ? lerp(Get_DB, abs(Get_DB), ZFighting_Mask) : Get_DB;
 		// Parallax Occlusion Mapping
 		float beforeDepthValue = Get_DB_ZDP, afterDepthValue = CurrentDepthMapValue - CurrentLayerDepth;
