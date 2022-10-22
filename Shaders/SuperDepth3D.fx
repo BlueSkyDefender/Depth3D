@@ -59,7 +59,7 @@ namespace SuperDepth3D
 		static const float DJ_X = 0, DJ_Y = 0.0, DJ_Z = 0.0, DJ_W = -0.100;
 		// DK_X = [FPS Focus Method] DK_Y = [Eye Eye Selection] DK_Z = [Eye Fade Selection] DK_W = [Eye Fade Speed Selection]	
 		static const float DK_X = 0, DK_Y = 0.0, DK_Z = 0, DK_W = 1;
-		// DL_X = [Not Used Here] DL_Y = [De-Artifact] DL_Z = [Null] DL_W = [Not Used Here]
+		// DL_X = [Not Used Here] DL_Y = [De-Artifact] DL_Z = [Compatibility Power] DL_W = [Not Used Here]
 		static const float DL_X = 0.5, DL_Y = 0, DL_Z = 0, DL_W = 0.05;		
 		// DN_X = [Position A & B] DN_Y = [Position C & D] DM_Z = [Position E & F] DN_W = [Menu Size Main]	
 		static const float DN_X = 0.0, DN_Y = 0.0, DN_Z = 0.0, DN_W = 0.0;
@@ -414,7 +414,7 @@ namespace SuperDepth3D
 					 "With this on it should work better in games with TAA, FSR,and or DLSS sometimes.\n"
 					 "Default is 0.25.";
 		ui_category = "Compatibility Options";
-	> = 0.0;
+	> = DL_Z;
 	
 	uniform float2 DLSS_FSR_Offset <
 		#if Compatibility
