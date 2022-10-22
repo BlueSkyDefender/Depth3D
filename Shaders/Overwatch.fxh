@@ -7107,9 +7107,9 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 #elif (App == 0xFE7D9E7E ) //Scorn
 	#define DA_W 1
     //#define DB_X 1
-	#define DA_X 0.0125//0.025
-	#define DF_Y 0.010
-	#define DA_Y 200.0 //225.00 
+	#define DA_X 0.015
+	#define DF_Y 0.007
+	#define DA_Y 200.0
     #define DA_Z 0.0001
 	#define DB_Z 0.0125
 	//#define DB_Y 1
@@ -7118,13 +7118,14 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DE_Z 0.375
 	#define DG_W 2.0 //PoP
     #define OIF 0.250 //Fix enables if Value is > 0.0
-	#define DI_W 2.5
+	#define DI_W 3.5
 	//#define FTM 1
-    #define DG_Z 0.045//0.050//0.075 //Min
+    #define DG_Z 0.0125 //Min
     //#define DE_W 0.75 //Auto
-    #define DI_Z 0.055//0.050//0.090 //Trim
+    #define DI_Z 0.050 //Trim
+    #define DF_W float2(0.001,0.0075)  //Edge & Scale
 	#define BMT 1
-	#define DF_Z 0.075
+	#define DF_Z 0.07
     //#define SMS 3      //SM Toggle Separation
 	#define DL_X 0.750 //SM Tune
 	#define DL_W 0.050 //SM Perspective
