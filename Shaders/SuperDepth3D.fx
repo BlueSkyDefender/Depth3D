@@ -2,7 +2,7 @@
 	///**SuperDepth3D**///
 	//----------------////
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	//* Depth Map Based 3D post-process shader v3.4.6
+	//* Depth Map Based 3D post-process shader v3.4.7
 	//* For Reshade 3.0+
 	//* ---------------------------------
 	//*
@@ -25,7 +25,7 @@
 	//* Just don't redistribute this file unless I authorize it.
 	//*
 	//* Have fun,
-	//* Written by Jose Negrete AKA BlueSkyDefender <UntouchableBlueSky@gmail.com>, December 2019
+	//* Written by Jose Negrete AKA BlueSkyDefender <UntouchableBlueSky@gmail.com>, October 2022
 	//*
 	//* Please feel free to contact me if you want to use this in your project.
 	//* https://github.com/BlueSkyDefender/Depth3D
@@ -395,9 +395,10 @@ namespace SuperDepth3D
 	
 	uniform int Switch_VRS <
 		ui_type = "combo";
-		ui_items = "Auto\0High\0Med\0Low\0Veary Low\0";
+		ui_items = "Auto\0High\0Med\0Low\0Very Low\0";
 		ui_label = " VRS Performance";
-		ui_tooltip = "Use this to disable/enable High Quality Varable Rate Shading.";
+		ui_tooltip = "Use this to set Varable Rate Shading to manually selection or automatic mod.\n"
+			   "Default is Automatic.";
 		ui_category = "Occlusion Masking";
 	> = 0;	
 		
@@ -1117,14 +1118,14 @@ namespace SuperDepth3D
 			Texture = texDF;
 		};
 	#endif
-	texture texDMN { Width = BUFFER_WIDTH ; Height = BUFFER_HEIGHT; Format = RGBA16F; };
+	texture texDMN { Width = BUFFER_WIDTH ; Height = BUFFER_HEIGHT; Format = RGBA16F; MipLevels = Max_Mips; };
 	
 	sampler SamplerDMN
 		{
 			Texture = texDMN;
 		};
 	
-	texture texzBufferN_P { Width = BUFFER_WIDTH ; Height = BUFFER_HEIGHT ; Format = RG16F; MipLevels = Max_Mips; };
+	texture texzBufferN_P { Width = BUFFER_WIDTH ; Height = BUFFER_HEIGHT ; Format = RG16F; };
 	
 	sampler SamplerzBufferN_P
 		{
@@ -2138,7 +2139,7 @@ namespace SuperDepth3D
 		//Luma Based VRS
 		float Auto_Adptive = Switch_VRS == 0 ? lerp(0.05,1.0,smoothstep(0.00000001f, 0.375, tex2D(SamplerzBufferN_P,0).y ) ) : 1,
 			  Luma_Adptive = smoothstep(0.0,saturate(VRS_Array[Switch_VRS] * Auto_Adptive), tex2Dlod(SamplerDMN,float4(Coordinates,0,9)).w);
-		if( Perf_LvL > 1 )
+		if( Performance_Level > 1 )
 			Perf *= saturate(Luma_Adptive * 0.5 + 0.5  );	
 		//ParallaxSteps Calculations
 		float MinNum = 20, D = abs(Diverge), Cal_Steps = D * Perf, Steps = clamp( Cal_Steps, Perf_LvL ? MinNum : lerp( MinNum, min( MinNum, D), GetDepth >= 0.999 ), 100 );//Foveated Rendering Point of attack 16-256 limit samples.
@@ -2461,24 +2462,26 @@ namespace SuperDepth3D
 	{   float2 Persp = Per;
 		float2 TCL = texcoord, TCR = texcoord, TCL_T = texcoord, TCR_T = texcoord, TexCoords = texcoord;
 		TCL += Persp; TCR -= Persp; TCL_T += Persp; TCR_T -= Persp;
-		#if !Reconstruction_Mode || !Inficolor_3D_Emulator
-		[branch] if (Stereoscopic_Mode == 0)
-		{
-			TCL.x = TCL.x*2;
-			TCR.x = TCR.x*2-1;
-		}
-		else if(Stereoscopic_Mode == 1)
-		{
-			TCL.y = TCL.y*2;
-			TCR.y = TCR.y*2-1;
-		}
-		else if(Stereoscopic_Mode == 5)
-		{
-			TCL = float2(TCL.x*2,TCL.y*2);
-			TCL_T = float2(TCL_T.x*2-1,TCL_T.y*2);
-			TCR = float2(TCR.x*2-1,TCR.y*2-1);
-			TCR_T = float2(TCR_T.x*2,TCR_T.y*2-1);
-		}
+		#if !Reconstruction_Mode
+			#if !Inficolor_3D_Emulator
+			[branch] if (Stereoscopic_Mode == 0)
+			{
+				TCL.x = TCL.x*2;
+				TCR.x = TCR.x*2-1;
+			}
+			else if(Stereoscopic_Mode == 1)
+			{
+				TCL.y = TCL.y*2;
+				TCR.y = TCR.y*2-1;
+			}
+			else if(Stereoscopic_Mode == 5)
+			{
+				TCL = float2(TCL.x*2,TCL.y*2);
+				TCL_T = float2(TCL_T.x*2-1,TCL_T.y*2);
+				TCR = float2(TCR.x*2-1,TCR.y*2-1);
+				TCR_T = float2(TCR_T.x*2,TCR_T.y*2-1);
+			}
+			#endif
 		#endif
 	
 		#if Inficolor_3D_Emulator
@@ -2790,7 +2793,7 @@ namespace SuperDepth3D
 		#else
 		Color.rgb = PS_calcLR(texcoord, position.xy).rgb; //Color = texcoord.x+texcoord.y > 1 ? Color : LBDetection();
 		#endif
-	
+		//Color = tex2Dlod(SamplerDMN,float4(texcoord,0,9)).w;
 		return timer <= Text_Timer || Text_Info ? Color.rgb + Color.w : Color.rgb;
 	}
 		
