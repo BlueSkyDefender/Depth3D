@@ -7639,17 +7639,17 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	//#define DA_W 1
     //#define DB_X 1
 	#define DA_X 0.025
-	//#define DF_Y 0.001
-	#define DA_Y 225.0
-    //#define DA_Z -0.0005
-	#define DB_Z 0.025
+	#define DF_Y 0.0125
+	#define DA_Y 170.0 //180.0
+    //#define DA_Z 0.0005
+	#define DB_Z 0.05
 	//#define DB_Y 1
 	#define DE_X 1
-	#define DE_Y 0.500
+	#define DE_Y 0.400
 	#define DE_Z 0.4375
-	//#define DG_W 0.5 //Neg PoP
+	#define DG_W 0.125//PoP
     #define OIF 0.125 //Fix enables if Value is > 0.0
-	#define DI_W 1.00
+	#define DI_W 2.50
 	//#define FTM 1
     //#define DG_Z 0.00125//0.050//0.075 //Min
     //#define DE_W 0.75 //Auto
@@ -7659,12 +7659,12 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DF_Z 0.125
     #define SMS 3            //SM Toggle Separation
 	#define DL_X 0.925       //SM Tune
-	//#define DL_W 0.050       //SM Perspective
-	#define DM_X 4           //HQ Tune
-	#define DM_Z 4           //HQ Smooth
+	//#define DL_W 0.5       //SM Perspective
+	#define DM_X 2           //HQ Tune
+	#define DM_Z 2           //HQ Smooth
     //#define DM_Y 3           //HQ VRS
-    #define DL_Y 0.250     //De-Artifact
-    #define DL_Z 0.250       //Compat Power
+    #define DL_Y 1.0     //De-Artifact
+    //#define DL_Z 0.0       //Compat Power
 	//#define DJ_X 0.250       //Range Smoothing
     /*
     #define MDD 1 //Set Menu Detection & Direction     //Off 0 | 1 | 2 | 3 | 4      
@@ -7690,9 +7690,9 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define PEW 1
     #define FOV 1
     #define NDG 1
-	#define LBM 1
-	#define DI_X 0.879
-	#define DI_Y 0.120
+	//#define LBM 1
+	//#define DI_X 0.879
+	//#define DI_Y 0.120
 #else
 	#define NPW 1 //No Profile
 #endif
