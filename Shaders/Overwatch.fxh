@@ -7721,7 +7721,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DM_X 4           //HQ Tune
 	#define DM_Z 2           //HQ Smooth
     //#define DM_Y 3           //HQ VRS
-    //#define DL_Y 1.0     //De-Artifact
+    #define DL_Y 0.250    //De-Artifact
     //#define DL_Z 0.0       //Compat Power
 	//#define DJ_X 0.250       //Range Smoothing
     /*
@@ -7744,7 +7744,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define DP_Z float4( 0.060 , 0.380 ,  0.286  , 0.195) //Pos D2 = XY Black & D3 = ZW Color
 	#define DP_W float4( 30.0  , 30.0  ,  30.0   , 14.0) //Tresh Hold for Color A1 & A3 and Color
 	*/
-    //#define DSW 1
+    #define DSW 1
     #define PEW 1
 #else
 	#define NPW 1 //No Profile
