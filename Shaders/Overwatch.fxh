@@ -7832,12 +7832,13 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define DJ_Y float4( 30.0, 30.0, 6.0, 5.0);            //Menu Detection Type for A, B, & C. The Last Value is a Shift amount for C. 
     #define DJ_Z float3( 1000., 1000., 1000);                //Set Match Tresh 
 	*/
-    /*	
-    #define MMD 3 //Set Multi Menu Detection             //Off / On
-    #define DO_X float4( 0.374 , 0.0888, 0.250 , 0.940  ) //Pos A1 = XY Color & A2 = ZW Black 
-    #define DO_Y float4( 0.587 , 0.0888, 0.500 , 0.1485 ) //Pos A3 = XY Color & B1 = ZW Color
-    #define DO_Z float4( 0.84  , 0.810 , 0.500 , 0.870  ) //Pos B2 = XY Black & B3 = ZW Color
-	#define DO_W float4( 30.0  , 30.0  , 30.0  , 30.0   )   //Tresh Hold for Color A & B and Color
+	
+    #define MMD 1 //Set Multi Menu Detection             //Off / On
+    #define DO_X float4( 0.500 , 0.0165, 0.972 , 0.0165 ) //Pos A1 = XY Color & A2 = ZW Black 
+    #define DO_Y float4( 0.500 , 0.9750, 0.000 , 0.000  ) //Pos A3 = XY Color & B1 = ZW Color
+    #define DO_Z float4( 0.000 , 0.000 , 0.000 , 0.000  ) //Pos B2 = XY Black & B3 = ZW Color
+	#define DO_W float4( 29.0  , 29.0  , 1000.0, 1000.0 )   //Tresh Hold for Color A & B and Color
+    /*
     #define DP_X float4( 0.0495, 0.057 , 0.500 , 0.057  ) //Pos C1 = XY Color & C2 = ZW Black 
     #define DP_Y float4( 0.930 , 0.960 , 0.688 , 0.320  ) //Pos C3 = XY Color & D1 = ZW Color
     #define DP_Z float4( 0.500 , 0.057 , 0.930 , 0.960  ) //Pos D2 = XY Black & D3 = ZW Color
