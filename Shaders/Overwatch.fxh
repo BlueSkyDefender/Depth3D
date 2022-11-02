@@ -7797,7 +7797,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DB_X 1
 	#define DA_X 0.025
 	//#define DF_Y 0.0025
-	#define DA_Y 31.0 //50.0 //37.5
+	#define DA_Y 32.0 //50.0 //37.5
     //#define DA_Z 0.001
 	#define DB_Z 0.050
 	//#define DB_Y 1
@@ -7815,14 +7815,14 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define BMT 1
 	#define DF_Z 0.0375
     #define SMS 1            //SM Toggle Separation
-	#define DL_X 0.925       //SM Tune
+	#define DL_X 0.900       //SM Tune
 	//#define DL_W 0.5       //SM Perspective
 	#define DM_X 3           //HQ Tune
 	#define DM_Z 3           //HQ Smooth
     //#define DM_Y 3           //HQ VRS
     //#define DL_Y 0.0    //De-Artifact
     #define DL_Z 0.75       //Compat Power
-	#define DJ_X 0.250       //Range Smoothing
+	//#define DJ_X 0.250       //Range Smoothing
     /*
     #define MDD 1 //Set Menu Detection & Direction     //Off 0 | 1 | 2 | 3 | 4      
     #define DN_X float4( 0.400 , 0.275, 0.600 , 0.722)  //Pos A = XY White & B = ZW White 
