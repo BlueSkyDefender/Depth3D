@@ -808,7 +808,7 @@ namespace SuperDepth3DVR
 		ui_items = "Off\0On\0";
 		ui_label = "·Color Correction·";
 		ui_tooltip = "Partial Luma Preserved Color Correction.\n"
-					"Removes Tint and or Color Cast in an automatic way while enhancing contrast.n\"
+					"Removes Tint and or Color Cast in an automatic way while enhancing contrast.\n"
 					"This works by sampling the image and creating a min and max color map and adjusting the image accordingly.\n"
 					"Default is Off.";
 		ui_category = "Image Effects";
