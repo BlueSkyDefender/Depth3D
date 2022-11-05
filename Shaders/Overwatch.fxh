@@ -7909,7 +7909,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define PEW 1
     #define FOV 1
     #define DAA 1
- #elif (App == 0x978D64F6 ) //Vermintide 2
+ #elif (App == 0x978D64F6 || App == 0x8C605518) //Vermintide 2
 	//#define DA_W 1
     //#define DB_X 1
 	#define DA_X 0.025

@@ -2,7 +2,7 @@
 	///**SuperDepth3D_VR+**///
 	//--------------------////
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	//* Depth Map Based 3D post-process shader v3.4.7
+	//* Depth Map Based 3D post-process shader v3.4.8
 	//* For Reshade 4.4+ I think...
 	//* ---------------------------------
 	//*
@@ -637,7 +637,7 @@ namespace SuperDepth3DVR
 					 "This is only for UI elements that show up in the Depth Buffer.\n"
 		             "Default is float2(X 0.0, Y 0.5)";
 		ui_category = "Heads-Up Display";
-	> = float2(DF_W,0.5);
+	> = float2(HMC,0.5);
 	#endif
 	
 	uniform int Focus_Reduction_Type <
