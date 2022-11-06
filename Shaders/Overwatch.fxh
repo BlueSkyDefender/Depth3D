@@ -3591,7 +3591,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DH_Z 0.255
 	#define DH_W 0.0
 #elif (App == 0x3C982FAC ) //Forza Horizon 4  
-	#define DA_W 1
+	//#define DA_W 1
 	#define DA_X 0.1
 	//#define DF_Y 0.05
 	#define DA_Y 7.5
