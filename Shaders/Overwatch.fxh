@@ -898,27 +898,32 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DAA 1
 #elif (App == 0x60F440F8 ) //Resident Evil Village
 	#define DA_W 1
-	#define DA_Y 80.0//65.0//50.0
 	//#define DA_Z 0.0004 //-0.65
-	#define DA_X 0.050//0.075
+	#define DA_X 0.0625 //0.075 //0.050
     #define DF_Y 0.075
+	#define DA_Y 65.0 //50.0 //85.0	
 	#define DB_Y 1
 	#define DE_X 3
 	#define DE_Y 0.375
 	#define DE_Z 0.375
-	#define BMT 1    
-	#define DF_Z 0.125
 	#define DG_W 0.425 //0.725 //Only Detect stuff past the screen.
-    #define DG_Z 0.040 //Min
+    #define OIF 0.125 //Fix enables if Value is > 0.0
+	#define DI_W 1.0
+	//#define FTM 1
+	#define BMT 1    
+	#define DF_Z 0.123
+    #define DG_Z 0.025//0.040 //Min
     #define DI_Z 0.125 //0.1375 //Trim
+    #define DF_W float2(0.001,0.0015)  //Edge & Scale
     #define SMS 3      //SM Toggle Separation
 	#define DL_X 0.85 //SM Tune
 	//#define DL_W 0.050  //SM Perspective
 	#define DM_X 3     //HQ Tune
 	#define DM_Z 2     //HQ Smooth
     //#define DM_Y 3     //HQ VRS
-    //#define DL_Y 0.375    //De-Artifact 0.1245	
-	#define DJ_X 0.75     //Range Smoothing
+    //#define DL_Y 0.375    //De-Artifact
+    #define DL_Z 0.125       //Compat Power
+	#define DJ_X 0.75       //Range Smoothing
     #define MDD 1 //Set Menu Detection & Direction     //Off 0 | 1 | 2 | 3 | 4      
     #define DN_X float4( 0.404, 0.346,  0.000, 0.575)  //Pos A = XY White & B = ZW White 
     #define DN_Y float4( 0.5491, 0.4225,  0.0, 0.0)       //Pos C = XY Light & D = ZW Match
