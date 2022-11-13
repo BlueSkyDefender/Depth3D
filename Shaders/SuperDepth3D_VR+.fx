@@ -2,7 +2,7 @@
 	///**SuperDepth3D_VR+**///
 	//--------------------////
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	//* Depth Map Based 3D post-process shader v3.4.8
+	//* Depth Map Based 3D post-process shader v3.4.9
 	//* For Reshade 4.4+ I think...
 	//* ---------------------------------
 	//*
@@ -75,7 +75,7 @@ namespace SuperDepth3DVR
 		#define OW_WP "WP Off\0Custom WP\0"
 		static const int WSM = 0;
 		//Triggers
-		static const int NVK = 0, NDG = 0, FTM = 0, SPO = 0, MMD = 0, SMP = 0, LBR = 0, HQT = 0, AFD = 0, MDD = 0, FPS = 1, SMS = 1, OIF = 0, NCW = 0, RHW = 0, NPW = 0, IDF = 0, SPF = 0, BDF = 0, HMT = 0, HMC = 0, DFW = 0, NFM = 0, DSW = 0, LBC = 0, LBS = 0, LBM = 0, DAA = 0, NDW = 0, PEW = 0, WPW = 0, FOV = 0, EDW = 0, SDT = 0;
+		static const int MMS = 0, NVK = 0, NDG = 0, FTM = 0, SPO = 0, MMD = 0, SMP = 0, LBR = 0, HQT = 0, AFD = 0, MDD = 0, FPS = 1, SMS = 1, OIF = 0, NCW = 0, RHW = 0, NPW = 0, IDF = 0, SPF = 0, BDF = 0, HMT = 0, HMC = 0, DFW = 0, NFM = 0, DSW = 0, LBC = 0, LBS = 0, LBM = 0, DAA = 0, NDW = 0, PEW = 0, WPW = 0, FOV = 0, EDW = 0, SDT = 0;
 		//Overwatch.fxh State
 		#define OSW 1
 	#endif
@@ -1321,25 +1321,35 @@ namespace SuperDepth3DVR
 	#endif
 	
 	#if MMD //Simple Menu Masking
-	bool Check_Color_Max(float2 Pos_IN, float C_Value)
+	bool Check_Color_MinMax_A(float2 Pos_IN)
 	{	float3 RGB_IN = C_Tresh(Pos_IN);
-		return RN_Value(RGB_IN.r + RGB_IN.g + RGB_IN.b) <= C_Value ? 1 : 0;
+		if ( MMS == 1 || MMS == 2)
+			return RN_Value(RGB_IN.r + RGB_IN.g + RGB_IN.b) >= 29.0? 1 : 0;
+		else
+			return RN_Value(RGB_IN.r + RGB_IN.g + RGB_IN.b) <= 1.0 ? 1 : 0;
 	}
 	
+	bool Check_Color_MinMax_B(float2 Pos_IN)
+	{	float3 RGB_IN = C_Tresh(Pos_IN);
+		if ( MMS == 2)
+			return RN_Value(RGB_IN.r + RGB_IN.g + RGB_IN.b) >= 29.0? 1 : 0;
+		else
+			return RN_Value(RGB_IN.r + RGB_IN.g + RGB_IN.b) <= 1.0 ? 1 : 0;
+	}	
 	float4 Simple_Menu_Detection()//Active RGB Detection
 	{ 
-		return float4( Check_Color(DO_X.xy, DO_W.x) && Check_Color_Max(DO_X.zw, 1.0) && Check_Color( DO_Y.xy, DO_W.y),
-					   Check_Color(DO_Y.zw, DO_W.z) && Check_Color_Max(DO_Z.xy, 1.0) && Check_Color( DO_Z.zw, DO_W.w),
-					   Check_Color(DP_X.xy, DP_W.x) && Check_Color_Max(DP_X.zw, 1.0) && Check_Color( DP_Y.xy, DP_W.y),
-					   Check_Color(DP_Y.zw, DP_W.z) && Check_Color_Max(DP_Z.xy, 1.0) && Check_Color( DP_Z.zw, DP_W.w) );
+		return float4( Check_Color(DO_X.xy, DO_W.x) && Check_Color_MinMax_A(DO_X.zw) && Check_Color( DO_Y.xy, DO_W.y),
+					   Check_Color(DO_Y.zw, DO_W.z) && Check_Color_MinMax_A(DO_Z.xy) && Check_Color( DO_Z.zw, DO_W.w),
+					   Check_Color(DP_X.xy, DP_W.x) && Check_Color_MinMax_A(DP_X.zw) && Check_Color( DP_Y.xy, DP_W.y),
+					   Check_Color(DP_Y.zw, DP_W.z) && Check_Color_MinMax_A(DP_Z.xy) && Check_Color( DP_Z.zw, DP_W.w) );
 	}
 		#if MMD == 3 || MMD == 4
 		float4 Simple_Menu_Detection_EX()//Active RGB Detection Extended
 		{ 
-			return float4( Check_Color(DQ_X.xy, DQ_W.x) && Check_Color_Max(DQ_X.zw, 1.0) && Check_Color( DQ_Y.xy, DQ_W.y),
-						   Check_Color(DQ_Y.zw, DQ_W.z) && Check_Color_Max(DQ_Z.xy, 1.0) && Check_Color( DQ_Z.zw, DQ_W.w),
-					   	Check_Color(DR_X.xy, DR_W.x) && Check_Color_Max(DR_X.zw, 1.0) && Check_Color( DR_Y.xy, DR_W.y),
-					   	Check_Color(DR_Y.zw, DR_W.z) && Check_Color_Max(DR_Z.xy, 1.0) && Check_Color( DR_Z.zw, DR_W.w) );
+			return float4( Check_Color(DQ_X.xy, DQ_W.x) && Check_Color_MinMax_B(DQ_X.zw) && Check_Color( DQ_Y.xy, DQ_W.y),
+						   Check_Color(DQ_Y.zw, DQ_W.z) && Check_Color_MinMax_B(DQ_Z.xy) && Check_Color( DQ_Z.zw, DQ_W.w),
+					   	Check_Color(DR_X.xy, DR_W.x) && Check_Color_MinMax_B(DR_X.zw) && Check_Color( DR_Y.xy, DR_W.y),
+					   	Check_Color(DR_Y.zw, DR_W.z) && Check_Color_MinMax_B(DR_Z.xy) && Check_Color( DR_Z.zw, DR_W.w) );
 		}
 		#endif
 	#endif
