@@ -55,8 +55,8 @@ namespace SuperDepth3DVR
 		static const float DH_X = 1.0, DH_Y = 1.0, DH_Z = 0.0, DH_W = 0.0;
 		// DI_X = [LBM Offset X] DI_Y = [LBM Offset Y] DI_Z = [Weapon Near Depth Trim] DI_W = [OIF Check Depth Limit]
 		static const float DI_X = 0.0, DI_Y = 0.0, DI_Z = 0.25, DI_W = 0.0;
-		// DJ_X = [Range Smoothing] DJ_Y = [Menu Detection Type] DJ_Z = [Match Threshold] DJ_W = [Check Depth Limit Weapon]
-		static const float DJ_X = 0, DJ_Y = 0.0, DJ_Z = 0.0, DJ_W = -0.100;
+		// DJ_X = [Range Smoothing] DJ_Y = [Menu Detection Type] DJ_Z = [Match Threshold] DJ_W = [Check Depth Limit Weapon Primary]
+		static const float DJ_X = 0, DJ_Y = 0.0, DJ_Z = 0.0, DJ_W = 0.100;
 		// DK_X = [FPS Focus Method] DK_Y = [Eye Eye Selection] DK_Z = [Eye Fade Selection] DK_W = [Eye Fade Speed Selection]	
 		static const float DK_X = 0, DK_Y = 0.0, DK_Z = 0, DK_W = 1;
 		// DL_X = [Not Used Here] DL_Y = [De-Artifact] DL_Z = [Compatibility Power] DL_W = [Not Used Here]
@@ -71,6 +71,8 @@ namespace SuperDepth3DVR
 		static const float DQ_X = 0.0, DQ_Y = 0.0, DQ_Z = 0.0, DQ_W = 1000.0;
 		// DR_X = [Position G & G] DR_Y = [Position G & H] DR_Z = [Position H & H] DR_W = [GH Menu Tresh]	
 		static const float DR_X = 0.0, DR_Y = 0.0, DR_Z = 0.0, DR_W = 1000.0;
+		// DR_X = [Null X] DR_Y = [Null Y] DR_Z = [Null Z] DR_W = [Check Depth Limit Weapon Secondary]
+		static const float DS_X = 0.0, DS_Y = 0.0, DS_Z = 0.0, DS_W = 1.0;
 		// WSM = [Weapon Setting Mode]
 		#define OW_WP "WP Off\0Custom WP\0"
 		static const int WSM = 0;
@@ -611,14 +613,14 @@ namespace SuperDepth3DVR
 	> = float4(0.03,DG_Z,DE_W,DI_Z);
 	
 	uniform float2 Weapon_Depth_Edge <
-		ui_type = "drag";
+		ui_type = "slider";
 		ui_min = 0.0; ui_max = 1.0;
 		ui_label = " Screen Edge Adjust & Near Scale";
 		ui_tooltip = "This Tool is to help with screen Edge adjustments and Weapon Hand scaling near the screen";
 		ui_category = "Weapon Hand Adjust";	
 	> = DF_W;
 	
-	uniform float Weapon_ZPD_Boundary <
+	uniform float2 Weapon_ZPD_Boundary <
 		ui_type = "slider";
 		ui_min = 0.0; ui_max = 0.5;
 		ui_label = " Weapon Screen Boundary Detection";
@@ -1796,7 +1798,7 @@ namespace SuperDepth3DVR
 	float3 Conv(float2 MD_WHD,float2 texcoord)
 	{	float D = MD_WHD.x, Z = ZPD_Separation.x, WZP = 0.5, ZP = 0.5, W_Convergence = WZPD_and_WND.x, WZPDB, Distance_From_Bottom = 0.9375, ZPD_Boundary = ZPD_Boundary_n_Fade.x, Store_WC;
 	    //Screen Space Detector.
-		if (abs(Weapon_ZPD_Boundary) > 0)
+		if (abs(Weapon_ZPD_Boundary.x) > 0)
 		{   float WArray[8] = { 0.5, 0.5625, 0.625, 0.6875, 0.75, 0.8125, 0.875, 0.9375};
 			float MWArray[8] = { 0.4375, 0.46875, 0.5, 0.53125, 0.625, 0.75, 0.875, 0.9375};
 			float WZDPArray[8] = { 1.0, 0.5, 0.75, 0.5, 0.625, 0.5, 0.55, 0.5};//SoF ZPD Weapon Map
@@ -1807,14 +1809,20 @@ namespace SuperDepth3DVR
 					WZPDB = 1 - (WZPD_and_WND.x * WZDPArray[i]) / tex2Dlod(SamplerDMVR,float4(float2(WArray[i],0.9375),0,0)).z;
 				else
 				{
-					if (Weapon_ZPD_Boundary < 0) //Code for Moving Weapon Hand stablity.
+					if (Weapon_ZPD_Boundary.x < 0) //Code for Moving Weapon Hand stablity.
 						WZPDB = 1 - WZPD_and_WND.x / tex2Dlod(SamplerDMVR,float4(float2(MWArray[i],Distance_From_Bottom),0,0)).z;
 					else //Normal
 						WZPDB = 1 - WZPD_and_WND.x / tex2Dlod(SamplerDMVR,float4(float2(WArray[i],Distance_From_Bottom),0,0)).z;
 				}
 	
-				if (WZPDB < -DJ_W) // Default -0.1
-					W_Convergence *= 1.0-abs(Weapon_ZPD_Boundary);
+				if ( WZPDB < -DJ_W ) // Default -0.1
+					W_Convergence *= 1.0-abs(Weapon_ZPD_Boundary.x);
+				 //Used if Weapon Buffer is way out of range.
+				if (Weapon_ZPD_Boundary.y > Weapon_ZPD_Boundary.x)
+				{
+					if ( WZPDB < -DS_W )
+						W_Convergence *= 1.0-abs(Weapon_ZPD_Boundary.y);
+				}
 			}
 		}
 		//Store Weapon Convergence for Smoothing.

@@ -1,7 +1,7 @@
 ////----------------------------------------//
 ///SuperDepth3D Overwatch Automation Header///
 //----------------------------------------////
-// Version 2.9.3
+// Version 2.9.4
 //---------------------------------------OVERWATCH---------------------------------------//
 // If you are reading this stop. Go away and never look back. From this point on if you  //
 // still think it's is worth looking at this..... Then no one can save you or your soul. //
@@ -58,7 +58,7 @@ static const float ZPD_Boundary_Fade_Time_D = 0.25;     //ZPD Boundary Fade Time
 
 //Balance Mode Toggle
 static const int Balance_Mode_Toggle_D = 0;             // 0 | 1 : Off | On                             | BMT
-static const float ZPD_Weapon_Boundary_Adjust_D = 0.0;  //ZPD Weapon Boundary Adjust                    | DF_X
+static const float2 ZPD_Weapon_Boundary_Adjust_D = 0.0; //ZPD Weapon Boundary Adjust X Y                | DF_X
 static const float Separation_D = 0.0;                  //ZPD Separation                                | DF_Y
 static const float Manual_ZPD_Balance_D = 0.15;         //Manual Balance Mode Adjustment                | DF_Z
 
@@ -97,7 +97,7 @@ static const int Alternate_Frame_Detection_ZPD_D = 0;   //Alternate Frame Detect
 static const float Range_Smoothing_D = 0;               //Range Smoothing                               | DJ_X
 static const float4 Menu_Detection_Type_D = 0;          //Menu Detection Type                           | DJ_Y
 static const float3 Match_Threshold_D = 0.0;            //Match Threshold                               | DJ_Z
-static const float Check_Depth_Limit_Weapon_D = -0.100; //Check Depth Limit Weapon                      | DJ_W
+static const float Check_Weapon_Depth_Limit_A_D = 0.10; //Check Weapon Depth Limit Primary              | DJ_W
 
 //FPS Focus
 static const int FPS_Focus_Type_D = 0;                  //FPS Focus Type: World | Weapon | Mix          | FPS
@@ -134,22 +134,27 @@ static const int Multi_Menu_Selection_D = 0;            // Set from 0-1 to 29-30
 static const float4 Pos_XY_XY_AA_D = 0;                 //Position A XY A XY                            | DO_X
 static const float4 Pos_XY_XY_AB_D = 0;                 //Position A XY B XY                            | DO_Y
 static const float4 Pos_XY_XY_BB_D = 0;                 //Position B XY B XY                            | DO_Z
-static const float4 Simple_Menu_Tresh_AB_D = 1000;      //Simple Manu Tresh For A & B                   | DO_Z
+static const float4 Simple_Menu_Tresh_AB_D = 1000;      //Simple Manu Tresh For A & B                   | DO_W
 
 static const float4 Pos_XY_XY_CC_D = 0;                 //Position C XY C XY                            | DP_X
 static const float4 Pos_XY_XY_CD_D = 0;                 //Position C XY D XY                            | DP_Y
 static const float4 Pos_XY_XY_DD_D = 0;                 //Position D XY D XY                            | DP_Z
-static const float4 Simple_Menu_Tresh_CD_D = 1000;      //Simple Manu Tresh For C & D                   | DP_Z
+static const float4 Simple_Menu_Tresh_CD_D = 1000;      //Simple Manu Tresh For C & D                   | DP_W
 
 static const float4 Pos_XY_XY_EE_D = 0;                 //Position E XY E XY                            | DQ_X
 static const float4 Pos_XY_XY_EF_D = 0;                 //Position E XY F XY                            | DQ_Y
 static const float4 Pos_XY_XY_FF_D = 0;                 //Position F XY F XY                            | DQ_Z
-static const float4 Simple_Menu_Tresh_EF_D = 1000;      //Simple Manu Tresh For E & F                   | DQ_Z
+static const float4 Simple_Menu_Tresh_EF_D = 1000;      //Simple Manu Tresh For E & F                   | DQ_W
 
 static const float4 Pos_XY_XY_GG_D = 0;                 //Position G XY G XY                            | DR_X
 static const float4 Pos_XY_XY_GH_D = 0;                 //Position G XY H XY                            | DR_Y
 static const float4 Pos_XY_XY_HH_D = 0;                 //Position H XY H XY                            | DR_Z
-static const float4 Simple_Menu_Tresh_GH_D = 1000;      //Simple Manu Tresh For G & H                   | DR_Z
+static const float4 Simple_Menu_Tresh_GH_D = 1000;      //Simple Manu Tresh For G & H                   | DR_W
+
+static const float4 NULL_X_D = 0;                       //NULL X                                        | DS_X
+static const float4 NULL_Y_D = 0;                       //NULL Y                                        | DS_Y
+static const float4 NULL_Z_D = 0;                       //NULL Z                                        | DS_Z
+static const float Check_Weapon_Depth_Limit_B_D = 1.0;  //Check Weapon Depth Limit Secondary            | DS_W
 
 //Special Toggles 
 static const int Resident_Evil_Fix_D = 0;               //Resident Evil Fix [Getting Phased Out]        | REF [Getting Phased Out]
@@ -250,7 +255,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DE_X 5
 	#define DE_Y 0.625
 	#define DE_Z 0.300
-	#define DF_X 0.300
+	#define DF_X float2(0.300,0.0)
 	#define BMT 1
 	#define DF_Z 0.175
     #define SMS 1      //SM Toggle Separation
@@ -451,7 +456,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DE_X 4
 	//#define DE_Y 0.375
 	#define DE_Z 0.375
-	#define DF_X 0.300
+	#define DF_X float2(0.300,0.0)
 	#define DJ_W 0.40 //TEMP
 	#define FOV 1
 	#define RHW 1
@@ -1304,7 +1309,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DA_Y 17.5
 	#define DB_Y 5
 	#define DB_W 22
-	#define DF_X 0.5
+	#define DF_X float2(0.5,0.0)
 #elif (App == 0xEA8E05B6) //Only If
 	#define DA_X 0.100
 	#define DB_Y 1
@@ -1355,7 +1360,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DB_W 23
 	#define HMC 0.534
 	#define HMT 1
-	#define DF_X 0.025
+	#define DF_X float2(0.025,0.0)
 #elif (App == 0x1714C977) //Deus Ex DX9
 	#define DA_X 0.05
 	#define DA_Y 125.0
@@ -1363,7 +1368,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DB_W 24
 	#define HMC 1.0
 	#define HMT 1
-	#define DF_X 0.05
+	#define DF_X float2(0.05,0.0)
 #elif (App == 0x92583CDD ) //Legend of Dungeon
 	#define DA_Y 12.5
 	#define DA_Z 0.185
@@ -1454,7 +1459,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DB_Y 4
 	#define WSM 3
 	#define DB_W 12
-	#define DF_X 0.13875
+	#define DF_X float2(0.13875,0.0)
 #elif (App == 0x9140DBE0 ) //Farcry 2
 	#define DA_X 0.05
 	#define DB_Y 4
@@ -1467,7 +1472,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DA_Y 25.0
 	#define DA_X 0.05
 	#define DB_Y 5
-	#define DF_X 0.150
+	#define DF_X float2(0.150,0.0)
 	#define WSM 3
 	#define DB_W 22
 #elif (App == 0xF0F2CF6A ) //Dragon Ball Z: Kakarot
@@ -1544,7 +1549,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DA_X 0.0375
 	#define DE_X 1
 	#define DE_Z 0.375
-	#define DF_X 0.175
+	#define DF_X float2(0.175,0.0)
 	#define WSM 3
 	#define DB_W 15
 	#define RHW 1
@@ -1560,7 +1565,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define BMT 1    
     #define DF_Z 0.110
 	#define DB_W 37
-	#define DF_X 0.3625
+	#define DF_X float2(0.3625,0.0)
 	#define PEW 1
 	//#define DSW 1
 #elif (App == 0x6061750E ) //Mirror's Edge
@@ -1605,7 +1610,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DE_Y 0.425
 	#define DE_Z 0.300
 	#define DG_W 0.210   //Pop out
-	#define DF_X 0.085
+	#define DF_X float2(0.085,0.0)
 	#define BMT 1    
 	#define DF_Z 0.150
 	#define DG_Z 0.065 //Min
@@ -1736,7 +1741,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DE_Y 0.425
 	#define DE_Z 0.375
 	#define DG_Z 0.3975
-	#define DF_X 0.225
+	#define DF_X float2(0.225,0.0)
 	#define NDW 1
 #elif (App == 0x2ECAAF29 || App == 0xE19E4830 || App == 0xE19E4830  ) //Half-Life 2 | Left 4 Dead 2
 	#define DA_Y 15.0
@@ -1748,7 +1753,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DE_X 7
 	#define DE_Y 0.5
 	#define DE_Z 0.375
-	#define DF_X 0.105
+	#define DF_X float2(0.105,0.0)
 	#define DJ_W 0.175
 	#define BMT 1
 	#define DF_Z 0.105
@@ -1836,7 +1841,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DE_Z 0.375
 	#define DB_Z 0.090
 	#define DB_W 29
-	#define DF_X 0.1
+	#define DF_X float2(0.1,0.0)
 #elif (App == 0xB05C57BC ) //HellBound
 	#define DA_W 1
 	#define DA_X 0.0325
@@ -2896,7 +2901,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DF_Z 0.1125
 	#define NDW 1
 	#define PEW 1
-	#define DF_X 0.1625 //0.250
+	#define DF_X float2(0.1625,0.0)
 	#define DJ_W 0.0
 	#define WSM 3
 	#define DB_W 20
@@ -3008,7 +3013,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DE_Z 0.375
     //#define AFD 1
 	#define DB_W 34
-	#define DF_X 0.20
+	#define DF_X float2(0.20,0.0)
 	//#define DG_W 0.08
 	#define BMT 1
 	#define DF_Z 0.04
@@ -3050,7 +3055,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DE_Y 0.650
 	#define DE_Z 0.400
 	#define DB_W 43
-	#define DF_X 0.1
+	#define DF_X float2(0.1,0.0)
 	#define DG_Z 0.100 //Min
     #define DI_Z 0.100 //Trim
 	#define SMS 1      //SM Toggle Separation
@@ -3117,7 +3122,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define RHW 1
 	#define WSM 2
 	#define DB_W 4
-	#define DF_X 0.150
+	#define DF_X float2(0.150,0.0)
 #elif (App == 0xCE21A723 ) //Bully Scholarship Edition
 	#define DA_Y 13.0
 	#define DA_X 0.070
@@ -3141,7 +3146,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DE_Z 0.4875
 	#define WSM 2
 	#define DB_W 5
-	#define DF_X 0.125
+	#define DF_X float2(0.125,0.0)
 	#define PEW 1
 	#define DAA 1
 #elif (App == 0xBCCAD1AE || App == 0x3D2B24D7 ) //Project Cars | Project Cars 2
@@ -3224,7 +3229,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	//#define DG_W 0.25
 	#define WSM 2
 	#define DB_W 7
-	#define DF_X 0.225
+	#define DF_X float2(0.225,0.0)
 	#define DSW 1 //?
 	#define PEW 1
 	#define RHW 1
@@ -3734,7 +3739,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DG_W -0.075
 	#define WSM 2 //Weapon Settings Mode
 	#define DB_W 19//Weapon Selection
-	#define DF_X 0.13
+	#define DF_X float2(0.13,0.0)
 	#define DJ_W 0.7 //1.0
 	#define DG_Z 0.06
 	#define DI_Z 0.070
@@ -5890,7 +5895,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DF_Z 0.100
 	#define WSM 2
 	#define DB_W 10
-	#define DF_X 0.3	
+	#define DF_X float2(0.3,0.0)
 	#define DJ_W 0.150
 	#define FPS  0
 	#define DK_X 2
@@ -5928,7 +5933,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DF_Z 0.1125
 //	#define WSM 2
 //	#define DB_W 10
-//	#define DF_X 0.3	
+//	#define DF_X float2( 0.3, 0.0)	
 //	#define DJ_W 0.150
 //	#define FPS  0
 //	#define DK_X 2
@@ -5980,7 +5985,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DF_Z 0.110
 	#define WSM 2
 	#define DB_W 27
-//	#define DF_X 0.3	
+//	#define DF_X float2(0.3,0.0)	
 //	#define DJ_W 0.150
 //	#define FPS  0
 //	#define DK_X 2
@@ -8066,7 +8071,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	*/
 	/*
     #define MMD 1 //Set Multi Menu Detection             //Off / On
-    #define MMS 0 //Set Multi Menu Selection from 0-1 to 29-30
+    #define MMS 0 //Set Multi Menu Selection from 0-1 to 29-30 and Off 0 | 1 | 2
     #define DO_X float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos A1 = XY Color & A2 = ZW Black 
     #define DO_Y float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos A3 = XY Color & B1 = ZW Color
     #define DO_Z float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos B2 = XY Black & B3 = ZW Color
@@ -8149,6 +8154,78 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 
     #define PEW 1
     #define FOV 1
+#elif (App == 0x8BBF7823 ) //DEATHLOOP    
+	#define DA_W 1
+    //#define DB_X 1
+	#define DA_X 0.10
+	//#define DF_Y 0.0025
+	#define DA_Y 55.0
+    //#define DA_Z 0.001
+	#define DB_Z 0.10
+	//#define DB_Y 1
+	#define DE_X 7
+	#define DE_Y 0.750
+	#define DE_Z 0.375
+	#define DG_W -0.25 //Neg PoP
+    #define OIF 0.500 //Fix enables if Value is > 0.0
+	#define DI_W 0.125
+	//#define FTM 1
+    //#define DG_Z 0.001//0.050//0.075 //Min
+    //#define DE_W 0.75 //Auto
+    //#define DI_Z 0.05//0.050//0.090 //Trim
+    //#define DF_W float2(0.001,0.00125)  //Edge & Scale
+	#define BMT 1
+	#define DF_Z 0.150
+    //#define SMS 1            //SM Toggle Separation
+	#define DL_X 0.925       //SM Tune
+	//#define DL_W 0.5       //SM Perspective
+	#define DM_X 3           //HQ Tune
+	#define DM_Z 3           //HQ Smooth
+    //#define DM_Y 3           //HQ VRS
+    #define DL_Y 0.250    //De-Artifact
+    #define DL_Z 0.125       //Compat Power
+	#define DJ_X 0.125       //Range Smoothing
+    /*
+    #define MDD 1 //Set Menu Detection & Direction     //Off 0 | 1 | 2 | 3 | 4      
+    #define DN_X float4( 0.400 , 0.275, 0.600 , 0.722)  //Pos A = XY White & B = ZW White 
+    #define DN_Y float4( 0.4822, 0.312,  0.0, 0.0)       //Pos C = XY Light & D = ZW Match
+    #define DN_Z float4( 0.0, 0.0,  0.0, 0.0)            //Pos E = XY Match & F = ZW Match
+	#define DN_W float4( 1.0, 0.0 , 0.0, 0.0 )          //Size = Menu [ABC] D E F
+    #define DJ_Y float4( 30.0, 30.0, 6.0, 5.0);            //Menu Detection Type for A, B, & C. The Last Value is a Shift amount for C. 
+    #define DJ_Z float3( 1000., 1000., 1000);                //Set Match Tresh 
+	*/
+    #define MMD 4 //Set Multi Menu Detection             //Off / On
+    #define MMS 0 //Set Multi Menu Selection from 0-1 to 29-30 and Off 0 | 1 | 2
+    #define DO_X float4( 0.360 , 0.080 , 0.325 , 0.080 ) //Pos A1 = XY Color & A2 = ZW Black 
+    #define DO_Y float4( 0.640 , 0.080 , 0.265 , 0.750 ) //Pos A3 = XY Color & B1 = ZW Color
+    #define DO_Z float4( 0.325 , 0.080 , 0.051 , 0.949 ) //Pos B2 = XY Black & B3 = ZW Color
+	#define DO_W float4( 24.0, 24.0, 24.0, 24.0)   //Tresh Hold for Color A & B and Color
+    #define DP_X float4( 0.051 , 0.949 , 0.325 , 0.080 ) //Pos C1 = XY Color & C2 = ZW Black 
+    #define DP_Y float4( 0.120 , 0.275 , 0.790 , 0.275 ) //Pos C3 = XY Color & D1 = ZW Color
+    #define DP_Z float4( 0.325 , 0.080 , 0.861 , 0.957 ) //Pos D2 = XY Black & D3 = ZW Color
+	#define DP_W float4( 24.0, 24.0, 24.0, 24.0)   //Tresh Hold for Color C & D and Color
+	#define DQ_X float4( 0.500 , 0.950 , 0.500 , 0.555 ) //Pos C1 = XY Color & C2 = ZW Black 
+    #define DQ_Y float4( 0.502 , 0.589 , 0.500 , 0.950 ) //Pos C3 = XY Color & D1 = ZW Color
+    #define DQ_Z float4( 0.500 , 0.555 , 0.498 , 0.589 ) //Pos D2 = XY Black & D3 = ZW Color
+	#define DQ_W float4( 24.0, 15.0, 24.0, 15.0) //Tresh Hold for Color A1 & A3 and Color
+	#define DR_X float4( 0.500 , 0.950 , 0.500 , 0.555 ) //Pos G1 = XY Color & G2 = ZW Black 
+    #define DR_Y float4( 0.499 , 0.589 , 0.500 , 0.969 ) //Pos G3 = XY Color & H1 = ZW Color
+    #define DR_Z float4( 0.499 , 0.140 , 0.400 , 0.140 ) //Pos H2 = XY Black & H3 = ZW Color
+	#define DR_W float4( 24.0, 15.0, 24.0, 16.0) //Tresh Hold for Color G & H and Color 
+
+	#define WSM 2
+	#define DB_W 17
+	#define DF_X float2(0.150,0.350)	
+	//#define DJ_W 0.150
+	#define DS_W 2.0
+	#define FPS  0
+	#define DK_X 2
+	#define DK_Y 0
+	#define DK_Z 1
+	#define DK_W 4  
+    #define PEW 1
+    #define FOV 1
+    #define DAA 1
 #else
 	#define NPW 1 //No Profile
 #endif
@@ -8281,7 +8358,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DI_W OIF_Check_Depth_Limit_D
 #endif
 
-// X = [Range Smoothing X] Y = [Menu Detection Type] Z = [Match Threshold] W = [Check Depth Limit Weapon]
+// X = [Range Smoothing X] Y = [Menu Detection Type] Z = [Match Threshold] W = [Check Depth Limit Weapon Primary]
 #ifndef DJ_X
     #define DJ_X Range_Smoothing_D
 #endif
@@ -8292,7 +8369,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define DJ_Z Match_Threshold_D
 #endif 
 #ifndef DJ_W
-	#define DJ_W Check_Depth_Limit_Weapon_D
+	#define DJ_W Check_Weapon_Depth_Limit_A_D
 #endif
 
 // X = [FPS Focus Method] Y = [Eye Eye Selection] Z = [Eye Fade Selection] W = [Eye Fade Speed Selection]
@@ -8405,6 +8482,20 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 #endif 
 #ifndef DR_W
 	#define DR_W Simple_Menu_Tresh_GH_D
+#endif
+
+// X = [Null X] Y = [Null Y] Z = [Null Z] W = [[Check Depth Limit Weapon Secondary]
+#ifndef DS_X
+    #define DS_X NULL_X_D
+#endif
+#ifndef DS_Y
+    #define DS_Y NULL_X_D
+#endif
+#ifndef DS_Z
+    #define DS_Z NULL_X_D
+#endif 
+#ifndef DS_W
+	#define DS_W Check_Weapon_Depth_Limit_B_D
 #endif
 
 //Special Toggles
@@ -8688,7 +8779,7 @@ float4 Weapon_Profiles(float WP ,float4 Weapon_Adjust) //Could reduce from 76 to
     if (WP == 16)
         Weapon_Adjust = float4(0.750,10.250,0.1125,0.0);  //WP 14 | Poppy Playtime
     if (WP == 17)
-        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 15 | Game
+        Weapon_Adjust = float4(5.0,22.5,0.0125,0.00);     //WP 15 | DEATHLOOP //float4(7.4,25.0,0.025,0.025);
     if (WP == 18)
         Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 16 | Game
     if (WP == 19)
