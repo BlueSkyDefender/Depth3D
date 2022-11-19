@@ -2,7 +2,7 @@
 	///**SuperDepth3D_VR+**///
 	//--------------------////
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	//* Depth Map Based 3D post-process shader v3.4.9
+	//* Depth Map Based 3D post-process shader v3.5.1
 	//* For Reshade 4.4+ I think...
 	//* ---------------------------------
 	//*
@@ -407,16 +407,25 @@ namespace SuperDepth3DVR
 					 "Default is Zero, Off.";
 		ui_category = "Occlusion Masking";
 	> = DJ_X;	
-
+	
 	uniform int Performance_Level <
 		ui_type = "combo";
-		ui_items = "Performant\0Normal\0Performant + Foveated Rendering\0Normal + Foveated Rendering\0";
+		ui_items = "Performant\0Normal\0Performant + VRS\0Normal + VRS\0";
 		ui_label = " Performance Mode";
 		ui_tooltip = "Performance Mode Lowers or Raises Occlusion Quality Processing so that there is a performance is adjustable.\n"
-					 "Foveated Rendering focuses the quality of the samples used to the enter of the screen where you look the most.\n"
+					 "Varable Rate Shading focuses the quality of the samples in lighter areas of the screen.\n"
 					 "Please enable the 'Performance Mode Checkbox,' in ReShade's GUI.\n"
 					 "It's located in the lower bottom right of the ReShade's Main UI.\n"
-					 "Default is Normal.";
+					 "Default is Performant.";
+		ui_category = "Occlusion Masking";
+	> = 0;
+	
+	uniform int Switch_VRS <
+		ui_type = "combo";
+		ui_items = "Auto\0High\0Med\0Low\0Very Low\0";
+		ui_label = " VRS Performance";
+		ui_tooltip = "Use this to set Varable Rate Shading to manually selection or automatic mod.\n"
+			   "Default is Automatic.";
 		ui_category = "Occlusion Masking";
 	> = 0;	
 	
@@ -441,7 +450,7 @@ namespace SuperDepth3DVR
 		#else
 		ui_type = "slider";
 		#endif
-		ui_min = 0; ui_max = 1;
+		ui_min = -1; ui_max = 1;
 		ui_label = " De-Artifacting";
 		ui_tooltip = "This when the image does not match the depth buffer causing artifacts.\n"
 					 "Use this on fur, hair, and other things that can cause artifacts at a high cost.\n"
@@ -1859,7 +1868,7 @@ namespace SuperDepth3DVR
 	    return float3( lerp( Convergence,min(saturate(Max_Depth),D), ZP), lerp(W_Convergence,WD,WZP), Store_WC);
 	}
 	
-	float3 DB( float2 texcoord)
+	float3 DB_Comb( float2 texcoord)
 	{
 		// X = Mix Depth | Y = Weapon Mask | Z = Weapon Hand | W = Normal Depth
 		float4 DM = float4(tex2Dlod(SamplerDMVR,float4(texcoord,0,0)).xyz,PrepDepth( SDT == 1 || SD_Trigger == 1 ? TC_SP(texcoord).xy : texcoord )[1][1]);
@@ -1965,7 +1974,7 @@ namespace SuperDepth3DVR
 		#endif
 	
 		#if LBM || LetterBox_Masking
-			float LB_Detection = tex2D(samplerMinMaxRGBLastFrame,float2(0.5,0.5)).w,LB_Masked = texcoord.y > DI_Y && texcoord.y < DI_X ? DM.y : 0.0125;
+			float LB_Detection = tex2D(SamplerLumVR,float2(1,0.083)).z,LB_Masked = texcoord.y > DI_Y && texcoord.y < DI_X ? DM.y : 0.0125;
 			
 			if(LB_Detection)
 				DM.y = LB_Masked;	
@@ -1973,14 +1982,19 @@ namespace SuperDepth3DVR
 	
 		return float3(DM.y,PrepDepth( SDT == 2 || SD_Trigger == 2 ? TC_SP(texcoord).zw : texcoord)[1][1],HandleConvergence.z);
 	}
+	#define Adapt_Adjust 0.7 //[0 - 1]
 	////////////////////////////////////////////////////Depth & Special Depth Triggers//////////////////////////////////////////////////////////////////
 	void zBuffer(in float4 position : SV_Position, in float2 texcoord : TEXCOORD, out float2 Point_Out : SV_Target0 , out float2 Linear_Out : SV_Target1)
-	{	
-		float3 Set_Depth = DB( texcoord.xy ).xyz;
+	{  //Temporal adaptation https://knarkowicz.wordpress.com/2016/01/09/automatic-exposure/
+		float  ExAd = (1-Adapt_Adjust)*1250, Lum = tex2Dlod(SamplerDMVR,float4(texcoord,0,12)).w, PastLum = tex2D(SamplerLumVR,float2(1,0.583)).z;
 	
+		float3 Set_Depth = DB_Comb( texcoord.xy ).xyz;
+		
+		if(  texcoord.x < pix.x * 2 && texcoord.y < pix.y * 2) 
+			Set_Depth.y = PastLum + (Lum - PastLum) * (1.0 - exp(-frametime/ExAd));	
 		if(1-texcoord.x < pix.x * 2 && 1-texcoord.y < pix.y * 2)
 			Set_Depth.y = AltWeapon_Fade();
-		if(  texcoord.x < pix.x * 2 && 1-texcoord.y < pix.y * 2) //BL
+		if(  texcoord.x < pix.x * 2 && 1-texcoord.y < pix.y * 2) 
 			Set_Depth.y = Weapon_ZPD_Fade(Set_Depth.z);
 		
 		//Luma Map
@@ -1994,33 +2008,44 @@ namespace SuperDepth3DVR
 		
 	void zBuffer_Blur(in float4 position : SV_Position, in float2 texcoord : TEXCOORD, out float2 Blur_Out : SV_Target0)
 	{   
-		float simple_Blur = tex2Dlod(SamplerzBufferVR_L,float4(texcoord,0, 2.0)).x;
-		simple_Blur += tex2Dlod(SamplerzBufferVR_L,float4(texcoord + float2( pix.x * Blur_Adjust * 2, pix.y),0, 2.0)).x;
-		simple_Blur += tex2Dlod(SamplerzBufferVR_L,float4(texcoord + float2( pix.x * Blur_Adjust   , pix.y),0, 2.0)).x;
-		simple_Blur += tex2Dlod(SamplerzBufferVR_L,float4(texcoord + float2(-pix.x * Blur_Adjust   , pix.y),0, 2.0)).x;
-		simple_Blur += tex2Dlod(SamplerzBufferVR_L,float4(texcoord + float2(-pix.x * Blur_Adjust * 2, pix.y),0, 2.0)).x;
+		float2 StoredTC = texcoord;
+			              texcoord.x *= 2; 
+		float simple_Blur = tex2Dlod(SamplerzBufferVR_L,float4(texcoord,0, 0.0)).x;
+		simple_Blur += tex2Dlod(SamplerzBufferVR_L,float4(texcoord + float2( pix.x * Blur_Adjust * 2, pix.y),0, 0.0)).x;
+		simple_Blur += tex2Dlod(SamplerzBufferVR_L,float4(texcoord + float2( pix.x * Blur_Adjust   , pix.y),0, 0.0)).x;
+		simple_Blur += tex2Dlod(SamplerzBufferVR_L,float4(texcoord + float2(-pix.x * Blur_Adjust   , pix.y),0, 0.0)).x;
+		simple_Blur += tex2Dlod(SamplerzBufferVR_L,float4(texcoord + float2(-pix.x * Blur_Adjust * 2, pix.y),0, 0.0)).x;
 		
-		Blur_Out = min(1,simple_Blur * 0.2);
+		float Corners = tex2Dlod(SamplerzBufferVR_P,float4(StoredTC * float2( 2, 1) - float2( 1 , 0),0, 2)).x;
+			  Corners = ddx(Corners) * ddy(Corners);
+			  
+		Blur_Out = StoredTC.x < 0.5 ? min(1,simple_Blur * 0.2) : saturate(Corners > 0.001);//,PrepDepth(texcoord)[2][0]);
 	}		
-	float3 GetDB(float2 texcoord)
+	float4 GetDB(float2 texcoord)
 	{
 		float VMW = View_Mode == 1 ? View_Mode_Warping : clamp(View_Mode_Warping,0, View_Mode == 5 ? 2 : 1);
 		float Depth_Blur = View_Mode_Warping > 0 ? min(tex2Dlod(SamplerzBufferVR_L, float4( texcoord, 0, clamp(VMW,0,5) ) ).x,tex2Dlod(SamplerzBufferVR_L, float4( texcoord, 0, 0) ).x) : tex2Dlod(SamplerzBufferVR_L, float4( texcoord, 0, 0) ).x;
 	
 		float3 DepthBuffer_LP = float3(Depth_Blur,tex2Dlod(SamplerzBufferVR_P, float4( texcoord, 0, 0) ).x, tex2Dlod(SamplerzBufferVR_P, float4(texcoord,0, 0) ).y );
 		
-		float Min_Blend = tex2Dlod(SamplerzBuffer_BlurVR, float4( texcoord, 0, 0) ).x;// min(tex2Dlod(SamplerzBufferVR_L, float4( texcoord, 0, 3.5) ).x,tex2Dlod(SamplerzBufferVR_L, float4( texcoord, 0, 2.5 ) ).x) ;
+		float Min_Blend = tex2Dlod(SamplerzBuffer_BlurVR, float4( texcoord * float2( 0.5 , 1), 0, 0) ).x;// min(tex2Dlod(SamplerzBufferVR_L, float4( texcoord, 0, 3.5) ).x,tex2Dlod(SamplerzBufferVR_L, float4( texcoord, 0, 2.5 ) ).x) ;
 		if( Range_Blend > 0)
 			   DepthBuffer_LP.xy = lerp(DepthBuffer_LP.xy,  Min_Blend ,(smoothstep(0.5,1.0, Min_Blend) *  Min_Divergence().y) * saturate(Range_Blend));
 			   
 		if(View_Mode == 0 || View_Mode == 3)	
 			DepthBuffer_LP.x = DepthBuffer_LP.y;
+						
+		float Mix_Past_Current_Corner_Mask = tex2Dlod(samplerMinMaxRGBLastFrame,float4(texcoord,0,0)).w + saturate(tex2Dlod(SamplerzBuffer_BlurVR, float4( texcoord * float2( 0.5 , 1) + float2(0.5,0), 0, 5 ) ).x * 100);	
+
+			  if(De_Artifacting >= 0)
+			  	Mix_Past_Current_Corner_Mask = 0;
 			
 		float Separation = lerp(1.0,5.0,ZPD_Separation.y); 	
-		return float3(Separation * DepthBuffer_LP.xy, DepthBuffer_LP.z);
+		return float4(Separation * DepthBuffer_LP.xy, DepthBuffer_LP.z, Mix_Past_Current_Corner_Mask);
 	}
 	//Perf Level selection                             X    Y      Z      W              X    Y      Z      W
 	static const float4 Performance_LvL[2] = { float4( 0.5, 0.5095, 0.679, 0.5 ), float4( 1.0, 1.019, 1.425, 1.0) };
+	static const float  VRS_Array[5] = { 0.5, 0.5, 0.25, 0.125 , 0.0625 };
 	//////////////////////////////////////////////////////////Parallax Generation///////////////////////////////////////////////////////////////////////
 	float2 Parallax(float Diverge, float2 Coordinates) // Horizontal parallax offset & Hole filling effect
 	{   
@@ -2051,6 +2076,11 @@ namespace SuperDepth3DVR
 			else
 				Perf = CB_Done ? 1.020: 1.021;
 		}
+		//Luma Based VRS
+		float Auto_Adptive = Switch_VRS == 0 ? lerp(0.05,1.0,smoothstep(0.00000001f, 0.375, tex2D(SamplerzBufferVR_P,0).y ) ) : 1,
+			  Luma_Adptive = smoothstep(0.0,saturate(VRS_Array[Switch_VRS] * Auto_Adptive), tex2Dlod(SamplerDMVR,float4(Coordinates,0,9)).w);
+		if( Performance_Level > 1 )
+			Perf *= saturate(Luma_Adptive * 0.5 + 0.5  );
 		//ParallaxSteps Calculations
 		float MinNum = 25, D = abs(Diverge), Cal_Steps = D * Perf, Steps = clamp( Cal_Steps, Perf_LvL ? MinNum : lerp( MinNum, min( MinNum, D), GetDepth >= 0.999 ), Performance_Level > 1 ? lerp(100,50,saturate(Vin_Pattern(Coordinates, float2(15.0,2.5)))) : 100 );//Foveated Rendering Point of attack 16-256 limit samples.
 		// Offset per step progress & Limit
@@ -2066,8 +2096,10 @@ namespace SuperDepth3DVR
 		{   // Shift coordinates horizontally in linear fasion
 		    ParallaxCoord.x -= deltaCoordinates; 
 		    // Get depth value at current coordinates
-		 	if(De_Artifacting > 0)
-			    CurrentDepthMapValue = min(GetDB( ParallaxCoord ).x ,GetDB( ParallaxCoord - float2(MS * lerp(0,0.125,saturate(De_Artifacting)),0)).x);
+		    if( De_Artifacting > 0 )
+		    	CurrentDepthMapValue = min(GetDB( ParallaxCoord ).x, GetDB( ParallaxCoord - float2(MS * lerp(0,0.125,saturate(De_Artifacting)),0)).x);
+			else if ( De_Artifacting < 0 && GetDB(ParallaxCoord).w )
+				CurrentDepthMapValue = min(GetDB( ParallaxCoord ).x, GetDB( ParallaxCoord - float2(MS * lerp(0,0.125,saturate(abs(De_Artifacting))),0)).x);
 		    else
 		    	CurrentDepthMapValue = GetDB( ParallaxCoord ).x;
 		    // Get depth of next layer
@@ -2404,22 +2436,28 @@ namespace SuperDepth3DVR
 		return tex2D(SamplerDMVR,texcoord).w;
 	}
 	
-	void Average_Luminance(float4 position : SV_Position, float2 texcoord : TEXCOORD, out float4 AL : SV_Target0, out float4 Other : SV_Target1)
+	void Averager(float4 position : SV_Position, float2 texcoord : TEXCOORD, out float4 AL : SV_Target0, out float4 Other : SV_Target1)
 	{	
 		float Average_ZPD = PrepDepth( texcoord )[0][0];
 		// SamplerDMVR 0 is Weapon State storage and SamplerDMVR 1 is Boundy State storage	
 		const int Num_of_Values = 6; //6 total array values that map to the textures width.
-		float Storage__Array[Num_of_Values] = { tex2D(SamplerDMVR,0).x,                //0.083
-	                                			tex2D(SamplerDMVR,1).x,                //0.250
-	                               			 tex2D(SamplerDMVR,int2(0,1)).x,        //0.416
-	                                			tex2D(SamplerDMVR,int2(1,0)).x,        //0.583
-												tex2D(SamplerzBufferVR_P,1).y,         //0.75
-												tex2D(SamplerzBufferVR_P,int2(0,1)).y};//0.916
+		float Storage__Array_A[Num_of_Values] = { tex2D(SamplerDMVR,0).x,                //0.083
+	                                			  tex2D(SamplerDMVR,1).x,                //0.250
+	                               			   tex2D(SamplerDMVR,int2(0,1)).x,        //0.416
+	                                			  tex2D(SamplerDMVR,int2(1,0)).x,        //0.583
+												  tex2D(SamplerzBufferVR_P,1).y,         //0.75
+												  tex2D(SamplerzBufferVR_P,int2(0,1)).y};//0.916
+		float Storage__Array_B[Num_of_Values] = { LBDetection(),                         //0.083
+	                                			  0,                                     //0.250
+	                               			   0,                                     //0.416
+	                                			  tex2D(SamplerzBufferVR_P,0).y,         //0.583
+												  0,                                     //0.75
+												  0};                                    //0.916
 		//Set a avr size for the Number of lines needed in texture storage.
 		float Grid = floor(texcoord.y * BUFFER_HEIGHT * BUFFER_RCP_HEIGHT * Num_of_Values);	
 		//Motion_Detection
-		AL = float4(length(tex2D(SamplerDMVR,texcoord).w - tex2D(SamplerPBBVR,texcoord).x),Average_ZPD,Storage__Array[int(fmod(Grid,Num_of_Values))],tex2Dlod(SamplerDMVR,float4(texcoord,0,0)).y);
-		Other = float4(tex2D(samplerMinMaxRGB, texcoord).rgb,LBDetection());
+		AL = float4(length(tex2D(SamplerDMVR,texcoord).w - tex2D(SamplerPBBVR,texcoord).x),Average_ZPD,texcoord.x < 0.5 ? Storage__Array_A[int(fmod(Grid,Num_of_Values))] : Storage__Array_B[int(fmod(Grid,Num_of_Values))] ,tex2Dlod(SamplerDMVR,float4(texcoord,0,0)).y);
+		Other = float4(tex2D(samplerMinMaxRGB, texcoord).rgb,saturate(tex2Dlod(SamplerzBuffer_BlurVR, float4( texcoord * float2( 0.5 , 1) + float2(0.5,0), 0, 5 ) ).x * 100));
 	}
 	////////////////////////////////////////////////////////////////////Logo////////////////////////////////////////////////////////////////////////////
 	#define _f float // Text rendering code copied/pasted from https://www.shadertoy.com/view/4dtGD2 by Hamneggs
@@ -2485,6 +2523,8 @@ namespace SuperDepth3DVR
 			Color = Menu_Open ? 0 : Format;
 		if(all(abs(float2(5.0,BUFFER_HEIGHT)-ScreenPos.xy) < float2(1.0,Debug_Y)))
 			Color = Menu_Open ? Format : 0;
+		
+		//Color = tex2D(SamplerLumVR,texcoord).z ;
 		
 		float InfoTexture = tex2D(SamplerInfo,texcoord).x;
 		
@@ -2959,7 +2999,7 @@ namespace SuperDepth3DVR
 			pass AverageLuminance
 		{
 			VertexShader = PostProcessVS;
-			PixelShader = Average_Luminance;
+			PixelShader = Averager;
 			RenderTarget0 = texLumVR;
 			RenderTarget1 = texMinMaxRGBLastFrame;
 		}

@@ -2,7 +2,7 @@
 	///**SuperDepth3D**///
 	//----------------////
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	//* Depth Map Based 3D post-process shader v3.5.0
+	//* Depth Map Based 3D post-process shader v3.5.1
 	//* For Reshade 3.0+
 	//* ---------------------------------
 	//*
@@ -418,6 +418,21 @@ namespace SuperDepth3D
 					 "Default is 0.25.";
 		ui_category = "Compatibility Options";
 	> = DL_Z;
+
+	uniform float De_Artifacting <
+		#if Compatibility
+		ui_type = "drag";
+		#else
+		ui_type = "slider";
+		#endif
+		ui_min = -1; ui_max = 1;
+		ui_label = " De-Artifacting";
+		ui_tooltip = "This when the image does not match the depth buffer causing artifacts.\n"
+					 "Use this on fur, hair, and other things that can cause artifacts at a high cost.\n"
+					 "I find a value of 0.5 is good enough in most cases.\n"
+					 "Default is Zero and it's Off.";
+		ui_category = "Compatibility Options";
+	> = DL_Y;	
 	
 	uniform float2 DLSS_FSR_Offset <
 		#if Compatibility
@@ -433,21 +448,6 @@ namespace SuperDepth3D
 					 "Default and starts at Zero and it's Off. With a max offset of 5pixels Wide.";
 		ui_category = "Compatibility Options";
 	> = 0;
-
-	uniform float De_Artifacting <
-		#if Compatibility
-		ui_type = "drag";
-		#else
-		ui_type = "slider";
-		#endif
-		ui_min = 0; ui_max = 1;
-		ui_label = " De-Artifacting";
-		ui_tooltip = "This when the image does not match the depth buffer causing artifacts.\n"
-					 "Use this on fur, hair, and other things that can cause artifacts at a high cost.\n"
-					 "I find a value of 0.5 is good enough in most cases.\n"
-					 "Default is Zero and it's Off.";
-		ui_category = "Compatibility Options";
-	> = DL_Y;		
 	
 	uniform int Depth_Map <
 		ui_type = "combo";
@@ -1182,6 +1182,15 @@ namespace SuperDepth3D
 		{
 			Texture = texLumN;
 		};
+		
+	texture2D texMinMaxRGBLastFrame { Width = BUFFER_WIDTH * Scale_Buffer; Height = BUFFER_HEIGHT * Scale_Buffer; Format = RGBA16f; };
+	sampler2D samplerMinMaxRGBLastFrame 
+	{
+		 Texture = texMinMaxRGBLastFrame;
+		 MagFilter = POINT;
+		 MinFilter = POINT;
+		 MipFilter = POINT;
+	};
 	#if Color_Correction_Mode		
 	texture2D texMinMaxRGB { Width = 2; Height = 1; Format = RGBA16f; };
 	sampler2D samplerMinMaxRGB
@@ -1192,15 +1201,6 @@ namespace SuperDepth3D
 		MipFilter = POINT;
 	};
 	
-	texture2D texMinMaxRGBLastFrame { Width = BUFFER_WIDTH * Scale_Buffer; Height = BUFFER_HEIGHT * Scale_Buffer; Format = RGBA16f; };
-	sampler2D samplerMinMaxRGBLastFrame 
-	{
-		 Texture = texMinMaxRGBLastFrame;
-		 MagFilter = POINT;
-		 MinFilter = POINT;
-		 MipFilter = POINT;
-	};
-
 	void MinMaxRGB(float4 vpos : SV_Position, float2 texcoord : TexCoord, out float4 minmaxRGB : SV_Target0)
 	{
 		float3 color, minRGB = 1.0, maxRGB = 0.0;
@@ -2084,16 +2084,21 @@ namespace SuperDepth3D
 		
 	void zBuffer_Blur(in float4 position : SV_Position, in float2 texcoord : TEXCOORD, out float Blur_Out : SV_Target0)
 	{   
-		float simple_Blur = tex2Dlod(SamplerzBufferN_L,float4(texcoord,0, 2.0)).x;
-		simple_Blur += tex2Dlod(SamplerzBufferN_L,float4(texcoord + float2( pix.x * Blur_Adjust * 2, pix.y),0, 2.0)).x;
-		simple_Blur += tex2Dlod(SamplerzBufferN_L,float4(texcoord + float2( pix.x * Blur_Adjust   , pix.y),0, 2.0)).x;
-		simple_Blur += tex2Dlod(SamplerzBufferN_L,float4(texcoord + float2(-pix.x * Blur_Adjust   , pix.y),0, 2.0)).x;
-		simple_Blur += tex2Dlod(SamplerzBufferN_L,float4(texcoord + float2(-pix.x * Blur_Adjust * 2, pix.y),0, 2.0)).x;
-
-		Blur_Out = float2(min(1,simple_Blur * 0.2),PrepDepth(texcoord)[2][0]);
+		float2 StoredTC = texcoord;
+			              texcoord.x *= 2; 
+		float simple_Blur = tex2Dlod(SamplerzBufferN_L,float4(texcoord,0, 0.0)).x;
+		simple_Blur += tex2Dlod(SamplerzBufferN_L,float4(texcoord + float2( pix.x * Blur_Adjust * 2, pix.y),0, 0.0)).x;
+		simple_Blur += tex2Dlod(SamplerzBufferN_L,float4(texcoord + float2( pix.x * Blur_Adjust   , pix.y),0, 0.0)).x;
+		simple_Blur += tex2Dlod(SamplerzBufferN_L,float4(texcoord + float2(-pix.x * Blur_Adjust   , pix.y),0, 0.0)).x;
+		simple_Blur += tex2Dlod(SamplerzBufferN_L,float4(texcoord + float2(-pix.x * Blur_Adjust * 2, pix.y),0, 0.0)).x;
+		
+		float Corners = tex2Dlod(SamplerzBufferN_P,float4(StoredTC * float2( 2, 1) - float2( 1 , 0),0, 2)).x;
+			  Corners = ddx(Corners) * ddy(Corners);
+			  
+		Blur_Out = StoredTC.x < 0.5 ? min(1,simple_Blur * 0.2) : saturate(Corners > 0.001);//,PrepDepth(texcoord)[2][0]);
 	}
 	
-	float3 GetDB(float2 texcoord)
+	float4 GetDB(float2 texcoord)
 	{
 		#if Reconstruction_Mode  
 		if( Vert_3D_Pinball )	
@@ -2108,7 +2113,7 @@ namespace SuperDepth3D
 		float2 DS_LP = float2(Depth_Blur,tex2Dlod(SamplerzBufferN_P, float4( texcoord, 0, 0) ).x);
 	
 		float3 DepthBuffer_LP = float3(DS_LP.x,DS_LP.y, tex2Dlod(SamplerzBufferN_P, float4(texcoord,0, 0) ).y );
-		float Min_Blend = tex2Dlod(SamplerzBuffer_BlurN, float4( texcoord, 0, 0) ).x;//min(tex2Dlod(SamplerzBufferN_L, float4( texcoord, 0, 3.5) ).x,tex2Dlod(SamplerzBufferN_L, float4( texcoord, 0, 2.5 ) ).x) ;
+		float Min_Blend = tex2Dlod(SamplerzBuffer_BlurN, float4( texcoord * float2( 0.5 , 1), 0, 0) ).x;//min(tex2Dlod(SamplerzBufferN_L, float4( texcoord, 0, 3.5) ).x,tex2Dlod(SamplerzBufferN_L, float4( texcoord, 0, 2.5 ) ).x) ;
 		if( Range_Blend > 0)
 			   DepthBuffer_LP.xy = lerp(DepthBuffer_LP.xy,  Min_Blend ,(smoothstep(0.5,1.0, Min_Blend) *  Min_Divergence().y) * saturate(Range_Blend));
 	
@@ -2119,7 +2124,13 @@ namespace SuperDepth3D
 		#else
 		float Separation = lerp(1.0,5.0,ZPD_Separation.y); 	
 		#endif
-		return float3(Separation * DepthBuffer_LP.xy, DepthBuffer_LP.z);
+		
+		float Mix_Past_Current_Corner_Mask = tex2Dlod(samplerMinMaxRGBLastFrame,float4(texcoord,0,0)).w + saturate(tex2Dlod(SamplerzBuffer_BlurN, float4( texcoord * float2( 0.5 , 1) + float2(0.5,0), 0, 5 ) ).x * 100);	
+
+			  if(De_Artifacting >= 0)
+			  	Mix_Past_Current_Corner_Mask = 1;
+		
+		return float4(Separation * DepthBuffer_LP.xy, DepthBuffer_LP.z, saturate(Mix_Past_Current_Corner_Mask) );
 	}
 	//Perf Level selection & Array access               X    Y      Z      W              X    Y      Z      W
 	static const float4 Performance_LvL[2] = { float4( 0.5, 0.5095, 0.679, 0.5 ), float4( 1.0, 1.019, 1.425, 1.0) };
@@ -2175,8 +2186,10 @@ namespace SuperDepth3D
 			// Shift coordinates horizontally in linear fasion
 		    ParallaxCoord.x -= deltaCoordinates; 
 		    // Get depth value at current coordinates
-		    if(De_Artifacting > 0)
+		    if( De_Artifacting > 0 )
 		    	CurrentDepthMapValue = min(GetDB( ParallaxCoord ).x, GetDB( ParallaxCoord - float2(MS * lerp(0,0.125,saturate(De_Artifacting)),0)).x);
+			else if ( De_Artifacting < 0 && GetDB(ParallaxCoord).w )
+				CurrentDepthMapValue = min(GetDB( ParallaxCoord ).x, GetDB( ParallaxCoord - float2(MS * lerp(0,0.125,saturate(abs(De_Artifacting))),0)).x);
 		    else
 		    	CurrentDepthMapValue = GetDB( ParallaxCoord ).x;
 		    // Get depth of next layer
@@ -2678,11 +2691,7 @@ namespace SuperDepth3D
 	#endif
 	}
 	///////////////////////////////////////////////////////Average & Information Textures///////////////////////////////////////////////////////////////
-	#if Color_Correction_Mode
 	void Average_Info(float4 position : SV_Position, float2 texcoord : TEXCOORD, out  float4 Average : SV_Target0, out  float4 Color_Correction : SV_Target1)
-	#else
-	void Average_Info(float4 position : SV_Position, float2 texcoord : TEXCOORD, out  float4 Average : SV_Target0)	
-	#endif
 	{	
 		float Average_ZPD = PrepDepth( texcoord )[0][0];
 	
@@ -2700,7 +2709,9 @@ namespace SuperDepth3D
 		Average = float4(LBDetection(),Average_ZPD,Storage__Array[int(fmod(Grid,Num_of_Values))],tex2Dlod(SamplerDMN,float4(texcoord,0,0)).y);
 		
 		#if Color_Correction_Mode
-			Color_Correction = tex2D(samplerMinMaxRGB, texcoord);
+			Color_Correction = float4(tex2D(samplerMinMaxRGB, texcoord).rgb, saturate(tex2Dlod(SamplerzBuffer_BlurN, float4( texcoord * float2( 0.5 , 1) + float2(0.5,0), 0, 5 ) ).x * 100));
+		#else
+			Color_Correction = float4(0,0,0, saturate(tex2Dlod(SamplerzBuffer_BlurN, float4( texcoord * float2( 0.5 , 1) + float2(0.5,0), 0, 5 ) ).x * 100));		
 		#endif
 	}
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -2811,7 +2822,7 @@ namespace SuperDepth3D
 		#else
 		Color.rgb = PS_calcLR(texcoord, position.xy).rgb; //Color = texcoord.x+texcoord.y > 1 ? Color : LBDetection();
 		#endif
-		//Color = tex2Dlod(SamplerDMN,float4(texcoord,0,9)).w;
+		//Color = GetDB(texcoord).w;//tex2Dlod(SamplerDMN,float4(texcoord,0,9)).w;
 		return timer <= Text_Timer || Text_Info ? Color.rgb + Color.w : Color.rgb;
 	}
 		
@@ -3179,9 +3190,7 @@ namespace SuperDepth3D
 			VertexShader = PostProcessVS;
 			PixelShader = Average_Info;
 			RenderTarget0 = texLumN;
-			#if Color_Correction_Mode
 			RenderTarget1 = texMinMaxRGBLastFrame;
-			#endif
 		}
 		#endif
 			pass DepthBuffer
@@ -3233,9 +3242,7 @@ namespace SuperDepth3D
 			VertexShader = PostProcessVS;
 			PixelShader = Average_Info;
 			RenderTarget0 = texLumN;
-			#if Color_Correction_Mode
 			RenderTarget1 = texMinMaxRGBLastFrame;
-			#endif
 		}
 		#endif
 	}
