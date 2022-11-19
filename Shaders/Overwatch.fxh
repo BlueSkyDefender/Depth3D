@@ -227,7 +227,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 #endif
 
 //Game Hashes//
-#if (App == 0xC19572DDF || App == 0xFBEE8027 ) //PCSX2 | CEMU
+#if (App == 0xC19572DDF || App == 0xFBEE8027 || App == 0x8488E781 ) //PCSX2 | CEMU | melonDS
 	#define RHW 1
 	#define SPF 2
 	#define HMT 1
