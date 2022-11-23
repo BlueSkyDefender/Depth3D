@@ -2,7 +2,7 @@
 	///**SuperDepth3D**///
 	//----------------////
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	//* Depth Map Based 3D post-process shader v3.5.1
+	//* Depth Map Based 3D post-process shader v3.5.2
 	//* For Reshade 3.0+
 	//* ---------------------------------
 	//*
@@ -77,7 +77,7 @@ namespace SuperDepth3D
 		#define OW_WP "WP Off\0Custom WP\0"
 		static const int WSM = 0;
 		//Triggers
-		static const int MMS = 0, NVK = 0, NDG = 0, FTM = 0, SPO = 0, MMD = 0, SMP = 0, LBR = 0, HQT = 0, AFD = 0, MDD = 0, FPS = 1, SMS = 1, OIF = 0, NCW = 0, RHW = 0, NPW = 0, IDF = 0, SPF = 0, BDF = 0, HMT = 0, HMC = 0, DFW = 0, NFM = 0, DSW = 0, BMT = 0, LBC = 0, LBS = 0, LBM = 0, DAA = 0, NDW = 0, PEW = 0, WPW = 0, FOV = 0, EDW = 0, SDT = 0;
+		static const int OIL = 0, MMS = 0, NVK = 0, NDG = 0, FTM = 0, SPO = 0, MMD = 0, SMP = 0, LBR = 0, HQT = 0, AFD = 0, MDD = 0, FPS = 1, SMS = 1, OIF = 0, NCW = 0, RHW = 0, NPW = 0, IDF = 0, SPF = 0, BDF = 0, HMT = 0, HMC = 0, DFW = 0, NFM = 0, DSW = 0, BMT = 0, LBC = 0, LBS = 0, LBM = 0, DAA = 0, NDW = 0, PEW = 0, WPW = 0, FOV = 0, EDW = 0, SDT = 0;
 		//Overwatch.fxh State
 		#define OSW 1
 	#endif
@@ -997,10 +997,26 @@ namespace SuperDepth3D
 		#endif
 	#endif
 
-	float2 RE_Set()
-	{	
-		int REF_Trigger = RE_Fix > 0 || OIF > 0;
-		return float2(REF_Trigger, RE_Fix > 0 ? RE_Fix : OIF ); 
+	float2 RE_Set(float Auto_Switch)
+	{
+		#if OIL == 1
+			float OIL_Switch[2] = {OIF.x,OIF.y};	
+		#elif ( OIL == 2 )
+			float OIL_Switch[3] = {OIF.x,OIF.y,OIF.z};	
+		#elif ( OIL == 3 )
+			float OIL_Switch[4] = {OIF.x,OIF.y,OIF.z,OIF.w};	
+		#else
+			float OIL_Switch = OIF.x;	
+		#endif   	
+		int Scale_Auto_Switch = clamp((Auto_Switch * 4) - 1,0 , 3 );
+		#if OIL >= 1
+		float Set_RE = OIL_Switch[Scale_Auto_Switch];
+		#else
+		float Set_RE = OIL_Switch;		
+		#endif
+		
+		int REF_Trigger = RE_Fix > 0 || Set_RE > 0;
+		return float2(REF_Trigger, RE_Fix > 0 ? RE_Fix : Set_RE ); 
 	}
 
 	float Scale(float val,float max,float min) //Scale to 0 - 1
@@ -1449,7 +1465,7 @@ namespace SuperDepth3D
 		float BaseVal = 1.0,
 			  Dist  = distance( center, texcoords ) * 2.0, 
 			  EdgeMask = saturate((BaseVal-Dist) / (BaseVal-Adjust_Value)),
-			  Set_Weapon_Scale_Near = -Weapon_Depth_Edge.y; 
+			  Set_Weapon_Scale_Near = -min(0.5,Weapon_Depth_Edge.y);//So it don't hang the game. 
 	    return lerp(Depth,(Mod_Depth - Set_Weapon_Scale_Near) / (1 + Set_Weapon_Scale_Near), EdgeMask );    
 	}
 	
@@ -1756,7 +1772,7 @@ namespace SuperDepth3D
 		return (1-(Val*2.))*1000;
 	}
 	
-	float2 Fade(float2 texcoord) // Maybe make it float2 and pass the 2nd switch to swap it with grater strength onlu if it's beyond -1.0
+	float3 Fade(float2 texcoord) // Maybe make it float2 and pass the 2nd switch to swap it with grater strength onlu if it's beyond -1.0
 	{   //Check Depth
 		float CD, Detect, Detect_Out_of_Range;
 		if(ZPD_Boundary > 0)
@@ -1800,20 +1816,34 @@ namespace SuperDepth3D
 					#endif
 					if ( CD < -Set_Pop_Min().x )//may lower this to like -0.1
 						Detect = 1;
-					//Used if Depth Buffer is way out of range.
-					if(RE_Set().x)
-					{
-						if ( CD < -DI_W )
-							Detect_Out_of_Range = 1;
+					//Used if Depth Buffer is way out of range or if you need granuality.
+					if(RE_Set(0).x)
+					{					
+						if ( CD < -DI_W.x && Detect_Out_of_Range <= 1)
+							Detect_Out_of_Range = 1;		
+							
+						#if OIL >= 1
+						if ( CD < -DI_W.y && Detect_Out_of_Range <= 2)
+							Detect_Out_of_Range = 2;							
+						#endif
+						#if OIL >= 2
+						if ( CD < -DI_W.z && Detect_Out_of_Range <= 3)
+							Detect_Out_of_Range = 3;							
+						#endif
+						#if OIL >= 3	
+						if ( CD < -DI_W.w && Detect_Out_of_Range <= 4)
+							Detect_Out_of_Range = 4;
+						#endif							
 					}
 				}
 			}
 		}
-		float ZPD_BnF = Auto_Adjust_Cal(Fast_Trigger_Mode && Detect_Out_of_Range ? 0.5 : ZPD_Boundary_n_Fade.y);
-		float Trigger_Fade_A = Detect, Trigger_Fade_B = Detect_Out_of_Range, AA = Auto_Adjust_Cal(ZPD_Boundary_n_Fade.y), 
+		int Sat_D_O_R = saturate(Detect_Out_of_Range);
+		float ZPD_BnF = Auto_Adjust_Cal(Fast_Trigger_Mode && Sat_D_O_R ? 0.5 : ZPD_Boundary_n_Fade.y);
+		float Trigger_Fade_A = Detect, Trigger_Fade_B = Sat_D_O_R, AA = Auto_Adjust_Cal(ZPD_Boundary_n_Fade.y), 
 			  PStoredfade_A = tex2D(SamplerLumN,float2(0, 0.250)).z, PStoredfade_B = tex2D(SamplerLumN,float2(0, 0.416)).z;
 		//Fade in toggle.
-		return float2( PStoredfade_A + (Trigger_Fade_A - PStoredfade_A) * (1.0 - exp(-frametime/AA )), PStoredfade_B + (Trigger_Fade_B - PStoredfade_B) * (1.0 - exp(-frametime/ZPD_BnF)) ); ///exp2 would be even slower
+		return float3( PStoredfade_A + (Trigger_Fade_A - PStoredfade_A) * (1.0 - exp(-frametime/AA )), PStoredfade_B + (Trigger_Fade_B - PStoredfade_B) * (1.0 - exp(-frametime/ZPD_BnF)) , saturate(Detect_Out_of_Range * 0.25) ); ///exp2 would be even slower
 	}
 	#define FadeSpeed_AW 0.375
 	float AltWeapon_Fade()
@@ -1853,6 +1883,7 @@ namespace SuperDepth3D
 		if(Inficolor_3D_Emulator && Inficolor_Near_Reduction)
 			Min_Trim = float2((Min_Trim.x * 2 + Min_Trim.x) * 0.5, min( 0.3, (Min_Trim.y * 2.5 + Min_Trim.y) * 0.5) );
 		//Fade Storage
+		float3 Fade_Pass = Fade(texcoord).xyz;
 		float ScaleND = saturate(lerp(R,1.0f,smoothstep(min(-Min_Trim.x,0),1.0f,R)));
 		float Edge_Adj = 0.5;
 		
@@ -1862,13 +1893,15 @@ namespace SuperDepth3D
 		if ( Weapon_Depth_Edge.x > 0)//1.0 needs to be adjusted when doing far scaling
 			R = lerp(DepthEdge(R, DM.x, texcoord, 1-Weapon_Depth_Edge.x),DM.x,smoothstep(0,1.0,DM.x));
 		
-		if(texcoord.x < pix.x * 2 && texcoord.y < pix.y * 2)//TL
+		if(   texcoord.x < pix.x * 2 &&   texcoord.y < pix.y * 2)//TL
 			R = Fade_in_out(texcoord);
-		if(1-texcoord.x < pix.x * 2 && 1-texcoord.y < pix.y * 2)//BR
-			R = Fade(texcoord).x;
-		if(texcoord.x < pix.x * 2 && 1-texcoord.y < pix.y * 2)//BL
-			R = Fade(texcoord).y;
-		
+		if( 1-texcoord.x < pix.x * 2 && 1-texcoord.y < pix.y * 2)//BR
+			R = Fade_Pass.x;
+		if(   texcoord.x < pix.x * 2 && 1-texcoord.y < pix.y * 2)//BL
+			R = Fade_Pass.y;
+		if( 1-texcoord.x < pix.x * 2 &&   texcoord.y < pix.y * 2)//TR
+			R = Fade_Pass.z;
+			
 		float Luma_Map = dot(0.333, tex2D(BackBufferCLAMP,texcoord).rgb);
 		
 		return saturate(float4(R,G,B,Luma_Map));
@@ -1922,8 +1955,8 @@ namespace SuperDepth3D
 				
 			float DOoR_A = smoothstep(0,1,tex2D(SamplerLumN,float2(0, 0.416)).z);//RE_Set().y = ,ZDP_Array[17] = { 0.0, 0.0125, 0.025, 0.0375, 0.04375, 0.05, 0.0625, 0.075, 0.0875, 0.09375, 0.1, 0.125, 0.150, 0.175, 0.20, 0.225, 0.250};
 			float DOoR_B = smoothstep(0,1,tex2D(SamplerLumN,float2(0, 0.250)).z);
-			if(RE_Set().x)
-				ZPD_Boundary = lerp(ZPD_Boundary, RE_Set().y, DOoR_A);
+			if(RE_Set(0).x)
+				ZPD_Boundary = lerp(ZPD_Boundary, RE_Set(tex2D(SamplerLumN,float2(1, 0.250)).z).y, DOoR_A);
 			if(Fast_Trigger_Mode)
 				DOoR_B = saturate(DOoR_A+DOoR_B);
 			
@@ -1955,7 +1988,9 @@ namespace SuperDepth3D
 			DM = PrepDepth(texcoord)[0][0];
 		if(texcoord.x < pix.x * 2 && 1-texcoord.y < pix.y * 2)
 			DM = PrepDepth(texcoord)[0][0];
-	
+		if( 1-texcoord.x < pix.x * 2 &&   texcoord.y < pix.y * 2)
+			DM = PrepDepth(texcoord)[0][0];
+			
 		if (WP == 0 || WZPD_and_WND.x <= 0)
 			DM.y = 0;
 	
@@ -2696,17 +2731,23 @@ namespace SuperDepth3D
 		float Average_ZPD = PrepDepth( texcoord )[0][0];
 	
 		const int Num_of_Values = 6; //6 total array values that map to the textures width.
-		float Storage__Array[Num_of_Values] = { tex2D(SamplerDMN,0).x,    //0.083 //tl
-	                                tex2D(SamplerDMN,1).x,                //0.250 //br
-	                                tex2D(SamplerDMN,int2(0,1)).x,        //0.416 //bl
-	                                tex2D(SamplerzBufferN_P,0).y,         //0.583
-									tex2D(SamplerzBufferN_P,1).y,         //0.750 
-									tex2D(SamplerzBufferN_P,int2(0,1)).y};//0.916
-	
+		float Storage_Array_A[Num_of_Values] = { tex2D(SamplerDMN,0).x,    //0.083 //tl
+	                                             tex2D(SamplerDMN,1).x,                //0.250 //br
+	                                             tex2D(SamplerDMN,int2(0,1)).x,        //0.416 //bl
+	                                             tex2D(SamplerzBufferN_P,0).y,         //0.583
+								             	tex2D(SamplerzBufferN_P,1).y,         //0.750 
+								             	tex2D(SamplerzBufferN_P,int2(0,1)).y};//0.916
+												
+		float Storage_Array_B[Num_of_Values] = { 1,                                    //0.083
+	                                			 tex2D(SamplerDMN,int2(1,0)).x,        //0.250 //TR Fade Z 
+	                               			  0,                                    //0.416
+	                                			 0,                                    //0.583
+												 0,                                    //0.750
+												 1};                                   //0.916	
 		//Set a avr size for the Number of lines needed in texture storage.
 		float Grid = floor(texcoord.y * BUFFER_HEIGHT * BUFFER_RCP_HEIGHT * Num_of_Values);
 		//Where LBDetection() is slot X in the float4 below I can do an array like in slot Z If I need to send more information.	
-		Average = float4(LBDetection(),Average_ZPD,Storage__Array[int(fmod(Grid,Num_of_Values))],tex2Dlod(SamplerDMN,float4(texcoord,0,0)).y);
+		Average = float4(LBDetection(),Average_ZPD, texcoord.x < 0.5 ? Storage_Array_A[int(fmod(Grid,Num_of_Values))] : Storage_Array_B[int(fmod(Grid,Num_of_Values))],tex2Dlod(SamplerDMN,float4(texcoord,0,0)).y);
 		
 		#if Color_Correction_Mode
 			Color_Correction = float4(tex2D(samplerMinMaxRGB, texcoord).rgb, saturate(tex2Dlod(SamplerzBuffer_BlurN, float4( texcoord * float2( 0.5 , 1) + float2(0.5,0), 0, 5 ) ).x * 100));

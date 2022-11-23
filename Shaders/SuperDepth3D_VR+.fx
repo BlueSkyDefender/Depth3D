@@ -77,7 +77,7 @@ namespace SuperDepth3DVR
 		#define OW_WP "WP Off\0Custom WP\0"
 		static const int WSM = 0;
 		//Triggers
-		static const int MMS = 0, NVK = 0, NDG = 0, FTM = 0, SPO = 0, MMD = 0, SMP = 0, LBR = 0, HQT = 0, AFD = 0, MDD = 0, FPS = 1, SMS = 1, OIF = 0, NCW = 0, RHW = 0, NPW = 0, IDF = 0, SPF = 0, BDF = 0, HMT = 0, HMC = 0, DFW = 0, NFM = 0, DSW = 0, LBC = 0, LBS = 0, LBM = 0, DAA = 0, NDW = 0, PEW = 0, WPW = 0, FOV = 0, EDW = 0, SDT = 0;
+		static const int OIL = 0, MMS = 0, NVK = 0, NDG = 0, FTM = 0, SPO = 0, MMD = 0, SMP = 0, LBR = 0, HQT = 0, AFD = 0, MDD = 0, FPS = 1, SMS = 1, OIF = 0, NCW = 0, RHW = 0, NPW = 0, IDF = 0, SPF = 0, BDF = 0, HMT = 0, HMC = 0, DFW = 0, NFM = 0, DSW = 0, LBC = 0, LBS = 0, LBM = 0, DAA = 0, NDW = 0, PEW = 0, WPW = 0, FOV = 0, EDW = 0, SDT = 0;
 		//Overwatch.fxh State
 		#define OSW 1
 	#endif
@@ -913,10 +913,25 @@ namespace SuperDepth3DVR
 	#define Res int2(BUFFER_WIDTH, BUFFER_HEIGHT)
 	#define ARatio Res.x / Res.y
 	
-	float2 RE_Set()
-	{	
-		int REF_Trigger = RE_Fix > 0 || OIF > 0;
-		return float2(REF_Trigger, RE_Fix > 0 ? RE_Fix : OIF ); 
+	float2 RE_Set(float Auto_Switch)
+	{
+		#if OIL == 1
+			float OIL_Switch[2] = {OIF.x,OIF.y};	
+		#elif ( OIL == 2 )
+			float OIL_Switch[3] = {OIF.x,OIF.y,OIF.z};	
+		#elif ( OIL == 3 )
+			float OIL_Switch[4] = {OIF.x,OIF.y,OIF.z,OIF.w};	
+		#else
+			float OIL_Switch = OIF.x;	
+		#endif   	
+		int Scale_Auto_Switch = clamp((Auto_Switch * 4) - 1,0 , 3 );
+		#if OIL >= 1
+		float Set_RE = OIL_Switch[Scale_Auto_Switch];
+		#else
+		float Set_RE = OIL_Switch;		
+		#endif
+		int REF_Trigger = RE_Fix > 0 || Set_RE > 0;
+		return float2(REF_Trigger, RE_Fix > 0 ? RE_Fix : Set_RE ); 
 	}
 	
 	float Scale(float val,float max,float min) //Scale to 0 - 1
@@ -1381,7 +1396,7 @@ namespace SuperDepth3DVR
 		float BaseVal = 1.0,
 			  Dist  = distance( center, texcoords ) * 2.0, 
 			  EdgeMask = saturate((BaseVal-Dist) / (BaseVal-Adjust_Value)),
-			  Set_Weapon_Scale_Near = -Weapon_Depth_Edge.y; 
+			  Set_Weapon_Scale_Near = -min(0.5,Weapon_Depth_Edge.y);//So it don't hang the game. 
 	    return lerp(Depth,(Mod_Depth - Set_Weapon_Scale_Near) / (1 + Set_Weapon_Scale_Near), EdgeMask );    
 	}
 
@@ -1676,7 +1691,7 @@ namespace SuperDepth3DVR
 		return (1-(Val*2.))*1000;
 	}
 	
-	float2 Fade(float2 texcoord) // Maybe make it float2 and pass the 2nd switch to swap it with grater strength onlu if it's beyond -1.0
+	float3 Fade(float2 texcoord) // Maybe make it float2 and pass the 2nd switch to swap it with grater strength onlu if it's beyond -1.0
 	{   //Check Depth
 		float CD, Detect, Detect_Out_of_Range;
 		if(ZPD_Boundary > 0)
@@ -1720,25 +1735,38 @@ namespace SuperDepth3DVR
 					#endif
 					if ( CD < -Set_Pop_Min().x )//may lower this to like -0.1
 						Detect = 1;
-					//Used if Depth Buffer is way out of range.
-					if(RE_Set().x)
-					{
-						if ( CD < -DI_W )
-							Detect_Out_of_Range = 1;
+					//Used if Depth Buffer is way out of range or if you need granuality.
+					if(RE_Set(0).x)
+					{					
+						if ( CD < -DI_W.x && Detect_Out_of_Range <= 1)
+							Detect_Out_of_Range = 1;		
+							
+						#if OIL >= 1
+						if ( CD < -DI_W.y && Detect_Out_of_Range <= 2)
+							Detect_Out_of_Range = 2;							
+						#endif
+						#if OIL >= 2
+						if ( CD < -DI_W.z && Detect_Out_of_Range <= 3)
+							Detect_Out_of_Range = 3;							
+						#endif
+						#if OIL >= 3	
+						if ( CD < -DI_W.w && Detect_Out_of_Range <= 4)
+							Detect_Out_of_Range = 4;
+						#endif							
 					}
 				}
 			}
 		}
-		
-		float ZPD_BnF = Auto_Adjust_Cal(Fast_Trigger_Mode && Detect_Out_of_Range ? 0.5 : ZPD_Boundary_n_Fade.y);
-		float Trigger_Fade_A = Detect, Trigger_Fade_B = Detect_Out_of_Range, AA = Auto_Adjust_Cal(ZPD_Boundary_n_Fade.y), 
+		int Sat_D_O_R = saturate(Detect_Out_of_Range);	
+		float ZPD_BnF = Auto_Adjust_Cal(Fast_Trigger_Mode && Sat_D_O_R ? 0.5 : ZPD_Boundary_n_Fade.y);
+		float Trigger_Fade_A = Detect, Trigger_Fade_B = Sat_D_O_R, AA = Auto_Adjust_Cal(ZPD_Boundary_n_Fade.y), 
 			  PStoredfade_A = tex2D(SamplerLumVR,float2(0, 0.250)).z, PStoredfade_B = tex2D(SamplerLumVR,float2(0, 0.416)).z;
 		//Fade in toggle.
-		return float2( PStoredfade_A + (Trigger_Fade_A - PStoredfade_A) * (1.0 - exp(-frametime/AA)), PStoredfade_B + (Trigger_Fade_B - PStoredfade_B) * (1.0 - exp(-frametime/ZPD_BnF)) ); ///exp2 would be even slower
+		return float3( PStoredfade_A + (Trigger_Fade_A - PStoredfade_A) * (1.0 - exp(-frametime/AA)), PStoredfade_B + (Trigger_Fade_B - PStoredfade_B) * (1.0 - exp(-frametime/ZPD_BnF)) , saturate(Detect_Out_of_Range * 0.25) );  ///exp2 would be even slower
 	}
 	
 	float Motion_Blinders(float2 texcoord)
-	{   float Trigger_Fade = tex2Dlod(SamplerLumVR,float4(texcoord,0,11)).x * lerp(0.0,25.0,Blinders), AA = (1-Fade_Time_Adjust)*1000, PStoredfade = tex2D(SamplerLumVR,float2(0,0.583)).z;
+	{   float Trigger_Fade = tex2Dlod(SamplerLumVR,float4(texcoord,0,11)).x * lerp(0.0,25.0,Blinders), AA = (1-Fade_Time_Adjust)*1000, PStoredfade = tex2D(SamplerLumVR,float2(1,0.916)).z;
 		return PStoredfade + (Trigger_Fade - PStoredfade) * (1.0 - exp2(-frametime/AA)); ///exp2 would be even slower
 	}
 	#define FadeSpeed_AW 0.375
@@ -1775,8 +1803,8 @@ namespace SuperDepth3DVR
 		float4 DM = float4(PrepDepth(texcoord)[0][0],PrepDepth(texcoord)[0][1],PrepDepth(texcoord)[0][2],PrepDepth(texcoord)[1][1]);
 		float R = DM.x, G = DM.y, B = DM.z, Auto_Scale = WZPD_and_WND.z > 0 ? lerp(lerp(1.0,0.625,saturate(WZPD_and_WND.z * 2)),1.0,lerp(Auto_Balance_Selection().y , smoothstep(0,0.5,tex2D(SamplerLumVR,float2(0,0.750)).z), 0.5)) : 1;
 		float2 Min_Trim = float2(Set_Pop_Min().y, WZPD_and_WND.w * Auto_Scale);
-
 		//Fade Storage
+		float3 Fade_Pass = Fade(texcoord).xyz;
 		float ScaleND = saturate(lerp(R,1.0f,smoothstep(min(-Min_Trim.x,0),1.0f,R)));
 	
 		if (Min_Trim.x > 0)
@@ -1785,14 +1813,14 @@ namespace SuperDepth3DVR
 		if ( Weapon_Depth_Edge.x > 0)//1.0 needs to be adjusted when doing far scaling
 			R = lerp(DepthEdge(R, DM.x, texcoord, 1-Weapon_Depth_Edge.x),DM.x,smoothstep(0,1.0,DM.x));
 	
-		if(texcoord.x < pix.x * 2 && texcoord.y < pix.y * 2)//TL
+		if(   texcoord.x < pix.x * 2 &&   texcoord.y < pix.y * 2)//TL
 			R = Fade_in_out(texcoord);
-		if(1-texcoord.x < pix.x * 2 && 1-texcoord.y < pix.y * 2)//BR
-			R = Fade(texcoord).x;
-		if(texcoord.x < pix.x * 2 && 1-texcoord.y < pix.y * 2)//BL
-			R = Fade(texcoord).y;
-		if(1-texcoord.x < pix.x * 2 && texcoord.y < pix.y * 2)//TR
-			R = Motion_Blinders(texcoord);
+		if( 1-texcoord.x < pix.x * 2 && 1-texcoord.y < pix.y * 2)//BR
+			R = Fade_Pass.x;
+		if(   texcoord.x < pix.x * 2 && 1-texcoord.y < pix.y * 2)//BL
+			R = Fade_Pass.y;
+		if( 1-texcoord.x < pix.x * 2 &&   texcoord.y < pix.y * 2)//TR
+			R = Fade_Pass.z;
 	
 		float Luma_Map = dot(0.333, tex2D(BackBufferCLAMP,texcoord).rgb);
 	
@@ -1848,8 +1876,8 @@ namespace SuperDepth3DVR
 			float DOoR_A = smoothstep(0,1,tex2D(SamplerLumVR,float2(0, 0.416)).z);//RE_Set().y = ,ZDP_Array[17] = { 0.0, 0.0125, 0.025, 0.0375, 0.04375, 0.05, 0.0625, 0.075, 0.0875, 0.09375, 0.1, 0.125, 0.150, 0.175, 0.20, 0.225, 0.250};
 			float DOoR_B = smoothstep(0,1,tex2D(SamplerLumVR,float2(0, 0.250)).z);
 			
-			if(RE_Set().x)
-				ZPD_Boundary = lerp(ZPD_Boundary, RE_Set().y, DOoR_A);
+			if(RE_Set(0).x)
+				ZPD_Boundary = lerp(ZPD_Boundary, RE_Set(tex2D(SamplerLumVR,float2(1, 0.250)).z).y, DOoR_A);
 				
 			if(Fast_Trigger_Mode)
 				DOoR_B = saturate(DOoR_A+DOoR_B);
@@ -1986,17 +2014,18 @@ namespace SuperDepth3DVR
 	////////////////////////////////////////////////////Depth & Special Depth Triggers//////////////////////////////////////////////////////////////////
 	void zBuffer(in float4 position : SV_Position, in float2 texcoord : TEXCOORD, out float2 Point_Out : SV_Target0 , out float2 Linear_Out : SV_Target1)
 	{  //Temporal adaptation https://knarkowicz.wordpress.com/2016/01/09/automatic-exposure/
-		float  ExAd = (1-Adapt_Adjust)*1250, Lum = tex2Dlod(SamplerDMVR,float4(texcoord,0,12)).w, PastLum = tex2D(SamplerLumVR,float2(1,0.583)).z;
+		float  ExAd = (1-Adapt_Adjust)*1250, Lum = tex2Dlod(SamplerDMVR,float4(texcoord,0,12)).w, PastLum = tex2D(SamplerLumVR,float2(0,0.583)).z;
 	
 		float3 Set_Depth = DB_Comb( texcoord.xy ).xyz;
 		
-		if(  texcoord.x < pix.x * 2 && texcoord.y < pix.y * 2) 
+		if(   texcoord.x < pix.x * 2 &&   texcoord.y < pix.y * 2) 
 			Set_Depth.y = PastLum + (Lum - PastLum) * (1.0 - exp(-frametime/ExAd));	
-		if(1-texcoord.x < pix.x * 2 && 1-texcoord.y < pix.y * 2)
+		if( 1-texcoord.x < pix.x * 2 && 1-texcoord.y < pix.y * 2)
 			Set_Depth.y = AltWeapon_Fade();
-		if(  texcoord.x < pix.x * 2 && 1-texcoord.y < pix.y * 2) 
+		if(   texcoord.x < pix.x * 2 && 1-texcoord.y < pix.y * 2) 
 			Set_Depth.y = Weapon_ZPD_Fade(Set_Depth.z);
-		
+		if( 1-texcoord.x < pix.x * 2 &&   texcoord.y < pix.y * 2)//TR
+			Set_Depth.y = Motion_Blinders(texcoord);	
 		//Luma Map
 		float3 Color = tex2D(BackBufferCLAMP,texcoord ).rgb;
 			   Color.x = max(Color.r, max(Color.g, Color.b)); 
@@ -2444,15 +2473,15 @@ namespace SuperDepth3DVR
 		float Storage__Array_A[Num_of_Values] = { tex2D(SamplerDMVR,0).x,                //0.083
 	                                			  tex2D(SamplerDMVR,1).x,                //0.250
 	                               			   tex2D(SamplerDMVR,int2(0,1)).x,        //0.416
-	                                			  tex2D(SamplerDMVR,int2(1,0)).x,        //0.583
+	                                			  tex2D(SamplerzBufferVR_P,0).y,         //0.583
 												  tex2D(SamplerzBufferVR_P,1).y,         //0.75
 												  tex2D(SamplerzBufferVR_P,int2(0,1)).y};//0.916
 		float Storage__Array_B[Num_of_Values] = { LBDetection(),                         //0.083
-	                                			  0,                                     //0.250
+	                                			  tex2D(SamplerDMVR,int2(1,0)).x,        //0.250
 	                               			   0,                                     //0.416
-	                                			  tex2D(SamplerzBufferVR_P,0).y,         //0.583
+	                                			  0,                                     //0.583
 												  0,                                     //0.75
-												  0};                                    //0.916
+												  tex2D(SamplerzBufferVR_P,int2(1,0)).y};//0.916
 		//Set a avr size for the Number of lines needed in texture storage.
 		float Grid = floor(texcoord.y * BUFFER_HEIGHT * BUFFER_RCP_HEIGHT * Num_of_Values);	
 		//Motion_Detection
