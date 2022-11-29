@@ -1,7 +1,7 @@
 ////----------------------------------------//
 ///SuperDepth3D Overwatch Automation Header///
 //----------------------------------------////
-// Version 2.9.6
+// Version 2.9.7
 //---------------------------------------OVERWATCH---------------------------------------//
 // If you are reading this stop. Go away and never look back. From this point on if you  //
 // still think it's is worth looking at this..... Then no one can save you or your soul. //
@@ -8801,7 +8801,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define NFM 1
 	#define DSW 1
 #elif (App == 0x3950D04E )	//Skyrim: SE
-	#define DA_W 1
+	//#define DA_W 1
     //#define DB_X 1
 	#define DA_X 0.0480
 	#define DF_Y 0.0525
@@ -8823,9 +8823,9 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define DI_Z 0.025 //Trim
     //#define DF_W float2(0.001,0.00125)  //Edge & Scale
 	#define BMT 1
-	#define DF_Z 0.13
+	#define DF_Z 0.075 //0.100//0.130
     #define SMS 1            //SM Toggle Separation
-	#define DL_X 0.500     //SM Tune
+	#define DL_X 0.600     //SM Tune
 	//#define DL_W 0.025       //SM Perspective
 	#define DM_X 4           //HQ Tune
 	#define DM_Z 1           //HQ Smooth
