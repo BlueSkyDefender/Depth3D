@@ -4090,25 +4090,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define FOV 1
 	//#define RHW 1
     //#define NFM 1
-#elif (App == 0xBCFD90CA ) //FFVII Remake Intergrade 
-	#define DA_W 1
-	#define DA_X 0.090
-	#define DF_Y 0.050	
-	#define DA_Y 21.0 //15
-    //#define DA_Z 0.00025 //-1.0
-	#define DE_X 1
-	#define DE_Y 0.325
-	#define DE_Z 0.400
-    #define DG_Z 0.002 //Min
-    #define DI_Z 0.200 //Trim
-	#define BMT 1
-	#define DF_Z 0.1125 //0.1875
-    #define DG_W 0.100 //Pop
-	#define SMS 2      //SM Toggle Separation
-	#define DL_X 0.550 //SM Tune
-	#define DL_W 0.000 //SM Perspective
-	#define DM_X 3    //HQ Tune
-	#define DM_Z 6     //HQ Smooth
 #elif (App == 0xC150B2EC ) //FarCry 6 
 	#define DA_W 1
 	#define DA_X 0.045
@@ -8873,6 +8854,31 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DC_Z 0.0
 	#define DC_W -0.058
 	#define PEW 1
+#elif (App == 0xBCFD90CA ) //FFVII Remake Intergrade 
+	#define DA_W 1
+	#define DA_X 0.090
+	#define DF_Y 0.050	
+	#define DA_Y 21.5 //15
+    //#define DA_Z 0.00025 //-1.0
+	#define DE_X 1
+	#define DE_Y 0.500
+	#define DE_Z 0.400
+    #define DG_Z 0.002 //Min
+    #define DI_Z 0.200 //Trim
+     //#define AFD 1
+	#define DG_W -0.250 //PoP
+    //#define OIL 1 //Set How many Levels We use for RE_Fix 0 | 1 | 2 | 3
+    #define OIF 0.325 //float2(0.265,0.001) //Fix enables if Value is > 0.0
+	#define DI_W 1.0  //float2(1.5,7.0)
+	//#define FTM 1
+	#define BMT 1
+	#define DF_Z 0.1125 //0.1875
+	#define SMS 3      //SM Toggle Separation
+	#define DL_X 0.550 //SM Tune
+	#define DL_W 0.000 //SM Perspective
+	#define DM_X 3    //HQ Tune
+	#define DM_Z 2     //HQ Smooth
+   #define DL_Y -0.5    //De-Artifact
 #else
 	#define NPW 1 //No Profile
 #endif
