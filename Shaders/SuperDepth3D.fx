@@ -2,7 +2,7 @@
 	///**SuperDepth3D**///
 	//----------------////
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	//* Depth Map Based 3D post-process shader v3.5.2
+	//* Depth Map Based 3D post-process shader v3.5.3
 	//* For Reshade 3.0+
 	//* ---------------------------------
 	//*
@@ -2738,12 +2738,12 @@ namespace SuperDepth3D
 								             	tex2D(SamplerzBufferN_P,1).y,         //0.750 
 								             	tex2D(SamplerzBufferN_P,int2(0,1)).y};//0.916
 												
-		float Storage_Array_B[Num_of_Values] = { 1,                                    //0.083
-	                                			 tex2D(SamplerDMN,int2(1,0)).x,        //0.250 //TR Fade Z 
-	                               			  0,                                    //0.416
-	                                			 0,                                    //0.583
-												 0,                                    //0.750
-												 1};                                   //0.916	
+		float Storage_Array_B[Num_of_Values] = { 1.0,                                   //0.083
+	                                			 tex2D(SamplerDMN,int2(1,0)).x,         //0.250 //TR Fade Z 
+	                               			  0.0,                                   //0.416
+	                                			 0.0,                                   //0.583
+												 0.0,                                   //0.750
+												 1.0};                                  //0.916	
 		//Set a avr size for the Number of lines needed in texture storage.
 		float Grid = floor(texcoord.y * BUFFER_HEIGHT * BUFFER_RCP_HEIGHT * Num_of_Values);
 		//Where LBDetection() is slot X in the float4 below I can do an array like in slot Z If I need to send more information.	

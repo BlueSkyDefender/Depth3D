@@ -2,7 +2,7 @@
 	///**SuperDepth3D_VR+**///
 	//--------------------////
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	//* Depth Map Based 3D post-process shader v3.5.1
+	//* Depth Map Based 3D post-process shader v3.5.2
 	//* For Reshade 4.4+ I think...
 	//* ---------------------------------
 	//*
@@ -2478,9 +2478,9 @@ namespace SuperDepth3DVR
 												  tex2D(SamplerzBufferVR_P,int2(0,1)).y};//0.916
 		float Storage__Array_B[Num_of_Values] = { LBDetection(),                         //0.083
 	                                			  tex2D(SamplerDMVR,int2(1,0)).x,        //0.250
-	                               			   0,                                     //0.416
-	                                			  0,                                     //0.583
-												  0,                                     //0.75
+	                               			   0.0,                                   //0.416
+	                                			  0.0,                                   //0.583
+												  0.0,                                   //0.75
 												  tex2D(SamplerzBufferVR_P,int2(1,0)).y};//0.916
 		//Set a avr size for the Number of lines needed in texture storage.
 		float Grid = floor(texcoord.y * BUFFER_HEIGHT * BUFFER_RCP_HEIGHT * Num_of_Values);	
