@@ -3257,23 +3257,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DG_W 0.1 //Allow some popout
 	#define PEW 1
 	#define DAA 1
-#elif (App == 0x808ABB25 ) //BioShock Infinite 
-	#define DA_X 0.025 //0.050
-    #define DF_Y 0.040
-	#define DA_Y 35.0 //12.50
-    #define DA_Z -0.00125
-    #define DB_Z 0.050
-    #define BMT 1
-	#define DF_Z 0.100
-    #define DG_Z 0.075//Min
-    #define DI_Z 0.150 //Trim
-	#define SMS 3      //SM Toggle Separation
-	#define DL_X 0.925 //SM Tune
-	#define DL_W 0.050 //SM Perspective
-	#define DM_X 3     //HQ Tune
-	#define DM_Z 4     //HQ Smooth
-	#define DSW 1
-    #define FOV 1
 #elif (App == 0x22CA259A ) //Kena Bridge of Spirits
     #define DA_W 1
 	#define DA_X 0.125//0.225
@@ -9585,6 +9568,24 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	//#define DF_X float2(0.050,0.0)	
     #define PEW 1
     #define DSW 1
+#elif (App == 0x808ABB25 ) //BioShock Infinite 
+	#define DA_X 0.025 //0.050
+    #define DF_Y 0 //0.025 //0.040
+	#define DA_Y 52.5 //12.50
+    #define DA_Z -0.00125
+    #define DB_Z 0.025
+    #define BMT 1
+	#define DF_Z 0.100
+    #define DG_Z 0.500 //0.030 //0.050//0.070//Min
+    #define DI_Z 0.2775 //0.150 //0.100 //0.090 //Trim
+    #define DF_W float2(0.0001,0.0155) //float2(0.0001,0.008)//float2(0.0001,0.003)  //Edge & Scale
+	#define SMS 3      //SM Toggle Separation
+	#define DL_X 0.950 //SM Tune
+	#define DL_W 0.050 //SM Perspective
+	#define DM_X 3     //HQ Tune
+	#define DM_Z 3     //HQ Smooth
+	#define DSW 1
+    #define FOV 1
 #else
 	#define NPW 1 //No Profile
 #endif
