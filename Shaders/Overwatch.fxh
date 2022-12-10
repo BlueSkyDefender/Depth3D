@@ -4557,24 +4557,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DM_Z 2     //HQ Smooth
 	#define PEW 1
 	#define DAA 1
-#elif (App == 0x50027232 ) //Yakuza0
-	#define DA_X 0.075
-	#define DF_Y 0.050
-	#define DA_Y 11.0
-	#define DB_Y 3
-	#define DE_X 1
-	#define DE_Y 0.4375
-	#define DE_Z 0.375
-    //#define DG_W 0.100 //Pop
-	#define BMT 1
-	#define DF_Z 0.100
-    #define SMS 3     //SM Toggle Separation
-	#define DL_X 0.750 //SM Tune
-	#define DL_W 0.025 //SM Perspective
-	#define DM_X 3     //HQ Tune
-	#define DM_Z 5     //HQ Smooth
-	#define PEW 1
-	#define NDW 1
 #elif (App == 0xBB2E4EFB ) //MassEffect
 	#define DA_X 0.050
 	#define DF_Y 0.0375
@@ -5301,36 +5283,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DM_X 3     //HQ Tune
 	#define DM_Z 1     //HQ Smooth
 	#define HQT 1	
-	#define PEW 1
-#elif (App == 0x9113C0D ) //Necromunda Hired Gun
-	#define DA_W 1
-	#define DA_X 0.020//0.025//0.0125
-	#define DF_Y 0.020
-	#define DA_Y 26.0
-	#define DB_Z 0.100
-    //#define DB_X 1
-	//#define DB_Y 1
-	#define DE_X 3
-	#define DE_Y 0.690
-	#define DE_Z 0.375
-	#define DG_W -0.100 //Pop
-    //#define OIF 0.225 //Fix enables if Value is > 0.0
-	//#define DI_W 1.25 //Adjustment for REF
-    #define DG_Z 0.065 //Min
-    #define DI_Z 0.050 //Trim
-	#define BMT 1
-	#define DF_Z 0.08
-    #define SMS 1      //SM Toggle Separation
-	#define DL_X 0.600 //SM Tune
-	#define DL_W 0.025 //SM Perspective
-	#define DM_X 3     //HQ Tune
-	#define DM_Z 1     //HQ Smooth
-	#define HQT 1
-	#define FPS  0
-	#define DK_X 2
-	#define DK_Y 0
-	#define DK_Z 1
-	#define DK_W 3
 	#define PEW 1
 #elif (App == 0xE1A4C79C ) //Generation Zero
 	#define DA_W 1
@@ -9586,6 +9538,64 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DM_Z 3     //HQ Smooth
 	#define DSW 1
     #define FOV 1
+#elif (App == 0x9113C0D ) //Necromunda Hired Gun
+	#define DA_W 1
+	#define DA_X 0.020
+	#define DF_Y 0.005
+	#define DA_Y 42.5
+	#define DB_Z 0.015
+    //#define DB_X 1
+	//#define DB_Y 1
+	#define DE_X 6
+	#define DE_Y 0.750
+	#define DE_Z 0.375
+	//#define AFD 1
+	#define DG_W -0.350 //PoP
+    //#define OIL 1 //Set How many Levels We use for RE_Fix 0 | 1 | 2 | 3
+    #define OIF 0.400 //float2(0.265,0.001) //Fix enables if Value is > 0.0
+	#define DI_W 0.300 //float2(1.5,7.0)
+	//#define FTM 1
+    //#define DG_Z 0.065 //Min
+    //#define DI_Z 0.050 //Trim
+    #define DF_W float2(0.001,0.0025) //Edge & Scale
+	#define BMT 1
+	#define DF_Z 0.0825
+    #define SMS 1      //SM Toggle Separation
+	#define DL_X 0.600 //SM Tune
+	#define DL_W 0.025 //SM Perspective
+	#define DM_X 3     //HQ Tune
+	#define DM_Z 1     //HQ Smooth
+    #define DL_Y -0.50    //De-Artifact
+	#define WSM 3
+	#define DB_W 32
+	#define FPS  0
+	#define DK_X 2
+	#define DK_Y 0
+	#define DK_Z 1
+	#define DK_W 3
+	#define PEW 1
+#elif (App == 0x50027232 ) //Yakuza0
+	#define DA_X 0.100
+	#define DF_Y 0.025
+	#define DA_Y 11.0
+	#define DB_Y 3
+	#define DE_X 1
+	#define DE_Y 0.4125
+	#define DE_Z 0.400
+	#define DG_W -0.125 //PoP
+    //#define OIL 1 //Set How many Levels We use for RE_Fix 0 | 1 | 2 | 3
+    #define OIF 0.200 //float2(0.265,0.001) //Fix enables if Value is > 0.0
+	#define DI_W 1.10 //float2(1.5,7.0)
+	#define BMT 1
+	#define DF_Z 0.0625//0.100
+    #define SMS 3     //SM Toggle Separation
+	#define DL_X 0.750 //SM Tune
+	#define DL_W 0.025 //SM Perspective
+	#define DM_X 3     //HQ Tune
+	#define DM_Z 5     //HQ Smooth
+    #define DL_Y 0.625    //De-Artifact
+	#define PEW 1
+	#define NDW 1
 #else
 	#define NPW 1 //No Profile
 #endif
@@ -10287,7 +10297,7 @@ float4 Weapon_Profiles(float WP ,float4 Weapon_Adjust)
     if (WP == 31)
         Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 29 | Game
     if (WP == 32)
-        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 30 | Game
+        Weapon_Adjust = float4(0.6475,7.5,0.280,0.0);     //WP 30 | Necromunda Hired Gun
     if (WP == 33)
         Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 31 | Game
     if (WP == 34)
