@@ -532,18 +532,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DB_Y 2
 	#define WSM 3
 	#define DB_W 2
-#elif (App == 0x44BD41E1 ) //Bioshock Remaster
-	#define DA_Z 0.001
-	#define DB_Y 3
-	#define WSM 3
-	#define DB_W 4
-#elif (App == 0x7CF5A01 ) //Bioshock 2 Remaster
-	#define DA_Z 0.001
-	#define DB_Y 3
-	#define HMC 0.5034
-	#define WSM 3
-	#define DB_W 5
-	#define HMT 1
 #elif (App == 0x22BA110F ) //Turok: DH 2017
 	#define DA_X 0.002
 	#define DA_Y 250.0
@@ -9730,6 +9718,142 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	//#define DF_X float2(0.050,0.0)	
     #define PEW 1
     #define DSW 1
+#elif (App == 0x44BD41E1 ) //Bioshock Remaster
+	//#define DA_W 1
+    //#define DB_X 1
+	#define DA_X 0.025
+	#define DF_Y 0.000
+	#define DA_Y 25.0
+    #define DA_Z 0.0005
+	#define DB_Z 0.050
+	//#define DB_Y 1
+	#define DE_X 6
+	#define DE_Y 0.500
+	#define DE_Z 0.375
+	//#define ADP 1
+	#define DG_W -0.25 //PoP
+    //#define OIL 1 //Set How many Levels We use for RE_Fix 0 | 1 | 2 | 3
+    #define OIF 0.375 //float2(0.265,0.001) //Fix enables if Value is > 0.0
+	#define DI_W 1.0 //float2(1.5,7.0)
+	//#define FTM 1
+    #define DG_Z 0.004 //Min
+    //#define DE_W 0.75 //Auto
+    #define DI_Z 0.08 //Trim
+    //#define DF_W float2(0.0001,0.0025)  //Edge & Scale
+	#define BMT 1
+	#define DF_Z 0.0525
+    #define SMS 3            //SM Toggle Separation
+	#define DL_X 0.925      //SM Tune
+	//#define DL_W 0.5       //SM Perspective
+	#define DM_X 3           //HQ Tune
+	#define DM_Z 3           //HQ Smooth
+    //#define DM_Y 3           //HQ VRS
+    //#define DL_Y 0.500    //De-Artifact
+    //#define DL_Z 0.50       //Compat Power
+	//#define DJ_X 0.250       //Range Smoothing
+    /*
+    #define MDD 1 //Set Menu Detection & Direction     //Off 0 | 1 | 2 | 3 | 4      
+    #define DN_X float4( 0.400 , 0.275, 0.600 , 0.722)  //Pos A = XY White & B = ZW White 
+    #define DN_Y float4( 0.4822, 0.312,  0.0, 0.0)       //Pos C = XY Light & D = ZW Match
+    #define DN_Z float4( 0.0, 0.0,  0.0, 0.0)            //Pos E = XY Match & F = ZW Match
+	#define DN_W float4( 1.0, 0.0 , 0.0, 0.0 )          //Size = Menu [ABC] D E F
+    #define DJ_Y float4( 30.0, 30.0, 6.0, 5.0);            //Menu Detection Type for A, B, & C. The Last Value is a Shift amount for C. 
+    #define DJ_Z float3( 1000., 1000., 1000);                //Set Match Tresh 
+	*/
+	/*
+    #define MMD 1 //Set Multi Menu Detection             //Off / On
+    #define MMS 0 //Set Multi Menu Selection from 0-1 to 29-30 and Off 0 | 1 | 2
+    #define DO_X float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos A1 = XY Color & A2 = ZW Black 
+    #define DO_Y float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos A3 = XY Color & B1 = ZW Color
+    #define DO_Z float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos B2 = XY Black & B3 = ZW Color
+	#define DO_W float4( 1000.0, 1000.0, 1000.0, 1000.0)   //Tresh Hold for Color A & B and Color
+    #define DP_X float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos C1 = XY Color & C2 = ZW Black 
+    #define DP_Y float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos C3 = XY Color & D1 = ZW Color
+    #define DP_Z float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos D2 = XY Black & D3 = ZW Color
+	#define DP_W float4( 1000.0, 1000.0, 1000.0, 1000.0)   //Tresh Hold for Color C & D and Color
+	#define DQ_X float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos C1 = XY Color & C2 = ZW Black 
+    #define DQ_Y float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos C3 = XY Color & D1 = ZW Color
+    #define DQ_Z float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos D2 = XY Black & D3 = ZW Color
+	#define DQ_W float4( 1000.0, 1000.0, 1000.0, 1000.0) //Tresh Hold for Color A1 & A3 and Color
+	#define DR_X float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos G1 = XY Color & G2 = ZW Black 
+    #define DR_Y float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos G3 = XY Color & H1 = ZW Color
+    #define DR_Z float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos H2 = XY Black & H3 = ZW Color
+	#define DR_W float4( 1000.0, 1000.0, 1000.0, 1000.0) //Tresh Hold for Color G & H and Color 
+	*/
+	#define WSM 3
+	#define DB_W 4
+	//#define DF_X float2(0.050,0.0)	
+    #define PEW 1
+    #define DSW 1
+#elif (App == 0x7CF5A01 ) //Bioshock 2 Remaster
+	//#define DA_W 1
+    //#define DB_X 1
+	#define DA_X 0.025
+	#define DF_Y 0.000
+	#define DA_Y 25.0
+    #define DA_Z 0.0005
+	#define DB_Z 0.050
+	//#define DB_Y 1
+	#define DE_X 6
+	#define DE_Y 0.500
+	#define DE_Z 0.375
+	//#define ADP 1
+	#define DG_W -0.25 //PoP
+    //#define OIL 1 //Set How many Levels We use for RE_Fix 0 | 1 | 2 | 3
+    #define OIF 0.375 //float2(0.265,0.001) //Fix enables if Value is > 0.0
+	#define DI_W 1.0 //float2(1.5,7.0)
+	//#define FTM 1
+    #define DG_Z 0.004 //Min
+    //#define DE_W 0.75 //Auto
+    #define DI_Z 0.08 //Trim
+    //#define DF_W float2(0.0001,0.0025)  //Edge & Scale
+	#define BMT 1
+	#define DF_Z 0.0525
+    #define SMS 3            //SM Toggle Separation
+	#define DL_X 0.925      //SM Tune
+	//#define DL_W 0.5       //SM Perspective
+	#define DM_X 3           //HQ Tune
+	#define DM_Z 3           //HQ Smooth
+    //#define DM_Y 3           //HQ VRS
+    //#define DL_Y 0.500    //De-Artifact
+    //#define DL_Z 0.50       //Compat Power
+	//#define DJ_X 0.250       //Range Smoothing
+    /*
+    #define MDD 1 //Set Menu Detection & Direction     //Off 0 | 1 | 2 | 3 | 4      
+    #define DN_X float4( 0.400 , 0.275, 0.600 , 0.722)  //Pos A = XY White & B = ZW White 
+    #define DN_Y float4( 0.4822, 0.312,  0.0, 0.0)       //Pos C = XY Light & D = ZW Match
+    #define DN_Z float4( 0.0, 0.0,  0.0, 0.0)            //Pos E = XY Match & F = ZW Match
+	#define DN_W float4( 1.0, 0.0 , 0.0, 0.0 )          //Size = Menu [ABC] D E F
+    #define DJ_Y float4( 30.0, 30.0, 6.0, 5.0);            //Menu Detection Type for A, B, & C. The Last Value is a Shift amount for C. 
+    #define DJ_Z float3( 1000., 1000., 1000);                //Set Match Tresh 
+	*/
+	/*
+    #define MMD 1 //Set Multi Menu Detection             //Off / On
+    #define MMS 0 //Set Multi Menu Selection from 0-1 to 29-30 and Off 0 | 1 | 2
+    #define DO_X float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos A1 = XY Color & A2 = ZW Black 
+    #define DO_Y float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos A3 = XY Color & B1 = ZW Color
+    #define DO_Z float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos B2 = XY Black & B3 = ZW Color
+	#define DO_W float4( 1000.0, 1000.0, 1000.0, 1000.0)   //Tresh Hold for Color A & B and Color
+    #define DP_X float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos C1 = XY Color & C2 = ZW Black 
+    #define DP_Y float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos C3 = XY Color & D1 = ZW Color
+    #define DP_Z float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos D2 = XY Black & D3 = ZW Color
+	#define DP_W float4( 1000.0, 1000.0, 1000.0, 1000.0)   //Tresh Hold for Color C & D and Color
+	#define DQ_X float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos C1 = XY Color & C2 = ZW Black 
+    #define DQ_Y float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos C3 = XY Color & D1 = ZW Color
+    #define DQ_Z float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos D2 = XY Black & D3 = ZW Color
+	#define DQ_W float4( 1000.0, 1000.0, 1000.0, 1000.0) //Tresh Hold for Color A1 & A3 and Color
+	#define DR_X float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos G1 = XY Color & G2 = ZW Black 
+    #define DR_Y float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos G3 = XY Color & H1 = ZW Color
+    #define DR_Z float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos H2 = XY Black & H3 = ZW Color
+	#define DR_W float4( 1000.0, 1000.0, 1000.0, 1000.0) //Tresh Hold for Color G & H and Color 
+	*/
+	#define WSM 3
+	#define DB_W 5
+	//#define DF_X float2(0.050,0.0)	
+    #define PEW 1
+    #define DSW 1
+	#define HMC 0.5034
+	#define HMT 1
 #else
 	#define NPW 1 //No Profile
 #endif
@@ -10375,9 +10499,9 @@ float4 Weapon_Profiles(float WP ,float4 Weapon_Adjust)
     if (WP == 3)
         Weapon_Adjust = float4(13.870,50.0,0.0,0.0);      //WP 1 | Graven
     if (WP == 4)
-        Weapon_Adjust = float4(0.425,15.0,99.0,0.0);      //WP 2 | Bioshock Remastred
+        Weapon_Adjust = float4(0.425,20.0,99.0,0.0);      //WP 2 | Bioshock Remastred
     if (WP == 5)
-        Weapon_Adjust = float4(0.425,21.25,99.5,0.0);     //WP 3 | Bioshock 2 Remastred
+        Weapon_Adjust = float4(0.425,20.0,99.5,0.0);      //WP 3 | Bioshock 2 Remastred
     if (WP == 6)
         Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 4 | Game
     if (WP == 7)
