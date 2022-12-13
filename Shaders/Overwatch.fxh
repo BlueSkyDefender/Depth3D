@@ -9670,15 +9670,15 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DF_Y 0.000
 	#define DA_Y 27.5
     //#define DA_Z 0.001
-	#define DB_Z 0.100
+	#define DB_Z 0.050
 	//#define DB_Y 1
 	#define DE_X 1
-	#define DE_Y 0.750//0.500
-	#define DE_Z 0.250
+	#define DE_Y 0.800
+	#define DE_Z 0.375
 	//#define ADP 1
 	#define DG_W -0.25 //PoP
     //#define OIL 1 //Set How many Levels We use for RE_Fix 0 | 1 | 2 | 3
-    #define OIF 0.375 //float2(0.265,0.001) //Fix enables if Value is > 0.0
+    #define OIF 0.400 //float2(0.265,0.001) //Fix enables if Value is > 0.0
 	#define DI_W 0.125 //float2(1.5,7.0)
 	//#define FTM 1
     #define DG_Z 0.005//0.050//0.075 //Min
