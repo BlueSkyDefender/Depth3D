@@ -1,7 +1,7 @@
 ////----------------------------------------//
 ///SuperDepth3D Overwatch Automation Header///
 //----------------------------------------////
-// Version 3.0.1
+// Version 3.0.2
 //---------------------------------------OVERWATCH---------------------------------------//
 // If you are reading this stop. Go away and never look back. From this point on if you  //
 // still think it's is worth looking at this..... Then no one can save you or your soul. //
@@ -2024,7 +2024,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define HQT 1
 	#define PEW 1
 	#define DAA 1
-#elif (App == 0x3604DCE6 ) //Remnant: From the Ashes
+#elif (App == 0x3604DCE6 || App == 0xE58986E ) //Remnant: From the Ashes //Steam //Windows Store
 	#define DA_W 1
 	#define DA_X 0.060
 	#define DF_Y 0.05
