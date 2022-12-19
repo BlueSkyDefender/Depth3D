@@ -2604,15 +2604,19 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	//#define DD_W -0.425
 #elif (App == 0x2EFA1BAF ) //Betrayer
 	//#define DA_W 1
-	#define DA_Y 15.0
-	#define DA_X 0.05
+	#define DA_Y 15
+	#define DA_X 0.0475
+	#define DA_Z 0.001
 	//#define DF_Y 0.01
 	#define DB_Y 4
 	//#define DB_Z 0.05625
 	//#define DA_Z 0.00025
-	#define DE_X 4
-	//#define DE_Y 0.450
+	#define DE_X 7
+	#define DE_Y 0.500
 	#define DE_Z 0.375
+	#define DG_W -0.125//PoP
+    #define OIF 0.25 //Fix enables if Value is > 0.0
+	#define DI_W 1.25	
 	#define PEW 1
 	#define FOV 1
 	#define WSM 3
