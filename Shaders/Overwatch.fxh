@@ -2170,31 +2170,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define HMT 1
 	#define HMC 0.506
 	#define DAA 1
-#elif (App == 0xD9691F81 ) //Destroy All Humans!
-	#define DA_W 1
-	#define DA_X 0.070 //0.050
-	#define DF_Y 0.015
-	#define DA_Y 32.5  //60.0
-    #define DA_Z -0.075
-	#define DB_Y 4
-	#define DE_X 1
-	#define DE_Y 0.375
-	#define DE_Z 0.375
-	#define DG_W -0.1125  //Pop out allowed
-    #define BMT 1    
-    #define DF_Z 0.125
-    #define SMS 3      //SM Toggle Separation
-	#define DL_X 0.700 //SM Tune // 0.550
-	#define DL_W 0.025 //SM Perspective
-	#define DM_X 3     //HQ Tune
-	#define DM_Z 8     //HQ Smooth
-    #define DL_Y 0.375 //De-Artifact
-	#define OIF 0.0375 //Fix enables if Value is > 0.0
-	#define DI_W 2.5   //Adjustment for REF
-	#define HQT 1
-	#define NFM 1
-	#define PEW 1
-	#define RHW 1
 #elif (App == 0x9C5C8E4D ) //INSIDE
 	#define DA_X 0.050
 	#define DB_Y 3
@@ -9913,7 +9888,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DM_X 3     //HQ Tune
 	#define DM_Z 2     //HQ Smooth
     //#define DM_Y 3           //HQ VRS
-    #define DL_Y -0.650    //De-Artifact
+    #define DL_Y 0.650    //De-Artifact
     #define DL_Z 0.1       //Compat Power
 	//#define DJ_X 0.250       //Range Smoothing
     /*
@@ -10184,6 +10159,32 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DH_W 0.0
 	#define PEW 1
 	#define DAA 1
+#elif (App == 0xD9691F81 ) //Destroy All Humans! || Destroy All Humans! 2 - Reprobed
+	#define DA_W 1
+	#define DA_X 0.075
+	#define DF_Y 0.015
+	#define DA_Y 30
+    //#define DA_Z -0.075
+	#define DB_Y 4
+	#define DE_X 1
+	#define DE_Y 0.375
+	#define DE_Z 0.375
+	#define DG_W -0.1125  //Pop out allowed
+    #define BMT 1    
+    #define DF_Z 0.100 // 0.125 
+    #define SMS 3      //SM Toggle Separation
+	#define DL_X 0.650 //SM Tune // 0.550
+	#define DL_W 0.025 //SM Perspective
+	#define DM_X 4     //HQ Tune
+	#define DM_Z 4     //HQ Smooth
+    //#define DL_Y 0.375 //De-Artifact Performance hit too large here.
+    #define DL_Z 0.125       //Compat Power
+	#define OIF 0.0375 //Fix enables if Value is > 0.0
+	#define DI_W 2.5   //Adjustment for REF
+	#define HQT 1
+	#define NFM 1
+	#define PEW 1
+	#define RHW 1
 #else
 	#define NPW 1 //No Profile
 #endif
