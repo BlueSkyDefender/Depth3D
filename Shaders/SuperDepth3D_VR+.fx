@@ -2,7 +2,7 @@
 	///**SuperDepth3D_VR+**///
 	//--------------------////
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	//* Depth Map Based 3D post-process shader v3.5.2
+	//* Depth Map Based 3D post-process shader v3.5.3
 	//* For Reshade 4.4+ I think...
 	//* ---------------------------------
 	//*
@@ -2067,7 +2067,7 @@ namespace SuperDepth3DVR
 		float Mix_Past_Current_Corner_Mask = tex2Dlod(samplerMinMaxRGBLastFrame,float4(texcoord,0,0)).w + saturate(tex2Dlod(SamplerzBuffer_BlurVR, float4( texcoord * float2( 0.5 , 1) + float2(0.5,0), 0, 5 ) ).x * 100);	
 
 			  if(De_Artifacting >= 0)
-			  	Mix_Past_Current_Corner_Mask = 0;
+			  	Mix_Past_Current_Corner_Mask = 1;
 			
 		float Separation = lerp(1.0,5.0,ZPD_Separation.y); 	
 		return float4(Separation * DepthBuffer_LP.xy, DepthBuffer_LP.z, Mix_Past_Current_Corner_Mask);
@@ -2122,15 +2122,14 @@ namespace SuperDepth3DVR
 			  
 		[loop] //Steep parallax mapping
 		while ( CurrentDepthMapValue > CurrentLayerDepth )
-		{   // Shift coordinates horizontally in linear fasion
+		{   
+			// Shift coordinates horizontally in linear fasion
 		    ParallaxCoord.x -= deltaCoordinates; 
 		    // Get depth value at current coordinates
-		    if( De_Artifacting > 0 )
-		    	CurrentDepthMapValue = min(GetDB( ParallaxCoord ).x, GetDB( ParallaxCoord - float2(MS * lerp(0,0.125,saturate(De_Artifacting)),0)).x);
-			else if ( De_Artifacting < 0 && GetDB(ParallaxCoord).w )
-				CurrentDepthMapValue = min(GetDB( ParallaxCoord ).x, GetDB( ParallaxCoord - float2(MS * lerp(0,0.125,saturate(abs(De_Artifacting))),0)).x);
-		    else
-		    	CurrentDepthMapValue = GetDB( ParallaxCoord ).x;
+		    if ( De_Artifacting != 0 && GetDB(ParallaxCoord).w )
+				CurrentDepthMapValue = lerp(GetDB(ParallaxCoord).x, GetDB(ParallaxCoord - float2(MS * 0.125, 0)).x, saturate(abs(De_Artifacting)));
+			else
+				CurrentDepthMapValue = GetDB( ParallaxCoord ).x;
 		    // Get depth of next layer
 		    CurrentLayerDepth += LayerDepth;
 			continue;

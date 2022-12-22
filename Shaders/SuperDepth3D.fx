@@ -2,7 +2,7 @@
 	///**SuperDepth3D**///
 	//----------------////
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	//* Depth Map Based 3D post-process shader v3.5.3
+	//* Depth Map Based 3D post-process shader v3.5.4
 	//* For Reshade 3.0+
 	//* ---------------------------------
 	//*
@@ -2221,12 +2221,10 @@ namespace SuperDepth3D
 			// Shift coordinates horizontally in linear fasion
 		    ParallaxCoord.x -= deltaCoordinates; 
 		    // Get depth value at current coordinates
-		    if( De_Artifacting > 0 )
-		    	CurrentDepthMapValue = min(GetDB( ParallaxCoord ).x, GetDB( ParallaxCoord - float2(MS * lerp(0,0.125,saturate(De_Artifacting)),0)).x);
-			else if ( De_Artifacting < 0 && GetDB(ParallaxCoord).w )
-				CurrentDepthMapValue = min(GetDB( ParallaxCoord ).x, GetDB( ParallaxCoord - float2(MS * lerp(0,0.125,saturate(abs(De_Artifacting))),0)).x);
-		    else
-		    	CurrentDepthMapValue = GetDB( ParallaxCoord ).x;
+		    if ( De_Artifacting != 0 && GetDB(ParallaxCoord).w )
+				CurrentDepthMapValue = lerp(GetDB(ParallaxCoord).x, GetDB(ParallaxCoord - float2(MS * 0.125, 0)).x, saturate(abs(De_Artifacting)));
+			else
+				CurrentDepthMapValue = GetDB( ParallaxCoord ).x;
 		    // Get depth of next layer
 		    CurrentLayerDepth += LayerDepth;
 			continue;
