@@ -455,30 +455,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DB_W 40
 	#define HMC 0.534
 	#define HMT 1
-#elif (App == 0x68EF1B4E || App == 0xC103D998 || App == 0xFAB47970 || App == 0x539E792B ) //Serious Sam Fusion | Serious Sam 4: Planet Badass | Serious Sam Siberian Mayhem/Unrestricted
-	#define DA_W 1
-	#define DA_X 0.0825 //0.0875
-	#define DF_Y 0.0125
-	#define DA_Y 10.0
-	#define DA_Z 0.1
-	#define DB_Y 1
-	#define DB_W 42
-    #define DF_X 0.25
-    #define DJ_W 0.6
-	#define DE_X 5
-	#define DE_Y 0.5
-	#define DE_Z 0.375
-	#define DB_Z 0.150
-	#define BMT 1    
-	#define DF_Z 0.190 //0.170
-	#define DG_Z 0.075 //Min
-    #define DI_Z 0.125//Trim
-	#define NDW 1
-	#define RHW 1
-	#define PEW 1
-	#define LBC 2  //Letter Box Correction Offsets With X & Y
-	#define DH_Z 0.256
-	#define DH_W 0.0
 #elif (App == 0x5FCFB1E5 ) //Project Warlock
 	#define DA_W 1
 	#define DA_X 0.0475
@@ -10185,6 +10161,35 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define NFM 1
 	#define PEW 1
 	#define RHW 1
+#elif (App == 0x68EF1B4E || App == 0xC103D998 || App == 0xFAB47970 || App == 0x539E792B ) //Serious Sam Fusion | Serious Sam 4: Planet Badass | Serious Sam Siberian Mayhem/Unrestricted
+	#define DA_W 1
+	#define DA_X 0.0825 //0.0875
+	//#define DF_Y 0.0125
+	#define DA_Y 10.0
+	#define DA_Z 0.1
+	#define DB_Y 1
+	#define DB_W 42
+    #define DF_X 0.25
+    #define DJ_W 0.6
+	#define DE_X 5
+	#define DE_Y 0.5
+	#define DE_Z 0.375
+	#define DB_Z 0.150
+	#define BMT 1    
+	#define DF_Z 0.190 //0.170
+	#define DG_Z 0.075 //Min
+    #define DI_Z 0.125//Trim
+    //#define SMS 3      //SM Toggle Separation
+	#define DL_X 0.750 //SM Tune // 0.550
+	//#define DL_W 0.025 //SM Perspective
+	//#define DM_X 4     //HQ Tune
+	//#define DM_Z 4     //HQ Smooth
+	#define NDW 1
+	#define RHW 1
+	#define PEW 1
+	#define LBC 2  //Letter Box Correction Offsets With X & Y
+	#define DH_Z 0.256
+	#define DH_W 0.0
 #else
 	#define NPW 1 //No Profile
 #endif
