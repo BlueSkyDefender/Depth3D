@@ -2,7 +2,7 @@
 	///**SuperDepth3D_VR+**///
 	//--------------------////
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	//* Depth Map Based 3D post-process shader v3.5.4
+	//* Depth Map Based 3D post-process shader v3.5.5
 	//* For Reshade 4.4+ I think...
 	//* ---------------------------------
 	//*
@@ -416,9 +416,9 @@ namespace SuperDepth3DVR
 					 "Varable Rate Shading focuses the quality of the samples in lighter areas of the screen.\n"
 					 "Please enable the 'Performance Mode Checkbox,' in ReShade's GUI.\n"
 					 "It's located in the lower bottom right of the ReShade's Main UI.\n"
-					 "Default is Performant.";
+					 "Default is Performant + VRS.";
 		ui_category = "Occlusion Masking";
-	> = 0;
+	> = 2;
 	
 	uniform int Switch_VRS <
 		ui_type = "combo";
@@ -435,12 +435,12 @@ namespace SuperDepth3DVR
 		#else
 		ui_type = "slider";
 		#endif
-		ui_min = 0.0; ui_max = 1.0;
+		ui_min = -1.0; ui_max = 1.0;
 		ui_label = " Compatibility Power";
 		ui_tooltip = "Not all games need a high offset for infilling.\n"
 					 "This option lets you increase this offset in both directions to limit artifacts.\n"
 					 "With this on it should work better in games with TAA, FSR,and or DLSS sometimes.\n"
-					 "Default is 0.25.";
+					 "Default is Zero.";
 		ui_category = "Compatibility Options";
 	> = DL_Z;
 
@@ -1697,29 +1697,33 @@ namespace SuperDepth3DVR
 		if(ZPD_Boundary > 0)
 		{   float4 Switch_Array = ZPD_Boundary == 6 ? float4(0.825,0.850,0.875,0.900) : float4(1.0,0.875,0.75,0.625);
 			//Normal A & B for both	
-			float CDArray_A[7] = { 0.125, 0.25, 0.375, 0.5, 0.625, 0.75, 0.875}, CDArray_B[7] = { 0.25, 0.375, 0.4375, 0.5, 0.5625, 0.625, 0.75}, CDArray_C[4] = { 0.875, 0.75, 0.5, 0.25};
+			const float CDArray_A0[7] = { 0.125, 0.25, 0.375, 0.5, 0.625, 0.75, 0.875}, CDArray_B0[7] = { 0.25, 0.375, 0.4375, 0.5, 0.5625, 0.625, 0.75};
+			const float CDArray_A1[6] = { 0.125, 0.25, 0.375, 0.625, 0.75, 0.875}, CDArray_B1[6] = { 0.25, 0.375, 0.4375, 0.5625, 0.625, 0.75};
+			const float CDArray_C0[4] = { 0.875, 0.75, 0.5, 0.25};
+
 			float CDArrayZPD_A[7] = { ZPD_Separation.x * Switch_Array.w, ZPD_Separation.x * Switch_Array.z, ZPD_Separation.x * Switch_Array.y, ZPD_Separation.x * Switch_Array.x, ZPD_Separation.x * Switch_Array.y, ZPD_Separation.x * Switch_Array.z, ZPD_Separation.x * Switch_Array.w },
 				  CDArrayZPD_B[7] = { ZPD_Separation.x * 0.3, ZPD_Separation.x * 0.5, ZPD_Separation.x * 0.75, ZPD_Separation.x, ZPD_Separation.x * 0.75, ZPD_Separation.x * 0.5, ZPD_Separation.x * 0.3},
-	 			 CDArrayZPD_C[12] = { ZPD_Separation.x * 0.5, ZPD_Separation.x * 0.625, ZPD_Separation.x * 0.75, ZPD_Separation.x * 0.875, ZPD_Separation.x * 0.9375, 
+	 			  CDArrayZPD_C[10] = { ZPD_Separation.x * 0.5625, ZPD_Separation.x * 0.75, ZPD_Separation.x * 0.875, ZPD_Separation.x * 0.9375, 
 									   ZPD_Separation.x, ZPD_Separation.x, 
-									   ZPD_Separation.x * 0.9375, ZPD_Separation.x * 0.875, ZPD_Separation.x * 0.75, ZPD_Separation.x * 0.625, ZPD_Separation.x * 0.5 };	
-			//Screen Space Detector 7x7 Grid from between 0 to 1 and ZPD Detection becomes stronger as it gets closer to the Center.
-			float Double_Per_Frame = AFD ? Alternate ? 1 : 2 : 1;
-			float2 GridXY; int2 iXY = ( ZPD_Boundary == 3 ? int2( 12, 4) : int2( 7, 7) ) * Double_Per_Frame;
-			[loop]
-			for( int iX = 0 ; iX < iXY.x; iX++ )
+									   ZPD_Separation.x * 0.9375, ZPD_Separation.x * 0.875, ZPD_Separation.x * 0.75, ZPD_Separation.x * 0.5625 };	
+			//Screen Space Detector 7x6 Grid from between 0 to 1 and ZPD Detection becomes stronger as it gets closer to the Center.
+			float Shift_Per_Frame = AFD ? Alternate ? 0 : 0.0625 : 0;
+			float2 GridXY; int2 iXY = ( ZPD_Boundary == 3 ? int2( 10, 4) : int2( 7, 6) );//was 12/4 and 7/7 This reduction saves 0.1 ms and should show no diff to the user.
+			[loop]                                                                       //I was thinking the lowest I can go would be 7/4 along with 5/6
+			for( int iX = 0 ; iX < iXY.x; iX++ )                                         //7 * 7 = 49 | 12 * 4 = 48 | 7 * 6 = 42 | 10 * 4 = 40 
 			{   [loop]
 				for( int iY = 0 ; iY < iXY.y; iY++ )
 				{
 					if(ZPD_Boundary == 1 || ZPD_Boundary == 6 || ZPD_Boundary == 7)
-						GridXY = float2( CDArray_A[iX], CDArray_A[iY]);
+						GridXY = float2( CDArray_A0[iX], CDArray_A1[iY]);
 					else if(ZPD_Boundary == 2 || ZPD_Boundary == 5)
-						GridXY = float2( CDArray_B[iX], CDArray_A[iY]);
+						GridXY = float2( CDArray_B0[iX], CDArray_A1[iY]);
 					else if(ZPD_Boundary == 3)
-						GridXY = float2( (iX + 1) * rcp(iXY.x + 2),CDArray_C[min(3,iY)]);
+						GridXY = float2( (iX + 1) * rcp(iXY.x + 2),CDArray_C0[min(3,iY)]);
 					else if(ZPD_Boundary == 4)
-						GridXY = float2( CDArray_A[iX], CDArray_B[iY]);
-					
+						GridXY = float2( CDArray_A0[iX], CDArray_B1[iY]);
+					if( AFD )
+						GridXY += Shift_Per_Frame;
 					float ZPD_I = ZPD_Boundary == 3 ?  CDArrayZPD_C[iX] : (ZPD_Boundary == 2 || ZPD_Boundary == 5  ? CDArrayZPD_B[iX] : CDArrayZPD_A[iX]);
 	
 					if(ZPD_Boundary >= 4)
@@ -2113,7 +2117,7 @@ namespace SuperDepth3DVR
 		//ParallaxSteps Calculations
 		float MinNum = 25, D = abs(Diverge), Cal_Steps = D * Perf, Steps = clamp( Cal_Steps, Perf_LvL ? MinNum : lerp( MinNum, min( MinNum, D), GetDepth >= 0.999 ), Performance_Level > 1 ? lerp(100,50,saturate(Vin_Pattern(Coordinates, float2(15.0,2.5)))) : 100 );//Foveated Rendering Point of attack 16-256 limit samples.
 		// Offset per step progress & Limit
-		float LayerDepth = rcp(Steps), TP = lerp(0.025, 0.05,Compatibility_Power);
+		float LayerDepth = rcp(Steps), TP = Compatibility_Power >= 0 ? lerp(0.025, 0.05,Compatibility_Power) : lerp(0.0225, 0.05,abs(Compatibility_Power) * saturate(Vin_Pattern(Coordinates, float2(15.0,3.0))));
 			  D = Diverge < 0 ? -75 : 75;
 	
 		//Offsets listed here Max Seperation is 3% - 8% of screen space with Depth Offsets & Netto layer offset change based on MS.
@@ -2132,10 +2136,9 @@ namespace SuperDepth3DVR
 				CurrentDepthMapValue = GetDB( ParallaxCoord ).x;
 		    // Get depth of next layer
 		    CurrentLayerDepth += LayerDepth;
-			continue;
 		}
 		
-		if( View_Mode <= 1)	
+		if( View_Mode <= 1 )	
 	   	ParallaxCoord.x += DB_Offset * VM_Switch;
 	    
 		float2 PrevParallaxCoord = float2( ParallaxCoord.x + deltaCoordinates, ParallaxCoord.y), Depth_Adjusted = 1-saturate(float2(GetDepth * 5.0, GetDepth));
