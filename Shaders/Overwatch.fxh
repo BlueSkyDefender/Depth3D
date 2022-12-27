@@ -1,7 +1,7 @@
 ////----------------------------------------//
 ///SuperDepth3D Overwatch Automation Header///
 //----------------------------------------////
-// Version 3.0.3
+// Version 3.0.4
 //---------------------------------------OVERWATCH---------------------------------------//
 // If you are reading this stop. Go away and never look back. From this point on if you  //
 // still think it's is worth looking at this..... Then no one can save you or your soul. //
@@ -9670,13 +9670,13 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define DSW 1
 	#define HMC 0.5034
 	#define HMT 1
-#elif (App == 0xF812A363 ) //High on Life
+#elif (App == 0xF812A363 || App == 0x973D94D) //High on Life //Windows Store // Steam
 	#define DA_W 1
     //#define DB_X 1
 	#define DA_X 0.0375
 	#define DF_Y 0.025
-	#define DA_Y 50.0//48.75
-    #define DA_Z -0.05
+	#define DA_Y 52.5
+    //#define DA_Z -0.05
 	#define DB_Z 0.0375
 	//#define DB_Y 1
 	#define DE_X 0
