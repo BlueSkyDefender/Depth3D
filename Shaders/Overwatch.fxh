@@ -9673,9 +9673,9 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 #elif (App == 0xF812A363 || App == 0x973D94D) //High on Life //Windows Store // Steam
 	#define DA_W 1
     //#define DB_X 1
-	#define DA_X 0.0375
-	#define DF_Y 0.025
-	#define DA_Y 52.5
+	//#define DA_X 0.030 //0.034//0.030
+	#define DF_Y 0.0075
+	#define DA_Y 65.0//65.0 //62.5//75.0
     //#define DA_Z -0.05
 	#define DB_Z 0.0375
 	//#define DB_Y 1
@@ -9688,12 +9688,12 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define OIF 0.375 //float2(0.265,0.001) //Fix enables if Value is > 0.0
 	//#define DI_W 1.0 //float2(1.5,7.0)
 	//#define FTM 1
-    #define DG_Z 0.225 //Min
+    #define DG_Z 0.0625//0.075//0.250 //0.245 //0.255 //Min
     //#define DE_W 0.75 //Auto
-    #define DI_Z 0.125 //Trim
-    #define DF_W float2(0.0001,0.019)  //Edge & Scale
+    #define DI_Z 0.0575//0.140//0.1325 //Trim
+    #define DF_W float2(0.0001,0.00525)  //Edge & Scale
 	#define BMT 1
-	#define DF_Z 0.01125
+	#define DF_Z 0.040
     #define SMS 3            //SM Toggle Separation
 	#define DL_X 0.925      //SM Tune
 	//#define DL_W 0.5       //SM Perspective
@@ -9701,7 +9701,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DM_Z 3           //HQ Smooth
     //#define DM_Y 3           //HQ VRS
     #define DL_Y 0.5    //De-Artifact
-    //#define DL_Z 0.05       //Compat Power
+    #define DL_Z 0.5       //Compat Power
 	//#define DJ_X 0.250       //Range Smoothing
     /*
     #define MDD 1 //Set Menu Detection & Direction     //Off 0 | 1 | 2 | 3 | 4      
@@ -9736,9 +9736,9 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	//#define DB_W 5
 	//#define DF_X float2(0.050,0.0)	
     #define PEW 1
-    #define DSW 1
-	//#define HMC 0.5034
-	//#define HMT 1
+    //#define DSW 1
+	#define HMC 1.0
+	#define HMT 1
 	#define FPS  0
 	#define DK_X 2
 	#define DK_Y 0
