@@ -677,10 +677,27 @@ The depth buffer should stop flickering in ReShade 4.8.3
 
 Hexen 2 FTEQW 64 should work already.
 
-{HomeFront the Revolution} 
-- Thank you zig11727
-Path to Install E:\Steam\SteamApps\common\Homefront_The_Revolution\Bin64
-Works Don't know the settings.
+{High on Life} [Reshade 5.5.1]
+To Disable some PostEffects go to this location on your system.
+
+Head over to C:\Users\UserName\AppData\Local\Oregon\Saved\Config\WinGDK
+Open the “Engine.ini” file
+Add:
+[SystemSettings]
+r.DepthOfFieldQuality=0
+r.MotionBlur.Max=0
+r.MotionBlurQuality=0
+r.DefaultFeature.MotionBlur=0
+r.SceneColorFringeQuality=0
+r.Tonemapper.Quality=3
+r.MaxAnisotropy=16
+
+For Bloom Add:
+r.BloomQuality=0
+
+Save the file Set it to read only. I recommend you set your setting in games first befor all of this.
+
+You may want to change the FoV.
 
 {Hitman: Absolution} [Reshade 3.0.8]
 Change the Reflections to Medium. Any higher then this will mess with the Depth Map. Seems like a in game bug.
