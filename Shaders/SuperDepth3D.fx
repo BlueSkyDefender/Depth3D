@@ -2,7 +2,7 @@
 	///**SuperDepth3D**///
 	//----------------////
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	//* Depth Map Based 3D post-process shader v3.5.7
+	//* Depth Map Based 3D post-process shader v3.5.8
 	//* For Reshade 3.0+
 	//* ---------------------------------
 	//*
@@ -77,7 +77,7 @@ namespace SuperDepth3D
 		#define OW_WP "WP Off\0Custom WP\0"
 		static const int WSM = 0;
 		//Triggers
-		static const int OIL = 0, MMS = 0, NVK = 0, NDG = 0, FTM = 0, SPO = 0, MMD = 0, SMP = 0, LBR = 0, HQT = 0, AFD = 0, MDD = 0, FPS = 1, SMS = 1, OIF = 0, NCW = 0, RHW = 0, NPW = 0, IDF = 0, SPF = 0, BDF = 0, HMT = 0, HMC = 0, DFW = 0, NFM = 0, DSW = 0, BMT = 0, LBC = 0, LBS = 0, LBM = 0, DAA = 0, NDW = 0, PEW = 0, WPW = 0, FOV = 0, EDW = 0, SDT = 0;
+		static const int ARW = 0, OIL = 0, MMS = 0, NVK = 0, NDG = 0, FTM = 0, SPO = 0, MMD = 0, SMP = 0, LBR = 0, HQT = 0, AFD = 0, MDD = 0, FPS = 1, SMS = 1, OIF = 0, NCW = 0, RHW = 0, NPW = 0, IDF = 0, SPF = 0, BDF = 0, HMT = 0, HMC = 0, DFW = 0, NFM = 0, DSW = 0, BMT = 0, LBC = 0, LBS = 0, LBM = 0, DAA = 0, NDW = 0, PEW = 0, WPW = 0, FOV = 0, EDW = 0, SDT = 0;
 		//Overwatch.fxh State
 		#define OSW 1
 	#endif
@@ -2925,7 +2925,7 @@ namespace SuperDepth3D
 	float3 InfoOut(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Target
 	{   float3 Color;
 		float2 TC = float2(texcoord.x,1-texcoord.y);
-		float BT = smoothstep(0,1,sin(timer*(3.75/1000))), Size = 1.1, Depth3D, Read_Help, Emu, SetFoV, PostEffects, NoPro, NotCom, ModFix, Needs, Network, OW_State, SetAA, SetWP, DGDX, DXVK;
+		float BT = smoothstep(0,1,sin(timer*(3.75/1000))), Size = 1.1, Depth3D, Read_Help, Emu, SetFoV, PostEffects, NoPro, NotCom, ModFix, Needs, AspectRaito, Network, OW_State, SetAA, SetWP, DGDX, DXVK;
 		//Text Information
 		float2 charSize = float2(.00875, .0125) * Size;// Set a general character size...
 		// Starting position.
@@ -2983,20 +2983,38 @@ namespace SuperDepth3D
 			Needs += drawChar( CH_A, charPos.xy, charSize, TC, Shift_Adjust.x ); 
 			Needs += drawChar( CH_M, charPos.xy, charSize, TC, Shift_Adjust.x );
 			Needs += drawChar( CH_E, charPos.xy, charSize, TC, Shift_Adjust.x );
-		#endif
-		/* Empthy		
-		#if DSO
+		#endif		
+		#if ARW 
 			charPos = float2( 0.009, 0.955);
-			//Network += drawChar( CH_N, charPos.xy, charSize, TC, 0 );
-			//Network += drawChar( CH_E, charPos.xy, charSize, TC, Shift_Adjust.x );
-			//Network += drawChar( CH_T, charPos.xy, charSize, TC, Shift_Adjust.x );
-			//Network += drawChar( CH_BLNK, charPos.xy, charSize, TC, Shift_Adjust.x );
-			//Network += drawChar( CH_P, charPos.xy, charSize, TC, Shift_Adjust.x );
-			//Network += drawChar( CH_L, charPos.xy, charSize, TC, Shift_Adjust.x );
-			//Network += drawChar( CH_A, charPos.xy, charSize, TC, Shift_Adjust.x );
-			//Network += drawChar( CH_Y, charPos.xy, charSize, TC, Shift_Adjust.x );
+			AspectRaito += drawChar( CH_C, charPos.xy, charSize, TC, 0 );
+			AspectRaito += drawChar( CH_H, charPos.xy, charSize, TC, Shift_Adjust.x );
+			AspectRaito += drawChar( CH_E, charPos.xy, charSize, TC, Shift_Adjust.x ); 
+			AspectRaito += drawChar( CH_C, charPos.xy, charSize, TC, Shift_Adjust.x );
+			AspectRaito += drawChar( CH_K, charPos.xy, charSize, TC, Shift_Adjust.x );
+			AspectRaito += drawChar( CH_BLNK, charPos.xy, charSize, TC, Shift_Adjust.x ); 
+			AspectRaito += drawChar( CH_A, charPos.xy, charSize, TC, Shift_Adjust.x );
+			AspectRaito += drawChar( CH_S, charPos.xy, charSize, TC, Shift_Adjust.x );
+			AspectRaito += drawChar( CH_P, charPos.xy, charSize, TC, Shift_Adjust.x ); 
+			AspectRaito += drawChar( CH_E, charPos.xy, charSize, TC, Shift_Adjust.x );
+			AspectRaito += drawChar( CH_C, charPos.xy, charSize, TC, Shift_Adjust.x );
+			AspectRaito += drawChar( CH_T, charPos.xy, charSize, TC, Shift_Adjust.x );
+			AspectRaito += drawChar( CH_BLNK, charPos.xy, charSize, TC, Shift_Adjust.x );
+			AspectRaito += drawChar( CH_R, charPos.xy, charSize, TC, Shift_Adjust.x );
+			AspectRaito += drawChar( CH_A, charPos.xy, charSize, TC, Shift_Adjust.x );
+			AspectRaito += drawChar( CH_I, charPos.xy, charSize, TC, Shift_Adjust.x ); 
+			AspectRaito += drawChar( CH_T, charPos.xy, charSize, TC, Shift_Adjust.x );
+			AspectRaito += drawChar( CH_O, charPos.xy, charSize, TC, Shift_Adjust.x );
+			AspectRaito += drawChar( CH_BLNK, charPos.xy, charSize, TC, Shift_Adjust.x );
+			AspectRaito += drawChar( CH_I, charPos.xy, charSize, TC, Shift_Adjust.x );
+			AspectRaito += drawChar( CH_N, charPos.xy, charSize, TC, Shift_Adjust.x );
+			AspectRaito += drawChar( CH_BLNK, charPos.xy, charSize, TC, Shift_Adjust.x );			
+			AspectRaito += drawChar( CH_A, charPos.xy, charSize, TC, Shift_Adjust.x ); 
+			AspectRaito += drawChar( CH_D, charPos.xy, charSize, TC, Shift_Adjust.x ); 
+			AspectRaito += drawChar( CH_D, charPos.xy, charSize, TC, Shift_Adjust.x ); 
+			AspectRaito += drawChar( CH_UNDS, charPos.xy, charSize, TC, Shift_Adjust.x ); 
+			AspectRaito += drawChar( CH_O, charPos.xy, charSize, TC, Shift_Adjust.x ); 
+			AspectRaito += drawChar( CH_N, charPos.xy, charSize, TC, Shift_Adjust.x );
 		#endif
-		*/
 		//Emulator Detected
 		#if (EDW)
 			charPos = float2( 0.009, 0.9375);
@@ -3045,7 +3063,7 @@ namespace SuperDepth3D
 			PostEffects += drawChar( CH_I, charPos.xy, charSize, TC, Shift_Adjust.x );
 			PostEffects += drawChar( CH_N, charPos.xy, charSize, TC, Shift_Adjust.x );
 		#endif
-		//Check TAA/MSAA/SS		
+		//Check TAA/MSAA/SS/DLSS/FSR/XeSS		
 		#if DAA
 			charPos = float2( 0.009, 0.9025);
 			SetAA += drawChar( CH_C, charPos.xy, charSize, TC, 0 ); 
@@ -3062,7 +3080,18 @@ namespace SuperDepth3D
 			SetAA += drawChar( CH_S, charPos.xy, charSize, TC, Shift_Adjust.x ); 
 			SetAA += drawChar( CH_A, charPos.xy, charSize, TC, Shift_Adjust.x ); 
 			SetAA += drawChar( CH_A, charPos.xy, charSize, TC, Shift_Adjust.x ); 
-			SetAA += drawChar( CH_SLSH, charPos.xy, charSize, TC, Shift_Adjust.x ); 
+			SetAA += drawChar( CH_SLSH, charPos.xy, charSize, TC, Shift_Adjust.x );
+			SetAA += drawChar( CH_D, charPos.xy, charSize, TC, Shift_Adjust.x ); 
+			SetAA += drawChar( CH_L, charPos.xy, charSize, TC, Shift_Adjust.x );
+			SetAA += drawChar( CH_S, charPos.xy, charSize, TC, Shift_Adjust.x ); 
+			SetAA += drawChar( CH_S, charPos.xy, charSize, TC, Shift_Adjust.x );
+			SetAA += drawChar( CH_SLSH, charPos.xy, charSize, TC, Shift_Adjust.x );
+			SetAA += drawChar( CH_F, charPos.xy, charSize, TC, Shift_Adjust.x ); 
+			SetAA += drawChar( CH_S, charPos.xy, charSize, TC, Shift_Adjust.x );
+			SetAA += drawChar( CH_R, charPos.xy, charSize, TC, Shift_Adjust.x ); 
+			SetAA += drawChar( CH_SLSH, charPos.xy, charSize, TC, Shift_Adjust.x );
+			SetAA += drawChar( CH_X, charPos.xy, charSize, TC, Shift_Adjust.x ); 
+			SetAA += drawChar( CH_E, charPos.xy, charSize, TC, Shift_Adjust.x );
 			SetAA += drawChar( CH_S, charPos.xy, charSize, TC, Shift_Adjust.x ); 
 			SetAA += drawChar( CH_S, charPos.xy, charSize, TC, Shift_Adjust.x );
 		#endif
@@ -3236,7 +3265,7 @@ namespace SuperDepth3D
 		Depth3D += drawChar( CH_O, charPos.xy, charSize_B, TC, Shift_Adjust.x );
 
 		//Website
-		return Depth3D+Read_Help+PostEffects+NoPro+NotCom+Network+ModFix+Needs+OW_State+SetAA+SetWP+SetFoV+Emu+DGDX+DXVK ? (1-texcoord.y*50.0+48.85)*texcoord.y-0.500: 0;
+		return Depth3D+Read_Help+PostEffects+NoPro+NotCom+Network+ModFix+Needs+OW_State+SetAA+SetWP+SetFoV+Emu+DGDX+DXVK+AspectRaito ? (1-texcoord.y*50.0+48.85)*texcoord.y-0.500: 0;
 	}	
 	
 	///////////////////////////////////////////////////////////////////ReShade.fxh//////////////////////////////////////////////////////////////////////
