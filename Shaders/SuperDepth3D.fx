@@ -2,7 +2,7 @@
 	///**SuperDepth3D**///
 	//----------------////
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	//* Depth Map Based 3D post-process shader v3.5.8
+	//* Depth Map Based 3D post-process shader v3.5.9
 	//* For Reshade 3.0+
 	//* ---------------------------------
 	//*
@@ -1720,7 +1720,7 @@ namespace SuperDepth3D
 		//texcoord = float2((texcoord.x*X)-midW,(texcoord.y*Y)-midH);	
 		
 		texcoord.xy -= DLSS_FSR_Offset.xy * pix;
-		
+
 		float4 DM = Depth(TC_SP(texcoord).xy).xxxx;
 		float R, G, B, A, WD = WeaponDepth(TC_SP(texcoord).xy).x, CoP = WeaponDepth(TC_SP(texcoord).xy).y, CutOFFCal = (CoP/DMA()) * 0.5; //Weapon Cutoff Calculation
 		CutOFFCal = step(DM.x,CutOFFCal);
@@ -1740,7 +1740,7 @@ namespace SuperDepth3D
 		G = DM.y > saturate(smoothstep(0,2.5,DM.w)); //Weapon Mask
 		B = DM.z; //Weapon Hand
 		A = ZPD_Boundary >= 4 ? max( G, R) : R; //Grid Depth
-	
+			
 		return float3x3( saturate(float3(R, G, B)), 	                                                      			//[0][0] = R | [0][1] = G | [0][2] = B
 						 saturate(float3(A, Depth( SDT == 1 || SD_Trigger == 1 ? texcoord : TC_SP(texcoord).xy).x, DM.w)),//[1][0] = A | [1][1] = D | [1][2] = DM
 								  float3(Weapon_Masker > saturate(smoothstep(0,2.5,DM.w)),0,0) );                         //[2][0] = 0 | [2][1] = 0 | [2][2] = 0
@@ -1786,16 +1786,22 @@ namespace SuperDepth3D
 	{   //Check Depth
 		float CD, Detect, Detect_Out_of_Range;
 		if(ZPD_Boundary > 0)
-		{   float4 Switch_Array = ZPD_Boundary == 6 ? float4(0.825,0.850,0.875,0.900) : float4(1.0,0.875,0.75,0.625);
+		{
+			#if LBM || LetterBox_Masking
+			const float2 LB_Dir = float2(0.150,0.850);
+			#else
+			const float2 LB_Dir = float2(0.125,0.875);
+			#endif   
+			float4 Switch_Array = ZPD_Boundary == 6 ? float4(0.825,0.850,0.875,0.900) : float4(1.0,0.875,0.75,0.625);
 			//Normal A & B for both	
-			const float CDArray_A0[7] = { 0.125, 0.25, 0.375, 0.5, 0.625, 0.75, 0.875}, CDArray_B0[7] = { 0.25, 0.375, 0.4375, 0.5, 0.5625, 0.625, 0.75}, CDArray_C0[9] = { 0.0625, 0.125, 0.25, 0.375, 0.5, 0.625, 0.75, 0.875, 0.9375};
-			const float CDArray_A1[6] = { 0.125, 0.25, 0.375, 0.5, 0.625, 0.75}, CDArray_B1[6] = { 0.25, 0.375, 0.4375, 0.5625, 0.625, 0.75};
-			//const float CDArray_A1[5] = { 0.125, 0.25, 0.375, 0.625, 0.75}, CDArray_B1[5] = { 0.25, 0.375, 0.4375, 0.625, 0.75}; // Don't check Center.
+			const float CDArray_A0[7] = { LB_Dir.x, 0.25, 0.375, 0.5, 0.625, 0.75, LB_Dir.y}, CDArray_B0[7] = { 0.25, 0.375, 0.4375, 0.5, 0.5625, 0.625, 0.75}, CDArray_C0[9] = { 0.0625, 0.125, 0.25, 0.375, 0.5, 0.625, 0.75, 0.875, 0.9375};
+			const float CDArray_A1[6] = { 0.25, 0.375, 0.5, 0.625, 0.75, 0.875}, CDArray_B1[6] = { 0.25, 0.375, 0.4375, 0.5625, 0.625, 0.75};
+
 			const float CDArray_C1[4] = { 0.25, 0.375, 0.75, 0.875};
 
 			float CDArrayZPD_A[7] = { ZPD_Separation.x * Switch_Array.w, ZPD_Separation.x * Switch_Array.z, ZPD_Separation.x * Switch_Array.y, ZPD_Separation.x * Switch_Array.x, ZPD_Separation.x * Switch_Array.y, ZPD_Separation.x * Switch_Array.z, ZPD_Separation.x * Switch_Array.w },
 				  CDArrayZPD_B[7] = { ZPD_Separation.x * 0.3, ZPD_Separation.x * 0.5, ZPD_Separation.x * 0.75, ZPD_Separation.x, ZPD_Separation.x * 0.75, ZPD_Separation.x * 0.5, ZPD_Separation.x * 0.3},
-	 			  CDArrayZPD_C[10] = { ZPD_Separation.x * 0.5625, ZPD_Separation.x * 0.75, ZPD_Separation.x * 0.875, ZPD_Separation.x * 0.9375, 
+	 			 CDArrayZPD_C[10] = { ZPD_Separation.x * 0.5625, ZPD_Separation.x * 0.75, ZPD_Separation.x * 0.875, ZPD_Separation.x * 0.9375, 
 									   ZPD_Separation.x, ZPD_Separation.x, 
 									   ZPD_Separation.x * 0.9375, ZPD_Separation.x * 0.875, ZPD_Separation.x * 0.75, ZPD_Separation.x * 0.5625 };	
 			//Screen Space Detector 7x6 Grid from between 0 to 1 and ZPD Detection becomes stronger as it gets closer to the Center.
@@ -1816,8 +1822,8 @@ namespace SuperDepth3D
 						GridXY = float2( CDArray_A0[iX], CDArray_B1[iY]);
 					if( AFD )
 						GridXY += Shift_Per_Frame;
-					float ZPD_I = ZPD_Boundary == 3 ?  CDArrayZPD_C[iX] : (ZPD_Boundary == 2 || ZPD_Boundary == 5  ? CDArrayZPD_B[iX] : CDArrayZPD_A[iX]);
-	
+					float ZPD_I = ZPD_Boundary == 3 ?  CDArrayZPD_C[iX] : (ZPD_Boundary == 2 || ZPD_Boundary == 5  ? CDArrayZPD_B[iX] : CDArrayZPD_A[iX]);		
+
 					if(ZPD_Boundary >= 4)
 					{
 						if ( PrepDepth(GridXY)[1][0] == 1 )
@@ -2142,7 +2148,8 @@ namespace SuperDepth3D
 		#endif
 	
 		#if LBM || LetterBox_Masking
-			float LB_Detection = tex2D(SamplerLumN,float2(0.5,0.5)).x,LB_Masked = texcoord.y > DI_Y && texcoord.y < DI_X ? DM.y : 0.0125;
+			float LB_Dir = LetterBox_Masking == 2 || LBM == 2 ? texcoord.x : texcoord.y;
+			float LB_Detection = tex2D(SamplerLumN,float2(0.5,0.5)).x,LB_Masked = LB_Dir > DI_Y && LB_Dir < DI_X ? DM.y : 0.0125;
 			
 			if(LB_Detection)
 				DM.y = LB_Masked;	
