@@ -367,7 +367,7 @@ https://community.pcgamingwiki.com/files/file/1948-destroy-all-humans-fov-change
 
 I also recommend you use View Mode set to Alpha. Because of all the Foliage.
 
-{Detroit: Become Human} [ReShade 5.5.2]
+{Detroit: Become Human} [ReShade 5.4.2]
 To Disable DoF
 
 Modify the game executable to disable depth of field
@@ -1070,7 +1070,7 @@ Rage 64 was tested only.
 - Thank you zig11727
 Path to install \Steam\SteamApps\common\Redout\redout\Binaries
 
-{RESIDENT EVIL HD BIOHAZARD HD}
+{RESIDENT EVIL HD BIOHAZARD HD | RESIDENT EVIL 0} [Reshade 5.5.2]
 The DepthBuffer issues force you to play in 4:3. Because, in 16:9 mode The depth buffer will never match the BackBuffer. Some issues with Clipping by the game is totaly playable.
 
 Should not need to do this. But, you may want to mod this game anyways.
