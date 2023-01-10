@@ -1,7 +1,7 @@
 ////----------------------------------------//
 ///SuperDepth3D Overwatch Automation Header///
 //----------------------------------------////
-// Version 3.0.8
+// Version 3.0.9
 //---------------------------------------OVERWATCH---------------------------------------//
 // If you are reading this stop. Go away and never look back. From this point on if you  //
 // still think it's is worth looking at this..... Then no one can save you or your soul. //
@@ -1696,17 +1696,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DB_Z 0.125
 	#define WSM 3
 	#define DB_W 23
-#elif (App == 0xF6F3C763 ) //WRATH
-	#define DA_X 0.065
-	#define DA_Y 75.0
-	#define DA_Z 0.00005
-	#define DB_Y 2
-	#define DE_X 4
-	#define DE_Y 0.5
-	#define DE_Z 0.375
-	#define DB_Z 0.090
-	#define DB_W 29
-	#define DF_X float2(0.1,0.0)
 #elif (App == 0xB05C57BC ) //HellBound
 	#define DA_W 1
 	#define DA_X 0.0325
@@ -10094,35 +10083,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define NFM 1
 	#define PEW 1
 	#define RHW 1
-#elif (App == 0x68EF1B4E || App == 0xC103D998 || App == 0xFAB47970 || App == 0x539E792B ) //Serious Sam Fusion | Serious Sam 4: Planet Badass | Serious Sam Siberian Mayhem/Unrestricted
-	#define DA_W 1
-	#define DA_X 0.0825 //0.0875
-	//#define DF_Y 0.0125
-	#define DA_Y 10.0
-	#define DA_Z 0.1
-	#define DB_Y 1
-	#define DB_W 42
-    #define DF_X 0.25
-    #define DJ_W 0.6
-	#define DE_X 5
-	#define DE_Y 0.5
-	#define DE_Z 0.375
-	#define DB_Z 0.150
-	#define BMT 1    
-	#define DF_Z 0.190 //0.170
-	#define DG_Z 0.075 //Min
-    #define DI_Z 0.125//Trim
-    //#define SMS 3      //SM Toggle Separation
-	#define DL_X 0.750 //SM Tune // 0.550
-	//#define DL_W 0.025 //SM Perspective
-	//#define DM_X 4     //HQ Tune
-	//#define DM_Z 4     //HQ Smooth
-	#define NDW 1
-	#define RHW 1
-	#define PEW 1
-	#define LBC 2  //Letter Box Correction Offsets With X & Y
-	#define DH_Z 0.256
-	#define DH_W 0.0
 #elif (App == 0x84DC9F37 ) //Close to the Sun
 	#define DA_W 1
     //#define DB_X 1
@@ -11000,6 +10960,127 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 
 	#define PEW 1
 	#define ARW 1
+#elif (App == 0xF6F3C763 ) //WRATH
+	//#define DA_W 1
+    #define DB_X 1
+	#define DA_X 0.065
+	#define DA_Y 75.0
+	#define DA_Z 0.00005
+	#define DB_Y 2
+	#define DE_X 4
+	#define DE_Y 0.525
+	#define DE_Z 0.375
+	#define DB_Z 0.090
+	#define DB_W 29
+	#define DF_X float2(0.1,0.0)
+	#define BMT 1
+	#define DF_Z 0.1125
+#elif (App == 0x68EF1B4E || App == 0xC103D998 || App == 0xFAB47970 || App == 0x539E792B ) //Serious Sam Fusion | Serious Sam 4: Planet Badass | Serious Sam Siberian Mayhem/Unrestricted
+	#define DA_W 1
+	#define DA_X 0.0875
+	//#define DF_Y 0.0125
+	#define DA_Y 10.0
+	#define DA_Z 0.1
+	#define DB_Y 1
+	#define DB_W 42
+    #define DF_X 0.25
+    #define DJ_W 0.6
+	#define DE_X 4
+	#define DE_Y 0.625
+	#define DE_Z 0.400
+	#define DB_Z 0.050
+	#define DG_W -0.125 //PoP
+    #define OIL 2 //Set How many Levels We use for RE_Fix 0 | 1 | 2 | 3
+    #define OIF float3(0.5,0.375,0.25)  //Fix enables if Value is > 0.0
+	#define DI_W float3(0.25,0.5,2.5)
+	#define DG_Z 0.075 //Min
+    #define DI_Z 0.125//Trim
+    //#define SMS 3      //SM Toggle Separation
+	#define DL_X 0.750 //SM Tune // 0.550
+	//#define DL_W 0.025 //SM Perspective
+	//#define DM_X 4     //HQ Tune
+	//#define DM_Z 4     //HQ Smooth
+	#define NDW 1
+	#define RHW 1
+	#define PEW 1
+	#define LBC 2  //Letter Box Correction Offsets With X & Y
+	#define DH_Z 0.256
+	#define DH_W 0.0
+#elif (App == 0x5FADA0E2 ) //Choo Choo Charlies
+	#define DA_W 1
+    //#define DB_X 1
+	#define DA_X 0.025
+	//#define DF_Y 0.00
+	#define DA_Y 25.0
+    //#define DA_Z 0.0005
+	#define DB_Z 0.100
+	//#define DB_Y 1
+	#define DE_X 1
+	#define DE_Y 0.750
+	#define DE_Z 0.375
+	//#define ADP 1
+	#define DG_W -0.25 //PoP
+    #define OIL 2 //Set How many Levels We use for RE_Fix 0 | 1 | 2 | 3
+    #define OIF float3(0.5,0.375,0.250)  //Fix enables if Value is > 0.0
+	#define DI_W float3(0.0,0.5,2.0)
+	//#define FTM 1
+    //#define DG_Z 0.020 //Min
+    //#define DE_W 0.000 //Auto
+    //#define DI_Z 0.100 //Trim
+    //#define DF_W float2(0.0001,0.0025)  //Edge & Scale
+	#define BMT 1
+	#define DF_Z 0.1375
+    //#define SMS 2            //SM Toggle Separation
+	#define DL_X 0.950      //SM Tune
+	//#define DL_W 0.5       //SM Perspective
+	#define DM_X 4           //HQ Tune
+	#define DM_Z 1           //HQ Smooth
+    //#define DM_Y 3           //HQ VRS
+    //#define DL_Y -0.5    //De-Artifact
+    //#define DL_Z 0.25       //Compat Power
+	//#define DJ_X 0.250       //Range Smoothing
+    /*
+    #define MDD 1 //Set Menu Detection & Direction     //Off 0 | 1 | 2 | 3 | 4      
+    #define DN_X float4( 0.400 , 0.275, 0.600 , 0.722)  //Pos A = XY White & B = ZW White 
+    #define DN_Y float4( 0.4822, 0.312,  0.0, 0.0)       //Pos C = XY Light & D = ZW Match
+    #define DN_Z float4( 0.0, 0.0,  0.0, 0.0)            //Pos E = XY Match & F = ZW Match
+	#define DN_W float4( 1.0, 0.0 , 0.0, 0.0 )          //Size = Menu [ABC] D E F
+    #define DJ_Y float4( 30.0, 30.0, 6.0, 5.0);            //Menu Detection Type for A, B, & C. The Last Value is a Shift amount for C. 
+    #define DJ_Z float3( 1000., 1000., 1000);                //Set Match Tresh 
+	*/
+
+    #define MMD 2 //Set Multi Menu Detection             //Off / On
+    #define MMS 0 //Set Multi Menu Selection from 0-1 to 29-30 and Off 0 | 1 | 2
+    #define DO_X float4( 0.030 , 0.090 , 0.120 , 0.500 ) //Pos A1 = XY Color & A2 = ZW Black 
+    #define DO_Y float4( 0.230 , 0.190 , 0.565 , 0.043 ) //Pos A3 = XY Color & B1 = ZW Color
+    #define DO_Z float4( 0.075 , 0.238 , 0.459 , 0.136 ) //Pos B2 = XY Black & B3 = ZW Color
+	#define DO_W float4( 30.0, 30.0, 30.0, 30.0)   //Tresh Hold for Color A & B and Color
+    #define DP_X float4( 0.348 , 0.450 , 0.052 , 0.410 ) //Pos C1 = XY Color & C2 = ZW Black 
+    #define DP_Y float4( 0.657 , 0.472 , 0.000 , 0.000 ) //Pos C3 = XY Color & D1 = ZW Color
+    #define DP_Z float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos D2 = XY Black & D3 = ZW Color
+	#define DP_W float4( 30.0, 30.0, 1000.0, 1000.0)   //Tresh Hold for Color C & D and Color
+	/*
+	#define DQ_X float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos C1 = XY Color & C2 = ZW Black 
+    #define DQ_Y float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos C3 = XY Color & D1 = ZW Color
+    #define DQ_Z float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos D2 = XY Black & D3 = ZW Color
+	#define DQ_W float4( 1000.0, 1000.0, 1000.0, 1000.0) //Tresh Hold for Color A1 & A3 and Color
+	#define DR_X float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos G1 = XY Color & G2 = ZW Black 
+    #define DR_Y float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos G3 = XY Color & H1 = ZW Color
+    #define DR_Z float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos H2 = XY Black & H3 = ZW Color
+	#define DR_W float4( 1000.0, 1000.0, 1000.0, 1000.0) //Tresh Hold for Color G & H and Color 
+	*/
+	//#define WSM 3
+	//#define DB_W 5
+	//#define DF_X float2(0.050,0.0)	
+	//#define HMT 1
+	//#define HMC 0.503
+
+	#define LBC 1 //Letter Box Correction With X & Y
+	#define LBS 1
+    #define DH_Z 0.0
+    #define DH_W -0.227
+	#define PEW 1
+	#define ARW 1
 #else
 	#define NPW 1 //No Profile
 #endif
@@ -11468,7 +11549,7 @@ float4 Weapon_Profiles(float WP ,float4 Weapon_Adjust) //Tried Switch But, can't
     if (WP == 28)
         Weapon_Adjust = float4(0.750,30.0,1.025,0.0);     //WP 26 | Prey 2006
     if (WP == 29)
-        Weapon_Adjust = float4(0.266,30.0,14.0,0.0);      //WP 27 | Wrath
+        Weapon_Adjust = float4(0.266,27.5,14.0,0.125);     //WP 27 | Wrath
     if (WP == 30)
         Weapon_Adjust = float4(3.625,20.0,0,0.0);         //WP 28 | We Where Here Together
     if (WP == 31)
@@ -11494,7 +11575,7 @@ float4 Weapon_Profiles(float WP ,float4 Weapon_Adjust) //Tried Switch But, can't
     if (WP == 41)
         Weapon_Adjust = float4(0.280,18.75,9.03,0.0);     //WP 39 | Serious Sam Revolution #EB9EEB74/Serious Sam HD: The First Encounter /The Second Encounter /Serious Sam 2 #8238E9CA/ Serious Sam 3: BFE*
     if (WP == 42)
-        Weapon_Adjust = float4(0.3,12.5,0.901,0.0);       //WP 40 | Serious Sam Fusion
+        Weapon_Adjust = float4(0.3,12.5,0.900,0.0);       //WP 40 | Serious Sam Fusion
     if (WP == 43)
         Weapon_Adjust = float4(1.2,12.5,0.3,0.05);        //WP 41 | GhostRunner DX12
     if (WP == 44)

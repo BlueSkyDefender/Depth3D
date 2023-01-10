@@ -2,7 +2,7 @@
 	///**SuperDepth3D_VR+**///
 	//--------------------////
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	//* Depth Map Based 3D post-process shader v3.5.8
+	//* Depth Map Based 3D post-process shader v3.5.9
 	//* For Reshade 4.4+ I think...
 	//* ---------------------------------
 	//*
@@ -1284,11 +1284,12 @@ namespace SuperDepth3DVR
 	}
 	
 	float LBDetection()//Active RGB Detection
-	{   float MipLevel = 5,Center = SLLTresh(float2(0.5,0.5), 8) > 0, Top_Left = LBSensitivity(SLLTresh(float2(0.1,0.1), MipLevel));
-		if ( LetterBox_Masking == 2 || LB_Correction == 2 || LBC == 2 || LBM == 2 )
-			return Top_Left && LBSensitivity(SLLTresh(float2(0.1,0.5), MipLevel)) && LBSensitivity(SLLTresh(float2(0.9,0.5), MipLevel)) && Center ? 1 : 0; //Vert
-		else                   //Left_Center                                  //Right_Center
-			return Top_Left && LBSensitivity(SLLTresh(float2(0.5,0.9), MipLevel)) && Center ? 1 : 0; //Hoz
+	{   float2 Letter_Box_Reposition = LBR ? float2(0.250,0.875) : float2(0.1,0.5);   
+		float MipLevel = 5,Center = SLLTresh(float2(0.5,0.5), 8) > 0, Top_Left = LBSensitivity(SLLTresh(float2(Letter_Box_Reposition.x,0.09), MipLevel));
+		if ( LetterBox_Masking == 2 || LB_Correction == 2 || LBC == 2 || LBM == 2 || SMP == 2)//Left_Center | Right_Center | Center
+			return LBSensitivity(SLLTresh(float2(0.1,0.5), MipLevel)) && LBSensitivity(SLLTresh(float2(0.9,0.5), MipLevel)) && Center ? 1 : 0; //Vert
+		else       //Top | Bottom | Center
+			return Top_Left && LBSensitivity(SLLTresh(float2(Letter_Box_Reposition.y,0.91), MipLevel)) && Center ? 1 : 0; //Hoz
 	}
 	#else
 	float LBDetection()//Stand in for not crashing when not in use
@@ -1752,7 +1753,7 @@ namespace SuperDepth3DVR
 					// CDArrayZPD[i] reads across prepDepth.......
 					CD = 1 - ZPD_I / PrepDepth(GridXY)[1][0];
 	
-					#if UI_MASK
+					#if UI_MASK //need to rework this
 						CD = max( 1 - ZPD_I / HUD_Mask(GridXY), CD );
 					#endif
 					if ( CD < -Set_Pop_Min().x )//may lower this to like -0.1

@@ -2,7 +2,7 @@
 	///**SuperDepth3D**///
 	//----------------////
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	//* Depth Map Based 3D post-process shader v3.5.9
+	//* Depth Map Based 3D post-process shader v3.6.0
 	//* For Reshade 3.0+
 	//* ---------------------------------
 	//*
@@ -1341,12 +1341,13 @@ namespace SuperDepth3D
 	}
 	
 	float LBDetection()//Active RGB Detection
-	{   float MipLevel = 5,Center = SLLTresh(float2(0.5,0.5), 8) > 0, Top_Left = LBSensitivity(SLLTresh(float2(0.1,0.1), MipLevel));
-		if ( LetterBox_Masking == 2 || LB_Correction == 2 || LBC == 2 || LBM == 2 )
-			return Top_Left && LBSensitivity(SLLTresh(float2(0.1,0.5), MipLevel)) && LBSensitivity(SLLTresh(float2(0.9,0.5), MipLevel)) && Center ? 1 : 0; //Vert
-		else                   //Left_Center                                  //Right_Center
-			return Top_Left && LBSensitivity(SLLTresh(float2(0.5,0.9), MipLevel)) && Center ? 1 : 0; //Hoz
-	}			              //Bottom_Center
+	{   float2 Letter_Box_Reposition = LBR ? float2(0.250,0.875) : float2(0.1,0.5);   
+		float MipLevel = 5,Center = SLLTresh(float2(0.5,0.5), 8) > 0, Top_Left = LBSensitivity(SLLTresh(float2(Letter_Box_Reposition.x,0.09), MipLevel));
+		if ( LetterBox_Masking == 2 || LB_Correction == 2 || LBC == 2 || LBM == 2 || SMP == 2)//Left_Center | Right_Center | Center
+			return LBSensitivity(SLLTresh(float2(0.1,0.5), MipLevel)) && LBSensitivity(SLLTresh(float2(0.9,0.5), MipLevel)) && Center ? 1 : 0; //Vert
+		else       //Top | Bottom | Center
+			return Top_Left && LBSensitivity(SLLTresh(float2(Letter_Box_Reposition.y,0.91), MipLevel)) && Center ? 1 : 0; //Hoz
+	}
 	#else
 	float LBDetection()//Stand in for not crashing when not in use
 	{	
@@ -2925,7 +2926,7 @@ namespace SuperDepth3D
 		#else
 		Color.rgb = PS_calcLR(texcoord, position.xy).rgb; //Color = texcoord.x+texcoord.y > 1 ? Color : LBDetection();
 		#endif
-		//Color = GetDB(texcoord).w;//tex2Dlod(SamplerDMN,float4(texcoord,0,9)).w;
+		//Color = LBDetection();
 		return timer <= Text_Timer || Text_Info ? Color.rgb + Color.w : Color.rgb;
 	}
 		
