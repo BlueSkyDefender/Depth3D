@@ -93,7 +93,7 @@ static const float Weapon_Near_Depth_Min_D = 0.0;       //Weapon Near Depth     
 static const float Weapon_Near_Depth_Trim_D = 0.25;     //Weapon Near Depth                     Trim    | DI_Z
 
 //Leftover Values
-static const int Alternate_Frame_Detection_ZPD_D = 0;   //Alternate Frame Detection ZPD 0 | 1 : Off / On| ADP
+static const int Alternate_Frame_Detection_ZPD_D = 0;   //Alternate Frame Detection ZPD 0 | 1 : Off / On| AFD
 static const float Range_Smoothing_D = 0;               //Range Smoothing                               | DJ_X
 static const float4 Menu_Detection_Type_D = 0;          //Menu Detection Type                           | DJ_Y
 static const float3 Match_Threshold_D = 0.0;            //Match Threshold                               | DJ_Z
@@ -1702,14 +1702,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DB_X 1
 	#define DB_Y 4
 	#define NCW 1
-#elif (App == 0x6DDCD106 ) //The Town of Light
-	#define DA_X 0.100
-	#define DA_Y 10.0
-	#define DB_X 1
-	#define DB_Y 4
-	#define DE_X 1
-	#define DE_Y 0.5
-	#define DE_Z 0.375
 #elif (App == 0x38ED56AE ) //Heavy Rain
 	#define DA_X 0.0325
 	#define DA_Y 50.0
@@ -8555,7 +8547,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DE_X 3
 	#define DE_Y 0.550
 	#define DE_Z 0.375
-	//#define ADP 1
 	#define DG_W -0.125//PoP
     //#define OIL 1 //Set How many Levels We use for RE_Fix 0 | 1 | 2 | 3
     #define OIF 0.250 //float2(0.265,0.001) //Fix enables if Value is > 0.0
@@ -8619,7 +8610,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DE_X 6
 	#define DE_Y 0.550
 	#define DE_Z 0.375
-	//#define ADP 1
 	#define DG_W -0.250 //PoP
     //#define OIL 1 //Set How many Levels We use for RE_Fix 0 | 1 | 2 | 3
     #define OIF 0.250 //float2(0.265,0.001) //Fix enables if Value is > 0.0
@@ -8686,7 +8676,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DE_X 3
 	#define DE_Y 0.500
 	#define DE_Z 0.375
-	//#define ADP 1
 	#define DG_W -0.100 //PoP
     //#define OIL 1 //Set How many Levels We use for RE_Fix 0 | 1 | 2 | 3
     #define OIF 0.3125 //float2(0.265,0.001) //Fix enables if Value is > 0.0
@@ -8759,7 +8748,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DE_X 3
 	#define DE_Y 0.500
 	#define DE_Z 0.375
-	//#define ADP 1
 	#define DG_W -0.100 //PoP
     //#define OIL 1 //Set How many Levels We use for RE_Fix 0 | 1 | 2 | 3
     #define OIF 0.3125 //float2(0.265,0.001) //Fix enables if Value is > 0.0
@@ -8832,7 +8820,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DE_X 3
 	#define DE_Y 0.500
 	#define DE_Z 0.375
-	//#define ADP 1
 	#define DG_W -0.100 //PoP
     //#define OIL 1 //Set How many Levels We use for RE_Fix 0 | 1 | 2 | 3
     #define OIF 0.3125 //float2(0.265,0.001) //Fix enables if Value is > 0.0
@@ -8905,7 +8892,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DE_X 1
 	#define DE_Y 0.500
 	#define DE_Z 0.400
-	//#define ADP 1
 	//#define DG_W -0.100 //PoP
     //#define OIL 1 //Set How many Levels We use for RE_Fix 0 | 1 | 2 | 3
     #define OIF 0.375 //float2(0.265,0.001) //Fix enables if Value is > 0.0
@@ -8973,7 +8959,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DE_X 1
 	#define DE_Y 0.500
 	#define DE_Z 0.400
-	//#define ADP 1
 	#define DG_W -0.200 //PoP
     //#define OIL 1 //Set How many Levels We use for RE_Fix 0 | 1 | 2 | 3
     #define OIF 0.200 //float2(0.265,0.001) //Fix enables if Value is > 0.0
@@ -9040,7 +9025,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DE_X 2
 	#define DE_Y 0.500//0.850
 	#define DE_Z 0.375
-	//#define ADP 1
 	#define DG_W 1.25 //PoP
     //#define OIL 1 //Set How many Levels We use for RE_Fix 0 | 1 | 2 | 3
     //#define OIF 0.500 //float2(0.265,0.001) //Fix enables if Value is > 0.0
@@ -9109,7 +9093,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DE_X 1
 	#define DE_Y 0.625
 	#define DE_Z 0.400
-	//#define ADP 1
 	#define DG_W -0.125 //PoP
     #define OIL 1 //Set How many Levels We use for RE_Fix 0 | 1 | 2 | 3
     #define OIF float2(0.375,0.2) //Fix enables if Value is > 0.0
@@ -9175,7 +9158,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DE_X 1
 	#define DE_Y 0.500
 	#define DE_Z 0.375
-	//#define ADP 1
 	#define DG_W -0.300 //PoP
     //#define OIL 1 //Set How many Levels We use for RE_Fix 0 | 1 | 2 | 3
     //#define OIF 0.250 //float2(0.265,0.001) //Fix enables if Value is > 0.0
@@ -9318,7 +9300,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DE_X 1
 	#define DE_Y 0.650
 	#define DE_Z 0.375
-	//#define ADP 1
 	#define DG_W -0.20 //PoP
     //#define OIL 1 //Set How many Levels We use for RE_Fix 0 | 1 | 2 | 3
     #define OIF 0.350 //float2(0.265,0.001) //Fix enables if Value is > 0.0
@@ -9385,7 +9366,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DE_X 1
 	#define DE_Y 0.800
 	#define DE_Z 0.375
-	//#define ADP 1
 	#define DG_W -0.25 //PoP
     //#define OIL 1 //Set How many Levels We use for RE_Fix 0 | 1 | 2 | 3
     #define OIF 0.400 //float2(0.265,0.001) //Fix enables if Value is > 0.0
@@ -9452,7 +9432,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DE_X 6
 	#define DE_Y 0.500
 	#define DE_Z 0.375
-	//#define ADP 1
 	#define DG_W -0.25 //PoP
     //#define OIL 1 //Set How many Levels We use for RE_Fix 0 | 1 | 2 | 3
     #define OIF 0.375 //float2(0.265,0.001) //Fix enables if Value is > 0.0
@@ -9519,7 +9498,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DE_X 6
 	#define DE_Y 0.500
 	#define DE_Z 0.375
-	//#define ADP 1
 	#define DG_W -0.25 //PoP
     //#define OIL 1 //Set How many Levels We use for RE_Fix 0 | 1 | 2 | 3
     #define OIF 0.375 //float2(0.265,0.001) //Fix enables if Value is > 0.0
@@ -9588,7 +9566,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DE_X 0
 	#define DE_Y 0.750
 	#define DE_Z 0.375
-	//#define ADP 1
 	#define DG_W -0.25 //PoP
     //#define OIL 1 //Set How many Levels We use for RE_Fix 0 | 1 | 2 | 3
     //#define OIF 0.375 //float2(0.265,0.001) //Fix enables if Value is > 0.0
@@ -9689,7 +9666,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DE_X 3
 	#define DE_Y 0.450
 	#define DE_Z 0.400
-	//#define ADP 1
 	#define DG_W -0.20 //PoP
     //#define OIL 1 //Set How many Levels We use for RE_Fix 0 | 1 | 2 | 3
     #define OIF 0.225 //float2(0.265,0.001) //Fix enables if Value is > 0.0
@@ -9756,7 +9732,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DE_X 1
 	#define DE_Y 0.750
 	#define DE_Z 0.375
-	//#define ADP 1
 	#define DG_W 0.375 //PoP
     //#define OIL 1 //Set How many Levels We use for RE_Fix 0 | 1 | 2 | 3
     #define OIF 0.50 //float2(0.265,0.001) //Fix enables if Value is > 0.0
@@ -9824,7 +9799,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DE_X 1
 	#define DE_Y 0.450
 	#define DE_Z 0.375
-	//#define ADP 1
 	#define DG_W 0.125 //PoP
     //#define OIL 1 //Set How many Levels We use for RE_Fix 0 | 1 | 2 | 3
     //#define OIF 0.375 //float2(0.265,0.001) //Fix enables if Value is > 0.0
@@ -9891,7 +9865,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DE_X 1
 	#define DE_Y 0.750
 	#define DE_Z 0.375
-	//#define ADP 1
 	#define DG_W 0.5 //PoP
     //#define OIL 1 //Set How many Levels We use for RE_Fix 0 | 1 | 2 | 3
     //#define OIF 0.375 //float2(0.265,0.001) //Fix enables if Value is > 0.0
@@ -9999,7 +9972,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define DL_Z 0.125       //Compat Power
 	#define OIF 0.0375 //Fix enables if Value is > 0.0
 	#define DI_W 2.5   //Adjustment for REF
-	#define NFM 1
+	//#define NFM 1
 	#define PEW 1
 	#define RHW 1
 #elif (App == 0x84DC9F37 ) //Close to the Sun
@@ -10014,7 +9987,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DE_X 1
 	#define DE_Y 0.750
 	#define DE_Z 0.400
-	//#define ADP 1
 	//#define DG_W 0.5 //PoP
     //#define OIL 1 //Set How many Levels We use for RE_Fix 0 | 1 | 2 | 3
     #define OIF 0.400 //float2(0.265,0.001) //Fix enables if Value is > 0.0
@@ -10081,7 +10053,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DE_X 1
 	#define DE_Y 0.5
 	#define DE_Z 0.375
-	//#define ADP 1
 	#define DG_W -0.125 //PoP
     #define OIL 1 //Set How many Levels We use for RE_Fix 0 | 1 | 2 | 3
     #define OIF float2(0.250,0.060) //Fix enables if Value is > 0.0
@@ -10149,7 +10120,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DE_X 0
 	#define DE_Y 0.500
 	#define DE_Z 0.375
-	//#define ADP 1
 	//#define DG_W 0.5 //PoP
     //#define OIL 1 //Set How many Levels We use for RE_Fix 0 | 1 | 2 | 3
     #define OIF 0.400 //float2(0.265,0.001) //Fix enables if Value is > 0.0
@@ -10245,7 +10215,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DE_X 1
 	#define DE_Y 0.550
 	#define DE_Z 0.375
-	//#define ADP 1
 	#define DG_W -0.125 //PoP
     #define OIL 1 //Set How many Levels We use for RE_Fix 0 | 1 | 2 | 3
     #define OIF float2(0.325,0.125) //Fix enables if Value is > 0.0
@@ -10318,7 +10287,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DE_X 1
 	#define DE_Y 0.750
 	#define DE_Z 0.375
-	//#define ADP 1
 	#define DG_W -0.125 //PoP
     #define OIL 1 //Set How many Levels We use for RE_Fix 0 | 1 | 2 | 3
     #define OIF float2(0.25,0.10) //Fix enables if Value is > 0.0
@@ -10392,7 +10360,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DE_X 1
 	#define DE_Y 0.600
 	#define DE_Z 0.375
-	//#define ADP 1
 	#define DG_W -0.25 //PoP
     //#define OIL 1 //Set How many Levels We use for RE_Fix 0 | 1 | 2 | 3
     #define OIF 0.200 //float2(0.265,0.001) //Fix enables if Value is > 0.0
@@ -10460,7 +10427,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DE_X 3
 	#define DE_Y 0.700
 	#define DE_Z 0.375
-	//#define ADP 1
 	#define DG_W -0.25 //PoP
     #define OIL 3 //Set How many Levels We use for RE_Fix 0 | 1 | 2 | 3
     #define OIF float4(0.45,0.25,0.2,0.175) //Fix enables if Value is > 0.0
@@ -10530,7 +10496,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DE_X 1
 	#define DE_Y 0.500
 	#define DE_Z 0.375
-	//#define ADP 1
 	//#define DG_W -0.25 //PoP
     //#define OIL 1 //Set How many Levels We use for RE_Fix 0 | 1 | 2 | 3
     #define OIF 0.25 //Fix enables if Value is > 0.0
@@ -10598,7 +10563,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DE_X 1
 	#define DE_Y 0.500
 	#define DE_Z 0.375
-	//#define ADP 1
 	//#define DG_W -0.25 //PoP
     //#define OIL 1 //Set How many Levels We use for RE_Fix 0 | 1 | 2 | 3
     #define OIF 0.25 //Fix enables if Value is > 0.0
@@ -10667,7 +10631,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DE_X 3
 	#define DE_Y 0.575
 	#define DE_Z 0.400
-	//#define ADP 1
 	//#define DG_W -0.20 //PoP
     #define OIL 1 //Set How many Levels We use for RE_Fix 0 | 1 | 2 | 3
     #define OIF float2(0.25,0.055)  //Fix enables if Value is > 0.0
@@ -10739,7 +10702,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DE_X 3
 	#define DE_Y 0.700
 	#define DE_Z 0.375
-	//#define ADP 1
 	#define DG_W -0.25 //PoP
     //#define OIL 1 //Set How many Levels We use for RE_Fix 0 | 1 | 2 | 3
     #define OIF 0.50 //float2(0.25,0.055)  //Fix enables if Value is > 0.0
@@ -10811,7 +10773,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DE_X 1
 	#define DE_Y 0.600
 	#define DE_Z 0.375
-	//#define ADP 1
 	//#define DG_W -0.1 //PoP
     //#define OIL 1 //Set How many Levels We use for RE_Fix 0 | 1 | 2 | 3
     //#define OIF 0.250 //float2(0.25,0.055)  //Fix enables if Value is > 0.0
@@ -10936,7 +10897,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DE_X 1
 	#define DE_Y 0.750
 	#define DE_Z 0.375
-	//#define ADP 1
 	#define DG_W -0.25 //PoP
     #define OIL 2 //Set How many Levels We use for RE_Fix 0 | 1 | 2 | 3
     #define OIF float3(0.5,0.375,0.250)  //Fix enables if Value is > 0.0
@@ -11011,7 +10971,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DE_X 3
 	#define DE_Y 0.700
 	#define DE_Z 0.375
-	//#define ADP 1
 	#define DG_W -0.25 //PoP
     #define OIL 3 //Set How many Levels We use for RE_Fix 0 | 1 | 2 | 3
     #define OIF float4(0.6,0.3,0.25,0.125)  //Fix enables if Value is > 0.0
@@ -11085,7 +11044,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DE_X 3
 	#define DE_Y 0.750
 	#define DE_Z 0.400
-	//#define ADP 1
 	#define DG_W -0.25 //PoP
     #define OIL 2 //Set How many Levels We use for RE_Fix 0 | 1 | 2 | 3
     #define OIF float3(0.5,0.35,0.25)  //Fix enables if Value is > 0.0
@@ -11146,6 +11104,215 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	//#define FMM 1
 	#define PEW 1
 	#define DAA 1
+#elif (App == 0x7A38C65F ) //The Council
+	//#define DA_W 1
+    //#define DB_X 1
+	#define DA_X 0.0625
+	#define DF_Y 0.025
+	#define DA_Y 16.25
+    //#define DA_Z 0.0005
+	#define DB_Z 0.025
+	//#define DB_Y 1
+	#define DE_X 3
+	#define DE_Y 0.750
+	#define DE_Z 0.400
+	#define DG_W -0.125 //PoP
+    #define OIL 2 //Set How many Levels We use for RE_Fix 0 | 1 | 2 | 3
+    #define OIF float3(0.5,0.375,0.225)  //Fix enables if Value is > 0.0
+	#define DI_W float3(0.0,1.0,2.5)
+	//#define FTM 1
+    //#define DG_Z 0.05 //Min
+    //#define DE_W 0.000 //Auto
+    //#define DI_Z 0.20 //Trim
+    //#define DF_W float2(0.0001,0.005)  //Edge & Scale
+	#define BMT 1
+	#define DF_Z 0.055
+    #define SMS 3            //SM Toggle Separation
+	#define DL_X 0.900      //SM Tune
+	//#define DL_W 0.5       //SM Perspective
+	#define DM_X 4           //HQ Tune
+	#define DM_Z 1           //HQ Smooth
+    //#define DM_Y 3           //HQ VRS
+    #define DL_Y -0.5   //De-Artifact
+    #define DL_Z 0.5       //Compat Power
+	//#define DJ_X 0.250       //Range Smoothing
+	/*
+    #define MAC 1
+    #define MDD 1 //Set Menu Detection & Direction      //Off 0 | 1 | 2 | 3 | 4      
+    #define DN_X float4( 0.8835, 0.956 , 0.982 , 0.954)//Pos A = XY Any & B = ZW Lock 
+    #define DN_Y float4( 0.500 , 0.004 ,  0.0, 0.0)     //Pos C = XY Any & D = ZW Match
+    #define DN_Z float4( 0.0, 0.0,  0.0, 0.0)           //Pos E = XY Match & F = ZW Match
+	#define DN_W float4( 1.0, 0.0 , 0.0, 0.0 )          //Size = Menu [ABC] D E F
+    #define DJ_Y float4( 28.0, 28.0, 20.0, 14.0);     //Menu Detection Type for A = X, B = Y, & C = Z. The Last Value is a Wild Card amount W is for X and Z. 
+    #define DJ_Z float3( 1000., 1000., 1000);           //Set Match Tresh 
+	*/
+	/*
+    #define MMD 1 //Set Multi Menu Detection             //Off / On
+    #define MMS 0 //Set Multi Menu Selection from 0-1 to 29-30 and Off 0 | 1 | 2
+    #define DO_X float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos A1 = XY Color & A2 = ZW Black 
+    #define DO_Y float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos A3 = XY Color & B1 = ZW Color
+    #define DO_Z float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos B2 = XY Black & B3 = ZW Color
+	#define DO_W float4( 1000.0, 1000.0, 1000.0, 1000.0)   //Tresh Hold for Color A & B and Color
+    #define DP_X float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos C1 = XY Color & C2 = ZW Black 
+    #define DP_Y float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos C3 = XY Color & D1 = ZW Color
+    #define DP_Z float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos D2 = XY Black & D3 = ZW Color
+	#define DP_W float4( 1000.0, 1000.0, 1000.0, 1000.0)   //Tresh Hold for Color C & D and Color
+	#define DQ_X float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos C1 = XY Color & C2 = ZW Black 
+    #define DQ_Y float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos C3 = XY Color & D1 = ZW Color
+    #define DQ_Z float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos D2 = XY Black & D3 = ZW Color
+	#define DQ_W float4( 1000.0, 1000.0, 1000.0, 1000.0) //Tresh Hold for Color A1 & A3 and Color
+	#define DR_X float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos G1 = XY Color & G2 = ZW Black 
+    #define DR_Y float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos G3 = XY Color & H1 = ZW Color
+    #define DR_Z float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos H2 = XY Black & H3 = ZW Color
+	#define DR_W float4( 1000.0, 1000.0, 1000.0, 1000.0) //Tresh Hold for Color G & H and Color 
+	*/
+	//#define WSM 3
+	//#define DB_W 5
+	//#define DF_X float2(0.050,0.0)	
+	//#define HMT 1
+	//#define HMC 0.503
+	//#define LBC 1  //Letter Box Correction Offsets With X & Y
+	//#define DH_Z 0.0
+	//#define DH_W -0.237
+	//#define FMM 1
+	#define PEW 1
+	//#define DAA 1
+#elif (App == 0x1061B3CF ) //Just Cause 3
+	#define DA_W 1
+    //#define DB_X 1
+	#define DA_X 0.03//0.025
+	//#define DF_Y 0.0025
+	#define DA_Y 60.0
+    //#define DA_Z 0.001
+	#define DB_Z 0.050
+	//#define DB_Y 1
+	#define DE_X 1
+	#define DE_Y 0.500
+	#define DE_Z 0.375
+	//#define DG_W 0.100//PoP
+    #define OIF 0.125 //Fix enables if Value is > 0.0
+	#define DI_W 1.5
+	//#define FTM 1
+    //#define DG_Z 0.001//0.050//0.075 //Min
+    //#define DE_W 0.75 //Auto
+    //#define DI_Z 0.05//0.050//0.090 //Trim
+    //#define DF_W float2(0.001,0.0025)  //Edge & Scale
+	#define BMT 1
+	#define DF_Z 0.05
+    //#define SMS 1            //SM Toggle Separation
+	#define DL_X 0.900      //SM Tune
+	//#define DL_W 0.5       //SM Perspective
+	#define DM_X 4           //HQ Tune
+	#define DM_Z 3           //HQ Smooth
+    //#define DM_Y 3           //HQ VRS
+    #define DL_Y -0.375   //De-Artifact
+    #define DL_Z -0.125       //Compat Power
+	//#define DJ_X 0.125       //Range Smoothing
+    /*
+    #define MDD 1 //Set Menu Detection & Direction     //Off 0 | 1 | 2 | 3 | 4      
+    #define DN_X float4( 0.400 , 0.275, 0.600 , 0.722)  //Pos A = XY White & B = ZW White 
+    #define DN_Y float4( 0.4822, 0.312,  0.0, 0.0)       //Pos C = XY Light & D = ZW Match
+    #define DN_Z float4( 0.0, 0.0,  0.0, 0.0)            //Pos E = XY Match & F = ZW Match
+	#define DN_W float4( 1.0, 0.0 , 0.0, 0.0 )          //Size = Menu [ABC] D E F
+    #define DJ_Y float4( 30.0, 30.0, 6.0, 5.0);            //Menu Detection Type for A, B, & C. The Last Value is a Shift amount for C. 
+    #define DJ_Z float3( 1000., 1000., 1000);                //Set Match Tresh 
+	*/
+    #define MMD 2 //Set Multi Menu Detection             //Off / On
+    #define MMS 0 //Set Multi Menu Selection from 0-1 to 29-30 and Off 0 | 1 | 2
+    #define DO_X float4( 0.150 , 0.150 , 0.500 , 0.070 ) //Pos A1 = XY Color & A2 = ZW Black 
+    #define DO_Y float4( 0.850 , 0.780 , 0.150 , 0.180 ) //Pos A3 = XY Color & B1 = ZW Color
+    #define DO_Z float4( 0.500 , 0.070 , 0.850 , 0.800 ) //Pos B2 = XY Black & B3 = ZW Color
+	#define DO_W float4( 25.0, 25.0, 25.0, 25.0)   //Tresh Hold for Color A & B and Color
+
+    #define DP_X float4( 0.150 , 0.150 , 0.500 , 0.070 ) //Pos C1 = XY Color & C2 = ZW Black 
+    #define DP_Y float4( 0.850 , 0.780 , 0.150 , 0.180 ) //Pos C3 = XY Color & D1 = ZW Color
+    #define DP_Z float4( 0.500 , 0.070 , 0.850 , 0.800 ) //Pos D2 = XY Black & D3 = ZW Color
+	#define DP_W float4( 26.0, 25.0, 26.0, 26.0)   //Tresh Hold for Color C & D and Color
+	/*
+	#define DQ_X float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos C1 = XY Color & C2 = ZW Black 
+    #define DQ_Y float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos C3 = XY Color & D1 = ZW Color
+    #define DQ_Z float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos D2 = XY Black & D3 = ZW Color
+	#define DQ_W float4( 1000.0, 1000.0, 1000.0, 1000.0) //Tresh Hold for Color A1 & A3 and Color
+	#define DR_X float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos G1 = XY Color & G2 = ZW Black 
+    #define DR_Y float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos G3 = XY Color & H1 = ZW Color
+    #define DR_Z float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos H2 = XY Black & H3 = ZW Color
+	#define DR_W float4( 1000.0, 1000.0, 1000.0, 1000.0) //Tresh Hold for Color G & H and Color 
+	*/
+    #define PEW 1
+#elif (App == 0x6DDCD106 ) //The Town of Light
+	//#define DA_W 1
+    #define DB_X 1
+	#define DA_X 0.100
+	#define DF_Y 0.000
+	#define DA_Y 7.5
+    //#define DA_Z 0.0005
+	#define DB_Z 0.050
+	//#define DB_Y 1
+	#define DE_X 1
+	#define DE_Y 0.750
+	#define DE_Z 0.400
+	//#define AFD 1
+	#define DG_W -0.1 //PoP
+    #define OIL 3 //Set How many Levels We use for RE_Fix 0 | 1 | 2 | 3
+    #define OIF float4(0.5,0.300,0.160,0.100) //float3(0.5,0.375,0.225)  //Fix enables if Value is > 0.0
+	#define DI_W float4(0.5,1.0,2.5,4.0) //float3(0.0,1.0,2.5)
+	//#define FTM 1
+    //#define DG_Z 0.05 //Min
+    //#define DE_W 0.000 //Auto
+    //#define DI_Z 0.20 //Trim
+    //#define DF_W float2(0.0001,0.0025)  //Edge & Scale
+	#define BMT 1
+	#define DF_Z 0.03549
+    //#define SMS 3            //SM Toggle Separation
+	#define DL_X 0.925      //SM Tune
+	//#define DL_W 0.5       //SM Perspective
+	#define DM_X 3           //HQ Tune
+	#define DM_Z 2           //HQ Smooth
+    //#define DM_Y 3           //HQ VRS
+    //#define DL_Y -0.5   //De-Artifact
+    //#define DL_Z -0.25       //Compat Power
+	//#define DJ_X 0.250       //Range Smoothing
+	/*
+    #define MAC 1
+    #define MDD 1 //Set Menu Detection & Direction      //Off 0 | 1 | 2 | 3 | 4      
+    #define DN_X float4( 0.8835, 0.956 , 0.982 , 0.954)//Pos A = XY Any & B = ZW Lock 
+    #define DN_Y float4( 0.500 , 0.004 ,  0.0, 0.0)     //Pos C = XY Any & D = ZW Match
+    #define DN_Z float4( 0.0, 0.0,  0.0, 0.0)           //Pos E = XY Match & F = ZW Match
+	#define DN_W float4( 1.0, 0.0 , 0.0, 0.0 )          //Size = Menu [ABC] D E F
+    #define DJ_Y float4( 28.0, 28.0, 20.0, 14.0);     //Menu Detection Type for A = X, B = Y, & C = Z. The Last Value is a Wild Card amount W is for X and Z. 
+    #define DJ_Z float3( 1000., 1000., 1000);           //Set Match Tresh 
+	*/
+
+    #define MMD 1 //Set Multi Menu Detection             //Off / On
+    #define MMS 0 //Set Multi Menu Selection from 0-1 to 29-30 and Off 0 | 1 | 2
+    #define DO_X float4( 0.1025, 0.085 , 0.910 , 0.100 ) //Pos A1 = XY Color & A2 = ZW Black 
+    #define DO_Y float4( 0.101 , 0.145 , 0.1025, 0.085 ) //Pos A3 = XY Color & B1 = ZW Color
+    #define DO_Z float4( 0.910 , 0.100 , 0.102 , 0.145 ) //Pos B2 = XY Black & B3 = ZW Color
+	#define DO_W float4( 29.0, 30.0, 29.0, 29.0)   //Tresh Hold for Color A & B and Color
+	/*
+    #define DP_X float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos C1 = XY Color & C2 = ZW Black 
+    #define DP_Y float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos C3 = XY Color & D1 = ZW Color
+    #define DP_Z float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos D2 = XY Black & D3 = ZW Color
+	#define DP_W float4( 1000.0, 1000.0, 1000.0, 1000.0)   //Tresh Hold for Color C & D and Color
+	#define DQ_X float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos C1 = XY Color & C2 = ZW Black 
+    #define DQ_Y float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos C3 = XY Color & D1 = ZW Color
+    #define DQ_Z float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos D2 = XY Black & D3 = ZW Color
+	#define DQ_W float4( 1000.0, 1000.0, 1000.0, 1000.0) //Tresh Hold for Color A1 & A3 and Color
+	#define DR_X float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos G1 = XY Color & G2 = ZW Black 
+    #define DR_Y float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos G3 = XY Color & H1 = ZW Color
+    #define DR_Z float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos H2 = XY Black & H3 = ZW Color
+	#define DR_W float4( 1000.0, 1000.0, 1000.0, 1000.0) //Tresh Hold for Color G & H and Color 
+	*/
+	//#define WSM 3
+	//#define DB_W 5
+	//#define DF_X float2(0.050,0.0)	
+	//#define HMT 1
+	//#define HMC 0.503
+	//#define LBC 1  //Letter Box Correction Offsets With X & Y
+	//#define DH_Z 0.0
+	//#define DH_W -0.237
+	//#define FMM 1
+	#define PEW 1
 #else
 	#define NPW 1 //No Profile
 #endif
