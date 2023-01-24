@@ -1,7 +1,7 @@
 ////----------------------------------------//
 ///SuperDepth3D Overwatch Automation Header///
 //----------------------------------------////
-// Version 3.1.0
+// Version 3.1.2
 //---------------------------------------OVERWATCH---------------------------------------//
 // If you are reading this stop. Go away and never look back. From this point on if you  //
 // still think it's is worth looking at this..... Then no one can save you or your soul. //
@@ -167,6 +167,7 @@ static const float Filter_Mode_Modifire01_D = 0.0;      //Filter Mode Modifier  
 
 static const int HUD_Mode_Trigger_D = 0;                //HUD Mode Trigger                              | HMT
 static const float HUDX_D = 0.0;                        //Heads Up Display Cut Off Point                | HMC
+static const float HUDY_D = 0.5;                        //Heads Up Display Distance                     | HMD
 
 //Special Toggles Defaults
 static const int Inverted_Depth_Fix_D = 0;              //Inverted Depth Fix                            | IDF 
@@ -365,9 +366,9 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DA_Y 10.0
 	#define DB_Y 4
 	#define DB_W 26
-#elif (App == 0xDE2F0F4D )	//Prey 2006
-	#define DB_W 28
-	#define DB_Y 3
+#elif (App == 0xDE2F0F4D )	//Prey 2006 ****
+	#define WSM 5
+	#define DB_W 2
 #elif (App == 0x36976F6D )	//Prey 2017
 	#define DA_W 1
 	#define DA_X 0.04625
@@ -377,20 +378,22 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DE_Y 0.5
 	#define DE_Z 0.300
     #define DF_Y 0.05
-	#define WSM 7
+	#define WSM 8
 	#define OW_WP "Read Help & Change Me\0Custom WP\0Prey High Settings and <\0Prey 2017 Very High\0"
 	#define RHW 1
 	#define PEW 1
 	#define WPW 1
-#elif (App == 0xBF757E3A )	//Return to Castle Wolfenstein
+#elif (App == 0xBF757E3A )	//Return to Castle Wolfenstein ****
 	#define DA_Y 8.75
 	#define DB_Y 2
-	#define DB_W 31
+	#define WSM 5
+	#define DB_W 5
 #elif (App == 0xC770832 || App == 0x3E42619F )	//Wolfenstein: The New Order | The Old Blood
 	#define DA_Y 25.0
 	#define DB_Y 5
 	#define DA_Z 0.00125
-	#define DB_W 33
+	#define WSM 5
+	#define DB_W 7
 #elif (App == 0x6FC1FF71 ) //Black Mesa
 	#define DA_Y 10.0
 	#define DA_Z 0.000125
@@ -402,19 +405,20 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define DE_Y 0.450
     #define DE_Z 0.450
     #define DG_W -0.225 //Pop out
-	#define DB_W 35
+	#define WSM 5
+	#define DB_W 9
 	#define BMT 1
 	#define DF_Z 0.1375
 	#define SMS 1     //SM Toggle Separation
 	#define DL_X 0.6375//SM Tune //0.5125 //0.560 
 	#define DL_W 0.0  //SM Perspective	
-#elif (App == 0x6D3CD99E ) //Blood 2
+#elif (App == 0x6D3CD99E ) //Blood 2 ****
 	#define DA_X 0.105
 	#define DB_Y 2
 	#define DE_X 4
 	//#define DE_Y 0.50
 	#define DE_Z 0.475
-	#define WSM 5
+	#define WSM 9
 	#define DB_W 8
 	#define OW_WP "Read Help & Change Me\0Custom WP\0Blood 2 All Weapons\0Blood 2 Bonus Weapons\0Blood 2 Former\0"
 	#define WPW 1
@@ -435,7 +439,8 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	//#define DL_W 0.025 //SM Perspective
 	#define DM_X 3     //HQ Tune
 	#define DM_Z 2     //HQ Smooth
-	#define DB_W 38
+	#define WSM 5
+	#define DB_W 12
 	#define DG_Z 0.250 //0.130
 	#define DI_Z 0.155
 	#define DE_X 4
@@ -445,14 +450,14 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DJ_W 0.40 //TEMP
 	#define FOV 1
 	#define RHW 1
-#elif (App == 0x6FB6410B ) //Cryostasis
+#elif (App == 0x6FB6410B ) //Cryostasis ****
 	#define DA_Y 13.75
-	#define DB_Y 3
-	#define DB_W 39
-#elif (App == 0x16B8D61A) //Unreal Gold with v227
+	#define WSM 5
+	#define DB_W 13
+#elif (App == 0x16B8D61A) //Unreal Gold with v227 ****
 	#define DA_Y 17.5
-	#define DB_Y 1
-	#define DB_W 40
+	#define WSM 5
+	#define DB_W 14
 	#define HMC 0.534
 	#define HMT 1
 #elif (App == 0x5FCFB1E5 ) //Project Warlock
@@ -466,12 +471,14 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	//#define DE_Y 0.500
 	#define DE_Z 0.400
 	#define DG_W 0.125
-	#define DB_W 45
+	#define WSM 5
+	#define DB_W 19
 	#define DSW 1
-#elif (App == 0x7DCCBBBD ) //Kingpin Life of Crime
+#elif (App == 0x7DCCBBBD ) //Kingpin Life of Crime ****
 	#define DA_Y 10.0
 	#define DB_Y 4
-	#define DB_W 46
+	#define WSM 5
+	#define DB_W 20
 	#define RHW 1
 #elif (App == 0x9C5C946E ) //EuroTruckSim2
     #define DB_X 1
@@ -479,7 +486,8 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define DF_Y 0.05
 	#define DA_Y 7.0
 	#define DA_Z -0.007
-	#define DB_W 47
+	#define WSM 5
+	#define DB_W 21
 	#define DB_Y 3 //1 or 5
 #elif (App == 0xB302EC7 || App == 0x91D9EBAF ) //F.E.A.R | F.E.A.R 2: Project Origin
 	#define DA_X 0.110
@@ -490,7 +498,8 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	//#define DE_Y 0.625
 	#define DE_Z 0.375
 	//#define DG_W 0.25
-	#define DB_W 48
+	#define WSM 5
+	#define DB_W 22
 	//#define DF_X 0.225
 	#define DSW 1 //?
 	#define FOV 1
@@ -498,11 +507,13 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 #elif (App == 0x2C742D7C ) //Immortal Redneck CP alt 1.9375
 	#define DA_Y 20.0
 	#define DB_Y 5
-	#define DB_W 50
+	#define WSM 5
+	#define DB_W 24
 #elif (App == 0x663E66FE ) //NecroVisioN & NecroVisioN: Lost Company
 	#define DA_Y 10.0
 	#define DB_Y 2
-	#define DB_W 52
+	#define WSM 5
+	#define DB_W 26
 #elif (App == 0xAA6B948E ) //Rage64
 	#define DA_Y 20.0
 	#define DB_Y 2
@@ -544,7 +555,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DB_Y 5
 #elif (App == 0xFE54BF56 ) //No One Lives Forever and 2
 	#define DA_X 0.0375
-	#define WSM 9
+	#define WSM 10
 	#define OW_WP "Read Help & Change Me\0Custom WP\0No One Lives Forever\0No One Lives Forever 2\0"
 	#define WPW 1
 	#define RHW 1
@@ -1016,8 +1027,8 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define SMS 1      //SM Toggle Separation
 	#define DL_X 0.650 //SM Tune
 	#define DL_W 0.050 //SM Perspective
-	#define WSM 2 //Weapon Settings Mode
-	//#define DB_W 51
+	#define WSM 3 //Weapon Settings Mode
+	//#define DB_W 6
 #elif (App == 0x42C1A2B ) //CoD: WWII
 	#define DA_X 0.04
 	#define DA_W 1
@@ -1070,7 +1081,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define HMC 0.5
 	#define BMT 1
 	#define DF_Z 0.100
-	#define WSM 6
+	#define WSM 7
 	#define SPO 1
 	#define OW_WP "Read Help & Change Me\0Custom WP\0Halo: Reach\0Halo: CE Anniversary\0Halo 2: Anniversary\0Halo 3 & Halo 3: ODST\0Halo 3 & Halo 3: ODST Alternet\0Halo 4\0Halo 4 Alternet\0"
 	#define RHW 1
@@ -1203,7 +1214,8 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DA_Y 18.75
 	#define DA_X 0.04125
 	#define DB_Y 5
-	#define DB_W 51
+	#define WSM 5
+	#define DB_W 25
 	#define DB_X 1
 	#define RHW 1
 #elif (App == 0x5925FCC8 ) //Dusk
@@ -1423,7 +1435,8 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	//#fine DG_W 0.325 //Pop out
     #define BMT 1    
     #define DF_Z 0.110
-	#define DB_W 37
+	#define WSM 5
+	#define DB_W 11
 	#define DF_X float2(0.3625,0.0)
 	#define PEW 1
 	//#define DSW 1
@@ -2052,11 +2065,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DA_Y 8.75
 	#define DB_Y 2
 	#define DF_Y 0.0875
-#elif (App == 0xCDD5E6CF ) //Legend of Grimrock
-	#define DA_X 0.120
-	#define DF_Y 0.135
-	#define DA_Y 12.5
-	#define DB_Y 3
 #elif (App == 0x7C0F0E77 ) //Soulcaliber VI
 	#define DA_W 1
 	#define DA_X 0.070
@@ -2261,7 +2269,8 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DE_X 4
 	#define DE_Y 0.500
 	#define DE_Z 0.375
-	#define DB_W 30
+	#define WSM 5
+	#define DB_W 4
 	#define FOV 1
 	#define DAA 1
 	#define NDW 1
@@ -2738,7 +2747,8 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DE_Y 0.500
 	#define DE_Z 0.375
     //#define AFD 1
-	#define DB_W 34
+	#define WSM 5
+	#define DB_W 8
 	#define DF_X float2(0.20,0.0)
 	//#define DG_W 0.08
 	#define BMT 1
@@ -2779,7 +2789,8 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DE_X 4
 	#define DE_Y 0.650
 	#define DE_Z 0.400
-	#define DB_W 43
+	#define WSM 5
+	#define DB_W 17
 	#define DF_X float2(0.1,0.0)
 	#define DG_Z 0.100 //Min
     #define DI_Z 0.100 //Trim
@@ -2967,7 +2978,8 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DE_Y 0.7
 	#define DE_Z 0.375
 	#define DG_W 0.125
-	#define DB_W 36
+	#define WSM 5
+	#define DB_W 10
     #define DG_Z 0.430
 	#define DSW 1
 	#define PEW 1
@@ -3816,8 +3828,8 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DM_Z 4     //HQ Smooth
     //#define DM_Y 3     //HQ VRS
     //#define DL_Y 0.375    //De-Artifact 0.1245
-	#define WSM 2 //Weapon Settings Mode
-	//#define DB_W 52
+	#define WSM 3 //Weapon Settings Mode
+	//#define DB_W 7
 	#define BDF 0    //Barrel Distortion Fix k1 k2 k3 and Zoom
 	#define DC_X 0.00
 	#define DC_Y 0.150
@@ -3941,8 +3953,8 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define DO_Z float4( 0.0   , 0.0   ,  0.0   , 0.0    ) //Pos B2 = XY Black & B3 = ZW Color
     #define DO_W float4( 28.0  , 28.0  ,  1000.0, 1000.0 ) //Tresh Hold for Color A1 & A3 and Color B1 & B3 
     #define AFD 1
-    #define WSM 2
-    #define DB_W 30
+    #define WSM 4
+    #define DB_W 3
     #define PEW 1
 #elif (App == 0xBE557C30 ) //Golden Light
     #define DA_W 1
@@ -3959,14 +3971,14 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define DF_Z 0.125
     #define DG_W 0.125 //Pop
 	#define PEW 1
-#elif (App == 0x70858D6 ) //PowerSlave Exhumed
+#elif (App == 0x70858D6 ) //PowerSlave Exhumed ****
     #define DA_X 0.250
     #define DF_Y 0.0125
     #define DA_Y 300.0
     #define BMT 1    
     #define DF_Z 0.500
-    #define WSM 2
-    #define DB_W 31
+    #define WSM 4
+    #define DB_W 4
 #elif (App == 0xB7097475 ) //God Damn The Garden
     #define DA_W 1
     #define DB_X 1
@@ -4117,24 +4129,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DN_W float4( 0.297, 0.0 , 0.0, 0.0 )         //Size = Menu [ABC] D E F
     #define DJ_Y float4( 30.0, 2.0, 29.0, 1000.0);            //Menu Detection Type for A, B, & C. The Last Value is ???   
     #define DJ_Z float3( 1000., 1000., 1000);                //Set Match Tresh 
-	#define PEW 1
-#elif (App == 0xF4901178 ) //The Surge 2 ****
-    #define DA_W 1 
-    #define DA_X 0.125
-    #define DF_Y 0.0225
-    #define DA_Y 35.00
-    #define DE_X 1
-    #define DE_Y 0.375
-    #define DE_Z 0.375
-    #define BMT 1    
-    #define DF_Z 0.125 //0.125 //0.150
-	#define DG_Z 0.100 //Min
-    #define DI_Z 0.150 //Trim
-	#define SMS 2      //SM Toggle Separation
-	#define DL_X 0.600 //SM Tune
-	#define DL_W 0.100 //SM Perspective
-	#define DM_X 3     //HQ Tune
-	#define DM_Z 3     //HQ Smooth
 	#define PEW 1
 #elif (App == 0xBAC3D546 ) //Wolfenstine New Colossus II 
     #define DA_X 0.040
@@ -4599,8 +4593,8 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define DO_Y float4( 0.0466, 0.875 ,  0.0633, 0.064  ) //Pos A3 = XY Color & B1 = ZW Color
     #define DO_Z float4( 0.409 , 0.08  ,  0.9   , 0.09825) //Pos B2 = XY Black & B3 = ZW Color
 	#define DO_W float4( 17.0   , 30.0   ,  30.0   , 29.0    ) //Tresh Hold for Color A1 & A3 and Color B1 & B3 
-	#define WSM 2
-	#define DB_W 39
+	#define WSM 3
+	#define DB_W 27
 	#define PEW 1
 #elif (App == 0xE26CF45E ) //Daemon X Machina
 	#define DA_W 1
@@ -4734,7 +4728,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define DJ_Y float4( 19.0 , 5.0, 19.0, 30.0);           //Menu Detection Type   
     #define DJ_Z float3( 1000, 1000, 1000);           //Set Match Tresh 1000 is off
 	#define WSM 2
-	#define DB_W 48
+	#define DB_W 15
     #define MMD 1 //Set Multi Menu Detection              //Off / On
     #define DO_X float4( 0.113 , 0.113 ,  0.800  , 0.150   ) //Pos A1 = XY Color & A2 = ZW Black 
     #define DO_Y float4( 0.4125, 0.113 ,  0.0    , 0.0     ) //Pos A3 = XY Color & B1 = ZW Color
@@ -4950,7 +4944,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DG_Y 0.0 
 	#define PEW 1
 	#define DAA 1
-#elif (App == 0x308AEBEA ) //TitanFall 2
+#elif (App == 0x308AEBEA ) //TitanFall 2 ****
 	//#define DA_W 1
 	#define DA_X 0.040
 	//#define DF_Y 0.015
@@ -4971,7 +4965,8 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DM_X 3     //HQ Tune
 	#define DM_Z 0     //HQ Smooth
 	#define DB_Y 4
-	#define DB_W 44
+	#define WSM 5
+	#define DB_W 18
     #define DF_X 0.35
 	#define DJ_W 0.25
 	#define FPS  2
@@ -5530,8 +5525,8 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define DP_Y float4( 0.350 , 0.241 ,  0.736  , 0.575) //Pos C3 = XY Color & D1 = ZW Color
     #define DP_Z float4( 0.060 , 0.380 ,  0.286  , 0.195) //Pos D2 = XY Black & D3 = ZW Color
 	#define DP_W float4( 30.0  , 30.0  ,  30.0   , 14.0) //Tresh Hold for Color A1 & A3 and Color
-	#define WSM 2
-	#define DB_W 29
+	#define WSM 4
+	#define DB_W 2
     #define PEW 1
     #define DSW 1
 #elif (App == 0x6A327F2C ) //Snake Pass
@@ -5897,7 +5892,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DP_W float4( 30.0  , 30.0  ,  30.0   , 14.0) //Tresh Hold for Color A1 & A3 and Color
 	*/
 	#define WSM 2
-	//#define DB_W 41
+	//#define DB_W 25
 	//#define DF_X 0.25	
 	//#define DJ_W 0.150
     #define PEW 1
@@ -5980,7 +5975,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DP_W float4( 30.0  , 30.0  ,  30.0   , 14.0) //Tresh Hold for Color A1 & A3 and Color
 	*/
 	#define WSM 2
-	#define DB_W 42
+	#define DB_W 18
 	#define RHW 1
     #define PEW 1
     #define DSW 1
@@ -6233,7 +6228,8 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DI_Z 0.05 //Trim
 	#define BMT 1
 	#define DF_Z 0.05
-	#define DB_W 49
+	#define WSM 5
+	#define DB_W 23
 	#define DSW 1
 	#define RHW 1
 	#define FOV 1
@@ -8660,7 +8656,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DR_W float4( 1000.0, 1000.0, 1000.0, 1000.0) //Tresh Hold for Color G & H and Color 
 	*/
 	#define WSM 3
-	#define DB_W 30
+	#define DB_W 26
 	#define DF_X float2(0.050,0.0)	
     #define PEW 1
     //#define NDW 1
@@ -9259,7 +9255,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DM_Z 1     //HQ Smooth
     #define DL_Y -0.50    //De-Artifact
 	#define WSM 3
-	#define DB_W 32
+	#define DB_W 11
 	#define FPS  0
 	#define DK_X 2
 	#define DK_Y 0
@@ -10850,7 +10846,8 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DE_Y 0.525
 	#define DE_Z 0.375
 	#define DB_Z 0.090
-	#define DB_W 29
+	#define WSM 5
+	#define DB_W 3
 	#define DF_X float2(0.1,0.0)
 	#define BMT 1
 	#define DF_Z 0.1125
@@ -10861,7 +10858,8 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DA_Y 10.0
 	#define DA_Z 0.1
 	#define DB_Y 1
-	#define DB_W 42
+	#define WSM 5
+	#define DB_W 16
     #define DF_X 0.25
     #define DJ_W 0.6
 	#define DE_X 4
@@ -11242,36 +11240,36 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 #elif (App == 0x6DDCD106 ) //The Town of Light
 	//#define DA_W 1
     #define DB_X 1
-	#define DA_X 0.100
+	#define DA_X 0.0875
 	#define DF_Y 0.000
-	#define DA_Y 7.5
+	#define DA_Y 7.25
     //#define DA_Z 0.0005
 	#define DB_Z 0.050
 	//#define DB_Y 1
-	#define DE_X 1
-	#define DE_Y 0.750
-	#define DE_Z 0.400
+	#define DE_X 3
+	#define DE_Y 0.875
+	#define DE_Z 0.375
 	//#define AFD 1
-	#define DG_W -0.1 //PoP
+	#define DG_W -0.125 //PoP
     #define OIL 3 //Set How many Levels We use for RE_Fix 0 | 1 | 2 | 3
-    #define OIF float4(0.5,0.300,0.160,0.100) //float3(0.5,0.375,0.225)  //Fix enables if Value is > 0.0
-	#define DI_W float4(0.5,1.0,2.5,4.0) //float3(0.0,1.0,2.5)
+    #define OIF float4(0.60,0.50,0.300,0.1) //float3(0.5,0.375,0.225)  //Fix enables if Value is > 0.0
+	#define DI_W float4(0.0,0.50,0.750,2.5) //float3(0.0,1.0,2.5)
 	//#define FTM 1
     //#define DG_Z 0.05 //Min
     //#define DE_W 0.000 //Auto
     //#define DI_Z 0.20 //Trim
     //#define DF_W float2(0.0001,0.0025)  //Edge & Scale
 	#define BMT 1
-	#define DF_Z 0.03549
+	#define DF_Z 0.0325
     //#define SMS 3            //SM Toggle Separation
 	#define DL_X 0.925      //SM Tune
 	//#define DL_W 0.5       //SM Perspective
-	#define DM_X 3           //HQ Tune
+	#define DM_X 4           //HQ Tune
 	#define DM_Z 2           //HQ Smooth
     //#define DM_Y 3           //HQ VRS
-    //#define DL_Y -0.5   //De-Artifact
-    //#define DL_Z -0.25       //Compat Power
-	//#define DJ_X 0.250       //Range Smoothing
+    //#define DL_Y 0.5   //De-Artifact
+    #define DL_Z 0.5       //Compat Power
+	//#define DJ_X 0.50       //Range Smoothing
 	/*
     #define MAC 1
     #define MDD 1 //Set Menu Detection & Direction      //Off 0 | 1 | 2 | 3 | 4      
@@ -11308,6 +11306,327 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	//#define DF_X float2(0.050,0.0)	
 	//#define HMT 1
 	//#define HMC 0.503
+	//#define LBC 1  //Letter Box Correction Offsets With X & Y
+	//#define DH_Z 0.0
+	//#define DH_W -0.237
+	//#define FMM 1
+	#define PEW 1
+#elif (App == 0xF5FC8B92 ) //The Light Remake
+	#define DA_W 1
+    #define DB_X 1
+	#define DA_X 0.025
+	#define DF_Y 0.000
+	#define DA_Y 20.0
+    //#define DA_Z 0.0005
+	#define DB_Z 0.025
+	//#define DB_Y 1
+	#define DE_X 1
+	#define DE_Y 0.750
+	#define DE_Z 0.375
+	//#define AFD 1
+	#define DG_W 1.5 //PoP
+    //#define OIL 3 //Set How many Levels We use for RE_Fix 0 | 1 | 2 | 3
+    //#define OIF float4(0.5,0.300,0.160,0.100) //float3(0.5,0.375,0.225)  //Fix enables if Value is > 0.0
+	//#define DI_W float4(0.5,1.0,2.5,4.0) //float3(0.0,1.0,2.5)
+	//#define FTM 1
+    #define DG_Z 0.040 //0.0125 //Min
+    //#define DE_W 0.000 //Auto
+    #define DI_Z 0.030 //Trim
+    #define DF_W float2(0.001,0.010)  //Edge & Scale
+	#define BMT 1
+	#define DF_Z 0.03
+    //#define SMS 3            //SM Toggle Separation
+	#define DL_X 0.950      //SM Tune
+	//#define DL_W 0.5       //SM Perspective
+	#define DM_X 4           //HQ Tune
+	#define DM_Z 1           //HQ Smooth
+    //#define DM_Y 3           //HQ VRS
+    //#define DL_Y -0.5   //De-Artifact
+    //#define DL_Z -0.25       //Compat Power
+	//#define DJ_X 0.250       //Range Smoothing
+	/*
+    #define MAC 1
+    #define MDD 1 //Set Menu Detection & Direction      //Off 0 | 1 | 2 | 3 | 4      
+    #define DN_X float4( 0.8835, 0.956 , 0.982 , 0.954)//Pos A = XY Any & B = ZW Lock 
+    #define DN_Y float4( 0.500 , 0.004 ,  0.0, 0.0)     //Pos C = XY Any & D = ZW Match
+    #define DN_Z float4( 0.0, 0.0,  0.0, 0.0)           //Pos E = XY Match & F = ZW Match
+	#define DN_W float4( 1.0, 0.0 , 0.0, 0.0 )          //Size = Menu [ABC] D E F
+    #define DJ_Y float4( 28.0, 28.0, 20.0, 14.0);     //Menu Detection Type for A = X, B = Y, & C = Z. The Last Value is a Wild Card amount W is for X and Z. 
+    #define DJ_Z float3( 1000., 1000., 1000);           //Set Match Tresh 
+	*/
+
+	/*
+    #define MMD 1 //Set Multi Menu Detection             //Off / On
+    #define MMS 0 //Set Multi Menu Selection from 0-1 to 29-30 and Off 0 | 1 | 2
+    #define DO_X float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos A1 = XY Color & A2 = ZW Black 
+    #define DO_Y float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos A3 = XY Color & B1 = ZW Color
+    #define DO_Z float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos B2 = XY Black & B3 = ZW Color
+	#define DO_W float4( 1000.0, 1000.0, 1000.0, 1000.0)   //Tresh Hold for Color A & B and Color
+    #define DP_X float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos C1 = XY Color & C2 = ZW Black 
+    #define DP_Y float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos C3 = XY Color & D1 = ZW Color
+    #define DP_Z float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos D2 = XY Black & D3 = ZW Color
+	#define DP_W float4( 1000.0, 1000.0, 1000.0, 1000.0)   //Tresh Hold for Color C & D and Color
+	#define DQ_X float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos C1 = XY Color & C2 = ZW Black 
+    #define DQ_Y float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos C3 = XY Color & D1 = ZW Color
+    #define DQ_Z float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos D2 = XY Black & D3 = ZW Color
+	#define DQ_W float4( 1000.0, 1000.0, 1000.0, 1000.0) //Tresh Hold for Color A1 & A3 and Color
+	#define DR_X float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos G1 = XY Color & G2 = ZW Black 
+    #define DR_Y float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos G3 = XY Color & H1 = ZW Color
+    #define DR_Z float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos H2 = XY Black & H3 = ZW Color
+	#define DR_W float4( 1000.0, 1000.0, 1000.0, 1000.0) //Tresh Hold for Color G & H and Color 
+	*/
+	//#define WSM 3
+	//#define DB_W 5
+	//#define DF_X float2(0.050,0.0)	
+	//#define HMT 1
+	//#define HMC 0.503
+	//#define LBC 1  //Letter Box Correction Offsets With X & Y
+	//#define DH_Z 0.0
+	//#define DH_W -0.237
+	//#define FMM 1
+	#define PEW 1
+#elif (App == 0xF4901178 ) //The Surge 2 ****
+    #define DA_W 1 
+    #define DA_X 0.125
+    #define DF_Y 0.0225
+    #define DA_Y 35.00
+    #define DE_X 1
+    #define DE_Y 0.375
+    #define DE_Z 0.375
+    #define BMT 1    
+    #define DF_Z 0.125 //0.125 //0.150
+	#define DG_Z 0.100 //Min
+    #define DI_Z 0.150 //Trim
+	#define SMS 2      //SM Toggle Separation
+	#define DL_X 0.600 //SM Tune
+	#define DL_W 0.100 //SM Perspective
+	#define DM_X 3     //HQ Tune
+	#define DM_Z 3     //HQ Smooth
+	#define PEW 1
+#elif (App == 0x2CB33C9A ) //The Surge
+	//#define DA_W 1
+    //#define DB_X 1
+	//#define DA_X 0.025
+	#define DF_Y 0.000
+	#define DA_Y 25.0
+    //#define DA_Z 0.0005
+	#define DB_Z 0.05
+	//#define DB_Y 1
+	#define DE_X 1
+	#define DE_Y 0.500
+	#define DE_Z 0.375
+	//#define AFD 1
+	//#define DG_W 1.5 //PoP
+    #define OIL 1 //Set How many Levels We use for RE_Fix 0 | 1 | 2 | 3
+    #define OIF float2(0.350,0.225)//float4(0.5,0.300,0.160,0.100) //float3(0.5,0.375,0.225)  //Fix enables if Value is > 0.0
+	#define DI_W float2(1.00,2.5)//float4(0.5,1.0,2.5,4.0) //float3(0.0,1.0,2.5)
+	//#define FTM 1
+    #define DG_Z 0.025 //0.0125 //Min
+    //#define DE_W 0.000 //Auto
+    #define DI_Z 0.125 //Trim
+    #define DF_W float2(0.001,0.001)  //Edge & Scale
+	#define BMT 1
+	#define DF_Z 0.075
+    //#define SMS 3            //SM Toggle Separation
+	#define DL_X 0.900      //SM Tune
+	//#define DL_W 0.5       //SM Perspective
+	#define DM_X 3           //HQ Tune
+	#define DM_Z 1           //HQ Smooth
+    //#define DM_Y 3           //HQ VRS
+    //#define DL_Y -0.5   //De-Artifact
+    #define DL_Z 0.5       //Compat Power
+	//#define DJ_X 0.250       //Range Smoothing
+	/*
+    #define MAC 1
+    #define MDD 1 //Set Menu Detection & Direction      //Off 0 | 1 | 2 | 3 | 4      
+    #define DN_X float4( 0.8835, 0.956 , 0.982 , 0.954)//Pos A = XY Any & B = ZW Lock 
+    #define DN_Y float4( 0.500 , 0.004 ,  0.0, 0.0)     //Pos C = XY Any & D = ZW Match
+    #define DN_Z float4( 0.0, 0.0,  0.0, 0.0)           //Pos E = XY Match & F = ZW Match
+	#define DN_W float4( 1.0, 0.0 , 0.0, 0.0 )          //Size = Menu [ABC] D E F
+    #define DJ_Y float4( 28.0, 28.0, 20.0, 14.0);     //Menu Detection Type for A = X, B = Y, & C = Z. The Last Value is a Wild Card amount W is for X and Z. 
+    #define DJ_Z float3( 1000., 1000., 1000);           //Set Match Tresh 
+	*/
+
+	/*
+    #define MMD 1 //Set Multi Menu Detection             //Off / On
+    #define MMS 0 //Set Multi Menu Selection from 0-1 to 29-30 and Off 0 | 1 | 2
+    #define DO_X float4( 0.187 , 0.125 , 0.500 , 0.100 ) //Pos A1 = XY Color & A2 = ZW Black 
+    #define DO_Y float4( 0.276 , 0.335 , 0.115 , 0.050 ) //Pos A3 = XY Color & B1 = ZW Color
+    #define DO_Z float4( 0.500 , 0.100 , 0.260 , 0.087 ) //Pos B2 = XY Black & B3 = ZW Color
+	#define DO_W float4( 30.0, 30.0, 30.0, 30.0)   //Tresh Hold for Color A & B and Color
+    #define DP_X float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos C1 = XY Color & C2 = ZW Black 
+    #define DP_Y float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos C3 = XY Color & D1 = ZW Color
+    #define DP_Z float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos D2 = XY Black & D3 = ZW Color
+	#define DP_W float4( 1000.0, 1000.0, 1000.0, 1000.0)   //Tresh Hold for Color C & D and Color
+	#define DQ_X float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos C1 = XY Color & C2 = ZW Black 
+    #define DQ_Y float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos C3 = XY Color & D1 = ZW Color
+    #define DQ_Z float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos D2 = XY Black & D3 = ZW Color
+	#define DQ_W float4( 1000.0, 1000.0, 1000.0, 1000.0) //Tresh Hold for Color A1 & A3 and Color
+	#define DR_X float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos G1 = XY Color & G2 = ZW Black 
+    #define DR_Y float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos G3 = XY Color & H1 = ZW Color
+    #define DR_Z float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos H2 = XY Black & H3 = ZW Color
+	#define DR_W float4( 1000.0, 1000.0, 1000.0, 1000.0) //Tresh Hold for Color G & H and Color 
+	*/
+	//#define WSM 3
+	//#define DB_W 5
+	//#define DF_X float2(0.050,0.0)	
+	//#define HMT 1
+	//#define HMC 0.503
+	//#define LBC 1  //Letter Box Correction Offsets With X & Y
+	//#define DH_Z 0.0
+	//#define DH_W -0.237
+	//#define FMM 1
+	#define FOV 1
+	#define PEW 1
+#elif (App == 0xCDD5E6CF ) //Legend of Grimrock
+	#define DA_X 0.120
+	#define DF_Y 0.135
+	#define DA_Y 12.5
+	#define DB_Y 3
+#elif (App == 0x4BAA047 ) //Legend of Grimrock 2
+	//#define DA_W 1
+    //#define DB_X 1
+	#define DA_X 0.155
+	#define DF_Y 0.001
+	#define DA_Y 7.5
+    //#define DA_Z 0.001
+	#define DB_Z 0.05
+	//#define DB_Y 1
+	//#define DE_X 1
+	//#define DE_Y 0.500
+	//#define DE_Z 0.375
+	//#define AFD 1
+	//#define DG_W 1.5 //PoP
+    //#define OIL 1 //Set How many Levels We use for RE_Fix 0 | 1 | 2 | 3
+    //#define OIF float2(0.350,0.225)//float4(0.5,0.300,0.160,0.100) //float3(0.5,0.375,0.225)  //Fix enables if Value is > 0.0
+	//#define DI_W float2(1.00,2.5)//float4(0.5,1.0,2.5,4.0) //float3(0.0,1.0,2.5)
+	//#define FTM 1
+    //#define DG_Z 0.025 //0.0125 //Min
+    //#define DE_W 0.000 //Auto
+    //#define DI_Z 0.125 //Trim
+    //#define DF_W float2(0.001,0.001)  //Edge & Scale
+	#define BMT 1
+	#define DF_Z 0.0375
+    //#define SMS 3            //SM Toggle Separation
+	#define DL_X 0.950      //SM Tune
+	//#define DL_W 0.5       //SM Perspective
+	#define DM_X 4           //HQ Tune
+	#define DM_Z 1           //HQ Smooth
+    //#define DM_Y 3           //HQ VRS
+    //#define DL_Y -0.5   //De-Artifact
+    //#define DL_Z 0.5       //Compat Power
+	//#define DJ_X 0.250       //Range Smoothing
+	/*
+    #define MAC 1
+    #define MDD 1 //Set Menu Detection & Direction      //Off 0 | 1 | 2 | 3 | 4      
+    #define DN_X float4( 0.8835, 0.956 , 0.982 , 0.954)//Pos A = XY Any & B = ZW Lock 
+    #define DN_Y float4( 0.500 , 0.004 ,  0.0, 0.0)     //Pos C = XY Any & D = ZW Match
+    #define DN_Z float4( 0.0, 0.0,  0.0, 0.0)           //Pos E = XY Match & F = ZW Match
+	#define DN_W float4( 1.0, 0.0 , 0.0, 0.0 )          //Size = Menu [ABC] D E F
+    #define DJ_Y float4( 28.0, 28.0, 20.0, 14.0);     //Menu Detection Type for A = X, B = Y, & C = Z. The Last Value is a Wild Card amount W is for X and Z. 
+    #define DJ_Z float3( 1000., 1000., 1000);           //Set Match Tresh 
+	*/
+
+	/*
+    #define MMD 1 //Set Multi Menu Detection             //Off / On
+    #define MMS 0 //Set Multi Menu Selection from 0-1 to 29-30 and Off 0 | 1 | 2
+    #define DO_X float4( 0.187 , 0.125 , 0.500 , 0.100 ) //Pos A1 = XY Color & A2 = ZW Black 
+    #define DO_Y float4( 0.276 , 0.335 , 0.115 , 0.050 ) //Pos A3 = XY Color & B1 = ZW Color
+    #define DO_Z float4( 0.500 , 0.100 , 0.260 , 0.087 ) //Pos B2 = XY Black & B3 = ZW Color
+	#define DO_W float4( 30.0, 30.0, 30.0, 30.0)   //Tresh Hold for Color A & B and Color
+    #define DP_X float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos C1 = XY Color & C2 = ZW Black 
+    #define DP_Y float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos C3 = XY Color & D1 = ZW Color
+    #define DP_Z float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos D2 = XY Black & D3 = ZW Color
+	#define DP_W float4( 1000.0, 1000.0, 1000.0, 1000.0)   //Tresh Hold for Color C & D and Color
+	#define DQ_X float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos C1 = XY Color & C2 = ZW Black 
+    #define DQ_Y float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos C3 = XY Color & D1 = ZW Color
+    #define DQ_Z float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos D2 = XY Black & D3 = ZW Color
+	#define DQ_W float4( 1000.0, 1000.0, 1000.0, 1000.0) //Tresh Hold for Color A1 & A3 and Color
+	#define DR_X float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos G1 = XY Color & G2 = ZW Black 
+    #define DR_Y float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos G3 = XY Color & H1 = ZW Color
+    #define DR_Z float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos H2 = XY Black & H3 = ZW Color
+	#define DR_W float4( 1000.0, 1000.0, 1000.0, 1000.0) //Tresh Hold for Color G & H and Color 
+	*/
+	//#define WSM 3
+	//#define DB_W 5
+	//#define DF_X float2(0.050,0.0)	
+	//#define HMT 1
+	//#define HMC 0.503
+	//#define LBC 1  //Letter Box Correction Offsets With X & Y
+	//#define DH_Z 0.0
+	//#define DH_W -0.237
+	//#define FMM 1
+	#define PEW 1
+#elif (App == 0x72Da7135 ) //Bugnaxs
+	//#define DA_W 1
+    //#define DB_X 1
+	#define DA_X 0.050
+	//#define DF_Y 0.001
+	#define DA_Y 50.0
+    //#define DA_Z 0.001
+	#define DB_Z 0.1
+	//#define DB_Y 1
+	#define DE_X 1
+	#define DE_Y 0.500
+	#define DE_Z 0.375
+	//#define AFD 1
+	#define DG_W 0.125 //PoP
+    //#define OIL 1 //Set How many Levels We use for RE_Fix 0 | 1 | 2 | 3
+    #define OIF 0.350  //Fix enables if Value is > 0.0
+	#define DI_W 1.25
+	//#define FTM 1
+    //#define DG_Z 0.025 //0.0125 //Min
+    //#define DE_W 0.000 //Auto
+    //#define DI_Z 0.125 //Trim
+    //#define DF_W float2(0.001,0.001)  //Edge & Scale
+	#define BMT 1
+	#define DF_Z 0.075
+    //#define SMS 3            //SM Toggle Separation
+	#define DL_X 0.750      //SM Tune
+	//#define DL_W 0.5       //SM Perspective
+	#define DM_X 4           //HQ Tune
+	#define DM_Z 8           //HQ Smooth
+    //#define DM_Y 3           //HQ VRS
+    //#define DL_Y -0.5   //De-Artifact
+    //#define DL_Z 0.5       //Compat Power
+	//#define DJ_X 0.250       //Range Smoothing
+	/*
+    #define MAC 1
+    #define MDD 1 //Set Menu Detection & Direction      //Off 0 | 1 | 2 | 3 | 4      
+    #define DN_X float4( 0.8835, 0.956 , 0.982 , 0.954)//Pos A = XY Any & B = ZW Lock 
+    #define DN_Y float4( 0.500 , 0.004 ,  0.0, 0.0)     //Pos C = XY Any & D = ZW Match
+    #define DN_Z float4( 0.0, 0.0,  0.0, 0.0)           //Pos E = XY Match & F = ZW Match
+	#define DN_W float4( 1.0, 0.0 , 0.0, 0.0 )          //Size = Menu [ABC] D E F
+    #define DJ_Y float4( 28.0, 28.0, 20.0, 14.0);     //Menu Detection Type for A = X, B = Y, & C = Z. The Last Value is a Wild Card amount W is for X and Z. 
+    #define DJ_Z float3( 1000., 1000., 1000);           //Set Match Tresh 
+	*/
+
+	/*
+    #define MMD 1 //Set Multi Menu Detection             //Off / On
+    #define MMS 0 //Set Multi Menu Selection from 0-1 to 29-30 and Off 0 | 1 | 2
+    #define DO_X float4( 0.187 , 0.125 , 0.500 , 0.100 ) //Pos A1 = XY Color & A2 = ZW Black 
+    #define DO_Y float4( 0.276 , 0.335 , 0.115 , 0.050 ) //Pos A3 = XY Color & B1 = ZW Color
+    #define DO_Z float4( 0.500 , 0.100 , 0.260 , 0.087 ) //Pos B2 = XY Black & B3 = ZW Color
+	#define DO_W float4( 30.0, 30.0, 30.0, 30.0)   //Tresh Hold for Color A & B and Color
+    #define DP_X float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos C1 = XY Color & C2 = ZW Black 
+    #define DP_Y float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos C3 = XY Color & D1 = ZW Color
+    #define DP_Z float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos D2 = XY Black & D3 = ZW Color
+	#define DP_W float4( 1000.0, 1000.0, 1000.0, 1000.0)   //Tresh Hold for Color C & D and Color
+	#define DQ_X float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos C1 = XY Color & C2 = ZW Black 
+    #define DQ_Y float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos C3 = XY Color & D1 = ZW Color
+    #define DQ_Z float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos D2 = XY Black & D3 = ZW Color
+	#define DQ_W float4( 1000.0, 1000.0, 1000.0, 1000.0) //Tresh Hold for Color A1 & A3 and Color
+	#define DR_X float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos G1 = XY Color & G2 = ZW Black 
+    #define DR_Y float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos G3 = XY Color & H1 = ZW Color
+    #define DR_Z float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos H2 = XY Black & H3 = ZW Color
+	#define DR_W float4( 1000.0, 1000.0, 1000.0, 1000.0) //Tresh Hold for Color G & H and Color 
+	*/
+	//#define WSM 3
+	//#define DB_W 5
+	//#define DF_X float2(0.050,0.0)	
+	#define HMT 1
+	#define HMC 2.5
+    #define HMD 0.350
 	//#define LBC 1  //Letter Box Correction Offsets With X & Y
 	//#define DH_Z 0.0
 	//#define DH_W -0.237
@@ -11613,6 +11932,9 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 #ifndef HMC
     #define HMC HUDX_D                         //HUD Mode Cut-Off 
 #endif
+#ifndef HMD
+    #define HMD HUDY_D                         //HUD Mode Distance
+#endif
 
 #ifndef DFW
     #define DFW Delay_Frame_Workaround_D       //Delay Frame Workaround
@@ -11713,12 +12035,12 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 #ifndef NCW
     #define NCW Not_Compatible_Warning_D       //Not Compatible Warning
 #endif
-//Weapon Settings "Use #define WSM | 2 | 3 | 4 | 5 | One is default"
+//Weapon Settings "Use #define WSM | 2 | 3 | 4 | 5 | 6 One is default"
 //Expanded Settings "Use #define WSM 6+ if Games have Multi Weapon Profiles."
 #ifndef OW_WP     //This is used if OW_WP is not called in the Above Profile
-    #define OW_WP "WP Off\0Custom WP\0WP 0\0WP 1\0WP 2\0WP 3\0WP 4\0WP 5\0WP 6\0WP 7\0WP 8\0WP 9\0WP 10\0WP 11\0WP 12\0WP 13\0WP 14\0WP 15\0WP 16\0WP 17\0WP 18\0WP 19\0WP 20\0WP 21\0WP 22\0WP 23\0WP 24\0WP 25\0WP 26\0WP 27\0WP 28\0WP 29\0WP 30\0WP 31\0WP 32\0WP 33\0WP 34\0WP 35\0WP 36\0WP 37\0WP 38\0WP 39\0WP 40\0WP 41\0WP 42\0WP 43\0WP 44\0WP 45\0WP 46\0WP 47\0WP 48\0WP 49\0WP 50\0"
+    #define OW_WP "WP Off\0Custom WP\0WP 0\0WP 1\0WP 2\0WP 3\0WP 4\0WP 5\0WP 6\0WP 7\0WP 8\0WP 9\0WP 10\0WP 11\0WP 12\0WP 13\0WP 14\0WP 15\0WP 16\0WP 17\0WP 18\0WP 19\0WP 20\0WP 21\0WP 22\0WP 23\0WP 24\0WP 25\0"
 #endif
-#ifndef WSM //Profiles List One | Profiles List Two | Profiles List Three | Profiles List Four | Profiles List Five | Six is MCC | Seven is Prey | Eight is Blood 2 | Nine No One Lives Forever |
+#ifndef WSM //Profiles List One | Profiles List Two | Profiles List Three | Profiles List Four | Profiles List Five| Profiles List Six | Seven is MCC | Eight is Prey | Nine is Blood 2 | Ten No One Lives Forever |
     #define WSM 1 //Weapon Setting Mode
 #endif
 
@@ -11781,60 +12103,11 @@ float4 Weapon_Profiles(float WP ,float4 Weapon_Adjust) //Tried Switch But, can't
         Weapon_Adjust = float4(0.255,6.375,53.75,0.0);    //WP 24 | S.T.A.L.K.E.R: Games
     if (WP == 27)
         Weapon_Adjust = float4(0.400,5.5625,0.0,0.0);     //WP 25 | AMID EVIL RTX
-    if (WP == 28)
-        Weapon_Adjust = float4(0.750,30.0,1.025,0.0);     //WP 26 | Prey 2006
-    if (WP == 29)
-        Weapon_Adjust = float4(0.266,27.5,14.0,0.125);     //WP 27 | Wrath
-    if (WP == 30)
-        Weapon_Adjust = float4(3.625,20.0,0,0.0);         //WP 28 | We Where Here Together
-    if (WP == 31)
-        Weapon_Adjust = float4(0.7,9.0,2.3625,0.0);       //WP 29 | Return to Castle Wolfenstine
-    if (WP == 32)
-        Weapon_Adjust = float4(0.4894,62.50,0.98875,0.0); //WP 30 | Wolfenstein
-    if (WP == 33)
-        Weapon_Adjust = float4(1.0,93.75,0.81875,0.0);    //WP 31 | Wolfenstein: The New Order #C770832 / The Old Blood #3E42619F
-    if (WP == 34)
-        Weapon_Adjust = float4(1.150,55.0,0.9,0.0);       //WP 32 | Cyberpunk 2077
-    if (WP == 35)
-        Weapon_Adjust = float4(0.278,42.50,9.0,0.0);      //WP 33 | Black Mesa
-    if (WP == 36)
-        Weapon_Adjust = float4(0.277,105.0,8.8625,0.0);   //WP 34 | Portal 2
-    if (WP == 37)
-        Weapon_Adjust = float4(0.277,15.0,8.8,0.0);       //WP 35 | Crysis Mod
-    if (WP == 38)
-        Weapon_Adjust = float4(1.00,22.5,0.180,0.0);      //WP 36 | SOMA
-    if (WP == 39)
-        Weapon_Adjust = float4(0.444,20.0,1.1875,0.0);    //WP 37 | Cryostasis
-    if (WP == 40)
-        Weapon_Adjust = float4(0.286,80.0,7.0,0.0);       //WP 38 | Unreal Gold with v227
-    if (WP == 41)
-        Weapon_Adjust = float4(0.280,18.75,9.03,0.0);     //WP 39 | Serious Sam Revolution #EB9EEB74/Serious Sam HD: The First Encounter /The Second Encounter /Serious Sam 2 #8238E9CA/ Serious Sam 3: BFE*
-    if (WP == 42)
-        Weapon_Adjust = float4(0.3,12.5,0.900,0.0);       //WP 40 | Serious Sam Fusion
-    if (WP == 43)
-        Weapon_Adjust = float4(1.2,12.5,0.3,0.05);        //WP 41 | GhostRunner DX12
-    if (WP == 44)
-        Weapon_Adjust = float4(0.278,20.0,8.8,0.0);       //WP 42 | TitanFall 2
-    if (WP == 45)
-        Weapon_Adjust = float4(1.300,17.50,0.0,0.0);      //WP 43 | Project Warlock
-    if (WP == 46)
-        Weapon_Adjust = float4(0.625,9.0,2.375,0.0);      //WP 44 | Kingpin Life of Crime
-    if (WP == 47)
-        Weapon_Adjust = float4(0.28,20.0,9.0,0.0);        //WP 45 | EuroTruckSim2
-    if (WP == 48)
-        Weapon_Adjust = float4(0.460,12.5,1.0,0.0);       //WP 46 | F.E.A.R #B302EC7 & F.E.A.R 2: Project Origin #91D9EBAF
-    if (WP == 49)
-        Weapon_Adjust = float4(1.5,30.0,0.950,0.050);     //WP 47 | Condemned Criminal Origins //float4(1.5,37.5,0.99875,0.0); 
-    if (WP == 50)
-        Weapon_Adjust = float4(2.0,16.25,0.09,0.0);       //WP 48 | Immortal Redneck CP alt 1.9375
-    if (WP == 51)
-        Weapon_Adjust = float4(0.485,62.5,0.9625,0.25);   //WP 49 | Dementium 2
-    if (WP == 52)
-        Weapon_Adjust = float4(0.489,68.75,1.02,0.0);     //WP 50 | NecroVisioN & NecroVisioN: Lost Company #663E66FE
 	//Do Not Add more Profiles
 	//61 Profiles is Unity's Limit if using else if
 	//76 Profiles reaches DX 9's Temp Registers Limit 
-	//Will be cliping it off at 52 so 50 Profiles will be the limit so that I have more room to grow and faster compile time. 
+	//Will be cliping it off at 52 so 50 Profiles will be the limit so that I have more room to grow and faster compile time.
+	//Reduced to Half Since 25 Profiles Spread across 6 Slots should speed up compile time in DX9 games.
 		return Weapon_Adjust;
 }
 #elif WSM == 2
@@ -11871,13 +12144,13 @@ float4 Weapon_Profiles(float WP ,float4 Weapon_Adjust) //Could reduce from 76 to
     if (WP == 14)
         Weapon_Adjust = float4(0.284,25.0,11.45,0.125);   //WP 12 | Crysis 3 Remastered
     if (WP == 15)
-        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 13 | Game
+        Weapon_Adjust = float4(0.300,4.25,0.825,0.0);     //WP 13 | Five Night's At Freddy's: Security Breach
     if (WP == 16)
         Weapon_Adjust = float4(0.750,10.250,0.1125,0.0);  //WP 14 | Poppy Playtime
     if (WP == 17)
         Weapon_Adjust = float4(5.0,22.5,0.0125,0.00);     //WP 15 | DEATHLOOP //float4(7.4,25.0,0.025,0.025);
     if (WP == 18)
-        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 16 | Game
+        Weapon_Adjust = float4(0.279,4.0,0.0,0.0);        //WP 16 | Prodeus
     if (WP == 19)
         Weapon_Adjust = float4(1.550,100.0,0.130,0.130);  //WP 17 | Halo Infinite //float4(1.550,117.5,0.125,0.125);
     if (WP == 20)
@@ -11891,65 +12164,16 @@ float4 Weapon_Profiles(float WP ,float4 Weapon_Adjust) //Could reduce from 76 to
     if (WP == 24)
         Weapon_Adjust = float4(15.500,60.0,0.0,0.075);    //WP 22 | Bright Memory: infinite
     if (WP == 25)
-        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 23 | Game
+        Weapon_Adjust = float4(15.025,100.0,0.0,0.0);     //WP 23 | Metal
     if (WP == 26)
         Weapon_Adjust = float4(0.725,5.0,0.3,0.050);      //WP 24 | Industria
     if (WP == 27)
         Weapon_Adjust = float4(1.325,10.0,0.0,0.0);       //WP 25 | KHOLAT
-    if (WP == 28)
-        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 26 | Game
-    if (WP == 29)
-        Weapon_Adjust = float4(1.7,12.25,0.0,0.0);        //WP 27 | Scathe
-    if (WP == 30)
-        Weapon_Adjust = float4(1.025,7.75,0.0,0.0);       //WP 28 | Nightmare Reaper
-    if (WP == 31)
-        Weapon_Adjust = float4(0.5,7.0,0.0,0.0);          //WP 29 | Powerslave Exhumed
-    if (WP == 32)
-        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 30 | Game
-    if (WP == 33)
-        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 31 | Game
-    if (WP == 34)
-        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 32 | Game
-    if (WP == 35)
-        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 33 | Game
-    if (WP == 36)
-        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 34 | Game
-    if (WP == 37)
-        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 35 | Game
-    if (WP == 38)
-        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 36 | Game
-    if (WP == 39)
-        Weapon_Adjust = float4(0.7,7.5,0.25,0.0);         //WP 37 | Ghostwire: Tokyo
-    if (WP == 40)
-        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 38 | Game
-    if (WP == 41)
-        Weapon_Adjust = float4(15.025,100.0,0.0,0.0);     //WP 39 | Metal
-    if (WP == 42)
-        Weapon_Adjust = float4(0.279,4.0,0.0,0.0);        //WP 40 | Prodeus
-    if (WP == 43)
-        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 41 | Game
-    if (WP == 44)
-        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 42 | Game
-    if (WP == 45)
-        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 43 | Game
-    if (WP == 46)
-        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 44 | Game
-    if (WP == 47)
-        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 45 | Game
-    if (WP == 48)
-        Weapon_Adjust = float4(0.300,4.25,0.825,0.0);     //WP 46 | Five Night's At Freddy's: Security Breach
-    if (WP == 49)
-        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 47 | Game
-    if (WP == 50)
-        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 48 | Game
-    if (WP == 51)
-        Weapon_Adjust = float4(1.960,5.25,0,0.0);         //WP 60 | Dying Light
-    if (WP == 52)
-        Weapon_Adjust = float4(2.196,1.750,0.0,0.0);      //WP 61 | Dying Light 2
 	//Do Not Add more Profiles
 	//61 Profiles is Unity's Limit if using else if
 	//76 Profiles reaches DX 9's Temp Registers Limit 
-	//Will be cliping it off at 52 so 50 Profiles will be the limit so that I have more room to grow and faster compile time. 
+	//Will be cliping it off at 52 so 50 Profiles will be the limit so that I have more room to grow and faster compile time.
+	//Reduced to Half Since 25 Profiles Spread across 6 Slots should speed up compile time in DX9 games.
 		return Weapon_Adjust;
 }
 #elif WSM == 3
@@ -11968,9 +12192,9 @@ float4 Weapon_Profiles(float WP ,float4 Weapon_Adjust)
     if (WP == 5)
         Weapon_Adjust = float4(0.425,20.0,99.5,0.0);      //WP 3 | Bioshock 2 Remastred
     if (WP == 6)
-        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 4 | Game
+        Weapon_Adjust = float4(1.960,5.25,0,0.0);         //WP 4 | Dying Light
     if (WP == 7)
-        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 5 | Game
+        Weapon_Adjust = float4(2.196,1.750,0.0,0.0);      //WP 5 | Dying Light 2
     if (WP == 8)
         Weapon_Adjust = float4(0.5,8.0,0,0.0);            //WP 6 | Strife
     if (WP == 9)
@@ -11978,7 +12202,7 @@ float4 Weapon_Profiles(float WP ,float4 Weapon_Adjust)
     if (WP == 10) 
         Weapon_Adjust = float4(2.15,25.0,0.0,0.0);        //WP 8 | No Man Sky FPS Mode //float4(1.825,13.75,0.0,0.0);
     if (WP == 11)
-        Weapon_Adjust = float4(0.0,0.0,0,0.0);            //WP 9 | Game
+        Weapon_Adjust = float4(0.6475,7.5,0.280,0.0);     //WP 9 | Necromunda Hired Gun
     if (WP == 12)
         Weapon_Adjust = float4(0.287,180.0,9.0,0.0);      //WP 10 | Farcry
     if (WP == 13)
@@ -12008,63 +12232,14 @@ float4 Weapon_Profiles(float WP ,float4 Weapon_Adjust)
     if (WP == 25)
         Weapon_Adjust = float4(0.350,17.5,2.050,0.0);     //WP 23 | Star Trek EliteForce II
     if (WP == 26)
-        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 24 | Game
+        Weapon_Adjust = float4(3.5,17.0,0.0,0.0);         //WP 24 | The Entropy Center
     if (WP == 27)
-        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 25 | Game
-    if (WP == 28)
-        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 26 | Game
-    if (WP == 29)
-        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 27 | Game
-    if (WP == 30)
-        Weapon_Adjust = float4(3.5,17.0,0.0,0.0);         //WP 28 | The Entropy Center
-    if (WP == 31)
-        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 29 | Game
-    if (WP == 32)
-        Weapon_Adjust = float4(0.6475,7.5,0.280,0.0);     //WP 30 | Necromunda Hired Gun
-    if (WP == 33)
-        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 31 | Game
-    if (WP == 34)
-        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 32 | Game
-    if (WP == 35)
-        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 33 | Game
-    if (WP == 36)
-        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 34 | Game
-    if (WP == 37)
-        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 35 | Game
-    if (WP == 38)
-        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 36 | Game
-    if (WP == 39)
-        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 37 | Game
-    if (WP == 40)
-        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 38 | Game
-    if (WP == 41)
-        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 39 | Game
-    if (WP == 42)
-        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 40 | Game
-    if (WP == 43)
-        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 41 | Game
-    if (WP == 44)
-        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 42 | Game
-    if (WP == 45)
-        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 43 | Game
-    if (WP == 46)
-        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 44 | Game
-    if (WP == 47)
-        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 45 | Game
-    if (WP == 48)
-        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 46 | Game
-    if (WP == 49)
-        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 47 | Game
-    if (WP == 50)
-        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 48 | Game
-    if (WP == 51)
-        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 49 | Game
-    if (WP == 52)
-        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 50 | Game
+        Weapon_Adjust = float4(0.7,7.5,0.25,0.0);         //WP 25 | Ghostwire: Tokyo
 	//Do Not Add more Profiles
 	//61 Profiles is Unity's Limit if using else if
 	//76 Profiles reaches DX 9's Temp Registers Limit 
-	//Will be cliping it off at 52 so 50 Profiles will be the limit so that I have more room to grow and faster compile time. 
+	//Will be cliping it off at 52 so 50 Profiles will be the limit so that I have more room to grow and faster compile time.
+	//Reduced to Half Since 25 Profiles Spread across 6 Slots should speed up compile time in DX9 games.
 		return Weapon_Adjust;
 }
 #elif WSM == 4
@@ -12075,11 +12250,11 @@ float DMA_Overwatch(float WP, float DMA_Adjust)
 
 float4 Weapon_Profiles(float WP ,float4 Weapon_Adjust)
 {   if (WP == 2)
-        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 0  | Game
+        Weapon_Adjust = float4(1.7,12.25,0.0,0.0);        //WP 0  | Scathe
     if (WP == 3)
-        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 1  | Game
+        Weapon_Adjust = float4(1.025,7.75,0.0,0.0);       //WP 1  | Nightmare Reaper
     if (WP == 4)
-        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 2  | Game
+        Weapon_Adjust = float4(0.5,7.0,0.0,0.0);          //WP 2  | Powerslave Exhumed
     if (WP == 5)
         Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 3  | Game
     if (WP == 6)
@@ -12126,63 +12301,80 @@ float4 Weapon_Profiles(float WP ,float4 Weapon_Adjust)
         Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 24 | Game
     if (WP == 27)
         Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 25 | Game
-    if (WP == 28)
-        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 26 | Game
-    if (WP == 29)
-        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 27 | Game
-    if (WP == 30)
-        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 28 | Game
-    if (WP == 31)
-        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 29 | Game
-    if (WP == 32)
-        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 30 | Game
-    if (WP == 33)
-        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 31 | Game
-    if (WP == 34)
-        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 32 | Game
-    if (WP == 35)
-        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 33 | Game
-    if (WP == 36)
-        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 34 | Game
-    if (WP == 37)
-        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 35 | Game
-    if (WP == 38)
-        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 36 | Game
-    if (WP == 39)
-        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 37 | Game
-    if (WP == 40)
-        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 38 | Game
-    if (WP == 41)
-        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 39 | Game
-    if (WP == 42)
-        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 40 | Game
-    if (WP == 43)
-        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 41 | Game
-    if (WP == 44)
-        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 42 | Game
-    if (WP == 45)
-        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 43 | Game
-    if (WP == 46)
-        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 44 | Game
-    if (WP == 47)
-        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 45 | Game
-    if (WP == 48)
-        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 46 | Game
-    if (WP == 49)
-        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 47 | Game
-    if (WP == 50)
-        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 48 | Game
-    if (WP == 51)
-        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 60 | Game
-    if (WP == 52)
-        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 61 | Game
 	//Do Not Add more Profiles
 	//61 Profiles is Unity's Limit if using else if
 	//76 Profiles reaches DX 9's Temp Registers Limit 
-	//Will be cliping it off at 52 so 50 Profiles will be the limit so that I have more room to grow and faster compile time. 
+	//Will be cliping it off at 52 so 50 Profiles will be the limit so that I have more room to grow and faster compile time.
+	//Reduced to Half Since 25 Profiles Spread across 6 Slots should speed up compile time in DX9 games.  
 		return Weapon_Adjust;
 }
 #elif WSM == 5
+float DMA_Overwatch(float WP, float DMA_Adjust)
+{
+	return DMA_Adjust;
+}
+
+float4 Weapon_Profiles(float WP ,float4 Weapon_Adjust)
+{   if (WP == 2)
+        Weapon_Adjust = float4(0.750,30.0,1.025,0.0);     //WP 0  | Prey 2006
+    if (WP == 3)
+        Weapon_Adjust = float4(0.266,27.5,14.0,0.125);    //WP 1  | Wrath
+    if (WP == 4)
+        Weapon_Adjust = float4(3.625,20.0,0,0.0);         //WP 2  | We Where Here Together
+    if (WP == 5)
+        Weapon_Adjust = float4(0.7,9.0,2.3625,0.0);       //WP 3  | Return to Castle Wolfenstine
+    if (WP == 6)
+        Weapon_Adjust = float4(0.4894,62.50,0.98875,0.0); //WP 4  | Wolfenstein
+    if (WP == 7)
+        Weapon_Adjust = float4(1.0,93.75,0.81875,0.0);    //WP 5  | Wolfenstein: The New Order #C770832 / The Old Blood #3E42619F
+    if (WP == 8)
+        Weapon_Adjust = float4(1.150,55.0,0.9,0.0);       //WP 6  | Cyberpunk 2077
+    if (WP == 9)
+        Weapon_Adjust = float4(0.278,42.50,9.0,0.0);      //WP 7  | Black Mesa
+    if (WP == 10)
+        Weapon_Adjust = float4(0.277,105.0,8.8625,0.0);   //WP 8  | Portal 2
+    if (WP == 11)
+        Weapon_Adjust = float4(0.277,15.0,8.8,0.0);       //WP 9 | Crysis Mod
+    if (WP == 12)
+        Weapon_Adjust = float4(1.00,22.5,0.180,0.0);      //WP 10 | SOMA
+    if (WP == 13)
+        Weapon_Adjust = float4(0.444,20.0,1.1875,0.0);    //WP 11 | Cryostasis
+    if (WP == 14)
+        Weapon_Adjust = float4(0.286,80.0,7.0,0.0);       //WP 12 | Unreal Gold with v227
+    if (WP == 15)
+        Weapon_Adjust = float4(0.280,18.75,9.03,0.0);     //WP 13 | Serious Sam Revolution #EB9EEB74/Serious Sam HD: The First Encounter /The Second Encounter /Serious Sam 2 #8238E9CA/ Serious Sam 3: BFE*
+    if (WP == 16)
+        Weapon_Adjust = float4(0.3,12.5,0.900,0.0);       //WP 14 | Serious Sam Fusion
+    if (WP == 17)
+        Weapon_Adjust = float4(1.2,12.5,0.3,0.05);        //WP 15 | GhostRunner DX12
+    if (WP == 18)
+        Weapon_Adjust = float4(0.278,20.0,8.8,0.0);       //WP 16 | TitanFall 2
+    if (WP == 19)
+        Weapon_Adjust = float4(1.300,17.50,0.0,0.0);      //WP 17 | Project Warlock
+    if (WP == 20)
+        Weapon_Adjust = float4(0.625,9.0,2.375,0.0);      //WP 18 | Kingpin Life of Crime
+    if (WP == 21)
+        Weapon_Adjust = float4(0.28,20.0,9.0,0.0);        //WP 19 | EuroTruckSim2
+    if (WP == 22)
+        Weapon_Adjust = float4(0.460,12.5,1.0,0.0);       //WP 20 | F.E.A.R #B302EC7 & F.E.A.R 2: Project Origin #91D9EBAF
+    if (WP == 23)
+        Weapon_Adjust = float4(1.5,30.0,0.950,0.050);     //WP 21 | Condemned Criminal Origins //float4(1.5,37.5,0.99875,0.0); 
+    if (WP == 24)
+        Weapon_Adjust = float4(2.0,16.25,0.09,0.0);       //WP 22 | Immortal Redneck CP alt 1.9375
+    if (WP == 25)
+        Weapon_Adjust = float4(0.485,62.5,0.9625,0.25);   //WP 23 | Dementium 2
+    if (WP == 26)
+        Weapon_Adjust = float4(0.489,68.75,1.02,0.0);     //WP 24 | NecroVisioN & NecroVisioN: Lost Company #663E66FE
+    if (WP == 27)
+        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 25 | Game
+	//Do Not Add more Profiles
+	//61 Profiles is Unity's Limit if using else if
+	//76 Profiles reaches DX 9's Temp Registers Limit 
+	//Will be cliping it off at 52 so 50 Profiles will be the limit so that I have more room to grow and faster compile time. \
+	//Reduced to Half Since 25 Profiles Spread across 6 Slots should speed up compile time in DX9 games. 
+		return Weapon_Adjust;
+}
+#elif WSM == 6
 float DMA_Overwatch(float WP, float DMA_Adjust)
 {
 	return DMA_Adjust;
@@ -12241,63 +12433,14 @@ float4 Weapon_Profiles(float WP ,float4 Weapon_Adjust)
         Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 24 | Game
     if (WP == 27)
         Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 25 | Game
-    if (WP == 28)
-        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 26 | Game
-    if (WP == 29)
-        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 27 | Game
-    if (WP == 30)
-        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 28 | Game
-    if (WP == 31)
-        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 29 | Game
-    if (WP == 32)
-        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 30 | Game
-    if (WP == 33)
-        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 31 | Game
-    if (WP == 34)
-        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 32 | Game
-    if (WP == 35)
-        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 33 | Game
-    if (WP == 36)
-        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 34 | Game
-    if (WP == 37)
-        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 35 | Game
-    if (WP == 38)
-        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 36 | Game
-    if (WP == 39)
-        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 37 | Game
-    if (WP == 40)
-        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 38 | Game
-    if (WP == 41)
-        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 39 | Game
-    if (WP == 42)
-        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 40 | Game
-    if (WP == 43)
-        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 41 | Game
-    if (WP == 44)
-        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 42 | Game
-    if (WP == 45)
-        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 43 | Game
-    if (WP == 46)
-        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 44 | Game
-    if (WP == 47)
-        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 45 | Game
-    if (WP == 48)
-        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 46 | Game
-    if (WP == 49)
-        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 47 | Game
-    if (WP == 50)
-        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 48 | Game
-    if (WP == 51)
-        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 60 | Game
-    if (WP == 52)
-        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 61 | Game
 	//Do Not Add more Profiles
 	//61 Profiles is Unity's Limit if using else if
 	//76 Profiles reaches DX 9's Temp Registers Limit 
-	//Will be cliping it off at 52 so 50 Profiles will be the limit so that I have more room to grow and faster compile time. 
+	//Will be cliping it off at 52 so 50 Profiles will be the limit so that I have more room to grow and faster compile time.
+	//Reduced to Half Since 25 Profiles Spread across 6 Slots should speed up compile time in DX9 games. 
 		return Weapon_Adjust;
 }
-#elif WSM == 6
+#elif WSM == 7
 float DMA_Overwatch(float WP, float DMA_Adjust) // MCC
 {
 	if( WP == 4) // Change on weapon selection.
@@ -12337,7 +12480,7 @@ float4 Weapon_Profiles(float WP ,float4 Weapon_Adjust) // MCC
 
 		return Weapon_Adjust;
 }
-#elif WSM == 7
+#elif WSM == 8
 float DMA_Overwatch(float WP, float DMA_Adjust)
 {
 	return DMA_Adjust;
@@ -12352,7 +12495,7 @@ float4 Weapon_Profiles(float WP ,float4 Weapon_Adjust) // Prey 2017
 
 	return Weapon_Adjust;
 }
-#elif WSM == 8
+#elif WSM == 9
 float DMA_Overwatch(float WP, float DMA_Adjust)
 {
 	return DMA_Adjust;
@@ -12369,7 +12512,7 @@ float4 Weapon_Profiles(float WP ,float4 Weapon_Adjust) // Blood 2
 
 	return Weapon_Adjust;
 }
-#elif WSM == 9
+#elif WSM == 10
 float DMA_Overwatch(float WP, float DMA_Adjust)
 {
 	return DMA_Adjust;
