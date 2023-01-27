@@ -1,7 +1,7 @@
 ////----------------------------------------//
 ///SuperDepth3D Overwatch Automation Header///
 //----------------------------------------////
-// Version 3.1.3
+// Version 3.1.4
 //---------------------------------------OVERWATCH---------------------------------------//
 // If you are reading this stop. Go away and never look back. From this point on if you  //
 // still think it's is worth looking at this..... Then no one can save you or your soul. //
@@ -186,7 +186,7 @@ static const int Set_Game_FoV_D = 0;                    //Set Game FoV          
 static const int Needs_DXVK_D = 0;                      //Needs DXVK Wrapper                            | NVK
 static const int Needs_DGVoodoo_Two_D = 0;              //Needs DGVooDoo2 DX12 Wrapper                  | NDG
 static const int Aspect_Ratio_Warning_D = 0;            //Aspect Ratio Warning                          | ARW
-
+static const int DRS_Warning_D = 0;                     //Dynamic Resolution Scaling Warning            | DRS
 //Special Toggles Generic
 static const int Read_Help_Warning_D = 0;               //Read Help Warning                             | RHW
 static const int Emulator_Detected_Warning_D = 0;       //Emulator Detected Warning                     | EDW
@@ -1990,11 +1990,11 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DL_W 0.050 //SM Perspective
 	#define NDW 1
 	#define PEW 1
-#elif (App == 0x621202BC ) //Vanquish DGVoodoo2
+#elif (App == 0x621202BC ) //Vanquish DGVoodoo2 ***
 	#define DA_X 0.05
 	#define DA_Y 15.0
 	#define DB_Y 3
-	#define DE_X 1La
+	#define DE_X 1
 	#define DE_Y 0.5
 	#define DE_Z 0.375
 	#define RHW 1
@@ -5084,33 +5084,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DO_W float4( 30.0  , 30.0  , 1000.0 , 1000.0  ) //Tresh Hold for Color A & B and Color
 	#define PEW 1
 	#define FOV 1
-#elif (App == 0x55FAB221 ) //Marvels Spider-Man
-	#define DA_W 1
-    //#define DB_X 1
-	#define DA_X 0.030
-	//#define DF_Y 0.030
-	#define DA_Y 27.5 //30.00
-    #define DA_Z -0.1875
-	#define DB_Z 0.100
-	//#define DB_Y 1
-	#define DE_X 3
-	#define DE_Y 0.500
-	#define DE_Z 0.375
-	//#define DG_W -0.100 //Pop
-    //#define OIF 0.225 //Fix enables if Value is > 0.0
-	//#define DI_W 1.25 //Adjustment for REF
-    #define DG_Z 0.025 //Min
-    #define DI_Z 0.050 //Trim
-	#define BMT 1
-	#define DF_Z 0.100
-    #define SMS 0      //SM Toggle Separation
-	#define DL_X 0.8625//SM Tune
-	#define DL_W 0.000 //SM Perspective
-	#define DM_X 3     //HQ Tune
-	#define DM_Z 1     //HQ Smooth
-	#define PEW 1
-	#define DAA 1
-    #define DSW 1	
 #elif (App == 0x78DF0627 ) //The Sinking City
 	#define DA_W 1
     //#define DB_X 1
@@ -8466,7 +8439,10 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DL_W 0.000 //SM Perspective
 	#define DM_X 3    //HQ Tune
 	#define DM_Z 2     //HQ Smooth
-   #define DL_Y -0.5    //De-Artifact
+	#define DL_Y -0.5    //De-Artifact
+	#define PEW 1
+	#define RHW 1
+    #define DRS 1
 #elif (App == 0x24C85A7A ) //Evil West
 	#define DA_W 1
     //#define DB_X 1
@@ -11708,7 +11684,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	//#define FMM 1
 	#define DAA 1
 	#define PEW 1
-#elif (App == 0x45BE97B7 ) //Sackboy
+#elif (App == 0x45BE97B7 ) //Sackboy A Big Adventure
 	#define DA_W 1
     //#define DB_X 1
 	#define DA_X 0.03
@@ -11855,6 +11831,67 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	//#define DH_W -0.237
 	//#define FMM 1
 	#define PEW 1
+#elif (App == 0x55FAB221 ) //Marvels Spider-Man
+	#define DA_W 1
+    //#define DB_X 1
+	#define DA_X 0.030
+	//#define DF_Y 0.030
+	#define DA_Y 27.5 //30.00
+    #define DA_Z -0.1875
+	#define DB_Z 0.100
+	//#define DB_Y 1
+	#define DE_X 3
+	#define DE_Y 0.500
+	#define DE_Z 0.375
+	//#define DG_W -0.100 //Pop
+    //#define OIF 0.225 //Fix enables if Value is > 0.0
+	//#define DI_W 1.25 //Adjustment for REF
+    #define DG_Z 0.025 //Min
+    #define DI_Z 0.050 //Trim
+	#define BMT 1
+	#define DF_Z 0.100
+    #define SMS 0      //SM Toggle Separation
+	#define DL_X 0.8625//SM Tune
+	#define DL_W 0.000 //SM Perspective
+	#define DM_X 3     //HQ Tune
+	#define DM_Z 1     //HQ Smooth
+	#define PEW 1
+	#define DAA 1
+    #define DSW 1
+    #define DRS 1
+#elif (App == 0xB976D288 ) //Marvels Spider-Man Miles Morales
+	#define DA_W 1
+    //#define DB_X 1
+	#define DA_X 0.075//0.030
+	//#define DF_Y 0.030
+	#define DA_Y 27.5 //30.00
+    //#define DA_Z -0.1875
+	#define DB_Z 0.025
+	//#define DB_Y 1
+	#define DE_X 3
+	#define DE_Y 0.625
+	#define DE_Z 0.400
+	#define DG_W -0.125 //Pop
+    #define OIL 3 //Set How many Levels We use for RE_Fix 0 | 1 | 2 | 3
+    #define OIF float4(0.5,0.40,0.2625,0.1875)  //Fix enables if Value is > 0.0
+	#define DI_W float4(0.0,1.0,1.75,3.0)
+    #define DG_Z 0.025 //Min
+    #define DI_Z 0.050 //Trim
+    #define DF_W float2(0.001,0.00125)  //Edge & Scale
+	#define BMT 1
+	#define DF_Z 0.100
+    #define SMS 0      //SM Toggle Separation
+	#define DL_X 0.850 //SM Tune
+	#define DL_W 0.000 //SM Perspective
+	#define DM_X 4     //HQ Tune
+	#define DM_Z 1     //HQ Smooth
+    #define DL_Z 0.5       //Compat Power
+    #define DL_Y -0.375   //De-Artifact
+	#define DJ_X 0.300       //Range Smoothing
+	#define PEW 1
+	#define DAA 1
+    #define DSW 1
+    #define DRS 1		
 #else
 	#define NPW 1 //No Profile
 #endif
@@ -12247,6 +12284,9 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 #endif
 #ifndef ARW
     #define ARW Aspect_Ratio_Warning_D         //Aspect Ratio Warning 
+#endif
+#ifndef DRS
+    #define DRS DRS_Warning_D                  //Dynamic Resolution Scaling Warning 
 #endif
 
 #ifndef RHW

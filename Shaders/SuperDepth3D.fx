@@ -2,7 +2,7 @@
 	///**SuperDepth3D**///
 	//----------------////
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	//* Depth Map Based 3D post-process shader v3.6.2
+	//* Depth Map Based 3D post-process shader v3.6.3
 	//* For Reshade 3.0+
 	//* ---------------------------------
 	//*
@@ -77,7 +77,7 @@ namespace SuperDepth3D
 		#define OW_WP "WP Off\0Custom WP\0"
 		static const int WSM = 0;
 		//Triggers
-		static const int MAC = 0, ARW = 0, OIL = 0, MMS = 0, NVK = 0, NDG = 0, FTM = 0, SPO = 0, MMD = 0, SMP = 0, LBR = 0, HQT = 0, AFD = 0, MDD = 0, FPS = 1, SMS = 1, OIF = 0, NCW = 0, RHW = 0, NPW = 0, IDF = 0, SPF = 0, BDF = 0, HMT = 0, HMC = 0, DFW = 0, NFM = 0, DSW = 0, BMT = 0, LBC = 0, LBS = 0, LBM = 0, DAA = 0, NDW = 0, PEW = 0, WPW = 0, FOV = 0, EDW = 0, SDT = 0;
+		static const int DRS = 0,MAC = 0, ARW = 0, OIL = 0, MMS = 0, NVK = 0, NDG = 0, FTM = 0, SPO = 0, MMD = 0, SMP = 0, LBR = 0, HQT = 0, AFD = 0, MDD = 0, FPS = 1, SMS = 1, OIF = 0, NCW = 0, RHW = 0, NPW = 0, IDF = 0, SPF = 0, BDF = 0, HMT = 0, HMC = 0, DFW = 0, NFM = 0, DSW = 0, BMT = 0, LBC = 0, LBS = 0, LBM = 0, DAA = 0, NDW = 0, PEW = 0, WPW = 0, FOV = 0, EDW = 0, SDT = 0;
 		//Overwatch.fxh State
 		#define OSW 1
 	#endif
@@ -2924,20 +2924,26 @@ namespace SuperDepth3D
 	#endif
 	
 	float3 Out(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Target
-	{   float4 Color = tex2D(SamplerInfo,texcoord).x;
-		#if Reconstruction_Mode
-		float2 TCL = texcoord, TCR = texcoord;
+	{   float4 Color;
+		float2 TCL = texcoord, TCR = texcoord, TC;
+		
 		if (Stereoscopic_Mode == 0 && !Inficolor_3D_Emulator )
 		{
 			TCL.x = TCL.x*2;
 			TCR.x = TCR.x*2-1;
+			TC = texcoord.x < 0.5;
 		}
-		if(Stereoscopic_Mode == 1 && !Inficolor_3D_Emulator )
+		
+		if (Stereoscopic_Mode == 1 && !Inficolor_3D_Emulator )
 		{
 			TCL.y = TCL.y*2;
 			TCR.y = TCR.y*2-1;
-		}	
+			TC = texcoord.y < 0.5;
+		}
 
+		Color = TC ? tex2D(SamplerInfo,TCL).x : tex2D(SamplerInfo,TCR).x;
+
+		#if Reconstruction_Mode
 		Color.rgb = Stereo_Convert( texcoord, differentialBlend(TCL, 0, Reconstruction_Type), differentialBlend(TCR, 1, Reconstruction_Type) ).rgb;	  	
 		#else
 		Color.rgb = PS_calcLR(texcoord, position.xy).rgb; //Color = texcoord.x+texcoord.y > 1 ? Color : LBDetection();
@@ -2949,7 +2955,7 @@ namespace SuperDepth3D
 	float3 InfoOut(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Target
 	{   float3 Color;
 		float2 TC = float2(texcoord.x,1-texcoord.y);
-		float BT = smoothstep(0,1,sin(timer*(3.75/1000))), Size = 1.1, Depth3D, Read_Help, Emu, SetFoV, PostEffects, NoPro, NotCom, ModFix, Needs, AspectRaito, Network, OW_State, SetAA, SetWP, DGDX, DXVK;
+		float BT = smoothstep(0,1,sin(timer*(3.75/1000))), Size = 1.1, DisableDRS, Depth3D, Read_Help, Emu, SetFoV, PostEffects, NoPro, NotCom, ModFix, Needs, AspectRaito, Network, OW_State, SetAA, SetWP, DGDX, DXVK;
 		//Text Information
 		float2 charSize = float2(.00875, .0125) * Size;// Set a general character size...
 		// Starting position.
@@ -3119,9 +3125,47 @@ namespace SuperDepth3D
 			SetAA += drawChar( CH_S, charPos.xy, charSize, TC, Shift_Adjust.x ); 
 			SetAA += drawChar( CH_S, charPos.xy, charSize, TC, Shift_Adjust.x );
 		#endif
+		//Disable Dynamic Resolution Scaling		
+		#if DRS
+			charPos = float2( 0.009, 0.885);
+			DisableDRS += drawChar( CH_D, charPos.xy, charSize, TC, 0 );
+			DisableDRS += drawChar( CH_I, charPos.xy, charSize, TC, Shift_Adjust.x );
+			DisableDRS += drawChar( CH_S, charPos.xy, charSize, TC, Shift_Adjust.x );
+			DisableDRS += drawChar( CH_A, charPos.xy, charSize, TC, Shift_Adjust.x );
+			DisableDRS += drawChar( CH_B, charPos.xy, charSize, TC, Shift_Adjust.x );
+			DisableDRS += drawChar( CH_L, charPos.xy, charSize, TC, Shift_Adjust.x );
+			DisableDRS += drawChar( CH_E, charPos.xy, charSize, TC, Shift_Adjust.x );
+			DisableDRS += drawChar( CH_BLNK, charPos.xy, charSize, TC, Shift_Adjust.x );
+			DisableDRS += drawChar( CH_D, charPos.xy, charSize, TC, Shift_Adjust.x );
+			DisableDRS += drawChar( CH_Y, charPos.xy, charSize, TC, Shift_Adjust.x );
+			DisableDRS += drawChar( CH_N, charPos.xy, charSize, TC, Shift_Adjust.x );
+			DisableDRS += drawChar( CH_A, charPos.xy, charSize, TC, Shift_Adjust.x );
+			DisableDRS += drawChar( CH_M, charPos.xy, charSize, TC, Shift_Adjust.x );
+			DisableDRS += drawChar( CH_I, charPos.xy, charSize, TC, Shift_Adjust.x );
+			DisableDRS += drawChar( CH_C, charPos.xy, charSize, TC, Shift_Adjust.x );
+			DisableDRS += drawChar( CH_BLNK, charPos.xy, charSize, TC, Shift_Adjust.x );
+			DisableDRS += drawChar( CH_R, charPos.xy, charSize, TC, Shift_Adjust.x );
+			DisableDRS += drawChar( CH_E, charPos.xy, charSize, TC, Shift_Adjust.x );
+			DisableDRS += drawChar( CH_S, charPos.xy, charSize, TC, Shift_Adjust.x );
+			DisableDRS += drawChar( CH_O, charPos.xy, charSize, TC, Shift_Adjust.x );
+			DisableDRS += drawChar( CH_L, charPos.xy, charSize, TC, Shift_Adjust.x );
+			DisableDRS += drawChar( CH_U, charPos.xy, charSize, TC, Shift_Adjust.x );
+			DisableDRS += drawChar( CH_T, charPos.xy, charSize, TC, Shift_Adjust.x );
+			DisableDRS += drawChar( CH_I, charPos.xy, charSize, TC, Shift_Adjust.x );
+			DisableDRS += drawChar( CH_O, charPos.xy, charSize, TC, Shift_Adjust.x );
+			DisableDRS += drawChar( CH_N, charPos.xy, charSize, TC, Shift_Adjust.x );
+			DisableDRS += drawChar( CH_BLNK, charPos.xy, charSize, TC, Shift_Adjust.x );
+			DisableDRS += drawChar( CH_S, charPos.xy, charSize, TC, Shift_Adjust.x );
+			DisableDRS += drawChar( CH_C, charPos.xy, charSize, TC, Shift_Adjust.x );
+			DisableDRS += drawChar( CH_A, charPos.xy, charSize, TC, Shift_Adjust.x );
+			DisableDRS += drawChar( CH_L, charPos.xy, charSize, TC, Shift_Adjust.x );
+			DisableDRS += drawChar( CH_I, charPos.xy, charSize, TC, Shift_Adjust.x );
+			DisableDRS += drawChar( CH_N, charPos.xy, charSize, TC, Shift_Adjust.x );
+			DisableDRS += drawChar( CH_G, charPos.xy, charSize, TC, Shift_Adjust.x );
+		#endif
 		//Set Weapon		
 		#if WPW
-			charPos = float2( 0.009, 0.885);
+			charPos = float2( 0.009, 0.8675);
 			SetWP += drawChar( CH_S, charPos.xy, charSize, TC, 0 ); 
 			SetWP += drawChar( CH_E, charPos.xy, charSize, TC, Shift_Adjust.x ); 
 			SetWP += drawChar( CH_T, charPos.xy, charSize, TC, Shift_Adjust.x ); 
@@ -3135,7 +3179,7 @@ namespace SuperDepth3D
 		#endif
 		//Net Play		
 		#if NDW
-			charPos = float2( 0.009, 0.8675);
+			charPos = float2( 0.009, 0.850);
 			Network += drawChar( CH_N, charPos.xy, charSize, TC, 0 );
 			Network += drawChar( CH_E, charPos.xy, charSize, TC, Shift_Adjust.x );
 			Network += drawChar( CH_T, charPos.xy, charSize, TC, Shift_Adjust.x );
@@ -3147,7 +3191,7 @@ namespace SuperDepth3D
 		#endif
 		//Set FoV		
 		#if FOV
-			charPos = float2( 0.009, 0.850);
+			charPos = float2( 0.009, 0.8325);
 			SetFoV += drawChar( CH_S, charPos.xy, charSize, TC, 0 );
 			SetFoV += drawChar( CH_E, charPos.xy, charSize, TC, Shift_Adjust.x );
 			SetFoV += drawChar( CH_T, charPos.xy, charSize, TC, Shift_Adjust.x );
@@ -3289,7 +3333,7 @@ namespace SuperDepth3D
 		Depth3D += drawChar( CH_O, charPos.xy, charSize_B, TC, Shift_Adjust.x );
 
 		//Website
-		return Depth3D+Read_Help+PostEffects+NoPro+NotCom+Network+ModFix+Needs+OW_State+SetAA+SetWP+SetFoV+Emu+DGDX+DXVK+AspectRaito ? (1-texcoord.y*50.0+48.85)*texcoord.y-0.500: 0;
+		return Depth3D+Read_Help+PostEffects+NoPro+NotCom+Network+ModFix+Needs+OW_State+SetAA+SetWP+SetFoV+Emu+DGDX+DXVK+AspectRaito+DisableDRS ? (1-texcoord.y*50.0+48.85)*texcoord.y-0.500: 0;
 	}	
 	
 	///////////////////////////////////////////////////////////////////ReShade.fxh//////////////////////////////////////////////////////////////////////

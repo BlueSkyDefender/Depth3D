@@ -568,12 +568,45 @@ Reshade version chosen due to EAC
 Other things to note you can set FPS Focus Depth if you have issues with aiming with your gun. 
 TAA causes shimmering.
 
+{Final Fantasy VII REMAKE INTERGRADE} [Reshade 5.6.0]
+https://www.nexusmods.com/finalfantasy7remake/mods/74?tab=files&file_id=3469
+
+Setting to set in Engine.ini
+
+[SystemSettings]
+# Edit this file with any CVar changes you want the game to use on startup (make sure they're underneath the [SystemSettings] line)
+# and copy it into your "Documents\My Games\FINAL FANTASY VII REMAKE\Saved\Config\WindowsNoEditor\" folder, as Engine.ini
+# (you might need to create the WindowsNoEditor folder, since game doesn't create it by default)
+# If CVars don't seem to be changed ingame (you can check with dev-console), try renaming Engine.ini to Engine instead
+# as your system might be hiding the existing .ini extension (Windows hides extensions by default)
+
+# The ingame resolution options are limited to 2160p and below
+# but you can uncomment the r.SetRes line below & change it to any custom resolution supported by your GPU/monitor
+# If the SetRes string ends with "f" (without quotes), the game will try using exclusive fullscreen (requires -dx11 launch param)
+# Similarly, "wf" will run it in a borderless window, while "w" will use windowed mode
+# Note that exclusive fullscreen seems to have issues when alt-tabbing!
+#r.SetRes=2560x1440f
+
+# Uncomment lines below to disable the buggy dynamic resolution used by the game
+# (UE4 on PC isn't meant to use DRS, UE4 devs themselves have said it won't run on PC properly, see my post for more info: https://forums.nexusmods.com/index.php?/topic/10858168-ffviihook-ue4-dev-console-unlocker/page-44#entry103836498)
+r.DynamicRes.OperationMode=0
+r.DynamicRes.MinScreenPercentage=100
+
+Download and from FFVIIHook in to the same folder where the game exe is.
+
+xinput13.dll goes where ff7remake.exe is.
+
+Engine.ini should be %USERPROFILE%\Documents\My Games\FINAL FANTASY VII REMAKE\Saved\Config\WindowsNoEditor.
+
+If no WindowsNoEditor Folder is there make it.
+
 {Final Fantasy XV Windows Edition} [Reshade 4.6.1]
 Problems with getting to the ReShade console.
 
 You can use Ctrl + Tab then tab to the box you want and hit Spacebar. Then use arrow keys to get to the sharder you want and hit enter. Then do this again for the settings.....
 
 You can also run the game in window mode then alt tab with the reshade menu open. Then Click out side then click back in to the game on top of the ReShade menu. Then close it and switch the game back to Fullscreen mode.
+
 
 {Gold Source: Games} [Reshade 5.0.2]
 When you install the opengl32.dll right click it and set it to read only.
