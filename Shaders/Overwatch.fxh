@@ -1,7 +1,7 @@
 ////----------------------------------------//
 ///SuperDepth3D Overwatch Automation Header///
 //----------------------------------------////
-// Version 3.1.4
+// Version 3.1.5
 //---------------------------------------OVERWATCH---------------------------------------//
 // If you are reading this stop. Go away and never look back. From this point on if you  //
 // still think it's is worth looking at this..... Then no one can save you or your soul. //
@@ -10936,26 +10936,27 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 #elif (App == 0x4FF5CF63 ) //Lords of the Fallen
 	//#define DA_W 1
     //#define DB_X 1
-	#define DA_X 0.040
+	#define DA_X 0.050
 	//#define DF_Y 0.00
-	#define DA_Y 65.0
+	#define DA_Y 57.5
     //#define DA_Z 0.0005
 	//#define DB_Z 0.025
 	//#define DB_Y 1
 	#define DE_X 3
-	#define DE_Y 0.700
+	#define DE_Y 0.625
 	#define DE_Z 0.375
-	#define DG_W -0.25 //PoP
+	//#define DG_W -0.25 //PoP
     #define OIL 3 //Set How many Levels We use for RE_Fix 0 | 1 | 2 | 3
-    #define OIF float4(0.6,0.3,0.25,0.125)  //Fix enables if Value is > 0.0
-	#define DI_W float4(0.0,1.0,2.5,5.0)
+    #define OIF float4(0.5,0.3,0.25,0.10)  //Fix enables if Value is > 0.0
+	#define DI_W float4(0.5,1.5,2.0,4.5)
+	//#define AFD 1
 	//#define FTM 1
     //#define DG_Z 0.05 //Min
     //#define DE_W 0.000 //Auto
     //#define DI_Z 0.015 //Trim
     #define DF_W float2(0.0001,0.001)  //Edge & Scale
 	#define BMT 1
-	#define DF_Z 0.075
+	#define DF_Z 0.065
     //#define SMS 2            //SM Toggle Separation
 	#define DL_X 0.950      //SM Tune
 	//#define DL_W 0.5       //SM Perspective
@@ -11699,7 +11700,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	//#define AFD 1
 	#define DG_W -0.125 //PoP
     #define OIL 2 //Set How many Levels We use for RE_Fix 0 | 1 | 2 | 3
-    #define OIF float3(0.5,0.250,0.125)//float4(0.5,0.300,0.160,0.100) //float3(0.5,0.375,0.225)  //Fix enables if Value is > 0.0
+    #define OIF float3(0.5,0.20,0.125)//float4(0.5,0.300,0.160,0.100) //float3(0.5,0.375,0.225)  //Fix enables if Value is > 0.0
 	#define DI_W float3(0.25,1.00,2.75)//float4(0.5,1.0,2.5,4.0) //float3(0.0,1.0,2.5)
 	//#define FTM 1
     //#define DG_Z 0.025 //0.0125 //Min
@@ -11707,7 +11708,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DI_Z 0.125 //Trim
     //#define DF_W float2(0.001,0.001)  //Edge & Scale
 	#define BMT 1
-	#define DF_Z 0.15
+	#define DF_Z 0.10
     //#define SMS 3            //SM Toggle Separation
 	#define DL_X 0.900      //SM Tune
 	//#define DL_W 0.5       //SM Perspective
@@ -11760,25 +11761,25 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 #elif (App == 0x1E28FCCC ) //Paradise Lost
 	#define DA_W 1
     //#define DB_X 1
-	#define DA_X 0.075
+	#define DA_X 0.115//0.075
 	//#define DF_Y 0.001
-	#define DA_Y 400.0//275.0
+	#define DA_Y 250//400.0
     //#define DA_Z 0.001
 	#define DB_Z 0.075
 	//#define DB_Y 1
 	#define DE_X 1
-	#define DE_Y 0.875
+	#define DE_Y 0.750
 	#define DE_Z 0.375
 	//#define AFD 1
-	#define DG_W 0.125 //PoP
+	//#define DG_W 0.125 //PoP
     //#define OIL 1 //Set How many Levels We use for RE_Fix 0 | 1 | 2 | 3
     //#define OIF 0.350  //Fix enables if Value is > 0.0
 	//#define DI_W 1.25
 	//#define FTM 1
-    #define DG_Z 0.170 //0.210 //Min
+    #define DG_Z 0.100 //0.170 //0.210 //Min
     //#define DE_W 0.000 //Auto
-    #define DI_Z 0.175 //0.200//Trim
-    #define DF_W float2(0.001,0.007)  //Edge & Scale
+    #define DI_Z 0.200 //0.175 //0.200//Trim
+    #define DF_W float2(0.001,0.005)  //Edge & Scale
 	#define BMT 1
 	#define DF_Z 0.15
     //#define SMS 3            //SM Toggle Separation
@@ -11831,6 +11832,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	//#define DH_W -0.237
 	//#define FMM 1
 	#define PEW 1
+	#define FOV 1
 #elif (App == 0x55FAB221 ) //Marvels Spider-Man
 	#define DA_W 1
     //#define DB_X 1
