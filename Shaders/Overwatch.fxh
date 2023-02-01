@@ -11894,12 +11894,12 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DAA 1
     #define DSW 1
     #define DRS 1
-#elif (App == 0xAE9BDA5E ) //Ghost of tail
+#elif (App == 0xAE9BDA5E ) //Ghost of Tale
 	#define DA_W 1
     #define DB_X 1
 	#define DA_X 0.0525
 	//#define DF_Y 0.01
-	#define DA_Y 52.5
+	#define DA_Y 50
     //#define DA_Z 0.000
 	#define DB_Z 0.025
 	//#define DB_Y 1
@@ -11917,7 +11917,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DI_Z 0.030 //Trim
     //#define DF_W float2(0.001,0.001)  //Edge & Scale
 	#define BMT 1
-	#define DF_Z 0.150
+	#define DF_Z 0.100
     #define SMS 3           //SM Toggle Separation
 	#define DL_X 0.90      //SM Tune
 	//#define DL_W 0.5       //SM Perspective
