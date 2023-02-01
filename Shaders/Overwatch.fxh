@@ -11308,8 +11308,8 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	//#define FTM 1
     #define DG_Z 0.040 //0.0125 //Min
     //#define DE_W 0.000 //Auto
-    #define DI_Z 0.030 //Trim
-    #define DF_W float2(0.001,0.010)  //Edge & Scale
+    #define DI_Z 0.040 //Trim
+    #define DF_W float2(0.001,0.0075)  //Edge & Scale
 	#define BMT 1
 	#define DF_Z 0.03
     //#define SMS 3            //SM Toggle Separation
