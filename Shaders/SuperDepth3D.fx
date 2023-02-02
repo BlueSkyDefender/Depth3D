@@ -2,7 +2,7 @@
 	///**SuperDepth3D**///
 	//----------------////
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	//* Depth Map Based 3D post-process shader v3.6.3
+	//* Depth Map Based 3D post-process shader v3.6.4
 	//* For Reshade 3.0+
 	//* ---------------------------------
 	//*
@@ -1802,17 +1802,21 @@ namespace SuperDepth3D
 			#endif   
 			float4 Switch_Array = ZPD_Boundary == 6 ? float4(0.825,0.850,0.875,0.900) : float4(1.0,0.875,0.75,0.625);
 			//Normal A & B for both	
-			const float CDArray_A0[7] = { LB_Dir.x, 0.25, 0.375, 0.5, 0.625, 0.75, LB_Dir.y}, CDArray_B0[7] = { 0.25, 0.375, 0.4375, 0.5, 0.5625, 0.625, 0.75}, CDArray_C0[9] = { 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9};
-			const float CDArray_A1[5] = { 0.3, 0.5, 0.625, 0.75, 0.875}, CDArray_B1[5] = { 0.3, 0.4, 0.5, 0.625, 0.75};
-			const float CDArray_C1[4] = { 0.25, 0.5, 0.75, 0.875};
+			const float CDArray_X_A0[7] = { LB_Dir.x, 0.25, 0.375, 0.5, 0.625, 0.75, LB_Dir.y}, 
+						CDArray_X_B0[7] = { 0.25, 0.375, 0.4375, 0.5, 0.5625, 0.625, 0.75}, 
+						CDArray_X_C0[9] = { 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9};
+							
+			const float CDArray_Y_A0[5] = { 0.3, 0.5, 0.625, 0.75, 0.875}, 
+						CDArray_Y_B0[5] = { 0.3, 0.4, 0.5, 0.625, 0.75},
+						CDArray_Y_C0[4] = { 0.25, 0.5, 0.75, 0.875};
 
 			float CDArrayZPD_A[7] = { ZPD_Separation.x * Switch_Array.w, ZPD_Separation.x * Switch_Array.z, ZPD_Separation.x * Switch_Array.y, ZPD_Separation.x * Switch_Array.x, ZPD_Separation.x * Switch_Array.y, ZPD_Separation.x * Switch_Array.z, ZPD_Separation.x * Switch_Array.w },
 				  CDArrayZPD_B[7] = { ZPD_Separation.x * 0.3, ZPD_Separation.x * 0.5, ZPD_Separation.x * 0.75, ZPD_Separation.x, ZPD_Separation.x * 0.75, ZPD_Separation.x * 0.5, ZPD_Separation.x * 0.3},
-	 			 CDArrayZPD_C[10] = { ZPD_Separation.x * 0.5625, ZPD_Separation.x * 0.75, ZPD_Separation.x * 0.875, ZPD_Separation.x * 0.9375, 
-									   ZPD_Separation.x, ZPD_Separation.x, 
+	 			 CDArrayZPD_C[9] = { ZPD_Separation.x * 0.5625, ZPD_Separation.x * 0.75, ZPD_Separation.x * 0.875, ZPD_Separation.x * 0.9375, 
+									   ZPD_Separation.x,
 									   ZPD_Separation.x * 0.9375, ZPD_Separation.x * 0.875, ZPD_Separation.x * 0.75, ZPD_Separation.x * 0.5625 };	
 			//Screen Space Detector 7x6 Grid from between 0 to 1 and ZPD Detection becomes stronger as it gets closer to the Center.
-			float Shift_Per_Frame = AFD ? Alternate ? 0 : 0.0625 : 0;
+			float Shift_Per_Frame = Alternate ? 0 : 0.0625;
 			float2 GridXY; int2 iXY = ( ZPD_Boundary == 3 ? int2( 9, 4) : int2( 7, 5) );//was 12/4 and 7/7 This reduction saves 0.1 ms and should show no diff to the user.
 			[loop]                                                                       //I was thinking the lowest I can go would be 9/4 along with 7/5
 			for( int iX = 0 ; iX < iXY.x; iX++ )                                         //7 * 7 = 49 | 12 * 4 = 48 | 7 * 6 = 42 | 9 * 4 = 36 | 7 * 5 = 35
@@ -1820,15 +1824,17 @@ namespace SuperDepth3D
 				for( int iY = 0 ; iY < iXY.y; iY++ )
 				{
 					if(ZPD_Boundary == 1 || ZPD_Boundary == 6 || ZPD_Boundary == 7)
-						GridXY = float2( CDArray_A0[iX], CDArray_A1[iY]);
+						GridXY = float2( CDArray_X_A0[iX], CDArray_Y_A0[iY]);
 					else if(ZPD_Boundary == 2 || ZPD_Boundary == 5)
-						GridXY = float2( CDArray_B0[iX], CDArray_A1[iY]);
+						GridXY = float2( CDArray_X_B0[iX], CDArray_Y_A0[iY]);
 					else if(ZPD_Boundary == 3)
-						GridXY = float2(CDArray_C0[iX],CDArray_C1[min(3,iY)]);
+						GridXY = float2( CDArray_X_C0[iX], CDArray_Y_C0[min(3,iY)]);
 					else if(ZPD_Boundary == 4)
-						GridXY = float2( CDArray_A0[iX], CDArray_B1[iY]);
+						GridXY = float2( CDArray_X_A0[iX], CDArray_Y_B0[iY]);
+					//GridXY.x += fmod(CDArray_Y_C0[min(3,iY)],0.25) ? 0.05 : 0;
 					if( AFD )
-						GridXY += Shift_Per_Frame;
+						GridXY.x += Shift_Per_Frame;
+						
 					float ZPD_I = ZPD_Boundary == 3 ?  CDArrayZPD_C[iX] : (ZPD_Boundary == 2 || ZPD_Boundary == 5  ? CDArrayZPD_B[iX] : CDArrayZPD_A[iX]);		
 
 					if(ZPD_Boundary >= 4)
