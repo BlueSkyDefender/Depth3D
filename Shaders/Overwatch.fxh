@@ -12144,10 +12144,10 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DE_Y 0.500
 	#define DE_Z 0.375
 	//#define AFD 1
-	//#define DG_W 0.25 //PoP
-    #define OIL 2 //Set How many Levels We use for RE_Fix 0 | 1 | 2 | 3
-    #define OIF float3(0.375,0.25,0.125)  //Fix enables if Value is > 0.0
-	#define DI_W float3(1.0,1.5,4.0)//float4(-0.25,0.0,0.875,2.5)
+	#define DG_W -0.125 //PoP
+    #define OIL 3 //Set How many Levels We use for RE_Fix 0 | 1 | 2 | 3
+    #define OIF float4(0.375,0.25,0.125,0.0625)  //Fix enables if Value is > 0.0
+	#define DI_W float4(1.0,1.5,3.75,5.0)//float4(-0.25,0.0,0.875,2.5)
 	//#define FTM 1
     //#define DG_Z 0.025 //0.0125 //Min
     //#define DE_W 0.000 //Auto
@@ -12175,13 +12175,13 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define DJ_Z float3( 1000., 1000., 1000);           //Set Match Tresh 
 	*/
 
-	/*
     #define MMD 1 //Set Multi Menu Detection             //Off / On
     #define MMS 0 //Set Multi Menu Selection from 0-1 to 29-30 and Off 0 | 1 | 2
-    #define DO_X float4( 0.187 , 0.125 , 0.500 , 0.100 ) //Pos A1 = XY Color & A2 = ZW Black 
-    #define DO_Y float4( 0.276 , 0.335 , 0.115 , 0.050 ) //Pos A3 = XY Color & B1 = ZW Color
-    #define DO_Z float4( 0.500 , 0.100 , 0.260 , 0.087 ) //Pos B2 = XY Black & B3 = ZW Color
+    #define DO_X float4( 0.482 , 0.785 , 0.964 , 0.945 ) //Pos A1 = XY Color & A2 = ZW Black 
+    #define DO_Y float4( 0.526 , 0.785 , 0.482 , 0.785 ) //Pos A3 = XY Color & B1 = ZW Color
+    #define DO_Z float4( 0.875 , 0.945 , 0.526 , 0.785 ) //Pos B2 = XY Black & B3 = ZW Color
 	#define DO_W float4( 30.0, 30.0, 30.0, 30.0)   //Tresh Hold for Color A & B and Color
+	/*
     #define DP_X float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos C1 = XY Color & C2 = ZW Black 
     #define DP_Y float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos C3 = XY Color & D1 = ZW Color
     #define DP_Z float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos D2 = XY Black & D3 = ZW Color
