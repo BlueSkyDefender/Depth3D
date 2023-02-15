@@ -2,7 +2,7 @@
 	///**SuperDepth3D_VR+**///
 	//--------------------////
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	//* Depth Map Based 3D post-process shader v3.6.4
+	//* Depth Map Based 3D post-process shader v3.6.5
 	//* For Reshade 4.4+ I think...
 	//* ---------------------------------
 	//*
@@ -801,11 +801,16 @@ namespace SuperDepth3DVR
 		ui_category = "Image Adjustment";
 	> = float3(0.24, 0.24, 0.24);
 	
-	uniform bool Theater_Mode <
-		ui_label = " Theater Mode";
-		ui_tooltip = "Sets the VR Shader into Theater mode.";
+	uniform int Theater_Mode <
+		ui_type = "combo";
+		ui_items = "Off\0Theater Mode Normal\0Theater Mode AR\0";
+		ui_label = " Theater Modes";
+		ui_tooltip = "Sets the VR Shader into Theater mode for CellPhone VR or Nreal Glasses.\n"
+					 "The 2nd Option is the same as the first. But, Zoomed in.\n"
+				     "Default is Off.\n";
 		ui_category = "Image Adjustment";
-	> = false;
+	> = 0;
+	
 	#else
 	static const int Barrel_Distortion = 0;
 	static const float FoV = 0;
@@ -2308,7 +2313,7 @@ namespace SuperDepth3DVR
 		//Field of View
 		float fov = FoV-(FoV*0.2), F = -fov + 1,HA = (F - 1)*(BUFFER_WIDTH*0.5)*pix.x;
 		//Field of View Application
-		float2 Z_A = float2(1.0,1.0); //Theater Mode
+		float2 Z_A = float2(Theater_Mode == 2 ? 0.75 : 1.0,1.0); //Theater Mode
 		if(!Theater_Mode)
 		{
 			Z_A = float2(1.0,0.5); //Full Screen Mode
