@@ -2,7 +2,7 @@
 	///**SuperDepth3D**///
 	//----------------////
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	//* Depth Map Based 3D post-process shader v3.6.5
+	//* Depth Map Based 3D post-process shader v3.6.6
 	//* For Reshade 3.0+
 	//* ---------------------------------
 	//*
@@ -1163,7 +1163,7 @@ namespace SuperDepth3D
 			MipFilter = POINT;
 		};
 	
-	texture texzBufferN_L { Width = BUFFER_WIDTH ; Height = BUFFER_HEIGHT ; Format = RG16F; MipLevels = 8; };
+	texture texzBufferN_L { Width = BUFFER_WIDTH ; Height = BUFFER_HEIGHT ; Format = R16F; MipLevels = 8; };
 	
 	sampler SamplerzBufferN_L
 		{
@@ -1184,7 +1184,7 @@ namespace SuperDepth3D
 			Texture = texSD_CB_R;
 		};
 	#endif
-	
+	//May be able to set this to RG8 not sure.
 	texture texzBufferBlurN < pooled = true; > { Width = BUFFER_WIDTH / 2.0 ; Height = BUFFER_HEIGHT / 2.0; Format = RG16F; MipLevels = 6; };
 	
 	sampler SamplerzBuffer_BlurN
@@ -1337,12 +1337,12 @@ namespace SuperDepth3D
 	
 	float SLLTresh(float2 TCLocations, float MipLevel)
 	{ 
-		return tex2Dlod(SamplerzBufferN_L,float4(TCLocations,0, MipLevel)).y;
+		return tex2Dlod(SamplerDMN,float4(TCLocations,0, MipLevel)).w;
 	}
 	
 	bool LBDetection()//Active RGB Detection
 	{   float2 Letter_Box_Reposition = LBR ? float2(0.250,0.875) : float2(0.1,0.5);   
-		float MipLevel = 5,Center = SLLTresh(float2(0.5,0.5), 8) > 0, Top_Left = LBSensitivity(SLLTresh(float2(Letter_Box_Reposition.x,0.09), MipLevel));
+		float MipLevel = 5,Center = SLLTresh(float2(0.5,0.5), 7) > 0, Top_Left = LBSensitivity(SLLTresh(float2(Letter_Box_Reposition.x,0.09), MipLevel));
 		if ( LetterBox_Masking == 2 || LB_Correction == 2 || LBC == 2 || LBM == 2 || SMP == 2)//Left_Center | Right_Center | Center
 			return LBSensitivity(SLLTresh(float2(0.1,0.5), MipLevel)) && LBSensitivity(SLLTresh(float2(0.9,0.5), MipLevel)) && Center; //Vert
 		else       //Top | Bottom | Center
@@ -1618,7 +1618,7 @@ namespace SuperDepth3D
 	}
 	
 	float4 TC_SP(float2 texcoord)
-	{
+	{	float LBDetect = tex2D(SamplerLumN,float2(0.5,0.5)).x;
 		float2 H_V_A, H_V_B, X_Y_A, X_Y_B, S_texcoord = texcoord;
 		#if BD_Correction || BDF
 		if(BD_Options == 0 || BD_Options == 2)
@@ -1635,9 +1635,9 @@ namespace SuperDepth3D
 			#endif
 
 			#if LBC || LB_Correction
-				X_Y_A = Image_Position_Adjust + (LBDetection() && LB_Correction_Switch ? Image_Pos_Offset : 0.0f );
+				X_Y_A = Image_Position_Adjust + (LBDetect && LB_Correction_Switch ? Image_Pos_Offset : 0.0f );
 				X_Y_B = Image_Position_Adjust + Image_Pos_Offset;
-					if((SDT == 2 || SD_Trigger == 2) && SDTriggers() && LBDetection())
+					if((SDT == 2 || SD_Trigger == 2) && SDTriggers() && LBDetect)
 					   X_Y_A = float2(Image_Position_Adjust.x,Image_Position_Adjust.y); 
 			#else
 				X_Y_A = float2(Image_Position_Adjust.x,Image_Position_Adjust.y);
@@ -1649,9 +1649,9 @@ namespace SuperDepth3D
 		S_texcoord.xy += float2(-X_Y_B.x,X_Y_B.y)*0.5;
 		
 			#if LBC || LB_Correction
-				H_V_A = Horizontal_and_Vertical * (LBDetection() && LB_Correction_Switch ? H_V_Offset : 1.0f );
+				H_V_A = Horizontal_and_Vertical * (LBDetect && LB_Correction_Switch ? H_V_Offset : 1.0f );
 				H_V_B = Horizontal_and_Vertical * H_V_Offset;
-					if((SDT == 2 || SD_Trigger == 2) && SDTriggers() && LBDetection())
+					if((SDT == 2 || SD_Trigger == 2) && SDTriggers() && LBDetect)
 						H_V_A = Horizontal_and_Vertical;	
 			#else
 				H_V_A = Horizontal_and_Vertical;
@@ -1953,11 +1953,12 @@ namespace SuperDepth3D
 		if(   texcoord.x < pix.x * 2 &&   texcoord.y < pix.y * 2)//TL
 			G = Fade_Pass_B.y;
 		if( 1-texcoord.x < pix.x * 2 && 1-texcoord.y < pix.y * 2)//BR
-			G = Fade_Pass_B.z;
-			
-		float Luma_Map = dot(0.333, tex2D(BackBufferCLAMP,texcoord).rgb);
+			G = Fade_Pass_B.z;	
+		//Luma Map
+		float3 Color = tex2D(BackBufferCLAMP,texcoord ).rgb;
+			   Color.x = max(Color.r, max(Color.g, Color.b)); 
 		
-		return saturate(float4(R,G,B,Luma_Map));
+		return saturate(float4(R,G,B,Color.x));
 	}
 	
 	float AutoDepthRange(float d, float2 texcoord )
@@ -2185,7 +2186,7 @@ namespace SuperDepth3D
 	}
 	#define Adapt_Adjust 0.7 //[0 - 1]
 	////////////////////////////////////////////////////Depth & Special Depth Triggers//////////////////////////////////////////////////////////////////
-	void Mod_Z(in float4 position : SV_Position, in float2 texcoord : TEXCOORD, out float2 Point_Out : SV_Target0 , out float2 Linear_Out : SV_Target1)
+	void Mod_Z(in float4 position : SV_Position, in float2 texcoord : TEXCOORD, out float2 Point_Out : SV_Target0 , out float Linear_Out : SV_Target1)
 	{   //Temporal adaptation https://knarkowicz.wordpress.com/2016/01/09/automatic-exposure/
 		float  ExAd = (1-Adapt_Adjust)*1250, Lum = tex2Dlod(SamplerDMN,float4(texcoord,0,12)).w, PastLum = tex2D(SamplerLumN,float2(0,0.583)).z;
 	
@@ -2197,13 +2198,9 @@ namespace SuperDepth3D
 			Set_Depth.y = AltWeapon_Fade();
 		if(  texcoord.x < pix.x * 2 && 1-texcoord.y < pix.y * 2) //BL
 			Set_Depth.y = Weapon_ZPD_Fade(Set_Depth.z);
-	
-		//Luma Map
-		float3 Color = tex2D(BackBufferCLAMP,texcoord ).rgb;
-			   Color.x = max(Color.r, max(Color.g, Color.b)); 
 		
 		Point_Out = Set_Depth.xy; 
-		Linear_Out = float2(Set_Depth.x,Color.x);//is z when above code is on.	
+		Linear_Out = Set_Depth.x;//is z when above code is on.	
 	}
 	
 	static const float Blur_Adjust = 3.0;
