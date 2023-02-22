@@ -12504,26 +12504,26 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 #elif (App == 0xCB7B0316 ) //Atomic Heart
 	#define DA_W 1
     //#define DB_X 1
-	#define DA_X 0.050
+	#define DA_X 0.060//0.0625
 	//#define DF_Y 0.00
-	#define DA_Y 25.0
+	#define DA_Y 27.5
     //#define DA_Z 0.0005
 	#define DB_Z 0.100
 	//#define DB_Y 1
 	#define DE_X 1
-	#define DE_Y 0.500
-	#define DE_Z 0.375
-	#define DG_W 0.75 //PoP
+	#define DE_Y 0.625
+	#define DE_Z 0.400
+	#define DG_W 5.0 //PoP
     //#define OIL 2 //Set How many Levels We use for RE_Fix 0 | 1 | 2 | 3
     //#define OIF float3(0.5,0.375,0.250)  //Fix enables if Value is > 0.0
 	//#define DI_W float3(0.0,0.5,2.0)
 	//#define FTM 1
-    //#define DG_Z 0.020 //Min
+    #define DG_Z 0.095 //Min
     //#define DE_W 0.000 //Auto
-    //#define DI_Z 0.100 //Trim
-    //#define DF_W float2(0.0001,0.0025)  //Edge & Scale
+    #define DI_Z 0.195 //Trim
+    #define DF_W float2(0.0001,0.015)  //Edge & Scale
 	#define BMT 1
-	//#define DF_Z 0.1375
+	#define DF_Z 0.160
     //#define SMS 2            //SM Toggle Separation
 	#define DL_X 0.950      //SM Tune
 	//#define DL_W 0.5       //SM Perspective
