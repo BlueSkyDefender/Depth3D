@@ -12429,14 +12429,14 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	//#define FMM 1
 	#define DAA 1
 	#define PEW 1
-#elif (App == 0xF6F06BA0 ) //MineCraft Dingeons
+#elif (App == 0xF6F06BA0 || App == 0x5899A89A) //Minecraft Dungeons
 	#define DA_W 1
     //#define DB_X 1
 	#define DA_X 0.250
 	//#define DF_Y 0.00
 	#define DA_Y 50.0
     #define DA_Z -0.250
-	#define DB_Z 0.100
+	#define DB_Z 0.05
 	//#define DB_Y 1
 	#define DE_X 3
 	#define DE_Y 0.860
@@ -12470,26 +12470,29 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define DJ_Y float4( 30.0, 30.0, 6.0, 5.0);            //Menu Detection Type for A, B, & C. The Last Value is a Shift amount for C. 
     #define DJ_Z float3( 1000., 1000., 1000);                //Set Match Tresh 
 	*/
-	/*
-    #define MMD 2 //Set Multi Menu Detection             //Off / On
+
+    #define MMD 4 //Set Multi Menu Detection             //Off / On
     #define MMS 0 //Set Multi Menu Selection from 0-1 to 29-30 and Off 0 | 1 | 2
-    #define DO_X float4( 0.030 , 0.090 , 0.120 , 0.500 ) //Pos A1 = XY Color & A2 = ZW Black 
-    #define DO_Y float4( 0.230 , 0.190 , 0.565 , 0.043 ) //Pos A3 = XY Color & B1 = ZW Color
-    #define DO_Z float4( 0.075 , 0.238 , 0.459 , 0.136 ) //Pos B2 = XY Black & B3 = ZW Color
-	#define DO_W float4( 30.0, 30.0, 30.0, 30.0)   //Tresh Hold for Color A & B and Color
-    #define DP_X float4( 0.348 , 0.450 , 0.052 , 0.410 ) //Pos C1 = XY Color & C2 = ZW Black 
-    #define DP_Y float4( 0.657 , 0.472 , 0.000 , 0.000 ) //Pos C3 = XY Color & D1 = ZW Color
-    #define DP_Z float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos D2 = XY Black & D3 = ZW Color
-	#define DP_W float4( 30.0, 30.0, 1000.0, 1000.0)   //Tresh Hold for Color C & D and Color
-	#define DQ_X float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos C1 = XY Color & C2 = ZW Black 
-    #define DQ_Y float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos C3 = XY Color & D1 = ZW Color
-    #define DQ_Z float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos D2 = XY Black & D3 = ZW Color
-	#define DQ_W float4( 1000.0, 1000.0, 1000.0, 1000.0) //Tresh Hold for Color A1 & A3 and Color
-	#define DR_X float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos G1 = XY Color & G2 = ZW Black 
-    #define DR_Y float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos G3 = XY Color & H1 = ZW Color
-    #define DR_Z float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos H2 = XY Black & H3 = ZW Color
-	#define DR_W float4( 1000.0, 1000.0, 1000.0, 1000.0) //Tresh Hold for Color G & H and Color 
-	*/
+    #define DO_X float4( 0.958 , 0.075 , 0.940 , 0.929 ) //Pos A1 = XY Color & A2 = ZW Black 
+    #define DO_Y float4( 0.9165, 0.836 , 0.0335, 0.965 ) //Pos A3 = XY Color & B1 = ZW Color
+    #define DO_Z float4( 0.940 , 0.876 , 0.9165, 0.783 ) //Pos B2 = XY Black & B3 = ZW Color
+	#define DO_W float4( 30.0, 30.0,30.0,30.0)   //Tresh Hold for Color A & B and Color
+
+    #define DP_X float4( 0.052 , 0.061 , 0.370 , 0.793 ) //Pos C1 = XY Color & C2 = ZW Black 
+    #define DP_Y float4( 0.121 , 0.063 , 0.445 , 0.966 ) //Pos C3 = XY Color & D1 = ZW Color
+    #define DP_Z float4( 0.940 , 0.876 , 0.9165 , 0.783 ) //Pos D2 = XY Black & D3 = ZW Color
+	#define DP_W float4( 30.0, 24.0, 30.0, 30.0)   //Tresh Hold for Color C & D and Color
+
+	#define DQ_X float4( 0.3845, 0.146 , 0.601 , 0.947 ) //Pos C1 = XY Color & C2 = ZW Black 
+    #define DQ_Y float4( 0.3145, 0.905 , 0.3845, 0.146 ) //Pos C3 = XY Color & D1 = ZW Color
+    #define DQ_Z float4( 0.601 , 0.947 , 0.3145, 0.905 ) //Pos D2 = XY Black & D3 = ZW Color
+	#define DQ_W float4( 30.0, 10.0, 13.0, 10.0) //Tresh Hold for Color A1 & A3 and Color
+
+	#define DR_X float4( 0.3765, 0.147 , 0.060 , 0.959 ) //Pos G1 = XY Color & G2 = ZW Black 
+    #define DR_Y float4( 0.606 , 0.147 , 0.133 , 0.178 ) //Pos G3 = XY Color & H1 = ZW Color
+    #define DR_Z float4( 0.145 , 0.0755, 0.140 , 0.190 ) //Pos H2 = XY Black & H3 = ZW Color
+	#define DR_W float4( 30.0, 30.0, 30.0, 15.0) //Tresh Hold for Color G & H and Color 
+
 	//#define WSM 3
 	//#define DB_W 5
 	//#define DF_X float2(0.050,0.0)	
@@ -12501,7 +12504,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DH_Z 0.0
     //#define DH_W -0.227
 	#define PEW 1
-#elif (App == 0xCB7B0316 ) //Atomic Heart
+#elif (App == 0xCB7B0316 || App == 0x262B39FE) //Atomic Heart Steam | Window
 	#define DA_W 1
     //#define DB_X 1
 	#define DA_X 0.060//0.0625
