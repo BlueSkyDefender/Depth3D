@@ -2,7 +2,7 @@
 	///**SuperDepth3D**///
 	//----------------////
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	//* Depth Map Based 3D post-process shader v3.6.6
+	//* Depth Map Based 3D post-process shader v3.6.7
 	//* For Reshade 3.0+
 	//* ---------------------------------
 	//*
@@ -1618,7 +1618,7 @@ namespace SuperDepth3D
 	}
 	
 	float4 TC_SP(float2 texcoord)
-	{	float LBDetect = tex2D(SamplerLumN,float2(0.5,0.5)).x;
+	{	float LBDetect = tex2Dlod(SamplerLumN,float4(0.5,0.5,0,0)).x;
 		float2 H_V_A, H_V_B, X_Y_A, X_Y_B, S_texcoord = texcoord;
 		#if BD_Correction || BDF
 		if(BD_Options == 0 || BD_Options == 2)
