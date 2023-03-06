@@ -12969,8 +12969,8 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DM_X 4           //HQ Tune
 	#define DM_Z 1           //HQ Smooth
     //#define DM_Y 3           //HQ VRS
-    #define DL_Y -0.25   //De-Artifact
-    #define DL_Z 0.300       //Compat Power
+    #define DL_Y -0.50   //De-Artifact
+    #define DL_Z 0.750       //Compat Power
 	//#define DJ_X 0.250       //Range Smoothing
 	/*
     #define MAC 1
