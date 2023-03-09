@@ -13021,8 +13021,8 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DM_X 4           //HQ Tune
 	#define DM_Z 1           //HQ Smooth
     //#define DM_Y 3           //HQ VRS
-    #define DL_Y -0.50   //De-Artifact
-    #define DL_Z 0.5       //Compat Power
+    #define DL_Y -0.375   //De-Artifact
+    #define DL_Z 0.125       //Compat Power
 	//#define DJ_X 0.250       //Range Smoothing
 	/*
     #define MAC 1
@@ -13036,7 +13036,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	*/
 
 
-    #define MMD 2 //Set Multi Menu Detection             //Off / On
+    #define MMD 4 //Set Multi Menu Detection             //Off / On
     #define MMS 0 //Set Multi Menu Selection from 0-1 to 29-30 and Off 0 | 1 | 2
     #define DO_X float4( 0.867 , 0.9295, 0.397 , 0.085 ) //Pos A1 = XY Color & A2 = ZW Black 
     #define DO_Y float4( 0.927 , 0.9295, 0.867 , 0.9295) //Pos A3 = XY Color & B1 = ZW Color
@@ -13047,16 +13047,17 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define DP_Y float4( 0.539 , 0.135 , 0.926 , 0.931 ) //Pos C3 = XY Color & D1 = ZW Color
     #define DP_Z float4( 0.397 , 0.085 , 0.867 , 0.9295 ) //Pos D2 = XY Black & D3 = ZW Color
 	#define DP_W float4( 27.0, 27.0, 30.0, 12.0)   //Tresh Hold for Color C & D and Color
-	/*
-	#define DQ_X float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos C1 = XY Color & C2 = ZW Black 
-    #define DQ_Y float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos C3 = XY Color & D1 = ZW Color
-    #define DQ_Z float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos D2 = XY Black & D3 = ZW Color
-	#define DQ_W float4( 1000.0, 1000.0, 1000.0, 1000.0) //Tresh Hold for Color A1 & A3 and Color
-	#define DR_X float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos G1 = XY Color & G2 = ZW Black 
-    #define DR_Y float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos G3 = XY Color & H1 = ZW Color
-    #define DR_Z float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos H2 = XY Black & H3 = ZW Color
-	#define DR_W float4( 1000.0, 1000.0, 1000.0, 1000.0) //Tresh Hold for Color G & H and Color 
-	*/
+
+	#define DQ_X float4( 0.935 , 0.926 , 0.938 , 0.934 ) //Pos C1 = XY Color & C2 = ZW Black 
+    #define DQ_Y float4( 0.779 , 0.925 , 0.927 , 0.925 ) //Pos C3 = XY Color & D1 = ZW Color
+    #define DQ_Z float4( 0.921 , 0.9285, 0.779 , 0.925 ) //Pos D2 = XY Black & D3 = ZW Color
+	#define DQ_W float4( 30.0, 30.0, 30.0, 30.0) //Tresh Hold for Color A1 & A3 and Color
+
+	#define DR_X float4( 0.9375, 0.928 , 0.397 , 0.085 ) //Pos G1 = XY Color & G2 = ZW Black 
+    #define DR_Y float4( 0.839 , 0.928 , 0.931 , 0.939 ) //Pos G3 = XY Color & H1 = ZW Color
+    #define DR_Z float4( 0.111 , 0.100 , 0.938 , 0.928 ) //Pos H2 = XY Black & H3 = ZW Color
+	#define DR_W float4( 30.0, 30.0, 30.0, 30.0) //Tresh Hold for Color G & H and Color 
+
 	//#define WSM 2 //Weapon Settings Mode
 	//#define DB_W 11
 	//#define DF_X float2(0.075,0.0)
