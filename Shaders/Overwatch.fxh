@@ -12999,6 +12999,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DAA 1
 	#define PEW 1
     #define DSW 1
+    #define FOV 1
 #elif (App == 0x62454263 ) //Red Dead Redemption 2
 	#define DA_W 1
 	#define DA_X 0.05
