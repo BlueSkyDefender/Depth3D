@@ -2,7 +2,7 @@
 	///**SuperDepth3D**///
 	//----------------////
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	//* Depth Map Based 3D post-process shader v3.6.7
+	//* Depth Map Based 3D post-process shader v3.6.9
 	//* For Reshade 3.0+
 	//* ---------------------------------
 	//*
@@ -1063,7 +1063,7 @@ namespace SuperDepth3D
 	}
 
 	#define pix float2(BUFFER_RCP_WIDTH, BUFFER_RCP_HEIGHT)
-	#define Per Vert_3D_Pinball ? float2( 0, (Perspective_Switch() * pix.x) * 0.5 ) : float2( (Perspective_Switch() * pix.x) * 0.5, 0) //Per is Perspective
+	#define Per Vert_3D_Pinball ? float2( 0, (Perspective_Switch() * pix.x) ) : float2( (Perspective_Switch() * pix.x), 0) //Per is Perspective
 	#define texsize int2(BUFFER_WIDTH, BUFFER_HEIGHT)
 	#define AI Interlace_Anaglyph_Calibrate.x * 0.5 //Optimization for line interlaced Adjustment.
 	#define ARatio texsize.x / texsize.y
@@ -1185,7 +1185,7 @@ namespace SuperDepth3D
 		};
 	#endif
 	//May be able to set this to RG8 not sure.
-	texture texzBufferBlurN < pooled = true; > { Width = BUFFER_WIDTH / 2.0 ; Height = BUFFER_HEIGHT / 2.0; Format = RG16F; MipLevels = 6; };
+	texture texzBufferBlurN < pooled = true; > { Width = BUFFER_WIDTH / 2.0 ; Height = BUFFER_HEIGHT / 3.0; Format = RG16F; MipLevels = 6; };
 	
 	sampler SamplerzBuffer_BlurN
 		{
@@ -1970,22 +1970,12 @@ namespace SuperDepth3D
 	{	float D = MD_WHD.x, Z = ZPD_Separation.x, WZP = 0.5, ZP = 0.5, W_Convergence = Inficolor_Near_Reduction ? WZPD_and_WND.x * 0.8 : WZPD_and_WND.x, WZPDB, Distance_From_Bottom = 0.9375, ZPD_Boundary = ZPD_Boundary_n_Fade.x, Store_WC, Set_Max_Depth = Max_Depth;
 	    //Screen Space Detector.
 		if (abs(Weapon_ZPD_Boundary.x) > 0)
-		{   float WArray[8] = { 0.5, 0.5625, 0.625, 0.6875, 0.75, 0.8125, 0.875, 0.9375},
-				  MWArray[8] = { 0.4375, 0.46875, 0.5, 0.53125, 0.625, 0.75, 0.875, 0.9375},
-				  WZDPArray[8] = { 1.0, 0.5, 0.75, 0.5, 0.625, 0.5, 0.55, 0.5};//SoF ZPD Weapon Map
+		{   float WArray[6] = { 0.4, 0.5, 0.6, 0.7, 0.8, 0.9};
 			[unroll] //only really only need to check one point just above the center bottom and to the right.
-			for( int i = 0 ; i < 8; i++ )
+			for( int i = 0 ; i < 6; i++ )
 			{
-				if((WP == 22 || WP == 4) && WSM == 1)//SoF & BL 2
-					WZPDB = 1 - (WZPD_and_WND.x * WZDPArray[i]) / tex2Dlod(SamplerDMN,float4(float2(WArray[i],0.9375),0,0)).z;
-				else
-				{
-					if (Weapon_ZPD_Boundary.x < 0) //Code for Moving Weapon Hand stablity.
-						WZPDB = 1 - WZPD_and_WND.x / tex2Dlod(SamplerDMN,float4(float2(MWArray[i],Distance_From_Bottom),0,0)).z;
-					else //Normal
-						WZPDB = 1 - WZPD_and_WND.x / tex2Dlod(SamplerDMN,float4(float2(WArray[i],Distance_From_Bottom),0,0)).z;
-				}
-	
+				WZPDB  = 1 - WZPD_and_WND.x / tex2Dlod(SamplerDMN, float4(float2(WArray[i],Distance_From_Bottom), 0, 0)).z;
+					
 				if ( WZPDB < -DJ_W ) // Default -0.1
 					W_Convergence *= 1.0-abs(Weapon_ZPD_Boundary.x);
 				 //Used if Weapon Buffer is way out of range.
@@ -2102,11 +2092,6 @@ namespace SuperDepth3D
 			   HandleConvergence.y *= WA_XYZW().w;
 			   HandleConvergence.y = lerp(HandleConvergence.y + FD_Adjust, HandleConvergence.y, FadeIO);
 		DM.y = lerp( HandleConvergence.x, HandleConvergence.y, DM.y);
-		//Better mixing for eye Comfort
-		DM.z = DM.y;
-		DM.y += lerp(DM.y,DM.x,DM.w);
-		DM.y *= 0.5f;
-		DM.y = lerp(DM.y,DM.z,0.9375f);
 	
 		float Edge_Adj = saturate(lerp(0.5,1.0,Edge_Adjust));
 		
@@ -2307,10 +2292,11 @@ namespace SuperDepth3D
 		if( Performance_Level > 1 )
 			Perf *= saturate(Luma_Adptive * 0.5 + 0.5  );	
 		//ParallaxSteps Calculations
-		float MinNum = 20, D = abs(Diverge), Cal_Steps = D * Perf, Steps = clamp( Cal_Steps, Perf_LvL ? MinNum : lerp( MinNum, min( MinNum, D), GetDepth >= 0.999 ), 100 );//Foveated Rendering Point of attack 16-256 limit samples.
+		float MinNum = 20, D = abs(Diverge), Cal_Steps = D * Perf, FOV_Ren = lerp(100, MinNum, saturate(Vin_Pattern(Coordinates, float2(15.0,3.0)) * GetDepth * 4 )),
+			  Steps  = clamp( Cal_Steps, Perf_LvL ? MinNum : lerp( MinNum, min( MinNum, D), GetDepth >= 0.999 ), FOV_Ren );//Foveated Rendering Point of attack 16-256 limit samples.
 		//float MinNum = 20, D = abs(Diverge), Cal_Steps = D * Perf, Steps = clamp( Cal_Steps, Performance_Level ? MinNum : lerp( MinNum, min( MinNum, D), GetDepth >= 0.999 ), lerp(100,View_Mode == 6 ? lerp(50, 20, saturate(GetDepth * 15)) : 50,saturate(Vin_Pattern(Coordinates, float2(15.0,2.5)))) );
 		float LayerDepth = rcp(Steps), TP = Compatibility_Power >= 0 ? lerp(0.025, 0.05,Compatibility_Power) : lerp(0.0225, 0.05,abs(Compatibility_Power) * saturate(Vin_Pattern(Coordinates, float2(15.0,3.0))));
-			  D = Diverge < 0 ? -75 : 75;
+		float US_Offset = lerp(75.0,175.0,GetDepth * 0.5); D = Diverge < 0 ? -US_Offset : US_Offset;
 	
 		//Offsets listed here Max Seperation is 3% - 8% of screen space with Depth Offsets & Netto layer offset change based on MS.
 		float deltaCoordinates = MS * LayerDepth, CurrentDepthMapValue = GetDB( ParallaxCoord).x, CurrentLayerDepth = 0.0f,

@@ -1,7 +1,7 @@
 ////----------------------------------------//
 ///SuperDepth3D Overwatch Automation Header///
 //----------------------------------------////
-// Version 3.1.9
+// Version 3.2.1
 //---------------------------------------OVERWATCH---------------------------------------//
 // If you are reading this stop. Go away and never look back. From this point on if you  //
 // still think it's is worth looking at this..... Then no one can save you or your soul. //
@@ -114,8 +114,8 @@ static const float Compatibility_Power_D = 0.0;         //Compatibility Power   
 static const float SM_Perspective_D  = 0.05;            //SM Perspective                                | DL_W
 
 //SM HQ Values
-static const int SM_PillarBox_Detection_D = 0;          // 0 | 1 | 2                                    | SMP //Do be Removed after a few Gens
-static const int HQ_Mode_Toggle_D = 1;                  // 0 | 1 |                                      | HQT //Do be Removed after a few Gens
+static const int SM_PillarBox_Detection_D = 0;          // 0 | 1 | 2                                    | SMP //To be Removed after a few Gens
+static const int HQ_Mode_Toggle_D = 1;                  // 0 | 1 |                                      | HQT
 static const int HQ_Tune_D = 4;                         //HQ Tune                                       | DM_X
 static const int HQ_VRS_D = 1;                          //HQ Variable Rate Shading Off|Auto|High|Med|Low| DM_Y
 static const int HQ_Smooth_D = 1;                       //HQ Smooth 0 - 6                               | DM_Z
@@ -866,7 +866,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DM_Z 2     //HQ Smooth
     //#define DM_Y 3     //HQ VRS
     //#define DL_Y 0.375    //De-Artifact
-    #define DL_Z 0.125       //Compat Power
+    //#define DL_Z 0.125       //Compat Power
 	#define DJ_X 0.75       //Range Smoothing
     #define MDD 1 //Set Menu Detection & Direction     //Off 0 | 1 | 2 | 3 | 4      
     #define DN_X float4( 0.404, 0.346,  0.000, 0.575)  //Pos A = XY White & B = ZW White 
@@ -4439,7 +4439,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	//#define DL_W 0.025 //SM Perspective
 	#define DM_X 3     //HQ Tune
 	#define DM_Z 1     //HQ Smooth
-    #define DL_Y 0.500    //De-Artifact Works well here because of the Fur	
+    //#define DL_Y 0.500    //De-Artifact Works well here because of the Fur	
 	#define PEW 1	
 #elif (App == 0x49B4730A ) //Dead or Alive  Xtream Venus Vacation
 	#define DA_W 1
@@ -5059,7 +5059,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DM_X 3     //HQ Tune
 	#define DM_Z 1     //HQ Smooth
     //#define DM_Y 3     //HQ VRS
-    #define DL_Y 0.8     //De-Artifact
+    //#define DL_Y 0.8     //De-Artifact
     #define MMD 3 //Set Multi Menu Detection             //Off / On
     #define DO_X float4( 0.190 , 0.061 , 0.190 , 0.050  ) //Pos A1 = XY Color & A2 = ZW Black 
     #define DO_Y float4( 0.810 , 0.061 , 0.190 , 0.061  ) //Pos A3 = XY Color & B1 = ZW Color
@@ -5411,7 +5411,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DM_X 3     //HQ Tune
 	#define DM_Z 3     //HQ Smooth
     //#define DM_Y 3     //HQ VRS
-    #define DL_Y 0.375    //De-Artifact 0.1245
+    //#define DL_Y 0.375    //De-Artifact 0.1245
     #define PEW 1
 #elif (App == 0xD7199355 ) //Scathe
 	#define DA_W 1
@@ -5839,7 +5839,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	//#define DL_W 0.050 //SM Perspective
 	#define DM_X 3     //HQ Tune
 	#define DM_Z 3     //HQ Smooth
-    #define DL_Y 0.25    //De-Artifact
+    //#define DL_Y 0.25    //De-Artifact
 	/*
     #define MDD 1 //Set Menu Detection & Direction     //Off 0 | 1 | 2 | 3 | 4      
     #define DN_X float4( 0.150, 0.240,  0.250, 0.925)  //Pos A = XY White & B = ZW Black 
@@ -5875,7 +5875,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	//#define DM_X 3     //HQ Tune
 	//#define DM_Z 2     //HQ Smooth
     //#define DM_Y 3     //HQ VRS
-    #define DL_Y 0.375    //De-Artifact 0.1245
+    //#define DL_Y 0.375    //De-Artifact 0.1245
 	//#define DJ_X 0.150     //Range Smoothing
     /*
     #define MDD 1 //Set Menu Detection & Direction     //Off 0 | 1 | 2 | 3 | 4      
@@ -6542,7 +6542,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DM_X 4     //HQ Tune
 	#define DM_Z 1     //HQ Smooth
     //#define DM_Y 3     //HQ VRS
-    #define DL_Y 0.500    //De-Artifact 0.1245
+    //#define DL_Y 0.500    //De-Artifact 0.1245
 	//#define DJ_X 0.150     //Range Smoothing
     /*
     #define MDD 1 //Set Menu Detection & Direction     //Off 0 | 1 | 2 | 3 | 4      
@@ -6593,7 +6593,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DM_X 4     //HQ Tune
 	#define DM_Z 1     //HQ Smooth
     //#define DM_Y 3     //HQ VRS
-    #define DL_Y 1.000    //De-Artifact 0.1245
+    //#define DL_Y 1.000    //De-Artifact 0.1245
 	//#define DJ_X 0.150     //Range Smoothing
     /*
     #define MDD 1 //Set Menu Detection & Direction     //Off 0 | 1 | 2 | 3 | 4      
@@ -6699,7 +6699,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DM_Z 2           //HQ Smooth
     //#define DM_Y 3           //HQ VRS
     //#define DL_Y 1.000       //De-Artifact
-    #define DL_Z 0.250       //Compat Power
+    //#define DL_Z 0.250       //Compat Power
 	//#define DJ_X 0.150       //Range Smoothing
     /*
     #define MDD 1 //Set Menu Detection & Direction     //Off 0 | 1 | 2 | 3 | 4      
@@ -6758,7 +6758,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DM_Z 3           //HQ Smooth
     //#define DM_Y 3           //HQ VRS
     //#define DL_Y 1.000       //De-Artifact
-    #define DL_Z 0.250       //Compat Power
+    //#define DL_Z 0.250       //Compat Power
 	//#define DJ_X 0.150       //Range Smoothing
     /*
     #define MDD 1 //Set Menu Detection & Direction     //Off 0 | 1 | 2 | 3 | 4      
@@ -6877,7 +6877,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DM_Z 3           //HQ Smooth
     //#define DM_Y 3           //HQ VRS
     //#define DL_Y 1.000       //De-Artifact
-    #define DL_Z 0.125       //Compat Power
+    //#define DL_Z 0.125       //Compat Power
 	//#define DJ_X 0.150       //Range Smoothing
     /*
     #define MDD 1 //Set Menu Detection & Direction     //Off 0 | 1 | 2 | 3 | 4      
@@ -6995,7 +6995,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DM_X 2           //HQ Tune
 	#define DM_Z 2           //HQ Smooth
     //#define DM_Y 3           //HQ VRS
-    #define DL_Y 1.0     //De-Artifact
+    //#define DL_Y 1.0     //De-Artifact
     //#define DL_Z 0.0       //Compat Power
 	//#define DJ_X 0.250       //Range Smoothing
     /*
@@ -7053,7 +7053,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DM_X 4           //HQ Tune
 	#define DM_Z 2           //HQ Smooth
     //#define DM_Y 3           //HQ VRS
-    #define DL_Y 0.250    //De-Artifact
+    //#define DL_Y 0.250    //De-Artifact
     //#define DL_Z 0.0       //Compat Power
 	//#define DJ_X 0.250       //Range Smoothing
     /*
@@ -7107,7 +7107,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DM_Z 3           //HQ Smooth
     //#define DM_Y 3           //HQ VRS
     //#define DL_Y 0.250    //De-Artifact
-    #define DL_Z 0.250       //Compat Power
+    //#define DL_Z 0.250       //Compat Power
 	//#define DJ_X 0.250       //Range Smoothing
     /*
     #define MDD 1 //Set Menu Detection & Direction     //Off 0 | 1 | 2 | 3 | 4      
@@ -7163,7 +7163,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DM_Z 3           //HQ Smooth
     //#define DM_Y 3           //HQ VRS
     //#define DL_Y 0.0    //De-Artifact
-    #define DL_Z 0.75       //Compat Power
+    //#define DL_Z 0.75       //Compat Power
 	//#define DJ_X 0.250       //Range Smoothing
     /*
     #define MDD 1 //Set Menu Detection & Direction     //Off 0 | 1 | 2 | 3 | 4      
@@ -7221,7 +7221,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DM_X 3           //HQ Tune
 	#define DM_Z 3           //HQ Smooth
     //#define DM_Y 3           //HQ VRS
-    #define DL_Y 0.75    //De-Artifact
+    //#define DL_Y 0.75    //De-Artifact
     //#define DL_Z 0.250       //Compat Power
 	//#define DJ_X 0.125       //Range Smoothing
     /*
@@ -7279,7 +7279,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	//#define DM_X 3           //HQ Tune
 	//#define DM_Z 3           //HQ Smooth
     //#define DM_Y 3           //HQ VRS
-    #define DL_Y 0.375    //De-Artifact
+    //#define DL_Y 0.375    //De-Artifact
     //#define DL_Z 0.250       //Compat Power
 	//#define DJ_X 0.125       //Range Smoothing
     /*
@@ -7338,7 +7338,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DM_X 3           //HQ Tune
 	#define DM_Z 3           //HQ Smooth
     //#define DM_Y 3           //HQ VRS
-    #define DL_Y 0.500    //De-Artifact
+    //#define DL_Y -0.500    //De-Artifact
     //#define DL_Z 0.250       //Compat Power
 	//#define DJ_X 0.125       //Range Smoothing
     /*
@@ -7522,8 +7522,8 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DM_X 3           //HQ Tune
 	#define DM_Z 3           //HQ Smooth
     //#define DM_Y 3           //HQ VRS
-    #define DL_Y 0.250    //De-Artifact
-    #define DL_Z 0.125       //Compat Power
+    //#define DL_Y 0.250    //De-Artifact
+    //#define DL_Z 0.125       //Compat Power
 	#define DJ_X 0.125       //Range Smoothing
     /*
     #define MDD 1 //Set Menu Detection & Direction     //Off 0 | 1 | 2 | 3 | 4      
@@ -7656,7 +7656,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DM_X 3           //HQ Tune
 	#define DM_Z 3           //HQ Smooth
     //#define DM_Y 3           //HQ VRS
-    #define DL_Y 0.250    //De-Artifact
+    //#define DL_Y 0.250    //De-Artifact
     //#define DL_Z 0.250       //Compat Power
 	//#define DJ_X 0.125       //Range Smoothing
     /*
@@ -7717,7 +7717,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DM_X 4           //HQ Tune
 	#define DM_Z 3           //HQ Smooth
     //#define DM_Y 3           //HQ VRS
-    #define DL_Y -1.0    //De-Artifact
+    //#define DL_Y -1.0    //De-Artifact
     //#define DL_Z 0.250       //Compat Power
 	//#define DJ_X 0.125       //Range Smoothing
     /*
@@ -7780,7 +7780,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DM_X 2           //HQ Tune
 	#define DM_Z 2           //HQ Smooth
     //#define DM_Y 3           //HQ VRS
-    #define DL_Y -0.850    //De-Artifact
+    //#define DL_Y -0.850    //De-Artifact
     //#define DL_Z 0.250       //Compat Power
 	//#define DJ_X 0.125       //Range Smoothing
     /*
@@ -7845,7 +7845,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DM_X 3           //HQ Tune
 	#define DM_Z 3           //HQ Smooth
     //#define DM_Y 3           //HQ VRS
-    #define DL_Y 1.0    //De-Artifact
+    //#define DL_Y 1.0    //De-Artifact
     //#define DL_Z 0.50       //Compat Power
 	#define DJ_X 0.500       //Range Smoothing
     /*
@@ -8033,7 +8033,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DM_X 3     //HQ Tune
 	#define DM_Z 3     //HQ Smooth
     //#define DM_Y 3     //HQ VRS
-    #define DL_Y 0.5    //De-Artifact 0.1245
+    //#define DL_Y 0.5    //De-Artifact 0.1245
 	//#define DJ_X 0.150     //Range Smoothing
     /*
     #define MDD 1 //Set Menu Detection & Direction     //Off 0 | 1 | 2 | 3 | 4      
@@ -8091,7 +8091,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DM_X 5           //HQ Tune
 	#define DM_Z 1           //HQ Smooth
     //#define DM_Y 3           //HQ VRS
-    #define DL_Y 0.800      //De-Artifact
+    //#define DL_Y 0.800      //De-Artifact
     //#define DL_Z 0.100       //Compat Power
 	//#define DJ_X 0.500       //Range Smoothing
     /*
@@ -8222,7 +8222,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DM_X 4           //HQ Tune
 	#define DM_Z 1           //HQ Smooth
     //#define DM_Y 3           //HQ VRS
-    #define DL_Y -1.0    //De-Artifact
+    //#define DL_Y -1.0    //De-Artifact
     //#define DL_Z 0.50       //Compat Power
 	//#define DJ_X 0.500       //Range Smoothing
     /*
@@ -8290,7 +8290,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DM_X 4           //HQ Tune
 	#define DM_Z 1           //HQ Smooth
     //#define DM_Y 3           //HQ VRS
-    #define DL_Y -1.0    //De-Artifact
+    //#define DL_Y -1.0    //De-Artifact
     //#define DL_Z 0.50       //Compat Power
 	//#define DJ_X 0.500       //Range Smoothing
     /*
@@ -8350,7 +8350,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DL_W 0.000 //SM Perspective
 	#define DM_X 3     //HQ Tune
 	#define DM_Z 3     //HQ Smooth
-    #define DL_Y -0.5    //De-Artifact
+    //#define DL_Y -0.5    //De-Artifact
     #define MDD 1 //Set Menu Detection & Direction    //Off 0 | 1 | 2 | 3 | 4      
     #define DN_X float4( 0.307 , 0.167,  0.304, 0.835 ) //Pos A = XY White & B = ZW Dark 
     #define DN_Y float4( 0.7525, 0.125,  0.0  , 0.0   ) //Pos C = XY White & D = ZW Match
@@ -8422,7 +8422,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DM_X 4           //HQ Tune
 	#define DM_Z 3           //HQ Smooth
     //#define DM_Y 3           //HQ VRS
-    #define DL_Y -0.5    //De-Artifact
+    //#define DL_Y -0.5    //De-Artifact
     //#define DL_Z 0.50       //Compat Power
 	#define DJ_X 0.500       //Range Smoothing
     /*
@@ -8486,7 +8486,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DM_X 4           //HQ Tune
 	#define DM_Z 3           //HQ Smooth
     //#define DM_Y 3           //HQ VRS
-    #define DL_Y 0.75    //De-Artifact
+    //#define DL_Y 0.75    //De-Artifact
     //#define DL_Z 0.50       //Compat Power
 	//#define DJ_X 0.500       //Range Smoothing
     /*
@@ -8550,7 +8550,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DM_Z 1           //HQ Smooth
     //#define DM_Y 3           //HQ VRS
     //#define DL_Y 0.75    //De-Artifact
-    #define DL_Z 0.50       //Compat Power
+    //#define DL_Z 0.50       //Compat Power
 	//#define DJ_X 0.500       //Range Smoothing
     /*
     #define MDD 1 //Set Menu Detection & Direction     //Off 0 | 1 | 2 | 3 | 4      
@@ -8616,7 +8616,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DM_Z 1           //HQ Smooth
     //#define DM_Y 3           //HQ VRS
     //#define DL_Y 0.75    //De-Artifact
-    #define DL_Z 0.50       //Compat Power
+    //#define DL_Z 0.50       //Compat Power
 	//#define DJ_X 0.500       //Range Smoothing
     /*
     #define MDD 1 //Set Menu Detection & Direction     //Off 0 | 1 | 2 | 3 | 4      
@@ -8688,7 +8688,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DM_Z 1           //HQ Smooth
     //#define DM_Y 3           //HQ VRS
     //#define DL_Y 0.75    //De-Artifact
-    #define DL_Z 0.50       //Compat Power
+    //#define DL_Z 0.50       //Compat Power
 	//#define DJ_X 0.500       //Range Smoothing
     /*
     #define MDD 1 //Set Menu Detection & Direction     //Off 0 | 1 | 2 | 3 | 4      
@@ -8760,7 +8760,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DM_Z 1           //HQ Smooth
     //#define DM_Y 3           //HQ VRS
     //#define DL_Y 0.75    //De-Artifact
-    #define DL_Z 0.50       //Compat Power
+    //#define DL_Z 0.50       //Compat Power
 	//#define DJ_X 0.500       //Range Smoothing
     /*
     #define MDD 1 //Set Menu Detection & Direction     //Off 0 | 1 | 2 | 3 | 4      
@@ -8831,7 +8831,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DM_X 2           //HQ Tune
 	#define DM_Z 2           //HQ Smooth
     //#define DM_Y 3           //HQ VRS
-    #define DL_Y 0.50    //De-Artifact
+    //#define DL_Y 0.50    //De-Artifact
     //#define DL_Z 0.50       //Compat Power
 	#define DJ_X 0.250       //Range Smoothing
     /*
@@ -9032,7 +9032,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DM_X 4           //HQ Tune
 	#define DM_Z 3           //HQ Smooth
     //#define DM_Y 3           //HQ VRS
-    #define DL_Y -0.50    //De-Artifact
+    //#define DL_Y -0.50    //De-Artifact
     //#define DL_Z 0.50       //Compat Power
 	//#define DJ_X 0.250       //Range Smoothing
     /*
@@ -9098,7 +9098,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DM_Z 0           //HQ Smooth
     //#define DM_Y 3           //HQ VRS
     //#define DL_Y -0.50    //De-Artifact
-    #define DL_Z -1.0       //Compat Power
+    //#define DL_Z -1.0       //Compat Power
 	//#define DJ_X 0.250       //Range Smoothing
     /*
     #define MDD 1 //Set Menu Detection & Direction     //Off 0 | 1 | 2 | 3 | 4      
@@ -9179,7 +9179,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DL_W 0.025 //SM Perspective
 	#define DM_X 3     //HQ Tune
 	#define DM_Z 1     //HQ Smooth
-    #define DL_Y -0.50    //De-Artifact
+    //#define DL_Y -0.50    //De-Artifact
 	#define WSM 3
 	#define DB_W 11
 	#define FPS  0
@@ -9207,7 +9207,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DL_W 0.025 //SM Perspective
 	#define DM_X 3     //HQ Tune
 	#define DM_Z 5     //HQ Smooth
-    #define DL_Y 0.625    //De-Artifact
+    //#define DL_Y 0.625    //De-Artifact
 	#define PEW 1
 	#define NDW 1
 #elif (App == 0xEC457EA9 ) //Draugen
@@ -9239,7 +9239,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	//#define DM_X 4           //HQ Tune
 	//#define DM_Z 1           //HQ Smooth
     //#define DM_Y 3           //HQ VRS
-    #define DL_Y -0.50    //De-Artifact
+    //#define DL_Y -0.50    //De-Artifact
     //#define DL_Z 0.50       //Compat Power
 	//#define DJ_X 0.250       //Range Smoothing
     /*
@@ -9305,7 +9305,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	//#define DM_X 4           //HQ Tune
 	//#define DM_Z 1           //HQ Smooth
     //#define DM_Y 3           //HQ VRS
-    #define DL_Y 0.500    //De-Artifact
+    //#define DL_Y 0.500    //De-Artifact
     //#define DL_Z 0.50       //Compat Power
 	//#define DJ_X 0.250       //Range Smoothing
     /*
@@ -9505,8 +9505,8 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DM_X 3           //HQ Tune
 	#define DM_Z 3           //HQ Smooth
     //#define DM_Y 3           //HQ VRS
-    #define DL_Y 0.5    //De-Artifact
-    #define DL_Z 0.5       //Compat Power
+    //#define DL_Y 0.5    //De-Artifact
+    //#define DL_Z 0.5       //Compat Power
 	//#define DJ_X 0.250       //Range Smoothing
     /*
     #define MDD 1 //Set Menu Detection & Direction     //Off 0 | 1 | 2 | 3 | 4      
@@ -9605,8 +9605,8 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DM_X 3     //HQ Tune
 	#define DM_Z 2     //HQ Smooth
     //#define DM_Y 3           //HQ VRS
-    #define DL_Y 0.650    //De-Artifact
-    #define DL_Z 0.1       //Compat Power
+    //#define DL_Y 0.650    //De-Artifact
+    //#define DL_Z 0.1       //Compat Power
 	//#define DJ_X 0.250       //Range Smoothing
     /*
     #define MDD 1 //Set Menu Detection & Direction     //Off 0 | 1 | 2 | 3 | 4      
@@ -9891,7 +9891,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DM_X 4     //HQ Tune
 	#define DM_Z 4     //HQ Smooth
     //#define DL_Y 0.375 //De-Artifact Performance hit too large here.
-    #define DL_Z 0.125       //Compat Power
+    //#define DL_Z 0.125       //Compat Power
 	#define OIF 0.0375 //Fix enables if Value is > 0.0
 	#define DI_W 2.5   //Adjustment for REF
 	//#define NFM 1
@@ -9992,7 +9992,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DM_X 4           //HQ Tune
 	#define DM_Z 1           //HQ Smooth
     //#define DM_Y 3           //HQ VRS
-    #define DL_Y -0.5    //De-Artifact
+    //#define DL_Y -0.5    //De-Artifact
     //#define DL_Z 0.05       //Compat Power
 	//#define DJ_X 0.250       //Range Smoothing
     /*
@@ -10059,7 +10059,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DM_X 4           //HQ Tune
 	#define DM_Z 1           //HQ Smooth
     //#define DM_Y 3           //HQ VRS
-    #define DL_Y -1.0    //De-Artifact
+    //#define DL_Y -1.0    //De-Artifact
     //#define DL_Z 0.05       //Compat Power
 	//#define DJ_X 0.250       //Range Smoothing
     /*
@@ -10129,8 +10129,8 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DA_W 1
     //#define DB_X 1
 	#define DA_X 0.10
-	#define DF_Y 0.0125
-	#define DA_Y 17.5
+	#define DF_Y 0.01
+	#define DA_Y 17.0 //17.5
     //#define DA_Z 0.0005
 	#define DB_Z 0.05
 	//#define DB_Y 1
@@ -10147,15 +10147,16 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DI_Z 0.20 //Trim
     //#define DF_W float2(0.0001,0.025)  //Edge & Scale
 	#define BMT 1
-	#define DF_Z 0.150
+	#define DF_Z 0.100
     //#define SMS 0            //SM Toggle Separation
-	#define DL_X 0.800      //SM Tune
+	#define DL_X 0.875      //SM Tune
 	//#define DL_W 0.5       //SM Perspective
 	#define DM_X 4           //HQ Tune
 	#define DM_Z 3           //HQ Smooth
-    //#define DM_Y 3           //HQ VRS
+    #define DM_Y 0           //HQ VRS
+    #define HQT 1
     //#define DL_Y 0.0    //De-Artifact
-    #define DL_Z -1.0       //Compat Power
+    //#define DL_Z -1.0       //Compat Power
 	//#define DJ_X 0.250       //Range Smoothing
     /*
     #define MDD 1 //Set Menu Detection & Direction     //Off 0 | 1 | 2 | 3 | 4      
@@ -10191,12 +10192,23 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	//#define DF_X float2(0.050,0.0)	
 	//#define HMT 1
 	//#define HMC 0.503
-	#define LBC 1 //Letter Box Correction With X & Y
-    #define DH_Z 0.0
-    #define DH_W -0.05
 	#define LBR 1
+	#define LBC 1 //Letter Box Correction With X & Y
+	//#define DH_X 1.0
+	#define DH_Y 1.0
+    //#define DH_Z 0.0
+    #define DH_W 0.0
+    //Needs to be done if DLSS is used.
+	/*
+	#define SPF 1
+	#define DD_X 1.0
+	#define DD_Y 0.994
+	#define DD_Z 0.0
+	#define DD_W -0.0025
+	*/
 	#define PEW 1
 	#define DSW 1
+	#define DAA 1
 #elif (App == 0x8F32C735 ) //Sessions Skate Sim
 	#define DA_W 1
     //#define DB_X 1
@@ -10367,7 +10379,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DM_Z 2           //HQ Smooth
     //#define DM_Y 3           //HQ VRS
     //#define DL_Y 0.25    //De-Artifact
-    #define DL_Z 0.25       //Compat Power
+    //#define DL_Z 0.25       //Compat Power
 	//#define DJ_X 0.250       //Range Smoothing
     /*
     #define MDD 1 //Set Menu Detection & Direction     //Off 0 | 1 | 2 | 3 | 4      
@@ -10435,7 +10447,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DM_X 4           //HQ Tune
 	#define DM_Z 3           //HQ Smooth
     //#define DM_Y 3           //HQ VRS
-    #define DL_Y -0.5    //De-Artifact
+    //#define DL_Y -0.5    //De-Artifact
     //#define DL_Z 0.25       //Compat Power
 	//#define DJ_X 0.250       //Range Smoothing
     /*
@@ -10761,22 +10773,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 
 	#define PEW 1
 	#define ARW 1
-#elif (App == 0xF6F3C763 ) //WRATH
-	//#define DA_W 1
-    #define DB_X 1
-	#define DA_X 0.065
-	#define DA_Y 75.0
-	#define DA_Z 0.00005
-	#define DB_Y 2
-	#define DE_X 4
-	#define DE_Y 0.525
-	#define DE_Z 0.375
-	#define DB_Z 0.090
-	#define WSM 5
-	#define DB_W 3
-	#define DF_X float2(0.1,0.0)
-	#define BMT 1
-	#define DF_Z 0.1125
 #elif (App == 0x68EF1B4E || App == 0xC103D998 || App == 0xFAB47970 || App == 0x539E792B ) //Serious Sam Fusion | Serious Sam 4: Planet Badass | Serious Sam Siberian Mayhem/Unrestricted
 	#define DA_W 1
 	#define DA_X 0.0875
@@ -11058,8 +11054,8 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DM_X 4           //HQ Tune
 	#define DM_Z 1           //HQ Smooth
     //#define DM_Y 3           //HQ VRS
-    #define DL_Y -0.5   //De-Artifact
-    #define DL_Z 0.5       //Compat Power
+    //#define DL_Y -0.5   //De-Artifact
+    //#define DL_Z 0.5       //Compat Power
 	//#define DJ_X 0.250       //Range Smoothing
 	/*
     #define MAC 1
@@ -11130,8 +11126,8 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DM_X 4           //HQ Tune
 	#define DM_Z 3           //HQ Smooth
     //#define DM_Y 3           //HQ VRS
-    #define DL_Y -0.375   //De-Artifact
-    #define DL_Z -0.125       //Compat Power
+    //#define DL_Y -0.375   //De-Artifact
+    //#define DL_Z -0.125       //Compat Power
 	//#define DJ_X 0.125       //Range Smoothing
     /*
     #define MDD 1 //Set Menu Detection & Direction     //Off 0 | 1 | 2 | 3 | 4      
@@ -11195,7 +11191,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DM_Z 2           //HQ Smooth
     //#define DM_Y 3           //HQ VRS
     //#define DL_Y 0.5   //De-Artifact
-    #define DL_Z 0.5       //Compat Power
+    //#define DL_Z 0.5       //Compat Power
 	//#define DJ_X 0.50       //Range Smoothing
 	/*
     #define MAC 1
@@ -11361,7 +11357,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DM_Z 1           //HQ Smooth
     //#define DM_Y 3           //HQ VRS
     //#define DL_Y -0.5   //De-Artifact
-    #define DL_Z 0.5       //Compat Power
+    //#define DL_Z 0.5       //Compat Power
 	//#define DJ_X 0.250       //Range Smoothing
 	/*
     #define MAC 1
@@ -11665,7 +11661,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DM_X 4           //HQ Tune
 	#define DM_Z 1           //HQ Smooth
     //#define DM_Y 3           //HQ VRS
-    #define DL_Y -0.5   //De-Artifact
+    //#define DL_Y -0.5   //De-Artifact
     //#define DL_Z 0.5       //Compat Power
 	//#define DJ_X 0.250       //Range Smoothing
 
@@ -11738,7 +11734,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DM_X 4           //HQ Tune
 	#define DM_Z 1           //HQ Smooth
     //#define DM_Y 3           //HQ VRS
-    #define DL_Y 0.75   //De-Artifact
+    //#define DL_Y 0.75   //De-Artifact
     //#define DL_Z 0.5       //Compat Power
 	//#define DJ_X 0.250       //Range Smoothing
 	
@@ -11837,8 +11833,8 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DL_W 0.000 //SM Perspective
 	#define DM_X 4     //HQ Tune
 	#define DM_Z 1     //HQ Smooth
-    #define DL_Z 0.5       //Compat Power
-    #define DL_Y -0.375   //De-Artifact
+    //#define DL_Z 0.5       //Compat Power
+    //#define DL_Y -0.375   //De-Artifact
 	#define DJ_X 0.300       //Range Smoothing
 	#define PEW 1
 	#define DAA 1
@@ -12034,8 +12030,8 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DM_X 4           //HQ Tune
 	#define DM_Z 1           //HQ Smooth
     //#define DM_Y 3           //HQ VRS
-    #define DL_Y -0.5   //De-Artifact
-    #define DL_Z 0.25       //Compat Power
+    //#define DL_Y -0.5   //De-Artifact
+    //#define DL_Z 0.25       //Compat Power
 	//#define DJ_X 0.250       //Range Smoothing
 	/*
     #define MAC 1
@@ -12111,8 +12107,8 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DM_X 4           //HQ Tune
 	#define DM_Z 4           //HQ Smooth
     //#define DM_Y 3           //HQ VRS
-    #define DL_Y -0.375   //De-Artifact
-    #define DL_Z 0.125       //Compat Power
+    //#define DL_Y -0.375   //De-Artifact
+    //#define DL_Z 0.125       //Compat Power
 	//#define DJ_X 0.250       //Range Smoothing
 	/*
     #define MAC 1
@@ -12189,8 +12185,8 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DM_X 4           //HQ Tune
 	#define DM_Z 1           //HQ Smooth
     //#define DM_Y 3           //HQ VRS
-    #define DL_Y -0.25   //De-Artifact
-    #define DL_Z 0.125       //Compat Power
+    //#define DL_Y -0.25   //De-Artifact
+    //#define DL_Z 0.125       //Compat Power
 	//#define DJ_X 0.250       //Range Smoothing
 	/*
     #define MAC 1
@@ -12414,8 +12410,8 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DM_X 4           //HQ Tune
 	#define DM_Z 1           //HQ Smooth
     //#define DM_Y 3           //HQ VRS
-    #define DL_Y -0.5   //De-Artifact
-    #define DL_Z 0.25       //Compat Power
+    //#define DL_Y -0.5   //De-Artifact
+    //#define DL_Z 0.25       //Compat Power
 	//#define DJ_X 0.250       //Range Smoothing
 	/*
     #define MAC 1
@@ -12492,7 +12488,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DM_Z 1           //HQ Smooth
     //#define DM_Y 3           //HQ VRS
     //#define DL_Y -0.25   //De-Artifact
-    #define DL_Z 0.25       //Compat Power
+    //#define DL_Z 0.25       //Compat Power
 	//#define DJ_X 0.250       //Range Smoothing
 	/*
     #define MAC 1
@@ -12569,7 +12565,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DM_Z 1           //HQ Smooth
     //#define DM_Y 3           //HQ VRS
     //#define DL_Y -0.25   //De-Artifact
-    #define DL_Z 0.25       //Compat Power
+    //#define DL_Z 0.25       //Compat Power
 	//#define DJ_X 0.250       //Range Smoothing
 	/*
     #define MAC 1
@@ -12646,7 +12642,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DM_Z 1           //HQ Smooth
     //#define DM_Y 3           //HQ VRS
     //#define DL_Y -0.25   //De-Artifact
-    #define DL_Z 0.25       //Compat Power
+    //#define DL_Z 0.25       //Compat Power
 	//#define DJ_X 0.250       //Range Smoothing
 	/*
     #define MAC 1
@@ -12932,27 +12928,27 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	//#define DB_Y 1
 	#define DE_X 1
 	#define DE_Y 0.750
-	#define DE_Z 0.400
+	#define DE_Z 0.425
 	//#define AFD 1
 	#define DG_W 0.25 //Neg PoP
-    //#define OIL 1 //Set How many Levels We use for RE_Fix 0 | 1 | 2 | 3
-    #define OIF 0.550 //float2(0.475,0.25) //Fix enables if Value is > 0.0
-	#define DI_W 0.75 //float2(0.0,2.5)
+    #define OIL 1 //Set How many Levels We use for RE_Fix 0 | 1 | 2 | 3
+    #define OIF float2(0.550,0.3) //Fix enables if Value is > 0.0
+	#define DI_W float2(0.75,2.5)
 	//#define FTM 1
     #define DG_Z 0.025 //Min
     #define DE_W 0.250 //Auto
     #define DI_Z 0.060 //Trim
     #define DF_W float2(0.001,0.007) //Edge & Scale
 	#define BMT 1
-	#define DF_Z 0.075 // 0.100
+	#define DF_Z 0.100
     //#define SMS 3           //SM Toggle Separation
 	#define DL_X 0.950      //SM Tune
 	//#define DL_W 0.5       //SM Perspective
 	#define DM_X 4           //HQ Tune
 	#define DM_Z 1           //HQ Smooth
     //#define DM_Y 3           //HQ VRS
-    #define DL_Y -0.275   //De-Artifact
-    #define DL_Z 0.500       //Compat Power
+    //#define DL_Y -0.275   //De-Artifact
+    //#define DL_Z 0.500       //Compat Power
 	//#define DJ_X 0.250       //Range Smoothing
 	/*
     #define MAC 1
@@ -13024,8 +13020,8 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DM_X 4           //HQ Tune
 	#define DM_Z 1           //HQ Smooth
     //#define DM_Y 3           //HQ VRS
-    #define DL_Y -0.375   //De-Artifact
-    #define DL_Z 0.125       //Compat Power
+    //#define DL_Y -0.375   //De-Artifact
+    //#define DL_Z 0.125       //Compat Power
 	//#define DJ_X 0.250       //Range Smoothing
 	/*
     #define MAC 1
@@ -13232,6 +13228,84 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DAA 1
 	#define PEW 1
 	#define NFM 1
+#elif (App == 0xF6F3C763 ) //WRATH: Aeon of Ruin
+	//#define DA_W 1
+    #define DB_X 1
+	#define DA_X 0.065
+	#define DF_Y 0.0125
+	#define DA_Y 75.0
+    #define DA_Z 0.00005 
+	#define DB_Z 0.090
+	//#define DB_Y 1
+	#define DE_X 4
+	#define DE_Y 0.525
+	#define DE_Z 0.375
+	//#define AFD 1
+	//#define DG_W 1.125 //0.75 //Neg PoP
+    //#define OIL 2 //Set How many Levels We use for RE_Fix 0 | 1 | 2 | 3
+    //#define OIF 0.50 //Fix enables if Value is > 0.0
+	//#define DI_W 2.0
+	//#define FTM 1
+    //#define DG_Z 0.03 //Min
+    //#define DE_W 0.250 //Auto
+    //#define DI_Z 0.05//Trim
+    //#define DF_W float2(0.125,0.006) //Edge & Scale
+	#define BMT 1
+	#define DF_Z 0.1125
+    //#define SMS 3           //SM Toggle Separation
+	#define DL_X 0.750      //SM Tune
+	//#define DL_W 0.5       //SM Perspective
+	#define DM_X 4           //HQ Tune
+	#define DM_Z 0           //HQ Smooth
+    //#define DM_Y 3           //HQ VRS
+    //#define DL_Y -0.50   //De-Artifact
+    //#define DL_Z 0.750       //Compat Power
+	//#define DJ_X 0.250       //Range Smoothing
+	/*
+    #define MAC 1
+    #define MDD 1 //Set Menu Detection & Direction      //Off 0 | 1 | 2 | 3 | 4      
+    #define DN_X float4( 0.8835, 0.956 , 0.982 , 0.954)//Pos A = XY Any & B = ZW Lock 
+    #define DN_Y float4( 0.500 , 0.004 ,  0.0, 0.0)     //Pos C = XY Any & D = ZW Match
+    #define DN_Z float4( 0.0, 0.0,  0.0, 0.0)           //Pos E = XY Match & F = ZW Match
+	#define DN_W float4( 1.0, 0.0 , 0.0, 0.0 )          //Size = Menu [ABC] D E F
+    #define DJ_Y float4( 28.0, 28.0, 20.0, 14.0);     //Menu Detection Type for A = X, B = Y, & C = Z. The Last Value is a Wild Card amount W is for X and Z. 
+    #define DJ_Z float3( 1000., 1000., 1000);           //Set Match Tresh 
+	*/
+
+	/*
+    #define MMD 1 //Set Multi Menu Detection             //Off / On
+    #define MMS 0 //Set Multi Menu Selection from 0-1 to 29-30 and Off 0 | 1 | 2
+    #define DO_X float4( 0.187 , 0.125 , 0.500 , 0.100 ) //Pos A1 = XY Color & A2 = ZW Black 
+    #define DO_Y float4( 0.276 , 0.335 , 0.115 , 0.050 ) //Pos A3 = XY Color & B1 = ZW Color
+    #define DO_Z float4( 0.500 , 0.100 , 0.260 , 0.087 ) //Pos B2 = XY Black & B3 = ZW Color
+	#define DO_W float4( 30.0, 30.0, 30.0, 30.0)   //Tresh Hold for Color A & B and Color
+    #define DP_X float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos C1 = XY Color & C2 = ZW Black 
+    #define DP_Y float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos C3 = XY Color & D1 = ZW Color
+    #define DP_Z float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos D2 = XY Black & D3 = ZW Color
+	#define DP_W float4( 1000.0, 1000.0, 1000.0, 1000.0)   //Tresh Hold for Color C & D and Color
+	#define DQ_X float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos C1 = XY Color & C2 = ZW Black 
+    #define DQ_Y float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos C3 = XY Color & D1 = ZW Color
+    #define DQ_Z float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos D2 = XY Black & D3 = ZW Color
+	#define DQ_W float4( 1000.0, 1000.0, 1000.0, 1000.0) //Tresh Hold for Color A1 & A3 and Color
+	#define DR_X float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos G1 = XY Color & G2 = ZW Black 
+    #define DR_Y float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos G3 = XY Color & H1 = ZW Color
+    #define DR_Z float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos H2 = XY Black & H3 = ZW Color
+	#define DR_W float4( 1000.0, 1000.0, 1000.0, 1000.0) //Tresh Hold for Color G & H and Color 
+	*/
+	#define WSM 5
+	#define DB_W 3
+	#define DF_X float2(0.1,0.0)
+	//#define DJ_W 0	
+	//#define HMT 1
+	//#define HMC 2.5
+    //#define HMD 0.350
+	//#define LBC 1  //Letter Box Correction Offsets With X & Y
+	//#define DH_Z 0.0
+	//#define DH_W -0.237
+	//#define FMM 1
+	//#define DAA 1
+	//#define PEW 1
+	//#define NFM 1
 #else
 	#define NPW 1 //No Profile
 #endif
@@ -13921,7 +13995,7 @@ float4 Weapon_Profiles(float WP ,float4 Weapon_Adjust)
 {   if (WP == 2)
         Weapon_Adjust = float4(0.750,30.0,1.025,0.0);     //WP 0  | Prey 2006
     if (WP == 3)
-        Weapon_Adjust = float4(0.266,27.5,14.0,0.125);    //WP 1  | Wrath
+        Weapon_Adjust = float4(0.266,26.25,14.0,0.125);    //WP 1  | Wrath
     if (WP == 4)
         Weapon_Adjust = float4(3.625,20.0,0,0.0);         //WP 2  | We Where Here Together
     if (WP == 5)

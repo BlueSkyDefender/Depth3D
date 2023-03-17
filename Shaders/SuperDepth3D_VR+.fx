@@ -2,7 +2,7 @@
 	///**SuperDepth3D_VR+**///
 	//--------------------////
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	//* Depth Map Based 3D post-process shader v3.6.7
+	//* Depth Map Based 3D post-process shader v3.6.8
 	//* For Reshade 4.4+ I think...
 	//* ---------------------------------
 	//*
@@ -230,6 +230,10 @@ namespace SuperDepth3DVR
 	#ifndef Super3D_Mode
 		#define Super3D_Mode 0
 	#endif
+	//This preprocessor is for Checkerboard Reconstruction Mode for really close to full Res images.
+	#ifndef Upscaler_Mode
+		#define Upscaler_Mode 2
+	#endif
 	#define SuperDepth Super3D_Mode
 	//This preprocessor is for HelixVision Mode that creates a Double Sized texture on the Horizontal axis.
 	#ifndef HelixVision_Mode
@@ -416,9 +420,9 @@ namespace SuperDepth3DVR
 					 "Varable Rate Shading focuses the quality of the samples in lighter areas of the screen.\n"
 					 "Please enable the 'Performance Mode Checkbox,' in ReShade's GUI.\n"
 					 "It's located in the lower bottom right of the ReShade's Main UI.\n"
-					 "Default is Performant + VRS.";
+					 "Default is Performant.";
 		ui_category = "Occlusion Masking";
-	> = 2;
+	> = 0;
 	
 	uniform int Switch_VRS <
 		ui_type = "combo";
@@ -881,7 +885,7 @@ namespace SuperDepth3DVR
 		ui_label = " Deband Toggle";
 		ui_tooltip = "Turns on automatic Depth Aware Deband this is used to reduce or remove the color banding in the image.";
 		ui_category = "Image Effects";
-	> = true;
+	> = false;
 	
 	#if !SuperDepth && !HelixVision
 		uniform bool NCAOC < // Non Companion App Overlay Compatibility
@@ -993,21 +997,12 @@ namespace SuperDepth3DVR
 	}
 	///////////////////////////////////////////////////////////Conversions/////////////////////////////////////////////////////////////
 	float3 RGBtoYCbCr(float3 rgb) // For Super3D a new Stereo3D output.
-	{   float TCoRF[1];//The Chronicles of Riddick: Assault on Dark Athena FIX I don't know why it works.......
+	{
 		float Y  =  .299 * rgb.x + .587 * rgb.y + .114 * rgb.z; // Luminance
 		float Cb = -.169 * rgb.x - .331 * rgb.y + .500 * rgb.z; // Chrominance Blue
 		float Cr =  .500 * rgb.x - .419 * rgb.y - .081 * rgb.z; // Chrominance Red
 		return float3(Y,Cb + 128./255.,Cr + 128./255.);
 	}
-	
-	#if SuperDepth //The Chronicles of Riddick: Assault on Dark Athena FIX I don't know why it works.......
-	float3 youknow(float2 Idontknow)
-	{
-		float whatisgoing;
-		float3 on;
-		return  whatisgoing+on;
-	}
-	#endif
 	///////////////////////////////////////////////////////////////3D Starts Here/////////////////////////////////////////////////////////////////
 	texture DepthBufferTex : DEPTH;
 	sampler DepthBuffer
@@ -1085,7 +1080,7 @@ namespace SuperDepth3DVR
 			AddressW = MIRROR;
 		};
 		
-	texture texzBufferBlurVR < pooled = true; > { Width = BUFFER_WIDTH / 2.0 ; Height = BUFFER_HEIGHT / 2.0; Format = RG16F; MipLevels = 6; };
+	texture texzBufferBlurVR < pooled = true; > { Width = BUFFER_WIDTH / 2.0 ; Height = BUFFER_HEIGHT / 3.0; Format = RG16F; MipLevels = 6; };
 	
 	sampler SamplerzBuffer_BlurVR
 		{
@@ -1132,25 +1127,37 @@ namespace SuperDepth3DVR
 			AddressW = BORDER;
 		};
 	#else
-	texture LeftTex  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBAC; };
-	
-	sampler SamplerLeft
-		{
-			Texture = LeftTex;
-			AddressU = BORDER;
-			AddressV = BORDER;
-			AddressW = BORDER;
-		};
-	
-	texture RightTex  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBAC; };
-	
-	sampler SamplerRight
-		{
-			Texture = RightTex;
-			AddressU = BORDER;
-			AddressV = BORDER;
-			AddressW = BORDER;
-		};
+		#if Upscaler_Mode
+		texture Left_Right_Tex  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBAC; };
+		
+		sampler SamplerLeftRight
+			{
+				Texture = Left_Right_Tex;
+				AddressU = BORDER;
+				AddressV = BORDER;
+				AddressW = BORDER;
+			};
+		#else
+		texture LeftTex  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBAC; };
+		
+		sampler SamplerLeft
+			{
+				Texture = LeftTex;
+				AddressU = BORDER;
+				AddressV = BORDER;
+				AddressW = BORDER;
+			};
+		
+		texture RightTex  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBAC; };
+		
+		sampler SamplerRight
+			{
+				Texture = RightTex;
+				AddressU = BORDER;
+				AddressV = BORDER;
+				AddressW = BORDER;
+			};
+		#endif
 	#endif
 	
 	texture Info_Tex < pooled = true; >  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = R8; };
@@ -1897,22 +1904,12 @@ namespace SuperDepth3DVR
 	{	float D = MD_WHD.x, Z = ZPD_Separation.x, WZP = 0.5, ZP = 0.5, W_Convergence = WZPD_and_WND.x, WZPDB, Distance_From_Bottom = 0.9375, ZPD_Boundary = ZPD_Boundary_n_Fade.x, Store_WC;
 	    //Screen Space Detector.
 		if (abs(Weapon_ZPD_Boundary.x) > 0)
-		{   float WArray[8] = { 0.5, 0.5625, 0.625, 0.6875, 0.75, 0.8125, 0.875, 0.9375};
-			float MWArray[8] = { 0.4375, 0.46875, 0.5, 0.53125, 0.625, 0.75, 0.875, 0.9375};
-			float WZDPArray[8] = { 1.0, 0.5, 0.75, 0.5, 0.625, 0.5, 0.55, 0.5};//SoF ZPD Weapon Map
+		{   float WArray[6] = { 0.4, 0.5, 0.6, 0.7, 0.8, 0.9};
 			[unroll] //only really only need to check one point just above the center bottom and to the right.
-			for( int i = 0 ; i < 8; i++ )
+			for( int i = 0 ; i < 6; i++ )
 			{
-				if((WP == 22 || WP == 4) && WSM == 1)//SoF & BL 2
-					WZPDB = 1 - (WZPD_and_WND.x * WZDPArray[i]) / tex2Dlod(SamplerDMVR,float4(float2(WArray[i],0.9375),0,0)).z;
-				else
-				{
-					if (Weapon_ZPD_Boundary.x < 0) //Code for Moving Weapon Hand stablity.
-						WZPDB = 1 - WZPD_and_WND.x / tex2Dlod(SamplerDMVR,float4(float2(MWArray[i],Distance_From_Bottom),0,0)).z;
-					else //Normal
-						WZPDB = 1 - WZPD_and_WND.x / tex2Dlod(SamplerDMVR,float4(float2(WArray[i],Distance_From_Bottom),0,0)).z;
-				}
-	
+				WZPDB  = 1 - WZPD_and_WND.x / tex2Dlod(SamplerDMVR, float4(float2(WArray[i],Distance_From_Bottom), 0, 0)).z;
+					
 				if ( WZPDB < -DJ_W ) // Default -0.1
 					W_Convergence *= 1.0-abs(Weapon_ZPD_Boundary.x);
 				 //Used if Weapon Buffer is way out of range.
@@ -2025,11 +2022,6 @@ namespace SuperDepth3DVR
 			   HandleConvergence.y *= WA_XYZW().w;
 			   HandleConvergence.y = lerp(HandleConvergence.y + FD_Adjust, HandleConvergence.y, FadeIO);
 		DM.y = lerp( HandleConvergence.x, HandleConvergence.y, DM.y);
-		//Better mixing for eye Comfort
-		DM.z = DM.y;
-		DM.y += lerp(DM.y,DM.x,DM.w);
-		DM.y *= 0.5f;
-		DM.y = lerp(DM.y,DM.z,0.9375f);
 	
 		float Edge_Adj = saturate(lerp(0.5,1.0,Edge_Adjust));
 		
@@ -2216,10 +2208,11 @@ namespace SuperDepth3DVR
 		if( Performance_Level > 1 )
 			Perf *= saturate(Luma_Adptive * 0.5 + 0.5  );
 		//ParallaxSteps Calculations
-		float MinNum = 25, D = abs(Diverge), Cal_Steps = D * Perf, Steps = clamp( Cal_Steps, Perf_LvL ? MinNum : lerp( MinNum, min( MinNum, D), GetDepth >= 0.999 ), Performance_Level > 1 ? lerp(100,50,saturate(Vin_Pattern(Coordinates, float2(15.0,2.5)))) : 100 );//Foveated Rendering Point of attack 16-256 limit samples.
+		float MinNum = 20, D = abs(Diverge), Cal_Steps = D * Perf, FOV_Ren = lerp(100, MinNum, saturate(Vin_Pattern(Coordinates, float2(15.0,3.0)) * GetDepth * 4 )),
+			  Steps  = clamp( Cal_Steps, Perf_LvL ? MinNum : lerp( MinNum, min( MinNum, D), GetDepth >= 0.999 ), FOV_Ren );//Foveated Rendering Point of attack 16-256 limit samples.
 		// Offset per step progress & Limit
 		float LayerDepth = rcp(Steps), TP = Compatibility_Power >= 0 ? lerp(0.025, 0.05,Compatibility_Power) : lerp(0.0225, 0.05,abs(Compatibility_Power) * saturate(Vin_Pattern(Coordinates, float2(15.0,3.0))));
-			  D = Diverge < 0 ? -75 : 75;
+		float US_Offset = lerp(75.0,175.0,GetDepth * 0.5); D = Diverge < 0 ? -US_Offset : US_Offset;
 	
 		//Offsets listed here Max Seperation is 3% - 8% of screen space with Depth Offsets & Netto layer offset change based on MS.
 		float deltaCoordinates = MS * LayerDepth, CurrentDepthMapValue = GetDB( ParallaxCoord).x, CurrentLayerDepth = 0.0f,
@@ -2306,9 +2299,14 @@ namespace SuperDepth3DVR
 	#if HelixVision
 	void LR_Out(float4 position : SV_Position, float2 texcoord : TEXCOORD, out float4 Double : SV_Target0)
 	#else
-	void LR_Out(float4 position : SV_Position, float2 texcoord : TEXCOORD, out float4 Left : SV_Target0, out float4 Right : SV_Target1)//, out float StoreBB : SV_Target2)
+		#if Upscaler_Mode
+		void LR_Out(float4 position : SV_Position, float2 texcoord : TEXCOORD, out float4 Left_Right : SV_Target0)//, out float StoreBB : SV_Target2)
+		#else
+		void LR_Out(float4 position : SV_Position, float2 texcoord : TEXCOORD, out float4 Left : SV_Target0, out float4 Right : SV_Target1)//, out float StoreBB : SV_Target2)
+		#endif
 	#endif
 	{   float2 StoreTC = texcoord; //StoreBB = dot(tex2D(BackBufferCLAMP,texcoord).rgb,float3(0.2125, 0.7154, 0.0721));
+		#if !Upscaler_Mode
 		//Field of View
 		float fov = FoV-(FoV*0.2), F = -fov + 1,HA = (F - 1)*(BUFFER_WIDTH*0.5)*pix.x;
 		//Field of View Application
@@ -2323,8 +2321,9 @@ namespace SuperDepth3DVR
 		float Y = Z_A.y * Z_A.x * 2;
 		float midW = (X - 1)*(BUFFER_WIDTH*0.5)*pix.x;
 		float midH = (Y - 1)*(BUFFER_HEIGHT*0.5)*pix.y;
-	
+		
 		texcoord = float2((texcoord.x*X)-midW,(texcoord.y*Y)-midH);
+		#endif
 		//Store Texcoords for left and right eye
 		float2 TCL = texcoord,TCR = texcoord;
 		//IPD Right Adjustment
@@ -2360,24 +2359,162 @@ namespace SuperDepth3DVR
 	#if HUD_MODE || HMT
 		float HUD_Adjustment = ((0.5 - HUD_Adjust.y)*25.) * pix.x;
 	#endif
+
+	float Pattern = floor(StoreTC.y*Res.y) + floor(StoreTC.x*Res.x);
+	float Pattern_Type = fmod(Pattern,2); //CB
+	
+	if(Upscaler_Mode == 1)
+		Pattern_Type = StoreTC.x < 0.5; //SBS
+	if( Upscaler_Mode == 2)
+		Pattern_Type = StoreTC.y < 0.5; //TnB
 	
 	#if HelixVision
-		float4 L = saturation( float4(MouseCursor( Parallax(-DLR.x, float2(TCL.x * 2,TCL.y)), position.xy).rgb,1.0) ),
-			   R = saturation( float4(MouseCursor( Parallax( DLR.y, float2(TCR.x  * 2 - 1,TCR.y)), position.xy).rgb,1.0) );
+	float3 Shift_LRD = StoreTC.x < 0.5 ? float3(-DLR.x,float2(TCL.x * 2,TCL.y)) : float3(DLR.y, float2(TCR.x  * 2 - 1,TCR.y));
+		Double = saturation(float4(MouseCursor( Parallax(Shift_LRD.x, Shift_LRD.yz), position.xy).rgb,1.0) );
 		#if HUD_MODE || HMT
-			L.rgb = HUD(L.rgb,float2((TCL.x * 2) - HUD_Adjustment,TCL.y));
-			R.rgb = HUD(R.rgb,float2((TCR.x  * 2 - 1) + HUD_Adjustment,TCR.y));
+			Double.rgb = HUD(Double.rgb,StoreTC.x < 0.5 ? float2((TCL.x * 2) - HUD_Adjustment,TCL.y) : float2((TCR.x  * 2 - 1) + HUD_Adjustment,TCR.y));
 		#endif
-		Double = StoreTC.x < 0.5 ? L : R; //Stereoscopic 3D using Reprojection Left & Right
+		//Double = StoreTC.x < 0.5 ? L : R; //Stereoscopic 3D using Reprojection Left & Right
 	#else
-		Left =  saturation(float4(MouseCursor( Parallax(-DLR.x, TCL), position.xy).rgb,1.0) ) ; //Stereoscopic 3D using Reprojection Left
-		Right = saturation(float4(MouseCursor( Parallax( DLR.y, TCR), position.xy).rgb,1.0) ) ;//Stereoscopic 3D using Reprojection Right
-		#if HUD_MODE || HMT
-			Left.rgb = HUD(Left.rgb,float2(TCL.x - HUD_Adjustment,TCL.y));
-			Right.rgb = HUD(Right.rgb,float2(TCR.x + HUD_Adjustment,TCR.y));
-		#endif
+			#if Upscaler_Mode	
+			if (Upscaler_Mode == 1)
+			{
+				TCL.x = TCL.x*2;
+				TCR.x = TCR.x*2-1;
+			}
+			
+			if(Upscaler_Mode == 2)
+			{
+				TCL.y = TCL.y*2;
+				TCR.y = TCR.y*2-1;
+			}
+			
+			float3 Shift_LR = Pattern_Type ? float3(-DLR.x,TCL) : float3(DLR.y, TCR);
+	
+			Left_Right =  saturation(float4(MouseCursor( Parallax(Shift_LR.x, Shift_LR.yz), position.xy).rgb,1.0) ) ; //Stereoscopic 3D using Reprojection Left & Right
+				#if HUD_MODE || HMT
+				Left_Right.rgb = HUD(Left_Right.rgb,Pattern_Type ? float2(TCL.x - HUD_Adjustment,TCL.y) : float2(TCR.x + HUD_Adjustment,TCR.y));
+				#endif
+			#else
+			Left =  saturation(float4(MouseCursor( Parallax(-DLR.x, TCL), position.xy).rgb,1.0) ) ; //Stereoscopic 3D using Reprojection Left
+			Right = saturation(float4(MouseCursor( Parallax( DLR.y, TCR), position.xy).rgb,1.0) ) ;//Stereoscopic 3D using Reprojection Right
+				#if HUD_MODE || HMT
+				Left.rgb = HUD(Left.rgb,float2(TCL.x - HUD_Adjustment,TCL.y));
+				Right.rgb = HUD(Right.rgb,float2(TCR.x + HUD_Adjustment,TCR.y));
+				#endif
+			#endif
+
 	#endif
 	}
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	float LI(in float3 value)
+	{
+		return min( max( value.r, value.g ), value.b );
+	}
+	
+	#if Upscaler_Mode && !HelixVision
+	float3 YCbCrtoRGB(float3 ycc)
+	{
+	    float y = ycc.x;
+	    float cb = ycc.y - 128.0 / 255.0;
+	    float cr = ycc.z - 128.0 / 255.0;
+	
+	    float r = y + 1.400 * cr;
+	    float g = y - 0.343 * cb - 0.711 * cr;
+	    float b = y + 1.765 * cb;
+	
+	    return float3(r, g, b);
+	}
+	
+	float4 SampleLR(float2 texcoord, float Mip)
+	{
+		float2 fullResolution = Upscaler_Mode == 2 ? float2( 1, 0.5 ) : float2( 0.5, 1 );
+		return tex2Dlod(SamplerLeftRight, float4(texcoord * fullResolution, 0,Mip));
+	}
+	
+	float2 EdgeDetection(float2 TC, float Mip)
+	{   
+	     const float3 XY = float3(pix * 1.5,0);
+	    // Bilinear Interpolation. 
+	    const float Left  = LI(  SampleLR( TC-XY.xz ,  Mip).rgb ),
+					Right = LI(  SampleLR( TC+XY.xz ,  Mip ).rgb ),
+					Up    = LI(  SampleLR( TC-XY.zy ,  Mip ).rgb ),
+					Down  = LI(  SampleLR( TC+XY.zy ,  Mip ).rgb );
+					
+		// Calculate like NFAA
+	    return float2(Down-Up,Right-Left);
+	}
+	
+	float Text_Detection(float2 texcoord)
+	{
+		float4 BC  = SampleLR( texcoord , 0);
+		// Luma Threshold Thank you Adyss
+		BC.a    = LI(BC.rgb);//Luma
+		BC.rgb /= max(BC.a, 0.001);
+		BC.a    = max(0.0, BC.a - 0.75 );
+		return BC.a;
+	}
+	float4 Upscaling( float2 texcoord, int Switcher) 
+	{
+		//Field of View
+		float fov = FoV-(FoV*0.2), F = -fov + 1,HA = (F - 1)*(BUFFER_WIDTH*0.5)*pix.x;
+		//Field of View Application
+		float2 Z_A = float2(Theater_Mode == 2 ? 0.75 : 1.0,1.0); //Theater Mode
+		if(!Theater_Mode)
+		{
+			Z_A = float2(1.0,0.5); //Full Screen Mode
+			texcoord.x = (texcoord.x*F)-HA;
+		}
+		//Texture Zoom & Aspect Ratio//
+		float X = Z_A.x;
+		float Y = Z_A.y * Z_A.x * 2;
+		float midW = (X - 1)*(BUFFER_WIDTH*0.5)*pix.x;
+		float midH = (Y - 1)*(BUFFER_HEIGHT*0.5)*pix.y;
+	
+		texcoord = float2((texcoord.x*X)-midW,(texcoord.y*Y)-midH);
+		
+		if (Upscaler_Mode == 1)
+			texcoord = !Switcher ? float2(texcoord.x,texcoord.y) : float2(texcoord.x+1,texcoord.y);
+		else if(Upscaler_Mode == 2)
+			texcoord = !Switcher ? float2(texcoord.x,texcoord.y) : float2(texcoord.x,texcoord.y+1);
+			
+		//Ended up using my own AA Algo as a base for internal Upscaling
+		float3 result = SampleLR( texcoord , 0).rgb,DownSample = SampleLR( texcoord , 0.5).rgb, Store_result = result;
+
+		const float AA_Power = 1.0, AA_Adjust = AA_Power * rcp(6); 
+		//Calculate Gradient from Edge  
+		float2 Edge = EdgeDetection( texcoord, 0) * 2.5;
+		// Like DLAA calculate mask from gradient above.
+	    const float Mask = length(Edge) > 0.2;
+
+	    // Like DLAA Calculate Main Mask based on edge.
+	    if ( Mask )
+		{
+			Edge = float2(Edge.x,-Edge.y);	       	    		    
+  		  result *= 1.0-AA_Power;
+			result += SampleLR( texcoord+(Edge * 0.5)*pix , 0).rgb * AA_Adjust;
+			result += SampleLR( texcoord-(Edge * 0.5)*pix , 0).rgb * AA_Adjust;
+			result += SampleLR( texcoord+(Edge * 0.25)*pix , 0).rgb * AA_Adjust;
+			result += SampleLR( texcoord-(Edge * 0.25)*pix , 0).rgb * AA_Adjust;
+			result += SampleLR( texcoord+Edge*pix , 0).rgb * AA_Adjust;
+			result += SampleLR( texcoord-Edge*pix , 0).rgb * AA_Adjust;
+		}
+		else
+		{
+			int Flip_Depth = Flip_Opengl_Depth ? !Depth_Map_Flip : Depth_Map_Flip;
+			float2  TCFlip  =  texcoord;
+			if (Flip_Depth)
+				TCFlip.y =  1 - TCFlip.y;		
+			//Luma Enhancment 
+			result = RGBtoYCbCr(result.rgb);
+			DownSample = RGBtoYCbCr(DownSample);
+			result.x = result.x * 2 - DownSample.x;
+			result = YCbCrtoRGB(result);
+		}
+	    // Blend result with store_result based on Text_Detection
+	    return float4(lerp(result, Store_result, saturate(Text_Detection(texcoord) * 5)), 1.0);		
+	}
+	#endif
 	///////////////////////////////////////////////////////////Barrel Distortion///////////////////////////////////////////////////////////////////////
 	float4 Circle(float4 C, float2 TC)
 	{
@@ -2421,7 +2558,11 @@ namespace SuperDepth3DVR
 		#if HelixVision
 			float3 Left;
 		#else
+			#if Upscaler_Mode
+			float3 Left = Upscaling( texcoord, 0).rgb;
+			#else
 			float3 Left = tex2D(SamplerLeft,texcoord).rgb;
+			#endif
 		#endif
 		return lerp(Left,0,Vignette(texcoord));
 	}
@@ -2431,7 +2572,11 @@ namespace SuperDepth3DVR
 		#if HelixVision
 			float3 Right;
 		#else
+			#if Upscaler_Mode
+			float3 Right = Upscaling( texcoord, 1).rgb;
+			#else
 			float3 Right = tex2D(SamplerRight,texcoord).rgb;
+			#endif
 		#endif
 		return lerp(Right,0,Vignette(texcoord));
 	}
@@ -2687,12 +2832,7 @@ namespace SuperDepth3DVR
 	{
 		return 0.39894*exp(-0.5*dot(v,v)/(sigma*sigma))/sigma;
 	}
-	
-	float LI(float3 RGB)
-	{
-		return dot(RGB,float3(0.2126, 0.7152, 0.0722));
-	}
-	
+		
 	float3 SmartSharp(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Target
 	{   float Sharp_This = overlay_open ? 0 : Sharpen_Power,mx, mn;
 		float2 tex_offset = pix; // Gets texel offset
@@ -3193,8 +3333,12 @@ namespace SuperDepth3DVR
 			#if HelixVision
 			RenderTarget0 = DoubleTex;//Can run into DX9 size Limitations
 			#else
-			RenderTarget0 = LeftTex;
-			RenderTarget1 = RightTex;
+				#if Upscaler_Mode
+				RenderTarget0 = Left_Right_Tex;
+				#else
+				RenderTarget0 = LeftTex;
+				RenderTarget1 = RightTex;
+				#endif
 			#endif
 		}
 			pass StereoOut
