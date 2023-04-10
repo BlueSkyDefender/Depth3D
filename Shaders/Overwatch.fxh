@@ -13079,16 +13079,16 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DL_Y -0.50   //De-Artifact
     //#define DL_Z 0.750       //Compat Power
 	//#define DJ_X 0.250       //Range Smoothing
-	/*
-    #define MAC 1
+	///* //This seems safe.....
+    #define MAC 0
     #define MDD 1 //Set Menu Detection & Direction      //Off 0 | 1 | 2 | 3 | 4      
-    #define DN_X float4( 0.8835, 0.956 , 0.982 , 0.954)//Pos A = XY Any & B = ZW Lock 
-    #define DN_Y float4( 0.500 , 0.004 ,  0.0, 0.0)     //Pos C = XY Any & D = ZW Match
+    #define DN_X float4( 0.135, 0.113, 0.500 , 0.9065)//Pos A = XY Any & B = ZW Lock 
+    #define DN_Y float4( 0.865, 0.113 ,  0.0, 0.0)     //Pos C = XY Any & D = ZW Match
     #define DN_Z float4( 0.0, 0.0,  0.0, 0.0)           //Pos E = XY Match & F = ZW Match
 	#define DN_W float4( 1.0, 0.0 , 0.0, 0.0 )          //Size = Menu [ABC] D E F
-    #define DJ_Y float4( 28.0, 28.0, 20.0, 14.0);     //Menu Detection Type for A = X, B = Y, & C = Z. The Last Value is a Wild Card amount W is for X and Z. 
+    #define DJ_Y float4( 26.0, 20.0, 26.0, 1000.0);     //Menu Detection Type for A = X, B = Y, & C = Z. The Last Value is a Wild Card amount W is for X and Z. 
     #define DJ_Z float3( 1000., 1000., 1000);           //Set Match Tresh 
-	*/
+	//*/
 
 	/*
     #define MMD 1 //Set Multi Menu Detection             //Off / On
