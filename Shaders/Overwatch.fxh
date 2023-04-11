@@ -9522,33 +9522,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DK_Y 0
 	#define DK_Z 3
 	#define DK_W 2
-#elif (App == 0x1BDC0C4C || App == 0x85D2106D  || App == 0x29B72DA0 || App == 0xD9E005D8 ) //Quake Enhanced Edition //Steam //Epic //Windows Games Store //GOG
-	#define DA_X 0.05//0.075
-    #define DF_Y 0.045
-	#define DA_Y 20.0 //12.5
-    #define DA_Z-0.0010
-	#define DB_Z 0.0625
-	//#define DB_Y 1
-	#define DE_X 6
-	#define DE_Y 0.750 //0.500
-	#define DE_Z 0.375
-	#define DG_W -0.25 //disallowed popout
-    //#define OIL 1 //Set How many Levels We use for RE_Fix 0 | 1 | 2 | 3
-    #define OIF 0.500 //float2(0.265,0.001) //Fix enables if Value is > 0.0
-	#define DI_W 1.0 //float2(1.5,7.0)
-	#define BMT 1
-	#define DF_Z 0.066
-	#define NDW 1
-	#define PEW 1
-	#define DF_X float2(0.1625,0.0)
-	#define DJ_W 0.0
-	#define WSM 3
-	#define DB_W 20
-	#define SMS 3      //SM Toggle Separation
-	#define DL_X 0.900 //SM Tune
-	#define DL_W 0.050 //SM Perspective
-	#define DM_X 3     //HQ Tune
-	#define DM_Z 2     //HQ Smooth
 #elif (App == 0x8C8F544C ) //Witcher 3 DX12
 	#define DA_W 1
     //#define DB_X 1
@@ -13745,16 +13718,16 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DL_Y -0.50   //De-Artifact
     //#define DL_Z 0.750       //Compat Power
 	//#define DJ_X 0.250       //Range Smoothing
-	/*
+	///*
     #define MAC 1
     #define MDD 1 //Set Menu Detection & Direction      //Off 0 | 1 | 2 | 3 | 4      
-    #define DN_X float4( 0.8835, 0.956 , 0.982 , 0.954)//Pos A = XY Any & B = ZW Lock 
-    #define DN_Y float4( 0.500 , 0.004 ,  0.0, 0.0)     //Pos C = XY Any & D = ZW Match
+    #define DN_X float4( 0.310 , 0.422 , 0.920 , 0.880)//Pos A = XY Any & B = ZW Lock 
+    #define DN_Y float4( 0.699 , 0.546 ,  0.0, 0.0)     //Pos C = XY Any & D = ZW Match
     #define DN_Z float4( 0.0, 0.0,  0.0, 0.0)           //Pos E = XY Match & F = ZW Match
 	#define DN_W float4( 1.0, 0.0 , 0.0, 0.0 )          //Size = Menu [ABC] D E F
-    #define DJ_Y float4( 28.0, 28.0, 20.0, 14.0);     //Menu Detection Type for A = X, B = Y, & C = Z. The Last Value is a Wild Card amount W is for X and Z. 
+    #define DJ_Y float4( 30.0, 30.0, 30.0, 1000.0);     //Menu Detection Type for A = X, B = Y, & C = Z. The Last Value is a Wild Card amount W is for X and Z. 
     #define DJ_Z float3( 1000., 1000., 1000);           //Set Match Tresh 
-	*/
+	//*/
 
 	/*
     #define MMD 1 //Set Multi Menu Detection             //Off / On
@@ -14190,7 +14163,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DS_Z 0
 	#define DA_W 1
     //#define DB_X 1
-	#define DA_X 0.025
+	#define DA_X 0.030
 	#define DF_Y 0.005
 	#define DA_Y 75.0
     //#define DA_Z -0.000375
@@ -14437,6 +14410,33 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	//#define PEW 1
 	//#define NFM 1
     #define DSW 1
+#elif (App == 0x1BDC0C4C || App == 0x85D2106D  || App == 0x29B72DA0 || App == 0xD9E005D8 ) //Quake Enhanced Edition //Steam //Epic //Windows Games Store //GOG
+	#define DA_X 0.05//0.075
+    #define DF_Y 0.035
+	#define DA_Y 20.0 //12.5
+    #define DA_Z-0.0010
+	#define DB_Z 0.0625
+	//#define DB_Y 1
+	#define DE_X 6
+	#define DE_Y 0.750 //0.500
+	#define DE_Z 0.400
+	#define DG_W -0.25 //disallowed popout
+    //#define OIL 1 //Set How many Levels We use for RE_Fix 0 | 1 | 2 | 3
+    #define OIF 0.500 //float2(0.265,0.001) //Fix enables if Value is > 0.0
+	#define DI_W 0.25 //float2(1.5,7.0)
+	#define BMT 1
+	#define DF_Z 0.066
+	#define NDW 1
+	#define PEW 1
+	#define DF_X float2(0.1625,0.0)
+	#define DJ_W 0.0
+	#define WSM 3
+	#define DB_W 20
+	#define SMS 3      //SM Toggle Separation
+	#define DL_X 0.900 //SM Tune
+	#define DL_W 0.050 //SM Perspective
+	#define DM_X 3     //HQ Tune
+	#define DM_Z 2     //HQ Smooth
 #else
 	#define NPW 1 //No Profile
 #endif
