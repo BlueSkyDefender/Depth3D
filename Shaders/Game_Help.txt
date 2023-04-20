@@ -1119,6 +1119,14 @@ Should not need to do this anymore. Use Overwatch.fxh
 Make sure Render Mode is Normal.
 Also Scale should be 1 for 1:1.
 
+{Resident Evil 4 Remake 2023} - ReShade 5.7.0
+You need to use the latest ReShade and praydog's REFramework for RE4.
+https://github.com/praydog/REFramework/releases/download/v1.4/RE4.zip
+
+You only need dinput8.dll
+
+Other then that.
+
 {Return To Castle Wolfenstine}
 Increase Depth to 25+ Do this by typing in your amount.
 The game seems to run really slow with my shader at the start. 
@@ -1459,6 +1467,14 @@ I would say also use an FOV fix. Like the one found at http://www.flawlesswidesc
 
 You also have to disable Letterboxing in the settings.
 
+{The Last of Us Part 1} - ReShade 5.8.0
+Game has crashing issues on Nvida cards with ReShade. 
+I was told that AMD cards and Intel Cards work.
+
+Keep in mind it is untested. Depth Buffer may still be unstable.
+
+Hope we can fix the issues in the future.
+
 {The Legend of Korra}
 If you want 4K in this res locked game you SpecialK build of Reshade.
 Guide Here.
@@ -1543,6 +1559,75 @@ Install ReShade into the Bin/x64_retail folder.
 In game settings:
 Adaptive Resolution FPS Target = 144
 Adaptive Supersampling = Enabled
+
+{Uncharted: Legacy of Thieves Collection} [Reshade 5.8.0] + addon
+Make sure to disable The ReShade Generic Depth Add-on before you use this one. 
+Then Download this modded generic Depth addon.
+
+https://www.mediafire.com/file/y1p9wmq7406z4tu/generic_depth_mod.addon64/file
+The two options you want to enable are
+
+[x]Use native resolution heuristics
+[x]Prioitize indirect calls heuristics
+
+and should look like this;
+
+[x]Use aspect ratio heuristics
+[ ]Use extended aspect ratio heuristics (for DLSS or Resolution scaling)
+[x]Use native resolution heuristics
+[ ]Prioitize lower verticies counts heuristics
+[x]Prioitize indirect calls heuristics
+[ ]Don't skip updates when there is little activity.
+[x]Copy depth buffer befire clear operations
+[x]Copy depth buffer during frame to prevent artifacts
+
+So the profile will try to reduce Distortions But, if you want a better experiance you want to follow the instructions here to disable some effects.
+
+You will need to modify the game's executable to disable the listed effects below.
+If you own the Steam version, then use Steamless to unpack the executables first.
+Has to be applied to both u4.exe/u4-l.exe (Uncharted 4) and tll.exe/tll-l.exe (Uncharted: The Lost Legacy) separately.
+Open the game's executable in a HEX editor (e.g. HxD). https://mh-nexus.de/en/hxd/
+
+Barrel distortion - https://www.pcgamingwiki.com/wiki/Uncharted:_Legacy_of_Thieves_Collection#Barrel_distortion
+
+Uncharted 4 (u4.exe/u4-l.exe)
+Find: 00 41 8B 86 48 0D 00 00
+Replace it with: 00 33 C0 90 90 90 90 90
+Save the changes.
+
+Uncharted: The Lost Legacy (tll.exe/tll-l.exe)
+Find: 00 41 8B 87 D4 0D 00 00
+Replace it with: 00 33 C0 90 90 90 90 90
+Save the changes.
+
+Depth of Field  - https://www.pcgamingwiki.com/wiki/Uncharted:_Legacy_of_Thieves_Collection#Depth_of_Field
+
+Uncharted 4 (u4.exe/u4-l.exe)
+Find: 00 41 8B 87 20 0C 00 00
+Replace it with: 00 B8 00 00 80 7F 90 90
+Save the changes.
+
+Uncharted: The Lost Legacy (tll.exe/tll-l.exe)
+Find: 00 41 8B 87 B0 0C 00 00
+Replace it with: 00 B8 00 00 80 7F 90 90
+Save the changes.
+
+Screen Zoom - https://www.pcgamingwiki.com/wiki/Uncharted:_Legacy_of_Thieves_Collection#Screen_zoom
+
+Uncharted 4 (u4.exe/u4-l.exe)
+Find: 00 41 8B 86 4C 0D 00 00
+Replace it with: 00 B8 00 00 80 3F 90 90
+Save the changes.
+
+Uncharted: The Lost Legacy (tll.exe/tll-l.exe)
+Find: 00 41 8B 87 D8 0D 00 00
+Replace it with: 00 B8 00 00 80 3F 90 90
+Save the changes.
+
+Once you do the changes listed here start the game and open up the shader and disable The Barrel distortion toggle in the shader for Uncharted: The Lost Legacy.
+The option near the bottom of the shader. 
+
+Enjoy.
 
 {Rise of the TombRaider | TombRaider 2013} [Reshade 4.6.1+]
 You may need to manually enable copy depth buffers in the ReShade DX11 menu for the games listed here.

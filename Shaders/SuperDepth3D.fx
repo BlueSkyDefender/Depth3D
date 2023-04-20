@@ -2301,7 +2301,7 @@ namespace SuperDepth3D
 	float2 Parallax(float Diverge, float2 Coordinates, float IO) // Horizontal parallax offset & Hole filling effect
 	{
 	    float  MS = Diverge * pix.x; int Perf_LvL = fmod(Performance_Level,2);  
-		float2 ParallaxCoord = Coordinates, Default_Offset = View_Mode == 1 ? float2(50.0,150.0) : float2(75.0,175.0), CBxy = floor( float2(Coordinates.x * BUFFER_WIDTH, Coordinates.y * BUFFER_HEIGHT));
+		float2 ParallaxCoord = Coordinates, Default_Offset = View_Mode == 1 ? lerp(float2(50.0,150.0), float2(75.0,175.0),abs(Compatibility_Power)) : float2(75.0,175.0), CBxy = floor( float2(Coordinates.x * BUFFER_WIDTH, Coordinates.y * BUFFER_HEIGHT));
 		float GetDepth = smoothstep(0,1, GetDB(Coordinates).z ), CB_Done = fmod(CBxy.x+CBxy.y,2),
 				   Perf = Performance_LvL[Perf_LvL].x;
 		//Would Use Switch....

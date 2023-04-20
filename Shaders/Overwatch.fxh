@@ -1,7 +1,7 @@
 ////----------------------------------------//
 ///SuperDepth3D Overwatch Automation Header///
 //----------------------------------------////
-// Version 3.2.4
+// Version 3.2.5
 //---------------------------------------OVERWATCH---------------------------------------//
 // If you are reading this stop. Go away and never look back. From this point on if you  //
 // still think it's is worth looking at this..... Then no one can save you or your soul. //
@@ -615,25 +615,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DA_Y 75.0
 	#define DA_Z 0.021
 	#define OIF 0.0125 //Fix enables if Value is > 0.0
-#elif (App == 0xAAA18268 ) //Hellblade ****
-    #define DA_W 1
-    #define DA_Y 20
-    #define DA_X 0.050
-    #define DF_Y 0.070
-    #define DB_Y 3
-    #define DE_X 1 
-    #define DE_Y 0.375
-    #define DE_Z 0.300
-    #define DG_W 0.375 //Detection was moved back.
-    #define DG_Z 0.050 //Min  New system from RE7 was used
-    #define DI_Z 0.0625//Trim New system from RE7 was used
-    #define BMT 1      //Disables Auto ZPD
-	#define DF_Z 0.060 //Sets Manual Mode power.
-	#define SMS 1      //SM Toggle Separation
-	#define DL_X 0.500 //SM Tune
-	#define DL_W 0.050 //SM Perspective
-	#define PEW 1
-	#define DAA 1
 #elif (App == 0x287BBA4C || App == 0x59BFE7AC ) //Grim Dawn 64bit/32bit
 	#define DB_Y 2
 	#define DA_Y 125.0
@@ -13331,7 +13312,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	//#define PEW 1
 	//#define NFM 1
 #elif (App == 0x60F43A2C ) //Resident Evil 4 Remake
-    //#define DS_Z 0//View Mode State
+    #define DS_Z 2
 	#define DA_W 1
     //#define DB_X 1
 	#define DA_X 0.0375
@@ -13410,6 +13391,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DAA 1
 	#define PEW 1
 	#define NFM 1
+	#define RHW 1
 #elif (App == 0xC4773871 ) //Octopath Traveler II
     //#define DS_Z 0
 	#define DA_W 1
@@ -14410,6 +14392,259 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	//#define PEW 1
 	//#define NFM 1
     #define DSW 1
+#elif (App == 0xB097DD6F )	//The Last of Us Part 1
+    #define DS_Z 2
+	//#define DA_W 1
+    //#define DB_X 1
+	#define DA_X 0.06
+	#define DF_Y 0.00
+	#define DA_Y 8.0
+    //#define DA_Z -0.000375
+	#define DB_Z 0.05
+	//#define DB_Y 1
+	#define DE_X 1
+	#define DE_Y 0.625
+	#define DE_Z 0.375
+	//#define AFD 1
+	#define DG_W -0.25
+    #define OIL 1 //Set How many Levels We use for RE_Fix 0 | 1 | 2 | 3
+    #define OIF float2(0.5,0.25) //Fix enables if Value is > 0.0
+	#define DI_W float2(0.25,1.5)
+	//#define FTM 1
+    //#define DG_Z 0.03 //Min
+    //#define DE_W 0.250 //Auto
+    //#define DI_Z 0.05//Trim
+    //#define DF_W float2(0.125,0.006) //Edge & Scale
+	#define BMT 1
+	#define DF_Z 0.125
+    //#define SMS 3           //SM Toggle Separation
+	#define DL_X 0.9       //SM Tune
+	//#define DL_W 0.5       //SM Perspective
+	#define DM_X 2           //HQ Tune
+	#define DM_Z 0           //HQ Smooth
+    //#define DM_Y 3           //HQ VRS
+    //#define DL_Y -0.50   //De-Artifact
+    #define DL_Z 0.500       //Compat Power
+	//#define DJ_X 0.250       //Range Smoothing
+	/*
+    #define MAC 1
+    #define MDD 1 //Set Menu Detection & Direction      //Off 0 | 1 | 2 | 3 | 4      
+    #define DN_X float4( 0.8835, 0.956 , 0.982 , 0.954)//Pos A = XY Any & B = ZW Lock 
+    #define DN_Y float4( 0.500 , 0.004 ,  0.0, 0.0)     //Pos C = XY Any & D = ZW Match
+    #define DN_Z float4( 0.0, 0.0,  0.0, 0.0)           //Pos E = XY Match & F = ZW Match
+	#define DN_W float4( 1.0, 0.0 , 0.0, 0.0 )          //Size = Menu [ABC] D E F
+    #define DJ_Y float4( 28.0, 28.0, 20.0, 14.0);     //Menu Detection Type for A = X, B = Y, & C = Z. The Last Value is a Wild Card amount W is for X and Z. 
+    #define DJ_Z float3( 1000., 1000., 1000);           //Set Match Tresh 
+	*/
+
+	/*
+    #define MMD 1 //Set Multi Menu Detection             //Off / On
+    #define MMS 0 //Set Multi Menu Selection from 0-1 to 29-30 and Off 0 | 1 | 2
+    #define DO_X float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos A1 = XY Color & A2 = ZW Black 
+    #define DO_Y float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos A3 = XY Color & B1 = ZW Color
+    #define DO_Z float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos B2 = XY Black & B3 = ZW Color
+	#define DO_W float4( 1000.0, 1000.0, 1000.0, 1000.0) //Tresh Hold for Color A & B and Color
+    #define DP_X float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos C1 = XY Color & C2 = ZW Black 
+    #define DP_Y float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos C3 = XY Color & D1 = ZW Color
+    #define DP_Z float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos D2 = XY Black & D3 = ZW Color
+	#define DP_W float4( 1000.0, 1000.0, 1000.0, 1000.0) //Tresh Hold for Color C & D and Color
+	#define DQ_X float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos C1 = XY Color & C2 = ZW Black 
+    #define DQ_Y float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos C3 = XY Color & D1 = ZW Color
+    #define DQ_Z float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos D2 = XY Black & D3 = ZW Color
+	#define DQ_W float4( 1000.0, 1000.0, 1000.0, 1000.0) //Tresh Hold for Color A1 & A3 and Color
+	#define DR_X float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos G1 = XY Color & G2 = ZW Black 
+    #define DR_Y float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos G3 = XY Color & H1 = ZW Color
+    #define DR_Z float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos H2 = XY Black & H3 = ZW Color
+	#define DR_W float4( 1000.0, 1000.0, 1000.0, 1000.0) //Tresh Hold for Color G & H and Color 
+	*/
+	//#define WSM 2
+	//#define DB_W 16
+	//#define DF_X float2(0.1375,0.0)
+	//#define DJ_W 0	
+	//#define HMT 1
+	//#define HMC 2.5
+    //#define HMD 0.350
+	//#define LBC 1  //Letter Box Correction Offsets With X & Y
+	//#define DH_Z 0.0
+	//#define DH_W -0.237
+	//#define FMM 1
+	//#define DAA 1
+	//#define PEW 1
+    #define RHW 1
+	#define NFM 1
+    #define DSW 1
+#elif (App == 0x446E2223 )	//Uncharted: Legacy of Thieves Collection; Uncharted: The Lost Legacy / Steam | 
+    //#define DS_Z 2
+	//#define DA_W 1
+    //#define DB_X 1
+	#define DA_X 0.06
+	#define DF_Y 0.00
+	#define DA_Y 7.0
+    //#define DA_Z -0.000375
+	#define DB_Z 0.05
+	//#define DB_Y 1
+	#define DE_X 1
+	#define DE_Y 0.550
+	#define DE_Z 0.375
+	//#define AFD 1
+	//#define DG_W -0.25
+    //#define OIL 1 //Set How many Levels We use for RE_Fix 0 | 1 | 2 | 3
+    //#define OIF float2(0.5,0.25) //Fix enables if Value is > 0.0
+	//#define DI_W float2(0.25,1.5)
+	//#define FTM 1
+    //#define DG_Z 0.03 //Min
+    //#define DE_W 0.250 //Auto
+    //#define DI_Z 0.05//Trim
+    //#define DF_W float2(0.125,0.006) //Edge & Scale
+	#define BMT 1
+	#define DF_Z 0.05
+    //#define SMS 3           //SM Toggle Separation
+	#define DL_X 0.9       //SM Tune
+	//#define DL_W 0.5       //SM Perspective
+	#define DM_X 2           //HQ Tune
+	#define DM_Z 0           //HQ Smooth
+    //#define DM_Y 3           //HQ VRS
+    //#define DL_Y -0.50   //De-Artifact
+    #define DL_Z 1.00       //Compat Power
+	//#define DJ_X 0.250       //Range Smoothing
+	/*
+    #define MAC 1
+    #define MDD 1 //Set Menu Detection & Direction      //Off 0 | 1 | 2 | 3 | 4      
+    #define DN_X float4( 0.8835, 0.956 , 0.982 , 0.954)//Pos A = XY Any & B = ZW Lock 
+    #define DN_Y float4( 0.500 , 0.004 ,  0.0, 0.0)     //Pos C = XY Any & D = ZW Match
+    #define DN_Z float4( 0.0, 0.0,  0.0, 0.0)           //Pos E = XY Match & F = ZW Match
+	#define DN_W float4( 1.0, 0.0 , 0.0, 0.0 )          //Size = Menu [ABC] D E F
+    #define DJ_Y float4( 28.0, 28.0, 20.0, 14.0);     //Menu Detection Type for A = X, B = Y, & C = Z. The Last Value is a Wild Card amount W is for X and Z. 
+    #define DJ_Z float3( 1000., 1000., 1000);           //Set Match Tresh 
+	*/
+
+	/*
+    #define MMD 1 //Set Multi Menu Detection             //Off / On
+    #define MMS 0 //Set Multi Menu Selection from 0-1 to 29-30 and Off 0 | 1 | 2
+    #define DO_X float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos A1 = XY Color & A2 = ZW Black 
+    #define DO_Y float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos A3 = XY Color & B1 = ZW Color
+    #define DO_Z float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos B2 = XY Black & B3 = ZW Color
+	#define DO_W float4( 1000.0, 1000.0, 1000.0, 1000.0) //Tresh Hold for Color A & B and Color
+    #define DP_X float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos C1 = XY Color & C2 = ZW Black 
+    #define DP_Y float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos C3 = XY Color & D1 = ZW Color
+    #define DP_Z float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos D2 = XY Black & D3 = ZW Color
+	#define DP_W float4( 1000.0, 1000.0, 1000.0, 1000.0) //Tresh Hold for Color C & D and Color
+	#define DQ_X float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos C1 = XY Color & C2 = ZW Black 
+    #define DQ_Y float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos C3 = XY Color & D1 = ZW Color
+    #define DQ_Z float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos D2 = XY Black & D3 = ZW Color
+	#define DQ_W float4( 1000.0, 1000.0, 1000.0, 1000.0) //Tresh Hold for Color A1 & A3 and Color
+	#define DR_X float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos G1 = XY Color & G2 = ZW Black 
+    #define DR_Y float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos G3 = XY Color & H1 = ZW Color
+    #define DR_Z float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos H2 = XY Black & H3 = ZW Color
+	#define DR_W float4( 1000.0, 1000.0, 1000.0, 1000.0) //Tresh Hold for Color G & H and Color 
+	*/
+	//#define WSM 2
+	//#define DB_W 16
+	//#define DF_X float2(0.1375,0.0)
+	//#define DJ_W 0	
+	//#define HMT 1
+	//#define HMC 2.5
+    //#define HMD 0.350
+	//#define LBC 1  //Letter Box Correction Offsets With X & Y
+	//#define DH_Z 0.0
+	//#define DH_W -0.237
+	#define BDF 1    //Barrel Distortion Fix k1 k2 k3 and Zoom
+	#define DC_X 0.00
+	#define DC_Y 0.115
+	#define DC_Z 0.000
+	#define DC_W -0.035
+	//#define FMM 1
+	//#define DAA 1
+	//#define PEW 1
+    #define RHW 1
+	#define NFM 1
+    #define DSW 1
+#elif (App == 0xB5674D0C )	//Uncharted: Legacy of Thieves Collection; Uncharted 4 / Steam | 
+    //#define DS_Z 2
+	//#define DA_W 1
+    //#define DB_X 1
+	#define DA_X 0.06
+	#define DF_Y 0.00
+	#define DA_Y 7.0
+    //#define DA_Z -0.000375
+	#define DB_Z 0.05
+	//#define DB_Y 1
+	#define DE_X 1
+	#define DE_Y 0.550
+	#define DE_Z 0.375
+	//#define AFD 1
+	//#define DG_W -0.25
+    //#define OIL 1 //Set How many Levels We use for RE_Fix 0 | 1 | 2 | 3
+    //#define OIF float2(0.5,0.25) //Fix enables if Value is > 0.0
+	//#define DI_W float2(0.25,1.5)
+	//#define FTM 1
+    //#define DG_Z 0.03 //Min
+    //#define DE_W 0.250 //Auto
+    //#define DI_Z 0.05//Trim
+    //#define DF_W float2(0.125,0.006) //Edge & Scale
+	#define BMT 1
+	#define DF_Z 0.05
+    //#define SMS 3           //SM Toggle Separation
+	#define DL_X 0.9       //SM Tune
+	//#define DL_W 0.5       //SM Perspective
+	#define DM_X 2           //HQ Tune
+	#define DM_Z 0           //HQ Smooth
+    //#define DM_Y 3           //HQ VRS
+    //#define DL_Y -0.50   //De-Artifact
+    #define DL_Z 0.750       //Compat Power
+	//#define DJ_X 0.250       //Range Smoothing
+	/*
+    #define MAC 1
+    #define MDD 1 //Set Menu Detection & Direction      //Off 0 | 1 | 2 | 3 | 4      
+    #define DN_X float4( 0.8835, 0.956 , 0.982 , 0.954)//Pos A = XY Any & B = ZW Lock 
+    #define DN_Y float4( 0.500 , 0.004 ,  0.0, 0.0)     //Pos C = XY Any & D = ZW Match
+    #define DN_Z float4( 0.0, 0.0,  0.0, 0.0)           //Pos E = XY Match & F = ZW Match
+	#define DN_W float4( 1.0, 0.0 , 0.0, 0.0 )          //Size = Menu [ABC] D E F
+    #define DJ_Y float4( 28.0, 28.0, 20.0, 14.0);     //Menu Detection Type for A = X, B = Y, & C = Z. The Last Value is a Wild Card amount W is for X and Z. 
+    #define DJ_Z float3( 1000., 1000., 1000);           //Set Match Tresh 
+	*/
+
+	/*
+    #define MMD 1 //Set Multi Menu Detection             //Off / On
+    #define MMS 0 //Set Multi Menu Selection from 0-1 to 29-30 and Off 0 | 1 | 2
+    #define DO_X float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos A1 = XY Color & A2 = ZW Black 
+    #define DO_Y float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos A3 = XY Color & B1 = ZW Color
+    #define DO_Z float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos B2 = XY Black & B3 = ZW Color
+	#define DO_W float4( 1000.0, 1000.0, 1000.0, 1000.0) //Tresh Hold for Color A & B and Color
+    #define DP_X float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos C1 = XY Color & C2 = ZW Black 
+    #define DP_Y float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos C3 = XY Color & D1 = ZW Color
+    #define DP_Z float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos D2 = XY Black & D3 = ZW Color
+	#define DP_W float4( 1000.0, 1000.0, 1000.0, 1000.0) //Tresh Hold for Color C & D and Color
+	#define DQ_X float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos C1 = XY Color & C2 = ZW Black 
+    #define DQ_Y float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos C3 = XY Color & D1 = ZW Color
+    #define DQ_Z float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos D2 = XY Black & D3 = ZW Color
+	#define DQ_W float4( 1000.0, 1000.0, 1000.0, 1000.0) //Tresh Hold for Color A1 & A3 and Color
+	#define DR_X float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos G1 = XY Color & G2 = ZW Black 
+    #define DR_Y float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos G3 = XY Color & H1 = ZW Color
+    #define DR_Z float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos H2 = XY Black & H3 = ZW Color
+	#define DR_W float4( 1000.0, 1000.0, 1000.0, 1000.0) //Tresh Hold for Color G & H and Color 
+	*/
+	//#define WSM 2
+	//#define DB_W 16
+	//#define DF_X float2(0.1375,0.0)
+	//#define DJ_W 0	
+	//#define HMT 1
+	//#define HMC 2.5
+    //#define HMD 0.350
+	//#define LBC 1  //Letter Box Correction Offsets With X & Y
+	//#define DH_Z 0.0
+	//#define DH_W -0.237
+	//#define BDF 1    //Barrel Distortion Fix k1 k2 k3 and Zoom
+	//#define DC_X 0.00
+	//#define DC_Y 0.115
+	//#define DC_Z 0.000
+	//#define DC_W -0.035
+	//#define FMM 1
+	//#define DAA 1
+	//#define PEW 1
+    #define RHW 1
+	#define NFM 1
+    #define DSW 1
 #elif (App == 0x1BDC0C4C || App == 0x85D2106D  || App == 0x29B72DA0 || App == 0xD9E005D8 ) //Quake Enhanced Edition //Steam //Epic //Windows Games Store //GOG
 	#define DA_X 0.05//0.075
     #define DF_Y 0.035
@@ -14420,7 +14655,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DE_X 6
 	#define DE_Y 0.750 //0.500
 	#define DE_Z 0.400
-	#define DG_W -0.25 //disallowed popout
+	#define DG_W -0.125 //disallowed popout
     //#define OIL 1 //Set How many Levels We use for RE_Fix 0 | 1 | 2 | 3
     #define OIF 0.500 //float2(0.265,0.001) //Fix enables if Value is > 0.0
 	#define DI_W 0.25 //float2(1.5,7.0)
@@ -14437,6 +14672,25 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DL_W 0.050 //SM Perspective
 	#define DM_X 3     //HQ Tune
 	#define DM_Z 2     //HQ Smooth
+#elif (App == 0xAAA18268 ) //Hellblade
+    #define DA_W 1
+    #define DA_Y 20
+    #define DA_X 0.050
+    #define DF_Y 0.070
+    #define DB_Y 3
+    #define DE_X 1 
+    #define DE_Y 0.375
+    #define DE_Z 0.300
+    #define DG_W 0.375 //Detection was moved back.
+    #define DG_Z 0.050 //Min  New system from RE7 was used
+    #define DI_Z 0.0625//Trim New system from RE7 was used
+    #define BMT 1      //Disables Auto ZPD
+	#define DF_Z 0.060 //Sets Manual Mode power.
+	#define SMS 1      //SM Toggle Separation
+	#define DL_X 0.750 //SM Tune
+	#define DL_W 0.050 //SM Perspective
+	#define PEW 1
+	#define DAA 1
 #else
 	#define NPW 1 //No Profile
 #endif
