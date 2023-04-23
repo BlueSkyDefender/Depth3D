@@ -233,7 +233,7 @@ namespace SuperDepth3DVR
 	#endif
 	//This preprocessor is for Checkerboard Reconstruction Mode for really close to full Res images.
 	#ifndef Upscaler_Mode
-		#define Upscaler_Mode 2
+		#define Upscaler_Mode 0
 	#endif
 	#define SuperDepth Super3D_Mode
 	//This preprocessor is for HelixVision Mode that creates a Double Sized texture on the Horizontal axis.
@@ -2256,7 +2256,7 @@ namespace SuperDepth3DVR
 		    ParallaxCoord.x -= deltaCoordinates; 
 		    // Get depth value at current coordinates
 		    if ( De_Artifacting != 0 && GetDB(ParallaxCoord).w )
-				CurrentDepthMapValue = min(GetDB( ParallaxCoord ).x, GetDB( ParallaxCoord - float2(MS * lerp(0,0.125,saturate(abs(De_Artifacting))),0)).x);
+				CurrentDepthMapValue = min(GetDB( ParallaxCoord ).x, GetDB( ParallaxCoord - float2(MS * lerp(0,0.125,saturate(abs(De_Artifacting) * GetDepth)),0)).x);
 			else
 				CurrentDepthMapValue = GetDB( ParallaxCoord ).x;
 		    // Get depth of next layer
