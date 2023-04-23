@@ -325,7 +325,7 @@ namespace SuperDepth3D
 					"Reiteration | Same thing as Stamped but with brakeage points.\n"
 					"Stamped     | Stamps out a transparent area where occlusion happens.\n"
 					"Mixed       | Used when high amounts of Semi-Transparent objects like foliage in the image.\n"
-					"Adaptive    | is a scene adapting infilling that uses disruptive reiterative sampling.\n" ;//**
+					"Adaptive    | is a scene adapting infilling that uses disruptive reiterative sampling.\n"
 					"\n"
 					"Warning: Also Make sure Performance Mode is active before closing the ReShade menu.\n"
 					"\n"
