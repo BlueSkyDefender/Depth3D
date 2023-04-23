@@ -254,34 +254,38 @@ namespace SuperDepth3D
 	uniform float Divergence <
 		ui_type = "slider";
 		ui_min = 0.0; ui_max = 100; ui_step = 0.5;
-		ui_label = "·Divergence Slider·";
-		ui_tooltip = "Divergence increases differences between the left and right retinal images and allows you to experience depth.\n"
-					 "The process of deriving binocular depth information is called stereopsis.";
+		ui_label =  "·Depth Adjustment·"; 
+		ui_tooltip =  "Increases differences between the left and right images and allows you to experience depth.\n"
+					  "The process of deriving binocular depth information is called stereopsis (or stereoscopic vision).";
 		ui_category = "Divergence & Convergence";
 	> = 50;
 
 	uniform float2 ZPD_Separation <
 		ui_type = "drag";
 		ui_min = 0.0; ui_max = 0.250;
-		ui_label = " ZPD & Separation";
-		ui_tooltip = "Zero Parallax Distance controls the focus distance for the screen Pop-out effect also known as Convergence.\n"
-					"Separation is a way to increase the intensity of Divergence without a performance cost.\n"
-					"For FPS Games keeps this low Since you don't want your gun to pop out of screen.\n"
-					"Default is 0.025, Zero is off.";
+		ui_label =    "ZPD & Separation";
+		ui_tooltip =  "ZPD (Zero Parallax Distance) controls the focus distance for the screen Pop-out effect.\n" //https://manual.reallusion.com/iClone_6/ENU/Pro_6.0/09_3D_Vision/Settings_for_Pop_Out_and_Deep_In_Effect.htm
+					  "For FPS Games keep ZPD low since you don't want your gun to pop out of the screen.\n"
+					  "\n"
+					  "Separation is a way to increase the perception of Depth.\n"
+					  "\n"
+					  "Default for ZPD is 0.025, for Seperation it's 0.0 and Zero is off.";
 		ui_category = "Divergence & Convergence";
-	> = float2(DA_X,DF_Y);
+	> = float2(DA_X,DF_Y);//0.025,0.000
 
 	uniform float ZPD_Balance <
 		ui_type = "drag";
 		ui_min = 0.0; ui_max = 1.0;
 		ui_label = " ZPD Balance";
-		ui_tooltip = "Zero Parallax Distance balances between ZPD Depth and Scene Depth.\n"
-					"Default is Zero is full Convergence and One is Full Depth.";
+		ui_tooltip = "This balances between ZPD Depth and Scene Depth.\n" //***
+					 "Changes the prioritization of the 3D effect.\n"
+					 "Default is 0 for ZPD Depth and 1 is Full Scene Depth.";
 		ui_category = "Divergence & Convergence";
 	> = DF_Z;
+	
 	#if !Inficolor_3D_Emulator
 	uniform int Auto_Balance_Ex <
-		ui_type = "combo";
+		ui_type  = "combo";
 		ui_items = "Off\0Left\0Center\0Right\0Center Wide\0Left Wide\0Right Wide\0";
 //		ui_items = "Off\0Left\0Center\0Right\0Center Wide\0Left Wide\0Right Wide\0Eye Tracker\0Eye Tracker Alt\0";
 		ui_label = " ZPD Auto Balance";
@@ -294,9 +298,8 @@ namespace SuperDepth3D
 		ui_type = "combo";
 		ui_items = "BD0 Off\0BD1 Full\0BD2 Narrow\0BD3 Wide\0BD4 FPS Center\0BD5 FPS Narrow\0BD6 FPS Edge\0BD7 FPS Mixed\0";		
 		ui_label = " ZPD Boundary Detection";
-		ui_tooltip = "This selection menu gives extra boundary conditions to ZPD.\n"
-					 			 "This treats your screen as a virtual wall.\n"
-					 		   "Default is Off.";
+		ui_tooltip = "This selection gives extra boundary conditions to detect for ZPD intrusions.\n"//***
+					 "Default is Off.";
 		ui_category = "Divergence & Convergence";
 	> = DE_X;
 	
@@ -307,8 +310,8 @@ namespace SuperDepth3D
 		ui_type = "slider";
 		#endif
 		ui_min = 0.0; ui_max = 0.5;
-		ui_label = " ZPD Boundary & Fade Time";
-		ui_tooltip = "This selection menu gives extra boundary conditions to scale ZPD & lets you adjust Fade time.";
+		ui_label = " ZPD Boundary Conditions & Transition Time";
+		ui_tooltip = "This selection gives extra boundary conditions to scale ZPD & lets you adjust the transition time.";
 		ui_category = "Divergence & Convergence";
 	> = float2(DE_Y,DE_Z);
 	
@@ -316,15 +319,15 @@ namespace SuperDepth3D
 		ui_type = "combo";
 		ui_items = "VM0 Normal \0VM1 Alpha \0VM2 Reiteration \0VM3 Stamped \0VM4 Mixed \0VM5 Adaptive \0";
 		ui_label = "·View Mode·";
-		ui_tooltip = "Changes the way the shader fills in the occlude sections in the image.\n"
-					"Normal      | Normal output used for most games with it's streched look.\n"
-					"Alpha       | Like Normal But with a bit more sepration in the gap filling.\n"
+		ui_tooltip = "Changes the way the shader fills in the occluded sections in the image.\n"
+					"Normal      | Normal output used for most games with a streched look.\n"
+					"Alpha       | Like Normal But with a bit more sepration in the infilling.\n"
 					"Reiteration | Same thing as Stamped but with brakeage points.\n"
-					"Stamped     | Stamps out a transparent area on the occluded area.\n"
-					"Mixed       | Used for higher amounts of Semi-Transparent objects like foliage.\n"
-					"Adaptive    | is a scene adapting infilling that uses disruptive reiterative sampling.\n"
+					"Stamped     | Stamps out a transparent area where occlusion happens.\n"
+					"Mixed       | Used when high amounts of Semi-Transparent objects like foliage in the image.\n"
+					"Adaptive    | is a scene adapting infilling that uses disruptive reiterative sampling.\n" ;//**
 					"\n"
-					"Warning: Also Make sure you turn on Performance Mode before you close this menu.\n"
+					"Warning: Also Make sure Performance Mode is active before closing the ReShade menu.\n"
 					"\n"
 					"Default is Alpha.";
 	ui_category = "Occlusion Masking";
@@ -337,18 +340,19 @@ namespace SuperDepth3D
 		ui_type = "slider";
 		#endif
 		ui_min = 0; ui_max = 5;
-		ui_label = " Halo Reduction";
-		ui_tooltip = "This warps the depth in some View Modes to hide or minimize the Halo in Most Games.\n"
-					 "With this on it should Hide the Halo a little better depending the View Mode it works on.\n"
+		ui_label = " Halo Reduction";//***
+		ui_tooltip = "This distorts the depth in some View Modes to hide or minimize the halo in Most Games.\n"
+					 "With this active it should Hide the Halo a little better depending the View Mode it works on.\n"
 					 "Default is 3 and Zero is Off.";
 		ui_category = "Occlusion Masking";
 	> = 3;	
-				
+
 	uniform int Custom_Sidebars <
 		ui_type = "combo";
 		ui_items = "Mirrored Edges\0Black Edges\0Stretched Edges\0";
 		ui_label = " Edge Handling";
-		ui_tooltip = "Edges selection for your screen output.";
+		ui_tooltip = "Edges selection for screen output.\n"
+		  			 "What type of filling to be used on the empty spaces on the edges";
 		ui_category = "Occlusion Masking";
 	> = 1;
 	
@@ -356,7 +360,7 @@ namespace SuperDepth3D
 		ui_type = "slider";
 		ui_min = 0.0; ui_max = 1.0;                                                                                                  
 		ui_label = " Edge Reduction";
-		ui_tooltip = "This Decreses the Edge at the cost of warping the Image.\n"
+		ui_tooltip = "This Decreses the Edge at the cost of warping the image.\n"
 					 "Default is 50.0%.";
 		ui_category = "Occlusion Masking";
 	> = 0.5;
@@ -371,8 +375,7 @@ namespace SuperDepth3D
 		ui_min = 0.5; ui_max = 1.0;
 		ui_label = " Max Depth";
 		ui_tooltip = "Max Depth lets you clamp the max depth range of your scene.\n"
-					 "So it's not hard on your eyes looking off in to the distance .\n"
-					 "Default and starts at One and it's Off.";
+					 "Default its 1 and Minimum is 0.5.";
 		ui_category = "Occlusion Masking";
 	> = 1.0;
 	#else
@@ -383,8 +386,8 @@ namespace SuperDepth3D
 		ui_type = "slider";
 		ui_min = 0; ui_max = 1;
 		ui_label = " Range Smoothing";
-		ui_tooltip = "This blends Two Depth Buffer at a distance to fill in missing information that is needed to compleat a image.\n"
-					 "With this on it should help with tress and other foliage that needs to be reconstructed by Temporal Methods.\n"
+		ui_tooltip = "This blends Two Depth Buffers at a distance to fill in missing information that is needed to compleat a image.\n"
+					 "With this active, it should help with trees and other foliage that needs to be reconstructed by Temporal Methods.\n"
 					 "Default is Zero, Off.";
 		ui_category = "Occlusion Masking";
 	> = DJ_X;		
@@ -393,20 +396,20 @@ namespace SuperDepth3D
 		ui_type = "combo";
 		ui_items = "Performant\0Normal\0Performant + VRS\0Normal + VRS\0";
 		ui_label = " Performance Mode";
-		ui_tooltip = "Performance Mode Lowers or Raises Occlusion Quality Processing so that there is a performance is adjustable.\n"
+		ui_tooltip = "Performance Mode Lowers or Raises Occlusion Quality Processing so that the performance is adjusted accordingly.\n"
 					 "Varable Rate Shading focuses the quality of the samples in lighter areas of the screen.\n"
-					 "Please enable the 'Performance Mode Checkbox,' in ReShade's GUI.\n"
-					 "It's located in the lower bottom right of the ReShade's Main UI.\n"
+					 "Please enable the 'Performance Mode' Checkbox, in ReShade's GUI.\n"
+					 "It's located in the lower bottom right of the ReShade's Main.\n"
 					 "Default is Performant.";
 		ui_category = "Occlusion Masking";
 	> = 0;
 	
 	uniform int Switch_VRS <
 		ui_type = "combo";
-		ui_items = "Auto\0High\0Med\0Low\0Very Low\0";
-		ui_label = " VRS Performance";
-		ui_tooltip = "Use this to set Varable Rate Shading to manually selection or automatic mod.\n"
-			   "Default is Automatic.";
+		ui_items =   "Auto\0High\0Med\0Low\0Very Low\0";
+		ui_label =   " VRS Performance";
+		ui_tooltip = "Use this to set Varable Rate Shading to manually selection or automatic mode.\n"
+			         "Default is Automatic.";
 		ui_category = "Occlusion Masking";
 	> = 0;	
 		
@@ -418,9 +421,8 @@ namespace SuperDepth3D
 		#endif
 		ui_min = -1.0; ui_max = 1.0;
 		ui_label = " Compatibility Power";
-		ui_tooltip = "Not all games need a high offset for infilling.\n"
-					 "This option lets you increase this offset in both directions to limit artifacts.\n"
-					 "With this on it should work better in games with TAA, FSR,and or DLSS sometimes.\n"
+		ui_tooltip = "This option lets you increase this offset in both directions to limit artifacts.\n"
+					 "With this active it should work better in games with TAA, XeSS, FSR,and or DLSS sometimes.\n"
 					 "Default is Zero.";
 		ui_category = "Compatibility Options";
 	> = DL_Z;
@@ -447,11 +449,11 @@ namespace SuperDepth3D
 		ui_type = "slider";
 		#endif
 		ui_min = 0.0; ui_max = 5.0;
-		ui_label = " Upscaler Offset";
+		ui_label = " Upscaler Offset"; //***
 		ui_tooltip = "This Offset is for non conforming ZBuffer Postion witch is normaly 1 pixel wide.\n"
-					 "This issue only happens sometimes when using things like DLSS or FSR.\n"
-					 "This does not solve for TAA artifacts like Jittering or smearing.\n"
-					 "Default and starts at Zero and it's Off. With a max offset of 5pixels Wide.";
+					 "This issue only happens sometimes when using things like DLSS, XeSS and or FSR.\n"
+					 "This does not solve for TAA artifacts like Jittering or Smearing.\n"
+					 "Default and starts at 0 and is Off. With a max offset of 5 pixels Wide.";
 		ui_category = "Compatibility Options";
 	> = 0;
 	
@@ -467,9 +469,9 @@ namespace SuperDepth3D
 	uniform float Depth_Map_Adjust <
 		ui_type = "drag";
 		ui_min = 1.0; ui_max = 250.0; ui_step = 0.125;
-		ui_label = " Depth Map Adjustment";
-		ui_tooltip = "This allows for you to adjust the DM precision.\n"
-					 "Adjust this to keep it as low as possible.\n"
+		ui_label = " Near Plane Adjustment";
+		ui_tooltip = "This allows for you to adjust the depth map's near plane.\n"
+					 "If a profile is activated ignore this.\n"
 					 "Default is 7.5";
 		ui_category = "Depth Map";
 	> = DA_Y;
@@ -479,8 +481,7 @@ namespace SuperDepth3D
 		ui_min = -1.0; ui_max = 1.0;
 		ui_label = " Depth Map Offset";
 		ui_tooltip = "Depth Map Offset is for non conforming ZBuffer.\n"
-					 "It,s rare if you need to use this in any game.\n"
-					 "Use this to make adjustments to DM 0 or DM 1.\n"
+					 "It's rare if you need to use this in any game.\n"
 					 "Default and starts at Zero and it's Off.";
 		ui_category = "Depth Map";
 	> = DA_Z;
@@ -489,8 +490,8 @@ namespace SuperDepth3D
 		ui_type = "drag";
 		ui_min = 0.0; ui_max = 0.625;
 		ui_label = " Auto Depth Adjust";
-		ui_tooltip = "Automatically scales depth so it fights out of game menu pop out.\n"
-					 "Default is 0.1f, Zero is off.";
+		ui_tooltip = "Automatically scales depth so it avoides extreme pop out.\n"
+					 "Default is 0.1, Zero is off.";
 		ui_category = "Depth Map";
 	> = DB_Z;
 	
@@ -498,10 +499,11 @@ namespace SuperDepth3D
 		ui_type = "combo";
 		ui_items = "Off\0Stereo Depth View\0Normal Depth View\0";
 		ui_label = " Depth Map View";
-		ui_tooltip = "Display the Depth Map";
+		ui_tooltip = "Display the Depth Map.\n"
+					 "Default is Off.";
 		ui_category = "Depth Map";
 	> = 0;
-	
+	//Should be removed and set to always on.
 	uniform bool Depth_Detection <
 		ui_label = " Depth Detection";
 		ui_tooltip = "Use this to dissable/enable in game Depth Detection.";
@@ -598,12 +600,12 @@ namespace SuperDepth3D
 		ui_type = "drag";
 		ui_min = 0.0; ui_max = 0.5;
 		ui_label = " Weapon ZPD, Min, Auto, & Trim";
-		ui_tooltip = "WZPD controls the focus distance for the screen Pop-out effect also known as Convergence for the weapon hand.\n"
-					"Weapon ZPD Is for setting a Weapon Profile Convergence, so you should most of the time leave this Default.\n"
-					"Weapon Min is used to adjust min weapon hand of the weapon hand when looking at the world near you.\n"
-					"Weapon Auto is used to auto adjust trimming when looking at a object or out to distance.\n"
-					"Weapon Trim is used cutout a location in the depth buffer so that Min and Auto can use.\n"
-					"Default is (ZPD X 0.03, Min Y 0.0, Auto Z 0.0, Trim Z 0.250 ) & Zero is off.";
+		ui_tooltip = "Weapon ZPD controls the focus distance for the screen Pop-out effect also known as Convergence for the weapon hand.\n"
+					 "This Is for setting a Weapon's Profile Convergence, so you should most of the time leave this as Default.\n"
+					 "Weapon Min is used to adjust min weapon hand of the weapon hand when looking at the world near you when the above fails.\n"
+					 "Weapon Auto is used to auto adjust trimming when looking around.\n"
+					 "Weapon Trim is used cutout a location in the depth buffer so that Min and Auto scale off of.\n"
+					 "Default is (ZPD X 0.03, Min Y 0.0, Auto Z 0.0, Trim Z 0.250 ) & Zero is off.";
 		ui_category = "Weapon Hand Adjust";	
 	> = float4(0.03,DG_Z,DE_W,DI_Z);
 	
@@ -642,7 +644,7 @@ namespace SuperDepth3D
 		ui_type = "combo";
 		ui_items = "CB Reconstruction\0Line Interlace Reconstruction\0Column Interlaced Reconstruction\0";
 		ui_label = "·Reconstruction Mode·";
-		ui_tooltip = "Stereoscopic 3D display output selection.";
+		ui_tooltip = "Stereoscopic reconstructed 3D display output selection.";
 		ui_category = "Stereoscopic Options";
 	> = 0;
 	#endif
@@ -653,7 +655,7 @@ namespace SuperDepth3D
 			ui_items = "TriOviz Inficolor 3D Emulation\0";
 			ui_label = " 3D Display Mode";
 		#else
-			#if Reconstruction_Mode
+			#if Reconstruction_Mode // traduzir todas as opçoes
 				ui_items = "Side by Side\0Top and Bottom\0Anaglyph 3D Red/Cyan\0Anaglyph 3D Red/Cyan Dubois\0Anaglyph 3D Red/Cyan Anachrome\0Anaglyph 3D Green/Magenta\0Anaglyph 3D Green/Magenta Dubois\0Anaglyph 3D Green/Magenta Triochrome\0Anaglyph 3D Blue/Amber ColorCode\0";
 				ui_label = " 3D Display Modes";
 			#else
@@ -668,8 +670,8 @@ namespace SuperDepth3D
 	uniform float2 Interlace_Anaglyph_Calibrate <
 		ui_type = "drag";
 		ui_min = 0.0; ui_max = 1.0;
-		ui_label = " Interlace, Anaglyph Saturation";
-		ui_tooltip = "Interlace Optimization is used to reduce aliasing in a Line or Column interlaced image. This has the side effect of softening the image.\n"
+		ui_label = " Interlace Optimization & Anaglyph Saturation";
+		ui_tooltip = "Interlace Optimization is used to reduce aliasing in a Line or Column interlaced images. This has the side effect of softening the image.\n"
 		             "Anaglyph Desaturation allows for removing color from an anaglyph 3D image. Zero is Black & White, One is full color.\n"
 					 "Default for Interlace Optimization and Anaglyph Desaturation/Saturation is 0.5.";
 		ui_category = "Stereoscopic Options";
@@ -679,7 +681,7 @@ namespace SuperDepth3D
 		ui_type = "drag";
 		ui_min = 0.0; ui_max = 1.0;
 		ui_label = " Anaglyph Contrast";
-		ui_tooltip = "Per Eye Contrast adjustment for Anaglyph 3D glasses.\n"
+		ui_tooltip = "Per Eye Contrast adjustment for Anaglyph 3D.\n"
 					 "Default is set to 0.5 Off.";
 		ui_category = "Stereoscopic Options";
 	> = float2(0.5,0.5);
@@ -689,7 +691,7 @@ namespace SuperDepth3D
 		ui_type = "drag";
 		ui_min = 0.0; ui_max = 1.0;
 		ui_label = " Inficolor Reduce Red, Green & Blue";
-		ui_tooltip = "Since may be the Red is the biggest offender. But, this option lets you reduce isolated any color in the upper range in the game.\n"
+		ui_tooltip = "This option lets you reduce or isolated any color in the upper range in the game.\n"
 					 "Default is set to 0.5.";
 		ui_category = "Stereoscopic Options";
 	> = 0.5;	
@@ -727,7 +729,7 @@ namespace SuperDepth3D
 		ui_type = "drag";
 		ui_min = 0.0; ui_max = 1.0;
 		ui_label = " Inficolor Focus";
-		ui_tooltip = "Adjust this until the image has as little Color Finging at the near and far range.\n"
+		ui_tooltip = "Adjust this until the image has as little Color Fringing at the near and far range.\n"
 					 "Default is set to 0.5.";
 		ui_category = "Stereoscopic Options";
 	> = 0.5;
@@ -745,7 +747,7 @@ namespace SuperDepth3D
 		ui_label = " Downscaling Support";
 		ui_tooltip = "Dynamic Super Resolution scaling support for Line Interlaced, Column Interlaced, & Checkerboard 3D displays.\n"
 					 "Set this to your native Screen Resolution A or B, DSR Smoothing must be set to 0%.\n"
-					 "This does not work with a hardware ware scaling done by VSR.\n"
+					 "This does not work with a hardware scaling done by VSR.\n"
 					 "Default is SR Native.";
 		ui_category = "Stereoscopic Options";
 	> = 0;
@@ -774,8 +776,8 @@ namespace SuperDepth3D
 		ui_type = "slider";
 		ui_min = -100; ui_max = 100;
 		ui_label = " Perspective Slider";
-		ui_tooltip = "Determines the perspective point of the two images this shader produces.\n"
-					 "For an HMD, use Polynomial Barrel Distortion shader to adjust for IPD.\n"
+		ui_tooltip = "Determines the perspective point of the two images this shader produces.\n" // ipd = Interpupillary distance 
+					 "For an HMD, use Polynomial Barrel Distortion shader to adjust for IPD or use SuperDepth3D_VR+.fx.\n"
 					 "Do not use this perspective adjustment slider to adjust for IPD.\n"
 					 "Default is Zero.";
 		ui_category = "Stereoscopic Options";
@@ -783,7 +785,8 @@ namespace SuperDepth3D
 	#endif
 	uniform bool Eye_Swap <
 		ui_label = " Swap Eyes";
-		ui_tooltip = "L/R to R/L.";
+		ui_tooltip = "L/R to R/L."; // E/D ou D/E
+
 		ui_category = "Stereoscopic Options";
 	> = false;
 	
@@ -792,7 +795,7 @@ namespace SuperDepth3D
 		ui_items = "World\0Weapon\0Mix\0";
 		ui_label = "·Focus Type·";
 		ui_tooltip = "This lets the shader handle real time depth reduction for aiming down your sights.\n"
-					"This may induce Eye Strain so take this as an Warning.";
+					"This may induce Eye Strain so take this as a Warning.";
 		ui_category = "FPS Focus";
 	> = FPS;
 	
@@ -801,10 +804,10 @@ namespace SuperDepth3D
 		ui_items = "Off\0Press\0Hold\0";
 		ui_label = " Activation Type";
 		ui_tooltip = "This lets the shader handle real time depth reduction for aiming down your sights.\n"
-					"This may induce Eye Strain so take this as an Warning.";
+					"This may induce Eye Strain so take this as a Warning.";
 		ui_category = "FPS Focus";
 	> = DK_X;
-
+	
 	uniform int Eye_Fade_Selection <
 		ui_type = "combo";
 		ui_items = "Both\0Right Only\0Left Only\0";
@@ -819,7 +822,7 @@ namespace SuperDepth3D
 		ui_type = "slider";
 		ui_min = 0; ui_max = 4;
 		ui_label = " Eye Fade Options";
-		ui_tooltip ="X, Fade Reduction: Decreases the depth amount by a current percentage.\n"
+		ui_tooltip ="X, Fade Reduction: Decreases the depth ammount by a current percentage.\n"
 					"Y, Fade Speed: Decreases or Incresses how fast it changes.\n"
 					"Default is X[ 0 ] Y[ 1 ].";
 		ui_category = "FPS Focus";
@@ -856,7 +859,7 @@ namespace SuperDepth3D
 	
 	uniform bool Toggle_Cursor <
 		ui_label = " Cursor Toggle";
-		ui_tooltip = "Turns Screen Cursor Off and On with out cycling once set to the type above.";
+		ui_tooltip = "Turns Screen Cursor Off and On without cycling, once set to the option above.";
 		ui_category = "Cursor Adjustments";
 	> = true;
 	
@@ -865,7 +868,7 @@ namespace SuperDepth3D
 		ui_type = "combo";
 		ui_items = "On\0Off\0Guide\0";
 		ui_label = "·Distortion Options·";
-		ui_tooltip = "Use this to Turn Off, Turn On, & to use the BD Alinement Guide.\n"
+		ui_tooltip = "Use this to Turn Off, Turn On, & to use the BD Alignment Guide.\n"
 					 "Default is ON.";
 		ui_category = "Distortion Corrections";
 	> = 0;
@@ -876,7 +879,7 @@ namespace SuperDepth3D
 		ui_type = "slider";
 		#endif
 		ui_min = -2.0; ui_max = 2.0;
-		ui_tooltip = "Adjust Distortions K1, K2, & K3.\n"
+		ui_tooltip = "Adjust Distortions K1, K2, & K3.\n" // k stands for coefficient 
 					 "Default is 0.0";
 		ui_label = " Barrel Distortion K1 K2 K3 ";
 		ui_category = "Distortion Corrections";
@@ -886,7 +889,7 @@ namespace SuperDepth3D
 		ui_type = "drag";
 		ui_min = -0.5; ui_max = 0.5;
 		ui_label = " Barrel Distortion Zoom";
-		ui_tooltip = "Adjust Distortions Zoom.\n"
+		ui_tooltip = "Adjust Zoom Distortions.\n"// ajustar distorçao causada pelo zoom
 					 			 "Default is 0.0";
 		ui_category = "Distortion Corrections";
 	> = DC_W;
@@ -921,7 +924,7 @@ namespace SuperDepth3D
 		ui_label = " Correction Factor";
 		ui_tooltip = "This gives full control over Color Correction Factor.\n"
 					"It can make dark areas brighter, Try to leave this on low to preserve atmosphere.\n"
-					"Default is 0.0f, Low.";
+					"Default is 0.0, Low.";
 		ui_category = "Miscellaneous Options";
 	> = 0.0;
 	#endif
