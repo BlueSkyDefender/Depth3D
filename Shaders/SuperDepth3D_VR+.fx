@@ -2,7 +2,7 @@
 	///**SuperDepth3D_VR+**///
 	//--------------------////
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	//* Depth Map Based 3D post-process shader v3.7.0
+	//* Depth Map Based 3D post-process shader v3.7.1
 	//* For Reshade 4.4+ I think...
 	//* ---------------------------------
 	//*
@@ -34,13 +34,13 @@
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 namespace SuperDepth3DVR
 {
-	#define Default_View_Mode 1
+	#define D_ViewMode 1
 	#if exists "Overwatch.fxh"                                           //Overwatch Interceptor//
 		#include "Overwatch.fxh"
 		#define OSW 0
 	#else// DA_X = [ZPD] DA_Y = [Depth Adjust] DA_Z = [Offset] DA_W = [Depth Linearization]
 		static const float DA_X = 0.025, DA_Y = 7.5, DA_Z = 0.0, DA_W = 0.0;
-		// DC_X = [Depth Flip] DC_Y = [Auto Balance] DC_Z = [Auto Depth] DC_W = [Weapon Hand]
+		// DC_X = [Depth Flip] DC_Y = [De-Artifact Scale] DC_Z = [Auto Depth] DC_W = [Weapon Hand]
 		static const float DB_X = 0, DB_Y = 0, DB_Z = 0.1, DB_W = 0.0;
 		// DC_X = [Barrel Distortion K1] DC_Y = [Barrel Distortion K2] DC_Z = [Barrel Distortion K3] DC_W = [Barrel Distortion Zoom]
 		static const float DC_X = 0, DC_Y = 0, DC_Z = 0, DC_W = 0;
@@ -73,7 +73,7 @@ namespace SuperDepth3DVR
 		// DR_X = [Position G & G] DR_Y = [Position G & H] DR_Z = [Position H & H] DR_W = [GH Menu Tresh]	
 		static const float DR_X = 0.0, DR_Y = 0.0, DR_Z = 0.0, DR_W = 1000.0;
 		// DR_X = [Null X] DR_Y = [Null Y] DR_Z = [Null Z] DR_W = [Check Depth Limit Weapon Secondary]
-		static const float DS_X = 0.0, DS_Y = 0.0, DS_Z = Default_View_Mode, DS_W = 1.0;
+		static const float DS_X = 0.0, DS_Y = 0.0, DS_Z = D_ViewMode, DS_W = 1.0;
 		// WSM = [Weapon Setting Mode]
 		#define OW_WP "WP Off\0Custom WP\0"
 		static const int WSM = 0;
@@ -449,7 +449,7 @@ namespace SuperDepth3DVR
 		ui_category = "Compatibility Options";
 	> = DL_Z;
 
-	uniform float De_Artifacting <
+	uniform float2 De_Artifacting <
 		#if Compatibility
 		ui_type = "drag";
 		#else
@@ -462,7 +462,7 @@ namespace SuperDepth3DVR
 					 "I find a value of 0.5 is good enough in most cases.\n"
 					 "Default is Zero and it's Off.";
 		ui_category = "Compatibility Options";
-	> = DL_Y;		
+	> = float2(DL_Y,DB_Y);		
 	
 	uniform float2 DLSS_FSR_Offset <
 		ui_type = "slider";
@@ -2191,7 +2191,7 @@ namespace SuperDepth3DVR
 						
 		float Mix_Past_Current_Corner_Mask = tex2Dlod(samplerMinMaxRGBLastFrame,float4(texcoord,0,0)).w + saturate(tex2Dlod(SamplerzBuffer_BlurVR, float4( texcoord * float2( 0.5 , 1) + float2(0.5,0), 0, 5 ) ).x * 100);	
 
-		if(De_Artifacting >= 0) // Investigate is this should be the Depth Buffer.
+		if(De_Artifacting.x >= 0) // Investigate is this should be the Depth Buffer.
 			Mix_Past_Current_Corner_Mask = 1;
 		
 			if( View_Mode >= 2)
@@ -2248,6 +2248,8 @@ namespace SuperDepth3DVR
 		//Offsets listed here Max Seperation is 3% - 8% of screen space with Depth Offsets & Netto layer offset change based on MS.
 		float deltaCoordinates = MS * LayerDepth, CurrentDepthMapValue = GetDB( ParallaxCoord).x, CurrentLayerDepth = 0.0f,
 			  DB_Offset = D * TP * pix.x, VM_Switch = View_Mode == 1 ? 0.125 : 1;
+
+		float Scale_With_Depth = saturate(GetDepth * lerp(1,12.5,abs(De_Artifacting.y)));
 			  
 		[loop] //Steep parallax mapping
 		while ( CurrentDepthMapValue > CurrentLayerDepth )
@@ -2255,8 +2257,8 @@ namespace SuperDepth3DVR
 			// Shift coordinates horizontally in linear fasion
 		    ParallaxCoord.x -= deltaCoordinates; 
 		    // Get depth value at current coordinates
-		    if ( De_Artifacting != 0 && GetDB(ParallaxCoord).w )
-				CurrentDepthMapValue = min(GetDB( ParallaxCoord ).x, GetDB( ParallaxCoord - float2(MS * lerp(0,0.125,saturate(abs(De_Artifacting) * GetDepth)),0)).x);
+		    if ( De_Artifacting.x != 0 && GetDB(ParallaxCoord).w )
+				CurrentDepthMapValue = min(GetDB( ParallaxCoord ).x, GetDB( ParallaxCoord - float2(MS * lerp(0,0.125,saturate(abs(De_Artifacting.x) * Scale_With_Depth)),0)).x);
 			else
 				CurrentDepthMapValue = GetDB( ParallaxCoord ).x;
 		    // Get depth of next layer

@@ -90,6 +90,9 @@ Depth Buffer seems to drop off in some locations. As reported, this is a Reshade
 {Dementium 2} [Reshade 4.4.0]
 You have to mess with the Depth Buffer options to get it to work. Not perfect. Kind of strange not all Reshade filters work.
 
+{Demonologist} [Reshade 5.8.0]
+You need to disable FSR2 and restart the game. While you are at it also turn off motion blur and Dof. Online Play should be fine if you use the Add-on Version of ReShade.
+
 {Black Mesa} [Reshade 3.2.1]
 So in newer versions of Reshade 4.4.0+ you need to set in-game MSAA to on. To do this, open the console and enter the command:
 mat_antialias 2
