@@ -2,7 +2,7 @@
 	///**SuperDepth3D**///
 	//----------------////
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	//* Depth Map Based 3D post-process shader v3.7.2
+	//* Depth Map Based 3D post-process shader v3.7.3
 	//* For Reshade 3.0+
 	//* ---------------------------------
 	//*
@@ -78,7 +78,7 @@ namespace SuperDepth3D
 		#define OW_WP "WP Off\0Custom WP\0"
 		static const int WSM = 0;
 		//Triggers
-		static const int DRS = 0,MAC = 0, ARW = 0, OIL = 0, MMS = 0, NVK = 0, NDG = 0, FTM = 0, SPO = 0, MMD = 0, SMP = 0, LBR = 0, HQT = 0, AFD = 0, MDD = 0, FPS = 1, SMS = 1, OIF = 0, NCW = 0, RHW = 0, NPW = 0, IDF = 0, SPF = 0, BDF = 0, HMT = 0, HMC = 0, DFW = 0, NFM = 0, DSW = 0, BMT = 0, LBC = 0, LBS = 0, LBM = 0, DAA = 0, NDW = 0, PEW = 0, WPW = 0, FOV = 0, EDW = 0, SDT = 0;
+		static const int LBE = 0, DRS = 0,MAC = 0, ARW = 0, OIL = 0, MMS = 0, NVK = 0, NDG = 0, FTM = 0, SPO = 0, MMD = 0, SMP = 0, LBR = 0, HQT = 0, AFD = 0, MDD = 0, FPS = 1, SMS = 1, OIF = 0, NCW = 0, RHW = 0, NPW = 0, IDF = 0, SPF = 0, BDF = 0, HMT = 0, HMC = 0, DFW = 0, NFM = 0, DSW = 0, BMT = 0, LBC = 0, LBS = 0, LBM = 0, DAA = 0, NDW = 0, PEW = 0, WPW = 0, FOV = 0, EDW = 0, SDT = 0;
 		//Overwatch.fxh State
 		#define OSW 1
 	#endif
@@ -1354,12 +1354,13 @@ namespace SuperDepth3D
 	}
 	
 	bool LBDetection()//Active RGB Detection
-	{   float2 Letter_Box_Reposition = LBR ? float2(0.250,0.875) : float2(0.1,0.5);   
-		float MipLevel = 5,Center = SLLTresh(float2(0.5,0.5), 7) > 0, Top_Left = LBSensitivity(SLLTresh(float2(Letter_Box_Reposition.x,0.09), MipLevel));
+	{   float2 Letter_Box_Reposition = LBR ? float2(0.250,0.875) : float2(0.1,0.5); 
+		float2 Letter_Box_Elevation = LBE ? float2(0.045,0.955) : float2(0.09,0.91);    
+		float MipLevel = 5,Center = SLLTresh(float2(0.5,0.5), 7) > 0, Top_Left = LBSensitivity(SLLTresh(float2(Letter_Box_Reposition.x,Letter_Box_Elevation.x), MipLevel));
 		if ( LetterBox_Masking == 2 || LB_Correction == 2 || LBC == 2 || LBM == 2 || SMP == 2)//Left_Center | Right_Center | Center
 			return LBSensitivity(SLLTresh(float2(0.1,0.5), MipLevel)) && LBSensitivity(SLLTresh(float2(0.9,0.5), MipLevel)) && Center; //Vert
 		else       //Top | Bottom | Center
-			return Top_Left && LBSensitivity(SLLTresh(float2(Letter_Box_Reposition.y,0.91), MipLevel)) && Center; //Hoz
+			return Top_Left && LBSensitivity(SLLTresh(float2(Letter_Box_Reposition.y,Letter_Box_Elevation.y), MipLevel)) && Center; //Hoz
 	}
 	#else
 	bool LBDetection()//Stand in for not crashing when not in use
