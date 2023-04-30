@@ -2,7 +2,7 @@
 	///**SuperDepth3D_VR+**///
 	//--------------------////
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	//* Depth Map Based 3D post-process shader v3.7.2
+	//* Depth Map Based 3D post-process shader v3.7.3
 	//* For Reshade 4.4+ I think...
 	//* ---------------------------------
 	//*
@@ -521,12 +521,14 @@ namespace SuperDepth3DVR
 		ui_tooltip = "Display the Depth Map.";
 		ui_category = "Depth Map";
 	> = false;
-	// New Menu Detection Code
-	uniform bool Depth_Detection <
-		ui_label = " Depth Detection";
-		ui_tooltip = "Use this to dissable/enable in game Depth Detection.";
+	
+	static const int Depth_Detection = 1;
+
+	uniform bool Range_Boost <
+		ui_label = " Depth Map Range";
+		ui_tooltip = "Boost Range details in Depth with out effecting near plane too much.";
 		ui_category = "Depth Map";
-	> = true;
+	> = DS_Y;
 	
 	uniform bool Depth_Map_Flip <
 		ui_label = " Depth Map Flip";
@@ -1615,18 +1617,23 @@ namespace SuperDepth3DVR
 	{
 		//Conversions to linear space.....
 		float zBuffer = tex2Dlod(DepthBuffer, float4(texcoord,0,0)).x, Far = 1.0, Near = 0.125/DMA(); //Near & Far Adjustment
-	
-		//Man Why can't depth buffers Just Be Normal
+		float2 Two_Ch_zBuffer, Store_zBuffer = float2( zBuffer, 1.0 - zBuffer );
 		float2 C = float2( Far / Near, 1.0 - Far / Near ), Z = Offset < 0 ? min( 1.0, zBuffer * ( 1.0 + abs(Offset) ) ) : float2( zBuffer, 1.0 - zBuffer );
 	
 		if(Offset > 0 || Offset < 0)
 			Z = Offset < 0 ? float2( Z.x, 1.0 - Z.y ) : min( 1.0, float2( Z.x * (1.0 + Offset) , Z.y / (1.0 - Offset) ) );
 		//MAD - RCP
 		if (Depth_Map == 0) //DM0 Normal
-			zBuffer = rcp(Z.x * C.y + C.x);
+			Two_Ch_zBuffer = rcp(float2(Z.x * C.y + C.x,Store_zBuffer.x * C.y + C.x));
 		else if (Depth_Map == 1) //DM1 Reverse
-			zBuffer = rcp(Z.y * C.y + C.x);
-		return saturate(zBuffer);
+			Two_Ch_zBuffer = rcp(float2(Z.y * C.y + C.x,Store_zBuffer.y * C.y + C.x));
+			
+		if(Range_Boost)
+			zBuffer = lerp(Two_Ch_zBuffer.y,Two_Ch_zBuffer.x,saturate(Two_Ch_zBuffer.y));
+		else
+			zBuffer = Two_Ch_zBuffer.x;
+		
+			return saturate(zBuffer);
 	}
 	//Weapon Setting//
 	float4 WA_XYZW()
