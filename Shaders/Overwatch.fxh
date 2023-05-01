@@ -13509,29 +13509,29 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DS_Z 0
 	#define DA_W 1
     //#define DB_X 1
-	#define DA_X 0.075
+	#define DA_X 0.071//0.075
 	#define DF_Y 0.00
 	#define DA_Y 24.5
     //#define DA_Z -0.000375
-	//#define DB_Z 0.05
+	#define DB_Z 0.05
  
 	#define DE_X 1
-	#define DE_Y 0.500
+	#define DE_Y 0.550
 	#define DE_Z 0.375
 	//#define AFD 1
-	#define DG_W 0.125 //Neg PoP
-    //#define OIL 1 //Set How many Levels We use for RE_Fix 0 | 1 | 2 | 3
-    #define OIF 0.30 //Fix enables if Value is > 0.0
-	#define DI_W 1.0
+	//#define DG_W 0.125 //Neg PoP
+    #define OIL 3 //Set How many Levels We use for RE_Fix 0 | 1 | 2 | 3
+    #define OIF float4(0.5,0.375,0.20,0.0625) //Fix enables if Value is > 0.0
+	#define DI_W float4(0.375,0.5,1.5,2.5)
 	//#define FTM 1
     //#define DG_Z 0.03 //Min
     //#define DE_W 0.250 //Auto
     //#define DI_Z 0.05//Trim
     //#define DF_W float2(0.125,0.006) //Edge & Scale
 	#define BMT 1
-	#define DF_Z 0.0375
-    //#define DL_Y -0.300   //De-Artifact
-    #define DL_Z 1.0       //Compat Power
+	#define DF_Z 0.0125
+    #define DL_Y -0.300   //De-Artifact
+    #define DL_Z 0.75       //Compat Power
 	//#define DJ_X 0.250       //Range Smoothing
 	///* //Should work on all Languages.
     #define MAC 1
