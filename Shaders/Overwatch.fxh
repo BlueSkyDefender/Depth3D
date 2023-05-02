@@ -13488,18 +13488,18 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DA_W 1
     //#define DB_X 1
 	#define DA_X 0.071//0.075
-	#define DF_Y 0.00
+	#define DF_Y 0.005
 	#define DA_Y 24.5
     //#define DA_Z -0.000375
 	#define DB_Z 0.05
  
 	#define DE_X 1
-	#define DE_Y 0.550
+	#define DE_Y 0.700
 	#define DE_Z 0.375
 	//#define AFD 1
 	//#define DG_W 0.125 //Neg PoP
     #define OIL 3 //Set How many Levels We use for RE_Fix 0 | 1 | 2 | 3
-    #define OIF float4(0.5,0.375,0.20,0.0625) //Fix enables if Value is > 0.0
+    #define OIF float4(0.55,0.35,0.25,0.075) //Fix enables if Value is > 0.0
 	#define DI_W float4(0.375,0.5,1.5,2.5)
 	//#define FTM 1
     //#define DG_Z 0.03 //Min
@@ -13521,31 +13521,30 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define DJ_Y float4( 30.0, 30.0, 30.0, 1000.0);     //Menu Detection Type for A = X, B = Y, & C = Z. The Last Value is a Wild Card amount W is for X and Z. 
     #define DJ_Z float3( 1000., 1000., 1000);           //Set Match Tresh 
 	//*/
-
-	//Supporting Languages like this is limiting. I should avoid using this for languages and focus on UI elements. But, in this case it's more stable to do.
-	//I didn't get all the languages. I am missing some.
     #define MMD 4 //Set Multi Menu Detection             //Off / On
     #define MMS 0 //Set Multi Menu Selection from 0-1 to 29-30 and Off 0 | 1 | 2
-    //English | French
-    #define DO_X float4( 0.087 , 0.097 , 0.586 , 0.186 ) //Pos A1 = XY Color & A2 = ZW Black 
-    #define DO_Y float4( 0.197 , 0.133 , 0.087 , 0.097 ) //Pos A3 = XY Color & B1 = ZW Color
-    #define DO_Z float4( 0.686 , 0.186 , 0.197 , 0.133 ) //Pos B2 = XY Black & B3 = ZW Color
+    // English | French | Spanish Spain | German | Italian | Spanish Mexico | Brazil Portu    
+	// Polski | Chinese A | Chinese B | Korean 
+    #define DO_X float4( 0.087 , 0.097 , 0.057 , 0.185 ) //Pos A1 = XY Color & A2 = ZW Black 
+    #define DO_Y float4( 0.188 , 0.130 , 0.089 , 0.098 ) //Pos A3 = XY Color & B1 = ZW Color
+    #define DO_Z float4( 0.057 , 0.185 , 0.1435, 0.1355) //Pos B2 = XY Black & B3 = ZW Color
 	#define DO_W float4( 30.0, 30.0, 30.0, 30.0) //Tresh Hold for Color A & B and Color
-	//Spanish Mexico | Brazil Portu | Italian
-    #define DP_X float4( 0.087 , 0.097 , 0.6055, 0.186 ) //Pos C1 = XY Color & C2 = ZW Black 
-    #define DP_Y float4( 0.197 , 0.133 , 0.087 , 0.097 ) //Pos C3 = XY Color & D1 = ZW Color
-    #define DP_Z float4( 0.645 , 0.186 , 0.1885, 0.133 ) //Pos D2 = XY Black & D3 = ZW Color
-	#define DP_W float4( 30.0, 30.0, 30.0, 30.0) //Tresh Hold for Color C & D and Color
-	//Chinese Simp | Japanese
-	#define DQ_X float4( 0.0885, 0.095 , 0.4605, 0.186 ) //Pos C1 = XY Color & C2 = ZW Black 
-    #define DQ_Y float4( 0.145 , 0.138 , 0.087 , 0.103 ) //Pos C3 = XY Color & D1 = ZW Color
-    #define DQ_Z float4( 0.575 , 0.186 , 0.225 , 0.133 ) //Pos D2 = XY Black & D3 = ZW Color
-	#define DQ_W float4( 30.0, 30.0, 30.0, 30.0) //Tresh Hold for Color A1 & A3 and Color
-	//Korean | German
-	#define DR_X float4( 0.089 , 0.0975, 0.4585, 0.186 ) //Pos G1 = XY Color & G2 = ZW Black 
-    #define DR_Y float4( 0.142 , 0.138 , 0.087 , 0.097 ) //Pos G3 = XY Color & H1 = ZW Color
-    #define DR_Z float4( 0.6255, 0.186 , 0.197 , 0.133 ) //Pos H2 = XY Black & H3 = ZW Color
-	#define DR_W float4( 30.0, 30.0, 30.0, 30.0) //Tresh Hold for Color G & H and Color 
+	// Japanese
+
+	#define DP_X float4( 0.087 , 0.103 , 0.057 , 0.185 ) //Pos C1 = XY Color & C2 = ZW Black 
+    #define DP_Y float4( 0.225 , 0.133 , 0.0, 0.0 ) //Pos C3 = XY Color & D1 = ZW Color
+    #define DP_Z float4( 0.0, 0.0,  0.0, 0.0 ) //Pos D2 = XY Black & D3 = ZW Color
+	#define DP_W float4( 30.0, 30.0, 1000.0, 1000.0) //Tresh Hold for Color C & D and Color
+	// Tutorial Pop Up All are close and Isolated I am worried it will Trigger.
+	#define DQ_X float4( 0.200 , 0.100 , 0.200, 0.075 ) //Pos C1 = XY Color & C2 = ZW Black 
+    #define DQ_Y float4( 0.211 , 0.090,  0.0, 0.0 ) //Pos C3 = XY Color & D1 = ZW Color
+    #define DQ_Z float4( 0.0, 0.0,  0.0, 0.0 ) //Pos D2 = XY Black & D3 = ZW Color
+	#define DQ_W float4( 30.0, 17.0, 1000.0, 1000.0) //Tresh Hold for Color A1 & A3 and Color
+
+	#define DR_X float4( 0.0, 0.0,  0.0, 0.0 ) //Pos G1 = XY Color & G2 = ZW Black 
+    #define DR_Y float4( 0.0, 0.0,  0.0, 0.0 ) //Pos G3 = XY Color & H1 = ZW Color
+    #define DR_Z float4( 0.0, 0.0,  0.0, 0.0 ) //Pos H2 = XY Black & H3 = ZW Color
+	#define DR_W float4( 1000.0, 1000.0, 1000.0, 1000.0) //Tresh Hold for Color G & H and Color 
 	
 	//#define WSM 2
 	//#define DB_W 16
