@@ -13530,7 +13530,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define DO_Z float4( 0.057 , 0.185 , 0.1435, 0.1355) //Pos B2 = XY Black & B3 = ZW Color
 	#define DO_W float4( 30.0, 30.0, 30.0, 30.0) //Tresh Hold for Color A & B and Color
 	// Japanese
-
 	#define DP_X float4( 0.087 , 0.103 , 0.057 , 0.185 ) //Pos C1 = XY Color & C2 = ZW Black 
     #define DP_Y float4( 0.225 , 0.133 , 0.0, 0.0 ) //Pos C3 = XY Color & D1 = ZW Color
     #define DP_Z float4( 0.0, 0.0,  0.0, 0.0 ) //Pos D2 = XY Black & D3 = ZW Color
@@ -13540,11 +13539,12 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define DQ_Y float4( 0.211 , 0.090,  0.0, 0.0 ) //Pos C3 = XY Color & D1 = ZW Color
     #define DQ_Z float4( 0.0, 0.0,  0.0, 0.0 ) //Pos D2 = XY Black & D3 = ZW Color
 	#define DQ_W float4( 30.0, 17.0, 1000.0, 1000.0) //Tresh Hold for Color A1 & A3 and Color
-
-	#define DR_X float4( 0.0, 0.0,  0.0, 0.0 ) //Pos G1 = XY Color & G2 = ZW Black 
-    #define DR_Y float4( 0.0, 0.0,  0.0, 0.0 ) //Pos G3 = XY Color & H1 = ZW Color
-    #define DR_Z float4( 0.0, 0.0,  0.0, 0.0 ) //Pos H2 = XY Black & H3 = ZW Color
-	#define DR_W float4( 1000.0, 1000.0, 1000.0, 1000.0) //Tresh Hold for Color G & H and Color 
+	// Social | English | French | Spanish Spain | German | Italian | Spanish Mexico | Brazil Portu | Polski
+	// Social | Chinese A | Chinese B | Korean | Japanese
+	#define DR_X float4( 0.087 , 0.090 , 0.057 , 0.171 ) //Pos G1 = XY Color & G2 = ZW Black 
+    #define DR_Y float4( 0.155 , 0.117 , 0.092 , 0.096 ) //Pos G3 = XY Color & H1 = ZW Color
+    #define DR_Z float4( 0.057 , 0.171 , 0.133 , 0.101 ) //Pos H2 = XY Black & H3 = ZW Color
+	#define DR_W float4( 30.0, 30.0, 30.0, 30.0) //Tresh Hold for Color G & H and Color 
 	
 	//#define WSM 2
 	//#define DB_W 16
@@ -13563,7 +13563,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define DSW 1
 	//Smooth Mode Setting
     //#define SMS 3           //SM Toggle Separation
-	#define DL_X 0.900       //SM Tune
+	#define DL_X 0.9       //SM Tune
 	//#define DL_W 0.5       //SM Perspective
 	#define DM_X 4           //HQ Tune
 	#define DM_Z 0           //HQ Smooth
