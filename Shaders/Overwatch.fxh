@@ -3268,28 +3268,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DF_Z 0.150 
 	#define DG_Z 0.100//Min
     #define DI_Z 0.125 //Trim  
-#elif (App == 0x2D1A3028 ) //Bright Memory: Infinite
-    #define DA_W 1
-    #define DA_X 0.130 //0.125 //0.140 
-    #define DF_Y 0.100
-    #define DA_Y 53.00  //55.00 //52.5
-    #define DB_Z 0.250
-    #define DE_X 2
-    #define DE_Y 0.750 //.0500 
-    #define DE_Z 0.375
-    #define DG_W 1.25 //popout
-	#define BMT 1    
-	#define DF_Z 0.130
-	//#define WSM 2 //Weapon Settings Mode
-	//#define DB_W 24//Weapon Selection
-	#define DG_Z 0.2125//Min //0.200 //0.225
-    #define DI_Z 0.750 //Trim
-    #define SMS 2      //SM Toggle Separation
-	#define DL_X 0.500 //SM Tune
-	#define DL_W 0.050 //SM Perspective
-	#define DM_X 3     //HQ Tune
-	#define DM_Z 2     //HQ Smooth
-	#define PEW 1
 #elif (App == 0x2ECE874 ) //Roblox Games
     #define DA_W 1
     #define DA_X 0.050//0.044//0.071
@@ -14449,9 +14427,9 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define LBE 1
 	//#define DH_Z 0.0
 	#define DH_W -0.2375
-	//Smooth Mode Setting
 	#define BMT 1
 	#define DF_Z 0.0125
+	//Smooth Mode Setting
     //#define SMS 1            //SM Toggle Separation
 	#define DL_X 0.900      //SM Tune
 	//#define DL_W 0.5       //SM Perspective
@@ -14641,6 +14619,33 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DL_X 0.75 //SM Tune
 	#define DL_W 0.0 //SM Perspective
 	#define DM_X 4     //HQ Tune
+#elif (App == 0x2D1A3028 ) //Bright Memory: Infinite
+    #define DA_W 1
+    #define DA_X 0.105 
+    #define DF_Y 0.100
+    #define DA_Y 55.0 //52.5//53.00
+    #define DB_Z 0.100
+    //#define DE_X 2
+    //#define DE_Y 0.750 //.0500 
+    //#define DE_Z 0.375
+    //#define DG_W 3.0 //popout
+	#define BMT 1    
+	#define DF_Z 0.125
+    //#define DL_Y -0.75      // De-Artifact Only works on some View Modes and causes performance degredation
+    #define DL_Z 1.00       // Compat Power
+	//#define DJ_X 0.00      // Range Smoothing
+	//#define WSM 2 //Weapon Settings Mode
+	//#define DB_W 24//Weapon Selection
+    #define DG_Z 0.200 //Min
+    #define DE_W 0.500 //Auto
+    #define DI_Z 0.500 //Trim
+    //#define DF_W float2(0.001,0.00125)  //Edge & Scale
+	//Smooth Mode Setting
+    #define SMS 2            //SM Toggle Separation
+	#define DL_X 0.750      //SM Tune
+	//#define DL_W 0.5       //SM Perspective
+	#define DM_X 3           //HQ Tune
+    #define DM_Y 0           //HQ VRS
 #else
 	#define NPW 1 //No Profile
 #endif
