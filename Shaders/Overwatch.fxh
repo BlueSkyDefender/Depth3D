@@ -13850,26 +13850,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DL_X 0.900 //SM Tune
 	#define DL_W 0.050 //SM Perspective
 	#define DM_X 3     //HQ Tune
-#elif (App == 0xAAA18268 ) //Hellblade
-    #define DA_W 1
-    #define DA_Y 20
-    #define DA_X 0.050
-    #define DF_Y 0.070
-     
-    #define DE_X 1 
-    #define DE_Y 0.375
-    #define DE_Z 0.300
-    #define DG_W 0.375 //Detection was moved back.
-    #define DG_Z 0.050 //Min  New system from RE7 was used
-    #define DI_Z 0.0625//Trim New system from RE7 was used
-    #define BMT 1      //Disables Auto ZPD
-	#define DF_Z 0.060 //Sets Manual Mode power.
-	#define PEW 1
-	#define DAA 1
-	//Smooth Mode Setting
-	#define SMS 1      //SM Toggle Separation
-	#define DL_X 0.750 //SM Tune
-	#define DL_W 0.050 //SM Perspective
 #elif (App == 0x60F440F8 ) //Resident Evil Village
 	#define DA_W 1
 	//#define DA_Z 0.0004 //-0.65
@@ -14645,6 +14625,28 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	//#define DL_W 0.5       //SM Perspective
 	#define DM_X 3           //HQ Tune
     #define DM_Y 0           //HQ VRS
+#elif (App == 0xAAA18268 ) //Hellblade
+    #define DA_W 1
+    #define DA_Y 17.5 //was made to reduce artifacts
+    #define DA_X 0.050
+    #define DF_Y 0.050
+    #define DE_X 1 
+    #define DE_Y 0.375
+    #define DE_Z 0.300
+    #define DG_W 0.375 //Detection was moved back.
+    //#define DG_Z 0.050 //Min  New system from RE7 was used
+    //#define DI_Z 0.0625//Trim New system from RE7 was used
+    #define BMT 1      //Disables Auto ZPD
+	#define DF_Z 0.060 //Sets Manual Mode power.
+    #define DL_Y -0.50      // De-Artifact Only works on some View Modes and causes performance degredation
+    //#define DL_Z 0.10       // Compat Power
+	//#define DJ_X 0.250      // Range Smoothing
+	#define PEW 1
+	#define DAA 1
+	//Smooth Mode Setting
+	#define SMS 2      //SM Toggle Separation
+	#define DL_X 0.750 //SM Tune
+	#define DL_W 0.050 //SM Perspective
 #else
 	#define NPW 1 //No Profile
 #endif
