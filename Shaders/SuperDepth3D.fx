@@ -2,7 +2,7 @@
 	///**SuperDepth3D**///
 	//----------------////
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	//* Depth Map Based 3D post-process shader v3.7.4
+	//* Depth Map Based 3D post-process shader v3.7.5
 	//* For Reshade 3.0+
 	//* ---------------------------------
 	//*
@@ -2382,11 +2382,20 @@ namespace SuperDepth3D
 		float beforeDepthValue = Get_DB_ZDP, afterDepthValue = CurrentDepthMapValue - CurrentLayerDepth;
 			  beforeDepthValue += LayerDepth - CurrentLayerDepth;
 		// Depth Diffrence for Gap masking and depth scaling in Normal Mode.
-		float DepthDiffrence = afterDepthValue - beforeDepthValue;//, DD_Map = abs(DepthDiffrence) > 0.064;//For AI infilling
+		float DepthDiffrence = afterDepthValue - beforeDepthValue, DD_Map = abs(DepthDiffrence) > 0.064;//For AI infilling
 		float weight = afterDepthValue / min(-0.0125,DepthDiffrence);
-			  weight = lerp(weight,weight + (2.0 * Depth_Adjusted.y),0.5);
-	
-			ParallaxCoord.x = lerp( ParallaxCoord.x, PrevParallaxCoord.x, weight);
+			  weight = lerp(weight + (2.0 * Depth_Adjusted.y),weight,0.75);//Reversed the logic since it seems look better this way and it leans towards the normal output.
+		float Weight = weight;
+			
+			if( View_Mode <= 1 )
+			{
+				if(Diverge < 0)
+					weight *= lerp( 1, 1-(0.0005 * saturate(GetDepth * 2.5)), DD_Map ); 
+				else
+					weight *= lerp( 1, 1+(0.0005 * saturate(GetDepth * 2.5)), DD_Map );  
+			}
+			//ParallaxCoord.x = lerp( ParallaxCoord.x, PrevParallaxCoord.x, weight); //Old		
+			ParallaxCoord.x = PrevParallaxCoord.x * weight + ParallaxCoord.x * (1 - Weight);
 		//This is to limit artifacts.
 		if( View_Mode > 0 )
 			ParallaxCoord.x += DB_Offset;
@@ -2394,9 +2403,9 @@ namespace SuperDepth3D
 		if( View_Mode <= 1 )
 		{
 			if(Diverge < 0)
-				ParallaxCoord.x += DepthDiffrence * 2.5 * pix.x;
+				ParallaxCoord.x += lerp(0,DepthDiffrence * 7.5 * pix.x, DD_Map );
 			else
-				ParallaxCoord.x -= DepthDiffrence * 2.5 * pix.x;
+				ParallaxCoord.x -= lerp(0,DepthDiffrence * 7.5 * pix.x, DD_Map );
 		}		
 	
 	#if Reconstruction_Mode

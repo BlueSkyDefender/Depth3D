@@ -13497,7 +13497,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DE_Y 0.700
 	#define DE_Z 0.375
 	//#define AFD 1
-	//#define DG_W 0.125 //Neg PoP
+	#define DG_W -0.125 //Neg PoP
     #define OIL 3 //Set How many Levels We use for RE_Fix 0 | 1 | 2 | 3
     #define OIF float4(0.55,0.35,0.25,0.075) //Fix enables if Value is > 0.0
 	#define DI_W float4(0.375,0.5,1.5,2.5)
@@ -13509,7 +13509,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define BMT 1
 	#define DF_Z 0.0125
     #define DL_Y -0.300   //De-Artifact
-    #define DL_Z 0.75       //Compat Power
+    #define DL_Z 0.25       //Compat Power
 	//#define DJ_X 0.250       //Range Smoothing
 	///* //Should work on all Languages.
     #define MAC 1
