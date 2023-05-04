@@ -2,7 +2,7 @@
 	///**SuperDepth3D**///
 	//----------------////
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	//* Depth Map Based 3D post-process shader v3.7.5
+	//* Depth Map Based 3D post-process shader v3.7.6
 	//* For Reshade 3.0+
 	//* ---------------------------------
 	//*
@@ -2100,7 +2100,8 @@ namespace SuperDepth3D
 	#if Inficolor_3D_Emulator
 		Set_Max_Depth = Inficolor_Max_Depth;
 	#endif
-	   return float3( lerp(Convergence,min(saturate(Set_Max_Depth),D), ZP), lerp(W_Convergence,WD,WZP), Store_WC);
+		D = min(saturate(Set_Max_Depth),D);
+	   return float3( lerp(Convergence,lerp(D,Convergence,Convergence), ZP), lerp(W_Convergence,WD,WZP), Store_WC);
 	}
 	
 	float3 DB_Comb( float2 texcoord)

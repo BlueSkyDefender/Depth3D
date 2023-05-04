@@ -3824,60 +3824,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define DJ_Y float4( 30.0, 2.0, 29.0, 1000.0);            //Menu Detection Type for A, B, & C. The Last Value is ???   
     #define DJ_Z float3( 1000., 1000., 1000);                //Set Match Tresh 
 	#define PEW 1
-#elif (App == 0xBAC3D546 ) //Wolfenstine New Colossus II 
-    #define DA_X 0.040
-    #define DF_Y 0.116
-    #define DA_Y 15.5
-    //#define DA_Z -0.0005
-    #define DE_X 2
-    #define DE_Y 0.500
-    #define DE_Z 0.375
-	#define DG_W 0.325 //Pop out
-    #define BMT 1    
-    #define DF_Z 0.116
-	#define DG_Z 0.070 //Min
-    #define DI_Z 0.225 //Trim
-	#define SMS 2      //SM Toggle Separation
-	#define DL_X 0.75 //SM Tune
-	#define DL_W 0.050 //SM Perspective
-	//#define DM_X 3     //HQ Tune
-	#define DM_Z 3     //HQ Smooth
-	#define FPS  0
-	#define DK_X 2
-	#define DK_Y 0
-	#define DK_Z 3
-	#define DK_W 1
-	#define PEW 1
-#elif (App == 0x132AB11B ) //Wolfenstine Youngblood 
-    #define DA_X 0.040
-    #define DF_Y 0.116
-    #define DA_Y 15.5
-    //#define DA_Z -0.0005
-    #define DE_X 2
-    #define DE_Y 0.500
-    #define DE_Z 0.375
-	//#fine DG_W 0.325 //Pop out
-    #define BMT 1    
-    #define DF_Z 0.116
-	#define DG_Z 0.070 //Min
-    #define DI_Z 0.225 //Trim
-	#define SMS 2      //SM Toggle Separation
-	#define DL_X 0.75 //SM Tune
-	#define DL_W 0.050 //SM Perspective
-	//#define DM_X 3     //HQ Tune
-	#define DM_Z 3     //HQ Smooth
-    #define LBC 1      //Letter Box Correction
-    #define LBS 1      //Letter Box Sensitivity
-	#define DH_Z 0.0   //Pos offset X    
-	#define DH_W -0.240//Pos offset Y
-	#define FPS  0
-	#define DK_X 2
-	#define DK_Y 0
-	#define DK_Z 3
-	#define DK_W 1
-	#define PEW 1
-	#define NDW 1
-	#define DAA 1
 #elif (App == 0xE44B25B ) //Injustice 2
     #define DA_X 0.100
     #define DF_Y 0.0125
@@ -13487,7 +13433,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DS_Z 0
 	#define DA_W 1
     //#define DB_X 1
-	#define DA_X 0.071//0.075
+	#define DA_X 0.075
 	#define DF_Y 0.005
 	#define DA_Y 24.5
     //#define DA_Z -0.000375
@@ -13497,7 +13443,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DE_Y 0.700
 	#define DE_Z 0.375
 	//#define AFD 1
-	#define DG_W -0.125 //Neg PoP
+	#define DG_W -0.05 //Neg PoP
     #define OIL 3 //Set How many Levels We use for RE_Fix 0 | 1 | 2 | 3
     #define OIF float4(0.55,0.35,0.25,0.075) //Fix enables if Value is > 0.0
 	#define DI_W float4(0.375,0.5,1.5,2.5)
@@ -13507,7 +13453,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DI_Z 0.05//Trim
     //#define DF_W float2(0.125,0.006) //Edge & Scale
 	#define BMT 1
-	#define DF_Z 0.0125
+	#define DF_Z 0.025
     #define DL_Y -0.300   //De-Artifact
     #define DL_Z 0.25       //Compat Power
 	//#define DJ_X 0.250       //Range Smoothing
@@ -14647,6 +14593,62 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define SMS 2      //SM Toggle Separation
 	#define DL_X 0.750 //SM Tune
 	#define DL_W 0.050 //SM Perspective
+#elif (App == 0xBAC3D546 ) //Wolfenstine New Colossus II 
+    #define DA_X 0.030//0.040
+    #define DF_Y 0.05 //0.116
+    #define DA_Y 25.0//15.5
+    //#define DA_Z -0.0005
+    //#define DE_X 2
+    //#define DE_Y 0.500
+    //#define DE_Z 0.375
+	//#define DG_W 0.325 //Pop out
+    #define BMT 1    
+    #define DF_Z 0.125
+	#define DG_Z 0.060 //Min
+    #define DI_Z 0.200 //Trim
+    #define DF_W float2(0.0001,0.007)// Edge & Scale
+	#define FPS  0
+	#define DK_X 2
+	#define DK_Y 0
+	#define DK_Z 3
+	#define DK_W 3
+	//Smooth Mode Setting	
+	#define SMS 3      //SM Toggle Separation
+	#define DL_X 0.800 //SM Tune
+	//#define DL_W 0.050 //SM Perspective
+	//#define DM_X 3     //HQ Tune
+	//#define DM_Z 3     //HQ Smooth
+	#define PEW 1
+#elif (App == 0x132AB11B ) //Wolfenstine Youngblood 
+    #define DA_X 0.040
+    #define DF_Y 0.116
+    #define DA_Y 15.5
+    //#define DA_Z -0.0005
+    #define DE_X 2
+    #define DE_Y 0.500
+    #define DE_Z 0.375
+	//#fine DG_W 0.325 //Pop out
+    #define BMT 1    
+    #define DF_Z 0.116
+	#define DG_Z 0.070 //Min
+    #define DI_Z 0.225 //Trim
+	#define SMS 2      //SM Toggle Separation
+	#define DL_X 0.75 //SM Tune
+	#define DL_W 0.050 //SM Perspective
+	//#define DM_X 3     //HQ Tune
+	#define DM_Z 3     //HQ Smooth
+    #define LBC 1      //Letter Box Correction
+    #define LBS 1      //Letter Box Sensitivity
+	#define DH_Z 0.0   //Pos offset X    
+	#define DH_W -0.240//Pos offset Y
+	#define FPS  0
+	#define DK_X 2
+	#define DK_Y 0
+	#define DK_Z 3
+	#define DK_W 1
+	#define PEW 1
+	#define NDW 1
+	#define DAA 1
 #else
 	#define NPW 1 //No Profile
 #endif

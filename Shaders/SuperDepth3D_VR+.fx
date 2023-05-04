@@ -2,7 +2,7 @@
 	///**SuperDepth3D_VR+**///
 	//--------------------////
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	//* Depth Map Based 3D post-process shader v3.7.4
+	//* Depth Map Based 3D post-process shader v3.7.5
 	//* For Reshade 4.4+ I think...
 	//* ---------------------------------
 	//*
@@ -2018,8 +2018,9 @@ namespace SuperDepth3DVR
 				WZP = 1;
 	
 			ZP = min(ZP,Auto_Balance_Clamp);
-	
-	    return float3( lerp( Convergence,min(saturate(Max_Depth),D), ZP), lerp(W_Convergence,WD,WZP), Store_WC);
+			
+		D = min(saturate(Max_Depth),D);
+	   return float3( lerp(Convergence,lerp(D,Convergence,Convergence), ZP), lerp(W_Convergence,WD,WZP), Store_WC);
 	}
 	
 	float3 DB_Comb( float2 texcoord)
