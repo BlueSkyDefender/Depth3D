@@ -8614,16 +8614,16 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define PEW 1
     #define DSW 1
 #elif (App == 0x808ABB25 || App == 0x87871191 ) //BioShock Infinite //Steam //Epic
-	#define DA_X 0.025 //0.050
-    #define DF_Y 0 //0.025 //0.040
-	#define DA_Y 52.5 //12.50
+	#define DA_X 0.01//0.025 //0.050
+    #define DF_Y 0.005 //0.025 //0.040
+	#define DA_Y 100.0//52.5 //12.50
     #define DA_Z -0.00125
     #define DB_Z 0.025
     #define BMT 1
-	#define DF_Z 0.100
-    #define DG_Z 0.500 //0.030 //0.050//0.070//Min
-    #define DI_Z 0.2775 //0.150 //0.100 //0.090 //Trim
-    #define DF_W float2(0.0001,0.0155) //float2(0.0001,0.008)//float2(0.0001,0.003)  //Edge & Scale
+	#define DF_Z 0.0375
+    //#define DG_Z 0.045//0.500 //0.030 //0.050//0.070//Min
+    //#define DI_Z 0.045//0.2775 //0.150 //0.100 //0.090 //Trim
+    #define DF_W float2(0.0001,0.006) //float2(0.0001,0.008)//float2(0.0001,0.003)  //Edge & Scale
 	#define SMS 3      //SM Toggle Separation
 	#define DL_X 0.950 //SM Tune
 	#define DL_W 0.050 //SM Perspective
