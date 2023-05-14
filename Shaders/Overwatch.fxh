@@ -295,20 +295,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define FOV 1
 	#define RHW 1
 	#define DSW 1
-#elif (App == 0x142EDFD6 || App == 0x2A0ECCC9 || App == 0x8B0C2031 )	//DOOM 2016 ****
-	#define DA_Y 23.125
-	#define DA_Z -0.00010
-	#define DA_X 0.071
-	#define DB_Z 0.1125
-	#define DF_Y 0.01875
-	#define DE_X 4
-	#define DE_Y 0.500
-	#define DE_Z 0.4375
-	#define DB_W 8
-    #define DG_Z 0.001
-	#define BMT 1
-	#define DF_Z 0.145
-	#define PEW 1
 #elif (App == 0x697CDA52 )	//CoD:WaW
 	#define DA_Y 12.5
 	#define DB_W 14
@@ -14686,6 +14672,31 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DM_Y 3     //HQ VRS
     //#define DL_Y 0.375    //De-Artifact 0.1245
 	#define DJ_X 0.150     //Range Smoothing
+#elif (App == 0x142EDFD6 || App == 0x2A0ECCC9 || App == 0x8B0C2031 )	//DOOM 2016 ****
+	#define DA_Y 22.5
+	//#define DA_Z -0.00010
+	#define DA_X 0.07
+	#define DB_Z 0.050
+	#define DF_Y 0.0125
+	#define DE_X 4
+	#define DE_Y 0.800
+	#define DE_Z 0.400
+	#define DG_W -0.375 //nEGPop
+    #define OIL 3           // Set How many Levels We use for RE_Fix 0 | 1 | 2 | 3 if 1 then it's float2(0,0) for OIF and DI_W
+    #define OIF float4(0.5,0.375,0.175,0.100) // Fix enables if Value is > 0.0 
+	#define DI_W float4(-0.125,0.5,1.75,6.0) // Like Shift Boundary DG_W But 0 to inf
+
+	#define DB_W 8
+    //#define DG_Z 0.001
+	#define BMT 1
+	#define DF_Z 0.250
+	//Smooth Mode Setting	
+	#define SMS 3      //SM Toggle Separation
+	#define DL_X 0.900 //SM Tune
+	//#define DL_W 0.050 //SM Perspective
+	//#define DM_X 3     //HQ Tune
+	//#define DM_Z 3     //HQ Smooth
+	#define PEW 1
 #else
 	#define NPW 1 //No Profile
 #endif
@@ -15218,7 +15229,7 @@ float4 Weapon_Profiles(float WP ,float4 Weapon_Adjust) //Tried Switch But, can't
     if (WP == 7)
         Weapon_Adjust = float4(0.276,22.0,9.50,0.200);    //WP 5  | Skyrim: SE
     if (WP == 8)
-        Weapon_Adjust = float4(0.338,21.0,9.1375,0.0);    //WP 6  | DOOM 2016
+        Weapon_Adjust = float4(0.338,20.5,9.1375,0.0);    //WP 6  | DOOM 2016
     if (WP == 9)//float4(0.255,177.5,63.025,0.0);
         Weapon_Adjust = float4(0.255,287.5,63.0,0.050);   //WP 7  | CoD:Black Ops | CoD:MW2 | CoD:MW3
     if (WP == 10)//float4(0.254,100.0,0.9843,0.0);
