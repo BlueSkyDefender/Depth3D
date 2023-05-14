@@ -14673,7 +14673,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DL_Y 0.375    //De-Artifact 0.1245
 	#define DJ_X 0.150     //Range Smoothing
 #elif (App == 0x142EDFD6 || App == 0x2A0ECCC9 || App == 0x8B0C2031 )	//DOOM 2016 ****
-	#define DA_Y 22.5
+	#define DA_Y 23.0
 	//#define DA_Z -0.00010
 	#define DA_X 0.07
 	#define DB_Z 0.050
