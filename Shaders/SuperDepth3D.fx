@@ -55,7 +55,7 @@ namespace SuperDepth3D
 		// DH_X = [LBC Size Offset X] DH_Y = [LBC Size Offset Y] DH_Z = [LBC Pos Offset X] DH_W = [LBC Pos Offset X]
 		static const float DH_X = 1.0, DH_Y = 1.0, DH_Z = 0.0, DH_W = 0.0;
 		// DI_X = [LBM Offset X] DI_Y = [LBM Offset Y] DI_Z = [Weapon Near Depth Trim] DI_W = [OIF Check Depth Limit]
-		static const float DI_X = 0.0, DI_Y = 0.0, DI_Z = 0.25, DI_W = 0.0;
+		static const float DI_X = 0.0, DI_Y = 0.0, DI_Z = 0.25, DI_W = 0.5;
 		// DJ_X = [Range Smoothing] DJ_Y = [Menu Detection Type] DJ_Z = [Match Threshold] DJ_W = [Check Depth Limit Weapon]
 		static const float DJ_X = 0, DJ_Y = 0.0, DJ_Z = 0.0, DJ_W = -0.100;
 		// DK_X = [FPS Focus Method] DK_Y = [Eye Eye Selection] DK_Z = [Eye Fade Selection] DK_W = [Eye Fade Speed Selection]	
@@ -310,10 +310,26 @@ namespace SuperDepth3D
 		ui_type = "slider";
 		#endif
 		ui_min = 0.0; ui_max = 0.5;
-		ui_label = " ZPD Boundary Conditions & Transition Time";
-		ui_tooltip = "This selection gives extra boundary conditions to scale ZPD & lets you adjust the transition time.";
+		ui_label = " ZPD Scaler¹ & Transition";
+		ui_tooltip = "This selection gives extra boundary conditions to scale ZPD level One.\n"
+					 "The 2nd option lets you adjust the transition time for LvL One & Two.\n"
+					 "Only works when Boundary Detection is enabled.";
 		ui_category = "Divergence & Convergence";
 	> = float2(DE_Y,DE_Z);
+	
+	uniform float2 ZPD_Boundary_n_Cutoff <
+		#if Compatibility
+		ui_type = "drag";
+		#else
+		ui_type = "slider";
+		#endif
+		ui_min = 0.0; ui_max = 1.0;
+		ui_label = " ZPD Scaler² & Intrusion";
+		ui_tooltip = "This selection gives extra boundary conditions to scale ZPD level two.\n"
+					 "lets you adjust how far behind the screen it should detect a intrustion.\n"
+					 "Only works when Boundary Detection is enabled & when scaler LvL one is set.";
+		ui_category = "Divergence & Convergence";
+	> = float2(OIF.x,DI_W.x);	
 	
 	uniform int View_Mode <
 		ui_type = "combo";
@@ -1011,13 +1027,13 @@ namespace SuperDepth3D
 	float3 RE_Set(float Auto_Switch)
 	{
 		#if OIL == 1
-			float OIL_Switch[2] = {OIF.x,OIF.y};	
+			float OIL_Switch[2] = {ZPD_Boundary_n_Cutoff.x,OIF.y};	
 		#elif ( OIL == 2 )
-			float OIL_Switch[3] = {OIF.x,OIF.y,OIF.z};	
+			float OIL_Switch[3] = {ZPD_Boundary_n_Cutoff.x,OIF.y,OIF.z};	
 		#elif ( OIL == 3 )
-			float OIL_Switch[4] = {OIF.x,OIF.y,OIF.z,OIF.w};	
+			float OIL_Switch[4] = {ZPD_Boundary_n_Cutoff.x,OIF.y,OIF.z,OIF.w};	
 		#else
-			float OIL_Switch[1] = {OIF.x};	
+			float OIL_Switch[1] = {ZPD_Boundary_n_Cutoff.x};	
 		#endif   	
 		int Scale_Auto_Switch = clamp((Auto_Switch * 4) - 1,0 , 3 );
 		float Set_RE = OIL_Switch[Scale_Auto_Switch];
@@ -1029,13 +1045,13 @@ namespace SuperDepth3D
 	float4 RE_Set_Adjustments()
 	{
 		#if OIL == 1
-			float OIL_Switch[4] = {OIF.x,OIF.y,0,0};	
+			float OIL_Switch[4] = {ZPD_Boundary_n_Cutoff.x,OIF.y,0,0};	
 		#elif ( OIL == 2 )
-			float OIL_Switch[4] = {OIF.x,OIF.y,OIF.z,0};	
+			float OIL_Switch[4] = {ZPD_Boundary_n_Cutoff.x,OIF.y,OIF.z,0};	
 		#elif ( OIL == 3 )
-			float OIL_Switch[4] = {OIF.x,OIF.y,OIF.z,OIF.w};	
+			float OIL_Switch[4] = {ZPD_Boundary_n_Cutoff.x,OIF.y,OIF.z,OIF.w};	
 		#else
-			float OIL_Switch[4] = {OIF.x,0,0,0};	
+			float OIL_Switch[4] = {ZPD_Boundary_n_Cutoff.x,0,0,0};	
 		#endif 
 		return float4(RE_Fix > 0 ? RE_Fix : OIL_Switch[0], OIL_Switch[1], OIL_Switch[2], OIL_Switch[3]);
 	}
@@ -1876,7 +1892,7 @@ namespace SuperDepth3D
 					//Used if Depth Buffer is way out of range or if you need granuality.
 					if(RE_Set(0).x)
 					{					
-						if ( CD < -DI_W.x && Detect_Out_of_Range <= 1)
+						if ( CD < -ZPD_Boundary_n_Cutoff.y && Detect_Out_of_Range <= 1)
 							Detect_Out_of_Range = 1;		
 							
 						#if OIL >= 1
