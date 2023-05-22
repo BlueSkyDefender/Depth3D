@@ -2,7 +2,7 @@
 	///**SuperDepth3D_VR+**///
 	//--------------------////
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	//* Depth Map Based 3D post-process shader v3.7.6
+	//* Depth Map Based 3D post-process shader v3.7.7
 	//* For Reshade 4.4+ I think...
 	//* ---------------------------------
 	//*
@@ -78,14 +78,15 @@ namespace SuperDepth3DVR
 		#define OW_WP "WP Off\0Custom WP\0"
 		static const int WSM = 0;
 		//Triggers
-		static const int LBE = 0, DRS = 0, MAC = 0, ARW = 0, OIL = 0, MMS = 0, NVK = 0, NDG = 0, FTM = 0, SPO = 0, MMD = 0, SMP = 0, LBR = 0, HQT = 0, AFD = 0, MDD = 0, FPS = 1, SMS = 1, OIF = 0, NCW = 0, RHW = 0, NPW = 0, IDF = 0, SPF = 0, BDF = 0, HMT = 0, HMC = 0, DFW = 0, NFM = 0, DSW = 0, LBC = 0, LBS = 0, LBM = 0, DAA = 0, NDW = 0, PEW = 0, WPW = 0, FOV = 0, EDW = 0, SDT = 0;
+		static const int SDU = 0, LBE = 0, DRS = 0, MAC = 0, ARW = 0, OIL = 0, MMS = 0, NVK = 0, NDG = 0, FTM = 0, SPO = 0, MMD = 0, SMP = 0, LBR = 0, HQT = 0, AFD = 0, MDD = 0, FPS = 1, SMS = 1, OIF = 0, NCW = 0, RHW = 0, NPW = 0, IDF = 0, SPF = 0, BDF = 0, HMT = 0, HMC = 0, DFW = 0, NFM = 0, DSW = 0, LBC = 0, LBS = 0, LBM = 0, DAA = 0, NDW = 0, PEW = 0, WPW = 0, FOV = 0, EDW = 0, SDT = 0;
 		//Overwatch.fxh State
 		#define OSW 1
 	#endif
 	//USER EDITABLE PREPROCESSOR FUNCTIONS START//
 	
-	// RE Fix is used to fix the issue with Resident Evil's 2 Remake 1-Shot cutscenes.
-	#define RE_Fix 0 //Default 0 is Off. One is High and Ten is Low        1-15
+	// This shift the detectors for ZPD Boundary Detection. 
+	#define Shift_Detectors_Up SDU //Default 0 is Off. One is On
+	//To override or activate this SDU change your have to set it too 0 or 1.
 	
 	// Change the Cancel Depth Key. Determines the Cancel Depth Toggle Key using keycode info
 	// The Key Code for Decimal Point is Number 110. Ex. for Numpad Decimal "." Cancel_Depth_Key 110
@@ -960,8 +961,8 @@ namespace SuperDepth3DVR
 		int Scale_Auto_Switch = clamp((Auto_Switch * 4) - 1,0 , 3 );
 		float Set_RE = OIL_Switch[Scale_Auto_Switch];
 
-		int REF_Trigger = RE_Fix > 0 || Set_RE > 0;
-		return float3(REF_Trigger, RE_Fix > 0 ? RE_Fix : Set_RE , Scale_Auto_Switch); 
+		int REF_Trigger = Set_RE > 0;
+		return float3(REF_Trigger,Set_RE , Scale_Auto_Switch); 
 	}
 	
 	float4 RE_Set_Adjustments()
@@ -975,7 +976,7 @@ namespace SuperDepth3DVR
 		#else
 			float OIL_Switch[4] = {ZPD_Boundary_n_Cutoff.x,0,0,0};	
 		#endif 
-		return float4(RE_Fix > 0 ? RE_Fix : OIL_Switch[0], OIL_Switch[1], OIL_Switch[2], OIL_Switch[3]);
+		return float4(OIL_Switch[0], OIL_Switch[1], OIL_Switch[2], OIL_Switch[3]);
 	}
 	
 	float Scale(float val,float max,float min) //Scale to 0 - 1
@@ -1770,9 +1771,10 @@ namespace SuperDepth3DVR
 						CDArray_X_B0[7] = { 0.25, 0.375, 0.4375, 0.5, 0.5625, 0.625, 0.75}, 
 						CDArray_X_C0[9] = { 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9};
 			float Bottom_Edge = ZPD_Boundary == 6 ? 0.95 : 0.9;	
-			const float CDArray_Y_A0[5] = { 0.25, 0.5, 0.65, 0.775, Bottom_Edge}, 
-						CDArray_Y_B0[5] = { 0.3, 0.4, 0.5, 0.625, 0.75},
-						CDArray_Y_C0[4] = { 0.25, 0.5, 0.75, 0.875};
+			float4 Shift_UP = Shift_Detectors_Up == 1 ? float4(0.375, 0.5, 0.6875, Bottom_Edge) : float4(0.5, 0.65, 0.775, Bottom_Edge);
+			float CDArray_Y_A0[5] = { 0.25, Shift_UP.x, Shift_UP.y, Shift_UP.z, Shift_UP.w}, 
+			      CDArray_Y_B0[5] = { 0.25, 0.375, 0.5, 0.6875, 0.875},
+				  CDArray_Y_C0[4] = { 0.25, 0.5, 0.75, 0.875};
 
 			float Shift_Values = 0.025;
 			if( ZPD_Boundary == 1 || ZPD_Boundary == 4 || ZPD_Boundary == 6 || ZPD_Boundary == 7)
