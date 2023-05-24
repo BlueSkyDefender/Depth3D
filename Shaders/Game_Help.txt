@@ -1679,6 +1679,9 @@ Use v227 patch. Use the DX9 render. Install Rehsade 3.0 to System folder select 
 In Unreal Set your res and the go to advance settings.
 Turn Off AA and go back in to the game. Start a game.
 
+{Warhammer 40,000 Boltgun}
+Go in to the Retro Options and Remove Pixelation if you want a cleaner image.
+
 {Watch Dogs 2} 
 or use the white listed reshade version.
 Go to the WatchDog2.exe and use compatibility mode.
