@@ -1,7 +1,7 @@
 ////----------------------------------------//
 ///SuperDepth3D Overwatch Automation Header///
 //----------------------------------------////
-// Version 3.3.0
+// Version 3.3.1
 //---------------------------------------OVERWATCH---------------------------------------//
 // If you are reading this stop. Go away and never look back. From this point on if you  //
 // still think it's is worth looking at this..... Then no one can save you or your soul. //
@@ -102,7 +102,7 @@ static const float LB_Masking_Offset_Y_D = 1.0;         //LetterBox Masking Offs
 
 //Weapon / World Near Depth Adjustments
 static const float Weapon_Near_Depth_Max_D = 0.0;       //Weapon Near Depth                     Max     | DE_W
-static const float2 Weapon_Edge_Correction_D = 0.0;     //Weapon Edge Correction & Weapon Near Scale    | DF_W
+static const float3 Weapon_Edge_Correction_D = 0.0;     //Weapon Edge Correction & Weapon Near Scale    | DF_W
 static const float Weapon_Near_Depth_Min_D = 0.0;       //Weapon Near Depth                     Min     | DG_Z
 static const float Weapon_Near_Depth_Trim_D = 0.25;     //Weapon Near Depth                     Trim    | DI_Z
 
@@ -216,6 +216,10 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define sApp 0xA100000
 #elif exists "GameComponentsOzzy_Win32Steam_Release.dll"//Batman BlackGate
 	#define sApp 0xA200000
+#elif exists "AVP2.exe"                                 //Aliens VS Predator 2
+	#define sApp 0xA300000
+#elif exists "PrimalHunt.exe"                           //Aliens VS Predator 2 - Primal Hunt
+	#define sApp 0xA400000
 #else
 	#define sApp __APPLICATION__
 #endif
@@ -501,13 +505,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DA_Y 10.0
 	#define DA_X 0.05
 	#define DA_Z 1.0
-	 
-#elif (App == 0xFE54BF56 ) //No One Lives Forever and 2
-	#define DA_X 0.0375
-	#define WSM 10
-	#define OW_WP "Read Help & Change Me\0Custom WP\0No One Lives Forever\0No One Lives Forever 2\0"
-	#define WPW 1
-	#define RHW 1
 #elif (App == 0x9E7AA0C4 ) //Shadow Tactics: Blades of the Shogun
 	#define DA_X 0.150
 	#define DF_Y 0.050
@@ -973,16 +970,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define OW_WP "Read Help & Change Me\0Custom WP\0Halo: Reach\0Halo: CE Anniversary\0Halo 2: Anniversary\0Halo 3 & Halo 3: ODST\0Halo 3 & Halo 3: ODST Alternet\0Halo 4\0Halo 4 Alternet\0"
 	#define RHW 1
 	#define WPW 1
-#elif (App == 0x2AB9ECF9) //System ReShock
-	#define DA_X 0.05
-	#define DA_W 1
-	#define DA_Y 11.25
-	#define DA_Z 0.00125
-	 
-	#define DE_X 5
-	#define DE_Y 0.4375
-	#define DE_Z 0.375
-	#define DE_W 0.055
 #elif (App == 0xC50993EC) //COD: Modern Warfare 2019
 	#define DA_X 0.0375
 	#define DA_W 1
@@ -5931,7 +5918,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define DG_Z 0.030//0.050//0.050//Min
     //#define DE_W 0.25 //Auto
     #define DI_Z 0.030//0.055//0.075//Trim
-    #define DF_W float2(0.250,0.008)  //Edge & Scale
+    #define DF_W float3(0.250,0.008,0.0)  //Edge & Scale
 	#define BMT 1
 	#define DF_Z 0.050
     #define FOV 1
@@ -6007,7 +5994,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DG_Z 0.045//0.050//0.075 //Min
     //#define DE_W 0.75 //Auto
     //#define DI_Z 0.055//0.050//0.090 //Trim
-    #define DF_W float2(0.001,0.006)  //Edge & Scale
+    #define DF_W float3(0.001,0.006,0.0)  //Edge & Scale
 	#define BMT 1
 	#define DF_Z 0.025
     #define SMS 3      //SM Toggle Separation
@@ -6059,7 +6046,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DG_Z 0.045//0.050//0.075 //Min
     //#define DE_W 0.75 //Auto
     //#define DI_Z 0.055//0.050//0.090 //Trim
-    //#define DF_W float2(0.001,0.006)  //Edge & Scale
+
 	#define BMT 1
 	#define DF_Z 0.125
     //#define SMS 3      //SM Toggle Separation
@@ -6112,7 +6099,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define DG_Z 0.00125//0.050//0.075 //Min
     //#define DE_W 0.75 //Auto
     #define DI_Z 0.125//0.050//0.090 //Trim
-    #define DF_W float2(0.005,0.0075)  //Edge & Scale
+    #define DF_W float3(0.005,0.0075,0.0)  //Edge & Scale
 	#define BMT 1
 	#define DF_Z 0.125
     //#define SMS 3            //SM Toggle Separation
@@ -6171,7 +6158,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define DG_Z 0.00125//0.050//0.075 //Min
     //#define DE_W 0.75 //Auto
     #define DI_Z 0.125//0.050//0.090 //Trim
-    #define DF_W float2(0.005,0.0075)  //Edge & Scale
+    #define DF_W float3(0.005,0.0075,0.0)  //Edge & Scale
 	#define BMT 1
 	#define DF_Z 0.125
     //#define SMS 3            //SM Toggle Separation
@@ -6230,7 +6217,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define DG_Z 0.00125//0.050//0.075 //Min
     //#define DE_W 0.75 //Auto
     #define DI_Z 0.125//0.050//0.090 //Trim
-    #define DF_W float2(0.005,0.00875)  //Edge & Scale
+    #define DF_W float3(0.005,0.00875,0.0)  //Edge & Scale
 	#define BMT 1
 	#define DF_Z 0.125
     #define SMS 3            //SM Toggle Separation
@@ -6290,7 +6277,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define DG_Z 0.00125//0.050//0.075 //Min
     //#define DE_W 0.75 //Auto
     #define DI_Z 0.125//0.050//0.090 //Trim
-    #define DF_W float2(0.005,0.0075)  //Edge & Scale
+    #define DF_W float3(0.005,0.0075,0.0)  //Edge & Scale
 	#define BMT 1
 	#define DF_Z 0.125
     //#define SMS 3            //SM Toggle Separation
@@ -6349,7 +6336,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define DG_Z 0.00125//0.050//0.075 //Min
     //#define DE_W 0.75 //Auto
     #define DI_Z 0.125//0.050//0.090 //Trim
-    #define DF_W float2(0.005,0.00875)  //Edge & Scale
+    #define DF_W float3(0.005,0.00875,0.0)  //Edge & Scale
 	#define BMT 1
 	#define DF_Z 0.125
     #define SMS 3            //SM Toggle Separation
@@ -6409,7 +6396,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DG_Z 0.00125//0.050//0.075 //Min
     //#define DE_W 0.75 //Auto
     //#define DI_Z 0.125//0.050//0.090 //Trim
-    //#define DF_W float2(0.005,0.00875)  //Edge & Scale
 	#define BMT 1
 	#define DF_Z 0.125
     #define SMS 3            //SM Toggle Separation
@@ -6467,7 +6453,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DG_Z 0.00125//0.050//0.075 //Min
     //#define DE_W 0.75 //Auto
     //#define DI_Z 0.125//0.050//0.090 //Trim
-    #define DF_W float2(0.001,0.00125)  //Edge & Scale
+    #define DF_W float3(0.001,0.00125,0.0)  //Edge & Scale
 	#define BMT 1
 	#define DF_Z 0.050
     #define SMS 3            //SM Toggle Separation
@@ -6520,7 +6506,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DG_Z 0.00125//0.050//0.075 //Min
     //#define DE_W 0.75 //Auto
     //#define DI_Z 0.125//0.050//0.090 //Trim
-    //#define DF_W float2(0.001,0.00125)  //Edge & Scale
 	#define BMT 1
 	#define DF_Z 0.0475
     #define SMS 3            //SM Toggle Separation
@@ -6576,7 +6561,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DG_Z 0.00125//0.050//0.075 //Min
     //#define DE_W 0.75 //Auto
     //#define DI_Z 0.125//0.050//0.090 //Trim
-    #define DF_W float2(0.001,0.00125)  //Edge & Scale
+    #define DF_W float3(0.001,0.00125,0.0)  //Edge & Scale
 	#define BMT 1
 	#define DF_Z 0.0375
     #define SMS 1            //SM Toggle Separation
@@ -6635,7 +6620,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DG_Z 0.00125//0.050//0.075 //Min
     //#define DE_W 0.75 //Auto
     //#define DI_Z 0.125//0.050//0.090 //Trim
-    //#define DF_W float2(0.001,0.00125)  //Edge & Scale
 	#define BMT 1
 	#define DF_Z 0.030
     #define SMS 1            //SM Toggle Separation
@@ -6693,7 +6677,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define DG_Z 0.001//0.050//0.075 //Min
     //#define DE_W 0.75 //Auto
     #define DI_Z 0.05//0.050//0.090 //Trim
-    //#define DF_W float2(0.001,0.00125)  //Edge & Scale
 	#define BMT 1
 	#define DF_Z 0.075
     //#define SMS 1            //SM Toggle Separation
@@ -6752,7 +6735,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DG_Z 0.001//0.050//0.075 //Min
     //#define DE_W 0.75 //Auto
     //#define DI_Z 0.05//0.050//0.090 //Trim
-    //#define DF_W float2(0.001,0.00125)  //Edge & Scale
 	#define BMT 1
 	#define DF_Z 0.100 //0.05-0.100
     //#define SMS 1            //SM Toggle Separation
@@ -6811,7 +6793,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DG_Z 0.001//0.050//0.075 //Min
     //#define DE_W 0.75 //Auto
     //#define DI_Z 0.05//0.050//0.090 //Trim
-    //#define DF_W float2(0.001,0.00125)  //Edge & Scale
 	#define BMT 1
 	#define DF_Z 0.100
     //#define SMS 1            //SM Toggle Separation
@@ -6874,7 +6855,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define DG_Z 0.075 //Min
     #define DE_W 0.375 //Auto
     #define DI_Z 0.250 //Trim
-    //#define DF_W float2(0.001,0.00125)  //Edge & Scale
 	#define BMT 1
 	#define DF_Z 0.150
     //#define SMS 1            //SM Toggle Separation
@@ -6936,7 +6916,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DG_Z 0.001//0.050//0.075 //Min
     //#define DE_W 0.75 //Auto
     //#define DI_Z 0.05//0.050//0.090 //Trim
-    //#define DF_W float2(0.001,0.00125)  //Edge & Scale
 	#define BMT 1
 	#define DF_Z 0.150
     //#define SMS 1            //SM Toggle Separation
@@ -7008,7 +6987,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DG_Z 0.001//0.050//0.075 //Min
     //#define DE_W 0.75 //Auto
     //#define DI_Z 0.05//0.050//0.090 //Trim
-    #define DF_W float2(0.001,0.00125)  //Edge & Scale
+    #define DF_W float3(0.001,0.00125,0.0)  //Edge & Scale
 	#define BMT 1
 	#define DF_Z 0.100
     //#define SMS 1            //SM Toggle Separation
@@ -7069,7 +7048,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DG_Z 0.001//0.050//0.075 //Min
     //#define DE_W 0.75 //Auto
     //#define DI_Z 0.05//0.050//0.090 //Trim
-    //#define DF_W float2(0.001,0.00125)  //Edge & Scale
 	#define BMT 1
 	#define DF_Z 0.100
     //#define SMS 1            //SM Toggle Separation
@@ -7132,7 +7110,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define DG_Z 0.025 //Min
     #define DE_W 0.500 //Auto
     #define DI_Z 0.150 //0.050//0.090 //Trim
-    //#define DF_W float2(0.001,0.00125)  //Edge & Scale
 	#define BMT 1
 	#define DF_Z 0.100
     //#define SMS 1            //SM Toggle Separation
@@ -7197,7 +7174,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DG_Z 0.001//0.050//0.075 //Min
     //#define DE_W 0.75 //Auto
     //#define DI_Z 0.05//0.050//0.090 //Trim
-    //#define DF_W float2(0.001,0.00125)  //Edge & Scale
 	#define BMT 1
 	#define DF_Z 0.100
     //#define SMS 1            //SM Toggle Separation
@@ -7261,7 +7237,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define DG_Z 0.055 //Min
     //#define DE_W 0.75 //Auto
     #define DI_Z 0.075 //Trim
-    //#define DF_W float2(0.001,0.00125)  //Edge & Scale
 	#define BMT 1
 	#define DF_Z 0.075
     #define SMS 3            //SM Toggle Separation
@@ -7378,7 +7353,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DG_Z 0.055 //Min
     //#define DE_W 0.75 //Auto
     //#define DI_Z 0.075 //Trim
-    //#define DF_W float2(0.001,0.00125)  //Edge & Scale
 	#define BMT 1
 	#define DF_Z 0.050
     #define SMS 3            //SM Toggle Separation
@@ -7442,7 +7416,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DG_Z 0.055 //Min
     //#define DE_W 0.75 //Auto
     //#define DI_Z 0.075 //Trim
-    //#define DF_W float2(0.001,0.00125)  //Edge & Scale
 	#define BMT 1
 	#define DF_Z 0.100
     #define SMS 1            //SM Toggle Separation
@@ -7509,7 +7482,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DG_Z 0.055 //Min
     //#define DE_W 0.75 //Auto
     //#define DI_Z 0.075 //Trim
-    //#define DF_W float2(0.001,0.00125)  //Edge & Scale
 	#define BMT 1
 	#define DF_Z 0.1125
     #define SMS 1            //SM Toggle Separation
@@ -7577,7 +7549,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define DG_Z 0.025 //Min
     //#define DE_W 0.75 //Auto
     #define DI_Z 0.025 //Trim
-    //#define DF_W float2(0.001,0.00125)  //Edge & Scale
 	#define BMT 1
 	#define DF_Z 0.075 //0.100//0.130
     #define SMS 1            //SM Toggle Separation
@@ -7709,7 +7680,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DG_Z 0.001//0.050//0.075 //Min
     //#define DE_W 0.75 //Auto
     //#define DI_Z 0.05//0.050//0.090 //Trim
-    //#define DF_W float2(0.001,0.00125)  //Edge & Scale
 	#define BMT 1
 	#define DF_Z 0.100
     //#define SMS 1            //SM Toggle Separation
@@ -7773,7 +7743,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DG_Z 0.001//0.050//0.075 //Min
     //#define DE_W 0.75 //Auto
     //#define DI_Z 0.05//0.050//0.090 //Trim
-    //#define DF_W float2(0.001,0.00125)  //Edge & Scale
 	#define BMT 1
 	#define DF_Z 0.050
     //#define SMS 1            //SM Toggle Separation
@@ -7836,7 +7805,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DG_Z 0.001//0.050//0.075 //Min
     //#define DE_W 0.75 //Auto
     //#define DI_Z 0.05//0.050//0.090 //Trim
-    //#define DF_W float2(0.001,0.00125)  //Edge & Scale
 	#define BMT 1
 	#define DF_Z 0.050
     //#define SMS 1            //SM Toggle Separation
@@ -7902,7 +7870,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DG_Z 0.001//0.050//0.075 //Min
     //#define DE_W 0.75 //Auto
     //#define DI_Z 0.05//0.050//0.090 //Trim
-    //#define DF_W float2(0.001,0.00125)  //Edge & Scale
 	#define BMT 1
 	#define DF_Z 0.125
     //#define SMS 1            //SM Toggle Separation
@@ -7974,7 +7941,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DG_Z 0.001//0.050//0.075 //Min
     //#define DE_W 0.75 //Auto
     //#define DI_Z 0.05//0.050//0.090 //Trim
-    //#define DF_W float2(0.001,0.00125)  //Edge & Scale
 	#define BMT 1
 	#define DF_Z 0.125
     //#define SMS 1            //SM Toggle Separation
@@ -8046,7 +8012,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DG_Z 0.001//0.050//0.075 //Min
     //#define DE_W 0.75 //Auto
     //#define DI_Z 0.05//0.050//0.090 //Trim
-    //#define DF_W float2(0.001,0.00125)  //Edge & Scale
 	#define BMT 1
 	#define DF_Z 0.125
     //#define SMS 1            //SM Toggle Separation
@@ -8118,7 +8083,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DG_Z 0.001//0.050//0.075 //Min
     //#define DE_W 0.75 //Auto
     //#define DI_Z 0.05//0.050//0.090 //Trim
-    //#define DF_W float2(0.001,0.00125)  //Edge & Scale
 	#define BMT 1
 	#define DF_Z 0.025
     //#define SMS 1            //SM Toggle Separation
@@ -8185,7 +8149,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DG_Z 0.001//0.050//0.075 //Min
     //#define DE_W 0.75 //Auto
     //#define DI_Z 0.05//0.050//0.090 //Trim
-    //#define DF_W float2(0.001,0.00125)  //Edge & Scale
 	#define BMT 1
 	#define DF_Z 0.150
     //#define SMS 1            //SM Toggle Separation
@@ -8251,7 +8214,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define DG_Z 0.100 //Min
     //#define DE_W 0.75 //Auto
     #define DI_Z 0.125 //Trim
-    #define DF_W float2(0.001,0.0025)  //Edge & Scale
+    #define DF_W float3(0.001,0.0025,0.0)  //Edge & Scale
 	#define BMT 1
 	#define DF_Z 0.125
     //#define SMS 1            //SM Toggle Separation
@@ -8319,7 +8282,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DG_Z 0.001//0.050//0.075 //Min
     //#define DE_W 0.75 //Auto
     //#define DI_Z 0.05//0.050//0.090 //Trim
-    //#define DF_W float2(0.001,0.00125)  //Edge & Scale
 	#define BMT 1
 	#define DF_Z 0.125
     //#define SMS 1            //SM Toggle Separation
@@ -8384,7 +8346,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define DG_Z 0.001//0.050//0.075 //Min
     //#define DE_W 0.75 //Auto
     //#define DI_Z 0.05//0.050//0.090 //Trim
-    //#define DF_W float2(0.001,0.00125)  //Edge & Scale
 	#define BMT 1
 	#define DF_Z 0.120
     //#define SMS 1            //SM Toggle Separation
@@ -8440,7 +8401,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DF_Z 0.0375
     //#define DG_Z 0.045//0.500 //0.030 //0.050//0.070//Min
     //#define DI_Z 0.045//0.2775 //0.150 //0.100 //0.090 //Trim
-    #define DF_W float2(0.0001,0.006) //float2(0.0001,0.008)//float2(0.0001,0.003)  //Edge & Scale
+    #define DF_W float3(0.0001,0.006,0.0) //float2(0.0001,0.008)//float2(0.0001,0.003)  //Edge & Scale
 	#define SMS 3      //SM Toggle Separation
 	#define DL_X 0.950 //SM Tune
 	#define DL_W 0.050 //SM Perspective
@@ -8467,7 +8428,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	//#define FTM 1
     //#define DG_Z 0.065 //Min
     //#define DI_Z 0.050 //Trim
-    #define DF_W float2(0.001,0.0025) //Edge & Scale
+    #define DF_W float3(0.001,0.0025,0.0) //Edge & Scale
 	#define BMT 1
 	#define DF_Z 0.0825
     #define SMS 1      //SM Toggle Separation
@@ -8526,7 +8487,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define DG_Z 0.001//0.050//0.075 //Min
     //#define DE_W 0.75 //Auto
     //#define DI_Z 0.05//0.050//0.090 //Trim
-    //#define DF_W float2(0.001,0.00125)  //Edge & Scale
 	#define BMT 1
 	#define DF_Z 0.1125
     #define SMS 3            //SM Toggle Separation
@@ -8592,7 +8552,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define DG_Z 0.005//0.050//0.075 //Min
     //#define DE_W 0.75 //Auto
     #define DI_Z 0.05//0.050//0.090 //Trim
-    //#define DF_W float2(0.001,0.001)  //Edge & Scale
 	#define BMT 1
 	#define DF_Z 0.080
     #define SMS 3            //SM Toggle Separation
@@ -8658,7 +8617,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define DG_Z 0.004 //Min
     //#define DE_W 0.75 //Auto
     #define DI_Z 0.08 //Trim
-    //#define DF_W float2(0.0001,0.0025)  //Edge & Scale
 	#define BMT 1
 	#define DF_Z 0.0525
     #define SMS 3            //SM Toggle Separation
@@ -8724,7 +8682,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define DG_Z 0.004 //Min
     //#define DE_W 0.75 //Auto
     #define DI_Z 0.08 //Trim
-    //#define DF_W float2(0.0001,0.0025)  //Edge & Scale
 	#define BMT 1
 	#define DF_Z 0.0525
     #define SMS 3            //SM Toggle Separation
@@ -8792,7 +8749,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define DG_Z 0.0625//0.075//0.250 //0.245 //0.255 //Min
     //#define DE_W 0.75 //Auto
     #define DI_Z 0.0575//0.140//0.1325 //Trim
-    #define DF_W float2(0.0001,0.00525)  //Edge & Scale
+    #define DF_W float3(0.0001,0.00525,0.0)  //Edge & Scale
 	#define BMT 1
 	#define DF_Z 0.040
     #define SMS 3            //SM Toggle Separation
@@ -8865,7 +8822,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define DG_Z 0.225 //Min
     //#define DE_W 0.75 //Auto
     #define DI_Z 0.125 //Trim
-    //#define DF_W float2(0.0001,0.019)  //Edge & Scale
 	#define BMT 1
 	#define DF_Z 0.050
 	#define SMS 3      //SM Toggle Separation
@@ -8931,7 +8887,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define DG_Z 0.035 //Min
     //#define DE_W 0.75 //Auto
     #define DI_Z 0.050 //Trim
-    //#define DF_W float2(0.0001,0.019)  //Edge & Scale
 	#define BMT 1
 	#define DF_Z 0.123
 	//#define SMS 3      //SM Toggle Separation
@@ -8998,7 +8953,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define DG_Z 0.05 //Min
     //#define DE_W 0.75 //Auto
     #define DI_Z 0.125 //Trim
-    //#define DF_W float2(0.0001,0.019)  //Edge & Scale
 	#define BMT 1
 	#define DF_Z 0.035
     #define SMS 3            //SM Toggle Separation
@@ -9064,7 +9018,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define DG_Z 0.05 //Min
     //#define DE_W 0.75 //Auto
     #define DI_Z 0.120 //Trim
-    #define DF_W float2(0.0001,0.004)  //Edge & Scale
+    #define DF_W float3(0.0001,0.004,0.0)  //Edge & Scale
 	#define BMT 1
 	#define DF_Z 0.050
     #define SMS 3            //SM Toggle Separation
@@ -9185,7 +9139,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define DG_Z 0.025 //Min
     //#define DE_W 0.000 //Auto
     #define DI_Z 0.05 //Trim
-    #define DF_W float2(0.0001,0.0025)  //Edge & Scale
+    #define DF_W float3(0.0001,0.0025,0.0)  //Edge & Scale
 	#define BMT 1
 	#define DF_Z 0.025
     #define SMS 3            //SM Toggle Separation
@@ -9251,7 +9205,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define DG_Z 0.025 //Min
     //#define DE_W 0.000 //Auto
     #define DI_Z 0.175//Trim
-    #define DF_W float2(0.0001,0.00125)  //Edge & Scale
+    #define DF_W float3(0.0001,0.00125,0.0)  //Edge & Scale
 	#define BMT 1
 	#define DF_Z 0.0375
     #define SMS 3            //SM Toggle Separation
@@ -9318,7 +9272,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DG_Z 0.060 //Min
     //#define DE_W 0.000 //Auto
     //#define DI_Z 0.20 //Trim
-    #define DF_W float2(0.0001,0.025)  //Edge & Scale
+    #define DF_W float3(0.0001,0.025,0.0)  //Edge & Scale
 	#define BMT 1
 	#define DF_Z 0.025
     #define SMS 3            //SM Toggle Separation
@@ -9383,7 +9337,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	//#define DI_W 1.25 //Adjustment for REF
     #define DG_Z 0.05 //Min
     #define DI_Z 0.100 //Trim
-    #define DF_W float2(0.001,0.0075)  //Edge & Scale
+    #define DF_W float3(0.001,0.0075,0.0)  //Edge & Scale
 	#define BMT 1
 	#define DF_Z 0.1375
     #define SMS 2      //SM Toggle Separation
@@ -9413,7 +9367,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DG_Z 0.060 //Min
     //#define DE_W 0.000 //Auto
     //#define DI_Z 0.20 //Trim
-    //#define DF_W float2(0.0001,0.025)  //Edge & Scale
 	#define BMT 1
 	#define DF_Z 0.100
     //#define SMS 0            //SM Toggle Separation
@@ -9497,7 +9450,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DG_Z 0.060 //Min
     //#define DE_W 0.000 //Auto
     //#define DI_Z 0.20 //Trim
-    //#define DF_W float2(0.0001,0.025)  //Edge & Scale
 	#define BMT 1
 	#define DF_Z 0.050
     //#define SMS 0            //SM Toggle Separation
@@ -9570,7 +9522,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DG_Z 0.060 //Min
     //#define DE_W 0.000 //Auto
     //#define DI_Z 0.20 //Trim
-    //#define DF_W float2(0.0001,0.025)  //Edge & Scale
 	#define BMT 1
 	#define DF_Z 0.015
     #define SMS 3            //SM Toggle Separation
@@ -9637,7 +9588,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define DG_Z 0.05 //Min
     #define DE_W 0.000 //Auto
     #define DI_Z 0.015 //Trim
-    #define DF_W float2(0.0001,0.00075)  //Edge & Scale
+    #define DF_W float3(0.0001,0.00075,0.0)  //Edge & Scale
 	#define BMT 1
 	#define DF_Z 0.050
     #define SMS 2            //SM Toggle Separation
@@ -9706,7 +9657,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DG_Z 0.05 //Min
     //#define DE_W 0.000 //Auto
     //#define DI_Z 0.015 //Trim
-    //#define DF_W float2(0.0001,0.00075)  //Edge & Scale
 	#define BMT 1
 	#define DF_Z 0.025
     //#define SMS 2            //SM Toggle Separation
@@ -9773,7 +9723,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DG_Z 0.05 //Min
     //#define DE_W 0.000 //Auto
     //#define DI_Z 0.015 //Trim
-    //#define DF_W float2(0.0001,0.00075)  //Edge & Scale
 	#define BMT 1
 	#define DF_Z 0.064
     #define SMS 3            //SM Toggle Separation
@@ -9841,7 +9790,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DG_Z 0.05 //Min
     //#define DE_W 0.000 //Auto
     //#define DI_Z 0.015 //Trim
-    //#define DF_W float2(0.0001,0.00075)  //Edge & Scale
 	#define BMT 1
 	#define DF_Z 0.025
     //#define SMS 2            //SM Toggle Separation
@@ -9912,7 +9860,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define DG_Z 0.05 //Min
     //#define DE_W 0.000 //Auto
     #define DI_Z 0.20 //Trim
-    #define DF_W float2(0.0001,0.005)  //Edge & Scale
+    #define DF_W float3(0.0001,0.005,0.0)  //Edge & Scale
 	#define BMT 1
 	#define DF_Z 0.025
     //#define SMS 2            //SM Toggle Separation
@@ -9983,7 +9931,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DG_Z 0.020 //Min
     //#define DE_W 0.000 //Auto
     //#define DI_Z 0.100 //Trim
-    #define DF_W float2(0.0001,0.0025)  //Edge & Scale
+    #define DF_W float3(0.0001,0.0025,0.0)  //Edge & Scale
 	#define BMT 1
 	#define DF_Z 0.025
     //#define SMS 2            //SM Toggle Separation
@@ -10093,7 +10041,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DG_Z 0.020 //Min
     //#define DE_W 0.000 //Auto
     //#define DI_Z 0.100 //Trim
-    //#define DF_W float2(0.0001,0.0025)  //Edge & Scale
 	#define BMT 1
 	#define DF_Z 0.1375
     //#define SMS 2            //SM Toggle Separation
@@ -10168,7 +10115,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DG_Z 0.05 //Min
     //#define DE_W 0.000 //Auto
     //#define DI_Z 0.015 //Trim
-    #define DF_W float2(0.0001,0.001)  //Edge & Scale
+    #define DF_W float3(0.0001,0.001,0.0)  //Edge & Scale
 	#define BMT 1
 	#define DF_Z 0.065
     //#define SMS 2            //SM Toggle Separation
@@ -10241,7 +10188,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define DG_Z 0.05 //Min
     //#define DE_W 0.000 //Auto
     //#define DI_Z 0.20 //Trim
-    //#define DF_W float2(0.0001,0.005)  //Edge & Scale
 	#define BMT 1
 	#define DF_Z 0.100
     //#define SMS 2            //SM Toggle Separation
@@ -10313,7 +10259,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DG_Z 0.05 //Min
     //#define DE_W 0.000 //Auto
     //#define DI_Z 0.20 //Trim
-    //#define DF_W float2(0.0001,0.005)  //Edge & Scale
 	#define BMT 1
 	#define DF_Z 0.055
     #define SMS 3            //SM Toggle Separation
@@ -10385,7 +10330,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DG_Z 0.001//0.050//0.075 //Min
     //#define DE_W 0.75 //Auto
     //#define DI_Z 0.05//0.050//0.090 //Trim
-    //#define DF_W float2(0.001,0.0025)  //Edge & Scale
 	#define BMT 1
 	#define DF_Z 0.05
     //#define SMS 1            //SM Toggle Separation
@@ -10449,7 +10393,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DG_Z 0.05 //Min
     //#define DE_W 0.000 //Auto
     //#define DI_Z 0.20 //Trim
-    //#define DF_W float2(0.0001,0.0025)  //Edge & Scale
 	#define BMT 1
 	#define DF_Z 0.0325
     //#define SMS 3            //SM Toggle Separation
@@ -10523,7 +10466,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define DG_Z 0.040 //0.0125 //Min
     //#define DE_W 0.000 //Auto
     #define DI_Z 0.040 //Trim
-    #define DF_W float2(0.001,0.0075)  //Edge & Scale
+    #define DF_W float3(0.001,0.0075,0.0)  //Edge & Scale
 	#define BMT 1
 	#define DF_Z 0.03
     //#define SMS 3            //SM Toggle Separation
@@ -10615,7 +10558,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define DG_Z 0.025 //0.0125 //Min
     //#define DE_W 0.000 //Auto
     #define DI_Z 0.125 //Trim
-    #define DF_W float2(0.001,0.001)  //Edge & Scale
+    #define DF_W float3(0.001,0.001,0.0)  //Edge & Scale
 	#define BMT 1
 	#define DF_Z 0.075
     //#define SMS 3            //SM Toggle Separation
@@ -10695,7 +10638,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DG_Z 0.025 //0.0125 //Min
     //#define DE_W 0.000 //Auto
     //#define DI_Z 0.125 //Trim
-    //#define DF_W float2(0.001,0.001)  //Edge & Scale
 	#define BMT 1
 	#define DF_Z 0.0375
     //#define SMS 3            //SM Toggle Separation
@@ -10769,7 +10711,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DG_Z 0.025 //0.0125 //Min
     //#define DE_W 0.000 //Auto
     //#define DI_Z 0.125 //Trim
-    //#define DF_W float2(0.001,0.001)  //Edge & Scale
 	#define BMT 1
 	#define DF_Z 0.075
     //#define SMS 3            //SM Toggle Separation
@@ -10844,7 +10785,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define DG_Z 0.025 //0.0125 //Min
     //#define DE_W 0.000 //Auto
     #define DI_Z 0.030 //Trim
-    //#define DF_W float2(0.001,0.001)  //Edge & Scale
 	#define BMT 1
 	#define DF_Z 0.025
     #define SMS 3           //SM Toggle Separation
@@ -10920,7 +10860,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DG_Z 0.025 //0.0125 //Min
     //#define DE_W 0.000 //Auto
     //#define DI_Z 0.125 //Trim
-    //#define DF_W float2(0.001,0.001)  //Edge & Scale
 	#define BMT 1
 	#define DF_Z 0.10
     //#define SMS 3            //SM Toggle Separation
@@ -10993,7 +10932,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define DG_Z 0.100 //0.170 //0.210 //Min
     //#define DE_W 0.000 //Auto
     #define DI_Z 0.200 //0.175 //0.200//Trim
-    #define DF_W float2(0.001,0.005)  //Edge & Scale
+    #define DF_W float3(0.001,0.005,0.0)  //Edge & Scale
 	#define BMT 1
 	#define DF_Z 0.15
     //#define SMS 3            //SM Toggle Separation
@@ -11093,7 +11032,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DI_W float4(0.0,1.0,1.75,3.0)
     #define DG_Z 0.025 //Min
     #define DI_Z 0.050 //Trim
-    #define DF_W float2(0.001,0.00125)  //Edge & Scale
+    #define DF_W float3(0.001,0.00125,0.0)  //Edge & Scale
 	#define BMT 1
 	#define DF_Z 0.100
     #define SMS 0      //SM Toggle Separation
@@ -11129,7 +11068,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DG_Z 0.025 //0.0125 //Min
     //#define DE_W 0.000 //Auto
     //#define DI_Z 0.030 //Trim
-    //#define DF_W float2(0.001,0.001)  //Edge & Scale
 	#define BMT 1
 	#define DF_Z 0.100
     #define SMS 3           //SM Toggle Separation
@@ -11209,7 +11147,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DG_Z 0.025 //0.0125 //Min
     //#define DE_W 0.000 //Auto
     //#define DI_Z 0.030 //Trim
-    //#define DF_W float2(0.001,0.001)  //Edge & Scale
 	#define BMT 1
 	#define DF_Z 0.100
     //#define SMS 3           //SM Toggle Separation
@@ -11289,7 +11226,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DG_Z 0.025 //0.0125 //Min
     //#define DE_W 0.000 //Auto
     //#define DI_Z 0.030 //Trim
-    //#define DF_W float2(0.001,0.001)  //Edge & Scale
 	#define BMT 1
 	#define DF_Z 0.050
     //#define SMS 3           //SM Toggle Separation
@@ -11366,7 +11302,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DG_Z 0.025 //0.0125 //Min
     //#define DE_W 0.000 //Auto
     //#define DI_Z 0.030 //Trim
-    //#define DF_W float2(0.001,0.001)  //Edge & Scale
 	#define BMT 1
 	#define DF_Z 0.100
     //#define SMS 3           //SM Toggle Separation
@@ -11445,7 +11380,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DG_Z 0.025 //0.0125 //Min
     //#define DE_W 0.000 //Auto
     //#define DI_Z 0.030 //Trim
-    //#define DF_W float2(0.001,0.001)  //Edge & Scale
 	#define BMT 1
 	#define DF_Z 0.100
     //#define SMS 3           //SM Toggle Separation
@@ -11491,7 +11425,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DG_Z 0.020 //Min
     //#define DE_W 0.000 //Auto
     //#define DI_Z 0.100 //Trim
-    //#define DF_W float2(0.0001,0.0025)  //Edge & Scale
 	#define BMT 1
 	#define DF_Z 0.00
     //#define SMS 2            //SM Toggle Separation
@@ -11566,7 +11499,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define DG_Z 0.095 //Min
     //#define DE_W 0.000 //Auto
     #define DI_Z 0.195 //Trim
-    #define DF_W float2(0.0001,0.015)  //Edge & Scale
+    #define DF_W float3(0.0001,0.015,0.0)  //Edge & Scale
 	#define BMT 1
 	#define DF_Z 0.160
     //#define SMS 2            //SM Toggle Separation
@@ -11611,7 +11544,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DG_Z 0.025 //0.0125 //Min
     //#define DE_W 0.000 //Auto
     //#define DI_Z 0.030 //Trim
-    //#define DF_W float2(0.001,0.001)  //Edge & Scale
 	#define BMT 1
 	#define DF_Z 0.10
     //#define SMS 3           //SM Toggle Separation
@@ -11657,7 +11589,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DG_Z 0.025 //0.0125 //Min
     //#define DE_W 0.000 //Auto
     //#define DI_Z 0.030 //Trim
-    //#define DF_W float2(0.001,0.001)  //Edge & Scale
 	#define BMT 1
 	#define DF_Z 0.125
     //#define SMS 3           //SM Toggle Separation
@@ -11704,7 +11635,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DG_Z 0.025 //0.0125 //Min
     //#define DE_W 0.000 //Auto
     //#define DI_Z 0.030 //Trim
-    //#define DF_W float2(0.001,0.001)  //Edge & Scale
 	#define BMT 1
 	#define DF_Z 0.05
     //#define SMS 3           //SM Toggle Separation
@@ -11750,7 +11680,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DG_Z 0.025 //0.0125 //Min
     //#define DE_W 0.000 //Auto
     //#define DI_Z 0.030 //Trim
-    //#define DF_W float2(0.001,0.001)  //Edge & Scale
 	#define BMT 1
 	#define DF_Z 0.030
     //#define SMS 3           //SM Toggle Separation
@@ -11795,7 +11724,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define DG_Z 0.0125 //Min
     //#define DE_W 0.000 //Auto
     #define DI_Z 0.1125 //Trim
-    #define DF_W float2(0.0001,0.00125)  //Edge & Scale
+    #define DF_W float3(0.0001,0.00125,0.0)  //Edge & Scale
 	#define BMT 1
 	#define DF_Z 0.075
     //#define SMS 2            //SM Toggle Separation
@@ -11870,7 +11799,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DG_Z 0.025 //0.0125 //Min
     //#define DE_W 0.000 //Auto
     //#define DI_Z 0.030 //Trim
-    //#define DF_W float2(0.001,0.001)  //Edge & Scale
 	#define BMT 1
 	#define DF_Z 0.030
     //#define SMS 3           //SM Toggle Separation
@@ -11948,7 +11876,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DG_Z 0.025 //0.0125 //Min
     //#define DE_W 0.000 //Auto
     //#define DI_Z 0.030 //Trim
-    //#define DF_W float2(0.001,0.001)  //Edge & Scale
 	#define BMT 1
 	#define DF_Z 0.040
     //#define SMS 3           //SM Toggle Separation
@@ -11995,7 +11922,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define DG_Z 0.025 //Min
     #define DE_W 0.250 //Auto
     #define DI_Z 0.060 //Trim
-    #define DF_W float2(0.001,0.007) //Edge & Scale
+    #define DF_W float3(0.001,0.007,0.0) //Edge & Scale
 	#define BMT 1
 	#define DF_Z 0.100
     //#define SMS 3           //SM Toggle Separation
@@ -12120,7 +12047,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DG_Z 0.025 //Min
     //#define DE_W 0.250 //Auto
     //#define DI_Z 0.060 //Trim
-    //#define DF_W float2(0.001,0.007) //Edge & Scale
 	#define BMT 1
 	#define DF_Z 0.125 // 0.100
     //#define SMS 3           //SM Toggle Separation
@@ -12197,7 +12123,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DG_Z 0.03 //Min
     //#define DE_W 0.250 //Auto
     //#define DI_Z 0.05//Trim
-    #define DF_W float2(0.125,0.006) //Edge & Scale
+    #define DF_W float3(0.125,0.006,0.0) //Edge & Scale
 	#define BMT 1
 	#define DF_Z 0.05 // 0.100
     //#define DL_Y -0.50   //De-Artifact
@@ -12244,7 +12170,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DG_Z 0.03 //Min
     //#define DE_W 0.250 //Auto
     //#define DI_Z 0.05//Trim
-    //#define DF_W float2(0.125,0.006) //Edge & Scale
 	#define BMT 1
 	#define DF_Z 0.1125
     //#define DL_Y -0.50   //De-Artifact
@@ -12322,7 +12247,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DG_Z 0.03 //Min
     //#define DE_W 0.250 //Auto
     //#define DI_Z 0.05//Trim
-    //#define DF_W float2(0.125,0.006) //Edge & Scale
 	#define BMT 1
 	#define DF_Z 0.100
     //#define DL_Y -0.50   //De-Artifact
@@ -12401,7 +12325,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DG_Z 0.03 //Min
     //#define DE_W 0.250 //Auto
     //#define DI_Z 0.05//Trim
-    //#define DF_W float2(0.125,0.006) //Edge & Scale
 	#define BMT 1
 	#define DF_Z 0.100
     //#define DL_Y -0.50   //De-Artifact
@@ -12482,7 +12405,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DG_Z 0.03 //Min
     //#define DE_W 0.250 //Auto
     //#define DI_Z 0.05//Trim
-    //#define DF_W float2(0.125,0.006) //Edge & Scale
 	#define BMT 1
 	#define DF_Z 0.100
     //#define DL_Y -0.50   //De-Artifact
@@ -12574,7 +12496,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DG_Z 0.03 //Min
     //#define DE_W 0.250 //Auto
     //#define DI_Z 0.05//Trim
-    //#define DF_W float2(0.125,0.006) //Edge & Scale
 	#define BMT 1
 	#define DF_Z 0.100
     //#define DL_Y -0.50   //De-Artifact
@@ -12661,7 +12582,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define DG_Z 0.05 //Min
     //#define DE_W 0.250 //Auto
     #define DI_Z 0.100//Trim
-    #define DF_W float2(0.0001,0.002) //Edge & Scale
+    #define DF_W float3(0.0001,0.002,0.0) //Edge & Scale
 	#define BMT 1
 	#define DF_Z 0.15
     //#define DL_Y -0.50   //De-Artifact
@@ -12766,7 +12687,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DG_Z 0.03 //Min
     //#define DE_W 0.250 //Auto
     //#define DI_Z 0.05//Trim
-    //#define DF_W float2(0.125,0.006) //Edge & Scale
 	#define BMT 1
 	#define DF_Z 0.0375
     //#define DL_Y -0.50   //De-Artifact
@@ -12845,7 +12765,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DG_Z 0.03 //Min
     //#define DE_W 0.250 //Auto
     //#define DI_Z 0.05//Trim
-    //#define DF_W float2(0.125,0.006) //Edge & Scale
 	#define BMT 1
 	#define DF_Z 0.1375
     //#define DL_Y -0.50   //De-Artifact
@@ -12894,7 +12813,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DG_Z 0.03 //Min
     //#define DE_W 0.250 //Auto
     //#define DI_Z 0.05//Trim
-    //#define DF_W float2(0.125,0.006) //Edge & Scale
 	#define BMT 1
 	#define DF_Z 0.150
     //#define DL_Y -0.50   //De-Artifact
@@ -12942,7 +12860,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DG_Z 0.03 //Min
     //#define DE_W 0.250 //Auto
     //#define DI_Z 0.05//Trim
-    //#define DF_W float2(0.125,0.006) //Edge & Scale
 	#define BMT 1
 	#define DF_Z 0.150
     //#define DL_Y -0.50   //De-Artifact
@@ -12991,7 +12908,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DG_Z 0.03 //Min
     //#define DE_W 0.250 //Auto
     //#define DI_Z 0.05//Trim
-    //#define DF_W float2(0.125,0.006) //Edge & Scale
 	#define BMT 1
 	#define DF_Z 0.1
     //#define DL_Y -0.50   //De-Artifact
@@ -13026,7 +12942,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DG_Z 0.03 //Min
     //#define DE_W 0.250 //Auto
     //#define DI_Z 0.05//Trim
-    //#define DF_W float2(0.125,0.006) //Edge & Scale
 	#define BMT 1
 	#define DF_Z 0.1
     //#define DL_Y -0.50   //De-Artifact
@@ -13105,7 +13020,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define DG_Z 0.0625//0.1 //Min
     //#define DE_W 0.250 //Auto
     #define DI_Z 0.1//Trim
-    #define DF_W float2(0.001,0.0025) //Edge & Scale
+    #define DF_W float3(0.001,0.0025,0.0) //Edge & Scale
 	#define BMT 1
 	#define DF_Z 0.130
     //#define DL_Y -0.50   //De-Artifact
@@ -13185,7 +13100,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DG_Z 0.03 //Min
     //#define DE_W 0.250 //Auto
     //#define DI_Z 0.05//Trim
-    //#define DF_W float2(0.125,0.006) //Edge & Scale
 	#define BMT 1
 	#define DF_Z 0.125
     //#define DL_Y -0.50   //De-Artifact
@@ -13268,7 +13182,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DG_Z 0.03 //Min
     //#define DE_W 0.250 //Auto
     //#define DI_Z 0.05//Trim
-    //#define DF_W float2(0.125,0.006) //Edge & Scale
 	#define BMT 1
 	#define DF_Z 0.025
     #define DL_Y -0.300   //De-Artifact
@@ -13353,7 +13266,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DG_Z 0.03 //Min
     //#define DE_W 0.250 //Auto
     //#define DI_Z 0.05//Trim
-    //#define DF_W float2(0.125,0.006) //Edge & Scale
 	#define BMT 1
 	#define DF_Z 0.125
     //#define DL_Y -0.50   //De-Artifact
@@ -13435,7 +13347,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DG_Z 0.03 //Min
     //#define DE_W 0.250 //Auto
     //#define DI_Z 0.05//Trim
-    //#define DF_W float2(0.125,0.006) //Edge & Scale
 	#define BMT 1
 	#define DF_Z 0.05
     //#define DL_Y -0.50   //De-Artifact
@@ -13522,7 +13433,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DG_Z 0.03 //Min
     //#define DE_W 0.250 //Auto
     //#define DI_Z 0.05//Trim
-    //#define DF_W float2(0.125,0.006) //Edge & Scale
 	#define BMT 1
 	#define DF_Z 0.05
     //#define DL_Y -0.50   //De-Artifact
@@ -13632,7 +13542,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DF_Z 0.120
     #define DG_Z 0.025//0.040 //Min
     #define DI_Z 0.125 //0.1375 //Trim
-    #define DF_W float2(0.001,0.0015)  //Edge & Scale
+    #define DF_W float3(0.001,0.0015,0.0)  //Edge & Scale
     //#define DL_Y 0.375    //De-Artifact
     //#define DL_Z 0.125       //Compat Power
 	#define DJ_X 0.625       //Range Smoothing
@@ -13672,7 +13582,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DG_Z 0.001//0.050//0.075 //Min
     //#define DE_W 0.75 //Auto
     //#define DI_Z 0.05//0.050//0.090 //Trim
-    //#define DF_W float2(0.001,0.00125)  //Edge & Scale
 	#define BMT 1
 	#define DF_Z 0.025//0.050 //0.125
     //#define DL_Y 0.400       //De-Artifact
@@ -13737,7 +13646,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define DG_Z 0.175//0.200 //Min
     //#define DE_W 0.125 //Auto
     #define DI_Z 0.225//0.225//Trim
-    #define DF_W float2(0.125,0.0005) //Edge & Scale
+    #define DF_W float3(0.125,0.0005,0.0) //Edge & Scale
 	#define BMT 1
 	#define DF_Z 0.0375
     //#define DL_Y -0.50   //De-Artifact
@@ -13774,7 +13683,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define DG_Z 0.100 //0.0375//Min
     //#define DE_W 0.250 //Auto
     #define DI_Z 0.04375//0.0375//Trim
-    #define DF_W float2(0.001,0.001) //Edge & Scale
+    #define DF_W float3(0.001,0.001,0.0) //Edge & Scale
 	#define BMT 1
 	#define DF_Z 0.125
 	#define DAA 1
@@ -13832,7 +13741,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DG_Z 0.045//0.0875//Min
 	#define DE_W 0.30//0.160 //Max
     #define DI_Z 0.07//0.150 //Trim
-    #define DF_W float2(0.0001,0.0075) //Edge & Scale
+    #define DF_W float3(0.0001,0.0075,0.0) //Edge & Scale
 	//Smooth Mode Setting
     #define SMS 3           //SM Toggle Separation
 	#define DL_X 0.900       //SM Tune
@@ -13856,7 +13765,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define OIL 1 //Set How many Levels We use for RE_Fix 0 | 1 | 2 | 3
     #define OIF float2(0.875,0.75) //Fix enables if Value is > 0.0
 	#define DI_W float2(1.0,1.5)
-    #define DF_W float2(0.0001,0.005) //Edge & Scale
+    #define DF_W float3(0.0001,0.005,0.0) //Edge & Scale
     #define DG_Z 0.03//0.040 //Min
 	#define DE_W 0.250 //Max
     #define DI_Z 0.075//0.055 //Trim
@@ -13924,7 +13833,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DG_Z 0.100      // Min Weapon Hands That are apart of world with Auto and Trim
     //#define DE_W 0.250      // Auto
     //#define DI_Z 0.043      // Trim
-    //#define DF_W float2(0,0)// Edge & Scale
 	#define BMT 1           // ZPD and World Scale Balance // I need to phase this out.
 	#define DF_Z 0.040      // Set the Balance  
     //#define DL_Y -0.50      // De-Artifact Only works on some View Modes and causes performance degredation
@@ -13982,7 +13890,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define DG_Z 0.050      // Min Weapon Hands That are apart of world with Auto and Trim
     //#define DE_W 0.250      // Auto
     #define DI_Z 0.125      // Trim
-    #define DF_W float2(0.0001,0.005)// Edge & Scale
+    #define DF_W float3(0.0001,0.005,0.0)// Edge & Scale
 	#define BMT 1           // ZPD and World Scale Balance // I need to phase this out.
 	#define DF_Z 0.045      // Set the Balance  
     #define DL_Y -0.5      // De-Artifact Only works on some View Modes and causes performance degredation
@@ -14066,7 +13974,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define DG_Z 0.01875//0.02//0.015 //Min
     //#define DE_W 0.75 //Auto
     #define DI_Z 0.025//0.02//0.050 //Trim
-    #define DF_W float2(0.001,0.0055)  //Edge & Scale
+    #define DF_W float3(0.001,0.0055,0.0)  //Edge & Scale
 	#define BMT 1
 	#define DF_Z 0.07
     //#define DL_Y 0.375    //De-Artifact 0.1245
@@ -14120,7 +14028,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DG_Z 0.001//0.050//0.075 //Min
     //#define DE_W 0.75 //Auto
     //#define DI_Z 0.05//0.050//0.090 //Trim
-    //#define DF_W float2(0.001,0.00125)  //Edge & Scale
     #define DL_Y -0.5    //De-Artifact
     //#define DL_Z 0.50       //Compat Power
 	//#define DJ_X 0.500       //Range Smoothing
@@ -14351,7 +14258,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DG_Z 0.070 //Min
 	#define DE_W 0.500 //Auto
 	#define DI_Z 0.100 //Trim
-    #define DF_W float2(0.0001,0.0025)// Edge & Scale	
+    #define DF_W float3(0.0001,0.0025,0.0)// Edge & Scale	
 	#define DB_W 5
 	#define DF_X float2(0.085,0.0)
 	#define NDW 1
@@ -14381,7 +14288,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define DG_Z 0.200 //Min
     #define DE_W 0.500 //Auto
     #define DI_Z 0.500 //Trim
-    //#define DF_W float2(0.001,0.00125)  //Edge & Scale
 	//Smooth Mode Setting
     #define SMS 2            //SM Toggle Separation
 	#define DL_X 0.750      //SM Tune
@@ -14423,7 +14329,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define DF_Z 0.125
 	#define DG_Z 0.060 //Min
     #define DI_Z 0.200 //Trim
-    #define DF_W float2(0.0001,0.007)// Edge & Scale
+    #define DF_W float3(0.0001,0.007,0.0)// Edge & Scale
 	#define FPS  0
 	#define DK_X 2
 	#define DK_Y 0
@@ -14577,7 +14483,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DG_Z 0.055 //Min
     //#define DE_W 0.75 //Auto
     //#define DI_Z 0.075 //Trim
-    //#define DF_W float2(0.001,0.00125)  //Edge & Scale
     //#define DL_Y 0.7    //De-Artifact
     //#define DL_Z 0.50       //Compat Power
 	//#define DJ_X 0.500       //Range Smoothing
@@ -14693,7 +14598,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DG_Z 0.001//0.050//0.075 //Min
     //#define DE_W 0.75 //Auto
     //#define DI_Z 0.05//0.050//0.090 //Trim
-    //#define DF_W float2(0.001,0.00125)  //Edge & Scale
     //#define DL_Y -0.5    //De-Artifact
     //#define DL_Z 0.50       //Compat Power
 	//#define DJ_X 0.500       //Range Smoothing
@@ -14764,7 +14668,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DG_Z 0.001//0.050//0.075 //Min
     //#define DE_W 0.75 //Auto
     //#define DI_Z 0.05//0.050//0.090 //Trim
-    //#define DF_W float2(0.001,0.00125)  //Edge & Scale
     //#define DL_Y -0.5    //De-Artifact
     //#define DL_Z 0.50       //Compat Power
 	//#define DJ_X 0.500       //Range Smoothing
@@ -14836,7 +14739,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define DG_Z 0.095 //Min
     //#define DE_W 0.75 //Auto
     #define DI_Z 0.045 //Trim
-    #define DF_W float2(0.001,0.0025)  //Edge & Scale
+    #define DF_W float3(0.001,0.0025,0.0)  //Edge & Scale
     #define DL_Y -0.5    //De-Artifact
     #define DL_Z 0.50       //Compat Power
 	//#define DJ_X 0.500       //Range Smoothing
@@ -14976,7 +14879,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define DG_Z 0.040 //Min
     //#define DE_W 0.75 //Auto
     #define DI_Z 0.050 //Trim
-    #define DF_W float2(0.001,0.0045)  //Edge & Scale
+    #define DF_W float3(0.001,0.0045,0.0)  //Edge & Scale
 	#define BMT 1
 	#define DF_Z 0.100
 
@@ -15043,7 +14946,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DG_Z 0.040 //Min
     //#define DE_W 0.75 //Auto
     //#define DI_Z 0.050 //Trim
-    //#define DF_W float2(0.001,0.0045)  //Edge & Scale
 	#define BMT 1
 	#define DF_Z 0.150
 
@@ -15094,6 +14996,114 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	//#define DL_W 0.050 //SM Perspective
 	#define DM_X 3     //HQ Tune
     //#define DM_Y 3     //HQ VRS
+#elif (App == 0x2AB9ECF9) //System ReShock Updated
+	#define DA_W 1
+    //#define DB_X 1
+	#define DA_X 0.025
+	#define DF_Y 0.020
+	#define DA_Y 250.0
+    //#define DA_Z -0.001
+	#define DB_Z 0.04
+ 
+	#define DE_X 1
+	#define DE_Y 0.900
+	#define DE_Z 0.375
+	#define DG_W 0.0 //Pop
+    //#define OIL 1 //Set How many Levels We use for RE_Fix 0 | 1 | 2 | 3
+    #define OIF float2(0.7,0.5) //Fix enables if Value is > 0.0
+	#define DI_W float2(2.0,4.5)
+
+	//#define FTM 1
+    #define DG_Z 0.035 //Min
+    //#define DE_W 0.00 //Auto
+    #define DI_Z 0.06 //Trim
+    #define DF_W float3(0.0001,0.0025,0.275)  //Edge & Scale
+	#define BMT 1
+	#define DF_Z 0.15
+
+    //#define DL_Y -0.50      // De-Artifact Only works on some View Modes and causes performance degredation
+    //#define DL_Z 1.00       // Compat Power
+	//#define DJ_X 0.250      // Range Smoothing
+	/*
+    #define MAC 0   
+    #define MDD 1 //Set Menu Detection & Direction     //Off 0 | 1 | 2 | 3 | 4      
+    #define DN_X float4( 0.095, 0.322 ,  0.9425, 0.152)  //Pos A = XY White & B = ZW White 
+    #define DN_Y float4( 0.095, 0.575 ,  0.0, 0.0)       //Pos C = XY Light & D = ZW Match
+    #define DN_Z float4( 0.0, 0.0,  0.0, 0.0)            //Pos E = XY Match & F = ZW Match
+	#define DN_W float4( 1.0, 0.0 , 0.0, 0.0 )          //Size = Menu [ABC] D E F
+    #define DJ_Y float4( 30, 30.0, 30.0, 1000.0);            //Menu Detection Type for A, B, & C. The Last Value is a Shift amount for C.  
+    #define DJ_Z float3( 1000., 1000., 1000);                //Set Match Tresh 
+	*/
+	/*	
+    #define MMD 1 //Set Multi Menu Detection             //Off / On
+    #define MMS 0 //Set Multi Menu Selection from 0-1 to 29-30 and Off 0 | 1 | 2
+    #define DO_X float4( 0.140 , 0.0425, 0.620 , 0.929 ) //Pos A1 = XY Color & A2 = ZW Black 
+    #define DO_Y float4( 0.620 , 0.109 , 0.140 , 0.0425 ) //Pos A3 = XY Color & B1 = ZW Color
+    #define DO_Z float4( 0.190 , 0.929 , 0.620 , 0.109 ) //Pos B2 = XY Black & B3 = ZW Color
+	#define DO_W float4( 27.0, 28.0, 27.0, 28.0 ) //Tresh Hold for Color A & B and Color
+
+    #define DP_X float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos C1 = XY Color & C2 = ZW Black 
+    #define DP_Y float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos C3 = XY Color & D1 = ZW Color
+    #define DP_Z float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos D2 = XY Black & D3 = ZW Color
+	#define DP_W float4( 1000.0, 1000.0, 1000.0, 1000.0) //Tresh Hold for Color C & D and Color
+	#define DQ_X float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos C1 = XY Color & C2 = ZW Black 
+    #define DQ_Y float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos C3 = XY Color & D1 = ZW Color
+    #define DQ_Z float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos D2 = XY Black & D3 = ZW Color
+	#define DQ_W float4( 1000.0, 1000.0, 1000.0, 1000.0) //Tresh Hold for Color A1 & A3 and Color
+	#define DR_X float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos G1 = XY Color & G2 = ZW Black 
+    #define DR_Y float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos G3 = XY Color & H1 = ZW Color
+    #define DR_Z float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos H2 = XY Black & H3 = ZW Color
+	#define DR_W float4( 1000.0, 1000.0, 1000.0, 1000.0) //Tresh Hold for Color G & H and Color 
+	*/
+	//#define WSM 4
+	//#define DB_W 9
+	//#define DF_X float2(0.050,0.0)	
+    //#define DS_Y 1
+    //#define SDU 1
+    #define PEW 1
+    #define DSW 1
+    //#define RHW 1
+	//Smooth Mode Setting  
+    #define SMS 3      //SM Toggle Separation
+	#define DL_X 0.950 //SM Tune
+	//#define DL_W 0.050 //SM Perspective
+	#define DM_X 3     //HQ Tune
+    //#define DM_Y 3     //HQ VRS
+#elif (App == 0xFE54BF56 ) //No One Lives Forever and 2
+	#define DA_X 0.0375
+	#define WSM 10
+	#define OW_WP "Read Help & Change Me\0Custom WP\0No One Lives Forever\0No One Lives Forever 2\0"
+	#define WPW 1
+	#define RHW 1
+#elif (App == 0xA300000 || App == 0xA400000 ) //Alien VS Preditor 2 & Primal Hunt
+	//#define DA_W 1
+    //#define DB_X 1
+	#define DA_X 0.035
+	#define DF_Y 0.020
+	#define DA_Y 26.0
+    //#define DA_Z -0.001
+	#define DB_Z 0.1
+ 
+	#define DE_X 4
+	#define DE_Y 0.500
+	#define DE_Z 0.375
+	#define DG_W 0.0 //Pop
+    //#define OIL 1 //Set How many Levels We use for RE_Fix 0 | 1 | 2 | 3
+    //#define OIF float2(0.7,0.5) //Fix enables if Value is > 0.0
+	//#define DI_W float2(2.0,4.5)
+
+	//#define FTM 1
+    //#define DG_Z 0.035 //Min
+    //#define DE_W 0.00 //Auto
+    //#define DI_Z 0.06 //Trim
+    //#define DF_W float3(0.0001,0.0025,0.275)  //Edge & Scale
+	#define BMT 1
+	#define DF_Z 0.25
+	#define WSM 11
+	#define OW_WP "Read Help & Change Me\0Custom WP\0Aliens VS Predator 2\0Aliens VS Predator 2 WIP\0"
+	#define WPW 1
+    #define NDG 1
+	#define RHW 1
 #else
 	#define NPW 1 //No Profile
 #endif
@@ -15121,7 +15131,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define DG_Z 0.100      // Min Weapon Hands That are apart of world with Auto and Trim
     #define DE_W 0.250      // Auto
     #define DI_Z 0.043      // Trim
-    #define DF_W float2(0,0)// Edge & Scale
+    #define DF_W float3(0,0,0)// Edge & Scale
 	#define BMT 1           // ZPD and World Scale Balance // I need to phase this out.
 	#define DF_Z 0.125      // Set the Balance  
     #define DL_Y -0.50      // De-Artifact Only works on some View Modes and causes performance degredation
@@ -16089,6 +16099,21 @@ float4 Weapon_Profiles(float WP ,float4 Weapon_Adjust) // No One Lives Forever
         Weapon_Adjust = float4(0.425,5.25,1.0,0.0);       //WP 4 | No One Lives Forever
     if (WP == 3)
         Weapon_Adjust = float4(0.519,31.25,8.875,0.0);    //WP 5 | No One Lives Forever 2
+
+	return Weapon_Adjust;
+}
+#elif WSM == 11
+float DMA_Overwatch(float WP, float DMA_Adjust)
+{
+	return DMA_Adjust;
+}
+
+float4 Weapon_Profiles(float WP ,float4 Weapon_Adjust) // Aliens VS Predator 2
+{
+    if (WP == 2)
+        Weapon_Adjust = float4(0.500,6.500,1.0,0.0);      //WP 4 | Aliens VS Predator 2
+    if (WP == 3)
+        Weapon_Adjust = float4(0.519,31.25,8.875,0.0);    //WP 5 | Aliens VS Predator 2 WIP
 
 	return Weapon_Adjust;
 }

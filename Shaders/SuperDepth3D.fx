@@ -2,7 +2,7 @@
 	///**SuperDepth3D**///
 	//----------------////
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	//* Depth Map Based 3D post-process shader v3.7.7
+	//* Depth Map Based 3D post-process shader v3.7.8
 	//* For Reshade 3.0+
 	//* ---------------------------------
 	//*
@@ -250,7 +250,7 @@ namespace SuperDepth3D
 	#ifndef Inficolor_3D_Emulator
 		#define Inficolor_3D_Emulator 0
 	#endif
-	//uniform float TEST < ui_type = "drag"; ui_min = 0; ui_max = 1; > = 1.0;
+	//uniform float3 TEST < ui_type = "drag"; ui_min = 0; ui_max = 1; > = 1.0;
 	//Divergence & Convergence//
 	uniform float Divergence <
 		ui_type = "slider";
@@ -628,7 +628,7 @@ namespace SuperDepth3D
 		ui_category = "Weapon Hand Adjust";	
 	> = float4(0.03,DG_Z,DE_W,DI_Z);
 	
-	uniform float2 Weapon_Depth_Edge <
+	uniform float3 Weapon_Depth_Edge <
 		ui_type = "slider";
 		ui_min = 0.0; ui_max = 1.0;
 		ui_label = " Screen Edge Adjust & Near Scale";
@@ -1517,7 +1517,9 @@ namespace SuperDepth3D
 			  Dist  = distance( center, texcoords ) * 2.0, 
 			  EdgeMask = saturate((BaseVal-Dist) / (BaseVal-Adjust_Value)),
 			  Set_Weapon_Scale_Near = -min(0.5,Weapon_Depth_Edge.y);//So it don't hang the game. 
-	    return lerp(Depth,(Mod_Depth - Set_Weapon_Scale_Near) / (1 + Set_Weapon_Scale_Near), EdgeMask );    
+		float Scale_Near = 1.0 + Weapon_Depth_Edge.z;
+			  Mod_Depth = ((Scale_Near*Mod_Depth) - Set_Weapon_Scale_Near) / (1.0 + Set_Weapon_Scale_Near);
+	    return lerp(Depth, Mod_Depth, EdgeMask );    
 	}
 	
 	float CCBox(float2 TC, float2 size) 
