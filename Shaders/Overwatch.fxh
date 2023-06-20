@@ -1,7 +1,7 @@
 ////----------------------------------------//
 ///SuperDepth3D Overwatch Automation Header///
 //----------------------------------------////
-// Version 3.3.1
+// Version 3.3.2
 //---------------------------------------OVERWATCH---------------------------------------//
 // If you are reading this stop. Go away and never look back. From this point on if you  //
 // still think it's is worth looking at this..... Then no one can save you or your soul. //
@@ -105,6 +105,7 @@ static const float Weapon_Near_Depth_Max_D = 0.0;       //Weapon Near Depth     
 static const float3 Weapon_Edge_Correction_D = 0.0;     //Weapon Edge Correction & Weapon Near Scale    | DF_W
 static const float Weapon_Near_Depth_Min_D = 0.0;       //Weapon Near Depth                     Min     | DG_Z
 static const float Weapon_Near_Depth_Trim_D = 0.25;     //Weapon Near Depth                     Trim    | DI_Z
+static const float2 OIL_Weapon_Near_Depth_Min_D = 0.0;  //Weapon Near Depth         OIL 2+      Min     | DS_X
 
 //Leftover Values
 static const int Alternate_Frame_Detection_ZPD_D = 0;   //Alternate Frame Detection ZPD 0 | 1 : Off / On| AFD
@@ -167,7 +168,6 @@ static const float4 Pos_XY_XY_GH_D = 0;                 //Position G XY H XY    
 static const float4 Pos_XY_XY_HH_D = 0;                 //Position H XY H XY                            | DR_Z
 static const float4 Simple_Menu_Tresh_GH_D = 1000;      //Simple Manu Tresh For G & H                   | DR_W
 
-static const float4 NULL_X_D = 0;                       //NULL X                                        | DS_X
 static const int View_Mode_State_D = D_ViewMode;        //View Mode State [Do not Use 6]                | DS_Z
 static const float Check_Weapon_Depth_Limit_B_D = 1.0;  //Check Weapon Depth Limit Secondary            | DS_W
 
@@ -15104,6 +15104,140 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define WPW 1
     #define NDG 1
 	#define RHW 1
+#elif (App == 0x7281105 ) //Amnesia Bunker
+	//#define DA_W 1
+    //#define DB_X 1
+	#define DA_X 0.025
+	#define DF_Y 0.025
+	#define DA_Y 60.0
+    #define DA_Z 0.00025
+	#define DB_Z 0.05
+ 
+	#define DE_X 2
+	#define DE_Y 0.750
+	#define DE_Z 0.375
+	#define DG_W 0.5 //Pop
+    //#define OIL 1 //Set How many Levels We use for RE_Fix 0 | 1 | 2 | 3
+    #define OIF 0.625 //Fix enables if Value is > 0.0
+	#define DI_W 1.0
+
+	//#define FTM 1
+    #define DG_Z 0.025 //Min
+    //#define DE_W 0.00 //Auto
+    #define DI_Z 0.032 //Trim
+    #define DF_W float3(0.0001,0.00125,0.175)  //Edge & Scale
+	#define BMT 1
+	#define DF_Z 0.25
+
+    //#define DL_Y -0.50      // De-Artifact Only works on some View Modes and causes performance degredation
+    //#define DL_Z 1.00       // Compat Power
+	//#define DJ_X 0.250      // Range Smoothing
+	
+//    #define MAC 0   
+//    #define MDD 1 //Set Menu Detection & Direction     //Off 0 | 1 | 2 | 3 | 4      
+//    #define DN_X float4( 0.081, 0.508 ,  0.055, 0.500)  //Pos A = XY White & B = ZW White 
+//    #define DN_Y float4( 0.0806,0.597 ,  0.0, 0.0)       //Pos C = XY Light & D = ZW Match
+//    #define DN_Z float4( 0.0, 0.0,  0.0, 0.0)            //Pos E = XY Match & F = ZW Match
+//	#define DN_W float4( 1.0, 0.0 , 0.0, 0.0 )          //Size = Menu [ABC] D E F
+//    #define DJ_Y float4( 15.0, 0.0, 15.0, 23.0);     //Menu Detection Type for A, B, & C. The Last Value is a Shift amount for C.  
+//    #define DJ_Z float3( 1000., 1000., 1000);           //Set Match Tresh 
+
+    #define MAC 0   
+    #define MDD 1 //Set Menu Detection & Direction     //Off 0 | 1 | 2 | 3 | 4      
+    #define DN_X float4( 0.4055,0.2664 ,  0.405, 0.510)  //Pos A = XY White & B = ZW White 
+    #define DN_Y float4( 0.3983, 0.880 ,  0.0, 0.0)       //Pos C = XY Light & D = ZW Match
+    #define DN_Z float4( 0.0, 0.0,  0.0, 0.0)            //Pos E = XY Match & F = ZW Match
+	#define DN_W float4( 1.0, 0.0 , 0.0, 0.0 )          //Size = Menu [ABC] D E F
+    #define DJ_Y float4( 20.0, 0.0, 29.0, 21.0);     //Menu Detection Type for A, B, & C. The Last Value is a Shift amount for C.  
+    #define DJ_Z float3( 1000., 1000., 1000);           //Set Match Tresh 
+	
+    #define MMD 4 //Set Multi Menu Detection             //Off / On
+    #define MMS 0 //Set Multi Menu Selection from 0-1 to 29-30 and Off 0 | 1 | 2
+    #define DO_X float4( 0.3983, 0.880 , 0.405 , 0.510 ) //Pos A1 = XY Color & A2 = ZW Black 
+    #define DO_Y float4( 0.4055, 0.2664 , 0.3983, 0.880 ) //Pos A3 = XY Color & B1 = ZW Color
+    #define DO_Z float4( 0.405 , 0.510 , 0.4055, 0.2664 ) //Pos B2 = XY Black & B3 = ZW Color
+	#define DO_W float4( 28.0, 15.0, 28.0, 16.0 ) //Tresh Hold for Color A & B and Color
+
+//    #define DP_X float4( 0.0764 , 0.345 , 0.055, 0.500 ) //Pos C1 = XY Color & C2 = ZW Black 
+//    #define DP_Y float4( 0.0564 , 0.9426 , 0.0764 , 0.345 ) //Pos C3 = XY Color & D1 = ZW Color
+//    #define DP_Z float4( 0.055, 0.500 , 0.040923, 0.933 ) //Pos D2 = XY Black & D3 = ZW Color
+//	#define DP_W float4( 23.0, 23.0, 23.0, 30.0) //Tresh Hold for Color C & D and Color
+
+    #define DP_X float4( 0.3983, 0.880 , 0.405 , 0.510 ) //Pos C1 = XY Color & C2 = ZW Black 
+    #define DP_Y float4( 0.4055, 0.2664 , 0.3983, 0.880 ) //Pos C3 = XY Color & D1 = ZW Color
+    #define DP_Z float4( 0.405 , 0.510 , 0.4055, 0.2664 ) //Pos D2 = XY Black & D3 = ZW Color
+	#define DP_W float4( 28.0, 19.0, 29.0, 19.0) //Tresh Hold for Color C & D and Color
+
+	
+//	#define DQ_X float4( 0.07723 , 0.125 , 0.055 , 0.500 ) //Pos C1 = XY Color & C2 = ZW Black 
+//    #define DQ_Y float4( 0.0564, 0.9426, 0.07723 , 0.125 ) //Pos C3 = XY Color & D1 = ZW Color
+//    #define DQ_Z float4( 0.055 , 0.500 , 0.040923,0.933) //Pos D2 = XY Black & D3 = ZW Color
+//	#define DQ_W float4( 23.0, 23.0, 23.0, 30.0) //Tresh Hold for Color A1 & A3 and Color
+
+	#define DQ_X float4( 0.3983, 0.880 , 0.405 , 0.510 ) //Pos C1 = XY Color & C2 = ZW Black 
+    #define DQ_Y float4( 0.4055, 0.2664 , 0.3983, 0.880 ) //Pos C3 = XY Color & D1 = ZW Color
+    #define DQ_Z float4( 0.405 , 0.510 , 0.4055, 0.2664 ) //Pos D2 = XY Black & D3 = ZW Color
+	#define DQ_W float4( 28.0, 18.0, 29.0, 18.0) //Tresh Hold for Color A1 & A3 and Color
+			
+	#define DR_X float4( 0.3983, 0.880 , 0.405 , 0.510 ) //Pos G1 = XY Color & G2 = ZW Black 
+    #define DR_Y float4( 0.4055, 0.2664 , 0.3983, 0.880  ) //Pos G3 = XY Color & H1 = ZW Color
+    #define DR_Z float4( 0.405 , 0.510 , 0.4055, 0.2664 ) //Pos H2 = XY Black & H3 = ZW Color
+	#define DR_W float4( 28.0, 17.0, 29.0, 17.0) //Tresh Hold for Color G & H and Color 
+	
+	//#define WSM 4
+	//#define DB_W 9
+	//#define DF_X float2(0.050,0.0)	
+    //#define DS_Y 1
+    //#define SDU 1
+    #define PEW 1
+    #define DSW 1
+    //#define RHW 1
+	//Smooth Mode Setting  
+    #define SMS 3      //SM Toggle Separation
+	#define DL_X 0.950 //SM Tune
+	//#define DL_W 0.050 //SM Perspective
+	#define DM_X 3     //HQ Tune
+    //#define DM_Y 3     //HQ VRS
+#elif (App == 0x99D666E ) //Layers of Fear 2023 dx12
+    //#define DS_Z 2        
+	#define DA_W 1          
+    //#define DB_X 1         
+	#define DA_X 0.025    
+	#define DF_Y 0.02       
+	#define DA_Y 2750.0     
+    //#define DA_Z -0.0001    // Linerzation Offset
+    //#define DS_Y 0          // Linerzation Offset Effects only distance if true
+	#define DB_Z 0.001       
+	#define DE_X 1          // ZPD Boundary 
+	#define DE_Y 0.700        // Set ZPD Boundary Level Zero 
+	#define DE_Z 0.400      // Speed that Boundary is Enforced
+	//#define AFD 1         // Alternate Frame Detection - May be phased out
+	//#define DG_W 0.250      // Shift Boundary Out of screen 0.5 and or In screen -0.5
+    #define OIL 3           // Set How many Levels We use for RE_Fix 0 | 1 | 2 | 3 if 1 then it's float2(0,0) for OIF and DI_W
+    #define OIF float4(0.5,0.375,0.015,0.005)         // Fix enables if Value is > 0.0 
+	#define DI_W float4(1.0,2.0,20.0,120.0)        // Like Shift Boundary DG_W But 0 to inf
+	#define FTM 0           // Fast Trigger Mode If this enabled then Level 1 and > switches instantly.
+    #define DG_Z 0.0375      // Min Weapon Hands That are apart of world with Auto and Trim
+    #define DS_X float2(0.0005,2)
+    //#define DE_W 0.250      // Auto
+    #define DI_Z 0.0375      // Trim
+    //#define DF_W float3(0,0,0)// Edge & Scale
+	#define BMT 1           // ZPD and World Scale Balance // I need to phase this out.
+	#define DF_Z 0.100      // Set the Balance  
+    //#define DL_Y -0.50      // De-Artifact Only works on some View Modes and causes performance degredation
+    //#define DL_Z 1.00       // Compat Power
+	//#define DJ_X 0.250      // Range Smoothing
+	//#define WSM 2           // Weapon Setting Mode 
+	//#define DB_W 16         // Weapon Profile
+	//#define DF_X float2(0,0)// ZPD Weapon Boundarys Level 1 and Level 2
+	//#define DJ_W 0	        // Weapon Depth Limit Location
+    #define PEW 1
+	//Smooth Mode Setting  
+    #define SMS 3      //SM Toggle Separation
+	#define DL_X 0.950 //SM Tune
+	//#define DL_W 0.050 //SM Perspective
+	#define DM_X 3     //HQ Tune
+    //#define DM_Y 3     //HQ VRS
 #else
 	#define NPW 1 //No Profile
 #endif
@@ -15129,6 +15263,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DI_W 1.0        // Like Shift Boundary DG_W But 0 to inf
 	#define FTM 0           // Fast Trigger Mode If this enabled then Level 1 and > switches instantly.
     #define DG_Z 0.100      // Min Weapon Hands That are apart of world with Auto and Trim
+    #define DS_X float2(0.0025,2)// Min Weapon bit only triggers when a OIL Level is set and set here on .y
     #define DE_W 0.250      // Auto
     #define DI_Z 0.043      // Trim
     #define DF_W float3(0,0,0)// Edge & Scale
@@ -15457,9 +15592,9 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DR_W Simple_Menu_Tresh_GH_D
 #endif
 
-// X = [Null X] Y = [Depth Range Boost] Z = [View Mode State] W = [Check Depth Limit Weapon Secondary]
+// X = [Weapon NearDepth Min OIL] Y = [Depth Range Boost] Z = [View Mode State] W = [Check Depth Limit Weapon Secondary]
 #ifndef DS_X
-    #define DS_X NULL_X_D
+    #define DS_X OIL_Weapon_Near_Depth_Min_D
 #endif
 #ifndef DS_Y
     #define DS_Y Depth_Range_D

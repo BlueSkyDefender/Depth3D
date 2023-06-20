@@ -2,7 +2,7 @@
 	///**SuperDepth3D_VR+**///
 	//--------------------////
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	//* Depth Map Based 3D post-process shader v3.7.8
+	//* Depth Map Based 3D post-process shader v3.7.9
 	//* For Reshade 4.4+ I think...
 	//* ---------------------------------
 	//*
@@ -72,7 +72,7 @@ namespace SuperDepth3DVR
 		static const float DQ_X = 0.0, DQ_Y = 0.0, DQ_Z = 0.0, DQ_W = 1000.0;
 		// DR_X = [Position G & G] DR_Y = [Position G & H] DR_Z = [Position H & H] DR_W = [GH Menu Tresh]	
 		static const float DR_X = 0.0, DR_Y = 0.0, DR_Z = 0.0, DR_W = 1000.0;
-		// DR_X = [Null X] DR_Y = [Null Y] DR_Z = [Null Z] DR_W = [Check Depth Limit Weapon Secondary]
+		// DS_X = [Weapon NearDepth Min OIL] DS_Y = [Null Y] DS_Z = [Null Z] DS_W = [Check Depth Limit Weapon Secondary]
 		static const float DS_X = 0.0, DS_Y = 0.0, DS_Z = D_ViewMode, DS_W = 1.0;
 		// WSM = [Weapon Setting Mode]
 		#define OW_WP "WP Off\0Custom WP\0"
@@ -1895,10 +1895,11 @@ namespace SuperDepth3DVR
 	{
 		float4 DM = float4(PrepDepth(texcoord)[0][0],PrepDepth(texcoord)[0][1],PrepDepth(texcoord)[0][2],PrepDepth(texcoord)[1][1]);
 		float R = DM.x, G = DM.y, B = DM.z, Auto_Scale = WZPD_and_WND.z > 0 ? lerp(lerp(1.0,0.625,saturate(WZPD_and_WND.z * 2)),1.0,lerp(Auto_Balance_Selection().y , smoothstep(0,0.5,tex2D(SamplerLumVR,float2(0,0.750)).z), 0.5)) : 1;
-		float2 Min_Trim = float2(Set_Pop_Min().y, WZPD_and_WND.w * Auto_Scale);
 		//Fade Storage
 		#if DX9_Toggle
 		float2x4 Fade_Pass = Fade(texcoord);
+		
+		float2 Min_Trim = float2(Set_Pop_Min().y, WZPD_and_WND.w * Auto_Scale);
 		#else
 		float3 Fade_Pass_A = float3( tex2D(SamplerzBuffer_BlurVR,float2(0,0.083)).y,
 									 tex2D(SamplerzBuffer_BlurVR,float2(0,0.250)).y,
@@ -1906,6 +1907,20 @@ namespace SuperDepth3DVR
 		float3 Fade_Pass_B = float3( tex2D(SamplerzBuffer_BlurVR,float2(0,0.583)).y,
 									 tex2D(SamplerzBuffer_BlurVR,float2(0,0.750)).y,
 									 tex2D(SamplerzBuffer_BlurVR,float2(0,0.916)).y );
+									 
+			#if OIL > 0
+			float Select_Min_LvL_Trigger;
+			if(DS_X.y == 1)
+				Select_Min_LvL_Trigger = Fade_Pass_B.x+Fade_Pass_B.y+Fade_Pass_B.z;
+			if(DS_X.y == 2)
+				Select_Min_LvL_Trigger = Fade_Pass_B.y+Fade_Pass_B.z;
+			if(DS_X.y == 3)
+				Select_Min_LvL_Trigger = Fade_Pass_B.z;
+			
+			float2 Min_Trim = float2(lerp(Set_Pop_Min().y,DS_X.x, saturate(Select_Min_LvL_Trigger) ), WZPD_and_WND.w * Auto_Scale);
+			#else
+			float2 Min_Trim = float2(Set_Pop_Min().y, WZPD_and_WND.w * Auto_Scale);
+			#endif
 		#endif
 		float ScaleND = saturate(lerp(R,1.0f,smoothstep(min(-Min_Trim.x,0),1.0f,R)));
 
