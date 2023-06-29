@@ -15278,6 +15278,46 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	//#define DL_W 0.050 //SM Perspective
 	#define DM_X 3     //HQ Tune
     //#define DM_Y 3     //HQ VRS    
+#elif (App == 0x8946F94D ) //Star Rail
+    //#define DS_Z 2        
+	#define DA_W 1          
+    #define DB_X 1         
+	#define DA_X 0.025    
+	#define DF_Y 0.005      
+	#define DA_Y 120.0     
+    //#define DA_Z -0.0001    // Linerzation Offset
+    //#define DS_Y 0          // Linerzation Offset Effects only distance if true
+	#define DB_Z 0.100       
+	#define DE_X 2          // ZPD Boundary 
+	#define DE_Y 0.700        // Set ZPD Boundary Level Zero 
+	#define DE_Z 0.4375     // Speed that Boundary is Enforced
+	//#define AFD 1         // Alternate Frame Detection - May be phased out
+	//#define DG_W 0.250     // Shift Boundary Out of screen 0.5 and or In screen -0.5
+    #define OIL 3           // Set How many Levels We use for RE_Fix 0 | 1 | 2 | 3 if 1 then it's float2(0,0) for OIF and DI_W
+    #define OIF float4(0.4,0.3,0.2,0.125)   // Fix enables if Value is > 0.0 
+	#define DI_W float4(0.5,1.5,3.500,5.0)        // Like Shift Boundary DG_W But 0 to inf
+	//#define FTM 0           // Fast Trigger Mode If this enabled then Level 1 and > switches instantly.
+    //#define DG_Z 0.0375      // Min Weapon Hands That are apart of world with Auto and Trim
+    //#define DS_X float2(0.0005,2)
+    //#define DE_W 0.250      // Auto
+    //#define DI_Z 0.0375      // Trim
+    //#define DF_W float3(0,0,0)// Edge & Scale
+	#define BMT 1           // ZPD and World Scale Balance // I need to phase this out.
+	#define DF_Z 0.10      // Set the Balance  
+    //#define DL_Y -0.50      // De-Artifact Only works on some View Modes and causes performance degredation
+    #define DL_Z 1.00       // Compat Power
+	//#define DJ_X 0.250      // Range Smoothing
+	//#define WSM 2           // Weapon Setting Mode 
+	//#define DB_W 16         // Weapon Profile
+	//#define DF_X float2(0,0)// ZPD Weapon Boundarys Level 1 and Level 2
+	//#define DJ_W 0	        // Weapon Depth Limit Location
+    #define PEW 1
+	//Smooth Mode Setting  
+    #define SMS 3      //SM Toggle Separation
+	#define DL_X 0.950 //SM Tune
+	//#define DL_W 0.050 //SM Perspective
+	#define DM_X 3     //HQ Tune
+    //#define DM_Y 3     //HQ VRS        
 #else
 	#define NPW 1 //No Profile
 #endif
