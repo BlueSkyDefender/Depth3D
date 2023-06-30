@@ -15317,7 +15317,80 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DL_X 0.950 //SM Tune
 	//#define DL_W 0.050 //SM Perspective
 	#define DM_X 3     //HQ Tune
-    //#define DM_Y 3     //HQ VRS        
+    //#define DM_Y 3     //HQ VRS  
+#elif (App == 0x33EC163B) //Diablo IV
+	//#define DA_W 1
+    //#define DB_X 1
+	#define DA_X 0.030
+	#define DF_Y 0.250
+	#define DA_Y 100
+    //#define DA_Z -0.001
+	#define DB_Z 0.05
+ 
+	#define DE_X 3
+	#define DE_Y 0.625
+	#define DE_Z 0.300
+	#define DG_W 0.25 //Pop
+    #define OIL 1 //Set How many Levels We use for RE_Fix 0 | 1 | 2 | 3
+    #define OIF float2(0.5,0.375) //Fix enables if Value is > 0.0
+	#define DI_W float2(0.75,1.25)//float2(2.0,4.5)
+
+	//#define FTM 1
+    //#define DG_Z 0.035 //Min
+    //#define DE_W 0.00 //Auto
+    //#define DI_Z 0.06 //Trim
+    //#define DF_W float3(0.0001,0.0025,0.275)  //Edge & Scale
+	#define BMT 1
+	#define DF_Z 0.25
+
+    //#define DL_Y -0.50      // De-Artifact Only works on some View Modes and causes performance degredation
+    #define DL_Z 1.00       // Compat Power
+	//#define DJ_X 0.250      // Range Smoothing
+	/*
+    #define MAC 0   
+    #define MDD 1 //Set Menu Detection & Direction     //Off 0 | 1 | 2 | 3 | 4      
+    #define DN_X float4( 0.095, 0.322 ,  0.9425, 0.152)  //Pos A = XY White & B = ZW White 
+    #define DN_Y float4( 0.095, 0.575 ,  0.0, 0.0)       //Pos C = XY Light & D = ZW Match
+    #define DN_Z float4( 0.0, 0.0,  0.0, 0.0)            //Pos E = XY Match & F = ZW Match
+	#define DN_W float4( 1.0, 0.0 , 0.0, 0.0 )          //Size = Menu [ABC] D E F
+    #define DJ_Y float4( 30, 30.0, 30.0, 1000.0);            //Menu Detection Type for A, B, & C. The Last Value is a Shift amount for C.  
+    #define DJ_Z float3( 1000., 1000., 1000);                //Set Match Tresh 
+	*/
+	/*	
+    #define MMD 1 //Set Multi Menu Detection             //Off / On
+    #define MMS 0 //Set Multi Menu Selection from 0-1 to 29-30 and Off 0 | 1 | 2
+    #define DO_X float4( 0.140 , 0.0425, 0.620 , 0.929 ) //Pos A1 = XY Color & A2 = ZW Black 
+    #define DO_Y float4( 0.620 , 0.109 , 0.140 , 0.0425 ) //Pos A3 = XY Color & B1 = ZW Color
+    #define DO_Z float4( 0.190 , 0.929 , 0.620 , 0.109 ) //Pos B2 = XY Black & B3 = ZW Color
+	#define DO_W float4( 27.0, 28.0, 27.0, 28.0 ) //Tresh Hold for Color A & B and Color
+
+    #define DP_X float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos C1 = XY Color & C2 = ZW Black 
+    #define DP_Y float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos C3 = XY Color & D1 = ZW Color
+    #define DP_Z float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos D2 = XY Black & D3 = ZW Color
+	#define DP_W float4( 1000.0, 1000.0, 1000.0, 1000.0) //Tresh Hold for Color C & D and Color
+	#define DQ_X float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos C1 = XY Color & C2 = ZW Black 
+    #define DQ_Y float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos C3 = XY Color & D1 = ZW Color
+    #define DQ_Z float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos D2 = XY Black & D3 = ZW Color
+	#define DQ_W float4( 1000.0, 1000.0, 1000.0, 1000.0) //Tresh Hold for Color A1 & A3 and Color
+	#define DR_X float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos G1 = XY Color & G2 = ZW Black 
+    #define DR_Y float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos G3 = XY Color & H1 = ZW Color
+    #define DR_Z float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos H2 = XY Black & H3 = ZW Color
+	#define DR_W float4( 1000.0, 1000.0, 1000.0, 1000.0) //Tresh Hold for Color G & H and Color 
+	*/
+	//#define WSM 4
+	//#define DB_W 9
+	//#define DF_X float2(0.050,0.0)	
+    //#define DS_Y 1
+    //#define SDU 1
+    #define PEW 1
+    #define DSW 1
+    //#define RHW 1
+	//Smooth Mode Setting  
+    #define SMS 3      //SM Toggle Separation
+	#define DL_X 0.950 //SM Tune
+	//#define DL_W 0.050 //SM Perspective
+	#define DM_X 3     //HQ Tune
+    //#define DM_Y 3     //HQ VRS      
 #else
 	#define NPW 1 //No Profile
 #endif
