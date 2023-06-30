@@ -2,7 +2,7 @@
 	///**SuperDepth3D_VR+**///
 	//--------------------////
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	//* Depth Map Based 3D post-process shader v3.7.9
+	//* Depth Map Based 3D post-process shader v3.8.0
 	//* For Reshade 4.4+ I think...
 	//* ---------------------------------
 	//*
@@ -2321,7 +2321,7 @@ namespace SuperDepth3DVR
 		//Anti-Weapon Hand Fighting
 		float Weapon_Mask = tex2Dlod(SamplerDMVR,float4(Coordinates,0,0)).y, ZFighting_Mask = 1.0-(1.0-tex2Dlod(SamplerLumVR,float4(Coordinates,0,1.400)).w - Weapon_Mask);
 			  ZFighting_Mask = ZFighting_Mask * (1.0-Weapon_Mask);
-		float2 PCoord = float2(View_Mode <= 1 ? PrevParallaxCoord.x : ParallaxCoord.x, PrevParallaxCoord.y ) ;
+		float2 PCoord = float2(View_Mode <= 1 ? lerp(PrevParallaxCoord.x,ParallaxCoord.x,GetDB(ParallaxCoord).z > 0.002 ) : ParallaxCoord.x, PrevParallaxCoord.y ) ;
 			   PCoord.x -= 0.0025 * MS;
 		float Get_DB = GetDB( PCoord ).x, 
 			  Get_DB_ZDP = WP > 0 ? lerp(Get_DB, abs(Get_DB), ZFighting_Mask) : Get_DB;

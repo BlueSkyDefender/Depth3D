@@ -2,7 +2,7 @@
 	///**SuperDepth3D**///
 	//----------------////
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	//* Depth Map Based 3D post-process shader v3.7.9
+	//* Depth Map Based 3D post-process shader v3.8.0
 	//* For Reshade 3.0+
 	//* ---------------------------------
 	//*
@@ -250,7 +250,7 @@ namespace SuperDepth3D
 	#ifndef Inficolor_3D_Emulator
 		#define Inficolor_3D_Emulator 0
 	#endif
-	//uniform float3 TEST < ui_type = "drag"; ui_min = 0; ui_max = 1; > = 1.0;
+	//uniform float TEST < ui_type = "drag"; ui_min = 0; ui_max = 1; > = 1.0;
 	//Divergence & Convergence//
 	uniform float Divergence <
 		ui_type = "slider";
@@ -2410,7 +2410,7 @@ namespace SuperDepth3D
 		//Anti-Weapon Hand Fighting
 		float Weapon_Mask = tex2Dlod(SamplerDMN,float4(Coordinates,0,0)).y, ZFighting_Mask = 1.0-(1.0-tex2Dlod(SamplerLumN,float4(Coordinates,0,1.400)).w - Weapon_Mask);
 			  ZFighting_Mask = ZFighting_Mask * (1.0-Weapon_Mask);
-		float2 PCoord = float2(View_Mode <= 1 ? PrevParallaxCoord.x : ParallaxCoord.x, PrevParallaxCoord.y ) ;
+		float2 PCoord = float2(View_Mode <= 1 ? lerp(PrevParallaxCoord.x,ParallaxCoord.x,GetDB(ParallaxCoord).z > 0.002 ) : ParallaxCoord.x, PrevParallaxCoord.y ) ;
 			   PCoord.x -= 0.004 * MS;
 		float Get_DB = GetDB( PCoord ).x, 
 			  Get_DB_ZDP = WP > 0 ? lerp(Get_DB, abs(Get_DB), ZFighting_Mask) : Get_DB;
@@ -3042,7 +3042,7 @@ namespace SuperDepth3D
 		#else
 		Color.rgb = PS_calcLR(texcoord, position.xy).rgb; //Color = texcoord.x+texcoord.y > 1 ? Color : LBDetection();
 		#endif
-		//Color = LBDetection();
+		//Color = GetDB(texcoord).z > 0.002;
 		return timer <= Text_Timer || Text_Info ? Color.rgb + Color.w : Color.rgb;
 	}
 		

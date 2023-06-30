@@ -15247,15 +15247,15 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DA_Y 200.0     
     //#define DA_Z -0.0001    // Linerzation Offset
     //#define DS_Y 0          // Linerzation Offset Effects only distance if true
-	#define DB_Z 0.100       
+	#define DB_Z 0.025      
 	#define DE_X 1          // ZPD Boundary 
 	#define DE_Y 0.500        // Set ZPD Boundary Level Zero 
 	#define DE_Z 0.400     // Speed that Boundary is Enforced
 	//#define AFD 1         // Alternate Frame Detection - May be phased out
 	//#define DG_W 0.250      // Shift Boundary Out of screen 0.5 and or In screen -0.5
     #define OIL 3           // Set How many Levels We use for RE_Fix 0 | 1 | 2 | 3 if 1 then it's float2(0,0) for OIF and DI_W
-    #define OIF float4(0.250,0.175,0.1,0.05)   // Fix enables if Value is > 0.0 
-	#define DI_W float4(1.50,2.500,5.0,17.5)        // Like Shift Boundary DG_W But 0 to inf
+    #define OIF float4(0.250,0.125,0.05,0.025)   // Fix enables if Value is > 0.0 
+	#define DI_W float4(1.00,1.75,2.5,12.5)        // Like Shift Boundary DG_W But 0 to inf
 	//#define FTM 0           // Fast Trigger Mode If this enabled then Level 1 and > switches instantly.
     //#define DG_Z 0.0375      // Min Weapon Hands That are apart of world with Auto and Trim
     //#define DS_X float2(0.0005,2)
