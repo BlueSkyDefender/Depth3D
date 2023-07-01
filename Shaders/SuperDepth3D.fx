@@ -2387,7 +2387,7 @@ namespace SuperDepth3D
 		float deltaCoordinates = MS * LayerDepth, CurrentDepthMapValue = GetDB( ParallaxCoord).x, CurrentLayerDepth = 0.0f,
 			  DB_Offset = D * TP * pix.x, VM_Switch = View_Mode == 1 ? 0.125 : 1;
 			  
-		float Scale_With_Depth = saturate(GetDepth * lerp(1,12.5,abs(De_Artifacting.y)));	    
+		float Scale_With_Depth = De_Artifacting.y == 0 ? 1 : saturate(GetDepth * lerp(1,12.5,abs(De_Artifacting.y)));	    
 	
 		[loop] //Steep parallax mapping
 		while ( CurrentDepthMapValue > CurrentLayerDepth )
@@ -2410,7 +2410,7 @@ namespace SuperDepth3D
 		//Anti-Weapon Hand Fighting
 		float Weapon_Mask = tex2Dlod(SamplerDMN,float4(Coordinates,0,0)).y, ZFighting_Mask = 1.0-(1.0-tex2Dlod(SamplerLumN,float4(Coordinates,0,1.400)).w - Weapon_Mask);
 			  ZFighting_Mask = ZFighting_Mask * (1.0-Weapon_Mask);
-		float2 PCoord = float2(View_Mode <= 1 ? lerp(PrevParallaxCoord.x,ParallaxCoord.x,GetDB(ParallaxCoord).z > 0.002 ) : ParallaxCoord.x, PrevParallaxCoord.y ) ;
+		float2 PCoord = float2(View_Mode <= 1 ? PrevParallaxCoord.x : ParallaxCoord.x, PrevParallaxCoord.y ) ;
 			   PCoord.x -= 0.004 * MS;
 		float Get_DB = GetDB( PCoord ).x, 
 			  Get_DB_ZDP = WP > 0 ? lerp(Get_DB, abs(Get_DB), ZFighting_Mask) : Get_DB;

@@ -15319,21 +15319,22 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DM_X 3     //HQ Tune
     //#define DM_Y 3     //HQ VRS  
 #elif (App == 0x33EC163B) //Diablo IV
+    //#define DS_Z 2  
 	//#define DA_W 1
     //#define DB_X 1
-	#define DA_X 0.030
+	#define DA_X 0.03
 	#define DF_Y 0.250
-	#define DA_Y 100
+	#define DA_Y 75
     //#define DA_Z -0.001
 	#define DB_Z 0.05
  
-	#define DE_X 3
+	#define DE_X 4
 	#define DE_Y 0.625
-	#define DE_Z 0.300
-	#define DG_W 0.25 //Pop
-    #define OIL 1 //Set How many Levels We use for RE_Fix 0 | 1 | 2 | 3
-    #define OIF float2(0.5,0.375) //Fix enables if Value is > 0.0
-	#define DI_W float2(0.75,1.25)//float2(2.0,4.5)
+	#define DE_Z 0.250
+	//#define DG_W 0.25 //Pop
+    #define OIL 2 //Set How many Levels We use for RE_Fix 0 | 1 | 2 | 3
+    #define OIF float3(0.5,0.375,0.25) //Fix enables if Value is > 0.0
+	#define DI_W float3(0.5,1.5,2.0)//float2(2.0,4.5)
 
 	//#define FTM 1
     //#define DG_Z 0.035 //Min
@@ -15346,39 +15347,41 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DL_Y -0.50      // De-Artifact Only works on some View Modes and causes performance degredation
     #define DL_Z 1.00       // Compat Power
 	//#define DJ_X 0.250      // Range Smoothing
-	/*
+	///*
     #define MAC 0   
     #define MDD 1 //Set Menu Detection & Direction     //Off 0 | 1 | 2 | 3 | 4      
-    #define DN_X float4( 0.095, 0.322 ,  0.9425, 0.152)  //Pos A = XY White & B = ZW White 
-    #define DN_Y float4( 0.095, 0.575 ,  0.0, 0.0)       //Pos C = XY Light & D = ZW Match
+    #define DN_X float4( 0.500, 0.111 ,  0.528, 0.063 )  //Pos A = XY White & B = ZW White 
+    #define DN_Y float4( 0.913, 0.072 ,  0.0, 0.0)       //Pos C = XY Light & D = ZW Match
     #define DN_Z float4( 0.0, 0.0,  0.0, 0.0)            //Pos E = XY Match & F = ZW Match
 	#define DN_W float4( 1.0, 0.0 , 0.0, 0.0 )          //Size = Menu [ABC] D E F
-    #define DJ_Y float4( 30, 30.0, 30.0, 1000.0);            //Menu Detection Type for A, B, & C. The Last Value is a Shift amount for C.  
+    #define DJ_Y float4( 5.0, 0.0, 27.0, 6.0);            //Menu Detection Type for A, B, & C. The Last Value is a Shift amount for C.  
     #define DJ_Z float3( 1000., 1000., 1000);                //Set Match Tresh 
-	*/
-	/*	
-    #define MMD 1 //Set Multi Menu Detection             //Off / On
+	//*/
+	
+    #define MMD 4 //Set Multi Menu Detection             //Off / On
     #define MMS 0 //Set Multi Menu Selection from 0-1 to 29-30 and Off 0 | 1 | 2
-    #define DO_X float4( 0.140 , 0.0425, 0.620 , 0.929 ) //Pos A1 = XY Color & A2 = ZW Black 
-    #define DO_Y float4( 0.620 , 0.109 , 0.140 , 0.0425 ) //Pos A3 = XY Color & B1 = ZW Color
-    #define DO_Z float4( 0.190 , 0.929 , 0.620 , 0.109 ) //Pos B2 = XY Black & B3 = ZW Color
-	#define DO_W float4( 27.0, 28.0, 27.0, 28.0 ) //Tresh Hold for Color A & B and Color
+    #define DO_X float4( 0.333 , 0.884 , 0.661 , 0.067 ) //Pos A1 = XY Color & A2 = ZW Black 
+    #define DO_Y float4( 0.665 , 0.356 , 0.333 , 0.884 ) //Pos A3 = XY Color & B1 = ZW Color
+    #define DO_Z float4( 0.661 , 0.067 , 0.665 , 0.356 ) //Pos B2 = XY Black & B3 = ZW Color
+	#define DO_W float4( 24.0, 19.0, 25.0, 20.0 ) //Tresh Hold for Color A & B and Color
 
-    #define DP_X float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos C1 = XY Color & C2 = ZW Black 
-    #define DP_Y float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos C3 = XY Color & D1 = ZW Color
-    #define DP_Z float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos D2 = XY Black & D3 = ZW Color
-	#define DP_W float4( 1000.0, 1000.0, 1000.0, 1000.0) //Tresh Hold for Color C & D and Color
-	#define DQ_X float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos C1 = XY Color & C2 = ZW Black 
-    #define DQ_Y float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos C3 = XY Color & D1 = ZW Color
-    #define DQ_Z float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos D2 = XY Black & D3 = ZW Color
-	#define DQ_W float4( 1000.0, 1000.0, 1000.0, 1000.0) //Tresh Hold for Color A1 & A3 and Color
-	#define DR_X float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos G1 = XY Color & G2 = ZW Black 
-    #define DR_Y float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos G3 = XY Color & H1 = ZW Color
-    #define DR_Z float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos H2 = XY Black & H3 = ZW Color
-	#define DR_W float4( 1000.0, 1000.0, 1000.0, 1000.0) //Tresh Hold for Color G & H and Color 
-	*/
-	//#define WSM 4
-	//#define DB_W 9
+    #define DP_X float4( 0.333 , 0.884 , 0.661 , 0.067 ) //Pos C1 = XY Color & C2 = ZW Black 
+    #define DP_Y float4( 0.633 , 0.500 , 0.333 , 0.884 ) //Pos C3 = XY Color & D1 = ZW Color
+    #define DP_Z float4( 0.661 , 0.067 , 0.633 , 0.500 ) //Pos D2 = XY Black & D3 = ZW Color
+	#define DP_W float4( 24.0, 21.0, 25.0, 22.0) //Tresh Hold for Color C & D and Color
+
+	#define DQ_X float4( 0.095 , 0.779 , 0.661 , 0.067 ) //Pos C1 = XY Color & C2 = ZW Black 
+    #define DQ_Y float4( 0.665 , 0.356 , 0.095 , 0.779 ) //Pos C3 = XY Color & D1 = ZW Color
+    #define DQ_Z float4( 0.661 , 0.067 , 0.665 , 0.356 ) //Pos D2 = XY Black & D3 = ZW Color
+	#define DQ_W float4( 24.0, 19.0, 25.0, 20.0) //Tresh Hold for Color A1 & A3 and Color
+
+	#define DR_X float4( 0.333 , 0.884 , 0.661 , 0.067 ) //Pos G1 = XY Color & G2 = ZW Black 
+    #define DR_Y float4( 0.633 , 0.500 , 0.095 , 0.779 ) //Pos G3 = XY Color & H1 = ZW Color
+    #define DR_Z float4( 0.661 , 0.067 , 0.633 , 0.500 ) //Pos H2 = XY Black & H3 = ZW Color
+	#define DR_W float4( 24.0, 21.0, 25.0, 22.0) //Tresh Hold for Color G & H and Color 
+
+	#define WSM 4
+	#define DB_W 11
 	//#define DF_X float2(0.050,0.0)	
     //#define DS_Y 1
     //#define SDU 1
@@ -15389,7 +15392,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define SMS 3      //SM Toggle Separation
 	#define DL_X 0.950 //SM Tune
 	//#define DL_W 0.050 //SM Perspective
-	#define DM_X 3     //HQ Tune
+	#define DM_X 1     //HQ Tune
     //#define DM_Y 3     //HQ VRS      
 #else
 	#define NPW 1 //No Profile
@@ -16131,7 +16134,7 @@ float4 Weapon_Profiles(float WP ,float4 Weapon_Adjust)
     if (WP == 10)
         Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 8  | Game
     if (WP == 11)
-        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 9  | Game
+        Weapon_Adjust = float4(0.25,0.75,0.0,0.0);        //WP 9  | Diablo IV
     if (WP == 12)
         Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 10 | Game
     if (WP == 13)
@@ -16195,7 +16198,7 @@ float4 Weapon_Profiles(float WP ,float4 Weapon_Adjust)
     if (WP == 9)
         Weapon_Adjust = float4(0.278,42.50,9.0,0.0);      //WP 7  | Black Mesa
     if (WP == 10)//float4(0.277,105.0,8.8625,0.0)
-        Weapon_Adjust = float4(0.277,90.0,9.0,0.0);   //WP 8  | Portal 2
+        Weapon_Adjust = float4(0.277,90.0,9.0,0.0);       //WP 8  | Portal 2
     if (WP == 11)
         Weapon_Adjust = float4(0.277,15.0,8.8,0.0);       //WP 9 | Crysis Mod
     if (WP == 12)
