@@ -15427,7 +15427,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DB_W 5         // Weapon Profile
 	//#define DF_X float2(0,0)// ZPD Weapon Boundarys Level 1 and Level 2
 	//#define DJ_W 0	        // Weapon Depth Limit Location
-    //#define PEW 1
+    #define RHW 1
     #define DSW 1    
 	//Smooth Mode Setting  
     #define SMS 3      //SM Toggle Separation
