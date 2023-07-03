@@ -330,6 +330,40 @@ Now the easy part Drag "inject64.exe" into the blue window. and Type DOA6.exe an
 
 Now Just start the game.
 
+{DaiKatana} -ReShade 5.8.0 + Daikatana 1.3 patch or with out.
+Steam or GOG version of the game is needed. 
+
+Optional Patch: https://bitbucket.org/daikatana13/daikatana/wiki/Downloads
+
+ReShade is installed under opengl.
+
+You will notice once you start the game ReShade will not load. This is due to the game directly
+loading opengl32 from the sys folder.
+
+To fix this manualy you need to point the gl_render to reshades opengl32.dll
+
+Thankfully I was able to make a scrip to make the changes under windows.
+https://www.mediafire.com/file/d8qd7uy8e1vcqc4/ReShade_Daikatana_opengl_fix.ps1/file
+
+Make sure you drop the PowerShell Script next to the games exicutable.
+
+Then run it in powershell terminal. To get it quick you need to Right click in the empty space
+next to the game in the same folder. 
+
+Click on Open in Terminal.
+
+Type:
+
+powershell ReShade_Daikatana_opengl_fix.ps1
+
+If that didn't work because of restrictions then use the command here:
+
+powershell -ExecutionPolicy Bypass -File ReShade_Daikatana_opengl_fix.ps1
+
+Hard game to get working. As a side note I may need to do this for other Quake 3 / Quake III games.
+
+Good luck!
+
 {DeadRising 3}
 Use Native scailing I think it's called in game as Full.
 I also suggest useing the 60FPS and 70-80 FOV Fix for this game.
