@@ -2,7 +2,7 @@
 	///**SuperDepth3D_VR+**///
 	//--------------------////
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	//* Depth Map Based 3D post-process shader v3.8.0
+	//* Depth Map Based 3D post-process shader v3.8.1
 	//* For Reshade 4.4+ I think...
 	//* ---------------------------------
 	//*
@@ -1324,7 +1324,7 @@ namespace SuperDepth3DVR
 	
 	bool LBDetection()//Active RGB Detection
 	{   float2 Letter_Box_Reposition = LBR ? float2(0.250,0.875) : float2(0.1,0.5); 
-		float2 Letter_Box_Elevation = LBE ? float2(0.045,0.955) : float2(0.09,0.91);  
+		float2 Letter_Box_Elevation = LBE ? LBE == 2 ? float2(0.035,0.965) : float2(0.045,0.955) : float2(0.09,0.91);
 		float MipLevel = 5,Center = SLLTresh(float2(0.5,0.5), 7) > 0, Top_Left = LBSensitivity(SLLTresh(float2(Letter_Box_Reposition.x,Letter_Box_Elevation.x), MipLevel));
 		if ( LetterBox_Masking == 2 || LB_Correction == 2 || LBC == 2 || LBM == 2 || SMP == 2)//Left_Center | Right_Center | Center
 			return LBSensitivity(SLLTresh(float2(0.1,0.5), MipLevel)) && LBSensitivity(SLLTresh(float2(0.9,0.5), MipLevel)) && Center; //Vert
