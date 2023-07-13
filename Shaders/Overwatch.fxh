@@ -16125,6 +16125,9 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define DR_Z float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos H2 = XY Black & H3 = ZW Color
 	#define DR_W float4( 1000.0, 1000.0, 1000.0, 1000.0) //Tresh Hold for Color G & H and Color 
 	*/
+	#define DAA 1           
+	#define PEW 1
+    #define DSW 1
 	//Smooth Mode Setting  
     #define SMS 3      //SM Toggle Separation
 	#define DL_X 0.9 //SM Tune
