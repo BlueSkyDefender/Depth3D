@@ -2,7 +2,7 @@
 	///**SuperDepth3D_VR+**///
 	//--------------------////
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	//* Depth Map Based 3D post-process shader v3.8.1
+	//* Depth Map Based 3D post-process shader v3.8.2
 	//* For Reshade 4.4+ I think...
 	//* ---------------------------------
 	//*
@@ -650,7 +650,7 @@ namespace SuperDepth3DVR
 		ui_category = "Weapon Hand Adjust";	
 	> = float4(0.03,DG_Z,DE_W,DI_Z);
 	
-	uniform float3 Weapon_Depth_Edge <
+	uniform float4 Weapon_Depth_Edge <
 		ui_type = "slider";
 		ui_min = 0.0; ui_max = 1.0;
 		ui_label = " Screen Edge Adjust & Near Scale";
@@ -1458,7 +1458,7 @@ namespace SuperDepth3DVR
 			  Set_Weapon_Scale_Near = -min(0.5,Weapon_Depth_Edge.y);//So it don't hang the game. 
 		float Scale_Near = 1.0 + Weapon_Depth_Edge.z;
 			  Mod_Depth = ((Scale_Near*Mod_Depth) - Set_Weapon_Scale_Near) / (1.0 + Set_Weapon_Scale_Near);
-	    return lerp(Depth, Mod_Depth, EdgeMask );    
+	    return lerp(Depth, lerp(Mod_Depth,Mod_Depth + Weapon_Depth_Edge.w,saturate((1-Depth)*0.125)), EdgeMask );    
 	}
 
 	float CCBox(float2 TC, float2 size) 
@@ -1759,7 +1759,7 @@ namespace SuperDepth3DVR
 	
 	float2x4 Fade(float2 texcoord)
 	{   //Check Depth
-		float CD, Detect, Detect_Out_of_Range;
+		float CD, Detect, Detect_Out_of_Range = -1;
 		if(ZPD_Boundary > 0)
 		{
 			#if LBM || LetterBox_Masking
@@ -1842,17 +1842,17 @@ namespace SuperDepth3DVR
 				}
 			}
 		}
-		int Sat_D_O_R = saturate(Detect_Out_of_Range);
-		float ZPD_BnF = Auto_Adjust_Cal(Fast_Trigger_Mode && Sat_D_O_R ? 0.5 : ZPD_Boundary_n_Fade.y);		
-		float Trigger_Fade_A = Detect, Trigger_Fade_B = Detect_Out_of_Range >= 1, Trigger_Fade_C = Detect_Out_of_Range >= 2, Trigger_Fade_D = Detect_Out_of_Range, Trigger_Fade_E = Detect_Out_of_Range >= 4, AA = Auto_Adjust_Cal(ZPD_Boundary_n_Fade.y), 
+		uint Sat_D_O_R = Detect_Out_of_Range == Fast_Trigger_Mode;
+		float ZPD_BnF = Auto_Adjust_Cal(Sat_D_O_R ? 0.5 : ZPD_Boundary_n_Fade.y);		
+		float Trigger_Fade_A = Detect, Trigger_Fade_B = Detect_Out_of_Range >= 1, Trigger_Fade_C = Detect_Out_of_Range >= 2, Trigger_Fade_D = Detect_Out_of_Range, Trigger_Fade_E = Detect_Out_of_Range >= 4, 
 			  PStoredfade_A = tex2D(SamplerLumVR,float2(0, 0.250)).z, PStoredfade_B = tex2D(SamplerLumVR,float2(0, 0.416)).z, PStoredfade_C = tex2D(SamplerLumVR,float2(1, 0.416)).z, PStoredfade_D = tex2D(SamplerLumVR,float2(1, 0.250)).z, PStoredfade_E = tex2D(SamplerLumVR,float2(1, 0.583)).z;
 		//Fade in toggle.
-		float2 CallFT = 1.0 - exp(float2(-frametime/AA,-frametime/ZPD_BnF));//exp2 would be even slower
-		return float2x4( float4(PStoredfade_A + (Trigger_Fade_A - PStoredfade_A) * CallFT.x,  
-								PStoredfade_B + (Trigger_Fade_B - PStoredfade_B) * CallFT.y,
-								PStoredfade_C + (Trigger_Fade_C - PStoredfade_C) * CallFT.y, 
-								PStoredfade_D + (Trigger_Fade_D - PStoredfade_D) * CallFT.y),
-						 float4(PStoredfade_E + (Trigger_Fade_E - PStoredfade_E) * CallFT.y,
+		float CallFT = 1.0 - exp(-frametime/ZPD_BnF);//exp2 would be even slower
+		return float2x4( float4(PStoredfade_A + (Trigger_Fade_A - PStoredfade_A) * CallFT,  
+								PStoredfade_B + (Trigger_Fade_B - PStoredfade_B) * CallFT,
+								PStoredfade_C + (Trigger_Fade_C - PStoredfade_C) * CallFT, 
+								PStoredfade_D + (Trigger_Fade_D - PStoredfade_D) * CallFT),
+						 float4(PStoredfade_E + (Trigger_Fade_E - PStoredfade_E) * CallFT,
 								0,
 								0,
 								saturate(Detect_Out_of_Range * 0.25)) );
@@ -1895,11 +1895,12 @@ namespace SuperDepth3DVR
 	{
 		float4 DM = float4(PrepDepth(texcoord)[0][0],PrepDepth(texcoord)[0][1],PrepDepth(texcoord)[0][2],PrepDepth(texcoord)[1][1]);
 		float R = DM.x, G = DM.y, B = DM.z, Auto_Scale = WZPD_and_WND.z > 0 ? lerp(lerp(1.0,0.625,saturate(WZPD_and_WND.z * 2)),1.0,lerp(Auto_Balance_Selection().y , smoothstep(0,0.5,tex2D(SamplerLumVR,float2(0,0.750)).z), 0.5)) : 1;
+		float SP_Min = Set_Pop_Min().y, Select_Min_LvL_Trigger;
 		//Fade Storage
 		#if DX9_Toggle
 		float2x4 Fade_Pass = Fade(texcoord);
 		
-		float2 Min_Trim = float2(Set_Pop_Min().y, WZPD_and_WND.w * Auto_Scale);
+		float2 Min_Trim = float2(SP_Min, WZPD_and_WND.w * Auto_Scale);
 		#else
 		float3 Fade_Pass_A = float3( tex2D(SamplerzBuffer_BlurVR,float2(0,0.083)).y,
 									 tex2D(SamplerzBuffer_BlurVR,float2(0,0.250)).y,
@@ -1908,19 +1909,14 @@ namespace SuperDepth3DVR
 									 tex2D(SamplerzBuffer_BlurVR,float2(0,0.750)).y,
 									 tex2D(SamplerzBuffer_BlurVR,float2(0,0.916)).y );
 									 
-			#if OIL > 0
-			float Select_Min_LvL_Trigger;
-			if(DS_X.y == 1)
-				Select_Min_LvL_Trigger = Fade_Pass_B.x+Fade_Pass_B.y+Fade_Pass_B.z;
-			if(DS_X.y == 2)
-				Select_Min_LvL_Trigger = Fade_Pass_B.y+Fade_Pass_B.z;
-			if(DS_X.y == 3)
-				Select_Min_LvL_Trigger = Fade_Pass_B.z;
+			float Scale_Auto_Switch = DS_X.y == 0 ? Fade_Pass_A.x : DS_X.z == 2 ? Fade_Pass_B.y * 4 >= DS_X.y : Fade_Pass_B.y * 4 == DS_X.y;
 			
-			float2 Min_Trim = float2(lerp(Set_Pop_Min().y,DS_X.x, saturate(Select_Min_LvL_Trigger) ), WZPD_and_WND.w * Auto_Scale);
-			#else
-			float2 Min_Trim = float2(Set_Pop_Min().y, WZPD_and_WND.w * Auto_Scale);
-			#endif
+			if(DS_X.z >= 1)
+				Select_Min_LvL_Trigger = Scale_Auto_Switch;
+				
+			SP_Min = lerp(SP_Min,DS_X.x, saturate(Select_Min_LvL_Trigger) );
+			
+			float2 Min_Trim = float2(SP_Min, WZPD_and_WND.w * Auto_Scale);
 		#endif
 		float ScaleND = saturate(lerp(R,1.0f,smoothstep(min(-Min_Trim.x,0),1.0f,R)));
 
@@ -2011,14 +2007,10 @@ namespace SuperDepth3DVR
 				  DOoR_D = smoothstep(0,1,tex2D(SamplerLumVR,float2(1, 0.250)).z),      //Set_Adjustments Z
 				  DOoR_E = smoothstep(0,1,tex2D(SamplerLumVR,float2(1, 0.583)).z);        //Set_Adjustments W
 				  
-			float2 Detection_Switch_Amount = RE_Set(tex2D(SamplerLumVR,float2(1,0.750)).z).yz;																   
+			float2 Detection_Switch_Amount = RE_Set(tex2D(SamplerLumVR,float2(1,0.750)).z).y;																   
 
 			if(RE_Set(0).x)
 			{
-				if(Fast_Trigger_Mode && Detection_Switch_Amount.y > 0)
-					Set_Adjustments = Detection_Switch_Amount.x;
-	
-	
 				DOoR_B = lerp(ZPD_Boundary, Set_Adjustments.x, DOoR_B);
 					#if OIL == 0
 					DOoR_E = DOoR_B;
@@ -2044,9 +2036,6 @@ namespace SuperDepth3DVR
 			}
 			else
 			DOoR_E = lerp(ZPD_Boundary, Detection_Switch_Amount.x, DOoR_B);
-		
-			if(Fast_Trigger_Mode)
-				DOoR_A = saturate(DOoR_A+DOoR_B+DOoR_C+DOoR_D+DOoR_E);
 			
 			Z *= lerp( 1, DOoR_E, DOoR_A);
 			
@@ -2054,13 +2043,10 @@ namespace SuperDepth3DVR
 			if (ZPD_Separation.x == 0)
 				ZP = 1;
 	
-			if (WZPD_and_WND.x <= 0)
-				WZP = 1;
-	
 			ZP = min(ZP,Auto_Balance_Clamp);
 			
 		D = min(saturate(Max_Depth),D);
-	   return float3( lerp(Convergence,lerp(D,Convergence,Convergence), ZP), lerp(W_Convergence,WD,WZP), Store_WC);
+	   return float3( lerp(Convergence,lerp(D,Convergence,saturate(Convergence)), ZP), lerp(W_Convergence,WD,WZP), Store_WC);
 	}
 	
 	float3 DB_Comb( float2 texcoord)
@@ -2298,7 +2284,8 @@ namespace SuperDepth3DVR
 		float deltaCoordinates = MS * LayerDepth, CurrentDepthMapValue = GetDB( ParallaxCoord).x, CurrentLayerDepth = 0.0f,
 			  DB_Offset = D * TP * pix.x, VM_Switch = View_Mode == 1 ? 0.125 : 1;
 
-		float Scale_With_Depth = De_Artifacting.y == 0 ? 1 : saturate(GetDepth * lerp(1,12.5,abs(De_Artifacting.y)));
+		float Mod_Depth = saturate(GetDepth * lerp(1,15,abs(De_Artifacting.y))), Reverse_Depth = De_Artifacting.y < 0 ? 1-Mod_Depth : Mod_Depth,
+			  Scale_With_Depth = De_Artifacting.y == 0 ? 1 : Reverse_Depth;
 			  
 		[loop] //Steep parallax mapping
 		while ( CurrentDepthMapValue > CurrentLayerDepth )

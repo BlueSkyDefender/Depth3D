@@ -2,7 +2,7 @@
 	///**SuperDepth3D**///
 	//----------------////
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	//* Depth Map Based 3D post-process shader v3.8.1
+	//* Depth Map Based 3D post-process shader v3.8.2
 	//* For Reshade 3.0+
 	//* ---------------------------------
 	//*
@@ -249,6 +249,9 @@ namespace SuperDepth3D
 	#endif
 	#ifndef Inficolor_3D_Emulator
 		#define Inficolor_3D_Emulator 0
+	#endif
+	#ifndef HDR_Compatible_Mode
+		#define HDR_Compatible_Mode 0
 	#endif
 	//uniform float TEST < ui_type = "drag"; ui_min = 0; ui_max = 1; > = 1.0;
 	//Divergence & Convergence//
@@ -614,7 +617,7 @@ namespace SuperDepth3D
 		             "Default is float2(X 0.0, Y 0.0, Z 0.0, W 1.0)";
 		ui_category = "Weapon Hand Adjust";
 	> = float4(0.0,0.0,0.0,0.0);
-	
+	// Need to Phase out Weapon ZPD maybe convert it to max pop out smoothing.
 	uniform float4 WZPD_and_WND <
 		ui_type = "drag";
 		ui_min = 0.0; ui_max = 0.5;
@@ -626,9 +629,9 @@ namespace SuperDepth3D
 					 "Weapon Trim is used cutout a location in the depth buffer so that Min and Auto scale off of.\n"
 					 "Default is (ZPD X 0.03, Min Y 0.0, Auto Z 0.0, Trim Z 0.250 ) & Zero is off.";
 		ui_category = "Weapon Hand Adjust";	
-	> = float4(0.03,DG_Z,DE_W,DI_Z);
+	> = float4(0.03,DG_Z,DE_W,DI_Z);// 0.03 can be a internal constant value
 	
-	uniform float3 Weapon_Depth_Edge <
+	uniform float4 Weapon_Depth_Edge <
 		ui_type = "slider";
 		ui_min = 0.0; ui_max = 1.0;
 		ui_label = " Screen Edge Adjust & Near Scale";
@@ -976,6 +979,39 @@ namespace SuperDepth3D
 	uniform float frametime < source = "frametime";>;
 	uniform bool Alternate < source = "framecount";>;     // Alternate Even Odd frames
 	uniform float timer < source = "timer"; >;
+	
+	#if HDR_Compatible_Mode == 1
+		#define BC_SPACE 1
+	#else
+		#define BC_SPACE 0
+	#endif
+
+	static const float3x3 BT709_To_BT2020 = float3x3(
+	  0.627225305694944,  0.329476882715808,  0.0432978115892484,
+	  0.0690418812810714, 0.919605681354755,  0.0113524373641739,
+	  0.0163911702607078, 0.0880887513437058, 0.895520078395586);
+	
+	static const float3x3 BT2020_To_BT709 = float3x3(
+	   1.66096379471340,   -0.588112737547978, -0.0728510571654192,
+	  -0.124477196529907,   1.13281946828499,  -0.00834227175508652,
+	  -0.0181571579858552, -0.100666415661988,  1.11882357364784);
+
+	float4 NormalizeScRGB(float4 RGB)
+	{
+	  RGB.rgb = RGB.rgb / 125.f; // normalize 10000 nits to 1.0
+	  RGB.rgb = mul(BT709_To_BT2020, RGB.rgb); // rotate into BT.2020 primaries so colors outside of BT.709 don't get lost to clipping
+	
+	  return RGB;
+	}
+	
+	float4 ExpandScRGB(float4 RGB)
+	{
+	  RGB.rgb = mul(BT2020_To_BT709, RGB.rgb); // rotate back into valid scRGB/BT.709 values
+	  RGB.rgb = RGB.rgb * 125.f; // expand into valid scRGB values again
+	
+	  return RGB;
+	}
+	
 	#if Compatibility_FP
 	uniform float3 motion[2] < source = "freepie"; index = 0; >;
 	//. motion[0] is yaw, pitch, roll and motion[1] is x, y, z. In ReShade 4.8+ in ReShade 4.7 it is x = y / y = z
@@ -1199,13 +1235,18 @@ namespace SuperDepth3D
 		};
 		
 	#if Reconstruction_Mode
-	texture texSD_CB_L { Width = BUFFER_WIDTH ; Height = BUFFER_HEIGHT ; Format = RGB10A2;};
+		#if BC_SPACE == 1
+			#define Color_Format RGBA16
+		#else
+			#define Color_Format RGB10A2
+		#endif
+	texture texSD_CB_L { Width = BUFFER_WIDTH ; Height = BUFFER_HEIGHT ; Format = Color_Format;};
 	
 	sampler Sampler_SD_CB_L
 		{
 			Texture = texSD_CB_L;
 		};
-	texture texSD_CB_R { Width = BUFFER_WIDTH ; Height = BUFFER_HEIGHT ; Format = RGB10A2;};
+	texture texSD_CB_R { Width = BUFFER_WIDTH ; Height = BUFFER_HEIGHT ; Format = Color_Format;};
 	
 	sampler Sampler_SD_CB_R
 		{
@@ -1346,6 +1387,16 @@ namespace SuperDepth3D
 	#else
 	float4 CSB(float2 texcoords)
 	{
+		#if BC_SPACE == 1
+		if(Custom_Sidebars == 0 && Depth_Map_View == 0)
+			return NormalizeScRGB(tex2Dlod(BackBufferMIRROR,float4(texcoords,0,0)));
+		else if(Custom_Sidebars == 1 && Depth_Map_View == 0)
+			return NormalizeScRGB(tex2Dlod(BackBufferBORDER,float4(texcoords,0,0)));
+		else if(Custom_Sidebars == 2 && Depth_Map_View == 0)
+			return NormalizeScRGB(tex2Dlod(BackBufferCLAMP,float4(texcoords,0,0)));
+		else
+			return NormalizeScRGB(tex2Dlod(SamplerzBufferN_P,float4(texcoords,0,0)).x);
+		#else
 		if(Custom_Sidebars == 0 && Depth_Map_View == 0)
 			return tex2Dlod(BackBufferMIRROR,float4(texcoords,0,0));
 		else if(Custom_Sidebars == 1 && Depth_Map_View == 0)
@@ -1354,6 +1405,8 @@ namespace SuperDepth3D
 			return tex2Dlod(BackBufferCLAMP,float4(texcoords,0,0));
 		else
 			return tex2Dlod(SamplerzBufferN_P,float4(texcoords,0,0)).x;
+		#endif
+
 	}
 	#endif
 	
@@ -1519,7 +1572,7 @@ namespace SuperDepth3D
 			  Set_Weapon_Scale_Near = -min(0.5,Weapon_Depth_Edge.y);//So it don't hang the game. 
 		float Scale_Near = 1.0 + Weapon_Depth_Edge.z;
 			  Mod_Depth = ((Scale_Near*Mod_Depth) - Set_Weapon_Scale_Near) / (1.0 + Set_Weapon_Scale_Near);
-	    return lerp(Depth, Mod_Depth, EdgeMask );    
+	    return lerp(Depth, lerp(Mod_Depth,Mod_Depth + Weapon_Depth_Edge.w,saturate((1-Depth)*0.125)), EdgeMask );    
 	}
 	
 	float CCBox(float2 TC, float2 size) 
@@ -1832,7 +1885,7 @@ namespace SuperDepth3D
 	
 	float3x3 Fade(float2 texcoord)
 	{   //Check Depth
-		float CD, Detect, Detect_Out_of_Range;
+		float CD, Detect, Detect_Out_of_Range = -1;//Done to not trigger FTM if set to 0
 		if(ZPD_Boundary > 0)
 		{
 			#if LBM || LetterBox_Masking
@@ -1915,17 +1968,17 @@ namespace SuperDepth3D
 				}
 			}
 		}
-		int Sat_D_O_R = saturate(Detect_Out_of_Range);
-		float ZPD_BnF = Auto_Adjust_Cal(Fast_Trigger_Mode && Sat_D_O_R ? 0.5 : ZPD_Boundary_n_Fade.y);		
-		float Trigger_Fade_A = Detect, Trigger_Fade_B = Detect_Out_of_Range >= 1, Trigger_Fade_C = Detect_Out_of_Range >= 2, Trigger_Fade_D = Detect_Out_of_Range >= 3, Trigger_Fade_E = Detect_Out_of_Range >= 4, AA = Auto_Adjust_Cal(ZPD_Boundary_n_Fade.y), 
+		uint Sat_D_O_R = Detect_Out_of_Range == Fast_Trigger_Mode;
+		float ZPD_BnF = Auto_Adjust_Cal(Sat_D_O_R ? 0.5 : ZPD_Boundary_n_Fade.y);		
+		float Trigger_Fade_A = Detect, Trigger_Fade_B = Detect_Out_of_Range >= 1, Trigger_Fade_C = Detect_Out_of_Range >= 2, Trigger_Fade_D = Detect_Out_of_Range >= 3, Trigger_Fade_E = Detect_Out_of_Range >= 4, 
 			  PStoredfade_A = tex2D(SamplerLumN,float2(0, 0.250)).z, PStoredfade_B = tex2D(SamplerLumN,float2(0, 0.416)).z, PStoredfade_C = tex2D(SamplerLumN,float2(1, 0.416)).z, PStoredfade_D = tex2D(SamplerLumN,float2(1, 0.250)).z, PStoredfade_E = tex2D(SamplerLumN,float2(1, 0.583)).z;
 		//Fade in toggle.
-		float2 CallFT = 1.0 - exp(float2(-frametime/AA,-frametime/ZPD_BnF));//exp2 would be even slower
-		return float3x3( float3( PStoredfade_A + (Trigger_Fade_A - PStoredfade_A) * CallFT.x,
-								 PStoredfade_B + (Trigger_Fade_B - PStoredfade_B) * CallFT.y, 
-								 PStoredfade_C + (Trigger_Fade_C - PStoredfade_C) * CallFT.y ),
-						 float3( PStoredfade_D + (Trigger_Fade_D - PStoredfade_D) * CallFT.y,
-								 PStoredfade_E + (Trigger_Fade_E - PStoredfade_E) * CallFT.y,
+		float CallFT = 1.0 - exp(-frametime/ZPD_BnF);//exp2 would be even slower
+		return float3x3( float3( PStoredfade_A + (Trigger_Fade_A - PStoredfade_A) * CallFT,
+								 PStoredfade_B + (Trigger_Fade_B - PStoredfade_B) * CallFT, 
+								 PStoredfade_C + (Trigger_Fade_C - PStoredfade_C) * CallFT ),
+						 float3( PStoredfade_D + (Trigger_Fade_D - PStoredfade_D) * CallFT,
+								 PStoredfade_E + (Trigger_Fade_E - PStoredfade_E) * CallFT,
 								 saturate(Detect_Out_of_Range * 0.25)                        ),
 						 float3(0,0,0)                                                       ); 
 	}
@@ -1963,14 +2016,13 @@ namespace SuperDepth3D
 	{
 		float4 DM = float4(PrepDepth(texcoord)[0][0],PrepDepth(texcoord)[0][1],PrepDepth(texcoord)[0][2],PrepDepth(texcoord)[1][1]);
 		float R = DM.x, G = DM.y, B = DM.z, Auto_Scale = WZPD_and_WND.z > 0 ? lerp(lerp(1.0,0.625,saturate(WZPD_and_WND.z * 2)),1.0,lerp(Auto_Balance_Selection().y , smoothstep(0,0.5,tex2D(SamplerLumN,float2(0,0.750)).z), 0.5)) : 1;
+		float SP_Min = Set_Pop_Min().y, Select_Min_LvL_Trigger;
 		//Fade Storage
 		#if DX9_Toggle
 		float3x3 Fade_Pass = Fade(texcoord); //[0][0] = F | [0][1] = F | [0][2] = F
 						 					 //[1][0] = F | [1][1] = N | [1][2] = 0
 											 //[2][0] = 0 | [2][1] = 0 | [2][2] = 0
-		float2 Min_Trim = float2(Set_Pop_Min().y,Inficolor_3D_Emulator ? WZPD_and_WND.w : WZPD_and_WND.w * Auto_Scale);
-		if(Inficolor_3D_Emulator && Inficolor_Near_Reduction)
-			Min_Trim = float2((Min_Trim.x * 2 + Min_Trim.x) * 0.5, min( 0.3, (Min_Trim.y * 2.5 + Min_Trim.y) * 0.5) );
+		float2 Min_Trim = float2(SP_Min,Inficolor_3D_Emulator ? WZPD_and_WND.w : WZPD_and_WND.w * Auto_Scale);
 		#else
 		float3 Fade_Pass_A = float3( tex2D(SamplerzBuffer_BlurN,float2(0,0.083)).y,
 									 tex2D(SamplerzBuffer_BlurN,float2(0,0.250)).y,
@@ -1978,22 +2030,20 @@ namespace SuperDepth3D
 		float3 Fade_Pass_B = float3( tex2D(SamplerzBuffer_BlurN,float2(0,0.583)).y,
 									 tex2D(SamplerzBuffer_BlurN,float2(0,0.750)).y,
 									 tex2D(SamplerzBuffer_BlurN,float2(0,0.916)).y );
-			#if OIL > 0
-			float Select_Min_LvL_Trigger;
-			if(DS_X.y == 1)
-				Select_Min_LvL_Trigger = Fade_Pass_B.x+Fade_Pass_B.y+Fade_Pass_B.z;
-			if(DS_X.y == 2)
-				Select_Min_LvL_Trigger = Fade_Pass_B.y+Fade_Pass_B.z;
-			if(DS_X.y == 3)
-				Select_Min_LvL_Trigger = Fade_Pass_B.z;
-		
-			float2 Min_Trim = float2(lerp(Set_Pop_Min().y,DS_X.x, saturate(Select_Min_LvL_Trigger) ), Inficolor_3D_Emulator ? WZPD_and_WND.w : WZPD_and_WND.w * Auto_Scale);
-			#else
-			float2 Min_Trim = float2(Set_Pop_Min().y, Inficolor_3D_Emulator ? WZPD_and_WND.w : WZPD_and_WND.w * Auto_Scale);
-			#endif
-		if(Inficolor_3D_Emulator && Inficolor_Near_Reduction)
-			Min_Trim = float2((Min_Trim.x * 2 + Min_Trim.x) * 0.5, min( 0.3, (Min_Trim.y * 2.5 + Min_Trim.y) * 0.5) );
-		#endif						 
+
+			float Scale_Auto_Switch = DS_X.y == 0 ? Fade_Pass_A.x : DS_X.z == 2 ? Fade_Pass_B.y * 4 >= DS_X.y : Fade_Pass_B.y * 4 == DS_X.y;
+			
+			if(DS_X.z >= 1)
+				Select_Min_LvL_Trigger = Scale_Auto_Switch;
+				
+			SP_Min = lerp(SP_Min,DS_X.x, saturate(Select_Min_LvL_Trigger) );
+			
+			float2 Min_Trim = float2(SP_Min, Inficolor_3D_Emulator ? WZPD_and_WND.w : WZPD_and_WND.w * Auto_Scale);
+		#endif
+						 
+			if(Inficolor_3D_Emulator && Inficolor_Near_Reduction)
+		Min_Trim = float2((Min_Trim.x * 2 + Min_Trim.x) * 0.5, min( 0.3, (Min_Trim.y * 2.5 + Min_Trim.y) * 0.5) );
+			
 		float ScaleND = saturate(lerp(R,1.0f,smoothstep(min(-Min_Trim.x,0),1.0f,R)));
 		float Edge_Adj = 0.5;
 		
@@ -2068,7 +2118,7 @@ namespace SuperDepth3D
 		}
 		//Store Weapon Convergence for Smoothing.
 		Store_WC = W_Convergence;
-		
+		//MD_WHD.y is Weapon Hand Depth
 		W_Convergence = 1 - tex2D(SamplerLumN,float2(0,0.916)).z / MD_WHD.y;// 1-W_Convergence/D
 		float WD = MD_WHD.y; //Needed to seperate Depth for the  Weapon Hand. It was causing problems with Auto Depth Range below.
 	
@@ -2083,15 +2133,14 @@ namespace SuperDepth3D
 				  DOoR_C = smoothstep(0,1,tex2D(SamplerLumN,float2(1, 0.416)).z),    //Set_Adjustments Y
 				  DOoR_D = smoothstep(0,1,tex2D(SamplerLumN,float2(1, 0.250)).z),      //Set_Adjustments Z
 				  DOoR_E = smoothstep(0,1,tex2D(SamplerLumN,float2(1, 0.583)).z);        //Set_Adjustments W
-				  
-			float2 Detection_Switch_Amount = RE_Set(tex2D(SamplerLumN,float2(1,0.750)).z).yz;																   
+			//The Switch Array B 0.750 that switches the OIL value in RE_Set.
+			//Z is a LvL between 0 - 3
+			//Y is current value of ZPD Value	  
+			//float2 Detection_Switch_Amount = RE_Set(tex2D(SamplerLumN,float2(1,0.750)).z).yz;//Y = X and Z = Y																   
+			float Detection_Switch_Amount = RE_Set(tex2D(SamplerLumN,float2(1,0.750)).z).y;//Y = X																   
 
 			if(RE_Set(0).x)
 			{
-				if(Fast_Trigger_Mode && Detection_Switch_Amount.y > 0)
-					Set_Adjustments = Detection_Switch_Amount.x;
-	
-	
 				DOoR_B = lerp(ZPD_Boundary, Set_Adjustments.x, DOoR_B);
 					#if OIL == 0
 					DOoR_E = DOoR_B;
@@ -2117,9 +2166,6 @@ namespace SuperDepth3D
 			}
 			else
 			DOoR_E = lerp(ZPD_Boundary, Detection_Switch_Amount.x, DOoR_B);
-		
-			if(Fast_Trigger_Mode)
-				DOoR_A = saturate(DOoR_A+DOoR_B+DOoR_C+DOoR_D+DOoR_E);
 			
 			Z *= lerp( 1, DOoR_E, DOoR_A);
 			
@@ -2127,19 +2173,16 @@ namespace SuperDepth3D
 			if (ZPD_Separation.x == 0)
 				ZP = 1;
 	
-			if (WZPD_and_WND.x <= 0)
-				WZP = 1;
-		
 			ZP = min(ZP, Auto_Balance_Clamp);
 	
 	#if Inficolor_3D_Emulator
 		Set_Max_Depth = Inficolor_Max_Depth;
 	#endif
 		D = min(saturate(Set_Max_Depth),D);
-	   return float3( lerp(Convergence,lerp(D,Convergence,Convergence), ZP), lerp(W_Convergence,WD,WZP), Store_WC);
+	   return float3( lerp(Convergence,lerp(D,Convergence,saturate(Convergence)), ZP), lerp(W_Convergence,WD,WZP), Store_WC);
 	}
 	
-	float3 DB_Comb( float2 texcoord)
+	float3 DB_Comb(float2 texcoord)
 	{
 		// X = Mix Depth | Y = Weapon Mask | Z = Weapon Hand | W = Normal Depth
 		float4 DM = float4(tex2Dlod(SamplerDMN,float4(texcoord,0,0)).xyz,PrepDepth( SDT == 1 || SD_Trigger == 1 ? TC_SP(texcoord).xy : texcoord )[1][1]);
@@ -2166,7 +2209,6 @@ namespace SuperDepth3D
 			FD_Adjust = 0.30;
 		if( Eye_Fade_Reduction_n_Power.x == 4)
 			FD_Adjust = 0.35;
-
 	
 		//Handle Convergence Here
 		float3 HandleConvergence = Conv(DM.xz,texcoord).xyz;
@@ -2386,8 +2428,9 @@ namespace SuperDepth3D
 		//Offsets listed here Max Seperation is 3% - 8% of screen space with Depth Offsets & Netto layer offset change based on MS.
 		float deltaCoordinates = MS * LayerDepth, CurrentDepthMapValue = GetDB( ParallaxCoord).x, CurrentLayerDepth = 0.0f,
 			  DB_Offset = D * TP * pix.x, VM_Switch = View_Mode == 1 ? 0.125 : 1;
-			  
-		float Scale_With_Depth = De_Artifacting.y == 0 ? 1 : saturate(GetDepth * lerp(1,12.5,abs(De_Artifacting.y)));	    
+			 
+		float Mod_Depth = saturate(GetDepth * lerp(1,15,abs(De_Artifacting.y))), Reverse_Depth = De_Artifacting.y < 0 ? 1-Mod_Depth : Mod_Depth,
+			  Scale_With_Depth = De_Artifacting.y == 0 ? 1 : Reverse_Depth;	    
 	
 		[loop] //Steep parallax mapping
 		while ( CurrentDepthMapValue > CurrentLayerDepth )
@@ -2916,7 +2959,7 @@ namespace SuperDepth3D
 	                               			  tex2D(SamplerDMN,int2(1,0)).x,         //0.416 //TR Fade Z Level 2
 	                                			 tex2D(SamplerDMN,1).y,                 //0.583 //BR Fade Z Level 4
 												 tex2D(SamplerDMN,0).y,                 //0.750 //TL Fade W The Switch
-												 1.0};                                  //0.916												 
+												 1.0};                                  //0.916 												 
 		//Set a avr size for the Number of lines needed in texture storage.
 		float Grid = floor(texcoord.y * BUFFER_HEIGHT * BUFFER_RCP_HEIGHT * Num_of_Values);
 		//Where LBDetection() is slot X in the float4 below I can do an array like in slot Z If I need to send more information.	
@@ -2964,7 +3007,7 @@ namespace SuperDepth3D
 			Result = Center + HorzResult * 0.5 * rcp(horizontalWeight);//Uni_LR( texcoord, Switcher );
 		else
 			Result = Center + (VertResult + HorzResult) * 0.5 * rcp(verticalWeight + horizontalWeight);
-
+			
 	    return Result;
 	}
 	#endif
@@ -3042,6 +3085,12 @@ namespace SuperDepth3D
 		#else
 		Color.rgb = PS_calcLR(texcoord, position.xy).rgb; //Color = texcoord.x+texcoord.y > 1 ? Color : LBDetection();
 		#endif
+		
+		#if BC_SPACE == 1
+	    Color = ExpandScRGB(Color);
+	    #else
+	    Color = Color;
+	    #endif
 		//Color = GetDB(texcoord).z > 0.002;
 		return timer <= Text_Timer || Text_Info ? Color.rgb + Color.w : Color.rgb;
 	}
