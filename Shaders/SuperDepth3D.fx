@@ -2,7 +2,7 @@
 	///**SuperDepth3D**///
 	//----------------////
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	//* Depth Map Based 3D post-process shader v3.8.2
+	//* Depth Map Based 3D post-process shader v3.8.3
 	//* For Reshade 3.0+
 	//* ---------------------------------
 	//*
@@ -72,8 +72,10 @@ namespace SuperDepth3D
 		static const float DQ_X = 0.0, DQ_Y = 0.0, DQ_Z = 0.0, DQ_W = 1000.0;
 		// DR_X = [Position G & G] DR_Y = [Position G & H] DR_Z = [Position H & H] DR_W = [GH Menu Tresh]	
 		static const float DR_X = 0.0, DR_Y = 0.0, DR_Z = 0.0, DR_W = 1000.0;
-		// DR_X = [Weapon NearDepth Min OIL] DR_Y = [Null Y] DR_Z = [Null Z] DR_W = [Check Depth Limit Weapon Secondary]
+		// DS_X = [Weapon NearDepth Min OIL] DS_Y = [Depth Range Boost] DS_Z = [View Mode State] DS_W = [Check Depth Limit Weapon Secondary]
 		static const float DS_X = 0.0, DS_Y = 0.0, DS_Z = D_ViewMode, DS_W = 1.0;
+		// DT_X = [Null X] DT_Y = [Null Y] DT_Z = [Null Z] DT_W = [Rescale Weapon Hand Near]
+		static const float DT_X = 0.0, DT_Y = 0.0, DT_Z = 0.0, DT_W = 0.0;
 		// WSM = [Weapon Setting Mode]
 		#define OW_WP "WP Off\0Custom WP\0"
 		static const int WSM = 0;
@@ -2127,17 +2129,20 @@ namespace SuperDepth3D
 
 				ZP = saturate( ZPD_Balance * max(0.5, Auto_Balance_Selection().x));
 				
-			float4 Set_Adjustments = RE_Set_Adjustments();
+			float4 Set_Adjustments = RE_Set_Adjustments();float2 SC_Adjutment = DT_W;
 			float DOoR_A = smoothstep(0,1,tex2D(SamplerLumN,float2(0, 0.250)).z), //ZPD_Boundary
-				  DOoR_B = smoothstep(0,1,tex2D(SamplerLumN,float2(0, 0.416)).z),  //Set_Adjustments X
-				  DOoR_C = smoothstep(0,1,tex2D(SamplerLumN,float2(1, 0.416)).z),    //Set_Adjustments Y
-				  DOoR_D = smoothstep(0,1,tex2D(SamplerLumN,float2(1, 0.250)).z),      //Set_Adjustments Z
-				  DOoR_E = smoothstep(0,1,tex2D(SamplerLumN,float2(1, 0.583)).z);        //Set_Adjustments W
+				  DOoR_B = smoothstep(0,1,tex2D(SamplerLumN,float2(0, 0.416)).z),   //Set_Adjustments X
+				  DOoR_C = smoothstep(0,1,tex2D(SamplerLumN,float2(1, 0.416)).z),     //Set_Adjustments Y
+				  DOoR_D = smoothstep(0,1,tex2D(SamplerLumN,float2(1, 0.250)).z),       //Set_Adjustments Z
+				  DOoR_E = smoothstep(0,1,tex2D(SamplerLumN,float2(1, 0.583)).z),         //Set_Adjustments W
+				  SetLvL = smoothstep(0,1,tex2D(SamplerLumN,float2(1, 0.750)).z);           //Set_Level			
+			if(SC_Adjutment.y > 0.0)
+				W_Convergence *= lerp(SC_Adjutment.x , 1.0,MD_WHD.x > SC_Adjutment.y);
 			//The Switch Array B 0.750 that switches the OIL value in RE_Set.
 			//Z is a LvL between 0 - 3
 			//Y is current value of ZPD Value	  
 			//float2 Detection_Switch_Amount = RE_Set(tex2D(SamplerLumN,float2(1,0.750)).z).yz;//Y = X and Z = Y																   
-			float Detection_Switch_Amount = RE_Set(tex2D(SamplerLumN,float2(1,0.750)).z).y;//Y = X																   
+			float Detection_Switch_Amount = RE_Set(SetLvL).y;//Y = X																   
 
 			if(RE_Set(0).x)
 			{
