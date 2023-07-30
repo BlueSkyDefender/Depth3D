@@ -16427,7 +16427,18 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	//#define DJ_X 0.750      // Range Smoothing
 	#define WSM 4           // Weapon Setting Mode 
 	#define DB_W 19         // Weapon Profile
-	//#define DF_X float2(0,0)// ZPD Weapon Boundarys Level 1 and Level 2
+	#define DF_X float2(0.250,0.404)// ZPD Weapon Boundarys Level 1 and Level 2
+	#define DJ_W 0.025	        // Weapon Depth Limit Location 1
+	#define DS_W 20.0	        // Weapon Depth Limit Location 2
+	#define DT_W float2(0.010,0.022)
+	#define MAC 1 //Set to one only the 3rd value has a wiled card. Not the 1st and 3rd.
+    #define MDD 1 //Set Menu Detection & Direction      //Off | 1 | 2 | 3 | 4      
+    #define DN_X float4( 0.060 , 0.139 , 0.149 , 0.069) //Pos A = XY Any & B = ZW Lock 
+    #define DN_Y float4( 0.236 , 0.158 ,  0.0, 0.0)     //Pos C = XY Any & D = ZW Match
+    #define DN_Z float4( 0.0, 0.0,  0.0, 0.0)           //Pos E = XY Match & F = ZW Match
+	#define DN_W float4( 1.0, 0.0 , 0.0, 0.0 )          //Size = Menu [ABC] D E F
+    #define DJ_Y float4( 30.0, 30.0, 30.0, 1000.0);       //Menu Detection Type for A = X, B = Y, & C = Z. The Last Value is a Wild Card amount W is for X and Z. 
+    #define DJ_Z float3( 1000., 1000., 1000);           //Set Match Tresh 
 	/*
     #define MMD 1 //Set Multi Menu Detection             //Off / On
     #define MMS 0 //Set Multi Menu Selection from 0-1 to 29-30 and Off 0 | 1 | 2
