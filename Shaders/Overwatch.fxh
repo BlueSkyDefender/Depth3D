@@ -203,7 +203,7 @@ static const float HUDX_D = 0.0;                        //Heads Up Display Cut O
 static const float HUDY_D = 0.5;                        //Heads Up Display Distance                     | HMD
 
 //Special Toggles Defaults
-static const int Inverted_Depth_Fix_D = 0;              //Inverted Depth Fix       Needs to be Remove   | IDF 
+static const int Auto_Balance_Ex_LvL_D = 2;             //Auto Balance Ex Level                         | ABE 
 static const int Delay_Frame_Workaround_D = 0;          //Delay Frame Workaround                        | DFW
 static const int Set_PopOut_D = 0;                      //Set Popout & Weapon Min                       | SPO
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -8343,16 +8343,18 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define PEW 1
     #define DSW 1
 #elif (App == 0x808ABB25 || App == 0x87871191 ) //BioShock Infinite //Steam //Epic
-	#define DA_X 0.01//0.025 //0.050
-    #define DF_Y 0.005 //0.025 //0.040
+	#define DA_X 0.01
+    #define DF_Y 0.005
+    #define DS_Y 1          // Linerzation Offset Effects only distance if true
 	#define DA_Y 100.0//52.5 //12.50
     #define DA_Z -0.00125
     #define DB_Z 0.025
     #define BMT 1
-	#define DF_Z 0.0375
+	#define DF_Z 0.375
     //#define DG_Z 0.045//0.500 //0.030 //0.050//0.070//Min
     //#define DI_Z 0.045//0.2775 //0.150 //0.100 //0.090 //Trim
-    #define DF_W float4(0.0001,0.006,0.0,0.0) //float2(0.0001,0.008)//float2(0.0001,0.003)  //Edge & Scale
+    #define DF_W float4(0.0001,0.004,0.0,0.0125) //Edge & Scale
+    #define ABE 0
 	#define SMS 3      //SM Toggle Separation
 	#define DL_X 0.950 //SM Tune
 	#define DL_W 0.050 //SM Perspective
@@ -17280,7 +17282,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DT_W Rescale_WH_Near_D
 #endif
 
-//Special Toggles
+//Special Settings
 #ifndef OIL
     #define OIL Over_Intrusion_Level_D         //Over Intrusion Level
 #endif
@@ -17293,8 +17295,8 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 #ifndef REF
     #define REF Resident_Evil_Fix_D            //Resident Evil Fix
 #endif
-#ifndef IDF
-    #define IDF Inverted_Depth_Fix_D           //Inverted Depth Fix
+#ifndef ABE
+    #define ABE Auto_Balance_Ex_LvL_D          //Inverted Depth Fix
 #endif
 #ifndef SPF
     #define SPF Size_Position_Fix_D            //Size & Position Fix

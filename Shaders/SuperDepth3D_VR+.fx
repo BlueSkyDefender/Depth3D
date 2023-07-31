@@ -2,7 +2,7 @@
 	///**SuperDepth3D_VR+**///
 	//--------------------////
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	//* Depth Map Based 3D post-process shader v3.8.3
+	//* Depth Map Based 3D post-process shader v3.8.4
 	//* For Reshade 4.4+ I think...
 	//* ---------------------------------
 	//*
@@ -80,7 +80,7 @@ namespace SuperDepth3DVR
 		#define OW_WP "WP Off\0Custom WP\0"
 		static const int WSM = 0;
 		//Triggers
-		static const int SDU = 0, LBE = 0, DRS = 0, MAC = 0, ARW = 0, OIL = 0, MMS = 0, NVK = 0, NDG = 0, FTM = 0, SPO = 0, MMD = 0, SMP = 0, LBR = 0, HQT = 0, AFD = 0, MDD = 0, FPS = 1, SMS = 1, OIF = 0, NCW = 0, RHW = 0, NPW = 0, IDF = 0, SPF = 0, BDF = 0, HMT = 0, HMC = 0, DFW = 0, NFM = 0, DSW = 0, LBC = 0, LBS = 0, LBM = 0, DAA = 0, NDW = 0, PEW = 0, WPW = 0, FOV = 0, EDW = 0, SDT = 0;
+		static const int SDU = 0, ABE = 2, LBE = 0, DRS = 0, MAC = 0, ARW = 0, OIL = 0, MMS = 0, NVK = 0, NDG = 0, FTM = 0, SPO = 0, MMD = 0, SMP = 0, LBR = 0, HQT = 0, AFD = 0, MDD = 0, FPS = 1, SMS = 1, OIF = 0, NCW = 0, RHW = 0, NPW = 0, SPF = 0, BDF = 0, HMT = 0, HMC = 0, DFW = 0, NFM = 0, DSW = 0, LBC = 0, LBS = 0, LBM = 0, DAA = 0, NDW = 0, PEW = 0, WPW = 0, FOV = 0, EDW = 0, SDT = 0;
 		//Overwatch.fxh State
 		#define OSW 1
 	#endif
@@ -93,10 +93,7 @@ namespace SuperDepth3DVR
 	// Change the Cancel Depth Key. Determines the Cancel Depth Toggle Key using keycode info
 	// The Key Code for Decimal Point is Number 110. Ex. for Numpad Decimal "." Cancel_Depth_Key 110
 	#define Cancel_Depth_Key 0 // You can use http://keycode.info/ to figure out what key is what.
-	
-	// Rare Games like Among the Sleep Need this to be turned on.
-	#define Invert_Depth 0 //Default 0 is Off. One is On.
-	
+
 	// Barrel Distortion Correction For SuperDepth3D for non conforming BackBuffer.
 	#define BD_Correction 0 //Default 0 is Off. One is On.
 	
@@ -323,7 +320,7 @@ namespace SuperDepth3DVR
 		ui_tooltip = "Automatically Balance between ZPD Depth and Scene Depth.\n"
 					 "Default is Off.";
 		ui_category = "Divergence & Convergence";
-	> = 2;
+	> = ABE;
 	
 	uniform int ZPD_Boundary <
 		ui_type = "combo";
@@ -2144,10 +2141,6 @@ namespace SuperDepth3DVR
 		
 		if (Cancel_Depth)
 			DM = 0.0625;
-	
-		#if Invert_Depth || IDF
-			DM.y = 1 - DM.y;
-		#endif
 	
 		#if UI_MASK
 			DM.y = lerp(DM.y,0,step(1.0-HUD_Mask(texcoord),0.5));
