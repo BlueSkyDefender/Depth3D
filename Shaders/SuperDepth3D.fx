@@ -1130,6 +1130,7 @@ namespace SuperDepth3D
 	#define texsize int2(BUFFER_WIDTH, BUFFER_HEIGHT)
 	#define AI Interlace_Anaglyph_Calibrate.x * 0.5 //Optimization for line interlaced Adjustment.
 	#define ARatio texsize.x / texsize.y
+	#define FLT_EPSILON  1.192092896e-07 // smallest such that Value + FLT_EPSILON != Value	
 				
 	float RN_Value(float i)
 	{
@@ -1560,8 +1561,7 @@ namespace SuperDepth3D
 			  Masker = lerp(LR_Masker,max(Masker,LR_Masker),EdgeMask);
 	    return lerp(Depth,Mod_Depth, lerp(EdgeMask,Masker,0.5) );    
 	}
-*/	
-	#define FLT_EPSILON  1.192092896e-07 // smallest such that Value + FLT_EPSILON != Value		
+*/		
 	float DepthEdge(float Mod_Depth, float Depth, float2 texcoords, float Adjust_Value )
 	{   Adjust_Value -= FLT_EPSILON;
 		float2 center = float2(0.5,texcoords.y); // Direction of effect.   
@@ -1569,9 +1569,10 @@ namespace SuperDepth3D
 			  Dist  = distance( center, texcoords ) * 2.0, 
 			  EdgeMask = saturate((BaseVal-Dist) / (BaseVal-Adjust_Value)),
 			  Set_Weapon_Scale_Near = -min(0.5,Weapon_Depth_Edge.y);//So it don't hang the game. 
-		float Scale_Near = 1.0 + Weapon_Depth_Edge.z;
-			  Mod_Depth = ((Scale_Near*Mod_Depth) - Set_Weapon_Scale_Near) / (1.0 + Set_Weapon_Scale_Near);
-	    return lerp(Depth, lerp(Mod_Depth,Mod_Depth + Weapon_Depth_Edge.w,saturate((1-Depth)*0.125)), EdgeMask );    
+		float Scale_Depth = 1+(Weapon_Depth_Edge.z*4);
+			  Mod_Depth = (Mod_Depth - Set_Weapon_Scale_Near) / (1.0 + Set_Weapon_Scale_Near);
+		float Near_Mod_Depth =  Scale_Depth * Mod_Depth;
+	    return lerp(Depth, lerp(Mod_Depth,Near_Mod_Depth + Weapon_Depth_Edge.w,saturate((1-Depth)*0.125)), EdgeMask );   
 	}
 	
 	float CCBox(float2 TC, float2 size) 
@@ -1968,7 +1969,7 @@ namespace SuperDepth3D
 			}
 		}
 		uint Sat_D_O_R = Detect_Out_of_Range == Fast_Trigger_Mode;
-		float ZPD_BnF = Auto_Adjust_Cal(Sat_D_O_R ? 0.5 : ZPD_Boundary_n_Fade.y);		
+		float ZPD_BnF = Auto_Adjust_Cal(Sat_D_O_R ? 0.5-FLT_EPSILON : ZPD_Boundary_n_Fade.y);		
 		float Trigger_Fade_A = Detect, Trigger_Fade_B = Detect_Out_of_Range >= 1, Trigger_Fade_C = Detect_Out_of_Range >= 2, Trigger_Fade_D = Detect_Out_of_Range >= 3, Trigger_Fade_E = Detect_Out_of_Range >= 4, 
 			  PStoredfade_A = tex2D(SamplerLumN,float2(0, 0.250)).z, PStoredfade_B = tex2D(SamplerLumN,float2(0, 0.416)).z, PStoredfade_C = tex2D(SamplerLumN,float2(1, 0.416)).z, PStoredfade_D = tex2D(SamplerLumN,float2(1, 0.250)).z, PStoredfade_E = tex2D(SamplerLumN,float2(1, 0.583)).z;
 		//Fade in toggle.
@@ -2015,7 +2016,7 @@ namespace SuperDepth3D
 	{
 		float4 DM = float4(PrepDepth(texcoord)[0][0],PrepDepth(texcoord)[0][1],PrepDepth(texcoord)[0][2],PrepDepth(texcoord)[1][1]);
 		float R = DM.x, G = DM.y, B = DM.z, Auto_Scale = WZPD_and_WND.z > 0 ? lerp(lerp(1.0,0.625,saturate(WZPD_and_WND.z * 2)),1.0,lerp(Auto_Balance_Selection().y , smoothstep(0,0.5,tex2D(SamplerLumN,float2(0,0.750)).z), 0.5)) : 1;
-		float SP_Min = Set_Pop_Min().y, Select_Min_LvL_Trigger;
+		float SP_Min = Set_Pop_Min().y, Select_Min_LvL_Trigger;float3 Level_Control = DS_X;
 		//Fade Storage
 		#if DX9_Toggle
 		float3x3 Fade_Pass = Fade(texcoord); //[0][0] = F | [0][1] = F | [0][2] = F
@@ -2030,12 +2031,12 @@ namespace SuperDepth3D
 									 tex2D(SamplerzBuffer_BlurN,float2(0,0.750)).y,
 									 tex2D(SamplerzBuffer_BlurN,float2(0,0.916)).y );
 
-			float Scale_Auto_Switch = DS_X.y == 0 ? Fade_Pass_A.x : DS_X.z == 2 ? Fade_Pass_B.y * 4 >= DS_X.y : Fade_Pass_B.y * 4 == DS_X.y;
+			float Scale_Auto_Switch = Level_Control.y == 0 ? Fade_Pass_A.x : Level_Control.z == 2 ? Fade_Pass_B.y * 4 >= Level_Control.y : Fade_Pass_B.y * 4 == Level_Control.y;
 			
-			if(DS_X.z >= 1)
+			if(Level_Control.z >= 1)
 				Select_Min_LvL_Trigger = Scale_Auto_Switch;
 				
-			SP_Min = lerp(SP_Min,DS_X.x, saturate(Select_Min_LvL_Trigger) );
+			SP_Min = lerp(SP_Min,Level_Control.x, saturate(Select_Min_LvL_Trigger) );
 			
 			float2 Min_Trim = float2(SP_Min, Inficolor_3D_Emulator ? WZPD_and_WND.w : WZPD_and_WND.w * Auto_Scale);
 		#endif
