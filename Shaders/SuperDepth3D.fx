@@ -74,13 +74,13 @@ namespace SuperDepth3D
 		static const float DR_X = 0.0, DR_Y = 0.0, DR_Z = 0.0, DR_W = 1000.0;
 		// DS_X = [Weapon NearDepth Min OIL] DS_Y = [Depth Range Boost] DS_Z = [View Mode State] DS_W = [Check Depth Limit Weapon Secondary]
 		static const float DS_X = 0.0, DS_Y = 0.0, DS_Z = D_ViewMode, DS_W = 1.0;
-		// DT_X = [Null X] DT_Y = [Null Y] DT_Z = [Null Z] DT_W = [Rescale Weapon Hand Near]
+		// DT_X = [Null X] DT_Y = [Null Y] DT_Z = [Weapon Hand Mask Z] DT_W = [Rescale Weapon Hand Near]
 		static const float DT_X = 0.0, DT_Y = 0.0, DT_Z = 0.0, DT_W = 0.0;
 		// WSM = [Weapon Setting Mode]
 		#define OW_WP "WP Off\0Custom WP\0"
 		static const int WSM = 0;
 		//Triggers
-		static const int SDU = 0, ABE = 2, LBE = 0, DRS = 0,MAC = 0, ARW = 0, OIL = 0, MMS = 0, NVK = 0, NDG = 0, FTM = 0, SPO = 0, MMD = 0, SMP = 0, LBR = 0, HQT = 0, AFD = 0, MDD = 0, FPS = 1, SMS = 1, OIF = 0, NCW = 0, RHW = 0, NPW = 0, SPF = 0, BDF = 0, HMT = 0, HMC = 0, DFW = 0, NFM = 0, DSW = 0, BMT = 0, LBC = 0, LBS = 0, LBM = 0, DAA = 0, NDW = 0, PEW = 0, WPW = 0, FOV = 0, EDW = 0, SDT = 0;
+		static const int WHM = 0, SDU = 0, ABE = 2, LBE = 0, DRS = 0,MAC = 0, ARW = 0, OIL = 0, MMS = 0, NVK = 0, NDG = 0, FTM = 0, SPO = 0, MMD = 0, SMP = 0, LBR = 0, HQT = 0, AFD = 0, MDD = 0, FPS = 1, SMS = 1, OIF = 0, NCW = 0, RHW = 0, NPW = 0, SPF = 0, BDF = 0, HMT = 0, HMC = 0, DFW = 0, NFM = 0, DSW = 0, BMT = 0, LBC = 0, LBS = 0, LBM = 0, DAA = 0, NDW = 0, PEW = 0, WPW = 0, FOV = 0, EDW = 0, SDT = 0;
 		//Overwatch.fxh State
 		#define OSW 1
 	#endif
@@ -1933,7 +1933,7 @@ namespace SuperDepth3D
 						GridXY.x += Shift_Per_Frame;
 
 					float ZPD_I = ZPD_Separation.x;
-					
+					// Need to investigate tex2Dlod(SamplerDMN,float4(GridXY,0,2)).x; in place of PrepDepth					
 					float PDepth = PrepDepth(GridXY)[1][0];
 					
 					if(ZPD_Boundary >= 4)
@@ -2287,6 +2287,11 @@ namespace SuperDepth3D
 			
 			if(LB_Detection)
 				DM.y = LB_Masked;	
+		#endif
+		// Should expand on this as a way to rescale Depth in a specific location around the weapon hand.
+		#if WHM //For now it's just UI masking for Diablo 4		
+		float Mask = tex2Dlod(SamplerDMN,float4(texcoord,0,7.5)).y;
+		DM.y = lerp(DM.y,0.025 ,smoothstep(0,DT_Z,Mask));
 		#endif
 		
 		return float3(DM.y,PrepDepth( SDT == 2 || SD_Trigger == 2 ? TC_SP(texcoord).zw : texcoord)[1][1],HandleConvergence.z);

@@ -1104,6 +1104,9 @@ Other things to note:
 
 Best to use Minimal Hud and as always "try" to disable most Post effects.
 
+{Pseudoregalia} [Reshade 5.9.0] - DX12
+In the Game settings under VIDEO you will need to Disable Retro Resolution Scale [ ].
+
 {Quake 2 XP} [Reshade 4.7.0, Xenos_2.3.2 Injector]
 Install game and make sure in launches in fullscreen and native resolution.
 
