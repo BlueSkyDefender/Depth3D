@@ -2,7 +2,7 @@
 	///**SuperDepth3D**///
 	//----------------////
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	//* Depth Map Based 3D post-process shader v3.8.4
+	//* Depth Map Based 3D post-process shader v3.8.5
 	//* For Reshade 3.0+
 	//* ---------------------------------
 	//*
@@ -2291,7 +2291,8 @@ namespace SuperDepth3D
 		// Should expand on this as a way to rescale Depth in a specific location around the weapon hand.
 		#if WHM //For now it's just UI masking for Diablo 4		
 		float Mask = tex2Dlod(SamplerDMN,float4(texcoord,0,7.5)).y;
-		DM.y = lerp(DM.y,0.025 ,smoothstep(0,DT_Z,Mask));
+		if(WP > 0)
+			DM.y = lerp(DM.y,0.025 ,smoothstep(0,DT_Z,Mask));
 		#endif
 		
 		return float3(DM.y,PrepDepth( SDT == 2 || SD_Trigger == 2 ? TC_SP(texcoord).zw : texcoord)[1][1],HandleConvergence.z);

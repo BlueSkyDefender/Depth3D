@@ -2,7 +2,7 @@
 	///**SuperDepth3D_VR+**///
 	//--------------------////
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	//* Depth Map Based 3D post-process shader v3.8.4
+	//* Depth Map Based 3D post-process shader v3.8.5
 	//* For Reshade 4.4+ I think...
 	//* ---------------------------------
 	//*
@@ -2157,7 +2157,8 @@ namespace SuperDepth3DVR
 		
 		#if WHM //For now it's just UI masking for Diablo 4		
 		float Mask = tex2Dlod(SamplerDMVR,float4(texcoord,0,7.5)).y;
-		DM.y = lerp(DM.y,0.025 ,smoothstep(0,DT_Z,Mask));
+		if(WP > 0)
+			DM.y = lerp(DM.y,0.025 ,smoothstep(0,DT_Z,Mask));
 		#endif
 		
 		return float3(DM.y,PrepDepth( SDT == 2 || SD_Trigger == 2 ? TC_SP(texcoord).zw : texcoord)[1][1],HandleConvergence.z);
