@@ -17040,6 +17040,60 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	//#define DL_W 0.050 //SM Perspective
 	#define DM_X 3     //HQ Tune
     //#define DM_Y 3     //HQ VR
+#elif (App == 0x9E9A6000 ) //Grand Theft Auto San Andreas [GTA SA] 
+    //#define DS_Z 3          // Set View Mode
+	//#define DA_W 1          // Set Linerzation
+    //#define DB_X 1          // Flip
+	#define DA_X 0.025      // ZPD
+	#define DF_Y 0.000       // Seperation
+	#define DA_Y 90.0       // Near Plane Adjustment
+    //#define DA_Z -1.000    // Linerzation Offset
+    //#define DS_Y 1          // Linerzation Offset Effects only distance if true
+	#define DB_Z 0.02        // Auto Depth Protection
+	#define DE_X 2          // ZPD Boundary 
+	#define DE_Y 0.700    // Set ZPD Boundary Level Zero 
+	#define DE_Z 0.3125      // Speed that Boundary is Enforced
+	//#define AFD 1         // Alternate Frame Detection - May be phased out
+	//#define DG_W 0.25      // Shift Boundary Out of screen 0.5 and or In screen -0.5
+    #define OIL 3           // Set How many Levels We use for RE_Fix 0 | 1 | 2 | 3 if 1 then it's float2(0,0) for OIF and DI_W
+    #define OIF float4(0.5,0.4,0.20,0.125)         // Fix enables if Value is > 0.0 
+	#define DI_W float4(0.25,0.75,1.5,3.0)        // Like Shift Boundary DG_W But 0 to inf
+	//#define FTM 2           // Fast Trigger Mode If this enabled then Level 1 and > switches instantly.
+    //#define DG_Z 0.0125      // Min Weapon Hands That are apart of world with Auto and Trim
+    //#define DS_X float3(0.025,0,1)// Min Weapon bit only triggers when a OIL Level is set and set here on .y
+    //#define DE_W 0.50      // Auto
+    //#define DI_Z 0.05      // Trim
+    //#define DF_W float4(0.0001,0.0,0.75,0.0)// Edge & Scale
+	#define BMT 1           // ZPD and World Scale Balance // I need to phase this out.
+	#define DF_Z 0.1       // Set the Balance  
+    #define DL_Y 0.25      // De-Artifact Only works on some View Modes and causes performance degredation
+    #define DL_Z 0.125       // Compat Power
+	//#define DJ_X 0.375      // Range Smoothing
+	#define WSM 2           // Weapon Setting Mode 
+	#define DB_W 23         // Weapon Profile
+	//#define DF_X float2(0,0)  // ZPD Weapon Boundarys Level 1 and Level 2
+	//#define DJ_W 0.1	        // Weapon Depth Limit Location 1
+	//#define DS_W 1.0	        // Weapon Depth Limit Location 2
+	//#define DT_W float2(0.015,0.025)//WH scale and cutoff
+	//#define WHM 1 //Weapon Hand Masking lets you use DT_Z 
+	//#define DT_Z 0.375 //Masking Power
+	/*
+    #define MMD 1 //Set Multi Menu Detection             //Off / On
+    #define MMS 0 //Set Multi Menu Selection from 0-1 to 29-30 and Off 0 | 1 | 2
+    #define DO_X float4( 0.646 , 0.051 , 0.307 , 0.069 ) //Pos A1 = XY Color & A2 = ZW Black 
+    #define DO_Y float4( 0.777 , 0.069 , 0.278 , 0.246 ) //Pos A3 = XY Color & B1 = ZW Color
+    #define DO_Z float4( 0.500 , 0.760 , 0.265 , 0.322 ) //Pos B2 = XY Black & B3 = ZW Color
+	#define DO_W float4( 21.0, 22.0, 30.0, 30.0) //Tresh Hold for Color A & B and Color
+	*/
+	//#define HMT 1     //HUD Mode Trigger
+	//#define HMC 2.5
+    //#define HMD 0.350
+	//Smooth Mode Setting  
+    #define SMS 3      //SM Toggle Separation
+	#define DL_X 0.950  //SM Tune
+	//#define DL_W 0.050 //SM Perspective
+	#define DM_X 3     //HQ Tune
+    //#define DM_Y 3     //HQ VR
 #else
 	#define NPW 1 //No Profile
 #endif
@@ -17704,7 +17758,7 @@ float4 Weapon_Profiles(float WP ,float4 Weapon_Adjust) //Could reduce from 76 to
     if (WP == 22)
         Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 20 | Game
     if (WP == 23)
-        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 21 | Game
+        Weapon_Adjust = float4(0.250,1.0,0.0,0.0);        //WP 21 | Grand Theft Auto San Andreas [GTA SA]
     if (WP == 24)
         Weapon_Adjust = float4(15.500,60.0,0.0,0.075);    //WP 22 | Bright Memory: infinite
     if (WP == 25)
