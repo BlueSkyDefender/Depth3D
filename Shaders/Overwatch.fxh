@@ -9008,37 +9008,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	//#define DF_X float2(0.050,0.0)	
     #define PEW 1
     #define DSW 1
-#elif (App == 0xFC113D8A || App == 0x75A38BDA ) //PsychoNauts 2 **** //Steam //Windows Store
-	#define DA_W 1
-	#define DA_Y 25.0
-	#define DA_X 0.1
-	#define DF_Y 0.05
-	#define DA_Z 0.00075
- 
-	#define DE_X 3
-	#define DE_Y 0.625
-	#define DE_Z 0.375
-	//#define DG_W -0.125 //PoP
-	#define OIF 0.0875//0.0625    //Fix enables if Value is > 0.0
-	#define DI_W 2.0 //Adjustment for REF
-	#define BMT 1    
-	#define DF_Z 0.020
-	#define DG_Z 0.025//Min
-    #define DI_Z 0.20 //Trim
-    #define SMS 3            //SM Toggle Separation
-	#define DL_X 0.525      //SM Tune
-	//#define DL_W 0.5       //SM Perspective
-	#define DM_X 4           //HQ Tune
-	#define DM_Z 1           //HQ Smooth
-    //#define DM_Y 3           //HQ VRS
-    //#define DL_Y 0.5    //De-Artifact
-    //#define DL_Z 0.05       //Compat Power
-	//#define DJ_X 0.250       //Range Smoothing
-	#define LBC 2  //Letter Box Correction Offsets With X & Y
-	#define DH_Z 0.255
-	#define DH_W 0.0
-	#define PEW 1
-	#define DAA 1
 #elif (App == 0xD9691F81 ) //Destroy All Humans! || Destroy All Humans! 2 - Reprobed
 	#define DA_W 1
 	#define DA_X 0.075
@@ -17094,6 +17063,74 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	//#define DL_W 0.050 //SM Perspective
 	#define DM_X 3     //HQ Tune
     //#define DM_Y 3     //HQ VR
+#elif (App == 0xFC113D8A || App == 0x75A38BDA ) //PsychoNauts 2 **** //Steam //Windows Store
+	#define DA_W 1
+	#define DA_Y 52.5
+	#define DB_Z 0.075         // Auto Depth Protection
+	#define DA_X 0.05
+	#define DF_Y 0.05
+    #define DA_Z 0.00075    // Linerzation Offset
+    #define DS_Y 1          // Linerzation Offset Effects only distance if true
+	#define DE_X 3
+	#define DE_Y 0.85    // Set ZPD Boundary Level Zero 
+	#define DE_Z 0.3      // Speed that Boundary is Enforced
+	//#define AFD 1         // Alternate Frame Detection - May be phased out
+	#define DG_W 0.0      // Shift Boundary Out of screen 0.5 and or In screen -0.5
+    #define OIL 3           // Set How many Levels We use for RE_Fix 0 | 1 | 2 | 3 if 1 then it's float2(0,0) for OIF and DI_W
+    #define OIF float4(0.625,0.45,0.3,0.1)         // Fix enables if Value is > 0.0 
+	#define DI_W float4(0.25,0.75,1.25,3.75)        // Like Shift Boundary DG_W But 0 to inf
+	#define BMT 1    
+	#define DF_Z 0.025
+	#define DG_Z 0.015//Min
+    #define DI_Z 0.050 //Trim
+
+    //#define DL_Y 0.5    //De-Artifact
+    //#define DL_Z 0.05       //Compat Power
+	//#define DJ_X 0.250       //Range Smoothing
+	//Menu Detection Templates -  Needs a Specail Shader to adjust
+    #define MAC 0 //Set to one only the 3rd value has a wiled card. Not the 1st and 3rd.
+    #define MDD 1 //Set Menu Detection & Direction      //Off | 1 | 2 | 3 | 4      
+    #define DN_X float4( 0.278 , 0.704 , 0.025 , 0.050) //Pos A = XY Any & B = ZW Lock 
+    #define DN_Y float4( 0.730 , 0.704 ,  0.0, 0.0)     //Pos C = XY Any & D = ZW Match
+    #define DN_Z float4( 0.0, 0.0,  0.0, 0.0)           //Pos E = XY Match & F = ZW Match
+	#define DN_W float4( 1.0, 0.0 , 0.0, 0.0 )          //Size = Menu [ABC] D E F
+    #define DJ_Y float4( 23.0, 1.0, 23.0, 27.0);       //Menu Detection Type for A = X, B = Y, & C = Z. The Last Value is a Wild Card amount W is for X and Z. 
+    #define DJ_Z float3( 1000., 1000., 1000);           //Set Match Tresh 
+
+    #define MMD 4 //Set Multi Menu Detection             //Off / On
+    #define MMS 0 //Set Multi Menu Selection from 0-1 to 29-30 and Off 0 | 1 | 2
+    #define DO_X float4( 0.196 , 0.121 , 0.500 , 0.165 ) //Pos A1 = XY Color & A2 = ZW Black 
+    #define DO_Y float4( 0.399 , 0.084 , 0.283 , 0.051 ) //Pos A3 = XY Color & B1 = ZW Color
+    #define DO_Z float4( 0.500 , 0.165 , 0.867 , 0.639 ) //Pos B2 = XY Black & B3 = ZW Color
+	#define DO_W float4( 30.0, 30.0, 30.0, 27.0) //Tresh Hold for Color A & B and Color
+
+    #define DP_X float4( 0.278 , 0.060 , 0.500 , 0.165 ) //Pos C1 = XY Color & C2 = ZW Black 
+    #define DP_Y float4( 0.865 , 0.685 , 0.338 , 0.107 ) //Pos C3 = XY Color & D1 = ZW Color
+    #define DP_Z float4( 0.025 , 0.050 , 0.856 , 0.825 ) //Pos D2 = XY Black & D3 = ZW Color
+	#define DP_W float4( 30.0, 30.0, 30.0, 27.0) //Tresh Hold for Color C & D and Color
+
+	#define DQ_X float4( 0.283 , 0.051 , 0.500 , 0.165 ) //Pos C1 = XY Color & C2 = ZW Black 
+    #define DQ_Y float4( 0.867 , 0.639 , 0.338 , 0.107 ) //Pos C3 = XY Color & D1 = ZW Color
+    #define DQ_Z float4( 0.025 , 0.050 , 0.856 , 0.825 ) //Pos D2 = XY Black & D3 = ZW Color
+	#define DQ_W float4( 30.0, 28.0, 30.0, 28.0) //Tresh Hold for Color A1 & A3 and Color
+
+	#define DR_X float4( 0.278 , 0.060 , 0.500 , 0.165 ) //Pos G1 = XY Color & G2 = ZW Black 
+    #define DR_Y float4( 0.865 , 0.685 , 0.060 , 0.130 ) //Pos G3 = XY Color & H1 = ZW Color
+    #define DR_Z float4( 0.596 , 0.060 , 0.573 , 0.625 ) //Pos H2 = XY Black & H3 = ZW Color
+	#define DR_W float4( 29.0, 30.0, 29.0, 18.0) //Tresh Hold for Color G & H and Color 
+
+	#define LBC 2  //Letter Box Correction Offsets With X & Y
+	#define DH_Z 0.255
+	#define DH_W 0.0
+	#define PEW 1
+	#define DAA 1
+	//Smooth Mode Setting  
+    #define SMS 2            //SM Toggle Separation
+	#define DL_X 0.85      //SM Tune
+	//#define DL_W 0.5       //SM Perspective
+	#define DM_X 4           //HQ Tune
+	#define DM_Z 1           //HQ Smooth
+    //#define DM_Y 3           //HQ VRS
 #else
 	#define NPW 1 //No Profile
 #endif
