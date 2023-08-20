@@ -2,7 +2,7 @@
 	///**SuperDepth3D**///
 	//----------------////
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	//* Depth Map Based 3D post-process shader v3.8.5
+	//* Depth Map Based 3D post-process shader v3.8.6
 	//* For Reshade 3.0+
 	//* ---------------------------------
 	//*
@@ -252,7 +252,7 @@ namespace SuperDepth3D
 	#ifndef HDR_Compatible_Mode
 		#define HDR_Compatible_Mode 0
 	#endif
-	//uniform float TEST < ui_type = "drag"; ui_min = 0; ui_max = 1; > = 1.0;
+	//uniform float2 TEST < ui_type = "drag"; ui_min = 0; ui_max = 1; > = 1.0;
 	//Divergence & Convergence//
 	uniform float Divergence <
 		ui_type = "slider";
@@ -2365,13 +2365,18 @@ namespace SuperDepth3D
 	
 		float2 DS_LP = float2(Depth_Blur,tex2Dlod(SamplerzBufferN_P, float4( texcoord, 0, 0) ).x);
 	
-		float3 DepthBuffer_LP = float3(DS_LP.x,DS_LP.y, tex2Dlod(SamplerzBufferN_P, float4(texcoord,0, 0) ).y );
+		float3 DepthBuffer_LP = float3(DS_LP.x,DS_LP.y, tex2Dlod(SamplerzBufferN_P, float4(texcoord,0, 1) ).y );
 		float Min_Blend = tex2Dlod(SamplerzBuffer_BlurN, float4( texcoord * float2( 0.5 , 1), 0, 0) ).x;//min(tex2Dlod(SamplerzBufferN_L, float4( texcoord, 0, 3.5) ).x,tex2Dlod(SamplerzBufferN_L, float4( texcoord, 0, 2.5 ) ).x) ;
 		if( Range_Blend > 0)
 			   DepthBuffer_LP.xy = lerp(DepthBuffer_LP.xy,  Min_Blend ,(smoothstep(0.5,1.0, Min_Blend) *  Min_Divergence().y) * saturate(Range_Blend));
-	
-		if(View_Mode == 0 || View_Mode == 3)	
-			DepthBuffer_LP.x = DepthBuffer_LP.y;
+		if(View_Mode != 4)
+		{
+			if(View_Mode == 0 || View_Mode == 3)	
+				DepthBuffer_LP.x = DepthBuffer_LP.y;
+		}
+		else
+			DepthBuffer_LP.x = lerp(DepthBuffer_LP.y,DepthBuffer_LP.x,smoothstep(0.8,1.0,DepthBuffer_LP.z));
+			
 		#if Inficolor_3D_Emulator
 		float Separation = lerp(1.0,5.0,(ZPD_Separation.y * 0.5 + ZPD_Separation.y) * 0.5);	
 		#else
@@ -2401,22 +2406,11 @@ namespace SuperDepth3D
 		//Would Use Switch....
 		if( View_Mode == 2)
 			Perf = Performance_LvL[Perf_LvL].z;
-		if( View_Mode == 3)
-			Perf = Performance_LvL[Perf_LvL].x;
-		if( View_Mode == 4)
+		if( View_Mode == 5)
 		{
 			Perf = GetDepth >= 0.999 ? CB_Done ? 0.5 : 1.000 : CB_Done ? 1.020: 1.040;
 			
 			Perf = lerp(Perf,1.425f,0.5);
-		}
-		if( View_Mode == 5) // Will be reworked
-		{
-			if( GetDepth >= 0.999 )
-				Perf = CB_Done ? 1.016: 1.017;
-			else if( GetDepth >= 0.875)
-				Perf = CB_Done ? 1.018: 1.019;
-			else
-				Perf = CB_Done ? 1.020: 1.021;
 		}				
 		//Luma Based VRS
 		float Auto_Adptive = Switch_VRS == 0 ? lerp(0.05,1.0,smoothstep(0.00000001f, 0.375, tex2D(SamplerzBufferN_P,0).y ) ) : 1,
@@ -2432,7 +2426,7 @@ namespace SuperDepth3D
 	
 		//Offsets listed here Max Seperation is 3% - 8% of screen space with Depth Offsets & Netto layer offset change based on MS.
 		float deltaCoordinates = MS * LayerDepth, CurrentDepthMapValue = GetDB( ParallaxCoord).x, CurrentLayerDepth = 0.0f,
-			  DB_Offset = D * TP * pix.x, VM_Switch = View_Mode == 1 ? 0.125 : 1;
+			  DB_Offset = D * TP * pix.x, VM_Switch = View_Mode == 1 ? 0.125 : lerp(1.0,0.125,GetDepth);
 			 
 		float Mod_Depth = saturate(GetDepth * lerp(1,15,abs(De_Artifacting.y))), Reverse_Depth = De_Artifacting.y < 0 ? 1-Mod_Depth : Mod_Depth,
 			  Scale_With_Depth = De_Artifacting.y == 0 ? 1 : Reverse_Depth;	    
