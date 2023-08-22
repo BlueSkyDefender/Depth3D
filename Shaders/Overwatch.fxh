@@ -16474,24 +16474,25 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	//#define DT_W float2(0.015,0.025)//WH scale and cutoff
 	//#define WHM 1 //Weapon Hand Masking lets you use DT_Z 
 	//#define DT_Z 0.375 //Masking Power
-	/*
+	
     #define MAC 1 //Set to one only the 3rd value has a wiled card. Not the 1st and 3rd.
     #define MDD 1 //Set Menu Detection & Direction      //Off | 1 | 2 | 3 | 4      
-    #define DN_X float4( 0.889, 0.951 , 0.500 , 0.059) //Pos A = XY Any & B = ZW Lock 
-    #define DN_Y float4( 0.627, 0.045 ,  0.0, 0.0)     //Pos C = XY Any & D = ZW Match
+    #define DN_X float4( 0.053, 0.124 , 0.875 , 0.120) //Pos A = XY Any & B = ZW Lock 
+    #define DN_Y float4( 0.075, 0.953 ,  0.0, 0.0)     //Pos C = XY Any & D = ZW Match
     #define DN_Z float4( 0.0, 0.0,  0.0, 0.0)           //Pos E = XY Match & F = ZW Match
 	#define DN_W float4( 1.0, 0.0 , 0.0, 0.0 )          //Size = Menu [ABC] D E F
-    #define DJ_Y float4( 30.0, 0.0, 24.0, 12.0);       //Menu Detection Type for A = X, B = Y, & C = Z. The Last Value is a Wild Card amount W is for X and Z. 
+    #define DJ_Y float4( 29.0, 5.0, 30.0, 1000.0);       //Menu Detection Type for A = X, B = Y, & C = Z. The Last Value is a Wild Card amount W is for X and Z. 
     #define DJ_Z float3( 1000., 1000., 1000);           //Set Match Tresh 
-	*/
+	
     #define MMD 2 //Set Multi Menu Detection             //Off / On
     #define MMS 0 //Set Multi Menu Selection from 0-1 to 29-30 and Off 0 | 1 | 2
+    //Map and Settings in phase one
     #define DO_X float4( 0.130 , 0.050 , 0.0235, 0.960 ) //Pos A1 = XY Color & A2 = ZW Black 
     #define DO_Y float4( 0.075 , 0.953 , 0.190 , 0.050 ) //Pos A3 = XY Color & B1 = ZW Color
     #define DO_Z float4( 0.0235, 0.960 , 0.062 , 0.944 ) //Pos B2 = XY Black & B3 = ZW Color
 	#define DO_W float4( 28.0, 27.0, 28.0, 30.0) //Tresh Hold for Color A & B and Color
-
-    #define DP_X float4( 0.208 , 0.050 , 0.0235, 0.960 ) //Pos C1 = XY Color & C2 = ZW Black 
+	//Settings phase two
+    #define DP_X float4( 0.215 , 0.050 , 0.0235, 0.960 ) //Pos C1 = XY Color & C2 = ZW Black 
     #define DP_Y float4( 0.062 , 0.944 , 0.000 , 0.000 ) //Pos C3 = XY Color & D1 = ZW Color
     #define DP_Z float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos D2 = XY Black & D3 = ZW Color
 	#define DP_W float4( 28.0, 30.0, 1000.0, 1000.0) //Tresh Hold for Color C & D and Color
