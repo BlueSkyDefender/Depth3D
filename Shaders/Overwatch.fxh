@@ -16670,7 +16670,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DA_Z -1.0    // Linerzation Offset
     //#define DS_Y 1          // Linerzation Offset Effects only distance if true
 	#define DB_Z 0.075       // Auto Depth Protection
-	#define DE_X 4          // ZPD Boundary 
+	#define DE_X 5          // ZPD Boundary 
 	#define DE_Y 0.750    // Set ZPD Boundary Level Zero 
 	#define DE_Z 0.400      // Speed that Boundary is Enforced
 	//#define AFD 1         // Alternate Frame Detection - May be phased out
@@ -16694,6 +16694,12 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DF_X float2(0.1375,0.25)  // ZPD Weapon Boundarys Level 1 and Level 2
 	//#define DJ_W 0.75	        // Weapon Depth Limit Location 1
 	#define DS_W 1.0	        // Weapon Depth Limit Location 2
+	#define FPS 2     // FPS Focus Settings 
+    #define DK_X 2 //Trigger Type
+    #define DK_Y 0 //Eye Selection
+    #define DK_Z 4 //Reduction Power
+    #define DK_W 0 //Set Shift Speed
+    
 	//#define DT_W float2(0.015,0.025)//WH scale and cutoff
 	//#define WHM 1 //Weapon Hand Masking lets you use DT_Z 
 	//#define DT_Z 0.375 //Masking Power
