@@ -2938,7 +2938,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DH_Z 0.255
 	#define DH_W 0.0
 #elif (App == 0x3C982FAC ) //Forza Horizon 4  
-	//#define DA_W 1
+	#define DA_W 1
 	#define DA_X 0.1
 	//#define DF_Y 0.05
 	#define DA_Y 7.5
@@ -16896,8 +16896,8 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define WSM 4
 	#define DB_W 22
 	#define DF_X float2(0.125,0.25)  // ZPD Weapon Boundarys Level 1 and Level 2
-	//#define DJ_W 0.75	        // Weapon Depth Limit Location 1
-	//#define DS_W 1.0	        // Weapon Depth Limit Location 2
+	#define DJ_W 0.1	        // Weapon Depth Limit Location 1
+	#define DS_W 0.65	        // Weapon Depth Limit Location 2
 	#define FPS 0     // FPS Focus Settings 
     #define DK_X 2 //Trigger Type
     #define DK_Y 0 //Eye Selection
@@ -16920,6 +16920,62 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define PEW 1
     #define RHW 1
 	#define NFM 1
+    #define DSW 1    
+	#define FOV 1
+#elif (App == 0x6F3CE890 ) // Sinned
+    //#define DS_Z 3          // Set View Mode
+	#define DA_W 1          // Set Linerzation
+    #define DB_X 1          // Flip
+	#define DA_X 0.011      // ZPD
+	#define DF_Y 0.100       // Seperation
+	#define DA_Y 500.0      // Near Plane Adjustment
+    #define DA_Z -1.0    // Linerzation Offset
+    #define DS_Y 1          // Linerzation Offset Effects only distance if true
+	#define DB_Z 0.01     // Auto Depth Protection
+	//#define DE_X 4          // ZPD Boundary 
+	//#define DE_Y 0.750    // Set ZPD Boundary Level Zero 
+	//#define DE_Z 0.375      // Speed that Boundary is Enforced
+	//#define AFD 1         // Alternate Frame Detection - May be phased out
+	//#define DG_W -0.25      // Shift Boundary Out of screen 0.5 and or In screen -0.5
+	//#define OIL 2           // Set How many Levels We use for RE_Fix 0 | 1 | 2 | 3 if 1 then it's float2(0,0) for OIF and DI_W
+    //#define OIF float3(0.5,0.375,0.25)         // Fix enables if Value is > 0.0 
+	//#define DI_W float3(0.5,1.0,2.0)     // Like Shift Boundary DG_W But 0 to inf
+	//#define FTM 2           // Fast Trigger Mode If this enabled then Level 1 and > switches instantly.
+    #define DG_Z 0.4375      // Min Weapon Hands That are apart of world with Auto and Trim
+    //#define DS_X float3(0.025,0,1)// Min Weapon bit only triggers when a OIL Level is set and set here on .y
+    //#define DE_W 0.50      // Auto
+    #define DI_Z 0.24875      // Trim
+    #define DF_W float4(0.0001,0.0007,0.0,0.001)// Edge & Scale
+	#define BMT 1           // ZPD and World Scale Balance // I need to phase this out.
+	#define DF_Z 0.5       // Set the Balance  
+    #define DL_Y 1.0      // De-Artifact Only works on some View Modes and causes performance degredation
+    #define DB_Y 1.0
+    #define DL_Z -1.0       // Compat Power
+	//#define DJ_X 0.375      // Range Smoothing
+	//#define WSM 4
+	//#define DB_W 22
+	//#define DF_X float2(0.125,0.25)  // ZPD Weapon Boundarys Level 1 and Level 2
+	//#define DJ_W 0.75	        // Weapon Depth Limit Location 1
+	//#define DS_W 1.0	        // Weapon Depth Limit Location 2
+	//#define FPS 0     // FPS Focus Settings 
+    //#define DK_X 2 //Trigger Type
+    //#define DK_Y 0 //Eye Selection
+    //#define DK_Z 4 //Reduction Power
+    //#define DK_W 1 //Set Shift Speed
+    
+	//#define DT_W float2(0.015,0.025)//WH scale and cutoff
+	//#define WHM 1 //Weapon Hand Masking lets you use DT_Z 
+	//#define DT_Z 0.375 //Masking Power
+	//#define HMT 1     //HUD Mode Trigger
+	//#define HMC 2.5
+    //#define HMD 0.350
+	//Smooth Mode Setting  
+    #define SMS 3      //SM Toggle Separation
+	#define DL_X 0.9  //SM Tune
+	//#define DL_W 0.050 //SM Perspective
+	#define DM_X 4     //HQ Tune
+    //#define DM_Y 3     //HQ VR          
+	#define PEW 1
     #define DSW 1
 #else
 	#define NPW 1 //No Profile
