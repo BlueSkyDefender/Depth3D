@@ -17190,7 +17190,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DM_Y 3     //HQ VR          
 	#define PEW 1
     #define DSW 1
-#elif (App == 0x4249D707 ) // Mafia Known as "game" WTF....
+#elif (App == 0x4249D707 || 0xc2762327 ) // Mafia Known as "game" WTF....
     //#define DS_Z 3          // Set View Mode
 	//#define DA_W 1          // Set Linerzation
     //#define DB_X 1          // Flip
