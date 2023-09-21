@@ -2,7 +2,7 @@
 	///**SuperDepth3D**///
 	//----------------////
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	//* Depth Map Based 3D post-process shader v3.8.6
+	//* Depth Map Based 3D post-process shader v3.8.7
 	//* For Reshade 3.0+
 	//* ---------------------------------
 	//*
@@ -282,7 +282,7 @@ namespace SuperDepth3D
 		ui_label = " ZPD Balance";
 		ui_tooltip = "This balances between ZPD Depth and Scene Depth.\n" //***
 					 "Changes the prioritization of the 3D effect.\n"
-					 "Default is 0 for ZPD Depth and 1 is Full Scene Depth.";
+					 "Default is 0 for ZPD Depth and 0.5 is enhanced Scene Depth.";
 		ui_category = "Divergence & Convergence";
 	> = DF_Z;
 	
@@ -1907,12 +1907,11 @@ namespace SuperDepth3D
 			if( ZPD_Boundary == 1 || ZPD_Boundary == 4 || ZPD_Boundary == 6 || ZPD_Boundary == 7)
 				Shift_Values = 0.031;	
 			//Screen Space Detector 7x6 Grid from between 0 to 1 and ZPD Detection becomes stronger as it gets closer to the Center.
-			float Shift_Per_Frame = Alternate ? 0 : 0.0275;
 			float3 XY = floor(texcoord.xyx * texsize.xyx * pix.xyx * float3(7,7,9));
 			float2 GridXY; int2 iXY = ( ZPD_Boundary == 3 ? int2( 9, 4) : int2( 7, 5) );//was 12/4 and 7/7 This reduction saves 0.1 ms and should show no diff to the user.
-			[loop]                                                                       //I was thinking the lowest I can go would be 9/4 along with 7/5
+			[loop]                                                                     //I was thinking the lowest I can go would be 9/4 along with 7/5
 			for( int iX = 0 ; iX < iXY.x; iX++ )                                         //7 * 7 = 49 | 12 * 4 = 48 | 7 * 6 = 42 | 9 * 4 = 36 | 7 * 5 = 35
-			{   [loop]
+			{   [unroll]
 				for( int iY = 0 ; iY < iXY.y; iY++ )
 				{
 					if(ZPD_Boundary == 1 || ZPD_Boundary == 6 || ZPD_Boundary == 7)
@@ -1929,11 +1928,8 @@ namespace SuperDepth3D
 
 						GridXY.y += fmod(XY.x,2) ? 0.0 : 0.05;
 
-					if( AFD )
-						GridXY.x += Shift_Per_Frame;
-
 					float ZPD_I = ZPD_Separation.x;
-					// Need to investigate tex2Dlod(SamplerDMN,float4(GridXY,0,2)).x; in place of PrepDepth					
+					// tex2Dlod(SamplerDMN,float4(GridXY,0,2)).x; // Does improve performance I tought it did.					
 					float PDepth = PrepDepth(GridXY)[1][0];
 					
 					if(ZPD_Boundary >= 4)
@@ -2425,22 +2421,27 @@ namespace SuperDepth3D
 		float US_Offset = lerp(Default_Offset.x,Default_Offset.y,GetDepth * 0.5); D = Diverge < 0 ? -US_Offset : US_Offset;
 	
 		//Offsets listed here Max Seperation is 3% - 8% of screen space with Depth Offsets & Netto layer offset change based on MS.
-		float deltaCoordinates = MS * LayerDepth, CurrentDepthMapValue = GetDB( ParallaxCoord).x, CurrentLayerDepth = 0.0f,
-			  DB_Offset = D * TP * pix.x, VM_Switch = View_Mode == 1 ? 0.125 : lerp(1.0,0.125,GetDepth);
-			 
+		float deltaCoordinates = MS * LayerDepth, CurrentDepthMapValue = min(1,GetDB( ParallaxCoord).x), CurrentLayerDepth = 0.0f,
+			  DB_Offset = D * TP * pix.x, VM_Switch = View_Mode == 1 || View_Mode == 6 ? 0.125 : lerp(1.0,0.125,GetDepth);
+		
 		float Mod_Depth = saturate(GetDepth * lerp(1,15,abs(De_Artifacting.y))), Reverse_Depth = De_Artifacting.y < 0 ? 1-Mod_Depth : Mod_Depth,
-			  Scale_With_Depth = De_Artifacting.y == 0 ? 1 : Reverse_Depth;	    
-	
+			  Scale_With_Depth = De_Artifacting.y == 0 ? 1 : Reverse_Depth;
+			  
+		float2 Artifacting_Adjust = float2(MS * lerp(0,0.125,saturate(abs(De_Artifacting.x) * Scale_With_Depth)),0);
+		// Perform the conditional check outside the loop
+		bool applyArtifacting = De_Artifacting.x != 0;
+		
 		[loop] //Steep parallax mapping
 		while ( CurrentDepthMapValue > CurrentLayerDepth )
 		{   
 			// Shift coordinates horizontally in linear fasion
 		    ParallaxCoord.x -= deltaCoordinates; 
 		    // Get depth value at current coordinates
-		    if ( De_Artifacting.x != 0 && GetDB(ParallaxCoord).w )
-				CurrentDepthMapValue = min(GetDB( ParallaxCoord ).x, GetDB( ParallaxCoord - float2(MS * lerp(0,0.125,saturate(abs(De_Artifacting.x) * Scale_With_Depth)),0)).x);
+		    float2 G_Depth = GetDB(ParallaxCoord).xw;  
+		    if ( G_Depth.y )
+				CurrentDepthMapValue = min(G_Depth.x, GetDB( ParallaxCoord - Artifacting_Adjust).x);
 			else
-				CurrentDepthMapValue = GetDB( ParallaxCoord ).x;
+				CurrentDepthMapValue = G_Depth.x;				
 		    // Get depth of next layer
 		    CurrentLayerDepth += LayerDepth;
 		}
@@ -2452,25 +2453,25 @@ namespace SuperDepth3D
 		//Anti-Weapon Hand Fighting
 		float Weapon_Mask = tex2Dlod(SamplerDMN,float4(Coordinates,0,0)).y, ZFighting_Mask = 1.0-(1.0-tex2Dlod(SamplerLumN,float4(Coordinates,0,1.400)).w - Weapon_Mask);
 			  ZFighting_Mask = ZFighting_Mask * (1.0-Weapon_Mask);
-		float2 PCoord = float2(View_Mode <= 1 ? PrevParallaxCoord.x : ParallaxCoord.x, PrevParallaxCoord.y ) ;
-			   PCoord.x -= 0.004 * MS;
+		float2 PCoord = float2(View_Mode <= 1 ? PrevParallaxCoord.x : ParallaxCoord.x, PrevParallaxCoord.y ) ;	
+			   PCoord.x -= 0.005 * MS;		   
 		float Get_DB = GetDB( PCoord ).x, 
 			  Get_DB_ZDP = WP > 0 ? lerp(Get_DB, abs(Get_DB), ZFighting_Mask) : Get_DB;
 		// Parallax Occlusion Mapping
 		float beforeDepthValue = Get_DB_ZDP, afterDepthValue = CurrentDepthMapValue - CurrentLayerDepth;
 			  beforeDepthValue += LayerDepth - CurrentLayerDepth;
 		// Depth Diffrence for Gap masking and depth scaling in Normal Mode.
-		float DepthDiffrence = afterDepthValue - beforeDepthValue, DD_Map = abs(DepthDiffrence) > 0.064;//For AI infilling
+		float DepthDiffrence = afterDepthValue - beforeDepthValue, DD_Map = saturate(abs(DepthDiffrence) > 0.064);//For AI infilling
 		float weight = afterDepthValue / min(-0.0125,DepthDiffrence);
-			  weight = lerp(weight + (2.0 * Depth_Adjusted.y),weight,0.75);//Reversed the logic since it seems look better this way and it leans towards the normal output.
+			  weight = lerp(weight + (2.0 * Depth_Adjusted.y) * DD_Map,weight,0.75);//Reversed the logic since it seems look better this way and it leans towards the normal output.
 		float Weight = weight;
 			
 			if( View_Mode <= 1 )
 			{
 				if(Diverge < 0)
-					weight *= lerp( 1, 1-(0.0005 * saturate(GetDepth * 2.5)), DD_Map ); 
+					weight *= lerp( 1, 1-(0.00075 * saturate(GetDepth * 2.5)), DD_Map ); 
 				else
-					weight *= lerp( 1, 1+(0.0005 * saturate(GetDepth * 2.5)), DD_Map );  
+					weight *= lerp( 1, 1+(0.00075 * saturate(GetDepth * 2.5)), DD_Map );  
 			}
 			//ParallaxCoord.x = lerp( ParallaxCoord.x, PrevParallaxCoord.x, weight); //Old		
 			ParallaxCoord.x = PrevParallaxCoord.x * weight + ParallaxCoord.x * (1 - Weight);

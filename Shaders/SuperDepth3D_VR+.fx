@@ -2,7 +2,7 @@
 	///**SuperDepth3D_VR+**///
 	//--------------------////
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	//* Depth Map Based 3D post-process shader v3.8.6
+	//* Depth Map Based 3D post-process shader v3.8.7
 	//* For Reshade 4.4+ I think...
 	//* ---------------------------------
 	//*
@@ -271,6 +271,7 @@ namespace SuperDepth3DVR
 		ui_min = 0; ui_max = 100;
 		ui_label = "·Interpupillary Distance·";
 		ui_tooltip = "Determines the distance between your eyes.\n"
+					 "Not Needed if you use VR software that calculate this.\n"
 					 "Default is 0.";
 		ui_category = "Eye Focus Adjustment";
 	> = 0;
@@ -286,20 +287,22 @@ namespace SuperDepth3DVR
 		ui_type = "slider";
 		#endif
 		ui_min = 0.0; ui_max = 100; ui_step = 0.5;
-		ui_label = "·Divergence Slider·";
-		ui_tooltip = "Divergence increases differences between the left and right retinal images and allows you to experience depth.\n"
-					 "The process of deriving binocular depth information is called stereopsis.";
+		ui_label =  "·Depth Adjustment·"; 
+		ui_tooltip =  "Increases differences between the left and right images and allows you to experience depth.\n"
+					  "The process of deriving binocular depth information is called stereopsis (or stereoscopic vision).";
 		ui_category = "Divergence & Convergence";
 	> = 50;
 	
 	uniform float2 ZPD_Separation <
 		ui_type = "drag";
 		ui_min = 0.0; ui_max = 0.250;
-		ui_label = " ZPD & Sepration";
-		ui_tooltip = "Zero Parallax Distance controls the focus distance for the screen Pop-out effect also known as Convergence.\n"
-					"Separation is a way to increase the intensity of Divergence without a performance cost.\n"
-					"For FPS Games keeps this low Since you don't want your gun to pop out of screen.\n"
-					"Default is 0.025, Zero is off.";
+		ui_label =    " ZPD & Separation";
+		ui_tooltip =  "ZPD (Zero Parallax Distance) controls the focus distance for the screen Pop-out effect.\n" //https://manual.reallusion.com/iClone_6/ENU/Pro_6.0/09_3D_Vision/Settings_for_Pop_Out_and_Deep_In_Effect.htm
+					  "For FPS Games keep ZPD low since you don't want your gun to pop out of the screen.\n"
+					  "\n"
+					  "Separation is a way to increase the perception of Depth.\n"
+					  "\n"
+					  "Default for ZPD is 0.025, for Seperation it's 0.0 and Zero is off.";
 		ui_category = "Divergence & Convergence";
 	> = float2(DA_X,DF_Y);
 	
@@ -307,8 +310,9 @@ namespace SuperDepth3DVR
 		ui_type = "drag";
 		ui_min = 0.0; ui_max = 1.0;
 		ui_label = " ZPD Balance";
-		ui_tooltip = "Zero Parallax Distance balances between ZPD Depth and Scene Depth.\n"
-					"Default is Zero is full Convergence and One is Full Depth.";
+		ui_tooltip = "This balances between ZPD Depth and Scene Depth.\n" //***
+					 "Changes the prioritization of the 3D effect.\n"
+					 "Default is 0 for ZPD Depth and 0.5 is enhanced Scene Depth.";
 		ui_category = "Divergence & Convergence";
 	> = DF_Z;
 	
@@ -326,9 +330,8 @@ namespace SuperDepth3DVR
 		ui_type = "combo";
 		ui_items = "BD0 Off\0BD1 Full\0BD2 Narrow\0BD3 Wide\0BD4 FPS Center\0BD5 FPS Narrow\0BD6 FPS Edge\0BD7 FPS Mixed\0";	
 		ui_label = " ZPD Boundary Detection";
-		ui_tooltip = "This selection menu gives extra boundary conditions to ZPD.\n"
-					 			 "This treats your screen as a virtual wall.\n"
-					 		   "Default is Off.";
+		ui_tooltip = "This selection gives extra boundary conditions to detect for ZPD intrusions.\n"//***
+					 "Default is Off.";
 		ui_category = "Divergence & Convergence";
 	> = DE_X;
 	
@@ -355,9 +358,9 @@ namespace SuperDepth3DVR
 		#endif
 		ui_min = 0.0; ui_max = 1.0;
 		ui_label = " ZPD Scaler² & Intrusion";
-		ui_tooltip = "This selection gives extra boundary conditions to scale ZPD level two.\n"
-					 "lets you adjust how far behind the screen it should detect a intrustion.\n"
-					 "Only works when Boundary Detection is enabled & when Scaler LvL one is set.";
+		ui_tooltip = "This selection gives extra boundary conditions to scale ZPD level One.\n"
+					 "The 2nd option lets you adjust the transition time for LvL One & Two.\n"
+					 "Only works when Boundary Detection is enabled.";
 		ui_category = "Divergence & Convergence";
 	> = float2(OIF.x,DI_W.x);
 	
@@ -365,15 +368,15 @@ namespace SuperDepth3DVR
 		ui_type = "combo";
 		ui_items = "VM0 Normal \0VM1 Alpha \0VM2 Reiteration \0VM3 Stamped \0VM4 Mixed \0VM5 Adaptive \0";
 		ui_label = "·View Mode·";
-		ui_tooltip = "Changes the way the shader fills in the occlude sections in the image.\n"
-					"Normal      | Normal output used for most games with it's streched look.\n"
-					"Alpha       | Like Normal But with a bit more sepration in the gap filling.\n"
+		ui_tooltip = "Changes the way the shader fills in the occluded sections in the image.\n"
+					"Normal      | Normal output used for most games with a streched look.\n"
+					"Alpha       | Like Normal But with a bit more sepration in the infilling.\n"
 					"Reiteration | Same thing as Stamped but with brakeage points.\n"
-					"Stamped     | Stamps out a transparent area on the occluded area.\n"
-					"Mixed       | Used for higher amounts of Semi-Transparent objects like foliage.\n"
+					"Stamped     | Stamps out a transparent area where occlusion happens.\n"
+					"Mixed       | Used when high amounts of Semi-Transparent objects like foliage in the image.\n"
 					"Adaptive    | is a scene adapting infilling that uses disruptive reiterative sampling.\n"
 					"\n"
-					"Warning: Also Make sure you turn on Performance Mode before you close this menu.\n"
+					"Warning: Also Make sure Performance Mode is active before closing the ReShade menu.\n"
 					"\n"
 					"Default is Alpha.";
 	ui_category = "Occlusion Masking";
@@ -387,8 +390,8 @@ namespace SuperDepth3DVR
 		#endif
 		ui_min = 0.0; ui_max = 5.0;
 		ui_label = " Halo Reduction";
-		ui_tooltip = "This warps the depth in some View Modes to hide or minimize the Halo in Most Games.\n"
-					 "With this on it should Hide the Halo a little better depending the View Mode it works on.\n"
+		ui_tooltip = "This distorts the depth in some View Modes to hide or minimize the halo in Most Games.\n"
+					 "With this active it should Hide the Halo a little better depending the View Mode it works on.\n"
 					 "Default is 3 and Zero is Off.";
 		ui_category = "Occlusion Masking";
 	> = 3;
@@ -397,7 +400,8 @@ namespace SuperDepth3DVR
 		ui_type = "combo";
 		ui_items = "Mirrored Edges\0Black Edges\0Stretched Edges\0";
 		ui_label = " Edge Handling";
-		ui_tooltip = "Edges selection for your screen output.";
+		ui_tooltip = "Edges selection for screen output.\n"
+		  			 "What type of filling to be used on the empty spaces on the edges";
 		ui_category = "Occlusion Masking";
 	> = 1;
 	
@@ -405,7 +409,7 @@ namespace SuperDepth3DVR
 		ui_type = "slider";
 		ui_min = 0.0; ui_max = 1.0;                                                                                                  
 		ui_label = " Edge Reduction";
-		ui_tooltip = "This Decreses the Edge at the cost of warping the Image.\n"
+		ui_tooltip = "This Decreses the Edge at the cost of warping the image.\n"
 					 "Default is 50.0%.";
 		ui_category = "Occlusion Masking";
 	> = 0.5;
@@ -428,8 +432,8 @@ namespace SuperDepth3DVR
 		ui_type = "slider";
 		ui_min = 0; ui_max = 1;
 		ui_label = " Range Smoothing";
-		ui_tooltip = "This blends Two Depth Buffer at a distance to fill in missing information that is needed to compleat a image.\n"
-					 "With this on it should help with tress and other foliage that needs to be reconstructed by Temporal Methods.\n"
+		ui_tooltip = "This blends Two Depth Buffers at a distance to fill in missing information that is needed to compleat a image.\n"
+					 "With this active, it should help with trees and other foliage that needs to be reconstructed by Temporal Methods.\n"
 					 "Default is Zero, Off.";
 		ui_category = "Occlusion Masking";
 	> = DJ_X;	
@@ -438,10 +442,10 @@ namespace SuperDepth3DVR
 		ui_type = "combo";
 		ui_items = "Performant\0Normal\0Performant + VRS\0Normal + VRS\0";
 		ui_label = " Performance Mode";
-		ui_tooltip = "Performance Mode Lowers or Raises Occlusion Quality Processing so that there is a performance is adjustable.\n"
+		ui_tooltip = "Performance Mode Lowers or Raises Occlusion Quality Processing so that the performance is adjusted accordingly.\n"
 					 "Varable Rate Shading focuses the quality of the samples in lighter areas of the screen.\n"
-					 "Please enable the 'Performance Mode Checkbox,' in ReShade's GUI.\n"
-					 "It's located in the lower bottom right of the ReShade's Main UI.\n"
+					 "Please enable the 'Performance Mode' Checkbox, in ReShade's GUI.\n"
+					 "It's located in the lower bottom right of the ReShade's Main.\n"
 					 "Default is Performant.";
 		ui_category = "Occlusion Masking";
 	> = 0;
@@ -450,8 +454,8 @@ namespace SuperDepth3DVR
 		ui_type = "combo";
 		ui_items = "Auto\0High\0Med\0Low\0Very Low\0";
 		ui_label = " VRS Performance";
-		ui_tooltip = "Use this to set Varable Rate Shading to manually selection or automatic mod.\n"
-			   "Default is Automatic.";
+		ui_tooltip = "Use this to set Varable Rate Shading to manually selection or automatic mode.\n"
+			         "Default is Automatic.";
 		ui_category = "Occlusion Masking";
 	> = 0;	
 	
@@ -463,9 +467,8 @@ namespace SuperDepth3DVR
 		#endif
 		ui_min = -1.0; ui_max = 1.0;
 		ui_label = " Compatibility Power";
-		ui_tooltip = "Not all games need a high offset for infilling.\n"
-					 "This option lets you increase this offset in both directions to limit artifacts.\n"
-					 "With this on it should work better in games with TAA, FSR,and or DLSS sometimes.\n"
+		ui_tooltip = "This option lets you increase this offset in both directions to limit artifacts.\n"
+					 "With this active it should work better in games with TAA, XeSS, FSR,and or DLSS sometimes.\n"
 					 "Default is Zero.";
 		ui_category = "Compatibility Options";
 	> = DL_Z;
@@ -488,11 +491,11 @@ namespace SuperDepth3DVR
 	uniform float2 DLSS_FSR_Offset <
 		ui_type = "slider";
 		ui_min = 0.0; ui_max = 5.0;
-		ui_label = " Upscailer Offset XY";
+		ui_label = " Upscaler Offset"; //***
 		ui_tooltip = "This Offset is for non conforming ZBuffer Postion witch is normaly 1 pixel wide.\n"
-					 "This issue only happens sometimes when using things like DLSS or FSR.\n"
-					 "This does not solve for TAA artifacts like Jittering or smearing.\n"
-					 "Default and starts at Zero and it's Off. With a max offset of 5pixels Wide.";
+					 "This issue only happens sometimes when using things like DLSS, XeSS and or FSR.\n"
+					 "This does not solve for TAA artifacts like Jittering or Smearing.\n"
+					 "Default and starts at 0 and is Off. With a max offset of 5 pixels Wide.";
 		ui_category = "Compatibility Options";
 		ui_category_closed = true;
 	> = 0;
@@ -510,9 +513,9 @@ namespace SuperDepth3DVR
 	uniform float Depth_Map_Adjust <
 		ui_type = "drag";
 		ui_min = 1.0; ui_max = 250.0; ui_step = 0.125;
-		ui_label = " Depth Map Adjustment";
-		ui_tooltip = "This allows for you to adjust the DM precision.\n"
-					 "Adjust this to keep it as low as possible.\n"
+		ui_label = " Near Plane Adjustment";
+		ui_tooltip = "This allows for you to adjust the depth map's near plane.\n"
+					 "If a profile is activated ignore this.\n"
 					 "Default is 7.5";
 		ui_category = "Depth Map";
 	> = DA_Y;
@@ -522,8 +525,7 @@ namespace SuperDepth3DVR
 		ui_min = -1.0; ui_max = 1.0;
 		ui_label = " Depth Map Offset";
 		ui_tooltip = "Depth Map Offset is for non conforming ZBuffer.\n"
-					 "It,s rare if you need to use this in any game.\n"
-					 "Use this to make adjustments to DM 0 or DM 1.\n"
+					 "It's rare if you need to use this in any game.\n"
 					 "Default and starts at Zero and it's Off.";
 		ui_category = "Depth Map";
 	> = DA_Z;
@@ -532,14 +534,15 @@ namespace SuperDepth3DVR
 		ui_type = "drag";
 		ui_min = 0.0; ui_max = 0.625;
 		ui_label = " Auto Depth Adjust";
-		ui_tooltip = "The Map Automaticly scales to outdoor and indoor areas.\n"
-					 "Default is 0.1f, Zero is off.";
+		ui_tooltip = "Automatically scales depth so it avoides extreme pop out.\n"
+					 "Default is 0.1, Zero is off.";
 		ui_category = "Depth Map";
 	> = DB_Z;
 	
 	uniform bool Depth_Map_View <
 		ui_label = " Depth Map View";
-		ui_tooltip = "Display the Depth Map.";
+		ui_tooltip = "Display the Depth Map.\n"
+					 "Default is Off.";
 		ui_category = "Depth Map";
 	> = false;
 	
@@ -631,8 +634,9 @@ namespace SuperDepth3DVR
 		ui_tooltip = "Adjust Weapon depth map for your games.\n"
 					 "X, CutOff Point used to set a different scale for first person hand apart from world scale.\n"
 					 "Y, Precision is used to adjust the first person hand in world scale.\n"
+					 "Z, Tuning is used to fine tune the precision adjustment above.\n"
 					 "W, Scale is used to compress or rescale the weapon.\n"
-		             "Default is float2(X 0.0, Y 0.0, Z 0.0, W 0.0)";
+		             "Default is float2(X 0.0, Y 0.0, Z 0.0, W 1.0)";
 		ui_category = "Weapon Hand Adjust";
 	> = float4(0.0,0.0,0.0,0.0);
 	
@@ -640,12 +644,12 @@ namespace SuperDepth3DVR
 		ui_type = "drag";
 		ui_min = 0.0; ui_max = 0.5;
 		ui_label = " Weapon ZPD, Min, Auto, & Trim";
-		ui_tooltip = "WZPD controls the focus distance for the screen Pop-out effect also known as Convergence for the weapon hand.\n"
-					"Weapon ZPD Is for setting a Weapon Profile Convergence, so you should most of the time leave this Default.\n"
-					"Weapon Min is used to adjust min weapon hand of the weapon hand when looking at the world near you.\n"
-					"Weapon Auto is used to auto adjust trimming when looking at a object or out to distance.\n"
-					"Weapon Trim is used cutout a location in the depth buffer so that Min and Auto can use.\n"
-					"Default is (ZPD X 0.03, Min Y 0.0, Auto Z 0.0, Trim Z 0.250 ) & Zero is off.";
+		ui_tooltip = "Weapon ZPD controls the focus distance for the screen Pop-out effect also known as Convergence for the weapon hand.\n"
+					 "This Is for setting a Weapon's Profile Convergence, so you should most of the time leave this as Default.\n"
+					 "Weapon Min is used to adjust min weapon hand of the weapon hand when looking at the world near you when the above fails.\n"
+					 "Weapon Auto is used to auto adjust trimming when looking around.\n"
+					 "Weapon Trim is used cutout a location in the depth buffer so that Min and Auto scale off of.\n"
+					 "Default is (ZPD X 0.03, Min Y 0.0, Auto Z 0.0, Trim Z 0.250 ) & Zero is off.";
 		ui_category = "Weapon Hand Adjust";	
 	> = float4(0.03,DG_Z,DE_W,DI_Z);
 	
@@ -684,7 +688,7 @@ namespace SuperDepth3DVR
 		ui_items = "World\0Weapon\0Mix\0";
 		ui_label = "·Focus Type·";
 		ui_tooltip = "This lets the shader handle real time depth reduction for aiming down your sights.\n"
-					"This may induce Eye Strain so take this as an Warning.";
+					"This may induce Eye Strain so take this as a Warning.";
 		ui_category = "FPS Focus";
 	> = FPS;
 	
@@ -693,7 +697,7 @@ namespace SuperDepth3DVR
 		ui_items = "Off\0Press\0Hold\0";
 		ui_label = " Activation Type";
 		ui_tooltip = "This lets the shader handle real time depth reduction for aiming down your sights.\n"
-					"This may induce Eye Strain so take this as an Warning.";
+					"This may induce Eye Strain so take this as a Warning.";
 		ui_category = "FPS Focus";
 	> = DK_X;
 
@@ -711,7 +715,7 @@ namespace SuperDepth3DVR
 		ui_type = "slider";
 		ui_min = 0; ui_max = 4;
 		ui_label = " Eye Fade Options";
-		ui_tooltip ="X, Fade Reduction: Decreases the depth amount by a current percentage.\n"
+		ui_tooltip ="X, Fade Reduction: Decreases the depth ammount by a current percentage.\n"
 					"Y, Fade Speed: Decreases or Incresses how fast it changes.\n"
 					"Default is X[ 0 ] Y[ 1 ].";
 		ui_category = "FPS Focus";
@@ -1782,12 +1786,11 @@ namespace SuperDepth3DVR
 			if( ZPD_Boundary == 1 || ZPD_Boundary == 4 || ZPD_Boundary == 6 || ZPD_Boundary == 7)
 				Shift_Values = 0.031;	
 			//Screen Space Detector 7x6 Grid from between 0 to 1 and ZPD Detection becomes stronger as it gets closer to the Center.
-			float Shift_Per_Frame = Alternate ? 0 : 0.0275;
 			float3 XY = floor(texcoord.xyx * Res.xyx * pix.xyx * float3(7,7,9));
 			float2 GridXY; int2 iXY = ( ZPD_Boundary == 3 ? int2( 9, 4) : int2( 7, 5) );//was 12/4 and 7/7 This reduction saves 0.1 ms and should show no diff to the user.
-			[loop]                                                                       //I was thinking the lowest I can go would be 9/4 along with 7/5
+			[loop]                                                                     //I was thinking the lowest I can go would be 9/4 along with 7/5
 			for( int iX = 0 ; iX < iXY.x; iX++ )                                         //7 * 7 = 49 | 12 * 4 = 48 | 7 * 6 = 42 | 9 * 4 = 36 | 7 * 5 = 35
-			{   [loop]
+			{   [unroll]
 				for( int iY = 0 ; iY < iXY.y; iY++ )
 				{
 					if(ZPD_Boundary == 1 || ZPD_Boundary == 6 || ZPD_Boundary == 7)
@@ -1799,12 +1802,10 @@ namespace SuperDepth3DVR
 					else if(ZPD_Boundary == 4)
 						GridXY = float2( CDArray_X_A0[iX], CDArray_Y_B0[iY]);
 					//We shift the lower half here to have a better spread.
+					if(ZPD_Boundary != 4)
 						GridXY.x += texcoord.y < 0.6 ? 0.0 : fmod(XY.y,2) ? Shift_Values : -Shift_Values;
 
 						GridXY.y += fmod(XY.x,2) ? 0.0 : 0.05;
-						
-					if( AFD )
-						GridXY.x += Shift_Per_Frame;
 
 					float ZPD_I = ZPD_Separation.x;
 					// Need to investigate tex2Dlod(SamplerDMSL,float4(GridXY,0,2)).x; in place of PrepDepth					
@@ -2281,16 +2282,21 @@ namespace SuperDepth3DVR
 		float Mod_Depth = saturate(GetDepth * lerp(1,15,abs(De_Artifacting.y))), Reverse_Depth = De_Artifacting.y < 0 ? 1-Mod_Depth : Mod_Depth,
 			  Scale_With_Depth = De_Artifacting.y == 0 ? 1 : Reverse_Depth;
 			  
+		float2 Artifacting_Adjust = float2(MS * lerp(0,0.125,saturate(abs(De_Artifacting.x) * Scale_With_Depth)),0);
+		// Perform the conditional check outside the loop
+		bool applyArtifacting = (De_Artifacting.x != 0);
+		
 		[loop] //Steep parallax mapping
 		while ( CurrentDepthMapValue > CurrentLayerDepth )
 		{   
 			// Shift coordinates horizontally in linear fasion
 		    ParallaxCoord.x -= deltaCoordinates; 
 		    // Get depth value at current coordinates
-		    if ( De_Artifacting.x != 0 && GetDB(ParallaxCoord).w )
-				CurrentDepthMapValue = min(GetDB( ParallaxCoord ).x, GetDB( ParallaxCoord - float2(MS * lerp(0,0.125,saturate(abs(De_Artifacting.x) * Scale_With_Depth)),0)).x);
+		    float2 G_Depth = GetDB(ParallaxCoord).xw;  
+		    if ( applyArtifacting && G_Depth.y )
+				CurrentDepthMapValue = min(G_Depth.x, GetDB( ParallaxCoord - Artifacting_Adjust).x);
 			else
-				CurrentDepthMapValue = GetDB( ParallaxCoord ).x;
+				CurrentDepthMapValue = G_Depth.x;				
 		    // Get depth of next layer
 		    CurrentLayerDepth += LayerDepth;
 		}
@@ -2303,24 +2309,24 @@ namespace SuperDepth3DVR
 		float Weapon_Mask = tex2Dlod(SamplerDMVR,float4(Coordinates,0,0)).y, ZFighting_Mask = 1.0-(1.0-tex2Dlod(SamplerLumVR,float4(Coordinates,0,1.400)).w - Weapon_Mask);
 			  ZFighting_Mask = ZFighting_Mask * (1.0-Weapon_Mask);
 		float2 PCoord = float2(View_Mode <= 1 ? PrevParallaxCoord.x: ParallaxCoord.x, PrevParallaxCoord.y ) ;
-			   PCoord.x -= 0.0025 * MS;
+			   PCoord.x -= 0.005 * MS;
 		float Get_DB = GetDB( PCoord ).x, 
 			  Get_DB_ZDP = WP > 0 ? lerp(Get_DB, abs(Get_DB), ZFighting_Mask) : Get_DB;
 		// Parallax Occlusion Mapping
 		float beforeDepthValue = Get_DB_ZDP, afterDepthValue = CurrentDepthMapValue - CurrentLayerDepth;
 			  beforeDepthValue += LayerDepth - CurrentLayerDepth;
 		// Depth Diffrence for Gap masking and depth scaling in Normal Mode.
-		float DepthDiffrence = afterDepthValue - beforeDepthValue, DD_Map = abs(DepthDiffrence) > 0.064;//For AI infilling
+		float DepthDiffrence = afterDepthValue - beforeDepthValue, DD_Map = saturate(abs(DepthDiffrence) > 0.064);//For AI infilling
 		float weight = afterDepthValue / min(-0.0125,DepthDiffrence);
-			  weight = lerp(weight + (2.0 * Depth_Adjusted.y),weight,0.75);//Reversed the logic since it seems look better this way and it leans towards the normal output.
+			  weight = lerp(weight + (2.0 * Depth_Adjusted.y) * DD_Map,weight,0.75);//Reversed the logic since it seems look better this way and it leans towards the normal output.
 		float Weight = weight;
 			
 			if( View_Mode <= 1 )
 			{
 				if(Diverge < 0)
-					weight *= lerp( 1, 1-(0.0005 * saturate(GetDepth * 2.5)), DD_Map ); 
+					weight *= lerp( 1, 1-(0.00075 * saturate(GetDepth * 2.5)), DD_Map ); 
 				else
-					weight *= lerp( 1, 1+(0.0005 * saturate(GetDepth * 2.5)), DD_Map );  
+					weight *= lerp( 1, 1+(0.00075 * saturate(GetDepth * 2.5)), DD_Map );  
 			}
 			//ParallaxCoord.x = lerp( ParallaxCoord.x, PrevParallaxCoord.x, weight); //Old		
 			ParallaxCoord.x = PrevParallaxCoord.x * weight + ParallaxCoord.x * (1 - Weight);

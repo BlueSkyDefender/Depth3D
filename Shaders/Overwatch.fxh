@@ -633,7 +633,24 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	 
 #elif (App == 0xCB1CCDC ) //BATMAN TTS
 	#define NCW 1 //Not Compatible
-	
+#elif (App == 0x4A2297E4 ) //Batman Arkham Knight
+	#define DA_X 0.045
+	#define DF_Y 0.0075
+	#define DA_Y 22.5
+	#define DE_X 1
+	#define DE_Y 0.500
+	#define DE_Z 0.375
+    //#define DG_W -0.30 //Neg-Pop
+    //#define DG_Z 0.150 //Min
+    //#define DI_Z 0.200 //Trim
+	#define BMT 1
+	#define DF_Z 0.150
+    #define SMS 1      //SM Toggle Separation
+	#define DL_X 0.600 //SM Tune
+	#define DL_W 0.000 //SM Perspective
+	#define DM_X 3     //HQ Tune
+	#define DM_Z 1     //HQ Smooth
+	#define PEW 1	
 #elif (App == 0xE9A02687 ) //BattleTech
 	#define DA_W 1
 	#define DB_X 1
@@ -10177,13 +10194,13 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DB_Z 0.100
  
 	#define DE_X 1
-	#define DE_Y 0.375
-	#define DE_Z 0.375
+	#define DE_Y 0.750
+	#define DE_Z 0.350
 	//#define AFD 1
 	//#define DG_W -0.25 //Neg PoP
-    //#define OIL 1 //Set How many Levels We use for RE_Fix 0 | 1 | 2 | 3
-    //#define OIF float2(0.475,0.25) //Fix enables if Value is > 0.0
-	//#define DI_W float2(0.0,2.5)
+    #define OIL 3 //Set How many Levels We use for RE_Fix 0 | 1 | 2 | 3
+    #define OIF float4(0.500,0.375,0.25,0.125) //Fix enables if Value is > 0.0
+	#define DI_W float4(0.5,2.5,5.0,7.5)
 	//#define FTM 1
     //#define DG_Z 0.025 //0.0125 //Min
     //#define DE_W 0.000 //Auto
@@ -17348,30 +17365,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DM_Y 3     //HQ VR          
 	#define PEW 1
     #define DSW 1
-#elif (App == 0x4A2297E4 ) //Batman Arkham Knight
-	#define DA_X 0.025
-	#define DF_Y 0.0075
-	#define DA_Y 42.5
-	#define DB_Z 0.050    // Auto Depth Protection
-	#define DE_X 2          // ZPD Boundary 
-	#define DE_Y 0.625    // Set ZPD Boundary Level Zero 
-	#define DE_Z 0.375      // Speed that Boundary is Enforced
-	//#define AFD 1         // Alternate Frame Detection - May be phased out
-	//#define DG_W -0.25      // Shift Boundary Out of screen 0.5 and or In screen -0.5
-	//#define OIL 1           // Set How many Levels We use for RE_Fix 0 | 1 | 2 | 3 if 1 then it's float2(0,0) for OIF and DI_W
-    #define OIF 0.375         // Fix enables if Value is > 0.0 
-	#define DI_W 2.0     // Like Shift Boundary DG_W But 0 to inf
-    //#define DG_W -0.30 //Neg-Pop
-    //#define DG_Z 0.150 //Min
-    //#define DI_Z 0.200 //Trim
-	#define BMT 1
-	#define DF_Z 0.150
-    #define SMS 3      //SM Toggle Separation
-	#define DL_X 0.725 //SM Tune
-	#define DL_W 0.000 //SM Perspective
-	#define DM_X 3     //HQ Tune
-	#define DM_Z 1     //HQ Smooth
-	#define PEW 1
 #else
 	#define NPW 1 //No Profile
 #endif
