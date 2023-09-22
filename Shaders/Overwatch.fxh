@@ -12640,63 +12640,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DM_Y 3     //HQ VRS
 	#define DAA 1           
 	#define PEW 1
-#elif (App == 0x491EA19E ) //Cyberpunk 2077
-	#define DA_W 1                   
-	#define DA_X 0.025//0.030   
-	#define DF_Y 0.01875//0.025       
-	#define DA_Y 95.0//80.0      
-    //#define DA_Z -0.0001    
-	#define DB_Z 0.10      
-	#define DE_X 7          
-	#define DE_Y 0.500      
-	#define DE_Z 0.375      
-	#define DG_W 0.250      // Shift Boundary Out of screen 0.5 and or In screen -0.5
-    #define OIL 0           // Set How many Levels We use for RE_Fix 0 | 1 | 2 | 3 if 1 then it's float2(0,0) for OIF and DI_W
-    #define OIF 0.5         // Fix enables if Value is > 0.0 
-	#define DI_W 0.5        // Like Shift Boundary DG_W But 0 to inf
-	//#define FTM 0         
-    //#define DG_Z 0.100      // Min Weapon Hands That are apart of world with Auto and Trim
-    //#define DE_W 0.250      // Auto
-    //#define DI_Z 0.043      // Trim
-	#define BMT 1           // ZPD and World Scale Balance // I need to phase this out.
-	#define DF_Z 0.040      // Set the Balance  
-    //#define DL_Y -0.50      // De-Artifact Only works on some View Modes and causes performance degredation
-    //#define DL_Z 1.00       // Compat Power
-	//#define DJ_X 0.250      // Range Smoothing
-
-    #define MMD 1 //Set Multi Menu Detection             //Off / On
-    #define MMS 0 //Set Multi Menu Selection from 0-1 to 29-30 and Off 0 | 1 | 2
-    #define DO_X float4( 0.913 , 0.935 , 0.100 , 0.580 ) //Pos A1 = XY Color & A2 = ZW Black 
-    #define DO_Y float4( 0.266 , 0.0325, 0.913 , 0.935 ) //Pos A3 = XY Color & B1 = ZW Color
-    #define DO_Z float4( 0.100 , 0.580 , 0.266 , 0.0325 ) //Pos B2 = XY Black & B3 = ZW Color
-	#define DO_W float4( 23.0, 23.0, 23.0, 22.0) //Tresh Hold for Color A & B and Color
-	/*
-    #define DP_X float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos C1 = XY Color & C2 = ZW Black 
-    #define DP_Y float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos C3 = XY Color & D1 = ZW Color
-    #define DP_Z float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos D2 = XY Black & D3 = ZW Color
-	#define DP_W float4( 1000.0, 1000.0, 1000.0, 1000.0) //Tresh Hold for Color C & D and Color
-	#define DQ_X float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos C1 = XY Color & C2 = ZW Black 
-    #define DQ_Y float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos C3 = XY Color & D1 = ZW Color
-    #define DQ_Z float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos D2 = XY Black & D3 = ZW Color
-	#define DQ_W float4( 1000.0, 1000.0, 1000.0, 1000.0) //Tresh Hold for Color A1 & A3 and Color
-	#define DR_X float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos G1 = XY Color & G2 = ZW Black 
-    #define DR_Y float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos G3 = XY Color & H1 = ZW Color
-    #define DR_Z float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos H2 = XY Black & H3 = ZW Color
-	#define DR_W float4( 1000.0, 1000.0, 1000.0, 1000.0) //Tresh Hold for Color G & H and Color 
-	*/
-	#define WSM 5           // Weapon Setting Mode 
-	#define DB_W 8         // Weapon Profile
-	#define DF_X float2(0.150,0)// ZPD Weapon Boundarys Level 1 and Level 2
-	#define DJ_W 0.2	        // Weapon Depth Limit Location
-	//Smooth Mode Setting
-    #define SMS 3           //SM Toggle Separation
-	#define DL_X 0.775       //SM Tune
-	//#define DL_W 0.05       //SM Perspective
-	#define DM_X 2           //HQ Tune
-	//#define HQT 1           //HQ Trigger
-    //#define DM_Y 3     //HQ VRS
-	#define DAA 1           
-	#define PEW 1
 #elif (App == 0x3C8DE8E8 ) //Metro Exodus
 	#define DA_W 1                   
 	#define DA_X 0.021//0.025   
@@ -17365,6 +17308,60 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DM_Y 3     //HQ VR          
 	#define PEW 1
     #define DSW 1
+#elif (App == 0x491EA19E ) //Cyberpunk 2077
+	#define DA_W 1                   
+	#define DA_X 0.025//0.030   
+	#define DF_Y 0.01875//0.025       
+	#define DA_Y 112.5//95.0//80.0      
+    //#define DA_Z -0.0001    
+	#define DB_Z 0.050      
+	#define DE_X 7          // ZPD Boundary 
+	#define DE_Y 0.750    // Set ZPD Boundary Level Zero 
+	#define DE_Z 0.375      // Speed that Boundary is Enforced
+	//#define AFD 1         // Alternate Frame Detection - May be phased out
+	//#define DG_W -0.125      // Shift Boundary Out of screen 0.5 and or In screen -0.5
+	#define OIL 1           // Set How many Levels We use for RE_Fix 0 | 1 | 2 | 3 if 1 then it's float2(0,0) for OIF and DI_W
+    #define OIF float2(0.5,0.375)         // Fix enables if Value is > 0.0 
+	#define DI_W float2(0.5,1.0)     // Like Shift Boundary DG_W But 0 to inf
+	#define BMT 1           // ZPD and World Scale Balance // I need to phase this out.
+	#define DF_Z 0.045      // Set the Balance  
+    //#define DL_Y -0.50      // De-Artifact Only works on some View Modes and causes performance degredation
+    //#define DL_Z 1.00       // Compat Power
+	//#define DJ_X 0.250      // Range Smoothing
+
+    #define MMD 1 //Set Multi Menu Detection             //Off / On
+    #define MMS 0 //Set Multi Menu Selection from 0-1 to 29-30 and Off 0 | 1 | 2
+    #define DO_X float4( 0.913 , 0.935 , 0.100 , 0.580 ) //Pos A1 = XY Color & A2 = ZW Black 
+    #define DO_Y float4( 0.266 , 0.0325, 0.913 , 0.935 ) //Pos A3 = XY Color & B1 = ZW Color
+    #define DO_Z float4( 0.100 , 0.580 , 0.266 , 0.0325 ) //Pos B2 = XY Black & B3 = ZW Color
+	#define DO_W float4( 23.0, 23.0, 23.0, 22.0) //Tresh Hold for Color A & B and Color
+	/*
+    #define DP_X float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos C1 = XY Color & C2 = ZW Black 
+    #define DP_Y float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos C3 = XY Color & D1 = ZW Color
+    #define DP_Z float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos D2 = XY Black & D3 = ZW Color
+	#define DP_W float4( 1000.0, 1000.0, 1000.0, 1000.0) //Tresh Hold for Color C & D and Color
+	#define DQ_X float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos C1 = XY Color & C2 = ZW Black 
+    #define DQ_Y float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos C3 = XY Color & D1 = ZW Color
+    #define DQ_Z float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos D2 = XY Black & D3 = ZW Color
+	#define DQ_W float4( 1000.0, 1000.0, 1000.0, 1000.0) //Tresh Hold for Color A1 & A3 and Color
+	#define DR_X float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos G1 = XY Color & G2 = ZW Black 
+    #define DR_Y float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos G3 = XY Color & H1 = ZW Color
+    #define DR_Z float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos H2 = XY Black & H3 = ZW Color
+	#define DR_W float4( 1000.0, 1000.0, 1000.0, 1000.0) //Tresh Hold for Color G & H and Color 
+	*/
+	#define WSM 5           // Weapon Setting Mode 
+	#define DB_W 8         // Weapon Profile
+	#define DF_X float2(0.150,0)// ZPD Weapon Boundarys Level 1 and Level 2
+	#define DJ_W 0.2	        // Weapon Depth Limit Location
+	//Smooth Mode Setting
+    #define SMS 3           //SM Toggle Separation
+	#define DL_X 0.85       //SM Tune
+	//#define DL_W 0.05       //SM Perspective
+	#define DM_X 2           //HQ Tune
+	//#define HQT 1           //HQ Trigger
+    //#define DM_Y 3     //HQ VRS
+	#define DAA 1           
+	#define PEW 1
 #else
 	#define NPW 1 //No Profile
 #endif
