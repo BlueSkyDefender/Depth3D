@@ -17362,6 +17362,53 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DM_Y 3     //HQ VRS
 	#define DAA 1           
 	#define PEW 1
+#elif (App == 0x49D2CF5E ) //Lies of P
+	#define DA_W 1                   
+	#define DA_X 0.025   
+	#define DF_Y 0.0025      
+	#define DA_Y 75.0     
+    //#define DA_Z -0.0001    
+	#define DB_Z 0.050      
+	#define DE_X 1          // ZPD Boundary 
+	#define DE_Y 0.750    // Set ZPD Boundary Level Zero 
+	#define DE_Z 0.375      // Speed that Boundary is Enforced
+	//#define AFD 1         // Alternate Frame Detection - May be phased out
+	//#define DG_W -0.125      // Shift Boundary Out of screen 0.5 and or In screen -0.5
+	#define OIL 3           // Set How many Levels We use for RE_Fix 0 | 1 | 2 | 3 if 1 then it's float2(0,0) for OIF and DI_W
+    #define OIF float4(0.5,0.375,0.250,0.09)         // Fix enables if Value is > 0.0 
+	#define DI_W float4(0.5,1.5,2.5,5.0)     // Like Shift Boundary DG_W But 0 to inf
+	#define BMT 1           // ZPD and World Scale Balance // I need to phase this out.
+	#define DF_Z 0.16      // Set the Balance  
+    //#define DL_Y -0.50      // De-Artifact Only works on some View Modes and causes performance degredation
+    //#define DL_Z 1.00       // Compat Power
+	//#define DJ_X 0.250      // Range Smoothing
+
+	//Menu Detection Templates -  Needs a Specail Shader to adjust
+    #define MAC 0 //Set to one only the 3rd value has a wiled card. Not the 1st and 3rd.
+    #define MDD 1 //Set Menu Detection & Direction      //Off | 1 | 2 | 3 | 4      
+    #define DN_X float4( 0.0515, 0.0925 , 0.9165 , 0.935) //Pos A = XY Any & B = ZW Lock 
+    #define DN_Y float4( 0.692 , 0.0925 ,  0.0, 0.0)     //Pos C = XY Any & D = ZW Match
+    #define DN_Z float4( 0.0, 0.0,  0.0, 0.0)           //Pos E = XY Match & F = ZW Match
+	#define DN_W float4( 1.0, 0.0 , 0.0, 0.0 )          //Size = Menu [ABC] D E F
+    #define DJ_Y float4( 16.0, 16.0, 18.0, 19.0);       //Menu Detection Type for A = X, B = Y, & C = Z. The Last Value is a Wild Card amount W is for X and Z. 
+    #define DJ_Z float3( 1000., 1000., 1000);           //Set Match Tresh 
+
+    #define MMD 1 //Set Multi Menu Detection             //Off / On
+    #define MMS 0 //Set Multi Menu Selection from 0-1 to 29-30 and Off 0 | 1 | 2
+    #define DO_X float4( 0.254 , 0.616 , 0.530 , 0.625 ) //Pos A1 = XY Color & A2 = ZW Black 
+    #define DO_Y float4( 0.666 , 0.612 , 0.000 , 0.000 ) //Pos A3 = XY Color & B1 = ZW Color
+    #define DO_Z float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos B2 = XY Black & B3 = ZW Color
+	#define DO_W float4( 21.0, 22.0, 1000.0, 1000.0) //Tresh Hold for Color A & B and Color
+
+	//Smooth Mode Setting
+    #define SMS 3           //SM Toggle Separation
+	#define DL_X 0.90       //SM Tune
+	//#define DL_W 0.05       //SM Perspective
+	#define DM_X 4           //HQ Tune
+	//#define HQT 1           //HQ Trigger
+    //#define DM_Y 3     //HQ VRS
+	#define DAA 1           
+	#define PEW 1
 #else
 	#define NPW 1 //No Profile
 #endif
