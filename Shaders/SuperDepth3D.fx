@@ -2,7 +2,7 @@
 	///**SuperDepth3D**///
 	//----------------////
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	//* Depth Map Based 3D post-process shader v3.8.7
+	//* Depth Map Based 3D post-process shader v3.8.8
 	//* For Reshade 3.0+
 	//* ---------------------------------
 	//*
@@ -32,6 +32,7 @@
 	//* http://reshade.me/forum/shader-presentation/2128-sidebyside-3d-depth-map-based-stereoscopic-shader
 	//* https://discord.gg/Q2n97Uj
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	#define SD3D "SuperDepth3D v3.8.8\n"
 namespace SuperDepth3D
 {
 	#define D_ViewMode 1
@@ -252,6 +253,101 @@ namespace SuperDepth3D
 	#ifndef HDR_Compatible_Mode
 		#define HDR_Compatible_Mode 0
 	#endif
+	
+	//Help / Guide / Information
+uniform int SuperDepth3D <
+	ui_text = SD3D
+			  "\n"
+				#if DSW
+				"Check Depth/Add-on Options: Copy Depth Clear/Frame: You should check it in the Depth/Add-ons tab above.\n"
+				"\n"
+				#endif	
+			
+				#if ARW 
+				"Check Aspet Ratio in Add-on: You should check it in the Depth/Add-ons tab above.\n"
+				"\n"
+				#endif
+		
+				#if EDW
+				"Emulator Detected: Because emulated games are hard to detection you will need to share/make/use a profile for the game you are trying to make work.\n"
+				"Extra options are enabled in this mode to allow better support for emulators.\n"
+				"Good Luck.\n"
+				"\n"
+				#endif
+				
+				#if PEW
+				"Disable CA/MB/Dof/Grain: Commen Post effects like chromatic aberration, Motion Blur, Depth of Field, Grain, and Ect. Will/May cause issues with this shader.\n"
+				"\n"
+				#endif
+				
+				#if DAA
+				"Check TAA/MSAA/SS/DLSS/FSR/XeSS: You may need to enable them or disable the following things correct issues that may happen in your game.\n"
+				"\n"
+				#endif
+			
+				#if DRS
+				"Disable Dynamic Resolution Scaling: You should disable DRS If it is causing issues in your game.\n"
+				"\n"
+				#endif
+				
+				#if WPW
+				"Set Weapon: Means you need to manunaly set the Weapon Hand Profile below. To fix the Weapon Hand Issues in your game.\n"
+				"\n"
+				#endif
+			
+				#if NDW
+				"Net Play: Means you are playing on a Online Game and you may need to use the Add-on Version of ReShade.\n"
+				"\n"
+				#endif
+				
+				#if FOV
+				"Set FoV: If you set Field of View for a better experiance.\n"
+				"\n"
+				#endif
+			
+				#if RHW
+				"Read Help: Mean you need to read the Help file for extra information to make the game more enjoyable. I hope to have a website for this some day.\n"
+				"\n"
+				#endif
+		
+				#if NPW
+				"No Profile: The current game has no profile. This means you need to make one or ask for one to be made for you.\n"
+				"\n"
+				#endif
+			
+				#if NCW
+				"Incompatible: The current game is incompatible. This may change with a game update or external modifications.\n"
+				"\n"
+				#endif
+			
+				#if NFM
+				"Needs Mod: The Shader needs a external Mod and or Add-ons to work optimaly or to work at all.\n"
+				"More information in the Read Help doc or Join our Discord https://discord.gg/KrEnCAxkwJ.\n"
+				"\n"
+				#endif
+		
+				#if NVK
+				"Needs DXVK: Download and use DXVK.\n"
+				"\n"
+				#endif
+		
+				#if NDG
+				"Needs DGVOODOO2: Download and use DGVooDoo2.\n"
+				"\n"
+				#endif
+		
+				#if OSW
+				"The header file for Profiles called Overwatch.fxh is Missing.\n"
+				"\n"
+				#endif
+				"__________________________________________________________________\n"
+			    "For more information and help please visit http://www.Depth3D.info";
+	ui_category = "Depth3D Information";
+	ui_category_closed = true;
+	ui_label = " ";
+	ui_type = "radio";
+	>;
+	
 	//uniform float2 TEST < ui_type = "drag"; ui_min = 0; ui_max = 1; > = 1.0;
 	//Divergence & Convergence//
 	uniform float Divergence <
@@ -358,7 +454,7 @@ namespace SuperDepth3D
 		#else
 		ui_type = "slider";
 		#endif
-		ui_min = 0; ui_max = 5;
+		ui_min = 0; ui_max = 6;
 		ui_label = " Halo Reduction";//***
 		ui_tooltip = "This distorts the depth in some View Modes to hide or minimize the halo in Most Games.\n"
 					 "With this active it should Hide the Halo a little better depending the View Mode it works on.\n"
@@ -384,23 +480,6 @@ namespace SuperDepth3D
 		ui_category = "Occlusion Masking";
 	> = 0.5;
 	
-	#if !Inficolor_3D_Emulator	
-	uniform float Max_Depth <
-		#if Compatibility
-		ui_type = "drag";
-		#else
-		ui_type = "slider";
-		#endif
-		ui_min = 0.5; ui_max = 1.0;
-		ui_label = " Max Depth";
-		ui_tooltip = "Max Depth lets you clamp the max depth range of your scene.\n"
-					 "Default its 1 and Minimum is 0.5.";
-		ui_category = "Occlusion Masking";
-	> = 1.0;
-	#else
-		static const int Max_Depth = 1;
-	#endif
-	
 		uniform float Range_Blend <
 		ui_type = "slider";
 		ui_min = 0; ui_max = 1;
@@ -414,8 +493,8 @@ namespace SuperDepth3D
 	uniform int Performance_Level <
 		ui_type = "combo";
 		ui_items = "Performant\0Normal\0Performant + VRS\0Normal + VRS\0";
-		ui_label = " Performance Mode";
-		ui_tooltip = "Performance Mode Lowers or Raises Occlusion Quality Processing so that the performance is adjusted accordingly.\n"
+		ui_label = " Performance Level";
+		ui_tooltip = "Performance Levels Lowers or Raises Occlusion Quality Processing so that the performance is adjusted accordingly.\n"
 					 "Varable Rate Shading focuses the quality of the samples in lighter areas of the screen.\n"
 					 "Please enable the 'Performance Mode' Checkbox, in ReShade's GUI.\n"
 					 "It's located in the lower bottom right of the ReShade's Main.\n"
@@ -498,7 +577,7 @@ namespace SuperDepth3D
 	uniform float Offset <
 		ui_type = "drag";
 		ui_min = -1.0; ui_max = 1.0;
-		ui_label = " Depth Map Offset";
+		ui_label = " Linear Offset";
 		ui_tooltip = "Depth Map Offset is for non conforming ZBuffer.\n"
 					 "It's rare if you need to use this in any game.\n"
 					 "Default and starts at Zero and it's Off.";
@@ -507,9 +586,9 @@ namespace SuperDepth3D
 	
 	uniform float Auto_Depth_Adjust <
 		ui_type = "drag";
-		ui_min = 0.0; ui_max = 0.625;
-		ui_label = " Auto Depth Adjust";
-		ui_tooltip = "Automatically scales depth so it avoides extreme pop out.\n"
+		ui_min = 0.0; ui_max = 0.500;
+		ui_label = " Auto Near Plane";
+		ui_tooltip = "Automatically adjust Near Plane to prevent excessive pop-out effects.\n"
 					 "Default is 0.1, Zero is off.";
 		ui_category = "Depth Map";
 	> = DB_Z;
@@ -967,6 +1046,66 @@ namespace SuperDepth3D
 					 "Default is Off.";
 		ui_category = "Miscellaneous Options";
 	> = false;
+
+	//Extra Informaton
+uniform int Extra_Information <
+	ui_text =   "Profiles Info:\n"
+				"If the shader loads a profile, avoid using [ZPD] and [Depth Map] optons. \n"
+				"Since adjusting options like Near Plane Adjustment, Flip, ZPD, Offset, & Ect.\n"
+				"Can and will break the profiles that are already in the Overwatch.fxh.\n"
+				"If you want to make your own profile delete Overwatch.fxh.\n"
+				"\n"
+				"New Profiles:\n"
+				"If the shader starts up and says 'No Profile,' the first thing you should do is\n"
+				"enable depth view in the game and set the depth where it looks like a B&W gradient\n"
+				"that shows up as dark near you and lighter as it moves into the distance.\n"
+				"If it doesn't look like that, set the [Depth Map] from DM0 to DM1.\n"
+				"At this point, check orientation. If it looks upside down, just use [Flip].\n"
+				"Disable the depth buffer view, and in-game, adjust the [Near Plane] until it looks nice.\n"
+				"Be careful not to have screen violations, That's where an object starts to stick out.\n"
+				"It should look like you are looking into a portal, and the objects are inside of it.\n"
+				"Ignore the FPS options here since it will be way more complicated for this mini guide.\n"
+				"\n"
+				"Boundary Detection:\n"				
+				"[ZPD Boundary Detection] Should be set at this time to 1-3 for most games.\n"
+				"Now move the camrea until it something near the screen violates the Boundary Detection.\n"
+				"Now adjust [ZPD Scaler¹] from 0.5-0.875 once that looks good move on to the option below.\n"
+				"[ZPD Scaler²] & [Intrusion] Move the camrea where it clip a little and adjust the 1st opion\n"
+				"where it looks good too you. Then move the 2nd slider until it stops working and adjust it\n"
+				"to about 1.0 - 0.5. This will start to make sense the more profiles you make over time.\n"
+				"This should serve you well in the majority of games.\n"				
+				"\n"
+				"Youtube Guides:\n"
+				"Some already exist and more will come in time. For more information goto\n"
+				"https://www.youtube.com/@BlueSkyDefender\n"
+				"\n"
+				"Performance:\n"
+				"To lower the cost of the shader use the lower cost Performance Levels Like.\n"
+				"[Performance + VRS v ]\n"
+				"|Normal + VRS        |\n"
+				"\n"
+				"Performance Ex:\n"
+				"Also please enable the 'Performance Mode' Checkbox, in ReShade's GUI.\n"
+				"It's located in the lower bottom right of the ReShade's Main Menu.\n"
+				"\n"
+				"Preprocessors:\n"
+				"Color Correcting  | Is the process of restoring the original colors in the scenes.\n"
+				"Deband            | Is used to correct for banding issues in the image.\n"
+				"HDR compatibility | Allows for HDR support in the shader when HDR is available.\n"
+				"Inficolor 3D      | Modify the shader to accommodate Inficolor glasses for 3D content.\n"
+				"Reconstruction    | Is a diffrent way to render the images out.\n"
+				"\n"
+				"Active Keys:\n"
+				"Menu Key          | Is used to toggle on-screen information you see at startup.\n"
+				"Mouse Button 4    | Is used to unlock and lock the on screen cursor.\n"
+				"_______________________________________________________________________________\n"
+			    "Try reading the Read Help doc or Join our Discord https://discord.gg/KrEnCAxkwJ";
+	ui_category = "Depth3D Guidelines";
+	ui_category_closed = true;
+	ui_label = " ";
+	ui_type = "radio";
+	>;
+
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	uniform bool Cancel_Depth < source = "key"; keycode = Cancel_Depth_Key; toggle = true; mode = "toggle";>;
 	uniform bool Mask_Cycle < source = "key"; keycode = Mask_Cycle_Key; toggle = true; mode = "toggle";>;
@@ -1255,9 +1394,9 @@ namespace SuperDepth3D
 	#endif
 
 	#if DX9_Toggle
-			texture texzBufferBlurN < pooled = true; > { Width = BUFFER_WIDTH / 2.0 ; Height = BUFFER_HEIGHT / 3.0; Format = R16F; MipLevels = 6; }; // Needs to be RG16F If external Texture is given for DownSample. Not needed if external texture is already down sampled.
+			texture texzBufferBlurN < pooled = true; > { Width = BUFFER_WIDTH / 2.0 ; Height = BUFFER_HEIGHT / 4.0; Format = R16F; MipLevels = 6; }; // Needs to be RG16F If external Texture is given for DownSample. Not needed if external texture is already down sampled.
 	#else
-			texture texzBufferBlurN < pooled = true; > { Width = BUFFER_WIDTH / 2.0 ; Height = BUFFER_HEIGHT / 3.0; Format = RG16F; MipLevels = 6; }; // Needs to be RG16F If external Texture is given for DownSample. Not needed if external texture is already down sampled.
+			texture texzBufferBlurN < pooled = true; > { Width = BUFFER_WIDTH / 2.0 ; Height = BUFFER_HEIGHT / 4.0; Format = RG16F; MipLevels = 6; }; // Needs to be RG16F If external Texture is given for DownSample. Not needed if external texture is already down sampled.
 	#endif
 	
 	sampler SamplerzBuffer_BlurN
@@ -2088,12 +2227,12 @@ namespace SuperDepth3D
 	}
 	
 	float AutoDepthRange(float d, float2 texcoord )
-	{ float LumAdjust_ADR = smoothstep(-0.0175,Auto_Depth_Adjust,Lum(texcoord).y);
+	{ float LumAdjust_ADR = smoothstep(-0.0175,min(0.5,Auto_Depth_Adjust),Lum(texcoord).y);
 	    return min(1,( d - 0 ) / ( LumAdjust_ADR - 0));
 	}
 		
 	float3 Conv(float2 MD_WHD,float2 texcoord)
-	{	float D = MD_WHD.x, Z = ZPD_Separation.x, WZP = 0.5, ZP = 0.5, W_Convergence = Inficolor_Near_Reduction ? WZPD_and_WND.x * 0.8 : WZPD_and_WND.x, WZPDB, Distance_From_Bottom = 0.9375, ZPD_Boundary = ZPD_Boundary_n_Fade.x, Store_WC, Set_Max_Depth = Max_Depth;
+	{	float D = MD_WHD.x, Z = ZPD_Separation.x, WZP = 0.5, ZP = 0.5, W_Convergence = Inficolor_Near_Reduction ? WZPD_and_WND.x * 0.8 : WZPD_and_WND.x, WZPDB, Distance_From_Bottom = 0.9375, ZPD_Boundary = ZPD_Boundary_n_Fade.x, Store_WC, Set_Max_Depth = 1.0;
 	    //Screen Space Detector.
 		if (abs(Weapon_ZPD_Boundary.x) > 0)
 		{   float WArray[6] = { 0.4, 0.5, 0.6, 0.7, 0.8, 0.9};
@@ -2356,22 +2495,19 @@ namespace SuperDepth3D
 		if(Vert_3D_Pinball && Stereoscopic_Mode != 5)	
 			texcoord.xy = texcoord.yx;
 		#endif
-		float VMW = View_Mode == 1 ? View_Mode_Warping : clamp(View_Mode_Warping,0, View_Mode == 5 ? 2 : 1);
-		float Depth_Blur = View_Mode_Warping > 0 ? min(tex2Dlod(SamplerzBufferN_L, float4( texcoord, 0, clamp(VMW,0,5) ) ).x,tex2Dlod(SamplerzBufferN_L, float4( texcoord, 0, 0) ).x) : tex2Dlod(SamplerzBufferN_L, float4( texcoord, 0, 0) ).x;
-	
-		float2 DS_LP = float2(Depth_Blur,tex2Dlod(SamplerzBufferN_P, float4( texcoord, 0, 0) ).x);
-	
-		float3 DepthBuffer_LP = float3(DS_LP.x,DS_LP.y, tex2Dlod(SamplerzBufferN_P, float4(texcoord,0, 1) ).y );
+		bool VM_5_Bool = View_Mode == 5;
+		float GetDepth = smoothstep(0,1, tex2Dlod(SamplerzBufferN_P, float4(texcoord,0, 1) ).y);
+		uint VMW = View_Mode == 1 ? View_Mode_Warping : lerp(6, VM_5_Bool ? 0 :View_Mode_Warping, VM_5_Bool ? GetDepth : 1);
+		float Depth_Blur = View_Mode_Warping > 0 ? min(tex2Dlod(SamplerzBufferN_L, float4( texcoord, 0, clamp(VMW,0,6) ) ).x,tex2Dlod(SamplerzBufferN_L, float4( texcoord, 0, 0) ).x) : tex2Dlod(SamplerzBufferN_L, float4( texcoord, 0, 0) ).x;
+
+		float2 DepthBuffer_LP = float2(Depth_Blur,tex2Dlod(SamplerzBufferN_P, float4( texcoord, 0, 0) ).x);;
 		float Min_Blend = tex2Dlod(SamplerzBuffer_BlurN, float4( texcoord * float2( 0.5 , 1), 0, 0) ).x;//min(tex2Dlod(SamplerzBufferN_L, float4( texcoord, 0, 3.5) ).x,tex2Dlod(SamplerzBufferN_L, float4( texcoord, 0, 2.5 ) ).x) ;
+
 		if( Range_Blend > 0)
 			   DepthBuffer_LP.xy = lerp(DepthBuffer_LP.xy,  Min_Blend ,(smoothstep(0.5,1.0, Min_Blend) *  Min_Divergence().y) * saturate(Range_Blend));
-		if(View_Mode != 4)
-		{
-			if(View_Mode == 0 || View_Mode == 3)	
-				DepthBuffer_LP.x = DepthBuffer_LP.y;
-		}
-		else
-			DepthBuffer_LP.x = lerp(DepthBuffer_LP.y,DepthBuffer_LP.x,smoothstep(0.8,1.0,DepthBuffer_LP.z));
+
+		if(View_Mode == 0 || View_Mode == 3)	
+			DepthBuffer_LP.x = DepthBuffer_LP.y;
 			
 		#if Inficolor_3D_Emulator
 		float Separation = lerp(1.0,5.0,(ZPD_Separation.y * 0.5 + ZPD_Separation.y) * 0.5);	
@@ -2384,30 +2520,31 @@ namespace SuperDepth3D
 		if(De_Artifacting.x >= 0) // Investigate is this should be the Depth Buffer.
 			Mix_Past_Current_Corner_Mask = 1;
 		
-			if( View_Mode >= 2)
+			if( View_Mode >= 2 && View_Mode < 5)
 				Mix_Past_Current_Corner_Mask = 0;
 		
-		return float4(Separation * DepthBuffer_LP.xy, DepthBuffer_LP.z, saturate(Mix_Past_Current_Corner_Mask) );
+		return float4(Separation * DepthBuffer_LP.xy, GetDepth, saturate(Mix_Past_Current_Corner_Mask) );
 	}
 	//Perf Level selection & Array access               X    Y      Z      W              X    Y      Z      W
-	static const float4 Performance_LvL[2] = { float4( 0.5, 0.5095, 0.679, 0.5 ), float4( 1.0, 1.019, 1.425, 1.0) };
+	//static const float2 Performance_LvL[2] = { float4( 0.5, 0.5095, 0.679, 0.5 ), float4( 1.0, 1.019, 1.425, 1.0) };
+	//Perf Level selection & Array access                X      Y               X    Y  
+	static const float2 Performance_LvL0[2] = { float2( 0.5  , 0.679), float2( 1.0, 1.425) };
+	static const float2 Performance_LvL1[2] = { float2( 0.375, 0.479), float2( 0.5, 0.679) };
 	static const float  VRS_Array[5] = { 0.5, 0.5, 0.25, 0.125 , 0.0625 };
 	//////////////////////////////////////////////////////////Parallax Generation///////////////////////////////////////////////////////////////////////
 	float2 Parallax(float Diverge, float2 Coordinates, float IO) // Horizontal parallax offset & Hole filling effect
 	{
-	    float  MS = Diverge * pix.x; int Perf_LvL = fmod(Performance_Level,2);  
-		float2 ParallaxCoord = Coordinates, Default_Offset = View_Mode == 1 ? float2(50.0,150.0) : float2(75.0,175.0), CBxy = floor( float2(Coordinates.x * BUFFER_WIDTH, Coordinates.y * BUFFER_HEIGHT));
-		float GetDepth = smoothstep(0,1, GetDB(Coordinates).z ), CB_Done = fmod(CBxy.x+CBxy.y,2),
-				   Perf = Performance_LvL[Perf_LvL].x;
+	    float  MS = Diverge * pix.x; uint Perf_LvL = fmod(Performance_Level,2);  
+		float2 ParallaxCoord = Coordinates, Default_Offset = View_Mode == 1 || View_Mode >= 5 ? float2(50.0,150.0) : float2(75.0,175.0), CBxy = floor( float2(Coordinates.x * BUFFER_WIDTH, Coordinates.y * BUFFER_HEIGHT));
+		float GetDepth = GetDB(Coordinates).z, CB_Done = fmod(CBxy.x+CBxy.y,2),
+			Perf = Performance_Level > 1 ? lerp(Performance_LvL1[Perf_LvL].x,Performance_LvL0[Perf_LvL].x,GetDepth) : Performance_LvL0[Perf_LvL].x;
 		//Would Use Switch....
 		if( View_Mode == 2)
-			Perf = Performance_LvL[Perf_LvL].z;
+			Perf = Performance_Level > 1 ? lerp(Performance_LvL1[Perf_LvL].y,Performance_LvL0[Perf_LvL].y,GetDepth) : Performance_LvL0[Perf_LvL].y;
+		if( View_Mode == 4)
+			Perf = CB_Done ? 0.679f : 0.367f;
 		if( View_Mode == 5)
-		{
-			Perf = GetDepth >= 0.999 ? CB_Done ? 0.5 : 1.000 : CB_Done ? 1.020: 1.040;
-			
-			Perf = lerp(Perf,1.425f,0.5);
-		}				
+			Perf = lerp(0.375f,0.679f,GetDepth);				
 		//Luma Based VRS
 		float Auto_Adptive = Switch_VRS == 0 ? lerp(0.05,1.0,smoothstep(0.00000001f, 0.375, tex2D(SamplerzBufferN_P,0).y ) ) : 1,
 			  Luma_Adptive = smoothstep(0.0,saturate(VRS_Array[Switch_VRS] * Auto_Adptive), tex2Dlod(SamplerDMN,float4(Coordinates,0,9)).w);
@@ -2422,7 +2559,7 @@ namespace SuperDepth3D
 	
 		//Offsets listed here Max Seperation is 3% - 8% of screen space with Depth Offsets & Netto layer offset change based on MS.
 		float deltaCoordinates = MS * LayerDepth, CurrentDepthMapValue = min(1,GetDB( ParallaxCoord).x), CurrentLayerDepth = 0.0f,
-			  DB_Offset = D * TP * pix.x, VM_Switch = View_Mode == 1 || View_Mode == 6 ? 0.125 : lerp(1.0,0.125,GetDepth);
+			  DB_Offset = D * TP * pix.x, VM_Switch = View_Mode == 1 || View_Mode >= 5 ? 0.125 : lerp(1.0,0.125,GetDepth);
 		
 		float Mod_Depth = saturate(GetDepth * lerp(1,15,abs(De_Artifacting.y))), Reverse_Depth = De_Artifacting.y < 0 ? 1-Mod_Depth : Mod_Depth,
 			  Scale_With_Depth = De_Artifacting.y == 0 ? 1 : Reverse_Depth;
@@ -2446,14 +2583,14 @@ namespace SuperDepth3D
 		    CurrentLayerDepth += LayerDepth;
 		}
 
-		if( View_Mode <= 1 )	
+		if( View_Mode <= 1 || View_Mode >= 5 )	
 	   	ParallaxCoord.x += DB_Offset * VM_Switch;
 	    
 		float2 PrevParallaxCoord = float2( ParallaxCoord.x + deltaCoordinates, ParallaxCoord.y), Depth_Adjusted = 1-saturate(float2(GetDepth * 5.0, GetDepth));
 		//Anti-Weapon Hand Fighting
 		float Weapon_Mask = tex2Dlod(SamplerDMN,float4(Coordinates,0,0)).y, ZFighting_Mask = 1.0-(1.0-tex2Dlod(SamplerLumN,float4(Coordinates,0,1.400)).w - Weapon_Mask);
 			  ZFighting_Mask = ZFighting_Mask * (1.0-Weapon_Mask);
-		float2 PCoord = float2(View_Mode <= 1 ? PrevParallaxCoord.x : ParallaxCoord.x, PrevParallaxCoord.y ) ;	
+		float2 PCoord = float2(View_Mode <= 1 || View_Mode >= 5 ? PrevParallaxCoord.x : ParallaxCoord.x, PrevParallaxCoord.y ) ;	
 			   PCoord.x -= 0.005 * MS;		   
 		float Get_DB = GetDB( PCoord ).x, 
 			  Get_DB_ZDP = WP > 0 ? lerp(Get_DB, abs(Get_DB), ZFighting_Mask) : Get_DB;
@@ -2466,7 +2603,7 @@ namespace SuperDepth3D
 			  weight = lerp(weight + (2.0 * Depth_Adjusted.y) * DD_Map,weight,0.75);//Reversed the logic since it seems look better this way and it leans towards the normal output.
 		float Weight = weight;
 			
-			if( View_Mode <= 1 )
+			if( View_Mode <= 1 || View_Mode >= 5 )
 			{
 				if(Diverge < 0)
 					weight *= lerp( 1, 1-(0.00075 * saturate(GetDepth * 2.5)), DD_Map ); 
@@ -2476,10 +2613,9 @@ namespace SuperDepth3D
 			//ParallaxCoord.x = lerp( ParallaxCoord.x, PrevParallaxCoord.x, weight); //Old		
 			ParallaxCoord.x = PrevParallaxCoord.x * weight + ParallaxCoord.x * (1 - Weight);
 		//This is to limit artifacts.
-		if( View_Mode > 0 )
-			ParallaxCoord.x += DB_Offset;
+		ParallaxCoord.x += DB_Offset;
 		
-		if( View_Mode <= 1 )
+		if( View_Mode <= 1 || View_Mode >= 5 )
 		{
 			if(Diverge < 0)
 				ParallaxCoord.x += lerp(0,DepthDiffrence * 7.5 * pix.x, DD_Map );
