@@ -1,7 +1,7 @@
 ////----------------------------------------//
 ///SuperDepth3D Overwatch Automation Header///
 //----------------------------------------////
-// Version 3.4.1
+// Version 3.4.2
 //---------------------------------------OVERWATCH---------------------------------------//
 // If you are reading this stop. Go away and never look back. From this point on if you  //
 // still think it's is worth looking at this..... Then no one can save you or your soul. //
@@ -7117,7 +7117,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DR_W float4( 1000.0, 1000.0, 1000.0, 1000.0) //Tresh Hold for Color G & H and Color 
 	*/
     #define PEW 1
-#elif (App == 0x9255C26F ) //Crash Bandicoot 4 It's About Time
+#elif (App == 0x9255C26F || App == 0x59939D69 ) //Crash Bandicoot 4 It's About Time
 	#define DA_W 1
     //#define DB_X 1
 	#define DA_X 0.125
@@ -16192,23 +16192,24 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DO_W float4( 21.0, 22.0, 30.0, 30.0) //Tresh Hold for Color A & B and Color
 	*/
 
-    #define MMD 1 //Set Multi Menu Detection             //Off / On
+    #define MMD 3 //Set Multi Menu Detection             //Off / On
     #define MMS 0 //Set Multi Menu Selection from 0-1 to 29-30 and Off 0 | 1 | 2
-    #define DO_X float4( 0.916 , 0.863 , 0.919 , 0.500 ) //Pos A1 = XY Color & A2 = ZW Black 
-    #define DO_Y float4( 0.078 , 0.913 , 0.340 , 0.056 ) //Pos A3 = XY Color & B1 = ZW Color
-    #define DO_Z float4( 0.500 , 0.767 , 0.583 , 0.056 ) //Pos B2 = XY Black & B3 = ZW Color
-	#define DO_W float4( 14.0, 30.0, 22.0, 22.0) //Tresh Hold for Color A & B and Color
-	/*
-    #define DP_X float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos C1 = XY Color & C2 = ZW Black 
-    #define DP_Y float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos C3 = XY Color & D1 = ZW Color
-    #define DP_Z float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos D2 = XY Black & D3 = ZW Color
-	#define DP_W float4( 1000.0, 1000.0, 1000.0, 1000.0) //Tresh Hold for Color C & D and Color
-
-	#define DQ_X float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos C1 = XY Color & C2 = ZW Black 
-    #define DQ_Y float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos C3 = XY Color & D1 = ZW Color
+    //Main Menu Slot One and Slot 2 Options
+    #define DO_X float4( 0.050 , 0.935 , 0.785 , 0.070 ) //Pos A1 = XY Color & A2 = ZW Black 
+    #define DO_Y float4( 0.045 , 0.100 , 0.150 , 0.109 ) //Pos A3 = XY Color & B1 = ZW Color
+    #define DO_Z float4( 0.785 , 0.070 , 0.150 , 0.941 ) //Pos B2 = XY Black & B3 = ZW Color
+	#define DO_W float4( 30.0, 19.0, 15.0, 15.0) //Tresh Hold for Color A & B and Color
+	//2nd is the in game update menu
+    #define DP_X float4( 0.150 , 0.109 , 0.785 , 0.070 ) //Pos C1 = XY Color & C2 = ZW Black 
+    #define DP_Y float4( 0.056 , 0.140 , 0.5335 , 0.858 ) //Pos C3 = XY Color & D1 = ZW Color
+    #define DP_Z float4( 0.500 , 0.700 , 0.719 , 0.042 ) //Pos D2 = XY Black & D3 = ZW Color
+	#define DP_W float4( 15.0, 13.0, 30.0, 19.0) //Tresh Hold for Color C & D and Color
+	//
+	#define DQ_X float4( 0.045 , 0.100 , 0.500 , 0.125 ) //Pos C1 = XY Color & C2 = ZW Black 
+    #define DQ_Y float4( 0.084 , 0.942 , 0.000 , 0.000 ) //Pos C3 = XY Color & D1 = ZW Color
     #define DQ_Z float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos D2 = XY Black & D3 = ZW Color
-	#define DQ_W float4( 1000.0, 1000.0, 1000.0, 1000.0) //Tresh Hold for Color A1 & A3 and Color
-
+	#define DQ_W float4( 19.0, 15.0, 1000.0, 1000.0) //Tresh Hold for Color A1 & A3 and Color
+	/*
 	#define DR_X float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos G1 = XY Color & G2 = ZW Black 
     #define DR_Y float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos G3 = XY Color & H1 = ZW Color
     #define DR_Z float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos H2 = XY Black & H3 = ZW Color
@@ -17649,6 +17650,55 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	//Smooth Mode Setting
     #define SMS 3           //SM Toggle Separation
 	#define DL_X 0.825       //SM Tune
+	//#define DL_W 0.05       //SM Perspective
+	#define DM_X 4           //HQ Tune
+	//#define HQT 1           //HQ Trigger
+    //#define DM_Y 3     //HQ VRS           
+	#define PEW 1
+    #define NDW 1
+	#define DAA 1
+#elif (App == 0xC614B005 )	//Wo Long
+    //#define DS_Z 2            // Set View Mode
+	#define DA_W 1            // Set Linerzation
+    //#define DB_X 1            // Flip
+	#define DA_X 0.039//0.025      // ZPD
+	#define DF_Y 0.000         // Seperation
+	#define DA_Y 50.0//80.0         // Near Plane Adjustment
+    //#define DA_Z -0.5      // Linerzation Offset
+    //#define DS_Y 1            // Linerzation Offset Effects only distance if true
+	#define DB_Z 0.05         // Auto Depth Protection
+	#define DE_X 1            // ZPD Boundary 
+	#define DE_Y 0.625        // Set ZPD Boundary Level Zero 
+	#define DE_Z 0.375        // Speed that Boundary is Enforced
+	//#define AFD 1           // Alternate Frame Detection - May be phased out
+	//#define DG_W 0.125        // Shift Boundary Out of screen 0.5 and or In screen -0.5
+	//#define OIL 2           // Set How many Levels We use for RE_Fix 0 | 1 | 2 | 3 if 1 then it's float2(0,0) for OIF and DI_W
+    //#define OIF float3(0.5,0.375,0.200)// Fix enables if Value is > 0.0 
+	//#define DI_W float3(0.5,1.0,2.0) // Like Shift Boundary DG_W But 0 to inf
+	//#define FTM 0             // Fast Trigger Mode If this enabled then Level 1 and > switches instantly.
+    ///#define DG_Z 0.500        // Min Weapon Hands That are apart of world with Auto and Trim
+    //#define DS_X float2(0.0025,2)// Min Weapon bit only triggers when a OIL Level is set and set here on .y
+    //#define DE_W 0.250        // Auto
+    ///#define DI_Z 0.310        // Trim
+    //#define DF_W float4(0,0,0,0)// Edge & Scale
+	
+	#define BMT 1             // ZPD and World Scale Balance // I need to phase this out.
+	#define DF_Z 0.000         // Set the Balance  
+    //#define DL_Y 0.5        // De-Artifact Only works on some View Modes and causes performance degredation
+	//#define DB_Y 1.0
+    //#define DL_Z 0.25         // Compat Power
+	//#define DJ_X 0.250        // Range Smoothing
+	//#define WSM 2             // Weapon Setting Mode 
+	//#define DB_W 16           // Weapon Profile
+	//#define DF_X float2(0,0)  // ZPD Weapon Boundarys Level 1 and Level 2
+	//#define DJ_W 0.1	        // Weapon Depth Limit Location 1
+	//#define DS_W 1.0	        // Weapon Depth Limit Location 2
+	//#define DT_W float2(0.015,0.03)//WH scale and cutoff
+	//#define WHM 1               //Weapon Hand Masking lets you use DT_Z 
+	//#define DT_Z 0.1            //WH Masking Power
+	//Smooth Mode Setting
+    #define SMS 3           //SM Toggle Separation
+	#define DL_X 0.90       //SM Tune
 	//#define DL_W 0.05       //SM Perspective
 	#define DM_X 4           //HQ Tune
 	//#define HQT 1           //HQ Trigger
