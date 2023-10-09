@@ -311,6 +311,22 @@ look for the system.cfg then drop the autoexec.cfg next to it and you are done.
 
 https://www.mediafire.com/file/fcchg1270vccfwz/Crysis_2.zip/file
 
+{Dead in the Water 2} [Reshade 5.9.2] + Add-On used ShaderToggler
+
+Add-on: 
+https://github.com/FransBouma/ShaderToggler
+
+Download the 64 bit version
+
+Youtube Guide:
+N/A
+
+Downloable Fix:
+https://www.mediafire.com/file/ozutfthx26w7t5j/ShaderToggler.ini/file
+
+Drop this ini next to the add-on and in game press ctrl + 1 in game to turn it off and on.
+
+
 {Dead or Alive 6} [Reshade 4.9.1]
 To use ReShade in this game you need to use a Injector that was written for UWP Games.
 

@@ -2,7 +2,7 @@
 	///**SuperDepth3D_VR+**///
 	//--------------------////
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	//* Depth Map Based 3D post-process shader v3.8.8
+	//* Depth Map Based 3D post-process shader v3.9.0
 	//* For Reshade 4.4+ I think...
 	//* ---------------------------------
 	//*
@@ -32,7 +32,7 @@
 	//* http://reshade.me/forum/shader-presentation/2128-sidebyside-3d-depth-map-based-stereoscopic-shader
 	//* https://discord.gg/Q2n97Uj
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	#define SD3DVR "SuperDepth3D_VR+ v3.8.8\n"
+	#define SD3DVR "SuperDepth3D_VR+ v3.9.0\n"
 namespace SuperDepth3DVR
 {
 	#define D_ViewMode 1
@@ -73,6 +73,10 @@ namespace SuperDepth3DVR
 		static const float DQ_X = 0.0, DQ_Y = 0.0, DQ_Z = 0.0, DQ_W = 1000.0;
 		// DR_X = [Position G & G] DR_Y = [Position G & H] DR_Z = [Position H & H] DR_W = [GH Menu Tresh]	
 		static const float DR_X = 0.0, DR_Y = 0.0, DR_Z = 0.0, DR_W = 1000.0;
+		// DU_X = [Position I & I] DU_Y = [Position I & J] DU_Z = [Position J & J] DU_W = [IJ Menu Tresh]	
+		static const float DU_X = 0.0, DU_Y = 0.0, DU_Z = 0.0, DU_W = 1000.0;
+		// DV_X = [Position K & K] DV_Y = [Position K & L] DV_Z = [Position L & L] DU_W = [KL Menu Tresh]	
+		static const float DV_X = 0.0, DV_Y = 0.0, DV_Z = 0.0, DV_W = 1000.0;
 		// DS_X = [Weapon NearDepth Min OIL] DS_Y = [Depth Range Boost] DS_Z = [View Mode State] DS_W = [Check Depth Limit Weapon Secondary]
 		static const float DS_X = 0.0, DS_Y = 0.0, DS_Z = D_ViewMode, DS_W = 1.0;
 		// DT_X = [Null X] DT_Y = [Null Y] DT_Z = [Weapon Hand Mask] DT_W = [Rescale Weapon Hand Near]
@@ -232,14 +236,24 @@ namespace SuperDepth3DVR
 	#ifndef Super3D_Mode
 		#define Super3D_Mode 0
 	#endif
-	//This preprocessor is for Checkerboard Reconstruction Mode for really close to full Res images.
+	#define SuperDepth Super3D_Mode
+	//This preprocessor is for Side by Side and Top n Bottom Upscaling with added AA
 	#ifndef Upscaler_Mode
 		#define Upscaler_Mode 0
 	#endif
-	#define SuperDepth Super3D_Mode
+	//This preprocessor is to set the vertical resolution 0 is 100% 1 is 75% and 2 is 50% the lowest Value
+	#ifndef Set_Vertical_Resolution
+		#define Set_Vertical_Resolution 0
+	#endif
 	//This preprocessor is for HelixVision Mode that creates a Double Sized texture on the Horizontal axis.
 	#ifndef HelixVision_Mode
 		#define HelixVision_Mode 0
+	#endif
+	#ifndef Color_Correction_Mode
+		#define Color_Correction_Mode 0
+	#endif
+	#ifndef Enable_Deband_Mode
+		#define Enable_Deband_Mode 0
 	#endif
 	//Render Buffer Resolution limit.
 	#define RenderBufferWidth (BUFFER_WIDTH * 2) > 4096
@@ -540,6 +554,13 @@ namespace SuperDepth3DVR
 			         "Default is Automatic.";
 		ui_category = "Occlusion Masking";
 	> = 0;	
+	
+	uniform bool Foveated_Mode <
+			ui_label = "Foveated Rendering";
+			ui_tooltip = "Foveated rendering lowes the quality of the infilling around the center of the image.\n"
+						 "In the future when we have a method for eye tracking this should work a lot better.";
+			ui_category = "Occlusion Masking";
+	> = true;
 	
 	uniform float Compatibility_Power <
 		#if Compatibility
@@ -932,7 +953,7 @@ namespace SuperDepth3DVR
 	static const float3 Polynomial_Colors_K2 = float3(0.24, 0.24, 0.24);
 	static const int Theater_Mode = 0;
 	#endif
-	
+	#if Color_Correction_Mode	
 	uniform int Color_Correction <
 		ui_type = "combo";
 		ui_items = "Off\0On\0";
@@ -953,11 +974,15 @@ namespace SuperDepth3DVR
 					"Default is 0.0f, Low.";
 		ui_category = "Image Effects";
 	> = 0.0;
-	
+	#endif	
 	uniform float Blinders <
 		ui_type = "slider";
 		ui_min = 0.0; ui_max = 1.0;
+	#if Color_Correction_Mode
 		ui_label = " Blinders";
+	#else
+		ui_label = "·Blinders·";	
+	#endif
 		ui_tooltip = "Lets you adjust blinders sensitivity.\n"
 					 "Default is Zero, Off.";
 		ui_category = "Image Effects";
@@ -990,13 +1015,13 @@ namespace SuperDepth3DVR
 		ui_tooltip = "Lets you saturate image, basically adds more color.";
 		ui_category = "Image Effects";
 	> = 0;
-	
+	#if Color_Correction_Mode || Enable_Deband_Mode	
 	uniform bool Toggle_Deband <
 		ui_label = " Deband Toggle";
 		ui_tooltip = "Turns on automatic Depth Aware Deband this is used to reduce or remove the color banding in the image.";
 		ui_category = "Image Effects";
 	> = false;
-	
+	#endif
 	#if !SuperDepth && !HelixVision
 		uniform bool NCAOC < // Non Companion App Overlay Compatibility
 		ui_label = " Alternative Overlay Mode";
@@ -1007,6 +1032,40 @@ namespace SuperDepth3DVR
 	#else
 		static const int NCAOC = 0;
 	#endif
+	
+	//Extra Informaton
+uniform int Extra_Information <
+	ui_text =   "Preprocessors:\n"
+				"Color Correcting  | Is the process of restoring the original colors in the scenes.\n"
+				"\n"
+				"Deband            | Is used to correct for banding issues in the image.\n"
+				"\n"
+				"HelixVision Mode  | Is for the use with HelixVision VR software & This modes provides\n"
+				"                    Double wide stereo3D buffer for other applications.\n"
+				"\n"
+				"Set Vertical Res  | Lowers the vertical resolution for extra performance and is best\n"
+				"                    used with SmartSharp option above. [0 = 100%] [1 = 75%] [2 = 50%] \n"
+				"\n"				
+				"Super 3D v1       | This mode is for the Depth3D Companion VR application\n"
+				"                    it allows for a higer quality image.\n"
+				"\n"
+				"Upscaler          | Dose two things it used a single Buffer for left and right images and\n"
+				"                    Upscales the image from [1 is 50%] of Hoz and [2 is 50%] if Vert.\n"				
+				//"HDR compatibility | Allows for HDR support in the shader when HDR is available.\n"
+				//"Inficolor 3D      | Modify the shader to accommodate Inficolor glasses for 3D content.\n"
+				//"Reconstruction    | Is a diffrent way to render the images out.\n"
+				"\n"
+				"Active Keys:\n"
+				"Menu Key          | Is used to toggle on-screen information you see at startup.\n"
+				"Mouse Button 4    | Is used to unlock and lock the on screen cursor.\n"
+				"_______________________________________________________________________________\n"
+			    "Try reading the Read Help doc or Join our Discord https://discord.gg/KrEnCAxkwJ";
+	ui_category = "Depth3D VR Preprocessors";
+	ui_category_closed = true;
+	ui_label = " ";
+	ui_type = "radio";
+	>;
+	
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	uniform bool Cancel_Depth < source = "key"; keycode = Cancel_Depth_Key; toggle = true; mode = "toggle";>;
 	uniform bool Mask_Cycle < source = "key"; keycode = Mask_Cycle_Key; toggle = true; >;
@@ -1251,7 +1310,15 @@ namespace SuperDepth3DVR
 				AddressW = BORDER;
 			};
 		#else
-		texture LeftTex  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBAC; };
+			
+		#if Set_Vertical_Resolution == 1		
+			#define Vertical_Resolution 0.75
+		#elif Set_Vertical_Resolution == 2		
+			#define Vertical_Resolution 0.50
+		#else
+			#define Vertical_Resolution 1.0
+		#endif
+		texture LeftTex  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT * Vertical_Resolution; Format = RGBAC; };
 		
 		sampler SamplerLeft
 			{
@@ -1261,7 +1328,7 @@ namespace SuperDepth3DVR
 				AddressW = BORDER;
 			};
 		
-		texture RightTex  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBAC; };
+		texture RightTex  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT * Vertical_Resolution; Format = RGBAC; };
 		
 		sampler SamplerRight
 			{
@@ -1285,15 +1352,6 @@ namespace SuperDepth3DVR
 			Texture = texLumVR;
 		};
 	
-	texture2D texMinMaxRGB { Width = 2; Height = 1; Format = RGBA16f; };
-	sampler2D samplerMinMaxRGB
-	{ 
-		Texture = texMinMaxRGB;
-		MagFilter = POINT;
-		MinFilter = POINT;
-		MipFilter = POINT;
-	};
-	
 	texture2D texMinMaxRGBLastFrame { Width = BUFFER_WIDTH * Scale_Buffer; Height = BUFFER_HEIGHT * Scale_Buffer; Format = RGBA16f; };
 	sampler2D samplerMinMaxRGBLastFrame 
 	{
@@ -1301,6 +1359,15 @@ namespace SuperDepth3DVR
 		 MagFilter = POINT;
 		 MinFilter = POINT;
 		 MipFilter = POINT;
+	};
+	#if Color_Correction_Mode
+	texture2D texMinMaxRGB { Width = 2; Height = 1; Format = RGBA16f; };
+	sampler2D samplerMinMaxRGB
+	{ 
+		Texture = texMinMaxRGB;
+		MagFilter = POINT;
+		MinFilter = POINT;
+		MipFilter = POINT;
 	};
 
 	void MinMaxRGB(float4 vpos : SV_Position, float2 texcoord : TexCoord, out float4 minmaxRGB : SV_Target0)
@@ -1336,7 +1403,7 @@ namespace SuperDepth3DVR
 		else
 		minmaxRGB = 0;
 	}
-	
+	#endif	
 	float2 Lum(float2 texcoord)
 	{   //Luminance
 			return saturate(tex2Dlod(SamplerLumVR,float4(texcoord,0,11)).xy);//Average Luminance Texture Sample
@@ -1514,13 +1581,23 @@ namespace SuperDepth3DVR
 					   Check_Color(DP_X.xy, DP_W.x) && Check_Color_MinMax_A(DP_X.zw) && Check_Color( DP_Y.xy, DP_W.y),
 					   Check_Color(DP_Y.zw, DP_W.z) && Check_Color_MinMax_A(DP_Z.xy) && Check_Color( DP_Z.zw, DP_W.w) );
 	}
-		#if MMD == 3 || MMD == 4
+		#if MMD >= 3
 		float4 Simple_Menu_Detection_EX()//Active RGB Detection Extended
 		{ 
 			return float4( Check_Color(DQ_X.xy, DQ_W.x) && Check_Color_MinMax_B(DQ_X.zw) && Check_Color( DQ_Y.xy, DQ_W.y),
 						   Check_Color(DQ_Y.zw, DQ_W.z) && Check_Color_MinMax_B(DQ_Z.xy) && Check_Color( DQ_Z.zw, DQ_W.w),
 					   	Check_Color(DR_X.xy, DR_W.x) && Check_Color_MinMax_B(DR_X.zw) && Check_Color( DR_Y.xy, DR_W.y),
 					   	Check_Color(DR_Y.zw, DR_W.z) && Check_Color_MinMax_B(DR_Z.xy) && Check_Color( DR_Z.zw, DR_W.w) );
+		}
+		#endif
+		
+		#if MMD >= 5
+		float4 Simple_Menu_Detection_EX_More()//Active RGB Detection Extended
+		{ 
+			return float4( Check_Color(DU_X.xy, DU_W.x) && Check_Color_MinMax_B(DU_X.zw) && Check_Color( DU_Y.xy, DU_W.y),
+						   Check_Color(DU_Y.zw, DU_W.z) && Check_Color_MinMax_B(DU_Z.xy) && Check_Color( DU_Z.zw, DU_W.w),
+					   	Check_Color(DV_X.xy, DV_W.x) && Check_Color_MinMax_B(DV_X.zw) && Check_Color( DV_Y.xy, DV_W.y),
+					   	Check_Color(DV_Y.zw, DV_W.z) && Check_Color_MinMax_B(DV_Z.xy) && Check_Color( DV_Z.zw, DV_W.w) );
 		}
 		#endif
 	#endif
@@ -1622,7 +1699,7 @@ namespace SuperDepth3DVR
 				int CSTT = clamp(Cursor_SC.y,0,10);
 				Color.rgb = CCArray[CSTT];
 			}
-
+		#if Color_Correction_Mode || Enable_Deband_Mode
 			if(Toggle_Deband)
 			{
 				//Code I asked Marty McFly | Pascal for and he let me have.
@@ -1646,12 +1723,14 @@ namespace SuperDepth3DVR
 				
 				Out.rgb = lerp(Out.rgb, scatter, diff.x <= LinerSampleDepth);
 			}
-			
+		#endif
+		#if Color_Correction_Mode
 			float3 minRGB = tex2D(samplerMinMaxRGB, float2(0.25,0.0)).rgb;
 			float3 maxRGB = tex2D(samplerMinMaxRGB, float2(0.75,0.0)).rgb;
 			
 			if(Color_Correction)
 				Out.rgb = saturate( (Out.rgb - minRGB) / (maxRGB-minRGB) );
+		#endif			
 		
 			Out = Cursor ? Color.rgb : Out.rgb;
 	
@@ -2210,7 +2289,7 @@ namespace SuperDepth3DVR
 				DM = 0.0625;
 			if( Simple_Menu_Detection().w == 1)
 				DM = 0.0625;
-			#if MMD == 3 || MMD == 4
+			#if MMD >= 3
 			if( Simple_Menu_Detection_EX().x == 1)
 				DM = 0.0625;
 			if( Simple_Menu_Detection_EX().y == 1)
@@ -2218,6 +2297,16 @@ namespace SuperDepth3DVR
 			if( Simple_Menu_Detection_EX().z == 1)
 				DM = 0.0625;
 			if( Simple_Menu_Detection_EX().w == 1)
+				DM = 0.0625;
+			#endif
+			#if MMD >= 5
+			if( Simple_Menu_Detection_EX_More().x == 1)
+				DM = 0.0625;
+			if( Simple_Menu_Detection_EX_More().y == 1)
+				DM = 0.0625;
+			if( Simple_Menu_Detection_EX_More().z == 1)
+				DM = 0.0625;
+			if( Simple_Menu_Detection_EX_More().w == 1)
 				DM = 0.0625;
 			#endif
 		}
@@ -2349,7 +2438,7 @@ namespace SuperDepth3DVR
 		if( Performance_Level > 1 )
 			Perf *= saturate(Luma_Adptive * 0.5 + 0.5  );
 		//ParallaxSteps Calculations
-		float MinNum = 20, D = abs(Diverge), Cal_Steps = D * Perf, FOV_Ren = lerp(100, MinNum, saturate(Vin_Pattern(Coordinates, float2(15.0,3.0)) * GetDepth * 4 )),
+		float MinNum = 20, D = abs(Diverge), Cal_Steps = D * Perf, FOV_Ren = Foveated_Mode ? lerp(100, MinNum, saturate(Vin_Pattern(Coordinates, float2(15.0,3.0)) * GetDepth * 4 )) : 50,
 			  Steps  = clamp( Cal_Steps, Perf_LvL ? MinNum : lerp( MinNum, min( MinNum, D), GetDepth >= 0.999 ), FOV_Ren );//Foveated Rendering Point of attack 16-256 limit samples.
 		// Offset per step progress & Limit
 		float LayerDepth = rcp(Steps), TP = Compatibility_Power >= 0 ? lerp(0.025, 0.05,Compatibility_Power) : lerp(0.0225, 0.05,abs(Compatibility_Power) * saturate(Vin_Pattern(Coordinates, float2(15.0,3.0))));
@@ -2389,7 +2478,7 @@ namespace SuperDepth3DVR
 		float Weapon_Mask = tex2Dlod(SamplerDMVR,float4(Coordinates,0,0)).y, ZFighting_Mask = 1.0-(1.0-tex2Dlod(SamplerLumVR,float4(Coordinates,0,1.400)).w - Weapon_Mask);
 			  ZFighting_Mask = ZFighting_Mask * (1.0-Weapon_Mask);
 		float2 PCoord = float2(View_Mode <= 1 || View_Mode >= 5 ? PrevParallaxCoord.x: ParallaxCoord.x, PrevParallaxCoord.y ) ;
-			   PCoord.x -= 0.005 * MS;
+			   //PCoord.x -= 0.005 * MS;
 		float Get_DB = GetDB( PCoord ).x, 
 			  Get_DB_ZDP = WP > 0 ? lerp(Get_DB, abs(Get_DB), ZFighting_Mask) : Get_DB;
 		// Parallax Occlusion Mapping
@@ -2891,7 +2980,11 @@ namespace SuperDepth3DVR
 		float Grid = floor(texcoord.y * BUFFER_HEIGHT * BUFFER_RCP_HEIGHT * Num_of_Values);	
 		//Motion_Detection
 		AL = float4(length(tex2D(SamplerDMVR,texcoord).w - tex2D(SamplerPBBVR,texcoord).x),Average_ZPD,texcoord.x < 0.5 ? Storage__Array_A[int(fmod(Grid,Num_of_Values))] : Storage__Array_B[int(fmod(Grid,Num_of_Values))] ,tex2Dlod(SamplerDMVR,float4(texcoord,0,0)).y);
+		#if Color_Correction_Mode
 		Other = float4(tex2D(samplerMinMaxRGB, texcoord).rgb,saturate(tex2Dlod(SamplerzBuffer_BlurVR, float4( texcoord * float2( 0.5 , 1) + float2(0.5,0), 0, 5 ) ).x * 100));
+		#else
+		Other = float4(0,0,0,saturate(tex2Dlod(SamplerzBuffer_BlurVR, float4( texcoord * float2( 0.5 , 1) + float2(0.5,0), 0, 5 ) ).x * 100));
+		#endif
 	}
 	////////////////////////////////////////////////////////////////////Logo////////////////////////////////////////////////////////////////////////////
 	#define _f float // Text rendering code copied/pasted from https://www.shadertoy.com/view/4dtGD2 by Hamneggs
@@ -3477,12 +3570,14 @@ namespace SuperDepth3DVR
 			RenderTarget0 = texzBufferVR_P;
 			RenderTarget1 = texzBufferVR_L;
 		}
+		#if Color_Correction_Mode
 			pass Color_Correction
 		{
 			VertexShader = PostProcessVS;
 			PixelShader = MinMaxRGB;
 			RenderTarget = texMinMaxRGB;
 		}
+		#endif
 			pass StereoBuffers
 		{
 			VertexShader = PostProcessVS;

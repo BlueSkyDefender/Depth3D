@@ -2,7 +2,7 @@
 	///**SuperDepth3D**///
 	//----------------////
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	//* Depth Map Based 3D post-process shader v3.8.8
+	//* Depth Map Based 3D post-process shader v3.9.0
 	//* For Reshade 3.0+
 	//* ---------------------------------
 	//*
@@ -32,7 +32,7 @@
 	//* http://reshade.me/forum/shader-presentation/2128-sidebyside-3d-depth-map-based-stereoscopic-shader
 	//* https://discord.gg/Q2n97Uj
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	#define SD3D "SuperDepth3D v3.8.8\n"
+	#define SD3D "SuperDepth3D v3.9.0\n"
 namespace SuperDepth3D
 {
 	#define D_ViewMode 1
@@ -73,6 +73,10 @@ namespace SuperDepth3D
 		static const float DQ_X = 0.0, DQ_Y = 0.0, DQ_Z = 0.0, DQ_W = 1000.0;
 		// DR_X = [Position G & G] DR_Y = [Position G & H] DR_Z = [Position H & H] DR_W = [GH Menu Tresh]	
 		static const float DR_X = 0.0, DR_Y = 0.0, DR_Z = 0.0, DR_W = 1000.0;
+		// DU_X = [Position I & I] DU_Y = [Position I & J] DU_Z = [Position J & J] DU_W = [IJ Menu Tresh]	
+		static const float DU_X = 0.0, DU_Y = 0.0, DU_Z = 0.0, DU_W = 1000.0;
+		// DV_X = [Position K & K] DV_Y = [Position K & L] DV_Z = [Position L & L] DU_W = [KL Menu Tresh]	
+		static const float DV_X = 0.0, DV_Y = 0.0, DV_Z = 0.0, DV_W = 1000.0;
 		// DS_X = [Weapon NearDepth Min OIL] DS_Y = [Depth Range Boost] DS_Z = [View Mode State] DS_W = [Check Depth Limit Weapon Secondary]
 		static const float DS_X = 0.0, DS_Y = 0.0, DS_Z = D_ViewMode, DS_W = 1.0;
 		// DT_X = [Null X] DT_Y = [Null Y] DT_Z = [Weapon Hand Mask Z] DT_W = [Rescale Weapon Hand Near]
@@ -509,8 +513,15 @@ uniform int SuperDepth3D <
 		ui_tooltip = "Use this to set Varable Rate Shading to manually selection or automatic mode.\n"
 			         "Default is Automatic.";
 		ui_category = "Occlusion Masking";
-	> = 0;	
-		
+	> = 0;
+	
+	uniform bool Foveated_Mode <
+			ui_label = "Foveated Rendering";
+			ui_tooltip = "Foveated rendering lowes the quality of the infilling around the center of the image.\n"
+						 "In the future when we have a method for eye tracking this should work a lot better.";
+			ui_category = "Occlusion Masking";
+	> = true;
+	
 	uniform float Compatibility_Power <
 		#if Compatibility
 		ui_type = "drag";
@@ -1670,13 +1681,23 @@ uniform int Extra_Information <
 					   Check_Color(DP_X.xy, DP_W.x) && Check_Color_MinMax_A(DP_X.zw) && Check_Color( DP_Y.xy, DP_W.y),
 					   Check_Color(DP_Y.zw, DP_W.z) && Check_Color_MinMax_A(DP_Z.xy) && Check_Color( DP_Z.zw, DP_W.w) );
 	}
-		#if MMD == 3 || MMD == 4
+		#if MMD >= 3
 		float4 Simple_Menu_Detection_EX()//Active RGB Detection Extended
 		{ 
 			return float4( Check_Color(DQ_X.xy, DQ_W.x) && Check_Color_MinMax_B(DQ_X.zw) && Check_Color( DQ_Y.xy, DQ_W.y),
 						   Check_Color(DQ_Y.zw, DQ_W.z) && Check_Color_MinMax_B(DQ_Z.xy) && Check_Color( DQ_Z.zw, DQ_W.w),
 					   	Check_Color(DR_X.xy, DR_W.x) && Check_Color_MinMax_B(DR_X.zw) && Check_Color( DR_Y.xy, DR_W.y),
 					   	Check_Color(DR_Y.zw, DR_W.z) && Check_Color_MinMax_B(DR_Z.xy) && Check_Color( DR_Z.zw, DR_W.w) );
+		}
+		#endif
+		
+		#if MMD >= 5
+		float4 Simple_Menu_Detection_EX_More()//Active RGB Detection Extended
+		{ 
+			return float4( Check_Color(DU_X.xy, DU_W.x) && Check_Color_MinMax_B(DU_X.zw) && Check_Color( DU_Y.xy, DU_W.y),
+						   Check_Color(DU_Y.zw, DU_W.z) && Check_Color_MinMax_B(DU_Z.xy) && Check_Color( DU_Z.zw, DU_W.w),
+					   	Check_Color(DV_X.xy, DV_W.x) && Check_Color_MinMax_B(DV_X.zw) && Check_Color( DV_Y.xy, DV_W.y),
+					   	Check_Color(DV_Y.zw, DV_W.z) && Check_Color_MinMax_B(DV_Z.xy) && Check_Color( DV_Z.zw, DV_W.w) );
 		}
 		#endif
 	#endif
@@ -2396,7 +2417,7 @@ uniform int Extra_Information <
 				DM = 0.0625;
 			if( Simple_Menu_Detection().w == 1)
 				DM = 0.0625;
-			#if MMD == 3 || MMD == 4
+			#if MMD >= 3
 			if( Simple_Menu_Detection_EX().x == 1)
 				DM = 0.0625;
 			if( Simple_Menu_Detection_EX().y == 1)
@@ -2404,6 +2425,16 @@ uniform int Extra_Information <
 			if( Simple_Menu_Detection_EX().z == 1)
 				DM = 0.0625;
 			if( Simple_Menu_Detection_EX().w == 1)
+				DM = 0.0625;
+			#endif
+			#if MMD >= 5
+			if( Simple_Menu_Detection_EX_More().x == 1)
+				DM = 0.0625;
+			if( Simple_Menu_Detection_EX_More().y == 1)
+				DM = 0.0625;
+			if( Simple_Menu_Detection_EX_More().z == 1)
+				DM = 0.0625;
+			if( Simple_Menu_Detection_EX_More().w == 1)
 				DM = 0.0625;
 			#endif
 		}
@@ -2551,8 +2582,8 @@ uniform int Extra_Information <
 		if( Performance_Level > 1 )
 			Perf *= saturate(Luma_Adptive * 0.5 + 0.5  );	
 		//ParallaxSteps Calculations
-		float MinNum = 20, D = abs(Diverge), Cal_Steps = D * Perf, FOV_Ren = lerp(100, MinNum, saturate(Vin_Pattern(Coordinates, float2(15.0,3.0)) * GetDepth * 4 )),
-			  Steps  = clamp( Cal_Steps, Perf_LvL ? MinNum : lerp( MinNum, min( MinNum, D), GetDepth >= 0.999 ), FOV_Ren );//Foveated Rendering Point of attack 16-256 limit samples.
+		float MinNum = 15, D = abs(Diverge), Cal_Steps = D * Perf, FOV_Ren = Foveated_Mode ? lerp(100, MinNum, saturate(Vin_Pattern(Coordinates, float2(15.0,3.0))) * saturate(GetDepth * 4) ) : 50,
+			  Steps  = clamp( Cal_Steps, MinNum, FOV_Ren );//Foveated Rendering Point of attack 16-256 limit samples.
 		//float MinNum = 20, D = abs(Diverge), Cal_Steps = D * Perf, Steps = clamp( Cal_Steps, Performance_Level ? MinNum : lerp( MinNum, min( MinNum, D), GetDepth >= 0.999 ), lerp(100,View_Mode == 6 ? lerp(50, 20, saturate(GetDepth * 15)) : 50,saturate(Vin_Pattern(Coordinates, float2(15.0,2.5)))) );
 		float LayerDepth = rcp(Steps), TP = Compatibility_Power >= 0 ? lerp(0.025, 0.05,Compatibility_Power) : lerp(0.0225, 0.05,abs(Compatibility_Power) * saturate(Vin_Pattern(Coordinates, float2(15.0,3.0))));
 		float US_Offset = lerp(Default_Offset.x,Default_Offset.y,GetDepth * 0.5); D = Diverge < 0 ? -US_Offset : US_Offset;
@@ -2591,7 +2622,7 @@ uniform int Extra_Information <
 		float Weapon_Mask = tex2Dlod(SamplerDMN,float4(Coordinates,0,0)).y, ZFighting_Mask = 1.0-(1.0-tex2Dlod(SamplerLumN,float4(Coordinates,0,1.400)).w - Weapon_Mask);
 			  ZFighting_Mask = ZFighting_Mask * (1.0-Weapon_Mask);
 		float2 PCoord = float2(View_Mode <= 1 || View_Mode >= 5 ? PrevParallaxCoord.x : ParallaxCoord.x, PrevParallaxCoord.y ) ;	
-			   PCoord.x -= 0.005 * MS;		   
+			   //PCoord.x -= 0.005 * MS;		   
 		float Get_DB = GetDB( PCoord ).x, 
 			  Get_DB_ZDP = WP > 0 ? lerp(Get_DB, abs(Get_DB), ZFighting_Mask) : Get_DB;
 		// Parallax Occlusion Mapping
