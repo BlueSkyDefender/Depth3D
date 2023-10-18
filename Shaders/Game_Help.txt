@@ -877,6 +877,45 @@ Change the "True" to "False" and save.
 {Little Nightmares} - Used ReShade 4.3
 In setting set Post Processing to low ore Med.
 
+{Lords of the Fallen} [Reshade 5.9.2] - Needs Depth Buffer Mod
+
+Get it from here.
+https://discord.gg/DsWDFgUPzJ
+  
+Settings to use.
+
+[D32G8                       ⯆]Select format to prioritize
+[Off                         ⯆]Select highest allowed clear count
+[6                           ⯆]Select lowest amount of vertices to ignore
+[x]Use aspect ratio heuristics
+[x]Use extended aspect ratio heuristics (for DLSS or resolution scaling)
+[ ]Use native resolution heuristics
+[ ]Use lower than native resolution heuristics
+[x]Prioritize low indirect calls
+[x]Avoid and set lower vertices limit
+[ ]Set indirect drawcalls if zero
+[ ]Skip indirect drawcalls if zero
+[ ]Don't skip update when there is little activity
+[x]Copy depth buffer before clear operations
+[x]Copy depth buffer during frame to prevent artifacts
+[x]Avoid high vertices counts on clear
+[x]Avoid high vertices counts relaxed
+
+Extra things you should do is. 
+
+%AppData%\Local\LOTF2\Saved\Config\Windows
+Open the “Engine.ini” file
+So on here at the bottom.
+
+Add:
+[SystemSettings]
+r.DepthOfFieldQuality=0
+r.MotionBlur.Max=0
+r.MotionBlurQuality=0
+r.DefaultFeature.MotionBlur=0
+r.SceneColorFringe.Max=0
+r.SceneColorFringeQuality=0
+
 {Lost Planet: Extreme Colonies} [Reshade 4.6.1] 
 Used DgVoodoo2 for Dx9
 Make sure to launch your game and set it up with ReShade dxgi.dll and use DgVoodoo2 to convert DX9 to DX11.

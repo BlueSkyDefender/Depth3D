@@ -2,7 +2,7 @@
 	///**SuperDepth3D**///
 	//----------------////
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	//* Depth Map Based 3D post-process shader v3.9.0
+	//* Depth Map Based 3D post-process shader v3.9.1
 	//* For Reshade 3.0+
 	//* ---------------------------------
 	//*
@@ -32,7 +32,7 @@
 	//* http://reshade.me/forum/shader-presentation/2128-sidebyside-3d-depth-map-based-stereoscopic-shader
 	//* https://discord.gg/Q2n97Uj
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	#define SD3D "SuperDepth3D v3.9.0\n"
+	#define SD3D "SuperDepth3D v3.9.1\n"
 namespace SuperDepth3D
 {
 	#define D_ViewMode 1
@@ -261,6 +261,12 @@ namespace SuperDepth3D
 	//Help / Guide / Information
 uniform int SuperDepth3D <
 	ui_text = SD3D
+			  #if !OSW
+			  OVERWATCH
+				  #if !NPW
+					"                             Profile Loaded\n"
+				  #endif 
+			  #endif
 			  "\n"
 				#if DSW
 				"Check Depth/Add-on Options: Copy Depth Clear/Frame: You should check it in the Depth/Add-ons tab above.\n"

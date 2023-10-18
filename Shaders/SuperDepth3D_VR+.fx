@@ -2,7 +2,7 @@
 	///**SuperDepth3D_VR+**///
 	//--------------------////
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	//* Depth Map Based 3D post-process shader v3.9.0
+	//* Depth Map Based 3D post-process shader v3.9.1
 	//* For Reshade 4.4+ I think...
 	//* ---------------------------------
 	//*
@@ -32,7 +32,7 @@
 	//* http://reshade.me/forum/shader-presentation/2128-sidebyside-3d-depth-map-based-stereoscopic-shader
 	//* https://discord.gg/Q2n97Uj
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	#define SD3DVR "SuperDepth3D_VR+ v3.9.0\n"
+	#define SD3DVR "SuperDepth3D_VR+ v3.9.1\n"
 namespace SuperDepth3DVR
 {
 	#define D_ViewMode 1
@@ -279,6 +279,12 @@ namespace SuperDepth3DVR
 		//Help / Guide / Information
 	uniform int SuperDepth3DVR <
 	ui_text = SD3DVR
+			  #if !OSW
+			  OVERWATCH
+				  #if !NPW
+					"                             Profile Loaded\n"
+				  #endif 
+			  #endif
 			  "\n"
 				#if DSW
 				"Check Depth/Add-on Options: Copy Depth Clear/Frame: You should check it in the Depth/Add-ons tab above.\n"
