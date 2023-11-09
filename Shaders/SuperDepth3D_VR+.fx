@@ -1,7 +1,7 @@
 	////--------------------//
 	///**SuperDepth3D_VR+**///
 	//--------------------////
-	#define SD3DVR "SuperDepth3D_VR+ v3.9.4\n"
+	#define SD3DVR "SuperDepth3D_VR+ v3.9.5\n"
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//* Depth Map Based 3D post-process shader
 	//* For Reshade 4.4+ I think...
@@ -642,6 +642,14 @@ namespace SuperDepth3DVR
 		ui_category = "Depth Map";
 	> = DB_Z;
 	
+	uniform int Range_Boost <
+		ui_type = "combo";
+		ui_items = "Off\0Offset Based\0Near Plane Based\0";
+		ui_label = " Boost Range";
+		ui_tooltip = "Boost Range details in Depth with out effecting near plane too much.";
+		ui_category = "Depth Map";
+	> = DS_Y;
+	
 	uniform bool Depth_Map_View <
 		ui_label = " Depth Map View";
 		ui_tooltip = "Display the Depth Map.\n"
@@ -650,12 +658,6 @@ namespace SuperDepth3DVR
 	> = false;
 	
 	static const int Depth_Detection = 1;
-
-	uniform bool Range_Boost <
-		ui_label = " Depth Map Range";
-		ui_tooltip = "Boost Range details in Depth with out effecting near plane too much.";
-		ui_category = "Depth Map";
-	> = DS_Y;
 	
 	uniform bool Depth_Map_Flip <
 		ui_label = " Depth Map Flip";
@@ -1433,6 +1435,23 @@ uniform int Extra_Information <
 	{   //Luminance
 			return saturate(tex2Dlod(SamplerLumVR,float4(texcoord,0,11)).xy);//Average Luminance Texture Sample
 	}
+	
+	#if (RHW || NCW || NPW || NFM || PEW || DSW || OSW || DAA || NDW || WPW || FOV || EDW)
+		#define Text_Timer 30000
+	#else
+		#define Text_Timer 25000
+	#endif
+	
+	bool Helper_Fuction()
+	{
+		return tex2D(SamplerInfo,float2(0.911,0.968)).x;
+	}
+
+	float Info_Fuction()
+	{
+		return timer <= Text_Timer || Text_Info;
+	}
+	
 	////////////////////////////////////////////////////Distortion Correction//////////////////////////////////////////////////////////////////////
 	#if BD_Correction || BDF
 	float2 D(float2 p, float k1, float k2, float k3) //Lens + Radial lens undistort filtering Left & Right
@@ -1455,10 +1474,6 @@ uniform int Extra_Information <
 	}
 	#endif
 	///////////////////////////////////////////////////////////3D Image Adjustments/////////////////////////////////////////////////////////////////////
-	bool Helper_Fuction()
-	{
-		return tex2D(SamplerInfo,float2(0.911,0.968)).x;
-	}
 	
 	#if D_Frame || DFW
 	float4 CurrentFrame(in float4 position : SV_Position, in float2 texcoords : TEXCOORD) : SV_Target
@@ -1887,23 +1902,27 @@ uniform int Extra_Information <
 	}
 	*/
 	float Depth(float2 texcoord)
-	{
-		//Conversions to linear space.....
-		float zBuffer = tex2Dlod(DepthBuffer, float4(texcoord,0,0)).x, Far = 1.0, Near = 0.125/DMA(); //Near & Far Adjustment
+	{	//Conversions to linear space.....
+		float zBuffer = tex2Dlod(DepthBuffer, float4(texcoord,0,0)).x, Far = 1.0, Near_A = 0.125/DMA(), Near_B = 0.125/(DMA()*2); //Near & Far Adjustment
 		float2 Two_Ch_zBuffer, Store_zBuffer = float2( zBuffer, 1.0 - zBuffer );
-		float2 C = float2( Far / Near, 1.0 - Far / Near );
+		float4 C = float4( Far / Near_A, 1.0 - Far / Near_A, Far / Near_B, 1.0 - Far / Near_B);
 		float2 Z = Offset < 0 ? min( 1.0, zBuffer * ( 1.0 + abs(Offset) ) ) : Store_zBuffer;
-		
+		//May add this later need to check emulators.
+		//if (Range_Boost == 2)
+		//	Store_zBuffer = Z;
+			
 		if(Offset > 0 || Offset < 0)
 			Z = Offset < 0 ? float2( Z.x, 1.0 - Z.y ) : min( 1.0, float2( Z.x * (1.0 + Offset) , Z.y / (1.0 - Offset) ) );
-
+		
+		float2 C_Switch = Range_Boost == 2 ? C.zw : C.xy;
+			
 		if (Depth_Map == 0) //DM0 Normal
-			Two_Ch_zBuffer = rcp(float2(Z.x,Store_zBuffer.x) * C.y + C.x);//MAD - RCP
+			Two_Ch_zBuffer = rcp(float2(Z.x,Store_zBuffer.x) * float2(C_Switch.y,C.y) + float2(C_Switch.x,C.x));//MAD - RCP
 		else if (Depth_Map == 1) //DM1 Reverse
-			Two_Ch_zBuffer = rcp(float2(Z.y,Store_zBuffer.y) * C.y + C.x);//MAD - RCP
+			Two_Ch_zBuffer = rcp(float2(Z.y,Store_zBuffer.y) * float2(C_Switch.y,C.y) + float2(C_Switch.x,C.x));//MAD - RCP
 		
 		if(Range_Boost)
-			zBuffer = lerp(Two_Ch_zBuffer.y,Two_Ch_zBuffer.x,smoothstep(0,1,Two_Ch_zBuffer.y));
+			zBuffer = lerp(Two_Ch_zBuffer.y,Two_Ch_zBuffer.x,saturate(Two_Ch_zBuffer.y));
 		else
 			zBuffer = Two_Ch_zBuffer.x;
 		
@@ -3148,12 +3167,6 @@ uniform int Extra_Information <
 	    return saturate(res);
 	}
 	
-	#if (RHW || NCW || NPW || NFM || PEW || DSW || OSW || DAA || NDW || WPW || FOV || EDW)
-		#define Text_Timer 30000
-	#else
-		#define Text_Timer 25000
-	#endif
-	
 	float4 Out(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Target
 	{
 		float Menu_Open = overlay_open ? 1 : 0;
@@ -3171,7 +3184,10 @@ uniform int Extra_Information <
 			Color.rgb = Menu_Open ? Format : 0;
 		
 		//Color = tex2D(SamplerLumVR,texcoord).z ;
-		
+		float DX9_Helper = Info_Fuction();
+		#if !DX9_Toggle
+		DX9_Helper = position.z;
+		#endif
 		float SteroTexture = tex2D(SamplerInfo,texcoord).x;
 		
 		float2 TCL = texcoord, TCR = texcoord, TC;
@@ -3188,7 +3204,7 @@ uniform int Extra_Information <
 		//Stereo Left TCL and Right TCR
 		Color.w = TC ? tex2D(SamplerInfo,TCL).x : tex2D(SamplerInfo,TCR).x;
 		
-		return  position.z ? SuperDepth ? Color + float4(SteroTexture.xx,0,1) : Color + Color.w : Color; //Blend Color
+		return DX9_Helper ? SuperDepth ? Color + float4(SteroTexture.xx,0,1) : Color + Color.w : Color; //Blend Color
 	}
 	
 	///////////////////////////////////////////////////////////////////SmartSharp Jr.//////////////////////////////////////////////////////////////////////
@@ -3632,8 +3648,7 @@ uniform int Extra_Information <
 	{// Vertex shader generating a triangle covering the entire screen
 		texcoord.x = (id == 2) ? 2.0 : 0.0;
 		texcoord.y = (id == 1) ? 2.0 : 0.0;
-		position = float4(texcoord * float2(2.0, -2.0) + float2(-1.0, 1.0), 0.0, 1.0);
-		position.z = timer <= Text_Timer || Text_Info;
+		position = float4(texcoord * float2(2.0, -2.0) + float2(-1.0, 1.0), timer <= Text_Timer || Text_Info, 1.0);
 	}
 	//*Rendering passes*//	
 	technique Information

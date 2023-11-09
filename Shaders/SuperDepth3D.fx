@@ -1,7 +1,7 @@
 	////----------------//
 	///**SuperDepth3D**///
 	//----------------////
-	#define SD3D "SuperDepth3D v3.9.3\n"
+	#define SD3D "SuperDepth3D v3.9.5\n"
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//* Depth Map Based 3D post-process shader
 	//* For Reshade 3.0+
@@ -600,6 +600,14 @@ uniform int SuperDepth3D <
 					 "Default is 0.1, Zero is off.";
 		ui_category = "Depth Map";
 	> = DB_Z;
+
+	uniform int Range_Boost <
+		ui_type = "combo";
+		ui_items = "Off\0Offset Based\0Near Plane Based\0";
+		ui_label = " Boost Range";
+		ui_tooltip = "Boost Range details in Depth with out effecting near plane too much.";
+		ui_category = "Depth Map";
+	> = DS_Y;
 	
 	uniform int Depth_Map_View <
 		ui_type = "combo";
@@ -611,12 +619,6 @@ uniform int SuperDepth3D <
 	> = 0;
 
 	static const int Depth_Detection = 1;
-
-	uniform bool Range_Boost <
-		ui_label = " Depth Map Range";
-		ui_tooltip = "Boost Range details in Depth with out effecting near plane too much.";
-		ui_category = "Depth Map";
-	> = DS_Y;
 	
 	uniform bool Depth_Map_Flip <
 		ui_label = " Depth Map Flip";
@@ -1518,11 +1520,22 @@ uniform int Extra_Information <
 	}
 	#endif
 	///////////////////////////////////////////////////////////3D Image Adjustments/////////////////////////////////////////////////////////////////////
+	#if (RHW || NCW || NPW || NFM || PEW || DSW || OSW || DAA || NDW || WPW || FOV || EDW)
+		#define Text_Timer 30000
+	#else
+		#define Text_Timer 25000
+	#endif
+	
 	bool Helper_Fuction()
 	{
 		return tex2D(SamplerInfo,float2(0.911,0.968)).x;
 	}
-	
+
+	float Info_Fuction()
+	{
+		return timer <= Text_Timer || Text_Info;
+	}	
+
 	#if D_Frame || DFW
 	float4 CurrentFrame(in float4 position : SV_Position, in float2 texcoords : TEXCOORD) : SV_Target
 	{
@@ -1983,21 +1996,26 @@ uniform int Extra_Information <
 	
 	float Depth(float2 texcoord)
 	{	//Conversions to linear space.....
-		float zBuffer = tex2Dlod(DepthBuffer, float4(texcoord,0,0)).x, Far = 1.0, Near = 0.125/DMA(); //Near & Far Adjustment
+		float zBuffer = tex2Dlod(DepthBuffer, float4(texcoord,0,0)).x, Far = 1.0, Near_A = 0.125/DMA(), Near_B = 0.125/(DMA()*2); //Near & Far Adjustment
 		float2 Two_Ch_zBuffer, Store_zBuffer = float2( zBuffer, 1.0 - zBuffer );
-		float2 C = float2( Far / Near, 1.0 - Far / Near );
+		float4 C = float4( Far / Near_A, 1.0 - Far / Near_A, Far / Near_B, 1.0 - Far / Near_B);
 		float2 Z = Offset < 0 ? min( 1.0, zBuffer * ( 1.0 + abs(Offset) ) ) : Store_zBuffer;
-		
+		//May add this later need to check emulators.
+		//if (Range_Boost == 2)
+		//	Store_zBuffer = Z;
+			
 		if(Offset > 0 || Offset < 0)
 			Z = Offset < 0 ? float2( Z.x, 1.0 - Z.y ) : min( 1.0, float2( Z.x * (1.0 + Offset) , Z.y / (1.0 - Offset) ) );
-
+		
+		float2 C_Switch = Range_Boost == 2 ? C.zw : C.xy;
+			
 		if (Depth_Map == 0) //DM0 Normal
-			Two_Ch_zBuffer = rcp(float2(Z.x,Store_zBuffer.x) * C.y + C.x);//MAD - RCP
+			Two_Ch_zBuffer = rcp(float2(Z.x,Store_zBuffer.x) * float2(C_Switch.y,C.y) + float2(C_Switch.x,C.x));//MAD - RCP
 		else if (Depth_Map == 1) //DM1 Reverse
-			Two_Ch_zBuffer = rcp(float2(Z.y,Store_zBuffer.y) * C.y + C.x);//MAD - RCP
+			Two_Ch_zBuffer = rcp(float2(Z.y,Store_zBuffer.y) * float2(C_Switch.y,C.y) + float2(C_Switch.x,C.x));//MAD - RCP
 		
 		if(Range_Boost)
-			zBuffer = lerp(Two_Ch_zBuffer.y,Two_Ch_zBuffer.x,smoothstep(0,1,Two_Ch_zBuffer.y));
+			zBuffer = lerp(Two_Ch_zBuffer.y,Two_Ch_zBuffer.x,saturate(Two_Ch_zBuffer.y));
 		else
 			zBuffer = Two_Ch_zBuffer.x;
 		
@@ -3284,16 +3302,13 @@ uniform int Extra_Information <
 	    return saturate(res);
 	}
 	
-	#if (RHW || NCW || NPW || NFM || PEW || DSW || OSW || DAA || NDW || WPW || FOV || EDW)
-		#define Text_Timer 30000
-	#else
-		#define Text_Timer 25000
-	#endif
-	
 	float4 Out(float4 position : SV_Position, float2 texcoord : TEXCOORD0) : SV_Target
 	{   float4 Color;
 		float2 TCL = texcoord, TCR = texcoord, TC;
-		
+		float DX9_Helper = Info_Fuction();
+		#if !DX9_Toggle
+		DX9_Helper = position.z;
+		#endif
 		if (Stereoscopic_Mode == 0 && !Inficolor_3D_Emulator )
 		{
 			TCL.x = TCL.x*2;
@@ -3315,7 +3330,7 @@ uniform int Extra_Information <
 		#else
 		Color.rgb = PS_calcLR(texcoord, position.xy).rgb;
 		#endif
-		Color = position.z ? Color.rgba + Color.w : Color; //Blend Color
+		Color = DX9_Helper ? Color.rgba + Color.w : Color; //Blend Color
 		#if BC_SPACE == 1
 	    Color = ExpandScRGB(Color);
 	    #else
@@ -3715,8 +3730,7 @@ uniform int Extra_Information <
 	{// Vertex shader generating a triangle covering the entire screen
 		texcoord.x = (id == 2) ? 2.0 : 0.0;
 		texcoord.y = (id == 1) ? 2.0 : 0.0;
-		position = float4(texcoord * float2(2.0, -2.0) + float2(-1.0, 1.0), 0.0, 1.0);
-		position.z = timer <= Text_Timer || Text_Info;
+		position = float4(texcoord * float2(2.0, -2.0) + float2(-1.0, 1.0), timer <= Text_Timer || Text_Info, 1.0);
 	}
 
 	technique Information
