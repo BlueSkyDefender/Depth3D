@@ -1,7 +1,7 @@
 ////----------------------------------------//
 ///SuperDepth3D Overwatch Automation Header///
 //----------------------------------------////
-#define OVERWATCH "Overwatch v3.4.9\n"
+#define OVERWATCH "Overwatch v3.5.0\n"
 //---------------------------------------OVERWATCH---------------------------------------//
 // If you are reading this stop. Go away and never look back. From this point on if you  //
 // still think it's is worth looking at this..... Then no one can save you or your soul. //
@@ -18907,7 +18907,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DB_X 1            // Flip
 	#define DA_X 0.0375//0.025//0.050      // ZPD
 	#define DF_Y 0.00         // Seperation
-	#define DA_Y 270//410.0//200.0         // Near Plane Adjustment
+	#define DA_Y 265//410.0//200.0         // Near Plane Adjustment
     #define DA_Z -0.375      // Linerzation Offset
     #define DS_Y 1            // Linerzation Offset Effects only distance if true
 	#define DB_Z 0.05         // Auto Depth Protection
@@ -18925,20 +18925,58 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DE_W 0.250        // Auto
     //#define DI_Z 0.043        // Trim
     #define DF_W float4(0,0,0,0)// Edge & Scale
+     //Menu Detection Templates -  Needs a Specail Shader to adjust
+    #define MAC 0 //Set to one only C has a wiled card. Not the A and C.
+    #define MDD 1 //Set Menu Detection & Direction      //Off | 1 | 2 | 3 | 4      
+    #define DN_X float4( 0.086, 0.085 , 0.500 , 0.025) //Pos A = XY Any & B = ZW Lock 
+    #define DN_Y float4( 0.527 , 0.085 ,  0.0, 0.0)     //Pos C = XY Any & D = ZW Match
+    #define DN_Z float4( 0.0, 0.0,  0.0, 0.0)           //Pos E = XY Match & F = ZW Match
+	#define DN_W float4( 1.0, 0.0 , 0.0, 0.0 )          //Size = Menu [ABC] D E F
+    #define DJ_Y float4( 18.0, 1.0, 18.0, 21.0)       //Menu Detection Type for A = X, B = Y, & C = Z. The Last Value is a Wild Card amount W is for X and Z. 
+    #define DJ_Z float3( 1000., 1000., 1000)           //Set Match Tresh 
+
+   //Simple Menu Detection May add one more later
+    #define SMD 2 //If It's set to 2 it enables the  Wiled Card for A and C
+    #define DW_X float4( 0.086, 0.085 , 0.500 , 0.025)  //Pos A = XY Any & B = ZW Lock 
+    #define DW_Y float2( 0.527 , 0.085 )                 //Pos C = XY 
+    #define DW_Z float4( 20.0, 1.0, 20.0, 19.0)//Menu Detection Type for A = X, B = Y, & C = Z. The Last Value is a Wild Card amount W is for X and Z. 
+   
+    //Multi Menu Detection                                 //4 Blocks total and 2 sub blocks per one block.
+    #define MMD 1 //Set Multi Menu Detection               //Off 0 | 1 | 2 | 3 | 4
+    #define MMS 0 //Set Multi Menu Selection 0-1 to 29-30  //Off 0 | 1 | 2 | 3 | 4
+    #define MML 0 //Set Multi Menu Leniency  0-2 and 28-30 //Off 0 | 1 | 2 | 3 | 4    
+	//Block One
+    #define DO_X float4( 0.662 , 0.244 , 0.832 , 0.443 ) //Pos A1 = XY Color & A2 = ZW Black 
+    #define DO_Y float4( 0.725 , 0.605 , 0.000 , 0.000 ) //Pos A3 = XY Color & B1 = ZW Color
+    #define DO_Z float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos B2 = XY Black & B3 = ZW Color
+	#define DO_W float4( 23.0, 10.0, 1000.0, 1000.0) //Tresh Hold for Color A & B and Color
+
+    #define DP_X float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos C1 = XY Color & C2 = ZW Black 
+    #define DP_Y float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos C3 = XY Color & D1 = ZW Color
+    #define DP_Z float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos D2 = XY Black & D3 = ZW Color
+	#define DP_W float4( 1000.0, 1000.0, 1000.0, 1000.0) //Tresh Hold for Color C & D and Color
+    
 	#define BMT 1             // ZPD and World Scale Balance // I need to phase this out.
-	#define DF_Z 0.125        // Set the Balance  
+	#define DF_Z 0.15        // Set the Balance  
     #define DL_Y 0.50        // De-Artifact Only works on some View Modes and causes performance degredation
 	#define DB_Y 0.5          // Effects De-Artifacts -1 to 1 Most of the time leave this at 0 and if you set 1 it takes depth into account 
     //#define DL_Z 1.00         // Compat Power
 	//#define DJ_X 0.250        // Range Smoothing
 	#define WSM 4             // Weapon Setting Mode 
 	#define DB_W 13           // Weapon Profile
-	#define DF_X float2(0.125,0)  // ZPD Weapon Boundarys Level 1 and Level 2
+	#define DF_X float2(0.125,0.250)  // ZPD Weapon Boundarys Level 1 and Level 2
 	//#define DJ_W 0.1	        // Weapon Depth Limit Location 1
 	//#define DS_W 1.0	        // Weapon Depth Limit Location 2
 	//#define DT_W float2(0.015,0.03)//WH scale and cutoff
 	//#define WHM 1               //Weapon Hand Masking lets you use DT_Z 
 	//#define DT_Z 0.1            //WH Masking Power
+
+    #define FPS 2     // FPS Focus Settings 
+    #define DK_X 2 //Trigger Type
+    //#define DK_Y 0 //Eye Selection
+    #define DK_Z 2 //Reduction Power
+    #define DK_W 4 //Set Shift Speed
+    
 	//Smooth Mode Setting
     #define SMS 3           //SM Toggle Separation
 	#define DL_X 0.90       //SM Tune
@@ -19890,7 +19928,7 @@ float4 Weapon_Profiles(float WP ,float4 Weapon_Adjust)
     if (WP == 12)
         Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 10 | Game
     if (WP == 13)
-        Weapon_Adjust = float4(3.0,20.0,0.0,0.0);         //WP 11 | RoboCop
+        Weapon_Adjust = float4(4.75,20.0,0.0,0.0);        //WP 11 | RoboCop
     if (WP == 14)
         Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 12 | Game
     if (WP == 15)

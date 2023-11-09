@@ -1,7 +1,7 @@
 	////--------------------//
 	///**SuperDepth3D_VR+**///
 	//--------------------////
-	#define SD3DVR "SuperDepth3D_VR+ v3.9.5\n"
+	#define SD3DVR "SuperDepth3D_VR+ v3.9.6\n"
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//* Depth Map Based 3D post-process shader
 	//* For Reshade 4.4+ I think...
@@ -2343,16 +2343,16 @@ uniform int Extra_Information <
 		if (WP == 0 || WZPD_and_WND.x <= 0)
 			DM.y = 0;
 			
-		float FadeIO = Focus_Reduction_Type == 0 ? 1 : smoothstep(0,1,1-Fade_in_out(texcoord).x), FD_Adjust = 0.125;	
+		float FadeIO = Focus_Reduction_Type == 0 ? 1 : smoothstep(0,1,1-Fade_in_out(texcoord).x), FD_Adjust = Focus_Reduction_Type == 2 ? 0.35 : 0.125;	
 	
 		if( Eye_Fade_Reduction_n_Power.x == 1)
-			FD_Adjust = 0.20;
+			FD_Adjust = Focus_Reduction_Type == 2 ? 0.30 : 0.20;
 		if( Eye_Fade_Reduction_n_Power.x == 2)
-			FD_Adjust = 0.25;
+			FD_Adjust = Focus_Reduction_Type == 2 ? 0.25 : 0.25;
 		if( Eye_Fade_Reduction_n_Power.x == 3)
-			FD_Adjust = 0.30;
+			FD_Adjust = Focus_Reduction_Type == 2 ? 0.20 : 0.30;
 		if( Eye_Fade_Reduction_n_Power.x == 4)
-			FD_Adjust = 0.35;
+			FD_Adjust = Focus_Reduction_Type == 2 ? 0.125 : 0.35;
 	
 		//Handle Convergence Here
 		float3 HandleConvergence = Conv(DM.xz,texcoord).xyz;
