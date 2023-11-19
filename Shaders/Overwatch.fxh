@@ -2424,27 +2424,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DSW 1
 	#define NDW 1
 	#define PEW 1
-#elif (App == 0x1BB6E62A ) //AMID EVIL RTX
-	#define DA_W 1
-	#define DA_X 0.05
-    #define DF_Y 0.015
-	#define DA_Y 15.0
-	//#define DA_Z 0.000125
-	 
-	#define DE_X 4
-	#define DE_Y 0.5
-	#define DE_Z 0.45
-	#define BMT 1    
-	#define DF_Z 0.030
-	#define SMS 2      //SM Toggle Separation
-	#define DL_X 0.825 //SM Tune
-	#define DL_W 0.050 //SM Perspective
-	#define DM_X 3     //HQ Tune
-	#define DM_Z 2     //HQ Smooth
-	#define FMM 1
-	#define PEW 1
-	#define DAA 1
-	#define DB_W 27
 #elif (App == 0xFBC55DDE || App == 0x836AD72D ) //Tormented Shouls & Demo 
 	#define DA_W 1
 	#define DA_Y 15.0
@@ -12363,9 +12342,9 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define DS_Z 2
 	#define DA_W 1
     //#define DB_X 1
-	#define DA_X 0.05
+	#define DA_X 0.07//0.05
 	//#define DF_Y 0.0025
-	#define DA_Y 37.0 //40.0 //35.0
+	#define DA_Y 26.0//37.0 //40.0 //35.0
     //#define DA_Z -0.030
 	#define DB_Z 0.100
  
@@ -19375,6 +19354,34 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define PEW 1
 	#define FOV 1
 	#define DAA 1
+#elif (App == 0x1BB6E62A ) //AMID EVIL RTX
+	#define DA_W 1
+	#define DA_X 0.050
+    #define DF_Y 0.015
+	#define DA_Y 14.5
+	//#define DA_Z 0.000125
+	#define DB_Z 0.050         // Auto Depth Protection
+	 
+	#define DE_X 4
+	#define DE_Y 0.500        // Set ZPD Boundary Level Zero 
+	#define DE_Z 0.400        // Speed that Boundary is Enforced
+	//#define AFD 1           // Alternate Frame Detection - May be phased out
+	//#define DG_W 0.250        // Shift Boundary Out of screen 0.5 and or In screen -0.5
+	#define OIL 1           // Set How many Levels We use for RE_Fix 0 | 1 | 2 | 3 if 1 then it's float2(0,0) for OIF and DI_W
+    #define OIF float2(0.375,0.250)// Fix enables if Value is > 0.0 
+	#define DI_W float2(0.5,1.25) // Like Shift Boundary DG_W But 0 to inf
+
+	#define BMT 1    
+	#define DF_Z 0.030
+	#define SMS 2      //SM Toggle Separation
+	#define DL_X 0.825 //SM Tune
+	//#define DL_W 0.050 //SM Perspective
+	#define DM_X 3     //HQ Tune
+	#define DM_Z 2     //HQ Smooth
+	#define FMM 1
+	#define PEW 1
+	#define DAA 1
+	#define DB_W 27
 #else
 	#define NPW 1 //No Profile
 #endif
@@ -20103,7 +20110,7 @@ float4 Weapon_Profiles(float WP ,float4 Weapon_Adjust) //Tried Switch But, can't
     if (WP == 26)
         Weapon_Adjust = float4(0.255,6.375,53.75,0.0);    //WP 24 | S.T.A.L.K.E.R: Games
     if (WP == 27)
-        Weapon_Adjust = float4(0.400,5.5625,0.0,0.0);     //WP 25 | AMID EVIL RTX
+        Weapon_Adjust = float4(0.403,6.250,0.0,0.0);      //WP 25 | AMID EVIL RTX
 	//Do Not Add more Profiles
 	//61 Profiles is Unity's Limit if using else if
 	//76 Profiles reaches DX 9's Temp Registers Limit 
