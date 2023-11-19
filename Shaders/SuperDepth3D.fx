@@ -1,7 +1,7 @@
 	////----------------//
 	///**SuperDepth3D**///
 	//----------------////
-	#define SD3D "SuperDepth3D v3.9.6\n"
+	#define SD3D "SuperDepth3D v3.9.8\n"
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//* Depth Map Based 3D post-process shader
 	//* For Reshade 3.0+
@@ -82,11 +82,11 @@ namespace SuperDepth3D
 		static const float DX_X = 0.0, DX_Y = 0.0, DX_Z = 0.0, DX_W = 1000.0;
 		// DY_X = [Position O & O] DY_Y = [Position O & P] DY_Z = [Position P & P] DY_W = [OP Menu Tresh]	
 		static const float DY_X = 0.0, DY_Y = 0.0, DY_Z = 0.0, DY_W = 1000.0;
-		// DW_X = [Position A & B] DW_Y = [Position C] DW_Z = [ABCW Menu Tresholds] DW_W = [NULL W]
-		static const float DW_X = 0.0, DW_Y = 0.0, DW_Z = 1000.0, DW_W = 0.0;
+		// DW_X = [SMD1 Position A & B] DW_Y = [SMD1 Position C] DW_Z = [SMD1 ABCW Menu Tresholds] DW_W = [SMD2 ABCW Menu Tresholds]
+		static const float DW_X = 0.0, DW_Y = 0.0, DW_Z = 1000.0, DW_W = 1000.0;
 		// DS_X = [Weapon NearDepth Min OIL] DS_Y = [Depth Range Boost] DS_Z = [View Mode State] DS_W = [Check Depth Limit Weapon Secondary]
 		static const float DS_X = 0.0, DS_Y = 0.0, DS_Z = D_ViewMode, DS_W = 1.0;
-		// DT_X = [Null X] DT_Y = [Null Y] DT_Z = [Weapon Hand Mask Z] DT_W = [Rescale Weapon Hand Near]
+		// DT_X = [SMD2 Position A & B] DT_Y = [SMD2 Position C] DT_Z = [Weapon Hand Mask Z] DT_W = [Rescale Weapon Hand Near]
 		static const float DT_X = 0.0, DT_Y = 0.0, DT_Z = 0.0, DT_W = 0.0;
 		// WSM = [Weapon Setting Mode]
 		#define OW_WP "WP Off\0Custom WP\0"
@@ -261,6 +261,7 @@ uniform int SuperDepth3D <
 			  "\n"
 				#if DSW
 				"Check Depth/Add-on Options: Copy Depth Clear/Frame: You should check it in the Depth/Add-ons tab above.\n"
+				"That or you may need to enable/disable Use Extended AR Heuristics or try Extended AR huristics.\n"
 				"\n"
 				#endif	
 			
@@ -323,6 +324,7 @@ uniform int SuperDepth3D <
 			
 				#if NFM
 				"Needs Mod: The Shader needs a external Mod and or Add-ons to work optimaly or to work at all.\n"
+				"It can be anything such as the REFramework or something like the Generic Depth Mod for Reshade.\n"
 				"More information in the Read Help doc or Join our Discord https://discord.gg/KrEnCAxkwJ.\n"
 				"\n"
 				#endif
@@ -1683,16 +1685,14 @@ uniform int Extra_Information <
 		#endif
 	
 			#if SMD //Simple Menu Detection	
-			float Simple_Menu()//Active RGB Detection
+			float Simple_Menu_A()//Active RGB Detection
 			{ 
 				float2 Pos_A = DW_X.xy, Pos_B = DW_X.zw, Pos_C = DW_Y.xy;
 				float4 ST_Values = DW_Z;
 		
-				#if SMD == 2
+				//Wild Card Always On
 				float Menu_X = Check_Color(Pos_A, ST_Values.x) || Check_Color(Pos_A, ST_Values.w);
-				#else
-				float Menu_X = Check_Color(Pos_A, ST_Values.x);
-				#endif
+
 				float Menu_Z = Check_Color(Pos_C, ST_Values.z) || Check_Color(Pos_C, ST_Values.w);
 				
 				float Menu_Detection = Menu_X &&                          //X & W is wiled Card. If MAC is enabled this is Disabled.
@@ -1700,8 +1700,26 @@ uniform int Extra_Information <
 									   Menu_Z;                            //Z & W is wiled Card.
 		
 				return Menu_Detection > 0;
-			}		
-			#endif	
+			}
+				#if SMD == 2
+				float Simple_Menu_B()//Active RGB Detection
+				{ 
+					float2 Pos_A = DT_X.xy, Pos_B = DT_X.zw, Pos_C = DT_Y.xy;
+					float4 ST_Values = DW_W;
+			
+					//Wild Card Always On
+					float Menu_X = Check_Color(Pos_A, ST_Values.x) || Check_Color(Pos_A, ST_Values.w);
+	
+					float Menu_Z = Check_Color(Pos_C, ST_Values.z) || Check_Color(Pos_C, ST_Values.w);
+					
+					float Menu_Detection = Menu_X &&                          //X & W is wiled Card. If MAC is enabled this is Disabled.
+										   Check_Color(Pos_B, ST_Values.y) && //Y
+										   Menu_Z;                            //Z & W is wiled Card.
+			
+					return Menu_Detection > 0;
+				}
+				#endif		
+			#endif
 	#endif
 	
 	
@@ -2540,7 +2558,10 @@ uniform int Extra_Information <
 		#endif	
 		
 		#if SMD	
-			DM = Simple_Menu() ? 0.0625 : DM;
+			DM = Simple_Menu_A() ? 0.0625 : DM;
+			#if SMD == 2	
+				DM = Simple_Menu_B() ? 0.0625 : DM;
+			#endif
 		#endif
 		
 		if (Cancel_Depth)
@@ -2745,26 +2766,10 @@ uniform int Extra_Information <
 		float weight = afterDepthValue / min(-0.0125,DepthDiffrence);
 			  weight = lerp(weight + (2.0 * Depth_Adjusted.y) * DD_Map,weight,0.75);//Reversed the logic since it seems look better this way and it leans towards the normal output.
 		float Weight = weight;
-			
-			if( View_Mode <= 1 || View_Mode >= 5 )
-			{
-				if(Diverge < 0)
-					weight *= lerp( 1, 1-(0.00075 * saturate(GetDepth * 2.5)), DD_Map ); 
-				else
-					weight *= lerp( 1, 1+(0.00075 * saturate(GetDepth * 2.5)), DD_Map );  
-			}
-			//ParallaxCoord.x = lerp( ParallaxCoord.x, PrevParallaxCoord.x, weight); //Old		
-			ParallaxCoord.x = PrevParallaxCoord.x * weight + ParallaxCoord.x * (1 - Weight);
-		//This is to limit artifacts.
-		ParallaxCoord.x += DB_Offset;
-		
-		if( View_Mode <= 1 || View_Mode >= 5 )
-		{
-			if(Diverge < 0)
-				ParallaxCoord.x += lerp(0,DepthDiffrence * 7.5 * pix.x, DD_Map );
-			else
-				ParallaxCoord.x -= lerp(0,DepthDiffrence * 7.5 * pix.x, DD_Map );
-		}		
+		//ParallaxCoord.x = lerp( ParallaxCoord.x, PrevParallaxCoord.x, weight); //Old		
+		ParallaxCoord.x = PrevParallaxCoord.x * weight + ParallaxCoord.x * (1 - Weight);
+		//This is to limit artifacts.	
+		ParallaxCoord.x += lerp(DB_Offset, DB_Offset * 2.0, DD_Map );// Also boost in some areas using DD_Map
 	
 	#if Reconstruction_Mode
 		if(Reconstruction_Type == 1 )
