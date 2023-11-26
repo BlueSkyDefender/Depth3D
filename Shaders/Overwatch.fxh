@@ -1414,7 +1414,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DB_Z 0.050
 	 
 	#define DB_W 20
-	#define DE_X 7
+	#define DE_X 5
 	#define DE_Y 0.5
 	#define DE_Z 0.375
 	#define DF_X float2(0.150,0.25)
