@@ -1,7 +1,7 @@
 ////----------------------------------------//
 ///SuperDepth3D Overwatch Automation Header///
 //----------------------------------------////
-#define OVERWATCH "Overwatch v3.5.2\n"
+#define OVERWATCH "Overwatch v3.5.4\n"
 //---------------------------------------OVERWATCH---------------------------------------//
 // If you are reading this stop. Go away and never look back. From this point on if you  //
 // still think it's is worth looking at this..... Then no one can save you or your soul. //
@@ -114,6 +114,7 @@ static const float LB_Masking_Offset_X_D = 1.0;         //LetterBox Masking Offs
 static const float LB_Masking_Offset_Y_D = 1.0;         //LetterBox Masking Offset Y                    | DI_Y
 
 //Weapon / World Near Depth Adjustments
+static const float Weapon_Near_Depth_Push_D = 0.0;      //Weapon Near                           Near    | WND
 static const float Weapon_Near_Depth_Max_D = 0.0;       //Weapon Near Depth                     Max     | DE_W
 static const float4 Weapon_Edge_Correction_D = 0.0;     //Weapon Edge Correction & Weapon Near  Scale   | DF_W
 static const float Weapon_Near_Depth_Min_D = 0.0;       //Weapon Near Depth                     Min     | DG_Z
@@ -128,9 +129,11 @@ static const float Check_Weapon_Depth_Limit_A_D = 0.10; //Check Weapon Depth Lim
 //FPS Focus
 static const int FPS_Focus_Type_D = 0;                  //FPS Focus Type: World | Weapon | Mix          | FPS
 static const int FPS_Focus_Method_D = 0;                //FPS Focus Method: Off | Switch | Hold         | DK_X
-static const int EFO_Eye_Selection_D = 0;               //Eye Eye Selection: Both | Right Eye | Left Eye| DK_Y
-static const int EFO_Fade_Selection_D = 0;              //Eye Fade Options: 0.1% | 0.2% | 0.3% | 0.4%   | DK_Z
-static const int EFO_Fade_Speed_Selection_D = 1;        //Eye Fade Speed Options: 0% | 50% | 100% | 150%| DK_W
+static const int EFO_Eye_Selection_D = 0;               //R/L Eye Selection: Both | Right Eye | Left Eye| DK_Y
+static const int FPS_Weapon_Reduction_D = 0;            //FPS Weapon Depth: 15% | 20% | 25% | 30% | 35% | WRP
+static const int EFO_Fade_Selection_D = 0;              //FPS World Depth: 10% | 20% | 30% | 40%| 50%   | DK_Z
+static const int EFO_Fade_Speed_Selection_D = 1;        //Eye Fade Speed: 0% | 50% | 100% | 150% | 175% | DK_W
+static const float Weapon_Distance_From_Bottom_D = 0.0; //Weapon Distance From Bottom [0 - 1]           | WFB
 
 //SM Values
 static const int SM_Toggle_Sparation_D = 1;             // 0 | 1 | 2 | 3                                | SMS
@@ -217,6 +220,11 @@ static const float Check_Weapon_Depth_Limit_B_D = 1.0;  //Check Weapon Depth Lim
 
 static const float WH_Masking_Adjust_D = 0;             //Weapon Hand Masking Adjust      Needs WHM     | DT_Z
 static const float2 Rescale_WH_Near_D = 0;              //Rescale amount & Cuttoff                      | DT_W
+
+static const float Null_X_D = 0;                        //Null X                                        | DZ_X
+static const float Null_Y_D = 0;                        //Null Y                                        | DZ_Y
+static const float Null_Z_D = 0;                        //Null Z                                        | DZ_Z
+static const float Null_W_D = 0;                        //Null W                                        | DZ_W
 
 //Special Toggles 
 static const int Resident_Evil_Fix_D = 0;               //Resident Evil Fix [Getting Phased Out]        | REF [Getting Phased Out]
@@ -391,11 +399,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DA_Y 8.75
 	#define WSM 5
 	#define DB_W 5
-#elif (App == 0xC770832 || App == 0x3E42619F )	//Wolfenstein: The New Order | The Old Blood
-	#define DA_Y 25.0
-	#define DA_Z 0.00125
-	#define WSM 5
-	#define DB_W 7
 #elif (App == 0x6D3CD99E ) //Blood 2 ****
 	#define DA_X 0.105
 	 
@@ -765,28 +768,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DA_X 0.056250
 	 
 	#define RHW 1
-#elif (App == 0x60F43F45 ) //Resident Evil 7
-	#define DA_W 1
-	#define DA_Y 19.0
-	#define DA_Z 0.0004
-	#define DA_X 0.075
-    #define DF_Y 0.1
-	 
-	#define DE_X 2
-	#define DE_Y 0.375
-	#define DE_Z 0.400
-	#define DG_W 0.725 //Only Detect stuff past the screen.
-    #define DG_Z 0.0425//Min
-    #define DE_W 0.150 //Max
-    #define DI_Z 0.180 //Trim	
-	#define BDF 1
-	#define DC_X 0.25
-	#define DC_Y 0.1
-	#define DC_Z -0.0625
-	#define DC_W -0.049
-	#define RHW 1
-	#define PEW 1
-	#define DAA 1
 #elif (App == 0x85F0A0FF ) //LUST for Darkness
 	#define DA_W 1
 	#define DB_X 1
@@ -1021,20 +1002,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define WSM 3
 	#define DB_W 8
 	#define RHW 1
-#elif (App == 0x21DC397E || App == 0x653AF1E1) //Gold Source
-	#define DA_X 0.045
-    #define DF_Y 0.125
-	#define DA_Y 32.0//21.25
-	#define DA_Z 0.0003
-	 
-	#define DE_X 7
-	#define DE_Y 0.500
-	#define DE_Z 0.375
-	#define DG_W -0.1375
-	#define BMT 1    
-	#define DF_Z 0.123 
-	#define WSM 3
-	#define DB_W 9
 #elif (App == 0x1E9DCD00) //Witch it
 	#define DA_X 0.0475
 	#define DA_W 1
@@ -1442,18 +1409,20 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define NDW 1
 #elif (App == 0x2ECAAF29 || App == 0xE19E4830 || App == 0xE19E4830  ) //Half-Life 2 | Left 4 Dead 2
 	#define DA_Y 15.0
-	#define DA_X 0.045
+	#define DA_X 0.040
     #define DF_Y 0.020
-	#define DB_Z 0.115
+	#define DB_Z 0.050
 	 
 	#define DB_W 20
 	#define DE_X 7
 	#define DE_Y 0.5
 	#define DE_Z 0.375
-	#define DF_X float2(0.105,0.0)
-	#define DJ_W 0.175
+	#define DF_X float2(0.150,0.25)
+	#define DJ_W 0.175	      // Weapon Depth Limit Location 1
+	#define DS_W 0.75	      // Weapon Depth Limit Location 2
+	#define WFB 0.0          // ZPD Weapon Elevaton for 1 and 2 scales from [0 - 1]
 	#define BMT 1
-	#define DF_Z 0.105
+	#define DF_Z 0.100
 	#define DSW 1
 	#define RHW 1
 #elif (App == 0xEACB4D0D ) //Final Fantasy XV Windows Edition
@@ -2733,19 +2702,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DL_W 0.050 //SM Perspective
 	#define DAA 1
 	#define PEW 1
-#elif (App == 0x11763BB7 ) //FATAL Frame Maiden of the Black Water.... Too Damn spooky....
-	#define DA_X 0.0825
-	#define DF_Y 0.040
-	#define DA_Y 16.25
-	#define DB_Z 0.275
-	 
-	#define DE_X 1
-	#define DE_Y 0.250
-	#define DE_Z 0.375
-	#define BMT 1
-	#define DF_Z 0.150
-	#define PEW 1
-	#define DAA 1
 #elif (App == 0x88C50B03 ) //League of Legends
 	#define DA_X 0.2
 	#define DF_Y 0.2
@@ -3066,7 +3022,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DL_W 0.05  //SM Perspective
 	#define DM_X 32    //HQ Tune
 	#define DM_Z 5     //HQ Smooth
-	#define DJ_X 0.85  //Range Smoothing
+	#define DJ_X 0.242  //Range Smoothing
 	#define PEW 1
 #elif (App == 0x1A2B216E ) //Crysis Remastered
 	#define DA_W 1
@@ -3225,7 +3181,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	//#define DL_W 0.025 //SM Perspective
 	#define DM_X 3     //HQ Tune
 	#define DM_Z 5     //HQ Smooth
-	#define DJ_X 0.5   //Range Smoothing
+	#define DJ_X 0.142   //Range Smoothing
     #define PEW 1 
 #elif (App == 0x548BD6AD ) //Lost Ark
     #define DA_X 0.075
@@ -4657,7 +4613,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DM_Z 4     //HQ Smooth
     //#define DM_Y 3     //HQ VRS
     //#define DL_Y 1     //De-Artifact 0.1245
-	#define DJ_X 0.875     //Range Smoothing
+	#define DJ_X 0.25     //Range Smoothing
 	#define PEW 1
 #elif (App == 0x3C4B9E1A ) //Hot Wheels Unleashed
 	#define DA_W 1
@@ -4940,7 +4896,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DM_Z 3     //HQ Smooth
     //#define DM_Y 3     //HQ VRS
     //#define DL_Y 0.375    //De-Artifact 0.1245
-    //#define DJ_X 0.250     //Range Smoothing
         #define MDD 1 //Set Menu Detection & Direction    //Off 0 | 1 | 2 | 3 | 4      
     #define DN_X float4( 0.295 , 0.270 , 0.513 , 0.302  ) //Pos A = XY White & B = ZW White 
     #define DN_Y float4( 0.595 , 0.115 , 0.000 , 0.000  ) //Pos C = XY Light & D = ZW Match
@@ -5090,7 +5045,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DM_Z 2     //HQ Smooth
     //#define DM_Y 3     //HQ VRS
     //#define DL_Y 0.375    //De-Artifact 0.1245
-	//#define DJ_X 0.150     //Range Smoothing
     #define PEW 1
 #elif (App == 0xCF5B15B ) //The Vanishing of Ethan Carter
 	//#define DA_W 1
@@ -5118,7 +5072,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DM_Z 2     //HQ Smooth
     //#define DM_Y 3     //HQ VRS
     //#define DL_Y 0.375    //De-Artifact 0.1245
-	//#define DJ_X 0.150     //Range Smoothing
     /*
     #define MDD 1 //Set Menu Detection & Direction     //Off 0 | 1 | 2 | 3 | 4      
     #define DN_X float4( 0.195, 0.195,  0.956, 0.8945)  //Pos A = XY White & B = ZW White 
@@ -5168,7 +5121,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DM_Z 2     //HQ Smooth
     //#define DM_Y 3     //HQ VRS
     //#define DL_Y 0.375    //De-Artifact 0.1245
-	//#define DJ_X 0.150     //Range Smoothing
     /*
     #define MDD 1 //Set Menu Detection & Direction     //Off 0 | 1 | 2 | 3 | 4      
     #define DN_X float4( 0.195, 0.195,  0.956, 0.8945)  //Pos A = XY White & B = ZW White 
@@ -5251,7 +5203,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	//#define DM_Z 2     //HQ Smooth
     //#define DM_Y 3     //HQ VRS
     //#define DL_Y 0.375    //De-Artifact 0.1245
-	//#define DJ_X 0.150     //Range Smoothing
     /*
     #define MDD 1 //Set Menu Detection & Direction     //Off 0 | 1 | 2 | 3 | 4      
     #define DN_X float4( 0.195, 0.195,  0.956, 0.8945)  //Pos A = XY White & B = ZW White 
@@ -5303,7 +5254,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DM_Z 3     //HQ Smooth
     //#define DM_Y 3     //HQ VRS
     //#define DL_Y 0.375    //De-Artifact 0.1245
-	//#define DJ_X 0.150     //Range Smoothing
     /////*
     #define MDD 1 //Set Menu Detection & Direction     //Off 0 | 1 | 2 | 3 | 4      
     #define DN_X float4( 0.400 , 0.275, 0.600 , 0.722)  //Pos A = XY White & B = ZW White 
@@ -5355,7 +5305,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DM_Z 3     //HQ Smooth
     //#define DM_Y 3     //HQ VRS
     //#define DL_Y 0.375    //De-Artifact 0.1245
-	//#define DJ_X 0.150     //Range Smoothing
     /*
     #define MDD 1 //Set Menu Detection & Direction     //Off 0 | 1 | 2 | 3 | 4      
     #define DN_X float4( 0.195, 0.195,  0.956, 0.8945)  //Pos A = XY White & B = ZW White 
@@ -5404,7 +5353,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DM_Z 3     //HQ Smooth
     //#define DM_Y 3     //HQ VRS
     //#define DL_Y 0.25   //De-Artifact
-	//#define DJ_X 0.150     //Range Smoothing
     #define PEW 1
     #define RHW 1
   #elif (App == 0x64ED1C8A ) //Visage
@@ -5434,7 +5382,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DM_Z 3     //HQ Smooth
     //#define DM_Y 3     //HQ VRS
     //#define DL_Y 0.375    //De-Artifact 0.1245
-	//#define DJ_X 0.150     //Range Smoothing
     /*
     #define MDD 1 //Set Menu Detection & Direction     //Off 0 | 1 | 2 | 3 | 4      
     #define DN_X float4( 0.400 , 0.275, 0.600 , 0.722)  //Pos A = XY White & B = ZW White 
@@ -5512,7 +5459,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	//#define DM_Z 3     //HQ Smooth
     //#define DM_Y 3     //HQ VRS
     //#define DL_Y 0.375    //De-Artifact 0.1245
-	//#define DJ_X 0.150     //Range Smoothing
     /*
     #define MDD 1 //Set Menu Detection & Direction     //Off 0 | 1 | 2 | 3 | 4      
     #define DN_X float4( 0.400 , 0.275, 0.600 , 0.722)  //Pos A = XY White & B = ZW White 
@@ -5562,7 +5508,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DM_Z 1     //HQ Smooth
     //#define DM_Y 3     //HQ VRS
     //#define DL_Y 0.375    //De-Artifact 0.1245
-	//#define DJ_X 0.150     //Range Smoothing
     /*
     #define MDD 1 //Set Menu Detection & Direction     //Off 0 | 1 | 2 | 3 | 4      
     #define DN_X float4( 0.400 , 0.275, 0.600 , 0.722)  //Pos A = XY White & B = ZW White 
@@ -5689,7 +5634,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DM_Z 1     //HQ Smooth
     //#define DM_Y 3     //HQ VRS
     //#define DL_Y 0.375    //De-Artifact 0.1245
-	//#define DJ_X 0.150     //Range Smoothing
     /*
     #define MDD 1 //Set Menu Detection & Direction     //Off 0 | 1 | 2 | 3 | 4      
     #define DN_X float4( 0.400 , 0.275, 0.600 , 0.722)  //Pos A = XY White & B = ZW White 
@@ -5740,7 +5684,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DM_Z 0     //HQ Smooth
     //#define DM_Y 3     //HQ VRS
     //#define DL_Y 0.375    //De-Artifact 0.1245
-	//#define DJ_X 0.150     //Range Smoothing
     /*
     #define MDD 1 //Set Menu Detection & Direction     //Off 0 | 1 | 2 | 3 | 4      
     #define DN_X float4( 0.400 , 0.275, 0.600 , 0.722)  //Pos A = XY White & B = ZW White 
@@ -5817,7 +5760,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DM_Z 1     //HQ Smooth
     //#define DM_Y 3     //HQ VRS
     //#define DL_Y 0.500    //De-Artifact 0.1245
-	//#define DJ_X 0.150     //Range Smoothing
     /*
     #define MDD 1 //Set Menu Detection & Direction     //Off 0 | 1 | 2 | 3 | 4      
     #define DN_X float4( 0.400 , 0.275, 0.600 , 0.722)  //Pos A = XY White & B = ZW White 
@@ -5868,7 +5810,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DM_Z 1     //HQ Smooth
     //#define DM_Y 3     //HQ VRS
     //#define DL_Y 1.000    //De-Artifact 0.1245
-	//#define DJ_X 0.150     //Range Smoothing
     /*
     #define MDD 1 //Set Menu Detection & Direction     //Off 0 | 1 | 2 | 3 | 4      
     #define DN_X float4( 0.400 , 0.275, 0.600 , 0.722)  //Pos A = XY White & B = ZW White 
@@ -5920,7 +5861,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DM_Z 5     //HQ Smooth
     //#define DM_Y 3     //HQ VRS
     //#define DL_Y 1.000    //De-Artifact 0.1245
-	//#define DJ_X 0.150     //Range Smoothing
     /*
     #define MDD 1 //Set Menu Detection & Direction     //Off 0 | 1 | 2 | 3 | 4      
     #define DN_X float4( 0.400 , 0.275, 0.600 , 0.722)  //Pos A = XY White & B = ZW White 
@@ -5974,7 +5914,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DM_Y 3           //HQ VRS
     //#define DL_Y 1.000       //De-Artifact
     //#define DL_Z 0.250       //Compat Power
-	//#define DJ_X 0.150       //Range Smoothing
     /*
     #define MDD 1 //Set Menu Detection & Direction     //Off 0 | 1 | 2 | 3 | 4      
     #define DN_X float4( 0.400 , 0.275, 0.600 , 0.722)  //Pos A = XY White & B = ZW White 
@@ -6033,7 +5972,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DM_Y 3           //HQ VRS
     //#define DL_Y 1.000       //De-Artifact
     //#define DL_Z 0.250       //Compat Power
-	//#define DJ_X 0.150       //Range Smoothing
     /*
     #define MDD 1 //Set Menu Detection & Direction     //Off 0 | 1 | 2 | 3 | 4      
     #define DN_X float4( 0.400 , 0.275, 0.600 , 0.722)  //Pos A = XY White & B = ZW White 
@@ -6092,7 +6030,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DM_Y 3           //HQ VRS
     //#define DL_Y 1.000       //De-Artifact
     //#define DL_Z 0.250       //Compat Power
-	//#define DJ_X 0.250       //Range Smoothing
     /*
     #define MDD 1 //Set Menu Detection & Direction     //Off 0 | 1 | 2 | 3 | 4      
     #define DN_X float4( 0.400 , 0.275, 0.600 , 0.722)  //Pos A = XY White & B = ZW White 
@@ -6152,7 +6089,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DM_Y 3           //HQ VRS
     //#define DL_Y 1.000       //De-Artifact
     //#define DL_Z 0.125       //Compat Power
-	//#define DJ_X 0.150       //Range Smoothing
     /*
     #define MDD 1 //Set Menu Detection & Direction     //Off 0 | 1 | 2 | 3 | 4      
     #define DN_X float4( 0.400 , 0.275, 0.600 , 0.722)  //Pos A = XY White & B = ZW White 
@@ -6211,7 +6147,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DM_Y 3           //HQ VRS
     //#define DL_Y 1.000       //De-Artifact
     //#define DL_Z 0.250       //Compat Power
-	//#define DJ_X 0.250       //Range Smoothing
     /*
     #define MDD 1 //Set Menu Detection & Direction     //Off 0 | 1 | 2 | 3 | 4      
     #define DN_X float4( 0.400 , 0.275, 0.600 , 0.722)  //Pos A = XY White & B = ZW White 
@@ -6270,7 +6205,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DM_Y 3           //HQ VRS
     //#define DL_Y 1.0     //De-Artifact
     //#define DL_Z 0.0       //Compat Power
-	//#define DJ_X 0.250       //Range Smoothing
     /*
     #define MDD 1 //Set Menu Detection & Direction     //Off 0 | 1 | 2 | 3 | 4      
     #define DN_X float4( 0.400 , 0.275, 0.600 , 0.722)  //Pos A = XY White & B = ZW White 
@@ -6328,7 +6262,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DM_Y 3           //HQ VRS
     //#define DL_Y 0.250    //De-Artifact
     //#define DL_Z 0.0       //Compat Power
-	//#define DJ_X 0.250       //Range Smoothing
     /*
     #define MDD 1 //Set Menu Detection & Direction     //Off 0 | 1 | 2 | 3 | 4      
     #define DN_X float4( 0.400 , 0.275, 0.600 , 0.722)  //Pos A = XY White & B = ZW White 
@@ -6380,7 +6313,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DM_Y 3           //HQ VRS
     //#define DL_Y 0.250    //De-Artifact
     //#define DL_Z 0.250       //Compat Power
-	//#define DJ_X 0.250       //Range Smoothing
     /*
     #define MDD 1 //Set Menu Detection & Direction     //Off 0 | 1 | 2 | 3 | 4      
     #define DN_X float4( 0.400 , 0.275, 0.600 , 0.722)  //Pos A = XY White & B = ZW White 
@@ -6436,7 +6368,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DM_Y 3           //HQ VRS
     //#define DL_Y 0.0    //De-Artifact
     //#define DL_Z 0.75       //Compat Power
-	//#define DJ_X 0.250       //Range Smoothing
     /*
     #define MDD 1 //Set Menu Detection & Direction     //Off 0 | 1 | 2 | 3 | 4      
     #define DN_X float4( 0.400 , 0.275, 0.600 , 0.722)  //Pos A = XY White & B = ZW White 
@@ -6494,7 +6425,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DM_Y 3           //HQ VRS
     //#define DL_Y 0.75    //De-Artifact
     //#define DL_Z 0.250       //Compat Power
-	//#define DJ_X 0.125       //Range Smoothing
     /*
     #define MDD 1 //Set Menu Detection & Direction     //Off 0 | 1 | 2 | 3 | 4      
     #define DN_X float4( 0.400 , 0.275, 0.600 , 0.722)  //Pos A = XY White & B = ZW White 
@@ -6577,7 +6507,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DM_Y 3           //HQ VRS
     //#define DL_Y -0.500    //De-Artifact
     //#define DL_Z 0.250       //Compat Power
-	//#define DJ_X 0.125       //Range Smoothing
 
     #define PEW 1
     #define FOV 1
@@ -6612,7 +6541,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DM_Y 3           //HQ VRS
     //#define DL_Y 0.500    //De-Artifact
     //#define DL_Z 0.250       //Compat Power
-	//#define DJ_X 0.125       //Range Smoothing
     #define PEW 1
     #define FOV 1
     #define DSW 1
@@ -6645,7 +6573,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DM_Y 3           //HQ VRS
     //#define DL_Y 0.500    //De-Artifact
     //#define DL_Z 0.250       //Compat Power
-	//#define DJ_X 0.125       //Range Smoothing
     /*
     #define MDD 1 //Set Menu Detection & Direction     //Off 0 | 1 | 2 | 3 | 4      
     #define DN_X float4( 0.400 , 0.275, 0.600 , 0.722)  //Pos A = XY White & B = ZW White 
@@ -6706,7 +6633,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DM_Y 3           //HQ VRS
     //#define DL_Y 0.250    //De-Artifact
     //#define DL_Z 0.125       //Compat Power
-	#define DJ_X 0.125       //Range Smoothing
+	#define DJ_X 0.035       //Range Smoothing
     /*
     #define MDD 1 //Set Menu Detection & Direction     //Off 0 | 1 | 2 | 3 | 4      
     #define DN_X float4( 0.400 , 0.275, 0.600 , 0.722)  //Pos A = XY White & B = ZW White 
@@ -6778,7 +6705,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DM_Y 3           //HQ VRS
     //#define DL_Y 0.250    //De-Artifact
     //#define DL_Z 0.250       //Compat Power
-	//#define DJ_X 0.125       //Range Smoothing
     #define PEW 1
 #elif (App == 0x1061AEB6 ) //Just Cause 4
 	#define DA_W 1
@@ -6809,7 +6735,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DM_Y 3           //HQ VRS
     //#define DL_Y -1.0    //De-Artifact
     //#define DL_Z 0.250       //Compat Power
-	//#define DJ_X 0.125       //Range Smoothing
     /*
     #define MDD 1 //Set Menu Detection & Direction     //Off 0 | 1 | 2 | 3 | 4      
     #define DN_X float4( 0.400 , 0.275, 0.600 , 0.722)  //Pos A = XY White & B = ZW White 
@@ -6857,7 +6782,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DM_Y 3           //HQ VRS
     //#define DL_Y -0.850    //De-Artifact
     //#define DL_Z 0.250       //Compat Power
-	//#define DJ_X 0.125       //Range Smoothing
     #define MMD 3 //Set Multi Menu Detection             //Off / On
     #define MMS 0 //Set Multi Menu Selection from 0-1 to 29-30 and Off 0 | 1 | 2
     #define DO_X float4( 0.145 , 0.146 , 0.145 , 0.900 ) //Pos A1 = XY Color & A2 = ZW Black 
@@ -6911,7 +6835,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DM_Y 3           //HQ VRS
     //#define DL_Y 1.0    //De-Artifact
     //#define DL_Z 0.50       //Compat Power
-	#define DJ_X 0.500       //Range Smoothing
+	#define DJ_X 0.142       //Range Smoothing
     #define PEW 1
     //#define NDW 1
 #elif (App == 0xED560119 ) //DarkSiders Genisis
@@ -6945,7 +6869,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DM_Y 3           //HQ VRS
     //#define DL_Y 0.7    //De-Artifact
     //#define DL_Z 0.50       //Compat Power
-	//#define DJ_X 0.500       //Range Smoothing
     #define PEW 1
 	#define NDW 1
 #elif (App == 0x1B8B9F54 ) //The Evil Within
@@ -6974,7 +6897,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DM_Z 3     //HQ Smooth
     //#define DM_Y 3     //HQ VRS
     //#define DL_Y 0.5    //De-Artifact 0.1245
-	//#define DJ_X 0.150     //Range Smoothing
     /*
     #define MDD 1 //Set Menu Detection & Direction     //Off 0 | 1 | 2 | 3 | 4      
     #define DN_X float4( 0.195, 0.195,  0.956, 0.8945)  //Pos A = XY White & B = ZW White 
@@ -7032,7 +6954,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DM_Y 3           //HQ VRS
     //#define DL_Y 0.800      //De-Artifact
     //#define DL_Z 0.100       //Compat Power
-	//#define DJ_X 0.500       //Range Smoothing
     /*
     #define MDD 1 //Set Menu Detection & Direction     //Off 0 | 1 | 2 | 3 | 4      
     #define DN_X float4( 0.400 , 0.275, 0.600 , 0.722)  //Pos A = XY White & B = ZW White 
@@ -7095,7 +7016,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DM_Y 3           //HQ VRS
     //#define DL_Y 0.800      //De-Artifact
     //#define DL_Z 0.100       //Compat Power
-	//#define DJ_X 0.500       //Range Smoothing
     /*
     #define MDD 1 //Set Menu Detection & Direction     //Off 0 | 1 | 2 | 3 | 4      
     #define DN_X float4( 0.400 , 0.275, 0.600 , 0.722)  //Pos A = XY White & B = ZW White 
@@ -7161,7 +7081,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DM_Y 3           //HQ VRS
     //#define DL_Y -1.0    //De-Artifact
     //#define DL_Z 0.50       //Compat Power
-	//#define DJ_X 0.500       //Range Smoothing
 	//#define WSM 2
 	//#define DB_W 20
 	#define PEW 1
@@ -7199,7 +7118,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DM_Y 3           //HQ VRS
     //#define DL_Y -1.0    //De-Artifact
     //#define DL_Z 0.50       //Compat Power
-	//#define DJ_X 0.500       //Range Smoothing
 	//#define WSM 2
 	//#define DB_W 20
 	#define PEW 1
@@ -7301,7 +7219,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DM_Y 3           //HQ VRS
     //#define DL_Y -0.5    //De-Artifact
     //#define DL_Z 0.50       //Compat Power
-	#define DJ_X 0.500       //Range Smoothing
+	#define DJ_X 0.142       //Range Smoothing
     /*
     #define MDD 1 //Set Menu Detection & Direction     //Off 0 | 1 | 2 | 3 | 4      
     #define DN_X float4( 0.400 , 0.275, 0.600 , 0.722)  //Pos A = XY White & B = ZW White 
@@ -7364,7 +7282,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DM_Y 3           //HQ VRS
     //#define DL_Y 0.75    //De-Artifact
     //#define DL_Z 0.50       //Compat Power
-	//#define DJ_X 0.500       //Range Smoothing
     #define PEW 1
     //#define NDW 1
 #elif (App == 0xCD52FFF9 ) //The Entropy Center
@@ -7397,7 +7314,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DM_Y 3           //HQ VRS
     //#define DL_Y 0.75    //De-Artifact
     //#define DL_Z 0.50       //Compat Power
-	//#define DJ_X 0.500       //Range Smoothing
 	#define WSM 3
 	#define DB_W 26
 	#define DF_X float2(0.050,0.0)	
@@ -7433,7 +7349,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DM_Y 3           //HQ VRS
     //#define DL_Y 0.75    //De-Artifact
     //#define DL_Z 0.50       //Compat Power
-	//#define DJ_X 0.500       //Range Smoothing
 	//#define WSM 3
 	//#define DB_W 30
 	//#define DF_X float2(0.050,0.0)	
@@ -7475,7 +7390,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DM_Y 3           //HQ VRS
     //#define DL_Y 0.75    //De-Artifact
     //#define DL_Z 0.50       //Compat Power
-	//#define DJ_X 0.500       //Range Smoothing
 	//#define WSM 3
 	//#define DB_W 30
 	//#define DF_X float2(0.050,0.0)	
@@ -7517,7 +7431,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DM_Y 3           //HQ VRS
     //#define DL_Y 0.75    //De-Artifact
     //#define DL_Z 0.50       //Compat Power
-	//#define DJ_X 0.500       //Range Smoothing
 	//#define WSM 3
 	//#define DB_W 30
 	//#define DF_X float2(0.050,0.0)	
@@ -7559,7 +7472,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DM_Y 3           //HQ VRS
     //#define DL_Y 0.50    //De-Artifact
     //#define DL_Z 0.50       //Compat Power
-	#define DJ_X 0.250       //Range Smoothing
+	#define DJ_X 0.071       //Range Smoothing
 	//#define WSM 3
 	//#define DB_W 30
 	//#define DF_X float2(0.050,0.0)	
@@ -7596,7 +7509,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DM_Y 3           //HQ VRS
     //#define DL_Y 0.50    //De-Artifact
     //#define DL_Z 0.50       //Compat Power
-	//#define DJ_X 0.250       //Range Smoothing
 	//#define WSM 3
 	//#define DB_W 30
 	//#define DF_X float2(0.050,0.0)	
@@ -7633,7 +7545,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DM_Y 3           //HQ VRS
     //#define DL_Y 0.50    //De-Artifact
     //#define DL_Z 0.50       //Compat Power
-	//#define DJ_X 0.150       //Range Smoothing
 	//#define WSM 3
 	//#define DB_W 30
 	//#define DF_X float2(0.050,0.0)	
@@ -7671,7 +7582,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DM_Y 3           //HQ VRS
     //#define DL_Y -0.50    //De-Artifact
     //#define DL_Z 0.50       //Compat Power
-	//#define DJ_X 0.250       //Range Smoothing
 	//#define WSM 3
 	//#define DB_W 30
 	//#define DF_X float2(0.050,0.0)	
@@ -7706,7 +7616,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DM_Y 3           //HQ VRS
     //#define DL_Y -0.50    //De-Artifact
     //#define DL_Z -1.0       //Compat Power
-	//#define DJ_X 0.250       //Range Smoothing
 	//#define WSM 3
 	//#define DB_W 30
 	//#define DF_X float2(0.050,0.0)	
@@ -7820,8 +7729,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DM_Y 3           //HQ VRS
     //#define DL_Y -0.50    //De-Artifact
     //#define DL_Z 0.50       //Compat Power
-	//#define DJ_X 0.250       //Range Smoothing
-
 	//#define WSM 3
 	//#define DB_W 30
 	//#define DF_X float2(0.050,0.0)	
@@ -7857,7 +7764,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DM_Y 3           //HQ VRS
     //#define DL_Y 0.500    //De-Artifact
     //#define DL_Z 0.50       //Compat Power
-	//#define DJ_X 0.250       //Range Smoothing
 	//#define WSM 3
 	//#define DB_W 30
 	//#define DF_X float2(0.050,0.0)	
@@ -7893,8 +7799,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DM_Y 3           //HQ VRS
     //#define DL_Y 0.500    //De-Artifact
     //#define DL_Z 0.50       //Compat Power
-	//#define DJ_X 0.250       //Range Smoothing
-
 	#define WSM 3
 	#define DB_W 4
 	//#define DF_X float2(0.050,0.0)	
@@ -7930,7 +7834,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DM_Y 3           //HQ VRS
     //#define DL_Y 0.500    //De-Artifact
     //#define DL_Z 0.50       //Compat Power
-	//#define DJ_X 0.250       //Range Smoothing
 	#define WSM 3
 	#define DB_W 5
 	//#define DF_X float2(0.050,0.0)	
@@ -7969,7 +7872,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DM_Y 3           //HQ VRS
     //#define DL_Y 0.5    //De-Artifact
     //#define DL_Z 0.5       //Compat Power
-	//#define DJ_X 0.250       //Range Smoothing
 	//#define WSM 3
 	//#define DB_W 5
 	//#define DF_X float2(0.050,0.0)	
@@ -8012,7 +7914,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DM_Y 3           //HQ VRS
     //#define DL_Y 0.650    //De-Artifact
     //#define DL_Z 0.1       //Compat Power
-	//#define DJ_X 0.250       //Range Smoothing
 	//#define WSM 3
 	//#define DB_W 5
 	//#define DF_X float2(0.050,0.0)	
@@ -8048,7 +7949,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DM_Y 3           //HQ VRS
     //#define DL_Y -0.650    //De-Artifact
     //#define DL_Z 0.1       //Compat Power
-	//#define DJ_X 0.375       //Range Smoothing
 	//#define WSM 3
 	//#define DB_W 5
 	//#define DF_X float2(0.050,0.0)	
@@ -8085,7 +7985,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DM_Y 3           //HQ VRS
     //#define DL_Y 0.5    //De-Artifact
     //#define DL_Z 0.05       //Compat Power
-	//#define DJ_X 0.250       //Range Smoothing
 	//#define WSM 3
 	//#define DB_W 5
 	//#define DF_X float2(0.050,0.0)	
@@ -8122,7 +8021,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DM_Y 3           //HQ VRS
     //#define DL_Y 0.5    //De-Artifact
     //#define DL_Z 0.05       //Compat Power
-	//#define DJ_X 0.250       //Range Smoothing
 	//#define WSM 3
 	//#define DB_W 5
 	//#define DF_X float2(0.050,0.0)	
@@ -8183,7 +8081,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DM_Y 3           //HQ VRS
     //#define DL_Y 0.5    //De-Artifact
     //#define DL_Z 0.05       //Compat Power
-	//#define DJ_X 0.250       //Range Smoothing
 	//#define WSM 3
 	//#define DB_W 5
 	//#define DF_X float2(0.050,0.0)	
@@ -8220,7 +8117,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DM_Y 3           //HQ VRS
     //#define DL_Y -0.5    //De-Artifact
     //#define DL_Z 0.05       //Compat Power
-	//#define DJ_X 0.250       //Range Smoothing
     /*
     #define MDD 1 //Set Menu Detection & Direction     //Off 0 | 1 | 2 | 3 | 4      
     #define DN_X float4( 0.400 , 0.275, 0.600 , 0.722)  //Pos A = XY White & B = ZW White 
@@ -8287,7 +8183,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DM_Y 3           //HQ VRS
     //#define DL_Y -1.0    //De-Artifact
     //#define DL_Z 0.05       //Compat Power
-	//#define DJ_X 0.250       //Range Smoothing
 	//#define WSM 3
 	//#define DB_W 5
 	//#define DF_X float2(0.050,0.0)	
@@ -8353,7 +8248,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define HQT 1
     //#define DL_Y 0.0    //De-Artifact
     //#define DL_Z -1.0       //Compat Power
-	//#define DJ_X 0.250       //Range Smoothing
 	//#define WSM 3
 	//#define DB_W 5
 	//#define DF_X float2(0.050,0.0)	
@@ -8406,7 +8300,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DM_Y 3           //HQ VRS
     //#define DL_Y 0.0    //De-Artifact
     //#define DL_Z -1.0       //Compat Power
-	//#define DJ_X 0.250       //Range Smoothing
     /*
     #define MDD 1 //Set Menu Detection & Direction     //Off 0 | 1 | 2 | 3 | 4      
     #define DN_X float4( 0.400 , 0.275, 0.600 , 0.722)  //Pos A = XY White & B = ZW White 
@@ -8478,7 +8371,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DM_Y 3           //HQ VRS
     //#define DL_Y -1.0    //De-Artifact
     //#define DL_Z 0.05       //Compat Power
-	//#define DJ_X 0.250       //Range Smoothing
 	//#define WSM 3
 	//#define DB_W 5
 	//#define DF_X float2(0.050,0.0)	
@@ -8516,7 +8408,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DM_Y 3           //HQ VRS
     //#define DL_Y 0.25    //De-Artifact
     //#define DL_Z 0.25       //Compat Power
-	//#define DJ_X 0.250       //Range Smoothing
 	//#define WSM 3
 	//#define DB_W 5
 	//#define DF_X float2(0.050,0.0)	
@@ -8555,7 +8446,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DM_Y 3           //HQ VRS
     //#define DL_Y -0.5    //De-Artifact
     //#define DL_Z 0.25       //Compat Power
-	//#define DJ_X 0.250       //Range Smoothing
     /*
     #define MDD 1 //Set Menu Detection & Direction     //Off 0 | 1 | 2 | 3 | 4      
     #define DN_X float4( 0.400 , 0.275, 0.600 , 0.722)  //Pos A = XY White & B = ZW White 
@@ -8621,7 +8511,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DM_Y 3           //HQ VRS
     //#define DL_Y -0.5    //De-Artifact
     //#define DL_Z 0.25       //Compat Power
-	//#define DJ_X 0.250       //Range Smoothing
 	//#define WSM 3
 	//#define DB_W 5
 	//#define DF_X float2(0.050,0.0)	
@@ -8659,7 +8548,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DM_Y 3           //HQ VRS
     //#define DL_Y -0.5    //De-Artifact
     //#define DL_Z 0.25       //Compat Power
-	//#define DJ_X 0.250       //Range Smoothing
 	//#define WSM 3
 	//#define DB_W 5
 	//#define DF_X float2(0.050,0.0)	
@@ -8701,7 +8589,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DM_Y 3           //HQ VRS
     //#define DL_Y -0.5    //De-Artifact
     //#define DL_Z 0.25       //Compat Power
-	//#define DJ_X 0.250       //Range Smoothing
 	//#define WSM 3
 	//#define DB_W 5
 	//#define DF_X float2(0.050,0.0)	
@@ -8743,7 +8630,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DM_Y 3           //HQ VRS
     //#define DL_Y -0.5    //De-Artifact
     //#define DL_Z 0.25       //Compat Power
-	//#define DJ_X 0.250       //Range Smoothing
 	//#define WSM 3
 	//#define DB_W 5
 	//#define DF_X float2(0.050,0.0)	
@@ -8823,7 +8709,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DM_Y 3           //HQ VRS
     //#define DL_Y -0.5    //De-Artifact
     //#define DL_Z 0.25       //Compat Power
-	//#define DJ_X 0.250       //Range Smoothing
     /*
     #define MDD 1 //Set Menu Detection & Direction     //Off 0 | 1 | 2 | 3 | 4      
     #define DN_X float4( 0.400 , 0.275, 0.600 , 0.722)  //Pos A = XY White & B = ZW White 
@@ -8898,7 +8783,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DM_Y 3           //HQ VRS
     //#define DL_Y -0.5    //De-Artifact
     //#define DL_Z 0.25       //Compat Power
-	//#define DJ_X 0.250       //Range Smoothing
     /*
     #define MDD 1 //Set Menu Detection & Direction     //Off 0 | 1 | 2 | 3 | 4      
     #define DN_X float4( 0.400 , 0.275, 0.600 , 0.722)  //Pos A = XY White & B = ZW White 
@@ -8970,7 +8854,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DM_Y 3           //HQ VRS
     //#define DL_Y -0.5    //De-Artifact
     //#define DL_Z 0.25       //Compat Power
-	//#define DJ_X 0.250       //Range Smoothing
     #define MAC 1
     #define MDD 1 //Set Menu Detection & Direction      //Off 0 | 1 | 2 | 3 | 4      
     #define DN_X float4( 0.8835, 0.956 , 0.982 , 0.954)//Pos A = XY Any & B = ZW Lock 
@@ -9041,7 +8924,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DM_Y 3           //HQ VRS
     //#define DL_Y -0.5   //De-Artifact
     //#define DL_Z 0.5       //Compat Power
-	//#define DJ_X 0.250       //Range Smoothing
 	/*
     #define MAC 1
     #define MDD 1 //Set Menu Detection & Direction      //Off 0 | 1 | 2 | 3 | 4      
@@ -9112,7 +8994,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DM_Y 3           //HQ VRS
     //#define DL_Y -0.375   //De-Artifact
     //#define DL_Z -0.125       //Compat Power
-	//#define DJ_X 0.125       //Range Smoothing
     /*
     #define MDD 1 //Set Menu Detection & Direction     //Off 0 | 1 | 2 | 3 | 4      
     #define DN_X float4( 0.400 , 0.275, 0.600 , 0.722)  //Pos A = XY White & B = ZW White 
@@ -9175,7 +9056,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DM_Y 3           //HQ VRS
     //#define DL_Y 0.5   //De-Artifact
     //#define DL_Z 0.5       //Compat Power
-	//#define DJ_X 0.50       //Range Smoothing
 	/*
     #define MAC 1
     #define MDD 1 //Set Menu Detection & Direction      //Off 0 | 1 | 2 | 3 | 4      
@@ -9249,7 +9129,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DM_Y 3           //HQ VRS
     //#define DL_Y -0.5   //De-Artifact
     //#define DL_Z -0.25       //Compat Power
-	//#define DJ_X 0.250       //Range Smoothing
 	/*
     #define MAC 1
     #define MDD 1 //Set Menu Detection & Direction      //Off 0 | 1 | 2 | 3 | 4      
@@ -9341,7 +9220,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DM_Y 3           //HQ VRS
     //#define DL_Y -0.5   //De-Artifact
     //#define DL_Z 0.5       //Compat Power
-	//#define DJ_X 0.250       //Range Smoothing
 	/*
     #define MAC 1
     #define MDD 1 //Set Menu Detection & Direction      //Off 0 | 1 | 2 | 3 | 4      
@@ -9420,7 +9298,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DM_Y 3           //HQ VRS
     //#define DL_Y -0.5   //De-Artifact
     //#define DL_Z 0.5       //Compat Power
-	//#define DJ_X 0.250       //Range Smoothing
 	/*
     #define MAC 1
     #define MDD 1 //Set Menu Detection & Direction      //Off 0 | 1 | 2 | 3 | 4      
@@ -9493,7 +9370,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DM_Y 3           //HQ VRS
     //#define DL_Y -0.5   //De-Artifact
     //#define DL_Z 0.5       //Compat Power
-	//#define DJ_X 0.250       //Range Smoothing
 	/*
     #define MAC 1
     #define MDD 1 //Set Menu Detection & Direction      //Off 0 | 1 | 2 | 3 | 4      
@@ -9567,7 +9443,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DM_Y 3           //HQ VRS
     //#define DL_Y -0.5   //De-Artifact
     //#define DL_Z 0.5       //Compat Power
-	//#define DJ_X 0.250       //Range Smoothing
 	/*
     #define MAC 1
     #define MDD 1 //Set Menu Detection & Direction      //Off 0 | 1 | 2 | 3 | 4      
@@ -9642,8 +9517,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DM_Y 3           //HQ VRS
     //#define DL_Y -0.5   //De-Artifact
     //#define DL_Z 0.5       //Compat Power
-	//#define DJ_X 0.250       //Range Smoothing
-
     //#define MAC 1
     #define MDD 4 //Set Menu Detection & Direction      //Off 0 | 1 | 2 | 3 | 4      
     #define DN_X float4( 0.200, 0.900 , 0.826 , 0.940)//Pos A = XY Any & B = ZW Lock 
@@ -9715,7 +9588,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DM_Y 3           //HQ VRS
     //#define DL_Y 0.75   //De-Artifact
     //#define DL_Z 0.5       //Compat Power
-	//#define DJ_X 0.250       //Range Smoothing
 	
     #define MAC 1
     #define MDD 1 //Set Menu Detection & Direction      //Off 0 | 1 | 2 | 3 | 4      
@@ -9814,7 +9686,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DM_Z 1     //HQ Smooth
     //#define DL_Z 0.5       //Compat Power
     //#define DL_Y -0.375   //De-Artifact
-	#define DJ_X 0.300       //Range Smoothing
+	#define DJ_X 0.085       //Range Smoothing
 	#define PEW 1
 	#define DAA 1
     #define DSW 1
@@ -9850,7 +9722,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DM_Y 3           //HQ VRS
     //#define DL_Y -0.5   //De-Artifact
     //#define DL_Z 0.5       //Compat Power
-	//#define DJ_X 0.250       //Range Smoothing
 
     //#define MAC 1
     #define MDD 1 //Set Menu Detection & Direction      //Off 0 | 1 | 2 | 3 | 4      
@@ -9929,7 +9800,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DM_Y 3           //HQ VRS
     //#define DL_Y -0.5   //De-Artifact
     //#define DL_Z 0.5       //Compat Power
-	//#define DJ_X 0.250       //Range Smoothing
 	/*
     #define MAC 1
     #define MDD 1 //Set Menu Detection & Direction      //Off 0 | 1 | 2 | 3 | 4      
@@ -10008,7 +9878,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DM_Y 3           //HQ VRS
     //#define DL_Y -0.5   //De-Artifact
     //#define DL_Z 0.25       //Compat Power
-	//#define DJ_X 0.250       //Range Smoothing
 	/*
     #define MAC 1
     #define MDD 1 //Set Menu Detection & Direction      //Off 0 | 1 | 2 | 3 | 4      
@@ -10085,7 +9954,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DL_Y -1.0   //De-Artifact
     
     //#define DL_Z 0.5       //Compat Power
-	//#define DJ_X 0.250       //Range Smoothing
 	/*
     #define MAC 1
     #define MDD 1 //Set Menu Detection & Direction      //Off 0 | 1 | 2 | 3 | 4      
@@ -10162,7 +10030,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DM_Y 3           //HQ VRS
     //#define DL_Y -0.25   //De-Artifact
     //#define DL_Z 0.125       //Compat Power
-	//#define DJ_X 0.250       //Range Smoothing
 
 	//#define WSM 3
 	//#define DB_W 12
@@ -10207,7 +10074,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DM_Y 3           //HQ VRS
     //#define DL_Y -0.5    //De-Artifact
     //#define DL_Z 0.25       //Compat Power
-	//#define DJ_X 0.250       //Range Smoothing
     /*
     #define MDD 1 //Set Menu Detection & Direction     //Off 0 | 1 | 2 | 3 | 4      
     #define DN_X float4( 0.400 , 0.275, 0.600 , 0.722)  //Pos A = XY White & B = ZW White 
@@ -10282,7 +10148,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DM_Y 3           //HQ VRS
     //#define DL_Y -0.5    //De-Artifact
     //#define DL_Z 0.25       //Compat Power
-	//#define DJ_X 0.250       //Range Smoothing
 	//#define WSM 3
 	//#define DB_W 5
 	//#define DF_X float2(0.050,0.0)	
@@ -10326,7 +10191,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DM_Y 3           //HQ VRS
     //#define DL_Y -0.5   //De-Artifact
     //#define DL_Z 0.25       //Compat Power
-	//#define DJ_X 0.250       //Range Smoothing
 	//#define WSM 3
 	#define DB_W 12
 	#define DF_X float2(0.150,0.0)
@@ -10371,7 +10235,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DM_Y 3           //HQ VRS
     //#define DL_Y -0.25   //De-Artifact
     //#define DL_Z 0.25       //Compat Power
-	//#define DJ_X 0.250       //Range Smoothing
 
 	//#define WSM 3
 	#define DB_W 12
@@ -10417,7 +10280,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DM_Y 3           //HQ VRS
     //#define DL_Y -0.25   //De-Artifact
     //#define DL_Z 0.25       //Compat Power
-	//#define DJ_X 0.250       //Range Smoothing
 	//#define WSM 3
 	#define DB_W 13
 	#define DF_X float2(0.150,0.0)
@@ -10462,7 +10324,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DM_Y 3           //HQ VRS
     //#define DL_Y -0.25   //De-Artifact
     //#define DL_Z 0.25       //Compat Power
-	//#define DJ_X 0.250       //Range Smoothing
 	//#define WSM 3
 	#define DB_W 12
 	#define DF_X float2(0.150,0.0)
@@ -10507,7 +10368,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DM_Y 3           //HQ VRS
     //#define DL_Y -0.5    //De-Artifact
     //#define DL_Z 0.20       //Compat Power
-	//#define DJ_X 0.250       //Range Smoothing
     /*
     #define MDD 1 //Set Menu Detection & Direction     //Off 0 | 1 | 2 | 3 | 4      
     #define DN_X float4( 0.400 , 0.275, 0.600 , 0.722)  //Pos A = XY White & B = ZW White 
@@ -10581,7 +10441,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DM_Y 3           //HQ VRS
     //#define DL_Y -0.25   //De-Artifact
     //#define DL_Z 0.25       //Compat Power
-	//#define DJ_X 0.250       //Range Smoothing
 	/*
     //#define MAC 1
     #define MDD 1 //Set Menu Detection & Direction      //Off 0 | 1 | 2 | 3 | 4      
@@ -10658,7 +10517,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DM_Y 3           //HQ VRS
     //#define DL_Y -0.25   //De-Artifact
     //#define DL_Z 0.25       //Compat Power
-	//#define DJ_X 0.250       //Range Smoothing
 
 	#define WSM 2 //Weapon Settings Mode
 	#define DB_W 11
@@ -10705,7 +10563,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DM_Y 3           //HQ VRS
     //#define DL_Y -0.275   //De-Artifact
     //#define DL_Z 0.500       //Compat Power
-	//#define DJ_X 0.250       //Range Smoothing
 	//#define WSM 2 //Weapon Settings Mode
 	//#define DB_W 11
 	//#define DF_X float2(0.075,0.0)
@@ -10747,7 +10604,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DM_Y 3           //HQ VRS
     //#define DL_Y -0.375   //De-Artifact
     //#define DL_Z 0.125       //Compat Power
-	//#define DJ_X 0.250       //Range Smoothing
 	/*
     #define MAC 1
     #define MDD 1 //Set Menu Detection & Direction      //Off 0 | 1 | 2 | 3 | 4      
@@ -10829,7 +10685,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DM_Y 3           //HQ VRS
     //#define DL_Y -0.50   //De-Artifact
     //#define DL_Z 0.750       //Compat Power
-	//#define DJ_X 0.250       //Range Smoothing
 	///* //This seems safe.....
     #define MAC 0
     #define MDD 1 //Set Menu Detection & Direction      //Off 0 | 1 | 2 | 3 | 4      
@@ -10904,7 +10759,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DF_Z 0.05 // 0.100
     //#define DL_Y -0.50   //De-Artifact
     //#define DL_Z 0.750       //Compat Power
-	//#define DJ_X 0.250       //Range Smoothing
 	//#define WSM 2 //Weapon Settings Mode
 	//#define DB_W 11
 	//#define DF_X float2(0.075,0.0)
@@ -10950,7 +10804,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DF_Z 0.1125
     //#define DL_Y -0.50   //De-Artifact
     //#define DL_Z 0.750       //Compat Power
-	//#define DJ_X 0.250       //Range Smoothing
 	/*
     #define MAC 1
     #define MDD 1 //Set Menu Detection & Direction      //Off 0 | 1 | 2 | 3 | 4      
@@ -11027,7 +10880,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DF_Z 0.100
     //#define DL_Y -0.50   //De-Artifact
     //#define DL_Z 0.750       //Compat Power
-	//#define DJ_X 0.250       //Range Smoothing
 	/*
     #define MAC 1
     #define MDD 1 //Set Menu Detection & Direction      //Off 0 | 1 | 2 | 3 | 4      
@@ -11105,7 +10957,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DF_Z 0.100
     //#define DL_Y -0.50   //De-Artifact
     #define DL_Z 0.50       //Compat Power
-	#define DJ_X 0.750       //Range Smoothing
+	#define DJ_X 0.214       //Range Smoothing
 	/*
     #define MAC 1
     #define MDD 1 //Set Menu Detection & Direction      //Off 0 | 1 | 2 | 3 | 4      
@@ -11185,7 +11037,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DF_Z 0.100
     //#define DL_Y -0.50   //De-Artifact
     //#define DL_Z 0.750       //Compat Power
-	//#define DJ_X 0.250       //Range Smoothing
 	/*
     #define MAC 1
     #define MDD 1 //Set Menu Detection & Direction      //Off 0 | 1 | 2 | 3 | 4      
@@ -11276,7 +11127,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DF_Z 0.100
     //#define DL_Y -0.50   //De-Artifact
     //#define DL_Z 0.750       //Compat Power
-	//#define DJ_X 0.250       //Range Smoothing
 	
     #define MAC 1                //0.0212
     #define MDD 1 //Set Menu Detection & Direction      //Off 0 | 1 | 2 | 3 | 4      
@@ -11363,7 +11213,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DF_Z 0.15
     //#define DL_Y -0.50   //De-Artifact
     //#define DL_Z 0.750       //Compat Power
-	//#define DJ_X 0.250       //Range Smoothing
 	/*
     #define MAC 1
     #define MDD 1 //Set Menu Detection & Direction      //Off 0 | 1 | 2 | 3 | 4      
@@ -11467,7 +11316,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DF_Z 0.0375
     //#define DL_Y -0.50   //De-Artifact
     //#define DL_Z 0.750       //Compat Power
-	//#define DJ_X 0.250       //Range Smoothing
 	///*
     #define MAC 1
     #define MDD 1 //Set Menu Detection & Direction      //Off 0 | 1 | 2 | 3 | 4      
@@ -11545,7 +11393,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DF_Z 0.1375
     //#define DL_Y -0.50   //De-Artifact
     //#define DL_Z 0.750       //Compat Power
-	//#define DJ_X 0.250       //Range Smoothing
 	//#define WSM 2
 	#define DB_W 9
 	#define DF_X float2(0.150,0.0)
@@ -11593,7 +11440,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DF_Z 0.150
     //#define DL_Y -0.50   //De-Artifact
     //#define DL_Z 0.750       //Compat Power
-	//#define DJ_X 0.250       //Range Smoothing
 	//#define WSM 2
 	#define DB_W 10
 	#define DF_X float2(0.175,0.0)
@@ -11640,7 +11486,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DF_Z 0.150
     //#define DL_Y -0.50   //De-Artifact
     //#define DL_Z 0.750       //Compat Power
-	//#define DJ_X 0.250       //Range Smoothing
 	//#define WSM 2
 	#define DB_W 16
 	#define DF_X float2(0.1375,0.0)
@@ -11688,7 +11533,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DF_Z 0.1
     //#define DL_Y -0.50   //De-Artifact
     //#define DL_Z 0.750       //Compat Power
-	//#define DJ_X 0.250       //Range Smoothing
     #define DSW 1
 	//Smooth Mode Setting
     //#define SMS 3           //SM Toggle Separation
@@ -11722,7 +11566,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DF_Z 0.1
     //#define DL_Y -0.50   //De-Artifact
     //#define DL_Z 0.750       //Compat Power
-	//#define DJ_X 0.250       //Range Smoothing
 	///*
     #define MAC 1
     #define MDD 1 //Set Menu Detection & Direction      //Off 0 | 1 | 2 | 3 | 4      
@@ -11801,7 +11644,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DF_Z 0.130
     //#define DL_Y -0.50   //De-Artifact
     //#define DL_Z 0.750       //Compat Power
-	//#define DJ_X 0.250       //Range Smoothing
 	/*
     #define MAC 1
     #define MDD 1 //Set Menu Detection & Direction      //Off 0 | 1 | 2 | 3 | 4      
@@ -11880,7 +11722,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DF_Z 0.125
     //#define DL_Y -0.50   //De-Artifact
     //#define DL_Z 0.750       //Compat Power
-	//#define DJ_X 0.250       //Range Smoothing
 	//#define FMM 1
 	///*
     #define MAC 1
@@ -11962,7 +11803,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DF_Z 0.025
     #define DL_Y -0.300   //De-Artifact
     #define DL_Z 0.25       //Compat Power
-	//#define DJ_X 0.250       //Range Smoothing
 	///* //Should work on all Languages.
     #define MAC 1
     #define MDD 1 //Set Menu Detection & Direction      //Off 0 | 1 | 2 | 3 | 4      
@@ -12046,7 +11886,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DF_Z 0.125
     //#define DL_Y -0.50   //De-Artifact
     #define DL_Z 0.500       //Compat Power
-	//#define DJ_X 0.250       //Range Smoothing
 	/*
     #define MAC 1
     #define MDD 1 //Set Menu Detection & Direction      //Off 0 | 1 | 2 | 3 | 4      
@@ -12127,7 +11966,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DF_Z 0.05
     //#define DL_Y -0.50   //De-Artifact
     #define DL_Z 1.00       //Compat Power
-	//#define DJ_X 0.250       //Range Smoothing
 	/*
     #define MAC 1
     #define MDD 1 //Set Menu Detection & Direction      //Off 0 | 1 | 2 | 3 | 4      
@@ -12213,7 +12051,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DF_Z 0.05
     //#define DL_Y -0.50   //De-Artifact
     #define DL_Z 0.750       //Compat Power
-	//#define DJ_X 0.250       //Range Smoothing
 	/*
     #define MAC 1
     #define MDD 1 //Set Menu Detection & Direction      //Off 0 | 1 | 2 | 3 | 4      
@@ -12321,7 +12158,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define DF_W float4(0.001,0.0015,0.0,0.0)  //Edge & Scale
     //#define DL_Y 0.375    //De-Artifact
     //#define DL_Z 0.125       //Compat Power
-	#define DJ_X 0.625       //Range Smoothing
+	#define DJ_X 0.178       //Range Smoothing
     #define MDD 1 //Set Menu Detection & Direction     //Off 0 | 1 | 2 | 3 | 4      
     #define DN_X float4( 0.404, 0.346,  0.000, 0.575)  //Pos A = XY White & B = ZW White 
     #define DN_Y float4( 0.5491, 0.4225,  0.0, 0.0)       //Pos C = XY Light & D = ZW Match
@@ -12362,7 +12199,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DF_Z 0.025//0.050 //0.125
     //#define DL_Y 0.400       //De-Artifact
     #define DL_Z 0.125       //Compat Power
-	#define DJ_X 0.250       //Range Smoothing
+	#define DJ_X 0.071       //Range Smoothing
     /*
     #define MDD 1 //Set Menu Detection & Direction     //Off 0 | 1 | 2 | 3 | 4      
     #define DN_X float4( 0.400 , 0.275, 0.600 , 0.722)  //Pos A = XY White & B = ZW White 
@@ -12427,7 +12264,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DF_Z 0.0375
     //#define DL_Y -0.50   //De-Artifact
     //#define DL_Z 0.750       //Compat Power
-	//#define DJ_X 0.250       //Range Smoothing
 	#define WSM 3
 	#define DAA 1
 	#define PEW 1
@@ -12614,7 +12450,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DF_Z 0.045      // Set the Balance  
     #define DL_Y -0.5      // De-Artifact Only works on some View Modes and causes performance degredation
     //#define DL_Z 1.00       // Compat Power
-	#define DJ_X 0.625      // Range Smoothing
+	#define DJ_X 0.178      // Range Smoothing
     #define MMD 1 //Set Multi Menu Detection             //Off / On
     #define MMS 0 //Set Multi Menu Selection from 0-1 to 29-30 and Off 0 | 1 | 2
     #define DO_X float4( 0.459 , 0.275 , 0.0825, 0.150 ) //Pos A1 = XY Color & A2 = ZW Black 
@@ -12697,7 +12533,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define BMT 1
 	#define DF_Z 0.07
     //#define DL_Y 0.375    //De-Artifact 0.1245
-	//#define DJ_X 0.150     //Range Smoothing
     /*
     #define MDD 1 //Set Menu Detection & Direction     //Off 0 | 1 | 2 | 3 | 4      
     #define DN_X float4( 0.400 , 0.275, 0.600 , 0.722)  //Pos A = XY White & B = ZW White 
@@ -12749,7 +12584,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DI_Z 0.05//0.050//0.090 //Trim
     #define DL_Y -0.5    //De-Artifact
     //#define DL_Z 0.50       //Compat Power
-	//#define DJ_X 0.500       //Range Smoothing
     /*
     #define MDD 1 //Set Menu Detection & Direction     //Off 0 | 1 | 2 | 3 | 4      
     #define DN_X float4( 0.400 , 0.275, 0.600 , 0.722)  //Pos A = XY White & B = ZW White 
@@ -12959,7 +12793,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DF_Z 0.125
     //#define DL_Y -0.75      // De-Artifact Only works on some View Modes and causes performance degredation
     #define DL_Z 1.00       // Compat Power
-	//#define DJ_X 0.00      // Range Smoothing
 	//#define WSM 2 //Weapon Settings Mode
 	//#define DB_W 24//Weapon Selection
     #define DG_Z 0.200 //Min
@@ -12986,7 +12819,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DF_Z 0.060 //Sets Manual Mode power.
     #define DL_Y -0.50      // De-Artifact Only works on some View Modes and causes performance degredation
     //#define DL_Z 0.10       // Compat Power
-	//#define DJ_X 0.250      // Range Smoothing
 	#define PEW 1
 	#define DAA 1
 	//Smooth Mode Setting
@@ -13113,7 +12945,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DM_X 4     //HQ Tune
     //#define DM_Y 3     //HQ VRS
     //#define DL_Y 0.375    //De-Artifact 0.1245
-	#define DJ_X 0.150     //Range Smoothing
+	#define DJ_X 0.042     //Range Smoothing
 #elif (App == 0x142EDFD6 || App == 0x2A0ECCC9 || App == 0x8B0C2031 )	//DOOM 2016 ****
 	#define DA_Y 23.0
 	//#define DA_Z -0.00010
@@ -13162,7 +12994,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DI_Z 0.075 //Trim
     //#define DL_Y 0.7    //De-Artifact
     //#define DL_Z 0.50       //Compat Power
-	//#define DJ_X 0.500       //Range Smoothing
 	#define WSM 2
 	#define DB_W 20
     #define PEW 1
@@ -13216,7 +13047,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DF_Z 0.15
     //#define DL_Y -0.75      // De-Artifact Only works on some View Modes and causes performance degredation
     #define DL_Z 0.00       // Compat Power
-	//#define DJ_X 0.35      // Range Smoothing
 	#define DB_W 6
 	#define FOV 1
 	#define RHW 1
@@ -13247,7 +13077,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DI_Z 0.05//0.050//0.090 //Trim
     //#define DL_Y -0.5    //De-Artifact
     //#define DL_Z 0.50       //Compat Power
-	//#define DJ_X 0.500       //Range Smoothing
     /*
     #define MDD 1 //Set Menu Detection & Direction     //Off 0 | 1 | 2 | 3 | 4      
     #define DN_X float4( 0.400 , 0.275, 0.600 , 0.722)  //Pos A = XY White & B = ZW White 
@@ -13318,7 +13147,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DI_Z 0.05//0.050//0.090 //Trim
     //#define DL_Y -0.5    //De-Artifact
     //#define DL_Z 0.50       //Compat Power
-	//#define DJ_X 0.500       //Range Smoothing
     /*
     #define MDD 1 //Set Menu Detection & Direction     //Off 0 | 1 | 2 | 3 | 4      
     #define DN_X float4( 0.400 , 0.275, 0.600 , 0.722)  //Pos A = XY White & B = ZW White 
@@ -13390,7 +13218,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define DF_W float4(0.001,0.0025,0.0,0.0)  //Edge & Scale
     #define DL_Y -0.5    //De-Artifact
     #define DL_Z 0.50       //Compat Power
-	//#define DJ_X 0.500       //Range Smoothing
     /*
     #define MDD 1 //Set Menu Detection & Direction     //Off 0 | 1 | 2 | 3 | 4      
     #define DN_X float4( 0.400 , 0.275, 0.600 , 0.722)  //Pos A = XY White & B = ZW White 
@@ -13465,7 +13292,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 
     //#define DM_Y 3     //HQ VRS
     //#define DL_Y 0.375    //De-Artifact 0.1245
-	//#define DJ_X 0.150     //Range Smoothing
     #define MAC 0   
     #define MDD 1 //Set Menu Detection & Direction     //Off 0 | 1 | 2 | 3 | 4      
 //    #define DN_X float4( 0.125, 0.105 ,  0.940 , 0.922)  //Pos A = XY White & B = ZW White 
@@ -13533,7 +13359,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 
     //#define DM_Y 3     //HQ VRS
     //#define DL_Y 0.375    //De-Artifact 0.1245
-	//#define DJ_X 0.150     //Range Smoothing
 	/*
     #define MAC 0   
     #define MDD 1 //Set Menu Detection & Direction     //Off 0 | 1 | 2 | 3 | 4      
@@ -13600,7 +13425,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 
     //#define DL_Y -0.50      // De-Artifact Only works on some View Modes and causes performance degredation
     #define DL_Z 1.00       // Compat Power
-	//#define DJ_X 0.250      // Range Smoothing
 	/*
     #define MAC 0   
     #define MDD 1 //Set Menu Detection & Direction     //Off 0 | 1 | 2 | 3 | 4      
@@ -13673,7 +13497,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 
     //#define DL_Y -0.50      // De-Artifact Only works on some View Modes and causes performance degredation
     //#define DL_Z 1.00       // Compat Power
-	//#define DJ_X 0.250      // Range Smoothing
 	/*
     #define MAC 0   
     #define MDD 1 //Set Menu Detection & Direction     //Off 0 | 1 | 2 | 3 | 4      
@@ -13781,7 +13604,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 
     //#define DL_Y -0.50      // De-Artifact Only works on some View Modes and causes performance degredation
     //#define DL_Z 1.00       // Compat Power
-	//#define DJ_X 0.250      // Range Smoothing
 	
 //    #define MAC 0   
 //    #define MDD 1 //Set Menu Detection & Direction     //Off 0 | 1 | 2 | 3 | 4      
@@ -13881,7 +13703,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DF_Z 0.100      // Set the Balance  
     //#define DL_Y -0.50      // De-Artifact Only works on some View Modes and causes performance degredation
     //#define DL_Z 1.00       // Compat Power
-	//#define DJ_X 0.250      // Range Smoothing
 	//#define WSM 2           // Weapon Setting Mode 
 	//#define DB_W 16         // Weapon Profile
 	//#define DF_X float2(0,0)// ZPD Weapon Boundarys Level 1 and Level 2
@@ -13920,7 +13741,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DF_Z 0.150      // Set the Balance  
     //#define DL_Y -0.50      // De-Artifact Only works on some View Modes and causes performance degredation
     #define DL_Z 1.00       // Compat Power
-	//#define DJ_X 0.250      // Range Smoothing
 	//#define WSM 2           // Weapon Setting Mode 
 	//#define DB_W 16         // Weapon Profile
 	//#define DF_X float2(0,0)// ZPD Weapon Boundarys Level 1 and Level 2
@@ -13959,7 +13779,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DF_Z 0.10      // Set the Balance  
     //#define DL_Y -0.50      // De-Artifact Only works on some View Modes and causes performance degredation
     #define DL_Z 1.00       // Compat Power
-	//#define DJ_X 0.250      // Range Smoothing
 	//#define WSM 2           // Weapon Setting Mode 
 	//#define DB_W 16         // Weapon Profile
 	//#define DF_X float2(0,0)// ZPD Weapon Boundarys Level 1 and Level 2
@@ -13999,7 +13818,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 
     //#define DL_Y -0.50      // De-Artifact Only works on some View Modes and causes performance degredation
     #define DL_Z 0.375       // Compat Power
-	//#define DJ_X 0.250      // Range Smoothing
 	///*
     #define MAC 0   
     #define MDD 1 //Set Menu Detection & Direction     //Off 0 | 1 | 2 | 3 | 4      
@@ -14076,7 +13894,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DF_Z 0.250      // Set the Balance  
     //#define DL_Y -0.50      // De-Artifact Only works on some View Modes and causes performance degredation
     //#define DL_Z 1.00       // Compat Power
-	//#define DJ_X 0.250      // Range Smoothing
+
 	#define WSM 4           // Weapon Setting Mode 
 	#define DB_W 5         // Weapon Profile
 	//#define DF_X float2(0,0)// ZPD Weapon Boundarys Level 1 and Level 2
@@ -14179,7 +13997,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 
     //#define DL_Y -0.50      // De-Artifact Only works on some View Modes and causes performance degredation
     //#define DL_Z 1.00       // Compat Power
-	//#define DJ_X 0.250      // Range Smoothing
+
 	/*
     #define MAC 0   
     #define MDD 1 //Set Menu Detection & Direction     //Off 0 | 1 | 2 | 3 | 4      
@@ -14253,7 +14071,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 
     //#define DL_Y -0.50      // De-Artifact Only works on some View Modes and causes performance degredation
     //#define DL_Z 1.00       // Compat Power
-	//#define DJ_X 0.250      // Range Smoothing
 
     #define MAC 0   
     #define MDD 1 //Set Menu Detection & Direction     //Off 0 | 1 | 2 | 3 | 4      
@@ -14327,7 +14144,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 
     //#define DL_Y -0.50      // De-Artifact Only works on some View Modes and causes performance degredation
     //#define DL_Z 1.00       // Compat Power
-	//#define DJ_X 0.250      // Range Smoothing
 	/*
     #define MAC 0   
     #define MDD 1 //Set Menu Detection & Direction     //Off 0 | 1 | 2 | 3 | 4      
@@ -14402,7 +14218,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 
     //#define DL_Y -0.50      // De-Artifact Only works on some View Modes and causes performance degredation
     //#define DL_Z 1.00       // Compat Power
-	//#define DJ_X 0.250      // Range Smoothing
+
 	/*
     #define MAC 0   
     #define MDD 1 //Set Menu Detection & Direction     //Off 0 | 1 | 2 | 3 | 4      
@@ -14486,7 +14302,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define DL_Y 0.50      // De-Artifact Only works on some View Modes and causes performance degredation
     #define DB_Y 1.0        // De-Artifact Scale
     #define DL_Z 0.0       // Compat Power
-	#define DJ_X 0.25      // Range Smoothing
+	#define DJ_X 0.071      // Range Smoothing
 	//Title Screen
     #define MAC 0   
     #define MDD 1 //Set Menu Detection & Direction     //Off 0 | 1 | 2 | 3 | 4      
@@ -14574,7 +14390,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 
     #define DL_Y -1.0      // De-Artifact Only works on some View Modes and causes performance degredation
     #define DL_Z 1.00       // Compat Power
-	//#define DJ_X 0.375      // Range Smoothing
+
 	/*
     #define MAC 0   
     #define MDD 1 //Set Menu Detection & Direction     //Off 0 | 1 | 2 | 3 | 4      
@@ -14651,7 +14467,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 
     #define DL_Y -0.25      // De-Artifact Only works on some View Modes and causes performance degredation
     #define DL_Z -0.25       // Compat Power
-	//#define DJ_X 0.375      // Range Smoothing
+
 	/*
     #define MAC 0   
     #define MDD 1 //Set Menu Detection & Direction     //Off 0 | 1 | 2 | 3 | 4      
@@ -14726,7 +14542,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DF_Z 0.150      // Set the Balance  
     //#define DL_Y -0.50      // De-Artifact Only works on some View Modes and causes performance degredation
     //#define DL_Z 1.00       // Compat Power
-	#define DJ_X 0.50      // Range Smoothing
+	#define DJ_X 0.142      // Range Smoothing
 	//#define WSM 2           // Weapon Setting Mode 
 	//#define DB_W 16         // Weapon Profile
 	//#define DF_X float2(0,0)// ZPD Weapon Boundarys Level 1 and Level 2
@@ -14772,7 +14588,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DF_Z 0.150      // Set the Balance  
     //#define DL_Y -0.50      // De-Artifact Only works on some View Modes and causes performance degredation
     #define DL_Z 1.00       // Compat Power
-	//#define DJ_X 0.50      // Range Smoothing
 	//#define WSM 2           // Weapon Setting Mode 
 	//#define DB_W 16         // Weapon Profile
 	//#define DF_X float2(0,0)// ZPD Weapon Boundarys Level 1 and Level 2
@@ -14845,7 +14660,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DF_Z 0.500      // Set the Balance  
     #define DL_Y -0.50      // De-Artifact Only works on some View Modes and causes performance degredation
     #define DL_Z 0.5       // Compat Power
-	#define DJ_X 0.750      // Range Smoothing
+	#define DJ_X 0.214      // Range Smoothing
 	//#define WSM 2           // Weapon Setting Mode 
 	//#define DB_W 16         // Weapon Profile
 	//#define DF_X float2(0,0)// ZPD Weapon Boundarys Level 1 and Level 2
@@ -14891,7 +14706,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DF_Z 0.150      // Set the Balance  
     //#define DL_Y -0.50      // De-Artifact Only works on some View Modes and causes performance degredation
     //#define DL_Z 0.5       // Compat Power
-	//#define DJ_X 0.750      // Range Smoothing
 	
 	//#define WSM 2           // Weapon Setting Mode 
 	//#define DB_W 16         // Weapon Profile
@@ -14959,7 +14773,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DF_Z 0.025      // Set the Balance  
     //#define DL_Y -0.50      // De-Artifact Only works on some View Modes and causes performance degredation
     //#define DL_Z 0.5       // Compat Power
-	//#define DJ_X 0.750      // Range Smoothing
 	//#define WSM 2           // Weapon Setting Mode 
 	//#define DB_W 16         // Weapon Profile
 	//#define DF_X float2(0,0)// ZPD Weapon Boundarys Level 1 and Level 2
@@ -15004,7 +14817,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DF_Z 0.15      // Set the Balance  
     //#define DL_Y -0.50      // De-Artifact Only works on some View Modes and causes performance degredation
     #define DL_Z 0.5       // Compat Power
-	//#define DJ_X 0.750      // Range Smoothing
+
 	//#define WSM 2           // Weapon Setting Mode 
 	//#define DB_W 16         // Weapon Profile
 	//#define DF_X float2(0,0)// ZPD Weapon Boundarys Level 1 and Level 2
@@ -15049,7 +14862,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DF_Z 0.10      // Set the Balance  
     //#define DL_Y -0.50      // De-Artifact Only works on some View Modes and causes performance degredation
     //#define DL_Z 0.5       // Compat Power
-	//#define DJ_X 0.750      // Range Smoothing
+
 	//#define WSM 2           // Weapon Setting Mode 
 	//#define DB_W 16         // Weapon Profile
 	//#define DF_X float2(0,0)// ZPD Weapon Boundarys Level 1 and Level 2
@@ -15094,7 +14907,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DF_Z 0.15      // Set the Balance  
     //#define DL_Y -0.50      // De-Artifact Only works on some View Modes and causes performance degredation
     #define DL_Z -1.0       // Compat Power
-	//#define DJ_X 0.750      // Range Smoothing
+
 	//#define WSM 2           // Weapon Setting Mode 
 	//#define DB_W 16         // Weapon Profile
 	//#define DF_X float2(0,0)// ZPD Weapon Boundarys Level 1 and Level 2
@@ -15139,7 +14952,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DF_Z 0.125      // Set the Balance  
     //#define DL_Y -0.50      // De-Artifact Only works on some View Modes and causes performance degredation
     //#define DL_Z 0.5       // Compat Power
-	//#define DJ_X 0.750      // Range Smoothing
+
 	#define WSM 4           // Weapon Setting Mode 
 	#define DB_W 19         // Weapon Profile
 	#define DF_X float2(0.250,0.404)// ZPD Weapon Boundarys Level 1 and Level 2
@@ -15194,7 +15007,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DF_Z 0.200      // Set the Balance  
     //#define DL_Y -0.50      // De-Artifact Only works on some View Modes and causes performance degredation
     //#define DL_Z 0.5       // Compat Power
-	//#define DJ_X 0.750      // Range Smoothing
+
 	//#define WSM 4           // Weapon Setting Mode 
 	//#define DB_W 19         // Weapon Profile
 	//#define DF_X float2(0,0)// ZPD Weapon Boundarys Level 1 and Level 2
@@ -15239,7 +15052,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DF_Z 0.125      // Set the Balance  
     //#define DL_Y -0.50      // De-Artifact Only works on some View Modes and causes performance degredation
     //#define DL_Z 0.5       // Compat Power
-	//#define DJ_X 0.750      // Range Smoothing
+
 	#define WSM 4           // Weapon Setting Mode 
 	#define DB_W 20         // Weapon Profile
 	//#define DF_X float2(0,0)// ZPD Weapon Boundarys Level 1 and Level 2
@@ -15285,7 +15098,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DF_Z 0.2       // Set the Balance  
     //#define DL_Y -0.50      // De-Artifact Only works on some View Modes and causes performance degredation
     //#define DL_Z 0.5       // Compat Power
-	#define DJ_X 0.375      // Range Smoothing
+	#define DJ_X 0.107      // Range Smoothing
 	//#define WSM 4           // Weapon Setting Mode 
 	//#define DB_W 20         // Weapon Profile
 	//#define DF_X float2(0,0)// ZPD Weapon Boundarys Level 1 and Level 2
@@ -15355,7 +15168,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DF_Z 0.15       // Set the Balance  
     //#define DL_Y -0.50      // De-Artifact Only works on some View Modes and causes performance degredation
     //#define DL_Z 0.5       // Compat Power
-	//#define DJ_X 0.375      // Range Smoothing
+
 	//#define WSM 4           // Weapon Setting Mode 
 	//#define DB_W 20         // Weapon Profile
 	//#define DF_X float2(0,0)// ZPD Weapon Boundarys Level 1 and Level 2
@@ -15401,7 +15214,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DF_Z 0.5       // Set the Balance  
     //#define DL_Y -0.50      // De-Artifact Only works on some View Modes and causes performance degredation
     //#define DL_Z 0.5       // Compat Power
-	//#define DJ_X 0.375      // Range Smoothing
+
 	#define WSM 4           // Weapon Setting Mode 
 	#define DB_W 25         // Weapon Profile
 	#define DF_X float2(0.386,0)// ZPD Weapon Boundarys Level 1 and Level 2
@@ -15448,7 +15261,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DF_Z 0.5       // Set the Balance  
     //#define DL_Y -0.50      // De-Artifact Only works on some View Modes and causes performance degredation
     //#define DL_Z 0.5       // Compat Power
-	//#define DJ_X 0.375      // Range Smoothing
+
 	#define WSM 4           // Weapon Setting Mode 
 	#define DB_W 25         // Weapon Profile
 	#define DF_X float2(0.386,0)// ZPD Weapon Boundarys Level 1 and Level 2
@@ -15496,7 +15309,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DF_Z 0.1       // Set the Balance  
     //#define DL_Y -0.50      // De-Artifact Only works on some View Modes and causes performance degredation
     //#define DL_Z 0.5       // Compat Power
-	#define DJ_X 0.25      // Range Smoothing
+	#define DJ_X 0.071      // Range Smoothing
 	//#define WSM 4           // Weapon Setting Mode 
 	//#define DB_W 25         // Weapon Profile
 	//#define DF_X float2(0.386,0)// ZPD Weapon Boundarys Level 1 and Level 2
@@ -15543,7 +15356,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DF_Z 0.1       // Set the Balance  
     //#define DL_Y -0.50      // De-Artifact Only works on some View Modes and causes performance degredation
     //#define DL_Z 0.5       // Compat Power
-	#define DJ_X 0.375      // Range Smoothing
+	#define DJ_X 0.107      // Range Smoothing
 	//#define WSM 4           // Weapon Setting Mode 
 	//#define DB_W 25         // Weapon Profile
 	//#define DF_X float2(0.386,0)// ZPD Weapon Boundarys Level 1 and Level 2
@@ -15590,7 +15403,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DF_Z 0.1       // Set the Balance  
     //#define DL_Y -0.50      // De-Artifact Only works on some View Modes and causes performance degredation
     //#define DL_Z 0.5       // Compat Power
-	//#define DJ_X 0.375      // Range Smoothing
+
 	//#define WSM 4           // Weapon Setting Mode 
 	//#define DB_W 25         // Weapon Profile
 	//#define DF_X float2(0.386,0)// ZPD Weapon Boundarys Level 1 and Level 2
@@ -15637,7 +15450,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DF_Z 0.15       // Set the Balance  
     //#define DL_Y -0.50      // De-Artifact Only works on some View Modes and causes performance degredation
     //#define DL_Z 0.5       // Compat Power
-	//#define DJ_X 0.375      // Range Smoothing
+
 	//#define WSM 4           // Weapon Setting Mode 
 	//#define DB_W 25         // Weapon Profile
 	//#define DF_X float2(0.386,0)// ZPD Weapon Boundarys Level 1 and Level 2
@@ -15708,7 +15521,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DF_Z 0.5       // Set the Balance  
     //#define DL_Y -0.50      // De-Artifact Only works on some View Modes and causes performance degredation
     #define DL_Z 0.25       // Compat Power
-	//#define DJ_X 0.375      // Range Smoothing
+
 	//#define WSM 4           // Weapon Setting Mode 
 	//#define DB_W 25         // Weapon Profile
 	//#define DF_X float2(0.386,0)// ZPD Weapon Boundarys Level 1 and Level 2
@@ -15755,7 +15568,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DF_Z 0.300       // Set the Balance  
     //#define DL_Y -0.50      // De-Artifact Only works on some View Modes and causes performance degredation
     #define DL_Z 0.25       // Compat Power
-	//#define DJ_X 0.375      // Range Smoothing
+
 	//#define WSM 4           // Weapon Setting Mode 
 	#define DB_W 25         // Weapon Profile
 	//#define DF_X float2(0,0)  // ZPD Weapon Boundarys Level 1 and Level 2
@@ -15804,13 +15617,12 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DF_Z 0.1       // Set the Balance  
     #define DL_Y 0.25      // De-Artifact Only works on some View Modes and causes performance degredation
     #define DL_Z 0.125       // Compat Power
-	//#define DJ_X 0.375      // Range Smoothing
+
 	#define WSM 2           // Weapon Setting Mode 
 	#define DB_W 23         // Weapon Profile
 	//#define DF_X float2(0,0)  // ZPD Weapon Boundarys Level 1 and Level 2
 	//#define DJ_W 0.1	        // Weapon Depth Limit Location 1
 	//#define DS_W 1.0	        // Weapon Depth Limit Location 2
-	//#define DT_W float2(0.015,0.025)//WH scale and cutoff
 	//#define WHM 1 //Weapon Hand Masking lets you use DT_Z 
 	//#define DT_Z 0.375 //Masking Power
 	/*
@@ -15853,7 +15665,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 
     //#define DL_Y 0.5    //De-Artifact
     //#define DL_Z 0.05       //Compat Power
-	//#define DJ_X 0.250       //Range Smoothing
+
 	//Menu Detection Templates -  Needs a Specail Shader to adjust
     #define MAC 0 //Set to one only the 3rd value has a wiled card. Not the 1st and 3rd.
     #define MDD 1 //Set Menu Detection & Direction      //Off | 1 | 2 | 3 | 4      
@@ -15926,15 +15738,12 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DF_Z 0.3       // Set the Balance  
     //#define DL_Y 0.25      // De-Artifact Only works on some View Modes and causes performance degredation
     //#define DL_Z 0.125       // Compat Power
-	#define DJ_X 0.1      // Range Smoothing
+	#define DJ_X 0.028      // Range Smoothing
 	//#define WSM 2           // Weapon Setting Mode 
 	//#define DB_W 23         // Weapon Profile
 	//#define DF_X float2(0,0)  // ZPD Weapon Boundarys Level 1 and Level 2
 	//#define DJ_W 0.1	        // Weapon Depth Limit Location 1
 	//#define DS_W 1.0	        // Weapon Depth Limit Location 2
-	//#define DT_W float2(0.015,0.025)//WH scale and cutoff
-	//#define WHM 1 //Weapon Hand Masking lets you use DT_Z 
-	//#define DT_Z 0.375 //Masking Power
 	
     #define MAC 0 //Set to one only the 3rd value has a wiled card. Not the 1st and 3rd.
     #define MDD 1 //Set Menu Detection & Direction      //Off | 1 | 2 | 3 | 4      
@@ -16007,15 +15816,13 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DF_Z 0.1       // Set the Balance  
     //#define DL_Y 0.25      // De-Artifact Only works on some View Modes and causes performance degredation
     //#define DL_Z 0.125       // Compat Power
-	//#define DJ_X 0.375      // Range Smoothing
+
 	#define WSM 2           // Weapon Setting Mode 
 	#define DB_W 9         // Weapon Profile
 	#define DF_X float2(0.1125,0.185)  // ZPD Weapon Boundarys Level 1 and Level 2
 	//#define DJ_W 0.1	        // Weapon Depth Limit Location 1
 	#define DS_W 5.0	        // Weapon Depth Limit Location 2
-	//#define DT_W float2(0.015,0.025)//WH scale and cutoff
-	//#define WHM 1 //Weapon Hand Masking lets you use DT_Z 
-	//#define DT_Z 0.375 //Masking Power
+
 	/*
     #define MMD 1 //Set Multi Menu Detection             //Off / On
     #define MMS 0 //Set Multi Menu Selection from 0-1 to 29-30 and Off 0 | 1 | 2
@@ -16061,15 +15868,12 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DF_Z 0.15       // Set the Balance  
     #define DL_Y 0.5      // De-Artifact Only works on some View Modes and causes performance degredation
     //#define DL_Z 1.0       // Compat Power
-	//#define DJ_X 0.375      // Range Smoothing
+
 	#define WSM 2           // Weapon Setting Mode 
 	#define DB_W 22         // Weapon Profile
 	//#define DF_X float2(0.100,0.185)  // ZPD Weapon Boundarys Level 1 and Level 2
 	//#define DJ_W 0.1	        // Weapon Depth Limit Location 1
 	//#define DS_W 5.0	        // Weapon Depth Limit Location 2
-	//#define DT_W float2(0.015,0.025)//WH scale and cutoff
-	//#define WHM 1 //Weapon Hand Masking lets you use DT_Z 
-	//#define DT_Z 0.375 //Masking Power
 	/*
     #define MMD 1 //Set Multi Menu Detection             //Off / On
     #define MMS 0 //Set Multi Menu Selection from 0-1 to 29-30 and Off 0 | 1 | 2
@@ -16115,15 +15919,12 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DF_Z 0.5       // Set the Balance  
     //#define DL_Y 0.25      // De-Artifact Only works on some View Modes and causes performance degredation
     #define DL_Z -1.0       // Compat Power
-	//#define DJ_X 0.375      // Range Smoothing
+
 	//#define WSM 2           // Weapon Setting Mode 
 	//#define DB_W 22         // Weapon Profile
 	//#define DF_X float2(0.100,0.185)  // ZPD Weapon Boundarys Level 1 and Level 2
 	//#define DJ_W 0.1	        // Weapon Depth Limit Location 1
 	//#define DS_W 5.0	        // Weapon Depth Limit Location 2
-	//#define DT_W float2(0.015,0.025)//WH scale and cutoff
-	//#define WHM 1 //Weapon Hand Masking lets you use DT_Z 
-	//#define DT_Z 0.375 //Masking Power
 	/*
     #define MMD 1 //Set Multi Menu Detection             //Off / On
     #define MMS 0 //Set Multi Menu Selection from 0-1 to 29-30 and Off 0 | 1 | 2
@@ -16193,15 +15994,12 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DF_Z 0.125       // Set the Balance  
     #define DL_Y 0.5      // De-Artifact Only works on some View Modes and causes performance degredation
     //#define DL_Z 1.0       // Compat Power
-	//#define DJ_X 0.375      // Range Smoothing
+
 	//#define WSM 2           // Weapon Setting Mode 
 	//#define DB_W 22         // Weapon Profile
 	//#define DF_X float2(0.100,0.185)  // ZPD Weapon Boundarys Level 1 and Level 2
 	//#define DJ_W 0.1	        // Weapon Depth Limit Location 1
 	//#define DS_W 5.0	        // Weapon Depth Limit Location 2
-	//#define DT_W float2(0.015,0.025)//WH scale and cutoff
-	//#define WHM 1 //Weapon Hand Masking lets you use DT_Z 
-	//#define DT_Z 0.375 //Masking Power
 	/*
     #define MMD 1 //Set Multi Menu Detection             //Off / On
     #define MMS 0 //Set Multi Menu Selection from 0-1 to 29-30 and Off 0 | 1 | 2
@@ -16247,15 +16045,12 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DF_Z 0.125       // Set the Balance  
     #define DL_Y -0.375      // De-Artifact Only works on some View Modes and causes performance degredation
     //#define DL_Z -1.0       // Compat Power
-	//#define DJ_X 0.375      // Range Smoothing
+
 	//#define WSM 2           // Weapon Setting Mode 
 	//#define DB_W 22         // Weapon Profile
 	//#define DF_X float2(0.100,0.185)  // ZPD Weapon Boundarys Level 1 and Level 2
 	//#define DJ_W 0.1	        // Weapon Depth Limit Location 1
 	//#define DS_W 5.0	        // Weapon Depth Limit Location 2
-	//#define DT_W float2(0.015,0.025)//WH scale and cutoff
-	//#define WHM 1 //Weapon Hand Masking lets you use DT_Z 
-	//#define DT_Z 0.375 //Masking Power
 
     #define MAC 1 //Set to one only the 3rd value has a wiled card. Not the 1st and 3rd.
     #define MDD 1 //Set Menu Detection & Direction      //Off | 1 | 2 | 3 | 4      
@@ -16325,15 +16120,12 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DF_Z 0.15       // Set the Balance  
     //#define DL_Y -0.375      // De-Artifact Only works on some View Modes and causes performance degredation
     //#define DL_Z -1.0       // Compat Power
-	//#define DJ_X 0.375      // Range Smoothing
+
 	//#define WSM 2           // Weapon Setting Mode 
 	//#define DB_W 22         // Weapon Profile
 	//#define DF_X float2(0.100,0.185)  // ZPD Weapon Boundarys Level 1 and Level 2
 	//#define DJ_W 0.1	        // Weapon Depth Limit Location 1
 	//#define DS_W 5.0	        // Weapon Depth Limit Location 2
-	//#define DT_W float2(0.015,0.025)//WH scale and cutoff
-	//#define WHM 1 //Weapon Hand Masking lets you use DT_Z 
-	//#define DT_Z 0.375 //Masking Power
 	
     #define MAC 1 //Set to one only the 3rd value has a wiled card. Not the 1st and 3rd.
     #define MDD 1 //Set Menu Detection & Direction      //Off | 1 | 2 | 3 | 4      
@@ -16404,15 +16196,13 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DF_Z 0.25       // Set the Balance  
     //#define DL_Y -0.375      // De-Artifact Only works on some View Modes and causes performance degredation
     //#define DL_Z -1.0       // Compat Power
-	//#define DJ_X 0.375      // Range Smoothing
+
 	//#define WSM 2           // Weapon Setting Mode 
 	//#define DB_W 22         // Weapon Profile
 	//#define DF_X float2(0.100,0.185)  // ZPD Weapon Boundarys Level 1 and Level 2
 	//#define DJ_W 0.1	        // Weapon Depth Limit Location 1
 	//#define DS_W 5.0	        // Weapon Depth Limit Location 2
-	//#define DT_W float2(0.015,0.025)//WH scale and cutoff
-	//#define WHM 1 //Weapon Hand Masking lets you use DT_Z 
-	//#define DT_Z 0.375 //Masking Power
+
 	/*	
     #define MAC 1 //Set to one only the 3rd value has a wiled card. Not the 1st and 3rd.
     #define MDD 1 //Set Menu Detection & Direction      //Off | 1 | 2 | 3 | 4      
@@ -16483,15 +16273,13 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DF_Z 0.15       // Set the Balance  
     //#define DL_Y -0.375      // De-Artifact Only works on some View Modes and causes performance degredation
     //#define DL_Z -1.0       // Compat Power
-	//#define DJ_X 0.375      // Range Smoothing
+
 	//#define WSM 2           // Weapon Setting Mode 
 	//#define DB_W 22         // Weapon Profile
 	//#define DF_X float2(0.100,0.185)  // ZPD Weapon Boundarys Level 1 and Level 2
 	//#define DJ_W 0.1	        // Weapon Depth Limit Location 1
 	//#define DS_W 5.0	        // Weapon Depth Limit Location 2
-	//#define DT_W float2(0.015,0.025)//WH scale and cutoff
-	//#define WHM 1 //Weapon Hand Masking lets you use DT_Z 
-	//#define DT_Z 0.375 //Masking Power
+
 	/*	
     #define MAC 1 //Set to one only the 3rd value has a wiled card. Not the 1st and 3rd.
     #define MDD 1 //Set Menu Detection & Direction      //Off | 1 | 2 | 3 | 4      
@@ -16542,7 +16330,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DF_Y 0.0125       // Seperation
 	#define DA_Y 10.0       // Near Plane Adjustment
     //#define DA_Z -1.0    // Linerzation Offset
-    //#define DS_Y 1          // Linerzation Offset Effects only distance if true
+    #define DS_Y 2          // Linerzation Offset Effects only distance if true
 	#define DB_Z 0.075       // Auto Depth Protection
 	#define DE_X 5          // ZPD Boundary 
 	#define DE_Y 0.750    // Set ZPD Boundary Level Zero 
@@ -16561,22 +16349,20 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define BMT 1           // ZPD and World Scale Balance // I need to phase this out.
 	#define DF_Z 0.055       // Set the Balance  
     //#define DL_Y -0.375      // De-Artifact Only works on some View Modes and causes performance degredation
-    //#define DL_Z -1.0       // Compat Power
-	//#define DJ_X 0.375      // Range Smoothing
+    #define DL_Z 0.125       // Compat Power
+
 	#define WSM 5
 	#define DB_W 9
 	#define DF_X float2(0.1375,0.25)  // ZPD Weapon Boundarys Level 1 and Level 2
 	//#define DJ_W 0.75	        // Weapon Depth Limit Location 1
 	#define DS_W 1.0	        // Weapon Depth Limit Location 2
-	#define FPS 2     // FPS Focus Settings 
+	#define FPS 1     // FPS Focus Settings 
     #define DK_X 2 //Trigger Type
     #define DK_Y 0 //Eye Selection
-    #define DK_Z 4 //Reduction Power
-    #define DK_W 0 //Set Shift Speed
+    #define WRP 7  //Weapon Reduction Power
+    #define DK_Z 8 //World Reduction Power
+    #define DK_W 3 //Set Shift Speed
     
-	//#define DT_W float2(0.015,0.025)//WH scale and cutoff
-	//#define WHM 1 //Weapon Hand Masking lets you use DT_Z 
-	//#define DT_Z 0.375 //Masking Power
 	//#define HMT 1     //HUD Mode Trigger
 	//#define HMC 2.5
     //#define HMD 0.350
@@ -16615,7 +16401,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define DL_Y 0.275      // De-Artifact Only works on some View Modes and causes performance degredation
     #define DB_Y 1.0
     #define DL_Z 0.0       // Compat Power
-	//#define DJ_X 0.375      // Range Smoothing
+
 	//#define WSM 5
 	//#define DB_W 9
 	//#define DF_X float2(0.1375,0.25)  // ZPD Weapon Boundarys Level 1 and Level 2
@@ -16627,9 +16413,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DK_Z 4 //Reduction Power
     //#define DK_W 0 //Set Shift Speed
     
-	//#define DT_W float2(0.015,0.025)//WH scale and cutoff
-	//#define WHM 1 //Weapon Hand Masking lets you use DT_Z 
-	//#define DT_Z 0.375 //Masking Power
 	//#define HMT 1     //HUD Mode Trigger
 	//#define HMC 2.5
     //#define HMD 0.350
@@ -16670,7 +16453,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define DL_Y 0.25      // De-Artifact Only works on some View Modes and causes performance degredation
     #define DB_Y 1.0
     #define DL_Z 0.0       // Compat Power
-	//#define DJ_X 0.375      // Range Smoothing
+
 	//#define WSM 5
 	//#define DB_W 9
 	//#define DF_X float2(0.1375,0.25)  // ZPD Weapon Boundarys Level 1 and Level 2
@@ -16682,9 +16465,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DK_Z 4 //Reduction Power
     //#define DK_W 0 //Set Shift Speed
     
-	//#define DT_W float2(0.015,0.025)//WH scale and cutoff
-	//#define WHM 1 //Weapon Hand Masking lets you use DT_Z 
-	//#define DT_Z 0.375 //Masking Power
 	//#define HMT 1     //HUD Mode Trigger
 	//#define HMC 2.5
     //#define HMD 0.350
@@ -16724,7 +16504,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define DL_Y 0.5      // De-Artifact Only works on some View Modes and causes performance degredation
     //#define DB_Y 1.0
     //#define DL_Z 0.375       // Compat Power
-	//#define DJ_X 0.375      // Range Smoothing
+
 	//#define WSM 5
 	//#define DB_W 9
 	//#define DF_X float2(0.1375,0.25)  // ZPD Weapon Boundarys Level 1 and Level 2
@@ -16735,10 +16515,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DK_Y 0 //Eye Selection
     //#define DK_Z 4 //Reduction Power
     //#define DK_W 0 //Set Shift Speed
-    
-	//#define DT_W float2(0.015,0.025)//WH scale and cutoff
-	//#define WHM 1 //Weapon Hand Masking lets you use DT_Z 
-	//#define DT_Z 0.375 //Masking Power
+
 	//#define HMT 1     //HUD Mode Trigger
 	//#define HMC 2.5
     //#define HMD 0.350
@@ -16777,7 +16554,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DL_Y 0.375      // De-Artifact Only works on some View Modes and causes performance degredation
     //#define DB_Y 1.0
     //#define DL_Z 0.375       // Compat Power
-	//#define DJ_X 0.375      // Range Smoothing
+
 	#define WSM 4
 	#define DB_W 22
 	#define DF_X float2(0.125,0.25)  // ZPD Weapon Boundarys Level 1 and Level 2
@@ -16789,9 +16566,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define DK_Z 4 //Reduction Power
     #define DK_W 1 //Set Shift Speed
     
-	//#define DT_W float2(0.015,0.025)//WH scale and cutoff
-	//#define WHM 1 //Weapon Hand Masking lets you use DT_Z 
-	//#define DT_Z 0.375 //Masking Power
+
 	//#define HMT 1     //HUD Mode Trigger
 	//#define HMC 2.5
     //#define HMD 0.350
@@ -16811,12 +16586,12 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DS_Z 3          // Set View Mode
 	#define DA_W 1          // Set Linerzation
     #define DB_X 1          // Flip
-	#define DA_X 0.011      // ZPD
-	#define DF_Y 0.100       // Seperation
-	#define DA_Y 500.0      // Near Plane Adjustment
+	#define DA_X 0.025      // ZPD
+	#define DF_Y 0.025       // Seperation
+	#define DA_Y 250.0      // Near Plane Adjustment
     #define DA_Z -1.0    // Linerzation Offset
-    #define DS_Y 1          // Linerzation Offset Effects only distance if true
-	#define DB_Z 0.01     // Auto Depth Protection
+    #define DS_Y 2          // Linerzation Offset Effects only distance if true
+	#define DB_Z 0.025     // Auto Depth Protection
 	//#define DE_X 4          // ZPD Boundary 
 	//#define DE_Y 0.750    // Set ZPD Boundary Level Zero 
 	//#define DE_Z 0.375      // Speed that Boundary is Enforced
@@ -16826,17 +16601,18 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define OIF float3(0.5,0.375,0.25)         // Fix enables if Value is > 0.0 
 	//#define DI_W float3(0.5,1.0,2.0)     // Like Shift Boundary DG_W But 0 to inf
 	//#define FTM 2           // Fast Trigger Mode If this enabled then Level 1 and > switches instantly.
-    #define DG_Z 0.4375      // Min Weapon Hands That are apart of world with Auto and Trim
+    #define WND 0.5
+    #define DG_Z 0.05      // Min Weapon Hands That are apart of world with Auto and Trim
     //#define DS_X float3(0.025,0,1)// Min Weapon bit only triggers when a OIL Level is set and set here on .y
     //#define DE_W 0.50      // Auto
-    #define DI_Z 0.24875      // Trim
-    #define DF_W float4(0.0001,0.0007,0.0,0.001)// Edge & Scale
+    #define DI_Z 0.05      // Trim
+    #define DF_W float4(0.0001,0.001,0.025,0.001)// Edge & Scale
 	#define BMT 1           // ZPD and World Scale Balance // I need to phase this out.
-	#define DF_Z 0.5       // Set the Balance  
+	#define DF_Z 0.25       // Set the Balance  
     #define DL_Y 1.0      // De-Artifact Only works on some View Modes and causes performance degredation
-    #define DB_Y 1.0
+    //#define DB_Y 1.0
     #define DL_Z -1.0       // Compat Power
-	//#define DJ_X 0.375      // Range Smoothing
+
 	//#define WSM 4
 	//#define DB_W 22
 	//#define DF_X float2(0.125,0.25)  // ZPD Weapon Boundarys Level 1 and Level 2
@@ -16848,9 +16624,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DK_Z 4 //Reduction Power
     //#define DK_W 1 //Set Shift Speed
     
-	//#define DT_W float2(0.015,0.025)//WH scale and cutoff
-	//#define WHM 1 //Weapon Hand Masking lets you use DT_Z 
-	//#define DT_Z 0.375 //Masking Power
 	//#define HMT 1     //HUD Mode Trigger
 	//#define HMC 2.5
     //#define HMD 0.350
@@ -16890,15 +16663,13 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DF_Z 0.250        // Set the Balance  
     //#define DL_Y -0.50        // De-Artifact Only works on some View Modes and causes performance degredation
     //#define DL_Z 1.00         // Compat Power
-	//#define DJ_X 0.250        // Range Smoothing
+
 	//#define WSM 2             // Weapon Setting Mode 
 	//#define DB_W 16           // Weapon Profile
 	//#define DF_X float2(0,0)  // ZPD Weapon Boundarys Level 1 and Level 2
 	//#define DJ_W 0.1	        // Weapon Depth Limit Location 1
 	//#define DS_W 1.0	        // Weapon Depth Limit Location 2
-	//#define DT_W float2(0.015,0.03)//WH scale and cutoff
-	//#define WHM 1               //Weapon Hand Masking lets you use DT_Z 
-	//#define DT_Z 0.1            //WH Masking Power
+
 #elif (App == 0xB1BB8A1F )	//Taboo Trial
     //#define DS_Z 2            // Set View Mode
 	#define DA_W 1            // Set Linerzation
@@ -16927,15 +16698,13 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DF_Z 0.100        // Set the Balance  
     //#define DL_Y -0.50        // De-Artifact Only works on some View Modes and causes performance degredation
     //#define DL_Z 1.00         // Compat Power
-	//#define DJ_X 0.250        // Range Smoothing
+
 	//#define WSM 2             // Weapon Setting Mode 
 	//#define DB_W 16           // Weapon Profile
 	//#define DF_X float2(0,0)  // ZPD Weapon Boundarys Level 1 and Level 2
 	//#define DJ_W 0.1	        // Weapon Depth Limit Location 1
 	//#define DS_W 1.0	        // Weapon Depth Limit Location 2
-	//#define DT_W float2(0.015,0.03)//WH scale and cutoff
-	//#define WHM 1               //Weapon Hand Masking lets you use DT_Z 
-	//#define DT_Z 0.1            //WH Masking Power
+
 	#define MMD 3 //Set Multi Menu Detection             //Off / On
     #define MMS 0 //Set Multi Menu Selection from 0-1 to 29-30 and Off 0 | 1 | 2
     #define DO_X float4( 0.100 , 0.275 , 0.405 , 0.805 ) //Pos A1 = XY Color & A2 = ZW Black 
@@ -17013,7 +16782,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DL_Y 1.0      // De-Artifact Only works on some View Modes and causes performance degredation
     //#define DB_Y 1.0
     //#define DL_Z -1.0       // Compat Power
-	//#define DJ_X 0.375      // Range Smoothing
+
 	//#define WSM 4
 	//#define DB_W 22
 	//#define DF_X float2(0.125,0.25)  // ZPD Weapon Boundarys Level 1 and Level 2
@@ -17025,9 +16794,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DK_Z 4 //Reduction Power
     //#define DK_W 1 //Set Shift Speed
     
-	//#define DT_W float2(0.015,0.025)//WH scale and cutoff
-	//#define WHM 1 //Weapon Hand Masking lets you use DT_Z 
-	//#define DT_Z 0.375 //Masking Power
+
 	//#define HMT 1     //HUD Mode Trigger
 	//#define HMC 2.5
     //#define HMD 0.350
@@ -17068,7 +16835,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define DL_Y 0.3      // De-Artifact Only works on some View Modes and causes performance degredation
     //#define DB_Y 1.0
     //#define DL_Z -1.0       // Compat Power
-	//#define DJ_X 0.375      // Range Smoothing
+
 	#define WSM 4
 	#define DB_W 26
 	//#define DF_X float2(0.125,0.25)  // ZPD Weapon Boundarys Level 1 and Level 2
@@ -17080,9 +16847,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DK_Z 4 //Reduction Power
     //#define DK_W 1 //Set Shift Speed
     
-	//#define DT_W float2(0.015,0.025)//WH scale and cutoff
-	//#define WHM 1 //Weapon Hand Masking lets you use DT_Z 
-	//#define DT_Z 0.375 //Masking Power
 	//#define HMT 1     //HUD Mode Trigger
 	//#define HMC 2.5
     //#define HMD 0.350
@@ -17123,7 +16887,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DL_Y 1.0      // De-Artifact Only works on some View Modes and causes performance degredation
     //#define DB_Y 1.0
     //#define DL_Z -1.0       // Compat Power
-	//#define DJ_X 0.375      // Range Smoothing
+
 	#define WSM 4
 	#define DB_W 27
 	//#define DF_X float2(0.125,0.25)  // ZPD Weapon Boundarys Level 1 and Level 2
@@ -17135,9 +16899,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DK_Z 4 //Reduction Power
     //#define DK_W 1 //Set Shift Speed
     
-	//#define DT_W float2(0.015,0.025)//WH scale and cutoff
-	//#define WHM 1 //Weapon Hand Masking lets you use DT_Z 
-	//#define DT_Z 0.375 //Masking Power
 	//#define HMT 1     //HUD Mode Trigger
 	//#define HMC 2.5
     //#define HMD 0.350
@@ -17178,7 +16939,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define DL_Y 1.0      // De-Artifact Only works on some View Modes and causes performance degredation
     #define DB_Y 1.0
     //#define DL_Z -1.0       // Compat Power
-	#define DJ_X 0.300      // Range Smoothing
+	#define DJ_X 0.085      // Range Smoothing
 	//#define WSM 4
 	//#define DB_W 26
 	//#define DF_X float2(0.125,0.25)  // ZPD Weapon Boundarys Level 1 and Level 2
@@ -17190,9 +16951,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DK_Z 4 //Reduction Power
     //#define DK_W 1 //Set Shift Speed
     
-	//#define DT_W float2(0.015,0.025)//WH scale and cutoff
-	//#define WHM 1 //Weapon Hand Masking lets you use DT_Z 
-	//#define DT_Z 0.375 //Masking Power
 	//#define HMT 1     //HUD Mode Trigger
 	//#define HMC 2.5
     //#define HMD 0.350
@@ -17233,7 +16991,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DL_Y 1.0      // De-Artifact Only works on some View Modes and causes performance degredation
     //#define DB_Y 1.0
     //#define DL_Z -1.0       // Compat Power
-	//#define DJ_X 0.300      // Range Smoothing
 	//#define WSM 4
 	//#define DB_W 26
 	//#define DF_X float2(0.125,0.25)  // ZPD Weapon Boundarys Level 1 and Level 2
@@ -17255,9 +17012,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define DJ_Y float4( 25.0, 25.0, 25.0, 1000.0);       //Menu Detection Type for A = X, B = Y, & C = Z. The Last Value is a Wild Card amount W is for X and Z. 
     #define DJ_Z float3( 1000., 1000., 1000);           //Set Match Tresh 
     
-	//#define DT_W float2(0.015,0.025)//WH scale and cutoff
-	//#define WHM 1 //Weapon Hand Masking lets you use DT_Z 
-	//#define DT_Z 0.375 //Masking Power
 	//#define HMT 1     //HUD Mode Trigger
 	//#define HMC 2.5
     //#define HMD 0.350
@@ -17288,7 +17042,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DF_Z 0.045      // Set the Balance  
     //#define DL_Y -0.50      // De-Artifact Only works on some View Modes and causes performance degredation
     //#define DL_Z 1.00       // Compat Power
-	//#define DJ_X 0.250      // Range Smoothing
 
     #define MMD 1 //Set Multi Menu Detection             //Off / On
     #define MMS 0 //Set Multi Menu Selection from 0-1 to 29-30 and Off 0 | 1 | 2
@@ -17342,7 +17095,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DF_Z 0.125      // Set the Balance  
     //#define DL_Y -0.50      // De-Artifact Only works on some View Modes and causes performance degredation
     //#define DL_Z 1.00       // Compat Power
-	//#define DJ_X 0.125      // Range Smoothing
 
     #define MAC 1 //Set to one only the 3rd value has a wiled card. Not the 1st and 3rd.
     #define MDD 1 //Set Menu Detection & Direction      //Off | 1 | 2 | 3 | 4      
@@ -17423,15 +17175,12 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define DL_Y 0.5        // De-Artifact Only works on some View Modes and causes performance degredation
 	#define DB_Y 1.0
     #define DL_Z 0.25         // Compat Power
-	//#define DJ_X 0.250        // Range Smoothing
+
 	//#define WSM 2             // Weapon Setting Mode 
 	//#define DB_W 16           // Weapon Profile
 	//#define DF_X float2(0,0)  // ZPD Weapon Boundarys Level 1 and Level 2
 	//#define DJ_W 0.1	        // Weapon Depth Limit Location 1
 	//#define DS_W 1.0	        // Weapon Depth Limit Location 2
-	//#define DT_W float2(0.015,0.03)//WH scale and cutoff
-	//#define WHM 1               //Weapon Hand Masking lets you use DT_Z 
-	//#define DT_Z 0.1            //WH Masking Power
 	//Smooth Mode Setting
     #define SMS 3           //SM Toggle Separation
 	#define DL_X 0.95       //SM Tune
@@ -17471,15 +17220,13 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DL_Y 0.5        // De-Artifact Only works on some View Modes and causes performance degredation
 	//#define DB_Y 1.0
     //#define DL_Z 0.25         // Compat Power
-	//#define DJ_X 0.250        // Range Smoothing
+
 	//#define WSM 2             // Weapon Setting Mode 
 	//#define DB_W 16           // Weapon Profile
 	//#define DF_X float2(0,0)  // ZPD Weapon Boundarys Level 1 and Level 2
 	//#define DJ_W 0.1	        // Weapon Depth Limit Location 1
 	//#define DS_W 1.0	        // Weapon Depth Limit Location 2
-	//#define DT_W float2(0.015,0.03)//WH scale and cutoff
-	//#define WHM 1               //Weapon Hand Masking lets you use DT_Z 
-	//#define DT_Z 0.1            //WH Masking Power
+
 	//Smooth Mode Setting
     #define SMS 3           //SM Toggle Separation
 	#define DL_X 0.95       //SM Tune
@@ -17551,15 +17298,13 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define DL_Y 0.25        // De-Artifact Only works on some View Modes and causes performance degredation
 	//#define DB_Y 1.0
     #define DL_Z 0.125         // Compat Power
-	//#define DJ_X 0.250        // Range Smoothing
+
 	//#define WSM 2             // Weapon Setting Mode 
 	//#define DB_W 16           // Weapon Profile
 	//#define DF_X float2(0,0)  // ZPD Weapon Boundarys Level 1 and Level 2
 	//#define DJ_W 0.1	        // Weapon Depth Limit Location 1
 	//#define DS_W 1.0	        // Weapon Depth Limit Location 2
-	//#define DT_W float2(0.015,0.03)//WH scale and cutoff
-	//#define WHM 1               //Weapon Hand Masking lets you use DT_Z 
-	//#define DT_Z 0.1            //WH Masking Power
+
 	//Smooth Mode Setting
     #define SMS 3           //SM Toggle Separation
 	#define DL_X 0.8       //SM Tune
@@ -17642,15 +17387,13 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define DL_Y -0.500        // De-Artifact Only works on some View Modes and causes performance degredation
 	//#define DB_Y 1.0
     //#define DL_Z 0.25         // Compat Power
-	//#define DJ_X 0.250        // Range Smoothing
+
 	//#define WSM 2             // Weapon Setting Mode 
 	//#define DB_W 16           // Weapon Profile
 	//#define DF_X float2(0,0)  // ZPD Weapon Boundarys Level 1 and Level 2
 	//#define DJ_W 0.1	        // Weapon Depth Limit Location 1
 	//#define DS_W 1.0	        // Weapon Depth Limit Location 2
-	//#define DT_W float2(0.015,0.03)//WH scale and cutoff
-	//#define WHM 1               //Weapon Hand Masking lets you use DT_Z 
-	//#define DT_Z 0.1            //WH Masking Power
+
 	//Smooth Mode Setting
     #define SMS 3           //SM Toggle Separation
 	#define DL_X 0.875       //SM Tune
@@ -17691,15 +17434,13 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DL_Y 0.5        // De-Artifact Only works on some View Modes and causes performance degredation
 	//#define DB_Y 1.0
     //#define DL_Z 0.25         // Compat Power
-	//#define DJ_X 0.250        // Range Smoothing
+
 	//#define WSM 2             // Weapon Setting Mode 
 	//#define DB_W 16           // Weapon Profile
 	//#define DF_X float2(0,0)  // ZPD Weapon Boundarys Level 1 and Level 2
 	//#define DJ_W 0.1	        // Weapon Depth Limit Location 1
 	//#define DS_W 1.0	        // Weapon Depth Limit Location 2
-	//#define DT_W float2(0.015,0.03)//WH scale and cutoff
-	//#define WHM 1               //Weapon Hand Masking lets you use DT_Z 
-	//#define DT_Z 0.1            //WH Masking Power
+
 	#define BDF 1    //Barrel Distortion Fix k1 k2 k3 and Zoom
 	#define DC_X -0.45
 	#define DC_Y 0.045
@@ -17744,15 +17485,12 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DL_Y 0.5        // De-Artifact Only works on some View Modes and causes performance degredation
 	//#define DB_Y 1.0
     //#define DL_Z 0.25         // Compat Power
-	//#define DJ_X 0.250        // Range Smoothing
 	//#define WSM 2             // Weapon Setting Mode 
 	//#define DB_W 16           // Weapon Profile
 	//#define DF_X float2(0,0)  // ZPD Weapon Boundarys Level 1 and Level 2
 	//#define DJ_W 0.1	        // Weapon Depth Limit Location 1
 	//#define DS_W 1.0	        // Weapon Depth Limit Location 2
-	//#define DT_W float2(0.015,0.03)//WH scale and cutoff
-	//#define WHM 1               //Weapon Hand Masking lets you use DT_Z 
-	//#define DT_Z 0.1            //WH Masking Power
+
 	//#define BDF 1    //Barrel Distortion Fix k1 k2 k3 and Zoom
 	//#define DC_X -0.45
 	//#define DC_Y 0.045
@@ -17798,15 +17536,12 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DL_Y 0.5        // De-Artifact Only works on some View Modes and causes performance degredation
 	//#define DB_Y 1.0
     //#define DL_Z 0.25         // Compat Power
-	//#define DJ_X 0.250        // Range Smoothing
 	//#define WSM 2             // Weapon Setting Mode 
 	//#define DB_W 16           // Weapon Profile
 	//#define DF_X float2(0,0)  // ZPD Weapon Boundarys Level 1 and Level 2
 	//#define DJ_W 0.1	        // Weapon Depth Limit Location 1
 	//#define DS_W 1.0	        // Weapon Depth Limit Location 2
-	//#define DT_W float2(0.015,0.03)//WH scale and cutoff
-	//#define WHM 1               //Weapon Hand Masking lets you use DT_Z 
-	//#define DT_Z 0.1            //WH Masking Power
+
 	//#define BDF 1    //Barrel Distortion Fix k1 k2 k3 and Zoom
 	//#define DC_X -0.45
 	//#define DC_Y 0.045
@@ -17883,15 +17618,13 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DL_Y -0.50        // De-Artifact Only works on some View Modes and causes performance degredation
 	//#define DB_Y 1.0          // Effects De-Artifacts -1 to 1 Most of the time leave this at 0 and if you set 1 it takes depth into account 
     //#define DL_Z 1.00         // Compat Power
-	//#define DJ_X 0.250        // Range Smoothing
+
 	//#define WSM 2             // Weapon Setting Mode 
 	//#define DB_W 16           // Weapon Profile
 	//#define DF_X float2(0,0)  // ZPD Weapon Boundarys Level 1 and Level 2
 	//#define DJ_W 0.1	        // Weapon Depth Limit Location 1
 	//#define DS_W 1.0	        // Weapon Depth Limit Location 2
-	//#define DT_W float2(0.015,0.03)//WH scale and cutoff
-	//#define WHM 1               //Weapon Hand Masking lets you use DT_Z 
-	//#define DT_Z 0.1            //WH Masking Power
+
 	//Smooth Mode Setting
     #define SMS 3           //SM Toggle Separation
 	#define DL_X 0.90       //SM Tune
@@ -17931,15 +17664,13 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DL_Y -0.50        // De-Artifact Only works on some View Modes and causes performance degredation
 	//#define DB_Y 1.0          // Effects De-Artifacts -1 to 1 Most of the time leave this at 0 and if you set 1 it takes depth into account 
     //#define DL_Z 1.00         // Compat Power
-	//#define DJ_X 0.250        // Range Smoothing
+
 	//#define WSM 2             // Weapon Setting Mode 
 	//#define DB_W 16           // Weapon Profile
 	//#define DF_X float2(0,0)  // ZPD Weapon Boundarys Level 1 and Level 2
 	//#define DJ_W 0.1	        // Weapon Depth Limit Location 1
 	//#define DS_W 1.0	        // Weapon Depth Limit Location 2
-	//#define DT_W float2(0.015,0.03)//WH scale and cutoff
-	//#define WHM 1               //Weapon Hand Masking lets you use DT_Z 
-	//#define DT_Z 0.1            //WH Masking Power
+
 	//Smooth Mode Setting
     #define SMS 3           //SM Toggle Separation
 	#define DL_X 0.95       //SM Tune
@@ -17979,15 +17710,13 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DL_Y -0.50        // De-Artifact Only works on some View Modes and causes performance degredation
 	//#define DB_Y 1.0          // Effects De-Artifacts -1 to 1 Most of the time leave this at 0 and if you set 1 it takes depth into account 
     //#define DL_Z 1.00         // Compat Power
-	//#define DJ_X 0.250        // Range Smoothing
+
 	//#define WSM 2             // Weapon Setting Mode 
 	//#define DB_W 16           // Weapon Profile
 	//#define DF_X float2(0,0)  // ZPD Weapon Boundarys Level 1 and Level 2
 	//#define DJ_W 0.1	        // Weapon Depth Limit Location 1
 	//#define DS_W 1.0	        // Weapon Depth Limit Location 2
-	//#define DT_W float2(0.015,0.03)//WH scale and cutoff
-	//#define WHM 1               //Weapon Hand Masking lets you use DT_Z 
-	//#define DT_Z 0.1            //WH Masking Power
+
 	#define LBC 1     //Letter Box Correction Offsets With X & Y
 	//#define LBR 0
 	//#define LBE 1
@@ -18077,15 +17806,13 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DL_Y -0.50        // De-Artifact Only works on some View Modes and causes performance degredation
 	//#define DB_Y 1.0          // Effects De-Artifacts -1 to 1 Most of the time leave this at 0 and if you set 1 it takes depth into account 
     //#define DL_Z 0.375         // Compat Power
-	#define DJ_X 0.20        // Range Smoothing
+	#define DJ_X 0.057        // Range Smoothing
 	//#define WSM 2             // Weapon Setting Mode 
 	//#define DB_W 16           // Weapon Profile
 	//#define DF_X float2(0,0)  // ZPD Weapon Boundarys Level 1 and Level 2
 	//#define DJ_W 0.1	        // Weapon Depth Limit Location 1
 	//#define DS_W 1.0	        // Weapon Depth Limit Location 2
-	//#define DT_W float2(0.015,0.03)//WH scale and cutoff
-	//#define WHM 1               //Weapon Hand Masking lets you use DT_Z 
-	//#define DT_Z 0.1            //WH Masking Power
+
 	#define LBC 1     //Letter Box Correction Offsets With X & Y
 	//#define LBR 0
 	//#define LBE 1
@@ -18132,15 +17859,12 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define DL_Y 0.250        // De-Artifact Only works on some View Modes and causes performance degredation
 	#define DB_Y 0.5          // Effects De-Artifacts -1 to 1 Most of the time leave this at 0 and if you set 1 it takes depth into account 
     //#define DL_Z 1.00         // Compat Power
-	//#define DJ_X 0.250        // Range Smoothing
 	//#define WSM 2             // Weapon Setting Mode 
 	//#define DB_W 16           // Weapon Profile
 	//#define DF_X float2(0,0)  // ZPD Weapon Boundarys Level 1 and Level 2
 	//#define DJ_W 0.1	        // Weapon Depth Limit Location 1
 	//#define DS_W 1.0	        // Weapon Depth Limit Location 2
-	//#define DT_W float2(0.015,0.03)//WH scale and cutoff
-	//#define WHM 1               //Weapon Hand Masking lets you use DT_Z 
-	//#define DT_Z 0.1            //WH Masking Power
+
 	//#define LBC 1     //Letter Box Correction Offsets With X & Y
 	//#define LBR 0
 	//#define LBE 1
@@ -18203,15 +17927,12 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DL_Y -0.50        // De-Artifact Only works on some View Modes and causes performance degredation
 	//#define DB_Y 1.0          // Effects De-Artifacts -1 to 1 Most of the time leave this at 0 and if you set 1 it takes depth into account 
     //#define DL_Z 1.00         // Compat Power
-	//#define DJ_X 0.250        // Range Smoothing
 	//#define WSM 2             // Weapon Setting Mode 
 	//#define DB_W 16           // Weapon Profile
 	//#define DF_X float2(0,0)  // ZPD Weapon Boundarys Level 1 and Level 2
 	//#define DJ_W 0.1	        // Weapon Depth Limit Location 1
 	//#define DS_W 1.0	        // Weapon Depth Limit Location 2
-	//#define DT_W float2(0.015,0.03)//WH scale and cutoff
-	//#define WHM 1               //Weapon Hand Masking lets you use DT_Z 
-	//#define DT_Z 0.1            //WH Masking Power
+
 	//#define LBC 1     //Letter Box Correction Offsets With X & Y
 	//#define LBR 0
 	//#define LBE 1
@@ -18256,15 +17977,13 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DL_Y -0.50        // De-Artifact Only works on some View Modes and causes performance degredation
 	//#define DB_Y 1.0          // Effects De-Artifacts -1 to 1 Most of the time leave this at 0 and if you set 1 it takes depth into account 
     //#define DL_Z 1.00         // Compat Power
-	#define DJ_X 0.5        // Range Smoothing
+	#define DJ_X 0.142        // Range Smoothing
 	//#define WSM 2             // Weapon Setting Mode 
 	//#define DB_W 16           // Weapon Profile
 	//#define DF_X float2(0,0)  // ZPD Weapon Boundarys Level 1 and Level 2
 	//#define DJ_W 0.1	        // Weapon Depth Limit Location 1
 	//#define DS_W 1.0	        // Weapon Depth Limit Location 2
-	//#define DT_W float2(0.015,0.03)//WH scale and cutoff
-	//#define WHM 1               //Weapon Hand Masking lets you use DT_Z 
-	//#define DT_Z 0.1            //WH Masking Power
+
 	#define LBC 1     //Letter Box Correction Offsets With X & Y
 	#define LBR 2
 	#define LBE 1
@@ -18312,15 +18031,13 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DL_Y 1.0        // De-Artifact Only works on some View Modes and causes performance degredation
 	//#define DB_Y 1.0          // Effects De-Artifacts -1 to 1 Most of the time leave this at 0 and if you set 1 it takes depth into account 
     //#define DL_Z 1.00         // Compat Power
-	#define DJ_X 0.375        // Range Smoothing
+	#define DJ_X 0.107        // Range Smoothing
 	//#define WSM 2             // Weapon Setting Mode 
 	//#define DB_W 16           // Weapon Profile
 	//#define DF_X float2(0,0)  // ZPD Weapon Boundarys Level 1 and Level 2
 	//#define DJ_W 0.1	        // Weapon Depth Limit Location 1
 	//#define DS_W 1.0	        // Weapon Depth Limit Location 2
-	//#define DT_W float2(0.015,0.03)//WH scale and cutoff
-	//#define WHM 1               //Weapon Hand Masking lets you use DT_Z 
-	//#define DT_Z 0.1            //WH Masking Power
+
 	//#define LBC 1     //Letter Box Correction Offsets With X & Y
 	//#define LBR 2
 	//#define LBE 1
@@ -18519,7 +18236,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DF_Z 0.125      // Set the Balance  
     #define DL_Y 0.5      // De-Artifact Only works on some View Modes and causes performance degredation
     //#define DL_Z 0.5       // Compat Power
-	//#define DJ_X 0.250      // Range Smoothing
 	
 	//Menu Detection Templates -  Needs a Specail Shader to adjust
     #define MAC 0 //Set to one only the 3rd value has a wiled card. Not the 1st and 3rd.
@@ -18598,7 +18314,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DF_Z 0.125      // Set the Balance  
     //#define DL_Y 1.0      // De-Artifact Only works on some View Modes and causes performance degredation
     #define DL_Z -0.75       // Compat Power
-	//#define DJ_X 0.250      // Range Smoothing
    //Menu Detection Templates -  Needs a Specail Shader to adjust
     #define MAC 1 //Set to one only C has a wiled card. Not the A and C.
     #define MDD 1 //Set Menu Detection & Direction      //Off | 1 | 2 | 3 | 4      
@@ -18699,7 +18414,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DL_Y -0.50        // De-Artifact Only works on some View Modes and causes performance degredation
 	//#define DB_Y 1.0          // Effects De-Artifacts -1 to 1 Most of the time leave this at 0 and if you set 1 it takes depth into account 
     //#define DL_Z 1.00         // Compat Power
-	//#define DJ_X 0.250        // Range Smoothing
 	//Smooth Mode Setting
     #define SMS 3           //SM Toggle Separation
 	#define DL_X 0.900       //SM Tune
@@ -18751,7 +18465,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DL_Y -0.50        // De-Artifact Only works on some View Modes and causes performance degredation
 	//#define DB_Y 1.0          // Effects De-Artifacts -1 to 1 Most of the time leave this at 0 and if you set 1 it takes depth into account 
     //#define DL_Z 1.00         // Compat Power
-	//#define DJ_X 0.250        // Range Smoothing
 	//Smooth Mode Setting
     #define SMS 3           //SM Toggle Separation
 	#define DL_X 0.900       //SM Tune
@@ -18817,15 +18530,12 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DL_Y -0.50        // De-Artifact Only works on some View Modes and causes performance degredation
 	//#define DB_Y 1.0          // Effects De-Artifacts -1 to 1 Most of the time leave this at 0 and if you set 1 it takes depth into account 
     //#define DL_Z 1.00         // Compat Power
-	//#define DJ_X 0.250        // Range Smoothing
 	//#define WSM 2             // Weapon Setting Mode 
 	//#define DB_W 16           // Weapon Profile
 	//#define DF_X float2(0,0)  // ZPD Weapon Boundarys Level 1 and Level 2
 	//#define DJ_W 0.1	        // Weapon Depth Limit Location 1
 	//#define DS_W 1.0	        // Weapon Depth Limit Location 2
-	//#define DT_W float2(0.015,0.03)//WH scale and cutoff
-	//#define WHM 1               //Weapon Hand Masking lets you use DT_Z 
-	//#define DT_Z 0.1            //WH Masking Power
+
 	//Smooth Mode Setting
     #define SMS 3           //SM Toggle Separation
 	#define DL_X 0.7625       //SM Tune
@@ -18894,15 +18604,12 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define DL_Y 0.50        // De-Artifact Only works on some View Modes and causes performance degredation
 	#define DB_Y 0.5          // Effects De-Artifacts -1 to 1 Most of the time leave this at 0 and if you set 1 it takes depth into account 
     //#define DL_Z 1.00         // Compat Power
-	//#define DJ_X 0.250        // Range Smoothing
 	#define WSM 4             // Weapon Setting Mode 
 	#define DB_W 13           // Weapon Profile
 	#define DF_X float2(0.125,0.250)  // ZPD Weapon Boundarys Level 1 and Level 2
 	//#define DJ_W 0.1	        // Weapon Depth Limit Location 1
 	//#define DS_W 1.0	        // Weapon Depth Limit Location 2
-	//#define DT_W float2(0.015,0.03)//WH scale and cutoff
-	//#define WHM 1               //Weapon Hand Masking lets you use DT_Z 
-	//#define DT_Z 0.1            //WH Masking Power
+
 
     #define FPS 2     // FPS Focus Settings 
     #define DK_X 2 //Trigger Type
@@ -18927,7 +18634,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DF_Y 0.00         // Seperation
 	#define DA_Y 35.0        // Near Plane Adjustment
     //#define DA_Z -0.375      // Linerzation Offset
-    #define DS_Y 2            // Linerzation Offset Effects only distance if true
+    #define DS_Y 3            // Linerzation Offset Effects only distance if true
 	#define DB_Z 0.025         // Auto Depth Protection
 	#define DE_X 2            // ZPD Boundary 
 	#define DE_Y 0.6        // Set ZPD Boundary Level Zero 
@@ -18948,15 +18655,12 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define DL_Y 0.50        // De-Artifact Only works on some View Modes and causes performance degredation
 	//#define DB_Y 0.5          // Effects De-Artifacts -1 to 1 Most of the time leave this at 0 and if you set 1 it takes depth into account 
     //#define DL_Z 1.00         // Compat Power
-	//#define DJ_X 0.250        // Range Smoothing
 	#define WSM 4             // Weapon Setting Mode 
 	//#define DB_W 18           // Weapon Profile
 	//#define DF_X float2(0.0001,0.5)  // ZPD Weapon Boundarys Level 1 and Level 2
 	//#define DJ_W 0.1	        // Weapon Depth Limit Location 1
 	#define DS_W 0.5	        // Weapon Depth Limit Location 2
-	//#define DT_W float2(0.015,0.03)//WH scale and cutoff
-	//#define WHM 1               //Weapon Hand Masking lets you use DT_Z 
-	//#define DT_Z 0.1            //WH Masking Power
+
 	//Smooth Mode Setting
     #define SMS 3           //SM Toggle Separation
 	#define DL_X 0.90       //SM Tune
@@ -19040,7 +18744,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define DL_Y 0.125        // De-Artifact Only works on some View Modes and causes performance degredation
 	//#define DB_Y 1.0          // Effects De-Artifacts -1 to 1 Most of the time leave this at 0 and if you set 1 it takes depth into account 
     //#define DL_Z 1.00         // Compat Power
-	//#define DJ_X 0.250        // Range Smoothing
 	//Smooth Mode Setting
     #define SMS 3           //SM Toggle Separation
 	#define DL_X 0.75       //SM Tune
@@ -19076,7 +18779,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define DL_Y 0.50        // De-Artifact Only works on some View Modes and causes performance degredation
 	//#define DB_Y 1.0          // Effects De-Artifacts -1 to 1 Most of the time leave this at 0 and if you set 1 it takes depth into account 
     //#define DL_Z 1.00         // Compat Power
-	//#define DJ_X 0.250        // Range Smoothing
 	
 	//Smooth Mode Setting
     #define SMS 3           //SM Toggle Separation
@@ -19116,7 +18818,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DL_Y -0.50        // De-Artifact Only works on some View Modes and causes performance degredation
 	//#define DB_Y 1.0          // Effects De-Artifacts -1 to 1 Most of the time leave this at 0 and if you set 1 it takes depth into account 
     //#define DL_Z 1.00         // Compat Power
-	//#define DJ_X 0.250        // Range Smoothing
 	#define WSM 4             // Weapon Setting Mode 
 	#define DB_W 14           // Weapon Profile
 	#define DF_X float2(0.001,0.270)  // ZPD Weapon Boundarys Level 1 and Level 2	
@@ -19149,40 +18850,39 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DL_Y -0.50        // De-Artifact Only works on some View Modes and causes performance degredation
 	//#define DB_Y 1.0          // Effects De-Artifacts -1 to 1 Most of the time leave this at 0 and if you set 1 it takes depth into account 
     //#define DL_Z 1.00         // Compat Power
-	//#define DJ_X 0.250        // Range Smoothing
 	//#define WSM 4             // Weapon Setting Mode 
 	//#define DB_W 15           // Weapon Profile
 	//#define DF_X float2(0.125,0.250)  // ZPD Weapon Boundarys Level 1 and Level 2	
 #elif ( App == 0xDA05BA00 ) //Tiny Tina's wonderlands
-    //#define DS_Z 2            // Set View Mode
+     //#define DS_Z 2            // Set View Mode
 	#define DA_W 1            // Set Linerzation
     //#define DB_X 1            // Flip
 	#define DA_X 0.025      // ZPD
 	#define DF_Y 0.00         // Seperation
 	#define DA_Y 30.0         // Near Plane Adjustment
-    //#define DA_Z -0.0001      // Linerzation Offset
-    #define DS_Y 2            // Linerzation Offset Effects only distance if true
+    #define DA_Z -0.250      // Linerzation Offset
+    #define DS_Y 3            // Linerzation Offset Effects only distance if true
 	#define DB_Z 0.05         // Auto Depth Protection
-	//#define DE_X 6            // ZPD Boundary 
-	//#define DE_Y 0.750        // Set ZPD Boundary Level Zero 
-	//#define DE_Z 0.375        // Speed that Boundary is Enforced
+	#define DE_X 5            // ZPD Boundary 
+	#define DE_Y 0.7        // Set ZPD Boundary Level Zero 
+	#define DE_Z 0.375        // Speed that Boundary is Enforced
 	//#define AFD 1           // Alternate Frame Detection - May be phased out
-	//#define DG_W 0.250        // Shift Boundary Out of screen 0.5 and or In screen -0.5
+	#define DG_W 3.5        // Shift Boundary Out of screen 0.5 and or In screen -0.5
 	//#define OIL 3           // Set How many Levels We use for RE_Fix 0 | 1 | 2 | 3 if 1 then it's float2(0,0) for OIF and DI_W
     //#define OIF float4(0.5,0.375,0.25,0.125)// Fix enables if Value is > 0.0 
 	//#define DI_W float4(0.5,1.0,2.5,25.0) // Like Shift Boundary DG_W But 0 to inf
 	//#define FTM 0             // Fast Trigger Mode If this enabled then Level 1 and > switches instantly.
-    #define DG_Z 0.045        // Min Weapon Hands That are apart of world with Auto and Trim
+	#define WND 0.175         //Weapon Near Pushes depth in and adjust perspective to match.
+    #define DG_Z 0.025        // Min Weapon Hands That are apart of world with Auto and Trim
     //#define DS_X float3(0.025,0,1)// Min Weapon bit only triggers when a OIL Level is set and set here on .y
-    //#define DE_W 0.250        // Auto
-    #define DI_Z 0.100        // Trim
-    #define DF_W float4(0.0001,0.001,0.125,0.055)// Edge & Scale
+    #define DE_W 0.50        // Auto
+    #define DI_Z 0.075//0.100        // Trim
+    #define DF_W float4(0.0001,0.001,0.2,0.05)// Edge & Scale
 	#define BMT 1             // ZPD and World Scale Balance // I need to phase this out.
 	#define DF_Z 0.175        // Set the Balance  
     #define DL_Y 0.125        // De-Artifact Only works on some View Modes and causes performance degredation
 	//#define DB_Y 1.0          // Effects De-Artifacts -1 to 1 Most of the time leave this at 0 and if you set 1 it takes depth into account 
-    //#define DL_Z 1.00         // Compat Power
-	//#define DJ_X 0.250        // Range Smoothing
+    #define DL_Z -0.5         // Compat Power
 	//#define WSM 4             // Weapon Setting Mode 
 	#define DB_W 5           // Weapon Profile
 	//#define DF_X float2(0.001,0.270)  // ZPD Weapon Boundarys Level 1 and Level 2
@@ -19190,52 +18890,47 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	//Multi Menu Detection                                 //4 Blocks total and 2 sub blocks per one block.
     #define MMD 3 //Set Multi Menu Detection               //Off 0 | 1 | 2 | 3 | 4
     #define MMS 0 //Set Multi Menu Selection 0-1 to 29-30  //Off 0 | 1 | 2 | 3 | 4
-    #define MML 0 //Set Multi Menu Leniency  0-2 and 28-30 //Off 0 | 1 | 2 | 3 | 4    
-	//Inventory & Journal Hero
-    #define DO_X float4( 0.714 , 0.843 , 0.875 , 0.808 ) //Pos A1 = XY Color & A2 = ZW Black 
-    #define DO_Y float4( 0.862 , 0.823 , 0.415 , 0.230 ) //Pos A3 = XY Color & B1 = ZW Color
-    #define DO_Z float4( 0.0625, 0.500 , 0.1905, 0.204 ) //Pos B2 = XY Black & B3 = ZW Color
-	#define DO_W float4( 23.0, 23.0, 23.0, 27.0) //Tresh Hold for Color A & B and Color
-	//Journal World Buffs & Journal Scrolls
-    #define DP_X float4( 0.415 , 0.230 , 0.0625, 0.500 ) //Pos C1 = XY Color & C2 = ZW Black 
-    #define DP_Y float4( 0.235 , 0.197 , 0.415 , 0.230 ) //Pos C3 = XY Color & D1 = ZW Color
-    #define DP_Z float4( 0.0625, 0.500 , 0.271 , 0.194 ) //Pos D2 = XY Black & D3 = ZW Color
-	#define DP_W float4( 23.0, 27.0, 23.0, 27.0) //Tresh Hold for Color C & D and Color
-    //Skills & Hero Stats
-	#define DQ_X float4( 0.634 , 0.920 , 0.903 , 0.901 ) //Pos C1 = XY Color & C2 = ZW Black 
-    #define DQ_Y float4( 0.446 , 0.137 , 0.938 , 0.091 ) //Pos C3 = XY Color & D1 = ZW Color
-    #define DQ_Z float4( 0.607 , 0.500 , 0.917 , 0.827 ) //Pos D2 = XY Black & D3 = ZW Color
-	#define DQ_W float4( 25.0, 25.0, 23.0, 23.0) //Tresh Hold for Color A1 & A3 and Color
-	// Myth Rank WIP 
+    #define MML -2 //Set Multi Menu Leniency  0-2 and 28-30 //Off 0 | 1 | 2 | 3 | 4    
+	//Inventory & Skills S
+    #define DO_X float4( 0.786 , 0.800 , 0.875 , 0.8085) //Pos A1 = XY Color & A2 = ZW Black 
+    #define DO_Y float4( 0.715 , 0.850 , 0.634 , 0.920 ) //Pos A3 = XY Color & B1 = ZW Color
+    #define DO_Z float4( 0.732 , 0.856 , 0.446 , 0.137) //Pos B2 = XY Black & B3 = ZW Color
+	#define DO_W float4( 25.0, 25.0, 25.0, 25.0) //Tresh Hold for Color A & B and Color
+	//Class Select &  Customize Character S
+    #define DP_X float4( 0.200 , 0.255 , 0.085 , 0.135 ) //Pos C1 = XY Color & C2 = ZW Black 
+    #define DP_Y float4( 0.432 , 0.255 , 0.978 , 0.074 ) //Pos C3 = XY Color & D1 = ZW Color
+    #define DP_Z float4( 0.085 , 0.135 , 0.053 , 0.150 ) //Pos D2 = XY Black & D3 = ZW Color
+	#define DP_W float4( 28.0, 28.0, 30.0, 23.0) //Tresh Hold for Color C & D and Color
+    //Hero Stats S
+	#define DQ_X float4( 0.636 , 0.535 , 0.704 , 0.856 ) //Pos C1 = XY Color & C2 = ZW Black 
+    #define DQ_Y float4( 0.919 , 0.828 , 0.636 , 0.720 ) //Pos C3 = XY Color & D1 = ZW Color
+    #define DQ_Z float4( 0.704 , 0.856 , 0.919 , 0.828 ) //Pos D2 = XY Black & D3 = ZW Color
+	#define DQ_W float4( 25.0, 24.0, 25.0, 24.0) //Tresh Hold for Color A1 & A3 and Color
+	// Myth Rank WIP S 
 	#define DR_X float4( 0.712 , 0.071 , 0.000 , 0.000 ) //Pos G1 = XY Color & G2 = ZW Black 
     #define DR_Y float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos G3 = XY Color & H1 = ZW Color
     #define DR_Z float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos H2 = XY Black & H3 = ZW Color
 	#define DR_W float4( 1000.0, 1000.0, 1000.0, 1000.0) //Tresh Hold for Color G & H and Color 
-    //Class Select &  Customize Character
-	#define DU_X float4( 0.200 , 0.255 , 0.314 , 0.456 ) //Pos I1 = XY Color & I2 = ZW Black 
-    #define DU_Y float4( 0.432 , 0.255 , 0.978 , 0.074 ) //Pos I3 = XY Color & J1 = ZW Color
-    #define DU_Z float4( 0.547 , 0.102 , 0.053 , 0.150 ) //Pos J2 = XY Black & J3 = ZW Color
-	#define DU_W float4( 28.0, 28.0, 30.0, 23.0) //Tresh Hold for Color I & J and Color
-	
-	#define DV_X float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos K1 = XY Color & K2 = ZW Black 
-    #define DV_Y float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos K3 = XY Color & L1 = ZW Color
+    //Journal Hero & Journal World Buffs
+	#define DU_X float4( 0.396 , 0.893 , 0.0625, 0.500 ) //Pos I1 = XY Color & I2 = ZW Black 
+    #define DU_Y float4( 0.1905, 0.204 , 0.396 , 0.893 ) //Pos I3 = XY Color & J1 = ZW Color
+    #define DU_Z float4( 0.0625, 0.500 , 0.235 , 0.197 ) //Pos J2 = XY Black & J3 = ZW Color
+	#define DU_W float4( 24.0, 27.0, 24.0, 27.0) //Tresh Hold for Color I & J and Color
+	// Journal Scrolls
+	#define DV_X float4( 0.396 , 0.893 , 0.0625, 0.500 ) //Pos K1 = XY Color & K2 = ZW Black 
+    #define DV_Y float4( 0.271 , 0.194 , 0.000 , 0.000 ) //Pos K3 = XY Color & L1 = ZW Color
     #define DV_Z float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos L2 = XY Black & L3 = ZW Color
-	#define DV_W float4( 1000.0, 1000.0, 1000.0, 1000.0) //Tresh Hold for Color K & L and Color
-	//Block Four
-	#define DX_X float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos M1 = XY Color & M2 = ZW Black 
-    #define DX_Y float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos M3 = XY Color & N1 = ZW Color
-    #define DX_Z float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos N2 = XY Black & N3 = ZW Color
-	#define DX_W float4( 1000.0, 1000.0, 1000.0, 1000.0) //Tresh Hold for Color M & N and Color
-	
-	#define DY_X float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos O1 = XY Color & O2 = ZW Black 
-    #define DY_Y float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos O3 = XY Color & P1 = ZW Color
-    #define DY_Z float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos P2 = XY Black & P3 = ZW Color
-	#define DY_W float4( 1000.0, 1000.0, 1000.0, 1000.0) //Tresh Hold for Color O & P and Color	
+	#define DV_W float4( 24.0, 27.0, 1000.0, 1000.0) //Tresh Hold for Color K & L and Color
 
+	#define LBC 1     //Letter Box Correction Offsets With X & Y
+	//#define LBR 0
+	//#define LBE 1
+	//#define DH_Z 0.0
+	#define DH_W -0.237	
 	
 	//Smooth Mode Setting
     #define SMS 3           //SM Toggle Separation
-	#define DL_X 0.75       //SM Tune
+	#define DL_X 0.950       //SM Tune
 	//#define DL_W 0.05       //SM Perspective
 	#define DM_X 4           //HQ Tune
 	//#define HQT 1           //HQ Trigger
@@ -19272,7 +18967,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DL_Y 0.125        // De-Artifact Only works on some View Modes and causes performance degredation
 	//#define DB_Y 1.0          // Effects De-Artifacts -1 to 1 Most of the time leave this at 0 and if you set 1 it takes depth into account 
     //#define DL_Z 1.00         // Compat Power
-	//#define DJ_X 0.250        // Range Smoothing
 	//#define WSM 4             // Weapon Setting Mode 
 	//#define DB_W 5           // Weapon Profile
 	//#define DF_X float2(0.001,0.270)  // ZPD Weapon Boundarys Level 1 and Level 2
@@ -19340,7 +19034,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define DL_Y 0.5        // De-Artifact Only works on some View Modes and causes performance degredation
 	//#define DB_Y 0.5          // Effects De-Artifacts -1 to 1 Most of the time leave this at 0 and if you set 1 it takes depth into account 
     #define DL_Z -0.5         // Compat Power
-	//#define DJ_X 0.250        // Range Smoothing
+	
 	//#define WSM 4             // Weapon Setting Mode 
 	//#define DB_W 5           // Weapon Profile
 	//#define DF_X float2(0.001,0.270)  // ZPD Weapon Boundarys Level 1 and Level 2
@@ -19382,6 +19076,317 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define PEW 1
 	#define DAA 1
 	#define DB_W 27
+#elif (App == 0x11763BB7 ) //FATAL Frame Maiden of the Black Water.... Too Damn spooky....
+    //#define DS_Z 2            // Set View Mode
+	//#define DA_W 1            // Set Linerzation
+    //#define DB_X 1            // Flip
+	#define DA_X 0.125      // ZPD
+	#define DF_Y 0.018         // Seperation
+	#define DA_Y 10.0 //12.5         // Near Plane Adjustment
+    //#define DA_Z -0.0001      // Linerzation Offset
+    #define DS_Y 2            // Linerzation Offset Effects only distance if true
+	#define DB_Z 0.075         // Auto Depth Protection
+	#define DE_X 2            // ZPD Boundary 
+	#define DE_Y 0.750        // Set ZPD Boundary Level Zero 
+	#define DE_Z 0.375        // Speed that Boundary is Enforced
+	//#define AFD 1           // Alternate Frame Detection - May be phased out
+	//#define DG_W 0.250        // Shift Boundary Out of screen 0.5 and or In screen -0.5
+	#define OIL 3           // Set How many Levels We use for RE_Fix 0 | 1 | 2 | 3 if 1 then it's float2(0,0) for OIF and DI_W
+    #define OIF float4(0.500,0.375,0.250,0.125)// Fix enables if Value is > 0.0 
+	#define DI_W float4(0.5,1.25,2.5,5.0) // Like Shift Boundary DG_W But 0 to inf
+	//#define FTM 0             // Fast Trigger Mode If this enabled then Level 1 and > switches instantly.
+    // DG_Z 0.045        // Min Weapon Hands That are apart of world with Auto and Trim
+    //#define DS_X float3(0.025,0,1)// Min Weapon bit only triggers when a OIL Level is set and set here on .y
+    //#define DE_W 0.250        // Auto
+    //#define DI_Z 0.100        // Trim
+    //#define DF_W float4(0.0001,0.001,0.125,0.055)// Edge & Scale
+
+    //Simple Menu Detection May add one more later
+    #define SMD 1 //Off 0 | 1 | 2 
+    //Book Pop Up
+    #define DW_X float4( 0.613 , 0.869 , 0.500 , 0.850)  //Pos A = XY Any & B = ZW Lock 
+    #define DW_Y float2( 0.698 , 0.869 )                 //Pos C = XY 
+    #define DW_Z float4( 22.0, 0.0, 22.0, 1000.0)//Menu Detection Type for A = X, B = Y, & C = Z. The Last Value is a Wild Card amount W is for X and Z. 
+    //Item Pop Up
+    //#define DT_X float4( 0.689 , 0.835 , 0.768 , 0.857)  //Pos A = XY Any & B = ZW Lock 
+    //#define DT_Y float2( 0.768 , 0.862 )                 //Pos C = XY 
+    //#define DW_W float4( 16.0, 1.0, 22.0, 1000.0)//Menu Detection Type for A = X, B = Y, & C = Z. The Last Value is a Wild Card amount W is for X and Z. 
+    
+    //Multi Menu Detection                                 //4 Blocks total and 2 sub blocks per one block.
+    #define MMD 1 //Set Multi Menu Detection               //Off 0 | 1 | 2 | 3 | 4
+    #define MMS 0 //Set Multi Menu Selection 0-1 to 29-30  //Off 0 | 1 | 2 | 3 | 4
+    #define MML 0 //Set Multi Menu Leniency  0-2 and 28-30 //Off 0 | 1 | 2 | 3 | 4    
+	//Pause Menu & Options
+    #define DO_X float4( 0.075 , 0.131 , 0.756 , 0.680 ) //Pos A1 = XY Color & A2 = ZW Black 
+    #define DO_Y float4( 0.907 , 0.129 , 0.075 , 0.131 ) //Pos A3 = XY Color & B1 = ZW Color
+    #define DO_Z float4( 0.842 , 0.918 , 0.842 , 0.924 ) //Pos B2 = XY Black & B3 = ZW Color
+	#define DO_W float4( 28.0, 30.0, 28.0, 22.0) //Tresh Hold for Color A & B and Color
+	//Map
+    #define DP_X float4( 0.075 , 0.131 , 0.875 , 0.918 ) //Pos C1 = XY Color & C2 = ZW Black 
+    #define DP_Y float4( 0.875 , 0.924 , 0.000 , 0.000 ) //Pos C3 = XY Color & D1 = ZW Color
+    #define DP_Z float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos D2 = XY Black & D3 = ZW Color
+	#define DP_W float4( 28.0, 22.0, 1000.0, 1000.0) //Tresh Hold for Color C & D and Color
+    
+	#define BMT 1             // ZPD and World Scale Balance // I need to phase this out.
+	#define DF_Z 0.150        // Set the Balance  
+    #define DL_Y 0.25        // De-Artifact Only works on some View Modes and causes performance degredation
+	#define DB_Y 1.0          // Effects De-Artifacts -1 to 1 Most of the time leave this at 0 and if you set 1 it takes depth into account 
+    //#define DL_Z 1.00         // Compat Power
+	#define DJ_X 0.035        // Range Smoothing
+	//#define WSM 4             // Weapon Setting Mode 
+	//#define DB_W 5           // Weapon Profile
+	//#define DF_X float2(0.001,0.270)  // ZPD Weapon Boundarys Level 1 and Level 2
+	//Smooth Mode Setting
+    #define SMS 3           //SM Toggle Separation
+	#define DL_X 0.875       //SM Tune
+	//#define DL_W 0.05       //SM Perspective
+	#define DM_X 4           //HQ Tune
+	//#define HQT 1           //HQ Trigger
+    //#define DM_Y 3     //HQ VRS 	
+	#define FOV 1
+	#define PEW 1
+	#define DAA 1
+#elif (App == 0xAF6A1BF0 ) //FATAL Frame Mask ofthe Lunar
+    //#define DS_Z 2            // Set View Mode
+	//#define DA_W 1            // Set Linerzation
+    //#define DB_X 1            // Flip
+	#define DA_X 0.1325      // ZPD
+	#define DF_Y 0.0125         // Seperation
+	#define DA_Y 12.5         // Near Plane Adjustment
+    //#define DA_Z -0.0001      // Linerzation Offset
+    #define DS_Y 2            // Linerzation Offset Effects only distance if true
+	#define DB_Z 0.075         // Auto Depth Protection
+	#define DE_X 2            // ZPD Boundary 
+	#define DE_Y 0.750        // Set ZPD Boundary Level Zero 
+	#define DE_Z 0.375        // Speed that Boundary is Enforced
+	//#define AFD 1           // Alternate Frame Detection - May be phased out
+	//#define DG_W 0.125        // Shift Boundary Out of screen 0.5 and or In screen -0.5
+	#define OIL 3           // Set How many Levels We use for RE_Fix 0 | 1 | 2 | 3 if 1 then it's float2(0,0) for OIF and DI_W
+    #define OIF float4(0.500,0.375,0.250,0.125)// Fix enables if Value is > 0.0 
+	#define DI_W float4(0.5,1.25,2.5,5.0) // Like Shift Boundary DG_W But 0 to inf
+	//#define FTM 0             // Fast Trigger Mode If this enabled then Level 1 and > switches instantly.
+    // DG_Z 0.045        // Min Weapon Hands That are apart of world with Auto and Trim
+    //#define DS_X float3(0.025,0,1)// Min Weapon bit only triggers when a OIL Level is set and set here on .y
+    //#define DE_W 0.250        // Auto
+    //#define DI_Z 0.100        // Trim
+    //#define DF_W float4(0.0001,0.001,0.125,0.055)// Edge & Scale
+
+    //Simple Menu Detection May add one more later
+    #define SMD 2 //Off 0 | 1 | 2 
+    #define DW_X float4( 0.382, 0.202 , 0.701 , 0.865)  //Pos A = XY Any & B = ZW Lock 
+    #define DW_Y float2( 0.617 , 0.279 )                 //Pos C = XY 
+    #define DW_Z float4( 21.0, 0.0, 21.0, 1000.0)//Menu Detection Type for A = X, B = Y, & C = Z. The Last Value is a Wild Card amount W is for X and Z. 
+    
+    #define DT_X float4( 0.058, 0.143 , 0.898 , 0.933)  //Pos A = XY Any & B = ZW Lock 
+    #define DT_Y float2( 0.162 , 0.044 )                 //Pos C = XY 
+    #define DW_W float4( 22.0, 0.0, 22.0, 1000.0)//Menu Detection Type for A = X, B = Y, & C = Z. The Last Value is a Wild Card amount W is for X and Z. 
+
+  //Multi Menu Detection                      //4 Blocks total and 2 sub blocks per one block.
+    #define MMD 1 //Set Multi Menu Detection  // Off  0 | 1 | 2 | 3 | 4
+    #define MMS 0 //Set Multi Menu Selection  // Off  0 | 1 | 2 | 3 | 4                       //0-2 check to 28-30 check Depnding on the option MML
+    #define MML -1 //Set Multi Menu Leniency   // -4 |-3 |-2 |-1 | Off | 1 | 2 | 3 | 4         //Negitive [0 & 30] No Leniency | Zero [0-1 & 29-30] Some Leniency | Positive [0-2 & 28-30] Most Leniency  
+	//Block One
+    #define DO_X float4( 0.058 , 0.144 , 0.875 , 0.933 ) //Pos A1 = XY Color & A2 = ZW Black 
+    #define DO_Y float4( 0.162 , 0.044 , 0.000 , 0.000 ) //Pos A3 = XY Color & B1 = ZW Color
+    #define DO_Z float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos B2 = XY Black & B3 = ZW Color
+	#define DO_W float4( 22.0, 22.0, 1000.0, 1000.0) //Tresh Hold for Color A & B and Color
+
+    #define DP_X float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos C1 = XY Color & C2 = ZW Black 
+    #define DP_Y float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos C3 = XY Color & D1 = ZW Color
+    #define DP_Z float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos D2 = XY Black & D3 = ZW Color
+	#define DP_W float4( 1000.0, 1000.0, 1000.0, 1000.0) //Tresh Hold for Color C & D and Color
+
+    
+	#define BMT 1             // ZPD and World Scale Balance // I need to phase this out.
+	#define DF_Z 0.150        // Set the Balance  
+    #define DL_Y 0.25        // De-Artifact Only works on some View Modes and causes performance degredation
+	#define DB_Y 1.0          // Effects De-Artifacts -1 to 1 Most of the time leave this at 0 and if you set 1 it takes depth into account 
+    //#define DL_Z 1.00         // Compat Power
+	#define DJ_X 0.035        // Range Smoothing
+	//#define WSM 4             // Weapon Setting Mode 
+	//#define DB_W 5           // Weapon Profile
+	//#define DF_X float2(0.001,0.270)  // ZPD Weapon Boundarys Level 1 and Level 2
+	//Smooth Mode Setting
+    #define SMS 3           //SM Toggle Separation
+	#define DL_X 0.875       //SM Tune
+	//#define DL_W 0.05       //SM Perspective
+	#define DM_X 4           //HQ Tune
+	//#define HQT 1           //HQ Trigger
+    //#define DM_Y 3     //HQ VRS 	
+	#define FOV 1
+	#define PEW 1
+	#define DAA 1
+#elif (App == 0xC770832 || App == 0x3E42619F )	//Wolfenstein: The New Order | The Old Blood
+    //#define DS_Z 2            // Set View Mode
+	//#define DA_W 1            // Set Linerzation
+    //#define DB_X 1            // Flip
+	#define DA_X 0.050//0.040//0.035//0.050      // ZPD
+	#define DF_Y 0.000         // Seperation
+	#define DA_Y 30.0//32.0//36.0//25.0         // Near Plane Adjustment
+    #define DA_Z 0.001      // Linerzation Offset
+    #define DS_Y 2            // Linerzation Offset Effects only distance if true
+	#define DB_Z 0.025         // Auto Depth Protection
+	#define DE_X 5            // ZPD Boundary 
+	#define DE_Y 0.550        // Set ZPD Boundary Level Zero 
+	#define DE_Z 0.400        // Speed that Boundary is Enforced
+	//#define AFD 1           // Alternate Frame Detection - May be phased out
+	#define DG_W -0.125        // Shift Boundary Out of screen 0.5 and or In screen -0.5
+	#define OIL 2           // Set How many Levels We use for RE_Fix 0 | 1 | 2 | 3 if 1 then it's float2(0,0) for OIF and DI_W
+    #define OIF float3(0.450,0.350,0.250)// Fix enables if Value is > 0.0 
+	#define DI_W float3(0.25,0.5,1.0) // Like Shift Boundary DG_W But 0 to inf
+	//#define FTM 0             // Fast Trigger Mode If this enabled then Level 1 and > switches instantly.
+    // DG_Z 0.045        // Min Weapon Hands That are apart of world with Auto and Trim
+    //#define DS_X float3(0.025,0,1)// Min Weapon bit only triggers when a OIL Level is set and set here on .y
+    //#define DE_W 0.250        // Auto
+    //#define DI_Z 0.100        // Trim
+    //#define DF_W float4(0.0001,0.001,0.125,0.055)// Edge & Scale
+
+	#define BMT 1             // ZPD and World Scale Balance // I need to phase this out.
+	#define DF_Z 0.250        // Set the Balance  
+    #define DL_Y 0.125        // De-Artifact Only works on some View Modes and causes performance degredation
+	//#define DB_Y 1.0          // Effects De-Artifacts -1 to 1 Most of the time leave this at 0 and if you set 1 it takes depth into account 
+    #define DL_Z 0.125         // Compat Power
+	//#define DJ_X 0.02        // Range Smoothing
+	#define WSM 5
+	#define DB_W 7
+	#define DF_X float2(0.275,0.300)  // ZPD Weapon Boundarys Level 1 and Level 2
+	#define DJ_W 0.5	        // Weapon Depth Limit Location 1
+	#define DS_W 2.5	        // Weapon Depth Limit Location 2
+	#define WFB 0.5          // ZPD Weapon Elevaton for 1 and 2
+	//#define WHM 1               //Weapon Hand Masking lets you use DT_Z 
+	//#define DT_Z 3.75            //WH Masking Power
+
+    #define FPS 2  // FPS Focus Settings 
+    #define DK_X 2 //Trigger Type
+    #define DK_Y 0 //Eye Selection
+    #define WRP 6  //Weapon Reduction Power
+    #define DK_Z 8 //World Reduction Power
+    #define DK_W 3 //Set Shift Speed	
+	
+	//Smooth Mode Setting
+    #define SMS 3           //SM Toggle Separation
+	#define DL_X 0.900       //SM Tune
+	//#define DL_W 0.05       //SM Perspective
+	#define DM_X 4           //HQ Tune
+	//#define HQT 1           //HQ Trigger
+    //#define DM_Y 3     //HQ VRS 	
+	#define FOV 1
+	#define PEW 1
+#elif (App == 0x60F43F45 ) //Resident Evil 7
+   //#define DS_Z 2            // Set View Mode
+	#define DA_W 1            // Set Linerzation
+    //#define DB_X 1            // Flip
+	#define DA_X 0.050         // ZPD
+	#define DF_Y 0.075         // Seperation
+	#define DA_Y 20.0         // Near Plane Adjustment
+    #define DA_Z -0.250 //0.0004      // Linerzation Offset
+    #define DS_Y 1 //2            // Linerzation Offset Effects only distance if true
+	#define DB_Z 0.025         // Auto Depth Protection
+	#define DE_X 2            // ZPD Boundary 
+	#define DE_Y 0.500        // Set ZPD Boundary Level Zero 
+	#define DE_Z 0.400        // Speed that Boundary is Enforced
+	//#define AFD 1           // Alternate Frame Detection - May be phased out
+	#define DG_W 0.600        // Shift Boundary Out of screen 0.5 and or In screen -0.5
+	#define OIL 1           // Set How many Levels We use for RE_Fix 0 | 1 | 2 | 3 if 1 then it's float2(0,0) for OIF and DI_W
+    #define OIF float2(0.375,0.250)// Fix enables if Value is > 0.0 
+	#define DI_W float2(1.25,2.5) // Like Shift Boundary DG_W But 0 to inf
+	//#define FTM 0             // Fast Trigger Mode If this enabled then Level 1 and > switches instantly.
+    // DG_Z 0.045        // Min Weapon Hands That are apart of world with Auto and Trim
+    //#define DS_X float3(0.025,0,1)// Min Weapon bit only triggers when a OIL Level is set and set here on .y
+    //#define DE_W 0.250        // Auto
+    //#define DI_Z 0.100        // Trim
+    #define DF_W float4(0.0001,0.001,0.0,0.100)// Edge & Scale
+
+    //Multi Menu Detection                    //4 Blocks total and 2 sub blocks per one block.
+    #define MMD 2 //Set Multi Menu Detection  // Off  0 | 1 | 2 | 3 | 4
+    #define MMS 0 //Set Multi Menu Selection  // Off  0 | 1 | 2 | 3 | 4                       //0-2 check to 28-30 check Depnding on the option MML
+    #define MML -2 //Set Multi Menu Leniency   // -4 |-3 |-2 |-1 | Off | 1 | 2 | 3 | 4         //Negitive [0 & 30] No Leniency | Zero [0-1 & 29-30] Some Leniency | Positive [0-2 & 28-30] Most Leniency    
+	//Pause Menu & Options
+    #define DO_X float4( 0.7605, 0.2175, 0.500 , 0.330 ) //Pos A1 = XY Color & A2 = ZW Black 
+    #define DO_Y float4( 0.2395, 0.680 , 0.079 , 0.518 ) //Pos A3 = XY Color & B1 = ZW Color
+    #define DO_Z float4( 0.392 , 0.500 , 0.339 , 0.184 ) //Pos B2 = XY Black & B3 = ZW Color
+	#define DO_W float4( 18.0, 18.0, 18.0, 18.0) //Tresh Hold for Color A & B and Color
+	//Controls / Display / Display / Audio / Language / Graphics
+    #define DP_X float4( 0.4015, 0.184, 0.392 , 0.500 ) //Pos C1 = XY Color & C2 = ZW Black 
+    #define DP_Y float4( 0.9225, 0.740 , 0.000 , 0.000 ) //Pos C3 = XY Color & D1 = ZW Color
+    #define DP_Z float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos D2 = XY Black & D3 = ZW Color
+	#define DP_W float4( 18.0, 18.0, 1000.0, 1000.0) //Tresh Hold for Color C & D and Color
+    //Files & Map 
+	#define DQ_X float4( 0.6305, 0.0645, 0.472 , 0.500 ) //Pos C1 = XY Color & C2 = ZW Black 
+    #define DQ_Y float4( 0.161 , 0.815 , 0.6305, 0.0645) //Pos C3 = XY Color & D1 = ZW Color
+    #define DQ_Z float4( 0.369 , 0.500 , 0.3765, 0.753 ) //Pos D2 = XY Black & D3 = ZW Color
+	#define DQ_W float4( 18.0, 18.0, 18.0, 18.0) //Tresh Hold for Color A1 & A3 and Color
+
+	#define DR_X float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos G1 = XY Color & G2 = ZW Black 
+    #define DR_Y float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos G3 = XY Color & H1 = ZW Color
+    #define DR_Z float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos H2 = XY Black & H3 = ZW Color
+	#define DR_W float4( 1000.0, 1000.0, 1000.0, 1000.0) //Tresh Hold for Color G & H and Color 
+
+	#define BMT 1             // ZPD and World Scale Balance // I need to phase this out.
+	#define DF_Z 0.50        // Set the Balance  
+    #define DL_Y 0.5        // De-Artifact Only works on some View Modes and causes performance degredation
+	//#define DB_Y 1.0          // Effects De-Artifacts -1 to 1 Most of the time leave this at 0 and if you set 1 it takes depth into account 
+    //#define DL_Z 1.00         // Compat Power
+	//#define DJ_X 0.02        // Range Smoothing
+
+	//Smooth Mode Setting
+    #define SMS 3           //SM Toggle Separation
+	#define DL_X 0.950       //SM Tune
+	//#define DL_W 0.05       //SM Perspective
+	#define DM_X 4           //HQ Tune
+	//#define HQT 1           //HQ Trigger
+    //#define DM_Y 3     //HQ VRS 
+
+	#define BDF 1
+	#define DC_X 0.25
+	#define DC_Y 0.1
+	#define DC_Z -0.0625
+	#define DC_W -0.049
+	#define RHW 1
+	#define PEW 1
+	#define DAA 1
+#elif (App == 0x21DC397E || App == 0x653AF1E1) //Gold Source AKA HL
+    //#define DS_Z 2            // Set View Mode
+	//#define DA_W 1            // Set Linerzation
+    //#define DB_X 1            // Flip
+	#define DA_X 0.025         // ZPD
+	#define DF_Y 0.100         // Seperation
+	#define DA_Y 25.0         // Near Plane Adjustment
+    //#define DA_Z -0.0001      // Linerzation Offset
+    #define DS_Y 2            // Linerzation Offset Effects only distance if true
+	#define DB_Z 0.025         // Auto Depth Protection
+	#define DE_X 7            // ZPD Boundary 
+	#define DE_Y 0.750        // Set ZPD Boundary Level Zero 
+	#define DE_Z 0.400        // Speed that Boundary is Enforced
+	//#define AFD 1           // Alternate Frame Detection - May be phased out
+	//#define DG_W 0.100        // Shift Boundary Out of screen 0.5 and or In screen -0.5
+	#define OIL 1           // Set How many Levels We use for RE_Fix 0 | 1 | 2 | 3 if 1 then it's float2(0,0) for OIF and DI_W
+    #define OIF float2(0.500,0.250)// Fix enables if Value is > 0.0 
+	#define DI_W float2(0.50,2.5) // Like Shift Boundary DG_W But 0 to inf
+	//#define FTM 0             // Fast Trigger Mode If this enabled then Level 1 and > switches instantly.
+    // DG_Z 0.045        // Min Weapon Hands That are apart of world with Auto and Trim
+    //#define DS_X float3(0.025,0,1)// Min Weapon bit only triggers when a OIL Level is set and set here on .y
+    //#define DE_W 0.250        // Auto
+    //#define DI_Z 0.100        // Trim
+    //#define DF_W float4(0.0001,0.001,0.125,0.055)// Edge & Scale
+
+	#define BMT 1             // ZPD and World Scale Balance // I need to phase this out.
+	#define DF_Z 0.050        // Set the Balance  
+    #define DL_Y 0.25        // De-Artifact Only works on some View Modes and causes performance degredation
+	//#define DB_Y 1.0          // Effects De-Artifacts -1 to 1 Most of the time leave this at 0 and if you set 1 it takes depth into account 
+    #define DL_Z 0.25         // Compat Power
+	//#define DJ_X 0.02        // Range Smoothing
+	#define WSM 3
+	#define DB_W 9	
+	
+	//Smooth Mode Setting
+    #define SMS 3           //SM Toggle Separation
+	#define DL_X 0.925       //SM Tune
+	//#define DL_W 0.05       //SM Perspective
+	#define DM_X 4           //HQ Tune
+	//#define HQT 1           //HQ Trigger
+    //#define DM_Y 3     //HQ VRS 	
+	#define FOV 1
 #else
 	#define NPW 1 //No Profile
 #endif
@@ -19406,6 +19411,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define OIF float2(0.5,0.375)// Fix enables if Value is > 0.0 
 	//#define DI_W float2(0.5,1.0) // Like Shift Boundary DG_W But 0 to inf
 	#define FTM 0             // Fast Trigger Mode If this enabled then Level 1 and > switches instantly.
+	#define WND 0.175         //Weapon Near Pushes depth in and adjust perspective to match.
     #define DG_Z 0.100        // Min Weapon Hands That are apart of world with Auto and Trim
     #define DS_X float3(0.025,0,1)// Min Weapon bit only triggers when a OIL Level is set and set here on .y
     #define DE_W 0.250        // Auto
@@ -19420,8 +19426,9 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define WSM 2             // Weapon Setting Mode 
 	#define DB_W 16           // Weapon Profile
 	#define DF_X float2(0,0)  // ZPD Weapon Boundarys Level 1 and Level 2
-	#define DJ_W 0.1	        // Weapon Depth Limit Location 1
-	#define DS_W 1.0	        // Weapon Depth Limit Location 2
+	#define DJ_W 0.1	      // Weapon Depth Limit Location 1
+	#define DS_W 1.0	      // Weapon Depth Limit Location 2
+	#define WFB 0.0          // ZPD Weapon Elevaton for 1 and 2 scales from [0 - 1]
 	#define DT_W float2(0.015,0.03)//WH scale and cutoff
 	#define WHM 1               //Weapon Hand Masking lets you use DT_Z 
 	#define DT_Z 0.1            //WH Masking Power
@@ -19434,15 +19441,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define NFM 1
     #define DSW 1
 */
-/* //Smooth Mode [ Do Not Use ]
-    //#define SMS 3         //SM Separation Limit
-	//#define DL_X 0.9125   //SM Tune Limit
-	//#define DL_W 0.5      //SM Perspective Limit
-	//#define DM_X 0        //SM HQ Tune Power
-    //#define DM_Y 3        //SM HQ VRS Limit
-	//#define HQT 1         //SM HQ Trigger
-	//#define FMM 1         //Filter Mode
-*/
+
 /* //Menu Detection Templates -  Needs a Specail Shader to adjust
     #define MAC 1 //Set to one only C has a wiled card. Not the A and C.
     #define MDD 1 //Set Menu Detection & Direction      //Off | 1 | 2 | 3 | 4      
@@ -19463,10 +19462,10 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define DT_Y float2( 0.500 , 0.004 )                 //Pos C = XY 
     #define DW_W float4( 1000.0, 1000.0, 1000.0, 1000.0)//Menu Detection Type for A = X, B = Y, & C = Z. The Last Value is a Wild Card amount W is for X and Z. 
 */
-/*  //Multi Menu Detection                                 //4 Blocks total and 2 sub blocks per one block.
-    #define MMD 1 //Set Multi Menu Detection               //Off 0 | 1 | 2 | 3 | 4
-    #define MMS 0 //Set Multi Menu Selection 0-1 to 29-30  //Off 0 | 1 | 2 | 3 | 4
-    #define MML 0 //Set Multi Menu Leniency  0-2 and 28-30 //Off 0 | 1 | 2 | 3 | 4    
+/*  //Multi Menu Detection                    //4 Blocks total and 2 sub blocks per one block.
+    #define MMD 1 //Set Multi Menu Detection  // Off  0 | 1 | 2 | 3 | 4
+    #define MMS 0 //Set Multi Menu Selection  // Off  0 | 1 | 2 | 3 | 4                       //0-2 check to 28-30 check Depnding on the option MML
+    #define MML 0 //Set Multi Menu Leniency   // -4 |-3 |-2 |-1 | Off | 1 | 2 | 3 | 4         //Negitive [0 & 30] No Leniency | Zero [0-1 & 29-30] Some Leniency | Positive [0-2 & 28-30] Most Leniency    
 	//Block One
     #define DO_X float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos A1 = XY Color & A2 = ZW Black 
     #define DO_Y float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos A3 = XY Color & B1 = ZW Color
@@ -19523,10 +19522,11 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	//#define DI_X 0.875
 	//#define DI_Y 0.125
 	
-    //#define FPS 2     // FPS Focus Settings 
+    //#define FPS 2  // FPS Focus Settings 
     //#define DK_X 2 //Trigger Type
     //#define DK_Y 0 //Eye Selection
-    //#define DK_Z 3 //Reduction Power
+    //#define WRP 3  //Weapon Reduction Power
+    //#define DK_Z 3 //World Reduction Power
     //#define DK_W 3 //Set Shift Speed
     
 	//#define BDF 1    //Barrel Distortion Fix k1 k2 k3 and Zoom
@@ -19535,14 +19535,14 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	//#define DC_Z 0.000
 	//#define DC_W -0.035
 */
-/*
-	//Smooth Mode Setting
-    #define SMS 3           //SM Toggle Separation
-	#define DL_X 0.7625       //SM Tune
-	//#define DL_W 0.05       //SM Perspective
-	#define DM_X 2           //HQ Tune
-	//#define HQT 1           //HQ Trigger
-    //#define DM_Y 3     //HQ VRS  
+/* //Smooth Mode [ Do Not Use ]
+    //#define SMS 3         //SM Separation Limit
+	//#define DL_X 0.9125   //SM Tune Limit
+	//#define DL_W 0.5      //SM Perspective Limit
+	//#define DM_X 0        //SM HQ Tune Power
+    //#define DM_Y 3        //SM HQ VRS Limit
+	//#define HQT 1         //SM HQ Trigger
+	//#define FMM 1         //Filter Mode
 */
 //Change Output
 //#ifndef checks whether the given token has been #defined earlier in the file or in an included file
@@ -19814,10 +19814,10 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 
 // X = [NULL X] Y = [NULL Y] Z = [Weapon Hand Masking Adjust] W = [Rescale Weapon Hand Near]
 #ifndef DT_X
-    #define DT_X Null_X_D
+    #define DT_X B_SPos_XY_XY_A_B_D
 #endif
 #ifndef DT_Y
-    #define DT_Y Null_Y_D
+    #define DT_Y B_SPos_XY_C_D
 #endif
 #ifndef DT_Z
     #define DT_Z WH_Masking_Adjust_D
@@ -19865,7 +19865,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define DW_Z A_Menu_Tresh_n_WC_D
 #endif 
 #ifndef DW_W
-	#define DW_W Null_W_D
+	#define DW_W B_Menu_Tresh_n_WC_D
 #endif
 
 // X = [Position M & M] Y = [Position M & N] Z = [Position N & N] W = [MN Menu Tresholds]
@@ -19894,6 +19894,20 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 #endif 
 #ifndef DY_W
 	#define DY_W Simple_Menu_Tresh_OP_D
+#endif
+
+// X = [Null X] Y = [Null Y] Z = [Null Z] W = [Null W]
+#ifndef DZ_X
+    #define DZ_X Null_X_D
+#endif
+#ifndef DZ_Y
+    #define DZ_Y Null_Y_D
+#endif
+#ifndef DZ_Z
+    #define DZ_Z Null_Z_D
+#endif 
+#ifndef DZ_W
+	#define DZ_W Null_W_D
 #endif
 
 //Special Settings
@@ -19996,7 +20010,16 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 #ifndef MML
     #define MML Multi_Menu_Leniency_D          //Multi Menu Leniency
 #endif 
- 
+#ifndef WRP
+    #define WRP FPS_Weapon_Reduction_D         //Weapon Reduction Power
+#endif 
+#ifndef WND
+    #define WND Weapon_Near_Depth_Push_D       //Weapon Near
+#endif 
+#ifndef WFB
+    #define WFB Weapon_Distance_From_Bottom_D  //Weapon Distance From Bottom
+#endif 
+
 //SuperDepth3D Warning System
 #ifndef NPW
     #define NPW No_Profile_Warning_D           //No Profile Warning
@@ -20206,7 +20229,7 @@ float4 Weapon_Profiles(float WP ,float4 Weapon_Adjust)
     if (WP == 8)
         Weapon_Adjust = float4(0.5,8.0,0,0.0);            //WP 6 | Strife
     if (WP == 9)
-        Weapon_Adjust = float4(0.350,11.50,2.0,0.0);      //WP 7 | Gold Source
+        Weapon_Adjust = float4(0.350,7.5,2.0,0.0);      //WP 7 | Gold Source
     if (WP == 10) 
         Weapon_Adjust = float4(2.15,25.0,0.0,0.0);        //WP 8 | No Man Sky FPS Mode //float4(1.825,13.75,0.0,0.0);
     if (WP == 11)
@@ -20334,7 +20357,7 @@ float4 Weapon_Profiles(float WP ,float4 Weapon_Adjust)
     if (WP == 6)
         Weapon_Adjust = float4(0.4894,62.50,0.98875,0.0); //WP 4  | Wolfenstein
     if (WP == 7)
-        Weapon_Adjust = float4(1.0,93.75,0.81875,0.0);    //WP 5  | Wolfenstein: The New Order #C770832 / The Old Blood #3E42619F
+        Weapon_Adjust = float4(0.850,93.75,0.81875,0.025);//WP 5  | Wolfenstein: The New Order #C770832 / The Old Blood #3E42619F
     if (WP == 8) //float4(1.150,55.0,0.9,0.0);//float4(1.150,32.5,0.9,0.0);
         Weapon_Adjust = float4(1.150,40.0,0.9,0.0);       //WP 6  | Cyberpunk 2077
     if (WP == 9)

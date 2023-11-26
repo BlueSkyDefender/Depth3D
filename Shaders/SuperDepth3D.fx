@@ -1,7 +1,7 @@
 	////----------------//
 	///**SuperDepth3D**///
 	//----------------////
-	#define SD3D "SuperDepth3D v3.9.8\n"
+	#define SD3D "SuperDepth3D v3.9.9\n"
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//* Depth Map Based 3D post-process shader
 	//* For Reshade 3.0+
@@ -88,11 +88,13 @@ namespace SuperDepth3D
 		static const float DS_X = 0.0, DS_Y = 0.0, DS_Z = D_ViewMode, DS_W = 1.0;
 		// DT_X = [SMD2 Position A & B] DT_Y = [SMD2 Position C] DT_Z = [Weapon Hand Mask Z] DT_W = [Rescale Weapon Hand Near]
 		static const float DT_X = 0.0, DT_Y = 0.0, DT_Z = 0.0, DT_W = 0.0;
+		// DZ_X = [Null X] DZ_Y = [Null Y] DZ_Z = [Null Z] DZ_W = [Null W]
+		static const float DZ_X = 0.0, DZ_Y = 0.0, DZ_Z = 0.0, DZ_W = 0.0;
 		// WSM = [Weapon Setting Mode]
 		#define OW_WP "WP Off\0Custom WP\0"
 		static const int WSM = 0;
 		//Triggers
-		static const int SMD = 0, WHM = 0, SDU = 0, ABE = 2, LBE = 0, DRS = 0, MAC = 0, ARW = 0, OIL = 0, MMS = 0, NVK = 0, NDG = 0, FTM = 0, SPO = 0, MMD = 0, SMP = 0, LBR = 0, HQT = 0, AFD = 0, MDD = 0, FPS = 1, SMS = 1, OIF = 0, NCW = 0, RHW = 0, NPW = 0, SPF = 0, BDF = 0, HMT = 0, HMC = 0, DFW = 0, NFM = 0, DSW = 0, BMT = 0, LBC = 0, LBS = 0, LBM = 0, DAA = 0, NDW = 0, PEW = 0, WPW = 0, FOV = 0, EDW = 0, SDT = 0;
+		static const float WFB = 0, WND = 0, WRP = 0, SMD = 0, WHM = 0, SDU = 0, ABE = 2, LBE = 0, DRS = 0, MAC = 0, ARW = 0, OIL = 0, MMS = 0, NVK = 0, NDG = 0, FTM = 0, SPO = 0, MMD = 0, SMP = 0, LBR = 0, HQT = 0, AFD = 0, MDD = 0, FPS = 1, SMS = 1, OIF = 0, NCW = 0, RHW = 0, NPW = 0, SPF = 0, BDF = 0, HMT = 0, HMC = 0, DFW = 0, NFM = 0, DSW = 0, BMT = 0, LBC = 0, LBS = 0, LBM = 0, DAA = 0, NDW = 0, PEW = 0, WPW = 0, FOV = 0, EDW = 0, SDT = 0;
 		//Overwatch.fxh State
 		#define OSW 1
 	#endif
@@ -206,6 +208,13 @@ namespace SuperDepth3D
 	#else
 		#define ISDX 0
 	#endif
+
+	#if __RENDERER__ >= 0x10000 && __RENDERER__ <= 0x20000 //Is Opengl
+		#define ISOGL 1
+	#else
+		#define ISOGL 0
+	#endif
+	
 	//Workaround for DX9 for auto Convergence.
 	#if __RENDERER__ == 0x9000
 		#define DX9_Toggle 1
@@ -248,6 +257,9 @@ namespace SuperDepth3D
 	#ifndef HDR_Compatible_Mode
 		#define HDR_Compatible_Mode 0
 	#endif
+	#ifndef SD3D_Simple_Mode
+		#define SD3D_Simple_Mode 0
+	#endif	
 	
 	//Help / Guide / Information
 uniform int SuperDepth3D <
@@ -356,12 +368,16 @@ uniform int SuperDepth3D <
 	uniform float Divergence <
 		ui_type = "slider";
 		ui_min = 0.0; ui_max = 100; ui_step = 0.5;
+		#if !SD3D_Simple_Mode
 		ui_label =  "·Depth Adjustment·"; 
+		#else
+		ui_label =  "·Depth Separation·"; 		
+		#endif
 		ui_tooltip =  "Increases differences between the left and right images and allows you to experience depth.\n"
 					  "The process of deriving binocular depth information is called stereopsis (or stereoscopic vision).";
 		ui_category = "Divergence & Convergence";
 	> = 50;
-
+	#if !SD3D_Simple_Mode
 	uniform float2 ZPD_Separation <
 		ui_type = "drag";
 		ui_min = 0.0; ui_max = 0.250;
@@ -374,7 +390,17 @@ uniform int SuperDepth3D <
 					  "Default for ZPD is 0.025, for Seperation it's 0.0 and Zero is off.";
 		ui_category = "Divergence & Convergence";
 	> = float2(DA_X,DF_Y);//0.025,0.000
-
+	#else
+		uniform float ZPD_Separation <
+		ui_type = "drag";
+		ui_min = 0.0; ui_max = 0.250;
+		ui_label =    " ZPD";
+		ui_tooltip =  "ZPD (Zero Parallax Distance) controls the focus distance for the screen Pop-out effect.\n" //https://manual.reallusion.com/iClone_6/ENU/Pro_6.0/09_3D_Vision/Settings_for_Pop_Out_and_Deep_In_Effect.htm
+					  "For FPS Games keep ZPD low since you don't want your gun to pop out of the screen.\n"
+					  "Default for ZPD is 0.025.";
+		ui_category = "Divergence & Convergence";
+	> = DA_X;//0.025,0.000
+	#endif
 	uniform float ZPD_Balance <
 		ui_type = "drag";
 		ui_min = 0.0; ui_max = 1.0;
@@ -457,8 +483,8 @@ uniform int SuperDepth3D <
 		#else
 		ui_type = "slider";
 		#endif
-		ui_min = 0; ui_max = 6;
-		ui_label = " Halo Reduction";//***
+		ui_min = 0; ui_max = 5; // Tried having a max of 6. But, After a year of having that max value it was never used in any profile Max of 5 was used sometimes
+		ui_label = " Halo Reduction";
 		ui_tooltip = "This distorts the depth in some View Modes to hide or minimize the halo in Most Games.\n"
 					 "With this active it should Hide the Halo a little better depending the View Mode it works on.\n"
 					 "Default is 3 and Zero is Off.";
@@ -602,10 +628,20 @@ uniform int SuperDepth3D <
 					 "Default is 0.1, Zero is off.";
 		ui_category = "Depth Map";
 	> = DB_Z;
-
+	/*
+		uniform float Push_Depth < //Experimental Option
+		ui_type = "drag";
+		ui_min = 0.0; ui_max = 0.500;
+		ui_label = " Push Depth";
+		ui_tooltip = "This option moves the ZPD cutoff point for infilling in by extention it limits the pop-out effect.\n"
+					 "Default is 0.0, Zero is off.";
+		ui_category = "Depth Map";
+	> = 0.0;
+	*/
+	static const int Push_Depth = 0.0;
 	uniform int Range_Boost <
 		ui_type = "combo";
-		ui_items = "Off\0Offset Based\0Near Plane Based\0";
+		ui_items = "Off\0Offset Based\0Near Plane Based X1\0Near Plane Based X2\0Near Plane Based X3\0Near Plane Based X4\0";
 		ui_label = " Boost Range";
 		ui_tooltip = "Boost Range details in Depth with out effecting near plane too much.";
 		ui_category = "Depth Map";
@@ -707,19 +743,18 @@ uniform int SuperDepth3D <
 		             "Default is float2(X 0.0, Y 0.0, Z 0.0, W 1.0)";
 		ui_category = "Weapon Hand Adjust";
 	> = float4(0.0,0.0,0.0,0.0);
-	// Need to Phase out Weapon ZPD maybe convert it to max pop out smoothing.
+
 	uniform float4 WZPD_and_WND <
 		ui_type = "drag";
 		ui_min = 0.0; ui_max = 0.5;
-		ui_label = " Weapon ZPD, Min, Auto, & Trim";
-		ui_tooltip = "Weapon ZPD controls the focus distance for the screen Pop-out effect also known as Convergence for the weapon hand.\n"
-					 "This Is for setting a Weapon's Profile Convergence, so you should most of the time leave this as Default.\n"
-					 "Weapon Min is used to adjust min weapon hand of the weapon hand when looking at the world near you when the above fails.\n"
-					 "Weapon Auto is used to auto adjust trimming when looking around.\n"
-					 "Weapon Trim is used cutout a location in the depth buffer so that Min and Auto scale off of.\n"
-					 "Default is (ZPD X 0.03, Min Y 0.0, Auto Z 0.0, Trim Z 0.250 ) & Zero is off.";
+		ui_label = " Weapon Near, Min, Auto, & Trim";
+		ui_tooltip = "Weapon Near: is used to set the Weapon ZPD for when the distortions from options below are to mush of a problem.\n"
+					 "Weapon Min : is used to adjust min weapon hand of the weapon hand when looking at the world near you when the above fails.\n"
+					 "Weapon Auto: is used to auto adjust trimming when looking around.\n"
+					 "Weapon Trim: is used cutout a location in the depth buffer so that Min and Auto scale off of.\n"
+					 "Default is (Near X 0.0, Min Y 0.0, Auto Z 0.0, Trim Z 0.250 ) & Zero is off.";
 		ui_category = "Weapon Hand Adjust";	
-	> = float4(0.03,DG_Z,DE_W,DI_Z);// 0.03 can be a internal constant value
+	> = float4(WND,DG_Z,DE_W,DI_Z);// Weapon ZDP was set to 0.03 and is an internal constant value
 	
 	uniform float4 Weapon_Depth_Edge <
 		ui_type = "slider";
@@ -929,17 +964,34 @@ uniform int SuperDepth3D <
 					"Default is Both.";
 		ui_category = "FPS Focus";
 	> = DK_Y;
-	
-	uniform int2 Eye_Fade_Reduction_n_Power <
+
+	uniform int Weapon_Reduction_n_Power <
 		ui_type = "slider";
-		ui_min = 0; ui_max = 4;
-		ui_label = " Eye Fade Options";
-		ui_tooltip ="X, Fade Reduction: Decreases the depth ammount by a current percentage.\n"
+		ui_min = 0; ui_max = 8;
+		ui_label = " Weapon Reduction";
+		ui_tooltip ="Weapon Reduction: Adjusts the Weapon in world space by a current percentage.\n"
+					"Default is [ 0 ].";
+		ui_category = "FPS Focus";
+	> = WRP;
+	
+	uniform int2 World_n_Fade_Reduction_Power <
+		ui_type = "slider";
+		ui_min = 0; ui_max = 8;
+		ui_label = " World & Fade Options";
+		ui_tooltip ="X, World Reduction: Decreases the ammount of world depth by a current percentage.\n"
 					"Y, Fade Speed: Decreases or Incresses how fast it changes.\n"
 					"Default is X[ 0 ] Y[ 1 ].";
 		ui_category = "FPS Focus";
 	> = int2(DK_Z,DK_W);
-
+	/*
+	uniform bool FPS_Focus_Smoothing <
+		ui_label = " Auto FPS Smoothing";
+		ui_tooltip = "Increases Halo Reduction to the max value of Five.\n"
+					 "This can allow a slight improvment in aiming.\n"
+					 "Default is Off.";
+		ui_category = "FPS Focus";
+	> = false;
+	*/
 	//Cursor Adjustments
 	uniform int Cursor_Type <
 		ui_type = "combo";
@@ -1249,7 +1301,13 @@ uniform int Extra_Information <
 	}
 	
 	float2 Min_Divergence() // and set scale
-	{   float Min_Div = max(1.0, Divergence), D_Scale = min(1.25,Scale(Min_Div,100.0,1.0));
+	{   
+		#if SD3D_Simple_Mode
+		float Diverge = Divergence <= 50 ? Divergence : 50;
+		#else
+		float Diverge = Divergence;
+		#endif	    
+		float Min_Div = max(1.0, Diverge), D_Scale = min(1.25,Scale(Min_Div,100.0,1.0));
 		return float2(lerp( 1.0, Max_Divergence, D_Scale), D_Scale);
 	}
 	
@@ -1269,11 +1327,23 @@ uniform int Extra_Information <
 	}
 	
 	//#define E_O_Switch fmod(abs(Perspective),2)
+	float Re_Scale_WN()
+	{
+		return saturate(WZPD_and_WND.x);
+	}
 	
-	float Perspective_Switch()
-	{   float I_3D_E = (Min_Divergence().x * lerp(1.0,2.0,Focus_Inficolor)); //This is to fix strange offset issue don't know why it need to be offset by one pixel to work.???
+	float Perspective_Switch()// Need to Fix Inficolor Perspective calculation.
+	{
+		float Min_Div = max(1.0, Divergence), D_Scale = Scale(Min_Div,100.0,1.0);   
+		float I_3D_E = (Min_Divergence().x * lerp(1.0,2.0,Focus_Inficolor)); //This is to fix strange offset issue don't know why it need to be offset by one pixel to work.???
+		I_3D_E += (Re_Scale_WN()*200)*D_Scale;
+		float Perspective_Out = Perspective, Push_Depth = (Re_Scale_WN()*100.0)*D_Scale;
 		//float PER_Switch = Stereoscopic_Mode == 0 || Stereoscopic_Mode == 5 ?  E_O_Switch ? Perspective : Perspective + 1 :  E_O_Switch ? Perspective + 1 : Perspective;
-		return Inficolor_3D_Emulator ? Eye_Swap ? I_3D_E : -I_3D_E : Perspective;
+		if( Inficolor_3D_Emulator) 
+			Perspective_Out = Eye_Swap ? I_3D_E : -I_3D_E;
+		else
+			Perspective_Out = Eye_Swap ? Perspective + Push_Depth : Perspective - Push_Depth;	
+		return Perspective_Out;	
 	}
 
 	#define pix float2(BUFFER_RCP_WIDTH, BUFFER_RCP_HEIGHT)
@@ -1723,11 +1793,14 @@ uniform int Extra_Information <
 	#endif
 	
 	
-		#if MMD //Simple Menu Masking
+#if MMD //Simple Menu Masking
+		
+		#define abs_Leniency abs(MML)
+		#define MM_Leniency MML < 0 ? float2(30.0,0.0) : float2(28.0,2.0)
 		
 		bool Check_Color_MinMax_A(float2 Pos_IN)
 		{   float3 RGB_IN = C_Tresh(Pos_IN);
-			float2 Leniency_Switch = MML >= 1 ? float2(28.0,2.0) : float2(29.0,1.0);
+			float2 Leniency_Switch = abs_Leniency >= 1 ? MM_Leniency : float2(29.0,1.0);
 			if ( MMS >= 1)
 				return RN_Value(RGB_IN.r + RGB_IN.g + RGB_IN.b) >= Leniency_Switch.x;
 			else
@@ -1745,7 +1818,7 @@ uniform int Extra_Information <
 		#if MMD >= 2
 		bool Check_Color_MinMax_B(float2 Pos_IN)
 		{   float3 RGB_IN = C_Tresh(Pos_IN);
-			float2 Leniency_Switch = MML >= 2 ? float2(28.0,2.0) : float2(29.0,1.0);
+			float2 Leniency_Switch = abs_Leniency >= 2 ? MM_Leniency : float2(29.0,1.0);
 			if ( MMS >= 2)
 				return RN_Value(RGB_IN.r + RGB_IN.g + RGB_IN.b) >= Leniency_Switch.x;
 			else
@@ -1764,7 +1837,7 @@ uniform int Extra_Information <
 		#if MMD >= 3
 		bool Check_Color_MinMax_C(float2 Pos_IN)
 		{   float3 RGB_IN = C_Tresh(Pos_IN);
-			float2 Leniency_Switch = MML >= 3 ? float2(28.0,2.0) : float2(29.0,1.0);
+			float2 Leniency_Switch = abs_Leniency >= 3 ? MM_Leniency : float2(29.0,1.0);
 			if ( MMS >= 3)
 				return RN_Value(RGB_IN.r + RGB_IN.g + RGB_IN.b) >= Leniency_Switch.x;
 			else
@@ -1783,7 +1856,7 @@ uniform int Extra_Information <
 		#if MMD >= 4
 		bool Check_Color_MinMax_D(float2 Pos_IN)
 		{   float3 RGB_IN = C_Tresh(Pos_IN);
-			float2 Leniency_Switch = MML >= 4 ? float2(28.0,2.0) : float2(29.0,1.0);
+			float2 Leniency_Switch = abs_Leniency >= 4 ? MM_Leniency : float2(29.0,1.0);
 			if ( MMS >= 4)
 				return RN_Value(RGB_IN.r + RGB_IN.g + RGB_IN.b) >= Leniency_Switch.x;
 			else
@@ -2013,8 +2086,16 @@ uniform int Extra_Information <
 	}
 	
 	float Depth(float2 texcoord)
-	{	//Conversions to linear space.....
-		float zBuffer = tex2Dlod(DepthBuffer, float4(texcoord,0,0)).x, Far = 1.0, Near_A = 0.125/DMA(), Near_B = 0.125/(DMA()*2); //Near & Far Adjustment
+	{
+		float RangeBoost = 1.5;
+		if( Range_Boost == 3)
+			RangeBoost = 2.0;
+		if( Range_Boost == 4)
+			RangeBoost = 3.0;
+		if( Range_Boost == 5)
+			RangeBoost = 4.0;
+        //Conversions to linear space.....
+		float zBuffer = tex2Dlod(DepthBuffer, float4(texcoord,0,0)).x, Far = 1.0, Near_A = 0.125/DMA(), Near_B = 0.125/(DMA()*RangeBoost); //Near & Far Adjustment
 		float2 Two_Ch_zBuffer, Store_zBuffer = float2( zBuffer, 1.0 - zBuffer );
 		float4 C = float4( Far / Near_A, 1.0 - Far / Near_A, Far / Near_B, 1.0 - Far / Near_B);
 		float2 Z = Offset < 0 ? min( 1.0, zBuffer * ( 1.0 + abs(Offset) ) ) : Store_zBuffer;
@@ -2025,7 +2106,7 @@ uniform int Extra_Information <
 		if(Offset > 0 || Offset < 0)
 			Z = Offset < 0 ? float2( Z.x, 1.0 - Z.y ) : min( 1.0, float2( Z.x * (1.0 + Offset) , Z.y / (1.0 - Offset) ) );
 		
-		float2 C_Switch = Range_Boost == 2 ? C.zw : C.xy;
+		float2 C_Switch = Range_Boost >= 2 ? C.zw : C.xy;
 			
 		if (Depth_Map == 0) //DM0 Normal
 			Two_Ch_zBuffer = rcp(float2(Z.x,Store_zBuffer.x) * float2(C_Switch.y,C.y) + float2(C_Switch.x,C.x));//MAD - RCP
@@ -2125,14 +2206,22 @@ uniform int Extra_Information <
 	/////////////////////////////////////////////////////////Fade In and Out Toggle/////////////////////////////////////////////////////////////////////
 	float Fade_in_out(float2 texcoord)
 	{ float TCoRF[1], Trigger_Fade, AA = Fade_Time_Adjust, PStoredfade = tex2D(SamplerLumN,float2(0,0.083)).z;
-		if(Eye_Fade_Reduction_n_Power.y == 0)
+		if(World_n_Fade_Reduction_Power.y == 0)
 			AA *= 0.75;
-		if(Eye_Fade_Reduction_n_Power.y == 2)
+		if(World_n_Fade_Reduction_Power.y == 1)
+			AA *= 1.0;
+		if(World_n_Fade_Reduction_Power.y == 3)
 			AA *= 1.25;
-		if(Eye_Fade_Reduction_n_Power.y == 3)
+		if(World_n_Fade_Reduction_Power.y == 4)
 			AA *= 1.375;
-		if(Eye_Fade_Reduction_n_Power.y == 4)
+		if(World_n_Fade_Reduction_Power.y == 5)
 			AA *= 1.5;
+		if(World_n_Fade_Reduction_Power.y == 6)
+			AA *= 1.625;
+		if(World_n_Fade_Reduction_Power.y == 7)
+			AA *= 1.75;
+		if(World_n_Fade_Reduction_Power.y == 8)//instant
+			AA *= 2.0;
 		//Fade in toggle.
 		if(FPSDFIO == 1 )//|| FPSDFIO == 3 )
 			Trigger_Fade = Trigger_Fade_A;
@@ -2288,7 +2377,7 @@ uniform int Extra_Information <
 		float SP_Min = Set_Pop_Min().y, Select_Min_LvL_Trigger;float3 Level_Control = DS_X;
 		//Auto Scale
 		if(WZPD_and_WND.z > 0)
-			Auto_Scale = lerp(lerp(1.0,0.625,saturate(WZPD_and_WND.z * 2)),1.0,lerp(Auto_Balance_Selection().y , smoothstep(0,0.5,tex2D(SamplerLumN,float2(0,0.750)).z), 0.5));
+			Auto_Scale = lerp(lerp(1.0,0.5,saturate(WZPD_and_WND.z * 2)),1.0,lerp(Auto_Balance_Selection().y , smoothstep(0,0.5,tex2D(SamplerLumN,float2(0,0.750)).z), 0.5));
 
 		//Fade Storage
 		#if DX9_Toggle
@@ -2370,14 +2459,14 @@ uniform int Extra_Information <
 	}
 		
 	float3 Conv(float2 MD_WHD,float2 texcoord)
-	{	float D = MD_WHD.x, Z = ZPD_Separation.x, WZP = 0.5, ZP = 0.5, W_Convergence = Inficolor_Near_Reduction ? WZPD_and_WND.x * 0.8 : WZPD_and_WND.x, WZPDB, Distance_From_Bottom = 0.9375, ZPD_Boundary = ZPD_Boundary_n_Fade.x, Store_WC, Set_Max_Depth = 1.0;
+	{	float WConverge = 0.030, D = MD_WHD.x, Z = ZPD_Separation.x, WZP = 0.5, ZP = 0.5, W_Convergence = Inficolor_Near_Reduction ? WConverge * 0.8 : WConverge, WZPDB, Distance_From_Bottom = lerp(0.9375,1.0,saturate(WFB)), ZPD_Boundary = ZPD_Boundary_n_Fade.x, Store_WC, Set_Max_Depth = 1.0;
 	    //Screen Space Detector.
 		if (abs(Weapon_ZPD_Boundary.x) > 0)
 		{   float WArray[6] = { 0.4, 0.5, 0.6, 0.7, 0.8, 0.9};
 			[unroll] //only really only need to check one point just above the center bottom and to the right.
 			for( int i = 0 ; i < 6; i++ )
 			{
-				WZPDB  = 1 - WZPD_and_WND.x / tex2Dlod(SamplerDMN, float4(float2(WArray[i],Distance_From_Bottom), 0, 0)).z;
+				WZPDB  = 1 - WConverge / tex2Dlod(SamplerDMN, float4(float2(WArray[i],Distance_From_Bottom), 0, 0)).z;
 					
 				if ( WZPDB < -DJ_W ) // Default -0.1
 					W_Convergence *= 1.0-abs(Weapon_ZPD_Boundary.x);
@@ -2472,20 +2561,27 @@ uniform int Extra_Information <
 		if( 1-texcoord.x < pix.x * 2 &&   texcoord.y < pix.y * 2)
 			DM = PrepDepth(texcoord)[0][0];
 			
-		if (WP == 0 || WZPD_and_WND.x <= 0)
+		if (WP == 0)
 			DM.y = 0;
 	
-		float FadeIO = Focus_Reduction_Type == 0 ? 1 : smoothstep(0,1,1-Fade_in_out(texcoord).x), FD_Adjust = Focus_Reduction_Type == 2 ? 0.35 : 0.125;	
+		float FadeIO = Focus_Reduction_Type == 0 ? 1 : smoothstep(0,1,1-Fade_in_out(texcoord).x), FD_Adjust = 0.050;	
 	
-		if( Eye_Fade_Reduction_n_Power.x == 1)
-			FD_Adjust = Focus_Reduction_Type == 2 ? 0.30 : 0.20;
-		if( Eye_Fade_Reduction_n_Power.x == 2)
-			FD_Adjust = Focus_Reduction_Type == 2 ? 0.25 : 0.25;
-		if( Eye_Fade_Reduction_n_Power.x == 3)
-			FD_Adjust = Focus_Reduction_Type == 2 ? 0.20 : 0.30;
-		if( Eye_Fade_Reduction_n_Power.x == 4)
-			FD_Adjust = Focus_Reduction_Type == 2 ? 0.125 : 0.35;
-	
+		if( Weapon_Reduction_n_Power.x == 1)
+			FD_Adjust = 0.075;
+		if( Weapon_Reduction_n_Power.x == 2)
+			FD_Adjust = 0.100;
+		if( Weapon_Reduction_n_Power.x == 3)
+			FD_Adjust = 0.125;
+		if( Weapon_Reduction_n_Power.x == 4)
+			FD_Adjust = 0.150;
+		if( Weapon_Reduction_n_Power.x == 5)
+			FD_Adjust = 0.175;
+		if( Weapon_Reduction_n_Power.x == 6)
+			FD_Adjust = 0.200;
+		if( Weapon_Reduction_n_Power.x == 7)
+			FD_Adjust = 0.225;
+		if( Weapon_Reduction_n_Power.x == 8)
+			FD_Adjust = 0.250;
 		//Handle Convergence Here
 		float3 HandleConvergence = Conv(DM.xz,texcoord).xyz;
 			   HandleConvergence.y *= WA_XYZW().w;
@@ -2639,6 +2735,16 @@ uniform int Extra_Information <
 	}
 	
 	float2 Artifact_Adjust() { return float2(abs(De_Artifacting.x),De_Artifacting.y); }
+
+	float Depth_Seperation()
+	{
+		#if !SD3D_Simple_Mode
+		return ZPD_Separation.y;
+		#else
+		float Cal_Separation_Offset =  1 + (4 * DF_Y);
+		return lerp(0.0,0.250,max(0,Scale(Divergence * Cal_Separation_Offset,100.0,50.0)));
+		#endif
+	}
 		
 	float GetDB(float2 texcoord)
 	{
@@ -2650,28 +2756,38 @@ uniform int Extra_Information <
 			texcoord.xy = texcoord.yx;
 		#endif
 		bool VM_5_Bool = View_Mode == 5;
-		float GetDepth = smoothstep(0,1, tex2Dlod(SamplerzBufferN_P, float4(texcoord,0, 1) ).y);
+		float GetDepth = smoothstep(0,1, tex2Dlod(SamplerzBufferN_P, float4(texcoord,0, 1) ).y), Sat_Range = saturate(Range_Blend);
 		uint VMW = View_Mode == 1 ? View_Mode_Warping : lerp(6, VM_5_Bool ? 0 :View_Mode_Warping, VM_5_Bool ? GetDepth : 1);
-		float Depth_Blur = View_Mode_Warping > 0 ? min(tex2Dlod(SamplerzBufferN_L, float4( texcoord, 0, clamp(VMW,0,6) ) ).x,tex2Dlod(SamplerzBufferN_L, float4( texcoord, 0, 0) ).x) : tex2Dlod(SamplerzBufferN_L, float4( texcoord, 0, 0) ).x;
+		
+		float2 Base_Depth_Buffers = float2(tex2Dlod(SamplerzBufferN_L, float4( texcoord, 0, 0) ).x,tex2Dlod(SamplerzBufferN_P, float4( texcoord, 0, 0) ).x);	
+		float2 Base_Depth_SubSampled = float2(tex2Dlod(SamplerzBufferN_L, float4( texcoord, 0, 2) ).x,tex2Dlod(SamplerzBufferN_P, float4( texcoord, 0, 2) ).x);
+		float2 Base_Depth = lerp(Base_Depth_Buffers.xy,Base_Depth_SubSampled.xy,Sat_Range);
+		/*
+		float FadeIO = smoothstep(0,1,tex2D(SamplerDMN,0).x);
+		if(FPS_Focus_Smoothing)
+			VMW = lerp(VMW, 5,FadeIO);
+		*/			
+		float Depth_Blur = min(tex2Dlod(SamplerzBufferN_L, float4( texcoord, 0, clamp(VMW,0,5) ) ).x,Base_Depth.x);
 
-		float2 DepthBuffer_LP = float2(Depth_Blur,tex2Dlod(SamplerzBufferN_P, float4( texcoord, 0, 0) ).x);
+		float2 DepthBuffer_LP = float2(Depth_Blur,Base_Depth.y);
 	    //float Basic_UI = saturate(tex2Dlod(SamplerDMN,float4(texcoord* float2(0.5,1) + float2(0.5,0),0,4.5)).w * 25);
 		// Basic_UI_TEST = tex2Dlod(SamplerDMN,float4(texcoord * float2(0.5,1),0,(uint)lerp(0,10,Basic_UI))).w;
-		float Min_Blend = min(tex2Dlod(SamplerzBufferN_L, float4( texcoord, 0, 1.0) ).x,tex2Dlod(SamplerzBuffer_BlurN, float4( texcoord, 0, 1.0 ) ).x);
-
+		float2 Min_Blend = float2(min(DepthBuffer_LP,tex2Dlod(SamplerzBuffer_BlurN, float4( texcoord, 0, 1.0 ) ).x));
+		
 		if( Range_Blend > 0)
-			   DepthBuffer_LP.xy = lerp(DepthBuffer_LP.xy,  Min_Blend ,(smoothstep(0.5,1.0, Min_Blend) *  Min_Divergence().y) * saturate(Range_Blend));
+			   DepthBuffer_LP.xy = lerp(DepthBuffer_LP.xy,  Min_Blend.xy ,(smoothstep(0.5,1.0, Min_Blend.x) *  Min_Divergence().y) * Sat_Range);
+
 		//Text Lifting Not viable Yet Need time to work on this
 		//if( TEST > 0)
 		//	   DepthBuffer_LP.xy = lerp(DepthBuffer_LP.xy,  min(DepthBuffer_LP.xy,saturate(tex2Dlod(SamplerzBufferN_L, float4( texcoord, 0, (uint)lerp(0,12,Basic_UI) ) ).x  * 0.01)) ,Basic_UI * saturate(TEST));
 
 		if(View_Mode == 0 || View_Mode == 3)	
-			DepthBuffer_LP.x = DepthBuffer_LP.y;
-			
+			DepthBuffer_LP.x = DepthBuffer_LP.y;		
+	
 		#if Inficolor_3D_Emulator
-		float Separation = lerp(1.0,5.0,(ZPD_Separation.y * 0.5 + ZPD_Separation.y) * 0.5);	
+		float Separation = lerp(1.0,5.0,(Depth_Seperation() * 0.5 + Depth_Seperation()) * 0.5);	
 		#else
-		float Separation = lerp(1.0,5.0,ZPD_Separation.y); 	
+		float Separation = lerp(1.0,5.0,Depth_Seperation()); 	
 		#endif
 		
 		return Separation * DepthBuffer_LP.x;
@@ -2719,7 +2835,7 @@ uniform int Extra_Information <
 		float US_Offset = lerp(Default_Offset.x,Default_Offset.y,GetDepth * 0.5); D = Diverge < 0 ? -US_Offset : US_Offset;
 	
 		//Offsets listed here Max Seperation is 3% - 8% of screen space with Depth Offsets & Netto layer offset change based on MS.
-		float deltaCoordinates = MS * LayerDepth, CurrentDepthMapValue = min(1,GetMixed( ParallaxCoord).x), CurrentLayerDepth = 0.0f,
+		float deltaCoordinates = MS * LayerDepth, CurrentDepthMapValue = GetMixed( ParallaxCoord).x, CurrentLayerDepth = -Re_Scale_WN()-saturate(Push_Depth)*0.1,
 			  DB_Offset = D * TP * pix.x, VM_Switch = View_Mode == 1 || View_Mode >= 5 ? 0.125 : lerp(1.0,0.125,GetDepth);
 		
 		float Mod_Depth = saturate(GetDepth * lerp(1,15,abs(Artifact_Adjust().y))), Reverse_Depth = Artifact_Adjust().y < 0 ? 1-Mod_Depth : Mod_Depth,
@@ -2731,12 +2847,12 @@ uniform int Extra_Information <
 		
 			if( View_Mode >= 2 && View_Mode < 5)
 				applyArtifacting = 0;
-				
+								
 		[loop] //Steep parallax mapping
 		while ( CurrentDepthMapValue > CurrentLayerDepth )
 		{   
 			// Shift coordinates horizontally in linear fasion
-		    ParallaxCoord.x -= deltaCoordinates; 
+		    ParallaxCoord.x -= deltaCoordinates;
 		    // Get depth value at current coordinates
 		    float G_Depth = GetMixed(ParallaxCoord).x;  
 		    if ( applyArtifacting )
@@ -2746,7 +2862,7 @@ uniform int Extra_Information <
 		    // Get depth of next layer
 		    CurrentLayerDepth += LayerDepth;
 		}
-
+			
 		if( View_Mode <= 1 || View_Mode >= 5 )	
 	   	ParallaxCoord.x += DB_Offset * VM_Switch;
 	    
@@ -2762,15 +2878,16 @@ uniform int Extra_Information <
 		float beforeDepthValue = Get_DB_ZDP, afterDepthValue = CurrentDepthMapValue - CurrentLayerDepth;
 			  beforeDepthValue += LayerDepth - CurrentLayerDepth;
 		// Depth Diffrence for Gap masking and depth scaling in Normal Mode.
-		float DepthDiffrence = afterDepthValue - beforeDepthValue, DD_Map = saturate(abs(DepthDiffrence) > 0.064);//For AI infilling
+		float DepthDiffrence = afterDepthValue - beforeDepthValue, DD_Map = abs(DepthDiffrence);
+		float2 DD_Spread = saturate(float2(DD_Map > 0.064,DD_Map > 0.128));
 		float weight = afterDepthValue / min(-0.0125,DepthDiffrence);
-			  weight = lerp(weight + (2.0 * Depth_Adjusted.y) * DD_Map,weight,0.75);//Reversed the logic since it seems look better this way and it leans towards the normal output.
+			  weight = lerp(weight + (2.0 * Depth_Adjusted.y) * DD_Spread.x,weight,0.75);//Reversed the logic since it seems look better this way and it leans towards the normal output.
 		float Weight = weight;
 		//ParallaxCoord.x = lerp( ParallaxCoord.x, PrevParallaxCoord.x, weight); //Old		
 		ParallaxCoord.x = PrevParallaxCoord.x * weight + ParallaxCoord.x * (1 - Weight);
 		//This is to limit artifacts.	
-		ParallaxCoord.x += lerp(DB_Offset, DB_Offset * 2.0, DD_Map );// Also boost in some areas using DD_Map
-	
+		ParallaxCoord.x += lerp(lerp(DB_Offset, DB_Offset * 1.25, DD_Spread.x ), DB_Offset * 1.375, DD_Spread.y );// Also boost in some areas using DD_Map
+
 	#if Reconstruction_Mode
 		if(Reconstruction_Type == 1 )
 			ParallaxCoord.y += IO * pix.y; //Optimization for line interlaced.
@@ -3026,6 +3143,10 @@ uniform int Extra_Information <
 	float3 PS_calcLR(float2 texcoord, float2 position)
 	#endif
 	{   float2 Persp = Per;
+		if(Stereoscopic_Mode == 0)
+			Persp *= 0.5;
+		//if(Stereoscopic_Mode == 5)//Need to work on this later.
+		//	Persp *= 0.25;
 		float2 TCL = texcoord, TCR = texcoord, TCL_T = texcoord, TCR_T = texcoord, TexCoords = texcoord;
 		TCL += Persp; TCR -= Persp; TCL_T += Persp; TCR_T -= Persp;
 		#if !Reconstruction_Mode
@@ -3066,16 +3187,24 @@ uniform int Extra_Information <
 	
 		float D = Eye_Swap ? -Min_Divergence().x : Min_Divergence().x;
 	
-		float FadeIO = Focus_Reduction_Type == 1 ? 1 : smoothstep(0,1,1-Fade_in_out(texcoord).x), FD = D, FD_Adjust = Focus_Reduction_Type == 2 ? 0.4375 : 0.1;
+		float FadeIO = Focus_Reduction_Type == 1 ? 1 : smoothstep(0,1,1-Fade_in_out(texcoord).x), FD = D, FD_Adjust = 0.25;
 	
-		if( Eye_Fade_Reduction_n_Power.x == 1)
-			FD_Adjust = Focus_Reduction_Type == 2 ? 0.500 : 0.2;
-		if( Eye_Fade_Reduction_n_Power.x == 2)
-			FD_Adjust = Focus_Reduction_Type == 2 ? 0.625 : 0.3;
-		if( Eye_Fade_Reduction_n_Power.x == 3)
-			FD_Adjust = Focus_Reduction_Type == 2 ? 0.750 : 0.4;	
-		if( Eye_Fade_Reduction_n_Power.x == 4)
-			FD_Adjust = Focus_Reduction_Type == 2 ? 0.875 : 0.5;
+		if( World_n_Fade_Reduction_Power.x == 1)
+			FD_Adjust = 0.3125;
+		if( World_n_Fade_Reduction_Power.x == 2)
+			FD_Adjust = 0.375;
+		if( World_n_Fade_Reduction_Power.x == 3)
+			FD_Adjust = 0.4375;	
+		if( World_n_Fade_Reduction_Power.x == 4)
+			FD_Adjust = 0.50;
+		if( World_n_Fade_Reduction_Power.x == 5)
+			FD_Adjust = 0.5625;
+		if( World_n_Fade_Reduction_Power.x == 6)
+			FD_Adjust = 0.625;
+		if( World_n_Fade_Reduction_Power.x == 7)
+			FD_Adjust = 0.6875;
+		if( World_n_Fade_Reduction_Power.x == 8)//Should expand to 0.875? it would be Power == 10
+			FD_Adjust = 0.75;
 	
 		if (FPSDFIO >= 1)
 			FD = lerp(FD * FD_Adjust,FD,FadeIO);
@@ -3311,7 +3440,7 @@ uniform int Extra_Information <
 	{   float4 Color;
 		float2 TCL = texcoord, TCR = texcoord, TC;
 		float DX9_Helper = Info_Fuction();
-		#if !DX9_Toggle
+		#if !DX9_Toggle && !ISOGL
 		DX9_Helper = position.z;
 		#endif
 		if (Stereoscopic_Mode == 0 && !Inficolor_3D_Emulator )
@@ -3343,6 +3472,7 @@ uniform int Extra_Information <
 	    #endif
 	    //float Basic_UI = saturate(tex2Dlod(SamplerDMN,float4(texcoord* float2(0.5,1) + float2(0.5,0),0,4)).w * 5);
 		//Color = tex2Dlod(SamplerDMN,float4(texcoord * float2(0.5,1),0,(uint)lerp(0,10,Basic_UI))).w;
+		//Color = texcoord.x > 0.5 ? Color : tex2D(SamplerDMN,0).x;
 		return Color.rgba;
 	}
 		
