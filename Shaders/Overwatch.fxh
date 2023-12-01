@@ -1,7 +1,7 @@
 ////----------------------------------------//
 ///SuperDepth3D Overwatch Automation Header///
 //----------------------------------------////
-#define OVERWATCH "Overwatch v3.5.5\n"
+#define OVERWATCH "Overwatch v3.5.6\n"
 //---------------------------------------OVERWATCH---------------------------------------//
 // If you are reading this stop. Go away and never look back. From this point on if you  //
 // still think it's is worth looking at this..... Then no one can save you or your soul. //
@@ -78,6 +78,8 @@ static const float HVP_X_D = 0;                         //Horizontal Position   
 static const float HVP_Y_D = 0;                         //Vertical Position                             | DD_W
 
 //ZPD Boundary Adjustment
+static const int ZPD_Weapon_Hand_Consideration_D = 0;   //ZPD Weapon Hand Consideration 0 | 1 | 2 Half  | CWH
+static const float ZPD_Weapon_Boundary_Alt_Adjust_D = 0;//ZPD Weapon Boundary Alt Adjust power for CWH  | WBA
 static const int ZPD_Boundary_Type_D = 0;               //ZPD Boundary Type                             | DE_X
 static const float ZPD_Boundary_Scaling_D = 0.5;        //ZPD Boundary Scaling                          | DE_Y 
 static const float ZPD_Boundary_Fade_Time_D = 0.25;     //ZPD Boundary Fade Time                        | DE_Z
@@ -19263,24 +19265,26 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DA_X 0.050         // ZPD
 	#define DF_Y 0.075         // Seperation
 	#define DA_Y 20.0         // Near Plane Adjustment
-    #define DA_Z -0.250 //0.0004      // Linerzation Offset
+    #define DA_Z -0.50 //0.0004      // Linerzation Offset
     #define DS_Y 1 //2            // Linerzation Offset Effects only distance if true
 	#define DB_Z 0.050         // Auto Depth Protection
 	#define DE_X 2            // ZPD Boundary 
 	#define DE_Y 0.750        // Set ZPD Boundary Level Zero 
 	#define DE_Z 0.375        // Speed that Boundary is Enforced
 	//#define AFD 1           // Alternate Frame Detection - May be phased out
-	#define DG_W 0.625        // Shift Boundary Out of screen 0.5 and or In screen -0.5
+    #define CWH 1             //ZPD Weapon Hand Consideration For Masking  0 is Off | 1 Is Full | 2 Half Right screen Mask And Not to be used with Weapon Profiles.
+    #define WBA 2.0           //ZPD Weapon Boundary Alt Adjust power for CWH 
+	#define DG_W 0.6        // Shift Boundary Out of screen 0.5 and or In screen -0.5
 	#define OIL 2           // Set How many Levels We use for RE_Fix 0 | 1 | 2 | 3 if 1 then it's float2(0,0) for OIF and DI_W
     #define OIF float3(0.5,0.375,0.250)// Fix enables if Value is > 0.0 
-	#define DI_W float3(1.25,2.5,3.5) // Like Shift Boundary DG_W But 0 to inf
+	#define DI_W float3(1.4,2.5,3.5) // Like Shift Boundary DG_W But 0 to inf
 	//#define FTM 0             // Fast Trigger Mode If this enabled then Level 1 and > switches instantly.
-	//#define DG_Z 0.001        // Min Weapon Hands That are apart of world with Auto and Trim
+	#define DG_Z 0.050        // Min Weapon Hands That are apart of world with Auto and Trim
     //#define DS_X float3(0.025,0,1)// Min Weapon bit only triggers when a OIL Level is set and set here on .y
-    //#define DE_W 0.250        // Auto
-    //#define DI_Z 0.250        // Trim
-	#define WND 0.25         //Weapon Near Pushes depth in and adjust perspective to match.
-    #define DF_W float4(0.0001,0.0015,0.25,0.03)// Edge & Scale
+    #define DE_W 0.50        // Auto
+    #define DI_Z 0.1        // Trim
+	#define WND 0.5         //Weapon Near Pushes depth in and adjust perspective to match.
+    #define DF_W float4(0.0001,0.0025,0.025,0.025)// Edge & Scale
 
     //Multi Menu Detection                    //4 Blocks total and 2 sub blocks per one block.
     #define MMD 2 //Set Multi Menu Detection  // Off  0 | 1 | 2 | 3 | 4
@@ -19308,7 +19312,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DR_W float4( 1000.0, 1000.0, 1000.0, 1000.0) //Tresh Hold for Color G & H and Color 
 
 	#define BMT 1             // ZPD and World Scale Balance // I need to phase this out.
-	#define DF_Z 0.50        // Set the Balance  
+	#define DF_Z 0.2        // Set the Balance  
     #define DL_Y 0.5        // De-Artifact Only works on some View Modes and causes performance degredation
 	//#define DB_Y 1.0          // Effects De-Artifacts -1 to 1 Most of the time leave this at 0 and if you set 1 it takes depth into account 
     //#define DL_Z 1.00         // Compat Power
@@ -19429,6 +19433,47 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DM_Y 3     //HQ VRS 	
 	#define DSW 1
 	#define RHW 1
+#elif (App == 0x226B75F8) //Lethal Company
+    //#define DS_Z 2            // Set View Mode
+	#define DA_W 1            // Set Linerzation
+    #define DB_X 1            // Flip
+	#define DA_X 0.030         // ZPD
+	#define DF_Y 0.001         // Seperation
+	#define DA_Y 50.0         // Near Plane Adjustment
+    #define DA_Z -1.0      // Linerzation Offset
+    #define DS_Y 2            // Linerzation Offset Effects only distance if true
+	#define DB_Z 0.025         // Auto Depth Protection
+	#define DE_X 5            // ZPD Boundary 
+	#define DE_Y 0.750        // Set ZPD Boundary Level Zero 
+	#define DE_Z 0.400        // Speed that Boundary is Enforced
+	//#define AFD 1           // Alternate Frame Detection - May be phased out
+	//#define DG_W 0.100        // Shift Boundary Out of screen 0.5 and or In screen -0.5
+	#define OIL 1           // Set How many Levels We use for RE_Fix 0 | 1 | 2 | 3 if 1 then it's float2(0,0) for OIF and DI_W
+    #define OIF float2(0.625,0.50)// Fix enables if Value is > 0.0 
+	#define DI_W float2(0.625,1.0) // Like Shift Boundary DG_W But 0 to inf
+	//#define FTM 0             // Fast Trigger Mode If this enabled then Level 1 and > switches instantly.
+	#define WND 0.175         //Weapon Near Pushes depth in and adjust perspective to match.
+	#define DG_Z 0.030        // Min Weapon Hands That are apart of world with Auto and Trim
+    //#define DS_X float3(0.025,0,1)// Min Weapon bit only triggers when a OIL Level is set and set here on .y
+    //#define DE_W 0.250        // Auto
+    #define DI_Z 0.030        // Trim
+    #define DF_W float4(0.0001,0.0,0.100,0.025)// Edge & Scale
+	#define BMT 1             // ZPD and World Scale Balance // I need to phase this out.
+	#define DF_Z 0.150        // Set the Balance  
+    #define DL_Y 1.0        // De-Artifact Only works on some View Modes and causes performance degredation
+	//#define DB_Y 1.0          // Effects De-Artifacts -1 to 1 Most of the time leave this at 0 and if you set 1 it takes depth into account 
+    #define DL_Z -1.0         // Compat Power
+	#define WSM 5
+	#define DB_W 27
+	//Smooth Mode Setting
+    #define SMS 3           //SM Toggle Separation
+	#define DL_X 0.95       //SM Tune
+	//#define DL_W 0.05       //SM Perspective
+	#define DM_X 4           //HQ Tune
+	//#define HQT 1           //HQ Trigger
+    //#define DM_Y 3     //HQ VRS 
+    #define NDW 1
+    #define NMW 1	
 #else
 	#define NPW 1 //No Profile
 #endif
@@ -19452,6 +19497,8 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	//#define OIL 1           // Set How many Levels We use for RE_Fix 0 | 1 | 2 | 3 if 1 then it's float2(0,0) for OIF and DI_W
     //#define OIF float2(0.5,0.375)// Fix enables if Value is > 0.0 
 	//#define DI_W float2(0.5,1.0) // Like Shift Boundary DG_W But 0 to inf
+    #define CWH 0             //ZPD Weapon Hand Consideration For Masking  0 is Off | 1 Is Full | 2 Half Right screen Mask And Not to be used with Weapon Profiles.
+    #define WBA 1.0           //ZPD Weapon Boundary Alt Adjust power for CWH 
 	#define FTM 0             // Fast Trigger Mode If this enabled then Level 1 and > switches instantly.
 	#define WND 0.175         //Weapon Near Pushes depth in and adjust perspective to match.
     #define DG_Z 0.100        // Min Weapon Hands That are apart of world with Auto and Trim
@@ -20061,6 +20108,13 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 #ifndef WFB
     #define WFB Weapon_Distance_From_Bottom_D  //Weapon Distance From Bottom
 #endif 
+#ifndef CWH
+    #define CWH ZPD_Weapon_Hand_Consideration_D//ZPD Weapon Hand Consideration & Masking
+#endif 
+#ifndef  WBA
+    #define WBA ZPD_Weapon_Boundary_Alt_Adjust_D//ZPD Weapon Boundary Alt Adjust
+#endif 
+
 
 //SuperDepth3D Warning System
 #ifndef NPW
@@ -20439,7 +20493,7 @@ float4 Weapon_Profiles(float WP ,float4 Weapon_Adjust)
     if (WP == 26)
         Weapon_Adjust = float4(0.489,68.75,1.02,0.0);     //WP 24 | NecroVisioN & NecroVisioN: Lost Company #663E66FE
     if (WP == 27)
-        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 25 | Game
+        Weapon_Adjust = float4(0.9,12.50,0.0,0.25);       //WP 25 | Lethal Company - Mask
 	//Do Not Add more Profiles
 	//61 Profiles is Unity's Limit if using else if
 	//76 Profiles reaches DX 9's Temp Registers Limit 

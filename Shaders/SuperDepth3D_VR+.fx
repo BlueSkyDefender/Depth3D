@@ -1,7 +1,7 @@
 	////--------------------//
 	///**SuperDepth3D_VR+**///
 	//--------------------////
-	#define SD3DVR "SuperDepth3D_VR+ v3.9.9\n"
+	#define SD3DVR "SuperDepth3D_VR+ v3.9.9.9\n"
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//* Depth Map Based 3D post-process shader
 	//* For Reshade 4.4+ I think...
@@ -94,7 +94,7 @@ namespace SuperDepth3DVR
 		#define OW_WP "WP Off\0Custom WP\0"
 		static const int WSM = 0;
 		//Triggers
-		static const float WFB = 0, WND = 0, WRP = 0, MML = 0, SMD = 0, WHM = 0, SDU = 0, ABE = 2, LBE = 0, DRS = 0, MAC = 0, ARW = 0, OIL = 0, MMS = 0, NVK = 0, NDG = 0, FTM = 0, SPO = 0, MMD = 0, SMP = 0, LBR = 0, HQT = 0, AFD = 0, MDD = 0, FPS = 1, SMS = 1, OIF = 0, NCW = 0, RHW = 0, NPW = 0, SPF = 0, BDF = 0, HMT = 0, HMC = 0, DFW = 0, NFM = 0, DSW = 0, LBC = 0, LBS = 0, LBM = 0, DAA = 0, NDW = 0, PEW = 0, WPW = 0, FOV = 0, EDW = 0, SDT = 0;
+		static const float CWH = 0, WBA = 0, WFB = 0, WND = 0, WRP = 0, MML = 0, SMD = 0, WHM = 0, SDU = 0, ABE = 2, LBE = 0, DRS = 0, MAC = 0, ARW = 0, OIL = 0, MMS = 0, NVK = 0, NDG = 0, FTM = 0, SPO = 0, MMD = 0, SMP = 0, LBR = 0, HQT = 0, AFD = 0, MDD = 0, FPS = 1, SMS = 1, OIF = 0, NCW = 0, RHW = 0, NPW = 0, SPF = 0, BDF = 0, HMT = 0, HMC = 0, DFW = 0, NFM = 0, DSW = 0, LBC = 0, LBS = 0, LBM = 0, DAA = 0, NDW = 0, PEW = 0, WPW = 0, FOV = 0, EDW = 0, SDT = 0;
 		//Overwatch.fxh State
 		#define OSW 1
 	#endif
@@ -2125,7 +2125,7 @@ uniform int Extra_Information <
 	
 	float2x4 Fade(float2 texcoord)
 	{   //Check Depth
-		float CD, Detect, Detect_Out_of_Range = -1;
+		float CD, Detect, Detect_Out_of_Range = -1, ZPD_Scaler_One_Boundary = Set_Pop_Min().x;
 		if(ZPD_Boundary > 0)
 		{
 			#if LBM || LetterBox_Masking
@@ -2188,8 +2188,13 @@ uniform int Extra_Information <
 					}
 					// CDArrayZPD[i] reads across prepDepth.......
 					CD = 1 - ZPD_I / PDepth;
-	
-					if ( CD < -Set_Pop_Min().x )
+					//Weapon Hand Consideration
+					#if CWH
+						bool WHC_Mask = texcoord.y > 0.55 ? 1 : tex2Dlod(SamplerzBuffer_BlurVR,float4(GridXY,0,0)).x;
+						//Mask set as bool because using lerp causes the code to break in this instance. 
+						ZPD_Scaler_One_Boundary = WHC_Mask ? ZPD_Scaler_One_Boundary : WBA;
+					#endif	
+					if ( CD < -ZPD_Scaler_One_Boundary )
 						Detect = 1;
 					//Used if Depth Buffer is way out of range or if you need granuality.
 					if(RE_Set(0).x)
@@ -2585,12 +2590,37 @@ uniform int Extra_Information <
 	void zBuffer_Blur(in float4 position : SV_Position, in float2 texcoord : TEXCOORD, out float2 Blur_Out : SV_Target0)
 	{   
 		float2 StoredTC = texcoord;
+		texcoord.y *= 2;
 		float simple_Blur = tex2Dlod(SamplerzBufferVR_L,float4(texcoord,0, 0.0)).x;
 		simple_Blur += tex2Dlod(SamplerzBufferVR_L,float4(texcoord + float2( pix.x * Blur_Adjust * 2, pix.y),0, 0.0)).x;
 		simple_Blur += tex2Dlod(SamplerzBufferVR_L,float4(texcoord + float2( pix.x * Blur_Adjust   , pix.y),0, 0.0)).x;
 		simple_Blur += tex2Dlod(SamplerzBufferVR_L,float4(texcoord + float2(-pix.x * Blur_Adjust   , pix.y),0, 0.0)).x;
 		simple_Blur += tex2Dlod(SamplerzBufferVR_L,float4(texcoord + float2(-pix.x * Blur_Adjust * 2, pix.y),0, 0.0)).x;
+		//Create Mask for Weapon Hand Consideration for ZPD boundary condition.
+		float2 Shape_TC = StoredTC;
+		float Shape_Out, Shape_One, Shape_Two, Shape_Three;
+		#if CWH
+		// Conditions for Shape_One
+		bool Shape_One_C1 = (Shape_TC.x / Shape_TC.y * 0.8125) > 1;
+		bool Shape_One_C2 = (((1 - Shape_TC.x) / Shape_TC.y) * 0.8125) > 1;
+		Shape_One = saturate(Shape_One_C1 || Shape_One_C2);  // Use saturate to clamp between 0 and 1
 		
+		// Conditions for Shape_Two
+		bool Shape_Two_C1 = (1 - Shape_TC.x < 0.400 && 1 - Shape_TC.y < 0.400);
+		Shape_Two = saturate(1 - Shape_Two_C1);  // Use saturate to clamp between 0 and 1
+		
+		// Conditions for Shape_Three
+		float Shape_Three_C1 = (1 - Shape_TC.x - 0.45) / (1 - Shape_TC.y);
+		Shape_Three = saturate(Shape_Three_C1 > 1);  // Use saturate to clamp between 0 and 1
+		
+		// Calculate Shape_Out
+		Shape_Out = Shape_One + (1 - Shape_Three);
+		Shape_Out *= Shape_One + Shape_Two;
+		
+		//Shape_Out = Shape_TC.y > TEST ? 0 : Shape_Out;
+		if(CWH == 2)
+		Shape_Out = Shape_TC.x < 0.5 ? 1 : Shape_Out;
+		#endif		
 		//Fade Storage
 		#if !DX9_Toggle
 		float2x4 Fade_Pass = Fade(StoredTC);	
@@ -2602,11 +2632,11 @@ uniform int Extra_Information <
 											   Fade_Pass[1][3],
 											   Fade_Pass[1][0] };
 		//Set a avr size for the Number of lines needed in texture storage.
-		float Grid = floor(texcoord.y * BUFFER_HEIGHT * BUFFER_RCP_HEIGHT * Num_of_Values);	
+		float Grid = floor(StoredTC.y * BUFFER_HEIGHT * BUFFER_RCP_HEIGHT * Num_of_Values);	
 		simple_Blur = min(1,simple_Blur * 0.2);
-		Blur_Out = float2(simple_Blur, Storage_Array[int(fmod(Grid,Num_of_Values))]);
+		Blur_Out = float2(StoredTC.y < 0.5 ? simple_Blur : saturate(Shape_Out), Storage_Array[int(fmod(Grid,Num_of_Values))]);
 		#else
-		Blur_Out = simple_Blur;
+		Blur_Out.xy = StoredTC.y < 0.5 ? simple_Blur : saturate(Shape_Out);
 		#endif
 	}	
 
@@ -2639,7 +2669,7 @@ uniform int Extra_Information <
 		float Depth_Blur = min(tex2Dlod(SamplerzBufferVR_L, float4( texcoord, 0, clamp(VMW,0,5) ) ).x,Base_Depth.x);
 
 		float2 DepthBuffer_LP = float2(Depth_Blur,Base_Depth.y);
-		float2 Min_Blend = float2(min(DepthBuffer_LP,tex2Dlod(SamplerzBuffer_BlurVR, float4( texcoord, 0, 1.0 ) ).x));
+		float2 Min_Blend = float2(min(DepthBuffer_LP,tex2Dlod(SamplerzBuffer_BlurVR, float4( texcoord * float2(1,0.5), 0, 1.0 ) ).x));
 		
 		if( Range_Blend > 0)
 			   DepthBuffer_LP.xy = lerp(DepthBuffer_LP.xy,  Min_Blend.xy ,(smoothstep(0.5,1.0, Min_Blend.x) *  Min_Divergence().y) * Sat_Range);
