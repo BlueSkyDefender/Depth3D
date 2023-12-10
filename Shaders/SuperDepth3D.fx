@@ -1,7 +1,7 @@
 	////----------------//
 	///**SuperDepth3D**///
 	//----------------////
-	#define SD3D "SuperDepth3D v3.9.9.9\n"
+	#define SD3D "SuperDepth3D v4.0.0\n"
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//* Depth Map Based 3D post-process shader
 	//* For Reshade 3.0+
@@ -94,11 +94,19 @@ namespace SuperDepth3D
 		#define OW_WP "WP Off\0Custom WP\0"
 		static const int WSM = 0;
 		//Triggers
-		static const float CWH = 0, WBA = 0, WFB = 0, WND = 0, WRP = 0, SMD = 0, WHM = 0, SDU = 0, ABE = 2, LBE = 0, DRS = 0, MAC = 0, ARW = 0, OIL = 0, MMS = 0, NVK = 0, NDG = 0, FTM = 0, SPO = 0, MMD = 0, SMP = 0, LBR = 0, HQT = 0, AFD = 0, MDD = 0, FPS = 1, SMS = 1, OIF = 0, NCW = 0, RHW = 0, NPW = 0, SPF = 0, BDF = 0, HMT = 0, HMC = 0, DFW = 0, NFM = 0, DSW = 0, BMT = 0, LBC = 0, LBS = 0, LBM = 0, DAA = 0, NDW = 0, PEW = 0, WPW = 0, FOV = 0, EDW = 0, SDT = 0;
+		static const float AWZ = 0, CWH = 0, WBA = 0, WFB = 0, WND = 0, WRP = 0, SMD = 0, WHM = 0, SDU = 0, ABE = 2, LBE = 0, DRS = 0, MAC = 0, ARW = 0, OIL = 0, MMS = 0, NVK = 0, NDG = 0, FTM = 0, SPO = 0, MMD = 0, SMP = 0, LBR = 0, HQT = 0, AFD = 0, MDD = 0, FPS = 1, SMS = 1, OIF = 0, NCW = 0, RHW = 0, NPW = 0, SPF = 0, BDF = 0, HMT = 0, HMC = 0, DFW = 0, NFM = 0, DSW = 0, BMT = 0, LBC = 0, LBS = 0, LBM = 0, DAA = 0, NDW = 0, PEW = 0, WPW = 0, FOV = 0, EDW = 0, SDT = 0;
 		//Overwatch.fxh State
 		#define OSW 1
 	#endif
 	//USER EDITABLE PREPROCESSOR FUNCTIONS START//
+
+	// Experimental DLP mode for Side By Side and the lesser supported Top n Bottom
+	#define EX_DLP_FS_Mode 1  //Default 0 is Off. One is On
+	//Please note this mode should run at your DLP native resolution at 720p or 1080p Native 120hz Auto Mode.
+	//Keeping a stable 120hz in game is required. Not sure if this is something we can enforce for now.
+	//Lot of issues with this mode that needs to be looked into. For now it's something to try out for fun.
+	//Keep in mind this Frame Sequential only for testing and no usable unless the game can keep a steady frame rate of around 120.
+	//It also has Debug options for advance users.
 
 	// This shift the detectors for ZPD Boundary Detection. 
 	#define Shift_Detectors_Up SDU //Default 0 is Off. One is On
@@ -483,7 +491,7 @@ uniform int SuperDepth3D <
 		#else
 		ui_type = "slider";
 		#endif
-		ui_min = 0; ui_max = 5; // Tried having a max of 6. But, After a year of having that max value it was never used in any profile Max of 5 was used sometimes
+		ui_min = 0; ui_max = 7;
 		ui_label = " Halo Reduction";
 		ui_tooltip = "This distorts the depth in some View Modes to hide or minimize the halo in Most Games.\n"
 					 "With this active it should Hide the Halo a little better depending the View Mode it works on.\n"
@@ -802,12 +810,22 @@ uniform int SuperDepth3D <
 			ui_items = "TriOviz Inficolor 3D Emulation\0";
 			ui_label = " 3D Display Mode";
 		#else
-			#if Reconstruction_Mode // traduzir todas as opçoes
-				ui_items = "Side by Side\0Top and Bottom\0Anaglyph 3D Red/Cyan\0Anaglyph 3D Red/Cyan Dubois\0Anaglyph 3D Red/Cyan Anachrome\0Anaglyph 3D Green/Magenta\0Anaglyph 3D Green/Magenta Dubois\0Anaglyph 3D Green/Magenta Triochrome\0Anaglyph 3D Blue/Amber ColorCode\0";
-				ui_label = " 3D Display Modes";
+			#if Reconstruction_Mode
+				#if EX_DLP_FS_Mode
+					ui_items = "Side by Side\0Top and Bottom\0Frame Sequential\0Anaglyph 3D Red/Cyan\0Anaglyph 3D Red/Cyan Dubois\0Anaglyph 3D Red/Cyan Anachrome\0Anaglyph 3D Green/Magenta\0Anaglyph 3D Green/Magenta Dubois\0Anaglyph 3D Green/Magenta Triochrome\0Anaglyph 3D Blue/Amber ColorCode\0Anaglyph 3D Red/Blue Optimized\0";
+					ui_label = " 3D Display Modes";
+				#else
+					ui_items = "Side by Side\0Top and Bottom\0Anaglyph 3D Red/Cyan\0Anaglyph 3D Red/Cyan Dubois\0Anaglyph 3D Red/Cyan Anachrome\0Anaglyph 3D Green/Magenta\0Anaglyph 3D Green/Magenta Dubois\0Anaglyph 3D Green/Magenta Triochrome\0Anaglyph 3D Blue/Amber ColorCode\0Anaglyph 3D Red/Blue Optimized\0";
+					ui_label = " 3D Display Modes";
+				#endif
 			#else
-				ui_items = "Side by Side\0Top and Bottom\0Line Interlaced\0Column Interlaced\0Checkerboard 3D\0Quad Lightfield 2x2\0Anaglyph 3D Red/Cyan\0Anaglyph 3D Red/Cyan Dubois\0Anaglyph 3D Red/Cyan Anachrome\0Anaglyph 3D Green/Magenta\0Anaglyph 3D Green/Magenta Dubois\0Anaglyph 3D Green/Magenta Triochrome\0Anaglyph 3D Blue/Amber ColorCode\0";		
-				ui_label = "·3D Display Modes·";
+				#if EX_DLP_FS_Mode
+					ui_items = "Side by Side\0Top and Bottom\0Line Interlaced\0Column Interlaced\0Checkerboard 3D\0Quad Lightfield 2x2\0Frame Sequential\0Anaglyph 3D Red/Cyan\0Anaglyph 3D Red/Cyan Dubois\0Anaglyph 3D Red/Cyan Anachrome\0Anaglyph 3D Green/Magenta\0Anaglyph 3D Green/Magenta Dubois\0Anaglyph 3D Green/Magenta Triochrome\0Anaglyph 3D Blue/Amber ColorCode\0Anaglyph 3D Red/Blue Optimized\0";		
+					ui_label = "·3D Display Modes·";
+				#else
+					ui_items = "Side by Side\0Top and Bottom\0Line Interlaced\0Column Interlaced\0Checkerboard 3D\0Quad Lightfield 2x2\0Anaglyph 3D Red/Cyan\0Anaglyph 3D Red/Cyan Dubois\0Anaglyph 3D Red/Cyan Anachrome\0Anaglyph 3D Green/Magenta\0Anaglyph 3D Green/Magenta Dubois\0Anaglyph 3D Green/Magenta Triochrome\0Anaglyph 3D Blue/Amber ColorCode\0Anaglyph 3D Red/Blue Optimized\0";		
+					ui_label = "·3D Display Modes·";
+				#endif
 			#endif
 		#endif
 		ui_tooltip = "Stereoscopic 3D display output selection.";
@@ -930,6 +948,22 @@ uniform int SuperDepth3D <
 		ui_category = "Stereoscopic Options";
 	> = 0;
 	#endif
+	
+	#if EX_DLP_FS_Mode
+	//https://paulbourke.net/stereographics/blueline/
+	//https://lists.gnu.org/archive/html/bino-list/2013-03/pdfz6rW7jUrgI.pdf
+	uniform int FS_Mode <
+		ui_type = "combo";
+		ui_items = "Off\0DLP Mode\0Blue Line FS\0Marked FS\0";
+		ui_label = " Frame Sequential Mode";
+		ui_tooltip = "This DLP mode added the Color Code to a Stereo Image so that the DLP Projector's Auto-Mode can enable.\n"
+					 "This is for 3-D Ready Second-generation DLP Projectors that can detect the solid color of the last active line.\n"
+					 "Please Note: Frame Sync is not supported yet, If you think you can help with this message me.\n"
+					 "Default is Off.";
+		ui_category = "Stereoscopic Options";
+	> = false;	
+	#endif
+	
 	uniform bool Eye_Swap <
 		ui_label = " Swap Eyes";
 		ui_tooltip = "L/R to R/L."; // E/D ou D/E
@@ -1180,6 +1214,7 @@ uniform int Extra_Information <
 	uniform float2 Mousecoords < source = "mousepoint"; > ;
 	uniform float frametime < source = "frametime";>;
 	uniform bool Alternate < source = "framecount";>;     // Alternate Even Odd frames
+	uniform int Frames < source = "framecount";>;     // Alternate Even Odd frames
 	uniform float timer < source = "timer"; >;
 	
 	#if HDR_Compatible_Mode == 1
@@ -1327,17 +1362,18 @@ uniform int Extra_Information <
 	}
 	
 	//#define E_O_Switch fmod(abs(Perspective),2)
-	float Re_Scale_WN()
-	{
-		return saturate(WZPD_and_WND.x);
+	float2 Re_Scale_WN()
+	{   float Near_Plane_Popout = WZPD_and_WND.x;
+		return saturate(float2(abs(Near_Plane_Popout),Near_Plane_Popout >= 0 ? 0 : 1));
 	}
 	
 	float Perspective_Switch()// Need to Fix Inficolor Perspective calculation.
-	{
+	{  
+	    float Scale_Value_Cal =  Re_Scale_WN().y ? 75 : 100.0;
 		float Min_Div = max(1.0, Divergence), D_Scale = Scale(Min_Div,100.0,1.0);   
 		float I_3D_E = (Min_Divergence().x * lerp(1.0,2.0,Focus_Inficolor)); //This is to fix strange offset issue don't know why it need to be offset by one pixel to work.???
-		I_3D_E += (Re_Scale_WN()*200)*D_Scale;
-		float Perspective_Out = Perspective, Push_Depth = (Re_Scale_WN()*100.0)*D_Scale;
+		I_3D_E += (Re_Scale_WN().x*(Scale_Value_Cal * 2))*D_Scale;
+		float Perspective_Out = Perspective, Push_Depth = (Re_Scale_WN().x*Scale_Value_Cal)*D_Scale;
 		//float PER_Switch = Stereoscopic_Mode == 0 || Stereoscopic_Mode == 5 ?  E_O_Switch ? Perspective : Perspective + 1 :  E_O_Switch ? Perspective + 1 : Perspective;
 		if( Inficolor_3D_Emulator) 
 			Perspective_Out = Eye_Swap ? I_3D_E : -I_3D_E;
@@ -2175,7 +2211,7 @@ uniform int Extra_Information <
 			DM.x = DM.x;
 		else
 		{
-			DM.x = lerp(DM.x,WD,CutOFFCal);
+			//DM.x = lerp(DM.x,WD,CutOFFCal); // Removed
 			DM.y = lerp(0.0,WD,CutOFFCal);
 			DM.z = lerp(0.5,WD,CutOFFCal);
 		}
@@ -2235,6 +2271,36 @@ uniform int Extra_Information <
 	{
 		return (1-(Val*2.))*1000;
 	}
+
+	bool CWH_Mask(float2 StoredTC)
+	{
+		//Create Mask for Weapon Hand Consideration for ZPD boundary condition.
+		float2 Shape_TC = StoredTC;
+		float Shape_Out, Shape_One, Shape_Two, Shape_Three;
+		
+		// Conditions for Shape_One
+		bool Shape_One_C1 = (Shape_TC.x / Shape_TC.y * 0.8125) > 1;
+		bool Shape_One_C2 = (((1 - Shape_TC.x) / Shape_TC.y) * 0.8125) > 1;
+		Shape_One = saturate(Shape_One_C1 || Shape_One_C2);  // Use saturate to clamp between 0 and 1
+		
+		// Conditions for Shape_Two
+		bool Shape_Two_C1 = (1 - Shape_TC.x < 0.400 && 1 - Shape_TC.y < 0.400);
+		Shape_Two = saturate(1 - Shape_Two_C1);  // Use saturate to clamp between 0 and 1
+		
+		// Conditions for Shape_Three
+		float Shape_Three_C1 = (1 - Shape_TC.x - 0.45) / (1 - Shape_TC.y);
+		Shape_Three = saturate(Shape_Three_C1 > 1);  // Use saturate to clamp between 0 and 1
+		
+		// Calculate Shape_Out
+		Shape_Out = Shape_One + (1 - Shape_Three);
+		Shape_Out *= Shape_One + Shape_Two;
+		
+		//Shape_Out = Shape_TC.y > TEST ? 0 : Shape_Out;
+		if(CWH == 2)
+		Shape_Out = Shape_TC.x < 0.5 ? 1 : Shape_Out;
+		
+		return Shape_Out;
+	}	
 	
 	float3x3 Fade(float2 texcoord)
 	{   //Check Depth
@@ -2303,9 +2369,8 @@ uniform int Extra_Information <
 	
 					//Weapon Hand Consideration
 					#if CWH
-						bool WHC_Mask = texcoord.y > 0.55 ? 1 : tex2Dlod(SamplerzBuffer_BlurN,float4(GridXY,0,0)).x;
-						//Mask set as bool because using lerp causes the code to break in this instance. 
-						ZPD_Scaler_One_Boundary = WHC_Mask ? ZPD_Scaler_One_Boundary : WBA;
+						bool WHC_Mask = CWH_Mask(GridXY);
+						ZPD_Scaler_One_Boundary = lerp(WBA, ZPD_Scaler_One_Boundary, WHC_Mask);
 					#endif
 	
 					if ( CD < -ZPD_Scaler_One_Boundary )
@@ -2556,6 +2621,7 @@ uniform int Extra_Information <
 	
 	float3 DB_Comb(float2 texcoord)
 	{
+		float Auto_Adjust_Weapon_Depth = 1, Anti_Weapon_Z = abs(AWZ);
 		// X = Mix Depth | Y = Weapon Mask | Z = Weapon Hand | W = Normal Depth
 		float4 DM = float4(tex2Dlod(SamplerDMN,float4(texcoord,0,0)).xyz,PrepDepth( SDT == 1 || SD_Trigger == 1 ? TC_SP(texcoord).xy : texcoord )[1][1]);
 		//Hide Temporal passthrough
@@ -2567,7 +2633,9 @@ uniform int Extra_Information <
 			DM = PrepDepth(texcoord)[0][0];
 		if( 1-texcoord.x < pix.x * 2 &&   texcoord.y < pix.y * 2)
 			DM = PrepDepth(texcoord)[0][0];
-			
+
+		//float Store_DMX = DM.x;	
+		
 		if (WP == 0)
 			DM.y = 0;
 	
@@ -2593,7 +2661,13 @@ uniform int Extra_Information <
 		float3 HandleConvergence = Conv(DM.xz,texcoord).xyz;
 			   HandleConvergence.y *= WA_XYZW().w;
 			   HandleConvergence.y = lerp(HandleConvergence.y + FD_Adjust, HandleConvergence.y, FadeIO);
-		DM.y = lerp( HandleConvergence.x, HandleConvergence.y, DM.y);
+		if(Anti_Weapon_Z > 0)//Anti-Weapon Hand Z-Fighting
+		{
+			float AAWD_Adjust = tex2Dlod(SamplerDMN,float4(float2(AWZ < 0 ? 0.55 : 0.50,0.525),0,8)).x;
+			Auto_Adjust_Weapon_Depth = lerp(0.5,1.0,smoothstep(0,1,AAWD_Adjust * (Anti_Weapon_Z > 1 ? 12.5 : 7.5)));
+		}
+		
+		DM.y = lerp( HandleConvergence.x, HandleConvergence.y * Auto_Adjust_Weapon_Depth, DM.y);
 	
 		float Edge_Adj = saturate(lerp(0.5,1.0,Edge_Adjust));
 		
@@ -2682,12 +2756,14 @@ uniform int Extra_Information <
 				DM.y = LB_Masked;	
 		#endif
 		// Should expand on this as a way to rescale Depth in a specific location around the weapon hand.
-		#if WHM //For now it's just UI masking for Diablo 4		
-		float Mask = tex2Dlod(SamplerDMN,float4(texcoord,0,7.5)).y;
+		#if WHM 		
+		float DT_Switch = DT_Z < 0;
+		float Mask = tex2Dlod(SamplerDMN,float4(texcoord,0,DT_Switch ? 2.0 : 7.5)).y;
+		float Blur_Mask = tex2Dlod(SamplerDMN,float4(texcoord,0,9)).x;
 		if(WP > 0)
-			DM.y = lerp(DM.y,0.025 ,smoothstep(0,DT_Z,Mask));
+			DM.y = lerp(DM.y,DT_Switch ? lerp(0.0,0.2,Blur_Mask) * lerp(2,1,FadeIO) : 0.025 ,smoothstep(0,abs(DT_Z),Mask) * lerp(1-FD_Adjust,1,FadeIO));
 		#endif
-		
+	
 		return float3(DM.y,PrepDepth( SDT == 2 || SD_Trigger == 2 ? TC_SP(texcoord).zw : texcoord)[1][1],HandleConvergence.z);
 	}
 	#define Adapt_Adjust 0.7 //[0 - 1]
@@ -2714,37 +2790,11 @@ uniform int Extra_Information <
 	void zBuffer_Blur(in float4 position : SV_Position, in float2 texcoord : TEXCOORD, out float2 Blur_Out : SV_Target0)
 	{   //Blur needs to be phased out. ****
 		float2 StoredTC = texcoord;
-		texcoord.y *= 2;
 		float simple_Blur = tex2Dlod(SamplerzBufferN_L,float4(texcoord,0, 0.0)).x;
 		simple_Blur += tex2Dlod(SamplerzBufferN_L,float4(texcoord + float2( pix.x * Blur_Adjust * 2, pix.y),0, 0.0)).x;
 		simple_Blur += tex2Dlod(SamplerzBufferN_L,float4(texcoord + float2( pix.x * Blur_Adjust   , pix.y),0, 0.0)).x;
 		simple_Blur += tex2Dlod(SamplerzBufferN_L,float4(texcoord + float2(-pix.x * Blur_Adjust   , pix.y),0, 0.0)).x;
 		simple_Blur += tex2Dlod(SamplerzBufferN_L,float4(texcoord + float2(-pix.x * Blur_Adjust * 2, pix.y),0, 0.0)).x;
-		//Create Mask for Weapon Hand Consideration for ZPD boundary condition.
-		float2 Shape_TC = StoredTC;
-		float Shape_Out, Shape_One, Shape_Two, Shape_Three;
-		#if CWH
-		// Conditions for Shape_One
-		bool Shape_One_C1 = (Shape_TC.x / Shape_TC.y * 0.8125) > 1;
-		bool Shape_One_C2 = (((1 - Shape_TC.x) / Shape_TC.y) * 0.8125) > 1;
-		Shape_One = saturate(Shape_One_C1 || Shape_One_C2);  // Use saturate to clamp between 0 and 1
-		
-		// Conditions for Shape_Two
-		bool Shape_Two_C1 = (1 - Shape_TC.x < 0.400 && 1 - Shape_TC.y < 0.400);
-		Shape_Two = saturate(1 - Shape_Two_C1);  // Use saturate to clamp between 0 and 1
-		
-		// Conditions for Shape_Three
-		float Shape_Three_C1 = (1 - Shape_TC.x - 0.45) / (1 - Shape_TC.y);
-		Shape_Three = saturate(Shape_Three_C1 > 1);  // Use saturate to clamp between 0 and 1
-		
-		// Calculate Shape_Out
-		Shape_Out = Shape_One + (1 - Shape_Three);
-		Shape_Out *= Shape_One + Shape_Two;
-		
-		//Shape_Out = Shape_TC.y > TEST ? 0 : Shape_Out;
-		if(CWH == 2)
-		Shape_Out = Shape_TC.x < 0.5 ? 1 : Shape_Out;
-		#endif
 		#if !DX9_Toggle
 		//Fade Storage
 		float3x3 Fade_Pass = Fade(StoredTC); //[0][0] = F | [0][1] = F | [0][2] = F
@@ -2760,9 +2810,9 @@ uniform int Extra_Information <
 		//Set a avr size for the Number of lines needed in texture storage.
 		float Grid = floor(StoredTC.y * BUFFER_HEIGHT * BUFFER_RCP_HEIGHT * Num_of_Values);							 
 		simple_Blur = min(1,simple_Blur * 0.2);
-		Blur_Out = float2( StoredTC.y < 0.5 ? simple_Blur : saturate(Shape_Out), Storage_Array[int(fmod(Grid,Num_of_Values))]);
+		Blur_Out = float2( simple_Blur, Storage_Array[int(fmod(Grid,Num_of_Values))]);
 		#else
-		Blur_Out = StoredTC.y < 0.5 ? simple_Blur : saturate(Shape_Out);
+		Blur_Out = simple_Blur;
 		#endif
 	}
 	
@@ -2777,7 +2827,8 @@ uniform int Extra_Information <
 		return lerp(0.0,0.250,max(0,Scale(Divergence * Cal_Separation_Offset,100.0,50.0)));
 		#endif
 	}
-		
+	
+	static const float  VMW_Array[8] = { 0.0, 1.0, 2.0, 3.0 , 3.5 , 4.0, 4.5 , 5.0 };	
 	float GetDB(float2 texcoord)
 	{
 		#if Reconstruction_Mode  
@@ -2789,7 +2840,8 @@ uniform int Extra_Information <
 		#endif
 		bool VM_5_Bool = View_Mode == 5;
 		float GetDepth = smoothstep(0,1, tex2Dlod(SamplerzBufferN_P, float4(texcoord,0, 1) ).y), Sat_Range = saturate(Range_Blend);
-		uint VMW = View_Mode == 1 ? View_Mode_Warping : lerp(6, VM_5_Bool ? 0 :View_Mode_Warping, VM_5_Bool ? GetDepth : 1);
+		float VM_Mip_Cal = VMW_Array[clamp(View_Mode_Warping,0,7)];
+		float VMW = View_Mode == 1 ? VM_Mip_Cal : lerp(6, VM_5_Bool ? 0 : VM_Mip_Cal, VM_5_Bool ? GetDepth : 1);
 		
 		float2 Base_Depth_Buffers = float2(tex2Dlod(SamplerzBufferN_L, float4( texcoord, 0, 0) ).x,tex2Dlod(SamplerzBufferN_P, float4( texcoord, 0, 0) ).x);	
 		float2 Base_Depth_SubSampled = float2(tex2Dlod(SamplerzBufferN_L, float4( texcoord, 0, 2) ).x,tex2Dlod(SamplerzBufferN_P, float4( texcoord, 0, 2) ).x);
@@ -2804,7 +2856,7 @@ uniform int Extra_Information <
 		float2 DepthBuffer_LP = float2(Depth_Blur,Base_Depth.y);
 	    //float Basic_UI = saturate(tex2Dlod(SamplerDMN,float4(texcoord* float2(0.5,1) + float2(0.5,0),0,4.5)).w * 25);
 		// Basic_UI_TEST = tex2Dlod(SamplerDMN,float4(texcoord * float2(0.5,1),0,(uint)lerp(0,10,Basic_UI))).w;
-		float2 Min_Blend = float2(min(DepthBuffer_LP,tex2Dlod(SamplerzBuffer_BlurN, float4( texcoord * float2(1,0.5), 0, 1.0 ) ).x));
+		float2 Min_Blend = float2(min(DepthBuffer_LP,tex2Dlod(SamplerzBuffer_BlurN, float4( texcoord, 0, 1.0 ) ).x));
 		
 		if( Range_Blend > 0)
 			   DepthBuffer_LP.xy = lerp(DepthBuffer_LP.xy,  Min_Blend.xy ,(smoothstep(0.5,1.0, Min_Blend.x) *  Min_Divergence().y) * Sat_Range);
@@ -2867,13 +2919,13 @@ uniform int Extra_Information <
 		float US_Offset = lerp(Default_Offset.x,Default_Offset.y,GetDepth * 0.5); D = Diverge < 0 ? -US_Offset : US_Offset;
 	
 		//Offsets listed here Max Seperation is 3% - 8% of screen space with Depth Offsets & Netto layer offset change based on MS.
-		float deltaCoordinates = MS * LayerDepth, CurrentDepthMapValue = GetMixed( ParallaxCoord).x, CurrentLayerDepth = -Re_Scale_WN()-saturate(Push_Depth)*0.1,
+		float deltaCoordinates = MS * LayerDepth, CurrentDepthMapValue = GetMixed( ParallaxCoord).x, CurrentLayerDepth = -Re_Scale_WN().x-saturate(Push_Depth)*0.1,
 			  DB_Offset = D * TP * pix.x, VM_Switch = View_Mode == 1 || View_Mode >= 5 ? 0.125 : lerp(1.0,0.125,GetDepth);
 		
 		float Mod_Depth = saturate(GetDepth * lerp(1,15,abs(Artifact_Adjust().y))), Reverse_Depth = Artifact_Adjust().y < 0 ? 1-Mod_Depth : Mod_Depth,
 			  Scale_With_Depth = Artifact_Adjust().y == 0 ? 1 : Reverse_Depth;
 			  
-		float2 Artifacting_Adjust = float2(MS * lerp(0,0.125,saturate(Artifact_Adjust().x * Scale_With_Depth)),0);
+		float2 Artifacting_Adjust = float2(MS * lerp(0,0.125,clamp(Artifact_Adjust().x * Scale_With_Depth,0,2)),0);
 		// Perform the conditional check outside the loop
 		bool applyArtifacting = Artifact_Adjust().x != 0;
 		
@@ -2958,17 +3010,26 @@ uniform int Extra_Information <
 	}
 	#endif
 	///////////////////////////////////////////////////////////Stereo Conversions///////////////////////////////////////////////////////////////////////
+	uint4 Frame_Selector()
+	{
+		int FS_RM = Reconstruction_Mode ? 2 : 6;
+		return uint4(fmod(Alternate,2),fmod(Frames,4),0,FS_RM);
+	}
+
 	float Anaglyph_Selection(int Selection)
 	{
-		float2 Anaglyph_Array[7] = { float2(6, 2),
+		float2 Anaglyph_Array[9] = { float2(6, 2),
 									 float2(7, 3),
 									 float2(8, 4),
 									 float2(9, 5),
 									 float2(10, 6),
 									 float2(11, 7),
 									 float2(12, 8),
+									 float2(13, 9),
+									 float2(14, 10)
 									};
-		return Reconstruction_Mode ? Anaglyph_Array[Selection].y : Anaglyph_Array[Selection].x;
+		float Anaglyph = Reconstruction_Mode ? Anaglyph_Array[Selection].y : Anaglyph_Array[Selection].x;
+		return EX_DLP_FS_Mode ? Anaglyph + 1 : Anaglyph;
 	}
 
 	float4 Stereo_Convert(float2 texcoord, float4 L, float4 R)
@@ -2992,6 +3053,10 @@ uniform int Extra_Information <
 		if(Stereoscopic_Mode == 1)
 			color = texcoord.y < 0.5 ? L : R;
 		#endif
+		if (Stereoscopic_Mode == Frame_Selector().w && EX_DLP_FS_Mode)
+		{
+			color = Frame_Selector().x ? L : R;
+		}
 		#if Inficolor_3D_Emulator
 			float DeGhost = 0.06, LOne, ROne;
 			//L.rgb += lerp(-1, 1,Anaglyph_Eye_Brightness.x); R.rgb += lerp(-1, 1,Anaglyph_Eye_Brightness.y);
@@ -3021,7 +3086,7 @@ uniform int Extra_Information <
 			float4 cB = float4(saturate(RMA),1);
 			//cA = (cA - 0.5) * Contrast.x + 0.5; cB = (cB - 0.5) * Contrast.y + 0.5;
 
-			if( Stereoscopic_Mode == Anaglyph_Selection(0) || Stereoscopic_Mode == Anaglyph_Selection(1) ) 
+			if( Stereoscopic_Mode == Anaglyph_Selection(0) || Stereoscopic_Mode == Anaglyph_Selection(1) || Stereoscopic_Mode == Anaglyph_Selection(7) ) 
 			{
 				//cA = (cA - 0.5) * Contrast.x + 0.5; cB = (cB - 0.5) * Contrast.y + 0.5;
 				LOne = Contrast.x*0.45;
@@ -3164,6 +3229,15 @@ uniform int Extra_Information <
 				image.b = accum.b+(accum.r*(DeGhost*-1.5))+(accum.g*(DeGhost*-1.5))+(accum.b*(DeGhost*3.0));
 				color = saturate(image);
 			}
+			else if (Stereoscopic_Mode == Anaglyph_Selection(7)) // Anaglyph 3D Red/Blue Optimized https://stereo.jpn.org/eng/stphmkr/help/stereo_13.htm
+			{   // Note to self I need to revist all modes http://www.flickr.com/photos/e_dubois/5230654930/
+				
+				float red = ( cA.r * 299 + cA.g * 587 + cA.b* 114 +  cB.r * 0 +  cB.g * 0 +  cB.b * 0 ) / 1000;
+				//float green = (cA.r * 0 + cA.g * 0 + cA.b * 0 + cB.r * 0 + cB.g * 0 + cB.b * 0) / 1000;
+				float blue = (cA.r * 0 + cA.g * 0 + cA.b * 0 + cB.r * 299 + cB.g * 587 + cB.b * 114) / 1000;
+	
+				color = float4(red, 0, blue, 0);			
+			}
 		}
 		#endif
 		return color;
@@ -3174,7 +3248,47 @@ uniform int Extra_Information <
 	#else
 	float3 PS_calcLR(float2 texcoord, float2 position)
 	#endif
-	{   float2 Persp = Per;
+	{
+		float D = Eye_Swap ? -Min_Divergence().x : Min_Divergence().x;
+	
+		float FadeIO = Focus_Reduction_Type == 1 ? 1 : smoothstep(0,1,1-Fade_in_out(texcoord).x), FD = D, FD_Adjust = 0.2;
+	
+		if( World_n_Fade_Reduction_Power.x == 1)
+			FD_Adjust = 0.3125;
+		if( World_n_Fade_Reduction_Power.x == 2)
+			FD_Adjust = 0.375;
+		if( World_n_Fade_Reduction_Power.x == 3)
+			FD_Adjust = 0.4375;	
+		if( World_n_Fade_Reduction_Power.x == 4)
+			FD_Adjust = 0.50;
+		if( World_n_Fade_Reduction_Power.x == 5)
+			FD_Adjust = 0.5625;
+		if( World_n_Fade_Reduction_Power.x == 6)
+			FD_Adjust = 0.625;
+		if( World_n_Fade_Reduction_Power.x == 7)
+			FD_Adjust = 0.6875;
+		if( World_n_Fade_Reduction_Power.x == 8)
+			FD_Adjust = 0.75;
+	
+		if (FPSDFIO >= 1)
+			FD = lerp(FD * FD_Adjust,FD,FadeIO);
+	
+		float2 DLR = float2(FD,FD),Persp = Per;
+		float Per_Fade = lerp(FD_Adjust,1.0,FadeIO);
+		
+		if( Eye_Fade_Selection == 0)
+			Persp *= Per_Fade;
+		if( Eye_Fade_Selection == 1)
+		{
+			Persp *= float2(1,Per_Fade); 
+			DLR = float2(D,FD);
+		}
+		else if( Eye_Fade_Selection == 2)
+		{
+			Persp *= float2(Per_Fade,1);
+			DLR = float2(FD,D); 
+		}
+  
 		if(Stereoscopic_Mode == 0)
 			Persp *= 0.5;
 		//if(Stereoscopic_Mode == 5)//Need to work on this later.
@@ -3216,37 +3330,7 @@ uniform int Extra_Information <
 		if(Inficolor_Auto_Focus)
 			Persp *= lerp(0.75,1.0, smoothstep(0,0.5,tex2D(SamplerLumN,float2(0,0.750)).z));
 		#endif
-	
-		float D = Eye_Swap ? -Min_Divergence().x : Min_Divergence().x;
-	
-		float FadeIO = Focus_Reduction_Type == 1 ? 1 : smoothstep(0,1,1-Fade_in_out(texcoord).x), FD = D, FD_Adjust = 0.25;
-	
-		if( World_n_Fade_Reduction_Power.x == 1)
-			FD_Adjust = 0.3125;
-		if( World_n_Fade_Reduction_Power.x == 2)
-			FD_Adjust = 0.375;
-		if( World_n_Fade_Reduction_Power.x == 3)
-			FD_Adjust = 0.4375;	
-		if( World_n_Fade_Reduction_Power.x == 4)
-			FD_Adjust = 0.50;
-		if( World_n_Fade_Reduction_Power.x == 5)
-			FD_Adjust = 0.5625;
-		if( World_n_Fade_Reduction_Power.x == 6)
-			FD_Adjust = 0.625;
-		if( World_n_Fade_Reduction_Power.x == 7)
-			FD_Adjust = 0.6875;
-		if( World_n_Fade_Reduction_Power.x == 8)//Should expand to 0.875? it would be Power == 10
-			FD_Adjust = 0.75;
-	
-		if (FPSDFIO >= 1)
-			FD = lerp(FD * FD_Adjust,FD,FadeIO);
-	
-		float2 DLR = float2(FD,FD);
-		if( Eye_Fade_Selection == 1)
-				DLR = float2(D,FD);
-		else if( Eye_Fade_Selection == 2)
-				DLR = float2(FD,D);
-	
+
 		float4 color, Left_T, Right_T, L, R, Left_Right;
 		#if Reconstruction_Mode
 
@@ -3471,7 +3555,7 @@ uniform int Extra_Information <
 	float4 Out(float4 position : SV_Position, float2 texcoord : TEXCOORD0) : SV_Target
 	{   float4 Color;
 		float2 TCL = texcoord, TCR = texcoord, TC;
-		float DX9_Helper = Info_Fuction();
+		float DX9_Helper = Info_Fuction(), FramePos = Frame_Selector().x;
 		#if !DX9_Toggle && !ISOGL
 		DX9_Helper = position.z;
 		#endif
@@ -3495,6 +3579,45 @@ uniform int Extra_Information <
 		Color.rgb = Stereo_Convert( texcoord, differentialBlend(TCL, 0, Reconstruction_Type), differentialBlend(TCR, 1, Reconstruction_Type) ).rgb;	  	
 		#else
 		Color.rgb = PS_calcLR(texcoord, position.xy).rgb;
+			#if EX_DLP_FS_Mode
+			//DLP Markers SbS
+			if(FS_Mode == 1 && Stereoscopic_Mode == 0 )
+				if(texcoord.y > 0.999)
+					Color.rgb = FramePos ? float3(0.0,1.0,1.0) : float3(1.0,0.0,0.0);
+				
+			//DLP Markers TnB
+			if(FS_Mode == 1 && Stereoscopic_Mode == 1 )
+			{
+				if(texcoord.y > 0.999)
+					Color.rgb = FramePos ? float3(1.0,1.0,0.0) : float3(0.0,0.0,1.0);
+					
+				if(texcoord.y > 0.499 && texcoord.y < 0.500)
+					Color.rgb = FramePos ? float3(1.0,1.0,0.0) : float3(0.0,0.0,1.0);
+			}
+			//DLP FS
+			if(FS_Mode == 1 && Stereoscopic_Mode == Frame_Selector().w )
+				if(texcoord.y > 0.999)
+					Color.rgb = Frame_Selector().y >= 2 ? float3(0.0,1.0,0.0) : float3(1.0,0.0,1.0);
+			//Blue Line FS
+			if(FS_Mode == 2 && Stereoscopic_Mode == Frame_Selector().w )
+				if(texcoord.y > 0.999)
+				{
+					Color.rgb = 0;
+					if(Frame_Selector().x)
+						Color.rgb = texcoord.x > 0.75 ? Color.rgb : float3(0.0,0.0,1.0);
+					else
+						Color.rgb = texcoord.x > 0.25 ? Color.rgb : float3(0.0,0.0,1.0);
+				}
+			
+			if(FS_Mode == 3 && Stereoscopic_Mode == Frame_Selector().w )
+				if(1-texcoord.y > 0.9995 && 1-texcoord.x > 0.9995)
+				{
+					Color.rgb = 0;
+					if(Frame_Selector().x)
+						Color.rgb = 1;
+				}
+			#endif		
+	
 		#endif
 		Color = DX9_Helper ? Color.rgba + Color.w : Color; //Blend Color
 		#if BC_SPACE == 1

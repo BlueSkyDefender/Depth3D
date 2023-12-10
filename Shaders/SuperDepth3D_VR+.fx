@@ -1,7 +1,7 @@
 	////--------------------//
 	///**SuperDepth3D_VR+**///
 	//--------------------////
-	#define SD3DVR "SuperDepth3D_VR+ v3.9.9.9\n"
+	#define SD3DVR "SuperDepth3D_VR+ v4.0.0\n"
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//* Depth Map Based 3D post-process shader
 	//* For Reshade 4.4+ I think...
@@ -94,7 +94,7 @@ namespace SuperDepth3DVR
 		#define OW_WP "WP Off\0Custom WP\0"
 		static const int WSM = 0;
 		//Triggers
-		static const float CWH = 0, WBA = 0, WFB = 0, WND = 0, WRP = 0, MML = 0, SMD = 0, WHM = 0, SDU = 0, ABE = 2, LBE = 0, DRS = 0, MAC = 0, ARW = 0, OIL = 0, MMS = 0, NVK = 0, NDG = 0, FTM = 0, SPO = 0, MMD = 0, SMP = 0, LBR = 0, HQT = 0, AFD = 0, MDD = 0, FPS = 1, SMS = 1, OIF = 0, NCW = 0, RHW = 0, NPW = 0, SPF = 0, BDF = 0, HMT = 0, HMC = 0, DFW = 0, NFM = 0, DSW = 0, LBC = 0, LBS = 0, LBM = 0, DAA = 0, NDW = 0, PEW = 0, WPW = 0, FOV = 0, EDW = 0, SDT = 0;
+		static const float AWZ = 0, CWH = 0, WBA = 0, WFB = 0, WND = 0, WRP = 0, MML = 0, SMD = 0, WHM = 0, SDU = 0, ABE = 2, LBE = 0, DRS = 0, MAC = 0, ARW = 0, OIL = 0, MMS = 0, NVK = 0, NDG = 0, FTM = 0, SPO = 0, MMD = 0, SMP = 0, LBR = 0, HQT = 0, AFD = 0, MDD = 0, FPS = 1, SMS = 1, OIF = 0, NCW = 0, RHW = 0, NPW = 0, SPF = 0, BDF = 0, HMT = 0, HMC = 0, DFW = 0, NFM = 0, DSW = 0, LBC = 0, LBS = 0, LBM = 0, DAA = 0, NDW = 0, PEW = 0, WPW = 0, FOV = 0, EDW = 0, SDT = 0;
 		//Overwatch.fxh State
 		#define OSW 1
 	#endif
@@ -527,7 +527,7 @@ namespace SuperDepth3DVR
 		#else
 		ui_type = "slider";
 		#endif
-		ui_min = 0.0; ui_max = 5.0;
+		ui_min = 0.0; ui_max = 7.0;
 		ui_label = " Halo Reduction";
 		ui_tooltip = "This distorts the depth in some View Modes to hide or minimize the halo in Most Games.\n"
 					 "With this active it should Hide the Halo a little better depending the View Mode it works on.\n"
@@ -1217,15 +1217,16 @@ uniform int Extra_Information <
 		return floor(i * 10.0f);// * 0.1f;
 	}
 	
-	float Re_Scale_WN()
-	{
-		return saturate(WZPD_and_WND.x * 2.0f);
+	float2 Re_Scale_WN()
+	{   float Near_Plane_Popout = WZPD_and_WND.x * 2;
+		return saturate(float2(abs(Near_Plane_Popout),Near_Plane_Popout >= 0 ? 0 : 1));
 	}
 	
 	float Perspective()
 	{
+	    float Scale_Value_Cal = Re_Scale_WN().y ? 75 : 100.0;
 		float Min_Div = max(1.0, Divergence), D_Scale = Scale(Min_Div,100.0,1.0);   
-		return IPD + (Re_Scale_WN()*100.0)*D_Scale; // Need to find the correct calculation here I think it's 0.5 less
+		return IPD + (Re_Scale_WN().x*Scale_Value_Cal)*D_Scale; // Need to find the correct calculation here I think it's 0.5 less
 	}
 
 	#define Interpupillary_Distance Perspective() * pix.x
@@ -2064,7 +2065,7 @@ uniform int Extra_Information <
 			DM.x = DM.x;
 		else
 		{
-			DM.x = lerp(DM.x,WD,CutOFFCal);
+			//DM.x = lerp(DM.x,WD,CutOFFCal);
 			DM.y = lerp(0.0,WD,CutOFFCal);
 			DM.z = lerp(0.5,WD,CutOFFCal);
 		}
@@ -2123,6 +2124,36 @@ uniform int Extra_Information <
 		return (1-(Val*2.))*1000;
 	}
 	
+	bool CWH_Mask(float2 StoredTC)
+	{
+		//Create Mask for Weapon Hand Consideration for ZPD boundary condition.
+		float2 Shape_TC = StoredTC;
+		float Shape_Out, Shape_One, Shape_Two, Shape_Three;
+		
+		// Conditions for Shape_One
+		bool Shape_One_C1 = (Shape_TC.x / Shape_TC.y * 0.8125) > 1;
+		bool Shape_One_C2 = (((1 - Shape_TC.x) / Shape_TC.y) * 0.8125) > 1;
+		Shape_One = saturate(Shape_One_C1 || Shape_One_C2);  // Use saturate to clamp between 0 and 1
+		
+		// Conditions for Shape_Two
+		bool Shape_Two_C1 = (1 - Shape_TC.x < 0.400 && 1 - Shape_TC.y < 0.400);
+		Shape_Two = saturate(1 - Shape_Two_C1);  // Use saturate to clamp between 0 and 1
+		
+		// Conditions for Shape_Three
+		float Shape_Three_C1 = (1 - Shape_TC.x - 0.45) / (1 - Shape_TC.y);
+		Shape_Three = saturate(Shape_Three_C1 > 1);  // Use saturate to clamp between 0 and 1
+		
+		// Calculate Shape_Out
+		Shape_Out = Shape_One + (1 - Shape_Three);
+		Shape_Out *= Shape_One + Shape_Two;
+		
+		//Shape_Out = Shape_TC.y > TEST ? 0 : Shape_Out;
+		if(CWH == 2)
+		Shape_Out = Shape_TC.x < 0.5 ? 1 : Shape_Out;
+		
+		return Shape_Out;
+	}	
+		
 	float2x4 Fade(float2 texcoord)
 	{   //Check Depth
 		float CD, Detect, Detect_Out_of_Range = -1, ZPD_Scaler_One_Boundary = Set_Pop_Min().x;
@@ -2190,9 +2221,8 @@ uniform int Extra_Information <
 					CD = 1 - ZPD_I / PDepth;
 					//Weapon Hand Consideration
 					#if CWH
-						bool WHC_Mask = texcoord.y > 0.55 ? 1 : tex2Dlod(SamplerzBuffer_BlurVR,float4(GridXY,0,0)).x;
-						//Mask set as bool because using lerp causes the code to break in this instance. 
-						ZPD_Scaler_One_Boundary = WHC_Mask ? ZPD_Scaler_One_Boundary : WBA;
+						bool WHC_Mask = CWH_Mask(GridXY);
+						ZPD_Scaler_One_Boundary = lerp(WBA, ZPD_Scaler_One_Boundary, WHC_Mask);
 					#endif	
 					if ( CD < -ZPD_Scaler_One_Boundary )
 						Detect = 1;
@@ -2430,6 +2460,7 @@ uniform int Extra_Information <
 	
 	float3 DB_Comb( float2 texcoord)
 	{
+		float Auto_Adjust_Weapon_Depth = 1, Anti_Weapon_Z = abs(AWZ);
 		// X = Mix Depth | Y = Weapon Mask | Z = Weapon Hand | W = Normal Depth
 		float4 DM = float4(tex2Dlod(SamplerDMVR,float4(texcoord,0,0)).xyz,PrepDepth( SDT == 1 || SD_Trigger == 1 ? TC_SP(texcoord).xy : texcoord )[1][1]);
 		//Hide Temporal passthrough
@@ -2468,7 +2499,13 @@ uniform int Extra_Information <
 		float3 HandleConvergence = Conv(DM.xz,texcoord).xyz;
 			   HandleConvergence.y *= WA_XYZW().w;
 			   HandleConvergence.y = lerp(HandleConvergence.y + FD_Adjust, HandleConvergence.y, FadeIO);
-		DM.y = lerp( HandleConvergence.x, HandleConvergence.y, DM.y);
+		if(Anti_Weapon_Z > 0)//Anti-Weapon Hand Z-Fighting
+		{
+			float AAWD_Adjust = tex2Dlod(SamplerDMVR,float4(float2(AWZ < 0 ? 0.55 : 0.50,0.525),0,8)).x;
+			Auto_Adjust_Weapon_Depth = lerp(0.5,1.0,smoothstep(0,1,AAWD_Adjust * (Anti_Weapon_Z > 1 ? 12.5 : 7.5)));
+		}
+
+		DM.y = lerp( HandleConvergence.x, HandleConvergence.y * Auto_Adjust_Weapon_Depth, DM.y);
 	
 		float Edge_Adj = saturate(lerp(0.5,1.0,Edge_Adjust));
 		
@@ -2557,10 +2594,12 @@ uniform int Extra_Information <
 				DM.y = LB_Masked;	
 		#endif
 		
-		#if WHM //For now it's just UI masking for Diablo 4		
-		float Mask = tex2Dlod(SamplerDMVR,float4(texcoord,0,7.5)).y;
+		#if WHM 		
+		float DT_Switch = DT_Z < 0;
+		float Mask = tex2Dlod(SamplerDMVR,float4(texcoord,0,DT_Switch ? 2.0 : 7.5)).y;
+		float Blur_Mask = tex2Dlod(SamplerDMVR,float4(texcoord,0,9)).x;
 		if(WP > 0)
-			DM.y = lerp(DM.y,0.025 ,smoothstep(0,DT_Z,Mask));
+			DM.y = lerp(DM.y,DT_Switch ? lerp(0.0,0.2,Blur_Mask) * lerp(2,1,FadeIO) : 0.025 ,smoothstep(0,abs(DT_Z),Mask) * lerp(1- FD_Adjust,1,FadeIO));
 		#endif
 		
 		return float3(DM.y,PrepDepth( SDT == 2 || SD_Trigger == 2 ? TC_SP(texcoord).zw : texcoord)[1][1],HandleConvergence.z);
@@ -2590,37 +2629,11 @@ uniform int Extra_Information <
 	void zBuffer_Blur(in float4 position : SV_Position, in float2 texcoord : TEXCOORD, out float2 Blur_Out : SV_Target0)
 	{   
 		float2 StoredTC = texcoord;
-		texcoord.y *= 2;
 		float simple_Blur = tex2Dlod(SamplerzBufferVR_L,float4(texcoord,0, 0.0)).x;
 		simple_Blur += tex2Dlod(SamplerzBufferVR_L,float4(texcoord + float2( pix.x * Blur_Adjust * 2, pix.y),0, 0.0)).x;
 		simple_Blur += tex2Dlod(SamplerzBufferVR_L,float4(texcoord + float2( pix.x * Blur_Adjust   , pix.y),0, 0.0)).x;
 		simple_Blur += tex2Dlod(SamplerzBufferVR_L,float4(texcoord + float2(-pix.x * Blur_Adjust   , pix.y),0, 0.0)).x;
-		simple_Blur += tex2Dlod(SamplerzBufferVR_L,float4(texcoord + float2(-pix.x * Blur_Adjust * 2, pix.y),0, 0.0)).x;
-		//Create Mask for Weapon Hand Consideration for ZPD boundary condition.
-		float2 Shape_TC = StoredTC;
-		float Shape_Out, Shape_One, Shape_Two, Shape_Three;
-		#if CWH
-		// Conditions for Shape_One
-		bool Shape_One_C1 = (Shape_TC.x / Shape_TC.y * 0.8125) > 1;
-		bool Shape_One_C2 = (((1 - Shape_TC.x) / Shape_TC.y) * 0.8125) > 1;
-		Shape_One = saturate(Shape_One_C1 || Shape_One_C2);  // Use saturate to clamp between 0 and 1
-		
-		// Conditions for Shape_Two
-		bool Shape_Two_C1 = (1 - Shape_TC.x < 0.400 && 1 - Shape_TC.y < 0.400);
-		Shape_Two = saturate(1 - Shape_Two_C1);  // Use saturate to clamp between 0 and 1
-		
-		// Conditions for Shape_Three
-		float Shape_Three_C1 = (1 - Shape_TC.x - 0.45) / (1 - Shape_TC.y);
-		Shape_Three = saturate(Shape_Three_C1 > 1);  // Use saturate to clamp between 0 and 1
-		
-		// Calculate Shape_Out
-		Shape_Out = Shape_One + (1 - Shape_Three);
-		Shape_Out *= Shape_One + Shape_Two;
-		
-		//Shape_Out = Shape_TC.y > TEST ? 0 : Shape_Out;
-		if(CWH == 2)
-		Shape_Out = Shape_TC.x < 0.5 ? 1 : Shape_Out;
-		#endif		
+		simple_Blur += tex2Dlod(SamplerzBufferVR_L,float4(texcoord + float2(-pix.x * Blur_Adjust * 2, pix.y),0, 0.0)).x;	
 		//Fade Storage
 		#if !DX9_Toggle
 		float2x4 Fade_Pass = Fade(StoredTC);	
@@ -2634,9 +2647,9 @@ uniform int Extra_Information <
 		//Set a avr size for the Number of lines needed in texture storage.
 		float Grid = floor(StoredTC.y * BUFFER_HEIGHT * BUFFER_RCP_HEIGHT * Num_of_Values);	
 		simple_Blur = min(1,simple_Blur * 0.2);
-		Blur_Out = float2(StoredTC.y < 0.5 ? simple_Blur : saturate(Shape_Out), Storage_Array[int(fmod(Grid,Num_of_Values))]);
+		Blur_Out = float2(simple_Blur, Storage_Array[int(fmod(Grid,Num_of_Values))]);
 		#else
-		Blur_Out.xy = StoredTC.y < 0.5 ? simple_Blur : saturate(Shape_Out);
+		Blur_Out.xy = simple_Blur;
 		#endif
 	}	
 
@@ -2652,11 +2665,13 @@ uniform int Extra_Information <
 		#endif
 	}
 	
+	static const float  VMW_Array[8] = { 0.0, 1.0, 2.0, 3.0 , 3.5 , 4.0, 4.5 , 5.0 };		
 	float GetDB(float2 texcoord)
 	{
 		bool VM_5_Bool = View_Mode == 5;
 		float GetDepth = smoothstep(0,1, tex2Dlod(SamplerzBufferVR_P, float4(texcoord,0, 1) ).y), Sat_Range = saturate(Range_Blend);
-		uint VMW = View_Mode == 1 ? View_Mode_Warping : lerp(6, VM_5_Bool ? 0 :View_Mode_Warping, VM_5_Bool ? GetDepth : 1);
+		float VM_Mip_Cal = VMW_Array[clamp(View_Mode_Warping,0,7)];
+		float VMW = View_Mode == 1 ? VM_Mip_Cal : lerp(6, VM_5_Bool ? 0 : VM_Mip_Cal, VM_5_Bool ? GetDepth : 1);
 		
 		float2 Base_Depth_Buffers = float2(tex2Dlod(SamplerzBufferVR_L, float4( texcoord, 0, 0) ).x,tex2Dlod(SamplerzBufferVR_P, float4( texcoord, 0, 0) ).x);	
 		float2 Base_Depth_SubSampled = float2(tex2Dlod(SamplerzBufferVR_L, float4( texcoord, 0, 2) ).x,tex2Dlod(SamplerzBufferVR_P, float4( texcoord, 0, 2) ).x);
@@ -2669,7 +2684,7 @@ uniform int Extra_Information <
 		float Depth_Blur = min(tex2Dlod(SamplerzBufferVR_L, float4( texcoord, 0, clamp(VMW,0,5) ) ).x,Base_Depth.x);
 
 		float2 DepthBuffer_LP = float2(Depth_Blur,Base_Depth.y);
-		float2 Min_Blend = float2(min(DepthBuffer_LP,tex2Dlod(SamplerzBuffer_BlurVR, float4( texcoord * float2(1,0.5), 0, 1.0 ) ).x));
+		float2 Min_Blend = float2(min(DepthBuffer_LP,tex2Dlod(SamplerzBuffer_BlurVR, float4( texcoord, 0, 1.0 ) ).x));
 		
 		if( Range_Blend > 0)
 			   DepthBuffer_LP.xy = lerp(DepthBuffer_LP.xy,  Min_Blend.xy ,(smoothstep(0.5,1.0, Min_Blend.x) *  Min_Divergence().y) * Sat_Range);
@@ -2722,13 +2737,13 @@ uniform int Extra_Information <
 		float US_Offset = lerp(Default_Offset.x,Default_Offset.y,GetDepth * 0.5); D = Diverge < 0 ? -US_Offset : US_Offset;
 	
 		//Offsets listed here Max Seperation is 3% - 8% of screen space with Depth Offsets & Netto layer offset change based on MS.
-		float deltaCoordinates = MS * LayerDepth, CurrentDepthMapValue = GetMixed( ParallaxCoord).x, CurrentLayerDepth = -Re_Scale_WN()*0.5,
+		float deltaCoordinates = MS * LayerDepth, CurrentDepthMapValue = GetMixed( ParallaxCoord).x, CurrentLayerDepth = -Re_Scale_WN().x*0.5,
 			  DB_Offset = D * TP * pix.x, VM_Switch = View_Mode == 1 || View_Mode >= 5  ? 0.125 : lerp(1.0,0.125,GetDepth);
 
 		float Mod_Depth = saturate(GetDepth * lerp(1,15,abs(Artifact_Adjust().y))), Reverse_Depth = Artifact_Adjust().y < 0 ? 1-Mod_Depth : Mod_Depth,
 			  Scale_With_Depth = Artifact_Adjust().y == 0 ? 1 : Reverse_Depth;
 			  
-		float2 Artifacting_Adjust = float2(MS * lerp(0,0.125,saturate(Artifact_Adjust().x * Scale_With_Depth)),0);
+		float2 Artifacting_Adjust = float2(MS * lerp(0,0.125,clamp(Artifact_Adjust().x * Scale_With_Depth,0,2)),0);
 		// Perform the conditional check outside the loop
 		bool applyArtifacting = (Artifact_Adjust().x != 0);
 		
@@ -2837,11 +2852,7 @@ uniform int Extra_Information <
 		#endif
 		//Store Texcoords for left and right eye
 		float2 TCL = texcoord,TCR = texcoord;
-		//IPD Right Adjustment
-		TCL.x -= Interpupillary_Distance*0.5f;
-		TCR.x += Interpupillary_Distance*0.5f;
-	
-		float D =  Min_Divergence().x;
+		float D = Min_Divergence().x;
 	
 		float FadeIO = Focus_Reduction_Type == 1 ? 1 : smoothstep(0,1,1-Fade_in_out(texcoord).x), FD = D, FD_Adjust = 0.2;
 	
@@ -2861,18 +2872,28 @@ uniform int Extra_Information <
 			FD_Adjust = 0.6875;
 		if( World_n_Fade_Reduction_Power.x == 8)
 			FD_Adjust = 0.75;
-			
-		if(Focus_Reduction_Type == 1)
-			FD_Adjust = 1.0;		
 	
 		if (FPSDFIO >= 1)
 			FD = lerp(FD * FD_Adjust,FD,FadeIO);
 	
-		float2 DLR = float2(FD,FD);
+		float2 DLR = float2(FD,FD), Persp = Interpupillary_Distance;
+		float Per_Fade = lerp(FD_Adjust,1.0,FadeIO);
+		
+		if( Eye_Fade_Selection == 0)
+			Persp *= Per_Fade;
 		if( Eye_Fade_Selection == 1)
-				DLR = float2(D,FD);
+		{
+			Persp *= float2(1,Per_Fade); 
+			DLR = float2(D,FD);
+		}
 		else if( Eye_Fade_Selection == 2)
-				DLR = float2(FD,D);
+		{
+			Persp *= float2(Per_Fade,1);
+			DLR = float2(FD,D); 
+		}	
+		//IPD Right Adjustment
+		TCL.x -= Persp.x*0.5f;
+		TCR.x += Persp.y*0.5f;
 				
 	//Left & Right Parallax for Stereo Vision
 	#if HUD_MODE || HMT
