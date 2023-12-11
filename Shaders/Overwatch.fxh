@@ -20126,7 +20126,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DM_Y 3     //HQ VRS 
 	#define NFM 1
 	#define PEW 1
-#elif (App == 0xAB9A0556 ) //Avatar Frontiers of Pandora
+#elif (App == 0xAB9A0556 || App == 0xDC6FD0E9 ) //Avatar Frontiers of Pandora
     //#define DS_Z 2            // Set View Mode
 	#define DA_W 1            // Set Linerzation
     //#define DB_X 1            // Flip
