@@ -1,7 +1,7 @@
 	////--------------------//
 	///**SuperDepth3D_VR+**///
 	//--------------------////
-	#define SD3DVR "SuperDepth3D_VR+ v4.0.1\n"
+	#define SD3DVR "SuperDepth3D_VR+ v4.0.2\n"
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//* Depth Map Based 3D post-process shader
 	//* For Reshade 4.4+ I think...
@@ -90,11 +90,19 @@ namespace SuperDepth3DVR
 		static const float DT_X = 0.0, DT_Y = 0.0, DT_Z = 0.0, DT_W = 0.0;
 		// DZ_X = [Text Position A & B] DZ_Y = [Text Position C] DZ_Z = [ABC Menu Tresholds] DZ_W = [Text Adjustment]
 		static const float DZ_X = 0.0, DZ_Y = 0.0, DZ_Z = 1000.0, DZ_W = 0.0;
+		// DAA_X = [Position A & B] DAA_Y = [Position C] DAA_Z = [ABCD Menu Tresholds] DAA_W = [Null]
+		static const float DAA_X = 0.0, DAA_Y = 0.0, DAA_Z = 1000.0, DAA_W = 0.0;		
+		// DBB_X = [Position A & B] DBB_Y = [Position C] DBB_Z = [ABCD Menu Tresholds] DBB_W = [Null]
+		static const float DBB_X = 0.0, DBB_Y = 0.0, DBB_Z = 1000.0, DBB_W = 0.0;		
+		// DCC_X = [Position A & B] DCC_Y = [Position C] DCC_Z = [ABCD Menu Tresholds] DCC_W = [Null]
+		static const float DCC_X = 0.0, DCC_Y = 0.0, DCC_Z = 1000.0, DCC_W = 0.0;
+		// DDD_X = [Position A & B] DDD_Y = [Position C & UI Pos] DDD_Z = [ABCW Stencil Menu Tresholds] DDD_W = [Stencil Adjust]
+		static const float DDD_X = 0.0, DDD_Y = 0.0, DDD_Z = 1000.0, DDD_W = 0.0;
 		// WSM = [Weapon Setting Mode]
 		#define OW_WP "WP Off\0Custom WP\0"
 		static const int WSM = 0;
 		//Triggers
-		static const float LHA = 0, WBS = 0, TMD = 0, AWZ = 0, CWH = 0, WBA = 0, WFB = 0, WND = 0, WRP = 0, MML = 0, SMD = 0, WHM = 0, SDU = 0, ABE = 2, LBE = 0, DRS = 0, MAC = 0, ARW = 0, OIL = 0, MMS = 0, NVK = 0, NDG = 0, FTM = 0, SPO = 0, MMD = 0, SMP = 0, LBR = 0, HQT = 0, AFD = 0, MDD = 0, FPS = 1, SMS = 1, OIF = 0, NCW = 0, RHW = 0, NPW = 0, SPF = 0, BDF = 0, HMT = 0, HMC = 0, DFW = 0, NFM = 0, DSW = 0, LBC = 0, LBS = 0, LBM = 0, DAA = 0, NDW = 0, PEW = 0, WPW = 0, FOV = 0, EDW = 0, SDT = 0;
+		static const float SUI = 0, SSA = 0, SNA = 0, SSB = 0, SNB = 0, FRM = 1, LHA = 0, WBS = 0, TMD = 0, AWZ = 0, CWH = 0, WBA = 0, WFB = 0, WND = 0, WRP = 0, MML = 0, SMD = 0, WHM = 0, SDU = 0, ABE = 2, LBE = 0, DRS = 0, MAC = 0, ARW = 0, OIL = 0, MMS = 0, NVK = 0, NDG = 0, FTM = 0, SPO = 0, MMD = 0, SMP = 0, LBR = 0, HQT = 0, AFD = 0, MDD = 0, FPS = 1, SMS = 1, OIF = 0, NCW = 0, RHW = 0, NPW = 0, SPF = 0, BDF = 0, HMT = 0, HMC = 0, DFW = 0, NFM = 0, DSW = 0, LBC = 0, LBS = 0, LBM = 0, DAA = 0, NDW = 0, PEW = 0, WPW = 0, FOV = 0, EDW = 0, SDT = 0;
 		//Overwatch.fxh State
 		#define OSW 1
 	#endif
@@ -518,13 +526,13 @@ namespace SuperDepth3DVR
 		#else
 		ui_type = "slider";
 		#endif
-		ui_min = 0.0; ui_max = 6.0;
+		ui_min = 0.0; ui_max = 8.0;
 		ui_label = " Halo Reduction";
 		ui_tooltip = "This distorts the depth in some View Modes to hide or minimize the halo in Most Games.\n"
 					 "With this active it should Hide the Halo a little better depending the View Mode it works on.\n"
-					 "Default is 3 and Zero is Off.";
+					 "Default is 4 and Zero is Off.";
 		ui_category = "Occlusion Masking";
-	> = 3;
+	> = 4;
 
 	uniform int Custom_Sidebars <
 		ui_type = "combo";
@@ -580,7 +588,7 @@ namespace SuperDepth3DVR
 			ui_tooltip = "Foveated rendering lowes the quality of the infilling around the center of the image.\n"
 						 "In the future when we have a method for eye tracking this should work a lot better.";
 			ui_category = "Occlusion Masking";
-	> = true;
+	> = FRM;
 	
 	uniform float Compatibility_Power <
 		#if Compatibility
@@ -824,7 +832,7 @@ namespace SuperDepth3DVR
 	
 	uniform int FPSDFIO <
 		ui_type = "combo";
-		ui_items = "Off\0Press\0Hold\0";
+		ui_items = "Off\0Press\0Hold\0Stencil\0Press & Stencil\0Hold & Stencil\0";
 		ui_label = " Activation Type";
 		ui_tooltip = "This lets the shader handle real time depth reduction for aiming down your sights.\n"
 					"This may induce Eye Strain so take this as a Warning.";
@@ -1138,7 +1146,7 @@ uniform int Extra_Information <
 	#define pix float2(BUFFER_RCP_WIDTH, BUFFER_RCP_HEIGHT)
 	#define AI Interlace_Anaglyph.x * 0.5 //Optimization for line interlaced Adjustment.
 	#define Res int2(BUFFER_WIDTH, BUFFER_HEIGHT)
-	#define ARatio Res.x / Res.y
+	#define ARatio pix.y / pix.x
 	#define FLT_EPSILON  1.192092896e-07 // smallest such that Value + FLT_EPSILON != Value	
 	
 	float3 RE_Set(float Auto_Switch)
@@ -1320,19 +1328,17 @@ uniform int Extra_Information <
 		};
 
 	#if DX9_Toggle
-		#if TMD
 		texture texzBufferBlurVR < pooled = true; > { Width = BUFFER_WIDTH / 4.0 ; Height = BUFFER_HEIGHT / 4.0; Format = R16F; MipLevels = 6; }; // Needs to be RG16F If external Texture is given for DownSample. Not needed if external texture is already down sampled.
 		
 		sampler SamplerzBuffer_BlurVR
 		{
 			Texture = texzBufferBlurVR;
 		};
-		#endif
 	#else
 		#if TMD
 		texture texzBufferBlurVR < pooled = true; > { Width = BUFFER_WIDTH / 4.0 ; Height = BUFFER_HEIGHT / 4.0; Format = RG16F; MipLevels = 6; }; // Needs to be RG16F If external Texture is given for DownSample. Not needed if external texture is already down sampled.
 		#else
-		texture texzBufferBlurVR < pooled = true; > { Width = BUFFER_WIDTH / 8.0 ; Height = BUFFER_HEIGHT / 8.0; Format = R16F; }; // Needs to be RG16F If external Texture is given for DownSample. Not needed if external texture is already down sampled.
+		texture texzBufferBlurVR < pooled = true; > { Width = BUFFER_WIDTH / 8.0 ; Height = BUFFER_HEIGHT / 8.0; Format = R16F; MipLevels = 3; }; // Needs to be RG16F If external Texture is given for DownSample. Not needed if external texture is already down sampled.
 		#endif	
 
 		sampler SamplerzBuffer_BlurVR
@@ -1504,9 +1510,9 @@ uniform int Extra_Information <
 		minmaxRGB = 0;
 	}
 	#endif	
-	float2 Lum(float2 texcoord)
+	float Avr_Mix(float2 texcoord)
 	{   //Luminance
-			return saturate(tex2Dlod(SamplerLumVR,float4(texcoord,0,11)).xy);//Average Luminance Texture Sample
+		return saturate(tex2Dlod(SamplerLumVR,float4(texcoord ,0,11)).y);//Average Luminance Texture Sample
 	}
 	
 	#if (RHW || NCW || NPW || NFM || PEW || DSW || OSW || DAA || NDW || WPW || FOV || EDW)
@@ -1634,7 +1640,7 @@ uniform int Extra_Information <
 	}
 	#endif
 	
-	#if MMD || MDD || SMD || TMD
+	#if MMD || MDD || SMD || TMD || SUI
 		float3 C_Tresh(float2 TCLocations)//Color Tresh
 		{ 
 			return tex2Dlod(BackBufferCLAMP,float4(TCLocations,0, 0)).rgb;
@@ -1670,21 +1676,21 @@ uniform int Extra_Information <
 		#endif	
 	#endif
 	
-	#if MDD || SMD || TMD
+	#if MDD || SMD || TMD || SUI
 		#if MDD
 		int Color_Likelyhood(float2 Pos_IN, float C_Value, int Switcher)
-		{	float3 RGB_IN = C_Tresh(Pos_IN);
-			return FN_Value(RGB_IN.r) + FN_Value(RGB_IN.g) + FN_Value(RGB_IN.b) == C_Value ? Switcher : 0;
+		{ 
+			return Check_Color(Pos_IN,C_Value) ? Switcher : 0;
 		}	
 		
-		float Menu_Size()//Active RGB Detection
+		float2 Menu_Size()//Active RGB Detection
 		{ 
 	
 			float2 Pos_A = DN_X.xy, Pos_B = DN_X.zw, Pos_C = DN_Y.xy,
 				   Pos_D = DN_Y.zw, Pos_E = DN_Z.xy, Pos_F = DN_Z.zw;
 			float Menu_Size_Selection[5] = { 0.0, DN_W.x, DN_W.y, DN_W.z, DN_W.w };
 			float4 MT_Values = DJ_Y;
-			float3 SMT_Values = DJ_Z;
+			float4 SMT_Values = DJ_Z;
 			//Wild Card Always On
 			float Menu_X = Check_Color(Pos_A, MT_Values.x) || Check_Color(Pos_A, MT_Values.w); 
 			float Menu_Z = Check_Color(Pos_C, MT_Values.z) || Check_Color(Pos_C, MT_Values.w);
@@ -1693,10 +1699,49 @@ uniform int Extra_Information <
 				   				Check_Color(Pos_B, MT_Values.y) &&       //Y
 				  				 Menu_Z,                                  //Z & W is wiled Card.
 				  Menu_Change = Menu_Detection + Color_Likelyhood(Pos_D, SMT_Values.x , 1) + Color_Likelyhood(Pos_E, SMT_Values.y , 2) + Color_Likelyhood(Pos_F, SMT_Values.z, 3);
-	
-			return (Menu_Detection > 0 ? Menu_Size_Selection[clamp((int)Menu_Change,0,4)] : 0) && Lock_Menu_Detection();
+			if(Lock_Menu_Detection())
+				return float2(Menu_Detection > 0 ? Menu_Size_Selection[clamp((int)Menu_Change,0,4)] : 0, SMT_Values.w);
+			else
+				return 0;
 		}		
 		#endif
+
+			#if SUI //Stencil UI & Detection
+				float Stencil_n_Detection_A()//Active RGB Detection
+				{ 
+					float2 Pos_A = DDD_X.xy, Pos_B = DDD_X.zw, Pos_C = DDD_Y.xy;
+					float4 ST_Values = DDD_Z;
+			
+					//Wild Card Always On
+					float Menu_X = Check_Color(Pos_A, ST_Values.x) || Check_Color(Pos_A, ST_Values.w);
+	
+					float Menu_Z = Check_Color(Pos_C, ST_Values.z) || Check_Color(Pos_C, ST_Values.w);
+					
+					float Menu_Detection = Menu_X &&                          //X & W is wiled Card. 
+										   Check_Color(Pos_B, ST_Values.y) && //Y
+										   Menu_Z;                            //Z & W is wiled Card.
+			
+					return (Menu_Detection > 0);
+				}
+				#if SUI >= 2
+				float Stencil_n_Detection_B()//Active RGB Detection
+				{ 
+					float2 Pos_A = DEE_X.xy, Pos_B = DEE_X.zw, Pos_C = DEE_Y.xy;
+					float4 ST_Values = DEE_Z;
+			
+					//Wild Card Always On
+					float Menu_X = Check_Color(Pos_A, ST_Values.x) || Check_Color(Pos_A, ST_Values.w);
+	
+					float Menu_Z = Check_Color(Pos_C, ST_Values.z) || Check_Color(Pos_C, ST_Values.w);
+					
+					float Menu_Detection = Menu_X &&                          //X & W is wiled Card. 
+										   Check_Color(Pos_B, ST_Values.y) && //Y
+										   Menu_Z;                            //Z & W is wiled Card.
+			
+					return (Menu_Detection > 0);
+				}
+				#endif
+			#endif
 	
 			#if SMD //Simple Menu Detection	
 			float Simple_Menu_A()//Active RGB Detection
@@ -2202,12 +2247,28 @@ uniform int Extra_Information <
 			AA *= 1.75;
 		if(World_n_Fade_Reduction_Power.y == 8)//instant
 			AA *= 2.0;
+
+		#if SUI
+		float SnD_Toggle = SNA ? Stencil_n_Detection_A() : 0;
+			#if SUI >= 2
+			  SnD_Toggle = SNB ? Stencil_n_Detection_B() : SnD_Toggle;
+			#endif
+		#else
+		float SnD_Toggle = 0;	
+		#endif
+	
 		//Fade in toggle.
-		if(FPSDFIO == 1)
+		if(FPSDFIO == 1 )
 			Trigger_Fade = Trigger_Fade_A;
 		else if(FPSDFIO == 2)
 			Trigger_Fade = Trigger_Fade_B;
-	
+		else if(FPSDFIO == 3)
+			Trigger_Fade = SnD_Toggle;
+		else if(FPSDFIO == 4)
+			Trigger_Fade = Trigger_Fade_A || SnD_Toggle;			
+		else if(FPSDFIO == 5)
+			Trigger_Fade = Trigger_Fade_B || SnD_Toggle;
+			
 		return PStoredfade + (Trigger_Fade - PStoredfade) * (1.0 - exp(-frametime/((1-AA)*1000))); ///exp2 would be even slower
 	}
 	
@@ -2394,13 +2455,13 @@ uniform int Extra_Information <
 							  float4 (0.0,0.0,0.0,0.0)};                                       //Eye Tracker Alt      8
 			
 		float AB_EX = lerp(Depth(XYArray[Auto_Balance_Ex].xy) , Depth(XYArray[Auto_Balance_Ex].zw), Auto_Balance_Ex > 3 && Auto_Balance_Ex < 7 ? 0.5 : 0 );
-		return float2(Auto_Balance_Ex > 0 ? saturate(lerp(AB_EX * 2 , Lum(float2(0.5,Switch_Height_Point)).y , 0.25) ) : 1, saturate(lerp( Depth( float2(0.5,Switch_Height_Point) ) * 2 , Lum(float2(0.5,Switch_Height_Point)).y , 0.25) ) ) ;
+		return float2(Auto_Balance_Ex > 0 ? saturate(lerp(AB_EX * 2 , Avr_Mix(float2(0.5,Switch_Height_Point)).x , 0.25) ) : 1, saturate(lerp( Depth( float2(0.5,Switch_Height_Point) ) * 2 , Avr_Mix(float2(0.5,Switch_Height_Point)).x , 0.25) ) ) ;
 	}
 
 	float4 DepthMap(in float4 position : SV_Position,in float2 texcoord : TEXCOORD) : SV_Target
 	{
 		float4 DM = float4(PrepDepth(texcoord)[0][0],PrepDepth(texcoord)[0][1],PrepDepth(texcoord)[0][2],PrepDepth(texcoord)[1][1]);
-		float R = DM.x, G = DM.y, B = DM.z, Auto_Scale = WZPD_and_WND.z > 0 ? lerp(lerp(1.0,0.5,saturate(WZPD_and_WND.z * 2)),1.0,lerp(Auto_Balance_Selection().y , smoothstep(0,0.5,tex2D(SamplerLumVR,float2(0,0.750)).z), 0.5)) : 1;
+		float R = DM.x, G = DM.y, B = DM.z, Auto_Scale = WZPD_and_WND.z > 0 ? lerp(lerp(1.0,0.5,saturate(WZPD_and_WND.z * 2)),1.0,lerp(saturate(Auto_Balance_Selection().y * 2.5) , smoothstep(0,0.5,tex2D(SamplerLumVR,float2(0,0.750)).z), 0.5)) : 1;
 		float SP_Min = Set_Pop_Min().y, Select_Min_LvL_Trigger;float3 Level_Control = DS_X;
 		//Fade Storage
 		#if DX9_Toggle
@@ -2472,7 +2533,7 @@ uniform int Extra_Information <
 	}
 	
 	float AutoDepthRange(float d, float2 texcoord )
-	{ float LumAdjust_ADR = smoothstep(-0.0175,min(0.5,Auto_Depth_Adjust),Lum(texcoord).y);
+	{ float LumAdjust_ADR = smoothstep(-0.0175,min(0.5,Auto_Depth_Adjust),Avr_Mix(texcoord).x);
 	    return min(1,( d - 0 ) / ( LumAdjust_ADR - 0));
 	}
 	
@@ -2623,17 +2684,24 @@ uniform int Extra_Information <
 		}
 		
 		#if MDD	
-			float MSDT = Menu_Size(), Direction = texcoord.x < MSDT;
-	
+			float MSDT_A = Menu_Size().x, MSDT_B = abs(Menu_Size().y), Direction = texcoord.x < MSDT_A, Other_Direction = texcoord.y > 1-MSDT_B;
+			
 			#if (MDD  == 2 )		
-				Direction = texcoord.x > MSDT;
+				Direction = texcoord.x > MSDT_A;
 			#elif (MDD  == 3 )		
-				Direction = texcoord.y < MSDT;
+				Direction = texcoord.y < MSDT_A;
 			#elif (MDD  == 4 )
-				Direction = texcoord.y > MSDT;
+				Direction = texcoord.y > MSDT_A;
 			#endif
-			if( MSDT > 0)
+			if( MSDT_A > 0)
+			{
 				DM = Direction ? 0.0625 : DM;
+				
+				if(Menu_Size().y < 0)
+					Other_Direction = texcoord.y < MSDT_B;
+					
+				DM = Other_Direction ? 0.0625 : DM;
+			}
 		#endif	
 		
 		#if MMD
@@ -2744,12 +2812,16 @@ uniform int Extra_Information <
 	void zBuffer_Blur(in float4 position : SV_Position, in float2 texcoord : TEXCOORD, out float2 Blur_Out : SV_Target0)
 	{   
 		float2 StoredTC = texcoord;
+		float Invert_Depth_Mask =  1-smoothstep(0.0,0.5,PrepDepth( StoredTC * float2(2.0, 1) - float2(1.0,0.0)  )[1][1]);
 		float Text_Mask;
 		#if TMD
+				#if DX9_Toggle
+				texcoord.x *= 2.0;
+				#endif
 		float3 Gen_Mask = step(DZ_W.y,tex2D(BackBufferCLAMP,texcoord ).rgb);
 			   Gen_Mask.x = max(Gen_Mask.r, max(Gen_Mask.g, Gen_Mask.b)); 
 			   Text_Mask = saturate(Gen_Mask.x);
-		#endif	
+		#endif			
 		//Fade Storage
 		#if !DX9_Toggle
 		float2x4 Fade_Pass = Fade(StoredTC);	
@@ -2763,54 +2835,65 @@ uniform int Extra_Information <
 		//Set a avr size for the Number of lines needed in texture storage.
 		float Grid = floor(StoredTC.y * BUFFER_HEIGHT * BUFFER_RCP_HEIGHT * Num_of_Values);	
 
-		Blur_Out = float2(Storage_Array[int(fmod(Grid,Num_of_Values))],Text_Mask);
+		Blur_Out = float2(StoredTC < 0.5 ? Storage_Array[int(fmod(Grid,Num_of_Values))] : Invert_Depth_Mask,Text_Mask);
 		#else
-		Blur_Out.xy = Text_Mask;
+		Blur_Out.xy = StoredTC < 0.5 ? Text_Mask : Invert_Depth_Mask;
 		#endif
-	}	
-
+	}
+	
+	#if SUI
+		#if SSA == 1//Square
+		float Stencil_Masking(float2 TC, float2 Pos, float2 UI_Mask_Size, float UI_Mask_Inversion)
+		{
+			TC += Pos - 0.5;
+			float UI_Direction = TC.x < UI_Mask_Size.x || TC.y < UI_Mask_Size.y;
+				  UI_Direction += 1-TC.x < UI_Mask_Size.x || 1-TC.y < UI_Mask_Size.y;
+			float UI_D = saturate(UI_Direction);
+			return lerp(UI_D,1-UI_D,UI_Mask_Inversion);
+		}
+		#elif SSA == 2 //Circle
+		float Stencil_Masking(float2 TC, float2 Pos, float2 UI_Mask_Size, float UI_Mask_Inversion )
+		{ 
+			TC -= Pos;
+			float d = length(TC * float2(ARatio,1)) - UI_Mask_Size.x;
+			float t = saturate(1.0 - d > 0.9999999);
+			return lerp(t,1-t,UI_Mask_Inversion);
+		}
+		#else//Future Expantion
+		float Stencil_Masking(float2 TC, float2 Pos, float2 UI_Mask_Size, float UI_Mask_Inversion )
+		{ 
+			return 0;
+		}
+		#endif			
+	#endif
+	
 	float2 Artifact_Adjust() { return float2(abs(De_Artifacting.x),De_Artifacting.y); }
 
 	float Depth_Seperation()
 	{
 		return min(0.25,Separation_Adjust);
 	}
-	static const float Blur_Adjust = 3.0;	
-	//static const float  VMW_Array[8] = { 0.0, 1.0, 2.0, 3.0 , 3.5 , 4.0, 4.5 , 5.0 };		
+	static const float  VMW_Array[9] = { 0.0, 1.0, 2.0, 3.0 , 3.5 , 4.0, 4.5 , 5.0, 5.5 };		
 	float GetDB(float2 texcoord)
 	{
+		float LR_Depth_Mask = 1-saturate(tex2Dlod(SamplerzBuffer_BlurVR, float4( texcoord  * float2(0.5,1) + float2(0.5,0), 0, 3.0 ) ).x * 2.5);
 		float2 Base_Depth_Buffers = float2(tex2Dlod(SamplerzBufferVR_L, float4( texcoord, 0, 0) ).x,tex2Dlod(SamplerzBufferVR_P, float4( texcoord, 0, 0) ).x);
-			
-		float simple_Blur = Base_Depth_Buffers.x * 0.204164;
-		if( Range_Blend > 0)
-		{
-			//float BA_Value = Blur_Adjust * smoothstep(0.0,0.25,abs(PrepDepth(texcoord )[1][1]*2));
-			simple_Blur += tex2Dlod(SamplerzBufferVR_L,float4(texcoord + float2( pix.x * Blur_Adjust * 2, 0),0, 2)).x * 0.093913;
-			simple_Blur += tex2Dlod(SamplerzBufferVR_L,float4(texcoord + float2( pix.x * Blur_Adjust    , 0),0, 1)).x * 0.304005;
-			simple_Blur += tex2Dlod(SamplerzBufferVR_L,float4(texcoord + float2(-pix.x * Blur_Adjust    , 0),0, 1)).x * 0.304005;
-			simple_Blur += tex2Dlod(SamplerzBufferVR_L,float4(texcoord + float2(-pix.x * Blur_Adjust * 2, 0),0, 2)).x * 0.093913;
-			simple_Blur = min(1,simple_Blur);
-		}	
-		bool VM_5_Bool = View_Mode == 5;
+
 		float GetDepth = smoothstep(0,1, tex2Dlod(SamplerzBufferVR_P, float4(texcoord,0, 1) ).y), Sat_Range = saturate(Range_Blend);
-		uint VM_Mip_Cal = clamp(View_Mode_Warping,0,6);//VMW_Array[clamp(View_Mode_Warping,0,7)];
-		float VMW = View_Mode == 1 ? VM_Mip_Cal : lerp(6, VM_5_Bool ? 0 : VM_Mip_Cal, VM_5_Bool ? GetDepth : 1);
-			
-		float2 Base_Depth_SubSampled = float2(tex2Dlod(SamplerzBufferVR_L, float4( texcoord, 0, 2) ).x,tex2Dlod(SamplerzBufferVR_P, float4( texcoord, 0, 2) ).x);
-		float2 Base_Depth = lerp(Base_Depth_Buffers.xy,Base_Depth_SubSampled.xy,Sat_Range);
+		
+		float Base_Depth_SubSampled = tex2Dlod(SamplerzBufferVR_L, float4( texcoord, 0, lerp(0.0,4.0,Base_Depth_Buffers.x)) ).x;
+		float Base_Depth = lerp(Base_Depth_Buffers.x,Base_Depth_SubSampled,LR_Depth_Mask.x*Sat_Range);
+
+		uint VM_Mip_Cal = VMW_Array[clamp(View_Mode_Warping,0,8)];
+		float VMW = View_Mode == 5 ? lerp(0,VM_Mip_Cal,Base_Depth_Buffers.x) : VM_Mip_Cal;
 		/*
-		float FadeIO = smoothstep(0,1,tex2D(SamplerDMVR,0).x);
+		float FadeIO = smoothstep(0,1,tex2D(SamplerDMN,0).x);
 		if(FPS_Focus_Smoothing)
 			VMW = lerp(VMW, 5,FadeIO);
-		*/
-		float Depth_Blur = min(tex2Dlod(SamplerzBufferVR_L, float4( texcoord, 0, clamp(VMW,0,5) ) ).x,Base_Depth.x);
+		*/			
+		float Min_Blend = min(tex2Dlod(SamplerzBufferVR_L, float4( texcoord, 0, clamp(VMW,0,5.5) ) ).x,Base_Depth.x);
 
-		float2 DepthBuffer_LP = float2(Depth_Blur,Base_Depth.y);
-		float2 Min_Blend = float2(lerp(DepthBuffer_LP,simple_Blur,saturate(PrepDepth(texcoord )[1][1]*2)));
-		
-		if( Range_Blend > 0)
-			   DepthBuffer_LP.xy = lerp(DepthBuffer_LP.xy,  Min_Blend.xy ,(smoothstep(0.5,1.0, Min_Blend.x) *  Min_Divergence().y) * Sat_Range);
-
+		float2 DepthBuffer_LP = float2(Min_Blend,Base_Depth_Buffers.y);
 		#if TMD
 			float Text_Direction = texcoord.x < DZ_W.z || texcoord.y < DZ_W.w;
 			#if (TMD  == 2 ) // Reverse
@@ -2821,9 +2904,9 @@ uniform int Extra_Information <
 
 		//UI Lift Masking 
 		#if DX9_Toggle  
-	    float Basic_UI = saturate(tex2Dlod(SamplerzBuffer_BlurVR, float4( texcoord, 0, 2.5 ) ).x * 30);
+	    float Basic_UI = saturate(tex2Dlod(SamplerzBuffer_BlurVR, float4( texcoord * float2(0.5,1.0) , 0, 2.5 ) ).x * 60);
 	    #else
-	    float Basic_UI = saturate(tex2Dlod(SamplerzBuffer_BlurVR, float4( texcoord, 0, 2.5 ) ).y * 30);
+	    float Basic_UI = saturate(tex2Dlod(SamplerzBuffer_BlurVR, float4( texcoord, 0, 2.5 ) ).y * 60);
 		#endif
 
 		if( DZ_W.x > 0 && Text_Menu_Detection())
@@ -2832,7 +2915,24 @@ uniform int Extra_Information <
 			DepthBuffer_LP.xy = lerp(DepthBuffer_LP.xy,  min(DepthBuffer_LP.xy,saturate(tex2Dlod(SamplerzBufferVR_L, float4( texcoord, 0, (uint)lerp(0,12,Basic_UI) ) ).x  * 0.01)) ,Basic_UI * saturate(DZ_W.x));
 		}
 		#endif
-
+		
+		#if SUI
+			float2 UI_A_Mask_Pos = DDD_Y.zw;
+			//Auto Depth 0.5 > needs more detection points will update that later.
+			float UI_A_Mask_Depth = DDD_W.w < 0.5 ? DDD_W.w : saturate(tex2Dlod(SamplerzBufferVR_L, float4( 1-UI_A_Mask_Pos, 0, 4) ).x + (0.5-DDD_W.w));
+			float2 UI_A_Mask_Size= DDD_W.xy;
+			if(Stencil_n_Detection_A())
+				DepthBuffer_LP.xy = lerp(DepthBuffer_LP.xy,UI_A_Mask_Depth,Stencil_Masking(texcoord,UI_A_Mask_Pos,UI_A_Mask_Size,DDD_W.z));
+				#if SUI == 2
+				float2 UI_B_Mask_Pos = DEE_Y.zw;
+				//Auto Depth 0.5 > needs more detection points will update that later.
+				float UI_B_Mask_Depth = DEE_W.w < 0.5 ? DEE_W.w : saturate(tex2Dlod(SamplerzBufferVR_L, float4( 1-UI_B_Mask_Pos, 0, 4) ).x + (0.5-DDD_W.w));
+				float2 UI_B_Mask_Size= DEE_W.xy;
+				if(Stencil_n_Detection_B())
+					DepthBuffer_LP.xy = lerp(DepthBuffer_LP.xy,UI_B_Mask_Depth,Stencil_Masking(texcoord,UI_B_Mask_Pos,UI_B_Mask_Size,DEE_W.z));
+				#endif
+		#endif	
+		
 		if(View_Mode == 0 || View_Mode == 3)	
 			DepthBuffer_LP.x = DepthBuffer_LP.y;		
 			
@@ -2850,10 +2950,10 @@ uniform int Extra_Information <
 		return tex2Dlod(SamplerzBufferVR_Mixed,float4(texcoord,0,0)).x;
 	}
 	
-	float2 De_Art(float2 sp, float2 ZoomDir, float Depth)
+	float2 De_Art(float2 sp, float2 ZoomDir)
 	{  
 		//if(De_Artifacting.x < 0)
-			return sp - lerp(ZoomDir,0, Depth);
+			return sp - ZoomDir;
 	}
 	//Perf Level selection & Array access               X     Y              X     Y  
 	static const float2 Performance_LvL0[2] = { float2( 0.5  , 0.679), float2( 1.0, 1.425) };
@@ -2864,7 +2964,8 @@ uniform int Extra_Information <
 	{   
 		float  MS = Diverge * pix.x; int Perf_LvL = fmod(Performance_Level,2);      
 		float2 ParallaxCoord = Coordinates,CBxy = floor( float2(Coordinates.x * BUFFER_WIDTH, Coordinates.y * BUFFER_HEIGHT));
-		float GetDepth = smoothstep(0,1, tex2Dlod(SamplerzBufferVR_L, float4(Coordinates,0, 1) ).y), CB_Done = fmod(CBxy.x+CBxy.y,2),
+		float LR_Depth_Mask = saturate(tex2Dlod(SamplerzBuffer_BlurVR, float4( Coordinates  * float2(0.5,1) + float2(0.5,0), 0, 3.0 ) ).x * 2.5);
+		float GetDepth = smoothstep(0,1, tex2Dlod(SamplerzBufferVR_L, float4(Coordinates,0, 1) ).x), CB_Done = fmod(CBxy.x+CBxy.y,2),
 			Perf = Performance_Level > 1 ? lerp(Performance_LvL1[Perf_LvL].x,Performance_LvL0[Perf_LvL].x,GetDepth) : Performance_LvL0[Perf_LvL].x;
 		//Would Use Switch....
 		if( View_Mode == 2)
@@ -2877,13 +2978,17 @@ uniform int Extra_Information <
 		float Auto_Adptive = Switch_VRS == 0 ? lerp(0.05,1.0,smoothstep(0.00000001f, 0.375, tex2D(SamplerzBufferVR_P,0).y ) ) : 1,
 			  Luma_Adptive = smoothstep(0.0,saturate(VRS_Array[Switch_VRS] * Auto_Adptive), tex2Dlod(SamplerDMVR,float4(Coordinates,0,9)).w);
 		if( Performance_Level > 1 )
-			Perf *= saturate(Luma_Adptive * 0.5 + 0.5  );
+			Perf *= saturate(Luma_Adptive);
+		//Foveated Calculations	
+		float Foveated_Mask = saturate(Vin_Pattern(Coordinates, float2(15.0,3.0)));	
+		if(Foveated_Mode)
+			Perf = lerp(Perf,0.350f,saturate(Foveated_Mask * GetDepth));
 		//ParallaxSteps Calculations
-		float MinNum = 19, D = abs(Diverge), Cal_Steps = D * Perf, FOV_Ren = Foveated_Mode ? lerp(100, MinNum, saturate(Vin_Pattern(Coordinates, float2(15.0,3.0)) * GetDepth * 4 )) : 50,
-			  Steps  = clamp( Cal_Steps, Perf_LvL ? MinNum : lerp( MinNum, min( MinNum, D), GetDepth >= 0.999 ), FOV_Ren );//Foveated Rendering Point of attack 16-256 limit samples.
-		// Offset per step progress & Limit
-		float LayerDepth = rcp(Steps), TP = lerp(0.025, 0.05,Compatibility_Power) * ( Compatibility_Power >= 0 ? 1 : saturate(Vin_Pattern(Coordinates, float2(15.0,3.0))) );
-		float US_Offset = Diverge < 0 ? -75 : 75;
+		float MinNum = 20, MaxNum = lerp(100, 50, saturate(1-LR_Depth_Mask ) ), D = abs(Diverge), Cal_Steps = (D * Perf) + (D * 0.04),
+			  Steps  = clamp( Cal_Steps, MinNum, MaxNum );//Foveated Rendering Point of attack 16-256 limit samples.
+
+		float LayerDepth = rcp(Steps),  TP = lerp(0.025, 0.05,Compatibility_Power) * ( Compatibility_Power >= 0 ? 1 : Foveated_Mask );
+		float D_Range = lerp(75,25,GetDepth), US_Offset = Diverge < 0 ? -D_Range : D_Range;
 	
 		//Offsets listed here Max Seperation is 3% - 8% of screen space with Depth Offsets & Netto layer offset change based on MS.
 		float deltaCoordinates = MS * LayerDepth, CurrentDepthMapValue = GetMixed( ParallaxCoord).x, CurrentLayerDepth = -Re_Scale_WN().x*0.5,
@@ -2907,7 +3012,7 @@ uniform int Extra_Information <
 		    // Get depth value at current coordinates
 		    float G_Depth = GetMixed(ParallaxCoord).x;  
 		    if ( applyArtifacting )
-				CurrentDepthMapValue = min(G_Depth.x, GetMixed( De_Art(ParallaxCoord, Artifacting_Adjust, GetDepth ) ).x);
+				CurrentDepthMapValue = min(G_Depth.x, GetMixed( De_Art(ParallaxCoord, Artifacting_Adjust) ).x);
 			else
 				CurrentDepthMapValue = G_Depth.x;				
 		    // Get depth of next layer
@@ -2919,7 +3024,7 @@ uniform int Extra_Information <
 	    
 		float2 PrevParallaxCoord = float2( ParallaxCoord.x + deltaCoordinates, ParallaxCoord.y), Depth_Adjusted = 1-saturate(float2(GetDepth * 5.0, GetDepth));
 		//Anti-Weapon Hand Fighting
-		float Weapon_Mask = tex2Dlod(SamplerDMVR,float4(Coordinates,0,0)).y, ZFighting_Mask = 1.0-(1.0-tex2Dlod(SamplerLumVR,float4(Coordinates,0,1.400)).w - Weapon_Mask);
+		float Weapon_Mask = tex2Dlod(SamplerDMVR,float4(Coordinates,0,0)).y, ZFighting_Mask = 1.0-(1.0-tex2Dlod(SamplerDMVR,float4(Coordinates ,0,5.5)).y - Weapon_Mask);
 			  ZFighting_Mask = ZFighting_Mask * (1.0-Weapon_Mask);
 		float2 PCoord = float2(View_Mode <= 1 || View_Mode >= 5 ? PrevParallaxCoord.x : ParallaxCoord.x, PrevParallaxCoord.y ) ;
 
@@ -2930,14 +3035,14 @@ uniform int Extra_Information <
 			  beforeDepthValue += LayerDepth - CurrentLayerDepth;
 		// Depth Diffrence for Gap masking and depth scaling in Normal Mode.
 		float DepthDiffrence = afterDepthValue - beforeDepthValue, DD_Map = abs(DepthDiffrence);
-		float2 DD_Spread = saturate(float2(DD_Map > 0.128,DD_Map > 0.032));
+		float2 DD_Spread = saturate(float2(DD_Map > 0.032,DD_Map > lerp(0.128,0.064 ,LR_Depth_Mask )));
 		float weight = afterDepthValue / min(-0.0125,DepthDiffrence);
-			  weight = lerp(weight + (2.0 * Depth_Adjusted.y) * DD_Spread.x,weight,0.75);//Reversed the logic since it seems look better this way and it leans towards the normal output.
+			  weight = lerp(weight + 2.0 * DD_Spread.x,weight,0.75);//Reversed the logic since it seems look better this way and it leans towards the normal output.
 		float Weight = weight;
 		//ParallaxCoord.x = lerp( ParallaxCoord.x, PrevParallaxCoord.x, weight); //Old		
 		ParallaxCoord.x = PrevParallaxCoord.x * weight + ParallaxCoord.x * (1 - Weight);
 		//This is to limit artifacts.	
-		ParallaxCoord.x += lerp(DB_Offset, DB_Offset * 1.5, DD_Spread.y );// Also boost in some areas using DD_Map
+		ParallaxCoord.x += lerp(DB_Offset, DB_Offset * 2.0, DD_Spread.y );// Also boost in some areas using DD_Map
 
 		return ParallaxCoord;
 	}
@@ -3414,7 +3519,7 @@ uniform int Extra_Information <
 	#else
 	void Averager(float4 position : SV_Position, float2 texcoord : TEXCOORD, out float4 AL : SV_Target0)
 	#endif
-	{	
+	{   float Half_Buffer = texcoord.x < 0.5;	
 		float Average_ZPD = PrepDepth( texcoord )[0][0], Past_Blinders = 0;
 		// SamplerDMVR 0 is Weapon State storage and SamplerDMVR 1 is Boundy State storage	
 		const int Num_of_Values = 6; //6 total array values that map to the textures width.
@@ -3436,7 +3541,7 @@ uniform int Extra_Information <
 		Past_Blinders = tex2D(SamplerPBBVR,texcoord).x;
 		#endif
 		//Motion_Detection
-		AL = float4(length(tex2D(SamplerDMVR,texcoord).w - Past_Blinders),Average_ZPD,texcoord.x < 0.5 ? Storage__Array_A[int(fmod(Grid,Num_of_Values))] : Storage__Array_B[int(fmod(Grid,Num_of_Values))] ,tex2Dlod(SamplerDMVR,float4(texcoord,0,0)).y);
+		AL = float4(length(tex2D(SamplerDMVR,texcoord).w - Past_Blinders), Average_ZPD,Half_Buffer ? Storage__Array_A[int(fmod(Grid,Num_of_Values))] : Storage__Array_B[int(fmod(Grid,Num_of_Values))], 0.0);
 		#if Color_Correction_Mode
 		Other = float4(tex2D(samplerMinMaxRGB, texcoord).rgb,1);
 		#endif

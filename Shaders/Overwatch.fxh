@@ -1,7 +1,7 @@
 ////----------------------------------------//
 ///SuperDepth3D Overwatch Automation Header///
 //----------------------------------------////
-#define OVERWATCH "Overwatch v3.6.1\n"
+#define OVERWATCH "Overwatch v3.6.3\n"
 //---------------------------------------OVERWATCH---------------------------------------//
 // If you are reading this stop. Go away and never look back. From this point on if you  //
 // still think it's is worth looking at this..... Then no one can save you or your soul. //
@@ -162,13 +162,13 @@ static const float4 Lock_Menu_Tresh_n_WC_D = 1000;      //Simple Menu Tresh For 
 
 //Menu Detection
 static const int Menu_Detection_Direction_D = 0;        // Off 0 | 1 | 2 | 3 | 4                        | MDD
-static const int Menu_A_C_To_C_Only_D = 0;              // Off 0 | 1                                    | MAC //To be Removed after a few Gens
+static const int Menu_Cutoff_D = 0;                     // Off 0 | 1                                    | COD
 static const float4 Pos_XY_XY_A_B_D = 0;                //Position A XY B XY                            | DN_X
 static const float4 Pos_XY_XY_C_D_D = 0;                //Position C XY D XY                            | DN_Y
 static const float4 Pos_XY_XY_E_F_D = 0;                //Position E XY F XY                            | DN_Z
 static const float4 Menu_Size_Adjust_D = 0;             //Menu Size Main ABC | D | E | F                | DN_W
 static const float4 Menu_Detection_Type_D = 1000.0;     //Menu Detection Type                           | DJ_Y
-static const float3 Match_Threshold_D = 1000.0;         //Match Threshold                               | DJ_Z
+static const float4 Match_Threshold_D = 1000.0;         //Match Threshold                               | DJ_Z
 
 //Multi Menu Detection
 static const int Multi_Menu_Detection_D = 0;            // Off 0 | 1 | 2 | 3 | 4                        | MMD
@@ -231,6 +231,23 @@ static const float4 C_Menu_Tresh_n_WC_D = 1000;         //3 Simple Menu Tresh Fo
 static const float4 D_SPos_XY_XY_A_B_D = 0;             //4 Position A XY B XY                          | DBB_X
 static const float2 D_SPos_XY_C_D = 0;                  //4 Position C XY                               | DBB_Y
 static const float4 D_Menu_Tresh_n_WC_D = 1000;         //4 Simple Menu Tresh For A,B,C & D             | DBB_Z
+
+//Stencil UI & Detection
+static const int Stencil_UI_Detection_D = 0;            //Off 0 | 1 Stencil One | 2 Stencil Two         | SUI
+
+static const int Stencil_Shape_Alpha_D = 0;             //Off 0 | 1 Square | 2 Circle                   | SSA
+static const int Stencil_A_Trigger_D = 0;               //Off 0 | 1 Trigger on Aim                      | SNA
+static const float4 UI_A_SPos_XY_XY_A_B_D = 0;          //Pos A = XY Any & B = ZW Lock                  | DDD_X
+static const float4 UI_A_SPos_XY_C_n_XY_Pos_D = 0;      //Pos C = XY Any & UI Postion                   | DDD_Y
+static const float4 UI_A_Menu_Tresh_n_WC_D = 1000;      //Simple UI Menu Tresh For A,B,C & D            | DDD_Z
+static const float4 UI_A_Stencil_Adjust_D = 0;          //Stencil XY Size Z Inv & W Depth Auto-Manual   | DDD_W
+
+static const int Stencil_Shape_Beta_D = 0;              //Off 0 | 1 Square | 2 Circle                   | SSB
+static const int Stencil_B_Trigger_D = 0;               //Off 0 | 1 Trigger on Aim                      | SNB
+static const float4 UI_B_SPos_XY_XY_A_B_D = 0;          //Pos A = XY Any & B = ZW Lock                  | DEE_X
+static const float4 UI_B_SPos_XY_C_n_XY_Pos_D = 0;      //Pos C = XY Any & UI Postion                   | DEE_Y
+static const float4 UI_B_Menu_Tresh_n_WC_D = 1000;      //Simple UI Menu Tresh For A,B,C & D            | DEE_Z
+static const float4 UI_B_Stencil_Adjust_D = 0;          //Stencil XY Size Z Inv & W Depth Auto-Manual   | DEE_W
 
 //New Settings
 static const int View_Mode_State_D = D_ViewMode;        //View Mode State [Do not Use 6]                | DS_Z
@@ -8802,12 +8819,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define DQ_Y float4( 0.5005, 0.065 , 0.500 , 0.0423) //Pos C3 = XY Color & D1 = ZW Color
     #define DQ_Z float4( 0.500 , 0.100 , 0.4975, 0.065 ) //Pos D2 = XY Black & D3 = ZW Color
 	#define DQ_W float4( 21.0, 28.0, 21.0, 28.0) //Tresh Hold for Color A1 & A3 and Color
-	/*
-	#define DR_X float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos G1 = XY Color & G2 = ZW Black 
-    #define DR_Y float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos G3 = XY Color & H1 = ZW Color
-    #define DR_Z float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos H2 = XY Black & H3 = ZW Color
-	#define DR_W float4( 1000.0, 1000.0, 1000.0, 1000.0) //Tresh Hold for Color G & H and Color 
-	*/
+
 	//#define WSM 3
 	//#define DB_W 5
 	//#define DF_X float2(0.050,0.0)	
@@ -8847,7 +8859,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DM_Y 3           //HQ VRS
     //#define DL_Y -0.5    //De-Artifact
     //#define DL_Z 0.25       //Compat Power
-    #define MAC 1
     #define MDD 1 //Set Menu Detection & Direction      //Off 0 | 1 | 2 | 3 | 4      
     #define DN_X float4( 0.8835, 0.956 , 0.982 , 0.954)//Pos A = XY Any & B = ZW Lock 
     #define DN_Y float4( 0.500 , 0.004 ,  0.0, 0.0)     //Pos C = XY Any & D = ZW Match
@@ -8856,26 +8867,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define DJ_Y float4( 28.0, 28.0, 20.0, 14.0);     //Menu Detection Type for A = X, B = Y, & C = Z. The Last Value is a Wild Card amount W is for X and Z. 
     #define DJ_Z float3( 1000., 1000., 1000);           //Set Match Tresh 
 
-	/*
-    #define MMD 1 //Set Multi Menu Detection             //Off / On
-    #define MMS 0 //Set Multi Menu Selection from 0-1 to 29-30 and Off 0 | 1 | 2
-    #define DO_X float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos A1 = XY Color & A2 = ZW Black 
-    #define DO_Y float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos A3 = XY Color & B1 = ZW Color
-    #define DO_Z float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos B2 = XY Black & B3 = ZW Color
-	#define DO_W float4( 1000.0, 1000.0, 1000.0, 1000.0)   //Tresh Hold for Color A & B and Color
-    #define DP_X float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos C1 = XY Color & C2 = ZW Black 
-    #define DP_Y float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos C3 = XY Color & D1 = ZW Color
-    #define DP_Z float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos D2 = XY Black & D3 = ZW Color
-	#define DP_W float4( 1000.0, 1000.0, 1000.0, 1000.0)   //Tresh Hold for Color C & D and Color
-	#define DQ_X float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos C1 = XY Color & C2 = ZW Black 
-    #define DQ_Y float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos C3 = XY Color & D1 = ZW Color
-    #define DQ_Z float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos D2 = XY Black & D3 = ZW Color
-	#define DQ_W float4( 1000.0, 1000.0, 1000.0, 1000.0) //Tresh Hold for Color A1 & A3 and Color
-	#define DR_X float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos G1 = XY Color & G2 = ZW Black 
-    #define DR_Y float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos G3 = XY Color & H1 = ZW Color
-    #define DR_Z float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos H2 = XY Black & H3 = ZW Color
-	#define DR_W float4( 1000.0, 1000.0, 1000.0, 1000.0) //Tresh Hold for Color G & H and Color 
-	*/
 	//#define WSM 3
 	//#define DB_W 5
 	//#define DF_X float2(0.050,0.0)	
@@ -8918,7 +8909,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DL_Y -0.5   //De-Artifact
     //#define DL_Z 0.5       //Compat Power
 	/*
-    #define MAC 1
     #define MDD 1 //Set Menu Detection & Direction      //Off 0 | 1 | 2 | 3 | 4      
     #define DN_X float4( 0.8835, 0.956 , 0.982 , 0.954)//Pos A = XY Any & B = ZW Lock 
     #define DN_Y float4( 0.500 , 0.004 ,  0.0, 0.0)     //Pos C = XY Any & D = ZW Match
@@ -8926,26 +8916,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DN_W float4( 1.0, 0.0 , 0.0, 0.0 )          //Size = Menu [ABC] D E F
     #define DJ_Y float4( 28.0, 28.0, 20.0, 14.0);     //Menu Detection Type for A = X, B = Y, & C = Z. The Last Value is a Wild Card amount W is for X and Z. 
     #define DJ_Z float3( 1000., 1000., 1000);           //Set Match Tresh 
-	*/
-	/*
-    #define MMD 1 //Set Multi Menu Detection             //Off / On
-    #define MMS 0 //Set Multi Menu Selection from 0-1 to 29-30 and Off 0 | 1 | 2
-    #define DO_X float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos A1 = XY Color & A2 = ZW Black 
-    #define DO_Y float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos A3 = XY Color & B1 = ZW Color
-    #define DO_Z float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos B2 = XY Black & B3 = ZW Color
-	#define DO_W float4( 1000.0, 1000.0, 1000.0, 1000.0)   //Tresh Hold for Color A & B and Color
-    #define DP_X float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos C1 = XY Color & C2 = ZW Black 
-    #define DP_Y float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos C3 = XY Color & D1 = ZW Color
-    #define DP_Z float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos D2 = XY Black & D3 = ZW Color
-	#define DP_W float4( 1000.0, 1000.0, 1000.0, 1000.0)   //Tresh Hold for Color C & D and Color
-	#define DQ_X float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos C1 = XY Color & C2 = ZW Black 
-    #define DQ_Y float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos C3 = XY Color & D1 = ZW Color
-    #define DQ_Z float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos D2 = XY Black & D3 = ZW Color
-	#define DQ_W float4( 1000.0, 1000.0, 1000.0, 1000.0) //Tresh Hold for Color A1 & A3 and Color
-	#define DR_X float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos G1 = XY Color & G2 = ZW Black 
-    #define DR_Y float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos G3 = XY Color & H1 = ZW Color
-    #define DR_Z float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos H2 = XY Black & H3 = ZW Color
-	#define DR_W float4( 1000.0, 1000.0, 1000.0, 1000.0) //Tresh Hold for Color G & H and Color 
 	*/
 	//#define WSM 3
 	//#define DB_W 5
@@ -9050,7 +9020,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DL_Y 0.5   //De-Artifact
     //#define DL_Z 0.5       //Compat Power
 	/*
-    #define MAC 1
     #define MDD 1 //Set Menu Detection & Direction      //Off 0 | 1 | 2 | 3 | 4      
     #define DN_X float4( 0.8835, 0.956 , 0.982 , 0.954)//Pos A = XY Any & B = ZW Lock 
     #define DN_Y float4( 0.500 , 0.004 ,  0.0, 0.0)     //Pos C = XY Any & D = ZW Match
@@ -9123,7 +9092,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DL_Y -0.5   //De-Artifact
     //#define DL_Z -0.25       //Compat Power
 	/*
-    #define MAC 1
     #define MDD 1 //Set Menu Detection & Direction      //Off 0 | 1 | 2 | 3 | 4      
     #define DN_X float4( 0.8835, 0.956 , 0.982 , 0.954)//Pos A = XY Any & B = ZW Lock 
     #define DN_Y float4( 0.500 , 0.004 ,  0.0, 0.0)     //Pos C = XY Any & D = ZW Match
@@ -9133,26 +9101,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define DJ_Z float3( 1000., 1000., 1000);           //Set Match Tresh 
 	*/
 
-	/*
-    #define MMD 1 //Set Multi Menu Detection             //Off / On
-    #define MMS 0 //Set Multi Menu Selection from 0-1 to 29-30 and Off 0 | 1 | 2
-    #define DO_X float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos A1 = XY Color & A2 = ZW Black 
-    #define DO_Y float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos A3 = XY Color & B1 = ZW Color
-    #define DO_Z float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos B2 = XY Black & B3 = ZW Color
-	#define DO_W float4( 1000.0, 1000.0, 1000.0, 1000.0)   //Tresh Hold for Color A & B and Color
-    #define DP_X float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos C1 = XY Color & C2 = ZW Black 
-    #define DP_Y float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos C3 = XY Color & D1 = ZW Color
-    #define DP_Z float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos D2 = XY Black & D3 = ZW Color
-	#define DP_W float4( 1000.0, 1000.0, 1000.0, 1000.0)   //Tresh Hold for Color C & D and Color
-	#define DQ_X float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos C1 = XY Color & C2 = ZW Black 
-    #define DQ_Y float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos C3 = XY Color & D1 = ZW Color
-    #define DQ_Z float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos D2 = XY Black & D3 = ZW Color
-	#define DQ_W float4( 1000.0, 1000.0, 1000.0, 1000.0) //Tresh Hold for Color A1 & A3 and Color
-	#define DR_X float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos G1 = XY Color & G2 = ZW Black 
-    #define DR_Y float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos G3 = XY Color & H1 = ZW Color
-    #define DR_Z float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos H2 = XY Black & H3 = ZW Color
-	#define DR_W float4( 1000.0, 1000.0, 1000.0, 1000.0) //Tresh Hold for Color G & H and Color 
-	*/
 	//#define WSM 3
 	//#define DB_W 5
 	//#define DF_X float2(0.050,0.0)	
@@ -9214,7 +9162,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DL_Y -0.5   //De-Artifact
     //#define DL_Z 0.5       //Compat Power
 	/*
-    #define MAC 1
     #define MDD 1 //Set Menu Detection & Direction      //Off 0 | 1 | 2 | 3 | 4      
     #define DN_X float4( 0.8835, 0.956 , 0.982 , 0.954)//Pos A = XY Any & B = ZW Lock 
     #define DN_Y float4( 0.500 , 0.004 ,  0.0, 0.0)     //Pos C = XY Any & D = ZW Match
@@ -9224,26 +9171,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define DJ_Z float3( 1000., 1000., 1000);           //Set Match Tresh 
 	*/
 
-	/*
-    #define MMD 1 //Set Multi Menu Detection             //Off / On
-    #define MMS 0 //Set Multi Menu Selection from 0-1 to 29-30 and Off 0 | 1 | 2
-    #define DO_X float4( 0.187 , 0.125 , 0.500 , 0.100 ) //Pos A1 = XY Color & A2 = ZW Black 
-    #define DO_Y float4( 0.276 , 0.335 , 0.115 , 0.050 ) //Pos A3 = XY Color & B1 = ZW Color
-    #define DO_Z float4( 0.500 , 0.100 , 0.260 , 0.087 ) //Pos B2 = XY Black & B3 = ZW Color
-	#define DO_W float4( 30.0, 30.0, 30.0, 30.0)   //Tresh Hold for Color A & B and Color
-    #define DP_X float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos C1 = XY Color & C2 = ZW Black 
-    #define DP_Y float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos C3 = XY Color & D1 = ZW Color
-    #define DP_Z float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos D2 = XY Black & D3 = ZW Color
-	#define DP_W float4( 1000.0, 1000.0, 1000.0, 1000.0)   //Tresh Hold for Color C & D and Color
-	#define DQ_X float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos C1 = XY Color & C2 = ZW Black 
-    #define DQ_Y float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos C3 = XY Color & D1 = ZW Color
-    #define DQ_Z float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos D2 = XY Black & D3 = ZW Color
-	#define DQ_W float4( 1000.0, 1000.0, 1000.0, 1000.0) //Tresh Hold for Color A1 & A3 and Color
-	#define DR_X float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos G1 = XY Color & G2 = ZW Black 
-    #define DR_Y float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos G3 = XY Color & H1 = ZW Color
-    #define DR_Z float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos H2 = XY Black & H3 = ZW Color
-	#define DR_W float4( 1000.0, 1000.0, 1000.0, 1000.0) //Tresh Hold for Color G & H and Color 
-	*/
 	//#define WSM 3
 	//#define DB_W 5
 	//#define DF_X float2(0.050,0.0)	
@@ -9292,7 +9219,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DL_Y -0.5   //De-Artifact
     //#define DL_Z 0.5       //Compat Power
 	/*
-    #define MAC 1
     #define MDD 1 //Set Menu Detection & Direction      //Off 0 | 1 | 2 | 3 | 4      
     #define DN_X float4( 0.8835, 0.956 , 0.982 , 0.954)//Pos A = XY Any & B = ZW Lock 
     #define DN_Y float4( 0.500 , 0.004 ,  0.0, 0.0)     //Pos C = XY Any & D = ZW Match
@@ -9302,26 +9228,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define DJ_Z float3( 1000., 1000., 1000);           //Set Match Tresh 
 	*/
 
-	/*
-    #define MMD 1 //Set Multi Menu Detection             //Off / On
-    #define MMS 0 //Set Multi Menu Selection from 0-1 to 29-30 and Off 0 | 1 | 2
-    #define DO_X float4( 0.187 , 0.125 , 0.500 , 0.100 ) //Pos A1 = XY Color & A2 = ZW Black 
-    #define DO_Y float4( 0.276 , 0.335 , 0.115 , 0.050 ) //Pos A3 = XY Color & B1 = ZW Color
-    #define DO_Z float4( 0.500 , 0.100 , 0.260 , 0.087 ) //Pos B2 = XY Black & B3 = ZW Color
-	#define DO_W float4( 30.0, 30.0, 30.0, 30.0)   //Tresh Hold for Color A & B and Color
-    #define DP_X float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos C1 = XY Color & C2 = ZW Black 
-    #define DP_Y float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos C3 = XY Color & D1 = ZW Color
-    #define DP_Z float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos D2 = XY Black & D3 = ZW Color
-	#define DP_W float4( 1000.0, 1000.0, 1000.0, 1000.0)   //Tresh Hold for Color C & D and Color
-	#define DQ_X float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos C1 = XY Color & C2 = ZW Black 
-    #define DQ_Y float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos C3 = XY Color & D1 = ZW Color
-    #define DQ_Z float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos D2 = XY Black & D3 = ZW Color
-	#define DQ_W float4( 1000.0, 1000.0, 1000.0, 1000.0) //Tresh Hold for Color A1 & A3 and Color
-	#define DR_X float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos G1 = XY Color & G2 = ZW Black 
-    #define DR_Y float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos G3 = XY Color & H1 = ZW Color
-    #define DR_Z float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos H2 = XY Black & H3 = ZW Color
-	#define DR_W float4( 1000.0, 1000.0, 1000.0, 1000.0) //Tresh Hold for Color G & H and Color 
-	*/
 	//#define WSM 3
 	//#define DB_W 5
 	//#define DF_X float2(0.050,0.0)	
@@ -9364,7 +9270,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DL_Y -0.5   //De-Artifact
     //#define DL_Z 0.5       //Compat Power
 	/*
-    #define MAC 1
     #define MDD 1 //Set Menu Detection & Direction      //Off 0 | 1 | 2 | 3 | 4      
     #define DN_X float4( 0.8835, 0.956 , 0.982 , 0.954)//Pos A = XY Any & B = ZW Lock 
     #define DN_Y float4( 0.500 , 0.004 ,  0.0, 0.0)     //Pos C = XY Any & D = ZW Match
@@ -9374,26 +9279,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define DJ_Z float3( 1000., 1000., 1000);           //Set Match Tresh 
 	*/
 
-	/*
-    #define MMD 1 //Set Multi Menu Detection             //Off / On
-    #define MMS 0 //Set Multi Menu Selection from 0-1 to 29-30 and Off 0 | 1 | 2
-    #define DO_X float4( 0.187 , 0.125 , 0.500 , 0.100 ) //Pos A1 = XY Color & A2 = ZW Black 
-    #define DO_Y float4( 0.276 , 0.335 , 0.115 , 0.050 ) //Pos A3 = XY Color & B1 = ZW Color
-    #define DO_Z float4( 0.500 , 0.100 , 0.260 , 0.087 ) //Pos B2 = XY Black & B3 = ZW Color
-	#define DO_W float4( 30.0, 30.0, 30.0, 30.0)   //Tresh Hold for Color A & B and Color
-    #define DP_X float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos C1 = XY Color & C2 = ZW Black 
-    #define DP_Y float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos C3 = XY Color & D1 = ZW Color
-    #define DP_Z float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos D2 = XY Black & D3 = ZW Color
-	#define DP_W float4( 1000.0, 1000.0, 1000.0, 1000.0)   //Tresh Hold for Color C & D and Color
-	#define DQ_X float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos C1 = XY Color & C2 = ZW Black 
-    #define DQ_Y float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos C3 = XY Color & D1 = ZW Color
-    #define DQ_Z float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos D2 = XY Black & D3 = ZW Color
-	#define DQ_W float4( 1000.0, 1000.0, 1000.0, 1000.0) //Tresh Hold for Color A1 & A3 and Color
-	#define DR_X float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos G1 = XY Color & G2 = ZW Black 
-    #define DR_Y float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos G3 = XY Color & H1 = ZW Color
-    #define DR_Z float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos H2 = XY Black & H3 = ZW Color
-	#define DR_W float4( 1000.0, 1000.0, 1000.0, 1000.0) //Tresh Hold for Color G & H and Color 
-	*/
 	//#define WSM 3
 	//#define DB_W 5
 	//#define DF_X float2(0.050,0.0)	
@@ -9437,7 +9322,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DL_Y -0.5   //De-Artifact
     //#define DL_Z 0.5       //Compat Power
 	/*
-    #define MAC 1
     #define MDD 1 //Set Menu Detection & Direction      //Off 0 | 1 | 2 | 3 | 4      
     #define DN_X float4( 0.8835, 0.956 , 0.982 , 0.954)//Pos A = XY Any & B = ZW Lock 
     #define DN_Y float4( 0.500 , 0.004 ,  0.0, 0.0)     //Pos C = XY Any & D = ZW Match
@@ -9447,26 +9331,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define DJ_Z float3( 1000., 1000., 1000);           //Set Match Tresh 
 	*/
 
-	/*
-    #define MMD 1 //Set Multi Menu Detection             //Off / On
-    #define MMS 0 //Set Multi Menu Selection from 0-1 to 29-30 and Off 0 | 1 | 2
-    #define DO_X float4( 0.187 , 0.125 , 0.500 , 0.100 ) //Pos A1 = XY Color & A2 = ZW Black 
-    #define DO_Y float4( 0.276 , 0.335 , 0.115 , 0.050 ) //Pos A3 = XY Color & B1 = ZW Color
-    #define DO_Z float4( 0.500 , 0.100 , 0.260 , 0.087 ) //Pos B2 = XY Black & B3 = ZW Color
-	#define DO_W float4( 30.0, 30.0, 30.0, 30.0)   //Tresh Hold for Color A & B and Color
-    #define DP_X float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos C1 = XY Color & C2 = ZW Black 
-    #define DP_Y float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos C3 = XY Color & D1 = ZW Color
-    #define DP_Z float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos D2 = XY Black & D3 = ZW Color
-	#define DP_W float4( 1000.0, 1000.0, 1000.0, 1000.0)   //Tresh Hold for Color C & D and Color
-	#define DQ_X float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos C1 = XY Color & C2 = ZW Black 
-    #define DQ_Y float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos C3 = XY Color & D1 = ZW Color
-    #define DQ_Z float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos D2 = XY Black & D3 = ZW Color
-	#define DQ_W float4( 1000.0, 1000.0, 1000.0, 1000.0) //Tresh Hold for Color A1 & A3 and Color
-	#define DR_X float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos G1 = XY Color & G2 = ZW Black 
-    #define DR_Y float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos G3 = XY Color & H1 = ZW Color
-    #define DR_Z float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos H2 = XY Black & H3 = ZW Color
-	#define DR_W float4( 1000.0, 1000.0, 1000.0, 1000.0) //Tresh Hold for Color G & H and Color 
-	*/
 	//#define WSM 3
 	//#define DB_W 5
 	//#define DF_X float2(0.050,0.0)	
@@ -9510,7 +9374,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DM_Y 3           //HQ VRS
     //#define DL_Y -0.5   //De-Artifact
     //#define DL_Z 0.5       //Compat Power
-    //#define MAC 1
+    
     #define MDD 4 //Set Menu Detection & Direction      //Off 0 | 1 | 2 | 3 | 4      
     #define DN_X float4( 0.200, 0.900 , 0.826 , 0.940)//Pos A = XY Any & B = ZW Lock 
     #define DN_Y float4( 0.800, 0.900 , 0.000 , 0.000)//Pos C = XY Any & D = ZW Match
@@ -9525,20 +9389,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define DO_Y float4( 0.580 , 0.125 , 0.000 , 0.000 ) //Pos A3 = XY Color & B1 = ZW Color
     #define DO_Z float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos B2 = XY Black & B3 = ZW Color
 	#define DO_W float4( 30.0, 30.0, 1000.0, 1000.0)   //Tresh Hold for Color A & B and Color
-	/*
-    #define DP_X float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos C1 = XY Color & C2 = ZW Black 
-    #define DP_Y float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos C3 = XY Color & D1 = ZW Color
-    #define DP_Z float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos D2 = XY Black & D3 = ZW Color
-	#define DP_W float4( 1000.0, 1000.0, 1000.0, 1000.0)   //Tresh Hold for Color C & D and Color
-	#define DQ_X float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos C1 = XY Color & C2 = ZW Black 
-    #define DQ_Y float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos C3 = XY Color & D1 = ZW Color
-    #define DQ_Z float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos D2 = XY Black & D3 = ZW Color
-	#define DQ_W float4( 1000.0, 1000.0, 1000.0, 1000.0) //Tresh Hold for Color A1 & A3 and Color
-	#define DR_X float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos G1 = XY Color & G2 = ZW Black 
-    #define DR_Y float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos G3 = XY Color & H1 = ZW Color
-    #define DR_Z float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos H2 = XY Black & H3 = ZW Color
-	#define DR_W float4( 1000.0, 1000.0, 1000.0, 1000.0) //Tresh Hold for Color G & H and Color 
-	*/
+
 	//#define WSM 3
 	//#define DB_W 5
 	//#define DF_X float2(0.050,0.0)	
@@ -9582,7 +9433,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DL_Y 0.75   //De-Artifact
     //#define DL_Z 0.5       //Compat Power
 	
-    #define MAC 1
     #define MDD 1 //Set Menu Detection & Direction      //Off 0 | 1 | 2 | 3 | 4      
     #define DN_X float4( 0.500 , 0.180 , 0.495 , 0.120)//Pos A = XY Any & B = ZW Lock 
     #define DN_Y float4( 0.5025, 0.600 , 0.0   , 0.0  )//Pos C = XY Any & D = ZW Match
@@ -9597,20 +9447,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define DO_Y float4( 0.566 , 0.120 , 0.000 , 0.000 ) //Pos A3 = XY Color & B1 = ZW Color
     #define DO_Z float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos B2 = XY Black & B3 = ZW Color
 	#define DO_W float4( 30.0, 30.0, 1000.0, 1000.0)   //Tresh Hold for Color A & B and Color
-	/*
-    #define DP_X float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos C1 = XY Color & C2 = ZW Black 
-    #define DP_Y float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos C3 = XY Color & D1 = ZW Color
-    #define DP_Z float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos D2 = XY Black & D3 = ZW Color
-	#define DP_W float4( 1000.0, 1000.0, 1000.0, 1000.0)   //Tresh Hold for Color C & D and Color
-	#define DQ_X float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos C1 = XY Color & C2 = ZW Black 
-    #define DQ_Y float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos C3 = XY Color & D1 = ZW Color
-    #define DQ_Z float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos D2 = XY Black & D3 = ZW Color
-	#define DQ_W float4( 1000.0, 1000.0, 1000.0, 1000.0) //Tresh Hold for Color A1 & A3 and Color
-	#define DR_X float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos G1 = XY Color & G2 = ZW Black 
-    #define DR_Y float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos G3 = XY Color & H1 = ZW Color
-    #define DR_Z float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos H2 = XY Black & H3 = ZW Color
-	#define DR_W float4( 1000.0, 1000.0, 1000.0, 1000.0) //Tresh Hold for Color G & H and Color 
-	*/
+
 	//#define WSM 3
 	//#define DB_W 5
 	//#define DF_X float2(0.050,0.0)	
@@ -9716,7 +9553,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DL_Y -0.5   //De-Artifact
     //#define DL_Z 0.5       //Compat Power
 
-    //#define MAC 1
     #define MDD 1 //Set Menu Detection & Direction      //Off 0 | 1 | 2 | 3 | 4      
     #define DN_X float4( 0.287 , 0.209 , 0.239 , 0.195)//Pos A = XY Any & B = ZW Lock 
     #define DN_Y float4( 0.710 , 0.209 ,  0.0, 0.0)     //Pos C = XY Any & D = ZW Match
@@ -9794,7 +9630,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DL_Y -0.5   //De-Artifact
     //#define DL_Z 0.5       //Compat Power
 	/*
-    #define MAC 1
     #define MDD 1 //Set Menu Detection & Direction      //Off 0 | 1 | 2 | 3 | 4      
     #define DN_X float4( 0.8835, 0.956 , 0.982 , 0.954)//Pos A = XY Any & B = ZW Lock 
     #define DN_Y float4( 0.500 , 0.004 ,  0.0, 0.0)     //Pos C = XY Any & D = ZW Match
@@ -9872,7 +9707,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DL_Y -0.5   //De-Artifact
     //#define DL_Z 0.25       //Compat Power
 	/*
-    #define MAC 1
     #define MDD 1 //Set Menu Detection & Direction      //Off 0 | 1 | 2 | 3 | 4      
     #define DN_X float4( 0.8835, 0.956 , 0.982 , 0.954)//Pos A = XY Any & B = ZW Lock 
     #define DN_Y float4( 0.500 , 0.004 ,  0.0, 0.0)     //Pos C = XY Any & D = ZW Match
@@ -9882,26 +9716,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define DJ_Z float3( 1000., 1000., 1000);           //Set Match Tresh 
 	*/
 
-	/*
-    #define MMD 1 //Set Multi Menu Detection             //Off / On
-    #define MMS 0 //Set Multi Menu Selection from 0-1 to 29-30 and Off 0 | 1 | 2
-    #define DO_X float4( 0.187 , 0.125 , 0.500 , 0.100 ) //Pos A1 = XY Color & A2 = ZW Black 
-    #define DO_Y float4( 0.276 , 0.335 , 0.115 , 0.050 ) //Pos A3 = XY Color & B1 = ZW Color
-    #define DO_Z float4( 0.500 , 0.100 , 0.260 , 0.087 ) //Pos B2 = XY Black & B3 = ZW Color
-	#define DO_W float4( 30.0, 30.0, 30.0, 30.0)   //Tresh Hold for Color A & B and Color
-    #define DP_X float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos C1 = XY Color & C2 = ZW Black 
-    #define DP_Y float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos C3 = XY Color & D1 = ZW Color
-    #define DP_Z float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos D2 = XY Black & D3 = ZW Color
-	#define DP_W float4( 1000.0, 1000.0, 1000.0, 1000.0)   //Tresh Hold for Color C & D and Color
-	#define DQ_X float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos C1 = XY Color & C2 = ZW Black 
-    #define DQ_Y float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos C3 = XY Color & D1 = ZW Color
-    #define DQ_Z float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos D2 = XY Black & D3 = ZW Color
-	#define DQ_W float4( 1000.0, 1000.0, 1000.0, 1000.0) //Tresh Hold for Color A1 & A3 and Color
-	#define DR_X float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos G1 = XY Color & G2 = ZW Black 
-    #define DR_Y float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos G3 = XY Color & H1 = ZW Color
-    #define DR_Z float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos H2 = XY Black & H3 = ZW Color
-	#define DR_W float4( 1000.0, 1000.0, 1000.0, 1000.0) //Tresh Hold for Color G & H and Color 
-	*/
 	//#define WSM 3
 	//#define DB_W 5
 	//#define DF_X float2(0.050,0.0)	
@@ -9948,7 +9762,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     
     //#define DL_Z 0.5       //Compat Power
 	/*
-    #define MAC 1
     #define MDD 1 //Set Menu Detection & Direction      //Off 0 | 1 | 2 | 3 | 4      
     #define DN_X float4( 0.8835, 0.956 , 0.982 , 0.954)//Pos A = XY Any & B = ZW Lock 
     #define DN_Y float4( 0.500 , 0.004 ,  0.0, 0.0)     //Pos C = XY Any & D = ZW Match
@@ -10435,7 +10248,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DL_Y -0.25   //De-Artifact
     //#define DL_Z 0.25       //Compat Power
 	/*
-    //#define MAC 1
     #define MDD 1 //Set Menu Detection & Direction      //Off 0 | 1 | 2 | 3 | 4      
     #define DN_X float4( 0.500 , 0.705 , 0.040 , 0.860  )//Pos A = XY Any & B = ZW Lock 
     #define DN_Y float4( 0.5085, 0.738 ,  0.0, 0.0)     //Pos C = XY Any & D = ZW Match
@@ -10598,7 +10410,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DL_Y -0.375   //De-Artifact
     //#define DL_Z 0.125       //Compat Power
 	/*
-    #define MAC 1
     #define MDD 1 //Set Menu Detection & Direction      //Off 0 | 1 | 2 | 3 | 4      
     #define DN_X float4( 0.8835, 0.956 , 0.982 , 0.954)//Pos A = XY Any & B = ZW Lock 
     #define DN_Y float4( 0.500 , 0.004 ,  0.0, 0.0)     //Pos C = XY Any & D = ZW Match
@@ -10679,7 +10490,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DL_Y -0.50   //De-Artifact
     //#define DL_Z 0.750       //Compat Power
 	///* //This seems safe.....
-    #define MAC 0
     #define MDD 1 //Set Menu Detection & Direction      //Off 0 | 1 | 2 | 3 | 4      
     #define DN_X float4( 0.135, 0.113, 0.500 , 0.9065)//Pos A = XY Any & B = ZW Lock 
     #define DN_Y float4( 0.865, 0.113 ,  0.0, 0.0)     //Pos C = XY Any & D = ZW Match
@@ -10689,30 +10499,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define DJ_Z float3( 1000., 1000., 1000);           //Set Match Tresh 
 	//*/
 
-	/*
-    #define MMD 1 //Set Multi Menu Detection             //Off / On
-    #define MMS 0 //Set Multi Menu Selection from 0-1 to 29-30 and Off 0 | 1 | 2
-    #define DO_X float4( 0.187 , 0.125 , 0.500 , 0.100 ) //Pos A1 = XY Color & A2 = ZW Black 
-    #define DO_Y float4( 0.276 , 0.335 , 0.115 , 0.050 ) //Pos A3 = XY Color & B1 = ZW Color
-    #define DO_Z float4( 0.500 , 0.100 , 0.260 , 0.087 ) //Pos B2 = XY Black & B3 = ZW Color
-	#define DO_W float4( 30.0, 30.0, 30.0, 30.0)   //Tresh Hold for Color A & B and Color
-    #define DP_X float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos C1 = XY Color & C2 = ZW Black 
-    #define DP_Y float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos C3 = XY Color & D1 = ZW Color
-    #define DP_Z float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos D2 = XY Black & D3 = ZW Color
-	#define DP_W float4( 1000.0, 1000.0, 1000.0, 1000.0)   //Tresh Hold for Color C & D and Color
-	#define DQ_X float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos C1 = XY Color & C2 = ZW Black 
-    #define DQ_Y float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos C3 = XY Color & D1 = ZW Color
-    #define DQ_Z float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos D2 = XY Black & D3 = ZW Color
-	#define DQ_W float4( 1000.0, 1000.0, 1000.0, 1000.0) //Tresh Hold for Color A1 & A3 and Color
-	#define DR_X float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos G1 = XY Color & G2 = ZW Black 
-    #define DR_Y float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos G3 = XY Color & H1 = ZW Color
-    #define DR_Z float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos H2 = XY Black & H3 = ZW Color
-	#define DR_W float4( 1000.0, 1000.0, 1000.0, 1000.0) //Tresh Hold for Color G & H and Color 
-	#define DU_X float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos I1 = XY Color & I2 = ZW Black 
-    #define DU_Y float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos I3 = XY Color & J1 = ZW Color
-    #define DU_Z float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos J2 = XY Black & J3 = ZW Color
-	#define DU_W float4( 1000.0, 1000.0, 1000.0, 1000.0) //Tresh Hold for Color I & J and Color 
-	*/
+
 	//#define WSM 2 //Weapon Settings Mode
 	//#define DB_W 11
 	//#define DF_X float2(0.075,0.0)
@@ -10798,7 +10585,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DL_Y -0.50   //De-Artifact
     //#define DL_Z 0.750       //Compat Power
 	/*
-    #define MAC 1
     #define MDD 1 //Set Menu Detection & Direction      //Off 0 | 1 | 2 | 3 | 4      
     #define DN_X float4( 0.8835, 0.956 , 0.982 , 0.954)//Pos A = XY Any & B = ZW Lock 
     #define DN_Y float4( 0.500 , 0.004 ,  0.0, 0.0)     //Pos C = XY Any & D = ZW Match
@@ -10808,26 +10594,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define DJ_Z float3( 1000., 1000., 1000);           //Set Match Tresh 
 	*/
 
-	/*
-    #define MMD 1 //Set Multi Menu Detection             //Off / On
-    #define MMS 0 //Set Multi Menu Selection from 0-1 to 29-30 and Off 0 | 1 | 2
-    #define DO_X float4( 0.187 , 0.125 , 0.500 , 0.100 ) //Pos A1 = XY Color & A2 = ZW Black 
-    #define DO_Y float4( 0.276 , 0.335 , 0.115 , 0.050 ) //Pos A3 = XY Color & B1 = ZW Color
-    #define DO_Z float4( 0.500 , 0.100 , 0.260 , 0.087 ) //Pos B2 = XY Black & B3 = ZW Color
-	#define DO_W float4( 30.0, 30.0, 30.0, 30.0)   //Tresh Hold for Color A & B and Color
-    #define DP_X float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos C1 = XY Color & C2 = ZW Black 
-    #define DP_Y float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos C3 = XY Color & D1 = ZW Color
-    #define DP_Z float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos D2 = XY Black & D3 = ZW Color
-	#define DP_W float4( 1000.0, 1000.0, 1000.0, 1000.0)   //Tresh Hold for Color C & D and Color
-	#define DQ_X float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos C1 = XY Color & C2 = ZW Black 
-    #define DQ_Y float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos C3 = XY Color & D1 = ZW Color
-    #define DQ_Z float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos D2 = XY Black & D3 = ZW Color
-	#define DQ_W float4( 1000.0, 1000.0, 1000.0, 1000.0) //Tresh Hold for Color A1 & A3 and Color
-	#define DR_X float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos G1 = XY Color & G2 = ZW Black 
-    #define DR_Y float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos G3 = XY Color & H1 = ZW Color
-    #define DR_Z float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos H2 = XY Black & H3 = ZW Color
-	#define DR_W float4( 1000.0, 1000.0, 1000.0, 1000.0) //Tresh Hold for Color G & H and Color 
-	*/
 	#define WSM 5
 	#define DB_W 3
 	#define DF_X float2(0.1,0.0)
@@ -10874,7 +10640,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DL_Y -0.50   //De-Artifact
     //#define DL_Z 0.750       //Compat Power
 	/*
-    #define MAC 1
     #define MDD 1 //Set Menu Detection & Direction      //Off 0 | 1 | 2 | 3 | 4      
     #define DN_X float4( 0.8835, 0.956 , 0.982 , 0.954)//Pos A = XY Any & B = ZW Lock 
     #define DN_Y float4( 0.500 , 0.004 ,  0.0, 0.0)     //Pos C = XY Any & D = ZW Match
@@ -10952,7 +10717,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define DL_Z 0.50       //Compat Power
 	#define DJ_X 0.214       //Range Smoothing
 	/*
-    #define MAC 1
     #define MDD 1 //Set Menu Detection & Direction      //Off 0 | 1 | 2 | 3 | 4      
     #define DN_X float4( 0.8835, 0.956 , 0.982 , 0.954)//Pos A = XY Any & B = ZW Lock 
     #define DN_Y float4( 0.500 , 0.004 ,  0.0, 0.0)     //Pos C = XY Any & D = ZW Match
@@ -10972,17 +10736,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define DP_Y float4( 0.546 , 0.114 , 0.541 , 0.114 ) //Pos C3 = XY Color & D1 = ZW Color
     #define DP_Z float4( 0.934 , 0.902 , 0.546 , 0.114 ) //Pos D2 = XY Black & D3 = ZW Color
 	#define DP_W float4( 30.0, 30.0, 30.0, 30.0)   //Tresh Hold for Color C & D and Color
-	/*
-	#define DQ_X float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos C1 = XY Color & C2 = ZW Black 
-    #define DQ_Y float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos C3 = XY Color & D1 = ZW Color
-    #define DQ_Z float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos D2 = XY Black & D3 = ZW Color
-	#define DQ_W float4( 1000.0, 1000.0, 1000.0, 1000.0) //Tresh Hold for Color A1 & A3 and Color
 
-	#define DR_X float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos G1 = XY Color & G2 = ZW Black 
-    #define DR_Y float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos G3 = XY Color & H1 = ZW Color
-    #define DR_Z float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos H2 = XY Black & H3 = ZW Color
-	#define DR_W float4( 1000.0, 1000.0, 1000.0, 1000.0) //Tresh Hold for Color G & H and Color 
-	*/
 	//#define WSM 4
 	//#define DB_W 8
 	//#define DF_X float2(0.1,0.0)
@@ -11031,7 +10785,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DL_Y -0.50   //De-Artifact
     //#define DL_Z 0.750       //Compat Power
 	/*
-    #define MAC 1
     #define MDD 1 //Set Menu Detection & Direction      //Off 0 | 1 | 2 | 3 | 4      
     #define DN_X float4( 0.8835, 0.956 , 0.982 , 0.954)//Pos A = XY Any & B = ZW Lock 
     #define DN_Y float4( 0.500 , 0.004 ,  0.0, 0.0)     //Pos C = XY Any & D = ZW Match
@@ -11121,7 +10874,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DL_Y -0.50   //De-Artifact
     //#define DL_Z 0.750       //Compat Power
 	
-    #define MAC 1                //0.0212
     #define MDD 1 //Set Menu Detection & Direction      //Off 0 | 1 | 2 | 3 | 4      
     #define DN_X float4( 0.0455, 0.887 , 0.035, 0.0905)//Pos A = XY Any & B = ZW Lock 
     #define DN_Y float4( 0.0455, 0.0285,  0.0, 0.0)    //Pos C = XY Any & D = ZW Match
@@ -11151,12 +10903,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define DQ_Y float4( 0.7315, 0.878 , 0.035 , 0.0905 ) //Pos C3 = XY Color & D1 = ZW Color
     #define DQ_Z float4( 0.500 , 0.275 , 0.04462, 0.020 ) //Pos D2 = XY Black & D3 = ZW Color
 	#define DQ_W float4( 18.0, 18.0, 20.0, 18.0) //Tresh Hold for Color A1 & A3 and Color
-	/*							
-	#define DR_X float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos G1 = XY Color & G2 = ZW Black 
-    #define DR_Y float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos G3 = XY Color & H1 = ZW Color
-    #define DR_Z float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos H2 = XY Black & H3 = ZW Color
-	#define DR_W float4( 1000.0, 1000.0, 1000.0, 1000.0) //Tresh Hold for Color G & H and Color 
-	*/
+
 	//#define WSM 4
 	//#define DB_W 8
 	//#define DF_X float2(0.1,0.0)
@@ -11207,7 +10954,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DL_Y -0.50   //De-Artifact
     //#define DL_Z 0.750       //Compat Power
 	/*
-    #define MAC 1
     #define MDD 1 //Set Menu Detection & Direction      //Off 0 | 1 | 2 | 3 | 4      
     #define DN_X float4( 0.4975 , 0.9636, 0.525 , 0.032)//Pos A = XY Any & B = ZW Lock 
     #define DN_Y float4( 0.3084, 0.949 ,  0.0, 0.0)     //Pos C = XY Any & D = ZW Match
@@ -11216,7 +10962,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define DJ_Y float4( 1.0, 2.0, 17.0, 18.0);     //Menu Detection Type for A = X, B = Y, & C = Z. The Last Value is a Wild Card amount W is for X and Z. 
     #define DJ_Z float3( 1000., 1000., 1000);           //Set Match Tresh 
 	*/
-
 
     #define MMD 2 //Set Multi Menu Detection             //Off / On
     #define MMS 0 //Set Multi Menu Selection from 0-1 to 29-30 and Off 0 | 1 | 2
@@ -11310,7 +11055,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DL_Y -0.50   //De-Artifact
     //#define DL_Z 0.750       //Compat Power
 	///*
-    #define MAC 1
     #define MDD 1 //Set Menu Detection & Direction      //Off 0 | 1 | 2 | 3 | 4      
     #define DN_X float4( 0.310 , 0.422 , 0.920 , 0.880)//Pos A = XY Any & B = ZW Lock 
     #define DN_Y float4( 0.699 , 0.546 ,  0.0, 0.0)     //Pos C = XY Any & D = ZW Match
@@ -11320,26 +11064,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define DJ_Z float3( 1000., 1000., 1000);           //Set Match Tresh 
 	//*/
 
-	/*
-    #define MMD 1 //Set Multi Menu Detection             //Off / On
-    #define MMS 0 //Set Multi Menu Selection from 0-1 to 29-30 and Off 0 | 1 | 2
-    #define DO_X float4( 0.187 , 0.125 , 0.500 , 0.100 ) //Pos A1 = XY Color & A2 = ZW Black 
-    #define DO_Y float4( 0.276 , 0.335 , 0.115 , 0.050 ) //Pos A3 = XY Color & B1 = ZW Color
-    #define DO_Z float4( 0.500 , 0.100 , 0.260 , 0.087 ) //Pos B2 = XY Black & B3 = ZW Color
-	#define DO_W float4( 30.0, 30.0, 30.0, 30.0)   //Tresh Hold for Color A & B and Color
-    #define DP_X float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos C1 = XY Color & C2 = ZW Black 
-    #define DP_Y float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos C3 = XY Color & D1 = ZW Color
-    #define DP_Z float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos D2 = XY Black & D3 = ZW Color
-	#define DP_W float4( 1000.0, 1000.0, 1000.0, 1000.0)   //Tresh Hold for Color C & D and Color
-	#define DQ_X float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos C1 = XY Color & C2 = ZW Black 
-    #define DQ_Y float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos C3 = XY Color & D1 = ZW Color
-    #define DQ_Z float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos D2 = XY Black & D3 = ZW Color
-	#define DQ_W float4( 1000.0, 1000.0, 1000.0, 1000.0) //Tresh Hold for Color A1 & A3 and Color
-	#define DR_X float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos G1 = XY Color & G2 = ZW Black 
-    #define DR_Y float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos G3 = XY Color & H1 = ZW Color
-    #define DR_Z float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos H2 = XY Black & H3 = ZW Color
-	#define DR_W float4( 1000.0, 1000.0, 1000.0, 1000.0) //Tresh Hold for Color G & H and Color 
-	*/
 	#define WSM 2
 	#define DB_W 5
 	#define DF_X float2(0.050,0.0)
@@ -11560,7 +11284,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DL_Y -0.50   //De-Artifact
     //#define DL_Z 0.750       //Compat Power
 	///*
-    #define MAC 1
     #define MDD 1 //Set Menu Detection & Direction      //Off 0 | 1 | 2 | 3 | 4      
     #define DN_X float4( 0.0850, 0.8781, 0.342 , 0.470)//Pos A = XY Any & B = ZW Lock 
     #define DN_Y float4( 0.350 , 0.5205,  0.0, 0.0)     //Pos C = XY Any & D = ZW Match
@@ -11638,7 +11361,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DL_Y -0.50   //De-Artifact
     //#define DL_Z 0.750       //Compat Power
 	/*
-    #define MAC 1
     #define MDD 1 //Set Menu Detection & Direction      //Off 0 | 1 | 2 | 3 | 4      
     #define DN_X float4( 0.8835, 0.956 , 0.982 , 0.954)//Pos A = XY Any & B = ZW Lock 
     #define DN_Y float4( 0.500 , 0.004 ,  0.0, 0.0)     //Pos C = XY Any & D = ZW Match
@@ -11653,20 +11375,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define DO_Y float4( 0.9605, 0.176 , 0.599 , 0.068 ) //Pos A3 = XY Color & B1 = ZW Color
     #define DO_Z float4( 0.500 , 0.975 , 0.057 , 0.168 ) //Pos B2 = XY Black & B3 = ZW Color
 	#define DO_W float4( 27.0, 30.0, 27.0, 29.0) //Tresh Hold for Color A & B and Color
-	/*
-    #define DP_X float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos C1 = XY Color & C2 = ZW Black 
-    #define DP_Y float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos C3 = XY Color & D1 = ZW Color
-    #define DP_Z float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos D2 = XY Black & D3 = ZW Color
-	#define DP_W float4( 1000.0, 1000.0, 1000.0, 1000.0) //Tresh Hold for Color C & D and Color
-	#define DQ_X float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos C1 = XY Color & C2 = ZW Black 
-    #define DQ_Y float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos C3 = XY Color & D1 = ZW Color
-    #define DQ_Z float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos D2 = XY Black & D3 = ZW Color
-	#define DQ_W float4( 1000.0, 1000.0, 1000.0, 1000.0) //Tresh Hold for Color A1 & A3 and Color
-	#define DR_X float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos G1 = XY Color & G2 = ZW Black 
-    #define DR_Y float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos G3 = XY Color & H1 = ZW Color
-    #define DR_Z float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos H2 = XY Black & H3 = ZW Color
-	#define DR_W float4( 1000.0, 1000.0, 1000.0, 1000.0) //Tresh Hold for Color G & H and Color 
-	*/
+
 	//#define WSM 2
 	//#define DB_W 16
 	//#define DF_X float2(0.1375,0.0)
@@ -11717,7 +11426,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DL_Z 0.750       //Compat Power
 	//#define FMM 1
 	///*
-    #define MAC 1
     #define MDD 1 //Set Menu Detection & Direction      //Off 0 | 1 | 2 | 3 | 4      
     #define DN_X float4( 0.467, 0.086 , 0.500 , 0.03)//Pos A = XY Any & B = ZW Lock 
     #define DN_Y float4( 0.536 , 0.086 ,  0.0, 0.0)     //Pos C = XY Any & D = ZW Match
@@ -11797,7 +11505,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define DL_Y -0.300   //De-Artifact
     #define DL_Z 0.25       //Compat Power
 	///* //Should work on all Languages.
-    #define MAC 1
     #define MDD 1 //Set Menu Detection & Direction      //Off 0 | 1 | 2 | 3 | 4      
     #define DN_X float4( 0.490 , 0.325 , 0.650 , 0.175)//Pos A = XY Any & B = ZW Lock 
     #define DN_Y float4( 0.832 , 0.325 ,  0.0, 0.0)     //Pos C = XY Any & D = ZW Match
@@ -11880,7 +11587,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DL_Y -0.50   //De-Artifact
     #define DL_Z 0.500       //Compat Power
 	/*
-    #define MAC 1
     #define MDD 1 //Set Menu Detection & Direction      //Off 0 | 1 | 2 | 3 | 4      
     #define DN_X float4( 0.8835, 0.956 , 0.982 , 0.954)//Pos A = XY Any & B = ZW Lock 
     #define DN_Y float4( 0.500 , 0.004 ,  0.0, 0.0)     //Pos C = XY Any & D = ZW Match
@@ -11890,26 +11596,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define DJ_Z float3( 1000., 1000., 1000);           //Set Match Tresh 
 	*/
 
-	/*
-    #define MMD 1 //Set Multi Menu Detection             //Off / On
-    #define MMS 0 //Set Multi Menu Selection from 0-1 to 29-30 and Off 0 | 1 | 2
-    #define DO_X float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos A1 = XY Color & A2 = ZW Black 
-    #define DO_Y float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos A3 = XY Color & B1 = ZW Color
-    #define DO_Z float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos B2 = XY Black & B3 = ZW Color
-	#define DO_W float4( 1000.0, 1000.0, 1000.0, 1000.0) //Tresh Hold for Color A & B and Color
-    #define DP_X float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos C1 = XY Color & C2 = ZW Black 
-    #define DP_Y float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos C3 = XY Color & D1 = ZW Color
-    #define DP_Z float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos D2 = XY Black & D3 = ZW Color
-	#define DP_W float4( 1000.0, 1000.0, 1000.0, 1000.0) //Tresh Hold for Color C & D and Color
-	#define DQ_X float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos C1 = XY Color & C2 = ZW Black 
-    #define DQ_Y float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos C3 = XY Color & D1 = ZW Color
-    #define DQ_Z float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos D2 = XY Black & D3 = ZW Color
-	#define DQ_W float4( 1000.0, 1000.0, 1000.0, 1000.0) //Tresh Hold for Color A1 & A3 and Color
-	#define DR_X float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos G1 = XY Color & G2 = ZW Black 
-    #define DR_Y float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos G3 = XY Color & H1 = ZW Color
-    #define DR_Z float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos H2 = XY Black & H3 = ZW Color
-	#define DR_W float4( 1000.0, 1000.0, 1000.0, 1000.0) //Tresh Hold for Color G & H and Color 
-	*/
 	//#define WSM 2
 	//#define DB_W 16
 	//#define DF_X float2(0.1375,0.0)
@@ -11960,7 +11646,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DL_Y -0.50   //De-Artifact
     #define DL_Z 1.00       //Compat Power
 	/*
-    #define MAC 1
     #define MDD 1 //Set Menu Detection & Direction      //Off 0 | 1 | 2 | 3 | 4      
     #define DN_X float4( 0.8835, 0.956 , 0.982 , 0.954)//Pos A = XY Any & B = ZW Lock 
     #define DN_Y float4( 0.500 , 0.004 ,  0.0, 0.0)     //Pos C = XY Any & D = ZW Match
@@ -12044,37 +11729,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DF_Z 0.05
     //#define DL_Y -0.50   //De-Artifact
     #define DL_Z 0.750       //Compat Power
-	/*
-    #define MAC 1
-    #define MDD 1 //Set Menu Detection & Direction      //Off 0 | 1 | 2 | 3 | 4      
-    #define DN_X float4( 0.8835, 0.956 , 0.982 , 0.954)//Pos A = XY Any & B = ZW Lock 
-    #define DN_Y float4( 0.500 , 0.004 ,  0.0, 0.0)     //Pos C = XY Any & D = ZW Match
-    #define DN_Z float4( 0.0, 0.0,  0.0, 0.0)           //Pos E = XY Match & F = ZW Match
-	#define DN_W float4( 1.0, 0.0 , 0.0, 0.0 )          //Size = Menu [ABC] D E F
-    #define DJ_Y float4( 28.0, 28.0, 20.0, 14.0);     //Menu Detection Type for A = X, B = Y, & C = Z. The Last Value is a Wild Card amount W is for X and Z. 
-    #define DJ_Z float3( 1000., 1000., 1000);           //Set Match Tresh 
-	*/
-
-	/*
-    #define MMD 1 //Set Multi Menu Detection             //Off / On
-    #define MMS 0 //Set Multi Menu Selection from 0-1 to 29-30 and Off 0 | 1 | 2
-    #define DO_X float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos A1 = XY Color & A2 = ZW Black 
-    #define DO_Y float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos A3 = XY Color & B1 = ZW Color
-    #define DO_Z float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos B2 = XY Black & B3 = ZW Color
-	#define DO_W float4( 1000.0, 1000.0, 1000.0, 1000.0) //Tresh Hold for Color A & B and Color
-    #define DP_X float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos C1 = XY Color & C2 = ZW Black 
-    #define DP_Y float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos C3 = XY Color & D1 = ZW Color
-    #define DP_Z float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos D2 = XY Black & D3 = ZW Color
-	#define DP_W float4( 1000.0, 1000.0, 1000.0, 1000.0) //Tresh Hold for Color C & D and Color
-	#define DQ_X float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos C1 = XY Color & C2 = ZW Black 
-    #define DQ_Y float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos C3 = XY Color & D1 = ZW Color
-    #define DQ_Z float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos D2 = XY Black & D3 = ZW Color
-	#define DQ_W float4( 1000.0, 1000.0, 1000.0, 1000.0) //Tresh Hold for Color A1 & A3 and Color
-	#define DR_X float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos G1 = XY Color & G2 = ZW Black 
-    #define DR_Y float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos G3 = XY Color & H1 = ZW Color
-    #define DR_Z float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos H2 = XY Black & H3 = ZW Color
-	#define DR_W float4( 1000.0, 1000.0, 1000.0, 1000.0) //Tresh Hold for Color G & H and Color 
-	*/
 	//#define WSM 2
 	//#define DB_W 16
 	//#define DF_X float2(0.1375,0.0)
@@ -12706,7 +12360,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define BMT 1
 	#define DF_Z 0.100
 	// Only for Night and Day
-    //#define MAC 1
     #define MDD 1 //Set Menu Detection & Direction     //Off 0 | 1 | 2 | 3 | 4      
     #define DN_X float4( 0.1625, 0.313 , 0.188 , 0.491)  //Pos A = XY White & B = ZW White 
     #define DN_Y float4( 0.1625, 0.6685,  0.0, 0.0)       //Pos C = XY Light & D = ZW Match
@@ -12895,7 +12548,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define BMT 1
 	#define DF_Z 0.25
 	
-	#define MAC 1
     #define MDD 1 //Set Menu Detection & Direction      //Off 0 | 1 | 2 | 3 | 4      
     #define DN_X float4( 0.195 , 0.500 , 0.805 , 0.500) //Pos A = XY Any & B = ZW Lock 
     #define DN_Y float4( 0.512 , 0.938 ,  0.0, 0.0)     //Pos C = XY Any & D = ZW Match
@@ -13284,8 +12936,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DF_Z 0.100
 
     //#define DM_Y 3     //HQ VRS
-    //#define DL_Y 0.375    //De-Artifact 0.1245
-    #define MAC 0   
+    //#define DL_Y 0.375    //De-Artifact 0.1245  
     #define MDD 1 //Set Menu Detection & Direction     //Off 0 | 1 | 2 | 3 | 4      
 //    #define DN_X float4( 0.125, 0.105 ,  0.940 , 0.922)  //Pos A = XY White & B = ZW White 
 //    #define DN_Y float4( 0.125, 0.43825,  0.0, 0.0)       //Pos C = XY Light & D = ZW Match
@@ -13352,8 +13003,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 
     //#define DM_Y 3     //HQ VRS
     //#define DL_Y 0.375    //De-Artifact 0.1245
-	/*
-    #define MAC 0   
+	/* 
     #define MDD 1 //Set Menu Detection & Direction     //Off 0 | 1 | 2 | 3 | 4      
     #define DN_X float4( 0.095, 0.322 ,  0.9425, 0.152)  //Pos A = XY White & B = ZW White 
     #define DN_Y float4( 0.095, 0.575 ,  0.0, 0.0)       //Pos C = XY Light & D = ZW Match
@@ -13369,20 +13019,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define DO_Y float4( 0.620 , 0.109 , 0.140 , 0.0425 ) //Pos A3 = XY Color & B1 = ZW Color
     #define DO_Z float4( 0.190 , 0.929 , 0.620 , 0.109 ) //Pos B2 = XY Black & B3 = ZW Color
 	#define DO_W float4( 27.0, 28.0, 27.0, 28.0 ) //Tresh Hold for Color A & B and Color
-	/*
-    #define DP_X float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos C1 = XY Color & C2 = ZW Black 
-    #define DP_Y float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos C3 = XY Color & D1 = ZW Color
-    #define DP_Z float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos D2 = XY Black & D3 = ZW Color
-	#define DP_W float4( 1000.0, 1000.0, 1000.0, 1000.0) //Tresh Hold for Color C & D and Color
-	#define DQ_X float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos C1 = XY Color & C2 = ZW Black 
-    #define DQ_Y float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos C3 = XY Color & D1 = ZW Color
-    #define DQ_Z float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos D2 = XY Black & D3 = ZW Color
-	#define DQ_W float4( 1000.0, 1000.0, 1000.0, 1000.0) //Tresh Hold for Color A1 & A3 and Color
-	#define DR_X float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos G1 = XY Color & G2 = ZW Black 
-    #define DR_Y float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos G3 = XY Color & H1 = ZW Color
-    #define DR_Z float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos H2 = XY Black & H3 = ZW Color
-	#define DR_W float4( 1000.0, 1000.0, 1000.0, 1000.0) //Tresh Hold for Color G & H and Color 
-	*/
+
     //#define DS_Y 1
     //#define SDU 1
     #define PEW 1
@@ -13418,37 +13055,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 
     //#define DL_Y -0.50      // De-Artifact Only works on some View Modes and causes performance degredation
     #define DL_Z 1.00       // Compat Power
-	/*
-    #define MAC 0   
-    #define MDD 1 //Set Menu Detection & Direction     //Off 0 | 1 | 2 | 3 | 4      
-    #define DN_X float4( 0.095, 0.322 ,  0.9425, 0.152)  //Pos A = XY White & B = ZW White 
-    #define DN_Y float4( 0.095, 0.575 ,  0.0, 0.0)       //Pos C = XY Light & D = ZW Match
-    #define DN_Z float4( 0.0, 0.0,  0.0, 0.0)            //Pos E = XY Match & F = ZW Match
-	#define DN_W float4( 1.0, 0.0 , 0.0, 0.0 )          //Size = Menu [ABC] D E F
-    #define DJ_Y float4( 30, 30.0, 30.0, 1000.0);            //Menu Detection Type for A, B, & C. The Last Value is a Shift amount for C.  
-    #define DJ_Z float3( 1000., 1000., 1000);                //Set Match Tresh 
-	*/
-	/*	
-    #define MMD 1 //Set Multi Menu Detection             //Off / On
-    #define MMS 0 //Set Multi Menu Selection from 0-1 to 29-30 and Off 0 | 1 | 2
-    #define DO_X float4( 0.140 , 0.0425, 0.620 , 0.929 ) //Pos A1 = XY Color & A2 = ZW Black 
-    #define DO_Y float4( 0.620 , 0.109 , 0.140 , 0.0425 ) //Pos A3 = XY Color & B1 = ZW Color
-    #define DO_Z float4( 0.190 , 0.929 , 0.620 , 0.109 ) //Pos B2 = XY Black & B3 = ZW Color
-	#define DO_W float4( 27.0, 28.0, 27.0, 28.0 ) //Tresh Hold for Color A & B and Color
 
-    #define DP_X float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos C1 = XY Color & C2 = ZW Black 
-    #define DP_Y float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos C3 = XY Color & D1 = ZW Color
-    #define DP_Z float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos D2 = XY Black & D3 = ZW Color
-	#define DP_W float4( 1000.0, 1000.0, 1000.0, 1000.0) //Tresh Hold for Color C & D and Color
-	#define DQ_X float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos C1 = XY Color & C2 = ZW Black 
-    #define DQ_Y float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos C3 = XY Color & D1 = ZW Color
-    #define DQ_Z float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos D2 = XY Black & D3 = ZW Color
-	#define DQ_W float4( 1000.0, 1000.0, 1000.0, 1000.0) //Tresh Hold for Color A1 & A3 and Color
-	#define DR_X float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos G1 = XY Color & G2 = ZW Black 
-    #define DR_Y float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos G3 = XY Color & H1 = ZW Color
-    #define DR_Z float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos H2 = XY Black & H3 = ZW Color
-	#define DR_W float4( 1000.0, 1000.0, 1000.0, 1000.0) //Tresh Hold for Color G & H and Color 
-	*/
 	#define WSM 4
 	#define DB_W 9
 	//#define DF_X float2(0.050,0.0)	
@@ -13490,37 +13097,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 
     //#define DL_Y -0.50      // De-Artifact Only works on some View Modes and causes performance degredation
     //#define DL_Z 1.00       // Compat Power
-	/*
-    #define MAC 0   
-    #define MDD 1 //Set Menu Detection & Direction     //Off 0 | 1 | 2 | 3 | 4      
-    #define DN_X float4( 0.095, 0.322 ,  0.9425, 0.152)  //Pos A = XY White & B = ZW White 
-    #define DN_Y float4( 0.095, 0.575 ,  0.0, 0.0)       //Pos C = XY Light & D = ZW Match
-    #define DN_Z float4( 0.0, 0.0,  0.0, 0.0)            //Pos E = XY Match & F = ZW Match
-	#define DN_W float4( 1.0, 0.0 , 0.0, 0.0 )          //Size = Menu [ABC] D E F
-    #define DJ_Y float4( 30, 30.0, 30.0, 1000.0);            //Menu Detection Type for A, B, & C. The Last Value is a Shift amount for C.  
-    #define DJ_Z float3( 1000., 1000., 1000);                //Set Match Tresh 
-	*/
-	/*	
-    #define MMD 1 //Set Multi Menu Detection             //Off / On
-    #define MMS 0 //Set Multi Menu Selection from 0-1 to 29-30 and Off 0 | 1 | 2
-    #define DO_X float4( 0.140 , 0.0425, 0.620 , 0.929 ) //Pos A1 = XY Color & A2 = ZW Black 
-    #define DO_Y float4( 0.620 , 0.109 , 0.140 , 0.0425 ) //Pos A3 = XY Color & B1 = ZW Color
-    #define DO_Z float4( 0.190 , 0.929 , 0.620 , 0.109 ) //Pos B2 = XY Black & B3 = ZW Color
-	#define DO_W float4( 27.0, 28.0, 27.0, 28.0 ) //Tresh Hold for Color A & B and Color
 
-    #define DP_X float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos C1 = XY Color & C2 = ZW Black 
-    #define DP_Y float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos C3 = XY Color & D1 = ZW Color
-    #define DP_Z float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos D2 = XY Black & D3 = ZW Color
-	#define DP_W float4( 1000.0, 1000.0, 1000.0, 1000.0) //Tresh Hold for Color C & D and Color
-	#define DQ_X float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos C1 = XY Color & C2 = ZW Black 
-    #define DQ_Y float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos C3 = XY Color & D1 = ZW Color
-    #define DQ_Z float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos D2 = XY Black & D3 = ZW Color
-	#define DQ_W float4( 1000.0, 1000.0, 1000.0, 1000.0) //Tresh Hold for Color A1 & A3 and Color
-	#define DR_X float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos G1 = XY Color & G2 = ZW Black 
-    #define DR_Y float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos G3 = XY Color & H1 = ZW Color
-    #define DR_Z float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos H2 = XY Black & H3 = ZW Color
-	#define DR_W float4( 1000.0, 1000.0, 1000.0, 1000.0) //Tresh Hold for Color G & H and Color 
-	*/
 	//#define WSM 4
 	//#define DB_W 9
 	//#define DF_X float2(0.050,0.0)	
@@ -13598,7 +13175,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DL_Y -0.50      // De-Artifact Only works on some View Modes and causes performance degredation
     //#define DL_Z 1.00       // Compat Power
 	
-//    #define MAC 0   
 //    #define MDD 1 //Set Menu Detection & Direction     //Off 0 | 1 | 2 | 3 | 4      
 //    #define DN_X float4( 0.081, 0.508 ,  0.055, 0.500)  //Pos A = XY White & B = ZW White 
 //    #define DN_Y float4( 0.0806,0.597 ,  0.0, 0.0)       //Pos C = XY Light & D = ZW Match
@@ -13606,8 +13182,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 //	#define DN_W float4( 1.0, 0.0 , 0.0, 0.0 )          //Size = Menu [ABC] D E F
 //    #define DJ_Y float4( 15.0, 0.0, 15.0, 23.0);     //Menu Detection Type for A, B, & C. The Last Value is a Shift amount for C.  
 //    #define DJ_Z float3( 1000., 1000., 1000);           //Set Match Tresh 
-
-    #define MAC 0   
+  
     #define MDD 1 //Set Menu Detection & Direction     //Off 0 | 1 | 2 | 3 | 4      
     #define DN_X float4( 0.4055,0.2664 ,  0.405, 0.510)  //Pos A = XY White & B = ZW White 
     #define DN_Y float4( 0.3983, 0.880 ,  0.0, 0.0)       //Pos C = XY Light & D = ZW Match
@@ -13811,8 +13386,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 
     //#define DL_Y -0.50      // De-Artifact Only works on some View Modes and causes performance degredation
     #define DL_Z 0.375       // Compat Power
-	///*
-    #define MAC 0   
+ 
     #define MDD 1 //Set Menu Detection & Direction     //Off 0 | 1 | 2 | 3 | 4      
     #define DN_X float4( 0.500, 0.111 ,  0.528, 0.063 )  //Pos A = XY White & B = ZW White 
     #define DN_Y float4( 0.913, 0.072 ,  0.0, 0.0)       //Pos C = XY Light & D = ZW Match
@@ -13820,7 +13394,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DN_W float4( 1.0, 0.0 , 0.0, 0.0 )          //Size = Menu [ABC] D E F
     #define DJ_Y float4( 5.0, 0.0, 27.0, 6.0);            //Menu Detection Type for A, B, & C. The Last Value is a Shift amount for C.  
     #define DJ_Z float3( 1000., 1000., 1000);                //Set Match Tresh 
-	//*/
+
 	
     #define MMD 4 //Set Multi Menu Detection             //Off / On
     #define MMS 0 //Set Multi Menu Selection from 0-1 to 29-30 and Off 0 | 1 | 2
@@ -13991,37 +13565,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DL_Y -0.50      // De-Artifact Only works on some View Modes and causes performance degredation
     //#define DL_Z 1.00       // Compat Power
 
-	/*
-    #define MAC 0   
-    #define MDD 1 //Set Menu Detection & Direction     //Off 0 | 1 | 2 | 3 | 4      
-    #define DN_X float4( 0.095, 0.322 ,  0.9425, 0.152)  //Pos A = XY White & B = ZW White 
-    #define DN_Y float4( 0.095, 0.575 ,  0.0, 0.0)       //Pos C = XY Light & D = ZW Match
-    #define DN_Z float4( 0.0, 0.0,  0.0, 0.0)            //Pos E = XY Match & F = ZW Match
-	#define DN_W float4( 1.0, 0.0 , 0.0, 0.0 )          //Size = Menu [ABC] D E F
-    #define DJ_Y float4( 30, 30.0, 30.0, 1000.0);            //Menu Detection Type for A, B, & C. The Last Value is a Shift amount for C.  
-    #define DJ_Z float3( 1000., 1000., 1000);                //Set Match Tresh 
-	*/
-	/*	
-    #define MMD 1 //Set Multi Menu Detection             //Off / On
-    #define MMS 0 //Set Multi Menu Selection from 0-1 to 29-30 and Off 0 | 1 | 2
-    #define DO_X float4( 0.140 , 0.0425, 0.620 , 0.929 ) //Pos A1 = XY Color & A2 = ZW Black 
-    #define DO_Y float4( 0.620 , 0.109 , 0.140 , 0.0425 ) //Pos A3 = XY Color & B1 = ZW Color
-    #define DO_Z float4( 0.190 , 0.929 , 0.620 , 0.109 ) //Pos B2 = XY Black & B3 = ZW Color
-	#define DO_W float4( 27.0, 28.0, 27.0, 28.0 ) //Tresh Hold for Color A & B and Color
-
-    #define DP_X float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos C1 = XY Color & C2 = ZW Black 
-    #define DP_Y float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos C3 = XY Color & D1 = ZW Color
-    #define DP_Z float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos D2 = XY Black & D3 = ZW Color
-	#define DP_W float4( 1000.0, 1000.0, 1000.0, 1000.0) //Tresh Hold for Color C & D and Color
-	#define DQ_X float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos C1 = XY Color & C2 = ZW Black 
-    #define DQ_Y float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos C3 = XY Color & D1 = ZW Color
-    #define DQ_Z float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos D2 = XY Black & D3 = ZW Color
-	#define DQ_W float4( 1000.0, 1000.0, 1000.0, 1000.0) //Tresh Hold for Color A1 & A3 and Color
-	#define DR_X float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos G1 = XY Color & G2 = ZW Black 
-    #define DR_Y float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos G3 = XY Color & H1 = ZW Color
-    #define DR_Z float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos H2 = XY Black & H3 = ZW Color
-	#define DR_W float4( 1000.0, 1000.0, 1000.0, 1000.0) //Tresh Hold for Color G & H and Color 
-	*/
 	//#define WSM 4
 	//#define DB_W 9
 	//#define DF_X float2(0.050,0.0)	
@@ -14064,8 +13607,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 
     //#define DL_Y -0.50      // De-Artifact Only works on some View Modes and causes performance degredation
     //#define DL_Z 1.00       // Compat Power
-
-    #define MAC 0   
+  
     #define MDD 1 //Set Menu Detection & Direction     //Off 0 | 1 | 2 | 3 | 4      
     #define DN_X float4( 0.349, 0.195 ,  0.3741, 0.1785)  //Pos A = XY White & B = ZW White 
     #define DN_Y float4( 0.376, 0.848 ,  0.0, 0.0)       //Pos C = XY Light & D = ZW Match
@@ -14074,27 +13616,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define DJ_Y float4( 30, 2.0, 30.0, 1000.0);            //Menu Detection Type for A, B, & C. The Last Value is a Shift amount for C.  
     #define DJ_Z float3( 1000., 1000., 1000);                //Set Match Tresh 
 
-	/*	
-    #define MMD 1 //Set Multi Menu Detection             //Off / On
-    #define MMS 0 //Set Multi Menu Selection from 0-1 to 29-30 and Off 0 | 1 | 2
-    #define DO_X float4( 0.140 , 0.0425, 0.620 , 0.929 ) //Pos A1 = XY Color & A2 = ZW Black 
-    #define DO_Y float4( 0.620 , 0.109 , 0.140 , 0.0425 ) //Pos A3 = XY Color & B1 = ZW Color
-    #define DO_Z float4( 0.190 , 0.929 , 0.620 , 0.109 ) //Pos B2 = XY Black & B3 = ZW Color
-	#define DO_W float4( 27.0, 28.0, 27.0, 28.0 ) //Tresh Hold for Color A & B and Color
-
-    #define DP_X float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos C1 = XY Color & C2 = ZW Black 
-    #define DP_Y float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos C3 = XY Color & D1 = ZW Color
-    #define DP_Z float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos D2 = XY Black & D3 = ZW Color
-	#define DP_W float4( 1000.0, 1000.0, 1000.0, 1000.0) //Tresh Hold for Color C & D and Color
-	#define DQ_X float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos C1 = XY Color & C2 = ZW Black 
-    #define DQ_Y float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos C3 = XY Color & D1 = ZW Color
-    #define DQ_Z float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos D2 = XY Black & D3 = ZW Color
-	#define DQ_W float4( 1000.0, 1000.0, 1000.0, 1000.0) //Tresh Hold for Color A1 & A3 and Color
-	#define DR_X float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos G1 = XY Color & G2 = ZW Black 
-    #define DR_Y float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos G3 = XY Color & H1 = ZW Color
-    #define DR_Z float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos H2 = XY Black & H3 = ZW Color
-	#define DR_W float4( 1000.0, 1000.0, 1000.0, 1000.0) //Tresh Hold for Color G & H and Color 
-	*/
 	//#define WSM 4
 	//#define DB_W 9
 	//#define DF_X float2(0.050,0.0)	
@@ -14137,16 +13658,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 
     //#define DL_Y -0.50      // De-Artifact Only works on some View Modes and causes performance degredation
     //#define DL_Z 1.00       // Compat Power
-	/*
-    #define MAC 0   
-    #define MDD 1 //Set Menu Detection & Direction     //Off 0 | 1 | 2 | 3 | 4      
-    #define DN_X float4( 0.349, 0.195 ,  0.3741, 0.1785)  //Pos A = XY White & B = ZW White 
-    #define DN_Y float4( 0.376, 0.848 ,  0.0, 0.0)       //Pos C = XY Light & D = ZW Match
-    #define DN_Z float4( 0.0, 0.0,  0.0, 0.0)            //Pos E = XY Match & F = ZW Match
-	#define DN_W float4( 1.0, 0.0 , 0.0, 0.0 )          //Size = Menu [ABC] D E F
-    #define DJ_Y float4( 30, 2.0, 30.0, 1000.0);            //Menu Detection Type for A, B, & C. The Last Value is a Shift amount for C.  
-    #define DJ_Z float3( 1000., 1000., 1000);                //Set Match Tresh 
-	*/
 		
     #define MMD 1 //Set Multi Menu Detection             //Off / On
     #define MMS 0 //Set Multi Menu Selection from 0-1 to 29-30 and Off 0 | 1 | 2
@@ -14154,20 +13665,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define DO_Y float4( 0.783 , 0.948 , 0.000 , 0.000 ) //Pos A3 = XY Color & B1 = ZW Color
     #define DO_Z float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos B2 = XY Black & B3 = ZW Color
 	#define DO_W float4( 26.0, 23.0, 1000.0, 1000.0 ) //Tresh Hold for Color A & B and Color
-	/*
-    #define DP_X float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos C1 = XY Color & C2 = ZW Black 
-    #define DP_Y float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos C3 = XY Color & D1 = ZW Color
-    #define DP_Z float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos D2 = XY Black & D3 = ZW Color
-	#define DP_W float4( 1000.0, 1000.0, 1000.0, 1000.0) //Tresh Hold for Color C & D and Color
-	#define DQ_X float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos C1 = XY Color & C2 = ZW Black 
-    #define DQ_Y float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos C3 = XY Color & D1 = ZW Color
-    #define DQ_Z float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos D2 = XY Black & D3 = ZW Color
-	#define DQ_W float4( 1000.0, 1000.0, 1000.0, 1000.0) //Tresh Hold for Color A1 & A3 and Color
-	#define DR_X float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos G1 = XY Color & G2 = ZW Black 
-    #define DR_Y float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos G3 = XY Color & H1 = ZW Color
-    #define DR_Z float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos H2 = XY Black & H3 = ZW Color
-	#define DR_W float4( 1000.0, 1000.0, 1000.0, 1000.0) //Tresh Hold for Color G & H and Color 
-	*/
+
 	//#define WSM 4
 	//#define DB_W 9
 	//#define DF_X float2(0.050,0.0)	
@@ -14212,37 +13710,13 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DL_Y -0.50      // De-Artifact Only works on some View Modes and causes performance degredation
     //#define DL_Z 1.00       // Compat Power
 
-	/*
-    #define MAC 0   
-    #define MDD 1 //Set Menu Detection & Direction     //Off 0 | 1 | 2 | 3 | 4      
-    #define DN_X float4( 0.349, 0.195 ,  0.3741, 0.1785)  //Pos A = XY White & B = ZW White 
-    #define DN_Y float4( 0.376, 0.848 ,  0.0, 0.0)       //Pos C = XY Light & D = ZW Match
-    #define DN_Z float4( 0.0, 0.0,  0.0, 0.0)            //Pos E = XY Match & F = ZW Match
-	#define DN_W float4( 1.0, 0.0 , 0.0, 0.0 )          //Size = Menu [ABC] D E F
-    #define DJ_Y float4( 30, 2.0, 30.0, 1000.0);            //Menu Detection Type for A, B, & C. The Last Value is a Shift amount for C.  
-    #define DJ_Z float3( 1000., 1000., 1000);                //Set Match Tresh 
-	*/
-		
     #define MMD 1 //Set Multi Menu Detection             //Off / On
     #define MMS 0 //Set Multi Menu Selection from 0-1 to 29-30 and Off 0 | 1 | 2
     #define DO_X float4( 0.305 , 0.116 , 0.500 , 0.025 ) //Pos A1 = XY Color & A2 = ZW Black 
     #define DO_Y float4( 0.066 , 0.177 , 0.000 , 0.000 ) //Pos A3 = XY Color & B1 = ZW Color
     #define DO_Z float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos B2 = XY Black & B3 = ZW Color
 	#define DO_W float4( 30.0, 30.0, 1000.0, 1000.0 ) //Tresh Hold for Color A & B and Color
-	/*
-    #define DP_X float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos C1 = XY Color & C2 = ZW Black 
-    #define DP_Y float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos C3 = XY Color & D1 = ZW Color
-    #define DP_Z float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos D2 = XY Black & D3 = ZW Color
-	#define DP_W float4( 1000.0, 1000.0, 1000.0, 1000.0) //Tresh Hold for Color C & D and Color
-	#define DQ_X float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos C1 = XY Color & C2 = ZW Black 
-    #define DQ_Y float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos C3 = XY Color & D1 = ZW Color
-    #define DQ_Z float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos D2 = XY Black & D3 = ZW Color
-	#define DQ_W float4( 1000.0, 1000.0, 1000.0, 1000.0) //Tresh Hold for Color A1 & A3 and Color
-	#define DR_X float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos G1 = XY Color & G2 = ZW Black 
-    #define DR_Y float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos G3 = XY Color & H1 = ZW Color
-    #define DR_Z float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos H2 = XY Black & H3 = ZW Color
-	#define DR_W float4( 1000.0, 1000.0, 1000.0, 1000.0) //Tresh Hold for Color G & H and Color 
-	*/
+
 	//#define WSM 4
 	//#define DB_W 9
 	//#define DF_X float2(0.050,0.0)	
@@ -14297,7 +13771,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define DL_Z 0.0       // Compat Power
 	#define DJ_X 0.071      // Range Smoothing
 	//Title Screen
-    #define MAC 0   
     #define MDD 1 //Set Menu Detection & Direction     //Off 0 | 1 | 2 | 3 | 4      
     #define DN_X float4( 0.261, 0.220 ,  0.240 , 0.194 )  //Pos A = XY White & B = ZW White 
     #define DN_Y float4( 0.804, 0.260 ,  0.0, 0.0)       //Pos C = XY Light & D = ZW Match
@@ -14383,17 +13856,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 
     #define DL_Y -1.0      // De-Artifact Only works on some View Modes and causes performance degredation
     #define DL_Z 1.00       // Compat Power
-
-	/*
-    #define MAC 0   
-    #define MDD 1 //Set Menu Detection & Direction     //Off 0 | 1 | 2 | 3 | 4      
-    #define DN_X float4( 0.349, 0.195 ,  0.3741, 0.1785)  //Pos A = XY White & B = ZW White 
-    #define DN_Y float4( 0.376, 0.848 ,  0.0, 0.0)       //Pos C = XY Light & D = ZW Match
-    #define DN_Z float4( 0.0, 0.0,  0.0, 0.0)            //Pos E = XY Match & F = ZW Match
-	#define DN_W float4( 1.0, 0.0 , 0.0, 0.0 )          //Size = Menu [ABC] D E F
-    #define DJ_Y float4( 30, 2.0, 30.0, 1000.0);            //Menu Detection Type for A, B, & C. The Last Value is a Shift amount for C.  
-    #define DJ_Z float3( 1000., 1000., 1000);                //Set Match Tresh 
-	*/
 		
     #define MMD 2 //Set Multi Menu Detection             //Off / On
     #define MMS 0 //Set Multi Menu Selection from 0-1 to 29-30 and Off 0 | 1 | 2
@@ -14406,16 +13868,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define DP_Y float4( 0.837 , 0.162 , 0.000 , 0.000 ) //Pos C3 = XY Color & D1 = ZW Color
     #define DP_Z float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos D2 = XY Black & D3 = ZW Color
 	#define DP_W float4( 30.0, 30.0, 1000.0, 1000.0) //Tresh Hold for Color C & D and Color
-	/*
-	#define DQ_X float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos C1 = XY Color & C2 = ZW Black 
-    #define DQ_Y float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos C3 = XY Color & D1 = ZW Color
-    #define DQ_Z float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos D2 = XY Black & D3 = ZW Color
-	#define DQ_W float4( 1000.0, 1000.0, 1000.0, 1000.0) //Tresh Hold for Color A1 & A3 and Color
-	#define DR_X float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos G1 = XY Color & G2 = ZW Black 
-    #define DR_Y float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos G3 = XY Color & H1 = ZW Color
-    #define DR_Z float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos H2 = XY Black & H3 = ZW Color
-	#define DR_W float4( 1000.0, 1000.0, 1000.0, 1000.0) //Tresh Hold for Color G & H and Color 
-	*/
+
 	//#define WSM 4
 	//#define DB_W 9
 	//#define DF_X float2(0.050,0.0)	
@@ -14460,17 +13913,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 
     #define DL_Y -0.25      // De-Artifact Only works on some View Modes and causes performance degredation
     #define DL_Z -0.25       // Compat Power
-
-	/*
-    #define MAC 0   
-    #define MDD 1 //Set Menu Detection & Direction     //Off 0 | 1 | 2 | 3 | 4      
-    #define DN_X float4( 0.349, 0.195 ,  0.3741, 0.1785)  //Pos A = XY White & B = ZW White 
-    #define DN_Y float4( 0.376, 0.848 ,  0.0, 0.0)       //Pos C = XY Light & D = ZW Match
-    #define DN_Z float4( 0.0, 0.0,  0.0, 0.0)            //Pos E = XY Match & F = ZW Match
-	#define DN_W float4( 1.0, 0.0 , 0.0, 0.0 )          //Size = Menu [ABC] D E F
-    #define DJ_Y float4( 30, 2.0, 30.0, 1000.0);            //Menu Detection Type for A, B, & C. The Last Value is a Shift amount for C.  
-    #define DJ_Z float3( 1000., 1000., 1000);                //Set Match Tresh 
-	*/
 		
     #define MMD 2 //Set Multi Menu Detection             //Off / On
     #define MMS 0 //Set Multi Menu Selection from 0-1 to 29-30 and Off 0 | 1 | 2
@@ -14483,16 +13925,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define DP_Y float4( 0.976 , 0.936 , 0.000 , 0.000 ) //Pos C3 = XY Color & D1 = ZW Color
     #define DP_Z float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos D2 = XY Black & D3 = ZW Color
 	#define DP_W float4( 30.0, 30.0, 1000.0, 1000.0) //Tresh Hold for Color C & D and Color
-	/*
-	#define DQ_X float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos C1 = XY Color & C2 = ZW Black 
-    #define DQ_Y float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos C3 = XY Color & D1 = ZW Color
-    #define DQ_Z float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos D2 = XY Black & D3 = ZW Color
-	#define DQ_W float4( 1000.0, 1000.0, 1000.0, 1000.0) //Tresh Hold for Color A1 & A3 and Color
-	#define DR_X float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos G1 = XY Color & G2 = ZW Black 
-    #define DR_Y float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos G3 = XY Color & H1 = ZW Color
-    #define DR_Z float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos H2 = XY Black & H3 = ZW Color
-	#define DR_W float4( 1000.0, 1000.0, 1000.0, 1000.0) //Tresh Hold for Color G & H and Color 
-	*/
+
 	//#define WSM 4
 	//#define DB_W 9
 	//#define DF_X float2(0.050,0.0)	
@@ -14586,7 +14019,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	//#define DF_X float2(0,0)// ZPD Weapon Boundarys Level 1 and Level 2
 	//#define DJ_W 0	        // Weapon Depth Limit Location
 
-    #define MAC 3
     #define MDD 1 //Set Menu Detection & Direction      //Off 0 | 1 | 2 | 3 | 4      
     #define DN_X float4( 0.685 , 0.486 , 0.915 , 0.912) //Pos A = XY Any & B = ZW Lock 
     #define DN_Y float4( 0.948 , 0.525 ,  0.0, 0.0)     //Pos C = XY Any & D = ZW Match
@@ -14704,7 +14136,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	//#define DB_W 16         // Weapon Profile
 	//#define DF_X float2(0,0)// ZPD Weapon Boundarys Level 1 and Level 2
 	//#define DJ_W 0	        // Weapon Depth Limit Location
-    #define MAC 0
     #define MDD 1 //Set Menu Detection & Direction      // Off | 1 | 2 | 3 | 4      
     #define DN_X float4( 0.308 , 0.829 , 0.500 , 0.986) //Pos A = XY Any & B = ZW Lock 
     #define DN_Y float4( 0.690 , 0.977 ,  0.0, 0.0)     //Pos C = XY Any & D = ZW Match
@@ -14952,7 +14383,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DJ_W 0.025	        // Weapon Depth Limit Location 1
 	#define DS_W 20.0	        // Weapon Depth Limit Location 2
 	#define DT_W float2(0.010,0.022)
-	#define MAC 1 //Set to one only the 3rd value has a wiled card. Not the 1st and 3rd.
     #define MDD 1 //Set Menu Detection & Direction      //Off | 1 | 2 | 3 | 4      
     #define DN_X float4( 0.060 , 0.139 , 0.149 , 0.069) //Pos A = XY Any & B = ZW Lock 
     #define DN_Y float4( 0.236 , 0.158 ,  0.0, 0.0)     //Pos C = XY Any & D = ZW Match
@@ -14960,14 +14390,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DN_W float4( 1.0, 0.0 , 0.0, 0.0 )          //Size = Menu [ABC] D E F
     #define DJ_Y float4( 30.0, 30.0, 30.0, 1000.0);       //Menu Detection Type for A = X, B = Y, & C = Z. The Last Value is a Wild Card amount W is for X and Z. 
     #define DJ_Z float3( 1000., 1000., 1000);           //Set Match Tresh 
-	/*
-    #define MMD 1 //Set Multi Menu Detection             //Off / On
-    #define MMS 0 //Set Multi Menu Selection from 0-1 to 29-30 and Off 0 | 1 | 2
-    #define DO_X float4( 0.058 , 0.139 , 0.149 , 0.067 ) //Pos A1 = XY Color & A2 = ZW Black 
-    #define DO_Y float4( 0.777 , 0.069 , 0.000 , 0.0.0 ) //Pos A3 = XY Color & B1 = ZW Color
-    #define DO_Z float4( 0.500 , 0.760 , 0.265 , 0.322 ) //Pos B2 = XY Black & B3 = ZW Color
-	#define DO_W float4( 21.0, 30.0, 30.0, 30.0) //Tresh Hold for Color A & B and Color
-	*/
+
 	//Smooth Mode Setting  
     #define SMS 3      //SM Toggle Separation
 	#define DL_X 0.95  //SM Tune
@@ -15448,16 +14871,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	//#define DB_W 25         // Weapon Profile
 	//#define DF_X float2(0.386,0)// ZPD Weapon Boundarys Level 1 and Level 2
 	//#define DJ_W 0	        // Weapon Depth Limit Location
-/* //Menu Detection Templates -  Needs a Specail Shader to adjust
-    #define MAC 1 //Set to one only C has a wiled card. Not the A and C.
-    #define MDD 1 //Set Menu Detection & Direction      //Off | 1 | 2 | 3 | 4      
-    #define DN_X float4( 0.8835, 0.956 , 0.982 , 0.954) //Pos A = XY Any & B = ZW Lock 
-    #define DN_Y float4( 0.500 , 0.004 ,  0.0, 0.0)     //Pos C = XY Any & D = ZW Match
-    #define DN_Z float4( 0.0, 0.0,  0.0, 0.0)           //Pos E = XY Match & F = ZW Match
-	#define DN_W float4( 1.0, 0.0 , 0.0, 0.0 )          //Size = Menu [ABC] D E F
-    #define DJ_Y float4( 28.0, 28.0, 20.0, 14.0)       //Menu Detection Type for A = X, B = Y, & C = Z. The Last Value is a Wild Card amount W is for X and Z. 
-    #define DJ_Z float3( 1000., 1000., 1000)           //Set Match Tresh 
-*/
+
     //Simple Menu Detection May add one more later
     #define SMD 1 //If It's set to 2 it enables the  Wiled Card for A and C
     #define DW_X float4( 0.332 , 0.227 , 0.613 , 0.791)  //Pos A = XY Any & B = ZW Lock 
@@ -15660,7 +15074,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DL_Z 0.05       //Compat Power
 
 	//Menu Detection Templates -  Needs a Specail Shader to adjust
-    #define MAC 0 //Set to one only the 3rd value has a wiled card. Not the 1st and 3rd.
     #define MDD 1 //Set Menu Detection & Direction      //Off | 1 | 2 | 3 | 4      
     #define DN_X float4( 0.278 , 0.704 , 0.025 , 0.050) //Pos A = XY Any & B = ZW Lock 
     #define DN_Y float4( 0.730 , 0.704 ,  0.0, 0.0)     //Pos C = XY Any & D = ZW Match
@@ -15738,7 +15151,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	//#define DJ_W 0.1	        // Weapon Depth Limit Location 1
 	//#define DS_W 1.0	        // Weapon Depth Limit Location 2
 	
-    #define MAC 0 //Set to one only the 3rd value has a wiled card. Not the 1st and 3rd.
     #define MDD 1 //Set Menu Detection & Direction      //Off | 1 | 2 | 3 | 4      
     #define DN_X float4( 0.500 , 0.050 , 0.177 , 0.621) //Pos A = XY Any & B = ZW Lock 
     #define DN_Y float4( 0.500 , 0.943 ,  0.0, 0.0)     //Pos C = XY Any & D = ZW Match
@@ -15754,22 +15166,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define DO_Y float4( 0.500 , 0.943 , 0.000 , 0.000 ) //Pos A3 = XY Color & B1 = ZW Color
     #define DO_Z float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos B2 = XY Black & B3 = ZW Color
 	#define DO_W float4( 30.0, 0.0, 1000.0, 1000.0) //Tresh Hold for Color A & B and Color
-	/*	
-    #define DP_X float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos C1 = XY Color & C2 = ZW Black 
-    #define DP_Y float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos C3 = XY Color & D1 = ZW Color
-    #define DP_Z float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos D2 = XY Black & D3 = ZW Color
-	#define DP_W float4( 1000.0, 1000.0, 1000.0, 1000.0) //Tresh Hold for Color C & D and Color
 
-	#define DQ_X float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos C1 = XY Color & C2 = ZW Black 
-    #define DQ_Y float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos C3 = XY Color & D1 = ZW Color
-    #define DQ_Z float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos D2 = XY Black & D3 = ZW Color
-	#define DQ_W float4( 1000.0, 1000.0, 1000.0, 1000.0) //Tresh Hold for Color A1 & A3 and Color
-
-	#define DR_X float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos G1 = XY Color & G2 = ZW Black 
-    #define DR_Y float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos G3 = XY Color & H1 = ZW Color
-    #define DR_Z float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos H2 = XY Black & H3 = ZW Color
-	#define DR_W float4( 1000.0, 1000.0, 1000.0, 1000.0) //Tresh Hold for Color G & H and Color 
-	*/
 	//#define HMT 1     //HUD Mode Trigger
 	//#define HMC 2.5
     //#define HMD 0.350
@@ -16045,7 +15442,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	//#define DJ_W 0.1	        // Weapon Depth Limit Location 1
 	//#define DS_W 5.0	        // Weapon Depth Limit Location 2
 
-    #define MAC 1 //Set to one only the 3rd value has a wiled card. Not the 1st and 3rd.
     #define MDD 1 //Set Menu Detection & Direction      //Off | 1 | 2 | 3 | 4      
     #define DN_X float4( 0.889, 0.951 , 0.500 , 0.059) //Pos A = XY Any & B = ZW Lock 
     #define DN_Y float4( 0.627, 0.045 ,  0.0, 0.0)     //Pos C = XY Any & D = ZW Match
@@ -16060,22 +15456,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define DO_Y float4( 0.932 , 0.956 , 0.000 , 0.000 ) //Pos A3 = XY Color & B1 = ZW Color
     #define DO_Z float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos B2 = XY Black & B3 = ZW Color
 	#define DO_W float4( 17.0, 30.0, 1000.0, 1000.0) //Tresh Hold for Color A & B and Color
-	/*
-    #define DP_X float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos C1 = XY Color & C2 = ZW Black 
-    #define DP_Y float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos C3 = XY Color & D1 = ZW Color
-    #define DP_Z float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos D2 = XY Black & D3 = ZW Color
-	#define DP_W float4( 1000.0, 1000.0, 1000.0, 1000.0) //Tresh Hold for Color C & D and Color
 
-	#define DQ_X float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos C1 = XY Color & C2 = ZW Black 
-    #define DQ_Y float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos C3 = XY Color & D1 = ZW Color
-    #define DQ_Z float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos D2 = XY Black & D3 = ZW Color
-	#define DQ_W float4( 1000.0, 1000.0, 1000.0, 1000.0) //Tresh Hold for Color A1 & A3 and Color
-
-	#define DR_X float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos G1 = XY Color & G2 = ZW Black 
-    #define DR_Y float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos G3 = XY Color & H1 = ZW Color
-    #define DR_Z float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos H2 = XY Black & H3 = ZW Color
-	#define DR_W float4( 1000.0, 1000.0, 1000.0, 1000.0) //Tresh Hold for Color G & H and Color 
-	*/
 	//#define HMT 1     //HUD Mode Trigger
 	//#define HMC 2.5
     //#define HMD 0.350
@@ -16119,8 +15500,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	//#define DF_X float2(0.100,0.185)  // ZPD Weapon Boundarys Level 1 and Level 2
 	//#define DJ_W 0.1	        // Weapon Depth Limit Location 1
 	//#define DS_W 5.0	        // Weapon Depth Limit Location 2
-	
-    #define MAC 1 //Set to one only the 3rd value has a wiled card. Not the 1st and 3rd.
+
     #define MDD 1 //Set Menu Detection & Direction      //Off | 1 | 2 | 3 | 4      
     #define DN_X float4( 0.053, 0.124 , 0.875 , 0.120) //Pos A = XY Any & B = ZW Lock 
     #define DN_Y float4( 0.075, 0.953 ,  0.0, 0.0)     //Pos C = XY Any & D = ZW Match
@@ -16141,17 +15521,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define DP_Y float4( 0.062 , 0.944 , 0.000 , 0.000 ) //Pos C3 = XY Color & D1 = ZW Color
     #define DP_Z float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos D2 = XY Black & D3 = ZW Color
 	#define DP_W float4( 28.0, 30.0, 1000.0, 1000.0) //Tresh Hold for Color C & D and Color
-	/*
-	#define DQ_X float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos C1 = XY Color & C2 = ZW Black 
-    #define DQ_Y float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos C3 = XY Color & D1 = ZW Color
-    #define DQ_Z float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos D2 = XY Black & D3 = ZW Color
-	#define DQ_W float4( 1000.0, 1000.0, 1000.0, 1000.0) //Tresh Hold for Color A1 & A3 and Color
 
-	#define DR_X float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos G1 = XY Color & G2 = ZW Black 
-    #define DR_Y float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos G3 = XY Color & H1 = ZW Color
-    #define DR_Z float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos H2 = XY Black & H3 = ZW Color
-	#define DR_W float4( 1000.0, 1000.0, 1000.0, 1000.0) //Tresh Hold for Color G & H and Color 
-	*/
 	//#define HMT 1     //HUD Mode Trigger
 	//#define HMC 2.5
     //#define HMD 0.350
@@ -16196,39 +15566,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	//#define DJ_W 0.1	        // Weapon Depth Limit Location 1
 	//#define DS_W 5.0	        // Weapon Depth Limit Location 2
 
-	/*	
-    #define MAC 1 //Set to one only the 3rd value has a wiled card. Not the 1st and 3rd.
-    #define MDD 1 //Set Menu Detection & Direction      //Off | 1 | 2 | 3 | 4      
-    #define DN_X float4( 0.053, 0.124 , 0.875 , 0.120) //Pos A = XY Any & B = ZW Lock 
-    #define DN_Y float4( 0.075, 0.953 ,  0.0, 0.0)     //Pos C = XY Any & D = ZW Match
-    #define DN_Z float4( 0.0, 0.0,  0.0, 0.0)           //Pos E = XY Match & F = ZW Match
-	#define DN_W float4( 1.0, 0.0 , 0.0, 0.0 )          //Size = Menu [ABC] D E F
-    #define DJ_Y float4( 29.0, 5.0, 30.0, 1000.0);       //Menu Detection Type for A = X, B = Y, & C = Z. The Last Value is a Wild Card amount W is for X and Z. 
-    #define DJ_Z float3( 1000., 1000., 1000);           //Set Match Tresh 
-	
-    #define MMD 2 //Set Multi Menu Detection             //Off / On
-    #define MMS 0 //Set Multi Menu Selection from 0-1 to 29-30 and Off 0 | 1 | 2
-    //Map and Settings in phase one
-    #define DO_X float4( 0.130 , 0.050 , 0.0235, 0.960 ) //Pos A1 = XY Color & A2 = ZW Black 
-    #define DO_Y float4( 0.075 , 0.953 , 0.190 , 0.050 ) //Pos A3 = XY Color & B1 = ZW Color
-    #define DO_Z float4( 0.0235, 0.960 , 0.062 , 0.944 ) //Pos B2 = XY Black & B3 = ZW Color
-	#define DO_W float4( 28.0, 27.0, 28.0, 30.0) //Tresh Hold for Color A & B and Color
-	//Settings phase two
-    #define DP_X float4( 0.215 , 0.050 , 0.0235, 0.960 ) //Pos C1 = XY Color & C2 = ZW Black 
-    #define DP_Y float4( 0.062 , 0.944 , 0.000 , 0.000 ) //Pos C3 = XY Color & D1 = ZW Color
-    #define DP_Z float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos D2 = XY Black & D3 = ZW Color
-	#define DP_W float4( 28.0, 30.0, 1000.0, 1000.0) //Tresh Hold for Color C & D and Color
-
-	#define DQ_X float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos C1 = XY Color & C2 = ZW Black 
-    #define DQ_Y float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos C3 = XY Color & D1 = ZW Color
-    #define DQ_Z float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos D2 = XY Black & D3 = ZW Color
-	#define DQ_W float4( 1000.0, 1000.0, 1000.0, 1000.0) //Tresh Hold for Color A1 & A3 and Color
-
-	#define DR_X float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos G1 = XY Color & G2 = ZW Black 
-    #define DR_Y float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos G3 = XY Color & H1 = ZW Color
-    #define DR_Z float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos H2 = XY Black & H3 = ZW Color
-	#define DR_W float4( 1000.0, 1000.0, 1000.0, 1000.0) //Tresh Hold for Color G & H and Color 
-	*/
 	//#define HMT 1     //HUD Mode Trigger
 	//#define HMC 2.5
     //#define HMD 0.350
@@ -16273,39 +15610,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	//#define DJ_W 0.1	        // Weapon Depth Limit Location 1
 	//#define DS_W 5.0	        // Weapon Depth Limit Location 2
 
-	/*	
-    #define MAC 1 //Set to one only the 3rd value has a wiled card. Not the 1st and 3rd.
-    #define MDD 1 //Set Menu Detection & Direction      //Off | 1 | 2 | 3 | 4      
-    #define DN_X float4( 0.053, 0.124 , 0.875 , 0.120) //Pos A = XY Any & B = ZW Lock 
-    #define DN_Y float4( 0.075, 0.953 ,  0.0, 0.0)     //Pos C = XY Any & D = ZW Match
-    #define DN_Z float4( 0.0, 0.0,  0.0, 0.0)           //Pos E = XY Match & F = ZW Match
-	#define DN_W float4( 1.0, 0.0 , 0.0, 0.0 )          //Size = Menu [ABC] D E F
-    #define DJ_Y float4( 29.0, 5.0, 30.0, 1000.0);       //Menu Detection Type for A = X, B = Y, & C = Z. The Last Value is a Wild Card amount W is for X and Z. 
-    #define DJ_Z float3( 1000., 1000., 1000);           //Set Match Tresh 
-	
-    #define MMD 2 //Set Multi Menu Detection             //Off / On
-    #define MMS 0 //Set Multi Menu Selection from 0-1 to 29-30 and Off 0 | 1 | 2
-    //Map and Settings in phase one
-    #define DO_X float4( 0.130 , 0.050 , 0.0235, 0.960 ) //Pos A1 = XY Color & A2 = ZW Black 
-    #define DO_Y float4( 0.075 , 0.953 , 0.190 , 0.050 ) //Pos A3 = XY Color & B1 = ZW Color
-    #define DO_Z float4( 0.0235, 0.960 , 0.062 , 0.944 ) //Pos B2 = XY Black & B3 = ZW Color
-	#define DO_W float4( 28.0, 27.0, 28.0, 30.0) //Tresh Hold for Color A & B and Color
-	//Settings phase two
-    #define DP_X float4( 0.215 , 0.050 , 0.0235, 0.960 ) //Pos C1 = XY Color & C2 = ZW Black 
-    #define DP_Y float4( 0.062 , 0.944 , 0.000 , 0.000 ) //Pos C3 = XY Color & D1 = ZW Color
-    #define DP_Z float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos D2 = XY Black & D3 = ZW Color
-	#define DP_W float4( 28.0, 30.0, 1000.0, 1000.0) //Tresh Hold for Color C & D and Color
-
-	#define DQ_X float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos C1 = XY Color & C2 = ZW Black 
-    #define DQ_Y float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos C3 = XY Color & D1 = ZW Color
-    #define DQ_Z float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos D2 = XY Black & D3 = ZW Color
-	#define DQ_W float4( 1000.0, 1000.0, 1000.0, 1000.0) //Tresh Hold for Color A1 & A3 and Color
-
-	#define DR_X float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos G1 = XY Color & G2 = ZW Black 
-    #define DR_Y float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos G3 = XY Color & H1 = ZW Color
-    #define DR_Z float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos H2 = XY Black & H3 = ZW Color
-	#define DR_W float4( 1000.0, 1000.0, 1000.0, 1000.0) //Tresh Hold for Color G & H and Color 
-	*/
 	//#define HMT 1     //HUD Mode Trigger
 	//#define HMC 2.5
     //#define HMD 0.350
@@ -16753,7 +16057,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DF_W float4(0.0001,0.0007,0.0,0.001)// Edge & Scale
     
  //Menu Detection Templates -  Needs a Specail Shader to adjust
-    #define MAC 1 //Set to one only C has a wiled card. Not the A and C.
     #define MDD 1 //Set Menu Detection & Direction      //Off | 1 | 2 | 3 | 4      
     #define DN_X float4( 0.095, 0.224 , 0.824 , 0.927) //Pos A = XY Any & B = ZW Lock 
     #define DN_Y float4( 0.866 , 0.222 ,  0.0, 0.0)     //Pos C = XY Any & D = ZW Match
@@ -16996,7 +16299,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DK_W 1 //Set Shift Speed
     
     //Menu Detection Templates -  Needs a Specail Shader to adjust
-    #define MAC 1 //Set to one only the 3rd value has a wiled card. Not the 1st and 3rd.
     #define MDD 1 //Set Menu Detection & Direction      //Off | 1 | 2 | 3 | 4      
     #define DN_X float4( 0.102 , 0.938 , 0.050 , 0.096) //Pos A = XY Any & B = ZW Lock 
     #define DN_Y float4( 0.898 , 0.938 ,  0.0, 0.0)     //Pos C = XY Any & D = ZW Match
@@ -17089,7 +16391,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DL_Y -0.50      // De-Artifact Only works on some View Modes and causes performance degredation
     //#define DL_Z 1.00       // Compat Power
 
-    #define MAC 1 //Set to one only the 3rd value has a wiled card. Not the 1st and 3rd.
     #define MDD 1 //Set Menu Detection & Direction      //Off | 1 | 2 | 3 | 4      
     #define DN_X float4( 0.062, 0.605 , 0.150 , 0.710) //Pos A = XY Any & B = ZW Lock 
     #define DN_Y float4( 0.237, 0.605,  0.0, 0.0)     //Pos C = XY Any & D = ZW Match
@@ -17131,7 +16432,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     ///#define DI_Z 0.310        // Trim
     //#define DF_W float4(0,0,0,0)// Edge & Scale
 	//Controller Map
-    #define MAC 1 //Set to one only the 3rd value has a wiled card. Not the 1st and 3rd.
     #define MDD 1 //Set Menu Detection & Direction      //Off | 1 | 2 | 3 | 4      
     #define DN_X float4( 0.375 , 0.940 , 0.4675 , 0.933) //Pos A = XY Any & B = ZW Lock 
     #define DN_Y float4( 0.699 , 0.964  ,  0.0, 0.0)     //Pos C = XY Any & D = ZW Match
@@ -17254,7 +16554,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     ///#define DI_Z 0.310        // Trim
     //#define DF_W float4(0,0,0,0)// Edge & Scale 
     //Menu Detection Templates -  Needs a Specail Shader to adjust
-    #define MAC 1 //Set to one only the 3rd value has a wiled card. Not the 1st and 3rd.
     #define MDD 1 //Set Menu Detection & Direction      //Off | 1 | 2 | 3 | 4      
     #define DN_X float4( 0.4065, 0.300 , 0.596 , 0.280) //Pos A = XY Any & B = ZW Lock 
     #define DN_Y float4( 0.594 , 0.300 , 0.0   , 0.0)     //Pos C = XY Any & D = ZW Match
@@ -17333,8 +16632,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     ///#define DI_Z 0.310        // Trim
     //#define DF_W float4(0,0,0,0)// Edge & Scale
 
- //Menu Detection Templates -  Needs a Specail Shader to adjust
-    #define MAC 1 //Set to one only the 3rd value has a wiled card. Not the 1st and 3rd.
+    //Menu Detection Templates -  Needs a Specail Shader to adjust
     #define MDD 1 //Set Menu Detection & Direction      //Off | 1 | 2 | 3 | 4      
     #define DN_X float4( 0.4295, 0.968 , 0.021 , 0.991) //Pos A = XY Any & B = ZW Lock 
     #define DN_Y float4( 0.535 , 0.968 ,  0.0, 0.0)     //Pos C = XY Any & D = ZW Match
@@ -17574,7 +16872,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DF_W float4(0,0,0,0)// Edge & Scale
     
     //Menu Detection Templates -  Needs a Specail Shader to adjust
-    #define MAC 0 //Set to one only the 3rd value has a wiled card. Not the 1st and 3rd.
     #define MDD 1 //Set Menu Detection & Direction      //Off | 1 | 2 | 3 | 4      
     #define DN_X float4( 0.410 , 0.300 , 0.646 , 0.065) //Pos A = XY Any & B = ZW Lock 
     #define DN_Y float4( 0.411 , 0.540 ,  0.0, 0.0)     //Pos C = XY Any & D = ZW Match //0.535
@@ -17752,7 +17049,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define DI_Z 0.050        // Trim
     //#define DF_W float4(0.0001,0,0,0.08625)// Edge & Scale
     //Menu Detection Templates -  Needs a Specail Shader to adjust
-    #define MAC 0 //Set to one only the 3rd value has a wiled card. Not the 1st and 3rd.
     #define MDD 4 //Set Menu Detection & Direction      //Off | 1 | 2 | 3 | 4      
     #define DN_X float4( 0.136, 0.296 , 0.500 , 0.935) //Pos A = XY Any & B = ZW Lock 
     #define DN_Y float4( 0.303, 0.295 ,  0.0, 0.0)     //Pos C = XY Any & D = ZW Match
@@ -17898,7 +17194,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DF_W float4(0.0001,0,0,0.08625)// Edge & Scale
 
 	//Menu Detection Templates -  Needs a Specail Shader to adjust
-    #define MAC 0 //Set to one only the 3rd value has a wiled card. Not the 1st and 3rd.
     #define MDD 1 //Set Menu Detection & Direction      //Off | 1 | 2 | 3 | 4      
     #define DN_X float4( 0.107, 0.548 , 0.685 , 0.653) //Pos A = XY Any & B = ZW Lock 
     #define DN_Y float4( 0.189 , 0.613 ,  0.0, 0.0)     //Pos C = XY Any & D = ZW Match
@@ -18070,7 +17365,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DF_W float4(0.0001,0.001,0.0,0.01)// Edge & Scale
 
 	//Menu Detection Templates -  Needs a Specail Shader to adjust
-    #define MAC 0 //Set to one only C has a wiled card. Not the A and C.
     #define MDD 1 //Set Menu Detection & Direction      //Off | 1 | 2 | 3 | 4      
     #define DN_X float4( 0.072 , 0.061 , 0.080 , 0.087) //Pos A = XY Any & B = ZW Lock 
     #define DN_Y float4( 0.207 , 0.546 , 0.500, 0.233)     //Pos C = XY Any & D = ZW Match
@@ -18231,7 +17525,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DL_Z 0.5       // Compat Power
 	
 	//Menu Detection Templates -  Needs a Specail Shader to adjust
-    #define MAC 0 //Set to one only the 3rd value has a wiled card. Not the 1st and 3rd.
     #define MDD 1 //Set Menu Detection & Direction      //Off | 1 | 2 | 3 | 4      
     #define DN_X float4( 0.062, 0.0884, 0.904 , 0.062) //Pos A = XY Any & B = ZW Lock 
     #define DN_Y float4( 0.919, 0.996 ,  0.0, 0.0)     //Pos C = XY Any & D = ZW Match
@@ -18308,7 +17601,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DL_Y 1.0      // De-Artifact Only works on some View Modes and causes performance degredation
     #define DL_Z -0.75       // Compat Power
    //Menu Detection Templates -  Needs a Specail Shader to adjust
-    #define MAC 1 //Set to one only C has a wiled card. Not the A and C.
     #define MDD 1 //Set Menu Detection & Direction      //Off | 1 | 2 | 3 | 4      
     #define DN_X float4( 0.357, 0.034 , 0.761 , 0.160) //Pos A = XY Any & B = ZW Lock 
     #define DN_Y float4( 0.418 , 0.118 ,  0.0, 0.0)     //Pos C = XY Any & D = ZW Match
@@ -18562,7 +17854,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DI_Z 0.043        // Trim
     #define DF_W float4(0,0,0,0)// Edge & Scale
      //Menu Detection Templates -  Needs a Specail Shader to adjust
-    #define MAC 0 //Set to one only C has a wiled card. Not the A and C.
     #define MDD 1 //Set Menu Detection & Direction      //Off | 1 | 2 | 3 | 4      
     #define DN_X float4( 0.086, 0.085 , 0.500 , 0.025) //Pos A = XY Any & B = ZW Lock 
     #define DN_Y float4( 0.527 , 0.085 ,  0.0, 0.0)     //Pos C = XY Any & D = ZW Match
@@ -18690,7 +17981,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DF_W float4(0,0,0,0)// Edge & Scale
     
     //Menu Detection Templates -  Needs a Specail Shader to adjust
-    #define MAC 1 //Set to one only C has a wiled card. Not the A and C.
     #define MDD 1 //Set Menu Detection & Direction      //Off | 1 | 2 | 3 | 4      
     #define DN_X float4( 0.400 , 0.122 , 0.041 , 0.971) //Pos A = XY Any & B = ZW Lock 
     #define DN_Y float4( 0.600 , 0.122 ,  0.0, 0.0)     //Pos C = XY Any & D = ZW Match
@@ -18846,7 +18136,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	//#define WSM 4             // Weapon Setting Mode 
 	//#define DB_W 15           // Weapon Profile
 	//#define DF_X float2(0.125,0.250)  // ZPD Weapon Boundarys Level 1 and Level 2	
-#elif ( App == 0xDA05BA00 ) //Tiny Tina's wonderlands
+#elif ( App == 0xDA05BA00 ) //Tiny Tina's Wonderlands
      //#define DS_Z 2            // Set View Mode
 	#define DA_W 1            // Set Linerzation
     //#define DB_X 1            // Flip
@@ -18868,11 +18158,11 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DI_W float2(2.75,3.5) // Like Shift Boundary DG_W But 0 to inf
 	//#define FTM 0             // Fast Trigger Mode If this enabled then Level 1 and > switches instantly.
 	#define WND 0.5         //Weapon Near Pushes depth in and adjust perspective to match.
-    #define DG_Z 0.025        // Min Weapon Hands That are apart of world with Auto and Trim
+    #define DG_Z 0.035//0.025        // Min Weapon Hands That are apart of world with Auto and Trim
     //#define DS_X float3(0.025,0,1)// Min Weapon bit only triggers when a OIL Level is set and set here on .y
     #define DE_W 0.50        // Auto
     #define DI_Z 0.07 //0.100        // Trim
-    #define DF_W float4(0.0001,0.005,0.1,0.005)// Edge & Scale
+    #define DF_W float4(0.0001,0.00375,0.1,0.005)// Edge & Scale //0.005
 	#define BMT 1             // ZPD and World Scale Balance // I need to phase this out.
 	#define DF_Z 0.375        // Set the Balance  
     #define DL_Y 0.25       // De-Artifact Only works on some View Modes and causes performance degredation
@@ -20264,7 +19554,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	//#define DI_Y 0.160
 
     //Menu Detection Templates -  Needs a Specail Shader to adjust
-    #define MAC 1 //Set to one only C has a wiled card. Not the A and C.
     #define MDD 1 //Set Menu Detection & Direction      //Off | 1 | 2 | 3 | 4      
     #define DN_X float4( 0.038 , 0.961 , 0.482 , 0.816) //Pos A = XY Any & B = ZW Lock 
     #define DN_Y float4( 0.945 , 0.965 ,  0.0, 0.0)     //Pos C = XY Any & D = ZW Match
@@ -20977,56 +20266,690 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DM_Y 3     //HQ VRS
 	#define PEW 1 
 	#define DAA 1
+#elif (App == 0x6DE081CF ) //Alan Wake 2
+    //#define DS_Z 3            // Set View Mode
+	//#define DA_W 1            // Set Linerzation
+    //#define DB_X 1            // Flip
+	#define DA_X 0.055//0.08//0.025         // ZPD
+	#define DF_Y 0.00          // Seperation
+	#define DA_Y 12.5//7.5//27.5          // Near Plane Adjustment
+    //#define DA_Z -0.125       // Linerzation Offset
+    #define DS_Y 2            // Linerzation Offset Effects only distance if true
+	#define DB_Z 0.025         // Auto Depth Protection
+	#define DE_X 2            // ZPD Boundary 
+	#define DE_Y 0.75        // Set ZPD Boundary Level Zero 
+	#define DE_Z 0.375        // Speed that Boundary is Enforced
+	//#define AFD 1           // Alternate Frame Detection - May be phased out
+	//#define DG_W -0.25        // Shift Boundary Out of screen 0.5 and or In screen -0.5
+	#define OIL 3           // Set How many Levels We use for RE_Fix 0 | 1 | 2 | 3 if 1 then it's float2(0,0) for OIF and DI_W
+    #define OIF float4(0.625,0.5,0.375,0.25)// Fix enables if Value is > 0.0 
+	#define DI_W float4(0.25,0.5,1.000,3.00) // Like Shift Boundary DG_W But 0 to inf
+	#define WND 0.5         //Weapon Near Pushes depth in and adjust perspective to match.
+    //#define DG_Z 0.025        // Min Weapon Hands That are apart of world with Auto and Trim
+    //#define DS_X float3(0.025,0,1)// Min Weapon bit only triggers when a OIL Level is set and set here on .y
+    //#define DE_W 0.50        // Auto
+    //#define DI_Z 0.025       // Trim
+    //#define DF_W float4(0.0001,0.0,0.0,0.038)// Edge & Scale
+  //  #define SDU 1	
+	#define BMT 1             // ZPD and World Scale Balance // I need to phase this out.
+	#define DF_Z 0.025           // Set the Balance  
+    #define DL_Y 0.125           // De-Artifact Only works on some View Modes and causes performance degredation
+	//#define DB_Y -1.0          // Effects De-Artifacts -1 to 1 Most of the time leave this at 0 and if you set 1 it takes depth into account 
+    //#define DL_Z -0.125        // Compat Power
+	#define DJ_X 0.5        // Range Smoothing
+	
+	//Smooth Mode Setting
+    #define SMS 3           //SM Toggle Separation
+	#define DL_X 0.800       //SM Tune
+	//#define DL_W 0.05       //SM Perspective
+	#define DM_X 4           //HQ Tune
+	//#define HQT 1           //HQ Trigger
+	//#define FRM 0            //HQ Mode
+    //#define DM_Y 3     //HQ VRS
+	#define PEW 1 
+	#define DAA 1
+	#define NFM 1
+	#define RHW 1
+#elif (App == 0xABDEBF40 ) //Kona 2
+    #define DS_Z 2            // Set View Mode
+	#define DA_W 1            // Set Linerzation
+    #define DB_X 1            // Flip
+	#define DA_X 0.025         // ZPD
+	#define DF_Y 0.000         // Seperation
+	#define DA_Y 100.0         // Near Plane Adjustment
+    //#define DA_Z -0.50 //0.0004      // Linerzation Offset
+    #define DS_Y 2            // Linerzation Offset Effects only distance if true
+	#define DB_Z 0.025         // Auto Depth Protection
+	#define DE_X 2            // ZPD Boundary 
+	#define DE_Y 0.500        // Set ZPD Boundary Level Zero 
+	#define DE_Z 0.375        // Speed that Boundary is Enforced
+	//#define AFD 1           // Alternate Frame Detection - May be phased out
+    #define CWH 1             //ZPD Weapon Hand Consideration For Masking  0 is Off | 1 Is Full | 2 Half Right screen Mask And Not to be used with Weapon Profiles.
+    #define WBA 2.0           //ZPD Weapon Boundary Alt Adjust power for CWH 
+	#define DG_W 0.5        // Shift Boundary Out of screen 0.5 and or In screen -0.5
+	//#define OIL 2           // Set How many Levels We use for RE_Fix 0 | 1 | 2 | 3 if 1 then it's float2(0,0) for OIF and DI_W
+    //#define OIF 0.75 // Fix enables if Value is > 0.0 
+	//#define DI_W 1.0 // Like Shift Boundary DG_W But 0 to inf
+	//#define FTM 0             // Fast Trigger Mode If this enabled then Level 1 and > switches instantly.
+	#define DG_Z 0.025        // Min Weapon Hands That are apart of world with Auto and Trim
+    //#define DS_X float3(0.025,0,1)// Min Weapon bit only triggers when a OIL Level is set and set here on .y
+    #define DE_W 0.50        // Auto
+    #define DI_Z 0.025        // Trim
+	#define WND 1.0         //Weapon Near Pushes depth in and adjust perspective to match.
+    #define DF_W float4(0.0001,0.001,0.0,0.0125)// Edge & Scale
+
+
+	#define BMT 1             // ZPD and World Scale Balance // I need to phase this out.
+	#define DF_Z 0.375        // Set the Balance  
+    #define DL_Y 0.125        // De-Artifact Only works on some View Modes and causes performance degredation
+	//#define DB_Y 1.0          // Effects De-Artifacts -1 to 1 Most of the time leave this at 0 and if you set 1 it takes depth into account 
+    //#define DL_Z 1.00         // Compat Power
+	//#define DJ_X 0.02        // Range Smoothing
+
+  //Simple Menu Detection
+    #define SMD 3 //Off 0 | 1 | 2 | 3 | 4 
+    #define DW_X float4( 0.361, 0.464 , 0.512 , 0.500)  //Pos A = XY Any & B = ZW Lock 
+    #define DW_Y float2( 0.637 , 0.668 )                 //Pos C = XY 
+    #define DW_Z float4( 30.0, 22.0, 30.0, 1000.0) //Menu Detection Type for A = X, B = Y, & C = Z. The Last Value is a Wild Card amount W is for X and Z. 
+    
+    #define DT_X float4( 0.500, 0.875 , 0.500 , 0.12)  //Pos A = XY Any & B = ZW Lock 
+    #define DT_Y float2( 0.936 , 0.904 )                 //Pos C = XY 
+    #define DW_W float4( 0.0, 0.0, 30.0, 1000.0) //Menu Detection Type for A = X, B = Y, & C = Z. The Last Value is a Wild Card amount W is for X and Z. 
+
+    #define DAA_X float4( 0.433, 0.910 , 0.318 , 0.399)  //Pos A = XY Any & B = ZW Lock 
+    #define DAA_Y float2( 0.545 , 0.911 )                 //Pos C = XY 
+    #define DAA_Z float4( 30.0, 0.0, 30.0, 27.0) //Menu Detection Type for A = X, B = Y, & C = Z. The Last Value is a Wild Card amount W is for X and Z. 
+
+   // #define DBB_X float4( 0.8835, 0.956 , 0.982 , 0.954)  //Pos A = XY Any & B = ZW Lock 
+  //  #define DBB_Y float2( 0.500 , 0.004 )                 //Pos C = XY 
+   // #define DBB_Z float4( 1000.0, 1000.0, 1000.0, 1000.0) //Menu Detection Type for A = X, B = Y, & C = Z. The Last Value is a Wild Card amount W is for X and Z. 
+
+
+	//Smooth Mode Setting
+    #define SMS 3           //SM Toggle Separation
+	#define DL_X 0.950       //SM Tune
+	//#define DL_W 0.05       //SM Perspective
+	#define DM_X 4           //HQ Tune
+	//#define HQT 1           //HQ Trigger
+    //#define DM_Y 3     //HQ VRS 
+
+	#define FOV 1
+	#define RHW 1
+	#define PEW 1
+	#define DAA 1
+#elif (App == 0xA684991A ) //Humanity
+    //#define DS_Z 2            // Set View Mode
+	#define DA_W 1            // Set Linerzation
+    #define DB_X 1            // Flip
+	#define DA_X 0.025         // ZPD
+	#define DF_Y 0.000         // Seperation
+	#define DA_Y 250.0         // Near Plane Adjustment
+    //#define DA_Z -0.50 //0.0004      // Linerzation Offset
+    #define DS_Y 0            // Linerzation Offset Effects only distance if true
+	#define DB_Z 0.0375         // Auto Depth Protection
+	#define DE_X 1            // ZPD Boundary 
+	#define DE_Y 0.75        // Set ZPD Boundary Level Zero 
+	#define DE_Z 0.375        // Speed that Boundary is Enforced
+	//#define AFD 1           // Alternate Frame Detection - May be phased out
+	#define DG_W -0.25        // Shift Boundary Out of screen 0.5 and or In screen -0.5
+	#define OIL 3           // Set How many Levels We use for RE_Fix 0 | 1 | 2 | 3 if 1 then it's float2(0,0) for OIF and DI_W
+    #define OIF float4(0.6,0.300,0.175,0.075)// Fix enables if Value is > 0.0 
+	#define DI_W float4(0.25,0.75,1.5,3.0) // Like Shift Boundary DG_W But 0 to inf
+	//#define OIL 2           // Set How many Levels We use for RE_Fix 0 | 1 | 2 | 3 if 1 then it's float2(0,0) for OIF and DI_W
+    //#define OIF 0.75 // Fix enables if Value is > 0.0 
+	//#define DI_W 1.0 // Like Shift Boundary DG_W But 0 to inf
+	//#define FTM 0             // Fast Trigger Mode If this enabled then Level 1 and > switches instantly.
+	//#define DG_Z 0.025        // Min Weapon Hands That are apart of world with Auto and Trim
+    //#define DS_X float3(0.025,0,1)// Min Weapon bit only triggers when a OIL Level is set and set here on .y
+    //#define DE_W 0.50        // Auto
+    //#define DI_Z 0.025        // Trim
+	#define WND 1.0         //Weapon Near Pushes depth in and adjust perspective to match.
+    //#define DF_W float4(0.0001,0.001,0.0,0.0125)// Edge & Scale
+
+  //Text Menu Detection
+    #define TMD 1 //Off 0 | 1Normal | 2 Inverse | 3 Mirror
+    #define DZ_X float4( 0.483 , 0.665 , 0.500 , 0.936)  //Pos A = XY Any & B = ZW Lock 
+    #define DZ_Y float2( 0.579 , 0.953 )                 //Pos C = XY 
+    #define DZ_Z float4( 30.0, 0.0, 27.0, 1000.0) //Text Detection Type for A = X, B = Y, & C = Z. The Last Value is a Wild Card amount W is for X and Z. 
+    #define DZ_W float4( 1.0, 1.000, 0.0, 0.692)             //Text Distance from screen, Text Cutoff point, and adjustable XY Masking.
+
+ //Simple Menu Detection
+    #define SMD 4 //Off 0 | 1 | 2 | 3 | 4 
+    #define DW_X float4( 0.045 , 0.500 , 0.559 , 0.954)  //Pos A = XY Any & B = ZW Lock 
+    #define DW_Y float2( 0.955 , 0.500 )                 //Pos C = XY 
+    #define DW_Z float4( 0.0, 28.0, 0.0, 1000.0) //Menu Detection Type for A = X, B = Y, & C = Z. The Last Value is a Wild Card amount W is for X and Z. 
+    
+    #define DT_X float4( 0.483 , 0.665 , 0.500 , 0.936)  //Pos A = XY Any & B = ZW Lock 
+    #define DT_Y float2( 0.579 , 0.953 )                 //Pos C = XY 
+    #define DW_W float4( 30.0, 0.0, 27.0, 1000.0) //Menu Detection Type for A = X, B = Y, & C = Z. The Last Value is a Wild Card amount W is for X and Z. 
+
+    #define DAA_X float4( 0.517, 0.515 , 0.500 , 0.581)  //Pos A = XY Any & B = ZW Lock 
+    #define DAA_Y float2( 0.425 , 0.616 )                 //Pos C = XY 
+    #define DAA_Z float4( 15.0, 0.0, 30.0, 1000.0) //Menu Detection Type for A = X, B = Y, & C = Z. The Last Value is a Wild Card amount W is for X and Z. 
+
+    #define DBB_X float4( 0.250 , 0.250 , 0.955 , 0.928)  //Pos A = XY Any & B = ZW Lock 
+    #define DBB_Y float2( 0.250 , 0.750 )                 //Pos C = XY 
+    #define DBB_Z float4( 30.0, 0.0, 30.0, 1000.0) //Menu Detection Type for A = X, B = Y, & C = Z. The Last Value is a Wild Card amount W is for X and Z. 
+
+
+	#define BMT 1             // ZPD and World Scale Balance // I need to phase this out.
+	#define DF_Z 0.05        // Set the Balance  
+    #define DL_Y 0.125        // De-Artifact Only works on some View Modes and causes performance degredation
+	//#define DB_Y 1.0          // Effects De-Artifacts -1 to 1 Most of the time leave this at 0 and if you set 1 it takes depth into account 
+    //#define DL_Z 1.00         // Compat Power
+	//#define DJ_X 0.02        // Range Smoothing
+
+	//Smooth Mode Setting
+    #define SMS 3           //SM Toggle Separation
+	#define DL_X 0.950       //SM Tune
+	//#define DL_W 0.05       //SM Perspective
+	#define DM_X 4           //HQ Tune
+	//#define HQT 1           //HQ Trigger
+    //#define DM_Y 3     //HQ VRS 
+
+	#define FOV 1
+	#define RHW 1
+	#define PEW 1
+	#define DAA 1
+#elif (App == 0xB46249F0 ) //Jusant
+    //#define DS_Z 2            // Set View Mode
+	#define DA_W 1            // Set Linerzation
+    //#define DB_X 1            // Flip
+	#define DA_X 0.025         // ZPD
+	#define DF_Y 0.000         // Seperation
+	#define DA_Y 100         // Near Plane Adjustment
+    //#define DA_Z -0.50 //0.0004      // Linerzation Offset
+    //#define DS_Y 2            // Linerzation Offset Effects only distance if true
+	#define DB_Z 0.05         // Auto Depth Protection
+	#define DE_X 3            // ZPD Boundary 
+	#define DE_Y 0.75        // Set ZPD Boundary Level Zero 
+	#define DE_Z 0.3        // Speed that Boundary is Enforced
+	//#define AFD 1           // Alternate Frame Detection - May be phased out
+	//#define DG_W -0.25        // Shift Boundary Out of screen 0.5 and or In screen -0.5
+	#define OIL 3           // Set How many Levels We use for RE_Fix 0 | 1 | 2 | 3 if 1 then it's float2(0,0) for OIF and DI_W
+    #define OIF float4(0.5,0.375,0.25,0.15)// Fix enables if Value is > 0.0 
+	#define DI_W float4(0.5,1.25,2.5,5.0) // Like Shift Boundary DG_W But 0 to inf
+	//#define OIL 2           // Set How many Levels We use for RE_Fix 0 | 1 | 2 | 3 if 1 then it's float2(0,0) for OIF and DI_W
+    //#define OIF 0.75 // Fix enables if Value is > 0.0 
+	//#define DI_W 1.0 // Like Shift Boundary DG_W But 0 to inf
+	//#define FTM 0             // Fast Trigger Mode If this enabled then Level 1 and > switches instantly.
+	//#define DG_Z 0.025        // Min Weapon Hands That are apart of world with Auto and Trim
+    //#define DS_X float3(0.025,0,1)// Min Weapon bit only triggers when a OIL Level is set and set here on .y
+    //#define DE_W 0.50        // Auto
+    //#define DI_Z 0.025        // Trim
+	#define WND 1.0         //Weapon Near Pushes depth in and adjust perspective to match.
+    //#define DF_W float4(0.0001,0.001,0.0,0.0125)// Edge & Scale
+
+ //Menu Detection Templates -  Needs a Specail Shader to adjust
+    #define MDD 1 //Set Menu Detection & Direction      //Off | 1 | 2 | 3 | 4      
+    #define DN_X float4( 0.066 , 0.141 , 0.245 , 0.450) //Pos A = XY Any & B = ZW Lock 
+    #define DN_Y float4( 0.215 , 0.083 , 0.800 , 0.500)     //Pos C = XY Any & D = ZW Match
+    #define DN_Z float4( 0.0, 0.0,  0.0, 0.0)           //Pos E = XY Match & F = ZW Match
+	#define DN_W float4( 0.225, 1.0 , 0.0, 0.0 )          //Size = Menu [ABC] D E F
+    #define DJ_Y float4( 30.0, 3.0, 30.0, 1000.0)       //Menu Detection Type for A = X, B = Y, & C = Z. The Last Value is a Wild Card amount W is for X and Z. 
+    #define DJ_Z float3( 3.0, 1000., 1000)           //Set Match Tresh 
+
+
+	#define BMT 1             // ZPD and World Scale Balance // I need to phase this out.
+	#define DF_Z 0.2        // Set the Balance  
+    #define DL_Y 0.125        // De-Artifact Only works on some View Modes and causes performance degredation
+	//#define DB_Y 1.0          // Effects De-Artifacts -1 to 1 Most of the time leave this at 0 and if you set 1 it takes depth into account 
+    //#define DL_Z 1.00         // Compat Power
+	//#define DJ_X 0.02        // Range Smoothing
+	#define FRM 0
+
+	//Smooth Mode Setting
+    #define SMS 3           //SM Toggle Separation
+	#define DL_X 0.85       //SM Tune
+	//#define DL_W 0.05       //SM Perspective
+	#define DM_X 6           //HQ Tune
+	//#define HQT 1           //HQ Trigger
+    #define DM_Y 0     //HQ VRS 
+
+	#define PEW 1
+	#define DAA 1
+	#define DSW 1
+#elif (App == 0xA1528B5B ) //Moria 
+    //#define DS_Z 2            // Set View Mode
+	#define DA_W 1            // Set Linerzation
+    //#define DB_X 1            // Flip
+	#define DA_X 0.025         // ZPD
+	#define DF_Y 0.000         // Seperation
+	#define DA_Y 75         // Near Plane Adjustment
+    //#define DA_Z -0.50 //0.0004      // Linerzation Offset
+    //#define DS_Y 2            // Linerzation Offset Effects only distance if true
+	#define DB_Z 0.10         // Auto Depth Protection
+	#define DE_X 3            // ZPD Boundary 
+	#define DE_Y 0.75        // Set ZPD Boundary Level Zero 
+	#define DE_Z 0.3        // Speed that Boundary is Enforced
+	//#define AFD 1           // Alternate Frame Detection - May be phased out
+	//#define DG_W -0.25        // Shift Boundary Out of screen 0.5 and or In screen -0.5
+	//#define OIL 3           // Set How many Levels We use for RE_Fix 0 | 1 | 2 | 3 if 1 then it's float2(0,0) for OIF and DI_W
+    //#define OIF float4(0.5,0.375,0.25,0.15)// Fix enables if Value is > 0.0 
+	//#define DI_W float4(0.5,1.25,2.5,5.0) // Like Shift Boundary DG_W But 0 to inf
+	//#define OIL 2           // Set How many Levels We use for RE_Fix 0 | 1 | 2 | 3 if 1 then it's float2(0,0) for OIF and DI_W
+    //#define OIF 0.75 // Fix enables if Value is > 0.0 
+	//#define DI_W 1.0 // Like Shift Boundary DG_W But 0 to inf
+	//#define FTM 0             // Fast Trigger Mode If this enabled then Level 1 and > switches instantly.
+	//#define DG_Z 0.025        // Min Weapon Hands That are apart of world with Auto and Trim
+    //#define DS_X float3(0.025,0,1)// Min Weapon bit only triggers when a OIL Level is set and set here on .y
+    //#define DE_W 0.50        // Auto
+    //#define DI_Z 0.025        // Trim
+	//#define WND 1.0         //Weapon Near Pushes depth in and adjust perspective to match.
+    //#define DF_W float4(0.0001,0.001,0.0,0.0125)// Edge & Scale
+
+ //Menu Detection Templates -  Needs a Specail Shader to adjust
+    #define MDD 1 //Set Menu Detection & Direction      //Off | 1 | 2 | 3 | 4      
+    #define DN_X float4( 0.127 , 0.231 , 0.500 , 0.050) //Pos A = XY Any & B = ZW Lock 
+    #define DN_Y float4( 0.316 , 0.223 , 0.000 , 0.000)     //Pos C = XY Any & D = ZW Match
+    #define DN_Z float4( 0.0, 0.0,  0.0, 0.0)           //Pos E = XY Match & F = ZW Match
+	#define DN_W float4( 0.469, 0.0 , 0.0, 0.0 )          //Size = Menu [ABC] D E F
+    #define DJ_Y float4( 26.0, 0.0, 26.0, 24.0)       //Menu Detection Type for A = X, B = Y, & C = Z. The Last Value is a Wild Card amount W is for X and Z. 
+    #define DJ_Z float4( 3.0, 1000., 1000, 0.08)           //Set Match Tresh and Last one elevation 
+
+    //Simple Menu Detection
+    #define SMD 4 //Off 0 | 1 | 2 | 3 | 4 
+    #define DW_X float4( 0.596 , 0.082 , 0.068 , 0.9615)  //Pos A = XY Any & B = ZW Lock 
+    #define DW_Y float2( 0.634 , 0.068)                 //Pos C = XY 
+    #define DW_Z float4( 22.0, 15.0, 22.0, 1000.0) //Menu Detection Type for A = X, B = Y, & C = Z. The Last Value is a Wild Card amount W is for X and Z. 
+
+    #define DT_X float4( 0.903 , 0.0785 , 0.068 , 0.9615)  //Pos A = XY Any & B = ZW Lock 
+    #define DT_Y float2( 0.863 , 0.076 )                 //Pos C = XY 
+    #define DW_W float4( 22.0, 15.0, 22.0, 1000.0) //Menu Detection Type for A = X, B = Y, & C = Z. The Last Value is a Wild Card amount W is for X and Z. 
+    
+    #define DAA_X float4( 0.596 , 0.082 , 0.1425, 0.932)  //Pos A = XY Any & B = ZW Lock 
+    #define DAA_Y float2( 0.9035 , 0.0785 )                 //Pos C = XY 
+    #define DAA_Z float4( 22.0, 26.0, 22.0, 25.0) //Menu Detection Type for A = X, B = Y, & C = Z. The Last Value is a Wild Card amount W is for X and Z. 
+	
+    #define DBB_X float4( 0.564, 0.073 , 0.050 , 0.962)  //Pos A = XY Any & B = ZW Lock 
+    #define DBB_Y float2( 0.935, 0.073 )                 //Pos C = XY 
+    #define DBB_Z float4( 30.0, 30.0, 30.0, 1000.0) //Menu Detection Type for A = X, B = Y, & C = Z. The Last Value is a Wild Card amount W is for X and Z. 
+
+    //Stencil UI & Detection
+    #define SUI 1 //Off 0 | 1 Square | 2 Circle "Future Update"
+    #define SSA 1 //Off 0 | 1 Square | 2 Circle
+    #define DDD_X float4( 0.1425, 0.932 , 0.964 , 0.065)  //Pos A = XY Any & B = ZW Lock 
+    #define DDD_Y float4( 0.958 , 0.783 , 0.5 , 0.071)      //Pos C = XY Any & UI Postion 
+    #define DDD_Z float4( 26.0, 25.0, 22.0, 25.0) //Detection Value 0-30 for A = X, B = Y, & C = Z. The Last Value is a Wild Card amount W is for X and Z. 
+    #define DDD_W float4( 0.325, 0.450, 1.0, 0.0625)             //X is Hoz Size and Y is Vert Size, Z is Inversion amount and W is Depth set elevation with 0.0-0.5 is Auto.
+	
+	#define BMT 1             // ZPD and World Scale Balance // I need to phase this out.
+	#define DF_Z 0.0125        // Set the Balance  
+    #define DL_Y 0.25        // De-Artifact Only works on some View Modes and causes performance degredation
+	//#define DB_Y 1.0          // Effects De-Artifacts -1 to 1 Most of the time leave this at 0 and if you set 1 it takes depth into account 
+    //#define DL_Z 1.00         // Compat Power
+	//#define DJ_X 0.02        // Range Smoothing
+	//#define FRM 0
+
+	//Smooth Mode Setting
+    #define SMS 3           //SM Toggle Separation
+	#define DL_X 0.95       //SM Tune
+	//#define DL_W 0.05       //SM Perspective
+	#define DM_X 4           //HQ Tune
+	//#define HQT 1           //HQ Trigger
+    //#define DM_Y 0     //HQ VRS 
+
+	#define PEW 1
+	#define DAA 1
+#elif (App == 0x6672950B ) //Zortch
+    //#define DS_Z 2            // Set View Mode
+	//#define DA_W 1            // Set Linerzation
+    #define DB_X 1            // Flip
+	#define DA_X 0.050         // ZPD
+	#define DF_Y 0.000         // Seperation
+	#define DA_Y 37.5         // Near Plane Adjustment
+    //#define DA_Z -0.50 //0.0004      // Linerzation Offset
+    //#define DS_Y 2            // Linerzation Offset Effects only distance if true
+	#define DB_Z 0.05         // Auto Depth Protection
+	#define DE_X 4            // ZPD Boundary 
+	#define DE_Y 0.75        // Set ZPD Boundary Level Zero 
+	#define DE_Z 0.375        // Speed that Boundary is Enforced
+	//#define AFD 1           // Alternate Frame Detection - May be phased out
+	#define DG_W -0.25        // Shift Boundary Out of screen 0.5 and or In screen -0.5
+	#define OIL 1           // Set How many Levels We use for RE_Fix 0 | 1 | 2 | 3 if 1 then it's float2(0,0) for OIF and DI_W
+    #define OIF float2(0.5,0.375)// Fix enables if Value is > 0.0 
+	#define DI_W float2(0.5,1.0) // Like Shift Boundary DG_W But 0 to inf
+	//#define OIL 2           // Set How many Levels We use for RE_Fix 0 | 1 | 2 | 3 if 1 then it's float2(0,0) for OIF and DI_W
+    //#define OIF 0.75 // Fix enables if Value is > 0.0 
+	//#define DI_W 1.0 // Like Shift Boundary DG_W But 0 to inf
+	//#define FTM 0             // Fast Trigger Mode If this enabled then Level 1 and > switches instantly.
+	//#define DG_Z 0.025        // Min Weapon Hands That are apart of world with Auto and Trim
+    //#define DS_X float3(0.025,0,1)// Min Weapon bit only triggers when a OIL Level is set and set here on .y
+    //#define DE_W 0.50        // Auto
+    //#define DI_Z 0.025        // Trim
+	#define WND -0.5         //Weapon Near Pushes depth in and adjust perspective to match.
+    //#define DF_W float4(0.0001,0.001,0.0,0.0125)// Edge & Scale
+
+	#define WSM 6             // Weapon Setting Mode 
+	#define DB_W 9           // Weapon Profile
+	#define AWZ 1.0          // Anti-Weapon Hand Z-Fighting -1 is shifted to the right a little bit and 1 is center
+	//#define WBS 0             //Weapon Boundary Switch 0 | 1
+	#define DF_X float2(0.1,0.2)  // ZPD Weapon Boundarys Level 1 and Level 2
+	#define DJ_W 1.0	      // Weapon Depth Limit Location 1
+	#define DS_W 1.5	      // Weapon Depth Limit Location 2
+	//#define WFB 1.0                // ZPD Weapon Elevaton for 1 and 2 scales from [0 - 1]
+
+	
+	#define BMT 1             // ZPD and World Scale Balance // I need to phase this out.
+	#define DF_Z 0.15        // Set the Balance  
+    //#define DL_Y 0.25        // De-Artifact Only works on some View Modes and causes performance degredation
+	//#define DB_Y 1.0          // Effects De-Artifacts -1 to 1 Most of the time leave this at 0 and if you set 1 it takes depth into account 
+    //#define DL_Z 1.00         // Compat Power
+	//#define DJ_X 0.02        // Range Smoothing
+	//#define FRM 0
+
+	//Smooth Mode Setting
+    #define SMS 3           //SM Toggle Separation
+	#define DL_X 0.95       //SM Tune
+	//#define DL_W 0.05       //SM Perspective
+	#define DM_X 4           //HQ Tune
+	//#define HQT 1           //HQ Trigger
+    //#define DM_Y 0     //HQ VRS 
+	#define PEW 1
+#elif (App == 0x6250A9E ) //Zombie Army Dead War 4
+    //#define DS_Z 2            // Set View Mode
+	//#define DA_W 1            // Set Linerzation
+    //#define DB_X 1            // Flip
+	#define DA_X 0.025         // ZPD
+	#define DF_Y 0.000         // Seperation
+	#define DA_Y 40.0         // Near Plane Adjustment
+    //#define DA_Z -0.50 //0.0004      // Linerzation Offset
+    //#define DS_Y 2            // Linerzation Offset Effects only distance if true
+	#define DB_Z 0.05         // Auto Depth Protection
+	#define DE_X 1            // ZPD Boundary 
+	#define DE_Y 0.75        // Set ZPD Boundary Level Zero 
+	#define DE_Z 0.375        // Speed that Boundary is Enforced
+	//#define AFD 1           // Alternate Frame Detection - May be phased out
+	//#define DG_W -0.25        // Shift Boundary Out of screen 0.5 and or In screen -0.5
+	#define OIL 2           // Set How many Levels We use for RE_Fix 0 | 1 | 2 | 3 if 1 then it's float2(0,0) for OIF and DI_W
+    #define OIF float3(0.5,0.375,0.250)// Fix enables if Value is > 0.0 
+	#define DI_W float3(0.5,1.0,2.0) // Like Shift Boundary DG_W But 0 to inf
+	//#define OIL 2           // Set How many Levels We use for RE_Fix 0 | 1 | 2 | 3 if 1 then it's float2(0,0) for OIF and DI_W
+    //#define OIF 0.75 // Fix enables if Value is > 0.0 
+	//#define DI_W 1.0 // Like Shift Boundary DG_W But 0 to inf
+	//#define FTM 0             // Fast Trigger Mode If this enabled then Level 1 and > switches instantly.
+	//#define DG_Z 0.025        // Min Weapon Hands That are apart of world with Auto and Trim
+    //#define DS_X float3(0.025,0,1)// Min Weapon bit only triggers when a OIL Level is set and set here on .y
+    //#define DE_W 0.50        // Auto
+    //#define DI_Z 0.025        // Trim
+	#define WND 0.5         //Weapon Near Pushes depth in and adjust perspective to match.
+    //#define DF_W float4(0.0001,0.001,0.0,0.0125)// Edge & Scale
+	//Text Menu Detection
+    #define TMD 1 //Off 0 | 1 Normal | 2 Inverse | 3 Mirror
+    #define DZ_X float4( 0.070 , 0.921 , 0.105 , 0.633)  //Pos A = XY Any & B = ZW Lock 
+    #define DZ_Y float2( 0.303 , 0.911 )                 //Pos C = XY 
+    #define DZ_Z float4( 30.0, 0.0, 30.0, 0.0)        //Text Detection Type for A = X, B = Y, & C = Z. The Last Value is a Wild Card amount W is for X and Z. 
+    #define DZ_W float4( 0.75, 0.9, 0.40, 0.0)         //Text Distance from screen, Text Cutoff point, and adjustable XY Masking.
+
+	/*
+	//Menu Detection Templates -  Needs a Specail Shader to adjust
+    #define MDD 1 //Set Menu Detection & Direction      //Off | 1 | 2 | 3 | 4      
+    #define DN_X float4( 0.070 , 0.921 , 0.105 , 0.633) //Pos A = XY Any & B = ZW Lock 
+    #define DN_Y float4( 0.303 , 0.911 ,  0.0, 0.0)     //Pos C = XY Any & D = ZW Match
+    #define DN_Z float4( 0.0, 0.0,  0.0, 0.0)           //Pos E = XY Match & F = ZW Match
+	#define DN_W float4( 0.325, 0.0 , 0.0, 0.0 )          //Size = Menu [ABC] D E F
+    #define DJ_Y float4( 30.0, 0.0, 30.0, 1000.0)      //Menu Detection Type for A = X, B = Y, & C = Z. The Last Value is a Wild Card amount W is for X and Z. 
+    #define DJ_Z float4( 1000., 1000., 1000, 0.1)       //Set Match Tresh and IU Y Elevation 
+   */
+    //Stencil UI & Detection
+    #define SUI 1 //Off 0 | 1 Stencil One | 2 Stencil Two
+    
+    #define SSA 2 //Off 0 | 1 Square | 2 Circle
+    #define SNA 1 //Off 0 | 1 Trigger on Aim
+    #define DDD_X float4( 0.197 , 0.386 , 0.500 , 0.975)  //Pos A = XY Any & B = ZW Lock 
+    #define DDD_Y float4( 0.239 , 0.640 , 0.5 , 0.5)      //Pos C = XY Any & UI Postion 
+    #define DDD_Z float4( 30.0, 0.0, 0.0, 1000.0) //Detection Value 0-30 for A = X, B = Y, & C = Z. The Last Value is a Wild Card amount W is for X and Z. 
+    #define DDD_W float4( 0.4875, 0.0, 1.0, 0.0625)             //X is Hoz Size and Y is Vert Size, Z is Inversion amount and W is Depth set elevation with 0.0-0.5 is Auto.
+
+	//Simple Menu Detection
+    #define SMD 1 //Off 0 | 1 | 2 | 3 | 4 
+    #define DW_X float4( 0.876, 0.873 , 0.380 , 0.692)  //Pos A = XY Any & B = ZW Lock 
+    #define DW_Y float2( 0.205 , 0.200 )                 //Pos C = XY 
+    #define DW_Z float4( 30.0, 0.0, 0.0, 1000.0) //Menu Detection Type for A = X, B = Y, & C = Z. The Last Value is a Wild Card amount W is for X and Z. 
+
+  //Multi Menu Detection                    //4 Blocks total and 2 sub blocks per one block.
+    #define MMD 2 //Set Multi Menu Detection  // Off  0 | 1 | 2 | 3 | 4
+    #define MMS 0 //Set Multi Menu Selection  // Off  0 | 1 | 2 | 3 | 4                       //0-2 check to 28-30 check Depnding on the option MML
+    #define MML -2 //Set Multi Menu Leniency   // -4 |-3 |-2 |-1 | Off | 1 | 2 | 3 | 4         //Negitive [0 & 30] No Leniency | Zero [0-1 & 29-30] Some Leniency | Positive [0-2 & 28-30] Most Leniency    
+	//Menu & Game / Score & Controls
+    #define DO_X float4( 0.140 , 0.150 , 0.918 , 0.071 ) //Pos A1 = XY Color & A2 = ZW Black 
+    #define DO_Y float4( 0.924 , 0.141 , 0.275 , 0.150 ) //Pos A3 = XY Color & B1 = ZW Color
+    #define DO_Z float4( 0.918 , 0.071 , 0.924 , 0.141 ) //Pos B2 = XY Black & B3 = ZW Color
+	#define DO_W float4( 30.0, 30.0, 30.0, 30.0) //Tresh Hold for Color A & B and Color
+	//Display & Audio
+    #define DP_X float4( 0.408 , 0.150 , 0.918 , 0.071 ) //Pos C1 = XY Color & C2 = ZW Black 
+    #define DP_Y float4( 0.924 , 0.141 , 0.535 , 0.150 ) //Pos C3 = XY Color & D1 = ZW Color
+    #define DP_Z float4( 0.918 , 0.071 , 0.924 , 0.141 ) //Pos D2 = XY Black & D3 = ZW Color
+	#define DP_W float4( 30.0, 30.0, 30.0, 30.0) //Tresh Hold for Color C & D and Color
+    //Accessibility / Campaign
+	#define DQ_X float4( 0.675 , 0.150 , 0.918 , 0.071 ) //Pos C1 = XY Color & C2 = ZW Black 
+    #define DQ_Y float4( 0.924 , 0.141 , 0.326 , 0.300 ) //Pos C3 = XY Color & D1 = ZW Color
+    #define DQ_Z float4( 0.918 , 0.071 , 0.924 , 0.141 ) //Pos D2 = XY Black & D3 = ZW Color
+	#define DQ_W float4( 30.0, 30.0, 30.0, 30.0) //Tresh Hold for Color A1 & A3 and Color
+	//Select Mission / Controller Select Mission
+	#define DR_X float4( 0.298 , 0.926 , 0.918 , 0.071 ) //Pos G1 = XY Color & G2 = ZW Black 
+    #define DR_Y float4( 0.924 , 0.141 , 0.298 , 0.937 ) //Pos G3 = XY Color & H1 = ZW Color
+    #define DR_Z float4( 0.918 , 0.071 , 0.924 , 0.141 ) //Pos H2 = XY Black & H3 = ZW Color
+	#define DR_W float4( 30.0, 30.0, 29.0, 30.0) //Tresh Hold for Color G & H and Color 
+
+	
+	#define BMT 1             // ZPD and World Scale Balance // I need to phase this out.
+	#define DF_Z 0.125        // Set the Balance  
+    //#define DL_Y 0.25        // De-Artifact Only works on some View Modes and causes performance degredation
+	//#define DB_Y 1.0          // Effects De-Artifacts -1 to 1 Most of the time leave this at 0 and if you set 1 it takes depth into account 
+    //#define DL_Z 1.00         // Compat Power
+	//#define DJ_X 0.02        // Range Smoothing
+	//#define FRM 0
+
+    #define FPS 0  // FPS Focus Settings 
+    #define DK_X 3 //Trigger Type
+    //#define DK_Y 0 //Eye Selection
+    //#define WRP 3  //Weapon Reduction Power
+    #define DK_Z 0 //World Reduction Power
+    #define DK_W 5 //Set Shift Speed
+
+	//Smooth Mode Setting
+    #define SMS 3           //SM Toggle Separation
+	#define DL_X 0.85       //SM Tune
+	//#define DL_W 0.05       //SM Perspective
+	#define DM_X 6           //HQ Tune
+	//#define HQT 1           //HQ Trigger
+    //#define DM_Y 0     //HQ VRS 
+	#define PEW 1
+#elif (App == 0x92FBBC4D ) //Trepang2
+    //#define DS_Z 2            // Set View Mode
+	#define DA_W 1            // Set Linerzation
+    //#define DB_X 1            // Flip
+	#define DA_X 0.015         // ZPD
+	//#define DF_Y 0.005         // Seperation
+	#define DA_Y 150.0         // Near Plane Adjustment
+    //#define DA_Z -0.50 //0.0004      // Linerzation Offset
+    //#define DS_Y 2            // Linerzation Offset Effects only distance if true
+	#define DB_Z 0.02         // Auto Depth Protection
+	//#define DE_X 4            // ZPD Boundary 
+	//#define DE_Y 0.75        // Set ZPD Boundary Level Zero 
+	//#define DE_Z 0.375        // Speed that Boundary is Enforced
+	//#define AFD 1           // Alternate Frame Detection - May be phased out
+	//#define DG_W -0.25        // Shift Boundary Out of screen 0.5 and or In screen -0.5
+	//#define OIL 1           // Set How many Levels We use for RE_Fix 0 | 1 | 2 | 3 if 1 then it's float2(0,0) for OIF and DI_W
+    //#define OIF float2(0.5,0.375)// Fix enables if Value is > 0.0 
+	//#define DI_W float2(0.5,1.0) // Like Shift Boundary DG_W But 0 to inf
+	//#define OIL 2           // Set How many Levels We use for RE_Fix 0 | 1 | 2 | 3 if 1 then it's float2(0,0) for OIF and DI_W
+    //#define OIF 0.75 // Fix enables if Value is > 0.0 
+	//#define DI_W 1.0 // Like Shift Boundary DG_W But 0 to inf
+	//#define FTM 0             // Fast Trigger Mode If this enabled then Level 1 and > switches instantly.
+	#define DG_Z 0.040        // Min Weapon Hands That are apart of world with Auto and Trim
+    //#define DS_X float3(0.025,0,1)// Min Weapon bit only triggers when a OIL Level is set and set here on .y
+    #define DE_W 0.3        // Auto
+    #define DI_Z 0.040        // Trim
+	#define WND -1.0         //Weapon Near Pushes depth in and adjust perspective to match.
+    #define DF_W float4(0.0001,0.002,0.0,0.002)// Edge & Scale
+
+	//#define WSM 6             // Weapon Setting Mode 
+	//#define DB_W 9           // Weapon Profile
+	//#define AWZ 1.0          // Anti-Weapon Hand Z-Fighting -1 is shifted to the right a little bit and 1 is center
+	//#define WBS 0             //Weapon Boundary Switch 0 | 1
+	//#define DF_X float2(0.1,0.2)  // ZPD Weapon Boundarys Level 1 and Level 2
+	//#define DJ_W 1.0	      // Weapon Depth Limit Location 1
+	//#define DS_W 1.5	      // Weapon Depth Limit Location 2
+	//#define WFB 1.0                // ZPD Weapon Elevaton for 1 and 2 scales from [0 - 1]
+	
+	#define BMT 1             // ZPD and World Scale Balance // I need to phase this out.
+	#define DF_Z 0.15        // Set the Balance  
+    #define DL_Y 0.25        // De-Artifact Only works on some View Modes and causes performance degredation
+	//#define DB_Y 1.0          // Effects De-Artifacts -1 to 1 Most of the time leave this at 0 and if you set 1 it takes depth into account 
+    //#define DL_Z 1.00         // Compat Power
+	//#define DJ_X 0.02        // Range Smoothing
+	//#define FRM 0
+
+	//Simple Menu Detection
+    #define SMD 2 //Off 0 | 1 | 2 | 3 | 4 
+    #define DW_X float4( 0.420, 0.925 , 0.500 , 0.050)    //Pos A = XY Any & B = ZW Lock 
+    #define DW_Y float2( 0.580 , 0.960 )                   //Pos C = XY 
+    #define DW_Z float4( 25.0, 0.0, 25.0, 24.0)   //Menu Detection Type for A = X, B = Y, & C = Z. The Last Value is a Wild Card amount W is for X and Z. 
+
+    #define DT_X float4( 0.269 , 0.464 , 0.500 , 0.050)    //Pos A = XY Any & B = ZW Lock 
+    #define DT_Y float2( 0.537 , 0.960 )                   //Pos C = XY 
+    #define DW_W float4( 30.0, 0.0, 25.0, 24.0)   //Menu Detection Type for A = X, B = Y, & C = Z. The Last Value is a Wild Card amount W is for X and Z. 
+
+	//Smooth Mode Setting
+    #define SMS 3           //SM Toggle Separation
+	#define DL_X 0.95       //SM Tune
+	//#define DL_W 0.05       //SM Perspective
+	#define DM_X 5           //HQ Tune
+	//#define HQT 1           //HQ Trigger
+    //#define DM_Y 0     //HQ VRS 
+	#define PEW 1
+	#define FOV 1
+#elif (App == 0xFD3749FC )	//The Crew Motorfest 
+    //#define DS_Z 2                 // Set View Mode
+	#define DA_W 1                 // Set Linerzation
+    //#define DB_X 1                 // Flip
+	#define DA_X 0.025             // ZPD
+	#define DF_Y 0.00              // Seperation
+	#define DA_Y 20.0              // Near Plane Adjustment
+    //#define DA_Z -0.0001           // Linerzation Offset
+    #define DS_Y 2                 // Linerzation Offset Effects only distance if true
+	#define DB_Z 0.05              // Auto Depth Protection
+	#define DE_X 1                 // ZPD Boundary 
+	#define DE_Y 0.750             // Set ZPD Boundary Level Zero 
+	#define DE_Z 0.375             // Speed that Boundary is Enforced
+	//#define AFD 1                // Alternate Frame Detection - May be phased out
+	#define DG_W 0.50             // Shift Boundary Out of screen 0.5 and or In screen -0.5
+	#define OIL 1                // Set How many Levels We use for RE_Fix 0 | 1 | 2 | 3 if 1 then it's float2(0,0) for OIF and DI_W
+    #define OIF float2(0.5,0.375)// Fix enables if Value is > 0.0 
+	#define DI_W float2(1.0,2.5) // Like Shift Boundary DG_W But 0 to inf
+    //#define CWH 0                  //ZPD Weapon Hand Consideration For Masking  0 is Off | 1 Is Full | 2 Half Right screen Mask And Not to be used with Weapon Profiles.
+    //#define WBA 1.0                //ZPD Weapon Boundary Alt Adjust power for CWH 
+	//#define FTM 0                  // Fast Trigger Mode If this enabled then Level 1 and > switches instantly.
+	#define WND 0.5                //Weapon Near Pushes depth in and adjust perspective to match.
+    //#define DG_Z 0.100             // Min Weapon Hands That are apart of world with Auto and Trim
+    //#define DS_X float3(0.025,0,1) // Min Weapon bit only triggers when a OIL Level is set and set here on .y
+    //#define DE_W 0.250             // Auto
+    //#define DI_Z 0.043             // Trim
+    //#define DF_W float4(0,0,0,0)   // Edge & Scale
+	#define BMT 1                  // ZPD and World Scale Balance // I need to phase this out.
+	#define DF_Z 0.025             // Set the Balance  
+    //#define DL_Y -0.50             // De-Artifact Only works on some View Modes and causes performance degredation
+	//#define DB_Y 1.0               // Effects De-Artifacts -1 to 1 Most of the time leave this at 0 and if you set 1 it takes depth into account 
+    //#define DL_Z 1.00              // Compat Power
+	//#define DJ_X 0.250             // Range Smoothing
+    //#define FRM 0                //Foveated Rendring mode Toggle
+
+	//Lock Out Menu Detectors  
+	#define LMD 1 //Off 0 | 1
+    #define DCC_X float4( 0.090 , 0.920 , 0.213 , 0.803)  //Pos A = XY Any & B = ZW Lock 
+    #define DCC_Y float2( 0.053 , 0.901 )                 //Pos C = XY 
+    #define DCC_Z float4( 30.0, 2.0, 21.0, 1000.0) //Menu Detection Type for A = X, B = Y, & C = Z. The Last Value is a Wild Card amount W is for X and Z. 
+
+	//Map WIP
+    #define MDD 1 //Set Menu Detection & Direction        //Off | 1 Left | 2 Right | 3 Bottom | 4 Top 
+	//#define COD 0 //Enable or Disable Cut-Off Direction   //Off | 1 Top & Bottom for One & Two or Left and Right for Three & Four 
+	//Menu Bar
+    #define DN_X float4( 0.022 , 0.349 , 0.025 , 0.406)   //Pos A = XY Any & B = ZW Lock 
+    #define DN_Y float4( 0.947 , 0.070 ,  0.1565, 0.500)       //Pos C = XY Any & D = ZW Match
+    #define DN_Z float4( 0.0, 0.0,  0.0, 0.0)             //Pos E = XY Match & F = ZW Match
+	#define DN_W float4( 0.053, 0.157 , 0.0, 0.0 )            //Size = Menu [ABC] D E F
+    #define DJ_Y float4( 21.0, 30.0, 2.0, 1000.0)        //Menu Detection Type for A = X, B = Y, & C = Z. The Last Value is a Wild Card amount W is for X and Z. 
+    #define DJ_Z float4( 21.0, 1000., 1000, 0.0)         //Set Match Tresh and IU Y Elevation or Cut-Off -1-1    
+	//Simple Menu Detection
+    #define SMD 4 //Off 0 | 1 | 2 | 3 | 4 
+    //PARTICIPATED
+    #define DW_X float4( 0.306 , 0.255 , 0.500 , 0.069)    //Pos A = XY Any & B = ZW Lock 
+    #define DW_Y float2( 0.693 , 0.255 )                   //Pos C = XY 
+    #define DW_Z float4( 30.0, 0.0, 30.0, 1000.0)   //Menu Detection Type for A = X, B = Y, & C = Z. The Last Value is a Wild Card amount W is for X and Z. 
+    // World Racing Menu
+    #define DT_X float4( 0.701, 0.634 , 0.701 , 0.548)    //Pos A = XY Any & B = ZW Lock 
+    #define DT_Y float2( 0.703 , 0.717 )                   //Pos C = XY 
+    #define DW_W float4( 17.0, 0.0, 30.0, 1000.0 )   //Menu Detection Type for A = X, B = Y, & C = Z. The Last Value is a Wild Card amount W is for X and Z. 
+	// Options
+    #define DAA_X float4( 0.022, 0.349 , 0.025 , 0.406)    //Pos A = XY Any & B = ZW Lock 
+    #define DAA_Y float2( 0.927 , 0.9248 )  //here                 //Pos C = XY 
+    #define DAA_Z float4( 21.0, 30.0, 30.0, 1000.0)   //Menu Detection Type for A = X, B = Y, & C = Z. The Last Value is a Wild Card amount W is for X and Z. 
+	//Activities
+    #define DBB_X float4( 0.022, 0.349 , 0.025 , 0.406)    //Pos A = XY Any & B = ZW Lock 
+    #define DBB_Y float2( 0.932 , 0.9247 )                   //Pos C = XY 
+    #define DBB_Z float4( 21.0, 30.0, 30.0, 1000.0)   //Menu Detection Type for A = X, B = Y, & C = Z. The Last Value is a Wild Card amount W is for X and Z. 
+	//Smooth Mode Setting
+    #define SMS 3           //SM Toggle Separation
+	#define DL_X 0.95       //SM Tune
+	//#define DL_W 0.05       //SM Perspective
+	#define DM_X 5           //HQ Tune
+	//#define HQT 1           //HQ Trigger
+    //#define DM_Y 0     //HQ VRS 
+	#define PEW 1
+	#define NDW 1    
 #else
 	#define NPW 1 //No Profile
 #endif
 
 /* //Template Start
 #elif (App == 0x77777777 )	//Game Name 
-    #define DS_Z 2            // Set View Mode
-	#define DA_W 1            // Set Linerzation
-    #define DB_X 1            // Flip
-	#define DA_X 0.01625      // ZPD
-	#define DF_Y 0.00         // Seperation
-	#define DA_Y 30.0         // Near Plane Adjustment
-    #define DA_Z -0.0001      // Linerzation Offset
-    #define DS_Y 0            // Linerzation Offset Effects only distance if true
-	#define DB_Z 0.05         // Auto Depth Protection
-	#define DE_X 2            // ZPD Boundary 
-	#define DE_Y 0.700        // Set ZPD Boundary Level Zero 
-	#define DE_Z 0.375        // Speed that Boundary is Enforced
-	//#define AFD 1           // Alternate Frame Detection - May be phased out
-	#define DG_W 0.250        // Shift Boundary Out of screen 0.5 and or In screen -0.5
-	//#define OIL 1           // Set How many Levels We use for RE_Fix 0 | 1 | 2 | 3 if 1 then it's float2(0,0) for OIF and DI_W
+    #define DS_Z 2                 // Set View Mode
+	#define DA_W 1                 // Set Linerzation
+    #define DB_X 1                 // Flip
+	#define DA_X 0.01625           // ZPD
+	#define DF_Y 0.00              // Seperation
+	#define DA_Y 30.0              // Near Plane Adjustment
+    #define DA_Z -0.0001           // Linerzation Offset
+    #define DS_Y 0                 // Linerzation Offset Effects only distance if true
+	#define DB_Z 0.05              // Auto Depth Protection
+	#define DE_X 2                 // ZPD Boundary 
+	#define DE_Y 0.700             // Set ZPD Boundary Level Zero 
+	#define DE_Z 0.375             // Speed that Boundary is Enforced
+	//#define AFD 1                // Alternate Frame Detection - May be phased out
+	#define DG_W 0.250             // Shift Boundary Out of screen 0.5 and or In screen -0.5
+	//#define OIL 1                // Set How many Levels We use for RE_Fix 0 | 1 | 2 | 3 if 1 then it's float2(0,0) for OIF and DI_W
     //#define OIF float2(0.5,0.375)// Fix enables if Value is > 0.0 
 	//#define DI_W float2(0.5,1.0) // Like Shift Boundary DG_W But 0 to inf
-    #define CWH 0             //ZPD Weapon Hand Consideration For Masking  0 is Off | 1 Is Full | 2 Half Right screen Mask And Not to be used with Weapon Profiles.
-    #define WBA 1.0           //ZPD Weapon Boundary Alt Adjust power for CWH 
-	#define FTM 0             // Fast Trigger Mode If this enabled then Level 1 and > switches instantly.
-	#define WND 0.175         //Weapon Near Pushes depth in and adjust perspective to match.
-    #define DG_Z 0.100        // Min Weapon Hands That are apart of world with Auto and Trim
-    #define DS_X float3(0.025,0,1)// Min Weapon bit only triggers when a OIL Level is set and set here on .y
-    #define DE_W 0.250        // Auto
-    #define DI_Z 0.043        // Trim
-    #define DF_W float4(0,0,0,0)// Edge & Scale
-	#define BMT 1             // ZPD and World Scale Balance // I need to phase this out.
-	#define DF_Z 0.125        // Set the Balance  
-    #define DL_Y -0.50        // De-Artifact Only works on some View Modes and causes performance degredation
-	#define DB_Y 1.0          // Effects De-Artifacts -1 to 1 Most of the time leave this at 0 and if you set 1 it takes depth into account 
-    #define DL_Z 1.00         // Compat Power
-	#define DJ_X 0.250        // Range Smoothing
-	#define WSM 2             // Weapon Setting Mode 
-	#define DB_W 16           // Weapon Profile
-	#define AWZ -1.0          // Anti-Weapon Hand Z-Fighting -1 is shifted to the right a little bit and 1 is center
-	#define WBS 0             //Weapon Boundary Switch 0 | 1
-	#define DF_X float2(0,0)  // ZPD Weapon Boundarys Level 1 and Level 2
-	#define DJ_W 0.1	      // Weapon Depth Limit Location 1
-	#define DS_W 1.0	      // Weapon Depth Limit Location 2
+    #define CWH 0                  //ZPD Weapon Hand Consideration For Masking  0 is Off | 1 Is Full | 2 Half Right screen Mask And Not to be used with Weapon Profiles.
+    #define WBA 1.0                //ZPD Weapon Boundary Alt Adjust power for CWH 
+	#define FTM 0                  // Fast Trigger Mode If this enabled then Level 1 and > switches instantly.
+	#define WND 0.175              //Weapon Near Pushes depth in and adjust perspective to match.
+    #define DG_Z 0.100             // Min Weapon Hands That are apart of world with Auto and Trim
+    #define DS_X float3(0.025,0,1) // Min Weapon bit only triggers when a OIL Level is set and set here on .y
+    #define DE_W 0.250             // Auto
+    #define DI_Z 0.043             // Trim
+    #define DF_W float4(0,0,0,0)   // Edge & Scale
+	#define BMT 1                  // ZPD and World Scale Balance // I need to phase this out.
+	#define DF_Z 0.125             // Set the Balance  
+    #define DL_Y -0.50             // De-Artifact Only works on some View Modes and causes performance degredation
+	#define DB_Y 1.0               // Effects De-Artifacts -1 to 1 Most of the time leave this at 0 and if you set 1 it takes depth into account 
+    #define DL_Z 1.00              // Compat Power
+	#define DJ_X 0.250             // Range Smoothing
+	#define WSM 2                  // Weapon Setting Mode 
+	#define DB_W 16                // Weapon Profile
+	#define AWZ -1.0               // Anti-Weapon Hand Z-Fighting -1 is shifted to the right a little bit and 1 is center
+	#define WBS 0                  //Weapon Boundary Switch 0 | 1
+	#define DF_X float2(0,0)       // ZPD Weapon Boundarys Level 1 and Level 2
+	#define DJ_W 0.1	           // Weapon Depth Limit Location 1
+	#define DS_W 1.0	           // Weapon Depth Limit Location 2
 	#define WFB 0.0                // ZPD Weapon Elevaton for 1 and 2 scales from [0 - 1]
 	#define DT_W float2(0.015,0.03)//WH scale and cutoff
 	#define WHM 1                  //Weapon Hand Masking lets you use DT_Z 
 	#define DT_Z 0.1               //WH Masking Power from -1 to 1
     //#define LHA                  //Lower Height Adjustment [0.5]to[0.575]
+    //#define FRM 0                //Foveated Rendring mode Toggle
 */ 
 /* // Warnings
 	#define DAA 1           
@@ -21036,40 +20959,45 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define NFM 1
     #define DSW 1
 */
-/*  //Lock Out Menu Detectors  
+//Menu Detection Templates - Needs a Specail Shader to adjust
+/*  
+	//Lock Out Menu Detectors  
 	#define LMD 0 //Off 0 | 1
     #define DCC_X float4( 0.8835, 0.956 , 0.982 , 0.954)  //Pos A = XY Any & B = ZW Lock 
     #define DCC_Y float2( 0.500 , 0.004 )                 //Pos C = XY 
     #define DCC_Z float4( 1000.0, 1000.0, 1000.0, 1000.0) //Menu Detection Type for A = X, B = Y, & C = Z. The Last Value is a Wild Card amount W is for X and Z. 
 */
-/* //Menu Detection Templates -  Needs a Specail Shader to adjust
-    #define MDD 1 //Set Menu Detection & Direction      //Off | 1 | 2 | 3 | 4      
-    #define DN_X float4( 0.8835, 0.956 , 0.982 , 0.954) //Pos A = XY Any & B = ZW Lock 
-    #define DN_Y float4( 0.500 , 0.004 ,  0.0, 0.0)     //Pos C = XY Any & D = ZW Match
-    #define DN_Z float4( 0.0, 0.0,  0.0, 0.0)           //Pos E = XY Match & F = ZW Match
-	#define DN_W float4( 1.0, 0.0 , 0.0, 0.0 )          //Size = Menu [ABC] D E F
-    #define DJ_Y float4( 28.0, 28.0, 20.0, 1000.0)       //Menu Detection Type for A = X, B = Y, & C = Z. The Last Value is a Wild Card amount W is for X and Z. 
-    #define DJ_Z float3( 1000., 1000., 1000)           //Set Match Tresh 
+/*
+    #define MDD 1 //Set Menu Detection & Direction        //Off | 1 Left | 2 Right | 3 Bottom | 4 Top 
+	#define COD 0 //Enable or Disable Cut-Off Direction   //Off | 1 Top & Bottom for One & Two or Left and Right for Three & Four 
+    #define DN_X float4( 0.8835, 0.956 , 0.982 , 0.954)   //Pos A = XY Any & B = ZW Lock 
+    #define DN_Y float4( 0.500 , 0.004 ,  0.0, 0.0)       //Pos C = XY Any & D = ZW Match
+    #define DN_Z float4( 0.0, 0.0,  0.0, 0.0)             //Pos E = XY Match & F = ZW Match
+	#define DN_W float4( 1.0, 0.0 , 0.0, 0.0 )            //Size = Menu [ABC] D E F
+    #define DJ_Y float4( 28.0, 28.0, 20.0, 1000.0)        //Menu Detection Type for A = X, B = Y, & C = Z. The Last Value is a Wild Card amount W is for X and Z. 
+    #define DJ_Z float4( 1000., 1000., 1000, 0.0)         //Set Match Tresh and IU Y Elevation or Cut-Off -1-1
 */
-/*  //Simple Menu Detection
+/*  
+	//Simple Menu Detection
     #define SMD 0 //Off 0 | 1 | 2 | 3 | 4 
-    #define DW_X float4( 0.8835, 0.956 , 0.982 , 0.954)  //Pos A = XY Any & B = ZW Lock 
-    #define DW_Y float2( 0.500 , 0.004 )                 //Pos C = XY 
-    #define DW_Z float4( 1000.0, 1000.0, 1000.0, 1000.0) //Menu Detection Type for A = X, B = Y, & C = Z. The Last Value is a Wild Card amount W is for X and Z. 
+    #define DW_X float4( 0.8835, 0.956 , 0.982 , 0.954)    //Pos A = XY Any & B = ZW Lock 
+    #define DW_Y float2( 0.500 , 0.004 )                   //Pos C = XY 
+    #define DW_Z float4( 1000.0, 1000.0, 1000.0, 1000.0)   //Menu Detection Type for A = X, B = Y, & C = Z. The Last Value is a Wild Card amount W is for X and Z. 
     
-    #define DT_X float4( 0.8835, 0.956 , 0.982 , 0.954)  //Pos A = XY Any & B = ZW Lock 
-    #define DT_Y float2( 0.500 , 0.004 )                 //Pos C = XY 
-    #define DW_W float4( 1000.0, 1000.0, 1000.0, 1000.0) //Menu Detection Type for A = X, B = Y, & C = Z. The Last Value is a Wild Card amount W is for X and Z. 
+    #define DT_X float4( 0.8835, 0.956 , 0.982 , 0.954)    //Pos A = XY Any & B = ZW Lock 
+    #define DT_Y float2( 0.500 , 0.004 )                   //Pos C = XY 
+    #define DW_W float4( 1000.0, 1000.0, 1000.0, 1000.0)   //Menu Detection Type for A = X, B = Y, & C = Z. The Last Value is a Wild Card amount W is for X and Z. 
 
-    #define DAA_X float4( 0.8835, 0.956 , 0.982 , 0.954)  //Pos A = XY Any & B = ZW Lock 
-    #define DAA_Y float2( 0.500 , 0.004 )                 //Pos C = XY 
-    #define DAA_Z float4( 1000.0, 1000.0, 1000.0, 1000.0) //Menu Detection Type for A = X, B = Y, & C = Z. The Last Value is a Wild Card amount W is for X and Z. 
+    #define DAA_X float4( 0.8835, 0.956 , 0.982 , 0.954)    //Pos A = XY Any & B = ZW Lock 
+    #define DAA_Y float2( 0.500 , 0.004 )                   //Pos C = XY 
+    #define DAA_Z float4( 1000.0, 1000.0, 1000.0, 1000.0)   //Menu Detection Type for A = X, B = Y, & C = Z. The Last Value is a Wild Card amount W is for X and Z. 
 
-    #define DBB_X float4( 0.8835, 0.956 , 0.982 , 0.954)  //Pos A = XY Any & B = ZW Lock 
-    #define DBB_Y float2( 0.500 , 0.004 )                 //Pos C = XY 
-    #define DBB_Z float4( 1000.0, 1000.0, 1000.0, 1000.0) //Menu Detection Type for A = X, B = Y, & C = Z. The Last Value is a Wild Card amount W is for X and Z. 
+    #define DBB_X float4( 0.8835, 0.956 , 0.982 , 0.954)    //Pos A = XY Any & B = ZW Lock 
+    #define DBB_Y float2( 0.500 , 0.004 )                   //Pos C = XY 
+    #define DBB_Z float4( 1000.0, 1000.0, 1000.0, 1000.0)   //Menu Detection Type for A = X, B = Y, & C = Z. The Last Value is a Wild Card amount W is for X and Z. 
 */
-/*  //Text Menu Detection
+/*
+	//Text Menu Detection
     #define TMD 0 //Off 0 | 1Normal | 2 Inverse | 3 Mirror
     #define DZ_X float4( 0.500 , 0.500 , 0.500 , 0.500)  //Pos A = XY Any & B = ZW Lock 
     #define DZ_Y float2( 0.500 , 0.500 )                 //Pos C = XY 
@@ -21120,6 +21048,24 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define DY_Y float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos O3 = XY Color & P1 = ZW Color
     #define DY_Z float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos P2 = XY Black & P3 = ZW Color
 	#define DY_W float4( 1000.0, 1000.0, 1000.0, 1000.0) //Tresh Hold for Color O & P and Color	
+*/
+/*
+    //Stencil UI & Detection
+    #define SUI 1 //Off 0 | 1 Stencil One | 2 Stencil Two
+    
+    #define SSA 0 //Off 0 | 1 Square | 2 Circle
+    #define SNA 1 //Off 0 | 1 Trigger on Aim
+    #define DDD_X float4( 0.500 , 0.500 , 0.500 , 0.500)  //Pos A = XY Any & B = ZW Lock 
+    #define DDD_Y float4( 0.500 , 0.500 , 0.5 , 0.5)      //Pos C = XY Any & UI Postion 
+    #define DDD_Z float4( 1000.0, 1000.0, 1000.0, 1000.0) //Detection Value 0-30 for A = X, B = Y, & C = Z. The Last Value is a Wild Card amount W is for X and Z. 
+    #define DDD_W float4( 0.0, 0.0, 1.0, 0.0)             //X is Hoz Size and Y is Vert Size, Z is Inversion amount and W is Depth set elevation with 0.0-0.5 > is Auto.
+
+    #define SSB 0 //Off 0 | 1 Square | 2 Circle
+    #define SNB 1 //Off 0 | 1 Trigger on Aim
+    #define DEE_X float4( 0.500 , 0.500 , 0.500 , 0.500)  //Pos A = XY Any & B = ZW Lock 
+    #define DEE_Y float4( 0.500 , 0.500 , 0.5 , 0.5)      //Pos C = XY Any & UI Postion 
+    #define DEE_Z float4( 1000.0, 1000.0, 1000.0, 1000.0) //Detection Value 0-30 for A = X, B = Y, & C = Z. The Last Value is a Wild Card amount W is for X and Z. 
+    #define DEE_W float4( 0.0, 0.0, 1.0, 0.0)             //X is Hoz Size and Y is Vert Size, Z is Inversion amount and W is Depth set elevation with 0.0-0.5 > is Auto.
 */
 /* Miscellaneous Depth Buffer Corrections
 	//#define HMT 1     //HUD Mode Trigger
@@ -21573,18 +21519,32 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DCC_W C_Null_W
 #endif
 
-// X = [Null X] Y = [Null Y] Z = [Null Z] W = [Null W]
+// X = [Position A & B] Y = [Position C & UI Pos] Z = [ABCW Stencil Menu Tresholds] W = [Stencil Adjust]
 #ifndef DDD_X
-    #define DDD_X D_Null_X
+    #define DDD_X UI_A_SPos_XY_XY_A_B_D
 #endif
 #ifndef DDD_Y
-    #define DDD_Y D_Null_Y
+    #define DDD_Y UI_A_SPos_XY_C_n_XY_Pos_D
 #endif
 #ifndef DDD_Z
-    #define DDD_Z D_Null_Z
+    #define DDD_Z UI_A_Menu_Tresh_n_WC_D
 #endif 
 #ifndef DDD_W
-	#define DDD_W D_Null_W
+	#define DDD_W UI_A_Stencil_Adjust_D
+#endif
+
+// X = [Position A & B] Y = [Position C & UI Pos] Z = [ABCW Stencil Menu Tresholds] W = [Stencil Adjust]
+#ifndef DEE_X
+    #define DEE_X UI_B_SPos_XY_XY_A_B_D
+#endif
+#ifndef DEE_Y
+    #define DEE_Y UI_B_SPos_XY_C_n_XY_Pos_D
+#endif
+#ifndef DEE_Z
+    #define DEE_Z UI_B_Menu_Tresh_n_WC_D
+#endif 
+#ifndef DEE_W
+	#define DEE_W UI_B_Stencil_Adjust_D
 #endif
 
 //Special Settings
@@ -21666,8 +21626,8 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 #ifndef FMM
     #define FMM Filter_Mode_Modifire_D         //Filter Mode Modifier N
 #endif 
-#ifndef MAC
-    #define MAC Menu_A_C_To_C_Only_D           //Menu A/C to only C WildCard
+#ifndef COD
+    #define COD Menu_Cutoff_D                  //Menu Cutoff Option
 #endif 
 #ifndef SDU
     #define SDU Shift_Detectors_Up_D           //Shift Detectors Up
@@ -21719,6 +21679,21 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 #endif 
 #ifndef  LHA
     #define LHA Lower_Height_Adjust_D          //Lower Height Adjustment
+#endif 
+#ifndef  SUI
+    #define SUI Stencil_UI_Detection_D         //Stencil UI & Detection
+#endif 
+#ifndef  SNA
+    #define SNA Stencil_A_Trigger_D            //Stencil Trigger on Aim Alpha
+#endif 
+#ifndef  SSA
+    #define SSA Stencil_Shape_Alpha_D          //Stencil Shape Alpha
+#endif 
+#ifndef  SNB
+    #define SNB Stencil_B_Trigger_D            //Stencil Trigger on Aim Beta
+#endif 
+#ifndef  SSB
+    #define SSB Stencil_Shape_Beta_D           //Stencil Shape Beta
 #endif 
 
 //SuperDepth3D Warning System
@@ -22128,7 +22103,7 @@ float4 Weapon_Profiles(float WP ,float4 Weapon_Adjust)
     if (WP == 8)
         Weapon_Adjust = float4(10.0,50.0,0.0,0.0);        //WP 6  | GhostRunner 2
     if (WP == 9)
-        Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 7  | Game
+        Weapon_Adjust = float4(0.3,81.25,9.0,0.0);         //WP 7  | Zortch
     if (WP == 10)
         Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 8  | Game
     if (WP == 11)
