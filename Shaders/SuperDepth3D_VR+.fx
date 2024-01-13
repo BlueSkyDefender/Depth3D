@@ -1,7 +1,7 @@
 	////--------------------//
 	///**SuperDepth3D_VR+**///
 	//--------------------////
-	#define SD3DVR "SuperDepth3D_VR+ v4.0.2\n"
+	#define SD3DVR "SuperDepth3D_VR+ v4.0.4\n"
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//* Depth Map Based 3D post-process shader
 	//* For Reshade 4.4+ I think...
@@ -94,7 +94,7 @@ namespace SuperDepth3DVR
 		static const float DAA_X = 0.0, DAA_Y = 0.0, DAA_Z = 1000.0, DAA_W = 0.0;		
 		// DBB_X = [Position A & B] DBB_Y = [Position C] DBB_Z = [ABCD Menu Tresholds] DBB_W = [Null]
 		static const float DBB_X = 0.0, DBB_Y = 0.0, DBB_Z = 1000.0, DBB_W = 0.0;		
-		// DCC_X = [Position A & B] DCC_Y = [Position C] DCC_Z = [ABCD Menu Tresholds] DCC_W = [Null]
+		// DCC_X = [Position A & B] DCC_Y = [Position C] DCC_Z = [ABCD Menu Tresholds] DCC_W = [Isolating Weapon Stencil Amount]
 		static const float DCC_X = 0.0, DCC_Y = 0.0, DCC_Z = 1000.0, DCC_W = 0.0;
 		// DDD_X = [Position A & B] DDD_Y = [Position C & UI Pos] DDD_Z = [ABCW Stencil Menu Tresholds] DDD_W = [Stencil Adjust]
 		static const float DDD_X = 0.0, DDD_Y = 0.0, DDD_Z = 1000.0, DDD_W = 0.0;
@@ -102,7 +102,7 @@ namespace SuperDepth3DVR
 		#define OW_WP "WP Off\0Custom WP\0"
 		static const int WSM = 0;
 		//Triggers
-		static const float SUI = 0, SSA = 0, SNA = 0, SSB = 0, SNB = 0, FRM = 1, LHA = 0, WBS = 0, TMD = 0, AWZ = 0, CWH = 0, WBA = 0, WFB = 0, WND = 0, WRP = 0, MML = 0, SMD = 0, WHM = 0, SDU = 0, ABE = 2, LBE = 0, DRS = 0, MAC = 0, ARW = 0, OIL = 0, MMS = 0, NVK = 0, NDG = 0, FTM = 0, SPO = 0, MMD = 0, SMP = 0, LBR = 0, HQT = 0, AFD = 0, MDD = 0, FPS = 1, SMS = 1, OIF = 0, NCW = 0, RHW = 0, NPW = 0, SPF = 0, BDF = 0, HMT = 0, HMC = 0, DFW = 0, NFM = 0, DSW = 0, LBC = 0, LBS = 0, LBM = 0, DAA = 0, NDW = 0, PEW = 0, WPW = 0, FOV = 0, EDW = 0, SDT = 0;
+		static const float IWS = 0, SUI = 0, SSA = 0, SNA = 0, SSB = 0, SNB = 0, FRM = 1, LHA = 0, WBS = 0, TMD = 0, AWZ = 0, CWH = 0, WBA = 0, WFB = 0, WND = 0, WRP = 0, MML = 0, SMD = 0, WHM = 0, SDU = 0, ABE = 2, LBE = 0, DRS = 0, MAC = 0, ARW = 0, OIL = 0, MMS = 0, NVK = 0, NDG = 0, FTM = 0, SPO = 0, MMD = 0, SMP = 0, LBR = 0, HQT = 0, AFD = 0, MDD = 0, FPS = 1, SMS = 1, OIF = 0, NCW = 0, RHW = 0, NPW = 0, SPF = 0, BDF = 0, HMT = 0, HMC = 0, DFW = 0, NFM = 0, DSW = 0, LBC = 0, LBS = 0, LBM = 0, DAA = 0, NDW = 0, PEW = 0, WPW = 0, FOV = 0, EDW = 0, SDT = 0;
 		//Overwatch.fxh State
 		#define OSW 1
 	#endif
@@ -629,7 +629,12 @@ namespace SuperDepth3DVR
 					 "Default and starts at 0 and is Off. With a max offset of 5 pixels Wide.";
 		ui_category = "Compatibility Options";
 	> = 0;
-	
+
+	uniform bool Auto_Scaler_Adjust <
+		ui_label = " Auto Scaler";
+		ui_tooltip = "Shift the depth map if a misalignment is detected.";
+		ui_category = "Compatibility Options";
+	> = true;	
 	
 	uniform int Depth_Map <
 		ui_type = "combo";
@@ -2210,8 +2215,12 @@ uniform int Extra_Information <
 		R = DM.x; //Mix Depth
 		G = DM.y > saturate(smoothstep(0,2.5,DM.w)); //Weapon Mask
 		B = DM.z; //Weapon Hand
+		#if IWS
+		float Isolating_Weapon_Stencil = texcoord.x+(texcoord.y*0.5) < DCC_W;
+		A = ZPD_Boundary >= 4 ? Isolating_Weapon_Stencil ? R : max( G, R) : R; //Grid Depth Stenciled
+		#else
 		A = ZPD_Boundary >= 4 ? max( G, R) : R; //Grid Depth
-	
+		#endif
 		return float3x3( saturate(float3(R, G, B)) , 													   //[0][0] = R | [0][1] = G | [0][2] = B
 						 saturate(float3(A,Depth( SDT == 1 || SD_Trigger == 1 ? texcoord : TC_SP(texcoord).xy).x,DM.w)) , //[1][0] = A | [1][1] = D | [1][2] = DM 
 								  float3(0,0,0) );														  //[2][0] = Null | [2][1] = Null | [2][2] = Null
@@ -2917,14 +2926,14 @@ uniform int Extra_Information <
 		#endif
 		
 		#if SUI
-			float2 UI_A_Mask_Pos = DDD_Y.zw;
+			float2 UI_A_Mask_Pos = 1-DDD_Y.zw;
 			//Auto Depth 0.5 > needs more detection points will update that later.
 			float UI_A_Mask_Depth = DDD_W.w < 0.5 ? DDD_W.w : saturate(tex2Dlod(SamplerzBufferVR_L, float4( 1-UI_A_Mask_Pos, 0, 4) ).x + (0.5-DDD_W.w));
 			float2 UI_A_Mask_Size= DDD_W.xy;
 			if(Stencil_n_Detection_A())
 				DepthBuffer_LP.xy = lerp(DepthBuffer_LP.xy,UI_A_Mask_Depth,Stencil_Masking(texcoord,UI_A_Mask_Pos,UI_A_Mask_Size,DDD_W.z));
 				#if SUI == 2
-				float2 UI_B_Mask_Pos = DEE_Y.zw;
+				float2 UI_B_Mask_Pos = 1-DEE_Y.zw;
 				//Auto Depth 0.5 > needs more detection points will update that later.
 				float UI_B_Mask_Depth = DEE_W.w < 0.5 ? DEE_W.w : saturate(tex2Dlod(SamplerzBufferVR_L, float4( 1-UI_B_Mask_Pos, 0, 4) ).x + (0.5-DDD_W.w));
 				float2 UI_B_Mask_Size= DEE_W.xy;
@@ -2939,6 +2948,18 @@ uniform int Extra_Information <
 		float Separation = lerp(1.0,5.0,Depth_Seperation()); 	
 		return Separation * DepthBuffer_LP.x;
 	}
+
+	bool Shift_Depth()
+	{
+		float Check_Depth_Pos_Bot_A = PrepDepth(float2(0.25,0.999))[0][0];
+		float Check_Depth_Pos_Bot_B = PrepDepth(float2(0.75,0.999))[0][0];		
+		float Check_Depth_Pos_Side = PrepDepth(float2(1.0,0.5))[0][0];
+		float Check_Depth_Pos_Corner = PrepDepth(float2(0.999,0.999))[0][0];	
+		float If_Has_Depth = tex2Dlod(SamplerLumVR,float4(float2(0.5,0.5),0,12)).y < 1;
+		int Check_Depth_Shift = Check_Depth_Pos_Bot_A * Check_Depth_Pos_Bot_B * Check_Depth_Pos_Side * Check_Depth_Pos_Corner;
+		
+		return Check_Depth_Shift == 1 && If_Has_Depth;	    
+	}
 	
 	void Mix_Z(in float4 position : SV_Position, in float2 texcoord : TEXCOORD, out float MixOut : SV_Target0)
 	{ 
@@ -2947,7 +2968,13 @@ uniform int Extra_Information <
 	
 	float GetMixed(float2 texcoord)
 	{
-		return tex2Dlod(SamplerzBufferVR_Mixed,float4(texcoord,0,0)).x;
+		float2 Shift_TC = texcoord;
+		if(DLSS_FSR_Offset.x == 0 && DLSS_FSR_Offset.y == 0)
+		{
+			if(Shift_Depth() && Auto_Scaler_Adjust)
+				Shift_TC -= float2(2.0,2.5) * pix;
+		}		
+		return tex2Dlod(SamplerzBufferVR_Mixed,float4(Shift_TC,0,0)).x;
 	}
 	
 	float2 De_Art(float2 sp, float2 ZoomDir)
@@ -2965,7 +2992,7 @@ uniform int Extra_Information <
 		float  MS = Diverge * pix.x; int Perf_LvL = fmod(Performance_Level,2);      
 		float2 ParallaxCoord = Coordinates,CBxy = floor( float2(Coordinates.x * BUFFER_WIDTH, Coordinates.y * BUFFER_HEIGHT));
 		float LR_Depth_Mask = saturate(tex2Dlod(SamplerzBuffer_BlurVR, float4( Coordinates  * float2(0.5,1) + float2(0.5,0), 0, 3.0 ) ).x * 2.5);
-		float GetDepth = smoothstep(0,1, tex2Dlod(SamplerzBufferVR_L, float4(Coordinates,0, 1) ).x), CB_Done = fmod(CBxy.x+CBxy.y,2),
+		float GetDepth = smoothstep(0,1, tex2Dlod(SamplerzBufferVR_L, float4(Coordinates,0, 4.0) ).x), CB_Done = fmod(CBxy.x+CBxy.y,2),
 			Perf = Performance_Level > 1 ? lerp(Performance_LvL1[Perf_LvL].x,Performance_LvL0[Perf_LvL].x,GetDepth) : Performance_LvL0[Perf_LvL].x;
 		//Would Use Switch....
 		if( View_Mode == 2)
@@ -2978,13 +3005,13 @@ uniform int Extra_Information <
 		float Auto_Adptive = Switch_VRS == 0 ? lerp(0.05,1.0,smoothstep(0.00000001f, 0.375, tex2D(SamplerzBufferVR_P,0).y ) ) : 1,
 			  Luma_Adptive = smoothstep(0.0,saturate(VRS_Array[Switch_VRS] * Auto_Adptive), tex2Dlod(SamplerDMVR,float4(Coordinates,0,9)).w);
 		if( Performance_Level > 1 )
-			Perf *= saturate(Luma_Adptive);
+			Perf *= saturate(Luma_Adptive);	
 		//Foveated Calculations	
-		float Foveated_Mask = saturate(Vin_Pattern(Coordinates, float2(15.0,3.0)));	
+		float Foveated_Mask = saturate(Vin_Pattern(Coordinates, float2(16.0,3.0))), MaxMix = lerp(100, 50, saturate(GetDepth * 2 - 1) );	
 		if(Foveated_Mode)
-			Perf = lerp(Perf,0.350f,saturate(Foveated_Mask * GetDepth));
+			MaxMix = lerp(75, 25, saturate(Foveated_Mask * saturate(GetDepth * 2 - 1 ) ));
 		//ParallaxSteps Calculations
-		float MinNum = 20, MaxNum = lerp(100, 50, saturate(1-LR_Depth_Mask ) ), D = abs(Diverge), Cal_Steps = (D * Perf) + (D * 0.04),
+		float MinNum = 20, MaxNum = MaxMix, D = abs(Diverge), Cal_Steps = D * Perf,
 			  Steps  = clamp( Cal_Steps, MinNum, MaxNum );//Foveated Rendering Point of attack 16-256 limit samples.
 
 		float LayerDepth = rcp(Steps),  TP = lerp(0.025, 0.05,Compatibility_Power) * ( Compatibility_Power >= 0 ? 1 : Foveated_Mask );
