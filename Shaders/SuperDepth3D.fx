@@ -1,7 +1,7 @@
 	////----------------//
 	///**SuperDepth3D**///
 	//----------------////
-	#define SD3D "SuperDepth3D v4.0.4\n"
+	#define SD3D "SuperDepth3D v4.0.5\n"
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//* Depth Map Based 3D post-process shader
 	//* For Reshade 3.0+
@@ -790,7 +790,7 @@ uniform int SuperDepth3D <
 	
 	uniform float2 Weapon_ZPD_Boundary <
 		ui_type = "slider";
-		ui_min = 0.0; ui_max = 0.5;
+		ui_min = -1.0; ui_max = 1.0;
 		ui_label = " Weapon Boundary Detection";
 		ui_tooltip = "This selection menu gives extra boundary conditions to WZPD.";
 		ui_category = "Weapon Hand Adjust";
@@ -2705,10 +2705,10 @@ uniform int Extra_Information <
 	    return min(1,( d - 0 ) / ( LumAdjust_ADR - 0));
 	}
 		
-	float3 Conv(float2 MD_WHD,float2 texcoord)
-	{	float WConverge = 0.030, D = MD_WHD.x, Z = Zero_Parallax_Distance, WZP = 0.5, ZP = 0.5, W_Convergence = Inficolor_Near_Reduction ? WConverge * 0.8 : WConverge, WZPDB, Distance_From_Bottom = lerp(0.9375,1.0,saturate(WFB)), ZPD_Boundary_Adjust = ZPD_Boundary_n_Fade.x, Store_WC, Set_Max_Depth = 1.0;
+	float4 Conv(float2 MD_WHD,float2 texcoord,float2 abs_WZPDB)
+	{   float WConverge = 0.030, D = MD_WHD.x, Z = Zero_Parallax_Distance, WZP = 0.5, ZP = 0.5, W_Convergence = Inficolor_Near_Reduction ? WConverge * 0.8 : WConverge, WZPDB, WZPD_Switch, Distance_From_Bottom = lerp(0.9375,1.0,saturate(WFB)), ZPD_Boundary_Adjust = ZPD_Boundary_n_Fade.x, Store_WC, Set_Max_Depth = 1.0;
 	    //Screen Space Detector.
-		if (abs(Weapon_ZPD_Boundary.x) > 0)
+		if (abs_WZPDB.x > 0)
 		{
 			#if WBS			   
 			float WArray[6] = { 0.1, 0.2, 0.3, 0.7, 0.8, 0.9};
@@ -2719,14 +2719,27 @@ uniform int Extra_Information <
 			for( int i = 0 ; i < 6; i++ )
 			{
 				WZPDB  = 1 - WConverge / tex2Dlod(SamplerDMN, float4(float2(WArray[i],Distance_From_Bottom), 0, 0)).z;
-					
-				if ( WZPDB < -DJ_W ) // Default -0.1
-					W_Convergence *= 1.0-abs(Weapon_ZPD_Boundary.x);
-				 //Used if Weapon Buffer is way out of range.
-				if (Weapon_ZPD_Boundary.y > Weapon_ZPD_Boundary.x)
+				if(Weapon_ZPD_Boundary.x >= 0)
+				{	
+					if ( WZPDB < -DJ_W ) // Default -0.1
+						W_Convergence *= 1.0-abs_WZPDB.x;
+					 //Used if Weapon Buffer is way out of range.
+					if (abs_WZPDB.y > abs_WZPDB.x)
+					{
+						if ( WZPDB < -DS_W )
+							W_Convergence *= 1.0-abs_WZPDB.y;
+					}
+				}
+				else
 				{
-					if ( WZPDB < -DS_W )
-						W_Convergence *= 1.0-abs(Weapon_ZPD_Boundary.y);
+					if ( WZPDB < -DJ_W ) // Default -0.1
+						WZPD_Switch = 1;
+					 //Used if Weapon Buffer is way out of range.
+					if (abs_WZPDB.y > abs_WZPDB.x)
+					{
+						if ( WZPDB < -DS_W )
+							WZPD_Switch = 2;
+					}
 				}
 			}
 		}
@@ -2796,7 +2809,7 @@ uniform int Extra_Information <
 		Set_Max_Depth = Inficolor_Max_Depth;
 	#endif
 		D = min(saturate(Set_Max_Depth),D);
-	   return float3( lerp(Convergence,lerp(D,Convergence,saturate(Convergence)), ZP), lerp(W_Convergence,WD,WZP), Store_WC);
+	   return float4( lerp(Convergence,lerp(D,Convergence,saturate(Convergence)), ZP), lerp(W_Convergence,WD,WZP), Store_WC, WZPD_Switch);
 	}
 	
 	float3 DB_Comb(float2 texcoord)
@@ -2838,8 +2851,15 @@ uniform int Extra_Information <
 		if( Weapon_Reduction_n_Power.x == 8)
 			FD_Adjust = 0.250;
 		//Handle Convergence Here
-		float3 HandleConvergence = Conv(DM.xz,texcoord).xyz;
+		float2 WZPDB = abs(Weapon_ZPD_Boundary);
+		float4 HandleConvergence = Conv(DM.xz,texcoord,WZPDB).xyzw;
 			   HandleConvergence.y *= WA_XYZW().w;
+			   
+			   if(HandleConvergence.w == 1)
+			   	HandleConvergence.y *= 1-WZPDB.x;
+			   if(HandleConvergence.w == 2)
+			   	HandleConvergence.y *= 1-WZPDB.y;
+			   	
 			   HandleConvergence.y = lerp(HandleConvergence.y + FD_Adjust, HandleConvergence.y, FadeIO);
 		if(Anti_Weapon_Z > 0)//Anti-Weapon Hand Z-Fighting
 		{
@@ -3140,11 +3160,6 @@ uniform int Extra_Information <
 	
 	
 	void Mix_Z(in float4 position : SV_Position, in float2 texcoord : TEXCOORD, out float MixOut : SV_Target0)
-	{ 
-		MixOut = GetDB( texcoord );
-	}
-	
-	float GetMixed(float2 texcoord)
 	{
 		float2 Shift_TC = texcoord;
 		if(DLSS_FSR_Offset.x == 0 && DLSS_FSR_Offset.y == 0)
@@ -3152,7 +3167,13 @@ uniform int Extra_Information <
 			if(Shift_Depth() && Auto_Scaler_Adjust)
 				Shift_TC -= float2(2.0,2.5) * pix;
 		}
-		return tex2Dlod(SamplerzBufferN_Mixed,float4(Shift_TC,0,0)).x;//Do not use mips on this buffer
+		MixOut = GetDB( Shift_TC );
+	}
+	
+	float GetMixed(float2 texcoord) //Sensitive Buffer.
+	{
+		//Careful not to shift here because we run out of memory in DX9
+		return tex2Dlod(SamplerzBufferN_Mixed,float4(texcoord,0,0)).x;//Do not use mips on this buffer
 	}
 	
 	float2 De_Art(float2 sp, float2 ZoomDir)
