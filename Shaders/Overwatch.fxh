@@ -1,7 +1,7 @@
 ////----------------------------------------//
 ///SuperDepth3D Overwatch Automation Header///
 //----------------------------------------////
-#define OVERWATCH "Overwatch v3.6.5\n"
+#define OVERWATCH "Overwatch v3.6.7\n"
 //---------------------------------------OVERWATCH---------------------------------------//
 // If you are reading this stop. Go away and never look back. From this point on if you  //
 // still think it's is worth looking at this..... Then no one can save you or your soul. //
@@ -9016,18 +9016,20 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DB_X 1
 	#define DA_X 0.05//0.075
 	//#define DF_Y 0.01
-	#define DA_Y 38.75//25
+	#define DA_Y 40.0
     //#define DA_Z 0.000
+    #define DS_Y 2            // Linerzation Offset Effects only distance if true
+
 	//#define DB_Z 0.100
  
-	#define DE_X 1
+	#define DE_X 2
 	#define DE_Y 0.750
 	#define DE_Z 0.375
 	//#define AFD 1
 	#define DG_W -0.25 //PoP
     #define OIL 2 //Set How many Levels We use for RE_Fix 0 | 1 | 2 | 3
-    #define OIF float3(0.05,0.325,0.225)  //Fix enables if Value is > 0.0
-	#define DI_W float3(0.25,0.75,1.25)//float4(-0.25,0.0,0.875,2.5)
+    #define OIF float3(0.5,0.375,0.250)  //Fix enables if Value is > 0.0
+	#define DI_W float3(0.5,2.5,3.75)
 	//#define FTM 1
     //#define DG_Z 0.025 //0.0125 //Min
     //#define DE_W 0.000 //Auto
@@ -9040,7 +9042,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DM_X 4           //HQ Tune
 	#define DM_Z 1           //HQ Smooth
     //#define DM_Y 3           //HQ VRS
-    //#define DL_Y -0.5   //De-Artifact
+    #define DL_Y 0.5   //De-Artifact
     //#define DL_Z 0.25       //Compat Power
 
 	//#define WSM 3
@@ -20083,14 +20085,12 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define SUI 2 //Off 0 | 1 Stencil One | 2 Stencil Two
     
     #define SSA 1 //Off 0 | 1 Square | 2 Circle
-    //#define SNA 1 //Off 0 | 1 Trigger on Aim
     #define DDD_X float4( 0.500 , 0.078 , 0.202 , 0.129)  //Pos A = XY Any & B = ZW Lock 
     #define DDD_Y float4( 0.798 , 0.812 , 0.5 , 0.439)      //Pos C = XY Any & UI Postion 
     #define DDD_Z float4( 11.0, 0.0, 1.0, 1000.0) //Detection Value 0-30 for A = X, B = Y, & C = Z. The Last Value is a Wild Card amount W is for X and Z. 
     #define DDD_W float4( 0.198, 0.115, 0.95, 0.0)             //X is Hoz Size and Y is Vert Size, Z is Inversion amount and W is Depth set elevation with 0.0-0.5 > is Auto.
 
     #define SSB 1 //Off 0 | 1 Square | 2 Circle
-    //#define SNB 1 //Off 0 | 1 Trigger on Aim
     #define DEE_X float4( 0.520 , 0.973 , 0.632 , 0.189)  //Pos A = XY Any & B = ZW Lock 
     #define DEE_Y float4( 0.599 , 0.998 , 0.5 , 0.476)      //Pos C = XY Any & UI Postion 
     #define DEE_Z float4( 27.0, 0.0, 0.0, 1000.0) //Detection Value 0-30 for A = X, B = Y, & C = Z. The Last Value is a Wild Card amount W is for X and Z. 
@@ -20099,29 +20099,60 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define MDD 1 //Set Menu Detection & Direction        //Off | 1 Left | 2 Right | 3 Bottom | 4 Top 
 	#define COD 0 //Enable or Disable Cut-Off Direction   //Off | 1 Top & Bottom for One & Two or Left and Right for Three & Four 
     #define DN_X float4( 0.022, 0.159 , 0.01 , 0.018)   //Pos A = XY Any & B = ZW Lock 
-    #define DN_Y float4( 0.229 , 0.986 ,  0.0, 0.0)       //Pos C = XY Any & D = ZW Match
+    #define DN_Y float4( 0.226 , 0.939 ,  0.0, 0.0)       //Pos C = XY Any & D = ZW Match
     #define DN_Z float4( 0.0, 0.0,  0.0, 0.0)             //Pos E = XY Match & F = ZW Match
 	#define DN_W float4( 0.234, 0.0 , 0.0, 0.0 )            //Size = Menu [ABC] D E F
-    #define DJ_Y float4( 27.0, 0.0, 0.0, 1000.0)        //Menu Detection Type for A = X, B = Y, & C = Z. The Last Value is a Wild Card amount W is for X and Z. 
+    #define DJ_Y float4( 27.0, 0.0, 1.0, 1000.0)        //Menu Detection Type for A = X, B = Y, & C = Z. The Last Value is a Wild Card amount W is for X and Z. 
     #define DJ_Z float4( 1000., 1000., 1000, 0.0)         //Set Match Tresh and IU Y Elevation or Cut-Off -1-1
 
 	//Simple Menu Detection
-    #define SMD 4 //Off 0 | 1 | 2 | 3 | 4 
-    #define DW_X float4( 0.2535, 0.256 , 0.174 , 0.194)    //Pos A = XY Any & B = ZW Lock 
-    #define DW_Y float2( 0.040 , 0.047 )                   //Pos C = XY 
-    #define DW_Z float4( 29.0, 0.0, 27.0, 1000.0)   //Menu Detection Type for A = X, B = Y, & C = Z. The Last Value is a Wild Card amount W is for X and Z. 
-    //Setting
-    #define DT_X float4( 0.187 , 0.151 , 0.599 , 0.998)    //Pos A = XY Any & B = ZW Lock 
-    #define DT_Y float2( 0.810 , 0.119 )                   //Pos C = XY 
+    #define SMD 2 //Off 0 | 1 | 2 | 3 | 4 
+    //Build One
+    #define DW_X float4( 0.565 , 0.304 , 0.599 , 0.998 )    //Pos A = XY Any & B = ZW Lock 
+    #define DW_Y float2( 0.034 , 0.060 )                   //Pos C = XY 
+    #define DW_Z float4( 22.0, 0.0, 27.0, 1000.0)   //Menu Detection Type for A = X, B = Y, & C = Z. The Last Value is a Wild Card amount W is for X and Z. 
+    //Build Two
+    #define DT_X float4( 0.381 , 0.572 , 0.599 , 0.998)    //Pos A = XY Any & B = ZW Lock 
+    #define DT_Y float2( 0.034 , 0.060 )                   //Pos C = XY 
     #define DW_W float4( 27.0, 0.0, 27.0, 1000.0)   //Menu Detection Type for A = X, B = Y, & C = Z. The Last Value is a Wild Card amount W is for X and Z. 
+    //Build Three
+    #define DAA_X float4( 0.8835, 0.956 , 0.982 , 0.954)    //Pos A = XY Any & B = ZW Lock 
+    #define DAA_Y float2( 0.500 , 0.004 )                   //Pos C = XY 
+    #define DAA_Z float4( 1000.0, 1000.0, 1000.0, 1000.0)   //Menu Detection Type for A = X, B = Y, & C = Z. The Last Value is a Wild Card amount W is for X and Z. 
 
-    #define DAA_X float4( 0.500 , 0.387 , 0.4985 , 0.382)    //Pos A = XY Any & B = ZW Lock 
-    #define DAA_Y float2( 0.218 , 0.500 )                   //Pos C = XY 
-    #define DAA_Z float4( 27.0, 1.0, 2.0, 1000.0)   //Menu Detection Type for A = X, B = Y, & C = Z. The Last Value is a Wild Card amount W is for X and Z. 
+    #define DBB_X float4( 0.8835, 0.956 , 0.982 , 0.954)    //Pos A = XY Any & B = ZW Lock 
+    #define DBB_Y float2( 0.500 , 0.004 )                   //Pos C = XY 
+    #define DBB_Z float4( 1000.0, 1000.0, 1000.0, 1000.0)   //Menu Detection Type for A = X, B = Y, & C = Z. The Last Value is a Wild Card amount W is for X and Z. 
 
-    #define DBB_X float4( 0.958, 0.045 , 0.599 , 0.998)    //Pos A = XY Any & B = ZW Lock 
-    #define DBB_Y float2( 0.034 , 0.056 )                   //Pos C = XY 
-    #define DBB_Z float4( 27.0, 0.0, 27.0, 1000.0)   //Menu Detection Type for A = X, B = Y, & C = Z. The Last Value is a Wild Card amount W is for X and Z. 
+
+  //  #define DAA_X float4( 0.500 , 0.387 , 0.4985 , 0.382)    //Pos A = XY Any & B = ZW Lock 
+  //  #define DAA_Y float2( 0.218 , 0.500 )                   //Pos C = XY 
+  //  #define DAA_Z float4( 27.0, 1.0, 2.0, 1000.0)   //Menu Detection Type for A = X, B = Y, & C = Z. The Last Value is a Wild Card amount W is for X and Z. 
+
+	//Multi Menu Detection                    //4 Blocks total and 2 sub blocks per one block.
+    #define MMD 2 //Set Multi Menu Detection  // Off  0 | 1 | 2 | 3 | 4
+    #define MMS 0 //Set Multi Menu Selection  // Off  0 | 1 | 2 | 3 | 4                       //0-2 check to 28-30 check Depnding on the option MML
+    #define MML -2 //Set Multi Menu Leniency   // -4 |-3 |-2 |-1 | Off | 1 | 2 | 3 | 4         //Negitive [0 & 30] No Leniency | Zero [0-1 & 29-30] Some Leniency | Positive [0-2 & 28-30] Most Leniency    
+	//Manage Group & Setting
+    #define DO_X float4( 0.2535, 0.256 , 0.174 , 0.194 ) //Pos A1 = XY Color & A2 = ZW Black 
+    #define DO_Y float4( 0.040 , 0.047 , 0.187 , 0.151 ) //Pos A3 = XY Color & B1 = ZW Color
+    #define DO_Z float4( 0.599 , 0.998 , 0.810 , 0.119 ) //Pos B2 = XY Black & B3 = ZW Color
+	#define DO_W float4( 29.0, 27.0, 27.0, 27.0) //Tresh Hold for Color A & B and Color
+	//Inventory & Car
+    #define DP_X float4( 0.958 , 0.045 , 0.798 , 0.156 ) //Pos C1 = XY Color & C2 = ZW Black 
+    #define DP_Y float4( 0.523 , 0.190 , 0.958 , 0.045 ) //Pos C3 = XY Color & D1 = ZW Color
+    #define DP_Z float4( 0.798 , 0.156 , 0.555 , 0.330 ) //Pos D2 = XY Black & D3 = ZW Color
+	#define DP_W float4( 27.0, 28.0, 27.0, 27.0) //Tresh Hold for Color C & D and Color
+    //Multiplayer
+	#define DQ_X float4( 0.735 , 0.068 , 0.992 , 0.052 ) //Pos C1 = XY Color & C2 = ZW Black 
+    #define DQ_Y float4( 0.048 , 0.968 , 0.000 , 0.000 ) //Pos C3 = XY Color & D1 = ZW Color
+    #define DQ_Z float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos D2 = XY Black & D3 = ZW Color
+	#define DQ_W float4( 28.0, 27.0, 1000.0, 1000.0) //Tresh Hold for Color A1 & A3 and Color
+
+	#define DR_X float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos G1 = XY Color & G2 = ZW Black 
+    #define DR_Y float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos G3 = XY Color & H1 = ZW Color
+    #define DR_Z float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos H2 = XY Black & H3 = ZW Color
+	#define DR_W float4( 1000.0, 1000.0, 1000.0, 1000.0) //Tresh Hold for Color G & H and Color 
 
 	//Smooth Mode Setting
     #define SMS 3           //SM Toggle Separation
@@ -20357,14 +20388,14 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define SUI 1 //Off 0 | 1 Stencil One | 2 Stencil Two
     
     #define SSA 0 //Off 0 | 1 Square | 2 Circle
-    #define SNA 1 //Off 0 | 1 Trigger on Aim
+    //#define SNA 1 //Off 0 | 1 Trigger on Aim
     #define DDD_X float4( 0.500 , 0.500 , 0.500 , 0.500)  //Pos A = XY Any & B = ZW Lock 
     #define DDD_Y float4( 0.500 , 0.500 , 0.5 , 0.5)      //Pos C = XY Any & UI Postion 
     #define DDD_Z float4( 1000.0, 1000.0, 1000.0, 1000.0) //Detection Value 0-30 for A = X, B = Y, & C = Z. The Last Value is a Wild Card amount W is for X and Z. 
     #define DDD_W float4( 0.0, 0.0, 1.0, 0.0)             //X is Hoz Size and Y is Vert Size, Z is Inversion amount and W is Depth set elevation with 0.0-0.5 > is Auto.
 
     #define SSB 0 //Off 0 | 1 Square | 2 Circle
-    #define SNB 1 //Off 0 | 1 Trigger on Aim
+    //#define SNB 1 //Off 0 | 1 Trigger on Aim
     #define DEE_X float4( 0.500 , 0.500 , 0.500 , 0.500)  //Pos A = XY Any & B = ZW Lock 
     #define DEE_Y float4( 0.500 , 0.500 , 0.5 , 0.5)      //Pos C = XY Any & UI Postion 
     #define DEE_Z float4( 1000.0, 1000.0, 1000.0, 1000.0) //Detection Value 0-30 for A = X, B = Y, & C = Z. The Last Value is a Wild Card amount W is for X and Z. 
