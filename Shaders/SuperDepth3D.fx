@@ -378,6 +378,8 @@ uniform int SuperDepth3D <
 	ui_label = " ";
 	ui_type = "radio";
 	>;
+
+	//uniform float2 TEST < ui_type = "slider"; ui_min = 0.0; ui_max = 1.0; > = 0.00;
 	//Divergence & Convergence//
 	uniform float Divergence <
 		ui_type = "slider";
