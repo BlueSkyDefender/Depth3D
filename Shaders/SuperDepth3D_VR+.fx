@@ -1,7 +1,7 @@
 	////--------------------//
 	///**SuperDepth3D_VR+**///
 	//--------------------////
-	#define SD3DVR "SuperDepth3D_VR+ v4.0.6\n"
+	#define SD3DVR "SuperDepth3D_VR+ v4.0.7\n"
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//* Depth Map Based 3D post-process shader
 	//* For Reshade 4.4+ I think...
@@ -1229,7 +1229,7 @@ uniform int Extra_Information <
 	
 	float2 Re_Scale_WN()
 	{   float Near_Plane_Popout = WZPD_and_WND.x * 2;
-		return saturate(float2(abs(Near_Plane_Popout),Near_Plane_Popout >= 0 ? 0 : 1));
+		return float2(abs(Near_Plane_Popout),Near_Plane_Popout >= 0 ? 0 : 1);
 	}
 	
 	float Perspective()

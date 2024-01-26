@@ -1,7 +1,7 @@
 	////----------------//
 	///**SuperDepth3D**///
 	//----------------////
-	#define SD3D "SuperDepth3D v4.0.6\n"
+	#define SD3D "SuperDepth3D v4.0.7\n"
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//* Depth Map Based 3D post-process shader
 	//* For Reshade 3.0+
@@ -1376,7 +1376,7 @@ uniform int Extra_Information <
 	//#define E_O_Switch fmod(abs(Perspective),2)
 	float2 Re_Scale_WN()
 	{   float Near_Plane_Popout = WZPD_and_WND.x;
-		return saturate(float2(abs(Near_Plane_Popout),Near_Plane_Popout >= 0 ? 0 : 1));
+		return float2(abs(Near_Plane_Popout),Near_Plane_Popout >= 0 ? 0 : 1);
 	}
 	
 	float Perspective_Switch()// Need to Fix Inficolor Perspective calculation.
