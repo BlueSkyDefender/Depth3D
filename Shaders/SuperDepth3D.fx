@@ -286,7 +286,10 @@ namespace SuperDepth3D
 	#ifndef HDR_Compatible_Mode
 		#define HDR_Compatible_Mode 0
 	#endif
-	
+		//This preprocessor is to set the vertical resolution to 50% on The Deph Buffer and is set too 2 It also does it to the primary buffer.
+	#ifndef Lower_Depth_Rez
+		#define Lower_Depth_Rez 0
+	#endif
 	//Help / Guide / Information
 uniform int SuperDepth3D <
 	ui_text = SD3D
@@ -562,15 +565,6 @@ uniform int SuperDepth3D <
 					 "Please enable the 'Performance Mode' Checkbox, in ReShade's GUI.\n"
 					 "It's located in the lower bottom right of the ReShade's Main.\n"
 					 "Default is Performant.";
-		ui_category = "Occlusion Masking";
-	> = 0;
-	
-	uniform int Switch_VRS <
-		ui_type = "combo";
-		ui_items =   "Auto\0High\0Med\0Low\0Very Low\0";
-		ui_label =   " VRS Performance";
-		ui_tooltip = "Use this to set Varable Rate Shading to manually selection or automatic mode.\n"
-			         "Default is Automatic.";
 		ui_category = "Occlusion Masking";
 	> = 0;
 	
@@ -1519,14 +1513,28 @@ uniform int Extra_Information <
 			Texture = texDF;
 		};
 	#endif
-	texture texDMN { Width = BUFFER_WIDTH ; Height = BUFFER_HEIGHT; Format = RGBA16F; MipLevels = Max_Mips; };
+
+	#if Lower_Depth_Rez
+		#if Lower_Depth_Rez == 2
+			#define Lower_Depth_Rez_A 0.5
+			#define Lower_Depth_Rez_B 0.5
+		#else
+			#define Lower_Depth_Rez_A 0.5
+			#define Lower_Depth_Rez_B 1.0	
+		#endif
+	#else
+		#define Lower_Depth_Rez_A 1.0
+		#define Lower_Depth_Rez_B 1.0
+	#endif	
+	
+	texture texDMN { Width = BUFFER_WIDTH ; Height = BUFFER_HEIGHT * Lower_Depth_Rez_B; Format = RGBA16F; MipLevels = Max_Mips; };
 	
 	sampler SamplerDMN
 		{
 			Texture = texDMN;
 		};
 	
-	texture texzBufferN_P { Width = BUFFER_WIDTH ; Height = BUFFER_HEIGHT ; Format = RG16F; };
+	texture texzBufferN_P { Width = BUFFER_WIDTH ; Height = BUFFER_HEIGHT * Lower_Depth_Rez_A; Format = RG16F; };
 	
 	sampler SamplerzBufferN_P
 		{
@@ -1536,7 +1544,7 @@ uniform int Extra_Information <
 			MipFilter = POINT;
 		};
 	
-	texture texzBufferN_L { Width = BUFFER_WIDTH ; Height = BUFFER_HEIGHT ; Format = R16F; MipLevels = 8; };
+	texture texzBufferN_L { Width = BUFFER_WIDTH ; Height = BUFFER_HEIGHT  * Lower_Depth_Rez_A; Format = R16F; MipLevels = 8; };
 	
 	sampler SamplerzBufferN_L
 		{
@@ -3365,13 +3373,12 @@ uniform int Extra_Information <
 			Perf = CB_Done ? 0.679f : 0.367f;
 		if( View_Mode == 5)
 			Perf = lerp(0.375f,0.679f,GetDepth);				
-		//Luma Based VRS // Need To Rework this when I can.
-		float Auto_Adptive = Switch_VRS == 0 ? lerp(0.05,1.0,smoothstep(0.00000001f, 0.375, tex2D(SamplerzBufferN_P,0).y ) ) : 1,
-			  Luma_Adptive = smoothstep(0.0,saturate(VRS_Array[Switch_VRS] * Auto_Adptive), tex2Dlod(SamplerDMN,float4(Coordinates,0,9)).w);//tex2Dlod(SamplerDMN,float4(Coordinates * float2(0.5,1),0,8)).w);
+		//Luma Based VRS
+		float Luma_Map = smoothstep(0.0,0.375, tex2Dlod(SamplerDMN,float4(Coordinates,0,7)).w);
 		if( Performance_Level > 1 )
-			Perf *= saturate(Luma_Adptive);
+				Perf *= lerp(0.25,1.0,smoothstep(0.0,0.25,saturate( Luma_Map )));
 		//Foveated Calculations	
-		float Foveated_Mask = saturate(Vin_Pattern(Coordinates, float2(16.0,3.0))), MaxMix = lerp(100, 50, saturate(GetDepth * 2 - 1) );	
+		float Foveated_Mask = saturate(Vin_Pattern(Coordinates, float2(16.0,2.5))), MaxMix = lerp(100, 50, saturate(GetDepth * 2 - 1) );	
 		if(Foveated_Mode)
 			MaxMix = lerp(75, 25, saturate(Foveated_Mask * saturate(GetDepth * 2 - 1 ) ));
 		//ParallaxSteps Calculations

@@ -1,7 +1,7 @@
 ////----------------------------------------//
 ///SuperDepth3D Overwatch Automation Header///
 //----------------------------------------////
-#define OVERWATCH "Overwatch v3.7.0\n"
+#define OVERWATCH "Overwatch v3.7.1\n"
 //---------------------------------------OVERWATCH---------------------------------------//
 // If you are reading this stop. Go away and never look back. From this point on if you  //
 // still think it's is worth looking at this..... Then no one can save you or your soul. //
@@ -154,7 +154,7 @@ static const int HQ_Smooth_D = 1;                       //HQ Smooth 0 - 6       
 static const float HQ_Trim_D = 0.0;                     //HQ Trim 0.0 - 0.5                             | DM_W
 
 //Shared Values
-static const int Warping_Masking_D = 4;                 //Warping Masking Adjustment                    | DAA_W
+static const int Warping_Masking_D = 1;                 //Warping Masking Adjustment                    | DAA_W
 static const int HQ_Tune_D = 4;                         //HQ Tune                                       | DM_X
 
 //Lock Out Menu Detection
@@ -14837,9 +14837,10 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define DR_Z float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos H2 = XY Black & H3 = ZW Color
 	#define DR_W float4( 1000.0, 1000.0, 1000.0, 1000.0) //Tresh Hold for Color G & H and Color 
 	*/
+	#define WND 1.0         //Weapon Near Pushes depth in and adjust perspective to match.
 	//Smooth Mode Setting  
     #define SMS 3      //SM Toggle Separation
-	#define DL_X 0.9  //SM Tune
+	#define DL_X 0.875  //SM Tune
 	//#define DL_W 0.050 //SM Perspective
 	#define DM_X 5     //HQ Tune
     //#define DM_Y 3     //HQ VR          
