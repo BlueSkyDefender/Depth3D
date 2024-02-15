@@ -1,7 +1,7 @@
 	////----------------//
 	///**SuperDepth3D**///
 	//----------------////
-	#define SD3D "SuperDepth3D v4.1.0\n"
+	#define SD3D "SuperDepth3D v4.1.1\n"
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//* Depth Map Based 3D post-process shader
 	//* For Reshade 3.0+
@@ -112,7 +112,7 @@ namespace SuperDepth3D
 		#define OW_WP "WP Off\0Custom WP\0"
 		static const int WSM = 0;
 		//Triggers
-		static const float ISD = 0, SDM = 0; ASA = 1, IWS = 0, SUI = 0, SSA = 0, SNA = 0, SSB = 0, SNB = 0, SSC = 0, SNC = 0, SSD = 0, SND = 0, FRM = 1, LHA = 0, WBS = 0, TMD = 0, AWZ = 0, CWH = 0, WBA = 0, WFB = 0, WND = 0, WRP = 0, SMD = 0, WHM = 0, SDU = 0, ABE = 2, LBE = 0, DRS = 0, MAC = 0, ARW = 0, OIL = 0, MMS = 0, NVK = 0, NDG = 0, FTM = 0, SPO = 0, MMD = 0, SMP = 0, LBR = 0, HQT = 0, AFD = 0, MDD = 0, FPS = 1, SMS = 1, OIF = 0, NCW = 0, RHW = 0, NPW = 0, SPF = 0, BDF = 0, HMT = 0, HMC = 0, DFW = 0, NFM = 0, DSW = 0, BMT = 0, LBC = 0, LBS = 0, LBM = 0, DAA = 0, NDW = 0, PEW = 0, WPW = 0, FOV = 0, EDW = 0, SDT = 0;
+		static const float LBI = 0, ISD = 0, SDM = 0; ASA = 1, IWS = 0, SUI = 0, SSA = 0, SNA = 0, SSB = 0, SNB = 0, SSC = 0, SNC = 0, SSD = 0, SND = 0, FRM = 1, LHA = 0, WBS = 0, TMD = 0, AWZ = 0, CWH = 0, WBA = 0, WFB = 0, WND = 0, WRP = 0, SMD = 0, WHM = 0, SDU = 0, ABE = 2, LBE = 0, DRS = 0, MAC = 0, ARW = 0, OIL = 0, MMS = 0, NVK = 0, NDG = 0, FTM = 0, SPO = 0, MMD = 0, SMP = 0, LBR = 0, HQT = 0, AFD = 0, MDD = 0, FPS = 1, SMS = 1, OIF = 0, NCW = 0, RHW = 0, NPW = 0, SPF = 0, BDF = 0, HMT = 0, HMC = 0, DFW = 0, NFM = 0, DSW = 0, BMT = 0, LBC = 0, LBS = 0, LBM = 0, DAA = 0, NDW = 0, PEW = 0, WPW = 0, FOV = 0, EDW = 0, SDT = 0;
 		//Overwatch.fxh State
 		#define OSW 1
 	#endif
@@ -1776,13 +1776,35 @@ uniform int Extra_Information <
 			Letter_Box_Reposition = float2(0.250,0.875);
 		if (LBR == 2) 
 			Letter_Box_Reposition = float2(0.5,0.625);
-			
+		
+		if (LBI)
+			Letter_Box_Reposition.x = 1-Letter_Box_Reposition.x;		
+	
+		//Letter Box Detection Map
+		
+		//Center (0.5,0.5) 
+		
+		//Letter Box Reposition & Letter Box Elevation Zero
+		//Top    (0.1,0.09)   LBE One = (0.1,0.045)  LBE Two = (0.1,0.035)  
+
+		//Bottom (0.5,0.91)   LBE One = (0.5,0.955)  LBE Two = (0.5,0.965)
+		
+		//Letter Box Reposition One
+		//Top    (0.250,0.09 )LBE One = (0.250,0.045)LBE Two = (0.250,0.035)
+
+		//Bottom (0.875,0.91) LBE One = (0.875,0.955)LBE Two = (0.875,0.965)
+		
+		//Letter Box Reposition Two
+		//Top    (0.5,0.09)   LBE One = (0.50,0.045) LBE Two = (0.5,0.035)
+ 
+		//Bottom (0.625,0.91) LBE One = (0.625,0.955)LBE Two = (0.625,0.965)
+		
 		float2 Letter_Box_Elevation = LBE ? LBE == 2 ? float2(0.035,0.965) : float2(0.045,0.955) : float2(0.09,0.91);    
-		float MipLevel = 5,Center = SLLTresh(float2(0.5,0.5), 7) > 0, Top_Left = LBSensitivity(SLLTresh(float2(Letter_Box_Reposition.x,Letter_Box_Elevation.x), MipLevel));
+		float MipLevel = 5,Center = SLLTresh(float2(0.5,0.5), 7) > 0, Top_Pos = LBSensitivity(SLLTresh(float2(Letter_Box_Reposition.x,Letter_Box_Elevation.x), MipLevel));
 		if ( LetterBox_Masking == 2 || LB_Correction == 2 || LBC == 2 || LBM == 2 || SMP == 2)//Left_Center | Right_Center | Center
 			return LBSensitivity(SLLTresh(float2(0.1,0.5), MipLevel)) && LBSensitivity(SLLTresh(float2(0.9,0.5), MipLevel)) && Center; //Vert
 		else       //Top | Bottom | Center
-			return Top_Left && LBSensitivity(SLLTresh(float2(Letter_Box_Reposition.y,Letter_Box_Elevation.y), MipLevel)) && Center; //Hoz
+			return Top_Pos && LBSensitivity(SLLTresh(float2(Letter_Box_Reposition.y,Letter_Box_Elevation.y), MipLevel)) && Center; //Hoz
 	}
 	#else
 	bool LBDetection()//Stand in for not crashing when not in use
