@@ -20173,7 +20173,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DS_Y 2            // Linerzation Offset Effects only distance if true
 	#define DB_Z 0.05         // Auto Depth Protection
 	#define DE_X 1            // ZPD Boundary 
-	#define DE_Y 0.750        // Set ZPD Boundary Level Zero 
+	#define DE_Y 0.700        // Set ZPD Boundary Level Zero 
 	#define DE_Z 0.400        // Speed that Boundary is Enforced
 	//#define AFD 1           // Alternate Frame Detection - May be phased out
 	#define DG_W -0.25        // Shift Boundary Out of screen 0.5 and or In screen -0.5
@@ -20188,8 +20188,8 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DF_W float4(0.0001,0.0,0.0,0.038)// Edge & Scale
   //  #define SDU 1	
   
-      //Stencil UI & Detection
-    #define SUI 2 //Off 0 | 1 Stencil One | 2 Stencil Two
+    //Stencil UI & Detection
+    #define SUI 3 //Off 0 | 1 Stencil One | 2 Stencil Two
     
     #define SSA 1 //Off 0 | 1 Square | 2 Circle
     //#define SNA 1 //Off 0 | 1 Trigger on Aim
@@ -20204,6 +20204,13 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define DEE_Y float4( 0.690 , 0.866 , 0.5 , 0.5)      //Pos C = XY Any & UI Postion 
     #define DEE_Z float4( 28.0, 28.0, 28.0, 1000.0) //Detection Value 0-30 for A = X, B = Y, & C = Z. The Last Value is a Wild Card amount W is for X and Z. 
     #define DEE_W float4( 0.297, 0.050, 1.0, 0.75)             //X is Hoz Size and Y is Vert Size, Z is Inversion amount and W is Depth set elevation with 0.0-0.5 > is Auto.
+
+    #define SSC 1 //Off 0 | 1 Square | 2 Circle
+    //#define SNC 1 //Off 0 | 1 Trigger on Aim
+    #define DFF_X float4( 0.296 , 0.813 , 0.498 , 0.903)  //Pos A = XY Any & B = ZW Lock 
+    #define DFF_Y float4( 0.703 , 0.968 , 0.5 , 0.891)      //Pos C = XY Any & UI Postion 
+    #define DFF_Z float4( 28.0, 28.0, 28.0, 1000.0) //Detection Value 0-30 for A = X, B = Y, & C = Z. The Last Value is a Wild Card amount W is for X and Z. 
+    #define DFF_W float4( 0.291, 0.420, 1.0, 0.875)             //X is Hoz Size and Y is Vert Size, Z is Inversion amount and W is Depth set elevation with 0.0-0.5 > is Auto.
       
    //Settings
     #define MDD 1 //Set Menu Detection & Direction        //Off | 1 Left | 2 Right | 3 Bottom | 4 Top 
@@ -20283,14 +20290,14 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 
 	#define BMT 1             // ZPD and World Scale Balance // I need to phase this out.
 	#define DF_Z 0.15           // Set the Balance  
-    #define DL_Y 0.5           // De-Artifact Only works on some View Modes and causes performance degredation
+    #define DL_Y 0.25           // De-Artifact Only works on some View Modes and causes performance degredation
 	#define DB_Y 1.0          // Effects De-Artifacts -1 to 1 Most of the time leave this at 0 and if you set 1 it takes depth into account 
-    #define DL_Z 0.5        // Compat Power
+    #define DL_Z 0.25        // Compat Power
 	//#define DJ_X 0.125        // Range Smoothing
 	
 	//Smooth Mode Setting
     #define SMS 3           //SM Toggle Separation
-	#define DL_X 0.9       //SM Tune
+	#define DL_X 0.875       //SM Tune
 	//#define DL_W 0.05       //SM Perspective
 	#define DM_X 6           //HQ Tune
 	//#define HQT 1           //HQ Trigger
