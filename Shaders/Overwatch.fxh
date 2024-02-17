@@ -3707,69 +3707,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DM_Z 2     //HQ Smooth
 	#define PEW 1
 	#define DAA 1
-#elif (App == 0xBB2E4EFB ) //MassEffect
-	#define DA_X 0.050
-	#define DF_Y 0.0375
-	#define DA_Y 14.0
-	 
-	#define DE_X 1
-	#define DE_Y 0.4400
-	#define DE_Z 0.4375
-    //#define DG_W 0.100 //Pop
-    #define OIF 0.20 //Fix enables if Value is > 0.0
-	#define DI_W 1.25 //Adjustment for REF
-	#define BMT 1
-	#define DF_Z 0.1375
-    #define SMS 1     //SM Toggle Separation
-	#define DL_X 0.800 //SM Tune
-	//#define DL_W 0.025 //SM Perspective
-	#define DM_X 3     //HQ Tune
-	#define DM_Z 4     //HQ Smooth
-	#define PEW 1
-    #define DSW 1
-    #define FOV 1
-#elif (App == 0xBB2E50AE ) //MassEffect 2
-	#define DA_X 0.050
-	#define DF_Y 0.0375
-	#define DA_Y 12.5
-	 
-	#define DE_X 1
-	#define DE_Y 0.475
-	#define DE_Z 0.400
-    //#define DG_W 0.100 //Pop
-    #define OIF 0.20 //Fix enables if Value is > 0.0
-	#define DI_W 1.25 //Adjustment for REF
-	#define BMT 1
-	#define DF_Z 0.1375
-    #define SMS 1     //SM Toggle Separation
-	#define DL_X 0.800 //SM Tune
-	//#define DL_W 0.025 //SM Perspective
-	#define DM_X 3     //HQ Tune
-	#define DM_Z 4     //HQ Smooth
-	#define PEW 1
-    #define DSW 1
-    #define FOV 1
-#elif (App == 0xBB2E5261 ) //MassEffect 3
-	#define DA_X 0.050
-	#define DF_Y 0.0375
-	#define DA_Y 13.0
-	 
-	#define DE_X 1
-	#define DE_Y 0.500
-	#define DE_Z 0.375
-    //#define DG_W 0.100 //Pop
-    #define OIF 0.20 //Fix enables if Value is > 0.0
-	#define DI_W 1.25 //Adjustment for REF
-	#define BMT 1
-	#define DF_Z 0.1375
-    #define SMS 1     //SM Toggle Separation
-	#define DL_X 0.75 //SM Tune
-	//#define DL_W 0.025 //SM Perspective
-	#define DM_X 3     //HQ Tune
-	#define DM_Z 4     //HQ Smooth
-	#define PEW 1
-    #define DSW 1
-    #define FOV 1
 #elif (App == 0xDA130F0B ) //Poppy PlayTime Ch. 1
 	#define DA_W 1
 	#define DA_X 0.051
@@ -21999,6 +21936,247 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define PEW 1 
 	#define DAA 1
 	#define NDW 1
+#elif (App == 0xBB2E4EFB ) //MassEffect LE	
+    //#define DS_Z 2                 // Set View Mode
+	//#define DA_W 1                 // Set Linerzation
+    //#define DB_X 1                 // Flip
+	#define DA_X 0.025                // ZPD
+	#define DF_Y 0.0125             // Seperation
+	#define DA_Y 37.5              // Near Plane Adjustment
+    //#define DA_Z -0.175           // Linerzation Offset
+    #define DS_Y 2                 // Linerzation Offset Effects only distance if true
+	#define DB_Z 0.025              // Auto Depth Protection
+	#define DE_X 3                 // ZPD Boundary 
+	#define DE_Y 0.625             // Set ZPD Boundary Level Zero 
+	#define DE_Z 0.425             // Speed that Boundary is Enforced
+	//#define AFD 1                // Alternate Frame Detection - May be phased out
+	#define DG_W -0.125             // Shift Boundary Out of screen 0.5 and or In screen -0.5
+	#define OIL 3                // Set How many Levels We use for RE_Fix 0 | 1 | 2 | 3 if 1 then it's float2(0,0) for OIF and DI_W
+    #define OIF float4(0.5,0.3,0.2,0.1)// Fix enables if Value is > 0.0 
+	#define DI_W float4(0.375,1.0,1.5,6.25) // Like Shift Boundary DG_W But 0 to inf
+    //#define CWH 0                  //ZPD Weapon Hand Consideration For Masking  0 is Off | 1 Is Full | 2 Half Right screen Mask And Not to be used with Weapon Profiles.
+    //#define WBA 1.0                //ZPD Weapon Boundary Alt Adjust power for CWH 
+	//#define FTM 0                  // Fast Trigger Mode If this enabled then Level 1 and > switches instantly.
+	#define WND 1.0              //Weapon Near Pushes depth in and adjust perspective to match.
+    //#define DG_Z 0.100             // Min Weapon Hands That are apart of world with Auto and Trim
+    //#define DS_X float3(0.025,0,1) // Min Weapon bit only triggers when a OIL Level is set and set here on .y
+    //#define DE_W 0.250             // Auto
+    //#define DI_Z 0.043             // Trim
+    //#define DF_W float4(0,0,0,0)   // Edge & Scale
+	//#define DAA_W 2              //Warp/Halo Masking Type 
+
+	#define BMT 1                  // ZPD and World Scale Balance // I need to phase this out.
+	#define DF_Z 0.5             // Set the Balance  
+    #define DL_Y 0.30             // De-Artifact Only works on some View Modes and causes performance degredation
+	#define DB_Y 1.0               // Effects De-Artifacts -1 to 1 Most of the time leave this at 0 and if you set 1 it takes depth into account 
+    #define DL_Z 0.5              // Compat Power
+	//#define DJ_X 0.250             // Range Smoothing
+	//#define WSM 2                  // Weapon Setting Mode 
+	//#define DB_W 16                // Weapon Profile
+	//#define AWZ -1.0               // Anti-Weapon Hand Z-Fighting -1 is shifted to the right a little bit and 1 is center
+	//#define WBS 0                  //Weapon Boundary Switch 0 | 1
+	//#define DF_X float2(0,0)       // ZPD Weapon Boundarys Level 1 and Level 2
+	//#define DJ_W 0.1	           // Weapon Depth Limit Location 1
+	//#define DS_W 1.0	           // Weapon Depth Limit Location 2
+	//#define WFB 0.0                // ZPD Weapon Elevaton for 1 and 2 scales from [0 - 1]
+	//#define DT_W float2(0.015,0.03)//WH scale and cutoff
+	//#define WHM 1                  //Weapon Hand Masking lets you use DT_Z 
+	//#define DT_Z 0.1               //WH Masking Power from -1 to 1
+    //#define LHA                  //Lower Height Adjustment [0.5]to[0.575]
+    #define FRM 1                //Foveated Rendring mode Toggle
+	
+	
+	//Smooth Mode
+	#define DL_X 0.875   //SM Tune Limit
+	//#define DM_X 5        //SM HQ Tune Power       - Will be made global
+    //#define DM_Y 1        //SM HQ VRS Limit
+	#define HQT 1         //SM HQ Trigger
+	//#define FMM 1         //Filter Mode          - Need to add this back in the new shader.
+
+	
+	#define PEW 1
+    #define DSW 1
+    #define FOV 1
+#elif (App == 0xBB2E50AE ) //MassEffect 2
+	#define DA_X 0.050
+	#define DF_Y 0.0375
+	#define DA_Y 12.5
+	 
+	#define DE_X 1
+	#define DE_Y 0.475
+	#define DE_Z 0.400
+    //#define DG_W 0.100 //Pop
+    #define OIF 0.20 //Fix enables if Value is > 0.0
+	#define DI_W 1.25 //Adjustment for REF
+	#define BMT 1
+	#define DF_Z 0.1375
+    #define SMS 1     //SM Toggle Separation
+	#define DL_X 0.800 //SM Tune
+	//#define DL_W 0.025 //SM Perspective
+	#define DM_X 3     //HQ Tune
+	#define DM_Z 4     //HQ Smooth
+	#define PEW 1
+    #define DSW 1
+    #define FOV 1
+#elif (App == 0xBB2E5261 ) //MassEffect 3
+	#define DA_X 0.050
+	#define DF_Y 0.0375
+	#define DA_Y 13.0
+	 
+	#define DE_X 1
+	#define DE_Y 0.500
+	#define DE_Z 0.375
+    //#define DG_W 0.100 //Pop
+    #define OIF 0.20 //Fix enables if Value is > 0.0
+	#define DI_W 1.25 //Adjustment for REF
+	#define BMT 1
+	#define DF_Z 0.1375
+    #define SMS 1     //SM Toggle Separation
+	#define DL_X 0.75 //SM Tune
+	//#define DL_W 0.025 //SM Perspective
+	#define DM_X 3     //HQ Tune
+	#define DM_Z 4     //HQ Smooth
+	#define PEW 1
+    #define DSW 1
+    #define FOV 1
+#elif (App == 0x53424305 ) //TombRaider 1 2 3	
+    //#define DS_Z 2                 // Set View Mode
+	//#define DA_W 1                 // Set Linerzation
+    #define DB_X 1                 // Flip
+	#define DA_X 0.025                // ZPD
+	//#define DF_Y 0.0125             // Seperation
+	#define DA_Y 75.0              // Near Plane Adjustment
+    //#define DA_Z -0.175           // Linerzation Offset
+    //#define DS_Y 2                 // Linerzation Offset Effects only distance if true
+	#define DB_Z 0.025              // Auto Depth Protection
+	#define DE_X 2                 // ZPD Boundary 
+	#define DE_Y 0.750             // Set ZPD Boundary Level Zero 
+	#define DE_Z 0.375             // Speed that Boundary is Enforced
+	//#define AFD 1                // Alternate Frame Detection - May be phased out
+	//#define DG_W 0.125             // Shift Boundary Out of screen 0.5 and or In screen -0.5
+	#define OIL 3                // Set How many Levels We use for RE_Fix 0 | 1 | 2 | 3 if 1 then it's float2(0,0) for OIF and DI_W
+    #define OIF float4(0.5,0.375,0.250,0.125)// Fix enables if Value is > 0.0 
+	#define DI_W float4(0.5,1.25,2.5,7.5) // Like Shift Boundary DG_W But 0 to inf
+    //#define CWH 0                  //ZPD Weapon Hand Consideration For Masking  0 is Off | 1 Is Full | 2 Half Right screen Mask And Not to be used with Weapon Profiles.
+    //#define WBA 1.0                //ZPD Weapon Boundary Alt Adjust power for CWH 
+	//#define FTM 0                  // Fast Trigger Mode If this enabled then Level 1 and > switches instantly.
+	#define WND 2.0              //Weapon Near Pushes depth in and adjust perspective to match.
+    //#define DG_Z 0.460             // Min Weapon Hands That are apart of world with Auto and Trim
+    //#define DS_X float3(0.025,0,1) // Min Weapon bit only triggers when a OIL Level is set and set here on .y
+    //#define DE_W 0.250             // Auto
+    //#define DI_Z 0.250             // Trim
+    //#define DF_W float4(0,0,0,0)   // Edge & Scale
+	//#define DAA_W 2              //Warp/Halo Masking Type 
+
+   //Stencil UI & Detection
+    #define SUI 4 //Off 0 | 1 Stencil One | 2 Stencil Two | 3 Stencil Three| 4 Stencil Four
+    
+    #define SSA 1 //Off 0 | 1 Square | 2 Circle
+    //#define SNA 1 //Off 0 | 1 Trigger on Aim
+    #define DDD_X float4( 0.500 , 0.123 , 0.2015, 0.750)  //Pos A = XY Any & B = ZW Lock 
+    #define DDD_Y float4( 0.6505, 0.905 , 0.5 , 0.4565)      //Pos C = XY Any & UI Postion 
+    #define DDD_Z float4( 15.0, 0.0, 29.0, 1000.0) //Detection Value 0-30 for A = X, B = Y, & C = Z. The Last Value is a Wild Card amount W is for X and Z. 
+    #define DDD_W float4( 0.147, 0.163, 1.0, 0.0)             //X is Hoz Size and Y is Vert Size, Z is Inversion amount and W is Depth set elevation with 0.0-0.5 > is Auto.
+
+    #define SSB 1 //Off 0 | 1 Square | 2 Circle
+    //#define SNB 1 //Off 0 | 1 Trigger on Aim
+    #define DEE_X float4( 0.500 , 0.289 , 0.637 , 0.903)  //Pos A = XY Any & B = ZW Lock 
+    #define DEE_Y float4( 0.6435, 0.905 , 0.502 , 0.456)      //Pos C = XY Any & UI Postion 
+    #define DEE_Z float4( 15.0, 1.0, 28.0, 1000.0) //Detection Value 0-30 for A = X, B = Y, & C = Z. The Last Value is a Wild Card amount W is for X and Z. 
+    #define DEE_W float4( 0.212, 0.331, 1.0, 0.0)             //X is Hoz Size and Y is Vert Size, Z is Inversion amount and W is Depth set elevation with 0.0-0.5 > is Auto.
+
+    #define SSC 1 //Off 0 | 1 Square | 2 Circle
+    //#define SNC 1 //Off 0 | 1 Trigger on Aim
+    #define DFF_X float4( 0.500 , 0.289 , 0.637 , 0.903)  //Pos A = XY Any & B = ZW Lock 
+    #define DFF_Y float4( 0.653, 0.9055 , 0.502 , 0.456)      //Pos C = XY Any & UI Postion 
+    #define DFF_Z float4( 15.0, 1.0, 29.0, 1000.0) //Detection Value 0-30 for A = X, B = Y, & C = Z. The Last Value is a Wild Card amount W is for X and Z. 
+    #define DFF_W float4( 0.212, 0.331, 1.0, 0.0)             //X is Hoz Size and Y is Vert Size, Z is Inversion amount and W is Depth set elevation with 0.0-0.5 > is Auto.
+
+    #define SSD 1 //Off 0 | 1 Square | 2 Circle
+    //#define SND 1 //Off 0 | 1 Trigger on Aim
+    #define DGG_X float4( 0.500 , 0.122 , 0.500 , 0.131)  //Pos A = XY Any & B = ZW Lock 
+    #define DGG_Y float4( 0.800 , 0.853 , 0.501 , 0.456)      //Pos C = XY Any & UI Postion 
+    #define DGG_Z float4( 15.0, 0.0, 29.0, 1000.0) //Detection Value 0-30 for A = X, B = Y, & C = Z. The Last Value is a Wild Card amount W is for X and Z. 
+    #define DGG_W float4( 0.146, 0.163, 1.0, 0.0)             //X is Hoz Size and Y is Vert Size, Z is Inversion amount and W is Depth set elevation with 0.0-0.5 > is Auto.
+
+    //Multi Menu Detection                    //4 Blocks total and 2 sub blocks per one block.
+    #define MMD 2 //Set Multi Menu Detection  // Off  0 | 1 | 2 | 3 | 4
+    #define MMS 0 //Set Multi Menu Selection  // Off  0 | 1 | 2 | 3 | 4                       //0-2 check to 28-30 check Depnding on the option MML
+    #define MML -2 //Set Multi Menu Leniency   // -4 |-3 |-2 |-1 | Off | 1 | 2 | 3 | 4         //Negitive [0 & 30] No Leniency | Zero [0-1 & 29-30] Some Leniency | Positive [0-2 & 28-30] Most Leniency    
+	//Tomb Raider I invatory In game & Option In game & Options in Game
+    #define DO_X float4( 0.053 , 0.904 , 0.500 , 0.150 ) //Pos A1 = XY Color & A2 = ZW Black 
+    #define DO_Y float4( 0.923 , 0.904 , 0.053 , 0.084 ) //Pos A3 = XY Color & B1 = ZW Color
+    #define DO_Z float4( 0.500 , 0.200 , 0.924 , 0.084 ) //Pos B2 = XY Black & B3 = ZW Color
+	#define DO_W float4( 29.0, 29.0, 30.0, 30.0) //Tresh Hold for Color A & B and Color
+	//Tomb Raider I Controlls English & Tomb Raider III Load and Save Game in Game
+    #define DP_X float4( 0.412 , 0.900 , 0.122 , 0.110 ) //Pos C1 = XY Color & C2 = ZW Black 
+    #define DP_Y float4( 0.500 , 0.128 , 0.063 , 0.065 ) //Pos C3 = XY Color & D1 = ZW Color
+    #define DP_Z float4( 0.500 , 0.114 , 0.934 , 0.065 ) //Pos D2 = XY Black & D3 = ZW Color
+	#define DP_W float4( 28.0, 15.0, 30.0, 30.0) //Tresh Hold for Color C & D and Color
+    //Tomb Raider II Controls Main Menu & Tomb Raider III Controls Main Menu
+	#define DQ_X float4( 0.500 , 0.127 , 0.806 , 0.500 ) //Pos C1 = XY Color & C2 = ZW Black 
+    #define DQ_Y float4( 0.696 , 0.905 , 0.500 , 0.127 ) //Pos C3 = XY Color & D1 = ZW Color
+    #define DQ_Z float4( 0.804 , 0.500 , 0.800 , 0.853 ) //Pos D2 = XY Black & D3 = ZW Color
+	#define DQ_W float4( 15.0, 27.0, 15.0, 29.0) //Tresh Hold for Color A1 & A3 and Color
+
+	#define DR_X float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos G1 = XY Color & G2 = ZW Black 
+    #define DR_Y float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos G3 = XY Color & H1 = ZW Color
+    #define DR_Z float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos H2 = XY Black & H3 = ZW Color
+	#define DR_W float4( 1000.0, 1000.0, 1000.0, 1000.0) //Tresh Hold for Color G & H and Color 
+    //Block Three
+	#define DU_X float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos I1 = XY Color & I2 = ZW Black 
+    #define DU_Y float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos I3 = XY Color & J1 = ZW Color
+    #define DU_Z float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos J2 = XY Black & J3 = ZW Color
+	#define DU_W float4( 1000.0, 1000.0, 1000.0, 1000.0) //Tresh Hold for Color I & J and Color
+	
+	#define DV_X float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos K1 = XY Color & K2 = ZW Black 
+    #define DV_Y float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos K3 = XY Color & L1 = ZW Color
+    #define DV_Z float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos L2 = XY Black & L3 = ZW Color
+	#define DV_W float4( 1000.0, 1000.0, 1000.0, 1000.0) //Tresh Hold for Color K & L and Color
+	//Block Four
+	#define DX_X float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos M1 = XY Color & M2 = ZW Black 
+    #define DX_Y float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos M3 = XY Color & N1 = ZW Color
+    #define DX_Z float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos N2 = XY Black & N3 = ZW Color
+	#define DX_W float4( 1000.0, 1000.0, 1000.0, 1000.0) //Tresh Hold for Color M & N and Color
+	
+	#define DY_X float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos O1 = XY Color & O2 = ZW Black 
+    #define DY_Y float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos O3 = XY Color & P1 = ZW Color
+    #define DY_Z float4( 0.000 , 0.000 , 0.000 , 0.000 ) //Pos P2 = XY Black & P3 = ZW Color
+	#define DY_W float4( 1000.0, 1000.0, 1000.0, 1000.0) //Tresh Hold for Color O & P and Color	
+
+
+	#define BMT 1                  // ZPD and World Scale Balance // I need to phase this out.
+	#define DF_Z 0.15             // Set the Balance  
+    #define DL_Y 0.25             // De-Artifact Only works on some View Modes and causes performance degredation
+	//#define DB_Y 1.0               // Effects De-Artifacts -1 to 1 Most of the time leave this at 0 and if you set 1 it takes depth into account 
+    #define DL_Z 0.0              // Compat Power
+	//#define DJ_X 0.250             // Range Smoothing
+	//#define WSM 2                  // Weapon Setting Mode 
+	//#define DB_W 16                // Weapon Profile
+	//#define AWZ -1.0               // Anti-Weapon Hand Z-Fighting -1 is shifted to the right a little bit and 1 is center
+	//#define WBS 0                  //Weapon Boundary Switch 0 | 1
+	//#define DF_X float2(0,0)       // ZPD Weapon Boundarys Level 1 and Level 2
+	//#define DJ_W 0.1	           // Weapon Depth Limit Location 1
+	//#define DS_W 1.0	           // Weapon Depth Limit Location 2
+	//#define WFB 0.0                // ZPD Weapon Elevaton for 1 and 2 scales from [0 - 1]
+	//#define DT_W float2(0.015,0.03)//WH scale and cutoff
+	//#define WHM 1                  //Weapon Hand Masking lets you use DT_Z 
+	//#define DT_Z 0.1               //WH Masking Power from -1 to 1
+    //#define LHA                  //Lower Height Adjustment [0.5]to[0.575]
+    #define FRM 0                //Foveated Rendring mode Toggle
+	
+	
+	//Smooth Mode
+	#define DL_X 0.750   //SM Tune Limit
+	//#define DM_X 5        //SM HQ Tune Power       - Will be made global
+    //#define DM_Y 1        //SM HQ VRS Limit
+	#define HQT 1         //SM HQ Trigger
+	//#define FMM 1         //Filter Mode          - Need to add this back in the new shader.
+
+	
+	#define PEW 1
+    //#define DSW 1
+    #define FOV 1
 #else
 	#define NPW 1 //No Profile
 #endif
