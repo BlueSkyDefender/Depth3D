@@ -1,7 +1,7 @@
 ////----------------------------------------//
 ///SuperDepth3D Overwatch Automation Header///
 //----------------------------------------////
-#define OVERWATCH "Overwatch v3.7.3\n"
+#define OVERWATCH "Overwatch v3.7.4\n"
 //---------------------------------------OVERWATCH---------------------------------------//
 // If you are reading this stop. Go away and never look back. From this point on if you  //
 // still think it's is worth looking at this..... Then no one can save you or your soul. //
@@ -22164,7 +22164,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	//#define DT_Z 0.1               //WH Masking Power from -1 to 1
     //#define LHA                  //Lower Height Adjustment [0.5]to[0.575]
     #define FRM 0                //Foveated Rendring mode Toggle
-	
+    #define ASA 0	
 	
 	//Smooth Mode
 	#define DL_X 0.750   //SM Tune Limit
@@ -22175,7 +22175,8 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 
 	
 	#define PEW 1
-    //#define DSW 1
+    #define DSW 1
+    #define NFM 1
     #define FOV 1
 #else
 	#define NPW 1 //No Profile
