@@ -1,7 +1,7 @@
 	////--------------------//
 	///**SuperDepth3D_VR+**///
 	//--------------------////
-	#define SD3DVR "SuperDepth3D_VR+ v4.1.1\n"
+	#define SD3DVR "SuperDepth3D_VR+ v4.1.3\n"
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//* Depth Map Based 3D post-process shader
 	//* For Reshade 4.4+ I think...
@@ -64,6 +64,8 @@ namespace SuperDepth3DVR
 		static const float DK_X = 0, DK_Y = 0.0, DK_Z = 0, DK_W = 1;
 		// DL_X = [Not Used Here] DL_Y = [De-Artifact] DL_Z = [Compatibility Power] DL_W = [Not Used Here]
 		static const float DL_X = 0.5, DL_Y = 0, DL_Z = 0, DL_W = 0.05;		
+		// DM_X = [HQ Tune] DM_Y = [HQ VRS] DM_Z = [HQ Smooth] DM_W = [HQ Trim]
+		static const float DM_X = 4, DM_Y = 1, DM_Z = 1, DM_W = 0.0;
 		// DN_X = [Position A & B] DN_Y = [Position C & D] DM_Z = [Position E & F] DN_W = [Menu Size Main]	
 		static const float DN_X = 0.0, DN_Y = 0.0, DN_Z = 0.0, DN_W = 0.0;
 		// DO_X = [Position A & A] DO_Y = [Position A & B] DO_Z = [Position B & B] DO_W = [AB Menu Tresh]	
@@ -107,12 +109,14 @@ namespace SuperDepth3DVR
 		// DHH_X = [Position A & B] DHH_Y = [Position C] DHH_Z = [ABCD Menu Tresholds] DHH_W = [Null]
 		static const float DHH_X = 0.0, DHH_Y = 0.0, DHH_Z = 1000.0, DHH_W = 0.0;	
 		// DII_X = [Position A & B] DII_Y = [Position C] DII_Z = [ABCD Menu Tresholds] DII_W = [Null]
-		static const float DII_X = 0.0, DII_Y = 0.0, DII_Z = 1000.0, DII_W = 0.0;	
+		static const float DII_X = 0.0, DII_Y = 0.0, DII_Z = 1000.0, DII_W = 0.0;
+		// DJJ_X = [Position A & B] DJJ_Y = [Position C & UI Pos] DJJ_Z = [ABCW Stencil Menu Tresholds] DJJ_W = [Stencil Adjust]
+		static const float DJJ_X = 0.0, DJJ_Y = 0.0, DJJ_Z = 1000.0, DJJ_W = 0.0;	
 		// WSM = [Weapon Setting Mode]
 		#define OW_WP "WP Off\0Custom WP\0"
 		static const int WSM = 0;
 		//Triggers
-		static const float LBI = 0, ISD = 0, ASA = 1, IWS = 0, SUI = 0, SSA = 0, SNA = 0, SSB = 0, SNB = 0, SSC = 0, SNC = 0, SSD = 0, SND = 0, FRM = 1, LHA = 0, WBS = 0, TMD = 0, AWZ = 0, CWH = 0, WBA = 0, WFB = 0, WND = 0, WRP = 0, MML = 0, SMD = 0, WHM = 0, SDU = 0, ABE = 2, LBE = 0, DRS = 0, MAC = 0, ARW = 0, OIL = 0, MMS = 0, NVK = 0, NDG = 0, FTM = 0, SPO = 0, MMD = 0, SMP = 0, LBR = 0, HQT = 0, AFD = 0, MDD = 0, FPS = 1, SMS = 1, OIF = 0, NCW = 0, RHW = 0, NPW = 0, SPF = 0, BDF = 0, HMT = 0, HMC = 0, DFW = 0, NFM = 0, DSW = 0, LBC = 0, LBS = 0, LBM = 0, DAA = 0, NDW = 0, PEW = 0, WPW = 0, FOV = 0, EDW = 0, SDT = 0;
+		static const float SSE = 0, SNE = 0, EDU = 0, LBI = 0, ISD = 0, ASA = 1, IWS = 0, SUI = 0, SSA = 0, SNA = 0, SSB = 0, SNB = 0, SSC = 0, SNC = 0, SSD = 0, SND = 0, FRM = 0, LHA = 0, WBS = 0, TMD = 0, AWZ = 0, CWH = 0, WBA = 0, WFB = 0, WND = 0, WRP = 0, MML = 0, SMD = 0, WHM = 0, SDU = 0, ABE = 2, LBE = 0, DRS = 0, MAC = 0, ARW = 0, OIL = 0, MMS = 0, NVK = 0, NDG = 0, FTM = 0, SPO = 0, MMD = 0, SMP = 0, LBR = 0, HQT = 0, AFD = 0, MDD = 0, FPS = 1, SMS = 1, OIF = 0, NCW = 0, RHW = 0, NPW = 0, SPF = 0, BDF = 0, HMT = 0, HMC = 0, DFW = 0, NFM = 0, DSW = 0, LBC = 0, LBS = 0, LBM = 0, DAA = 0, NDW = 0, PEW = 0, WPW = 0, FOV = 0, EDW = 0, SDT = 0;
 		//Overwatch.fxh State
 		#define OSW 1
 	#endif
@@ -1854,6 +1858,27 @@ uniform int Extra_Information <
 						return (Menu_Detection > 0);
 				}
 				#endif
+				#if SUI >= 5
+				float Stencil_n_Detection_E()//Active RGB Detection
+				{ 
+					float2 Pos_A = DJJ_X.xy, Pos_B = DJJ_X.zw, Pos_C = DJJ_Y.xy;
+					float4 ST_Values = DJJ_Z;
+			
+					//Wild Card Always On
+					float Menu_X = Check_Color(Pos_A, ST_Values.x) || Check_Color(Pos_A, ST_Values.w);
+	
+					float Menu_Z = Check_Color(Pos_C, ST_Values.z) || Check_Color(Pos_C, ST_Values.w);
+					
+					float Menu_Detection = Menu_X &&                          //X & W is wiled Card. 
+										   Check_Color(Pos_B, ST_Values.y) && //Y
+										   Menu_Z;                            //Z & W is wiled Card.
+			
+					if( ISD )
+						return (Menu_Detection > 0) && Lock_Menu_Detection();
+					else
+						return (Menu_Detection > 0);	
+				}
+				#endif
 			#endif
 	
 			#if SMD //Simple Menu Detection	
@@ -2413,6 +2438,9 @@ uniform int Extra_Information <
 					#if SUI >= 4
 					  SnD_Toggle = SND ? Stencil_n_Detection_D() : SnD_Toggle;
 					#endif
+						#if SUI >= 5
+						  SnD_Toggle = SNE ? Stencil_n_Detection_E() : SnD_Toggle;
+						#endif
 		#else
 		float SnD_Toggle = 0;	
 		#endif
@@ -2493,19 +2521,14 @@ uniform int Extra_Information <
 						CDArray_X_B0[7] = { 0.25, 0.375, 0.4375, 0.5, 0.5625, 0.625, 0.75}, 
 						CDArray_X_C0[9] = { 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9};
 			float Bottom_Edge = ZPD_Boundary == 6 ? 0.95 : 0.9;
-			#if LBC || LB_Correction
-			float LetterBox_Detection_A = LBDetection() ? 0.85 : Bottom_Edge;
-			float LetterBox_Detection_B = LBDetection() ? 0.85 : 0.875;
+
+			float LetterBox_Detection_A = LBDetection() || EDU ? 0.85 : Bottom_Edge;
+			float LetterBox_Detection_B = LBDetection() || EDU ? 0.85 : 0.875;
 			float4 Shift_UP = Shift_Detectors_Up == 1 ? float4(0.375, 0.5, 0.6875, LetterBox_Detection_A) : float4(0.5, 0.65, 0.775, LetterBox_Detection_A);
 			float CDArray_Y_A0[5] = { 0.25, Shift_UP.x, Shift_UP.y, Shift_UP.z, Shift_UP.w}, 
 			      CDArray_Y_B0[5] = { 0.25, 0.375, 0.5, 0.6875, LetterBox_Detection_B},
 				  CDArray_Y_C0[4] = { 0.25, 0.5, 0.75, LetterBox_Detection_B};
-			#else	
-			float4 Shift_UP = Shift_Detectors_Up == 1 ? float4(0.375, 0.5, 0.6875, Bottom_Edge) : float4(0.5, 0.65, 0.775, Bottom_Edge);
-			float CDArray_Y_A0[5] = { 0.25, Shift_UP.x, Shift_UP.y, Shift_UP.z, Shift_UP.w}, 
-			      CDArray_Y_B0[5] = { 0.25, 0.375, 0.5, 0.6875, 0.875},
-				  CDArray_Y_C0[4] = { 0.25, 0.5, 0.75, 0.875};
-			#endif				  
+			  
 			float Shift_Values = 0.025;
 			if( ZPD_Boundary == 1 || ZPD_Boundary == 4 || ZPD_Boundary == 6 || ZPD_Boundary == 7)
 				Shift_Values = 0.031;	
@@ -2529,11 +2552,11 @@ uniform int Extra_Information <
 						GridXY.y += Shift_Mask(texcoord).x ? 0.0 : 0.05;
 
 					float ZPD_I = Zero_Parallax_Distance;				
-					#if !DX9_Toggle
-					float PDepth = tex2Dlod(SamplerDMVR,float4(GridXY,0,0)).x;
-					#else				
+					//#if !DX9_Toggle
+					//float PDepth = tex2Dlod(SamplerDMVR,float4(GridXY,0,0)).x;
+					//#else				
 					float PDepth = PrepDepth(GridXY)[1][0];
-					#endif			
+					//#endif			
 					if(ZPD_Boundary >= 4)
 					{
 						if ( PDepth == 1 )
@@ -3067,6 +3090,11 @@ uniform int Extra_Information <
 			}
 			else
 			return 0;
+		}
+
+		float Stencil_Sampler(float3 TC_W)
+		{
+			return saturate(tex2Dlod(SamplerzBufferVR_L, float4( TC_W.xy, 0, 4) ).x + (0.5-TC_W.z));		
 		}			
 	#endif
 	
@@ -3126,14 +3154,14 @@ uniform int Extra_Information <
 		#if SUI
 			float2 UI_A_Mask_Pos = 1-DDD_Y.zw;
 			//Auto Depth 0.5 > needs more detection points will update that later.
-			float UI_A_Mask_Depth = DDD_W.w < 0.5 ? DDD_W.w : saturate(tex2Dlod(SamplerzBufferVR_L, float4( 1-UI_A_Mask_Pos, 0, 4) ).x + (0.5-DDD_W.w));
+			float UI_A_Mask_Depth = DDD_W.w < 0.5 ? DDD_W.w : Stencil_Sampler(float3( 1-UI_A_Mask_Pos, DDD_W.w));
 			float2 UI_A_Mask_Size= DDD_W.xy;
 			if(Stencil_n_Detection_A())
 				DepthBuffer_LP.xy = lerp(DepthBuffer_LP.xy,UI_A_Mask_Depth,Stencil_Masking(texcoord,UI_A_Mask_Pos,UI_A_Mask_Size,DDD_W.z,SSA));
 				#if SUI == 2
 				float2 UI_B_Mask_Pos = 1-DEE_Y.zw;
 				//Auto Depth 0.5 > needs more detection points will update that later.
-				float UI_B_Mask_Depth = DEE_W.w < 0.5 ? DEE_W.w : saturate(tex2Dlod(SamplerzBufferVR_L, float4( 1-UI_B_Mask_Pos, 0, 4) ).x + (0.5-DEE_W.w));
+				float UI_B_Mask_Depth = DEE_W.w < 0.5 ? DEE_W.w : Stencil_Sampler(float3( 1-UI_B_Mask_Pos, DEE_W.w));
 				float2 UI_B_Mask_Size= DEE_W.xy;
 				if(Stencil_n_Detection_B())
 					DepthBuffer_LP.xy = lerp(DepthBuffer_LP.xy,UI_B_Mask_Depth,Stencil_Masking(texcoord,UI_B_Mask_Pos,UI_B_Mask_Size,DEE_W.z,SSB));
@@ -3141,7 +3169,7 @@ uniform int Extra_Information <
 					#if SUI == 3
 					float2 UI_C_Mask_Pos = 1-DFF_Y.zw;
 					//Auto Depth 0.5 > needs more detection points will update that later.
-					float UI_C_Mask_Depth = DFF_W.w < 0.5 ? DFF_W.w : saturate(tex2Dlod(SamplerzBufferVR_L, float4( 1-UI_C_Mask_Pos, 0, 4) ).x + (0.5-DFF_W.w));
+					float UI_C_Mask_Depth = DFF_W.w < 0.5 ? DFF_W.w : Stencil_Sampler(float3( 1-UI_C_Mask_Pos, DFF_W.w));
 					float2 UI_C_Mask_Size= DFF_W.xy;
 					if(Stencil_n_Detection_C())
 						DepthBuffer_LP.xy = lerp(DepthBuffer_LP.xy,UI_C_Mask_Depth,Stencil_Masking(texcoord,UI_C_Mask_Pos,UI_C_Mask_Size,DFF_W.z,SSC));
@@ -3149,11 +3177,19 @@ uniform int Extra_Information <
 						#if SUI >= 4
 						float2 UI_D_Mask_Pos = 1-DGG_Y.zw;
 						//Auto Depth 0.5 > needs more detection points will update that later.
-						float UI_D_Mask_Depth = DGG_W.w < 0.5 ? DGG_W.w : saturate(tex2Dlod(SamplerzBufferVR_L, float4( 1-UI_D_Mask_Pos, 0, 4) ).x + (0.5-DGG_W.w));
+						float UI_D_Mask_Depth = DGG_W.w < 0.5 ? DGG_W.w : Stencil_Sampler(float3( 1-UI_D_Mask_Pos, DGG_W.w));
 						float2 UI_D_Mask_Size= DGG_W.xy;
 						if(Stencil_n_Detection_D())
-							DepthBuffer_LP.xy = lerp(DepthBuffer_LP.xy,UI_D_Mask_Depth,Stencil_Masking(texcoord,UI_D_Mask_Pos,UI_D_Mask_Size,DFF_W.z,SSD));
+							DepthBuffer_LP.xy = lerp(DepthBuffer_LP.xy,UI_D_Mask_Depth,Stencil_Masking(texcoord,UI_D_Mask_Pos,UI_D_Mask_Size,DGG_W.z,SSD));
 						#endif
+							#if SUI >= 5
+							float2 UI_E_Mask_Pos = 1-DJJ_Y.zw;
+							//Auto Depth 0.5 > needs more detection points will update that later.
+							float UI_E_Mask_Depth = DJJ_W.w < 0.5 ? DJJ_W.w : Stencil_Sampler(float3( 1-UI_E_Mask_Pos,DJJ_W.w));
+							float2 UI_E_Mask_Size= DJJ_W.xy;
+							if(Stencil_n_Detection_E())
+								DepthBuffer_LP.xy = lerp(DepthBuffer_LP.xy,UI_E_Mask_Depth,Stencil_Masking(texcoord,UI_E_Mask_Pos,UI_E_Mask_Size,DJJ_W.z,SSD));
+							#endif
 		#endif	
 		
 		if(View_Mode == 0 || View_Mode == 3)	
