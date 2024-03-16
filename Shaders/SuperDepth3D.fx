@@ -1,7 +1,7 @@
 	////----------------//
 	///**SuperDepth3D**///
 	//----------------////
-	#define SD3D "SuperDepth3D v4.1.3\n"
+	#define SD3D "SuperDepth3D v4.1.4\n"
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//* Depth Map Based 3D post-process shader
 	//* For Reshade 3.0+
@@ -56,7 +56,7 @@ namespace SuperDepth3D
 		static const float DG_X = 0.0, DG_Y = 0.0, DG_Z = 0.0, DG_W = 0.0;
 		// DH_X = [LBC Size Offset X] DH_Y = [LBC Size Offset Y] DH_Z = [LBC Pos Offset X] DH_W = [LBC Pos Offset X]
 		static const float DH_X = 1.0, DH_Y = 1.0, DH_Z = 0.0, DH_W = 0.0;
-		// DI_X = [LBM Offset X] DI_Y = [LBM Offset Y] DI_Z = [Weapon Near Depth Trim] DI_W = [OIF Check Depth Limit]
+		// DI_X = [LBM Offset XY] DI_Y = [CRC Pos XY] DI_Z = [Weapon Near Depth Trim] DI_W = [OIF Check Depth Limit]
 		static const float DI_X = 0.0, DI_Y = 0.0, DI_Z = 0.25, DI_W = 0.5;
 		// DJ_X = [Range Smoothing] DJ_Y = [Menu Detection Type] DJ_Z = [Match Threshold] DJ_W = [Check Depth Limit Weapon]
 		static const float DJ_X = 0, DJ_Y = 0.0, DJ_Z = 0.0, DJ_W = -0.100;
@@ -112,11 +112,13 @@ namespace SuperDepth3D
 		static const float DII_X = 0.0, DII_Y = 0.0, DII_Z = 1000.0, DII_W = 0.0;
 		// DJJ_X = [Position A & B] DJJ_Y = [Position C & UI Pos] DJJ_Z = [ABCW Stencil Menu Tresholds] DJJ_W = [Stencil Adjust]
 		static const float DJJ_X = 0.0, DJJ_Y = 0.0, DJJ_Z = 1000.0, DJJ_W = 0.0;
+		// DKK_X = [SDT Position A & B] DKK_Y = [SDT Position C] DKK_Z = [SDT ABCD Menu Tresholds] DKK_W = [Null]
+		static const float DKK_X = 0.0, DKK_Y = 0.0, DKK_Z = 1000.0, DKK_W = 0.0;
 		// WSM = [Weapon Setting Mode]
 		#define OW_WP "WP Off\0Custom WP\0"
 		static const int WSM = 0;
-		//Triggers
-		static const float SSE = 0, SNE = 0, EDU = 0, LBI = 0,ISD = 0, ASA = 1, IWS = 0, SUI = 0, SSA = 0, SNA = 0, SSB = 0, SNB = 0,SSC = 0, SNC = 0,SSD = 0, SND = 0, LHA = 0, WBS = 0, TMD = 0, FRM = 0, AWZ = 0, CWH = 0, WBA = 0, WFB = 0, WND = 0, WRP = 0, MML = 0, SMD = 0, WHM = 0, SDU = 0, ABE = 2, LBE = 0, HQT = 0, HMD = 0.5, MAC = 0, OIL = 0, MMS = 0, FTM = 0, FMM = 0, SPO = 0, MMD = 0, LBR = 0, AFD = 0, MDD = 0, FPS = 1, SMS = 1, OIF = 0, NCW = 0, RHW = 0, NPW = 0, SPF = 0, BDF = 0, HMT = 0, HMC = 0, DFW = 0, NFM = 0, DSW = 0, LBC = 0, LBS = 0, LBM = 0, DAA = 0, NDW = 0, PEW = 0, WPW = 0, FOV = 0, EDW = 0, SDT = 0;
+		//Triggers 
+		static const float LDT = 0, ALM = 0, SSE = 0, SNE = 0, EDU = 0, LBI = 0,ISD = 0, ASA = 1, IWS = 0, SUI = 0, SSA = 0, SNA = 0, SSB = 0, SNB = 0,SSC = 0, SNC = 0,SSD = 0, SND = 0, LHA = 0, WBS = 0, TMD = 0, FRM = 0, AWZ = 0, CWH = 0, WBA = 0, WFB = 0, WND = 0, WRP = 0, MML = 0, SMD = 0, WHM = 0, SDU = 0, ABE = 2, LBE = 0, HQT = 0, HMD = 0.5, MAC = 0, OIL = 0, MMS = 0, FTM = 0, FMM = 0, SPO = 0, MMD = 0, LBR = 0, AFD = 0, MDD = 0, FPS = 1, SMS = 1, OIF = 0, NCW = 0, RHW = 0, NPW = 0, SPF = 0, BDF = 0, HMT = 0, HMC = 0, DFW = 0, NFM = 0, DSW = 0, LBC = 0, LBS = 0, LBM = 0, DAA = 0, NDW = 0, PEW = 0, WPW = 0, FOV = 0, EDW = 0, SDT = 0;
 		//Overwatch.fxh State
 		#define OSW 1
 	#endif
@@ -1780,6 +1782,8 @@ uniform int Extra_Information <
 			Letter_Box_Reposition = float2(0.250,0.875);
 		if (LBR == 2) 
 			Letter_Box_Reposition = float2(0.5,0.625);
+		if (LBR == 3) 
+			Letter_Box_Reposition = float2(0.50,0.5);
 		
 		if (LBI)
 			Letter_Box_Reposition.x = 1-Letter_Box_Reposition.x;		
@@ -1816,37 +1820,36 @@ uniform int Extra_Information <
 		return 0;
 	}	
 	#endif
-	
-	#if SDT || SD_Trigger
-	float TargetedDepth(float2 TC)
-	{
-		return smoothstep(0,1,tex2Dlod(SamplerzBufferN_P,float4(TC,0,0)).y);
+
+	#if MMD || MDD || SMD || TMD || SUI || SDT || SD_Trigger
+	float3 C_Tresh(float2 TCLocations)//Color Tresh
+	{ 
+		return tex2Dlod(BackBufferCLAMP,float4(TCLocations,0, 0)).rgb;
 	}
 	
-	float SDTriggers()//Specialized Depth Triggers
-	{   float Threshold = 0.001;//Both this and the options below may need to be adjusted. A Value lower then 7.5 will break this.!?!?!?!
-		if ( SD_Trigger == 1 || SDT == 1)//Top _ Left                             //Center_Left                             //Botto_Left
-			return (TargetedDepth(float2(0.95,0.25)) >= Threshold ) && (TargetedDepth(float2(0.95,0.5)) >= Threshold) && (TargetedDepth(float2(0.95,0.75)) >= Threshold) ? 0 : 1;
-		else																	  //Center				
-			return (TargetedDepth(float2(0.5,0.1)) >= 1 ) && (TargetedDepth(float2(0.5,0.5)) < 1) && (TargetedDepth(float2(0.5,0.9)) >= 1) ? 0 : 1;
+	bool Check_Color(float2 Pos_IN, float C_Value)
+	{	float3 RGB_IN = C_Tresh(Pos_IN);
+		return RN_Value(RGB_IN.r + RGB_IN.g + RGB_IN.b) == C_Value;
 	}
-	#else
-	float SDTriggers()//Stand in for not crashing when not in use
-	{	
-		return 0;
-	}
-	#endif
 	
-	#if MMD || MDD || SMD || TMD || SUI
-		float3 C_Tresh(float2 TCLocations)//Color Tresh
+		#if SDT || SD_Trigger	
+		float SDT_Lock_Menu_Detection()//Active RGB Detection
 		{ 
-			return tex2Dlod(BackBufferCLAMP,float4(TCLocations,0, 0)).rgb;
+			float2 Pos_A = DKK_X.xy, Pos_B = DKK_X.zw, Pos_C = DKK_Y.xy;
+			float4 ST_Values = DKK_Z;
+	
+			//Wild Card Always On
+			float Menu_X = Check_Color(Pos_A, ST_Values.x) || Check_Color(Pos_A, ST_Values.w);
+	
+			float Menu_Z = Check_Color(Pos_C, ST_Values.z) || Check_Color(Pos_C, ST_Values.w);
+			
+			float Menu_Detection = Menu_X &&                          //X & W is wiled Card.
+								   Check_Color(Pos_B, ST_Values.y) && //Y
+								   Menu_Z;                            //Z & W is wiled Card.
+	
+			return !(Menu_Detection > 0);
 		}
-		
-		bool Check_Color(float2 Pos_IN, float C_Value)
-		{	float3 RGB_IN = C_Tresh(Pos_IN);
-			return RN_Value(RGB_IN.r + RGB_IN.g + RGB_IN.b) == C_Value;
-		}
+		#endif
 	
 		#if LMD //Text Menu Detection
 		float Lock_Menu_Detection()//Active RGB Detection
@@ -2124,22 +2127,25 @@ uniform int Extra_Information <
 			#endif
 			
 			#if TMD //Text Menu Detection
-			float Text_Menu_Detection()//Active RGB Detection
-			{ 
-				float2 Pos_A = DZ_X.xy, Pos_B = DZ_X.zw, Pos_C = DZ_Y.xy;
-				float4 ST_Values = DZ_Z;
-		
-				//Wild Card Always On
-				float Menu_X = Check_Color(Pos_A, ST_Values.x) || Check_Color(Pos_A, ST_Values.w);
-
-				float Menu_Z = Check_Color(Pos_C, ST_Values.z) || Check_Color(Pos_C, ST_Values.w);
-				
-				float Menu_Detection = Menu_X &&                          //X & W is wiled Card.
-									   Check_Color(Pos_B, ST_Values.y) && //Y
-									   Menu_Z;                            //Z & W is wiled Card.
-		
-				return (Menu_Detection > 0) && Lock_Menu_Detection();
-			}		
+				#if TMD == 1
+				#else
+				float Text_Menu_Detection()//Active RGB Detection
+				{ 
+					float2 Pos_A = DZ_X.xy, Pos_B = DZ_X.zw, Pos_C = DZ_Y.xy;
+					float4 ST_Values = DZ_Z;
+			
+					//Wild Card Always On
+					float Menu_X = Check_Color(Pos_A, ST_Values.x) || Check_Color(Pos_A, ST_Values.w);
+	
+					float Menu_Z = Check_Color(Pos_C, ST_Values.z) || Check_Color(Pos_C, ST_Values.w);
+					
+					float Menu_Detection = Menu_X &&                          //X & W is wiled Card.
+										   Check_Color(Pos_B, ST_Values.y) && //Y
+										   Menu_Z;                            //Z & W is wiled Card.
+			
+					return (Menu_Detection > 0) && Lock_Menu_Detection();
+				}		
+				#endif
 			#endif			
 	#endif
 	
@@ -2398,41 +2404,37 @@ uniform int Extra_Information <
 		}
 		#endif
 		
-		#if DB_Size_Position || SPF || LBC || LB_Correction || SDT || SD_Trigger
-		
-			#if SDT || SD_Trigger
-				X_Y_A = float2(Image_Position_Adjust.x,Image_Position_Adjust.y) + (SDTriggers() ? float2( DG_X , DG_Y) : 0.0);
-			#endif
+		#if DB_Size_Position || SPF || LBC || LB_Correction
 
 			#if LBC || LB_Correction
 				X_Y_A = Image_Position_Adjust + (LBDetect && LB_Correction_Switch ? Image_Pos_Offset : 0.0f );
-				X_Y_B = Image_Position_Adjust + Image_Pos_Offset;
-					if((SDT == 2 || SD_Trigger == 2) && SDTriggers() && LBDetect)
-					   X_Y_A = float2(Image_Position_Adjust.x,Image_Position_Adjust.y); 
 			#else
 				X_Y_A = float2(Image_Position_Adjust.x,Image_Position_Adjust.y);
 			#endif
 
-
-	
 		texcoord.xy += float2(-X_Y_A.x,X_Y_A.y)*0.5;
-		S_texcoord.xy += float2(-X_Y_B.x,X_Y_B.y)*0.5;
 		
 			#if LBC || LB_Correction
 				H_V_A = Horizontal_and_Vertical * (LBDetect && LB_Correction_Switch ? H_V_Offset : 1.0f );
-				H_V_B = Horizontal_and_Vertical * H_V_Offset;
-					if((SDT == 2 || SD_Trigger == 2) && SDTriggers() && LBDetect)
-						H_V_A = Horizontal_and_Vertical;	
+				//H_V_B = Horizontal_and_Vertical * H_V_Offset;	
 			#else
 				H_V_A = Horizontal_and_Vertical;
 			#endif
 			
 		float2 midHV_A = (H_V_A-1) * float2(BUFFER_WIDTH * 0.5,BUFFER_HEIGHT * 0.5) * pix;
 		texcoord = float2((texcoord.x*H_V_A.x)-midHV_A.x,(texcoord.y*H_V_A.y)-midHV_A.y);
-
-		float2 midHV_B = (H_V_B-1) * float2(BUFFER_WIDTH * 0.5,BUFFER_HEIGHT * 0.5) * pix;
-		S_texcoord = float2((S_texcoord.x*H_V_B.x)-midHV_B.x,(S_texcoord.y*H_V_B.y)-midHV_B.y);
 		#endif
+		//Need to add a method to disable this when three pixels are detected.
+		//Will to this tomorrow.
+		#if SDT || SD_Trigger		
+			X_Y_B = Image_Position_Adjust + float2(DG_X,DG_Y);
+			
+			S_texcoord.xy += float2(-X_Y_B.x,X_Y_B.y)*0.5;
+			//Will work on this later.
+			//float2 midHV_B = (H_V_B-1) * float2(BUFFER_WIDTH * 0.5,BUFFER_HEIGHT * 0.5) * pix;
+			//S_texcoord = float2((S_texcoord.x*H_V_B.x)-midHV_B.x,(S_texcoord.y*H_V_B.y)-midHV_B.y);
+		#endif
+		
 		return float4(texcoord,S_texcoord);
 	}
 	
@@ -2468,8 +2470,11 @@ uniform int Extra_Information <
 			zBuffer = lerp(Two_Ch_zBuffer.y,Two_Ch_zBuffer.x,saturate(Two_Ch_zBuffer.y));
 		else
 			zBuffer = Two_Ch_zBuffer.x;
-		
-		return saturate(zBuffer);
+		#if ALM == 1
+			return smoothstep(0,1,zBuffer);
+		#else
+			return saturate(zBuffer);
+		#endif
 	}
 	//Weapon Setting//
 	float4 WA_XYZW()
@@ -2544,9 +2549,9 @@ uniform int Extra_Information <
 		A = ZPD_Boundary >= 4 ? max( G, R) : R; //Grid Depth
 		#endif	
 		
-		return float3x3( saturate(float3(R, G, B)), 	                                                      			//[0][0] = R | [0][1] = G | [0][2] = B
-						 saturate(float3(A, Depth( SDT == 1 || SD_Trigger == 1 ? texcoord : TC_SP(texcoord).xy).x, DM.w)),//[1][0] = A | [1][1] = D | [1][2] = DM
-								  float3(Weapon_Masker > saturate(smoothstep(0,2.5,DM.w)),0,0) );                         //[2][0] = 0 | [2][1] = 0 | [2][2] = 0
+		return float3x3( saturate(float3(R, G, B)),											  //[0][0] = R | [0][1] = G | [0][2] = B
+						 saturate(float3(A, Depth( TC_SP(texcoord).xy ).x, DM.w)),			   //[1][0] = A | [1][1] = D | [1][2] = DM
+								  float3(Weapon_Masker > saturate(smoothstep(0,2.5,DM.w)),0,0) );//[2][0] = 0 | [2][1] = 0 | [2][2] = 0
 	}
 	//////////////////////////////////////////////////////////////Depth HUD Alterations///////////////////////////////////////////////////////////////////////
 	#if UI_MASK
@@ -2988,14 +2993,15 @@ uniform int Extra_Information <
 		Set_Max_Depth = Inficolor_Max_Depth;
 	#endif
 		D = min(saturate(Set_Max_Depth),D);
-	   return float4( lerp(Convergence,lerp(D,Convergence,saturate(Convergence)), ZP), lerp(W_Convergence,WD,WZP), Store_WC, WZPD_Switch);
+		//* lerp(1,2,D) // place this after saturate(Convergence)
+	   return float4( lerp(Convergence,lerp(D,Convergence,saturate(Convergence) ), ZP), lerp(W_Convergence,WD,WZP), Store_WC, WZPD_Switch);
 	}
 	
 	float3 DB_Comb(float2 texcoord)
 	{
 		float Auto_Adjust_Weapon_Depth = 1, Anti_Weapon_Z = abs(AWZ);
 		// X = Mix Depth | Y = Weapon Mask | Z = Weapon Hand | W = Normal Depth
-		float4 DM = float4(tex2Dlod(SamplerDMN,float4(texcoord,0,0)).xyz,PrepDepth( SDT == 1 || SD_Trigger == 1 ? TC_SP(texcoord).xy : texcoord )[1][1]);
+		float4 DM = float4(tex2Dlod(SamplerDMN,float4(texcoord,0,0)).xyz,PrepDepth( texcoord )[1][1]);
 		//Hide Temporal passthrough
 		if(texcoord.x < pix.x * 2 && texcoord.y < pix.y * 2)
 			DM = PrepDepth(texcoord)[0][0];
@@ -3160,13 +3166,6 @@ uniform int Extra_Information <
 			DM.y = lerp(DM.y,0,step(1.0-HUD_Mask(texcoord),0.5));
 		#endif
 	
-		#if LBM || LetterBox_Masking
-			float LB_Dir = LetterBox_Masking == 2 || LBM == 2 ? texcoord.x : texcoord.y;
-			float LB_Detection = tex2D(SamplerLumN,float2(1,0.083)).z,LB_Masked = LB_Dir > DI_Y && LB_Dir < DI_X ? DM.y : 0.0125;
-			
-			if(LB_Detection)
-				DM.y = LB_Masked;	
-		#endif
 		// Should expand on this as a way to rescale Depth in a specific location around the weapon hand.
 		#if WHM 		
 		float DT_Switch = DT_Z < 0;
@@ -3176,7 +3175,7 @@ uniform int Extra_Information <
 			DM.y = lerp(DM.y,DT_Switch ? lerp(0.0,0.2,Blur_Mask) * lerp(2,1,FadeIO) : 0.025 ,smoothstep(0,abs(DT_Z),Mask) * lerp(1-FD_Adjust,1,FadeIO));
 		#endif
 	
-		return float3(DM.y,PrepDepth( SDT == 2 || SD_Trigger == 2 ? TC_SP(texcoord).zw : texcoord)[1][1],HandleConvergence.z);
+		return float3(DM.y,PrepDepth( texcoord )[1][1],HandleConvergence.z);
 	}
 	#define Adapt_Adjust 0.7 //[0 - 1]
 	////////////////////////////////////////////////////Depth & Special Depth Triggers//////////////////////////////////////////////////////////////////
@@ -3206,7 +3205,11 @@ uniform int Extra_Information <
 				#if DX9_Toggle
 				texcoord.x *= 2.0;
 				#endif
-		float3 Gen_Mask = step(DZ_W.y,tex2D(BackBufferCLAMP,texcoord ).rgb);
+			#if TMD == 1
+			float3 Gen_Mask = step(0.875,tex2D(BackBufferCLAMP,texcoord ).rgb);
+			#else
+			float3 Gen_Mask = step(DZ_W.y,tex2D(BackBufferCLAMP,texcoord ).rgb);
+			#endif
 			   Gen_Mask.x = max(Gen_Mask.r, max(Gen_Mask.g, Gen_Mask.b)); 
 			   Text_Mask = saturate(Gen_Mask.x);
 		#endif		
@@ -3268,6 +3271,15 @@ uniform int Extra_Information <
 	static const float  VMW_Array[10] = { 0.0, 1.0, 2.0, 3.0 , 3.5 , 4.0, 4.5 , 5.0, 5.5, 6.0 };	
 	float GetDB(float2 texcoord)
 	{
+		#if TMD
+			//UI Lift Masking 
+			#if DX9_Toggle  
+		    float Basic_UI = saturate(tex2Dlod(SamplerzBuffer_BlurN, float4( texcoord * float2(0.5,1.0) , 0, 2.5 ) ).x * 60);
+		    #else
+		    float Basic_UI = saturate(tex2Dlod(SamplerzBuffer_BlurN, float4( texcoord, 0, 2.5 ) ).y * 60);
+			#endif
+		#endif
+		
 		#if Reconstruction_Mode  
 		if( Vert_3D_Pinball )	
 			texcoord.xy = texcoord.yx;	
@@ -3291,29 +3303,33 @@ uniform int Extra_Information <
 		float FadeIO = smoothstep(0,1,tex2D(SamplerDMN,0).x);
 		if(FPS_Focus_Smoothing)
 			VMW = lerp(VMW, 5,FadeIO);
-		*/			
-		float Min_Blend = min(tex2Dlod(SamplerzBufferN_L, float4( texcoord, 0, clamp(VMW,0,5.5) ) ).x,Base_Depth.x);
+		*/
+		#if TMD == 1
+			VMW = lerp(clamp(VMW,0,6.0),6.0,Basic_UI);
+		#else
+			VMW = clamp(VMW,0,6.0);
+		#endif
+		
+		float Min_Blend = min(tex2Dlod(SamplerzBufferN_L, float4( texcoord, 0, VMW ) ).x,Base_Depth.x);
 
 		float2 DepthBuffer_LP = float2(Min_Blend,Base_Depth_Buffers.y);
 	
 		#if TMD
-			float Text_Direction = texcoord.x < DZ_W.z || texcoord.y < DZ_W.w;
-			#if (TMD  == 2 ) // Reverse
-			Text_Direction = 1-texcoord.x < DZ_W.z || 1-texcoord.y < DZ_W.w;
-			#elif (TMD  == 3 ) // Mirror
-			Text_Direction += 1-texcoord.x < DZ_W.z || 1-texcoord.y < DZ_W.w;
+			#if TMD == 1
+			#else
+				float Text_Direction = texcoord.x < DZ_W.z || texcoord.y < DZ_W.w;
+				#if (TMD  == 3 ) // Reverse
+				Text_Direction = 1-texcoord.x < DZ_W.z || 1-texcoord.y < DZ_W.w;
+				#elif (TMD  == 4 ) // Mirror
+				Text_Direction += 1-texcoord.x < DZ_W.z || 1-texcoord.y < DZ_W.w;
+				#endif
+				
+			if( DZ_W.x > 0 && Text_Menu_Detection())
+			{
+				if(Text_Direction)
+				DepthBuffer_LP.xy = lerp(DepthBuffer_LP.xy,  min(DepthBuffer_LP.xy,saturate(tex2Dlod(SamplerzBufferN_L, float4( texcoord, 0, (uint)lerp(0,12,Basic_UI) ) ).x  * 0.01)) ,Basic_UI * saturate(DZ_W.x));
+			}
 			#endif
-		//UI Lift Masking 
-		#if DX9_Toggle  
-	    float Basic_UI = saturate(tex2Dlod(SamplerzBuffer_BlurN, float4( texcoord * float2(0.5,1.0) , 0, 2.5 ) ).x * 60);
-	    #else
-	    float Basic_UI = saturate(tex2Dlod(SamplerzBuffer_BlurN, float4( texcoord, 0, 2.5 ) ).y * 60);
-		#endif
-		if( DZ_W.x > 0 && Text_Menu_Detection())
-		{
-			if(Text_Direction)
-			DepthBuffer_LP.xy = lerp(DepthBuffer_LP.xy,  min(DepthBuffer_LP.xy,saturate(tex2Dlod(SamplerzBufferN_L, float4( texcoord, 0, (uint)lerp(0,12,Basic_UI) ) ).x  * 0.01)) ,Basic_UI * saturate(DZ_W.x));
-		}
 		#endif
 		
 		#if SUI
@@ -3371,6 +3387,25 @@ uniform int Extra_Information <
 		return Separation * DepthBuffer_LP.x;
 	}
 	
+	#if SDT || SD_Trigger
+	float TargetedDepth(float2 TC)
+	{
+		return smoothstep(0,1,Depth(TC).x);
+	}
+	
+	float SDTriggers()//Specialized Depth Triggers
+	{   float Threshold = 0.001;//Both this and the options below may need to be adjusted. A Value lower then 7.5 will break this.!?!?!?!
+		if ( SD_Trigger == 1 || SDT == 1)//Top _ Left                             //Center_Left                             //Botto_Left
+			return (TargetedDepth(float2(0.95,0.25)) >= Threshold ) && (TargetedDepth(float2(0.95,0.5)) >= Threshold) && (TargetedDepth(float2(0.95,0.75)) >= Threshold) ? 0 : 1;
+		else
+			return ((TargetedDepth(float2(0.5,0.10)) <= 1 ) && //Top
+				   ((TargetedDepth(float2(0.5,0.25)) <= 1 ) && //Center Top
+					(TargetedDepth(float2(0.5,0.50)) <= 1 ))&& //Center
+					(TargetedDepth(float2(0.5,0.75)) <  1 ) && //Center Bottom
+					(TargetedDepth(float2(0.5,0.90)) <  1 ))? 0 : 1;//Bottom
+	}
+	#endif
+	
 	bool Shift_Depth()
 	{
 		float Check_Depth_Pos_Bot_A = PrepDepth(float2(0.25,0.999))[0][0];
@@ -3381,22 +3416,42 @@ uniform int Extra_Information <
 		int Check_Depth_Shift = Check_Depth_Pos_Bot_A * Check_Depth_Pos_Bot_B * Check_Depth_Pos_Side * Check_Depth_Pos_Corner;
 		
 		return Check_Depth_Shift == 1 && If_Has_Depth;	    
-	}
-	
+	}	
 	
 	void Mix_Z(in float4 position : SV_Position, in float2 texcoord : TEXCOORD, out float MixOut : SV_Target0)
 	{
 		float2 Shift_TC = texcoord;
+		//work on this
+		#if SDT || SD_Trigger
+			#if LDT
+				if( SDTriggers() && SDT_Lock_Menu_Detection())
+					Shift_TC = TC_SP(Shift_TC).zw;
+			#else
+				if( SDTriggers() )
+					Shift_TC = TC_SP(Shift_TC).zw;
+			#endif
+		#endif
 		
-		#if DB_Size_Position || SPF || LBC || LB_Correction // || SDT || SD_Trigger
+		#if DB_Size_Position || SPF || LBC || LB_Correction
 		if(Shift_Depth() && Auto_Scaler_Adjust && !LBDetection())
 			Shift_TC *= 1-(3.25 * pix);
 		#else
 		if(Shift_Depth() && Auto_Scaler_Adjust)
 			Shift_TC *= 1-(3.25 * pix);
 		#endif
-				
+		
 		MixOut = GetDB( Shift_TC );
+		
+		#if LBM || LetterBox_Masking
+			float LB_Dir = LetterBox_Masking == 2 || LBM == 2 ? texcoord.x : texcoord.y;
+			float2 Cal_LB_Mask = saturate(float2(DI_X,1-DI_X));
+			float LB_Detection = tex2D(SamplerLumN,float2(1,0.083)).z,LB_Masked = LB_Dir > Cal_LB_Mask.y && LB_Dir < Cal_LB_Mask.x ? MixOut : 0.0125;
+			
+			if(LB_Detection)
+				MixOut = LB_Masked;	
+		#endif
+			
+		//MixOut = MixOut;
 	}
 	
 	float GetMixed(float2 texcoord) //Sensitive Buffer.
@@ -3436,7 +3491,7 @@ uniform int Extra_Information <
 		if( Performance_Level > 1 )
 				Perf *= lerp(0.25,1.0,smoothstep(0.0,0.25,saturate( Luma_Map )));
 		//Foveated Calculations	
-		float Foveated_Mask = saturate(Vin_Pattern(Coordinates, float2(16.0,2.5))), MaxMix = lerp(100, 50, saturate(GetDepth * 2 - 1) );	
+		float Foveated_Mask = saturate(Vin_Pattern(Coordinates, float2(16.0,2.0))), MaxMix = lerp(100, 50, saturate(GetDepth * 2 - 1) );	
 		if(Foveated_Mode)
 			MaxMix = lerp(75, 25, saturate(Foveated_Mask * saturate(GetDepth * 2 - 1 ) ));
 		//ParallaxSteps Calculations
@@ -3453,7 +3508,8 @@ uniform int Extra_Information <
 		float Mod_Depth = saturate(GetDepth * lerp(1,15,abs(Artifact_Adjust().y))), Reverse_Depth = Artifact_Adjust().y < 0 ? 1-Mod_Depth : Mod_Depth,
 			  Scale_With_Depth = Artifact_Adjust().y == 0 ? 1 : Reverse_Depth;
 			  
-		float2 Artifacting_Adjust = float2(MS * lerp(0,0.125,clamp(Artifact_Adjust().x * Scale_With_Depth,0,2)),0);
+		float AA_Switch = De_Artifacting.x < 0 ? lerp(0.0125,Artifact_Adjust().x ,smoothstep(0.0,1.0,Foveated_Mask)): Artifact_Adjust().x;
+		float2 Artifacting_Adjust = float2(MS * lerp(0,0.125,clamp(AA_Switch * Scale_With_Depth,0,2)),0);
 		// Perform the conditional check outside the loop
 		bool applyArtifacting = (Artifact_Adjust().x != 0);
 		
@@ -4164,7 +4220,12 @@ uniform int Extra_Information <
 		int Check_Depth_Shift = Check_Depth_Pos_Bot_A * Check_Depth_Pos_Bot_B * Check_Depth_Pos_Side * Check_Depth_Pos_Corner;
 		
 		Color = Check_Depth_Shift == 1 && If_Has_Depth;	    
-		*/	
+		*/
+		//if(texcoord.y < 0.5)	
+		//Color = texcoord.x < 0.5 ? SDTriggers() : Color;
+		//else
+		//Color = texcoord.x > 0.5 ? LBDetection() : Color;
+
 		return Color.rgba;
 	}
 		
