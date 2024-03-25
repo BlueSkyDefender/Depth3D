@@ -1,7 +1,7 @@
 	////--------------------//
 	///**SuperDepth3D_VR+**///
 	//--------------------////
-	#define SD3DVR "SuperDepth3D_VR+ v4.1.4\n"
+	#define SD3DVR "SuperDepth3D_VR+ v4.1.5\n"
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//* Depth Map Based 3D post-process shader
 	//* For Reshade 4.4+ I think...
@@ -3043,12 +3043,12 @@ uniform int Extra_Information <
 				#if DX9_Toggle
 				texcoord.x *= 2.0;
 				#endif
-			#if TMD == 1
-			float3 Gen_Mask = step(0.875,tex2D(BackBufferCLAMP,texcoord ).rgb);
+		float3 CCC = tex2D(BackBufferCLAMP,texcoord ).rgb;
+			#if TMD == 1		
+			float Gen_Mask = step(0.8f,(CCC.r+CCC.g+CCC.b)/3);
 			#else
-			float3 Gen_Mask = step(DZ_W.y,tex2D(BackBufferCLAMP,texcoord ).rgb);
+			float Gen_Mask = step(DZ_W.y,(CCC.r+CCC.g+CCC.b)/3);
 			#endif
-			   Gen_Mask.x = max(Gen_Mask.r, max(Gen_Mask.g, Gen_Mask.b)); 
 			   Text_Mask = saturate(Gen_Mask.x);
 		#endif			
 		//Fade Storage
@@ -3155,7 +3155,7 @@ uniform int Extra_Information <
 			if( DZ_W.x > 0 && Text_Menu_Detection())
 			{
 				if(Text_Direction)
-				DepthBuffer_LP.xy = lerp(DepthBuffer_LP.xy,  min(DepthBuffer_LP.xy,saturate(tex2Dlod(SamplerzBufferN_L, float4( texcoord, 0, (uint)lerp(0,12,Basic_UI) ) ).x  * 0.01)) ,Basic_UI * saturate(DZ_W.x));
+				DepthBuffer_LP.xy = lerp(DepthBuffer_LP.xy,  min(DepthBuffer_LP.xy,saturate(tex2Dlod(SamplerzBufferVR_L, float4( texcoord, 0, (uint)lerp(0,12,Basic_UI) ) ).x  * 0.01)) ,Basic_UI * saturate(DZ_W.x));
 			}
 			#endif
 		#endif

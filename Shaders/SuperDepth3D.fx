@@ -1,7 +1,7 @@
 	////----------------//
 	///**SuperDepth3D**///
 	//----------------////
-	#define SD3D "SuperDepth3D v4.1.4\n"
+	#define SD3D "SuperDepth3D v4.1.5\n"
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//* Depth Map Based 3D post-process shader
 	//* For Reshade 3.0+
@@ -3205,12 +3205,13 @@ uniform int Extra_Information <
 				#if DX9_Toggle
 				texcoord.x *= 2.0;
 				#endif
-			#if TMD == 1
-			float3 Gen_Mask = step(0.875,tex2D(BackBufferCLAMP,texcoord ).rgb);
+		float3 CCC = tex2D(BackBufferCLAMP,texcoord ).rgb;
+
+			#if TMD == 1		
+			float Gen_Mask = step(0.8f,(CCC.r+CCC.g+CCC.b)/3);
 			#else
-			float3 Gen_Mask = step(DZ_W.y,tex2D(BackBufferCLAMP,texcoord ).rgb);
+			float Gen_Mask = step(DZ_W.y,(CCC.r+CCC.g+CCC.b)/3);
 			#endif
-			   Gen_Mask.x = max(Gen_Mask.r, max(Gen_Mask.g, Gen_Mask.b)); 
 			   Text_Mask = saturate(Gen_Mask.x);
 		#endif		
 		#if !DX9_Toggle
