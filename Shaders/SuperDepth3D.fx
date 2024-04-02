@@ -1,7 +1,7 @@
 	////----------------//
 	///**SuperDepth3D**///
 	//----------------////
-	#define SD3D "SuperDepth3D v4.1.5\n"
+	#define SD3D "SuperDepth3D v4.1.7\n"
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//* Depth Map Based 3D post-process shader
 	//* For Reshade 3.0+
@@ -114,11 +114,13 @@ namespace SuperDepth3D
 		static const float DJJ_X = 0.0, DJJ_Y = 0.0, DJJ_Z = 1000.0, DJJ_W = 0.0;
 		// DKK_X = [SDT Position A & B] DKK_Y = [SDT Position C] DKK_Z = [SDT ABCD Menu Tresholds] DKK_W = [Null]
 		static const float DKK_X = 0.0, DKK_Y = 0.0, DKK_Z = 1000.0, DKK_W = 0.0;
+		// DLL_X = [Position A & B] DLL_Y = [Position C & UI Pos] DLL_Z = [ABCW Stencil Menu Tresholds] DJJ_W = [Stencil Adjust]
+		static const float DLL_X = 0.0, DLL_Y = 0.0, DLL_Z = 1000.0, DLL_W = 0.0;
 		// WSM = [Weapon Setting Mode]
 		#define OW_WP "WP Off\0Custom WP\0"
 		static const int WSM = 0;
 		//Triggers 
-		static const float LDT = 0, ALM = 0, SSE = 0, SNE = 0, EDU = 0, LBI = 0,ISD = 0, ASA = 1, IWS = 0, SUI = 0, SSA = 0, SNA = 0, SSB = 0, SNB = 0,SSC = 0, SNC = 0,SSD = 0, SND = 0, LHA = 0, WBS = 0, TMD = 0, FRM = 0, AWZ = 0, CWH = 0, WBA = 0, WFB = 0, WND = 0, WRP = 0, MML = 0, SMD = 0, WHM = 0, SDU = 0, ABE = 2, LBE = 0, HQT = 0, HMD = 0.5, MAC = 0, OIL = 0, MMS = 0, FTM = 0, FMM = 0, SPO = 0, MMD = 0, LBR = 0, AFD = 0, MDD = 0, FPS = 1, SMS = 1, OIF = 0, NCW = 0, RHW = 0, NPW = 0, SPF = 0, BDF = 0, HMT = 0, HMC = 0, DFW = 0, NFM = 0, DSW = 0, LBC = 0, LBS = 0, LBM = 0, DAA = 0, NDW = 0, PEW = 0, WPW = 0, FOV = 0, EDW = 0, SDT = 0;
+		static const float DAO = 0, LDT = 0, ALM = 0, SSF = 0, SNF = 0, SSE = 0, SNE = 0, EDU = 0, LBI = 0,ISD = 0, ASA = 1, IWS = 0, SUI = 0, SSA = 0, SNA = 0, SSB = 0, SNB = 0,SSC = 0, SNC = 0,SSD = 0, SND = 0, LHA = 0, WBS = 0, TMD = 0, FRM = 0, AWZ = 0, CWH = 0, WBA = 0, WFB = 0, WND = 0, WRP = 0, MML = 0, SMD = 0, WHM = 0, SDU = 0, ABE = 2, LBE = 0, HQT = 0, HMD = 0.5, MAC = 0, OIL = 0, MMS = 0, FTM = 0, FMM = 0, SPO = 0, MMD = 0, LBR = 0, AFD = 0, MDD = 0, FPS = 1, SMS = 1, OIF = 0, NCW = 0, RHW = 0, NPW = 0, SPF = 0, BDF = 0, HMT = 0, HMC = 0, DFW = 0, NFM = 0, DSW = 0, LBC = 0, LBS = 0, LBM = 0, DAA = 0, NDW = 0, PEW = 0, WPW = 0, FOV = 0, EDW = 0, SDT = 0;
 		//Overwatch.fxh State
 		#define OSW 1
 	#endif
@@ -609,7 +611,42 @@ uniform int SuperDepth3D <
 					 "Default is Zero and it's Off.";
 		ui_category = "Compatibility Options";
 	> = float2(DL_Y,DB_Y);	
+
+	uniform bool De_Art_Opt <
+		ui_label = " De-Artifact Hoz";
+		ui_tooltip = "Some times We get artifacting on the Hoz axis around round or sloped objects.\n"
+					 "Enable this if you want to also target this issue.\n"
+					 "Default is Off.";
+		ui_category = "Compatibility Options";
+	> = DAO;
+
+	uniform int Select_SS <
+		ui_type = "combo";
+		ui_items = "DLSS\0FSR\0XeSS\0";
+		ui_label = " Upscaling Algorithm";
+		ui_tooltip = "Use this to match Super Sampling type.\n"
+					 "Default is FSR.";
+		ui_category = "Scaling Corrections";
+	> = 1;
 	
+	uniform int Easy_SS_Scaling <
+		//ui_category_closed = false;
+		ui_type = "combo";	
+		//ui_items = "Off\0Quality           - Good\0Balanced          - Fair\0Performance       - Avoid\0Ultra Performance - Do Not Use\0";
+		//ui_items = "Off\0Ultra Quality     - Good\0Quality           - Good\0Balanced          - Fair\0Performance       - Avoid\0";	
+		ui_items = "Off\0[XeSS] Ultra Quality | [DLSS/FSR] Quality           \0[XeSS] Quality       | [DLSS/FSR] Balanced          \0[XeSS] Balanced      | [DLSS/FSR] Performance       \0[XeSS] Performance   | [DLSS/FSR] Ultra Performance \0";	
+		ui_label = " Upscaling Quality";
+		ui_tooltip = "Use to adjust the DepthBuffer to match the BackBuffer when using some types of Super Sampling in some games.\n"
+					"Ultra Quality     | Best.\n"
+					"Quality           | Good.\n"
+					"Balanced          | Fair.\n"
+					"Performance       | Avoid.\n"
+					"Ultra Performance | Do Not Use.\n"
+					"\n"
+					"Default is Off.";			 
+		ui_category = "Scaling Corrections";
+	> = 0;
+
 	uniform float2 DLSS_FSR_Offset <
 		#if Compatibility
 		ui_type = "drag";
@@ -622,14 +659,15 @@ uniform int SuperDepth3D <
 					 "This issue only happens sometimes when using things like DLSS, XeSS and or FSR.\n"
 					 "This does not solve for TAA artifacts like Jittering or Smearing.\n"
 					 "Default and starts at 0 and is Off. With a max offset of 5 pixels Wide.";
-		ui_category = "Compatibility Options";
+		ui_category = "Scaling Corrections";
 	> = 0;
 
 	uniform bool Auto_Scaler_Adjust <
 		ui_label = " Auto Scaler";
 		ui_tooltip = "Shift the depth map if a misalignment is detected.";
-		ui_category = "Compatibility Options";
+		ui_category = "Scaling Corrections";
 	> = ASA;
+
 	
 	uniform int Depth_Map <
 		ui_type = "combo";
@@ -2010,6 +2048,27 @@ uniform int Extra_Information <
 						return (Menu_Detection > 0);	
 				}
 				#endif
+				#if SUI >= 6
+				float Stencil_n_Detection_F()//Active RGB Detection
+				{ 
+					float2 Pos_A = DLL_X.xy, Pos_B = DLL_X.zw, Pos_C = DLL_Y.xy;
+					float4 ST_Values = DLL_Z;
+			
+					//Wild Card Always On
+					float Menu_X = Check_Color(Pos_A, ST_Values.x) || Check_Color(Pos_A, ST_Values.w);
+	
+					float Menu_Z = Check_Color(Pos_C, ST_Values.z) || Check_Color(Pos_C, ST_Values.w);
+					
+					float Menu_Detection = Menu_X &&                          //X & W is wiled Card. 
+										   Check_Color(Pos_B, ST_Values.y) && //Y
+										   Menu_Z;                            //Z & W is wiled Card.
+			
+					if( ISD )
+						return (Menu_Detection > 0) && Lock_Menu_Detection();
+					else
+						return (Menu_Detection > 0);	
+				}
+				#endif
 			#endif
 	
 			#if SMD //Simple Menu Detection	
@@ -2523,6 +2582,31 @@ uniform int Extra_Information <
 		//texcoord.xy *= TEST.x; //Need to do a best Guess algo for standared DLSS,FSR,and XeSS
 		texcoord.xy -= DLSS_FSR_Offset.xy * pix;
 
+		float SS_Scaling = 1;
+	    //Select_SS 0 //DLSS
+	    //Select_SS 1 //FSR
+	    //Select_SS 2 //XeSS
+        switch (Easy_SS_Scaling) 
+		{
+            case 1:
+                SS_Scaling = Select_SS == 2 ? 1.303 : 1.5;
+                break;
+            case 2:
+     		   if(Select_SS == 2)
+                	SS_Scaling = 1.5;
+                else
+					SS_Scaling = Select_SS == 1 ? 1.7 : 1.73;
+                break;
+            case 3:
+                SS_Scaling = Select_SS == 2 ? 1.7 : 2.0;
+                break;
+            case 4:
+                SS_Scaling = Select_SS == 2 ? 2.0 : 3.0;
+                break;
+        }
+				
+		texcoord.xy /= SS_Scaling; 
+	
 		float4 DM = Depth(TC_SP(texcoord).xy).xxxx;
 		float R, G, B, A, WD = WeaponDepth(TC_SP(texcoord).xy).x, CoP = WeaponDepth(TC_SP(texcoord).xy).y, CutOFFCal = (CoP/DMA()) * 0.5; //Weapon Cutoff Calculation
 		CutOFFCal = step(DM.x,CutOFFCal);
@@ -2598,6 +2682,9 @@ uniform int Extra_Information <
 						#if SUI >= 5
 						  SnD_Toggle = SNE ? Stencil_n_Detection_E() : SnD_Toggle;
 						#endif
+							#if SUI >= 6
+							  SnD_Toggle = SNF ? Stencil_n_Detection_F() : SnD_Toggle;
+							#endif
 		#else
 		float SnD_Toggle = 0;
 		#endif
@@ -3274,11 +3361,13 @@ uniform int Extra_Information <
 	{
 		#if TMD
 			//UI Lift Masking 
+			float TMD_LvL = TMD == 1 ? 60 : 600;
 			#if DX9_Toggle  
-		    float Basic_UI = saturate(tex2Dlod(SamplerzBuffer_BlurN, float4( texcoord * float2(0.5,1.0) , 0, 2.5 ) ).x * 60);
+		    float Basic_UI = tex2Dlod(SamplerzBuffer_BlurN, float4( texcoord * float2(0.5,1.0) , 0, 2.5 ) ).x;
 		    #else
-		    float Basic_UI = saturate(tex2Dlod(SamplerzBuffer_BlurN, float4( texcoord, 0, 2.5 ) ).y * 60);
+		    float Basic_UI = tex2Dlod(SamplerzBuffer_BlurN, float4( texcoord, 0, 2.5 ) ).y;
 			#endif
+			Basic_UI = saturate( Basic_UI * TMD_LvL);
 		#endif
 		
 		#if Reconstruction_Mode  
@@ -3370,8 +3459,16 @@ uniform int Extra_Information <
 							float UI_E_Mask_Depth = DJJ_W.w < 0.5 ? DJJ_W.w : Stencil_Sampler(float3( 1-UI_E_Mask_Pos,DJJ_W.w));
 							float2 UI_E_Mask_Size= DJJ_W.xy;
 							if(Stencil_n_Detection_E())
-								DepthBuffer_LP.xy = lerp(DepthBuffer_LP.xy,UI_E_Mask_Depth,Stencil_Masking(texcoord,UI_E_Mask_Pos,UI_E_Mask_Size,DJJ_W.z,SSD));
+								DepthBuffer_LP.xy = lerp(DepthBuffer_LP.xy,UI_E_Mask_Depth,Stencil_Masking(texcoord,UI_E_Mask_Pos,UI_E_Mask_Size,DJJ_W.z,SSE));
 							#endif
+								#if SUI >= 6
+								float2 UI_F_Mask_Pos = 1-DLL_Y.zw;
+								//Auto Depth 0.5 > needs more detection points will update that later.
+								float UI_F_Mask_Depth = DLL_W.w < 0.5 ? DLL_W.w : Stencil_Sampler(float3( 1-UI_F_Mask_Pos,DLL_W.w));
+								float2 UI_F_Mask_Size= DLL_W.xy;
+								if(Stencil_n_Detection_F())
+									DepthBuffer_LP.xy = lerp(DepthBuffer_LP.xy,UI_F_Mask_Depth,Stencil_Masking(texcoord,UI_F_Mask_Pos,UI_F_Mask_Size,DLL_W.z,SSF));
+								#endif
 		#endif	
 		
 		if(View_Mode == 0 || View_Mode == 3)	
@@ -3461,10 +3558,13 @@ uniform int Extra_Information <
 		return tex2Dlod(SamplerzBufferN_Mixed,float4(texcoord,0,0)).x;//Do not use mips on this buffer
 	}
 	
-	float2 De_Art(float2 sp, float2 ZoomDir)
-	{  
+	float2 De_Art(float2 sp, float2 Shift_n_Zoom)
+	{  //sp.y * Shift_n_Zoom.y + (1-Shift_n_Zoom.y)*0.5
 		//if(De_Artifacting.x < 0)
-			return sp - ZoomDir;//lerp(ZoomDir,0, Depth);
+		if( De_Art_Opt )
+			return float2(sp.x - Shift_n_Zoom.x,sp.y * Shift_n_Zoom.y + (1-Shift_n_Zoom.y)*0.5);//lerp(ZoomDir,0, Depth);
+		else
+			return float2(sp.x - Shift_n_Zoom.x,sp.y);//lerp(ZoomDir,0, Depth);
 	}	
 	//Perf Level selection & Array access               X    Y      Z      W              X    Y      Z      W
 	//static const float2 Performance_LvL[2] = { float4( 0.5, 0.5095, 0.679, 0.5 ), float4( 1.0, 1.019, 1.425, 1.0) };
@@ -3503,14 +3603,14 @@ uniform int Extra_Information <
 		float D_Range = lerp(75,25,GetDepth), US_Offset = Diverge < 0 ? -D_Range : D_Range;
 	
 		//Offsets listed here Max Seperation is 3% - 8% of screen space with Depth Offsets & Netto layer offset change based on MS.
-		float deltaCoordinates = MS * LayerDepth, CurrentDepthMapValue = min(1,GetMixed( ParallaxCoord).x), CurrentLayerDepth = -Re_Scale_WN().x,
+		float deltaCoordinates = MS.x * LayerDepth, CurrentDepthMapValue = min(1,GetMixed( ParallaxCoord).x), CurrentLayerDepth = -Re_Scale_WN().x,
 			  DB_Offset = US_Offset * TP * pix.x;
 		
 		float Mod_Depth = saturate(GetDepth * lerp(1,15,abs(Artifact_Adjust().y))), Reverse_Depth = Artifact_Adjust().y < 0 ? 1-Mod_Depth : Mod_Depth,
 			  Scale_With_Depth = Artifact_Adjust().y == 0 ? 1 : Reverse_Depth;
 			  
 		float AA_Switch = De_Artifacting.x < 0 ? lerp(0.0125,Artifact_Adjust().x ,smoothstep(0.0,1.0,Foveated_Mask)): Artifact_Adjust().x;
-		float2 Artifacting_Adjust = float2(MS * lerp(0,0.125,clamp(AA_Switch * Scale_With_Depth,0,2)),0);
+		float2 Artifacting_Adjust = float2(MS.x * lerp(0,0.125,clamp(AA_Switch * Scale_With_Depth,0,2)),1.0 - (MS.x * lerp(0,0.25,clamp(Artifact_Adjust().x * Scale_With_Depth,0,2))));
 		// Perform the conditional check outside the loop
 		bool applyArtifacting = (Artifact_Adjust().x != 0);
 		
