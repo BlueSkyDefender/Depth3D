@@ -1,7 +1,7 @@
 	////----------------//
 	///**SuperDepth3D**///
 	//----------------////
-	#define SD3D "SuperDepth3D v4.1.7\n"
+	#define SD3D "SuperDepth3D v4.1.8\n"
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//* Depth Map Based 3D post-process shader
 	//* For Reshade 3.0+
@@ -2714,15 +2714,21 @@ uniform int Extra_Information <
 	{
 		//Create Mask for Weapon Hand Consideration for ZPD boundary condition.
 		float2 Shape_TC = StoredTC;
-		float Shape_Out, Shape_One, Shape_Two, Shape_Three, Shape_Four;
+		float Shape_Out, Shape_One, Shape_Two, Shape_Three, Shape_Four, SO_Switch = 0.75, ST_Switch = 0.45;
+		
+		if(CWH >= 3)
+		{
+			SO_Switch = 0.325;
+			ST_Switch = 0.75 ;
+		}
 		
 		// Conditions for Shape_One
-		bool Shape_One_C1 = (Shape_TC.x / Shape_TC.y * 0.75) > 1;
+		bool Shape_One_C1 = (Shape_TC.x / Shape_TC.y * SO_Switch) > 1;
 		bool Shape_One_C2 = (((1 - Shape_TC.x) / Shape_TC.y) * 0.8125 ) > 1;
 		Shape_One = saturate(Shape_One_C1 || Shape_One_C2); 
 		
 		// Conditions for Shape_Two
-		bool Shape_Two_C1 = (1 - Shape_TC.x < 0.450 && 1 - Shape_TC.y < 0.450);
+		bool Shape_Two_C1 = (1 - Shape_TC.x < 0.450 && 1 - Shape_TC.y < ST_Switch);
 		Shape_Two = saturate(1 - Shape_Two_C1); 
 		
 		// Conditions for Shape_Three
@@ -2738,7 +2744,7 @@ uniform int Extra_Information <
 		Shape_Out *= Shape_One + Shape_Two;
 		Shape_Out *= Shape_Four;
 
-		if(CWH == 2)
+		if(CWH == 2 || CWH == 4)
 		Shape_Out = Shape_TC.x < 0.5 ? 1 : Shape_Out;
 		
 		return Shape_Out;
@@ -2894,14 +2900,14 @@ uniform int Extra_Information <
 		float SP_Min = Set_Pop_Min().y, Select_Min_LvL_Trigger;float3 Level_Control = DS_X;
 		//Auto Scale
 		if(WZPD_and_WND.z > 0)
-			Auto_Scale = lerp(lerp(1.0,0.5,saturate(WZPD_and_WND.z * 2)),1.0,lerp(saturate(Auto_Balance_Selection().y * 2.5) , smoothstep(0,0.5,tex2D(SamplerLumN,float2(0,0.750)).z), 0.5));
+			Auto_Scale = lerp(lerp(1.0,0.1,saturate(WZPD_and_WND.z * 2)),1.0,lerp(saturate(Auto_Balance_Selection().y * 2.5) , smoothstep(0,0.5,tex2D(SamplerLumN,float2(0,0.750)).z), 0.5));
 
 		//Fade Storage
 		#if DX9_Toggle
 		float3x3 Fade_Pass = Fade(texcoord); //[0][0] = F | [0][1] = F | [0][2] = F
 						 					//[1][0] = F | [1][1] = N | [1][2] = 0
 											 //[2][0] = 0 | [2][1] = 0 | [2][2] = 0
-		float2 Min_Trim = float2(SP_Min,Inficolor_3D_Emulator ? WZPD_and_WND.w : WZPD_and_WND.w) * Auto_Scale;
+		float2 Min_Trim = float2(SP_Min,Inficolor_3D_Emulator ? WZPD_and_WND.w : WZPD_and_WND.w);
 		#else
 		float3 Fade_Pass_A = float3( tex2D(SamplerzBuffer_BlurN,float2(0,0.083)).x,
 									 tex2D(SamplerzBuffer_BlurN,float2(0,0.250)).x,
@@ -2917,7 +2923,7 @@ uniform int Extra_Information <
 				
 			SP_Min = lerp(SP_Min,Level_Control.x, saturate(Select_Min_LvL_Trigger) );
 			
-			float2 Min_Trim = float2(SP_Min, Inficolor_3D_Emulator ? WZPD_and_WND.w : WZPD_and_WND.w) * Auto_Scale;
+			float2 Min_Trim = float2(SP_Min, Inficolor_3D_Emulator ? WZPD_and_WND.w : WZPD_and_WND.w);
 		#endif
 						 
 		if(Inficolor_3D_Emulator && Inficolor_Near_Reduction)
@@ -2927,7 +2933,10 @@ uniform int Extra_Information <
 		float Edge_Adj = 0.5;
 		
 		if (Min_Trim.x > 0)
-			R = saturate(lerp(ScaleND,R,smoothstep(0,Min_Trim.y,ScaleND)));
+		{
+			R = saturate(lerp(ScaleND,R,smoothstep(0,Min_Trim.y,ScaleND)));			
+			R = lerp(DM.x,R,Auto_Scale);
+		}
 			//R = DepthEdge( R, DM.x, texcoord, 0.550, PrepDepth(texcoord)[2][0], tex2Dlod(SamplerzBuffer_BlurN,float4(texcoord,0,6)).y);	
 		if ( Weapon_Depth_Edge.x > 0)//1.0 needs to be adjusted when doing far scaling
 			R = lerp(DepthEdge(R, DM.x, texcoord, 1-Weapon_Depth_Edge.x),DM.x,smoothstep(0,1.0,DM.x));
@@ -4326,7 +4335,7 @@ uniform int Extra_Information <
 		//Color = texcoord.x < 0.5 ? SDTriggers() : Color;
 		//else
 		//Color = texcoord.x > 0.5 ? LBDetection() : Color;
-
+		//Color = CWH_Mask(texcoord);
 		return Color.rgba;
 	}
 		
