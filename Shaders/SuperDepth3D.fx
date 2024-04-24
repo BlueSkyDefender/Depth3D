@@ -1,7 +1,7 @@
 	////----------------//
 	///**SuperDepth3D**///
 	//----------------////
-	#define SD3D "SuperDepth3D v4.1.8\n"
+	#define SD3D "SuperDepth3D v4.1.9\n"
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//* Depth Map Based 3D post-process shader
 	//* For Reshade 3.0+
@@ -205,7 +205,7 @@ namespace SuperDepth3D
 		#define Compatibility 0
 	#endif
 	
-	#if __RESHADE__ >= 40300
+	#if __RESHADE__ >= 50000
 		#define Compatibility_DD 1
 	#else
 		#define Compatibility_DD 0
@@ -2757,7 +2757,8 @@ uniform int Extra_Information <
 	}
 	
 	float3x3 Fade(float2 texcoord)
-	{   //Check Depth
+	{
+		//Check Depth
 		float CD, Detect, Detect_Out_of_Range = -1, ZPD_Scaler_One_Boundary = Set_Pop_Min().x;//Done to not trigger FTM if set to 0
 		if(ZPD_Boundary > 0)
 		{
@@ -2783,7 +2784,7 @@ uniform int Extra_Information <
 			float2 GridXY; int2 iXY = ( ZPD_Boundary == 3 ? int2( 9, 4) : int2( 7, 5) );//was 12/4 and 7/7 This reduction saves 0.1 ms and should show no diff to the user.
 			[loop]                                                                     //I was thinking the lowest I can go would be 9/4 along with 7/5
 			for( int iX = 0 ; iX < iXY.x; iX++ )                                         //7 * 7 = 49 | 12 * 4 = 48 | 7 * 6 = 42 | 9 * 4 = 36 | 7 * 5 = 35
-			{   [unroll]
+			{   [loop]
 				for( int iY = 0 ; iY < iXY.y; iY++ )
 				{
 					if(ZPD_Boundary == 1 || ZPD_Boundary == 6 || ZPD_Boundary == 7)
@@ -2797,7 +2798,7 @@ uniform int Extra_Information <
 					//We shift the lower half here to have a better spread.
 					if(texcoord.y > 0.6 && texcoord.y < 0.8)						
 						GridXY.y += Shift_Mask(texcoord).x ? 0.0 : 0.05;
-									
+				
 					float ZPD_I = Zero_Parallax_Distance;
 					//Need to revisit this Because The performance gain even if it was small was worth it.
 					//#if !DX9_Toggle
@@ -2845,19 +2846,25 @@ uniform int Extra_Information <
 				}
 			}
 		}
-		uint Sat_D_O_R = Detect_Out_of_Range == Fast_Trigger_Mode;
-		float ZPD_BnF = Auto_Adjust_Cal(Sat_D_O_R ? 0.5-FLT_EPSILON : ZPD_Boundary_n_Fade.y);		
-		float Trigger_Fade_A = Detect, Trigger_Fade_B = Detect_Out_of_Range >= 1, Trigger_Fade_C = Detect_Out_of_Range >= 2, Trigger_Fade_D = Detect_Out_of_Range >= 3, Trigger_Fade_E = Detect_Out_of_Range >= 4, 
-			  PStoredfade_A = tex2D(SamplerLumN,float2(0, 0.250)).z, PStoredfade_B = tex2D(SamplerLumN,float2(0, 0.416)).z, PStoredfade_C = tex2D(SamplerLumN,float2(1, 0.416)).z, PStoredfade_D = tex2D(SamplerLumN,float2(1, 0.250)).z, PStoredfade_E = tex2D(SamplerLumN,float2(1, 0.583)).z;
-		//Fade in toggle.
-		float CallFT = 1.0 - exp(-frametime/ZPD_BnF);//exp2 would be even slower
-		return float3x3( float3( PStoredfade_A + (Trigger_Fade_A - PStoredfade_A) * CallFT,
-								 PStoredfade_B + (Trigger_Fade_B - PStoredfade_B) * CallFT, 
-								 PStoredfade_C + (Trigger_Fade_C - PStoredfade_C) * CallFT ),
-						 float3( PStoredfade_D + (Trigger_Fade_D - PStoredfade_D) * CallFT,
-								 PStoredfade_E + (Trigger_Fade_E - PStoredfade_E) * CallFT,
-								 saturate(Detect_Out_of_Range * 0.25)                        ),
-						 float3(0,0,0)                                                       ); 
+	
+	    uint Sat_D_O_R = Detect_Out_of_Range == Fast_Trigger_Mode;
+	    float ZPD_BnF = Auto_Adjust_Cal(Sat_D_O_R ? 0.5 - FLT_EPSILON : ZPD_Boundary_n_Fade.y);
+	    float PStoredfade_A = tex2D(SamplerLumN, float2(0, 0.250)).z, 
+			  PStoredfade_B = tex2D(SamplerLumN, float2(0, 0.416)).z, 
+			  PStoredfade_C = tex2D(SamplerLumN, float2(1, 0.416)).z, 
+			  PStoredfade_D = tex2D(SamplerLumN, float2(1, 0.250)).z, 
+			  PStoredfade_E = tex2D(SamplerLumN, float2(1, 0.583)).z;
+	
+	    // Fade in toggle.
+	    float CallFT = 1.0 - exp(-frametime / ZPD_BnF); // exp2 would be even slower
+	    return float3x3(float3(PStoredfade_A + (Detect - PStoredfade_A) * CallFT,
+	                           PStoredfade_B + ((Detect_Out_of_Range >= 1) - PStoredfade_B) * CallFT,
+	                           PStoredfade_C + ((Detect_Out_of_Range >= 2) - PStoredfade_C) * CallFT),
+	                    float3(PStoredfade_D + ((Detect_Out_of_Range >= 3) - PStoredfade_D) * CallFT,
+	                           PStoredfade_E + ((Detect_Out_of_Range >= 4) - PStoredfade_E) * CallFT,
+	                           saturate(Detect_Out_of_Range * 0.25)),
+	                    float3(0, 0, 0));
+						 
 	}
 	#define FadeSpeed_AW 0.375
 	float AltWeapon_Fade()
@@ -3158,13 +3165,13 @@ uniform int Extra_Information <
 		float Edge_Adj = saturate(lerp(0.5,1.0,Edge_Adjust));
 		
 			DM = lerp(lerp(EdgeMask( DM, texcoord, 0.955 ),DM,  Edge_Adj), DM, saturate(1-DM.y) );	
-			
+		#if Compatibility_DD	
 		if (Depth_Detection == 1)
 		{
 			if (!DepthCheck)
 				DM = 0.0625;
 		}
-		
+		#endif
 		#if SDM
 			if(Sten_D_M)
 				DM = DBB_W;
@@ -3946,7 +3953,7 @@ uniform int Extra_Information <
 		float D = Eye_Swap ? -Min_Divergence().x : Min_Divergence().x;
 	
 		float FadeIO = Focus_Reduction_Type == 1 ? 1 : smoothstep(0,1,1-Fade_in_out(texcoord).x), FD = D, FD_Adjust = 0.2;
-	
+		
 		if( World_n_Fade_Reduction_Power.x == 1)
 			FD_Adjust = 0.3125;
 		if( World_n_Fade_Reduction_Power.x == 2)
@@ -3963,7 +3970,7 @@ uniform int Extra_Information <
 			FD_Adjust = 0.6875;
 		if( World_n_Fade_Reduction_Power.x == 8)
 			FD_Adjust = 0.75;
-	
+
 		if (FPSDFIO >= 1)
 			FD = lerp(FD * FD_Adjust,FD,FadeIO);
 	
@@ -4012,12 +4019,13 @@ uniform int Extra_Information <
 		#endif
 	
 		#if Inficolor_3D_Emulator
-		if (Depth_Detection == 1)
-		{
-			if (!DepthCheck)
-				Persp = 0;
-		}	
-		
+			#if Compatibility_DD
+			if (Depth_Detection == 1)
+			{
+				if (!DepthCheck)
+					Persp = 0;
+			}	
+			#endif
 		if (Cancel_Depth)
 			Persp = 0;
 			
@@ -4733,9 +4741,13 @@ uniform int Extra_Information <
 	technique Information_SD
 	< ui_label = "Information";
 	//toggle = Text_Info_Key;
-	 hidden = true; 
+	 hidden = true;
 	 enabled = true;
+	 #if Compatibility_DD
 	 timeout = 1;
+	 #else 
+	 timeout = 1000;
+	 #endif
 	 ui_tooltip = "Help Technique."; >
 	{
 			pass Help
@@ -4773,8 +4785,7 @@ uniform int Extra_Information <
 			RenderTarget1 = texMinMaxRGBLastFrame;
 			#endif
 		}
-		#endif
-			
+		#endif	
 			pass Blur_DepthBuffer
 		{
 			VertexShader = PostProcessVS;
