@@ -1,7 +1,7 @@
 ////----------------------------------------//
 ///SuperDepth3D Overwatch Automation Header///
 //----------------------------------------////
-#define OVERWATCH "Overwatch v3.7.7\n"
+#define OVERWATCH "Overwatch v3.7.8\n"
 //---------------------------------------OVERWATCH---------------------------------------//
 // If you are reading this stop. Go away and never look back. From this point on if you  //
 // still think it's is worth looking at this..... Then no one can save you or your soul. //
@@ -26345,7 +26345,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 
 	//#define DAA 1
 	#define PEW 1
-	#elif (App == 0xE11C5755) //Fallout 3 GOTY
+	#elif (App == 0xE11C5755 || App == 0xAF8F9E38) //Fallout 3 GOTY
     //#define DS_Z 2                 // Set View Mode
 	//#define DA_W 1                 // Set Linerzation
     //#define DB_X 1                 // Flip
@@ -26387,9 +26387,9 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DB_W 16                // Weapon Profile
 	#define AWZ 1               // Anti-Weapon Hand Z-Fighting -1 is shifted to the right a little bit and 1 is center
 	//#define WBS 0                  //Weapon Boundary Switch 0 | 1
-	#define DF_X float2(0.125,0.00)       // ZPD Weapon Boundarys Level 1 and Level 2
-	//#define DJ_W 0.125	           // Weapon Depth Limit Location 1
-	//#define DS_W 1.5	           // Weapon Depth Limit Location 2
+	#define DF_X float2(0.125,0.250)       // ZPD Weapon Boundarys Level 1 and Level 2
+	#define DJ_W 0.125	           // Weapon Depth Limit Location 1
+	#define DS_W 0.5	           // Weapon Depth Limit Location 2
 	//#define WFB 0.0                // ZPD Weapon Elevaton for 1 and 2 scales from [0 - 1]
 	//#define DT_W float2(0.015,0.03)//WH scale and cutoff
 	//#define WHM 1                  //Weapon Hand Masking lets you use DT_Z 
@@ -26410,12 +26410,12 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	//#define LBM 2 //Letter Box Masking With size Adust for Top and Bottom and 2 is Left and Right
 	//#define DI_X 0.670
   
-    //#define FPS 2  // FPS Focus Settings 
-    //#define DK_X 2 //Trigger Type
+    #define FPS 2  // FPS Focus Settings 
+    #define DK_X 2 //Trigger Type
     //#define DK_Y 0 //Eye Selection
-    //#define WRP 1  //Weapon Reduction Power
-    //#define DK_Z 2 //World Reduction Power
-    //#define DK_W 4 //Set Shift Speed
+    #define WRP 5  //Weapon Reduction Power
+    #define DK_Z 4 //World Reduction Power
+    #define DK_W 3 //Set Shift Speed
   	//#define SPF 1    //Resize Depth So it fits the game correctly
 	//#define DD_X 1.330
 	//#define DD_Y 0.995
@@ -27860,8 +27860,8 @@ float4 Weapon_Profiles(float WP ,float4 Weapon_Adjust)
         Weapon_Adjust = float4(11.250,62.000,0.0,0.0);    //WP 12 | ILLWILL
     if (WP == 15)
         Weapon_Adjust = float4(7.0,75.0,0.0,0.0);         //WP 13 | The Voidness
-    if (WP == 16)
-        Weapon_Adjust = float4(0.5625,17.5,1.025,0.0);    //WP 14 | Fallout 3 GOTY
+    if (WP == 16) //0.565 17.5 1.025
+        Weapon_Adjust = float4(0.75,16.0,1.0,0.0);        //WP 14 | Fallout 3 GOTY & NV
     if (WP == 17)
         Weapon_Adjust = float4(0.0,0.0,0.0,0.0);          //WP 15 | Game
     if (WP == 18)
