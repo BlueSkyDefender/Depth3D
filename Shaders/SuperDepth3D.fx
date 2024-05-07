@@ -1,7 +1,7 @@
 	////----------------//
 	///**SuperDepth3D**///
 	//----------------////
-	#define SD3D "SuperDepth3D v4.1.9\n"
+	#define SD3D "SuperDepth3D v4.2.0\n"
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//* Depth Map Based 3D post-process shader
 	//* For Reshade 3.0+
@@ -1803,7 +1803,11 @@ uniform int Extra_Information <
 	int LBSensitivity( float inVal )
 	{
 		#if LBS
+			#if LBS == 2
+			return inVal < 0.0225; //Even More Less Sensitive
+			#else
 			return inVal < 0.005; //Less Sensitive
+			#endif
 		#else
 			return inVal == 0; //Sensitive
 		#endif
@@ -1848,7 +1852,7 @@ uniform int Extra_Information <
 		float2 Letter_Box_Elevation = LBE ? LBE == 2 ? float2(0.035,0.965) : float2(0.045,0.955) : float2(0.09,0.91);    
 		float MipLevel = 5,Center = SLLTresh(float2(0.5,0.5), 7) > 0, Top_Pos = LBSensitivity(SLLTresh(float2(Letter_Box_Reposition.x,Letter_Box_Elevation.x), MipLevel));
 		if ( LetterBox_Masking == 2 || LB_Correction == 2 || LBC == 2 || LBM == 2 || SMP == 2)//Left_Center | Right_Center | Center
-			return LBSensitivity(SLLTresh(float2(0.1,0.5), MipLevel)) && LBSensitivity(SLLTresh(float2(0.9,0.5), MipLevel)) && Center; //Vert
+			return LBSensitivity(SLLTresh(float2(0.075,0.5), MipLevel)) && LBSensitivity(SLLTresh(float2(0.925,0.5), MipLevel)) && Center; //Vert
 		else       //Top | Bottom | Center
 			return Top_Pos && LBSensitivity(SLLTresh(float2(Letter_Box_Reposition.y,Letter_Box_Elevation.y), MipLevel)) && Center; //Hoz
 	}
@@ -4343,7 +4347,10 @@ uniform int Extra_Information <
 		//Color = texcoord.x < 0.5 ? SDTriggers() : Color;
 		//else
 		//Color = texcoord.x > 0.5 ? LBDetection() : Color;
+		//Color = LBDetection();
+		//Color = tex2Dlod(SamplerLumN,float4(1, 0.083,0,0)).z;
 		//Color = CWH_Mask(texcoord);
+		//Color =  LBSensitivity(SLLTresh(float2(0.05,0.5), 5));
 		return Color.rgba;
 	}
 		
