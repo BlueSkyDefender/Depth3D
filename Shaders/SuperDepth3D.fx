@@ -1,7 +1,7 @@
 	////----------------//
 	///**SuperDepth3D**///
 	//----------------////
-	#define SD3D "SuperDepth3D v4.2.0\n"
+	#define SD3D "SuperDepth3D v4.2.1\n"
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//* Depth Map Based 3D post-process shader
 	//* For Reshade 3.0+
@@ -3167,13 +3167,17 @@ uniform int Extra_Information <
 		DM.y = lerp( HandleConvergence.x, HandleConvergence.y * Auto_Adjust_Weapon_Depth, DM.y);
 	
 		float Edge_Adj = saturate(lerp(0.5,1.0,Edge_Adjust));
-		
+		#if Inficolor_3D_Emulator
+			float UI_Detection_Mask = 0.5;
+		#else
+			float UI_Detection_Mask = 0.0625;
+		#endif
 			DM = lerp(lerp(EdgeMask( DM, texcoord, 0.955 ),DM,  Edge_Adj), DM, saturate(1-DM.y) );	
 		#if Compatibility_DD	
 		if (Depth_Detection == 1)
 		{
 			if (!DepthCheck)
-				DM = 0.0625;
+				DM = UI_Detection_Mask;
 		}
 		#endif
 		#if SDM
@@ -3193,81 +3197,81 @@ uniform int Extra_Information <
 			#endif
 			if( MSDT_A > 0)
 			{
-				DM = Direction ? 0.0625 : DM;
+				DM = Direction ? UI_Detection_Mask : DM;
 				
 				if(Menu_Size().y < 0)
 					Other_Direction = texcoord.y < MSDT_B;
 					
-				DM = Other_Direction ? 0.0625 : DM;
+				DM = Other_Direction ? UI_Detection_Mask : DM;
 			}
 		#endif	
 		
 		#if MMD
 		float4 SMD_Lock_A = Simple_Menu_Detection_A() && Lock_Menu_Detection();		
 			if( SMD_Lock_A.x == 1)
-				DM = 0.0625;
+				DM = UI_Detection_Mask;
 			if( SMD_Lock_A.y == 1)
-				DM = 0.0625;
+				DM = UI_Detection_Mask;
 			if( SMD_Lock_A.z == 1)
-				DM = 0.0625;
+				DM = UI_Detection_Mask;
 			if( SMD_Lock_A.w == 1)
-				DM = 0.0625;
+				DM = UI_Detection_Mask;
 			#if MMD >= 2
 		float4 SMD_Lock_B = Simple_Menu_Detection_B() && Lock_Menu_Detection();
 			if( SMD_Lock_B.x == 1)
-				DM = 0.0625;
+				DM = UI_Detection_Mask;
 			if( SMD_Lock_B.y == 1)
-				DM = 0.0625;
+				DM = UI_Detection_Mask;
 			if( SMD_Lock_B.z == 1)
-				DM = 0.0625;
+				DM = UI_Detection_Mask;
 			if( SMD_Lock_B.w == 1)
-				DM = 0.0625;
+				DM = UI_Detection_Mask;
 			#endif
 			#if MMD >= 3
 		float4 SMD_Lock_C = Simple_Menu_Detection_C() && Lock_Menu_Detection();
 			if( SMD_Lock_C.x == 1)
-				DM = 0.0625;
+				DM = UI_Detection_Mask;
 			if( SMD_Lock_C.y == 1)
-				DM = 0.0625;
+				DM = UI_Detection_Mask;
 			if( SMD_Lock_C.z == 1)
-				DM = 0.0625;
+				DM = UI_Detection_Mask;
 			if( SMD_Lock_C.w == 1)
-				DM = 0.0625;
+				DM = UI_Detection_Mask;
 			#endif
 			#if MMD >= 4
 		float4 SMD_Lock_D = Simple_Menu_Detection_D() && Lock_Menu_Detection();
 			if( SMD_Lock_D.x == 1)
-				DM = 0.0625;
+				DM = UI_Detection_Mask;
 			if( SMD_Lock_D.y == 1)
-				DM = 0.0625;
+				DM = UI_Detection_Mask;
 			if( SMD_Lock_D.z == 1)
-				DM = 0.0625;
+				DM = UI_Detection_Mask;
 			if( SMD_Lock_D.w == 1)
-				DM = 0.0625;
+				DM = UI_Detection_Mask;
 			#endif
 		#endif	
 		
 		#if SMD //May Do one or two more levels	
-			DM = Simple_Menu_A() ? 0.0625 : DM;
+			DM = Simple_Menu_A() ? UI_Detection_Mask : DM;
 			#if SMD >= 2	
-				DM = Simple_Menu_B() ? 0.0625 : DM;
+				DM = Simple_Menu_B() ? UI_Detection_Mask : DM;
 			#endif
 				#if SMD >= 3	
-					DM = Simple_Menu_C() ? 0.0625 : DM;
+					DM = Simple_Menu_C() ? UI_Detection_Mask : DM;
 				#endif
 					#if SMD >= 4	
-						DM = Simple_Menu_D() ? 0.0625 : DM;
+						DM = Simple_Menu_D() ? UI_Detection_Mask : DM;
 					#endif
 						#if SMD >= 5	
-							DM = Simple_Menu_E() ? 0.0625 : DM;
+							DM = Simple_Menu_E() ? UI_Detection_Mask : DM;
 						#endif
 							#if SMD >= 6	
-								DM = Simple_Menu_F() ? 0.0625 : DM;
+								DM = Simple_Menu_F() ? UI_Detection_Mask : DM;
 							#endif
 		#endif	
 		
 		if (Cancel_Depth)
-			DM = 0.0625;
+			DM = UI_Detection_Mask;
 	
 		#if UI_MASK
 			DM.y = lerp(DM.y,0,step(1.0-HUD_Mask(texcoord),0.5));
