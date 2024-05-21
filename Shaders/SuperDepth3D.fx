@@ -1,7 +1,7 @@
 	////----------------//
 	///**SuperDepth3D**///
 	//----------------////
-	#define SD3D "SuperDepth3D v4.2.1\n"
+	#define SD3D "SuperDepth3D v4.2.2\n"
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//* Depth Map Based 3D post-process shader
 	//* For Reshade 3.0+
@@ -1571,11 +1571,18 @@ uniform int Extra_Information <
 		#define Lower_Depth_Rez_B 1.0
 	#endif	
 	
-	texture texDMN { Width = BUFFER_WIDTH ; Height = BUFFER_HEIGHT * Lower_Depth_Rez_B; Format = RGBA16F; MipLevels = Max_Mips; };
+	texture texDMN { Width = BUFFER_WIDTH ; Height = BUFFER_HEIGHT * Lower_Depth_Rez_B; Format = RG16F; MipLevels = Max_Mips; };
 	
 	sampler SamplerDMN
 		{
 			Texture = texDMN;
+		};
+
+	texture texCN { Width = BUFFER_WIDTH ; Height = BUFFER_HEIGHT * Lower_Depth_Rez_B; Format = R8; MipLevels = Max_Mips; };
+	
+	sampler SamplerCN
+		{
+			Texture = texCN;
 		};
 	
 	texture texzBufferN_P { Width = BUFFER_WIDTH ; Height = BUFFER_HEIGHT * Lower_Depth_Rez_A; Format = RG16F; };
@@ -1815,7 +1822,7 @@ uniform int Extra_Information <
 	
 	float SLLTresh(float2 TCLocations, float MipLevel)
 	{ 
-		return tex2Dlod(SamplerDMN,float4(TCLocations,0, MipLevel)).w;
+		return tex2Dlod(SamplerCN,float4(TCLocations,0, MipLevel)).x;
 	}
 	
 	bool LBDetection()//Active RGB Detection
@@ -2627,17 +2634,17 @@ uniform int Extra_Information <
 		float Weapon_Masker = lerp(0.0,WD,CutOFFCal);
 	
 		R = DM.x; //Mix Depth
-		G = DM.y > saturate(smoothstep(0,2.5,DM.w)); //Weapon Mask
-		B = DM.z; //Weapon Hand
+		G = DM.z; //Weapon Hand
+		B = DM.y > saturate(smoothstep(0,2.5,DM.w)); //Weapon Mask
 		
 		#if IWS
 		float Isolating_Weapon_Stencil = texcoord.x+(texcoord.y*0.5) < DCC_W;
-		A = ZPD_Boundary >= 4 ? Isolating_Weapon_Stencil ? R : max( G, R) : R; //Grid Depth Stenciled
+		A = ZPD_Boundary >= 4 ? Isolating_Weapon_Stencil ? R : max( B, R) : R; //Grid Depth Stenciled
 		#else
-		A = ZPD_Boundary >= 4 ? max( G, R) : R; //Grid Depth
+		A = ZPD_Boundary >= 4 ? max( B, R) : R; //Grid Depth
 		#endif	
 		
-		return float3x3( saturate(float3(R, G, B)),											  //[0][0] = R | [0][1] = G | [0][2] = B
+		return float3x3( saturate(float3(R, G, 0)),											  //[0][0] = R | [0][1] = G | [0][2] = B
 						 saturate(float3(A, Depth( TC_SP(texcoord).xy ).x, DM.w)),			   //[1][0] = A | [1][1] = D | [1][2] = DM
 								  float3(Weapon_Masker > saturate(smoothstep(0,2.5,DM.w)),0,0) );//[2][0] = 0 | [2][1] = 0 | [2][2] = 0
 	}
@@ -2759,7 +2766,16 @@ uniform int Extra_Information <
 		float4 Shift_XY = floor(texcoord.xxyy * Res.xxyy * pix.xxyy * float4(7,9,7,9));
 		return float2(fmod(Shift_XY.x,2),fmod(ZPD_Boundary == 3 ? Shift_XY.w : Shift_XY.z,2));
 	}
-	
+	/*
+	float P_Depth(float2 TC)
+	{
+		//A = ZPD_Boundary >= 4 ? max( B, R) : R; //Grid Depth
+		float2 MD_W = tex2Dlod(SamplerDMN,float4(TC,0,0)).xy;
+		float W_Masking = MD_W.y == 0.5 ? 0 : 1;
+		MD_W.x = ZPD_Boundary >= 4 ? max( W_Masking, MD_W.x) : MD_W.x; //Grid Depth
+		return MD_W.x;
+	}
+	*/
 	float3x3 Fade(float2 texcoord)
 	{
 		//Check Depth
@@ -2806,15 +2822,12 @@ uniform int Extra_Information <
 					float ZPD_I = Zero_Parallax_Distance;
 					//Need to revisit this Because The performance gain even if it was small was worth it.
 					//#if !DX9_Toggle
-					//float PDepth = tex2Dlod(SamplerDMN,float4(GridXY,0,0)).x;
+					//float PDepth = P_Depth(GridXY);
 					//#else				
 					float PDepth = PrepDepth(GridXY)[1][0];
 					//#endif
-					if(ZPD_Boundary >= 4)
-					{
-						if ( PDepth == 1 )
+					if(ZPD_Boundary >= 4 && PDepth == 1)
 							ZPD_I = 0;
-					}
 
 					//Weapon Hand Consideration
 					#if CWH
@@ -2904,9 +2917,9 @@ uniform int Extra_Information <
 					  saturate(lerp( Depth( float2(0.5,Switch_Height_Point) ) * 2 , Avr_Mix(float2(0.5,Switch_Height_Point)).x , 0.25) ) ) ;
 	}
 	
-	float4 DepthMap(in float4 position : SV_Position,in float2 texcoord : TEXCOORD) : SV_Target
+	void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD, out float2 DM_Out : SV_Target0 , out float Color_Out : SV_Target1)
 	{
-		float4 DM = float4(PrepDepth(texcoord)[0][0],PrepDepth(texcoord)[0][1],PrepDepth(texcoord)[0][2],PrepDepth(texcoord)[1][1]);
+		float4 DM = float4(PrepDepth(texcoord)[0][0],PrepDepth(texcoord)[0][1],0,PrepDepth(texcoord)[1][1]);
 		float R = DM.x, G = DM.y, B = DM.z, Auto_Scale = 1;
 		float SP_Min = Set_Pop_Min().y, Select_Min_LvL_Trigger;float3 Level_Control = DS_X;
 		//Auto Scale
@@ -2987,8 +3000,8 @@ uniform int Extra_Information <
 		float3 Color, Color_A = tex2D(BackBufferCLAMP,texcoord ).rgb;//, Color_B = step(0.9,tex2D(BackBufferCLAMP,texcoord ).rgb);
 			   Color.x = max(Color_A.r, max(Color_A.g, Color_A.b)); 
 			   //Color.y = max(Color_B.r, max(Color_B.g, Color_B.b)); 
-		float3 Out = float3(R,G,B);
-		return saturate(float4(Out,Color.x));
+		DM_Out = saturate(float2(R,G));
+		Color_Out = saturate(Color.x);
 	}
 	
 	float AutoDepthRange(float d, float2 texcoord )
@@ -3009,7 +3022,7 @@ uniform int Extra_Information <
 			[unroll] //only really only need to check one point just above the center bottom and to the right.
 			for( int i = 0 ; i < 6; i++ )
 			{
-				WZPDB  = 1 - WConverge / tex2Dlod(SamplerDMN, float4(float2(WArray[i],Distance_From_Bottom), 0, 0)).z;
+				WZPDB  = 1 - WConverge / tex2Dlod(SamplerDMN, float4(float2(WArray[i],Distance_From_Bottom), 0, 0)).y;
 				if(Weapon_ZPD_Boundary.x >= 0)
 				{	
 					if ( WZPDB < -DJ_W ) // Default -0.1
@@ -3103,12 +3116,20 @@ uniform int Extra_Information <
 		//* lerp(1,2,D) // place this after saturate(Convergence)
 	   return float4( lerp(Convergence,lerp(D,Convergence,saturate(Convergence) ), ZP), lerp(W_Convergence,WD,WZP), Store_WC, WZPD_Switch);
 	}
-	
+
+	float WeaponMask(float2 TC,float Mips)
+	{
+		if(WP == 0)
+			return 1;
+		else
+			return tex2Dlod(SamplerDMN,float4(TC,0,Mips)).y == 0.5 ? 0 : 1;
+	}
+
 	float3 DB_Comb(float2 texcoord)
 	{
 		float Auto_Adjust_Weapon_Depth = 1, Anti_Weapon_Z = abs(AWZ);
 		// X = Mix Depth | Y = Weapon Mask | Z = Weapon Hand | W = Normal Depth
-		float4 DM = float4(tex2Dlod(SamplerDMN,float4(texcoord,0,0)).xyz,PrepDepth( texcoord )[1][1]);
+		float4 DM = float4(tex2Dlod(SamplerDMN,float4(texcoord,0,0)).x,WeaponMask(texcoord,0),tex2Dlod(SamplerDMN,float4(texcoord,0,0)).y,PrepDepth( texcoord )[1][1]);
 		//Hide Temporal passthrough
 		if(texcoord.x < pix.x * 2 && texcoord.y < pix.y * 2)
 			DM = PrepDepth(texcoord)[0][0];
@@ -3280,7 +3301,7 @@ uniform int Extra_Information <
 		// Should expand on this as a way to rescale Depth in a specific location around the weapon hand.
 		#if WHM 		
 		float DT_Switch = DT_Z < 0;
-		float Mask = tex2Dlod(SamplerDMN,float4(texcoord,0,DT_Switch ? 2.0 : 7.5)).y;
+		float Mask = WeaponMask(texcoord,DT_Switch ? 2.0 : 7.5);//tex2Dlod(SamplerDMN,float4(texcoord,0,DT_Switch ? 2.0 : 7.5)).y;
 		float Blur_Mask = tex2Dlod(SamplerDMN,float4(texcoord,0,9)).x;
 		if(WP > 0)
 			DM.y = lerp(DM.y,DT_Switch ? lerp(0.0,0.2,Blur_Mask) * lerp(2,1,FadeIO) : 0.025 ,smoothstep(0,abs(DT_Z),Mask) * lerp(1-FD_Adjust,1,FadeIO));
@@ -3292,7 +3313,7 @@ uniform int Extra_Information <
 	////////////////////////////////////////////////////Depth & Special Depth Triggers//////////////////////////////////////////////////////////////////
 	void Mod_Z(in float4 position : SV_Position, in float2 texcoord : TEXCOORD, out float2 Point_Out : SV_Target0 , out float Linear_Out : SV_Target1)
 	{   //Temporal adaptation https://knarkowicz.wordpress.com/2016/01/09/automatic-exposure/
-		float  ExAd = (1-Adapt_Adjust)*1250, Lum = tex2Dlod(SamplerDMN,float4(texcoord,0,12)).w, PastLum = tex2D(SamplerLumN,float2(0,0.583)).z;
+		float  ExAd = (1-Adapt_Adjust)*1250, Lum = tex2Dlod(SamplerCN,float4(texcoord,0,12)).x, PastLum = tex2D(SamplerLumN,float2(0,0.583)).z;
 	
 		float3 Set_Depth = DB_Comb( texcoord.xy ).xyz;
 		
@@ -3612,7 +3633,7 @@ uniform int Extra_Information <
 		if( View_Mode == 5)
 			Perf = lerp(0.375f,0.679f,GetDepth);				
 		//Luma Based VRS
-		float Luma_Map = smoothstep(0.0,0.375, tex2Dlod(SamplerDMN,float4(Coordinates,0,7)).w);
+		float Luma_Map = smoothstep(0.0,0.375, tex2Dlod(SamplerCN,float4(Coordinates,0,7)).x);
 		if( Performance_Level > 1 )
 				Perf *= lerp(0.25,1.0,smoothstep(0.0,0.25,saturate( Luma_Map )));
 		//Foveated Calculations	
@@ -3661,7 +3682,7 @@ uniform int Extra_Information <
 	    
 		float2 PrevParallaxCoord = float2( ParallaxCoord.x + deltaCoordinates, ParallaxCoord.y);
 		//Anti-Weapon Hand Fighting                                         // Set to 6.0 if it I want it Stronger.
-		float Weapon_Mask = tex2Dlod(SamplerDMN,float4(Coordinates,0,0)).y, ZFighting_Mask = 1.0-(1.0-tex2Dlod(SamplerDMN,float4(Coordinates ,0,5.5)).y - Weapon_Mask);
+		float Weapon_Mask = WeaponMask(Coordinates,0), ZFighting_Mask = 1.0-(1.0-WeaponMask(Coordinates,5.5) - Weapon_Mask); //tex2Dlod(SamplerDMN,float4(Coordinates,0,0)).y, ZFighting_Mask = 1.0-(1.0-tex2Dlod(SamplerDMN,float4(Coordinates ,0,5.5)).y - Weapon_Mask);
 			  ZFighting_Mask = ZFighting_Mask * (1.0-Weapon_Mask);
 		float2 PCoord = float2(View_Mode <= 1 || View_Mode >= 5 ? PrevParallaxCoord.x : ParallaxCoord.x, PrevParallaxCoord.y ) ;	
 			   //PCoord.x -= 0.005 * MS;		   
@@ -4807,7 +4828,8 @@ uniform int Extra_Information <
 		{
 			VertexShader = PostProcessVS;
 			PixelShader = DepthMap;
-			RenderTarget = texDMN;
+			RenderTarget0 = texDMN;
+			RenderTarget1 = texCN;
 		}	
 			pass Modzbuffer
 		{
