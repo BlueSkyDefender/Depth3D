@@ -3128,8 +3128,9 @@ uniform int Extra_Information <
 	float3 DB_Comb(float2 texcoord)
 	{
 		float Auto_Adjust_Weapon_Depth = 1, Anti_Weapon_Z = abs(AWZ);
+		float2 MD_W = tex2Dlod(SamplerDMN,float4(texcoord,0,0)).xy;
 		// X = Mix Depth | Y = Weapon Mask | Z = Weapon Hand | W = Normal Depth
-		float4 DM = float4(tex2Dlod(SamplerDMN,float4(texcoord,0,0)).x,WeaponMask(texcoord,0),tex2Dlod(SamplerDMN,float4(texcoord,0,0)).y,PrepDepth( texcoord )[1][1]);
+		float4 DM = float4(MD_W.x,WeaponMask(texcoord,0),MD_W.y,PrepDepth( texcoord )[1][1]);
 		//Hide Temporal passthrough
 		if(texcoord.x < pix.x * 2 && texcoord.y < pix.y * 2)
 			DM = PrepDepth(texcoord)[0][0];
