@@ -27764,7 +27764,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define NDW 1
 	#define PEW 1
 	//#define FOV 1
-#elif (App == 0x22A11E54 ) //Hellblade 2
+#elif (App == 0x22A11E54 || App == 0x2AEB2784) //Hellblade 2 Windows Store and Steam
     //#define DS_Z 2                 // Set View Mode
 	#define DA_W 1                 // Set Linerzation
     //#define DB_X 1                 // Flip
