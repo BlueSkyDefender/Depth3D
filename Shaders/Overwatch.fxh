@@ -27843,6 +27843,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define PEW 1
 	#define NFM 1
 	#define DSW 1
+	#define DRS 1
 	//#define FOV 1
 #else
 	#define NPW 1 //No Profile
