@@ -1,7 +1,7 @@
 	////----------------//
 	///**SuperDepth3D**///
 	//----------------////
-	#define SD3D "SuperDepth3D v4.2.2\n"
+	#define SD3D "SuperDepth3D v4.2.3\n"
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//* Depth Map Based 3D post-process shader
 	//* For Reshade 3.0+
@@ -3430,8 +3430,14 @@ uniform int Extra_Information <
 		
 		float Base_Depth_SubSampled = tex2Dlod(SamplerzBufferN_L, float4( texcoord, 0, lerp(0.0,4.0,Base_Depth_Buffers.x)) ).x;
 		float Base_Depth = lerp(Base_Depth_Buffers.x,Base_Depth_SubSampled,LR_Depth_Mask.x*Sat_Range);
-
-		uint VM_Mip_Cal = VMW_Array[clamp(View_Mode_Warping,0,9)];
+		
+		uint VMW_Switch = View_Mode_Warping;
+		#if LBM || LetterBox_Masking
+		float LB_Detection = tex2D(SamplerLumN,float2(1,0.083)).z;
+		if(LB_Detection)
+			VMW_Switch *= 0.5;
+		#endif
+		uint VM_Mip_Cal = VMW_Array[clamp(VMW_Switch,0,9)];
 		//Smoothing is not masked so that things that will cause distortions is smooth stronger then thing that don't need it.
 		LR_Depth_Mask = smoothstep(Warping_Masking == 2 ? 0.75 : 1,0,tex2Dlod(SamplerzBufferN_L,float4(texcoord,0,3)).x*(1-LR_Depth_Mask));
 		float VMW = Warping_Masking == 0 ? VM_Mip_Cal : lerp(VM_Mip_Cal,0,LR_Depth_Mask.x);
