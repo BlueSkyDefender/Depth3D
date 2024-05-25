@@ -1,7 +1,7 @@
 	////----------------//
 	///**SuperDepth3D**///
 	//----------------////
-	#define SD3D "SuperDepth3D v4.2.3\n"
+	#define SD3D "SuperDepth3D v4.2.4\n"
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//* Depth Map Based 3D post-process shader
 	//* For Reshade 3.0+
@@ -945,7 +945,7 @@ uniform int SuperDepth3D <
 		ui_tooltip = "Automatically Balance between ZPD Depth and Scene Depth.\n"
 					 "Default is Off.";
 		ui_category = "Stereoscopic Options";
-	> = 2;
+	> = ABE;
 
 	uniform float Inficolor_OverShoot <
 		ui_type = "drag";
@@ -2910,10 +2910,20 @@ uniform int Extra_Information <
 							  float4 ( 0.75 , Switch_Height_Point, 0.625, Switch_Height_Point),//Right Wide           6
 							  float4 (FP_IO_Pos().x,FP_IO_Pos().y,0.0,0.0),                    //Eye Tracker          7
 							  float4 (FP_IO_Pos().x,FP_IO_Pos().y,0.0,0.0)};                   //Eye Tracker Alt      8
-			
+	
 		float Overshoot = 1 + saturate(Inficolor_OverShoot), 
 			  AB_EX = lerp(Depth(XYArray[Auto_Balance_Ex].xy) , Depth(XYArray[Auto_Balance_Ex].zw), Auto_Balance_Ex > 3 && Auto_Balance_Ex < 7 ? 0.5 : 0 );
-		return float2(Auto_Balance_Ex > 0 ? Inficolor_3D_Emulator ? Overshoot * saturate(AB_EX * 2) : saturate(lerp(AB_EX * 2 , Avr_Mix(float2(0.5,Switch_Height_Point)).x , 0.25) ) : 1,
+
+		if(Auto_Balance_Ex > 0)
+		{	  
+			AB_EX = saturate(lerp(AB_EX * Overshoot , Avr_Mix(float2(0.5,Switch_Height_Point)).x , 0.25) );
+			if(Inficolor_3D_Emulator)
+				AB_EX = Overshoot * AB_EX;
+		}
+	    else
+	    	AB_EX = 1;
+	    	
+		return float2(AB_EX,
 					  saturate(lerp( Depth( float2(0.5,Switch_Height_Point) ) * 2 , Avr_Mix(float2(0.5,Switch_Height_Point)).x , 0.25) ) ) ;
 	}
 	
@@ -2931,7 +2941,7 @@ uniform int Extra_Information <
 		float3x3 Fade_Pass = Fade(texcoord); //[0][0] = F | [0][1] = F | [0][2] = F
 						 					//[1][0] = F | [1][1] = N | [1][2] = 0
 											 //[2][0] = 0 | [2][1] = 0 | [2][2] = 0
-		float2 Min_Trim = float2(SP_Min,Inficolor_3D_Emulator ? WZPD_and_WND.w : WZPD_and_WND.w);
+		float2 Min_Trim = float2(SP_Min,WZPD_and_WND.w);
 		#else
 		float3 Fade_Pass_A = float3( tex2D(SamplerzBuffer_BlurN,float2(0,0.083)).x,
 									 tex2D(SamplerzBuffer_BlurN,float2(0,0.250)).x,
@@ -2947,7 +2957,7 @@ uniform int Extra_Information <
 				
 			SP_Min = lerp(SP_Min,Level_Control.x, saturate(Select_Min_LvL_Trigger) );
 			
-			float2 Min_Trim = float2(SP_Min, Inficolor_3D_Emulator ? WZPD_and_WND.w : WZPD_and_WND.w);
+			float2 Min_Trim = float2(SP_Min,WZPD_and_WND.w);
 		#endif
 						 
 		if(Inficolor_3D_Emulator && Inficolor_Near_Reduction)
@@ -3010,7 +3020,7 @@ uniform int Extra_Information <
 	}
 		
 	float4 Conv(float2 MD_WHD,float2 texcoord,float2 abs_WZPDB)
-	{   float WConverge = 0.030, D = MD_WHD.x, Z = Zero_Parallax_Distance, WZP = 0.5, ZP = 0.5, W_Convergence = Inficolor_Near_Reduction ? WConverge * 0.8 : WConverge, WZPDB, WZPD_Switch, Distance_From_Bottom = lerp(0.9375,1.0,saturate(WFB)), ZPD_Boundary_Adjust = ZPD_Boundary_n_Fade.x, Store_WC, Set_Max_Depth = 1.0;
+	{   float WConverge = 0.030, D = MD_WHD.x, Z = Zero_Parallax_Distance, WZP = 0.5, ZP = 0.5, W_Convergence = Inficolor_Near_Reduction ? WConverge * 0.8 : WConverge, WZPDB, WZPD_Switch, Distance_From_Bottom = lerp(0.9375,1.0,saturate(WFB)), ZPD_Boundary_Adjust = ZPD_Boundary_n_Fade.x, Store_WC;
 	    //Screen Space Detector.
 		if (abs_WZPDB.x > 0)
 		{
@@ -3055,9 +3065,11 @@ uniform int Extra_Information <
 	
 			if (Auto_Depth_Adjust > 0)
 				D = AutoDepthRange(D,texcoord);
-
-				ZP = saturate( ZPD_Balance * max(0.5, Auto_Balance_Selection().x));
-				
+		#if Inficolor_3D_Emulator
+			ZP = saturate( ZPD_Balance * Auto_Balance_Selection().x);
+		#else			
+			ZP = saturate( ZPD_Balance * max(0.5, Auto_Balance_Selection().x));
+		#endif	
 			float4 Set_Adjustments = RE_Set_Adjustments();float2 SC_Adjutment = DT_W;
 			float DOoR_A = smoothstep(0,1,tex2D(SamplerLumN,float2(0, 0.250)).z), //ZPD_Boundary
 				  DOoR_B = smoothstep(0,1,tex2D(SamplerLumN,float2(0, 0.416)).z),   //Set_Adjustments X
@@ -3108,13 +3120,13 @@ uniform int Extra_Information <
 				ZP = 1;
 	
 			ZP = min(ZP, Auto_Balance_Clamp);
-	
-	#if Inficolor_3D_Emulator
-		Set_Max_Depth = Inficolor_Max_Depth;
-	#endif
-		D = min(saturate(Set_Max_Depth),D);
+
 		//* lerp(1,2,D) // place this after saturate(Convergence)
-	   return float4( lerp(Convergence,lerp(D,Convergence,saturate(Convergence) ), ZP), lerp(W_Convergence,WD,WZP), Store_WC, WZPD_Switch);
+		float Mod_Depth = lerp(Convergence,lerp(D,Convergence,saturate(Convergence) ), ZP);
+	#if Inficolor_3D_Emulator
+		Mod_Depth = lerp(Mod_Depth,min(saturate(Inficolor_Max_Depth),Mod_Depth),saturate(D * 0.5));
+	#endif
+	   return float4( Mod_Depth, lerp(W_Convergence,WD,WZP), Store_WC, WZPD_Switch);
 	}
 
 	float WeaponMask(float2 TC,float Mips)
@@ -4031,6 +4043,13 @@ uniform int Extra_Information <
 		//if(Stereoscopic_Mode == 5)//Need to work on this later.
 		//	Persp *= 0.25;
 		float2 TCL = texcoord, TCR = texcoord, TCL_T = texcoord, TCR_T = texcoord, TexCoords = texcoord;
+
+
+		#if Inficolor_3D_Emulator
+		if(Inficolor_Auto_Focus)
+			Persp *= lerp(0.75,1.0, saturate(smoothstep(-0.0175,min(0.5,0.13),Avr_Mix(texcoord).x)) );
+		#endif
+
 		TCL += Persp; TCR -= Persp; TCL_T += Persp; TCR_T -= Persp;
 		#if !Reconstruction_Mode
 			#if !Inficolor_3D_Emulator
@@ -4052,21 +4071,6 @@ uniform int Extra_Information <
 				TCR_T = float2(TCR_T.x*2,TCR_T.y*2-1);
 			}
 			#endif
-		#endif
-	
-		#if Inficolor_3D_Emulator
-			#if Compatibility_DD
-			if (Depth_Detection == 1)
-			{
-				if (!DepthCheck)
-					Persp = 0;
-			}	
-			#endif
-		if (Cancel_Depth)
-			Persp = 0;
-			
-		if(Inficolor_Auto_Focus)
-			Persp *= lerp(0.75,1.0, smoothstep(0,0.5,tex2D(SamplerLumN,float2(0,0.750)).z));
 		#endif
 
 		float4 color, Left_T, Right_T, L, R, Left_Right;

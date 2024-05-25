@@ -2648,7 +2648,7 @@ uniform int Extra_Information <
 			float2 GridXY; int2 iXY = ( ZPD_Boundary == 3 ? int2( 9, 4) : int2( 7, 5) );//was 12/4 and 7/7 This reduction saves 0.1 ms and should show no diff to the user.
 			[loop]                                                                     //I was thinking the lowest I can go would be 9/4 along with 7/5
 			for( int iX = 0 ; iX < iXY.x; iX++ )                                         //7 * 7 = 49 | 12 * 4 = 48 | 7 * 6 = 42 | 9 * 4 = 36 | 7 * 5 = 35
-			{   [unroll]
+			{   [loop] 
 				for( int iY = 0 ; iY < iXY.y; iY++ )
 				{
 					if(ZPD_Boundary == 1 || ZPD_Boundary == 6 || ZPD_Boundary == 7)
@@ -2938,7 +2938,9 @@ uniform int Extra_Information <
 			ZP = min(ZP,Auto_Balance_Clamp);
 			
 		//D = min(saturate(Max_Depth),D);
-	   return float4( lerp(Convergence,lerp(D,Convergence,saturate(Convergence)), ZP), lerp(W_Convergence,WD,WZP), Store_WC, WZPD_Switch);
+		float Mod_Depth = lerp(Convergence,lerp(D,Convergence,saturate(Convergence) ), ZP);
+				
+	   return float4( Mod_Depth, lerp(W_Convergence,WD,WZP), Store_WC, WZPD_Switch);
 	}
 	
 	float WeaponMask(float2 TC,float Mips)
@@ -3013,13 +3015,13 @@ uniform int Extra_Information <
 		DM.y = lerp( HandleConvergence.x, HandleConvergence.y * Auto_Adjust_Weapon_Depth, DM.y);
 	
 		float Edge_Adj = saturate(lerp(0.5,1.0,Edge_Adjust));
-		
+		float UI_Detection_Mask = 0.0625;		
 			DM = lerp(lerp(EdgeMask( DM, texcoord, 0.955 ),DM,  Edge_Adj), DM, saturate(1-DM.y) );
 			
 		if (Depth_Detection == 1)
 		{
 			if (!DepthCheck)
-				DM = 0.0625;
+				DM = UI_Detection_Mask;
 		}
 		
 		#if SDM
@@ -3039,81 +3041,81 @@ uniform int Extra_Information <
 			#endif
 			if( MSDT_A > 0)
 			{
-				DM = Direction ? 0.0625 : DM;
+				DM = Direction ? UI_Detection_Mask : DM;
 				
 				if(Menu_Size().y < 0)
 					Other_Direction = texcoord.y < MSDT_B;
 					
-				DM = Other_Direction ? 0.0625 : DM;
+				DM = Other_Direction ? UI_Detection_Mask : DM;
 			}
 		#endif	
 		
 		#if MMD
 		float4 SMD_Lock_A = Simple_Menu_Detection_A() && Lock_Menu_Detection();		
 			if( SMD_Lock_A.x == 1)
-				DM = 0.0625;
+				DM = UI_Detection_Mask;
 			if( SMD_Lock_A.y == 1)
-				DM = 0.0625;
+				DM = UI_Detection_Mask;
 			if( SMD_Lock_A.z == 1)
-				DM = 0.0625;
+				DM = UI_Detection_Mask;
 			if( SMD_Lock_A.w == 1)
-				DM = 0.0625;
+				DM = UI_Detection_Mask;
 			#if MMD >= 2
 		float4 SMD_Lock_B = Simple_Menu_Detection_B() && Lock_Menu_Detection();
 			if( SMD_Lock_B.x == 1)
-				DM = 0.0625;
+				DM = UI_Detection_Mask;
 			if( SMD_Lock_B.y == 1)
-				DM = 0.0625;
+				DM = UI_Detection_Mask;
 			if( SMD_Lock_B.z == 1)
-				DM = 0.0625;
+				DM = UI_Detection_Mask;
 			if( SMD_Lock_B.w == 1)
-				DM = 0.0625;
+				DM = UI_Detection_Mask;
 			#endif
 			#if MMD >= 3
 		float4 SMD_Lock_C = Simple_Menu_Detection_C() && Lock_Menu_Detection();
 			if( SMD_Lock_C.x == 1)
-				DM = 0.0625;
+				DM = UI_Detection_Mask;
 			if( SMD_Lock_C.y == 1)
-				DM = 0.0625;
+				DM = UI_Detection_Mask;
 			if( SMD_Lock_C.z == 1)
-				DM = 0.0625;
+				DM = UI_Detection_Mask;
 			if( SMD_Lock_C.w == 1)
-				DM = 0.0625;
+				DM = UI_Detection_Mask;
 			#endif
 			#if MMD >= 4
 		float4 SMD_Lock_D = Simple_Menu_Detection_D() && Lock_Menu_Detection();
 			if( SMD_Lock_D.x == 1)
-				DM = 0.0625;
+				DM = UI_Detection_Mask;
 			if( SMD_Lock_D.y == 1)
-				DM = 0.0625;
+				DM = UI_Detection_Mask;
 			if( SMD_Lock_D.z == 1)
-				DM = 0.0625;
+				DM = UI_Detection_Mask;
 			if( SMD_Lock_D.w == 1)
-				DM = 0.0625;
+				DM = UI_Detection_Mask;
 			#endif
 		#endif	
 		
 		#if SMD //May Do one or two more levels	
-			DM = Simple_Menu_A() ? 0.0625 : DM;
+			DM = Simple_Menu_A() ? UI_Detection_Mask : DM;
 			#if SMD >= 2	
-				DM = Simple_Menu_B() ? 0.0625 : DM;
+				DM = Simple_Menu_B() ? UI_Detection_Mask : DM;
 			#endif
 				#if SMD >= 3	
-					DM = Simple_Menu_C() ? 0.0625 : DM;
+					DM = Simple_Menu_C() ? UI_Detection_Mask : DM;
 				#endif
 					#if SMD >= 4	
-						DM = Simple_Menu_D() ? 0.0625 : DM;
+						DM = Simple_Menu_D() ? UI_Detection_Mask : DM;
 					#endif
 						#if SMD >= 5	
-							DM = Simple_Menu_E() ? 0.0625 : DM;
+							DM = Simple_Menu_E() ? UI_Detection_Mask : DM;
 						#endif
 							#if SMD >= 6	
-								DM = Simple_Menu_F() ? 0.0625 : DM;
+								DM = Simple_Menu_F() ? UI_Detection_Mask : DM;
 							#endif
 		#endif	
 		
 		if (Cancel_Depth)
-			DM = 0.0625;
+			DM = UI_Detection_Mask;
 	
 		#if UI_MASK
 			DM.y = lerp(DM.y,0,step(1.0-HUD_Mask(texcoord),0.5));
