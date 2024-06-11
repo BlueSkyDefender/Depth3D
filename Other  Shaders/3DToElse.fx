@@ -19,11 +19,13 @@
  //*																																												*//
  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-uniform bool SbS_Half_Full <
+uniform int SbS_Half_Full <
+	ui_type = "combo";
+	ui_items = "Off\0Full in/Half out\0Half in/Full out\0";
 	ui_label = "Half / Full";
-	ui_tooltip = "Switch Aspect Ratio From Half to Full for Side by Side Video.";
+	ui_tooltip = "Switch Aspect Ratio From Half/Full in to Full/Half out for Side by Side Video.";
 	ui_category = "Stereoscopic Conversion";
-> = false;
+> = 0;
 
 uniform int Stereoscopic_Mode_Input <
 	ui_type = "combo";
@@ -149,7 +151,11 @@ float fmod(float a, float b)
 float4 BB_Texture(float2 TC)
 {
 	if(Stereoscopic_Mode_Input == 1)
-		TC.y = SbS_Half_Full ? TC.y * 0.5 + 0.25 : TC.y;
+		TC.y = (SbS_Half_Full == 1) ? TC.y * 0.5 + 0.25 : TC.y;
+		TC.y = (SbS_Half_Full == 2) ? TC.y * 2.0 - 0.5 : TC.y;
+		if (TC.y < 0.0 || TC.y > 1.0)
+			return float4(0,0,0,0);
+				
 	float4 Color = tex2Dlod(BackBuffer, float4(TC,0,0) ), Exp_Darks, Exp_Brights;
 	        	 
 	float3 AdaptColor = tex2Dlod(BackBuffer, float4(TC,0,0) ).rgb;
