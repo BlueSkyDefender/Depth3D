@@ -1,7 +1,7 @@
 	////----------------//
 	///**SuperDepth3D**///
 	//----------------////
-	#define SD3D "SuperDepth3D v4.2.5\n"
+	#define SD3D "SuperDepth3D v4.2.3\n"
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//* Depth Map Based 3D post-process shader
 	//* For Reshade 3.0+
@@ -1567,6 +1567,14 @@ uniform int Extra_Information <
 			MipFilter = POINT;
 		};
 	
+		sampler BackBufferSampleTexture
+		{
+			Texture = BackBufferTex;
+			AddressU = CLAMP;
+			AddressV = CLAMP;
+			AddressW = CLAMP;
+		};
+	
 	#if D_Frame || DFW
 	texture texCF { Width = BUFFER_WIDTH ; Height = BUFFER_HEIGHT ; Format = RGBA8; };
 	
@@ -1899,7 +1907,7 @@ uniform int Extra_Information <
 	#if MMD || MDD || SMD || TMD || SUI || SDT || SD_Trigger
 	float3 C_Tresh(float2 TCLocations)//Color Tresh
 	{ 
-		return tex2Dlod(BackBufferCLAMP,float4(TCLocations,0, 0)).rgb;
+		return tex2Dlod(BackBufferSampleTexture,float4(TCLocations,0, 0)).rgb;
 	}
 	
 	bool Check_Color(float2 Pos_IN, float C_Value)
@@ -4462,6 +4470,7 @@ uniform int Extra_Information <
 		//Color = tex2Dlod(SamplerLumN,float4(1, 0.083,0,0)).z;
 		//Color = CWH_Mask(texcoord);
 		//Color =  LBSensitivity(SLLTresh(float2(0.05,0.5), 5));
+	
 		return Color.rgba;
 	}
 		

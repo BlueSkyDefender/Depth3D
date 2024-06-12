@@ -1,7 +1,7 @@
 	////--------------------//
 	///**SuperDepth3D_VR+**///
 	//--------------------////
-	#define SD3DVR "SuperDepth3D_VR+ v4.2.1\n"
+	#define SD3DVR "SuperDepth3D_VR+ v4.2.2\n"
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//* Depth Map Based 3D post-process shader
 	//* For Reshade 4.4+ I think...
@@ -1354,9 +1354,23 @@ uniform int Extra_Information <
 			AddressU = BORDER;
 			AddressV = BORDER;
 			AddressW = BORDER;
+			MagFilter = POINT;
+			MinFilter = POINT;
+			MipFilter = POINT;
 		};
 	
 	sampler BackBufferCLAMP
+		{
+			Texture = BackBufferTex;
+			AddressU = CLAMP;
+			AddressV = CLAMP;
+			AddressW = CLAMP;
+			MagFilter = POINT;
+			MinFilter = POINT;
+			MipFilter = POINT;
+		};
+	
+		sampler BackBufferSampleTexture
 		{
 			Texture = BackBufferTex;
 			AddressU = CLAMP;
@@ -1746,7 +1760,7 @@ uniform int Extra_Information <
 	#if MMD || MDD || SMD || TMD || SUI || SDT || SD_Trigger
 	float3 C_Tresh(float2 TCLocations)//Color Tresh
 	{ 
-		return tex2Dlod(BackBufferCLAMP,float4(TCLocations,0, 0)).rgb;
+		return tex2Dlod(BackBufferSampleTexture,float4(TCLocations,0, 0)).rgb;
 	}
 	
 	bool Check_Color(float2 Pos_IN, float C_Value)

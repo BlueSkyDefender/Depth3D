@@ -1,7 +1,7 @@
 ////----------------------------------------//
 ///SuperDepth3D Overwatch Automation Header///
 //----------------------------------------////
-#define OVERWATCH "Overwatch v3.8.5\n"
+#define OVERWATCH "Overwatch v3.8.6\n"
 //---------------------------------------OVERWATCH---------------------------------------//
 // If you are reading this stop. Go away and never look back. From this point on if you  //
 // still think it's is worth looking at this..... Then no one can save you or your soul. //
@@ -27514,7 +27514,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	//#define TMD 1	
 
 	//Simple Menu Detection
-    #define SMD 5 //Off 0 | 1 | 2 | 3 | 4 | 5 | 6 
+    #define SMD 6 //Off 0 | 1 | 2 | 3 | 4 | 5 | 6 
     //Inventory
     #define DW_X float4( 0.092 , 0.088 , 0.500 , 0.096)    //Pos A = XY Any & B = ZW Lock 
     #define DW_Y float2( 0.720 , 0.094 )                   //Pos C = XY 
@@ -27536,9 +27536,9 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define DHH_Y float2( 0.402 , 0.602 )                   //Pos C = XY 
     #define DHH_Z float4( 21.0, 0.0, 30.0, 1000.0)   //Menu Detection Type for A = X, B = Y, & C = Z. The Last Value is a Wild Card amount W is for X and Z. 
 
-    #define DII_X float4( 0.500 , 0.500 , 0.500 , 0.500)    //Pos A = XY Any & B = ZW Lock 
-    #define DII_Y float2( 0.500 , 0.500 )                   //Pos C = XY 
-    #define DII_Z float4( 1000.0, 1000.0, 1000.0, 1000.0)   //Menu Detection Type for A = X, B = Y, & C = Z. The Last Value is a Wild Card amount W is for X and Z. 
+    #define DII_X float4( 0.688 , 0.372 , 0.065 , 0.500)    //Pos A = XY Any & B = ZW Lock 
+    #define DII_Y float2( 0.688 , 0.507 )                   //Pos C = XY 
+    #define DII_Z float4( 27.0, 0.0, 25.0, 1000.0)   //Menu Detection Type for A = X, B = Y, & C = Z. The Last Value is a Wild Card amount W is for X and Z. 
 
 
     //Stencil UI & Detection
