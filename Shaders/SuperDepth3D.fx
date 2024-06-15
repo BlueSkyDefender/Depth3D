@@ -1,7 +1,7 @@
 	////----------------//
 	///**SuperDepth3D**///
 	//----------------////
-	#define SD3D "SuperDepth3D v4.2.3\n"
+	#define SD3D "SuperDepth3D v4.2.5\n"
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//* Depth Map Based 3D post-process shader
 	//* For Reshade 3.0+
@@ -412,7 +412,7 @@ uniform int SuperDepth3D <
 	ui_type = "radio";
 	>;
 
-	//uniform float2 TEST < ui_type = "slider"; ui_min = 0.0; ui_max = 1.0; > = 0.00;
+	//uniform float4 TEST < ui_type = "slider"; ui_min = 0.0; ui_max = 1.0; > = 0.00;
 	//Divergence & Convergence//
 	uniform float Divergence <
 		ui_type = "slider";
@@ -1237,7 +1237,19 @@ uniform int SuperDepth3D <
 					 "Default is Off.";
 		ui_category = "Miscellaneous Options";
 	> = false;
-
+	
+	#if WHM	
+	uniform float UI_Seeking_Strength <
+		ui_type = "slider";
+		ui_min = 0.0; ui_max = 1.0; ui_step = 0.01;
+		ui_label = " UI Adjust";
+		ui_tooltip = "This gives control over adjusting seeking for UI when it's enabled.\n"
+					"Default is 0.0.";
+		ui_category = "Miscellaneous Options";
+	> = DT_Z;
+	#else
+	static const float UI_Seeking_Strength = DT_Z;	
+	#endif	
 	//Extra Informaton
 uniform int Extra_Information <
 	ui_text =   "Profiles Info:\n"
@@ -1513,12 +1525,11 @@ uniform int Extra_Information <
 	}
 	///////////////////////////////////////////////////////////Conversions/////////////////////////////////////////////////////////////
 	float3 RGBtoYCbCr(float3 rgb) // For Super3D a new Stereo3D output.
-	{   float TCoRF[1];//The Chronicles of Riddick: Assault on Dark Athena FIX I don't know why it works.......
-		float Y  =  .299 * rgb.x + .587 * rgb.y + .114 * rgb.z; // Luminance
+	{   float Y  =  .299 * rgb.x + .587 * rgb.y + .114 * rgb.z; // Luminance
 		float Cb = -.169 * rgb.x - .331 * rgb.y + .500 * rgb.z; // Chrominance Blue
 		float Cr =  .500 * rgb.x - .419 * rgb.y - .081 * rgb.z; // Chrominance Red
 		return float3(Y,Cb + 128./255.,Cr + 128./255.);
-	}//Code Not used for anything...
+	}
 	///////////////////////////////////////////////////////////////3D Starts Here///////////////////////////////////////////////////////////
 	texture DepthBufferTex : DEPTH;
 	sampler DepthBuffer
@@ -1616,8 +1627,12 @@ uniform int Extra_Information <
 		{
 			Texture = texDMN;
 		};
-
-	texture texCN { Width = BUFFER_WIDTH ; Height = BUFFER_HEIGHT * Lower_Depth_Rez_B; Format = R8; MipLevels = Max_Mips; };
+	#if WHM
+		#define Color_Format_A RG8
+	#else
+		#define Color_Format_A R8
+	#endif
+	texture texCN { Width = BUFFER_WIDTH ; Height = BUFFER_HEIGHT * Lower_Depth_Rez_B; Format = Color_Format_A; MipLevels = Max_Mips; };
 	
 	sampler SamplerCN
 		{
@@ -1643,17 +1658,17 @@ uniform int Extra_Information <
 		
 	#if Reconstruction_Mode
 		#if BC_SPACE == 1
-			#define Color_Format RGBA16
+			#define Color_Format_B RGBA16
 		#else
-			#define Color_Format RGB10A2
+			#define Color_Format_B RGB10A2
 		#endif
-	texture texSD_CB_L { Width = BUFFER_WIDTH ; Height = BUFFER_HEIGHT ; Format = Color_Format;};
+	texture texSD_CB_L { Width = BUFFER_WIDTH ; Height = BUFFER_HEIGHT ; Format = Color_Format_B;};
 	
 	sampler Sampler_SD_CB_L
 		{
 			Texture = texSD_CB_L;
 		};
-	texture texSD_CB_R { Width = BUFFER_WIDTH ; Height = BUFFER_HEIGHT ; Format = Color_Format;};
+	texture texSD_CB_R { Width = BUFFER_WIDTH ; Height = BUFFER_HEIGHT ; Format = Color_Format_B;};
 	
 	sampler Sampler_SD_CB_R
 		{
@@ -1934,22 +1949,38 @@ uniform int Extra_Information <
 		}
 		#endif
 	
-		#if LMD //Text Menu Detection
+		#if LMD //Text Menu Detection One
 		float Lock_Menu_Detection()//Active RGB Detection
 		{ 
-			float2 Pos_A = DCC_X.xy, Pos_B = DCC_X.zw, Pos_C = DCC_Y.xy;
-			float4 ST_Values = DCC_Z;
+			float Menu_Detection_0, Menu_Detection_1;
+			float2 Pos_A_0 = DCC_X.xy, Pos_B_0 = DCC_X.zw, Pos_C_0 = DCC_Y.xy;
+			float4 ST_Values_0 = DCC_Z;
 	
 			//Wild Card Always On
-			float Menu_X = Check_Color(Pos_A, ST_Values.x) || Check_Color(Pos_A, ST_Values.w);
+			float Menu_X_0 = Check_Color(Pos_A_0, ST_Values_0.x) || Check_Color(Pos_A_0, ST_Values_0.w);
 	
-			float Menu_Z = Check_Color(Pos_C, ST_Values.z) || Check_Color(Pos_C, ST_Values.w);
+			float Menu_Z_0 = Check_Color(Pos_C_0, ST_Values_0.z) || Check_Color(Pos_C_0, ST_Values_0.w);
 			
-			float Menu_Detection = Menu_X &&                          //X & W is wiled Card.
-								   Check_Color(Pos_B, ST_Values.y) && //Y
-								   Menu_Z;                            //Z & W is wiled Card.
+			Menu_Detection_0 = Menu_X_0 &&                          //X & W is wiled Card.
+							   Check_Color(Pos_B_0, ST_Values_0.y) && //Y
+							   Menu_Z_0;                            //Z & W is wiled Card.
+								   
+			#if LMD > 1 //Text Menu Detection Two
+				float2 Pos_A_1 = DMM_X.xy, Pos_B_1 = DMM_X.zw, Pos_C_1 = DMM_Y.xy;
+				float4 ST_Values_1 = DMM_Z;
+		
+				//Wild Card Always On
+				float Menu_X_1 = Check_Color(Pos_A_1, ST_Values_1.x) || Check_Color(Pos_A_1, ST_Values_1.w);
+		
+				float Menu_Z_1 = Check_Color(Pos_C_1, ST_Values_1.z) || Check_Color(Pos_C_1, ST_Values_1.w);
+				
+				Menu_Detection_1 = Menu_X_1 &&                          //X & W is wiled Card.
+								   Check_Color(Pos_B_1, ST_Values_1.y) && //Y
+								   Menu_Z_1;                            //Z & W is wiled Card.
+			#endif	
 	
-			return !(Menu_Detection > 0);
+			//return !(Menu_Detection_0 > 0);
+			return (Menu_Detection_0 <= 0) || (Menu_Detection_1 <= 0);
 		}
 		#else
 		float Lock_Menu_Detection()
@@ -2961,7 +2992,7 @@ uniform int Extra_Information <
 					  saturate(lerp( Depth( float2(0.5,Switch_Height_Point) ) * 2 , Avr_Mix(float2(0.5,Switch_Height_Point)).x , 0.25) ) ) ;
 	}
 	
-	void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD, out float2 DM_Out : SV_Target0 , out float Color_Out : SV_Target1)
+	void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD, out float2 DM_Out : SV_Target0 , out float2 Color_Out : SV_Target1)
 	{
 		float4 DM = float4(PrepDepth(texcoord)[0][0],PrepDepth(texcoord)[0][1],0,PrepDepth(texcoord)[1][1]);
 		float R = DM.x, G = DM.y, B = DM.z, Auto_Scale = 1;
@@ -3041,11 +3072,25 @@ uniform int Extra_Information <
 				G = Fade_Pass_B.z;
 		#endif	
 		//Luma Map
-		float3 Color, Color_A = tex2D(BackBufferCLAMP,texcoord ).rgb;//, Color_B = step(0.9,tex2D(BackBufferCLAMP,texcoord ).rgb);
+		float3 Color, Color_A = tex2D(BackBufferSampleTexture,texcoord ).rgb;//, Color_B = step(0.9,tex2D(BackBufferCLAMP,texcoord ).rgb);
 			   Color.x = max(Color_A.r, max(Color_A.g, Color_A.b)); 
-			   //Color.y = max(Color_B.r, max(Color_B.g, Color_B.b)); 
+		#if WHM 
+		float2 TC_Off = texcoord * float2(2,1);// - float2(1,0);
+		float2 Offset = float2(5,5)*pix;
+		float3 center = tex2D(BackBufferSampleTexture, TC_Off).xyz;
+		float3 right = tex2D(BackBufferSampleTexture, TC_Off + float2(Offset.x, 0.0)).xyz;
+		float3 left = tex2D(BackBufferSampleTexture, TC_Off + float2(-Offset.x, 0.0)).xyz;
+		float3 up = tex2D(BackBufferSampleTexture, TC_Off + float2(0.0, Offset.y)).xyz;
+		float3 down = tex2D(BackBufferSampleTexture, TC_Off + float2(0.0, -Offset.y)).xyz;
+		
+		float3 Color_UI_MAP = -4.0 * center + right + left + up + down; //We mask it out later
+		
+		Color.y = max(Color_UI_MAP.r, max(Color_UI_MAP.g, Color_UI_MAP.b));
+		#endif
+		
 		DM_Out = saturate(float2(R,G));
-		Color_Out = saturate(Color.x);
+		
+		Color_Out = saturate(Color.xy);
 	}
 	
 	float AutoDepthRange(float d, float2 texcoord )
@@ -3344,14 +3389,28 @@ uniform int Extra_Information <
 		#if UI_MASK
 			DM.y = lerp(DM.y,0,step(1.0-HUD_Mask(texcoord),0.5));
 		#endif
-	
+		
 		// Should expand on this as a way to rescale Depth in a specific location around the weapon hand.
 		#if WHM 		
 		float DT_Switch = DT_Z < 0;
-		float Mask = WeaponMask(texcoord,DT_Switch ? 2.0 : 7.5);//tex2Dlod(SamplerDMN,float4(texcoord,0,DT_Switch ? 2.0 : 7.5)).y;
-		float Blur_Mask = tex2Dlod(SamplerDMN,float4(texcoord,0,9)).x;
+		float Mask_A = tex2Dlod(SamplerLumN,float4(texcoord * float2(0.5,1) ,0,4.0)).x;
+		float Mask_B = tex2Dlod(SamplerLumN,float4(texcoord * float2(0.5,1) + float2(0.5,0) ,0,2.0)).x * 0.5;
 		if(WP > 0)
-			DM.y = lerp(DM.y,DT_Switch ? lerp(0.0,0.2,Blur_Mask) * lerp(2,1,FadeIO) : 0.025 ,smoothstep(0,abs(DT_Z),Mask) * lerp(1-FD_Adjust,1,FadeIO));
+		{
+			if (DT_Switch)
+			{
+				float Blur_Mask = tex2Dlod(SamplerDMN,float4(texcoord,0,9)).x;
+				DM.y = lerp(DM.y,lerp(0.0,0.2,Blur_Mask) * lerp(2,1,FadeIO) ,smoothstep(0,abs(UI_Seeking_Strength),Mask_A) * lerp(1-FD_Adjust,1,FadeIO));
+			}
+			else
+			{	
+				float UI_MASK_A = tex2Dlod(SamplerCN,float4(texcoord * float2(0.5,1)  ,0,6)).y ;
+
+				UI_MASK_A =  lerp( 0, saturate(UI_MASK_A * 2.0),Mask_A); 				
+				
+				DM.y = lerp(DM.y, lerp(WeaponMask(texcoord,0) ? 0.5 : DM.y,0.025,saturate( Mask_A + Mask_B )) ,smoothstep(0,abs(  UI_Seeking_Strength  ),UI_MASK_A) );// * lerp(1-FD_Adjust,1,FadeIO));
+			}		
+		}
 		#endif
 	
 		return float3(DM.y,PrepDepth( texcoord )[1][1],HandleConvergence.z);
@@ -3483,15 +3542,15 @@ uniform int Extra_Information <
 		if(LB_Detection)
 			VMW_Switch *= 0.5;
 		#endif
-		uint VM_Mip_Cal = VMW_Array[clamp(VMW_Switch,0,9)];
-		//Smoothing is not masked so that things that will cause distortions is smooth stronger then thing that don't need it.
-		LR_Depth_Mask = smoothstep(Warping_Masking == 2 ? 0.75 : 1,0,tex2Dlod(SamplerzBufferN_L,float4(texcoord,0,3)).x*(1-LR_Depth_Mask));
-		float VMW = Warping_Masking == 0 ? VM_Mip_Cal : lerp(VM_Mip_Cal,0,LR_Depth_Mask.x);
-		/*
+		uint VM_Mip_Cal = VMW_Array[clamp(VMW_Switch,0,9)], ISV_Switch = 3;
+
 		float FadeIO = smoothstep(0,1,tex2D(SamplerDMN,0).x);
-		if(FPS_Focus_Smoothing)
-			VMW = lerp(VMW, 5,FadeIO);
-		*/
+		if(FPSDFIO > 0)
+			ISV_Switch = lerp(ISV_Switch,6,FadeIO);
+
+		//Smoothing is not masked so that things that will cause distortions is smooth stronger then thing that don't need it.
+		LR_Depth_Mask = smoothstep(Warping_Masking == 2 ? 0.75 : 1,0,tex2Dlod(SamplerzBufferN_L,float4(texcoord,0,ISV_Switch)).x*(1-LR_Depth_Mask));
+		float VMW = Warping_Masking == 0 ? VM_Mip_Cal : lerp(VM_Mip_Cal,0,LR_Depth_Mask.x);
 		#if TMD == 1
 			VMW = lerp(clamp(VMW,0,6.0),6.0,Basic_UI);
 		#else
@@ -4287,8 +4346,12 @@ uniform int Extra_Information <
 												 1.0};                                  //0.916 												 
 		//Set a avr size for the Number of lines needed in texture storage.
 		float Grid = floor(texcoord.y * BUFFER_HEIGHT * BUFFER_RCP_HEIGHT * Num_of_Values);
-
-		Average = float4(0.0, Average_ZPD, Half_Buffer ? Storage_Array_A[int(fmod(Grid,Num_of_Values))] : Storage_Array_B[int(fmod(Grid,Num_of_Values))],0.0);
+		#if WHM 
+		float UI_MAP = texcoord.x < 0.5 ? WeaponMask(texcoord * float2(2,1),7.5) : WeaponMask(texcoord * float2(2,1) - float2(1,0),7.0);
+ 	   #else
+		float UI_MAP = 0.0;
+		#endif 	   
+		Average = float4(UI_MAP, Average_ZPD, Half_Buffer ? Storage_Array_A[int(fmod(Grid,Num_of_Values))] : Storage_Array_B[int(fmod(Grid,Num_of_Values))],0.0);
 		
 		#if Color_Correction_Mode
 			Color_Correction = float4(tex2D(samplerMinMaxRGB, texcoord).rgb,1);	

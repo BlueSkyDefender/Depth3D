@@ -1,7 +1,7 @@
 	////--------------------//
 	///**SuperDepth3D_VR+**///
 	//--------------------////
-	#define SD3DVR "SuperDepth3D_VR+ v4.2.2\n"
+	#define SD3DVR "SuperDepth3D_VR+ v4.2.4\n"
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//* Depth Map Based 3D post-process shader
 	//* For Reshade 4.4+ I think...
@@ -1412,8 +1412,12 @@ uniform int Extra_Information <
 		{
 			Texture = texDMVR;
 		};
-
-	texture texCVR  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT * Lower_Depth_Rez_B; Format = R8; MipLevels = 8;};
+	#if WHM
+		#define Color_Format_A RG8
+	#else
+		#define Color_Format_A R8
+	#endif
+	texture texCVR  { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT * Lower_Depth_Rez_B; Format = Color_Format_A; MipLevels = 8;};
 	
 	sampler SamplerCVR
 		{
@@ -1787,29 +1791,45 @@ uniform int Extra_Information <
 		}
 		#endif
 	
-		#if LMD //Text Menu Detection
+		#if LMD //Text Menu Detection One
 		float Lock_Menu_Detection()//Active RGB Detection
 		{ 
-			float2 Pos_A = DCC_X.xy, Pos_B = DCC_X.zw, Pos_C = DCC_Y.xy;
-			float4 ST_Values = DCC_Z;
+			float Menu_Detection_0, Menu_Detection_1;
+			float2 Pos_A_0 = DCC_X.xy, Pos_B_0 = DCC_X.zw, Pos_C_0 = DCC_Y.xy;
+			float4 ST_Values_0 = DCC_Z;
 	
 			//Wild Card Always On
-			float Menu_X = Check_Color(Pos_A, ST_Values.x) || Check_Color(Pos_A, ST_Values.w);
+			float Menu_X_0 = Check_Color(Pos_A_0, ST_Values_0.x) || Check_Color(Pos_A_0, ST_Values_0.w);
 	
-			float Menu_Z = Check_Color(Pos_C, ST_Values.z) || Check_Color(Pos_C, ST_Values.w);
+			float Menu_Z_0 = Check_Color(Pos_C_0, ST_Values_0.z) || Check_Color(Pos_C_0, ST_Values_0.w);
 			
-			float Menu_Detection = Menu_X &&                          //X & W is wiled Card.
-								   Check_Color(Pos_B, ST_Values.y) && //Y
-								   Menu_Z;                            //Z & W is wiled Card.
+			Menu_Detection_0 = Menu_X_0 &&                          //X & W is wiled Card.
+							   Check_Color(Pos_B_0, ST_Values_0.y) && //Y
+							   Menu_Z_0;                            //Z & W is wiled Card.
+								   
+			#if LMD > 1 //Text Menu Detection Two
+				float2 Pos_A_1 = DMM_X.xy, Pos_B_1 = DMM_X.zw, Pos_C_1 = DMM_Y.xy;
+				float4 ST_Values_1 = DMM_Z;
+		
+				//Wild Card Always On
+				float Menu_X_1 = Check_Color(Pos_A_1, ST_Values_1.x) || Check_Color(Pos_A_1, ST_Values_1.w);
+		
+				float Menu_Z_1 = Check_Color(Pos_C_1, ST_Values_1.z) || Check_Color(Pos_C_1, ST_Values_1.w);
+				
+				Menu_Detection_1 = Menu_X_1 &&                          //X & W is wiled Card.
+								   Check_Color(Pos_B_1, ST_Values_1.y) && //Y
+								   Menu_Z_1;                            //Z & W is wiled Card.
+			#endif	
 	
-			return !(Menu_Detection > 0);
-		}		
+			//return !(Menu_Detection_0 > 0);
+			return (Menu_Detection_0 <= 0) || (Menu_Detection_1 <= 0);
+		}
 		#else
 		float Lock_Menu_Detection()
 		{ 
 			return true;
 		}
-		#endif	
+		#endif		
 	#endif
 	
 	#if MDD || SMD || TMD || SUI
@@ -2773,7 +2793,7 @@ uniform int Extra_Information <
 		return float2(Auto_Balance_Ex > 0 ? saturate(lerp(AB_EX * 2 , Avr_Mix(float2(0.5,Switch_Height_Point)).x , 0.25) ) : 1, saturate(lerp( Depth( float2(0.5,Switch_Height_Point) ) * 2 , Avr_Mix(float2(0.5,Switch_Height_Point)).x , 0.25) ) ) ;
 	}
 
-	void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD, out float2 DM_Out : SV_Target0 , out float Color_Out : SV_Target1)
+	void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD, out float2 DM_Out : SV_Target0 , out float2 Color_Out : SV_Target1)
 	{
 		float4 DM = float4(PrepDepth(texcoord)[0][0],PrepDepth(texcoord)[0][1],PrepDepth(texcoord)[0][2],PrepDepth(texcoord)[1][1]);
 		float R = DM.x, G = DM.y, B = DM.z, Auto_Scale = WZPD_and_WND.z > 0 ? lerp(lerp(1.0,0.1,saturate(WZPD_and_WND.z * 2)),1.0,lerp(saturate(Auto_Balance_Selection().y * 2.5) , smoothstep(0,0.5,tex2D(SamplerLumVR,float2(0,0.750)).z), 0.5)) : 1;
@@ -2845,9 +2865,21 @@ uniform int Extra_Information <
 		//Luma Map
 		float3 Color, Color_A = tex2D(BackBufferCLAMP,texcoord ).rgb;//, Color_B = step(0.9,tex2D(BackBufferCLAMP,texcoord ).rgb);
 			   Color.x = max(Color_A.r, max(Color_A.g, Color_A.b)); 
-			   //Color.y = max(Color_B.r, max(Color_B.g, Color_B.b)); 
+		#if WHM 
+		float2 TC_Off = texcoord * float2(2,1);// - float2(1,0);
+		float2 Offset = float2(5,5)*pix;
+		float3 center = tex2D(BackBufferSampleTexture, TC_Off).xyz;
+		float3 right = tex2D(BackBufferSampleTexture, TC_Off + float2(Offset.x, 0.0)).xyz;
+		float3 left = tex2D(BackBufferSampleTexture, TC_Off + float2(-Offset.x, 0.0)).xyz;
+		float3 up = tex2D(BackBufferSampleTexture, TC_Off + float2(0.0, Offset.y)).xyz;
+		float3 down = tex2D(BackBufferSampleTexture, TC_Off + float2(0.0, -Offset.y)).xyz;
+		
+		float3 Color_UI_MAP = -4.0 * center + right + left + up + down; //We mask it out later
+		
+		Color.y = max(Color_UI_MAP.r, max(Color_UI_MAP.g, Color_UI_MAP.b));
+		#endif
 		DM_Out = saturate(float2(R,G));
-		Color_Out = saturate(Color.x);
+		Color_Out = saturate(Color.xy);
 	}
 	
 	float AutoDepthRange(float d, float2 texcoord )
@@ -3135,12 +3167,27 @@ uniform int Extra_Information <
 			DM.y = lerp(DM.y,0,step(1.0-HUD_Mask(texcoord),0.5));
 		#endif
 		
+		// Should expand on this as a way to rescale Depth in a specific location around the weapon hand.
 		#if WHM 		
 		float DT_Switch = DT_Z < 0;
-		float Mask = WeaponMask(texcoord,DT_Switch ? 2.0 : 7.5);;
-		float Blur_Mask = tex2Dlod(SamplerDMVR,float4(texcoord,0,9)).x;
+		float Mask_A = tex2Dlod(SamplerLumVR,float4(texcoord * float2(0.5,1) ,0,4.0)).w;
+		float Mask_B = tex2Dlod(SamplerLumVR,float4(texcoord * float2(0.5,1) + float2(0.5,0) ,0,2.0)).w * 0.5;
 		if(WP > 0)
-			DM.y = lerp(DM.y,DT_Switch ? lerp(0.0,0.2,Blur_Mask) * lerp(2,1,FadeIO) : 0.025 ,smoothstep(0,abs(DT_Z),Mask) * lerp(1- FD_Adjust,1,FadeIO));
+		{
+			if (DT_Switch)
+			{
+				float Blur_Mask = tex2Dlod(SamplerDMVR,float4(texcoord,0,9)).x;
+				DM.y = lerp(DM.y,lerp(0.0,0.2,Blur_Mask) * lerp(2,1,FadeIO) ,smoothstep(0,abs(DT_Z),Mask_A) * lerp(1-FD_Adjust,1,FadeIO));
+			}
+			else
+			{	
+				float UI_MASK_A = tex2Dlod(SamplerCVR,float4(texcoord * float2(0.5,1)  ,0,6)).y ;
+
+				UI_MASK_A =  lerp( 0, saturate(UI_MASK_A * 2.0),Mask_A); 				
+				
+				DM.y = lerp(DM.y, lerp(WeaponMask(texcoord,0) ? 0.5 : DM.y,0.025,saturate( Mask_A + Mask_B )) ,smoothstep(0,abs(  DT_Z  ),UI_MASK_A) );;
+			}		
+		}
 		#endif
 		
 		return float3(DM.y,PrepDepth( texcoord )[1][1],HandleConvergence.z);
@@ -3264,7 +3311,11 @@ uniform int Extra_Information <
 		if(LB_Detection)
 			VMW_Switch *= 0.5;
 		#endif
-		uint VM_Mip_Cal = VMW_Array[clamp(VMW_Switch,0,9)];
+		uint VM_Mip_Cal = VMW_Array[clamp(VMW_Switch,0,9)], ISV_Switch = 3;
+
+		float FadeIO = smoothstep(0,1,tex2D(SamplerDMVR,0).x);
+		if(FPSDFIO > 0)
+			ISV_Switch = lerp(ISV_Switch,6,FadeIO);
 
 		//Smoothing is not masked so that things that will cause distortions is smooth stronger then thing that don't need it.
 		LR_Depth_Mask = smoothstep(Warping_Masking == 2 ? 0.75 : 1, 0,tex2Dlod(SamplerzBufferVR_L,float4(texcoord,0,3)).x*(1-LR_Depth_Mask));		
@@ -4021,8 +4072,13 @@ uniform int Extra_Information <
 		#if Enable_Blinders_Mode 
 		Past_Blinders = tex2D(SamplerPBBVR,texcoord).x;
 		#endif
+		#if WHM 
+		float UI_MAP = texcoord.x < 0.5 ? WeaponMask(texcoord * float2(2,1),7.5) : WeaponMask(texcoord * float2(2,1) - float2(1,0),7.0);
+ 	   #else
+		float UI_MAP = 0.0;
+		#endif 
 		//Motion_Detection
-		AL = float4(length(tex2D(SamplerDMVR,texcoord).w - Past_Blinders), Average_ZPD,Half_Buffer ? Storage__Array_A[int(fmod(Grid,Num_of_Values))] : Storage__Array_B[int(fmod(Grid,Num_of_Values))], 0.0);
+		AL = float4(length(tex2D(SamplerDMVR,texcoord).w - Past_Blinders), Average_ZPD,Half_Buffer ? Storage__Array_A[int(fmod(Grid,Num_of_Values))] : Storage__Array_B[int(fmod(Grid,Num_of_Values))], UI_MAP);
 		#if Color_Correction_Mode
 		Other = float4(tex2D(samplerMinMaxRGB, texcoord).rgb,1);
 		#endif
@@ -4087,7 +4143,7 @@ uniform int Extra_Information <
 			Color.rgb = Menu_Open ? 0 : Format;
 		if(all(abs(float2(5.0,BUFFER_HEIGHT)-ScreenPos.xy) < float2(1.0,Debug_Y)))
 			Color.rgb = Menu_Open ? Format : 0;
-		
+
 		//Color = tex2D(SamplerLumVR,texcoord).z ;
 		float Text_Helper = Info_Fuction();
 
