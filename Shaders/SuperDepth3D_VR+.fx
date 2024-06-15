@@ -3184,7 +3184,7 @@ uniform int Extra_Information <
 				float UI_MASK_A = tex2Dlod(SamplerCVR,float4(texcoord * float2(0.5,1)  ,0,6)).y ;
 
 				UI_MASK_A =  lerp( 0, saturate(UI_MASK_A * 2.0),Mask_A); 				
-				
+				DM.y = WeaponMask(texcoord,0) ? 0.0 : DM.y;//Not sure if this was the best thing to do to mask it.			
 				DM.y = lerp(DM.y, lerp(WeaponMask(texcoord,0) ? 0.5 : DM.y,0.025,saturate( Mask_A + Mask_B )) ,smoothstep(0,abs(  DT_Z  ),UI_MASK_A) );;
 			}		
 		}
