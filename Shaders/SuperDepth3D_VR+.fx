@@ -1,7 +1,7 @@
 	////--------------------//
 	///**SuperDepth3D_VR+**///
 	//--------------------////
-	#define SD3DVR "SuperDepth3D_VR+ v4.2.4\n"
+	#define SD3DVR "SuperDepth3D_VR+ v4.2.5\n"
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//* Depth Map Based 3D post-process shader
 	//* For Reshade 4.4+ I think...
@@ -120,7 +120,7 @@ namespace SuperDepth3DVR
 		#define OW_WP "WP Off\0Custom WP\0"
 		static const int WSM = 0;
 		//Triggers
-		static const float DAO = 0, LDT = 0, ALM = 0, SSF = 0, SNF = 0, SSE = 0, SNE = 0, EDU = 0, LBI = 0, ISD = 0, ASA = 1, IWS = 0, SUI = 0, SSA = 0, SNA = 0, SSB = 0, SNB = 0, SSC = 0, SNC = 0, SSD = 0, SND = 0, FRM = 0, LHA = 0, WBS = 0, TMD = 0, AWZ = 0, CWH = 0, WBA = 0, WFB = 0, WND = 0, WRP = 0, MML = 0, SMD = 0, WHM = 0, SDU = 0, ABE = 2, LBE = 0, DRS = 0, MAC = 0, ARW = 0, OIL = 0, MMS = 0, NVK = 0, NDG = 0, FTM = 0, SPO = 0, MMD = 0, SMP = 0, LBR = 0, HQT = 0, AFD = 0, MDD = 0, FPS = 1, SMS = 1, OIF = 0, NCW = 0, RHW = 0, NPW = 0, SPF = 0, BDF = 0, HMT = 0, HMC = 0, DFW = 0, NFM = 0, DSW = 0, LBC = 0, LBS = 0, LBM = 0, DAA = 0, NDW = 0, PEW = 0, WPW = 0, FOV = 0, EDW = 0, SDT = 0;
+		static const float KHM = 0, DAO = 0, LDT = 0, ALM = 0, SSF = 0, SNF = 0, SSE = 0, SNE = 0, EDU = 0, LBI = 0, ISD = 0, ASA = 1, IWS = 0, SUI = 0, SSA = 0, SNA = 0, SSB = 0, SNB = 0, SSC = 0, SNC = 0, SSD = 0, SND = 0, FRM = 0, LHA = 0, WBS = 0, TMD = 0, AWZ = 0, CWH = 0, WBA = 0, WFB = 0, WND = 0, WRP = 0, MML = 0, SMD = 0, WHM = 0, SDU = 0, ABE = 2, LBE = 0, DRS = 0, MAC = 0, ARW = 0, OIL = 0, MMS = 0, NVK = 0, NDG = 0, FTM = 0, SPO = 0, MMD = 0, SMP = 0, LBR = 0, HQT = 0, AFD = 0, MDD = 0, FPS = 1, SMS = 1, OIF = 0, NCW = 0, RHW = 0, NPW = 0, SPF = 0, BDF = 0, HMT = 0, HMC = 0, DFW = 0, NFM = 0, DSW = 0, LBC = 0, LBS = 0, LBM = 0, DAA = 0, NDW = 0, PEW = 0, WPW = 0, FOV = 0, EDW = 0, SDT = 0;
 		//Overwatch.fxh State
 		#define OSW 1
 	#endif
@@ -294,7 +294,10 @@ namespace SuperDepth3DVR
 	#ifndef SD3DVR_Simple_Mode
 		#define SD3DVR_Simple_Mode 0
 	#endif
-
+	#ifndef Use_Point_Sampling
+		#define Use_Point_Sampling 0
+	#endif
+	
 	//Render Buffer Resolution limit.
 	#define RenderBufferWidth (BUFFER_WIDTH * 2) > 4096
 	//Render Buffer Warnings for HelixVision
@@ -1335,48 +1338,61 @@ uniform int Extra_Information <
 	///////////////////////////////////////////////////////////////3D Starts Here/////////////////////////////////////////////////////////////////
 	texture DepthBufferTex : DEPTH;
 	sampler DepthBuffer
-		{
-			Texture = DepthBufferTex;
-			AddressU = BORDER;
-			AddressV = BORDER;
-			AddressW = BORDER;
-			//Used Point for games like AMID Evil that don't have a proper Filtering.
-			MagFilter = POINT;
-			MinFilter = POINT;
-			MipFilter = POINT;
-		};
+	{
+		Texture = DepthBufferTex;
+		AddressU = BORDER;
+		AddressV = BORDER;
+		AddressW = BORDER;
+		//Used Point for games like AMID Evil that don't have a proper Filtering.
+		MagFilter = POINT;
+		MinFilter = POINT;
+		MipFilter = POINT;
+	};
 	
 	texture BackBufferTex : COLOR;
 	
 	sampler BackBuffer
-		{
-			Texture = BackBufferTex;
-			AddressU = BORDER;
-			AddressV = BORDER;
-			AddressW = BORDER;
-			MagFilter = POINT;
-			MinFilter = POINT;
-			MipFilter = POINT;
-		};
+	{
+		Texture = BackBufferTex;
+		AddressU = BORDER;
+		AddressV = BORDER;
+		AddressW = BORDER;
+		#if Use_Point_Sampling
+		MagFilter = POINT;
+		MinFilter = POINT;
+		MipFilter = POINT;
+		#endif
+	};
 	
 	sampler BackBufferCLAMP
-		{
-			Texture = BackBufferTex;
-			AddressU = CLAMP;
-			AddressV = CLAMP;
-			AddressW = CLAMP;
-			MagFilter = POINT;
-			MinFilter = POINT;
-			MipFilter = POINT;
-		};
+	{
+		Texture = BackBufferTex;
+		AddressU = CLAMP;
+		AddressV = CLAMP;
+		AddressW = CLAMP;
+		#if Use_Point_Sampling
+		MagFilter = POINT;
+		MinFilter = POINT;
+		MipFilter = POINT;
+		#endif
+	};
 	
-		sampler BackBufferSampleTexture
-		{
-			Texture = BackBufferTex;
-			AddressU = CLAMP;
-			AddressV = CLAMP;
-			AddressW = CLAMP;
-		};
+	#if Use_Point_Sampling	
+	sampler BackBufferSampleTexture
+	{
+		Texture = BackBufferTex;
+		AddressU = CLAMP;
+		AddressV = CLAMP;
+		AddressW = CLAMP;
+	};
+	#endif
+
+	#if Use_Point_Sampling		
+		#define Non_Point_Sampler BackBufferSampleTexture
+	#else
+		#define Non_Point_Sampler BackBufferCLAMP
+	#endif
+	
 	#if D_Frame || DFW
 	texture texCF { Width = BUFFER_WIDTH ; Height = BUFFER_HEIGHT ; Format = RGBA8; };
 	
@@ -1764,7 +1780,7 @@ uniform int Extra_Information <
 	#if MMD || MDD || SMD || TMD || SUI || SDT || SD_Trigger
 	float3 C_Tresh(float2 TCLocations)//Color Tresh
 	{ 
-		return tex2Dlod(BackBufferSampleTexture,float4(TCLocations,0, 0)).rgb;
+		return tex2Dlod(Non_Point_Sampler,float4(TCLocations,0, 0)).rgb;
 	}
 	
 	bool Check_Color(float2 Pos_IN, float C_Value)
@@ -2863,16 +2879,16 @@ uniform int Extra_Information <
 				G = Fade_Pass_B.z;
 		#endif
 		//Luma Map
-		float3 Color, Color_A = tex2D(BackBufferCLAMP,texcoord ).rgb;//, Color_B = step(0.9,tex2D(BackBufferCLAMP,texcoord ).rgb);
+		float3 Color, Color_A = tex2D(Non_Point_Sampler,texcoord ).rgb;//, Color_B = step(0.9,tex2D(BackBufferCLAMP,texcoord ).rgb);
 			   Color.x = max(Color_A.r, max(Color_A.g, Color_A.b)); 
 		#if WHM 
 		float2 TC_Off = texcoord * float2(2,1);// - float2(1,0);
 		float2 Offset = float2(5,5)*pix;
-		float3 center = tex2D(BackBufferSampleTexture, TC_Off).xyz;
-		float3 right = tex2D(BackBufferSampleTexture, TC_Off + float2(Offset.x, 0.0)).xyz;
-		float3 left = tex2D(BackBufferSampleTexture, TC_Off + float2(-Offset.x, 0.0)).xyz;
-		float3 up = tex2D(BackBufferSampleTexture, TC_Off + float2(0.0, Offset.y)).xyz;
-		float3 down = tex2D(BackBufferSampleTexture, TC_Off + float2(0.0, -Offset.y)).xyz;
+		float3 center = tex2D(Non_Point_Sampler, TC_Off).xyz;
+		float3 right = tex2D(Non_Point_Sampler, TC_Off + float2(Offset.x, 0.0)).xyz;
+		float3 left = tex2D(Non_Point_Sampler, TC_Off + float2(-Offset.x, 0.0)).xyz;
+		float3 up = tex2D(Non_Point_Sampler, TC_Off + float2(0.0, Offset.y)).xyz;
+		float3 down = tex2D(Non_Point_Sampler, TC_Off + float2(0.0, -Offset.y)).xyz;
 		
 		float3 Color_UI_MAP = -4.0 * center + right + left + up + down; //We mask it out later
 		
@@ -3167,6 +3183,13 @@ uniform int Extra_Information <
 			DM.y = lerp(DM.y,0,step(1.0-HUD_Mask(texcoord),0.5));
 		#endif
 		
+		#if KHM 
+		if(WP > 0)
+		{		
+			float Cal_Depth = saturate(Conv(tex2Dlod(SamplerDMVR,float4(texcoord,0,8.5)).x,texcoord,0.0).x);
+			DM.y = lerp( WeaponMask(texcoord ,5.5) && texcoord.y > 0.5 ? Cal_Depth : DM.y ,Cal_Depth,WeaponMask(texcoord ,0));
+		}
+		#endif		
 		// Should expand on this as a way to rescale Depth in a specific location around the weapon hand.
 		#if WHM 		
 		float DT_Switch = DT_Z < 0;
@@ -3223,7 +3246,7 @@ uniform int Extra_Information <
 				#if DX9_Toggle
 				texcoord.x *= 2.0;
 				#endif
-		float3 CCC = tex2D(BackBufferCLAMP,texcoord ).rgb;
+		float3 CCC = tex2D(Non_Point_Sampler,texcoord ).rgb;
 			#if TMD == 1		
 			float Gen_Mask = step(0.8f,(CCC.r+CCC.g+CCC.b)/3);
 			#else
@@ -3973,7 +3996,7 @@ uniform int Extra_Information <
 			{   //Had to change float4 to float3.... Error only shows under linux.
 				if(HelixVision)
 				{
-					Left.rgb = tex2D(BackBufferCLAMP,texcoord).rgb;
+					Left.rgb = tex2D(Non_Point_Sampler,texcoord).rgb;
 					//Right.rgb = R(float2(texcoord.x - 1,texcoord.y)).rgb;
 				}
 				else
