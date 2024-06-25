@@ -26366,7 +26366,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DF_Y 0.00          // Seperation
 	#define DA_Y 18.5 //12.5//7.5//28.5          // Near Plane Adjustment
     //#define DA_Z -0.125       // Linerzation Offset
-    #define DS_Y 2            // Linerzation Offset Effects only distance if true
+    //#define DS_Y 2            // Linerzation Offset Effects only distance if true
 	#define DB_Z 0.025         // Auto Depth Protection
 	#define DE_X 2            // ZPD Boundary 
 	#define DE_Y 0.75        // Set ZPD Boundary Level Zero 
@@ -26386,11 +26386,11 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DAA_W 2              //Warp/Halo Masking Type 
 	
 	#define BMT 1             // ZPD and World Scale Balance // I need to phase this out.
-	#define DF_Z 0.050           // Set the Balance  
-    #define DL_Y 0.125           // De-Artifact Only works on some View Modes and causes performance degredation
+	#define DF_Z 0.15           // Set the Balance  
+    #define DL_Y 0.15           // De-Artifact Only works on some View Modes and causes performance degredation
 	//#define DB_Y -1.0          // Effects De-Artifacts -1 to 1 Most of the time leave this at 0 and if you set 1 it takes depth into account 
     #define DL_Z 0.20        // Compat Power
-	#define DJ_X 0.25        // Range Smoothing
+	#define DJ_X 0.15        // Range Smoothing
 	
 	//Smooth Mode Setting
     #define SMS 3           //SM Toggle Separation
