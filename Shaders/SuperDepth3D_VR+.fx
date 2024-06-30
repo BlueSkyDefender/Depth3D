@@ -1,7 +1,7 @@
 	////--------------------//
 	///**SuperDepth3D_VR+**///
 	//--------------------////
-	#define SD3DVR "SuperDepth3D_VR+ v4.2.5\n"
+	#define SD3DVR "SuperDepth3D_VR+ v4.2.6\n"
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//* Depth Map Based 3D post-process shader
 	//* For Reshade 4.4+ I think...
@@ -657,7 +657,7 @@ namespace SuperDepth3DVR
 
 	uniform int Select_SS <
 		ui_type = "combo";
-		ui_items = "DLSS\0FSR\0XeSS\0";
+		ui_items = "DLSS\0FSR\0XeSS\0Variant One\0";
 		ui_label = " Upscaling Algorithm";
 		ui_tooltip = "Use this to match Super Sampling type.\n"
 					 "Default is FSR.";
@@ -689,12 +689,12 @@ namespace SuperDepth3DVR
 		ui_type = "slider";
 		#endif
 		ui_min = -5.0; ui_max = 5.0;
-		ui_label = " Upscaler Offset"; //***
+		ui_label = " Upscaler Offset";
 		ui_tooltip = "This Offset is for non conforming ZBuffer Postion witch is normaly 1 pixel wide.\n"
 					 "This issue only happens sometimes when using things like DLSS, XeSS and or FSR.\n"
 					 "This does not solve for TAA artifacts like Jittering or Smearing.\n"
 					 "Default and starts at 0 and is Off. With a max offset of 5 pixels Wide.";
-		ui_category = "Upscaling Corrections";
+		ui_category = "Scaling Corrections";
 	> = 0;
 
 	uniform bool Auto_Scaler_Adjust <
@@ -2369,13 +2369,6 @@ uniform int Extra_Information <
 	float4 TC_SP(float2 texcoord)
 	{	float LBDetect = tex2Dlod(SamplerLumVR,float4(1, 0.083,0,0)).z;
 		float2 H_V_A, H_V_B, X_Y_A, X_Y_B, S_texcoord = texcoord;
-		#if BD_Correction || BDF
-		if(BD_Options == 0 || BD_Options == 2)
-		{
-			float3 K123 = Colors_K1_K2_K3 * 0.1;
-			texcoord = D(texcoord.xy,K123.x,K123.y,K123.z);
-		}
-		#endif
 		
 		#if DB_Size_Position || SPF || LBC || LB_Correction
 
@@ -2497,29 +2490,51 @@ uniform int Extra_Information <
 		texcoord.xy -= DLSS_FSR_Offset.xy * pix;
 	
 		float SS_Scaling = 1;
-	    //Select_SS 0 //DLSS
-	    //Select_SS 1 //FSR
-	    //Select_SS 2 //XeSS
-        switch (Easy_SS_Scaling) 
+		//Select_SS 0 //DLSS
+		//Select_SS 1 //FSR
+		//Select_SS 2 //XeSS
+		//Select_SS 3 //Custom
+		if(Select_SS == 3)
 		{
-            case 1:
-                SS_Scaling = Select_SS == 2 ? 1.303 : 1.5;
-                break;
-            case 2:
-     		   if(Select_SS == 2)
-                	SS_Scaling = 1.5;
-                else
-					SS_Scaling = Select_SS == 1 ? 1.7 : 1.73;
-                break;
-            case 3:
-                SS_Scaling = Select_SS == 2 ? 1.7 : 2.0;
-                break;
-            case 4:
-                SS_Scaling = Select_SS == 2 ? 2.0 : 3.0;
-                break;
-        }
-				
-		texcoord.xy /= SS_Scaling; 
+		    switch (Easy_SS_Scaling) 
+		    {
+		        case 1:
+		            SS_Scaling = 1.2195;
+		            break;
+		        case 2:
+		            SS_Scaling = 1.460;
+		            break;
+		        case 3:
+		            SS_Scaling = 1.818;
+		            break;
+		        case 4:
+		            SS_Scaling = 2.513;
+		            break;
+		    }
+		}
+		else
+		{
+		    switch (Easy_SS_Scaling) 
+		    {
+		        case 1:
+		            SS_Scaling = Select_SS == 2 ? 1.303 : 1.5;
+		            break;
+		        case 2:
+		            if(Select_SS == 2)
+		                SS_Scaling = 1.5;
+		            else
+		                SS_Scaling = Select_SS == 1 ? 1.7 : 1.73;
+		            break;
+		        case 3:
+		            SS_Scaling = Select_SS == 2 ? 1.7 : 2.0;
+		            break;
+		        case 4:
+		            SS_Scaling = Select_SS == 2 ? 2.0 : 3.0;
+		            break;
+		    }
+		}
+		
+		texcoord.xy /= SS_Scaling;
 	
 		float4 DM = Depth(TC_SP(texcoord).xy).xxxx;
 		float R, G, B, A, WD = WeaponDepth(TC_SP(texcoord).xy).x, CoP = WeaponDepth(TC_SP(texcoord).xy).y, CutOFFCal = (CoP/DMA()) * 0.5; //Weapon Cutoff Calculation
@@ -3466,6 +3481,14 @@ uniform int Extra_Information <
 	
 	void Mix_Z(in float4 position : SV_Position, in float2 texcoord : TEXCOORD, out float MixOut : SV_Target0)
 	{ 
+		#if BD_Correction || BDF
+		if(BD_Options == 0 || BD_Options == 2)
+		{
+			float3 K123 = Colors_K1_K2_K3 * 0.1;
+			texcoord = D(texcoord.xy,K123.x,K123.y,K123.z);
+		}
+		#endif
+	
 		float2 Shift_TC = texcoord;
 		
 		#if SDT || SD_Trigger

@@ -1,7 +1,7 @@
 	////----------------//
 	///**SuperDepth3D**///
 	//----------------////
-	#define SD3D "SuperDepth3D v4.2.7\n"
+	#define SD3D "SuperDepth3D v4.2.8\n"
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//* Depth Map Based 3D post-process shader
 	//* For Reshade 3.0+
@@ -414,8 +414,9 @@ uniform int SuperDepth3D <
 	ui_label = " ";
 	ui_type = "radio";
 	>;
+	
+	//uniform float2 TEST < ui_type = "slider"; ui_min = 0.0; ui_max = 1.0; > = 0.00;
 
-	//uniform float4 TEST < ui_type = "slider"; ui_min = 0.0; ui_max = 1.0; > = 0.00;
 	//Divergence & Convergence//
 	uniform float Divergence <
 		ui_type = "slider";
@@ -426,7 +427,7 @@ uniform int SuperDepth3D <
 					  "Default is 50% and Max is 125%.";
 		ui_category = "Divergence & Separation";
 	> = 50;
-	
+
 	uniform float Separation_Adjust <
 		ui_type = "drag";
 		ui_min = 0.0; ui_max = 0.125;
@@ -637,7 +638,7 @@ uniform int SuperDepth3D <
 
 	uniform int Select_SS <
 		ui_type = "combo";
-		ui_items = "DLSS\0FSR\0XeSS\0";
+		ui_items = "DLSS\0FSR\0XeSS\0Variant One\0";
 		ui_label = " Upscaling Algorithm";
 		ui_tooltip = "Use this to match Super Sampling type.\n"
 					 "Default is FSR.";
@@ -661,15 +662,27 @@ uniform int SuperDepth3D <
 					"Default is Off.";			 
 		ui_category = "Scaling Corrections";
 	> = 0;
-
+	/*
+	uniform float SS_Scaling_Adjuster <
+		#if Compatibility
+		ui_type = "drag";
+		#else
+		ui_type = "slider";
+		#endif
+		ui_min = -0.5; ui_max = 0.5;
+		ui_label = " Upscaler Adjust";
+		ui_tooltip = "This lets you adjust existing values to fit the screen.";
+		ui_category = "Scaling Corrections";
+	> = 0.0;
+	*/
 	uniform float2 DLSS_FSR_Offset <
 		#if Compatibility
 		ui_type = "drag";
 		#else
 		ui_type = "slider";
 		#endif
-		ui_min = 0.0; ui_max = 5.0;
-		ui_label = " Upscaler Offset"; //***
+		ui_min = -5.0; ui_max = 5.0;
+		ui_label = " Upscaler Offset";
 		ui_tooltip = "This Offset is for non conforming ZBuffer Postion witch is normaly 1 pixel wide.\n"
 					 "This issue only happens sometimes when using things like DLSS, XeSS and or FSR.\n"
 					 "This does not solve for TAA artifacts like Jittering or Smearing.\n"
@@ -2547,13 +2560,6 @@ uniform int Extra_Information <
 	float4 TC_SP(float2 texcoord)
 	{	float LBDetect = tex2Dlod(SamplerLumN,float4(1, 0.083,0,0)).z;
 		float2 H_V_A, H_V_B, X_Y_A, X_Y_B, S_texcoord = texcoord;
-		#if BD_Correction || BDF
-		if(BD_Options == 0 || BD_Options == 2)
-		{
-			float3 K123 = Colors_K1_K2_K3 * 0.1;
-			texcoord = D(texcoord.xy,K123.x,K123.y,K123.z);
-		}
-		#endif
 		
 		#if DB_Size_Position || SPF || LBC || LB_Correction
 
@@ -2675,29 +2681,55 @@ uniform int Extra_Information <
 		texcoord.xy -= DLSS_FSR_Offset.xy * pix;
 
 		float SS_Scaling = 1;
-	    //Select_SS 0 //DLSS
-	    //Select_SS 1 //FSR
-	    //Select_SS 2 //XeSS
-        switch (Easy_SS_Scaling) 
+		//Select_SS 0 //DLSS
+		//Select_SS 1 //FSR
+		//Select_SS 2 //XeSS
+		//Select_SS 3 //Custom
+		if(Select_SS == 3)
 		{
-            case 1:
-                SS_Scaling = Select_SS == 2 ? 1.303 : 1.5;
-                break;
-            case 2:
-     		   if(Select_SS == 2)
-                	SS_Scaling = 1.5;
-                else
-					SS_Scaling = Select_SS == 1 ? 1.7 : 1.73;
-                break;
-            case 3:
-                SS_Scaling = Select_SS == 2 ? 1.7 : 2.0;
-                break;
-            case 4:
-                SS_Scaling = Select_SS == 2 ? 2.0 : 3.0;
-                break;
-        }
-				
-		texcoord.xy /= SS_Scaling; 
+		    switch (Easy_SS_Scaling) 
+		    {
+		        case 1:
+		            SS_Scaling = 1.2195;
+		            break;
+		        case 2:
+		            SS_Scaling = 1.460;
+		            break;
+		        case 3:
+		            SS_Scaling = 1.818;
+		            break;
+		        case 4:
+		            SS_Scaling = 2.513;
+		            break;
+		    }
+		}
+		else
+		{
+		    switch (Easy_SS_Scaling) 
+		    {
+		        case 1:
+		            SS_Scaling = Select_SS == 2 ? 1.303 : 1.5;
+		            break;
+		        case 2:
+		            if(Select_SS == 2)
+		                SS_Scaling = 1.5;
+		            else
+		                SS_Scaling = Select_SS == 1 ? 1.7 : 1.73;
+		            break;
+		        case 3:
+		            SS_Scaling = Select_SS == 2 ? 1.7 : 2.0;
+		            break;
+		        case 4:
+		            SS_Scaling = Select_SS == 2 ? 2.0 : 3.0;
+		            break;
+		    }
+		}
+		
+		texcoord.xy /= SS_Scaling;
+
+        //Manual Adjustment
+		//texcoord *= 1-clamp(SS_Scaling_Adjuster,-0.5,0.5);	
+
 	
 		float4 DM = Depth(TC_SP(texcoord).xy).xxxx;
 		float R, G, B, A, WD = WeaponDepth(TC_SP(texcoord).xy).x, CoP = WeaponDepth(TC_SP(texcoord).xy).y, CutOFFCal = (CoP/DMA()) * 0.5; //Weapon Cutoff Calculation
@@ -3699,7 +3731,16 @@ uniform int Extra_Information <
 	
 	void Mix_Z(in float4 position : SV_Position, in float2 texcoord : TEXCOORD, out float MixOut : SV_Target0)
 	{
+		#if BD_Correction || BDF
+		if(BD_Options == 0 || BD_Options == 2)
+		{
+			float3 K123 = Colors_K1_K2_K3 * 0.1;
+			texcoord = D(texcoord.xy,K123.x,K123.y,K123.z);
+		}
+		#endif
+		
 		float2 Shift_TC = texcoord;
+			
 		//work on this
 		#if SDT || SD_Trigger
 			#if LDT
@@ -4319,7 +4360,7 @@ uniform int Extra_Information <
 			color.rgb = tex2D(SamplerzBufferN_P,TexCoords).xxx;
 		
 		
-		float DepthBlur, Alinement_Depth = tex2Dlod(SamplerzBufferN_P,float4(TexCoords,0,0)).x, Depth = Alinement_Depth;
+		float DepthBlur, Alinement_Depth = tex2Dlod(SamplerzBufferN_Mixed,float4(TexCoords,0,0)).x, Depth = Alinement_Depth;
 		const float DBPower = 1.0, Con = 11, weight[11] = { 0.0,0.010,-0.010,0.020,-0.020,0.030,-0.030,0.040,-0.040,0.050,-0.050 };
 		if(BD_Options == 2 || Alinement_View)
 		{
@@ -4327,7 +4368,7 @@ uniform int Extra_Information <
 			[loop]
 			for (int i = 0; i < 11; i++)
 			{
-				DepthBlur += tex2Dlod(SamplerzBufferN_L,float4(TexCoords + dir * weight[i] * DBPower,0,2) ).x;
+				DepthBlur += tex2Dlod(SamplerzBufferN_Mixed,float4(TexCoords + dir * weight[i] * DBPower,0,2) ).x;
 			}
 			
 			Alinement_Depth = ( Alinement_Depth + DepthBlur ) * 0.08333;
