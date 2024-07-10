@@ -2140,21 +2140,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DE_Z 0.300
 	#define PEW 1
 	#define FOV 1
-#elif (App == 0xF9341C1 ) //Valheim
-	#define DA_W 1
-    #define DB_X 1
-	#define DA_Y 10.0
-	#define DA_X 0.05125
-	#define DF_Y 0.005
-	 
-	//#define DB_Z 0.125
-	#define DA_Z 0.001
-	#define DE_X 2
-	#define DE_Y 0.500
-	#define DE_Z 0.375
-	#define DG_W 0.15
-	#define PEW 1
-	#define DAA 1
 #elif (App == 0xA05A15C4 ) //Spooky's House of Jump Scares
 	//#define DA_W 1
     //#define DB_X 1
@@ -29429,7 +29414,48 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	//#define DSW 1
 	//#define DRS 1
 	#define DAA 1
-	#define FOV 1 	
+	#define FOV 1
+	#elif (App == 0xF9341C1 ) //Valheim
+    //#define DS_Z 2                 // Set View Mode
+	#define DA_W 1                 // Set Linerzation
+    //#define ALM 0                  // Use Alt linearization
+    #define DB_X 1                 // Flip
+	#define DA_X 0.025             // ZPD
+	#define DF_Y 0.00              // Seperation
+	#define DA_Y 20.0              // Near Plane Adjustment
+    //#define DA_Z -0.0001           // Linerzation Offset
+    #define DS_Y 2                 // Linerzation Offset Effects only distance if true
+	#define DB_Z 0.05              // Auto Depth Protection
+	#define DE_X 3                 // ZPD Boundary 
+	#define DE_Y 0.750             // Set ZPD Boundary Level Zero 
+	#define DE_Z 0.375             // Speed that Boundary is Enforced
+	//#define AFD 1                // Alternate Frame Detection - May be phased out
+	#define DG_W 0.250             // Shift Boundary Out of screen 0.5 and or In screen -0.5
+	#define OIL 2                // Set How many Levels We use for RE_Fix 0 | 1 | 2 | 3 if 1 then it's float2(0,0) for OIF and DI_W
+    #define OIF float3(0.625,0.500,0.375)// Fix enables if Value is > 0.0 
+	#define DI_W float3(0.5,1.0,1.5) // Like Shift Boundary DG_W But 0 to inf
+    //#define CWH 0                  //ZPD Weapon Hand Consideration For Masking  0 is Off | 1 Is Full | 2 Half Right screen Mask And Not to be used with Weapon Profiles.
+    //#define WBA 1.0                //ZPD Weapon Boundary Alt Adjust power for CWH 
+	//#define FTM 0                  // Fast Trigger Mode If this enabled then Level 1 and > switches instantly.
+	//#define WND 0.175              //Weapon Near Pushes depth in and adjust perspective to match.
+    //#define DG_Z 0.100             // Min Weapon Hands That are apart of world with Auto and Trim
+    //#define DS_X float3(0.025,0,1) // Min Weapon bit only triggers when a OIL Level is set and set here on .y
+    //#define DE_W 0.250             // Auto
+    //#define DI_Z 0.043             // Trim
+    //#define DF_W float4(0,0,0,0)   // Edge & Scale
+	//#define DAA_W 1              //Warp/Halo Masking Type 
+	//#define EDU 0                  //Elevate Detectors Up effects ZPD
+
+	#define BMT 1                  // ZPD and World Scale Balance // I need to phase this out.
+	#define DF_Z 0.25             // Set the Balance 
+    //#define DAO 0                  // Turn On or Off De-Artifact Options For now DAO if set to 1 it's also applys to Hoz 
+    #define DL_Y 0.50             // De-Artifact Only works on some View Modes and causes performance degredation
+	//#define DB_Y 1.0               // Effects De-Artifacts -1 to 1 Most of the time leave this at 0 and if you set 1 it takes depth into account 
+    //#define DL_Z 1.00              // Compat Power
+	//#define DJ_X 0.250             // Range Smoothing
+
+	#define PEW 1
+	#define DAA 1
 #else
 	#define NPW 1 //No Profile
 #endif
