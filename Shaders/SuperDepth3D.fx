@@ -3979,7 +3979,7 @@ uniform int Extra_Information <
 	}
 
 	float4 Stereo_Convert(float2 texcoord, float4 L, float4 R)
-	{   float2 TC = texcoord; float4 color, accum, image = 1;
+	{   float2 TC = texcoord; float4 color, accum, image = 1, color_saturation = lerp(0,2,Interlace_Anaglyph_Calibrate.y);
 		float2 gridxy, GXYArray[9] = {
 			float2(TC.x * BUFFER_WIDTH, TC.y * BUFFER_HEIGHT), //Native
 			float2(TC.x * 3840.0, TC.y * 2160.0),
@@ -4007,7 +4007,7 @@ uniform int Extra_Information <
 			float DeGhost = 0.06, LOne, ROne;
 			//L.rgb += lerp(-1, 1,Anaglyph_Eye_Brightness.x); R.rgb += lerp(-1, 1,Anaglyph_Eye_Brightness.y);
 			float3 HalfLA = dot(L.rgb,float3(0.299, 0.587, 0.114)), HalfRA = dot(R.rgb,float3(0.299, 0.587, 0.114));
-			float3 LMA = lerp(HalfLA,L.rgb,lerp(0,2,Interlace_Anaglyph_Calibrate.y)), RMA = lerp(HalfRA,R.rgb,lerp(0,2,Interlace_Anaglyph_Calibrate.y));
+			float3 LMA = lerp(HalfLA,L.rgb,color_saturation), RMA = lerp(HalfRA,R.rgb,color_saturation);
 			float2 Contrast = lerp(0.875,1.125,Anaglyph_Eye_Contrast);		
 			// Left/Right Image
 			float4 cA = float4(saturate(LMA),1);
@@ -4025,7 +4025,7 @@ uniform int Extra_Information <
 			float DeGhost = 0.06, LOne, ROne;
 			//L.rgb += lerp(-1, 1,Anaglyph_Eye_Brightness.x); R.rgb += lerp(-1, 1,Anaglyph_Eye_Brightness.y);
 			float3 HalfLA = dot(L.rgb,float3(0.299, 0.587, 0.114)), HalfRA = dot(R.rgb,float3(0.299, 0.587, 0.114));
-			float3 LMA = lerp(HalfLA,L.rgb,lerp(0,2,Interlace_Anaglyph_Calibrate.y)), RMA = lerp(HalfRA,R.rgb,lerp(0,2,Interlace_Anaglyph_Calibrate.y));
+			float3 LMA = lerp(HalfLA,L.rgb,color_saturation.xxx), RMA = lerp(HalfRA,R.rgb,color_saturation.xxx);
 			float2 Contrast = lerp(0,2,Anaglyph_Eye_Contrast);		
 			// Left/Right Image
 			float4 cA = float4(saturate(LMA),1);
