@@ -1,7 +1,7 @@
 	////----------------//
 	///**SuperDepth3D**///
 	//----------------////
-	#define SD3D "SuperDepth3D v4.2.8\n"
+	#define SD3D "SuperDepth3D v4.2.9\n"
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//* Depth Map Based 3D post-process shader
 	//* For Reshade 3.0+
@@ -1650,7 +1650,7 @@ uniform int Extra_Information <
 		#define Lower_Depth_Rez_B 1.0
 	#endif	
 	
-	texture texDMN { Width = BUFFER_WIDTH ; Height = BUFFER_HEIGHT * Lower_Depth_Rez_B; Format = RG16F; MipLevels = Max_Mips; };
+	texture texDMN { Width = BUFFER_WIDTH ; Height = BUFFER_HEIGHT * Lower_Depth_Rez_B; Format = RG16F; MipLevels = Max_Mips; }; //Mips Used
 	
 	sampler SamplerDMN
 		{
@@ -1661,7 +1661,7 @@ uniform int Extra_Information <
 	#else
 		#define Color_Format_A R8
 	#endif
-	texture texCN { Width = BUFFER_WIDTH ; Height = BUFFER_HEIGHT * Lower_Depth_Rez_B; Format = Color_Format_A; MipLevels = Max_Mips; };
+	texture texCN { Width = BUFFER_WIDTH ; Height = BUFFER_HEIGHT * Lower_Depth_Rez_B; Format = Color_Format_A; MipLevels = Max_Mips; }; //Mips Used
 	
 	sampler SamplerCN
 		{
@@ -1678,7 +1678,7 @@ uniform int Extra_Information <
 			MipFilter = POINT;
 		};
 	
-	texture texzBufferN_L { Width = BUFFER_WIDTH ; Height = BUFFER_HEIGHT  * Lower_Depth_Rez_A; Format = R16F; MipLevels = 8; };
+	texture texzBufferN_L { Width = BUFFER_WIDTH ; Height = BUFFER_HEIGHT  * Lower_Depth_Rez_A; Format = R16F; MipLevels = 8; }; //Mips Used
 	
 	sampler SamplerzBufferN_L
 		{
@@ -1739,7 +1739,7 @@ uniform int Extra_Information <
 	sampler SamplerInfo { Texture = Info_Tex; MagFilter = POINT; MinFilter = POINT; MipFilter = POINT; };
 	#define Scale_Buffer 160 / BUFFER_WIDTH
 	////////////////////////////////////////////////////////Adapted Luminance/////////////////////////////////////////////////////////////////////
-	texture texLumN {Width = BUFFER_WIDTH * Scale_Buffer; Height = BUFFER_HEIGHT * Scale_Buffer; Format = RGBA16F; MipLevels = 8;};
+	texture texLumN {Width = BUFFER_WIDTH * Scale_Buffer; Height = BUFFER_HEIGHT * Scale_Buffer; Format = RGBA16F; MipLevels = 8;}; //Mips Used
 	
 	sampler SamplerLumN
 		{
@@ -2558,13 +2558,15 @@ uniform int Extra_Information <
 	}
 	
 	float4 TC_SP(float2 texcoord)
-	{	float LBDetect = tex2Dlod(SamplerLumN,float4(1, 0.083,0,0)).z;
+	{   //I don't know how to fix this error without moving this to a entire new section of the shader.	
+		float LBDetect = tex2Dlod(SamplerLumN,float4(1, 0.083,0,0)).z; //This is causing the error: Cannot sample from texture that also used as render target
+		//Need to work on this later. So far it seem fine.....
 		float2 H_V_A, H_V_B, X_Y_A, X_Y_B, S_texcoord = texcoord;
 		
 		#if DB_Size_Position || SPF || LBC || LB_Correction
 
 			#if LBC || LB_Correction
-				X_Y_A = Image_Position_Adjust + (LBDetect && LB_Correction_Switch ? Image_Pos_Offset : 0.0f );
+				X_Y_A = Image_Position_Adjust + (LBDetect && LB_Correction_Switch ? Image_Pos_Offset : 0.0f ); //Error Used here as a trigger
 			#else
 				X_Y_A = float2(Image_Position_Adjust.x,Image_Position_Adjust.y);
 			#endif
@@ -2572,7 +2574,7 @@ uniform int Extra_Information <
 		texcoord.xy += float2(-X_Y_A.x,X_Y_A.y)*0.5;
 		
 			#if LBC || LB_Correction
-				H_V_A = Horizontal_and_Vertical * (LBDetect && LB_Correction_Switch ? H_V_Offset : 1.0f );
+				H_V_A = Horizontal_and_Vertical * (LBDetect && LB_Correction_Switch ? H_V_Offset : 1.0f );     //Error Used here as a trigger
 				//H_V_B = Horizontal_and_Vertical * H_V_Offset;	
 			#else
 				H_V_A = Horizontal_and_Vertical;
@@ -3479,13 +3481,15 @@ uniform int Extra_Information <
 	
 		float3 Set_Depth = DB_Comb( texcoord.xy ).xyz;
 		
-		if(texcoord.x < pix.x * 2 && texcoord.y < pix.y * 2) //TL
+		if(texcoord.x < pix.x * 2 && texcoord.y < pix.y * 2)    //TL
 			Set_Depth.y = PastLum + (Lum - PastLum) * (1.0 - exp(-frametime/ExAd));	
 		if(1-texcoord.x < pix.x * 2 && 1-texcoord.y < pix.y * 2) //BR
 			Set_Depth.y = AltWeapon_Fade();
 		if(  texcoord.x < pix.x * 2 && 1-texcoord.y < pix.y * 2) //BL
 			Set_Depth.y = Weapon_ZPD_Fade(Set_Depth.z);
-		
+		//if( 1-texcoord.x < pix.x * 2 &&   texcoord.y < pix.y * 2)//TR
+		//	Set_Depth.y = 0;		
+			
 		Point_Out = Set_Depth.xy; 
 		Linear_Out = Set_Depth.x;//is z when above code is on.	
 	}
@@ -3507,7 +3511,8 @@ uniform int Extra_Information <
 			float Gen_Mask = step(DZ_W.y,(CCC.r+CCC.g+CCC.b)/3);
 			#endif
 			   Text_Mask = saturate(Gen_Mask.x);
-		#endif		
+		#endif
+		
 		#if !DX9_Toggle
 		//Fade Storage
 		float3x3 Fade_Pass = Fade(StoredTC); //[0][0] = F | [0][1] = F | [0][2] = F
@@ -4402,8 +4407,8 @@ uniform int Extra_Information <
 	                                             tex2D(SamplerzBufferN_P,0).y,         //0.583 //TL
 								             	tex2D(SamplerzBufferN_P,1).y,         //0.750 //BR 
 								             	tex2D(SamplerzBufferN_P,int2(0,1)).y};//0.916 //BL
-												
-		float Storage_Array_B[Num_of_Values] = { LBDetection(),                         //0.083
+												 //LBDetection Seems to be causing issues with TC_SP.xy
+		float Storage_Array_B[Num_of_Values] = { LBDetection(),                         //0.083                     
 	                                			 tex2D(SamplerDMN,int2(1,0)).y,         //0.250 //TR Fade Z Level 3
 	                               			  tex2D(SamplerDMN,int2(1,0)).x,         //0.416 //TR Fade Z Level 2
 	                                			 tex2D(SamplerDMN,1).y,                 //0.583 //BR Fade Z Level 4
