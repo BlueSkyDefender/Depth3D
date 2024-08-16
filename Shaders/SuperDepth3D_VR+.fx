@@ -1,7 +1,7 @@
 	////--------------------//
 	///**SuperDepth3D_VR+**///
 	//--------------------////
-	#define SD3DVR "SuperDepth3D_VR+ v4.2.6\n"
+	#define SD3DVR "SuperDepth3D_VR+ v4.2.7\n"
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//* Depth Map Based 3D post-process shader
 	//* For Reshade 4.4+ I think...
@@ -513,7 +513,7 @@ namespace SuperDepth3DVR
 		ui_category = "Convergence";
 	> = float2(DE_Y,DE_Z);
 	
-	uniform float2 ZPD_Boundary_n_Cutoff <
+	uniform float2 ZPD_Boundary_n_Cutoff_A <
 		#if Compatibility
 		ui_type = "drag";
 		#else
@@ -521,11 +521,55 @@ namespace SuperDepth3DVR
 		#endif
 		ui_min = 0.0; ui_max = 1.0;
 		ui_label = " ZPD Scaler² & Intrusion";
-		ui_tooltip = "This selection gives extra boundary conditions to scale ZPD level One.\n"
-					 "The 2nd option lets you adjust the transition time for LvL One & Two.\n"
-					 "Only works when Boundary Detection is enabled.";
+		ui_tooltip = "This selection gives extra boundary conditions to scale ZPD level Two.\n"
+					 "lets you adjust how far behind the screen it should detect a intrustion.\n"
+					 "Only works when Boundary Detection is enabled & when scaler LvL one is set.";
 		ui_category = "Convergence";
-	> = float2(OIF.x,DI_W.x);
+	> = float2(OIF.x,DI_W.x);	
+
+	#if EDW
+		uniform float2 ZPD_Boundary_n_Cutoff_B <
+			#if Compatibility
+			ui_type = "drag";
+			#else
+			ui_type = "slider";
+			#endif
+			ui_min = 0.0; ui_max = 2.5;
+			ui_label = " ZPD Scaler³ & Intrusion";
+			ui_tooltip = "This selection gives extra boundary conditions to scale ZPD level Three.\n"
+						 "lets you adjust how far behind the screen it should detect a intrustion.\n"
+						 "Only works when Boundary Detection is enabled & when scaler LvL one is set.";
+			ui_category = "Convergence";
+		> = float2(OIF.y,DI_W.y);	
+
+		uniform float2 ZPD_Boundary_n_Cutoff_C <
+			#if Compatibility
+			ui_type = "drag";
+			#else
+			ui_type = "slider";
+			#endif
+			ui_min = 0.0; ui_max = 3.75;
+			ui_label = " ZPD Scaler4 & Intrusion";
+			ui_tooltip = "This selection gives extra boundary conditions to scale ZPD level Four.\n"
+						 "lets you adjust how far behind the screen it should detect a intrustion.\n"
+						 "Only works when Boundary Detection is enabled & when scaler LvL one is set.";
+			ui_category = "Convergence";
+		> = float2(OIF.z,DI_W.z);	
+
+		uniform float2 ZPD_Boundary_n_Cutoff_D <
+			#if Compatibility
+			ui_type = "drag";
+			#else
+			ui_type = "slider";
+			#endif
+			ui_min = 0.0; ui_max = 5.0;
+			ui_label = " ZPD Scaler5 & Intrusion";
+			ui_tooltip = "This selection gives extra boundary conditions to scale ZPD level Five.\n"
+						 "lets you adjust how far behind the screen it should detect a intrustion.\n"
+						 "Only works when Boundary Detection is enabled & when scaler LvL one is set.";
+			ui_category = "Convergence";
+		> = float2(OIF.w,DI_W.w);	
+	#endif
 	
 	uniform int View_Mode <
 		ui_type = "combo";
@@ -767,63 +811,72 @@ namespace SuperDepth3DVR
 		ui_category = "Depth Map";
 	> = DB_X;
 	#if DB_Size_Position || SPF == 2 || LB_Correction
-	uniform float2 Horizontal_and_Vertical <
-		ui_type = "drag";
-		ui_min = 0.0; ui_max = 2;
-		ui_label = "·Horizontal & Vertical Size·";
-		ui_tooltip = "Adjust Horizontal and Vertical Resize. Default is 1.0.";
-		ui_category = "Reposition Depth";
-	> = float2(DD_X,DD_Y);
+		uniform float2 Horizontal_and_Vertical <
+			ui_type = "drag";
+			ui_min = 0.0; ui_max = 2;
+			ui_label = "·Horizontal & Vertical Size Center·";
+			ui_tooltip = "Adjust Horizontal and Vertical Resize from the Center. Default is 1.0.";
+			ui_category = "Reposition Depth";
+		> = float2(DD_X,DD_Y);
+
+		uniform float2 Horizontal_and_Vertical_TL <
+			ui_type = "drag";
+			ui_min = 0.0; ui_max = 2;
+			ui_label = " Horizontal & Vertical Scale";
+			ui_tooltip = "Adjust Horizontal and Vertical Resize from the Top Left. Default is 1.0.";
+			ui_category = "Reposition Depth";
+		> = float2(1.0,1.0);
 	
-	uniform float2 Image_Position_Adjust<
-		ui_type = "drag";
-		ui_min = -1.0; ui_max = 1.0;
-		ui_label = " Horizontal & Vertical Position";
-		ui_tooltip = "Adjust the Image Position if it's off by a bit. Default is Zero.";
-		ui_category = "Reposition Depth";
-	> = float2(DD_Z,DD_W);
+		uniform float2 Image_Position_Adjust<
+			ui_type = "drag";
+			ui_min = -1.0; ui_max = 1.0;
+			ui_label = " Horizontal & Vertical Position";
+			ui_tooltip = "Adjust the Image Position if it's off by a bit. Default is Zero.";
+			ui_category = "Reposition Depth";
+		> = float2(DD_Z,DD_W);
 	
 	#if LB_Correction
-	uniform float2 H_V_Offset <
-		ui_type = "drag";
-		ui_min = 0.0; ui_max = 2;
-		ui_label = " Horizontal & Vertical Size Offset";
-		ui_tooltip = "Adjust Horizontal and Vertical Resize Offset for Letter Box Correction. Default is 1.0.";
-		ui_category = "Reposition Depth";
-	> = float2(1.0,1.0);
-	
-	uniform float2 Image_Pos_Offset <
-		ui_type = "drag";
-		ui_min = 0.0; ui_max = 2;
-		ui_label = " Horizontal & Vertical Position Offset";
-		ui_tooltip = "Adjust the Image Position if it's off by a bit for Letter Box Correction. Default is Zero.";
-		ui_category = "Reposition Depth";
-	> = float2(0.0,0.0);
-	
-	uniform bool LB_Correction_Switch <
-		ui_label = " Letter Box Correction Toggle";
-		ui_tooltip = "Use this to turn off and on the correction when LetterBox Detection is active.";
-		ui_category = "Reposition Depth";
-	> = true;
+		uniform float2 H_V_Offset <
+			ui_type = "drag";
+			ui_min = 0.0; ui_max = 2;
+			ui_label = " Horizontal & Vertical Size Offset";
+			ui_tooltip = "Adjust Horizontal and Vertical Resize Offset for Letter Box Correction. Default is 1.0.";
+			ui_category = "Reposition Depth";
+		> = float2(1.0,1.0);
+		
+		uniform float2 Image_Pos_Offset <
+			ui_type = "drag";
+			ui_min = 0.0; ui_max = 2;
+			ui_label = " Horizontal & Vertical Position Offset";
+			ui_tooltip = "Adjust the Image Position if it's off by a bit for Letter Box Correction. Default is Zero.";
+			ui_category = "Reposition Depth";
+		> = float2(0.0,0.0);
+		
+		uniform bool LB_Correction_Switch <
+			ui_label = " Letter Box Correction Toggle";
+			ui_tooltip = "Use this to turn off and on the correction when LetterBox Detection is active.";
+			ui_category = "Reposition Depth";
+		> = true;
 	#else
-	static const bool LB_Correction_Switch = true;
-	static const float2 H_V_Offset = float2(DH_X,DH_Y);
-	static const float2 Image_Pos_Offset  = float2(DH_Z,DH_W);
+		static const bool LB_Correction_Switch = true;
+		static const float2 H_V_Offset = float2(DH_X,DH_Y);
+		static const float2 Image_Pos_Offset  = float2(DH_Z,DH_W);
 	#endif
 	
-	uniform bool Alinement_View <
-		ui_label = " Alinement View";
-		ui_tooltip = "A Guide to help aline the Depth Buffer to the Image.";
-		ui_category = "Reposition Depth";
-	> = false;
+		uniform bool Alinement_View <
+			ui_label = " Alinement View";
+			ui_tooltip = "A Guide to help aline the Depth Buffer to the Image.";
+			ui_category = "Reposition Depth";
+		> = false;
 	#else
-	static const bool Alinement_View = false;
-	static const float2 Horizontal_and_Vertical = float2(DD_X,DD_Y);
-	static const float2 Image_Position_Adjust = float2(DD_Z,DD_W);
-	
-	static const bool LB_Correction_Switch = true;
-	static const float2 H_V_Offset = float2(DH_X,DH_Y);
-	static const float2 Image_Pos_Offset  = float2(DH_Z,DH_W);
+		static const bool Alinement_View = false;
+		static const float2 Horizontal_and_Vertical = float2(DD_X,DD_Y);
+		static const float2 Horizontal_and_Vertical_TL =  = float2(1.0,1.0);
+		static const float2 Image_Position_Adjust = float2(DD_Z,DD_W);
+		
+		static const bool LB_Correction_Switch = true;
+		static const float2 H_V_Offset = float2(DH_X,DH_Y);
+		static const float2 Image_Pos_Offset  = float2(DH_Z,DH_W);
 	#endif
 	//Weapon Hand Adjust//
 	uniform int WP <
@@ -1223,33 +1276,41 @@ uniform int Extra_Information <
 	
 	float3 RE_Set(float Auto_Switch)
 	{
-		#if OIL == 1
-			float OIL_Switch[2] = {ZPD_Boundary_n_Cutoff.x,OIF.y};	
-		#elif ( OIL == 2 )
-			float OIL_Switch[3] = {ZPD_Boundary_n_Cutoff.x,OIF.y,OIF.z};	
-		#elif ( OIL == 3 )
-			float OIL_Switch[4] = {ZPD_Boundary_n_Cutoff.x,OIF.y,OIF.z,OIF.w};	
+		#if EDW
+			float OIL_Switch[4] = {ZPD_Boundary_n_Cutoff_A.x,ZPD_Boundary_n_Cutoff_B.x,ZPD_Boundary_n_Cutoff_C.x,ZPD_Boundary_n_Cutoff_D.x};		
 		#else
-			float OIL_Switch[1] = {ZPD_Boundary_n_Cutoff.x};	
-		#endif   	
+			#if OIL == 1
+				float OIL_Switch[2] = {ZPD_Boundary_n_Cutoff_A.x,OIF.y};	
+			#elif ( OIL == 2 )
+				float OIL_Switch[3] = {ZPD_Boundary_n_Cutoff_A.x,OIF.y,OIF.z};	
+			#elif ( OIL == 3 )
+				float OIL_Switch[4] = {ZPD_Boundary_n_Cutoff_A.x,OIF.y,OIF.z,OIF.w};	
+			#else
+				float OIL_Switch[1] = {ZPD_Boundary_n_Cutoff_A.x};	
+			#endif
+		#endif 	
 		int Scale_Auto_Switch = clamp((Auto_Switch * 4) - 1,0 , 3 );
 		float Set_RE = OIL_Switch[Scale_Auto_Switch];
 
 		int REF_Trigger = Set_RE > 0;
-		return float3(REF_Trigger,Set_RE , Scale_Auto_Switch); 
+		return float3(REF_Trigger, Set_RE , Scale_Auto_Switch); 
 	}
 	
 	float4 RE_Set_Adjustments()
 	{
-		#if OIL == 1
-			float OIL_Switch[4] = {ZPD_Boundary_n_Cutoff.x,OIF.y,0,0};	
-		#elif ( OIL == 2 )
-			float OIL_Switch[4] = {ZPD_Boundary_n_Cutoff.x,OIF.y,OIF.z,0};	
-		#elif ( OIL == 3 )
-			float OIL_Switch[4] = {ZPD_Boundary_n_Cutoff.x,OIF.y,OIF.z,OIF.w};	
+		#if EDW
+			float OIL_Switch[4] = {ZPD_Boundary_n_Cutoff_A.x,ZPD_Boundary_n_Cutoff_B.x,ZPD_Boundary_n_Cutoff_C.x,ZPD_Boundary_n_Cutoff_D.x};		
 		#else
-			float OIL_Switch[4] = {ZPD_Boundary_n_Cutoff.x,0,0,0};	
-		#endif 
+			#if OIL == 1
+				float OIL_Switch[4] = {ZPD_Boundary_n_Cutoff_A.x,OIF.y,0,0};	
+			#elif ( OIL == 2 )
+				float OIL_Switch[4] = {ZPD_Boundary_n_Cutoff_A.x,OIF.y,OIF.z,0};	
+			#elif ( OIL == 3 )
+				float OIL_Switch[4] = {ZPD_Boundary_n_Cutoff_A.x,OIF.y,OIF.z,OIF.w};	
+			#else
+				float OIL_Switch[4] = {ZPD_Boundary_n_Cutoff_A.x,0,0,0};	
+			#endif 
+		#endif
 		return float4(OIL_Switch[0], OIL_Switch[1], OIL_Switch[2], OIL_Switch[3]);
 	}
 	
@@ -2389,6 +2450,8 @@ uniform int Extra_Information <
 			
 		float2 midHV_A = (H_V_A-1) * float2(BUFFER_WIDTH * 0.5,BUFFER_HEIGHT * 0.5) * pix;
 		texcoord = float2((texcoord.x*H_V_A.x)-midHV_A.x,(texcoord.y*H_V_A.y)-midHV_A.y);
+		//Non LB Resizing.
+		texcoord *= Horizontal_and_Vertical_TL;
 		#endif
 		//Need to add a method to disable this when three pixels are detected.
 		//Will to this tomorrow.
@@ -2752,21 +2815,36 @@ uniform int Extra_Information <
 					//Used if Depth Buffer is way out of range or if you need granuality.
 					if(RE_Set(0).x)
 					{					
-						if ( CD < -ZPD_Boundary_n_Cutoff.y && Detect_Out_of_Range <= 1)
-							Detect_Out_of_Range = 1;		
-							
-						#if OIL >= 1
-						if ( CD < -DI_W.y && Detect_Out_of_Range <= 2)
-							Detect_Out_of_Range = 2;							
-						#endif
-						#if OIL >= 2
-						if ( CD < -DI_W.z && Detect_Out_of_Range <= 3)
-							Detect_Out_of_Range = 3;							
-						#endif
-						#if OIL >= 3	
-						if ( CD < -DI_W.w && Detect_Out_of_Range <= 4)
-							Detect_Out_of_Range = 4;
-						#endif							
+						if ( CD < -ZPD_Boundary_n_Cutoff_A.y && Detect_Out_of_Range <= 1)
+							Detect_Out_of_Range = 1;	
+					
+						#if EDW	
+
+							if ( CD < -ZPD_Boundary_n_Cutoff_B.y && Detect_Out_of_Range <= 2)
+								Detect_Out_of_Range = 2;							
+
+							if ( CD < -ZPD_Boundary_n_Cutoff_C.y && Detect_Out_of_Range <= 3)
+								Detect_Out_of_Range = 3;							
+	
+							if ( CD < -ZPD_Boundary_n_Cutoff_D.y && Detect_Out_of_Range <= 4)
+								Detect_Out_of_Range = 4;
+								
+						#else	
+													
+							#if OIL >= 1
+							if ( CD < -DI_W.y && Detect_Out_of_Range <= 2)
+								Detect_Out_of_Range = 2;							
+							#endif
+							#if OIL >= 2
+							if ( CD < -DI_W.z && Detect_Out_of_Range <= 3)
+								Detect_Out_of_Range = 3;							
+							#endif
+							#if OIL >= 3	
+							if ( CD < -DI_W.w && Detect_Out_of_Range <= 4)
+								Detect_Out_of_Range = 4;
+							#endif	
+						
+						#endif						
 					}
 				}
 			}
