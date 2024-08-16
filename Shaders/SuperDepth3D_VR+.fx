@@ -871,7 +871,7 @@ namespace SuperDepth3DVR
 	#else
 		static const bool Alinement_View = false;
 		static const float2 Horizontal_and_Vertical = float2(DD_X,DD_Y);
-		static const float2 Horizontal_and_Vertical_TL =  = float2(1.0,1.0);
+		static const float2 Horizontal_and_Vertical_TL = float2(1.0,1.0);
 		static const float2 Image_Position_Adjust = float2(DD_Z,DD_W);
 		
 		static const bool LB_Correction_Switch = true;
