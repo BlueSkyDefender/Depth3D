@@ -1,7 +1,7 @@
 	////----------------//
 	///**SuperDepth3D**///
 	//----------------////
-	#define SD3D "SuperDepth3D v4.3.0\n"
+	#define SD3D "SuperDepth3D v4.3.1\n"
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//* Depth Map Based 3D post-process shader
 	//* For Reshade 3.0+
@@ -733,13 +733,13 @@ uniform int SuperDepth3D <
 					 "Default and starts at 0 and is Off. With a max offset of 5 pixels Wide.";
 		ui_category = "Scaling Corrections";
 	> = 0;
-
+	#if !DX9_Toggle 
 	uniform bool Auto_Scaler_Adjust <
 		ui_label = " Auto Scaler";
 		ui_tooltip = "Shift the depth map if a misalignment is detected.";
 		ui_category = "Scaling Corrections";
 	> = ASA;
-
+	#endif
 	
 	uniform int Depth_Map <
 		ui_type = "combo";
@@ -3228,7 +3228,9 @@ uniform int Extra_Information <
 	}
 		
 	float4 Conv(float2 MD_WHD,float2 texcoord,float2 abs_WZPDB)
-	{   float WConverge = 0.030, D = MD_WHD.x, Z = Zero_Parallax_Distance, WZP = 0.5, ZP = 0.5, W_Convergence = Inficolor_Near_Reduction ? WConverge * 0.8 : WConverge, WZPDB, WZPD_Switch, Distance_From_Bottom = lerp(0.9375,1.0,saturate(WFB)), ZPD_Boundary_Adjust = ZPD_Boundary_n_Fade.x, Store_WC;
+	{   float WConverge = 0.030, D = MD_WHD.x, Z = Zero_Parallax_Distance, WZP = 0.5, ZP = 0.5, 
+			  W_Convergence = Inficolor_Near_Reduction ? WConverge * 0.8 : WConverge, WZPDB, WZPD_Switch, 
+			  Distance_From_Bottom = lerp(0.9375,1.0,saturate(WFB)), ZPD_Boundary_Adjust = ZPD_Boundary_n_Fade.x, Store_WC;
 	    //Screen Space Detector.
 		if (abs_WZPDB.x > 0)
 		{
@@ -3835,18 +3837,20 @@ uniform int Extra_Information <
 					Shift_TC = TC_SP(Shift_TC).zw;
 			#endif
 		#endif
-		float2 Depth_Size = tex2Dsize(DepthBuffer);
-		//float Depth_AR = Depth_Size.x/Depth_Size.y;
-		//float modifiedAR = Depth_AR - floor(Depth_AR);
-		Depth_Size = rcp(Depth_Size);
-		#if DB_Size_Position || SPF || LBC || LB_Correction
-		if(Shift_Depth() && Auto_Scaler_Adjust && !LBDetection())
-			Shift_TC /= 1 + Depth_Size;
-		#else
-		if(Shift_Depth() && Auto_Scaler_Adjust)
-			Shift_TC /= 1 + Depth_Size;
-		#endif
-		
+		#if !DX9_Toggle  		
+			float2 Depth_Size = tex2Dsize(DepthBuffer);
+			//float Depth_AR = Depth_Size.x/Depth_Size.y;
+			//float modifiedAR = Depth_AR - floor(Depth_AR);
+			Depth_Size = rcp(Depth_Size);
+			
+			#if DB_Size_Position || SPF || LBC || LB_Correction
+			if(Shift_Depth() && Auto_Scaler_Adjust && !LBDetection())
+				Shift_TC /= 1 + Depth_Size;
+			#else
+			if(Shift_Depth() && Auto_Scaler_Adjust)
+				Shift_TC /= 1 + Depth_Size;
+			#endif
+		#endif		
 		MixOut = GetDB( Shift_TC );
 		
 		#if LBM || LetterBox_Masking

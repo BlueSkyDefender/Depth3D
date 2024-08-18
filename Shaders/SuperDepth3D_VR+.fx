@@ -1,7 +1,7 @@
 	////--------------------//
 	///**SuperDepth3D_VR+**///
 	//--------------------////
-	#define SD3DVR "SuperDepth3D_VR+ v4.2.7\n"
+	#define SD3DVR "SuperDepth3D_VR+ v4.2.8\n"
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//* Depth Map Based 3D post-process shader
 	//* For Reshade 4.4+ I think...
@@ -740,13 +740,13 @@ namespace SuperDepth3DVR
 					 "Default and starts at 0 and is Off. With a max offset of 5 pixels Wide.";
 		ui_category = "Scaling Corrections";
 	> = 0;
-
+	#if !DX9_Toggle 
 	uniform bool Auto_Scaler_Adjust <
 		ui_label = " Auto Scaler";
 		ui_tooltip = "Shift the depth map if a misalignment is detected.";
 		ui_category = "Upscaling Corrections";
 	> = ASA;
-	
+	#endif	
 	uniform int Depth_Map <
 		ui_type = "combo";
 		ui_items = "DM0 Normal\0DM1 Reversed\0";
@@ -3579,13 +3579,20 @@ uniform int Extra_Information <
 			#endif
 		#endif
 		
-		#if DB_Size_Position || SPF || LBC || LB_Correction // || SDT || SD_Trigger
-		if(Shift_Depth() && Auto_Scaler_Adjust && !LBDetection())
-			Shift_TC *= 1-(3.25 * pix);
-		#else
-		if(Shift_Depth() && Auto_Scaler_Adjust)
-			Shift_TC *= 1-(3.25 * pix);
-		#endif
+		#if !DX9_Toggle  		
+			float2 Depth_Size = tex2Dsize(DepthBuffer);
+			//float Depth_AR = Depth_Size.x/Depth_Size.y;
+			//float modifiedAR = Depth_AR - floor(Depth_AR);
+			Depth_Size = rcp(Depth_Size);
+			
+			#if DB_Size_Position || SPF || LBC || LB_Correction
+			if(Shift_Depth() && Auto_Scaler_Adjust && !LBDetection())
+				Shift_TC /= 1 + Depth_Size;
+			#else
+			if(Shift_Depth() && Auto_Scaler_Adjust)
+				Shift_TC /= 1 + Depth_Size;
+			#endif
+		#endif	
 				
 		MixOut = GetDB( Shift_TC );
 		
