@@ -1,7 +1,7 @@
 	////--------------------//
 	///**SuperDepth3D_VR+**///
 	//--------------------////
-	#define SD3DVR "SuperDepth3D_VR+ v4.2.8\n"
+	#define SD3DVR "SuperDepth3D_VR+ v4.2.9\n"
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//* Depth Map Based 3D post-process shader
 	//* For Reshade 4.4+ I think...
@@ -3291,9 +3291,12 @@ uniform int Extra_Information <
 		if(WP > 0)
 		{
 			if (DT_Switch)
-			{
-				float Blur_Mask = tex2Dlod(SamplerDMVR,float4(texcoord,0,9)).x;
-				DM.y = lerp(DM.y,lerp(0.0,0.2,Blur_Mask) * lerp(2,1,FadeIO) ,smoothstep(0,abs(DT_Z),Mask_A) * lerp(1-FD_Adjust,1,FadeIO));
+			{				
+				float Blur_Mask = tex2Dlod(SamplerDMVR,float4(texcoord,0,6)).x;
+				DM.y = lerp(DM.y,saturate(DM.y),WeaponMask(texcoord,0));
+				float Weapon_Depth_Gen = lerp(DM.y,lerp(0.0,0.2,Blur_Mask) * lerp(2,1,FadeIO) ,smoothstep(0,abs(DT_Z),Mask_A) * lerp(1-FD_Adjust,1,FadeIO));
+				DM.y = lerp(DM.y,Weapon_Depth_Gen,WeaponMask(texcoord,0));
+				
 			}
 			else
 			{	

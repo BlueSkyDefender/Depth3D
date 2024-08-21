@@ -1,7 +1,7 @@
 	////----------------//
 	///**SuperDepth3D**///
 	//----------------////
-	#define SD3D "SuperDepth3D v4.3.1\n"
+	#define SD3D "SuperDepth3D v4.3.2\n"
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//* Depth Map Based 3D post-process shader
 	//* For Reshade 3.0+
@@ -415,7 +415,7 @@ uniform int SuperDepth3D <
 	ui_type = "radio";
 	>;
 	
-	//uniform float TEST < ui_type = "slider"; ui_min = 0.0; ui_max = 1.0; > = 0.00;
+	//uniform float3 TEST < ui_type = "slider"; ui_min = 0.0; ui_max = 1.0; > = 0.00;
 
 	//Divergence & Convergence//
 	uniform float Divergence <
@@ -3536,19 +3536,23 @@ uniform int Extra_Information <
 		float Mask_B = tex2Dlod(SamplerLumN,float4(texcoord * float2(0.5,1) + float2(0.5,0) ,0,2.0)).x * 0.5;
 		if(WP > 0)
 		{
+		
 			if (DT_Switch)
 			{
-				float Blur_Mask = tex2Dlod(SamplerDMN,float4(texcoord,0,9)).x;
-				DM.y = lerp(DM.y,lerp(0.0,0.2,Blur_Mask) * lerp(2,1,FadeIO) ,smoothstep(0,abs(UI_Seeking_Strength),Mask_A) * lerp(1-FD_Adjust,1,FadeIO));
+				float Blur_Mask = tex2Dlod(SamplerDMN,float4(texcoord,0,6)).x;
+				DM.y = lerp(DM.y,saturate(DM.y),WeaponMask(texcoord,0));
+				float Weapon_Depth_Gen = lerp(DM.y,lerp(0.0,0.2,Blur_Mask) * lerp(2,1,FadeIO) ,smoothstep(0,abs(UI_Seeking_Strength),Mask_A) * lerp(1-FD_Adjust,1,FadeIO));
+				DM.y = lerp(DM.y,Weapon_Depth_Gen,WeaponMask(texcoord,0));
 			}
 			else
-			{	
+			{   //For Diablo
 				float UI_MASK_A = tex2Dlod(SamplerCN,float4(texcoord * float2(0.5,1)  ,0,6)).y ;
 
 				UI_MASK_A =  lerp( 0, saturate(UI_MASK_A * 2.0),Mask_A); 				
 				DM.y = WeaponMask(texcoord,0) ? 0.0 : DM.y;//Not sure if this was the best thing to do to mask it.
 				DM.y = lerp(DM.y, lerp(WeaponMask(texcoord,0) ? 0.5 : DM.y,0.025,saturate( Mask_A + Mask_B )) ,smoothstep(0,abs(  UI_Seeking_Strength  ),UI_MASK_A) );// * lerp(1-FD_Adjust,1,FadeIO));
 			}		
+		
 		}
 		#endif
 	
