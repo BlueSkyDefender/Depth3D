@@ -1,7 +1,7 @@
 ////----------------------------------------//
 ///SuperDepth3D Overwatch Automation Header///
 //----------------------------------------////
-#define OVERWATCH "Overwatch v3.9.2\n"
+#define OVERWATCH "Overwatch v3.9.3\n"
 //---------------------------------------OVERWATCH---------------------------------------//
 // If you are reading this stop. Go away and never look back. From this point on if you  //
 // still think it's is worth looking at this..... Then no one can save you or your soul. //
@@ -7496,45 +7496,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	//#define HMT 1
 	//#define HMC 0.503
 	#define PEW 1
-#elif (App == 0x8CC8A7BD ) //Duke Nukem 3D: 20th Anniversary World Tour
-	//#define DA_W 1
-    //#define DB_X 1
-	#define DA_X 0.025
-	#define DF_Y 0.0125
-	#define DA_Y 130.0
-    //#define DA_Z 0.0005
-	#define DB_Z 0.0125
- 
-	#define DE_X 3
-	#define DE_Y 0.700
-	#define DE_Z 0.375
-	#define DG_W -0.25 //PoP
-    #define OIL 3 //Set How many Levels We use for RE_Fix 0 | 1 | 2 | 3
-    #define OIF float4(0.45,0.25,0.2,0.175) //Fix enables if Value is > 0.0
-	#define DI_W float4(0.5,1.75,3.25,17.5)
-	//#define FTM 1
-    #define DG_Z 0.05 //Min
-    #define DE_W 0.000 //Auto
-    #define DI_Z 0.015 //Trim
-    #define DF_W float4(0.0001,0.00075,0.0,0.0)  //Edge & Scale
-	#define BMT 1
-	#define DF_Z 0.050
-    #define SMS 2            //SM Toggle Separation
-	#define DL_X 0.900      //SM Tune
-	//#define DL_W 0.5       //SM Perspective
-	#define DM_X 4           //HQ Tune
-	#define DM_Z 2           //HQ Smooth
-    //#define DM_Y 3           //HQ VRS
-    //#define DL_Y 0.25    //De-Artifact
-    //#define DL_Z 0.25       //Compat Power
-	//#define WSM 3
-	//#define DB_W 5
-	//#define DF_X float2(0.050,0.0)	
-	//#define HMT 1
-	//#define HMC 0.503
-	#define PEW 1
-	#define NDW 1
-	#define DSW 1
 #elif (App == 0xE2F6CE28 ) //Remember Me
 	//#define DA_W 1
     //#define DB_X 1
@@ -15861,10 +15822,10 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define DV_Z float4( 0.0725, 0.954 , 0.752 , 0.112 ) //Pos L2 = XY Black & L3 = ZW Color
 	#define DV_W float4( 20.0, 20.0, 20.0, 18.0) //Tresh Hold for Color K & L and Color
 	//Block Four //Status and Multi Player
-	#define DX_X float4( 0.042 , 0.037 , 0.0725 , 0.954 ) //Pos M1 = XY Color & M2 = ZW Black 
-    #define DX_Y float4( 0.065 , 0.448 , 0.038 , 0.035 ) //Pos M3 = XY Color & N1 = ZW Color
+	#define DX_X float4( 0.0425, 0.038 , 0.0725 , 0.954 ) //Pos M1 = XY Color & M2 = ZW Black 
+    #define DX_Y float4( 0.0654 , 0.448 , 0.038 , 0.035 ) //Pos M3 = XY Color & N1 = ZW Color
     #define DX_Z float4( 0.0725 , 0.954 , 0.792, 0.4145 ) //Pos N2 = XY Black & N3 = ZW Color
-	#define DX_W float4( 18.0, 18.0, 19.0, 19.0) //Tresh Hold for Color M & N and Color
+	#define DX_W float4( 19.0, 19.0, 19.0, 19.0) //Tresh Hold for Color M & N and Color
 	//Messages and ???
 	#define DY_X float4( 0.041 , 0.055 , 0.207 , 0.954 ) //Pos O1 = XY Color & O2 = ZW Black 
     #define DY_Y float4( 0.203 , 0.180 , 0.000 , 0.000 ) //Pos O3 = XY Color & P1 = ZW Color
@@ -30247,6 +30208,78 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 
 	#define DAA 1
 	#define PEW 1
+#elif (App == 0x8CC8A7BD ) //Duke Nukem 3D: 20th Anniversary World Tour
+	//#define FTM 1
+    //#define DG_Z 0.05 //Min
+    //#define DE_W 0.000 //Auto
+    //#define DI_Z 0.015 //Trim
+    //#define DF_W float4(0.0001,0.00075,0.0,0.0)  //Edge & Scale
+
+	
+    //#define DS_Z 3                 // Set View Mode
+	//#define DA_W 1                 // Set Linerzation
+    //#define DB_X 1                 // Flip
+	#define DA_X 0.025             // ZPD
+	#define DF_Y 0.025              // Seperation
+	#define DA_Y 125.0            // Near Plane Adjustment
+    //#define DA_Z -.500           // Linerzation Offset
+    //#define DS_Y 0                 // Linerzation Offset Effects only distance if true
+	#define DB_Z 0.022            // Auto Depth Protection
+	#define DE_X 2                 // ZPD Boundary 
+	#define DE_Y 0.750             // Set ZPD Boundary Level Zero 
+	#define DE_Z 0.375             // Speed that Boundary is Enforced
+	//#define AFD 1                // Alternate Frame Detection - May be phased out
+	#define DG_W -0.25             // Shift Boundary Out of screen 0.5 and or In screen -0.5
+    #define OIL 3 //Set How many Levels We use for RE_Fix 0 | 1 | 2 | 3
+    #define OIF float4(0.50,0.375,0.25,0.125) //Fix enables if Value is > 0.0
+	#define DI_W float4(0.5,1.75,3.25,7.5)
+    //#define CWH 3                  //ZPD Weapon Hand Consideration For Masking  0 is Off | 1 Is Full | 2 Half Right screen Mask And Not to be used with Weapon Profiles.
+    //#define WBA 2.0                //ZPD Weapon Boundary Alt Adjust power for CWH 
+	//#define FTM 4                  // Fast Trigger Mode If this enabled then Level 1 and > switches instantly.
+	#define WND 1.0              //Weapon Near Pushes depth in and adjust perspective to match.
+	//#define DG_Z 0.050        // Min Weapon Hands That are apart of world with Auto and Trim
+    //#define DS_X float3(0.025,0,1) // Min Weapon bit only triggers when a OIL Level is set and set here on .y
+    //#define DE_W 0.250        // Auto
+    //#define DI_Z 0.050        // Trim
+    //#define DF_W float4(0.0001,0.000,0.0,0.0125)// Edge & Scale
+	#define DAA_W 2              //Warp/Halo Masking Type 
+	//#define EDU 1                  //Elevate Detectors Up effects ZPD
+	//#define TMD 1	
+
+	#define BMT 1                  // ZPD and World Scale Balance // I need to phase this out.
+	#define DF_Z 0.100             // Set the Balance  
+    //#define DAO 1                  // Turn On or Off De-Artifact Options For now DAO if set to 1 it's also applys to Hoz 
+    //#define DL_Y 1.0             // De-Artifact Only works on some View Modes and causes performance degredation
+    //#define DL_Z -0.5              // Compat Power
+	//#define DJ_X 0.050             // Range Smoothing
+	
+
+	//#define LBM 1 //Letter Box Masking With size Adust for Top and Bottom and 2 is Left and Right
+	//#define DI_X 0.879
+
+	//#define LBC 1     //Letter Box Correction Offsets With X & Y
+	//#define LBR 1
+	//#define LBE 1
+	//#define DH_Z 0.0
+	//#define DH_W -0.255
+
+
+ //Smooth Mode
+    //#define SMS 1         //SM Separation Limit  - Do Not use any more
+	#define DL_X 0.875       //SM Tune Limit
+	//#define DL_W 0.5      //SM Perspective Limit - Do Not use any more
+	#define DM_X 6        //SM HQ Tune Power       - Will be made global
+    //#define DM_Y 1        //SM HQ VRS Limit
+	//#define HQT 1         //SM HQ Trigger
+	//#define FMM 1         //Filter Mode          - Need to add this back in the new shader.
+	#define NDW 1
+	//#define PEW 1
+	#define NFM 1
+	#define DSW 1
+	//#define DRS 1
+	//#define DAA 1
+	//#define FOV 1
+    //#define ARW 1	
 #else
 	#define NPW 1 //No Profile
 #endif
