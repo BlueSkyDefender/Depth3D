@@ -30280,7 +30280,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	//#define DAA 1
 	//#define FOV 1
     //#define ARW 1	
-#elif (App == 0xE9B34073 ) //StarWars: Outlaws
+#elif (App == 0xE9B34073 || App == 0x9316522A) //StarWars: Outlaws
     //#define DS_Z 3                 // Set View Mode
 	#define DA_W 1                 // Set Linerzation
     //#define DB_X 1                 // Flip
