@@ -1,7 +1,7 @@
 ////----------------------------------------//
 ///SuperDepth3D Overwatch Automation Header///
 //----------------------------------------////
-#define OVERWATCH "Overwatch v3.9.4\n"
+#define OVERWATCH "Overwatch v3.9.5\n"
 //---------------------------------------OVERWATCH---------------------------------------//
 // If you are reading this stop. Go away and never look back. From this point on if you  //
 // still think it's is worth looking at this..... Then no one can save you or your soul. //
@@ -422,6 +422,24 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define BMT 1                  // ZPD and World Scale Balance // I need to phase this out.
 	#define DF_Z 0.25              // Set the Balance  
 	#define WND 0.5              //Weapon Near Pushes depth in and adjust perspective to match.
+#elif (App == 0x1D367077 ) //N64 Recompiled
+	#define RHW 1
+	#define SPF 2
+	#define HMT 1
+	#define DSW 1
+	#define EDW 1
+	#define ASA 0
+	#define DB_Z 0.025             // Auto Depth Protection
+	#define DA_Y 25.0
+	#define DE_X 1                 // ZPD Boundary 
+	#define DE_Y 0.750             // Set ZPD Boundary Level Zero 
+	#define DE_Z 0.400             // Speed that Boundary is Enforced
+    #define OIL 3 //Set How many Levels We use for RE_Fix 0 | 1 | 2 | 3
+    #define OIF float4(0.6,0.375,0.250,0.125) //Fix enables if Value is > 0.0
+	#define DI_W float4(0.5,1.25,2.5,3.75)
+	#define BMT 1                  // ZPD and World Scale Balance // I need to phase this out.
+	#define DF_Z 0.25              // Set the Balance  
+	#define WND 1.0              //Weapon Near Pushes depth in and adjust perspective to match.
 #elif (App == 0xC753DADB )	//ES: Oblivion
     #define DA_X 0.0605
     #define DF_Y 0.025
