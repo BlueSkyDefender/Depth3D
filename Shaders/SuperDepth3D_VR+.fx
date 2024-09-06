@@ -1,7 +1,7 @@
 	////--------------------//
 	///**SuperDepth3D_VR+**///
 	//--------------------////
-	#define SD3DVR "SuperDepth3D_VR+ v4.2.9\n"
+	#define SD3DVR "SuperDepth3D_VR+ v4.3.0\n"
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//* Depth Map Based 3D post-process shader
 	//* For Reshade 4.4+ I think...
@@ -1638,7 +1638,7 @@ uniform int Extra_Information <
 		#endif
 	#endif
 	
-	texture Info_Tex < pooled = true; >  { Width = 960; Height = 540; Format = RG8;};
+	texture Info_Tex { Width = 960; Height = 540; Format = RG8;};
 	sampler SamplerInfo { Texture = Info_Tex; MagFilter = POINT; MinFilter = POINT; MipFilter = POINT; };
 	
 	#define Scale_Buffer 160 / BUFFER_WIDTH
@@ -2703,17 +2703,22 @@ uniform int Extra_Information <
 	{
 		//Create Mask for Weapon Hand Consideration for ZPD boundary condition.
 		float2 Shape_TC = StoredTC;
-		float Shape_Out, Shape_One, Shape_Two, Shape_Three, Shape_Four, SO_Switch = 0.75, ST_Switch = 0.45;
+		float Shape_Out, Shape_One, Shape_Two, Shape_Three, Shape_Four, SO_Switch = 0.75, ST_Switch = 0.45, FO_Switch = 0.8125;
 		
-		if(CWH >= 3)
+		if(CWH >= 3 && CWH <= 4)
 		{
 			SO_Switch = 0.325;
-			ST_Switch = 0.750;
+			ST_Switch = 0.75 ;
+		}
+
+		if(CWH >= 5)
+		{
+			FO_Switch = 0.5;
 		}
 		
 		// Conditions for Shape_One
 		bool Shape_One_C1 = (Shape_TC.x / Shape_TC.y * SO_Switch) > 1;
-		bool Shape_One_C2 = (((1 - Shape_TC.x) / Shape_TC.y) * 0.8125 ) > 1;
+		bool Shape_One_C2 = (((1 - Shape_TC.x) / Shape_TC.y) * FO_Switch ) > 1;
 		Shape_One = saturate(Shape_One_C1 || Shape_One_C2); 
 		
 		// Conditions for Shape_Two
@@ -2733,7 +2738,7 @@ uniform int Extra_Information <
 		Shape_Out *= Shape_One + Shape_Two;
 		Shape_Out *= Shape_Four;
 
-		if(CWH == 2 || CWH == 4)
+		if(CWH == 2 || CWH == 4 && CWH != 5)
 		Shape_Out = Shape_TC.x < 0.5 ? 1 : Shape_Out;
 		
 		return Shape_Out;
@@ -2899,7 +2904,14 @@ uniform int Extra_Information <
 							  float4 (0.0,0.0,0.0,0.0)};                                       //Eye Tracker Alt      8
 			
 		float AB_EX = lerp(Depth(XYArray[Auto_Balance_Ex].xy) , Depth(XYArray[Auto_Balance_Ex].zw), Auto_Balance_Ex > 3 && Auto_Balance_Ex < 7 ? 0.5 : 0 );
-		return float2(Auto_Balance_Ex > 0 ? saturate(lerp(AB_EX * 2 , Avr_Mix(float2(0.5,Switch_Height_Point)).x , 0.25) ) : 1, saturate(lerp( Depth( float2(0.5,Switch_Height_Point) ) * 2 , Avr_Mix(float2(0.5,Switch_Height_Point)).x , 0.25) ) ) ;
+		
+		if(Auto_Balance_Ex > 0)	  
+			AB_EX = saturate(lerp(AB_EX, Avr_Mix(float2(0.5,Switch_Height_Point)).x, 0.25) );
+	    else
+	    	AB_EX = 1;
+		
+		return float2(smoothstep(0,1,AB_EX * 2.5),
+							 saturate(lerp( Depth( float2(0.5,Switch_Height_Point) ) * 2 , Avr_Mix(float2(0.5,Switch_Height_Point)).x , 0.25) ) ) ;
 	}
 
 	void DepthMap(in float4 position : SV_Position, in float2 texcoord : TEXCOORD, out float2 DM_Out : SV_Target0 , out float2 Color_Out : SV_Target1)
