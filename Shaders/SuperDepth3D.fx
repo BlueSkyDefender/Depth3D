@@ -2618,48 +2618,6 @@ uniform int Extra_Information <
 		#endif
 	}
 	
-	float4 TC_SP(float2 texcoord)
-	{   //I don't know how to fix this error without moving this to a entire new section of the shader.	
-		float LBDetect = tex2Dlod(SamplerLumN,float4(1, 0.083,0,0)).z; //This is causing the error: Cannot sample from texture that also used as render target
-		//Need to work on this later. So far it seem fine.....
-		float2 H_V_A, H_V_B, X_Y_A, X_Y_B, S_texcoord = texcoord;
-		
-		#if DB_Size_Position || SPF || LBC || LB_Correction
-
-			#if LBC || LB_Correction
-				X_Y_A = Image_Position_Adjust + (LBDetect && LB_Correction_Switch ? Image_Pos_Offset : 0.0f ); //Error Used here as a trigger
-			#else
-				X_Y_A = float2(Image_Position_Adjust.x,Image_Position_Adjust.y);
-			#endif
-
-		texcoord.xy += float2(-X_Y_A.x,X_Y_A.y)*0.5;
-		
-			#if LBC || LB_Correction
-				H_V_A = Horizontal_and_Vertical * (LBDetect && LB_Correction_Switch ? H_V_Offset : 1.0f );     //Error Used here as a trigger
-				//H_V_B = Horizontal_and_Vertical * H_V_Offset;	
-			#else
-				H_V_A = Horizontal_and_Vertical;
-			#endif
-			
-		float2 midHV_A = (H_V_A-1) * float2(BUFFER_WIDTH * 0.5,BUFFER_HEIGHT * 0.5) * pix;
-		texcoord = float2((texcoord.x*H_V_A.x)-midHV_A.x,(texcoord.y*H_V_A.y)-midHV_A.y);
-		//Non LB Resizing.
-		texcoord *= Horizontal_and_Vertical_TL;
-		#endif
-		//Need to add a method to disable this when three pixels are detected.
-		//Will to this tomorrow.
-		#if SDT || SD_Trigger		
-			X_Y_B = Image_Position_Adjust + float2(DG_X,DG_Y);
-			
-			S_texcoord.xy += float2(-X_Y_B.x,X_Y_B.y)*0.5;
-			//Will work on this later.
-			//float2 midHV_B = (H_V_B-1) * float2(BUFFER_WIDTH * 0.5,BUFFER_HEIGHT * 0.5) * pix;
-			//S_texcoord = float2((S_texcoord.x*H_V_B.x)-midHV_B.x,(S_texcoord.y*H_V_B.y)-midHV_B.y);
-		#endif
-		
-		return float4(texcoord,S_texcoord);
-	}
-	
 	float Depth(float2 texcoord)
 	{
 		float RangeBoost = 1.5;
@@ -2698,6 +2656,77 @@ uniform int Extra_Information <
 			return saturate(zBuffer);
 		#endif
 	}
+
+	#if SDT || SD_Trigger
+	float TargetedDepth(float2 TC)
+	{
+		return smoothstep(0,1,Depth(TC).x);
+	}
+	
+	float SDTriggers()//Specialized Depth Triggers
+	{   float Threshold = 0.001;//Both this and the options below may need to be adjusted. A Value lower then 7.5 will break this.!?!?!?!
+		if ( SD_Trigger == 1 || SDT == 1)//Top _ Left                             //Center_Left                             //Botto_Left
+			return (TargetedDepth(float2(0.95,0.25)) >= Threshold ) && (TargetedDepth(float2(0.95,0.5)) >= Threshold) && (TargetedDepth(float2(0.95,0.75)) >= Threshold) ? 0 : 1;
+		else if ( SD_Trigger == 3 || SDT == 3) //Top Center                     Center                           Bottom Center                   
+			return (TargetedDepth(float2(0.25,0.9)) >= 1 ) && (TargetedDepth(float2(0.5,0.5)) < 1) && (TargetedDepth(float2(0.75,0.9)) >= 1) ? 1 : 0;			
+		else
+			return ((TargetedDepth(float2(0.5,0.10)) <= 1 ) && //Top
+				   ((TargetedDepth(float2(0.5,0.25)) <= 1 ) && //Center Top
+					(TargetedDepth(float2(0.5,0.50)) <= 1 ))&& //Center
+					(TargetedDepth(float2(0.5,0.75)) <  1 ) && //Center Bottom
+					(TargetedDepth(float2(0.5,0.90)) <  1 ))? 0 : 1;//Bottom
+	}
+	#endif	
+	
+	float4 TC_SP(float2 texcoord)
+	{   //I don't know how to fix this error without moving this to a entire new section of the shader.	
+		float LBDetect = tex2Dlod(SamplerLumN,float4(1, 0.083,0,0)).z; //This is causing the error: Cannot sample from texture that also used as render target
+		//float SDDetect = 0; 
+		//LBDetection()
+		//Need to work on this later. So far it seem fine.....
+		float2 H_V_A, H_V_B, X_Y_A, X_Y_B, S_texcoord = texcoord;
+		bool SDT_Bool = 1;
+		
+		#if SDT == 3 || SD_Trigger == 3
+			SDT_Bool = SDTriggers();
+		#endif
+		
+		#if DB_Size_Position || SPF || LBC || LB_Correction
+
+			#if LBC || LB_Correction
+				X_Y_A = Image_Position_Adjust + (LBDetect && SDT_Bool && LB_Correction_Switch ? Image_Pos_Offset : 0.0f ); //Error Used here as a trigger
+			#else
+				X_Y_A = float2(Image_Position_Adjust.x,Image_Position_Adjust.y);
+			#endif
+
+		texcoord.xy += float2(-X_Y_A.x,X_Y_A.y)*0.5;
+		
+			#if LBC || LB_Correction
+				H_V_A = Horizontal_and_Vertical * (LBDetect && SDT_Bool && LB_Correction_Switch ? H_V_Offset : 1.0f );     //Error Used here as a trigger
+				//H_V_B = Horizontal_and_Vertical * H_V_Offset;	
+			#else
+				H_V_A = Horizontal_and_Vertical;
+			#endif
+			
+		float2 midHV_A = (H_V_A-1) * float2(BUFFER_WIDTH * 0.5,BUFFER_HEIGHT * 0.5) * pix;
+		texcoord = float2((texcoord.x*H_V_A.x)-midHV_A.x,(texcoord.y*H_V_A.y)-midHV_A.y);
+		//Non LB Resizing.
+		texcoord *= Horizontal_and_Vertical_TL;
+		#endif
+		//Need to add a method to disable this when three pixels are detected.
+		//Will to this Someday.
+		#if SDT || SD_Trigger		
+			X_Y_B = Image_Position_Adjust + float2(DG_X,DG_Y);
+			
+			S_texcoord.xy += float2(-X_Y_B.x,X_Y_B.y)*0.5;
+			//Will work on this later.
+			//float2 midHV_B = (H_V_B-1) * float2(BUFFER_WIDTH * 0.5,BUFFER_HEIGHT * 0.5) * pix;
+			//S_texcoord = float2((S_texcoord.x*H_V_B.x)-midHV_B.x,(S_texcoord.y*H_V_B.y)-midHV_B.y);
+		#endif
+		
+		return float4(texcoord,S_texcoord);
+	}
+	
 	//Weapon Setting//
 	float4 WA_XYZW()
 	{
@@ -3791,25 +3820,6 @@ uniform int Extra_Information <
 		return Separation * DepthBuffer_LP.x;
 	}
 	
-	#if SDT || SD_Trigger
-	float TargetedDepth(float2 TC)
-	{
-		return smoothstep(0,1,Depth(TC).x);
-	}
-	
-	float SDTriggers()//Specialized Depth Triggers
-	{   float Threshold = 0.001;//Both this and the options below may need to be adjusted. A Value lower then 7.5 will break this.!?!?!?!
-		if ( SD_Trigger == 1 || SDT == 1)//Top _ Left                             //Center_Left                             //Botto_Left
-			return (TargetedDepth(float2(0.95,0.25)) >= Threshold ) && (TargetedDepth(float2(0.95,0.5)) >= Threshold) && (TargetedDepth(float2(0.95,0.75)) >= Threshold) ? 0 : 1;
-		else
-			return ((TargetedDepth(float2(0.5,0.10)) <= 1 ) && //Top
-				   ((TargetedDepth(float2(0.5,0.25)) <= 1 ) && //Center Top
-					(TargetedDepth(float2(0.5,0.50)) <= 1 ))&& //Center
-					(TargetedDepth(float2(0.5,0.75)) <  1 ) && //Center Bottom
-					(TargetedDepth(float2(0.5,0.90)) <  1 ))? 0 : 1;//Bottom
-	}
-	#endif
-	
 	bool Shift_Depth()
 	{
 		float Check_Depth_Pos_Bot_A = PrepDepth(float2(0.25,0.999))[0][0];
@@ -4459,17 +4469,28 @@ uniform int Extra_Information <
 		
 		
 		float DepthBlur, Alinement_Depth = tex2Dlod(SamplerzBufferN_Mixed,float4(TexCoords,0,0)).x, Depth = Alinement_Depth;
-		const float DBPower = 1.0, Con = 11, weight[11] = { 0.0,0.010,-0.010,0.020,-0.020,0.030,-0.030,0.040,-0.040,0.050,-0.050 };
+		const float DBPower = 50, Con = 9;
+		const float2 cardinalOffsets[9] = {
+										    float2( 0,  0),  // Center (no offset)
+										    float2(-1,  0),  // Left
+										    float2( 1,  0),  // Right
+										    float2( 0, -1),  // Down
+										    float2( 0,  1),  // Up
+										    float2(-2, -2),  // Down Left
+										    float2( 2, -2),  // Down Right
+										    float2(-2,  2),  // Up Left
+										    float2( 2,  2)   // Up Right
+										  };
 		if(BD_Options == 2 || Alinement_View)
 		{
 			float2 dir = 0.5 - TexCoords; 
 			[loop]
-			for (int i = 0; i < 11; i++)
+			for (int i = 0; i < Con; i++)
 			{
-				DepthBlur += tex2Dlod(SamplerzBufferN_Mixed,float4(TexCoords + dir * weight[i] * DBPower,0,2) ).x;
+				DepthBlur += tex2Dlod(SamplerzBufferN_Mixed,float4(TexCoords + dir * cardinalOffsets[i] * pix * DBPower,0,1) ).x;
 			}
 			
-			Alinement_Depth = ( Alinement_Depth + DepthBlur ) * 0.08333;
+			Alinement_Depth = ( Alinement_Depth + DepthBlur ) * 0.1;
 		}
 	
 		if (BD_Options == 2 || Alinement_View)
@@ -4699,7 +4720,7 @@ uniform int Extra_Information <
 		//Color = tex2Dlod(SamplerLumN,float4(1, 0.083,0,0)).z;
 		//Color = CWH_Mask(texcoord);
 		//Color =  LBSensitivity(SLLTresh(float2(0.05,0.5), 5));
-	
+		//Color = SDTriggers();
 		return Color.rgba;
 	}
 		
