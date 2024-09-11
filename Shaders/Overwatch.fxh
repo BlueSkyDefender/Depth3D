@@ -30480,7 +30480,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DE_W 0.250        // Auto
     //#define DI_Z 0.050        // Trim
     //#define DF_W float4(0.0001,0.000,0.0,0.0125)// Edge & Scale
-	#define DAA_W 2              //Warp/Halo Masking Type 
+	//#define DAA_W 2              //Warp/Halo Masking Type 
 	//#define EDU 1                  //Elevate Detectors Up effects ZPD
 	//#define TMD 1	
 
@@ -30512,7 +30512,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define SMS 1         //SM Separation Limit  - Do Not use any more
 	#define DL_X 0.75       //SM Tune Limit
 	//#define DL_W 0.5      //SM Perspective Limit - Do Not use any more
-	#define DM_X 6        //SM HQ Tune Power       - Will be made global
+	#define DM_X 7        //SM HQ Tune Power       - Will be made global
     //#define DM_Y 1        //SM HQ VRS Limit
 	//#define HQT 1         //SM HQ Trigger
 	//#define FMM 1         //Filter Mode          - Need to add this back in the new shader.
