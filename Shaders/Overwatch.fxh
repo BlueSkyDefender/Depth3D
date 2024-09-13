@@ -527,18 +527,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DA_Y 8.75
 	#define WSM 5
 	#define DB_W 5
-#elif (App == 0x6D3CD99E ) //Blood 2 ****
-	#define DA_X 0.105
-	 
-	#define DE_X 4
-	//#define DE_Y 0.50
-	#define DE_Z 0.475
-	#define WSM 10
-	#define DB_W 8
-	#define OW_WP "Read Help & Change Me\0Custom WP\0Blood 2 All Weapons\0Blood 2 Bonus Weapons\0Blood 2 Former\0"
-	#define WPW 1
-	#define NFM 1
-	#define RHW 1
 #elif (App == 0xF22A9C7D || App == 0x5416A79D ) //SOMA
 	#define DA_Y 56.0 //30.0 //25.5
 	#define DA_X 0.0375
@@ -15726,7 +15714,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define DH_X 1.340
     
 	//Simple Menu Detection
-    #define SMD 3 //Off 0 | 1 | 2 | 3 | 4 | 5 | 6 
+    #define SMD 2 //Off 0 | 1 | 2 | 3 | 4 | 5 | 6 
     //Map A
     #define DW_X float4( 0.051, 0.068 , 0.05 , 0.955)    //Pos A = XY Any & B = ZW Lock 
     #define DW_Y float2( 0.935 , 0.0915 )                   //Pos C = XY 
@@ -30523,7 +30511,67 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	//#define DRS 1
 	#define DAA 1
 	//#define FOV 1
-    //#define ARW 1	
+    //#define ARW 1
+#elif (App == 0x6D3CD99E ) //Blood 2
+    //#define DS_Z 3                 // Set View Mode
+	//#define DA_W 1                 // Set Linerzation
+    //#define DB_X 1                 // Flip
+	#define DA_X 0.025 //0.100             // ZPD
+	//#define DF_Y 0.025              // Seperation
+	#define DA_Y 29.5 //7.5            // Near Plane Adjustment
+    //#define DA_Z -.500           // Linerzation Offset
+    //#define DS_Y 0                 // Linerzation Offset Effects only distance if true
+	#define DB_Z 0.025            // Auto Depth Protection
+	#define DE_X 4                 // ZPD Boundary 
+	#define DE_Y 0.75             // Set ZPD Boundary Level Zero 
+	#define DE_Z 0.40             // Speed that Boundary is Enforced
+	//#define AFD 1                // Alternate Frame Detection - May be phased out
+	//#define DG_W 0.25             // Shift Boundary Out of screen 0.5 and or In screen -0.5
+    #define OIL 2 //Set How many Levels We use for RE_Fix 0 | 1 | 2 | 3
+    #define OIF float3(0.625,0.50,0.375) //Fix enables if Value is > 0.0
+	#define DI_W float3(0.5,0.75,1.25)
+    //#define CWH 3                  //ZPD Weapon Hand Consideration For Masking  0 is Off | 1 Is Full | 2 Half Right screen Mask And Not to be used with Weapon Profiles.
+    //#define WBA 2.0                //ZPD Weapon Boundary Alt Adjust power for CWH 
+	//#define FTM 4                  // Fast Trigger Mode If this enabled then Level 1 and > switches instantly.
+	#define WND 1.0              //Weapon Near Pushes depth in and adjust perspective to match.
+	//#define DG_Z 0.050        // Min Weapon Hands That are apart of world with Auto and Trim
+    //#define DS_X float3(0.025,0,1) // Min Weapon bit only triggers when a OIL Level is set and set here on .y
+    //#define DE_W 0.250        // Auto
+    //#define DI_Z 0.050        // Trim
+    //#define DF_W float4(0.0001,0.000,0.0,0.0125)// Edge & Scale
+	//#define DAA_W 2              //Warp/Halo Masking Type 
+	//#define EDU 1                  //Elevate Detectors Up effects ZPD
+	//#define TMD 1	
+
+	#define BMT 1                  // ZPD and World Scale Balance // I need to phase this out.
+	#define DF_Z 0.25             // Set the Balance  
+    //#define DAO 1                  // Turn On or Off De-Artifact Options For now DAO if set to 1 it's also applys to Hoz 
+    #define DL_Y 0.625             // De-Artifact Only works on some View Modes and causes performance degredation
+    //#define DL_Z -0.5              // Compat Power
+	//#define DJ_X 0.050             // Range Smoothing
+	
+	#define WSM 10
+	//#define DB_W 8
+	#define OW_WP "Read Help & Change Me\0Custom WP\0Blood 2 Base Weapons\0Blood 2 Bonus Weapons\0"
+	#define WPW 1
+	
+ //Smooth Mode
+    //#define SMS 1         //SM Separation Limit  - Do Not use any more
+	#define DL_X 0.75       //SM Tune Limit
+	//#define DL_W 0.5      //SM Perspective Limit - Do Not use any more
+	#define DM_X 7        //SM HQ Tune Power       - Will be made global
+    //#define DM_Y 1        //SM HQ VRS Limit
+	//#define HQT 1         //SM HQ Trigger
+	//#define FMM 1         //Filter Mode          - Need to add this back in the new shader.
+	//#define NDW 1
+	//#define PEW 1
+	#define NFM 1
+	//#define DSW 1
+	//#define DRS 1
+	//#define DAA 1
+	//#define FOV 1
+    //#define ARW 1
+	#define RHW 1
 #else
 	#define NPW 1 //No Profile
 #endif
@@ -32133,11 +32181,9 @@ float DMA_Overwatch(float WP, float DMA_Adjust)
 float4 Weapon_Profiles(float WP ,float4 Weapon_Adjust) // Blood 2
 {
     if (WP == 2)
-        Weapon_Adjust = float4(0.4213,5.0,0.5,0.0);        //WP 0 | Blood 2 All Weapons
+        Weapon_Adjust = float4(0.4213,5.25,0.55,0.125);        //WP 0 | Blood 2 All Weapons
     if (WP == 3)
-        Weapon_Adjust = float4(0.484,5.0,0.5,0.0);         //WP 1 | Blood 2 Bonus weapons
-    if (WP == 4)
-        Weapon_Adjust = float4(0.4213,5.0,0.8,0.0);        //WP 2 | Blood 2 Former
+        Weapon_Adjust = float4(0.495,5.25,0.55,0.125);         //WP 1 | Blood 2 Bonus weapons
 
 	return Weapon_Adjust;
 }
