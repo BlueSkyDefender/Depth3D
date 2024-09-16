@@ -184,11 +184,7 @@ You will lose a lot of texture detail. I do not recommend playing like this.
 
 Now For Mods you will have click on the Bat files provided.
 
-{BuildGDX}  [Reshade 4.7.0, note: used Xenos to inject]
-Download https://github.com/DarthTon/Xenos/releases and the latest version of Reshade.
-
-Create a folder and extract Xenos 2.3.2. You only really need the Xenos.exe 64 bit program and also extract Reshade 64bit ReShade64.dll into the same folder
-as Xenos. Place SuperDepth3D with Overwatch.fxh in this folder and start Xenos.exe.
+{BuildGDX}  [Reshade 4.7.0]
 
 Click on Manual Launch radio button.
 Click on Add and select the ReShade64.dll.
@@ -1162,13 +1158,10 @@ Best to use Minimal Hud and as always "try" to disable most Post effects.
 {Pseudoregalia} [Reshade 5.9.0] - DX12
 In the Game settings under VIDEO you will need to Disable Retro Resolution Scale [ ].
 
-{Quake 2 XP} [Reshade 4.7.0, Xenos_2.3.2 Injector]
+{Quake 2 XP} [Reshade 4.7.0]
 Install game and make sure in launches in fullscreen and native resolution.
 
-Download https://github.com/DarthTon/Xenos/releases and the latest version of reshade.
-
-Create a folder and extract Xenos 2.3.2 you only really need the Xenos.exe 32 bit program and also extract ReShade 32bit opengl32.dll/ReShade32.dll in to the same folder
-as Xenos. Place SuperDepth3D with Overwatch.fxh in this folder and start Xenos.exe.
+Place SuperDepth3D with Overwatch.fxh in this folder.
 
 Click on Manual Launch radio button.
 Click on Add and select the opengl32.dll/ReShade32.dll
