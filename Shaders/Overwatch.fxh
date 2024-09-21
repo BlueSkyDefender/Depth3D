@@ -1,7 +1,7 @@
 ////----------------------------------------//
 ///SuperDepth3D Overwatch Automation Header///
 //----------------------------------------////
-#define OVERWATCH "Overwatch v3.9.8\n"
+#define OVERWATCH "Overwatch v3.9.9\n"
 //---------------------------------------OVERWATCH---------------------------------------//
 // If you are reading this stop. Go away and never look back. From this point on if you  //
 // still think it's is worth looking at this..... Then no one can save you or your soul. //
@@ -398,11 +398,9 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define sApp 0xA400000
 #elif exists Platform8                               //Platform 8	
 	#define sApp 0xA500000
-#else
-	#define sApp __APPLICATION__
 #endif
 //End of Special Handling
-#define App sApp
+#define App __APPLICATION__
 
 //Game Hashes//
 #if (App == 0xC19572DDF || App == 0xFBEE8027 || App == 0x2A19A7FA|| App == 0xCBFC0440 ) //PCSX2 | CEMU | Yuzu | Ryujinx
@@ -742,7 +740,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 #elif (App == 0x3F017CF ) //Call of Cthulhu
 	#define DA_W 1
 	#define DA_X 0.0375
-#elif (App == 0xA100000 ) //Lego Batman 1 & 2
+#elif (sApp == 0xA100000 ) //Lego Batman 1 & 2
 	#define DA_Y 27.5
 	#define DA_X 0.125
 	#define DA_Z 0.001
@@ -754,7 +752,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DA_Z 0.001
 	 
 	#define RHW 1
-#elif (App == 0xA200000 ) //Batman BlackGate
+#elif (sApp == 0xA200000 ) //Batman BlackGate
 	#define DA_Y 12.5
 	#define DA_X 0.0375
 	#define DA_Z 0.00025
@@ -11478,7 +11476,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define OW_WP "Read Help & Change Me\0Custom WP\0No One Lives Forever\0No One Lives Forever 2\0"
 	#define WPW 1
 	#define RHW 1
-#elif (App == 0xA300000 || App == 0xA400000 ) //Alien VS Preditor 2 & Primal Hunt
+#elif (sApp == 0xA300000 || sApp == 0xA400000 ) //Alien VS Preditor 2 & Primal Hunt
 	//#define DA_W 1
     //#define DB_X 1
 	#define DA_X 0.035
@@ -17591,7 +17589,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DM_Y 3     //HQ VRS 
 	#define FOV 1
 	#define PEW 1
-#elif (App == 0xA500000 ) //Platform 8
+#elif (App == 0x3E367B93 && sApp == 0xA500000) //Platform 8
     //#define DS_Z 2            // Set View Mode
 	#define DA_W 1            // Set Linerzation
     //#define DB_X 1            // Flip
@@ -20599,7 +20597,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define DL_Z 0.25         // Compat Power
 	//#define DJ_X 0.02        // Range Smoothing
 	//#define FRM 0
-		//#define ASA 0
+		 
 	//Smooth Mode Setting
     #define SMS 3           //SM Toggle Separation
 	#define DL_X 0.875       //SM Tune
@@ -20758,7 +20756,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define DL_Z -0.125         // Compat Power
 	//#define DJ_X 0.02        // Range Smoothing
 	#define FRM 0
-		//#define ASA 0
+		 
 	//Smooth Mode Setting
     #define SMS 3           //SM Toggle Separation
 	#define DL_X 0.95       //SM Tune
@@ -20866,7 +20864,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define DL_Z -0.100         // Compat Power
 	//#define DJ_X 0.02        // Range Smoothing
 	#define FRM 0
-		//#define ASA 0
+		 
 	//Smooth Mode Setting
     #define SMS 3           //SM Toggle Separation
 	#define DL_X 0.75       //SM Tune
@@ -21000,7 +20998,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DL_Z -0.25         // Compat Power
 	//#define DJ_X 0.02        // Range Smoothing
 	#define FRM 0
-		//#define ASA 0
+		 
 	//Smooth Mode Setting
 	#define DL_X 0.875       //SM Tune
 	//#define DL_W 0.05       //SM Perspective
@@ -21058,7 +21056,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     #define DL_Z 0.25         // Compat Power
 	//#define DJ_X 0.02        // Range Smoothing
 	#define FRM 0
-		//#define ASA 0
+		 
     #define DAA_W 2
 	//Smooth Mode Setting
 	#define DL_X 0.95       //SM Tune
@@ -21491,7 +21489,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	//#define DT_Z 0.1               //WH Masking Power from -1 to 1
     //#define LHA                  //Lower Height Adjustment [0.5]to[0.575]
     #define FRM 0                //Foveated Rendring mode Toggle
-    //#define ASA 0	
+     	
 	
 	//Smooth Mode
 	//#define DL_X 0.750   //SM Tune Limit
@@ -21682,7 +21680,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	//#define DT_Z 0.1               //WH Masking Power from -1 to 1
     //#define LHA                  //Lower Height Adjustment [0.5]to[0.575]
     #define FRM 0                //Foveated Rendring mode Toggle
-    //#define ASA 0	
+     	
 	
 	//Smooth Mode
 	//#define DL_X 0.750   //SM Tune Limit
@@ -21809,7 +21807,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	//#define DT_Z 0.1               //WH Masking Power from -1 to 1
     //#define LHA                  //Lower Height Adjustment [0.5]to[0.575]
     #define FRM 0                //Foveated Rendring mode Toggle
-    //#define ASA 0	
+     	
 	
 	//Smooth Mode
 	//#define DL_X 0.750   //SM Tune Limit
@@ -22025,7 +22023,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	//#define DT_Z 0.1               //WH Masking Power from -1 to 1
     //#define LHA                  //Lower Height Adjustment [0.5]to[0.575]
     #define FRM 0                //Foveated Rendring mode Toggle
-    //#define ASA 0	
+     	
 	
 	//Smooth Mode
 	//#define DL_X 0.750   //SM Tune Limit
@@ -22171,7 +22169,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	//#define DT_Z 0.1               //WH Masking Power from -1 to 1
     //#define LHA                  //Lower Height Adjustment [0.5]to[0.575]
     #define FRM 0                //Foveated Rendring mode Toggle
-    //#define ASA 0	
+     	
 	
 	//Smooth Mode
 	//#define DL_X 0.750   //SM Tune Limit
@@ -22805,7 +22803,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	//#define DT_Z 0.1               //WH Masking Power from -1 to 1
     //#define LHA                  //Lower Height Adjustment [0.5]to[0.575]
     //#define FRM 0                //Foveated Rendring mode Toggle
-    //#define ASA 0
+     
     
     #define FPS 2  // FPS Focus Settings 
     #define DK_X 2 //Trigger Type
@@ -22941,7 +22939,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	//#define DT_Z 0.1               //WH Masking Power from -1 to 1
     //#define LHA                  //Lower Height Adjustment [0.5]to[0.575]
     //#define FRM 0                //Foveated Rendring mode Toggle
-    //#define ASA 0
+     
     
     //#define FPS 2  // FPS Focus Settings 
     //#define DK_X 2 //Trigger Type
@@ -23033,7 +23031,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	//#define DT_Z 0.1               //WH Masking Power from -1 to 1
     //#define LHA                  //Lower Height Adjustment [0.5]to[0.575]
     //#define FRM 0                //Foveated Rendring mode Toggle
-    //#define ASA 0
+     
     
     //#define FPS 2  // FPS Focus Settings 
     //#define DK_X 2 //Trigger Type
@@ -23133,7 +23131,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	//#define DT_Z 0.1               //WH Masking Power from -1 to 1
     //#define LHA                  //Lower Height Adjustment [0.5]to[0.575]
     //#define FRM 0                //Foveated Rendring mode Toggle
-    //#define ASA 0
+     
     
     //#define FPS 2  // FPS Focus Settings 
     //#define DK_X 2 //Trigger Type
@@ -23202,7 +23200,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	//#define DT_Z 0.1               //WH Masking Power from -1 to 1
     //#define LHA                  //Lower Height Adjustment [0.5]to[0.575]
     //#define FRM 0                //Foveated Rendring mode Toggle
-    //#define ASA 0
+     
     
     //#define FPS 2  // FPS Focus Settings 
     //#define DK_X 2 //Trigger Type
@@ -23344,7 +23342,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	//#define DT_Z 0.1               //WH Masking Power from -1 to 1
     //#define LHA                  //Lower Height Adjustment [0.5]to[0.575]
     //#define FRM 0                //Foveated Rendring mode Toggle
-    //#define ASA 0
+     
     
     //#define FPS 2  // FPS Focus Settings 
     //#define DK_X 2 //Trigger Type
@@ -23540,7 +23538,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	//#define DT_Z 0.1               //WH Masking Power from -1 to 1
     //#define LHA                  //Lower Height Adjustment [0.5]to[0.575]
     //#define FRM 0                //Foveated Rendring mode Toggle
-    //#define ASA 0
+     
     
     //#define FPS 2  // FPS Focus Settings 
     //#define DK_X 2 //Trigger Type
@@ -23613,7 +23611,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	//#define DT_Z 0.1               //WH Masking Power from -1 to 1
     //#define LHA                  //Lower Height Adjustment [0.5]to[0.575]
     //#define FRM 0                //Foveated Rendring mode Toggle
-    //#define ASA 0
+     
     
     //#define FPS 2  // FPS Focus Settings 
     //#define DK_X 2 //Trigger Type
@@ -23695,7 +23693,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	//#define DT_Z 0.1               //WH Masking Power from -1 to 1
     //#define LHA                  //Lower Height Adjustment [0.5]to[0.575]
     //#define FRM 0                //Foveated Rendring mode Toggle
-    //#define ASA 0
+     
     
     //#define FPS 2  // FPS Focus Settings 
     //#define DK_X 2 //Trigger Type
@@ -23795,7 +23793,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	//#define DT_Z 0.1               //WH Masking Power from -1 to 1
     //#define LHA                  //Lower Height Adjustment [0.5]to[0.575]
     //#define FRM 0                //Foveated Rendring mode Toggle
-    //#define ASA 0
+     
     
     //#define FPS 2  // FPS Focus Settings 
     //#define DK_X 2 //Trigger Type
@@ -24161,7 +24159,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	//#define DT_Z 0.1               //WH Masking Power from -1 to 1
     //#define LHA                  //Lower Height Adjustment [0.5]to[0.575]
     //#define FRM 0                //Foveated Rendring mode Toggle
-    //#define ASA 0
+     
 
     //Letter Box Correction Offsets With X & Y
     //#define LBC 1     //Letter Box Correction
@@ -24292,7 +24290,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	//#define DT_Z 0.1               //WH Masking Power from -1 to 1
     //#define LHA                  //Lower Height Adjustment [0.5]to[0.575]
     //#define FRM 0                //Foveated Rendring mode Toggle
-    //#define ASA 0
+     
 
     //Letter Box Correction Offsets With X & Y
     //#define LBC 1     //Letter Box Correction
@@ -24404,7 +24402,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	//#define DT_Z 0.1               //WH Masking Power from -1 to 1
     //#define LHA                  //Lower Height Adjustment [0.5]to[0.575]
     //#define FRM 0                //Foveated Rendring mode Toggle
-    //#define ASA 0
+     
 
     //Letter Box Correction Offsets With X & Y
     //#define LBC 1     //Letter Box Correction
@@ -24578,7 +24576,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	//#define DT_Z 0.1               //WH Masking Power from -1 to 1
     //#define LHA                  //Lower Height Adjustment [0.5]to[0.575]
     //#define FRM 0                //Foveated Rendring mode Toggle
-    //#define ASA 0
+     
 
     //Letter Box Correction Offsets With X & Y
     //#define LBC 1     //Letter Box Correction
@@ -24739,7 +24737,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	//#define DT_Z 0.1               //WH Masking Power from -1 to 1
     //#define LHA                  //Lower Height Adjustment [0.5]to[0.575]
     //#define FRM 0                //Foveated Rendring mode Toggle
-    //#define ASA 0
+     
 
     //Letter Box Correction Offsets With X & Y
     //#define LBC 1     //Letter Box Correction
@@ -24929,7 +24927,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	//#define DT_Z 0.1               //WH Masking Power from -1 to 1
     //#define LHA                  //Lower Height Adjustment [0.5]to[0.575]
     //#define FRM 0                //Foveated Rendring mode Toggle
-    //#define ASA 0
+     
 
     //Letter Box Correction Offsets With X & Y
     //#define LBC 1     //Letter Box Correction
@@ -25019,7 +25017,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	//#define DT_Z 0.1               //WH Masking Power from -1 to 1
     //#define LHA                  //Lower Height Adjustment [0.5]to[0.575]
     //#define FRM 0                //Foveated Rendring mode Toggle
-    //#define ASA 0
+     
 
     //Letter Box Correction Offsets With X & Y
     //#define LBC 1     //Letter Box Correction
@@ -25318,7 +25316,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	//#define DT_Z 0.1               //WH Masking Power from -1 to 1
     //#define LHA                  //Lower Height Adjustment [0.5]to[0.575]
     //#define FRM 0                //Foveated Rendring mode Toggle
-    //#define ASA 0
+     
 
     //Letter Box Correction Offsets With X & Y
     //#define LBC 1     //Letter Box Correction
@@ -25408,7 +25406,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	//#define DT_Z 0.1               //WH Masking Power from -1 to 1
     //#define LHA                  //Lower Height Adjustment [0.5]to[0.575]
     //#define FRM 0                //Foveated Rendring mode Toggle
-    //#define ASA 0
+     
 
     //Letter Box Correction Offsets With X & Y
     //#define LBC 1     //Letter Box Correction
@@ -25498,7 +25496,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	//#define DT_Z 0.1               //WH Masking Power from -1 to 1
     //#define LHA                  //Lower Height Adjustment [0.5]to[0.575]
     //#define FRM 0                //Foveated Rendring mode Toggle
-    //#define ASA 0
+     
 
     //Letter Box Correction Offsets With X & Y
     //#define LBC 1     //Letter Box Correction
@@ -25894,7 +25892,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	//#define DT_Z 0.1               //WH Masking Power from -1 to 1
     //#define LHA                  //Lower Height Adjustment [0.5]to[0.575]
     //#define FRM 0                //Foveated Rendring mode Toggle
-    //#define ASA 0
+     
 
     //Letter Box Correction Offsets With X & Y
     //#define LBC 1     //Letter Box Correction
@@ -26072,7 +26070,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	//#define DT_Z 0.1               //WH Masking Power from -1 to 1
     //#define LHA                  //Lower Height Adjustment [0.5]to[0.575]
     //#define FRM 0                //Foveated Rendring mode Toggle
-    //#define ASA 0
+     
 
     //Letter Box Correction Offsets With X & Y
     //#define LBC 1     //Letter Box Correction
@@ -26344,7 +26342,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	//#define DT_Z 0.1               //WH Masking Power from -1 to 1
     //#define LHA                  //Lower Height Adjustment [0.5]to[0.575]
     //#define FRM 0                //Foveated Rendring mode Toggle
-    //#define ASA 0
+     
 
     //Letter Box Correction Offsets With X & Y
     //#define LBC 1     //Letter Box Correction
@@ -26645,7 +26643,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	//#define DT_Z 0.1               //WH Masking Power from -1 to 1
     //#define LHA                  //Lower Height Adjustment [0.5]to[0.575]
     //#define FRM 0                //Foveated Rendring mode Toggle
-    //#define ASA 0
+     
 
     //Letter Box Correction Offsets With X & Y
     //#define LBC 1     //Letter Box Correction
@@ -26733,7 +26731,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	//#define DT_Z 0.1               //WH Masking Power from -1 to 1
     //#define LHA                  //Lower Height Adjustment [0.5]to[0.575]
     //#define FRM 0                //Foveated Rendring mode Toggle
-    //#define ASA 0
+     
 
     //Letter Box Correction Offsets With X & Y
     #define LBC 2     //Letter Box Correction
@@ -26902,7 +26900,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	//#define DT_Z 0.1               //WH Masking Power from -1 to 1
     //#define LHA                  //Lower Height Adjustment [0.5]to[0.575]
     //#define FRM 0                //Foveated Rendring mode Toggle
-    //#define ASA 0
+     
 
 
 	//#define LBM 2 //Letter Box Masking With size Adust for Top and Bottom and 2 is Left and Right
@@ -27008,7 +27006,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	//#define DT_Z 0.1               //WH Masking Power from -1 to 1
     //#define LHA                  //Lower Height Adjustment [0.5]to[0.575]
     //#define FRM 0                //Foveated Rendring mode Toggle
-    //#define ASA 0
+     
 
 
 	//#define LBM 2 //Letter Box Masking With size Adust for Top and Bottom and 2 is Left and Right
@@ -27090,7 +27088,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	//#define DT_Z 0.1               //WH Masking Power from -1 to 1
     //#define LHA                  //Lower Height Adjustment [0.5]to[0.575]
     //#define FRM 0                //Foveated Rendring mode Toggle
-    //#define ASA 0
+     
 
 
 	//#define LBM 2 //Letter Box Masking With size Adust for Top and Bottom and 2 is Left and Right
@@ -27172,7 +27170,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	//#define DT_Z 0.1               //WH Masking Power from -1 to 1
     //#define LHA                  //Lower Height Adjustment [0.5]to[0.575]
     //#define FRM 0                //Foveated Rendring mode Toggle
-    //#define ASA 0
+     
 
 
 	//#define LBM 2 //Letter Box Masking With size Adust for Top and Bottom and 2 is Left and Right
@@ -27354,7 +27352,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	//#define DT_Z 0.1               //WH Masking Power from -1 to 1
     //#define LHA                  //Lower Height Adjustment [0.5]to[0.575]
     //#define FRM 0                //Foveated Rendring mode Toggle
-    //#define ASA 0
+     
 
 	
  //Smooth Mode
@@ -27455,7 +27453,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	//#define DT_Z 0.1               //WH Masking Power from -1 to 1
     //#define LHA                  //Lower Height Adjustment [0.5]to[0.575]
     //#define FRM 0                //Foveated Rendring mode Toggle
-    //#define ASA 0
+     
 
 	
  //Smooth Mode
@@ -27528,7 +27526,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	//#define DT_Z 0.1               //WH Masking Power from -1 to 1
     //#define LHA                  //Lower Height Adjustment [0.5]to[0.575]
     //#define FRM 0                //Foveated Rendring mode Toggle
-    //#define ASA 0
+     
 
 	#define LBC 1     //Letter Box Correction Offsets With X & Y
 	#define LBR 1
@@ -27683,7 +27681,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	//#define DT_Z 0.1               //WH Masking Power from -1 to 1
     //#define LHA                  //Lower Height Adjustment [0.5]to[0.575]
     //#define FRM 0                //Foveated Rendring mode Toggle
-    //#define ASA 0
+     
 
 	#define LBM 1 //Letter Box Masking With size Adust for Top and Bottom and 2 is Left and Right
 	#define DI_X 0.879
@@ -27803,7 +27801,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	//#define DT_Z 0.1               //WH Masking Power from -1 to 1
     //#define LHA                  //Lower Height Adjustment [0.5]to[0.575]
     //#define FRM 0                //Foveated Rendring mode Toggle
-    //#define ASA 0
+     
 
 	//#define LBM 1 //Letter Box Masking With size Adust for Top and Bottom and 2 is Left and Right
 	//#define DI_X 0.879
@@ -27916,7 +27914,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	//#define DT_Z 0.1               //WH Masking Power from -1 to 1
     //#define LHA                  //Lower Height Adjustment [0.5]to[0.575]
     //#define FRM 0                //Foveated Rendring mode Toggle
-    //#define ASA 0
+     
 
 	//#define LBM 1 //Letter Box Masking With size Adust for Top and Bottom and 2 is Left and Right
 	//#define DI_X 0.879
@@ -28047,7 +28045,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	//#define DT_Z 0.1               //WH Masking Power from -1 to 1
     //#define LHA                  //Lower Height Adjustment [0.5]to[0.575]
     //#define FRM 0                //Foveated Rendring mode Toggle
-    //#define ASA 0
+     
 
 	//#define LBM 1 //Letter Box Masking With size Adust for Top and Bottom and 2 is Left and Right
 	//#define DI_X 0.879
@@ -28124,7 +28122,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	//#define DT_Z 0.1               //WH Masking Power from -1 to 1
     //#define LHA                  //Lower Height Adjustment [0.5]to[0.575]
     //#define FRM 0                //Foveated Rendring mode Toggle
-    //#define ASA 0
+     
 
 	//#define LBM 1 //Letter Box Masking With size Adust for Top and Bottom and 2 is Left and Right
 	//#define DI_X 0.879
@@ -28456,7 +28454,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	//#define DT_Z 0.1               //WH Masking Power from -1 to 1
     //#define LHA                  //Lower Height Adjustment [0.5]to[0.575]
     //#define FRM 0                //Foveated Rendring mode Toggle
-    //#define ASA 0
+     
 
 	//#define LBM 1 //Letter Box Masking With size Adust for Top and Bottom and 2 is Left and Right
 	//#define DI_X 0.879
@@ -28535,7 +28533,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	//#define DT_Z 0.1               //WH Masking Power from -1 to 1
     //#define LHA                  //Lower Height Adjustment [0.5]to[0.575]
     //#define FRM 0                //Foveated Rendring mode Toggle
-    //#define ASA 0
+     
 
 	//#define LBM 1 //Letter Box Masking With size Adust for Top and Bottom and 2 is Left and Right
 	//#define DI_X 0.879
@@ -28614,7 +28612,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	//#define DT_Z 0.1               //WH Masking Power from -1 to 1
     //#define LHA                  //Lower Height Adjustment [0.5]to[0.575]
     //#define FRM 0                //Foveated Rendring mode Toggle
-    //#define ASA 0
+     
 
 	//#define LBM 1 //Letter Box Masking With size Adust for Top and Bottom and 2 is Left and Right
 	//#define DI_X 0.879
@@ -28693,7 +28691,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	//#define DT_Z 0.1               //WH Masking Power from -1 to 1
     //#define LHA                  //Lower Height Adjustment [0.5]to[0.575]
     //#define FRM 0                //Foveated Rendring mode Toggle
-    //#define ASA 0
+     
 
 	//#define LBM 1 //Letter Box Masking With size Adust for Top and Bottom and 2 is Left and Right
 	//#define DI_X 0.879
@@ -28772,7 +28770,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	//#define DT_Z 0.1               //WH Masking Power from -1 to 1
     //#define LHA                  //Lower Height Adjustment [0.5]to[0.575]
     //#define FRM 0                //Foveated Rendring mode Toggle
-    //#define ASA 0
+     
 
 	//#define LBM 1 //Letter Box Masking With size Adust for Top and Bottom and 2 is Left and Right
 	//#define DI_X 0.879
@@ -28851,7 +28849,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	//#define DT_Z 0.1               //WH Masking Power from -1 to 1
     //#define LHA                  //Lower Height Adjustment [0.5]to[0.575]
     //#define FRM 0                //Foveated Rendring mode Toggle
-    //#define ASA 0
+     
 
 	//#define LBM 1 //Letter Box Masking With size Adust for Top and Bottom and 2 is Left and Right
 	//#define DI_X 0.879
@@ -28935,7 +28933,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	//#define DT_Z 0.1               //WH Masking Power from -1 to 1
     //#define LHA                  //Lower Height Adjustment [0.5]to[0.575]
     //#define FRM 0                //Foveated Rendring mode Toggle
-    //#define ASA 0
+     
 
 	//#define LBM 1 //Letter Box Masking With size Adust for Top and Bottom and 2 is Left and Right
 	//#define DI_X 0.879
@@ -29015,7 +29013,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	//#define DT_Z 0.1               //WH Masking Power from -1 to 1
     //#define LHA                  //Lower Height Adjustment [0.5]to[0.575]
     //#define FRM 0                //Foveated Rendring mode Toggle
-    //#define ASA 0
+     
 
 	//#define LBM 1 //Letter Box Masking With size Adust for Top and Bottom and 2 is Left and Right
 	//#define DI_X 0.879
@@ -29095,7 +29093,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	//#define DT_Z 0.1               //WH Masking Power from -1 to 1
     //#define LHA                  //Lower Height Adjustment [0.5]to[0.575]
     //#define FRM 0                //Foveated Rendring mode Toggle
-    //#define ASA 0
+     
 
 	//#define LBM 1 //Letter Box Masking With size Adust for Top and Bottom and 2 is Left and Right
 	//#define DI_X 0.879
@@ -29221,7 +29219,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	//#define DT_Z 0.1               //WH Masking Power from -1 to 1
     //#define LHA                  //Lower Height Adjustment [0.5]to[0.575]
     //#define FRM 0                //Foveated Rendring mode Toggle
-    //#define ASA 0
+     
 
 	//#define LBM 1 //Letter Box Masking With size Adust for Top and Bottom and 2 is Left and Right
 	//#define DI_X 0.879
@@ -29301,7 +29299,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	//#define DT_Z 0.1               //WH Masking Power from -1 to 1
     //#define LHA                  //Lower Height Adjustment [0.5]to[0.575]
     //#define FRM 0                //Foveated Rendring mode Toggle
-    //#define ASA 0
+     
 
 	//#define LBM 1 //Letter Box Masking With size Adust for Top and Bottom and 2 is Left and Right
 	//#define DI_X 0.879
@@ -30072,7 +30070,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	//#define DT_Z 0.1               //WH Masking Power from -1 to 1
     //#define LHA                  //Lower Height Adjustment [0.5]to[0.575]
     //#define FRM 0                //Foveated Rendring mode Toggle
-    //#define ASA 0
+     
 
     //Letter Box Correction Offsets With X & Y
     //#define LBC 1     //Letter Box Correction
@@ -30524,7 +30522,7 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
     //#define DS_Z 3                 // Set View Mode
 	#define DA_W 1                 // Set Linerzation
     //#define DB_X 1                 // Flip
-	#define DA_X 0.100             // ZPD
+	#define DA_X 0.050             // ZPD
 	//#define DF_Y 0.025              // Seperation
 	#define DA_Y 7.5//12.0            // Near Plane Adjustment
     //#define DA_Z -.500           // Linerzation Offset
