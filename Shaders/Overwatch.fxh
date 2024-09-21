@@ -11470,41 +11470,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	//#define DL_W 0.050 //SM Perspective
 	#define DM_X 4     //HQ Tune
     //#define DM_Y 3     //HQ VRS
-#elif (App == 0xFE54BF56 ) //No One Lives Forever and 2
-	#define DA_X 0.0375
-	#define WSM 11
-	#define OW_WP "Read Help & Change Me\0Custom WP\0No One Lives Forever\0No One Lives Forever 2\0"
-	#define WPW 1
-	#define RHW 1
-#elif (sApp == 0xA300000 || sApp == 0xA400000 ) //Alien VS Preditor 2 & Primal Hunt
-	//#define DA_W 1
-    //#define DB_X 1
-	#define DA_X 0.035
-	#define DF_Y 0.020
-	#define DA_Y 26.0
-    //#define DA_Z -0.001
-	#define DB_Z 0.1
- 
-	#define DE_X 4
-	#define DE_Y 0.500
-	#define DE_Z 0.375
-	#define DG_W 0.0 //Pop
-    //#define OIL 1 //Set How many Levels We use for RE_Fix 0 | 1 | 2 | 3
-    //#define OIF float2(0.7,0.5) //Fix enables if Value is > 0.0
-	//#define DI_W float2(2.0,4.5)
-
-	//#define FTM 1
-    //#define DG_Z 0.035 //Min
-    //#define DE_W 0.00 //Auto
-    //#define DI_Z 0.06 //Trim
-    //#define DF_W float3(0.0001,0.0025,0.275)  //Edge & Scale
-	#define BMT 1
-	#define DF_Z 0.25
-	#define WSM 12
-	#define OW_WP "Read Help & Change Me\0Custom WP\0Aliens VS Predator 2\0Aliens VS Predator 2 WIP\0"
-	#define WPW 1
-    #define NDG 1
-	#define RHW 1
 #elif (App == 0x7281105 || App == 0x8C01E44B ) //Amnesia Bunker
 	//#define DA_W 1
     //#define DB_X 1
@@ -30627,7 +30592,43 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	//#define DRS 1
 	#define DAA 1
 	//#define FOV 1
-    //#define ARW 1	
+    //#define ARW 1
+#elif (App == 0xFE54BF56 && sApp == 0xA300000 || sApp == 0xA400000 ) //Alien VS Preditor 2 & Primal Hunt // Needs to be befor No One Lives Forever and 2
+	//#define DA_W 1
+    //#define DB_X 1
+	#define DA_X 0.025
+	#define DF_Y 0.005
+	#define DA_Y 35.5
+    //#define DA_Z -0.001
+	#define DB_Z 0.05
+    #define DS_Y 2                 // Linerzation Offset Effects only distance if true 
+	#define DE_X 4
+	#define DE_Y 0.750
+	#define DE_Z 0.375
+	#define DG_W 0.0 //Pop
+    #define OIL 2 //Set How many Levels We use for RE_Fix 0 | 1 | 2 | 3
+    #define OIF float3(0.625,0.5,0.375) //Fix enables if Value is > 0.0
+	#define DI_W float3(0.25,0.375,1.0)
+	#define WND 0.5              //Weapon Near Pushes depth in and adjust perspective to match.
+	//#define AWZ 0.5
+	//#define FTM 1
+    //#define DG_Z 0.035 //Min
+    //#define DE_W 0.00 //Auto
+    //#define DI_Z 0.06 //Trim
+    //#define DF_W float3(0.0001,0.0025,0.275)  //Edge & Scale
+	#define BMT 1
+	#define DF_Z 0.5
+	#define WSM 12
+	#define OW_WP "Read Help & Change Me\0Custom WP\0Aliens VS Predator 2\0Aliens VS Predator 2 WIP\0"
+	#define WPW 1
+    #define NDG 1
+	#define RHW 1
+#elif (App == 0xFE54BF56 ) //No One Lives Forever and 2
+	#define DA_X 0.0375
+	#define WSM 11
+	#define OW_WP "Read Help & Change Me\0Custom WP\0No One Lives Forever\0No One Lives Forever 2\0"
+	#define WPW 1
+	#define RHW 1	
 #else
 	#define NPW 1 //No Profile
 #endif
@@ -32267,7 +32268,7 @@ float DMA_Overwatch(float WP, float DMA_Adjust)
 float4 Weapon_Profiles(float WP ,float4 Weapon_Adjust) // Aliens VS Predator 2
 {
     if (WP == 2)
-        Weapon_Adjust = float4(0.500,6.500,1.0,0.0);      //WP 2 | Aliens VS Predator 2
+        Weapon_Adjust = float4(0.500,6.500,1.0,0.25);      //WP 2 | Aliens VS Predator 2
     if (WP == 3)
         Weapon_Adjust = float4(0.519,31.25,8.875,0.0);    //WP 3 | Aliens VS Predator 2 WIP
 
