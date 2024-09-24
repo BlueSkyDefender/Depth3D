@@ -1,7 +1,7 @@
 	////----------------//
 	///**SuperDepth3D**///
 	//----------------////
-	#define SD3D "SuperDepth3D v4.3.3\n"
+	#define SD3D "SuperDepth3D v4.3.4\n"
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//* Depth Map Based 3D post-process shader
 	//* For Reshade 3.0+
@@ -114,8 +114,12 @@ namespace SuperDepth3D
 		static const float DJJ_X = 0.0, DJJ_Y = 0.0, DJJ_Z = 1000.0, DJJ_W = 0.0;
 		// DKK_X = [SDT Position A & B] DKK_Y = [SDT Position C] DKK_Z = [SDT ABCD Menu Tresholds] DKK_W = [Null]
 		static const float DKK_X = 0.0, DKK_Y = 0.0, DKK_Z = 1000.0, DKK_W = 0.0;
-		// DLL_X = [Position A & B] DLL_Y = [Position C & UI Pos] DLL_Z = [ABCW Stencil Menu Tresholds] DJJ_W = [Stencil Adjust]
+		// DLL_X = [Position A & B] DLL_Y = [Position C & UI Pos] DLL_Z = [ABCW Stencil Menu Tresholds] DLL_W = [Stencil Adjust]
 		static const float DLL_X = 0.0, DLL_Y = 0.0, DLL_Z = 1000.0, DLL_W = 0.0;
+		// DMM_X = [Lock Position A & B] DMM_Y = [Lock Position C] DMM_Z = [Lock ABCW Menu Tresholds] DMM_W = [Isolating Weapon Stencil Amount]
+		static const float DMM_X = 0.0, DMM_Y = 0.0, DMM_Z = 1000.0, DMM_W = 0.0;
+		// DNN_X = [Horizontal Scale] DNN_Y = [Vertical Scale] DNN_Z = [Null Z] DNN_W = [Null W]
+		static const float DNN_X = 1.0, DNN_Y = 1.0, DNN_Z = 0.0, DNN_W = 0.0;
 		// WSM = [Weapon Setting Mode]
 		#define OW_WP "WP Off\0Custom WP\0"
 		static const int WSM = 0;
@@ -831,7 +835,7 @@ uniform int SuperDepth3D <
 			ui_label = " Horizontal & Vertical Scale";
 			ui_tooltip = "Adjust Horizontal and Vertical Resize from the Top Left. Default is 1.0.";
 			ui_category = "Reposition Depth";
-		> = float2(1.0,1.0);
+		> = float2(DNN_X,DNN_Y);
 		
 		uniform float2 Image_Position_Adjust<
 			ui_type = "drag";
@@ -877,7 +881,7 @@ uniform int SuperDepth3D <
 	#else
 		static const bool Alinement_View = false;
 		static const float2 Horizontal_and_Vertical = float2(DD_X,DD_Y);
-		static const float2 Horizontal_and_Vertical_TL = float2(1.0,1.0);
+		static const float2 Horizontal_and_Vertical_TL = float2(DNN_X,DNN_Y);
 		static const float2 Image_Position_Adjust = float2(DD_Z,DD_W);
 		
 		static const bool LB_Correction_Switch = true;

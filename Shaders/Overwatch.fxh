@@ -1,7 +1,7 @@
 ////----------------------------------------//
 ///SuperDepth3D Overwatch Automation Header///
 //----------------------------------------////
-#define OVERWATCH "Overwatch v3.9.9\n"
+#define OVERWATCH "Overwatch v4.0.0\n"
 //---------------------------------------OVERWATCH---------------------------------------//
 // If you are reading this stop. Go away and never look back. From this point on if you  //
 // still think it's is worth looking at this..... Then no one can save you or your soul. //
@@ -75,6 +75,8 @@ static const float BD_Zoom_D = 0.0;                     //Barrel Distortion Zoom
 static const int Size_Position_Fix_D = 0;               // 0 | 1 : Off | On                             | SPF
 static const float HVS_X_D = 1.0;                       //Horizontal Size                               | DD_X
 static const float HVS_Y_D = 1.0;                       //Vertical Size                                 | DD_Y
+static const float HVS_TL_X_D = 1.0;                    //Horizontal Scale                              | DNN_X
+static const float HVS_TL_Y_D = 1.0;                    //Vertical  Scale                               | DNN_Y
 static const float HVP_X_D = 0;                         //Horizontal Position                           | DD_Z
 static const float HVP_Y_D = 0;                         //Vertical Position                             | DD_W
 
@@ -1730,16 +1732,6 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DL_X 0.450 //SM Tune
 	#define DL_W 0.050 //SM Perspective
 	#define NDW 1
-	#define PEW 1
-#elif (App == 0x621202BC ) //Vanquish DGVoodoo2 ***
-	#define DA_X 0.05
-	#define DA_Y 15.0
-	 
-	#define DE_X 1
-	#define DE_Y 0.5
-	#define DE_Z 0.375
-	#define RHW 1
-	#define NFM 1
 	#define PEW 1
 #elif (App == 0xA1214CD1 ) //Life is Strange
 	#define DA_X 0.125
@@ -30694,6 +30686,61 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	//#define DAA 1
 	//#define FOV 1
     //#define ARW 1
+#elif (App == 0x621202BC ) //Vanquish DXVK
+    //#define DS_Z 3                 // Set View Mode
+	//#define DA_W 1                 // Set Linerzation
+    //#define DB_X 1                 // Flip
+	#define DA_X 0.050              // ZPD
+	//#define DF_Y 0.025              // Seperation
+	#define DA_Y 15.0            // Near Plane Adjustment
+    //#define DA_Z -.500           // Linerzation Offset
+    //#define DS_Y 0                 // Linerzation Offset Effects only distance if true
+	#define DB_Z 0.025            // Auto Depth Protection
+	#define DE_X 1                 // ZPD Boundary 
+	#define DE_Y 0.75             // Set ZPD Boundary Level Zero 
+	#define DE_Z 0.375             // Speed that Boundary is Enforced
+	//#define AFD 1                // Alternate Frame Detection - May be phased out
+	//#define DG_W 0.25             // Shift Boundary Out of screen 0.5 and or In screen -0.5
+    #define OIL 1 //Set How many Levels We use for RE_Fix 0 | 1 | 2 | 3
+    #define OIF float2(0.50,0.375) //Fix enables if Value is > 0.0
+	#define DI_W float2(0.5,1.25)
+    //#define CWH 3                  //ZPD Weapon Hand Consideration For Masking  0 is Off | 1 Is Full | 2 Half Right screen Mask And Not to be used with Weapon Profiles.
+    //#define WBA 2.0                //ZPD Weapon Boundary Alt Adjust power for CWH 
+	//#define FTM 4                  // Fast Trigger Mode If this enabled then Level 1 and > switches instantly.
+	#define WND 0.5              //Weapon Near Pushes depth in and adjust perspective to match.
+	//#define DG_Z 0.050        // Min Weapon Hands That are apart of world with Auto and Trim
+    //#define DS_X float3(0.025,0,1) // Min Weapon bit only triggers when a OIL Level is set and set here on .y
+    //#define DE_W 0.250        // Auto
+    //#define DI_Z 0.050        // Trim
+    //#define DF_W float4(0.0001,0.000,0.0,0.0125)// Edge & Scale
+	//#define DAA_W 2              //Warp/Halo Masking Type 
+	//#define EDU 1                  //Elevate Detectors Up effects ZPD
+	//#define TMD 1	
+
+	#define BMT 1                  // ZPD and World Scale Balance // I need to phase this out.
+	#define DF_Z 0.25             // Set the Balance  
+    //#define DAO 1                  // Turn On or Off De-Artifact Options For now DAO if set to 1 it's also applys to Hoz 
+    #define DL_Y 0.5             // De-Artifact Only works on some View Modes and causes performance degredation
+    //#define DL_Z -0.5              // Compat Power
+	//#define DJ_X 0.050             // Range Smoothing
+	
+	#define SPF 1    //Resize Depth So it fits the game correctly
+	//#define DD_X 1.330
+	//#define DD_Y 0.700
+	
+	#define DNN_X 0.937
+	#define DNN_Y 0.5275	
+	
+	//#define DD_Z 0.600
+	//#define DD_W -0.425
+	#define ASA 0	
+ //Smooth Mode
+    //#define SMS 1         //SM Separation Limit  - Do Not use any more
+	#define DL_X 0.9       //SM Tune Limit
+	//#define DL_W 0.5      //SM Perspective Limit - Do Not use any more
+	#define DM_X 7        //SM HQ Tune Power       - Will be made global
+	#define NFM 1
+	#define PEW 1    
 #else
 	#define NPW 1 //No Profile
 #endif
@@ -30957,10 +31004,14 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 */
 /*
 	//#define SPF 1    //Resize Depth So it fits the game correctly
-	//#define DD_X 1.330
-	//#define DD_Y 0.700
-	//#define DD_Z 0.600
-	//#define DD_W -0.425
+	//#define DD_X 1.330 //Horizontal Size
+	//#define DD_Y 0.700 //Vertical  Size
+
+	//#define DNN_X 1.330 //Horizontal Scale  
+	//#define DNN_Y 0.700 //Vertical  Scale 
+
+	//#define DD_Z 0.600  //Horizontal Pos
+	//#define DD_W -0.425 //Vertical  Pos
 */
 /* //Smooth Mode [ Do Not Use ]
     //#define SMS 3         //SM Separation Limit  - Do Not use any more
@@ -31517,6 +31568,20 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 #endif 
 #ifndef DMM_W
 	#define DMM_W E_Null_W
+#endif
+
+// X = [Horizontal Scale] Y = [Vertical Scale] Z = [Null Z] W = [Null W]
+#ifndef DNN_X
+    #define DNN_X HVS_TL_X_D
+#endif
+#ifndef DNN_Y
+    #define DNN_Y HVS_TL_Y_D
+#endif
+#ifndef DNN_Z
+    #define DNN_Z F_Null_Z
+#endif 
+#ifndef DNN_W
+	#define DNN_W F_Null_W
 #endif
 
 //Special Settings
