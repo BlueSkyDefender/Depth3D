@@ -30739,8 +30739,9 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DL_X 0.9       //SM Tune Limit
 	//#define DL_W 0.5      //SM Perspective Limit - Do Not use any more
 	#define DM_X 7        //SM HQ Tune Power       - Will be made global
-	#define NFM 1
-	#define PEW 1    
+	//#define NFM 1
+	#define PEW 1   
+    #define NVK 1 
 #else
 	#define NPW 1 //No Profile
 #endif
