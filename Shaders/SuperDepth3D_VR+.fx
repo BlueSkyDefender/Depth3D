@@ -1,7 +1,7 @@
 	////--------------------//
 	///**SuperDepth3D_VR+**///
 	//--------------------////
-	#define SD3DVR "SuperDepth3D_VR+ v4.3.1\n"
+	#define SD3DVR "SuperDepth3D_VR+ v4.3.4\n"
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//* Depth Map Based 3D post-process shader
 	//* For Reshade 4.4+ I think...
@@ -118,7 +118,7 @@ namespace SuperDepth3DVR
 		static const float DLL_X = 0.0, DLL_Y = 0.0, DLL_Z = 1000.0, DLL_W = 0.0;
 		// DMM_X = [Lock Position A & B] DMM_Y = [Lock Position C] DMM_Z = [Lock ABCW Menu Tresholds] DMM_W = [Isolating Weapon Stencil Amount]
 		static const float DMM_X = 0.0, DMM_Y = 0.0, DMM_Z = 1000.0, DMM_W = 0.0;
-		// DNN_X = [Horizontal Scale] DNN_Y = [Vertical Scale] DNN_Z = [Null Z] DNN_W = [Null W]
+		// DNN_X = [Horizontal Scale] DNN_Y = [Vertical Scale] DNN_Z = [Flip Scale] DNN_W = [Null W]
 		static const float DNN_X = 1.0, DNN_Y = 1.0, DNN_Z = 0.0, DNN_W = 0.0;
 		// WSM = [Weapon Setting Mode]
 		#define OW_WP "WP Off\0Custom WP\0"
@@ -744,6 +744,21 @@ namespace SuperDepth3DVR
 					 "Default and starts at 0 and is Off. With a max offset of 5 pixels Wide.";
 		ui_category = "Scaling Corrections";
 	> = 0;
+	
+	uniform uint2 Starting_Resolution <
+		#if Compatibility
+		ui_type = "drag";
+		#else
+		ui_type = "slider";
+		#endif
+		ui_min = 0; ui_max = 0;
+		ui_label = " Upscaler Guided";
+		ui_tooltip = "This lets you set existing known value and automatically scales if a change was detected\n"
+					 "Set it to the Depth Buffers starting resolution or maybe your native res.\n"
+					 "Default is 0 and it is Off.";
+		ui_category = "Scaling Corrections";
+	> = uint2(0,0);
+	
 	#if !DX9_Toggle 
 	uniform bool Auto_Scaler_Adjust <
 		ui_label = " Auto Scaler";
@@ -822,14 +837,6 @@ namespace SuperDepth3DVR
 			ui_tooltip = "Adjust Horizontal and Vertical Resize from the Center. Default is 1.0.";
 			ui_category = "Reposition Depth";
 		> = float2(DD_X,DD_Y);
-
-		uniform float2 Horizontal_and_Vertical_TL <
-			ui_type = "drag";
-			ui_min = 0.0; ui_max = 2;
-			ui_label = " Horizontal & Vertical Scale";
-			ui_tooltip = "Adjust Horizontal and Vertical Resize from the Top Left. Default is 1.0.";
-			ui_category = "Reposition Depth";
-		> = float2(DNN_X,DNN_Y);
 	
 		uniform float2 Image_Position_Adjust<
 			ui_type = "drag";
@@ -838,7 +845,22 @@ namespace SuperDepth3DVR
 			ui_tooltip = "Adjust the Image Position if it's off by a bit. Default is Zero.";
 			ui_category = "Reposition Depth";
 		> = float2(DD_Z,DD_W);
-	
+
+		uniform float2 Horizontal_and_Vertical_TL <
+			ui_type = "drag";
+			ui_min = 0.0; ui_max = 2;
+			ui_label = " Horizontal & Vertical Scale";
+			ui_tooltip = "Adjust Horizontal and Vertical Resize from the Top Left. Default is 1.0.";
+			ui_category = "Reposition Depth";
+		> = float2(DNN_X,DNN_Y);
+		
+		uniform bool Flip_HV_Scale <
+			ui_label = " Flip Scale";
+			ui_tooltip = "Turn this on to flip the scaling from Top Left <-> Bottom Right.\n"
+					     "To Bottom Right <-> Top Left.";
+			ui_category = "Reposition Depth";
+		> = DNN_Z;	
+		
 	#if LB_Correction
 		uniform float2 H_V_Offset <
 			ui_type = "drag";
@@ -875,8 +897,10 @@ namespace SuperDepth3DVR
 	#else
 		static const bool Alinement_View = false;
 		static const float2 Horizontal_and_Vertical = float2(DD_X,DD_Y);
-		static const float2 Horizontal_and_Vertical_TL = float2(DNN_X,DNN_Y);
 		static const float2 Image_Position_Adjust = float2(DD_Z,DD_W);
+		static const float2 Horizontal_and_Vertical_TL = float2(DNN_X,DNN_Y);
+		
+		static const bool Flip_HV_Scale = DNN_Z;
 		
 		static const bool LB_Correction_Switch = true;
 		static const float2 H_V_Offset = float2(DH_X,DH_Y);
@@ -1530,12 +1554,12 @@ uniform int Extra_Information <
 		};
 
 	#if DX9_Toggle
-		texture texzBufferBlurVR < pooled = true; > { Width = BUFFER_WIDTH / 4.0 ; Height = BUFFER_HEIGHT / 4.0; Format = R16F; MipLevels = 6; }; // Needs to be RG16F If external Texture is given for DownSample. Not needed if external texture is already down sampled.
+		texture texzBufferBlurVR { Width = BUFFER_WIDTH / 4.0 ; Height = BUFFER_HEIGHT / 4.0; Format = R16F; MipLevels = 6; }; // Needs to be RG16F If external Texture is given for DownSample. Not needed if external texture is already down sampled.
 	#else
 		#if TMD
-		texture texzBufferBlurVR < pooled = true; > { Width = BUFFER_WIDTH / 4.0 ; Height = BUFFER_HEIGHT / 4.0; Format = RG16F; MipLevels = 6; }; // Needs to be RG16F If external Texture is given for DownSample. Not needed if external texture is already down sampled.
+		texture texzBufferBlurVR { Width = BUFFER_WIDTH / 4.0 ; Height = BUFFER_HEIGHT / 4.0; Format = RG16F; MipLevels = 6; }; // Needs to be RG16F If external Texture is given for DownSample. Not needed if external texture is already down sampled.
 		#else
-		texture texzBufferBlurVR < pooled = true; > { Width = BUFFER_WIDTH / 4.0 ; Height = BUFFER_HEIGHT / 4.0; Format = R16F; MipLevels = 6; }; // Needs to be RG16F If external Texture is given for DownSample. Not needed if external texture is already down sampled.
+		texture texzBufferBlurVR { Width = BUFFER_WIDTH / 4.0 ; Height = BUFFER_HEIGHT / 4.0; Format = R16F; MipLevels = 6; }; // Needs to be RG16F If external Texture is given for DownSample. Not needed if external texture is already down sampled.
 		#endif	
 	#endif	
 		sampler SamplerzBuffer_BlurVR
@@ -2438,39 +2462,60 @@ uniform int Extra_Information <
 		zBuffer = (exp(zBuffer * log(C + 1.0)) - 1.0) / C;
 	}
 	*/
+	float2 ScaleSize(float2 Starting_Size, float2 Current_Size) 
+	{	
+	    // Calculate the scaling factor as the ratio of heights between Current_Size and Starting_Size
+ 	   float2 scaleFactor_XY = Current_Size.xy / Starting_Size.xy;
+	    return scaleFactor_XY;
+	}
+	
 	float Depth(float2 texcoord)
-	{
-		float RangeBoost = 1.5;
-		if( Range_Boost == 3)
-			RangeBoost = 2.0;
-		if( Range_Boost == 4)
-			RangeBoost = 3.0;
-		if( Range_Boost == 5)
-			RangeBoost = 4.0;	
-		//Conversions to linear space.....
-		float zBuffer = tex2Dlod(DepthBuffer, float4(texcoord,0,0)).x, Far = 1.0, Near_A = 0.125/DMA(), Near_B = 0.125/(DMA()*RangeBoost); //Near & Far Adjustment
-		float2 Two_Ch_zBuffer, Store_zBuffer = float2( zBuffer, 1.0 - zBuffer );
-		float4 C = float4( Far / Near_A, 1.0 - Far / Near_A, Far / Near_B, 1.0 - Far / Near_B);
-		float2 Z = Offset < 0 ? min( 1.0, zBuffer * ( 1.0 + abs(Offset) ) ) : Store_zBuffer;
-		//May add this later need to check emulators.
-		//if (Range_Boost == 2)
-		//	Store_zBuffer = Z;
+	{   //May have to move this around. But, it seems good in it's current location.	
+		float2 Current_Size = tex2Dsize(DepthBuffer);
+		float2 Adjust_Size_XY = ScaleSize(Starting_Resolution, Current_Size); 
+		
+		if(Adjust_Size_XY.y != 0 && Starting_Resolution.y != 0)	
+			texcoord.y = texcoord.y / Adjust_Size_XY.y;
 			
-		if(Offset > 0 || Offset < 0)
-			Z = Offset < 0 ? float2( Z.x, 1.0 - Z.y ) : min( 1.0, float2( Z.x * (1.0 + Offset) , Z.y / (1.0 - Offset) ) );
+		if(Adjust_Size_XY.x != 0 && Starting_Resolution.x != 0)	
+			texcoord.x = texcoord.x / Adjust_Size_XY.x;
+	
+		// Retrieve depth from the buffer
+		float zBuffer = tex2Dlod(DepthBuffer, float4(texcoord, 0, 0)).x;
+
+		// Set RangeBoost based on Range_Boost value
+		float RangeBoost = (Range_Boost == 3) ? 2.0 :
+		                   (Range_Boost == 4) ? 3.0 :
+		                   (Range_Boost == 5) ? 4.0 : 1.5;
+		                   
+		//define near/far values with adjustments		                   
+		float Far = 1.0;
+		float Near_A = 0.125 / DMA();
+		float Near_B = 0.125 / (DMA() * RangeBoost);
 		
-		float2 C_Switch = Range_Boost >= 2 ? C.zw : C.xy;
-			
-		if (Depth_Map == 0) //DM0 Normal
-			Two_Ch_zBuffer = rcp(float2(Z.x,Store_zBuffer.x) * float2(C_Switch.y,C.y) + float2(C_Switch.x,C.x));//MAD - RCP
-		else if (Depth_Map == 1) //DM1 Reverse
-			Two_Ch_zBuffer = rcp(float2(Z.y,Store_zBuffer.y) * float2(C_Switch.y,C.y) + float2(C_Switch.x,C.x));//MAD - RCP
+		// Prepare zBuffer storage and constant values for linear conversions
+		float2 Store_zBuffer = float2(zBuffer, 1.0 - zBuffer);
+		float4 C = float4(Far / Near_A, 1.0 - Far / Near_A, Far / Near_B, 1.0 - Far / Near_B);
 		
-		if(Range_Boost)
-			zBuffer = lerp(Two_Ch_zBuffer.y,Two_Ch_zBuffer.x,saturate(Two_Ch_zBuffer.y));
-		else
-			zBuffer = Two_Ch_zBuffer.x;
+		// Adjust Z based on Offset
+		float2 Z = (Offset < 0) ? min(1.0, zBuffer * (1.0 + abs(Offset))) : Store_zBuffer;
+		if (Offset != 0)
+		    Z = (Offset < 0) ? float2(Z.x, 1.0 - Z.y) 
+		                     : min(1.0, float2(Z.x * (1.0 + Offset), Z.y / (1.0 - Offset)));
 		
+		// Choose constants based on Range_Boost setting
+		float2 C_Switch = (Range_Boost >= 2) ? C.zw : C.xy;
+		
+		// Calculate Two_Ch_zBuffer based on Depth_Map setting
+		float2 Two_Ch_zBuffer;
+		if (Depth_Map == 0)  // Normal mode
+		    Two_Ch_zBuffer = rcp(Z.x * C_Switch.y + C_Switch.x);
+		else                 // Reverse mode
+		    Two_Ch_zBuffer = rcp(Z.y * C_Switch.y + C_Switch.x);
+		
+		// Apply final zBuffer adjustments based on Range_Boost
+		zBuffer = Range_Boost ? lerp(Two_Ch_zBuffer.y, Two_Ch_zBuffer.x, saturate(Two_Ch_zBuffer.y)) : Two_Ch_zBuffer.x;
+
 		#if ALM == 1
 			return smoothstep(0,1,zBuffer);
 		#else
@@ -2532,7 +2577,13 @@ uniform int Extra_Information <
 		float2 midHV_A = (H_V_A-1) * float2(BUFFER_WIDTH * 0.5,BUFFER_HEIGHT * 0.5) * pix;
 		texcoord = float2((texcoord.x*H_V_A.x)-midHV_A.x,(texcoord.y*H_V_A.y)-midHV_A.y);
 		//Non LB Resizing.
-		texcoord *= Horizontal_and_Vertical_TL;
+		if(!Flip_HV_Scale)
+			texcoord *= Horizontal_and_Vertical_TL;
+		else
+		{
+			texcoord = 1-texcoord;
+			texcoord = 1-texcoord * Horizontal_and_Vertical_TL;
+		}
 		#endif
 		//Need to add a method to disable this when three pixels are detected.
 		//Will to this Someday.
@@ -2657,6 +2708,17 @@ uniform int Extra_Information <
 		#else
 		A = ZPD_Boundary >= 4 ? max( B, R) : R; //Grid Depth
 		#endif
+		
+		#if HUD_MODE || HMT
+		float HUDCutOFFCal = ((HUD_Adjust.x * 0.5)/DMA()) * 0.5;
+		
+		float COC = step(DM.w,HUDCutOFFCal); //HUD Cutoff Calculation
+		
+		//This code is for hud segregation.
+		if (HUD_Adjust.x > 0)
+			A = COC ? 0.5 : A;
+		#endif
+		
 		return float3x3( saturate(float3(R, G, 0)) , 							 //[0][0] = R | [0][1] = G | [0][2] = B
 						 saturate(float3(A,Depth( TC_SP(texcoord).xy).x ,DM.w)) , //[1][0] = A | [1][1] = D | [1][2] = DM 
 								  float3(0,0,0) );								//[2][0] = Null | [2][1] = Null | [2][2] = Null
@@ -2738,18 +2800,27 @@ uniform int Extra_Information <
 	{
 		//Create Mask for Weapon Hand Consideration for ZPD boundary condition.
 		float2 Shape_TC = StoredTC;
-		float Shape_Out, Shape_One, Shape_Two, Shape_Three, Shape_Four, SO_Switch = 0.75, ST_Switch = 0.45, FO_Switch = 0.8125;
+		float Shape_Out, Shape_One, Shape_Two, Shape_Three, Shape_Four, SO_Switch = 0.75, ST_Switch = 0.45, FO_Switch = 0.8125, STT_Switch = 0.35, SF_Switch = 0.550, STTT_Switch = 0.45;
 		
 		if(CWH >= 3 && CWH <= 4)
 		{
 			SO_Switch = 0.325;
 			ST_Switch = 0.75 ;
 		}
-
-		if(CWH >= 5)
+	
+		if(CWH == 5)
 		{
 			FO_Switch = 0.5;
 		}
+		
+		if(CWH == 6)
+		{
+			STT_Switch = 0.55;
+			SF_Switch = 0.675;
+			ST_Switch = 0.325;
+			STTT_Switch = 0.4;
+		}	
+	
 		
 		// Conditions for Shape_One
 		bool Shape_One_C1 = (Shape_TC.x / Shape_TC.y * SO_Switch) > 1;
@@ -2757,15 +2828,15 @@ uniform int Extra_Information <
 		Shape_One = saturate(Shape_One_C1 || Shape_One_C2); 
 		
 		// Conditions for Shape_Two
-		bool Shape_Two_C1 = (1 - Shape_TC.x < 0.450 && 1 - Shape_TC.y < ST_Switch);
+		bool Shape_Two_C1 = (1 - Shape_TC.x < STTT_Switch && 1 - Shape_TC.y < ST_Switch);
 		Shape_Two = saturate(1 - Shape_Two_C1); 
 		
 		// Conditions for Shape_Three
-		float Shape_Three_C1 = (1 - Shape_TC.x - 0.35) / (1 - Shape_TC.y);
+		float Shape_Three_C1 = (1 - Shape_TC.x - STT_Switch) / (1 - Shape_TC.y);
 		Shape_Three = saturate(Shape_Three_C1 > 1); 
 		
 		// Conditions for Shape_Four
-		float Shape_Four_C1 = Shape_TC.x < 0.3  && 1-Shape_TC.x < 0.9 && Shape_TC.y > 0.550;
+		float Shape_Four_C1 = Shape_TC.x < 0.3  && 1-Shape_TC.x < 0.9 && Shape_TC.y > SF_Switch;
 		Shape_Four = 1-Shape_Four_C1; 
 		
 		// Calculate Shape_Out
@@ -3159,6 +3230,10 @@ uniform int Extra_Information <
 		float2 MD_W = tex2Dlod(SamplerDMVR,float4(texcoord,0,0)).xy;
 		// X = Mix Depth | Y = Weapon Mask | Z = Weapon Hand | W = Normal Depth
 		float4 DM = float4(MD_W.x,WeaponMask(texcoord,0),MD_W.y,PrepDepth( texcoord )[1][1]);
+		//FLT_EPSILON was added here to help prevent crashing
+		DM.x += FLT_EPSILON;//Needed on X
+		DM.z += FLT_EPSILON;//Needed on Z
+		
 		//Hide Temporal passthrough
 		if(texcoord.x < pix.x * 2 && texcoord.y < pix.y * 2)
 			DM = PrepDepth(texcoord)[0][0];
@@ -3355,7 +3430,15 @@ uniform int Extra_Information <
 			}		
 		}
 		#endif
-		
+
+		#if HUD_MODE || HMT
+		float HUDCutOFFCal = ((HUD_Adjust.x * 0.5)/DMA()) * 0.5, COC = step(PrepDepth(texcoord)[1][2],HUDCutOFFCal); //HUD Cutoff Calculation
+
+		//This code is for hud segregation.
+		if (HUD_Adjust.x > 0)
+			DM.y = COC ? 0.001 + lerp(-0.25,0.25,saturate(HUD_Adjust.y)) : DM.y ;
+		#endif	
+	
 		return float3(DM.y,PrepDepth( texcoord )[1][1],HandleConvergence.z);
 	}
 	#define Adapt_Adjust 0.7 //[0 - 1]
@@ -3741,6 +3824,7 @@ uniform int Extra_Information <
 		return ParallaxCoord;
 	}
 	//////////////////////////////////////////////////////////////HUD Alterations///////////////////////////////////////////////////////////////////////
+	/*
 	#if HUD_MODE || HMT
 	float3 HUD(float3 HUD, float2 texcoord )
 	{
@@ -3763,6 +3847,7 @@ uniform int Extra_Information <
 		return  texcoord.x < 0.001 || 1-texcoord.x < 0.001 ? StoredHUD : HUD;
 	}
 	#endif
+	*/
 	///////////////////////////////////////////////////////////Stereo Calculation///////////////////////////////////////////////////////////////////////
 	float4 saturation(float4 C)
 	{
@@ -3842,11 +3927,6 @@ uniform int Extra_Information <
 		//IPD Right Adjustment
 		TCL.x -= Persp.x*0.5f;
 		TCR.x += Persp.y*0.5f;
-				
-	//Left & Right Parallax for Stereo Vision
-	#if HUD_MODE || HMT
-		float HUD_Adjustment = ((0.5 - HUD_Adjust.y)*25.) * pix.x;
-	#endif
 
 	float Pattern = floor(StoreTC.y*Res.y) + floor(StoreTC.x*Res.x);
 	float Pattern_Type = fmod(Pattern,2); //CB
@@ -3859,9 +3939,6 @@ uniform int Extra_Information <
 	#if HelixVision
 	float3 Shift_LRD = StoreTC.x < 0.5 ? float3(-DLR.x,float2(TCL.x * 2,TCL.y)) : float3(DLR.y, float2(TCR.x  * 2 - 1,TCR.y));
 		Double = saturation(float4(MouseCursor( Parallax(Shift_LRD.x, Shift_LRD.yz), position.xy).rgb,1.0) );
-		#if HUD_MODE || HMT
-			Double.rgb = HUD(Double.rgb,StoreTC.x < 0.5 ? float2((TCL.x * 2) - HUD_Adjustment,TCL.y) : float2((TCR.x  * 2 - 1) + HUD_Adjustment,TCR.y));
-		#endif
 		//Double = StoreTC.x < 0.5 ? L : R; //Stereoscopic 3D using Reprojection Left & Right
 	#else
 			#if Upscaler_Mode	
@@ -3880,16 +3957,10 @@ uniform int Extra_Information <
 			float3 Shift_LR = Pattern_Type ? float3(-DLR.x,TCL) : float3(DLR.y, TCR);
 	
 			Left_Right =  saturation(float4(MouseCursor( Parallax(Shift_LR.x, Shift_LR.yz), position.xy).rgb,1.0) ) ; //Stereoscopic 3D using Reprojection Left & Right
-				#if HUD_MODE || HMT
-				Left_Right.rgb = HUD(Left_Right.rgb,Pattern_Type ? float2(TCL.x - HUD_Adjustment,TCL.y) : float2(TCR.x + HUD_Adjustment,TCR.y));
-				#endif
+			
 			#else
 			Left =  saturation(float4(MouseCursor( Parallax(-DLR.x, TCL), position.xy).rgb,1.0) ) ; //Stereoscopic 3D using Reprojection Left
 			Right = saturation(float4(MouseCursor( Parallax( DLR.y, TCR), position.xy).rgb,1.0) ) ;//Stereoscopic 3D using Reprojection Right
-				#if HUD_MODE || HMT
-				Left.rgb = HUD(Left.rgb,float2(TCL.x - HUD_Adjustment,TCL.y));
-				Right.rgb = HUD(Right.rgb,float2(TCR.x + HUD_Adjustment,TCR.y));
-				#endif
 			#endif
 
 	#endif
