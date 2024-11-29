@@ -1,7 +1,7 @@
 	////--------------------//
 	///**SuperDepth3D_VR+**///
 	//--------------------////
-	#define SD3DVR "SuperDepth3D_VR+ v4.3.4\n"
+	#define SD3DVR "SuperDepth3D_VR+ v4.3.5\n"
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//* Depth Map Based 3D post-process shader
 	//* For Reshade 4.4+ I think...
@@ -124,7 +124,7 @@ namespace SuperDepth3DVR
 		#define OW_WP "WP Off\0Custom WP\0"
 		static const int WSM = 0;
 		//Triggers
-		static const float KHM = 0, DAO = 0, LDT = 0, ALM = 0, SSF = 0, SNF = 0, SSE = 0, SNE = 0, EDU = 0, LBI = 0, ISD = 0, ASA = 1, IWS = 0, SUI = 0, SSA = 0, SNA = 0, SSB = 0, SNB = 0, SSC = 0, SNC = 0, SSD = 0, SND = 0, FRM = 0, LHA = 0, WBS = 0, TMD = 0, AWZ = 0, CWH = 0, WBA = 0, WFB = 0, WND = 0, WRP = 0, MML = 0, SMD = 0, WHM = 0, SDU = 0, ABE = 2, LBE = 0, DRS = 0, MAC = 0, ARW = 0, OIL = 0, MMS = 0, NVK = 0, NDG = 0, FTM = 0, SPO = 0, MMD = 0, SMP = 0, LBR = 0, HQT = 0, AFD = 0, MDD = 0, FPS = 1, SMS = 1, OIF = 0, NCW = 0, RHW = 0, NPW = 0, SPF = 0, BDF = 0, HMT = 0, HMC = 0, DFW = 0, NFM = 0, DSW = 0, LBC = 0, LBS = 0, LBM = 0, DAA = 0, NDW = 0, PEW = 0, WPW = 0, FOV = 0, EDW = 0, SDT = 0;
+		static const float WZD = 0, KHM = 0, DAO = 0, LDT = 0, ALM = 0, SSF = 0, SNF = 0, SSE = 0, SNE = 0, EDU = 0, LBI = 0, ISD = 0, ASA = 1, IWS = 0, SUI = 0, SSA = 0, SNA = 0, SSB = 0, SNB = 0, SSC = 0, SNC = 0, SSD = 0, SND = 0, FRM = 0, LHA = 0, WBS = 0, TMD = 0, AWZ = 0, CWH = 0, WBA = 0, WFB = 0, WND = 0, WRP = 0, MML = 0, SMD = 0, WHM = 0, SDU = 0, ABE = 2, LBE = 0, DRS = 0, MAC = 0, ARW = 0, OIL = 0, MMS = 0, NVK = 0, NDG = 0, FTM = 0, SPO = 0, MMD = 0, SMP = 0, LBR = 0, HQT = 0, AFD = 0, MDD = 0, FPS = 1, SMS = 1, OIF = 0, NCW = 0, RHW = 0, NPW = 0, SPF = 0, BDF = 0, HMT = 0, HMC = 0, DFW = 0, NFM = 0, DSW = 0, LBC = 0, LBS = 0, LBM = 0, DAA = 0, NDW = 0, PEW = 0, WPW = 0, FOV = 0, EDW = 0, SDT = 0;
 		//Overwatch.fxh State
 		#define OSW 1
 	#endif
@@ -760,10 +760,12 @@ namespace SuperDepth3DVR
 	> = uint2(0,0);
 	
 	#if !DX9_Toggle 
-	uniform bool Auto_Scaler_Adjust <
+	uniform int Auto_Scaler_Adjust <
+		ui_type = "combo";
+		ui_items = "Off\0Normal\0Side\0";
 		ui_label = " Auto Scaler";
-		ui_tooltip = "Shift the depth map if a misalignment is detected.";
-		ui_category = "Upscaling Corrections";
+		ui_tooltip = "Shift the depth map if a slight misalignment is detected.";
+		ui_category = "Scaling Corrections";
 	> = ASA;
 	#endif	
 	uniform int Depth_Map <
@@ -1020,15 +1022,14 @@ namespace SuperDepth3DVR
 					"Default is X[ 0 ] Y[ 1 ].";
 		ui_category = "FPS Focus";
 	> = int2(DK_Z,DK_W);
-	/*
-	uniform bool FPS_Focus_Smoothing <
-		ui_label = " Auto FPS Smoothing";
-		ui_tooltip = "Increases Halo Reduction to the max value of Five.\n"
-					 "This can allow a slight improvment in aiming.\n"
-					 "Default is Off.";
+	#if !Enable_Blinders_Mode
+	uniform bool Toggle_On_Boundary <
+		ui_label = " On Boundary Activation";
+		ui_tooltip = "Turns on when the first boundy hit is detected from the weapon profile above.";
 		ui_category = "FPS Focus";
-	> = false;
-	*/
+	> = WZD;
+	#endif
+	
 	//Cursor Adjustments
 	uniform int Cursor_Type <
 		ui_type = "combo";
@@ -2736,7 +2737,7 @@ uniform int Extra_Information <
 	}
 	#endif
 	/////////////////////////////////////////////////////////Fade In and Out Toggle/////////////////////////////////////////////////////////////////////
-	float Fade_in_out(float2 texcoord)
+	float Fade_in_out()
 	{ float TCoRF[1], Trigger_Fade, AA = Fade_Time_Adjust, PStoredfade = tex2D(SamplerLumVR,float2(0,0.083)).z;
 		if(World_n_Fade_Reduction_Power.y == 0)
 			AA *= 0.75;
@@ -2787,7 +2788,10 @@ uniform int Extra_Information <
 			Trigger_Fade = Trigger_Fade_A || SnD_Toggle;			
 		else if(FPSDFIO == 5)
 			Trigger_Fade = Trigger_Fade_B || SnD_Toggle;
-			
+		#if !Enable_Blinders_Mode
+		if(Toggle_On_Boundary)	
+			Trigger_Fade = tex2D(SamplerLumVR,float2(1,0.916)).z >= 1 && Trigger_Fade;
+		#endif
 		return PStoredfade + (Trigger_Fade - PStoredfade) * (1.0 - exp(-frametime/((1-AA)*1000))); ///exp2 would be even slower
 	}
 	
@@ -3059,7 +3063,7 @@ uniform int Extra_Information <
 			R = lerp(DepthEdge(R, DM.x, texcoord, 1-Weapon_Depth_Edge.x),DM.x,smoothstep(0,1.0,DM.x));
 	
 		if(   texcoord.x < pix.x * 2 &&   texcoord.y < pix.y * 2)//TL
-			R = Fade_in_out(texcoord);
+			R = Fade_in_out().x;
 		#if DX9_Toggle
 			if( 1-texcoord.x < pix.x * 2 && 1-texcoord.y < pix.y * 2)//BR
 				R = Fade_Pass[0][0];
@@ -3131,12 +3135,18 @@ uniform int Extra_Information <
 				if(Weapon_ZPD_Boundary.x >= 0)
 				{	
 					if ( WZPDB < -DJ_W ) // Default -0.1
+					{
 						W_Convergence *= 1.0-abs_WZPDB.x;
+						WZPD_Switch = 1;
+					}
 					 //Used if Weapon Buffer is way out of range.
 					if (abs_WZPDB.y > abs_WZPDB.x)
 					{
 						if ( WZPDB < -DS_W )
+						{
 							W_Convergence *= 1.0-abs_WZPDB.y;
+							WZPD_Switch = 2;
+						}
 					}
 				}
 				else
@@ -3224,7 +3234,7 @@ uniform int Extra_Information <
 			return tex2Dlod(SamplerDMVR,float4(TC,0,Mips)).y == 0.5 ? 0 : 1;
 	}
 	
-	float3 DB_Comb( float2 texcoord)
+	float4 DB_Comb( float2 texcoord)
 	{
 		float Auto_Adjust_Weapon_Depth = 1, Anti_Weapon_Z = abs(AWZ);
 		float2 MD_W = tex2Dlod(SamplerDMVR,float4(texcoord,0,0)).xy;
@@ -3253,7 +3263,17 @@ uniform int Extra_Information <
 		if (WP == 0 )
 			DM.y = 0;
 			
-		float FadeIO = Focus_Reduction_Type == 0 ? 1 : smoothstep(0,1,1-Fade_in_out(texcoord).x), FD_Adjust = 0.050;	
+		//Handle Convergence Here
+		float2 WZPDB = abs(Weapon_ZPD_Boundary);
+		float4 HandleConvergence = Conv(DM.xz,texcoord,WZPDB);
+			   HandleConvergence.y *= WA_XYZW().w;
+			   
+			   if(HandleConvergence.w == 1)
+			   	HandleConvergence.y *= 1-WZPDB.x;
+			   if(HandleConvergence.w == 2)
+			   	HandleConvergence.y *= 1-WZPDB.y;
+
+		float FadeIO = Focus_Reduction_Type == 0 ? 1 : smoothstep(0, 1, 1 - Fade_in_out().x), FD_Adjust = 0.050;
 	
 		if( Weapon_Reduction_n_Power.x == 1)
 			FD_Adjust = 0.075;
@@ -3271,16 +3291,6 @@ uniform int Extra_Information <
 			FD_Adjust = 0.225;
 		if( Weapon_Reduction_n_Power.x == 8)
 			FD_Adjust = 0.250;
-	
-		//Handle Convergence Here
-		float2 WZPDB = abs(Weapon_ZPD_Boundary);
-		float4 HandleConvergence = Conv(DM.xz,texcoord,WZPDB);
-			   HandleConvergence.y *= WA_XYZW().w;
-			   
-			   if(HandleConvergence.w == 1)
-			   	HandleConvergence.y *= 1-WZPDB.x;
-			   if(HandleConvergence.w == 2)
-			   	HandleConvergence.y *= 1-WZPDB.y;
 			   	
 			   HandleConvergence.y = lerp(HandleConvergence.y + FD_Adjust, HandleConvergence.y, FadeIO);
 		if(Anti_Weapon_Z > 0)//Anti-Weapon Hand Z-Fighting
@@ -3439,7 +3449,7 @@ uniform int Extra_Information <
 			DM.y = COC ? 0.001 + lerp(-0.25,0.25,saturate(HUD_Adjust.y)) : DM.y ;
 		#endif	
 	
-		return float3(DM.y,PrepDepth( texcoord )[1][1],HandleConvergence.z);
+		return float4(DM.y,PrepDepth( texcoord )[1][1],HandleConvergence.z,HandleConvergence.w);
 	}
 	#define Adapt_Adjust 0.7 //[0 - 1]
 	////////////////////////////////////////////////////Depth & Special Depth Triggers//////////////////////////////////////////////////////////////////
@@ -3447,7 +3457,7 @@ uniform int Extra_Information <
 	{  //Temporal adaptation https://knarkowicz.wordpress.com/2016/01/09/automatic-exposure/
 		float  ExAd = (1-Adapt_Adjust)*1250, Lum = tex2Dlod(SamplerCVR,float4(texcoord,0,12)).x, PastLum = tex2D(SamplerLumVR,float2(0,0.583)).z;
 	
-		float3 Set_Depth = DB_Comb( texcoord.xy ).xyz;
+		float4 Set_Depth = DB_Comb( texcoord.xy ).xyzw;
 		
 		if(   texcoord.x < pix.x * 2 &&   texcoord.y < pix.y * 2) 
 			Set_Depth.y = PastLum + (Lum - PastLum) * (1.0 - exp(-frametime/ExAd));	
@@ -3457,7 +3467,10 @@ uniform int Extra_Information <
 			Set_Depth.y = Weapon_ZPD_Fade(Set_Depth.z);
 		#if Enable_Blinders_Mode
 		if( 1-texcoord.x < pix.x * 2 &&   texcoord.y < pix.y * 2)//TR
-			Set_Depth.y = Motion_Blinders(texcoord);	
+			Set_Depth.y = Motion_Blinders(texcoord);
+		#else
+		if( 1-texcoord.x < pix.x * 2 &&   texcoord.y < pix.y * 2)//TR
+			Set_Depth.y = Set_Depth.w;		
 		#endif
 		Point_Out = Set_Depth.xy; 
 		Linear_Out = Set_Depth.x;	
@@ -3659,18 +3672,24 @@ uniform int Extra_Information <
 		return Separation * DepthBuffer_LP.x;
 	}
 	
-	bool Shift_Depth()
+	int2 Shift_Depth()
 	{
-		float Check_Depth_Pos_Bot_A = PrepDepth(float2(0.25,0.999))[0][0];
-		float Check_Depth_Pos_Bot_B = PrepDepth(float2(0.75,0.999))[0][0];		
-		float Check_Depth_Pos_Side = PrepDepth(float2(1.0,0.5))[0][0];
-		float Check_Depth_Pos_Corner = PrepDepth(float2(0.999,0.999))[0][0];	
 		float If_Has_Depth = tex2Dlod(SamplerLumVR,float4(float2(0.5,0.5),0,12)).y < 1;
-		int Check_Depth_Shift = Check_Depth_Pos_Bot_A * Check_Depth_Pos_Bot_B * Check_Depth_Pos_Side * Check_Depth_Pos_Corner;
-		
-		return Check_Depth_Shift == 1 && If_Has_Depth;	    
-	}
 	
+		float Check_Depth_Pos_Bot_A = PrepDepth(float2(0.25,0.999))[0][0];
+		float Check_Depth_Pos_Bot_B = PrepDepth(float2(0.75,0.999))[0][0];
+
+		float Check_Depth_Pos_Corner = PrepDepth(float2(0.999,0.999))[0][0];
+	
+		float Check_Depth_Pos_Side_A = PrepDepth(float2(0.999,0.5))[0][0];//It was 1.0 , 0.5
+		float Check_Depth_Pos_Side_B = PrepDepth(float2(0.999,0.75))[0][0];
+		
+		int Check_Depth_Shift_A = Check_Depth_Pos_Bot_A * Check_Depth_Pos_Bot_B * Check_Depth_Pos_Side_A * Check_Depth_Pos_Corner;
+		int Check_Depth_Shift_B = Check_Depth_Pos_Side_B * Check_Depth_Pos_Side_A * Check_Depth_Pos_Corner;
+		
+		return int2(Check_Depth_Shift_A == 1, Check_Depth_Shift_B == 1) && If_Has_Depth;	    
+	}
+
 	void Mix_Z(in float4 position : SV_Position, in float2 texcoord : TEXCOORD, out float MixOut : SV_Target0)
 	{ 
 		#if BD_Correction || BDF
@@ -3700,11 +3719,15 @@ uniform int Extra_Information <
 			Depth_Size = rcp(Depth_Size);
 			
 			#if DB_Size_Position || SPF || LBC || LB_Correction
-			if(Shift_Depth() && Auto_Scaler_Adjust && !LBDetection())
+			if(Shift_Depth().x && Auto_Scaler_Adjust && !LBDetection())
 				Shift_TC /= 1 + Depth_Size;
+			else if(Shift_Depth().y && Auto_Scaler_Adjust > 1 && !LBDetection())
+				Shift_TC.x /= 1 + Depth_Size.x * 3.25;
 			#else
-			if(Shift_Depth() && Auto_Scaler_Adjust)
+			if(Shift_Depth().x && Auto_Scaler_Adjust)
 				Shift_TC /= 1 + Depth_Size;
+			else if(Shift_Depth().y && Auto_Scaler_Adjust > 1)
+				Shift_TC.x /= 1 + Depth_Size.x * 3.25;
 			#endif
 		#endif	
 				
@@ -3886,8 +3909,8 @@ uniform int Extra_Information <
 		//Store Texcoords for left and right eye
 		float2 TCL = texcoord,TCR = texcoord;
 		float D = Min_Divergence().x;
-	
-		float FadeIO = Focus_Reduction_Type == 1 ? 1 : smoothstep(0,1,1-Fade_in_out(texcoord).x), FD = D, FD_Adjust = 0.2;
+
+		float FadeIO = Focus_Reduction_Type == 1 ? 1 : smoothstep(0, 1, 1 - Fade_in_out().x), FD = D, FD_Adjust = 0.2;
 	
 		if( World_n_Fade_Reduction_Power.x == 1)
 			FD_Adjust = 0.3125;
