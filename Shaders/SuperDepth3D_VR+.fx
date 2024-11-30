@@ -202,10 +202,19 @@ namespace SuperDepth3DVR
 	#endif
 	
 	#if __RESHADE__ >= 40300
-		#define Compatibility_DD 1
+		#define Compatibility_00 1
 	#else
-		#define Compatibility_DD 0
+		#define Compatibility_00 0
 	#endif
+	
+	#if __RENDERER__ == 0x9000
+		#if __RESHADE__ <= 60303
+			#define Compatibility_01 1
+		#else
+			#define Compatibility_01 0
+		#endif	
+	#endif
+	
 	//DX9 0x9000 and OpenGL
 	#if __RENDERER__ == 0x9000 || __RENDERER__ >= 0x10000
 		#define RenderLimitations 1
@@ -744,7 +753,7 @@ namespace SuperDepth3DVR
 					 "Default and starts at 0 and is Off. With a max offset of 5 pixels Wide.";
 		ui_category = "Scaling Corrections";
 	> = 0;
-	
+	#if !Compatibility_01	
 	uniform uint2 Starting_Resolution <
 		#if Compatibility
 		ui_type = "drag";
@@ -758,7 +767,7 @@ namespace SuperDepth3DVR
 					 "Default is 0 and it is Off.";
 		ui_category = "Scaling Corrections";
 	> = uint2(0,0);
-	
+	#endif
 	#if !DX9_Toggle 
 	uniform int Auto_Scaler_Adjust <
 		ui_type = "combo";
@@ -1293,7 +1302,7 @@ uniform int Extra_Information <
 	
 	static const float Auto_Balance_Clamp = 0.5; //This Clamps Auto Balance's max Distance.
 	
-	#if Compatibility_DD
+	#if Compatibility_00
 	uniform bool DepthCheck < source = "bufready_depth"; >;
 	#endif
 	
@@ -1603,7 +1612,7 @@ uniform int Extra_Information <
 		#define RGBA RGBA8
 	#endif
 	
-	#if Compatibility_DD
+	#if Compatibility_00
 	#define RGBAC RGB10A2
 	#else
 	#define RGBAC RGBA8
@@ -2471,7 +2480,8 @@ uniform int Extra_Information <
 	}
 	
 	float Depth(float2 texcoord)
-	{   //May have to move this around. But, it seems good in it's current location.	
+	{   //May have to move this around. But, it seems good in it's current location.
+		#if !Compatibility_01	
 		float2 Current_Size = tex2Dsize(DepthBuffer);
 		float2 Adjust_Size_XY = ScaleSize(Starting_Resolution, Current_Size); 
 		
@@ -2480,7 +2490,7 @@ uniform int Extra_Information <
 			
 		if(Adjust_Size_XY.x != 0 && Starting_Resolution.x != 0)	
 			texcoord.x = texcoord.x / Adjust_Size_XY.x;
-	
+		#endif
 		// Retrieve depth from the buffer
 		float zBuffer = tex2Dlod(DepthBuffer, float4(texcoord, 0, 0)).x;
 

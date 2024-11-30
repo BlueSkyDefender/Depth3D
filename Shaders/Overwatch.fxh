@@ -29491,11 +29491,11 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 	#define DA_W 0                 // Set Linerzation
     //#define DB_X 1                 // Flip
 	#define DA_X 0.025             // ZPD
-	#define DF_Y 0.025              // Seperation
-	#define DA_Y 25.0              // Near Plane Adjustment
+	//#define DF_Y 0.025              // Seperation
+	#define DA_Y 22.5              // Near Plane Adjustment
     //#define DA_Z -.500           // Linerzation Offset
     #define DS_Y 0                 // Linerzation Offset Effects only distance if true
-	#define DB_Z 0.040            // Auto Depth Protection
+	#define DB_Z 0.025             // Auto Depth Protection
 	#define DE_X 4                 // ZPD Boundary 
 	#define DE_Y 0.750             // Set ZPD Boundary Level Zero 
 	#define DE_Z 0.375             // Speed that Boundary is Enforced
@@ -29522,9 +29522,9 @@ static const int Not_Compatible_Warning_D = 0;          //Not Compatible Warning
 
  //Smooth Mode
     //#define SMS 1         //SM Separation Limit  - Do Not use any more
-	#define DL_X 0.75       //SM Tune Limit
+	#define DL_X 0.625       //SM Tune Limit
 	//#define DL_W 0.5      //SM Perspective Limit - Do Not use any more
-	#define DM_X 7        //SM HQ Tune Power       - Will be made global
+	#define DM_X 6        //SM HQ Tune Power       - Will be made global
     //#define DM_Y 1        //SM HQ VRS Limit
 	//#define HQT 1         //SM HQ Trigger
 	//#define FMM 1         //Filter Mode          - Need to add this back in the new shader.

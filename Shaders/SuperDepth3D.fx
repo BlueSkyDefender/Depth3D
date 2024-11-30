@@ -214,10 +214,19 @@ namespace SuperDepth3D
 	#endif
 	
 	#if __RESHADE__ >= 50000
-		#define Compatibility_DD 1
+		#define Compatibility_00 1
 	#else
-		#define Compatibility_DD 0
+		#define Compatibility_00 0
 	#endif
+	
+	#if __RENDERER__ == 0x9000
+		#if __RESHADE__ <= 60303
+			#define Compatibility_01 1
+		#else
+			#define Compatibility_01 0
+		#endif	
+	#endif
+	
 	//FreePie Compatibility
 	#if __RESHADE__ >= 40600
 		#if __RESHADE__ > 40700
@@ -737,7 +746,7 @@ uniform int SuperDepth3D <
 					 "Default and starts at 0 and is Off. With a max offset of 5 pixels Wide.";
 		ui_category = "Scaling Corrections";
 	> = 0;
-
+	#if !Compatibility_01
 	uniform uint2 Starting_Resolution <
 		#if Compatibility
 		ui_type = "drag";
@@ -751,7 +760,7 @@ uniform int SuperDepth3D <
 					 "Default is 0 and it is Off.";
 		ui_category = "Scaling Corrections";
 	> = uint2(0,0);
-
+	#endif
 	#if !DX9_Toggle 
 	uniform int Auto_Scaler_Adjust <
 		ui_type = "combo";
@@ -1481,7 +1490,7 @@ uniform int Extra_Information <
 	
 	static const float Auto_Balance_Clamp = 0.5; //This Clamps Auto Balance's max Distance.
 	
-	#if Compatibility_DD
+	#if Compatibility_00
 	uniform bool DepthCheck < source = "bufready_depth"; >;
 	#endif
 
@@ -2663,7 +2672,8 @@ uniform int Extra_Information <
 	}
 
 	float Depth(float2 texcoord)
-	{   //May have to move this around. But, it seems good in it's current location.	
+	{   //May have to move this around. But, it seems good in it's current location.
+		#if !Compatibility_01	
 		float2 Current_Size = tex2Dsize(DepthBuffer);
 		float2 Adjust_Size_XY = ScaleSize(Starting_Resolution, Current_Size); 
 		
@@ -2672,7 +2682,7 @@ uniform int Extra_Information <
 			
 		if(Adjust_Size_XY.x != 0 && Starting_Resolution.x != 0)	
 			texcoord.x = texcoord.x / Adjust_Size_XY.x;
-	
+		#endif
 		// Retrieve depth from the buffer
 		float zBuffer = tex2Dlod(DepthBuffer, float4(texcoord, 0, 0)).x;
 
@@ -3546,7 +3556,7 @@ uniform int Extra_Information <
 			float UI_Detection_Mask = 0.0625;
 		#endif
 			DM = lerp(lerp(EdgeMask( DM, texcoord, 0.955 ),DM,  Edge_Adj), DM, saturate(1-DM.y) );	
-		#if Compatibility_DD	
+		#if Compatibility_00	
 		if (Depth_Detection == 1)
 		{
 			if (!DepthCheck)
@@ -5248,7 +5258,7 @@ uniform int Extra_Information <
 	//toggle = Text_Info_Key;
 	 hidden = true;
 	 enabled = true;
-	 #if Compatibility_DD
+	 #if Compatibility_00
 	 timeout = 1;
 	 #else 
 	 timeout = 1000;
