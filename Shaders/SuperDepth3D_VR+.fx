@@ -1,7 +1,7 @@
 	////--------------------//
 	///**SuperDepth3D_VR+**///
 	//--------------------////
-	#define SD3DVR "SuperDepth3D_VR+ v4.3.5\n"
+	#define SD3DVR "SuperDepth3D_VR+ v4.3.6\n"
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//* Depth Map Based 3D post-process shader
 	//* For Reshade 4.4+ I think...
@@ -2491,41 +2491,40 @@ uniform int Extra_Information <
 		if(Adjust_Size_XY.x != 0 && Starting_Resolution.x != 0)	
 			texcoord.x = texcoord.x / Adjust_Size_XY.x;
 		#endif
-		// Retrieve depth from the buffer
-		float zBuffer = tex2Dlod(DepthBuffer, float4(texcoord, 0, 0)).x;
+        //Conversions to linear space.....
+		float zBuffer = tex2Dlod(DepthBuffer, float4(texcoord,0,0)).x;
 
 		// Set RangeBoost based on Range_Boost value
 		float RangeBoost = (Range_Boost == 3) ? 2.0 :
 		                   (Range_Boost == 4) ? 3.0 :
 		                   (Range_Boost == 5) ? 4.0 : 1.5;
-		                   
+
 		//define near/far values with adjustments		                   
 		float Far = 1.0;
 		float Near_A = 0.125 / DMA();
 		float Near_B = 0.125 / (DMA() * RangeBoost);
 		
-		// Prepare zBuffer storage and constant values for linear conversions
-		float2 Store_zBuffer = float2(zBuffer, 1.0 - zBuffer);
-		float4 C = float4(Far / Near_A, 1.0 - Far / Near_A, Far / Near_B, 1.0 - Far / Near_B);
+		float2 Two_Ch_zBuffer, Store_zBuffer = float2( zBuffer, 1.0 - zBuffer );
+		float4 C = float4( Far / Near_A, 1.0 - Far / Near_A, Far / Near_B, 1.0 - Far / Near_B);
+		float2 Z = Offset < 0 ? min( 1.0, zBuffer * ( 1.0 + abs(Offset) ) ) : Store_zBuffer;
+		//May add this later need to check emulators.
+		//if (Range_Boost == 2)
+		//	Store_zBuffer = Z;
+			
+		if(Offset > 0 || Offset < 0)
+			Z = Offset < 0 ? float2( Z.x, 1.0 - Z.y ) : min( 1.0, float2( Z.x * (1.0 + Offset) , Z.y / (1.0 - Offset) ) );
 		
-		// Adjust Z based on Offset
-		float2 Z = (Offset < 0) ? min(1.0, zBuffer * (1.0 + abs(Offset))) : Store_zBuffer;
-		if (Offset != 0)
-		    Z = (Offset < 0) ? float2(Z.x, 1.0 - Z.y) 
-		                     : min(1.0, float2(Z.x * (1.0 + Offset), Z.y / (1.0 - Offset)));
+		float2 C_Switch = Range_Boost >= 2 ? C.zw : C.xy;
+			
+		if (Depth_Map == 0) //DM0 Normal
+			Two_Ch_zBuffer = rcp(float2(Z.x,Store_zBuffer.x) * float2(C_Switch.y,C.y) + float2(C_Switch.x,C.x));//MAD - RCP
+		else if (Depth_Map == 1) //DM1 Reverse
+			Two_Ch_zBuffer = rcp(float2(Z.y,Store_zBuffer.y) * float2(C_Switch.y,C.y) + float2(C_Switch.x,C.x));//MAD - RCP
 		
-		// Choose constants based on Range_Boost setting
-		float2 C_Switch = (Range_Boost >= 2) ? C.zw : C.xy;
-		
-		// Calculate Two_Ch_zBuffer based on Depth_Map setting
-		float2 Two_Ch_zBuffer;
-		if (Depth_Map == 0)  // Normal mode
-		    Two_Ch_zBuffer = rcp(Z.x * C_Switch.y + C_Switch.x);
-		else                 // Reverse mode
-		    Two_Ch_zBuffer = rcp(Z.y * C_Switch.y + C_Switch.x);
-		
-		// Apply final zBuffer adjustments based on Range_Boost
-		zBuffer = Range_Boost ? lerp(Two_Ch_zBuffer.y, Two_Ch_zBuffer.x, saturate(Two_Ch_zBuffer.y)) : Two_Ch_zBuffer.x;
+		if(Range_Boost)
+			zBuffer = lerp(Two_Ch_zBuffer.y,Two_Ch_zBuffer.x,saturate(Two_Ch_zBuffer.y));
+		else
+			zBuffer = Two_Ch_zBuffer.x;
 
 		#if ALM == 1
 			return smoothstep(0,1,zBuffer);
@@ -2835,6 +2834,13 @@ uniform int Extra_Information <
 			STTT_Switch = 0.4;
 		}	
 	
+		if(CWH == 7)
+		{
+			STT_Switch = 0.1875;
+			SF_Switch = 0.75;
+			//ST_Switch = 0.325;
+			STTT_Switch = 0.4;
+		}
 		
 		// Conditions for Shape_One
 		bool Shape_One_C1 = (Shape_TC.x / Shape_TC.y * SO_Switch) > 1;
@@ -2861,6 +2867,9 @@ uniform int Extra_Information <
 		if(CWH == 2 || CWH == 4 && CWH != 5)
 		Shape_Out = Shape_TC.x < 0.5 ? 1 : Shape_Out;
 		
+		if(CWH == 7)
+			Shape_Out = Shape_TC.x < 0.125 || Shape_TC.x > 0.875 || Shape_TC.y < 0.7 ? 1 : Shape_Out;
+			
 		return Shape_Out;
 	}
 	
