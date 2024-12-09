@@ -1,7 +1,7 @@
 	////--------------------//
 	///**SuperDepth3D_VR+**///
 	//--------------------////
-	#define SD3DVR "SuperDepth3D_VR+ v4.3.6\n"
+	#define SD3DVR "SuperDepth3D_VR+ v4.3.7\n"
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//* Depth Map Based 3D post-process shader
 	//* For Reshade 4.4+ I think...
@@ -2841,7 +2841,17 @@ uniform int Extra_Information <
 			//ST_Switch = 0.325;
 			STTT_Switch = 0.4;
 		}
-		
+
+		if(CWH == 8)
+		{
+			//STT_Switch = 0.25;
+			SF_Switch = 0.75;
+			//ST_Switch = 0.325;
+			//STTT_Switch = 0.4;
+			SO_Switch = 0.625;
+			
+		}	
+	
 		// Conditions for Shape_One
 		bool Shape_One_C1 = (Shape_TC.x / Shape_TC.y * SO_Switch) > 1;
 		bool Shape_One_C2 = (((1 - Shape_TC.x) / Shape_TC.y) * FO_Switch ) > 1;
