@@ -1,7 +1,7 @@
 	////----------------//
 	///**SuperDepth3D**///
 	//----------------////
-	#define SD3D "SuperDepth3D v4.4.0\n"
+	#define SD3D "SuperDepth3D v4.4.1\n"
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//* Depth Map Based 3D post-process shader
 	//* For Reshade 3.0+
@@ -118,13 +118,13 @@ namespace SuperDepth3D
 		static const float DLL_X = 0.0, DLL_Y = 0.0, DLL_Z = 1000.0, DLL_W = 0.0;
 		// DMM_X = [Lock Position A & B] DMM_Y = [Lock Position C] DMM_Z = [Lock ABCW Menu Tresholds] DMM_W = [Isolating Weapon Stencil Amount]
 		static const float DMM_X = 0.0, DMM_Y = 0.0, DMM_Z = 1000.0, DMM_W = 0.0;
-		// DNN_X = [Horizontal Scale] DNN_Y = [Vertical Scale] DNN_Z = [Flip Scale] DNN_W = [Null W]
-		static const float DNN_X = 1.0, DNN_Y = 1.0, DNN_Z = 0.0, DNN_W = 0.0;
+		// DNN_X = [Horizontal Scale] DNN_Y = [Vertical Scale] DNN_Z = [Flip Scale] DNN_W = [Game Depth Near Plane Values]
+		static const float DNN_X = 1.0, DNN_Y = 1.0, DNN_Z = 0.0, DNN_W = 1.0;
 		// WSM = [Weapon Setting Mode]
 		#define OW_WP "WP Off\0Custom WP\0"
 		static const int WSM = 0;
 		//Triggers 
-		static const float WZD = 0, KHM = 0, DAO = 0, LDT = 0, ALM = 0, SSF = 0, SNF = 0, SSE = 0, SNE = 0, EDU = 0, LBI = 0,ISD = 0, ASA = 1, IWS = 0, SUI = 0, SSA = 0, SNA = 0, SSB = 0, SNB = 0,SSC = 0, SNC = 0,SSD = 0, SND = 0, LHA = 0, WBS = 0, TMD = 0, FRM = 0, AWZ = 0, CWH = 0, WBA = 0, WFB = 0, WND = 0, WRP = 0, MML = 0, SMD = 0, WHM = 0, SDU = 0, ABE = 2, LBE = 0, HQT = 0, HMD = 0.5, MAC = 0, OIL = 0, MMS = 0, FTM = 0, FMM = 0, SPO = 0, MMD = 0, LBR = 0, AFD = 0, MDD = 0, FPS = 1, SMS = 1, OIF = 0, NCW = 0, RHW = 0, NPW = 0, SPF = 0, BDF = 0, HMT = 0, HMC = 0, DFW = 0, NFM = 0, DSW = 0, LBC = 0, LBS = 0, LBM = 0, DAA = 0, NDW = 0, PEW = 0, WPW = 0, FOV = 0, EDW = 0, SDT = 0;
+		static const float MGA = 0, WZD = 0, KHM = 0, DAO = 0, LDT = 0, ALM = 0, SSF = 0, SNF = 0, SSE = 0, SNE = 0, EDU = 0, LBI = 0,ISD = 0, ASA = 1, IWS = 0, SUI = 0, SSA = 0, SNA = 0, SSB = 0, SNB = 0,SSC = 0, SNC = 0,SSD = 0, SND = 0, LHA = 0, WBS = 0, TMD = 0, FRM = 0, AWZ = 0, CWH = 0, WBA = 0, WFB = 0, WND = 0, WRP = 0, MML = 0, SMD = 0, WHM = 0, SDU = 0, ABE = 2, LBE = 0, HQT = 0, HMD = 0.5, MAC = 0, OIL = 0, MMS = 0, FTM = 0, FMM = 0, SPO = 0, MMD = 0, LBR = 0, AFD = 0, MDD = 0, FPS = 1, SMS = 1, OIF = 0, NCW = 0, RHW = 0, NPW = 0, SPF = 0, BDF = 0, HMT = 0, HMC = 0, DFW = 0, NFM = 0, DSW = 0, LBC = 0, LBS = 0, LBM = 0, DAA = 0, NDW = 0, PEW = 0, WPW = 0, FOV = 0, EDW = 0, SDT = 0;
 		//Overwatch.fxh State
 		#define OSW 1
 	#endif
@@ -427,6 +427,15 @@ uniform int SuperDepth3D <
 	ui_label = " ";
 	ui_type = "radio";
 	>;
+	#if MGA > 0
+	uniform int Set_Game_Profile <
+		ui_type = "combo";
+		ui_items = MG_App;
+		ui_label = "·Select Game·";
+		ui_tooltip = "This sets the profile for a application that has a multiple amount of games.";
+		ui_category = "Game Selection";
+	> = 0;	
+	#endif
 	//uniform float TEST < ui_type = "slider"; ui_min = 0.0; ui_max = 1.0; > = 0.00;
 	//Divergence & Convergence//
 	uniform float Divergence <
@@ -2656,10 +2665,17 @@ uniform int Extra_Information <
 
 	float DMA() //Small List of internal Multi Game Depth Adjustments.
 	{ 
+		float NP_Adjust_Value = 1.0;
+		
+		#if MGA > 0
+		if(Set_Game_Profile > 0)
+			NP_Adjust_Value = dot(DNN_W, float4(Set_Game_Profile == 1, Set_Game_Profile == 2, Set_Game_Profile == 3, Set_Game_Profile == 4));
+		#endif
+		
 		#if !OSW 
-		return DMA_Overwatch( WP, Depth_Map_Adjust);
+		return DMA_Overwatch( WP, Depth_Map_Adjust) * NP_Adjust_Value;
 		#else
-		return Depth_Map_Adjust;
+		return Depth_Map_Adjust * NP_Adjust_Value;
 		#endif
 	}
 
@@ -2691,9 +2707,9 @@ uniform int Extra_Information <
 		                   (Range_Boost == 5) ? 4.0 : 1.5;
 
 		//define near/far values with adjustments		                   
-		float Far = 1.0;
-		float Near_A = 0.125 / DMA();
-		float Near_B = 0.125 / (DMA() * RangeBoost);
+		float Far = 1.0, FLT_DMA = DMA() + FLT_EPSILON;
+		float Near_A = 0.125 / FLT_DMA;
+		float Near_B = 0.125 / (FLT_DMA * RangeBoost);
 		
 		float2 Two_Ch_zBuffer, Store_zBuffer = float2( zBuffer, 1.0 - zBuffer );
 		float4 C = float4( Far / Near_A, 1.0 - Far / Near_A, Far / Near_B, 1.0 - Far / Near_B);
