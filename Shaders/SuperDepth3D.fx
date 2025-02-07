@@ -1,7 +1,7 @@
 	////----------------//
 	///**SuperDepth3D**///
 	//----------------////
-	#define SD3D "SuperDepth3D v4.4.4\n"
+	#define SD3D "SuperDepth3D v4.4.5\n"
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//* Depth Map Based 3D post-process shader
 	//* For Reshade 3.0+
@@ -2129,7 +2129,8 @@ uniform int Extra_Information <
 	float4 CSB(float2 texcoords)
 	{ 
 		float2 TC = -texcoords * texcoords*32 + texcoords*32;
-		float Vin = smoothstep(FLT_EPSILON,(FLT_EPSILON+Adjust_Vignette)*27.0f,TC.x * TC.y);
+		float Vin = Adjust_Vignette > 0 ? saturate(smoothstep(FLT_EPSILON,(FLT_EPSILON+Adjust_Vignette)*27.0f,TC.x * TC.y)) : 1;
+		
 		#if BC_SPACE == 1
 		if(Custom_Sidebars == 0 && Depth_Map_View == 0)
 			return NormalizeScRGB(tex2Dlod(BackBufferMIRROR,float4(texcoords,0,0)) *  Vin);
@@ -3643,7 +3644,7 @@ uniform int Extra_Information <
 			//I need to make sure that if it's near 
 			//it is closer to the original value
 			if(ZPD_OverShoot > 0)
-				Z = lerp(Z,Z * (1+min(0.625,0.625 * ZPD_OverShoot)),OS_Value);
+				Z = lerp(Z,Z * (1+min(0.75,0.75 * ZPD_OverShoot)),OS_Value);
 			
 			Z *= lerp( 1, DOoR_E, DOoR_A);
 			
