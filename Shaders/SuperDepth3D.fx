@@ -1,7 +1,7 @@
 	////----------------//
 	///**SuperDepth3D**///
 	//----------------////
-	#define SD3D "SuperDepth3D v4.4.5\n"
+	#define SD3D "SuperDepth3D v4.4.7\n"
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//* Depth Map Based 3D post-process shader
 	//* For Reshade 3.0+
@@ -306,53 +306,59 @@ namespace SuperDepth3D
 	#endif
 	//This preprocessor is for Interlaced Reconstruction of Line Interlaced for Top and Bottom and Column Interlaced for Side by Side.
 	#ifndef Virtual_Reality_Mode
-		#define Virtual_Reality_Mode 0	
+	    #define Virtual_Reality_Mode 0    
 	#endif
-		#if !Virtual_Reality_Mode
-		
-			#ifndef Inficolor_3D_Emulator
-				#define Inficolor_3D_Emulator 0
-			#endif
-		
-			#ifndef Reconstruction_Mode
-				#define Reconstruction_Mode 0
-			#endif
-			
-	 	#else
-	 		#define Reconstruction_Mode 0
-	 		#define Inficolor_3D_Emulator 0
-		#endif 	
-
-		//This is for REST Add On
-		#if Inficolor_3D_Emulator
-			#define REST_UI_Mode 0
-		#else
-			#ifndef REST_UI_Mode
-				#define REST_UI_Mode 0
-			#endif
-		#endif		
-		
+	
+	#if !Virtual_Reality_Mode
+	
+	    #ifndef Inficolor_3D_Emulator
+	        #define Inficolor_3D_Emulator 0
+	    #endif
+	
+	    #if !REST_UI_Mode
+	        #ifndef Reconstruction_Mode
+	            #define Reconstruction_Mode 0
+	        #endif
+	    #else
+	        #define Reconstruction_Mode 0
+	    #endif
+	
+	#else
+	    #define Reconstruction_Mode 0
+	    #define Inficolor_3D_Emulator 0
+	#endif 
+	
+	// This is for REST Add-On
+	#if Inficolor_3D_Emulator || Reconstruction_Mode
+	    #define REST_UI_Mode 0
+	#else
+	    #ifndef REST_UI_Mode
+	        #define REST_UI_Mode 0
+	    #endif
+	#endif 
+	
 	#if Virtual_Reality_Mode
-		//This preprocessor is for Super3D Mode for really close to full Res images per I using Channel Compression
-		#ifndef Super3D_Mode
-			#define Super3D_Mode 0
-		#endif
+	    // This preprocessor is for Super3D Mode for close-to-full-res images using channel compression
+	    #ifndef Super3D_Mode
+	        #define Super3D_Mode 0
+	    #endif
 	#endif
 	
 	#ifndef Enable_Deband_Mode
-		#define Enable_Deband_Mode 0
+	    #define Enable_Deband_Mode 0
 	#endif
-
+	
 	#ifndef HDR_Compatible_Mode
-		#define HDR_Compatible_Mode 0
+	    #define HDR_Compatible_Mode 0
 	#endif
-		//This preprocessor is to set the vertical resolution to 50% on The Deph Buffer and is set too 2 It also does it to the primary buffer.
+	
+	// This preprocessor sets the vertical resolution to 50% for the depth buffer and primary buffer.
 	#ifndef Lower_Depth_Rez
-		#define Lower_Depth_Rez 0
+	    #define Lower_Depth_Rez 0
 	#endif
-
+	
 	#ifndef Use_Point_Sampling
-		#define Use_Point_Sampling 0
+	    #define Use_Point_Sampling 0
 	#endif
 	
 	//Help / Guide / Information
@@ -514,7 +520,7 @@ uniform int SuperDepth3D <
 	
 	uniform float ZPD_Balance <
 		ui_type = "drag";
-		ui_min = 0.0; ui_max = 1.0;
+		ui_min = -1.0; ui_max = 1.0;
 		ui_label = " ZPD Balance";
 		ui_tooltip = "This balances between ZPD Depth and Scene Depth.\n" //***
 					 "Changes the prioritization of the 3D effect.\n"
@@ -664,7 +670,7 @@ uniform int SuperDepth3D <
 					 "Default is 5 and Zero is Off.";
 		ui_category = "Occlusion Masking";
 	> = DM_X;	
-	#if !D_Frame || !DFW
+
 	uniform int Custom_Sidebars <
 		ui_type = "combo";
 		ui_items = "Mirrored Edges\0Black Edges\0Stretched Edges\0";
@@ -673,7 +679,7 @@ uniform int SuperDepth3D <
 		  			 "What type of filling to be used on the empty spaces on the edges";
 		ui_category = "Occlusion Masking";
 	> = 1;
-	#endif
+
 	uniform float Edge_Adjust <
 		ui_type = "slider";
 		ui_min = 0.0; ui_max = 1.0;                                                                                                  
@@ -1820,23 +1826,30 @@ uniform int Extra_Information <
 	{
 		return floor(i * 10.0f);// * 0.1f;
 	}
-	//I like this
+
 	float4 AdjustSaturation(float4 color)
-	{
-	    // Calculate the difference between the color channels
-	    float maxVal = max(color.r, max(color.g, color.b));
-	    float minVal = min(color.r, min(color.g, color.b));
-	    float delta = maxVal - minVal;
-	
-	    // Calculate luminance using a weighted sum of the color channels
-	    float3 coeff = float3(0.299, 0.587, 0.114);
-	    float lum = dot(color.rgb, coeff);
-	
-	    // The amount to adjust the color based on delta
-	    float saturationFactor = 1.0 + Saturation * (delta / max(0.001, maxVal));  // Avoid division by zero
-	
-	    // Apply the adjusted saturation factor
-	    return float4(lerp(lum, color.rgb, saturationFactor), color.a);
+	{ 
+		float hueShift = 0.0;
+		float saturation = 1+Saturation;
+
+		// Hue adjustment
+		float3 hueAdjust = 1.0 - min(abs(hueShift - float3(0.0, 2.0, 1.0)), 1.0);
+		
+		// Ensure red component consistency using dot product
+		hueAdjust.x = 1.0 - dot(hueAdjust.yz, 1.0);
+		
+		// Apply hue adjustment to the input texture color
+		float3 colorAdjusted = float3(
+									    dot(color.xyz, hueAdjust.xyz),
+									    dot(color.xyz, hueAdjust.zxy),
+									    dot(color.xyz, hueAdjust.yzx)
+									 );
+		
+		// Blend the adjusted color with grayscale
+		float3 grayscale = dot(colorAdjusted, float3(0.333, 0.333, 0.333) );
+		float3 finalColor = lerp(grayscale, colorAdjusted, saturation);
+
+		return float4(finalColor, color.w);
 	}
 	
 	float Vin_Pattern(float2 TC, float2 V_Power)
@@ -1868,80 +1881,142 @@ uniform int Extra_Information <
 	};
 	
 	texture BackBufferTex : COLOR;
-	sampler BackBufferMIRROR
+	sampler BackBuffer_SD
 	{
 		Texture = BackBufferTex;
-		AddressU = MIRROR;
-		AddressV = MIRROR;
-		AddressW = MIRROR;
 		#if Use_Point_Sampling
 		MagFilter = POINT;
 		MinFilter = POINT;
 		MipFilter = POINT;
 		#endif
-	};
-	
-	sampler BackBufferBORDER
-	{
-		Texture = BackBufferTex;
-		AddressU = BORDER;
-		AddressV = BORDER;
-		AddressW = BORDER;
-		#if Use_Point_Sampling
-		MagFilter = POINT;
-		MinFilter = POINT;
-		MipFilter = POINT;
-		#endif
-	};
-	
-	sampler BackBufferCLAMP
-	{
-		Texture = BackBufferTex;
-		AddressU = CLAMP;
-		AddressV = CLAMP;
-		AddressW = CLAMP;
-		#if Use_Point_Sampling
-		MagFilter = POINT;
-		MinFilter = POINT;
-		MipFilter = POINT;
-		#endif		
-	};
-	
-	#if Use_Point_Sampling	
-	sampler BackBufferSampleTexture
-	{
-		Texture = BackBufferTex;
-		AddressU = CLAMP;
-		AddressV = CLAMP;
-		AddressW = CLAMP;
-	};
-	#endif
-	#if Use_Point_Sampling		
-		#define Non_Point_Sampler BackBufferSampleTexture
-	#else
-		#define Non_Point_Sampler BackBufferCLAMP
-	#endif
-	
-	#if D_Frame || DFW
-	texture texCF { Width = BUFFER_WIDTH ; Height = BUFFER_HEIGHT ; Format = RGBA8; };
-	
-	sampler SamplerCF
+	};	
+		
+	#if D_Frame || DFW	
+		texture texCF { Width = BUFFER_WIDTH ; Height = BUFFER_HEIGHT ; Format = RGBA8; };
+		
+		sampler SamplerCF
 		{
 			Texture = texCF;
+			#if Use_Point_Sampling
+			MagFilter = POINT;
+			MinFilter = POINT;
+			MipFilter = POINT;
+			#endif		
 		};
-	
-	texture texDF { Width = BUFFER_WIDTH ; Height = BUFFER_HEIGHT ; Format = RGBA8; };
-	
-	sampler SamplerDF
+		
+		texture texDF { Width = BUFFER_WIDTH ; Height = BUFFER_HEIGHT ; Format = RGBA8; };
+		
+		sampler DF_BackBufferMIRROR
+		{
+			Texture = texDF;
+			AddressU = MIRROR;
+			AddressV = MIRROR;
+			AddressW = MIRROR;
+			#if Use_Point_Sampling
+			MagFilter = POINT;
+			MinFilter = POINT;
+			MipFilter = POINT;
+			#endif
+		};
+			
+		sampler DF_BackBufferBORDER
 		{
 			Texture = texDF;
 			AddressU = BORDER;
 			AddressV = BORDER;
 			AddressW = BORDER;
+			#if Use_Point_Sampling
 			MagFilter = POINT;
 			MinFilter = POINT;
 			MipFilter = POINT;
+			#endif
 		};
+			
+		sampler DF_BackBufferCLAMP
+		{
+			Texture = texDF;
+			AddressU = CLAMP;
+			AddressV = CLAMP;
+			AddressW = CLAMP;
+			#if Use_Point_Sampling
+			MagFilter = POINT;
+			MinFilter = POINT;
+			MipFilter = POINT;
+			#endif		
+		};
+		
+		#define BackBuffer_M DF_BackBufferMIRROR
+		#define BackBuffer_B DF_BackBufferBORDER
+		#define BackBuffer_C DF_BackBufferCLAMP
+		
+		#if Use_Point_Sampling	
+			sampler BackBufferSampleTexture
+			{
+				Texture = BackBufferTex;
+				AddressU = CLAMP;
+				AddressV = CLAMP;
+				AddressW = CLAMP;
+			};	
+			#define Non_Point_Sampler BackBufferSampleTexture
+		#else
+			#define Non_Point_Sampler BackBuffer_C
+		#endif
+	#else
+		sampler BackBufferMIRROR
+		{
+			Texture = BackBufferTex;
+			AddressU = MIRROR;
+			AddressV = MIRROR;
+			AddressW = MIRROR;
+			#if Use_Point_Sampling
+			MagFilter = POINT;
+			MinFilter = POINT;
+			MipFilter = POINT;
+			#endif
+		};
+		
+		sampler BackBufferBORDER
+		{
+			Texture = BackBufferTex;
+			AddressU = BORDER;
+			AddressV = BORDER;
+			AddressW = BORDER;
+			#if Use_Point_Sampling
+			MagFilter = POINT;
+			MinFilter = POINT;
+			MipFilter = POINT;
+			#endif
+		};
+		
+		sampler BackBufferCLAMP
+		{
+			Texture = BackBufferTex;
+			AddressU = CLAMP;
+			AddressV = CLAMP;
+			AddressW = CLAMP;
+			#if Use_Point_Sampling
+			MagFilter = POINT;
+			MinFilter = POINT;
+			MipFilter = POINT;
+			#endif		
+		};
+		
+		#define BackBuffer_M BackBufferMIRROR
+		#define BackBuffer_B BackBufferBORDER
+		#define BackBuffer_C BackBufferCLAMP
+		
+		#if Use_Point_Sampling	
+			sampler BackBufferSampleTexture
+			{
+				Texture = BackBufferTex;
+				AddressU = CLAMP;
+				AddressV = CLAMP;
+				AddressW = CLAMP;
+			};	
+			#define Non_Point_Sampler BackBufferSampleTexture
+		#else
+			#define Non_Point_Sampler BackBuffer_C
+		#endif			
 	#endif
 
 	#if Lower_Depth_Rez
@@ -2104,28 +2179,6 @@ uniform int Extra_Information <
 		return timer <= Text_Timer || Text_Info;
 	}	
 
-	#if D_Frame || DFW
-	float4 CurrentFrame(in float4 position : SV_Position, in float2 texcoords : TEXCOORD) : SV_Target
-	{
-		return tex2Dlod(BackBufferBORDER,float4(texcoords,0,0));
-	}
-	
-	float4 DelayFrame(in float4 position : SV_Position, in float2 texcoords : TEXCOORD) : SV_Target
-	{
-		return tex2Dlod(SamplerCF,float4(texcoords,0,0));
-	}
-
-	float4 CSB(float2 texcoords)
-	{
-		float4 ColorOut = tex2Dlod(SamplerDF,float4(texcoords,0,0)); 
-		float2 TC = -texcoords * texcoords*32 + texcoords*32;
-
-		if(Depth_Map_View == 0)
-			return ColorOut;
-		else
-			return tex2D(SamplerzBufferN_P,texcoords).xxxx;
-	}
-	#else
 	float4 CSB(float2 texcoords)
 	{ 
 		float2 TC = -texcoords * texcoords*32 + texcoords*32;
@@ -2133,26 +2186,25 @@ uniform int Extra_Information <
 		
 		#if BC_SPACE == 1
 		if(Custom_Sidebars == 0 && Depth_Map_View == 0)
-			return NormalizeScRGB(tex2Dlod(BackBufferMIRROR,float4(texcoords,0,0)) *  Vin);
+			return NormalizeScRGB(tex2Dlod(BackBuffer_M,float4(texcoords,0,0)) *  Vin);
 		else if(Custom_Sidebars == 1 && Depth_Map_View == 0)
-			return NormalizeScRGB(tex2Dlod(BackBufferBORDER,float4(texcoords,0,0)) *  Vin);
+			return NormalizeScRGB(tex2Dlod(BackBuffer_B,float4(texcoords,0,0)) *  Vin);
 		else if(Custom_Sidebars == 2 && Depth_Map_View == 0)
-			return NormalizeScRGB(tex2Dlod(BackBufferCLAMP,float4(texcoords,0,0)) *  Vin);
+			return NormalizeScRGB(tex2Dlod(BackBuffer_C,float4(texcoords,0,0)) *  Vin);
 		else
 			return NormalizeScRGB(tex2Dlod(SamplerzBufferN_P,float4(texcoords,0,0)).x);
 		#else
 		if(Custom_Sidebars == 0 && Depth_Map_View == 0)
-			return tex2Dlod(BackBufferMIRROR,float4(texcoords,0,0)) *  Vin;
+			return tex2Dlod(BackBuffer_M,float4(texcoords,0,0)) *  Vin;
 		else if(Custom_Sidebars == 1 && Depth_Map_View == 0)
-			return tex2Dlod(BackBufferBORDER,float4(texcoords,0,0)) *  Vin;
+			return tex2Dlod(BackBuffer_B,float4(texcoords,0,0)) *  Vin;
 		else if(Custom_Sidebars == 2 && Depth_Map_View == 0)
-			return tex2Dlod(BackBufferCLAMP,float4(texcoords,0,0)) *  Vin;
+			return tex2Dlod(BackBuffer_C,float4(texcoords,0,0)) *  Vin;
 		else
 			return tex2Dlod(SamplerzBufferN_P,float4(texcoords,0,0)).x;
 		#endif
 
 	}
-	#endif
 	
 	#if LBC || LBM || LB_Correction || LetterBox_Masking
 	int LBSensitivity( float inVal )
@@ -2732,8 +2784,8 @@ uniform int Extra_Information <
 
 	float3 regamma(float3 c) { return float3(pow(abs(c.r),1.0/2.2), pow(abs(c.g),1.0/2.2), pow(abs(c.b),1.0/2.2));} 
 
-	float4 MouseCursor(float2 texcoord , float2 pos, int Switch )
-	{   float4 Out = CSB(texcoord),Color, Exp_Darks, Exp_Brights;
+	float4 MouseCursor(float2 texcoord , float2 pos, int Switch,int UI_Mode )
+	{   float4 Out = UI_Mode ? tex2D(BackBuffer_SD,texcoord) : CSB(texcoord),Color, Exp_Darks, Exp_Brights;
 			float Cursor;
 			if(Cursor_Type > 0 && Switch)
 			{
@@ -3595,8 +3647,11 @@ uniform int Extra_Information <
 			if (Auto_Depth_Adjust > 0)
 				D = AutoDepthRange(D,texcoord);
 			// Used to scale for Auto Balance here 0 means we are looking close at something.
-			ZP = saturate( ZPD_Balance * OS_Value);// * MD_WHD.x);
-	
+			if(ZPD_Balance >= 0)
+				ZP = saturate( ZPD_Balance * OS_Value);// * MD_WHD.x);
+			else
+				ZP = saturate( ZPD_Balance * (OS_Value * OS_Value));
+				
 			float4 Set_Adjustments = RE_Set_Adjustments();float2 SC_Adjutment = DT_W;
 			float DOoR_A = smoothstep(0,1,tex2D(SamplerAvrP_N,float2(0, 0.1875)).z), //ZPD_Boundary
 				  DOoR_B = smoothstep(0,1,tex2D(SamplerAvrP_N,float2(0, 0.3125)).z),   //Set_Adjustments X
@@ -4758,9 +4813,9 @@ uniform int Extra_Information <
 				float4 Shift_LR = Vert_3D_Pinball ? Pattern_Type ? float4(-DLR.x,TCL.yx,AI) : float4(DLR.y, TCR.yx, -AI) : Pattern_Type ? float4(-DLR.x,TCL,AI) : float4(DLR.y, TCR, -AI);
 		
 				if(Vert_3D_Pinball)
-					Left_Right = MouseCursor(Parallax(Shift_LR.x,Shift_LR.yz,Shift_LR.w).yx, position.xy , Mouse_Toggle_Click).rgb;		
+					Left_Right = MouseCursor(Parallax(Shift_LR.x,Shift_LR.yz,Shift_LR.w).yx, position.xy , Mouse_Toggle_Click, 0).rgb;		
 				else
-					Left_Right = MouseCursor(Parallax(Shift_LR.x,Shift_LR.yz,Shift_LR.w), position.xy , Mouse_Toggle_Click).rgb;	
+					Left_Right = MouseCursor(Parallax(Shift_LR.x,Shift_LR.yz,Shift_LR.w), position.xy , Mouse_Toggle_Click, 0).rgb;	
 		#else
 			#if Reconstruction_Mode	
 			if(Reconstruction_Type == 1 )
@@ -4771,9 +4826,9 @@ uniform int Extra_Information <
 			float4 Shift_LR = Vert_3D_Pinball ? Pattern_Type ? float4(-DLR.x,TCL.yx,AI) : float4(DLR.y, TCR.yx, -AI) : Pattern_Type ? float4(-DLR.x,TCL,AI) : float4(DLR.y, TCR, -AI);
 		
 				if(Vert_3D_Pinball)
-					Left_Right = MouseCursor(Parallax(Shift_LR.x,Shift_LR.yz,Shift_LR.w).yx, position.xy , Mouse_Toggle_Click).rgb;		
+					Left_Right = MouseCursor(Parallax(Shift_LR.x,Shift_LR.yz,Shift_LR.w).yx, position.xy , Mouse_Toggle_Click, 0).rgb;		
 				else
-					Left_Right = MouseCursor(Parallax(Shift_LR.x,Shift_LR.yz,Shift_LR.w), position.xy , Mouse_Toggle_Click).rgb;	
+					Left_Right = MouseCursor(Parallax(Shift_LR.x,Shift_LR.yz,Shift_LR.w), position.xy , Mouse_Toggle_Click, 0).rgb;	
 			#else
 				#if REST_UI_Mode
 				if(Stereoscopic_Mode == 2 || Stereoscopic_Mode == 1)
@@ -4799,21 +4854,21 @@ uniform int Extra_Information <
 			{		
 				if(Vert_3D_Pinball)
 				{
-					L.rgb = MouseCursor(Parallax(-DLR.x, TCL.yx, AI).yx, position.xy , Mouse_Toggle_Click).rgb;
-					R.rgb = MouseCursor(Parallax( DLR.y, TCR.yx,-AI).yx, position.xy , Mouse_Toggle_Click).rgb;
+					L.rgb = MouseCursor(Parallax(-DLR.x, TCL.yx, AI).yx, position.xy , Mouse_Toggle_Click, 0).rgb;
+					R.rgb = MouseCursor(Parallax( DLR.y, TCR.yx,-AI).yx, position.xy , Mouse_Toggle_Click, 0).rgb;
 				}
 				else
 				{
-					L.rgb = MouseCursor(Parallax(-DLR.x,TCL, AI), position.xy , Mouse_Toggle_Click).rgb;
-					R.rgb = MouseCursor(Parallax( DLR.y,TCR,-AI), position.xy , Mouse_Toggle_Click).rgb;
+					L.rgb = MouseCursor(Parallax(-DLR.x,TCL, AI), position.xy , Mouse_Toggle_Click, 0).rgb;
+					R.rgb = MouseCursor(Parallax( DLR.y,TCR,-AI), position.xy , Mouse_Toggle_Click, 0).rgb;
 				}
 			}
 			else	
 			{
 				if(Vert_3D_Pinball && Stereoscopic_Mode != 5)
-					Left_Right = MouseCursor(Parallax(Shift_LR.x,Shift_LR.yz,Shift_LR.w).yx, position.xy , Mouse_Toggle_Click).rgb;		
+					Left_Right = MouseCursor(Parallax(Shift_LR.x,Shift_LR.yz,Shift_LR.w).yx, position.xy , Mouse_Toggle_Click, 0).rgb;		
 				else
-					Left_Right = MouseCursor(Parallax(Shift_LR.x,Shift_LR.yz,Shift_LR.w), position.xy , Mouse_Toggle_Click).rgb;		
+					Left_Right = MouseCursor(Parallax(Shift_LR.x,Shift_LR.yz,Shift_LR.w), position.xy , Mouse_Toggle_Click, 0).rgb;		
 			}
 			#endif
 		#endif
@@ -4856,7 +4911,7 @@ uniform int Extra_Information <
 		}
 	
 		if (BD_Options == 2 || Alinement_View)
-			color.rgb = dot(tex2D(BackBufferBORDER,TexCoords).rgb,0.333) * float3((Depth/Alinement_Depth> 0.998),1,(Depth/Alinement_Depth > 0.998));
+			color.rgb = dot(tex2D(BackBuffer_B,TexCoords).rgb,0.333) * float3((Depth/Alinement_Depth> 0.998),1,(Depth/Alinement_Depth > 0.998));
 		if( Helper_Fuction() == 0 || timer <= 0)  
 			color.rgb *= TexCoords.xyx;
 		
@@ -5682,6 +5737,90 @@ uniform int Extra_Information <
 		*/
 		return float4(Out.x,1-CWH_Mask(texcoord).x,Grid,1);
 	}	
+	
+	#define SIGMA 0.25
+	#define MSIZE 3
+	
+	float normpdf3(in float3 v, in float sigma)
+	{
+		return 0.39894*exp(-0.5*dot(v,v)/(sigma*sigma))/sigma;
+	}
+	
+	float LI(in float3 value)
+	{
+		return min( max( value.r, value.g ), value.b );
+	}	
+		
+	float4 Sharp(sampler Tex, float2 texcoord, float maxRadius)
+	{
+	    float4 final_color, nc;
+	    float Sharp_This = Sharpen_Power, mx, mn;
+	
+	    // Get the original color of the current pixel (center)
+	    float4 centerColor = tex2D(Tex, texcoord);
+
+	    #if !Virtual_Reality_Mode
+	    if (Sharp_This > 0 && Stereoscopic_Mode != 4) //Blocks it when CB mode
+	    #else
+	    if (Sharp_This > 0 && Stereoscopic_Mode != 2) //Blocks it when CB mode
+	    #endif
+	    {
+			//Bilateral Filter//                                                Q1         Q2       Q3        Q4
+			const int kSize = MSIZE * 0.5; // Default M-size is Quality 2 so [MSIZE 3] [MSIZE 5] [MSIZE 7] [MSIZE 9] / 2.
+			
+			float2 RPC_WS = pix * 1.5;
+			float Z, factor;
+			
+			[loop]
+			for (int i=-kSize; i <= kSize; ++i)
+			{
+				for (int j=-kSize; j <= kSize; ++j)
+				{
+					nc = tex2Dlod(Tex, float4(texcoord.xy + float2(i,j) * RPC_WS * rcp(kSize * 2.0f),0,0)).rgb;
+					factor = normpdf3(nc.rgb-centerColor.rgb, SIGMA);
+					Z += factor;
+					final_color += factor * nc;
+				}
+			}
+			
+			final_color = saturate(final_color/Z);
+			
+			mn = min( min( LI(centerColor.rgb), LI(final_color.rgb)), LI(nc.rgb));
+			mx = max( max( LI(centerColor.rgb), LI(final_color.rgb)), LI(nc.rgb));
+			
+			// Smooth minimum distance to signal limit divided by smooth max.
+			float rcpM = rcp(mx), CAS_Mask;// = saturate(min(mn, 1.0 - mx) * rcpM);
+			
+			// Shaping amount of sharpening masked
+			CAS_Mask = saturate(min(mn, 2.0 - mx) * rcpM);
+			
+			float Mask_Two = 1-LI(centerColor.rgb);
+			
+			float3 Sharp_Out = centerColor.rgb + (centerColor.rgb - final_color.rgb) * Sharp_This;
+	        #if !Virtual_Reality_Mode
+	        	centerColor.rgb = lerp(centerColor.rgb,Sharp_Out,CAS_Mask * Mask_Two);
+	        #else
+	        	//Consideration for Super3D mode
+				centerColor.rgb = Super3D_Mode ? lerp(centerColor.rgb,float3(Sharp_Out.rg,centerColor.b),CAS_Mask) : lerp(centerColor.rgb,Sharp_Out,CAS_Mask);
+			#endif	        
+	    }
+	    return centerColor;
+	}
+	
+	float4 SmartSharpJr(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Target
+	{  
+		float4 Color = tex2D(BackBuffer_SD,texcoord);//dot(Color.rgb,0.333);//
+		 Color.w = max(Color.r, max(Color.g, Color.b));
+		 //Color.w = dot(Color.rgb,0.333);
+	    return float4(Sharp(BackBuffer_SD, texcoord, 1.0).rgb,Color.w);
+	}
+	#if AXAA_EXIST
+	float4 AXAA_PS(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Target
+	{  
+		return USE_AXAA ? AXAA(BackBuffer_SD,texcoord) : tex2D(BackBuffer_SD,texcoord);
+	}
+	#endif
+	
 	#if REST_UI_Mode //Thankyou Tjandra for this option for people. 
 	float4 REST_Conversion_PS(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Target
 	{
@@ -5696,101 +5835,25 @@ uniform int Extra_Information <
 		
 		if(Stereoscopic_Mode == 1)
 			TC.y = texcoord.y < 0.5 ? texcoord.y * 2.0 + hw_offset.y : texcoord.y * 2.0 - 1.0 - hw_offset.y;
-		//tex2D(BackBufferBORDER,TC)
-		return MouseCursor( TC , position.xy , CLK);
+		//tex2D(BackBuffer_B,TC)
+		float4 Color = MouseCursor( TC , position.xy , CLK, 1);
+			   Color.w = max(Color.r, max(Color.g, Color.b));
+		return Color;
 	}
 	#endif
 	
-	#define sigma_r 0.25 // Range standard deviation	
-	float Gaussian(float x, float sigma)
+	#if D_Frame || DFW
+	float4 CurrentFrame(in float4 position : SV_Position, in float2 texcoords : TEXCOORD) : SV_Target
 	{
-	    return exp(-0.5f * (x * x) / (sigma * sigma));
+		return tex2Dlod(BackBuffer_SD,float4(texcoords,0,0));
 	}
 	
-	float LI(in float3 value)
+	float4 DelayFrame(in float4 position : SV_Position, in float2 texcoords : TEXCOORD) : SV_Target
 	{
-		return min( max( value.r, value.g ), value.b );
-	}	
-		
-	float4 Sharp(sampler Tex, float2 texcoord, float maxRadius)
-	{
-	    float4 final_color, resultColor = 0.0;
-	    float weightSum = 0.0, Sharp_This = Sharpen_Power, mx, mn;
-	
-	    // Get the original color of the current pixel (center)
-	    float4 centerColor = tex2D(Tex, texcoord);
-
-	    #if !Virtual_Reality_Mode
-	    if (Sharp_This > 0 && Stereoscopic_Mode != 4) //Blocks it when CB mode
-	    #else
-	    if (Sharp_This > 0 && Stereoscopic_Mode != 2) //Blocks it when CB mode
-	    #endif
-	    {
-	        // Define the offsets for 4 directions
-	        float2 rightOffset = float2(1, 0) * maxRadius * pix;
-	        float2 leftOffset = float2(-1, 0) * maxRadius * pix;
-	        float2 upOffset = float2(0, 1) * maxRadius * pix;
-	        float2 downOffset = float2(0, -1) * maxRadius * pix;
-	
-	        // Sample colors in each direction
-	        float4 colorRight = tex2D(Tex, texcoord + rightOffset);
-	        float4 colorLeft = tex2D(Tex, texcoord + leftOffset);
-	        float4 colorUp = tex2D(Tex, texcoord + upOffset);
-	        float4 colorDown = tex2D(Tex, texcoord + downOffset);
-	
-	        // Compute range weights (Gaussian based on color difference)
-	        float weightRight = Gaussian(length(centerColor.rgb - colorRight.rgb), sigma_r);
-	        float weightLeft = Gaussian(length(centerColor.rgb - colorLeft.rgb), sigma_r);
-	        float weightUp = Gaussian(length(centerColor.rgb - colorUp.rgb), sigma_r);
-	        float weightDown = Gaussian(length(centerColor.rgb - colorDown.rgb), sigma_r);
-	
-	        // Accumulate weighted colors and weights
-	        resultColor += colorRight * weightRight;
-	        resultColor += colorLeft * weightLeft;
-	        resultColor += colorUp * weightUp;
-	        resultColor += colorDown * weightDown;
-	        weightSum += weightRight + weightLeft + weightUp + weightDown;
-	
-	        // Compute the final color
-	        final_color = saturate(resultColor / weightSum);
-	
-	        // Smooth minimum and maximum luminance calculation
-	        mn = min(min(min(LI(colorLeft.rgb), LI(centerColor.rgb)), LI(colorRight.rgb)), 
-	                 min(LI(colorUp.rgb), LI(colorDown.rgb)));
-	        mx = max(max(max(LI(colorLeft.rgb), LI(centerColor.rgb)), LI(colorRight.rgb)), 
-	                 max(LI(colorUp.rgb), LI(colorDown.rgb)));
-	
-	        // Smooth minimum distance to signal limit divided by smooth max
-	        float rcpM = rcp(mx);
-	        //float CAS_Mask_A = saturate(min(mn, 1.0 - mx) * rcpM);
-	        float CAS_Mask = saturate(min(mn, 2.0 - mx) * rcpM) * 2 - 1;
-			//float De_Halo = LI(centerColor.rgb);
-	        // Shaping amount of sharpening masked
-	        float3 Sharp_Out = centerColor.rgb + (centerColor.rgb - final_color.rgb) * Sharp_This;
-	        //float Halo_Mask = saturate((LI(centerColor.rgb / Sharp_Out.rgb)) * 2 - 1);
-	        #if !Virtual_Reality_Mode
-	        	centerColor.rgb = lerp(centerColor.rgb,Sharp_Out,CAS_Mask);
-	        #else
-	        	//Consideration for Super3D mode
-				centerColor.rgb = Super3D_Mode ? lerp(centerColor.rgb,float3(Sharp_Out.rg,centerColor.b),CAS_Mask) : lerp(centerColor.rgb,Sharp_Out,CAS_Mask);
-			#endif	        
-	    }
-	    return centerColor;
-	}
-	
-	float4 SmartSharpJr(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Target
-	{  
-		float4 Color = tex2D(BackBufferBORDER,texcoord);//dot(Color.rgb,0.333);//
-		 Color.w = max(Color.r, max(Color.g, Color.b));
-		 //Color.w = dot(Color.rgb,0.333);
-	    return float4(Sharp(BackBufferBORDER, texcoord, 1.0).rgb,Color.w);
-	}
-	#if AXAA_EXIST
-	float4 AXAA_PS(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Target
-	{  
-		return USE_AXAA ? AXAA(BackBufferBORDER,texcoord) : tex2D(BackBufferBORDER,texcoord);
+		return tex2Dlod(SamplerCF,float4(texcoords,0,0));
 	}
 	#endif
+	
 	///////////////////////////////////////////////////////////////////ReShade.fxh//////////////////////////////////////////////////////////////////////
 	void PostProcessVS(in uint id : SV_VertexID, out float4 position : SV_Position, out float2 texcoord : TEXCOORD0)
 	{// Vertex shader generating a triangle covering the entire screen
@@ -5818,11 +5881,11 @@ uniform int Extra_Information <
 			RenderTarget = Info_Tex;
 		}
 	}
-	
+		
 	technique SuperDepth3D
 	< ui_tooltip = "Suggestion : You Can Enable 'Performance Mode Checkbox,' in the lower bottom right of the ReShade's Main UI.\n"
 				   			 "Do this once you set your 3D settings of course."; >
-	{		
+	{	
 		#if D_Frame || DFW
 			pass Delay_Frame
 		{
@@ -5836,14 +5899,13 @@ uniform int Extra_Information <
 			PixelShader = CurrentFrame;
 			RenderTarget = texCF;
 		}
-		#else
+		#endif
 			pass Average_Information
 		{
 			VertexShader = PostProcessVS;
 			PixelShader = Average_Info;
 			RenderTarget0 = texAvrN;
-		}
-		#endif	
+		}	
 			pass Blur_DepthBuffer
 		{
 			VertexShader = PostProcessVS;
@@ -5886,27 +5948,19 @@ uniform int Extra_Information <
 			VertexShader = PostProcessVS;
 			PixelShader = Out;
 		}
-
-			pass USMOut
-		{
-			VertexShader = PostProcessVS;
-			PixelShader = SmartSharpJr;
-		}	
-		#if AXAA_EXIST
-			pass AXAA
-		{
-			VertexShader = PostProcessVS;
-			PixelShader = AXAA_PS;
-		}
-		#endif
-		
-		#if D_Frame || DFW
-			pass Average_Information
-		{
-			VertexShader = PostProcessVS;
-			PixelShader = Average_Info;
-			RenderTarget0 = texAvrN;
-		}
+		#if !REST_UI_Mode
+				pass USMOut
+			{
+				VertexShader = PostProcessVS;
+				PixelShader = SmartSharpJr;
+			}	
+			#if AXAA_EXIST
+				pass AXAA
+			{
+				VertexShader = PostProcessVS;
+				PixelShader = AXAA_PS;
+			}
+			#endif
 		#endif
 	}
 	#if REST_UI_Mode
@@ -5921,6 +5975,18 @@ uniform int Extra_Information <
 			VertexShader= PostProcessVS;
 			PixelShader= REST_Conversion_PS;
 		}
+			pass USMOut
+		{
+			VertexShader = PostProcessVS;
+			PixelShader = SmartSharpJr;
+		}	
+		#if AXAA_EXIST
+			pass AXAA
+		{
+			VertexShader = PostProcessVS;
+			PixelShader = AXAA_PS;
+		}
+		#endif
 	}
 	#endif	
 	
