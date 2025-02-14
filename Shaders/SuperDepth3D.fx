@@ -1,7 +1,7 @@
 	////----------------//
 	///**SuperDepth3D**///
 	//----------------////
-	#define SD3D "SuperDepth3D v4.4.7\n"
+	#define SD3D "SuperDepth3D v4.4.8\n"
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//* Depth Map Based 3D post-process shader
 	//* For Reshade 3.0+
@@ -329,7 +329,7 @@ namespace SuperDepth3D
 	#endif 
 	
 	// This is for REST Add-On
-	#if Inficolor_3D_Emulator || Reconstruction_Mode
+	#if Inficolor_3D_Emulator || Reconstruction_Mode || Virtual_Reality_Mode
 	    #define REST_UI_Mode 0
 	#else
 	    #ifndef REST_UI_Mode
