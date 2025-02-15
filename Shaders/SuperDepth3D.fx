@@ -1,7 +1,7 @@
 	////----------------//
 	///**SuperDepth3D**///
 	//----------------////
-	#define SD3D "SuperDepth3D v4.4.8\n"
+	#define SD3D "SuperDepth3D v4.5.0\n"
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//* Depth Map Based 3D post-process shader
 	//* For Reshade 3.0+
@@ -120,7 +120,7 @@ namespace SuperDepth3D
 		static const float DII_X = 0.0, DII_Y = 0.0, DII_Z = 1000.0, DII_W = 0.0;
 		// DJJ_X = [Position A & B] DJJ_Y = [Position C & UI Pos] DJJ_Z = [ABCW Stencil Menu Tresholds] DJJ_W = [Stencil Adjust]
 		static const float DJJ_X = 0.0, DJJ_Y = 0.0, DJJ_Z = 1000.0, DJJ_W = 0.0;
-		// DKK_X = [SDT Position A & B] DKK_Y = [SDT Position C] DKK_Z = [SDT ABCD Menu Tresholds] DKK_W = [Null]
+		// DKK_X = [SDT Position A & B] DKK_Y = [SDT Position C] DKK_Z = [SDT ABCD Menu Tresholds] DKK_W = [Last OIF Check Depth Limit Boundary & Cutoff]
 		static const float DKK_X = 0.0, DKK_Y = 0.0, DKK_Z = 1000.0, DKK_W = 0.0;
 		// DLL_X = [Position A & B] DLL_Y = [Position C & UI Pos] DLL_Z = [ABCW Stencil Menu Tresholds] DLL_W = [Stencil Adjust]
 		static const float DLL_X = 0.0, DLL_Y = 0.0, DLL_Z = 1000.0, DLL_W = 0.0;
@@ -606,7 +606,21 @@ uniform int SuperDepth3D <
 						 "lets you adjust how far behind the screen it should detect a intrustion.\n"
 						 "Only works when Boundary Detection is enabled & when scaler LvL one is set.";
 			ui_category = "Zero Parallax Distance";
-		> = float2(OIF.w,DI_W.w);	
+		> = float2(OIF.w,DI_W.w);
+
+		uniform float2 ZPD_Boundary_n_Cutoff_End <
+			#if Compatibility
+			ui_type = "drag";
+			#else
+			ui_type = "slider";
+			#endif
+			ui_min = 0.0; ui_max = 5.0;
+			ui_label = " ZPD Scaler6 & Intrusion";
+			ui_tooltip = "This selection gives extra boundary conditions to scale ZPD level Six.\n"
+						 "lets you adjust how far behind the screen it should detect a intrustion.\n"
+						 "Only works when Boundary Detection is enabled & when scaler LvL one is set.";
+			ui_category = "Zero Parallax Distance";
+		> = DKK_W;	
 	#endif
 	
 	uniform bool ZPD_Screen_Edge_Avoidance <
@@ -1707,9 +1721,9 @@ uniform int Extra_Information <
 
 	float3 RE_Set(float Auto_Switch)
 	{
-		#if EDW
+		#if EDW // Set By SuperDepth3D
 			float OIL_Switch[4] = {ZPD_Boundary_n_Cutoff_A.x,ZPD_Boundary_n_Cutoff_B.x,ZPD_Boundary_n_Cutoff_C.x,ZPD_Boundary_n_Cutoff_D.x};		
-		#else
+		#else // Set by Overwatch
 			#if OIL == 1
 				float OIL_Switch[2] = {ZPD_Boundary_n_Cutoff_A.x,OIF.y};	
 			#elif ( OIL == 2 )
@@ -1720,18 +1734,22 @@ uniform int Extra_Information <
 				float OIL_Switch[1] = {ZPD_Boundary_n_Cutoff_A.x};	
 			#endif
 		#endif 	
-		int Scale_Auto_Switch = clamp((Auto_Switch * 4) - 1,0 , 3 );
+		int Scale_Auto_Switch = clamp((Auto_Switch * 5) - 1,0 , 3 );
 		float Set_RE = OIL_Switch[Scale_Auto_Switch];
 
 		int REF_Trigger = Set_RE > 0;
+		
+		//X is a Bool to enable the extra Levels
+		//Y is the Set_Level Number from the auto Switch
+		//Z is not used
 		return float3(REF_Trigger, Set_RE , Scale_Auto_Switch); 
 	}
 	
 	float4 RE_Set_Adjustments()
 	{
-		#if EDW
+		#if EDW // Set By SuperDepth3D
 			float OIL_Switch[4] = {ZPD_Boundary_n_Cutoff_A.x,ZPD_Boundary_n_Cutoff_B.x,ZPD_Boundary_n_Cutoff_C.x,ZPD_Boundary_n_Cutoff_D.x};		
-		#else
+		#else // Set by Overwatch
 			#if OIL == 1
 				float OIL_Switch[4] = {ZPD_Boundary_n_Cutoff_A.x,OIF.y,0,0};	
 			#elif ( OIL == 2 )
@@ -1743,6 +1761,15 @@ uniform int Extra_Information <
 			#endif 
 		#endif
 		return float4(OIL_Switch[0], OIL_Switch[1], OIL_Switch[2], OIL_Switch[3]);
+	}
+
+	float2 RE_Extended()
+	{
+		#if EDW
+		return ZPD_Boundary_n_Cutoff_End.xy;
+		#else
+		return DKK_W;
+		#endif
 	}
 
 	float Scale(float val,float max,float min) //Scale to 0 - 1
@@ -3407,7 +3434,9 @@ uniform int Extra_Information <
 	
 							if ( CD < -ZPD_Boundary_n_Cutoff_D.y && Detect_Out_of_Range <= 4)
 								Detect_Out_of_Range = 4;
-								
+
+							if ( CD < -RE_Extended().y && Detect_Out_of_Range <= 5)
+								Detect_Out_of_Range = 5;
 						#else	
 													
 							#if OIL >= 1
@@ -3422,7 +3451,11 @@ uniform int Extra_Information <
 							if ( CD < -DI_W.w && Detect_Out_of_Range <= 4)
 								Detect_Out_of_Range = 4;
 							#endif	
-						
+							#if OIL >= 4	
+							if ( CD < -RE_Extended().y && Detect_Out_of_Range <= 5)
+								Detect_Out_of_Range = 5;
+							#endif	
+					
 						#endif
 					}
 				}
@@ -3431,11 +3464,12 @@ uniform int Extra_Information <
 	
 	    uint Sat_D_O_R = Detect_Out_of_Range == Fast_Trigger_Mode;
 	    float ZPD_BnF = Auto_Adjust_Cal(Sat_D_O_R ? 0.5 - FLT_EPSILON : ZPD_Boundary_n_Fade.y);
-	    float PStoredfade_A = tex2D(SamplerAvrP_N, float2(0, 0.1875)).z, 
-			  PStoredfade_B = tex2D(SamplerAvrP_N, float2(0, 0.3125)).z, 
-			  PStoredfade_C = tex2D(SamplerAvrP_N, float2(1, 0.3125)).z, 
-			  PStoredfade_D = tex2D(SamplerAvrP_N, float2(1, 0.1875)).z, 
-			  PStoredfade_E = tex2D(SamplerAvrP_N, float2(1, 0.4375)).z;
+	    float PStoredfade_A = tex2D(SamplerAvrP_N, float2(0, 0.1875)).z,//0 
+			  PStoredfade_B = tex2D(SamplerAvrP_N, float2(0, 0.3125)).z,//1
+			  PStoredfade_C = tex2D(SamplerAvrP_N, float2(1, 0.1875)).z,//2
+			  PStoredfade_D = tex2D(SamplerAvrP_N, float2(1, 0.3125)).z,//3
+			  PStoredfade_E = tex2D(SamplerAvrP_N, float2(1, 0.4375)).z,//4
+			  PStoredfade_F = tex2D(SamplerAvrP_N, float2(1, 0.5625)).z;//5
 	
 	    // Fade in toggle.
 	    float CallFT = 1.0 - exp(-frametime / ZPD_BnF); // exp2 would be even slower
@@ -3444,8 +3478,8 @@ uniform int Extra_Information <
 	                           PStoredfade_C + ((Detect_Out_of_Range >= 2) - PStoredfade_C) * CallFT),
 	                    float3(PStoredfade_D + ((Detect_Out_of_Range >= 3) - PStoredfade_D) * CallFT,
 	                           PStoredfade_E + ((Detect_Out_of_Range >= 4) - PStoredfade_E) * CallFT,
-	                           saturate(Detect_Out_of_Range * 0.25)),
-	                    float3(0, 0, 0));
+	                           PStoredfade_F + ((Detect_Out_of_Range >= 5) - PStoredfade_F) * CallFT),
+	                    float3(saturate(Detect_Out_of_Range * 0.2), 0, 0));
 						 
 	}
 	#define FadeSpeed_AW 0.375
@@ -3494,17 +3528,18 @@ uniform int Extra_Information <
 		//Fade Storage
 		#if DX9_Toggle
 		float3x3 Fade_Pass = Fade(texcoord); //[0][0] = F | [0][1] = F | [0][2] = F
-						 					//[1][0] = F | [1][1] = N | [1][2] = 0
-											 //[2][0] = 0 | [2][1] = 0 | [2][2] = 0
+						 					//[1][0] = F | [1][1] = F | [1][2] = F
+											 //[2][0] = N | [2][1] = 0 | [2][2] = 0
 		float2 Min_Trim = float2(SP_Min,WZPD_and_WND.w);
 		#else
-		float3 Fade_Pass_A = float3( tex2D(SamplerzBuffer_BlurN,float2(0,0.083)).x,
-									 tex2D(SamplerzBuffer_BlurN,float2(0,0.250)).x,
-									 tex2D(SamplerzBuffer_BlurN,float2(0,0.416)).x );
-		float3 Fade_Pass_B = float3( tex2D(SamplerzBuffer_BlurN,float2(0,0.583)).x,
-									 tex2D(SamplerzBuffer_BlurN,float2(0,0.750)).x,
-									 tex2D(SamplerzBuffer_BlurN,float2(0,0.916)).x );
-
+		float3 Fade_Pass_A = float3( tex2D(SamplerzBuffer_BlurN,float2(0,0.0625)).x,  //[0][0]
+									 tex2D(SamplerzBuffer_BlurN,float2(0,0.1875)).x,  //[0][1]
+									 tex2D(SamplerzBuffer_BlurN,float2(0,0.3125)).x );//[0][2]
+		float3 Fade_Pass_B = float3( tex2D(SamplerzBuffer_BlurN,float2(0,0.4375)).x,  //[1][0]
+									 tex2D(SamplerzBuffer_BlurN,float2(0,0.5625)).x,  //[1][1]
+									 tex2D(SamplerzBuffer_BlurN,float2(0,0.6875)).x );//[1][2]
+		float  Fade_Pass_C =         tex2D(SamplerzBuffer_BlurN,float2(0,0.9375)).x;  //[2][0] = N
+																        
 			float Scale_Auto_Switch = Level_Control.y == 0 ? Fade_Pass_A.x : Level_Control.z == 2 ? Fade_Pass_B.y * 4 >= Level_Control.y : Fade_Pass_B.y * 4 == Level_Control.y;
 			
 			if(Level_Control.z >= 1)
@@ -3530,40 +3565,40 @@ uniform int Extra_Information <
 		if ( Weapon_Depth_Edge.x > 0)//1.0 needs to be adjusted when doing far scaling
 			R = lerp(DepthEdge(R, DM.x, texcoord, 1-Weapon_Depth_Edge.x),DM.x,smoothstep(0,1.0,DM.x));
 		
-		if(   texcoord.x < pix.x * 2 &&   texcoord.y < pix.y * 2)//TL
+		if(   texcoord.x < pix.x * 2 &&   texcoord.y < pix.y * 2)//TL OG Fade
 			R = Fade_in_out().x;
 		#if DX9_Toggle
-			if( 1-texcoord.x < pix.x * 2 && 1-texcoord.y < pix.y * 2)//BR
+			if( 1-texcoord.x < pix.x * 2 && 1-texcoord.y < pix.y * 2)//BR 0
 				R = Fade_Pass[0][0];
-			if(   texcoord.x < pix.x * 2 && 1-texcoord.y < pix.y * 2)//BL
+			if(   texcoord.x < pix.x * 2 && 1-texcoord.y < pix.y * 2)//BL 1
 				R = Fade_Pass[0][1];
-			if( 1-texcoord.x < pix.x * 2 &&   texcoord.y < pix.y * 2)//TR
+			if( 1-texcoord.x < pix.x * 2 &&   texcoord.y < pix.y * 2)//TR 2
 				R = Fade_Pass[0][2];
 
-			if( 1-texcoord.x < pix.x * 2 &&   texcoord.y < pix.y * 2)//TR
+			if( 1-texcoord.x < pix.x * 2 &&   texcoord.y < pix.y * 2)//TR 3
 				G = Fade_Pass[1][0];
-			if(   texcoord.x < pix.x * 2 &&   texcoord.y < pix.y * 2)//TL
-				G = Fade_Pass[1][2];
-			if( 1-texcoord.x < pix.x * 2 && 1-texcoord.y < pix.y * 2)//BR
+			if(   texcoord.x < pix.x * 2 &&   texcoord.y < pix.y * 2)//TL 4
 				G = Fade_Pass[1][1];
-			if(   texcoord.x < pix.x * 2 && 1-texcoord.y < pix.y * 2)//BL
-				G = OverShoot_Fade();
+			if( 1-texcoord.x < pix.x * 2 && 1-texcoord.y < pix.y * 2)//BR 5
+				G = Fade_Pass[1][2];
+			if(   texcoord.x < pix.x * 2 && 1-texcoord.y < pix.y * 2)//BL N
+				G = Fade_Pass[2][0];
 		#else
-			if( 1-texcoord.x < pix.x * 2 && 1-texcoord.y < pix.y * 2)//BR
-				R = Fade_Pass_A.x;
-			if(   texcoord.x < pix.x * 2 && 1-texcoord.y < pix.y * 2)//BL
-				R = Fade_Pass_A.y;
-			if( 1-texcoord.x < pix.x * 2 &&   texcoord.y < pix.y * 2)//TR
-				R = Fade_Pass_A.z;
+			if( 1-texcoord.x < pix.x * 2 && 1-texcoord.y < pix.y * 2)//BR 0
+				R = Fade_Pass_A.x;//[0][0]
+			if(   texcoord.x < pix.x * 2 && 1-texcoord.y < pix.y * 2)//BL 1
+				R = Fade_Pass_A.y;//[0][1]
+			if( 1-texcoord.x < pix.x * 2 &&   texcoord.y < pix.y * 2)//TR 2
+				R = Fade_Pass_A.z;//[0][2]
 
-			if( 1-texcoord.x < pix.x * 2 &&   texcoord.y < pix.y * 2)//TR
-				G = Fade_Pass_B.x;
-			if(   texcoord.x < pix.x * 2 &&   texcoord.y < pix.y * 2)//TL
-				G = Fade_Pass_B.y;
-			if( 1-texcoord.x < pix.x * 2 && 1-texcoord.y < pix.y * 2)//BR
-				G = Fade_Pass_B.z;
-			if(   texcoord.x < pix.x * 2 && 1-texcoord.y < pix.y * 2)//BL
-				G = OverShoot_Fade();
+			if( 1-texcoord.x < pix.x * 2 &&   texcoord.y < pix.y * 2)//TR 3
+				G = Fade_Pass_B.x;//[1][0]
+			if(   texcoord.x < pix.x * 2 &&   texcoord.y < pix.y * 2)//TL 4
+				G = Fade_Pass_B.y;//[1][1]
+			if( 1-texcoord.x < pix.x * 2 && 1-texcoord.y < pix.y * 2)//BR 5
+				G = Fade_Pass_B.z;//[1][2]
+			if(   texcoord.x < pix.x * 2 && 1-texcoord.y < pix.y * 2)//BL N
+				G = Fade_Pass_C;  //[2][0]
 		#endif	
 		//Luma Map
 		float3 Color, Color_A = tex2D(Non_Point_Sampler,texcoord ).rgb;//, Color_B = step(0.9,tex2D(BackBufferCLAMP,texcoord ).rgb);
@@ -3653,47 +3688,55 @@ uniform int Extra_Information <
 				ZP = saturate( ZPD_Balance * (OS_Value * OS_Value));
 				
 			float4 Set_Adjustments = RE_Set_Adjustments();float2 SC_Adjutment = DT_W;
-			float DOoR_A = smoothstep(0,1,tex2D(SamplerAvrP_N,float2(0, 0.1875)).z), //ZPD_Boundary
-				  DOoR_B = smoothstep(0,1,tex2D(SamplerAvrP_N,float2(0, 0.3125)).z),   //Set_Adjustments X
-				  DOoR_C = smoothstep(0,1,tex2D(SamplerAvrP_N,float2(1, 0.3125)).z),     //Set_Adjustments Y
-				  DOoR_D = smoothstep(0,1,tex2D(SamplerAvrP_N,float2(1, 0.1875)).z),       //Set_Adjustments Z
-				  DOoR_E = smoothstep(0,1,tex2D(SamplerAvrP_N,float2(1, 0.4375)).z),         //Set_Adjustments W
-				  SetLvL = smoothstep(0,1,tex2D(SamplerAvrP_N,float2(1, 0.5625)).z);           //Set_Level			
+			float DOoR_A = smoothstep(0,1,tex2D(SamplerAvrP_N,float2(0, 0.1875)).z), //ZPD_Boundary    0
+				  DOoR_B = smoothstep(0,1,tex2D(SamplerAvrP_N,float2(0, 0.3125)).z),   //Set_Adjustments 1
+				  DOoR_C = smoothstep(0,1,tex2D(SamplerAvrP_N,float2(1, 0.1875)).z),     //Set_Adjustments 2
+				  DOoR_D = smoothstep(0,1,tex2D(SamplerAvrP_N,float2(1, 0.3125)).z),       //Set_Adjustments 3
+				  DOoR_E = smoothstep(0,1,tex2D(SamplerAvrP_N,float2(1, 0.4375)).z),         //Set_Adjustments 4 
+				  DOoR_F = smoothstep(0,1,tex2D(SamplerAvrP_N,float2(1, 0.5625)).z),		   //Set_Adjustments 5
+				  SetLvL = smoothstep(0,1,tex2D(SamplerAvrP_N,float2(1, 0.8125)).z); //Set_Level N
+			
 			if(SC_Adjutment.y > 0.0)
 				W_Convergence *= lerp(SC_Adjutment.x , 1.0,MD_WHD.x > SC_Adjutment.y);
 			//The Switch Array B 0.750 that switches the OIL value in RE_Set.
 			//Z is a LvL between 0 - 3
-			//Y is current value of ZPD Value	  
-			//float2 Detection_Switch_Amount = RE_Set(tex2D(SamplerAvrP_N,float2(1,0.5625)).z).yz;//Y = X and Z = Y																   
+			//N is current value of ZPD Value	  															   
 			float Detection_Switch_Amount = RE_Set(SetLvL).y;//Y = X																   
 
 			if(RE_Set(0).x)
 			{
 				DOoR_B = lerp(ZPD_Boundary_Adjust, Set_Adjustments.x, DOoR_B);
 					#if OIL == 0
-					DOoR_E = DOoR_B;
+					DOoR_F = DOoR_B;
 					#endif
 	
 				#if OIL >= 1
 				DOoR_C = lerp(DOoR_B, Set_Adjustments.y, DOoR_C);
 					#if OIL == 1
-					DOoR_E = DOoR_C;
+					DOoR_F = DOoR_C;
 					#endif	
 				#endif
 				
 				#if OIL >= 2	
 				DOoR_D = lerp(DOoR_C, Set_Adjustments.z, DOoR_D);
 					#if OIL == 2
-					DOoR_E = DOoR_D;
+					DOoR_F = DOoR_D;
 					#endif	
 				#endif		
-				
+
 				#if OIL >= 3	
 				DOoR_E = lerp(DOoR_D, Set_Adjustments.w, DOoR_E);
+					#if OIL == 3
+					DOoR_F = DOoR_E;
+					#endif	
+				#endif	
+				
+				#if OIL >= 4	
+				DOoR_F = lerp(DOoR_E, RE_Extended().x, DOoR_F);
 				#endif		
 			}
 			else
-			DOoR_E = lerp(ZPD_Boundary_Adjust, Detection_Switch_Amount.x, DOoR_B);
+			DOoR_F = lerp(ZPD_Boundary_Adjust, Detection_Switch_Amount.x, DOoR_B);
 			
 			//Want to add a Over Shoot Value to ZDP
 			//I need to make sure that if it's near 
@@ -3701,7 +3744,7 @@ uniform int Extra_Information <
 			if(ZPD_OverShoot > 0)
 				Z = lerp(Z,Z * (1+min(0.75,0.75 * ZPD_OverShoot)),OS_Value);
 			
-			Z *= lerp( 1, DOoR_E, DOoR_A);
+			Z *= lerp( 1, DOoR_F, DOoR_A);
 			
 			float Convergence = 1 - Z / D;
 			if (Zero_Parallax_Distance == 0)
@@ -3966,8 +4009,17 @@ uniform int Extra_Information <
 		if( 1-texcoord.x < pix.x * 2 &&   texcoord.y < pix.y * 2)//TR
 			Set_Depth.y = Set_Depth.w;		
 		//For High Frequency Information.
-		float HF_Info = saturate(ddx(Set_Depth.x) * ddy(Set_Depth.x));			
-	
+		float HF_Info = saturate(ddx(Set_Depth.x) * ddy(Set_Depth.x));
+			
+		if(texcoord.x < pix.x * 2 && texcoord.y < pix.y * 2)    //TL
+			HF_Info = 0;	
+		if(1-texcoord.x < pix.x * 2 && 1-texcoord.y < pix.y * 2) //BR
+			HF_Info = 0;
+		if(  texcoord.x < pix.x * 2 && 1-texcoord.y < pix.y * 2) //BL
+			HF_Info = OverShoot_Fade();
+		if( 1-texcoord.x < pix.x * 2 &&   texcoord.y < pix.y * 2)//TR
+			HF_Info = 0;
+			
 		Point_Out = Set_Depth.xy; 
 		Linear_Out = float2(Set_Depth.x,HF_Info);
 	}
@@ -3992,17 +4044,19 @@ uniform int Extra_Information <
 		#endif
 		
 		#if !DX9_Toggle
-		//Fade Storage
+		//Fade Storage		
 		float3x3 Fade_Pass = Fade(StoredTC); //[0][0] = F | [0][1] = F | [0][2] = F
-						 					//[1][0] = F | [1][1] = N | [1][2] = 0
-											 //[2][0] = 0 | [2][1] = 0 | [2][2] = 0
-		const int Num_of_Values = 6; //4 total array values that map to the textures width.
+						 					//[1][0] = F | [1][1] = F | [1][2] = F
+											 //[2][0] = N | [2][1] = 0 | [2][2] = 0
+		const int Num_of_Values = 8; //4 total array values that map to the textures width.
 		float Storage_Array[Num_of_Values] = { Fade_Pass[0][0],
 	                                		   Fade_Pass[0][1],
 	                                		   Fade_Pass[0][2], 
 	                                		   Fade_Pass[1][0],
+											   Fade_Pass[1][1],
 											   Fade_Pass[1][2],
-											   Fade_Pass[1][1] };
+											   0.0,
+											   Fade_Pass[2][0] };
 		//Set a avr size for the Number of lines needed in texture storage.
 		float Grid = floor(StoredTC.y * BUFFER_HEIGHT * BUFFER_RCP_HEIGHT * Num_of_Values);							 
 
@@ -4941,19 +4995,19 @@ uniform int Extra_Information <
 	                                             tex2D(SamplerDMN,1).x,                 //0.1875 //BR Fade X Level 0
 	                                             tex2D(SamplerDMN,int2(0,1)).x,         //0.3125 //BL Fade Y Level 1
 	                                             tex2D(SamplerzBufferN_P,0).y,          //0.4375 //TL
-								             	tex2D(SamplerzBufferN_P,1).y,          //0.5625 //BR 
-								             	tex2D(SamplerzBufferN_P,int2(0,1)).y,  //0.6875 //BL
+								             	tex2D(SamplerzBufferN_P,1).y,          //0.5625 //BR AltWeapon_Fade
+								             	tex2D(SamplerzBufferN_P,int2(0,1)).y,  //0.6875 //BL Weapon_ZPD_Fade
 												 1.0,                                   //0.8125
-												 1.0}; 			                     //0.9375
-												 //LBDetection Seems to be causing issues with TC_SP.xy
+												 1.0}; 			                     //0.9375								 
+												 //LBDetection Seems to be causing issues with TC_SP.xy											 
 		float Storage_Array_B[Num_of_Values] = { LBDetection(),                         //0.0625                     
-	                                			 tex2D(SamplerDMN,int2(1,0)).y,         //0.1875 //TR Fade Z Level 3
-	                               			  tex2D(SamplerDMN,int2(1,0)).x,         //0.3125 //TR Fade Z Level 2
-	                                			 tex2D(SamplerDMN,1).y,                 //0.4375 //BR Fade Z Level 4
-												 tex2D(SamplerDMN,0).y,                 //0.5625 //TL Fade W The Switch
-												 tex2D(SamplerzBufferN_P,int2(1,0)).y,  //0.6875
-												 1.0,                                   //0.8125
-												 tex2D(SamplerDMN,int2(0,1)).y}; 			        //0.9375
+	                                			 tex2D(SamplerDMN,int2(1,0)).x,         //0.1875 //TR Fade Z Level 2
+	                               			  tex2D(SamplerDMN,int2(1,0)).y,         //0.3125 //TR Fade Z Level 3
+	                                			 tex2D(SamplerDMN,0).y,                 //0.4375 //BR Fade Z Level 4
+												 tex2D(SamplerDMN,1).y,                 //0.5625 //TL Fade Z Level 5
+												 tex2D(SamplerzBufferN_P,int2(1,0)).y,  //0.6875 
+												 tex2D(SamplerDMN,int2(0,1)).y,         //0.8125 //BL Fade W The Switch
+												 tex2D(SamplerzBufferN_L,int2(0,1)).y}; //0.9375 //BL OverShoot_Fade()
 		//Set a avr size for the Number of lines needed in texture storage.
 		float Grid = floor(texcoord.y * BUFFER_HEIGHT * BUFFER_RCP_HEIGHT * Num_of_Values);
 		#if WHM 
@@ -5315,6 +5369,7 @@ uniform int Extra_Information <
 		    #else
 		    Color = Color;
 		    #endif
+		    //Color = OverShoot_Fade();
 			return Color.rgba;
 		}
 	#endif	

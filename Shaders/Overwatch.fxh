@@ -1,7 +1,7 @@
 ////----------------------------------------//
 ///SuperDepth3D Overwatch Automation Header///
 //----------------------------------------////
-#define OVERWATCH "Overwatch v4.1.5\n"
+#define OVERWATCH "Overwatch v4.1.6\n"
 //---------------------------------------OVERWATCH---------------------------------------//
 // If you are reading this stop. Go away and never look back. From this point on if you  //
 // still think it's is worth looking at this..... Then no one can save you or your soul. //
@@ -326,6 +326,7 @@ static const int Over_Intrusion_Level_D = 0;            //Over Intrusion Level 0
 static const float4 Over_Intrusion_Fix_D = 0.0;         //Over Intrusion Fix                            | OIF
 static const int Fast_Trigger_Mode_D = 0;               //Fast Trigger Mode for OIF                     | FTM
 static const float4 OIF_Check_Depth_Limit_D = float4(0.5,0.0,0.0,0.0);//Over Intrusion Check Depth Limit| DI_W
+static const float2 OIF_Check_Depth_Limit_Boundary_n_Cutoff_D = float2(0,0);//OIL Boundary & Cutoff End | DKK_W
 static const float Filter_Mode_Modifire01_D = 0.0;      //Filter Mode Modifier                          | FMM
 static const int Shift_Detectors_Up_D = 0;              //Shift Detectors Up                            | SDU
 static const int Isolating_Weapon_Stencil_D = 0;        //Isolating Weapon Stencil                      | IWS
@@ -34429,7 +34430,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DAA 1
 	#define FOV 1
     //#define ARW 1
-#elif (App == 0x4E14FE13 ) //Grand Theft Auto III: Liberty City - The Definitive Edition
+#elif (App == 0x4E14FE13 || App == 0x8228A9DB ) //Grand Theft Auto III: Liberty City - The Definitive Edition
     //#define DS_Z 2                                 // Set View Mode
 	#define DA_W 1                                 // Set Linerzation
     //#define DB_X 1                                 // Flip
@@ -34447,9 +34448,11 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	//#define AFD 1                                  // Alternate Frame Detection - May be phased out
 	//#define DG_W -0.125                            // Shift Boundary Out of screen 0.5 and or In screen -0.5
 	//#define EGB 1                                  //Edge Guard weakens the edge detection like the orginal vision back when the feature was added
-    #define OIL 3                                  //Set How many Levels
-    #define OIF float4(0.5,0.375,0.250,0.125)      //Fix enables if Value is > 0.0
-	#define DI_W float4(0.5,1.0,2.0,5.0)
+    #define OIL 4                                  //Set How many Levels
+    #define OIF float4(0.625,0.5,0.375,0.25)       //Fix enables if Value is > 0.0
+	#define DI_W float4(0.25,0.5,1.0,2.0)
+	#define DKK_W float2(0.125,5.0)
+	
     //#define CWH 2                                  //ZPD Weapon Hand Consideration For Masking  0 is Off | 1 Is Full | 2 Half Right screen Mask And Not to be used with Weapon Profiles.
     //#define WBA 2.5                                //ZPD Weapon Boundary Alt Adjust power for CWH 
 	//#define FTM 4                                  // Fast Trigger Mode If this enabled then Level 1 and > switches instantly.
@@ -34550,9 +34553,10 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	//#define AFD 1                      // Alternate Frame Detection - May be phased out
 	#define DG_W 0.250                   // Shift Boundary Out of screen 0.5 and or In screen -0.5
 	#define EGB 1                        //Edge Guard weakens the edge detection back in the 3.0 erra
-	//#define OIL 1                      // Set How many Levels We use for RE_Fix 0 | 1 | 2 | 3 if 1 then it's float2(0,0) for OIF and DI_W
+	//#define OIL 1                      // Set Levels used for RE_Fix 0 | 1 | 2 | 3 if One then it's float2(0,0) and Three it's float4(0,0,0,0) for OIF & DI_W; If it's 4 Use DKK_W and set float2(0,0) X for Limit and Y for Cutoff. 
     //#define OIF float2(0.5,0.375)      // Fix enables if Value is > 0.0 
 	//#define DI_W float2(0.5,1.0)       // Like Shift Boundary DG_W But 0 to inf
+	//#define DKK_W float2(0.5,1.0)      // Last OIL 4 Boundary & Cutoff
     #define CWH 0                        //ZPD Weapon Hand Consideration For Masking  0 is Off | 1 Is Full | 2 Half Right screen Mask And Not to be used with Weapon Profiles.
     #define WBA 1.0                      //ZPD Weapon Boundary Alt Adjust power for CWH 
 	#define FTM 0                        // Fast Trigger Mode If this enabled then Level 1 and > switches instantly.
@@ -35343,7 +35347,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DJJ_W UI_E_Stencil_Adjust_D
 #endif
 
-// X = [SDT Position A & B] Y = [SDT Position C] Z = [SDT ABCW Menu Tresholds] W = [Null W]
+// X = [SDT Position A & B] Y = [SDT Position C] Z = [SDT ABCW Menu Tresholds] W = [Last OIF Check Depth Limit Boundary & Cutoff]
 #ifndef DKK_X
     #define DKK_X Lock_SDT_Pos_XY_XY_A_B_D
 #endif
@@ -35354,7 +35358,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
     #define DKK_Z Lock_SDT_Menu_Tresh_n_WC_D
 #endif 
 #ifndef DKK_W
-	#define DKK_W D_Null_W
+	#define DKK_W OIF_Check_Depth_Limit_Boundary_n_Cutoff_D
 #endif
 
 // X = [Position A & B] Y = [Position C & UI Pos] Z = [ABCW Stencil Menu Tresholds] W = [Stencil Adjust]
