@@ -1728,7 +1728,7 @@ uniform int Extra_Information <
 				float OIL_Switch[2] = {ZPD_Boundary_n_Cutoff_A.x,OIF.y};	
 			#elif ( OIL == 2 )
 				float OIL_Switch[3] = {ZPD_Boundary_n_Cutoff_A.x,OIF.y,OIF.z};	
-			#elif ( OIL == 3 )
+			#elif ( OIL >= 3 )
 				float OIL_Switch[4] = {ZPD_Boundary_n_Cutoff_A.x,OIF.y,OIF.z,OIF.w};	
 			#else
 				float OIL_Switch[1] = {ZPD_Boundary_n_Cutoff_A.x};	
@@ -1754,7 +1754,7 @@ uniform int Extra_Information <
 				float OIL_Switch[4] = {ZPD_Boundary_n_Cutoff_A.x,OIF.y,0,0};	
 			#elif ( OIL == 2 )
 				float OIL_Switch[4] = {ZPD_Boundary_n_Cutoff_A.x,OIF.y,OIF.z,0};	
-			#elif ( OIL == 3 )
+			#elif ( OIL >= 3 )
 				float OIL_Switch[4] = {ZPD_Boundary_n_Cutoff_A.x,OIF.y,OIF.z,OIF.w};	
 			#else
 				float OIL_Switch[4] = {ZPD_Boundary_n_Cutoff_A.x,0,0,0};	
