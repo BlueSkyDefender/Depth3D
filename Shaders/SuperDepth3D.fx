@@ -3683,7 +3683,7 @@ uniform int Extra_Information <
 				D = AutoDepthRange(D,texcoord);
 			// Used to scale for Auto Balance here 0 means we are looking close at something.
 			if(ZPD_Balance >= 0)
-				ZP = saturate( ZPD_Balance * OS_Value);// * MD_WHD.x);
+				ZP = saturate( ZPD_Balance * (OS_Value * 0.5));// * MD_WHD.x);
 			else
 				ZP = saturate( ZPD_Balance * (OS_Value * OS_Value));
 				
