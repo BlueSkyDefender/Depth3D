@@ -1,7 +1,7 @@
 	////----------------//
 	///**SuperDepth3D**///
 	//----------------////
-	#define SD3D "SuperDepth3D v4.5.0\n"
+	#define SD3D "SuperDepth3D v4.5.1\n"
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//* Depth Map Based 3D post-process shader
 	//* For Reshade 3.0+
@@ -520,7 +520,7 @@ uniform int SuperDepth3D <
 	
 	uniform float ZPD_Balance <
 		ui_type = "drag";
-		ui_min = -1.0; ui_max = 1.0;
+		ui_min = 0.0; ui_max = 1.0;
 		ui_label = " ZPD Balance";
 		ui_tooltip = "This balances between ZPD Depth and Scene Depth.\n" //***
 					 "Changes the prioritization of the 3D effect.\n"
@@ -3683,9 +3683,7 @@ uniform int Extra_Information <
 				D = AutoDepthRange(D,texcoord);
 			// Used to scale for Auto Balance here 0 means we are looking close at something.
 			if(ZPD_Balance >= 0)
-				ZP = saturate( ZPD_Balance * (OS_Value * 0.5));// * MD_WHD.x);
-			else
-				ZP = saturate( ZPD_Balance * (OS_Value * OS_Value));
+				ZP = saturate( abs(ZPD_Balance) * (OS_Value * OS_Value));// * MD_WHD.x);
 				
 			float4 Set_Adjustments = RE_Set_Adjustments();float2 SC_Adjutment = DT_W;
 			float DOoR_A = smoothstep(0,1,tex2D(SamplerAvrP_N,float2(0, 0.1875)).z), //ZPD_Boundary    0
