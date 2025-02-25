@@ -1,7 +1,7 @@
 	////----------------//
 	///**SuperDepth3D**///
 	//----------------////
-	#define SD3D "SuperDepth3D v4.5.1\n"
+	#define SD3D "SuperDepth3D v4.5.2\n"
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//* Depth Map Based 3D post-process shader
 	//* For Reshade 3.0+
@@ -3300,7 +3300,12 @@ uniform int Extra_Information <
 			SO_Switch = 0.625;
 			
 		}
-		
+
+		if(CWH == 10)
+		{
+			ST_Switch = 0.2;
+		}
+
 		// Conditions for Shape_One
 		bool Shape_One_C1 = (Shape_TC.x / Shape_TC.y * SO_Switch) > 1;
 		bool Shape_One_C2 = (((1 - Shape_TC.x) / Shape_TC.y) * FO_Switch ) > 1;
@@ -3326,9 +3331,9 @@ uniform int Extra_Information <
 		if(CWH == 2 || CWH == 4 && CWH != 5)
 		Shape_Out = Shape_TC.x < 0.5 ? 1 : Shape_Out;
 		
-		if(CWH == 7)
+		if(CWH == 7 || CWH == 9 || CWH == 10)
 			Shape_Out = Shape_TC.x < 0.125 || Shape_TC.x > 0.875 || Shape_TC.y < 0.7 ? 1 : Shape_Out;
-			
+		
 		return Shape_Out;
 	}			
 
