@@ -2812,7 +2812,9 @@ uniform int Extra_Information <
 	float3 regamma(float3 c) { return float3(pow(abs(c.r),1.0/2.2), pow(abs(c.g),1.0/2.2), pow(abs(c.b),1.0/2.2));} 
 
 	float4 MouseCursor(float2 texcoord , float2 pos, int Switch,int UI_Mode )
-	{   float4 Out = UI_Mode ? tex2D(BackBuffer_SD,texcoord) : CSB(texcoord),Color, Exp_Darks, Exp_Brights;
+	{ 
+			//DX9 fails if I don't use tex2Dlod here
+			float4 Out = UI_Mode ? tex2Dlod(BackBuffer_SD,float4(texcoord,0,0)) : CSB(texcoord),Color, Exp_Darks, Exp_Brights;
 			float Cursor;
 			if(Cursor_Type > 0 && Switch)
 			{
@@ -3418,8 +3420,8 @@ uniform int Extra_Information <
 					// CDArrayZPD[i] reads across prepDepth.......
 					CD = 1 - ZPD_I / PDepth;
 					
-					if( ZPD_Screen_Edge_Avoidance )
-						CD *= tex2D(SamplerInfo,GridXY).z;
+					if( ZPD_Screen_Edge_Avoidance ) //DX9 also gets mad here if I don't use tex2Dlod here.
+						CD *= tex2Dlod(SamplerInfo,float4(GridXY,0,0)).z;
 	
 					if ( CD < -ZPD_Scaler_One_Boundary )
 						Detect = 1;
@@ -3529,7 +3531,7 @@ uniform int Extra_Information <
 		//Auto Scale
 		if(WZPD_and_WND.z > 0)
 			Auto_Scale = lerp(lerp(1.0,0.1,saturate(WZPD_and_WND.z * 2)),1.0,lerp(saturate(Auto_Scaler() * 2.5) , smoothstep(0,0.5,tex2D(SamplerAvrP_N,float2(0,0.5625)).z), 0.5));
-
+		
 		//Fade Storage
 		#if DX9_Toggle
 		float3x3 Fade_Pass = Fade(texcoord); //[0][0] = F | [0][1] = F | [0][2] = F
@@ -5976,7 +5978,8 @@ uniform int Extra_Information <
 			PixelShader = DepthMap;
 			RenderTarget0 = texDMN;
 			RenderTarget1 = texCN;
-		}	
+		}
+	
 			pass Modzbuffer
 		{
 			VertexShader = PostProcessVS;
