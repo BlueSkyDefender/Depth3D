@@ -1,7 +1,7 @@
 	////----------------//
 	///**SuperDepth3D**///
 	//----------------////
-	#define SD3D "SuperDepth3D v4.5.2\n"
+	#define SD3D "SuperDepth3D v4.5.3\n"
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//* Depth Map Based 3D post-process shader
 	//* For Reshade 3.0+
@@ -855,7 +855,7 @@ uniform int SuperDepth3D <
 	#if !DX9_Toggle 
 	uniform int Auto_Scaler_Adjust <
 		ui_type = "combo";
-			ui_items = "Off\0Normal\0Side\0";
+			ui_items = "Off\0Normal\0Side\0Bottom\0";
 		ui_label = " Auto Scaler";
 		ui_tooltip = "Shift the depth map if a slight misalignment is detected.";
 		ui_category = "Scaling Corrections";
@@ -2771,6 +2771,7 @@ uniform int Extra_Information <
 			  EdgeMask = saturate((BaseVal-Dist) / (BaseVal-Adjust_Value)),
 			  Set_Weapon_Scale_Near = -min(0.5,Weapon_Depth_Edge.y);//So it don't hang the game. 
 		float Scale_Depth = 1+(Weapon_Depth_Edge.z*4);
+			  //Scale_Depth *= smoothstep(0.5,0,Depth);
 			  Mod_Depth = (Mod_Depth - Set_Weapon_Scale_Near) / (1.0 + Set_Weapon_Scale_Near);
 		float Near_Mod_Depth =  Scale_Depth * Mod_Depth;
 	    return lerp(Depth, lerp(Mod_Depth,Near_Mod_Depth + Weapon_Depth_Edge.w,saturate((1-Depth)*0.125)), EdgeMask );   
@@ -4105,6 +4106,15 @@ uniform int Extra_Information <
 	{
 		return min(0.25,Separation_Adjust);
 	}
+	//Will want to intergrate this later	
+	#define Smooth_Tune 0.75
+	#define HQ_Boost 8
+	float Smooth_Tune_Boost() 
+	{
+	    float HQ_Scale = 0.1 * (HQ_Boost / 8.0);
+	    return saturate(Smooth_Tune + HQ_Scale) * 0.75 + 0.25;
+	}
+	
 	static const float  VMW_Array[10] = { 0.0, 1.0, 2.0, 3.0 , 3.5 , 4.0, 4.5 , 5.0, 5.5, 6.0 };	
 	float GetDB(float2 texcoord)
 	{
@@ -4239,16 +4249,17 @@ uniform int Extra_Information <
 		float Separation = lerp(1.0,5.0,Depth_Seperation()); 	
 		#endif
 			//Separation = lerp(0.2,0,saturate(GetDepth * 1000)) + Separation;
-		return Separation * DepthBuffer_LP.x;
+		return Separation * DepthBuffer_LP.x;// * Smooth_Tune_Boost();
 	}
 	
-	int2 Shift_Depth()
+	int3 Shift_Depth()
 	{
 		float If_Has_Depth = tex2Dlod(SamplerAvrB_N,float4(float2(0.5,0.5),0,12)).y < 1;
 	
 		float Check_Depth_Pos_Bot_A = PrepDepth(float2(0.25,0.999))[0][0];
 		float Check_Depth_Pos_Bot_B = PrepDepth(float2(0.75,0.999))[0][0];
-
+		float Check_Depth_Pos_Bot_C = PrepDepth(float2(0.50,0.999))[0][0];
+		
 		float Check_Depth_Pos_Corner = PrepDepth(float2(0.999,0.999))[0][0];
 	
 		float Check_Depth_Pos_Side_A = PrepDepth(float2(0.999,0.5))[0][0];//It was 1.0 , 0.5
@@ -4256,8 +4267,9 @@ uniform int Extra_Information <
 		
 		int Check_Depth_Shift_A = Check_Depth_Pos_Bot_A * Check_Depth_Pos_Bot_B * Check_Depth_Pos_Side_A * Check_Depth_Pos_Corner;
 		int Check_Depth_Shift_B = Check_Depth_Pos_Side_B * Check_Depth_Pos_Side_A * Check_Depth_Pos_Corner;
+		int Check_Depth_Shift_C = Check_Depth_Pos_Bot_A * Check_Depth_Pos_Bot_B * Check_Depth_Pos_Bot_C  * Check_Depth_Pos_Corner;
 		
-		return int2(Check_Depth_Shift_A == 1, Check_Depth_Shift_B == 1) && If_Has_Depth;	    
+		return int3(Check_Depth_Shift_A == 1, Check_Depth_Shift_B == 1, Check_Depth_Shift_C == 1 ) && If_Has_Depth;	    
 	}	
 	
 	void Mix_Z(in float4 position : SV_Position, in float2 texcoord : TEXCOORD, out float MixOut : SV_Target0)
@@ -4291,13 +4303,17 @@ uniform int Extra_Information <
 			#if DB_Size_Position || SPF || LBC || LB_Correction
 			if(Shift_Depth().x && Auto_Scaler_Adjust && !LBDetection())
 				Shift_TC /= 1 + Depth_Size;
-			else if(Shift_Depth().y && Auto_Scaler_Adjust > 1 && !LBDetection())
+			else if(Shift_Depth().y && Auto_Scaler_Adjust == 2 && !LBDetection())
 				Shift_TC.x /= 1 + Depth_Size.x * 3.25;
+			else if(Shift_Depth().z && Auto_Scaler_Adjust == 3 && !LBDetection())
+				Shift_TC.x /= 1 + Depth_Size * 3.25;				
 			#else
 			if(Shift_Depth().x && Auto_Scaler_Adjust)
 				Shift_TC /= 1 + Depth_Size;
-			else if(Shift_Depth().y && Auto_Scaler_Adjust > 1)
+			else if(Shift_Depth().y && Auto_Scaler_Adjust == 2)
 				Shift_TC.x /= 1 + Depth_Size.x * 3.25;
+			else if(Shift_Depth().z && Auto_Scaler_Adjust == 3)
+				Shift_TC /= 1 + Depth_Size * 2.25;			
 			#endif
 		#endif		
 		MixOut = GetDB( Shift_TC );
@@ -5375,6 +5391,7 @@ uniform int Extra_Information <
 		    Color = Color;
 		    #endif
 		    //Color = OverShoot_Fade();
+		    //Color = Shift_Depth().z;
 			return Color.rgba;
 		}
 	#endif	
