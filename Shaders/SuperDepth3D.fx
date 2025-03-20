@@ -1,7 +1,7 @@
 	////----------------//
 	///**SuperDepth3D**///
 	//----------------////
-	#define SD3D "SuperDepth3D v4.5.3\n"
+	#define SD3D "SuperDepth3D v4.5.4\n"
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//* Depth Map Based 3D post-process shader
 	//* For Reshade 3.0+
@@ -48,7 +48,7 @@ namespace SuperDepth3D
 	#if exists "Overwatch.fxh"                                           //Overwatch Interceptor//
 		#include "Overwatch.fxh"
 		#define OSW 0
-	#else// DA_X = [ZPD] DA_Y = [Depth Adjust] DA_Z = [Offset] DA_W = [Depth Linearization]
+	#else// DA_X = [ZPD] DA_Y = [Depth Adjust] DA_Z = [Offset X] DA_W = [Depth Linearization]
 		static const float DA_X = 0.025, DA_Y = 7.5, DA_Z = 0.0, DA_W = 0.0;
 		// DC_X = [Depth Flip] DC_Y = [De-Artifact Scale] DC_Z = [Auto Depth] DC_W = [Weapon Hand]
 		static const float DB_X = 0, DB_Y = 0, DB_Z = 0.1, DB_W = 0.0;
@@ -116,7 +116,7 @@ namespace SuperDepth3D
 		static const float DGG_X = 0.0, DGG_Y = 0.0, DGG_Z = 1000.0, DGG_W = 0.0;
 		// DHH_X = [Position A & B] DHH_Y = [Position C] DHH_Z = [ABCD Menu Tresholds] DHH_W = [Smart Convergence]
 		static const float DHH_X = 0.0, DHH_Y = 0.0, DHH_Z = 1000.0, DHH_W = 0.0;	
-		// DII_X = [Position A & B] DII_Y = [Position C] DII_Z = [ABCD Menu Tresholds] DII_W = [Null]
+		// DII_X = [Position A & B] DII_Y = [Position C] DII_Z = [ABCD Menu Tresholds] DII_W = [Offset Y]
 		static const float DII_X = 0.0, DII_Y = 0.0, DII_Z = 1000.0, DII_W = 0.0;
 		// DJJ_X = [Position A & B] DJJ_Y = [Position C & UI Pos] DJJ_Z = [ABCW Stencil Menu Tresholds] DJJ_W = [Stencil Adjust]
 		static const float DJJ_X = 0.0, DJJ_Y = 0.0, DJJ_Z = 1000.0, DJJ_W = 0.0;
@@ -131,6 +131,7 @@ namespace SuperDepth3D
 		// WSM = [Weapon Setting Mode]
 		#define OW_WP "WP Off\0Custom WP\0"
 		static const int WSM = 0, TSC = 0;
+		static const int2 DOL = 0;
 		//Triggers 
 		static const float HNR = 0, THF = 0, EGB = 0,PLS = 0, MGA = 0, WZD = 0, KHM = 0, DAO = 0, LDT = 0, ALM = 0, SSF = 0, SNF = 0, SSE = 0, SNE = 0, EDU = 0, LBI = 0,ISD = 0, ASA = 1, IWS = 0, SUI = 0, SSA = 0, SNA = 0, SSB = 0, SNB = 0,SSC = 0, SNC = 0,SSD = 0, SND = 0, LHA = 0, WBS = 0, TMD = 0, FRM = 0, AWZ = 0, CWH = 0, WBA = 0, WFB = 0, WND = 0, WRP = 0, MML = 0, SMD = 0, WHM = 0, SDU = 0, ABE = 2, LBE = 0, HQT = 0, HMD = 0.5, MAC = 0, OIL = 0, MMS = 0, FTM = 0, FMM = 0, SPO = 0, MMD = 0, LBR = 0, AFD = 0, MDD = 0, FPS = 1, SMS = 1, OIF = 0, NCW = 0, RHW = 0, NPW = 0, SPF = 0, BDF = 0, HMT = 0, HMC = 0, DFW = 0, NFM = 0, DSW = 0, LBC = 0, LBS = 0, LBM = 0, DAA = 0, NDW = 0, PEW = 0, WPW = 0, FOV = 0, EDW = 0, SDT = 0;
 		//Overwatch.fxh State
@@ -194,7 +195,10 @@ namespace SuperDepth3D
 	// The game part needs to be transparent and the UI part needs to be black.
 	
 	// The Key Code for the mouse is 0-4 key 1 is right mouse button.
-	#define Cursor_Lock_Key 4 // Set default on mouse 4
+	#define Mouse_Key_Four 4 //Forward Mouse Button
+	#define Mouse_Key_Three 3 //Back Mouse Button
+	#define Mouse_Key_Two 2 //Middle Mouse Button
+ 
 	#define Fade_Key 1 // Set default on mouse 1
 	#define Fade_Time_Adjust 0.5625 // From 0 to 1 is the Fade Time adjust for this mode. Default is 0.5625;
 	
@@ -503,7 +507,19 @@ uniform int SuperDepth3D <
 					  "Default is 0.0 and Max is 0.25.";
 		ui_category = "Divergence & Separation";
 	> = DF_Y;
-
+	#if Virtual_Reality_Mode
+		#if !Super3D_Mode
+		uniform int IPD <
+			ui_type = "drag";
+			ui_min = 0; ui_max = 100;
+			ui_label = " IPD";
+			ui_tooltip = "Interpupillary Distance Determines the distance between your eyes.\n"
+						 "Not Needed if you use VR software that calculate this.\n"
+						 "Default is 0.";
+			ui_category = "Divergence & Separation";
+		> = 0;
+		#endif
+	#endif
 		uniform float Zero_Parallax_Distance <
 		ui_type = "slider";
 		ui_min = 0.0; ui_max = 0.250;
@@ -884,7 +900,7 @@ uniform int SuperDepth3D <
 		ui_category = "Depth Map";
 	> = DA_Y;
 	
-	uniform float Offset <
+	uniform float2 Offset <
 		ui_type = "drag";
 		ui_min = -1.0; ui_max = 1.0;
 		ui_label = " Linear Offset";
@@ -892,7 +908,7 @@ uniform int SuperDepth3D <
 					 "It's rare if you need to use this in any game.\n"
 					 "Default and starts at Zero and it's Off.";
 		ui_category = "Depth Map";
-	> = DA_Z;
+	> = float2(DA_Z,DII_W);
 	
 	uniform float Auto_Depth_Adjust <
 		ui_type = "drag";
@@ -1099,8 +1115,16 @@ uniform int SuperDepth3D <
 	static const float2 Interlace_Anaglyph_Calibrate = 0.5;
 	static const float2 Anaglyph_Eye_Contrast = 0.0;
 	static const int Scaling_Support = 0;
-	static const int Perspective = 0;
-	
+	uniform int Perspective <
+		ui_type = "slider";
+		ui_min = -100; ui_max = 100;
+		ui_label = " Perspective Slider";
+		ui_tooltip = "Determines the perspective point of the two images this shader produces.\n" // ipd = Interpupillary distance 
+					 "For an HMD, use Polynomial Barrel Distortion shader to adjust for IPD or use SuperDepth3D_VR+.fx.\n"
+					 "Do not use this perspective adjustment slider to adjust for IPD.\n"
+					 "Default is Zero.";
+		ui_category = "Stereoscopic Options";
+	> = 0;	
 	static const int Inficolor_Near_Reduction = 0;
 	static const float Focus_Inficolor = 0.5;
 	static const float Inficolor_Max_Depth = 1.0;
@@ -1237,17 +1261,21 @@ uniform int SuperDepth3D <
 	
 		#else
 		static const int Inficolor_Near_Reduction = 0;
-		
-		uniform int Perspective <
-			ui_type = "slider";
-			ui_min = -100; ui_max = 100;
-			ui_label = " Perspective Slider";
-			ui_tooltip = "Determines the perspective point of the two images this shader produces.\n" // ipd = Interpupillary distance 
-						 "For an HMD, use Polynomial Barrel Distortion shader to adjust for IPD or use SuperDepth3D_VR+.fx.\n"
-						 "Do not use this perspective adjustment slider to adjust for IPD.\n"
-						 "Default is Zero.";
-			ui_category = "Stereoscopic Options";
-		> = 0;
+			#if !Virtual_Reality_Mode && !Super3D_Mode
+			uniform int Perspective <
+				ui_type = "slider";
+				ui_min = -100; ui_max = 100;
+				ui_label = " Perspective Slider";
+				ui_tooltip = "Determines the perspective point of the two images this shader produces.\n" // ipd = Interpupillary distance 
+							 "For an HMD, use Polynomial Barrel Distortion shader to adjust for IPD or use SuperDepth3D_VR+.fx.\n"
+							 "Do not use this perspective adjustment slider to adjust for IPD.\n"
+							 "Default is Zero.";
+				ui_category = "Stereoscopic Options";
+			> = 0;
+			#else
+			static const int Perspective = 0;
+			#endif
+			
 		#endif
 		
 		#if EX_DLP_FS_Mode
@@ -1357,18 +1385,36 @@ uniform int SuperDepth3D <
 								 "Defaults are ( X 1, Y 0, Z 0).";
 		ui_category = "Cursor Adjustments";
 	> = int3(1,0,0);
+
+	uniform int Cursor_Lock_Button_Selection <
+		ui_type = "combo";
+		ui_items = "Default\0Mouse 2\0Mouse 3\0Mouse 4\0";
+		ui_label = "Cursor Lock Button Selection";
+		ui_tooltip = "Choose what mouse button to.\n"
+								 "Default is Mouse 4.";
+		ui_category = "Cursor Adjustments";
+	> = 0;
+
+	uniform int Cursor_Toggle_Button_Selection <
+		ui_type = "combo";
+		ui_items = "Default\0Mouse 2\0Mouse 3\0Mouse 4\0";
+		ui_label = "Cursor Toggle Button Selection";
+		ui_tooltip = "Choose what mouse button to.\n"
+								 "Default is Mouse 4.";
+		ui_category = "Cursor Adjustments";
+	> = 0;
 	
 	uniform bool Cursor_Lock <
 		ui_label = " Cursor Lock";
 		ui_tooltip = "Screen Cursor to Screen Crosshair Lock.";
 		ui_category = "Cursor Adjustments";
-	> = false;
+	> = false;	
 	
 	uniform bool Toggle_Cursor <
 		ui_label = " Cursor Toggle";
 		ui_tooltip = "Turns Screen Cursor Off and On without cycling, once set to the option above.";
 		ui_category = "Cursor Adjustments";
-	> = true;
+	> = false;
 	
 	#if BD_Correction
 	uniform int BD_Options <
@@ -1597,7 +1643,7 @@ uniform int Extra_Information <
 				"It's located in the lower bottom right of the ReShade's Main Menu.\n"
 				"\n"
 				"Preprocessors:\n"
-				"Color Correcting  | Is the process of restoring the original colors in the scenes.\n"
+				//"Color Correcting  | Is the process of restoring the original colors in the scenes.\n"
 				"Deband            | Is used to correct for banding issues in the image.\n"
 				"HDR compatibility | Allows for HDR support in the shader when HDR is available.\n"
 				"Inficolor 3D      | Modify the shader to accommodate Inficolor glasses for 3D content.\n"
@@ -1605,7 +1651,7 @@ uniform int Extra_Information <
 				"\n"
 				"Active Keys:\n"
 				"Menu Key          | Is used to toggle on-screen information you see at startup.\n"
-				"Mouse Button 4    | Is used to unlock and lock the on screen cursor.\n"
+				"Mouse Button 4    | Is used to unlock and lock the on screen cursor at default.\n"
 				"_______________________________________________________________________________\n"
 			    "Try reading the Read Help doc or Join our Discord https://discord.gg/KrEnCAxkwJ";
 	ui_category = "Depth3D Guidelines";
@@ -1618,7 +1664,11 @@ uniform int Extra_Information <
 	uniform bool Cancel_Depth < source = "key"; keycode = Cancel_Depth_Key; toggle = true; mode = "toggle";>;
 	uniform bool Mask_Cycle < source = "key"; keycode = Mask_Cycle_Key; toggle = true; mode = "toggle";>;
 	uniform bool Text_Info < source = "key"; keycode = Text_Info_Key; toggle = true; mode = "toggle";>;
-	uniform bool CLK < source = "mousebutton"; keycode = Cursor_Lock_Key; toggle = true; mode = "toggle";>;
+
+	uniform bool CLK_04 < source = "mousebutton"; keycode = Mouse_Key_Four; toggle = true; mode = "toggle";>;
+	uniform bool CLK_03 < source = "mousebutton"; keycode = Mouse_Key_Three; toggle = true; mode = "toggle";>;
+	uniform bool CLK_02 < source = "mousebutton"; keycode = Mouse_Key_Two; toggle = true; mode = "toggle";>;
+
 	uniform bool Trigger_Fade_A < source = "mousebutton"; keycode = Fade_Key; toggle = true; mode = "toggle";>;
 	uniform bool Trigger_Fade_B < source = "mousebutton"; keycode = Fade_Key;>;
 	uniform bool Menu_Open < source = "overlay_open"; >;
@@ -1825,14 +1875,17 @@ uniform int Extra_Information <
 
 		float I_3D_E = (Min_Divergence().x * lerp(1.0,2.0,Focus_Inficolor)); //This is to fix strange offset issue don't know why it need to be offset by one pixel to work.???
 			  I_3D_E += (Re_Scale_WN().x*(Scale_Value_Cal * 2))*D_Scale;
-	    	 
-  
-		float Perspective_Out = Perspective, Push_Depth = (Re_Scale_WN().x*Scale_Value_Cal)*D_Scale;
+		#if Virtual_Reality_Mode && !Super3D_Mode
+		float Pers = IPD;
+		#else	    	 
+  	  float Pers = Perspective;
+  	  #endif  	  
+		float Perspective_Out = Pers, Push_Depth = (Re_Scale_WN().x*Scale_Value_Cal)*D_Scale;
 
 		if( Inficolor_3D_Emulator) 
 			Perspective_Out = Eye_Swap ? I_3D_E : -I_3D_E;
 		else
-			Perspective_Out = Eye_Swap ? Perspective + Push_Depth : Perspective - Push_Depth;
+			Perspective_Out = Eye_Swap ? Pers + Push_Depth : Pers - Push_Depth;
 			
 		return Perspective_Out;	
 	}
@@ -2821,22 +2874,38 @@ uniform int Extra_Information <
 			{
 				float CCScale = lerp(0.005,0.025,Scale(Cursor_SC.x,10,0));//scaling
 				float2 MousecoordsXY = texcoord - (Mousecoords * pix), Scale_Cursor = float2(CCScale,CCScale* ARatio );
-	
-				if (Cursor_Lock && !CLK)
+
+				bool CLK_L = CLK_04;
+				if(Cursor_Lock_Button_Selection == 1)
+					CLK_L = CLK_02;
+				if(Cursor_Lock_Button_Selection == 2)
+					CLK_L = CLK_03;					
+				if(Cursor_Lock_Button_Selection == 3)
+					CLK_L = CLK_04;	
+			
+				if (Cursor_Lock && !CLK_L)
 				MousecoordsXY = texcoord - float2(0.5,lerp(0.5,0.5725,Scale(Cursor_SC.z,10,0) ));
-	
-				if(Toggle_Cursor)
+
+				bool CLK_T = Toggle_Cursor;
+				if(Cursor_Toggle_Button_Selection == 1)
+					CLK_T = CLK_02;
+				if(Cursor_Toggle_Button_Selection == 2)
+					CLK_T = CLK_03;					
+				if(Cursor_Toggle_Button_Selection == 3)
+					CLK_T = CLK_04;
+					
+				if(!CLK_T)
 				{
-				if(Cursor_Type == 1)
-					Cursor = smoothstep( 0.0, 2 / pix.y, CCRetical( MousecoordsXY.xy, Scale_Cursor  * 0.75 ) ) ;
-				else if (Cursor_Type == 2)
-					Cursor = smoothstep( 0.0, 2 / pix.y, -CCCBox( MousecoordsXY.xy, CCScale * 0.375 ) ) ;
-				else if (Cursor_Type == 3)
-					Cursor = smoothstep( 0.0, 2 / pix.y, -CCBox( MousecoordsXY.xy, CCScale * 0.25 ) ) ;	
-				else if (Cursor_Type == 4)
-					Cursor = smoothstep( 0.0, 2 / pix.y, -CCCross( MousecoordsXY.xy, Scale_Cursor  * 0.75  ) ) ;			
-				else if (Cursor_Type == 5)
-					Cursor = smoothstep( 0.0, 2 / pix.y, -CCCursor( MousecoordsXY.xy, Scale_Cursor  * 0.5  ) ) ;
+					if(Cursor_Type == 1)
+						Cursor = smoothstep( 0.0, 2 / pix.y, CCRetical( MousecoordsXY.xy, Scale_Cursor  * 0.75 ) ) ;
+					else if (Cursor_Type == 2)
+						Cursor = smoothstep( 0.0, 2 / pix.y, -CCCBox( MousecoordsXY.xy, CCScale * 0.375 ) ) ;
+					else if (Cursor_Type == 3)
+						Cursor = smoothstep( 0.0, 2 / pix.y, -CCBox( MousecoordsXY.xy, CCScale * 0.25 ) ) ;	
+					else if (Cursor_Type == 4)
+						Cursor = smoothstep( 0.0, 2 / pix.y, -CCCross( MousecoordsXY.xy, Scale_Cursor  * 0.75  ) ) ;			
+					else if (Cursor_Type == 5)
+						Cursor = smoothstep( 0.0, 2 / pix.y, -CCCursor( MousecoordsXY.xy, Scale_Cursor  * 0.5  ) ) ;
 				}
 	
 				// Cursor Color Array //
@@ -2916,7 +2985,7 @@ uniform int Extra_Information <
  	   float2 scaleFactor_XY = Current_Size.xy / Starting_Size.xy;
 	    return scaleFactor_XY;
 	}
-
+	
 	float Depth(float2 texcoord)
 	{   //May have to move this around. But, it seems good in it's current location.
 		#if !Compatibility_01	
@@ -2944,13 +3013,28 @@ uniform int Extra_Information <
 		
 		float2 Two_Ch_zBuffer, Store_zBuffer = float2( zBuffer, 1.0 - zBuffer );
 		float4 C = float4( Far / Near_A, 1.0 - Far / Near_A, Far / Near_B, 1.0 - Far / Near_B);
-		float2 Z = Offset < 0 ? min( 1.0, zBuffer * ( 1.0 + abs(Offset) ) ) : Store_zBuffer;
+
+	    
+	    float InputSwitch = tex2D(SamplerAvrP_N,float2(1, 0.8125)).z; //tex2D(SamplerzBuffer_BlurN,float2(0,0.9375)).x
+	    if(DOL.x > 0)
+			InputSwitch = int(InputSwitch * 5 ) >= DOL.y;		
+		else
+			InputSwitch = 1;
+		
+		float2 O = InputSwitch ? Offset : 0.0;
+		float2 Z = O.x < 0 ? 
+								min( 1.0, zBuffer * ( 1.0 + abs(O.x) ) ) : 
+																			  Store_zBuffer;
 		//May add this later need to check emulators.
 		//if (Range_Boost == 2)
 		//	Store_zBuffer = Z;
-			
-		if(Offset > 0 || Offset < 0)
-			Z = Offset < 0 ? float2( Z.x, 1.0 - Z.y ) : min( 1.0, float2( Z.x * (1.0 + Offset) , Z.y / (1.0 - Offset) ) );
+	
+		if(O.x != 0)
+			Z = O.x < 0 ? float2( Z.x, 1.0 - Z.y ) 
+													  : 
+													    min( 1.0, float2( Z.x * (1.0 + O.x) , Z.y / (1.0 - O.x) ) );
+		if(O.y != 0)
+			Z = pow(Z,1+O.y);
 		
 		float2 C_Switch = Range_Boost >= 2 ? C.zw : C.xy;
 			
@@ -2959,7 +3043,7 @@ uniform int Extra_Information <
 		else if (Depth_Map == 1) //DM1 Reverse
 			Two_Ch_zBuffer = rcp(float2(Z.y,Store_zBuffer.y) * float2(C_Switch.y,C.y) + float2(C_Switch.x,C.x));//MAD - RCP
 		
-		if(Range_Boost)
+		if(Range_Boost)//Offset Based
 			zBuffer = lerp(Two_Ch_zBuffer.y,Two_Ch_zBuffer.x,saturate(Two_Ch_zBuffer.y));
 		else
 			zBuffer = Two_Ch_zBuffer.x;
@@ -3397,6 +3481,8 @@ uniform int Extra_Information <
 						GridXY = float2( CDArray_X_C0[iX], CDArray_Y_C0[min(3,iY)]);
 					else if(ZPD_Boundary == 4)
 						GridXY = float2( CDArray_X_A0[iX], CDArray_Y_B0[iY]);
+					//Work on adding a single point detector for future issues.
+					//GridXY = float2(0.5,0.375);
 					
 					//We shift the lower half here to have a better spread.
 					if(texcoord.y > 0.6 && texcoord.y < 0.8)						
@@ -3613,12 +3699,12 @@ uniform int Extra_Information <
 			   Color.x = max(Color_A.r, max(Color_A.g, Color_A.b)); 
 		#if WHM 
 		float2 TC_Off = texcoord * float2(2,1);// - float2(1,0);
-		float2 Offset = float2(5,5)*pix;
+		float2 Offsets = float2(5,5)*pix;
 		float3 center = tex2D(Non_Point_Sampler, TC_Off).xyz;
-		float3 right = tex2D(Non_Point_Sampler, TC_Off + float2(Offset.x, 0.0)).xyz;
-		float3 left = tex2D(Non_Point_Sampler, TC_Off + float2(-Offset.x, 0.0)).xyz;
-		float3 up = tex2D(Non_Point_Sampler, TC_Off + float2(0.0, Offset.y)).xyz;
-		float3 down = tex2D(Non_Point_Sampler, TC_Off + float2(0.0, -Offset.y)).xyz;
+		float3 right = tex2D(Non_Point_Sampler, TC_Off + float2(Offsets.x, 0.0)).xyz;
+		float3 left = tex2D(Non_Point_Sampler, TC_Off + float2(-Offsets.x, 0.0)).xyz;
+		float3 up = tex2D(Non_Point_Sampler, TC_Off + float2(0.0, Offsets.y)).xyz;
+		float3 down = tex2D(Non_Point_Sampler, TC_Off + float2(0.0, -Offsets.y)).xyz;
 		
 		float3 Color_UI_MAP = -4.0 * center + right + left + up + down; //We mask it out later
 		
@@ -4839,7 +4925,7 @@ uniform int Extra_Information <
 		}
   
 		if(Stereoscopic_Mode == 0)
-			Persp *= 0.5;
+			Persp *= 0.5f;
 		//if(Stereoscopic_Mode == 5)//Need to work on this later.
 		//	Persp *= 0.25;
 		float2 TCL = texcoord, TCR = texcoord, TCL_T = texcoord, TCR_T = texcoord, TexCoords = texcoord;
@@ -5392,6 +5478,12 @@ uniform int Extra_Information <
 		    #endif
 		    //Color = OverShoot_Fade();
 		    //Color = Shift_Depth().z;
+		    
+		    //tex2D(SamplerzBuffer_BlurN,float2(0,0.9375)).x
+		    //tex2D(SamplerAvrP_N,float2(1, 0.8125)).z
+		    //float InputSwitch = tex2D(SamplerzBuffer_BlurN,float2(0,0.9375)).x;
+			//return int(InputSwitch * 5 ) >= 5;
+			
 			return Color.rgba;
 		}
 	#endif	
@@ -5945,9 +6037,9 @@ uniform int Extra_Information <
 	 hidden = true;
 	 enabled = true;
 	 #if Compatibility_00
-	 timeout = 1;
+	 timeout = 2;
 	 #else 
-	 timeout = 1000;
+	 timeout = 1250;
 	 #endif
 	 ui_tooltip = "Help Technique."; >
 	{
