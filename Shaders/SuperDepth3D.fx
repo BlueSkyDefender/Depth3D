@@ -1,7 +1,7 @@
 	////----------------//
 	///**SuperDepth3D**///
 	//----------------////
-	#define SD3D "SuperDepth3D v4.5.4\n"
+	#define SD3D "SuperDepth3D v4.5.5\n"
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//* Depth Map Based 3D post-process shader
 	//* For Reshade 3.0+
@@ -130,6 +130,8 @@ namespace SuperDepth3D
 		static const float DNN_X = 1.0, DNN_Y = 1.0, DNN_Z = 0.0, DNN_W = 1.0;
 		// WSM = [Weapon Setting Mode]
 		#define OW_WP "WP Off\0Custom WP\0"
+		#define G_Info "Missing Overwatch.fxh Information.\n"
+		#define G_Note "Note: If you pulled this file intentionally, please ignore this message.\n"
 		static const int WSM = 0, TSC = 0;
 		static const int2 DOL = 0;
 		//Triggers 
@@ -375,9 +377,10 @@ uniform int SuperDepth3D <
 				  #endif 
 			  #endif
 			  "\n"
+				G_Note
+			  "\n"
 				#if DSW
-				"Check Depth/Add-on Options: Copy Depth Clear/Frame: You should check it in the Depth/Add-ons tab above.\n"
-				"That or you may need to enable/disable Use Extended AR Heuristics or try Extended AR huristics.\n"
+				"Check Depth/Add-on Options: Copy Depth Clear/Frame: You should check it in the Depth/Add-ons tab above. Alternatively, you may need to enable/disable Use Extended AR Heuristics or try Extended AR heuristics.\n"
 				"\n"
 				#endif	
 			
@@ -394,7 +397,7 @@ uniform int SuperDepth3D <
 				#endif
 				
 				#if PEW
-				"Disable CA/MB/Dof/Grain: Commen Post effects like chromatic aberration, Motion Blur, Depth of Field, Grain, and Ect. Will/May cause issues with this shader.\n"
+				"Disable CA/MB/DoF/Grain: Common post effects like Chromatic Aberration, Motion Blur, Depth of Field, Grain, etc. They will/may cause issues with this shader.\n"
 				"\n"
 				#endif
 				
@@ -459,10 +462,12 @@ uniform int SuperDepth3D <
 				"The header file for Profiles called Overwatch.fxh is Missing.\n"
 				"\n"
 				#endif
+				G_Info
 				"__________________________________________________________________\n"
-			    "For more information and help please visit http://www.Depth3D.info";
+			    "For more information and help please visit http://www.Depth3D.info\n"
+				"Discord: https://discord.gg/KrEnCAxkwJ";
 	ui_category = "Depth3D Information";
-	ui_category_closed = true;
+	ui_category_closed = false;
 	ui_label = " ";
 	ui_type = "radio";
 	>;
@@ -486,19 +491,17 @@ uniform int SuperDepth3D <
 					  "Default is 50% and Max is 125%.";
 		ui_category = "Divergence & Separation";
 	> = 50;
-	#if TSC // Will Update this to remove this lock when
-		uniform float ZPD_OverShoot <
-			ui_type = "slider";
-			ui_min = 0.0; ui_max = 1.0;
-			ui_label =  " Smart Convergence"; 
-			ui_tooltip =  "ZPD OverShoot controls the focus distance for the screen Pop-out effect in the distance.\n"
-						  "If you see me do not adjust base ZPD (Zero Parallax Distance) below.\n"
-						  "Default for ZPD is 0.0 Off.";
-			ui_category = "Divergence & Separation";
-		> = DHH_W;
-	#else
-		static const float ZPD_OverShoot = DHH_W;
-	#endif
+	
+	uniform float ZPD_OverShoot <
+		ui_type = "slider";
+		ui_min = 0.0; ui_max = 1.0;
+		ui_label =  " Smart Convergence"; 
+		ui_tooltip =  "ZPD OverShoot controls the focus distance for the screen Pop-out effect in the distance.\n"
+					  "If you see me do not adjust base ZPD (Zero Parallax Distance) below.\n"
+					  "Default for ZPD is 0.0 Off.";
+		ui_category = "Divergence & Separation";
+	> = DHH_W;
+
 	uniform float Separation_Adjust <
 		ui_type = "drag";
 		ui_min = 0.0; ui_max = 0.125;
@@ -1600,7 +1603,7 @@ uniform int SuperDepth3D <
 	#else
 	static const float UI_Seeking_Strength = DT_Z;	
 	#endif	
-	
+/* //Slated for deletion and with a link to a Help Guide online	
 	//Extra Informaton
 uniform int Extra_Information <
 	ui_text =   "Profiles Info:\n"
@@ -1659,7 +1662,7 @@ uniform int Extra_Information <
 	ui_label = " ";
 	ui_type = "radio";
 	>;
-
+*/
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	uniform bool Cancel_Depth < source = "key"; keycode = Cancel_Depth_Key; toggle = true; mode = "toggle";>;
 	uniform bool Mask_Cycle < source = "key"; keycode = Mask_Cycle_Key; toggle = true; mode = "toggle";>;
@@ -3014,8 +3017,7 @@ uniform int Extra_Information <
 		float2 Two_Ch_zBuffer, Store_zBuffer = float2( zBuffer, 1.0 - zBuffer );
 		float4 C = float4( Far / Near_A, 1.0 - Far / Near_A, Far / Near_B, 1.0 - Far / Near_B);
 
-	    
-	    float InputSwitch = tex2D(SamplerAvrP_N,float2(1, 0.8125)).z; //tex2D(SamplerzBuffer_BlurN,float2(0,0.9375)).x
+	    float InputSwitch = tex2Dlod(SamplerAvrP_N,float4(1, 0.8125,0,0)).z; //tex2D(SamplerzBuffer_BlurN,float2(0,0.9375)).x
 	    if(DOL.x > 0)
 			InputSwitch = int(InputSwitch * 5 ) >= DOL.y;		
 		else
