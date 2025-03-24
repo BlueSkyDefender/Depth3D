@@ -1,7 +1,7 @@
 	////----------------//
 	///**SuperDepth3D**///
 	//----------------////
-	#define SD3D "SuperDepth3D v4.5.5\n"
+	#define SD3D "SuperDepth3D v4.5.6\n"
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//* Depth Map Based 3D post-process shader
 	//* For Reshade 3.0+
@@ -4882,9 +4882,17 @@ uniform int Extra_Information <
 	#endif
 	{
 		#if REST_UI_Mode
-			float Mouse_Toggle_Click = !CLK;
+			bool CLK_L = CLK_04;
+			if(Cursor_Lock_Button_Selection == 1)
+				CLK_L = CLK_02;
+			if(Cursor_Lock_Button_Selection == 2)
+				CLK_L = CLK_03;					
+			if(Cursor_Lock_Button_Selection == 3)
+				CLK_L = CLK_04;
+				
+			float Mouse_Toggle_Click = !CLK_L;
 		#else
-			float Mouse_Toggle_Click = 1;//!CLK;
+			float Mouse_Toggle_Click = 1;
 		#endif
 		float D = Eye_Swap ? -Min_Divergence().x : Min_Divergence().x;
 
@@ -6007,7 +6015,17 @@ uniform int Extra_Information <
 		if(Stereoscopic_Mode == 1)
 			TC.y = texcoord.y < 0.5 ? texcoord.y * 2.0 + hw_offset.y : texcoord.y * 2.0 - 1.0 - hw_offset.y;
 		//tex2D(BackBuffer_B,TC)
-		float4 Color = MouseCursor( TC , position.xy , CLK, 1);
+		//             MouseCursor(TC  , position.xy , Mouse_Toggle_Click, 0).rgb;
+
+		bool CLK_L = CLK_04;
+		if(Cursor_Lock_Button_Selection == 1)
+			CLK_L = CLK_02;
+		if(Cursor_Lock_Button_Selection == 2)
+			CLK_L = CLK_03;					
+		if(Cursor_Lock_Button_Selection == 3)
+			CLK_L = CLK_04;
+			
+		float4 Color = MouseCursor( TC , position.xy , CLK_L, 1);
 			   Color.w = max(Color.r, max(Color.g, Color.b));
 		return Color;
 	}
