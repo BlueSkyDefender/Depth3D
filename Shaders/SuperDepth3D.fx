@@ -1,7 +1,7 @@
 	////----------------//
 	///**SuperDepth3D**///
 	//----------------////
-	#define SD3D "SuperDepth3D v4.5.6\n"
+	#define SD3D "SuperDepth3D v4.5.7\n"
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//* Depth Map Based 3D post-process shader
 	//* For Reshade 3.0+
@@ -207,7 +207,11 @@ namespace SuperDepth3D
 	// Delay Frame for instances the depth bufferis 1 frame behind useful for games that need "Copy Depth Buffer
 	// Before Clear Operation," Is checked in the API Depth Buffer tab in ReShade.
 	#ifndef Delay_Frame_Mode
-		#define Delay_Frame_Mode 0
+		#if DFW
+			#define Delay_Frame_Mode 1
+		#else
+			#define Delay_Frame_Mode 0
+		#endif
 	#endif
 	//Change Delay_Frame_Mode to 1 to enable this option.
 	#define D_Frame Delay_Frame_Mode //This should be set to 0 most of the times this will cause latency by one frame.
@@ -443,8 +447,8 @@ uniform int SuperDepth3D <
 			
 				#if NFM
 				"Needs Mod: The Shader needs a external Mod and or Add-ons to work optimaly or to work at all.\n"
+				"\n"
 				"It can be anything such as the REFramework or something like the Generic Depth Mod for Reshade.\n"
-				"More information in the Read Help doc or Join our Discord https://discord.gg/KrEnCAxkwJ.\n"
 				"\n"
 				#endif
 		
@@ -482,15 +486,18 @@ uniform int SuperDepth3D <
 	#endif
 	//uniform float TEST < ui_type = "slider"; ui_min = 0.0; ui_max = 1.0; > = 0.00;
 	//Divergence & Convergence//
-	uniform float Divergence <
+	uniform float Depth_Adjustment < //This change was made to make it more simple for users
 		ui_type = "slider";
 		ui_min = 0.0; ui_max = 100; ui_step = 0.5;
 		ui_label =  "·Depth Adjustment·"; 
 		ui_tooltip =  "Increases differences between the left and right images and allows you to experience depth.\n"
 					  "The process of deriving binocular depth information is called stereopsis (or stereoscopic vision).\n"
-					  "Default is 50% and Max is 125%.";
+					  "Default is 50% and Max is 100%.";
 		ui_category = "Divergence & Separation";
 	> = 50;
+	//Static Values for Base Depth adjustments.
+	static const float Divergence = 100;
+	static const float Separation_Adjust = DF_Y;//Is now internal adjusted.
 	
 	uniform float ZPD_OverShoot <
 		ui_type = "slider";
@@ -502,14 +509,6 @@ uniform int SuperDepth3D <
 		ui_category = "Divergence & Separation";
 	> = DHH_W;
 
-	uniform float Separation_Adjust <
-		ui_type = "drag";
-		ui_min = 0.0; ui_max = 0.125;
-		ui_label =    " Separation";
-		ui_tooltip =  "Separation is a other way to increase the perception of Depth.\n"
-					  "Default is 0.0 and Max is 0.25.";
-		ui_category = "Divergence & Separation";
-	> = DF_Y;
 	#if Virtual_Reality_Mode
 		#if !Super3D_Mode
 		uniform int IPD <
@@ -1974,7 +1973,7 @@ uniform int Extra_Information <
 		#endif
 	};	
 		
-	#if D_Frame || DFW	
+	#if D_Frame	
 		texture texCF { Width = BUFFER_WIDTH ; Height = BUFFER_HEIGHT ; Format = RGBA8; };
 		
 		sampler SamplerCF
@@ -2183,6 +2182,13 @@ uniform int Extra_Information <
 		{
 			Texture = texzBufferBlurN;
 		};
+	//Can expand this to RG16F used to pass information to Avr Tex	
+	texture texzBufferBlurEx < pooled = true; > { Width = BUFFER_WIDTH / 4.0 ; Height = BUFFER_HEIGHT / 4.0; Format = R16F;  };
+
+	sampler SamplerzBuffer_BlurEx
+	{
+		Texture = texzBufferBlurEx;
+	};
 	
 	texture texzBufferN_M { Width = BUFFER_WIDTH ; Height = BUFFER_HEIGHT ; Format = R16F; }; //Do not use mips in this buffer
 	
@@ -2206,7 +2212,7 @@ uniform int Extra_Information <
 	#define Scale_Buffer 160 / BUFFER_WIDTH
 	////////////////////////////////////////////////////////Adapted Luminance/////////////////////////////////////////////////////////////////////
 	texture texAvrN {Width = BUFFER_WIDTH * Scale_Buffer; Height = BUFFER_HEIGHT * Scale_Buffer; Format = RGBA16F; MipLevels = 8;}; //Mips Used
-	
+
 	sampler SamplerAvrB_N
 		{
 			Texture = texAvrN;
@@ -3079,10 +3085,8 @@ uniform int Extra_Information <
 	#endif	
 	
 	float4 TC_SP(float2 texcoord)
-	{   //I don't know how to fix this error without moving this to a entire new section of the shader.	
-		float LBDetect = tex2Dlod(SamplerAvrP_N,float4(1, 0.0625,0,0)).z; //This is causing the error: Cannot sample from texture that also used as render target
-		//float SDDetect = 0; 
-		//LBDetection()
+	{  
+		float LBDetect = tex2Dlod(SamplerAvrP_N,float4(1, 0.0625,0,0)).z;
 		//Need to work on this later. So far it seem fine.....
 		float2 H_V_A, H_V_B, X_Y_A, X_Y_B, S_texcoord = texcoord;
 		bool SDT_Bool = 1;
@@ -4118,11 +4122,12 @@ uniform int Extra_Information <
 		Linear_Out = float2(Set_Depth.x,HF_Info);
 	}
 	
-	void zBuffer_Blur(in float4 position : SV_Position, in float2 texcoord : TEXCOORD, out float2 Blur_Out : SV_Target0)
+	void zBuffer_Blur(in float4 position : SV_Position, in float2 texcoord : TEXCOORD, out float2 Blur_Out : SV_Target0, out float2 Info_Ex : SV_Target1)
 	{   
 		float2 StoredTC = texcoord;
 		float Invert_Depth_Mask =  1-smoothstep(0.0,0.5,PrepDepth( StoredTC * float2(2.0, 1) - float2(1.0,0.0)  )[1][1]);
 		float Text_Mask;
+		float Average_ZPD = PrepDepth( texcoord )[0][0];
 		#if TMD
 				#if DX9_Toggle
 				texcoord.x *= 2.0;
@@ -4158,6 +4163,7 @@ uniform int Extra_Information <
 		#else
 		Blur_Out = StoredTC < 0.5 ? Text_Mask : Invert_Depth_Mask;
 		#endif
+		Info_Ex = float2(Average_ZPD,0);
 	}
 	
 	#if SUI
@@ -4194,13 +4200,12 @@ uniform int Extra_Information <
 	{
 		return min(0.25,Separation_Adjust);
 	}
-	//Will want to intergrate this later	
-	#define Smooth_Tune 0.75
-	#define HQ_Boost 8
+	//This is where Depth Is adjusted. Since it's no longer adjusted by Divergence.	
 	float Smooth_Tune_Boost() 
 	{
-	    float HQ_Scale = 0.1 * (HQ_Boost / 8.0);
-	    return saturate(Smooth_Tune + HQ_Scale) * 0.75 + 0.25;
+		float RCP_Diverge = 100 * rcp(Divergence);
+		float S_T_Adjust = min(1.25,abs(Depth_Adjustment) * 0.01) * RCP_Diverge;
+	    return abs(lerp(0.01f,1.0f,S_T_Adjust));
 	}
 	
 	static const float  VMW_Array[10] = { 0.0, 1.0, 2.0, 3.0 , 3.5 , 4.0, 4.5 , 5.0, 5.5, 6.0 };	
@@ -4336,8 +4341,8 @@ uniform int Extra_Information <
 		#else
 		float Separation = lerp(1.0,5.0,Depth_Seperation()); 	
 		#endif
-			//Separation = lerp(0.2,0,saturate(GetDepth * 1000)) + Separation;
-		return Separation * DepthBuffer_LP.x;// * Smooth_Tune_Boost();
+		
+		return (Separation * DepthBuffer_LP.x) * Smooth_Tune_Boost();
 	}
 	
 	int3 Shift_Depth()
@@ -5098,7 +5103,7 @@ uniform int Extra_Information <
 	///////////////////////////////////////////////////////Average & Information Textures///////////////////////////////////////////////////////////////
 	void Average_Info(float4 position : SV_Position, float2 texcoord : TEXCOORD, out  float4 Average : SV_Target0)
 	{   float Half_Buffer = texcoord.x < 0.5;
-		float Average_ZPD = PrepDepth( texcoord )[0][0];	
+		float Average_ZPD = tex2Dlod(SamplerzBuffer_BlurEx,float4(texcoord,0,0)).x;
 		//0.083 //0.0625
 		//0.250 //0.1875
 		//0.416 //0.3125
@@ -6031,7 +6036,7 @@ uniform int Extra_Information <
 	}
 	#endif
 	
-	#if D_Frame || DFW
+	#if D_Frame
 	float4 CurrentFrame(in float4 position : SV_Position, in float2 texcoords : TEXCOORD) : SV_Target
 	{
 		return tex2Dlod(BackBuffer_SD,float4(texcoords,0,0));
@@ -6075,7 +6080,7 @@ uniform int Extra_Information <
 	< ui_tooltip = "Suggestion : You Can Enable 'Performance Mode Checkbox,' in the lower bottom right of the ReShade's Main UI.\n"
 				   			 "Do this once you set your 3D settings of course."; >
 	{	
-		#if D_Frame || DFW
+		#if D_Frame
 			pass Delay_Frame
 		{
 			VertexShader = PostProcessVS;
@@ -6100,6 +6105,7 @@ uniform int Extra_Information <
 			VertexShader = PostProcessVS;
 			PixelShader = zBuffer_Blur;
 			RenderTarget0 = texzBufferBlurN;
+			RenderTarget1 = texzBufferBlurEx;
 		}
 			pass DepthBuffer
 		{
