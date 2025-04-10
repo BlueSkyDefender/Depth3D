@@ -1,7 +1,7 @@
 ////----------------------------------------//
 ///SuperDepth3D Overwatch Automation Header///
 //----------------------------------------////
-#define OVERWATCH "Overwatch v4.2.3\n"
+#define OVERWATCH "Overwatch v4.2.4\n"
 //---------------------------------------OVERWATCH---------------------------------------//
 // If you are reading this stop. Go away and never look back. From this point on if you  //
 // still think it's is worth looking at this..... Then no one can save you or your soul. //
@@ -35996,8 +35996,9 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	//#define DAA 1
 	//#define FOV 1
     //#define ARW 1
-#elif (App == 0xDCFDCBA7 ) //Assassin's Creed Shadows+
-	#define G_Info "Assassin's Creed Shadows+: AppID 0xDCFDCBA7\n" //Will now be added to every profile at the end.
+#elif (App == 0xDCFDCBA7 ) //Assassin's Creed Shadows
+	#define G_Info "Assassin's Creed Shadows: AppID 0x64AF115E\n" \
+	               "Assassin's Creed Shadows+: AppID 0xDCFDCBA7\n"
     #define G_Note "Note: Make sure you use the Add-ons & also set Upscaler Quality to Custom 75% to Native.\n"
     //#define DS_Z 2                                 // Set View Mode
 	#define DA_W 1                                 // Set Linerzation
