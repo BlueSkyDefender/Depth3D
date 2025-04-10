@@ -35996,7 +35996,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	//#define DAA 1
 	//#define FOV 1
     //#define ARW 1
-#elif (App == 0xDCFDCBA7 ) //Assassin's Creed Shadows
+#elif (App == 0xDCFDCBA7 || App == 0x64AF115E ) //Assassin's Creed Shadows
 	#define G_Info "Assassin's Creed Shadows: AppID 0x64AF115E\n" \
 	               "Assassin's Creed Shadows+: AppID 0xDCFDCBA7\n"
     #define G_Note "Note: Make sure you use the Add-ons & also set Upscaler Quality to Custom 75% to Native.\n"
