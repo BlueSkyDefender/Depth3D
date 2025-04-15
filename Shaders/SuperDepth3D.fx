@@ -1,7 +1,7 @@
 	////----------------//
 	///**SuperDepth3D**///
 	//----------------////
-	#define SD3D "SuperDepth3D v4.5.7\n"
+	#define SD3D "SuperDepth3D v4.6.0\n"
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//* Depth Map Based 3D post-process shader
 	//* For Reshade 3.0+
@@ -337,7 +337,7 @@ namespace SuperDepth3D
 	    #define Reconstruction_Mode 0
 	    #define Inficolor_3D_Emulator 0
 	#endif 
-	
+
 	// This is for REST Add-On
 	#if Inficolor_3D_Emulator || Reconstruction_Mode || Virtual_Reality_Mode
 	    #define REST_UI_Mode 0
@@ -1061,13 +1061,13 @@ uniform int SuperDepth3D <
 		ui_type = "drag";
 		ui_min = 0.0; ui_max = 0.5;
 		ui_label = " Weapon Near, Min, Auto, & Trim";
-		ui_tooltip = "Weapon Near: is used to set the Weapon ZPD for when the distortions from options below are to mush of a problem.\n"
+		ui_tooltip = "Null: This Option is empty for now and will be reworked later.\n"
 					 "Weapon Min : is used to adjust min weapon hand of the weapon hand when looking at the world near you when the above fails.\n"
 					 "Weapon Auto: is used to auto adjust trimming when looking around.\n"
 					 "Weapon Trim: is used cutout a location in the depth buffer so that Min and Auto scale off of.\n"
 					 "Default is (Near X 0.0, Min Y 0.0, Auto Z 0.0, Trim Z 0.250 ) & Zero is off.";
 		ui_category = "Weapon Hand Adjust";	
-	> = float4(WND,DG_Z,DE_W,DI_Z);// Weapon ZDP was set to 0.03 and is an internal constant value
+	> = float4(0,DG_Z,DE_W,DI_Z);// Weapon ZDP was set to 0.03 and is an internal constant value
 	
 	uniform float4 Weapon_Depth_Edge <
 		ui_type = "slider";
@@ -1084,6 +1084,17 @@ uniform int SuperDepth3D <
 		ui_tooltip = "This selection menu gives extra boundary conditions to WZPD.";
 		ui_category = "Weapon Hand Adjust";
 	> = DF_X;
+	
+	uniform float PopOut_Target <
+		ui_type = "drag";
+		ui_min = 0.0; ui_max = 1.0;
+		ui_label = " Popout Target";
+		ui_tooltip = "Popout Target: use to adjust for for when the distortions when objects are coming to far out of the screen like Weapon Hands.\n"
+					 "The Point of this is to set a target that the Shader will Try to reach only when Popout is detected.\n"
+					 "Default is Zero & it's off.";
+		ui_category = "Weapon Hand Adjust";	
+	> = WND;	
+	
 	#if HUD_MODE || HMT
 	//Heads-Up Display
 	uniform float2 HUD_Adjust <
@@ -1679,73 +1690,16 @@ uniform int Extra_Information <
 	uniform bool Alternate < source = "framecount";>;     // Alternate Even Odd frames
 	uniform int Frames < source = "framecount";>;     // Alternate Even Odd frames
 	uniform float timer < source = "timer"; >;
+	#define FLT_EPSILON  1.192092896e-07 // smallest such that Value + FLT_EPSILON != Value	
 	
-	float Min3(float x, float y, float z)
+	float2 Divergence_Switch()
 	{
-	    return min(x, min(y, z));
+		#if Inficolor_3D_Emulator
+		return (Depth_Adjustment * 0.5) + FLT_EPSILON;
+		#else
+		return float2(Divergence,Depth_Adjustment) + FLT_EPSILON;
+		#endif
 	}
-	
-	float Max3(float x, float y, float z)
-	{
-	    return max(x, max(y, z));
-	}
-	
-	#if HDR_Compatible_Mode == 1
-		#define BC_SPACE 1
-	#else
-		#define BC_SPACE 0
-	#endif
-
-	static const float3x3 BT709_To_BT2020 = float3x3(
-	  0.627225305694944,  0.329476882715808,  0.0432978115892484,
-	  0.0690418812810714, 0.919605681354755,  0.0113524373641739,
-	  0.0163911702607078, 0.0880887513437058, 0.895520078395586);
-	
-	static const float3x3 BT2020_To_BT709 = float3x3(
-	   1.66096379471340,   -0.588112737547978, -0.0728510571654192,
-	  -0.124477196529907,   1.13281946828499,  -0.00834227175508652,
-	  -0.0181571579858552, -0.100666415661988,  1.11882357364784);
-
-	float4 NormalizeScRGB(float4 RGB)
-	{
-	  RGB.rgb = RGB.rgb / 125.f; // normalize 10000 nits to 1.0
-	  RGB.rgb = mul(BT709_To_BT2020, RGB.rgb); // rotate into BT.2020 primaries so colors outside of BT.709 don't get lost to clipping
-	
-	  return RGB;
-	}
-	
-	float4 ExpandScRGB(float4 RGB)
-	{
-	  RGB.rgb = mul(BT2020_To_BT709, RGB.rgb); // rotate back into valid scRGB/BT.709 values
-	  RGB.rgb = RGB.rgb * 125.f; // expand into valid scRGB values again
-	
-	  return RGB;
-	}
-	
-	#if Compatibility_FP
-	uniform float3 motion[2] < source = "freepie"; index = 0; >;
-	//. motion[0] is yaw, pitch, roll and motion[1] is x, y, z. In ReShade 4.8+ in ReShade 4.7 it is x = y / y = z
-	//float3 FP_IO_Rot(){return motion[0];}
-	float3 FP_IO_Pos()
-	{
-	#if Compatibility_FP == 1
-		#warning "Eye Tracking enhanced features need ReShade 4.8.0 and above."
-		return motion[1].yzz;
-	#elif Compatibility_FP == 2
-		return motion[1];
-	#endif
-	}
-	#else
-	//float3 FP_IO_Rot(){return 0;}
-	float3 FP_IO_Pos(){return 0;}
-	#warning "Eye Tracking Need ReShade 4.6.0 and above."
-	#endif
-	
-	static const float Auto_Balance_Clamp = 0.5; //This Clamps Auto Balance's max Distance.
-	
-	#if Compatibility_00
-	uniform bool DepthCheck < source = "bufready_depth"; >;
-	#endif
 
 	//Resolution Scaling so that auto anti cross talk works.
 	#define Comb_Size BUFFER_HEIGHT + BUFFER_WIDTH
@@ -1770,184 +1724,32 @@ uniform int Extra_Information <
 			#define Max_Mips 12
 		#endif
 	#endif
-
-	float3 RE_Set(float Auto_Switch)
-	{
-		#if EDW // Set By SuperDepth3D
-			float OIL_Switch[4] = {ZPD_Boundary_n_Cutoff_A.x,ZPD_Boundary_n_Cutoff_B.x,ZPD_Boundary_n_Cutoff_C.x,ZPD_Boundary_n_Cutoff_D.x};		
-		#else // Set by Overwatch
-			#if OIL == 1
-				float OIL_Switch[2] = {ZPD_Boundary_n_Cutoff_A.x,OIF.y};	
-			#elif ( OIL == 2 )
-				float OIL_Switch[3] = {ZPD_Boundary_n_Cutoff_A.x,OIF.y,OIF.z};	
-			#elif ( OIL >= 3 )
-				float OIL_Switch[4] = {ZPD_Boundary_n_Cutoff_A.x,OIF.y,OIF.z,OIF.w};	
-			#else
-				float OIL_Switch[1] = {ZPD_Boundary_n_Cutoff_A.x};	
-			#endif
-		#endif 	
-		int Scale_Auto_Switch = clamp((Auto_Switch * 5) - 1,0 , 3 );
-		float Set_RE = OIL_Switch[Scale_Auto_Switch];
-
-		int REF_Trigger = Set_RE > 0;
-		
-		//X is a Bool to enable the extra Levels
-		//Y is the Set_Level Number from the auto Switch
-		//Z is not used
-		return float3(REF_Trigger, Set_RE , Scale_Auto_Switch); 
-	}
 	
-	float4 RE_Set_Adjustments()
-	{
-		#if EDW // Set By SuperDepth3D
-			float OIL_Switch[4] = {ZPD_Boundary_n_Cutoff_A.x,ZPD_Boundary_n_Cutoff_B.x,ZPD_Boundary_n_Cutoff_C.x,ZPD_Boundary_n_Cutoff_D.x};		
-		#else // Set by Overwatch
-			#if OIL == 1
-				float OIL_Switch[4] = {ZPD_Boundary_n_Cutoff_A.x,OIF.y,0,0};	
-			#elif ( OIL == 2 )
-				float OIL_Switch[4] = {ZPD_Boundary_n_Cutoff_A.x,OIF.y,OIF.z,0};	
-			#elif ( OIL >= 3 )
-				float OIL_Switch[4] = {ZPD_Boundary_n_Cutoff_A.x,OIF.y,OIF.z,OIF.w};	
-			#else
-				float OIL_Switch[4] = {ZPD_Boundary_n_Cutoff_A.x,0,0,0};	
-			#endif 
-		#endif
-		return float4(OIL_Switch[0], OIL_Switch[1], OIL_Switch[2], OIL_Switch[3]);
-	}
+	#if HDR_Compatible_Mode == 1
+		#define BC_SPACE 1
+	#else
+		#define BC_SPACE 0
+	#endif
 
-	float2 RE_Extended()
+	#if Compatibility_FP
+	uniform float3 motion[2] < source = "freepie"; index = 0; >;
+	//. motion[0] is yaw, pitch, roll and motion[1] is x, y, z. In ReShade 4.8+ in ReShade 4.7 it is x = y / y = z
+	//float3 FP_IO_Rot(){return motion[0];}
+	float3 FP_IO_Pos()
 	{
-		#if EDW
-		return ZPD_Boundary_n_Cutoff_End.xy;
-		#else
-		return DKK_W;
-		#endif
+	#if Compatibility_FP == 1
+		#warning "Eye Tracking enhanced features need ReShade 4.8.0 and above."
+		return motion[1].yzz;
+	#elif Compatibility_FP == 2
+		return motion[1];
+	#endif
 	}
-
-	float Scale(float val,float max,float min) //Scale to 0 - 1
-	{
-		return (val - min) / (max - min);
-	}
+	#else
+	//float3 FP_IO_Rot(){return 0;}
+	float3 FP_IO_Pos(){return 0;}
+	#warning "Eye Tracking Need ReShade 4.6.0 and above."
+	#endif
 	
-	//Resolution Scaling because I can't tell your monitor size. Each level is 25 more then it should be.
-	float CalculateMaxDivergence(uint x)
-	{   // Doing what commented out does not work for some reason.So I have to do this strange thing below.
-		//#define Max_Divergence (BUFFER_HEIGHT / 2160) * 100.
-		//static const float Max_Divergence = (BUFFER_HEIGHT / 2160) * 100.; //BUFFER_WIDTH	
-		float numerator = x;
-		float denominator = 2160.0;
-		
-		float reciprocalDenominator = rcp(denominator);
-		return numerator * reciprocalDenominator;
-	}
-  	
-	float2 Min_Divergence() // and set scale
-	{   
-		float Diverge = Divergence;	    
-		float Min_Div = max(1.0, Diverge), D_Scale = min(1.25,Scale(Min_Div,100.0,1.0));
-		float MD_Adjust = CalculateMaxDivergence(BUFFER_HEIGHT) * 100.0;
-		return float2(lerp( 1.0, MD_Adjust, D_Scale), D_Scale);
-	}
-	
-	float2 Set_Pop_Min()
-	{
-		#if SPO
-		return Set_Popout( WP, DG_W , WZPD_and_WND.y);
-		#else
-		return float2( DG_W, WZPD_and_WND.y );
-		#endif
-	}
-
-	float fmod(float a, float b)
-	{
-		float c = frac(abs(a / b)) * abs(b);
-		return a < 0 ? -c : c;
-	}	
-	//#define E_O_Switch fmod(abs(Perspective),2)
-	float2 Re_Scale_WN()
-	{   float Near_Plane_Popout = WZPD_and_WND.x;
-		return float2(abs(Near_Plane_Popout),Near_Plane_Popout >= 0 ? 100.0 : 75.0); // Used to be  0 : 1; Now I just set to Zero = 100.0 if One = 75.0 
-	}	
-
-	float Perspective_Switch()
-	{  
-	    float Scale_Value_Cal =  Re_Scale_WN().y;
-	    	  Scale_Value_Cal *= CalculateMaxDivergence(BUFFER_HEIGHT); 
-		float Min_Div = max(1.0, Divergence), D_Scale = Scale(Min_Div,100.0,1.0); 
-
-		float I_3D_E = (Min_Divergence().x * lerp(1.0,2.0,Focus_Inficolor)); //This is to fix strange offset issue don't know why it need to be offset by one pixel to work.???
-			  I_3D_E += (Re_Scale_WN().x*(Scale_Value_Cal * 2))*D_Scale;
-		#if Virtual_Reality_Mode && !Super3D_Mode
-		float Pers = IPD;
-		#else	    	 
-  	  float Pers = Perspective;
-  	  #endif  	  
-		float Perspective_Out = Pers, Push_Depth = (Re_Scale_WN().x*Scale_Value_Cal)*D_Scale;
-
-		if( Inficolor_3D_Emulator) 
-			Perspective_Out = Eye_Swap ? I_3D_E : -I_3D_E;
-		else
-			Perspective_Out = Eye_Swap ? Pers + Push_Depth : Pers - Push_Depth;
-			
-		return Perspective_Out;	
-	}
-
-	#define pix float2(BUFFER_RCP_WIDTH, BUFFER_RCP_HEIGHT)
-	#define Per Vert_3D_Pinball ? float2( 0, (Perspective_Switch() * pix.x) ) : float2( (Perspective_Switch() * pix.x), 0) //Per is Perspective
-	#define Res int2(BUFFER_WIDTH, BUFFER_HEIGHT)
-	#define AI Interlace_Anaglyph_Calibrate.x * 0.5 //Optimization for line interlaced Adjustment.
-	#define ARatio pix.y / pix.x
-	#define FLT_EPSILON  1.192092896e-07 // smallest such that Value + FLT_EPSILON != Value	
-				
-	float RN_Value(float i)
-	{
-		return round(i * 10.0f);// * 0.1f;
-	}
-	
-	float FN_Value(float i)
-	{
-		return floor(i * 10.0f);// * 0.1f;
-	}
-
-	float4 AdjustSaturation(float4 color)
-	{ 
-		float hueShift = 0.0;
-		float saturation = 1+Saturation;
-
-		// Hue adjustment
-		float3 hueAdjust = 1.0 - min(abs(hueShift - float3(0.0, 2.0, 1.0)), 1.0);
-		
-		// Ensure red component consistency using dot product
-		hueAdjust.x = 1.0 - dot(hueAdjust.yz, 1.0);
-		
-		// Apply hue adjustment to the input texture color
-		float3 colorAdjusted = float3(
-									    dot(color.xyz, hueAdjust.xyz),
-									    dot(color.xyz, hueAdjust.zxy),
-									    dot(color.xyz, hueAdjust.yzx)
-									 );
-		
-		// Blend the adjusted color with grayscale
-		float3 grayscale = dot(colorAdjusted, float3(0.333, 0.333, 0.333) );
-		float3 finalColor = lerp(grayscale, colorAdjusted, saturation);
-
-		return float4(finalColor, color.w);
-	}
-	
-	float Vin_Pattern(float2 TC, float2 V_Power)
-	{	//Focuse away from center
-		TC *= (1.0 - TC.yx); 
-	    float Vin = TC.x*TC.y * V_Power.x, Use_Depth = 1;// step(PrepDepth( texcoord.xy )[0][0] + 0.30, 0.375);
-	    return 1-saturate(pow(abs(Vin),V_Power.y));	
-	}
-	///////////////////////////////////////////////////////////Conversions/////////////////////////////////////////////////////////////
-	float3 RGBtoYCbCr(float3 rgb) // For Super3D a new Stereo3D output.
-	{
-		float Y  =  .299 * rgb.x + .587 * rgb.y + .114 * rgb.z; // Luminance
-		float Cb = -.169 * rgb.x - .331 * rgb.y + .500 * rgb.z; // Chrominance Blue
-		float Cr =  .500 * rgb.x - .419 * rgb.y - .081 * rgb.z; // Chrominance Red
-		return float3(Y,Cb + 128./255.,Cr + 128./255.);
-	}
 	///////////////////////////////////////////////////////////////3D Starts Here///////////////////////////////////////////////////////////
 	texture DepthBufferTex : DEPTH;
 	sampler DepthBuffer
@@ -2230,6 +2032,232 @@ uniform int Extra_Information <
 	{ 
 		return saturate(tex2Dlod(SamplerAvrB_N,float4(texcoord,0,11)).y);//Average Depth Brightnes Texture Sample
 	}		
+	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	
+	float Min3(float x, float y, float z)
+	{
+	    return min(x, min(y, z));
+	}
+	
+	float Max3(float x, float y, float z)
+	{
+	    return max(x, max(y, z));
+	}
+	
+	static const float3x3 BT709_To_BT2020 = float3x3(
+	  0.627225305694944,  0.329476882715808,  0.0432978115892484,
+	  0.0690418812810714, 0.919605681354755,  0.0113524373641739,
+	  0.0163911702607078, 0.0880887513437058, 0.895520078395586);
+	
+	static const float3x3 BT2020_To_BT709 = float3x3(
+	   1.66096379471340,   -0.588112737547978, -0.0728510571654192,
+	  -0.124477196529907,   1.13281946828499,  -0.00834227175508652,
+	  -0.0181571579858552, -0.100666415661988,  1.11882357364784);
+
+	float4 NormalizeScRGB(float4 RGB)
+	{
+	  RGB.rgb = RGB.rgb / 125.f; // normalize 10000 nits to 1.0
+	  RGB.rgb = mul(BT709_To_BT2020, RGB.rgb); // rotate into BT.2020 primaries so colors outside of BT.709 don't get lost to clipping
+	
+	  return RGB;
+	}
+	
+	float4 ExpandScRGB(float4 RGB)
+	{
+	  RGB.rgb = mul(BT2020_To_BT709, RGB.rgb); // rotate back into valid scRGB/BT.709 values
+	  RGB.rgb = RGB.rgb * 125.f; // expand into valid scRGB values again
+	
+	  return RGB;
+	}
+	
+	static const float Auto_Balance_Clamp = 0.5; //This Clamps Auto Balance's max Distance.
+	
+	#if Compatibility_00
+	uniform bool DepthCheck < source = "bufready_depth"; >;
+	#endif
+
+	float3 RE_Set(float Auto_Switch)
+	{
+		#if EDW // Set By SuperDepth3D
+			float OIL_Switch[4] = {ZPD_Boundary_n_Cutoff_A.x,ZPD_Boundary_n_Cutoff_B.x,ZPD_Boundary_n_Cutoff_C.x,ZPD_Boundary_n_Cutoff_D.x};		
+		#else // Set by Overwatch
+			#if OIL == 1
+				float OIL_Switch[2] = {ZPD_Boundary_n_Cutoff_A.x,OIF.y};	
+			#elif ( OIL == 2 )
+				float OIL_Switch[3] = {ZPD_Boundary_n_Cutoff_A.x,OIF.y,OIF.z};	
+			#elif ( OIL >= 3 )
+				float OIL_Switch[4] = {ZPD_Boundary_n_Cutoff_A.x,OIF.y,OIF.z,OIF.w};	
+			#else
+				float OIL_Switch[1] = {ZPD_Boundary_n_Cutoff_A.x};	
+			#endif
+		#endif 	
+		int Scale_Auto_Switch = clamp((Auto_Switch * 5) - 1,0 , 3 );
+		float Set_RE = OIL_Switch[Scale_Auto_Switch];
+
+		int REF_Trigger = Set_RE > 0;
+		
+		//X is a Bool to enable the extra Levels
+		//Y is the Set_Level Number from the auto Switch
+		//Z is not used
+		return float3(REF_Trigger, Set_RE , Scale_Auto_Switch); 
+	}
+	
+	float4 RE_Set_Adjustments()
+	{
+		#if EDW // Set By SuperDepth3D
+			float OIL_Switch[4] = {ZPD_Boundary_n_Cutoff_A.x,ZPD_Boundary_n_Cutoff_B.x,ZPD_Boundary_n_Cutoff_C.x,ZPD_Boundary_n_Cutoff_D.x};		
+		#else // Set by Overwatch
+			#if OIL == 1
+				float OIL_Switch[4] = {ZPD_Boundary_n_Cutoff_A.x,OIF.y,0,0};	
+			#elif ( OIL == 2 )
+				float OIL_Switch[4] = {ZPD_Boundary_n_Cutoff_A.x,OIF.y,OIF.z,0};	
+			#elif ( OIL >= 3 )
+				float OIL_Switch[4] = {ZPD_Boundary_n_Cutoff_A.x,OIF.y,OIF.z,OIF.w};	
+			#else
+				float OIL_Switch[4] = {ZPD_Boundary_n_Cutoff_A.x,0,0,0};	
+			#endif 
+		#endif
+		return float4(OIL_Switch[0], OIL_Switch[1], OIL_Switch[2], OIL_Switch[3]);
+	}
+
+	float2 RE_Extended()
+	{
+		#if EDW
+		return ZPD_Boundary_n_Cutoff_End.xy;
+		#else
+		return DKK_W;
+		#endif
+	}
+
+	float Scale(float val,float max,float min) //Scale to 0 - 1
+	{
+		return (val - min) / (max - min);
+	}
+	
+	//Resolution Scaling because I can't tell your monitor size. Each level is 25 more then it should be.
+	float CalculateMaxDivergence(uint x)
+	{   // Doing what commented out does not work for some reason.So I have to do this strange thing below.
+		//#define Max_Divergence (BUFFER_HEIGHT / 2160) * 100.
+		//static const float Max_Divergence = (BUFFER_HEIGHT / 2160) * 100.; //BUFFER_WIDTH	
+		float numerator = x;
+		float denominator = 2160.0;
+		
+		float reciprocalDenominator = rcp(denominator);
+		return numerator * reciprocalDenominator;
+	}
+  	
+	float2 Min_Divergence() // and set scale
+	{   
+		float Diverge = Divergence_Switch().x;	    
+		float Min_Div = max(1.0, Diverge), D_Scale = min(1.25,Scale(Min_Div,100.0,1.0));
+		float MD_Adjust = CalculateMaxDivergence(BUFFER_HEIGHT) * 100.0;
+		return float2(lerp( 1.0, MD_Adjust, D_Scale), D_Scale);
+	}
+	
+	float2 Set_Pop_Min()
+	{
+		#if SPO
+		return Set_Popout( WP, DG_W , WZPD_and_WND.y);
+		#else
+		return float2( DG_W, WZPD_and_WND.y );
+		#endif
+	}
+
+	float fmod(float a, float b)
+	{
+		float c = frac(abs(a / b)) * abs(b);
+		return a < 0 ? -c : c;
+	}	
+	//#define E_O_Switch fmod(abs(Perspective),2)
+	float2 Re_Scale_WN()
+	{   //float Near_Plane_Popout = WZPD_and_WND.x;//Old Way
+		float Value = PopOut_Target;
+		//int Switch = tex2Dlod(SamplerAvrP_N,float4(0.5.xx,0,12)).w > 0;
+		float S_More = tex2D(SamplerzBufferN_L,0).y;
+		//Value = Switch ? Value * 0.5 : Value;
+		float Near_Plane_Popout = lerp( Value * 0.5, Value, S_More );
+		return float2(abs(Near_Plane_Popout),Near_Plane_Popout >= 0 ? 100.0 : 75.0); // Used to be  0 : 1; Now I just set to Zero = 100.0 if One = 75.0 
+	}	
+
+	float Perspective_Switch()
+	{  
+	    float Scale_Value_Cal =  Re_Scale_WN().y;
+	    	  Scale_Value_Cal *= CalculateMaxDivergence(BUFFER_HEIGHT); 
+		float Min_Div = max(1.0, Divergence_Switch().x), D_Scale = Scale(Min_Div,100.0,1.0); 
+
+		float I_3D_E = (Min_Divergence().x * lerp(1.0,2.0,Focus_Inficolor)); //This is to fix strange offset issue don't know why it need to be offset by one pixel to work.???
+			  I_3D_E += (Re_Scale_WN().x*(Scale_Value_Cal * 2))*D_Scale;
+		#if Virtual_Reality_Mode && !Super3D_Mode
+		float Pers = IPD;
+		#else	    	 
+  	  float Pers = Perspective;
+  	  #endif  	  
+		float Perspective_Out = Pers, Push_Depth = (Re_Scale_WN().x*Scale_Value_Cal)*D_Scale;
+
+		if( Inficolor_3D_Emulator) 
+			Perspective_Out = Eye_Swap ? I_3D_E : -I_3D_E;
+		else
+			Perspective_Out = Eye_Swap ? Pers + Push_Depth : Pers - Push_Depth;
+			
+		return Perspective_Out;	
+	}
+
+	#define pix float2(BUFFER_RCP_WIDTH, BUFFER_RCP_HEIGHT)
+	#define Per Vert_3D_Pinball ? float2( 0, (Perspective_Switch() * pix.x) ) : float2( (Perspective_Switch() * pix.x), 0) //Per is Perspective
+	#define Res int2(BUFFER_WIDTH, BUFFER_HEIGHT)
+	#define AI Interlace_Anaglyph_Calibrate.x * 0.5 //Optimization for line interlaced Adjustment.
+	#define ARatio pix.y / pix.x
+				
+	float RN_Value(float i)
+	{
+		return round(i * 10.0f);// * 0.1f;
+	}
+	
+	float FN_Value(float i)
+	{
+		return floor(i * 10.0f);// * 0.1f;
+	}
+
+	float4 AdjustSaturation(float4 color)
+	{ 
+		float hueShift = 0.0;
+		float saturation = 1+Saturation;
+
+		// Hue adjustment
+		float3 hueAdjust = 1.0 - min(abs(hueShift - float3(0.0, 2.0, 1.0)), 1.0);
+		
+		// Ensure red component consistency using dot product
+		hueAdjust.x = 1.0 - dot(hueAdjust.yz, 1.0);
+		
+		// Apply hue adjustment to the input texture color
+		float3 colorAdjusted = float3(
+									    dot(color.xyz, hueAdjust.xyz),
+									    dot(color.xyz, hueAdjust.zxy),
+									    dot(color.xyz, hueAdjust.yzx)
+									 );
+		
+		// Blend the adjusted color with grayscale
+		float3 grayscale = dot(colorAdjusted, float3(0.333, 0.333, 0.333) );
+		float3 finalColor = lerp(grayscale, colorAdjusted, saturation);
+
+		return float4(finalColor, color.w);
+	}
+	
+	float Vin_Pattern(float2 TC, float2 V_Power)
+	{	//Focuse away from center
+		TC *= (1.0 - TC.yx); 
+	    float Vin = TC.x*TC.y * V_Power.x, Use_Depth = 1;// step(PrepDepth( texcoord.xy )[0][0] + 0.30, 0.375);
+	    return 1-saturate(pow(abs(Vin),V_Power.y));	
+	}
+	///////////////////////////////////////////////////////////Conversions/////////////////////////////////////////////////////////////
+	float3 RGBtoYCbCr(float3 rgb) // For Super3D a new Stereo3D output.
+	{
+		float Y  =  .299 * rgb.x + .587 * rgb.y + .114 * rgb.z; // Luminance
+		float Cb = -.169 * rgb.x - .331 * rgb.y + .500 * rgb.z; // Chrominance Blue
+		float Cr =  .500 * rgb.x - .419 * rgb.y - .081 * rgb.z; // Chrominance Red
+		return float3(Y,Cb + 128./255.,Cr + 128./255.);
+	}
+
 	////////////////////////////////////////////////////Distortion Correction//////////////////////////////////////////////////////////////////////
 	#if BD_Correction || BDF
 	float2 D(float2 p, float k1, float k2, float k3) //Lens + Radial lens undistort filtering Left & Right
@@ -3651,7 +3679,7 @@ uniform int Extra_Information <
 		#endif
 						 
 		if(Inficolor_3D_Emulator && Inficolor_Near_Reduction)
-			Min_Trim = float2((Min_Trim.x * 2 + Min_Trim.x) * 0.5, min( 0.3, (Min_Trim.y * 2.5 + Min_Trim.y) * 0.5) );
+			Min_Trim = float2((Min_Trim.x * 2.5 + Min_Trim.x) * 0.5, min( 0.3, (Min_Trim.y * 2.5 + Min_Trim.y) * 0.5) );
 			
 		float ScaleND = saturate(lerp(R,1.0f,smoothstep(min(-Min_Trim.x,0),1.0f,R)));
 		float Edge_Adj = 0.5;
@@ -3729,7 +3757,7 @@ uniform int Extra_Information <
 		
 	float4 Conv(float2 MD_WHD,float2 texcoord,float2 abs_WZPDB)
 	{   float WConverge = 0.030, D = MD_WHD.x, Z = Zero_Parallax_Distance, WZP = 0.5, ZP = 0.5, OS_Value = saturate(OverShoot_Fade()),
-			  W_Convergence = Inficolor_Near_Reduction ? WConverge * 0.8 : WConverge, WZPDB, WZPD_Switch, 
+			  W_Convergence = Inficolor_Near_Reduction ? WConverge * 0.875 : WConverge, WZPDB, WZPD_Switch, 
 			  Distance_From_Bottom = lerp(0.9375,1.0,saturate(WFB)), ZPD_Boundary_Adjust = ZPD_Boundary_n_Fade.x, Store_WC;
 	    //Screen Space Detector.
 		if (abs_WZPDB.x > 0)
@@ -4093,13 +4121,18 @@ uniform int Extra_Information <
 	#define Adapt_Adjust 0.7 //[0 - 1]
 	////////////////////////////////////////////////////Depth & Special Depth Triggers//////////////////////////////////////////////////////////////////
 	void Mod_Z(in float4 position : SV_Position, in float2 texcoord : TEXCOORD, out float2 Point_Out : SV_Target0 , out float2 Linear_Out : SV_Target1)
-	{   //Temporal adaptation https://knarkowicz.wordpress.com/2016/01/09/automatic-exposure/
-		float  ExAd = (1-Adapt_Adjust)*1250, Lum = tex2Dlod(SamplerCN,float4(texcoord,0,12)).x, PastLum = tex2D(SamplerAvrP_N,float2(0,0.4375)).z;
-	
+	{   //Temporal adaptation based on https://knarkowicz.wordpress.com/2016/01/09/automatic-exposure/
+		float ExAd_A = (1-Adapt_Adjust)*1250, Current_A = tex2Dlod(SamplerCN,float4(texcoord,0,12)).x, Past_A = tex2D(SamplerAvrP_N,float2(0,0.4375)).z;
+		float ExAd_B = (1-Adapt_Adjust)*1250, Current_B = smoothstep(0,0.1,tex2Dlod(SamplerAvrP_N,float4(0.5.xx,0,12)).w), Past_B = tex2D(SamplerAvrP_N,float2(0,0.8125)).z;
+		//Temporal again but for Popout.
+					//Popout Detection
+			//Color = tex2Dlod(SamplerAvrP_N,float4(texcoord,0,12)).w > 0; // Detect if there is pop out.
+			//Color = smoothstep(0,0.1,tex2Dlod(SamplerAvrP_N,float4(texcoord,0,12)).w); //Scale Popout linerly 
+		
 		float4 Set_Depth = DB_Comb( texcoord.xy ).xyzw;
 		
 		if(texcoord.x < pix.x * 2 && texcoord.y < pix.y * 2)    //TL
-			Set_Depth.y = PastLum + (Lum - PastLum) * (1.0 - exp(-frametime/ExAd));	
+			Set_Depth.y = Past_A + (Current_A - Past_A) * (1.0 - exp(-frametime/ExAd_A));	
 		if(1-texcoord.x < pix.x * 2 && 1-texcoord.y < pix.y * 2) //BR
 			Set_Depth.y = AltWeapon_Fade();
 		if(  texcoord.x < pix.x * 2 && 1-texcoord.y < pix.y * 2) //BL
@@ -4110,7 +4143,7 @@ uniform int Extra_Information <
 		float HF_Info = saturate(ddx(Set_Depth.x) * ddy(Set_Depth.x));
 			
 		if(texcoord.x < pix.x * 2 && texcoord.y < pix.y * 2)    //TL
-			HF_Info = 0;	
+			HF_Info = Past_B + (Current_B - Past_B) * (1.0 - exp(-frametime/ExAd_B));		
 		if(1-texcoord.x < pix.x * 2 && 1-texcoord.y < pix.y * 2) //BR
 			HF_Info = 0;
 		if(  texcoord.x < pix.x * 2 && 1-texcoord.y < pix.y * 2) //BL
@@ -4203,8 +4236,8 @@ uniform int Extra_Information <
 	//This is where Depth Is adjusted. Since it's no longer adjusted by Divergence.	
 	float Smooth_Tune_Boost() 
 	{
-		float RCP_Diverge = 100 * rcp(Divergence);
-		float S_T_Adjust = min(1.25,abs(Depth_Adjustment) * 0.01) * RCP_Diverge;
+		float RCP_Diverge = 100 * rcp(Divergence_Switch().x);
+		float S_T_Adjust = min(1.25,abs(Divergence_Switch().y) * 0.01) * RCP_Diverge;
 	    return abs(lerp(0.01f,1.0f,S_T_Adjust));
 	}
 	
@@ -4342,7 +4375,7 @@ uniform int Extra_Information <
 		float Separation = lerp(1.0,5.0,Depth_Seperation()); 	
 		#endif
 		
-		return (Separation * DepthBuffer_LP.x) * Smooth_Tune_Boost();
+		return min(2.0,(Separation * DepthBuffer_LP.x) * Smooth_Tune_Boost());
 	}
 	
 	int3 Shift_Depth()
@@ -4672,18 +4705,20 @@ uniform int Extra_Information <
 			float DeGhost = 0.06, LOne, ROne;
 			//L.rgb += lerp(-1, 1,Anaglyph_Eye_Brightness.x); R.rgb += lerp(-1, 1,Anaglyph_Eye_Brightness.y);
 			float3 HalfLA = dot(L.rgb,float3(0.299, 0.587, 0.114)), HalfRA = dot(R.rgb,float3(0.299, 0.587, 0.114));
-			float3 LMA = lerp(HalfLA,L.rgb,color_saturation), RMA = lerp(HalfRA,R.rgb,color_saturation);
+			float3 LMA = lerp(HalfLA,L.rgb,color_saturation.xxx), RMA = lerp(HalfRA,R.rgb,color_saturation.xxx);
 			float2 Contrast = lerp(0.875,1.125,Anaglyph_Eye_Contrast);		
 			// Left/Right Image
 			float4 cA = float4(saturate(LMA),1);
 			float4 cB = float4(saturate(RMA),1);
 
 			cA = (cA - 0.5) * Contrast.x + 0.5; cB = (cB - 0.5) * Contrast.y + 0.5;
+			float Deghost = distance(cA.r, cB.g) > 0.1875;
+			Deghost = lerp( 0, 0.5, Deghost);
+			//Used RGB Color Detection Camera. So this should be closer then before.
+			float3 leftEyeColor = float3(1.0,0.0,1.0); //magenta
+			float3 rightEyeColor = float3(0.0,1.0,Deghost); //green
 			
-			float3 leftEyeColor = float3(1.0,0.0,1.0) * 1.0625; //magenta
-			float3 rightEyeColor = float3(0.0,1.0,0.0) * 1.0625; //green
-						
-			color = saturate((cA.rgb*leftEyeColor)+(cB.rgb*rightEyeColor));
+			color = saturate(((cA.rgb*leftEyeColor)+(cB.rgb*rightEyeColor)) * float3(1,1,rcp(1+Deghost)));
 		#else
 		if(Stereoscopic_Mode >= Anaglyph_Selection(0))
 		{
@@ -5104,6 +5139,7 @@ uniform int Extra_Information <
 	void Average_Info(float4 position : SV_Position, float2 texcoord : TEXCOORD, out  float4 Average : SV_Target0)
 	{   float Half_Buffer = texcoord.x < 0.5;
 		float Average_ZPD = tex2Dlod(SamplerzBuffer_BlurEx,float4(texcoord,0,0)).x;
+		float Detect_Popout = tex2Dlod(SamplerzBufferN_L,float4(texcoord,0,1)).x < 0;
 		//0.083 //0.0625
 		//0.250 //0.1875
 		//0.416 //0.3125
@@ -5119,7 +5155,7 @@ uniform int Extra_Information <
 	                                             tex2D(SamplerzBufferN_P,0).y,          //0.4375 //TL
 								             	tex2D(SamplerzBufferN_P,1).y,          //0.5625 //BR AltWeapon_Fade
 								             	tex2D(SamplerzBufferN_P,int2(0,1)).y,  //0.6875 //BL Weapon_ZPD_Fade
-												 1.0,                                   //0.8125
+												 tex2D(SamplerzBufferN_L,0).y,          //0.8125 //TL Popout detection
 												 1.0}; 			                     //0.9375								 
 												 //LBDetection Seems to be causing issues with TC_SP.xy											 
 		float Storage_Array_B[Num_of_Values] = { LBDetection(),                         //0.0625                     
@@ -5140,7 +5176,7 @@ uniform int Extra_Information <
 			 //	UI_MAP = WeaponMask(texcoord * float2(2,1),7.5) ;
 			//#endif
 		#endif 	   
-		Average = float4(UI_MAP, Average_ZPD, Half_Buffer ? Storage_Array_A[int(fmod(Grid,Num_of_Values))] : Storage_Array_B[int(fmod(Grid,Num_of_Values))],0.0);
+		Average = float4(UI_MAP, Average_ZPD, Half_Buffer ? Storage_Array_A[int(fmod(Grid,Num_of_Values))] : Storage_Array_B[int(fmod(Grid,Num_of_Values))],Detect_Popout);
 	}
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	#if Reconstruction_Mode || Virtual_Reality_Mode
@@ -5498,7 +5534,18 @@ uniform int Extra_Information <
 		    //tex2D(SamplerAvrP_N,float2(1, 0.8125)).z
 		    //float InputSwitch = tex2D(SamplerzBuffer_BlurN,float2(0,0.9375)).x;
 			//return int(InputSwitch * 5 ) >= 5;
+			//Popout Detection
+			//Color = tex2Dlod(SamplerAvrP_N,float4(texcoord,0,12)).w > 0; // Detect if there is pop out.
+			//Color = smoothstep(0,0.1,tex2Dlod(SamplerAvrP_N,float4(texcoord,0,12)).w); //Scale Popout linerly 
+			//Color = tex2D(SamplerzBufferN_L,0).y;
+			/*
+			float Value = 1.0;
+			int Switch = tex2Dlod(SamplerAvrP_N,float4(0.5.xx,0,12)).w > 0;
+			float S_More = tex2D(SamplerzBufferN_L,0).y;
+			//Value = Switch ? Value * 0.5 : Value;
 			
+			Color = lerp( Value * 0.5, Value, S_More );
+			*/
 			return Color.rgba;
 		}
 	#endif	
