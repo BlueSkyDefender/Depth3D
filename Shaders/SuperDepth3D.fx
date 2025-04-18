@@ -1,7 +1,7 @@
 	////----------------//
 	///**SuperDepth3D**///
 	//----------------////
-	#define SD3D "SuperDepth3D v4.6.0\n"
+	#define SD3D "SuperDepth3D v4.6.2\n"
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//* Depth Map Based 3D post-process shader
 	//* For Reshade 3.0+
@@ -4429,16 +4429,16 @@ uniform int Extra_Information <
 			#if DB_Size_Position || SPF || LBC || LB_Correction
 			if(Shift_Depth().x && Auto_Scaler_Adjust && !LBDetection())
 				Shift_TC /= 1 + Depth_Size;
-			else if(Shift_Depth().y && Auto_Scaler_Adjust == 2 && !LBDetection())
+			if(Shift_Depth().y && Auto_Scaler_Adjust == 2 && !LBDetection())
 				Shift_TC.x /= 1 + Depth_Size.x * 3.25;
-			else if(Shift_Depth().z && Auto_Scaler_Adjust == 3 && !LBDetection())
-				Shift_TC.x /= 1 + Depth_Size * 3.25;				
+			if(Shift_Depth().z && Auto_Scaler_Adjust == 3 && !LBDetection())
+				Shift_TC.x /= 1 + Depth_Size * 2.25;				
 			#else
 			if(Shift_Depth().x && Auto_Scaler_Adjust)
 				Shift_TC /= 1 + Depth_Size;
-			else if(Shift_Depth().y && Auto_Scaler_Adjust == 2)
+			if(Shift_Depth().y && Auto_Scaler_Adjust == 2)
 				Shift_TC.x /= 1 + Depth_Size.x * 3.25;
-			else if(Shift_Depth().z && Auto_Scaler_Adjust == 3)
+			if(Shift_Depth().z && Auto_Scaler_Adjust == 3)
 				Shift_TC /= 1 + Depth_Size * 2.25;			
 			#endif
 		#endif		
@@ -4712,13 +4712,13 @@ uniform int Extra_Information <
 			float4 cB = float4(saturate(RMA),1);
 
 			cA = (cA - 0.5) * Contrast.x + 0.5; cB = (cB - 0.5) * Contrast.y + 0.5;
-			float Deghost = distance(cA.r, cB.g) > 0.1875;
-			Deghost = lerp( 0, 0.5, Deghost);
+			//float Deghost = distance(cA.r, cB.g) > 0.1875;
+			//Deghost = lerp( 0, 0.5, Deghost);
 			//Used RGB Color Detection Camera. So this should be closer then before.
 			float3 leftEyeColor = float3(1.0,0.0,1.0); //magenta
-			float3 rightEyeColor = float3(0.0,1.0,Deghost); //green
+			float3 rightEyeColor = float3(0.0,1.0,0.0); //green
 			
-			color = saturate(((cA.rgb*leftEyeColor)+(cB.rgb*rightEyeColor)) * float3(1,1,rcp(1+Deghost)));
+			color = saturate(((cA.rgb*leftEyeColor)+(cB.rgb*rightEyeColor)));// * float3(1,1,rcp(1+Deghost)));
 		#else
 		if(Stereoscopic_Mode >= Anaglyph_Selection(0))
 		{
