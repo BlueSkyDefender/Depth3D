@@ -36690,7 +36690,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
     //#define WRP 3                                  //Weapon Reduction Power
     #define DK_Z 4                                 //World Reduction Power
     #define DK_W 4                                 //Set Shift Speed
-    //#define WZD 1                                  //Weapon Zoom Detection    
+    #define WZD 1                                  //Weapon Zoom Detection    
 
     #define MDD 1 //Set Menu Detection & Direction     //Off 0 | 1 | 2 | 3 | 4      
     #define DN_X float4( 0.4055,0.2664 ,  0.405, 0.510)  //Pos A = XY White & B = ZW White 
