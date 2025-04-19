@@ -1,7 +1,7 @@
 	////----------------//
 	///**SuperDepth3D**///
 	//----------------////
-	#define SD3D "SuperDepth3D v4.6.2\n"
+	#define SD3D "SuperDepth3D v4.6.3\n"
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//* Depth Map Based 3D post-process shader
 	//* For Reshade 3.0+
@@ -2902,15 +2902,15 @@ uniform int Extra_Information <
 
 	float3 regamma(float3 c) { return float3(pow(abs(c.r),1.0/2.2), pow(abs(c.g),1.0/2.2), pow(abs(c.b),1.0/2.2));} 
 
-	float4 MouseCursor(float2 texcoord , float2 pos, int Switch,int UI_Mode )
+	float4 MouseCursor(float3 texcoord , float2 pos, int Switch,int UI_Mode )
 	{ 
 			//DX9 fails if I don't use tex2Dlod here
-			float4 Out = UI_Mode ? tex2Dlod(BackBuffer_SD,float4(texcoord,0,0)) : CSB(texcoord),Color, Exp_Darks, Exp_Brights;
+			float4 Out = UI_Mode ? tex2Dlod(BackBuffer_SD,float4(texcoord.xy,0,0)) : CSB(texcoord.xy),Color, Exp_Darks, Exp_Brights;
 			float Cursor;
 			if(Cursor_Type > 0 && Switch)
 			{
 				float CCScale = lerp(0.005,0.025,Scale(Cursor_SC.x,10,0));//scaling
-				float2 MousecoordsXY = texcoord - (Mousecoords * pix), Scale_Cursor = float2(CCScale,CCScale* ARatio );
+				float2 MousecoordsXY = texcoord.xy - (Mousecoords * pix), Scale_Cursor = float2(CCScale,CCScale* ARatio );
 
 				bool CLK_L = CLK_04;
 				if(Cursor_Lock_Button_Selection == 1)
@@ -2921,7 +2921,7 @@ uniform int Extra_Information <
 					CLK_L = CLK_04;	
 			
 				if (Cursor_Lock && !CLK_L)
-				MousecoordsXY = texcoord - float2(0.5,lerp(0.5,0.5725,Scale(Cursor_SC.z,10,0) ));
+				MousecoordsXY = texcoord.xy - float2(0.5,lerp(0.5,0.5725,Scale(Cursor_SC.z,10,0) ));
 
 				bool CLK_T = Toggle_Cursor;
 				if(Cursor_Toggle_Button_Selection == 1)
@@ -2966,7 +2966,7 @@ uniform int Extra_Information <
 			if(Toggle_Deband)
 			{
 				//Code I asked Marty McFly | Pascal for and he let me have.
-				const float SEARCH_RADIUS = 1, Depth_Sample = tex2Dlod(SamplerzBufferN_P,float4(texcoord,0,0)).x < 0.98;
+				const float SEARCH_RADIUS = 1, Depth_Sample = tex2Dlod(SamplerzBufferN_P,float4(texcoord.xy,0,0)).x < 0.98;
 				const float2 magicdot = float2(0.75487766624669276, 0.569840290998);
 				const float3 magicadd = float3(0, 0.025, 0.0125) * dot(magicdot, 1);
 				float3 dither = frac(dot(pos.xy, magicdot) + magicadd);
@@ -2980,7 +2980,7 @@ uniform int Extra_Information <
 				
 				texcoord.xy = texcoord.xy + lerp(0,37.5 * pix,SEARCH_RADIUS);
 				
-				float3 scatter =  CSB(texcoord + shift * lerp(0,pix * 75,SEARCH_RADIUS)).rgb;
+				float3 scatter =  CSB(texcoord.xy + shift * lerp(0,pix * 75,SEARCH_RADIUS)).rgb;
 				float3 diff = Depth_Sample ? abs(Out.rgb - scatter) : all(Out.rgb - scatter); 
 					   diff.x = max(max(diff.x, diff.y), diff.z) ;
 				
@@ -2995,7 +2995,7 @@ uniform int Extra_Information <
 	    	Out.g *= lerp(1,lerp(1, 0.5, smoothstep(-0.375, 0.0, blend_RGB.g)),Inficolor_Reduce_RGB.y);
 	    	Out.b *= lerp(1,lerp(1, 0.5, smoothstep(-0.500, 0.0, blend_RGB.b)),Inficolor_Reduce_RGB.z);
 	    #endif
-			return Out;
+			return float4(Out.rgb,texcoord.z);
 	}
 	
 	//////////////////////////////////////////////////////////Depth Map Information/////////////////////////////////////////////////////////////////////
@@ -4479,7 +4479,7 @@ uniform int Extra_Information <
 	static const float  VRS_Array[5] = { 0.5, 0.5, 0.25, 0.125 , 0.0625 };
 	static const float  HFI_Array[4] = { 0, 5, 6, 7};
 	//////////////////////////////////////////////////////////Parallax Generation///////////////////////////////////////////////////////////////////////
-	float2 Parallax(float Diverge, float2 Coordinates, float IO) // Horizontal parallax offset & Hole filling effect
+	float3 Parallax(float Diverge, float2 Coordinates, float IO) // Horizontal parallax offset & Hole filling effect
 	{
 	    float  MS = Diverge * pix.x; uint Perf_LvL = fmod(Performance_Level,2);  
 		float2 ParallaxCoord = Coordinates, CBxy = floor( float2(Coordinates.x * BUFFER_WIDTH, Coordinates.y * BUFFER_HEIGHT));
@@ -4625,7 +4625,7 @@ uniform int Extra_Information <
 				ParallaxCoord.x += IO * pix.x; //Optimization for column interlaced.
 		#endif
 		
-		return ParallaxCoord;
+		return float3(ParallaxCoord,DD_Map >= 0.06);
 	}
 	//////////////////////////////////////////////////////////////HUD Alterations///////////////////////////////////////////////////////////////////////
 /*
@@ -4676,8 +4676,9 @@ uniform int Extra_Information <
 		return EX_DLP_FS_Mode ? Anaglyph + 1 : Anaglyph;
 	}
 	
-	float4 Stereo_Convert(float2 texcoord, float4 L, float4 R)
-	{   float2 TC = texcoord; float4 color, accum, image = 1, color_saturation = lerp(0,2,Interlace_Anaglyph_Calibrate.y);
+	float4 Stereo_Convert(float2 texcoord, float4 cL, float4 cR)
+	{   float4 L = float4(cL.rgb,0),R = float4(cR.rgb,0);   
+		float2 TC = texcoord; float4 color, accum, image = 1, color_saturation = lerp(0,2,Interlace_Anaglyph_Calibrate.y);
 		float2 gridxy, GXYArray[9] = {
 			float2(TC.x * BUFFER_WIDTH, TC.y * BUFFER_HEIGHT), //Native
 			float2(TC.x * 3840.0, TC.y * 2160.0),
@@ -5024,9 +5025,9 @@ uniform int Extra_Information <
 				float4 Shift_LR = Vert_3D_Pinball ? Pattern_Type ? float4(-DLR.x,TCL.yx,AI) : float4(DLR.y, TCR.yx, -AI) : Pattern_Type ? float4(-DLR.x,TCL,AI) : float4(DLR.y, TCR, -AI);
 		
 				if(Vert_3D_Pinball)
-					Left_Right = MouseCursor(Parallax(Shift_LR.x,Shift_LR.yz,Shift_LR.w).yx, position.xy , Mouse_Toggle_Click, 0).rgb;		
+					Left_Right = MouseCursor(Parallax(Shift_LR.x,Shift_LR.yz,Shift_LR.w).yxz, position.xy , Mouse_Toggle_Click, 0);		
 				else
-					Left_Right = MouseCursor(Parallax(Shift_LR.x,Shift_LR.yz,Shift_LR.w), position.xy , Mouse_Toggle_Click, 0).rgb;	
+					Left_Right = MouseCursor(Parallax(Shift_LR.x,Shift_LR.yz,Shift_LR.w).xyz, position.xy , Mouse_Toggle_Click, 0);	
 		#else
 			#if Reconstruction_Mode	
 			if(Reconstruction_Type == 1 )
@@ -5037,9 +5038,9 @@ uniform int Extra_Information <
 			float4 Shift_LR = Vert_3D_Pinball ? Pattern_Type ? float4(-DLR.x,TCL.yx,AI) : float4(DLR.y, TCR.yx, -AI) : Pattern_Type ? float4(-DLR.x,TCL,AI) : float4(DLR.y, TCR, -AI);
 		
 				if(Vert_3D_Pinball)
-					Left_Right = MouseCursor(Parallax(Shift_LR.x,Shift_LR.yz,Shift_LR.w).yx, position.xy , Mouse_Toggle_Click, 0).rgb;		
+					Left_Right = MouseCursor(Parallax(Shift_LR.x,Shift_LR.yz,Shift_LR.w).yxz, position.xy , Mouse_Toggle_Click, 0);		
 				else
-					Left_Right = MouseCursor(Parallax(Shift_LR.x,Shift_LR.yz,Shift_LR.w), position.xy , Mouse_Toggle_Click, 0).rgb;	
+					Left_Right = MouseCursor(Parallax(Shift_LR.x,Shift_LR.yz,Shift_LR.w)).xyz, position.xy , Mouse_Toggle_Click, 0);	
 			#else
 				#if REST_UI_Mode
 				if(Stereoscopic_Mode == 2 || Stereoscopic_Mode == 1)
@@ -5065,25 +5066,25 @@ uniform int Extra_Information <
 			{		
 				if(Vert_3D_Pinball)
 				{
-					L.rgb = MouseCursor(Parallax(-DLR.x, TCL.yx, AI).yx, position.xy , Mouse_Toggle_Click, 0).rgb;
-					R.rgb = MouseCursor(Parallax( DLR.y, TCR.yx,-AI).yx, position.xy , Mouse_Toggle_Click, 0).rgb;
+					L = MouseCursor(Parallax(-DLR.x, TCL.yx, AI).yxz, position.xy , Mouse_Toggle_Click, 0);
+					R = MouseCursor(Parallax( DLR.y, TCR.yx,-AI).yxz, position.xy , Mouse_Toggle_Click, 0);
 				}
 				else
 				{
-					L.rgb = MouseCursor(Parallax(-DLR.x,TCL, AI), position.xy , Mouse_Toggle_Click, 0).rgb;
-					R.rgb = MouseCursor(Parallax( DLR.y,TCR,-AI), position.xy , Mouse_Toggle_Click, 0).rgb;
+					L = MouseCursor(Parallax(-DLR.x,TCL, AI).xyz, position.xy , Mouse_Toggle_Click, 0);
+					R = MouseCursor(Parallax( DLR.y,TCR,-AI).xyz, position.xy , Mouse_Toggle_Click, 0);
 				}
 			}
 			else	
 			{
 				if(Vert_3D_Pinball && Stereoscopic_Mode != 5)
-					Left_Right = MouseCursor(Parallax(Shift_LR.x,Shift_LR.yz,Shift_LR.w).yx, position.xy , Mouse_Toggle_Click, 0).rgb;		
+					Left_Right = MouseCursor(Parallax(Shift_LR.x,Shift_LR.yz,Shift_LR.w).yxz, position.xy , Mouse_Toggle_Click, 0);		
 				else
-					Left_Right = MouseCursor(Parallax(Shift_LR.x,Shift_LR.yz,Shift_LR.w), position.xy , Mouse_Toggle_Click, 0).rgb;		
+					Left_Right = MouseCursor(Parallax(Shift_LR.x,Shift_LR.yz,Shift_LR.w).xyz, position.xy , Mouse_Toggle_Click, 0);		
 			}
 			#endif
 		#endif
-
+				//Left_Right.rgb *= 1-Left_Right.w;
 		//Convert Stereo
 		#if Reconstruction_Mode || Virtual_Reality_Mode
 		color.rgb = Left_Right.rgb;
@@ -6077,7 +6078,7 @@ uniform int Extra_Information <
 		if(Cursor_Lock_Button_Selection == 3)
 			CLK_L = CLK_04;
 			
-		float4 Color = MouseCursor( TC , position.xy , CLK_L, 1);
+		float4 Color = MouseCursor( float3(TC,0) , position.xy , CLK_L, 1);
 			   Color.w = max(Color.r, max(Color.g, Color.b));
 		return Color;
 	}

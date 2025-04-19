@@ -56,7 +56,11 @@
  //* - God what a pain
  //*																																												
  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
+#if __RENDERER__ >= 0x10000 && __RENDERER__ < 0x20000 //This was added due to not compiling on AMD OpenGL
+	#define OpenGL_Switch 1
+#else
+	#define OpenGL_Switch 0
+#endif
 //////////////////////////////////////////////////////////Defines///////////////////////////////////////////////////////////////////
 #define Pix float2(BUFFER_RCP_WIDTH, BUFFER_RCP_HEIGHT)
 //#define FXAA_EDGE_THRESHOLD      (1.0/8.0)  // Replaced with AXAA early Return
@@ -72,7 +76,13 @@
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 float4 FxaaTexOff(sampler tex, float2 pos, int2 off)
 {
+	#if OpenGL_Switch
+	float2 texelSize = Pix;
+	float2 uv = pos + float2(off) * texelSize;
+	return tex2Dlod(tex, float4(uv, 0, 0));
+	#else
     return tex2Dlod(tex, float4(pos.xy,0,0), off);
+	#endif
 }
 
 float FxaaLuma(float3 rgb)
