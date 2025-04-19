@@ -1,7 +1,7 @@
 	////----------------//
 	///**SuperDepth3D**///
 	//----------------////
-	#define SD3D "SuperDepth3D v4.6.3\n"
+	#define SD3D "SuperDepth3D v4.6.4\n"
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//* Depth Map Based 3D post-process shader
 	//* For Reshade 3.0+
@@ -5040,7 +5040,7 @@ uniform int Extra_Information <
 				if(Vert_3D_Pinball)
 					Left_Right = MouseCursor(Parallax(Shift_LR.x,Shift_LR.yz,Shift_LR.w).yxz, position.xy , Mouse_Toggle_Click, 0);		
 				else
-					Left_Right = MouseCursor(Parallax(Shift_LR.x,Shift_LR.yz,Shift_LR.w)).xyz, position.xy , Mouse_Toggle_Click, 0);	
+					Left_Right = MouseCursor(Parallax(Shift_LR.x,Shift_LR.yz,Shift_LR.w).xyz, position.xy , Mouse_Toggle_Click, 0);	
 			#else
 				#if REST_UI_Mode
 				if(Stereoscopic_Mode == 2 || Stereoscopic_Mode == 1)
