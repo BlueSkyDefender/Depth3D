@@ -1,7 +1,7 @@
 	////----------------//
 	///**SuperDepth3D**///
 	//----------------////
-	#define SD3D "SuperDepth3D v4.6.4\n"
+	#define SD3D "SuperDepth3D v4.6.5\n"
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//* Depth Map Based 3D post-process shader
 	//* For Reshade 3.0+
@@ -873,7 +873,7 @@ uniform int SuperDepth3D <
 	#if !DX9_Toggle 
 	uniform int Auto_Scaler_Adjust <
 		ui_type = "combo";
-			ui_items = "Off\0Normal\0Side\0Bottom\0";
+			ui_items = "Off\0ON\0";
 		ui_label = " Auto Scaler";
 		ui_tooltip = "Shift the depth map if a slight misalignment is detected.";
 		ui_category = "Scaling Corrections";
@@ -4427,19 +4427,25 @@ uniform int Extra_Information <
 			Depth_Size = rcp(Depth_Size);
 			
 			#if DB_Size_Position || SPF || LBC || LB_Correction
-			if(Shift_Depth().x && Auto_Scaler_Adjust && !LBDetection())
-				Shift_TC /= 1 + Depth_Size;
-			if(Shift_Depth().y && Auto_Scaler_Adjust == 2 && !LBDetection())
-				Shift_TC.x /= 1 + Depth_Size.x * 3.25;
-			if(Shift_Depth().z && Auto_Scaler_Adjust == 3 && !LBDetection())
-				Shift_TC.x /= 1 + Depth_Size * 2.25;				
+			if(Auto_Scaler_Adjust)
+			{
+				if(Shift_Depth().x && !LBDetection())
+					Shift_TC /= 1 + Depth_Size;
+				if(Shift_Depth().y && !LBDetection())
+					Shift_TC.x /= 1 + Depth_Size.x * 3.0;
+				if(Shift_Depth().z && !LBDetection())
+					Shift_TC.y -= Depth_Size.y;				
+			}
 			#else
-			if(Shift_Depth().x && Auto_Scaler_Adjust)
-				Shift_TC /= 1 + Depth_Size;
-			if(Shift_Depth().y && Auto_Scaler_Adjust == 2)
-				Shift_TC.x /= 1 + Depth_Size.x * 3.25;
-			if(Shift_Depth().z && Auto_Scaler_Adjust == 3)
-				Shift_TC /= 1 + Depth_Size * 2.25;			
+			if(Auto_Scaler_Adjust)
+			{
+				if(Shift_Depth().x)
+					Shift_TC /= 1 + Depth_Size;
+				if(Shift_Depth().y)
+					Shift_TC.x /= 1 + Depth_Size.x * 3.0;
+				if(Shift_Depth().z)
+					Shift_TC.y -= Depth_Size.y;			
+			}
 			#endif
 		#endif		
 		MixOut = GetDB( Shift_TC );
@@ -4515,7 +4521,7 @@ uniform int Extra_Information <
 			  AA_Value = lerp(AA_Value,1.0,Smooth_C);
 			  
 		//Adjustments and Switching for De-Artifacting.	  
-		float AA_Switch = De_Artifacting.x < 0 ? lerp(0.0125,AA_Value ,smoothstep(0.0,1.0,Foveated_Mask)): AA_Value;
+		float AA_Switch = De_Artifacting.x < 0 ? lerp(0.3,AA_Value ,smoothstep(0.0,1.0,Foveated_Mask)): AA_Value;
 		float2 Artifacting_Adjust = float2(MS.x * lerp(0,0.125,clamp(AA_Switch * Scale_With_Depth,0,2)),1.0 - (MS.x * lerp(0,0.25,clamp(AA_Value * Scale_With_Depth,0,2))));
 		// Perform the conditional check outside the loop
 		bool applyArtifacting = (AA_Value != 0);
