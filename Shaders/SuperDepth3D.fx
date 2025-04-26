@@ -1,7 +1,7 @@
 	////----------------//
 	///**SuperDepth3D**///
 	//----------------////
-	#define SD3D "SuperDepth3D v4.6.5\n"
+	#define SD3D "SuperDepth3D v4.6.6\n"
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//* Depth Map Based 3D post-process shader
 	//* For Reshade 3.0+
@@ -3369,8 +3369,13 @@ uniform int Extra_Information <
 			Trigger_Fade = Trigger_Fade_B || SnD_Toggle;
 			
 		if(Toggle_On_Boundary)	
-			Trigger_Fade = tex2D(SamplerAvrP_N, float2(1, 0.6875)).z >= 1 && Trigger_Fade;
-			
+		{
+		    if( WP > 0)
+				Trigger_Fade = tex2D(SamplerAvrP_N, float2(1, 0.6875)).z >= 1 && Trigger_Fade;
+			else //tex2Dlod(SamplerAvrP_N,float4(1, 0.1875,0,0)).z = N
+				Trigger_Fade = tex2D(SamplerAvrP_N, float2(0, 0.1875)).z > 0.125 && Trigger_Fade;
+		}
+		
 		return PStoredfade + (Trigger_Fade - PStoredfade) * (1.0 - exp(-frametime/((1-AA)*1000))); ///exp2 would be even slower
 	}
 	
@@ -4496,7 +4501,7 @@ uniform int Extra_Information <
 		if( View_Mode == 2)
 			Perf = Performance_Level > 1 ? lerp(Performance_LvL1[Perf_LvL].y,Performance_LvL0[Perf_LvL].y,GetDepth) : Performance_LvL0[Perf_LvL].y;
 		if( View_Mode == 4)
-			Perf = CB_Done ? 0.679f : 0.367f;
+			Perf = lerp( CB_Done ? 0.679f : 0.367f,0.367f, saturate((GetDepth * 0.5)/LR_Depth_Mask) );
 		if( View_Mode == 5)
 			Perf = lerp(0.375f,0.679f,GetDepth);				
 			
@@ -4521,7 +4526,7 @@ uniform int Extra_Information <
 			  AA_Value = lerp(AA_Value,1.0,Smooth_C);
 			  
 		//Adjustments and Switching for De-Artifacting.	  
-		float AA_Switch = De_Artifacting.x < 0 ? lerp(0.3,AA_Value ,smoothstep(0.0,1.0,Foveated_Mask)): AA_Value;
+		float AA_Switch = De_Artifacting.x < 0 ? lerp(0.3 * AA_Value,AA_Value ,smoothstep(0.0,1.0,Foveated_Mask)): AA_Value;
 		float2 Artifacting_Adjust = float2(MS.x * lerp(0,0.125,clamp(AA_Switch * Scale_With_Depth,0,2)),1.0 - (MS.x * lerp(0,0.25,clamp(AA_Value * Scale_With_Depth,0,2))));
 		// Perform the conditional check outside the loop
 		bool applyArtifacting = (AA_Value != 0);
@@ -5186,6 +5191,12 @@ uniform int Extra_Information <
 		Average = float4(UI_MAP, Average_ZPD, Half_Buffer ? Storage_Array_A[int(fmod(Grid,Num_of_Values))] : Storage_Array_B[int(fmod(Grid,Num_of_Values))],Detect_Popout);
 	}
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	float colorDiffBlend(float3 a, float3 b)
+	{
+	    float3 differential = a - b;
+	    return rcp(length(differential) + 0.001);
+	}
+
 	#if Reconstruction_Mode || Virtual_Reality_Mode
 	float4 Direction(float2 texcoord,float dx, float dy, int Switcher) //Load Pixel
 	{	texcoord += float2(dx, dy);
@@ -5193,12 +5204,6 @@ uniform int Extra_Information <
 			return tex2D(Sampler_SD_CB_L, texcoord ) ;
 		else
 			return tex2D(Sampler_SD_CB_R, texcoord ) ;
-	}
-	
-	float colorDiffBlend(float3 a, float3 b)
-	{
-	    float3 differential = a - b;
-	    return rcp(length(differential) + 0.001);
 	}
 	
 	float4 differentialBlend(float2 texcoord, int Switcher, int Set_Direction)
@@ -5228,6 +5233,34 @@ uniform int Extra_Information <
 	    return Result;
 	}
 	#endif
+	/*
+	float4 Dir(sampler Tex, float2 texcoord,float dx, float dy) //Load Pixel
+	{	   texcoord += float2(dx, dy);
+			return tex2D(Tex, texcoord ) ;
+	}
+	
+	float4 CBBlend(sampler Tex,float2 texcoord)
+	{    
+		if ((texcoord.x > 1 || texcoord.x < 0) || (texcoord.y > 1 || texcoord.y < 0))
+		    return 0;
+
+		float4 Up     = Dir(Tex,texcoord, 0.0  ,-pix.y),
+		       Down   = Dir(Tex,texcoord, 0.0  , pix.y),
+		       Left   = Dir(Tex,texcoord,-pix.x, 0.0  ),
+		       Right  = Dir(Tex,texcoord, pix.x, 0.0  ),
+			   Center = Dir(Tex,texcoord, 0.0  , 0.0  ), 
+               Result;
+	
+	    float verticalWeight = colorDiffBlend(Up.rgb, Down.rgb);
+	    float horizontalWeight = colorDiffBlend(Left.rgb, Right.rgb);
+		float4 VertResult = (Up + Down) * verticalWeight;
+		float4 HorzResult = (Left + Right) * horizontalWeight;
+	    
+		Result = Center + (VertResult + HorzResult) * 0.5 * rcp(verticalWeight + horizontalWeight);
+			
+	    return Result * 0.5;
+	}
+	*/	
 	////////////////////////////////////////////////////////////////////Logo////////////////////////////////////////////////////////////////////////////
 	#define _f float // Text rendering code copied/pasted from https://www.shadertoy.com/view/4dtGD2 by Hamneggs
 	static const _f CH_A    = _f(0x69f99), CH_B    = _f(0x79797), CH_C    = _f(0xe111e),
@@ -6044,7 +6077,13 @@ uniform int Extra_Information <
 	    }
 	    return centerColor;
 	}
-	
+	/*
+	float4 MixModeBlend(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Target
+	{  
+
+	    return CBBlend(BackBuffer_SD,texcoord);
+	}
+	*/	
 	float4 SmartSharpJr(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Target
 	{  
 		float4 Color = tex2D(BackBuffer_SD,texcoord);//dot(Color.rgb,0.333);//
@@ -6198,6 +6237,13 @@ uniform int Extra_Information <
 			VertexShader = PostProcessVS;
 			PixelShader = Out;
 		}
+		
+		//	pass BlendOut
+		//{
+		//	VertexShader = PostProcessVS;
+		//	PixelShader = MixModeBlend;
+		//}
+		
 		#if !REST_UI_Mode
 				pass USMOut
 			{
