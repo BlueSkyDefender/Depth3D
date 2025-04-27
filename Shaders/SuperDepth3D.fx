@@ -1,7 +1,7 @@
 	////----------------//
 	///**SuperDepth3D**///
 	//----------------////
-	#define SD3D "SuperDepth3D v4.6.6\n"
+	#define SD3D "SuperDepth3D v4.6.7\n"
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//* Depth Map Based 3D post-process shader
 	//* For Reshade 3.0+
@@ -3657,7 +3657,9 @@ uniform int Extra_Information <
 		//Auto Scale
 		if(WZPD_and_WND.z > 0)
 			Auto_Scale = lerp(lerp(1.0,0.1,saturate(WZPD_and_WND.z * 2)),1.0,lerp(saturate(Auto_Scaler() * 2.5) , smoothstep(0,0.5,tex2D(SamplerAvrP_N,float2(0,0.5625)).z), 0.5));
-		
+		else if(WZPD_and_WND.z < 0)
+			Auto_Scale = lerp(1.0,lerp(1.0,0.1,saturate(abs(WZPD_and_WND.z) * 2)),saturate(Auto_Scaler() * 2.5));
+			
 		//Fade Storage
 		#if DX9_Toggle
 		float3x3 Fade_Pass = Fade(texcoord); //[0][0] = F | [0][1] = F | [0][2] = F
