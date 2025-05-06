@@ -1,7 +1,7 @@
 	////----------------//
 	///**SuperDepth3D**///
 	//----------------////
-	#define SD3D "SuperDepth3D v4.7.1\n"
+	#define SD3D "SuperDepth3D v4.7.2\n"
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//* Depth Map Based 3D post-process shader
 	//* For Reshade 3.0+
@@ -944,7 +944,7 @@ uniform int SuperDepth3D <
 		ui_tooltip = "Shift the depth map if a slight misalignment is detected.";
 		ui_category = "Scaling Corrections";
 	> = ASA;
-		#if LBC || LB_Correction
+		#if LBC || LB_Correction || EDW
 		uniform int LBD_Switcher <
 			ui_type = "combo";
 				ui_items = "Off\0Direction X&Y\0Direction X\0Direction Y\0";
@@ -2277,8 +2277,12 @@ uniform int Extra_Information <
   	  float Pers = Inficolor_3D_Emulator ? -Divergence_Switch().y * lerp(0.25,0.75,1-Focus_Inficolor) : Perspective;
   	  #endif  	  
 		float Perspective_Out = Pers, Push_Depth = (Re_Scale_WN().x*Scale_Value_Cal)*D_Scale;
-		#if !Use_2D_Plus_Depth	
-		Perspective_Out = Eye_Swap ? Pers + Push_Depth : Pers - Push_Depth;
+		#if !Use_2D_Plus_Depth
+			#if Legacy_Mode
+			Perspective_Out = Eye_Swap ? Perspective : Perspective;
+			#else
+			Perspective_Out = Eye_Swap ? Pers + Push_Depth : Pers - Push_Depth;
+			#endif
 		#endif
 		return Perspective_Out;	
 	}
