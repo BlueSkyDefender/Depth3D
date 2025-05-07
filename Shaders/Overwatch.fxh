@@ -36472,7 +36472,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
     //#define DS_Y 2                                 // Linerzation Offset Effects only distance if true
 	#define DB_Z 0.025                              // Auto Depth Protection
 
-	#define DE_X 4                                 // ZPD Boundary 
+	#define DE_X 5                                 // ZPD Boundary 
 	#define DE_Y 0.75                              // Set ZPD Boundary Level Zero 
 	#define DE_Z 0.375                             // Speed that Boundary is Enforced
 	//#define AFD 1                                  // Alternate Frame Detection - May be phased out

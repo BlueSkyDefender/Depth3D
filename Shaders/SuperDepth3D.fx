@@ -1,7 +1,7 @@
 	////----------------//
 	///**SuperDepth3D**///
 	//----------------////
-	#define SD3D "SuperDepth3D v4.7.2\n"
+	#define SD3D "SuperDepth3D v4.7.3\n"
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//* Depth Map Based 3D post-process shader
 	//* For Reshade 3.0+
@@ -686,8 +686,8 @@ uniform int SuperDepth3D <
 	> = EGB;
 	#if !Use_2D_Plus_Depth
 		#if Legacy_Mode
-		static const int View_Mode = 0;
-		/*
+		//static const int View_Mode = 0;
+		///*
 		uniform int View_Mode <
 			ui_type = "combo";
 			ui_items = "VM0 Stamped \0VM1 Blend\0";
@@ -701,7 +701,7 @@ uniform int SuperDepth3D <
 						"Default is Blend.";
 		ui_category = "Occlusion Masking";
 		> = DS_Z;
-		*/
+		//*/
 		#else
 		uniform int View_Mode <
 			ui_type = "combo";
@@ -726,11 +726,11 @@ uniform int SuperDepth3D <
 		ui_type = "combo";
 		ui_items = "M0 Full \0M1 Masked \0M2 Half \0";
 		#if !Use_2D_Plus_Depth
-			#if Legacy_Mode
-			ui_label = "·Halo Priority·";
-			#else
+			//#if Legacy_Mode
+			//ui_label = "·Halo Priority·";
+			//#else
 			ui_label = " Halo Priority";
-			#endif
+			//#endif
 		#else
 		ui_label = "·Halo Priority·";
 		#endif
@@ -2279,7 +2279,7 @@ uniform int Extra_Information <
 		float Perspective_Out = Pers, Push_Depth = (Re_Scale_WN().x*Scale_Value_Cal)*D_Scale;
 		#if !Use_2D_Plus_Depth
 			#if Legacy_Mode
-			Perspective_Out = Eye_Swap ? Perspective : Perspective;
+			Perspective_Out = Inficolor_3D_Emulator ? -Divergence_Switch().y * lerp(0.25,0.75,1-Focus_Inficolor) : Perspective;
 			#else
 			Perspective_Out = Eye_Swap ? Pers + Push_Depth : Pers - Push_Depth;
 			#endif
@@ -4617,31 +4617,44 @@ uniform int Extra_Information <
 		float GetDepth = smoothstep(0,1, tex2Dlod(SamplerzBufferN_L, float4(Coordinates,0, 2.0) ).x), CB_Done = fmod(CBxy.x+CBxy.y,2),
 			  Perf = Performance_Level > 1 ? lerp(Performance_LvL1[Perf_LvL].x,Performance_LvL0[Perf_LvL].x,GetDepth) : Performance_LvL0[Perf_LvL].x;
 
-		float DepthLR = 1, DLR, LRDepth, Num, S[5] = {0.5,0.625,0.75,0.875,1.01};
+		float DepthLR = 1, LRDepth = 1, LDepthR, sumW, DLR, Num, S[6] = {0.5,0.6,0.7,0.8,0.9,1.01};
 		#if Legacy_Mode
 			MS = -MS;
+
 			[loop]
-			for ( int i = 0 ; i < 5; ++i )
+			for ( int i = 0 ; i < 6; ++i )
 			{   
 				Num = S[i] * MS;
-				/*
+				LRDepth = min(LRDepth, GetMixed(float2(ParallaxCoord.x + Num, ParallaxCoord.y)).x );	
+	
 				if(View_Mode == 1)
-				{
-					LRDepth += GetMixed(float2(ParallaxCoord.x + Num * 0.75, ParallaxCoord.y)).x / 5.0;
-				
-					DepthLR = min(DepthLR, GetMixed(float2(ParallaxCoord.x + Num, ParallaxCoord.y)).x );	
-				
-					DLR = length(DepthLR - LRDepth);
+				{				
+					float w0 = 1.0, w1 = 0.750, w2 = 0.50, w3 = 0.375, w4 = 0.25, w5 = 0.125;
+					sumW = w0 + w1 + w2 + w3 + w4 + w5;
+					float Mix_Depth = min(DepthLR,GetMixed(float2(ParallaxCoord.x + 0.500 * MS, ParallaxCoord.y)).x) * w0;
+					float Cal_Mid_Depth = Mix_Depth;
+						  Mix_Depth += GetMixed(float2(ParallaxCoord.x + 0.600 * MS, ParallaxCoord.y)).x * w1;
+						  Mix_Depth += GetMixed(float2(ParallaxCoord.x + 0.700 * MS, ParallaxCoord.y)).x * w2;
+						  Mix_Depth += GetMixed(float2(ParallaxCoord.x + 0.800 * MS, ParallaxCoord.y)).x * w3;
+						  Mix_Depth += GetMixed(float2(ParallaxCoord.x + 0.900 * MS, ParallaxCoord.y)).x * w4;
+						  Mix_Depth += GetMixed(float2(ParallaxCoord.x + 1.000 * MS, ParallaxCoord.y)).x * w5;
+					Mix_Depth /= sumW;
+		
+					Mix_Depth = min(Mix_Depth,Cal_Mid_Depth);
+
+					DLR = abs(Mix_Depth - LRDepth);
 					
-					DepthLR = lerp(DepthLR,lerp(DepthLR,LRDepth,DLR),GetMixed(float2(ParallaxCoord.x + Num * 0.5, ParallaxCoord.y)).x);
+					DepthLR = lerp(Mix_Depth,LRDepth,saturate(1-DLR) * 0.1 + 0.1);
 				}
-				else
-				*/
-					DepthLR = min(DepthLR, GetMixed(float2(ParallaxCoord.x + Num, ParallaxCoord.y)).x );	
+				
 			}
 			//Reprojection Left and Right
-			ParallaxCoord = float2(Coordinates.x + MS * DepthLR, Coordinates.y);
-			return float3(ParallaxCoord,0); 
+			if(View_Mode == 1)
+				ParallaxCoord = float2(Coordinates.x + MS * DepthLR, Coordinates.y);
+			else
+				ParallaxCoord = float2(Coordinates.x + MS * LRDepth, Coordinates.y);
+
+			return float3(ParallaxCoord,DepthLR); 
 		#else
 			//Would Use Switch....
 			if( View_Mode == 2)
@@ -5679,6 +5692,7 @@ uniform int Extra_Information <
 				
 				Color = lerp( Value * 0.5, Value, S_More );
 				*/
+				//Color = Parallax(TEST, texcoord, 0).z;
 				return Color.rgba;
 			}
 		#endif
