@@ -1,7 +1,7 @@
 	////----------------//
 	///**SuperDepth3D**///
 	//----------------////
-	#define SD3D "SuperDepth3D v4.7.3\n"
+	#define SD3D "SuperDepth3D v4.7.4\n"
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//* Depth Map Based 3D post-process shader
 	//* For Reshade 3.0+
@@ -132,7 +132,7 @@ namespace SuperDepth3D
 		#define OW_WP "WP Off\0Custom WP\0"
 		#define G_Info "Missing Overwatch.fxh Information.\n"
 		#define G_Note "Note: If you pulled this file intentionally, please ignore this message.\n"
-		static const int DMM = 0, LBL = 0, LBD = 0, WSM = 0, TSC = 0;
+		static const int SDD = 0, DMM = 0, LBL = 0, LBD = 0, WSM = 0, TSC = 0;
 		static const int2 DOL = 0;
 		//Triggers 
 		static const float HNR = 0, THF = 0, EGB = 0,PLS = 0, MGA = 0, WZD = 0, KHM = 0, DAO = 0, LDT = 0, ALM = 0, SSF = 0, SNF = 0, SSE = 0, SNE = 0, EDU = 0, LBI = 0,ISD = 0, ASA = 1, IWS = 0, SUI = 0, SSA = 0, SNA = 0, SSB = 0, SNB = 0,SSC = 0, SNC = 0,SSD = 0, SND = 0, LHA = 0, WBS = 0, TMD = 0, FRM = 0, AWZ = 0, CWH = 0, WBA = 0, WFB = 0, WND = 0, WRP = 0, MML = 0, SMD = 0, WHM = 0, SDU = 0, ABE = 2, LBE = 0, HQT = 0, HMD = 0.5, MAC = 0, OIL = 0, MMS = 0, FTM = 0, FMM = 0, SPO = 0, MMD = 0, LBR = 0, AFD = 0, MDD = 0, FPS = 1, SMS = 1, OIF = 0, NCW = 0, RHW = 0, NPW = 0, SPF = 0, BDF = 0, HMT = 0, HMC = 0, DFW = 0, NFM = 0, DSW = 0, LBC = 0, LBS = 0, LBM = 0, DAA = 0, NDW = 0, PEW = 0, WPW = 0, FOV = 0, EDW = 0, SDT = 0;
@@ -606,6 +606,9 @@ uniform int SuperDepth3D <
 		ui_category = "Zero Parallax Distance";
 	> = float2(DE_Y,DE_Z);
 	
+	//Workaround it only reads from the first value.
+	static const float CutOff_Value = DI_W;	
+	
 	uniform float2 ZPD_Boundary_n_Cutoff_A <
 		#if Compatibility
 		ui_type = "drag";
@@ -618,7 +621,7 @@ uniform int SuperDepth3D <
 					 "lets you adjust how far behind the screen it should detect a intrustion.\n"
 					 "Only works when Boundary Detection is enabled & when scaler LvL one is set.";
 		ui_category = "Zero Parallax Distance";
-	> = float2(OIF.x,DI_W.x);	
+	> = float2(OIF.x,CutOff_Value);	
 
 	#if EDW
 		uniform float2 ZPD_Boundary_n_Cutoff_B <
@@ -3594,10 +3597,11 @@ uniform int Extra_Information <
 						CDArray_X_C0[9] = { 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9},
 						CDArray_X_C1[13] = { 0.1, 0.1666667, 0.2333333, 0.3, 0.3666667, 0.4333333, 0.5, 0.5666667, 0.6333333, 0.7, 0.7666667, 0.8333333, 0.9 };
 
-			float Bottom_Edge = ZPD_Boundary == 6 ? 0.95 : 0.9;
-
-			float LetterBox_Detection_A = LBDetection() || EDU ? 0.85 : Bottom_Edge;
-			float LetterBox_Detection_B = LBDetection() || EDU ? 0.85 : 0.875;
+			float Bottom_Edge_A = ZPD_Boundary == 6 || SDD ? 0.95 : 0.9;
+			float Bottom_Edge_B = SDD ? 0.95 : 0.875;
+			
+			float LetterBox_Detection_A = LBDetection() || EDU ? 0.85 : Bottom_Edge_A;
+			float LetterBox_Detection_B = LBDetection() || EDU ? 0.85 : Bottom_Edge_B;
 			float4 Shift_UP = Shift_Detectors_Up == 1 ? float4(0.375, 0.5, 0.6875, LetterBox_Detection_A) : float4(0.5, 0.65, 0.775, LetterBox_Detection_A);
 			float CDArray_Y_A0[5] = { 0.25, Shift_UP.x, Shift_UP.y, Shift_UP.z, Shift_UP.w}, 
 			      CDArray_Y_B0[5] = { 0.25, 0.375, 0.5, 0.6875, LetterBox_Detection_B},
@@ -4473,6 +4477,7 @@ uniform int Extra_Information <
 		float Separation = lerp(1.0,5.0,Depth_Seperation()); 	
 		
 		float Boost_Range_Depth = DepthBuffer_LP.x, Pop_Adjust = saturate(DI_Y);
+		float Max_Clamp = Pop_Adjust > 0 ? 5.0 : 2.5 ;
 		if(Pop_Adjust > 0)//Boost_Mode from 2018
 		{
 			float2 Clamp_Near = max(0,float2(tex2Dlod(SamplerzBufferN_P, float4(texcoord,0, 0) ).y, DepthBuffer_LP.x));	
@@ -4485,7 +4490,8 @@ uniform int Extra_Information <
 			  Boost_Range_Depth = lerp(DepthBuffer_LP.x,Boost_Range_Depth, Clamp_Near.y * 0.5 + 0.5);
 			  Boost_Range_Depth = lerp(DepthBuffer_LP.x,Boost_Range_Depth,Cal_Power_Blend * Pop_Adjust);
 		}	  
-		return min(5.0,(Separation * Boost_Range_Depth) * Smooth_Tune_Boost());
+		
+		return clamp((Separation * Boost_Range_Depth) * Smooth_Tune_Boost(),-1.5,Max_Clamp);
 	}
 	
 	int3 Shift_Depth()
