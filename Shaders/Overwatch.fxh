@@ -38825,7 +38825,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 
 	#define DF_Z 0.30                               // Set the Balance  
     //#define DAO 1                                 // Turn On or Off De-Artifact Options For now DAO if set to 1 it's also applys to Hoz 
-    #define DL_Y 0.70                               // De-Artifact Only works on some View Modes and causes performance degredation
+    #define DL_Y 0.625                               // De-Artifact Only works on some View Modes and causes performance degredation
     //#define DL_Z 0.25                             // Compat Power
 	#define DJ_X 0.125                            // Range Smoothing
     #define THF 3                                 // Target High Frequency information Like Hair

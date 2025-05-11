@@ -1,7 +1,7 @@
 	////----------------//
 	///**SuperDepth3D**///
 	//----------------////
-	#define SD3D "SuperDepth3D v4.7.4\n"
+	#define SD3D "SuperDepth3D v4.7.5\n"
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//* Depth Map Based 3D post-process shader
 	//* For Reshade 3.0+
@@ -485,6 +485,11 @@ uniform int SuperDepth3D <
 				"The header file for Profiles called Overwatch.fxh is Missing.\n"
 				"\n"
 				#endif
+				#if Legacy_Mode
+				"Legacy Mode is still a Work In Progress.\n"
+				"\n"
+
+				#endif
 				G_Info
 				"__________________________________________________________________\n"
 			    "For more information and help please visit http://www.Depth3D.info\n"
@@ -693,11 +698,11 @@ uniform int SuperDepth3D <
 		///*
 		uniform int View_Mode <
 			ui_type = "combo";
-			ui_items = "VM0 Stamped \0VM1 Blend\0";
+			ui_items = "VM0 Stamped \0VM1 Blend \0";
 			ui_label = "·View Mode·";
 			ui_tooltip = "Changes the way the shader fills in the occluded sections in the image.\n"
 						"Stamped      | Stamps out a transparent area where occlusion happens.\n"
-						" Blend       | Like Normal But but blends the the in the information.\n"
+						"Blend        | Like Normal But but blends the the in the information.\n"
 						"\n"
 						"Warning: Also Make sure Performance Mode is active before closing the ReShade menu.\n"
 						"\n"
@@ -1232,26 +1237,26 @@ uniform int SuperDepth3D <
 							ui_label = " 3D Display Modes";
 				#else
 					#if Inficolor_3D_Emulator
-						ui_items = "TriOviz Inficolor 3D Emulation\0";
+						ui_items = "TriOviz Inficolor 3D Emulation Alpha\0TriOviz Inficolor 3D Emulation Beta\0";
 						ui_label = " 3D Display Mode";
 					#else
 						#if Reconstruction_Mode
 							#if EX_DLP_FS_Mode
-								ui_items = "Side by Side\0Top and Bottom\0Frame Sequential\0Anaglyph 3D Red/Cyan\0Anaglyph 3D Red/Cyan Dubois\0Anaglyph 3D Red/Cyan Anachrome\0Anaglyph 3D Green/Magenta\0Anaglyph 3D Green/Magenta Dubois\0Anaglyph 3D Green/Magenta Triochrome\0Anaglyph 3D Blue/Amber ColorCode\0Anaglyph 3D Red/Blue Optimized\0";
+								ui_items = "Side by Side\0Top and Bottom\0Frame Sequential\0Anaglyph 3D Red/Cyan\0Anaglyph 3D Red/Cyan Dubois\0Anaglyph 3D Red/Cyan Anachrome\0Anaglyph 3D Green/Magenta\0Anaglyph 3D Green/Magenta Dubois\0Anaglyph 3D Green/Magenta Triochrome\0Anaglyph 3D Blue/Amber ColorCode\0Anaglyph 3D Red/Blue Optimized\0Anaglyph 3D Magenta-Cyan\0";
 								ui_label = " 3D Display Modes";
 							#else
-								ui_items = "Side by Side\0Top and Bottom\0Anaglyph 3D Red/Cyan\0Anaglyph 3D Red/Cyan Dubois\0Anaglyph 3D Red/Cyan Anachrome\0Anaglyph 3D Green/Magenta\0Anaglyph 3D Green/Magenta Dubois\0Anaglyph 3D Green/Magenta Triochrome\0Anaglyph 3D Blue/Amber ColorCode\0Anaglyph 3D Red/Blue Optimized\0";
+								ui_items = "Side by Side\0Top and Bottom\0Anaglyph 3D Red/Cyan\0Anaglyph 3D Red/Cyan Dubois\0Anaglyph 3D Red/Cyan Anachrome\0Anaglyph 3D Green/Magenta\0Anaglyph 3D Green/Magenta Dubois\0Anaglyph 3D Green/Magenta Triochrome\0Anaglyph 3D Blue/Amber ColorCode\0Anaglyph 3D Red/Blue Optimized\0Anaglyph 3D Magenta-Cyan\0";
 								ui_label = " 3D Display Modes";
 							#endif
 						#else
 							#if EX_DLP_FS_Mode
-								ui_items = "Side by Side\0Top and Bottom\0Line Interlaced\0Column Interlaced\0Checkerboard 3D\0Quad Lightfield 2x2\0Frame Sequential\0Anaglyph 3D Red/Cyan\0Anaglyph 3D Red/Cyan Dubois\0Anaglyph 3D Red/Cyan Anachrome\0Anaglyph 3D Green/Magenta\0Anaglyph 3D Green/Magenta Dubois\0Anaglyph 3D Green/Magenta Triochrome\0Anaglyph 3D Blue/Amber ColorCode\0Anaglyph 3D Red/Blue Optimized\0";		
+								ui_items = "Side by Side\0Top and Bottom\0Line Interlaced\0Column Interlaced\0Checkerboard 3D\0Quad Lightfield 2x2\0Frame Sequential\0Anaglyph 3D Red/Cyan\0Anaglyph 3D Red/Cyan Dubois\0Anaglyph 3D Red/Cyan Anachrome\0Anaglyph 3D Green/Magenta\0Anaglyph 3D Green/Magenta Dubois\0Anaglyph 3D Green/Magenta Triochrome\0Anaglyph 3D Blue/Amber ColorCode\0Anaglyph 3D Red/Blue Optimized\0Anaglyph 3D Magenta-Cyan\0";		
 								ui_label = "·3D Display Modes·";
 							#else
 								#if REST_UI_Mode
-									ui_items = "Side by Side\0Top and Bottom\0Line Interlaced\0Column Interlaced\0Checkerboard 3D\0Quad Lightfield 2x2 - Not Working\0Anaglyph 3D Red/Cyan\0Anaglyph 3D Red/Cyan Dubois\0Anaglyph 3D Red/Cyan Anachrome\0Anaglyph 3D Green/Magenta\0Anaglyph 3D Green/Magenta Dubois\0Anaglyph 3D Green/Magenta Triochrome\0Anaglyph 3D Blue/Amber ColorCode\0Anaglyph 3D Red/Blue Optimized\0";		
+									ui_items = "Side by Side\0Top and Bottom\0Line Interlaced\0Column Interlaced\0Checkerboard 3D\0Quad Lightfield 2x2 - Not Working\0Anaglyph 3D Red/Cyan\0Anaglyph 3D Red/Cyan Dubois\0Anaglyph 3D Red/Cyan Anachrome\0Anaglyph 3D Green/Magenta\0Anaglyph 3D Green/Magenta Dubois\0Anaglyph 3D Green/Magenta Triochrome\0Anaglyph 3D Blue/Amber ColorCode\0Anaglyph 3D Red/Blue Optimized\0Anaglyph 3D Magenta-Cyan\0";		
 								#else
-									ui_items = "Side by Side\0Top and Bottom\0Line Interlaced\0Column Interlaced\0Checkerboard 3D\0Quad Lightfield 2x2\0Anaglyph 3D Red/Cyan\0Anaglyph 3D Red/Cyan Dubois\0Anaglyph 3D Red/Cyan Anachrome\0Anaglyph 3D Green/Magenta\0Anaglyph 3D Green/Magenta Dubois\0Anaglyph 3D Green/Magenta Triochrome\0Anaglyph 3D Blue/Amber ColorCode\0Anaglyph 3D Red/Blue Optimized\0";		
+									ui_items = "Side by Side\0Top and Bottom\0Line Interlaced\0Column Interlaced\0Checkerboard 3D\0Quad Lightfield 2x2\0Anaglyph 3D Red/Cyan\0Anaglyph 3D Red/Cyan Dubois\0Anaglyph 3D Red/Cyan Anachrome\0Anaglyph 3D Green/Magenta\0Anaglyph 3D Green/Magenta Dubois\0Anaglyph 3D Green/Magenta Triochrome\0Anaglyph 3D Blue/Amber ColorCode\0Anaglyph 3D Red/Blue Optimized\0Anaglyph 3D Magenta-Cyan\0";		
 								#endif
 								ui_label = "·3D Display Modes·";
 							#endif
@@ -1783,7 +1788,13 @@ uniform int Extra_Information <
 	float2 Divergence_Switch()
 	{
 		float2 Divergence = float2(100,Depth_Adjustment);
+		#if Legacy_Mode
+				Divergence = float2(Depth_Adjustment,100);
+		#endif
 		#if Inficolor_3D_Emulator
+			#if Legacy_Mode
+				Divergence.x = Depth_Adjustment.x * 0.5;
+			#endif
 			return float2(Divergence.x,Divergence.y * 0.5) + FLT_EPSILON;
 		#else
 			return Divergence + FLT_EPSILON;		
@@ -2276,13 +2287,19 @@ uniform int Extra_Information <
 
 		#if Virtual_Reality_Mode && !Super3D_Mode
 		float Pers = IPD;
-		#else	    	 
-  	  float Pers = Inficolor_3D_Emulator ? -Divergence_Switch().y * lerp(0.25,0.75,1-Focus_Inficolor) : Perspective;
+		#else
+		#if Legacy_Mode
+		float IC_Diverge = Divergence_Switch().x * 0.5;
+		#else
+		float IC_Diverge = Divergence_Switch().y;
+		#endif
+		float I_3D_Divergence = Eye_Swap ? IC_Diverge * lerp(0.25,0.75,1-Focus_Inficolor) : -IC_Diverge * lerp(0.25,0.75,1-Focus_Inficolor) ;	    	 
+  	  float Pers = Inficolor_3D_Emulator ?  I_3D_Divergence : Perspective;
   	  #endif  	  
 		float Perspective_Out = Pers, Push_Depth = (Re_Scale_WN().x*Scale_Value_Cal)*D_Scale;
 		#if !Use_2D_Plus_Depth
 			#if Legacy_Mode
-			Perspective_Out = Inficolor_3D_Emulator ? -Divergence_Switch().y * lerp(0.25,0.75,1-Focus_Inficolor) : Perspective;
+			Perspective_Out = Inficolor_3D_Emulator ? I_3D_Divergence : Perspective;
 			#else
 			Perspective_Out = Eye_Swap ? Pers + Push_Depth : Pers - Push_Depth;
 			#endif
@@ -4634,28 +4651,28 @@ uniform int Extra_Information <
 				LRDepth = min(LRDepth, GetMixed(float2(ParallaxCoord.x + Num, ParallaxCoord.y)).x );	
 	
 				if(View_Mode == 1)
-				{				
-					float w0 = 1.0, w1 = 0.750, w2 = 0.50, w3 = 0.375, w4 = 0.25, w5 = 0.125;
-					sumW = w0 + w1 + w2 + w3 + w4 + w5;
+				{							
+					float w0 = 1.0, w1 = 0.50, w2 = 0.375, w3 = 0.250, w4 = 0.125, w5 = 0.0625, w6 = 0.03125;
+					sumW = w0 + w1 + w2 + w3 + w4 + w5 + w6;
 					float Mix_Depth = min(DepthLR,GetMixed(float2(ParallaxCoord.x + 0.500 * MS, ParallaxCoord.y)).x) * w0;
 					float Cal_Mid_Depth = Mix_Depth;
-						  Mix_Depth += GetMixed(float2(ParallaxCoord.x + 0.600 * MS, ParallaxCoord.y)).x * w1;
-						  Mix_Depth += GetMixed(float2(ParallaxCoord.x + 0.700 * MS, ParallaxCoord.y)).x * w2;
-						  Mix_Depth += GetMixed(float2(ParallaxCoord.x + 0.800 * MS, ParallaxCoord.y)).x * w3;
-						  Mix_Depth += GetMixed(float2(ParallaxCoord.x + 0.900 * MS, ParallaxCoord.y)).x * w4;
-						  Mix_Depth += GetMixed(float2(ParallaxCoord.x + 1.000 * MS, ParallaxCoord.y)).x * w5;
+						  Mix_Depth += GetMixed(float2(ParallaxCoord.x + 0.5833 * MS, ParallaxCoord.y)).x * w1;
+						  Mix_Depth += GetMixed(float2(ParallaxCoord.x + 0.6667 * MS, ParallaxCoord.y)).x * w2;
+						  Mix_Depth += GetMixed(float2(ParallaxCoord.x + 0.7500 * MS, ParallaxCoord.y)).x * w3;
+						  Mix_Depth += GetMixed(float2(ParallaxCoord.x + 0.8333 * MS, ParallaxCoord.y)).x * w4;
+						  Mix_Depth += GetMixed(float2(ParallaxCoord.x + 0.9167 * MS, ParallaxCoord.y)).x * w5;
+						  Mix_Depth += GetMixed(float2(ParallaxCoord.x + 1.0000 * MS, ParallaxCoord.y)).x * w6;
 					Mix_Depth /= sumW;
 		
 					Mix_Depth = min(Mix_Depth,Cal_Mid_Depth);
-
+					//Test with Cal_Mid_Depth & LRDepth
 					DLR = abs(Mix_Depth - LRDepth);
-					
-					DepthLR = lerp(Mix_Depth,LRDepth,saturate(1-DLR) * 0.1 + 0.1);
-				}
-				
+					DLR = lerp(saturate(1-DLR) * 0.1 + 0.1,saturate(1-DLR) * 0.2 + 0.2,LRDepth);	
+					DepthLR = lerp(Mix_Depth,LRDepth,DLR);
+				}		
 			}
 			//Reprojection Left and Right
-			if(View_Mode == 1)
+			if(View_Mode == 1 || View_Mode == 2)
 				ParallaxCoord = float2(Coordinates.x + MS * DepthLR, Coordinates.y);
 			else
 				ParallaxCoord = float2(Coordinates.x + MS * LRDepth, Coordinates.y);
@@ -4783,7 +4800,7 @@ uniform int Extra_Information <
 
 	float Anaglyph_Selection(int Selection)
 	{
-		float2 Anaglyph_Array[9] = { float2(6, 2),
+		float2 Anaglyph_Array[10] = { float2(6, 2),
 									 float2(7, 3),
 									 float2(8, 4),
 									 float2(9, 5),
@@ -4791,7 +4808,8 @@ uniform int Extra_Information <
 									 float2(11, 7),
 									 float2(12, 8),
 									 float2(13, 9),
-									 float2(14, 10)
+									 float2(14, 10),
+									 float2(15, 11)
 									};
 		float Anaglyph = Reconstruction_Mode ? Anaglyph_Array[Selection].y : Anaglyph_Array[Selection].x;
 		return EX_DLP_FS_Mode ? Anaglyph + 1 : Anaglyph;
@@ -4824,23 +4842,48 @@ uniform int Extra_Information <
 			color = Frame_Selector().x ? L : R;
 		}
 		#if Inficolor_3D_Emulator
-			float DeGhost = 0.06, LOne, ROne;
-			//L.rgb += lerp(-1, 1,Anaglyph_Eye_Brightness.x); R.rgb += lerp(-1, 1,Anaglyph_Eye_Brightness.y);
 			float3 HalfLA = dot(L.rgb,float3(0.299, 0.587, 0.114)), HalfRA = dot(R.rgb,float3(0.299, 0.587, 0.114));
 			float3 LMA = lerp(HalfLA,L.rgb,color_saturation.xxx), RMA = lerp(HalfRA,R.rgb,color_saturation.xxx);
 			float2 Contrast = lerp(0.875,1.125,Anaglyph_Eye_Contrast);		
 			// Left/Right Image
 			float4 cA = float4(saturate(LMA),1);
 			float4 cB = float4(saturate(RMA),1);
-
 			cA = (cA - 0.5) * Contrast.x + 0.5; cB = (cB - 0.5) * Contrast.y + 0.5;
-			//float Deghost = distance(cA.r, cB.g) > 0.1875;
-			//Deghost = lerp( 0, 0.5, Deghost);
-			//Used RGB Color Detection Camera. So this should be closer then before.
-			float3 leftEyeColor = float3(1.0,0.0,1.0); //magenta
-			float3 rightEyeColor = float3(0.0,1.0,0.0); //green
-			
-			color = saturate(((cA.rgb*leftEyeColor)+(cB.rgb*rightEyeColor)));// * float3(1,1,rcp(1+Deghost)));
+		
+			if(Stereoscopic_Mode == 0)
+			{
+				float3 leftEyeColor = float3(1.0,0.0,1.0); //magenta
+				float3 rightEyeColor = float3(0.0,1.0,0.0); //green
+				
+				color = saturate(((cA.rgb*leftEyeColor)+(cB.rgb*rightEyeColor)));// * float3(1,1,rcp(1+Deghost)));
+			}
+			else
+			{
+				float red = cA.r;// Left
+				float green = dot(cB.rgb,float3(0.299, 0.587, 0.114)); 	
+				float blue = cA.b;
+		
+				color = float4(red, green, blue, 0);		
+			}
+			/* Extra options med Deghosting
+			else
+			{
+				float red = lerp(cA.r , cA.b, 0.5);// Left
+				float green = lerp(cB.g , cB.b, 0.5); // Right
+				float blue = cA.b;
+				//float blue = dot(cA.rgb,float3(0.299, 0.587, 0.114));
+		
+				color = float4(red, green, blue, 0);				
+			}
+			else //Max Deghosing
+			{
+				float red = cA.r + cA.b;// Left
+				float green = cB.g + cB.b; // Right
+				float blue = dot(cB.rgb,float3(0.299, 0.587, 0.114)) + dot(cA.rgb,float3(0.299, 0.587, 0.114));
+		
+				color = float4(red, green, blue * 0.5, 0);
+			}
+			*/
 		#else
 		if(Stereoscopic_Mode >= Anaglyph_Selection(0))
 		{
@@ -5005,6 +5048,16 @@ uniform int Extra_Information <
 				float blue = (cA.r * 0 + cA.g * 0 + cA.b * 0 + cB.r * 299 + cB.g * 587 + cB.b * 114) / 1000;
 	
 				color = float4(red, 0, blue, 0);			
+			}
+			else if (Stereoscopic_Mode == Anaglyph_Selection(8)) // Anaglyph 3D Magenta-Cyan
+			{
+				float red = cA.r + cA.b;// Left
+				float green = cB.g + cB.b; // Right
+				//float blue = max(cA.r,max(cA.g,cA.b)) + max(cB.r,max(cB.g,cB.b));
+				//float blue = min(cA.r,min(cA.g,cA.b)) + min(cB.r,min(cB.g,cB.b));
+				float blue = dot(cB.rgb,float3(0.299, 0.587, 0.114)) + dot(cA.rgb,float3(0.299, 0.587, 0.114));
+		
+				color = float4(red, green, blue * 0.5, 0);
 			}
 		}
 		#endif
@@ -5417,6 +5470,11 @@ uniform int Extra_Information <
 	#if !Use_2D_Plus_Depth
 		#if Virtual_Reality_Mode	
 		///////////////////////////////////////////////////////////Barrel Distortion///////////////////////////////////////////////////////////////////////
+		int VR_Stereoscopic_Mode()
+		{
+			return Menu_Open ? 3 : Stereoscopic_Mode;
+		}
+		
 		float4 Circle(float4 C, float2 TC)
 		{
 			float2 C_A = float2(1.0f,1.1375f), midHV = (C_A-1) * float2(BUFFER_WIDTH * 0.5,BUFFER_HEIGHT * 0.5) * pix;
@@ -5479,7 +5537,7 @@ uniform int Extra_Information <
 		float3 L(float2 texcoord)
 		{
 			float3 Left;
-			if(Stereoscopic_Mode == 0 || Stereoscopic_Mode == 1)
+			if(VR_Stereoscopic_Mode() == 0 || VR_Stereoscopic_Mode() == 1)
 				Left = differentialBlend(texcoord, 0, Reconstruction_Type).rgb;
 			else
 				Left = tex2Dlod(Sampler_SD_CB_L,float4(texcoord,0,0)).rgb;
@@ -5490,7 +5548,7 @@ uniform int Extra_Information <
 		float3 R(float2 texcoord)
 		{
 			float3 Right;
-			if(Stereoscopic_Mode == 0 || Stereoscopic_Mode == 1)
+			if(VR_Stereoscopic_Mode() == 0 || VR_Stereoscopic_Mode() == 1)
 				Right = differentialBlend(texcoord, 1, Reconstruction_Type).rgb;
 			else
 				Right = tex2Dlod(Sampler_SD_CB_R,float4(texcoord,0,0)).rgb;
@@ -5514,14 +5572,14 @@ uniform int Extra_Information <
 				float2 TCL = texcoord, TCR = texcoord, TC;
 				float Text_Helper = Info_Fuction();
 				#if !Super3D_Mode
-					if (Stereoscopic_Mode == 0  )
+					if (VR_Stereoscopic_Mode() == 0  )
 					{
 						TCL.x = TCL.x*2;
 						TCR.x = TCR.x*2-1;
 						TC = texcoord.x < 0.5;
 					}
 					
-					if (Stereoscopic_Mode == 1  )
+					if (VR_Stereoscopic_Mode() == 1  )
 					{
 						TCL.y = TCL.y*2;
 						TCR.y = TCR.y*2-1;
@@ -5569,7 +5627,7 @@ uniform int Extra_Information <
 					
 					float3 Left_CB = Left.rgb;//differentialBlend(TCL, 0, Reconstruction_Type).rgb;
 					float3 Right_CB = Right.rgb;//differentialBlend(TCR, 1, Reconstruction_Type).rgb;
-					if(Stereoscopic_Mode == 0 || Stereoscopic_Mode == 1)
+					if(VR_Stereoscopic_Mode() == 0 || VR_Stereoscopic_Mode() == 1)
 						Color.rgb = TC ? Left_CB : Right_CB;
 					else
 						Color.rgb = L(texcoord) + R(texcoord);	  	
