@@ -1,7 +1,7 @@
 ////----------------------------------------//
 ///SuperDepth3D Overwatch Automation Header///
 //----------------------------------------////
-#define OVERWATCH "Overwatch v4.3.6\n"
+#define OVERWATCH "Overwatch v4.3.7\n"
 //---------------------------------------OVERWATCH---------------------------------------//
 // If you are reading this stop. Go away and never look back. From this point on if you  //
 // still think it's is worth looking at this..... Then no one can save you or your soul. //
@@ -325,8 +325,8 @@ static const float4 TPos_XY_XY_A_B_D = 0;               //Text Position A XY B X
 static const float2 TSPos_XY_C_D = 0;                   //Text Position C XY                            | DZ_Y
 static const float4 TMenu_Tresh_n_WC_D = 1000;          //Text Menu Tresh For A,B,C & D                 | DZ_Z
 static const float4 Text_Lift_Cutoff_XYDirection_D = 0; //Text Lift | Cutoff | Masking XY Postion Adjust| DZ_W
-static const float4 GDNP_Values_XYZW_D = 0;              //Game Depth Near Plane Values for XYZW        | DNN_W
-
+static const float4 GDNP_Values_XYZW_D = 0;             //Game Depth Near Plane Values for XYZW         | DNN_W
+static const int Weapon_Mix_Mode_D = 0;                 //Off 0 | On 1 Weapon Mix Mode                  | WMM
 
 //Special Toggles 
 static const int Resident_Evil_Fix_D = 0;               //Resident Evil Fix [Getting Phased Out]        | REF //To be Removed after a few Gens
@@ -40459,6 +40459,9 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 #endif
 #ifndef DOL
     #define DOL Disable_Offset_On_Level_D      //Disable Offset on Level  
+#endif
+#ifndef WMM
+    #define WMM Weapon_Mix_Mode_D              //Weapon Mix Mode  
 #endif
 
 //SuperDepth3D Warning System
