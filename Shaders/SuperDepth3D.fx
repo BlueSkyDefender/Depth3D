@@ -1,7 +1,7 @@
 	////----------------//
 	///**SuperDepth3D**///
 	//----------------////
-	#define SD3D "SuperDepth3D v4.7.5\n"
+	#define SD3D "SuperDepth3D v4.7.6\n"
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//* Depth Map Based 3D post-process shader
 	//* For Reshade 3.0+
@@ -132,7 +132,7 @@ namespace SuperDepth3D
 		#define OW_WP "WP Off\0Custom WP\0"
 		#define G_Info "Missing Overwatch.fxh Information.\n"
 		#define G_Note "Note: If you pulled this file intentionally, please ignore this message.\n"
-		static const int SDD = 0, DMM = 0, LBL = 0, LBD = 0, WSM = 0, TSC = 0;
+		static const int WMM = 0, SDD = 0, DMM = 0, LBL = 0, LBD = 0, WSM = 0, TSC = 0;
 		static const int2 DOL = 0;
 		//Triggers 
 		static const float HNR = 0, THF = 0, EGB = 0,PLS = 0, MGA = 0, WZD = 0, KHM = 0, DAO = 0, LDT = 0, ALM = 0, SSF = 0, SNF = 0, SSE = 0, SNE = 0, EDU = 0, LBI = 0,ISD = 0, ASA = 1, IWS = 0, SUI = 0, SSA = 0, SNA = 0, SSB = 0, SNB = 0,SSC = 0, SNC = 0,SSD = 0, SND = 0, LHA = 0, WBS = 0, TMD = 0, FRM = 0, AWZ = 0, CWH = 0, WBA = 0, WFB = 0, WND = 0, WRP = 0, MML = 0, SMD = 0, WHM = 0, SDU = 0, ABE = 2, LBE = 0, HQT = 0, HMD = 0.5, MAC = 0, OIL = 0, MMS = 0, FTM = 0, FMM = 0, SPO = 0, MMD = 0, LBR = 0, AFD = 0, MDD = 0, FPS = 1, SMS = 1, OIF = 0, NCW = 0, RHW = 0, NPW = 0, SPF = 0, BDF = 0, HMT = 0, HMC = 0, DFW = 0, NFM = 0, DSW = 0, LBC = 0, LBS = 0, LBM = 0, DAA = 0, NDW = 0, PEW = 0, WPW = 0, FOV = 0, EDW = 0, SDT = 0;
@@ -318,12 +318,14 @@ namespace SuperDepth3D
 	#ifndef Use_2D_Plus_Depth
 	    #define Use_2D_Plus_Depth 0
 	#endif
+	
 	#if Use_2D_Plus_Depth
 		#define Virtual_Reality_Mode 0 
 		#define Inficolor_3D_Emulator 0
 		#define Reconstruction_Mode 0
 		#define REST_UI_Mode 0
 		#define Super3D_Mode 0
+		#define Anaglyph_Mode 0
 	#else
 		//This preprocessor is for Interlaced Reconstruction of Line Interlaced for Top and Bottom and Column Interlaced for Side by Side.
 		#ifndef Virtual_Reality_Mode
@@ -332,25 +334,34 @@ namespace SuperDepth3D
 		
 		#if !Virtual_Reality_Mode
 		
+			#ifndef Anaglyph_Mode
+			    #define Anaglyph_Mode 0
+			#endif
+		
 		    #ifndef Inficolor_3D_Emulator
 		        #define Inficolor_3D_Emulator 0
 		    #endif
 		
 		    #if !REST_UI_Mode
-		        #ifndef Reconstruction_Mode
-		            #define Reconstruction_Mode 0
-		        #endif
+		    	#if !Anaglyph_Mode
+			        #ifndef Reconstruction_Mode
+			            #define Reconstruction_Mode 0
+			        #endif
+			    #else
+			        #define Reconstruction_Mode 0
+			    #endif			    	
 		    #else
 		        #define Reconstruction_Mode 0
 		    #endif
 		
 		#else
+			#define Anaglyph_Mode 0
 		    #define Reconstruction_Mode 0
 		    #define Inficolor_3D_Emulator 0
 		#endif 
 	
 		// This is for REST Add-On
-		#if Inficolor_3D_Emulator || Reconstruction_Mode || Virtual_Reality_Mode
+		#if Inficolor_3D_Emulator || Reconstruction_Mode || Virtual_Reality_Mode || Anaglyph_Mode
 		    #define REST_UI_Mode 0
 		#else
 		    #ifndef REST_UI_Mode
@@ -372,19 +383,11 @@ namespace SuperDepth3D
 	#ifndef HDR_Compatible_Mode
 	    #define HDR_Compatible_Mode 0
 	#endif
-	
-	// This preprocessor sets the vertical resolution to 50% for the depth buffer and primary buffer.
-	#ifndef Lower_Depth_Rez
-	    #define Lower_Depth_Rez 0
-	#endif
-	
-	#ifndef Use_Point_Sampling
-	    #define Use_Point_Sampling 0
-	#endif
-
+	/* //Placed on Hold
 	#ifndef Filter_Final_Image
 	    #define Filter_Final_Image 0
 	#endif
+	*/
 	
 	#ifndef Legacy_Mode
 	    #define Legacy_Mode 0
@@ -508,7 +511,7 @@ uniform int SuperDepth3D <
 		ui_category = "Game Selection";
 	> = 0;	
 	#endif
-	//uniform int TEST < ui_type = "slider"; ui_min = -100.0; ui_max = 100.0; > = 0.00;
+	//uniform float TEST < ui_type = "slider"; ui_min = 0; ui_max = 1.0; > = 0.00;
 	//Divergence & Convergence//
 	uniform float Depth_Adjustment < //This change was made to make it more simple for users
 		ui_type = "slider";
@@ -1196,10 +1199,11 @@ uniform int SuperDepth3D <
 
 	#if Use_2D_Plus_Depth
 		static const int Stereoscopic_Mode = 0;
-		static const float2 Interlace_Anaglyph_Calibrate = 0.5;
+		static const float Anaglyph_Saturation = 0.5;
+		static const float Interlace_Optimization = 0.5;
 		static const float2 Anaglyph_Eye_Contrast = 0.0;
 		static const int Scaling_Support = 0;
-		
+		static const int Eye_Swap = 0;
 		static const int Inficolor_Near_Reduction = 0;
 		static const float Focus_Inficolor = 0.5;
 		static const float Inficolor_Max_Depth = 1.0;
@@ -1221,7 +1225,8 @@ uniform int SuperDepth3D <
 		//Stereoscopic Options//
 		#if Super3D_Mode && Virtual_Reality_Mode
 		static const int Stereoscopic_Mode = 0;
-		static const float2 Interlace_Anaglyph_Calibrate = 0.5;
+		static const float Anaglyph_Saturation = 0.5;
+		static const float Interlace_Optimization = 0.5;
 		static const float2 Anaglyph_Eye_Contrast = 0.0;
 		static const int Scaling_Support = 0;
 		
@@ -1236,27 +1241,32 @@ uniform int SuperDepth3D <
 							ui_items = "Side by Side\0Top and Bottom\0Checkerboard 3D\0";
 							ui_label = " 3D Display Modes";
 				#else
-					#if Inficolor_3D_Emulator
-						ui_items = "TriOviz Inficolor 3D Emulation Alpha\0TriOviz Inficolor 3D Emulation Beta\0";
-						ui_label = " 3D Display Mode";
+					#if Inficolor_3D_Emulator || Anaglyph_Mode
+						#if Anaglyph_Mode && !Inficolor_3D_Emulator
+							ui_items = "Anaglyph 3D Red-Cyan\0Anaglyph 3D Red-Cyan Dubois\0Anaglyph 3D Red-Cyan Anachrome\0Anaglyph 3D Red-Cyan LCD Optimized Anaglyph\0Anaglyph 3D Green-Magenta\0Anaglyph 3D Green-Magenta Dubois\0Anaglyph 3D Green-Magenta Triochrome\0Anaglyph 3D Blue-Amber ColorCode\0Anaglyph 3D Red-Blue Optimized\0Anaglyph 3D Magenta-Cyan\0";
+							ui_label = " 3D Display Mode";
+						#else
+							ui_items = "TriOviz Inficolor 3D Emulation Alpha\0TriOviz Inficolor 3D Emulation Beta\0";
+							ui_label = " 3D Display Mode";
+						#endif
 					#else
 						#if Reconstruction_Mode
 							#if EX_DLP_FS_Mode
-								ui_items = "Side by Side\0Top and Bottom\0Frame Sequential\0Anaglyph 3D Red/Cyan\0Anaglyph 3D Red/Cyan Dubois\0Anaglyph 3D Red/Cyan Anachrome\0Anaglyph 3D Green/Magenta\0Anaglyph 3D Green/Magenta Dubois\0Anaglyph 3D Green/Magenta Triochrome\0Anaglyph 3D Blue/Amber ColorCode\0Anaglyph 3D Red/Blue Optimized\0Anaglyph 3D Magenta-Cyan\0";
+								ui_items = "Side by Side\0Top and Bottom\0Frame Sequential\0";
 								ui_label = " 3D Display Modes";
 							#else
-								ui_items = "Side by Side\0Top and Bottom\0Anaglyph 3D Red/Cyan\0Anaglyph 3D Red/Cyan Dubois\0Anaglyph 3D Red/Cyan Anachrome\0Anaglyph 3D Green/Magenta\0Anaglyph 3D Green/Magenta Dubois\0Anaglyph 3D Green/Magenta Triochrome\0Anaglyph 3D Blue/Amber ColorCode\0Anaglyph 3D Red/Blue Optimized\0Anaglyph 3D Magenta-Cyan\0";
+								ui_items = "Side by Side\0Top and Bottom\0";
 								ui_label = " 3D Display Modes";
 							#endif
 						#else
 							#if EX_DLP_FS_Mode
-								ui_items = "Side by Side\0Top and Bottom\0Line Interlaced\0Column Interlaced\0Checkerboard 3D\0Quad Lightfield 2x2\0Frame Sequential\0Anaglyph 3D Red/Cyan\0Anaglyph 3D Red/Cyan Dubois\0Anaglyph 3D Red/Cyan Anachrome\0Anaglyph 3D Green/Magenta\0Anaglyph 3D Green/Magenta Dubois\0Anaglyph 3D Green/Magenta Triochrome\0Anaglyph 3D Blue/Amber ColorCode\0Anaglyph 3D Red/Blue Optimized\0Anaglyph 3D Magenta-Cyan\0";		
+								ui_items = "Side by Side\0Top and Bottom\0Line Interlaced\0Column Interlaced\0Checkerboard 3D\0Quad Lightfield 2x2\0Frame Sequential\0";		
 								ui_label = "·3D Display Modes·";
 							#else
 								#if REST_UI_Mode
-									ui_items = "Side by Side\0Top and Bottom\0Line Interlaced\0Column Interlaced\0Checkerboard 3D\0Quad Lightfield 2x2 - Not Working\0Anaglyph 3D Red/Cyan\0Anaglyph 3D Red/Cyan Dubois\0Anaglyph 3D Red/Cyan Anachrome\0Anaglyph 3D Green/Magenta\0Anaglyph 3D Green/Magenta Dubois\0Anaglyph 3D Green/Magenta Triochrome\0Anaglyph 3D Blue/Amber ColorCode\0Anaglyph 3D Red/Blue Optimized\0Anaglyph 3D Magenta-Cyan\0";		
+									ui_items = "Side by Side\0Top and Bottom\0Line Interlaced\0Column Interlaced\0Checkerboard 3D\0Quad Lightfield 2x2 - Not Working\0";		
 								#else
-									ui_items = "Side by Side\0Top and Bottom\0Line Interlaced\0Column Interlaced\0Checkerboard 3D\0Quad Lightfield 2x2\0Anaglyph 3D Red/Cyan\0Anaglyph 3D Red/Cyan Dubois\0Anaglyph 3D Red/Cyan Anachrome\0Anaglyph 3D Green/Magenta\0Anaglyph 3D Green/Magenta Dubois\0Anaglyph 3D Green/Magenta Triochrome\0Anaglyph 3D Blue/Amber ColorCode\0Anaglyph 3D Red/Blue Optimized\0Anaglyph 3D Magenta-Cyan\0";		
+									ui_items = "Side by Side\0Top and Bottom\0Line Interlaced\0Column Interlaced\0Checkerboard 3D\0Quad Lightfield 2x2\0";		
 								#endif
 								ui_label = "·3D Display Modes·";
 							#endif
@@ -1266,25 +1276,39 @@ uniform int SuperDepth3D <
 				ui_tooltip = "Stereoscopic 3D display output selection.";
 				ui_category = "Stereoscopic Options";
 			> = 0;
-		
-			uniform float2 Interlace_Anaglyph_Calibrate <
-				ui_type = "drag";
-				ui_min = 0.0; ui_max = 1.0;
-				ui_label = " Interlace Optimization & Anaglyph Saturation";
-				ui_tooltip = "Interlace Optimization is used to reduce aliasing in a Line or Column interlaced images. This has the side effect of softening the image.\n"
-				             "Anaglyph Desaturation allows for removing color from an anaglyph 3D image. Zero is Black & White, One is full color.\n"
-							 "Default for Interlace Optimization and Anaglyph Desaturation/Saturation is 0.5.";
-				ui_category = "Stereoscopic Options";
-			> = float2(0.5,0.5);
-			
-			uniform float2 Anaglyph_Eye_Contrast <
-				ui_type = "drag";
-				ui_min = 0.0; ui_max = 1.0;
-				ui_label = " Anaglyph Contrast";
-				ui_tooltip = "Per Eye Contrast adjustment for Anaglyph 3D.\n"
-							 "Default is set to 0.5 Off.";
-				ui_category = "Stereoscopic Options";
-			> = float2(0.5,0.5);
+		//Interlace_Anaglyph_Calibrate
+			#if Anaglyph_Mode || Inficolor_3D_Emulator
+				uniform float Anaglyph_Saturation <
+					ui_type = "drag";
+					ui_min = 0.0; ui_max = 1.0;
+					ui_label = " Anaglyph Saturation";
+					ui_tooltip = "Anaglyph Desaturation allows for removing color from an anaglyph 3D image. Zero is Black & White, One is full color.\n"
+								 "Default for Anaglyph Desaturation/Saturation is 0.5.";
+					ui_category = "Stereoscopic Options";
+				> = 0.5;
+				static const float Interlace_Optimization = 0.5;
+				
+				uniform float2 Anaglyph_Eye_Contrast <
+					ui_type = "drag";
+					ui_min = 0.0; ui_max = 1.0;
+					ui_label = " Anaglyph Contrast";
+					ui_tooltip = "Per Eye Contrast adjustment for Anaglyph 3D.\n"
+								 "Default is set to 0.5 Off.";
+					ui_category = "Stereoscopic Options";
+				> = float2(0.5,0.5);
+				
+			#else
+				uniform float Interlace_Optimization <
+					ui_type = "drag";
+					ui_min = 0.0; ui_max = 1.0;
+					ui_label = " Interlace Optimization";
+					ui_tooltip = "Interlace Optimization is used to reduce aliasing in a Line or Column interlaced images. This has the side effect of softening the image.\n"
+								 "Default for Interlace Optimization is 0.5.";
+					ui_category = "Stereoscopic Options";
+				> = 0.5;
+				static const float Anaglyph_Saturation = 0.5;
+			#endif			
+
 			#if Inficolor_3D_Emulator
 		
 			uniform float3 Inficolor_Reduce_RGB <
@@ -1330,7 +1354,7 @@ uniform int SuperDepth3D <
 				//static const float Inficolor_OverShoot = 0.0;
 			#endif
 			
-			#if Ven && !Inficolor_3D_Emulator
+			#if Ven && !Inficolor_3D_Emulator && !Anaglyph_Mode
 			uniform int Scaling_Support <
 				ui_type = "combo";
 				ui_items = "SR Native\0SR 2160p A\0SR 2160p B\0SR 1080p A\0SR 1080p B\0SR 1050p A\0SR 1050p B\0SR 720p A\0SR 720p B\0";
@@ -1613,23 +1637,28 @@ uniform int SuperDepth3D <
 	static const float3 Polynomial_Colors_K1 = float3(0.22, 0.22, 0.22);
 	static const float3 Polynomial_Colors_K2 = float3(0.24, 0.24, 0.24);
 		#if !Super3D_Mode
-		uniform int Theater_Mode <
-			ui_type = "combo";
-			ui_items = "Off\0Theater Mode Normal\0Theater Mode Extended\0Theater Mode Max\0";
-			ui_label = "·Theater Modes·";
-			ui_tooltip = "Sets the VR Shader into Theater mode for CellPhone VR or AR Glasses.\n"
-						 "The 2nd Option is the same as the first. But, Zoomed in as a tradeoff.\n"
-					     "Default is Off.\n";
-			ui_category = "Image Effects";
-		> = 0;	
-		uniform float FoV <
-			ui_type = "slider";
-			ui_min = 0; ui_max = 0.5;
-			ui_label = " Field of View";
-			ui_tooltip = "Lets you adjust the FoV of the Image.\n"
-						 "Default is 0.0.";
-			ui_category = "Image Effects";
-		> = 0;
+			#if !Anaglyph_Mode
+			uniform int Theater_Mode <
+				ui_type = "combo";
+				ui_items = "Off\0Theater Mode Normal\0Theater Mode Extended\0Theater Mode Max\0";
+				ui_label = "·Theater Modes·";
+				ui_tooltip = "Sets the VR Shader into Theater mode for CellPhone VR or AR Glasses.\n"
+							 "The 2nd Option is the same as the first. But, Zoomed in as a tradeoff.\n"
+						     "Default is Off.\n";
+				ui_category = "Image Effects";
+			> = 0;	
+			uniform float FoV <
+				ui_type = "slider";
+				ui_min = 0; ui_max = 0.5;
+				ui_label = " Field of View";
+				ui_tooltip = "Lets you adjust the FoV of the Image.\n"
+							 "Default is 0.0.";
+				ui_category = "Image Effects";
+			> = 0;
+			#else
+			static const int Theater_Mode = 0;
+			static const float FoV = 0;
+			#endif			
 		#else
 		static const int Theater_Mode = 0;
 		static const float FoV = 0;
@@ -1639,7 +1668,7 @@ uniform int SuperDepth3D <
 	uniform float Adjust_Vignette <
 		ui_type = "slider";
 		ui_min = 0; ui_max = 1;
-		#if Virtual_Reality_Mode || Super3D_Mode
+		#if Virtual_Reality_Mode || Super3D_Mode || Anaglyph_Mode
 		ui_label = "·Vignette·";	
 		#else
 		ui_label = " Vignette";
@@ -1868,11 +1897,6 @@ uniform int Extra_Information <
 	sampler BackBuffer_SD
 	{
 		Texture = BackBufferTex;
-		#if Use_Point_Sampling
-		MagFilter = POINT;
-		MinFilter = POINT;
-		MipFilter = POINT;
-		#endif
 	};	
 		
 	#if D_Frame	
@@ -1880,12 +1904,7 @@ uniform int Extra_Information <
 		
 		sampler SamplerCF
 		{
-			Texture = texCF;
-			#if Use_Point_Sampling
-			MagFilter = POINT;
-			MinFilter = POINT;
-			MipFilter = POINT;
-			#endif		
+			Texture = texCF;		
 		};
 		
 		texture texDF { Width = BUFFER_WIDTH ; Height = BUFFER_HEIGHT ; Format = RGBA8; };
@@ -1896,11 +1915,6 @@ uniform int Extra_Information <
 			AddressU = MIRROR;
 			AddressV = MIRROR;
 			AddressW = MIRROR;
-			#if Use_Point_Sampling
-			MagFilter = POINT;
-			MinFilter = POINT;
-			MipFilter = POINT;
-			#endif
 		};
 			
 		sampler DF_BackBufferBORDER
@@ -1909,11 +1923,6 @@ uniform int Extra_Information <
 			AddressU = BORDER;
 			AddressV = BORDER;
 			AddressW = BORDER;
-			#if Use_Point_Sampling
-			MagFilter = POINT;
-			MinFilter = POINT;
-			MipFilter = POINT;
-			#endif
 		};
 			
 		sampler DF_BackBufferCLAMP
@@ -1921,30 +1930,15 @@ uniform int Extra_Information <
 			Texture = texDF;
 			AddressU = CLAMP;
 			AddressV = CLAMP;
-			AddressW = CLAMP;
-			#if Use_Point_Sampling
-			MagFilter = POINT;
-			MinFilter = POINT;
-			MipFilter = POINT;
-			#endif		
+			AddressW = CLAMP;	
 		};
 		
 		#define BackBuffer_M DF_BackBufferMIRROR
 		#define BackBuffer_B DF_BackBufferBORDER
 		#define BackBuffer_C DF_BackBufferCLAMP
 		
-		#if Use_Point_Sampling	
-			sampler BackBufferSampleTexture
-			{
-				Texture = BackBufferTex;
-				AddressU = CLAMP;
-				AddressV = CLAMP;
-				AddressW = CLAMP;
-			};	
-			#define Non_Point_Sampler BackBufferSampleTexture
-		#else
-			#define Non_Point_Sampler BackBuffer_C
-		#endif
+		#define Non_Point_Sampler BackBuffer_C
+		
 	#else
 		sampler BackBufferMIRROR
 		{
@@ -1952,11 +1946,6 @@ uniform int Extra_Information <
 			AddressU = MIRROR;
 			AddressV = MIRROR;
 			AddressW = MIRROR;
-			#if Use_Point_Sampling
-			MagFilter = POINT;
-			MinFilter = POINT;
-			MipFilter = POINT;
-			#endif
 		};
 		
 		sampler BackBufferBORDER
@@ -1965,11 +1954,6 @@ uniform int Extra_Information <
 			AddressU = BORDER;
 			AddressV = BORDER;
 			AddressW = BORDER;
-			#if Use_Point_Sampling
-			MagFilter = POINT;
-			MinFilter = POINT;
-			MipFilter = POINT;
-			#endif
 		};
 		
 		sampler BackBufferCLAMP
@@ -1977,46 +1961,18 @@ uniform int Extra_Information <
 			Texture = BackBufferTex;
 			AddressU = CLAMP;
 			AddressV = CLAMP;
-			AddressW = CLAMP;
-			#if Use_Point_Sampling
-			MagFilter = POINT;
-			MinFilter = POINT;
-			MipFilter = POINT;
-			#endif		
+			AddressW = CLAMP;		
 		};
 		
 		#define BackBuffer_M BackBufferMIRROR
 		#define BackBuffer_B BackBufferBORDER
 		#define BackBuffer_C BackBufferCLAMP
-		
-		#if Use_Point_Sampling	
-			sampler BackBufferSampleTexture
-			{
-				Texture = BackBufferTex;
-				AddressU = CLAMP;
-				AddressV = CLAMP;
-				AddressW = CLAMP;
-			};	
-			#define Non_Point_Sampler BackBufferSampleTexture
-		#else
-			#define Non_Point_Sampler BackBuffer_C
-		#endif			
-	#endif
 
-	#if Lower_Depth_Rez
-		#if Lower_Depth_Rez == 2
-			#define Lower_Depth_Rez_A 0.5
-			#define Lower_Depth_Rez_B 0.5
-		#else
-			#define Lower_Depth_Rez_A 0.5
-			#define Lower_Depth_Rez_B 1.0	
-		#endif
-	#else
-		#define Lower_Depth_Rez_A 1.0
-		#define Lower_Depth_Rez_B 1.0
+		#define Non_Point_Sampler BackBuffer_C
+			
 	#endif	
 	
-	texture texDMN { Width = BUFFER_WIDTH ; Height = BUFFER_HEIGHT * Lower_Depth_Rez_B; Format = RG16F; MipLevels = Max_Mips; }; //Mips Used
+	texture texDMN { Width = BUFFER_WIDTH ; Height = BUFFER_HEIGHT; Format = RG16F; MipLevels = Max_Mips; }; //Mips Used
 	
 	sampler SamplerDMN
 		{
@@ -2027,14 +1983,14 @@ uniform int Extra_Information <
 	#else
 		#define Color_Format_A R8
 	#endif
-	texture texCN { Width = BUFFER_WIDTH ; Height = BUFFER_HEIGHT * Lower_Depth_Rez_B; Format = Color_Format_A; MipLevels = Max_Mips; }; //Mips Used
+	texture texCN { Width = BUFFER_WIDTH ; Height = BUFFER_HEIGHT; Format = Color_Format_A; MipLevels = Max_Mips; }; //Mips Used
 	
 	sampler SamplerCN
 		{
 			Texture = texCN;
 		};
 	
-	texture texzBufferN_P { Width = BUFFER_WIDTH ; Height = BUFFER_HEIGHT * Lower_Depth_Rez_A; Format = RG16F; };
+	texture texzBufferN_P { Width = BUFFER_WIDTH ; Height = BUFFER_HEIGHT; Format = RG16F; };
 	
 	sampler SamplerzBufferN_P
 		{
@@ -2044,31 +2000,40 @@ uniform int Extra_Information <
 			MipFilter = POINT;
 		};
 	
-	texture texzBufferN_L { Width = BUFFER_WIDTH ; Height = BUFFER_HEIGHT  * Lower_Depth_Rez_A; Format = RG16F; MipLevels = 8; }; //Mips Used
+	texture texzBufferN_L { Width = BUFFER_WIDTH ; Height = BUFFER_HEIGHT; Format = RG16F; MipLevels = 8; }; //Mips Used
 	
 	sampler SamplerzBufferN_L
 		{
 			Texture = texzBufferN_L;
 		};
 		
-	#if Reconstruction_Mode || Virtual_Reality_Mode
+	#if Reconstruction_Mode || Virtual_Reality_Mode || Anaglyph_Mode
 		#if BC_SPACE == 1
 			#define Color_Format_B RGBA16
 		#else
 			#define Color_Format_B RGB10A2
 		#endif
-	texture texSD_CB_L { Width = BUFFER_WIDTH ; Height = BUFFER_HEIGHT ; Format = Color_Format_B;};
-	
-	sampler Sampler_SD_CB_L
-		{
-			Texture = texSD_CB_L;
-		};
-	texture texSD_CB_R { Width = BUFFER_WIDTH ; Height = BUFFER_HEIGHT ; Format = Color_Format_B;};
-	
-	sampler Sampler_SD_CB_R
-		{
-			Texture = texSD_CB_R;
-		};
+		#if !Anaglyph_Mode
+		texture texSD_CB_L { Width = BUFFER_WIDTH ; Height = BUFFER_HEIGHT ; Format = Color_Format_B;};
+		
+		sampler Sampler_SD_CB_L
+			{
+				Texture = texSD_CB_L;
+			};
+		texture texSD_CB_R { Width = BUFFER_WIDTH ; Height = BUFFER_HEIGHT ; Format = Color_Format_B;};
+		
+		sampler Sampler_SD_CB_R
+			{
+				Texture = texSD_CB_R;
+			};
+		#else
+		texture texSD_RL { Width = BUFFER_WIDTH ; Height = BUFFER_HEIGHT ; Format = Color_Format_B; MipLevels = 1;};
+		
+		sampler Sampler_SD_RL
+			{
+				Texture = texSD_RL;
+			};		
+		#endif
 	#endif
 
 	#if DX9_Toggle
@@ -2310,7 +2275,7 @@ uniform int Extra_Information <
 	#define pix float2(BUFFER_RCP_WIDTH, BUFFER_RCP_HEIGHT)
 	#define Per Vert_3D_Pinball ? float2( 0, (Perspective_Switch() * pix.x) ) : float2( (Perspective_Switch() * pix.x), 0) //Per is Perspective
 	#define Res int2(BUFFER_WIDTH, BUFFER_HEIGHT)
-	#define AI Interlace_Anaglyph_Calibrate.x * 0.5 //Optimization for line interlaced Adjustment.
+	#define AI Interlace_Optimization * 0.5 //Optimization for line interlaced Adjustment.
 	#define ARatio pix.y / pix.x
 				
 	float RN_Value(float i)
@@ -3314,6 +3279,7 @@ uniform int Extra_Information <
 	
 		return float2(saturate(zBufferWH), WA_XYZW().x);
 	}
+	#define WPPP 1
 	//3x2 and 2x3 not Emu on older ReShade versions. I had to use 3x3. Old Values for 3x2
 	float3x3 PrepDepth(float2 texcoord)
 	{   int Flip_Depth = Flip_Opengl_Depth ? !Depth_Map_Flip : Depth_Map_Flip;
@@ -3387,8 +3353,16 @@ uniform int Extra_Information <
 		float R, G, B, A, WD = WeaponDepth(TC_SP(texcoord).xy).x, CoP = WeaponDepth(TC_SP(texcoord).xy).y, CutOFFCal = (CoP/DMA()) * 0.5; //Weapon Cutoff Calculation
 		CutOFFCal = step(DM.x,CutOFFCal);
 	
-		[branch] if (WP == 0)
+		[branch] 
+		if (WP == 0)
 			DM.x = DM.x;
+		else if(WP != 0 && WMM == 1)//Weapon Mix Mode added for Doom The Dark Ages
+		{
+			DM.x = DM.x;
+			DM.y = lerp(0.0,WD,CutOFFCal);
+			DM.z = lerp(0.5,WD,CutOFFCal);
+			DM.x = lerp(lerp(DM.y,DM.x,0.5),DM.x,DM.x);
+		}	
 		else
 		{
 			//DM.x = lerp(DM.x,WD,CutOFFCal); // Removed
@@ -4800,24 +4774,24 @@ uniform int Extra_Information <
 
 	float Anaglyph_Selection(int Selection)
 	{
-		float2 Anaglyph_Array[10] = { float2(6, 2),
-									 float2(7, 3),
-									 float2(8, 4),
-									 float2(9, 5),
-									 float2(10, 6),
-									 float2(11, 7),
-									 float2(12, 8),
-									 float2(13, 9),
-									 float2(14, 10),
-									 float2(15, 11)
+		float Anaglyph_Array[10] = { 0,
+									 1,
+									 2,
+									 3,
+									 4,
+									 5,
+									 6,
+									 7,
+									 8,
+									 9
 									};
-		float Anaglyph = Reconstruction_Mode ? Anaglyph_Array[Selection].y : Anaglyph_Array[Selection].x;
-		return EX_DLP_FS_Mode ? Anaglyph + 1 : Anaglyph;
+		float Anaglyph = Anaglyph_Array[Selection].x;//Reconstruction_Mode ? Anaglyph_Array[Selection].y : Anaglyph_Array[Selection].x;
+		return Anaglyph;
 	}
 	
 	float4 Stereo_Convert(float2 texcoord, float4 cL, float4 cR)
 	{   float4 L = float4(cL.rgb,0),R = float4(cR.rgb,0);   
-		float2 TC = texcoord; float4 color, accum, image = 1, color_saturation = lerp(0,2,Interlace_Anaglyph_Calibrate.y);
+		float2 TC = texcoord; float4 color, accum, image = 1, color_saturation = lerp(0,2,Anaglyph_Saturation);
 		float2 gridxy, GXYArray[9] = {
 			float2(TC.x * BUFFER_WIDTH, TC.y * BUFFER_HEIGHT), //Native
 			float2(TC.x * 3840.0, TC.y * 2160.0),
@@ -4841,7 +4815,7 @@ uniform int Extra_Information <
 		{
 			color = Frame_Selector().x ? L : R;
 		}
-		#if Inficolor_3D_Emulator
+		#if Inficolor_3D_Emulator || Anaglyph_Mode
 			float3 HalfLA = dot(L.rgb,float3(0.299, 0.587, 0.114)), HalfRA = dot(R.rgb,float3(0.299, 0.587, 0.114));
 			float3 LMA = lerp(HalfLA,L.rgb,color_saturation.xxx), RMA = lerp(HalfRA,R.rgb,color_saturation.xxx);
 			float2 Contrast = lerp(0.875,1.125,Anaglyph_Eye_Contrast);		
@@ -4849,7 +4823,7 @@ uniform int Extra_Information <
 			float4 cA = float4(saturate(LMA),1);
 			float4 cB = float4(saturate(RMA),1);
 			cA = (cA - 0.5) * Contrast.x + 0.5; cB = (cB - 0.5) * Contrast.y + 0.5;
-		
+			#if !Anaglyph_Mode || Inficolor_3D_Emulator
 			if(Stereoscopic_Mode == 0)
 			{
 				float3 leftEyeColor = float3(1.0,0.0,1.0); //magenta
@@ -4884,182 +4858,201 @@ uniform int Extra_Information <
 				color = float4(red, green, blue * 0.5, 0);
 			}
 			*/
-		#else
-		if(Stereoscopic_Mode >= Anaglyph_Selection(0))
-		{
-			float DeGhost = 0.06, LOne, ROne;
-			//L.rgb += lerp(-1, 1,Anaglyph_Eye_Brightness.x); R.rgb += lerp(-1, 1,Anaglyph_Eye_Brightness.y);
-			float3 HalfLA = dot(L.rgb,float3(0.299, 0.587, 0.114)), HalfRA = dot(R.rgb,float3(0.299, 0.587, 0.114));
-			float3 LMA = lerp(HalfLA,L.rgb,color_saturation.xxx), RMA = lerp(HalfRA,R.rgb,color_saturation.xxx);
-			float2 Contrast = lerp(0,2,Anaglyph_Eye_Contrast);		
-			// Left/Right Image
-			float4 cA = float4(saturate(LMA),1);
-			float4 cB = float4(saturate(RMA),1);
-			//cA = (cA - 0.5) * Contrast.x + 0.5; cB = (cB - 0.5) * Contrast.y + 0.5;
-
-			if( Stereoscopic_Mode == Anaglyph_Selection(0) || Stereoscopic_Mode == Anaglyph_Selection(1) || Stereoscopic_Mode == Anaglyph_Selection(7) ) 
+			#else	
+			if(Stereoscopic_Mode >= Anaglyph_Selection(0))
 			{
+				float DeGhost = 0.06, LOne, ROne;
+				//L.rgb += lerp(-1, 1,Anaglyph_Eye_Brightness.x); R.rgb += lerp(-1, 1,Anaglyph_Eye_Brightness.y);
+				float3 HalfLA = dot(L.rgb,float3(0.299, 0.587, 0.114)), HalfRA = dot(R.rgb,float3(0.299, 0.587, 0.114));
+				float3 LMA = lerp(HalfLA,L.rgb,color_saturation.xxx), RMA = lerp(HalfRA,R.rgb,color_saturation.xxx);
+				float2 Contrast = lerp(0,2,Anaglyph_Eye_Contrast);		
+				// Left/Right Image
+				float4 cA = float4(saturate(LMA),1);
+				float4 cB = float4(saturate(RMA),1);
 				//cA = (cA - 0.5) * Contrast.x + 0.5; cB = (cB - 0.5) * Contrast.y + 0.5;
-				LOne = Contrast.x*0.45;
-				ROne = Contrast.y;
-				accum = saturate(cA*float4(LOne,(1.0-LOne)*0.5,(1.0-LOne)*0.5,1.0));
-				cA.r = pow(accum.r+accum.g+accum.b, 1.00);
-				
-				accum = saturate(cB*float4(1.0-ROne,ROne,0.0,1.0));
-				cB.g = pow(accum.r+accum.g+accum.b, 1.15);
-				
-				accum = saturate(cB*float4(1.0-ROne,0.0,ROne,1.0));
-				cB.b = pow(accum.r+accum.g+accum.b, 1.15);
-			}
 	
-			if( Stereoscopic_Mode == Anaglyph_Selection(2) || Stereoscopic_Mode == Anaglyph_Selection(4) ) 
-			{//float4(cB.r,cA.g,cB.b,1.0
-				//cA = (cA - 0.5) * Contrast.x + 0.5; cB = (cB - 0.5) * Contrast.y + 0.5;
-				
-				LOne = Contrast.x;
-				ROne = Contrast.y*0.8;
-	
-				accum = saturate(cB*float4(ROne,1.0-ROne,0.0,1.0));
-				cB.r = pow(accum.r+accum.g+accum.b, 1.15);
-	
-				accum = saturate(cA*float4((1.0-LOne)*0.5,LOne,(1.0-LOne)*0.5,1.0));
-				cA.g = pow(accum.r+accum.g+accum.b, 1.05);
-	
-				accum = saturate(cB*float4(0.0,1.0-ROne,ROne,1.0));
-				cB.b = pow(accum.r+accum.g+accum.b, 1.15);
-				
-			}
-	
-			if (Stereoscopic_Mode == Anaglyph_Selection(0)) // Anaglyph 3D Colors Red/Cyan
-				color =  float4(cA.r,cB.g,cB.b,1.0);
-			else if (Stereoscopic_Mode == Anaglyph_Selection(1)) // Anaglyph 3D Dubois Red/Cyan
-			{		
-				float red = 0.437 * cA.r + 0.449 * cA.g + 0.164 * cA.b - 0.011 * cB.r - 0.032 * cB.g - 0.007 * cB.b;
-	
-				if (red > 1) { red = 1; }   if (red < 0) { red = 0; }
-	
-				float green = -0.062 * cA.r -0.062 * cA.g -0.024 * cA.b + 0.377 * cB.r + 0.761 * cB.g + 0.009 * cB.b;
-	
-				if (green > 1) { green = 1; }   if (green < 0) { green = 0; }
-	
-				float blue = -0.048 * cA.r - 0.050 * cA.g - 0.017 * cA.b -0.026 * cB.r -0.093 * cB.g + 1.234  * cB.b;
-	
-				if (blue > 1) { blue = 1; }   if (blue < 0) { blue = 0; }
-	
-				color = float4(red, green, blue, 0);
-			}
-			else if (Stereoscopic_Mode == Anaglyph_Selection(2)) // Anaglyph 3D Deghosted Red/Cyan Code From http://iaian7.com/quartz/AnaglyphCompositing & vectorform.com by John Einselen
-			{
-				LOne = Contrast.x*0.45;
-				ROne = Contrast.y;
-				DeGhost *= 0.1;
-	
-				accum = saturate(cA*float4(LOne,(1.0-LOne)*0.5,(1.0-LOne)*0.5,1.0));
-				image.r = pow(accum.r+accum.g+accum.b, 1.00);
-				image.a = accum.a;
-	
-				accum = saturate(cB*float4(1.0-ROne,ROne,0.0,1.0));
-				image.g = pow(accum.r+accum.g+accum.b, 1.15);
-				image.a = image.a+accum.a;
-	
-				accum = saturate(cB*float4(1.0-ROne,0.0,ROne,1.0));
-				image.b = pow(accum.r+accum.g+accum.b, 1.15);
-				image.a = (image.a+accum.a)/3.0;
-	
-				accum = image;
-				image.r = (accum.r+(accum.r*DeGhost)+(accum.g*(DeGhost*-0.5))+(accum.b*(DeGhost*-0.5)));
-				image.g = (accum.g+(accum.r*(DeGhost*-0.25))+(accum.g*(DeGhost*0.5))+(accum.b*(DeGhost*-0.25)));
-				image.b = (accum.b+(accum.r*(DeGhost*-0.25))+(accum.g*(DeGhost*-0.25))+(accum.b*(DeGhost*0.5)));
-				color = image;
-			}
-			else if (Stereoscopic_Mode == Anaglyph_Selection(3)) // Anaglyph 3D Green/Magenta
-				color = float4(cB.r,cA.g,cB.b,1.0);
-			else if (Stereoscopic_Mode == Anaglyph_Selection(4)) // Anaglyph 3D Dubois Green/Magenta
-			{
-				float red = -0.062 * cA.r -0.158 * cA.g -0.039 * cA.b + 0.529 * cB.r + 0.705 * cB.g + 0.024 * cB.b;
-	
-				if (red > 1) { red = 1; }   if (red < 0) { red = 0; }
-	
-				float green = 0.284 * cA.r + 0.668 * cA.g + 0.143 * cA.b - 0.016 * cB.r - 0.015 * cB.g + 0.065 * cB.b;
-	
-				if (green > 1) { green = 1; }   if (green < 0) { green = 0; }
-	
-				float blue = -0.015 * cA.r -0.027 * cA.g + 0.021 * cA.b + 0.009 * cB.r + 0.075 * cB.g + 0.937  * cB.b;
-	
-				if (blue > 1) { blue = 1; }   if (blue < 0) { blue = 0; }
-	
-				color = float4(red, green, blue, 0);
-			}
-			else if (Stereoscopic_Mode == Anaglyph_Selection(5))// Anaglyph 3D Deghosted Green/Magenta Code From http://iaian7.com/quartz/AnaglyphCompositing & vectorform.com by John Einselen
-			{
-				LOne = Contrast.x*0.45;
-				ROne = Contrast.y*0.8;
-				DeGhost *= 0.275;
-	
-				accum = saturate(cB*float4(ROne,1.0-ROne,0.0,1.0));
-				image.r = pow(accum.r+accum.g+accum.b, 1.15);
-				image.a = accum.a;
-	
-				accum = saturate(cA*float4((1.0-LOne)*0.5,LOne,(1.0-LOne)*0.5,1.0));
-				image.g = pow(accum.r+accum.g+accum.b, 1.05);
-				image.a = image.a+accum.a;
-	
-				accum = saturate(cB*float4(0.0,1.0-ROne,ROne,1.0));
-				image.b = pow(accum.r+accum.g+accum.b, 1.15);
-				image.a = (image.a+accum.a)*0.33333333;
-	
-				accum = image;
-				image.r = accum.r+(accum.r*(DeGhost*0.5))+(accum.g*(DeGhost*-0.25))+(accum.b*(DeGhost*-0.25));
-				image.g = accum.g+(accum.r*(DeGhost*-0.5))+(accum.g*(DeGhost*0.25))+(accum.b*(DeGhost*-0.5));
-				image.b = accum.b+(accum.r*(DeGhost*-0.25))+(accum.g*(DeGhost*-0.25))+(accum.b*(DeGhost*0.5));
-				color = image;
-			}
-			else if (Stereoscopic_Mode == Anaglyph_Selection(6)) // Anaglyph 3D Blue/Amber Code From http://iaian7.com/quartz/AnaglyphCompositing & vectorform.com by John Einselen
-			{
-				LOne = Contrast.x*0.45;
-				ROne = Contrast.y;
-				float D[1];//The Chronicles of Riddick: Assault on Dark Athena FIX I don't know why it works.......
-				DeGhost *= 0.275;
-	
-				accum = saturate(cA*float4(ROne,0.0,1.0-ROne,1.0));
-				image.r = pow(accum.r+accum.g+accum.b, 1.05);
-				image.a = accum.a;
-	
-				accum = saturate(cA*float4(0.0,ROne,1.0-ROne,1.0));
-				image.g = pow(accum.r+accum.g+accum.b, 1.10);
-				image.a = image.a+accum.a;
-	
-				accum = saturate(cB*float4((1.0-LOne)*0.5,(1.0-LOne)*0.5,LOne,1.0));
-				image.b = pow(accum.r+accum.g+accum.b, 1.0);
-				image.b = lerp(pow(image.b,(DeGhost*0.15)+1.0),1.0-pow(abs(1.0-image.b),(DeGhost*0.15)+1.0),image.b);
-				image.a = (image.a+accum.a)*0.33333333;
-	
-				accum = image;
-				image.r = accum.r+(accum.r*(DeGhost*1.5))+(accum.g*(DeGhost*-0.75))+(accum.b*(DeGhost*-0.75));
-				image.g = accum.g+(accum.r*(DeGhost*-0.75))+(accum.g*(DeGhost*1.5))+(accum.b*(DeGhost*-0.75));
-				image.b = accum.b+(accum.r*(DeGhost*-1.5))+(accum.g*(DeGhost*-1.5))+(accum.b*(DeGhost*3.0));
-				color = saturate(image);
-			}
-			else if (Stereoscopic_Mode == Anaglyph_Selection(7)) // Anaglyph 3D Red/Blue Optimized https://stereo.jpn.org/eng/stphmkr/help/stereo_13.htm
-			{   // Note to self I need to revist all modes http://www.flickr.com/photos/e_dubois/5230654930/
-				
-				float red = ( cA.r * 299 + cA.g * 587 + cA.b* 114 +  cB.r * 0 +  cB.g * 0 +  cB.b * 0 ) / 1000;
-				//float green = (cA.r * 0 + cA.g * 0 + cA.b * 0 + cB.r * 0 + cB.g * 0 + cB.b * 0) / 1000;
-				float blue = (cA.r * 0 + cA.g * 0 + cA.b * 0 + cB.r * 299 + cB.g * 587 + cB.b * 114) / 1000;
-	
-				color = float4(red, 0, blue, 0);			
-			}
-			else if (Stereoscopic_Mode == Anaglyph_Selection(8)) // Anaglyph 3D Magenta-Cyan
-			{
-				float red = cA.r + cA.b;// Left
-				float green = cB.g + cB.b; // Right
-				//float blue = max(cA.r,max(cA.g,cA.b)) + max(cB.r,max(cB.g,cB.b));
-				//float blue = min(cA.r,min(cA.g,cA.b)) + min(cB.r,min(cB.g,cB.b));
-				float blue = dot(cB.rgb,float3(0.299, 0.587, 0.114)) + dot(cA.rgb,float3(0.299, 0.587, 0.114));
+				if( Stereoscopic_Mode == Anaglyph_Selection(0) || Stereoscopic_Mode == Anaglyph_Selection(1) || Stereoscopic_Mode == Anaglyph_Selection(3) || Stereoscopic_Mode == Anaglyph_Selection(8) ) 
+				{
+					//cA = (cA - 0.5) * Contrast.x + 0.5; cB = (cB - 0.5) * Contrast.y + 0.5;
+					LOne = Contrast.x*0.45;
+					ROne = Contrast.y;
+					accum = saturate(cA*float4(LOne,(1.0-LOne)*0.5,(1.0-LOne)*0.5,1.0));
+					cA.r = pow(accum.r+accum.g+accum.b, 1.00);
+					
+					accum = saturate(cB*float4(1.0-ROne,ROne,0.0,1.0));
+					cB.g = pow(accum.r+accum.g+accum.b, 1.15);
+					
+					accum = saturate(cB*float4(1.0-ROne,0.0,ROne,1.0));
+					cB.b = pow(accum.r+accum.g+accum.b, 1.15);
+				}
 		
-				color = float4(red, green, blue * 0.5, 0);
-			}
-		}
+				if( Stereoscopic_Mode == Anaglyph_Selection(2) || Stereoscopic_Mode == Anaglyph_Selection(5) ) 
+				{//float4(cB.r,cA.g,cB.b,1.0
+					//cA = (cA - 0.5) * Contrast.x + 0.5; cB = (cB - 0.5) * Contrast.y + 0.5;
+					
+					LOne = Contrast.x;
+					ROne = Contrast.y*0.8;
+		
+					accum = saturate(cB*float4(ROne,1.0-ROne,0.0,1.0));
+					cB.r = pow(accum.r+accum.g+accum.b, 1.15);
+		
+					accum = saturate(cA*float4((1.0-LOne)*0.5,LOne,(1.0-LOne)*0.5,1.0));
+					cA.g = pow(accum.r+accum.g+accum.b, 1.05);
+		
+					accum = saturate(cB*float4(0.0,1.0-ROne,ROne,1.0));
+					cB.b = pow(accum.r+accum.g+accum.b, 1.15);
+					
+				}
+				// Anaglyph Start
+				if (Stereoscopic_Mode == Anaglyph_Selection(0)) // Anaglyph 3D Colors Red/Cyan
+					color =  float4(cA.r,cB.g,cB.b,1.0);
+				else if (Stereoscopic_Mode == Anaglyph_Selection(1)) // Anaglyph 3D Dubois Red/Cyan
+				{		
+					float red = 0.437 * cA.r + 0.449 * cA.g + 0.164 * cA.b - 0.011 * cB.r - 0.032 * cB.g - 0.007 * cB.b;
+		
+					if (red > 1) { red = 1; }   if (red < 0) { red = 0; }
+		
+					float green = -0.062 * cA.r -0.062 * cA.g -0.024 * cA.b + 0.377 * cB.r + 0.761 * cB.g + 0.009 * cB.b;
+		
+					if (green > 1) { green = 1; }   if (green < 0) { green = 0; }
+		
+					float blue = -0.048 * cA.r - 0.050 * cA.g - 0.017 * cA.b -0.026 * cB.r -0.093 * cB.g + 1.234  * cB.b;
+		
+					if (blue > 1) { blue = 1; }   if (blue < 0) { blue = 0; }
+		
+					color = float4(red, green, blue, 0);
+				}
+				else if (Stereoscopic_Mode == Anaglyph_Selection(2)) // Anaglyph 3D Deghosted Red/Cyan Code From http://iaian7.com/quartz/AnaglyphCompositing & vectorform.com by John Einselen
+				{
+					LOne = Contrast.x*0.45;
+					ROne = Contrast.y;
+					DeGhost *= 0.1;
+		
+					accum = saturate(cA*float4(LOne,(1.0-LOne)*0.5,(1.0-LOne)*0.5,1.0));
+					image.r = pow(accum.r+accum.g+accum.b, 1.00);
+					image.a = accum.a;
+		
+					accum = saturate(cB*float4(1.0-ROne,ROne,0.0,1.0));
+					image.g = pow(accum.r+accum.g+accum.b, 1.15);
+					image.a = image.a+accum.a;
+		
+					accum = saturate(cB*float4(1.0-ROne,0.0,ROne,1.0));
+					image.b = pow(accum.r+accum.g+accum.b, 1.15);
+					image.a = (image.a+accum.a)/3.0;
+		
+					accum = image;
+					image.r = (accum.r+(accum.r*DeGhost)+(accum.g*(DeGhost*-0.5))+(accum.b*(DeGhost*-0.5)));
+					image.g = (accum.g+(accum.r*(DeGhost*-0.25))+(accum.g*(DeGhost*0.5))+(accum.b*(DeGhost*-0.25)));
+					image.b = (accum.b+(accum.r*(DeGhost*-0.25))+(accum.g*(DeGhost*-0.25))+(accum.b*(DeGhost*0.5)));
+					color = image;
+				}
+				else if (Stereoscopic_Mode == Anaglyph_Selection(3)) // Anaglyph 3D Colors Red/Cyan LCD Optimized Anaglyph https://cybereality.com/rendepth-red-cyan-anaglyph-filter-optimized-for-stereoscopic-3d-on-lcd-monitors/
+				{   //LCD Optimized Anaglyph by Andres Hernandez - AKA cybereality
+				
+					const float3 gammaMap = float3(1.6, 0.8, 1.0);
+					const float3x3 left_filter = float3x3( float3(0.4561   ,-0.400822  ,-0.0152161  ),
+														   float3(0.500484 ,-0.0378246 ,-0.0205971  ),
+														   float3(0.176381 ,-0.0157589 ,-0.00546856 ));
+					const float3x3 right_filter = float3x3( float3(-0.0434706  , 0.378476   ,-0.0721527),
+														    float3(-0.0879388  , 0.73364    ,-0.112961 ),
+														    float3(-0.00155529 , -0.0184503 , 1.2264   ));
+				
+						color.rgb = saturate(mul(cA.rgb, left_filter));// Left
+						color.rgb += saturate(mul(cB.rgb,right_filter));// Right
+						color.rgb = pow(color.rgb,rcp(gammaMap.rgb));
+				}
+				else if (Stereoscopic_Mode == Anaglyph_Selection(4)) // Anaglyph 3D Green/Magenta
+					color = float4(cB.r,cA.g,cB.b,1.0);
+				else if (Stereoscopic_Mode == Anaglyph_Selection(5)) // Anaglyph 3D Dubois Green/Magenta
+				{
+					float red = -0.062 * cA.r -0.158 * cA.g -0.039 * cA.b + 0.529 * cB.r + 0.705 * cB.g + 0.024 * cB.b;
+		
+					if (red > 1) { red = 1; }   if (red < 0) { red = 0; }
+		
+					float green = 0.284 * cA.r + 0.668 * cA.g + 0.143 * cA.b - 0.016 * cB.r - 0.015 * cB.g + 0.065 * cB.b;
+		
+					if (green > 1) { green = 1; }   if (green < 0) { green = 0; }
+		
+					float blue = -0.015 * cA.r -0.027 * cA.g + 0.021 * cA.b + 0.009 * cB.r + 0.075 * cB.g + 0.937  * cB.b;
+		
+					if (blue > 1) { blue = 1; }   if (blue < 0) { blue = 0; }
+		
+					color = float4(red, green, blue, 0);
+				}
+				else if (Stereoscopic_Mode == Anaglyph_Selection(6))// Anaglyph 3D Deghosted Green/Magenta Code From http://iaian7.com/quartz/AnaglyphCompositing & vectorform.com by John Einselen
+				{
+					LOne = Contrast.x*0.45;
+					ROne = Contrast.y*0.8;
+					DeGhost *= 0.275;
+		
+					accum = saturate(cB*float4(ROne,1.0-ROne,0.0,1.0));
+					image.r = pow(accum.r+accum.g+accum.b, 1.15);
+					image.a = accum.a;
+		
+					accum = saturate(cA*float4((1.0-LOne)*0.5,LOne,(1.0-LOne)*0.5,1.0));
+					image.g = pow(accum.r+accum.g+accum.b, 1.05);
+					image.a = image.a+accum.a;
+		
+					accum = saturate(cB*float4(0.0,1.0-ROne,ROne,1.0));
+					image.b = pow(accum.r+accum.g+accum.b, 1.15);
+					image.a = (image.a+accum.a)*0.33333333;
+		
+					accum = image;
+					image.r = accum.r+(accum.r*(DeGhost*0.5))+(accum.g*(DeGhost*-0.25))+(accum.b*(DeGhost*-0.25));
+					image.g = accum.g+(accum.r*(DeGhost*-0.5))+(accum.g*(DeGhost*0.25))+(accum.b*(DeGhost*-0.5));
+					image.b = accum.b+(accum.r*(DeGhost*-0.25))+(accum.g*(DeGhost*-0.25))+(accum.b*(DeGhost*0.5));
+					color = image;
+				}
+				else if (Stereoscopic_Mode == Anaglyph_Selection(7)) // Anaglyph 3D Blue/Amber Code From http://iaian7.com/quartz/AnaglyphCompositing & vectorform.com by John Einselen
+				{
+					LOne = Contrast.x*0.45;
+					ROne = Contrast.y;
+					float D[1];//The Chronicles of Riddick: Assault on Dark Athena FIX I don't know why it works.......
+					DeGhost *= 0.275;
+		
+					accum = saturate(cA*float4(ROne,0.0,1.0-ROne,1.0));
+					image.r = pow(accum.r+accum.g+accum.b, 1.05);
+					image.a = accum.a;
+		
+					accum = saturate(cA*float4(0.0,ROne,1.0-ROne,1.0));
+					image.g = pow(accum.r+accum.g+accum.b, 1.10);
+					image.a = image.a+accum.a;
+		
+					accum = saturate(cB*float4((1.0-LOne)*0.5,(1.0-LOne)*0.5,LOne,1.0));
+					image.b = pow(accum.r+accum.g+accum.b, 1.0);
+					image.b = lerp(pow(image.b,(DeGhost*0.15)+1.0),1.0-pow(abs(1.0-image.b),(DeGhost*0.15)+1.0),image.b);
+					image.a = (image.a+accum.a)*0.33333333;
+		
+					accum = image;
+					image.r = accum.r+(accum.r*(DeGhost*1.5))+(accum.g*(DeGhost*-0.75))+(accum.b*(DeGhost*-0.75));
+					image.g = accum.g+(accum.r*(DeGhost*-0.75))+(accum.g*(DeGhost*1.5))+(accum.b*(DeGhost*-0.75));
+					image.b = accum.b+(accum.r*(DeGhost*-1.5))+(accum.g*(DeGhost*-1.5))+(accum.b*(DeGhost*3.0));
+					color = saturate(image);
+				}
+				else if (Stereoscopic_Mode == Anaglyph_Selection(8)) // Anaglyph 3D Red/Blue Optimized https://stereo.jpn.org/eng/stphmkr/help/stereo_13.htm
+				{   // Note to self I need to revist all modes http://www.flickr.com/photos/e_dubois/5230654930/
+					
+					float red = ( cA.r * 299 + cA.g * 587 + cA.b* 114 +  cB.r * 0 +  cB.g * 0 +  cB.b * 0 ) / 1000;
+					//float green = (cA.r * 0 + cA.g * 0 + cA.b * 0 + cB.r * 0 + cB.g * 0 + cB.b * 0) / 1000;
+					float blue = (cA.r * 0 + cA.g * 0 + cA.b * 0 + cB.r * 299 + cB.g * 587 + cB.b * 114) / 1000;
+		
+					color = float4(red, 0, blue, 0);			
+				}
+				else if (Stereoscopic_Mode == Anaglyph_Selection(9)) // Anaglyph 3D Magenta-Cyan
+				{
+					float red = cA.r + cA.b;// Left
+					float green = cB.g + cB.b; // Right
+					//float blue = max(cA.r,max(cA.g,cA.b)) + max(cB.r,max(cB.g,cB.b));
+					//float blue = min(cA.r,min(cA.g,cA.b)) + min(cB.r,min(cB.g,cB.b));
+					float blue = dot(cB.rgb,float3(0.299, 0.587, 0.114)) + dot(cA.rgb,float3(0.299, 0.587, 0.114));
+			
+					color = float4(red, green, blue * 0.5, 0);
+				}
+	
+			}		
+			#endif	
+		#else
+
 		#endif
 		return color;
 	}
@@ -5090,8 +5083,12 @@ uniform int Extra_Information <
 			return texcoord;
 	}
 
-	#if Reconstruction_Mode || Virtual_Reality_Mode
-	void CB_Reconstruction(float4 position : SV_Position, float2 texcoord : TEXCOORD0, out float4 Left : SV_Target0, out float4 Right : SV_Target1)
+	#if Reconstruction_Mode || Virtual_Reality_Mode || Anaglyph_Mode
+		#if Anaglyph_Mode
+		void Anaglyph(float4 position : SV_Position, float2 texcoord : TEXCOORD0, out float4 LR_Out: SV_Target0)
+		#else
+		void CB_Reconstruction(float4 position : SV_Position, float2 texcoord : TEXCOORD0, out float4 Left : SV_Target0, out float4 Right : SV_Target1)
+		#endif
 	#else
 	float3 PS_calcLR(float2 texcoord, float2 position)
 	#endif
@@ -5149,7 +5146,7 @@ uniform int Extra_Information <
 			DLR = float2(FD,D); 
 		}
   
-		if(Stereoscopic_Mode == 0 && !Inficolor_3D_Emulator)
+		if(Stereoscopic_Mode == 0 && !Inficolor_3D_Emulator && !Anaglyph_Mode)
 			Persp *= 0.5f;
 		//if(Stereoscopic_Mode == 5)//Need to work on this later.
 		//	Persp *= 0.25;
@@ -5165,23 +5162,25 @@ uniform int Extra_Information <
 		#if !Virtual_Reality_Mode
 			#if !Reconstruction_Mode
 				#if !Inficolor_3D_Emulator
-				[branch] if (Stereoscopic_Mode == 0 && !REST_UI_Mode )
-				{
-					TCL.x = TCL.x*2;
-					TCR.x = TCR.x*2-1;
-				}
-				else if(Stereoscopic_Mode == 1 && !REST_UI_Mode )
-				{
-					TCL.y = TCL.y*2;
-					TCR.y = TCR.y*2-1;
-				}
-				else if(Stereoscopic_Mode == 5)
-				{
-					TCL = float2(TCL.x*2,TCL.y*2);
-					TCL_T = float2(TCL_T.x*2-1,TCL_T.y*2);
-					TCR = float2(TCR.x*2-1,TCR.y*2-1);
-					TCR_T = float2(TCR_T.x*2,TCR_T.y*2-1);
-				}
+					#if !Anaglyph_Mode
+						[branch] if (Stereoscopic_Mode == 0 && !REST_UI_Mode )
+						{
+							TCL.x = TCL.x*2;
+							TCR.x = TCR.x*2-1;
+						}
+						else if(Stereoscopic_Mode == 1 && !REST_UI_Mode )
+						{
+							TCL.y = TCL.y*2;
+							TCR.y = TCR.y*2-1;
+						}
+						else if(Stereoscopic_Mode == 5)
+						{
+							TCL = float2(TCL.x*2,TCL.y*2);
+							TCL_T = float2(TCL_T.x*2-1,TCL_T.y*2);
+							TCR = float2(TCR.x*2-1,TCR.y*2-1);
+							TCR_T = float2(TCR_T.x*2,TCR_T.y*2-1);
+						}
+					#endif
 				#endif
 			#endif
 		#endif
@@ -5236,7 +5235,7 @@ uniform int Extra_Information <
 			if(Stereoscopic_Mode == 5)
 				Shift_LR = TexCoords.y < 0.5 ? TexCoords.x < 0.5 ? float4(-DLR.x,TCL,AI) : float4(-DLR.x * 0.33333333,TCL_T,AI) : TexCoords.x < 0.5 ? float4(DLR.y * 0.33333333, TCR_T, -AI) : float4(DLR.y, TCR, -AI);
 	
-			if(Stereoscopic_Mode >= 6 || Inficolor_3D_Emulator)
+			if(Stereoscopic_Mode >= 6 || Inficolor_3D_Emulator || Anaglyph_Mode)
 			{		
 				if(Vert_3D_Pinball)
 				{
@@ -5263,7 +5262,7 @@ uniform int Extra_Information <
 		#if Reconstruction_Mode || Virtual_Reality_Mode
 		color.rgb = Left_Right.rgb;
 		#else
-		color.rgb = Stereoscopic_Mode >= 6 || Inficolor_3D_Emulator ? Stereo_Convert( TexCoords, L, R).rgb : Left_Right.rgb;
+		color.rgb = Stereoscopic_Mode >= 6 || Inficolor_3D_Emulator || Anaglyph_Mode ? Stereo_Convert( TexCoords, L, R).rgb : Left_Right.rgb;
 		#endif
 		
 		color = AdjustSaturation(color);
@@ -5301,13 +5300,17 @@ uniform int Extra_Information <
 		if( Helper_Fuction() == 0 || timer <= 0)  
 			color.rgb *= TexCoords.xyx;
 		
-	#if Reconstruction_Mode || Virtual_Reality_Mode
+	#if Reconstruction_Mode || Virtual_Reality_Mode 
 		Left.rgb = Pattern_Type ? 0 : color.rgb ; 
 		Right.rgb= Pattern_Type ? color.rgb  : 0;
 		Left.w = 1.0; 
 		Right.w= 1.0;
 	#else
+		#if Anaglyph_Mode
+		LR_Out = color.rgba;
+		#else
 		return color.rgb;
+		#endif
 	#endif
 	}
 	#endif
@@ -5397,6 +5400,7 @@ uniform int Extra_Information <
 	    return Result;
 	}
 	#endif
+	/* //Placed on Hold
 	#if Filter_Final_Image
 	float4 Dir(sampler Tex, float2 texcoord,float dx, float dy) //Load Pixel
 	{	   texcoord += float2(dx, dy);
@@ -5425,6 +5429,7 @@ uniform int Extra_Information <
 	    return Result * 0.5;
 	}
 	#endif	
+	*/
 	////////////////////////////////////////////////////////////////////Logo////////////////////////////////////////////////////////////////////////////
 	#define _f float // Text rendering code copied/pasted from https://www.shadertoy.com/view/4dtGD2 by Hamneggs
 	static const _f CH_A    = _f(0x69f99), CH_B    = _f(0x79797), CH_C    = _f(0xe111e),
@@ -5671,14 +5676,14 @@ uniform int Extra_Information <
 				float2 TCL = texcoord, TCR = texcoord, TC;
 				float Text_Helper = Info_Fuction(), FramePos = Frame_Selector().x;
 		
-				if (Stereoscopic_Mode == 0 && !Inficolor_3D_Emulator )
+				if (Stereoscopic_Mode == 0 && !Inficolor_3D_Emulator && !Anaglyph_Mode)
 				{
 					TCL.x = TCL.x*2;
 					TCR.x = TCR.x*2-1;
 					TC = texcoord.x < 0.5;
 				}
 				
-				if (Stereoscopic_Mode == 1 && !Inficolor_3D_Emulator )
+				if (Stereoscopic_Mode == 1 && !Inficolor_3D_Emulator && !Anaglyph_Mode)
 				{
 					TCL.y = TCL.y*2;
 					TCR.y = TCR.y*2-1;
@@ -5690,7 +5695,44 @@ uniform int Extra_Information <
 				#if Reconstruction_Mode
 				Color.rgb = Stereo_Convert( texcoord, differentialBlend(TCL, 0, Reconstruction_Type), differentialBlend(TCR, 1, Reconstruction_Type) ).rgb;	  	
 				#else
-				Color.rgb = PS_calcLR(texcoord, position.xy).rgb;
+					#if Anaglyph_Mode //Need to add blur here on blue channel.				
+						float Acc = 0.0, Blur_Blue = 0.0;
+						float S[7] = { -1.5, -1.0, -0.5, 0.0, 0.5, 1.0, 1.5 };
+						float W[7] = { 0.035, 0.100, 0.233, 0.264, 0.233, 0.100, 0.035 }; // Normalized Gaussian weights (σ ≈ 0.75)
+						float MS = Min_Divergence().x * pix.x;
+		
+						if(Stereoscopic_Mode == Anaglyph_Selection(8))
+						{
+							Color.rg = tex2D(Sampler_SD_RL,texcoord).rg;
+						
+							[loop]
+							for (int i = 0; i < 7; ++i)
+							{
+							    float Num = S[i] * MS;
+							    float weight = W[i];
+							    Blur_Blue += tex2Dlod(Sampler_SD_RL, float4(float2(texcoord.x + Num * 0.6666666666666667, texcoord.y), 0, 1)).b * weight;
+							    Acc += weight;
+							}
+							Color.b = Blur_Blue / Acc;
+						}
+						else
+						{
+							Color.rgb = tex2D(Sampler_SD_RL,texcoord).rgb;
+							/*
+							[loop]
+							for (int i = 0; i < 7; ++i)
+							{
+							    float Num = S[i] * MS;
+							    float weight = W[i];
+							    Blur_Blue += tex2Dlod(Sampler_SD_RL, float4(float2(texcoord.x + Num * 0.6666666666666667, texcoord.y), 0, 1)).b * weight;
+							    Acc += weight;
+							}
+							Color.b = Blur_Blue / Acc;
+							*/
+						}					
+					#else
+					Color.rgb = PS_calcLR(texcoord, position.xy).rgb;
+					#endif					
 					#if EX_DLP_FS_Mode
 					//DLP Markers SbS
 					if(FS_Mode == 1 && Stereoscopic_Mode == 0 )
@@ -6271,6 +6313,7 @@ uniform int Extra_Information <
 	    }
 	    return centerColor;
 	}
+	/* //Placed on Hold
 	#if Filter_Final_Image
 	float4 MixModeBlend(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Target
 	{  
@@ -6278,6 +6321,7 @@ uniform int Extra_Information <
 	    return CBBlend(BackBuffer_SD,texcoord);
 	}
 	#endif	
+	*/
 	float4 SmartSharpJr(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Target
 	{  
 		float4 Color = tex2D(BackBuffer_SD,texcoord);//dot(Color.rgb,0.333);//
@@ -6418,13 +6462,18 @@ uniform int Extra_Information <
 			RenderTarget0 = texzBufferN_M;
 		}
 
-		#if Reconstruction_Mode || Virtual_Reality_Mode
+		#if Reconstruction_Mode || Virtual_Reality_Mode || Anaglyph_Mode
 			pass Muti_Mode_Reconstruction
 		{
 			VertexShader = PostProcessVS;
+			#if Anaglyph_Mode
+			PixelShader = Anaglyph;
+			RenderTarget0 = texSD_RL;
+			#else
 			PixelShader = CB_Reconstruction;
 			RenderTarget0 = texSD_CB_L;
 			RenderTarget1 = texSD_CB_R;
+			#endif
 		}
 		#endif
 		
@@ -6433,6 +6482,7 @@ uniform int Extra_Information <
 			VertexShader = PostProcessVS;
 			PixelShader = Out;
 		}
+		/* //Placed on Hold
 		#if Filter_Final_Image
 			pass BlendOut
 		{
@@ -6440,6 +6490,7 @@ uniform int Extra_Information <
 			PixelShader = MixModeBlend;
 		}
 		#endif
+		*/
 		#if !REST_UI_Mode
 				pass USMOut
 			{
