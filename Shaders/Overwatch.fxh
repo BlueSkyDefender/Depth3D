@@ -39206,16 +39206,25 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
     //#define DFW 1 
 #elif (App == 0x854F40DF ) //Doom The Dark Ages
 	#define G_Info "Doom The Dark Ages | AppID 0x854F40DF STEAM \n"
-    #define G_Note "Note: Present From Compute needs to be set < ON >.\n" \
-       			"Set the highest quality AA in DLSS/FSR/XESS and turnoff post effects.\n" \
-       			"Don't forget to set your HUD Scale to 0.5 in the ACCESSIBILITY then UI location.\n" 
-    //#define DS_Z 4                               // Set View Mode
+	#if IS_DX12
+	    #define G_Note "Note: Present From Compute needs to be set < ON >.\n" \
+	       			"Set the highest quality AA in DLSS/FSR/XESS and turnoff post effects.\n" \
+	       			"Don't forget to set your HUD Scale to 0.5 in the ACCESSIBILITY then UI location.\n" 
+		#define PEW 1
+		#define DRS 1
+		#define DAA 1
+		#define FOV 1
+	#else
+	    #define G_Note "Note: ReShade was installed as DX12 in a Vulkan Game.\n" \
+	       			"Please reinstall ReShade under Vulkan.\n" 	
+	#endif				 
+   //#define DS_Z 4                               // Set View Mode
 	#define DA_W 1                                 // Set Linerzation
     //#define DB_X 1                               // Flip
 	#define DA_X 0.025                             // ZPD
 	//#define DHH_W 0.25                           // Smart Convergence 
 	//#define DF_Y 0.010                           // Seperation
-	#define DA_Y 25.0                             // Near Plane Adjustment
+	#define DA_Y 26.25                             // Near Plane Adjustment
     //#define DA_Z -0.012                          // Linerzation Offset
     #define DS_Y 2                                 // Linerzation Offset Effects only distance if true
 	#define DB_Z 0.025                             // Auto Depth Protection
@@ -39310,13 +39319,13 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	//#define HQT 1                                  //SM HQ Trigger
 	//#define FMM 1                                  //Filter Mode          - Need to add this back in the new shader.
 	//#define NDW 1
-	#define PEW 1
+	//#define PEW 1
 	//#define NFM 1
 	//#define NDG 1
 	//#define DSW 1
-	#define DRS 1
-	#define DAA 1
-	#define FOV 1
+	//#define DRS 1
+	//#define DAA 1
+	//#define FOV 1
     //#define ARW 1
     //#define DFW 1 
 #elif (App == 0xC9C4ACAB || App == 0xC1935FB5 ) //Avowed
