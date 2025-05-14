@@ -1,7 +1,7 @@
 	////----------------//
 	///**SuperDepth3D**///
 	//----------------////
-	#define SD3D "SuperDepth3D v4.7.6\n"
+	#define SD3D "SuperDepth3D v4.7.7\n"
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//* Depth Map Based 3D post-process shader
 	//* For Reshade 3.0+
@@ -154,9 +154,11 @@ namespace SuperDepth3D
 	#define Shift_Detectors_Up SDU //Default 0 is Off. One is On
 	//To override or activate this SDU change your have to set it too 0 or 1.
 	
+	#ifndef Cancel_Depth_Key
 	// Change the Cancel Depth Key. Determines the Cancel Depth Toggle Key using keycode info
 	// The Key Code for Decimal Point is Number 110. Ex. for Numpad Decimal "." Cancel_Depth_Key 110
-	#define Cancel_Depth_Key 0 // You can use http://keycode.info/ to figure out what key is what.
+		#define Cancel_Depth_Key 0 // You can use http://keycode.info/ to figure out what key is what.
+	#endif
 	
 	// Barrel Distortion Correction For SuperDepth3D for non conforming BackBuffer.
 	#define BD_Correction 0 //Default 0 is Off. One is On.
@@ -1795,6 +1797,32 @@ uniform int Extra_Information <
 	ui_type = "radio";
 	>;
 */
+	// Change the Cancel Depth Key. Determines the Cancel Depth Toggle Key using keycode info
+	// The Key Code for Decimal Point is Number 110. Ex. for Numpad Decimal "." Cancel_Depth_Key 110
+	//	#define Cancel_Depth_Key 0 // You can use http://keycode.info/ to figure out what key is what.
+	//Extra Informaton
+uniform int Extra_Information <
+	ui_text =   "Preprocessors:\n"
+				//"Color Correcting  | Is the process of restoring the original colors in the scenes.\n"
+				//"Deband            | Is used to correct for banding issues in the image.\n"
+				//"HDR compatibility | Allows for HDR support in the shader when HDR is available.\n"
+				//"Inficolor 3D      | Modify the shader to accommodate Inficolor glasses for 3D content.\n"
+				//"Reconstruction    | Is a diffrent way to render the images out.\n"
+				"Cancel Depth Key  | Lets you set a key to disable Depth.\n"
+				"                  | Ex. Key Code for Num Pad Decimal Point is 110.\n"
+				"                  | Go-to http://keycode.info/ to look for other keys.\n"
+				"\n"
+				//"Active Keys:\n"
+				//"Menu Key          | Is used to toggle on-screen information you see at startup.\n"
+				//"Mouse Button 4    | Is used to unlock and lock the on screen cursor at default.\n"
+				"_______________________________________________________________________________\n"
+			    "Try reading the Read Help doc or Join our Discord https://discord.gg/KrEnCAxkwJ";
+	ui_category = "Depth3D Guidelines";
+	ui_category_closed = true;
+	ui_label = " ";
+	ui_type = "radio";
+	>;
+
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	uniform bool Cancel_Depth < source = "key"; keycode = Cancel_Depth_Key; toggle = true; mode = "toggle";>;
 	uniform bool Mask_Cycle < source = "key"; keycode = Mask_Cycle_Key; toggle = true; mode = "toggle";>;
