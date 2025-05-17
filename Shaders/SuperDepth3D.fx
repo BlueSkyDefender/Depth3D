@@ -1,7 +1,7 @@
 	////----------------//
 	///**SuperDepth3D**///
 	//----------------////
-	#define SD3D "SuperDepth3D v4.7.8\n"
+	#define SD3D "SuperDepth3D v4.7.9\n"
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//* Depth Map Based 3D post-process shader
 	//* For Reshade 3.0+
@@ -2379,9 +2379,9 @@ uniform int Extra_Information <
 	#endif
 	///////////////////////////////////////////////////////////3D Image Adjustments/////////////////////////////////////////////////////////////////////
 	#if (RHW || NCW || NPW || NFM || PEW || DSW || OSW || DAA || NDW || WPW || FOV || EDW)
-		#define Text_Timer 30000
+		#define Text_Timer 15000
 	#else
-		#define Text_Timer 25000
+		#define Text_Timer 12500
 	#endif
 	
 	bool Helper_Fuction()
