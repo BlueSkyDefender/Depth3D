@@ -1,7 +1,7 @@
 	////----------------//
 	///**SuperDepth3D**///
 	//----------------////
-	#define SD3D "SuperDepth3D v4.7.7\n"
+	#define SD3D "SuperDepth3D v4.7.8\n"
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//* Depth Map Based 3D post-process shader
 	//* For Reshade 3.0+
@@ -5672,8 +5672,8 @@ uniform int Extra_Information <
 					float CbCr_Right = texcoord.x < 0.5 ? YCbCrRight(texcoord * 2 - float2(0,1)).y : YCbCrRight(texcoord * 2 - 1 ).z;
 		
 					float CbCr = texcoord.y < 0.5 ? CbCr_Left : CbCr_Right;
-		
-					Color.rgb = float3(Y_Left,Y_Right,CbCr);
+
+					Color.rgb = Menu_Open ? L(texcoord) + R(texcoord) : float3(Y_Left,Y_Right,CbCr);
 				#endif
 				
 				Color = Text_Helper ? Color.rgba + Color.w : Color; //Blend Color

@@ -39205,7 +39205,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
     //#define ARW 1
     //#define DFW 1 
 #elif (App == 0x854F40DF ) //Doom The Dark Ages
-	#define G_Info "Doom The Dark Ages | AppID 0x854F40DF STEAM \n"
+	#define G_Info "Doom The Dark Ages | AppID 0x854F40DF STEAM & Windows Store \n"
 	#if IS_DX12
 	    #define G_Note "Note: Present From Compute needs to be set < ON >.\n" \
 	       			"Set the highest quality AA in DLSS/FSR/XESS and turnoff post effects.\n" \

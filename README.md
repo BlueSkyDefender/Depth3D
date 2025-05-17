@@ -1,31 +1,18 @@
-### **Post-Process shaders for ReShade, Freestyle, & Ansel**
+### **Post-Process shaders for ReShade**
 ### Highlighted Shaders for ReShade 
-**SuperDepth3D & SuperDepth3D VR**<br />
-This Shader allows for Depth Map Based 3D like What Nvidia does with Compatibility Mode 3D and what TriDef's does with Power 3D. 
-With many more options than regular Depth3D. Depth3D is my shader that helps introduce users to the world of 3D. SuperDepth3D allows much more control and support for different devices.
-
-More in the works at the [AstrayFX](https://blueskydefender.github.io/AstrayFX/) repository. This is shader content that falls outside of Stereo 3D....
+**SuperDepth3D**<br />
+This shader allows for depth map-based 3D, similar to what NVIDIA offers with Compatibility Mode 3D and what TriDef does with Power 3D. SuperDepth3D provides much more control and support for different devices.
 
 ### Shader Assistant
 **Overwatch.fxh**<br />
-Overwatch will assist many of my shaders by setting the Depth Settings for you in select games. To be honest this is the reason donations help me, help you. With every donation this allows Overwatch to grow. This makes it easier to just load it alongside my Depth
-Based Shaders and have some settings set for you. Less Hassle more FUN.
+Overwatch is a companion tool designed to enhance your experience with SuperDepth3D by automatically setting depth and 3D configurations in many games. It simplifies setup so you can spend less time tweaking and more time enjoying immersive gameplay.
 
-### Highlighted Shaders Freestyle & Ansel
-**3DViewer**<br />
-This Shader allows for Depth Map Based 3D. With more user control to adjust the image too how they want. Compatible with 3DTV's 3DMonitors & VR HMDs. Made with Freestyle & Ansel in mind.
-
-**Enhance**<br /> 
-A fast Simple way to enhance the look of your image. Needs to be added.
-
-**Flair**<br />
-A multi anamorphic like lens flare shader. It lets you add......... "Flair........" to your images....... get it?
-
-**Particles**<br />
-Lets you add particles to the image to mimic dust or fire flys with local isolation of color and bright objects.
+Honestly, this is where your donations make a real difference. They help me improve and expand Overwatch, making it smarter and compatible with more titles. Less hassle, more fun for everyone.
 
 ### Depth3D VR
 **Companion App**<br />
+
+**This Software is now Deprecated.**
 
 This Free VR App, is a basic way to view my stereoscopic shaders on your OpenXR supported HMD.<br />
 
@@ -44,21 +31,11 @@ No support for Laptops with Hybrid systems. Though there are workarounds as user
 ### Game Compatibility
 **Game Compatibility Information**
 
-http://reshade.me/compatibility
+https://www.pcgamingwiki.com/wiki/ReShade#Compatibility_list
 At this link look for Depth Map Compatibility.
 This should work for Both AMD/Nividia GPUs.
 
-Some issues in many opengl Games with AMD. So you may have issues here.
-like with games as .Hack//G.U.
-
-Also, Way many more games listed in Games_Help.txt
-
-Please read me ReadMeDepth3d.txt For Setting and More Information. "Needs to be Updated"
-
 ### Contact & Donation Links
-
-**Want to leave me a message at the forums?:** BlueSkyKnight<br />
-https://reshade.me/forum/shader-presentation/2128-sidebyside-3d-depth-map-based-stereoscopic-shader<br />
 
 **Want to leave me a message?:** BlueSkyDefender<br />
 Also my steam page https://steamcommunity.com/id/BlueSkyDefender<br />
