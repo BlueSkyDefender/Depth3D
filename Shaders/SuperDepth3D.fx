@@ -1,7 +1,7 @@
 	////----------------//
 	///**SuperDepth3D**///
 	//----------------////
-	#define SD3D "SuperDepth3D v4.7.9\n"
+	#define SD3D "SuperDepth3D v4.8.0\n"
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//* Depth Map Based 3D post-process shader
 	//* For Reshade 3.0+
@@ -2094,7 +2094,17 @@ uniform int Extra_Information <
 			MinFilter = POINT;
 			MipFilter = POINT;
 		};
+	//UPSample Pass
+	texture texzBufferN_U { Width = BUFFER_WIDTH ; Height = BUFFER_HEIGHT ; Format = R16F; }; //Do not use mips in this buffer
 	
+	sampler SamplerzBufferN_Up
+		{
+			Texture = texzBufferN_U;
+			MagFilter = POINT;
+			MinFilter = POINT;
+			MipFilter = POINT;
+		};
+
 	#if UI_MASK
 	texture TexMaskA < source = "DM_Mask_A.png"; > { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA8; };
 	sampler SamplerMaskA { Texture = TexMaskA;};
@@ -4611,10 +4621,60 @@ uniform int Extra_Information <
 		//MixOut = MixOut;
 	}
 	
-	float GetMixed(float2 texcoord) //Sensitive Buffer.
+	void swap(inout float a, inout float b)
 	{
+	    float t = a;
+	    a = min(t, b);
+	    b = max(t, b);
+	}
+
+	float Median3x3(sampler2D tex, float2 uv, float2 texelSize)
+	{
+	    static const float2 offsets[9] = { float2(-1, -1), float2( 0, -1), float2( 1, -1),
+									       float2(-1,  0), float2( 0,  0), float2( 1,  0),
+									       float2(-1,  1), float2( 0,  1), float2( 1,  1) };
+	
+	    float v[9];
+	    for (int i = 0; i < 9; ++i)
+	    {
+	        v[i] = tex2Dlod(tex, float4(uv + offsets[i] * texelSize, 0, 0)).x;
+		}
+	    
+	    swap(v[1], v[2]); swap(v[4], v[5]); swap(v[7], v[8]);
+	    swap(v[0], v[1]); swap(v[3], v[4]); swap(v[6], v[7]);
+	    swap(v[1], v[2]); swap(v[4], v[5]); swap(v[7], v[8]);
+	    swap(v[0], v[3]); swap(v[5], v[8]); swap(v[4], v[7]);
+	    swap(v[3], v[6]); swap(v[1], v[4]); swap(v[2], v[5]);
+	    swap(v[4], v[7]); swap(v[4], v[2]); swap(v[6], v[4]);
+	    swap(v[4], v[2]);
+		
+		// Median
+	    return v[4];
+	}
+	
+	void Up_Z(in float4 position : SV_Position, in float2 texcoord : TEXCOORD, out float UpOut : SV_Target0)
+	{
+		float2 Depth_Size = rcp(tex2Dsize(DepthBuffer));
+	
+	    float base = tex2D(SamplerzBufferN_Mixed, texcoord).x;
+		float Med = Median3x3(SamplerzBufferN_Mixed, texcoord, Depth_Size);
+		
+		//UpOut = min(base,Med);
+	    float diff = abs(base - Med);
+	
+	    // Sensitivity threshold
+	    float threshold = 0.001;
+	    float blend = saturate(diff / threshold); // Adaptive blend weight
+	
+	    UpOut = lerp(base, Med, blend);    					    	
+	}	
+	
+	float2 GetMixed(float2 texcoord) //Sensitive Buffer.
+	{
+		float BufferA = tex2Dlod(SamplerzBufferN_Up,float4(texcoord,0,0)).x, 
+			  BufferB = tex2Dlod(SamplerzBufferN_Mixed,float4(texcoord,0,0)).x;
 		//Careful not to shift here because we run out of memory in DX9
-		return tex2Dlod(SamplerzBufferN_Mixed,float4(texcoord,0,0)).x;//Do not use mips on this buffer
+		return float2(BufferA,BufferB);//Do not use mips on this buffer
 	}
 	#if !Use_2D_Plus_Depth
 	float2 De_Art(float2 sp, float2 Shift_n_Zoom)
@@ -4732,24 +4792,29 @@ uniform int Extra_Information <
 				//Offsets listed here Max Seperation is 3% - 8% of screen space with Depth Offsets & Netto layer offset change based on MS.
 				float deltaCoordinates = MS.x * LayerDepth, CurrentDepthMapValue = min(1,GetMixed( ParallaxCoord).x), CurrentLayerDepth = -Re_Scale_WN().x,
 					  DB_Offset = US_Offset * TP * pix.x;
-	
-			
-			[loop] //Steep parallax mapping Ray Marcher
-			while ( CurrentDepthMapValue >= CurrentLayerDepth )
-			{   
-				if(CurrentDepthMapValue < CurrentLayerDepth)//Had to do this check to keep it from crashing
-					break;
-				// Shift coordinates horizontally in linear fasion
-			    ParallaxCoord.x -= deltaCoordinates; 
-			    // Get depth value at current coordinates
-			    float G_Depth = GetMixed(ParallaxCoord).x;  
-			    if ( applyArtifacting )
-					CurrentDepthMapValue = min(G_Depth.x, GetMixed( De_Art(ParallaxCoord, Artifacting_Adjust ) ).x);
-				else
-					CurrentDepthMapValue = G_Depth.x;				
-			    // Get depth of next layer
-			    CurrentLayerDepth += LayerDepth;
-			}
+					  
+		    	float blend, threshold = 0.005; 
+				[loop] //Steep parallax mapping Ray Marcher
+				while ( CurrentDepthMapValue >= CurrentLayerDepth )
+				{   
+					if(CurrentDepthMapValue < CurrentLayerDepth)//Had to do this check to keep it from crashing
+						break;
+					// Shift coordinates horizontally in linear fasion
+				    ParallaxCoord.x -= deltaCoordinates; 
+				    // Get depth value at current coordinates
+				    float G_Depth = GetMixed(ParallaxCoord).x , C_Depth = GetMixed( De_Art(ParallaxCoord, Artifacting_Adjust ) ).y;
+					float diff = abs(G_Depth - C_Depth);
+				
+				    // Sensitivity threshold
+				    blend = saturate(diff / threshold);
+				    
+				    if ( applyArtifacting && blend)
+						CurrentDepthMapValue = min(G_Depth.x, C_Depth);//GetMixed( De_Art(ParallaxCoord, Artifacting_Adjust ) ).x);
+					else
+						CurrentDepthMapValue = G_Depth.x;				
+				    // Get depth of next layer
+				    CurrentLayerDepth += LayerDepth;
+				}
 			
 				if( View_Mode <= 1 || View_Mode >= 5 )	
 			   	ParallaxCoord.x += DB_Offset * 0.125;
@@ -5285,7 +5350,8 @@ uniform int Extra_Information <
 			}
 			#endif
 		#endif
-				//Left_Right.rgb *= 1-Left_Right.w;
+		//Debug Here
+		//Left_Right.rgb *= 1-Left_Right.w;
 		//Convert Stereo
 		#if Reconstruction_Mode || Virtual_Reality_Mode
 		color.rgb = Left_Right.rgb;
@@ -6483,6 +6549,14 @@ uniform int Extra_Information <
 			RenderTarget0 = texzBufferN_P;
 			RenderTarget1 = texzBufferN_L;
 		}
+		
+			pass DepthUpscaling
+		{
+			VertexShader = PostProcessVS;
+			PixelShader = Up_Z;
+			RenderTarget0 = texzBufferN_U;
+		}
+		
 			pass MixDepth
 		{
 			VertexShader = PostProcessVS;
