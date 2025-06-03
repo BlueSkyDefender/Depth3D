@@ -1,7 +1,7 @@
 	////----------------//
 	///**SuperDepth3D**///
 	//----------------////
-	#define SD3D "SuperDepth3D v4.8.0\n"
+	#define SD3D "SuperDepth3D v4.8.1\n"
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//* Depth Map Based 3D post-process shader
 	//* For Reshade 3.0+
@@ -6550,18 +6550,18 @@ uniform int Extra_Information <
 			RenderTarget1 = texzBufferN_L;
 		}
 		
-			pass DepthUpscaling
-		{
-			VertexShader = PostProcessVS;
-			PixelShader = Up_Z;
-			RenderTarget0 = texzBufferN_U;
-		}
-		
 			pass MixDepth
 		{
 			VertexShader = PostProcessVS;
 			PixelShader = Mix_Z;
 			RenderTarget0 = texzBufferN_M;
+		}
+
+			pass DepthUpscaling
+		{
+			VertexShader = PostProcessVS;
+			PixelShader = Up_Z;
+			RenderTarget0 = texzBufferN_U;
 		}
 
 		#if Reconstruction_Mode || Virtual_Reality_Mode || Anaglyph_Mode
