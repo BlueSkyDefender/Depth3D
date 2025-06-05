@@ -1,7 +1,7 @@
 	////----------------//
 	///**SuperDepth3D**///
 	//----------------////
-	#define SD3D "SuperDepth3D v4.8.1\n"
+	#define SD3D "SuperDepth3D v4.8.2\n"
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//* Depth Map Based 3D post-process shader
 	//* For Reshade 3.0+
@@ -385,12 +385,11 @@ namespace SuperDepth3D
 	#ifndef HDR_Compatible_Mode
 	    #define HDR_Compatible_Mode 0
 	#endif
-	/* //Placed on Hold
-	#ifndef Filter_Final_Image
-	    #define Filter_Final_Image 0
-	#endif
-	*/
-	
+
+	//#ifndef Filter_Final_Image
+	    #define Filter_Image 0
+	//#endif
+
 	#ifndef Legacy_Mode
 	    #define Legacy_Mode 0
 	#endif
@@ -2084,7 +2083,14 @@ uniform int Extra_Information <
 	{
 		Texture = texzBufferBlurEx;
 	};
-	
+	/*
+	texture texzBufferDir < pooled = true; > { Width = BUFFER_WIDTH / 4.0 ; Height = BUFFER_HEIGHT / 4.0; Format = RG8;  };
+
+	sampler SamplerzBuffer_Dir
+	{
+		Texture = texzBufferDir;
+	};	
+	*/	
 	texture texzBufferN_M { Width = BUFFER_WIDTH ; Height = BUFFER_HEIGHT ; Format = R16F; }; //Do not use mips in this buffer
 	
 	sampler SamplerzBufferN_Mixed
@@ -2952,6 +2958,26 @@ uniform int Extra_Information <
 					#endif
 	#endif
 	/////////////////////////////////////////////////////////////Cursor///////////////////////////////////////////////////////////////////////////
+	/*
+	float2 EdgeDetection(sampler Tex, float2 TC, float2 offset)
+	{
+	    float Left = tex2D(Tex, TC - float2(offset.x, 0)).x;
+	    float Right = tex2D(Tex, TC + float2(offset.x, 0)).x;
+	    float Up = tex2D(Tex, TC - float2(0, offset.y)).x;
+	    float Down = tex2D(Tex, TC + float2(0, offset.y)).x;
+	
+	    return float2(Down - Up, Right - Left);
+	}
+	*/
+	
+	float2 EdgeDetection(sampler Tex, float2 TC, float2 offset)
+	{
+	    float value = tex2D(Tex, TC).x;
+	    float dx = ddx_fine(value);
+	    float dy = ddy_fine(value);
+	    return float2(dy, dx);
+	}
+	
 	float4 EdgeMask(float4 color, float2 texcoords, float Adjust_Value)
 	{	
 		float2 center = float2(0.5,texcoords.y); // Direction of effect.   
@@ -2960,18 +2986,7 @@ uniform int Extra_Information <
 			  EdgeMask = clamp((BaseVal-Dist) / (BaseVal-Adjust_Value),0.125,1); 
 	    return color * EdgeMask;    
 	}
-/*	
-	#define FLT_EPSILON  1.192092896e-07 // smallest such that Value + FLT_EPSILON != Value		
-	float DepthEdge(float Mod_Depth, float Depth, float2 texcoords, float Adjust_Value, float Masker,float LR_Masker)
-	{   Adjust_Value -= FLT_EPSILON;
-		float2 center = float2(0.5,texcoords.y); // Direction of effect.   
-		float BaseVal = 1.0,
-			  Dist  = distance( center, texcoords ) * 2.0, 
-			  EdgeMask = saturate((BaseVal-Dist) / (BaseVal-Adjust_Value)); 
-			  Masker = lerp(LR_Masker,max(Masker,LR_Masker),EdgeMask);
-	    return lerp(Depth,Mod_Depth, lerp(EdgeMask,Masker,0.5) );    
-	}
-*/		
+	
 	float DepthEdge(float Mod_Depth, float Depth, float2 texcoords, float Adjust_Value )
 	{   Adjust_Value -= FLT_EPSILON;
 		float2 center = float2(0.5,texcoords.y); // Direction of effect.   
@@ -3381,11 +3396,6 @@ uniform int Extra_Information <
 		}
 		
 		texcoord.xy /= SS_Scaling;
-		//texcoord.xy /= TEST;
-		
-        //Manual Adjustment
-		//texcoord *= 1-clamp(SS_Scaling_Adjuster,-0.5,0.5);	
-
 	
 		float4 DM = Depth(TC_SP(texcoord).xy).xxxx;
 		float R, G, B, A, WD = WeaponDepth(TC_SP(texcoord).xy).x, CoP = WeaponDepth(TC_SP(texcoord).xy).y, CutOFFCal = (CoP/DMA()) * 0.5; //Weapon Cutoff Calculation
@@ -4288,7 +4298,7 @@ uniform int Extra_Information <
 		Linear_Out = float2(Set_Depth.x,HF_Info);
 	}
 	
-	void zBuffer_Blur(in float4 position : SV_Position, in float2 texcoord : TEXCOORD, out float2 Blur_Out : SV_Target0, out float2 Info_Ex : SV_Target1)
+	void zBuffer_Blur(in float4 position : SV_Position, in float2 texcoord : TEXCOORD, out float2 Blur_Out : SV_Target0, out float2 Info_Ex : SV_Target1, out float2 Direction : SV_Target2)
 	{   
 		float2 StoredTC = texcoord;
 		float Invert_Depth_Mask =  1-smoothstep(0.0,0.5,PrepDepth( StoredTC * float2(2.0, 1) - float2(1.0,0.0)  )[1][1]);
@@ -4374,6 +4384,51 @@ uniform int Extra_Information <
 		float S_T_Adjust = min(1.25,abs(Divergence_Switch().y) * 0.01);// * RCP_Diverge;
 	    return abs(lerp(0.01f,1.0f,S_T_Adjust));
 	}
+
+	float2 SDAA(sampler tex,float2 texcoord, int Dir)
+	{   
+		float2 SDAA;
+		float AA_Power = 0.666;
+		float result = tex2D(tex, texcoord).x * (1.0-AA_Power);
+		float2 N, Offset = rcp( tex2Dsize(DepthBuffer) );
+		float2 X = float2(Offset.x, 0.0), Y = float2(0.0, Offset.y);
+
+		// Calculate Edge
+		float2 Edge = EdgeDetection(tex,texcoord, Offset);
+		
+		//Calculate Gradient from edge    
+		if(!Dir)
+		{   // Horizontal directions & Vertical directions
+			Edge += EdgeDetection( tex, texcoord - X, Offset);  // Move left (negative X direction)
+			Edge += EdgeDetection( tex, texcoord + X, Offset);  // Move right (positive X direction)
+			Edge += EdgeDetection( tex, texcoord - Y, Offset);  // Move down (negative Y direction)
+			Edge += EdgeDetection( tex, texcoord + Y, Offset);  // Move up (positive Y direction)
+		}
+		else
+		{   // Diagonal directions
+			Edge += EdgeDetection( tex, texcoord - X - Y, Offset);  // Move down-left (negative X, negative Y)
+			Edge += EdgeDetection( tex, texcoord - X + Y, Offset);  // Move up-left (negative X, positive Y)
+			Edge += EdgeDetection( tex, texcoord + X - Y, Offset);  // Move down-right (positive X, negative Y)
+			Edge += EdgeDetection( tex, texcoord + X + Y, Offset);  // Move up-right (positive X, positive Y)
+		}      	    
+		//Revert gradient
+		N = float2(Edge.x,-Edge.y);
+
+		// Like DLAA calculate mask from gradient above.
+		const float Mask = length(N);
+
+		// Will Be Making changes for short edges and long later.
+		const float AA_Adjust = AA_Power * rcp(4);
+		result += tex2D(tex, texcoord+(N * 0.5)*Offset).x * AA_Adjust;
+		result += tex2D(tex, texcoord-(N * 0.5)*Offset).x * AA_Adjust;
+		result += tex2D(tex, texcoord+N*Offset).x * AA_Adjust;
+		result += tex2D(tex, texcoord-N*Offset).x * AA_Adjust;		
+		
+		// Set result
+		SDAA = float2(result,Mask);
+		
+		return SDAA;
+	}
 	
 	static const float  VMW_Array[10] = { 0.0, 1.0, 2.0, 3.0 , 3.5 , 4.0, 4.5 , 5.0, 5.5, 6.0 };	
 	float GetDB(float2 texcoord)
@@ -4397,7 +4452,14 @@ uniform int Extra_Information <
 			texcoord.xy = texcoord.yx;
 		#endif
 		float LR_Depth_Mask = 1-saturate(tex2Dlod(SamplerzBuffer_BlurN, float4( texcoord  * float2(0.5,1) + float2(0.5,0), 0, 2.5 ) ).x * 5.0);	
-		float2 Base_Depth_Buffers = float2(tex2Dlod(SamplerzBufferN_L, float4( texcoord, 0, 0) ).x,tex2Dlod(SamplerzBufferN_P, float4( texcoord, 0, 0) ).x);
+
+		//Depth Base AA
+	    float2 DBAA = SDAA(SamplerzBufferN_P,texcoord, 0);
+		float Mask = saturate(DBAA.y * 4);
+		float Base_Depth_Buffer = tex2Dlod(SamplerzBufferN_L, float4( texcoord, 0, 0) ).x;
+		float2 Base_Depth_Buffers = float2(Base_Depth_Buffer,tex2Dlod(SamplerzBufferN_P, float4( texcoord, 0, 0) ).x);
+		
+		Base_Depth_Buffers.x = lerp(Base_Depth_Buffers.x, DBAA.x, Mask);
 	
 		float GetDepth = smoothstep(0,1, tex2Dlod(SamplerzBufferN_P, float4(texcoord,0, 1) ).y), Sat_Range = saturate(Range_Blend);
 		
@@ -4620,7 +4682,7 @@ uniform int Extra_Information <
 			
 		//MixOut = MixOut;
 	}
-	
+	/* //save for later
 	void swap(inout float a, inout float b)
 	{
 	    float t = a;
@@ -4633,7 +4695,6 @@ uniform int Extra_Information <
 	    static const float2 offsets[9] = { float2(-1, -1), float2( 0, -1), float2( 1, -1),
 									       float2(-1,  0), float2( 0,  0), float2( 1,  0),
 									       float2(-1,  1), float2( 0,  1), float2( 1,  1) };
-	
 	    float v[9];
 	    for (int i = 0; i < 9; ++i)
 	    {
@@ -4651,22 +4712,26 @@ uniform int Extra_Information <
 		// Median
 	    return v[4];
 	}
-	
+	*/	
 	void Up_Z(in float4 position : SV_Position, in float2 texcoord : TEXCOORD, out float UpOut : SV_Target0)
 	{
-		float2 Depth_Size = rcp(tex2Dsize(DepthBuffer));
-	
-	    float base = tex2D(SamplerzBufferN_Mixed, texcoord).x;
+		float base = tex2D(SamplerzBufferN_Mixed, texcoord).x;
+		/* // Save for later
+		float2 Depth_Size = rcp( tex2Dsize(DepthBuffer) );	
 		float Med = Median3x3(SamplerzBufferN_Mixed, texcoord, Depth_Size);
+		float2 N = EdgeDetection(SamplerzBufferN_Mixed, texcoord, Depth_Size );
 		
-		//UpOut = min(base,Med);
-	    float diff = abs(base - Med);
-	
-	    // Sensitivity threshold
-	    float threshold = 0.001;
-	    float blend = saturate(diff / threshold); // Adaptive blend weight
-	
-	    UpOut = lerp(base, Med, blend);    					    	
+		float Mask = length(N);
+
+		UpOut = lerp(base,Med, Mask);	
+		*/
+		
+		//Depth Base AA
+	    float2 DBAA = SDAA(SamplerzBufferN_Mixed,texcoord, 1);
+		float Mask = saturate(DBAA.y * 4);
+		
+		UpOut = lerp(base,DBAA.x, Mask);	
+	    					    	
 	}	
 	
 	float2 GetMixed(float2 texcoord) //Sensitive Buffer.
@@ -4838,8 +4903,11 @@ uniform int Extra_Information <
 				float Weight = weight;
 				//ParallaxCoord.x = lerp( ParallaxCoord.x, PrevParallaxCoord.x, weight); //Old		
 				ParallaxCoord.x = PrevParallaxCoord.x * weight + ParallaxCoord.x * (1 - Weight);
-				//This is to limit artifacts.	
-				ParallaxCoord.x += lerp(DB_Offset, DB_Offset * 2.0, DD_Spread.y );// Also boost in some areas using DD_Map
+				//This is to limit artifacts.
+				if(View_Mode >= 2 && View_Mode <= 4)
+					ParallaxCoord.x += DB_Offset * 2.0;
+				else	
+					ParallaxCoord.x += lerp(DB_Offset * 1.5, DB_Offset * 2.5, DD_Spread.y );// Also boost in some areas using DD_Map
 	
 			#if Reconstruction_Mode
 				if(Reconstruction_Type == 1 )
@@ -5494,23 +5562,28 @@ uniform int Extra_Information <
 	    return Result;
 	}
 	#endif
-	/* //Placed on Hold
-	#if Filter_Final_Image
-	float4 Dir(sampler Tex, float2 texcoord,float dx, float dy) //Load Pixel
+
+	#if Filter_Image
+	float4 Dir(sampler Tex, float2 texcoord,float dx, float dy, int Set_Direction)
 	{	   texcoord += float2(dx, dy);
-			return tex2D(Tex, texcoord ) ;
+			float3 Pattern = float3( floor(texcoord.y*Res.y) + floor(texcoord.x*Res.x), floor(texcoord.x*Res.x), floor(texcoord.y*Res.y));
+			float Pattern_Type = fmod(Pattern.x,2); //CB
+			if(Set_Direction)
+				return Pattern_Type ? 0 : tex2D(Tex, texcoord ) ;
+			else
+				return Pattern_Type ? tex2D(Tex, texcoord ) : 0 ;
 	}
 	
-	float4 CBBlend(sampler Tex,float2 texcoord)
+	float4 CBBlend(sampler Tex,float2 texcoord,int Switcher )
 	{    
 		if ((texcoord.x > 1 || texcoord.x < 0) || (texcoord.y > 1 || texcoord.y < 0))
 		    return 0;
 
-		float4 Up     = Dir(Tex,texcoord, 0.0  ,-pix.y),
-		       Down   = Dir(Tex,texcoord, 0.0  , pix.y),
-		       Left   = Dir(Tex,texcoord,-pix.x, 0.0  ),
-		       Right  = Dir(Tex,texcoord, pix.x, 0.0  ),
-			   Center = Dir(Tex,texcoord, 0.0  , 0.0  ), 
+		float4 Up     = Dir(Tex,texcoord, 0.0  ,-pix.y, Switcher),
+		       Down   = Dir(Tex,texcoord, 0.0  , pix.y, Switcher),
+		       Left   = Dir(Tex,texcoord,-pix.x, 0.0  , Switcher),
+		       Right  = Dir(Tex,texcoord, pix.x, 0.0  , Switcher),
+			   Center = Dir(Tex,texcoord, 0.0  , 0.0  , Switcher), 
                Result;
 	
 	    float verticalWeight = colorDiffBlend(Up.rgb, Down.rgb);
@@ -5519,11 +5592,17 @@ uniform int Extra_Information <
 		float4 HorzResult = (Left + Right) * horizontalWeight;
 	    
 		Result = Center + (VertResult + HorzResult) * 0.5 * rcp(verticalWeight + horizontalWeight);
-			
-	    return Result * 0.5;
+		
+		float Mask = length(EdgeDetection(Tex, texcoord, pix));
+	
+	    return lerp(tex2D(Tex,texcoord),Result,Mask);
+	}
+
+	float4 MixModeBlend(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Target
+	{  
+	    return ( CBBlend(BackBuffer_SD,texcoord,0) + CBBlend(BackBuffer_SD,texcoord,1) ) * 0.5;
 	}
 	#endif	
-	*/
 	////////////////////////////////////////////////////////////////////Logo////////////////////////////////////////////////////////////////////////////
 	#define _f float // Text rendering code copied/pasted from https://www.shadertoy.com/view/4dtGD2 by Hamneggs
 	static const _f CH_A    = _f(0x69f99), CH_B    = _f(0x79797), CH_C    = _f(0xe111e),
@@ -5893,6 +5972,9 @@ uniform int Extra_Information <
 				Color = lerp( Value * 0.5, Value, S_More );
 				*/
 				//Color = Parallax(TEST, texcoord, 0).z;
+				//float2 DBAA = SDAA(SamplerzBufferN_P,texcoord);
+						//float Mask = saturate(DBAA.y * 4);
+				//		Color = DBAA.x;
 				return Color.rgba;
 			}
 		#endif
@@ -6407,15 +6489,8 @@ uniform int Extra_Information <
 	    }
 	    return centerColor;
 	}
-	/* //Placed on Hold
-	#if Filter_Final_Image
-	float4 MixModeBlend(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Target
-	{  
 
-	    return CBBlend(BackBuffer_SD,texcoord);
-	}
-	#endif	
-	*/
+
 	float4 SmartSharpJr(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Target
 	{  
 		float4 Color = tex2D(BackBuffer_SD,texcoord);//dot(Color.rgb,0.333);//
@@ -6507,6 +6582,14 @@ uniform int Extra_Information <
 	< ui_tooltip = "Suggestion : You Can Enable 'Performance Mode Checkbox,' in the lower bottom right of the ReShade's Main UI.\n"
 				   			 "Do this once you set your 3D settings of course."; >
 	{	
+		#if Filter_Image
+			pass BlendOut
+		{
+			VertexShader = PostProcessVS;
+			PixelShader = MixModeBlend;
+		}
+		#endif
+	
 		#if D_Frame
 			pass Delay_Frame
 		{
@@ -6533,6 +6616,7 @@ uniform int Extra_Information <
 			PixelShader = zBuffer_Blur;
 			RenderTarget0 = texzBufferBlurN;
 			RenderTarget1 = texzBufferBlurEx;
+			//RenderTarget2 = texzBufferDir;
 		}
 			pass DepthBuffer
 		{
@@ -6584,15 +6668,7 @@ uniform int Extra_Information <
 			VertexShader = PostProcessVS;
 			PixelShader = Out;
 		}
-		/* //Placed on Hold
-		#if Filter_Final_Image
-			pass BlendOut
-		{
-			VertexShader = PostProcessVS;
-			PixelShader = MixModeBlend;
-		}
-		#endif
-		*/
+
 		#if !REST_UI_Mode
 				pass USMOut
 			{
