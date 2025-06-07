@@ -1,7 +1,7 @@
 	////----------------//
 	///**SuperDepth3D**///
 	//----------------////
-	#define SD3D "SuperDepth3D v4.8.2\n"
+	#define SD3D "SuperDepth3D v4.8.3\n"
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//* Depth Map Based 3D post-process shader
 	//* For Reshade 3.0+
@@ -4385,11 +4385,11 @@ uniform int Extra_Information <
 	    return abs(lerp(0.01f,1.0f,S_T_Adjust));
 	}
 
-	float2 SDAA(sampler tex,float2 texcoord, int Dir)
+	float2 SDAA(sampler tex,float2 texcoord)
 	{   
 		float2 SDAA;
-		float AA_Power = 0.666;
-		float result = tex2D(tex, texcoord).x * (1.0-AA_Power);
+		float AA_Power = 0.625;
+		float Result = tex2D(tex, texcoord).x * (1.0-AA_Power);
 		float2 N, Offset = rcp( tex2Dsize(DepthBuffer) );
 		float2 X = float2(Offset.x, 0.0), Y = float2(0.0, Offset.y);
 
@@ -4397,20 +4397,19 @@ uniform int Extra_Information <
 		float2 Edge = EdgeDetection(tex,texcoord, Offset);
 		
 		//Calculate Gradient from edge    
-		if(!Dir)
-		{   // Horizontal directions & Vertical directions
-			Edge += EdgeDetection( tex, texcoord - X, Offset);  // Move left (negative X direction)
-			Edge += EdgeDetection( tex, texcoord + X, Offset);  // Move right (positive X direction)
-			Edge += EdgeDetection( tex, texcoord - Y, Offset);  // Move down (negative Y direction)
-			Edge += EdgeDetection( tex, texcoord + Y, Offset);  // Move up (positive Y direction)
-		}
-		else
-		{   // Diagonal directions
-			Edge += EdgeDetection( tex, texcoord - X - Y, Offset);  // Move down-left (negative X, negative Y)
-			Edge += EdgeDetection( tex, texcoord - X + Y, Offset);  // Move up-left (negative X, positive Y)
-			Edge += EdgeDetection( tex, texcoord + X - Y, Offset);  // Move down-right (positive X, negative Y)
-			Edge += EdgeDetection( tex, texcoord + X + Y, Offset);  // Move up-right (positive X, positive Y)
-		}      	    
+
+		// Horizontal directions & Vertical directions
+		Edge += EdgeDetection( tex, texcoord - X, Offset);  // Move left (negative X direction)
+		Edge += EdgeDetection( tex, texcoord + X, Offset);  // Move right (positive X direction)
+		Edge += EdgeDetection( tex, texcoord - Y, Offset);  // Move down (negative Y direction)
+		Edge += EdgeDetection( tex, texcoord + Y, Offset);  // Move up (positive Y direction)
+
+		// Diagonal directions
+		Edge += EdgeDetection( tex, texcoord - X - Y, Offset);  // Move down-left (negative X, negative Y)
+		Edge += EdgeDetection( tex, texcoord - X + Y, Offset);  // Move up-left (negative X, positive Y)
+		Edge += EdgeDetection( tex, texcoord + X - Y, Offset);  // Move down-right (positive X, negative Y)
+		Edge += EdgeDetection( tex, texcoord + X + Y, Offset);  // Move up-right (positive X, positive Y)
+	    
 		//Revert gradient
 		N = float2(Edge.x,-Edge.y);
 
@@ -4419,13 +4418,13 @@ uniform int Extra_Information <
 
 		// Will Be Making changes for short edges and long later.
 		const float AA_Adjust = AA_Power * rcp(4);
-		result += tex2D(tex, texcoord+(N * 0.5)*Offset).x * AA_Adjust;
-		result += tex2D(tex, texcoord-(N * 0.5)*Offset).x * AA_Adjust;
-		result += tex2D(tex, texcoord+N*Offset).x * AA_Adjust;
-		result += tex2D(tex, texcoord-N*Offset).x * AA_Adjust;		
+		Result += tex2D(tex, texcoord+(N * 0.5)*Offset).x * AA_Adjust;
+		Result += tex2D(tex, texcoord-(N * 0.5)*Offset).x * AA_Adjust;
+		Result += tex2D(tex, texcoord+N*Offset).x * AA_Adjust;
+		Result += tex2D(tex, texcoord-N*Offset).x * AA_Adjust;		
 		
 		// Set result
-		SDAA = float2(result,Mask);
+		SDAA = float2(Result,Mask);
 		
 		return SDAA;
 	}
@@ -4454,7 +4453,7 @@ uniform int Extra_Information <
 		float LR_Depth_Mask = 1-saturate(tex2Dlod(SamplerzBuffer_BlurN, float4( texcoord  * float2(0.5,1) + float2(0.5,0), 0, 2.5 ) ).x * 5.0);	
 
 		//Depth Base AA
-	    float2 DBAA = SDAA(SamplerzBufferN_P,texcoord, 0);
+	    float2 DBAA = SDAA(SamplerzBufferN_P,texcoord);
 		float Mask = saturate(DBAA.y * 4);
 		float Base_Depth_Buffer = tex2Dlod(SamplerzBufferN_L, float4( texcoord, 0, 0) ).x;
 		float2 Base_Depth_Buffers = float2(Base_Depth_Buffer,tex2Dlod(SamplerzBufferN_P, float4( texcoord, 0, 0) ).x);
@@ -4682,7 +4681,7 @@ uniform int Extra_Information <
 			
 		//MixOut = MixOut;
 	}
-	/* //save for later
+
 	void swap(inout float a, inout float b)
 	{
 	    float t = a;
@@ -4690,48 +4689,34 @@ uniform int Extra_Information <
 	    b = max(t, b);
 	}
 
-	float Median3x3(sampler2D tex, float2 uv, float2 texelSize)
+	float Median3x3(sampler2D Tex, float2 TC, float2 Depth_Size)
 	{
 	    static const float2 offsets[9] = { float2(-1, -1), float2( 0, -1), float2( 1, -1),
 									       float2(-1,  0), float2( 0,  0), float2( 1,  0),
 									       float2(-1,  1), float2( 0,  1), float2( 1,  1) };
-	    float v[9];
+	    float s[9];
 	    for (int i = 0; i < 9; ++i)
 	    {
-	        v[i] = tex2Dlod(tex, float4(uv + offsets[i] * texelSize, 0, 0)).x;
+	        s[i] = tex2Dlod(Tex, float4(TC + offsets[i] * Depth_Size, 0, 0)).x;
 		}
 	    
-	    swap(v[1], v[2]); swap(v[4], v[5]); swap(v[7], v[8]);
-	    swap(v[0], v[1]); swap(v[3], v[4]); swap(v[6], v[7]);
-	    swap(v[1], v[2]); swap(v[4], v[5]); swap(v[7], v[8]);
-	    swap(v[0], v[3]); swap(v[5], v[8]); swap(v[4], v[7]);
-	    swap(v[3], v[6]); swap(v[1], v[4]); swap(v[2], v[5]);
-	    swap(v[4], v[7]); swap(v[4], v[2]); swap(v[6], v[4]);
-	    swap(v[4], v[2]);
+	    swap(s[1], s[2]); swap(s[4], s[5]); swap(s[7], s[8]);
+	    swap(s[0], s[1]); swap(s[3], s[4]); swap(s[6], s[7]);
+	    swap(s[1], s[2]); swap(s[4], s[5]); swap(s[7], s[8]);
+	    swap(s[0], s[3]); swap(s[5], s[8]); swap(s[4], s[7]);
+	    swap(s[3], s[6]); swap(s[1], s[4]); swap(s[2], s[5]);
+	    swap(s[4], s[7]); swap(s[4], s[2]); swap(s[6], s[4]);
+	    swap(s[4], s[2]);
 		
 		// Median
-	    return v[4];
-	}
-	*/	
+	    return s[4];
+	}	
+	
 	void Up_Z(in float4 position : SV_Position, in float2 texcoord : TEXCOORD, out float UpOut : SV_Target0)
 	{
-		float base = tex2D(SamplerzBufferN_Mixed, texcoord).x;
-		/* // Save for later
 		float2 Depth_Size = rcp( tex2Dsize(DepthBuffer) );	
-		float Med = Median3x3(SamplerzBufferN_Mixed, texcoord, Depth_Size);
-		float2 N = EdgeDetection(SamplerzBufferN_Mixed, texcoord, Depth_Size );
-		
-		float Mask = length(N);
-
-		UpOut = lerp(base,Med, Mask);	
-		*/
-		
-		//Depth Base AA
-	    float2 DBAA = SDAA(SamplerzBufferN_Mixed,texcoord, 1);
-		float Mask = saturate(DBAA.y * 4);
-		
-		UpOut = lerp(base,DBAA.x, Mask);	
-	    					    	
+		float Median = Median3x3(SamplerzBufferN_Mixed, texcoord, Depth_Size);
+		UpOut = Median;	  					    	
 	}	
 	
 	float2 GetMixed(float2 texcoord) //Sensitive Buffer.

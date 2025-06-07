@@ -1,7 +1,7 @@
 ////----------------------------------------//
 ///SuperDepth3D Overwatch Automation Header///
 //----------------------------------------////
-#define OVERWATCH "Overwatch v4.4.1\n"
+#define OVERWATCH "Overwatch v4.4.2\n"
 //---------------------------------------OVERWATCH---------------------------------------//
 // If you are reading this stop. Go away and never look back. From this point on if you  //
 // still think it's is worth looking at this..... Then no one can save you or your soul. //
@@ -40002,7 +40002,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DA_X 0.025                              // ZPD
 	#define DHH_W 0.500                              // Smart Convergence 
 	//#define DF_Y 0.010                           // Seperation
-	#define DA_Y 250.0                              // Near Plane Adjustment
+	#define DA_Y 237.5                              // Near Plane Adjustment
     //#define DA_Z 0.0005                          // Linerzation Offset
     //#define DS_Y 2                                 // Linerzation Offset Effects only distance if true
 	#define DB_Z 0.0125                             // Auto Depth Protection
@@ -40016,8 +40016,8 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
     //#define DMM 1                                // Detect More Mode
     #define OIL 4                                  // Set How many Levels
     #define OIF float4(0.625,0.5,0.375,0.25)                  // Fix enables if Value is > 0.0
-	#define DI_W float4(0.5,1.0,1.5,2.0)
-	#define DKK_W float2(0.125,3.0)//XY
+	#define DI_W float4(0.25,0.5,1.0,1.5)
+	#define DKK_W float2(0.125,2.0)//XY
 	
     //#define CWH 3                               // ZPD Weapon Hand Consideration For Masking  0 is Off | 1 Is Full | 2 Half Right screen Mask And Not to be used with Weapon Profiles.
     //#define WBA 2.5                              // ZPD Weapon Boundary Alt Adjust power for CWH 
@@ -40225,9 +40225,10 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DE_Y 0.700
 	#define DE_Z 0.375
     //#define DG_W -0.125 //popout  
-    #define OIL 3           // Set How many Levels We use for RE_Fix 0 | 1 | 2 | 3 if 1 then it's float2(0,0) for OIF and DI_W
+    #define OIL 4           // Set How many Levels We use for RE_Fix 0 | 1 | 2 | 3 if 1 then it's float2(0,0) for OIF and DI_W
     #define OIF float4(0.6,0.5,0.375,0.25)         // Fix enables if Value is > 0.0 
 	#define DI_W float4(0.5,0.75,1.25,2.5)        // Like Shift Boundary DG_W But 0 to inf
+	#define DKK_W float2(0.125,5.0)//XY
 	#define PLS 3   	                          // Performance Level Selection
 	#define BMT 1    
 	#define DF_Z 0.15
