@@ -1,7 +1,7 @@
 	////----------------//
 	///**SuperDepth3D**///
 	//----------------////
-	#define SD3D "SuperDepth3D v4.8.4\n"
+	#define SD3D "SuperDepth3D v4.8.5\n"
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//* Depth Map Based 3D post-process shader
 	//* For Reshade 3.0+
@@ -247,6 +247,12 @@ namespace SuperDepth3D
 			#define Compatibility_01 0
 		#endif	
 	#endif
+
+	#if __RESHADE__ <= 60303
+		#define Compatibility_02 1
+	#else
+		#define Compatibility_02 0
+	#endif	
 	
 	//FreePie Compatibility
 	#if __RESHADE__ >= 40600
@@ -2973,8 +2979,13 @@ uniform int Extra_Information <
 	float2 EdgeDetection(sampler Tex, float2 TC, float2 offset)
 	{
 	    float value = tex2D(Tex, TC).x;
+	    #if Compatibility_02
+	    float dx = ddx(value);
+	    float dy = ddy(value);
+	    #else
 	    float dx = ddx_fine(value);
 	    float dy = ddy_fine(value);
+	    #endif
 	    return float2(dy, dx);
 	}
 	
@@ -4895,9 +4906,9 @@ uniform int Extra_Information <
 				ParallaxCoord.x = PrevParallaxCoord.x * weight + ParallaxCoord.x * (1 - Weight);
 				//This is to limit artifacts.
 				if(View_Mode >= 2 && View_Mode <= 4)
-					ParallaxCoord.x += DB_Offset * 2.0;
+					ParallaxCoord.x += DB_Offset * 4.0;
 				else	
-					ParallaxCoord.x += lerp(DB_Offset * 1.5, DB_Offset * 2.5, DD_Spread.y );// Also boost in some areas using DD_Map
+					ParallaxCoord.x += lerp(DB_Offset * 2.0, DB_Offset * 4.0, DD_Spread.y );// Also boost in some areas using DD_Map
 	
 			#if Reconstruction_Mode
 				if(Reconstruction_Type == 1 )

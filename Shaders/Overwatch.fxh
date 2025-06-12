@@ -1,7 +1,7 @@
 ////----------------------------------------//
 ///SuperDepth3D Overwatch Automation Header///
 //----------------------------------------////
-#define OVERWATCH "Overwatch v4.4.3\n"
+#define OVERWATCH "Overwatch v4.4.4\n"
 //---------------------------------------OVERWATCH---------------------------------------//
 // If you are reading this stop. Go away and never look back. From this point on if you  //
 // still think it's is worth looking at this..... Then no one can save you or your soul. //
@@ -25826,7 +25826,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define BMT 1                  // ZPD and World Scale Balance // I need to phase this out.
 	#define DF_Z 0.375               // Set the Balance  
     //#define DAO 1                  // Turn On or Off De-Artifact Options For now DAO if set to 1 it's also applys to Hoz 
-    #define DL_Y 0.625             // De-Artifact Only works on some View Modes and causes performance degredation
+    #define DL_Y 0.50            // De-Artifact Only works on some View Modes and causes performance degredation
     #define DL_Z -0.1250              // Compat Power
 	//#define DJ_X 0.050             // Range Smoothing
 	#define THF 3
@@ -25851,6 +25851,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DL_X 0.75       //SM Tune Limit
 	//#define DL_W 0.5      //SM Perspective Limit - Do Not use any more
 	#define DM_X 7        //SM HQ Tune Power       - Will be made global
+	#define DAA_W 2                                  //Warp/Halo Masking Type 
     //#define DM_Y 1        //SM HQ VRS Limit
 	//#define HQT 1         //SM HQ Trigger
 	//#define FMM 1         //Filter Mode          - Need to add this back in the new shader.
