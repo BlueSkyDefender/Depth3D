@@ -1,7 +1,7 @@
 	////----------------//
 	///**SuperDepth3D**///
 	//----------------////
-	#define SD3D "SuperDepth3D v4.8.3\n"
+	#define SD3D "SuperDepth3D v4.8.4\n"
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//* Depth Map Based 3D post-process shader
 	//* For Reshade 3.0+
@@ -4298,7 +4298,7 @@ uniform int Extra_Information <
 		Linear_Out = float2(Set_Depth.x,HF_Info);
 	}
 	
-	void zBuffer_Blur(in float4 position : SV_Position, in float2 texcoord : TEXCOORD, out float2 Blur_Out : SV_Target0, out float2 Info_Ex : SV_Target1, out float2 Direction : SV_Target2)
+	void zBuffer_Blur(in float4 position : SV_Position, in float2 texcoord : TEXCOORD, out float2 Blur_Out : SV_Target0, out float2 Info_Ex : SV_Target1)
 	{   
 		float2 StoredTC = texcoord;
 		float Invert_Depth_Mask =  1-smoothstep(0.0,0.5,PrepDepth( StoredTC * float2(2.0, 1) - float2(1.0,0.0)  )[1][1]);
@@ -4384,10 +4384,9 @@ uniform int Extra_Information <
 		float S_T_Adjust = min(1.25,abs(Divergence_Switch().y) * 0.01);// * RCP_Diverge;
 	    return abs(lerp(0.01f,1.0f,S_T_Adjust));
 	}
-
+	#if !DX9_Toggle
 	float2 SDAA(sampler tex,float2 texcoord)
 	{   
-		float2 SDAA;
 		float AA_Power = 0.625;
 		float Result = tex2D(tex, texcoord).x * (1.0-AA_Power);
 		float2 N, Offset = rcp( tex2Dsize(DepthBuffer) );
@@ -4404,6 +4403,9 @@ uniform int Extra_Information <
 		Edge += EdgeDetection( tex, texcoord - Y, Offset);  // Move down (negative Y direction)
 		Edge += EdgeDetection( tex, texcoord + Y, Offset);  // Move up (positive Y direction)
 
+		// Like DLAA calculate mask from gradient above.
+		float Mask = length(Edge);
+
 		// Diagonal directions
 		Edge += EdgeDetection( tex, texcoord - X - Y, Offset);  // Move down-left (negative X, negative Y)
 		Edge += EdgeDetection( tex, texcoord - X + Y, Offset);  // Move up-left (negative X, positive Y)
@@ -4413,9 +4415,6 @@ uniform int Extra_Information <
 		//Revert gradient
 		N = float2(Edge.x,-Edge.y);
 
-		// Like DLAA calculate mask from gradient above.
-		const float Mask = length(N);
-
 		// Will Be Making changes for short edges and long later.
 		const float AA_Adjust = AA_Power * rcp(4);
 		Result += tex2D(tex, texcoord+(N * 0.5)*Offset).x * AA_Adjust;
@@ -4424,11 +4423,9 @@ uniform int Extra_Information <
 		Result += tex2D(tex, texcoord-N*Offset).x * AA_Adjust;		
 		
 		// Set result
-		SDAA = float2(Result,Mask);
-		
-		return SDAA;
+		return float2(Result,Mask);
 	}
-	
+	#endif
 	static const float  VMW_Array[10] = { 0.0, 1.0, 2.0, 3.0 , 3.5 , 4.0, 4.5 , 5.0, 5.5, 6.0 };	
 	float GetDB(float2 texcoord)
 	{
@@ -4451,15 +4448,16 @@ uniform int Extra_Information <
 			texcoord.xy = texcoord.yx;
 		#endif
 		float LR_Depth_Mask = 1-saturate(tex2Dlod(SamplerzBuffer_BlurN, float4( texcoord  * float2(0.5,1) + float2(0.5,0), 0, 2.5 ) ).x * 5.0);	
-
+		#if !DX9_Toggle
 		//Depth Base AA
 	    float2 DBAA = SDAA(SamplerzBufferN_P,texcoord);
-		float Mask = saturate(DBAA.y * 4);
+		float Mask = saturate(DBAA.y * 8);
+		#endif
 		float Base_Depth_Buffer = tex2Dlod(SamplerzBufferN_L, float4( texcoord, 0, 0) ).x;
 		float2 Base_Depth_Buffers = float2(Base_Depth_Buffer,tex2Dlod(SamplerzBufferN_P, float4( texcoord, 0, 0) ).x);
-		
-		Base_Depth_Buffers.x = lerp(Base_Depth_Buffers.x, DBAA.x, Mask);
-	
+			#if !DX9_Toggle
+			Base_Depth_Buffers.x = lerp(Base_Depth_Buffers.x, DBAA.x, Mask);
+			#endif
 		float GetDepth = smoothstep(0,1, tex2Dlod(SamplerzBufferN_P, float4(texcoord,0, 1) ).y), Sat_Range = saturate(Range_Blend);
 		
 		float Base_Depth_SubSampled = tex2Dlod(SamplerzBufferN_L, float4( texcoord, 0, lerp(0.0,4.0,Base_Depth_Buffers.x)) ).x;
@@ -4489,7 +4487,10 @@ uniform int Extra_Information <
 		float Near_Mask = tex2Dlod(SamplerzBufferN_L, float4( texcoord, 0, 9 ) ).x * 0.5;
 		if(Weapon_Near_Halo_Reduction)
 			VMW = lerp(VMW,9,Near_Mask);//int(lerp(VMW,9,Near_Mask));
-		
+			#if !DX9_Toggle	
+			//Mask to reduce Halo Reduction in high Freqancy areas.
+			VMW = lerp(VMW, 0, Mask);
+			#endif	
 		float Min_Blend = min(tex2Dlod(SamplerzBufferN_L, float4( texcoord, 0, VMW ) ).x,Base_Depth.x);
 
 		float2 DepthBuffer_LP = float2(Min_Blend,Base_Depth_Buffers.y);
@@ -4681,7 +4682,7 @@ uniform int Extra_Information <
 			
 		//MixOut = MixOut;
 	}
-
+	#if !DX9_Toggle
 	void swap(inout float a, inout float b)
 	{
 	    float t = a;
@@ -4718,13 +4719,17 @@ uniform int Extra_Information <
 		float Median = Median3x3(SamplerzBufferN_Mixed, texcoord, Depth_Size);
 		UpOut = Median;	  					    	
 	}	
-	
+	#endif
 	float2 GetMixed(float2 texcoord) //Sensitive Buffer.
 	{
+		#if !DX9_Toggle
 		float BufferA = tex2Dlod(SamplerzBufferN_Up,float4(texcoord,0,0)).x, 
 			  BufferB = tex2Dlod(SamplerzBufferN_Mixed,float4(texcoord,0,0)).x;
 		//Careful not to shift here because we run out of memory in DX9
 		return float2(BufferA,BufferB);//Do not use mips on this buffer
+		#else
+		return tex2Dlod(SamplerzBufferN_Mixed,float4(texcoord,0,0)).x;
+		#endif
 	}
 	#if !Use_2D_Plus_Depth
 	float2 De_Art(float2 sp, float2 Shift_n_Zoom)
@@ -5956,10 +5961,6 @@ uniform int Extra_Information <
 				
 				Color = lerp( Value * 0.5, Value, S_More );
 				*/
-				//Color = Parallax(TEST, texcoord, 0).z;
-				//float2 DBAA = SDAA(SamplerzBufferN_P,texcoord);
-						//float Mask = saturate(DBAA.y * 4);
-				//		Color = DBAA.x;
 				return Color.rgba;
 			}
 		#endif
@@ -6625,14 +6626,14 @@ uniform int Extra_Information <
 			PixelShader = Mix_Z;
 			RenderTarget0 = texzBufferN_M;
 		}
-
+		#if !DX9_Toggle
 			pass DepthUpscaling
 		{
 			VertexShader = PostProcessVS;
 			PixelShader = Up_Z;
 			RenderTarget0 = texzBufferN_U;
 		}
-
+		#endif
 		#if Reconstruction_Mode || Virtual_Reality_Mode || Anaglyph_Mode
 			pass Muti_Mode_Reconstruction
 		{
