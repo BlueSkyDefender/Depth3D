@@ -38445,11 +38445,11 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
     #define WBA 2.5                               // ZPD Weapon Boundary Alt Adjust power for CWH 
 	//#define FTM 4                                 // Fast Trigger Mode If this enabled then Level 1 and > switches instantly.
 	#define WND 0.75                                 // Weapon Near Pushes depth in and adjust perspective to match.
-	//#define DG_Z 0.025                            // Min Weapon Hands That are apart of world with Auto and Trim
+	#define DG_Z 0.03                            // Min Weapon Hands That are apart of world with Auto and Trim
     //#define DS_X float3(0.025,0,1)                // Min Weapon bit only triggers when a OIL Level is set and set here on .y
     //#define DE_W 0.5                              // Auto
-    //#define DI_Z 0.0625                           // Trim
-    //#define DF_W float4(0.0001,0.000,0.125,0.0625)// Edge & Scale
+    #define DI_Z 0.1                           // Trim
+    #define DF_W float4(0.0001,0.000,0.0,0.0125)// Edge & Scale
 	
 	//#define EDU 1                                 // Elevate Detectors Up effects ZPD
 	//#define TMD 1	
@@ -39335,7 +39335,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	//#define DL_W 0.5                               //SM Perspective Limit - Do Not use any more
 	#define DM_X 6                                   //SM HQ Tune Power       - Will be made global
 	#define DAA_W 2                                //Warp/Halo Masking Type 
-    #define HNR 1                                  //Halo Near Reduction For anyting near the player
+   // #define HNR 1                                  //Halo Near Reduction For anyting near the player
     //#define DM_Y 1                                 //SM HQ VRS Limit
 	//#define HQT 1                                  //SM HQ Trigger
 	//#define FMM 1                                  //Filter Mode          - Need to add this back in the new shader.

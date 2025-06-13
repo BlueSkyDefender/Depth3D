@@ -1,7 +1,7 @@
 	////----------------//
 	///**SuperDepth3D**///
 	//----------------////
-	#define SD3D "SuperDepth3D v4.8.5\n"
+	#define SD3D "SuperDepth3D v4.8.6\n"
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//* Depth Map Based 3D post-process shader
 	//* For Reshade 3.0+
@@ -1702,10 +1702,25 @@ uniform int SuperDepth3D <
 		ui_category = "Image Effects";
 	> = 0;
 
-	#if AXAA_EXIST
-	uniform bool USE_AXAA <
-		ui_label = " Adaptive approXimate Anti-Aliasing";
-		ui_tooltip = "Adaptive approXimate Anti-Aliasing is Based on LG's modifications to FXAA.";
+	#if AXAA_EXIST	
+	uniform int USE_AA <
+		ui_type = "combo";
+		ui_items = "Off\0Adaptive approXimate Anti-Aliasing\0Multi Directional Anti-Aliasing\0";		
+		ui_label = " Anti-Aliasing";
+		ui_tooltip = "Note: Set the Anti-Aliasing type to use on the last output of the 3D image.\n"
+					 "      Adaptive approXimate Anti-Aliasing is Based on LG's modifications to FXAA.\n"
+					 "      Multi Directional Anti-Aliasing is a aggresive home grown AA for 3D output.\n"
+					 "Default is Off.";
+		ui_category = "Image Effects";
+	> = false;
+	#else
+		uniform int USE_AA <
+		ui_type = "combo";
+		ui_items = "Off\0Multi Directional Anti-Aliasing\0";		
+		ui_label = " Anti-Aliasing";
+		ui_tooltip = "Note: Set the Anti-Aliasing type to use on the last output of the 3D image.\n"
+					 "      Multi Directional Anti-Aliasing is a aggresive home grown AA for 3D output.\n"
+					 "Default is Off.";
 		ui_category = "Image Effects";
 	> = false;
 	#endif
@@ -1846,7 +1861,7 @@ uniform int Extra_Information <
 	uniform int Frames < source = "framecount";>;     // Alternate Even Odd frames
 	uniform float timer < source = "timer"; >;
 	#define FLT_EPSILON  1.192092896e-07 // smallest such that Value + FLT_EPSILON != Value	
-	
+
 	float2 Divergence_Switch()
 	{
 		float2 Divergence = float2(100,Depth_Adjustment);
@@ -2148,6 +2163,10 @@ uniform int Extra_Information <
 		return saturate(tex2Dlod(SamplerAvrB_N,float4(texcoord,0,11)).y);//Average Depth Brightnes Texture Sample
 	}		
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	float2 rcp_Depth_Size()
+	{
+	    return 1.0 / tex2Dsize(DepthBuffer);
+	}
 	
 	float Min3(float x, float y, float z)
 	{
@@ -2964,21 +2983,20 @@ uniform int Extra_Information <
 					#endif
 	#endif
 	/////////////////////////////////////////////////////////////Cursor///////////////////////////////////////////////////////////////////////////
-	/*
-	float2 EdgeDetection(sampler Tex, float2 TC, float2 offset)
+
+	float2 EdgeDetectionC(sampler Tex, float2 TC, float2 offset)
 	{
-	    float Left = tex2D(Tex, TC - float2(offset.x, 0)).x;
-	    float Right = tex2D(Tex, TC + float2(offset.x, 0)).x;
-	    float Up = tex2D(Tex, TC - float2(0, offset.y)).x;
-	    float Down = tex2D(Tex, TC + float2(0, offset.y)).x;
+	    float Left = tex2D(Tex, TC - float2(offset.x, 0)).w;
+	    float Right = tex2D(Tex, TC + float2(offset.x, 0)).w;
+	    float Up = tex2D(Tex, TC - float2(0, offset.y)).w;
+	    float Down = tex2D(Tex, TC + float2(0, offset.y)).w;
 	
 	    return float2(Down - Up, Right - Left);
 	}
-	*/
-	
-	float2 EdgeDetection(sampler Tex, float2 TC, float2 offset)
+
+	float2 EdgeDetectionD(sampler Tex, float2 TC, float2 offset)
 	{
-	    float value = tex2D(Tex, TC).x;
+	    float value = tex2D(Tex, TC).x * 2 - 1;
 	    #if Compatibility_02
 	    float dx = ddx(value);
 	    float dy = ddy(value);
@@ -4395,48 +4413,7 @@ uniform int Extra_Information <
 		float S_T_Adjust = min(1.25,abs(Divergence_Switch().y) * 0.01);// * RCP_Diverge;
 	    return abs(lerp(0.01f,1.0f,S_T_Adjust));
 	}
-	#if !DX9_Toggle
-	float2 SDAA(sampler tex,float2 texcoord)
-	{   
-		float AA_Power = 0.625;
-		float Result = tex2D(tex, texcoord).x * (1.0-AA_Power);
-		float2 N, Offset = rcp( tex2Dsize(DepthBuffer) );
-		float2 X = float2(Offset.x, 0.0), Y = float2(0.0, Offset.y);
 
-		// Calculate Edge
-		float2 Edge = EdgeDetection(tex,texcoord, Offset);
-		
-		//Calculate Gradient from edge    
-
-		// Horizontal directions & Vertical directions
-		Edge += EdgeDetection( tex, texcoord - X, Offset);  // Move left (negative X direction)
-		Edge += EdgeDetection( tex, texcoord + X, Offset);  // Move right (positive X direction)
-		Edge += EdgeDetection( tex, texcoord - Y, Offset);  // Move down (negative Y direction)
-		Edge += EdgeDetection( tex, texcoord + Y, Offset);  // Move up (positive Y direction)
-
-		// Like DLAA calculate mask from gradient above.
-		float Mask = length(Edge);
-
-		// Diagonal directions
-		Edge += EdgeDetection( tex, texcoord - X - Y, Offset);  // Move down-left (negative X, negative Y)
-		Edge += EdgeDetection( tex, texcoord - X + Y, Offset);  // Move up-left (negative X, positive Y)
-		Edge += EdgeDetection( tex, texcoord + X - Y, Offset);  // Move down-right (positive X, negative Y)
-		Edge += EdgeDetection( tex, texcoord + X + Y, Offset);  // Move up-right (positive X, positive Y)
-	    
-		//Revert gradient
-		N = float2(Edge.x,-Edge.y);
-
-		// Will Be Making changes for short edges and long later.
-		const float AA_Adjust = AA_Power * rcp(4);
-		Result += tex2D(tex, texcoord+(N * 0.5)*Offset).x * AA_Adjust;
-		Result += tex2D(tex, texcoord-(N * 0.5)*Offset).x * AA_Adjust;
-		Result += tex2D(tex, texcoord+N*Offset).x * AA_Adjust;
-		Result += tex2D(tex, texcoord-N*Offset).x * AA_Adjust;		
-		
-		// Set result
-		return float2(Result,Mask);
-	}
-	#endif
 	static const float  VMW_Array[10] = { 0.0, 1.0, 2.0, 3.0 , 3.5 , 4.0, 4.5 , 5.0, 5.5, 6.0 };	
 	float GetDB(float2 texcoord)
 	{
@@ -4459,16 +4436,11 @@ uniform int Extra_Information <
 			texcoord.xy = texcoord.yx;
 		#endif
 		float LR_Depth_Mask = 1-saturate(tex2Dlod(SamplerzBuffer_BlurN, float4( texcoord  * float2(0.5,1) + float2(0.5,0), 0, 2.5 ) ).x * 5.0);	
-		#if !DX9_Toggle
-		//Depth Base AA
-	    float2 DBAA = SDAA(SamplerzBufferN_P,texcoord);
-		float Mask = saturate(DBAA.y * 8);
-		#endif
+		
 		float Base_Depth_Buffer = tex2Dlod(SamplerzBufferN_L, float4( texcoord, 0, 0) ).x;
 		float2 Base_Depth_Buffers = float2(Base_Depth_Buffer,tex2Dlod(SamplerzBufferN_P, float4( texcoord, 0, 0) ).x);
-			#if !DX9_Toggle
-			Base_Depth_Buffers.x = lerp(Base_Depth_Buffers.x, DBAA.x, Mask);
-			#endif
+		float2 Store_Base_Depth_Buffers = Base_Depth_Buffers;
+
 		float GetDepth = smoothstep(0,1, tex2Dlod(SamplerzBufferN_P, float4(texcoord,0, 1) ).y), Sat_Range = saturate(Range_Blend);
 		
 		float Base_Depth_SubSampled = tex2Dlod(SamplerzBufferN_L, float4( texcoord, 0, lerp(0.0,4.0,Base_Depth_Buffers.x)) ).x;
@@ -4498,10 +4470,7 @@ uniform int Extra_Information <
 		float Near_Mask = tex2Dlod(SamplerzBufferN_L, float4( texcoord, 0, 9 ) ).x * 0.5;
 		if(Weapon_Near_Halo_Reduction)
 			VMW = lerp(VMW,9,Near_Mask);//int(lerp(VMW,9,Near_Mask));
-			#if !DX9_Toggle	
-			//Mask to reduce Halo Reduction in high Freqancy areas.
-			VMW = lerp(VMW, 0, Mask);
-			#endif	
+			
 		float Min_Blend = min(tex2Dlod(SamplerzBufferN_L, float4( texcoord, 0, VMW ) ).x,Base_Depth.x);
 
 		float2 DepthBuffer_LP = float2(Min_Blend,Base_Depth_Buffers.y);
@@ -4639,10 +4608,10 @@ uniform int Extra_Information <
 			#endif
 		#endif
 		#if !DX9_Toggle  		
-			float2 Depth_Size = tex2Dsize(DepthBuffer);
+			float2 Depth_Size = rcp_Depth_Size();
 			//float Depth_AR = Depth_Size.x/Depth_Size.y;
 			//float modifiedAR = Depth_AR - floor(Depth_AR);
-			Depth_Size = rcp(Depth_Size);
+			
 			
 			#if DB_Size_Position || SPF || LBC || LB_Correction
 			int LBD_Switch = LBD_Switcher > 0 ? 1 : !LBDetection();
@@ -4726,7 +4695,7 @@ uniform int Extra_Information <
 	
 	void Up_Z(in float4 position : SV_Position, in float2 texcoord : TEXCOORD, out float UpOut : SV_Target0)
 	{
-		float2 Depth_Size = rcp( tex2Dsize(DepthBuffer) );	
+		float2 Depth_Size = rcp_Depth_Size();	
 		float Median = Median3x3(SamplerzBufferN_Mixed, texcoord, Depth_Size);
 		UpOut = Median;	  					    	
 	}	
@@ -5594,9 +5563,9 @@ uniform int Extra_Information <
 	    
 		Result = Center + (VertResult + HorzResult) * 0.5 * rcp(verticalWeight + horizontalWeight);
 		
-		float Mask = length(EdgeDetection(Tex, texcoord, pix));
+		//float Mask = length(EdgeDetection(Tex, texcoord, pix));
 	
-	    return lerp(tex2D(Tex,texcoord),Result,Mask);
+	    return lerp(tex2D(Tex,texcoord),Result,1);
 	}
 
 	float4 MixModeBlend(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Target
@@ -5972,6 +5941,10 @@ uniform int Extra_Information <
 				
 				Color = lerp( Value * 0.5, Value, S_More );
 				*/
+				//Color = 0;
+				
+				//float2 Direction = SDAA(SamplerzBufferN_P,texcoord);
+				//Color.xy = saturate(Direction.x * Direction.y) > TEST;
 				return Color.rgba;
 			}
 		#endif
@@ -6490,17 +6463,83 @@ uniform int Extra_Information <
 
 	float4 SmartSharpJr(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Target
 	{  
-		float4 Color = tex2D(BackBuffer_SD,texcoord);//dot(Color.rgb,0.333);//
+		#if BC_SPACE == 1			    
+		float4 Color = NormalizeScRGBtex2D(BackBuffer_SD,texcoord));
+		#else
+		float4 Color = tex2D(BackBuffer_SD,texcoord);	
+		#endif
 		 Color.w = max(Color.r, max(Color.g, Color.b));
-		 //Color.w = dot(Color.rgb,0.333);
+		//#if BC_SPACE == 1
+	   // return ExpandScRGB(float4(Sharp(BackBuffer_SD, texcoord, 1.0).rgb,Color.w));
+	   // #else
 	    return float4(Sharp(BackBuffer_SD, texcoord, 1.0).rgb,Color.w);
+	    //#endif
 	}
-	#if AXAA_EXIST
-	float4 AXAA_PS(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Target
+	
+	float4 SDAA_PS(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Target
 	{  
-		return USE_AXAA ? AXAA(BackBuffer_SD,texcoord) : tex2D(BackBuffer_SD,texcoord);
+		float AA_Power = 0.625;
+		float4 Result = tex2D(BackBuffer_SD, texcoord) * (1.0-AA_Power);
+		
+		float2 Offset = pix;
+	    float2 X = float2(pix.x, 0.0), Y = float2(0.0, pix.y);
+	        
+	    // Calculate Edge
+	    float2 Edge = EdgeDetectionC(BackBuffer_SD, texcoord, Offset);
+	      
+		//Calculate Gradient from edge    
+		Edge += EdgeDetectionC(BackBuffer_SD, texcoord -X, Offset);
+		Edge += EdgeDetectionC(BackBuffer_SD, texcoord +X, Offset);
+		Edge += EdgeDetectionC(BackBuffer_SD, texcoord -Y, Offset);
+		Edge += EdgeDetectionC(BackBuffer_SD, texcoord +Y, Offset);
+	
+	    // Like NFAA calculate normal from Edge
+	    float2 N = float2(Edge.x,-Edge.y);
+	
+		X *= 0.5;//Reduce Corner Rounding
+		Y *= 0.5;//Reduce Corner Rounding
+		Edge += EdgeDetectionC(BackBuffer_SD, texcoord -X -Y, Offset);
+		Edge += EdgeDetectionC(BackBuffer_SD, texcoord -X +Y, Offset);
+		Edge += EdgeDetectionC(BackBuffer_SD, texcoord +X -Y, Offset);
+		Edge += EdgeDetectionC(BackBuffer_SD, texcoord +X +Y, Offset);
+	
+		
+		// Like DLAA calculate mask from gradient above.
+	    const float Mask = 1-saturate(length(N));
+	    
+	    // Like NFAA Calculate Main Mask based on edge strenght.
+	    if ( Mask )
+	    {
+	    	Result = tex2D(BackBuffer_SD, texcoord).rgb;
+	    }
+	    else
+		{   	    
+		    //Revert gradient
+		    N = float2(Edge.x,-Edge.y) ;
+	    
+		    const float AA_Adjust = AA_Power * rcp(6);   
+			Result += tex2D(BackBuffer_SD, texcoord+(N * 0.5)*Offset).rgb * AA_Adjust;
+			Result += tex2D(BackBuffer_SD, texcoord-(N * 0.5)*Offset).rgb * AA_Adjust;
+			Result += tex2D(BackBuffer_SD, texcoord+(N * 0.25)*Offset).rgb * AA_Adjust;
+			Result += tex2D(BackBuffer_SD, texcoord-(N * 0.25)*Offset).rgb * AA_Adjust;
+			Result += tex2D(BackBuffer_SD, texcoord+N*Offset).rgb * AA_Adjust;
+			Result += tex2D(BackBuffer_SD, texcoord-N*Offset).rgb * AA_Adjust;
+		}
+
+		#if AXAA_EXIST
+		if(USE_AA == 1)
+			return AXAA(BackBuffer_SD,texcoord);
+		else if(USE_AA == 2)
+			return Result;
+		else
+			return tex2D(BackBuffer_SD,texcoord);
+		#else
+		if(USE_AA == 1)
+			return Result;
+		else
+			return tex2D(BackBuffer_SD,texcoord);	
+		#endif
 	}
-	#endif
 	
 	#if REST_UI_Mode //Thankyou Tjandra for this option for people. 
 	float4 REST_Conversion_PS(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Target
@@ -6672,13 +6711,13 @@ uniform int Extra_Information <
 				VertexShader = PostProcessVS;
 				PixelShader = SmartSharpJr;
 			}	
-			#if AXAA_EXIST
-				pass AXAA
+
+				pass SDAA
 			{
 				VertexShader = PostProcessVS;
-				PixelShader = AXAA_PS;
+				PixelShader = SDAA_PS;
 			}
-			#endif
+
 		#endif
 	}
 	#if REST_UI_Mode
