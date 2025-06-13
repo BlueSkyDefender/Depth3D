@@ -1,7 +1,7 @@
 	////----------------//
 	///**SuperDepth3D**///
 	//----------------////
-	#define SD3D "SuperDepth3D v4.8.6\n"
+	#define SD3D "SuperDepth3D v4.8.7\n"
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//* Depth Map Based 3D post-process shader
 	//* For Reshade 3.0+
@@ -6478,11 +6478,11 @@ uniform int Extra_Information <
 	
 	float4 SDAA_PS(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Target
 	{  
-		float AA_Power = 0.625;
+		float AA_Power = 0.75;
 		float4 Result = tex2D(BackBuffer_SD, texcoord) * (1.0-AA_Power);
 		
 		float2 Offset = pix;
-	    float2 X = float2(pix.x, 0.0), Y = float2(0.0, pix.y);
+	    float2 N, X = float2(Offset.x, 0.0), Y = float2(0.0, Offset.y);
 	        
 	    // Calculate Edge
 	    float2 Edge = EdgeDetectionC(BackBuffer_SD, texcoord, Offset);
@@ -6492,25 +6492,19 @@ uniform int Extra_Information <
 		Edge += EdgeDetectionC(BackBuffer_SD, texcoord +X, Offset);
 		Edge += EdgeDetectionC(BackBuffer_SD, texcoord -Y, Offset);
 		Edge += EdgeDetectionC(BackBuffer_SD, texcoord +Y, Offset);
-	
-	    // Like NFAA calculate normal from Edge
-	    float2 N = float2(Edge.x,-Edge.y);
-	
-		X *= 0.5;//Reduce Corner Rounding
-		Y *= 0.5;//Reduce Corner Rounding
-		Edge += EdgeDetectionC(BackBuffer_SD, texcoord -X -Y, Offset);
-		Edge += EdgeDetectionC(BackBuffer_SD, texcoord -X +Y, Offset);
-		Edge += EdgeDetectionC(BackBuffer_SD, texcoord +X -Y, Offset);
-		Edge += EdgeDetectionC(BackBuffer_SD, texcoord +X +Y, Offset);
-	
-		
+		Edge *= 2;
 		// Like DLAA calculate mask from gradient above.
-	    const float Mask = 1-saturate(length(N));
+	    const float Mask = 1-saturate(length(float2(Edge.x,Edge.y)) * 2.0);
+		//Corner Rounding
+		//Edge += EdgeDetectionC(BackBuffer_SD, texcoord -X -Y, Offset);
+		//Edge += EdgeDetectionC(BackBuffer_SD, texcoord -X +Y, Offset);
+		//Edge += EdgeDetectionC(BackBuffer_SD, texcoord +X -Y, Offset);
+		//Edge += EdgeDetectionC(BackBuffer_SD, texcoord +X +Y, Offset);
 	    
 	    // Like NFAA Calculate Main Mask based on edge strenght.
 	    if ( Mask )
 	    {
-	    	Result = tex2D(BackBuffer_SD, texcoord).rgb;
+	    	Result = Result / (1.0-AA_Power);
 	    }
 	    else
 		{   	    
@@ -6520,8 +6514,8 @@ uniform int Extra_Information <
 		    const float AA_Adjust = AA_Power * rcp(6);   
 			Result += tex2D(BackBuffer_SD, texcoord+(N * 0.5)*Offset).rgb * AA_Adjust;
 			Result += tex2D(BackBuffer_SD, texcoord-(N * 0.5)*Offset).rgb * AA_Adjust;
-			Result += tex2D(BackBuffer_SD, texcoord+(N * 0.25)*Offset).rgb * AA_Adjust;
-			Result += tex2D(BackBuffer_SD, texcoord-(N * 0.25)*Offset).rgb * AA_Adjust;
+			Result += tex2D(BackBuffer_SD, texcoord+(N * 1.25)*Offset).rgb * AA_Adjust;
+			Result += tex2D(BackBuffer_SD, texcoord-(N * 1.25)*Offset).rgb * AA_Adjust;
 			Result += tex2D(BackBuffer_SD, texcoord+N*Offset).rgb * AA_Adjust;
 			Result += tex2D(BackBuffer_SD, texcoord-N*Offset).rgb * AA_Adjust;
 		}
