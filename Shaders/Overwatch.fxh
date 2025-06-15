@@ -1,7 +1,7 @@
 ////----------------------------------------//
 ///SuperDepth3D Overwatch Automation Header///
 //----------------------------------------////
-#define OVERWATCH "Overwatch v4.4.4\n"
+#define OVERWATCH "Overwatch v4.4.5\n"
 //---------------------------------------OVERWATCH---------------------------------------//
 // If you are reading this stop. Go away and never look back. From this point on if you  //
 // still think it's is worth looking at this..... Then no one can save you or your soul. //
@@ -28363,54 +28363,6 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	//#define FOV 1
     #define ARW 1	
     //#define RHW 1
-#elif (App == 0xD93B8576 ) //Black Myth: Wukong
-   // #define DG_Z 0.025 //Min
-    //#define DI_Z 0.050 //Trim
-/////////////////////////////////////////
-    #define DS_Z 2                 // Set View Mode
-	#define DA_W 1                 // Set Linerzation
-    //#define DB_X 1                 // Flip
-	#define DA_X 0.025             // ZPD
-	#define DF_Y 0.005              // Seperation
-	#define DA_Y 50.0              // Near Plane Adjustment
-    //#define DA_Z -.500           // Linerzation Offset
-    #define DS_Y 2                 // Linerzation Offset Effects only distance if true
-	#define DB_Z 0.025              // Auto Depth Protection
-	#define DE_X 1                 // ZPD Boundary 
-	#define DE_Y 0.750             // Set ZPD Boundary Level Zero 
-	#define DE_Z 0.375             // Speed that Boundary is Enforced
-	//#define AFD 1                // Alternate Frame Detection - May be phased out
-	//#define DG_W 0.25             // Shift Boundary Out of screen 0.5 and or In screen -0.5
-	#define OIL 1               // Set How many Levels We use for RE_Fix 0 | 1 | 2 | 3 if 1 then it's float2(0,0) for OIF and DI_W
-    #define OIF float2(0.5,0.375)// Fix enables if Value is > 0.0 
-	#define DI_W float2(0.50,1.25) // Like Shift Boundary DG_W But 0 to inf
-	#define WND 0.5              //Weapon Near Pushes depth in and adjust perspective to match.
-
-	#define BMT 1                  // ZPD and World Scale Balance // I need to phase this out.
-	#define DF_Z 0.250             // Set the Balance  
-    //#define DAO 1                  // Turn On or Off De-Artifact Options For now DAO if set to 1 it's also applys to Hoz 
-    #define DL_Y 1.0             // De-Artifact Only works on some View Modes and causes performance degredation
-    //#define DL_Z -0.5              // Compat Power
-	//#define DJ_X 0.050             // Range Smoothing
-	#define DAA_W 2              //Warp/Halo Masking Type 
-	
- //Smooth Mode
-    //#define SMS 1         //SM Separation Limit  - Do Not use any more
-	#define DL_X 0.875       //SM Tune Limit
-	//#define DL_W 0.5      //SM Perspective Limit - Do Not use any more
-	#define DM_X 5        //SM HQ Tune Power       - Will be made global
-    //#define DM_Y 1        //SM HQ VRS Limit
-	//#define HQT 1         //SM HQ Trigger
-	//#define FMM 1         //Filter Mode          - Need to add this back in the new shader.
-	//#define NDW 1
-	#define PEW 1
-	//#define NFM 1
-	#define DSW 1
-	//#define DRS 1
-	#define DAA 1
-	//#define FOV 1
-    #define ARW 1	
-    //#define RHW 1
 #elif (App == 0x6F24790F ) //Final Fantasy XIV Online MMORPG
     //#define DS_Z 2                 // Set View Mode
 	#define DA_W 1                 // Set Linerzation
@@ -40377,6 +40329,62 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
     //#define ARW 1
     //#define DFW 1 
     #define NVK 1    //Needs DirectX Vulkan-based translation layer Warning 
+#elif (App == 0xD93B8576 ) //Black Myth: Wukong
+	#define G_Info "Black Myth: Wukong | AppID 0xD93B8576 Steam \n"
+	
+    #define G_Note "Note: You will need to use the 'Generic Depth Mod' for this game with RT On.\n" \
+    			   "You Should only need to Set Select the Primary Prioritized Attribute to Vertices.\n" \
+			       "But, If you are using RT then you will need to Then Turn on\n" \
+				   "Avoid and set lower vertices Limit [10], Also Disable restrictions\n" \
+				   "that allow selection of zero buffers and that should be it.\n" \
+				   "You can use DLSS/FSR/XeSS at 75% or more on scaling.\n" \
+				   "Make sure to turn of Flame Gen.\n"
+    #define DS_Z 2                 // Set View Mode
+	#define DA_W 1                 // Set Linerzation
+    //#define DB_X 1                 // Flip
+	#define DHH_W 0.50                              // Smart Convergence 
+	#define DA_X 0.025             // ZPD
+	#define DF_Y 0.005              // Seperation
+	#define DA_Y 50.0              // Near Plane Adjustment
+    //#define DA_Z -.500           // Linerzation Offset
+    #define DS_Y 2                 // Linerzation Offset Effects only distance if true
+	#define DB_Z 0.025              // Auto Depth Protection
+	#define DE_X 1                 // ZPD Boundary 
+	#define DE_Y 0.750             // Set ZPD Boundary Level Zero 
+	#define DE_Z 0.375             // Speed that Boundary is Enforced
+	//#define AFD 1                // Alternate Frame Detection - May be phased out
+	//#define DG_W 0.25             // Shift Boundary Out of screen 0.5 and or In screen -0.5
+	#define OIL 4               // Set How many Levels We use for RE_Fix 0 | 1 | 2 | 3 if 1 then it's float2(0,0) for OIF and DI_W
+    #define OIF float4(0.625,0.5,0.375,0.250)// Fix enables if Value is > 0.0 
+	#define DI_W float4(0.25,0.5,1.25,2.5) // Like Shift Boundary DG_W But 0 to inf
+	#define DKK_W float2(0.125,5.0)//XY
+	#define WND 0.75              //Weapon Near Pushes depth in and adjust perspective to match.
+
+	#define BMT 1                  // ZPD and World Scale Balance // I need to phase this out.
+	#define DF_Z 0.250             // Set the Balance  
+    //#define DAO 1                  // Turn On or Off De-Artifact Options For now DAO if set to 1 it's also applys to Hoz 
+    #define DL_Y 0.75             // De-Artifact Only works on some View Modes and causes performance degredation
+    //#define DL_Z -0.5              // Compat Power
+	//#define DJ_X 0.050             // Range Smoothing
+	#define DAA_W 2              //Warp/Halo Masking Type 
+	
+ //Smooth Mode
+    //#define SMS 1         //SM Separation Limit  - Do Not use any more
+	#define DL_X 0.70       //SM Tune Limit
+	//#define DL_W 0.5      //SM Perspective Limit - Do Not use any more
+	#define DM_X 5        //SM HQ Tune Power       - Will be made global
+    //#define DM_Y 1        //SM HQ VRS Limit
+	//#define HQT 1         //SM HQ Trigger
+	//#define FMM 1         //Filter Mode          - Need to add this back in the new shader.
+	//#define NDW 1
+	#define PEW 1
+	//#define NFM 1
+	#define DSW 1
+	//#define DRS 1
+	#define DAA 1
+	//#define FOV 1
+    #define ARW 1	
+    //#define RHW 1
 #else
 	#define NPW 1 //No Profile
 	//#define G_Note "Note: Since no profile exists, you need to create one or ask for one.\n"

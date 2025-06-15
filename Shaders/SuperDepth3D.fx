@@ -1,7 +1,7 @@
 	////----------------//
 	///**SuperDepth3D**///
 	//----------------////
-	#define SD3D "SuperDepth3D v4.8.7\n"
+	#define SD3D "SuperDepth3D v4.8.8\n"
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//* Depth Map Based 3D post-process shader
 	//* For Reshade 3.0+
@@ -6490,16 +6490,16 @@ uniform int Extra_Information <
 		//Calculate Gradient from edge    
 		Edge += EdgeDetectionC(BackBuffer_SD, texcoord -X, Offset);
 		Edge += EdgeDetectionC(BackBuffer_SD, texcoord +X, Offset);
+		// Like DLAA calculate mask from gradient above.
+	    const float Mask = 1-saturate(length(float2(Edge.x,Edge.y)) * 2.0); // Need a better way for edge detection
+
 		Edge += EdgeDetectionC(BackBuffer_SD, texcoord -Y, Offset);
 		Edge += EdgeDetectionC(BackBuffer_SD, texcoord +Y, Offset);
-		Edge *= 2;
-		// Like DLAA calculate mask from gradient above.
-	    const float Mask = 1-saturate(length(float2(Edge.x,Edge.y)) * 2.0);
 		//Corner Rounding
-		//Edge += EdgeDetectionC(BackBuffer_SD, texcoord -X -Y, Offset);
-		//Edge += EdgeDetectionC(BackBuffer_SD, texcoord -X +Y, Offset);
-		//Edge += EdgeDetectionC(BackBuffer_SD, texcoord +X -Y, Offset);
-		//Edge += EdgeDetectionC(BackBuffer_SD, texcoord +X +Y, Offset);
+		Edge += EdgeDetectionC(BackBuffer_SD, texcoord -X -Y, Offset);
+		Edge += EdgeDetectionC(BackBuffer_SD, texcoord -X +Y, Offset);
+		Edge += EdgeDetectionC(BackBuffer_SD, texcoord +X -Y, Offset);
+		Edge += EdgeDetectionC(BackBuffer_SD, texcoord +X +Y, Offset);
 	    
 	    // Like NFAA Calculate Main Mask based on edge strenght.
 	    if ( Mask )
@@ -6514,8 +6514,8 @@ uniform int Extra_Information <
 		    const float AA_Adjust = AA_Power * rcp(6);   
 			Result += tex2D(BackBuffer_SD, texcoord+(N * 0.5)*Offset).rgb * AA_Adjust;
 			Result += tex2D(BackBuffer_SD, texcoord-(N * 0.5)*Offset).rgb * AA_Adjust;
-			Result += tex2D(BackBuffer_SD, texcoord+(N * 1.25)*Offset).rgb * AA_Adjust;
-			Result += tex2D(BackBuffer_SD, texcoord-(N * 1.25)*Offset).rgb * AA_Adjust;
+			Result += tex2D(BackBuffer_SD, texcoord+(N * 0.25)*Offset).rgb * AA_Adjust;
+			Result += tex2D(BackBuffer_SD, texcoord-(N * 0.25)*Offset).rgb * AA_Adjust;
 			Result += tex2D(BackBuffer_SD, texcoord+N*Offset).rgb * AA_Adjust;
 			Result += tex2D(BackBuffer_SD, texcoord-N*Offset).rgb * AA_Adjust;
 		}
