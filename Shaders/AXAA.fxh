@@ -44,7 +44,7 @@
  //*
  //* ----------------------------------------------------------------------------------
  //*
- //* Port/Modified to ReShadeFX by Jose Negrete AKA BlueSkyDefender - Depth3D.info
+ //* Port/Modified to ReShadeFX by Jose Negrete AKA BlueSkyDefender - http://www.Depth3D.info
  //*
  //* Notes:
  //* ----------------------------------------------------------------------------------
@@ -54,8 +54,13 @@
  //* the licence was harder than porting the shader.
  //*
  //* - God what a pain
+ //*
+ //* Update: I found a more human readable version here. 
+ //*         https://github.com/kosua20/Rendu/blob/master/resources/common/shaders/screens/fxaa.frag
+ //*         At this point I will be branching this to DXAA. Since AXAA Is nice and all. I just like
+ //*         my own port that is all.
  //*																																												
- //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+ ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #if __RENDERER__ >= 0x10000 && __RENDERER__ < 0x20000 //This was added due to not compiling on AMD OpenGL
 	#define OpenGL_Switch 1
 #else
@@ -63,8 +68,6 @@
 #endif
 //////////////////////////////////////////////////////////Defines///////////////////////////////////////////////////////////////////
 #define Pix float2(BUFFER_RCP_WIDTH, BUFFER_RCP_HEIGHT)
-//#define FXAA_EDGE_THRESHOLD      (1.0/8.0)  // Replaced with AXAA early Return
-//#define FXAA_EDGE_THRESHOLD_MIN  (1.0/24.0) // Replaced with AXAA early Return
 #define FXAA_SEARCH_STEPS        32
 #define FXAA_SEARCH_ACCELERATION 1
 #define FXAA_SEARCH_THRESHOLD    (1.0/4.0)
@@ -84,7 +87,7 @@ float4 FxaaTexOff(sampler tex, float2 pos, int2 off)
     return tex2Dlod(tex, float4(pos.xy,0,0), off);
 	#endif
 }
-
+//A lot of the helper functions stuff is not needed in ReShade.
 float FxaaLuma(float3 rgb)
 {
     return rgb.y * (0.587 / 0.299) + rgb.x;
@@ -137,12 +140,6 @@ float4 AXAA(sampler tex,float2 texcoord)
 	if (abs(lumaM - rangeMid) <= alpha)
 	    return float4(FxaaFilterReturn(rgbM), 1.0f);
 	    
-	/* // FXAA old way of doing it
-    if (range < max(FXAA_EDGE_THRESHOLD_MIN, rangeMax * FXAA_EDGE_THRESHOLD))
-    {
-        return float4(FxaaFilterReturn(rgbM), 1.0f);
-    }
-    */
     float3 rgbL = rgbN + rgbW + rgbM + rgbE + rgbS;
     
     //COMPUTE LOWPASS
@@ -180,9 +177,11 @@ float4 AXAA(sampler tex,float2 texcoord)
     bool horzSpan = edgeHorz >= edgeVert;
     float lengthSign = horzSpan ? -Pix.y : -Pix.x;
     if (!horzSpan)
+    {
         lumaN = lumaW;
-    if (!horzSpan)
         lumaS = lumaE;
+    }
+    
     float gradientN = abs(lumaN - lumaM);
     float gradientS = abs(lumaS - lumaM);
     lumaN = (lumaN + lumaM) * 0.5;
@@ -215,11 +214,11 @@ float4 AXAA(sampler tex,float2 texcoord)
 	// CHOOSE SIDE OF PIXEL WHERE GRADIENT IS HIGHEST
 	bool pairN = gradientN >= gradientS;
 	if (!pairN)
+	{
 	    lumaN = lumaS;
-	if (!pairN)
 	    gradientN = gradientS;
-	if (!pairN)
 	    lengthSign *= -1.0;
+	}
 	
 	float2 posN;
 	posN.x = texcoord.x + (horzSpan ? 0.0 : lengthSign * 0.5);

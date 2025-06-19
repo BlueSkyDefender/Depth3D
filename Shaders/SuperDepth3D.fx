@@ -1,7 +1,7 @@
 	////----------------//
 	///**SuperDepth3D**///
 	//----------------////
-	#define SD3D "SuperDepth3D v4.8.8\n"
+	#define SD3D "SuperDepth3D v4.9.0\n"
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//* Depth Map Based 3D post-process shader
 	//* For Reshade 3.0+
@@ -42,6 +42,14 @@ namespace SuperDepth3D
 	#else
 		#warning "Missing AXAA.fxh Header File"
 		#define AXAA_EXIST 0
+	#endif
+
+	#if exists "DXAA.fxh"
+		#include "DXAA.fxh"
+		#define DXAA_EXIST 1
+	#else
+		#warning "Missing DXAA.fxh Header File"
+		#define DXAA_EXIST 0
 	#endif
 	
 	#define D_ViewMode 1
@@ -825,13 +833,14 @@ uniform int SuperDepth3D <
 					 "Default is Performant.";
 		ui_category = "Occlusion Masking";
 	> = PLS;
-	
+	/* Will add this back when Eyetracking is a thing
 	uniform bool Foveated_Mode <
 			ui_label = "Foveated Rendering";
 			ui_tooltip = "Foveated rendering lowes the quality of the infilling around the center of the image.\n"
 						 "In the future when we have a method for eye tracking this should work a lot better.";
 			ui_category = "Occlusion Masking";
 	> = FRM;
+	*/
 	#endif
 	#if !Use_2D_Plus_Depth
 	uniform float Compatibility_Power <
@@ -876,7 +885,7 @@ uniform int SuperDepth3D <
 					 "Default is Zero and it's Off.";
 		ui_category = "Compatibility Options";
 	> = THF;
-
+	/*
 	uniform bool De_Art_Opt <
 		ui_label = " De-Artifact Hoz";
 		ui_tooltip = "Some times We get artifacting on the Hoz axis around round or sloped objects.\n"
@@ -884,6 +893,7 @@ uniform int SuperDepth3D <
 					 "Default is Off.";
 		ui_category = "Compatibility Options";
 	> = DAO;
+	*/
 		#endif
 	uniform int Select_SS <
 		ui_type = "combo";
@@ -1702,27 +1712,33 @@ uniform int SuperDepth3D <
 		ui_category = "Image Effects";
 	> = 0;
 
-	#if AXAA_EXIST	
+	#if AXAA_EXIST || AXAA_EXIST	
 	uniform int USE_AA <
 		ui_type = "combo";
-		ui_items = "Off\0Adaptive approXimate Anti-Aliasing\0Multi Directional Anti-Aliasing\0";		
+		#if AXAA_EXIST || DXAA_EXIST
+			#if HDR_Compatible_Mode
+			ui_items = "Off\0Adaptive approXimate Anti-Aliasing HDR Compatible\0Directional approXimate Anti-Aliasing\0";
+			#else
+			ui_items = "Off\0Adaptive approXimate Anti-Aliasing\0Directional approXimate Anti-Aliasing\0";
+			#endif
+		#elif AXAA_EXIST
+			#if HDR_Compatible_Mode
+			ui_items = "Off\0Adaptive approXimate Anti-Aliasing HDR Compatible\0";
+			#else
+			ui_items = "Off\0Adaptive approXimate Anti-Aliasing\0";			
+			#endif		
+		#elif DXAA_EXIST	
+			ui_items = "Off\0Directional approXimate Anti-Aliasing\0";
+		#endif
 		ui_label = " Anti-Aliasing";
 		ui_tooltip = "Note: Set the Anti-Aliasing type to use on the last output of the 3D image.\n"
 					 "      Adaptive approXimate Anti-Aliasing is Based on LG's modifications to FXAA.\n"
-					 "      Multi Directional Anti-Aliasing is a aggresive home grown AA for 3D output.\n"
+					 "      Directional approXimate Anti-Aliasing is based on AXAA but faster.\n"
 					 "Default is Off.";
 		ui_category = "Image Effects";
 	> = false;
 	#else
-		uniform int USE_AA <
-		ui_type = "combo";
-		ui_items = "Off\0Multi Directional Anti-Aliasing\0";		
-		ui_label = " Anti-Aliasing";
-		ui_tooltip = "Note: Set the Anti-Aliasing type to use on the last output of the 3D image.\n"
-					 "      Multi Directional Anti-Aliasing is a aggresive home grown AA for 3D output.\n"
-					 "Default is Off.";
-		ui_category = "Image Effects";
-	> = false;
+		static const bool USE_AA = false;
 	#endif
 	
 	#if Enable_Deband_Mode
@@ -2121,7 +2137,7 @@ uniform int Extra_Information <
 			MinFilter = POINT;
 			MipFilter = POINT;
 		};
-	//UPSample Pass
+	//UpSample Pass
 	texture texzBufferN_U { Width = BUFFER_WIDTH ; Height = BUFFER_HEIGHT ; Format = R16F; }; //Do not use mips in this buffer
 	
 	sampler SamplerzBufferN_Up
@@ -2388,6 +2404,13 @@ uniform int Extra_Information <
 	    float Vin = TC.x*TC.y * V_Power.x, Use_Depth = 1;// step(PrepDepth( texcoord.xy )[0][0] + 0.30, 0.375);
 	    return 1-saturate(pow(abs(Vin),V_Power.y));	
 	}
+
+	float3 Patterns(float2 TC)
+	{
+		float3 Pattern = float3( floor(TC.y*Res.y) + floor(TC.x*Res.x), floor(TC.x*Res.x), floor(TC.y*Res.y));
+		return Pattern;
+	}
+
 	///////////////////////////////////////////////////////////Conversions/////////////////////////////////////////////////////////////
 	float3 RGBtoYCbCr(float3 rgb) // For Super3D a new Stereo3D output.
 	{
@@ -4662,6 +4685,15 @@ uniform int Extra_Information <
 			
 		//MixOut = MixOut;
 	}
+	
+	float2 De_Art(float2 sp, float2 Shift)//, int Switch)
+	{
+		//if(Switch)
+			return float2(sp.x - Shift.x,sp.y);
+		//else
+		//	return float2(sp.x + Shift.x,sp.y);
+	}
+	
 	#if !DX9_Toggle
 	void swap(inout float a, inout float b)
 	{
@@ -4691,43 +4723,83 @@ uniform int Extra_Information <
 		
 		// Median
 	    return s[4];
-	}	
+	}
+	/*
+	float GetDepth(float2 texcoord, float mips) 
+	{
+		return tex2Dlod(SamplerzBufferN_Mixed,float4(texcoord,0,mips)).x;
+	}
 	
+	float De_Art_Parallax(float Diverge, float2 Coordinates) 
+	{
+	    float  MS = ( Diverge * TEST) * pix.x;		
+		float LRDepth = 1, Num, S[3] = {0.5,0.75,1.0};
+	
+			MS = -MS;
+
+			[loop]
+			for ( int i = 0 ; i < 3; ++i )
+			{   
+				Num = S[i] * MS;
+				LRDepth = min(LRDepth, GetDepth(float2(Coordinates.x + Num, Coordinates.y),0) );	
+		
+			}
+			
+			return LRDepth; 
+	}
+	*/	
+	static const float  HFI_Array[4] = { 0, 5, 6, 7};	
 	void Up_Z(in float4 position : SV_Position, in float2 texcoord : TEXCOORD, out float UpOut : SV_Target0)
 	{
+	/*
+		float  MS = 100 * pix.x;
+		float GetDepth = smoothstep(0,1, tex2Dlod(SamplerzBufferN_L, float4(texcoord,0, 2.0) ).x);
+		//Extra scaleing for the main Loop
+		float Mod_Depth = saturate(GetDepth * lerp(1,15,abs(Artifact_Adjust().y))), Reverse_Depth = Artifact_Adjust().y < 0 ? 1-Mod_Depth : Mod_Depth,
+				  Scale_With_Depth = Artifact_Adjust().y == 0 ? 1 : Reverse_Depth;
+				  
+		float Foveated_Mask = saturate(Vin_Pattern(texcoord, float2(16.0,2.0))), MaxMix = lerp(100, 50, saturate(GetDepth * 2 - 1) );	
+
+		//De-Artifacting.
+		float AA_Value = Artifact_Adjust().x;
+		float Corners = saturate(tex2Dlod(SamplerzBufferN_L,float4(texcoord,0,HFI_Array[Target_High_Frequency])).y);
+		float Smooth_C = smoothstep(0.0,1.0,Corners * 1000);
+			
+		if(Target_High_Frequency > 0)
+			AA_Value = lerp(AA_Value,1.0,Smooth_C);
+			  
+		//Adjustments and Switching for De-Artifacting.	  
+		float AA_Switch = De_Artifacting.x < 0 ? lerp(0.3 * AA_Value,AA_Value ,smoothstep(0.0,1.0,Foveated_Mask)): AA_Value;
+		float2 Artifacting_Adjust = float2(MS.x * lerp(0,0.125,clamp(AA_Switch * Scale_With_Depth,0,2)),1.0 - (MS.x * lerp(0,0.25,clamp(AA_Value * Scale_With_Depth,0,2))));
+
+		float2 shift_coords_A = De_Art(texcoord, Artifacting_Adjust , 0);
+		float2 shift_coords_B = De_Art(texcoord, Artifacting_Adjust , 1);
+	*/
 		float2 Depth_Size = rcp_Depth_Size();	
 		float Median = Median3x3(SamplerzBufferN_Mixed, texcoord, Depth_Size);
-		UpOut = Median;	  					    	
+		//float Mixed = tex2Dlod(SamplerzBufferN_Mixed,float4(shift_coords_A,0,0)).x;// + tex2Dlod(SamplerzBufferN_Mixed,float4(shift_coords_B,0,0)).x;
+
+		UpOut = Median;//min(Median, Mixed);	  					    	
 	}	
 	#endif
-	float2 GetMixed(float2 texcoord) //Sensitive Buffer.
+	float2 GetMixed(float2 texcoord, float mips) //Sensitive Buffer.
 	{
 		#if !DX9_Toggle
-		float BufferA = tex2Dlod(SamplerzBufferN_Up,float4(texcoord,0,0)).x, 
-			  BufferB = tex2Dlod(SamplerzBufferN_Mixed,float4(texcoord,0,0)).x;
+		float BufferA = tex2Dlod(SamplerzBufferN_Up,float4(texcoord,0,mips)).x, 
+			  BufferB = tex2Dlod(SamplerzBufferN_Mixed,float4(texcoord,0,mips)).x;
 		//Careful not to shift here because we run out of memory in DX9
 		return float2(BufferA,BufferB);//Do not use mips on this buffer
 		#else
-		return tex2Dlod(SamplerzBufferN_Mixed,float4(texcoord,0,0)).x;
+		return tex2Dlod(SamplerzBufferN_Mixed,float4(texcoord,0,mips)).x;
 		#endif
 	}
-	#if !Use_2D_Plus_Depth
-	float2 De_Art(float2 sp, float2 Shift_n_Zoom)
-	{  //sp.y * Shift_n_Zoom.y + (1-Shift_n_Zoom.y)*0.5
-		//if(De_Artifacting.x < 0)
-		if( De_Art_Opt )
-			return float2(sp.x - Shift_n_Zoom.x,sp.y * Shift_n_Zoom.y + (1-Shift_n_Zoom.y)*0.5);//lerp(ZoomDir,0, Depth);
-		else
-			return float2(sp.x - Shift_n_Zoom.x,sp.y);//lerp(ZoomDir,0, Depth);
-	}	
-	//#define BATCH_SIZE 2
+	#if !Use_2D_Plus_Depth	
 	//Perf Level selection & Array access               X    Y      Z      W              X    Y      Z      W
 	//static const float2 Performance_LvL[2] = { float4( 0.5, 0.5095, 0.679, 0.5 ), float4( 1.0, 1.019, 1.425, 1.0) };
 	//Perf Level selection & Array access                X      Y               X    Y  
 	static const float2 Performance_LvL0[2] = { float2( 0.5  , 0.679), float2( 1.0, 1.425) };
 	static const float2 Performance_LvL1[2] = { float2( 0.375, 0.479), float2( 0.5, 0.679) };
 	static const float  VRS_Array[5] = { 0.5, 0.5, 0.25, 0.125 , 0.0625 };
-	static const float  HFI_Array[4] = { 0, 5, 6, 7};
 	//////////////////////////////////////////////////////////Parallax Generation///////////////////////////////////////////////////////////////////////
 	float3 Parallax(float Diverge, float2 Coordinates, float IO) // Horizontal parallax offset & Hole filling effect
 	{
@@ -4745,20 +4817,20 @@ uniform int Extra_Information <
 			for ( int i = 0 ; i < 6; ++i )
 			{   
 				Num = S[i] * MS;
-				LRDepth = min(LRDepth, GetMixed(float2(ParallaxCoord.x + Num, ParallaxCoord.y)).x );	
+				LRDepth = min(LRDepth, GetMixed(float2(ParallaxCoord.x + Num, ParallaxCoord.y),0).x );	
 	
 				if(View_Mode == 1)
 				{							
 					float w0 = 1.0, w1 = 0.50, w2 = 0.375, w3 = 0.250, w4 = 0.125, w5 = 0.0625, w6 = 0.03125;
 					sumW = w0 + w1 + w2 + w3 + w4 + w5 + w6;
-					float Mix_Depth = min(DepthLR,GetMixed(float2(ParallaxCoord.x + 0.500 * MS, ParallaxCoord.y)).x) * w0;
+					float Mix_Depth = min(DepthLR,GetMixed(float2(ParallaxCoord.x + 0.500 * MS, ParallaxCoord.y),0).x) * w0;
 					float Cal_Mid_Depth = Mix_Depth;
-						  Mix_Depth += GetMixed(float2(ParallaxCoord.x + 0.5833 * MS, ParallaxCoord.y)).x * w1;
-						  Mix_Depth += GetMixed(float2(ParallaxCoord.x + 0.6667 * MS, ParallaxCoord.y)).x * w2;
-						  Mix_Depth += GetMixed(float2(ParallaxCoord.x + 0.7500 * MS, ParallaxCoord.y)).x * w3;
-						  Mix_Depth += GetMixed(float2(ParallaxCoord.x + 0.8333 * MS, ParallaxCoord.y)).x * w4;
-						  Mix_Depth += GetMixed(float2(ParallaxCoord.x + 0.9167 * MS, ParallaxCoord.y)).x * w5;
-						  Mix_Depth += GetMixed(float2(ParallaxCoord.x + 1.0000 * MS, ParallaxCoord.y)).x * w6;
+						  Mix_Depth += GetMixed(float2(ParallaxCoord.x + 0.5833 * MS, ParallaxCoord.y),0).x * w1;
+						  Mix_Depth += GetMixed(float2(ParallaxCoord.x + 0.6667 * MS, ParallaxCoord.y),0).x * w2;
+						  Mix_Depth += GetMixed(float2(ParallaxCoord.x + 0.7500 * MS, ParallaxCoord.y),0).x * w3;
+						  Mix_Depth += GetMixed(float2(ParallaxCoord.x + 0.8333 * MS, ParallaxCoord.y),0).x * w4;
+						  Mix_Depth += GetMixed(float2(ParallaxCoord.x + 0.9167 * MS, ParallaxCoord.y),0).x * w5;
+						  Mix_Depth += GetMixed(float2(ParallaxCoord.x + 1.0000 * MS, ParallaxCoord.y),0).x * w6;
 					Mix_Depth /= sumW;
 		
 					Mix_Depth = min(Mix_Depth,Cal_Mid_Depth);
@@ -4790,8 +4862,8 @@ uniform int Extra_Information <
 					Perf *= lerp(0.25,1.0,smoothstep(0.0,0.25,saturate( Luma_Map )));
 			//Foveated Calculations	
 			float Foveated_Mask = saturate(Vin_Pattern(Coordinates, float2(16.0,2.0))), MaxMix = lerp(100, 50, saturate(GetDepth * 2 - 1) );	
-			if(Foveated_Mode)
-				MaxMix = lerp(75, 25, saturate(Foveated_Mask * saturate(GetDepth * 2 - 1 ) ));
+			//if(Foveated_Mode)
+			//	MaxMix = lerp(75, 25, saturate(Foveated_Mask * saturate(GetDepth * 2 - 1 ) ));
 	
 			//Extra scaleing for the main Loop
 			float Mod_Depth = saturate(GetDepth * lerp(1,15,abs(Artifact_Adjust().y))), Reverse_Depth = Artifact_Adjust().y < 0 ? 1-Mod_Depth : Mod_Depth,
@@ -4801,84 +4873,116 @@ uniform int Extra_Information <
 			float AA_Value = Artifact_Adjust().x;
 			float Corners = saturate(tex2Dlod(SamplerzBufferN_L,float4(Coordinates,0,HFI_Array[Target_High_Frequency])).y);
 			float Smooth_C = smoothstep(0.0,1.0,Corners * 1000);
-				  if(Target_High_Frequency > 0)
-				  AA_Value = lerp(AA_Value,1.0,Smooth_C);
+				
+			if(Target_High_Frequency > 0)
+				AA_Value = lerp(AA_Value,1.0,Smooth_C);
 				  
 			//Adjustments and Switching for De-Artifacting.	  
 			float AA_Switch = De_Artifacting.x < 0 ? lerp(0.3 * AA_Value,AA_Value ,smoothstep(0.0,1.0,Foveated_Mask)): AA_Value;
 			float2 Artifacting_Adjust = float2(MS.x * lerp(0,0.125,clamp(AA_Switch * Scale_With_Depth,0,2)),1.0 - (MS.x * lerp(0,0.25,clamp(AA_Value * Scale_With_Depth,0,2))));
 			// Perform the conditional check outside the loop
-			bool applyArtifacting = (AA_Value != 0);
+			bool AA_Toggle = true;
 			
-			if( View_Mode >= 2 && View_Mode < 5)
-					applyArtifacting = 0;	
-					
-				//ParallaxSteps Calculations
-				float MinNum = 25, MaxNum = MaxMix, D = abs(Diverge), Cal_Steps = D * Perf,
-					  Steps  = clamp( Cal_Steps, MinNum, MaxNum );//Foveated Rendering Point of attack 16-256 limit samples.
-	
-				float N = 0.5,F = 1.0, Z = tex2Dlod(SamplerzBuffer_BlurN, float4( Coordinates  * float2(0.5,1) + float2(0.5,0), 0, 1 ) ).x;
-			    float ZS = smoothstep(0.5,1.0,( Z - N ) / ( F - N));
-				float Auto_Compatibility_Power = abs(Compatibility_Power) ? Compatibility_Power : lerp(-0.25,0.0, ZS );
-		
-				float LayerDepth = rcp(Steps),  TP = lerp(0.025, 0.05,Auto_Compatibility_Power) * ( Compatibility_Power >= 0 ? 1 : Foveated_Mask );
-				float D_Range = lerp(75,25,GetDepth), US_Offset = Diverge < 0 ? -D_Range : D_Range;
-			
-				//Offsets listed here Max Seperation is 3% - 8% of screen space with Depth Offsets & Netto layer offset change based on MS.
-				float deltaCoordinates = MS.x * LayerDepth, CurrentDepthMapValue = min(1,GetMixed( ParallaxCoord).x), CurrentLayerDepth = -Re_Scale_WN().x,
-					  DB_Offset = US_Offset * TP * pix.x;
-					  
-		    	float blend, threshold = 0.005; 
-				[loop] //Steep parallax mapping Ray Marcher
-				while ( CurrentDepthMapValue >= CurrentLayerDepth )
-				{   
-					if(CurrentDepthMapValue < CurrentLayerDepth)//Had to do this check to keep it from crashing
-						break;
-					// Shift coordinates horizontally in linear fasion
-				    ParallaxCoord.x -= deltaCoordinates; 
-				    // Get depth value at current coordinates
-				    float G_Depth = GetMixed(ParallaxCoord).x , C_Depth = GetMixed( De_Art(ParallaxCoord, Artifacting_Adjust ) ).y;
-					float diff = abs(G_Depth - C_Depth);
+			if(Artifact_Adjust().x == 0)
+				AA_Toggle = false;
 				
-				    // Sensitivity threshold
-				    blend = saturate(diff / threshold);
-				    
-				    if ( applyArtifacting && blend)
-						CurrentDepthMapValue = min(G_Depth.x, C_Depth);//GetMixed( De_Art(ParallaxCoord, Artifacting_Adjust ) ).x);
-					else
-						CurrentDepthMapValue = G_Depth.x;				
-				    // Get depth of next layer
-				    CurrentLayerDepth += LayerDepth;
-				}
-			
-				if( View_Mode <= 1 || View_Mode >= 5 )	
-			   	ParallaxCoord.x += DB_Offset * 0.125;
-		    
-				float2 PrevParallaxCoord = float2( ParallaxCoord.x + deltaCoordinates, ParallaxCoord.y);
-				//Anti-Weapon Hand Fighting                                         // Set to 6.0 if it I want it Stronger.
-				float Weapon_Mask = WeaponMask(Coordinates,0), ZFighting_Mask = 1.0-(1.0-WeaponMask(Coordinates,5.5) - Weapon_Mask); //tex2Dlod(SamplerDMN,float4(Coordinates,0,0)).y, ZFighting_Mask = 1.0-(1.0-tex2Dlod(SamplerDMN,float4(Coordinates ,0,5.5)).y - Weapon_Mask);
-					  ZFighting_Mask = ZFighting_Mask * (1.0-Weapon_Mask);
-				float2 PCoord = float2(View_Mode <= 1 || View_Mode >= 5 ? PrevParallaxCoord.x : ParallaxCoord.x, PrevParallaxCoord.y ) ;	
-					   //PCoord.x -= 0.005 * MS;		   
-				float Get_DB = GetMixed( PCoord ).x,
-					  Get_DB_ZDP = WP > 0 ? lerp(Get_DB, abs(Get_DB), ZFighting_Mask) : Get_DB;
-				// Parallax Occlusion Mapping
-				float beforeDepthValue = Get_DB_ZDP, afterDepthValue = CurrentDepthMapValue - CurrentLayerDepth;
-					  beforeDepthValue += LayerDepth - CurrentLayerDepth;
-				// Depth Diffrence for Gap masking and depth scaling in Normal Mode.
-				float DepthDiffrence = afterDepthValue - beforeDepthValue, DD_Map = abs(DepthDiffrence);
-				float2 DD_Spread = saturate(float2(DD_Map > 0.032,DD_Map > lerp(0.128,0.064 ,LR_Depth_Mask )));//was 0.064 may add this back later.
-				float weight = afterDepthValue / min(-0.0125,DepthDiffrence);
-					  weight = lerp(weight + 2.0 * DD_Spread.x,weight,0.75);//Reversed the logic since it seems look better this way and it leans towards the normal output.
-				float Weight = weight;
-				//ParallaxCoord.x = lerp( ParallaxCoord.x, PrevParallaxCoord.x, weight); //Old		
-				ParallaxCoord.x = PrevParallaxCoord.x * weight + ParallaxCoord.x * (1 - Weight);
-				//This is to limit artifacts.
-				if(View_Mode >= 2 && View_Mode <= 4)
-					ParallaxCoord.x += DB_Offset * 4.0;
-				else	
-					ParallaxCoord.x += lerp(DB_Offset * 2.0, DB_Offset * 4.0, DD_Spread.y );// Also boost in some areas using DD_Map
+			if(Target_High_Frequency > 0)
+				AA_Toggle = true;
+				
+			if(View_Mode >= 2 && View_Mode <= 4)
+			    AA_Toggle = false;
+								
+			//ParallaxSteps Calculations
+			float MinNum = 25, MaxNum = MaxMix, D = abs(Diverge), Cal_Steps = D * Perf,
+				  Steps  = clamp( Cal_Steps, MinNum, MaxNum );//Foveated Rendering Point of attack 16-256 limit samples.
+
+			float N = 0.5,F = 1.0, Z = tex2Dlod(SamplerzBuffer_BlurN, float4( Coordinates  * float2(0.5,1) + float2(0.5,0), 0, 1 ) ).x;
+		    float ZS = smoothstep(0.5,1.0,( Z - N ) / ( F - N));
+			float Auto_Compatibility_Power = abs(Compatibility_Power) ? Compatibility_Power : lerp(-0.25,0.0, ZS );
 	
+			float LayerDepth = rcp(Steps),  TP = lerp(0.025, 0.05,Auto_Compatibility_Power) * ( Compatibility_Power >= 0 ? 1 : Foveated_Mask );
+			float D_Range = lerp(75,25,GetDepth), US_Offset = Diverge < 0 ? -D_Range : D_Range;
+		
+			//Offsets listed here Max Seperation is 3% - 8% of screen space with Depth Offsets & Netto layer offset change based on MS.
+			float deltaCoordinates = MS.x * LayerDepth, CurrentDepthMapValue = min(1,GetMixed( ParallaxCoord,0).x), CurrentLayerDepth = -Re_Scale_WN().x,
+				  DB_Offset = US_Offset * TP * pix.x;
+				  
+			    float Mask, threshold = 0.001; 	
+		if(AA_Toggle)
+		{
+			[loop] //Steep parallax mapping Ray Marcher
+			while ( CurrentDepthMapValue >= CurrentLayerDepth )
+			{   
+				if(CurrentDepthMapValue < CurrentLayerDepth)
+					break;
+				// Shift coordinates horizontally in linear fasion
+			    ParallaxCoord.x -= deltaCoordinates; 
+			    // Get depth value at current coordinates
+			    float2 De_Art_Coords = De_Art(ParallaxCoord, Artifacting_Adjust );
+			    float G_Depth = GetMixed(ParallaxCoord,0).x , C_Depth = GetMixed( De_Art_Coords,0).y;
+				float diff = abs(G_Depth - C_Depth);
+			
+			    // Sensitivity threshold
+			    Mask = saturate(diff > threshold);
+				float Final_Mask = AA_Switch * Mask;
+				
+				CurrentDepthMapValue = lerp(G_Depth,min(G_Depth, C_Depth), Final_Mask);
+			
+			    // Get depth of next layer
+			    CurrentLayerDepth += LayerDepth;
+			}
+		}
+		else
+		{
+			[loop] //Steep parallax mapping Ray Marcher
+			while ( CurrentDepthMapValue >= CurrentLayerDepth )
+			{   
+				if(CurrentDepthMapValue < CurrentLayerDepth)
+					break;
+				// Shift coordinates horizontally in linear fasion
+			    ParallaxCoord.x -= deltaCoordinates; 
+			    // Get depth value at current coordinates
+			    float2 De_Art_Coords = De_Art(ParallaxCoord, Artifacting_Adjust );
+			    float G_Depth = GetMixed(ParallaxCoord,0).x , C_Depth = GetMixed( De_Art_Coords,0).y;
+				float diff = abs(G_Depth - C_Depth);
+			
+			    // Sensitivity threshold
+			    Mask = saturate(diff > threshold);		    
+			    // Get depth value at current coordinates
+				CurrentDepthMapValue = GetMixed(ParallaxCoord,0).x;
+			    // Get depth of next layer
+			    CurrentLayerDepth += LayerDepth;
+			}			
+		}
+		
+			if( View_Mode <= 1 || View_Mode >= 5 )	
+		   	ParallaxCoord.x += DB_Offset * 0.125;
+	    
+			float2 PrevParallaxCoord = float2( ParallaxCoord.x + deltaCoordinates, ParallaxCoord.y);
+			//Anti-Weapon Hand Fighting                                         // Set to 6.0 if it I want it Stronger.
+			float Weapon_Mask = WeaponMask(Coordinates,0), ZFighting_Mask = 1.0-(1.0-WeaponMask(Coordinates,5.5) - Weapon_Mask); //tex2Dlod(SamplerDMN,float4(Coordinates,0,0)).y, ZFighting_Mask = 1.0-(1.0-tex2Dlod(SamplerDMN,float4(Coordinates ,0,5.5)).y - Weapon_Mask);
+				  ZFighting_Mask = ZFighting_Mask * (1.0-Weapon_Mask);
+			float2 PCoord = float2(View_Mode <= 1 || View_Mode >= 5 ? PrevParallaxCoord.x : ParallaxCoord.x, PrevParallaxCoord.y ) ;	
+				   //PCoord.x -= 0.005 * MS;		   
+			float Get_DB = GetMixed( PCoord ,0).x,
+				  Get_DB_ZDP = WP > 0 ? lerp(Get_DB, abs(Get_DB), ZFighting_Mask) : Get_DB;
+			// Parallax Occlusion Mapping
+			float beforeDepthValue = Get_DB_ZDP, afterDepthValue = CurrentDepthMapValue - CurrentLayerDepth;
+				  beforeDepthValue += LayerDepth - CurrentLayerDepth;
+			// Depth Diffrence for Gap masking and depth scaling in Normal Mode.
+			float DepthDiffrence = afterDepthValue - beforeDepthValue, DD_Map = abs(DepthDiffrence);
+			float2 DD_Spread = saturate(float2(DD_Map > 0.032,DD_Map > lerp(0.128,0.064 ,LR_Depth_Mask )));//was 0.064 may add this back later.
+			float weight = afterDepthValue / min(-0.0125,DepthDiffrence);
+				  weight = lerp(weight + 2.0 * DD_Spread.x,weight,0.75);//Reversed the logic since it seems look better this way and it leans towards the normal output.
+			float Weight = weight;
+			//ParallaxCoord.x = lerp( ParallaxCoord.x, PrevParallaxCoord.x, weight); //Old		
+			ParallaxCoord.x = PrevParallaxCoord.x * weight + ParallaxCoord.x * (1 - Weight);
+			//This is to limit artifacts.
+			if(View_Mode >= 2 && View_Mode <= 4)
+				ParallaxCoord.x += DB_Offset * 4.0;
+			else	
+				ParallaxCoord.x += lerp(DB_Offset * 2.0, DB_Offset * 4.0, DD_Spread.y );// Also boost in some areas using DD_Map
+
 			#if Reconstruction_Mode
 				if(Reconstruction_Type == 1 )
 					ParallaxCoord.y += IO * pix.y; //Optimization for line interlaced.
@@ -4894,7 +4998,7 @@ uniform int Extra_Information <
 			return float3(ParallaxCoord,DD_Map >= 0.06);
 		#endif
 	}
-
+	
 	///////////////////////////////////////////////////////////Stereo Conversions///////////////////////////////////////////////////////////////////////
 	#if !Virtual_Reality_Mode
 	uint4 Frame_Selector()
@@ -5214,29 +5318,8 @@ uniform int Extra_Information <
 			return texcoord;
 	}
 
-	#if Reconstruction_Mode || Virtual_Reality_Mode || Anaglyph_Mode
-		#if Anaglyph_Mode
-		void Anaglyph(float4 position : SV_Position, float2 texcoord : TEXCOORD0, out float4 LR_Out: SV_Target0)
-		#else
-		void CB_Reconstruction(float4 position : SV_Position, float2 texcoord : TEXCOORD0, out float4 Left : SV_Target0, out float4 Right : SV_Target1)
-		#endif
-	#else
-	float3 PS_calcLR(float2 texcoord, float2 position)
-	#endif
+	float4x4 Con_Values(float2 texcoord)
 	{
-		#if REST_UI_Mode
-			bool CLK_L = Toggle_REST;
-			if(Cursor_Lock_Button_Selection == 1)
-				CLK_L = CLK_02;
-			if(Cursor_Lock_Button_Selection == 2)
-				CLK_L = CLK_03;					
-			if(Cursor_Lock_Button_Selection == 3)
-				CLK_L = CLK_04;
-				
-			float Mouse_Toggle_Click = !CLK_L;
-		#else
-			float Mouse_Toggle_Click = 1;
-		#endif
 		float D = Eye_Swap ? -Min_Divergence().x : Min_Divergence().x;
 
 		float FadeIO = Focus_Reduction_Type == 1 ? 1 : smoothstep(0, 1, 1 - Fade_in_out().x), FD = D, FD_Adjust = 0.2;
@@ -5279,9 +5362,8 @@ uniform int Extra_Information <
   
 		if(Stereoscopic_Mode == 0 && !Inficolor_3D_Emulator && !Anaglyph_Mode)
 			Persp *= 0.5f;
-		//if(Stereoscopic_Mode == 5)//Need to work on this later.
-		//	Persp *= 0.25;
-		float2 TCL = texcoord, TCR = texcoord, TCL_T = texcoord, TCR_T = texcoord, TexCoords = texcoord;
+
+		float2 TCL = texcoord, TCR = texcoord, TCL_T = texcoord, TCR_T = texcoord;
 
 
 		#if Inficolor_3D_Emulator
@@ -5315,7 +5397,7 @@ uniform int Extra_Information <
 				#endif
 			#endif
 		#endif
-		float4 color, Left_T, Right_T, L, R, Left_Right;
+		
 		//FoV Cal for left and right eye.
 		if(Stereoscopic_Mode == 0)
 		{
@@ -5323,73 +5405,136 @@ uniform int Extra_Information <
 			TCR = FoVCal(TCR);
 		}
 		
-		float3 Pattern = float3( floor(TexCoords.y*Res.y) + floor(TexCoords.x*Res.x), floor(TexCoords.x*Res.x), floor(TexCoords.y*Res.y));
-		float Pattern_Type = fmod(Pattern.x,2); //CB
-		#if Virtual_Reality_Mode
-				float4 Shift_LR = Vert_3D_Pinball ? Pattern_Type ? float4(-DLR.x,TCL.yx,AI) : float4(DLR.y, TCR.yx, -AI) : Pattern_Type ? float4(-DLR.x,TCL,AI) : float4(DLR.y, TCR, -AI);
+		float3 PatternsXYZ = Patterns(texcoord.xy);
+		float Pattern = PatternsXYZ.x;//CB
+		#if !Virtual_Reality_Mode
+			#if Reconstruction_Mode	
+				if(Reconstruction_Type == 1 )
+					Pattern = PatternsXYZ.z; //LI
+				if(Reconstruction_Type == 2 )
+					Pattern = PatternsXYZ.y; //CI
+			#else
+					#if REST_UI_Mode
+					if(Stereoscopic_Mode == 2 || Stereoscopic_Mode == 1)
+						Pattern = PatternsXYZ.z; //LI
+					if( Stereoscopic_Mode == 3 || Stereoscopic_Mode == 0)
+						Pattern = PatternsXYZ.y ; //CI
+					#else
+					if(Stereoscopic_Mode == 0)
+						Pattern = texcoord.x < 0.5; //SBS
+					if( Stereoscopic_Mode == 1)
+						Pattern = texcoord.y < 0.5; //TnB
+					if(Stereoscopic_Mode == 2)
+						Pattern = PatternsXYZ.z; //LI
+					if( Stereoscopic_Mode == 3)
+						Pattern = PatternsXYZ.y; //CI
+					#endif
+			#endif
+		#endif
 		
+		return float4x4(float4(DLR.x,DLR.y,0,Pattern),
+						float4(TCL.x,TCL.y,TCL_T.x,TCL_T.y),
+						float4(TCR.x,TCR.y,TCR_T.x,TCR_T.y),
+						float4(0,0,0,0));
+	}
+
+	#if Reconstruction_Mode || Virtual_Reality_Mode || Anaglyph_Mode
+		#if Anaglyph_Mode
+		void Anaglyph(float4 position : SV_Position, float2 texcoord : TEXCOORD0, out float4 LR_Out: SV_Target0)
+		#else
+		void CB_Reconstruction(float4 position : SV_Position, float2 texcoord : TEXCOORD0, out float4 Left : SV_Target0, out float4 Right : SV_Target1)
+		#endif
+	#else
+	float3 PS_calcLR(float2 texcoord, float2 position)
+	#endif
+	{
+		#if REST_UI_Mode
+			bool CLK_L = Toggle_REST;
+			if(Cursor_Lock_Button_Selection == 1)
+				CLK_L = CLK_02;
+			if(Cursor_Lock_Button_Selection == 2)
+				CLK_L = CLK_03;					
+			if(Cursor_Lock_Button_Selection == 3)
+				CLK_L = CLK_04;
+				
+			float Mouse_Toggle_Click = !CLK_L;
+		#else
+			float Mouse_Toggle_Click = 1;
+		#endif
+		
+		float4 Shift_LR;		
+		float4x4 C_Values = Con_Values(texcoord);
+		float2 DLR = float2(C_Values._m00,C_Values._m01), 
+			   TCL = float2(C_Values._m10,C_Values._m11), 
+			   TCR = float2(C_Values._m20,C_Values._m21), 
+			   TCL_T = float2(C_Values._m12,C_Values._m13),
+			   TCR_T = float2(C_Values._m22,C_Values._m23),
+			   TexCoords = texcoord;
+		
+		float4 color, L, R, Left_Right, Parallax_LR, Parallax_L, Parallax_R, LR_De_Art;
+			
+		float Pattern_Type = fmod(C_Values._m03,2);
+		
+		#if Virtual_Reality_Mode
+				Shift_LR = Vert_3D_Pinball ? Pattern_Type ? float4(-DLR.x,TCL.yx,AI) : float4(DLR.y, TCR.yx, -AI) : Pattern_Type ? float4(-DLR.x,TCL,AI) : float4(DLR.y, TCR, -AI);
+				Parallax_LR.xyz = Parallax(Shift_LR.x,Shift_LR.yz,Shift_LR.w).xyz;
+				
 				if(Vert_3D_Pinball)
-					Left_Right = MouseCursor(Parallax(Shift_LR.x,Shift_LR.yz,Shift_LR.w).yxz, position.xy , Mouse_Toggle_Click, 0);		
-				else
-					Left_Right = MouseCursor(Parallax(Shift_LR.x,Shift_LR.yz,Shift_LR.w).xyz, position.xy , Mouse_Toggle_Click, 0);	
+					Parallax_LR.xyz = Parallax_LR.yxz;
+					
+					//LR_De_Art.x = De_Art_Parallax(Shift_LR.x,Shift_LR.yz);			
+					Left_Right = MouseCursor(Parallax_LR.xyz, position.xy , Mouse_Toggle_Click, 0);	
+				
 		#else
 			#if Reconstruction_Mode	
-			if(Reconstruction_Type == 1 )
-				Pattern_Type = fmod(Pattern.z,2); //LI
-			if(Reconstruction_Type == 2 )
-				Pattern_Type = fmod(Pattern.y,2); //CI
-				
-			float4 Shift_LR = Vert_3D_Pinball ? Pattern_Type ? float4(-DLR.x,TCL.yx,AI) : float4(DLR.y, TCR.yx, -AI) : Pattern_Type ? float4(-DLR.x,TCL,AI) : float4(DLR.y, TCR, -AI);
-		
-				if(Vert_3D_Pinball)
-					Left_Right = MouseCursor(Parallax(Shift_LR.x,Shift_LR.yz,Shift_LR.w).yxz, position.xy , Mouse_Toggle_Click, 0);		
-				else
-					Left_Right = MouseCursor(Parallax(Shift_LR.x,Shift_LR.yz,Shift_LR.w).xyz, position.xy , Mouse_Toggle_Click, 0);	
+			Shift_LR = Vert_3D_Pinball ? Pattern_Type ? float4(-DLR.x,TCL.yx,AI) : float4(DLR.y, TCR.yx, -AI) : Pattern_Type ? float4(-DLR.x,TCL,AI) : float4(DLR.y, TCR, -AI);
+			Parallax_LR.xyz = Parallax(Shift_LR.x,Shift_LR.yz,Shift_LR.w).xyz;
+			
+			if(Vert_3D_Pinball)
+				Parallax_LR.xyz = Parallax_LR.yxz;
+					
+					//LR_De_Art.x = De_Art_Parallax(Shift_LR.x,Shift_LR.yz);
+					Left_Right = MouseCursor(Parallax_LR.xyz, position.xy , Mouse_Toggle_Click, 0);
+					
 			#else
-				#if REST_UI_Mode
-				if(Stereoscopic_Mode == 2 || Stereoscopic_Mode == 1)
-					Pattern_Type = fmod(Pattern.z,2); //LI
-				if( Stereoscopic_Mode == 3 || Stereoscopic_Mode == 0)
-					Pattern_Type = fmod(Pattern.y,2); //CI
-				#else
-				if(Stereoscopic_Mode == 0)
-					Pattern_Type = TexCoords.x < 0.5; //SBS
-				if( Stereoscopic_Mode == 1)
-					Pattern_Type = TexCoords.y < 0.5; //TnB
-				if(Stereoscopic_Mode == 2)
-					Pattern_Type = fmod(Pattern.z,2); //LI
-				if( Stereoscopic_Mode == 3)
-					Pattern_Type = fmod(Pattern.y,2); //CI
-				#endif
-			float4 Shift_LR = Vert_3D_Pinball ? Pattern_Type ? float4(-DLR.x,TCL.yx,AI) : float4(DLR.y, TCR.yx, -AI) : Pattern_Type ? float4(-DLR.x,TCL,AI) : float4(DLR.y, TCR, -AI);
+			Shift_LR = Vert_3D_Pinball ? Pattern_Type ? float4(-DLR.x,TCL.yx,AI) : float4(DLR.y, TCR.yx, -AI) : Pattern_Type ? float4(-DLR.x,TCL,AI) : float4(DLR.y, TCR, -AI);
 	
 			if(Stereoscopic_Mode == 5)
 				Shift_LR = TexCoords.y < 0.5 ? TexCoords.x < 0.5 ? float4(-DLR.x,TCL,AI) : float4(-DLR.x * 0.33333333,TCL_T,AI) : TexCoords.x < 0.5 ? float4(DLR.y * 0.33333333, TCR_T, -AI) : float4(DLR.y, TCR, -AI);
 	
 			if(Stereoscopic_Mode >= 6 || Inficolor_3D_Emulator || Anaglyph_Mode)
 			{		
+	
+				Parallax_L.xyz = Parallax(-DLR.x,TCL, AI).xyz;
+				Parallax_R.xyz = Parallax( DLR.y,TCR,-AI).xyz;
+			
 				if(Vert_3D_Pinball)
 				{
-					L = MouseCursor(Parallax(-DLR.x, TCL.yx, AI).yxz, position.xy , Mouse_Toggle_Click, 0);
-					R = MouseCursor(Parallax( DLR.y, TCR.yx,-AI).yxz, position.xy , Mouse_Toggle_Click, 0);
+					Parallax_L.xyz = Parallax_L.yxz;
+					Parallax_R.xyz = Parallax_R.yxz;
 				}
-				else
-				{
-					L = MouseCursor(Parallax(-DLR.x,TCL, AI).xyz, position.xy , Mouse_Toggle_Click, 0);
-					R = MouseCursor(Parallax( DLR.y,TCR,-AI).xyz, position.xy , Mouse_Toggle_Click, 0);
-				}
+				//LR_De_Art.x = De_Art_Parallax(-DLR.x,TCL.yx);
+				//LR_De_Art.y = De_Art_Parallax( DLR.y,TCR.yx);
+				L = MouseCursor(Parallax_L.xyz, position.xy , Mouse_Toggle_Click, 0);
+				R = MouseCursor(Parallax_R.xyz, position.xy , Mouse_Toggle_Click, 0);
 			}
 			else	
 			{
+			
+				Parallax_LR.xyz = Parallax(Shift_LR.x,Shift_LR.yz,Shift_LR.w).xyz;
+				
 				if(Vert_3D_Pinball && Stereoscopic_Mode != 5)
-					Left_Right = MouseCursor(Parallax(Shift_LR.x,Shift_LR.yz,Shift_LR.w).yxz, position.xy , Mouse_Toggle_Click, 0);		
-				else
-					Left_Right = MouseCursor(Parallax(Shift_LR.x,Shift_LR.yz,Shift_LR.w).xyz, position.xy , Mouse_Toggle_Click, 0);		
+					Parallax_LR.xyz = Parallax_LR.yxz;
+							
+				//LR_De_Art.x = De_Art_Parallax(Shift_LR.x,Shift_LR.yz);
+				Left_Right = MouseCursor(Parallax_LR.xyz, position.xy , Mouse_Toggle_Click, 0);
+						
 			}
 			#endif
 		#endif
 		//Debug Here
-		//Left_Right.rgb *= 1-Left_Right.w;
+		//Left_Right.rgb = Left_Right.w;
+		//Left_Right.rgb = LR_De_Art.x;//
 		//Convert Stereo
 		#if Reconstruction_Mode || Virtual_Reality_Mode
 		color.rgb = Left_Right.rgb;
@@ -5451,14 +5596,7 @@ uniform int Extra_Information <
 	{   float Half_Buffer = texcoord.x < 0.5;
 		float Average_ZPD = tex2Dlod(SamplerzBuffer_BlurEx,float4(texcoord,0,0)).x;
 		float Detect_Popout = tex2Dlod(SamplerzBufferN_L,float4(texcoord,0,1)).x < 0;
-		//0.083 //0.0625
-		//0.250 //0.1875
-		//0.416 //0.3125
-		//0.583 //0.4375
-		//0.750 //0.5625
-		//0.916 //0.6875
-		        //0.8125
-		        //0.9375	
+	
 		const int Num_of_Values = 8; //8 total array values that map to the textures width.
 		float Storage_Array_A[Num_of_Values] = { tex2D(SamplerDMN,0).x,    			 //0.0625 //TL Fade in Out
 	                                             tex2D(SamplerDMN,1).x,                 //0.1875 //BR Fade X Level 0
@@ -5922,29 +6060,7 @@ uniform int Extra_Information <
 			    #else
 			    Color = Color;
 			    #endif
-			    //Color = OverShoot_Fade();
-			    //Color = Shift_Depth().z;
-			    
-			    //tex2D(SamplerzBuffer_BlurN,float2(0,0.9375)).x
-			    //tex2D(SamplerAvrP_N,float2(1, 0.8125)).z
-			    //float InputSwitch = tex2D(SamplerzBuffer_BlurN,float2(0,0.9375)).x;
-				//return int(InputSwitch * 5 ) >= 5;
-				//Popout Detection
-				//Color = tex2Dlod(SamplerAvrP_N,float4(texcoord,0,12)).w > 0; // Detect if there is pop out.
-				//Color = smoothstep(0,0.1,tex2Dlod(SamplerAvrP_N,float4(texcoord,0,12)).w); //Scale Popout linerly 
-				//Color = tex2D(SamplerzBufferN_L,0).y;
-				/*
-				float Value = 1.0;
-				int Switch = tex2Dlod(SamplerAvrP_N,float4(0.5.xx,0,12)).w > 0;
-				float S_More = tex2D(SamplerzBufferN_L,0).y;
-				//Value = Switch ? Value * 0.5 : Value;
-				
-				Color = lerp( Value * 0.5, Value, S_More );
-				*/
-				//Color = 0;
-				
-				//float2 Direction = SDAA(SamplerzBufferN_P,texcoord);
-				//Color.xy = saturate(Direction.x * Direction.y) > TEST;
+
 				return Color.rgba;
 			}
 		#endif
@@ -5968,7 +6084,7 @@ uniform int Extra_Information <
 			if (Depth_Map_View == 2)
 				return MouseCursor(float3(texcoord.xy,0), position.xy , Mouse_Toggle_Click, 0);
 			else
-				return texcoord.x < 0.5 ?  MouseCursor(float3(texcoord.xy * float2(2,1),0), position.xy , Mouse_Toggle_Click, 0) : 1-GetMixed(texcoord * float2(2,1) - float2(1.0, 0.0)).x;
+				return texcoord.x < 0.5 ?  MouseCursor(float3(texcoord.xy * float2(2,1),0), position.xy , Mouse_Toggle_Click, 0) : 1-GetMixed(texcoord * float2(2,1) - float2(1.0, 0.0), 0).x;
 	}
 	#endif	
 	float4 InfoOut(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Target
@@ -6463,11 +6579,11 @@ uniform int Extra_Information <
 
 	float4 SmartSharpJr(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Target
 	{  
-		#if BC_SPACE == 1			    
-		float4 Color = NormalizeScRGBtex2D(BackBuffer_SD,texcoord));
-		#else
+		//#if BC_SPACE == 1			    
+		//float4 Color = NormalizeScRGB(tex2D(BackBuffer_SD,texcoord));
+		//#else
 		float4 Color = tex2D(BackBuffer_SD,texcoord);	
-		#endif
+		//#endif
 		 Color.w = max(Color.r, max(Color.g, Color.b));
 		//#if BC_SPACE == 1
 	   // return ExpandScRGB(float4(Sharp(BackBuffer_SD, texcoord, 1.0).rgb,Color.w));
@@ -6476,63 +6592,46 @@ uniform int Extra_Information <
 	    //#endif
 	}
 	
-	float4 SDAA_PS(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Target
-	{  
-		float AA_Power = 0.75;
-		float4 Result = tex2D(BackBuffer_SD, texcoord) * (1.0-AA_Power);
+		/* //Higher Quality
+		// Vertical edge detection using horizontal variation
+		float horzCardinal = abs((Left.w + Right.w) - 2.0 * Center.w);
+		float horzLeftDiagonal = abs((UpLeft.w + DownLeft.w) - 2.0 * Center.w) * 0.7;
+		float horzRightDiagonal = abs((UpRight.w + DownRight.w) - 2.0 * Center.w) * 0.7;
 		
-		float2 Offset = pix;
-	    float2 N, X = float2(Offset.x, 0.0), Y = float2(0.0, Offset.y);
-	        
-	    // Calculate Edge
-	    float2 Edge = EdgeDetectionC(BackBuffer_SD, texcoord, Offset);
-	      
-		//Calculate Gradient from edge    
-		Edge += EdgeDetectionC(BackBuffer_SD, texcoord -X, Offset);
-		Edge += EdgeDetectionC(BackBuffer_SD, texcoord +X, Offset);
-		// Like DLAA calculate mask from gradient above.
-	    const float Mask = 1-saturate(length(float2(Edge.x,Edge.y)) * 2.0); // Need a better way for edge detection
+		float leftSideEdge = max(horzCardinal, horzLeftDiagonal);
+		float rightSideEdge = max(horzCardinal, horzRightDiagonal);
+		float Vert = leftSideEdge + rightSideEdge;
 
-		Edge += EdgeDetectionC(BackBuffer_SD, texcoord -Y, Offset);
-		Edge += EdgeDetectionC(BackBuffer_SD, texcoord +Y, Offset);
-		//Corner Rounding
-		Edge += EdgeDetectionC(BackBuffer_SD, texcoord -X -Y, Offset);
-		Edge += EdgeDetectionC(BackBuffer_SD, texcoord -X +Y, Offset);
-		Edge += EdgeDetectionC(BackBuffer_SD, texcoord +X -Y, Offset);
-		Edge += EdgeDetectionC(BackBuffer_SD, texcoord +X +Y, Offset);
-	    
-	    // Like NFAA Calculate Main Mask based on edge strenght.
-	    if ( Mask )
-	    {
-	    	Result = Result / (1.0-AA_Power);
-	    }
-	    else
-		{   	    
-		    //Revert gradient
-		    N = float2(Edge.x,-Edge.y) ;
-	    
-		    const float AA_Adjust = AA_Power * rcp(6);   
-			Result += tex2D(BackBuffer_SD, texcoord+(N * 0.5)*Offset).rgb * AA_Adjust;
-			Result += tex2D(BackBuffer_SD, texcoord-(N * 0.5)*Offset).rgb * AA_Adjust;
-			Result += tex2D(BackBuffer_SD, texcoord+(N * 0.25)*Offset).rgb * AA_Adjust;
-			Result += tex2D(BackBuffer_SD, texcoord-(N * 0.25)*Offset).rgb * AA_Adjust;
-			Result += tex2D(BackBuffer_SD, texcoord+N*Offset).rgb * AA_Adjust;
-			Result += tex2D(BackBuffer_SD, texcoord-N*Offset).rgb * AA_Adjust;
-		}
-
-		#if AXAA_EXIST
+		// Horizontal edge detection using Vertical variation
+		float vertCardinal = abs((Up.w + Down.w) - 2.0 * Center.w);
+		float vertTopDiagonal = abs((UpLeft.w + UpRight.w) - 2.0 * Center.w) * 0.7;
+		float vertBottomDiagonal = abs((DownLeft.w + DownRight.w) - 2.0 * Center.w) * 0.7;
+		
+		float topSideEdge = max(vertCardinal, vertTopDiagonal);
+		float bottomSideEdge = max(vertCardinal, vertBottomDiagonal);
+		float Horz =  topSideEdge + bottomSideEdge;
+		*/
+	float4 SDAA_PS(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Target
+	{
+		#if AXAA_EXIST || DXAA_EXIST
 		if(USE_AA == 1)
 			return AXAA(BackBuffer_SD,texcoord);
 		else if(USE_AA == 2)
-			return Result;
+			return DXAA(BackBuffer_SD, texcoord); // Not HDR Compatiable yet
 		else
 			return tex2D(BackBuffer_SD,texcoord);
-		#else
+		#elif AXAA_EXIST
 		if(USE_AA == 1)
-			return Result;
+			return AXAA(BackBuffer_SD, texcoord); // Not HDR Compatiable yet
+		else
+			return tex2D(BackBuffer_SD,texcoord);			
+		#elif DXAA_EXIST	
+		if(USE_AA == 1)
+			return DXAA(BackBuffer_SD, texcoord); // Not HDR Compatiable yet
 		else
 			return tex2D(BackBuffer_SD,texcoord);	
-		#endif
+
+		#endif	
 	}
 	
 	#if REST_UI_Mode //Thankyou Tjandra for this option for people. 
@@ -6705,13 +6804,13 @@ uniform int Extra_Information <
 				VertexShader = PostProcessVS;
 				PixelShader = SmartSharpJr;
 			}	
-
+			#if AXAA_EXIST || DXAA_EXIST
 				pass SDAA
 			{
 				VertexShader = PostProcessVS;
 				PixelShader = SDAA_PS;
 			}
-
+			#endif
 		#endif
 	}
 	#if REST_UI_Mode
@@ -6731,11 +6830,11 @@ uniform int Extra_Information <
 			VertexShader = PostProcessVS;
 			PixelShader = SmartSharpJr;
 		}	
-		#if AXAA_EXIST
-			pass AXAA
+		#if AXAA_EXIST || DXAA_EXIST
+			pass SDAA
 		{
 			VertexShader = PostProcessVS;
-			PixelShader = AXAA_PS;
+			PixelShader = SDAA_PS;
 		}
 		#endif
 	}

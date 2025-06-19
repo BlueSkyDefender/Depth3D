@@ -1,7 +1,7 @@
 ////----------------------------------------//
 ///SuperDepth3D Overwatch Automation Header///
 //----------------------------------------////
-#define OVERWATCH "Overwatch v4.4.5\n"
+#define OVERWATCH "Overwatch v4.4.6\n"
 //---------------------------------------OVERWATCH---------------------------------------//
 // If you are reading this stop. Go away and never look back. From this point on if you  //
 // still think it's is worth looking at this..... Then no one can save you or your soul. //
@@ -40339,7 +40339,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 				   "that allow selection of zero buffers and that should be it.\n" \
 				   "You can use DLSS/FSR/XeSS at 75% or more on scaling.\n" \
 				   "Make sure to turn of Flame Gen.\n"
-    #define DS_Z 2                 // Set View Mode
+    //#define DS_Z 2                 // Set View Mode
 	#define DA_W 1                 // Set Linerzation
     //#define DB_X 1                 // Flip
 	#define DHH_W 0.50                              // Smart Convergence 
@@ -40363,10 +40363,11 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define BMT 1                  // ZPD and World Scale Balance // I need to phase this out.
 	#define DF_Z 0.250             // Set the Balance  
     //#define DAO 1                  // Turn On or Off De-Artifact Options For now DAO if set to 1 it's also applys to Hoz 
-    #define DL_Y 0.75             // De-Artifact Only works on some View Modes and causes performance degredation
+    #define DL_Y 0.625             // De-Artifact Only works on some View Modes and causes performance degredation
     //#define DL_Z -0.5              // Compat Power
 	//#define DJ_X 0.050             // Range Smoothing
 	#define DAA_W 2              //Warp/Halo Masking Type 
+    //#define THF 3                                 // Target High Frequency information Like Hair
 	
  //Smooth Mode
     //#define SMS 1         //SM Separation Limit  - Do Not use any more
