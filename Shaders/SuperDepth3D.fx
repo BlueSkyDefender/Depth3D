@@ -1,7 +1,7 @@
 	////----------------//
 	///**SuperDepth3D**///
 	//----------------////
-	#define SD3D "SuperDepth3D v4.9.1\n"
+	#define SD3D "SuperDepth3D v4.9.2\n"
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//* Depth Map Based 3D post-process shader
 	//* For Reshade 3.0+
@@ -396,8 +396,8 @@ namespace SuperDepth3D
 	    #define Filter_Image 0
 	//#endif
 
-	#ifndef Legacy_Mode
-	    #define Legacy_Mode 0
+	#ifndef Alternate_View_Mode
+	    #define Alternate_View_Mode 0
 	#endif
 	
 	//Help / Guide / Information
@@ -495,7 +495,7 @@ uniform int SuperDepth3D <
 				"The header file for Profiles called Overwatch.fxh is Missing.\n"
 				"\n"
 				#endif
-				#if Legacy_Mode
+				#if Alternate_View_Mode
 				"Legacy Mode is still a Work In Progress.\n"
 				"\n"
 
@@ -703,7 +703,7 @@ uniform int SuperDepth3D <
 			ui_category = "Zero Parallax Distance";
 	> = EGB;
 	#if !Use_2D_Plus_Depth
-		#if Legacy_Mode
+		#if Alternate_View_Mode
 		//static const int View_Mode = 0;
 		///*
 		uniform int View_Mode <
@@ -718,7 +718,7 @@ uniform int SuperDepth3D <
 						"\n"
 						"Default is Blend.";
 		ui_category = "Occlusion Masking";
-		> = DS_Z;
+		> = 1;
 		//*/
 		#else
 		uniform int View_Mode <
@@ -744,7 +744,7 @@ uniform int SuperDepth3D <
 		ui_type = "combo";
 		ui_items = "M0 Full \0M1 Masked \0M2 Half \0";
 		#if !Use_2D_Plus_Depth
-			//#if Legacy_Mode
+			//#if Alternate_View_Mode
 			//ui_label = "·Halo Priority·";
 			//#else
 			ui_label = " Halo Priority";
@@ -1859,11 +1859,11 @@ uniform int Extra_Information <
 	float2 Divergence_Switch()
 	{
 		float2 Divergence = float2(100,Depth_Adjustment);
-		#if Legacy_Mode
+		#if Alternate_View_Mode
 				Divergence = float2(Depth_Adjustment,100);
 		#endif
 		#if Inficolor_3D_Emulator
-			#if Legacy_Mode
+			#if Alternate_View_Mode
 				Divergence.x = Depth_Adjustment.x * 0.5;
 			#endif
 			return float2(Divergence.x,Divergence.y * 0.5) + FLT_EPSILON;
@@ -1939,17 +1939,23 @@ uniform int Extra_Information <
 	sampler BackBuffer_SD
 	{
 		Texture = BackBufferTex;
-	};	
-		
+	};
+	
+	#if BC_SPACE == 1
+		#define Color_Format_B RGBA16
+	#else
+		#define Color_Format_B RGB10A2
+	#endif
+	
 	#if D_Frame	
-		texture texCF { Width = BUFFER_WIDTH ; Height = BUFFER_HEIGHT ; Format = RGBA8; };
+		texture texCF { Width = BUFFER_WIDTH ; Height = BUFFER_HEIGHT ; Format = Color_Format_B; };
 		
 		sampler SamplerCF
 		{
 			Texture = texCF;		
 		};
 		
-		texture texDF { Width = BUFFER_WIDTH ; Height = BUFFER_HEIGHT ; Format = RGBA8; };
+		texture texDF { Width = BUFFER_WIDTH ; Height = BUFFER_HEIGHT ; Format = Color_Format_B; };
 		
 		sampler DF_BackBufferMIRROR
 		{
@@ -2050,11 +2056,6 @@ uniform int Extra_Information <
 		};
 		
 	#if Reconstruction_Mode || Virtual_Reality_Mode || Anaglyph_Mode
-		#if BC_SPACE == 1
-			#define Color_Format_B RGBA16
-		#else
-			#define Color_Format_B RGB10A2
-		#endif
 		#if !Anaglyph_Mode
 		texture texSD_CB_L { Width = BUFFER_WIDTH ; Height = BUFFER_HEIGHT ; Format = Color_Format_B;};
 		
@@ -2341,7 +2342,7 @@ uniform int Extra_Information <
 		#if Virtual_Reality_Mode && !Super3D_Mode
 		float Pers = IPD;
 		#else
-		#if Legacy_Mode
+		#if Alternate_View_Mode
 		float IC_Diverge = Divergence_Switch().x * 0.5;
 		#else
 		float IC_Diverge = Divergence_Switch().y;
@@ -2351,7 +2352,7 @@ uniform int Extra_Information <
   	  #endif  	  
 		float Perspective_Out = Pers, Push_Depth = (Re_Scale_WN().x*Scale_Value_Cal)*D_Scale;
 		#if !Use_2D_Plus_Depth
-			#if Legacy_Mode
+			#if Alternate_View_Mode
 			Perspective_Out = Inficolor_3D_Emulator ? I_3D_Divergence : Perspective;
 			#else
 			Perspective_Out = Eye_Swap ? Pers + Push_Depth : Pers - Push_Depth;
@@ -4812,12 +4813,13 @@ uniform int Extra_Information <
 		float GetDepth = smoothstep(0,1, tex2Dlod(SamplerzBufferN_L, float4(Coordinates,0, 2.0) ).x), CB_Done = fmod(CBxy.x+CBxy.y,2),
 			  Perf = Performance_Level > 1 ? lerp(Performance_LvL1[Perf_LvL].x,Performance_LvL0[Perf_LvL].x,GetDepth) : Performance_LvL0[Perf_LvL].x;
 
-		float DepthLR = 1, LRDepth = 1, LDepthR, sumW, DLR, Num, S[6] = {0.5,0.6,0.7,0.8,0.9,1.01};
-		#if Legacy_Mode
+		float Max_Clamp = saturate(DI_Y) > 0 ? 5.0 : 2.5 ;
+		float DepthLR = Max_Clamp, LRDepth = Max_Clamp, LDepthR, sumW, DLR, Num, S[7] = {0.5,0.6,0.7,0.8,0.9,1.0,1.1};
+		#if Alternate_View_Mode
 			MS = -MS;
 
 			[loop]
-			for ( int i = 0 ; i < 6; ++i )
+			for ( int i = 0 ; i < 7; ++i )
 			{   
 				Num = S[i] * MS;
 				LRDepth = min(LRDepth, GetMixed(float2(ParallaxCoord.x + Num, ParallaxCoord.y),0).x );	
@@ -4835,12 +4837,13 @@ uniform int Extra_Information <
 						  Mix_Depth += GetMixed(float2(ParallaxCoord.x + 0.9167 * MS, ParallaxCoord.y),0).x * w5;
 						  Mix_Depth += GetMixed(float2(ParallaxCoord.x + 1.0000 * MS, ParallaxCoord.y),0).x * w6;
 					Mix_Depth /= sumW;
-		
+					
+					DLR = saturate(abs(Mix_Depth - LRDepth) * 12.5);
+					
 					Mix_Depth = min(Mix_Depth,Cal_Mid_Depth);
-					//Test with Cal_Mid_Depth & LRDepth
-					DLR = abs(Mix_Depth - LRDepth);
-					DLR = lerp(saturate(1-DLR) * 0.1 + 0.1,saturate(1-DLR) * 0.2 + 0.2,LRDepth);	
-					DepthLR = lerp(Mix_Depth,LRDepth,DLR);
+					float sDLR = DLR >= 1 ? 0.5 : 0;
+					DLR = lerp(DLR * 1.5 - 0.5,sDLR,LRDepth);	
+					DepthLR = lerp(LRDepth,Mix_Depth,DLR);
 				}		
 			}
 			//Reprojection Left and Right
@@ -4849,7 +4852,7 @@ uniform int Extra_Information <
 			else
 				ParallaxCoord = float2(Coordinates.x + MS * LRDepth, Coordinates.y);
 
-			return float3(ParallaxCoord,DepthLR); 
+			return float3(ParallaxCoord,DLR); 
 		#else
 			//Would Use Switch....
 			if( View_Mode == 2)
