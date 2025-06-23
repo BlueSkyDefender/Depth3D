@@ -88,14 +88,9 @@ float4 FxaaTexOff(sampler tex, float2 pos, int2 off)
 	#endif
 }
 //A lot of the helper functions stuff is not needed in ReShade.
-float FxaaLuma(float3 rgb)
+float Max3_AXAA(float3 RGB)
 {
-    return rgb.y * (0.587 / 0.299) + rgb.x;
-}
-
-float3 FxaaFilterReturn(float3 rgb)
-{
-    return rgb;
+	return max(RGB.r, max(RGB.g, RGB.b));
 }
 
 float4 FxaaTexGrad(sampler tex, float2 pos, float2 grad)
@@ -103,20 +98,20 @@ float4 FxaaTexGrad(sampler tex, float2 pos, float2 grad)
     return tex2Dgrad(tex, pos.xy, grad, grad);
 }
 
-float3 FxaaLerp3(float3 a, float3 b, float amountOfA)
+float3 LerpR(float3 a, float3 b, float amountOfA)	
 {
-    return (float3(-amountOfA,0,0) * b) +
-        ((a * float3(amountOfA,0,0)) + b);
+    return float3( a.r * amountOfA + b.r * (1.0 - amountOfA),  // lerp red channel
+				   b.g,                                        // keep green from b
+				   b.b                                       );// keep blue from b
 }
 
 float4 FxaaTexLod(sampler tex, float2 pos)
 {
     return tex2Dlod(tex, float4(pos.xy, 0.0,0));
 }
-
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-float4 AXAA(sampler tex,float2 texcoord)
+float4 AXAA(sampler tex,float2 texcoord,bool HDR_Mode)
 {
     //SEARCH MAP
     float3 rgbN = FxaaTexOff(tex, texcoord, int2( 0,-1)).xyz;
@@ -124,11 +119,11 @@ float4 AXAA(sampler tex,float2 texcoord)
     float3 rgbM = FxaaTexOff(tex, texcoord, int2( 0, 0)).xyz;
     float3 rgbE = FxaaTexOff(tex, texcoord, int2( 1, 0)).xyz;
     float3 rgbS = FxaaTexOff(tex, texcoord, int2( 0, 1)).xyz;
-    float lumaN = FxaaLuma(rgbN);
-    float lumaW = FxaaLuma(rgbW);
-    float lumaM = FxaaLuma(rgbM);
-    float lumaE = FxaaLuma(rgbE);
-    float lumaS = FxaaLuma(rgbS);
+    float lumaN = Max3_AXAA(rgbN);
+    float lumaW = Max3_AXAA(rgbW);
+    float lumaM = Max3_AXAA(rgbM);
+    float lumaE = Max3_AXAA(rgbE);
+    float lumaS = Max3_AXAA(rgbS);
     float rangeMin = min(lumaM, min(min(lumaN, lumaW), min(lumaS, lumaE)));
     float rangeMax = max(lumaM, max(max(lumaN, lumaW), max(lumaS, lumaE)));
     float range = rangeMax - rangeMin;
@@ -138,7 +133,7 @@ float4 AXAA(sampler tex,float2 texcoord)
 
 	// Check if current pix is in the rangeMid ± alpha and EXIT
 	if (abs(lumaM - rangeMid) <= alpha)
-	    return float4(FxaaFilterReturn(rgbM), 1.0f);
+	    return float4(rgbM.rgb,lumaM);
 	    
     float3 rgbL = rgbN + rgbW + rgbM + rgbE + rgbS;
     
@@ -146,26 +141,36 @@ float4 AXAA(sampler tex,float2 texcoord)
     #if FXAA_SUBPIX != 0
         float lumaL = (lumaN + lumaW + lumaE + lumaS) * 0.25;
         float rangeL = abs(lumaL - lumaM);
-    #endif
+    #endif   
+    //Blending - HDR-Safe Version
+	float SafeRange = max(range, 0.001); // Preventer divide by zero
+	float Ratio = rangeL / SafeRange;
+	
+	// For HDR: Normalize the ratio to expected 0-1 range
+	if (HDR_Mode)
+	    Ratio = saturate(Ratio);
+	else
+		Ratio = rangeL;
+    
     #if FXAA_SUBPIX == 1
         float blendL = max(0.0,
-            (rangeL / range) - FXAA_SUBPIX_TRIM) * FXAA_SUBPIX_TRIM_SCALE;
+            (Ratio / range) - FXAA_SUBPIX_TRIM) * FXAA_SUBPIX_TRIM_SCALE;
         blendL = min(FXAA_SUBPIX_CAP, blendL);
     #endif
     
-    //CHOOSE VERTICAL OR HORIZONTAL SEARCH
+    //CHOOSE VERTICAL OR HORIZONTALS SEARCH
     float3 rgbNW = FxaaTexOff(tex, texcoord, int2(-1,-1)).xyz;
     float3 rgbNE = FxaaTexOff(tex, texcoord, int2( 1,-1)).xyz;
     float3 rgbSW = FxaaTexOff(tex, texcoord, int2(-1, 1)).xyz;
     float3 rgbSE = FxaaTexOff(tex, texcoord, int2( 1, 1)).xyz;
     #if (FXAA_SUBPIX_FASTER == 0) && (FXAA_SUBPIX > 0)
         rgbL += (rgbNW + rgbNE + rgbSW + rgbSE);
-        rgbL *= float3(1.0 / 9.0,0,0);
+        rgbL *= 1.0 / 9.0;
     #endif
-    float lumaNW = FxaaLuma(rgbNW);
-    float lumaNE = FxaaLuma(rgbNE);
-    float lumaSW = FxaaLuma(rgbSW);
-    float lumaSE = FxaaLuma(rgbSE);
+    float lumaNW = Max3_AXAA(rgbNW);
+    float lumaNE = Max3_AXAA(rgbNE);
+    float lumaSW = Max3_AXAA(rgbSW);
+    float lumaSE = Max3_AXAA(rgbSE);
     float edgeVert =
 			        abs((0.25 * lumaNW) + (-0.5 * lumaN) + (0.25 * lumaNE)) +
 			        abs((0.50 * lumaW) + (-1.0 * lumaM) + (0.50 * lumaE)) +
@@ -246,9 +251,9 @@ float4 AXAA(sampler tex,float2 texcoord)
 	{
 	#if FXAA_SEARCH_ACCELERATION == 1
 	    if (!doneN)
-	        lumaEndN = FxaaLuma(FxaaTexLod(tex, posN.xy).xyz);
+	        lumaEndN = Max3_AXAA(FxaaTexLod(tex, posN.xy).xyz);
 	    if (!doneP)
-	        lumaEndP = FxaaLuma(FxaaTexLod(tex, posP.xy).xyz);
+	        lumaEndP = Max3_AXAA(FxaaTexLod(tex, posP.xy).xyz);
 	#endif
 	    doneN = doneN || (abs(lumaEndN - lumaN) >= gradientN);
 	    doneP = doneP || (abs(lumaEndP - lumaN) >= gradientN);
@@ -276,6 +281,8 @@ float4 AXAA(sampler tex,float2 texcoord)
 	float3 rgbF = FxaaTexLod(tex, float2(
                                             texcoord.x + (horzSpan ? 0.0 : subPixelOffset),
                                             texcoord.y + (horzSpan ? subPixelOffset : 0.0))).xyz;    
-
-	return float4(FxaaFilterReturn(FxaaLerp3(rgbL, rgbF, blendL)), 1.0f);
+	if (HDR_Mode)
+		return float4(lerp(rgbL.rgb, rgbF.rgb, blendL), lumaM);
+	else
+		return float4(LerpR(rgbL.rgb, rgbF.rgb, blendL), lumaM);
 }

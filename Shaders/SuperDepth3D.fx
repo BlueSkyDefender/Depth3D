@@ -1,7 +1,7 @@
 	////----------------//
 	///**SuperDepth3D**///
 	//----------------////
-	#define SD3D "SuperDepth3D v4.9.0\n"
+	#define SD3D "SuperDepth3D v4.9.1\n"
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//* Depth Map Based 3D post-process shader
 	//* For Reshade 3.0+
@@ -44,14 +44,6 @@ namespace SuperDepth3D
 		#define AXAA_EXIST 0
 	#endif
 
-	#if exists "DXAA.fxh"
-		#include "DXAA.fxh"
-		#define DXAA_EXIST 1
-	#else
-		#warning "Missing DXAA.fxh Header File"
-		#define DXAA_EXIST 0
-	#endif
-	
 	#define D_ViewMode 1
 	#if exists "Overwatch.fxh"                                           //Overwatch Interceptor//
 		#include "Overwatch.fxh"
@@ -630,7 +622,7 @@ uniform int SuperDepth3D <
 	> = float2(DE_Y,DE_Z);
 	
 	//Workaround it only reads from the first value.
-	static const float CutOff_Value = DI_W;	
+	static const float CutOff_Value = (float)DI_W;//tjandra fixed the warning issue by recasting to a float	
 	
 	uniform float2 ZPD_Boundary_n_Cutoff_A <
 		#if Compatibility
@@ -1712,24 +1704,10 @@ uniform int SuperDepth3D <
 		ui_category = "Image Effects";
 	> = 0;
 
-	#if AXAA_EXIST || AXAA_EXIST	
+	#if AXAA_EXIST	
 	uniform int USE_AA <
 		ui_type = "combo";
-		#if AXAA_EXIST || DXAA_EXIST
-			#if HDR_Compatible_Mode
-			ui_items = "Off\0Adaptive approXimate Anti-Aliasing HDR Compatible\0Directional approXimate Anti-Aliasing\0";
-			#else
-			ui_items = "Off\0Adaptive approXimate Anti-Aliasing\0Directional approXimate Anti-Aliasing\0";
-			#endif
-		#elif AXAA_EXIST
-			#if HDR_Compatible_Mode
-			ui_items = "Off\0Adaptive approXimate Anti-Aliasing HDR Compatible\0";
-			#else
-			ui_items = "Off\0Adaptive approXimate Anti-Aliasing\0";			
-			#endif		
-		#elif DXAA_EXIST	
-			ui_items = "Off\0Directional approXimate Anti-Aliasing\0";
-		#endif
+		ui_items = "Off\0Adaptive approXimate Anti-Aliasing\0";					
 		ui_label = " Anti-Aliasing";
 		ui_tooltip = "Note: Set the Anti-Aliasing type to use on the last output of the 3D image.\n"
 					 "      Adaptive approXimate Anti-Aliasing is Based on LG's modifications to FXAA.\n"
@@ -2147,7 +2125,7 @@ uniform int Extra_Information <
 			MinFilter = POINT;
 			MipFilter = POINT;
 		};
-
+	
 	#if UI_MASK
 	texture TexMaskA < source = "DM_Mask_A.png"; > { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA8; };
 	sampler SamplerMaskA { Texture = TexMaskA;};
@@ -2219,7 +2197,32 @@ uniform int Extra_Information <
 	
 	  return RGB;
 	}
+	/*
+	// Standard YCoCg conversion
+	float3 RGBToYCoCg8Normalized(float3 rgb)
+	{
+	    float3 ycocg;
+	    ycocg.x = 0.25 * rgb.r + 0.5 * rgb.g + 0.25 * rgb.b;       // Y (Luma)
+	    ycocg.y = 0.5 * rgb.r - 0.5 * rgb.b + 0.5;                 // Co (Orange-Blue) + 0.5 for 8-bit storage
+	    ycocg.z = -0.25 * rgb.r + 0.5 * rgb.g - 0.25 * rgb.b + 0.5; // Cg (Green-Magenta) + 0.5 for 8-bit storage
+	    return ycocg;
+	}
 	
+	float3 YCoCg8NormalizedToRGB(float3 ycocg)
+	{
+	    // Restore chrominance to signed range
+	    float co = ycocg.y - 0.5;
+	    float cg = ycocg.z - 0.5;
+	    
+	    // Inverse YCoCg transform
+	    float3 rgb;
+	    rgb.r = ycocg.x + co - cg;  // R
+	    rgb.g = ycocg.x + cg;       // G
+	    rgb.b = ycocg.x - co - cg;  // B
+	    
+	    return saturate(rgb); // Clamp to valid range
+	}
+	*/
 	static const float Auto_Balance_Clamp = 0.5; //This Clamps Auto Balance's max Distance.
 	
 	#if Compatibility_00
@@ -6574,66 +6577,35 @@ uniform int Extra_Information <
 			#endif	        
 	    }
 	    return centerColor;
-	}
-
+	}	
 
 	float4 SmartSharpJr(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Target
 	{  
-		//#if BC_SPACE == 1			    
-		//float4 Color = NormalizeScRGB(tex2D(BackBuffer_SD,texcoord));
-		//#else
-		float4 Color = tex2D(BackBuffer_SD,texcoord);	
-		//#endif
-		 Color.w = max(Color.r, max(Color.g, Color.b));
-		//#if BC_SPACE == 1
-	   // return ExpandScRGB(float4(Sharp(BackBuffer_SD, texcoord, 1.0).rgb,Color.w));
-	   // #else
+		#if BC_SPACE == 1			    
+		float4 Color = Sharp(BackBuffer_SD, texcoord, 1.0);
+		#else
+		float4 Color = tex2D(BackBuffer_SD,texcoord);
+		       Color.w = max(Color.r, max(Color.g, Color.b));	
+		#endif
+		 
+		#if BC_SPACE == 1
+	    return Color;
+	    #else
 	    return float4(Sharp(BackBuffer_SD, texcoord, 1.0).rgb,Color.w);
-	    //#endif
+	    #endif
 	}
-	
-		/* //Higher Quality
-		// Vertical edge detection using horizontal variation
-		float horzCardinal = abs((Left.w + Right.w) - 2.0 * Center.w);
-		float horzLeftDiagonal = abs((UpLeft.w + DownLeft.w) - 2.0 * Center.w) * 0.7;
-		float horzRightDiagonal = abs((UpRight.w + DownRight.w) - 2.0 * Center.w) * 0.7;
-		
-		float leftSideEdge = max(horzCardinal, horzLeftDiagonal);
-		float rightSideEdge = max(horzCardinal, horzRightDiagonal);
-		float Vert = leftSideEdge + rightSideEdge;
-
-		// Horizontal edge detection using Vertical variation
-		float vertCardinal = abs((Up.w + Down.w) - 2.0 * Center.w);
-		float vertTopDiagonal = abs((UpLeft.w + UpRight.w) - 2.0 * Center.w) * 0.7;
-		float vertBottomDiagonal = abs((DownLeft.w + DownRight.w) - 2.0 * Center.w) * 0.7;
-		
-		float topSideEdge = max(vertCardinal, vertTopDiagonal);
-		float bottomSideEdge = max(vertCardinal, vertBottomDiagonal);
-		float Horz =  topSideEdge + bottomSideEdge;
-		*/
+	#if AXAA_EXIST
 	float4 SDAA_PS(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Target
 	{
-		#if AXAA_EXIST || DXAA_EXIST
+		float4 Out;
 		if(USE_AA == 1)
-			return AXAA(BackBuffer_SD,texcoord);
-		else if(USE_AA == 2)
-			return DXAA(BackBuffer_SD, texcoord); // Not HDR Compatiable yet
+			Out = AXAA(BackBuffer_SD, texcoord, BC_SPACE);
 		else
-			return tex2D(BackBuffer_SD,texcoord);
-		#elif AXAA_EXIST
-		if(USE_AA == 1)
-			return AXAA(BackBuffer_SD, texcoord); // Not HDR Compatiable yet
-		else
-			return tex2D(BackBuffer_SD,texcoord);			
-		#elif DXAA_EXIST	
-		if(USE_AA == 1)
-			return DXAA(BackBuffer_SD, texcoord); // Not HDR Compatiable yet
-		else
-			return tex2D(BackBuffer_SD,texcoord);	
-
-		#endif	
+			Out = tex2D(BackBuffer_SD,texcoord);				
+		return Out;	
 	}
-	
+	#endif
+
 	#if REST_UI_Mode //Thankyou Tjandra for this option for people. 
 	float4 REST_Conversion_PS(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Target
 	{
@@ -6745,7 +6717,6 @@ uniform int Extra_Information <
 			PixelShader = zBuffer_Blur;
 			RenderTarget0 = texzBufferBlurN;
 			RenderTarget1 = texzBufferBlurEx;
-			//RenderTarget2 = texzBufferDir;
 		}
 			pass DepthBuffer
 		{
@@ -6804,7 +6775,7 @@ uniform int Extra_Information <
 				VertexShader = PostProcessVS;
 				PixelShader = SmartSharpJr;
 			}	
-			#if AXAA_EXIST || DXAA_EXIST
+			#if AXAA_EXIST
 				pass SDAA
 			{
 				VertexShader = PostProcessVS;
@@ -6830,7 +6801,7 @@ uniform int Extra_Information <
 			VertexShader = PostProcessVS;
 			PixelShader = SmartSharpJr;
 		}	
-		#if AXAA_EXIST || DXAA_EXIST
+		#if AXAA_EXIST
 			pass SDAA
 		{
 			VertexShader = PostProcessVS;
