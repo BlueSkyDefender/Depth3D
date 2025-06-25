@@ -1,7 +1,7 @@
 	////----------------//
 	///**SuperDepth3D**///
 	//----------------////
-	#define SD3D "SuperDepth3D v4.9.2\n"
+	#define SD3D "SuperDepth3D v4.9.3\n"
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//* Depth Map Based 3D post-process shader
 	//* For Reshade 3.0+
@@ -518,7 +518,7 @@ uniform int SuperDepth3D <
 		ui_category = "Game Selection";
 	> = 0;	
 	#endif
-	//uniform float TEST < ui_type = "slider"; ui_min = 0; ui_max = 1.0; > = 0.00;
+	uniform float TEST < ui_type = "slider"; ui_min = 0; ui_max = 1.0; > = 0.00;
 	//Divergence & Convergence//
 	uniform float Depth_Adjustment < //This change was made to make it more simple for users
 		ui_type = "slider";
@@ -708,11 +708,11 @@ uniform int SuperDepth3D <
 		///*
 		uniform int View_Mode <
 			ui_type = "combo";
-			ui_items = "VM0 Stamped \0VM1 Blend \0";
+			ui_items = "VM0 Stamped \0VM1 Blend+ \0VM1 Blend++ \0VM1 Blend+++ \0";
 			ui_label = "·View Mode·";
 			ui_tooltip = "Changes the way the shader fills in the occluded sections in the image.\n"
 						"Stamped      | Stamps out a transparent area where occlusion happens.\n"
-						"Blend        | Like Normal But but blends the the in the information.\n"
+						"Blend+++     | Like Normal But but blends the the in the information.\n"
 						"\n"
 						"Warning: Also Make sure Performance Mode is active before closing the ReShade menu.\n"
 						"\n"
@@ -785,7 +785,16 @@ uniform int SuperDepth3D <
 					 "Default is 5 and Zero is Off.";
 		ui_category = "Occlusion Masking";
 	> = DM_X;	
-
+	#if DX9_Toggle
+	uniform int Custom_Sidebars <
+		ui_type = "combo";
+		ui_items = "Stretched Edges\0Black Edges\0";
+		ui_label = " Edge Handling";
+		ui_tooltip = "Edges selection for screen output.\n"
+		  			 "What type of filling to be used on the empty spaces on the edges";
+		ui_category = "Occlusion Masking";
+	> = 1;
+	#else
 	uniform int Custom_Sidebars <
 		ui_type = "combo";
 		ui_items = "Mirrored Edges\0Black Edges\0Stretched Edges\0";
@@ -794,7 +803,7 @@ uniform int SuperDepth3D <
 		  			 "What type of filling to be used on the empty spaces on the edges";
 		ui_category = "Occlusion Masking";
 	> = 1;
-
+	#endif
 	uniform float Edge_Adjust <
 		ui_type = "slider";
 		ui_min = 0.0; ui_max = 1.0;                                                                                                  
@@ -1956,7 +1965,7 @@ uniform int Extra_Information <
 		};
 		
 		texture texDF { Width = BUFFER_WIDTH ; Height = BUFFER_HEIGHT ; Format = Color_Format_B; };
-		
+		#if !DX9_Toggle		
 		sampler DF_BackBufferMIRROR
 		{
 			Texture = texDF;
@@ -1964,15 +1973,14 @@ uniform int Extra_Information <
 			AddressV = MIRROR;
 			AddressW = MIRROR;
 		};
-			
+		#endif			
 		sampler DF_BackBufferBORDER
 		{
 			Texture = texDF;
 			AddressU = BORDER;
 			AddressV = BORDER;
 			AddressW = BORDER;
-		};
-			
+		};	
 		sampler DF_BackBufferCLAMP
 		{
 			Texture = texDF;
@@ -1980,14 +1988,16 @@ uniform int Extra_Information <
 			AddressV = CLAMP;
 			AddressW = CLAMP;	
 		};
-		
+		#if !DX9_Toggle		
 		#define BackBuffer_M DF_BackBufferMIRROR
+		#endif
 		#define BackBuffer_B DF_BackBufferBORDER
 		#define BackBuffer_C DF_BackBufferCLAMP
 		
 		#define Non_Point_Sampler BackBuffer_C
 		
 	#else
+		#if !DX9_Toggle
 		sampler BackBufferMIRROR
 		{
 			Texture = BackBufferTex;
@@ -1995,7 +2005,7 @@ uniform int Extra_Information <
 			AddressV = MIRROR;
 			AddressW = MIRROR;
 		};
-		
+		#endif		
 		sampler BackBufferBORDER
 		{
 			Texture = BackBufferTex;
@@ -2003,7 +2013,7 @@ uniform int Extra_Information <
 			AddressV = BORDER;
 			AddressW = BORDER;
 		};
-		
+
 		sampler BackBufferCLAMP
 		{
 			Texture = BackBufferTex;
@@ -2011,8 +2021,9 @@ uniform int Extra_Information <
 			AddressV = CLAMP;
 			AddressW = CLAMP;		
 		};
-		
+		#if !DX9_Toggle
 		#define BackBuffer_M BackBufferMIRROR
+		#endif
 		#define BackBuffer_B BackBufferBORDER
 		#define BackBuffer_C BackBufferCLAMP
 
@@ -2099,14 +2110,7 @@ uniform int Extra_Information <
 	{
 		Texture = texzBufferBlurEx;
 	};
-	/*
-	texture texzBufferDir < pooled = true; > { Width = BUFFER_WIDTH / 4.0 ; Height = BUFFER_HEIGHT / 4.0; Format = RG8;  };
-
-	sampler SamplerzBuffer_Dir
-	{
-		Texture = texzBufferDir;
-	};	
-	*/	
+	
 	texture texzBufferN_M { Width = BUFFER_WIDTH ; Height = BUFFER_HEIGHT ; Format = R16F; }; //Do not use mips in this buffer
 	
 	sampler SamplerzBufferN_Mixed
@@ -2116,6 +2120,8 @@ uniform int Extra_Information <
 			MinFilter = POINT;
 			MipFilter = POINT;
 		};
+	#if !Alternate_View_Mode
+	#if !DX9_Toggle
 	//UpSample Pass
 	texture texzBufferN_U { Width = BUFFER_WIDTH ; Height = BUFFER_HEIGHT ; Format = R16F; }; //Do not use mips in this buffer
 	
@@ -2126,7 +2132,8 @@ uniform int Extra_Information <
 			MinFilter = POINT;
 			MipFilter = POINT;
 		};
-	
+	#endif	
+	#endif
 	#if UI_MASK
 	texture TexMaskA < source = "DM_Mask_A.png"; > { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA8; };
 	sampler SamplerMaskA { Texture = TexMaskA;};
@@ -2468,23 +2475,41 @@ uniform int Extra_Information <
 		float Vin = Adjust_Vignette > 0 ? saturate(smoothstep(FLT_EPSILON,(FLT_EPSILON+Adjust_Vignette)*27.0f,TC.x * TC.y)) : 1;
 		
 		#if BC_SPACE == 1
-		if(Custom_Sidebars == 0 && Depth_Map_View == 0)
-			return NormalizeScRGB(tex2Dlod(BackBuffer_M,float4(texcoords,0,0)) *  Vin);
-		else if(Custom_Sidebars == 1 && Depth_Map_View == 0)
-			return NormalizeScRGB(tex2Dlod(BackBuffer_B,float4(texcoords,0,0)) *  Vin);
-		else if(Custom_Sidebars == 2 && Depth_Map_View == 0)
-			return NormalizeScRGB(tex2Dlod(BackBuffer_C,float4(texcoords,0,0)) *  Vin);
-		else
-			return NormalizeScRGB(tex2Dlod(SamplerzBufferN_P,float4(texcoords,0,0)).x);
+			#if DX9_Toggle
+			if(Custom_Sidebars == 1 && Depth_Map_View == 0)
+				return NormalizeScRGB(tex2Dlod(BackBuffer_B,float4(texcoords,0,0)) *  Vin);
+			else if(Custom_Sidebars == 0 && Depth_Map_View == 0)
+				return NormalizeScRGB(tex2Dlod(BackBuffer_C,float4(texcoords,0,0)) *  Vin);
+			else
+				return NormalizeScRGB(tex2Dlod(SamplerzBufferN_P,float4(texcoords,0,0)).x);
+			#else	
+			if(Custom_Sidebars == 0 && Depth_Map_View == 0)
+				return NormalizeScRGB(tex2Dlod(BackBuffer_M,float4(texcoords,0,0)) *  Vin);
+			else if(Custom_Sidebars == 1 && Depth_Map_View == 0)
+				return NormalizeScRGB(tex2Dlod(BackBuffer_B,float4(texcoords,0,0)) *  Vin);
+			else if(Custom_Sidebars == 2 && Depth_Map_View == 0)
+				return NormalizeScRGB(tex2Dlod(BackBuffer_C,float4(texcoords,0,0)) *  Vin);
+			else
+				return NormalizeScRGB(tex2Dlod(SamplerzBufferN_P,float4(texcoords,0,0)).x);
+			#endif
 		#else
-		if(Custom_Sidebars == 0 && Depth_Map_View == 0)
-			return tex2Dlod(BackBuffer_M,float4(texcoords,0,0)) *  Vin;
-		else if(Custom_Sidebars == 1 && Depth_Map_View == 0)
-			return tex2Dlod(BackBuffer_B,float4(texcoords,0,0)) *  Vin;
-		else if(Custom_Sidebars == 2 && Depth_Map_View == 0)
-			return tex2Dlod(BackBuffer_C,float4(texcoords,0,0)) *  Vin;
-		else
-			return tex2Dlod(SamplerzBufferN_P,float4(texcoords,0,0)).x;
+			#if DX9_Toggle
+			if(Custom_Sidebars == 1 && Depth_Map_View == 0)
+				return tex2Dlod(BackBuffer_B,float4(texcoords,0,0)) *  Vin;
+			else if(Custom_Sidebars == 0 && Depth_Map_View == 0)
+				return tex2Dlod(BackBuffer_C,float4(texcoords,0,0)) *  Vin;
+			else
+				return tex2Dlod(SamplerzBufferN_P,float4(texcoords,0,0)).x;
+			#else
+			if(Custom_Sidebars == 0 && Depth_Map_View == 0)
+				return tex2Dlod(BackBuffer_M,float4(texcoords,0,0)) *  Vin;
+			else if(Custom_Sidebars == 1 && Depth_Map_View == 0)
+				return tex2Dlod(BackBuffer_B,float4(texcoords,0,0)) *  Vin;
+			else if(Custom_Sidebars == 2 && Depth_Map_View == 0)
+				return tex2Dlod(BackBuffer_C,float4(texcoords,0,0)) *  Vin;
+			else
+				return tex2Dlod(SamplerzBufferN_P,float4(texcoords,0,0)).x;
+			#endif
 		#endif
 
 	}
@@ -4569,13 +4594,16 @@ uniform int Extra_Information <
 								#endif
 		#endif	
 		#if !Use_2D_Plus_Depth
-		if(View_Mode == 0 || View_Mode == 3)	
-			DepthBuffer_LP.x = DepthBuffer_LP.y;		
+			#if !Alternate_View_Mode
+			if(View_Mode == 0 || View_Mode == 3)	
+				DepthBuffer_LP.x = DepthBuffer_LP.y;		
+			#endif
 		#endif
 		float Separation = lerp(1.0,5.0,Depth_Seperation()); 	
 		
 		float Boost_Range_Depth = DepthBuffer_LP.x, Pop_Adjust = saturate(DI_Y);
 		float Max_Clamp = Pop_Adjust > 0 ? 5.0 : 2.5 ;
+		#if !Alternate_View_Mode
 		if(Pop_Adjust > 0)//Boost_Mode from 2018
 		{
 			float2 Clamp_Near = max(0,float2(tex2Dlod(SamplerzBufferN_P, float4(texcoord,0, 0) ).y, DepthBuffer_LP.x));	
@@ -4590,6 +4618,9 @@ uniform int Extra_Information <
 		}	  
 		
 		return clamp((Separation * Boost_Range_Depth) * Smooth_Tune_Boost(),-1.5,Max_Clamp);
+		#else
+		return clamp((Separation * Boost_Range_Depth) * Smooth_Tune_Boost(),-1.5,2.5);
+		#endif
 	}
 	
 	int3 Shift_Depth()
@@ -4728,82 +4759,88 @@ uniform int Extra_Information <
 		// Median
 	    return s[4];
 	}
-	/*
-	float GetDepth(float2 texcoord, float mips) 
-	{
-		return tex2Dlod(SamplerzBufferN_Mixed,float4(texcoord,0,mips)).x;
-	}
 	
-	float De_Art_Parallax(float Diverge, float2 Coordinates) 
-	{
-	    float  MS = ( Diverge * TEST) * pix.x;		
-		float LRDepth = 1, Num, S[3] = {0.5,0.75,1.0};
-	
-			MS = -MS;
-
-			[loop]
-			for ( int i = 0 ; i < 3; ++i )
-			{   
-				Num = S[i] * MS;
-				LRDepth = min(LRDepth, GetDepth(float2(Coordinates.x + Num, Coordinates.y),0) );	
-		
-			}
-			
-			return LRDepth; 
-	}
-	*/	
-	static const float  HFI_Array[4] = { 0, 5, 6, 7};	
+	#if !Alternate_View_Mode	
 	void Up_Z(in float4 position : SV_Position, in float2 texcoord : TEXCOORD, out float UpOut : SV_Target0)
 	{
-	/*
-		float  MS = 100 * pix.x;
-		float GetDepth = smoothstep(0,1, tex2Dlod(SamplerzBufferN_L, float4(texcoord,0, 2.0) ).x);
-		//Extra scaleing for the main Loop
-		float Mod_Depth = saturate(GetDepth * lerp(1,15,abs(Artifact_Adjust().y))), Reverse_Depth = Artifact_Adjust().y < 0 ? 1-Mod_Depth : Mod_Depth,
-				  Scale_With_Depth = Artifact_Adjust().y == 0 ? 1 : Reverse_Depth;
-				  
-		float Foveated_Mask = saturate(Vin_Pattern(texcoord, float2(16.0,2.0))), MaxMix = lerp(100, 50, saturate(GetDepth * 2 - 1) );	
 
-		//De-Artifacting.
-		float AA_Value = Artifact_Adjust().x;
-		float Corners = saturate(tex2Dlod(SamplerzBufferN_L,float4(texcoord,0,HFI_Array[Target_High_Frequency])).y);
-		float Smooth_C = smoothstep(0.0,1.0,Corners * 1000);
-			
-		if(Target_High_Frequency > 0)
-			AA_Value = lerp(AA_Value,1.0,Smooth_C);
-			  
-		//Adjustments and Switching for De-Artifacting.	  
-		float AA_Switch = De_Artifacting.x < 0 ? lerp(0.3 * AA_Value,AA_Value ,smoothstep(0.0,1.0,Foveated_Mask)): AA_Value;
-		float2 Artifacting_Adjust = float2(MS.x * lerp(0,0.125,clamp(AA_Switch * Scale_With_Depth,0,2)),1.0 - (MS.x * lerp(0,0.25,clamp(AA_Value * Scale_With_Depth,0,2))));
-
-		float2 shift_coords_A = De_Art(texcoord, Artifacting_Adjust , 0);
-		float2 shift_coords_B = De_Art(texcoord, Artifacting_Adjust , 1);
-	*/
 		float2 Depth_Size = rcp_Depth_Size();	
 		float Median = Median3x3(SamplerzBufferN_Mixed, texcoord, Depth_Size);
 		//float Mixed = tex2Dlod(SamplerzBufferN_Mixed,float4(shift_coords_A,0,0)).x;// + tex2Dlod(SamplerzBufferN_Mixed,float4(shift_coords_B,0,0)).x;
 
 		UpOut = Median;//min(Median, Mixed);	  					    	
-	}	
+	}
+	#endif	
 	#endif
 	float2 GetMixed(float2 texcoord, float mips) //Sensitive Buffer.
 	{
 		#if !DX9_Toggle
-		float BufferA = tex2Dlod(SamplerzBufferN_Up,float4(texcoord,0,mips)).x, 
-			  BufferB = tex2Dlod(SamplerzBufferN_Mixed,float4(texcoord,0,mips)).x;
-		//Careful not to shift here because we run out of memory in DX9
-		return float2(BufferA,BufferB);//Do not use mips on this buffer
+			#if !Alternate_View_Mode
+			float BufferA = tex2Dlod(SamplerzBufferN_Up,float4(texcoord,0,mips)).x, 
+				  BufferB = tex2Dlod(SamplerzBufferN_Mixed,float4(texcoord,0,mips)).x;
+			//Careful not to shift here because we run out of memory in DX9
+			return float2(BufferA,BufferB);//Do not use mips on this buffer
+			#else
+			return tex2Dlod(SamplerzBufferN_Mixed,float4(texcoord,0,mips)).x;
+			#endif	
 		#else
 		return tex2Dlod(SamplerzBufferN_Mixed,float4(texcoord,0,mips)).x;
 		#endif
 	}
-	#if !Use_2D_Plus_Depth	
+	
+	#if !Use_2D_Plus_Depth
+	
+	#define GET_WEIGHT(index, start, end, steps) \
+	    ((index == 0) ? 1.0 : \
+	     (index > steps) ? 0.0 : \
+	     start + ((end - start) * (index - 1)) / float(steps - 1))
+	
+	#define GET_SEPARATION(index, start, end, steps) \
+	    ((index > steps) ? 0.0 : \
+	     start + ((end - start) * index) / float(steps - 1))
+	
+	float BlendDepth(float2 TC, float MS, float DepthLR, float LRDepth, int nSteps)
+	{
+	    const float WEIGHT_START = 0.5f, WEIGHT_END = 0.125f, SEP_START = 0.5f, SEP_END = 1.0f;
+	    
+	    float sumW = 0,mixDepth = 0, calMidDepth = 0;
+	    
+	    [loop]
+	    for(int j = 0; j < nSteps; j++)
+	    {
+	        float weight = GET_WEIGHT(j, WEIGHT_START, WEIGHT_END, nSteps);
+	        float separation = GET_SEPARATION(j, SEP_START, SEP_END, nSteps);
+	        
+	        float depthSample = GetMixed(float2(TC.x + separation * MS, TC.y), 0).x;
+	        
+	        if(j == 0)
+	        {
+	            depthSample = min(DepthLR, depthSample);
+	            calMidDepth = depthSample * weight;
+	        }
+	        
+	        mixDepth += depthSample * weight;
+	        sumW += weight;
+	    }
+	    
+	    mixDepth /= sumW;
+	    
+	    float dlr = saturate(abs(mixDepth - LRDepth) * 12.5);
+	    float minDepth = min(mixDepth, calMidDepth);
+	    mixDepth = lerp(mixDepth, minDepth, minDepth);
+	    float sDLR = dlr >= 1 ? 0.5 : 0;
+	    dlr = lerp(dlr, sDLR, LRDepth);
+	    
+	    return lerp(LRDepth, mixDepth, dlr);
+	}
+	
 	//Perf Level selection & Array access               X    Y      Z      W              X    Y      Z      W
 	//static const float2 Performance_LvL[2] = { float4( 0.5, 0.5095, 0.679, 0.5 ), float4( 1.0, 1.019, 1.425, 1.0) };
 	//Perf Level selection & Array access                X      Y               X    Y  
 	static const float2 Performance_LvL0[2] = { float2( 0.5  , 0.679), float2( 1.0, 1.425) };
 	static const float2 Performance_LvL1[2] = { float2( 0.375, 0.479), float2( 0.5, 0.679) };
 	static const float  VRS_Array[5] = { 0.5, 0.5, 0.25, 0.125 , 0.0625 };
+	static const float  HFI_Array[4] = { 0, 5, 6, 7};
 	//////////////////////////////////////////////////////////Parallax Generation///////////////////////////////////////////////////////////////////////
 	float3 Parallax(float Diverge, float2 Coordinates, float IO) // Horizontal parallax offset & Hole filling effect
 	{
@@ -4813,41 +4850,38 @@ uniform int Extra_Information <
 		float GetDepth = smoothstep(0,1, tex2Dlod(SamplerzBufferN_L, float4(Coordinates,0, 2.0) ).x), CB_Done = fmod(CBxy.x+CBxy.y,2),
 			  Perf = Performance_Level > 1 ? lerp(Performance_LvL1[Perf_LvL].x,Performance_LvL0[Perf_LvL].x,GetDepth) : Performance_LvL0[Perf_LvL].x;
 
-		float Max_Clamp = saturate(DI_Y) > 0 ? 5.0 : 2.5 ;
-		float DepthLR = Max_Clamp, LRDepth = Max_Clamp, LDepthR, sumW, DLR, Num, S[7] = {0.5,0.6,0.7,0.8,0.9,1.0,1.1};
 		#if Alternate_View_Mode
+		float Max_Clamp = 2.5;
+		float SampleControl = saturate(Min_Divergence().x); // 0.0 to 1.0 slider/control
+		int NumSamples = lerp(5, 20, SampleControl); // or int NumSamples = 5 + (int)(15 * SampleControl);
+		float DepthLR = Max_Clamp, LRDepth = Max_Clamp, LDepthR, sumW, DLR, Num;
+			float2 AdjustedParallaxCoord = float2(ParallaxCoord.x + MS * 0.075, ParallaxCoord.y);
 			MS = -MS;
-
 			[loop]
-			for ( int i = 0 ; i < 7; ++i )
+			for ( int i = 0 ; i < NumSamples; ++i )
 			{   
-				Num = S[i] * MS;
-				LRDepth = min(LRDepth, GetMixed(float2(ParallaxCoord.x + Num, ParallaxCoord.y),0).x );	
-	
-				if(View_Mode == 1)
-				{							
-					float w0 = 1.0, w1 = 0.50, w2 = 0.375, w3 = 0.250, w4 = 0.125, w5 = 0.0625, w6 = 0.03125;
-					sumW = w0 + w1 + w2 + w3 + w4 + w5 + w6;
-					float Mix_Depth = min(DepthLR,GetMixed(float2(ParallaxCoord.x + 0.500 * MS, ParallaxCoord.y),0).x) * w0;
-					float Cal_Mid_Depth = Mix_Depth;
-						  Mix_Depth += GetMixed(float2(ParallaxCoord.x + 0.5833 * MS, ParallaxCoord.y),0).x * w1;
-						  Mix_Depth += GetMixed(float2(ParallaxCoord.x + 0.6667 * MS, ParallaxCoord.y),0).x * w2;
-						  Mix_Depth += GetMixed(float2(ParallaxCoord.x + 0.7500 * MS, ParallaxCoord.y),0).x * w3;
-						  Mix_Depth += GetMixed(float2(ParallaxCoord.x + 0.8333 * MS, ParallaxCoord.y),0).x * w4;
-						  Mix_Depth += GetMixed(float2(ParallaxCoord.x + 0.9167 * MS, ParallaxCoord.y),0).x * w5;
-						  Mix_Depth += GetMixed(float2(ParallaxCoord.x + 1.0000 * MS, ParallaxCoord.y),0).x * w6;
-					Mix_Depth /= sumW;
-					
-					DLR = saturate(abs(Mix_Depth - LRDepth) * 12.5);
-					
-					Mix_Depth = min(Mix_Depth,Cal_Mid_Depth);
-					float sDLR = DLR >= 1 ? 0.5 : 0;
-					DLR = lerp(DLR * 1.5 - 0.5,sDLR,LRDepth);	
-					DepthLR = lerp(LRDepth,Mix_Depth,DLR);
-				}		
+				//float nSamples = 0.5 + (0.5 * i) / (NumSamples - 1); // Dynamic range 0.5 to 1.0
+		        float nSamples = 0.5 + (0.6 * i) / (NumSamples - 1); // Dynamic range 0.5 to 1.1
+		        Num = nSamples * MS;
+		        LRDepth = min(LRDepth, GetMixed(float2(AdjustedParallaxCoord.x + Num, AdjustedParallaxCoord.y),0).x );
+		        
+		        // Process depth samples based on view mode
+		        if(View_Mode == 1)
+		        {
+		            DepthLR = BlendDepth(ParallaxCoord, MS, DepthLR, LRDepth, 6);
+		        }
+		        else if(View_Mode == 2)
+		        {
+		            DepthLR = BlendDepth(ParallaxCoord, MS, DepthLR, LRDepth, 9);
+		        }
+		        else
+		        {
+		       	 DepthLR = BlendDepth(ParallaxCoord, MS, DepthLR, LRDepth, 12);
+		        }
+		        		
 			}
 			//Reprojection Left and Right
-			if(View_Mode == 1 || View_Mode == 2)
+			if(View_Mode > 0)
 				ParallaxCoord = float2(Coordinates.x + MS * DepthLR, Coordinates.y);
 			else
 				ParallaxCoord = float2(Coordinates.x + MS * LRDepth, Coordinates.y);
@@ -5579,7 +5613,7 @@ uniform int Extra_Information <
 		}
 	
 		if (BD_Options == 2 || Alinement_View)
-			color.rgb = dot(tex2D(BackBuffer_B,TexCoords).rgb,0.333) * float3((Depth/Alinement_Depth> 0.998),1,(Depth/Alinement_Depth > 0.998));
+			color.rgb = dot(tex2D(BackBuffer_C,TexCoords).rgb,0.333) * float3((Depth/Alinement_Depth> 0.998),1,(Depth/Alinement_Depth > 0.998));
 		if( Helper_Fuction() == 0 || timer <= 0)  
 			color.rgb *= TexCoords.xyx;
 		
@@ -6744,12 +6778,14 @@ uniform int Extra_Information <
 			RenderTarget0 = texzBufferN_M;
 		}
 		#if !DX9_Toggle
-			pass DepthUpscaling
-		{
-			VertexShader = PostProcessVS;
-			PixelShader = Up_Z;
-			RenderTarget0 = texzBufferN_U;
-		}
+			#if !Alternate_View_Mode
+				pass DepthUpscaling
+			{
+				VertexShader = PostProcessVS;
+				PixelShader = Up_Z;
+				RenderTarget0 = texzBufferN_U;
+			}
+			#endif
 		#endif
 		#if Reconstruction_Mode || Virtual_Reality_Mode || Anaglyph_Mode
 			pass Muti_Mode_Reconstruction

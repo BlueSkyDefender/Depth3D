@@ -1,7 +1,7 @@
 ////----------------------------------------//
 ///SuperDepth3D Overwatch Automation Header///
 //----------------------------------------////
-#define OVERWATCH "Overwatch v4.4.7\n"
+#define OVERWATCH "Overwatch v4.4.8\n"
 //---------------------------------------OVERWATCH---------------------------------------//
 // If you are reading this stop. Go away and never look back. From this point on if you  //
 // still think it's is worth looking at this..... Then no one can save you or your soul. //
@@ -38856,7 +38856,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	//#define DJ_X 0.375                            // Range Smoothing
     //#define THF 3                                 // Target High Frequency information Like Hair
 	// May turn this on all the time in InfiColor Mode
-	#define DI_Y 0.625                                //Boost Mode Pop Level Adjuster 0 - 1
+	#define DI_Y 0.5                                //Boost Mode Pop Level Adjuster 0 - 1
     
     //Letter Box Correction Offsets With X & Y
     //#define LBC 1                                   //Letter Box Correction
