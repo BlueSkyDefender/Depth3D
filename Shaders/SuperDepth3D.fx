@@ -1,7 +1,7 @@
 	////----------------//
 	///**SuperDepth3D**///
 	//----------------////
-	#define SD3D "SuperDepth3D v4.9.3\n"
+	#define SD3D "SuperDepth3D v4.9.5\n"
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//* Depth Map Based 3D post-process shader
 	//* For Reshade 3.0+
@@ -518,7 +518,7 @@ uniform int SuperDepth3D <
 		ui_category = "Game Selection";
 	> = 0;	
 	#endif
-	uniform float TEST < ui_type = "slider"; ui_min = 0; ui_max = 1.0; > = 0.00;
+	//uniform float TEST < ui_type = "slider"; ui_min = 0; ui_max = 1.0; > = 0.00;
 	//Divergence & Convergence//
 	uniform float Depth_Adjustment < //This change was made to make it more simple for users
 		ui_type = "slider";
@@ -3700,6 +3700,7 @@ uniform int Extra_Information <
 		return MD_W.x;
 	}
 	*/
+	//Note float3x3 may have issues with OpenGL may need to convert to void.
 	float3x3 Fade(float2 texcoord)
 	{   //Check Depth
 		float CD, Detect, Detect_Out_of_Range = -1, ZPD_Scaler_One_Boundary = Set_Pop_Min().x;//Done to not trigger FTM if set to 0
@@ -5358,7 +5359,7 @@ uniform int Extra_Information <
 			return texcoord;
 	}
 
-	float4x4 Con_Values(float2 texcoord)
+	void Con_Values(in float2 texcoord, out float2 DLR, out float2 TCL, out float2 TCR, out float2 TCL_T, out float2 TCR_T, out float Pattern)
 	{
 		float D = Eye_Swap ? -Min_Divergence().x : Min_Divergence().x;
 
@@ -5384,7 +5385,8 @@ uniform int Extra_Information <
 		if (FPSDFIO >= 1)
 			FD = lerp(FD * FD_Adjust,FD,FadeIO);
 	
-		float2 DLR = float2(FD,FD),Persp = Per;
+		DLR = float2(FD,FD);
+		float2 Persp = Per;
 		float Per_Fade = lerp(FD_Adjust,1.0,FadeIO);
 		
 		if( Eye_Fade_Selection == 0)
@@ -5403,7 +5405,7 @@ uniform int Extra_Information <
 		if(Stereoscopic_Mode == 0 && !Inficolor_3D_Emulator && !Anaglyph_Mode)
 			Persp *= 0.5f;
 
-		float2 TCL = texcoord, TCR = texcoord, TCL_T = texcoord, TCR_T = texcoord;
+		TCL = texcoord; TCR = texcoord; TCL_T = texcoord; TCR_T = texcoord;
 
 
 		#if Inficolor_3D_Emulator
@@ -5446,7 +5448,7 @@ uniform int Extra_Information <
 		}
 		
 		float3 PatternsXYZ = Patterns(texcoord.xy);
-		float Pattern = PatternsXYZ.x;//CB
+		Pattern = PatternsXYZ.x;//CB
 		#if !Virtual_Reality_Mode
 			#if Reconstruction_Mode	
 				if(Reconstruction_Type == 1 )
@@ -5470,12 +5472,7 @@ uniform int Extra_Information <
 						Pattern = PatternsXYZ.y; //CI
 					#endif
 			#endif
-		#endif
-		
-		return float4x4(float4(DLR.x,DLR.y,0,Pattern),
-						float4(TCL.x,TCL.y,TCL_T.x,TCL_T.y),
-						float4(TCR.x,TCR.y,TCR_T.x,TCR_T.y),
-						float4(0,0,0,0));
+		#endif						
 	}
 
 	#if Reconstruction_Mode || Virtual_Reality_Mode || Anaglyph_Mode
@@ -5502,18 +5499,12 @@ uniform int Extra_Information <
 			float Mouse_Toggle_Click = 1;
 		#endif
 		
-		float4 Shift_LR;		
-		float4x4 C_Values = Con_Values(texcoord);
-		float2 DLR = float2(C_Values._m00,C_Values._m01), 
-			   TCL = float2(C_Values._m10,C_Values._m11), 
-			   TCR = float2(C_Values._m20,C_Values._m21), 
-			   TCL_T = float2(C_Values._m12,C_Values._m13),
-			   TCR_T = float2(C_Values._m22,C_Values._m23),
-			   TexCoords = texcoord;
-		
+		float4 Shift_LR;
+		float2 DLR, TCL, TCR, TCL_T, TCR_T, TexCoords = texcoord;
+		float Pattern_Type;		
+		Con_Values(texcoord,DLR, TCL, TCR, TCL_T, TCR_T, Pattern_Type);		
 		float4 color, L, R, Left_Right, Parallax_LR, Parallax_L, Parallax_R, LR_De_Art;
-			
-		float Pattern_Type = fmod(C_Values._m03,2);
+		Pattern_Type = fmod(Pattern_Type,2);
 		
 		#if Virtual_Reality_Mode
 				Shift_LR = Vert_3D_Pinball ? Pattern_Type ? float4(-DLR.x,TCL.yx,AI) : float4(DLR.y, TCR.yx, -AI) : Pattern_Type ? float4(-DLR.x,TCL,AI) : float4(DLR.y, TCR, -AI);
@@ -5565,10 +5556,10 @@ uniform int Extra_Information <
 				
 				if(Vert_3D_Pinball && Stereoscopic_Mode != 5)
 					Parallax_LR.xyz = Parallax_LR.yxz;
-							
+						
 				//LR_De_Art.x = De_Art_Parallax(Shift_LR.x,Shift_LR.yz);
 				Left_Right = MouseCursor(Parallax_LR.xyz, position.xy , Mouse_Toggle_Click, 0);
-						
+				//Left_Right = MouseCursor(Parallax_LR.xyz, position.xy , Mouse_Toggle_Click, 0);		
 			}
 			#endif
 		#endif
@@ -6100,7 +6091,7 @@ uniform int Extra_Information <
 			    #else
 			    Color = Color;
 			    #endif
-
+				//Color.rgb = PS_calcLR(texcoord, position.xy).rgb;
 				return Color.rgba;
 			}
 		#endif

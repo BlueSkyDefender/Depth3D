@@ -2170,21 +2170,6 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define FOV 1
 	#define WSM 3
 	#define DB_W 16
-#elif (App == 0x75CE6926 ) //Chronicle of Riddick Assault on Dark Athena
-	//#define DA_W 1
-	//#define DA_Y 15.0
-	//#define DA_X 0.1325
-	#define DA_X 0.0666
-	//#define DF_Y 0.01
-	 
-	//#define DB_Z 0.05625
-	//#define DA_Z 0.00025
-	#define DE_X 2
-	//#define DE_Y 0.450
-	//#define DE_Z 0.375
-	#define PEW 1
-	#define DSW 1
-	#define RHW 1
 #elif (App == 0xAA5644F9 || App == 0x1981FECC ) //Need For Speed: Heat | Payback
 	#define DA_W 1
 	#define DA_Y 10.0
@@ -12023,100 +12008,6 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DL_X 0.95  //SM Tune
 	//#define DL_W 0.050 //SM Perspective
 	#define DM_X 3     //HQ Tune
-    //#define DM_Y 3     //HQ VR
-#elif (App == 0xB75F3C89 || App == 0xF188276F ) //Amnesia: The Dark Descent
-	//#define DA_W 1          // Set Linerzation
-    //#define DB_X 1          // Flip
-	#define DA_X 0.015      // ZPD
-	#define DF_Y 0.020       // Seperation
-	#define DA_Y 275.0       // Near Plane Adjustment
-    #define DA_Z 0.0005    // Linerzation Offset
-    #define DS_Y 1          // Linerzation Offset Effects only distance if true
-	#define DB_Z 0.02        // Auto Depth Protection
-	//#define DE_X 1          // ZPD Boundary 
-	//#define DE_Y 0.6875     // Set ZPD Boundary Level Zero 
-	//#define DE_Z 0.35      // Speed that Boundary is Enforced
-	//#define AFD 1         // Alternate Frame Detection - May be phased out
-	//#define DG_W -0.125      // Shift Boundary Out of screen 0.5 and or In screen -0.5
-    //#define OIL 2           // Set How many Levels We use for RE_Fix 0 | 1 | 2 | 3 if 1 then it's float2(0,0) for OIF and DI_W
-    //#define OIF float3(0.5,0.375,0.25)         // Fix enables if Value is > 0.0 
-	//#define DI_W float3(0.5,1.0,2.0)        // Like Shift Boundary DG_W But 0 to inf
-	//#define FTM 2           // Fast Trigger Mode If this enabled then Level 1 and > switches instantly.
-    #define DG_Z 0.100      // Min Weapon Hands That are apart of world with Auto and Trim
-    //#define DS_X float3(0.025,0,1)// Min Weapon bit only triggers when a OIL Level is set and set here on .y
-    #define DE_W 0.00      // Auto
-    #define DI_Z 0.0525      // Trim
-    #define DF_W float4(0.125,0.000,0.500,0.000)// Edge & Scale
-	#define BMT 1           // ZPD and World Scale Balance // I need to phase this out.
-	#define DF_Z 0.5       // Set the Balance  
-    //#define DL_Y -0.50      // De-Artifact Only works on some View Modes and causes performance degredation
-    //#define DL_Z 0.5       // Compat Power
-
-	#define WSM 4           // Weapon Setting Mode 
-	#define DB_W 25         // Weapon Profile
-	#define DF_X float2(0.386,0)// ZPD Weapon Boundarys Level 1 and Level 2
-	#define DJ_W 10.0	        // Weapon Depth Limit Location 1
-	//#define DS_W 1.0	        // Weapon Depth Limit Location 2
-	/*
-    #define MMD 1 //Set Multi Menu Detection             //Off / On
-    #define MMS 0 //Set Multi Menu Selection from 0-1 to 29-30 and Off 0 | 1 | 2
-    #define DO_X float4( 0.646 , 0.051 , 0.307 , 0.069 ) //Pos A1 = XY Color & A2 = ZW Black 
-    #define DO_Y float4( 0.777 , 0.069 , 0.278 , 0.246 ) //Pos A3 = XY Color & B1 = ZW Color
-    #define DO_Z float4( 0.500 , 0.760 , 0.265 , 0.322 ) //Pos B2 = XY Black & B3 = ZW Color
-	#define DO_W float4( 21.0, 22.0, 30.0, 30.0) //Tresh Hold for Color A & B and Color
-	*/
-	//Smooth Mode Setting  
-    #define SMS 3      //SM Toggle Separation
-	#define DL_X 0.95  //SM Tune
-	//#define DL_W 0.050 //SM Perspective
-	#define DM_X 4     //HQ Tune
-    //#define DM_Y 3     //HQ VR	
-#elif (App == 0x91FF5778 || App == 0x6DD82022 ) //Amnesia: Machine for Pigs
-	//#define DA_W 1          // Set Linerzation
-    //#define DB_X 1          // Flip
-	#define DA_X 0.015      // ZPD
-	#define DF_Y 0.020       // Seperation
-	#define DA_Y 275.0       // Near Plane Adjustment
-    #define DA_Z 0.0005    // Linerzation Offset
-    #define DS_Y 1          // Linerzation Offset Effects only distance if true
-	#define DB_Z 0.02        // Auto Depth Protection
-	//#define DE_X 1          // ZPD Boundary 
-	//#define DE_Y 0.6875     // Set ZPD Boundary Level Zero 
-	//#define DE_Z 0.35      // Speed that Boundary is Enforced
-	//#define AFD 1         // Alternate Frame Detection - May be phased out
-	//#define DG_W -0.125      // Shift Boundary Out of screen 0.5 and or In screen -0.5
-    //#define OIL 2           // Set How many Levels We use for RE_Fix 0 | 1 | 2 | 3 if 1 then it's float2(0,0) for OIF and DI_W
-    //#define OIF float3(0.5,0.375,0.25)         // Fix enables if Value is > 0.0 
-	//#define DI_W float3(0.5,1.0,2.0)        // Like Shift Boundary DG_W But 0 to inf
-	//#define FTM 2           // Fast Trigger Mode If this enabled then Level 1 and > switches instantly.
-    #define DG_Z 0.100      // Min Weapon Hands That are apart of world with Auto and Trim
-    //#define DS_X float3(0.025,0,1)// Min Weapon bit only triggers when a OIL Level is set and set here on .y
-    #define DE_W 0.00      // Auto
-    #define DI_Z 0.0525      // Trim
-    #define DF_W float4(0.125,0.000,0.400,0.000)// Edge & Scale
-	#define BMT 1           // ZPD and World Scale Balance // I need to phase this out.
-	#define DF_Z 0.5       // Set the Balance  
-    //#define DL_Y -0.50      // De-Artifact Only works on some View Modes and causes performance degredation
-    //#define DL_Z 0.5       // Compat Power
-
-	#define WSM 4           // Weapon Setting Mode 
-	#define DB_W 25         // Weapon Profile
-	#define DF_X float2(0.386,0)// ZPD Weapon Boundarys Level 1 and Level 2
-	#define DJ_W 10.0	        // Weapon Depth Limit Location 1
-	//#define DS_W 1.0	        // Weapon Depth Limit Location 2
-	/*
-    #define MMD 1 //Set Multi Menu Detection             //Off / On
-    #define MMS 0 //Set Multi Menu Selection from 0-1 to 29-30 and Off 0 | 1 | 2
-    #define DO_X float4( 0.646 , 0.051 , 0.307 , 0.069 ) //Pos A1 = XY Color & A2 = ZW Black 
-    #define DO_Y float4( 0.777 , 0.069 , 0.278 , 0.246 ) //Pos A3 = XY Color & B1 = ZW Color
-    #define DO_Z float4( 0.500 , 0.760 , 0.265 , 0.322 ) //Pos B2 = XY Black & B3 = ZW Color
-	#define DO_W float4( 21.0, 22.0, 30.0, 30.0) //Tresh Hold for Color A & B and Color
-	*/
-	//Smooth Mode Setting  
-    #define SMS 3      //SM Toggle Separation
-	#define DL_X 0.95  //SM Tune
-	//#define DL_W 0.050 //SM Perspective
-	#define DM_X 4     //HQ Tune
     //#define DM_Y 3     //HQ VR	
 #elif (App == 0x73C5395D ) //Outward DE
     //#define DS_Z 3          // Set View Mode
@@ -40679,7 +40570,124 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	//#define DAA 1
 	#define FOV 1
     //#define ARW 1
-    //#define DFW 1 
+    //#define DFW 1
+#elif (App == 0x75CE6926 ) //The Chronicles of Riddick: Assault on Dark Athena
+	#define G_Info "The Chronicles of Riddick: Assault on Dark Athena | AppID 0x75CE6926 GoG \n"
+	
+    #define G_Note "Note: Need 4G Large Address Aware 4G PATCH.\n" \
+    			   "Also make sure to use copy buffers in the add-on tab.\n" \
+				   "Try 5.0.0+ Version of ReShade I need to look into the most stable version.\n" \
+				   "One last thing you need too mod the came to remove letter box.\n"
+
+
+	#define PEW 1
+	#define DSW 1
+	#define RHW 1 
+#elif (App == 0xB75F3C89 || App == 0xF188276F ) //Amnesia: The Dark Descent
+	//#define DA_W 1          // Set Linerzation
+    //#define DB_X 1          // Flip
+	#define DA_X 0.015      // ZPD
+	#define DF_Y 0.020       // Seperation
+	#define DA_Y 275.0       // Near Plane Adjustment
+    #define DA_Z 0.0005    // Linerzation Offset
+    #define DS_Y 1          // Linerzation Offset Effects only distance if true
+	#define DB_Z 0.02        // Auto Depth Protection
+	//#define DE_X 1          // ZPD Boundary 
+	//#define DE_Y 0.6875     // Set ZPD Boundary Level Zero 
+	//#define DE_Z 0.35      // Speed that Boundary is Enforced
+	//#define AFD 1         // Alternate Frame Detection - May be phased out
+	//#define DG_W -0.125      // Shift Boundary Out of screen 0.5 and or In screen -0.5
+    //#define OIL 2           // Set How many Levels We use for RE_Fix 0 | 1 | 2 | 3 if 1 then it's float2(0,0) for OIF and DI_W
+    //#define OIF float3(0.5,0.375,0.25)         // Fix enables if Value is > 0.0 
+	//#define DI_W float3(0.5,1.0,2.0)        // Like Shift Boundary DG_W But 0 to inf
+	//#define FTM 2           // Fast Trigger Mode If this enabled then Level 1 and > switches instantly.
+    #define DG_Z 0.100      // Min Weapon Hands That are apart of world with Auto and Trim
+    //#define DS_X float3(0.025,0,1)// Min Weapon bit only triggers when a OIL Level is set and set here on .y
+    #define DE_W 0.00      // Auto
+    #define DI_Z 0.0525      // Trim
+    #define DF_W float4(0.125,0.000,0.0,0.000)// Edge & Scale
+	#define BMT 1           // ZPD and World Scale Balance // I need to phase this out.
+	#define DF_Z 0.5       // Set the Balance  
+    //#define DL_Y -0.50      // De-Artifact Only works on some View Modes and causes performance degredation
+    //#define DL_Z 0.5       // Compat Power
+    
+	//#define WMM 1                                  // Weapon Mix Mode 
+	#define WSM 4           // Weapon Setting Mode 
+	#define DB_W 25         // Weapon Profile
+	#define DF_X float2(0.386,0)// ZPD Weapon Boundarys Level 1 and Level 2
+	#define DJ_W 10.0	        // Weapon Depth Limit Location 1
+	//#define DS_W 1.0	        // Weapon Depth Limit Location 2
+	/*
+    #define MMD 1 //Set Multi Menu Detection             //Off / On
+    #define MMS 0 //Set Multi Menu Selection from 0-1 to 29-30 and Off 0 | 1 | 2
+    #define DO_X float4( 0.646 , 0.051 , 0.307 , 0.069 ) //Pos A1 = XY Color & A2 = ZW Black 
+    #define DO_Y float4( 0.777 , 0.069 , 0.278 , 0.246 ) //Pos A3 = XY Color & B1 = ZW Color
+    #define DO_Z float4( 0.500 , 0.760 , 0.265 , 0.322 ) //Pos B2 = XY Black & B3 = ZW Color
+	#define DO_W float4( 21.0, 22.0, 30.0, 30.0) //Tresh Hold for Color A & B and Color
+	*/
+	//Smooth Mode Setting  
+    #define SMS 3      //SM Toggle Separation
+	#define DL_X 0.95  //SM Tune
+	//#define DL_W 0.050 //SM Perspective
+	#define DM_X 4     //HQ Tune
+    //#define DM_Y 3     //HQ VR	
+    	//#define NDW 1
+	#define PEW 1
+	//#define NFM 1
+	//#define NDG 1
+	//#define DSW 1
+	//#define DRS 1
+	//#define DAA 1
+	//#define FOV 1
+    //#define ARW 1
+    //#define DFW 1
+#elif (App == 0x91FF5778 || App == 0x6DD82022 ) //Amnesia: Machine for Pigs
+	//#define DA_W 1          // Set Linerzation
+    //#define DB_X 1          // Flip
+	#define DA_X 0.015      // ZPD
+	#define DF_Y 0.020       // Seperation
+	#define DA_Y 275.0       // Near Plane Adjustment
+    #define DA_Z 0.0005    // Linerzation Offset
+    #define DS_Y 1          // Linerzation Offset Effects only distance if true
+	#define DB_Z 0.02        // Auto Depth Protection
+	//#define DE_X 1          // ZPD Boundary 
+	//#define DE_Y 0.6875     // Set ZPD Boundary Level Zero 
+	//#define DE_Z 0.35      // Speed that Boundary is Enforced
+	//#define AFD 1         // Alternate Frame Detection - May be phased out
+	//#define DG_W -0.125      // Shift Boundary Out of screen 0.5 and or In screen -0.5
+    //#define OIL 2           // Set How many Levels We use for RE_Fix 0 | 1 | 2 | 3 if 1 then it's float2(0,0) for OIF and DI_W
+    //#define OIF float3(0.5,0.375,0.25)         // Fix enables if Value is > 0.0 
+	//#define DI_W float3(0.5,1.0,2.0)        // Like Shift Boundary DG_W But 0 to inf
+	//#define FTM 2           // Fast Trigger Mode If this enabled then Level 1 and > switches instantly.
+    #define DG_Z 0.100      // Min Weapon Hands That are apart of world with Auto and Trim
+    //#define DS_X float3(0.025,0,1)// Min Weapon bit only triggers when a OIL Level is set and set here on .y
+    #define DE_W 0.00      // Auto
+    #define DI_Z 0.0525      // Trim
+    #define DF_W float4(0.125,0.000,0.400,0.000)// Edge & Scale
+	#define BMT 1           // ZPD and World Scale Balance // I need to phase this out.
+	#define DF_Z 0.5       // Set the Balance  
+    //#define DL_Y -0.50      // De-Artifact Only works on some View Modes and causes performance degredation
+    //#define DL_Z 0.5       // Compat Power
+
+	#define WSM 4           // Weapon Setting Mode 
+	#define DB_W 25         // Weapon Profile
+	#define DF_X float2(0.386,0)// ZPD Weapon Boundarys Level 1 and Level 2
+	#define DJ_W 10.0	        // Weapon Depth Limit Location 1
+	//#define DS_W 1.0	        // Weapon Depth Limit Location 2
+	/*
+    #define MMD 1 //Set Multi Menu Detection             //Off / On
+    #define MMS 0 //Set Multi Menu Selection from 0-1 to 29-30 and Off 0 | 1 | 2
+    #define DO_X float4( 0.646 , 0.051 , 0.307 , 0.069 ) //Pos A1 = XY Color & A2 = ZW Black 
+    #define DO_Y float4( 0.777 , 0.069 , 0.278 , 0.246 ) //Pos A3 = XY Color & B1 = ZW Color
+    #define DO_Z float4( 0.500 , 0.760 , 0.265 , 0.322 ) //Pos B2 = XY Black & B3 = ZW Color
+	#define DO_W float4( 21.0, 22.0, 30.0, 30.0) //Tresh Hold for Color A & B and Color
+	*/
+	//Smooth Mode Setting  
+    #define SMS 3      //SM Toggle Separation
+	#define DL_X 0.95  //SM Tune
+	//#define DL_W 0.050 //SM Perspective
+	#define DM_X 4     //HQ Tune
+    //#define DM_Y 3     //HQ VR
 #else
 	#define NPW 1 //No Profile
 	//#define G_Note "Note: Since no profile exists, you need to create one or ask for one.\n"
