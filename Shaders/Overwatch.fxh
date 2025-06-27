@@ -40707,7 +40707,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 				   "For the UI fix goto our Discord.\n" 
 	#endif
     //#define DS_Z 4                               // Set View Mode
-	#define DA_W 1                                 // Set Linerzation
+	//#define DA_W 1                                 // Set Linerzation
     //#define DB_X 1                                 // Flip
 	#define DA_X 0.025                             // ZPD
 	//#define DHH_W 0.5                           // Smart Convergence 
