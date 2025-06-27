@@ -40703,6 +40703,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	    #define G_Note "Note: Under the DX11 Render all effects work.\n" \
     			   "But, You still need to go to the Add-on Tab.\n" \
 				   "Set the first '[x] Copy Depth Buffer Before Clear'\n" \
+				   "Also set the 'Filter by Depth' [  D32  ].\n"  \
 				   "Option in the Generic Depth in the Add-on tab.\n"  \
 				   "For the UI fix goto our Discord.\n" 
 	#endif
