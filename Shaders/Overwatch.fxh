@@ -40717,7 +40717,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
     #define DS_Y 2                                 // Linerzation Offset Effects only distance if true
 	#define DB_Z 0.05                             // Auto Depth Protection
 	
-	#define DE_X 1                                 // ZPD Boundary 
+	//#define DE_X 1                                 // ZPD Boundary 
 	//#define DE_Y 0.75                              // Set ZPD Boundary Level Zero 
 	//#define DE_Z 0.375                             // Speed that Boundary is Enforced
 	//#define AFD 1                                // Alternate Frame Detection - May be phased out
@@ -40733,11 +40733,11 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
     //#define WBA 2.5                              // ZPD Weapon Boundary Alt Adjust power for CWH 
 	//#define FTM 4                                // Fast Trigger Mode If this enabled then Level 1 and > switches instantly.
 	#define WND 0.5                                // Weapon Near Pushes depth in and adjust perspective to match.
-	//#define DG_Z 0.0125                            // Min Weapon Hands That are apart of world with Auto and Trim
+	#define DG_Z 0.025                            // Min Weapon Hands That are apart of world with Auto and Trim
     //#define DS_X float3(0.025,0,1)               // Min Weapon bit only triggers when a OIL Level is set and set here on .y
     //#define DE_W 0.5                             // Auto
-    //#define DI_Z 0.05                              // Trim
-    //#define DF_W float4(0.001,0.001,0.0,0.025)    // Edge & Scale
+    #define DI_Z 0.05                              // Trim
+    #define DF_W float4(0.001,0.0,0.0,0.025)    // Edge & Scale
 	
 	//#define EDU 1                                 // Elevate Detectors Up effects ZPD
 	//#define TMD 1	
