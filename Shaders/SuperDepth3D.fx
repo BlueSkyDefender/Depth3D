@@ -1,7 +1,7 @@
 	////----------------//
 	///**SuperDepth3D**///
 	//----------------////
-	#define SD3D "SuperDepth3D v4.9.5\n"
+	#define SD3D "SuperDepth3D v4.9.6\n"
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//* Depth Map Based 3D post-process shader
 	//* For Reshade 3.0+
@@ -2533,7 +2533,7 @@ uniform int Extra_Information <
 		return tex2Dlod(SamplerCN,float4(TCLocations,0, MipLevel)).x;
 	}
 	
-	bool LBDetection()//Active RGB Detection
+	int LBDetection()//Active RGB Detection
 	{   int Letter_Box_Center_Mips_Level_Senstivity = 7;   
 		float2 Letter_Box_Reposition = float2(0.1,0.5);
 		if (LBR == 1) 
@@ -2583,7 +2583,7 @@ uniform int Extra_Information <
 			return Top_Pos && LBSensitivity(SLLTresh(float2(Letter_Box_Reposition.y,Letter_Box_Elevation.y), MipLevel)) && Center; //Hoz
 	}
 	#else
-	bool LBDetection()//Stand in for not crashing when not in use
+	int LBDetection()//Stand in for not crashing when not in use
 	{	
 		return 0;
 	}	
@@ -4405,7 +4405,7 @@ uniform int Extra_Information <
 		float3x3 Fade_Pass = Fade(StoredTC); //[0][0] = F | [0][1] = F | [0][2] = F
 						 					//[1][0] = F | [1][1] = F | [1][2] = F
 											 //[2][0] = N | [2][1] = 0 | [2][2] = 0
-		const int Num_of_Values = 8; //4 total array values that map to the textures width.
+		const int Num_of_Values = 8; //8 total array values that map to the textures width.
 		float Storage_Array[Num_of_Values] = { Fade_Pass[0][0],
 	                                		   Fade_Pass[0][1],
 	                                		   Fade_Pass[0][2], 
@@ -4791,25 +4791,19 @@ uniform int Extra_Information <
 	
 	#if !Use_2D_Plus_Depth
 	
-	#define GET_WEIGHT(index, start, end, steps) \
-	    ((index == 0) ? 1.0 : \
-	     (index > steps) ? 0.0 : \
-	     start + ((end - start) * (index - 1)) / float(steps - 1))
-	
 	#define GET_SEPARATION(index, start, end, steps) \
 	    ((index > steps) ? 0.0 : \
 	     start + ((end - start) * index) / float(steps - 1))
 	
 	float BlendDepth(float2 TC, float MS, float DepthLR, float LRDepth, int nSteps)
 	{
-	    const float WEIGHT_START = 0.5f, WEIGHT_END = 0.125f, SEP_START = 0.5f, SEP_END = 1.0f;
+	    const float SEP_START = 0.0f, SEP_END = 1.0f;
 	    
-	    float sumW = 0,mixDepth = 0, calMidDepth = 0;
+	    float weight = 1 ,sumW = 0, mixDepth = 0, calMidDepth = 0;
 	    
 	    [loop]
 	    for(int j = 0; j < nSteps; j++)
 	    {
-	        float weight = GET_WEIGHT(j, WEIGHT_START, WEIGHT_END, nSteps);
 	        float separation = GET_SEPARATION(j, SEP_START, SEP_END, nSteps);
 	        
 	        float depthSample = GetMixed(float2(TC.x + separation * MS, TC.y), 0).x;
@@ -4817,7 +4811,7 @@ uniform int Extra_Information <
 	        if(j == 0)
 	        {
 	            depthSample = min(DepthLR, depthSample);
-	            calMidDepth = depthSample * weight;
+	            calMidDepth = depthSample * weight * 0.5;
 	        }
 	        
 	        mixDepth += depthSample * weight;
@@ -4830,7 +4824,7 @@ uniform int Extra_Information <
 	    float minDepth = min(mixDepth, calMidDepth);
 	    mixDepth = lerp(mixDepth, minDepth, minDepth);
 	    float sDLR = dlr >= 1 ? 0.5 : 0;
-	    dlr = lerp(dlr, sDLR, LRDepth);
+	    dlr = lerp(dlr, sDLR, mixDepth);
 	    
 	    return lerp(LRDepth, mixDepth, dlr);
 	}
