@@ -5439,7 +5439,8 @@ uniform int Extra_Information <
 							    float pixY = 1.0 / Res.y;
 							
 							    // Linear approximation of gap size in pixels didn't need to do this but what ever do what I want. 
-							    float gapPixels = 0.0204082 * Res.y;
+							    //was 0.0204082 but since we are doing on two images with have to double it.
+							    float gapPixels = 0.040816326 * Res.y;
 							
 							    float Value_Shift_A = 2.0 + (gapPixels * pixY);
 							    float Value_Shift_B = 1.0 + (gapPixels * pixY);
