@@ -1,7 +1,7 @@
 	////----------------//
 	///**SuperDepth3D**///
 	//----------------////
-	#define SD3D "SuperDepth3D v4.9.7\n"
+	#define SD3D "SuperDepth3D v4.9.8\n"
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//* Depth Map Based 3D post-process shader
 	//* For Reshade 3.0+
@@ -1222,6 +1222,7 @@ uniform int SuperDepth3D <
 		static const float2 Anaglyph_Eye_Contrast = 0.0;
 		static const int Scaling_Support = 0;
 		static const int Eye_Swap = 0;
+		static const bool Frame_Packed = false;
 		static const int Inficolor_Near_Reduction = 0;
 		static const float Focus_Inficolor = 0.5;
 		static const float Inficolor_Max_Depth = 1.0;
