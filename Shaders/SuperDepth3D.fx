@@ -1,7 +1,7 @@
 	////----------------//
 	///**SuperDepth3D**///
 	//----------------////
-	#define SD3D "SuperDepth3D v4.9.6\n"
+	#define SD3D "SuperDepth3D v4.9.7\n"
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//* Depth Map Based 3D post-process shader
 	//* For Reshade 3.0+
@@ -1419,7 +1419,19 @@ uniform int SuperDepth3D <
 				ui_category = "Stereoscopic Options";
 			> = false;	
 			#endif
-		#endif		
+		#endif
+		#if Virtual_Reality_Mode || Anaglyph_Mode || Inficolor_3D_Emulator || Reconstruction_Mode || EX_DLP_FS_Mode		
+			static const bool Frame_Packed = false;
+			#else
+			uniform bool Frame_Packed <
+				ui_label = " Frame Packed 3D";
+				ui_tooltip = "Frame Packed 3D Only works when Top n Bottom format is used.\n"
+							 "You must set the frame packed format your self since it can't be done here.";
+		
+				ui_category = "Stereoscopic Options";
+			> = false;
+		#endif
+		
 		uniform bool Eye_Swap <
 			ui_label = " Swap Eyes";
 			ui_tooltip = "L/R to R/L."; // E/D ou D/E
@@ -4913,7 +4925,7 @@ uniform int Extra_Information <
 				AA_Value = lerp(AA_Value,1.0,Smooth_C);
 				  
 			//Adjustments and Switching for De-Artifacting.	  
-			float AA_Switch = De_Artifacting.x < 0 ? lerp(0.3 * AA_Value,AA_Value ,smoothstep(0.0,1.0,Foveated_Mask)): AA_Value;
+			float AA_Switch = De_Artifacting.x < 0 ? lerp(0.3 * AA_Value, AA_Value ,smoothstep(0.0,1.0,Foveated_Mask)): AA_Value;
 			float2 Artifacting_Adjust = float2(MS.x * lerp(0,0.125,clamp(AA_Switch * Scale_With_Depth,0,2)),1.0 - (MS.x * lerp(0,0.25,clamp(AA_Value * Scale_With_Depth,0,2))));
 			// Perform the conditional check outside the loop
 			bool AA_Toggle = true;
@@ -4930,13 +4942,14 @@ uniform int Extra_Information <
 			//ParallaxSteps Calculations
 			float MinNum = 25, MaxNum = MaxMix, D = abs(Diverge), Cal_Steps = D * Perf,
 				  Steps  = clamp( Cal_Steps, MinNum, MaxNum );//Foveated Rendering Point of attack 16-256 limit samples.
-
-			float N = 0.5,F = 1.0, Z = tex2Dlod(SamplerzBuffer_BlurN, float4( Coordinates  * float2(0.5,1) + float2(0.5,0), 0, 1 ) ).x;
+			//Compatibility Power
+			float N = 0.5,F = 1.0, Z = tex2Dlod(SamplerzBuffer_BlurN, float4( Coordinates  * float2(0.5,1) + float2(0.5,0), 0, 2 ) ).x;
 		    float ZS = smoothstep(0.5,1.0,( Z - N ) / ( F - N));
-			float Auto_Compatibility_Power = abs(Compatibility_Power) ? Compatibility_Power : lerp(-0.25,0.0, ZS );
+			float Auto_Compatibility_Power = abs(Compatibility_Power) ? Compatibility_Power : lerp(-0.25,0.0, ZS ); 
+			  	Auto_Compatibility_Power = Compatibility_Power >= 0 ? Auto_Compatibility_Power : Auto_Compatibility_Power * Foveated_Mask ;
 	
-			float LayerDepth = rcp(Steps),  TP = lerp(0.025, 0.05,Auto_Compatibility_Power) * ( Compatibility_Power >= 0 ? 1 : Foveated_Mask );
-			float D_Range = lerp(75,25,GetDepth), US_Offset = Diverge < 0 ? -D_Range : D_Range;
+			float LayerDepth = rcp(Steps),  TP = lerp(0.015, 0.03,Auto_Compatibility_Power);		 
+			float D_Range = 37.5, US_Offset = Diverge < 0 ? -D_Range : D_Range;
 		
 			//Offsets listed here Max Seperation is 3% - 8% of screen space with Depth Offsets & Netto layer offset change based on MS.
 			float deltaCoordinates = MS.x * LayerDepth, CurrentDepthMapValue = min(1,GetMixed( ParallaxCoord,0).x), CurrentLayerDepth = -Re_Scale_WN().x,
@@ -5419,8 +5432,25 @@ uniform int Extra_Information <
 						}
 						else if(Stereoscopic_Mode == 1 && !REST_UI_Mode )
 						{
-							TCL.y = TCL.y*2;
-							TCR.y = TCR.y*2-1;
+						
+							if ( Frame_Packed )
+							{
+							    float pixY = 1.0 / Res.y;
+							
+							    // Linear approximation of gap size in pixels didn't need to do this but what ever do what I want. 
+							    float gapPixels = 0.0204082 * Res.y;
+							
+							    float Value_Shift_A = 2.0 + (gapPixels * pixY);
+							    float Value_Shift_B = 1.0 + (gapPixels * pixY);
+							
+							    TCL.y = TCL.y * Value_Shift_A;
+							    TCR.y = TCR.y * Value_Shift_A - Value_Shift_B;
+							}
+							else
+							{    
+								TCL.y = TCL.y*2;
+								TCR.y = TCR.y*2-1;
+							}
 						}
 						else if(Stereoscopic_Mode == 5)
 						{
