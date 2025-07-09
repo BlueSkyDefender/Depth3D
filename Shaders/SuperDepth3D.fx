@@ -4949,7 +4949,7 @@ uniform int Extra_Information <
 			float Auto_Compatibility_Power = abs(Compatibility_Power) ? Compatibility_Power : lerp(-0.25,0.0, ZS ); 
 			  	Auto_Compatibility_Power = Compatibility_Power >= 0 ? Auto_Compatibility_Power : Auto_Compatibility_Power * Foveated_Mask ;
 	
-			float LayerDepth = rcp(Steps),  TP = lerp(0.015, 0.03,Auto_Compatibility_Power);		 
+			float LayerDepth = rcp(Steps),  TP = lerp(0.015, 0.0375,Auto_Compatibility_Power);		 
 			float D_Range = 37.5, US_Offset = Diverge < 0 ? -D_Range : D_Range;
 		
 			//Offsets listed here Max Seperation is 3% - 8% of screen space with Depth Offsets & Netto layer offset change based on MS.
