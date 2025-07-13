@@ -1,7 +1,7 @@
 	////----------------//
 	///**SuperDepth3D**///
 	//----------------////
-	#define SD3D "SuperDepth3D v4.9.8\n"
+	#define SD3D "SuperDepth3D v4.9.9\n"
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//* Depth Map Based 3D post-process shader
 	//* For Reshade 3.0+
@@ -226,6 +226,9 @@ namespace SuperDepth3D
 
 	//Lower Height Adjustment
 	#define Lower_Height_Adjust LHA //To override or activate this set it to 0 or 1 This only works if Overwatch tells the shader to do it or not.
+	
+	// More powerfull Disocclusion
+	#define Disocclusion_Plus 1 //WIP
 	
 	//USER EDITABLE PREPROCESSOR FUNCTIONS END//
 	#if !defined(__RESHADE__) || __RESHADE__ < 40000
@@ -2133,7 +2136,7 @@ uniform int Extra_Information <
 			MinFilter = POINT;
 			MipFilter = POINT;
 		};
-	#if !Alternate_View_Mode
+
 	#if !DX9_Toggle
 	//UpSample Pass
 	texture texzBufferN_U { Width = BUFFER_WIDTH ; Height = BUFFER_HEIGHT ; Format = R16F; }; //Do not use mips in this buffer
@@ -2146,7 +2149,7 @@ uniform int Extra_Information <
 			MipFilter = POINT;
 		};
 	#endif	
-	#endif
+
 	#if UI_MASK
 	texture TexMaskA < source = "DM_Mask_A.png"; > { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; Format = RGBA8; };
 	sampler SamplerMaskA { Texture = TexMaskA;};
@@ -4774,29 +4777,57 @@ uniform int Extra_Information <
 	    return s[4];
 	}
 	
-	#if !Alternate_View_Mode	
+	float Disocclusion(sampler Tex, float2 texcoord, float DPix )
+	{	
+		float Disocclusion_Adjust = 0.5f, Depth = tex2D(Tex,texcoord).x;
+	    float DM, Adj, MS = Min_Divergence().x * DPix, N = 9, Div = rcp(N), weight[9] = { 0.0f, 0.0125f, -0.0125f, 0.025f, -0.025f, 0.0375f, -0.0375f, 0.05f, -0.05f };
+		
+	    Adj += 5.5f; // Normal
+	    float2 dir = float2(0.5f, 0.0f);
+	    MS *= Disocclusion_Adjust * 4;
+			
+	    if (Disocclusion_Adjust > 0)
+	    {
+			[loop]
+	        for (int i = 0; i < N; i++)
+	        {
+	            DM += tex2Dlod(Tex,float4(float2(texcoord + dir * (weight[i] * MS) * Adj),0,0)).x * Div;
+	            continue;
+	        }
+
+	    }
+	    else
+	    {
+	        DM = Depth;
+	    }
+	    
+	    return min(DM,Depth);
+	}		
+	
+	
 	void Up_Z(in float4 position : SV_Position, in float2 texcoord : TEXCOORD, out float UpOut : SV_Target0)
 	{
-
+		
 		float2 Depth_Size = rcp_Depth_Size();	
-		float Median = Median3x3(SamplerzBufferN_Mixed, texcoord, Depth_Size);
-		//float Mixed = tex2Dlod(SamplerzBufferN_Mixed,float4(shift_coords_A,0,0)).x;// + tex2Dlod(SamplerzBufferN_Mixed,float4(shift_coords_B,0,0)).x;
+		#if Disocclusion_Plus
+		float occlusion = Disocclusion(SamplerzBufferN_Mixed, texcoord, Depth_Size.x);
 
-		UpOut = Median;//min(Median, Mixed);	  					    	
+		UpOut = occlusion;		
+		#else
+		float Median = Median3x3(SamplerzBufferN_Mixed, texcoord, Depth_Size);
+
+		UpOut = Median;	  					    	
+		#endif
 	}
-	#endif	
+	
 	#endif
 	float2 GetMixed(float2 texcoord, float mips) //Sensitive Buffer.
 	{
 		#if !DX9_Toggle
-			#if !Alternate_View_Mode
 			float BufferA = tex2Dlod(SamplerzBufferN_Up,float4(texcoord,0,mips)).x, 
 				  BufferB = tex2Dlod(SamplerzBufferN_Mixed,float4(texcoord,0,mips)).x;
 			//Careful not to shift here because we run out of memory in DX9
-			return float2(BufferA,BufferB);//Do not use mips on this buffer
-			#else
-			return tex2Dlod(SamplerzBufferN_Mixed,float4(texcoord,0,mips)).x;
-			#endif	
+			return float2(BufferA,BufferB);//Do not use mips on this buffer	
 		#else
 		return tex2Dlod(SamplerzBufferN_Mixed,float4(texcoord,0,mips)).x;
 		#endif
@@ -4811,35 +4842,34 @@ uniform int Extra_Information <
 	float BlendDepth(float2 TC, float MS, float DepthLR, float LRDepth, int nSteps)
 	{
 	    const float SEP_START = 0.0f, SEP_END = 1.0f;
-	    
-	    float weight = 1 ,sumW = 0, mixDepth = 0, calMidDepth = 0;
+	    const float baseWeight   = 1.0; 
+	    const float blurStrength = 1.0;   
+	
+	    float mixDepth   = 0.0;
+	    float sumW       = 0.0;
+	    float calMidDepth = 0.0;        
 	    
 	    [loop]
-	    for(int j = 0; j < nSteps; j++)
+	    for (int j = 0; j < nSteps; ++j)
 	    {
-	        float separation = GET_SEPARATION(j, SEP_START, SEP_END, nSteps);
-	        
+	        float separation  = GET_SEPARATION(j, SEP_START, SEP_END, nSteps);
 	        float depthSample = GetMixed(float2(TC.x + separation * MS, TC.y), 0).x;
-	        
-	        if(j == 0)
-	        {
-	            depthSample = min(DepthLR, depthSample);
-	            calMidDepth = depthSample * weight * 0.5;
-	        }
-	        
+	
+	
+	        float weight = baseWeight + blurStrength * j;
+	
+	        if (j == 0)
+	            calMidDepth = depthSample * weight;
+	
 	        mixDepth += depthSample * weight;
-	        sumW += weight;
+	        sumW     += weight;
 	    }
-	    
-	    mixDepth /= sumW;
-	    
-	    float dlr = saturate(abs(mixDepth - LRDepth) * 12.5);
-	    float minDepth = min(mixDepth, calMidDepth);
-	    mixDepth = lerp(mixDepth, minDepth, minDepth);
-	    float sDLR = dlr >= 1 ? 0.5 : 0;
-	    dlr = lerp(dlr, sDLR, mixDepth);
-	    
-	    return lerp(LRDepth, mixDepth, dlr);
+	
+	    mixDepth /= sumW;         // normies the weighted sum
+	
+    	float  dlr      = saturate(abs(mixDepth - LRDepth) * 1.5);
+        return lerp(LRDepth,mixDepth,dlr);
+  
 	}
 	
 	//Perf Level selection & Array access               X    Y      Z      W              X    Y      Z      W
@@ -4968,7 +4998,7 @@ uniform int Extra_Information <
 			    ParallaxCoord.x -= deltaCoordinates; 
 			    // Get depth value at current coordinates
 			    float2 De_Art_Coords = De_Art(ParallaxCoord, Artifacting_Adjust );
-			    float G_Depth = GetMixed(ParallaxCoord,0).x , C_Depth = GetMixed( De_Art_Coords,0).y;
+			    float G_Depth = GetMixed(ParallaxCoord,0).x , C_Depth = GetMixed( De_Art_Coords,0).y ;
 				float diff = abs(G_Depth - C_Depth);
 			
 			    // Sensitivity threshold
@@ -4992,7 +5022,7 @@ uniform int Extra_Information <
 			    ParallaxCoord.x -= deltaCoordinates; 
 			    // Get depth value at current coordinates
 			    float2 De_Art_Coords = De_Art(ParallaxCoord, Artifacting_Adjust );
-			    float G_Depth = GetMixed(ParallaxCoord,0).x , C_Depth = GetMixed( De_Art_Coords,0).y;
+			    float G_Depth = GetMixed(ParallaxCoord,0).x , C_Depth = GetMixed( De_Art_Coords,0).y ;
 				float diff = abs(G_Depth - C_Depth);
 			
 			    // Sensitivity threshold
@@ -6795,14 +6825,12 @@ uniform int Extra_Information <
 			RenderTarget0 = texzBufferN_M;
 		}
 		#if !DX9_Toggle
-			#if !Alternate_View_Mode
 				pass DepthUpscaling
 			{
 				VertexShader = PostProcessVS;
 				PixelShader = Up_Z;
 				RenderTarget0 = texzBufferN_U;
 			}
-			#endif
 		#endif
 		#if Reconstruction_Mode || Virtual_Reality_Mode || Anaglyph_Mode
 			pass Muti_Mode_Reconstruction
