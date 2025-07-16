@@ -41758,8 +41758,8 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
     //#define DFW 1 
 #elif (App == 0x64317982 || App == 0x1332A12F )	//Baldur's Gate 3
 
-	#define G_Info "Baldur's Gate 3 | AppID 0x1332A12F STEAM \n" \
-				   "                | AppID 0x64317982 ????? \n" 
+	#define G_Info "Baldur's Gate 3 | AppID 0x1332A12F STEAM VK \n" \
+				   "                | AppID 0x64317982 STEAM DX11\n" 
     #define G_Note "Note: Generic Depth Add-on Settings.\n" \
     			   "[x] Copy depth buffer before clear operations.\n" \
     			   "[x] Copy depth buffer during frame to prevent artifacts.\n" \
