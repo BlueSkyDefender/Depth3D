@@ -34618,7 +34618,13 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 #elif (App == 0xDCFDCBA7 || App == 0x64AF115E ) //Assassin's Creed Shadows
 	#define G_Info "Assassin's Creed Shadows: AppID 0x64AF115E\n" \
 	               "Assassin's Creed Shadows+: AppID 0xDCFDCBA7\n"
-    #define G_Note "Note: Make sure you use the Add-ons & also set Upscaler Quality to Custom 75% to Native.\n"
+    #define G_Note "Note: Make sure you use the Add-ons & also set Upscaler Quality to Custom 75% to Native.\n" \
+    "Add-ons: Settings.\n" \
+    "[ D32S8 V] Filter by Depth Buffer format\n" \
+    "[ Multiples of resolution (fo V] Aspect ratio heuristics\n" \
+    "[x]Disable restrictions that allow seclection of zero buffers.\n" \
+	"[x]Copy depth buffer befor clear operattions\n" \
+    "Also disable DoF/Motion Blur/Chromatic Aberration/Dynamic Resolution.\n" 
     //#define DS_Z 2                                 // Set View Mode
 	#define DA_W 1                                 // Set Linerzation
     //#define DB_X 1                                 // Flip
@@ -34660,7 +34666,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
     #define DL_Y 0.5                              // De-Artifact Only works on some View Modes and causes performance degredation
     //#define DL_Z 0.5                            // Compat Power
 	//#define DJ_X 0.25                             // Range Smoothing
-    #define THF 3                                  // Target High Frequency information Like Hair
+    #define THF 1                                  // Target High Frequency information Like Hair
     
     //Letter Box Correction Offsets With X & Y
     //#define LBC 1     //Letter Box Correction
@@ -34693,7 +34699,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 
     //Smooth Mode
     //#define SMS 1                                  //SM Separation Limit  - Do Not use any more
-	#define DL_X 0.75                                //SM Tune Limit
+	#define DL_X 0.625                                //SM Tune Limit
 	//#define DL_W 0.5                               //SM Perspective Limit - Do Not use any more
 	#define DM_X 6                                   //SM HQ Tune Power       - Will be made global
 	#define DAA_W 2                                  //Warp/Halo Masking Type 
