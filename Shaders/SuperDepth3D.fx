@@ -1,7 +1,7 @@
 	////----------------//
 	///**SuperDepth3D**///
 	//----------------////
-	#define SD3D "SuperDepth3D v4.9.9\n"
+	#define SD3D "SuperDepth3D v5.0.0\n"
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//* Depth Map Based 3D post-process shader
 	//* For Reshade 3.0+
@@ -3626,7 +3626,7 @@ uniform int Extra_Information <
 	{
 		//Create Mask for Weapon Hand Consideration for ZPD boundary condition.
 		float2 Shape_TC = StoredTC;
-		float Shape_Out, Shape_One, Shape_Two, Shape_Three, Shape_Four, SO_Switch = 0.75, ST_Switch = 0.45, FO_Switch = 0.8125, STT_Switch = 0.35, SF_Switch = 0.550, STTT_Switch = 0.45;
+		float Shape_Out, Shape_One, Shape_Two, Shape_Three, Shape_Four, SO_Switch = 0.75, ST_Switch = 0.45, FO_Switch = 0.8125, STT_Switch = 0.35, SF_Switch = 0.550, STTT_Switch = 0.45, SFB_Switch = 0.90, SFC_Switch = 0.3;
 		
 		if(CWH >= 3 && CWH <= 4)
 		{
@@ -3670,6 +3670,19 @@ uniform int Extra_Information <
 			ST_Switch = 0.2;
 		}
 
+		if(CWH == 11)
+		{
+			STT_Switch = 1.0;
+			SO_Switch = 0.0;
+			
+			SF_Switch = 0.6;
+			SFB_Switch = 1.0;
+			SFC_Switch = 0.375;
+			
+			ST_Switch = 0.4;
+			STTT_Switch = 0.375;	
+		}
+
 		// Conditions for Shape_One
 		bool Shape_One_C1 = (Shape_TC.x / Shape_TC.y * SO_Switch) > 1;
 		bool Shape_One_C2 = (((1 - Shape_TC.x) / Shape_TC.y) * FO_Switch ) > 1;
@@ -3684,7 +3697,7 @@ uniform int Extra_Information <
 		Shape_Three = saturate(Shape_Three_C1 > 1); 
 		
 		// Conditions for Shape_Four
-		float Shape_Four_C1 = Shape_TC.x < 0.3  && 1-Shape_TC.x < 0.9 && Shape_TC.y > SF_Switch;
+		float Shape_Four_C1 = Shape_TC.x < SFC_Switch  && 1-Shape_TC.x < SFB_Switch && Shape_TC.y > SF_Switch;
 		Shape_Four = 1-Shape_Four_C1; 
 		
 		// Calculate Shape_Out
@@ -3698,8 +3711,9 @@ uniform int Extra_Information <
 		if(CWH == 7 || CWH == 9 || CWH == 10)
 			Shape_Out = Shape_TC.x < 0.125 || Shape_TC.x > 0.875 || Shape_TC.y < 0.7 ? 1 : Shape_Out;
 		
+		
 		return Shape_Out;
-	}			
+	}				
 
 	float2 Shift_Mask(float2 texcoord)
 	{
@@ -5033,7 +5047,8 @@ uniform int Extra_Information <
 			    CurrentLayerDepth += LayerDepth;
 			}			
 		}
-		
+			
+			//Need to work on this to de-artifact
 			if( View_Mode <= 1 || View_Mode >= 5 )	
 		   	ParallaxCoord.x += DB_Offset * 0.125;
 	    
@@ -5058,7 +5073,7 @@ uniform int Extra_Information <
 			ParallaxCoord.x = PrevParallaxCoord.x * weight + ParallaxCoord.x * (1 - Weight);
 			//This is to limit artifacts.
 			if(View_Mode >= 2 && View_Mode <= 4)
-				ParallaxCoord.x += DB_Offset * 4.0;
+				ParallaxCoord.x += DB_Offset * 4.0;//lerp(4.0, 8.0,Mask);
 			else	
 				ParallaxCoord.x += lerp(DB_Offset * 2.0, DB_Offset * 4.0, DD_Spread.y );// Also boost in some areas using DD_Map
 
