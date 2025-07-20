@@ -41592,7 +41592,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DA_W 1                                 // Set Linerzation
     //#define DB_X 1                                 // Flip
 	#define DA_X 0.025                              // ZPD
-	//#define DHH_W 0.25                              // Smart Convergence 
+	#define DHH_W 0.125                              // Smart Convergence 
 	//#define DF_Y 0.010                           // Seperation
 	#define DA_Y 79.0                             // Near Plane Adjustment
     //#define DA_Z 0.0005                          // Linerzation Offset

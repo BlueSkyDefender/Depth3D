@@ -815,7 +815,7 @@ uniform int SuperDepth3D <
 					 "Default is 50.0%.";
 		ui_category = "Occlusion Masking";
 	> = 0.5;
-	
+	/* //Slated for removal 
 		uniform float Range_Blend <
 		ui_type = "slider";
 		ui_min = 0; ui_max = 1;
@@ -824,7 +824,8 @@ uniform int SuperDepth3D <
 					 "With this active, it should help with trees and other foliage that needs to be reconstructed by Temporal Methods.\n"
 					 "Default is Zero, Off.";
 		ui_category = "Occlusion Masking";
-	> = DJ_X;		
+	> = DJ_X;
+	*/ 		
 	#if !Use_2D_Plus_Depth
 	uniform int Performance_Level <
 		ui_type = "combo";
@@ -4524,10 +4525,10 @@ uniform int Extra_Information <
 		float2 Base_Depth_Buffers = float2(Base_Depth_Buffer,tex2Dlod(SamplerzBufferN_P, float4( texcoord, 0, 0) ).x);
 		float2 Store_Base_Depth_Buffers = Base_Depth_Buffers;
 
-		float GetDepth = smoothstep(0,1, tex2Dlod(SamplerzBufferN_P, float4(texcoord,0, 1) ).y), Sat_Range = saturate(Range_Blend);
+		float GetDepth = smoothstep(0,1, tex2Dlod(SamplerzBufferN_P, float4(texcoord,0, 1) ).y);
 		
-		float Base_Depth_SubSampled = tex2Dlod(SamplerzBufferN_L, float4( texcoord, 0, lerp(0.0,4.0,Base_Depth_Buffers.x)) ).x;
-		float Base_Depth = lerp(Base_Depth_Buffers.x,Base_Depth_SubSampled,LR_Depth_Mask.x*Sat_Range);
+		//float Base_Depth_SubSampled = tex2Dlod(SamplerzBufferN_L, float4( texcoord, 0, lerp(0.0,4.0,Base_Depth_Buffers.x)) ).x;
+		float Base_Depth = Base_Depth_Buffers.x;////lerp(Base_Depth_Buffers.x,Base_Depth_SubSampled,LR_Depth_Mask.x*Sat_Range);
 		
 		uint VMW_Switch = View_Mode_Warping;
 		#if LBM || LetterBox_Masking
@@ -4892,7 +4893,7 @@ uniform int Extra_Information <
 	static const float2 Performance_LvL0[2] = { float2( 0.5  , 0.679), float2( 1.0, 1.425) };
 	static const float2 Performance_LvL1[2] = { float2( 0.375, 0.479), float2( 0.5, 0.679) };
 	static const float  VRS_Array[5] = { 0.5, 0.5, 0.25, 0.125 , 0.0625 };
-	static const float  HFI_Array[4] = { 0, 5, 6, 7};
+	static const float  HFI_Array[4] = { 0, 4, 5, 6};
 	//////////////////////////////////////////////////////////Parallax Generation///////////////////////////////////////////////////////////////////////
 	float3 Parallax(float Diverge, float2 Coordinates, float IO) // Horizontal parallax offset & Hole filling effect
 	{
@@ -5050,11 +5051,13 @@ uniform int Extra_Information <
 			
 			//Need to work on this to de-artifact
 			if( View_Mode <= 1 || View_Mode >= 5 )	
-		   	ParallaxCoord.x += DB_Offset * 0.125;
+		   	ParallaxCoord.x += DB_Offset * lerp(0.125 , 0.25, Mask);
+		    else
+		   	ParallaxCoord.x += DB_Offset * lerp(0.0 , 0.5, Mask);
 	    
 			float2 PrevParallaxCoord = float2( ParallaxCoord.x + deltaCoordinates, ParallaxCoord.y);
-			//Anti-Weapon Hand Fighting                                         // Set to 6.0 if it I want it Stronger.
-			float Weapon_Mask = WeaponMask(Coordinates,0), ZFighting_Mask = 1.0-(1.0-WeaponMask(Coordinates,5.5) - Weapon_Mask); //tex2Dlod(SamplerDMN,float4(Coordinates,0,0)).y, ZFighting_Mask = 1.0-(1.0-tex2Dlod(SamplerDMN,float4(Coordinates ,0,5.5)).y - Weapon_Mask);
+			//Anti-Weapon Hand Fighting
+			float Weapon_Mask = WeaponMask(Coordinates,0), ZFighting_Mask = 1.0-(1.0-WeaponMask(Coordinates,6.0) - Weapon_Mask); //tex2Dlod(SamplerDMN,float4(Coordinates,0,0)).y, ZFighting_Mask = 1.0-(1.0-tex2Dlod(SamplerDMN,float4(Coordinates ,0,5.5)).y - Weapon_Mask);
 				  ZFighting_Mask = ZFighting_Mask * (1.0-Weapon_Mask);
 			float2 PCoord = float2(View_Mode <= 1 || View_Mode >= 5 ? PrevParallaxCoord.x : ParallaxCoord.x, PrevParallaxCoord.y ) ;	
 				   //PCoord.x -= 0.005 * MS;		   
@@ -5073,7 +5076,7 @@ uniform int Extra_Information <
 			ParallaxCoord.x = PrevParallaxCoord.x * weight + ParallaxCoord.x * (1 - Weight);
 			//This is to limit artifacts.
 			if(View_Mode >= 2 && View_Mode <= 4)
-				ParallaxCoord.x += DB_Offset * 4.0;//lerp(4.0, 8.0,Mask);
+				ParallaxCoord.x += DB_Offset * 4.0;
 			else	
 				ParallaxCoord.x += lerp(DB_Offset * 2.0, DB_Offset * 4.0, DD_Spread.y );// Also boost in some areas using DD_Map
 
