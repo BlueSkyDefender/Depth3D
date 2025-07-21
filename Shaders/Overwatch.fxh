@@ -39358,19 +39358,20 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
     //#define DFW 1 
 #elif (App == 0x147C5D2A )	//Steelrising
    	#define G_Info "Steelrising | AppID 0x147C5D2A Steam \n"
-	/*
-    #define G_Note "Note: Issue is with Hair, try these settings to help with that.\n" \
-       			"Remastred: with TAA ON.\n" \
-       			"Remastred: with FXAA On with DoF On.\n" \
-       			"Lowest / Optimal: with any setting.\n" 
-   */  
+	
+    #define G_Note "Note: Don't go to low on upscaling Try to stay as close to Native as you can.\n" \
+       			"Basic 75 to 100.\n" \
+       			"DLSS Qulity or better.\n" \
+       			"FSR Quality or better.\n" \
+       			"But, to be honest Use Native and lower your screen res instead.\n"
+    
     //#define DS_Z 4                               // Set View Mode
 	#define DA_W 1                                 // Set Linerzation
     //#define DB_X 1                                 // Flip
-	#define DA_X 0.0625                             // ZPD
+	#define DA_X 0.04375                             // ZPD
 	//#define DHH_W 0.5                           // Smart Convergence 
 	//#define DF_Y 0.010                           // Seperation
-	#define DA_Y 25.0                               // Near Plane Adjustment
+	#define DA_Y 50.0                               // Near Plane Adjustment
     //#define DA_Z -0.012                          // Linerzation Offset
     #define DS_Y 2                                 // Linerzation Offset Effects only distance if true
 	#define DB_Z 0.025                             // Auto Depth Protection
@@ -39399,12 +39400,12 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	
 	//#define EDU 1                                 // Elevate Detectors Up effects ZPD
 	//#define TMD 1	
-    //#define ASA 0                                 // Auto Depth Scaling
+    #define ASA 0                                 // Auto Depth Scaling
 	//#define PLS 3   	                          // Performance Level Selection
 
-	#define DF_Z 0.25                               // Set the Balance  
+	#define DF_Z 0.375                               // Set the Balance  
     //#define DAO 1                                 // Turn On or Off De-Artifact Options For now DAO if set to 1 it's also applys to Hoz 
-    #define DL_Y 0.4375                               // De-Artifact Only works on some View Modes and causes performance degredation
+    #define DL_Y 0.5                               // De-Artifact Only works on some View Modes and causes performance degredation
     //#define DL_Z -0.125                             // Compat Power
 	//#define DJ_X 0.25                            // Range Smoothing
     //#define THF 3                                 // Target High Frequency information Like Hair
@@ -39456,9 +39457,9 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 
     //Smooth Mode
     //#define SMS 1                                  //SM Separation Limit  - Do Not use any more
-	#define DL_X 0.65                               //SM Tune Limit
+	#define DL_X 0.64                               //SM Tune Limit
 	//#define DL_W 0.5                               //SM Perspective Limit - Do Not use any more
-	#define DM_X 6                                   //SM HQ Tune Power       - Will be made global
+	#define DM_X 4                                   //SM HQ Tune Power       - Will be made global
 	//#define DAA_W 2                                //Warp/Halo Masking Type 
     //#define HNR 1                                  //Halo Near Reduction For anyting near the player
     //#define DM_Y 1                                 //SM HQ VRS Limit
@@ -39496,8 +39497,6 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DE_Z 0.375
 
 */
-
-
 	///*
     #define MDD 1 //Set Menu Detection & Direction      //Off 0 | 1 | 2 | 3 | 4      
     #define DN_X float4( 0.0850, 0.8781, 0.342 , 0.470)//Pos A = XY Any & B = ZW Lock 
@@ -39507,25 +39506,55 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
     #define DJ_Y float4( 27.0, 2.0, 27.0, 1000.0);     //Menu Detection Type for A = X, B = Y, & C = Z. The Last Value is a Wild Card amount W is for X and Z. 
     #define DJ_Z float4( 1000., 1000., 1000., 0.0 );           //Set Match Tresh 
 	//*/
-
+	/*
     #define MMD 4 //Set Multi Menu Detection             //Off / On
     #define MMS 0 //Set Multi Menu Selection from 0-1 to 29-30 and Off 0 | 1 | 2
     #define DO_X float4( 0.0475, 0.500 , 0.485 , 0.961 ) //Pos A1 = XY Color & A2 = ZW Black 
     #define DO_Y float4( 0.0420, 0.600 , 0.0475, 0.500 ) //Pos A3 = XY Color & B1 = ZW Color
     #define DO_Z float4( 0.470 , 0.961 , 0.0420, 0.600 ) //Pos B2 = XY Black & B3 = ZW Color
 	#define DO_W float4( 25.0, 21.0, 25.0, 21.0) //Tresh Hold for Color A & B and Color
+	
     #define DP_X float4( 0.499 , 0.5035, 0.500 , 0.025 ) //Pos C1 = XY Color & C2 = ZW Black 
     #define DP_Y float4( 0.500 , 0.4050, 0.0475, 0.499 ) //Pos C3 = XY Color & D1 = ZW Color
     #define DP_Z float4( 0.507 , 0.961 , 0.0475, 0.440 ) //Pos D2 = XY Black & D3 = ZW Color
 	#define DP_W float4( 30.0, 30.0, 25.0, 22.0) //Tresh Hold for Color C & D and Color
+	
 	#define DQ_X float4( 0.500 , 0.531 , 0.500 , 0.030 ) //Pos C1 = XY Color & C2 = ZW Black 
     #define DQ_Y float4( 0.500 , 0.595 , 0.500 , 0.026 ) //Pos C3 = XY Color & D1 = ZW Color
     #define DQ_Z float4( 0.489 , 0.961 , 0.450 , 0.026 ) //Pos D2 = XY Black & D3 = ZW Color
 	#define DQ_W float4( 30.0, 30.0, 28.0, 25.0) //Tresh Hold for Color A1 & A3 and Color
+	
 	#define DR_X float4( 0.500 , 0.026 , 0.550 , 0.961 ) //Pos G1 = XY Color & G2 = ZW Black 
     #define DR_Y float4( 0.450 , 0.026 , 0.500 , 0.026 ) //Pos G3 = XY Color & H1 = ZW Color
     #define DR_Z float4( 0.747 , 0.980 , 0.450 , 0.026 ) //Pos H2 = XY Black & H3 = ZW Color
 	#define DR_W float4( 28.0, 25.0, 28.0, 25.0) //Tresh Hold for Color G & H and Color 
+	*/
+	//Simple Menu Detection
+    #define SMD 5 //Off 0 | 1 | 2 | 3 | 4 | 5 | 6 
+    #define DW_X float4( 0.042 , 0.495 , 0.4325 , 0.9605)    //Pos A = XY Any & B = ZW Lock 
+    #define DW_Y float2( 0.339 , 0.500 )                   //Pos C = XY 
+    #define DW_Z float4( 25.0, 1.0, 25.0, 1000.0)   //Menu Detection Type for A = X, B = Y, & C = Z. The Last Value is a Wild Card amount W is for X and Z. 
+    
+    #define DT_X float4( 0.042 , 0.490 , 0.475 , 0.960)    //Pos A = XY Any & B = ZW Lock 
+    #define DT_Y float2( 0.042 , 0.513 )                   //Pos C = XY 
+    #define DW_W float4( 25.0, 1.0, 24.0, 1000.0)   //Menu Detection Type for A = X, B = Y, & C = Z. The Last Value is a Wild Card amount W is for X and Z. 
+
+    #define DAA_X float4( 0.042 , 0.490 , 0.475 , 0.960)    //Pos A = XY Any & B = ZW Lock 
+    #define DAA_Y float2( 0.339 , 0.500 )                   //Pos C = XY 
+    #define DAA_Z float4( 25.0, 1.0, 25.0, 1000.0)   //Menu Detection Type for A = X, B = Y, & C = Z. The Last Value is a Wild Card amount W is for X and Z. 
+
+    #define DBB_X float4( 0.042 , 0.490 , 0.477 , 0.960)    //Pos A = XY Any & B = ZW Lock 
+    #define DBB_Y float2( 0.042 , 0.513 )                   //Pos C = XY 
+    #define DBB_Z float4( 25.0, 1.0, 24.0, 1000.0)   //Menu Detection Type for A = X, B = Y, & C = Z. The Last Value is a Wild Card amount W is for X and Z. 
+
+    #define DHH_X float4( 0.2125 , 0.500 , 0.470 , 0.960)    //Pos A = XY Any & B = ZW Lock 
+    #define DHH_Y float2( 0.2125 , 0.745 )                   //Pos C = XY 
+    #define DHH_Z float4( 25.0, 1.0, 30.0, 1000.0)   //Menu Detection Type for A = X, B = Y, & C = Z. The Last Value is a Wild Card amount W is for X and Z. 
+
+    #define DII_X float4( 0.500 , 0.500 , 0.500 , 0.500)    //Pos A = XY Any & B = ZW Lock 
+    #define DII_Y float2( 0.500 , 0.500 )                   //Pos C = XY 
+    #define DII_Z float4( 1000.0, 1000.0, 1000.0, 1000.0)   //Menu Detection Type for A = X, B = Y, & C = Z. The Last Value is a Wild Card amount W is for X and Z. 
+
 #elif (App == 0xD87951C4 ) //Horizon Zero Dawn
 
 	#define G_Info "Horizon Zero Dawn | AppID 0xD87951C4 Steam \n"

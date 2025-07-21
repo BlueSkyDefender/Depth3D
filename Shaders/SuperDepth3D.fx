@@ -227,9 +227,6 @@ namespace SuperDepth3D
 	//Lower Height Adjustment
 	#define Lower_Height_Adjust LHA //To override or activate this set it to 0 or 1 This only works if Overwatch tells the shader to do it or not.
 	
-	// More powerfull Disocclusion
-	#define Disocclusion_Plus 1 //WIP
-	
 	//USER EDITABLE PREPROCESSOR FUNCTIONS END//
 	#if !defined(__RESHADE__) || __RESHADE__ < 40000
 		#define Compatibility 1
@@ -4762,6 +4759,21 @@ uniform int Extra_Information <
 	}
 	
 	#if !DX9_Toggle
+	float Min3x3(sampler2D Tex, float2 TC, float2 Depth_Size)
+	{
+	    static const float2 offsets[9] = { float2(-1, -1), float2( 0, -1), float2( 1, -1),
+									       float2(-1,  0), float2( 0,  0), float2( 1,  0),
+									       float2(-1,  1), float2( 0,  1), float2( 1,  1) };
+	    float minVal = 1e10;
+	    [unroll]
+	    for (int i = 0; i < 9; i++)
+	    {
+	        float val = tex2Dlod(Tex, float4(TC + offsets[i] * Depth_Size, 0, 0)).x;
+	        minVal = min(minVal, val);
+	    }
+	    return minVal;
+	}
+	/* //Failed attempts 
 	void swap(inout float a, inout float b)
 	{
 	    float t = a;
@@ -4792,10 +4804,42 @@ uniform int Extra_Information <
 	    return s[4];
 	}
 	
-	float Disocclusion(sampler Tex, float2 texcoord, float DPix )
+	float Max3x3(sampler2D Tex, float2 TC, float2 Depth_Size)
+	{
+	    static const float2 offsets[9] = { float2(-1, -1), float2( 0, -1), float2( 1, -1),
+									       float2(-1,  0), float2( 0,  0), float2( 1,  0),
+									       float2(-1,  1), float2( 0,  1), float2( 1,  1) };
+	    float maxVal = -1e10;
+	    [unroll]
+	    for (int i = 0; i < 9; i++)
+	    {
+	        float val = tex2Dlod(Tex, float4(TC + offsets[i] * Depth_Size, 0, 0)).x;
+	        maxVal = max(maxVal, val);
+	    }
+	    return maxVal;
+	}
+
+	float Midpoint3x3(sampler2D Tex, float2 TC, float2 Depth_Size)
+	{
+	    static const float2 offsets[9] = { float2(-1, -1), float2( 0, -1), float2( 1, -1),
+									       float2(-1,  0), float2( 0,  0), float2( 1,  0),
+									       float2(-1,  1), float2( 0,  1), float2( 1,  1) };
+	    float minVal = 1e10;
+	    float maxVal = -1e10;
+	    [unroll]
+	    for (int i = 0; i < 9; i++)
+	    {
+	        float val = tex2Dlod(Tex, float4(TC + offsets[i] * Depth_Size, 0, 0)).x;
+	        minVal = min(minVal, val);
+	        maxVal = max(maxVal, val);
+	    }
+	    return 0.5 * (minVal + maxVal);
+	}	
+	*/	
+	float Disocclusion(sampler Tex, float2 texcoord, float2 DPix ) //Non_Point_Sampler
 	{	
-		float Disocclusion_Adjust = 0.5f, Depth = tex2D(Tex,texcoord).x;
-	    float DM, Adj, MS = Min_Divergence().x * DPix, N = 9, Div = rcp(N), weight[9] = { 0.0f, 0.0125f, -0.0125f, 0.025f, -0.025f, 0.0375f, -0.0375f, 0.05f, -0.05f };
+		float Disocclusion_Adjust = 0.5f, Depth = Alternate_View_Mode ? tex2D(Tex,texcoord).x : Min3x3(Tex, texcoord, DPix);
+	    float DM, Adj, MS = Min_Divergence().x * DPix.x, N = 9, Div = rcp(N), weight[9] = { 0.0f, 0.0125f, -0.0125f, 0.025f, -0.025f, 0.0375f, -0.0375f, 0.05f, -0.05f };
 		
 	    Adj += 5.5f; // Normal
 	    float2 dir = float2(0.5f, 0.0f);
@@ -4818,21 +4862,14 @@ uniform int Extra_Information <
 	    
 	    return min(DM,Depth);
 	}		
-	
-	
+		
 	void Up_Z(in float4 position : SV_Position, in float2 texcoord : TEXCOORD, out float UpOut : SV_Target0)
 	{
 		
 		float2 Depth_Size = rcp_Depth_Size();	
-		#if Disocclusion_Plus
-		float occlusion = Disocclusion(SamplerzBufferN_Mixed, texcoord, Depth_Size.x);
+		float occlusion = Disocclusion(SamplerzBufferN_Mixed, texcoord, Depth_Size);
 
 		UpOut = occlusion;		
-		#else
-		float Median = Median3x3(SamplerzBufferN_Mixed, texcoord, Depth_Size);
-
-		UpOut = Median;	  					    	
-		#endif
 	}
 	
 	#endif
@@ -4948,7 +4985,7 @@ uniform int Extra_Information <
 				Perf = lerp( CB_Done ? 0.679f : 0.367f,0.367f, saturate((GetDepth * 0.5)/LR_Depth_Mask) );
 			if( View_Mode == 5)
 				Perf = lerp(0.375f,0.679f,GetDepth);				
-				
+
 			//Luma Based VRS
 			float Luma_Map = smoothstep(0.0,0.375, tex2Dlod(SamplerCN,float4(Coordinates,0,7)).x);
 			if( Performance_Level > 1 )
