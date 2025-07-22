@@ -41079,7 +41079,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DA_W 1                                 // Set Linerzation
     //#define DB_X 1                                 // Flip
 	#define DA_X 0.025                              // ZPD
-	#define DHH_W 0.25                              // Smart Convergence 
+	#define DHH_W 0.225                              // Smart Convergence 
 	//#define DF_Y 0.010                           // Seperation
 	#define DA_Y 82.5                              // Near Plane Adjustment
     //#define DA_Z 0.0005                          // Linerzation Offset
@@ -41167,9 +41167,9 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 
     //Smooth Mode
     //#define SMS 1                                  //SM Separation Limit  - Do Not use any more
-	#define DL_X 0.7                               //SM Tune Limit
+	#define DL_X 0.725                               //SM Tune Limit
 	//#define DL_W 0.5                               //SM Perspective Limit - Do Not use any more
-	#define DM_X 6                                   //SM HQ Tune Power       - Will be made global
+	#define DM_X 5                                   //SM HQ Tune Power       - Will be made global
 	//#define DAA_W 2                                //Warp/Halo Masking Type 
     //#define HNR 1                                  //Halo Near Reduction For anyting near the player
     //#define DM_Y 1                                 //SM HQ VRS Limit

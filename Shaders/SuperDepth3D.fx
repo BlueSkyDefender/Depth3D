@@ -4773,69 +4773,7 @@ uniform int Extra_Information <
 	    }
 	    return minVal;
 	}
-	/* //Failed attempts 
-	void swap(inout float a, inout float b)
-	{
-	    float t = a;
-	    a = min(t, b);
-	    b = max(t, b);
-	}
-
-	float Median3x3(sampler2D Tex, float2 TC, float2 Depth_Size)
-	{
-	    static const float2 offsets[9] = { float2(-1, -1), float2( 0, -1), float2( 1, -1),
-									       float2(-1,  0), float2( 0,  0), float2( 1,  0),
-									       float2(-1,  1), float2( 0,  1), float2( 1,  1) };
-	    float s[9];
-	    for (int i = 0; i < 9; ++i)
-	    {
-	        s[i] = tex2Dlod(Tex, float4(TC + offsets[i] * Depth_Size, 0, 0)).x;
-		}
-	    
-	    swap(s[1], s[2]); swap(s[4], s[5]); swap(s[7], s[8]);
-	    swap(s[0], s[1]); swap(s[3], s[4]); swap(s[6], s[7]);
-	    swap(s[1], s[2]); swap(s[4], s[5]); swap(s[7], s[8]);
-	    swap(s[0], s[3]); swap(s[5], s[8]); swap(s[4], s[7]);
-	    swap(s[3], s[6]); swap(s[1], s[4]); swap(s[2], s[5]);
-	    swap(s[4], s[7]); swap(s[4], s[2]); swap(s[6], s[4]);
-	    swap(s[4], s[2]);
-		
-		// Median
-	    return s[4];
-	}
 	
-	float Max3x3(sampler2D Tex, float2 TC, float2 Depth_Size)
-	{
-	    static const float2 offsets[9] = { float2(-1, -1), float2( 0, -1), float2( 1, -1),
-									       float2(-1,  0), float2( 0,  0), float2( 1,  0),
-									       float2(-1,  1), float2( 0,  1), float2( 1,  1) };
-	    float maxVal = -1e10;
-	    [unroll]
-	    for (int i = 0; i < 9; i++)
-	    {
-	        float val = tex2Dlod(Tex, float4(TC + offsets[i] * Depth_Size, 0, 0)).x;
-	        maxVal = max(maxVal, val);
-	    }
-	    return maxVal;
-	}
-
-	float Midpoint3x3(sampler2D Tex, float2 TC, float2 Depth_Size)
-	{
-	    static const float2 offsets[9] = { float2(-1, -1), float2( 0, -1), float2( 1, -1),
-									       float2(-1,  0), float2( 0,  0), float2( 1,  0),
-									       float2(-1,  1), float2( 0,  1), float2( 1,  1) };
-	    float minVal = 1e10;
-	    float maxVal = -1e10;
-	    [unroll]
-	    for (int i = 0; i < 9; i++)
-	    {
-	        float val = tex2Dlod(Tex, float4(TC + offsets[i] * Depth_Size, 0, 0)).x;
-	        minVal = min(minVal, val);
-	        maxVal = max(maxVal, val);
-	    }
-	    return 0.5 * (minVal + maxVal);
-	}	
-	*/	
 	float Disocclusion(sampler Tex, float2 texcoord, float2 DPix ) //Non_Point_Sampler
 	{	
 		float Disocclusion_Adjust = 0.5f, Depth = Alternate_View_Mode ? tex2D(Tex,texcoord).x : Min3x3(Tex, texcoord, DPix);
@@ -4937,7 +4875,7 @@ uniform int Extra_Information <
 	    float  MS = Diverge * pix.x; uint Perf_LvL = fmod(Performance_Level,2); 		
 		float2 ParallaxCoord = Coordinates, CBxy = floor( float2(Coordinates.x * BUFFER_WIDTH, Coordinates.y * BUFFER_HEIGHT));
 		float LR_Depth_Mask = saturate(tex2Dlod(SamplerzBuffer_BlurN, float4( Coordinates  * float2(0.5,1) + float2(0.5,0), 0, 3.0 ) ).x * 2.5);
-		float GetDepth = smoothstep(0,1, tex2Dlod(SamplerzBufferN_L, float4(Coordinates,0, 2.0) ).x), CB_Done = fmod(CBxy.x+CBxy.y,2),
+		float GetDepth = smoothstep(0,1, tex2Dlod(SamplerDMN, float4(Coordinates,0, 2.0) ).x), CB_Done = fmod(CBxy.x+CBxy.y,2),
 			  Perf = Performance_LvL0[Perf_LvL].x;
 
 		#if Alternate_View_Mode
@@ -6203,6 +6141,7 @@ uniform int Extra_Information <
 			    Color = Color;
 			    #endif
 				//Color.rgb = PS_calcLR(texcoord, position.xy).rgb;
+				//Color = tex2Dlod(SamplerDMN,float4(texcoord,0,0)).x;
 				return Color.rgba;
 			}
 		#endif
