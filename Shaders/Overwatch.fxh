@@ -1,7 +1,7 @@
 ////----------------------------------------//
 ///SuperDepth3D Overwatch Automation Header///
 //----------------------------------------////
-#define OVERWATCH "Overwatch v4.5.3\n"
+#define OVERWATCH "Overwatch v4.5.5\n"
 //---------------------------------------OVERWATCH---------------------------------------//
 // If you are reading this stop. Go away and never look back. From this point on if you  //
 // still think it's is worth looking at this..... Then no one can save you or your soul. //
@@ -20376,65 +20376,6 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define PEW 1
     #define DSW 1
     //#define NFM 1
-#elif (App == 0x2BAF6411 ) //Sons of the Forest
-	#define DA_W 1
-    #define DB_X 1
-	#define DA_X 0.05
-	#define DF_Y 0.0
-	#define DA_Y 50.0
-    #define DA_Z 0.000125          // Linerzation Offset
-    #define DS_Y 2                 // Linerzation Offset Effects only distance if true
-	#define DB_Z 0.025
- 
-	#define DE_X 1
-	#define DE_Y 0.750
-	#define DE_Z 0.425
-	//#define AFD 1
-	#define DG_W 0.500 //Neg PoP
-    #define OIL 1 //Set How many Levels We use for RE_Fix 0 | 1 | 2 | 3
-    #define OIF float2(0.550,0.3) //Fix enables if Value is > 0.0
-	#define DI_W float2(1.0,2.5)
-    #define CWH 1                  //ZPD Weapon Hand Consideration For Masking  0 is Off | 1 Is Full | 2 Half Right screen Mask And Not to be used with Weapon Profiles.
-    #define WBA 1.0                //ZPD Weapon Boundary Alt Adjust power for CWH 
-	#define WND 1.0              //Weapon Near Pushes depth in and adjust perspective to match.
-
-	//#define FTM 1
-    #define DG_Z 0.025 //Min
-    #define DE_W 0.250 //Auto
-    #define DI_Z 0.060 //Trim
-    #define DF_W float4(0.001,0.0075,0.0,0.05) //Edge & Scale
-	#define BMT 1
-	#define DF_Z 0.500
-
-    #define DL_Y 0.125   //De-Artifact
-    //#define DL_Z 0.500       //Compat Power
-	//#define WSM 2 //Weapon Settings Mode
-	//#define DB_W 11
-	//#define DF_X float2(0.075,0.0)
-	//#define DJ_W 0	
-	//#define HMT 1
-	//#define HMC 2.5
-    //#define HMD 0.350
-	//#define LBC 1  //Letter Box Correction Offsets With X & Y
-	//#define DH_Z 0.0
-	//#define DH_W -0.237
-	//#define FMM 1
-
-	//Smooth Mode
-    //#define SMS 3         //SM Separation Limit  - Do Not use any more
-	//#define DL_X 0.95   //SM Tune Limit
-	//#define DL_W 0.5      //SM Perspective Limit - Do Not use any more
-	#define DM_X 5        //SM HQ Tune Power       - Will be made global
-    //#define DM_Y 1        //SM HQ VRS Limit
-	//#define HQT 1         //SM HQ Trigger
-	//#define FMM 1         //Filter Mode          - Need to add this back in the new shader.
-	
-	
-	#define DAA 1
-	#define PEW 1
-    #define DSW 1
-    #define FOV 1
-    #define NCW 1
 #elif (App == 0x6A0D70F6 ) //Fossil Fuel 2	
     //#define DS_Z 2                 // Set View Mode
 	#define DA_W 1                 // Set Linerzation
@@ -39530,7 +39471,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DR_W float4( 28.0, 25.0, 28.0, 25.0) //Tresh Hold for Color G & H and Color 
 	*/
 	//Simple Menu Detection
-    #define SMD 5 //Off 0 | 1 | 2 | 3 | 4 | 5 | 6 
+    #define SMD 6 //Off 0 | 1 | 2 | 3 | 4 | 5 | 6 
     #define DW_X float4( 0.042 , 0.495 , 0.4325 , 0.9605)    //Pos A = XY Any & B = ZW Lock 
     #define DW_Y float2( 0.339 , 0.500 )                   //Pos C = XY 
     #define DW_Z float4( 25.0, 1.0, 25.0, 1000.0)   //Menu Detection Type for A = X, B = Y, & C = Z. The Last Value is a Wild Card amount W is for X and Z. 
@@ -39551,9 +39492,9 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
     #define DHH_Y float2( 0.2125 , 0.745 )                   //Pos C = XY 
     #define DHH_Z float4( 25.0, 1.0, 30.0, 1000.0)   //Menu Detection Type for A = X, B = Y, & C = Z. The Last Value is a Wild Card amount W is for X and Z. 
 
-    #define DII_X float4( 0.500 , 0.500 , 0.500 , 0.500)    //Pos A = XY Any & B = ZW Lock 
-    #define DII_Y float2( 0.500 , 0.500 )                   //Pos C = XY 
-    #define DII_Z float4( 1000.0, 1000.0, 1000.0, 1000.0)   //Menu Detection Type for A = X, B = Y, & C = Z. The Last Value is a Wild Card amount W is for X and Z. 
+    #define DII_X float4( 0.414 , 0.596 , 0.499 , 0.337)    //Pos A = XY Any & B = ZW Lock 
+    #define DII_Y float2( 0.586 , 0.596 )                   //Pos C = XY 
+    #define DII_Z float4( 30.0, 30.0, 30.0, 1000.0)   //Menu Detection Type for A = X, B = Y, & C = Z. The Last Value is a Wild Card amount W is for X and Z. 
 
 #elif (App == 0xD87951C4 ) //Horizon Zero Dawn
 
@@ -42128,6 +42069,85 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	//#define FOV 1
     //#define ARW 1
     //#define DFW 1 
+#elif (App == 0x2BAF6411 ) //Sons of the Forest
+	#define G_Info "Sons of the Forest | AppID 0x2BAF6411 Steam \n"
+	
+    #define G_Note "Note: If you use DYNAMIC RESOLUTION < FSR >.\n" \
+       			"Ex. FSR 3.0 - < Quality >.\n"\
+       			"In the sharder settings look for and set the Upscaler Type and Quality Level\n"\
+       			       			"\n"\
+       			"Scaling Corrections:\n"\
+       			"[FSR               V] Upscaling Algorithm\n"\
+       			"[DLSS/FSR] Quality V] Upsacling Quality\n"\
+       			       			"\n"\
+       			"If you use TAAU set DYNAMIC RESOLUTION Target to 20 and Prey\n"\
+       			"That you have enough overhead and set Upsacling Quality to Off.\n"\
+       			"[Off               V] Upsacling Quality\n"\
+       			       			"\n"\
+       			"Recommended Settings:\n"\
+       			"DYNAMIC RESOLUTION < Off >\n"\
+       			"ANTI ALIASING < Off/SMAA/FXAA/TAA >\n"\
+       			"Also disable ingame Post Processing.\n"
+    
+	#define DA_W 1
+    #define DB_X 1
+	#define DA_X 0.04375//0.0375//0.025//0.05
+	#define DF_Y 0.0
+	#define DA_Y 68.75//87.5//125.0//50.0
+    #define DA_Z 0.000125          // Linerzation Offset
+    #define DS_Y 2                 // Linerzation Offset Effects only distance if true
+	#define DB_Z 0.025
+ 
+	#define DE_X 1
+	#define DE_Y 0.750
+	#define DE_Z 0.425
+	//#define AFD 1
+	#define DG_W 0.375 //Neg PoP
+    #define OIL 1 //Set How many Levels We use for RE_Fix 0 | 1 | 2 | 3
+    #define OIF float2(0.550,0.3) //Fix enables if Value is > 0.0
+	#define DI_W float2(1.0,2.5)
+    #define CWH 1                  //ZPD Weapon Hand Consideration For Masking  0 is Off | 1 Is Full | 2 Half Right screen Mask And Not to be used with Weapon Profiles.
+    #define WBA 1.0                //ZPD Weapon Boundary Alt Adjust power for CWH 
+	#define WND 1.0              //Weapon Near Pushes depth in and adjust perspective to match.
+    #define ASA 0                                 // Auto Depth Scaling
+    
+	//#define FTM 1
+    #define DG_Z 0.025 //Min
+    #define DE_W 0.250 //Auto
+    #define DI_Z 0.060 //Trim
+    #define DF_W float4(0.001,0.0075,0.0,0.05) //Edge & Scale
+	#define BMT 1
+	#define DF_Z 0.500
+
+    #define DL_Y 0.5   //De-Artifact
+    //#define DL_Z 0.500       //Compat Power
+	//#define WSM 2 //Weapon Settings Mode
+	//#define DB_W 11
+	//#define DF_X float2(0.075,0.0)
+	//#define DJ_W 0	
+	//#define HMT 1
+	//#define HMC 2.5
+    //#define HMD 0.350
+	//#define LBC 1  //Letter Box Correction Offsets With X & Y
+	//#define DH_Z 0.0
+	//#define DH_W -0.237
+	//#define FMM 1
+
+	//Smooth Mode
+    //#define SMS 3         //SM Separation Limit  - Do Not use any more
+	//#define DL_X 0.95   //SM Tune Limit
+	//#define DL_W 0.5      //SM Perspective Limit - Do Not use any more
+	#define DM_X 5        //SM HQ Tune Power       - Will be made global
+    //#define DM_Y 1        //SM HQ VRS Limit
+	//#define HQT 1         //SM HQ Trigger
+	//#define FMM 1         //Filter Mode          - Need to add this back in the new shader.
+	
+	
+	#define DAA 1
+	#define PEW 1
+    #define DSW 1
+    #define FOV 1
+    //#define NCW 1
 #else
 	#define NPW 1 //No Profile
 	//#define G_Note "Note: Since no profile exists, you need to create one or ask for one.\n"

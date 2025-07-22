@@ -1,7 +1,7 @@
 	////----------------//
 	///**SuperDepth3D**///
 	//----------------////
-	#define SD3D "SuperDepth3D v5.0.0\n"
+	#define SD3D "SuperDepth3D v5.0.1\n"
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//* Depth Map Based 3D post-process shader
 	//* For Reshade 3.0+
@@ -72,7 +72,7 @@ namespace SuperDepth3D
 		static const float DK_X = 0, DK_Y = 0.0, DK_Z = 0, DK_W = 1;
 		// DL_X = [Not Used Here] DL_Y = [De-Artifact] DL_Z = [Compatibility Power] DL_W = [Not Used Here]
 		static const float DL_X = 0.5, DL_Y = 0, DL_Z = 0, DL_W = 0.05;		
-		// DM_X = [HQ Tune] DM_Y = [HQ VRS] DM_Z = [HQ Smooth] DM_W = [HQ Trim]
+		// DM_X = [HQ Tune] DM_Y = [HQ Depth] DM_Z = [HQ Smooth] DM_W = [HQ Trim]
 		static const float DM_X = 4, DM_Y = 1, DM_Z = 1, DM_W = 0.0;
 		// DN_X = [Position A & B] DN_Y = [Position C & D] DM_Z = [Position E & F] DN_W = [Menu Size Main]	
 		static const float DN_X = 0.0, DN_Y = 0.0, DN_Z = 0.0, DN_W = 0.0;
@@ -826,7 +826,7 @@ uniform int SuperDepth3D <
 	#if !Use_2D_Plus_Depth
 	uniform int Performance_Level <
 		ui_type = "combo";
-		ui_items = "Performant\0Normal\0Performant + VRS\0Normal + VRS\0";
+		ui_items = "Performant\0Normal\0Performant + Depth\0Normal + Depth\0";
 		ui_label = " Performance Level";
 		ui_tooltip = "Performance Levels Lowers or Raises Occlusion Quality Processing so that the performance is adjusted accordingly.\n"
 					 "Varable Rate Shading focuses the quality of the samples in lighter areas of the screen.\n"
@@ -1809,8 +1809,8 @@ uniform int Extra_Information <
 				"\n"
 				"Performance:\n"
 				"To lower the cost of the shader use the lower cost Performance Levels Like.\n"
-				"[Performance + VRS v ]\n"
-				"|Normal + VRS        |\n"
+				"[Performance + Depth v ]\n"
+				"|Normal + Depth        |\n"
 				"\n"
 				"Performance Ex:\n"
 				"Also please enable the 'Performance Mode' Checkbox, in ReShade's GUI.\n"
@@ -4928,8 +4928,8 @@ uniform int Extra_Information <
 	//static const float2 Performance_LvL[2] = { float4( 0.5, 0.5095, 0.679, 0.5 ), float4( 1.0, 1.019, 1.425, 1.0) };
 	//Perf Level selection & Array access                X      Y               X    Y  
 	static const float2 Performance_LvL0[2] = { float2( 0.5  , 0.679), float2( 1.0, 1.425) };
-	static const float2 Performance_LvL1[2] = { float2( 0.375, 0.479), float2( 0.5, 0.679) };
-	static const float  VRS_Array[5] = { 0.5, 0.5, 0.25, 0.125 , 0.0625 };
+	//static const float2 Performance_LvL1[2] = { float2( 0.375, 0.479), float2( 0.5, 0.679) };
+	//static const float  VRS_Array[5] = { 0.5, 0.5, 0.25, 0.125 , 0.0625 };
 	static const float  HFI_Array[4] = { 0, 4, 5, 6};
 	//////////////////////////////////////////////////////////Parallax Generation///////////////////////////////////////////////////////////////////////
 	float3 Parallax(float Diverge, float2 Coordinates, float IO) // Horizontal parallax offset & Hole filling effect
@@ -4938,7 +4938,7 @@ uniform int Extra_Information <
 		float2 ParallaxCoord = Coordinates, CBxy = floor( float2(Coordinates.x * BUFFER_WIDTH, Coordinates.y * BUFFER_HEIGHT));
 		float LR_Depth_Mask = saturate(tex2Dlod(SamplerzBuffer_BlurN, float4( Coordinates  * float2(0.5,1) + float2(0.5,0), 0, 3.0 ) ).x * 2.5);
 		float GetDepth = smoothstep(0,1, tex2Dlod(SamplerzBufferN_L, float4(Coordinates,0, 2.0) ).x), CB_Done = fmod(CBxy.x+CBxy.y,2),
-			  Perf = Performance_Level > 1 ? lerp(Performance_LvL1[Perf_LvL].x,Performance_LvL0[Perf_LvL].x,GetDepth) : Performance_LvL0[Perf_LvL].x;
+			  Perf = Performance_LvL0[Perf_LvL].x;
 
 		#if Alternate_View_Mode
 		float Max_Clamp = 2.5;
@@ -4980,16 +4980,16 @@ uniform int Extra_Information <
 		#else
 			//Would Use Switch....
 			if( View_Mode == 2)
-				Perf = Performance_Level > 1 ? lerp(Performance_LvL1[Perf_LvL].y,Performance_LvL0[Perf_LvL].y,GetDepth) : Performance_LvL0[Perf_LvL].y;
+				Perf = Performance_LvL0[Perf_LvL].y;
 			if( View_Mode == 4)
 				Perf = lerp( CB_Done ? 0.679f : 0.367f,0.367f, saturate((GetDepth * 0.5)/LR_Depth_Mask) );
 			if( View_Mode == 5)
 				Perf = lerp(0.375f,0.679f,GetDepth);				
-
 			//Luma Based VRS
-			float Luma_Map = smoothstep(0.0,0.375, tex2Dlod(SamplerCN,float4(Coordinates,0,7)).x);
+			//float Luma_Map = saturate( smoothstep(0.0,0.375, tex2Dlod(SamplerCN,float4(Coordinates,0,7)).x) );
 			if( Performance_Level > 1 )
-					Perf *= lerp(0.25,1.0,smoothstep(0.0,0.25,saturate( Luma_Map )));
+					Perf *= lerp(1.0,0.25, saturate(GetDepth));
+
 			//Foveated Calculations	
 			float Foveated_Mask = saturate(Vin_Pattern(Coordinates, float2(16.0,2.0))), MaxMix = lerp(100, 50, saturate(GetDepth * 2 - 1) );	
 			//if(Foveated_Mode)
