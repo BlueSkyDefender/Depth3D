@@ -1,7 +1,7 @@
 ////----------------------------------------//
 ///SuperDepth3D Overwatch Automation Header///
 //----------------------------------------////
-#define OVERWATCH "Overwatch v4.5.5\n"
+#define OVERWATCH "Overwatch v4.5.8\n"
 //---------------------------------------OVERWATCH---------------------------------------//
 // If you are reading this stop. Go away and never look back. From this point on if you  //
 // still think it's is worth looking at this..... Then no one can save you or your soul. //
@@ -327,6 +327,7 @@ static const float4 TMenu_Tresh_n_WC_D = 1000;          //Text Menu Tresh For A,
 static const float4 Text_Lift_Cutoff_XYDirection_D = 0; //Text Lift | Cutoff | Masking XY Postion Adjust| DZ_W
 static const float4 GDNP_Values_XYZW_D = 0;             //Game Depth Near Plane Values for XYZW         | DNN_W
 static const int Weapon_Mix_Mode_D = 0;                 //Off 0 | On 1 Weapon Mix Mode                  | WMM
+static const float4 Alpha_Stencil_UI_D = 0.0;           //X = ON/Off Y = A Static or B Depth Z = ? W = ? | DMM_W
 
 //Special Toggles 
 static const int Resident_Evil_Fix_D = 0;               //Resident Evil Fix [Getting Phased Out]        | REF //To be Removed after a few Gens
@@ -8967,55 +8968,6 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DL_X 0.950       //SM Tune
 	//#define DL_W 0.5       //SM Perspective
 	#define DM_X 2           //HQ Tune
-    //#define DM_Y 3           //HQ VRS
-#elif (App == 0xC4773871 ) //Octopath Traveler II
-    //#define DS_Z 0
-	#define DA_W 1
-    //#define DB_X 1
-	#define DA_X 0.100
-	#define DF_Y 0.010
-	#define DA_Y 250.0
-    #define DA_Z -0.000375
-	#define DB_Z 0.025
- 
-	#define DE_X 1
-	#define DE_Y 0.625
-	#define DE_Z 0.375
-	//#define AFD 1
-	//#define DG_W 0.1 //0.75 //Neg PoP
-    #define OIL 3 //Set How many Levels We use for RE_Fix 0 | 1 | 2 | 3
-    #define OIF float4( 0.4,0.375,0.25,0.2) //Fix enables if Value is > 0.0
-	#define DI_W float4(0.5,1.5,2.0,3.0)
-	//#define FTM 1
-    //#define DG_Z 0.03 //Min
-    //#define DE_W 0.250 //Auto
-    //#define DI_Z 0.05//Trim
-	#define BMT 1
-	#define DF_Z 0.100
-    //#define DL_Y -0.50   //De-Artifact
-    //#define DL_Z 0.750       //Compat Power
-
-	//#define WSM 4
-	//#define DB_W 8
-	//#define DF_X float2(0.1,0.0)
-	//#define DJ_W 0	
-	//#define HMT 1
-	//#define HMC 2.5
-    //#define HMD 0.350
-	//#define LBC 1  //Letter Box Correction Offsets With X & Y
-	//#define DH_Z 0.0
-	//#define DH_W -0.237
-	//#define FMM 1
-	//#define DAA 1
-	//#define PEW 1
-	//#define NFM 1
-	#define RHW 1
-	//Smooth Mode Setting
-    //#define SMS 3           //SM Toggle Separation
-	#define DL_X 0.950       //SM Tune
-	//#define DL_W 0.5       //SM Perspective
-	#define DM_X 2           //HQ Tune
-	#define DM_Z 0           //HQ Smooth
     //#define DM_Y 3           //HQ VRS
 #elif (App == 0x47F294E9 ) //Octopath Traveler ****
 	#define DA_Y 250.0
@@ -39732,6 +39684,19 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
     //#define ARW 1
     //#define DFW 1 
 #elif (App == 0xB4403655 ) //Elden Ring
+
+	#define G_Info "Elden Ring | AppID 0xB4403655 STEAM \n"
+	
+    #define G_Note "Note: To play online you need to use the Non Ado-on Version of ReShade.\n" \
+    			   "\n" \
+    			   "Game Settings: \n" \
+   				"Antialiasing Quality < Off > or < Low >\n" \
+				   "Motion Blur < Off > \n" \
+				   "\n" \
+				   "If you don't set the setting above it will cause distortions on your person.\n" \
+				   "Ray Tracing Quality can be set to any level.\n"
+
+
     //#define DS_Z 4            // Set View Mode
 	#define DA_W 1
     #define DA_X 0.060//0.025 //0.060//0.121
@@ -41604,6 +41569,8 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
     //#define THF 3                                 // Target High Frequency information Like Hair
 	// May turn this on all the time in InfiColor Mode
 	//#define DI_Y 0.25                                //Boost Mode Pop Level Adjuster 0 - 1
+
+	#define DMM_W float4(1,2,0,0) //UI Toggle ON/OFF | Type | Null | Null 
     
     //Letter Box Correction Offsets With X & Y
     //#define LBC 1                                   //Letter Box Correction
@@ -42148,6 +42115,65 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
     #define DSW 1
     #define FOV 1
     //#define NCW 1
+#elif (App == 0xC4773871 ) //Octopath Traveler II
+
+	#define G_Info "Octopath Traveler II | AppID 0xC4773871 STEAM \n"
+	
+
+    //#define DS_Z 0
+	#define DA_W 1
+    //#define DB_X 1
+	#define DA_X 0.05//0.087
+	#define DF_Y 0.005
+	#define DA_Y 450.0//250.0
+    //#define DA_Z -0.000375
+	#define DB_Z 0.045
+ 
+	#define DE_X 3                                 // ZPD Boundary 
+	#define DE_Y 0.75                              // Set ZPD Boundary Level Zero 
+	#define DE_Z 0.375                             // Speed that Boundary is Enforced
+	//#define AFD 1                                // Alternate Frame Detection - May be phased out
+	//#define DG_W 0.25                              // Shift Boundary Out of screen 0.5 and or In screen -0.5
+	//#define EGB 1                                  // Edge Guard weakens the edge detection like the orginal vision back when the feature was added
+    //#define DMM 1                                // Detect More Mode
+    #define OIL 4                                  // Set How many Levels
+    #define OIF float4(0.625,0.5,0.375,0.25)                  // Fix enables if Value is > 0.0
+	#define DI_W float4(0.5,1.5,3.0,6.0)
+	#define DKK_W float2(0.125,9.0)//XY
+	//#define FTM 1
+    //#define DG_Z 0.03 //Min
+    //#define DE_W 0.250 //Auto
+    //#define DI_Z 0.05//Trim
+	#define BMT 1
+	#define DF_Z 0.250
+    #define DL_Y -1.0   //De-Artifact
+    //#define DL_Z 0.750       //Compat Power
+    #define DMM 1                                // Detect More Mode
+	#define WND 1.0                                // Weapon Near Pushes depth in and adjust perspective to match.
+   
+	//#define WSM 4
+	//#define DB_W 8
+	//#define DF_X float2(0.1,0.0)
+	//#define DJ_W 0	
+	//#define HMT 1
+	//#define HMC 2.5
+    //#define HMD 0.350
+	//#define LBC 1  //Letter Box Correction Offsets With X & Y
+	//#define DH_Z 0.0
+	//#define DH_W -0.237
+	//#define FMM 1
+	//#define DAA 1
+	//#define PEW 1
+	//#define NFM 1
+	#define RHW 1
+	//Smooth Mode Setting
+    //#define SMS 3           //SM Toggle Separation
+	#define DL_X 0.950       //SM Tune
+	//#define DL_W 0.5       //SM Perspective
+	#define DM_X 5           //HQ Tune
+	#define DM_Z 0           //HQ Smooth
+    //#define DM_Y 3           //HQ VRS
+    #define PEW 1
 #else
 	#define NPW 1 //No Profile
 	//#define G_Note "Note: Since no profile exists, you need to create one or ask for one.\n"
@@ -42247,8 +42273,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
     //#define DK_Z 3 //World Reduction Power
     //#define DK_W 3 //Set Shift Speed
     //#define WZD 0  //Weapon Zoom Detection    
-      
-    
+    //#define DMM_W float4(0,0,0,0) //UI Toggle ON/OFF | Type | Null | Null 
 */ 
 
 //Menu Detection Templates - Needs a Specail Shader to adjust
@@ -43029,7 +43054,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DLL_W UI_F_Stencil_Adjust_D
 #endif
 
-// X = [Lock Position A & B] Y = [Lock Position C] Z = [Lock ABCW Menu Tresholds] W = [Isolating Weapon Stencil Amount]
+// X = [Lock Position A & B] Y = [Lock Position C] Z = [Lock ABCW Menu Tresholds] W = [Alpha Stencil UI]
 #ifndef DMM_X
     #define DMM_X Lock_Pos_XY_XY_A_B_1D
 #endif
@@ -43040,7 +43065,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
     #define DMM_Z Lock_Menu_Tresh_n_WC_1D
 #endif 
 #ifndef DMM_W
-	#define DMM_W E_Null_W
+	#define DMM_W Alpha_Stencil_UI_D
 #endif
 
 // X = [Horizontal Scale] Y = [Vertical Scale] Z = [Flip Scale] W = [Game Depth Near Plane Values]
@@ -43149,7 +43174,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
     #define SDU Shift_Detectors_Up_D           //Shift Detectors Up
 #endif
 #ifndef SDD
-    #define SDD Shift_Detectors_Down_D           //Shift Detectors Down
+    #define SDD Shift_Detectors_Down_D         //Shift Detectors Down
 #endif
 
 #ifndef DMM
