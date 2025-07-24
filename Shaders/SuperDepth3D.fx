@@ -1,7 +1,7 @@
 	////----------------//
 	///**SuperDepth3D**///
 	//----------------////
-	#define SD3D "SuperDepth3D v5.0.3\n"
+	#define SD3D "SuperDepth3D v5.0.4\n"
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//* Depth Map Based 3D post-process shader
 	//* For Reshade 3.0+
@@ -5037,7 +5037,7 @@ uniform int Extra_Information <
 				    float Final_Mask = AA_Switch * Mask;
 				
 				    // Optional: refine the depth step when Mask is active
-				    float stepScale = lerp(lerp(1.0,Perf_Level,G_Depth), Masked_Level, Mask);
+				    float stepScale = lerp(lerp(1.0,Perf_Level,saturate(G_Depth)), Masked_Level, Mask);
 				    float adjustedLayerDepth = LayerDepth * stepScale;
 				    float adjustedDeltaCoord = deltaCoordinates * stepScale;
 				
@@ -5069,7 +5069,7 @@ uniform int Extra_Information <
 				    Mask = saturate(diff > threshold);
 				
 				    // Scale step size when masked
-				    float stepScale = lerp(lerp(1.0,Perf_Level,G_Depth), Masked_Level, Mask);
+				    float stepScale = lerp(lerp(1.0,Perf_Level,saturate(G_Depth)), Masked_Level, Mask);
 				    float adjustedLayerDepth = LayerDepth * stepScale;
 				    float adjustedDeltaCoord = deltaCoordinates * stepScale;
 				
