@@ -1,7 +1,7 @@
 ////----------------------------------------//
 ///SuperDepth3D Overwatch Automation Header///
 //----------------------------------------////
-#define OVERWATCH "Overwatch v4.5.8\n"
+#define OVERWATCH "Overwatch v4.5.9\n"
 //---------------------------------------OVERWATCH---------------------------------------//
 // If you are reading this stop. Go away and never look back. From this point on if you  //
 // still think it's is worth looking at this..... Then no one can save you or your soul. //
@@ -35502,7 +35502,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
     #define DL_Y -0.750                              // De-Artifact Only works on some View Modes and causes performance degredation
     //#define DL_Z 0.5                            // Compat Power
 	//#define DJ_X 0.25                             // Range Smoothing
-    #define THF 3                                  // Target High Frequency information Like Hair
+    #define THF 2                                  // Target High Frequency information Like Hair
  
     #define MMD 1 //Set Multi Menu Detection             //Off / On
     #define MMS 0 //Set Multi Menu Selection from 0-1 to 29-30 and Off 0 | 1 | 2
@@ -35573,7 +35573,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
     //#define SMS 1                                  //SM Separation Limit  - Do Not use any more
 	#define DL_X 0.75                                //SM Tune Limit
 	//#define DL_W 0.5                               //SM Perspective Limit - Do Not use any more
-	#define DM_X 6                                   //SM HQ Tune Power       - Will be made global
+	#define DM_X 5                                   //SM HQ Tune Power       - Will be made global
 	//#define DAA_W 2                                  //Warp/Halo Masking Type 
     //#define HNR 1                                    //Halo Near Reduction For anyting near the player
     //#define DM_Y 1                                 //SM HQ VRS Limit
@@ -42055,13 +42055,13 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
        			"DYNAMIC RESOLUTION < Off >\n"\
        			"ANTI ALIASING < Off/SMAA/FXAA/TAA >\n"\
        			"Also disable ingame Post Processing.\n"
-    
+	#define DHH_W 0.100                            // Smart Convergence    
 	#define DA_W 1
     #define DB_X 1
 	#define DA_X 0.04375//0.0375//0.025//0.05
 	#define DF_Y 0.0
 	#define DA_Y 68.75//87.5//125.0//50.0
-    #define DA_Z 0.000125          // Linerzation Offset
+    //#define DA_Z 0.000125          // Linerzation Offset
     #define DS_Y 2                 // Linerzation Offset Effects only distance if true
 	#define DB_Z 0.025
  
@@ -42102,9 +42102,9 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 
 	//Smooth Mode
     //#define SMS 3         //SM Separation Limit  - Do Not use any more
-	//#define DL_X 0.95   //SM Tune Limit
+	#define DL_X 0.63   //SM Tune Limit
 	//#define DL_W 0.5      //SM Perspective Limit - Do Not use any more
-	#define DM_X 5        //SM HQ Tune Power       - Will be made global
+	#define DM_X 4        //SM HQ Tune Power       - Will be made global
     //#define DM_Y 1        //SM HQ VRS Limit
 	//#define HQT 1         //SM HQ Trigger
 	//#define FMM 1         //Filter Mode          - Need to add this back in the new shader.

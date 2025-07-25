@@ -1,7 +1,7 @@
 	////----------------//
 	///**SuperDepth3D**///
 	//----------------////
-	#define SD3D "SuperDepth3D v5.0.4\n"
+	#define SD3D "SuperDepth3D v5.0.5\n"
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//* Depth Map Based 3D post-process shader
 	//* For Reshade 3.0+
@@ -2131,15 +2131,14 @@ uniform int Extra_Information <
 	{
 		Texture = texzBufferBlurEx;
 	};
-	
+	#if !DX9_Toggle	
+	texture texzBufferN_M { Width = BUFFER_WIDTH ; Height = BUFFER_HEIGHT ; Format = R16F; MipLevels = 3;};
+	#else
 	texture texzBufferN_M { Width = BUFFER_WIDTH ; Height = BUFFER_HEIGHT ; Format = R16F; }; //Do not use mips in this buffer
-	
+	#endif	
 	sampler SamplerzBufferN_Mixed
 		{
 			Texture = texzBufferN_M;
-			MagFilter = POINT;
-			MinFilter = POINT;
-			MipFilter = POINT;
 		};
 
 	#if !DX9_Toggle
@@ -3998,17 +3997,22 @@ uniform int Extra_Information <
 		
 		Color.y = max(Color_UI_MAP.r, max(Color_UI_MAP.g, Color_UI_MAP.b));
 		#else
-		float2 TC_Off = texcoord;
-		float2 Offsets = pix;
-		float center = tex2D(BackBuffer_SD, TC_Off).w;
-		float right = tex2D(BackBuffer_SD, TC_Off + float2(Offsets.x, 0.0)).w;
-		float left = tex2D(BackBuffer_SD, TC_Off + float2(-Offsets.x, 0.0)).w;
-		float up = tex2D(BackBuffer_SD, TC_Off + float2(0.0, Offsets.y)).w;
-		float down = tex2D(BackBuffer_SD, TC_Off + float2(0.0, -Offsets.y)).w;
-		
-		float Color_UI_MAP = 4.0 * (center + right + left + up + down); //We mask it out later		
-		
-		Color.y = 1-Color_UI_MAP;
+		if(Alpha_Channel_UI)
+		{
+			float2 TC_Off = texcoord;
+			float2 Offsets = pix;
+			float center = tex2D(BackBuffer_SD, TC_Off).w;
+			float right = tex2D(BackBuffer_SD, TC_Off + float2(Offsets.x, 0.0)).w;
+			float left = tex2D(BackBuffer_SD, TC_Off + float2(-Offsets.x, 0.0)).w;
+			float up = tex2D(BackBuffer_SD, TC_Off + float2(0.0, Offsets.y)).w;
+			float down = tex2D(BackBuffer_SD, TC_Off + float2(0.0, -Offsets.y)).w;
+			
+			float Color_UI_MAP = 4.0 * (center + right + left + up + down); //We mask it out later		
+			
+			Color.y = 1-Color_UI_MAP;
+		}
+		else
+			Color.y = tex2D(BackBuffer_SD, texcoord).w;
 		#endif
 		
 		DM_Out = saturate(float2(R,G));
@@ -4765,6 +4769,11 @@ uniform int Extra_Information <
 		{	
 			float Avg_UI = tex2Dlod(SamplerAvrB_N,float4(float2(0.5,0.5),0,12)).x;
 			float2 UI_G_Scale = lerp(float2(0.5,0.375),float2(1.0,0.625),1-texcoord.y);
+			#if Inficolor_3D_Emulator
+			UI_G_Scale *= 2.0;
+			#else
+			UI_G_Scale *= 1.1875;
+			#endif
 			float IU_Auto = Alpha_Auto_UI ? UI_G_Scale.x : UI_G_Scale.y ;
 			
 			float Alpha_UI = tex2Dlod(SamplerCN,float4(texcoord,0,0)).y;
@@ -4773,36 +4782,34 @@ uniform int Extra_Information <
 		
 			float Game_Alpha_UI = smoothstep(Cal_UI_Dist,1, Alpha_UI );
 			float Game_Alpha_UI_M = smoothstep( Cal_UI_Dist, 1, tex2Dlod(SamplerCN,float4(texcoord,0,4)).y );
+			float OA_Power = saturate(abs(Divergence_Switch().y) * 0.02);
 			
 			if(1-Alpha_UI > 0.0 )
 			{
 				if(Alpha_Auto_UI == 1) 
 				{
 					float2 texelSize = float2(0.25, 0.0); // X-axis only
-					float mipLevel = 4.0;
+					float mipLevel = 5.0;
 					
 					float sampleLeft  = tex2Dlod(SamplerAvrB_N, float4(texcoord - texelSize, 0, mipLevel)).y;
 					float sampleRight = tex2Dlod(SamplerAvrB_N, float4(texcoord + texelSize, 0, mipLevel)).y;
 					float sampleCenter = tex2Dlod(SamplerAvrB_N, float4(texcoord, 0, mipLevel)).y; 
 					
 					MixOut = (sampleLeft + sampleCenter + sampleRight);
+					MixOut *= OA_Power;
 					MixOut *= min(Game_Alpha_UI,Game_Alpha_UI_M);
 				}
 				else if(Alpha_Auto_UI == 2) 
 				{
 					MixOut = tex2Dlod(SamplerAvrB_N,float4(texcoord,0,11)).y * 3;
+					MixOut *= OA_Power;
 					MixOut *= min(Game_Alpha_UI,Game_Alpha_UI_M);
 				}
 				else
-					MixOut = min(Game_Alpha_UI,Game_Alpha_UI_M);
+					MixOut = min(Game_Alpha_UI,Game_Alpha_UI_M) * OA_Power;
 			}
 		}
 		#endif
-	}
-	
-	float2 De_Art(float2 sp, float2 Shift)
-	{
-		return float2(sp.x - Shift.x,sp.y);
 	}
 	
 	#if !DX9_Toggle
@@ -4821,32 +4828,26 @@ uniform int Extra_Information <
 	    return minVal;
 	}
 	
-	float Disocclusion(sampler Tex, float2 texcoord, float2 DPix ) //Non_Point_Sampler
-	{	
-		float Disocclusion_Adjust = 0.5f, Depth = Alternate_View_Mode ? tex2D(Tex,texcoord).x : Min3x3(Tex, texcoord, DPix);
-	    float DM, Adj, MS = Min_Divergence().x * DPix.x, N = 9, Div = rcp(N), weight[9] = { 0.0f, 0.0125f, -0.0125f, 0.025f, -0.025f, 0.0375f, -0.0375f, 0.05f, -0.05f };
-		
-	    Adj += 5.5f; // Normal
-	    float2 dir = float2(0.5f, 0.0f);
-	    MS *= Disocclusion_Adjust * 4;
-			
-	    if (Disocclusion_Adjust > 0)
-	    {
-			[loop]
-	        for (int i = 0; i < N; i++)
-	        {
-	            DM += tex2Dlod(Tex,float4(float2(texcoord + dir * (weight[i] * MS) * Adj),0,0)).x * Div;
-	            continue;
-	        }
-
-	    }
-	    else
-	    {
-	        DM = Depth;
-	    }
+	float Disocclusion(sampler Tex, float2 texcoord, float2 DPix) // Non_Point_Sampler
+	{
+	    float Depth = Alternate_View_Mode ? tex2D(Tex,texcoord).x : Min3x3(Tex, texcoord, DPix), DM = 0.0f;
 	    
-	    return min(DM,Depth);
-	}		
+		const int N = 8;
+		const float2 dir = float2(0.5f, 0.0f);
+	    const float MS = abs(Divergence_Switch().y) * 0.0005, Disocclusion_Adjust = 5.5f, Div = rcp(N + 1);
+		const float weight[N] = { 0.0125f,-0.0125f, 0.0175f,-0.0175f, 0.03f, -0.03f, 0.05f,-0.05f };
+
+        DM = Depth * Div;
+
+        [loop]
+        for (int i = 0; i < N; i++)
+        {
+            float2 offset = dir * (weight[i] * MS) * Disocclusion_Adjust; // * 1.0 - 1.25
+            DM += tex2Dlod(Tex, float4(texcoord + offset, 0, 3)).x * Div;
+        }
+	
+	    return min(DM, Depth);
+	}	
 		
 	void Up_Z(in float4 position : SV_Position, in float2 texcoord : TEXCOORD, out float UpOut : SV_Target0)
 	{
@@ -4858,18 +4859,25 @@ uniform int Extra_Information <
 	}
 	
 	#endif
-	float2 GetMixed(float2 texcoord, float mips) //Sensitive Buffer.
+	float GetMixed(float2 texcoord, float Mips) //Sensitive Buffer.
 	{
 		#if !DX9_Toggle
-			float BufferA = tex2Dlod(SamplerzBufferN_Up,float4(texcoord,0,mips)).x, 
-				  BufferB = tex2Dlod(SamplerzBufferN_Mixed,float4(texcoord,0,mips)).x;
-			//Careful not to shift here because we run out of memory in DX9
-			return float2(BufferA,BufferB);//Do not use mips on this buffer	
+		float BufferA = tex2Dlod(SamplerzBufferN_Up,float4(texcoord,0,0)).x; 
+		//float BufferB = tex2Dlod(SamplerzBufferN_Mixed,float4(texcoord,0,Mips)).x;
+		//Careful not to shift here because we run out of memory in DX9
+		return BufferA;
 		#else
-		return tex2Dlod(SamplerzBufferN_Mixed,float4(texcoord,0,mips)).x;
+		return tex2Dlod(SamplerzBufferN_Mixed,float4(texcoord,0,0)).x;	
 		#endif
 	}
-	
+	// Combines both original and artifacting-corrected depths
+	float2 GetMixed_Combined(float2 baseCoord, float2 shift)
+	{
+		//shift used to be the De_Art Fuction
+	    float G_Depth = GetMixed(baseCoord, 0).x;
+	    float C_Depth = GetMixed(baseCoord - float2(shift.x, 0), 0).x;
+	    return float2(G_Depth, C_Depth);
+	}	
 	#if !Use_2D_Plus_Depth
 	
 	#define GET_SEPARATION(index, start, end, steps) \
@@ -4907,8 +4915,7 @@ uniform int Extra_Information <
     	float  dlr      = saturate(abs(mixDepth - LRDepth) * 1.5);
         return lerp(LRDepth,mixDepth,dlr);
   
-	}
-	
+	}	
 	//Perf Level selection & Array access                X      Y               X    Y  
 	static const float2 Performance_LvL[2] = { float2( 0.5, 0.75), float2( 1.0, 1.0) };
 	static const float  HFI_Array[4] = { 0, 4, 5, 6};
@@ -4919,7 +4926,7 @@ uniform int Extra_Information <
 		float2 ParallaxCoord = Coordinates, CBxy = floor( float2(Coordinates.x * BUFFER_WIDTH, Coordinates.y * BUFFER_HEIGHT));
 		float LR_Depth_Mask = saturate(tex2Dlod(SamplerzBuffer_BlurN, float4( Coordinates  * float2(0.5,1) + float2(0.5,0), 0, 3.0 ) ).x * 2.5);
 		float GetDepth = smoothstep(0,1, tex2Dlod(SamplerDMN, float4(Coordinates,0, 2.0) ).x), CB_Done = fmod(CBxy.x+CBxy.y,2),
-			  Perf = Performance_LvL[Perf_LvL].x, Perf_Level = 2.0, Masked_Level = 0.9;
+			  Perf = Performance_LvL[Perf_LvL].x, Perf_Level = 1.0, Masked_Level = 1.0;
 
 		#if Alternate_View_Mode
 		float Max_Clamp = 2.5;
@@ -4965,13 +4972,18 @@ uniform int Extra_Information <
 			if( View_Mode == 4)
 				Perf = lerp( CB_Done ? 0.75f : 0.500f, 0.625f, saturate((GetDepth * 0.5)/LR_Depth_Mask) );
 			if( View_Mode == 5)
-				Perf = lerp(0.50f,0.625f,GetDepth);					
+				Perf = lerp(0.50f,0.625f,GetDepth);	
+				
 			//Luma Based VRS
-			//float Luma_Map = saturate( smoothstep(0.0,0.375, tex2Dlod(SamplerCN,float4(Coordinates,0,7)).x) );
+			//float Luma_Map = lerp(1.0,3.0,saturate( smoothstep(0.0,0.375, tex2Dlod(SamplerCN,float4(Coordinates,0,1)).x) ));
+			
 			if( Performance_Level > 1 )
-				Perf_Level = 3.0;
+			{
+				Perf_Level = 2.0;
+				Masked_Level = 0.9;//Boost Near so we have less artifacts
+			}
 			//Foveated Calculations	
-			float Foveated_Mask = saturate( Vin_Pattern(Coordinates, float2(16.0,2.0))), MaxMix = lerp(100, 50, saturate(GetDepth * 2 - 1) );	
+			float Foveated_Mask = saturate( Vin_Pattern(Coordinates, float2(16.0,2.0)));	
 			//if(Foveated_Mode)
 			//	MaxMix = lerp(75, 25, saturate(Foveated_Mask * saturate(GetDepth * 2 - 1 ) ));
 	
@@ -5003,8 +5015,7 @@ uniform int Extra_Information <
 			    AA_Toggle = false;
 								
 			//ParallaxSteps Calculations
-			float MinNum = 25, MaxNum = MaxMix, D = abs(Diverge), Cal_Steps = D * Perf,
-				  Steps  = clamp( Cal_Steps, MinNum, MaxNum );//Foveated Rendering Point of attack 16-256 limit samples.
+			float D = abs(Diverge), Cal_Steps = D * Perf, Steps  = Cal_Steps;
 			//Compatibility Power
 			float N = 0.5,F = 1.0, Z = tex2Dlod(SamplerzBuffer_BlurN, float4( Coordinates  * float2(0.5,1) + float2(0.5,0), 0, 2 ) ).x;
 		    float ZS = smoothstep(0.5,1.0,( Z - N ) / ( F - N));
@@ -5018,7 +5029,7 @@ uniform int Extra_Information <
 			float deltaCoordinates = MS.x * LayerDepth, CurrentDepthMapValue = min(1,GetMixed( ParallaxCoord,0).x), CurrentLayerDepth = -Re_Scale_WN().x,
 				  DB_Offset = US_Offset * TP * pix.x;
 				  
-			    float Mask, threshold = 0.001; 	
+		    float Mask, threshold = 0.001; 	
 			if(AA_Toggle)
 			{
 				[loop] // Steep parallax mapping Ray Marcher
@@ -5027,10 +5038,11 @@ uniform int Extra_Information <
 				    if (CurrentDepthMapValue < CurrentLayerDepth)
 				        break;
 				
+				    // Combine both depth samples into one call
+				    float2 Depths = GetMixed_Combined(ParallaxCoord, Artifacting_Adjust);
 				    // Get depth values
-				    float2 De_Art_Coords = De_Art(ParallaxCoord, Artifacting_Adjust);
-				    float G_Depth = GetMixed(ParallaxCoord, 0).x, C_Depth = GetMixed(De_Art_Coords, 0).y;
-				    float diff = abs(G_Depth - C_Depth);
+				    float G_Depth = Depths.x, C_Depth = Depths.y;			    
+					float diff = abs(G_Depth - C_Depth);
 				    
 				    // Sensitivity threshold
 				    Mask = saturate(diff > threshold);
@@ -5059,11 +5071,12 @@ uniform int Extra_Information <
 				{   
 				    if (CurrentDepthMapValue < CurrentLayerDepth)
 				        break;
-				
+					    
+				    // Combine both depth samples into one call
+				    float2 Depths = GetMixed_Combined(ParallaxCoord, Artifacting_Adjust);
 				    // Get depth values
-				    float2 De_Art_Coords = De_Art(ParallaxCoord, Artifacting_Adjust);
-				    float G_Depth = GetMixed(ParallaxCoord, 0).x, C_Depth = GetMixed(De_Art_Coords, 0).y;
-				    float diff = abs(G_Depth - C_Depth);
+				    float G_Depth = Depths.x, C_Depth = Depths.y;			    
+					float diff = abs(G_Depth - C_Depth);
 				
 				    // Sensitivity threshold
 				    Mask = saturate(diff > threshold);
@@ -6114,7 +6127,7 @@ uniform int Extra_Information <
 						float Acc = 0.0, Blur_Blue = 0.0;
 						float S[7] = { -1.5, -1.0, -0.5, 0.0, 0.5, 1.0, 1.5 };
 						float W[7] = { 0.035, 0.100, 0.233, 0.264, 0.233, 0.100, 0.035 }; // Normalized Gaussian weights (σ ≈ 0.75)
-						float MS = Min_Divergence().x * pix.x;
+						float MS = abs(Divergence_Switch().y) * pix.x;
 		
 						if(Stereoscopic_Mode == Anaglyph_Selection(8))
 						{
@@ -6197,6 +6210,11 @@ uniform int Extra_Information <
 				//Color.rgb = PS_calcLR(texcoord, position.xy).rgb;
 				//Color = smoothstep(0.25,1,tex2Dlod(SamplerCN,float4(texcoord,0,0)).y * 0.5 + 0.5);
 				//Color = tex2Dlod(BackBuffer_SD,float4(texcoord,0,0)).w;
+				//float Disocclusion_Adjust = 0.5;
+				//Color = Divergence_Switch().y * 0.0005;
+				//Color = (Min_Divergence().y * 0.05);// * pix.x * Disocclusion_Adjust * 4;
+				//Color = Color.x > 0.05;
+				//Color = MS > TEST;
 				return Color.rgba;
 			}
 		#endif
