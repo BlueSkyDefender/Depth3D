@@ -1,7 +1,7 @@
 ////----------------------------------------//
 ///SuperDepth3D Overwatch Automation Header///
 //----------------------------------------////
-#define OVERWATCH "Overwatch v4.5.9\n"
+#define OVERWATCH "Overwatch v4.6.0\n"
 //---------------------------------------OVERWATCH---------------------------------------//
 // If you are reading this stop. Go away and never look back. From this point on if you  //
 // still think it's is worth looking at this..... Then no one can save you or your soul. //
@@ -39264,7 +39264,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DA_X 0.04375                             // ZPD
 	//#define DHH_W 0.5                           // Smart Convergence 
 	//#define DF_Y 0.010                           // Seperation
-	#define DA_Y 50.0                               // Near Plane Adjustment
+	#define DA_Y 52.5                               // Near Plane Adjustment
     //#define DA_Z -0.012                          // Linerzation Offset
     #define DS_Y 2                                 // Linerzation Offset Effects only distance if true
 	#define DB_Z 0.025                             // Auto Depth Protection
@@ -41413,7 +41413,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DA_Y 250.0                             // Near Plane Adjustment
     //#define DA_Z 0.0005                          // Linerzation Offset
     #define DS_Y 3                                 // Linerzation Offset Effects only distance if true
-	#define DB_Z 0.05                             // Auto Depth Protection
+	#define DB_Z 0.025                             // Auto Depth Protection
 	
 	#define DE_X 1                                 // ZPD Boundary 
 	#define DE_Y 0.75                              // Set ZPD Boundary Level Zero 
@@ -41424,7 +41424,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
     //#define DMM 1                                // Detect More Mode
     #define OIL 1                                  // Set How many Levels
     #define OIF float2(0.625,0.5)                  // Fix enables if Value is > 0.0
-	#define DI_W float2(0.5,1.0)
+	#define DI_W float2(0.50,1.0)
 	//#define DKK_W float2(0.125,3.0)//XY
 	
     #define CWH 1                               // ZPD Weapon Hand Consideration For Masking  0 is Off | 1 Is Full | 2 Half Right screen Mask And Not to be used with Weapon Profiles.
@@ -41450,7 +41450,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
     //#define THF 3                                 // Target High Frequency information Like Hair
 	// May turn this on all the time in InfiColor Mode
 	//#define DI_Y 0.25                                //Boost Mode Pop Level Adjuster 0 - 1
-    
+	#define DMM_W float4(1,1,0,-0.25) 			   //UI Toggle ON/OFF | UI Type 0-3 | Narrow or Wide ON/OFF | Distance From Edge -1 to 1;    
     //Letter Box Correction Offsets With X & Y
     //#define LBC 1                                   //Letter Box Correction
     //#define LBS 2                                 //Letter Box Sensitvity
@@ -41570,7 +41570,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	// May turn this on all the time in InfiColor Mode
 	//#define DI_Y 0.25                                //Boost Mode Pop Level Adjuster 0 - 1
 
-	#define DMM_W float4(1,2,0,0) //UI Toggle ON/OFF | Type | Null | Null 
+	#define DMM_W float4(1,3,0,0) //UI Toggle ON/OFF | Type | Null | Null 
     
     //Letter Box Correction Offsets With X & Y
     //#define LBC 1                                   //Letter Box Correction

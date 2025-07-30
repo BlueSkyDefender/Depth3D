@@ -1,7 +1,7 @@
 	////----------------//
 	///**SuperDepth3D**///
 	//----------------////
-	#define SD3D "SuperDepth3D v5.0.5\n"
+	#define SD3D "SuperDepth3D v5.0.7\n"
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//* Depth Map Based 3D post-process shader
 	//* For Reshade 3.0+
@@ -510,7 +510,7 @@ uniform int SuperDepth3D <
 		ui_category = "Game Selection";
 	> = 0;	
 	#endif
-	//uniform float TEST < ui_type = "slider"; ui_min = 0; ui_max = 1.0; > = 0.00;
+	//uniform float2 TEST < ui_type = "slider"; ui_min = 0; ui_max = 1.0; > = 0.00;
 	//Divergence & Convergence//
 	uniform float Depth_Adjustment < //This change was made to make it more simple for users
 		ui_type = "slider";
@@ -1765,26 +1765,41 @@ uniform int SuperDepth3D <
 	> = DT_Z;
 	#else
 	static const float UI_Seeking_Strength = DT_Z;
-	
+
 	uniform bool Alpha_Channel_UI <
-		ui_label = "UI From Alpha";	
+		ui_label = " Alpha UI";	
 		ui_tooltip = "Use this check and use the Alpha Channel for UI in Depth.\n"
 					 "Useful for that store UI elements in the Alpha Channel so we can use them.\n"
 					 "Default is Off.";
 		ui_category = "Miscellaneous Options";
 	> = DMM_W.x;
 	
-
 	uniform int Alpha_Auto_UI <
 		ui_label = " UI Mode";
 		ui_type = "combo";
-		ui_items = "Mostly Static UI\0Self-Adjusting UI (Local-Depth)\0Self-Adjusting UI (Avr-Depth)\0";
+		ui_items = "Mostly Static UI\0Self-Adjusting UI (Local-Depth)\0Self-Adjusting UI (Avr-Depth)\0Self-Adjusting UI (Guided-Depth)\0";
 		ui_tooltip = "Choose how to handle UI masking via the alpha channel:\n\n"
 		             "- Mostly Static UI: Best for games with UI that doesn't move or change frequently.\n"
 		             "- Self-Adjusting UI (Depth-Based): Dynamically adjusts based on depth, useful for games\n"
 		             "  where UI elements shift or overlap with 3D content.";
 		ui_category = "Miscellaneous Options";
-	> = DMM_W.y;	
+	> = DMM_W.y;
+
+	uniform float Alpha_UI_Has_LB <
+		ui_type = "slider";
+		ui_min = -1.0; ui_max = 1.0; ui_step = 0.01;
+		ui_label = " UI LetterBox";
+		ui_tooltip = "This gives the options to account for Letter Box.\n"
+					"Negitive values use blend and postitive values is a Hard Cutoff.\n"
+					"Default is 0.0, off.";
+		ui_category = "Miscellaneous Options";
+	> = DMM_W.w;
+	//This last option will be reworked.
+	uniform bool Alpha_UI_is_Narrow <
+		ui_label = " UI Narrow";
+		ui_tooltip = "Only use for when the letterbox is narrow.";
+		ui_category = "Miscellaneous Options";
+	> = DMM_W.z;		
 	#endif	
 /* //Slated for deletion and with a link to a Help Guide online	
 	//Extra Informaton
@@ -2125,7 +2140,7 @@ uniform int Extra_Information <
 			Texture = texzBufferBlurN;
 		};
 	//Can expand this to RG16F used to pass information to Avr Tex	
-	texture texzBufferBlurEx < pooled = true; > { Width = BUFFER_WIDTH / 4.0 ; Height = BUFFER_HEIGHT / 4.0; Format = R16F;  };
+	texture texzBufferBlurEx < pooled = true; > { Width = BUFFER_WIDTH / 4.0 ; Height = BUFFER_HEIGHT / 4.0; Format = RG16F;  };
 
 	sampler SamplerzBuffer_BlurEx
 	{
@@ -2159,7 +2174,7 @@ uniform int Extra_Information <
 
 	#define Scale_Buffer 160 / BUFFER_WIDTH
 	////////////////////////////////////////////////////////Adapted Luminance/////////////////////////////////////////////////////////////////////
-	texture texAvrN {Width = BUFFER_WIDTH * Scale_Buffer; Height = BUFFER_HEIGHT * Scale_Buffer; Format = RGBA16F; MipLevels = 8;}; //Mips Used
+	texture texAvrN {Width = BUFFER_WIDTH * Scale_Buffer; Height = BUFFER_HEIGHT * Scale_Buffer; Format = RGBA16F; MipLevels = 9;}; //Mips Used
 
 	sampler SamplerAvrB_N
 		{
@@ -4007,7 +4022,7 @@ uniform int Extra_Information <
 			float up = tex2D(BackBuffer_SD, TC_Off + float2(0.0, Offsets.y)).w;
 			float down = tex2D(BackBuffer_SD, TC_Off + float2(0.0, -Offsets.y)).w;
 			
-			float Color_UI_MAP = 4.0 * (center + right + left + up + down); //We mask it out later		
+			float Color_UI_MAP = (center + right + left + up + down) / 5; //We mask it out later		
 			
 			Color.y = 1-Color_UI_MAP;
 		}
@@ -4431,6 +4446,7 @@ uniform int Extra_Information <
 		float Invert_Depth_Mask =  1-smoothstep(0.0,0.5,PrepDepth( StoredTC * float2(2.0, 1) - float2(1.0,0.0)  )[1][1]);
 		float Text_Mask;
 		float Average_ZPD = PrepDepth( texcoord )[0][0];
+		float Average_UI = tex2Dlod(SamplerCN,float4(texcoord,0,12)).y;
 		#if TMD
 				#if DX9_Toggle
 				texcoord.x *= 2.0;
@@ -4466,7 +4482,7 @@ uniform int Extra_Information <
 		#else
 		Blur_Out = StoredTC < 0.5 ? Text_Mask : Invert_Depth_Mask;
 		#endif
-		Info_Ex = float2(Average_ZPD,0);
+		Info_Ex = float2(Average_ZPD,Average_UI);
 	}
 	
 	#if SUI
@@ -4689,6 +4705,34 @@ uniform int Extra_Information <
 		return int3(Check_Depth_Shift_A == 1, Check_Depth_Shift_B == 1, Check_Depth_Shift_C == 1 ) && If_Has_Depth;	    
 	}	
 	
+	float Detect_LetterBox_UI()
+	{
+		float2 Narrow_Wide_LB = Alpha_UI_is_Narrow ? float2(0.05,0.95) : float2(0.1,0.9) ;	
+		float2 Connect4[4] = { float2(0.01,Narrow_Wide_LB.x),
+                               float2(0.99,Narrow_Wide_LB.x),
+                               float2(0.01,Narrow_Wide_LB.y),
+                               float2(0.99,Narrow_Wide_LB.y) };							 
+
+		float Alpha_UI_0 = tex2Dlod(SamplerCN,float4(Connect4[0],0,0)).y < 1,
+			  Alpha_UI_1 = tex2Dlod(SamplerCN,float4(Connect4[1],0,0)).y < 1,
+			  Alpha_UI_2 = tex2Dlod(SamplerCN,float4(Connect4[2],0,0)).y < 1,
+			  Alpha_UI_3 = tex2Dlod(SamplerCN,float4(Connect4[3],0,0)).y < 1;
+	
+		return Alpha_UI_0 && Alpha_UI_1 && Alpha_UI_2 && Alpha_UI_3;	  
+	}
+	
+	float LetterBox_UI(float2 tc)
+	{
+		float Hard_or_Blend = abs(Alpha_UI_Has_LB);
+		float Clip_Alpha_UI = Hard_or_Blend * 0.5, CAUI_Scale_A = Hard_or_Blend * 4;
+		float Clip_UI_A = saturate((tc.y < 0.5 ? tc.y > Clip_Alpha_UI : 1-tc.y > Clip_Alpha_UI));
+		float Clip_UI_B = smoothstep(0.15 * CAUI_Scale_A,0.03 * CAUI_Scale_A, tc.y < 0.5 ? tc.y : 1-tc.y );
+		if(Detect_LetterBox_UI())
+			return saturate(Alpha_UI_Has_LB > 0 ? Clip_UI_A : Clip_UI_B);
+		else
+			return 1;
+	}
+		
 	void Mix_Z(in float4 position : SV_Position, in float2 texcoord : TEXCOORD, out float MixOut : SV_Target0)
 	{
 		#if BD_Correction || BDF
@@ -4766,48 +4810,111 @@ uniform int Extra_Information <
 		
 		#if !WHM 
 		if( Alpha_Channel_UI )
-		{	
-			float Avg_UI = tex2Dlod(SamplerAvrB_N,float4(float2(0.5,0.5),0,12)).x;
-			float2 UI_G_Scale = lerp(float2(0.5,0.375),float2(1.0,0.625),1-texcoord.y);
-			#if Inficolor_3D_Emulator
-			UI_G_Scale *= 2.0;
-			#else
-			UI_G_Scale *= 1.1875;
-			#endif
-			float IU_Auto = Alpha_Auto_UI ? UI_G_Scale.x : UI_G_Scale.y ;
+		{
+			float Store_MixOut = MixOut;
+			float Avg_UI = tex2Dlod(SamplerzBuffer_BlurEx,float4(float2(0.5,0.5),0,12)).y;
 			
+			float Game_Alpha_UI, Game_Alpha_UI_M, Adjust_UI = 0.0;	
 			float Alpha_UI = tex2Dlod(SamplerCN,float4(texcoord,0,0)).y;
-			float Min_UI = lerp(0.125,0.0,1-Avg_UI);
-			float Cal_UI_Dist = lerp(-Min_UI, -IU_Auto, Avg_UI);
-		
-			float Game_Alpha_UI = smoothstep(Cal_UI_Dist,1, Alpha_UI );
-			float Game_Alpha_UI_M = smoothstep( Cal_UI_Dist, 1, tex2Dlod(SamplerCN,float4(texcoord,0,4)).y );
-			float OA_Power = saturate(abs(Divergence_Switch().y) * 0.02);
+				
+			float OA_Power = saturate(abs(Divergence_Switch().y) * 0.01);
 			
+			float Alpha_Letter_Box = Alpha_UI_Has_LB == 0  ? 1 : LetterBox_UI(texcoord);	
+					
 			if(1-Alpha_UI > 0.0 )
 			{
-				if(Alpha_Auto_UI == 1) 
+				if(Alpha_Auto_UI == 1) //Local
 				{
-					float2 texelSize = float2(0.25, 0.0); // X-axis only
+					float mipCoarse = 2.0, mipFine = 2.5;
+
+					float CoarseCenter =  smoothstep(-1.0,2.0,tex2Dlod(SamplerAvrB_N,float4(texcoord,0,mipCoarse)).x);		
+					float FineCenter = tex2Dlod(SamplerAvrB_N, float4(texcoord, 0, mipFine)).x;							
+					
+					float BlendOut = lerp(-0.2,0.55,CoarseCenter);
+					BlendOut = lerp(BlendOut,1.0,FineCenter);
+					float Tuning_Value = 0.0;
+						  Tuning_Value -= Adjust_UI;
+ 
+					float Alpha_UI_Depth = 0.9;//0 - 1
+					Game_Alpha_UI = smoothstep(Alpha_UI_Depth,1, Alpha_UI );
+					Game_Alpha_UI_M = smoothstep( Alpha_UI_Depth, 1, tex2Dlod(SamplerCN,float4(texcoord,0,4)).y );
+		
+					float S_UI = 1-Alpha_UI > 0.0;
+					float AS_UI = lerp(0.0,lerp(S_UI,texcoord.y + 0.25,0.25),BlendOut + Tuning_Value) ;
+			
+					MixOut = min(Game_Alpha_UI,Game_Alpha_UI_M) + AS_UI;
+				}
+				else if(Alpha_Auto_UI == 2) //Avr // WIP
+				{
+					float2 coordSize = float2(0.25, 0.0); // X-axis only
 					float mipLevel = 5.0;
 					
-					float sampleLeft  = tex2Dlod(SamplerAvrB_N, float4(texcoord - texelSize, 0, mipLevel)).y;
-					float sampleRight = tex2Dlod(SamplerAvrB_N, float4(texcoord + texelSize, 0, mipLevel)).y;
-					float sampleCenter = tex2Dlod(SamplerAvrB_N, float4(texcoord, 0, mipLevel)).y; 
+					float2 tSizeFine = Res / exp2(mipLevel);
+					float2 texelSizeFine = rcp(tSizeFine);
+					float2 snappedUVFine = floor(texcoord * tSizeFine) * texelSizeFine;
+	
+					float DLeft  = tex2Dlod(SamplerAvrB_N, float4(snappedUVFine - coordSize, 0, mipLevel)).y;
+					float DCenter = tex2Dlod(SamplerAvrB_N, float4(snappedUVFine, 0, mipLevel)).y;		
+					float DRight = tex2Dlod(SamplerAvrB_N, float4(snappedUVFine + coordSize, 0, mipLevel)).y;
+		 				
+					float DMix = (DLeft + DCenter + DRight) / 3;						
 					
-					MixOut = (sampleLeft + sampleCenter + sampleRight);
-					MixOut *= OA_Power;
-					MixOut *= min(Game_Alpha_UI,Game_Alpha_UI_M);
+					float BlendOut = lerp(0.0,0.5,DMix);
+	
+					float Tuning_Value = lerp(-0.125,0.5,Avg_UI);
+						  Tuning_Value -= Adjust_UI;
+ 
+					float Alpha_UI_Depth = 0.75;//0 - 1
+					Game_Alpha_UI = smoothstep(Alpha_UI_Depth,1, Alpha_UI );
+					Game_Alpha_UI_M = smoothstep( Alpha_UI_Depth, 1, tex2Dlod(SamplerCN,float4(texcoord,0,4)).y );
+		
+					float S_UI = 1-Alpha_UI > 0.0;
+					float AS_UI = lerp(0.0,S_UI,BlendOut + Tuning_Value) ;
+			
+					MixOut = min(Game_Alpha_UI,Game_Alpha_UI_M) + AS_UI;
 				}
-				else if(Alpha_Auto_UI == 2) 
+				else if(Alpha_Auto_UI == 3) //Guided
 				{
-					MixOut = tex2Dlod(SamplerAvrB_N,float4(texcoord,0,11)).y * 3;
-					MixOut *= OA_Power;
-					MixOut *= min(Game_Alpha_UI,Game_Alpha_UI_M);
+					float2 coordSize = float2(0.25, 0.0); // X-axis only
+					float mipLevel = 5.0;
+					
+					float2 tSizeFine = Res / exp2(mipLevel);
+					float2 texelSizeFine = rcp(tSizeFine);
+					float2 snappedUVFine = floor(texcoord * tSizeFine) * texelSizeFine;
+	
+					float DLeft  = tex2Dlod(SamplerAvrB_N, float4(snappedUVFine - coordSize, 0, mipLevel)).y;
+					float DCenter = tex2Dlod(SamplerAvrB_N, float4(snappedUVFine, 0, mipLevel)).y;		
+					float DRight = tex2Dlod(SamplerAvrB_N, float4(snappedUVFine + coordSize, 0, mipLevel)).y;
+		 				
+					float DMix = min(DLeft , min(DCenter , DRight)) ;						
+					
+					float BlendOut = lerp(0.0,0.5,DMix);
+	
+					float Tuning_Value = lerp(-0.05,0.0,1-texcoord.y);
+						  Tuning_Value -= Adjust_UI;
+ 
+					float Alpha_UI_Depth = 0.9;//0 - 1
+					Game_Alpha_UI = smoothstep(Alpha_UI_Depth,1, Alpha_UI );
+					Game_Alpha_UI_M = smoothstep( Alpha_UI_Depth, 1, tex2Dlod(SamplerCN,float4(texcoord,0,4)).y );
+		
+					float S_UI = 1-Alpha_UI > 0.0;
+					float AS_UI = lerp(0.0,S_UI,BlendOut + Tuning_Value) ;
+			
+					MixOut = min(Game_Alpha_UI,Game_Alpha_UI_M) + AS_UI;
+				}				
+				else // Static
+				{
+					float Alpha_UI_Depth = 0.75;//0 - 1
+					Game_Alpha_UI = smoothstep(Alpha_UI_Depth, 1, Alpha_UI );
+					Game_Alpha_UI_M = smoothstep( Alpha_UI_Depth, 1, tex2Dlod(SamplerCN,float4(texcoord,0,4)).y );
+				    
+					MixOut = lerp(min(Game_Alpha_UI,Game_Alpha_UI_M), (1-texcoord.y) * 0.5 + 0.5,0.125) + Adjust_UI;
 				}
-				else
-					MixOut = min(Game_Alpha_UI,Game_Alpha_UI_M) * OA_Power;
+				
+				MixOut *= OA_Power;
+				MixOut = lerp(0.02,MixOut,saturate(Avg_UI.x * 10));
 			}
+			MixOut = lerp( Store_MixOut, MixOut, Alpha_Letter_Box);
 		}
 		#endif
 	}
@@ -5741,9 +5848,28 @@ uniform int Extra_Information <
 	}
 	#endif
 	///////////////////////////////////////////////////////Average & Information Textures///////////////////////////////////////////////////////////////
+	float Dilate3x3(sampler tex, float2 texcoords, float mipLevel)
+	{
+	    // Initialize with centar
+	    float m = tex2Dlod(tex, float4(texcoords, 0, mipLevel)).x;
+		[unroll]
+	    for (int j = -1; j <= 1; ++j)
+	    {
+	    	[unroll] 
+	        for (int i = -1; i <= 1; ++i)
+	        {
+	            float2 XY = float2(i, j) * Pix * 50.0;
+	            float v = tex2Dlod(tex, float4(texcoords + XY, 0, mipLevel)).x;
+	            m = min(m, v);
+	        }
+	    }
+	    return m;
+	}
+	
 	void Average_Info(float4 position : SV_Position, float2 texcoord : TEXCOORD, out  float4 Average : SV_Target0)
 	{   float Half_Buffer = texcoord.x < 0.5;
 		float Average_ZPD = tex2Dlod(SamplerzBuffer_BlurEx,float4(texcoord,0,0)).x;
+		float Average_D = Alpha_Channel_UI ? Dilate3x3(SamplerzBufferN_L,texcoord, 4.0) : 0;	
 		float Detect_Popout = tex2Dlod(SamplerzBufferN_L,float4(texcoord,0,1)).x < 0;
 	
 		const int Num_of_Values = 8; //8 total array values that map to the textures width.
@@ -5768,10 +5894,10 @@ uniform int Extra_Information <
 		float Grid = floor(texcoord.y * BUFFER_HEIGHT * BUFFER_RCP_HEIGHT * Num_of_Values);
 		#if WHM 
 		float UI_MAP = texcoord.x < 0.5 ? WeaponMask(texcoord * float2(2,1),7.5) : WeaponMask(texcoord * float2(2,1) - float2(1,0),7.0);
+			Average = float4(UI_MAP, Average_ZPD, Half_Buffer ? Storage_Array_A[int(fmod(Grid,Num_of_Values))] : Storage_Array_B[int(fmod(Grid,Num_of_Values))],Detect_Popout);
  	   #else
-		float UI_MAP = tex2Dlod(SamplerCN,float4(texcoord,0,12)).y;
-		#endif 	   
-		Average = float4(UI_MAP, Average_ZPD, Half_Buffer ? Storage_Array_A[int(fmod(Grid,Num_of_Values))] : Storage_Array_B[int(fmod(Grid,Num_of_Values))],Detect_Popout);
+			Average = float4(Average_D, Average_ZPD, Half_Buffer ? Storage_Array_A[int(fmod(Grid,Num_of_Values))] : Storage_Array_B[int(fmod(Grid,Num_of_Values))],Detect_Popout);
+		#endif 
 	}
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	float colorDiffBlend(float3 a, float3 b)
@@ -6215,6 +6341,10 @@ uniform int Extra_Information <
 				//Color = (Min_Divergence().y * 0.05);// * pix.x * Disocclusion_Adjust * 4;
 				//Color = Color.x > 0.05;
 				//Color = MS > TEST;
+				//float Alpha_UI = tex2Dlod(SamplerCN,float4(texcoord,0,0)).y;
+				//Color = 1-Alpha_UI > 0;
+				//Color = tex2D(BackBuffer_SD,texcoord).w;
+			
 				return Color.rgba;
 			}
 		#endif
