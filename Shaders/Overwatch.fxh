@@ -1,7 +1,7 @@
 ////----------------------------------------//
 ///SuperDepth3D Overwatch Automation Header///
 //----------------------------------------////
-#define OVERWATCH "Overwatch v4.6.0\n"
+#define OVERWATCH "Overwatch v4.6.1\n"
 //---------------------------------------OVERWATCH---------------------------------------//
 // If you are reading this stop. Go away and never look back. From this point on if you  //
 // still think it's is worth looking at this..... Then no one can save you or your soul. //
@@ -41422,9 +41422,9 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	//#define DG_W 0.25                              // Shift Boundary Out of screen 0.5 and or In screen -0.5
 	//#define EGB 1                                  // Edge Guard weakens the edge detection like the orginal vision back when the feature was added
     //#define DMM 1                                // Detect More Mode
-    #define OIL 1                                  // Set How many Levels
-    #define OIF float2(0.625,0.5)                  // Fix enables if Value is > 0.0
-	#define DI_W float2(0.50,1.0)
+    #define OIL 3                                  // Set How many Levels
+    #define OIF float4(0.625,0.5,0.375,0.25)                  // Fix enables if Value is > 0.0
+	#define DI_W float4(0.50,1.0,2.0,4.0)
 	//#define DKK_W float2(0.125,3.0)//XY
 	
     #define CWH 1                               // ZPD Weapon Hand Consideration For Masking  0 is Off | 1 Is Full | 2 Half Right screen Mask And Not to be used with Weapon Profiles.

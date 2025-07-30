@@ -1,7 +1,7 @@
 	////----------------//
 	///**SuperDepth3D**///
 	//----------------////
-	#define SD3D "SuperDepth3D v5.0.7\n"
+	#define SD3D "SuperDepth3D v5.0.8\n"
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//* Depth Map Based 3D post-process shader
 	//* For Reshade 3.0+
@@ -2174,7 +2174,7 @@ uniform int Extra_Information <
 
 	#define Scale_Buffer 160 / BUFFER_WIDTH
 	////////////////////////////////////////////////////////Adapted Luminance/////////////////////////////////////////////////////////////////////
-	texture texAvrN {Width = BUFFER_WIDTH * Scale_Buffer; Height = BUFFER_HEIGHT * Scale_Buffer; Format = RGBA16F; MipLevels = 9;}; //Mips Used
+	texture texAvrN {Width = BUFFER_WIDTH * Scale_Buffer; Height = BUFFER_HEIGHT * Scale_Buffer; Format = RGBA16F; MipLevels = 3;}; //Mips Used
 
 	sampler SamplerAvrB_N
 		{
@@ -4840,7 +4840,7 @@ uniform int Extra_Information <
 					Game_Alpha_UI_M = smoothstep( Alpha_UI_Depth, 1, tex2Dlod(SamplerCN,float4(texcoord,0,4)).y );
 		
 					float S_UI = 1-Alpha_UI > 0.0;
-					float AS_UI = lerp(0.0,lerp(S_UI,texcoord.y + 0.25,0.25),BlendOut + Tuning_Value) ;
+					float AS_UI = lerp(0.0,lerp(S_UI,texcoord.y < 0.5? texcoord.y + 0.25 : (1-texcoord.y) + 0.25,0.25),BlendOut + Tuning_Value) ;
 			
 					MixOut = min(Game_Alpha_UI,Game_Alpha_UI_M) + AS_UI;
 				}
@@ -4910,11 +4910,11 @@ uniform int Extra_Information <
 				    
 					MixOut = lerp(min(Game_Alpha_UI,Game_Alpha_UI_M), (1-texcoord.y) * 0.5 + 0.5,0.125) + Adjust_UI;
 				}
-				
+				MixOut = lerp( Store_MixOut, MixOut, Alpha_Letter_Box);
 				MixOut *= OA_Power;
 				MixOut = lerp(0.02,MixOut,saturate(Avg_UI.x * 10));
 			}
-			MixOut = lerp( Store_MixOut, MixOut, Alpha_Letter_Box);
+
 		}
 		#endif
 	}
