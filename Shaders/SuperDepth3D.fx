@@ -1,7 +1,7 @@
 	////----------------//
 	///**SuperDepth3D**///
 	//----------------////
-	#define SD3D "SuperDepth3D v5.0.8\n"
+	#define SD3D "SuperDepth3D v5.0.9\n"
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//* Depth Map Based 3D post-process shader
 	//* For Reshade 3.0+
@@ -382,6 +382,10 @@ namespace SuperDepth3D
 	
 	#ifndef HDR_Compatible_Mode
 	    #define HDR_Compatible_Mode 0
+	#endif
+
+	#ifndef Depth_Is_Point
+	    #define Depth_Is_Point 0
 	#endif
 
 	//#ifndef Filter_Final_Image
@@ -2154,6 +2158,11 @@ uniform int Extra_Information <
 	sampler SamplerzBufferN_Mixed
 		{
 			Texture = texzBufferN_M;
+			#if Depth_Is_Point
+			MagFilter = POINT;
+			MinFilter = POINT;
+			MipFilter = POINT;
+			#endif
 		};
 
 	#if !DX9_Toggle
@@ -2174,7 +2183,7 @@ uniform int Extra_Information <
 
 	#define Scale_Buffer 160 / BUFFER_WIDTH
 	////////////////////////////////////////////////////////Adapted Luminance/////////////////////////////////////////////////////////////////////
-	texture texAvrN {Width = BUFFER_WIDTH * Scale_Buffer; Height = BUFFER_HEIGHT * Scale_Buffer; Format = RGBA16F; MipLevels = 3;}; //Mips Used
+	texture texAvrN { Width = BUFFER_WIDTH * Scale_Buffer; Height = BUFFER_HEIGHT * Scale_Buffer; Format = RGBA16F; MipLevels = 8;}; //Mips Used
 
 	sampler SamplerAvrB_N
 		{
@@ -3104,7 +3113,7 @@ uniform int Extra_Information <
 			  Dist  = distance( center, texcoords ) * 2.0, 
 			  EdgeMask = saturate((BaseVal-Dist) / (BaseVal-Adjust_Value)),
 			  Set_Weapon_Scale_Near = -min(0.5,Weapon_Depth_Edge.y);//So it don't hang the game. 
-		float Scale_Depth = 1+(Weapon_Depth_Edge.z*4);
+		float Scale_Depth = lerp(1+(Weapon_Depth_Edge.z*4),0,saturate(Depth * 2));
 			  //Scale_Depth *= smoothstep(0.5,0,Depth);
 			  Mod_Depth = (Mod_Depth - Set_Weapon_Scale_Near) / (1.0 + Set_Weapon_Scale_Near);
 		float Near_Mod_Depth =  Scale_Depth * Mod_Depth;
@@ -4036,7 +4045,7 @@ uniform int Extra_Information <
 	}
 	
 	float AutoDepthRange(float d, float2 texcoord )
-	{ float LumAdjust_ADR = smoothstep(-0.0175,min(0.5,Auto_Depth_Adjust),Avr_Mix(texcoord).x);
+	{ float LumAdjust_ADR = smoothstep(-0.0175,min(0.5,Auto_Depth_Adjust),Avr_Mix(float2(0.5,0.5)).x);
 	    return min(1,( d - 0 ) / ( LumAdjust_ADR - 0));
 	}
 		
@@ -5619,7 +5628,7 @@ uniform int Extra_Information <
 
 		#if Inficolor_3D_Emulator
 		if(Inficolor_Auto_Focus)
-			Persp *= lerp(0.75,1.0, saturate(smoothstep(-0.0175,min(0.5,0.13),Avr_Mix(texcoord).x)) );
+			Persp *= lerp(0.75,1.0, saturate(smoothstep(-0.0175,min(0.5,0.13),Avr_Mix(float2(0.5,0.5)).x)) );
 		#endif
 
 		TCL += Persp; TCR -= Persp; TCL_T += Persp; TCR_T -= Persp;
@@ -6334,17 +6343,6 @@ uniform int Extra_Information <
 			    Color = Color;
 			    #endif
 				//Color.rgb = PS_calcLR(texcoord, position.xy).rgb;
-				//Color = smoothstep(0.25,1,tex2Dlod(SamplerCN,float4(texcoord,0,0)).y * 0.5 + 0.5);
-				//Color = tex2Dlod(BackBuffer_SD,float4(texcoord,0,0)).w;
-				//float Disocclusion_Adjust = 0.5;
-				//Color = Divergence_Switch().y * 0.0005;
-				//Color = (Min_Divergence().y * 0.05);// * pix.x * Disocclusion_Adjust * 4;
-				//Color = Color.x > 0.05;
-				//Color = MS > TEST;
-				//float Alpha_UI = tex2Dlod(SamplerCN,float4(texcoord,0,0)).y;
-				//Color = 1-Alpha_UI > 0;
-				//Color = tex2D(BackBuffer_SD,texcoord).w;
-			
 				return Color.rgba;
 			}
 		#endif
