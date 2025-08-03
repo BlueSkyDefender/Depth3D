@@ -1,7 +1,7 @@
 	////----------------//
 	///**SuperDepth3D**///
 	//----------------////
-	#define SD3D "SuperDepth3D v5.0.9\n"
+	#define SD3D "SuperDepth3D v5.1.0\n"
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//* Depth Map Based 3D post-process shader
 	//* For Reshade 3.0+
@@ -180,24 +180,7 @@ namespace SuperDepth3D
 	// Too Make there Own UI MASK if need be.
 	// You need to turn this on to use UI Masking options Below.
 	#define HUD_MODE 0 // Set this to 1 if basic HUD items are drawn in the depth buffer to be adjustable.
-	
-	// -=UI Mask Texture Mask Interceptor=- This is used to set Two UI Masks for any game. Keep this in mind when you enable UI_MASK.
-	// You Will have to create Three PNG Textures named DM_Mask_A.png & DM_Mask_B.png with transparency for this option.
-	// They will also need to be the same resolution as what you have set for the game and the color black where the UI is.
-	// This is needed for games like RTS since the UI will be set in depth. This corrects this issue.
-	#if ((exists "DM_Mask_A.png") || (exists "DM_Mask_B.png"))
-		#define UI_MASK 1
-	#else
-		#define UI_MASK 0
-	#endif
-	// To cycle through the textures set a Key. The Key Code for "n" is Key Code Number 78.
-	#define Set_Key_Code_Here 0 // You can use http://keycode.info/ to figure out what key is what.
-	// Texture EX. Before |::::::::::| After |**********|
-	//                    |:::       |       |***       |
-	//                    |:::_______|       |***_______|
-	// So :::: are UI Elements in game. The *** is what the Mask needs to cover up.
-	// The game part needs to be transparent and the UI part needs to be black.
-	
+		
 	// The Key Code for the mouse is 0-4 key 1 is right mouse button.
 	#define Mouse_Key_Four 4 //Forward Mouse Button
 	#define Mouse_Key_Three 3 //Back Mouse Button
@@ -384,10 +367,6 @@ namespace SuperDepth3D
 	    #define HDR_Compatible_Mode 0
 	#endif
 
-	#ifndef Depth_Is_Point
-	    #define Depth_Is_Point 0
-	#endif
-
 	//#ifndef Filter_Final_Image
 	    #define Filter_Image 0
 	//#endif
@@ -395,6 +374,18 @@ namespace SuperDepth3D
 	#ifndef Alternate_View_Mode
 	    #define Alternate_View_Mode 0
 	#endif
+
+	#ifndef Alternate_View_Mode
+	    #define Alternate_View_Mode 0
+	#endif
+	
+	#if DX9_Toggle	
+		#ifndef Set_Custom_Sidebars
+		    #define Set_Custom_Sidebars 1
+		#endif
+	#else
+		#define Set_Custom_Sidebars 1
+	#endif	
 	
 	//Help / Guide / Information
 uniform int SuperDepth3D <
@@ -781,16 +772,7 @@ uniform int SuperDepth3D <
 					 "Default is 5 and Zero is Off.";
 		ui_category = "Occlusion Masking";
 	> = DM_X;	
-	#if DX9_Toggle
-	uniform int Custom_Sidebars <
-		ui_type = "combo";
-		ui_items = "Stretched Edges\0Black Edges\0";
-		ui_label = " Edge Handling";
-		ui_tooltip = "Edges selection for screen output.\n"
-		  			 "What type of filling to be used on the empty spaces on the edges";
-		ui_category = "Occlusion Masking";
-	> = 1;
-	#else
+	#if !DX9_Toggle
 	uniform int Custom_Sidebars <
 		ui_type = "combo";
 		ui_items = "Mirrored Edges\0Black Edges\0Stretched Edges\0";
@@ -1989,10 +1971,6 @@ uniform int Extra_Information <
 	};
 	
 	texture BackBufferTex : COLOR;
-	sampler BackBuffer_SD
-	{
-		Texture = BackBufferTex;
-	};
 	
 	#if BC_SPACE == 1
 		#define Color_Format_B RGBA16
@@ -2009,39 +1987,90 @@ uniform int Extra_Information <
 		};
 		
 		texture texDF { Width = BUFFER_WIDTH ; Height = BUFFER_HEIGHT ; Format = Color_Format_B; };
-		#if !DX9_Toggle		
-		sampler DF_BackBufferMIRROR
+		
+		#if DX9_Toggle
+		sampler DF_BackBufferBMC
 		{
 			Texture = texDF;
-			AddressU = MIRROR;
-			AddressV = MIRROR;
-			AddressW = MIRROR;
+			#if Set_Custom_Sidebars == 0
+				AddressU = MIRROR;
+				AddressV = MIRROR;
+				AddressW = MIRROR;
+			#elif Set_Custom_Sidebars == 1
+				AddressU = BORDER;
+				AddressV = BORDER;
+				AddressW = BORDER;
+			#elif Set_Custom_Sidebars == 2		
+				AddressU = CLAMP;
+				AddressV = CLAMP;
+				AddressW = CLAMP;
+			#else
+				#warning "Set_Custom_Sidebars must be 0, 1, or 2. Defaulting to BORDER one."
+				AddressU = BORDER;
+				AddressV = BORDER;
+				AddressW = BORDER;
+			#endif			
 		};
-		#endif			
-		sampler DF_BackBufferBORDER
-		{
-			Texture = texDF;
-			AddressU = BORDER;
-			AddressV = BORDER;
-			AddressW = BORDER;
-		};	
-		sampler DF_BackBufferCLAMP
-		{
-			Texture = texDF;
-			AddressU = CLAMP;
-			AddressV = CLAMP;
-			AddressW = CLAMP;	
-		};
-		#if !DX9_Toggle		
-		#define BackBuffer_M DF_BackBufferMIRROR
+		#else		
+			sampler DF_BackBufferMIRROR
+			{
+				Texture = texDF;
+				AddressU = MIRROR;
+				AddressV = MIRROR;
+				AddressW = MIRROR;
+			};
+				
+			sampler DF_BackBufferBORDER
+			{
+				Texture = texDF;
+				AddressU = BORDER;
+				AddressV = BORDER;
+				AddressW = BORDER;
+			};	
+			sampler DF_BackBufferCLAMP
+			{
+				Texture = texDF;
+				AddressU = CLAMP;
+				AddressV = CLAMP;
+				AddressW = CLAMP;	
+			};
 		#endif
+		
+		#define BackBuffer_M DF_BackBufferMIRROR
 		#define BackBuffer_B DF_BackBufferBORDER
 		#define BackBuffer_C DF_BackBufferCLAMP
 		
-		#define Non_Point_Sampler BackBuffer_C
+		#if DX9_Toggle
+			#define Non_Point_Sampler DF_BackBufferBMC
+		#else
+			#define Non_Point_Sampler BackBuffer_C
+		#endif
 		
 	#else
-		#if !DX9_Toggle
+		#if DX9_Toggle
+		sampler BackBufferBMC
+		{
+			Texture = BackBufferTex;
+			#if Set_Custom_Sidebars == 0
+				AddressU = MIRROR;
+				AddressV = MIRROR;
+				AddressW = MIRROR;
+			#elif Set_Custom_Sidebars == 1
+				AddressU = BORDER;
+				AddressV = BORDER;
+				AddressW = BORDER;
+			#elif Set_Custom_Sidebars == 2		
+				AddressU = CLAMP;
+				AddressV = CLAMP;
+				AddressW = CLAMP;
+			#else
+				#warning "Set_Custom_Sidebars must be 0, 1, or 2. Defaulting to BORDER one."
+				AddressU = BORDER;
+				AddressV = BORDER;
+				AddressW = BORDER;
+			#endif			
+		};
+		#else
 		sampler BackBufferMIRROR
 		{
 			Texture = BackBufferTex;
@@ -2049,13 +2078,15 @@ uniform int Extra_Information <
 			AddressV = MIRROR;
 			AddressW = MIRROR;
 		};
-		#endif		
+	
 		sampler BackBufferBORDER
 		{
 			Texture = BackBufferTex;
+			
 			AddressU = BORDER;
 			AddressV = BORDER;
 			AddressW = BORDER;
+			
 		};
 
 		sampler BackBufferCLAMP
@@ -2065,14 +2096,18 @@ uniform int Extra_Information <
 			AddressV = CLAMP;
 			AddressW = CLAMP;		
 		};
-		#if !DX9_Toggle
-		#define BackBuffer_M BackBufferMIRROR
 		#endif
+		
+
+		#define BackBuffer_M BackBufferMIRROR
 		#define BackBuffer_B BackBufferBORDER
 		#define BackBuffer_C BackBufferCLAMP
-
-		#define Non_Point_Sampler BackBuffer_C
-			
+		
+		#if DX9_Toggle
+			#define Non_Point_Sampler BackBufferBMC
+		#else
+			#define Non_Point_Sampler BackBuffer_C
+		#endif			
 	#endif	
 	
 	texture texDMN { Width = BUFFER_WIDTH ; Height = BUFFER_HEIGHT; Format = RG16F; MipLevels = Max_Mips; }; //Mips Used
@@ -2152,24 +2187,41 @@ uniform int Extra_Information <
 	};
 	#if !DX9_Toggle	
 	texture texzBufferN_M { Width = BUFFER_WIDTH ; Height = BUFFER_HEIGHT ; Format = R16F; MipLevels = 3;};
-	#else
-	texture texzBufferN_M { Width = BUFFER_WIDTH ; Height = BUFFER_HEIGHT ; Format = R16F; }; //Do not use mips in this buffer
-	#endif	
-	sampler SamplerzBufferN_Mixed
+
+	sampler SamplerzBufferP_Mixed
 		{
 			Texture = texzBufferN_M;
-			#if Depth_Is_Point
 			MagFilter = POINT;
 			MinFilter = POINT;
 			MipFilter = POINT;
-			#endif
+		};		
+	#else
+	texture texzBufferN_M { Width = BUFFER_WIDTH ; Height = BUFFER_HEIGHT ; Format = R16F; }; //Do not use mips in this buffer
+
+	sampler SamplerzBufferB_Mixed
+		{
+			Texture = texzBufferN_M;
 		};
+		
+	sampler SamplerzBufferP_Mixed
+		{
+			Texture = texzBufferN_M;
+			MagFilter = POINT;
+			MinFilter = POINT;
+			MipFilter = POINT;
+		};		
+	#endif	
 
 	#if !DX9_Toggle
 	//UpSample Pass
 	texture texzBufferN_U { Width = BUFFER_WIDTH ; Height = BUFFER_HEIGHT ; Format = R16F; }; //Do not use mips in this buffer
 	
-	sampler SamplerzBufferN_Up
+	sampler SamplerzBufferB_Up
+		{
+			Texture = texzBufferN_U;
+		};
+
+	sampler SamplerzBufferP_Up
 		{
 			Texture = texzBufferN_U;
 			MagFilter = POINT;
@@ -2514,10 +2566,8 @@ uniform int Extra_Information <
 		
 		#if BC_SPACE == 1
 			#if DX9_Toggle
-			if(Custom_Sidebars == 1 && Depth_Map_View == 0)
-				return NormalizeScRGB(tex2Dlod(BackBuffer_B,float4(texcoords,0,0)) *  Vin);
-			else if(Custom_Sidebars == 0 && Depth_Map_View == 0)
-				return NormalizeScRGB(tex2Dlod(BackBuffer_C,float4(texcoords,0,0)) *  Vin);
+			if(Depth_Map_View == 0)
+				return NormalizeScRGB(tex2Dlod(Non_Point_Sampler,float4(texcoords,0,0)) *  Vin);
 			else
 				return NormalizeScRGB(tex2Dlod(SamplerzBufferN_P,float4(texcoords,0,0)).x);
 			#else	
@@ -2532,10 +2582,8 @@ uniform int Extra_Information <
 			#endif
 		#else
 			#if DX9_Toggle
-			if(Custom_Sidebars == 1 && Depth_Map_View == 0)
-				return tex2Dlod(BackBuffer_B,float4(texcoords,0,0)) *  Vin;
-			else if(Custom_Sidebars == 0 && Depth_Map_View == 0)
-				return tex2Dlod(BackBuffer_C,float4(texcoords,0,0)) *  Vin;
+			if(Depth_Map_View == 0)
+				return tex2Dlod(Non_Point_Sampler,float4(texcoords,0,0)) *  Vin;
 			else
 				return tex2Dlod(SamplerzBufferN_P,float4(texcoords,0,0)).x;
 			#else
@@ -3159,7 +3207,7 @@ uniform int Extra_Information <
 	float4 MouseCursor(float3 texcoord , float2 pos, int Switch,int UI_Mode )
 	{ 
 			//DX9 fails if I don't use tex2Dlod here
-			float4 Out = UI_Mode ? tex2Dlod(BackBuffer_SD,float4(texcoord.xy,0,0)) : CSB(texcoord.xy),Color, Exp_Darks, Exp_Brights;
+			float4 Out = UI_Mode ? tex2Dlod(Non_Point_Sampler,float4(texcoord.xy,0,0)) : CSB(texcoord.xy),Color, Exp_Darks, Exp_Brights;
 			float Cursor;
 			if(Cursor_Type > 0 && Switch)
 			{
@@ -4025,18 +4073,18 @@ uniform int Extra_Information <
 		{
 			float2 TC_Off = texcoord;
 			float2 Offsets = pix;
-			float center = tex2D(BackBuffer_SD, TC_Off).w;
-			float right = tex2D(BackBuffer_SD, TC_Off + float2(Offsets.x, 0.0)).w;
-			float left = tex2D(BackBuffer_SD, TC_Off + float2(-Offsets.x, 0.0)).w;
-			float up = tex2D(BackBuffer_SD, TC_Off + float2(0.0, Offsets.y)).w;
-			float down = tex2D(BackBuffer_SD, TC_Off + float2(0.0, -Offsets.y)).w;
+			float center = tex2D(Non_Point_Sampler, TC_Off).w;
+			float right = tex2D(Non_Point_Sampler, TC_Off + float2(Offsets.x, 0.0)).w;
+			float left = tex2D(Non_Point_Sampler, TC_Off + float2(-Offsets.x, 0.0)).w;
+			float up = tex2D(Non_Point_Sampler, TC_Off + float2(0.0, Offsets.y)).w;
+			float down = tex2D(Non_Point_Sampler, TC_Off + float2(0.0, -Offsets.y)).w;
 			
 			float Color_UI_MAP = (center + right + left + up + down) / 5; //We mask it out later		
 			
 			Color.y = 1-Color_UI_MAP;
 		}
 		else
-			Color.y = tex2D(BackBuffer_SD, texcoord).w;
+			Color.y = tex2D(Non_Point_Sampler, texcoord).w;
 		#endif
 		
 		DM_Out = saturate(float2(R,G));
@@ -4968,24 +5016,28 @@ uniform int Extra_Information <
 	void Up_Z(in float4 position : SV_Position, in float2 texcoord : TEXCOORD, out float UpOut : SV_Target0)
 	{
 		
-		float2 Depth_Size = rcp_Depth_Size();	
-		float occlusion = Disocclusion(SamplerzBufferN_Mixed, texcoord, Depth_Size);
-
-		UpOut = occlusion;		
+		float2 Depth_Size = rcp_Depth_Size();			
+		UpOut = Disocclusion(SamplerzBufferP_Mixed, texcoord, Depth_Size);;		
+	}
+	#endif
+	
+	float2 GetMixed(float2 texcoord, float Mips) //Sensitive Buffer.
+	{
+		float2 Out;
+		#if DX9_Toggle
+		if(View_Mode <= 2 || View_Mode >= 5)
+			Out = tex2Dlod(SamplerzBufferB_Mixed,float4(texcoord,0,Mips)).x;
+		else
+			Out = tex2Dlod(SamplerzBufferP_Mixed,float4(texcoord,0,Mips)).x;		
+		#else
+		if(View_Mode <= 2 || View_Mode >= 5)
+			Out = tex2Dlod(SamplerzBufferB_Up,float4(texcoord,0,Mips)).x;
+		else
+			Out = tex2Dlod(SamplerzBufferP_Up,float4(texcoord,0,Mips)).x;
+		#endif
+		return Out;
 	}
 	
-	#endif
-	float GetMixed(float2 texcoord, float Mips) //Sensitive Buffer.
-	{
-		#if !DX9_Toggle
-		float BufferA = tex2Dlod(SamplerzBufferN_Up,float4(texcoord,0,0)).x; 
-		//float BufferB = tex2Dlod(SamplerzBufferN_Mixed,float4(texcoord,0,Mips)).x;
-		//Careful not to shift here because we run out of memory in DX9
-		return BufferA;
-		#else
-		return tex2Dlod(SamplerzBufferN_Mixed,float4(texcoord,0,0)).x;	
-		#endif
-	}
 	// Combines both original and artifacting-corrected depths
 	float2 GetMixed_Combined(float2 baseCoord, float2 shift)
 	{
@@ -5131,7 +5183,7 @@ uniform int Extra_Information <
 			    AA_Toggle = false;
 								
 			//ParallaxSteps Calculations
-			float D = abs(Diverge), Cal_Steps = D * Perf, Steps  = Cal_Steps;
+			int D = abs(Diverge), Cal_Steps = D * Perf, Steps  = Cal_Steps;
 			//Compatibility Power
 			float N = 0.5,F = 1.0, Z = tex2Dlod(SamplerzBuffer_BlurN, float4( Coordinates  * float2(0.5,1) + float2(0.5,0), 0, 2 ) ).x;
 		    float ZS = smoothstep(0.5,1.0,( Z - N ) / ( F - N));
@@ -5812,7 +5864,7 @@ uniform int Extra_Information <
 		if (Depth_Map_View == 2)
 			color.rgb = tex2D(SamplerzBufferN_P,TexCoords).xxx;
 				
-		float DepthBlur, Alinement_Depth = tex2Dlod(SamplerzBufferN_Mixed,float4(TexCoords,0,0)).x, Depth = Alinement_Depth;
+		float DepthBlur, Alinement_Depth = tex2Dlod(SamplerzBufferP_Mixed,float4(TexCoords,0,0)).x, Depth = Alinement_Depth;
 		const float DBPower = 50, Con = 9;
 		const float2 cardinalOffsets[9] = {
 										    float2( 0,  0),  // Center (no offset)
@@ -5831,14 +5883,14 @@ uniform int Extra_Information <
 			[loop]
 			for (int i = 0; i < Con; i++)
 			{
-				DepthBlur += tex2Dlod(SamplerzBufferN_Mixed,float4(TexCoords + dir * cardinalOffsets[i] * pix * DBPower,0,1) ).x;
+				DepthBlur += tex2Dlod(SamplerzBufferP_Mixed,float4(TexCoords + dir * cardinalOffsets[i] * pix * DBPower,0,1) ).x;
 			}
 			
 			Alinement_Depth = ( Alinement_Depth + DepthBlur ) * 0.1;
 		}
 	
 		if (BD_Options == 2 || Alinement_View)
-			color.rgb = dot(tex2D(BackBuffer_C,TexCoords).rgb,0.333) * float3((Depth/Alinement_Depth> 0.998),1,(Depth/Alinement_Depth > 0.998));
+			color.rgb = dot(tex2D(Non_Point_Sampler,TexCoords).rgb,0.333) * float3((Depth/Alinement_Depth> 0.998),1,(Depth/Alinement_Depth > 0.998));
 		if( Helper_Fuction() == 0 || timer <= 0)  
 			color.rgb *= TexCoords.xyx;
 		
@@ -5989,7 +6041,7 @@ uniform int Extra_Information <
 
 	float4 MixModeBlend(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Target
 	{  
-	    return ( CBBlend(BackBuffer_SD,texcoord,0) + CBBlend(BackBuffer_SD,texcoord,1) ) * 0.5;
+	    return ( CBBlend(Non_Point_Sampler,texcoord,0) + CBBlend(Non_Point_Sampler,texcoord,1) ) * 0.5;
 	}
 	#endif	
 	////////////////////////////////////////////////////////////////////Logo////////////////////////////////////////////////////////////////////////////
@@ -6861,16 +6913,16 @@ uniform int Extra_Information <
 	float4 SmartSharpJr(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Target
 	{  
 		#if BC_SPACE == 1			    
-		float4 Color = Sharp(BackBuffer_SD, texcoord, 1.0);
+		float4 Color = Sharp(Non_Point_Sampler, texcoord, 1.0);
 		#else
-		float4 Color = tex2D(BackBuffer_SD,texcoord);
+		float4 Color = tex2D(Non_Point_Sampler,texcoord);
 		       Color.w = max(Color.r, max(Color.g, Color.b));	
 		#endif
 		 
 		#if BC_SPACE == 1
 	    return Color;
 	    #else
-	    return float4(Sharp(BackBuffer_SD, texcoord, 1.0).rgb,Color.w);
+	    return float4(Sharp(Non_Point_Sampler, texcoord, 1.0).rgb,Color.w);
 	    #endif
 	}
 	#if AXAA_EXIST
@@ -6878,9 +6930,9 @@ uniform int Extra_Information <
 	{
 		float4 Out;
 		if(USE_AA == 1)
-			Out = AXAA(BackBuffer_SD, texcoord, BC_SPACE);
+			Out = AXAA(Non_Point_Sampler, texcoord, BC_SPACE);
 		else
-			Out = tex2D(BackBuffer_SD,texcoord);				
+			Out = tex2D(Non_Point_Sampler,texcoord);				
 		return Out;	
 	}
 	#endif
@@ -6921,7 +6973,7 @@ uniform int Extra_Information <
 	#if D_Frame
 	float4 CurrentFrame(in float4 position : SV_Position, in float2 texcoords : TEXCOORD) : SV_Target
 	{
-		return tex2Dlod(BackBuffer_SD,float4(texcoords,0,0));
+		return tex2Dlod(Non_Point_Sampler,float4(texcoords,0,0));
 	}
 	
 	float4 DelayFrame(in float4 position : SV_Position, in float2 texcoords : TEXCOORD) : SV_Target
