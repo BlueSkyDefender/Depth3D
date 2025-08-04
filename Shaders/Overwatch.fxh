@@ -30794,6 +30794,8 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	//#define DJ_W 0.1	           // Weapon Depth Limit Location 1
 	//#define DS_W 0.5	           // Weapon Depth Limit Location 2
 
+	#define DMM_W float4(1,4,0,0) 			   //UI Toggle ON/OFF | UI Type 0-3 | Narrow or Wide ON/OFF | Distance From Edge -1 to 1;    
+
 
     //#define FPS 2  // FPS Focus Settings 
     //#define DK_X 2 //Trigger Type
@@ -30806,7 +30808,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	
  //Smooth Mode
     //#define SMS 1         //SM Separation Limit  - Do Not use any more
-	#define DL_X 0.75       //SM Tune Limit
+	#define DL_X 0.65       //SM Tune Limit
 	//#define DL_W 0.5      //SM Perspective Limit - Do Not use any more
 	#define DM_X 5        //SM HQ Tune Power       - Will be made global
     //#define DM_Y 1        //SM HQ VRS Limit
