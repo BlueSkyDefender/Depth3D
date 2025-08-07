@@ -1,7 +1,7 @@
 	////----------------//
 	///**SuperDepth3D**///
 	//----------------////
-	#define SD3D "SuperDepth3D v5.1.1\n"
+	#define SD3D "SuperDepth3D v5.1.2\n"
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//* Depth Map Based 3D post-process shader
 	//* For Reshade 3.0+
@@ -505,7 +505,7 @@ uniform int SuperDepth3D <
 		ui_category = "Game Selection";
 	> = 0;	
 	#endif
-	uniform float3 TEST < ui_type = "slider"; ui_min = 0; ui_max = 1.0; > = 0.00;
+	//uniform float3 TEST < ui_type = "slider"; ui_min = 0; ui_max = 1.0; > = 0.00;
 	//Divergence & Convergence//
 	uniform float Depth_Adjustment < //This change was made to make it more simple for users
 		ui_type = "slider";
@@ -1751,14 +1751,15 @@ uniform int SuperDepth3D <
 	> = DT_Z;
 	#else
 	static const float UI_Seeking_Strength = DT_Z;
-
+	static const float4 Alpha_XYZW = DMM_W;
+	
 	uniform bool Alpha_Channel_UI <
 		ui_label = " Alpha UI";	
 		ui_tooltip = "Use this check and use the Alpha Channel for UI in Depth.\n"
 					 "Useful for that store UI elements in the Alpha Channel so we can use them.\n"
 					 "Default is Off.";
 		ui_category = "Miscellaneous Options";
-	> = DMM_W.x;
+	> = Alpha_XYZW.x;
 	
 	uniform int Alpha_Auto_UI <
 		ui_label = " UI Mode";
@@ -1769,7 +1770,7 @@ uniform int SuperDepth3D <
 		             "- Self-Adjusting UI (Depth-Based): Dynamically adjusts based on depth, useful for games\n"
 		             "  where UI elements shift or overlap with 3D content.";
 		ui_category = "Miscellaneous Options";
-	> = DMM_W.y;
+	> = Alpha_XYZW.y;
 
 	uniform float Alpha_UI_Has_LB <
 		ui_type = "slider";
@@ -1779,13 +1780,13 @@ uniform int SuperDepth3D <
 					"Negitive values use blend and postitive values is a Hard Cutoff.\n"
 					"Default is 0.0, off.";
 		ui_category = "Miscellaneous Options";
-	> = DMM_W.w;
+	> = Alpha_XYZW.w;
 	//This last option will be reworked.
 	uniform bool Alpha_UI_is_Narrow <
 		ui_label = " UI Narrow";
 		ui_tooltip = "Only use for when the letterbox is narrow.";
 		ui_category = "Miscellaneous Options";
-	> = DMM_W.z;		
+	> = Alpha_XYZW.z;		
 	#endif	
 /* //Slated for deletion and with a link to a Help Guide online	
 	//Extra Informaton
