@@ -1,7 +1,7 @@
 ////----------------------------------------//
 ///SuperDepth3D Overwatch Automation Header///
 //----------------------------------------////
-#define OVERWATCH "Overwatch v4.6.5\n"
+#define OVERWATCH "Overwatch v4.6.7\n"
 //---------------------------------------OVERWATCH---------------------------------------//
 // If you are reading this stop. Go away and never look back. From this point on if you  //
 // still think it's is worth looking at this..... Then no one can save you or your soul. //
@@ -327,7 +327,8 @@ static const float4 TMenu_Tresh_n_WC_D = 1000;          //Text Menu Tresh For A,
 static const float4 Text_Lift_Cutoff_XYDirection_D = 0; //Text Lift | Cutoff | Masking XY Postion Adjust| DZ_W
 static const float4 GDNP_Values_XYZW_D = 0;             //Game Depth Near Plane Values for XYZW         | DNN_W
 static const int Weapon_Mix_Mode_D = 0;                 //Off 0 | On 1 Weapon Mix Mode                  | WMM
-static const float4 Alpha_Stencil_UI_D = 0.0;           //X = ON/Off Y = A Static or B Depth Z = ? W = ? | DMM_W
+static const float4 Alpha_Stencil_UI_D = 0.0;           //X = ON/Off Y = A Static or B Depth Z = ? W    | DMM_W
+static const float Alpha_Stencil_UI_Adjust_D = 0.9;     //Lets you Adjust the Stencil's Contrbution     | ASU
 
 //Special Toggles 
 static const int Resident_Evil_Fix_D = 0;               //Resident Evil Fix [Getting Phased Out]        | REF //To be Removed after a few Gens
@@ -365,7 +366,8 @@ static const int Edge_Guard_Bool_D = 0;                 //Enable or Disable Edge
 static const int Target_High_Frequency_D = 0;           //Enable or Disable Targeted High Frequency     | THF
 static const int Halo_Near_Reduction_D = 0;             //Set Halo Near Reduction                       | HNR
 static const int2 Disable_Offset_On_Level_D = 0;        //Disable Offset on Level                       | DOL
-
+static const int Vendor_D = 0;                          //Disable Alpha UI On All exemption Vendor      | VEN                   | DOL
+//Vendors 0 Off 1 Ace 2 Lev
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 //Special Toggles Warnings
@@ -39941,20 +39943,34 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 #elif (App == 0xD93B8576 ) //Black Myth: Wukong
 	#define G_Info "Black Myth: Wukong | AppID 0xD93B8576 Steam \n"
 	
-    #define G_Note "Note: You will need to use the 'Generic Depth Mod' for this game with RT On.\n" \
-    			   "You Should only need to Set Select the Primary Prioritized Attribute to Vertices.\n" \
-			       "But, If you are using RT then you will need to Then Turn on\n" \
-				   "Avoid and set lower vertices Limit [10], Also Disable restrictions\n" \
-				   "that allow selection of zero buffers and that should be it.\n" \
-				   "You can use DLSS/FSR/XeSS at 75% or more on scaling.\n" \
-				   "Make sure to turn of Flame Gen.\n"
+#define G_Note \
+			    "Note: You will need to use the 'Generic Depth Mod' for this game with RT On.\n" \
+			    "You should only need to select and set the following setting.\n" \
+			    "\n" \
+			    "1.[ Vertices  v] Select the Primary Prioritized Attribute.\n" \
+			    "2.[x] Avoid and set the lower vertices limit 'if you are using RT'.\n" \
+			    "3.[ 10        v] Select the hightest vertices count to avoid.\n" \
+			    "4.[x] Disable restrictions that allow selection of zero buffers.\n" \
+			    "\n" \
+			    "You can use DLSS/FSR/XeSS at 75%% or more on scaling.\n" \
+			    "Don't forget to turn off Flame Gen.\n" \
+			    "\n" \
+			    "At the bottom of the shader, turn on Alpha UI.\n" \
+			    "Only if you are using the ShaderToggler Add-on.\n" \
+			    "\n" \
+			    "1.[x] Alpha UI.\n" \
+			    "2.[ Vicinal-Depth or Mix-Depth  v] UI Mode.\n" \
+			    "\n" \
+			    "If you are using a controller, then also use the Xinp Add-on.\n" \
+			    "For the Generic Depth Mod, ShaderToggler, and Xinp Controller Add-ons, go to our Discord.\n"
+				   
     //#define DS_Z 2                 // Set View Mode
 	#define DA_W 1                 // Set Linerzation
     //#define DB_X 1                 // Flip
 	#define DHH_W 0.50                              // Smart Convergence 
 	#define DA_X 0.025             // ZPD
 	#define DF_Y 0.005              // Seperation
-	#define DA_Y 50.0              // Near Plane Adjustment
+	#define DA_Y 52.5              // Near Plane Adjustment
     //#define DA_Z -.500           // Linerzation Offset
     #define DS_Y 2                 // Linerzation Offset Effects only distance if true
 	#define DB_Z 0.025              // Auto Depth Protection
@@ -39967,18 +39983,24 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
     #define OIF float4(0.625,0.5,0.375,0.250)// Fix enables if Value is > 0.0 
 	#define DI_W float4(0.25,0.5,1.25,2.5) // Like Shift Boundary DG_W But 0 to inf
 	#define DKK_W float2(0.125,5.0)//XY
-	#define WND 0.75              //Weapon Near Pushes depth in and adjust perspective to match.
+	#define WND 1.0              //Weapon Near Pushes depth in and adjust perspective to match.
 
 	#define BMT 1                  // ZPD and World Scale Balance // I need to phase this out.
-	#define DF_Z 0.250             // Set the Balance  
+	#define DF_Z 0.300             // Set the Balance  
     //#define DAO 1                  // Turn On or Off De-Artifact Options For now DAO if set to 1 it's also applys to Hoz 
-    #define DL_Y 0.625             // De-Artifact Only works on some View Modes and causes performance degredation
+    #define DL_Y 0.600             // De-Artifact Only works on some View Modes and causes performance degredation
     //#define DL_Z -0.5              // Compat Power
 	//#define DJ_X 0.050             // Range Smoothing
 	#define DAA_W 2              //Warp/Halo Masking Type 
     //#define THF 3                                 // Target High Frequency information Like Hair
+
+	#if VEN == 2
+		#define DMM_W float4(1,6,0,0.0) 			   //UI Toggle ON/OFF | UI Type 0-3 | Narrow or Wide ON/OFF | Distance From Edge -1 to 1;    
+	#else
+		#define DMM_W float4(0,6,0,0.0) 			   //UI Toggle ON/OFF | UI Type 0-3 | Narrow or Wide ON/OFF | Distance From Edge -1 to 1;    
+	#endif
 	
- //Smooth Mode
+	//#define ASU 0.5     //Lets you Adjust the Stencil's Contrbution
     //#define SMS 1         //SM Separation Limit  - Do Not use any more
 	#define DL_X 0.70       //SM Tune Limit
 	//#define DL_W 0.5      //SM Perspective Limit - Do Not use any more
@@ -42835,6 +42857,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
     //#define DK_Z 3 //World Reduction Power
     //#define DK_W 3 //Set Shift Speed
     //#define WZD 0  //Weapon Zoom Detection    
+    //#define VEN 0  //Vendor exemption
     //#define DMM_W float4(0,0,0,0) //UI Toggle ON/OFF | Type | Null | Null 
 */ 
 
@@ -43738,6 +43761,9 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 #ifndef SDD
     #define SDD Shift_Detectors_Down_D         //Shift Detectors Down
 #endif
+#ifndef VEN
+    #define VEN Vendor_D                       //Disable Alpha UI On All except Vendor
+#endif
 
 #ifndef DMM
     #define DMM Detect_More_Mode_D             //Detect More Mode
@@ -43879,6 +43905,9 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 #endif
 #ifndef WMM
     #define WMM Weapon_Mix_Mode_D              //Weapon Mix Mode  
+#endif
+#ifndef ASU
+    #define ASU Alpha_Stencil_UI_Adjust_D      //Stencil's Contrbution
 #endif
 
 //SuperDepth3D Warning System

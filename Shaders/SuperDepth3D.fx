@@ -1,7 +1,7 @@
 	////----------------//
 	///**SuperDepth3D**///
 	//----------------////
-	#define SD3D "SuperDepth3D v5.1.2\n"
+	#define SD3D "SuperDepth3D v5.1.3\n"
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//* Depth Map Based 3D post-process shader
 	//* For Reshade 3.0+
@@ -36,6 +36,7 @@
 
 namespace SuperDepth3D
 {
+	#define VEN 0
 	#if exists "AXAA.fxh"
 		#include "AXAA.fxh"
 		#define AXAA_EXIST 1
@@ -1764,7 +1765,7 @@ uniform int SuperDepth3D <
 	uniform int Alpha_Auto_UI <
 		ui_label = " UI Mode";
 		ui_type = "combo";
-		ui_items = "Mostly Static UI\0Self-Adjusting UI (Local-Depth)\0Self-Adjusting UI (Avr-Depth)\0Self-Adjusting UI (Guided-Depth)\0Self-Adjusting UI (FPS-Alpha)\0Self-Adjusting UI (3rd-Alpha)\0";
+		ui_items = "Self-Adjusting UI (Vicinal-Depth)\0Self-Adjusting UI (Local-Depth)\0Self-Adjusting UI (Avr-Depth)\0Self-Adjusting UI (Guided-Depth)\0Self-Adjusting UI (FPS-Alpha)\0Self-Adjusting UI (3rd-Alpha)\0Self-Adjusting UI (Mix-Alpha)\0";
 		ui_tooltip = "Choose how to handle UI masking via the alpha channel:\n\n"
 		             "- Mostly Static UI: Best for games with UI that doesn't move or change frequently.\n"
 		             "- Self-Adjusting UI (Depth-Based): Dynamically adjusts based on depth, useful for games\n"
@@ -1852,7 +1853,7 @@ uniform int Extra_Information <
 	// The Key Code for Decimal Point is Number 110. Ex. for Numpad Decimal "." Cancel_Depth_Key 110
 	//	#define Cancel_Depth_Key 0 // You can use http://keycode.info/ to figure out what key is what.
 	//Extra Informaton
-uniform int Extra_Information <
+	uniform int Extra_Information <
 	ui_text =   "Preprocessors:\n"
 				//"Color Correcting  | Is the process of restoring the original colors in the scenes.\n"
 				//"Deband            | Is used to correct for banding issues in the image.\n"
@@ -1877,13 +1878,17 @@ uniform int Extra_Information <
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	uniform bool Cancel_Depth < source = "key"; keycode = Cancel_Depth_Key; toggle = true; mode = "toggle";>;
 	uniform bool Text_Info < source = "key"; keycode = Text_Info_Key; toggle = true; mode = "toggle";>;
-
+	//Needs Gamepad Add-on
+	uniform float gamepad_toggle[20] < source = "gamepad_toggle"; >;
+	uniform float gamepad_raw[20]    < source = "gamepad_raw";    >;
+	
 	uniform bool CLK_04 < source = "mousebutton"; keycode = Mouse_Key_Four; toggle = true; mode = "toggle";>;
 	uniform bool CLK_03 < source = "mousebutton"; keycode = Mouse_Key_Three; toggle = true; mode = "toggle";>;
 	uniform bool CLK_02 < source = "mousebutton"; keycode = Mouse_Key_Two; toggle = true; mode = "toggle";>;
 
-	uniform bool Trigger_Fade_A < source = "mousebutton"; keycode = Fade_Key; toggle = true; mode = "toggle";>;
-	uniform bool Trigger_Fade_B < source = "mousebutton"; keycode = Fade_Key;>;
+	uniform bool Trigger_Fade_Toggle < source = "mousebutton"; keycode = Fade_Key; toggle = true; mode = "toggle";>;
+	uniform bool Trigger_Fade_Hold < source = "mousebutton"; keycode = Fade_Key;>;
+	
 	uniform bool Menu_Open < source = "overlay_open"; >;
 	uniform float2 Mousecoords < source = "mousepoint"; > ;
 	uniform float frametime < source = "frametime";>;
@@ -2540,7 +2545,7 @@ uniform int Extra_Information <
 		p.x = (x2 + 1.) * 1. * 0.5;
 		p.y = (y2 + 1.) * 1. * 0.5;
 	
-	return p;
+		return p;
 	}
 	#endif
 	///////////////////////////////////////////////////////////3D Image Adjustments/////////////////////////////////////////////////////////////////////
@@ -3664,18 +3669,18 @@ uniform int Extra_Information <
 		#else
 		float SnD_Toggle = 0;
 		#endif
-	
+
 		//Fade in toggle.
 		if(FPSDFIO == 1 )
-			Trigger_Fade = Trigger_Fade_A;
+			Trigger_Fade = Trigger_Fade_Toggle || gamepad_toggle[4];
 		else if(FPSDFIO == 2)
-			Trigger_Fade = Trigger_Fade_B;
+			Trigger_Fade = Trigger_Fade_Hold || gamepad_raw[4];
 		else if(FPSDFIO == 3)
 			Trigger_Fade = SnD_Toggle;
 		else if(FPSDFIO == 4)
-			Trigger_Fade = Trigger_Fade_A || SnD_Toggle;			
+			Trigger_Fade = Trigger_Fade_Toggle || SnD_Toggle || gamepad_toggle[4];			
 		else if(FPSDFIO == 5)
-			Trigger_Fade = Trigger_Fade_B || SnD_Toggle;
+			Trigger_Fade = Trigger_Fade_Hold || SnD_Toggle || gamepad_raw[4];
 			
 		if(Toggle_On_Boundary)	
 		{
@@ -4779,6 +4784,15 @@ uniform int Extra_Information <
 		return Alpha_UI_0 && Alpha_UI_1 && Alpha_UI_2 && Alpha_UI_3;	  
 	}
 	
+	float IM_Stencil(float2 tc, float Near, float Far, bool type)
+	{
+		float TCX_S = tc.x < 0.5 ? tc.x : 1-tc.x;
+		float TCY_S = tc.y < 0.5 ? tc.y : 1-tc.y;
+		float TCXY_S = (TCX_S + TCY_S) * 0.5;
+		float IM_S = saturate( type ? smoothstep(Near,Far, lerp(1,TCXY_S,tc.y)) : smoothstep(Near,Far, TCXY_S ) ); 
+		return IM_S;
+	}
+	
 	float LetterBox_UI(float2 tc)
 	{
 		float Hard_or_Blend = abs(Alpha_UI_Has_LB);
@@ -4885,6 +4899,7 @@ uniform int Extra_Information <
 		{
 			float Store_MixOut = MixOut; float2 FPS_Alpha_UI, TRD_Alpha_UI;
 			float Avg_UI = saturate(smoothstep(0.25,1,tex2Dlod(SamplerzBuffer_BlurEx,float4(float2(0.5,0.5),0,12)).y) * 2);
+			float Edge_Fix = EdgeMask( 1, texcoord, 0.95 ).x;	
 			
 			float Game_Alpha_UI, Game_Alpha_UI_M;	
 			float Alpha_UI = tex2Dlod(SamplerCN,float4(texcoord,0,0)).y;
@@ -4892,9 +4907,45 @@ uniform int Extra_Information <
 			float Low_Rez_Depth = tex2Dlod(SamplerAvrB_N, float4(texcoord, 0, 5)).x;	
 			float OA_Power = saturate(abs(Divergence_Switch().y) * 0.01);
 			float Alpha_Letter_Box = Alpha_UI_Has_LB == 0  ? 1 : LetterBox_UI(texcoord);	
-					
-			if(1-Alpha_UI > 0.0 )
+			float Alpha_UI_Depth = ASU;//0 - 1
+			float Controller_RT = saturate(gamepad_toggle[5]*2);
+			
+			if(1-Alpha_UI > 0.0)
 			{
+				if(Alpha_Auto_UI == 0 || Alpha_Auto_UI == 6) // Vicinal
+				{
+					float mipCoarse = 4.0, mipFine = 2.0, mipLarge = 5.0, Scale_Dist_A = 1.0, Scale_Dist_B = 0.5;
+					float Middel_Depth = smoothstep(0.0,1.0,tex2Dlod(SamplerAvrB_N, float4(float2(0.5,0.5), 0, mipLarge)).x);	  
+
+					float CoarseCenter =  smoothstep(-1.0,2.0,tex2Dlod(SamplerAvrB_N,float4(texcoord,0,mipCoarse)).x);		
+					float FineCenter = tex2Dlod(SamplerAvrB_N, float4(texcoord, 0, mipFine)).x;							
+					float LargeCenter = tex2Dlod(SamplerAvrB_N, float4(texcoord, 0, mipLarge)).x;
+					
+					float BlendOut = lerp(-0.5,Scale_Dist_B,CoarseCenter);
+					BlendOut = min(LargeCenter,BlendOut);
+					BlendOut = lerp(BlendOut,Scale_Dist_A,FineCenter);
+					float Tuning_Value = 0.0;
+					
+					Game_Alpha_UI = smoothstep(Alpha_UI_Depth,1, Alpha_UI );
+					Game_Alpha_UI_M = smoothstep( Alpha_UI_Depth, 1, tex2Dlod(SamplerCN,float4(texcoord,0,4)).y );
+		
+					float S_UI = 1-Alpha_UI > 0.0;
+					float AS_UI = lerp(0.0,S_UI,BlendOut + Tuning_Value);
+					
+					if(Alpha_Auto_UI == 6)
+					{
+						TRD_Alpha_UI.x = min(Game_Alpha_UI,Game_Alpha_UI_M) + AS_UI;
+						TRD_Alpha_UI.x = lerp(0.5f,TRD_Alpha_UI.x,Middel_Depth);
+					}
+					else
+					{
+						MixOut = min(Game_Alpha_UI,Game_Alpha_UI_M) + AS_UI;
+						MixOut = lerp(0.5f,MixOut,Middel_Depth);
+					}
+					
+					Avg_UI = lerp(Avg_UI,1.0,Controller_RT);
+				}
+				
 				if(Alpha_Auto_UI == 1 || Alpha_Auto_UI == 4 || Alpha_Auto_UI == 5) //Local
 				{
 					float mipCoarse = 2.0, mipFine = 4.0, Scale_FPS_Dist_A = 1.0, Scale_FPS_Dist_B = 0.55;
@@ -4922,7 +4973,6 @@ uniform int Extra_Information <
 					BlendOut = lerp(BlendOut,Scale_FPS_Dist_A,FineCenter);
 					float Tuning_Value = 0.0;
  
-					float Alpha_UI_Depth = 0.9;//0 - 1
 					Game_Alpha_UI = smoothstep(Alpha_UI_Depth,1, Alpha_UI );
 					Game_Alpha_UI_M = smoothstep( Alpha_UI_Depth, 1, tex2Dlod(SamplerCN,float4(texcoord,0,4)).y );
 		
@@ -4939,7 +4989,7 @@ uniform int Extra_Information <
 						MixOut = min(Game_Alpha_UI,Game_Alpha_UI_M) + AS_UI;
 				}
 				
-				if(Alpha_Auto_UI == 2 || Alpha_Auto_UI == 5) //Avr
+				if(Alpha_Auto_UI == 2 || Alpha_Auto_UI == 5 ) //Avr
 				{
 					float mipLevel_A = 7, mipLevel_B = 5.0;
 					//float Middel_Depth = Alpha_Auto_UI == 5 ? smoothstep(0.5,1.0,tex2Dlod(SamplerAvrB_N, float4(float2(0.5,0.5), 0, 0)).x) : 0;	
@@ -4949,7 +4999,6 @@ uniform int Extra_Information <
 						
 					float BlendOut = lerp(-0.5,1.0,DMix); //lerp(0.75,0.5,Middel_Depth)
  						 
-					float Alpha_UI_Depth = 0.9;//0 - 1
 					Game_Alpha_UI = smoothstep(Alpha_UI_Depth,1, Alpha_UI );
 					Game_Alpha_UI_M = smoothstep( Alpha_UI_Depth, 1, tex2Dlod(SamplerCN,float4(texcoord,0,4)).y );
 		
@@ -4984,7 +5033,6 @@ uniform int Extra_Information <
 	
 					float Tuning_Value = lerp(-0.05,0.0,1-texcoord.y);
  
-					float Alpha_UI_Depth = 0.9;//0 - 1
 					Game_Alpha_UI = smoothstep(Alpha_UI_Depth,1, Alpha_UI );
 					Game_Alpha_UI_M = smoothstep( Alpha_UI_Depth, 1, tex2Dlod(SamplerCN,float4(texcoord,0,4)).y );
 		
@@ -5027,16 +5075,30 @@ uniform int Extra_Information <
 					MixOut = lerp(Guided,Local,FPS_Area_S);
 					MixOut = lerp(Guided,MixOut,Avg_UI);
 				}
-
-				if(Alpha_Auto_UI == 0) // Static
-				{
-					float Alpha_UI_Depth = 0.75;//0 - 1
-					Game_Alpha_UI = smoothstep(Alpha_UI_Depth, 1, Alpha_UI );
-					Game_Alpha_UI_M = smoothstep( Alpha_UI_Depth, 1, tex2Dlod(SamplerCN,float4(texcoord,0,4)).y );
-				    
-					MixOut = lerp(min(Game_Alpha_UI,Game_Alpha_UI_M), (1-texcoord.y) * 0.5 + 0.5,0.125);
-				}
 				
+				if (Alpha_Auto_UI == 6) //Third Person
+				{
+					float Local = TRD_Alpha_UI.x * OA_Power;
+					float Guided = TRD_Alpha_UI.y * OA_Power;
+					
+					float S_UI = smoothstep(0.375,1.0,Avg_UI);//1 when no UI more UI it gets closer to zero.
+					float2 C_RT_Scale =lerp(float2(0.25,0.5),float2(0.375,0.75), Controller_RT);
+					float TRD_Area_S = texcoord.x < 0.5 ? texcoord.x : 1-texcoord.x,C_UI_Value_A = 0.4375, TCY = texcoord.y * 0.5 + 0.625;
+						  TRD_Area_S = smoothstep(C_UI_Value_A * 0.5,C_UI_Value_A,TRD_Area_S); 
+						  TRD_Area_S = saturate(lerp(TRD_Area_S, 1,texcoord.y < 0.25) + smoothstep(C_RT_Scale.x,C_RT_Scale.y,1-texcoord.y) * 2);
+						  TRD_Area_S = saturate(smoothstep(lerp(0,-0.125,Edge_Fix),1.0,TRD_Area_S));
+						  //TRD_Area_S = lerp(1,TRD_Area_S,texcoord.x < 0.5? 1.0 : saturate((TCY - texcoord.x) * (TCY - (1-texcoord.x)) * 25.0));
+						  //TRD_Area_S = lerp(1,TRD_Area_S,saturate((TCY - texcoord.x) * (TCY - (1-texcoord.x)) * 25.0));
+						  TRD_Area_S = lerp(TRD_Area_S,1.0,IM_Stencil(texcoord, -0.5, 1.5, 1) * 0.4375 + 0.4375 );
+						  
+					float LargeCenter = saturate(tex2Dlod(SamplerAvrB_N, float4(texcoord, 0, 6)).x);
+					MixOut = lerp(Guided,Local,lerp(1.0,TRD_Area_S,LargeCenter));
+					MixOut = lerp(Local,MixOut,S_UI);
+					MixOut = lerp(MixOut,Local,Controller_RT);
+					
+					Avg_UI = lerp(Avg_UI,1.0,Controller_RT);
+				}				
+
 				MixOut = lerp( Store_MixOut, MixOut, Alpha_Letter_Box);
 				
 				if (Alpha_Auto_UI <= 3)
@@ -6468,7 +6530,11 @@ uniform int Extra_Information <
 			    Color = Color;
 			    #endif
 				//Color.rgb = PS_calcLR(texcoord, position.xy).rgb;
-			
+				//uniform float gamepad_toggle[20] < source = "gamepad_toggle"; >;
+				//uniform float gamepad_raw[20]    < source = "gamepad_raw";    >;
+				
+				//Color.rgb = gamepad_toggle[4];
+				//Color = Trigger_Fade_Hold;
 				return Color.rgba;
 			}
 		#endif
@@ -7210,6 +7276,5 @@ uniform int Extra_Information <
 		}
 		#endif
 	}
-	#endif	
-	
+	#endif		
 }
