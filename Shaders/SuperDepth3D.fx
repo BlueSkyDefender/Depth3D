@@ -1,7 +1,7 @@
 	////----------------//
 	///**SuperDepth3D**///
 	//----------------////
-	#define SD3D "SuperDepth3D v5.1.3\n"
+	#define SD3D "SuperDepth3D v5.1.4\n"
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//* Depth Map Based 3D post-process shader
 	//* For Reshade 3.0+
@@ -4908,7 +4908,7 @@ uniform int Extra_Information <
 			float OA_Power = saturate(abs(Divergence_Switch().y) * 0.01);
 			float Alpha_Letter_Box = Alpha_UI_Has_LB == 0  ? 1 : LetterBox_UI(texcoord);	
 			float Alpha_UI_Depth = ASU;//0 - 1
-			float Controller_RT = saturate(gamepad_toggle[5]*2);
+			float Controller_RT = saturate(gamepad_raw[5]*2);
 			
 			if(1-Alpha_UI > 0.0)
 			{

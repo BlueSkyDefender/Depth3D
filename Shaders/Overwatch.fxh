@@ -1,7 +1,7 @@
 ////----------------------------------------//
 ///SuperDepth3D Overwatch Automation Header///
 //----------------------------------------////
-#define OVERWATCH "Overwatch v4.6.7\n"
+#define OVERWATCH "Overwatch v4.6.8\n"
 //---------------------------------------OVERWATCH---------------------------------------//
 // If you are reading this stop. Go away and never look back. From this point on if you  //
 // still think it's is worth looking at this..... Then no one can save you or your soul. //
@@ -40002,7 +40002,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	
 	//#define ASU 0.5     //Lets you Adjust the Stencil's Contrbution
     //#define SMS 1         //SM Separation Limit  - Do Not use any more
-	#define DL_X 0.70       //SM Tune Limit
+	#define DL_X 0.6875       //SM Tune Limit
 	//#define DL_W 0.5      //SM Perspective Limit - Do Not use any more
 	#define DM_X 5        //SM HQ Tune Power       - Will be made global
     //#define DM_Y 1        //SM HQ VRS Limit
