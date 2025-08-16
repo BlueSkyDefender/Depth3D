@@ -1,7 +1,7 @@
 	////----------------//
 	///**SuperDepth3D**///
 	//----------------////
-	#define SD3D "SuperDepth3D v5.1.4\n"
+	#define SD3D "SuperDepth3D v5.1.5\n"
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//* Depth Map Based 3D post-process shader
 	//* For Reshade 3.0+
@@ -1878,9 +1878,8 @@ uniform int Extra_Information <
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	uniform bool Cancel_Depth < source = "key"; keycode = Cancel_Depth_Key; toggle = true; mode = "toggle";>;
 	uniform bool Text_Info < source = "key"; keycode = Text_Info_Key; toggle = true; mode = "toggle";>;
-	//Needs Gamepad Add-on
-	uniform float gamepad_toggle[20] < source = "gamepad_toggle"; >;
-	uniform float gamepad_raw[20]    < source = "gamepad_raw";    >;
+	//Needs Gamepad Add-on X is Toggle Y is Raw
+	uniform float2 gamepad_toggle_raw[20]    < source = "gamepad_toggle_raw";>;
 	
 	uniform bool CLK_04 < source = "mousebutton"; keycode = Mouse_Key_Four; toggle = true; mode = "toggle";>;
 	uniform bool CLK_03 < source = "mousebutton"; keycode = Mouse_Key_Three; toggle = true; mode = "toggle";>;
@@ -3672,15 +3671,15 @@ uniform int Extra_Information <
 
 		//Fade in toggle.
 		if(FPSDFIO == 1 )
-			Trigger_Fade = Trigger_Fade_Toggle || gamepad_toggle[4];
+			Trigger_Fade = Trigger_Fade_Toggle || gamepad_toggle_raw[4].x;
 		else if(FPSDFIO == 2)
-			Trigger_Fade = Trigger_Fade_Hold || gamepad_raw[4];
+			Trigger_Fade = Trigger_Fade_Hold || gamepad_toggle_raw[4].y;
 		else if(FPSDFIO == 3)
 			Trigger_Fade = SnD_Toggle;
 		else if(FPSDFIO == 4)
-			Trigger_Fade = Trigger_Fade_Toggle || SnD_Toggle || gamepad_toggle[4];			
+			Trigger_Fade = Trigger_Fade_Toggle || SnD_Toggle || gamepad_toggle_raw[4].x;			
 		else if(FPSDFIO == 5)
-			Trigger_Fade = Trigger_Fade_Hold || SnD_Toggle || gamepad_raw[4];
+			Trigger_Fade = Trigger_Fade_Hold || SnD_Toggle || gamepad_toggle_raw[4].y;
 			
 		if(Toggle_On_Boundary)	
 		{
@@ -4908,7 +4907,7 @@ uniform int Extra_Information <
 			float OA_Power = saturate(abs(Divergence_Switch().y) * 0.01);
 			float Alpha_Letter_Box = Alpha_UI_Has_LB == 0  ? 1 : LetterBox_UI(texcoord);	
 			float Alpha_UI_Depth = ASU;//0 - 1
-			float Controller_RT = saturate(gamepad_raw[5]*2);
+			float Controller_RT = saturate(gamepad_toggle_raw[5].y*2);
 			
 			if(1-Alpha_UI > 0.0)
 			{
