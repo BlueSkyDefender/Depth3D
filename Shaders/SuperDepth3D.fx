@@ -1,7 +1,7 @@
 	////----------------//
 	///**SuperDepth3D**///
 	//----------------////
-	#define SD3D "SuperDepth3D v5.1.5\n"
+	#define SD3D "SuperDepth3D v5.1.6\n"
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//* Depth Map Based 3D post-process shader
 	//* For Reshade 3.0+
@@ -1765,7 +1765,7 @@ uniform int SuperDepth3D <
 	uniform int Alpha_Auto_UI <
 		ui_label = " UI Mode";
 		ui_type = "combo";
-		ui_items = "Self-Adjusting UI (Vicinal-Depth)\0Self-Adjusting UI (Local-Depth)\0Self-Adjusting UI (Avr-Depth)\0Self-Adjusting UI (Guided-Depth)\0Self-Adjusting UI (FPS-Alpha)\0Self-Adjusting UI (3rd-Alpha)\0Self-Adjusting UI (Mix-Alpha)\0";
+		ui_items = "Self-Adjusting UI (Vicinal-Depth)\0Self-Adjusting UI (Local-Depth)\0Self-Adjusting UI (Avr-Depth)\0Self-Adjusting UI (Guided-Depth)\0Self-Adjusting UI (FPS-Alpha)\0Self-Adjusting UI (3rd-Alpha)\0Self-Adjusting UI (Mix-Alpha)\0Self-Adjusting UI (FPTP-Alpha)\0";
 		ui_tooltip = "Choose how to handle UI masking via the alpha channel:\n\n"
 		             "- Mostly Static UI: Best for games with UI that doesn't move or change frequently.\n"
 		             "- Self-Adjusting UI (Depth-Based): Dynamically adjusts based on depth, useful for games\n"
@@ -4945,11 +4945,11 @@ uniform int Extra_Information <
 					Avg_UI = lerp(Avg_UI,1.0,Controller_RT);
 				}
 				
-				if(Alpha_Auto_UI == 1 || Alpha_Auto_UI == 4 || Alpha_Auto_UI == 5) //Local
+				if(Alpha_Auto_UI == 1 || Alpha_Auto_UI == 4 || Alpha_Auto_UI == 5 || Alpha_Auto_UI == 7) //Local
 				{
 					float mipCoarse = 2.0, mipFine = 4.0, Scale_FPS_Dist_A = 1.0, Scale_FPS_Dist_B = 0.55;
 
-					if(Alpha_Auto_UI == 4)
+					if(Alpha_Auto_UI == 4 || Alpha_Auto_UI == 7)
 					{
 						Scale_FPS_Dist_A = 1.075;
 						Scale_FPS_Dist_B = 0.5;
@@ -4977,7 +4977,7 @@ uniform int Extra_Information <
 		
 					float S_UI = lerp(1-Alpha_UI > 0.0,texcoord.y < 0.5? texcoord.y + 0.25 : (1-texcoord.y) + 0.25,0.25);
 					float AS_UI = lerp(0.0,S_UI,BlendOut + Tuning_Value) ;
-					if (Alpha_Auto_UI == 4 || Alpha_Auto_UI == 5)
+					if (Alpha_Auto_UI == 4 || Alpha_Auto_UI == 5 || Alpha_Auto_UI == 7)
 					{
 						if(Alpha_Auto_UI == 5)
 						TRD_Alpha_UI.x = min(Game_Alpha_UI,Game_Alpha_UI_M) + AS_UI;
@@ -4988,7 +4988,7 @@ uniform int Extra_Information <
 						MixOut = min(Game_Alpha_UI,Game_Alpha_UI_M) + AS_UI;
 				}
 				
-				if(Alpha_Auto_UI == 2 || Alpha_Auto_UI == 5 ) //Avr
+				if(Alpha_Auto_UI == 2 || Alpha_Auto_UI == 5 || Alpha_Auto_UI == 7) //Avr
 				{
 					float mipLevel_A = 7, mipLevel_B = 5.0;
 					//float Middel_Depth = Alpha_Auto_UI == 5 ? smoothstep(0.5,1.0,tex2Dlod(SamplerAvrB_N, float4(float2(0.5,0.5), 0, 0)).x) : 0;	
@@ -5004,7 +5004,7 @@ uniform int Extra_Information <
 					float S_UI = lerp(1-Alpha_UI > 0.0,texcoord.y < 0.5? texcoord.y + 0.25 : (1-texcoord.y) + 0.25,0.25);;
 					float AS_UI = lerp(0.0,S_UI,BlendOut) ;
 			
-					if (Alpha_Auto_UI == 5)
+					if (Alpha_Auto_UI == 5 || Alpha_Auto_UI == 7)
 						TRD_Alpha_UI.y = min(Game_Alpha_UI,Game_Alpha_UI_M) + AS_UI;
 					else
 						MixOut = min(Game_Alpha_UI,Game_Alpha_UI_M) + AS_UI;	
@@ -5038,7 +5038,7 @@ uniform int Extra_Information <
 					float S_UI = 1-Alpha_UI > 0.0;
 					float AS_UI = lerp(0.0,S_UI,BlendOut + Tuning_Value) ;
 			
-					if (Alpha_Auto_UI == 4)
+					if (Alpha_Auto_UI == 4 )
 						FPS_Alpha_UI.y = min(Game_Alpha_UI,Game_Alpha_UI_M) + AS_UI;
 					else
 						MixOut = min(Game_Alpha_UI,Game_Alpha_UI_M) + AS_UI;
@@ -5097,6 +5097,27 @@ uniform int Extra_Information <
 					
 					Avg_UI = lerp(Avg_UI,1.0,Controller_RT);
 				}				
+
+				if (Alpha_Auto_UI == 7) //Third / First / Person
+				{
+					float Guided = TRD_Alpha_UI.y * OA_Power;
+					float Local = FPS_Alpha_UI.x * OA_Power;
+					float S_UI = lerp(0.0,0.5,Avg_UI);
+					
+					//float FPS_Area_S = texcoord.x < 0.5 ? texcoord.x : 1-texcoord.x,C_UI_Value_A = lerp(0.4,0.5,Avg_UI);
+					//	  FPS_Area_S = saturate(smoothstep(C_UI_Value_A * 0.5,C_UI_Value_A,FPS_Area_S) * smoothstep(0.875,0.5,texcoord.y) * 2.0); 
+						  
+					//float FPS_Area_S = texcoord.y < 0.5 ? texcoord.y : 1-texcoord.y ,C_UI_Value_A = lerp(0.4,0.5,Avg_UI);
+					//      FPS_Area_S = saturate(smoothstep(C_UI_Value_A * 0.5,C_UI_Value_A,FPS_Area_S) * smoothstep(0.75,0.5,texcoord.y) ); 
+					float FPS_Area_S = texcoord.x < 0.5 ? texcoord.x : 1-texcoord.x ,C_UI_Value_A = lerp(0.5,0.6,Avg_UI);
+						  FPS_Area_S = saturate(smoothstep(C_UI_Value_A * 0.5,C_UI_Value_A,FPS_Area_S) * smoothstep(0.75,0.5,texcoord.y > 0.5 ? texcoord.y : 1-texcoord.y) * 2 );
+
+						  
+					Local = lerp(Local,lerp(Local,Store_MixOut,S_UI),Vin_Alpha_UI(texcoord,Low_Rez_Depth,0));
+					
+					MixOut = lerp(Guided,Local,FPS_Area_S);
+					MixOut = lerp(Guided,MixOut,Avg_UI);
+				}
 
 				MixOut = lerp( Store_MixOut, MixOut, Alpha_Letter_Box);
 				
