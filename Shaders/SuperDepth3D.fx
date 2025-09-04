@@ -1,7 +1,7 @@
 	////----------------//
 	///**SuperDepth3D**///
 	//----------------////
-	#define SD3D "SuperDepth3D v5.1.6\n"
+	#define SD3D "SuperDepth3D v5.1.8\n"
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//* Depth Map Based 3D post-process shader
 	//* For Reshade 3.0+
@@ -133,7 +133,7 @@ namespace SuperDepth3D
 		#define OW_WP "WP Off\0Custom WP\0"
 		#define G_Info "Missing Overwatch.fxh Information.\n"
 		#define G_Note "Note: If you pulled this file intentionally, please ignore this message.\n"
-		static const int WMM = 0, SDD = 0, DMM = 0, LBL = 0, LBD = 0, WSM = 0, TSC = 0;
+		static const int AIM = 0, WMM = 0, SDD = 0, DMM = 0, LBD = 0, WSM = 0;
 		static const int2 DOL = 0;
 		//Triggers 
 		static const float HNR = 0, THF = 0, EGB = 0,PLS = 0, MGA = 0, WZD = 0, KHM = 0, DAO = 0, LDT = 0, ALM = 0, SSF = 0, SNF = 0, SSE = 0, SNE = 0, EDU = 0, LBI = 0,ISD = 0, ASA = 1, IWS = 0, SUI = 0, SSA = 0, SNA = 0, SSB = 0, SNB = 0,SSC = 0, SNC = 0,SSD = 0, SND = 0, LHA = 0, WBS = 0, TMD = 0, FRM = 0, AWZ = 0, CWH = 0, WBA = 0, WFB = 0, WND = 0, WRP = 0, MML = 0, SMD = 0, WHM = 0, SDU = 0, ABE = 2, LBE = 0, HQT = 0, HMD = 0.5, MAC = 0, OIL = 0, MMS = 0, FTM = 0, FMM = 0, SPO = 0, MMD = 0, LBR = 0, AFD = 0, MDD = 0, FPS = 1, SMS = 1, OIF = 0, NCW = 0, RHW = 0, NPW = 0, SPF = 0, BDF = 0, HMT = 0, HMC = 0, DFW = 0, NFM = 0, DSW = 0, LBC = 0, LBS = 0, LBM = 0, DAA = 0, NDW = 0, PEW = 0, WPW = 0, FOV = 0, EDW = 0, SDT = 0;
@@ -953,7 +953,7 @@ uniform int SuperDepth3D <
 		ui_tooltip = "Shift the depth map if a slight misalignment is detected.";
 		ui_category = "Scaling Corrections";
 	> = ASA;
-		#if LBC || LB_Correction || EDW
+		#if LBC || LB_Correction || EDW || DB_Size_Position
 		uniform int LBD_Switcher <
 			ui_type = "combo";
 				ui_items = "Off\0Direction X&Y\0Direction X\0Direction Y\0";
@@ -1782,6 +1782,12 @@ uniform int SuperDepth3D <
 					"Default is 0.0, off.";
 		ui_category = "Miscellaneous Options";
 	> = Alpha_XYZW.w;
+
+	uniform bool Isolate_UI <
+		ui_label = " UI Alpha Isolation";
+		ui_tooltip = "Used to Isolate a narrow band of information in the Alpha Channel.";
+		ui_category = "Miscellaneous Options";
+	> = AIM;	
 	//This last option will be reworked.
 	uniform bool Alpha_UI_is_Narrow <
 		ui_label = " UI Narrow";
@@ -4076,15 +4082,14 @@ uniform int Extra_Information <
 		#else
 		if(Alpha_Channel_UI)
 		{
-			float2 TC_Off = texcoord;
-			float2 Offsets = pix;
-			float center = tex2D(Non_Point_Sampler, TC_Off).w;
-			float right = tex2D(Non_Point_Sampler, TC_Off + float2(Offsets.x, 0.0)).w;
-			float left = tex2D(Non_Point_Sampler, TC_Off + float2(-Offsets.x, 0.0)).w;
-			float up = tex2D(Non_Point_Sampler, TC_Off + float2(0.0, Offsets.y)).w;
-			float down = tex2D(Non_Point_Sampler, TC_Off + float2(0.0, -Offsets.y)).w;
+			float Alpha_Avr = Isolate_UI ? 4.0 : 5.0;
+			float center = tex2D(Non_Point_Sampler, texcoord).w;
 			
-			float Color_UI_MAP = (center + right + left + up + down) / 5; //We mask it out later		
+			// Gather 4 neighbors in one call R/G/B/A are the 4 surrounding center
+			float4 gathered = tex2DgatherA(Non_Point_Sampler, texcoord);
+			
+			// Average center + 4 gathered neaighbors
+			float Color_UI_MAP = (center + gathered.x + gathered.y + gathered.z + gathered.w) * rcp(Alpha_Avr);	
 			
 			Color.y = 1-Color_UI_MAP;
 		}
@@ -4902,7 +4907,10 @@ uniform int Extra_Information <
 			
 			float Game_Alpha_UI, Game_Alpha_UI_M;	
 			float Alpha_UI = tex2Dlod(SamplerCN,float4(texcoord,0,0)).y;
-			
+
+			if(Isolate_UI)
+				Alpha_UI = smoothstep(0.0, 0.25,Alpha_UI);
+
 			float Low_Rez_Depth = tex2Dlod(SamplerAvrB_N, float4(texcoord, 0, 5)).x;	
 			float OA_Power = saturate(abs(Divergence_Switch().y) * 0.01);
 			float Alpha_Letter_Box = Alpha_UI_Has_LB == 0  ? 1 : LetterBox_UI(texcoord);	
@@ -4976,6 +4984,10 @@ uniform int Extra_Information <
 					Game_Alpha_UI_M = smoothstep( Alpha_UI_Depth, 1, tex2Dlod(SamplerCN,float4(texcoord,0,4)).y );
 		
 					float S_UI = lerp(1-Alpha_UI > 0.0,texcoord.y < 0.5? texcoord.y + 0.25 : (1-texcoord.y) + 0.25,0.25);
+					
+					if(Isolate_UI)
+						S_UI = 1-Alpha_UI > 0.0 ? 0.875 : 1;
+					
 					float AS_UI = lerp(0.0,S_UI,BlendOut + Tuning_Value) ;
 					if (Alpha_Auto_UI == 4 || Alpha_Auto_UI == 5 || Alpha_Auto_UI == 7)
 					{
@@ -5001,7 +5013,11 @@ uniform int Extra_Information <
 					Game_Alpha_UI = smoothstep(Alpha_UI_Depth,1, Alpha_UI );
 					Game_Alpha_UI_M = smoothstep( Alpha_UI_Depth, 1, tex2Dlod(SamplerCN,float4(texcoord,0,4)).y );
 		
-					float S_UI = lerp(1-Alpha_UI > 0.0,texcoord.y < 0.5? texcoord.y + 0.25 : (1-texcoord.y) + 0.25,0.25);;
+					float S_UI = lerp(1-Alpha_UI > 0.0,texcoord.y < 0.5? texcoord.y + 0.25 : (1-texcoord.y) + 0.25,0.25);
+					
+					if(Isolate_UI)
+						S_UI = 1-Alpha_UI > 0.0 ? 0.875 : 1;					
+					
 					float AS_UI = lerp(0.0,S_UI,BlendOut) ;
 			
 					if (Alpha_Auto_UI == 5 || Alpha_Auto_UI == 7)
@@ -5030,7 +5046,7 @@ uniform int Extra_Information <
 						
 					float BlendOut = lerp(Scale_FPS_Dist_C,0.25,DMix);
 	
-					float Tuning_Value = lerp(-0.05,0.0,1-texcoord.y);
+					float Tuning_Value = Alpha_Auto_UI == 3 ? 0.0 : lerp(-0.05,0.0,1-texcoord.y);
  
 					Game_Alpha_UI = smoothstep(Alpha_UI_Depth,1, Alpha_UI );
 					Game_Alpha_UI_M = smoothstep( Alpha_UI_Depth, 1, tex2Dlod(SamplerCN,float4(texcoord,0,4)).y );
@@ -5123,8 +5139,9 @@ uniform int Extra_Information <
 				
 				if (Alpha_Auto_UI <= 3)
 					MixOut *= OA_Power;
-				
-				MixOut = lerp(0.025,MixOut,Avg_UI);
+					
+				if(!Isolate_UI)
+					MixOut = lerp(0.025,MixOut,Avg_UI);
 			}
 
 		}
@@ -5155,17 +5172,21 @@ uniform int Extra_Information <
 		const float2 dir = float2(0.5f, 0.0f);
 	    const float MS = abs(Divergence_Switch().y) * 0.0005, Disocclusion_Adjust = 5.5f, Div = rcp(N + 1);
 		const float weight[N] = { 0.0125f,-0.0125f, 0.0175f,-0.0175f, 0.03f, -0.03f, 0.05f,-0.05f };
-
-        DM = Depth * Div;
-
-        [loop]
-        for (int i = 0; i < N; i++)
-        {
-            float2 offset = dir * (weight[i] * MS) * Disocclusion_Adjust; // * 1.0 - 1.25
-            DM += tex2Dlod(Tex, float4(texcoord + offset, 0, 3)).x * Div;
-        }
+		if(View_Mode != 3)
+		{
+	        DM = Depth * Div;
 	
-	    return min(DM, Depth);
+	        [loop]
+	        for (int i = 0; i < N; i++)
+	        {
+	            float2 offset = dir * (weight[i] * MS) * Disocclusion_Adjust; // * 1.0 - 1.25
+	            DM += tex2Dlod(Tex, float4(texcoord + offset, 0, 3)).x * Div;
+	        }
+	
+	    	return min(DM, Depth);
+	    }
+	    else
+	    	return Depth;
 	}	
 		
 	void Up_Z(in float4 position : SV_Position, in float2 texcoord : TEXCOORD, out float UpOut : SV_Target0)
@@ -5362,7 +5383,7 @@ uniform int Extra_Information <
 				        break;
 				
 				    // Combine both depth samples into one call
-				    float2 Depths = GetMixed_Combined(ParallaxCoord, Artifacting_Adjust);
+				    float2 Depths = GetMixed_Combined(ParallaxCoord, Artifacting_Adjust);//May be able to apply a corner map to Artifacting_Adjust to increase performance.
 				    // Get depth values
 				    float G_Depth = Depths.x, C_Depth = Depths.y;			    
 					float diff = abs(G_Depth - C_Depth);
@@ -5396,7 +5417,7 @@ uniform int Extra_Information <
 				        break;
 					    
 				    // Combine both depth samples into one call
-				    float2 Depths = GetMixed_Combined(ParallaxCoord, Artifacting_Adjust);
+				    float2 Depths = GetMixed_Combined(ParallaxCoord, 0);
 				    // Get depth values
 				    float G_Depth = Depths.x, C_Depth = Depths.y;			    
 					float diff = abs(G_Depth - C_Depth);
@@ -5786,8 +5807,11 @@ uniform int Extra_Information <
 
 	void Con_Values(in float2 texcoord, out float2 DLR, out float2 TCL, out float2 TCR, out float2 TCL_T, out float2 TCR_T, out float Pattern)
 	{
+		#if Virtual_Reality_Mode
+		float D = !Eye_Swap ? -Min_Divergence().x : Min_Divergence().x;
+		#else
 		float D = Eye_Swap ? -Min_Divergence().x : Min_Divergence().x;
-
+		#endif
 		float FadeIO = Focus_Reduction_Type == 1 ? 1 : smoothstep(0, 1, 1 - Fade_in_out().x), FD = D, FD_Adjust = 0.2;
 						
 		if( World_n_Fade_Reduction_Power.x == 1)
@@ -6074,7 +6098,7 @@ uniform int Extra_Information <
 	    	[unroll] 
 	        for (int i = -1; i <= 1; ++i)
 	        {
-	            float2 XY = float2(i, j) * Pix * 50.0;
+	            float2 XY = float2(i, j) * pix * 50.0;
 	            float v = tex2Dlod(tex, float4(texcoords + XY, 0, mipLevel)).x;
 	            m = min(m, v);
 	        }
@@ -6555,6 +6579,7 @@ uniform int Extra_Information <
 				
 				//Color.rgb = gamepad_toggle[4];
 				//Color = Trigger_Fade_Hold;
+				//Color = 1-tex2D(Non_Point_Sampler,texcoord).w;
 				return Color.rgba;
 			}
 		#endif
