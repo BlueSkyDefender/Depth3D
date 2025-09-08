@@ -1,7 +1,7 @@
 	////----------------//
 	///**SuperDepth3D**///
 	//----------------////
-	#define SD3D "SuperDepth3D v5.1.8\n"
+	#define SD3D "SuperDepth3D v5.1.9\n"
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//* Depth Map Based 3D post-process shader
 	//* For Reshade 3.0+
@@ -1765,7 +1765,16 @@ uniform int SuperDepth3D <
 	uniform int Alpha_Auto_UI <
 		ui_label = " UI Mode";
 		ui_type = "combo";
-		ui_items = "Self-Adjusting UI (Vicinal-Depth)\0Self-Adjusting UI (Local-Depth)\0Self-Adjusting UI (Avr-Depth)\0Self-Adjusting UI (Guided-Depth)\0Self-Adjusting UI (FPS-Alpha)\0Self-Adjusting UI (3rd-Alpha)\0Self-Adjusting UI (Mix-Alpha)\0Self-Adjusting UI (FPTP-Alpha)\0";
+		ui_items = "Self-Adjusting UI (Vicinal-Depth)\0"
+		           "Self-Adjusting UI (Local-Depth)\0"
+		           "Self-Adjusting UI (Avr-Depth)\0"
+		           "Self-Adjusting UI (Guided-Depth)\0"
+		           "Self-Adjusting UI (FPS-Alpha)\0"
+		           "Self-Adjusting UI (3rd-Alpha)\0"
+		           "Self-Adjusting UI (Mix-Alpha)\0"
+		           "Self-Adjusting UI (FPTP-Alpha)\0"
+		           "Self-Adjusting UI (Min-Alpha)\0"
+		           "Self-Adjusting UI (FPSP-Alpha)\0";
 		ui_tooltip = "Choose how to handle UI masking via the alpha channel:\n\n"
 		             "- Mostly Static UI: Best for games with UI that doesn't move or change frequently.\n"
 		             "- Self-Adjusting UI (Depth-Based): Dynamically adjusts based on depth, useful for games\n"
@@ -2639,6 +2648,8 @@ uniform int Extra_Information <
 			Letter_Box_Reposition = float2(0.5,0.625);
 		if (LBR == 3) 
 			Letter_Box_Reposition = float2(0.50,0.5);
+		if (LBR == 4) 
+			Letter_Box_Reposition = float2(0.5,0.92);
 		
 		if (LBI)
 			Letter_Box_Reposition.x = 1-Letter_Box_Reposition.x;		
@@ -4081,17 +4092,31 @@ uniform int Extra_Information <
 		Color.y = max(Color_UI_MAP.r, max(Color_UI_MAP.g, Color_UI_MAP.b));
 		#else
 		if(Alpha_Channel_UI)
-		{
-			float Alpha_Avr = Isolate_UI ? 4.0 : 5.0;
+		{			
 			float center = tex2D(Non_Point_Sampler, texcoord).w;
 			
-			// Gather 4 neighbors in one call R/G/B/A are the 4 surrounding center
+			// Gather 4 diagonal neighbors
 			float4 gathered = tex2DgatherA(Non_Point_Sampler, texcoord);
 			
-			// Average center + 4 gathered neaighbors
-			float Color_UI_MAP = (center + gathered.x + gathered.y + gathered.z + gathered.w) * rcp(Alpha_Avr);	
+			float Color_UI_MAP;
 			
-			Color.y = 1-Color_UI_MAP;
+			if (true)
+			{
+			    // --- New method: 7 samples (center + 4 + left/right)
+			    float left  = tex2D(Non_Point_Sampler, texcoord - float2(pix.x, 0.0)).w;
+			    float right = tex2D(Non_Point_Sampler, texcoord + float2(pix.x, 0.0)).w;
+			
+			    float Alpha_Avr = Isolate_UI ? 6.0 : 7.0;
+			    Color_UI_MAP = (center + gathered.x + gathered.y + gathered.z + gathered.w + left + right) * rcp(Alpha_Avr);
+			}
+			else
+			{
+			    // --- Old method: 5 samples (center + 4)
+			    float Alpha_Avr = Isolate_UI ? 4.0 : 5.0;
+			    Color_UI_MAP = (center + gathered.x + gathered.y + gathered.z + gathered.w) * rcp(Alpha_Avr);
+			}
+			
+			Color.y = 1 - Color_UI_MAP;
 		}
 		else
 			Color.y = tex2D(Non_Point_Sampler, texcoord).w;
@@ -4815,14 +4840,24 @@ uniform int Extra_Information <
 			texcoord.x = (texcoord.x - 0.5) * ARatio + 0.5;
 			
 		float V_Value_A = FLT_EPSILON + 1.0,V_Value_B = FLT_EPSILON + 0.5, V_Calibrate = lerp(0.55,0.54,Depth_Info);
-		float2 Prep_TC = texcoord * 2.9, V_Adjust_A = float2(V_Value_A * 0.5,V_Value_A * V_Calibrate), V_Adjust_B = float2(V_Value_B * 0.5,V_Value_B);
+		float2 Prep_TC = texcoord * 2.925, V_Adjust_A = float2(V_Value_A * 0.5,V_Value_A * V_Calibrate), V_Adjust_B = float2(V_Value_B * 0.5,V_Value_B);
 		float2 TCV = -texcoord * Prep_TC + Prep_TC;
 		float Vin = smoothstep(V_Adjust_A.x,V_Adjust_A.y,TCV.x * TCV.y) * 2;
 		if(Switch)
 			Vin = smoothstep(V_Adjust_B.x,V_Adjust_B.y,TCV.x * TCV.y);
 		return saturate(Vin);
 	}
-		
+	
+	float Alpha_UI_Mask(float2 texcoord, float Mip)
+	{
+		float Alpha_UI = tex2Dlod(SamplerCN,float4(texcoord,0,Mip)).y;
+
+		if(Isolate_UI)
+			Alpha_UI = smoothstep(0.0, 0.25,Alpha_UI);
+	
+		return Alpha_UI;	
+	}	
+	
 	void Mix_Z(in float4 position : SV_Position, in float2 texcoord : TEXCOORD, out float MixOut : SV_Target0)
 	{
 		#if BD_Correction || BDF
@@ -4906,10 +4941,7 @@ uniform int Extra_Information <
 			float Edge_Fix = EdgeMask( 1, texcoord, 0.95 ).x;	
 			
 			float Game_Alpha_UI, Game_Alpha_UI_M;	
-			float Alpha_UI = tex2Dlod(SamplerCN,float4(texcoord,0,0)).y;
-
-			if(Isolate_UI)
-				Alpha_UI = smoothstep(0.0, 0.25,Alpha_UI);
+			float Alpha_UI = Alpha_UI_Mask(texcoord,0);
 
 			float Low_Rez_Depth = tex2Dlod(SamplerAvrB_N, float4(texcoord, 0, 5)).x;	
 			float OA_Power = saturate(abs(Divergence_Switch().y) * 0.01);
@@ -4919,7 +4951,7 @@ uniform int Extra_Information <
 			
 			if(1-Alpha_UI > 0.0)
 			{
-				if(Alpha_Auto_UI == 0 || Alpha_Auto_UI == 6) // Vicinal
+				if(Alpha_Auto_UI == 0 || Alpha_Auto_UI == 6 || Alpha_Auto_UI == 8) // Vicinal
 				{
 					float mipCoarse = 4.0, mipFine = 2.0, mipLarge = 5.0, Scale_Dist_A = 1.0, Scale_Dist_B = 0.5;
 					float Middel_Depth = smoothstep(0.0,1.0,tex2Dlod(SamplerAvrB_N, float4(float2(0.5,0.5), 0, mipLarge)).x);	  
@@ -4939,7 +4971,7 @@ uniform int Extra_Information <
 					float S_UI = 1-Alpha_UI > 0.0;
 					float AS_UI = lerp(0.0,S_UI,BlendOut + Tuning_Value);
 					
-					if(Alpha_Auto_UI == 6)
+					if(Alpha_Auto_UI == 6 || Alpha_Auto_UI == 8)
 					{
 						TRD_Alpha_UI.x = min(Game_Alpha_UI,Game_Alpha_UI_M) + AS_UI;
 						TRD_Alpha_UI.x = lerp(0.5f,TRD_Alpha_UI.x,Middel_Depth);
@@ -4953,7 +4985,7 @@ uniform int Extra_Information <
 					Avg_UI = lerp(Avg_UI,1.0,Controller_RT);
 				}
 				
-				if(Alpha_Auto_UI == 1 || Alpha_Auto_UI == 4 || Alpha_Auto_UI == 5 || Alpha_Auto_UI == 7) //Local
+				if(Alpha_Auto_UI == 1 || Alpha_Auto_UI == 4 || Alpha_Auto_UI == 5 || Alpha_Auto_UI == 7 || Alpha_Auto_UI == 9) //Local
 				{
 					float mipCoarse = 2.0, mipFine = 4.0, Scale_FPS_Dist_A = 1.0, Scale_FPS_Dist_B = 0.55;
 
@@ -4963,6 +4995,13 @@ uniform int Extra_Information <
 						Scale_FPS_Dist_B = 0.5;
 						mipCoarse = lerp(4.0,mipCoarse,saturate(Avg_UI * 2));
 						mipFine = lerp(5.0,mipFine,saturate(Avg_UI * 2));
+					}
+					else if(Alpha_Auto_UI == 9)
+					{
+						Scale_FPS_Dist_A = 1.05;
+						Scale_FPS_Dist_B = 0.125;
+						mipCoarse = lerp(4.0,mipCoarse,saturate(Avg_UI * 2));
+						//mipFine = lerp(5.0,mipFine,saturate(Avg_UI * 2));
 					}
 					else if(Alpha_Auto_UI == 5)
 					{
@@ -4988,8 +5027,8 @@ uniform int Extra_Information <
 					if(Isolate_UI)
 						S_UI = 1-Alpha_UI > 0.0 ? 0.875 : 1;
 					
-					float AS_UI = lerp(0.0,S_UI,BlendOut + Tuning_Value) ;
-					if (Alpha_Auto_UI == 4 || Alpha_Auto_UI == 5 || Alpha_Auto_UI == 7)
+					float AS_UI = lerp(0.0,S_UI,BlendOut + Tuning_Value);
+					if (Alpha_Auto_UI == 4 || Alpha_Auto_UI == 5 || Alpha_Auto_UI == 7 || Alpha_Auto_UI == 9)
 					{
 						if(Alpha_Auto_UI == 5)
 						TRD_Alpha_UI.x = min(Game_Alpha_UI,Game_Alpha_UI_M) + AS_UI;
@@ -5000,15 +5039,18 @@ uniform int Extra_Information <
 						MixOut = min(Game_Alpha_UI,Game_Alpha_UI_M) + AS_UI;
 				}
 				
-				if(Alpha_Auto_UI == 2 || Alpha_Auto_UI == 5 || Alpha_Auto_UI == 7) //Avr
+				if(Alpha_Auto_UI == 2 || Alpha_Auto_UI == 5 || Alpha_Auto_UI == 7 || Alpha_Auto_UI == 8|| Alpha_Auto_UI == 9) //Avr
 				{
 					float mipLevel_A = 7, mipLevel_B = 5.0;
-					//float Middel_Depth = Alpha_Auto_UI == 5 ? smoothstep(0.5,1.0,tex2Dlod(SamplerAvrB_N, float4(float2(0.5,0.5), 0, 0)).x) : 0;	
 					float DCenter = tex2Dlod(SamplerAvrB_N, float4(texcoord, 0, mipLevel_A)).x;			 								
 					float BCenter = tex2Dlod(SamplerAvrB_N, float4(texcoord, 0, mipLevel_B)).x;						
 					float DMix = min(DCenter,BCenter);
+					float2 Alpha_Five_Switch = Alpha_Auto_UI == 5 ? float2(-0.7,1.5) : float2(-0.5,1.0);
+					
+					if(Alpha_Auto_UI == 9)
+						Alpha_Five_Switch = float2(-0.25,1.0);
 						
-					float BlendOut = lerp(-0.5,1.0,DMix); //lerp(0.75,0.5,Middel_Depth)
+					float BlendOut = lerp(Alpha_Five_Switch.x,Alpha_Five_Switch.y,DMix);
  						 
 					Game_Alpha_UI = smoothstep(Alpha_UI_Depth,1, Alpha_UI );
 					Game_Alpha_UI_M = smoothstep( Alpha_UI_Depth, 1, tex2Dlod(SamplerCN,float4(texcoord,0,4)).y );
@@ -5020,13 +5062,13 @@ uniform int Extra_Information <
 					
 					float AS_UI = lerp(0.0,S_UI,BlendOut) ;
 			
-					if (Alpha_Auto_UI == 5 || Alpha_Auto_UI == 7)
+					if (Alpha_Auto_UI == 5 || Alpha_Auto_UI == 7 || Alpha_Auto_UI == 8 || Alpha_Auto_UI == 9)
 						TRD_Alpha_UI.y = min(Game_Alpha_UI,Game_Alpha_UI_M) + AS_UI;
 					else
 						MixOut = min(Game_Alpha_UI,Game_Alpha_UI_M) + AS_UI;	
 				}
 				
-				if(Alpha_Auto_UI == 3 || Alpha_Auto_UI == 4) //Guided
+				if(Alpha_Auto_UI == 3 || Alpha_Auto_UI == 4 ) //Guided
 				{
 					float2 coordSize = float2(0.25, 0.0); // X-axis only
 					float mipLevel = 3, Scale_FPS_Dist_C = 0.05;
@@ -5053,7 +5095,7 @@ uniform int Extra_Information <
 		
 					float S_UI = 1-Alpha_UI > 0.0;
 					float AS_UI = lerp(0.0,S_UI,BlendOut + Tuning_Value) ;
-			
+
 					if (Alpha_Auto_UI == 4 )
 						FPS_Alpha_UI.y = min(Game_Alpha_UI,Game_Alpha_UI_M) + AS_UI;
 					else
@@ -5125,7 +5167,7 @@ uniform int Extra_Information <
 						  
 					//float FPS_Area_S = texcoord.y < 0.5 ? texcoord.y : 1-texcoord.y ,C_UI_Value_A = lerp(0.4,0.5,Avg_UI);
 					//      FPS_Area_S = saturate(smoothstep(C_UI_Value_A * 0.5,C_UI_Value_A,FPS_Area_S) * smoothstep(0.75,0.5,texcoord.y) ); 
-					float FPS_Area_S = texcoord.x < 0.5 ? texcoord.x : 1-texcoord.x ,C_UI_Value_A = lerp(0.5,0.6,Avg_UI);
+					float FPS_Area_S = texcoord.x < 0.5 ? texcoord.x : 1-texcoord.x ,C_UI_Value_A = lerp(0.45,0.55,Avg_UI);
 						  FPS_Area_S = saturate(smoothstep(C_UI_Value_A * 0.5,C_UI_Value_A,FPS_Area_S) * smoothstep(0.75,0.5,texcoord.y > 0.5 ? texcoord.y : 1-texcoord.y) * 2 );
 
 						  
@@ -5135,6 +5177,35 @@ uniform int Extra_Information <
 					MixOut = lerp(Guided,MixOut,Avg_UI);
 				}
 
+				if (Alpha_Auto_UI == 8) //Third Person
+				{
+					float Guided = TRD_Alpha_UI.y * OA_Power;
+					float Local = TRD_Alpha_UI.x * OA_Power;
+					float S_UI = lerp(0.0,0.5,Avg_UI);
+					float Center_Area_S = texcoord.x < 0.5 ? texcoord.x : 1-texcoord.x ,C_UI_Value_A = 0.25;
+						  Center_Area_S = saturate(smoothstep(C_UI_Value_A * 0.5,C_UI_Value_A,Center_Area_S) * smoothstep(0.8,0.5,texcoord.y > 0.5 ? texcoord.y : 1-texcoord.y) * 2 );
+						  
+					Local = lerp(Local,lerp(Local,Store_MixOut,S_UI),Vin_Alpha_UI(texcoord,Low_Rez_Depth,0));
+					// * 0.625
+					MixOut = lerp(Guided,Local,Center_Area_S * 0.9); // Can Adjust this for multi games.
+					MixOut = lerp(Guided,MixOut,Avg_UI);
+				}
+
+				if (Alpha_Auto_UI == 9) //Third / First
+				{
+					float Guided = TRD_Alpha_UI.y * OA_Power;
+					float Local = FPS_Alpha_UI.x * OA_Power;
+					float S_UI = lerp(0.0,0.5,Avg_UI * 0.5);
+					float S_Mask = lerp(0,-0.7,Avg_UI * 0.5);					
+					float FPS_Area_S = texcoord.x < 0.5 ? smoothstep(S_Mask,0.5,texcoord.x) : smoothstep(S_Mask,0.5,1-texcoord.x),C_UI_Value_A = lerp(1.0,0.5,Avg_UI);
+						  FPS_Area_S = saturate(smoothstep(C_UI_Value_A * 0.5,C_UI_Value_A,FPS_Area_S) * smoothstep(0.75,0.5,texcoord.y > 0.5 ? smoothstep(-0.5,1.625,texcoord.y) : smoothstep(0.125,1.75,1-texcoord.y))  );
+						  
+					Local = lerp(Local,lerp(Local,Store_MixOut,S_UI),Vin_Alpha_UI(texcoord,Low_Rez_Depth,0));
+					
+					MixOut = lerp(Guided,Local,FPS_Area_S);
+					MixOut = lerp(Guided,MixOut,Avg_UI);
+				}
+				
 				MixOut = lerp( Store_MixOut, MixOut, Alpha_Letter_Box);
 				
 				if (Alpha_Auto_UI <= 3)
@@ -5149,24 +5220,27 @@ uniform int Extra_Information <
 	}
 	
 	#if !DX9_Toggle
-	float Min3x3(sampler2D Tex, float2 TC, float2 Depth_Size)
+	float Min4x4(sampler2D Tex, float2 TC, float2 Depth_Size)
 	{
-	    static const float2 offsets[9] = { float2(-1, -1), float2( 0, -1), float2( 1, -1),
-									       float2(-1,  0), float2( 0,  0), float2( 1,  0),
-									       float2(-1,  1), float2( 0,  1), float2( 1,  1) };
-	    float minVal = 1e10;
-	    [unroll]
-	    for (int i = 0; i < 9; i++)
-	    {
-	        float val = tex2Dlod(Tex, float4(TC + offsets[i] * Depth_Size, 0, 0)).x;
-	        minVal = min(minVal, val);
-	    }
+		float minVal = 1e10;
+	    // 4 gathers cover the 4x4 neighborhood
+	    float4 g0 = tex2DgatherR(Tex, TC);                                   // top-left block
+	    float4 g1 = tex2DgatherR(Tex, TC + float2( Depth_Size.x, 0.0));      // top-right block
+	    float4 g2 = tex2DgatherR(Tex, TC + float2(0.0, Depth_Size.y));       // bottom-left block
+	    float4 g3 = tex2DgatherR(Tex, TC + Depth_Size);                      // bottom-right block
+	
+	    // Reduce each gather
+	    minVal = min(minVal, min(min(g0.x, g0.y), min(g0.z, g0.w)));
+	    minVal = min(minVal, min(min(g1.x, g1.y), min(g1.z, g1.w)));
+	    minVal = min(minVal, min(min(g2.x, g2.y), min(g2.z, g2.w)));
+	    minVal = min(minVal, min(min(g3.x, g3.y), min(g3.z, g3.w)));
+	
 	    return minVal;
 	}
 	
 	float Disocclusion(sampler Tex, float2 texcoord, float2 DPix) // Non_Point_Sampler
 	{
-	    float Depth = Alternate_View_Mode ? tex2D(Tex,texcoord).x : Min3x3(Tex, texcoord, DPix), DM = 0.0f;
+	    float Depth = Alternate_View_Mode ? tex2D(Tex,texcoord).x : Min4x4(Tex, texcoord, DPix), DM = 0.0f;
 	    
 		const int N = 8;
 		const float2 dir = float2(0.5f, 0.0f);
@@ -5260,6 +5334,7 @@ uniform int Extra_Information <
         return lerp(LRDepth,mixDepth,dlr);
   
 	}	
+	
 	//Perf Level selection & Array access                X      Y               X    Y  
 	static const float2 Performance_LvL[2] = { float2( 0.5, 0.75), float2( 1.0, 1.0) };
 	static const float  HFI_Array[4] = { 0, 4, 5, 6};
@@ -5270,8 +5345,9 @@ uniform int Extra_Information <
 		float2 ParallaxCoord = Coordinates, CBxy = floor( float2(Coordinates.x * BUFFER_WIDTH, Coordinates.y * BUFFER_HEIGHT));
 		float LR_Depth_Mask = saturate(tex2Dlod(SamplerzBuffer_BlurN, float4( Coordinates  * float2(0.5,1) + float2(0.5,0), 0, 3.0 ) ).x * 2.5);
 		float GetDepth = smoothstep(0,1, tex2Dlod(SamplerDMN, float4(Coordinates,0, 2.0) ).x), CB_Done = fmod(CBxy.x+CBxy.y,2),
-			  Perf = Performance_LvL[Perf_LvL].x, Perf_Level = 1.0, Masked_Level = 1.0;
-
+			  Perf = Performance_LvL[Perf_LvL].x, Perf_Level = 1.0, Masked_Level = 1.0;			  
+		float Alpha_UI = Alpha_UI_Mask(ParallaxCoord,2), Set_UI = Alpha_Channel_UI ? saturate(Alpha_UI > 0.999) : 1;
+		
 		#if Alternate_View_Mode
 		float Max_Clamp = 2.5;
 		float SampleControl = saturate(Min_Divergence().x); // 0.0 to 1.0 slider/control
@@ -5326,6 +5402,7 @@ uniform int Extra_Information <
 				Perf_Level = 2.0;
 				Masked_Level = 0.9;//Boost Near so we have less artifacts
 			}
+			
 			//Foveated Calculations	
 			float Foveated_Mask = saturate( Vin_Pattern(Coordinates, float2(16.0,2.0)));	
 			//if(Foveated_Mode)
@@ -5336,16 +5413,18 @@ uniform int Extra_Information <
 				  Scale_With_Depth = Artifact_Adjust().y == 0 ? 1 : Reverse_Depth;
 				  
 			//De-Artifacting.
-			float AA_Value = Artifact_Adjust().x;
+			float AA_Value = Artifact_Adjust().x;	
+
 			float Corners = saturate(tex2Dlod(SamplerzBufferN_L,float4(Coordinates,0,HFI_Array[Target_High_Frequency])).y);
 			float Smooth_C = smoothstep(0.0,1.0,Corners * 1000);
 				
 			if(Target_High_Frequency > 0)
-				AA_Value = lerp(AA_Value,1.0,Smooth_C);
+				AA_Value = lerp(AA_Value,1.0,Smooth_C);				
 				  
 			//Adjustments and Switching for De-Artifacting.	  
-			float AA_Switch = De_Artifacting.x < 0 ? lerp(0.3 * AA_Value, AA_Value ,smoothstep(0.0,1.0,Foveated_Mask)): AA_Value;
+			float AA_Switch = De_Artifacting.x < 0 ? lerp(0.3 * AA_Value, AA_Value ,smoothstep(0.0,1.0,Foveated_Mask)): AA_Value;	
 			float2 Artifacting_Adjust = float2(MS.x * lerp(0,0.125,clamp(AA_Switch * Scale_With_Depth,0,2)),1.0 - (MS.x * lerp(0,0.25,clamp(AA_Value * Scale_With_Depth,0,2))));
+				   Artifacting_Adjust *= Set_UI;
 			// Perform the conditional check outside the loop
 			bool AA_Toggle = true;
 			
@@ -5363,17 +5442,17 @@ uniform int Extra_Information <
 			//Compatibility Power
 			float N = 0.5,F = 1.0, Z = tex2Dlod(SamplerzBuffer_BlurN, float4( Coordinates  * float2(0.5,1) + float2(0.5,0), 0, 2 ) ).x;
 		    float ZS = smoothstep(0.5,1.0,( Z - N ) / ( F - N));
-			float Auto_Compatibility_Power = abs(Compatibility_Power) ? Compatibility_Power : lerp(-0.25,0.0, ZS ); 
+			float Auto_Compatibility_Power = abs(Compatibility_Power) ? abs(Compatibility_Power) : lerp(-0.25,0.0, ZS ); //if Zero it's ZS
 			  	Auto_Compatibility_Power = Compatibility_Power >= 0 ? Auto_Compatibility_Power : Auto_Compatibility_Power * Foveated_Mask ;
 	
-			float LayerDepth = rcp(Steps),  TP = lerp(0.015, 0.0375,Auto_Compatibility_Power);		 
+			float LayerDepth = rcp(Steps),  TP = saturate(lerp(0.015, 0.0375,Auto_Compatibility_Power) * Set_UI);		 
 			float D_Range = 37.5, US_Offset = Diverge < 0 ? -D_Range : D_Range;
 		
 			//Offsets listed here Max Seperation is 3% - 8% of screen space with Depth Offsets & Netto layer offset change based on MS.
 			float deltaCoordinates = MS.x * LayerDepth, CurrentDepthMapValue = min(1,GetMixed( ParallaxCoord,0).x), CurrentLayerDepth = -Re_Scale_WN().x,
 				  DB_Offset = US_Offset * TP * pix.x;
 				  
-		    float Mask, threshold = 0.001; 	
+		    float Mask, threshold = 0.01; 	
 			if(AA_Toggle)
 			{
 				[loop] // Steep parallax mapping Ray Marcher
@@ -5402,7 +5481,7 @@ uniform int Extra_Information <
 				    //Need Cast this again.
 					G_Depth = GetMixed(ParallaxCoord, 0).x;
 				    // Update current depth value
-				    CurrentDepthMapValue = lerp(G_Depth, min(G_Depth, C_Depth), Final_Mask);
+				    CurrentDepthMapValue = lerp(G_Depth, min(G_Depth, C_Depth), Final_Mask * Set_UI);
 				
 				    // Update depth step
 				    CurrentLayerDepth += adjustedLayerDepth;
@@ -5438,12 +5517,6 @@ uniform int Extra_Information <
 				}
 			
 			}
-			
-			//Need to work on this to de-artifact
-			if( View_Mode <= 1 || View_Mode >= 5 )	
-		   	ParallaxCoord.x += DB_Offset * lerp(0.125 , 0.25, Mask);
-		    else
-		   	ParallaxCoord.x += DB_Offset * lerp(0.0 , 0.5, Mask);
 	    
 			float2 PrevParallaxCoord = float2( ParallaxCoord.x + deltaCoordinates, ParallaxCoord.y);
 			//Anti-Weapon Hand Fighting
