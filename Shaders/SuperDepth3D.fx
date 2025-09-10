@@ -1,7 +1,7 @@
 	////----------------//
 	///**SuperDepth3D**///
 	//----------------////
-	#define SD3D "SuperDepth3D v5.1.9\n"
+	#define SD3D "SuperDepth3D v5.2.0\n"
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//* Depth Map Based 3D post-process shader
 	//* For Reshade 3.0+
@@ -1765,16 +1765,16 @@ uniform int SuperDepth3D <
 	uniform int Alpha_Auto_UI <
 		ui_label = " UI Mode";
 		ui_type = "combo";
-		ui_items = "Self-Adjusting UI (Vicinal-Depth)\0"
-		           "Self-Adjusting UI (Local-Depth)\0"
-		           "Self-Adjusting UI (Avr-Depth)\0"
-		           "Self-Adjusting UI (Guided-Depth)\0"
-		           "Self-Adjusting UI (FPS-Alpha)\0"
-		           "Self-Adjusting UI (3rd-Alpha)\0"
-		           "Self-Adjusting UI (Mix-Alpha)\0"
-		           "Self-Adjusting UI (FPTP-Alpha)\0"
-		           "Self-Adjusting UI (Min-Alpha)\0"
-		           "Self-Adjusting UI (FPSP-Alpha)\0";
+		ui_items = "Self-Adjusting UI (Vicinal-Depth)\0" //0
+		           "Self-Adjusting UI (Local-Depth)\0"   //1
+		           "Self-Adjusting UI (Avr-Depth)\0"     //2 
+		           "Self-Adjusting UI (Guided-Depth)\0"  //3
+		           "Self-Adjusting UI (FPS-Alpha)\0"     //4
+		           "Self-Adjusting UI (3rd-Alpha)\0"     //5
+		           "Self-Adjusting UI (Mix-Alpha)\0"     //6
+		           "Self-Adjusting UI (FPTP-Alpha)\0"    //7
+		           "Self-Adjusting UI (Min-Alpha)\0"     //8
+		           "Self-Adjusting UI (FPSP-Alpha)\0";   //9
 		ui_tooltip = "Choose how to handle UI masking via the alpha channel:\n\n"
 		             "- Mostly Static UI: Best for games with UI that doesn't move or change frequently.\n"
 		             "- Self-Adjusting UI (Depth-Based): Dynamically adjusts based on depth, useful for games\n"
@@ -4853,7 +4853,7 @@ uniform int Extra_Information <
 		float Alpha_UI = tex2Dlod(SamplerCN,float4(texcoord,0,Mip)).y;
 
 		if(Isolate_UI)
-			Alpha_UI = smoothstep(0.0, 0.25,Alpha_UI);
+			Alpha_UI = Alpha_UI > 0.41;//smoothstep(0.0, 0.4,Alpha_UI);
 	
 		return Alpha_UI;	
 	}	
@@ -5067,41 +5067,40 @@ uniform int Extra_Information <
 					else
 						MixOut = min(Game_Alpha_UI,Game_Alpha_UI_M) + AS_UI;	
 				}
-				
+
 				if(Alpha_Auto_UI == 3 || Alpha_Auto_UI == 4 ) //Guided
 				{
+					float Set_Mip = tex2Dlod(SamplerAvrB_N, float4(texcoord, 0, 4)).y;
 					float2 coordSize = float2(0.25, 0.0); // X-axis only
-					float mipLevel = 3, Scale_FPS_Dist_C = 0.05;
-					
-					float2 tSizeFine = Res / exp2(mipLevel);
-					float2 texelSizeFine = rcp(tSizeFine);
-					float2 snappedUVFine = floor(texcoord * tSizeFine) * texelSizeFine;						
+					float mipLevel_A = lerp(4.0,6.0,Set_Mip), mipLevel_B = 7.0, Scale_FPS_Dist_C = 0.1;					
 	
-					float DLeft  = tex2Dlod(SamplerAvrB_N, float4(snappedUVFine - coordSize, 0, mipLevel)).y;
-					float DCenter = tex2Dlod(SamplerAvrB_N, float4(snappedUVFine, 0, mipLevel)).y;		
-					float DRight = tex2Dlod(SamplerAvrB_N, float4(snappedUVFine + coordSize, 0, mipLevel)).y;
+					float DLeft  = tex2Dlod(SamplerAvrB_N, float4(texcoord - coordSize, 0, mipLevel_A)).y;
+					float DCenter = tex2Dlod(SamplerAvrB_N, float4(texcoord, 0, mipLevel_A)).y;		
+					float DRight = tex2Dlod(SamplerAvrB_N, float4(texcoord + coordSize, 0, mipLevel_A)).y;
 		 				
 					float DMix = min(DLeft , min(DCenter , DRight));
+			 								
+					float Center = tex2Dlod(SamplerAvrB_N, float4(texcoord, 0, mipLevel_B)).x;
 						
-					if(Alpha_Auto_UI == 4)
-						Scale_FPS_Dist_C = lerp(-Scale_FPS_Dist_C,Scale_FPS_Dist_C,DCenter);
-						
-					float BlendOut = lerp(Scale_FPS_Dist_C,0.25,DMix);
+					DMix = min(Center,DMix) * 0.5;
+					
+					float2 Alpha_Five_Switch = Alpha_Auto_UI == 4 ? lerp(-Scale_FPS_Dist_C,Scale_FPS_Dist_C,Low_Rez_Depth) : float2(lerp(-0.125,0.125,Low_Rez_Depth),1.0);
+					
+					float Tuning_Value = Alpha_Auto_UI == 4 ? lerp(-0.05,0.0,1-texcoord.y) : 0.0;
 	
-					float Tuning_Value = Alpha_Auto_UI == 3 ? 0.0 : lerp(-0.05,0.0,1-texcoord.y);
- 
+					float BlendOut = lerp(Alpha_Five_Switch.x,Alpha_Five_Switch.y,DMix);
+ 						 
 					Game_Alpha_UI = smoothstep(Alpha_UI_Depth,1, Alpha_UI );
 					Game_Alpha_UI_M = smoothstep( Alpha_UI_Depth, 1, tex2Dlod(SamplerCN,float4(texcoord,0,4)).y );
 		
 					float S_UI = 1-Alpha_UI > 0.0;
 					float AS_UI = lerp(0.0,S_UI,BlendOut + Tuning_Value) ;
-
+		
 					if (Alpha_Auto_UI == 4 )
 						FPS_Alpha_UI.y = min(Game_Alpha_UI,Game_Alpha_UI_M) + AS_UI;
 					else
 						MixOut = min(Game_Alpha_UI,Game_Alpha_UI_M) + AS_UI;
-				}				
-				
+				}
 				
 				if (Alpha_Auto_UI == 4) //FPS
 				{
