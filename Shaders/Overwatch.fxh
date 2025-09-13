@@ -39869,7 +39869,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	//#if VEN == 2
 	//	#define DMM_W float4(1,6,0,0.0) 			   //UI Toggle ON/OFF | UI Type 0-3 | Narrow or Wide ON/OFF | Distance From Edge -1 to 1;    
 	//#else
-		#define DMM_W float4(1,1,0,0.0) 			   //UI Toggle ON/OFF | UI Type 0-3 | Narrow or Wide ON/OFF | Distance From Edge -1 to 1;    
+		#define DMM_W float4(1,0,0,0.0) 			   //UI Toggle ON/OFF | UI Type 0-3 | Narrow or Wide ON/OFF | Distance From Edge -1 to 1;    
 	//#endif
 	
 	//#define ASU 0.5     //Lets you Adjust the Stencil's Contrbution
