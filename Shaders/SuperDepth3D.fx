@@ -1,7 +1,7 @@
 	////----------------//
 	///**SuperDepth3D**///
 	//----------------////
-	#define SD3D "SuperDepth3D v5.2.0\n"
+	#define SD3D "SuperDepth3D v5.2.1\n"
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//* Depth Map Based 3D post-process shader
 	//* For Reshade 3.0+
@@ -133,7 +133,7 @@ namespace SuperDepth3D
 		#define OW_WP "WP Off\0Custom WP\0"
 		#define G_Info "Missing Overwatch.fxh Information.\n"
 		#define G_Note "Note: If you pulled this file intentionally, please ignore this message.\n"
-		static const int AIM = 0, WMM = 0, SDD = 0, DMM = 0, LBD = 0, WSM = 0;
+		static const int RCI = 0, AIM = 0, WMM = 0, SDD = 0, DMM = 0, LBD = 0, WSM = 0;
 		static const int2 DOL = 0;
 		//Triggers 
 		static const float HNR = 0, THF = 0, EGB = 0,PLS = 0, MGA = 0, WZD = 0, KHM = 0, DAO = 0, LDT = 0, ALM = 0, SSF = 0, SNF = 0, SSE = 0, SNE = 0, EDU = 0, LBI = 0,ISD = 0, ASA = 1, IWS = 0, SUI = 0, SSA = 0, SNA = 0, SSB = 0, SNB = 0,SSC = 0, SNC = 0,SSD = 0, SND = 0, LHA = 0, WBS = 0, TMD = 0, FRM = 0, AWZ = 0, CWH = 0, WBA = 0, WFB = 0, WND = 0, WRP = 0, MML = 0, SMD = 0, WHM = 0, SDU = 0, ABE = 2, LBE = 0, HQT = 0, HMD = 0.5, MAC = 0, OIL = 0, MMS = 0, FTM = 0, FMM = 0, SPO = 0, MMD = 0, LBR = 0, AFD = 0, MDD = 0, FPS = 1, SMS = 1, OIF = 0, NCW = 0, RHW = 0, NPW = 0, SPF = 0, BDF = 0, HMT = 0, HMC = 0, DFW = 0, NFM = 0, DSW = 0, LBC = 0, LBS = 0, LBM = 0, DAA = 0, NDW = 0, PEW = 0, WPW = 0, FOV = 0, EDW = 0, SDT = 0;
@@ -1774,7 +1774,8 @@ uniform int SuperDepth3D <
 		           "Self-Adjusting UI (Mix-Alpha)\0"     //6
 		           "Self-Adjusting UI (FPTP-Alpha)\0"    //7
 		           "Self-Adjusting UI (Min-Alpha)\0"     //8
-		           "Self-Adjusting UI (FPSP-Alpha)\0";   //9
+		           "Self-Adjusting UI (FPSP-Alpha)\0"    //9
+		           "Self-Adjusting UI (FPMP-Alpha)\0";   //10
 		ui_tooltip = "Choose how to handle UI masking via the alpha channel:\n\n"
 		             "- Mostly Static UI: Best for games with UI that doesn't move or change frequently.\n"
 		             "- Self-Adjusting UI (Depth-Based): Dynamically adjusts based on depth, useful for games\n"
@@ -1792,6 +1793,12 @@ uniform int SuperDepth3D <
 		ui_category = "Miscellaneous Options";
 	> = Alpha_XYZW.w;
 
+	uniform bool Read_Controller_AUI <
+		ui_label = " UI Read Controller";
+		ui_tooltip = "Reads the Right Trigger of your controller 'Needs the Ximp Add-on'.";
+		ui_category = "Miscellaneous Options";
+	> = RCI;
+	
 	uniform bool Isolate_UI <
 		ui_label = " UI Alpha Isolation";
 		ui_tooltip = "Used to Isolate a narrow band of information in the Alpha Channel.";
@@ -1802,7 +1809,7 @@ uniform int SuperDepth3D <
 		ui_label = " UI Narrow";
 		ui_tooltip = "Only use for when the letterbox is narrow.";
 		ui_category = "Miscellaneous Options";
-	> = Alpha_XYZW.z;		
+	> = Alpha_XYZW.z;
 	#endif	
 /* //Slated for deletion and with a link to a Help Guide online	
 	//Extra Informaton
@@ -4981,11 +4988,9 @@ uniform int Extra_Information <
 						MixOut = min(Game_Alpha_UI,Game_Alpha_UI_M) + AS_UI;
 						MixOut = lerp(0.5f,MixOut,Middel_Depth);
 					}
-					
-					Avg_UI = lerp(Avg_UI,1.0,Controller_RT);
 				}
 				
-				if(Alpha_Auto_UI == 1 || Alpha_Auto_UI == 4 || Alpha_Auto_UI == 5 || Alpha_Auto_UI == 7 || Alpha_Auto_UI == 9) //Local
+				if(Alpha_Auto_UI == 1 || Alpha_Auto_UI == 4 || Alpha_Auto_UI == 5 || Alpha_Auto_UI == 7 || Alpha_Auto_UI == 9 || Alpha_Auto_UI == 10) //Local
 				{
 					float mipCoarse = 2.0, mipFine = 4.0, Scale_FPS_Dist_A = 1.0, Scale_FPS_Dist_B = 0.55;
 
@@ -5028,7 +5033,7 @@ uniform int Extra_Information <
 						S_UI = 1-Alpha_UI > 0.0 ? 0.875 : 1;
 					
 					float AS_UI = lerp(0.0,S_UI,BlendOut + Tuning_Value);
-					if (Alpha_Auto_UI == 4 || Alpha_Auto_UI == 5 || Alpha_Auto_UI == 7 || Alpha_Auto_UI == 9)
+					if (Alpha_Auto_UI == 4 || Alpha_Auto_UI == 5 || Alpha_Auto_UI == 7 || Alpha_Auto_UI == 9 || Alpha_Auto_UI == 10)
 					{
 						if(Alpha_Auto_UI == 5)
 						TRD_Alpha_UI.x = min(Game_Alpha_UI,Game_Alpha_UI_M) + AS_UI;
@@ -5039,11 +5044,11 @@ uniform int Extra_Information <
 						MixOut = min(Game_Alpha_UI,Game_Alpha_UI_M) + AS_UI;
 				}
 				
-				if(Alpha_Auto_UI == 2 || Alpha_Auto_UI == 5 || Alpha_Auto_UI == 7 || Alpha_Auto_UI == 8|| Alpha_Auto_UI == 9) //Avr
+				if(Alpha_Auto_UI == 2 || Alpha_Auto_UI == 5 || Alpha_Auto_UI == 7 || Alpha_Auto_UI == 8 || Alpha_Auto_UI == 9 || Alpha_Auto_UI == 10) //Avr
 				{
 					float mipLevel_A = 7, mipLevel_B = 5.0;
 					float DCenter = tex2Dlod(SamplerAvrB_N, float4(texcoord, 0, mipLevel_A)).x;			 								
-					float BCenter = tex2Dlod(SamplerAvrB_N, float4(texcoord, 0, mipLevel_B)).x;						
+					float BCenter = Alpha_Auto_UI == 10 ? smoothstep(0.0,1.0,tex2Dlod(SamplerAvrB_N, float4(texcoord, 0, mipLevel_B)).x) : tex2Dlod(SamplerAvrB_N, float4(texcoord, 0, mipLevel_B)).x;						
 					float DMix = min(DCenter,BCenter);
 					float2 Alpha_Five_Switch = Alpha_Auto_UI == 5 ? float2(-0.7,1.5) : float2(-0.5,1.0);
 					
@@ -5062,7 +5067,7 @@ uniform int Extra_Information <
 					
 					float AS_UI = lerp(0.0,S_UI,BlendOut) ;
 			
-					if (Alpha_Auto_UI == 5 || Alpha_Auto_UI == 7 || Alpha_Auto_UI == 8 || Alpha_Auto_UI == 9)
+					if (Alpha_Auto_UI == 5 || Alpha_Auto_UI == 7 || Alpha_Auto_UI == 8 || Alpha_Auto_UI == 9 || Alpha_Auto_UI == 10)
 						TRD_Alpha_UI.y = min(Game_Alpha_UI,Game_Alpha_UI_M) + AS_UI;
 					else
 						MixOut = min(Game_Alpha_UI,Game_Alpha_UI_M) + AS_UI;	
@@ -5138,7 +5143,7 @@ uniform int Extra_Information <
 					float Guided = TRD_Alpha_UI.y * OA_Power;
 					
 					float S_UI = smoothstep(0.375,1.0,Avg_UI);//1 when no UI more UI it gets closer to zero.
-					float2 C_RT_Scale =lerp(float2(0.25,0.5),float2(0.375,0.75), Controller_RT);
+					float2 C_RT_Scale = float2(0.25,0.5);//lerp(float2(0.25,0.5),float2(0.375,0.75), Controller_RT);
 					float TRD_Area_S = texcoord.x < 0.5 ? texcoord.x : 1-texcoord.x,C_UI_Value_A = 0.4375, TCY = texcoord.y * 0.5 + 0.625;
 						  TRD_Area_S = smoothstep(C_UI_Value_A * 0.5,C_UI_Value_A,TRD_Area_S); 
 						  TRD_Area_S = saturate(lerp(TRD_Area_S, 1,texcoord.y < 0.25) + smoothstep(C_RT_Scale.x,C_RT_Scale.y,1-texcoord.y) * 2);
@@ -5150,9 +5155,6 @@ uniform int Extra_Information <
 					float LargeCenter = saturate(tex2Dlod(SamplerAvrB_N, float4(texcoord, 0, 6)).x);
 					MixOut = lerp(Guided,Local,lerp(1.0,TRD_Area_S,LargeCenter));
 					MixOut = lerp(Local,MixOut,S_UI);
-					MixOut = lerp(MixOut,Local,Controller_RT);
-					
-					Avg_UI = lerp(Avg_UI,1.0,Controller_RT);
 				}				
 
 				if (Alpha_Auto_UI == 7) //Third / First / Person
@@ -5190,14 +5192,14 @@ uniform int Extra_Information <
 					MixOut = lerp(Guided,MixOut,Avg_UI);
 				}
 
-				if (Alpha_Auto_UI == 9) //Third / First
+				if (Alpha_Auto_UI == 9 || Alpha_Auto_UI == 10) //Third / First
 				{
 					float Guided = TRD_Alpha_UI.y * OA_Power;
 					float Local = FPS_Alpha_UI.x * OA_Power;
 					float S_UI = lerp(0.0,0.5,Avg_UI * 0.5);
 					float S_Mask = lerp(0,-0.7,Avg_UI * 0.5);					
 					float FPS_Area_S = texcoord.x < 0.5 ? smoothstep(S_Mask,0.5,texcoord.x) : smoothstep(S_Mask,0.5,1-texcoord.x),C_UI_Value_A = lerp(1.0,0.5,Avg_UI);
-						  FPS_Area_S = saturate(smoothstep(C_UI_Value_A * 0.5,C_UI_Value_A,FPS_Area_S) * smoothstep(0.75,0.5,texcoord.y > 0.5 ? smoothstep(-0.5,1.625,texcoord.y) : smoothstep(0.125,1.75,1-texcoord.y))  );
+						  FPS_Area_S = saturate(smoothstep(C_UI_Value_A * 0.5,C_UI_Value_A,FPS_Area_S) * smoothstep(0.75,0.5,texcoord.y > 0.5 ? smoothstep(-0.5,1.75,texcoord.y) : smoothstep(0.125,1.75,1-texcoord.y))  );
 						  
 					Local = lerp(Local,lerp(Local,Store_MixOut,S_UI),Vin_Alpha_UI(texcoord,Low_Rez_Depth,0));
 					
@@ -5206,6 +5208,9 @@ uniform int Extra_Information <
 				}
 				
 				MixOut = lerp( Store_MixOut, MixOut, Alpha_Letter_Box);
+				
+				if(Read_Controller_AUI)
+					Avg_UI = lerp(Avg_UI,1.0,Controller_RT);
 				
 				if (Alpha_Auto_UI <= 3)
 					MixOut *= OA_Power;
@@ -5423,7 +5428,7 @@ uniform int Extra_Information <
 			//Adjustments and Switching for De-Artifacting.	  
 			float AA_Switch = De_Artifacting.x < 0 ? lerp(0.3 * AA_Value, AA_Value ,smoothstep(0.0,1.0,Foveated_Mask)): AA_Value;	
 			float2 Artifacting_Adjust = float2(MS.x * lerp(0,0.125,clamp(AA_Switch * Scale_With_Depth,0,2)),1.0 - (MS.x * lerp(0,0.25,clamp(AA_Value * Scale_With_Depth,0,2))));
-				   Artifacting_Adjust *= Set_UI;
+
 			// Perform the conditional check outside the loop
 			bool AA_Toggle = true;
 			
@@ -5444,7 +5449,7 @@ uniform int Extra_Information <
 			float Auto_Compatibility_Power = abs(Compatibility_Power) ? abs(Compatibility_Power) : lerp(-0.25,0.0, ZS ); //if Zero it's ZS
 			  	Auto_Compatibility_Power = Compatibility_Power >= 0 ? Auto_Compatibility_Power : Auto_Compatibility_Power * Foveated_Mask ;
 	
-			float LayerDepth = rcp(Steps),  TP = saturate(lerp(0.015, 0.0375,Auto_Compatibility_Power) * Set_UI);		 
+			float LayerDepth = rcp(Steps),  TP = saturate(lerp(0.015, 0.0375,Auto_Compatibility_Power) );		 
 			float D_Range = 37.5, US_Offset = Diverge < 0 ? -D_Range : D_Range;
 		
 			//Offsets listed here Max Seperation is 3% - 8% of screen space with Depth Offsets & Netto layer offset change based on MS.
@@ -6652,6 +6657,8 @@ uniform int Extra_Information <
 				//Color.rgb = gamepad_toggle[4];
 				//Color = Trigger_Fade_Hold;
 				//Color = 1-tex2D(Non_Point_Sampler,texcoord).w;
+				//Color = PrepDepth(texcoord)[2][0];
+				//Color = Dilate3x3(SamplerzBufferN_L,texcoord, 4.0f);
 				return Color.rgba;
 			}
 		#endif
