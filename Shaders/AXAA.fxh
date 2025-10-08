@@ -66,6 +66,13 @@
 #else
 	#define OpenGL_Switch 0
 #endif
+
+#if __RESHADE__ <= 60100 // This was added to fix compiling on old ReShade versions
+	#define ReShade_Switch 1
+#else
+	#define ReShade_Switch 0
+#endif
+
 //////////////////////////////////////////////////////////Defines///////////////////////////////////////////////////////////////////
 #define Pix float2(BUFFER_RCP_WIDTH, BUFFER_RCP_HEIGHT)
 #define FXAA_SEARCH_STEPS        32
@@ -95,7 +102,12 @@ float Max3_AXAA(float3 RGB)
 
 float4 FxaaTexGrad(sampler tex, float2 pos, float2 grad)
 {
+	#if ReShade_Switch
+    float lod = log2(max(length(grad) * 512.0, 1e-6)); // approximate LOD
+    return tex2Dlod(tex, float4(pos, 0, lod));
+    #else
     return tex2Dgrad(tex, pos.xy, grad, grad);
+	#endif
 }
 
 float3 LerpR(float3 a, float3 b, float amountOfA)	
