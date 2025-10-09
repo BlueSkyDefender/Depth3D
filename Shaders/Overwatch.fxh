@@ -1,7 +1,7 @@
 ////----------------------------------------//
 ///SuperDepth3D Overwatch Automation Header///
 //----------------------------------------////
-#define OVERWATCH "Overwatch v4.8.1\n"
+#define OVERWATCH "Overwatch v4.8.2\n"
 //---------------------------------------OVERWATCH---------------------------------------//
 // If you are reading this stop. Go away and never look back. From this point on if you  //
 // still think it's is worth looking at this..... Then no one can save you or your soul. //
@@ -44107,7 +44107,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 
 	#define DF_Z 0.25                                // Set the Balance  
     //#define DAO 1                                 // Turn On or Off De-Artifact Options For now DAO if set to 1 it's also applys to Hoz 
-    //#define DL_Y -1.0                                // De-Artifact Only works on some View Modes and causes performance degredation
+    #define DL_Y 0.5                                // De-Artifact Only works on some View Modes and causes performance degredation
     //#define DL_Z -0.125                             // Compat Power
 	//#define DJ_X 0.25                            // Range Smoothing
     //#define THF 2                                 // Target High Frequency information Like Hair
