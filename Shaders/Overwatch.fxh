@@ -6854,6 +6854,8 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define PEW 1
     #define DSW 1
 #elif (App == 0x22CA259A ) //Kena Bridge of Spirits
+    #define DS_Z 2                               // Set View Mode
+
 	#define DA_W 1
     //#define DB_X 1
 	#define DA_X 0.10
@@ -6862,26 +6864,27 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
     //#define DA_Z 0.0005
 	#define DB_Z 0.05
  
-	#define DE_X 1
-	#define DE_Y 0.550
-	#define DE_Z 0.375
-	#define DG_W -0.125 //PoP
-    #define OIL 1 //Set How many Levels We use for RE_Fix 0 | 1 | 2 | 3
-    #define OIF float2(0.325,0.125) //Fix enables if Value is > 0.0
-	#define DI_W float2(0.50,5.0)
+	#define DE_X 1                                 // ZPD Boundary 
+	#define DE_Y 0.75                              // Set ZPD Boundary Level Zero 
+	#define DE_Z 0.375                              // Speed that Boundary is Enforced
+	//#define AFD 1                                // Alternate Frame Detection - May be phased out
+	//#define DG_W -0.125                              // Shift Boundary Out of screen 0.5 and or In screen -0.5
+	//#define EGB 1                                  // Edge Guard weakens the edge detection like the orginal vision back when the feature was added
+    //#define DMM 1                                // Detect More Mode
+    #define OIL 4                                  // Set How many Levels
+    #define OIF float4(0.625,0.5,0.375,0.25)                  // Fix enables if Value is > 0.0
+	#define DI_W float4(0.25,0.5,1.0,2.5)
+	#define DKK_W float2(0.125,5.0)//XY	
+
+	#define WND 0.5                                // Weapon Near Pushes depth in and adjust perspective to match.
+	
 	//#define FTM 1
     //#define DG_Z 0.060 //Min
     //#define DE_W 0.000 //Auto
     //#define DI_Z 0.20 //Trim
 	#define BMT 1
-	#define DF_Z 0.100
-    //#define SMS 0            //SM Toggle Separation
-	#define DL_X 0.875      //SM Tune
-	//#define DL_W 0.5       //SM Perspective
-	#define DM_X 4           //HQ Tune
-	#define DM_Z 3           //HQ Smooth
-    #define DM_Y 0           //HQ VRS
-    #define HQT 1
+	#define DF_Z 0.15
+
     //#define DL_Y 0.0    //De-Artifact
     //#define DL_Z -1.0       //Compat Power
 	//#define WSM 3
@@ -6895,17 +6898,36 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DH_Y 1.0
     //#define DH_Z 0.0
     #define DH_W 0.0
-    //Needs to be done if DLSS is used.
-	/*
-	#define SPF 1
-	#define DD_X 1.0
-	#define DD_Y 0.994
-	#define DD_Z 0.0
-	#define DD_W -0.0025
-	*/
+
+    #define DL_Y 0.5                                // De-Artifact Only works on some View Modes and causes performance degredation
+	//Need to comebackto this Need to deisable in cutsceans
+	//#define DMM_W float4(1,0,0,0.0) 			   //UI Toggle ON/OFF | UI Type 0-3 | Narrow or Wide ON/OFF | Distance From Edge -1 to 1;    
+    //#define ASU 1                                  //Stencil's Contrbution
+    //#define AIM 0                                  //Alpha Isolation Mode
+
+    
+
+    //Smooth Mode
+    //#define SMS 1                                  //SM Separation Limit  - Do Not use any more
+	#define DL_X 0.750                               //SM Tune Limit
+	//#define DL_W 0.5                               //SM Perspective Limit - Do Not use any more
+	#define DM_X 5                                   //SM HQ Tune Power       - Will be made global
+	//#define DAA_W 2                                //Warp/Halo Masking Type 
+    //#define HNR 1                                  //Halo Near Reduction For anyting near the player
+    //#define DM_Y 1                                 //SM HQ VRS Limit
+	//#define HQT 1                                  //SM HQ Trigger
+	//#define FMM 1                                  //Filter Mode          - Need to add this back in the new shader.
+	//#define NDW 1
 	#define PEW 1
+	//#define NFM 1
+	//#define NDG 1
 	#define DSW 1
+	//#define DRS 1
 	#define DAA 1
+	//#define FOV 1
+    //#define ARW 1
+    //#define DFW 1 
+    
 #elif (App == 0x8F32C735 ) //Sessions Skate Sim
 	#define DA_W 1
     //#define DB_X 1
@@ -44107,7 +44129,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 
 	#define DF_Z 0.25                                // Set the Balance  
     //#define DAO 1                                 // Turn On or Off De-Artifact Options For now DAO if set to 1 it's also applys to Hoz 
-    #define DL_Y 0.5                                // De-Artifact Only works on some View Modes and causes performance degredation
+    #define DL_Y 0.75                                // De-Artifact Only works on some View Modes and causes performance degredation
     //#define DL_Z -0.125                             // Compat Power
 	//#define DJ_X 0.25                            // Range Smoothing
     //#define THF 2                                 // Target High Frequency information Like Hair
