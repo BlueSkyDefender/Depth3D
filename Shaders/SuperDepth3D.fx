@@ -382,7 +382,24 @@ namespace SuperDepth3D
 		#endif
 	#else
 		#define Set_Custom_Sidebars 1
-	#endif	
+	#endif
+	
+	// Define aspect ratios as integers (multiply by 1000 for precision)
+	#define ASPECT_16_9_INT  1778  // 1.778 * 1000
+	#define ASPECT_16_10_INT 1600  // 1.6 * 1000
+	#define AR_TOLERANCE_INT 10    // 0.01 * 1000
+	
+	// Calculate aspect ratio as integer
+	#define ASPECT_SCREEN_RATIO_INT ((BUFFER_WIDTH * 1000) / BUFFER_HEIGHT)
+	
+	// Determine aspect ratio type
+	#if ((ASPECT_SCREEN_RATIO_INT >= (ASPECT_16_9_INT - AR_TOLERANCE_INT)) && (ASPECT_SCREEN_RATIO_INT <= (ASPECT_16_9_INT + AR_TOLERANCE_INT)))
+	    #define AR_Is 1  // 16:9
+	#elif ((ASPECT_SCREEN_RATIO_INT >= (ASPECT_16_10_INT - AR_TOLERANCE_INT)) && (ASPECT_SCREEN_RATIO_INT <= (ASPECT_16_10_INT + AR_TOLERANCE_INT)))
+	    #define AR_Is 2  // 16:10
+	#else
+	    #define AR_Is 0  // Widescreen or other
+	#endif
 	
 	//Help / Guide / Information
 uniform int SuperDepth3D <
@@ -479,6 +496,14 @@ uniform int SuperDepth3D <
 				"The header file for Profiles called Overwatch.fxh is Missing.\n"
 				"\n"
 				#endif
+				#if AR_Is == 1
+				"                                  16:9\n"
+				#elif AR_Is == 2
+				"                                  16:10\n"
+				#else
+				"                               ?Widescreen?\n"
+				#endif
+				"\n"
 				G_Info
 				"__________________________________________________________________\n"
 			    "For more information and help please visit http://www.Depth3D.info\n"
@@ -1753,6 +1778,14 @@ uniform int SuperDepth3D <
 		ui_category = "Miscellaneous Options";
 	> = Alpha_XYZW.y;
 
+	uniform float Bound_UI <
+		ui_type = "slider";
+		ui_min = 0; ui_max = 1;	
+		ui_label = " UI Bound";
+		ui_tooltip = "Only use if your UI Pops-Out to much.";
+		ui_category = "Miscellaneous Options";
+	> = 0;
+	
 	uniform float Alpha_UI_Has_LB <
 		ui_type = "slider";
 		ui_min = -1.0; ui_max = 1.0; ui_step = 0.01;
@@ -2479,7 +2512,7 @@ uniform int Extra_Information <
 	#define Res int2(BUFFER_WIDTH, BUFFER_HEIGHT)
 	#define AI Interlace_Optimization * 0.5 //Optimization for line interlaced Adjustment.
 	#define ARatio pix.y / pix.x
-				
+			
 	float RN_Value(float i)
 	{
 		return round(i * 10.0f);// * 0.1f;
@@ -2615,6 +2648,11 @@ uniform int Extra_Information <
 		#endif
 
 	}
+
+	float SLLTresh(float2 TCLocations, float MipLevel)
+	{ 
+		return tex2Dlod(SamplerCN,float4(TCLocations,0, MipLevel)).x;
+	}
 	
 	#if LBC || LBM || LB_Correction || LetterBox_Masking
 	int LBSensitivity( float inVal )
@@ -2628,12 +2666,7 @@ uniform int Extra_Information <
 		#else
 			return inVal == 0; //Sensitive
 		#endif
-	}
-	
-	float SLLTresh(float2 TCLocations, float MipLevel)
-	{ 
-		return tex2Dlod(SamplerCN,float4(TCLocations,0, MipLevel)).x;
-	}
+	}	
 	
 	int LBDetection()//Active RGB Detection
 	{   int Letter_Box_Center_Mips_Level_Senstivity = 7;   
@@ -4848,9 +4881,44 @@ uniform int Extra_Information <
 	
 		return Alpha_UI;	
 	}	
+	#if AR_Is == 2
+	int ARSensitivity( float inVal )
+	{
+		#if ARS
+			#if ARS == 2
+			return inVal < 0.0225; //Even More Less Sensitive
+			#else
+			return inVal < 0.005; //Less Sensitive
+			#endif
+		#else
+			return inVal == 0; //Sensitive
+		#endif
+	}	
+
+	int ARDetection()//Active RGB Detection
+	{   int Letter_Box_Center_Mips_Level_Senstivity = 7;   
+		float AR_position = 0.5;
+		float2 AR_Elevation =  float2(0.025,0.975);    
+		
+		float MipLevel = 4,Center = SLLTresh(float2(0.5,0.5), Letter_Box_Center_Mips_Level_Senstivity) > 0, 
+			  Top_Pos = ARSensitivity(SLLTresh(float2(AR_position,AR_Elevation.x), MipLevel)),
+			  Bottom_Pos = ARSensitivity(SLLTresh(float2(AR_position,AR_Elevation.y), MipLevel));
+
+			return Top_Pos && Center && Bottom_Pos;
+	}
+	
+	float calculateAROffset(float screenHeight, float lossPercentage) 
+	{
+	    float width16_10 = screenHeight * 16.0 / 10.0;
+	    float height16_9 = width16_10 * 9.0 / 16.0;
+	    float baseOffset = (screenHeight - height16_9) / 2.0;
+	    
+    	return round(baseOffset * (1.0 - lossPercentage / 100.0));
+	}	
+	#endif
 	
 	void Mix_Z(in float4 position : SV_Position, in float2 texcoord : TEXCOORD, out float MixOut : SV_Target0)
-	{
+	{	
 		#if BD_Correction || BDF
 		if(BD_Options == 0 || BD_Options == 2)
 		{
@@ -4861,6 +4929,17 @@ uniform int Extra_Information <
 		
 		float2 Shift_TC = texcoord;
 			
+		#if AR_Is == 2
+		float Pix_Offset = calculateAROffset(Res.y,3.0) * pix.y;//2.5-3.75
+		if(ARDetection())
+		{
+		   if(Shift_TC.y > Pix_Offset)
+   			Shift_TC.y = Shift_TC.y - Pix_Offset;
+   		else
+   			Shift_TC.y = 1;
+   	 }
+   	 #endif	
+   	 
 		//work on this
 		#if SDT || SD_Trigger
 			#if LDT
@@ -4879,7 +4958,7 @@ uniform int Extra_Information <
 			
 			#if DB_Size_Position || SPF || LBC || LB_Correction
 			int LBD_Switch = LBD_Switcher > 0 ? 1 : !LBDetection();
-			if(Auto_Scaler_Adjust)
+			if(Auto_Scaler_Adjust && AR_Is != 2)
 			{
 				if(LBDetection())
 				{
@@ -4901,7 +4980,7 @@ uniform int Extra_Information <
 				}				
 			}
 			#else
-			if(Auto_Scaler_Adjust)
+			if(Auto_Scaler_Adjust && AR_Is != 2)
 			{
 				if(Shift_Depth().x)
 					Shift_TC *= 1-Depth_Size * 2.5;
@@ -5191,6 +5270,9 @@ uniform int Extra_Information <
 					MixOut = lerp(Guided,MixOut,Avg_UI);
 				}
 				
+				if(Bound_UI > 0)
+					MixOut = max(-(1-Bound_UI),MixOut);					
+				
 				MixOut = lerp( Store_MixOut, MixOut, Alpha_Letter_Box);
 				
 				if(Read_Controller_AUI)
@@ -5208,7 +5290,7 @@ uniform int Extra_Information <
 	}
 	
 	#if !DX9_Toggle
-	/*
+
 	float Min4x4(sampler2D Tex, float2 TC, float2 Depth_Size)
 	{
 	    float minVal = 1e10;
@@ -5230,7 +5312,7 @@ uniform int Extra_Information <
 	
 	    return minVal;
 	}
-	*/
+
 	float Min3x3(sampler2D Tex, float2 TC, float2 Depth_Size)
 	{
 	    static const float2 offsets[9] = { float2(-1, -1), float2( 0, -1), float2( 1, -1),
@@ -5248,7 +5330,7 @@ uniform int Extra_Information <
 
 	float Disocclusion(sampler Tex, float2 texcoord, float2 DPix) // Non_Point_Sampler
 	{
-	    float Depth = Min3x3(Tex, texcoord, DPix), DM = 0.0f;
+	    float tolerance = 1, Depth = abs(tex2Dsize(DepthBuffer).x - Res.x) < tolerance ? Min4x4(Tex, texcoord, DPix) : Min3x3(Tex, texcoord, DPix), DM = 0.0f;
 
 		const int N = 8;
 		const float2 dir = float2(0.5f, 0.0f);
@@ -6665,6 +6747,34 @@ uniform int Extra_Information <
 				//Color = TSAA( texcoord, rcp_Depth_Size());
 				//Color = tex2D(SamplerzBufferP_Up , texcoord ).x;
 				//Color = Res.x == tex2Dsize(DepthBuffer).x ? 1 : 0;
+				/*				
+				float2 depthSize = tex2Dsize(DepthBuffer);
+				float2 screenSize = Res;
+				
+				// Calculate aspect ratios
+				float aspectDRatio = depthSize.x / depthSize.y;
+				float aspectSRatio = screenSize.x / screenSize.y;
+				
+				// Determine aspect ratio type
+				float tolerance = 0.01;
+				float AR = 0; // Default: widescreen or other
+				
+				if (abs(aspectSRatio - ASPECT_16_9) < tolerance)
+				{
+				    AR = 1; // 16:9
+				}
+				else if (abs(aspectSRatio - ASPECT_16_10) < tolerance)
+				{
+				    AR = 2; // 16:10
+				}
+				
+				Color = AR == 2 ? 1 : 0;
+				*/
+				//0.025
+				//0.975
+				//Color = texcoord.y > 0.975 ? 1 : Color;
+				//Color = ARDetection();
+				//Color = tex2D(Non_Point_Sampler, texcoord).w;
 				return Color.rgba;
 			}
 		#endif
