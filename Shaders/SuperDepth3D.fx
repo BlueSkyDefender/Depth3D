@@ -1,7 +1,7 @@
 	////----------------//
 	///**SuperDepth3D**///
 	//----------------////
-	#define SD3D "SuperDepth3D v5.2.2\n"
+	#define SD3D "SuperDepth3D v5.2.3\n"
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//* Depth Map Based 3D post-process shader
 	//* For Reshade 3.0+
@@ -1770,7 +1770,8 @@ uniform int SuperDepth3D <
 		           "Self-Adjusting UI (FPTP-Alpha)\0"    //7
 		           "Self-Adjusting UI (Min-Alpha)\0"     //8
 		           "Self-Adjusting UI (FPSP-Alpha)\0"    //9
-		           "Self-Adjusting UI (FPMP-Alpha)\0";   //10
+		           "Self-Adjusting UI (FPMP-Alpha)\0"    //10
+		           "Self-Adjusting UI (FPSP2-Alpha)\0";  //11
 		ui_tooltip = "Choose how to handle UI masking via the alpha channel:\n\n"
 		             "- Mostly Static UI: Best for games with UI that doesn't move or change frequently.\n"
 		             "- Self-Adjusting UI (Depth-Based): Dynamically adjusts based on depth, useful for games\n"
@@ -2710,14 +2711,25 @@ uniform int Extra_Information <
 		//Top    (0.5,0.09)   LBE One = (0.50,0.045) LBE Two = (0.5,0.035)
  
 		//Bottom (0.625,0.91) LBE One = (0.625,0.955)LBE Two = (0.625,0.965)
-		
-		float2 Letter_Box_Elevation = LBE ? LBE == 2 ? float2(0.035,0.965) : float2(0.045,0.955) : float2(0.09,0.91);    
-		float MipLevel = 5,Center = SLLTresh(float2(0.5,0.5), Letter_Box_Center_Mips_Level_Senstivity) > 0, 
-			  Top_Pos = LBSensitivity(SLLTresh(float2(Letter_Box_Reposition.x,Letter_Box_Elevation.x), MipLevel));
-		if ( LetterBox_Masking == 2 || LB_Correction == 2 || LBC == 2 || LBM == 2 || SMP == 2)//Left_Center | Right_Center | Center
-			return LBSensitivity(SLLTresh(float2(0.075,0.5), MipLevel)) && LBSensitivity(SLLTresh(float2(0.925,0.5), MipLevel)) && Center; //Vert
-		else       //Top | Bottom | Center
-			return Top_Pos && LBSensitivity(SLLTresh(float2(Letter_Box_Reposition.y,Letter_Box_Elevation.y), MipLevel)) && Center; //Hoz
+		#if LB_Correction == 3 || LB_Correction == 4 || LBC == 3 || LBC == 4 || LetterBox_Masking == 3 || LBM == 3 || LetterBox_Masking == 4 || LBM == 4 //Hoz & Vert
+			//Top Left | Top Right | Center | Bottom Left | Bottom Right
+			float MipLevel = 5;
+			int Top_Left = LBSensitivity(SLLTresh(float2(0.05,0.015), MipLevel));
+			int Top_Right = LBSensitivity(SLLTresh(float2(0.95,0.015), MipLevel));
+			float Center = SLLTresh(float2(0.5,0.5), Letter_Box_Center_Mips_Level_Senstivity) > 0;
+			int Bottom_Left = LBSensitivity(SLLTresh(float2(0.05,0.985), MipLevel));
+			int Bottom_Right = LBSensitivity(SLLTresh(float2(0.95,0.985), MipLevel));
+
+			return (Top_Left && Top_Right) && Center && (Bottom_Left && Bottom_Right);
+		#else
+			float2 Letter_Box_Elevation = LBE ? LBE == 2 ? float2(0.035,0.965) : float2(0.045,0.955) : float2(0.09,0.91);    
+			float MipLevel = 5,Center = SLLTresh(float2(0.5,0.5), Letter_Box_Center_Mips_Level_Senstivity) > 0, 
+				  Top_Pos = LBSensitivity(SLLTresh(float2(Letter_Box_Reposition.x,Letter_Box_Elevation.x), MipLevel));
+			if ( LetterBox_Masking == 2 || LB_Correction == 2 || LBC == 2 || LBM == 2 || SMP == 2)//Left_Center | Right_Center | Center
+				return LBSensitivity(SLLTresh(float2(0.075,0.5), MipLevel)) && LBSensitivity(SLLTresh(float2(0.925,0.5), MipLevel)) && Center; //Vert
+			else       //Top | Bottom | Center
+				return Top_Pos && LBSensitivity(SLLTresh(float2(Letter_Box_Reposition.y,Letter_Box_Elevation.y), MipLevel)) && Center; //Hoz
+		#endif
 	}
 	#else
 	int LBDetection()//Stand in for not crashing when not in use
@@ -5053,10 +5065,10 @@ uniform int Extra_Information <
 					}
 				}
 				
-				if(Alpha_Auto_UI == 1 || Alpha_Auto_UI == 4 || Alpha_Auto_UI == 5 || Alpha_Auto_UI == 7 || Alpha_Auto_UI == 9 || Alpha_Auto_UI == 10) //Local
+				if(Alpha_Auto_UI == 1 || Alpha_Auto_UI == 4 || Alpha_Auto_UI == 5 || Alpha_Auto_UI == 7 || Alpha_Auto_UI == 9 || Alpha_Auto_UI == 10 || Alpha_Auto_UI == 11) //Local
 				{
 					float mipCoarse = 2.0, mipFine = 4.0, Scale_FPS_Dist_A = 1.0, Scale_FPS_Dist_B = 0.55;
-
+					
 					if(Alpha_Auto_UI == 4 || Alpha_Auto_UI == 7)
 					{
 						Scale_FPS_Dist_A = 1.075;
@@ -5075,6 +5087,13 @@ uniform int Extra_Information <
 					{
 						mipCoarse = lerp(4.0,mipCoarse,saturate(Avg_UI * 2));
 						mipFine = lerp(5.0,mipFine,saturate(Avg_UI * 2));
+					}
+					else if(Alpha_Auto_UI == 11)
+					{
+						Scale_FPS_Dist_A = 1.0;
+						Scale_FPS_Dist_B = 0.0;
+						mipCoarse = 5;
+						mipFine = 6;
 					}
 					else
 						mipFine = lerp(mipFine,2.0,saturate(Avg_UI * 2));
@@ -5096,7 +5115,7 @@ uniform int Extra_Information <
 						S_UI = 1-Alpha_UI > 0.0 ? 0.875 : 1;
 					
 					float AS_UI = lerp(0.0,S_UI,BlendOut + Tuning_Value);
-					if (Alpha_Auto_UI == 4 || Alpha_Auto_UI == 5 || Alpha_Auto_UI == 7 || Alpha_Auto_UI == 9 || Alpha_Auto_UI == 10)
+					if (Alpha_Auto_UI == 4 || Alpha_Auto_UI == 5 || Alpha_Auto_UI == 7 || Alpha_Auto_UI == 9 || Alpha_Auto_UI == 10 || Alpha_Auto_UI == 11)
 					{
 						if(Alpha_Auto_UI == 5)
 						TRD_Alpha_UI.x = min(Game_Alpha_UI,Game_Alpha_UI_M) + AS_UI;
@@ -5107,7 +5126,7 @@ uniform int Extra_Information <
 						MixOut = min(Game_Alpha_UI,Game_Alpha_UI_M) + AS_UI;
 				}
 				
-				if(Alpha_Auto_UI == 2 || Alpha_Auto_UI == 5 || Alpha_Auto_UI == 7 || Alpha_Auto_UI == 8 || Alpha_Auto_UI == 9 || Alpha_Auto_UI == 10) //Avr
+				if(Alpha_Auto_UI == 2 || Alpha_Auto_UI == 5 || Alpha_Auto_UI == 7 || Alpha_Auto_UI == 8 || Alpha_Auto_UI == 9 || Alpha_Auto_UI == 10 || Alpha_Auto_UI == 11) //Avr
 				{
 					float mipLevel_A = 7, mipLevel_B = 5.0;
 					float DCenter = tex2Dlod(SamplerAvrB_N, float4(texcoord, 0, mipLevel_A)).x;			 								
@@ -5115,9 +5134,9 @@ uniform int Extra_Information <
 					float DMix = min(DCenter,BCenter);
 					float2 Alpha_Five_Switch = Alpha_Auto_UI == 5 ? float2(-0.7,1.5) : float2(-0.5,1.0);
 					
-					if(Alpha_Auto_UI == 9)
+					if(Alpha_Auto_UI == 9 )
 						Alpha_Five_Switch = float2(-0.25,1.0);
-						
+
 					float BlendOut = lerp(Alpha_Five_Switch.x,Alpha_Five_Switch.y,DMix);
  						 
 					Game_Alpha_UI = smoothstep(Alpha_UI_Depth,1, Alpha_UI );
@@ -5130,7 +5149,7 @@ uniform int Extra_Information <
 					
 					float AS_UI = lerp(0.0,S_UI,BlendOut) ;
 			
-					if (Alpha_Auto_UI == 5 || Alpha_Auto_UI == 7 || Alpha_Auto_UI == 8 || Alpha_Auto_UI == 9 || Alpha_Auto_UI == 10)
+					if (Alpha_Auto_UI == 5 || Alpha_Auto_UI == 7 || Alpha_Auto_UI == 8 || Alpha_Auto_UI == 9 || Alpha_Auto_UI == 10 || Alpha_Auto_UI == 11)
 						TRD_Alpha_UI.y = min(Game_Alpha_UI,Game_Alpha_UI_M) + AS_UI;
 					else
 						MixOut = min(Game_Alpha_UI,Game_Alpha_UI_M) + AS_UI;	
@@ -5256,6 +5275,21 @@ uniform int Extra_Information <
 				}
 
 				if (Alpha_Auto_UI == 9 || Alpha_Auto_UI == 10) //Third / First
+				{
+					float Guided = TRD_Alpha_UI.y * OA_Power;
+					float Local = FPS_Alpha_UI.x * OA_Power;
+					float S_UI = lerp(0.0,0.5,Avg_UI * 0.5);
+					float S_Mask = lerp(0,-0.7,Avg_UI * 0.5);					
+					float FPS_Area_S = texcoord.x < 0.5 ? smoothstep(S_Mask,0.5,texcoord.x) : smoothstep(S_Mask,0.5,1-texcoord.x),C_UI_Value_A = lerp(1.0,0.5,Avg_UI);
+						  FPS_Area_S = saturate(smoothstep(C_UI_Value_A * 0.5,C_UI_Value_A,FPS_Area_S) * smoothstep(0.75,0.5,texcoord.y > 0.5 ? smoothstep(-0.5,1.75,texcoord.y) : smoothstep(0.125,1.75,1-texcoord.y))  );
+						  
+					Local = lerp(Local,lerp(Local,Store_MixOut,S_UI),Vin_Alpha_UI(texcoord,Low_Rez_Depth,0));
+					
+					MixOut = lerp(Guided,Local,FPS_Area_S);
+					MixOut = lerp(Guided,MixOut,Avg_UI);
+				}
+
+				if (Alpha_Auto_UI == 11) //Third / First
 				{
 					float Guided = TRD_Alpha_UI.y * OA_Power;
 					float Local = FPS_Alpha_UI.x * OA_Power;
