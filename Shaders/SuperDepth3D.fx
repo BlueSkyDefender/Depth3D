@@ -210,6 +210,8 @@ namespace SuperDepth3D
 
 	//Lower Height Adjustment
 	#define Lower_Height_Adjust LHA //To override or activate this set it to 0 or 1 This only works if Overwatch tells the shader to do it or not.
+
+	#define Profiler_Mode 0 //If you want to make your own profiles and submit them to BlueSkyDefender Aka Depth3D Main Dev
 	
 	//USER EDITABLE PREPROCESSOR FUNCTIONS END//
 	#if !defined(__RESHADE__) || __RESHADE__ < 40000
@@ -429,6 +431,13 @@ uniform int SuperDepth3D <
 				"Good Luck.\n"
 				"\n"
 				#endif
+
+				#if Profiler_Mode
+				"Profiler Mode Enabled: This mode is to share/make/use a profile for the game you are trying to make work in this shader.\n"
+				"Extra options are enabled in this mode to allow for better profiles to be made.\n"
+				"Good Luck.\n"
+				"\n"
+				#endif				
 				
 				#if PEW
 				"Disable CA/MB/DoF/Grain: Common post effects like Chromatic Aberration, Motion Blur, Depth of Field, Grain, etc. They will/may cause issues with this shader.\n"
@@ -642,7 +651,7 @@ uniform int SuperDepth3D <
 		ui_category = "Zero Parallax Distance";
 	> = float2(OIF.x,CutOff_Value);	
 
-	#if EDW
+	#if EDW || Profiler_Mode
 		uniform float2 ZPD_Boundary_n_Cutoff_B <
 			#if Compatibility
 			ui_type = "drag";
@@ -948,7 +957,7 @@ uniform int SuperDepth3D <
 		ui_tooltip = "Shift the depth map if a slight misalignment is detected.";
 		ui_category = "Scaling Corrections";
 	> = ASA;
-		#if LBC || LB_Correction || EDW || DB_Size_Position
+		#if LBC || LB_Correction || EDW || DB_Size_Position || Profiler_Mode
 		uniform int LBD_Switcher <
 			ui_type = "combo";
 				ui_items = "Off\0Direction X&Y\0Direction X\0Direction Y\0";
@@ -2387,7 +2396,7 @@ uniform int Extra_Information <
 
 	float3 RE_Set(float Auto_Switch)
 	{
-		#if EDW // Set By SuperDepth3D
+		#if EDW || Profiler_Mode // Set By SuperDepth3D
 			float OIL_Switch[4] = {ZPD_Boundary_n_Cutoff_A.x,ZPD_Boundary_n_Cutoff_B.x,ZPD_Boundary_n_Cutoff_C.x,ZPD_Boundary_n_Cutoff_D.x};		
 		#else // Set by Overwatch
 			#if OIL == 1
@@ -2413,7 +2422,7 @@ uniform int Extra_Information <
 	
 	float4 RE_Set_Adjustments()
 	{
-		#if EDW // Set By SuperDepth3D
+		#if EDW || Profiler_Mode// Set By SuperDepth3D
 			float OIL_Switch[4] = {ZPD_Boundary_n_Cutoff_A.x,ZPD_Boundary_n_Cutoff_B.x,ZPD_Boundary_n_Cutoff_C.x,ZPD_Boundary_n_Cutoff_D.x};		
 		#else // Set by Overwatch
 			#if OIL == 1
@@ -2431,7 +2440,7 @@ uniform int Extra_Information <
 
 	float2 RE_Extended()
 	{
-		#if EDW
+		#if EDW || Profiler_Mode
 		return ZPD_Boundary_n_Cutoff_End.xy;
 		#else
 		return DKK_W;
@@ -3939,7 +3948,7 @@ uniform int Extra_Information <
 							if ( CD < -ZPD_Boundary_n_Cutoff_A.y && Detect_Out_of_Range <= 1)
 								Detect_Out_of_Range = 1;	
 					
-						#if EDW	
+						#if EDW || Profiler_Mode	
 
 							if ( CD < -ZPD_Boundary_n_Cutoff_B.y && Detect_Out_of_Range <= 2)
 								Detect_Out_of_Range = 2;							
@@ -6929,7 +6938,7 @@ uniform int Extra_Information <
 			AspectRaito += drawChar( CH_N, charPos.xy, charSize, TC, Shift_Adjust.x );
 		#endif
 		//Emulator Detected
-		#if (EDW)
+		#if EDW
 			charPos = float2( 0.009, 0.9375);
 			Emu += drawChar( CH_E, charPos.xy, charSize, TC, 0 );
 			Emu += drawChar( CH_M, charPos.xy, charSize, TC, Shift_Adjust.x );
