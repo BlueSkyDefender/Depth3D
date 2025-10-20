@@ -1,7 +1,7 @@
 	////----------------//
 	///**SuperDepth3D**///
 	//----------------////
-	#define SD3D "SuperDepth3D v5.2.3\n"
+	#define SD3D "SuperDepth3D v5.2.4\n"
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//* Depth Map Based 3D post-process shader
 	//* For Reshade 3.0+
@@ -2446,7 +2446,26 @@ uniform int Extra_Information <
 		return DKK_W;
 		#endif
 	}
+	
+	#if EDW || Profiler_Mode
+    int ZPDBoundaryRank()
+    {
+    	float Rank;
+        float A = ZPD_Boundary_n_Cutoff_A.x,
+              B = ZPD_Boundary_n_Cutoff_B.x, 
+              C = ZPD_Boundary_n_Cutoff_C.x, 
+              D = ZPD_Boundary_n_Cutoff_D.x, 
+              End = ZPD_Boundary_n_Cutoff_End.x;
+        if (A > 0.0) Rank = 0;
+        if (B > 0.0) Rank = 1;
+        if (C > 0.0) Rank = 2;
+        if (D > 0.0) Rank = 3;
+        if (End > 0.0) Rank = 4;  
 
+		return Rank; 
+    }
+	#endif
+	
 	float Scale(float val,float max,float min) //Scale to 0 - 1
 	{
 		return (val - min) / (max - min);
@@ -3950,17 +3969,21 @@ uniform int Extra_Information <
 					
 						#if EDW || Profiler_Mode	
 
-							if ( CD < -ZPD_Boundary_n_Cutoff_B.y && Detect_Out_of_Range <= 2)
-								Detect_Out_of_Range = 2;							
-
-							if ( CD < -ZPD_Boundary_n_Cutoff_C.y && Detect_Out_of_Range <= 3)
-								Detect_Out_of_Range = 3;							
-	
-							if ( CD < -ZPD_Boundary_n_Cutoff_D.y && Detect_Out_of_Range <= 4)
-								Detect_Out_of_Range = 4;
-
-							if ( CD < -RE_Extended().y && Detect_Out_of_Range <= 5)
-								Detect_Out_of_Range = 5;
+							if(ZPD_Boundary_n_Cutoff_B.x != 0)
+							    if (CD < -ZPD_Boundary_n_Cutoff_B.y && Detect_Out_of_Range <= 2)
+							        Detect_Out_of_Range = 2;
+							
+							if(ZPD_Boundary_n_Cutoff_C.x != 0)
+							    if (CD < -ZPD_Boundary_n_Cutoff_C.y && Detect_Out_of_Range <= 3)
+							        Detect_Out_of_Range = 3;
+							
+							if(ZPD_Boundary_n_Cutoff_D.x != 0)
+							    if (CD < -ZPD_Boundary_n_Cutoff_D.y && Detect_Out_of_Range <= 4)
+							        Detect_Out_of_Range = 4;
+							
+							if(ZPD_Boundary_n_Cutoff_End.x != 0)
+							    if (CD < -RE_Extended().y && Detect_Out_of_Range <= 5)
+							        Detect_Out_of_Range = 5;
 						#else	
 													
 							#if OIL >= 1
@@ -4259,34 +4282,73 @@ uniform int Extra_Information <
 			if(RE_Set(0).x)
 			{
 				DOoR_B = lerp(ZPD_Boundary_Adjust, Set_Adjustments.x, DOoR_B);
+				#if Profiler_Mode || EDW					
+					if (ZPDBoundaryRank() == 0)
+					{
+					    DOoR_F = DOoR_B;
+					}
+					
+					if (ZPDBoundaryRank() >= 1)
+					{
+					    DOoR_C = lerp(DOoR_B, Set_Adjustments.y, DOoR_C);
+					    if (ZPDBoundaryRank() == 1)
+					    {
+					        DOoR_F = DOoR_C;
+					    }
+					}
+					
+					if (ZPDBoundaryRank() >= 2)
+					{
+					    DOoR_D = lerp(DOoR_C, Set_Adjustments.z, DOoR_D);
+					    if (ZPDBoundaryRank() == 2)
+					    {
+					        DOoR_F = DOoR_D;
+					    }
+					}
+					
+					if (ZPDBoundaryRank() >= 3)
+					{
+					    DOoR_E = lerp(DOoR_D, Set_Adjustments.w, DOoR_E);
+					    if (ZPDBoundaryRank() == 3)
+					    {
+					        DOoR_F = DOoR_E;
+					    }
+					}
+					
+					if (ZPDBoundaryRank() >= 4)
+					{
+					    DOoR_F = lerp(DOoR_E, RE_Extended().x, DOoR_F);
+					}			
+				#else
 					#if OIL == 0
-					DOoR_F = DOoR_B;
+					    DOoR_F = DOoR_B;
 					#endif
-	
-				#if OIL >= 1
-				DOoR_C = lerp(DOoR_B, Set_Adjustments.y, DOoR_C);
-					#if OIL == 1
-					DOoR_F = DOoR_C;
-					#endif	
+					
+					#if OIL >= 1
+					    DOoR_C = lerp(DOoR_B, Set_Adjustments.y, DOoR_C);
+					    #if OIL == 1
+					        DOoR_F = DOoR_C;
+					    #endif
+					#endif
+					
+					#if OIL >= 2
+					    DOoR_D = lerp(DOoR_C, Set_Adjustments.z, DOoR_D);
+					    #if OIL == 2
+					        DOoR_F = DOoR_D;
+					    #endif
+					#endif
+					
+					#if OIL >= 3
+					    DOoR_E = lerp(DOoR_D, Set_Adjustments.w, DOoR_E);
+					    #if OIL == 3
+					        DOoR_F = DOoR_E;
+					    #endif
+					#endif
+					
+					#if OIL >= 4
+					    DOoR_F = lerp(DOoR_E, RE_Extended().x, DOoR_F);
+					#endif
 				#endif
-				
-				#if OIL >= 2	
-				DOoR_D = lerp(DOoR_C, Set_Adjustments.z, DOoR_D);
-					#if OIL == 2
-					DOoR_F = DOoR_D;
-					#endif	
-				#endif		
-
-				#if OIL >= 3	
-				DOoR_E = lerp(DOoR_D, Set_Adjustments.w, DOoR_E);
-					#if OIL == 3
-					DOoR_F = DOoR_E;
-					#endif	
-				#endif	
-				
-				#if OIL >= 4	
-				DOoR_F = lerp(DOoR_E, RE_Extended().x, DOoR_F);
-				#endif		
 			}
 			else
 			DOoR_F = lerp(ZPD_Boundary_Adjust, Detection_Switch_Amount.x, DOoR_B);
