@@ -531,7 +531,7 @@ uniform int SuperDepth3D <
 		ui_category = "Game Selection";
 	> = 0;	
 	#endif
-	//uniform int TEST < ui_type = "slider"; ui_min = 0; ui_max = 100.0; > = 0.00;
+	//uniform float TEST < ui_type = "slider"; ui_min = 0; ui_max = 100.0; > = 0.00;
 	//Divergence & Convergence//
 	uniform float Depth_Adjustment < //This change was made to make it more simple for users
 		ui_type = "slider";
@@ -4411,7 +4411,17 @@ uniform int Extra_Information <
 		else
 			return tex2Dlod(SamplerDMN,float4(TC,0,Mips)).y == 0.5 ? 0 : 1;
 	}
+	
+	float Alpha_UI_Mask(float2 texcoord, float Mip)
+	{
+		float Alpha_UI = tex2Dlod(SamplerCN,float4(texcoord,0,Mip)).y;
 
+		if(Isolate_UI)
+			Alpha_UI = Alpha_UI > 0.41;//smoothstep(0.0, 0.4,Alpha_UI);
+	
+		return Alpha_UI;	
+	}	
+	
 	float4 DB_Comb(float2 texcoord)
 	{
 		float Auto_Adjust_Weapon_Depth = 1, Anti_Weapon_Z = abs(AWZ);
@@ -4479,8 +4489,9 @@ uniform int Extra_Information <
 		}
 		
 		DM.y = lerp( HandleConvergence.x, HandleConvergence.y * Auto_Adjust_Weapon_Depth, DM.y);
-	
+		float Alpha_UI_Edge_Masking = Alpha_Channel_UI ? Alpha_UI_Mask(texcoord, 0) : 0;
 		float Edge_Adj = saturate(lerp(0.5,1.0,Edge_Adjust));
+		Edge_Adj = lerp(Edge_Adj,1,Alpha_UI_Edge_Masking);
 		#if Inficolor_3D_Emulator
 			float UI_Detection_Mask = 0.5;
 		#else
@@ -4984,15 +4995,6 @@ uniform int Extra_Information <
 		return saturate(Vin);
 	}
 	
-	float Alpha_UI_Mask(float2 texcoord, float Mip)
-	{
-		float Alpha_UI = tex2Dlod(SamplerCN,float4(texcoord,0,Mip)).y;
-
-		if(Isolate_UI)
-			Alpha_UI = Alpha_UI > 0.41;//smoothstep(0.0, 0.4,Alpha_UI);
-	
-		return Alpha_UI;	
-	}	
 	#if AR_Is == 2
 	int ARSensitivity( float inVal )
 	{
