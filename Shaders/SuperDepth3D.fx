@@ -1,7 +1,7 @@
 	////----------------//
 	///**SuperDepth3D**///
 	//----------------////
-	#define SD3D "SuperDepth3D v5.2.4\n"
+	#define SD3D "SuperDepth3D v5.2.5\n"
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//* Depth Map Based 3D post-process shader
 	//* For Reshade 3.0+
@@ -4489,9 +4489,9 @@ uniform int Extra_Information <
 		}
 		
 		DM.y = lerp( HandleConvergence.x, HandleConvergence.y * Auto_Adjust_Weapon_Depth, DM.y);
-		float Alpha_UI_Edge_Masking = Alpha_Channel_UI ? Alpha_UI_Mask(texcoord, 0) : 0;
+		float Alpha_UI_Edge_Masking = Alpha_Channel_UI ? Alpha_UI_Mask(texcoord, 0) > 0 : 0;
 		float Edge_Adj = saturate(lerp(0.5,1.0,Edge_Adjust));
-		Edge_Adj = lerp(Edge_Adj,1,Alpha_UI_Edge_Masking);
+			  Edge_Adj = lerp(1,Edge_Adj,Alpha_UI_Edge_Masking);
 		#if Inficolor_3D_Emulator
 			float UI_Detection_Mask = 0.5;
 		#else
@@ -5143,7 +5143,7 @@ uniform int Extra_Information <
 		    float Store_MixOut = MixOut;
 		    float2 FPS_Alpha_UI, TRD_Alpha_UI;
 		    float Avg_UI = saturate(smoothstep(0.25, 1, tex2Dlod(SamplerzBuffer_BlurEx, float4(0.5, 0.5, 0, 12)).y) * 2);
-		    float Edge_Fix = EdgeMask(1, texcoord, 0.95).x;
+		    //float Edge_Fix = EdgeMask(1, texcoord, 0.95).x;
 		    
 		    float Game_Alpha_UI, Game_Alpha_UI_M;
 		    float Alpha_UI = Alpha_UI_Mask(texcoord, 0);
@@ -5378,7 +5378,7 @@ uniform int Extra_Information <
 		            float TRD_Area_S = smoothstep(C_UI_Value_A * 0.5, C_UI_Value_A, texcoord_x_mirror);
 		            TRD_Area_S = saturate(lerp(TRD_Area_S, 1, texcoord.y < 0.25) + 
 		                                  smoothstep(C_RT_Scale.x, C_RT_Scale.y, 1 - texcoord.y) * 2);
-		            TRD_Area_S = saturate(smoothstep(lerp(0, -0.125, Edge_Fix), 1.0, TRD_Area_S));
+		            TRD_Area_S = smoothstep(0.0, 1.0, TRD_Area_S);
 		            TRD_Area_S = lerp(TRD_Area_S, 1.0, IM_Stencil(texcoord, -0.5, 1.5, 1) * 0.4375 + 0.4375);
 		            
 		            float LargeCenter = saturate(tex2Dlod(SamplerAvrB_N, float4(texcoord, 0, 6)).x);
