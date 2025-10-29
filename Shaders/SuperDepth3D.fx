@@ -531,7 +531,7 @@ uniform int SuperDepth3D <
 		ui_category = "Game Selection";
 	> = 0;	
 	#endif
-	//uniform float TEST < ui_type = "slider"; ui_min = 0; ui_max = 100.0; > = 0.00;
+	uniform float TEST < ui_type = "slider"; ui_min = 0; ui_max = 2.0; > = 0.00;
 	//Divergence & Convergence//
 	uniform float Depth_Adjustment < //This change was made to make it more simple for users
 		ui_type = "slider";
@@ -2726,67 +2726,161 @@ uniform int Extra_Information <
 		#endif
 	}	
 	
-	int LBDetection()//Active RGB Detection
-	{   int Letter_Box_Center_Mips_Level_Senstivity = 7;   
-		float2 Letter_Box_Reposition = float2(0.1,0.5);
-		if (LBR == 1) 
-			Letter_Box_Reposition = float2(0.250,0.875);
-		if (LBR == 2) 
-			Letter_Box_Reposition = float2(0.5,0.625);
-		if (LBR == 3) 
-			Letter_Box_Reposition = float2(0.50,0.5);
-		if (LBR == 4) 
-			Letter_Box_Reposition = float2(0.5,0.92);
-		
-		if (LBI)
-			Letter_Box_Reposition.x = 1-Letter_Box_Reposition.x;		
-	
-		if (LBL == 1)
-			Letter_Box_Center_Mips_Level_Senstivity = 8;
-		if (LBL == 2)
-			Letter_Box_Center_Mips_Level_Senstivity = 9;
-		if (LBL == 3)
-			Letter_Box_Center_Mips_Level_Senstivity = 10;
-		if (LBL >= 4)
-			Letter_Box_Center_Mips_Level_Senstivity = 11;
-			
-		//Letter Box Detection Map
-		
-		//Center (0.5,0.5) 
-		
-		//Letter Box Reposition & Letter Box Elevation Zero
-		//Top    (0.1,0.09)   LBE One = (0.1,0.045)  LBE Two = (0.1,0.035)  
-
-		//Bottom (0.5,0.91)   LBE One = (0.5,0.955)  LBE Two = (0.5,0.965)
-		
-		//Letter Box Reposition One
-		//Top    (0.250,0.09 )LBE One = (0.250,0.045)LBE Two = (0.250,0.035)
-
-		//Bottom (0.875,0.91) LBE One = (0.875,0.955)LBE Two = (0.875,0.965)
-		
-		//Letter Box Reposition Two
-		//Top    (0.5,0.09)   LBE One = (0.50,0.045) LBE Two = (0.5,0.035)
- 
-		//Bottom (0.625,0.91) LBE One = (0.625,0.955)LBE Two = (0.625,0.965)
-		#if LB_Correction == 3 || LB_Correction == 4 || LBC == 3 || LBC == 4 || LetterBox_Masking == 3 || LBM == 3 || LetterBox_Masking == 4 || LBM == 4 //Hoz & Vert
-			//Top Left | Top Right | Center | Bottom Left | Bottom Right
-			float MipLevel = 5;
-			int Top_Left = LBSensitivity(SLLTresh(float2(0.05,0.015), MipLevel));
-			int Top_Right = LBSensitivity(SLLTresh(float2(0.95,0.015), MipLevel));
-			float Center = SLLTresh(float2(0.5,0.5), Letter_Box_Center_Mips_Level_Senstivity) > 0;
-			int Bottom_Left = LBSensitivity(SLLTresh(float2(0.05,0.985), MipLevel));
-			int Bottom_Right = LBSensitivity(SLLTresh(float2(0.95,0.985), MipLevel));
-
-			return (Top_Left && Top_Right) && Center && (Bottom_Left && Bottom_Right);
-		#else
-			float2 Letter_Box_Elevation = LBE ? LBE == 2 ? float2(0.035,0.965) : float2(0.045,0.955) : float2(0.09,0.91);    
-			float MipLevel = 5,Center = SLLTresh(float2(0.5,0.5), Letter_Box_Center_Mips_Level_Senstivity) > 0, 
-				  Top_Pos = LBSensitivity(SLLTresh(float2(Letter_Box_Reposition.x,Letter_Box_Elevation.x), MipLevel));
-			if ( LetterBox_Masking == 2 || LB_Correction == 2 || LBC == 2 || LBM == 2 || SMP == 2)//Left_Center | Right_Center | Center
-				return LBSensitivity(SLLTresh(float2(0.075,0.5), MipLevel)) && LBSensitivity(SLLTresh(float2(0.925,0.5), MipLevel)) && Center; //Vert
-			else       //Top | Bottom | Center
-				return Top_Pos && LBSensitivity(SLLTresh(float2(Letter_Box_Reposition.y,Letter_Box_Elevation.y), MipLevel)) && Center; //Hoz
-		#endif
+	int LBDetection() // Active RGB Detection
+	{   
+	    int Letter_Box_Center_Mips_Level_Senstivity = 7;   
+	    float2 Letter_Box_Reposition = float2(0.1, 0.5);
+	    
+	    // Letter Box Reposition Settings
+	    if (LBR == 1) 
+	        Letter_Box_Reposition = float2(0.250, 0.875);
+	    if (LBR == 2) 
+	        Letter_Box_Reposition = float2(0.5, 0.625);
+	    if (LBR == 3) 
+	        Letter_Box_Reposition = float2(0.50, 0.5);
+	    if (LBR == 4) 
+	        Letter_Box_Reposition = float2(0.5, 0.92);
+	    if (LBR == 5) 
+	        Letter_Box_Reposition = float2(0.5, 0.100);
+	    
+	    // Letter Box Invert
+	    if (LBI)
+	        Letter_Box_Reposition.x = 1 - Letter_Box_Reposition.x;		
+	    
+	    // Letter Box Level Sensitivity Settings
+	    if (LBL == 1)
+	        Letter_Box_Center_Mips_Level_Senstivity = 8;
+	    if (LBL == 2)
+	        Letter_Box_Center_Mips_Level_Senstivity = 9;
+	    if (LBL == 3)
+	        Letter_Box_Center_Mips_Level_Senstivity = 10;
+	    if (LBL >= 4)
+	        Letter_Box_Center_Mips_Level_Senstivity = 11;
+	    
+	    //===========================================================================
+	    // LETTER BOX DETECTION MAP - POSITION REFERENCE
+	    //===========================================================================
+	    
+	    // CENTER POSITION:
+	    // (0.5, 0.5)
+	    
+	    //===========================================================================
+	    // DEFAULT (LBR == 0):
+	    //   Top:    (0.1, 0.09)
+	    //           LBE One = (0.1, 0.045)  
+	    //           LBE Two = (0.1, 0.035)
+	    //   Bottom: (0.5, 0.91)
+	    //           LBE One = (0.5, 0.955)  
+	    //           LBE Two = (0.5, 0.965)
+	    //===========================================================================
+	    
+	    //===========================================================================
+	    // LETTER BOX REPOSITION ONE (LBR == 1):
+	    //   Top:    (0.250, 0.09)
+	    //           LBE One = (0.250, 0.045)
+	    //           LBE Two = (0.250, 0.035)
+	    //   Bottom: (0.875, 0.91)
+	    //           LBE One = (0.875, 0.955)
+	    //           LBE Two = (0.875, 0.965)
+	    //===========================================================================
+	    
+	    //===========================================================================
+	    // LETTER BOX REPOSITION TWO (LBR == 2):
+	    //   Top:    (0.5, 0.09)
+	    //           LBE One = (0.5, 0.045)
+	    //           LBE Two = (0.5, 0.035)
+	    //   Bottom: (0.625, 0.91)
+	    //           LBE One = (0.625, 0.955)
+	    //           LBE Two = (0.625, 0.965)
+	    //===========================================================================
+	    
+	    //===========================================================================
+	    // LETTER BOX REPOSITION THREE (LBR == 3):
+	    //   Top:    (0.50, 0.09)
+	    //           LBE One = (0.50, 0.045)
+	    //           LBE Two = (0.50, 0.035)
+	    //   Bottom: (0.5, 0.91)
+	    //           LBE One = (0.5, 0.955)
+	    //           LBE Two = (0.5, 0.965)
+	    //===========================================================================
+	    
+	    //===========================================================================
+	    // LETTER BOX REPOSITION FOUR (LBR == 4):
+	    //   Top:    (0.5, 0.09)
+	    //           LBE One = (0.5, 0.045)
+	    //           LBE Two = (0.5, 0.035)
+	    //   Bottom: (0.92, 0.91)
+	    //           LBE One = (0.92, 0.955)
+	    //           LBE Two = (0.92, 0.965)
+	    //===========================================================================
+	    
+	    //===========================================================================
+	    // LETTER BOX REPOSITION FIVE (LBR == 5):
+	    //   Top:    (0.5, 0.09)
+	    //           LBE One = (0.5, 0.045)
+	    //           LBE Two = (0.5, 0.035)
+	    //   Bottom: (0.125, 0.91)
+	    //           LBE One = (0.100, 0.955)
+	    //           LBE Two = (0.100, 0.965)
+	    //===========================================================================
+	    
+	    #if LB_Correction == 3 || LB_Correction == 4 || LBC == 3 || LBC == 4 || LetterBox_Masking == 3 || LBM == 3 || LetterBox_Masking == 4 || LBM == 4
+	        //=======================================================================
+	        // HORIZONTAL & VERTICAL MODE (5-Point Detection)
+	        //=======================================================================
+	        float MipLevel = 5;
+	        
+	        // Detection Points:
+	        int Top_Left      = LBSensitivity(SLLTresh(float2(0.05, 0.015), MipLevel));  // Top Left Corner
+	        int Top_Right     = LBSensitivity(SLLTresh(float2(0.95, 0.015), MipLevel));  // Top Right Corner
+	        float Center      = SLLTresh(float2(0.5, 0.5), Letter_Box_Center_Mips_Level_Senstivity) > 0;  // Center
+	        int Bottom_Left   = LBSensitivity(SLLTresh(float2(0.05, 0.985), MipLevel));  // Bottom Left Corner
+	        int Bottom_Right  = LBSensitivity(SLLTresh(float2(0.95, 0.985), MipLevel));  // Bottom Right Corner
+	        
+	        return (Top_Left && Top_Right) && Center && (Bottom_Left && Bottom_Right);
+	        
+	    #else
+	        //=======================================================================
+	        // STANDARD MODE (3-Point Detection)
+	        //=======================================================================
+	        
+	        // Letter Box Elevation Settings (Y-axis adjustment):
+	        //   LBE == 0: (0.09, 0.91)   - Standard
+	        //   LBE == 1: (0.045, 0.955) - Elevated
+	        //   LBE == 2: (0.035, 0.965) - Maximum Elevation
+	        float2 Letter_Box_Elevation = LBE ? (LBE == 2 ? float2(0.035, 0.965) : float2(0.045, 0.955)) : float2(0.09, 0.91);
+	        
+	        float MipLevel = 5;
+	        float Center = SLLTresh(float2(0.5, 0.5), Letter_Box_Center_Mips_Level_Senstivity) > 0;
+	        float Top_Pos = LBSensitivity(SLLTresh(float2(Letter_Box_Reposition.x, Letter_Box_Elevation.x), MipLevel));
+	        
+	        if (LetterBox_Masking == 2 || LB_Correction == 2 || LBC == 2 || LBM == 2 || SMP == 2)
+	        {
+	            //===================================================================
+	            // VERTICAL MODE (3-Point Detection)
+	            //===================================================================
+	            // Detection Points:
+	            //   Left Center:   (0.075, 0.5)
+	            //   Right Center:  (0.925, 0.5)
+	            //   Center:        (0.5, 0.5)
+	            return LBSensitivity(SLLTresh(float2(0.075, 0.5), MipLevel)) && 
+	                   LBSensitivity(SLLTresh(float2(0.925, 0.5), MipLevel)) && 
+	                   Center;
+	        }
+	        else
+	        {
+	            //===================================================================
+	            // HORIZONTAL MODE (3-Point Detection)
+	            //===================================================================
+	            // Detection Points:
+	            //   Top:    (Letter_Box_Reposition.x, Letter_Box_Elevation.x)
+	            //   Bottom: (Letter_Box_Reposition.y, Letter_Box_Elevation.y)
+	            //   Center: (0.5, 0.5)
+	            return Top_Pos && 
+	                   LBSensitivity(SLLTresh(float2(Letter_Box_Reposition.y, Letter_Box_Elevation.y), MipLevel)) && 
+	                   Center;
+	        }
+	    #endif
 	}
 	#else
 	int LBDetection()//Stand in for not crashing when not in use
@@ -5011,12 +5105,12 @@ uniform int Extra_Information <
 
 	int ARDetection()//Active RGB Detection
 	{   int Letter_Box_Center_Mips_Level_Senstivity = 7;   
-		float AR_position = 0.5;
+		float2 AR_position = float2(0.5,0.125);
 		float2 AR_Elevation =  float2(0.025,0.975);    
 		
 		float MipLevel = 4,Center = SLLTresh(float2(0.5,0.5), Letter_Box_Center_Mips_Level_Senstivity) > 0, 
-			  Top_Pos = ARSensitivity(SLLTresh(float2(AR_position,AR_Elevation.x), MipLevel)),
-			  Bottom_Pos = ARSensitivity(SLLTresh(float2(AR_position,AR_Elevation.y), MipLevel));
+			  Top_Pos = ARSensitivity(SLLTresh(float2(AR_position.x,AR_Elevation.x), MipLevel)),
+			  Bottom_Pos = ARSensitivity(SLLTresh(float2(AR_position.y,AR_Elevation.y), MipLevel));
 
 			return Top_Pos && Center && Bottom_Pos;
 	}
@@ -5566,7 +5660,7 @@ uniform int Extra_Information <
 	{
 		Recon = Disocclusion(SamplerzBufferP_Mixed, texcoord, rcp_Depth_Size());
 	}
-		#if Anti_Jitter_Mode		
+		#if Anti_Jitter_Mode			
 		void TAA_Buffer(in float4 position : SV_Position, in float2 texcoord : TEXCOORD, out float Temporal : SV_Target0)
 		{
 			// Sample Current Frame
@@ -7570,7 +7664,7 @@ uniform int Extra_Information <
 	#endif
 	
 	#if !DX9_Toggle //Not needed in DX9
-		#if Anti_Jitter_Mode
+		#if Anti_Jitter_Mode	
 		float2 Acc_Buffer(in float4 position : SV_Position, in float2 texcoord : TEXCOORD) : SV_Target
 		{   
 			float Out;	
