@@ -133,10 +133,10 @@ namespace SuperDepth3D
 		#define OW_WP "WP Off\0Custom WP\0"
 		#define G_Info "Missing Overwatch.fxh Information.\n"
 		#define G_Note "Note: If you pulled this file intentionally, please ignore this message.\n"
-		static const int SBTDA = 0, SMSBT = 0, UIF = 0, UIL = 0, RCI = 0, AIM = 0, WMM = 0, SDD = 0, DMM = 0, LBD = 0, WSM = 0;
+		static const int MED = 0, SBTDA = 0, SMSBT = 0, UIF = 0, UIL = 0, RCI = 0, AIM = 0, WMM = 0, SDD = 0, DMM = 0, LBD = 0, WSM = 0;
 		static const int2 DOL = 0;
 		//Triggers 
-		static const float  UIB = 0, HNR = 0, THF = 0, EGB = 0,PLS = 0, MGA = 0, WZD = 0, KHM = 0, DAO = 0, LDT = 0, ALM = 0, SSF = 0, SNF = 0, SSE = 0, SNE = 0, EDU = 0, LBI = 0,ISD = 0, ASA = 1, IWS = 0, SUI = 0, SSA = 0, SNA = 0, SSB = 0, SNB = 0,SSC = 0, SNC = 0,SSD = 0, SND = 0, LHA = 0, WBS = 0, TMD = 0, FRM = 0, AWZ = 0, CWH = 0, WBA = 0, WFB = 0, WND = 0, WRP = 0, MML = 0, SMD = 0, WHM = 0, SDU = 0, ABE = 2, LBE = 0, HQT = 0, HMD = 0.5, MAC = 0, OIL = 0, MMS = 0, FTM = 0, FMM = 0, SPO = 0, MMD = 0, LBR = 0, AFD = 0, MDD = 0, FPS = 1, SMS = 1, OIF = 0, NCW = 0, RHW = 0, NPW = 0, SPF = 0, BDF = 0, HMT = 0, HMC = 0, DFW = 0, NFM = 0, DSW = 0, LBC = 0, LBS = 0, LBM = 0, DAA = 0, NDW = 0, PEW = 0, WPW = 0, FOV = 0, EDW = 0, SDT = 0;
+		static const float UIB = 0, HNR = 0, THF = 0, EGB = 0,PLS = 0, MGA = 0, WZD = 0, KHM = 0, DAO = 0, LDT = 0, ALM = 0, SSF = 0, SNF = 0, SSE = 0, SNE = 0, EDU = 0, LBI = 0,ISD = 0, ASA = 1, IWS = 0, SUI = 0, SSA = 0, SNA = 0, SSB = 0, SNB = 0,SSC = 0, SNC = 0,SSD = 0, SND = 0, LHA = 0, WBS = 0, TMD = 0, FRM = 0, AWZ = 0, CWH = 0, WBA = 0, WFB = 0, WND = 0, WRP = 0, MML = 0, SMD = 0, WHM = 0, SDU = 0, ABE = 2, LBE = 0, HQT = 0, HMD = 0.5, MAC = 0, OIL = 0, MMS = 0, FTM = 0, FMM = 0, SPO = 0, MMD = 0, LBR = 0, AFD = 0, MDD = 0, FPS = 1, SMS = 1, OIF = 0, NCW = 0, RHW = 0, NPW = 0, SPF = 0, BDF = 0, HMT = 0, HMC = 0, DFW = 0, NFM = 0, DSW = 0, LBC = 0, LBS = 0, LBM = 0, DAA = 0, NDW = 0, PEW = 0, WPW = 0, FOV = 0, EDW = 0, SDT = 0;
 		//Overwatch.fxh State
 		#define OSW 1
 	#endif
@@ -303,6 +303,10 @@ namespace SuperDepth3D
 	//New ReShade PreProcessor stuff	
 	#ifndef Use_2D_Plus_Depth
 	    #define Use_2D_Plus_Depth 0
+	#endif
+
+	#ifndef M_Edge
+	    #define M_Edge MED
 	#endif
 	
 	#if Use_2D_Plus_Depth
@@ -1754,6 +1758,11 @@ uniform int SuperDepth3D <
 					"Default is 0.0.";
 		ui_category = "Miscellaneous Options";
 	> = DT_Z;
+	
+	static const int Alpha_Channel_UI = 0;
+	static const int Isolate_UI = 0;
+	static const int Alpha_UI_is_Narrow = 0;
+	static const int Alpha_UI_Has_LB = 0;
 	#else
 	static const float UI_Seeking_Strength = DT_Z;
 	static const float4 Alpha_XYZW = DMM_W;
@@ -4691,6 +4700,11 @@ uniform int Extra_Information <
 		
 		if (Cancel_Depth)
 			DM = UI_Detection_Mask;
+			
+		#if M_Edge
+		if(texcoord.x < 0.001 || 1-texcoord.x < 0.001)
+			DM = 0.1;
+		#endif
 	
 		#if UI_MASK
 			DM.y = lerp(DM.y,0,step(1.0-HUD_Mask(texcoord),0.5));
