@@ -1,7 +1,7 @@
 	////----------------//
 	///**SuperDepth3D**///
 	//----------------////
-	#define SD3D "SuperDepth3D v5.2.6\n"
+	#define SD3D "SuperDepth3D v5.2.7\n"
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//* Depth Map Based 3D post-process shader
 	//* For Reshade 3.0+
@@ -3863,9 +3863,9 @@ uniform int Extra_Information <
 		if(World_n_Fade_Reduction_Power.y == 6)
 			AA *= 1.625;
 		if(World_n_Fade_Reduction_Power.y == 7)
-			AA *= 1.75;
+			AA *= 1.7;
 		if(World_n_Fade_Reduction_Power.y == 8)//instant
-			AA *= 2.0;
+			AA *= 1.775;
 		#if SUI
 		float SnD_Toggle = SNA ? Stencil_n_Detection_A() : 0;
 			#if SUI >= 2
