@@ -5350,40 +5350,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
     #define FOV 1
     #define DAA 1
     #define NDW 1
- #elif (App == 0x7180D9FF ) //Shadow of the Tombraider
-	#define DA_W 1
-    //#define DB_X 1
-	#define DA_X 0.035
-	//#define DF_Y 0.0025
-	#define DA_Y 37.5
-    //#define DA_Z 0.001
-	#define DB_Z 0.100
- 
-	#define DE_X 1
-	#define DE_Y 0.500
-	#define DE_Z 0.375
-	//#define DG_W 0.2//PoP
-    //#define OIF 0.375 //Fix enables if Value is > 0.0
-	//#define DI_W 0.375
-	//#define FTM 1
-    //#define DG_Z 0.001//0.050//0.075 //Min
-    //#define DE_W 0.75 //Auto
-    //#define DI_Z 0.05//0.050//0.090 //Trim
-	#define BMT 1
-	#define DF_Z 0.100 //0.05-0.100
-    //#define SMS 1            //SM Toggle Separation
-	#define DL_X 0.900       //SM Tune
-	//#define DL_W 0.5       //SM Perspective
-	#define DM_X 3           //HQ Tune
-	#define DM_Z 3           //HQ Smooth
-    //#define DM_Y 3           //HQ VRS
-    //#define DL_Y -0.500    //De-Artifact
-    //#define DL_Z 0.250       //Compat Power
-
-    #define PEW 1
-    #define FOV 1
-    #define DAA 1
-    #define NDW 1
+    
  #elif (App == 0xEE08F4D7 || App == 0x541182E5 ) //Grow Up | Grow Home
 	//#define DA_W 1
     #define DB_X 1
@@ -48440,7 +48407,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
     #define DS_Y 0                                 // Linearization Offset Effects only distance if true
 	#define DB_Z 0.025                             // Auto Depth Protection
 	
-	#define DE_X 4                                 // ZPD Boundary 
+	#define DE_X 1                                 // ZPD Boundary 
 	#define DE_Y 0.75                              // Set ZPD Boundary Level Zero 
 	#define DE_Z 0.375                             // Speed that Boundary is Enforced
 	//#define AFD 1                                // Alternate Frame Detection - May be phased out
@@ -48456,10 +48423,10 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
     //#define WBA 2.5                              // ZPD Weapon Boundary Alt Adjust power for CWH 
 	//#define FTM 4                                // Fast Trigger Mode If this enabled then Level 1 and > switches instantly.
 	#define WND 0.5                                // Weapon Near Pushes depth in and adjust perspective to match.
-	//#define DG_Z 0.1125                             // Min Weapon Hands That are apart of world with Auto and Trim
+	#define DG_Z 0.075                             // Min Weapon Hands That are apart of world with Auto and Trim
     //#define DS_X float3(0.025,0,1)               // Min Weapon bit only triggers when a OIL Level is set and set here on .y
     //#define DE_W 0.375                            // Auto
-    //#define DI_Z 0.075                             // Trim
+    #define DI_Z 0.100                             // Trim
     //#define DF_W float4(0.0001,0.000,0.0,0.005)    // Edge & Scale
 	//#define MED 1                                // Mask Edge In Depth	
 	//#define EDU 1                                // Elevate Detectors Up effects ZPD
@@ -48854,7 +48821,48 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	//#define FOV 1
     //#define ARW 1
     //#define DFW 1 
-    
+ #elif (App == 0x7180D9FF ) //Shadow of the Tombraider
+	#define DA_W 1
+    //#define DB_X 1
+	#define DA_X 0.035
+	//#define DF_Y 0.0025
+	#define DA_Y 37.5
+    //#define DA_Z 0.001
+	#define DB_Z 0.0125
+    #define DS_Y 3                                 // Linearization Offset Effects only distance if true
+ 
+	#define DE_X 1                                 // ZPD Boundary 
+	#define DE_Y 0.75                              // Set ZPD Boundary Level Zero 
+	#define DE_Z 0.375                             // Speed that Boundary is Enforced
+	//#define AFD 1                                // Alternate Frame Detection - May be phased out
+	//#define DG_W 0.5                             // Shift Boundary Out of screen 0.5 and or In screen -0.5
+	#define EGB 1                                // Edge Guard weakens the edge detection like the original vision back when the feature was added
+    //#define DMM 1                                // Detect More Mode
+    #define OIL 4                                  // Set How many Levels
+    #define OIF float4(0.625,0.5,0.375,0.25)       // Fix enables if Value is > 0.0
+	#define DI_W float4(0.25,0.5,1.0,2.0)
+	#define DKK_W float2(0.125,4.0)                //XY
+	#define WND 0.25                                // Weapon Near Pushes depth in and adjust perspective to match.
+	
+	//#define FTM 1
+    //#define DG_Z 0.001//0.050//0.075 //Min
+    //#define DE_W 0.75 //Auto
+    //#define DI_Z 0.05//0.050//0.090 //Trim
+	#define BMT 1
+	#define DF_Z 0.150
+    //#define SMS 1            //SM Toggle Separation
+	#define DL_X 0.900       //SM Tune
+	//#define DL_W 0.5       //SM Perspective
+	#define DM_X 3           //HQ Tune
+	#define DM_Z 3           //HQ Smooth
+    //#define DM_Y 3           //HQ VRS
+    //#define DL_Y -0.500    //De-Artifact
+    //#define DL_Z 0.250       //Compat Power
+
+    #define PEW 1
+    #define FOV 1
+    #define DAA 1
+    #define NDW 1    
 #else
 	#define NPW 1 //No Profile
 	//#define G_Note "Note: Since no profile exists, you need to create one or ask for one.\n"

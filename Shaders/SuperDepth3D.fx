@@ -1,7 +1,7 @@
 	////----------------//
 	///**SuperDepth3D**///
 	//----------------////
-	#define SD3D "SuperDepth3D v5.2.7\n"
+	#define SD3D "SuperDepth3D v5.2.8\n"
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//* Depth Map Based 3D post-process shader
 	//* For Reshade 3.0+
@@ -388,6 +388,23 @@ namespace SuperDepth3D
 		#endif
 	#else
 		#define Set_Custom_Sidebars 1
+	#endif
+
+	//HandHeld Stuff//	
+	#if __VENDOR__ == 0x8086 //Intel
+		#ifndef Handheld_Mode
+			#define Handheld_Mode 1
+		#endif		
+	#else
+		#ifndef Handheld_Mode
+			#define Handheld_Mode 0
+		#endif
+	#endif
+
+	#if Handheld_Mode
+		#define Set_Depth_Res 2
+	#else
+		#define Set_Depth_Res 0
 	#endif
 	
 	// Define aspect ratios as integers (multiply by 1000 for precision)
@@ -811,17 +828,31 @@ uniform int SuperDepth3D <
 	> = DJ_X;
 	*/ 		
 	#if !Use_2D_Plus_Depth
-	uniform int Performance_Level <
-		ui_type = "combo";
-		ui_items = "Performant\0Normal\0Performant + Depth\0Normal + Depth\0";
-		ui_label = " Performance Level";
-		ui_tooltip = "Performance Levels Lowers or Raises Occlusion Quality Processing so that the performance is adjusted accordingly.\n"
-					 "Varable Rate Shading focuses the quality of the samples in lighter areas of the screen.\n"
-					 "Please enable the 'Performance Mode' Checkbox, in ReShade's GUI.\n"
-					 "It's located in the lower bottom right of the ReShade's Main.\n"
-					 "Default is Performant.";
-		ui_category = "Occlusion Masking";
-	> = PLS;
+		#if Handheld_Mode
+			uniform int Performance_Level <
+				ui_type = "combo";
+				ui_items = "Performant + Depth\0Normal + Depth\0";
+				ui_label = " Performance Level";
+				ui_tooltip = "Performance Levels Lowers or Raises Occlusion Quality Processing so that the performance is adjusted accordingly.\n"
+							 "Varable Rate Shading focuses the quality of the samples in lighter areas of the screen.\n"
+							 "Please enable the 'Performance Mode' Checkbox, in ReShade's GUI.\n"
+							 "It's located in the lower bottom right of the ReShade's Main.\n"
+							 "Default is Performant.";
+				ui_category = "Occlusion Masking";
+			> = PLS;
+		#else
+			uniform int Performance_Level <
+				ui_type = "combo";
+				ui_items = "Performant\0Normal\0Performant + Depth\0Normal + Depth\0";
+				ui_label = " Performance Level";
+				ui_tooltip = "Performance Levels Lowers or Raises Occlusion Quality Processing so that the performance is adjusted accordingly.\n"
+							 "Varable Rate Shading focuses the quality of the samples in lighter areas of the screen.\n"
+							 "Please enable the 'Performance Mode' Checkbox, in ReShade's GUI.\n"
+							 "It's located in the lower bottom right of the ReShade's Main.\n"
+							 "Default is Performant.";
+				ui_category = "Occlusion Masking";
+			> = PLS;
+		#endif
 	/* Will add this back when Eyetracking is a thing
 	uniform bool Foveated_Mode <
 			ui_label = "Foveated Rendering";
@@ -1978,30 +2009,6 @@ uniform int Extra_Information <
 			return Divergence + FLT_EPSILON;		
 		#endif
 	}
-
-	//Resolution Scaling so that auto anti cross talk works.
-	#define Comb_Size BUFFER_HEIGHT + BUFFER_WIDTH
-	#if ( Comb_Size <= 3360)
-		#if ( Comb_Size <= 1400)
-			#if (Set_Depth_Res >= 2 )
-				#define Max_Mips 8
-			#else
-				#define Max_Mips 9
-			#endif
-		#else
-			#if (Set_Depth_Res >= 2 )
-				#define Max_Mips 10
-			#else
-				#define Max_Mips 11
-			#endif
-		#endif
-	#else
-		#if (Set_Depth_Res >= 2 )
-			#define Max_Mips 11
-		#else
-			#define Max_Mips 12
-		#endif
-	#endif
 	
 	#if HDR_Compatible_Mode == 1
 		#define BC_SPACE 1
@@ -2027,7 +2034,45 @@ uniform int Extra_Information <
 	float3 FP_IO_Pos(){return 0;}
 	#warning "Eye Tracking Need ReShade 4.6.0 and above."
 	#endif
+
+	// Simulate Depth_Rez using integer math: 100 = 1.0, 75 = 0.75, 50 = 0.5
+	#if Set_Depth_Res == 1
+	    #define Depth_Rez_Mul 75
+	    #define Depth_Rez 0.75
+	#elif Set_Depth_Res == 2
+	    #define Depth_Rez_Mul 50
+	    #define Depth_Rez 0.5   
+	#else
+	    #define Depth_Rez_Mul 100
+	    #define Depth_Rez 1.0
+	#endif
 	
+	// Calculate integer-scaled DS_Comb_Size = (BUFFER_HEIGHT + BUFFER_WIDTH) * Depth_Rez
+	#define COMB_SIZE (BUFFER_HEIGHT + BUFFER_WIDTH)
+	#define DS_COMB_SIZE ((COMB_SIZE * Depth_Rez_Mul) / 100)
+	
+	// Now, use preprocessor conditions with integer comparisons
+	#if DS_COMB_SIZE <= 3360
+	    #if DS_COMB_SIZE <= 1400
+	        #if Set_Depth_Res >= 2
+	            #define Max_Mips 8
+	        #else
+	            #define Max_Mips 9
+	        #endif
+	    #else
+	        #if Set_Depth_Res >= 2
+	            #define Max_Mips 10
+	        #else
+	            #define Max_Mips 11
+	        #endif
+	    #endif
+	#else
+	    #if Set_Depth_Res >= 2
+	        #define Max_Mips 11
+	    #else
+	        #define Max_Mips 12
+	    #endif
+	#endif
 	///////////////////////////////////////////////////////////////3D Starts Here///////////////////////////////////////////////////////////
 	texture DepthBufferTex : DEPTH;
 	sampler DepthBuffer
@@ -2182,21 +2227,21 @@ uniform int Extra_Information <
 		#endif			
 	#endif	
 	
-	texture texDMN { Width = BUFFER_WIDTH ; Height = BUFFER_HEIGHT; Format = RG16F; MipLevels = Max_Mips; }; //Mips Used
+	texture texDMN { Width = BUFFER_WIDTH * Depth_Rez; Height = BUFFER_HEIGHT * Depth_Rez; Format = RG16F; MipLevels = Max_Mips; }; //Mips Used
 	
 	sampler SamplerDMN
 		{
 			Texture = texDMN;
 		};
 
-	texture texCN { Width = BUFFER_WIDTH ; Height = BUFFER_HEIGHT; Format = RG8; MipLevels = Max_Mips; }; //Mips Used
+	texture texCN { Width = BUFFER_WIDTH * Depth_Rez; Height = BUFFER_HEIGHT * Depth_Rez; Format = RG8; MipLevels = Max_Mips; }; //Mips Used
 	
 	sampler SamplerCN
 		{
 			Texture = texCN;
 		};
 	
-	texture texzBufferN_P { Width = BUFFER_WIDTH ; Height = BUFFER_HEIGHT; Format = RG16F; };
+	texture texzBufferN_P { Width = BUFFER_WIDTH * Depth_Rez; Height = BUFFER_HEIGHT * Depth_Rez; Format = RG16F; };
 	
 	sampler SamplerzBufferN_P
 		{
@@ -2206,7 +2251,7 @@ uniform int Extra_Information <
 			MipFilter = POINT;
 		};
 	
-	texture texzBufferN_L { Width = BUFFER_WIDTH ; Height = BUFFER_HEIGHT; Format = RG16F; MipLevels = 8; }; //Mips Used
+	texture texzBufferN_L { Width = BUFFER_WIDTH * Depth_Rez; Height = BUFFER_HEIGHT * Depth_Rez; Format = RG16F; MipLevels = 8; }; //Mips Used
 	
 	sampler SamplerzBufferN_L
 		{
@@ -2258,7 +2303,7 @@ uniform int Extra_Information <
 		Texture = texzBufferBlurEx;
 	};
 	#if !DX9_Toggle	
-	texture texzBufferN_M { Width = BUFFER_WIDTH ; Height = BUFFER_HEIGHT ; Format = R16F; MipLevels = 3;};
+	texture texzBufferN_M { Width = BUFFER_WIDTH  * Depth_Rez; Height = BUFFER_HEIGHT  * Depth_Rez; Format = R16F; MipLevels = 3;};
 
 	sampler SamplerzBufferP_Mixed
 		{
@@ -2268,7 +2313,7 @@ uniform int Extra_Information <
 			MipFilter = POINT;
 		};		
 	#else
-	texture texzBufferN_M { Width = BUFFER_WIDTH ; Height = BUFFER_HEIGHT ; Format = R16F; }; //Do not use mips in this buffer
+	texture texzBufferN_M { Width = BUFFER_WIDTH  * Depth_Rez; Height = BUFFER_HEIGHT * Depth_Rez; Format = R16F; }; //Do not use mips in this buffer
 
 	sampler SamplerzBufferB_Mixed
 		{
@@ -2286,7 +2331,7 @@ uniform int Extra_Information <
 
 	#if !DX9_Toggle
 	// Reconstuction
-	texture texReconBuffer { Width = BUFFER_WIDTH ; Height = BUFFER_HEIGHT ; Format = R16F; }; //Do not use mips in this buffer
+	texture texReconBuffer { Width = BUFFER_WIDTH  * Depth_Rez; Height = BUFFER_HEIGHT  * Depth_Rez; Format = R16F; }; //Do not use mips in this buffer
 	#if Anti_Jitter_Mode	
 	sampler SamplerzBufferP_Current
 		{
@@ -2311,7 +2356,7 @@ uniform int Extra_Information <
 	#endif
 	// TAA
 		#if Anti_Jitter_Mode
-		texture TAABuffer { Width = BUFFER_WIDTH ; Height = BUFFER_HEIGHT ; Format = R16F; }; //Do not use mips in this buffer
+		texture TAABuffer { Width = BUFFER_WIDTH * Depth_Rez; Height = BUFFER_HEIGHT  * Depth_Rez; Format = R16F; }; //Do not use mips in this buffer
 
 		sampler SamplerzBufferB_Up
 			{
@@ -2326,7 +2371,7 @@ uniform int Extra_Information <
 				MipFilter = POINT;
 			};
 		
-		texture AccBuffer { Width = BUFFER_WIDTH ; Height = BUFFER_HEIGHT ; Format = RG16F; }; //Do not use mips in this buffer
+		texture AccBuffer { Width = BUFFER_WIDTH * Depth_Rez; Height = BUFFER_HEIGHT * Depth_Rez; Format = RG16F; }; //Do not use mips in this buffer
 		
 		sampler SamplerzACC
 			{
@@ -5799,13 +5844,16 @@ uniform int Extra_Information <
 			
 		//Luma Based VRS
 		//float Luma_Map = lerp(1.0,3.0,saturate( smoothstep(0.0,0.375, tex2Dlod(SamplerCN,float4(Coordinates,0,1)).x) ));
-		
+		#if Handheld_Mode
+			Perf_Level = 2.0;
+			Masked_Level = 0.9;//Boost Near so we have less artifacts
+		#else
 		if( Performance_Level > 1 )
 		{
 			Perf_Level = 2.0;
 			Masked_Level = 0.9;//Boost Near so we have less artifacts
 		}
-		
+		#endif
 		//Foveated Calculations	
 		float Foveated_Mask = saturate( Vin_Pattern(Coordinates, float2(16.0,2.0)));	
 		//if(Foveated_Mode)
