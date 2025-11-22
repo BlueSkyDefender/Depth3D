@@ -1,7 +1,7 @@
 	////----------------//
 	///**SuperDepth3D**///
 	//----------------////
-	#define SD3D "SuperDepth3D v5.2.8\n"
+	#define SD3D "SuperDepth3D v5.2.9\n"
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//* Depth Map Based 3D post-process shader
 	//* For Reshade 3.0+
@@ -133,7 +133,7 @@ namespace SuperDepth3D
 		#define OW_WP "WP Off\0Custom WP\0"
 		#define G_Info "Missing Overwatch.fxh Information.\n"
 		#define G_Note "Note: If you pulled this file intentionally, please ignore this message.\n"
-		static const int MED = 0, SBTDA = 0, SMSBT = 0, UIF = 0, UIL = 0, RCI = 0, AIM = 0, WMM = 0, SDD = 0, DMM = 0, LBD = 0, WSM = 0;
+		static const int RSV = 0, AJM = 0, MED = 0, SBTDA = 0, SMSBT = 0, UIF = 0, UIL = 0, RCI = 0, AIM = 0, WMM = 0, SDD = 0, DMM = 0, LBD = 0, WSM = 0;
 		static const int2 DOL = 0;
 		//Triggers 
 		static const float UIB = 0, HNR = 0, THF = 0, EGB = 0,PLS = 0, MGA = 0, WZD = 0, KHM = 0, DAO = 0, LDT = 0, ALM = 0, SSF = 0, SNF = 0, SSE = 0, SNE = 0, EDU = 0, LBI = 0,ISD = 0, ASA = 1, IWS = 0, SUI = 0, SSA = 0, SNA = 0, SSB = 0, SNB = 0,SSC = 0, SNC = 0,SSD = 0, SND = 0, LHA = 0, WBS = 0, TMD = 0, FRM = 0, AWZ = 0, CWH = 0, WBA = 0, WFB = 0, WND = 0, WRP = 0, MML = 0, SMD = 0, WHM = 0, SDU = 0, ABE = 2, LBE = 0, HQT = 0, HMD = 0.5, MAC = 0, OIL = 0, MMS = 0, FTM = 0, FMM = 0, SPO = 0, MMD = 0, LBR = 0, AFD = 0, MDD = 0, FPS = 1, SMS = 1, OIF = 0, NCW = 0, RHW = 0, NPW = 0, SPF = 0, BDF = 0, HMT = 0, HMC = 0, DFW = 0, NFM = 0, DSW = 0, LBC = 0, LBS = 0, LBM = 0, DAA = 0, NDW = 0, PEW = 0, WPW = 0, FOV = 0, EDW = 0, SDT = 0;
@@ -379,7 +379,7 @@ namespace SuperDepth3D
 	//#endif
 	
 	#ifndef Anti_Jitter_Mode //TAA_Mode
-	    #define Anti_Jitter_Mode 0
+	    #define Anti_Jitter_Mode AJM
 	#endif
 
 	#if DX9_Toggle	
@@ -655,8 +655,23 @@ uniform int SuperDepth3D <
 		ui_category = "Zero Parallax Distance";
 	> = float2(DE_Y,DE_Z);
 	
-	//Workaround it only reads from the first value.
-	static const float CutOff_Value = (float)DI_W;//tjandra fixed the warning issue by recasting to a float	
+	//Workaround because of DX9
+	#if OIL == 0
+	    static const float4 OIL_Values_Vec = float4((float)OIF, 0, 0, 0);
+	    static const float4 CutOff_Values_Vec = float4((float)DI_W, 0, 0, 0);
+	#elif OIL == 1
+	    static const float4 OIL_Values_Vec = float4(OIF, 0, 0);
+	    static const float4 CutOff_Values_Vec = float4(DI_W, 0, 0);
+	#elif OIL == 2
+	    static const float4 OIL_Values_Vec = float4(OIF, 0);
+	    static const float4 CutOff_Values_Vec = float4(DI_W, 0);
+	#elif OIL == 3
+	    static const float4 OIL_Values_Vec = OIF;
+	    static const float4 CutOff_Values_Vec = DI_W;
+	#else
+	    static const float4 OIL_Values_Vec = OIF;
+	    static const float4 CutOff_Values_Vec = DI_W;	    
+	#endif
 	
 	uniform float2 ZPD_Boundary_n_Cutoff_A <
 		#if Compatibility
@@ -670,9 +685,10 @@ uniform int SuperDepth3D <
 					 "lets you adjust how far behind the screen it should detect a intrustion.\n"
 					 "Only works when Boundary Detection is enabled & when scaler LvL one is set.";
 		ui_category = "Zero Parallax Distance";
-	> = float2(OIF.x,CutOff_Value);	
+	> = float2(OIL_Values_Vec.x,CutOff_Values_Vec.x);	
 
 	#if EDW || Profiler_Mode
+	
 		uniform float2 ZPD_Boundary_n_Cutoff_B <
 			#if Compatibility
 			ui_type = "drag";
@@ -685,7 +701,7 @@ uniform int SuperDepth3D <
 						 "lets you adjust how far behind the screen it should detect a intrustion.\n"
 						 "Only works when Boundary Detection is enabled & when scaler LvL one is set.";
 			ui_category = "Zero Parallax Distance";
-		> = float2(OIF.y,DI_W.y);	
+		> = float2(OIL_Values_Vec.y,CutOff_Values_Vec.y);	
 
 		uniform float2 ZPD_Boundary_n_Cutoff_C <
 			#if Compatibility
@@ -699,7 +715,7 @@ uniform int SuperDepth3D <
 						 "lets you adjust how far behind the screen it should detect a intrustion.\n"
 						 "Only works when Boundary Detection is enabled & when scaler LvL one is set.";
 			ui_category = "Zero Parallax Distance";
-		> = float2(OIF.z,DI_W.z);	
+		> = float2(OIL_Values_Vec.z,CutOff_Values_Vec.z);	
 
 		uniform float2 ZPD_Boundary_n_Cutoff_D <
 			#if Compatibility
@@ -713,7 +729,7 @@ uniform int SuperDepth3D <
 						 "lets you adjust how far behind the screen it should detect a intrustion.\n"
 						 "Only works when Boundary Detection is enabled & when scaler LvL one is set.";
 			ui_category = "Zero Parallax Distance";
-		> = float2(OIF.w,DI_W.w);
+		> = float2(OIL_Values_Vec.w,CutOff_Values_Vec.w);
 
 		uniform float2 ZPD_Boundary_n_Cutoff_End <
 			#if Compatibility
@@ -892,6 +908,19 @@ uniform int SuperDepth3D <
 		ui_category = "Compatibility Options";
 	> = float2(DL_Y,DB_Y);	
 
+	uniform int Reconstruction_Size <
+		ui_label = " Reconstruction Size";
+		#if Compatibility
+		ui_type = "drag";
+		#else
+		ui_type = "slider";
+		#endif
+		ui_min = 0; ui_max = 2;
+		ui_tooltip = "Use this to enlarge the sampling area for Depth Reconstuction.\n"
+					 "Zero is Default, One is 1.5x, and Two is 2x.";
+		ui_category = "Compatibility Options";
+	> = RSV;
+
 	uniform int Target_High_Frequency <
 		ui_label = " De-Artifact HF";
 		#if Compatibility
@@ -905,15 +934,7 @@ uniform int SuperDepth3D <
 					 "Default is Zero and it's Off.";
 		ui_category = "Compatibility Options";
 	> = THF;
-	/*
-	uniform bool De_Art_Opt <
-		ui_label = " De-Artifact Hoz";
-		ui_tooltip = "Some times We get artifacting on the Hoz axis around round or sloped objects.\n"
-					 "Enable this if you want to also target this issue.\n"
-					 "Default is Off.";
-		ui_category = "Compatibility Options";
-	> = DAO;
-	*/
+
 		#endif
 	uniform int Select_SS <
 		ui_type = "combo";
@@ -2240,6 +2261,16 @@ uniform int Extra_Information <
 		{
 			Texture = texCN;
 		};
+
+	texture texMiniReconBuffer { Width = BUFFER_WIDTH * 0.25; Height = BUFFER_HEIGHT * 0.25; Format = R16F; };
+	
+	sampler SamplerMR
+		{
+			Texture = texMiniReconBuffer;
+			MagFilter = POINT;
+			MinFilter = POINT;
+			MipFilter = POINT;
+		};
 	
 	texture texzBufferN_P { Width = BUFFER_WIDTH * Depth_Rez; Height = BUFFER_HEIGHT * Depth_Rez; Format = RG16F; };
 	
@@ -2330,17 +2361,21 @@ uniform int Extra_Information <
 	#endif	
 
 	#if !DX9_Toggle
+		#if Anti_Jitter_Mode
+		// TAA
+		texture TAABuffer { Width = BUFFER_WIDTH * Depth_Rez; Height = BUFFER_HEIGHT  * Depth_Rez; Format = R16F; };
+	
+		sampler SamplerzBufferP_TAA
+			{
+				Texture = TAABuffer;
+				MagFilter = POINT;
+				MinFilter = POINT;
+				MipFilter = POINT;
+			};
+		#endif			
 	// Reconstuction
 	texture texReconBuffer { Width = BUFFER_WIDTH  * Depth_Rez; Height = BUFFER_HEIGHT  * Depth_Rez; Format = R16F; }; //Do not use mips in this buffer
-	#if Anti_Jitter_Mode	
-	sampler SamplerzBufferP_Current
-		{
-			Texture = texReconBuffer;
-			MagFilter = POINT;
-			MinFilter = POINT;
-			MipFilter = POINT;
-		};
-	#else
+
 	sampler SamplerzBufferB_Up
 		{
 			Texture = texReconBuffer;
@@ -2353,24 +2388,9 @@ uniform int Extra_Information <
 			MinFilter = POINT;
 			MipFilter = POINT;
 		};
-	#endif
-	// TAA
-		#if Anti_Jitter_Mode
-		texture TAABuffer { Width = BUFFER_WIDTH * Depth_Rez; Height = BUFFER_HEIGHT  * Depth_Rez; Format = R16F; }; //Do not use mips in this buffer
 
-		sampler SamplerzBufferB_Up
-			{
-				Texture = TAABuffer;
-			};
-	
-		sampler SamplerzBufferP_Up
-			{
-				Texture = TAABuffer;
-				MagFilter = POINT;
-				MinFilter = POINT;
-				MipFilter = POINT;
-			};
-		
+		#if Anti_Jitter_Mode
+		// TAA
 		texture AccBuffer { Width = BUFFER_WIDTH * Depth_Rez; Height = BUFFER_HEIGHT * Depth_Rez; Format = RG16F; }; //Do not use mips in this buffer
 		
 		sampler SamplerzACC
@@ -4058,6 +4078,23 @@ uniform int Extra_Information <
 		float4 Shift_XY = floor(texcoord.xxyy * Res.xxyy * pix.xxyy * float4(7,9,7,9));
 		return float2(fmod(Shift_XY.x,2),fmod(ZPD_Boundary == 3 ? Shift_XY.w : Shift_XY.z,2));
 	}
+
+
+	float MiniReconstructionPS(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Target
+	{
+		static const float2 offsets[9] = { float2(-1, -1), float2( 0, -1), float2( 1, -1),
+									       float2(-1,  0), float2( 0,  0), float2( 1,  0),
+									       float2(-1,  1), float2( 0,  1), float2( 1,  1) };
+	    float minVal = 1e10;
+	    [unroll]
+	    for (int i = 0; i < 9; i++)
+	    {
+	        float val = PrepDepth( texcoord + offsets[i] * rcp_Depth_Size() * 0.5 )[1][0];
+	        minVal = min(minVal, val);
+	    }
+	    return minVal;
+	}
+	
 	/*
 	float P_Depth(float2 TC)
 	{
@@ -4116,11 +4153,11 @@ uniform int Extra_Information <
 						GridXY.y += Shift_Mask(texcoord).x ? 0.0 : 0.05;
 
 					float ZPD_I = Zero_Parallax_Distance;
-					//#if !DX9_Toggle
-					//float PDepth = tex2Dlod(SamplerDMN,float4(GridXY,0,0)).x;
-					//#else				
+					#if !DX9_Toggle
+					float PDepth = tex2Dlod(SamplerMR,float4(GridXY,0,0)).x;
+					#else				
 					float PDepth = PrepDepth(GridXY)[1][0];
-					//#endif	
+					#endif	
 					if(ZPD_Boundary >= 4 && PDepth == 1)
 							ZPD_I = 0;
 					
@@ -4376,7 +4413,7 @@ uniform int Extra_Information <
 		
 		Color_Out = saturate(Color.xy);
 	}
-	
+
 	float AutoDepthRange(float d, float2 texcoord )
 	{ float LumAdjust_ADR = smoothstep(-0.0175,min(0.5,Auto_Depth_Adjust),Avr_Mix(float2(0.5,0.5)).x);
 	    return min(1,( d - 0 ) / ( LumAdjust_ADR - 0));
@@ -5650,28 +5687,106 @@ uniform int Extra_Information <
 	}
 	
 	#if !DX9_Toggle
-
-	float Min4x4(sampler2D Tex, float2 TC, float2 Depth_Size)
+	#define Current_Buffer SamplerzBufferP_Mixed
+	
+	#if Anti_Jitter_Mode
+	
+	#if Set_Depth_Res == 1
+	    #define Depth_Set_Size 1.75
+	#elif Set_Depth_Res == 2
+	    #define Depth_Set_Size 2.0   
+	#else
+	    #define Depth_Set_Size 1.0
+	#endif
+				
+	void TAA_Buffer(in float4 position : SV_Position, in float2 texcoord : TEXCOORD, out float Temporal : SV_Target0)
 	{
-	    float minVal = 1e10;
-	    
-	    // Offset by -0.5 pixels to center the 4x4 grid around TC
-	    float2 baseTC = TC - 0.5 * Depth_Size;
-	    
-	    // 4 gathers cover the 4x4 neighborhood
-	    float4 g0 = tex2DgatherR(Tex, baseTC);                                   // top-left block
-	    float4 g1 = tex2DgatherR(Tex, baseTC + float2(Depth_Size.x, 0.0));       // top-right block
-	    float4 g2 = tex2DgatherR(Tex, baseTC + float2(0.0, Depth_Size.y));       // bottom-left block
-	    float4 g3 = tex2DgatherR(Tex, baseTC + Depth_Size);                      // bottom-right block
+		// Sample Current Frame
+	    float sceneDepth = tex2D(Current_Buffer, texcoord).x;
+		// Sample Single Frame
+	    float pastDepth = tex2D(SamplerzACC, texcoord).y;
+		// Sample History Frame - Normaly we use motion vectors to push it back -..... But, not here not this time.
+	    float historyDepth = tex2D(SamplerzACC, texcoord).x;
+		// Check for diffrencs between frames
+	    float Dist = abs(sceneDepth - pastDepth);
+	    // Dynamic Blend Factor
+	    float motionLen = min(Dist, 1.0);
+	    float motionFactor = saturate(saturate(1.0 - sqrt(motionLen)) * 2 - 1);
 	
-	    // Reduce each gather
-	    minVal = min(minVal, min(min(g0.x, g0.y), min(g0.z, g0.w)));
-	    minVal = min(minVal, min(min(g1.x, g1.y), min(g1.z, g1.w)));
-	    minVal = min(minVal, min(min(g2.x, g2.y), min(g2.z, g2.w)));
-	    minVal = min(minVal, min(min(g3.x, g3.y), min(g3.z, g3.w)));
+	    // 3x3 Neighborhood Sampling (9 samples total)
+	    int2 offsets[9] =
+	    {
+	        int2(-1, -1), // top-left
+	        int2( 0, -1), // top-center
+	        int2( 1, -1), // top-right
+	        int2(-1,  0), // middle-left
+	        int2( 0,  0), // center (current pixel)
+	        int2( 1,  0), // middle-right
+	        int2(-1,  1), // bottom-left
+	        int2( 0,  1), // bottom-center
+	        int2( 1,  1)  // bottom-right
+	    };
+	    
+	    float2 texelSize = rcp_Depth_Size() * Depth_Set_Size;
+	    float Threshold = 0.01;
 	
-	    return minVal;
+	    // Initialize with center pixel depth instead of extreme values
+	    float minDepth = sceneDepth;
+	    float maxDepth = sceneDepth;
+	    float minDepthFallback = sceneDepth;
+	    float maxDepthFallback = sceneDepth;
+		int vCount = 0;
+		
+		[unroll]
+		for (int i = 0; i < 9; ++i)
+		{
+		    float2 offsetUV = texcoord + offsets[i] * texelSize;
+		    float neighborDepth = tex2Dlod(Current_Buffer, float4(offsetUV,0,0)).x;
+		    
+		    // Skip center pixel (index 4) for neighborhood analysis
+		    if (i == 4) continue;
+		    
+		    // Always update fallback bounds
+		    minDepthFallback = min(minDepthFallback, neighborDepth);
+		    maxDepthFallback = max(maxDepthFallback, neighborDepth);
+		    
+		    // Check depth similarity between neighbor and center pixe
+		    float neighborDiff = neighborDepth - sceneDepth;
+		    // If Dist not use here it would be bettter to process Diag and coners sepratly.
+		    if (neighborDiff <= Threshold)
+		    {
+		        minDepth = min(minDepth, neighborDepth);
+		        maxDepth = max(maxDepth, neighborDepth);
+		        ++vCount;
+		    }
+		}
+		int Set_vCount = 3;
+		// Choose bounds based on valid neighbor count (out of 8 neighbors) 4 is Shaper and 8 is softer
+		if (vCount < Set_vCount)
+		{
+		    minDepth = minDepthFallback;
+		    maxDepth = maxDepthFallback;
+		}
+		
+		// Clamp history color inside depth-aware soft AABB
+	    float clampedHistoryDepth = clamp(historyDepth, minDepth, maxDepth);
+	
+	    // Final Blend
+	    #if Anti_Jitter_Mode == 2
+	    // Confidence-based blend factor
+	    float taaMix = lerp(0.05, 0.5, motionFactor);
+	    Temporal = lerp(clampedHistoryDepth, sceneDepth, taaMix);
+	    #else
+	    Temporal = clampedHistoryDepth;
+	    #endif
 	}
+	#endif
+	
+	#if Anti_Jitter_Mode
+		#define R_Sampler SamplerzBufferP_TAA
+	#else
+		#define R_Sampler SamplerzBufferP_Mixed
+	#endif
 
 	float Min3x3(sampler2D Tex, float2 TC, float2 Depth_Size)
 	{
@@ -5690,12 +5805,21 @@ uniform int Extra_Information <
 
 	float Disocclusion(sampler Tex, float2 texcoord, float2 DPix) // Non_Point_Sampler
 	{
-	    float tolerance = 1, Depth = abs(tex2Dsize(DepthBuffer).x - Res.x) < tolerance ? Min4x4(Tex, texcoord, DPix) : Min3x3(Tex, texcoord, DPix), DM = 0.0f;
+		float Recon_Size = 1.0;
+		
+		if(Reconstruction_Size == 1)
+			Recon_Size = 1.75;
+		if(Reconstruction_Size == 2)
+			Recon_Size = 2.0;
+		
+	    float Depth = Min3x3(Tex, texcoord, DPix * Recon_Size), DM = 0.0f;
 
 		const int N = 8;
 		const float2 dir = float2(0.5f, 0.0f);
 	    const float MS = abs(Divergence_Switch().y) * 0.0005, Disocclusion_Adjust = 5.5f, Div = rcp(N + 1);
 		const float weight[N] = { 0.0125f,-0.0125f, 0.0175f,-0.0175f, 0.03f, -0.03f, 0.05f,-0.05f };
+		//const int N = 4;
+		//const float weight[N] = { 0.0125f, -0.0125f, 0.05f, -0.05f };	
 		if(View_Mode != 3)
 		{
 	        DM = Depth * Div;
@@ -5712,88 +5836,18 @@ uniform int Extra_Information <
 	    else
 	    	return Depth;
 	}
-
-	#define Current_Buffer SamplerzBufferP_Current
-
+	
 	void ReconstructionPS(in float4 position : SV_Position, in float2 texcoord : TEXCOORD, out float Recon : SV_Target0)
 	{
-		Recon = Disocclusion(SamplerzBufferP_Mixed, texcoord, rcp_Depth_Size());
+		Recon = Disocclusion(R_Sampler, texcoord, rcp_Depth_Size());
 	}
-		#if Anti_Jitter_Mode			
-		void TAA_Buffer(in float4 position : SV_Position, in float2 texcoord : TEXCOORD, out float Temporal : SV_Target0)
-		{
-			// Sample Current Frame
-		    float sceneDepth = tex2D(Current_Buffer, texcoord).x;
-			// Sample Single Frame
-		    float pastDepth = tex2D(SamplerzACC, texcoord).y;
-			// Sample History Frame - Normaly we use motion vectors to push it back -..... But, not here not this time.
-		    float historyDepth = tex2D(SamplerzACC, texcoord).x;
-			// Check for diffrencs between frames
-		    float Dist = abs(sceneDepth - pastDepth);
-		
-			// 3x3 Neighborhood Sampling (9 samples total)
-		    int2 offsets[9] =
-		    {
-		        int2(-1, -1), // top-left
-		        int2( 0, -1), // top-center
-		        int2( 1, -1), // top-right
-		        int2(-1,  0), // middle-left
-		        int2( 0,  0), // center (current pixel)
-		        int2( 1,  0), // middle-right
-		        int2(-1,  1), // bottom-left
-		        int2( 0,  1), // bottom-center
-		        int2( 1,  1)  // bottom-right
-		    };
-		    
-		    float2 texelSize = rcp_Depth_Size();
-		    float FLT_MAX = 3.402823466e+38;
-		    float Threshold = 0.01;
-			
-			// Single loop for both depthaware and fallback collection
-		    float minDepth = FLT_MAX;
-		    float maxDepth = -FLT_MAX;
-		    float minDepthFallback = FLT_MAX;
-		    float maxDepthFallback = -FLT_MAX;
-		    int vCount = 0;
-			
-			[unroll]
-			for (int i = 0; i < 9; ++i)
-			{
-			    float2 offsetUV = texcoord + offsets[i] * texelSize;
-			    float neighborDepth = tex2D(Current_Buffer, offsetUV).x;
-			    
-			    // Skip center pixel (index 4) for neighborhood analysis
-			    if (i == 4) continue;
-			    
-			    // Always update fallback bounds
-			    minDepthFallback = min(minDepthFallback, neighborDepth);
-			    maxDepthFallback = max(maxDepthFallback, neighborDepth);
-			    
-			    // Check depth similarity between neighbor and center pixe
-			    float neighborDiff = abs(neighborDepth - sceneDepth);
-			    // If Dist not use here it would be bettter to process Diag and coners sepratly.
-			    if (neighborDiff < Threshold)
-			    {
-			        minDepth = min(minDepth, neighborDepth);
-			        maxDepth = max(maxDepth, neighborDepth);
-			        ++vCount;
-			    }
-			}
-			int Set_vCount = 7; // Value of 6 or 7 seems to work bestest
-			// Choose bounds based on valid neighbor count (out of 8 neighbors) 4 is Shaper and 8 is softer
-			if (vCount < Set_vCount)
-			{
-			    minDepth = minDepthFallback;
-			    maxDepth = maxDepthFallback;
-			}
-			
-			// Clamp history color inside depth-aware soft AABB
-		    float clampedHistoryDepth = clamp(historyDepth, minDepth, maxDepth);
-
-			Temporal = clampedHistoryDepth;
-		}
-		#endif	
 	#endif
+	
+	#if DX9_Toggle
+		#define M_Sampler SamplerzBufferP_Mixed
+	#else
+		#define M_Sampler SamplerzBufferP_Up
+	#endif	
 	
 	float2 GetMixed(float2 texcoord, float Mips) //Sensitive Buffer.
 	{
@@ -5845,12 +5899,12 @@ uniform int Extra_Information <
 		//Luma Based VRS
 		//float Luma_Map = lerp(1.0,3.0,saturate( smoothstep(0.0,0.375, tex2Dlod(SamplerCN,float4(Coordinates,0,1)).x) ));
 		#if Handheld_Mode
-			Perf_Level = 2.0;
-			Masked_Level = 0.9;//Boost Near so we have less artifacts
+			Perf_Level = 1.75;
+			Masked_Level = 0.95;//Boost Near so we have less artifacts
 		#else
 		if( Performance_Level > 1 )
 		{
-			Perf_Level = 2.0;
+			Perf_Level = 1.75;
 			Masked_Level = 0.9;//Boost Near so we have less artifacts
 		}
 		#endif
@@ -6567,7 +6621,7 @@ uniform int Extra_Information <
 		if (Depth_Map_View == 2)
 			color.rgb = tex2D(SamplerzBufferN_P,TexCoords).xxx;
 				
-		float DepthBlur, Alinement_Depth = tex2Dlod(SamplerzBufferP_Mixed,float4(TexCoords,0,0)).x, Depth = Alinement_Depth;
+		float DepthBlur, Alinement_Depth = tex2Dlod(M_Sampler,float4(TexCoords,0,0)).x, Depth = Alinement_Depth;
 		const float DBPower = 50, Con = 9;
 		const float2 cardinalOffsets[9] = {
 										    float2( 0,  0),  // Center (no offset)
@@ -6586,7 +6640,7 @@ uniform int Extra_Information <
 			[loop]
 			for (int i = 0; i < Con; i++)
 			{
-				DepthBlur += tex2Dlod(SamplerzBufferP_Mixed,float4(TexCoords + dir * cardinalOffsets[i] * pix * DBPower,0,1) ).x;
+				DepthBlur += tex2Dlod(M_Sampler,float4(TexCoords + dir * cardinalOffsets[i] * pix * DBPower,0,1) ).x;
 			}
 			
 			Alinement_Depth = ( Alinement_Depth + DepthBlur ) * 0.1;
@@ -7729,12 +7783,7 @@ uniform int Extra_Information <
 		#if Anti_Jitter_Mode	
 		float2 Acc_Buffer(in float4 position : SV_Position, in float2 texcoord : TEXCOORD) : SV_Target
 		{   
-			float Out;	
-		
-			if(View_Mode <= 2 || View_Mode >= 5)
-				Out = tex2Dlod(SamplerzBufferB_Up,float4(texcoord,0,0)).x;
-			else
-				Out = tex2Dlod(SamplerzBufferP_Up,float4(texcoord,0,0)).x;
+			float Out = tex2Dlod(SamplerzBufferP_TAA,float4(texcoord,0,0)).x;
 			
 			//Need to not do this in DX9
 			return float2(Out,tex2D(Current_Buffer, texcoord).x);
@@ -7811,7 +7860,12 @@ uniform int Extra_Information <
 			RenderTarget0 = texDMN;
 			RenderTarget1 = texCN;
 		}
-	
+			pass MiniReconstuction
+		{
+			VertexShader = PostProcessVS;
+			PixelShader = MiniReconstructionPS;
+			RenderTarget0 = texMiniReconBuffer;
+		}
 			pass Modzbuffer
 		{
 			VertexShader = PostProcessVS;
@@ -7827,14 +7881,7 @@ uniform int Extra_Information <
 			RenderTarget0 = texzBufferN_M;
 		}
 				
-		#if !DX9_Toggle
-
-			pass Reconstruction 
-		{
-			VertexShader = PostProcessVS;
-			PixelShader = ReconstructionPS;
-			RenderTarget0 = texReconBuffer;
-		}
+		#if !DX9_Toggle		
 			#if Anti_Jitter_Mode	
 				pass TAA
 		    {
@@ -7843,7 +7890,15 @@ uniform int Extra_Information <
 		        RenderTarget0 = TAABuffer;
 		    }
 		    #endif
+		    
+			pass Reconstruction 
+		{
+			VertexShader = PostProcessVS;
+			PixelShader = ReconstructionPS;
+			RenderTarget0 = texReconBuffer;
+		}
 		#endif
+		
 		#if Reconstruction_Mode || Virtual_Reality_Mode || Anaglyph_Mode
 			pass Muti_Mode_Reconstruction
 		{
