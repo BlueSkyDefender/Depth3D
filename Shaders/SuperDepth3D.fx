@@ -133,7 +133,7 @@ namespace SuperDepth3D
 		#define OW_WP "WP Off\0Custom WP\0"
 		#define G_Info "Missing Overwatch.fxh Information.\n"
 		#define G_Note "Note: If you pulled this file intentionally, please ignore this message.\n"
-		static const int RSV = 0, AJM = 0, MED = 0, SBTDA = 0, SMSBT = 0, UIF = 0, UIL = 0, RCI = 0, AIM = 0, WMM = 0, SDD = 0, DMM = 0, LBD = 0, WSM = 0;
+		static const int SMSUM = 0, RSV = 0, AJM = 0, MED = 0, SBTDA = 0, SMSBT = 0, UIF = 0, UIL = 0, RCI = 0, AIM = 0, WMM = 0, SDD = 0, DMM = 0, LBD = 0, WSM = 0;
 		static const int2 DOL = 0;
 		//Triggers 
 		static const float UIB = 0, HNR = 0, THF = 0, EGB = 0,PLS = 0, MGA = 0, WZD = 0, KHM = 0, DAO = 0, LDT = 0, ALM = 0, SSF = 0, SNF = 0, SSE = 0, SNE = 0, EDU = 0, LBI = 0,ISD = 0, ASA = 1, IWS = 0, SUI = 0, SSA = 0, SNA = 0, SSB = 0, SNB = 0,SSC = 0, SNC = 0,SSD = 0, SND = 0, LHA = 0, WBS = 0, TMD = 0, FRM = 0, AWZ = 0, CWH = 0, WBA = 0, WFB = 0, WND = 0, WRP = 0, MML = 0, SMD = 0, WHM = 0, SDU = 0, ABE = 2, LBE = 0, HQT = 0, HMD = 0.5, MAC = 0, OIL = 0, MMS = 0, FTM = 0, FMM = 0, SPO = 0, MMD = 0, LBR = 0, AFD = 0, MDD = 0, FPS = 1, SMS = 1, OIF = 0, NCW = 0, RHW = 0, NPW = 0, SPF = 0, BDF = 0, HMT = 0, HMC = 0, DFW = 0, NFM = 0, DSW = 0, LBC = 0, LBS = 0, LBM = 0, DAA = 0, NDW = 0, PEW = 0, WPW = 0, FOV = 0, EDW = 0, SDT = 0;
@@ -1900,7 +1900,7 @@ uniform int SuperDepth3D <
 	
 	#if AR_Is == 1
 	#elif AR_Is == 2
-		uniform bool Disable_CO <
+	uniform bool Disable_CO <
 		ui_label = " Disable AR Scaling Options";
 		ui_tooltip = "This disables 16:10 compatibility options.";
 		ui_category = "16:10 Options";
@@ -1911,7 +1911,12 @@ uniform int SuperDepth3D <
 		ui_tooltip = "This is the alternet scaling mode for 16:10 Content.";
 		ui_category = "16:10 Options";
 	> = SMSBT;
-	
+
+	uniform bool Shift_Up_Mode <
+		ui_label = "Shift Up Scaling Mode";
+		ui_tooltip = "This is the alternet mode shifting content down for 16:10 Content.";
+		ui_category = "16:10 Options";
+	> = SMSUM;	
 	#else	
 	#endif	
 /* //Slated for deletion and with a link to a Help Guide online	
@@ -2912,7 +2917,24 @@ uniform int Extra_Information <
 	        int Bottom_Right  = LBSensitivity(SLLTresh(float2(0.95, 0.985), MipLevel));  // Bottom Right Corner
 	        
 	        return (Top_Left && Top_Right) && Center && (Bottom_Left && Bottom_Right);
+	    #elif LB_Correction == 5 || LBC == 5 || LetterBox_Masking == 5 || LBM == 5 || LB_Correction == 6 || LBC == 6 || LetterBox_Masking == 6 || LBM == 6
+	        //=======================================================================
+	        // HORIZONTAL & VERTICAL MODE (4-Point Detection)
+	        //=======================================================================
+	        float MipLevel = 5;
 	        
+	        // Detection Points:
+	        int Top_Left      = LBSensitivity(SLLTresh(float2(0.05, 0.015), MipLevel));  // Top Left Corner
+	        int Top_Right     = LBSensitivity(SLLTresh(float2(0.95, 0.015), MipLevel));  // Top Right Corner
+	        float Center      = SLLTresh(float2(0.5, 0.5), Letter_Box_Center_Mips_Level_Senstivity) > 0;  // Center	        
+	        #if LB_Correction == 5 || LBC == 5 || LetterBox_Masking == 5 || LBM == 5
+	        int Bottom_Left   = LBSensitivity(SLLTresh(float2(0.05, 0.985), MipLevel));  // Bottom Left Corner
+	        	return (Top_Left && Top_Right) && Center && Bottom_Left;	
+	        #endif    
+	        #if LB_Correction == 6 || LBC == 6 || LetterBox_Masking == 6 || LBM == 6
+	        int Bottom_Right  = LBSensitivity(SLLTresh(float2(0.95, 0.985), MipLevel));  // Bottom Right Corner
+	        	return (Top_Left && Top_Right) && Center && Bottom_Right;	        
+	        #endif
 	    #else
 	        //=======================================================================
 	        // STANDARD MODE (3-Point Detection)
@@ -2970,7 +2992,11 @@ uniform int Extra_Information <
 	}
 	
 	bool Check_Color(float2 Pos_IN, float C_Value)
-	{	float3 RGB_IN = C_Tresh(Pos_IN);
+	{	
+		#if AR_Is == 2  // 16:10
+		    Pos_IN.y = 0.5 + (Pos_IN.y - 0.5) * 0.9;  // 9/10
+		#endif
+		float3 RGB_IN = C_Tresh(Pos_IN);
 		return RN_Value(RGB_IN.r + RGB_IN.g + RGB_IN.b) == C_Value;
 	}
 	
@@ -4922,6 +4948,10 @@ uniform int Extra_Information <
 	#if SUI
 		float Stencil_Masking(float2 TC, float2 Pos, float2 UI_Mask_Size, float UI_Mask_Inversion,int SSS)
 		{
+			#if AR_Is == 2  // 16:10
+		        TC.y = 0.5 + (TC.y - 0.5) * 1.111111;
+		        Pos.y = 0.5 + (Pos.y - 0.5) * 0.9;
+		    #endif
 			if(SSS == 1)//Square
 			{
 			TC += Pos - 0.5;
@@ -5247,6 +5277,7 @@ uniform int Extra_Information <
 			
 		#if AR_Is == 2
 		float Pix_Offset = calculateAROffset(Res.y,3.0) * pix.y;//2.5-3.75
+		
 		if(ARDetection())
 		{
 			if(!Disable_CO)
@@ -5255,10 +5286,21 @@ uniform int Extra_Information <
 					Shift_TC.y =  scaleFromCenter( Shift_TC.y, Res.y, 79);
 				else
 				{
-					if(Shift_TC.y > Pix_Offset)
-						Shift_TC.y = Shift_TC.y - Pix_Offset;
-					else
-						Shift_TC.y = 1;
+		            if(Shift_Up_Mode)
+		            {
+		            	Pix_Offset *= 1.62; // tweak until visually close enough
+		                if (Shift_TC.y + Pix_Offset < 1)
+		                    Shift_TC.y = Shift_TC.y + Pix_Offset; // shift UP
+		                else
+		                    Shift_TC.y = 1;
+		            }
+		            else
+		            {
+		                if(Shift_TC.y > Pix_Offset)
+		                    Shift_TC.y = Shift_TC.y - Pix_Offset; // shift DOWN
+		                else
+		                    Shift_TC.y = 1;
+		            }
 				}
 			}
    	 }
