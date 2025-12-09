@@ -1,7 +1,7 @@
 	////----------------//
 	///**SuperDepth3D**///
 	//----------------////
-	#define SD3D "SuperDepth3D v5.2.9\n"
+	#define SD3D "SuperDepth3D v5.3.0\n"
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//* Depth Map Based 3D post-process shader
 	//* For Reshade 3.0+
@@ -5265,14 +5265,6 @@ uniform int Extra_Information <
 	
 	void Mix_Z(in float4 position : SV_Position, in float2 texcoord : TEXCOORD, out float MixOut : SV_Target0)
 	{	
-		#if BD_Correction || BDF
-		if(BD_Options == 0 || BD_Options == 2)
-		{
-			float3 K123 = Colors_K1_K2_K3 * 0.1;
-			texcoord = D(texcoord.xy,K123.x,K123.y,K123.z);
-		}
-		#endif
-		
 		float2 Shift_TC = texcoord;
 			
 		#if AR_Is == 2
@@ -5357,7 +5349,16 @@ uniform int Extra_Information <
 				//Shift_TC.y -= Depth_Size.y;		
 			}
 			#endif
-		#endif		
+		#endif	
+	
+		#if BD_Correction || BDF
+		if(BD_Options == 0 || BD_Options == 2)
+		{
+			float3 K123 = Colors_K1_K2_K3 * 0.1;
+			Shift_TC = D(Shift_TC.xy,K123.x,K123.y,K123.z);
+		}
+		#endif	
+	
 		MixOut = GetDB( Shift_TC );
 		
 		#if LBM || LetterBox_Masking
