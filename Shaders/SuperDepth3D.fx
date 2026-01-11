@@ -1,7 +1,7 @@
 	////----------------//
 	///**SuperDepth3D**///
 	//----------------////
-	#define SD3D "SuperDepth3D v5.3.0\n"
+	#define SD3D "SuperDepth3D v5.3.1\n"
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//* Depth Map Based 3D post-process shader
 	//* For Reshade 3.0+
@@ -404,7 +404,7 @@ namespace SuperDepth3D
 	#if Handheld_Mode
 		#define Set_Depth_Res 2
 	#else
-		#define Set_Depth_Res 0
+		#define Set_Depth_Res 1
 	#endif
 	
 	// Define aspect ratios as integers (multiply by 1000 for precision)
@@ -2025,7 +2025,8 @@ uniform int Extra_Information <
 	uniform int Frames < source = "framecount";>;     // Alternate Even Odd frames
 	uniform float timer < source = "timer"; >;
 	#define FLT_EPSILON  1.192092896e-07 // smallest such that Value + FLT_EPSILON != Value	
-
+	#define M_Divergence 0.3
+	
 	float2 Divergence_Switch()
 	{
 		float2 Divergence = float2(100,Depth_Adjustment);
@@ -2594,7 +2595,7 @@ uniform int Extra_Information <
 	float2 Min_Divergence() // and set scale
 	{   
 		float Diverge = Divergence_Switch().x;	    
-		float Min_Div = max(1.0, Diverge), D_Scale = min(1.25,Scale(Min_Div,100.0,1.0));
+		float Min_Div = max(1.0, Diverge), D_Scale = min(1.0+saturate(M_Divergence),Scale(Min_Div,100.0,1.0));
 		float MD_Adjust = CalculateMaxDivergence(BUFFER_HEIGHT) * 100.0;
 		return float2(lerp( 1.0, MD_Adjust, D_Scale), D_Scale);
 	}
@@ -4010,7 +4011,7 @@ uniform int Extra_Information <
 	{
 		//Create Mask for Weapon Hand Consideration for ZPD boundary condition.
 		float2 Shape_TC = StoredTC;
-		float Shape_Out, Shape_One, Shape_Two, Shape_Three, Shape_Four, SO_Switch = 0.75, ST_Switch = 0.45, FO_Switch = 0.8125, STT_Switch = 0.35, SF_Switch = 0.550, STTT_Switch = 0.45, SFB_Switch = 0.90, SFC_Switch = 0.3;
+		float Shape_Out, Shape_One, Shape_Two, Shape_Three, Shape_Four, SO_Switch = 0.75, ST_Switch = 0.45, FO_Switch = 0.8125, STT_Switch = 0.35, SF_Switch = 0.550, STTT_Switch = 0.45, SFB_Switch = 0.90, SFC_Switch = 0.3, M1_Adjust = 1.0;
 		
 		if(CWH >= 3 && CWH <= 4)
 		{
@@ -4067,9 +4068,22 @@ uniform int Extra_Information <
 			STTT_Switch = 0.375;	
 		}
 
+		if(CWH == 12)
+		{
+			M1_Adjust = 1.25;
+			SO_Switch = 0.0;
+			
+			//SF_Switch = 0.6;
+			//SFB_Switch = 1.0;
+			SFC_Switch = 0.0;
+			
+			ST_Switch = 0.75;
+			//STTT_Switch = 0.375;
+		}
+		
 		// Conditions for Shape_One
 		bool Shape_One_C1 = (Shape_TC.x / Shape_TC.y * SO_Switch) > 1;
-		bool Shape_One_C2 = (((1 - Shape_TC.x) / Shape_TC.y) * FO_Switch ) > 1;
+		bool Shape_One_C2 = (((M1_Adjust - Shape_TC.x) / Shape_TC.y) * FO_Switch ) > 1;
 		Shape_One = saturate(Shape_One_C1 || Shape_One_C2); 
 		
 		// Conditions for Shape_Two
@@ -4094,7 +4108,12 @@ uniform int Extra_Information <
 		
 		if(CWH == 7 || CWH == 9 || CWH == 10)
 			Shape_Out = Shape_TC.x < 0.125 || Shape_TC.x > 0.875 || Shape_TC.y < 0.7 ? 1 : Shape_Out;
-		
+
+		float TriHeight = 0.5, TriWidth  = 0.625;
+		float Shape_Triangle = saturate( Shape_TC.y >= TriHeight && abs(Shape_TC.x - 0.625) <= (Shape_TC.y - TriHeight) * ((TriWidth * 0.5) / (1.0 - TriHeight)) );	
+
+		if(CWH == 12)
+		Shape_Out = Shape_TC.x < 0.625 ? 1-Shape_Triangle : Shape_Out;		
 		
 		return Shape_Out;
 	}				
@@ -4353,39 +4372,41 @@ uniform int Extra_Information <
 		if ( Weapon_Depth_Edge.x > 0)//1.0 needs to be adjusted when doing far scaling
 			R = lerp(DepthEdge(R, DM.x, texcoord, 1-Weapon_Depth_Edge.x),DM.x,smoothstep(0,1.0,DM.x));
 		
-		if(   texcoord.x < pix.x * 2 &&   texcoord.y < pix.y * 2)//TL OG Fade
+		float C_Size = 3;
+		
+		if(   texcoord.x < pix.x * C_Size &&   texcoord.y < pix.y * C_Size)//TL OG Fade
 			R = Fade_in_out().x;
 		#if DX9_Toggle
-			if( 1-texcoord.x < pix.x * 2 && 1-texcoord.y < pix.y * 2)//BR 0
+			if( 1-texcoord.x < pix.x * C_Size && 1-texcoord.y < pix.y * C_Size)//BR 0
 				R = Fade_Pass[0][0];
-			if(   texcoord.x < pix.x * 2 && 1-texcoord.y < pix.y * 2)//BL 1
+			if(   texcoord.x < pix.x * C_Size && 1-texcoord.y < pix.y * C_Size)//BL 1
 				R = Fade_Pass[0][1];
-			if( 1-texcoord.x < pix.x * 2 &&   texcoord.y < pix.y * 2)//TR 2
+			if( 1-texcoord.x < pix.x * C_Size &&   texcoord.y < pix.y * C_Size)//TR 2
 				R = Fade_Pass[0][2];
 
-			if( 1-texcoord.x < pix.x * 2 &&   texcoord.y < pix.y * 2)//TR 3
+			if( 1-texcoord.x < pix.x * C_Size &&   texcoord.y < pix.y * C_Size)//TR 3
 				G = Fade_Pass[1][0];
-			if(   texcoord.x < pix.x * 2 &&   texcoord.y < pix.y * 2)//TL 4
+			if(   texcoord.x < pix.x * C_Size &&   texcoord.y < pix.y * C_Size)//TL 4
 				G = Fade_Pass[1][1];
-			if( 1-texcoord.x < pix.x * 2 && 1-texcoord.y < pix.y * 2)//BR 5
+			if( 1-texcoord.x < pix.x * C_Size && 1-texcoord.y < pix.y * C_Size)//BR 5
 				G = Fade_Pass[1][2];
-			if(   texcoord.x < pix.x * 2 && 1-texcoord.y < pix.y * 2)//BL N
+			if(   texcoord.x < pix.x * C_Size && 1-texcoord.y < pix.y * C_Size)//BL N
 				G = Fade_Pass[2][0];
 		#else
-			if( 1-texcoord.x < pix.x * 2 && 1-texcoord.y < pix.y * 2)//BR 0
+			if( 1-texcoord.x < pix.x * C_Size && 1-texcoord.y < pix.y * C_Size)//BR 0
 				R = Fade_Pass_A.x;//[0][0]
-			if(   texcoord.x < pix.x * 2 && 1-texcoord.y < pix.y * 2)//BL 1
+			if(   texcoord.x < pix.x * C_Size && 1-texcoord.y < pix.y * C_Size)//BL 1
 				R = Fade_Pass_A.y;//[0][1]
-			if( 1-texcoord.x < pix.x * 2 &&   texcoord.y < pix.y * 2)//TR 2
+			if( 1-texcoord.x < pix.x * C_Size &&   texcoord.y < pix.y * C_Size)//TR 2
 				R = Fade_Pass_A.z;//[0][2]
 
-			if( 1-texcoord.x < pix.x * 2 &&   texcoord.y < pix.y * 2)//TR 3
+			if( 1-texcoord.x < pix.x * C_Size &&   texcoord.y < pix.y * C_Size)//TR 3
 				G = Fade_Pass_B.x;//[1][0]
-			if(   texcoord.x < pix.x * 2 &&   texcoord.y < pix.y * 2)//TL 4
+			if(   texcoord.x < pix.x * C_Size &&   texcoord.y < pix.y * C_Size)//TL 4
 				G = Fade_Pass_B.y;//[1][1]
-			if( 1-texcoord.x < pix.x * 2 && 1-texcoord.y < pix.y * 2)//BR 5
+			if( 1-texcoord.x < pix.x * C_Size && 1-texcoord.y < pix.y * C_Size)//BR 5
 				G = Fade_Pass_B.z;//[1][2]
-			if(   texcoord.x < pix.x * 2 && 1-texcoord.y < pix.y * 2)//BL N
+			if(   texcoord.x < pix.x * C_Size && 1-texcoord.y < pix.y * C_Size)//BL N
 				G = Fade_Pass_C;  //[2][0]
 		#endif	
 		//Luma Map
@@ -4643,14 +4664,15 @@ uniform int Extra_Information <
 		DM.x += FLT_EPSILON;//Needed on X
 		DM.z += FLT_EPSILON;//Needed on Z
 		DM.w += FLT_EPSILON;//Needed on W
+		float C_Size = 3;
 		//Hide Temporal passthrough
-		if(texcoord.x < pix.x * 2 && texcoord.y < pix.y * 2)
+		if(texcoord.x < pix.x * C_Size && texcoord.y < pix.y * C_Size)
 			DM = PrepDepth(texcoord)[0][0];
-		if(1-texcoord.x < pix.x * 2 && 1-texcoord.y < pix.y * 2)
+		if(1-texcoord.x < pix.x * C_Size && 1-texcoord.y < pix.y * C_Size)
 			DM = PrepDepth(texcoord)[0][0];
-		if(texcoord.x < pix.x * 2 && 1-texcoord.y < pix.y * 2)
+		if(texcoord.x < pix.x * C_Size && 1-texcoord.y < pix.y * C_Size)
 			DM = PrepDepth(texcoord)[0][0];
-		if( 1-texcoord.x < pix.x * 2 &&   texcoord.y < pix.y * 2)
+		if( 1-texcoord.x < pix.x * C_Size &&   texcoord.y < pix.y * C_Size)
 			DM = PrepDepth(texcoord)[0][0];
 			
 		#if SDM
@@ -4988,7 +5010,7 @@ uniform int Extra_Information <
 	float Smooth_Tune_Boost() 
 	{
 		//float RCP_Diverge = 100 * rcp(Divergence_Switch().x);
-		float S_T_Adjust = min(1.25,abs(Divergence_Switch().y) * 0.01);// * RCP_Diverge;
+		float S_T_Adjust = min(1.0+saturate(M_Divergence),abs(Divergence_Switch().y) * 0.01);// * RCP_Diverge;
 	    return abs(lerp(0.01f,1.0f,S_T_Adjust));
 	}
 
@@ -7234,7 +7256,7 @@ uniform int Extra_Information <
 				//0.975
 				//Color = texcoord.y > 0.975 ? 1 : Color;
 				//Color = ARDetection();
-				//Color = tex2D(Non_Point_Sampler, texcoord).w;
+				//Color = tex2D(SamplerInfo,texcoord).y;
 				return Color.rgba;
 			}
 		#endif
@@ -7846,7 +7868,7 @@ uniform int Extra_Information <
 	//toggle = Text_Info_Key;
 	 hidden = true;
 	 enabled = true;
-	 timeout = 1250;
+	 //timeout = 1250;
 	 ui_tooltip = "Help Technique."; >
 	{
 			pass Help
