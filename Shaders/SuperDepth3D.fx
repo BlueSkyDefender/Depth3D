@@ -1,7 +1,7 @@
 	////----------------//
 	///**SuperDepth3D**///
 	//----------------////
-	#define SD3D "SuperDepth3D v5.3.1\n"
+	#define SD3D "SuperDepth3D v5.3.2\n"
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//* Depth Map Based 3D post-process shader
 	//* For Reshade 3.0+
@@ -2369,7 +2369,7 @@ uniform int Extra_Information <
 	#if !DX9_Toggle
 		#if Anti_Jitter_Mode
 		// TAA
-		texture TAABuffer { Width = BUFFER_WIDTH * Depth_Rez; Height = BUFFER_HEIGHT  * Depth_Rez; Format = R16F; };
+		texture TAABuffer { Width = BUFFER_WIDTH * Depth_Rez; Height = BUFFER_HEIGHT * Depth_Rez; Format = R16F; };
 	
 		sampler SamplerzBufferP_TAA
 			{
@@ -2380,7 +2380,7 @@ uniform int Extra_Information <
 			};
 		#endif			
 	// Reconstuction
-	texture texReconBuffer { Width = BUFFER_WIDTH  * Depth_Rez; Height = BUFFER_HEIGHT  * Depth_Rez; Format = R16F; }; //Do not use mips in this buffer
+	texture texReconBuffer { Width = BUFFER_WIDTH  * Depth_Rez; Height = BUFFER_HEIGHT * Depth_Rez; Format = R16F; }; //Do not use mips in this buffer
 
 	sampler SamplerzBufferB_Up
 		{
