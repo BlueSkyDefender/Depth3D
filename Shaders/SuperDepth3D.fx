@@ -1,7 +1,7 @@
 	////----------------//
 	///**SuperDepth3D**///
 	//----------------////
-	#define SD3D "SuperDepth3D v5.3.3\n"
+	#define SD3D "SuperDepth3D v5.3.4\n"
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//* Depth Map Based 3D post-process shader
 	//* For Reshade 3.0+
@@ -2073,9 +2073,14 @@ uniform int Extra_Information <
 	    #define Depth_Rez_Mul 100
 	    #define Depth_Rez 1.0
 	#endif
-	
-	// Had to use MAX dimension, not sum
-	#define COMB_SIZE ((BUFFER_WIDTH > BUFFER_HEIGHT) ? BUFFER_WIDTH : BUFFER_HEIGHT)
+		
+	// Depth Size MAX
+	#if BUFFER_WIDTH > BUFFER_HEIGHT
+	    #define COMB_SIZE BUFFER_WIDTH
+	#else
+	    #define COMB_SIZE BUFFER_HEIGHT
+	#endif
+
 	#define DS_COMB_SIZE ((COMB_SIZE * Depth_Rez_Mul) / 100)
 
 	// Mip selection
