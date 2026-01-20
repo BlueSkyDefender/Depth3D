@@ -1,7 +1,7 @@
 	////----------------//
 	///**SuperDepth3D**///
 	//----------------////
-	#define SD3D "SuperDepth3D v5.3.2\n"
+	#define SD3D "SuperDepth3D v5.3.3\n"
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//* Depth Map Based 3D post-process shader
 	//* For Reshade 3.0+
@@ -2074,31 +2074,31 @@ uniform int Extra_Information <
 	    #define Depth_Rez 1.0
 	#endif
 	
-	// Calculate integer-scaled DS_Comb_Size = (BUFFER_HEIGHT + BUFFER_WIDTH) * Depth_Rez
-	#define COMB_SIZE (BUFFER_HEIGHT + BUFFER_WIDTH)
+	// Had to use MAX dimension, not sum
+	#define COMB_SIZE ((BUFFER_WIDTH > BUFFER_HEIGHT) ? BUFFER_WIDTH : BUFFER_HEIGHT)
 	#define DS_COMB_SIZE ((COMB_SIZE * Depth_Rez_Mul) / 100)
-	
-	// Now, use preprocessor conditions with integer comparisons
+
+	// Mip selection
 	#if DS_COMB_SIZE <= 3360
-	    #if DS_COMB_SIZE <= 1400
-	        #if Set_Depth_Res >= 2
-	            #define Max_Mips 8
-	        #else
-	            #define Max_Mips 9
-	        #endif
-	    #else
-	        #if Set_Depth_Res >= 2
-	            #define Max_Mips 10
-	        #else
-	            #define Max_Mips 11
-	        #endif
-	    #endif
+		#if DS_COMB_SIZE <= 1400
+			#if Set_Depth_Res >= 2
+				#define Max_Mips 8
+			#else
+				#define Max_Mips 9
+			#endif
+		#else
+			#if Set_Depth_Res >= 2
+				#define Max_Mips 10
+			#else
+				#define Max_Mips 11
+			#endif
+		#endif
 	#else
-	    #if Set_Depth_Res >= 2
-	        #define Max_Mips 11
-	    #else
-	        #define Max_Mips 12
-	    #endif
+		#if Set_Depth_Res >= 2
+			#define Max_Mips 11
+		#else
+			#define Max_Mips 12
+		#endif
 	#endif
 	///////////////////////////////////////////////////////////////3D Starts Here///////////////////////////////////////////////////////////
 	texture DepthBufferTex : DEPTH;
