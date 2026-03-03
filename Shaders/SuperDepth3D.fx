@@ -1,7 +1,7 @@
 	////----------------//
 	///**SuperDepth3D**///
 	//----------------////
-	#define SD3D "SuperDepth3D v5.3.4\n"
+	#define SD3D "SuperDepth3D v5.3.5\n"
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//* Depth Map Based 3D post-process shader
 	//* For Reshade 3.0+
@@ -4727,7 +4727,7 @@ uniform int Extra_Information <
 		}
 		
 		DM.y = lerp( HandleConvergence.x, HandleConvergence.y * Auto_Adjust_Weapon_Depth, DM.y);
-		float Alpha_UI_Edge_Masking = Alpha_Channel_UI ? Alpha_UI_Mask(texcoord, 0) > 0 : 0;
+		float Alpha_UI_Edge_Masking = Alpha_Channel_UI ? Alpha_UI_Mask(texcoord * float2(1.0,0.9) + float2(0.0,0.1), 0) > 0 : 0;
 		float Edge_Adj = saturate(lerp(0.5,1.0,Edge_Adjust));
 			  Edge_Adj = lerp(1,Edge_Adj,Alpha_UI_Edge_Masking);
 		#if Inficolor_3D_Emulator
