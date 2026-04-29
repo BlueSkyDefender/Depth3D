@@ -1,7 +1,7 @@
 	////----------------//
 	///**SuperDepth3D**///
 	//----------------////
-	#define SD3D "SuperDepth3D v5.3.5\n"
+	#define SD3D "SuperDepth3D v5.3.6\n"
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//* Depth Map Based 3D post-process shader
 	//* For Reshade 3.0+
@@ -133,10 +133,10 @@ namespace SuperDepth3D
 		#define OW_WP "WP Off\0Custom WP\0"
 		#define G_Info "Missing Overwatch.fxh Information.\n"
 		#define G_Note "Note: If you pulled this file intentionally, please ignore this message.\n"
-		static const int SMSUM = 0, RSV = 0, AJM = 0, MED = 0, SBTDA = 0, SMSBT = 0, UIF = 0, UIL = 0, RCI = 0, AIM = 0, WMM = 0, SDD = 0, DMM = 0, LBD = 0, WSM = 0;
+		static const int EVS = 0, SMSUM = 0, RSV = 0, AJM = 0, MED = 0, SBTDA = 0, SMSBT = 0, UIF = 0, UIL = 0, RCI = 0, AIM = 0, WMM = 0, SDD = 0, DMM = 0, LBD = 0, WSM = 0;
 		static const int2 DOL = 0;
 		//Triggers 
-		static const float UFC = 0, UIB = 0, HNR = 0, THF = 0, EGB = 0,PLS = 0, MGA = 0, WZD = 0, KHM = 0, DAO = 0, LDT = 0, ALM = 0, SSF = 0, SNF = 0, SSE = 0, SNE = 0, EDU = 0, LBI = 0,ISD = 0, ASA = 1, IWS = 0, SUI = 0, SSA = 0, SNA = 0, SSB = 0, SNB = 0,SSC = 0, SNC = 0,SSD = 0, SND = 0, LHA = 0, WBS = 0, TMD = 0, FRM = 0, AWZ = 0, CWH = 0, WBA = 0, WFB = 0, WND = 0, WRP = 0, MML = 0, SMD = 0, WHM = 0, SDU = 0, ABE = 2, LBE = 0, HQT = 0, HMD = 0.5, MAC = 0, OIL = 0, MMS = 0, FTM = 0, FMM = 0, SPO = 0, MMD = 0, LBR = 0, AFD = 0, MDD = 0, FPS = 1, SMS = 1, OIF = 0, NCW = 0, RHW = 0, NPW = 0, SPF = 0, BDF = 0, HMT = 0, HMC = 0, DFW = 0, NFM = 0, DSW = 0, LBC = 0, LBS = 0, LBM = 0, DAA = 0, NDW = 0, PEW = 0, WPW = 0, FOV = 0, EDW = 0, SDT = 0;
+		static const float UFC = 0, UIB = 0, HNR = 0, THF = 0, EGB = 0,PLS = 1, MGA = 0, WZD = 0, KHM = 0, DAO = 0, LDT = 0, ALM = 0, SSF = 0, SNF = 0, SSE = 0, SNE = 0, EDU = 0, LBI = 0,ISD = 0, ASA = 1, IWS = 0, SUI = 0, SSA = 0, SNA = 0, SSB = 0, SNB = 0,SSC = 0, SNC = 0,SSD = 0, SND = 0, LHA = 0, WBS = 0, TMD = 0, FRM = 0, AWZ = 0, CWH = 0, WBA = 0, WFB = 0, WND = 0, WRP = 0, MML = 0, SMD = 0, WHM = 0, SDU = 0, ABE = 2, LBE = 0, HQT = 0, HMD = 0.5, MAC = 0, OIL = 0, MMS = 0, FTM = 0, FMM = 0, SPO = 0, MMD = 0, LBR = 0, AFD = 0, MDD = 0, FPS = 1, SMS = 1, OIF = 0, NCW = 0, RHW = 0, NPW = 0, SPF = 0, BDF = 0, HMT = 0, HMC = 0, DFW = 0, NFM = 0, DSW = 0, LBC = 0, LBS = 0, LBM = 0, DAA = 0, NDW = 0, PEW = 0, WPW = 0, FOV = 0, EDW = 0, SDT = 0;
 		//Overwatch.fxh State
 		#define OSW 1
 	#endif
@@ -846,7 +846,7 @@ uniform int SuperDepth3D <
 	#if !Use_2D_Plus_Depth
 	uniform int Performance_Level <
 		ui_type = "combo";
-		ui_items = "Performant + Depth\0Normal + Depth\0";
+		ui_items = "Performant \0Normal \0High \0";
 		ui_label = " Performance Level";
 		ui_tooltip = "Performance Levels Lowers or Raises Occlusion Quality Processing so that the performance is adjusted accordingly.\n"
 					 "Varable Rate Shading focuses the quality of the samples in lighter areas of the screen.\n"
@@ -865,6 +865,7 @@ uniform int SuperDepth3D <
 	> = FRM;
 	*/
 	#endif
+
 	#if !Use_2D_Plus_Depth
 	uniform float Compatibility_Power <
 		#if Compatibility
@@ -907,6 +908,16 @@ uniform int SuperDepth3D <
 					 "Zero is Default and One is 1.5x";
 		ui_category = "Compatibility Options";
 	> = RSV;
+
+	uniform bool Extended_Smoothing <
+	    ui_label = " Expand Depth";
+	   // ui_min = 0; ui_max = 1;
+	    ui_tooltip = "Expands the depth smoothing/dilation footprint horizontally.\n"
+	                 "Off is Default (per-axis, preserves edges).\n"
+	                 "On is Extended (wider dilation, good for thin geometry or low-res depth).";
+		ui_category = "Compatibility Options";
+	> = EVS;	
+	
 	#else
 		uniform int Reconstruction_Size <
 		ui_label = " Reconstruction Size";
@@ -920,6 +931,17 @@ uniform int SuperDepth3D <
 					 "Zero is Default and One is 1.5x";
 		ui_category = "Compatibility Options";
 	> = RSV;
+
+
+	uniform bool Extended_Smoothing <
+	    ui_label = " Expand Depth";
+	   // ui_min = 0; ui_max = 1;
+	    ui_tooltip = "Expands the depth smoothing/dilation footprint horizontally.\n"
+	                 "Off is Default (per-axis, preserves edges).\n"
+	                 "On is Extended (wider dilation, good for thin geometry or low-res depth).";
+		ui_category = "Compatibility Options";
+	> = EVS;
+	
 	#endif	
 	uniform int Select_SS <
 		ui_type = "combo";
@@ -1827,7 +1849,8 @@ uniform int SuperDepth3D <
 		           "Self-Adjusting UI (FPSP-Alpha)\0"    //9
 		           "Self-Adjusting UI (FPMP-Alpha)\0"    //10
 		           "Self-Adjusting UI (FPSP2-Alpha)\0"    //11		           
-		           "Self-Adjusting UI (Min-FPSP-Alpha)\0";  //12
+		           "Self-Adjusting UI (Min-FPSP-Alpha)\0"  //12
+		           "Self-Adjusting UI (Min-FPSP-Alpha2)\0";  //13
 		ui_tooltip = "Choose how to handle UI masking via the alpha channel:\n\n"
 		             "- Mostly Static UI: Best for games with UI that doesn't move or change frequently.\n"
 		             "- Self-Adjusting UI (Depth-Based): Dynamically adjusts based on depth, useful for games\n"
@@ -5045,156 +5068,216 @@ uniform int Extra_Information <
 	    return abs(lerp(0.01f,1.0f,S_T_Adjust));
 	}
 
-	static const float  VMW_Array[10] = { 0.0, 1.0, 2.0, 3.0 , 3.5 , 4.0, 4.5 , 5.0, 5.5, 6.0 };	
+	static const float VMW_Array[10] = { 0.0, 1.0, 2.0, 3.0, 3.5, 4.0, 4.5, 5.0, 5.5, 6.0 };
+
+	float DilateH_Scan(sampler tex, float2 uv, float vmw)
+	{
+		const float tapMip = 2.0;
+		float reach = pix.x * exp2(vmw) * 2.0;
+		float m = tex2Dlod(tex, float4(uv, 0, 0)).x;
+		[unroll]
+		for (int i = 1; i <= 6; ++i)
+		{
+			float t = (float)i / 6.0;
+			float off = reach * t;
+			m = min(m, tex2Dlod(tex, float4(uv + float2(off, 0), 0, tapMip)).x);
+			m = min(m, tex2Dlod(tex, float4(uv - float2(off, 0), 0, tapMip)).x);
+		}
+		return m;
+	}
+
+	float DilateH(sampler tex, float2 uv, float vmw)
+	{
+		float Depth   = tex2Dlod(tex, float4(uv, 0, 0)).x;
+		float mipped  = tex2Dlod(tex, float4(uv, 0, vmw)).x;
+		float dilated = DilateH_Scan(tex, uv, vmw);
+
+		float mask = saturate((Depth - dilated) * 8.0);
+
+		return lerp(mipped, Depth, 1-mask);
+	}
+	
 	float GetDB(float2 texcoord)
 	{
-		#if TMD
-			//UI Lift Masking 
-			float TMD_LvL = TMD == 1 ? 60 : 600;
-			#if DX9_Toggle  
-		    float Basic_UI = tex2Dlod(SamplerzBuffer_BlurN, float4( texcoord * float2(0.5,1.0) , 0, 2.5 ) ).x;
-		    #else
-		    float Basic_UI = tex2Dlod(SamplerzBuffer_BlurN, float4( texcoord, 0, 2.5 ) ).y;
-			#endif
-			Basic_UI = saturate( Basic_UI * TMD_LvL);
-		#endif
-		
-		#if Reconstruction_Mode || Virtual_Reality_Mode
-		if( Vert_3D_Pinball )	
-			texcoord.xy = texcoord.yx;	
-		#else
-		if(Vert_3D_Pinball && Stereoscopic_Mode != 5)	
-			texcoord.xy = texcoord.yx;
-		#endif
-		float LR_Depth_Mask = 1-saturate(tex2Dlod(SamplerzBuffer_BlurN, float4( texcoord  * float2(0.5,1) + float2(0.5,0), 0, 2.5 ) ).x * 5.0);	
-		
-		float Base_Depth_Buffer = tex2Dlod(SamplerzBufferN_L, float4( texcoord, 0, 0) ).x;
-		float2 Base_Depth_Buffers = float2(Base_Depth_Buffer,tex2Dlod(SamplerzBufferN_P, float4( texcoord, 0, 0) ).x);
-		float2 Store_Base_Depth_Buffers = Base_Depth_Buffers;
-
-		float GetDepth = smoothstep(0,1, tex2Dlod(SamplerzBufferN_P, float4(texcoord,0, 1) ).y);
-		
-		//float Base_Depth_SubSampled = tex2Dlod(SamplerzBufferN_L, float4( texcoord, 0, lerp(0.0,4.0,Base_Depth_Buffers.x)) ).x;
-		float Base_Depth = Base_Depth_Buffers.x;////lerp(Base_Depth_Buffers.x,Base_Depth_SubSampled,LR_Depth_Mask.x*Sat_Range);
-		
-		uint VMW_Switch = View_Mode_Warping;
-		#if LBM || LetterBox_Masking
-		float LB_Detection = tex2D(SamplerAvrP_N,float2(1,0.0625)).z;
-		if(LB_Detection)
-			VMW_Switch *= 0.5;
-		#endif
-		uint VM_Mip_Cal = VMW_Array[clamp(VMW_Switch,0,9)], ISV_Switch = 3;
-
-		float FadeIO = smoothstep(0,1,tex2D(SamplerDMN,0).x);
-		if(FPSDFIO > 0)
-			ISV_Switch = lerp(ISV_Switch,6,FadeIO);
-
-		//Smoothing is not masked so that things that will cause distortions is smooth stronger then thing that don't need it.
-		LR_Depth_Mask = smoothstep(Warping_Masking == 2 ? 0.75 : 1,0,tex2Dlod(SamplerzBufferN_L,float4(texcoord,0,ISV_Switch)).x*(1-LR_Depth_Mask));
-		float VMW = Warping_Masking == 0 ? VM_Mip_Cal : lerp(VM_Mip_Cal,0,LR_Depth_Mask.x);
-		#if TMD == 1
-			VMW = lerp(clamp(VMW,0,6.0),6.0,Basic_UI);
-		#else
-			VMW = clamp(VMW,0,6.0);
-		#endif
-		
-		float Near_Mask = tex2Dlod(SamplerzBufferN_L, float4( texcoord, 0, 9 ) ).x * 0.5;
-		if(Weapon_Near_Halo_Reduction)
-			VMW = lerp(VMW,9,Near_Mask);//int(lerp(VMW,9,Near_Mask));
-			
-		float Min_Blend = min(tex2Dlod(SamplerzBufferN_L, float4( texcoord, 0, VMW ) ).x,Base_Depth.x);
-
-		float2 DepthBuffer_LP = float2(Min_Blend,Base_Depth_Buffers.y);
+	    // UI Lift Masking (TMD)
+	    #if TMD
+	        float TMD_LvL = (TMD == 1) ? 60 : 600;
+	        #if DX9_Toggle
+	            float Basic_UI = tex2Dlod(SamplerzBuffer_BlurN, float4(texcoord * float2(0.5, 1.0), 0, 2.5)).x;
+	        #else
+	            float Basic_UI = tex2Dlod(SamplerzBuffer_BlurN, float4(texcoord, 0, 2.5)).y;
+	        #endif
+	        Basic_UI = saturate(Basic_UI * TMD_LvL);
+	    #endif
 	
-		#if TMD
-			#if TMD == 1
-			#else
-				float Text_Direction = texcoord.x < DZ_W.z || texcoord.y < DZ_W.w;
-				#if (TMD  == 3 ) // Reverse
-				Text_Direction = 1-texcoord.x < DZ_W.z || 1-texcoord.y < DZ_W.w;
-				#elif (TMD  == 4 ) // Mirror
-				Text_Direction += 1-texcoord.x < DZ_W.z || 1-texcoord.y < DZ_W.w;
-				#endif
-				
-			if( DZ_W.x > 0 && Text_Menu_Detection())
-			{
-				if(Text_Direction)
-				DepthBuffer_LP.xy = lerp(DepthBuffer_LP.xy,  min(DepthBuffer_LP.xy,saturate(tex2Dlod(SamplerzBufferN_L, float4( texcoord, 0, (uint)lerp(0,12,Basic_UI) ) ).x  * 0.01)) ,Basic_UI * saturate(DZ_W.x));
-			}
-			#endif
-		#endif
-		
-		#if SUI
-			float2 UI_A_Mask_Pos = 1-DDD_Y.zw;
-			//Auto Depth 0.5 > needs more detection points will update that later.
-			float UI_A_Mask_Depth = DDD_W.w < 0.5 ? DDD_W.w : Stencil_Sampler(float3( 1-UI_A_Mask_Pos,DDD_W.w));
-			float2 UI_A_Mask_Size= DDD_W.xy;
-			if(Stencil_n_Detection_A())
-				DepthBuffer_LP.xy = lerp(DepthBuffer_LP.xy,UI_A_Mask_Depth,Stencil_Masking(texcoord,UI_A_Mask_Pos,UI_A_Mask_Size,DDD_W.z,SSA));
-				#if SUI >= 2
-				float2 UI_B_Mask_Pos = 1-DEE_Y.zw;
-				//Auto Depth 0.5 > needs more detection points will update that later.
-				float UI_B_Mask_Depth = DEE_W.w < 0.5 ? DEE_W.w : Stencil_Sampler(float3( 1-UI_B_Mask_Pos,DEE_W.w));
-				float2 UI_B_Mask_Size= DEE_W.xy;
-				if(Stencil_n_Detection_B())
-					DepthBuffer_LP.xy = lerp(DepthBuffer_LP.xy,UI_B_Mask_Depth,Stencil_Masking(texcoord,UI_B_Mask_Pos,UI_B_Mask_Size,DEE_W.z,SSB));
-				#endif
-					#if SUI >= 3
-					float2 UI_C_Mask_Pos = 1-DFF_Y.zw;
-					//Auto Depth 0.5 > needs more detection points will update that later.
-					float UI_C_Mask_Depth = DFF_W.w < 0.5 ? DFF_W.w : Stencil_Sampler(float3( 1-UI_C_Mask_Pos,DFF_W.w));
-					float2 UI_C_Mask_Size= DFF_W.xy;
-					if(Stencil_n_Detection_C())
-						DepthBuffer_LP.xy = lerp(DepthBuffer_LP.xy,UI_C_Mask_Depth,Stencil_Masking(texcoord,UI_C_Mask_Pos,UI_C_Mask_Size,DFF_W.z,SSC));
-					#endif
-						#if SUI >= 4
-						float2 UI_D_Mask_Pos = 1-DGG_Y.zw;
-						//Auto Depth 0.5 > needs more detection points will update that later.
-						float UI_D_Mask_Depth = DGG_W.w < 0.5 ? DGG_W.w : Stencil_Sampler(float3( 1-UI_D_Mask_Pos,DGG_W.w));
-						float2 UI_D_Mask_Size= DGG_W.xy;
-						if(Stencil_n_Detection_D())
-							DepthBuffer_LP.xy = lerp(DepthBuffer_LP.xy,UI_D_Mask_Depth,Stencil_Masking(texcoord,UI_D_Mask_Pos,UI_D_Mask_Size,DGG_W.z,SSD));
-						#endif
-							#if SUI >= 5
-							float2 UI_E_Mask_Pos = 1-DJJ_Y.zw;
-							//Auto Depth 0.5 > needs more detection points will update that later.
-							float UI_E_Mask_Depth = DJJ_W.w < 0.5 ? DJJ_W.w : Stencil_Sampler(float3( 1-UI_E_Mask_Pos,DJJ_W.w));
-							float2 UI_E_Mask_Size= DJJ_W.xy;
-							if(Stencil_n_Detection_E())
-								DepthBuffer_LP.xy = lerp(DepthBuffer_LP.xy,UI_E_Mask_Depth,Stencil_Masking(texcoord,UI_E_Mask_Pos,UI_E_Mask_Size,DJJ_W.z,SSE));
-							#endif
-								#if SUI >= 6
-								float2 UI_F_Mask_Pos = 1-DLL_Y.zw;
-								//Auto Depth 0.5 > needs more detection points will update that later.
-								float UI_F_Mask_Depth = DLL_W.w < 0.5 ? DLL_W.w : Stencil_Sampler(float3( 1-UI_F_Mask_Pos,DLL_W.w));
-								float2 UI_F_Mask_Size= DLL_W.xy;
-								if(Stencil_n_Detection_F())
-									DepthBuffer_LP.xy = lerp(DepthBuffer_LP.xy,UI_F_Mask_Depth,Stencil_Masking(texcoord,UI_F_Mask_Pos,UI_F_Mask_Size,DLL_W.z,SSF));
-								#endif
-		#endif	
-		#if !Use_2D_Plus_Depth
-			if(View_Mode == 0 || View_Mode == 3)	
-				DepthBuffer_LP.x = DepthBuffer_LP.y;		
-		#endif
-		float Separation = lerp(1.0,5.0,Depth_Seperation()); 	
-		
-		float Boost_Range_Depth = DepthBuffer_LP.x, Pop_Adjust = saturate(DI_Y);
-		float Max_Clamp = Pop_Adjust > 0 ? 5.0 : 2.5 ;
-
-		if(Pop_Adjust > 0)//Boost_Mode from 2018
-		{
-			float2 Clamp_Near = max(0,float2(tex2Dlod(SamplerzBufferN_P, float4(texcoord,0, 0) ).y, DepthBuffer_LP.x));	
-			float Mid_Point = Clamp_Near.y > 0.5 ? Clamp_Near.x : Clamp_Near.y;
-			float RCP_Diverge = saturate(0.01 * Divergence_Switch().y);
-			float Cal_Power_Blend = lerp(1.75,1.25,RCP_Diverge);
-			
-			  Boost_Range_Depth = lerp(DepthBuffer_LP.x * 2 - 1,DepthBuffer_LP.x * 3 - 1.5, Mid_Point * 0.25 + 0.25);
-			  Boost_Range_Depth = lerp(DepthBuffer_LP.x,Boost_Range_Depth * 0.5 + 0.5, Clamp_Near.y);
-			  Boost_Range_Depth = lerp(DepthBuffer_LP.x,Boost_Range_Depth, Clamp_Near.y * 0.5 + 0.5);
-			  Boost_Range_Depth = lerp(DepthBuffer_LP.x,Boost_Range_Depth,Cal_Power_Blend * Pop_Adjust);
-		}	  
-		
-		return clamp((Separation * Boost_Range_Depth) * Smooth_Tune_Boost(),-1.5,Max_Clamp);
+	    // Vertical pinball coordinate swap
+	    #if Reconstruction_Mode || Virtual_Reality_Mode
+	        if (Vert_3D_Pinball)
+	            texcoord.xy = texcoord.yx;
+	    #else
+	        if (Vert_3D_Pinball && Stereoscopic_Mode != 5)
+	            texcoord.xy = texcoord.yx;
+	    #endif
+	
+	    // Left/Right depth mask from blurred SBS depth
+	    float LR_Depth_Mask = 1 - saturate(tex2Dlod(SamplerzBuffer_BlurN,
+	        float4(texcoord * float2(0.5, 1) + float2(0.5, 0), 0, 2.5)).x * 5.0);
+	
+	    // Base depth fetches
+	    float  Base_Depth_Buffer  = tex2Dlod(SamplerzBufferN_L, float4(texcoord, 0, 0)).x;
+	    float2 Base_Depth_Buffers = float2(Base_Depth_Buffer,
+	                                       tex2Dlod(SamplerzBufferN_P, float4(texcoord, 0, 0)).x);
+	    float2 Store_Base_Depth_Buffers = Base_Depth_Buffers;
+	
+	    float GetDepth = smoothstep(0, 1, tex2Dlod(SamplerzBufferN_P, float4(texcoord, 0, 1)).y);
+	
+	    //float Base_Depth_SubSampled = tex2Dlod(SamplerzBufferN_L, float4( texcoord, 0, lerp(0.0,4.0,Base_Depth_Buffers.x)) ).x;
+	    float Base_Depth = Base_Depth_Buffers.x; ////lerp(Base_Depth_Buffers.x,Base_Depth_SubSampled,LR_Depth_Mask.x*Sat_Range);
+	
+	    // Pick warp mip level (VMW)
+	    uint VMW_Switch = View_Mode_Warping;
+	    #if LBM || LetterBox_Masking
+	        float LB_Detection = tex2D(SamplerAvrP_N, float2(1, 0.0625)).z;
+	        if (LB_Detection)
+	            VMW_Switch *= 0.5;
+	    #endif
+	    uint VM_Mip_Cal = VMW_Array[clamp(VMW_Switch, 0, 9)];
+	    uint ISV_Switch = 3;
+	
+	    float FadeIO = smoothstep(0, 1, tex2D(SamplerDMN, 0).x);
+	    if (FPSDFIO > 0)
+	        ISV_Switch = lerp(ISV_Switch, 6, FadeIO);
+	
+	    // Smoothing is not masked so distortion-prone areas smooth stronger than calm ones.
+	    LR_Depth_Mask = smoothstep(Warping_Masking == 2 ? 0.75 : 1, 0,
+	        tex2Dlod(SamplerzBufferN_L, float4(texcoord, 0, ISV_Switch)).x * (1 - LR_Depth_Mask));
+	
+	    float VMW = (Warping_Masking == 0) ? VM_Mip_Cal : lerp(VM_Mip_Cal, 0, LR_Depth_Mask.x);
+	    #if TMD == 1
+	        VMW = lerp(clamp(VMW, 0, 6.0), 6.0, Basic_UI);
+	    #else
+	        VMW = clamp(VMW, 0, 6.0);
+	    #endif
+	
+	    float Near_Mask = tex2Dlod(SamplerzBufferN_L, float4(texcoord, 0, 9)).x * 0.5;
+	    if (Weapon_Near_Halo_Reduction)
+	        VMW = lerp(VMW, 9, Near_Mask); //int(lerp(VMW,9,Near_Mask));
+	
+		// Use horizontal dilation normally; fall back to the original isotropic
+	    // mip read when Pinball mode swapped the axes.
+	    bool PinballSwap = false;
+	    #if Reconstruction_Mode || Virtual_Reality_Mode
+	        PinballSwap = Vert_3D_Pinball;
+	    #else
+	        PinballSwap = Vert_3D_Pinball && Stereoscopic_Mode != 5;
+	    #endif
+	    float Smoothed = PinballSwap
+	        ? tex2Dlod(SamplerzBufferN_L, float4(texcoord, 0, VMW)).x
+	        : DilateH(SamplerzBufferN_L, texcoord, VMW);
+	    float Min_Blend = min(Smoothed, Base_Depth.x);
+	
+	    float2 DepthBuffer_LP = float2(Min_Blend, Base_Depth_Buffers.y);
+	
+	    // TMD text-direction UI lift
+	    #if TMD
+	        #if TMD == 1
+	        #else
+	            float Text_Direction = texcoord.x < DZ_W.z || texcoord.y < DZ_W.w;
+	            #if (TMD == 3) // Reverse
+	                Text_Direction  = 1 - texcoord.x < DZ_W.z || 1 - texcoord.y < DZ_W.w;
+	            #elif (TMD == 4) // Mirror
+	                Text_Direction += 1 - texcoord.x < DZ_W.z || 1 - texcoord.y < DZ_W.w;
+	            #endif
+	
+	            if (DZ_W.x > 0 && Text_Menu_Detection())
+	            {
+	                if (Text_Direction)
+	                    DepthBuffer_LP.xy = lerp(DepthBuffer_LP.xy,
+	                        min(DepthBuffer_LP.xy,
+	                            saturate(tex2Dlod(SamplerzBufferN_L,
+	                                float4(texcoord, 0, (uint)lerp(0, 12, Basic_UI))).x * 0.01)),
+	                        Basic_UI * saturate(DZ_W.x));
+	            }
+	        #endif
+	    #endif
+	
+	    // Stencil UI masks (SUI A-F)
+	    // Auto Depth 0.5 > needs more detection points - will update later.
+	    #if SUI
+	        float2 UI_A_Mask_Pos   = 1 - DDD_Y.zw;
+	        float  UI_A_Mask_Depth = (DDD_W.w < 0.5) ? DDD_W.w : Stencil_Sampler(float3(1 - UI_A_Mask_Pos, DDD_W.w));
+	        float2 UI_A_Mask_Size  = DDD_W.xy;
+	        if (Stencil_n_Detection_A())
+	            DepthBuffer_LP.xy = lerp(DepthBuffer_LP.xy, UI_A_Mask_Depth,
+	                Stencil_Masking(texcoord, UI_A_Mask_Pos, UI_A_Mask_Size, DDD_W.z, SSA));
+	    #endif
+	    #if SUI >= 2
+	        float2 UI_B_Mask_Pos   = 1 - DEE_Y.zw;
+	        float  UI_B_Mask_Depth = (DEE_W.w < 0.5) ? DEE_W.w : Stencil_Sampler(float3(1 - UI_B_Mask_Pos, DEE_W.w));
+	        float2 UI_B_Mask_Size  = DEE_W.xy;
+	        if (Stencil_n_Detection_B())
+	            DepthBuffer_LP.xy = lerp(DepthBuffer_LP.xy, UI_B_Mask_Depth,
+	                Stencil_Masking(texcoord, UI_B_Mask_Pos, UI_B_Mask_Size, DEE_W.z, SSB));
+	    #endif
+	    #if SUI >= 3
+	        float2 UI_C_Mask_Pos   = 1 - DFF_Y.zw;
+	        float  UI_C_Mask_Depth = (DFF_W.w < 0.5) ? DFF_W.w : Stencil_Sampler(float3(1 - UI_C_Mask_Pos, DFF_W.w));
+	        float2 UI_C_Mask_Size  = DFF_W.xy;
+	        if (Stencil_n_Detection_C())
+	            DepthBuffer_LP.xy = lerp(DepthBuffer_LP.xy, UI_C_Mask_Depth,
+	                Stencil_Masking(texcoord, UI_C_Mask_Pos, UI_C_Mask_Size, DFF_W.z, SSC));
+	    #endif
+	    #if SUI >= 4
+	        float2 UI_D_Mask_Pos   = 1 - DGG_Y.zw;
+	        float  UI_D_Mask_Depth = (DGG_W.w < 0.5) ? DGG_W.w : Stencil_Sampler(float3(1 - UI_D_Mask_Pos, DGG_W.w));
+	        float2 UI_D_Mask_Size  = DGG_W.xy;
+	        if (Stencil_n_Detection_D())
+	            DepthBuffer_LP.xy = lerp(DepthBuffer_LP.xy, UI_D_Mask_Depth,
+	                Stencil_Masking(texcoord, UI_D_Mask_Pos, UI_D_Mask_Size, DGG_W.z, SSD));
+	    #endif
+	    #if SUI >= 5
+	        float2 UI_E_Mask_Pos   = 1 - DJJ_Y.zw;
+	        float  UI_E_Mask_Depth = (DJJ_W.w < 0.5) ? DJJ_W.w : Stencil_Sampler(float3(1 - UI_E_Mask_Pos, DJJ_W.w));
+	        float2 UI_E_Mask_Size  = DJJ_W.xy;
+	        if (Stencil_n_Detection_E())
+	            DepthBuffer_LP.xy = lerp(DepthBuffer_LP.xy, UI_E_Mask_Depth,
+	                Stencil_Masking(texcoord, UI_E_Mask_Pos, UI_E_Mask_Size, DJJ_W.z, SSE));
+	    #endif
+	    #if SUI >= 6
+	        float2 UI_F_Mask_Pos   = 1 - DLL_Y.zw;
+	        float  UI_F_Mask_Depth = (DLL_W.w < 0.5) ? DLL_W.w : Stencil_Sampler(float3(1 - UI_F_Mask_Pos, DLL_W.w));
+	        float2 UI_F_Mask_Size  = DLL_W.xy;
+	        if (Stencil_n_Detection_F())
+	            DepthBuffer_LP.xy = lerp(DepthBuffer_LP.xy, UI_F_Mask_Depth,
+	                Stencil_Masking(texcoord, UI_F_Mask_Pos, UI_F_Mask_Size, DLL_W.z, SSF));
+	    #endif
+	
+	    // 2D+Depth path: collapse L to P
+	    #if !Use_2D_Plus_Depth
+	        if (View_Mode == 0 || View_Mode == 3)
+	            DepthBuffer_LP.x = DepthBuffer_LP.y;
+	    #endif
+	
+	    float Separation        = lerp(1.0, 5.0, Depth_Seperation());
+	    float Boost_Range_Depth = DepthBuffer_LP.x;
+	    float Pop_Adjust        = saturate(DI_Y);
+	    float Max_Clamp         = (Pop_Adjust > 0) ? 5.0 : 2.5;
+	
+	    // Boost Mode (from 2018): nonlinear mid-depth pop
+	    if (Pop_Adjust > 0)
+	    {
+	        float2 Clamp_Near     = max(0, float2(tex2Dlod(SamplerzBufferN_P, float4(texcoord, 0, 0)).y, DepthBuffer_LP.x));
+	        float  Mid_Point      = (Clamp_Near.y > 0.5) ? Clamp_Near.x : Clamp_Near.y;
+	        float  RCP_Diverge    = saturate(0.01 * Divergence_Switch().y);
+	        float  Cal_Power_Blend = lerp(1.75, 1.25, RCP_Diverge);
+	
+	        Boost_Range_Depth = lerp(DepthBuffer_LP.x * 2 - 1, DepthBuffer_LP.x * 3 - 1.5, Mid_Point * 0.25 + 0.25);
+	        Boost_Range_Depth = lerp(DepthBuffer_LP.x,         Boost_Range_Depth * 0.5 + 0.5, Clamp_Near.y);
+	        Boost_Range_Depth = lerp(DepthBuffer_LP.x,         Boost_Range_Depth,             Clamp_Near.y * 0.5 + 0.5);
+	        Boost_Range_Depth = lerp(DepthBuffer_LP.x,         Boost_Range_Depth,             Cal_Power_Blend * Pop_Adjust);
+	    }
+	
+	    return clamp(Separation * Boost_Range_Depth * Smooth_Tune_Boost(), -1.5, Max_Clamp);
 	}
 	
 	int3 Shift_Depth()
@@ -5432,6 +5515,7 @@ uniform int Extra_Information <
 		
 		    float Game_Alpha_UI, Game_Alpha_UI_M;
 		    float Alpha_UI = Alpha_UI_Mask(texcoord, 0);
+		    	  Alpha_UI = min(Alpha_UI,Alpha_UI_Mask(texcoord, 1.0));
 	
 		    float Low_Rez_Depth    = tex2Dlod(SamplerAvrB_N, float4(texcoord, 0, 5 )).x;
 		    float OA_Power         = saturate(abs(Divergence_Switch().y) * 0.01);
@@ -5451,8 +5535,8 @@ uniform int Extra_Information <
 		        Game_Alpha_UI_M = smoothstep(Alpha_UI_Depth, 1, tex2Dlod(SamplerCN, float4(texcoord, 0, 4)).y);
 		        float Min_Game_Alpha = min(Game_Alpha_UI, Game_Alpha_UI_M * 0.025);//0.025 should be adjustable in the Future
 		
-		        // Vicinal modes 0, 6, 8, 12
-		        if(Alpha_Auto_UI == 0 || Alpha_Auto_UI == 6 || Alpha_Auto_UI == 8 || Alpha_Auto_UI == 12)
+		        // Vicinal modes 0, 6, 8, 12, 13
+		        if(Alpha_Auto_UI == 0 || Alpha_Auto_UI == 6 || Alpha_Auto_UI == 8 || Alpha_Auto_UI == 12 || Alpha_Auto_UI == 13)
 		        {
 		            float mipCoarse = 4.0, mipFine = 2.0, mipLarge = 5.0;
 		
@@ -5468,15 +5552,15 @@ uniform int Extra_Information <
 		            float S_UI  = 1 - Alpha_UI > 0.0;
 		            float AS_UI = lerp(0.0, S_UI, BlendOut);
 		
-		            if(Alpha_Auto_UI == 6 || Alpha_Auto_UI == 8 || Alpha_Auto_UI == 12)
+		            if(Alpha_Auto_UI == 6 || Alpha_Auto_UI == 8 || Alpha_Auto_UI == 12 || Alpha_Auto_UI == 13)
 		                TRD_Alpha_UI.x = lerp(0.5, Min_Game_Alpha + AS_UI, Middel_Depth);
 		            else
 		                MixOut = lerp(0.5, Min_Game_Alpha + AS_UI, Middel_Depth);
 		        }
 		
-		        // Local modes 1, 4, 5, 7, 9, 10, 11, 12
+		        // Local modes 1, 4, 5, 7, 9, 10, 11, 12, 13
 		        if(Alpha_Auto_UI == 1  || Alpha_Auto_UI == 4 || Alpha_Auto_UI == 5 ||
-		           Alpha_Auto_UI == 7  || Alpha_Auto_UI == 9 || Alpha_Auto_UI == 10 || Alpha_Auto_UI == 11 || Alpha_Auto_UI == 12)
+		           Alpha_Auto_UI == 7  || Alpha_Auto_UI == 9 || Alpha_Auto_UI == 10 || Alpha_Auto_UI == 11 || Alpha_Auto_UI == 12 || Alpha_Auto_UI == 13)
 		        {
 		            float mipCoarse        = 2.0;
 		            float mipFine          = 4.0;
@@ -5490,7 +5574,7 @@ uniform int Extra_Information <
 		                mipCoarse = lerp(4.0, mipCoarse, Avg_UI_doubled);
 		                mipFine   = lerp(5.0, mipFine,   Avg_UI_doubled);
 		            }
-		            else if(Alpha_Auto_UI == 9)
+		            else if(Alpha_Auto_UI == 9 || Alpha_Auto_UI == 13)
 		            {
 		                Scale_FPS_Dist_A = 1.05;
 		                Scale_FPS_Dist_B = 0.125;
@@ -5527,7 +5611,7 @@ uniform int Extra_Information <
 		            float AS_UI = lerp(0.0, S_UI, BlendOut);
 		
 		            if(Alpha_Auto_UI == 4 || Alpha_Auto_UI == 7 || Alpha_Auto_UI == 9 ||
-		               Alpha_Auto_UI == 10 || Alpha_Auto_UI == 11 || Alpha_Auto_UI == 12)
+		               Alpha_Auto_UI == 10 || Alpha_Auto_UI == 11 || Alpha_Auto_UI == 12 || Alpha_Auto_UI == 13)
 		                FPS_Alpha_UI.x = Min_Game_Alpha + AS_UI;
 		            else if(Alpha_Auto_UI == 5)
 		                TRD_Alpha_UI.x = Min_Game_Alpha + AS_UI;
@@ -5535,9 +5619,9 @@ uniform int Extra_Information <
 		                MixOut = Min_Game_Alpha + AS_UI;
 		        }
 		
-		        // Average modes 2, 5, 7, 8, 9, 10, 11, 12
+		        // Average modes 2, 5, 7, 8, 9, 10, 11, 12, 13
 		        if(Alpha_Auto_UI == 2  || Alpha_Auto_UI == 5 || Alpha_Auto_UI == 7 ||
-		           Alpha_Auto_UI == 8  || Alpha_Auto_UI == 9 || Alpha_Auto_UI == 10 || Alpha_Auto_UI == 11 || Alpha_Auto_UI == 12)
+		           Alpha_Auto_UI == 8  || Alpha_Auto_UI == 9 || Alpha_Auto_UI == 10 || Alpha_Auto_UI == 11 || Alpha_Auto_UI == 12 || Alpha_Auto_UI == 13)
 		        {
 		            float mipLevel_A = 7, mipLevel_B = 5.0;
 		
@@ -5549,7 +5633,7 @@ uniform int Extra_Information <
 		            float DMix = min(DCenter, BCenter);
 		
 		            float2 Alpha_Five_Switch = Alpha_Auto_UI == 5 ? float2(-0.7, 1.5) :
-		                                       Alpha_Auto_UI == 9 ? float2(-0.25, 1.0) :
+		                                       (Alpha_Auto_UI == 9 || Alpha_Auto_UI == 13) ? float2(-0.25, 1.0) :
 		                                                            float2(-0.5, 1.0);
 		
 		            float BlendOut = lerp(Alpha_Five_Switch.x, Alpha_Five_Switch.y, DMix);
@@ -5564,7 +5648,7 @@ uniform int Extra_Information <
 		            float AS_UI = lerp(0.0, S_UI, BlendOut);
 		
 		            if(Alpha_Auto_UI == 5 || Alpha_Auto_UI == 7 || Alpha_Auto_UI == 8 ||
-		               Alpha_Auto_UI == 9 || Alpha_Auto_UI == 10 || Alpha_Auto_UI == 11 || Alpha_Auto_UI == 12)
+		               Alpha_Auto_UI == 9 || Alpha_Auto_UI == 10 || Alpha_Auto_UI == 11 || Alpha_Auto_UI == 12 || Alpha_Auto_UI == 13)
 		                TRD_Alpha_UI.y = Min_Game_Alpha + AS_UI;
 		            else
 		                MixOut = Min_Game_Alpha + AS_UI;
@@ -5578,7 +5662,7 @@ uniform int Extra_Information <
 		            float mipLevel_A = lerp(4.0, 6.0, Set_Mip);
 		            float mipLevel_B = 7.0;
 		            float Scale_FPS_Dist_C = 0.1;
-
+	
 		            float DLeft   = tex2Dlod(SamplerAvrB_N, float4(texcoord - coordSize, 0, mipLevel_A)).y;
 		            float DCenter = tex2Dlod(SamplerAvrB_N, float4(texcoord,              0, mipLevel_A)).y;
 		            float DRight  = tex2Dlod(SamplerAvrB_N, float4(texcoord + coordSize, 0, mipLevel_A)).y;
@@ -5718,34 +5802,70 @@ uniform int Extra_Information <
 		            float Guided  = TRD_Alpha_UI.y * OA_Power;
 		            float Vicinal = TRD_Alpha_UI.x * OA_Power;
 		            float Local   = FPS_Alpha_UI.x * OA_Power;
-
+	
 		            // Mode 8 side: Center-weighted
 		            float S_UI_8        = lerp(0.0, 0.5, Avg_UI);
 		            float C_UI_Value_8  = 0.25;
 		            float Center_Area_S = saturate(smoothstep(C_UI_Value_8 * 0.5, C_UI_Value_8, texcoord_x_mirror) *
 		                                           smoothstep(0.8, 0.5, texcoord.y > 0.5 ? texcoord.y : 1 - texcoord.y) * 2);
-
+	
 		            float Local_8  = lerp(Vicinal, lerp(Vicinal, Store_MixOut, S_UI_8), Vin_Alpha_UI(texcoord, Low_Rez_Depth, 0));
 		            float MixOut_8 = lerp(Guided, Local_8, Center_Area_S * 0.9);
 		                  MixOut_8 = lerp(Guided, MixOut_8, Avg_UI);
-
+	
 		            // Mode 10 side: Wide mask
 		            float S_UI_10      = lerp(0.0, 0.5, Avg_UI_halved);
 		            float S_Mask       = lerp(0, -0.7, Avg_UI_halved);
 		            float C_UI_Value_A = lerp(1.0, 0.5, Avg_UI);
-
+	
 		            float FPS_Area_S = texcoord.x < 0.5 ? smoothstep(S_Mask, 0.5, texcoord.x)
 		                                                 : smoothstep(S_Mask, 0.5, 1 - texcoord.x);
 		                  FPS_Area_S = saturate(smoothstep(C_UI_Value_A * 0.5, C_UI_Value_A, FPS_Area_S) *
 		                                        smoothstep(0.75, 0.5, texcoord.y > 0.5
 		                                            ? smoothstep(-0.5, 1.75, texcoord.y)
 		                                            : smoothstep(0.125, 1.75, 1 - texcoord.y)));
-
+	
 		            float Local_10  = lerp(Local, lerp(Local, Store_MixOut, S_UI_10), Vin_Alpha_UI(texcoord, Low_Rez_Depth, 0));
 		            float MixOut_10 = lerp(Guided, lerp(Guided, Local_10, FPS_Area_S), Avg_UI);
-
+	
 					float EdgeCenter = lerp(0.0, 0.5, min(texcoord_x_mirror, texcoord_y_mirror) );
 					MixOut = lerp(MixOut_8, MixOut_10, EdgeCenter);
+		        }
+		
+		        // Composite mode 13 Min-FPSP (blend of mode 8 and mode 9)
+		        if(Alpha_Auto_UI == 13)
+		        {
+		            float Guided  = TRD_Alpha_UI.y * OA_Power;
+		            float Vicinal = TRD_Alpha_UI.x * OA_Power;
+		            float Local   = FPS_Alpha_UI.x * OA_Power;
+	
+		            // Mode 8 side: Center-weighted
+		            float S_UI_8        = lerp(0.0, 0.5, Avg_UI);
+		            float C_UI_Value_8  = 0.25;
+		            float Center_Area_S = saturate(smoothstep(C_UI_Value_8 * 0.5, C_UI_Value_8, texcoord_x_mirror) *
+		                                           smoothstep(0.8, 0.5, texcoord.y > 0.5 ? texcoord.y : 1 - texcoord.y) * 2);
+	
+		            float Local_8  = lerp(Vicinal, lerp(Vicinal, Store_MixOut, S_UI_8), Vin_Alpha_UI(texcoord, Low_Rez_Depth, 0));
+		            float MixOut_8 = lerp(Guided, Local_8, Center_Area_S * 0.9);
+		                  MixOut_8 = lerp(Guided, MixOut_8, Avg_UI);
+	
+		            // Mode 9 side: Wide mask
+		            float S_UI_9       = lerp(0.0, 0.5, Avg_UI_halved);
+		            float S_Mask       = lerp(0, -0.7, Avg_UI_halved);
+		            float C_UI_Value_A = lerp(1.0, 0.5, Avg_UI);
+	
+		            float FPS_Area_S = texcoord.x < 0.5 ? smoothstep(S_Mask, 0.5, texcoord.x)
+		                                                 : smoothstep(S_Mask, 0.5, 1 - texcoord.x);
+		                  FPS_Area_S = saturate(smoothstep(C_UI_Value_A * 0.5, C_UI_Value_A, FPS_Area_S) *
+		                                        smoothstep(0.75, 0.5, texcoord.y > 0.5
+		                                            ? smoothstep(-0.5, 1.75, texcoord.y)
+		                                            : smoothstep(0.125, 1.75, 1 - texcoord.y)));
+	
+		            float Local_9  = lerp(Local, lerp(Local, Store_MixOut, S_UI_9), Vin_Alpha_UI(texcoord, Low_Rez_Depth, 0));
+		            float MixOut_9 = lerp(Guided, lerp(Guided, Local_9, FPS_Area_S), Avg_UI);
+	
+		            float EdgeCenter = lerp(0.0, 0.5, min(texcoord_x_mirror, texcoord_y_mirror));
+		            MixOut = lerp(MixOut_8, MixOut_9, EdgeCenter);
 		        }
 		
 		        // Post processing
@@ -5784,12 +5904,7 @@ uniform int Extra_Information <
 		}
 		#endif
 	}
-	
-	#if !DX9_Toggle
-	#define Current_Buffer SamplerzBufferP_Mixed
-	
-	#if Anti_Jitter_Mode
-	
+
 	#if Set_Depth_Res == 1
 	    #define Depth_Set_Size 1.75
 	#elif Set_Depth_Res == 2
@@ -5797,6 +5912,11 @@ uniform int Extra_Information <
 	#else
 	    #define Depth_Set_Size 1.0
 	#endif
+	
+	#if !DX9_Toggle
+	#define Current_Buffer SamplerzBufferP_Mixed
+	
+	#if Anti_Jitter_Mode
 				
 	void TAA_Buffer(in float4 position : SV_Position, in float2 texcoord : TEXCOORD, out float Temporal : SV_Target0)
 	{
@@ -5949,24 +6069,48 @@ uniform int Extra_Information <
 	}
 	
 	void DepthSmoothPS(in float4 position : SV_Position, in float2 texcoord : TEXCOORD, out float Smooth : SV_Target0)
-	{	    
+	{
 	    float Center = tex2Dlod(SamplerzBufferP_Up, float4(texcoord, 0, 0)).x;
-	    float2 DPix = rcp_Depth_Size();	    
-	    // Near ring - gather replaces 4 samples
-	    float4 Near = tex2DgatherR(SamplerzBufferP_Up, texcoord - 0.5 * Pix);
+	    float2 DPix = rcp_Depth_Size() * Depth_Set_Size;
+	
+	    float4 Near = tex2DgatherR(SamplerzBufferP_Up, texcoord - 0.5 * pix);
 	    float MinNear = min(min(Near.x, Near.y), min(Near.z, Near.w));
-	    
-	    // Far ring
+	
 	    float L = tex2Dlod(SamplerzBufferP_Up, float4(texcoord - float2(DPix.x, 0), 0, 0)).x;
 	    float R = tex2Dlod(SamplerzBufferP_Up, float4(texcoord + float2(DPix.x, 0), 0, 0)).x;
 	    float U = tex2Dlod(SamplerzBufferP_Up, float4(texcoord - float2(0, DPix.y), 0, 0)).x;
 	    float D = tex2Dlod(SamplerzBufferP_Up, float4(texcoord + float2(0, DPix.y), 0, 0)).x;
-	    float MinFar = min(min(L, R), min(U, D));
+	
+	    float Smoothed;
 	    
-	    float MinVal = min(Center, min(MinNear, MinFar));
-	    float Edge = abs(R - L) + abs(D - U);
-	    
-	    Smooth = lerp(Center, MinVal, saturate(Edge * 25.0));
+		[branch]
+	    if (!Extended_Smoothing)
+	    {
+	        float InvCenter = rcp(max(Center, 0.001));
+	        float EdgeH = abs(R - L) * InvCenter;
+	        float EdgeV = abs(D - U) * InvCenter;
+	
+	        float MinH = min(L, R);
+	        float MinV = min(U, D);
+	
+	        float DepthRange = 0.05 * Center;
+	        float RejectV    = step(abs(MinV    - Center), DepthRange);
+	        float RejectNear = step(abs(MinNear - Center), DepthRange);
+	
+	        Smoothed = Center;
+	        Smoothed = lerp(Smoothed, min(Smoothed, MinH),    saturate(EdgeH * 25.0));
+	        Smoothed = lerp(Smoothed, min(Smoothed, MinV),    saturate(EdgeV * 25.0) * RejectV);
+	        Smoothed = lerp(Smoothed, min(Smoothed, MinNear), saturate(EdgeH * EdgeV * 625.0) * RejectNear);
+	    }
+	    else
+	    {
+	        float MinFar = min(min(L, R), min(U, D));
+	        float MinVal = min(Center, min(MinNear, MinFar));
+	        float Edge   = abs(R - L) + abs(D - U);
+	        Smoothed = lerp(Center, MinVal, saturate(Edge * 25.0));
+	    }
+	
+	    Smooth = Smoothed;
 	}
 	#endif
 	
@@ -6002,14 +6146,16 @@ uniform int Extra_Information <
 	    return float2(G_Depth, C_Depth);
 	}	
 	#if !Use_2D_Plus_Depth	
-	//Perf Level selection & Array access                X      Y               X    Y  
-	static const float2 Performance_LvL[2] = { float2( 0.5, 0.75), float2( 1.0, 1.0) };
+	//Perf Level selection & Array access               X      Y      
+	static const float2 Performance_LvL[3] = { float2( 0.75, 0.75),
+											   float2( 1.0 , 1.0 ),
+											   float2( 1.25, 1.25)};
 	//////////////////////////////////////////////////////////Parallax Generation///////////////////////////////////////////////////////////////////////
 	float3 Parallax(float Diverge, float2 Coordinates, float IO) // Horizontal parallax offset & Hole filling effect
 	{
 	    //Divergence to Pixel Space
 	    float  MS = Diverge * pix.x;
-	    uint Perf_LvL = fmod(Performance_Level,2);
+	    uint Perf_LvL = fmod(Performance_Level,3);
 	    
 	    //Starting Coordinates & Checkerboard Pattern
 	    float2 ParallaxCoord = Coordinates;
@@ -6023,7 +6169,7 @@ uniform int Extra_Information <
 	    float Set_UI = Alpha_Channel_UI ? saturate(Alpha_UI > 0.999) : 1;
 	    
 	    //Performance Level Selection
-	    float Perf = Performance_LvL[Perf_LvL].x;
+	    float Perf = Performance_LvL[Perf_LvL].x;//VM0 VM1
 	    
 	    if( View_Mode == 2)
 	        Perf = Performance_LvL[Perf_LvL].y;
@@ -6034,9 +6180,13 @@ uniform int Extra_Information <
 	    
 	    //Distance Field Skip Range: x = flat areas (high skip), y = edges (fine step)
 	    #if Handheld_Mode
-	        float2 DF_MaxSkip = float2(2.5, 1.0);
+	        float2 DF_MaxSkip = float2(2.5, 1.5);
 	    #else
-	    float2 DF_MaxSkip = float2(1.5, 1.0);
+	    float2 DF_MaxSkip = float2(2.0, 1.0);
+	    if ( Perf_LvL == 1 )
+	    	DF_MaxSkip = float2(1.5, 1.0);
+	    if ( Perf_LvL == 2 )
+	    	DF_MaxSkip = float2(1.0, 1.0);
 	    #endif
 	    
 	    //Foveated Calculations
@@ -6093,7 +6243,7 @@ uniform int Extra_Information <
 	    
 	    //Edge Detection Threshold
 	    float Mask;
-	    float threshold = 0.005;
+	    float threshold = 0.0005;
 	    
 	    ///////////////////////////////////////////////////////////Ray March///////////////////////////////////////////////////////////////////////////////
 	    if(AA_Toggle)
@@ -6185,69 +6335,62 @@ uniform int Extra_Information <
 	    float DD_Map = abs(DepthDiffrence);
 	    float2 DD_Spread = saturate(float2(DD_Map > 0.032, DD_Map > lerp(0.128,0.064 ,LR_Depth_Mask )));
 	    
-		//Background Seek at Depth Discontinuities
-	    //Sharp gap: large depth jump in a single step. Slope: gradual accumulation.
-	    bool IsSharpGap = abs(beforeDepthValue) > 0.001 ? abs(afterDepthValue / beforeDepthValue) > 2.0 : false;
-	    bool BackgroundSeek = (View_Mode == 5 || View_Mode == 0 || View_Mode == 1) && DD_Map >= 0.12 && IsSharpGap;
-	    
-	    if(BackgroundSeek)
-	    {
-	        //Continue marching past the foreground to find background surface
-	        //float2 SeekCoord = ParallaxCoord;
-	        float2 SeekCoord = float2(ParallaxCoord.x - deltaCoordinates, ParallaxCoord.y);
-	        float SeekLayerDepth = CurrentLayerDepth;
-	        int MaxSeekSteps = clamp(D, 8, 25);
-	        
-	        [loop]
-	        for(int s = 0; s < MaxSeekSteps; s++)
-	        {
-	            SeekCoord.x -= deltaCoordinates;
-	            float SeekDepth = GetMixed(SeekCoord, 0).x;
-	            SeekLayerDepth += LayerDepth;
-	            
-	            if(SeekDepth >= SeekLayerDepth)
-	            {
-	                ParallaxCoord.x = SeekCoord.x;
-	                break;
-	            }
-	        }
-	    }
-	    else if((View_Mode <= 1 || View_Mode >= 5) && DD_Map >= 0.12)
-	    {
-	        //Binary Search Refinement for VM0 VM1 VM5 at sharp non-gap surfaces
-	        float BS_Start = PrevParallaxCoord.x;
-	        float BS_End = ParallaxCoord.x;
-	        float BS_LayerStart = CurrentLayerDepth - LayerDepth;
-	        float BS_LayerEnd = CurrentLayerDepth;
-	        
-	        [unroll]
-	        for(int b = 0; b < 3; b++)
-	        {
-	            float BS_MidX = (BS_Start + BS_End) * 0.5;
-	            float BS_MidLayer = (BS_LayerStart + BS_LayerEnd) * 0.5;
-	            float BS_MidDepth = GetMixed(float2(BS_MidX, ParallaxCoord.y), 0).x;
-	            
-	            if(BS_MidDepth >= BS_MidLayer)
-	            {
-	                BS_Start = BS_MidX;
-	                BS_LayerStart = BS_MidLayer;
-	            }
-	            else
-	            {
-	                BS_End = BS_MidX;
-	                BS_LayerEnd = BS_MidLayer;
-	            }
-	        }
-	        ParallaxCoord.x = (BS_Start + BS_End) * 0.5;
-	    }
-	    else
-	    {
-	        //Standard POM Interpolation for all View Modes
-	        float weight = afterDepthValue / min(-0.0125,DepthDiffrence);
-	              weight = lerp(weight + 2.0 * DD_Spread.x,weight,0.75);
-	        float Weight = weight;
-	        ParallaxCoord.x = PrevParallaxCoord.x * weight + ParallaxCoord.x * (1 - Weight);
-	    }
+		//Shared preconditions for refinement paths
+		bool isHardMode = (View_Mode <= 1 || View_Mode >= 5);
+		bool needsRefinement = isHardMode && DD_Map >= 0.12;
+		
+		if(needsRefinement)
+		{
+		    bool IsSharpGap = abs(beforeDepthValue) > 0.001 &&
+		                      abs(afterDepthValue)  > 2.0 * abs(beforeDepthValue);
+		
+		    if(IsSharpGap)
+		    {
+		        float2 SeekCoord       = float2(ParallaxCoord.x - deltaCoordinates, ParallaxCoord.y);
+		        float  SeekLayerDepth  = CurrentLayerDepth;
+		        int    MaxSeekSteps    = clamp(D, 8, 25);
+		
+		        [loop]
+		        for(int s = 0; s < MaxSeekSteps; s++)
+		        {
+		            SeekCoord.x    -= deltaCoordinates;
+		            SeekLayerDepth += LayerDepth;
+		            float SeekDepth = GetMixed(SeekCoord, 0).x;
+		
+		            if(SeekDepth >= SeekLayerDepth)
+		            {
+		                ParallaxCoord.x = SeekCoord.x;
+		                break;
+		            }
+		        }
+		    }
+		    else
+		    {
+		        float xRange     = ParallaxCoord.x - PrevParallaxCoord.x;
+		        float layerStart = CurrentLayerDepth - LayerDepth;
+		        float t          = 0.5;
+		        float step       = 0.25;
+		
+		        [unroll]
+		        for(int b = 0; b < 3; b++)
+		        {
+		            float midX     = PrevParallaxCoord.x + xRange * t;
+		            float midLayer = layerStart + LayerDepth * t;
+		            float midDepth = GetMixed(float2(midX, ParallaxCoord.y), 0).x;
+		
+		            t    += (midDepth >= midLayer) ? step : -step;
+		            step *= 0.5;
+		        }
+		        ParallaxCoord.x = PrevParallaxCoord.x + xRange * t;
+		    }
+		}
+		else
+		{
+		    //Weighted POM Interpolation
+		    float weight = afterDepthValue / min(-0.0125, DepthDiffrence);
+		    if(isHardMode) weight += 0.5 * DD_Spread.x;
+		    ParallaxCoord.x = lerp(ParallaxCoord.x, PrevParallaxCoord.x, weight);
+		}
     
 	    //Compatibility Offset for View Modes
 	    ParallaxCoord.x += lerp(DB_Offset * 2.0, DB_Offset * 4.0, DD_Spread.y );
@@ -6871,8 +7014,9 @@ uniform int Extra_Information <
 	}
 	#endif
 	///////////////////////////////////////////////////////Average & Information Textures///////////////////////////////////////////////////////////////
-	float Dilate3x3(sampler tex, float2 texcoords, float mipLevel)
+	float Dilate3x3(sampler tex, float2 texcoords, float mipLevel, int Switch)
 	{
+		float Spread = !Switch ? 50.0f : 25.0f; 
 	    // Initialize with centar
 	    float m = tex2Dlod(tex, float4(texcoords, 0, mipLevel)).x;
 		[unroll]
@@ -6892,7 +7036,7 @@ uniform int Extra_Information <
 	void Average_Info(float4 position : SV_Position, float2 texcoord : TEXCOORD, out  float4 Average : SV_Target0)
 	{   float Half_Buffer = texcoord.x < 0.5;
 		float Average_ZPD = tex2Dlod(SamplerzBuffer_BlurEx,float4(texcoord,0,0)).x;
-		float Average_D = Alpha_Channel_UI ? Dilate3x3(SamplerzBufferN_L,texcoord, 4.0f) : 0;	
+		float Average_D = Alpha_Channel_UI ? Dilate3x3(SamplerzBufferN_L,texcoord, 4.0f, 0) : Dilate3x3(SamplerzBufferN_L,texcoord, 3.0f, 1);
 		float Detect_Popout = tex2Dlod(SamplerzBufferN_L,float4(texcoord,0,1)).x < 0;
 	
 		const int Num_of_Values = 8; //8 total array values that map to the textures width.
@@ -8009,7 +8153,7 @@ uniform int Extra_Information <
 	//toggle = Text_Info_Key;
 	 hidden = true;
 	 enabled = true;
-	 //timeout = 1250;
+	 timeout = 1250;
 	 ui_tooltip = "Help Technique."; >
 	{
 			pass Help
