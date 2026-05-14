@@ -1,7 +1,7 @@
 	////----------------//
 	///**SuperDepth3D**///
 	//----------------////
-	#define SD3D "SuperDepth3D v5.3.6\n"
+	#define SD3D "SuperDepth3D v5.3.7\n"
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//* Depth Map Based 3D post-process shader
 	//* For Reshade 3.0+
@@ -389,6 +389,10 @@ namespace SuperDepth3D
 	#else
 		#define Set_Custom_Sidebars 1
 	#endif
+
+	#ifndef Frame_Packed_Mode
+	    #define Frame_Packed_Mode 0
+	#endif	
 
 	//HandHeld Stuff//	
 	#if __VENDOR__ == 0x8086 //Intel
@@ -1020,7 +1024,7 @@ uniform int SuperDepth3D <
 		ui_tooltip = "Shift the depth map if a slight misalignment is detected.";
 		ui_category = "Scaling Corrections";
 	> = ASA;
-		#if LBC || LB_Correction || EDW || DB_Size_Position || Profiler_Mode
+		#if LBC || LB_Correction || EDW || DB_Size_Position || Profiler_Mode || SPF
 		uniform int LBD_Switcher <
 			ui_type = "combo";
 				ui_items = "Off\0Direction X&Y\0Direction X\0Direction Y\0";
@@ -1269,7 +1273,6 @@ uniform int SuperDepth3D <
 		static const float2 Anaglyph_Eye_Contrast = 0.0;
 		static const int Scaling_Support = 0;
 		static const int Eye_Swap = 0;
-		static const bool Frame_Packed = false;
 		static const int Inficolor_Near_Reduction = 0;
 		static const float Focus_Inficolor = 0.5;
 		static const float Inficolor_Max_Depth = 1.0;
@@ -1467,22 +1470,22 @@ uniform int SuperDepth3D <
 				ui_category = "Stereoscopic Options";
 			> = false;	
 			#endif
-		#endif
-		#if Virtual_Reality_Mode || Anaglyph_Mode || Inficolor_3D_Emulator || Reconstruction_Mode || EX_DLP_FS_Mode		
-			static const bool Frame_Packed = false;
-			#else
-			uniform bool Frame_Packed <
-				ui_label = " Frame Packed 3D";
-				ui_tooltip = "Frame Packed 3D Only works when Top n Bottom format is used.\n"
-							 "You must set the frame packed format your self since it can't be done here.";
+		#endif			
+			uniform bool Eye_Swap <
+				ui_label = " Swap Eyes";
+				ui_tooltip = "L/R to R/L."; // E/D ou D/E
 		
 				ui_category = "Stereoscopic Options";
 			> = false;
-		#endif
-		
-		uniform bool Eye_Swap <
-			ui_label = " Swap Eyes";
-			ui_tooltip = "L/R to R/L."; // E/D ou D/E
+	#endif
+	
+	#if !Frame_Packed_Mode && !Virtual_Reality_Mode && !Anaglyph_Mode && !Inficolor_3D_Emulator && !EX_DLP_FS_Mode && !Use_2D_Plus_Depth	
+		static const bool Frame_Packed = false;
+	#else
+		uniform bool Frame_Packed <
+			ui_label = " Frame Packed 3D";
+			ui_tooltip = "Frame Packed 3D Only works when Top n Bottom format is used.\n"
+						 "You must set the frame packed format your self since it can't be done here.";
 	
 			ui_category = "Stereoscopic Options";
 		> = false;
@@ -5450,7 +5453,7 @@ uniform int Extra_Information <
 			//float modifiedAR = Depth_AR - floor(Depth_AR);
 			
 			
-			#if DB_Size_Position || SPF || LBC || LB_Correction
+			#if LBC || LB_Correction || EDW || DB_Size_Position || Profiler_Mode || SPF
 			int LBD_Switch = LBD_Switcher > 0 ? 1 : !LBDetection();
 			if(Auto_Scaler_Adjust && AR_Is != 2)
 			{
@@ -6800,26 +6803,8 @@ uniform int Extra_Information <
 						}
 						else if(Stereoscopic_Mode == 1 && !REST_UI_Mode )
 						{
-						
-							if ( Frame_Packed )
-							{
-							    float pixY = 1.0 / Res.y;
-							
-							    // Linear approximation of gap size in pixels didn't need to do this but what ever do what I want. 
-							    //was 0.0204082 but since we are doing on two images with have to double it.
-							    float gapPixels = 0.040816326 * Res.y;
-							
-							    float Value_Shift_A = 2.0 + (gapPixels * pixY);
-							    float Value_Shift_B = 1.0 + (gapPixels * pixY);
-							
-							    TCL.y = TCL.y * Value_Shift_A;
-							    TCR.y = TCR.y * Value_Shift_A - Value_Shift_B;
-							}
-							else
-							{    
-								TCL.y = TCL.y*2;
-								TCR.y = TCR.y*2-1;
-							}
+							TCL.y = TCL.y*2;
+							TCR.y = TCR.y*2-1;
 						}
 						else if(Stereoscopic_Mode == 5)
 						{
@@ -6922,7 +6907,11 @@ uniform int Extra_Information <
 			if(Stereoscopic_Mode == 5)
 				Shift_LR = TexCoords.y < 0.5 ? TexCoords.x < 0.5 ? float4(-DLR.x,TCL,AI) : float4(-DLR.x * 0.33333333,TCL_T,AI) : TexCoords.x < 0.5 ? float4(DLR.y * 0.33333333, TCR_T, -AI) : float4(DLR.y, TCR, -AI);
 	
-			if( Inficolor_3D_Emulator || Anaglyph_Mode)
+			#if EX_DLP_FS_Mode
+			if( Inficolor_3D_Emulator || Anaglyph_Mode || Stereoscopic_Mode >= 6)
+			#else
+			if( Inficolor_3D_Emulator || Anaglyph_Mode )
+			#endif
 			{		
 				if(Vert_3D_Pinball)
 				{
@@ -8083,7 +8072,40 @@ uniform int Extra_Information <
 		return Out;	
 	}
 	#endif
-
+	#if Frame_Packed_Mode && !REST_UI_Mode
+	float4 Framed_PS(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Target
+	{	
+	    float gapNorm = 0.040816326;
+	
+	    float halfGap = gapNorm * 0.5;
+	
+	    float topEnd    = 0.5 - halfGap;
+	    float bottomBeg = 0.5 + halfGap;
+	    float2 srcUV = texcoord;
+	    
+		if(Stereoscopic_Mode == 1 )
+		{		
+			if ( Frame_Packed )
+			{	
+			    // Black middle bar
+			    if (texcoord.y > topEnd && texcoord.y < bottomBeg)
+			        return float4(0, 0, 0, 1);
+			
+			    if (texcoord.y <= topEnd)
+			    {
+			        // Top output area samples the original top half
+			        srcUV.y = texcoord.y / topEnd * 0.5;
+			    }
+			    else
+			    {
+			        // Bottom output area samples the original bottom half
+			        srcUV.y = 0.5 + ((texcoord.y - bottomBeg) / (1.0 - bottomBeg)) * 0.5;
+			    }
+			}
+		}
+	    return tex2D(Non_Point_Sampler, srcUV);			
+	}
+	#endif			
 	#if REST_UI_Mode //Thankyou Tjandra for this option for people. 
 	float4 REST_Conversion_PS(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Target
 	{
@@ -8291,6 +8313,15 @@ uniform int Extra_Information <
 				PixelShader = SDAA_PS;
 			}
 			#endif
+			
+			#if Frame_Packed_Mode
+			pass Framed
+			{
+				VertexShader = PostProcessVS;
+				PixelShader = Framed_PS;
+			}
+			#endif
+	
 		#endif
 		#if Anti_Jitter_Mode	
 		    pass ACC //Accumulation Buffer //Past
