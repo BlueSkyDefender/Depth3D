@@ -1,7 +1,7 @@
 	////----------------//
 	///**SuperDepth3D**///
 	//----------------////
-	#define SD3D "SuperDepth3D v5.3.7\n"
+	#define SD3D "SuperDepth3D v5.3.8\n"
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//* Depth Map Based 3D post-process shader
 	//* For Reshade 3.0+
@@ -144,12 +144,21 @@ namespace SuperDepth3D
 	//USER EDITABLE PREPROCESSOR FUNCTIONS START//
 
 	// Experimental DLP mode for Side By Side and the lesser supported Top n Bottom
-	#define EX_DLP_FS_Mode 0  //Default 0 is Off. One is On
+	#ifndef EX_DLP_FS_Mode
+		#define EX_DLP_FS_Mode 0  //Default 0 is Off. One is On
+	#endif
 	//Please note this mode should run at your DLP native resolution at 720p or 1080p Native 120hz Auto Mode.
 	//Keeping a stable 120hz in game is required. Not sure if this is something we can enforce for now.
 	//Lot of issues with this mode that needs to be looked into. For now it's something to try out for fun.
 	//Keep in mind this Frame Sequential only for testing and no usable unless the game can keep a steady frame rate of around 120.
 	//It also has Debug options for advance users.
+	
+	// Double Buffer Mode exposes a BUFFER_WIDTH*2 SBS texture (DoubleTex)
+	// capture/export addons (VRExport, VRScreenCap, KatangaVR, etc.) can read via
+	// the ReShade addon API.
+	#ifndef DoubleBuffer_Mode
+		#define DoubleBuffer_Mode 0  //Default 0 is Off. One is On
+	#endif
 
 	// This shift the detectors for ZPD Boundary Detection. 
 	#define Shift_Detectors_Up SDU //Default 0 is Off. One is On
@@ -333,13 +342,13 @@ namespace SuperDepth3D
 		    #endif
 		
 		    #if !REST_UI_Mode
-		    	#if !Anaglyph_Mode
+		    	#if !Anaglyph_Mode && !EX_DLP_FS_Mode
 			        #ifndef Reconstruction_Mode
 			            #define Reconstruction_Mode 0
 			        #endif
 			    #else
 			        #define Reconstruction_Mode 0
-			    #endif			    	
+			    #endif
 		    #else
 		        #define Reconstruction_Mode 0
 		    #endif
@@ -366,7 +375,30 @@ namespace SuperDepth3D
 		    #endif
 		#endif
 	#endif
-	#ifndef Enable_Deband_Mode
+	// DoubleBuffer_Mode - This is getting reall complicted.
+	// If the user has DoubleBuffer_Mode on alongside a mode that produces a
+	// different (or no) stereo output, silently force DoubleBuffer_Mode off and
+	// let the other mode win. Matches the precedence pattern used above for
+	// Anaglyph_Mode / Reconstruction_Mode / Inficolor_3D_Emulator under VR.
+	// Users can leave DoubleBuffer_Mode set in their preset and switch output
+	// modes freely; the preprocessor sorts it out.
+	  #if DoubleBuffer_Mode
+	        #if Use_2D_Plus_Depth || Anaglyph_Mode || Inficolor_3D_Emulator || Reconstruction_Mode || Super3D_Mode
+	                #undef  DoubleBuffer_Mode
+	                #define DoubleBuffer_Mode 0
+	        #endif
+	  #endif
+	
+	// EX_DLP_FS_Mode (Frame Sequential / Frame Alternation) is incompatible with Reconstruction_Mode:
+// the FA branch in PS_calcLR (line ~6515) reads L/R, but the Reconstruction branch in the same
+// function only computes Parallax_LR — L/R stay uninitialized → garbage output at runtime.
+// Silently force Reconstruction off when FS support is compiled in.
+  #if EX_DLP_FS_Mode && Reconstruction_Mode
+        #undef  Reconstruction_Mode
+        #define Reconstruction_Mode 0
+  #endif
+
+#ifndef Enable_Deband_Mode
 	    #define Enable_Deband_Mode 0
 	#endif
 	
@@ -1320,13 +1352,8 @@ uniform int SuperDepth3D <
 						#endif
 					#else
 						#if Reconstruction_Mode
-							#if EX_DLP_FS_Mode
-								ui_items = "Side by Side\0Top and Bottom\0Frame Sequential\0";
-								ui_label = " 3D Display Modes";
-							#else
-								ui_items = "Side by Side\0Top and Bottom\0";
-								ui_label = " 3D Display Modes";
-							#endif
+							ui_items = "Side by Side\0Top and Bottom\0";
+							ui_label = " 3D Display Modes";
 						#else
 							#if EX_DLP_FS_Mode
 								ui_items = "Side by Side\0Top and Bottom\0Line Interlaced\0Column Interlaced\0Checkerboard 3D\0Quad Lightfield 2x2\0Frame Sequential\0";		
@@ -1468,7 +1495,14 @@ uniform int SuperDepth3D <
 							 "Please Note: Frame Sync is not supported yet, If you think you can help with this message me.\n"
 							 "Default is Off.";
 				ui_category = "Stereoscopic Options";
-			> = false;	
+			> = false;
+	
+			uniform bool FS_FA <
+				ui_label = " Frame Alternation";
+				ui_tooltip = "Frame Alternation switch used to swap from FS to FA.\n"
+							 "Default is Off.";
+				ui_category = "Stereoscopic Options";
+			> = false;			
 			#endif
 		#endif			
 			uniform bool Eye_Swap <
@@ -1486,8 +1520,11 @@ uniform int SuperDepth3D <
 			ui_label = " Frame Packed 3D";
 			ui_tooltip = "Frame Packed 3D Only works when Top n Bottom format is used.\n"
 						 "You must set the frame packed format your self since it can't be done here.";
-	
+
 			ui_category = "Stereoscopic Options";
+			#if EX_DLP_FS_Mode
+			hidden = true;
+			#endif
 		> = false;
 	#endif
 	
@@ -2041,7 +2078,10 @@ uniform int Extra_Information <
 	uniform bool Menu_Open < source = "overlay_open"; >;
 	uniform float2 Mousecoords < source = "mousepoint"; > ;
 	uniform float frametime < source = "frametime";>;
+	// Frame Alternation source: 0 = ReShade framecount (default), 1 = addon-driven (Frame Alternation addon).
+	uniform bool Frame_Alternate < source = "addon"; > = false; // Addon controls via set_uniform_value("Alternate", ...) each frame.
 	uniform bool Alternate < source = "framecount";>;     // Alternate Even Odd frames
+
 	uniform int Frames < source = "framecount";>;     // Alternate Even Odd frames
 	uniform float timer < source = "timer"; >;
 	#define FLT_EPSILON  1.192092896e-07 // smallest such that Value + FLT_EPSILON != Value	
@@ -2333,7 +2373,7 @@ uniform int Extra_Information <
 		sampler Sampler_SD_CB_R
 			{
 				Texture = texSD_CB_R;
-			};
+			};		
 		#else
 		texture texSD_RL { Width = BUFFER_WIDTH ; Height = BUFFER_HEIGHT ; Format = Color_Format_B; MipLevels = 1;};
 		
@@ -2343,7 +2383,16 @@ uniform int Extra_Information <
 			};		
 		#endif
 	#endif
-
+	
+	#if DoubleBuffer_Mode
+	texture DoubleTex { Width = BUFFER_WIDTH * 2; Height = BUFFER_HEIGHT; Format = Color_Format_B; };
+	
+	sampler SamplerDouble
+	    {
+	            Texture = DoubleTex;
+	    };
+	#endif
+  
 	#if DX9_Toggle
 		texture texzBufferBlurN < pooled = true; > { Width = BUFFER_WIDTH / 4.0 ; Height = BUFFER_HEIGHT / 4.0; Format = R16F; MipLevels = 6; }; // Needs to be RG16F If external Texture is given for DownSample. Not needed if external texture is already down sampled.
 	#else
@@ -6420,7 +6469,12 @@ uniform int Extra_Information <
 	uint4 Frame_Selector()
 	{
 		int FS_RM = Reconstruction_Mode ? 2 : 6;
-		return uint4(fmod(Alternate,2),fmod(Frames,4),0,FS_RM);
+		#if EX_DLP_FS_Mode
+		float Swap_Frame = FS_FA ? Frame_Alternate : Alternate;
+		#else
+		float Swap_Frame = Alternate;
+		#endif
+		return uint4(fmod(Swap_Frame,2),fmod(Frames,4),0,FS_RM);
 	}
 
 	float Anaglyph_Selection(int Selection)
@@ -7342,7 +7396,21 @@ uniform int Extra_Information <
 					float3 Left_CB = Left.rgb;//differentialBlend(TCL, 0, Reconstruction_Type).rgb;
 					float3 Right_CB = Right.rgb;//differentialBlend(TCR, 1, Reconstruction_Type).rgb;
 					if(VR_Stereoscopic_Mode() == 0 || VR_Stereoscopic_Mode() == 1)
-						Color.rgb = TC ? Left_CB : Right_CB;
+					{
+						#if DoubleBuffer_Mode
+							// DoubleTex (BUFFER_WIDTH*2 x BUFFER_HEIGHT) already holds the full-res SBS image.
+							// SBS on-screen layout matches it 1:1 — hardware bilinear downsamples 2:1 horizontally.
+							// TnB on-screen layout needs remapping: top half = left eye, bottom half = right eye.
+							float2 db_uv = VR_Stereoscopic_Mode() == 0
+								? texcoord
+								: (texcoord.y < 0.5
+									? float2(texcoord.x * 0.5,       texcoord.y * 2.0)
+									: float2(texcoord.x * 0.5 + 0.5, texcoord.y * 2.0 - 1.0));
+							Color.rgb = tex2D(SamplerDouble, db_uv).rgb;
+						#else
+							Color.rgb = TC ? Left_CB : Right_CB;
+						#endif
+					}
 					else
 						Color.rgb = L(texcoord) + R(texcoord);	  	
 				#else // Super3D Mode
@@ -7556,7 +7624,47 @@ uniform int Extra_Information <
 			else
 				return texcoord.x < 0.5 ?  MouseCursor(float3(texcoord.xy * float2(2,1),0), position.xy , Mouse_Toggle_Click, 0) : 1-GetMixed(texcoord * float2(2,1) - float2(1.0, 0.0), 0).x;
 	}
-	#endif	
+	#endif
+	#if DoubleBuffer_Mode
+	float4 DB_Out(float4 position : SV_Position, float2 texcoord : TEXCOORD0) : SV_Target
+	{
+		float2 DLR, TCL, TCR, TCL_T, TCR_T;
+		float  Pattern_Type;
+		// VR builds: Con_Values skips the SBS auto-doubling (gated by !Virtual_Reality_Mode at :6825),
+		// so we pre-remap output texcoord to per-eye UV ourselves.
+		// Non-VR builds: Con_Values does its own SBS doubling when Stereoscopic_Mode==0 at runtime,
+		// so we pass raw texcoord and let it do the work. (Assumes runtime SBS layout.)
+		#if Virtual_Reality_Mode
+		float2 src_uv = texcoord.x < 0.5
+			? float2(texcoord.x * 2.0,        texcoord.y)
+			: float2(texcoord.x * 2.0 - 1.0, texcoord.y);
+		Con_Values(src_uv, DLR, TCL, TCR, TCL_T, TCR_T, Pattern_Type);
+		#else
+		Con_Values(texcoord, DLR, TCL, TCR, TCL_T, TCR_T, Pattern_Type);
+		#endif
+
+		// Vert_3D_Pinball swap, mirroring lines 6933-6937.
+		if (Vert_3D_Pinball)
+		{
+			TCL = TCL.yx;
+			TCR = TCR.yx;
+		}
+
+		// Direct per-eye parallax — same calls as lines 6939-6940.
+		float3 eye = texcoord.x < 0.5
+			? Parallax(-DLR.x, TCL,  AI).xyz
+			: Parallax( DLR.y, TCR, -AI).xyz;
+
+		// Vert_3D_Pinball post-swap, mirroring lines 6944-6945.
+		if (Vert_3D_Pinball)
+			eye = eye.yxz;
+
+		// MouseCursor blend, mirroring lines 6948-6949.
+		eye = MouseCursor(eye, position.xy, 1, 0).rgb;
+
+		return float4(eye, 1.0);
+	}
+	#endif
 	float4 InfoOut(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Target
 	{   float3 Color;
 		float2 TC = float2(texcoord.x,1-texcoord.y);
@@ -8084,9 +8192,9 @@ uniform int Extra_Information <
 	    float2 srcUV = texcoord;
 	    
 		if(Stereoscopic_Mode == 1 )
-		{		
+		{
 			if ( Frame_Packed )
-			{	
+			{
 			    // Black middle bar
 			    if (texcoord.y > topEnd && texcoord.y < bottomBeg)
 			        return float4(0, 0, 0, 1);
@@ -8293,7 +8401,14 @@ uniform int Extra_Information <
 			#endif
 		}
 		#endif
-		
+		#if DoubleBuffer_Mode
+			pass DoubleOut
+		{
+			VertexShader = PostProcessVS;
+			PixelShader = DB_Out;
+			RenderTarget0 = DoubleTex;
+		}
+		#endif		
 			pass StereoOut
 		{
 			VertexShader = PostProcessVS;
@@ -8314,7 +8429,7 @@ uniform int Extra_Information <
 			}
 			#endif
 			
-			#if Frame_Packed_Mode
+			#if Frame_Packed_Mode &! EX_DLP_FS_Mode
 			pass Framed
 			{
 				VertexShader = PostProcessVS;
