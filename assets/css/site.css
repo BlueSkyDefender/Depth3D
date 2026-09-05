@@ -506,3 +506,11 @@ a.badge:hover {
   border-color: var(--border-hi);
   color: var(--text);
 }
+
+/* A quiet run of names, separated by dots. Deliberately not chips: boxes
+   would make the names look like badges of honour rather than a plain list. */
+.namelist {
+  margin-top: 12px;
+  color: var(--text-dim);
+  word-spacing: .1em;
+}
