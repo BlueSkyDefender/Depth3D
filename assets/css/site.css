@@ -1,0 +1,508 @@
+/* ==========================================================================
+   Depth3D site.
+
+   Colours, ramps and component shapes come from the Depth3D Launcher GUI
+   (Depth3DLauncherGUI_VS/src/gui.html) so the site and the app match.
+
+   The whole site follows dyslexia friendly typography. There is no toggle,
+   because these rules are good for everyone:
+
+     - large text, generous line height, extra letter and word spacing
+     - short line length, roughly 60 characters
+     - always left aligned, never justified
+     - no italics, no ALL CAPS body text, no underline for emphasis
+     - softened contrast: never pure black on pure white, or the reverse
+     - a plain sans serif at a comfortable size
+
+   The font is the normal system sans, not OpenDyslexic. The spacing and
+   layout rules are what do the work here, and they suit every reader.
+
+   Light and dark are both supported. The page follows the reader's system
+   setting unless they pick one with the button in the title bar, which is
+   remembered in this browser.
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   Light. Off white rather than pure white, dark grey rather than pure black,
+   because full contrast causes glare and is harder to read.
+   -------------------------------------------------------------------------- */
+:root {
+  --bg:          #f2f1ed;
+  --surface:     #fbfaf7;
+  --surface-2:   #f4f3ef;
+  --surface-3:   #eae8e2;
+  --surface-4:   #dddbd3;
+  --border:      #dcd9d2;
+  --border-hi:   #bfbbb1;
+  --text:        #26262d;
+  --text-dim:    #4d4d57;
+  --text-mute:   #6c6c77;
+
+  --accent:      #33333c;   /* underline, links, primary button fill */
+  --accent-fg:   #f7f6f3;   /* text sitting on --accent */
+
+  --ok:          #2f7d4f;
+  --warn:        #8f6318;
+  --info:        #2f5c96;
+
+  --radius:      6px;
+  --radius-sm:   4px;
+  --titlebar:    46px;
+  --tabbar:      54px;
+
+  /* The same system sans the launcher uses. */
+  --font: "Segoe UI Variable Text", "Segoe UI", system-ui, -apple-system, sans-serif;
+  --mono: "Cascadia Mono", "Consolas", ui-monospace, monospace;
+
+  --measure: 60ch;
+  color-scheme: light;
+}
+
+/* --------------------------------------------------------------------------
+   Dark. The launcher's own ramp, lifted slightly off pure black.
+   The site opens light. Dark is only used when the reader picks it with the
+   theme button, and that choice is remembered in their browser.
+   -------------------------------------------------------------------------- */
+:root[data-theme="dark"] {
+  --bg:          #101013;
+  --surface:     #17171a;
+  --surface-2:   #1e1e22;
+  --surface-3:   #26262b;
+  --surface-4:   #2e2e34;
+  --border:      #303036;
+  --border-hi:   #42424b;
+  --text:        #dedee3;
+  --text-dim:    #b6b6be;
+  --text-mute:   #8d8d97;
+
+  --accent:      #c3c3ca;
+  --accent-fg:   #101012;
+
+  --ok:          #6cc48a;
+  --warn:        #d6a768;
+  --info:        #7b9fd1;
+
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: calc(var(--titlebar) + var(--tabbar) + 16px);
+}
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font);
+  font-size: 18px;
+  line-height: 1.8;
+  letter-spacing: .03em;
+  word-spacing: .08em;
+  text-align: left;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Line length is capped everywhere text is read as prose. */
+p, li, .desc, .lead { max-width: var(--measure); }
+
+/* No italics anywhere. */
+i, em, cite, address { font-style: normal; font-weight: 600; }
+
+::selection { background: var(--surface-4); color: var(--text); }
+::-webkit-scrollbar { width: 14px; height: 14px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--surface-4); border-radius: 7px; border: 3px solid var(--bg); }
+::-webkit-scrollbar-thumb:hover { background: var(--border-hi); }
+:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; border-radius: 3px; }
+
+a { color: var(--accent); text-decoration: underline; text-underline-offset: 4px; text-decoration-thickness: 1px; }
+a:hover { color: var(--text); text-decoration-thickness: 2px; }
+
+code {
+  font-family: var(--mono); font-size: .92em;
+  letter-spacing: 0; word-spacing: 0;
+  background: var(--surface-2); border: 1px solid var(--border);
+  border-radius: 3px; padding: 2px 7px; color: var(--text);
+}
+
+.skip {
+  position: absolute; left: -9999px; top: 0;
+  background: var(--accent); color: var(--accent-fg);
+  padding: 10px 16px; border-radius: var(--radius-sm); font-weight: 700; z-index: 60;
+  text-decoration: none;
+}
+.skip:focus { left: 10px; top: 10px; }
+
+/* ==========================================================================
+   Title bar
+   ========================================================================== */
+#titlebar {
+  position: sticky; top: 0; z-index: 30;
+  height: var(--titlebar);
+  display: flex; align-items: center;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+}
+#titlebar .brand {
+  display: flex; align-items: center; gap: 10px;
+  padding: 0 16px; font-size: 17px; font-weight: 700;
+  color: var(--text); text-decoration: none;
+}
+#titlebar .brand:hover { color: var(--text); }
+/* --------------------------------------------------------------------------
+   The logo cube.
+
+   The cube is real geometry, not a picture of one. site.js projects a unit
+   cube through the same 2:1 dimetric projection the original mark uses and
+   shades each face by its angle to a fixed light, so at rest it draws the
+   original logo exactly, pixel for pixel.
+
+   Easter egg: point at the logo and the cube turns. One revolution takes six
+   seconds, and it always comes to rest facing forward again. Anyone whose
+   system asks for less motion just gets the still logo.
+
+   The SVG ships with the original three faces already in it, so the logo is
+   correct before any script runs, and stays correct if none ever does.
+   -------------------------------------------------------------------------- */
+#titlebar .brand .mark {
+  width: 24px; height: 24px; flex: 0 0 auto;
+  display: block;
+}
+#titlebar .brand .mark svg { width: 100%; height: 100%; display: block; }
+
+#titlebar .drag { flex: 1; }
+#titlebar .tools { display: flex; align-items: center; gap: 14px; padding: 0 14px; }
+#titlebar .tagline { font-size: 15px; color: var(--text-mute); }
+
+.themebtn {
+  display: inline-flex; align-items: center; gap: 8px;
+  min-height: 32px; padding: 4px 12px;
+  background: var(--surface-3);
+  border: 1px solid var(--border-hi);
+  border-radius: var(--radius-sm);
+  color: var(--text-dim);
+  font-family: inherit; font-size: 15px; font-weight: 600;
+  cursor: pointer;
+}
+.themebtn:hover { background: var(--surface-4); color: var(--text); }
+.themebtn svg { width: 17px; height: 17px; flex: 0 0 auto; }
+.themebtn .icon-dark { display: none; }
+:root[data-theme="dark"] .themebtn .icon-dark { display: block; }
+:root[data-theme="dark"] .themebtn .icon-light { display: none; }
+
+/* ==========================================================================
+   Nav
+   ========================================================================== */
+#tabbar {
+  position: sticky; top: var(--titlebar); z-index: 29;
+  height: var(--tabbar);
+  display: flex; align-items: stretch; gap: 2px;
+  padding: 0 8px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+#tabbar::-webkit-scrollbar { display: none; }
+.tab {
+  position: relative;
+  display: flex; align-items: center; gap: 9px;
+  padding: 0 18px;
+  color: var(--text-mute);
+  font-size: 16px; font-weight: 600;
+  white-space: nowrap;
+  text-decoration: none;
+}
+.tab:hover { color: var(--text-dim); text-decoration: none; }
+.tab.active { color: var(--text); }
+.tab.active::after {
+  content: ""; position: absolute; left: 14px; right: 14px; bottom: -1px;
+  height: 3px; background: var(--accent); border-radius: 2px;
+}
+.tab svg { width: 18px; height: 18px; flex: 0 0 auto; }
+#tabbar .spacer { flex: 1; }
+#tabbar .statuschip {
+  align-self: center;
+  display: flex; align-items: center; gap: 8px;
+  font-size: 15px; color: var(--text-mute);
+  padding: 0 14px; white-space: nowrap;
+}
+
+/* ==========================================================================
+   Layout
+   ========================================================================== */
+.panel-inner { max-width: 960px; margin: 0 auto; padding: 22px 24px 56px; }
+
+.hero { padding: 54px 0 42px; border-bottom: 1px solid var(--border); margin-bottom: 28px; }
+.hero .eyebrow { font-size: 15px; font-weight: 600; color: var(--text-mute); margin-bottom: 14px; }
+.hero h1 { font-size: 44px; font-weight: 700; line-height: 1.25; margin-bottom: 18px; max-width: 20ch; }
+.hero p { font-size: 20px; color: var(--text-dim); }
+.hero p + p { margin-top: 14px; }
+.hero .actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 30px; }
+
+/* ==========================================================================
+   Cards
+   ========================================================================== */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  margin-bottom: 18px;
+  scroll-margin-top: calc(var(--titlebar) + var(--tabbar) + 16px);
+}
+.card-head {
+  display: flex; align-items: center; flex-wrap: wrap; gap: 12px;
+  padding: 17px 20px;
+  border-bottom: 1px solid var(--border);
+}
+.card-head h2 { font-size: 21px; font-weight: 700; line-height: 1.4; }
+.card-head .sub { font-size: 15px; color: var(--text-mute); font-weight: 400; }
+.card-head svg { width: 20px; height: 20px; color: var(--text-dim); flex: 0 0 auto; }
+.card-head .spacer { flex: 1; }
+.card-body { padding: 19px 20px; }
+.card-body.sep { border-top: 1px solid var(--border); }
+.card-body > p { color: var(--text-dim); }
+.card-body > p + p { margin-top: 15px; }
+.card-body strong, .card-body b { color: var(--text); font-weight: 700; }
+.card-body .lead { color: var(--text); font-size: 19px; }
+.card-body h3 { font-size: 17px; font-weight: 700; margin: 22px 0 8px; }
+.card-body h3:first-child { margin-top: 0; }
+
+.row {
+  display: flex; align-items: flex-start; gap: 16px;
+  padding: 15px 0;
+  border-bottom: 1px solid var(--border);
+}
+.row:first-child { padding-top: 0; }
+.row:last-child { border-bottom: 0; padding-bottom: 0; }
+.row .label { flex: 1; min-width: 0; }
+.row .label .name { font-size: 17px; font-weight: 700; }
+.row .label .desc { font-size: 16px; color: var(--text-dim); margin-top: 5px; }
+.row .trail { flex: 0 0 auto; }
+
+/* Numbered steps */
+ol.steps { list-style: none; counter-reset: step; }
+ol.steps li {
+  counter-increment: step;
+  position: relative; padding: 0 0 0 46px; margin-bottom: 14px;
+  color: var(--text-dim);
+}
+ol.steps li:last-child { margin-bottom: 0; }
+ol.steps li::before {
+  content: counter(step);
+  position: absolute; left: 0; top: 3px;
+  width: 32px; height: 32px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--surface-3); border: 1px solid var(--border-hi);
+  color: var(--text); font-size: 15px; font-weight: 700;
+  letter-spacing: 0;
+}
+
+ul.plain { list-style: none; }
+ul.plain li { position: relative; padding-left: 24px; margin-bottom: 11px; color: var(--text-dim); }
+ul.plain li:last-child { margin-bottom: 0; }
+ul.plain li::before {
+  content: ""; position: absolute; left: 4px; top: 14px;
+  width: 8px; height: 8px; border-radius: 50%; background: var(--text-mute);
+}
+
+/* ==========================================================================
+   Buttons, badges
+   ========================================================================== */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 9px;
+  min-height: 44px; padding: 9px 18px;
+  background: var(--surface-3);
+  border: 1px solid var(--border-hi);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  font-family: inherit; font-size: 17px; font-weight: 600;
+  letter-spacing: .02em;
+  cursor: pointer; text-decoration: none;
+}
+.btn:hover { background: var(--surface-4); color: var(--text); text-decoration: none; }
+.btn:active { background: var(--surface-2); }
+.btn svg { width: 18px; height: 18px; flex: 0 0 auto; }
+.btn.ghost { background: none; border-color: var(--border); color: var(--text-dim); }
+.btn.ghost:hover { background: var(--surface-2); color: var(--text); }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-fg); font-weight: 700; }
+.btn.primary:hover { background: var(--text); border-color: var(--text); color: var(--bg); }
+.btn.sm { min-height: 38px; padding: 7px 15px; font-size: 16px; }
+
+.badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 4px 11px;
+  border-radius: 3px;
+  background: var(--surface-3);
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+  font-size: 15px;
+  white-space: nowrap;
+}
+.badge.ok     { color: var(--ok);     border-color: var(--ok); }
+.badge.info   { color: var(--info);   border-color: var(--info); }
+.badge.silver { color: var(--text);   border-color: var(--border-hi); }
+
+.dot { width: 9px; height: 9px; border-radius: 50%; background: var(--text-mute); flex: 0 0 auto; }
+.dot.ok { background: var(--ok); }
+
+/* ==========================================================================
+   Content bits
+   ========================================================================== */
+.chips { display: flex; flex-wrap: wrap; gap: 9px; margin-top: 18px; }
+.actions-inline { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 20px; }
+
+.note {
+  display: flex; gap: 13px;
+  margin-top: 18px; padding: 15px 17px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--info);
+  border-radius: var(--radius-sm);
+  color: var(--text-dim);
+}
+.note svg { width: 20px; height: 20px; color: var(--info); flex: 0 0 auto; margin-top: 5px; }
+.note.warn { border-left-color: var(--warn); }
+.note.warn svg { color: var(--warn); }
+.note p { max-width: none; }
+
+.grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 0 28px; }
+
+.linklist { list-style: none; }
+.linklist li { padding: 11px 0; border-bottom: 1px solid var(--border); font-size: 17px; max-width: none; }
+.linklist li:last-child { border-bottom: 0; }
+.linklist .k { color: var(--text-mute); display: inline-block; min-width: 170px; }
+
+/* Reference tables kept readable rather than dense. */
+.spec { width: 100%; border-collapse: collapse; margin-top: 8px; }
+.spec th, .spec td {
+  text-align: left; padding: 12px 16px 12px 0;
+  border-bottom: 1px solid var(--border); vertical-align: top; font-size: 16px;
+}
+.spec th { color: var(--text); font-weight: 700; }
+.spec td { color: var(--text-dim); }
+.spec tr:last-child th, .spec tr:last-child td { border-bottom: 0; }
+.spec .key { font-family: var(--mono); letter-spacing: 0; word-spacing: 0; white-space: nowrap; }
+
+/* ==========================================================================
+   Footer
+   ========================================================================== */
+#footer { border-top: 1px solid var(--border); background: var(--surface); margin-top: 36px; }
+#footer .inner {
+  max-width: 960px; margin: 0 auto; padding: 26px 24px;
+  display: flex; flex-wrap: wrap; gap: 18px; align-items: center;
+  font-size: 16px; color: var(--text-mute);
+}
+#footer .inner .spacer { flex: 1; }
+#footer nav { display: flex; flex-wrap: wrap; gap: 20px; }
+#edition-bar {
+  display: flex; align-items: center; justify-content: center;
+  padding: 10px;
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+  color: var(--text-dim);
+  font-size: 15px; font-weight: 600;
+}
+
+/* ==========================================================================
+   Small screens
+   ========================================================================== */
+@media (max-width: 700px) {
+  body { font-size: 17px; }
+  .hero { padding: 36px 0 30px; }
+  .hero h1 { font-size: 31px; }
+  .hero p { font-size: 18px; }
+  .row { flex-direction: column; align-items: stretch; gap: 10px; }
+  #tabbar .statuschip { display: none; }
+  #titlebar .tagline { display: none; }
+  #titlebar .tools { padding: 0 10px; }
+  .themebtn span { display: none; }
+  .themebtn { padding: 4px 9px; }
+  .linklist .k { display: block; min-width: 0; }
+  .spec, .spec tbody, .spec tr, .spec th, .spec td { display: block; width: 100%; }
+  .spec th { border-bottom: 0; padding-bottom: 4px; }
+  .actions-inline .btn, .hero .actions .btn { width: 100%; }
+}
+
+/* ==========================================================================
+   Chrome stays dark
+
+   The title bar, the nav and the footer keep the launcher's dark ramp in
+   both themes. Only the page body follows light and dark. It keeps the app
+   and the site looking like the same product, and it frames the content.
+
+   These tokens are fixed on purpose, so nothing here inherits the light
+   palette. This block sits last in the file so it wins by source order.
+   ========================================================================== */
+:root {
+  --chrome-bg:        #17171a;
+  --chrome-border:    #303036;
+  --chrome-border-hi: #42424b;
+  --chrome-surface:   #26262b;
+  --chrome-surface-hi:#2e2e34;
+  --chrome-text:      #dedee3;
+  --chrome-dim:       #b6b6be;
+  --chrome-mute:      #8d8d97;
+  --chrome-accent:    #c3c3ca;
+  --chrome-ok:        #6cc48a;
+}
+
+#titlebar {
+  background: var(--chrome-bg);
+  border-bottom-color: var(--chrome-border);
+}
+#titlebar .brand,
+#titlebar .brand:hover { color: var(--chrome-text); }
+#titlebar .tagline { color: var(--chrome-mute); }
+
+.themebtn {
+  background: var(--chrome-surface);
+  border-color: var(--chrome-border-hi);
+  color: var(--chrome-dim);
+}
+.themebtn:hover { background: var(--chrome-surface-hi); color: var(--chrome-text); }
+
+#tabbar {
+  background: var(--chrome-bg);
+  border-bottom-color: var(--chrome-border);
+}
+.tab { color: var(--chrome-mute); }
+.tab:hover { color: var(--chrome-dim); }
+.tab.active { color: var(--chrome-text); }
+.tab.active::after { background: var(--chrome-accent); }
+#tabbar .statuschip { color: var(--chrome-mute); }
+#tabbar .statuschip .dot.ok { background: var(--chrome-ok); }
+
+#footer {
+  background: var(--chrome-bg);
+  border-top-color: var(--chrome-border);
+}
+#footer .inner { color: var(--chrome-mute); }
+#footer a { color: var(--chrome-accent); }
+#footer a:hover { color: var(--chrome-text); }
+#edition-bar {
+  background: var(--chrome-bg);
+  border-top-color: var(--chrome-border);
+  color: var(--chrome-dim);
+}
+
+/* The focus ring has to stay visible against the dark chrome too. */
+#titlebar :focus-visible,
+#tabbar :focus-visible,
+#footer :focus-visible { outline-color: var(--chrome-accent); }
+
+/* A badge that is also a link, used for the video part chips. It keeps the
+   badge shape but behaves like a button, so the underline would only add noise. */
+a.badge {
+  text-decoration: none;
+  color: var(--text-dim);
+  cursor: pointer;
+}
+a.badge:hover {
+  background: var(--surface-4);
+  border-color: var(--border-hi);
+  color: var(--text);
+}
