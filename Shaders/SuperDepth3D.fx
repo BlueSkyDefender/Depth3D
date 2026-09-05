@@ -1,7 +1,7 @@
 	////----------------//
 	///**SuperDepth3D**///
 	//----------------////
-	#define SD3D "SuperDepth3D v5.3.8\n"
+	#define SD3D "SuperDepth3D v5.4.0\n"
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//* Depth Map Based 3D post-process shader
 	//* For Reshade 3.0+
@@ -180,6 +180,19 @@ namespace SuperDepth3D
 	// Horizontal & Vertical Depth Buffer Resize for non conforming DepthBuffer.
 	// Also used to enable Image Position Adjust is used to move the Z-Buffer around.
 	#define DB_Size_Position 0 //Default 0 is Off. One is On.
+	
+	// Exact Depth Buffer Fit, fed by the Generic Depth Mod add-on. The add-on sets this to 1 when it is
+	// supplying the real rendered viewport INSIDE the depth texture. Unreal pads the allocation (Moss pads
+	// 1440 up to 1536) and renders the scene into the top left sub rect, leaving dead rows at the bottom.
+	// While it is on the exact numbers are used and the content based Letter Box Detection stands down,
+	// because a guessed correction can only fight an exact one. This stays 0 for anyone running the shader
+	// WITHOUT the add-on: the uniforms below read 0, the branch is never taken and the Letter Box Detection
+	// is left alone, so their behaviour is unchanged. It defaults to 1 rather than 0 so that a shader
+	// "Reset all to default" - which clears preprocessor definitions - cannot silently compile the fit out.
+	// The runtime "depth_autofit" uniform is what actually switches it on and off.
+	#ifndef GDM_DEPTH_AUTOFIT
+		#define GDM_DEPTH_AUTOFIT 1
+	#endif
 	
 	// Auto Letter Box Correction
 	#define LB_Correction 0 //[Zero is Off] [One is Auto Hoz] [Two is Auto Vert]
@@ -972,32 +985,6 @@ uniform int SuperDepth3D <
 	> = EVS;
 	
 	#endif	
-	uniform int Select_SS <
-		ui_type = "combo";
-		ui_items = "DLSS\0FSR\0XeSS\0Variant One\0";
-		ui_label = " Upscaling Algorithm";
-		ui_tooltip = "Use this to match Super Sampling type.\n"
-					 "Default is FSR.";
-		ui_category = "Scaling Corrections";
-	> = 1;
-	
-	uniform int Easy_SS_Scaling <
-		//ui_category_closed = false;
-		ui_type = "combo";	
-		//ui_items = "Off\0Quality           - Good\0Balanced          - Fair\0Performance       - Avoid\0Ultra Performance - Do Not Use\0";
-		//ui_items = "Off\0Ultra Quality     - Good\0Quality           - Good\0Balanced          - Fair\0Performance       - Avoid\0";	
-		ui_items = "Off\0[XeSS] Ultra Quality | [DLSS/FSR] Quality           \0[XeSS] Quality       | [DLSS/FSR] Balanced          \0[XeSS] Balanced      | [DLSS/FSR] Performance       \0[XeSS] Performance   | [DLSS/FSR] Ultra Performance \0";	
-		ui_label = " Upscaling Quality";
-		ui_tooltip = "Use to adjust the DepthBuffer to match the BackBuffer when using some types of Super Sampling in some games.\n"
-					"Ultra Quality     | Best.\n"
-					"Quality           | Good.\n"
-					"Balanced          | Fair.\n"
-					"Performance       | Avoid.\n"
-					"Ultra Performance | Do Not Use.\n"
-					"\n"
-					"Default is Off.";			 
-		ui_category = "Scaling Corrections";
-	> = 0;
 	/*
 	uniform float SS_Scaling_Adjuster <
 		#if Compatibility
@@ -2635,6 +2622,8 @@ uniform int Extra_Information <
 	#if !DX9_Toggle
 	uniform float2 DB_Res_Info < source = "depth_resolution"; >;
 	uniform float4 DB_Viewport_Size < source = "depth_viewport_size"; >;
+	uniform bool DB_AutoFit < source = "depth_autofit"; >;
+	uniform float2 DB_Render_Size < source = "depth_render_size"; >;
 	#endif
 	#if Compatibility_00
 		uniform bool DepthCheck < source = "bufready_depth"; >;
@@ -3883,6 +3872,13 @@ uniform int Extra_Information <
 	float Depth(float2 texcoord)
 	{   //May have to move this around. But, it seems good in it's current location.
 		#if !Compatibility_01	
+		//BSD: when the mod has taken over, TC_SP has already mapped this coord onto the rendered sub rect
+		//exactly, so the old Starting Resolution rescale must not run on top of it - the two would stack and
+		//double correct. A stale Starting_Resolution left behind in a preset would otherwise do exactly that.
+		#if GDM_DEPTH_AUTOFIT && !DX9_Toggle
+		if(!DB_AutoFit)
+		#endif
+		{
 		float2 Current_Size = tex2Dsize(DepthBuffer);
 		float2 Adjust_Size_XY = ScaleSize(Starting_Resolution, Current_Size); 
 		
@@ -3891,6 +3887,7 @@ uniform int Extra_Information <
 			
 		if(Adjust_Size_XY.x != 0 && Starting_Resolution.x != 0)	
 			texcoord.x = texcoord.x / Adjust_Size_XY.x;
+		}
 		#endif
         //Conversions to linear space.....
 		float zBuffer = tex2Dlod(DepthBuffer, float4(texcoord,0,0)).x;
@@ -3976,11 +3973,58 @@ uniform int Extra_Information <
 		float2 H_V_A, H_V_B, X_Y_A, X_Y_B, S_texcoord = texcoord;
 		bool SDT_Bool = 1;
 		
+		//BSD: exact depth buffer fit fed by the add-on. DB_Fit maps the screen coord onto the rendered sub rect
+		//inside the depth texture, DB_Org is that sub rect's origin (0,0 on Unreal, which pads from the top left).
+		//Both stay identity when the add-on is absent, switched off, or has nothing selected, so this cannot
+		//misfire. WDEPTH needs no numbers of its own: the add-on only accepts a weapon buffer that matches the
+		//world buffer's width, height and format, so the same fit is correct for the weapon hand too.
+		float2 DB_Fit = 1.0, DB_Org = 0.0;
+		#if GDM_DEPTH_AUTOFIT && !DX9_Toggle
+		bool DB_On = DB_AutoFit && DB_Res_Info.x > 0 && DB_Res_Info.y > 0 && DB_Viewport_Size.z > 0 && DB_Viewport_Size.w > 0;
+		if(DB_On)
+		{
+			//Pixel for pixel is the normal case: the scene lands on the SAME pixel rect in both the colour and
+			//depth targets, so only the texture sizes differ. Unreal pads the depth allocation (1440 up to 1536
+			//in Moss) and that ratio IS the whole correction. A cutscene that shrinks the viewport cancels out
+			//of this - both targets shift by the same pixels - so no origin term is needed and it stays correct
+			//through cutscenes on its own.
+			//Scale is the back buffer against the depth texture: Unreal pads the depth allocation (Moss pads
+			//1440 up to 1536) and that ratio removes the dead rows.
+			//Reference = the region the screen actually shows. Normally the back buffer, which stands in for it.
+			//With the add-on's "full render region" switch on, DB_Render_Size carries the largest viewport it has
+			//seen - the real render region, and the only correct reference when an upscaler runs under a cutscene.
+			//Zero when that switch is off, so the back buffer stays the default and confirmed-working reference.
+			//The full render region. DB_Render_Size carries the LARGEST viewport the add-on has seen; the back
+			//buffer is the fallback. Only the letter box branch below needs it.
+			float2 DB_Ref = (DB_Render_Size.x > 0) ? DB_Render_Size : float2(BUFFER_WIDTH, BUFFER_HEIGHT);
+			//DEFAULT: the rendered region IS what the screen shows, so stretch it across the screen. One ratio
+			//covers a padded texture (Moss: 2560x1440 rendered into 2560x1536) and any upscaler or windowed
+			//render (Pools FSR3 into a 2560x1440 texture: 1600x900 at 1.0, 1312x738 at 0.8, 880x496 at 0.5).
+			DB_Fit = DB_Viewport_Size.zw / DB_Res_Info;
+			DB_Org = DB_Viewport_Size.xy / DB_Res_Info;
+			//EXCEPTION: when the region's SHAPE does not match the render region it is a letter or pillar box -
+			//a sub-rect that does NOT fill the screen. It is top aligned in the depth texture but CENTRED on
+			//screen (TS2: 2560x1071 inside 2560x1440), so scale from the full region and shift by half the gap.
+			//2%% tolerance, not equality: render resolutions round to multiples of 8/16, so an upscaled region
+			//is only APPROXIMATELY the screen aspect (Pools 880x496 misses 16:9 by 2560 in cross product terms)
+			//while a real letter box misses by orders of magnitude more.
+			if(abs(DB_Viewport_Size.z * DB_Ref.y - DB_Viewport_Size.w * DB_Ref.x) > DB_Ref.x * DB_Viewport_Size.w * 0.02)
+			{
+				DB_Fit = DB_Ref / DB_Res_Info;
+				DB_Org = (DB_Viewport_Size.xy - (DB_Ref - DB_Viewport_Size.zw) * 0.5) / DB_Res_Info;
+			}
+			//The mod has taken over, so stand the Letter Box Detection down - a guessed correction can only
+			//fight an exact one. GATED, not removed: this whole block compiles out without the add-on, and
+			//DB_On is false when it is switched off, so the detector still serves everyone who has no add-on.
+			LBDetect = 0;
+		}
+		#endif
+		
 		#if SDT == 3 || SD_Trigger == 3
 			SDT_Bool = SDTriggers();
 		#endif
 		
-		#if DB_Size_Position || SPF || LBC || LB_Correction
+		#if DB_Size_Position || SPF || LBC || LB_Correction || (GDM_DEPTH_AUTOFIT && !DX9_Toggle)
 
 			#if LBC || LB_Correction
 				X_Y_A = Image_Position_Adjust + (LBDetect && SDT_Bool && LB_Correction_Switch ? Image_Pos_Offset : 0.0f ); //Error Used here as a trigger
@@ -3999,6 +4043,9 @@ uniform int Extra_Information <
 			
 		float2 midHV_A = (H_V_A-1) * float2(BUFFER_WIDTH * 0.5,BUFFER_HEIGHT * 0.5) * pix;
 		texcoord = float2((texcoord.x*H_V_A.x)-midHV_A.x,(texcoord.y*H_V_A.y)-midHV_A.y);
+		//BSD: apply the exact fit here, at the very stage the old way scales the depth. Done BEFORE the Flip
+		//Scale branch below, so the flip cannot invert the origin out from under it.
+		texcoord = texcoord * DB_Fit + DB_Org;
 		//Non LB Resizing.
 		if(!Flip_HV_Scale)
 			texcoord *= Horizontal_and_Vertical_TL;
@@ -4017,6 +4064,10 @@ uniform int Extra_Information <
 			//Will work on this later.
 			//float2 midHV_B = (H_V_B-1) * float2(BUFFER_WIDTH * 0.5,BUFFER_HEIGHT * 0.5) * pix;
 			//S_texcoord = float2((S_texcoord.x*H_V_B.x)-midHV_B.x,(S_texcoord.y*H_V_B.y)-midHV_B.y);
+		#endif
+		
+		#if GDM_DEPTH_AUTOFIT && !DX9_Toggle
+		S_texcoord = S_texcoord * DB_Fit + DB_Org;
 		#endif
 		
 		return float4(texcoord,S_texcoord);
@@ -4091,52 +4142,6 @@ uniform int Extra_Information <
 		#endif
 		texcoord.x = (texcoord.x - 0.5) / (1.0 - Side_Shrink * 0.25) + 0.5;
 
-		float SS_Scaling = 1;
-		//Select_SS 0 //DLSS
-		//Select_SS 1 //FSR
-		//Select_SS 2 //XeSS
-		//Select_SS 3 //Custom
-		if(Select_SS == 3)
-		{
-		    switch (Easy_SS_Scaling) 
-		    {
-		        case 1:
-		            SS_Scaling = 1.2195;
-		            break;
-		        case 2:
-		            SS_Scaling = 1.460;
-		            break;
-		        case 3:
-		            SS_Scaling = 1.818;
-		            break;
-		        case 4:
-		            SS_Scaling = 2.513;
-		            break;
-		    }
-		}
-		else
-		{
-		    switch (Easy_SS_Scaling) 
-		    {
-		        case 1:
-		            SS_Scaling = Select_SS == 2 ? 1.303 : 1.5;
-		            break;
-		        case 2:
-		            if(Select_SS == 2)
-		                SS_Scaling = 1.5;
-		            else
-		                SS_Scaling = Select_SS == 1 ? 1.7 : 1.73;
-		            break;
-		        case 3:
-		            SS_Scaling = Select_SS == 2 ? 1.7 : 2.0;
-		            break;
-		        case 4:
-		            SS_Scaling = Select_SS == 2 ? 2.0 : 3.0;
-		            break;
-		    }
-		}
-		
-		texcoord.xy /= SS_Scaling;
 	
 		float4 DM = Depth(TC_SP(texcoord).xy).xxxx;
 		float R, G, B, A, WD = WeaponDepth(TC_SP(texcoord).xy).x, CoP = WeaponDepth(TC_SP(texcoord).xy).y, CutOFFCal;
