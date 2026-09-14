@@ -54717,7 +54717,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 #define G_Info "Dawn Walker | AppID 0x1CDCCDF5 Steam \n"
 
 #define G_Note "Generic Depth Mod Add-on Settings:\n" \
-               "[x] Take odver Depth fit.\n" \
+               "[x] Take over Depth fit.\n" \
                "[Multiples of resolution    v] Aspect ratio heuristic.\n"               
 //               "\n" \
 //               "Important Game Notes:\n" \
@@ -54778,6 +54778,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DF_Z 0.5                              // Set the Balance  
     //#define DAO 1                                // Turn On or Off De-Artifact Options For now DAO if set to 1 it's also applies to Hoz 
     #define DL_Y 0.5                             // De-Artifact Only works on some View Modes and causes performance degradation
+	#define DB_Y 1.0                              // Effects De-Artifacts -1 to 1 Most of the time leave this at 0 and if you set 1 it takes depth into account 
     //#define DL_Z -0.125                          // Compat Power
 	//#define DJ_X 0.25                            // Range Smoothing
     //#define THF 2                                // Target High Frequency information Like Hair
@@ -54807,7 +54808,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	//#define AWZ 1                                  // Anti-Weapon Hand Z-Fighting -1 is shifted to the right a little bit and 1 is center
    
 	#define AJM 1    //Anti-Jitter Mode 0 | 1 | 2 | 3 | 4
-    #define RSV 1    //Reconstruction Set Value 0 | 1 
+    //#define RSV 1    //Reconstruction Set Value 0 | 1 
 
     //Alpha UI
     //#define DMM_W float4(1,13,0,0) //UI Toggle ON/OFF | Type | Null | Null 
@@ -54861,7 +54862,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
     //#define SMS 1                                 //SM Separation Limit  - Do Not use any more
 	#define DL_X 0.625                             //SM Tune Limit
 	//#define DL_W 0.5                              //SM Perspective Limit - Do Not use any more
-	#define DM_X 5                                  //SM HQ Tune Power       - Will be made global
+	#define DM_X 4                                  //SM HQ Tune Power       - Will be made global
 	//#define DAA_W 2                               //Warp/Halo Masking Type 
     //#define HNR 1                                 //Halo Near Reduction For anything near the player
     //#define DM_Y 1                                //SM HQ VRS Limit
@@ -54876,15 +54877,16 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	//#define DAA 1
 	//#define FOV 1
     //#define ARW 1
-    //#define DFW 1        
+    //#define DFW 1   
     #elif (App == 0xD3CBA2BF ) //Moss Collection
     
 #define G_Info "Moss Collection | AppID 0xD3CBA2BF Steam \n"
 
 #define G_Note "Generic Depth Mod Add-on Settings:\n" \
-               "[x] Take odver Depth fit.\n" \
-               "[Highter Draw Calls         v] Draw stats heuristics.\n" \
-               "[Multiples of resolution    v] Aspect ratio heuristic.\n"         
+               "[x] Take over Depth fit.\n" \
+               /* "[Higher Draw Calls         v] Draw stats heuristics.\n" */ \
+               "[Draw calls                 v] Select the primary prioritized attribute.\n" \
+               "[Multiples of resolution    v] Aspect ratio heuristic.\n"
 //               "\n" \
 //               "Important Game Notes:\n" \
 //               "- This game uses DirectX 9.\n" \
