@@ -2,11 +2,12 @@
 ///**SuperDepth3D_WoWvx**///
 //----------------------////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//* Depth Map Based 2D + 3D Shader v3.0.0
+//* Depth Map Based 2D + Depth Shader v3.1.0
 //* For Reshade 3.0+
 //* ---------------------------------
 //*
 //* Original work was based on the shader code by me. The WoWvx stuff was reversed engineered I never had access to the original code.
+//*
 //* Text rendering code Ported from https://www.shadertoy.com/view/4dtGD2 by Hamneggs to ReshadeFX used for error codes.
 //* If I missed any information please contact me so I can make corrections.
 //*
@@ -31,9 +32,9 @@
 #if exists "Overwatch.fxh"                                           //Overwatch Interceptor//
 	#include "Overwatch.fxh"
 	#define OSW 0
-#else// DA_X = [ZPD] DA_Y = [Depth Adjust] DA_Z = [Offset] DA_W = [Depth Linearization]
+#else// DA_X = [ZPD] DA_Y = [Depth Adjust] DA_Z = [Offset X] DA_W = [Depth Linearization]
 	static const float DA_X = 0.025, DA_Y = 7.5, DA_Z = 0.0, DA_W = 0.0;
-	// DB_X = [Depth Flip] DB_Y = [Auto Balance] DB_Z = [Auto Depth] DB_W = [Weapon Hand]
+	// DB_X = [Depth Flip] DB_Y = [De-Artifact Scale] DB_Z = [Auto Depth] DB_W = [Weapon Hand]
 	static const float DB_X = 0, DB_Y = 0, DB_Z = 0.1, DB_W = 0.0;
 	// DC_X = [Barrel Distortion K1] DC_Y = [Barrel Distortion K2] DC_Z = [Barrel Distortion K3] DC_W = [Barrel Distortion Zoom]
 	static const float DC_X = 0, DC_Y = 0, DC_Z = 0, DC_W = 0;
@@ -41,26 +42,62 @@
 	static const float DD_X = 1, DD_Y = 1, DD_Z = 0.0, DD_W = 0.0;
 	// DE_X = [ZPD Boundary Type] DE_Y = [ZPD Boundary Scaling] DE_Z = [ZPD Boundary Fade Time] DE_W = [Weapon Near Depth Max]
 	static const float DE_X = 0, DE_Y = 0.5, DE_Z = 0.25, DE_W = 0.0;
-	// DF_X = [Weapon ZPD Boundary] DF_Y = [Separation] DF_Z = [ZPD Balance] DF_W = [HUD]
-	static const float DF_X = 0.0, DF_Y = 0.0, DF_Z = 0.125, DF_W = 0.0;
+	// DF_X = [Weapon ZPD Boundary] DF_Y = [Separation] DF_Z = [ZPD Balance] DF_W = [Weapon Edge & Weapon Scale]
+	static const float DF_X = 0.0, DF_Y = 0.0, DF_Z = 0.15, DF_W = 0.0;
 	// DG_X = [Special Depth X] DG_Y = [Special Depth Y] DG_Z = [Weapon Near Depth Min] DG_W = [Check Depth Limit]
 	static const float DG_X = 0.0, DG_Y = 0.0, DG_Z = 0.0, DG_W = 0.0;
-	// DH_X = [LBC Size Offset X] DH_Y = [LBC Size Offset Y] DH_Z = [LBC Pos Offset X] DH_W = [LBC Pos Offset X]
+	// DH_X = [LBC Size Offset X] DH_Y = [LBC Size Offset Y] DH_Z = [LBC Pos Offset X] DH_W = [LBC Pos Offset Y]
 	static const float DH_X = 1.0, DH_Y = 1.0, DH_Z = 0.0, DH_W = 0.0;
-	// DI_X = [LBM Offset X] DI_Y = [LBM Offset Y] DI_Z = [Weapon Near Depth Trim] DI_W = [REF Check Depth Limit]
-	static const float DI_X = 0.0, DI_Y = 0.0, DI_Z = 0.25, DI_W = 0.0;
-	// DJ_X = [NULL X] DJ_Y = [NULL Y] DJ_Z = [NULL Z] DJ_W = [Check Depth Limit Weapon]
-	static const float DJ_X = 0.0, DJ_Y = 0.0, DJ_Z = 0.25, DJ_W = -0.100;	
-	// DK_X = [FPS Focus Method] DK_Y = [Eye Eye Selection] DK_Z = [Eye Fade Selection] DK_W = [Eye Fade Speed Selection]	
-	static const float DK_X = 0, DK_Y = 0.0, DK_Z = 0, DK_W = 0;	
+	// DI_X = [LBM Offset XY] DI_Y = [Boost Mode Pop Level Adjuster] DI_Z = [Weapon Near Depth Trim] DI_W = [OIF Check Depth Limit]
+	static const float DI_X = 0.0, DI_Y = 0.0, DI_Z = 0.25, DI_W = 0.5;
+	// DJ_X = [Range Smoothing] DJ_Y = [Menu Detection Type] DJ_Z = [Match Threshold] DJ_W = [Check Depth Limit Weapon]
+	static const float DJ_X = 0, DJ_Y = 0.0, DJ_Z = 0.0, DJ_W = -0.100;
+	// DK_X = [FPS Focus Method] DK_Y = [Eye Eye Selection] DK_Z = [Eye Fade Selection] DK_W = [Eye Fade Speed Selection]
+	static const float DK_X = 0, DK_Y = 0.0, DK_Z = 0, DK_W = 1;
+	// DS_X = [Weapon NearDepth Min OIL] DS_Y = [Depth Range Boost] DS_Z = [View Mode State] DS_W = [Check Depth Limit Weapon Secondary]
+	static const float DS_X = 0.0, DS_Y = 0.0, DS_Z = 0.0, DS_W = 1.0;
+	// DT_X = [SMD2 Position A & B] DT_Y = [SMD2 Position C] DT_Z = [Weapon Hand Mask Z] DT_W = [Rescale Weapon Hand Near]
+	static const float DT_X = 0.0, DT_Y = 0.0, DT_Z = 0.0, DT_W = 0.0;
+	// DHH_X = [Position A & B] DHH_Y = [Position C] DHH_Z = [ABCD Menu Tresholds] DHH_W = [Smart Convergence]
+	static const float DHH_X = 0.0, DHH_Y = 0.0, DHH_Z = 1000.0, DHH_W = 0.0;
+	// DII_X = [Position A & B] DII_Y = [Position C] DII_Z = [ABCD Menu Tresholds] DII_W = [Offset Y]
+	static const float DII_X = 0.0, DII_Y = 0.0, DII_Z = 1000.0, DII_W = 0.0;
+	// DKK_X = [SDT Position A & B] DKK_Y = [SDT Position C] DKK_Z = [SDT ABCD Menu Tresholds] DKK_W = [Last OIF Check Depth Limit Boundary & Cutoff]
+	static const float DKK_X = 0.0, DKK_Y = 0.0, DKK_Z = 1000.0, DKK_W = 0.0;
+	// DCC_X = [Position A & B] DCC_Y = [Position C] DCC_Z = [ABCD Menu Tresholds] DCC_W = [Isolating Weapon Stencil Amount]
+	static const float DCC_X = 0.0, DCC_Y = 0.0, DCC_Z = 1000.0, DCC_W = 0.0;
+	// DNN_X = [Horizontal Scale] DNN_Y = [Vertical Scale] DNN_Z = [Flip Scale] DNN_W = [Game Depth Near Plane Values]
+	static const float DNN_X = 1.0, DNN_Y = 1.0, DNN_Z = 0.0, DNN_W = 1.0;
 	// WSM = [Weapon Setting Mode]
 	#define OW_WP "WP Off\0Custom WP\0"
+	#define G_Info "Missing Overwatch.fxh Information.\n"
+	#define G_Note "Note: If you pulled this file intentionally, please ignore this message.\n"
 	static const int WSM = 0;
-	//Triggers
-	static const int REF = 0, NCW = 0, RHW = 0, NPW = 0, IDF = 0, SPF = 0, BDF = 0, HMT = 0, DFW = 0, NFM = 0, DSW = 0, BMT = 0, LBC = 0, LBM = 0, DAA = 0, NDW = 0, PEW = 0, WPW = 0, FOV = 0, EDW = 0, SDT = 0;
+	static const int2 DOL = 0;
+	//Triggers - this list tracks SuperDepth3D.fx, so a profile written for it also compiles here.
+	static const int REF = 0, NCW = 0, RHW = 0, NPW = 0, IDF = 0, SPF = 0, BDF = 0, HMT = 0, HMC = 0, DFW = 0, NFM = 0,
+					   DSW = 0, LBC = 0, LBS = 0, LBM = 0, DAA = 0, NDW = 0, PEW = 0, WPW = 0, FOV = 0, EDW = 0, SDT = 0,
+					   MGA = 0, ALM = 0, ASA = 1, AWZ = 0, CWH = 0, WBA = 0, WBS = 0, WFB = 0, WND = 0, WHM = 0, WZD = 0,
+					   OIL = 0, OIF = 0, FTM = 0, EDU = 0, KHM = 0, LHA = 0, MED = 0, PLS = 1, SDU = 0, SDD = 0, UFC = 0,
+					   UIB = 0, HNR = 0, EGB = 0, ISD = 0, IWS = 0, SUI = 0, LBI = 0, LBE = 0, LBR = 0, LDT = 0, WMM = 0,
+					   WRP = 0, MMD = 0, MML = 0, MMS = 0, MDD = 0, SMD = 0, TMD = 0, FPS = 1, MAC = 0, SPO = 0;
 	//Overwatch.fxh State
 	#define OSW 1
 #endif
+//Two profile keys change width depending on the profile, so they are packed to a fixed width once here and read
+//by component below. Overwatch writes DF_X as a float2 and DI_W as a float1-4 sized by OIL; the fallback block above
+//declares both as plain floats. SuperDepth3D packs DI_W the same way.
+static const float2 WZPD_Boundary_XY = float2(DF_X);
+#if OIL == 1
+	static const float4 OIF_CutOff_Vec = float4(DI_W, 0, 0);
+#elif OIL == 2
+	static const float4 OIF_CutOff_Vec = float4(DI_W, 0);
+#elif OIL >= 3
+	static const float4 OIF_CutOff_Vec = DI_W;
+#else
+	static const float4 OIF_CutOff_Vec = float4((float)DI_W, 0, 0, 0);
+#endif
+
 //USER EDITABLE PREPROCESSOR FUNCTIONS START//
 
 // Zero Parallax Distance Balance Mode allows you to switch control from manual to automatic and vice versa.
@@ -126,6 +163,19 @@
 //Text Information Key Default Menu Key
 #define Text_Info_Key 93
 
+// Generic Depth Mod add-on: exact Depth Buffer Fit. The add-on hands the shader the real rendered viewport, so the
+// depth map lands on the image pixel for pixel instead of being guessed at. Falls back to the old behaviour on its own
+// when the add-on is missing, switched off, or has nothing selected.
+#ifndef GDM_DEPTH_AUTOFIT
+	#define GDM_DEPTH_AUTOFIT 1
+#endif
+
+// Generic Depth Mod add-on: dedicated WDEPTH weapon-hand buffer, separate from the game depth buffer, with an
+// automatic weapon cutout that needs no per-game CutOff Point. 0 keeps the legacy shared depth buffer path.
+#ifndef GDM_WEAPON_DEPTH
+	#define GDM_WEAPON_DEPTH 0
+#endif
+
 //This is to enable manual control over the Lens angle in degrees uses this to set the angle below for "Set_Degrees"
 #define Lenticular_Degrees 0
 #define Set_Degrees 12.5625 //This is set to my default and may/will not work for your screen.
@@ -151,6 +201,20 @@
 	#endif
 #else
 	#define Compatibility_FP 0
+#endif
+
+//DX9 gate: the D3D9 ps_3_0 constant register budget has no room for the add-on's float4 viewport uniform, and the
+//add-on's fit is not needed there, so the whole autofit block only exists on DX10 and up.
+#if __RENDERER__ == 0x9000
+	#define DX9_Toggle 1
+#else
+	#define DX9_Toggle 0
+#endif
+
+#if __RENDERER__ == 0x9000 && __RESHADE__ <= 60303
+	#define Compatibility_01 1
+#else
+	#define Compatibility_01 0
 #endif
 
 //Flip Depth for OpenGL and Reshade 5.0 since older Profiles Need this.
@@ -227,7 +291,7 @@ uniform float2 ZPD_Separation <
 	ui_category = "Stereoscopic Options";
 > = float2(DA_X,0.0);
 
-#if Balance_Mode || BMT
+#if Balance_Mode
 uniform float ZPD_Balance <
 	ui_type = "drag";
 	ui_min = 0.0; ui_max = 1.0;
@@ -322,20 +386,46 @@ uniform float Depth_Edge_Mask <
 	ui_category = "Occlusion Masking";
 > = 0.0;
 
-uniform float DLSS_FSR_Offset <
+uniform float2 DLSS_FSR_Offset <
 	#if Compatibility
 	ui_type = "drag";
 	#else
 	ui_type = "slider";
 	#endif
-	ui_min = 0.0; ui_max = 4.0;
-	ui_label = " Upscailer Offset";
-	ui_tooltip = "This Offset is for non conforming ZBuffer Postion witch is normaly 1 pixel wide.\n"
-				 "This issue only happens sometimes when using things like DLSS or FSR.\n"
-				 "This does not solve for TAA artifacts like Jittering or smearing.\n"
-				 "Default and starts at Zero and it's Off. With a max offset of 4pixels Wide.";
-	ui_category = "Occlusion Masking";
+	ui_min = -5.0; ui_max = 5.0;
+	ui_label = " Upscaler Offset";
+	ui_tooltip = "This Offset is for non conforming ZBuffer Position which is normally 1 pixel wide.\n"
+				 "This issue only happens sometimes when using things like DLSS, XeSS and or FSR.\n"
+				 "This does not solve for TAA artifacts like Jittering or Smearing.\n"
+				 "Default and starts at 0 and is Off. With a max offset of 5 pixels Wide.";
+	ui_category = "Scaling Corrections";
 > = 0;
+#if !Compatibility_01
+uniform uint2 Starting_Resolution <
+	#if Compatibility
+	ui_type = "drag";
+	#else
+	ui_type = "slider";
+	#endif
+	ui_min = 0; ui_max = 0;
+	ui_label = " Upscaler Guided";
+	ui_tooltip = "This lets you set an existing known value and automatically scales if a change was detected.\n"
+				 "Set it to the Depth Buffer's starting resolution or maybe your native res.\n"
+				 "Default is 0 and it is Off.";
+	ui_category = "Scaling Corrections";
+> = uint2(0,0);
+#endif
+#if GDM_DEPTH_AUTOFIT && !DX9_Toggle
+//Fed by the Generic Depth Mod add-on. All four stay at zero without it, which is what switches the fit off.
+uniform float2 DB_Res_Info < source = "depth_resolution"; >;
+uniform float4 DB_Viewport_Size < source = "depth_viewport_size"; >;
+uniform bool DB_AutoFit < source = "depth_autofit"; >;
+uniform float2 DB_Render_Size < source = "depth_render_size"; >;
+#endif
+#if GDM_WEAPON_DEPTH
+uniform bool WPresentCheck < source = "weapon_present"; >;
+uniform bool WDepthCheck < source = "bufready_wdepth"; >;
+#endif
 
 uniform int Depth_Map <
 	ui_type = "combo";
@@ -356,16 +446,24 @@ uniform float Depth_Map_Adjust <
 	ui_category = "Depth Map";
 > = DA_Y;
 
-uniform float Offset <
+uniform float2 Offset <
 	ui_type = "drag";
 	ui_min = -1.0; ui_max = 1.0;
-	ui_label = " Depth Map Offset";
+	ui_label = " Linear Offset";
 	ui_tooltip = "Depth Map Offset is for non conforming ZBuffer.\n"
-				 "It,s rare if you need to use this in any game.\n"
+				 "It's rare if you need to use this in any game.\n"
 				 "Use this to make adjustments to DM 0 or DM 1.\n"
 				 "Default and starts at Zero and it's Off.";
 	ui_category = "Depth Map";
-> = DA_Z;
+> = float2(DA_Z,DII_W);
+
+uniform int Range_Boost <
+	ui_type = "combo";
+	ui_items = "Off\0Offset Based\0Near Plane Based X1\0Near Plane Based X2\0Near Plane Based X3\0Near Plane Based X4\0";
+	ui_label = " Boost Range";
+	ui_tooltip = "Boost Range details in Depth without effecting near plane too much.";
+	ui_category = "Depth Map";
+> = DS_Y;
 
 uniform float Auto_Depth_Adjust <
 	ui_type = "drag";
@@ -437,6 +535,21 @@ uniform bool LB_Correction_Switch <
 > = true;
 #endif
 
+uniform float2 Horizontal_and_Vertical_TL <
+	ui_type = "drag";
+	ui_min = 0.0; ui_max = 2;
+	ui_label = " Horizontal & Vertical Scale";
+	ui_tooltip = "Adjust Horizontal and Vertical Resize from the Top Left. Default is 1.0.";
+	ui_category = "Reposition Depth";
+> = float2(DNN_X,DNN_Y);
+
+uniform bool Flip_HV_Scale <
+	ui_label = " Flip Scale";
+	ui_tooltip = "Turn this on to flip the scaling from Top Left <-> Bottom Right.\n"
+				 "To Bottom Right <-> Top Left.";
+	ui_category = "Reposition Depth";
+> = DNN_Z;
+
 uniform bool Alinement_View <
 	ui_label = " Alinement View";
 	ui_tooltip = "A Guide to help aline the Depth Buffer to the Image.";
@@ -446,10 +559,21 @@ uniform bool Alinement_View <
 static const bool Alinement_View = false;
 static const float2 Horizontal_and_Vertical = float2(DD_X,DD_Y);
 static const float2 Image_Position_Adjust = float2(DD_Z,DD_W);
+static const float2 Horizontal_and_Vertical_TL = float2(DNN_X,DNN_Y);
+static const bool Flip_HV_Scale = DNN_Z;
 
 static const bool LB_Correction_Switch = true;
 static const float2 H_V_Offset = float2(DH_X,DH_Y);
 static const float2 Image_Pos_Offset  = float2(DH_Z,DH_W);
+#endif
+#if MGA > 0
+uniform int Set_Game_Profile <
+	ui_type = "combo";
+	ui_items = MG_App;
+	ui_label = "·Select Game·";
+	ui_tooltip = "This sets the profile for an application that holds several games.";
+	ui_category = "Game Selection";
+> = 0;
 #endif
 //Weapon Hand Adjust//
 uniform int WP <
@@ -491,7 +615,7 @@ uniform float Weapon_ZPD_Boundary <
 	ui_label = " Weapon Boundary Detection";
 	ui_tooltip = "This selection menu gives extra boundary conditions to WZPD.";
 	ui_category = "Weapon Hand Adjust";
-> = DF_X;
+> = WZPD_Boundary_XY.x;
 #if HUD_MODE || HMT
 //Heads-Up Display
 uniform float2 HUD_Adjust <
@@ -634,6 +758,7 @@ uniform bool DepthCheck < source = "bufready_depth"; >;
 #define Per float2( (Perspective * pix.x) * 0.5, 0) //Per is Perspective
 #define AI Interlace_Anaglyph_Calibrate.x * 0.5 //Optimization for line interlaced Adjustment.
 #define ARatio (BUFFER_WIDTH / BUFFER_HEIGHT)
+#define FLT_EPSILON  1.192092896e-07 // smallest such that Value + FLT_EPSILON != Value
 
 
 float Scale(float val,float max,float min) //Scale to 0 - 1
@@ -655,6 +780,21 @@ float3 RGBtoYCbCr(float3 rgb) // For Super3D a new Stereo3D output.
 	return float3(Y,Cb + 128./255.,Cr + 128./255.);
 }//Code Not used for anything...
 ///////////////////////////////////////////////////////////////3D Starts Here///////////////////////////////////////////////////////////
+#if GDM_WEAPON_DEPTH //Only allocated when the feature is on, so no texture slot is spent otherwise.
+texture WeaponDepthBufferTex : WDEPTH;
+sampler WDepthBuffer
+	{
+		Texture = WeaponDepthBufferTex;
+		AddressU = BORDER;
+		AddressV = BORDER;
+		AddressW = BORDER;
+		//Used Point for games like AMID Evil that don't have a proper Filtering.
+		MagFilter = POINT;
+		MinFilter = POINT;
+		MipFilter = POINT;
+	};
+#endif
+
 texture DepthBufferTex : DEPTH;
 sampler DepthBuffer
 	{
@@ -746,6 +886,16 @@ texture texLumWoWvx {Width = BUFFER_WIDTH * Scale_Buffer; Height = BUFFER_HEIGHT
 sampler SamplerLumWoWvx
 	{
 		Texture = texLumWoWvx;
+	};
+
+//Disable Offset on Level reads the out of range level from inside Depth(), and Depth() runs in the same pass that
+//writes texLumWoWvx, which a shader may not sample from. So the level is parked here by its own tiny pass, which
+//never calls Depth() itself. SuperDepth3D needs no such store because its averaging pass does not call Depth().
+texture texDOLWoWvx { Width = 1; Height = 1; Format = R16F; };
+
+sampler SamplerDOLWoWvx
+	{
+		Texture = texDOLWoWvx;
 	};
 	
 float2 Lum(float2 texcoord)
@@ -890,14 +1040,24 @@ return Cursor ? Color : Out;
 }
 //////////////////////////////////////////////////////////Depth Map Information/////////////////////////////////////////////////////////////////////
 float DMA() //Small List of internal Multi Game Depth Adjustments.
-{ float DMA = Depth_Map_Adjust;
-	#if (__APPLICATION__ == 0xC0052CC4) //Halo The Master Chief Collection
-	if( WP == 4) // Change on weapon selection.
-		DMA *= 0.25;
-	else if( WP == 5)
-		DMA *= 0.8875;
+{
+	float NP_Adjust_Value = 1.0;
+
+	#if MGA > 0
+	if(Set_Game_Profile > 0)
+		NP_Adjust_Value = dot(DNN_W, float4(Set_Game_Profile == 1, Set_Game_Profile == 2, Set_Game_Profile == 3, Set_Game_Profile == 4));
 	#endif
-	return DMA;
+
+	#if !OSW //Overwatch carries the per game weapon adjustments now, so the old inline list is gone.
+	return DMA_Overwatch( WP, Depth_Map_Adjust) * NP_Adjust_Value;
+	#else
+	return Depth_Map_Adjust * NP_Adjust_Value;
+	#endif
+}
+
+float2 ScaleSize(float2 Starting_Size, float2 Current_Size)
+{	//Ratio of the current depth texture against the resolution the profile was written at.
+	return Current_Size.xy / Starting_Size.xy;
 }
 
 float2 TC_SP(float2 texcoord)
@@ -909,7 +1069,34 @@ float2 TC_SP(float2 texcoord)
 		texcoord = D(texcoord.xy,K123.x,K123.y,K123.z);
 	}
 	#endif
-	#if DB_Size_Position || SPF || LBC || LB_Correction || SDT || SD_Trigger
+
+	//Exact Depth Buffer Fit, fed by the Generic Depth Mod add-on. DB_Fit maps the screen coord onto the rendered sub
+	//rect inside the depth texture, DB_Org is that sub rect's origin. Both stay identity when the add-on is absent,
+	//switched off, or has nothing selected, so this cannot misfire.
+	float2 DB_Fit = 1.0, DB_Org = 0.0;
+	#if GDM_DEPTH_AUTOFIT && !DX9_Toggle
+	bool DB_On = DB_AutoFit && DB_Res_Info.x > 0 && DB_Res_Info.y > 0 && DB_Viewport_Size.z > 0 && DB_Viewport_Size.w > 0;
+	if(DB_On)
+	{
+		//Reference = the region the screen actually shows. The back buffer stands in for it, unless the add-on's
+		//"full render region" switch is on, which fills DB_Render_Size with the largest viewport it has seen.
+		float2 DB_Ref = (DB_Render_Size.x > 0) ? DB_Render_Size : float2(BUFFER_WIDTH, BUFFER_HEIGHT);
+		//Default: the rendered region IS what the screen shows, so stretch it across the screen. One ratio covers a
+		//padded depth texture and any upscaled or windowed render.
+		DB_Fit = DB_Viewport_Size.zw / DB_Res_Info;
+		DB_Org = DB_Viewport_Size.xy / DB_Res_Info;
+		//Exception: when the region's shape does not match the render region it is a letter or pillar box. It is top
+		//aligned in the depth texture but centred on screen, so scale from the full region and shift by half the gap.
+		//2% tolerance, not equality: render resolutions round to multiples of 8 or 16.
+		if(abs(DB_Viewport_Size.z * DB_Ref.y - DB_Viewport_Size.w * DB_Ref.x) > DB_Ref.x * DB_Viewport_Size.w * 0.02)
+		{
+			DB_Fit = DB_Ref / DB_Res_Info;
+			DB_Org = (DB_Viewport_Size.xy - (DB_Ref - DB_Viewport_Size.zw) * 0.5) / DB_Res_Info;
+		}
+	}
+	#endif
+
+	#if DB_Size_Position || SPF || LBC || LB_Correction || SDT || SD_Trigger || (GDM_DEPTH_AUTOFIT && !DX9_Toggle)
 
 		#if SDT || SD_Trigger
 			float2 X_Y = float2(Image_Position_Adjust.x,Image_Position_Adjust.y) + (SDTriggers() ? float2( DG_X , DG_Y) : 0.0);
@@ -930,25 +1117,89 @@ float2 TC_SP(float2 texcoord)
 		#endif
 	float2 midHV = (H_V-1) * float2(BUFFER_WIDTH * 0.5,BUFFER_HEIGHT * 0.5) * pix;
 	texcoord = float2((texcoord.x*H_V.x)-midHV.x,(texcoord.y*H_V.y)-midHV.y);
+	//The exact fit is applied at the very stage the old way scales the depth, and before the Flip Scale branch so the
+	//flip cannot invert the origin out from under it.
+	texcoord = texcoord * DB_Fit + DB_Org;
+	//Non LB Resizing.
+	if(!Flip_HV_Scale)
+		texcoord *= Horizontal_and_Vertical_TL;
+	else
+	{
+		texcoord = 1-texcoord;
+		texcoord = 1-texcoord * Horizontal_and_Vertical_TL;
+	}
 	#endif
 	return texcoord;
 }
 
 float Depth(float2 texcoord)
-{	//Conversions to linear space.....
-	float zBuffer = tex2Dlod(DepthBuffer, float4(texcoord,0,0)).x, Far = 1.0, Near = 0.125/DMA(); //Near & Far Adjustment
-	//Man Why can't depth buffers Just Be Normal
-	float2 C = float2( Far / Near, 1.0 - Far / Near ), Z = Offset < 0 ? min( 1.0, zBuffer * ( 1.0 + abs(Offset) ) ) : float2( zBuffer, 1.0 - zBuffer );
+{
+	#if !Compatibility_01
+	//When the add-on has taken over, TC_SP has already mapped this coord onto the rendered sub rect exactly, so the
+	//Upscaler Guided rescale must not run on top of it - the two would stack and double correct.
+	#if GDM_DEPTH_AUTOFIT && !DX9_Toggle
+	if(!DB_AutoFit)
+	#endif
+	{
+		float2 Current_Size = tex2Dsize(DepthBuffer);
+		float2 Adjust_Size_XY = ScaleSize(Starting_Resolution, Current_Size);
 
-	if(Offset > 0 || Offset < 0)
-		Z = Offset < 0 ? float2( Z.x, 1.0 - Z.y ) : min( 1.0, float2( Z.x * (1.0 + Offset) , Z.y / (1.0 - Offset) ) );
-	//MAD - RCP
+		if(Adjust_Size_XY.y != 0 && Starting_Resolution.y != 0)
+			texcoord.y = texcoord.y / Adjust_Size_XY.y;
+
+		if(Adjust_Size_XY.x != 0 && Starting_Resolution.x != 0)
+			texcoord.x = texcoord.x / Adjust_Size_XY.x;
+	}
+	#endif
+	//Conversions to linear space.....
+	float zBuffer = tex2Dlod(DepthBuffer, float4(texcoord,0,0)).x;
+
+	// Set RangeBoost based on Range_Boost value
+	float RangeBoost = (Range_Boost == 3) ? 2.0 :
+					   (Range_Boost == 4) ? 3.0 :
+					   (Range_Boost == 5) ? 4.0 : 1.5;
+
+	//define near/far values with adjustments
+	float Far = 1.0, FLT_DMA = DMA() + FLT_EPSILON;
+	float Near_A = 0.125 / FLT_DMA;
+	float Near_B = 0.125 / (FLT_DMA * RangeBoost);
+
+	float2 Two_Ch_zBuffer, Store_zBuffer = float2( zBuffer, 1.0 - zBuffer );
+	float4 C = float4( Far / Near_A, 1.0 - Far / Near_A, Far / Near_B, 1.0 - Far / Near_B);
+
+	//Disable Offset on Level. DOL.x turns it on and DOL.y is the level it takes effect from. The level comes from the
+	//same out of range detector the RE fix uses, parked in the bottom left corner of the depth map and read back out of
+	//its own one pixel store. The lookup only happens when a profile asks for it, so nothing is spent otherwise.
+	float2 O = Offset;
+	if(DOL.x > 0)
+	{
+		float InputSwitch = tex2Dlod(SamplerDOLWoWvx,float4(0,0,0,0)).x;
+		O = int(InputSwitch * 5) >= DOL.y ? Offset : 0.0;
+	}
+	float2 Z = O.x < 0 ? min( 1.0, zBuffer * ( 1.0 + abs(O.x) ) ) : Store_zBuffer;
+
+	if(O.x != 0)
+		Z = O.x < 0 ? float2( Z.x, 1.0 - Z.y ) : min( 1.0, float2( Z.x * (1.0 + O.x) , Z.y / (1.0 - O.x) ) );
+	if(O.y != 0)
+		Z = pow(Z,1+O.y);
+
+	float2 C_Switch = Range_Boost >= 2 ? C.zw : C.xy;
+
 	if (Depth_Map == 0) //DM0 Normal
-		zBuffer = rcp(Z.x * C.y + C.x);
+		Two_Ch_zBuffer = rcp(float2(Z.x,Store_zBuffer.x) * float2(C_Switch.y,C.y) + float2(C_Switch.x,C.x));//MAD - RCP
 	else if (Depth_Map == 1) //DM1 Reverse
-		zBuffer = rcp(Z.y * C.y + C.x);
+		Two_Ch_zBuffer = rcp(float2(Z.y,Store_zBuffer.y) * float2(C_Switch.y,C.y) + float2(C_Switch.x,C.x));//MAD - RCP
 
-	return saturate(zBuffer);
+	if(Range_Boost)//Offset Based
+		zBuffer = lerp(Two_Ch_zBuffer.y,Two_Ch_zBuffer.x,saturate(Two_Ch_zBuffer.y));
+	else
+		zBuffer = Two_Ch_zBuffer.x;
+
+	#if ALM == 1
+		return smoothstep(0,1,zBuffer);
+	#else
+		return saturate(zBuffer);
+	#endif
 }
 //Weapon Setting//
 float4 WA_XYZW()
@@ -966,7 +1217,13 @@ float4 WA_XYZW()
 //Weapon Depth Buffer//
 float2 WeaponDepth(float2 texcoord)
 {   //Conversions to linear space.....
-	float zBufferWH = tex2Dlod(DepthBuffer, float4(texcoord,0,0)).x, Far = 1.0, Near = 0.125/(0.00000001 + WA_XYZW().y);  //Near & Far Adjustment
+	#if GDM_WEAPON_DEPTH //The add-on's dedicated weapon-hand buffer, separate from the world depth buffer.
+	float zBufferWH = tex2Dlod(WDepthBuffer, float4(texcoord,0,0)).x;
+	#else
+	float zBufferWH = tex2Dlod(DepthBuffer, float4(texcoord,0,0)).x;
+	#endif
+
+	float Far = 1.0, Near = 0.125/(0.00000001 + WA_XYZW().y);  //Near & Far Adjustment
 
 	float2 Offsets = float2(1 + WA_XYZW().z,1 - WA_XYZW().z), Z = float2( zBufferWH, 1-zBufferWH );
 
@@ -995,29 +1252,52 @@ float3x3 PrepDepth(float2 texcoord)
 				
 	//texcoord = float2((texcoord.x*X)-midW,(texcoord.y*Y)-midH);	
 	
-	texcoord.xy -= DLSS_FSR_Offset.x * pix;
+	texcoord.xy -= DLSS_FSR_Offset.xy * pix;
 	
 	float4 DM = Depth(TC_SP(texcoord)).xxxx;
-	float R, G, B, A, WD = WeaponDepth(TC_SP(texcoord)).x, CoP = WeaponDepth(TC_SP(texcoord)).y, CutOFFCal = (CoP/DMA()) * 0.5; //Weapon Cutoff Calculation
-	CutOFFCal = step(DM.x,CutOFFCal);
+	float R, G, B, A, WD = WeaponDepth(TC_SP(texcoord)).x, CoP = WeaponDepth(TC_SP(texcoord)).y, CutOFFCal;
+	#if GDM_WEAPON_DEPTH
+		//Automated weapon-hand cutout. The dedicated WDEPTH buffer clears its background to the far plane and
+		//WeaponDepth() linearizes so 0 = near and 1 = far, so the hand is every pixel nearer than far. No per game
+		//CutOff Point tuning needed.
+		CutOFFCal = WPresentCheck ? step(WD,0.999) : 0;
+	#else
+		CutOFFCal = step(DM.x,(CoP/DMA()) * 0.5); //Legacy world depth cutoff, shared depth buffer
+	#endif
 
-	[branch] if (WP == 0)
+	[branch]
+	if (WP == 0)
 		DM.x = DM.x;
+	else if(WP != 0 && WMM == 1)//Weapon Mix Mode, added for Doom The Dark Ages
+	{
+		DM.x = DM.x;
+		DM.y = lerp(0.0,WD,CutOFFCal);
+		DM.z = lerp(0.5,WD,CutOFFCal);
+		DM.x = lerp(lerp(DM.y,DM.x,0.5),DM.x,DM.x);
+	}
 	else
 	{
-		DM.x = lerp(DM.x,WD,CutOFFCal);
+		//DM.x = lerp(DM.x,WD,CutOFFCal); // Removed, the world depth is left alone and the hand rides in its own channel
 		DM.y = lerp(0.0,WD,CutOFFCal);
 		DM.z = lerp(0.5,WD,CutOFFCal);
 	}
 
+	float Weapon_Masker = lerp(0.0,WD,CutOFFCal);
+
+	//Channel order follows SuperDepth3D: G carries the weapon hand and B the weapon mask.
 	R = DM.x; //Mix Depth
-	G = DM.y > saturate(smoothstep(0,2.5,DM.w)); //Weapon Mask
-	B = DM.z; //Weapon Hand
-	A = ZPD_Boundary >= 4 ? max( G, R) : R; //Grid Depth
+	G = DM.z; //Weapon Hand
+	B = DM.y > saturate(smoothstep(0,2.5,DM.w)); //Weapon Mask
+	#if IWS
+	float Isolating_Weapon_Stencil = texcoord.x+(texcoord.y*0.5) < DCC_W;
+	A = ZPD_Boundary >= 4 ? Isolating_Weapon_Stencil ? R : max( B, R) : R; //Grid Depth Stenciled
+	#else
+	A = ZPD_Boundary >= 4 ? max( B, R) : R; //Grid Depth
+	#endif
 
 	return float3x3( saturate(float3(R, G, B)), 	                                                      //[0][0] = R | [0][1] = G | [0][2] = B
 					 saturate(float3(A, Depth( SDT || SD_Trigger ? texcoord : TC_SP(texcoord) ).x, DM.w)),//[1][0] = A | [1][1] = D | [1][2] = DM
-							  float3(0,0,0) );                                                            //[2][0] = 0 | [2][1] = 0 | [2][2] = 0
+							  float3(Weapon_Masker > saturate(smoothstep(0,2.5,DM.w)),0,0) );                                                            //[2][0] = 0 | [2][1] = 0 | [2][2] = 0
 }
 //////////////////////////////////////////////////////////////Depth HUD Alterations///////////////////////////////////////////////////////////////////////
 #if UI_MASK
@@ -1093,7 +1373,7 @@ float2 Fade(float2 texcoord) // Maybe make it float2 and pass the 2nd switch to 
 				//Used if Depth Buffer is way out of range.
 				if(REF || RE_Fix)
 				{
-				if ( CD < -DI_W )
+				if ( CD < -OIF_CutOff_Vec.x )
 					Detect_Out_of_Range = 1;
 				}
 			}
@@ -1156,13 +1436,13 @@ float3 Conv(float2 MD_WHD,float2 texcoord)
 		for( int i = 0 ; i < 8; i++ )
 		{
 			if((WP == 22 || WP == 4) && WSM == 1)//SoF & BL 2
-				WZPDB = 1 - (WZPD_and_WND.x * WZDPArray[i]) / tex2Dlod(SamplerDMWoWvx,float4(float2(WArray[i],0.9375),0,0)).z;
+				WZPDB = 1 - (WZPD_and_WND.x * WZDPArray[i]) / tex2Dlod(SamplerDMWoWvx,float4(float2(WArray[i],0.9375),0,0)).y;
 			else
 			{
 				if (Weapon_ZPD_Boundary < 0) //Code for Moving Weapon Hand stablity.
-					WZPDB = 1 - WZPD_and_WND.x / tex2Dlod(SamplerDMWoWvx,float4(float2(MWArray[i],Distance_From_Bottom),0,0)).z;
+					WZPDB = 1 - WZPD_and_WND.x / tex2Dlod(SamplerDMWoWvx,float4(float2(MWArray[i],Distance_From_Bottom),0,0)).y;
 				else //Normal
-					WZPDB = 1 - WZPD_and_WND.x / tex2Dlod(SamplerDMWoWvx,float4(float2(WArray[i],Distance_From_Bottom),0,0)).z;
+					WZPDB = 1 - WZPD_and_WND.x / tex2Dlod(SamplerDMWoWvx,float4(float2(WArray[i],Distance_From_Bottom),0,0)).y;
 			}
 
 			if (WZPDB < -DJ_W) // Default -0.1
@@ -1178,7 +1458,7 @@ float3 Conv(float2 MD_WHD,float2 texcoord)
 		if (Auto_Depth_Adjust > 0)
 			D = AutoDepthRange(D,texcoord);
 
-	#if Balance_Mode || BMT
+	#if Balance_Mode
 			ZP = saturate(ZPD_Balance);
 	#else
 		if(Auto_Balance_Ex > 0 )
@@ -1213,7 +1493,8 @@ float3 Conv(float2 MD_WHD,float2 texcoord)
 float3 DB_Comb( float2 texcoord)
 {
 	// X = Mix Depth | Y = Weapon Mask | Z = Weapon Hand | W = Normal Depth
-	float4 DM = float4(tex2Dlod(SamplerDMWoWvx,float4(texcoord,0,0)).xyz,PrepDepth( SDT || SD_Trigger ? TC_SP(texcoord) :  texcoord )[1][1]);
+	float3 MD_W = tex2Dlod(SamplerDMWoWvx,float4(texcoord,0,0)).xyz; //x = Mix Depth, y = Weapon Hand, z = Weapon Mask
+	float4 DM = float4(MD_W.x,MD_W.z,MD_W.y,PrepDepth( SDT || SD_Trigger ? TC_SP(texcoord) :  texcoord )[1][1]);
 	//Hide Temporal passthrough
 	if(texcoord.x < pix.x * 2 && texcoord.y < pix.y * 2)
 		DM = PrepDepth(texcoord)[0][0];
@@ -1563,6 +1844,12 @@ Color = MouseCursor(float2(texcoord.x*2 + Perspective * pix.x,texcoord.y)).rgb;
  return BlockOne + Content_Type ? float3(0,0,1) : BACK;
 }
 /////////////////////////////////////////////////////////Average Luminance Textures/////////////////////////////////////////////////////////////////
+//Parks the out of range level for Disable Offset on Level. Must not call Depth(), see texDOLWoWvx above.
+float DOL_Level(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Target
+{
+	return tex2Dlod(SamplerLumWoWvx,float4(0, 0.416,0,0)).z;
+}
+
 float4 Average_Luminance(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Target
 {
 	float4 ABEA, ABEArray[6] = {
@@ -1588,7 +1875,7 @@ float4 Average_Luminance(float4 position : SV_Position, float2 texcoord : TEXCOO
 	//Set a avr size for the Number of lines needed in texture storage.
 	float Grid = floor(texcoord.y * BUFFER_HEIGHT * BUFFER_RCP_HEIGHT * Num_of_Values);
 
-	return float4(Average_Lum_ZPD,Average_Lum_Bottom,Storage__Array[int(fmod(Grid,Num_of_Values))],tex2Dlod(SamplerDMWoWvx,float4(texcoord,0,0)).y);
+	return float4(Average_Lum_ZPD,Average_Lum_Bottom,Storage__Array[int(fmod(Grid,Num_of_Values))],tex2Dlod(SamplerDMWoWvx,float4(texcoord,0,0)).z);
 }
 ////////////////////////////////////////////////////////////////////Logo////////////////////////////////////////////////////////////////////////////
 #define _f float // Text rendering code copied/pasted from https://www.shadertoy.com/view/4dtGD2 by Hamneggs
@@ -1995,6 +2282,12 @@ technique SuperDepth3D_WoWvx
 		RenderTarget = texLumWoWvx;
 	}
 	#endif
+		pass DOL_Store
+	{
+		VertexShader = PostProcessVS;
+		PixelShader = DOL_Level;
+		RenderTarget = texDOLWoWvx;
+	}
 		pass DepthBuffer
 	{
 		VertexShader = PostProcessVS;
