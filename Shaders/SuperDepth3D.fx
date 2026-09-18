@@ -2196,15 +2196,28 @@ uniform int Extra_Information <
 		#define Color_Format_B RGB10A2
 	#endif
 	
-	#if D_Frame	
-		texture texCF { Width = BUFFER_WIDTH ; Height = BUFFER_HEIGHT ; Format = Color_Format_B; };
-		
+	#if D_Frame
+		//Match the back buffer so the delayed copy keeps HDR range, 10-bit precision and a full alpha channel for Alpha UI.
+		#if BC_SPACE == 1
+			#define Color_Format_DF RGBA16F
+		#elif BUFFER_COLOR_BIT_DEPTH == 10
+			#define Color_Format_DF RGB10A2
+		#else
+			#define Color_Format_DF RGBA8
+		#endif
+		//This frame's image. Written by Current_Frame, copied into texDF by Delay_Frame on the next frame.
+		texture texCF { Width = BUFFER_WIDTH ; Height = BUFFER_HEIGHT ; Format = Color_Format_DF; };
+
 		sampler SamplerCF
 		{
-			Texture = texCF;		
+			Texture = texCF;
 		};
-		
-		texture texDF { Width = BUFFER_WIDTH ; Height = BUFFER_HEIGHT ; Format = Color_Format_B; };
+
+		//Last frame's image. Everything that reads the back buffer before StereoOut reads this instead.
+		texture texDF { Width = BUFFER_WIDTH ; Height = BUFFER_HEIGHT ; Format = Color_Format_DF; };
+
+		//The live back buffer, for Current_Frame, BlendOut and every pass that runs after StereoOut.
+		#define Live_Sampler BB_Mask
 		
 		#if DX9_Toggle
 		sampler DF_BackBufferBMC
@@ -2325,8 +2338,9 @@ uniform int Extra_Information <
 			#define Non_Point_Sampler BackBufferBMC
 		#else
 			#define Non_Point_Sampler BackBuffer_C
-		#endif			
-	#endif	
+		#endif
+		#define Live_Sampler Non_Point_Sampler
+	#endif
 	
 	texture texDMN { Width = BUFFER_WIDTH * Depth_Rez; Height = BUFFER_HEIGHT * Depth_Rez; Format = RG16F; MipLevels = Max_Mips; }; //Mips Used
 	
@@ -3653,7 +3667,7 @@ uniform int Extra_Information <
 	float4 MouseCursor(float3 texcoord , float2 pos, int Switch,int UI_Mode )
 	{ 
 			//DX9 fails if I don't use tex2Dlod here
-			float4 Out = UI_Mode ? tex2Dlod(Non_Point_Sampler,float4(texcoord.xy,0,0)) : CSB(texcoord.xy),Color, Exp_Darks, Exp_Brights;
+			float4 Out = UI_Mode ? tex2Dlod(Live_Sampler,float4(texcoord.xy,0,0)) : CSB(texcoord.xy),Color, Exp_Darks, Exp_Brights; //UI_Mode runs after StereoOut (REST), so it reads the live back buffer.
 			float Cursor;
 			if(Cursor_Type > 0 && Switch)
 			{
@@ -7398,7 +7412,7 @@ uniform int Extra_Information <
 
 	float4 MixModeBlend(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Target
 	{  
-	    return ( CBBlend(Non_Point_Sampler,texcoord,0) + CBBlend(Non_Point_Sampler,texcoord,1) ) * 0.5;
+	    return ( CBBlend(Live_Sampler,texcoord,0) + CBBlend(Live_Sampler,texcoord,1) ) * 0.5; //Filters the live image before Current_Frame captures it.
 	}
 	#endif	
 	////////////////////////////////////////////////////////////////////Logo////////////////////////////////////////////////////////////////////////////
@@ -8370,13 +8384,14 @@ uniform int Extra_Information <
 	}	
 
 	float4 SmartSharpJr(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Target
-	{  
-		#if BC_SPACE == 1			    
-		float4 Color = Sharp(Non_Point_Sampler, texcoord, 1.0);
+	{  	//Runs after StereoOut, so it reads the live back buffer (the stereo image), never the delayed copy.
+		#if BC_SPACE == 1
+		float4 Color = Sharp(Live_Sampler, texcoord, 1.0);
 		#else
-		float4 Color = tex2D(Non_Point_Sampler,texcoord);
+		float4 Color = tex2D(Live_Sampler,texcoord);
 	//Confidence from the infill mask in alpha. Holes skip sharpening so fabricated detail is not amplified.
-	#if !Reconstruction_Mode && !Virtual_Reality_Mode && !Anaglyph_Mode && !Use_2D_Plus_Depth && !REST_UI_Mode && !D_Frame
+	//D_Frame no longer needs excluding: the live back buffer carries the same mask in both modes.
+	#if !Reconstruction_Mode && !Virtual_Reality_Mode && !Anaglyph_Mode && !Use_2D_Plus_Depth && !REST_UI_Mode
 	float Conf = Color.a;
 	#else
 	float Conf = 1.0;
@@ -8387,7 +8402,7 @@ uniform int Extra_Information <
 		#if BC_SPACE == 1
 	    return Color;
 	    #else
-	    return float4(lerp(Color.rgb, Sharp(Non_Point_Sampler, texcoord, 1.0).rgb, Conf),Color.w);
+	    return float4(lerp(Color.rgb, Sharp(Live_Sampler, texcoord, 1.0).rgb, Conf),Color.w);
 	    #endif
 	}
 	float4 Infill_Overlay_PS(float4 position : SV_Position, float2 texcoord : TEXCOORD) : SV_Target
@@ -8403,9 +8418,9 @@ uniform int Extra_Information <
 	{
 		float4 Out;
 		if(USE_AA == 1)
-			Out = AXAA(Non_Point_Sampler, texcoord, BC_SPACE);
+			Out = AXAA(Live_Sampler, texcoord, BC_SPACE);
 		else
-			Out = tex2D(Non_Point_Sampler,texcoord);				
+			Out = tex2D(Live_Sampler,texcoord);
 		return Out;	
 	}
 	#endif
@@ -8440,7 +8455,7 @@ uniform int Extra_Information <
 			    }
 			}
 		}
-	    return tex2D(Non_Point_Sampler, srcUV);			
+	    return tex2D(Live_Sampler, srcUV);
 	}
 	#endif			
 	#if REST_UI_Mode //Thank you Tjandra for this option for people. 
@@ -8478,8 +8493,8 @@ uniform int Extra_Information <
 	
 	#if D_Frame
 	float4 CurrentFrame(in float4 position : SV_Position, in float2 texcoords : TEXCOORD) : SV_Target
-	{
-		return tex2Dlod(Non_Point_Sampler,float4(texcoords,0,0));
+	{	//Must read the live back buffer. Non_Point_Sampler points at the delayed copy in this mode.
+		return tex2Dlod(Live_Sampler,float4(texcoords,0,0));
 	}
 	
 	float4 DelayFrame(in float4 position : SV_Position, in float2 texcoords : TEXCOORD) : SV_Target
@@ -8683,7 +8698,7 @@ uniform int Extra_Information <
 			#endif
 	
 		#endif
-		#if Anti_Jitter_Mode	
+		#if Anti_Jitter_Mode && !DX9_Toggle //Acc_Buffer and AccBuffer do not exist in DX9, same as the TAA pass above.
 		    pass ACC //Accumulation Buffer //Past
 	    {
 	        VertexShader = PostProcessVS;
