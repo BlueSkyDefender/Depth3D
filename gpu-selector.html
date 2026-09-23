@@ -92,19 +92,26 @@
       <h2>Setting up Depth3D with it</h2>
     </div>
     <div class="card-body">
+      <p>Depth3D runs through GPU Selector's <strong>Inject Mode</strong>. ReShade, Depth3D and the Enhanced Generic Depth (GDM) add-on are set up for each launch and removed when the game closes, so nothing is left behind in the game folder.</p>
       <ol class="steps">
-        <li>Install GPU Selector and open the <strong>Mods</strong> tab.</li>
+        <li>Install GPU Selector and open the <strong>Mods</strong> tab (press 5).</li>
         <li>On the <strong>ReShade</strong> card, pick a version and set Build Type to <strong>Full Add-on Support</strong>.</li>
-        <li>Click <strong>Download ReShade</strong>, then <strong>Launch</strong> and point the wizard at your game.</li>
-        <li>Deploy the <strong>Depth3D</strong> card. This also gives you the Enhanced Generic Depth add-on.</li>
-        <li>Start the game and press <strong>Home</strong>.</li>
+        <li>Click <strong>Download ReShade</strong>.</li>
+        <li>Turn on <strong>Inject Mode</strong>: click the syringe button on the ReShade card. The ReShade logo turns purple.</li>
+        <li>On the <strong>Depth3D</strong> card, click <strong>Deploy</strong>. This installs SuperDepth3D and the GDM add-on.</li>
+        <li>Go to the <strong>Games</strong> tab and start the game with <strong>Launch</strong> in GPU Selector, not from Steam.</li>
+        <li>In the game, press <strong>Home</strong> and open the <strong>Add-ons</strong> tab. <strong>Generic Depth Mod</strong> should be listed.</li>
       </ol>
       <p style="margin-top:18px">
         Overwatch comes with Depth3D, so a game with a profile is already configured.
       </p>
       <div class="note">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 16v-4M12 8h.01"/></svg>
-        <p>Deploying Enhanced Generic Depth also turns off ReShade's built-in Generic Depth in ReShade.ini. Two depth detectors fighting over the same buffer is the usual reason people see no change.</p>
+        <p><strong>You don't need the ReShade setup wizard</strong> (the Launch button on the ReShade card) for Depth3D, and you don't need Manage Add-on Games for GDM. GDM is added to every Inject Mode launch, and ReShade's built-in Generic Depth is switched off for that launch, so the two never fight over the depth buffer.</p>
+      </div>
+      <div class="note">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 16v-4M12 8h.01"/></svg>
+        <p><strong>Already installed ReShade into the game with the wizard?</strong> That is a separate ReShade and it doesn't get GDM. When you launch the game, GPU Selector asks: pick <strong>Take Over This Launch</strong> to use GPU Selector's ReShade with Depth3D. Yours is set aside and put back when the game closes. Leave GPU Selector open while you play.</p>
       </div>
     </div>
   </section>

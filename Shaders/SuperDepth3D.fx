@@ -1866,6 +1866,13 @@ uniform int SuperDepth3D <
 	static const int Isolate_UI = 0;
 	static const int Alpha_UI_is_Narrow = 0;
 	static const int Alpha_UI_Has_LB = 0;
+	uniform float Alpha_Finer_Mip_Center <
+		ui_type = "slider";
+		ui_min = 0; ui_max = 1;	
+		ui_label = " UI Finer Center";
+		ui_tooltip = "This is to give a finer center mip level.";
+		ui_category = "Miscellaneous Options";
+	> = UFC;	
 	#else
 	static const float UI_Seeking_Strength = DT_Z;
 	static const float4 Alpha_XYZW = DMM_W;

@@ -19,9 +19,16 @@ Honestly, this is where your donations make a real difference. They help me impr
 ### Easy Install
 **GPU Selector**<br />
 
-GPU Selector deploys ReShade, Depth3D and the Depth3D add-ons for you, so you do not have to run the ReShade setup wizard by hand for every game. Pick a ReShade version, set the Build Type to Full Add-on Support, deploy the Depth3D card, and you are done - Overwatch.fxh comes with it, so games with a profile are already configured.
+GPU Selector sets up ReShade, Depth3D and the Depth3D add-ons for you through its **Inject Mode**, for each launch, and removes them when the game closes. You do not run the ReShade setup wizard at all.
 
-It also handles the step people most often get wrong: **when the Enhanced Generic Depth add-on is deployed to a game, GPU Selector automatically disables the built-in Generic Depth in ReShade.ini**, so the two never fight over the depth buffer.
+1. In the **Mods** tab, set the ReShade card's Build Type to **Full Add-on Support** and click **Download ReShade**.
+2. Turn on **Inject Mode** (the syringe button on the ReShade card).
+3. Click **Deploy** on the Depth3D card.
+4. Start the game with **Launch** in GPU Selector and press **Home**.
+
+Overwatch.fxh comes with it, so games with a profile are already configured.
+
+It also handles the step people most often get wrong: **the Enhanced Generic Depth add-on is added to every Inject Mode launch and ReShade's built-in Generic Depth is switched off for that launch**, so the two never fight over the depth buffer. A ReShade installed into a game folder with the setup wizard is separate and does not get it; for those games, pick **Take Over This Launch** when GPU Selector asks.
 
 Its Inject Mode is a real alternative where a normal ReShade install cannot work at all - UWP and Microsoft Store games, titles with file integrity checks, EAC-protected games, and Wine/Linux. It can also force a game onto a specific GPU, which on hybrid laptops and dual-GPU desktops is often what makes the depth buffer show up in the first place.
 

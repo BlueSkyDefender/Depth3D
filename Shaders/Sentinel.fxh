@@ -597,3 +597,6 @@ DisableDrawCallRestrictionOnClear=1
 SkipFullscreenDraw=1
 TLoUWorkaround=1
 
+[0x7D8C8793]
+Game=TERA
+CopyOnCommandListClose=1
