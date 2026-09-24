@@ -600,3 +600,11 @@ TLoUWorkaround=1
 [0x7D8C8793]
 Game=TERA
 CopyOnCommandListClose=1
+
+[0x76D21E12]
+Game=Silent Hill Townfall
+UseAspectRatioHeuristics=2
+MergePooledBuffers=1
+CopyOnCommandListClose=1
+PooledCopySharing=1
+DepthAutoFit=1

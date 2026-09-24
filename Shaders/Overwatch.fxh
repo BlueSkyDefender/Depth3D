@@ -1,7 +1,7 @@
 ////----------------------------------------//
 ///SuperDepth3D Overwatch Automation Header///
 //----------------------------------------////
-#define OVERWATCH "Overwatch v5.0.5\n"
+#define OVERWATCH "Overwatch v5.0.6\n"
 //---------------------------------------OVERWATCH---------------------------------------//
 // If you are reading this stop. Go away and never look back. From this point on if you  //
 // still think it's is worth looking at this..... Then no one can save you or your soul. //
@@ -136,6 +136,7 @@ static const float LB_Masking_Offset_XY_D = 1.0;        //LetterBox Masking Offs
 
 //Weapon / World Near Depth Adjustments
 static const float Weapon_Near_Depth_Push_D = 0.0;      //Weapon Near                           Near    | WND
+static const float Weapon_Near_Amount_D = 0.0;          //Weapon Near Depth                     Near    | WNR
 static const float Weapon_Near_Depth_Max_D = 0.0;       //Weapon Near Depth                     Max     | DE_W
 static const float4 Weapon_Edge_Correction_D = 0.0;     //Weapon Edge Correction & Weapon Near  Scale   | DF_W
 static const float Weapon_Near_Depth_Min_D = 0.0;       //Weapon Near Depth                     Min     | DG_Z
@@ -334,6 +335,7 @@ static const int Alpha_Stencil_UI_Isolation_D = 0;      //Off 0 | On 1 Alpha Iso
 
 static const int Alpha_Stencil_UI_FullScreen_D = 0;     //Off 0 | On 1 Disable Alpha UI When FS         | UIF
 static const int Alpha_Stencil_UI_LetterBox_D = 0;      //Off 0 | On 1 Disable Alpha UI When LB         | UIL
+static const int Alpha_Stencil_UI_LB_Flatten_D = 0;     //Off 0 | On 1 Flatten Letter Box UI Depth      | ULF
 static const float Alpha_Stencil_UI_Bound_UI_D = 0;     //Off 0 to 1 Set upper bound on UI              | UIB
 static const float Alpha_Finer_Mip_D = 0;               //Off 0 to 1 For a Finer Mips                   | UFM
 
@@ -20734,40 +20736,6 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DL_X 0.625                             //SM Tune Limit
 	#define DM_X 6                                 //SM HQ Tune Power       - Will be made global
 	#define DAA_W 2                                //Warp/Halo Masking Type
-#elif (App == 0x35FC0B4A ) //Silent Hill f
-	#define G_Info "Silent Hill f | AppID 0x35FC0B4A STEAM \n"
-	#define G_Note "Note: Generic Depth Mod Add-on Settings:\n" \
-	               "[Multiples of resolution    v] Aspect ratio heuristic.\n" \
-	               "\n" \
-	               "Tip: Use the highest quality settings for your upscaling (FSR/DLSS/XeSS/TSR) or native resolution for best results.\n"
-	#define DA_W 1                                 // Set Linearization
-	#define DA_X 0.025                             // ZPD
-	#define DHH_W 0.125                            // Smart Convergence
-	#define DA_Y 72.5                              // Near Plane Adjustment
-	#define DB_Z 0.0125                            // Auto Depth Protection
-	#define DE_X 1                                 // ZPD Boundary
-	#define DE_Y 0.75                              // Set ZPD Boundary Level Zero
-	#define DE_Z 0.375                             // Speed that Boundary is Enforced
-	#define EGB 1                                  // Edge Guard weakens the edge detection, like the original version when the feature was added
-	#define DMM 1                                  // Detect More Mode
-	#define OIL 4                                  // Set How many Levels
-	#define OIF float4(0.625,0.5,0.375,0.25)       // Fix enables if Value is > 0.0
-	#define DI_W float4(0.5,1.0,2.0,3.0)
-	#define DKK_W float2(0.125,4.5)                //XY
-	#define WND 0.5                                // Weapon Near pushes depth in and adjusts perspective to match.
-	#define DF_Z 0.25                              // Set the Balance
-	#define DL_Y 0.5                               // De-Artifact only works on some view modes and costs performance
-	// May turn this on all the time in InfiColor Mode
-	//Letter Box Correction Offsets With X & Y
-	//Letter Box Masking with size adjust: 1 = top and bottom, 2 = left and right
-	#define DMM_W float4(1,11,0,0.0)               //UI Toggle ON/OFF | UI Type 0-3 | Narrow or Wide ON/OFF | Distance From Edge -1 to 1;
-	//HUD Mode Trigger
-	//Barrel Distortion Fix k1 k2 k3 and Zoom
-	//Smooth Mode
-	#define DL_X 0.55                              //SM Tune Limit
-	#define DM_X 5                                 //SM HQ Tune Power       - Will be made global
-	#define DAA_W 2                                //Warp/Halo Masking Type
-	#define PEW 1
 #elif (App == 0x3BDD00D4 ) //Little Nightmares 3
 	#define G_Info "Little Nightmares III | AppID 0x3BDD00D4 STEAM \n"
 	#define G_Note "Note: Generic Depth Mod Add-on Settings:\n" \
@@ -26056,7 +26024,61 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define FOV 1
 	//#define ARW 1
 	//#define DFW 1
+#elif (App == 0x76D21E12 ) //Silent Hill TownFall
+	#define G_Info "Silent Hill TownFall | AppID 0x76D21E12 STEAM \n"
+	#define G_Note "Note: In the game settings turn OFF Letterbox and turn OFF Motion Blur.\n" \
+	               "\n" \
+	               "Generic Depth Mod Add-on Settings:\n" \
+	               "[Multiples of resolution    v] Aspect ratio heuristic.\n" \
+	               "[x] Merge pooled buffer copies.\n" \
+	               "[x] Copy when the scene command list is closed.\n" \
+	               "[x] Copy from pooled buffer copies.\n" \
+	               "[x] Take over depth fit (exact).\n" \
+	               "\n" \
+	               "Tip: Use the highest quality settings for your upscaling (FSR/DLSS/XeSS/TSR) or native resolution for best results.\n" \
+	               "\n" \
+	               "The Generic Depth Mod add-on is needed. Please download the GPU Selector app, it has support for this game.\n"
+	#define DA_W 1                                 // Set Linearization
+	#define DA_X 0.025                             // ZPD
+	#define DHH_W 0.5                            // Smart Convergence
+	#define DA_Y 1250.0                            // Near Plane Adjustment
+	#define DB_Z 0.001                            // Auto Depth Protection
+	#define DS_Y 2                                  // Linearization Offset affects only distance if true
+
+	#define DE_X 7                                 // ZPD Boundary
+	#define DE_Y 0.75                              // Set ZPD Boundary Level Zero
+	#define DE_Z 0.400                             // Speed that Boundary is Enforced
+	#define DG_W 0.125                            // Shift Boundary Out of screen 0.5 and or In screen -0.5
+	//#define EGB 1                                  // Edge Guard weakens the edge detection, like the original version when the feature was added
+	#define DMM 1                                  // Detect More Mode
+	#define OIL 4                                  // Set How many Levels
+	#define OIF float4(0.625,0.5,0.375,0.25)       // Fix enables if Value is > 0.0
+	#define DI_W float4(0.5,1.0,1.5,3.0)
+	#define DKK_W float2(0.125,4.0)                //XY
+	#define WND 1.0                                // Weapon Near pushes depth in and adjusts perspective to match.
+	#define WNR 0.4                                // Weapon Near, only when the weapon is far closer than anything else
+	#define DG_Z 0.0125                             // Min: weapon hands that are part of the world, with Auto and Trim
+	//#define DS_X float3(0.025,0,1)                // Min Weapon bit only triggers when an OIL level is set; set here on .y
+	//#define DE_W 0.375                              // Auto
+	#define DI_Z 0.0125                           // Trim
+	//#define DF_W float4(0.0001,0.001,0.0,0.00)    // Edge & Scale
+	#define DF_Z 0.125                               // Set the Balance
+	#define DL_Y 0.5                               // De-Artifact only works on some view modes and costs performance
+	#define DB_Y 0.5                                // Affects De-Artifact, -1 to 1. Leave at 0 most of the time; 1 takes depth into account
+	#define DMM_W float4(1,11,0,0.0)               // UI Toggle ON/OFF | UI Type 0-3 | Narrow or Wide ON/OFF | Distance From Edge -1 to 1;
+	#define ULF 1                                  // Flatten Letter Box UI Depth
+	#define UIB 1                                  //Set upper bound on UI
+	#define HNR 1                                  //Halo Near Reduction for anything near the player
+
+	//#define WMM 1                                  // Weapon Mix Mode
+	#define WSM 7                                   // Weapon Setting Mode
+	#define DB_W 23                                 // Weapon Profile	
 	
+	//Smooth Mode
+	#define DL_X 0.75                              //SM Tune Limit
+	#define DM_X 4                                 //SM HQ Tune Power       - Will be made global
+	//#define DAA_W 2                                //Warp/Halo Masking Type
+	#define PEW 1	
 #else
 	#define NPW 1                                  //No Profile
 	//#define G_Note "Note: Since no profile exists, you need to create one or ask for one.\n"
@@ -27230,8 +27252,14 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 #ifndef UIL
 	#define UIL Alpha_Stencil_UI_LetterBox_D       //Disable Alpha UI When LB
 #endif
+#ifndef ULF
+	#define ULF Alpha_Stencil_UI_LB_Flatten_D      //Flatten Letter Box UI Depth
+#endif
 #ifndef UIB
 	#define UIB Alpha_Stencil_UI_Bound_UI_D        //Set upper bound on UI
+#endif
+#ifndef WNR
+	#define WNR Weapon_Near_Amount_D               //Weapon Near, the X of Weapon Near Min Auto Trim
 #endif
 #ifndef UFC
 	#define UFC Alpha_Finer_Mip_D                  //Set For Finer Mips
@@ -27782,8 +27810,8 @@ float4 Weapon_Profiles(float WP ,float4 Weapon_Adjust)
 		Weapon_Adjust = float4(0.0,0.0,0.0,0.0);           //WP 19 | Game
 	if (WP == 22)
 		Weapon_Adjust = float4(1.3753,17.5,0.0,0.375);     //WP 20 | ROUTINE
-	if (WP == 23)
-		Weapon_Adjust = float4(0.0,0.0,0.0,0.0);           //WP 21 | Game
+	if (WP == 23) //23.75,275.0 //24.5,50.0
+		Weapon_Adjust = float4(24.5,50.0,0.0,0.0);         //WP 21 | Silent Hill Townfall
 	if (WP == 24)
 		Weapon_Adjust = float4(0.0,0.0,0.0,0.0);           //WP 22 | Game
 	if (WP == 25)

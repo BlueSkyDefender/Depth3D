@@ -1,7 +1,7 @@
 	////----------------//
 	///**SuperDepth3D**///
 	//----------------////
-	#define SD3D "SuperDepth3D v5.4.0\n"
+	#define SD3D "SuperDepth3D v5.4.1\n"
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//* Depth Map Based 3D post-process shader
 	//* For Reshade 3.0+
@@ -133,10 +133,10 @@ namespace SuperDepth3D
 		#define OW_WP "WP Off\0Custom WP\0"
 		#define G_Info "Missing Overwatch.fxh Information.\n"
 		#define G_Note "Note: If you pulled this file intentionally, please ignore this message.\n"
-		static const int EVS = 0, SMSUM = 0, RSV = 0, AJM = 0, MED = 0, SBTDA = 0, SMSBT = 0, UIF = 0, UIL = 0, RCI = 0, AIM = 0, WMM = 0, SDD = 0, DMM = 0, LBD = 0, WSM = 0;
+		static const int EVS = 0, SMSUM = 0, RSV = 0, AJM = 0, MED = 0, SBTDA = 0, SMSBT = 0, UIF = 0, UIL = 0, RCI = 0, AIM = 0, WMM = 0, SDD = 0, DMM = 0, LBD = 0, WSM = 0, ULF = 0;
 		static const int2 DOL = 0;
 		//Triggers 
-		static const float UFC = 0, UIB = 0, HNR = 0, THF = 0, EGB = 0,PLS = 1, MGA = 0, WZD = 0, KHM = 0, DAO = 0, LDT = 0, ALM = 0, SSF = 0, SNF = 0, SSE = 0, SNE = 0, EDU = 0, LBI = 0,ISD = 0, ASA = 1, IWS = 0, SUI = 0, SSA = 0, SNA = 0, SSB = 0, SNB = 0,SSC = 0, SNC = 0,SSD = 0, SND = 0, LHA = 0, WBS = 0, TMD = 0, FRM = 0, AWZ = 0, CWH = 0, WBA = 0, WFB = 0, WND = 0, WRP = 0, MML = 0, SMD = 0, WHM = 0, SDU = 0, ABE = 2, LBE = 0, HQT = 0, HMD = 0.5, MAC = 0, OIL = 0, MMS = 0, FTM = 0, FMM = 0, SPO = 0, MMD = 0, LBR = 0, AFD = 0, MDD = 0, FPS = 1, SMS = 1, OIF = 0, NCW = 0, RHW = 0, NPW = 0, SPF = 0, BDF = 0, HMT = 0, HMC = 0, DFW = 0, NFM = 0, DSW = 0, LBC = 0, LBS = 0, LBM = 0, DAA = 0, NDW = 0, PEW = 0, WPW = 0, FOV = 0, EDW = 0, SDT = 0;
+		static const float UFC = 0, UIB = 0, HNR = 0, THF = 0, EGB = 0,PLS = 1, MGA = 0, WZD = 0, KHM = 0, DAO = 0, LDT = 0, ALM = 0, SSF = 0, SNF = 0, SSE = 0, SNE = 0, EDU = 0, LBI = 0,ISD = 0, ASA = 1, IWS = 0, SUI = 0, SSA = 0, SNA = 0, SSB = 0, SNB = 0,SSC = 0, SNC = 0,SSD = 0, SND = 0, LHA = 0, WBS = 0, TMD = 0, FRM = 0, AWZ = 0, CWH = 0, WBA = 0, WFB = 0, WND = 0, WNR = 0, WRP = 0, MML = 0, SMD = 0, WHM = 0, SDU = 0, ABE = 2, LBE = 0, HQT = 0, HMD = 0.5, MAC = 0, OIL = 0, MMS = 0, FTM = 0, FMM = 0, SPO = 0, MMD = 0, LBR = 0, AFD = 0, MDD = 0, FPS = 1, SMS = 1, OIF = 0, NCW = 0, RHW = 0, NPW = 0, SPF = 0, BDF = 0, HMT = 0, HMC = 0, DFW = 0, NFM = 0, DSW = 0, LBC = 0, LBS = 0, LBM = 0, DAA = 0, NDW = 0, PEW = 0, WPW = 0, FOV = 0, EDW = 0, SDT = 0;
 		//Overwatch.fxh State
 		#define OSW 1
 	#endif
@@ -1256,13 +1256,13 @@ uniform int SuperDepth3D <
 		ui_type = "drag";
 		ui_min = 0.0; ui_max = 0.5;
 		ui_label = " Weapon Near, Min, Auto, & Trim";
-		ui_tooltip = "Null: This Option is empty for now and will be reworked later.\n"
+		ui_tooltip = "Weapon Near: This Only effects a weapon when it's way closer then anything else.\n"
 					 "Weapon Min : is used to adjust min weapon hand of the weapon hand when looking at the world near you when the above fails.\n"
 					 "Weapon Auto: is used to auto adjust trimming when looking around.\n"
 					 "Weapon Trim: is used cutout a location in the depth buffer so that Min and Auto scale off of.\n"
 					 "Default is (Near X 0.0, Min Y 0.0, Auto Z 0.0, Trim Z 0.250 ) & Zero is off.";
 		ui_category = "Weapon Hand Adjust";	
-	> = float4(0,DG_Z,DE_W,DI_Z);// Weapon ZDP was set to 0.03 and is an internal constant value
+	> = float4(WNR,DG_Z,DE_W,DI_Z);
 	
 	uniform float4 Weapon_Depth_Edge <
 		ui_type = "slider";
@@ -1866,6 +1866,7 @@ uniform int SuperDepth3D <
 	static const int Isolate_UI = 0;
 	static const int Alpha_UI_is_Narrow = 0;
 	static const int Alpha_UI_Has_LB = 0;
+	static const bool UI_LB_Flatten = 0;
 	uniform float Alpha_Finer_Mip_Center <
 		ui_type = "slider";
 		ui_min = 0; ui_max = 1;	
@@ -1964,7 +1965,37 @@ uniform int SuperDepth3D <
 		ui_tooltip = "This is for when some games overlay a full screen effect when using letter box for some reason.";
 		ui_category = "Miscellaneous Options";
 	> = UIL;		
+
+	uniform bool UI_LB_Flatten <
+		ui_label = " UI LB Flatten";
+		ui_tooltip = "Keeps the letter box as part of the UI but pins it to one flat depth.\n"
+					 "The UI sits at a low res depth so it hovers over whatever is under it. A\n"
+					 "letter box has nothing under it, so that depth varies across the bar and\n"
+					 "shows as a halo along its edge. This pins it instead.\n"
+					 "The extent comes from the live depth buffer mapping, so it rescales in real\n"
+					 "time and follows an aspect change mid scene.\n"
+					 "Needs the Generic Depth Mod add-on with Exact Depth Fit on. Default is off.";
+		ui_category = "Miscellaneous Options";
+	> = ULF;
 	#endif	
+	
+	// BSD: fixed constants for UI LB Flatten, tuned in Silent Hill Townfall 2026-09-24 against the
+	// computed boundary, and confirmed to cover BOTH bars.
+	//
+	// EDGE grows the pinned area, in Alpha UI stencil texels, so it is a property of this shader rather
+	// than of any game and it holds across resolutions and across Depth_Rez. The stencil is dilated three
+	// times on its way here: DepthMap writes texCN.y from 7 taps (centre + a 2x2 gather + left/right),
+	// that write is downsampled into texCN at Depth_Rez, and Alpha_UI_Mask then mins mip 0 against mip 1,
+	// whose bilinear tap spans four texCN texels and dominates. That chain accounts for roughly 3.5, and
+	// 5.0 is what actually covers both bars, so something in it reaches a little further than the read of
+	// the code suggests. Do NOT trim it back toward the theoretical figure without retesting: 1.6 left the
+	// TOP bar short, 3.6 was still not enough.
+	//
+	// DEPTH is where the bars sit. It is a preference, not derivable from the frame, and a single value
+	// has to serve both bars even though the scene behind them differs. If a game ever wants another,
+	// change it here, or promote it to an Overwatch define beside DMM_W.
+	static const float UI_LB_Depth = 0.875;
+	static const float UI_LB_Edge  = 5.0;
 	
 	#if AR_Is == 1
 	#elif AR_Is == 2
@@ -4479,10 +4510,16 @@ uniform int Extra_Information <
 			{   [loop] 
 				for( int iY = 0 ; iY < iXY.y; iY++ )
 				{
-					if(ZPD_Boundary == 1 || ZPD_Boundary == 6 || ZPD_Boundary == 7)
+					if(ZPD_Boundary == 1 || ZPD_Boundary == 6)
 						GridXY = float2( CDArray_X_A0[iX], CDArray_Y_A0[iY]);
 					else if(ZPD_Boundary == 2 || ZPD_Boundary == 5)
 						GridXY = float2( CDArray_X_B0[iX], CDArray_Y_A0[iY]);
+					else if(ZPD_Boundary == 7)
+						// BD7 FPS Mixed: narrow spacing everywhere except the two OUTERMOST columns, which take
+						// the edge positions from A0, so they land on LB_Dir.x and LB_Dir.y. Y is unchanged, both
+						// the edge and narrow branches already share CDArray_Y_A0, and 7 does not match the
+						// Bottom_Edge_A test for 6, so the bottom row stays at the narrow 0.9 rather than 0.95.
+						GridXY = float2( (iX == 0 || iX == iXY.x - 1) ? CDArray_X_A0[iX] : CDArray_X_B0[iX], CDArray_Y_A0[iY]);
 					else if(ZPD_Boundary == 3)
 						GridXY = float2( Detect_More_Mode ? CDArray_X_C1[iX] : CDArray_X_C0[iX], CDArray_Y_C0[min(3,iY)]);
 					else if(ZPD_Boundary == 4)
@@ -5145,7 +5182,14 @@ uniform int Extra_Information <
 		#if M_Edge
 		if(texcoord.x < 0.001 || 1-texcoord.x < 0.001)
 			DM = 0.1;
+		#else	
+		if(texcoord.x < 0.002 || 1-texcoord.x < 0.002)
+			DM = 0.4;			
 		#endif
+	
+		// Weapon_Near
+		float WN_Mask = smoothstep(-0.375, -0.625, DM.y);//Narrow range mid point is the number between A and B
+		DM.y = lerp(DM.y, lerp(DM.y, DM.y * -2.0, WN_Mask), WZPD_and_WND.x);
 	
 		#if UI_MASK
 			DM.y = lerp(DM.y,0,step(1.0-HUD_Mask(texcoord),0.5));
@@ -6082,6 +6126,39 @@ uniform int Extra_Information <
 		
 		        if(!Isolate_UI)
 		            MixOut = lerp(0.025, MixOut, Avg_UI);
+
+		        #if !DX9_Toggle
+		        if(UI_LB_Flatten && DB_AutoFit && DB_Res_Info.x > 0 && DB_Res_Info.y > 0 &&
+		           DB_Viewport_Size.z > 0 && DB_Viewport_Size.w > 0)
+		        {
+		            float2 LB_Ref = (DB_Render_Size.x > 0) ? DB_Render_Size : float2(BUFFER_WIDTH, BUFFER_HEIGHT);
+		            float2 LB_Fit = DB_Viewport_Size.zw / DB_Res_Info;
+		            float2 LB_Org = DB_Viewport_Size.xy / DB_Res_Info;
+		            if(abs(DB_Viewport_Size.z * LB_Ref.y - DB_Viewport_Size.w * LB_Ref.x) > LB_Ref.x * DB_Viewport_Size.w * 0.02)
+		            {
+		                LB_Fit = LB_Ref / DB_Res_Info;
+		                LB_Org = (DB_Viewport_Size.xy - (LB_Ref - DB_Viewport_Size.zw) * 0.5) / DB_Res_Info;
+		            }
+		            // invert the mapping: where the rendered sub rect starts and ends in screen space
+		            float2 LB_Start = (DB_Viewport_Size.xy / DB_Res_Info - LB_Org) / LB_Fit;
+		            float2 LB_End   = ((DB_Viewport_Size.xy + DB_Viewport_Size.zw) / DB_Res_Info - LB_Org) / LB_Fit;
+		            // UI_LB_Edge grows the pinned area, in stencil texels, to cover Alpha_UI_Mask's mip 0 vs mip 1
+		            // dilation. Only trim an axis that actually HAS a bar: with no letter box the region already
+		            // spans the screen, so trimming it anyway would pin a border all the way round on a game that
+		            // fills the frame, which is exactly what players get when they turn the game's letter box off.
+		            float2 LB_Has_Bar = float2(LB_Start.x > 0.002 || LB_End.x < 0.998,
+		                                       LB_Start.y > 0.002 || LB_End.y < 0.998);
+		            float2 LB_Trim = UI_LB_Edge * pix / Depth_Rez * LB_Has_Bar;
+		            LB_Start += LB_Trim;
+		            LB_End   -= LB_Trim;
+		            // Strength follows Avg_UI, the same value the rest of the block blends on. At 0 this does
+		            // nothing at all, which is the smooth form of what Alpha_UI_FullScreen does as a hard
+		            // switch, and it ramps in from there rather than snapping.
+		            if(texcoord.y < LB_Start.y || texcoord.y > LB_End.y ||
+		               texcoord.x < LB_Start.x || texcoord.x > LB_End.x)
+		                MixOut = lerp(MixOut, UI_LB_Depth, Avg_UI);
+		        }
+		        #endif
 		    }
 		}
 		#endif
