@@ -608,3 +608,7 @@ MergePooledBuffers=1
 CopyOnCommandListClose=1
 PooledCopySharing=1
 DepthAutoFit=1
+
+[0x4B609342]
+Game=CONTROL Resonant
+UseAspectRatioHeuristics=2

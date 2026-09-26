@@ -1,7 +1,7 @@
 	////----------------//
 	///**SuperDepth3D**///
 	//----------------////
-	#define SD3D "SuperDepth3D v5.4.1\n"
+	#define SD3D "SuperDepth3D v5.4.2\n"
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//* Depth Map Based 3D post-process shader
 	//* For Reshade 3.0+
@@ -136,7 +136,7 @@ namespace SuperDepth3D
 		static const int EVS = 0, SMSUM = 0, RSV = 0, AJM = 0, MED = 0, SBTDA = 0, SMSBT = 0, UIF = 0, UIL = 0, RCI = 0, AIM = 0, WMM = 0, SDD = 0, DMM = 0, LBD = 0, WSM = 0, ULF = 0;
 		static const int2 DOL = 0;
 		//Triggers 
-		static const float UFC = 0, UIB = 0, HNR = 0, THF = 0, EGB = 0,PLS = 1, MGA = 0, WZD = 0, KHM = 0, DAO = 0, LDT = 0, ALM = 0, SSF = 0, SNF = 0, SSE = 0, SNE = 0, EDU = 0, LBI = 0,ISD = 0, ASA = 1, IWS = 0, SUI = 0, SSA = 0, SNA = 0, SSB = 0, SNB = 0,SSC = 0, SNC = 0,SSD = 0, SND = 0, LHA = 0, WBS = 0, TMD = 0, FRM = 0, AWZ = 0, CWH = 0, WBA = 0, WFB = 0, WND = 0, WNR = 0, WRP = 0, MML = 0, SMD = 0, WHM = 0, SDU = 0, ABE = 2, LBE = 0, HQT = 0, HMD = 0.5, MAC = 0, OIL = 0, MMS = 0, FTM = 0, FMM = 0, SPO = 0, MMD = 0, LBR = 0, AFD = 0, MDD = 0, FPS = 1, SMS = 1, OIF = 0, NCW = 0, RHW = 0, NPW = 0, SPF = 0, BDF = 0, HMT = 0, HMC = 0, DFW = 0, NFM = 0, DSW = 0, LBC = 0, LBS = 0, LBM = 0, DAA = 0, NDW = 0, PEW = 0, WPW = 0, FOV = 0, EDW = 0, SDT = 0;
+		static const float UFC = 0, UIB = 0, HNR = 0, THF = 0, EGB = 0,PLS = 1, MGA = 0, WZD = 0, KHM = 0, DAO = 0, LDT = 0, ALM = 0, SSF = 0, SNF = 0, SSE = 0, SNE = 0, EDU = 0, LBI = 0,ISD = 0, ASA = 1, IWS = 0, SUI = 0, SSA = 0, SNA = 0, SSB = 0, SNB = 0,SSC = 0, SNC = 0,SSD = 0, SND = 0, LHA = 0, WBS = 0, TMD = 0, FRM = 0, AWZ = 0, CWH = 0, WBA = 0, WFB = 0, WND = 0, WNR = 0, ABWS = 0, AFS = 0.4375, WRP = 0, MML = 0, SMD = 0, WHM = 0, SDU = 0, ABE = 2, LBE = 0, HQT = 0, HMD = 0.5, MAC = 0, OIL = 0, MMS = 0, FTM = 0, FMM = 0, SPO = 0, MMD = 0, LBR = 0, AFD = 0, MDD = 0, FPS = 1, SMS = 1, OIF = 0, NCW = 0, RHW = 0, NPW = 0, SPF = 0, BDF = 0, HMT = 0, HMC = 0, DFW = 0, NFM = 0, DSW = 0, LBC = 0, LBS = 0, LBM = 0, DAA = 0, NDW = 0, PEW = 0, WPW = 0, FOV = 0, EDW = 0, SDT = 0;
 		//Overwatch.fxh State
 		#define OSW 1
 	#endif
@@ -866,14 +866,7 @@ uniform int SuperDepth3D <
 		ui_category = "Occlusion Masking";
 	> = 1;
 	#endif
-	uniform float Edge_Adjust <
-		ui_type = "slider";
-		ui_min = 0.0; ui_max = 1.0;                                                                                                  
-		ui_label = " Edge Reduction";
-		ui_tooltip = "This Decreases the Edge at the cost of warping the image.\n"
-					 "Default is 50.0%.";
-		ui_category = "Occlusion Masking";
-	> = 0.5;
+
 	/* //Slated for removal 
 		uniform float Range_Blend <
 		ui_type = "slider";
@@ -2402,7 +2395,7 @@ uniform int Extra_Information <
 			Texture = texMiniReconBuffer;
 			MagFilter = POINT;
 			MinFilter = POINT;
-			MipFilter = POINT;
+			MipFilter = POINT;	
 		};
 	#endif
 	
@@ -2414,6 +2407,7 @@ uniform int Extra_Information <
 			MagFilter = POINT;
 			MinFilter = POINT;
 			MipFilter = POINT;
+			
 		};
 	
 	texture texzBufferN_L { Width = BUFFER_WIDTH * Depth_Rez; Height = BUFFER_HEIGHT * Depth_Rez; Format = RG16F; MipLevels = 8; }; //Mips Used
@@ -3642,7 +3636,7 @@ uniform int Extra_Information <
 	    #endif
 	    return float2(dy, dx);
 	}
-	
+	/*
 	float4 EdgeMask(float4 color, float2 texcoords, float Adjust_Value)
 	{	
 		float2 center = float2(0.5,texcoords.y); // Direction of effect.   
@@ -3651,7 +3645,7 @@ uniform int Extra_Information <
 			  EdgeMask = clamp((BaseVal-Dist) / (BaseVal-Adjust_Value),0.125,1); 
 	    return color * EdgeMask;    
 	}
-	
+	*/
 	float DepthEdge(float Mod_Depth, float Depth, float2 texcoords, float Adjust_Value )
 	{   Adjust_Value -= FLT_EPSILON;
 		float2 center = float2(0.5,texcoords.y); // Direction of effect.   
@@ -4035,31 +4029,12 @@ uniform int Extra_Information <
 		bool DB_On = DB_AutoFit && DB_Res_Info.x > 0 && DB_Res_Info.y > 0 && DB_Viewport_Size.z > 0 && DB_Viewport_Size.w > 0;
 		if(DB_On)
 		{
-			//Pixel for pixel is the normal case: the scene lands on the SAME pixel rect in both the colour and
-			//depth targets, so only the texture sizes differ. Unreal pads the depth allocation (1440 up to 1536
-			//in Moss) and that ratio IS the whole correction. A cutscene that shrinks the viewport cancels out
-			//of this - both targets shift by the same pixels - so no origin term is needed and it stays correct
-			//through cutscenes on its own.
-			//Scale is the back buffer against the depth texture: Unreal pads the depth allocation (Moss pads
-			//1440 up to 1536) and that ratio removes the dead rows.
-			//Reference = the region the screen actually shows. Normally the back buffer, which stands in for it.
-			//With the add-on's "full render region" switch on, DB_Render_Size carries the largest viewport it has
-			//seen - the real render region, and the only correct reference when an upscaler runs under a cutscene.
-			//Zero when that switch is off, so the back buffer stays the default and confirmed-working reference.
-			//The full render region. DB_Render_Size carries the LARGEST viewport the add-on has seen; the back
-			//buffer is the fallback. Only the letter box branch below needs it.
+
 			float2 DB_Ref = (DB_Render_Size.x > 0) ? DB_Render_Size : float2(BUFFER_WIDTH, BUFFER_HEIGHT);
-			//DEFAULT: the rendered region IS what the screen shows, so stretch it across the screen. One ratio
-			//covers a padded texture (Moss: 2560x1440 rendered into 2560x1536) and any upscaler or windowed
-			//render (Pools FSR3 into a 2560x1440 texture: 1600x900 at 1.0, 1312x738 at 0.8, 880x496 at 0.5).
+
 			DB_Fit = DB_Viewport_Size.zw / DB_Res_Info;
 			DB_Org = DB_Viewport_Size.xy / DB_Res_Info;
-			//EXCEPTION: when the region's SHAPE does not match the render region it is a letter or pillar box -
-			//a sub-rect that does NOT fill the screen. It is top aligned in the depth texture but CENTRED on
-			//screen (TS2: 2560x1071 inside 2560x1440), so scale from the full region and shift by half the gap.
-			//2%% tolerance, not equality: render resolutions round to multiples of 8/16, so an upscaled region
-			//is only APPROXIMATELY the screen aspect (Pools 880x496 misses 16:9 by 2560 in cross product terms)
-			//while a real letter box misses by orders of magnitude more.
+
 			if(abs(DB_Viewport_Size.z * DB_Ref.y - DB_Viewport_Size.w * DB_Ref.x) > DB_Ref.x * DB_Viewport_Size.w * 0.02)
 			{
 				DB_Fit = DB_Ref / DB_Res_Info;
@@ -4624,7 +4599,11 @@ uniform int Extra_Information <
 		float  ExAd = (1-(FadeSpeed_AW * 2.0))*1000, Current =  min(0.75f,smoothstep(0,0.25f,PrepDepth(0.5f)[0][0])), Past = tex2D(SamplerAvrP_N,float2(0,0.5625)).z;
 		return Past + (Current - Past) * (1.0 - exp(-frametime/ExAd));
 	}
-	#define FadeSpeed_AF 0.4375
+	#define FadeSpeed_AF AFS //Overwatch controlled, AFS defaults to 0.4375. Lower is slower.
+
+	// BSD: the A and B weapon detectors used to hand out a DISCRETE switch
+	static const bool W_Smooth_A_B = ABWS;
+	#define WZPD_RAMP 1.0 //how sharply the ramp reaches full strength past the limit. Lower is softer.
 	float Weapon_ZPD_Fade(float Weapon_Con)
 	{
 		float  ExAd = (1-(FadeSpeed_AF * 2.0))*1000, Current =  Weapon_Con, Past = tex2D(SamplerAvrP_N,float2(0,0.6875)).z;
@@ -4800,30 +4779,61 @@ uniform int Extra_Information <
 	float4 Conv(float2 MD_WHD,float2 texcoord,float2 abs_WZPDB)
 	{   float WConverge = 0.030, D = MD_WHD.x, Z = Zero_Parallax_Distance, WZP = 0.5, ZP = 0.5, OS_Value = saturate(OverShoot_Fade()),
 			  W_Convergence = Inficolor_Near_Reduction ? WConverge * 0.75 : WConverge, WZPDB, WZPD_Switch, 
-			  Distance_From_Bottom = lerp(0.9375,1.0,saturate(WFB)), ZPD_Boundary_Adjust = ZPD_Boundary_n_Fade.x, Store_WC;
+			  Distance_From_Bottom = lerp(0.9,1.0,saturate(WFB)), ZPD_Boundary_Adjust = ZPD_Boundary_n_Fade.x, Store_WC,
+			  Switch_Factor = 1.0, Fade_A = 0.0, Fade_B = 0.0;
 	    //Screen Space Detector.
 		if (abs_WZPDB.x > 0)
 		{
+			//Weapon sample row. WO is the window BOTH detectors scan when ABWS is off, A and B are the
+			//ABWS on windows. The row is a search, so a tap a window gives up is a chance lost.
+			//WO no longer matches the released row on purpose: first tap is 0.25, the release had 0.4.
 			#if WBS			   
 			float WArray[6] = { 0.1, 0.2, 0.3, 0.7, 0.8, 0.9};
+			//all three windows cover the whole row, ABWS changes nothing here
+			#define WO_FIRST 0
+			#define WO_LAST  5
+			#define WA_FIRST 0
+			#define WA_LAST  5
+			#define WB_FIRST 0
+			#define WB_LAST  5
 			#else
-			float WArray[6] = { 0.4, 0.5, 0.6, 0.7, 0.8, 0.9};
+			float WArray[6] = { 0.25, 0.5, 0.6, 0.7, 0.8, 0.9};
+			//  x pos   0.25 0.5  0.6  0.7  0.8  0.9
+			//  WO       X    X    X    X    X    X     ABWS off, both detectors
+			//  WA       X    X    X    X               ABWS on, drives DF_X.x
+			//  WB            X    X    X    X    X     ABWS on, drives DF_X.y
+			#define WO_FIRST 0//Start
+			#define WO_LAST  5//Stop
+			#define WA_FIRST 0//Start
+			#define WA_LAST  3//Stop
+			#define WB_FIRST 1//Start
+			#define WB_LAST  5//Stop
 			#endif
 			[unroll] //only really only need to check one point just above the center bottom and to the right.
 			for( int i = 0 ; i < 6; i++ )
 			{
 				WZPDB  = 1 - WConverge / tex2Dlod(SamplerDMN, float4(float2(WArray[i],Distance_From_Bottom), 0, 0)).y;
+				//ABWS off is the OLD behaviour exactly: both detectors scan WO, the shipped row.
+				bool In_Old = i >= WO_FIRST && i <= WO_LAST;
+				bool In_A = W_Smooth_A_B ? (i >= WA_FIRST && i <= WA_LAST) : In_Old;
+				bool In_B = W_Smooth_A_B ? (i >= WB_FIRST && i <= WB_LAST) : In_Old;
+				//How far past each limit this tap sits, 0 at the limit and 1 once well past. Strongest tip wins,
+				//so a stage contributes once rather than once per tap.
+				Fade_A = max(Fade_A, In_A ? saturate((-WZPDB - DJ_W) * WZPD_RAMP) : 0.0);
+				Fade_B = max(Fade_B, In_B ? saturate((-WZPDB - DS_W) * WZPD_RAMP) : 0.0);
 				if(Weapon_ZPD_Boundary.x >= 0)
 				{	
-					if ( WZPDB < -DJ_W ) // Default -0.1
+					if ( In_A && WZPDB < -DJ_W ) // Default -0.1
 					{
 						W_Convergence *= 1.0-abs_WZPDB.x;
 						WZPD_Switch = 1;
 					}
-					 //Used if Weapon Buffer is way out of range.
-					if (abs_WZPDB.y > abs_WZPDB.x)
+					 //Used if Weapon Buffer is way out of range. The |y| > |x| test is the OLD rule, which
+					 //locks B out whenever DF_X.y <= DF_X.x. ABWS on drops it, since B has its own window
+					 //and its own depth limit there and does not need to outrank A to be allowed to fire.
+					if (W_Smooth_A_B || abs_WZPDB.y > abs_WZPDB.x)
 					{
-						if ( WZPDB < -DS_W )
+						if ( In_B && WZPDB < -DS_W )
 						{
 							W_Convergence *= 1.0-abs_WZPDB.y;
 							WZPD_Switch = 2;
@@ -4832,17 +4842,27 @@ uniform int Extra_Information <
 				}
 				else
 				{
-					if ( WZPDB < -DJ_W ) // Default -0.1
+					if ( In_A && WZPDB < -DJ_W ) // Default -0.1
 						WZPD_Switch = 1;
-					 //Used if Weapon Buffer is way out of range.
-					if (abs_WZPDB.y > abs_WZPDB.x)
+					 //Used if Weapon Buffer is way out of range. The |y| > |x| test is the OLD rule, which
+					 //locks B out whenever DF_X.y <= DF_X.x. ABWS on drops it, since B has its own window
+					 //and its own depth limit there and does not need to outrank A to be allowed to fire.
+					if (W_Smooth_A_B || abs_WZPDB.y > abs_WZPDB.x)
 					{
-						if ( WZPDB < -DS_W )
+						if ( In_B && WZPDB < -DS_W )
 							WZPD_Switch = 2;
 					}
 				}
 			}
+			#undef WO_FIRST
+			#undef WO_LAST
+			#undef WA_FIRST
+			#undef WA_LAST
+			#undef WB_FIRST
+			#undef WB_LAST
 		}
+		//A and B compose here instead of one replacing the other, and each applies once.
+		Switch_Factor = lerp(1.0, 1.0 - abs_WZPDB.x, Fade_A) * lerp(1.0, 1.0 - abs_WZPDB.y, Fade_B);
 		//Store Weapon Convergence for Smoothing.
 		Store_WC = W_Convergence;
 		//MD_WHD.y is Weapon Hand Depth
@@ -4964,7 +4984,8 @@ uniform int Extra_Information <
 	#if Inficolor_3D_Emulator
 		Mod_Depth = lerp(Mod_Depth,min(saturate(Inficolor_Max_Depth),Mod_Depth),saturate(D * 0.5));
 	#endif
-	   return float4( Mod_Depth, lerp(W_Convergence,WD,WZP), Store_WC, WZPD_Switch); //The last two are for the weapon hand
+	   //.w carries the continuous factor when smoothing is on, and the old switch number when it is off.
+	   return float4( Mod_Depth, lerp(W_Convergence,WD,WZP), Store_WC, W_Smooth_A_B ? Switch_Factor : WZPD_Switch); //The last two are for the weapon hand
 	}
 
 	float WeaponMask(float2 TC,float Mips)
@@ -5006,6 +5027,19 @@ uniform int Extra_Information <
 		if( 1-texcoord.x < pix.x * C_Size &&   texcoord.y < pix.y * C_Size)
 			DM = PrepDepth(texcoord)[0][0];
 			
+		#if M_Edge
+		if(texcoord.x < 0.001 || 1-texcoord.x < 0.001)
+		{
+			DM = 0.1;
+		}
+		#else	
+		if(texcoord.x < 0.002 || 1-texcoord.x < 0.002)
+		{
+			if(DM.y > 0.025)
+				DM = lerp(0.04,0.4,tex2Dlod(SamplerDMN,float4(texcoord,0,8)).x);
+		}				
+		#endif	
+			
 		#if SDM
 		float Sten_D_M = 0.0;
 		if(DM.y >= 0.9999)
@@ -5021,10 +5055,15 @@ uniform int Extra_Information <
 		float4 HandleConvergence = Conv(DM.xz,texcoord,WZPDB).xyzw;
 			   HandleConvergence.y *= WA_XYZW().w;
 			   
-			   if(HandleConvergence.w == 1)
-			   	HandleConvergence.y *= 1-WZPDB.x;
-			   if(HandleConvergence.w == 2)
-			   	HandleConvergence.y *= 1-WZPDB.y;
+			   if(W_Smooth_A_B)
+			   	HandleConvergence.y *= HandleConvergence.w;
+			   else
+			   {
+			   	if(HandleConvergence.w == 1)
+			   		HandleConvergence.y *= 1-WZPDB.x;
+			   	if(HandleConvergence.w == 2)
+			   		HandleConvergence.y *= 1-WZPDB.y;
+			   }
 
 		float FadeIO = Focus_Reduction_Type == 0 ? 1 : smoothstep(0, 1, 1 - Fade_in_out().x), FD_Adjust = 0.050;	
 	
@@ -5053,15 +5092,13 @@ uniform int Extra_Information <
 		}
 		
 		DM.y = lerp( HandleConvergence.x, HandleConvergence.y * Auto_Adjust_Weapon_Depth, DM.y);
-		float Alpha_UI_Edge_Masking = Alpha_Channel_UI ? Alpha_UI_Mask(texcoord * float2(1.0,0.9) + float2(0.0,0.1), 0) > 0 : 0;
-		float Edge_Adj = saturate(lerp(0.5,1.0,Edge_Adjust));
-			  Edge_Adj = lerp(1,Edge_Adj,Alpha_UI_Edge_Masking);
+
 		#if Inficolor_3D_Emulator
 			float UI_Detection_Mask = 0.5;
 		#else
 			float UI_Detection_Mask = 0.0625;
 		#endif
-			DM = lerp(lerp(EdgeMask( DM, texcoord, 0.955 ),DM,  Edge_Adj), DM, saturate(1-DM.y) );	
+	
 		#if Compatibility_00	
 		if (Depth_Detection == 1)
 		{
@@ -5178,18 +5215,11 @@ uniform int Extra_Information <
 			if (Cancel_Depth_Controller)
 				DM = UI_Detection_Mask;
 		#endif	
-					
-		#if M_Edge
-		if(texcoord.x < 0.001 || 1-texcoord.x < 0.001)
-			DM = 0.1;
-		#else	
-		if(texcoord.x < 0.002 || 1-texcoord.x < 0.002)
-			DM = 0.4;			
-		#endif
 	
 		// Weapon_Near
-		float WN_Mask = smoothstep(-0.375, -0.625, DM.y);//Narrow range mid point is the number between A and B
-		DM.y = lerp(DM.y, lerp(DM.y, DM.y * -2.0, WN_Mask), WZPD_and_WND.x);
+		bool WN_Switch = WZPD_and_WND.x < 0;
+		float WN_Mask = WN_Switch ? smoothstep(-0.25, -0.5, DM.y) : smoothstep(-0.375, -0.625, DM.y);//Narrow range mid point is the number between A and B
+		DM.y = lerp(DM.y, lerp(DM.y, DM.y * -2.0, WN_Mask), abs(WZPD_and_WND.x));
 	
 		#if UI_MASK
 			DM.y = lerp(DM.y,0,step(1.0-HUD_Mask(texcoord),0.5));
