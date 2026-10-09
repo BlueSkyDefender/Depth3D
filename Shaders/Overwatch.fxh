@@ -1,7 +1,7 @@
 ////----------------------------------------//
 ///SuperDepth3D Overwatch Automation Header///
 //----------------------------------------////
-#define OVERWATCH "Overwatch v5.0.6\n"
+#define OVERWATCH "Overwatch v5.0.7\n"
 //---------------------------------------OVERWATCH---------------------------------------//
 // If you are reading this stop. Go away and never look back. From this point on if you  //
 // still think it's is worth looking at this..... Then no one can save you or your soul. //
@@ -176,7 +176,7 @@ static const float HQ_Trim_D = 0.0;                     //HQ Trim 0.0 - 0.5     
 
 //Shared Values
 static const int Warping_Masking_D = 1;                 //Warping Masking Adjustment                    | DAA_W
-static const int HQ_Tune_D = 4;                         //HQ Tune                                       | DM_X
+static const int HQ_Tune_D = 3;                         //HQ Tune                                       | DM_X
 
 //Lock Out Menu Detection
 static const int Lock_Out_Menu_Detection_D = 0;         // Off 0 | 1                                    | LMD
@@ -3702,7 +3702,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DI_W 0.375
 	#define DF_Z 0.125
 	#define DL_X 0.850                             //SM Tune
-	#define DM_X 4                                 //HQ Tune
+	#define DM_X 3                                 //HQ Tune
 	#define PEW 1
 #elif (App == 0x5A1F3C90 ) //STEEP
 	#define DA_W 1
@@ -3718,7 +3718,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DI_W 1.00
 	#define DF_Z 0.125
 	#define DL_X 0.850                             //SM Tune
-	#define DM_X 4                                 //HQ Tune
+	#define DM_X 3                                 //HQ Tune
 	#define PEW 1
 	#define FOV 1
 	#define NCW 1
@@ -3736,7 +3736,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DF_W float4(0.005,0.0075,0.0,0.0)      //Edge & Scale
 	#define DF_Z 0.125
 	#define DL_X 0.900                             //SM Tune
-	#define DM_X 4                                 //HQ Tune
+	#define DM_X 3                                 //HQ Tune
 	#define FPS  0
 	#define DK_X 2
 	#define DK_Y 0
@@ -3760,7 +3760,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DF_W float4(0.005,0.0075,0.0,0.0)      //Edge & Scale
 	#define DF_Z 0.125
 	#define DL_X 0.900                             //SM Tune
-	#define DM_X 4                                 //HQ Tune
+	#define DM_X 3                                 //HQ Tune
 	#define FPS  0
 	#define DK_X 2
 	#define DK_Y 0
@@ -3784,7 +3784,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DF_W float4(0.005,0.00875,0.0,0.0)     //Edge & Scale
 	#define DF_Z 0.125
 	#define DL_X 0.950                             //SM Tune
-	#define DM_X 4                                 //HQ Tune
+	#define DM_X 3                                 //HQ Tune
 	#define FPS  0
 	#define DK_X 2
 	#define DK_Y 0
@@ -3809,7 +3809,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DF_W float4(0.005,0.0075,0.0,0.0)      //Edge & Scale
 	#define DF_Z 0.125
 	#define DL_X 0.900                             //SM Tune
-	#define DM_X 4                                 //HQ Tune
+	#define DM_X 3                                 //HQ Tune
 	#define FPS  0
 	#define DK_X 2
 	#define DK_Y 0
@@ -3833,7 +3833,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DF_W float4(0.005,0.00875,0.0,0.0)     //Edge & Scale
 	#define DF_Z 0.125
 	#define DL_X 0.950                             //SM Tune
-	#define DM_X 4                                 //HQ Tune
+	#define DM_X 3                                 //HQ Tune
 	#define FPS  0
 	#define DK_X 2
 	#define DK_Y 0
@@ -3874,7 +3874,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DF_W float4(0.001,0.00125,0.0,0.0)     //Edge & Scale
 	#define DF_Z 0.050
 	#define DL_X 0.950                             //SM Tune
-	#define DM_X 4                                 //HQ Tune
+	#define DM_X 3                                 //HQ Tune
 	#define DSW 1
 	#define PEW 1
 #elif (App == 0x82E531A5 ) //Watch Dogs: Legion
@@ -4055,7 +4055,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DI_W 1.5
 	#define DF_Z 0.100
 	#define DL_X 0.900                                   //SM Tune
-	#define DM_X 4                                       //HQ Tune
+	#define DM_X 3                                       //HQ Tune
 	#define MMD 1                                        //Set Multi Menu Detection             //Off / On
 	#define MMS 1                                        //Set Multi Menu Selection from 0-1 to 29-30 and Off 0 | 1 | 2
 	#define DO_X float4( 0.090 , 0.175 , 0.525 , 0.175 ) //Pos A1 = XY Color & A2 = ZW Black
@@ -4281,7 +4281,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DI_W 1.0                                     //float2(1.5,7.0)
 	#define DF_Z 0.100
 	#define DL_X 0.825                                   //SM Tune
-	#define DM_X 4                                       //HQ Tune
+	#define DM_X 3                                       //HQ Tune
 	#define MMD 1                                        //Set Multi Menu Detection             //Off / On
 	#define MMS 0                                        //Set Multi Menu Selection from 0-1 to 29-30 and Off 0 | 1 | 2
 	#define DO_X float4( 0.053 , 0.083 , 0.075 , 0.325 ) //Pos A1 = XY Color & A2 = ZW Black
@@ -4302,7 +4302,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DI_W 0.625                             //float2(1.5,7.0)
 	#define DF_Z 0.050
 	#define DL_X 0.950                             //SM Tune
-	#define DM_X 4                                 //HQ Tune
+	#define DM_X 3                                 //HQ Tune
 	#define PEW 1
 #elif (App == 0xCD52FFF9 ) //The Entropy Centre
 	#define DA_W 1
@@ -4317,7 +4317,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DI_W 0.625                             //float2(1.5,7.0)
 	#define DF_Z 0.050
 	#define DL_X 0.900                             //SM Tune
-	#define DM_X 4                                 //HQ Tune
+	#define DM_X 3                                 //HQ Tune
 	#define WSM 3
 	#define DB_W 26
 	#define DF_X float2(0.050,0.0)
@@ -4421,7 +4421,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DI_W 1.200                             //float2(1.5,7.0)
 	#define DF_Z 0.150
 	#define DL_X 0.950                             //SM Tune
-	#define DM_X 4                                 //HQ Tune
+	#define DM_X 3                                 //HQ Tune
 	#define PEW 1
 	#define DSW 1
 #elif (App == 0xC2E621A5 ) //No Man's Sky
@@ -4439,7 +4439,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DF_W float4(0.001,0.0025,0.0,0.0)      //Edge & Scale
 	#define DF_Z 0.125
 	#define DL_X 0.650                             //SM Tune
-	#define DM_X 4                                 //HQ Tune
+	#define DM_X 3                                 //HQ Tune
 	#define PEW 1
 	#define RHW 1
 #elif (App == 0xB9F94F65 ) //The Callisto Protocol
@@ -4457,7 +4457,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DI_W float2(0.5,2.0)
 	#define DF_Z 0.125
 	#define DL_X 0.900                             //SM Tune
-	#define DM_X 4                                 //HQ Tune
+	#define DM_X 3                                 //HQ Tune
 	#define PEW 1
 #elif (App == 0x5EB9CBE2 ) //Brothers: A Tale of Two Sons
 	#define DA_X 0.075
@@ -4677,7 +4677,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DF_W float4(0.0001,0.0025,0.0,0.0)     //Edge & Scale
 	#define DF_Z 0.025
 	#define DL_X 0.950                             //SM Tune
-	#define DM_X 4                                 //HQ Tune
+	#define DM_X 3                                 //HQ Tune
 	#define PEW 1
 #elif (App == 0x2FEDE211 ) //DreadOut 2
 	#define DA_W 1
@@ -4696,7 +4696,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DF_W float4(0.0001,0.00125,0.0,0.0)           //Edge & Scale
 	#define DF_Z 0.0375
 	#define DL_X 0.950                                    //SM Tune
-	#define DM_X 4                                        //HQ Tune
+	#define DM_X 3                                        //HQ Tune
 	#define MMD 4                                         //Set Multi Menu Detection             //Off / On
 	#define MMS 1                                         //Set Multi Menu Selection from 0-1 to 29-30 and Off 0 | 1 | 2 One is for the first 4 and Two is for the last 4
 	#define DO_X float4( 0.009 , 0.035 , 0.1425 , 0.190 ) //Pos A1 = XY Color & A2 = ZW White
@@ -4730,7 +4730,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DF_W float4(0.0001,0.025,0.0,0.0)      //Edge & Scale
 	#define DF_Z 0.025
 	#define DL_X 0.950                             //SM Tune
-	#define DM_X 4                                 //HQ Tune
+	#define DM_X 3                                 //HQ Tune
 	#define HMT 1
 	#define HMC 0.503
 	#define PEW 1
@@ -4764,7 +4764,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DI_W float2(0.5,4.0)
 	#define DF_Z 0.050
 	#define DL_X 0.875                                   //SM Tune
-	#define DM_X 4                                       //HQ Tune
+	#define DM_X 3                                       //HQ Tune
 	#define MMD 1                                        //Set Multi Menu Detection             //Off / On
 	#define MMS 0                                        //Set Multi Menu Selection from 0-1 to 29-30 and Off 0 | 1 | 2
 	#define DO_X float4( 0.727 , 0.597 , 0.975 , 0.175 ) //Pos A1 = XY Color & A2 = ZW Black
@@ -4800,7 +4800,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DI_W 0.50                              //float2(1.5,7.0)
 	#define DF_Z 0.015
 	#define DL_X 0.850                             //SM Tune
-	#define DM_X 4                                 //HQ Tune
+	#define DM_X 3                                 //HQ Tune
 	#define PEW 1
 #elif (App == 0xE2F6CE28 ) //Remember Me
 	#define DA_X 0.05
@@ -4814,7 +4814,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DI_W 1.25
 	#define DF_Z 0.025
 	#define DL_X 0.900                                   //SM Tune
-	#define DM_X 4                                       //HQ Tune
+	#define DM_X 3                                       //HQ Tune
 	#define MMD 4                                        //Set Multi Menu Detection             //Off / On
 	#define MMS 0                                        //Set Multi Menu Selection from 0-1 to 29-30 and Off 0 | 1 | 2
 	#define DO_X float4( 0.159 , 0.575 , 0.887 , 0.928 ) //Pos A1 = XY Color & A2 = ZW Black
@@ -4864,7 +4864,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DI_W float2(1.0,4.0)
 	#define DF_Z 0.025
 	#define DL_X 1.000                             //SM Tune
-	#define DM_X 4                                 //HQ Tune
+	#define DM_X 3                                 //HQ Tune
 	#define LBC 1                                  //Letter Box Correction Offsets With X & Y
 	#define DH_W -0.237
 	#define PEW 1
@@ -4885,7 +4885,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DF_W float4(0.0001,0.005,0.0,0.0)      //Edge & Scale
 	#define DF_Z 0.025
 	#define DL_X 1.000                             //SM Tune
-	#define DM_X 4                                 //HQ Tune
+	#define DM_X 3                                 //HQ Tune
 	#define PEW 1
 	#define NFM 1
 #elif (App == 0x77737774 ) //Resident Evil 0
@@ -4898,7 +4898,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DF_W float4(0.0001,0.0025,0.0,0.0)     //Edge & Scale
 	#define DF_Z 0.025
 	#define DL_X 1.000                             //SM Tune
-	#define DM_X 4                                 //HQ Tune
+	#define DM_X 3                                 //HQ Tune
 	#define SPF 1                                  //Letter Box Correction Offsets With X & Y
 	#define DD_X 1.067
 	#define DD_Y 0.937
@@ -4948,7 +4948,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DI_W float3(0.0,0.5,2.0)
 	#define DF_Z 0.1375
 	#define DL_X 0.950                                   //SM Tune
-	#define DM_X 4                                       //HQ Tune
+	#define DM_X 3                                       //HQ Tune
 	#define MMD 2                                        //Set Multi Menu Detection             //Off / On
 	#define MMS 0                                        //Set Multi Menu Selection from 0-1 to 29-30 and Off 0 | 1 | 2
 	#define DO_X float4( 0.030 , 0.090 , 0.120 , 0.500 ) //Pos A1 = XY Color & A2 = ZW Black
@@ -4987,7 +4987,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DF_W float4(0.0001,0.001,0.0,0.0)            //Edge & Scale
 	#define DF_Z 0.065
 	#define DL_X 0.950                                   //SM Tune
-	#define DM_X 4                                       //HQ Tune
+	#define DM_X 3                                       //HQ Tune
 	#define MMD 3                                        //Set Multi Menu Detection             //Off / On
 	#define MMS 0                                        //Set Multi Menu Selection from 0-1 to 29-30 and Off 0 | 1 | 2
 	#define DO_X float4( 0.500 , 0.040 , 0.500 , 0.100 ) //Pos A1 = XY Color & A2 = ZW Black
@@ -5018,7 +5018,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DG_Z 0.05                                   //Min
 	#define DF_Z 0.100
 	#define DL_X 0.925                                  //SM Tune
-	#define DM_X 4                                      //HQ Tune
+	#define DM_X 3                                      //HQ Tune
 	#define MDD 1                                       //Set Menu Detection & Direction      //Off 0 | 1 | 2 | 3 | 4
 	#define DN_X float4( 0.8835, 0.956 , 0.982 , 0.954) //Pos A = XY Any & B = ZW Lock
 	#define DN_Y float4( 0.500 , 0.004 ,  0.0, 0.0)     //Pos C = XY Any & D = ZW Match
@@ -5042,7 +5042,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DI_W float3(0.0,1.0,2.5)
 	#define DF_Z 0.055
 	#define DL_X 0.900                             //SM Tune
-	#define DM_X 4                                 //HQ Tune
+	#define DM_X 3                                 //HQ Tune
 	#define PEW 1
 #elif (App == 0x1061B3CF ) //Just Cause 3
 	#define DA_W 1
@@ -5056,7 +5056,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DI_W 1.5
 	#define DF_Z 0.05
 	#define DL_X 0.900                                   //SM Tune
-	#define DM_X 4                                       //HQ Tune
+	#define DM_X 3                                       //HQ Tune
 	#define MMD 2                                        //Set Multi Menu Detection             //Off / On
 	#define MMS 0                                        //Set Multi Menu Selection from 0-1 to 29-30 and Off 0 | 1 | 2
 	#define DO_X float4( 0.150 , 0.150 , 0.500 , 0.070 ) //Pos A1 = XY Color & A2 = ZW Black
@@ -5093,7 +5093,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DI_W float4(0.0,0.50,0.750,2.5)              //float3(0.0,1.0,2.5)
 	#define DF_Z 0.0325
 	#define DL_X 0.925                                   //SM Tune
-	#define DM_X 4                                       //HQ Tune
+	#define DM_X 3                                       //HQ Tune
 	#define MMD 1                                        //Set Multi Menu Detection             //Off / On
 	#define MMS 0                                        //Set Multi Menu Selection from 0-1 to 29-30 and Off 0 | 1 | 2
 	#define DO_X float4( 0.1025, 0.085 , 0.910 , 0.100 ) //Pos A1 = XY Color & A2 = ZW Black
@@ -5131,7 +5131,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DF_W float4(0.001,0.0075,0.0,0.0)      //Edge & Scale
 	#define DF_Z 0.03
 	#define DL_X 0.950                             //SM Tune
-	#define DM_X 4                                 //HQ Tune
+	#define DM_X 3                                 //HQ Tune
 	#define PEW 1
 #elif (App == 0xF4901178 ) //The Surge 2 ****
 	#define DA_W 1
@@ -5176,7 +5176,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DB_Z 0.05
 	#define DF_Z 0.0375
 	#define DL_X 0.950                             //SM Tune
-	#define DM_X 4                                 //HQ Tune
+	#define DM_X 3                                 //HQ Tune
 	#define PEW 1
 #elif (App == 0x72Da7135 ) //Bugsnax
 	#define DA_X 0.050
@@ -5190,7 +5190,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DI_W 1.25
 	#define DF_Z 0.075
 	#define DL_X 0.750                             //SM Tune
-	#define DM_X 4                                 //HQ Tune
+	#define DM_X 3                                 //HQ Tune
 	#define HMT 1
 	#define HMC 2.5
 	#define HMD 0.350
@@ -5214,7 +5214,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DI_Z 0.030                             //Trim
 	#define DF_Z 0.025
 	#define DL_X 0.95                              //SM Tune
-	#define DM_X 4                                 //HQ Tune
+	#define DM_X 3                                 //HQ Tune
 	#define DAA 1
 	#define PEW 1
 #elif (App == 0x45BE97B7 ) //Sackboy: A Big Adventure
@@ -5232,7 +5232,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DI_W float3(0.25,1.00,2.75)                  //float4(0.5,1.0,2.5,4.0) //float3(0.0,1.0,2.5)
 	#define DF_Z 0.10
 	#define DL_X 0.900                                   //SM Tune
-	#define DM_X 4                                       //HQ Tune
+	#define DM_X 3                                       //HQ Tune
 	#define MDD 4                                        //Set Menu Detection & Direction      //Off 0 | 1 | 2 | 3 | 4
 	#define DN_X float4( 0.200, 0.900 , 0.826 , 0.940)   //Pos A = XY Any & B = ZW Lock
 	#define DN_Y float4( 0.800, 0.900 , 0.000 , 0.000)   //Pos C = XY Any & D = ZW Match
@@ -5260,7 +5260,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DF_W float4(0.001,0.005,0.0,0.0)             //Edge & Scale
 	#define DF_Z 0.15
 	#define DL_X 0.950                                   //SM Tune
-	#define DM_X 4                                       //HQ Tune
+	#define DM_X 3                                       //HQ Tune
 	#define MDD 1                                        //Set Menu Detection & Direction      //Off 0 | 1 | 2 | 3 | 4
 	#define DN_X float4( 0.500 , 0.180 , 0.495 , 0.120)  //Pos A = XY Any & B = ZW Lock
 	#define DN_Y float4( 0.5025, 0.600 , 0.0   , 0.0  )  //Pos C = XY Any & D = ZW Match
@@ -5290,7 +5290,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DI_W float4(1.0,2.0,3.0,5.0)
 	#define DF_Z 0.100
 	#define DL_X 0.90                                     //SM Tune
-	#define DM_X 4                                        //HQ Tune
+	#define DM_X 3                                        //HQ Tune
 	#define MDD 1                                         //Set Menu Detection & Direction      //Off 0 | 1 | 2 | 3 | 4
 	#define DN_X float4( 0.287 , 0.209 , 0.239 , 0.195)   //Pos A = XY Any & B = ZW Lock
 	#define DN_Y float4( 0.710 , 0.209 ,  0.0, 0.0)       //Pos C = XY Any & D = ZW Match
@@ -5367,7 +5367,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DI_W float3(0.5,2.5,3.75)
 	#define DF_Z 0.050
 	#define DL_X 0.95                              //SM Tune
-	#define DM_X 4                                 //HQ Tune
+	#define DM_X 3                                 //HQ Tune
 	#define DL_Y 0.5                               //De-Artifact
 	#define RHW 1
 	#define DAA 1
@@ -5385,7 +5385,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DI_W float4(0.5,2.5,5.0,7.5)
 	#define DF_Z 0.100
 	#define DL_X 0.900                             //SM Tune
-	#define DM_X 4                                 //HQ Tune
+	#define DM_X 3                                 //HQ Tune
 	#define DAA 1
 	#define PEW 1
 #elif (App == 0xF6F06BA0 || App == 0x5899A89A ) //Minecraft Dungeons Steam | Windows Store
@@ -5403,7 +5403,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DI_W float3(1.0,1.5,2.0)                      //float3(0.0,0.5,2.0)
 	#define DF_Z 0.00
 	#define DL_X 0.950                                    //SM Tune
-	#define DM_X 4                                        //HQ Tune
+	#define DM_X 3                                        //HQ Tune
 	#define MMD 4                                         //Set Multi Menu Detection             //Off / On
 	#define MMS 0                                         //Set Multi Menu Selection from 0-1 to 29-30 and Off 0 | 1 | 2
 	#define DO_X float4( 0.958 , 0.075 , 0.940 , 0.929 )  //Pos A1 = XY Color & A2 = ZW Black
@@ -5437,7 +5437,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DI_W float2(0.0,2.5)
 	#define DF_Z 0.10
 	#define DL_X 0.925                             //SM Tune
-	#define DM_X 4                                 //HQ Tune
+	#define DM_X 3                                 //HQ Tune
 	#define DB_W 12
 	#define DF_X float2(0.150,0.0)
 	#define DAA 1
@@ -5456,7 +5456,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DI_W float2(0.0,2.5)
 	#define DF_Z 0.125
 	#define DL_X 0.925                             //SM Tune
-	#define DM_X 4                                 //HQ Tune
+	#define DM_X 3                                 //HQ Tune
 	#define DB_W 12
 	#define DF_X float2(0.150,0.0)
 	#define DAA 1
@@ -5475,7 +5475,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DI_W float2(0.0,2.5)
 	#define DF_Z 0.05
 	#define DL_X 0.925                             //SM Tune
-	#define DM_X 4                                 //HQ Tune
+	#define DM_X 3                                 //HQ Tune
 	#define DB_W 13
 	#define DF_X float2(0.150,0.0)
 	#define DAA 1
@@ -5494,7 +5494,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DI_W float2(0.0,2.5)
 	#define DF_Z 0.030
 	#define DL_X 0.925                             //SM Tune
-	#define DM_X 4                                 //HQ Tune
+	#define DM_X 3                                 //HQ Tune
 	#define DB_W 12
 	#define DF_X float2(0.150,0.0)
 	#define DAA 1
@@ -5516,7 +5516,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DF_W float4(0.0001,0.00125,0.0,0.0)          //Edge & Scale
 	#define DF_Z 0.075
 	#define DL_X 0.950                                   //SM Tune
-	#define DM_X 4                                       //HQ Tune
+	#define DM_X 3                                       //HQ Tune
 	#define MMD 4                                        //Set Multi Menu Detection             //Off / On
 	#define MMS 0                                        //Set Multi Menu Selection from 0-1 to 29-30 and Off 0 | 1 | 2
 	#define DO_X float4( 0.103 , 0.100 , 0.500 , 0.200 ) //Pos A1 = XY Color & A2 = ZW Black
@@ -5551,7 +5551,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DG_W -0.125                            //Neg PoP
 	#define DF_Z 0.040
 	#define DL_X 0.950                             //SM Tune
-	#define DM_X 4                                 //HQ Tune
+	#define DM_X 3                                 //HQ Tune
 	#define WSM 2                                  //Weapon Settings Mode
 	#define DB_W 11
 	#define DF_X float2(0.075,0.0)
@@ -5573,7 +5573,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DI_W float3(0.0,0.5,1.0)
 	#define DF_Z 0.125                                 // 0.100
 	#define DL_X 0.950                                 //SM Tune
-	#define DM_X 4                                     //HQ Tune
+	#define DM_X 3                                     //HQ Tune
 	///* //This seems safe.....
 	#define MDD 1                                      //Set Menu Detection & Direction      //Off 0 | 1 | 2 | 3 | 4
 	#define DN_X float4( 0.135, 0.113, 0.500 , 0.9065) //Pos A = XY Any & B = ZW Lock
@@ -5602,7 +5602,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define NFM 1
 	//Smooth Mode Setting
 	#define DL_X 0.950                             //SM Tune
-	#define DM_X 4                                 //HQ Tune
+	#define DM_X 3                                 //HQ Tune
 #elif (App == 0xF6F3C763 ) //WRATH: Aeon of Ruin
 	#define DB_X 1
 	#define DA_X 0.065
@@ -5619,7 +5619,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DF_X float2(0.1,0.0)
 	//Smooth Mode Setting
 	#define DL_X 0.750                             //SM Tune
-	#define DM_X 4                                 //HQ Tune
+	#define DM_X 3                                 //HQ Tune
 #elif (App == 0x3D8A9B78 ) //Thief
 	#define DA_X 0.100
 	#define DF_Y 0.000
@@ -5723,7 +5723,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define RHW 1
 	//Smooth Mode Setting
 	#define DL_X 0.950                                    //SM Tune
-	#define DM_X 4                                        //HQ Tune
+	#define DM_X 3                                        //HQ Tune
 #elif (App == 0x399E2A74 ) //Blacktail
 	#define DA_W 1
 	#define DA_X 0.02625
@@ -5996,7 +5996,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DSW 1
 	//Smooth Mode Setting
 	#define DL_X 0.9                                     //SM Tune
-	#define DM_X 4                                       //HQ Tune
+	#define DM_X 3                                       //HQ Tune
 #elif (App == 0x1BDC0C4C || App == 0x85D2106D || App == 0x29B72DA0 || App == 0xD9E005D8 ) //Quake Enhanced Edition //Steam //Epic //Windows Games Store //GOG
 	#define DA_X 0.05                              //0.075
 	#define DF_Y 0.035
@@ -6273,7 +6273,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DR_W float4( 1000.0, 1000.0, 1000.0, 1000.0)     //Threshold for Color G & H and Color
 	//Smooth Mode Setting
 	#define DL_X 0.875                                       //0.775 //SM Tune
-	#define DM_X 4                                           //HQ Tune
+	#define DM_X 3                                           //HQ Tune
 #elif (App == 0xBE672B63 ) //Grounded
 	#define DA_W 1
 	#define DA_X 0.025
@@ -6429,7 +6429,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DSW 1
 	//Smooth Mode Setting
 	#define DL_X 0.850                                    //SM Tune
-	#define DM_X 4                                        //HQ Tune
+	#define DM_X 3                                        //HQ Tune
 #elif (App == 0xA1D04FDC ) //Dishonored
 	#define DA_X 0.025
 	#define DF_Y 0.005
@@ -6449,7 +6449,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	//
 	#define DF_Z 0.100
 	#define DL_X 0.950                             //SM Tune
-	#define DM_X 4                                 //HQ Tune
+	#define DM_X 3                                 //HQ Tune
 #elif (App == 0xDB778A3B ) //Portal 2 ****
 	#define DA_X 0.025
 	#define DF_Y 0.000
@@ -6588,7 +6588,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define PEW 1
 	//Smooth Mode Setting
 	#define DL_X 0.900                                    //SM Tune
-	#define DM_X 4                                        //HQ Tune
+	#define DM_X 3                                        //HQ Tune
 #elif (App == 0x47C6537E ) //Warhammer 40,000: Boltgun
 	#define DA_W 1
 	#define DA_X 0.070
@@ -6636,7 +6636,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DSW 1
 	//Smooth Mode Setting
 	#define DL_X 0.950                             //SM Tune
-	#define DM_X 4                                 //HQ Tune
+	#define DM_X 3                                 //HQ Tune
 #elif (App == 0x99D666E ) //Layers of Fear 2023 DX12
 	#define DA_W 1
 	#define DA_X 0.015                             // 0.025
@@ -6732,7 +6732,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DJ_W 0.125
 	#define DL_Z 0.25                              // Compat Power
 	#define DL_X 0.950                             //SM Tune
-	#define DM_X 4                                 //HQ Tune
+	#define DM_X 3                                 //HQ Tune
 	#define WSM 15
 	#define OW_WP "Read Help & Change Me\0Custom WP\0The Outer Worlds\0The Outer Worlds Spacer Ed\0"
 	#if IS_DX12
@@ -6841,7 +6841,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DAA 1
 	//Smooth Mode Setting
 	#define DL_X 0.8                                     //SM Tune
-	#define DM_X 4                                       //HQ Tune
+	#define DM_X 3                                       //HQ Tune
 #elif (App == 0x99E35C9B ) //The Outlast Trials
 	#define DA_W 1
 	#define DA_X 0.025
@@ -6933,7 +6933,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DAA 1
 	//Smooth Mode Setting
 	#define DL_X 0.875                                   //SM Tune
-	#define DM_X 4                                       //HQ Tune
+	#define DM_X 3                                       //HQ Tune
 #elif (App == 0x85C3019A ) //Road 96
 	#define DA_W 1
 	#define DB_X 1
@@ -7069,7 +7069,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DSW 1
 	//Smooth Mode Setting
 	#define DL_X 0.9                                     //SM Tune
-	#define DM_X 4                                       //HQ Tune
+	#define DM_X 3                                       //HQ Tune
 #elif (App == 0x29CB30F6 ) //Gripper
 	#define DA_W 1                                       // Set Linearization
 	#define DA_X 0.025                                   // ZPD
@@ -7191,7 +7191,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	*/
 	//Smooth Mode Setting
 	#define DL_X 0.775                                   //SM Tune
-	#define DM_X 4                                       //HQ Tune
+	#define DM_X 3                                       //HQ Tune
 #elif (App == 0xB59EAF54 ) //Fe
 	#define DA_W 1                                       // Set Linearization
 	#define DB_X 1                                       // Flip
@@ -7276,7 +7276,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DJ_Z float4( 1000., 1000., 1000., 0.0 );    //Set Match Thresh
 	//Smooth Mode Setting
 	#define DL_X 0.95                                   //SM Tune
-	#define DM_X 4                                      //HQ Tune
+	#define DM_X 3                                      //HQ Tune
 #elif (App == 0x49C2BE08 ) //CARNAL
 	#define DA_W 1                                       // Set Linearization
 	#define DB_X 1                                       // Flip
@@ -7299,7 +7299,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	*/
 	//Smooth Mode Setting
 	#define DL_X 0.95                                    //SM Tune
-	#define DM_X 4                                       //HQ Tune
+	#define DM_X 3                                       //HQ Tune
 #elif (App == 0x19B7E127 ) //Bloodhound
 	#define DA_W 1                                       // Set Linearization
 	#define DA_X 0.025                                   // ZPD
@@ -7326,7 +7326,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	*/
 	//Smooth Mode Setting
 	#define DL_X 0.95                                    //SM Tune
-	#define DM_X 4                                       //HQ Tune
+	#define DM_X 3                                       //HQ Tune
 #elif (App == 0xB85640E9 ) //Finding the Soul Orb
 	#define DA_W 1                                       // Set Linearization
 	#define DA_X 0.015                                   // ZPD
@@ -7356,7 +7356,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	*/
 	//Smooth Mode Setting
 	#define DL_X 0.95                                    //SM Tune
-	#define DM_X 4                                       //HQ Tune
+	#define DM_X 3                                       //HQ Tune
 #elif (App == 0xB7097475 ) //God Damn The Garden
 	#define DA_W 1
 	#define DB_X 1
@@ -7372,7 +7372,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DSW 1
 	//Smooth Mode Setting
 	#define DL_X 0.95                              //SM Tune
-	#define DM_X 4                                 //HQ Tune
+	#define DM_X 3                                 //HQ Tune
 #elif (App == 0xBF222C03 ) //Among the Sleep
 	#define DA_W 1                                       // Set Linearization
 	#define DB_X 1                                       // Flip
@@ -7506,7 +7506,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DP_W float4( 30.0, 30.0, 26.0, 25.0)         //Threshold for Color C & D and Color
 	//Smooth Mode Setting
 	#define DL_X 0.950                                   //SM Tune
-	#define DM_X 4                                       //HQ Tune
+	#define DM_X 3                                       //HQ Tune
 	#define RHW 1
 #elif (App == 0x2F0BD376 ) //Minecraft / BuildGDX / Delver
 	#define DB_X 1                                       // Flip
@@ -7616,7 +7616,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DAA 1
 	//Smooth Mode Setting
 	#define DL_X 0.85                                    //SM Tune
-	#define DM_X 4                                       //HQ Tune
+	#define DM_X 3                                       //HQ Tune
 #elif (App == 0xFD3DA5A0 ) //Remnant 2
 	#define DS_Z 3                                       // Set View Mode
 	#define DA_W 1                                       // Set Linearization
@@ -7648,7 +7648,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define NFM 1
 	//Smooth Mode Setting
 	#define DL_X 0.825                                   //SM Tune
-	#define DM_X 4                                       //HQ Tune
+	#define DM_X 3                                       //HQ Tune
 #elif (App == 0x31192 ) //Quake 2
 	#define DA_X 0.025                                   //0.0375//0.050      // ZPD
 	#define DF_Y 0.005                                   // Separation
@@ -7675,7 +7675,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	*/
 	//Smooth Mode Setting
 	#define DL_X 0.95                                    //SM Tune
-	#define DM_X 4                                       //HQ Tune
+	#define DM_X 3                                       //HQ Tune
 #elif (App == 0x912AD70F ) //DeadLink
 	#define DA_W 1                                       // Set Linearization
 	#define DA_X 0.025                                   //0.0375//0.050      // ZPD
@@ -7705,7 +7705,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	*/
 	//Smooth Mode Setting
 	#define DL_X 0.95                                    //SM Tune
-	#define DM_X 4                                       //HQ Tune
+	#define DM_X 3                                       //HQ Tune
 #elif (App == 0x7D37D662 ) //Vampire Hunters
 	#define DA_W 1                                        // Set Linearization
 	#define DB_X 1                                        // Flip
@@ -7856,7 +7856,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DF_Z 0.25                              // Set the Balance
 	//Smooth Mode Setting
 	#define DL_X 0.90                              //SM Tune
-	#define DM_X 4                                 //HQ Tune
+	#define DM_X 3                                 //HQ Tune
 #elif (App == 0xFF3A6B3E ) //Middle-earth: Shadow of War
 	#define DA_W 1                                 // Set Linearization
 	#define DA_X 0.025                             // ZPD
@@ -7874,7 +7874,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DF_Z 0.15                              // Set the Balance
 	//Smooth Mode Setting
 	#define DL_X 0.90                              //SM Tune
-	#define DM_X 4                                 //HQ Tune
+	#define DM_X 3                                 //HQ Tune
 #elif (App == 0x874318FE ) //Batman: Arkham Asylum
 	#define DA_X 0.0375                            // ZPD
 	#define DF_Y 0.01                              // Separation
@@ -7891,7 +7891,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DL_Z 0.0                               // Compat Power
 	//Smooth Mode Setting
 	#define DL_X 0.9375                            //SM Tune
-	#define DM_X 4                                 //HQ Tune
+	#define DM_X 3                                 //HQ Tune
 	#define RHW 1
 	#define DSW 1
 #elif (App == 0x7CBA2E8C || App == 0x69277DAF ) // City / Origins
@@ -7911,7 +7911,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DL_Z 0.0                               // Compat Power
 	//Smooth Mode Setting
 	#define DL_X 0.90                              //SM Tune
-	#define DM_X 4                                 //HQ Tune
+	#define DM_X 3                                 //HQ Tune
 	#define RHW 1
 #elif (App == 0x83FC5C9A ) // Kingdoms of Amalur: Re-Reckoning
 	#define DA_X 0.0375                            // ZPD
@@ -7929,7 +7929,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DL_Y 0.5                               // De-Artifact only works on some view modes and costs performance
 	//Smooth Mode Setting
 	#define DL_X 0.9                               //SM Tune
-	#define DM_X 4                                 //HQ Tune
+	#define DM_X 3                                 //HQ Tune
 #elif (App == 0xAC2FD3B ) // Starfield
 	#define DA_W 1                                 // Set Linearization
 	#define DA_X 0.025                             // ZPD
@@ -7958,7 +7958,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DK_W 1                                 //Set Shift Speed
 	//Smooth Mode Setting
 	#define DL_X 0.9                               //SM Tune
-	#define DM_X 4                                 //HQ Tune
+	#define DM_X 3                                 //HQ Tune
 	#define DAA 1
 	#define PEW 1
 	#define RHW 1
@@ -7983,7 +7983,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DL_Z -1.0                              // Compat Power
 	//Smooth Mode Setting
 	#define DL_X 0.9                               //SM Tune
-	#define DM_X 4                                 //HQ Tune
+	#define DM_X 3                                 //HQ Tune
 	#define PEW 1
 	#define DSW 1
 #elif (App == 0xA5FD535F ) //Escape from Tarkov
@@ -8075,7 +8075,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DF_Z 0.15                                   // Set the Balance
 	//Smooth Mode Setting
 	#define DL_X 0.9                                    //SM Tune
-	#define DM_X 4                                      //HQ Tune
+	#define DM_X 3                                      //HQ Tune
 	#define PEW 1
 	#define DSW 1
 #elif (App == 0x1820BE77 ) // Severed Steel
@@ -8098,7 +8098,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DB_W 26
 	//Smooth Mode Setting
 	#define DL_X 0.95                              //SM Tune
-	#define DM_X 4                                 //HQ Tune
+	#define DM_X 3                                 //HQ Tune
 	#define PEW 1
 	#define DSW 1
 #elif (App == 0x853F522D ) // After Us
@@ -8188,7 +8188,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DF_Z 0.100                             // Set the Balance
 	//Smooth Mode Setting
 	#define DL_X 0.95                              //SM Tune
-	#define DM_X 4                                 //HQ Tune
+	#define DM_X 3                                 //HQ Tune
 	#define PEW 1
 	#define NDW 1
 #elif (App == 0xC614B005 ) //Wo Long: Fallen Dynasty
@@ -8265,7 +8265,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DC_W 0.045
 	//Smooth Mode Setting
 	#define DL_X 0.90                              //SM Tune
-	#define DM_X 4                                 //HQ Tune
+	#define DM_X 3                                 //HQ Tune
 	#define PEW 1
 	#define NFM 1
 #elif (App == 0x484F434A ) //My Friendly Neighborhood
@@ -8285,7 +8285,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DF_Z 0.200                              // Set the Balance
 	//Smooth Mode Setting
 	#define DL_X 0.95                               //SM Tune
-	#define DM_X 4                                  //HQ Tune
+	#define DM_X 3                                  //HQ Tune
 	#define PEW 1
 	#define DSW 1
 	#define DAA 1
@@ -8306,7 +8306,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DF_Z 0.277                             // Set the Balance
 	//Smooth Mode Setting
 	#define DL_X 0.90                              //SM Tune
-	#define DM_X 4                                 //HQ Tune
+	#define DM_X 3                                 //HQ Tune
 	#define PEW 1
 #elif (App == 0xCF0D8C10 ) //Viewfinder
 	#define DA_W 1                                       // Set Linearization
@@ -8352,7 +8352,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DF_Z 0.150                                   // Set the Balance
 	//Smooth Mode Setting
 	#define DL_X 0.90                                    //SM Tune
-	#define DM_X 4                                       //HQ Tune
+	#define DM_X 3                                       //HQ Tune
 	#define PEW 1
 	#define DAA 1
 #elif (App == 0x887100FB ) //Trek to Yomi // Ronin
@@ -8377,7 +8377,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DI_X 0.875
 	//Smooth Mode Setting
 	#define DL_X 0.95                              //SM Tune
-	#define DM_X 4                                 //HQ Tune
+	#define DM_X 3                                 //HQ Tune
 	#define PEW 1
 	#define DAA 1
 #elif (App == 0x97CF825C ) //Bleak Faith: Forsaken
@@ -8397,7 +8397,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DB_Y 0.5                               // Affects De-Artifact, -1 to 1. Leave at 0 most of the time; 1 takes depth into account
 	//Smooth Mode Setting
 	#define DL_X 0.75                              //SM Tune
-	#define DM_X 4                                 //HQ Tune
+	#define DM_X 3                                 //HQ Tune
 	#define PEW 1
 	#define DAA 1
 #elif (App == 0xC2B6A79E ) //Daydream: Forgotten Sorrow
@@ -8429,7 +8429,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DF_Z 0.05                                    // Set the Balance
 	//Smooth Mode Setting
 	#define DL_X 0.9                                     //SM Tune
-	#define DM_X 4                                       //HQ Tune
+	#define DM_X 3                                       //HQ Tune
 	#define PEW 1
 	#define DAA 1
 #elif (App == 0xF297227E ) //The Quarry
@@ -8461,7 +8461,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DI_X 0.875
 	//Smooth Mode Setting
 	#define DL_X 0.825                             //SM Tune
-	#define DM_X 4                                 //HQ Tune
+	#define DM_X 3                                 //HQ Tune
 	#define PEW 1
 	#define DAA 1
 #elif (App == 0x303CF2B7 ) //Bramble
@@ -8615,7 +8615,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DR_W float4( 1000.0, 1000.0, 1000.0, 1000.0) //Threshold for Color G & H and Color
 	//Smooth Mode Setting
 	#define DL_X 0.800                                   //SM Tune
-	#define DM_X 4                                       //HQ Tune
+	#define DM_X 3                                       //HQ Tune
 	#define DAA 1
 	#define PEW 1
 #elif (App == 0xA867FE21 ) //Senran Kagura Peach Ball // Special Depth Trigger needs a rework to account for DLSS offsets when detected.
@@ -8653,7 +8653,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DF_Z 0.125                                 // Set the Balance
 	//Smooth Mode Setting
 	#define DL_X 0.900                                 //SM Tune
-	#define DM_X 4                                     //HQ Tune
+	#define DM_X 3                                     //HQ Tune
 	#define PEW 1
 #elif (App == 0x6C54F60B ) //Sonic Superstars
 	#define DA_W 1                                       // Set Linearization
@@ -8684,7 +8684,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DF_Z 0.125                                   // Set the Balance
 	//Smooth Mode Setting
 	#define DL_X 0.900                                   //SM Tune
-	#define DM_X 4                                       //HQ Tune
+	#define DM_X 3                                       //HQ Tune
 	#define DAA 1
 	#define PEW 1
 	#define DSW 1
@@ -8811,7 +8811,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DK_W 4                                        //Set Shift Speed
 	//Smooth Mode Setting
 	#define DL_X 0.90                                     //SM Tune
-	#define DM_X 4                                        //HQ Tune
+	#define DM_X 3                                        //HQ Tune
 	#define DAA 1
 	#define PEW 1
 	#define NFM 1
@@ -8835,7 +8835,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DS_W 0.5                               // Weapon Depth Limit Location 2
 	//Smooth Mode Setting
 	#define DL_X 0.90                              //SM Tune
-	#define DM_X 4                                 //HQ Tune
+	#define DM_X 3                                 //HQ Tune
 	#define DAA 1
 	#define PEW 1
 	#define DSW 1
@@ -8920,7 +8920,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DL_Z 0.5                                       // Compat Power
 	//Smooth Mode Setting
 	#define DL_X 0.75                                      //SM Tune
-	#define DM_X 4                                         //HQ Tune
+	#define DM_X 3                                         //HQ Tune
 	#define HQT 1                                          //HQ Trigger
 	#define DM_Y 4                                         //HQ VRS
 	#define DAA 1
@@ -9054,7 +9054,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DH_W -0.237
 	//Smooth Mode Setting
 	#define DL_X 0.950                                   //SM Tune
-	#define DM_X 4                                       //HQ Tune
+	#define DM_X 3                                       //HQ Tune
 	#define DAA 1
 	#define PEW 1
 	#define NDW 1
@@ -9157,7 +9157,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DL_Z -0.5                                    // Compat Power
 	//Smooth Mode Setting
 	#define DL_X 0.95                                    //SM Tune
-	#define DM_X 4                                       //HQ Tune
+	#define DM_X 3                                       //HQ Tune
 	#define PEW 1
 	#define FOV 1
 	#define DAA 1
@@ -9176,7 +9176,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define WND -1.0                               //Weapon Near pushes depth in and adjusts perspective to match.
 	#define DF_Z 0.030
 	#define DL_X 0.825                             //SM Tune
-	#define DM_X 4                                 //HQ Tune
+	#define DM_X 3                                 //HQ Tune
 	#define DM_Y 0                                 //HQ VRS
 	#define PEW 1
 	#define DAA 1
@@ -9233,7 +9233,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define WND -1.0                                      //Weapon Near pushes depth in and adjusts perspective to match.
 	//Smooth Mode Setting
 	#define DL_X 0.875                                    //SM Tune
-	#define DM_X 6                                        //HQ Tune
+	#define DM_X 5                                        //HQ Tune
 	#define HQT 1                                         //HQ Trigger
 	#define FOV 1
 	#define PEW 1
@@ -9272,7 +9272,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DB_Y 1.0                                      // Affects De-Artifact, -1 to 1. Leave at 0 most of the time; 1 takes depth into account
 	//Smooth Mode Setting
 	#define DL_X 0.875                                    //SM Tune
-	#define DM_X 6                                        //HQ Tune
+	#define DM_X 5                                        //HQ Tune
 	#define FOV 1
 	#define PEW 1
 	#define DAA 1
@@ -9296,7 +9296,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DB_W 9
 	//Smooth Mode Setting
 	#define DL_X 0.925                              //SM Tune
-	#define DM_X 4                                  //HQ Tune
+	#define DM_X 3                                  //HQ Tune
 	#define FOV 1
 #elif (App == 0x226B75F8 ) //Lethal Company
 	#define DA_W 1                                 // Set Linearization
@@ -9321,7 +9321,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DB_W 27
 	//Smooth Mode Setting
 	#define DL_X 0.95                              //SM Tune
-	#define DM_X 4                                 //HQ Tune
+	#define DM_X 3                                 //HQ Tune
 	#define NDW 1
 #elif (App == 0x55AB5DC5 ) //The Invincible -- too many issues due to FOV/BD
 	#define DA_W 1                                 // Set Linearization
@@ -9341,7 +9341,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DB_W 24
 	//Smooth Mode Setting
 	#define DL_X 0.95                              //SM Tune
-	#define DM_X 4                                 //HQ Tune
+	#define DM_X 3                                 //HQ Tune
 	#define NCW 1
 #elif (App == 0x59AD8233 ) //Journey
 	#define DA_X 0.025                             // ZPD
@@ -9358,7 +9358,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DF_Z 0.25                              // Set the Balance
 	//Smooth Mode Setting
 	#define DL_X 0.95                              //SM Tune
-	#define DM_X 4                                 //HQ Tune
+	#define DM_X 3                                 //HQ Tune
 	#define DAA 1
 	#define NFM 1
 #elif (App == 0xD3CA7FE3 ) //Turok 3: Shadow of Oblivion
@@ -9381,7 +9381,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DI_X 0.840
 	//Smooth Mode Setting
 	#define DL_X 0.95                              //SM Tune
-	#define DM_X 4                                 //HQ Tune
+	#define DM_X 3                                 //HQ Tune
 #elif (App == 0x22BA110F ) //Turok: Dinosaur Hunter 2017
 	#define DA_X 0.025                             // ZPD
 	#define DF_Y 0.001                             // Separation
@@ -9406,7 +9406,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DI_X 0.840
 	//Smooth Mode Setting
 	#define DL_X 0.95                              //SM Tune
-	#define DM_X 4                                 //HQ Tune
+	#define DM_X 3                                 //HQ Tune
 	#define FOV 1
 #elif (App == 0x5F1DBD3B ) //Turok 2: Seeds of Evil 2017
 	#define DA_X 0.025                             // ZPD
@@ -9429,7 +9429,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DF_X float2(0.15,0)                    // ZPD Weapon Boundaries Level 1 and Level 2
 	//Smooth Mode Setting
 	#define DL_X 0.95                              //SM Tune
-	#define DM_X 4                                 //HQ Tune
+	#define DM_X 3                                 //HQ Tune
 	#define FOV 1
 #elif (App == 0xEFD03791 ) //Hatsune Miku: Project DIVA Mega Mix+
 	#define DA_W 1                                 // Set Linearization
@@ -9451,7 +9451,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DB_Y 1.0                               // Affects De-Artifact, -1 to 1. Leave at 0 most of the time; 1 takes depth into account
 	//Smooth Mode Setting
 	#define DL_X 0.95                              //SM Tune
-	#define DM_X 4                                 //HQ Tune
+	#define DM_X 3                                 //HQ Tune
 	#define HQT 1                                  //HQ Trigger
 	#define NFM 1
 #elif (App == 0xBF246E4D ) //Kingpin Reloaded
@@ -9479,7 +9479,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DW_Z float4( 23.0, 0.0, 23.0, 1000.0)      //Menu Detection Type for A = X, B = Y, C = Z. W is a wild card amount for X and Z.
 	//Smooth Mode Setting
 	#define DL_X 0.95                                  //SM Tune
-	#define DM_X 4                                     //HQ Tune
+	#define DM_X 3                                     //HQ Tune
 	#define FOV 1
 #elif (App == 0x7DCCBBBD ) //Kingpin: Life of Crime ****
 	#define DA_Y 10.0
@@ -9502,7 +9502,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DF_Z 0.100                             // Set the Balance
 	//Smooth Mode Setting
 	#define DL_X 0.95                              //SM Tune
-	#define DM_X 4                                 //HQ Tune
+	#define DM_X 3                                 //HQ Tune
 	#define NFM 1
 	#define FOV 1
 #elif (App == 0xBE1CF565 ) //Chasm: The Rift
@@ -9524,7 +9524,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DB_W 21                                // Weapon Profile
 	//Smooth Mode Setting
 	#define DL_X 0.925                             //SM Tune
-	#define DM_X 4                                 //HQ Tune
+	#define DM_X 3                                 //HQ Tune
 	#define FOV 1
 #elif (App == 0x2FBBE960 ) //THE MULLER-POWELL PRINCIPLE
 	#define DA_W 1                                 // Set Linearization
@@ -9547,7 +9547,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DB_W 12                                // Weapon Profile
 	//Smooth Mode Setting
 	#define DL_X 0.95                              //SM Tune
-	#define DM_X 4                                 //HQ Tune
+	#define DM_X 3                                 //HQ Tune
 	#define FOV 1
 	#define PEW 1
 #elif (App == 0x3E367B93 ) //Exit 8
@@ -9573,7 +9573,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DC_W -0.090
 	//Smooth Mode Setting
 	#define DL_X 0.75                              //SM Tune
-	#define DM_X 4                                 //HQ Tune
+	#define DM_X 3                                 //HQ Tune
 	#define FOV 1
 	#define PEW 1
 #elif (App == 0x3E367B93 && sApp == 0xA500000 ) //Platform 8
@@ -9598,7 +9598,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DC_W -0.0375
 	//Smooth Mode Setting
 	#define DL_X 0.75                              //SM Tune
-	#define DM_X 4                                 //HQ Tune
+	#define DM_X 3                                 //HQ Tune
 	#define FOV 1
 	#define PEW 1
 #elif (App == 0x28BF39A4 ) //Labrys
@@ -9622,7 +9622,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DL_Y 0.50                              // De-Artifact only works on some view modes and costs performance
 	//Smooth Mode Setting
 	#define DL_X 0.95                              //SM Tune
-	#define DM_X 4                                 //HQ Tune
+	#define DM_X 3                                 //HQ Tune
 	#define NFM 1
 	#define PEW 1
 #elif (App == 0x4296CA1F ) //Pyrami Head
@@ -9638,7 +9638,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DL_Y 2.0                               // De-Artifact only works on some view modes and costs performance
 	//Smooth Mode Setting
 	#define DL_X 0.95                              //SM Tune
-	#define DM_X 4                                 //HQ Tune
+	#define DM_X 3                                 //HQ Tune
 	#define NFM 1
 	#define PEW 1
 #elif (App == 0xAB9A0556 || App == 0xDC6FD0E9 ) //Avatar: Frontiers of Pandora
@@ -9778,7 +9778,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DB_W 6                                     // Weapon Profile
 	//Smooth Mode Setting
 	#define DL_X 0.95                                  //SM Tune
-	#define DM_X 4                                     //HQ Tune
+	#define DM_X 3                                     //HQ Tune
 	#define DAA 1
 #elif (App == 0x81CD2CB4 ) //Graveyard Shift
 	#define DA_W 1                                 // Set Linearization
@@ -9803,7 +9803,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DL_Z -0.125                            // Compat Power
 	//Smooth Mode Setting
 	#define DL_X 0.95                              //SM Tune
-	#define DM_X 4                                 //HQ Tune
+	#define DM_X 3                                 //HQ Tune
 	#define DAA 1
 	#define NCW 1
 #elif (App == 0x9B6F3496 ) //Bloodstained: Ritual of the Night
@@ -9822,7 +9822,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DL_Y 0.125                                 // De-Artifact only works on some view modes and costs performance
 	//Smooth Mode Setting
 	#define DL_X 0.95                                  //SM Tune
-	#define DM_X 4                                     //HQ Tune
+	#define DM_X 3                                     //HQ Tune
 	#define DAA 1
 #elif (App == 0x5A5B43EE ) //Unholy
 	#define DA_W 1                                       // Set Linearization
@@ -9858,7 +9858,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DL_Y 0.375                                   // De-Artifact only works on some view modes and costs performance
 	//Smooth Mode Setting
 	#define DL_X 0.95                                    //SM Tune
-	#define DM_X 4                                       //HQ Tune
+	#define DM_X 3                                       //HQ Tune
 	#define DM_Y 4                                       //HQ VRS
 	#define PEW 1
 	#define DAA 1
@@ -9904,7 +9904,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DB_W 7                                       // Weapon Profile
 	//Smooth Mode Setting
 	#define DL_X 0.95                                    //SM Tune
-	#define DM_X 6                                       //HQ Tune
+	#define DM_X 5                                       //HQ Tune
 	#define PEW 1
 	#define DAA 1
 	#define FOV 1
@@ -9942,7 +9942,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DB_W 23                                      // Weapon Profile
 	//Smooth Mode Setting
 	#define DL_X 0.95                                    //SM Tune
-	#define DM_X 4                                       //HQ Tune
+	#define DM_X 3                                       //HQ Tune
 	#define PEW 1
 	#define DAA 1
 #elif (App == 0x905EF4B ) //Alisa
@@ -9965,7 +9965,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DD_X 1.330
 	//Smooth Mode Setting
 	#define DL_X 0.90                              //SM Tune
-	#define DM_X 4                                 //HQ Tune
+	#define DM_X 3                                 //HQ Tune
 	#define PEW 1
 	#define DAA 1
 	#define DSW 1
@@ -10003,7 +10003,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DBB_Z float4( 28.0, 0.0, 28.0, 29.0)         //Menu Detection Type for A = X, B = Y, C = Z. W is a wild card amount for X and Z.
 	//Smooth Mode Setting
 	#define DL_X 0.95                                    //SM Tune
-	#define DM_X 4                                       //HQ Tune
+	#define DM_X 3                                       //HQ Tune
 	#define PEW 1
 	#define DAA 1
 #elif (App == 0x5D76FD6F ) //En Garde
@@ -10066,7 +10066,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DH_W -0.255
 	//Smooth Mode Setting
 	#define DL_X 0.95                                      //SM Tune
-	#define DM_X 6                                         //HQ Tune
+	#define DM_X 5                                         //HQ Tune
 	#define PEW 1
 	#define DAA 1
 #elif (App == 0xABDEBF40 ) //Kona II: Brume
@@ -10104,7 +10104,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DAA_Z float4( 30.0, 0.0, 30.0, 27.0)        //Menu Detection Type for A = X, B = Y, C = Z. W is a wild card amount for X and Z.
 	//Smooth Mode Setting
 	#define DL_X 0.950                                  //SM Tune
-	#define DM_X 4                                      //HQ Tune
+	#define DM_X 3                                      //HQ Tune
 	#define FOV 1
 	#define RHW 1
 	#define PEW 1
@@ -10186,7 +10186,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DL_Y 0.125                                  // De-Artifact only works on some view modes and costs performance
 	//Smooth Mode Setting
 	#define DL_X 0.85                                   //SM Tune
-	#define DM_X 6                                      //HQ Tune
+	#define DM_X 5                                      //HQ Tune
 	#define DM_Y 0                                      //HQ VRS
 	#define PEW 1
 	#define DAA 1
@@ -10233,7 +10233,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DL_Y 0.25                                     // De-Artifact only works on some view modes and costs performance
 	//Smooth Mode Setting
 	#define DL_X 0.95                                     //SM Tune
-	#define DM_X 4                                        //HQ Tune
+	#define DM_X 3                                        //HQ Tune
 	#define PEW 1
 	#define DAA 1
 #elif (App == 0x6672950B ) //Zortch
@@ -10279,7 +10279,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DF_Z 0.15                                    // Set the Balance
 	//Smooth Mode Setting
 	#define DL_X 0.95                                    //SM Tune
-	#define DM_X 4                                       //HQ Tune
+	#define DM_X 3                                       //HQ Tune
 	#define PEW 1
 #elif (App == 0x6250A9E || App == 0xC661409A || App == 0xC3C44C1A ) //Zombie Army 4: Dead War
 	#define DA_X 0.025                                    // ZPD
@@ -10364,7 +10364,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DK_W 5                                        //Set Shift Speed
 	//Smooth Mode Setting
 	#define DL_X 0.85                                     //SM Tune
-	#define DM_X 6                                        //HQ Tune
+	#define DM_X 5                                        //HQ Tune
 	#define PEW 1
 #elif (App == 0x92FBBC4D ) //Trepang2
 	#define DA_W 1                                      // Set Linearization
@@ -10479,7 +10479,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DK_W 3                                  //Set Shift Speed
 	//Smooth Mode Setting
 	#define DL_X 0.900                              //SM Tune
-	#define DM_X 4                                  //HQ Tune
+	#define DM_X 3                                  //HQ Tune
 	#define DM_Y 3                                  //HQ VRS
 	#define FOV 1
 	#define PEW 1
@@ -10604,7 +10604,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DJ_W 0.625                                    // Weapon Depth Limit Location 1
 	//Smooth Mode Setting
 	#define DL_X 0.9                                      //SM Tune
-	#define DM_X 6                                        //HQ Tune
+	#define DM_X 5                                        //HQ Tune
 	#define HQT 1                                         //HQ Trigger
 	#define DM_Y 0                                        //HQ VRS
 	#define PEW 1
@@ -10632,7 +10632,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DL_Y 0.250                             // De-Artifact only works on some view modes and costs performance
 	//Smooth Mode Setting
 	#define DL_X 0.95                              //SM Tune
-	#define DM_X 4                                 //HQ Tune
+	#define DM_X 3                                 //HQ Tune
 	#define FOV 1
 #elif (App == 0x37DD21C3 ) //Twin Mirror
 	#define DA_W 1                                        // Set Linearization
@@ -10766,7 +10766,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DL_Z 0.125                                   // Compat Power
 	//Smooth Mode Setting
 	#define DL_X 0.8                                     //SM Tune
-	#define DM_X 4                                       //HQ Tune
+	#define DM_X 3                                       //HQ Tune
 	#define DM_Y 0                                       //HQ VRS
 	#define PEW 1
 	#define NDW 1
@@ -10830,7 +10830,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DI_X 0.90
 	//Smooth Mode Setting
 	#define DL_X 0.650                                   //SM Tune
-	#define DM_X 4                                       //HQ Tune
+	#define DM_X 3                                       //HQ Tune
 	#define HQT 1                                        //HQ Trigger
 	#define DM_Y 3                                       //HQ VRS
 	#define PEW 1
@@ -11195,7 +11195,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DI_W 0.125
 	#define DF_Z 0.50
 	#define DL_X 0.75                                    //SM Tune
-	#define DM_X 6                                       //HQ Tune
+	#define DM_X 5                                       //HQ Tune
 	#define DL_Y 0.5                                     //De-Artifact
 	#define DAA_W 2                                      //Warp/Halo Masking Type
 	#define WND 0.5                                      //Weapon Near pushes depth in and adjusts perspective to match.
@@ -11340,7 +11340,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DL_Z -0.100                                   // Compat Power
 	//Smooth Mode Setting
 	#define DL_X 0.75                                     //SM Tune
-	#define DM_X 6                                        //HQ Tune
+	#define DM_X 5                                        //HQ Tune
 	#define HQT 0                                         //HQ Trigger
 	#define DM_Y 0                                        //HQ VRS
 	#define PEW 1
@@ -11418,7 +11418,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DF_Z 0.1                                      // Set the Balance
 	//Smooth Mode Setting
 	#define DL_X 0.875                                    //SM Tune
-	#define DM_X 6                                        //HQ Tune
+	#define DM_X 5                                        //HQ Tune
 	#define HQT 1                                         //HQ Trigger
 	#define DM_Y 0                                        //HQ VRS
 #elif (App == 0x24A63A76 ) //COCOON
@@ -11581,7 +11581,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DL_Y .300                                    // De-Artifact only works on some view modes and costs performance
 	//Smooth Mode Setting
 	#define DL_X 0.7                                     //SM Tune
-	#define DM_X 6                                       //HQ Tune
+	#define DM_X 5                                       //HQ Tune
 	#define HQT 1                                        //HQ Trigger
 	#define DM_Y 0                                       //HQ VRS
 	#define PEW 1
@@ -11715,7 +11715,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DF_Z 0.15                                     // Set the Balance
 	#define DL_Y 0.75                                     // De-Artifact only works on some view modes and costs performance
 	//Smooth Mode
-	#define DM_X 6                                        //SM HQ Tune Power       - Will be made global
+	#define DM_X 5                                        //SM HQ Tune Power       - Will be made global
 	#define HQT 1                                         //SM HQ Trigger
 	#define PEW 1
 	#define FOV 1
@@ -11845,7 +11845,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DL_Y 0.400                                    // De-Artifact only works on some view modes and costs performance
 	#define DL_Z -0.375                                   // Compat Power
 	//Smooth Mode
-	#define DM_X 8                                        //SM HQ Tune Power       - Will be made global
+	#define DM_X 7                                        //SM HQ Tune Power       - Will be made global
 	#define HQT 1                                         //SM HQ Trigger
 	#define PEW 1
 	#define DSW 1
@@ -12508,7 +12508,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DK_W 4                                         //Set Shift Speed
 	//Smooth Mode [ Do Not Use ]
 	#define DL_X 0.9                                       //SM Tune Limit
-	#define DM_X 6                                         //SM HQ Tune Power       - Will be made global
+	#define DM_X 5                                         //SM HQ Tune Power       - Will be made global
 	#define PEW 1
 #elif (App == 0xCDC12A5C ) //The Uncertain: Last Quiet Day
 	#define DB_X 1                                        // Flip
@@ -12626,7 +12626,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DL_Y 0.25                                     // De-Artifact only works on some view modes and costs performance
 	//Smooth Mode [ Do Not Use ]
 	#define DL_X 0.9                                      //SM Tune Limit
-	#define DM_X 6                                        //SM HQ Tune Power       - Will be made global
+	#define DM_X 5                                        //SM HQ Tune Power       - Will be made global
 	#define DSW 1
 #elif (App == 0xF94ECD05 ) //Nevermind
 	#define DB_X 1                                        // Flip
@@ -12685,7 +12685,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DB_W 14                                // Weapon Profile
 	//Smooth Mode
 	#define DL_X 0.9                               //SM Tune Limit
-	#define DM_X 6                                 //SM HQ Tune Power       - Will be made global
+	#define DM_X 5                                 //SM HQ Tune Power       - Will be made global
 	#define HQT 1                                  //SM HQ Trigger
 #elif (App == 0x24B355C5 ) //The Tartarus Key
 	#define DA_W 1                                        // Set Linearization
@@ -13534,7 +13534,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	//Letter Box Correction Offsets With X & Y
 	//Smooth Mode
 	#define DL_X 0.85                              //SM Tune Limit
-	#define DM_X 6                                 //SM HQ Tune Power       - Will be made global
+	#define DM_X 5                                 //SM HQ Tune Power       - Will be made global
 	#define HQT 1                                  //SM HQ Trigger
 	#define PEW 1
 #elif (App == 0x970D87BD ) //The Voidness
@@ -13603,7 +13603,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	//Letter Box Correction Offsets With X & Y
 	//Smooth Mode
 	#define DL_X 0.925                                    //SM Tune Limit
-	#define DM_X 4                                        //SM HQ Tune Power       - Will be made global
+	#define DM_X 3                                        //SM HQ Tune Power       - Will be made global
 	#define DAA 1
 	#define PEW 1
 #elif (App == 0x599f4CAF ) //The Convenience Store Yakin Jiken
@@ -13795,7 +13795,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DL_Y 0.75                              // De-Artifact only works on some view modes and costs performance
 	//Smooth Mode Setting
 	#define DL_X 0.5                               //SM Tune
-	#define DM_X 6                                 //HQ Tune
+	#define DM_X 5                                 //HQ Tune
 	#define HQT 1                                  //HQ Trigger
 	#define DM_Y 0                                 //HQ VRS
 	#define PEW 1
@@ -14082,7 +14082,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DK_Z 1                                          //World Reduction Power
 	//Smooth Mode
 	#define DL_X 0.75                                       //SM Tune Limit
-	#define DM_X 6                                          //SM HQ Tune Power       - Will be made global
+	#define DM_X 5                                          //SM HQ Tune Power       - Will be made global
 	#define NDW 1
 	#define FOV 1
 	#define PEW 1
@@ -14388,7 +14388,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DI_X 0.879
 	//Smooth Mode
 	#define DL_X 0.5                                      //SM Tune Limit
-	#define DM_X 6                                        //SM HQ Tune Power       - Will be made global
+	#define DM_X 5                                        //SM HQ Tune Power       - Will be made global
 	#define PEW 1
 	#define DSW 1
 	#define DRS 1
@@ -14560,7 +14560,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DL_Y 0.5                               // De-Artifact only works on some view modes and costs performance
 	//Smooth Mode
 	#define DL_X 0.75                              //SM Tune Limit
-	#define DM_X 6                                 //SM HQ Tune Power       - Will be made global
+	#define DM_X 5                                 //SM HQ Tune Power       - Will be made global
 	#define NDW 1
 	#define PEW 1
 	#define NFM 1
@@ -14583,7 +14583,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define PEW 1
 	//Smooth Mode Setting
 	#define DL_X 0.75                              //SM Tune
-	#define DM_X 6                                 //HQ Tune
+	#define DM_X 5                                 //HQ Tune
 #elif (App == 0xC543611 ) //Kingdom Hearts Launcher
 	//Simple Menu Detection
 	#define SMD 6                                        //Off 0 | 1 | 2 | 3 | 4 | 5 | 6
@@ -14652,7 +14652,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DL_Z -0.25                             // Compat Power
 	//Smooth Mode
 	#define DL_X 0.75                              //SM Tune Limit
-	#define DM_X 6                                 //SM HQ Tune Power       - Will be made global
+	#define DM_X 5                                 //SM HQ Tune Power       - Will be made global
 	#define NFM 1
 #elif (App == 0x8CD69EAE ) //Kingdom Hearts: Birth by Sleep
 	#define DA_X 0.025                             // ZPD
@@ -14672,7 +14672,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DL_Z -0.25                             // Compat Power
 	//Smooth Mode
 	#define DL_X 0.75                              //SM Tune Limit
-	#define DM_X 6                                 //SM HQ Tune Power       - Will be made global
+	#define DM_X 5                                 //SM HQ Tune Power       - Will be made global
 	#define NFM 1
 #elif (App == 0x3CE12580 ) //Kingdom Hearts: Dream Drop Distance
 	#define DA_X 0.025                             // ZPD
@@ -14692,7 +14692,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DL_Z -0.25                             // Compat Power
 	//Smooth Mode
 	#define DL_X 0.75                              //SM Tune Limit
-	#define DM_X 6                                 //SM HQ Tune Power       - Will be made global
+	#define DM_X 5                                 //SM HQ Tune Power       - Will be made global
 	#define NFM 1
 #elif (App == 0x3215341D ) //Riven
 	#define DA_W 1                                 // Set Linearization
@@ -14737,7 +14737,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DC_W -0.025
 	//Smooth Mode
 	#define DL_X 0.75                              //SM Tune Limit
-	#define DM_X 6                                 //SM HQ Tune Power       - Will be made global
+	#define DM_X 5                                 //SM HQ Tune Power       - Will be made global
 	#define PEW 1
 	#define DAA 1
 #elif (App == 0xB601C7C5 ) //CarX - base profile, may come back to fix the menus
@@ -14912,7 +14912,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DII_Z float4( 1000.0, 1000.0, 1000.0, 1000.0) //Menu Detection Type for A = X, B = Y, C = Z. W is a wild card amount for X and Z.
 	//Smooth Mode
 	#define DL_X 0.5                                      //SM Tune Limit
-	#define DM_X 6                                        //SM HQ Tune Power       - Will be made global
+	#define DM_X 5                                        //SM HQ Tune Power       - Will be made global
 	#define ARW 1
 #elif (App == 0xF3C8CFC3 ) //CYGNI
 	#define DS_Z 3                                 // Set View Mode
@@ -14930,7 +14930,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DL_Z -1.0                              // Compat Power
 	//Smooth Mode
 	#define DL_X 0.5                               //SM Tune Limit
-	#define DM_X 8                                 //SM HQ Tune Power       - Will be made global
+	#define DM_X 7                                 //SM HQ Tune Power       - Will be made global
 	#define PEW 1
 #elif (App == 0x86562CC2 ) //Star Wars Jedi: Fallen Order
 	#define DA_W 1                                 // Set Linearization
@@ -14969,7 +14969,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DL_Y 1.0                               // De-Artifact only works on some view modes and costs performance
 	//Smooth Mode
 	#define DL_X 0.625                             //SM Tune Limit
-	#define DM_X 6                                 //SM HQ Tune Power       - Will be made global
+	#define DM_X 5                                 //SM HQ Tune Power       - Will be made global
 	#define NDW 1
 	#define PEW 1
 	#define DAA 1
@@ -14996,7 +14996,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DL_Y 1.0                               // De-Artifact only works on some view modes and costs performance
 	//Smooth Mode
 	#define DL_X 0.625                             //SM Tune Limit
-	#define DM_X 6                                 //SM HQ Tune Power       - Will be made global
+	#define DM_X 5                                 //SM HQ Tune Power       - Will be made global
 	#define NDW 1
 	#define PEW 1
 	#define DAA 1
@@ -15023,7 +15023,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define WFB 0.5                                // ZPD Weapon Elevation for 1 and 2 scales from [0 - 1]
 	//Smooth Mode
 	#define DL_X 0.625                             //SM Tune Limit
-	#define DM_X 6                                 //SM HQ Tune Power       - Will be made global
+	#define DM_X 5                                 //SM HQ Tune Power       - Will be made global
 	#define PEW 1
 	#define DSW 1
 	#define RHW 1
@@ -15096,7 +15096,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DAA_W 2                                //Warp/Halo Masking Type
 	//Smooth Mode
 	#define DL_X 0.75                              //SM Tune Limit
-	#define DM_X 4                                 //SM HQ Tune Power       - Will be made global
+	#define DM_X 3                                 //SM HQ Tune Power       - Will be made global
 	#define PEW 1
 	#define DAA 1
 #elif (App == 0x6F24790F ) //Final Fantasy XIV Online
@@ -15138,7 +15138,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DF_Z 0.100                             // Set the Balance
 	//Smooth Mode
 	#define DL_X 0.875                             //SM Tune Limit
-	#define DM_X 6                                 //SM HQ Tune Power       - Will be made global
+	#define DM_X 5                                 //SM HQ Tune Power       - Will be made global
 	#define NDW 1
 	#define NFM 1
 	#define DSW 1
@@ -15168,7 +15168,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DC_W -0.071
 	//Smooth Mode
 	#define DL_X 0.625                             //SM Tune Limit
-	#define DM_X 6                                 //SM HQ Tune Power       - Will be made global
+	#define DM_X 5                                 //SM HQ Tune Power       - Will be made global
 	#define PEW 1
 	#define NFM 1
 	#define DSW 1
@@ -15199,7 +15199,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define SDT 3                                           //Special Depth Trigger With X & Y Offsets
 	//Smooth Mode
 	#define DL_X 0.75                                       //SM Tune Limit
-	#define DM_X 6                                          //SM HQ Tune Power       - Will be made global
+	#define DM_X 5                                          //SM HQ Tune Power       - Will be made global
 	#define PEW 1
 	#define DAA 1
 #elif (App == 0x6D3CD99E ) //Blood 2
@@ -15239,7 +15239,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define ASA 0
 	//Smooth Mode
 	#define DL_X 0.750                             //SM Tune Limit
-	#define DM_X 4                                 //SM HQ Tune Power       - Will be made global
+	#define DM_X 3                                 //SM HQ Tune Power       - Will be made global
 	#define NDW 1
 	#define PEW 1
 	#define DSW 1
@@ -15260,7 +15260,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define ASA 0
 	//Smooth Mode
 	#define DL_X 0.750                             //SM Tune Limit
-	#define DM_X 4                                 //SM HQ Tune Power       - Will be made global
+	#define DM_X 3                                 //SM HQ Tune Power       - Will be made global
 	#define NDW 1
 	#define PEW 1
 	#define DSW 1
@@ -15377,7 +15377,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define LBR 1
 	//Smooth Mode
 	#define DL_X 0.9                               //SM Tune Limit
-	#define DM_X 6                                 //SM HQ Tune Power       - Will be made global
+	#define DM_X 5                                 //SM HQ Tune Power       - Will be made global
 #elif (App == 0x505D9D14 ) //Star Wars: KotOR II
 	#define DB_X 1                                 // Flip
 	#define DA_X 0.025                             // ZPD
@@ -15398,7 +15398,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define LBR 1
 	//Smooth Mode
 	#define DL_X 0.9                               //SM Tune Limit
-	#define DM_X 6                                 //SM HQ Tune Power       - Will be made global
+	#define DM_X 5                                 //SM HQ Tune Power       - Will be made global
 #elif (App == 0xF50A9814 ) //Persona 5
 	#define DA_X 0.025                             // ZPD
 	#define DA_Y 55.0                              // Near Plane Adjustment
@@ -15418,7 +15418,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define LBR 1
 	//Smooth Mode
 	#define DL_X 0.75                              //SM Tune Limit
-	#define DM_X 6                                 //SM HQ Tune Power       - Will be made global
+	#define DM_X 5                                 //SM HQ Tune Power       - Will be made global
 	#define PEW 1
 	#define NFM 1
 	#define ARW 1
@@ -15443,7 +15443,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DL_Z -0.25                             // Compat Power
 	//Smooth Mode
 	#define DL_X 0.75                              //SM Tune Limit
-	#define DM_X 6                                 //SM HQ Tune Power       - Will be made global
+	#define DM_X 5                                 //SM HQ Tune Power       - Will be made global
 	#define PEW 1
 #elif (App == 0x98746774 || App == 0xDCB4592 ) //God of War
 	#define DA_W 1                                 // Set Linearization
@@ -15464,7 +15464,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DL_Z -0.2                              // Compat Power
 	//Smooth Mode
 	#define DL_X 0.625                             //SM Tune Limit
-	#define DM_X 6                                 //SM HQ Tune Power       - Will be made global
+	#define DM_X 5                                 //SM HQ Tune Power       - Will be made global
 	#define PEW 1
 #elif (App == 0x95BD2B21 ) //Shadow of a Doubt
 	#define DA_W 1
@@ -15571,7 +15571,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DF_Z 0.375                             // Set the Balance
 	//Smooth Mode
 	#define DL_X 0.75                              //SM Tune Limit
-	#define DM_X 4                                 //SM HQ Tune Power       - Will be made global
+	#define DM_X 3                                 //SM HQ Tune Power       - Will be made global
 	#define NFM 1
 #elif (App == 0x3C96E88E ) //Silent Hill 2
 	#define DA_W 1                                 // Set Linearization
@@ -15592,7 +15592,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DL_Y 0.55                              // De-Artifact only works on some view modes and costs performance
 	//Smooth Mode
 	#define DL_X 0.75                              //SM Tune Limit
-	#define DM_X 6                                 //SM HQ Tune Power       - Will be made global
+	#define DM_X 5                                 //SM HQ Tune Power       - Will be made global
 	#define PEW 1
 	#define DSW 1
 	#define DRS 1
@@ -15616,7 +15616,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DL_Y 0.5                               // De-Artifact only works on some view modes and costs performance
 	//Smooth Mode
 	#define DL_X 0.75                              //SM Tune Limit
-	#define DM_X 6                                 //SM HQ Tune Power       - Will be made global
+	#define DM_X 5                                 //SM HQ Tune Power       - Will be made global
 	#define PEW 1
 #elif (App == 0x5D510AD ) //Farming Simulator 19
 	#define DA_X 0.025                             // ZPD
@@ -15636,7 +15636,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DL_Y 0.55                              // De-Artifact only works on some view modes and costs performance
 	//Smooth Mode
 	#define DL_X 0.75                              //SM Tune Limit
-	#define DM_X 6                                 //SM HQ Tune Power       - Will be made global
+	#define DM_X 5                                 //SM HQ Tune Power       - Will be made global
 	#define PEW 1
 #elif (App == 0x54BD1D74 ) //Biomutant
 	#define DA_W 1                                 // Set Linearization
@@ -15655,7 +15655,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DL_Y 0.50                              // De-Artifact only works on some view modes and costs performance
 	//Smooth Mode
 	#define DL_X 0.75                              //SM Tune Limit
-	#define DM_X 6                                 //SM HQ Tune Power       - Will be made global
+	#define DM_X 5                                 //SM HQ Tune Power       - Will be made global
 	#define PEW 1
 	#define DSW 1
 #elif (App == 0xCB210AE6 ) //Until Dawn
@@ -15679,7 +15679,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DH_W -0.256
 	//Smooth Mode
 	#define DL_X 0.75                              //SM Tune Limit
-	#define DM_X 6                                 //SM HQ Tune Power       - Will be made global
+	#define DM_X 5                                 //SM HQ Tune Power       - Will be made global
 	#define PEW 1
 	#define DSW 1
 #elif (App == 0xE80D8009 ) //Risk of Rain
@@ -15753,7 +15753,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DLL_W float4( 0.0, 0.0, 1.0, 0.0)             //X = Hoz size, Y = Vert size, Z = inversion amount, W = depth elevation 0.0-0.5 (above is Auto).
 	//Smooth Mode
 	#define DL_X 0.5                                      //SM Tune Limit
-	#define DM_X 6                                        //SM HQ Tune Power       - Will be made global
+	#define DM_X 5                                        //SM HQ Tune Power       - Will be made global
 	#define NDW 1
 	#define PEW 1
 	#define DSW 1
@@ -15786,7 +15786,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DO_W float4( 30.0  , 30.0  , 1000.0, 1000.0 )  //Threshold for Color A & B and Color
 	//Smooth Mode
 	#define DL_X 0.5                                       //SM Tune Limit
-	#define DM_X 6                                         //SM HQ Tune Power       - Will be made global
+	#define DM_X 5                                         //SM HQ Tune Power       - Will be made global
 	#define PEW 1
 #elif (App == 0x98E46BDC ) //Forgive Me Father
 	#define DA_W 1
@@ -15817,7 +15817,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DB_W 23                                // Weapon Profile
 	//Smooth Mode
 	#define DL_X 0.75                              //SM Tune Limit
-	#define DM_X 6                                 //SM HQ Tune Power       - Will be made global
+	#define DM_X 5                                 //SM HQ Tune Power       - Will be made global
 	#define NDW 1
 	#define PEW 1
 	#define NFM 1
@@ -15852,7 +15852,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define WZD 1                                  //Weapon Zoom Detection
 	//Smooth Mode
 	#define DL_X 0.75                              //SM Tune Limit
-	#define DM_X 6                                 //SM HQ Tune Power       - Will be made global
+	#define DM_X 5                                 //SM HQ Tune Power       - Will be made global
 	#define PEW 1
 	#define NFM 1
 	#define DSW 1
@@ -15910,7 +15910,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DB_W 25                                // Weapon Profile
 	//Smooth Mode
 	#define DL_X 0.75                              //SM Tune Limit
-	#define DM_X 6                                 //SM HQ Tune Power       - Will be made global
+	#define DM_X 5                                 //SM HQ Tune Power       - Will be made global
 	#define PEW 1
 	#define ARW 1
 #elif (App == 0xF4776195 ) //The Thing: Remastered
@@ -15982,7 +15982,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DLL_W float4( 0.0, 0.0, 1.0, 0.0)             //X = Hoz size, Y = Vert size, Z = inversion amount, W = depth elevation 0.0-0.5 (above is Auto).
 	//Smooth Mode
 	#define DL_X 0.75                                     //SM Tune Limit
-	#define DM_X 6                                        //SM HQ Tune Power       - Will be made global
+	#define DM_X 5                                        //SM HQ Tune Power       - Will be made global
 	#define PEW 1
 	#define NFM 1
 #elif (App == 0x446E2223 ) //Uncharted: Legacy of Thieves Collection - Uncharted: The Lost Legacy / Steam
@@ -16002,7 +16002,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DL_Z 0.75                                     // Compat Power
 	//Smooth Mode
 	#define DL_X 0.75                                     //SM Tune Limit
-	#define DM_X 6                                        //SM HQ Tune Power       - Will be made global
+	#define DM_X 5                                        //SM HQ Tune Power       - Will be made global
 	#define PEW 1
 	#define ARW 1
 	//Simple Menu Detection
@@ -16041,7 +16041,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DL_Z -1.0                              // Compat Power
 	//Smooth Mode
 	#define DL_X 0.75                              //SM Tune Limit
-	#define DM_X 6                                 //SM HQ Tune Power       - Will be made global
+	#define DM_X 5                                 //SM HQ Tune Power       - Will be made global
 	#define PEW 1
 	#define ARW 1
 	#define BDF 1                                  //Barrel Distortion Fix k1 k2 k3 and Zoom
@@ -16074,7 +16074,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DL_Z 0.5                               // Compat Power
 	//Smooth Mode
 	#define DL_X 0.75                              //SM Tune Limit
-	#define DM_X 6                                 //SM HQ Tune Power       - Will be made global
+	#define DM_X 5                                 //SM HQ Tune Power       - Will be made global
 	#define PEW 1
 	#define DRS 1
 	#define ARW 1
@@ -16101,7 +16101,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DL_Y 0.125                             // -1.0             // De-Artifact only works on some view modes and costs performance
 	//Smooth Mode
 	#define DL_X 0.75                              //SM Tune Limit
-	#define DM_X 6                                 //SM HQ Tune Power       - Will be made global
+	#define DM_X 5                                 //SM HQ Tune Power       - Will be made global
 	#define PEW 1
 #elif (App == 0x769C6C5D ) //Call of the Wild: The Angler Steam
 	#define DS_Z 2                                        // Set View Mode
@@ -16177,7 +16177,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DLL_W float4( 0.0, 0.0, 1.0, 0.0)             //X = Hoz size, Y = Vert size, Z = inversion amount, W = depth elevation 0.0-0.5 (above is Auto).
 	//Smooth Mode
 	#define DL_X 0.75                                     //SM Tune Limit
-	#define DM_X 6                                        //SM HQ Tune Power       - Will be made global
+	#define DM_X 5                                        //SM HQ Tune Power       - Will be made global
 	#define NDW 1
 	#define PEW 1
 	#define DRS 1
@@ -16201,7 +16201,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DL_Z 0.25                              // Compat Power
 	//Smooth Mode
 	#define DL_X 0.75                              //SM Tune Limit
-	#define DM_X 4                                 //SM HQ Tune Power       - Will be made global
+	#define DM_X 3                                 //SM HQ Tune Power       - Will be made global
 	#define PEW 1
 	#define DSW 1
 #elif (App == 0xF17F5400 ) //Slitterhead
@@ -16222,7 +16222,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DL_Y 0.5                               // -1.0             // De-Artifact only works on some view modes and costs performance
 	//Smooth Mode
 	#define DL_X 0.75                              //SM Tune Limit
-	#define DM_X 6                                 //SM HQ Tune Power       - Will be made global
+	#define DM_X 5                                 //SM HQ Tune Power       - Will be made global
 	#define PEW 1
 #elif (App == 0xB02D9356 ) //Cruel
 	#define DA_W 1                                 // Set Linearization
@@ -16244,7 +16244,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DB_W 24                                // Weapon Profile
 	//Smooth Mode
 	#define DL_X 0.75                              //SM Tune Limit
-	#define DM_X 6                                 //SM HQ Tune Power       - Will be made global
+	#define DM_X 5                                 //SM HQ Tune Power       - Will be made global
 	#define PEW 1
 	#define DSW 1
 	#define ARW 1
@@ -16261,7 +16261,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DF_Z 0.125                             // Set the Balance
 	//Smooth Mode
 	#define DL_X 0.75                              //SM Tune Limit
-	#define DM_X 4                                 //SM HQ Tune Power       - Will be made global
+	#define DM_X 3                                 //SM HQ Tune Power       - Will be made global
 	#define PEW 1
 	#define DSW 1
 	#define ARW 1
@@ -16286,7 +16286,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DNN_Y 0.703                            //Vertical Scale
 	//Smooth Mode
 	#define DL_X 0.75                              //SM Tune Limit
-	#define DM_X 6                                 //SM HQ Tune Power       - Will be made global
+	#define DM_X 5                                 //SM HQ Tune Power       - Will be made global
 	#define PEW 1
 	#define DSW 1
 	#define ARW 1
@@ -16305,7 +16305,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DB_W 27                                // Weapon Profile
 	//Smooth Mode
 	#define DL_X 0.75                              //SM Tune Limit
-	#define DM_X 4                                 //SM HQ Tune Power       - Will be made global
+	#define DM_X 3                                 //SM HQ Tune Power       - Will be made global
 	#define NFM 1
 	#define DSW 1
 #elif (App == 0xE2CE5064 ) //My Summer Car
@@ -16325,7 +16325,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DF_Z 0.25                              // Set the Balance
 	//Smooth Mode
 	#define DL_X 0.75                              //SM Tune Limit
-	#define DM_X 6                                 //SM HQ Tune Power       - Will be made global
+	#define DM_X 5                                 //SM HQ Tune Power       - Will be made global
 	#define NFM 1
 	#define DSW 1
 #elif (App == 0xAC222D6F ) //Europa
@@ -16347,7 +16347,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DL_Y 0.5                               // -1.0             // De-Artifact only works on some view modes and costs performance
 	//Smooth Mode
 	#define DL_X 0.75                              //SM Tune Limit
-	#define DM_X 6                                 //SM HQ Tune Power       - Will be made global
+	#define DM_X 5                                 //SM HQ Tune Power       - Will be made global
 	#define PEW 1
 #elif (App == 0xFE11942E ) //The Cabin Factory
 	#define DA_W 1                                 // Set Linearization
@@ -16366,7 +16366,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DL_Z 0.5                               // Compat Power
 	//Smooth Mode
 	#define DL_X 0.75                              //SM Tune Limit
-	#define DM_X 6                                 //SM HQ Tune Power       - Will be made global
+	#define DM_X 5                                 //SM HQ Tune Power       - Will be made global
 	#define PEW 1
 #elif (App == 0x4EDBEAD0 ) //Children of the Sun
 	#define DS_Z 2                                 // Set View Mode
@@ -16389,7 +16389,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DL_Z 0.5                               // Compat Power
 	//Smooth Mode
 	#define DL_X 0.75                              //SM Tune Limit
-	#define DM_X 6                                 //SM HQ Tune Power       - Will be made global
+	#define DM_X 5                                 //SM HQ Tune Power       - Will be made global
 	#define PEW 1
 #elif (App == 0x77E2B6B1 ) //Judgment
 	#define DA_W 1                                        // Set Linearization
@@ -16468,7 +16468,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DY_W float4( 1000.0, 1000.0, 1000.0, 1000.0)  //Threshold for Color O & P and Color
 	//Smooth Mode
 	#define DL_X 0.75                                     //SM Tune Limit
-	#define DM_X 6                                        //SM HQ Tune Power       - Will be made global
+	#define DM_X 5                                        //SM HQ Tune Power       - Will be made global
 	#define PEW 1
 	#define DRS 1
 	#define DAA 1
@@ -16498,7 +16498,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DL_Y 0.25                              // De-Artifact only works on some view modes and costs performance
 	//Smooth Mode
 	#define DL_X 0.75                              //SM Tune Limit
-	#define DM_X 4                                 //SM HQ Tune Power       - Will be made global
+	#define DM_X 3                                 //SM HQ Tune Power       - Will be made global
 	#define PEW 1
 	#define DAA 1
 	#define ARW 1
@@ -16521,7 +16521,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DL_Y 0.75                              // De-Artifact only works on some view modes and costs performance
 	//Smooth Mode
 	#define DL_X 0.75                              //SM Tune Limit
-	#define DM_X 6                                 //SM HQ Tune Power       - Will be made global
+	#define DM_X 5                                 //SM HQ Tune Power       - Will be made global
 	#define HQT 1                                  //SM HQ Trigger
 	#define PEW 1
 	#define DRS 1
@@ -16542,7 +16542,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DF_Z 0.5                               // Set the Balance
 	//Smooth Mode
 	#define DL_X 0.75                              //SM Tune Limit
-	#define DM_X 4                                 //SM HQ Tune Power       - Will be made global
+	#define DM_X 3                                 //SM HQ Tune Power       - Will be made global
 	#define PEW 1
 	#define DRS 1
 	#define DAA 1
@@ -16569,7 +16569,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DL_Z -0.5                              // Compat Power
 	//Smooth Mode
 	#define DL_X 0.75                              //SM Tune Limit
-	#define DM_X 6                                 //SM HQ Tune Power       - Will be made global
+	#define DM_X 5                                 //SM HQ Tune Power       - Will be made global
 	#define PEW 1
 	#define DRS 1
 	#define DAA 1
@@ -16612,7 +16612,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DL_Y 0.375                             // De-Artifact only works on some view modes and costs performance
 	#define DL_Z -0.25                             // Compat Power
 	#define DL_X 0.850                             //SM Tune
-	#define DM_X 4                                 //HQ Tune
+	#define DM_X 3                                 //HQ Tune
 	#define PEW 1
 	#define DAA 1
 	#define DSW 1
@@ -16637,7 +16637,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define THF 3                                  // Target high-frequency information like hair
 	//Smooth Mode
 	#define DL_X 0.75                              //SM Tune Limit
-	#define DM_X 4                                 //SM HQ Tune Power       - Will be made global
+	#define DM_X 3                                 //SM HQ Tune Power       - Will be made global
 	#define DAA_W 2                                //Warp/Halo Masking Type
 	#define PEW 1
 	#define DRS 1
@@ -16668,7 +16668,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DI_X 0.875
 	//Smooth Mode
 	#define DL_X 0.75                              //SM Tune Limit
-	#define DM_X 6                                 //SM HQ Tune Power       - Will be made global
+	#define DM_X 5                                 //SM HQ Tune Power       - Will be made global
 	#define DAA_W 2                                //Warp/Halo Masking Type
 	#define HNR 1                                  //Halo Near Reduction for anything near the player
 	#define PEW 1
@@ -16722,7 +16722,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	//Letter Box Correction Offsets With X & Y
 	//Smooth Mode
 	#define DL_X 0.75                              //SM Tune Limit
-	#define DM_X 6                                 //SM HQ Tune Power       - Will be made global
+	#define DM_X 5                                 //SM HQ Tune Power       - Will be made global
 	#define HQT 1                                  //SM HQ Trigger
 	#define PEW 1
 #elif (App == 0xEEDDA3DE ) //Dragon Ball: Sparking! Zero - thank you GenesisJeanz
@@ -16744,7 +16744,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	//Letter Box Correction Offsets With X & Y
 	//Smooth Mode
 	#define DL_X 0.75                              //SM Tune Limit
-	#define DM_X 6                                 //SM HQ Tune Power       - Will be made global
+	#define DM_X 5                                 //SM HQ Tune Power       - Will be made global
 	#define PEW 1
 #elif (App == 0xFEE78174 ) //Manus Del
 	#define DA_W 1                                 // Set Linearization
@@ -16761,7 +16761,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	//Letter Box Correction Offsets With X & Y
 	//Smooth Mode
 	#define DL_X 0.75                              //SM Tune Limit
-	#define DM_X 4                                 //SM HQ Tune Power       - Will be made global
+	#define DM_X 3                                 //SM HQ Tune Power       - Will be made global
 	#define PEW 1
 	#define FOV 1
 	#define ARW 1
@@ -16785,7 +16785,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	//Letter Box Correction Offsets With X & Y
 	//Smooth Mode
 	#define DL_X 0.75                              //SM Tune Limit
-	#define DM_X 6                                 //SM HQ Tune Power       - Will be made global
+	#define DM_X 5                                 //SM HQ Tune Power       - Will be made global
 	#define DAA_W 2                                //Warp/Halo Masking Type
 	#define DSW 1
 #elif (App == 0x6FC1FF71 ) //Black Mesa **
@@ -16815,9 +16815,12 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DK_W 3                                 //Set Shift Speed
 	//Smooth Mode Setting
 	#define DL_X 0.65                              //SM Tune
-	#define DM_X 4                                 //HQ Tune
+	#define DM_X 3                                 //HQ Tune
 #elif (App == 0x2D1A3028 ) //Bright Memory: Infinite
-	#define DS_Z 2                                 // Set View Mode
+	#define G_Note "Note: Launch from Steam with the DX12 and Ray Tracing option.\n" \
+	               "In DX11, DLSS Frame Generation (sl.dlss_g.dll) hides the depth buffer.\n" \
+	               "Do not add -dx12 as a launch option, it crashes the game.\n"
+	#define DS_Z 4                                 // Set View Mode
 	#define DA_W 1                                 // Set Linearization
 	#define DA_X 0.075                             // ZPD
 	#define DHH_W 0.5                              // Smart Convergence
@@ -16833,15 +16836,17 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define WND 0.5                                //Weapon Near pushes depth in and adjusts perspective to match.
 	#define DG_Z 0.0625                            // Min: weapon hands that are part of the world, with Auto and Trim
 	#define DE_W 0.50                              // Auto
-	#define DF_W float4(0.0001,0.000,0.0,0.35)     // Edge & Scale
+	#define DI_Z 0.200                             // Trim
+	#define DF_W float4(0.0001,0.0025,0.0,0.25)    // Edge & Scale
 	#define ASA 1                                  //Auto Depth Scaling
 	#define DF_Z 0.125                             // Set the Balance
 	#define DL_Y 0.500                             // De-Artifact only works on some view modes and costs performance
 	#define RSV 1                                  //Reconstruction Set Value 0 | 1 | 2
+	#define AJM 1                                  //Anti-Jitter Mode 0 | 1 | 2 | 3 | 4
 	//Letter Box Correction Offsets With X & Y
 	//Smooth Mode
 	#define DL_X 0.725                             //SM Tune Limit
-	#define DM_X 6                                 //SM HQ Tune Power       - Will be made global
+	#define DM_X 5                                 //SM HQ Tune Power       - Will be made global
 	#define DAA_W 2                                //Warp/Halo Masking Type
 	#define PEW 1
 	#define DAA 1
@@ -16871,7 +16876,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DI_X 0.879
 	//Smooth Mode
 	#define DL_X 0.9                                      //SM Tune Limit
-	#define DM_X 6                                        //SM HQ Tune Power       - Will be made global
+	#define DM_X 5                                        //SM HQ Tune Power       - Will be made global
 	#define DAA_W 2                                       //Warp/Halo Masking Type
 	#define PEW 1
 	#define DAA 1
@@ -16916,7 +16921,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	//Letter Box Correction Offsets With X & Y
 	//Smooth Mode
 	#define DL_X 0.9                               //SM Tune Limit
-	#define DM_X 6                                 //SM HQ Tune Power       - Will be made global
+	#define DM_X 5                                 //SM HQ Tune Power       - Will be made global
 	#define DAA_W 2                                //Warp/Halo Masking Type
 	#define PEW 1
 	#define DAA 1
@@ -16943,7 +16948,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	//Letter Box Correction Offsets With X & Y
 	//Smooth Mode
 	#define DL_X 0.75                              //SM Tune Limit
-	#define DM_X 6                                 //SM HQ Tune Power       - Will be made global
+	#define DM_X 5                                 //SM HQ Tune Power       - Will be made global
 	#define PEW 1
 	#define NFM 1
 	#define DAA 1
@@ -16969,7 +16974,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	//Letter Box Correction Offsets With X & Y
 	//Smooth Mode
 	#define DL_X 0.75                              //SM Tune Limit
-	#define DM_X 4                                 //SM HQ Tune Power       - Will be made global
+	#define DM_X 3                                 //SM HQ Tune Power       - Will be made global
 #elif (App == 0xD37289 ) //Signalis
 	#define DA_W 1                                 // Set Linearization
 	#define DB_X 1                                 // Flip
@@ -16995,7 +17000,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define HMC 0.520
 	//Smooth Mode
 	#define DL_X 0.75                              //SM Tune Limit
-	#define DM_X 6                                 //SM HQ Tune Power       - Will be made global
+	#define DM_X 5                                 //SM HQ Tune Power       - Will be made global
 	#define DSW 1
 	#define ARW 1
 #elif (App == 0x22B98797 ) //Cult of the Lamb
@@ -17070,7 +17075,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DII_Z float4( 1000.0, 1000.0, 1000.0, 1000.0) //Menu Detection Type for A = X, B = Y, C = Z. W is a wild card amount for X and Z.
 	//Smooth Mode
 	#define DL_X 0.75                                     //SM Tune Limit
-	#define DM_X 4                                        //SM HQ Tune Power       - Will be made global
+	#define DM_X 3                                        //SM HQ Tune Power       - Will be made global
 	#define FOV 1
 	#define ARW 1
 #elif (App == 0x16811BA2 ) //Empyreal Demo
@@ -17097,7 +17102,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	//Letter Box Correction Offsets With X & Y
 	//Smooth Mode
 	#define DL_X 0.75                              //SM Tune Limit
-	#define DM_X 6                                 //SM HQ Tune Power       - Will be made global
+	#define DM_X 5                                 //SM HQ Tune Power       - Will be made global
 	#define DAA_W 2                                //Warp/Halo Masking Type
 	#define PEW 1
 	#define DRS 1
@@ -17122,7 +17127,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DB_W 16                                // Weapon Profile
 	//Smooth Mode
 	#define DL_X 0.75                              //SM Tune Limit
-	#define DM_X 6                                 //SM HQ Tune Power       - Will be made global
+	#define DM_X 5                                 //SM HQ Tune Power       - Will be made global
 	#define PEW 1
 	#define DSW 1
 #elif (App == 0xAE198EC6 ) //Fly Knight
@@ -17142,7 +17147,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	//Letter Box Correction Offsets With X & Y
 	//Smooth Mode
 	#define DL_X 0.75                              //SM Tune Limit
-	#define DM_X 6                                 //SM HQ Tune Power       - Will be made global
+	#define DM_X 5                                 //SM HQ Tune Power       - Will be made global
 	#define DAA_W 2                                //Warp/Halo Masking Type
 	#define PEW 1
 #elif (App == 0x65C2F980 ) //Tom Clancy's EndWar
@@ -17167,7 +17172,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	//Letter Box Correction Offsets With X & Y
 	//Smooth Mode
 	#define DL_X 0.75                                        //SM Tune Limit
-	#define DM_X 6                                           //SM HQ Tune Power       - Will be made global
+	#define DM_X 5                                           //SM HQ Tune Power       - Will be made global
 	#define PEW 1
 #elif (App == 0xABADF9C2 ) //Sonic Robo Blast 2
 	#define G_Info "Sonic Robo Blast 2: AppID 0xABADF9C2\n" //Will now be added to every profile at the end.
@@ -17191,7 +17196,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	//Letter Box Correction Offsets With X & Y
 	//Smooth Mode
 	#define DL_X 0.75                                       //SM Tune Limit
-	#define DM_X 6                                          //SM HQ Tune Power       - Will be made global
+	#define DM_X 5                                          //SM HQ Tune Power       - Will be made global
 	#define NDW 1
 #elif (App == 0x267579EB ) //Helldivers 2
 	#define G_Info "Helldivers 2: AppID 0x267579EB\n"      //Will now be added to every profile at the end.
@@ -17299,7 +17304,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DL_Y 0.250                                     // De-Artifact only works on some view modes and costs performance
 	//Smooth Mode
 	#define DL_X 0.75                                      //SM Tune Limit
-	#define DM_X 6                                         //SM HQ Tune Power       - Will be made global
+	#define DM_X 5                                         //SM HQ Tune Power       - Will be made global
 	#define NDW 1
 	#define PEW 1
 #elif (App == 0xCBE571E2 ) //Butcher's Creek
@@ -17322,7 +17327,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	//Letter Box Correction Offsets With X & Y
 	//Smooth Mode
 	#define DL_X 0.75                                    //SM Tune Limit
-	#define DM_X 6                                       //SM HQ Tune Power       - Will be made global
+	#define DM_X 5                                       //SM HQ Tune Power       - Will be made global
 	#define PEW 1
 #elif (App == 0xDCFDCBA7 || App == 0x64AF115E ) //Assassin's Creed Shadows
 	#define G_Info "Assassin's Creed Shadows: AppID 0x64AF115E\n" \
@@ -17353,7 +17358,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	//Letter Box Correction Offsets With X & Y
 	//Smooth Mode
 	#define DL_X 0.625                             //SM Tune Limit
-	#define DM_X 6                                 //SM HQ Tune Power       - Will be made global
+	#define DM_X 5                                 //SM HQ Tune Power       - Will be made global
 	#define DAA_W 2                                //Warp/Halo Masking Type
 	#define PEW 1
 	#define NFM 1
@@ -17383,7 +17388,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	//Letter Box Correction Offsets With X & Y
 	//Smooth Mode
 	#define DL_X 0.75                                 //SM Tune Limit
-	#define DM_X 6                                    //SM HQ Tune Power       - Will be made global
+	#define DM_X 5                                    //SM HQ Tune Power       - Will be made global
 	#define PEW 1
 	#define FOV 1
 #elif (App == 0x3867F04A ) //Castle of Illusion
@@ -17407,7 +17412,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	//Letter Box Correction Offsets With X & Y
 	//Smooth Mode
 	#define DL_X 0.75                                       //SM Tune Limit
-	#define DM_X 6                                          //SM HQ Tune Power       - Will be made global
+	#define DM_X 5                                          //SM HQ Tune Power       - Will be made global
 	#define PEW 1
 	#define DAA 1
 #elif (App == 0x23D5135F ) //Alien: Isolation
@@ -17439,7 +17444,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DC_W -0.022
 	//Smooth Mode
 	#define DL_X 0.875                                   //SM Tune Limit
-	#define DM_X 6                                       //SM HQ Tune Power       - Will be made global
+	#define DM_X 5                                       //SM HQ Tune Power       - Will be made global
 	#define PEW 1
 #elif (App == 0x803B6FC7 ) //Lunacid: Tears of the Moon
 	#define G_Info "Lunacid Tears of the Moon: AppID 0x803B6FC7\n" //Will now be added to every profile at the end.
@@ -17463,7 +17468,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	//Letter Box Correction Offsets With X & Y
 	//Smooth Mode
 	#define DL_X 0.75                              //SM Tune Limit
-	#define DM_X 6                                 //SM HQ Tune Power       - Will be made global
+	#define DM_X 5                                 //SM HQ Tune Power       - Will be made global
 	#define NFM 1
 	#define DSW 1
 #elif (App == 0xB097DD6F ) //The Last of Us Part I
@@ -17494,7 +17499,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	//Letter Box Correction Offsets With X & Y
 	//Smooth Mode
 	#define DL_X 0.75                                          //SM Tune Limit
-	#define DM_X 6                                             //SM HQ Tune Power       - Will be made global
+	#define DM_X 5                                             //SM HQ Tune Power       - Will be made global
 	#define PEW 1
 	#define NFM 1
 	#define DSW 1
@@ -17529,7 +17534,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	//Letter Box Correction Offsets With X & Y
 	//Smooth Mode
 	#define DL_X 0.525                                          //SM Tune Limit
-	#define DM_X 6                                              //SM HQ Tune Power       - Will be made global
+	#define DM_X 5                                              //SM HQ Tune Power       - Will be made global
 	#define PEW 1
 	#define NFM 1
 	#define DSW 1
@@ -17561,7 +17566,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define UIB 1                                  //Set upper bound on UI
 	//Smooth Mode
 	#define DL_X 0.5                               //SM Tune Limit
-	#define DM_X 6                                 //SM HQ Tune Power       - Will be made global
+	#define DM_X 5                                 //SM HQ Tune Power       - Will be made global
 	#define DAA_W 2                                //Warp/Halo Masking Type
 	#define HQT 1                                  //SM HQ Trigger
 	#define PEW 1
@@ -17593,7 +17598,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define UIB 1                                  //Set upper bound on UI
 	//Smooth Mode
 	#define DL_X 0.5                               //SM Tune Limit
-	#define DM_X 6                                 //SM HQ Tune Power       - Will be made global
+	#define DM_X 5                                 //SM HQ Tune Power       - Will be made global
 	#define DAA_W 2                                //Warp/Halo Masking Type
 	#define HQT 1                                  //SM HQ Trigger
 	#define PEW 1
@@ -17623,7 +17628,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	//Letter Box Correction Offsets With X & Y
 	//Smooth Mode
 	#define DL_X 0.875                              //SM Tune Limit
-	#define DM_X 6                                  //SM HQ Tune Power       - Will be made global
+	#define DM_X 5                                  //SM HQ Tune Power       - Will be made global
 	#define NDW 1
 	#define PEW 1
 #elif (App == 0x491EA19E ) //Cyberpunk 2077
@@ -17753,7 +17758,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DR_W float4( 28.0, 17.0, 29.0, 17.0)           //Threshold for Color G & H and Color
 	//Smooth Mode
 	#define DL_X 0.75                                      //SM Tune Limit
-	#define DM_X 6                                         //SM HQ Tune Power       - Will be made global
+	#define DM_X 5                                         //SM HQ Tune Power       - Will be made global
 	#define DAA_W 2                                        //Warp/Halo Masking Type
 	#define PEW 1
 	#define DSW 1
@@ -17784,7 +17789,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DB_W 3                                         // Weapon Profile
 	//Smooth Mode
 	#define DL_X 0.875                                     //SM Tune Limit
-	#define DM_X 6                                         //SM HQ Tune Power       - Will be made global
+	#define DM_X 5                                         //SM HQ Tune Power       - Will be made global
 	#define PEW 1
 #elif (App == 0x60F43F45 ) //Resident Evil 7: Biohazard
 	#define DA_W 1                                       // Set Linearization
@@ -17835,7 +17840,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DL_Y 0.5                                     // De-Artifact only works on some view modes and costs performance
 	//Smooth Mode Setting
 	#define DL_X 0.950                                   //SM Tune
-	#define DM_X 4                                       //HQ Tune
+	#define DM_X 3                                       //HQ Tune
 	#define DM_Y 5                                       //HQ VRS
 	#define BDF 1
 	#define DC_X 0.25
@@ -17872,7 +17877,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DB_W 7                                 // Weapon Profile
 	//Smooth Mode
 	#define DL_X 0.625                             //SM Tune Limit
-	#define DM_X 6                                 //SM HQ Tune Power       - Will be made global
+	#define DM_X 5                                 //SM HQ Tune Power       - Will be made global
 	#define PEW 1
 	#define FOV 1
 #elif (App == 0x18FC9649 ) //Marvel's Spider-Man 2
@@ -17900,7 +17905,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	//Letter Box Correction Offsets With X & Y
 	//Smooth Mode
 	#define DL_X 0.7                                  //SM Tune Limit
-	#define DM_X 6                                    //SM HQ Tune Power       - Will be made global
+	#define DM_X 5                                    //SM HQ Tune Power       - Will be made global
 	#define PEW 1
 	#define DSW 1
 	#define DRS 1
@@ -17936,7 +17941,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	//Letter Box Correction Offsets With X & Y
 	//Smooth Mode
 	#define DL_X 0.75                              //SM Tune Limit
-	#define DM_X 6                                 //SM HQ Tune Power       - Will be made global
+	#define DM_X 5                                 //SM HQ Tune Power       - Will be made global
 	#define PEW 1
 	#define DSW 1
 	#define DRS 1
@@ -17993,7 +17998,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define HMC 0.5
 	//Smooth Mode
 	#define DL_X 0.75                              //SM Tune Limit
-	#define DM_X 4                                 //SM HQ Tune Power       - Will be made global
+	#define DM_X 3                                 //SM HQ Tune Power       - Will be made global
 	#define PEW 1
 	#define NDG 1
 #elif (App == 0xC2762327 && sApp == 0xA600000 ) //Harry Potter and the Chamber of Secrets 2
@@ -18021,7 +18026,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define HMC 0.5
 	//Smooth Mode
 	#define DL_X 0.75                              //SM Tune Limit
-	#define DM_X 6                                 //SM HQ Tune Power       - Will be made global
+	#define DM_X 5                                 //SM HQ Tune Power       - Will be made global
 	#define PEW 1
 	#define NDG 1
 #elif (App == 0xE9C72A53 ) //Harry Potter and the Prisoner of Azkaban 3
@@ -18047,7 +18052,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define HMC 0.5
 	//Smooth Mode
 	#define DL_X 0.75                              //SM Tune Limit
-	#define DM_X 4                                 //SM HQ Tune Power       - Will be made global
+	#define DM_X 3                                 //SM HQ Tune Power       - Will be made global
 	#define PEW 1
 	#define NDG 1
 #elif (App == 0x4249D707 || App == 0xc2762327 ) // Mafia Known as "game" WTF.... Need to correct this
@@ -18066,7 +18071,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DB_W 27
 	//Smooth Mode Setting
 	#define DL_X 0.9                               //SM Tune
-	#define DM_X 4                                 //HQ Tune
+	#define DM_X 3                                 //HQ Tune
 	#define PEW 1
 	#define DSW 1
 #elif (App == 0x9805AEA5 ) //Atomfall
@@ -18096,7 +18101,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define WZD 1                                  //Weapon Zoom Detection
 	//Smooth Mode
 	#define DL_X 0.75                              //SM Tune Limit
-	#define DM_X 6                                 //SM HQ Tune Power       - Will be made global
+	#define DM_X 5                                 //SM HQ Tune Power       - Will be made global
 	#define DAA_W 2                                //Warp/Halo Masking Type
 	#define PEW 1
 	#define FOV 1
@@ -18127,7 +18132,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define WZD 1                                  //Weapon Zoom Detection
 	//Smooth Mode
 	#define DL_X 0.75                              //SM Tune Limit
-	#define DM_X 6                                 //SM HQ Tune Power       - Will be made global
+	#define DM_X 5                                 //SM HQ Tune Power       - Will be made global
 	#define DAA_W 2                                //Warp/Halo Masking Type
 	#define PEW 1
 #elif (App == 0xA68AA950 ) //Fortune's Run
@@ -18172,7 +18177,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	//Letter Box Correction Offsets With X & Y
 	//Smooth Mode
 	#define DL_X 0.75                                      //SM Tune Limit
-	#define DM_X 6                                         //SM HQ Tune Power       - Will be made global
+	#define DM_X 5                                         //SM HQ Tune Power       - Will be made global
 	#define DAA_W 2                                        //Warp/Halo Masking Type
 	#define PEW 1
 	#define DSW 1
@@ -18200,7 +18205,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	//Letter Box Correction Offsets With X & Y
 	//Smooth Mode
 	#define DL_X 0.75                              //SM Tune Limit
-	#define DM_X 6                                 //SM HQ Tune Power       - Will be made global
+	#define DM_X 5                                 //SM HQ Tune Power       - Will be made global
 	#define DAA_W 2                                //Warp/Halo Masking Type
 	#define PEW 1
 #elif (App == 0x9BD7A4FD ) //Star Wars Battlefront II
@@ -18227,7 +18232,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	//Letter Box Correction Offsets With X & Y
 	//Smooth Mode
 	#define DL_X 0.75                              //SM Tune Limit
-	#define DM_X 6                                 //SM HQ Tune Power       - Will be made global
+	#define DM_X 5                                 //SM HQ Tune Power       - Will be made global
 	#define PEW 1
 	#define FOV 1
 #elif (App == 0x49D2CF5E ) //Lies of P
@@ -18264,7 +18269,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	//Letter Box Correction Offsets With X & Y
 	//Smooth Mode
 	#define DL_X 0.825                                      //SM Tune Limit
-	#define DM_X 4                                          //SM HQ Tune Power       - Will be made global
+	#define DM_X 3                                          //SM HQ Tune Power       - Will be made global
 	#define PEW 1
 	#define DAA 1
 	//Menu Detection Templates - needs a special shader to adjust
@@ -18342,7 +18347,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	//HUD Mode Trigger
 	//Smooth Mode
 	#define DL_X 0.875                               //SM Tune Limit
-	#define DM_X 6                                   //SM HQ Tune Power       - Will be made global
+	#define DM_X 5                                   //SM HQ Tune Power       - Will be made global
 	#define PEW 1
 	#define DAA 1
 #elif (App == 0x1C2203BC || App == 0x835B2D42 ) //TUNIC //Steam //Windows Store
@@ -18376,7 +18381,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	//HUD Mode Trigger
 	//Smooth Mode
 	#define DL_X 0.7                                 //SM Tune Limit
-	#define DM_X 6                                   //SM HQ Tune Power       - Will be made global
+	#define DM_X 5                                   //SM HQ Tune Power       - Will be made global
 	#define PEW 1
 	#define DSW 1
 #elif (App == 0x4B794AD5 ) //KIBORG
@@ -18408,7 +18413,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	//HUD Mode Trigger
 	//Smooth Mode
 	#define DL_X 0.7                                 //SM Tune Limit
-	#define DM_X 6                                   //SM HQ Tune Power       - Will be made global
+	#define DM_X 5                                   //SM HQ Tune Power       - Will be made global
 	#define PEW 1
 	#define NFM 1
 #elif (App == 0x4CA0AC85 ) //Broken Lore: Don't Watch
@@ -18439,7 +18444,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DC_W -0.020
 	//Smooth Mode
 	#define DL_X 0.7                                 //SM Tune Limit
-	#define DM_X 6                                   //SM HQ Tune Power       - Will be made global
+	#define DM_X 5                                   //SM HQ Tune Power       - Will be made global
 	#define PEW 1
 	#define ARW 1
 #elif (App == 0x99C2795A ) //Necrophosis
@@ -18473,7 +18478,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	//Barrel Distortion Fix k1 k2 k3 and Zoom
 	//Smooth Mode
 	#define DL_X 0.75                              //SM Tune Limit
-	#define DM_X 6                                 //SM HQ Tune Power       - Will be made global
+	#define DM_X 5                                 //SM HQ Tune Power       - Will be made global
 	#define PEW 1
 	#define ARW 1
 #elif (App == 0x2B9AD630 || App == 0x873950A8 ) //Project SandFall
@@ -18511,7 +18516,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	//Barrel Distortion Fix k1 k2 k3 and Zoom
 	//Smooth Mode
 	#define DL_X 0.5                                 //SM Tune Limit
-	#define DM_X 6                                   //SM HQ Tune Power       - Will be made global
+	#define DM_X 5                                   //SM HQ Tune Power       - Will be made global
 	#define PEW 1
 	#define ARW 1
 #elif (App == 0x9838851A || App == 0xCC389230 ) //Tom Clancy's Ghost Recon Breakpoint
@@ -18548,7 +18553,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	//Barrel Distortion Fix k1 k2 k3 and Zoom
 	//Smooth Mode
 	#define DL_X 0.75                                //SM Tune Limit
-	#define DM_X 6                                   //SM HQ Tune Power       - Will be made global
+	#define DM_X 5                                   //SM HQ Tune Power       - Will be made global
 	#define DAA_W 2                                  //Warp/Halo Masking Type
 	#define PEW 1
 	#define ARW 1
@@ -18576,7 +18581,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	//Barrel Distortion Fix k1 k2 k3 and Zoom
 	//Smooth Mode
 	#define DL_X 0.75                                //SM Tune Limit
-	#define DM_X 6                                   //SM HQ Tune Power       - Will be made global
+	#define DM_X 5                                   //SM HQ Tune Power       - Will be made global
 	#define PEW 1
 #elif (App == 0x8D16AF94 ) //Exanima
 	#define G_Info "Exanima | AppID 0x8D16AF94 \n"
@@ -18608,7 +18613,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	//Barrel Distortion Fix k1 k2 k3 and Zoom
 	//Smooth Mode
 	#define DL_X 0.75                                //SM Tune Limit
-	#define DM_X 6                                   //SM HQ Tune Power       - Will be made global
+	#define DM_X 5                                   //SM HQ Tune Power       - Will be made global
 	#define DAA 1
 #elif (App == 0x854F40DF ) //Doom The Dark Ages
 	#define G_Info "Doom The Dark Ages | AppID 0x854F40DF STEAM & Windows Store \n"
@@ -18743,7 +18748,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	//Barrel Distortion Fix k1 k2 k3 and Zoom
 	//Smooth Mode
 	#define DL_X 0.78125                           //SM Tune Limit
-	#define DM_X 6                                 //SM HQ Tune Power       - Will be made global
+	#define DM_X 5                                 //SM HQ Tune Power       - Will be made global
 	#define DAA_W 2                                //Warp/Halo Masking Type
 	#define PEW 1
 	#define DRS 1
@@ -18819,7 +18824,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	//Barrel Distortion Fix k1 k2 k3 and Zoom
 	//Smooth Mode
 	#define DL_X 0.600                             //SM Tune Limit
-	#define DM_X 4                                 //SM HQ Tune Power       - Will be made global
+	#define DM_X 3                                 //SM HQ Tune Power       - Will be made global
 	#define HQT 1                                  //SM HQ Trigger
 	#define PEW 1
 	#define DSW 1
@@ -18858,7 +18863,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	//Barrel Distortion Fix k1 k2 k3 and Zoom
 	//Smooth Mode
 	#define DL_X 0.625                             //SM Tune Limit
-	#define DM_X 6                                 //SM HQ Tune Power       - Will be made global
+	#define DM_X 5                                 //SM HQ Tune Power       - Will be made global
 	#define DAA_W 2                                //Warp/Halo Masking Type
 	#define PEW 1
 #elif (App == 0x147C5D2A ) //Steelrising
@@ -18891,7 +18896,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	//Barrel Distortion Fix k1 k2 k3 and Zoom
 	//Smooth Mode
 	#define DL_X 0.65                                     //SM Tune Limit
-	#define DM_X 6                                        //SM HQ Tune Power       - Will be made global
+	#define DM_X 5                                        //SM HQ Tune Power       - Will be made global
 	#define PEW 1
 	#define DAA 1
 	/*
@@ -18992,7 +18997,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	//Barrel Distortion Fix k1 k2 k3 and Zoom
 	//Smooth Mode
 	#define DL_X 0.5625                            //SM Tune Limit
-	#define DM_X 6                                 //SM HQ Tune Power       - Will be made global
+	#define DM_X 5                                 //SM HQ Tune Power       - Will be made global
 	#define PEW 1
 #elif (App == 0xB4403655 ) //Elden Ring
 	#define G_Info "Elden Ring | AppID 0xB4403655 STEAM \n"
@@ -19116,7 +19121,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define WND 1.0                                //Weapon Near pushes depth in and adjusts perspective to match.
 	//Smooth Mode Setting
 	#define DL_X 0.625                             //SM Tune
-	#define DM_X 6                                 //HQ Tune
+	#define DM_X 5                                 //HQ Tune
 	#define HQT 1                                  //HQ Trigger
 	#define PEW 1
 	#define DAA 1
@@ -19160,7 +19165,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	//Barrel Distortion Fix k1 k2 k3 and Zoom
 	//Smooth Mode
 	#define DL_X 0.75                              //SM Tune Limit
-	#define DM_X 6                                 //SM HQ Tune Power       - Will be made global
+	#define DM_X 5                                 //SM HQ Tune Power       - Will be made global
 	#define HQT 1                                  //SM HQ Trigger
 	#define PEW 1
 	#define NFM 1
@@ -19252,7 +19257,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	//HUD Mode Trigger
 	//Barrel Distortion Fix k1 k2 k3 and Zoom
 	//Smooth Mode
-	#define DM_X 6                                 //SM HQ Tune Power       - Will be made global
+	#define DM_X 5                                 //SM HQ Tune Power       - Will be made global
 	#define DAA_W 2                                //Warp/Halo Masking Type
 	#define PEW 1
 #elif (App == 0x51C8FDAA ) //Assassin's Creed Valhalla
@@ -19287,7 +19292,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	//Barrel Distortion Fix k1 k2 k3 and Zoom
 	//Smooth Mode
 	#define DL_X 0.625                                      //SM Tune Limit
-	#define DM_X 6                                          //SM HQ Tune Power       - Will be made global
+	#define DM_X 5                                          //SM HQ Tune Power       - Will be made global
 	#define DAA_W 2                                         //Warp/Halo Masking Type
 	#define PEW 1
 	#define NFM 1
@@ -19398,7 +19403,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	*/
 	//Smooth Mode Setting
 	#define DL_X 0.95                                    //SM Tune
-	#define DM_X 4                                       //HQ Tune
+	#define DM_X 3                                       //HQ Tune
 	#define PEW 1
 #elif (App == 0x91FF5778 || App == 0x6DD82022 ) //Amnesia: A Machine for Pigs
 	#define DA_X 0.015                                   // ZPD
@@ -19426,7 +19431,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	*/
 	//Smooth Mode Setting
 	#define DL_X 0.95                                    //SM Tune
-	#define DM_X 4                                       //HQ Tune
+	#define DM_X 3                                       //HQ Tune
 #elif (App == 0x8F017168 ) //System Shock 2: 25th Anniversary Remaster
 	#define G_Info "System Shock 2: 25th Anniversary Remaster | AppID 0xBD8B2F39 STEAM \n"
 	#if IS_VK
@@ -19463,7 +19468,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	//Barrel Distortion Fix k1 k2 k3 and Zoom
 	//Smooth Mode
 	#define DL_X 0.75                              //SM Tune Limit
-	#define DM_X 6                                 //SM HQ Tune Power       - Will be made global
+	#define DM_X 5                                 //SM HQ Tune Power       - Will be made global
 	#define PEW 1
 	#define FOV 1
 #elif (App == 0x71170B42 ) //Blood: Fresh Supply
@@ -19501,7 +19506,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	//Barrel Distortion Fix k1 k2 k3 and Zoom
 	//Smooth Mode
 	#define DL_X 0.75                              //SM Tune Limit
-	#define DM_X 6                                 //SM HQ Tune Power       - Will be made global
+	#define DM_X 5                                 //SM HQ Tune Power       - Will be made global
 	#define NFM 1
 	#define FOV 1
 #elif (App == 0xF070FF2 ) //Stellar Blade
@@ -19571,7 +19576,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	//Barrel Distortion Fix k1 k2 k3 and Zoom
 	//Smooth Mode
 	#define DL_X 0.75                              //SM Tune Limit
-	#define DM_X 6                                 //SM HQ Tune Power       - Will be made global
+	#define DM_X 5                                 //SM HQ Tune Power       - Will be made global
 	#define PEW 1
 	#define DAA 1
 #elif (App == 0xFE3FC68F ) //Seria
@@ -19603,7 +19608,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	//Barrel Distortion Fix k1 k2 k3 and Zoom
 	//Smooth Mode
 	#define DL_X 0.75                              //SM Tune Limit
-	#define DM_X 6                                 //SM HQ Tune Power       - Will be made global
+	#define DM_X 5                                 //SM HQ Tune Power       - Will be made global
 	#define PEW 1
 #elif (App == 0xC270FC91 ) //The Midnight Walk
 	#define G_Info "The Midnight Walk | AppID 0xC270FC91 Steam \n"
@@ -19638,7 +19643,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	//Barrel Distortion Fix k1 k2 k3 and Zoom
 	//Smooth Mode
 	#define DL_X 0.75                              //SM Tune Limit
-	#define DM_X 6                                 //SM HQ Tune Power       - Will be made global
+	#define DM_X 5                                 //SM HQ Tune Power       - Will be made global
 	#define PEW 1
 #elif (App == 0xBA13E318 ) //JDM: Japanese Drift Master
 	#define G_Info "JDM: Japanese Drift Master | AppID 0xBA13E318 Steam \n"
@@ -19776,7 +19781,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DL_Y 0.55                                      // De-Artifact only works on some view modes and costs performance
 	//Smooth Mode Setting
 	#define DL_X 0.625                                     //SM Tune
-	#define DM_X 6                                         //HQ Tune
+	#define DM_X 5                                         //HQ Tune
 	#define HQT 1                                          //HQ Trigger
 	#define PEW 1
 	#define NDW 1
@@ -19810,7 +19815,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	//Barrel Distortion Fix k1 k2 k3 and Zoom
 	//Smooth Mode
 	#define DL_X 0.85                              //SM Tune Limit
-	#define DM_X 6                                 //SM HQ Tune Power       - Will be made global
+	#define DM_X 5                                 //SM HQ Tune Power       - Will be made global
 #elif (App == 0x5B7D9A73 ) //Out of Sight
 	#define G_Info "Out Of Sight | AppID 0x5B7D9A73 Steam \n"
 	/*
@@ -19853,7 +19858,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DC_W -0.025
 	//Smooth Mode
 	#define DL_X 0.875                             //SM Tune Limit
-	#define DM_X 6                                 //SM HQ Tune Power       - Will be made global
+	#define DM_X 5                                 //SM HQ Tune Power       - Will be made global
 #elif (App == 0x2BAF6411 ) //Sons of the Forest
 	#define G_Info "Sons of the Forest | AppID 0x2BAF6411 Steam \n"
 	#define G_Note "Note: If you use DYNAMIC RESOLUTION < FSR >:\n" \
@@ -19899,7 +19904,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DL_Y 0.5                               //De-Artifact
 	//Smooth Mode
 	#define DL_X 0.63                              //SM Tune Limit
-	#define DM_X 4                                 //SM HQ Tune Power       - Will be made global
+	#define DM_X 3                                 //SM HQ Tune Power       - Will be made global
 	#define DAA 1
 	#define PEW 1
 	#define DSW 1
@@ -19965,7 +19970,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	//Barrel Distortion Fix k1 k2 k3 and Zoom
 	//Smooth Mode
 	#define DL_X 0.75                              //SM Tune Limit
-	#define DM_X 4                                 //SM HQ Tune Power       - Will be made global
+	#define DM_X 3                                 //SM HQ Tune Power       - Will be made global
 	#define PEW 1
 	#define DAA 1
 	#define FOV 1
@@ -19999,7 +20004,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	//Barrel Distortion Fix k1 k2 k3 and Zoom
 	//Smooth Mode
 	#define DL_X 0.75                              //SM Tune Limit
-	#define DM_X 6                                 //SM HQ Tune Power       - Will be made global
+	#define DM_X 5                                 //SM HQ Tune Power       - Will be made global
 	#define PEW 1
 #elif (App == 0x42F66404 ) //Bayonetta
 	#define G_Info "Bayonetta | AppID 0x42F66404 STEAM \n"
@@ -20029,7 +20034,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	//Barrel Distortion Fix k1 k2 k3 and Zoom
 	//Smooth Mode
 	#define DL_X 0.75                              //SM Tune Limit
-	#define DM_X 4                                 //SM HQ Tune Power       - Will be made global
+	#define DM_X 3                                 //SM HQ Tune Power       - Will be made global
 	#define PEW 1
 #elif (App == 0x3B5BD6F2 ) //PEAK
 	#define G_Info "PEAK | AppID 0x3B5BD6F2 STEAM \n"
@@ -20062,7 +20067,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	//Barrel Distortion Fix k1 k2 k3 and Zoom
 	//Smooth Mode
 	#define DL_X 0.66                              //SM Tune Limit
-	#define DM_X 6                                 //SM HQ Tune Power       - Will be made global
+	#define DM_X 5                                 //SM HQ Tune Power       - Will be made global
 	#define PEW 1
 #elif (App == 0x301B8589 ) //Wuchang: Fallen Feathers
 	#define G_Info "Wuchang: Fallen Feathers | AppID 0x301B8589 STEAM \n"
@@ -20168,7 +20173,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	//Barrel Distortion Fix k1 k2 k3 and Zoom
 	//Smooth Mode
 	#define DL_X 0.625                             //SM Tune Limit
-	#define DM_X 6                                 //SM HQ Tune Power       - Will be made global
+	#define DM_X 5                                 //SM HQ Tune Power       - Will be made global
 	#define PEW 1
 #elif (App == 0x39BAA02B ) //ZingangGame
 	#define G_Info "F.I.S.T: Forged in Shadow Torch | AppID 0x39BAA02B STEAM \n"
@@ -20202,7 +20207,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	//Barrel Distortion Fix k1 k2 k3 and Zoom
 	//Smooth Mode
 	#define DL_X 0.75                              //SM Tune Limit
-	#define DM_X 6                                 //SM HQ Tune Power       - Will be made global
+	#define DM_X 5                                 //SM HQ Tune Power       - Will be made global
 	#define PEW 1
 #elif (App == 0xD37046E7 ) //DollsNest
 	#define G_Info "Dolls Nest | AppID 0xD37046E7 STEAM \n"
@@ -20232,7 +20237,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	//Barrel Distortion Fix k1 k2 k3 and Zoom
 	//Smooth Mode
 	#define DL_X 0.50                              //SM Tune Limit
-	#define DM_X 6                                 //SM HQ Tune Power       - Will be made global
+	#define DM_X 5                                 //SM HQ Tune Power       - Will be made global
 	#define PEW 1
 	#define NFM 1
 #elif (App == 0xBD8B2F39 ) //Assassin's Creed Odyssey
@@ -20266,7 +20271,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define AIM 1                                  //Alpha Isolation Mode
 	//Smooth Mode
 	#define DL_X 0.75                              //SM Tune Limit
-	#define DM_X 6                                 //SM HQ Tune Power       - Will be made global
+	#define DM_X 5                                 //SM HQ Tune Power       - Will be made global
 	#define PEW 1
 	#define FOV 1
 #elif (App == 0xC7A2E4E4 ) //Epic Mickey Recolored
@@ -20319,7 +20324,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DMM_W float4(1,8,0,0.0)                       //UI Toggle ON/OFF | UI Type 0-3 | Narrow or Wide ON/OFF | Distance From Edge -1 to 1;
 	//Smooth Mode
 	#define DL_X 0.9                                      //SM Tune Limit
-	#define DM_X 6                                        //SM HQ Tune Power       - Will be made global
+	#define DM_X 5                                        //SM HQ Tune Power       - Will be made global
 #elif (App == 0x66B23380 ) //Hell Is Us
 	#define G_Info "Hell Is Us | AppID 0x66B23380 STEAM \n"
 	/*
@@ -20556,7 +20561,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define RSV 1                                  //Reconstruction Set Value 0 | 1 | 2
 	//Smooth Mode
 	#define DL_X 0.625                             //SM Tune Limit
-	#define DM_X 6                                 //SM HQ Tune Power       - Will be made global
+	#define DM_X 5                                 //SM HQ Tune Power       - Will be made global
 	#define PEW 1
 	#define DSW 1
 	#define DAA 1
@@ -20608,7 +20613,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DMM_W float4(0,5,0,0)                  //UI Toggle ON/OFF | UI Type 0-3 | Narrow or Wide ON/OFF | Distance From Edge -1 to 1;
 	//Smooth Mode
 	#define DL_X 0.875                             //SM Tune Limit
-	#define DM_X 4                                 //SM HQ Tune Power       - Will be made global
+	#define DM_X 3                                 //SM HQ Tune Power       - Will be made global
 	#define PEW 1
 	#define DAA 1
 #elif (App == 0xC34702F ) //Megabonk
@@ -20712,7 +20717,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	//Barrel Distortion Fix k1 k2 k3 and Zoom
 	//Smooth Mode
 	#define DL_X 0.625                             //SM Tune Limit
-	#define DM_X 6                                 //SM HQ Tune Power       - Will be made global
+	#define DM_X 5                                 //SM HQ Tune Power       - Will be made global
 	#define DAA_W 2                                //Warp/Halo Masking Type
 #elif (App == 0x3BDD00D4 ) //Little Nightmares 3
 	#define G_Info "Little Nightmares III | AppID 0x3BDD00D4 STEAM \n"
@@ -21004,7 +21009,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	//Barrel Distortion Fix k1 k2 k3 and Zoom
 	//Smooth Mode
 	#define DL_X 0.625                             //SM Tune Limit
-	#define DM_X 4                                 //SM HQ Tune Power       - Will be made global
+	#define DM_X 3                                 //SM HQ Tune Power       - Will be made global
 	#define NDW 1
 	#define PEW 1
 #elif (App == 0x85F76405 ) //Tormented Souls 2
@@ -21901,10 +21906,12 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DE_X 4                                 // ZPD Boundary
 	#define DE_Y 0.75                              // Set ZPD Boundary Level Zero
 	#define DE_Z 0.375                             // Speed that Boundary is Enforced
+	//#define DG_W -0.125                            // Shift Boundary Out of screen 0.5 and or In screen -0.5
+	#define DMM 1                                 // Detect More Mode
 	#define OIL 4                                  // Set How many Levels
 	#define OIF float4(0.625,0.5,0.375,0.25)       // Fix enables if Value is > 0.0
-	#define DI_W float4(0.5,1.0,1.5,2.0)
-	#define DKK_W float2(0.125,3.0)                //XY
+	#define DI_W float4(0.5,1.0,1.25,2.5)
+	#define DKK_W float2(0.125,5.0)                //XY
 	#define WND 0.5                                // Weapon Near pushes depth in and adjusts perspective to match.
 	#define DF_Z 0.5                               // Set the Balance
 	#define DL_Y -1.0                              // De-Artifact only works on some view modes and costs performance
@@ -21922,7 +21929,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	//Letter Box Masking with size adjust: 1 = top and bottom, 2 = left and right
 	//Smooth Mode
 	#define DL_X 0.65                              //SM Tune Limit
-	#define DM_X 4                                 //SM HQ Tune Power       - Will be made global
+	#define DM_X 3                                 //SM HQ Tune Power       - Will be made global
 	#define PEW 1
 #elif (App == 0xEAD26AA4 ) // Caput Mortum
 	#define G_Info "Caput Mortum | AppID 0xEAD26AA4 STEAM \n"
@@ -22139,7 +22146,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	//Letter Box Correction Offsets With X & Y
 	//Letter Box Masking with size adjust: 1 = top and bottom, 2 = left and right
 	//Smooth Mode
-	#define DM_X 4                                  //SM HQ Tune Power       - Will be made global
+	#define DM_X 3                                  //SM HQ Tune Power       - Will be made global
 	#define HQT 1                                   //SM HQ Trigger
 	#define PEW 1
 	#define DAA 1
@@ -22228,7 +22235,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DL_Z 0.25                                    // Compat Power
 	//Smooth Mode Setting
 	#define DL_X 0.95                                    //SM Tune
-	#define DM_X 4                                       //HQ Tune
+	#define DM_X 3                                       //HQ Tune
 	#define DM_Y 4                                       //HQ VRS
 	#define DAA 1
 #elif (App == 0x7EF1B86E ) //Marvel's Avengers
@@ -22427,7 +22434,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	//Letter Box Masking with size adjust: 1 = top and bottom, 2 = left and right
 	#define MED 1                                  //Mask Edge In Depth
 	//Smooth Mode
-	#define DM_X 4                                 //SM HQ Tune Power       - Will be made global
+	#define DM_X 3                                 //SM HQ Tune Power       - Will be made global
 	#define PEW 1
 	#define DAA 1
 #elif (App == 0xB3729F40 ) //Rocket League Steam
@@ -22457,7 +22464,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	//Letter Box Correction Offsets With X & Y
 	//Letter Box Masking with size adjust: 1 = top and bottom, 2 = left and right
 	//Smooth Mode
-	#define DM_X 4                                 //SM HQ Tune Power       - Will be made global
+	#define DM_X 3                                 //SM HQ Tune Power       - Will be made global
 	#define PEW 1
 	#define DSW 1
 	#define DAA 1
@@ -22590,7 +22597,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	//Letter Box Correction Offsets With X & Y
 	//Letter Box Masking with size adjust: 1 = top and bottom, 2 = left and right
 	//Smooth Mode
-	#define DM_X 4                                 //SM HQ Tune Power       - Will be made global
+	#define DM_X 3                                 //SM HQ Tune Power       - Will be made global
 	#define PEW 1
 #elif (App == 0x1F89A910 ) //Under the Waves
 	#define G_Info "Under The Waves | AppID 0x1F89A910 STEAM \n"
@@ -22743,7 +22750,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	//Letter Box Masking with size adjust: 1 = top and bottom, 2 = left and right
 	//Smooth Mode
 	#define DL_X 0.75                              //SM Tune Limit
-	#define DM_X 4                                 //SM HQ Tune Power       - Will be made global
+	#define DM_X 3                                 //SM HQ Tune Power       - Will be made global
 	#define PEW 1
 #elif (App == 0x60F440F8 ) //Resident Evil Village
 	#define G_Info "Resident Evil Village: AppID 0x60F440F8\n" //Will now be added to every profile at the end.
@@ -22784,7 +22791,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	//Letter Box Correction Offsets With X & Y
 	//Smooth Mode
 	#define DL_X 0.6375                                        //SM Tune Limit
-	#define DM_X 6                                             //SM HQ Tune Power       - Will be made global
+	#define DM_X 5                                             //SM HQ Tune Power       - Will be made global
 	#define PEW 1
 	#define DAA 1
 #elif (App == 0x962f016C ) //Nioh 3
@@ -22818,7 +22825,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	//Letter Box Masking with size adjust: 1 = top and bottom, 2 = left and right
 	//Smooth Mode
 	#define DL_X 0.5625                            //SM Tune Limit
-	#define DM_X 4                                 //SM HQ Tune Power       - Will be made global
+	#define DM_X 3                                 //SM HQ Tune Power       - Will be made global
 	#define PEW 1
 #elif (App == 0xCBE94135 ) //Anno: Mutationem
 	#define G_Info "Anno: Mutationem | AppID 0xCBE94135 STEAM \n"
@@ -22858,7 +22865,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	//Letter Box Masking with size adjust: 1 = top and bottom, 2 = left and right
 	//Smooth Mode
 	#define DL_X 0.5625                            //SM Tune Limit
-	#define DM_X 4                                 //SM HQ Tune Power       - Will be made global
+	#define DM_X 3                                 //SM HQ Tune Power       - Will be made global
 	#define PEW 1
 #elif (App == 0xD58F450 ) //REANIMAL
 	#define G_Info "REANIMAL | AppID 0xD58F450 STEAM \n"
@@ -22898,7 +22905,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	//Letter Box Masking with size adjust: 1 = top and bottom, 2 = left and right
 	//Smooth Mode
 	#define DL_X 0.75                              //SM Tune Limit
-	#define DM_X 6                                 //SM HQ Tune Power       - Will be made global
+	#define DM_X 5                                 //SM HQ Tune Power       - Will be made global
 	#define PEW 1
 	#define NFM 1
 	#define DSW 1
@@ -23255,7 +23262,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	//Letter Box Masking with size adjust: 1 = top and bottom, 2 = left and right
 	//Smooth Mode
 	#define DL_X 0.625                             //SM Tune Limit
-	#define DM_X 4                                 //SM HQ Tune Power       - Will be made global
+	#define DM_X 3                                 //SM HQ Tune Power       - Will be made global
 	#define NDW 1
 	#define PEW 1
 	#define DRS 1
@@ -23296,7 +23303,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	//Letter Box Masking with size adjust: 1 = top and bottom, 2 = left and right
 	//Smooth Mode
 	#define DL_X 0.625                             //SM Tune Limit
-	#define DM_X 4                                 //SM HQ Tune Power       - Will be made global
+	#define DM_X 3                                 //SM HQ Tune Power       - Will be made global
 	#define PEW 1
 	#define FOV 1
 #elif (App == 0xB53B8500 ) //DEATH STRANDING
@@ -23523,7 +23530,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	//Barrel Distortion Fix k1 k2 k3 and Zoom
 	//Smooth Mode
 	#define DL_X 0.75                              //SM Tune Limit
-	#define DM_X 4                                 //SM HQ Tune Power       - Will be made global
+	#define DM_X 3                                 //SM HQ Tune Power       - Will be made global
 	#define PEW 1
 #elif (App == 0x98034E4C ) //Asphalt 9 AKA Asphalt Legends Unite
 	#define G_Info "Asphalt 9 AKA Asphalt Legends Unite | AppID 0x98034E4C STEAM \n"
@@ -23586,7 +23593,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	//Barrel Distortion Fix k1 k2 k3 and Zoom
 	//Smooth Mode
 	#define DL_X 0.625                             //SM Tune Limit
-	#define DM_X 4                                 //SM HQ Tune Power       - Will be made global
+	#define DM_X 3                                 //SM HQ Tune Power       - Will be made global
 	#define PEW 1
 	#define DAA 1
 #elif (App == 0x3983BCAC ) //Lay of the Land
@@ -23671,7 +23678,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	//Barrel Distortion Fix k1 k2 k3 and Zoom
 	//Smooth Mode
 	#define DL_X 0.4375                            //SM Tune Limit
-	#define DM_X 4                                 //SM HQ Tune Power       - Will be made global
+	#define DM_X 3                                 //SM HQ Tune Power       - Will be made global
 	#define PEW 1
 #elif (App == 0xD0F69E54 ) //Yooka-Laylee
 	#define G_Info "Yooka-Laylee | AppID 0xD0F69E54 STEAM \n"
@@ -23710,7 +23717,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	//Barrel Distortion Fix k1 k2 k3 and Zoom
 	//Smooth Mode
 	#define DL_X 0.4375                            //SM Tune Limit
-	#define DM_X 4                                 //SM HQ Tune Power       - Will be made global
+	#define DM_X 3                                 //SM HQ Tune Power       - Will be made global
 	#define PEW 1
 #elif (App == 0xB6433F0D ) //John Carpenter's Toxic Commando
 	#define G_Info "John Carpenter's Toxic Commando | AppID 0xB6433F0D STEAM \n"
@@ -23916,7 +23923,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	//Letter Box Masking with size adjust: 1 = top and bottom, 2 = left and right
 	//Smooth Mode
 	#define DL_X 0.5                                //SM Tune Limit
-	#define DM_X 4                                  //SM HQ Tune Power       - Will be made global
+	#define DM_X 3                                  //SM HQ Tune Power       - Will be made global
 	#define PEW 1
 #elif (App == 0x5D5EB177 ) //Idol of Ash
 	#define G_Info "Idol of Ash | AppID 0x5D5EB177 STEAM \n"
@@ -23960,7 +23967,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	//Letter Box Masking with size adjust: 1 = top and bottom, 2 = left and right
 	//Smooth Mode
 	#define DL_X 0.625                              //SM Tune Limit
-	#define DM_X 4                                  //SM HQ Tune Power       - Will be made global
+	#define DM_X 3                                  //SM HQ Tune Power       - Will be made global
 	#define PEW 1
 #elif (App == 0xCF2A5FCD ) //Grime II
 	#define G_Info "Grime II | AppID 0xCF2A5FCD STEAM \n"
@@ -24057,7 +24064,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	//Letter Box Masking with size adjust: 1 = top and bottom, 2 = left and right
 	#define WSM 3                                        // Weapon Setting Mode
 	#define DB_W 27                                      // Weapon Profile
-	#define AJM 1                                        //Anti-Jitter Mode 0 | 1 | 2 | 3 | 4
+	#define AJM 0                                        //Anti-Jitter Mode 0 | 1 | 2 | 3 | 4
 	//Alpha UI
 	//HUD Mode Trigger
 	//Barrel Distortion Fix k1 k2 k3 and Zoom
@@ -24506,7 +24513,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 
 	//Smooth Mode
 	#define DL_X 0.5                                //SM Tune Limit
-	#define DM_X 4                                  //SM HQ Tune Power       - Will be made global
+	#define DM_X 3                                  //SM HQ Tune Power       - Will be made global
 	//#define DAA_W 2                               //Warp/Halo Masking Type
 	//#define HNR 1                                 //Halo Near Reduction for anything near the player
 	//#define DM_Y 1                                //SM HQ VRS Limit
@@ -24607,7 +24614,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 
 	//Smooth Mode
 	#define DL_X 0.625                             //SM Tune Limit
-	#define DM_X 4                                 //SM HQ Tune Power       - Will be made global
+	#define DM_X 3                                 //SM HQ Tune Power       - Will be made global
 	#define DAA_W 2                                //Warp/Halo Masking Type
 	//#define HNR 1                                //Halo Near Reduction for anything near the player
 	//#define DM_Y 1                               //SM HQ VRS Limit
@@ -25008,7 +25015,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 
 	//Smooth Mode
 	#define DL_X 0.625                              //SM Tune Limit
-	#define DM_X 4                                  //SM HQ Tune Power       - Will be made global
+	#define DM_X 3                                  //SM HQ Tune Power       - Will be made global
 	//#define DAA_W 2                               //Warp/Halo Masking Type
 	//#define HNR 1                                 //Halo Near Reduction for anything near the player
 	//#define DM_Y 1                                //SM HQ VRS Limit
@@ -25330,7 +25337,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 
 	//Smooth Mode
 	#define DL_X 0.75                               //SM Tune Limit
-	#define DM_X 4                                  //SM HQ Tune Power       - Will be made global
+	#define DM_X 3                                  //SM HQ Tune Power       - Will be made global
 	//#define DAA_W 2                               //Warp/Halo Masking Type
 	//#define HNR 1                                 //Halo Near Reduction for anything near the player
 	//#define DM_Y 1                                //SM HQ VRS Limit
@@ -25831,7 +25838,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 
 	//Smooth Mode
 	#define DL_X 0.75                               //SM Tune Limit
-	#define DM_X 4                                  //SM HQ Tune Power       - Will be made global
+	#define DM_X 3                                  //SM HQ Tune Power       - Will be made global
 	#define DAA_W 3                                 //Warp/Halo Masking Type
 	//#define HNR 1                                 //Halo Near Reduction for anything near the player
 	//#define DM_Y 1                                //SM HQ VRS Limit
@@ -25987,7 +25994,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 
 	//Smooth Mode
 	#define DL_X 0.625                              //SM Tune Limit
-	#define DM_X 4                                  //SM HQ Tune Power       - Will be made global
+	#define DM_X 3                                  //SM HQ Tune Power       - Will be made global
 	//#define DAA_W 3                               //Warp/Halo Masking Type
 	//#define HNR 1                                 //Halo Near Reduction for anything near the player
 	//#define DM_Y 1                                //SM HQ VRS Limit
@@ -26054,7 +26061,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	
 	//Smooth Mode
 	#define DL_X 0.75                              //SM Tune Limit
-	#define DM_X 4                                 //SM HQ Tune Power       - Will be made global
+	#define DM_X 3                                 //SM HQ Tune Power       - Will be made global
 	//#define DAA_W 2                                //Warp/Halo Masking Type
 	#define PEW 1
 #elif (App == 0x49F7B9C0 ) //CONTROL DX12
@@ -26277,7 +26284,70 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	
 	//Smooth Mode
 	#define DL_X 0.75                               //SM Tune Limit
-	#define DM_X 4                                  //SM HQ Tune Power       - Will be made global
+	#define DM_X 3                                  //SM HQ Tune Power       - Will be made global
+	//#define DAA_W 2                                 //Warp/Halo Masking Type
+	//#define HNR 1                                 //Halo Near Reduction for anything near the player
+	//#define DM_Y 1                                //SM HQ VRS Limit
+	//#define PLS 1                                 //SM HQ Trigger
+	//#define NDW 1
+	#define PEW 1
+	//#define NFM 1
+	//#define NDG 1
+	//#define DSW 1
+	//#define DRS 1
+	//#define DAA 1
+	//#define FOV 1
+	//#define ARW 1
+	//#define DFW 1	
+#elif (App == 0x80C94E25 ) //REPLACED
+	#define G_Info "REPLACED | AppID 0x80C94E2 STEAM \n"
+	#define G_Note "Note: The Generic Depth Mod add-on is recommended, but not needed.\n" \
+	               "This game works better with it.\n" \
+	               "\n" \
+	               "Recommended Settings:\n" \
+	               "Letter Boxing < Off >\n" \
+	               "\n" \
+	               "In a future update, other effects will be able to be modded out too.\n"
+
+	#define DA_W 1                                  // Set Linearization
+	#define DA_X 0.030                            // ZPD
+	#define DA_Y 1500.0                           // Near Plane Adjustment
+	#define DB_Z 0.0125                              // Auto Depth Protection
+	//#define DS_Z 1                                // Set View Mode
+
+	#define DE_X 1                                  // ZPD Boundary
+	#define DE_Y 0.75                               // Set ZPD Boundary Level Zero
+	#define DE_Z 0.4375                              // Speed that Boundary is Enforced
+	//#define DG_W 0.125                             // Shift Boundary Out of screen 0.5 and or In screen -0.5
+	//#define EGB 1                                   // Edge Guard weakens the edge detection, like the original version when the feature was added
+	//#define DMM 1                                 // Detect More Mode
+	#define OIL 4                                   // Set How many Levels
+	#define OIF float4(0.625,0.5,0.375,0.100)        // Fix enables if Value is > 0.0
+	#define DI_W float4(0.5,0.75,1.25,12.5)
+	#define DKK_W float2(0.003,25.0)                 //XY
+	#define DF_Z 0.125                               // Set the Balance
+	#define WND 1.0                                 // Near pushes depth in and adjusts perspective to match.
+	#define DL_Y -1.0                             // De-Artifact only works on some view modes and costs performance
+	#define DL_Z 0.5                            // Compat Power
+	#define DB_Y 0.5                               // Affects De-Artifact, -1 to 1. Leave at 0 most of the time; 1 takes depth into account
+
+	#define WNR 0.275                                // Weapon Near, only when the weapon is far closer than anything else
+	//#define DF_X float2(0.375,0.25)                  // ZPD Weapon Boundaries Level 1 and Level 2
+	//#define DJ_W 1.0                               // Weapon Depth Limit Location 1
+	//#define DS_W 1.75                               // Weapon Depth Limit Location 2
+	//#define AWZ 1                                 // Anti-Weapon Hand Z-Fighting: -1 shifts slightly right, 1 is center
+	#define ASA 0	
+	//#define WFB 0.0                                   // ZPD Weapon Elevation for 1 and 2 scales from [0 - 1]
+	//#define WSM 1                                 // Weapon Setting Mode
+	//#define DB_W 17                               // Weapon Profile
+	//#define ABWS 1                                // Smooth the A B weapon switch
+	//#define AFS 0.375                             // A B Weapon Switch Fade Speed
+
+	#define AJM 1                                   //Anti-Jitter Mode 0 | 1 | 2 | 3 | 4
+	
+	//Smooth Mode
+	#define DL_X 0.75                               //SM Tune Limit
+	#define DM_X 3                                  //SM HQ Tune Power       - Will be made global
 	//#define DAA_W 2                                 //Warp/Halo Masking Type
 	//#define HNR 1                                 //Halo Near Reduction for anything near the player
 	//#define DM_Y 1                                //SM HQ VRS Limit
@@ -26621,7 +26691,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 #define HNR 0                                                   //Halo Near Reduction for anything near the player
 #define DL_X 0.75                                               //SM Tune Limit
 #define DAA_W 2                                                 //Warp/Halo Masking Type
-#define DM_X 6                                                  //SM HQ Tune Power
+#define DM_X 5                                                  //SM HQ Tune Power
 #define DM_Y 1                                                  //SM HQ VRS Limit
 #define HQT 1                                                   //SM HQ Trigger
 

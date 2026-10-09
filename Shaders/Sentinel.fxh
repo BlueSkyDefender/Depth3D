@@ -60,6 +60,8 @@
 //                                          //   0 Default | 1 Higher vertices | 2 Higher draw calls | 3 Lower vertices | 4 Lower draw calls
 // UseAspectRatioHeuristics=                // Aspect ratio heuristic
 //                                          //   0 None | 1 Similar aspect ratio | 2 Multiples of resolution (for DLSS or resolution scaling) | 3 Match resolution exactly | 4 Match custom width and height exactly
+// MinDepthSize=                            // Minimum depth buffer size
+//                                          //   0 Default | 1 25% | 2 33% | 3 50% | 4 Off - 25% to 50% work with any aspect ratio heuristic, None included
 // FilterResolutionWidth=                   // Filter by width and height
 //                                          //   a number - only with Aspect ratio heuristic 4
 // FilterResolutionHeight=                  // Filter by width and height
@@ -612,3 +614,10 @@ DepthAutoFit=1
 [0x4B609342]
 Game=CONTROL Resonant
 UseAspectRatioHeuristics=2
+
+[0x80C94E25]
+Game=REPLACED
+FilterFormat=6
+UseAspectRatioHeuristics=0
+MinDepthSize=1
+DepthAutoFit=1
