@@ -18504,6 +18504,7 @@ static const int Temp_Smart_Convergence_D = 0;          //Temp Bool for Smart Co
 	#define DF_Z 0.30                                // Set the Balance
 	#define DL_Y 0.625                               // De-Artifact only works on some view modes and costs performance
 	#define THF 3                                    // Target high-frequency information like hair
+	#define LBE 1                                    //Letter Box Elevation	
 	// May turn this on all the time in InfiColor Mode
 	#define DI_Y 0.5                                 //Boost Mode Pop Level Adjuster 0 - 1
 	//Letter Box Correction Offsets With X & Y
