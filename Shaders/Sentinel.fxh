@@ -182,6 +182,31 @@
 // WDepthClearPosition=                     // WEAPON clear position
 //                                          //   0 First | 1 Second | 2 Third | 3 Fourth | 4 Last - with the override on
 //
+// Path-traced games:
+//   Games with no normal depth buffer. Auto finds them by name; only set this for a game
+//   that is not found, or 1 to turn it off. It applies on the next start.
+//
+// PathTracedDepth=                         // Path-traced depth
+//                                          //   0 Auto | 1 Off | 2 Remix | 3 Other - Other is path tracers like Quake II RTX
+// RemixDepthImage=                         // Remix depth image (Remix only)
+//                                          //   a number - 1 primary depth (default), 5 steady DLSS depth (4 without frame generation)
+// RemixDepthPair=                          // Remix pair (Remix only)
+//                                          //   a number - the image Remix writes in turn with RemixDepthImage, -1 off (default)
+//
+//   Remix games all share one id (0xF8D4C41F, NvRemixBridge.exe). A Remix game known by its own files uses its
+//   own section first: 0xB100000 Half-Life 2 RTX | 0xB200000 Portal with RTX | 0xB300000 Painkiller RTX.
+// rtx.anything=                            // A Remix setting (Remix games only, in the game's own section)
+//                                          //   e.g. rtx.viewModel.scale=0.25 - GPU Selector writes it into the game's
+//                                          //   dxvk.conf (or rtx.conf if the key is there) before launch
+//                                          //   The Add-on itself ignores these lines.
+//
+// DX9 MSAA depth:
+//   DX9 games with MSAA on, where the depth buffer shows greyed out in the list. The
+//   replay draws the world again into a depth the shader can read. Costs performance.
+//
+// ReplayDepthProbe=                        // Enable replay-depth probe
+//                                          //   0 off | 1 on - DX9 only
+//
 // Game specific workarounds:
 //   Set only the one that names your game, and only together with the other options its
 //   guide lists under Extra Information in the Add-on. They do nothing in any other game,
@@ -294,6 +319,13 @@ DisableRestrictions=1
 Game=System Shock 2: 25th Anniversary Remaster
 DepthCopyBeforeClears=1
 FilterFormat=5
+WDepthDetectionMode=1
+
+[0x97766FEA]
+Game=System Shock 2: 25th Anniversary Remaster
+DepthCopyBeforeClears=1
+FilterFormat=5
+WDepthDetectionMode=1
 
 [0x71170B42]
 Game=Blood: Fresh Supply
@@ -621,3 +653,28 @@ FilterFormat=6
 UseAspectRatioHeuristics=0
 MinDepthSize=1
 DepthAutoFit=1
+
+[0xF8D4C41F]
+Game=Remix (NvRemixBridge.exe, every Remix game; set for Half-Life 2 RTX)
+RemixDepthImage=5
+
+[0xB100000]
+Game=Half-Life 2 RTX (Remix)
+RemixDepthImage=5
+rtx.viewModel.scale=0.15
+
+[0xB200000]
+Game=Portal with RTX (Remix: two depth images written in turn)
+RemixDepthImage=1
+RemixDepthPair=2
+rtx.viewModel.scale=0.15
+
+[0xB300000]
+Game=Painkiller RTX (Remix: two depth images written in turn)
+RemixDepthImage=1
+RemixDepthPair=2
+rtx.viewModel.scale=0.25
+
+[0xFA9008AB]
+Game=Torchlight
+ReplayDepthProbe=1
