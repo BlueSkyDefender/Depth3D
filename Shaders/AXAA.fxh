@@ -171,200 +171,204 @@ float4 AXAA_W(sampler tex,sampler texF,float2 texcoord,bool HDR_Mode,float3 W,bo
 	// Soft: an edge moving by a pixel crosses these limits from frame to frame, and a hard on/off made it pop (crawl).
 	// AA_Fade eases the result in over a band around each limit instead. Fully off or fully on still exits or runs as before.
 	float Th = max(FXAA_EDGE_THRESHOLD_MIN, rangeMax * FXAA_EDGE_THRESHOLD);
+	//Every EXIT below keeps the plain pixel: the rest is nested under its check, with one return at the end.
+	float4 AXAA_Out = float4(rgbM.rgb,lumaM);
 	#if AXAA_SOFT
-	if (range < Th * 0.75)
-	    return float4(rgbM.rgb,lumaM);
+	bool AA_Go = range >= Th * 0.75;
 	float AA_Fade = saturate((range - Th * 0.75) * rcp(Th * 0.5));
 	#else
-	if (range < Th)
-	    return float4(rgbM.rgb,lumaM);
+	bool AA_Go = range >= Th;
 	float AA_Fade = 1.0;
 	#endif
-
-	// FILTERED REGION CHECK (AXAA): already filtered pixels blend their neighbours, so M or one of its neighbours sits
-	// in rangeMid ± alpha. A raw edge only has the two sides' values. EXIT
-	float rangeMid = 0.5 * (rangeMin + rangeMax);
-	float alpha = AXAA_ALPHA * range; // Alpha is 10% of the luma range
-	float4 NWES = abs(float4(lumaN, lumaW, lumaE, lumaS) - rangeMid);
-	float Mid_D = min(abs(lumaM - rangeMid), min(min(NWES.x, NWES.y), min(NWES.z, NWES.w)));
-	#if AXAA_SOFT
-	if (Mid_D <= alpha * 0.5)
-	    return float4(rgbM.rgb,lumaM);
-	AA_Fade *= saturate((Mid_D - alpha * 0.5) * rcp(alpha));
-	#else
-	if (Mid_D <= alpha)
-	    return float4(rgbM.rgb,lumaM);
-	#endif
-
-    float3 rgbL = rgbN + rgbW + rgbM + rgbE + rgbS;
-
-    //COMPUTE LOWPASS
-    #if FXAA_SUBPIX != 0
-        float lumaL = (lumaN + lumaW + lumaE + lumaS) * 0.25;
-        float rangeL = abs(lumaL - lumaM);
-    #endif
-
-    #if FXAA_SUBPIX == 1
-        //One divide by the range, in SDR and HDR alike. The contrast check above keeps range over zero.
-        float blendL = max(0.0,
-            (rangeL / range) - FXAA_SUBPIX_TRIM) * FXAA_SUBPIX_TRIM_SCALE;
-        blendL = min(FXAA_SUBPIX_CAP, blendL);
-    #endif
-    
-    //CHOOSE VERTICAL OR HORIZONTALS SEARCH
-    float3 rgbNW = FxaaTexOff(tex, texcoord, int2(-1,-1)).xyz;
-    float3 rgbNE = FxaaTexOff(tex, texcoord, int2( 1,-1)).xyz;
-    float3 rgbSW = FxaaTexOff(tex, texcoord, int2(-1, 1)).xyz;
-    float3 rgbSE = FxaaTexOff(tex, texcoord, int2( 1, 1)).xyz;
-    #if (FXAA_SUBPIX_FASTER == 0) && (FXAA_SUBPIX > 0)
-        rgbL += (rgbNW + rgbNE + rgbSW + rgbSE);
-        rgbL *= 1.0 / 9.0;
-    #endif
-    float lumaNW = AXAA_Luma(rgbNW, W, HDR_Mode);
-    float lumaNE = AXAA_Luma(rgbNE, W, HDR_Mode);
-    float lumaSW = AXAA_Luma(rgbSW, W, HDR_Mode);
-    float lumaSE = AXAA_Luma(rgbSE, W, HDR_Mode);
-    #if AXAA_SUBPIX_311
-    //FXAA 3.11 subpixel amount: how far M sits from the weighted 3x3 average (straight neighbours count twice), as a
-    //share of the range, eased and squared. Read here, before N and S are reused for the edge.
-    float subpixC = saturate(abs(((lumaN + lumaS + lumaW + lumaE) * 2.0 + (lumaNW + lumaNE + lumaSW + lumaSE)) * (1.0 / 12.0) - lumaM) / range);
-    float subpixF = (-2.0 * subpixC + 3.0) * subpixC * subpixC;
-    float subpixH = subpixF * subpixF * FXAA_SUBPIX_CAP;
-    #endif
-    float edgeVert =
-			        abs((0.25 * lumaNW) + (-0.5 * lumaN) + (0.25 * lumaNE)) +
-			        abs((0.50 * lumaW) + (-1.0 * lumaM) + (0.50 * lumaE)) +
-			        abs((0.25 * lumaSW) + (-0.5 * lumaS) + (0.25 * lumaSE));
-    float edgeHorz =
-			        abs((0.25 * lumaNW) + (-0.5 * lumaW) + (0.25 * lumaSW)) +
-			        abs((0.50 * lumaN) + (-1.0 * lumaM) + (0.50 * lumaS)) +
-			        abs((0.25 * lumaNE) + (-0.5 * lumaE) + (0.25 * lumaSE));
-    // FOLIAGE GUARD: a real edge is strong in one direction only, min(edgeVert, edgeHorz) / range is 0 for a straight edge
-    // and 0.25 for a 45 degree one. Leaves, grass and other busy texture flip in both directions: a lone speck is 1.0, a
-    // checkerboard 2.0. Fading the AA out from 0.5 to 1.0 keeps their detail and leaves edges and diagonals as they were.
-    // Silhouettes against the sky are clean edges, so leaf outlines still get smoothed.
-    float Clutter = min(edgeVert, edgeHorz) * rcp(range);
-    AA_Fade *= 1.0 - smoothstep(0.5, 1.0, Clutter) * AXAA_FOLIAGE;
-    if (AA_Fade <= 0.0)
-        return float4(rgbM.rgb,lumaM);
-    bool horzSpan = edgeHorz >= edgeVert;
-    float lengthSign = horzSpan ? -Pix.y : -Pix.x;
-    if (!horzSpan)
-    {
-        lumaN = lumaW;
-        lumaS = lumaE;
-    }
-    
-    float gradientN = abs(lumaN - lumaM);
-    float gradientS = abs(lumaS - lumaM);
-
-	// THIN LINE CHECK (AXAA): steep on both sides is a one pixel line. The bilinear fetch and the 3x3 lowpass would
-	// both blend it into its neighbours, so keep the pixel. EXIT
-	// Relative: in dark scenes real lines rarely reach 0.3, so the limit scales with the brightest tap (floor 0.25).
-	#if AXAA_RELATIVE
-	float Lum_Scale = max(rangeMax, 0.25);
-	#else
-	float Lum_Scale = 1.0;
-	#endif
-	float thinT = AXAA_BETA * Lum_Scale, thinG = min(gradientN, gradientS);
-	#if AXAA_SOFT
-	if (thinG > thinT * 1.15)
-	    return float4(rgbM.rgb,lumaM);
-	AA_Fade *= saturate((thinT * 1.15 - thinG) * rcp(thinT * 0.3));
-	#else
-	if (thinG > thinT)
-	    return float4(rgbM.rgb,lumaM);
-	#endif
-
-    lumaN = (lumaN + lumaM) * 0.5;
-    lumaS = (lumaS + lumaM) * 0.5;
-	// ADAPTIVE SEARCH RANGE (AXAA): dmin and dmax are M against the min and max luma of the whole 3x3.
-	float minLuma = min(min(rangeMin, min(lumaNW, lumaNE)), min(lumaSW, lumaSE));
-	float maxLuma = max(max(rangeMax, max(lumaNW, lumaNE)), max(lumaSW, lumaSE));
-	float dmin = lumaM - minLuma;
-	float dmax = maxLuma - lumaM;
-	// Low contrast all round, max(dmin, dmax) <= 0.1, gets 1 iteration. Above that the full search runs, which covers
-	// the poster's "2+ iterations" (min > 0.1) and "3+ iterations" (min > 0.3): those are the least it may take.
-	int searchIterations = max(dmin, dmax) <= 0.1 * Lum_Scale ? 1 : FXAA_SEARCH_STEPS;
-	
-	// CHOOSE SIDE OF PIXEL WHERE GRADIENT IS HIGHEST
-	bool pairN = gradientN >= gradientS;
-	if (!pairN)
+	if (AA_Go)
 	{
-	    lumaN = lumaS;
-	    gradientN = gradientS;
-	    lengthSign *= -1.0;
-	}
-	
-	float2 posN;
-	posN.x = texcoord.x + (horzSpan ? 0.0 : lengthSign * 0.5);
-	posN.y = texcoord.y + (horzSpan ? lengthSign * 0.5 : 0.0);
-	
-	// CHOOSE SEARCH LIMITING VALUES
-	gradientN *= FXAA_SEARCH_THRESHOLD;
-	
-	// SEARCH IN BOTH DIRECTIONS UNTIL FIND LUMA PAIR AVERAGE IS OUT OF RANGE
-	float2 posP = posN;
-	float2 offNP = horzSpan ?
-						     float2(Pix.x, 0.0) :
-						     float2(0.0f, Pix.y);
-	float lumaEndN = lumaN;
-	float lumaEndP = lumaN;
-	bool doneN = false;
-	bool doneP = false;
-	
-	#if FXAA_SEARCH_ACCELERATION == 1
-	    posN += offNP * float2(-1.0, -1.0);
-	    posP += offNP * float2(1.0, 1.0);
-	#endif
-	
-	for (int i = 0; i < searchIterations; i++)  // Apply adaptive search range
-	{
-	#if FXAA_SEARCH_ACCELERATION == 1
-	    if (!doneN)
-	        lumaEndN = AXAA_Luma(FxaaTexLod(tex, posN.xy).xyz, W, HDR_Mode);
-	    if (!doneP)
-	        lumaEndP = AXAA_Luma(FxaaTexLod(tex, posP.xy).xyz, W, HDR_Mode);
-	#endif
-	    doneN = doneN || (abs(lumaEndN - lumaN) >= gradientN);
-	    doneP = doneP || (abs(lumaEndP - lumaN) >= gradientN);
-	    if (doneN && doneP)
-	        break;
-	    if (!doneN)
-	        posN -= offNP;
-	    if (!doneP)
-	        posP += offNP;
-	}
-	
-	// HANDLE IF CENTER IS ON POSITIVE OR NEGATIVE SIDE
-	float dstN = horzSpan ? texcoord.x - posN.x : texcoord.y - posN.y;
-	float dstP = horzSpan ? posP.x - texcoord.x : posP.y - texcoord.y;
-	bool directionN = dstN < dstP;
-	lumaEndN = directionN ? lumaEndN : lumaEndP;
-	
-	// CHECK IF PIXEL IS IN SECTION OF SPAN WHICH GETS NO FILTERING
-	float Normal = lengthSign;
-	if (((lumaM - lumaN) < 0.0) == ((lumaEndN - lumaN) < 0.0))
-	    lengthSign = 0.0;
+		// FILTERED REGION CHECK (AXAA): already filtered pixels blend their neighbours, so M or one of its neighbours sits
+		// in rangeMid ± alpha. A raw edge only has the two sides' values. EXIT
+		float rangeMid = 0.5 * (rangeMin + rangeMax);
+		float alpha = AXAA_ALPHA * range; // Alpha is 10% of the luma range
+		float4 NWES = abs(float4(lumaN, lumaW, lumaE, lumaS) - rangeMid);
+		float Mid_D = min(abs(lumaM - rangeMid), min(min(NWES.x, NWES.y), min(NWES.z, NWES.w)));
+		#if AXAA_SOFT
+		AA_Go = Mid_D > alpha * 0.5;
+		AA_Fade *= saturate((Mid_D - alpha * 0.5) * rcp(alpha));
+		#else
+		AA_Go = Mid_D > alpha;
+		#endif
+		if (AA_Go)
+		{
+			float3 rgbL = rgbN + rgbW + rgbM + rgbE + rgbS;
 
-	float spanLength = (dstP + dstN);
-	dstN = directionN ? dstN : dstP;
-	float subPixelOffset = (0.5 + (dstN * (-1.0 / spanLength))) * lengthSign;
-	#if AXAA_SUBPIX_311
-	// SUBPIXEL (FXAA 3.11): no box blur. One fetch, shifted across the edge by the larger of the edge offset (0 where
-	// the span gets no filtering) and the subpixel amount. Keeps texture and edges sharper than the 3x3 average.
-	subPixelOffset = max(subPixelOffset * rcp(Normal), subpixH) * Normal;
-	#endif
-	float3 rgbF = FxaaTexLod(texF, float2(
-                                            texcoord.x + (horzSpan ? 0.0 : subPixelOffset),
-                                            texcoord.y + (horzSpan ? subPixelOffset : 0.0))).xyz;
-	if (Linear_F)
-	    rgbF = AXAA_sRGB(rgbF);
-	#if !AXAA_SUBPIX_311
-	// SUBPIXEL BLENDING (FXAA): FxaaLerp3(rgbL, rgbF, blendL), the lowpass weighted by blendL, on all three channels.
-	rgbF = lerp(rgbF.rgb, rgbL.rgb, blendL);
-	#endif
-	return float4(lerp(rgbM.rgb, rgbF.rgb, AA_Fade), lumaM);
+			//COMPUTE LOWPASS
+			#if FXAA_SUBPIX != 0
+			float lumaL = (lumaN + lumaW + lumaE + lumaS) * 0.25;
+			float rangeL = abs(lumaL - lumaM);
+			#endif
+
+			#if FXAA_SUBPIX == 1
+			//One divide by the range, in SDR and HDR alike. The contrast check above keeps range over zero.
+			float blendL = max(0.0,
+				(rangeL / range) - FXAA_SUBPIX_TRIM) * FXAA_SUBPIX_TRIM_SCALE;
+			blendL = min(FXAA_SUBPIX_CAP, blendL);
+			#endif
+
+			//CHOOSE VERTICAL OR HORIZONTALS SEARCH
+			float3 rgbNW = FxaaTexOff(tex, texcoord, int2(-1,-1)).xyz;
+			float3 rgbNE = FxaaTexOff(tex, texcoord, int2( 1,-1)).xyz;
+			float3 rgbSW = FxaaTexOff(tex, texcoord, int2(-1, 1)).xyz;
+			float3 rgbSE = FxaaTexOff(tex, texcoord, int2( 1, 1)).xyz;
+			#if (FXAA_SUBPIX_FASTER == 0) && (FXAA_SUBPIX > 0)
+			rgbL += (rgbNW + rgbNE + rgbSW + rgbSE);
+			rgbL *= 1.0 / 9.0;
+			#endif
+			float lumaNW = AXAA_Luma(rgbNW, W, HDR_Mode);
+			float lumaNE = AXAA_Luma(rgbNE, W, HDR_Mode);
+			float lumaSW = AXAA_Luma(rgbSW, W, HDR_Mode);
+			float lumaSE = AXAA_Luma(rgbSE, W, HDR_Mode);
+			#if AXAA_SUBPIX_311
+			//FXAA 3.11 subpixel amount: how far M sits from the weighted 3x3 average (straight neighbours count twice), as a
+			//share of the range, eased and squared. Read here, before N and S are reused for the edge.
+			float subpixC = saturate(abs(((lumaN + lumaS + lumaW + lumaE) * 2.0 + (lumaNW + lumaNE + lumaSW + lumaSE)) * (1.0 / 12.0) - lumaM) / range);
+			float subpixF = (-2.0 * subpixC + 3.0) * subpixC * subpixC;
+			float subpixH = subpixF * subpixF * FXAA_SUBPIX_CAP;
+			#endif
+			float edgeVert =
+				abs((0.25 * lumaNW) + (-0.5 * lumaN) + (0.25 * lumaNE)) +
+				abs((0.50 * lumaW) + (-1.0 * lumaM) + (0.50 * lumaE)) +
+				abs((0.25 * lumaSW) + (-0.5 * lumaS) + (0.25 * lumaSE));
+			float edgeHorz =
+				abs((0.25 * lumaNW) + (-0.5 * lumaW) + (0.25 * lumaSW)) +
+				abs((0.50 * lumaN) + (-1.0 * lumaM) + (0.50 * lumaS)) +
+				abs((0.25 * lumaNE) + (-0.5 * lumaE) + (0.25 * lumaSE));
+			// FOLIAGE GUARD: a real edge is strong in one direction only, min(edgeVert, edgeHorz) / range is 0 for a straight edge
+			// and 0.25 for a 45 degree one. Leaves, grass and other busy texture flip in both directions: a lone speck is 1.0, a
+			// checkerboard 2.0. Fading the AA out from 0.5 to 1.0 keeps their detail and leaves edges and diagonals as they were.
+			// Silhouettes against the sky are clean edges, so leaf outlines still get smoothed.
+			float Clutter = min(edgeVert, edgeHorz) * rcp(range);
+			AA_Fade *= 1.0 - smoothstep(0.5, 1.0, Clutter) * AXAA_FOLIAGE;
+			if (AA_Fade > 0.0)
+			{
+				bool horzSpan = edgeHorz >= edgeVert;
+				float lengthSign = horzSpan ? -Pix.y : -Pix.x;
+				if (!horzSpan)
+				{
+					lumaN = lumaW;
+					lumaS = lumaE;
+				}
+
+				float gradientN = abs(lumaN - lumaM);
+				float gradientS = abs(lumaS - lumaM);
+
+				// THIN LINE CHECK (AXAA): steep on both sides is a one pixel line. The bilinear fetch and the 3x3 lowpass would
+				// both blend it into its neighbours, so keep the pixel. EXIT
+				// Relative: in dark scenes real lines rarely reach 0.3, so the limit scales with the brightest tap (floor 0.25).
+				#if AXAA_RELATIVE
+				float Lum_Scale = max(rangeMax, 0.25);
+				#else
+				float Lum_Scale = 1.0;
+				#endif
+				float thinT = AXAA_BETA * Lum_Scale, thinG = min(gradientN, gradientS);
+				#if AXAA_SOFT
+				AA_Go = thinG <= thinT * 1.15;
+				AA_Fade *= saturate((thinT * 1.15 - thinG) * rcp(thinT * 0.3));
+				#else
+				AA_Go = thinG <= thinT;
+				#endif
+				if (AA_Go)
+				{
+					lumaN = (lumaN + lumaM) * 0.5;
+					lumaS = (lumaS + lumaM) * 0.5;
+					// ADAPTIVE SEARCH RANGE (AXAA): dmin and dmax are M against the min and max luma of the whole 3x3.
+					float minLuma = min(min(rangeMin, min(lumaNW, lumaNE)), min(lumaSW, lumaSE));
+					float maxLuma = max(max(rangeMax, max(lumaNW, lumaNE)), max(lumaSW, lumaSE));
+					float dmin = lumaM - minLuma;
+					float dmax = maxLuma - lumaM;
+					// Low contrast all round, max(dmin, dmax) <= 0.1, gets 1 iteration. Above that the full search runs, which covers
+					// the poster's "2+ iterations" (min > 0.1) and "3+ iterations" (min > 0.3): those are the least it may take.
+					int searchIterations = max(dmin, dmax) <= 0.1 * Lum_Scale ? 1 : FXAA_SEARCH_STEPS;
+
+					// CHOOSE SIDE OF PIXEL WHERE GRADIENT IS HIGHEST
+					bool pairN = gradientN >= gradientS;
+					if (!pairN)
+					{
+						lumaN = lumaS;
+						gradientN = gradientS;
+						lengthSign *= -1.0;
+					}
+
+					float2 posN;
+					posN.x = texcoord.x + (horzSpan ? 0.0 : lengthSign * 0.5);
+					posN.y = texcoord.y + (horzSpan ? lengthSign * 0.5 : 0.0);
+
+					// CHOOSE SEARCH LIMITING VALUES
+					gradientN *= FXAA_SEARCH_THRESHOLD;
+
+					// SEARCH IN BOTH DIRECTIONS UNTIL FIND LUMA PAIR AVERAGE IS OUT OF RANGE
+					float2 posP = posN;
+					float2 offNP = horzSpan ?
+					                     float2(Pix.x, 0.0) :
+					                     float2(0.0f, Pix.y);
+					float lumaEndN = lumaN;
+					float lumaEndP = lumaN;
+					bool doneN = false;
+					bool doneP = false;
+
+					#if FXAA_SEARCH_ACCELERATION == 1
+					posN += offNP * float2(-1.0, -1.0);
+					posP += offNP * float2(1.0, 1.0);
+					#endif
+
+					for (int i = 0; i < searchIterations; i++)  // Apply adaptive search range
+					{
+						#if FXAA_SEARCH_ACCELERATION == 1
+						if (!doneN)
+							lumaEndN = AXAA_Luma(FxaaTexLod(tex, posN.xy).xyz, W, HDR_Mode);
+						if (!doneP)
+							lumaEndP = AXAA_Luma(FxaaTexLod(tex, posP.xy).xyz, W, HDR_Mode);
+						#endif
+						doneN = doneN || (abs(lumaEndN - lumaN) >= gradientN);
+						doneP = doneP || (abs(lumaEndP - lumaN) >= gradientN);
+						if (doneN && doneP)
+							break;
+						if (!doneN)
+							posN -= offNP;
+						if (!doneP)
+							posP += offNP;
+					}
+
+					// HANDLE IF CENTER IS ON POSITIVE OR NEGATIVE SIDE
+					float dstN = horzSpan ? texcoord.x - posN.x : texcoord.y - posN.y;
+					float dstP = horzSpan ? posP.x - texcoord.x : posP.y - texcoord.y;
+					bool directionN = dstN < dstP;
+					lumaEndN = directionN ? lumaEndN : lumaEndP;
+
+					// CHECK IF PIXEL IS IN SECTION OF SPAN WHICH GETS NO FILTERING
+					float Normal = lengthSign;
+					if (((lumaM - lumaN) < 0.0) == ((lumaEndN - lumaN) < 0.0))
+						lengthSign = 0.0;
+
+					float spanLength = (dstP + dstN);
+					dstN = directionN ? dstN : dstP;
+					float subPixelOffset = (0.5 + (dstN * (-1.0 / spanLength))) * lengthSign;
+					#if AXAA_SUBPIX_311
+					// SUBPIXEL (FXAA 3.11): no box blur. One fetch, shifted across the edge by the larger of the edge offset (0 where
+					// the span gets no filtering) and the subpixel amount. Keeps texture and edges sharper than the 3x3 average.
+					subPixelOffset = max(subPixelOffset * rcp(Normal), subpixH) * Normal;
+					#endif
+					float3 rgbF = FxaaTexLod(texF, float2(
+					                                        texcoord.x + (horzSpan ? 0.0 : subPixelOffset),
+					                                        texcoord.y + (horzSpan ? subPixelOffset : 0.0))).xyz;
+					if (Linear_F)
+						rgbF = AXAA_sRGB(rgbF);
+					#if !AXAA_SUBPIX_311
+					// SUBPIXEL BLENDING (FXAA): FxaaLerp3(rgbL, rgbF, blendL), the lowpass weighted by blendL, on all three channels.
+					rgbF = lerp(rgbF.rgb, rgbL.rgb, blendL);
+					#endif
+					AXAA_Out = float4(lerp(rgbM.rgb, rgbF.rgb, AA_Fade), lumaM);
+				}
+			}
+		}
+	}
+	return AXAA_Out;
 }
 
 float4 AXAA(sampler tex,float2 texcoord,bool HDR_Mode)
