@@ -1,7 +1,7 @@
 ////----------------------------------------//
 ///SuperDepth3D Sentinel Profile Automation///
 //----------------------------------------////
-// Sentinel v1.0.0
+// Sentinel v1.0.1
 //---------------------------------------SENTINEL----------------------------------------//
 // Overwatch covers the position and Recon scouts ahead. Sentinel holds the post and     //
 // stands watch over the Generic Depth Mod Add-on for as long as the game runs.          //
@@ -72,6 +72,8 @@
 //                                          //   0 off | 1 on - for Xash3D style games that flicker when idle
 // IgnoreUnusableBufferInList=              // Ignore buffers that are unusable in the list
 //                                          //   0 off | 1 on - hides idle and clear-only buffers from the list
+// SkipSquareBuffers=                       // Skip square & map like buffers
+//                                          //   0 off | 1 on - skips shadow map shapes: square, or power of two (2048x1024)
 //
 // Selection priorities:
 //   Tie breakers for when several buffers look alike. Set ONE and test. Stacking them
@@ -132,10 +134,15 @@
 //                                          //   0 Off | 1 Greater Than One | 2 Greater Than Two | 3 Greater Than Three | 4 Greater Than Four | 5 Greater Than Five
 // DepthBufferClearIndex=                   // Select Minimal allowed clear buffer
 //                                          //   0 Off | 1 Less Than One | 2 Less Than Two | 3 Less Than Three | 4 Less Than Four | 5 Less Than Five
+// ClearCopyAutoWorkload=                   // Copy only from the biggest clear
+//                                          //   0 off | 1 on - Kingdom Hearts: Birth by Sleep
+// KeepFirstCopy=                           // Keep the first copy of the frame
+//                                          //   0 off | 1 on - Kingdom Hearts: Dream Drop Distance
 // AvoidHighVerticesOnClear=                // Select the level to avoid high vertices on clear
 //                                          //   0 Off | 1 Max | 2 Mid | 3 Min | 4 Assertive | 5 Reserved
 // DisableRestrictions=                     // Disable restrictions that allow selection of zero buffers
 //                                          //   0 off | 1 on
+//                                          //   It also lets buffers that the game no longer uses stay in the race.
 // DepthCopyBeforeClears=                   // Copy depth buffer before clear operations
 //                                          //   0 off | 1 on - 2 also turns on 'Copy depth buffer during frame'
 // DisableDrawCallRestrictionOnClear=       // Disable draw call restriction during frame
@@ -164,6 +171,8 @@
 //                                          //   0 off | 1 on - on by default, turn off only if it hurts
 // DepthAutoFitMaxViewport=                 // Measure against full render region (upscaler cutscenes)
 //                                          //   0 off | 1 on
+// DepthAutoFitHoldLarger=                  // Keep the larger view when two passes tie
+//                                          //   0 off | 1 on - Kingdom Hearts III
 //
 // Generic Weapon Depth:
 //   First person games only, and only when the weapon or hands need depth of their own:
@@ -208,20 +217,9 @@
 //                                          //   0 off | 1 on - DX9 only
 //
 // Game specific workarounds:
-//   Set only the one that names your game, and only together with the other options its
-//   guide lists under Extra Information in the Add-on. They do nothing in any other game,
-//   and most stay hidden in the overlay until those other options are set.
+//   Only Killing Time: Resurrected still has one. It does nothing in any other game.
+//   The other games that had one are covered by the general options above now.
 //
-// TLoUWorkaround=                          // The Last of Us: Part One workaround
-//                                          //   0 off | 1 on - The Last of Us: Part One
-// KHBbSWorkaround=                         // KHBbSWorkaround
-//                                          //   0 Off | 1 Clears | 2 Indirects - Kingdom Hearts: Birth by Sleep
-// KHWorkaround=                            // Kingdom Hearts: Dream Drop Distance workaround
-//                                          //   0 off | 1 on - Kingdom Hearts: Dream Drop Distance
-// BanisherWorkaround=                      // Banishers crash workaround
-//                                          //   0 off | 1 on - Banishers: Ghosts of New Eden
-// ThaumaturgeWorkaround=                   // Thaumaturge crash workaround
-//                                          //   0 off | 1 on - The Thaumaturge
 // KTWorkaround=                            // Killing Time workaround
 //                                          //   0 off | 1 on - Killing Time: Resurrected
 
@@ -259,10 +257,12 @@ DisableRestrictions=1
 DepthCopyBeforeClears=1
 
 [0x120C9132]
-Game=The Last of Us Part II
-DepthCopyBeforeClears=1
-FilterFormat=6
-PrioritizeIndirectDrawcallsHigh=1
+Game=The Last of Us Part II Remastered
+DisableRestrictions=1
+FilterFormat=5
+IgnoreUnusableBufferInList=1
+SkipSquareBuffers=1
+MergePooledBuffers=1
 
 [0x49D2CF5E]
 Game=Lies of P
@@ -298,10 +298,12 @@ DepthCopyBeforeClears=1
 
 [0x808ABB25]
 Game=BioShock Infinite //Steam //Epic (id 1 of 2)
+DepthCopyBeforeClears=2
 AvoidHighVerticesOnClear=2
 
 [0x87871191]
 Game=BioShock Infinite //Steam //Epic (id 2 of 2)
+DepthCopyBeforeClears=2
 AvoidHighVerticesOnClear=2
 
 [0xD93B8576]
@@ -594,42 +596,41 @@ KTWorkaround=1
 
 [0x8CD69EAE]
 Game=Kingdom Hearts: Birth by Sleep
-DepthCopyBeforeClears=2
-DisableRestrictions=1
-AvoidHighVerticesOnClear=4
-DepthBufferClearIndex=1
-KHBbSWorkaround=2
+DepthCopyBeforeClears=1
+ClearCopyAutoWorkload=1
 
 [0x3CE12580]
 Game=Kingdom Hearts: Dream Drop Distance
 DepthCopyBeforeClears=2
 DisableRestrictions=1
-DisableDrawCallRestrictionOnClear=1
-AvoidSelectedDepthBufferClear=1
-KHWorkaround=1
+KeepFirstCopy=1
 
 [0x9EC5A0DB]
 Game=The Thaumaturge
-DepthCopyBeforeClears=2
-DisableRestrictions=1
-DisableDrawCallRestrictionOnClear=1
-AvoidHighVertices=1
-AvoidHighDrawcalls=1
-ThaumaturgeWorkaround=1
+FilterFormat=6
+UseAspectRatioHeuristics=2
+SkipSquareBuffers=1
+MergePooledBuffers=1
+CopyOnCommandListClose=1
+PooledCopySharing=1
 
 [0xEE23A44]
 Game=Banishers: Ghosts of New Eden
+FilterFormat=6
+UseAspectRatioHeuristics=2
+SkipSquareBuffers=1
 PrioritizeIndirectDrawcallsLow=1
-DepthCopyBeforeClears=1
-BanisherWorkaround=1
+MergePooledBuffers=1
+CopyOnCommandListClose=1
+PooledCopySharing=1
 
 [0xB097DD6F]
 Game=The Last of Us Part I
 IgnoreUnusableBufferInList=1
-DepthCopyBeforeClears=2
-DisableDrawCallRestrictionOnClear=1
-SkipFullscreenDraw=1
-TLoUWorkaround=1
+SkipSquareBuffers=1
+MergePooledBuffers=1
+CopyOnCommandListClose=1
+PooledCopySharing=1
 
 [0x7D8C8793]
 Game=TERA
@@ -645,7 +646,9 @@ DepthAutoFit=1
 
 [0x4B609342]
 Game=CONTROL Resonant
+FilterFormat=5
 UseAspectRatioHeuristics=2
+MergePooledBuffers=1
 
 [0x80C94E25]
 Game=REPLACED
@@ -678,3 +681,28 @@ rtx.viewModel.scale=0.25
 [0xFA9008AB]
 Game=Torchlight
 ReplayDepthProbe=1
+
+[0xC100000]
+Game=Minecraft Java Edition (javaw.exe in Minecraft's own Java folder; other Java games keep 0x2F0BD376)
+DepthCopyBeforeClears=2
+WDepthDetectionMode=1
+
+[0xCE890ACA]
+Game=Enshrouded
+UseAspectRatioHeuristics=2
+MergePooledBuffers=1
+
+[0xF3D09057]
+Game=Phantom Blade Zero
+UseAspectRatioHeuristics=2
+FilterFormat=6
+IgnoreIndirectDrawcallsZero=1
+MergePooledBuffers=1
+
+[0x837F12C9]
+Game=Quantum Break
+SkipSquareBuffers=1
+
+[0xBC87F566]
+Game=Kingdom Hearts III
+DepthAutoFitHoldLarger=1
