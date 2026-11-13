@@ -64,7 +64,7 @@
     Licensing
   </a>
   <span class="spacer"></span>
-  <span class="statuschip"><span class="dot ok"></span>SuperDepth3D v5.4.0</span>
+  <span class="statuschip"><span class="dot ok"></span>SuperDepth3D v6.0.0</span>
 </nav>
 
 <main id="main">
@@ -93,7 +93,7 @@
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M2 12l10 5 10-5"/><path d="M2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/></svg>
       <h2>SuperDepth3D</h2>
       <span class="spacer"></span>
-      <span class="badge silver">v5.4.0</span>
+      <span class="badge silver">v6.0.0</span>
     </div>
     <div class="card-body">
       <p class="lead">
@@ -143,6 +143,59 @@
     </div>
   </section>
 
+  <section class="card" id="whats-new">
+    <div class="card-head">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M12 2l2.9 6.9L22 10l-5.5 4.7L18.2 22 12 18.3 5.8 22l1.7-7.3L2 10l7.1-1.1z"/></svg>
+      <h2>Why v6.0.0 is a major update</h2>
+      <span class="spacer"></span>
+      <span class="badge silver">New</span>
+    </div>
+    <div class="card-body">
+      <p class="lead">
+        SuperDepth3D now builds the 3D picture a new way, called MeshWarp3D.
+      </p>
+      <p>
+        To make the second eye, the shader has to move every pixel left or right by its depth.
+        Until now it did that by searching across the screen for every single pixel, one at a time.
+        That search was the slowest part of the shader.
+      </p>
+      <p>
+        MeshWarp3D moves whole rows of the picture at once, like stretching a sheet. Only the few
+        pixels at the edges of objects still need the slow search. Less work for your graphics card,
+        and cleaner edges.
+      </p>
+    </div>
+    <div class="card-body sep">
+      <div class="row">
+        <div class="label">
+          <div class="name">Faster</div>
+          <div class="desc">Faster than v5.5.2 in most scenes, most of all with Infill Blur on.</div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="label">
+          <div class="name">New ways to fill the gaps</div>
+          <div class="desc">New VM0 Normal and VM6 Glass, and a reworked VM3 Stamped. VM1 Alpha is the old Refined look.</div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="label">
+          <div class="name">Simpler menu</div>
+          <div class="desc">Many fine tuning sliders are gone. Their best values are built in.</div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="label">
+          <div class="name">Older games still work</div>
+          <div class="desc">MeshWarp3D needs DirectX 11 or newer. DirectX 9 and 10 games keep the old way.</div>
+        </div>
+      </div>
+      <div class="note">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 16v-4M12 8h.01"/></svg>
+        <p>Because the 3D is made a new way, your saved presets may look a little different. VR users: the eyes were swapped before, so if you turned on Swap Eyes, turn it off.</p>
+      </div>
+    </div>
+  </section>
   <section class="card" id="start">
     <div class="card-head">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5"/><path d="M12 15V3"/></svg>
